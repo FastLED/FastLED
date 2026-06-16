@@ -324,9 +324,8 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         u32 clock_hz = calculateI2sClockHz(ct);
         mConfig.pclk_hz = clock_hz;
 
-        FL_DBG("ChannelEngineI2S: Built Wave8 LUT for timing T1=" << timing.t1_ns
-               << "ns, T2=" << timing.t2_ns << "ns, T3=" << timing.t3_ns << "ns");
-        FL_DBG("ChannelEngineI2S: I2S clock set to " << clock_hz << " Hz");
+        FL_DBG_F("ChannelEngineI2S: Built Wave8 LUT for timing T1=%sns, T2=%sns, T3=%sns", timing.t1_ns, timing.t2_ns, timing.t3_ns);
+        FL_DBG_F("ChannelEngineI2S: I2S clock set to %s Hz", clock_hz);
     }
 
     // Initialize or reconfigure if needed
@@ -389,8 +388,7 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         pconfig.max_transfer_bytes = data_size;
         mBufferSize = data_size;
 
-        FL_DBG("ChannelEngineI2S: Wave8 buffer size = " << data_size << " bytes ("
-               << total_words << " words) for " << mNumLeds << " LEDs");
+        FL_DBG_F("ChannelEngineI2S: Wave8 buffer size = %s bytes (%s words) for %s LEDs", data_size, total_words, mNumLeds);
 #else
         // Legacy transpose encoding
         size_t offset_start = 0;
@@ -406,12 +404,12 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         }
 
         if (!mPeripheral->initialize(pconfig)) {
-            FL_WARN("ChannelEngineI2S: Failed to initialize peripheral");
+            FL_WARN_F("ChannelEngineI2S: Failed to initialize peripheral");
             return false;
         }
         if (!mPeripheral->registerTransmitCallback(
                 reinterpret_cast<void*>(&isrTransmitDone), this)) { // ok reinterpret cast
-            FL_WARN("ChannelEngineI2S: registerTransmitCallback failed");
+            FL_WARN_F("ChannelEngineI2S: registerTransmitCallback failed");
             mPeripheral->deinitialize();
             return false;
         }
@@ -420,7 +418,7 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         for (int i = 0; i < 2; i++) {
             mBuffers[i] = mPeripheral->allocateBuffer(mBufferSize);
             if (mBuffers[i] == nullptr) {
-                FL_WARN("ChannelEngineI2S: Failed to allocate buffer");
+                FL_WARN_F("ChannelEngineI2S: Failed to allocate buffer");
                 return false;
             }
             // Initialize with zeros (LOW for reset)
@@ -469,7 +467,7 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         for (const auto& channel : channelData) {
             channel->setInUse(false);
         }
-        FL_WARN("ChannelEngineI2S: Failed to start transmission");
+        FL_WARN_F("ChannelEngineI2S: Failed to start transmission");
         return false;
     }
 

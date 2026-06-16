@@ -40,7 +40,7 @@ namespace fl {
  *
  * // Initialize with custom signal range (optional - defaults to 100ns/100μs)
  * if (!rx->begin(100, 100000)) {  // min=100ns, max=100μs
- *     FL_WARN("RX channel init failed");
+ *     FL_WARN_F("RX channel init failed");
  *     return;
  * }
  *
@@ -55,7 +55,7 @@ namespace fl {
  *     fl::vector<uint8_t> bytes;
  *     auto result = rx->decode(rx_timing, fl::back_inserter(bytes));
  *     if (result.ok()) {
- *         FL_DBG("Decoded " << result.value() << " bytes");
+ *         FL_DBG_F("Decoded %s bytes", result.value());
  *     }
  * }
  * @endcode
@@ -199,7 +199,7 @@ public:
      *     uint8_t buffer[256];
      *     auto result = rx->decode(rx_timing, buffer);
      *     if (result.ok()) {
-     *         FL_DBG("Decoded " << result.value() << " bytes");
+     *         FL_DBG_F("Decoded %s bytes", result.value());
      *     }
      * }
      * @endcode
@@ -228,7 +228,7 @@ public:
      * EdgeTime edges[100];
      * size_t count = rx->getRawEdgeTimes(edges);
      * for (size_t i = 0; i < count; i++) {
-     *     FL_DBG((edges[i].high ? "HIGH " : "LOW ") << edges[i].ns << "ns");
+     *     FL_DBG_F("%s%sns", (edges[i].high ? "HIGH " : "LOW "), edges[i].ns);
      * }
      * @endcode
      */

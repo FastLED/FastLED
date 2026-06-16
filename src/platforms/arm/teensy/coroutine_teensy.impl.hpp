@@ -198,7 +198,7 @@ void* CoroutinePlatformTeensy::createContext(void (*entry_fn)(),
 
     fl::u8* stack = static_cast<fl::u8*>(malloc(stack_size));  // ok bare allocation
     if (!stack) {
-        FL_WARN("CoroutinePlatformTeensy: Failed to allocate stack");
+        FL_WARN_F("CoroutinePlatformTeensy: Failed to allocate stack");
         return nullptr;
     }
 
@@ -288,7 +288,7 @@ TaskCoroutinePtr TaskCoroutineTeensy::create(
         u8 /*priority*/) FL_NOEXCEPT {
     auto* ctx = CoroutineContext::create(fl::move(function), stack_size);
     if (!ctx) {
-        FL_WARN("TaskCoroutineTeensy: Failed to create context for '" << name << "'");
+        FL_WARN_F("TaskCoroutineTeensy: Failed to create context for '%s'", name);
         return nullptr;
     }
 

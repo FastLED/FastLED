@@ -52,6 +52,7 @@ from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChe
 from ci.lint_cpp.include_paths_checker import IncludePathsChecker
 from ci.lint_cpp.is_header_include_checker import IsHeaderIncludeChecker
 from ci.lint_cpp.iwyu_pragma_block_checker import IwyuPragmaBlockChecker
+from ci.lint_cpp.legacy_log_macro_checker import LegacyLogMacroChecker
 from ci.lint_cpp.logging_in_iram_checker import LoggingInIramChecker
 from ci.lint_cpp.member_style_checker import MemberStyleChecker
 from ci.lint_cpp.namespace_platforms_checker import NamespacePlatformsChecker
@@ -187,6 +188,7 @@ def create_checkers(
         NumericLimitMacroChecker(),
         StaticInHeaderChecker(),
         LoggingInIramChecker(),
+        LegacyLogMacroChecker(),
         PlatformIncludesChecker(),
         PlatformTrampolineChecker(),  # Enforce trampoline architecture in src/fl/** and root src/
         WeakAttributeChecker(),

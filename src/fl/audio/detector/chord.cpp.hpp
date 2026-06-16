@@ -83,9 +83,7 @@ void ChordDetector::update(shared_ptr<Context> context) {
 
             mFireChordChange = true;
 
-            FL_DBG("Chord detected: " << mCurrentChord.getRootName()
-                   << mCurrentChord.getTypeName()
-                   << " (conf: " << mCurrentChord.confidence << ")");
+            FL_DBG_F("Chord detected: %s%s (conf: %s)", mCurrentChord.getRootName(), mCurrentChord.getTypeName(), mCurrentChord.confidence);
         } else {
             // Same chord, update confidence
             mCurrentChord.confidence = detected.confidence;

@@ -161,7 +161,7 @@ void CoroutineContext::suspend() FL_NOEXCEPT {
 
     // Check stack health before switching — catch overflow early
     if (!platform.checkStackHealth(self->mPlatformCtx)) {
-        FL_WARN("FATAL: Stack overflow detected in coroutine");
+        FL_WARN_F("FATAL: Stack overflow detected in coroutine");
         while (true) {}  // Halt — memory is already corrupted
     }
 
@@ -188,7 +188,7 @@ void CoroutineRunner::enqueue(CoroutineContext* ctx) FL_NOEXCEPT {
     }
 
     if (mCount >= kMaxCoroutines) {
-        FL_WARN("CoroutineRunner: Queue full, cannot enqueue");
+        FL_WARN_F("CoroutineRunner: Queue full, cannot enqueue");
         return;
     }
 

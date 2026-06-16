@@ -518,7 +518,7 @@ void rgb_2_rgbw_colorimetric(u16 w_color_temperature, u8 r,
                              u8 g_scale, u8 b_scale, u8 *out_r,
                              u8 *out_g, u8 *out_b, u8 *out_w) FL_NOEXCEPT {
 #ifndef FASTLED_SUPPRESS_COLORIMETRIC_FALLBACK_WARNING
-    FL_WARN_ONCE("RGBW: kRGBWColorimetric requested but FASTLED_RGBW_COLORIMETRIC is not defined — falling back to kRGBWExactColors. Define FASTLED_RGBW_COLORIMETRIC=1 to enable the colorimetric path.");
+    FL_WARN_F_ONCE("RGBW: kRGBWColorimetric requested but FASTLED_RGBW_COLORIMETRIC is not defined — falling back to kRGBWExactColors. Define FASTLED_RGBW_COLORIMETRIC=1 to enable the colorimetric path.");
 #endif
     rgb_2_rgbw_exact(w_color_temperature, r, g, b, r_scale, g_scale, b_scale,
                      out_r, out_g, out_b, out_w);
@@ -529,7 +529,7 @@ void rgb_2_rgbw_colorimetric_boosted(u16 w_color_temperature, u8 r,
                                      u8 g_scale, u8 b_scale, u8 *out_r,
                                      u8 *out_g, u8 *out_b, u8 *out_w) FL_NOEXCEPT {
 #ifndef FASTLED_SUPPRESS_COLORIMETRIC_FALLBACK_WARNING
-    FL_WARN_ONCE("RGBW: kRGBWColorimetricBoosted requested but FASTLED_RGBW_COLORIMETRIC is not defined — falling back to kRGBWExactColors. Define FASTLED_RGBW_COLORIMETRIC=1 to enable the colorimetric path.");
+    FL_WARN_F_ONCE("RGBW: kRGBWColorimetricBoosted requested but FASTLED_RGBW_COLORIMETRIC is not defined — falling back to kRGBWExactColors. Define FASTLED_RGBW_COLORIMETRIC=1 to enable the colorimetric path.");
 #endif
     rgb_2_rgbw_exact(w_color_temperature, r, g, b, r_scale, g_scale, b_scale,
                      out_r, out_g, out_b, out_w);

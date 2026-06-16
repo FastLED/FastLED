@@ -44,17 +44,17 @@ struct TimingGroup {
 
 ChannelEngineObjectFLED::ChannelEngineObjectFLED()
  FL_NOEXCEPT : mPeripheral(IObjectFLEDPeripheral::create()) {
-    FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: created");
+    FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: created");
 }
 
 ChannelEngineObjectFLED::ChannelEngineObjectFLED(
         fl::shared_ptr<IObjectFLEDPeripheral> peripheral)
  FL_NOEXCEPT : mPeripheral(fl::move(peripheral)) {
-    FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: created with injected peripheral");
+    FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: created with injected peripheral");
 }
 
 ChannelEngineObjectFLED::~ChannelEngineObjectFLED() {
-    FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: destroyed");
+    FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: destroyed");
 }
 
 bool ChannelEngineObjectFLED::canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT {
@@ -132,8 +132,7 @@ void ChannelEngineObjectFLED::show() FL_NOEXCEPT {
             // Validate pin
             auto validation = mPeripheral->validatePin(pin);
             if (!validation.valid) {
-                FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: Pin " << (int)pin
-                        << " invalid: " << validation.error_message);
+                FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: Pin %s invalid: %s", (int)pin, validation.error_message);
                 continue;
             }
 

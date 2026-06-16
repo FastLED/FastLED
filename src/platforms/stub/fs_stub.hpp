@@ -281,13 +281,13 @@ public:
 #else
         if (access(full_path.c_str(), F_OK) != 0) {
 #endif
-            FL_WARN("Test file not found: " << full_path.c_str());
+            FL_WARN_F("Test file not found: %s", full_path.c_str());
             return filebuf_ptr();
         }
 
         auto handle = fl::make_shared<StubFileHandle>(full_path);
         if (!handle->valid()) {
-            FL_WARN("Failed to open test file: " << full_path.c_str());
+            FL_WARN_F("Failed to open test file: %s", full_path.c_str());
             return filebuf_ptr();
         }
 

@@ -1,4 +1,4 @@
-#include "fl/system/file_system.h"
+﻿#include "fl/system/file_system.h"
 #include "fl/stl/has_include.h"
 #include "fl/log/log.h"
 #include "fl/stl/vector.h"
@@ -12,7 +12,7 @@
 // This split lets the linker tree-shake the entire SD chain (libSD.a,
 // libFS.a, Arduino's VFSImpl, the printf engine VFSFileImpl drags in
 // via snprintf) AUTOMATICALLY when the user never calls
-// `FileSystem::beginSd()` — no FASTLED_USE_SDCARD opt-in required, and
+// `FileSystem::beginSd()` â€” no FASTLED_USE_SDCARD opt-in required, and
 // the macro that the earlier macro-gate PR (#2778 v1) shipped is
 // removed by this PR. See FastLED #2773 item 1.2 and the SD TU header
 // for the mechanism.
@@ -68,7 +68,7 @@ class NullFileHandle : public filebuf {
 class NullFileSystem : public FsImpl {
   public:
     NullFileSystem() FL_NOEXCEPT {
-        FL_WARN("NullFileSystem instantiated as a placeholder, please "
+        FL_WARN_F("NullFileSystem instantiated as a placeholder, please "
                      "implement a file system for your platform.");
     }
     ~NullFileSystem() FL_NOEXCEPT override {}
@@ -124,7 +124,7 @@ bool FileSystem::readScreenMaps(const char *path,
                                 fl::flat_map<string, ScreenMap> *out, string *error) {
     string text;
     if (!readText(path, &text)) {
-        FL_WARN("Failed to read file: " << path);
+        FL_WARN_F("Failed to read file: %s", path);
         if (error) {
             *error = "Failed to read file: ";
             error->append(path);
@@ -134,7 +134,7 @@ bool FileSystem::readScreenMaps(const char *path,
     string err;
     bool ok = ScreenMap::ParseJson(text.c_str(), out, &err);
     if (!ok) {
-        FL_WARN("Failed to parse screen map: " << err.c_str());
+        FL_WARN_F("Failed to parse screen map: %s", err.c_str());
         *error = err;
         return false;
     }
@@ -145,7 +145,7 @@ bool FileSystem::readScreenMap(const char *path, const char *name,
                                ScreenMap *out, string *error) {
     string text;
     if (!readText(path, &text)) {
-        FL_WARN("Failed to read file: " << path);
+        FL_WARN_F("Failed to read file: %s", path);
         if (error) {
             *error = "Failed to read file: ";
             error->append(path);
@@ -155,7 +155,7 @@ bool FileSystem::readScreenMap(const char *path, const char *name,
     string err;
     bool ok = ScreenMap::ParseJson(text.c_str(), name, out, &err);
     if (!ok) {
-        FL_WARN("Failed to parse screen map: " << err.c_str());
+        FL_WARN_F("Failed to parse screen map: %s", err.c_str());
         *error = err;
         return false;
     }
@@ -180,7 +180,7 @@ Video FileSystem::openVideo(const char *path, fl::size pixelsPerFrame, float fps
 bool FileSystem::readText(const char *path, fl::string *out) {
     fl::ifstream file = openRead(path);
     if (!file.is_open()) {
-        FL_WARN("Failed to open file: " << path);
+        FL_WARN_F("Failed to open file: %s", path);
         return false;
     }
     fl::size size = file.size();
@@ -193,7 +193,7 @@ bool FileSystem::readText(const char *path, fl::string *out) {
         wrote = true;
     }
     file.close();
-    FL_DBG_IF(!wrote, "Failed to write any data to the output string.");
+    FL_DBG_F_IF(!wrote, "Failed to write any data to the output string.");
     return wrote;
 }
 

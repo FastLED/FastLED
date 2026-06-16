@@ -26,7 +26,7 @@ constexpr u8 STM32_PLATFORM_ID = 6;
 int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
     (void)config;
     (void)out_handle;
-    FL_WARN("STM32 ISR: not yet implemented");
+    FL_WARN_F("STM32 ISR: not yet implemented");
     return -100;  // Not implemented
 }
 
@@ -34,25 +34,25 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     (void)pin;
     (void)config;
     (void)out_handle;
-    FL_WARN("STM32 ISR: not yet implemented");
+    FL_WARN_F("STM32 ISR: not yet implemented");
     return -100;  // Not implemented
 }
 
 int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
     (void)handle;
-    FL_WARN("STM32 ISR: not yet implemented");
+    FL_WARN_F("STM32 ISR: not yet implemented");
     return -100;  // Not implemented
 }
 
 int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     (void)handle;
-    FL_WARN("STM32 ISR: not yet implemented");
+    FL_WARN_F("STM32 ISR: not yet implemented");
     return -100;  // Not implemented
 }
 
 int disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     (void)handle;
-    FL_WARN("STM32 ISR: not yet implemented");
+    FL_WARN_F("STM32 ISR: not yet implemented");
     return -100;  // Not implemented
 }
 

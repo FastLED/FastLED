@@ -133,8 +133,7 @@ Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const {
     if (i >= mNumLeds) {
         // Handle out-of-bounds access, possibly by returning a default
         // Tile2x2_u8
-        FASTLED_ASSERT(false, "Out of bounds access in Corkscrew at_splat: "
-                                  << i << " size: " << mNumLeds);
+        FASTLED_ASSERT(false, "Out of bounds access in Corkscrew at_splat");
         return Tile2x2_u8();
     }
     

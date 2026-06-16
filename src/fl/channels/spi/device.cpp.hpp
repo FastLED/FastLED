@@ -20,26 +20,25 @@ namespace spi {
 
 Device::Device(const Config& config)
     : pImpl(fl::make_unique<Impl>(config)) {
-    FL_LOG_SPI("SPI Device: Created with clock=" << config.clock_pin
-           << " data_pins.size()=" << config.data_pins.size());
+    FL_LOG_SPI_F("SPI Device: Created with clock=%s data_pins.size()=%s", config.clock_pin, config.data_pins.size());
 }
 
 Device::~Device() FL_NOEXCEPT {
-    FL_LOG_SPI("SPI Device: Destructor called");
+    FL_LOG_SPI_F("SPI Device: Destructor called");
     if (pImpl && pImpl->initialized) {
-        FL_LOG_SPI("SPI Device: Calling end() from destructor");
+        FL_LOG_SPI_F("SPI Device: Calling end() from destructor");
         end();
     }
 
-    FL_LOG_SPI("SPI Device: Checking owned hardware backend");
+    FL_LOG_SPI_F("SPI Device: Checking owned hardware backend");
     // Clean up owned hardware backend (for SINGLE_SPI mode)
     // Note: hw_backend is now a shared_ptr, so cleanup is automatic
     if (pImpl && pImpl->owns_backend && pImpl->hw_backend) {
-        FL_LOG_SPI("SPI Device: Cleaning up owned hardware backend");
+        FL_LOG_SPI_F("SPI Device: Cleaning up owned hardware backend");
         pImpl->hw_backend->end();
         pImpl->hw_backend = nullptr;
     }
-    FL_LOG_SPI("SPI Device: Destructor complete");
+    FL_LOG_SPI_F("SPI Device: Destructor complete");
 }
 
 fl::optional<fl::task::Error> Device::begin() {
@@ -54,15 +53,14 @@ fl::optional<fl::task::Error> Device::begin() {
 
     // Validate SPI mode (0-3 for CPOL/CPHA combinations)
     if (pImpl->config.spi_mode > 3) {
-        FL_WARN("SPI Device: Invalid SPI mode " << pImpl->config.spi_mode << " (must be 0-3)");
+        FL_WARN_F("SPI Device: Invalid SPI mode %s (must be 0-3)", pImpl->config.spi_mode);
         return fl::task::Error("Invalid SPI mode");
     }
 
     // Note: SPI mode configuration is not yet supported by the hardware layer
     // All devices currently operate in mode 0 (CPOL=0, CPHA=0)
     if (pImpl->config.spi_mode != 0) {
-        FL_WARN("SPI Device: SPI mode " << pImpl->config.spi_mode
-                << " requested but hardware layer only supports mode 0 - ignoring");
+        FL_WARN_F("SPI Device: SPI mode %s requested but hardware layer only supports mode 0 - ignoring", pImpl->config.spi_mode);
     }
 
     // Register with SPIBusManager
@@ -76,13 +74,13 @@ fl::optional<fl::task::Error> Device::begin() {
     );
 
     if (!pImpl->bus_handle.is_valid) {
-        FL_WARN("SPI Device: Failed to register with bus manager");
+        FL_WARN_F("SPI Device: Failed to register with bus manager");
         return fl::task::Error("Failed to register with bus manager");
     }
 
     // Initialize the bus
     if (!mgr.initialize()) {
-        FL_WARN("SPI Device: Bus initialization failed");
+        FL_WARN_F("SPI Device: Bus initialization failed");
         return fl::task::Error("Bus initialization failed");
     }
 
@@ -92,7 +90,7 @@ fl::optional<fl::task::Error> Device::begin() {
         // Create and initialize a SpiHw1 controller
         const fl::vector<fl::shared_ptr<SpiHw1>>& controllers = SpiHw1::getAll();
         if (controllers.empty()) {
-            FL_WARN("SPI Device: No SpiHw1 controllers available on this platform");
+            FL_WARN_F("SPI Device: No SpiHw1 controllers available on this platform");
             return fl::task::Error("No SpiHw1 controllers available");
         }
 
@@ -106,13 +104,13 @@ fl::optional<fl::task::Error> Device::begin() {
         hw_config.bus_num = 0;  // Default to bus 0
 
         if (!hw->begin(hw_config)) {
-            FL_WARN("SPI Device: Failed to initialize SpiHw1 controller");
+            FL_WARN_F("SPI Device: Failed to initialize SpiHw1 controller");
             return fl::task::Error("Failed to initialize SpiHw1");
         }
 
         pImpl->hw_backend = hw;
         pImpl->owns_backend = false;  // We don't own it (it's from the static pool)
-        FL_LOG_SPI("SPI Device: Created SpiHw1 controller for SINGLE_SPI mode");
+        FL_LOG_SPI_F("SPI Device: Created SpiHw1 controller for SINGLE_SPI mode");
     } else {
         // Multi-lane or hardware controller already exists
         pImpl->hw_backend = bus_info ? bus_info->hw_controller : nullptr;
@@ -120,7 +118,7 @@ fl::optional<fl::task::Error> Device::begin() {
     }
 
     pImpl->initialized = true;
-    FL_LOG_SPI("SPI Device: Initialized successfully");
+    FL_LOG_SPI_F("SPI Device: Initialized successfully");
     return fl::nullopt;
 }
 
@@ -146,7 +144,7 @@ void Device::end() {
     }
 
     pImpl->initialized = false;
-    FL_LOG_SPI("SPI Device: Shutdown complete");
+    FL_LOG_SPI_F("SPI Device: Shutdown complete");
 }
 
 bool Device::isReady() const {
@@ -198,14 +196,14 @@ Result<Transaction> Device::writeAsync(const u8* data, size_t size) {
     // Acquire DMA buffer
     DMABuffer buffer = acquireBuffer(size);
     if (!buffer.ok()) {
-        FL_WARN("SPI Device: Failed to acquire DMA buffer for async write");
+        FL_WARN_F("SPI Device: Failed to acquire DMA buffer for async write");
         return Result<Transaction>::failure(buffer.error(), "Failed to acquire DMA buffer");
     }
 
     // Copy data to DMA buffer
     fl::span<u8> buf_span = buffer.data();
     if (buf_span.size() < size) {
-        FL_WARN("SPI Device: Buffer size mismatch");
+        FL_WARN_F("SPI Device: Buffer size mismatch");
         return Result<Transaction>::failure(SPIError::BUFFER_TOO_LARGE, "Buffer size mismatch");
     }
 
@@ -216,7 +214,7 @@ Result<Transaction> Device::writeAsync(const u8* data, size_t size) {
     // Start async transmission
     fl::optional<fl::task::Error> tx_result = transmit(buffer, true);  // true = async
     if (tx_result) {  // If error is present
-        FL_WARN("SPI Device: Failed to start async transmission");
+        FL_WARN_F("SPI Device: Failed to start async transmission");
         return Result<Transaction>::failure(SPIError::NOT_SUPPORTED, tx_result->message.c_str());
     }
 
@@ -232,7 +230,7 @@ Result<Transaction> Device::writeAsync(const u8* data, size_t size) {
     txn.pImpl = fl::make_unique<Transaction::Impl>(this);
     txn.pImpl->completed = false;  // Will complete when hardware finishes
 
-    FL_LOG_SPI("SPI Device: Async write started (" << size << " bytes)");
+    FL_LOG_SPI_F("SPI Device: Async write started (%s bytes)", size);
     return Result<Transaction>::success(fl::move(txn));
 }
 
@@ -263,7 +261,7 @@ DMABuffer Device::acquireBuffer(size_t size) {
 
     // Get hardware controller
     if (!pImpl->hw_backend) {
-        FL_WARN("SPI Device: No hardware controller available");
+        FL_WARN_F("SPI Device: No hardware controller available");
         return DMABuffer(SPIError::NOT_INITIALIZED);
     }
 
@@ -275,9 +273,9 @@ DMABuffer Device::acquireBuffer(size_t size) {
     DMABuffer buffer = hw->acquireDMABuffer(size);
 
     if (!buffer.ok()) {
-        FL_WARN("SPI Device: Failed to acquire DMA buffer from hardware");
+        FL_WARN_F("SPI Device: Failed to acquire DMA buffer from hardware");
     } else {
-        FL_LOG_SPI("SPI Device: Acquired DMA buffer (" << size << " bytes)");
+        FL_LOG_SPI_F("SPI Device: Acquired DMA buffer (%s bytes)", size);
     }
 
     return buffer;
@@ -294,7 +292,7 @@ fl::optional<fl::task::Error> Device::transmit(DMABuffer& buffer, bool async) {
 
     // Get hardware controller
     if (!pImpl->hw_backend) {
-        FL_WARN("SPI Device: No hardware controller available");
+        FL_WARN_F("SPI Device: No hardware controller available");
         return fl::task::Error("No hardware controller");
     }
 
@@ -306,19 +304,19 @@ fl::optional<fl::task::Error> Device::transmit(DMABuffer& buffer, bool async) {
     bool success = hw->transmit(mode);
 
     if (!success) {
-        FL_WARN("SPI Device: Transmission failed");
+        FL_WARN_F("SPI Device: Transmission failed");
         return fl::task::Error("Transmission failed");
     }
 
     // If blocking mode, wait for completion
     if (!async) {
         if (!hw->waitComplete()) {
-            FL_WARN("SPI Device: Wait for completion failed");
+            FL_WARN_F("SPI Device: Wait for completion failed");
             return fl::task::Error("Wait for completion failed");
         }
     }
 
-    FL_LOG_SPI("SPI Device: Transmission started (" << (async ? "async" : "blocking") << ")");
+    FL_LOG_SPI_F("SPI Device: Transmission started (%s)", (async ? "async" : "blocking"));
     return fl::nullopt;
 }
 
@@ -329,7 +327,7 @@ bool Device::waitComplete(u32 timeout_ms) {
 
     // Get hardware controller
     if (!pImpl->hw_backend) {
-        FL_WARN("SPI Device: No hardware controller available");
+        FL_WARN_F("SPI Device: No hardware controller available");
         return false;
     }
 
@@ -368,10 +366,9 @@ fl::optional<fl::task::Error> Device::setClockSpeed(u32 speed_hz) {
     // To apply immediately, call end() followed by begin().
 
     if (pImpl->initialized) {
-        FL_LOG_SPI("SPI Device: Clock speed updated to " << speed_hz
-               << " Hz (will take effect on next begin())");
+        FL_LOG_SPI_F("SPI Device: Clock speed updated to %s Hz (will take effect on next begin())", speed_hz);
     } else {
-        FL_LOG_SPI("SPI Device: Clock speed set to " << speed_hz << " Hz");
+        FL_LOG_SPI_F("SPI Device: Clock speed set to %s Hz", speed_hz);
     }
 
     return fl::nullopt;
@@ -435,8 +432,10 @@ bool Transaction::wait(u32 timeout_ms) {
         return false;
     }
 
-    // Wait for the hardware to complete
+#ifdef FASTLED_LOG_SPI_ENABLED
     u32 start_time = fl::millis();
+#endif
+    // Wait for the hardware to complete
     bool success = pImpl->device->waitComplete(timeout_ms);
 
     if (success) {
@@ -447,14 +446,15 @@ bool Transaction::wait(u32 timeout_ms) {
         pImpl->completed = true;
         pImpl->result = fl::nullopt;
 
-        u32 elapsed = fl::millis() - start_time;
-        FL_LOG_SPI("Transaction: Completed successfully (waited " << elapsed << "ms)");
+#ifdef FASTLED_LOG_SPI_ENABLED
+        FL_LOG_SPI_F("Transaction: Completed successfully (waited %sms)", fl::millis() - start_time);
+#endif
         return true;
     } else {
         // Timeout occurred
         pImpl->completed = true;
         pImpl->result = fl::task::Error("Transaction timeout");
-        FL_WARN("Transaction: Timeout after " << timeout_ms << "ms");
+        FL_WARN_F("Transaction: Timeout after %sms", timeout_ms);
         return false;
     }
 }
@@ -485,7 +485,7 @@ bool Transaction::cancel() {
         pImpl->device->pImpl->async_state.active = false;
     }
 
-    FL_LOG_SPI("Transaction: Cancelled");
+    FL_LOG_SPI_F("Transaction: Cancelled");
     return true;
 }
 

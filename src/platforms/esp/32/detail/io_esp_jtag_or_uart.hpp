@@ -1,4 +1,4 @@
-// ESP32 I/O implementation - Unified UART + USB-Serial JTAG backend
+﻿// ESP32 I/O implementation - Unified UART + USB-Serial JTAG backend
 // Auto-detects USB-Serial JTAG on ESP32-S3/C3/C6/H2, falls back to UART otherwise
 // No Arduino dependencies - works standalone with ESP-IDF
 
@@ -8,7 +8,7 @@
 
 #include "platforms/esp/is_esp.h"
 
-#include "fl/log/log.h"  // FL_PRINT (used by reportInitDiagnosticsIfNeeded)
+#include "fl/log/log.h"  // FL_PRINT_F("%s", used by reportInitDiagnosticsIfNeeded)
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/singleton.h"
 #include "platforms/esp/32/drivers/uart_esp32.h"
@@ -29,7 +29,7 @@
 // Previously EspIO held BOTH UartEsp32 AND UsbSerialJtagEsp32 as direct
 // members and runtime-probed which one was buffered. The linker had to
 // keep both drivers (and the ESP-IDF JTAG driver they pull in) alive
-// because both were reachable from every print/read/write/flush path —
+// because both were reachable from every print/read/write/flush path â€”
 // ~2-3 KB of dead weight when only one backend is actually used. See
 // FastLED #2773 item 1.4.
 //
@@ -38,15 +38,15 @@
 // Arduino-ESP32's existing `ARDUINO_USB_CDC_ON_BOOT` convention:
 //
 //   * ARDUINO_USB_CDC_ON_BOOT=1 (Arduino routes Serial through USB
-//     Serial-JTAG)     → EspIO uses UsbSerialJtagEsp32.
+//     Serial-JTAG)     â†’ EspIO uses UsbSerialJtagEsp32.
 //   * otherwise (Arduino-default UART0 console, or non-Arduino ESP-IDF
-//     build)            → EspIO uses UartEsp32.
+//     build)            â†’ EspIO uses UartEsp32.
 //
 // Explicit overrides for the rare case where a user wants a different
 // backend than what their Arduino board config implies:
 //
-//   * `#define FASTLED_ESP_FORCE_UART_SERIAL`        → forces UART.
-//   * `#define FASTLED_ESP_FORCE_USB_SERIAL_JTAG`    → forces JTAG.
+//   * `#define FASTLED_ESP_FORCE_UART_SERIAL`        â†’ forces UART.
+//   * `#define FASTLED_ESP_FORCE_USB_SERIAL_JTAG`    â†’ forces JTAG.
 //
 // Both macros are honored only when JTAG hardware is available; on
 // chips without JTAG (`FL_ESP_HAS_USB_SERIAL_JTAG == 0`) the choice is
@@ -227,11 +227,9 @@ private:
             case UsbSerialJtagEsp32::InitOutcome::kVerificationFailed:  outcome = "VerificationFailed"; break;
             case UsbSerialJtagEsp32::InitOutcome::kNotAvailable:        outcome = "NotAvailable"; break;
         }
-        FL_PRINT("EspIO: backend=" << backend
-                 << " usb_jtag_outcome=" << outcome
-                 << " err=" << static_cast<int>(mDriver.initError()));
+        FL_PRINT_F("EspIO: backend=%s usb_jtag_outcome=%s err=%s", backend, outcome, static_cast<int>(mDriver.initError()));
 #else
-        FL_PRINT("EspIO: backend=UART0 (compile-time choice; "
+        FL_PRINT_F("EspIO: backend=UART0 (compile-time choice; "
                  "#define FASTLED_ESP_FORCE_USB_SERIAL_JTAG to switch)");
 #endif
     }

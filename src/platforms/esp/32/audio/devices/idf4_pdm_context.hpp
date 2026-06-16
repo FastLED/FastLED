@@ -55,12 +55,12 @@ PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NOEXCEPT {
 
     esp_err_t ret = i2s_driver_install(i2s_port, &i2s_config, 0, nullptr);
     if (ret != ESP_OK) {
-        FL_WARN("Failed to install PDM I2S driver: " << ret);
+        FL_WARN_F("Failed to install PDM I2S driver: %s", ret);
         return ctx;
     }
     ret = i2s_set_pin(i2s_port, &pin_config);
     if (ret != ESP_OK) {
-        FL_WARN("Failed to set PDM I2S pins: " << ret);
+        FL_WARN_F("Failed to set PDM I2S pins: %s", ret);
         i2s_driver_uninstall(i2s_port);
         return ctx;
     }

@@ -44,19 +44,19 @@
  *
  * // Accessing an integer with a default value
  * int brightness = jsonDoc["config"]["brightness"] | 255; // Result: 128
- * FL_WARN("Brightness: " << brightness);
+ * FL_WARN_F("Brightness: %s", brightness);
  *
  * // Accessing a boolean with a default value
  * bool enabled = jsonDoc["config"]["enabled"] | false;    // Result: true
- * FL_WARN("Enabled: " << enabled);
+ * FL_WARN_F("Enabled: %s", enabled);
  *
  * // Accessing a string with a default value
  * fl::string deviceName = jsonDoc["config"]["name"] | fl::string("unknown"); // Result: "my_device"
- * FL_WARN("Device Name: " << deviceName);
+ * FL_WARN_F("Device Name: %s", deviceName);
  *
  * // Accessing a non-existent key with a default value
  * int nonExistent = jsonDoc["config"]["non_existent_key"] | 0; // Result: 0
- * FL_WARN("Non-existent: " << nonExistent);
+ * FL_WARN_F("Non-existent: %s", nonExistent);
  * @endcode
  *
  * Generating JSON Data - Build with Ease:
@@ -92,7 +92,7 @@
  *
  * // Convert the entire JSON object to a string
  * fl::string jsonString = newJson.to_string();
- * FL_WARN("Generated JSON:\n" << jsonString);
+ * FL_WARN_F("Generated JSON:\n%s", jsonString);
  * // Expected output (formatting may vary):
  * // {"version":1.0,"isActive":true,"message":"Hello, FastLED!","settings":{"mode":"dynamic","speed":50},"colors":["red","green","blue"]}
  * @endcode

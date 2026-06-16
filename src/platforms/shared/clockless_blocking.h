@@ -88,9 +88,9 @@ public:
         // This may indicate missing platform-specific optimizations
         static bool warned = false;  // okay static in header
         if (!warned) {
-            FL_WARN("Using GENERIC fallback clockless controller - platform-specific driver not available!");
-            FL_WARN("  This may result in reduced performance or timing issues.");
-            FL_WARN("  Expected platforms (ESP32/Teensy/etc) should use hardware drivers.");
+            FL_WARN_F("Using GENERIC fallback clockless controller - platform-specific driver not available!");
+            FL_WARN_F("  This may result in reduced performance or timing issues.");
+            FL_WARN_F("  Expected platforms (ESP32/Teensy/etc) should use hardware drivers.");
             warned = true;
         }
 

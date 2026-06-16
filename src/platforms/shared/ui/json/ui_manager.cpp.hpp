@@ -116,7 +116,7 @@ fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() FL_NOEXCEPT {
         if (auto ptr = component.lock()) {
             out.push_back(ptr);
         } else {
-            FL_WARN("*** WARNING: Component weak_ptr is expired, skipping");
+            FL_WARN_F("*** WARNING: Component weak_ptr is expired, skipping");
         }
     }
     // Sort components by ID to ensure consistent serialization order
@@ -185,15 +185,13 @@ void JsonUiManager::executeUiUpdates(const fl::json &doc) FL_NOEXCEPT {
                 const fl::json v = doc[key.c_str()];
                 component->updateInternal(v);
             } else {
-                FL_ERROR("could not find component with ID or name: " << id_or_name);
+                FL_ERROR_F("could not find component with ID or name: %s", id_or_name);
             }
         }
     } else {
         // Debug: Show what we actually received instead of just asserting
         fl::string debugJson = doc.to_string();
-        FL_WARN("*** UI UPDATE ERROR: Expected JSON object but got " << 
-               (doc.is_array() ? "array" : "non-object") << 
-               ": " << debugJson.substr(0, 200).c_str() << "...");
+        FL_WARN_F("*** UI UPDATE ERROR: Expected JSON object but got %s: %s...", (doc.is_array() ? "array" : "non-object"), debugJson.substr(0, 200).c_str());
         
         // Use a warning instead of assertion to prevent crashes
         // FL_ASSERT(false, "JSON document is not an object, cannot execute UI updates");

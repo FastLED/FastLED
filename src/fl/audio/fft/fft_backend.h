@@ -139,7 +139,7 @@ inline bool espDspGlobalInit() FL_NOEXCEPT {
     esp_err_t err =
         dsps_fft2r_init_fc32(nullptr, CONFIG_DSP_MAX_FFT_SIZE);
     if (err != ESP_OK) {
-        FL_WARN("dsps_fft2r_init_fc32 failed: " << static_cast<int>(err));
+        FL_WARN_F("dsps_fft2r_init_fc32 failed: %s", static_cast<int>(err));
         return false;
     }
     initialized = true;

@@ -161,7 +161,7 @@ I2sLcdCamPeripheralMockImpl::~I2sLcdCamPeripheralMockImpl() {
 bool I2sLcdCamPeripheralMockImpl::initialize(const I2sLcdCamConfig& config) FL_NOEXCEPT {
     // Validate config
     if (config.num_lanes == 0 || config.num_lanes > 16) {
-        FL_WARN("I2sLcdCamPeripheralMock: Invalid num_lanes: " << config.num_lanes);
+        FL_WARN_F("I2sLcdCamPeripheralMock: Invalid num_lanes: %s", config.num_lanes);
         return false;
     }
 
@@ -198,7 +198,7 @@ u16* I2sLcdCamPeripheralMockImpl::allocateBuffer(size_t size_bytes) FL_NOEXCEPT 
 #endif
 
     if (buffer == nullptr) {
-        FL_WARN("I2sLcdCamPeripheralMock: Failed to allocate buffer (" << aligned_size << " bytes)");
+        FL_WARN_F("I2sLcdCamPeripheralMock: Failed to allocate buffer (%s bytes)", aligned_size);
     }
 
     return static_cast<u16*>(buffer);
@@ -220,7 +220,7 @@ void I2sLcdCamPeripheralMockImpl::freeBuffer(u16* buffer) FL_NOEXCEPT {
 
 bool I2sLcdCamPeripheralMockImpl::transmit(const u16* buffer, size_t size_bytes) FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN("I2sLcdCamPeripheralMock: Cannot transmit - not initialized");
+        FL_WARN_F("I2sLcdCamPeripheralMock: Cannot transmit - not initialized");
         return false;
     }
 

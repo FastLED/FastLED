@@ -62,11 +62,10 @@ MultiLaneDevice::MultiLaneDevice(const Config& config)
     // Validate configuration
     size_t num_lanes = config.data_pins.size();
     if (num_lanes < 1 || num_lanes > 8) {
-        FL_WARN("MultiLaneDevice: Invalid number of data pins (" << num_lanes
-                << "), must be 1-8");
+        FL_WARN_F("MultiLaneDevice: Invalid number of data pins (%s), must be 1-8", num_lanes);
     }
 
-    FL_DBG("MultiLaneDevice: Created with " << num_lanes << " lane(s)");
+    FL_DBG_F("MultiLaneDevice: Created with %s lane(s)", num_lanes);
 }
 
 MultiLaneDevice::~MultiLaneDevice() FL_NOEXCEPT {
@@ -97,7 +96,7 @@ fl::optional<fl::task::Error> MultiLaneDevice::begin() {
         // Try Single-SPI (SpiHw1)
         const auto& controllers = SpiHw1::getAll();
         if (controllers.empty()) {
-            FL_WARN("MultiLaneDevice: No Single-SPI hardware available");
+            FL_WARN_F("MultiLaneDevice: No Single-SPI hardware available");
             return fl::task::Error("Single-SPI hardware not available");
         }
 
@@ -111,7 +110,7 @@ fl::optional<fl::task::Error> MultiLaneDevice::begin() {
         }
 
         if (!hw) {
-            FL_WARN("MultiLaneDevice: All Single-SPI controllers in use");
+            FL_WARN_F("MultiLaneDevice: All Single-SPI controllers in use");
             return fl::task::Error("All Single-SPI controllers already in use");
         }
 
@@ -123,19 +122,19 @@ fl::optional<fl::task::Error> MultiLaneDevice::begin() {
         hw_config.data_pin = pImpl->config.data_pins[0];
 
         if (!hw->begin(hw_config)) {
-            FL_WARN("MultiLaneDevice: Failed to initialize Single-SPI hardware");
+            FL_WARN_F("MultiLaneDevice: Failed to initialize Single-SPI hardware");
             return fl::task::Error("Failed to initialize Single-SPI hardware");
         }
 
         pImpl->backend = hw;
         pImpl->backend_type = 1;
-        FL_DBG("MultiLaneDevice: Initialized Single-SPI (" << hw->getName() << ")");
+        FL_DBG_F("MultiLaneDevice: Initialized Single-SPI (%s)", hw->getName());
 
     } else if (num_lanes == 2) {
         // Try Dual-SPI (SpiHw2)
         const auto& controllers = SpiHw2::getAll();
         if (controllers.empty()) {
-            FL_WARN("MultiLaneDevice: No Dual-SPI hardware available");
+            FL_WARN_F("MultiLaneDevice: No Dual-SPI hardware available");
             return fl::task::Error("Dual-SPI hardware not available");
         }
 
@@ -149,7 +148,7 @@ fl::optional<fl::task::Error> MultiLaneDevice::begin() {
         }
 
         if (!hw) {
-            FL_WARN("MultiLaneDevice: All Dual-SPI controllers in use");
+            FL_WARN_F("MultiLaneDevice: All Dual-SPI controllers in use");
             return fl::task::Error("All Dual-SPI controllers already in use");
         }
 
@@ -162,19 +161,19 @@ fl::optional<fl::task::Error> MultiLaneDevice::begin() {
         hw_config.data1_pin = pImpl->config.data_pins[1];
 
         if (!hw->begin(hw_config)) {
-            FL_WARN("MultiLaneDevice: Failed to initialize Dual-SPI hardware");
+            FL_WARN_F("MultiLaneDevice: Failed to initialize Dual-SPI hardware");
             return fl::task::Error("Failed to initialize Dual-SPI hardware");
         }
 
         pImpl->backend = hw;
         pImpl->backend_type = 2;
-        FL_DBG("MultiLaneDevice: Initialized Dual-SPI (" << hw->getName() << ")");
+        FL_DBG_F("MultiLaneDevice: Initialized Dual-SPI (%s)", hw->getName());
 
     } else if (num_lanes >= 3 && num_lanes <= 4) {
         // Try Quad-SPI (SpiHw4)
         const auto& controllers = SpiHw4::getAll();
         if (controllers.empty()) {
-            FL_WARN("MultiLaneDevice: No Quad-SPI hardware available");
+            FL_WARN_F("MultiLaneDevice: No Quad-SPI hardware available");
             return fl::task::Error("Quad-SPI hardware not available");
         }
 
@@ -188,7 +187,7 @@ fl::optional<fl::task::Error> MultiLaneDevice::begin() {
         }
 
         if (!hw) {
-            FL_WARN("MultiLaneDevice: All Quad-SPI controllers in use");
+            FL_WARN_F("MultiLaneDevice: All Quad-SPI controllers in use");
             return fl::task::Error("All Quad-SPI controllers already in use");
         }
 
@@ -203,19 +202,19 @@ fl::optional<fl::task::Error> MultiLaneDevice::begin() {
         hw_config.data3_pin = (num_lanes > 3) ? pImpl->config.data_pins[3] : -1;
 
         if (!hw->begin(hw_config)) {
-            FL_WARN("MultiLaneDevice: Failed to initialize Quad-SPI hardware");
+            FL_WARN_F("MultiLaneDevice: Failed to initialize Quad-SPI hardware");
             return fl::task::Error("Failed to initialize Quad-SPI hardware");
         }
 
         pImpl->backend = hw;
         pImpl->backend_type = 4;
-        FL_DBG("MultiLaneDevice: Initialized Quad-SPI (" << hw->getName() << ")");
+        FL_DBG_F("MultiLaneDevice: Initialized Quad-SPI (%s)", hw->getName());
 
     } else if (num_lanes >= 5 && num_lanes <= 8) {
         // Try Octal-SPI (SpiHw8)
         const auto& controllers = SpiHw8::getAll();
         if (controllers.empty()) {
-            FL_WARN("MultiLaneDevice: No Octal-SPI hardware available");
+            FL_WARN_F("MultiLaneDevice: No Octal-SPI hardware available");
             return fl::task::Error("Octal-SPI hardware not available");
         }
 
@@ -229,7 +228,7 @@ fl::optional<fl::task::Error> MultiLaneDevice::begin() {
         }
 
         if (!hw) {
-            FL_WARN("MultiLaneDevice: All Octal-SPI controllers in use");
+            FL_WARN_F("MultiLaneDevice: All Octal-SPI controllers in use");
             return fl::task::Error("All Octal-SPI controllers already in use");
         }
 
@@ -248,13 +247,13 @@ fl::optional<fl::task::Error> MultiLaneDevice::begin() {
         hw_config.data7_pin = (num_lanes > 7) ? pImpl->config.data_pins[7] : -1;
 
         if (!hw->begin(hw_config)) {
-            FL_WARN("MultiLaneDevice: Failed to initialize Octal-SPI hardware");
+            FL_WARN_F("MultiLaneDevice: Failed to initialize Octal-SPI hardware");
             return fl::task::Error("Failed to initialize Octal-SPI hardware");
         }
 
         pImpl->backend = hw;
         pImpl->backend_type = 8;
-        FL_DBG("MultiLaneDevice: Initialized Octal-SPI (" << hw->getName() << ")");
+        FL_DBG_F("MultiLaneDevice: Initialized Octal-SPI (%s)", hw->getName());
     }
 
     pImpl->initialized = true;
@@ -277,7 +276,7 @@ void MultiLaneDevice::end() {
         lane.clear();
     }
 
-    FL_DBG("MultiLaneDevice: Shutdown complete");
+    FL_DBG_F("MultiLaneDevice: Shutdown complete");
 }
 
 bool MultiLaneDevice::isReady() const {
@@ -286,7 +285,7 @@ bool MultiLaneDevice::isReady() const {
 
 Lane& MultiLaneDevice::lane(size_t lane_id) {
     if (!pImpl || lane_id >= pImpl->lanes.size()) {
-        FL_WARN("MultiLaneDevice: Invalid lane ID " << lane_id);
+        FL_WARN_F("MultiLaneDevice: Invalid lane ID %s", lane_id);
         // Return first lane as fallback (avoid crash)
         static Lane dummy_lane(0, nullptr); // okay static in header
         return dummy_lane;
@@ -318,8 +317,7 @@ Result<void> MultiLaneDevice::flush() {
                 found_first = true;
             } else if (lane_size != expected_size) {
                 // Size mismatch detected
-                FL_WARN("MultiLaneDevice: Lane size mismatch - expected " << expected_size
-                        << " bytes (lane 0), but lane " << i << " has " << lane_size << " bytes");
+                FL_WARN_F("MultiLaneDevice: Lane size mismatch - expected %s bytes (lane 0), but lane %s has %s bytes", expected_size, i, lane_size);
                 return Result<void>::failure(SPIError::INVALID_PARAMETER,
                     "Lane size mismatch: all lanes must have identical sizes");
             }
@@ -327,7 +325,7 @@ Result<void> MultiLaneDevice::flush() {
     }
 
     if (expected_size == 0) {
-        FL_WARN("MultiLaneDevice: No data to flush (all lanes empty)");
+        FL_WARN_F("MultiLaneDevice: No data to flush (all lanes empty)");
         return Result<void>::failure(SPIError::ALLOCATION_FAILED,
             "No data to transmit");
     }
@@ -339,7 +337,7 @@ Result<void> MultiLaneDevice::flush() {
     DMABuffer dma_buffer = pImpl->backend->acquireDMABuffer(max_size);
 
     if (!dma_buffer.ok()) {
-        FL_WARN("MultiLaneDevice: Failed to acquire DMA buffer");
+        FL_WARN_F("MultiLaneDevice: Failed to acquire DMA buffer");
         return Result<void>::failure(dma_buffer.error(),
             "Failed to acquire DMA buffer");
     }
@@ -356,8 +354,7 @@ Result<void> MultiLaneDevice::flush() {
 
             // Verify sizes match (DMA buffer should be exactly the size we requested)
             if (lane_data.size() != dma_data.size()) {
-                FL_WARN("MultiLaneDevice: DMA buffer size mismatch - expected " << lane_data.size()
-                        << " bytes, got " << dma_data.size() << " bytes");
+                FL_WARN_F("MultiLaneDevice: DMA buffer size mismatch - expected %s bytes, got %s bytes", lane_data.size(), dma_data.size());
                 error = "DMA buffer size mismatch";
                 transpose_ok = false;
             } else {
@@ -417,7 +414,7 @@ Result<void> MultiLaneDevice::flush() {
     }
 
     if (!transpose_ok) {
-        FL_WARN("MultiLaneDevice: Transposition failed - " << (error ? error : "unknown error"));
+        FL_WARN_F("MultiLaneDevice: Transposition failed - %s", (error ? error : "unknown error"));
         return Result<void>::failure(SPIError::ALLOCATION_FAILED,
             error ? error : "Transposition failed");
     }
@@ -426,7 +423,7 @@ Result<void> MultiLaneDevice::flush() {
     bool transmit_ok = pImpl->backend->transmit(TransmitMode::ASYNC);
 
     if (!transmit_ok) {
-        FL_WARN("MultiLaneDevice: Hardware transmit failed");
+        FL_WARN_F("MultiLaneDevice: Hardware transmit failed");
         return Result<void>::failure(SPIError::BUSY,
             "Hardware transmit failed");
     }
@@ -436,8 +433,7 @@ Result<void> MultiLaneDevice::flush() {
         lane.clear();
     }
 
-    FL_DBG("MultiLaneDevice: Flushed " << pImpl->lanes.size() << " lanes ("
-           << max_size << " bytes per lane)");
+    FL_DBG_F("MultiLaneDevice: Flushed %s lanes (%s bytes per lane)", pImpl->lanes.size(), max_size);
 
     // Success - transmission started asynchronously
     // User must call waitComplete() manually to block until transmission completes
@@ -464,13 +460,12 @@ bool MultiLaneDevice::isBusy() const {
 
 WriteResult MultiLaneDevice::writeImpl(fl::span<const fl::span<const u8>> lane_data) {
     if (!isReady()) {
-        FL_WARN("MultiLaneDevice: Not ready for write");
+        FL_WARN_F("MultiLaneDevice: Not ready for write");
         return WriteResult("Device not ready");
     }
 
     if (lane_data.size() > pImpl->lanes.size()) {
-        FL_WARN("MultiLaneDevice: Too many lanes provided (" << lane_data.size()
-                << " > " << pImpl->lanes.size() << ")");
+        FL_WARN_F("MultiLaneDevice: Too many lanes provided (%s > %s)", lane_data.size(), pImpl->lanes.size());
         return WriteResult("Too many lanes provided");
     }
 
@@ -479,8 +474,7 @@ WriteResult MultiLaneDevice::writeImpl(fl::span<const fl::span<const u8>> lane_d
         size_t first_size = lane_data[0].size();
         for (size_t i = 1; i < lane_data.size(); i++) {
             if (lane_data[i].size() != first_size) {
-                FL_WARN("MultiLaneDevice: Lane size mismatch - lane 0 has " << first_size
-                        << " bytes, lane " << i << " has " << lane_data[i].size() << " bytes");
+                FL_WARN_F("MultiLaneDevice: Lane size mismatch - lane 0 has %s bytes, lane %s has %s bytes", first_size, i, lane_data[i].size());
                 return WriteResult("Lane size mismatch: all lanes must have identical sizes");
             }
         }
@@ -497,11 +491,11 @@ WriteResult MultiLaneDevice::writeImpl(fl::span<const fl::span<const u8>> lane_d
     // Start hardware transmission (async)
     auto flush_result = flush();
     if (!flush_result.ok()) {
-        FL_WARN("MultiLaneDevice: Flush failed");
+        FL_WARN_F("MultiLaneDevice: Flush failed");
         return WriteResult("Flush failed");
     }
 
-    FL_DBG("MultiLaneDevice: Wrote " << lane_data.size() << " lanes atomically (async)");
+    FL_DBG_F("MultiLaneDevice: Wrote %s lanes atomically (async)", lane_data.size());
 
     // Return success - use device->wait() to block until complete
     return WriteResult();

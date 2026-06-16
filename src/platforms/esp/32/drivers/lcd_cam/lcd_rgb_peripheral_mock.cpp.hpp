@@ -148,7 +148,7 @@ LcdRgbPeripheralMockImpl::~LcdRgbPeripheralMockImpl() {
 bool LcdRgbPeripheralMockImpl::initialize(const LcdRgbPeripheralConfig& config) FL_NOEXCEPT {
     // Validate config
     if (config.num_lanes == 0 || config.num_lanes > 16) {
-        FL_WARN("LcdRgbPeripheralMock: Invalid num_lanes: " << config.num_lanes);
+        FL_WARN_F("LcdRgbPeripheralMock: Invalid num_lanes: %s", config.num_lanes);
         return false;
     }
 
@@ -186,7 +186,7 @@ u16* LcdRgbPeripheralMockImpl::allocateFrameBuffer(size_t size_bytes) FL_NOEXCEP
 #endif
 
     if (buffer == nullptr) {
-        FL_WARN("LcdRgbPeripheralMock: Failed to allocate buffer (" << aligned_size << " bytes)");
+        FL_WARN_F("LcdRgbPeripheralMock: Failed to allocate buffer (%s bytes)", aligned_size);
     }
 
     return static_cast<u16*>(buffer);
@@ -208,7 +208,7 @@ void LcdRgbPeripheralMockImpl::freeFrameBuffer(u16* buffer) FL_NOEXCEPT {
 
 bool LcdRgbPeripheralMockImpl::drawFrame(const u16* buffer, size_t size_bytes) FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN("LcdRgbPeripheralMock: Cannot draw - not initialized");
+        FL_WARN_F("LcdRgbPeripheralMock: Cannot draw - not initialized");
         return false;
     }
 

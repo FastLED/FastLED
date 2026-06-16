@@ -67,13 +67,13 @@ void Rpc::bindAsync(const char* name,
 json Rpc::handle(const json& request) {
     // Extract method name
     if (!request.contains("method")) {
-        FL_ERROR("RPC: Invalid Request - missing 'method' field");
+        FL_ERROR_F("RPC: Invalid Request - missing 'method' field");
         return detail::makeJsonRpcError(-32600, "Invalid Request: missing 'method'", request["id"]);
     }
 
     auto methodOpt = request["method"].as_string();
     if (!methodOpt.has_value()) {
-        FL_ERROR("RPC: Invalid Request - 'method' must be a string");
+        FL_ERROR_F("RPC: Invalid Request - 'method' must be a string");
         return detail::makeJsonRpcError(-32600, "Invalid Request: 'method' must be a string", request["id"]);
     }
     fl::string methodName = methodOpt.value();
@@ -99,14 +99,14 @@ json Rpc::handle(const json& request) {
     // Look up the method
     auto it = mRegistry.find(methodName);
     if (it == mRegistry.end()) {
-        FL_WARN("RPC: Method not found: " << methodName.c_str());
+        FL_WARN_F("RPC: Method not found: %s", methodName.c_str());
         return detail::makeJsonRpcError(-32601, "Method not found: " + methodName, request["id"]);
     }
 
     // Extract params (default to empty array)
     json params = request.contains("params") ? request["params"] : json::parse("[]");
     if (!params.is_array()) {
-        FL_ERROR("RPC: Invalid params - must be an array for method: " << methodName.c_str());
+        FL_ERROR_F("RPC: Invalid params - must be an array for method: %s", methodName.c_str());
         return detail::makeJsonRpcError(-32602, "Invalid params: must be an array", request["id"]);
     }
 
@@ -128,7 +128,7 @@ json Rpc::handle(const json& request) {
         ack.set("result", ackResult);
 
         mResponseSink(ack);
-        FL_DBG("RPC: Sent ACK for async method: " << methodName.c_str());
+        FL_DBG_F("RPC: Sent ACK for async method: %s", methodName.c_str());
     }
 
     fl::tuple<TypeConversionResult, json> resultTuple;
@@ -154,7 +154,7 @@ json Rpc::handle(const json& request) {
 
     // Check for conversion errors
     if (!convResult.ok()) {
-        FL_ERROR("RPC: Invalid params for method '" << methodName.c_str() << "': " << convResult.errorMessage().c_str());
+        FL_ERROR_F("RPC: Invalid params for method '%s': %s", methodName.c_str(), convResult.errorMessage().c_str());
         return detail::makeJsonRpcError(-32602, "Invalid params: " + convResult.errorMessage(), request["id"]);
     }
 

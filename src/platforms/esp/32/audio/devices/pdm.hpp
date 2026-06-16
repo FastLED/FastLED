@@ -52,7 +52,7 @@ class PDM_Audio : public audio::IInput {
 
     void start() FL_NOEXCEPT override {
         if (mPdmContextOpt) {
-            FL_WARN("PDM channel is already initialized");
+            FL_WARN_F("PDM channel is already initialized");
             return;
         }
         esp_pdm::PDMContext ctx = esp_pdm::pdm_audio_init(mPdmConfig);
@@ -83,7 +83,7 @@ class PDM_Audio : public audio::IInput {
 
     audio::Sample read() FL_NOEXCEPT override {
         if (!mPdmContextOpt) {
-            FL_WARN("PDM channel is not initialized");
+            FL_WARN_F("PDM channel is not initialized");
             return audio::Sample();
         }
 

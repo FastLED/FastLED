@@ -101,6 +101,30 @@ impl FileContentChecker for TestIncludePathsChecker {
 
 struct TestPathStructureChecker;
 
+fn test_path_matching_source_exists(root_prefix: &str, test_name_no_ext: &str) -> bool {
+    let expected_h = format!("src/{test_name_no_ext}.h");
+    let expected_hpp = format!("src/{test_name_no_ext}.hpp");
+    let expected_cpp_hpp = format!("src/{test_name_no_ext}.cpp.hpp");
+    join_project_path(root_prefix, &expected_h).exists()
+        || join_project_path(root_prefix, &expected_hpp).exists()
+        || join_project_path(root_prefix, &expected_cpp_hpp).exists()
+}
+
+fn test_path_split_source_exists(root_prefix: &str, test_name_no_ext: &str) -> bool {
+    let mut candidate = test_name_no_ext.to_string();
+    while let Some((prefix, suffix)) = candidate.rsplit_once('_') {
+        let slash_in_suffix = suffix.contains('/');
+        if slash_in_suffix || prefix.is_empty() {
+            break;
+        }
+        candidate = prefix.to_string();
+        if test_path_matching_source_exists(root_prefix, &candidate) {
+            return true;
+        }
+    }
+    false
+}
+
 impl FileContentChecker for TestPathStructureChecker {
     fn name(&self) -> &'static str {
         "TestPathStructureChecker"
@@ -141,10 +165,10 @@ impl FileContentChecker for TestPathStructureChecker {
         let expected_h = format!("src/{test_name_no_ext}.h");
         let expected_hpp = format!("src/{test_name_no_ext}.hpp");
         let expected_cpp_hpp = format!("src/{test_name_no_ext}.cpp.hpp");
-        if join_project_path(&root_prefix, &expected_h).exists()
-            || join_project_path(&root_prefix, &expected_hpp).exists()
-            || join_project_path(&root_prefix, &expected_cpp_hpp).exists()
-        {
+        if test_path_matching_source_exists(&root_prefix, &test_name_no_ext) {
+            return Vec::new();
+        }
+        if test_path_split_source_exists(&root_prefix, &test_name_no_ext) {
             return Vec::new();
         }
         if file_content
@@ -589,4 +613,3 @@ impl FileContentChecker for NoexceptSpecialMembersChecker {
         violations
     }
 }
-

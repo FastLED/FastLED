@@ -73,7 +73,7 @@ string formatSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results
 }
 
 void printSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results) {
-    FL_WARN(formatSummaryTable(driver_results).c_str());
+    FL_WARN_F("%s", formatSummaryTable(driver_results).c_str());
 }
 
 }  // namespace validation

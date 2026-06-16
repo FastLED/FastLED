@@ -140,7 +140,7 @@ public:
                 // Note: numPixels will be set when FastLED calls setLeds()
                 mPixelBus = createPixelBus();
                 if (!mPixelBus) {
-                    FL_WARN("Failed to create NeoPixelBus instance");
+                    FL_WARN_F("Failed to create NeoPixelBus instance");
                     return;
                 }
                 
@@ -150,7 +150,7 @@ public:
                 // Allow derived classes to perform additional initialization
                 onInitialized();
             } catch (...) {
-                FL_WARN("NeoPixelBus initialization failed");
+                FL_WARN_F("NeoPixelBus initialization failed");
                 mInitialized = false;
             }
         }
@@ -170,7 +170,7 @@ public:
             mPixelBus.reset();
             mPixelBus = createPixelBus(pixels.size());
             if (!mPixelBus) {
-                FL_WARN("Failed to recreate NeoPixelBus with new size");
+                FL_WARN_F("Failed to recreate NeoPixelBus with new size");
                 return;
             }
             mPixelBus->Begin();
@@ -323,7 +323,7 @@ public:
             try {
                 mPixelBus = fl::make_unique<BusType>(0, DATA_PIN);
                 if (!mPixelBus) {
-                    FL_WARN("Failed to create RGBW NeoPixelBus instance");
+                    FL_WARN_F("Failed to create RGBW NeoPixelBus instance");
                     return;
                 }
                 
@@ -332,7 +332,7 @@ public:
                 
                 onInitialized();
             } catch (...) {
-                FL_WARN("RGBW NeoPixelBus initialization failed");
+                FL_WARN_F("RGBW NeoPixelBus initialization failed");
                 mInitialized = false;
             }
         }
@@ -349,7 +349,7 @@ public:
             mPixelBus.reset();
             mPixelBus = fl::make_unique<BusType>(pixels.size(), DATA_PIN);
             if (!mPixelBus) {
-                FL_WARN("Failed to recreate RGBW NeoPixelBus with new size");
+                FL_WARN_F("Failed to recreate RGBW NeoPixelBus with new size");
                 return;
             }
             mPixelBus->Begin();

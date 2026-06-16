@@ -270,16 +270,9 @@ decodeEdges(const ChipsetTiming4Phase &timing,
     }
 
 #ifdef FL_DEBUG
-    FL_WARN("[FlexPWM DECODE] bytes=" << byte_index
-            << " total_bits=" << total_bits
-            << " errors=" << error_count
-            << " resyncs=" << resync_count
-            << " edges=" << edges.size());
+    FL_WARN_F("[FlexPWM DECODE] bytes=%s total_bits=%s errors=%s resyncs=%s edges=%s", byte_index, total_bits, error_count, resync_count, edges.size());
     if (edges.size() >= 4) {
-        FL_WARN("[FlexPWM DECODE] e[0]=" << (edges[0].high?"H":"L") << edges[0].ns
-                << " e[1]=" << (edges[1].high?"H":"L") << edges[1].ns
-                << " e[2]=" << (edges[2].high?"H":"L") << edges[2].ns
-                << " e[3]=" << (edges[3].high?"H":"L") << edges[3].ns);
+        FL_WARN_F("[FlexPWM DECODE] e[0]=%s%s e[1]=%s%s e[2]=%s%s e[3]=%s%s", (edges[0].high?"H":"L"), edges[0].ns, (edges[1].high?"H":"L"), edges[1].ns, (edges[2].high?"H":"L"), edges[2].ns, (edges[3].high?"H":"L"), edges[3].ns);
     }
 #endif
 
@@ -353,8 +346,7 @@ FlexPwmRxChannelImpl *FlexPwmRxChannelImpl::sActiveInstance = nullptr;
 bool FlexPwmRxChannelImpl::begin(const RxConfig &config) {
     mPinInfo = lookupPin(mPin);
     if (!mPinInfo) {
-        FL_WARN("Pin " << mPin
-                        << " does not support FlexPWM capture on Teensy 4.x");
+        FL_WARN_F("Pin %s does not support FlexPWM capture on Teensy 4.x", mPin);
         return false;
     }
 
@@ -455,23 +447,19 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
     pwm->MCTRL |= FLEXPWM_MCTRL_RUN(1 << sm);
 
 #ifdef FL_DEBUG
-    FL_WARN("[FlexPWM CFG] pin=" << static_cast<int>(mPinInfo->pin)
-            << " pwm" << (pwm == &IMXRT_FLEXPWM1 ? 1 : pwm == &IMXRT_FLEXPWM2 ? 2 : pwm == &IMXRT_FLEXPWM3 ? 3 : 4)
-            << " sm=" << static_cast<int>(sm)
-            << " chB=" << mPinInfo->channel_b);
-    FL_WARN("[FlexPWM CFG] MCTRL=0x" << fl::hex << pwm->MCTRL
-            << " CTRL2=0x" << pwm->SM[sm].CTRL2
-            << " CTRL=0x" << pwm->SM[sm].CTRL << fl::dec);
+    FL_WARN_F("[FlexPWM CFG] pin=%s pwm%s sm=%s chB=%s", static_cast<int>(mPinInfo->pin), (pwm == &IMXRT_FLEXPWM1 ? 1 : pwm == &IMXRT_FLEXPWM2 ? 2 : pwm == &IMXRT_FLEXPWM3 ? 3 : 4), static_cast<int>(sm), mPinInfo->channel_b);
+    FL_WARN_F("[FlexPWM CFG] MCTRL=0x%x CTRL2=0x%x CTRL=0x%x",
+              pwm->MCTRL, pwm->SM[sm].CTRL2, pwm->SM[sm].CTRL);
     if (!mPinInfo->channel_b) {
-        FL_WARN("[FlexPWM CFG] CAPTCTRLA=0x" << fl::hex << pwm->SM[sm].CAPTCTRLA
-                << " DMAEN=0x" << pwm->SM[sm].DMAEN
-                << " STS=0x" << pwm->SM[sm].STS << fl::dec);
+        FL_WARN_F("[FlexPWM CFG] CAPTCTRLA=0x%x DMAEN=0x%x STS=0x%x",
+                  pwm->SM[sm].CAPTCTRLA, pwm->SM[sm].DMAEN,
+                  pwm->SM[sm].STS);
     } else {
-        FL_WARN("[FlexPWM CFG] CAPTCTRLB=0x" << fl::hex << pwm->SM[sm].CAPTCTRLB
-                << " DMAEN=0x" << pwm->SM[sm].DMAEN
-                << " STS=0x" << pwm->SM[sm].STS << fl::dec);
+        FL_WARN_F("[FlexPWM CFG] CAPTCTRLB=0x%x DMAEN=0x%x STS=0x%x",
+                  pwm->SM[sm].CAPTCTRLB, pwm->SM[sm].DMAEN,
+                  pwm->SM[sm].STS);
     }
-    FL_WARN("[FlexPWM CFG] MUX=0x" << fl::hex << *(mPinInfo->mux_register) << fl::dec);
+    FL_WARN_F("[FlexPWM CFG] MUX=0x%x", *(mPinInfo->mux_register));
 #endif
 }
 
@@ -511,12 +499,11 @@ void FlexPwmRxChannelImpl::configureDma() {
     volatile u32 *dmamux_reg = &DMAMUX_CHCFG0 + mDma.channel;
     uintptr_t dma_daddr = mDma.TCD->DADDR; // ok reading register
     uintptr_t buf_addr = reinterpret_cast<uintptr_t>(mCaptureBuffer.data()); // ok reinterpret cast
-    FL_WARN("[FlexPWM DMA] ch=" << mDma.channel
-            << " src=" << static_cast<int>(mPinInfo->dma_source)
-            << " DMAMUX=0x" << fl::hex << *dmamux_reg << fl::dec
-            << " CITER=" << static_cast<int>(mDma.TCD->CITER)
-            << " ERQ=" << (DMA_ERQ & (1 << mDma.channel) ? 1 : 0)
-            << " DADDR_match=" << (dma_daddr == buf_addr ? "YES" : "NO"));
+    FL_WARN_F("[FlexPWM DMA] ch=%s src=%d DMAMUX=0x%x CITER=%d ERQ=%d DADDR_match=%s",
+              mDma.channel, static_cast<int>(mPinInfo->dma_source),
+              *dmamux_reg, static_cast<int>(mDma.TCD->CITER),
+              (DMA_ERQ & (1 << mDma.channel) ? 1 : 0),
+              (dma_daddr == buf_addr ? "YES" : "NO"));
 #endif
 }
 
@@ -627,12 +614,7 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
     }
 
 #ifdef FL_DEBUG
-    FL_WARN("[FlexPWM RX] DMA captures_written=" << captures_written
-            << " BITER=" << biter << " CITER=" << citer
-            << " done=" << (dma_done ? 1 : 0)
-            << " mReceiveDone=" << (mReceiveDone ? 1 : 0)
-            << " ch=" << mDma.channel
-            << " pin=" << static_cast<int>(mPinInfo->pin));
+    FL_WARN_F("[FlexPWM RX] DMA captures_written=%s BITER=%s CITER=%s done=%s mReceiveDone=%s ch=%s pin=%s", captures_written, biter, citer, (dma_done ? 1 : 0), (mReceiveDone ? 1 : 0), mDma.channel, static_cast<int>(mPinInfo->pin));
 #endif
 
     // CRITICAL: Invalidate D-cache for the capture buffer region.
@@ -646,11 +628,9 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
 
 #ifdef FL_DEBUG
     if (captures_written >= 8) {
-        FL_WARN("[FlexPWM RAW] first: " << mCaptureBuffer[0] << " " << mCaptureBuffer[1]
-                << " " << mCaptureBuffer[2] << " " << mCaptureBuffer[3]);
+        FL_WARN_F("[FlexPWM RAW] first: %s %s %s %s", mCaptureBuffer[0], mCaptureBuffer[1], mCaptureBuffer[2], mCaptureBuffer[3]);
         size_t mid = captures_written / 2;
-        FL_WARN("[FlexPWM RAW] mid[" << mid << "]: " << mCaptureBuffer[mid] << " " << mCaptureBuffer[mid+1]
-                << " " << mCaptureBuffer[mid+2] << " " << mCaptureBuffer[mid+3]);
+        FL_WARN_F("[FlexPWM RAW] mid[%s]: %s %s %s %s", mid, mCaptureBuffer[mid], mCaptureBuffer[mid+1], mCaptureBuffer[mid+2], mCaptureBuffer[mid+3]);
     }
 #endif
 
@@ -686,18 +666,11 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
     }
 
 #ifdef FL_DEBUG
-    FL_WARN("[FlexPWM EDGE] total=" << mEdges.size());
+    FL_WARN_F("[FlexPWM EDGE] total=%s", mEdges.size());
     if (mEdges.size() >= 8) {
-        FL_WARN("[FlexPWM E] 0:" << (mEdges[0].high?"H":"L") << mEdges[0].ns
-                << " 1:" << (mEdges[1].high?"H":"L") << mEdges[1].ns
-                << " 2:" << (mEdges[2].high?"H":"L") << mEdges[2].ns
-                << " 3:" << (mEdges[3].high?"H":"L") << mEdges[3].ns);
+        FL_WARN_F("[FlexPWM E] 0:%s%s 1:%s%s 2:%s%s 3:%s%s", (mEdges[0].high?"H":"L"), mEdges[0].ns, (mEdges[1].high?"H":"L"), mEdges[1].ns, (mEdges[2].high?"H":"L"), mEdges[2].ns, (mEdges[3].high?"H":"L"), mEdges[3].ns);
         size_t mid = mEdges.size() / 2;
-        FL_WARN("[FlexPWM E@" << mid << "] "
-                << (mEdges[mid].high?"H":"L") << mEdges[mid].ns
-                << " " << (mEdges[mid+1].high?"H":"L") << mEdges[mid+1].ns
-                << " " << (mEdges[mid+2].high?"H":"L") << mEdges[mid+2].ns
-                << " " << (mEdges[mid+3].high?"H":"L") << mEdges[mid+3].ns);
+        FL_WARN_F("[FlexPWM E@%s] %s%s %s%s %s%s %s%s", mid, (mEdges[mid].high?"H":"L"), mEdges[mid].ns, (mEdges[mid+1].high?"H":"L"), mEdges[mid+1].ns, (mEdges[mid+2].high?"H":"L"), mEdges[mid+2].ns, (mEdges[mid+3].high?"H":"L"), mEdges[mid+3].ns);
     }
 #endif
 
@@ -764,8 +737,7 @@ bool FlexPwmRxChannelImpl::injectEdges(fl::span<const EdgeTime> edges) {
 fl::shared_ptr<FlexPwmRxChannel> FlexPwmRxChannel::create(int pin) {
     const FlexPwmPinInfo *info = lookupPin(pin);
     if (!info) {
-        FL_WARN("Pin " << pin
-                        << " does not support FlexPWM capture on Teensy 4.x");
+        FL_WARN_F("Pin %s does not support FlexPWM capture on Teensy 4.x", pin);
         return fl::shared_ptr<FlexPwmRxChannel>();
     }
     return fl::make_shared<FlexPwmRxChannelImpl>(pin);

@@ -222,7 +222,7 @@ void UsbSerialJtagEsp32::write(const char* str) FL_NOEXCEPT {
                 src += (size_t)written;
                 remaining -= (size_t)written;
             } else if (written < 0) {
-                FL_WARN("USB-Serial JTAG write failed: err=" << written);
+                FL_WARN_F("USB-Serial JTAG write failed: err=%s", written);
                 break;
             }
             // written == 0: buffer full, will retry after timeout
@@ -293,7 +293,7 @@ void UsbSerialJtagEsp32::writeln(const char* str) FL_NOEXCEPT {
                 src += (size_t)written;
                 remaining -= (size_t)written;
             } else if (written < 0) {
-                FL_WARN("USB-Serial JTAG writeln failed: err=" << written);
+                FL_WARN_F("USB-Serial JTAG writeln failed: err=%s", written);
                 break;
             }
             // written == 0: buffer full after timeout, retry

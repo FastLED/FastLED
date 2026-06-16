@@ -89,7 +89,7 @@ void ChannelDriverI2sSpi::show() FL_NOEXCEPT {
         fl::task::run(250, fl::task::ExecFlags::SYSTEM);
     }
     if (mBusy) {
-        FL_WARN("ChannelDriverI2sSpi: DMA hung — forcing release");
+        FL_WARN_F("ChannelDriverI2sSpi: DMA hung — forcing release");
         mBusy = false;
         for (auto &channel : mTransmittingChannels) {
             channel->setInUse(false);
@@ -187,14 +187,14 @@ bool ChannelDriverI2sSpi::beginTransmission(
         }
 
         if (!mPeripheral->initialize(config)) {
-            FL_WARN("ChannelDriverI2sSpi: Failed to initialize peripheral");
+            FL_WARN_F("ChannelDriverI2sSpi: Failed to initialize peripheral");
             return false;
         }
 
         // Allocate buffer
         mBuffer = mPeripheral->allocateBuffer(interleavedSize);
         if (mBuffer == nullptr) {
-            FL_WARN("ChannelDriverI2sSpi: Failed to allocate buffer");
+            FL_WARN_F("ChannelDriverI2sSpi: Failed to allocate buffer");
             return false;
         }
         mBufferSize = interleavedSize;
@@ -224,7 +224,7 @@ bool ChannelDriverI2sSpi::beginTransmission(
         for (const auto &channel : channels) {
             channel->setInUse(false);
         }
-        FL_WARN("ChannelDriverI2sSpi: Transmit failed");
+        FL_WARN_F("ChannelDriverI2sSpi: Transmit failed");
         return false;
     }
 

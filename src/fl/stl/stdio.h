@@ -553,6 +553,9 @@ inline void format_arg(sstream& stream, const FormatSpec& spec, const char* arg)
     stream << result;
 }
 
+void format_arg(sstream& stream, const FormatSpec& spec, const fl::string& arg) FL_NOEXCEPT;
+void format_arg(sstream& stream, const FormatSpec& spec, const fl::string_view& arg) FL_NOEXCEPT;
+
 // Specialized format_arg for char arrays (string literals like "hello")
 template<fl::size N>
 void format_arg(sstream& stream, const FormatSpec& spec, const char (&arg)[N]) FL_NOEXCEPT {

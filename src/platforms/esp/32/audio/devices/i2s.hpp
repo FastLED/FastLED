@@ -45,7 +45,7 @@ class I2S_Audio : public audio::IInput {
 
     void start() FL_NOEXCEPT override {
         if (mI2sContextOpt) {
-            FL_WARN("I2S channel is already initialized");
+            FL_WARN_F("I2S channel is already initialized");
             return;
         }
         esp_i2s::I2SContext ctx = esp_i2s::i2s_audio_init(mStdConfig);
@@ -71,7 +71,7 @@ class I2S_Audio : public audio::IInput {
 
     audio::Sample read() FL_NOEXCEPT override {
         if (!mI2sContextOpt) {
-            FL_WARN("I2S channel is not initialized");
+            FL_WARN_F("I2S channel is not initialized");
             return audio::Sample();  // Invalid sample
         }
 

@@ -23,6 +23,7 @@
 #include "fl/stl/ostream.cpp.hpp"
 #include "fl/stl/shared_ptr.cpp.hpp"
 #include "fl/stl/singleton.cpp.hpp"
+#include "fl/stl/stdio.cpp.hpp"
 #include "fl/stl/string.cpp.hpp"
 #include "fl/stl/string_interner.cpp.hpp"
 #include "fl/stl/string_view.cpp.hpp"

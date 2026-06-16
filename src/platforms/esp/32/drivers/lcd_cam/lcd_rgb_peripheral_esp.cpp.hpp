@@ -68,7 +68,7 @@ LcdRgbPeripheralEsp::~LcdRgbPeripheralEsp() {
 
 bool LcdRgbPeripheralEsp::initialize(const LcdRgbPeripheralConfig& config) FL_NOEXCEPT {
     if (mInitialized) {
-        FL_WARN("LcdRgbPeripheralEsp: Already initialized");
+        FL_WARN_F("LcdRgbPeripheralEsp: Already initialized");
         return false;
     }
 
@@ -76,12 +76,12 @@ bool LcdRgbPeripheralEsp::initialize(const LcdRgbPeripheralConfig& config) FL_NO
 
     // Validate configuration
     if (config.num_lanes < 1 || config.num_lanes > 16) {
-        FL_WARN("LcdRgbPeripheralEsp: Invalid num_lanes: " << config.num_lanes);
+        FL_WARN_F("LcdRgbPeripheralEsp: Invalid num_lanes: %s", config.num_lanes);
         return false;
     }
 
     if (config.pclk_hz == 0) {
-        FL_WARN("LcdRgbPeripheralEsp: Invalid pclk_hz: 0");
+        FL_WARN_F("LcdRgbPeripheralEsp: Invalid pclk_hz: 0");
         return false;
     }
 
@@ -137,14 +137,14 @@ bool LcdRgbPeripheralEsp::initialize(const LcdRgbPeripheralConfig& config) FL_NO
     // Create RGB panel
     esp_err_t err = esp_lcd_new_rgb_panel(&panel_config, &mPanelHandle);
     if (err != ESP_OK) {
-        FL_WARN("LcdRgbPeripheralEsp: Failed to create RGB panel: " << err);
+        FL_WARN_F("LcdRgbPeripheralEsp: Failed to create RGB panel: %s", err);
         return false;
     }
 
     // Initialize panel
     err = esp_lcd_panel_init(mPanelHandle);
     if (err != ESP_OK) {
-        FL_WARN("LcdRgbPeripheralEsp: Failed to initialize panel: " << err);
+        FL_WARN_F("LcdRgbPeripheralEsp: Failed to initialize panel: %s", err);
         esp_lcd_panel_del(mPanelHandle);
         mPanelHandle = nullptr;
         return false;

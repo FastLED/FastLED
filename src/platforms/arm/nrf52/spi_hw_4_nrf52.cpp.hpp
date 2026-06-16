@@ -65,14 +65,14 @@ bool SPIQuadNRF52::begin(const SpiHw4::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
-        FL_WARN("SPIQuadNRF52: Bus ID mismatch");
+        FL_WARN_F("SPIQuadNRF52: Bus ID mismatch");
         return false;
     }
 
     // Validate pin assignments
     if (config.clock_pin < 0 || config.data0_pin < 0 || config.data1_pin < 0 ||
         config.data2_pin < 0 || config.data3_pin < 0) {
-        FL_WARN("SPIQuadNRF52: Invalid pin configuration");
+        FL_WARN_F("SPIQuadNRF52: Invalid pin configuration");
         return false;
     }
 
@@ -233,13 +233,13 @@ bool SPIQuadNRF52::allocateDMABuffers(size_t required_size) {
     // Allocate new buffers in RAM (required for EasyDMA)
     mLane0Buffer = (u8*)fl::malloc(required_size);
     if (mLane0Buffer == nullptr) {
-        FL_WARN("SPIQuadNRF52: Failed to allocate lane 0 DMA buffer");
+        FL_WARN_F("SPIQuadNRF52: Failed to allocate lane 0 DMA buffer");
         return false;
     }
 
     mLane1Buffer = (u8*)fl::malloc(required_size);
     if (mLane1Buffer == nullptr) {
-        FL_WARN("SPIQuadNRF52: Failed to allocate lane 1 DMA buffer");
+        FL_WARN_F("SPIQuadNRF52: Failed to allocate lane 1 DMA buffer");
         fl::free(mLane0Buffer);
         mLane0Buffer = nullptr;
         return false;
@@ -247,7 +247,7 @@ bool SPIQuadNRF52::allocateDMABuffers(size_t required_size) {
 
     mLane2Buffer = (u8*)fl::malloc(required_size);
     if (mLane2Buffer == nullptr) {
-        FL_WARN("SPIQuadNRF52: Failed to allocate lane 2 DMA buffer");
+        FL_WARN_F("SPIQuadNRF52: Failed to allocate lane 2 DMA buffer");
         fl::free(mLane0Buffer);
         fl::free(mLane1Buffer);
         mLane0Buffer = nullptr;
@@ -257,7 +257,7 @@ bool SPIQuadNRF52::allocateDMABuffers(size_t required_size) {
 
     mLane3Buffer = (u8*)fl::malloc(required_size);
     if (mLane3Buffer == nullptr) {
-        FL_WARN("SPIQuadNRF52: Failed to allocate lane 3 DMA buffer");
+        FL_WARN_F("SPIQuadNRF52: Failed to allocate lane 3 DMA buffer");
         fl::free(mLane0Buffer);
         fl::free(mLane1Buffer);
         fl::free(mLane2Buffer);
@@ -350,7 +350,7 @@ bool SPIQuadNRF52::waitComplete(u32 timeout_ms) {
     // Check if we timed out
     bool timed_out = (timeout_ms != fl::numeric_limits<u32>::max()) && (iterations >= timeout_iterations);
     if (timed_out) {
-        FL_WARN("SPIQuadNRF52: Transaction timeout");
+        FL_WARN_F("SPIQuadNRF52: Transaction timeout");
         // Clear state even on timeout
         mTransactionActive = false;
         return false;

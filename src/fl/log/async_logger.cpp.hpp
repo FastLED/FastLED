@@ -17,8 +17,7 @@ namespace detail {
     /// Called from checkLoggerEnabled template function
     /// IMPORTANT: This must NOT be inline - needs external linkage for cross-TU calls
     void printLoggerDisabledError(const char* category_name, const char* define_name) {
-        FL_ERROR(category_name << " ASYNC LOGGING NOT ENABLED. "
-            << "Add '#define " << define_name << "' before including FastLED.h");
+        FL_ERROR_F("%s ASYNC LOGGING NOT ENABLED. Add '#define %s' before including FastLED.h", category_name, define_name);
     }
 } // namespace detail
 

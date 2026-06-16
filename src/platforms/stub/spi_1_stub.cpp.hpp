@@ -38,23 +38,23 @@ bool SpiHw1Stub::begin(const SpiHw1::Config& config) FL_NOEXCEPT {
 }
 
 void SpiHw1Stub::end() FL_NOEXCEPT {
-    FL_LOG_SPI("SpiHw1Stub::end() called, mInitialized=" << (mInitialized ? "true" : "false"));
+    FL_LOG_SPI_F("SpiHw1Stub::end() called, mInitialized=%s", (mInitialized ? "true" : "false"));
     if (!mInitialized) {
-        FL_LOG_SPI("SpiHw1Stub::end() already ended, returning");
+        FL_LOG_SPI_F("SpiHw1Stub::end() already ended, returning");
         return;  // Already ended - idempotent
     }
 
-    FL_LOG_SPI("SpiHw1Stub::end() setting mInitialized=false");
+    FL_LOG_SPI_F("SpiHw1Stub::end() setting mInitialized=false");
     mInitialized = false;
-    FL_LOG_SPI("SpiHw1Stub::end() clearing mLastBuffer");
+    FL_LOG_SPI_F("SpiHw1Stub::end() clearing mLastBuffer");
     mLastBuffer.clear();
 
-    FL_LOG_SPI("SpiHw1Stub::end() resetting mCurrentBuffer");
+    FL_LOG_SPI_F("SpiHw1Stub::end() resetting mCurrentBuffer");
     // Release current buffer
     mCurrentBuffer.reset();
-    FL_LOG_SPI("SpiHw1Stub::end() setting mBufferAcquired=false");
+    FL_LOG_SPI_F("SpiHw1Stub::end() setting mBufferAcquired=false");
     mBufferAcquired = false;
-    FL_LOG_SPI("SpiHw1Stub::end() complete");
+    FL_LOG_SPI_F("SpiHw1Stub::end() complete");
 }
 
 DMABuffer SpiHw1Stub::acquireDMABuffer(size_t bytes_per_lane) FL_NOEXCEPT {
@@ -175,10 +175,10 @@ namespace platforms {
 /// Called lazily on first access to SpiHw1::getAll().
 /// Registers mock SpiHw1 controller instances for testing.
 void initSpiHw1Instances() FL_NOEXCEPT {
-    FL_WARN("Registering SpiHw1 stub instances...");
+    FL_WARN_F("Registering SpiHw1 stub instances...");
     SpiHw1::registerInstance(getController0_Spi1());
     SpiHw1::registerInstance(getController1_Spi1());
-    FL_WARN("SpiHw1 stub instances registered!");
+    FL_WARN_F("SpiHw1 stub instances registered!");
 }
 
 }  // namespace platforms

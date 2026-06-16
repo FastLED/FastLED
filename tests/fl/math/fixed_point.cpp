@@ -1,3 +1,4 @@
+// allow-include-after-namespace: helper headers intentionally instantiate inside this test's anonymous namespace.
 // ============================================================================
 // Fixed-Point Type Tests - Architecture
 // ============================================================================
@@ -117,8 +118,8 @@ namespace { // Anonymous namespace for fixed_point tests
 template <typename T>
 using raw_t = decltype(T().raw());
 
-#include "fixed_point_bounds.h"
-#include "fixed_point_test_helpers.h"
+#include "tests/fl/math/fixed_point_bounds.h"
+#include "tests/fl/math/fixed_point_test_helpers.h"
 
 // --- Helper functions ---
 

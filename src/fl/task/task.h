@@ -85,7 +85,7 @@ auto t = fl::task::coroutine({
             // Process the data
             process_data(data);
         } else {
-            FL_WARN("Fetch failed: " << result.error().message);
+            FL_WARN_F("Fetch failed: %s", result.error().message);
         }
 
         // Task completes and automatically cleans up
