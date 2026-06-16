@@ -26,7 +26,7 @@
 #include "fl/stl/json.h"
 #include "fl/task/task.h"
 #include "fl/task/executor.h"
-#include "fl/math/wave/wave_simulation_real.h"
+#include "fl/math/wave/wave_perf_bench.h"
 #include "fl/stl/atomic.h"
 #include "fl/task/promise.h"
 #include "fl/math/simd.h"
@@ -3740,55 +3740,26 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
             response.set("error", "out_of_range");
             return response;
         }
-        fl::LaplacianStencil stencil =
+        const fl::LaplacianStencil stencil =
             (stencil_name == "NinePointIsotropic")
             ? fl::LaplacianStencil::NinePointIsotropic
             : fl::LaplacianStencil::FivePoint;
-        auto sim = fl::make_unique<fl::WaveSimulation2D_Real>(
-            static_cast<fl::u32>(W), static_cast<fl::u32>(H), 0.16f, 6.0f);
-        sim->setHalfDuplex(false);
-        sim->setStencil(stencil);
-        for (int y = 0; y < H; ++y) {
-            for (int x = 0; x < W; ++x) {
-                sim->setf(static_cast<fl::size>(x),
-                          static_cast<fl::size>(y),
-                          ((x + y) & 1) ? -0.5f : 0.5f);
-            }
-        }
-        sim->update();  // warm-up
-        double sum = 0.0;
-        double sum_sq = 0.0;
-        for (int r = 0; r < repeats; ++r) {
-            const fl::u32 t0 = fl::micros();
-            for (int i = 0; i < iterations; ++i) {
-                sim->update();
-            }
-            const fl::u32 t1 = fl::micros();
-            const double us_per_update =
-                static_cast<double>(t1 - t0) / iterations;
-            sum += us_per_update;
-            sum_sq += us_per_update * us_per_update;
-        }
-        const double mean = sum / repeats;
-        const double variance = (sum_sq / repeats) - (mean * mean);
-        double std_dev = 0.0;
-        if (variance > 0.0) {
-            // Newton-Raphson sqrt — avoids pulling in <cmath> on
-            // platforms where it's costly. 6 iterations gives ~14
-            // significant digits for the input ranges we expect.
-            double s = variance;
-            for (int k = 0; k < 6; ++k) {
-                s = 0.5 * (s + variance / s);
-            }
-            std_dev = s;
-        }
-        const double std_dev_pct = (mean > 0.0)
-            ? (100.0 * std_dev / mean) : 0.0;
-        response.set("success", true);
+        // External-binder pattern: simulator-side code (in
+        // src/fl/math/wave/wave_perf_bench.h) owns the wave PDE setup,
+        // checkerboard seed, warm-up, timing and statistics. This RPC
+        // is the thin JSON-RPC translation layer.
+        const fl::wave_perf::WavePerfRepeatResult bench =
+            fl::wave_perf::runWavePerfRepeat(
+                static_cast<fl::u32>(W),
+                static_cast<fl::u32>(H),
+                static_cast<fl::u32>(iterations),
+                static_cast<fl::u32>(repeats),
+                stencil);
+        response.set("success", bench.success);
         response.set("stencil", stencil_name.c_str());
-        response.set("mean_us_per_update", mean);
-        response.set("std_dev_us_per_update", std_dev);
-        response.set("std_dev_pct", std_dev_pct);
+        response.set("mean_us_per_update", bench.mean_us_per_update);
+        response.set("std_dev_us_per_update", bench.std_dev_us_per_update);
+        response.set("std_dev_pct", bench.std_dev_pct);
         return response;
     });
 
@@ -3848,71 +3819,29 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
             return response;
         }
 
-        fl::LaplacianStencil stencil = fl::LaplacianStencil::NinePointIsotropic;
-        if (stencil_name == "FivePoint") {
-            stencil = fl::LaplacianStencil::FivePoint;
-        }
+        const fl::LaplacianStencil stencil =
+            (stencil_name == "FivePoint")
+            ? fl::LaplacianStencil::FivePoint
+            : fl::LaplacianStencil::NinePointIsotropic;
 
-        auto sim = fl::make_unique<fl::WaveSimulation2D_Real>(
-            static_cast<fl::u32>(W), static_cast<fl::u32>(H), 0.16f, 6.0f);
-        sim->setHalfDuplex(false);
-        sim->setStencil(stencil);
+        // External-binder pattern: simulator-side code (in
+        // src/fl/math/wave/wave_perf_bench.h) owns the wave PDE setup,
+        // checkerboard seed, warm-up, and timing. This RPC is the thin
+        // JSON-RPC translation layer.
+        const fl::wave_perf::WavePerfResult bench = loads_only
+            ? fl::wave_perf::runWavePerfLoadsOnly(
+                  static_cast<fl::u32>(W), static_cast<fl::u32>(H),
+                  static_cast<fl::u32>(iterations), stencil)
+            : fl::wave_perf::runWavePerf(
+                  static_cast<fl::u32>(W), static_cast<fl::u32>(H),
+                  static_cast<fl::u32>(iterations), stencil);
 
-        // Deterministic checkerboard seed at +/-0.5 (avoids the +/-1.0
-        // float_to_fixed asymmetry issue noted in #3083's audit).
-        for (int y = 0; y < H; ++y) {
-            for (int x = 0; x < W; ++x) {
-                sim->setf(static_cast<fl::size>(x),
-                          static_cast<fl::size>(y),
-                          ((x + y) & 1) ? -0.5f : 0.5f);
-            }
-        }
-
-        // Warm-up step — gets past any first-call init quirks and primes
-        // caches before the measurement window.
-        sim->update();
-
-        const fl::u32 t0 = fl::micros();
-        if (loads_only) {
-            // Memory-bound baseline: read every inner cell `iterations`
-            // times, sum into a volatile sink so the compiler can't
-            // hoist or elide the loop. Touches the same memory pattern
-            // as update() without any of the kernel arithmetic.
-            volatile fl::i32 sink = 0;
-            for (int i = 0; i < iterations; ++i) {
-                fl::i32 acc = 0;
-                for (int y = 0; y < H; ++y) {
-                    for (int x = 0; x < W; ++x) {
-                        acc += sim->geti16(
-                            static_cast<fl::size>(x),
-                            static_cast<fl::size>(y));
-                    }
-                }
-                sink += acc;
-            }
-            (void)sink;
-        } else {
-            for (int i = 0; i < iterations; ++i) {
-                sim->update();
-            }
-        }
-        const fl::u32 t1 = fl::micros();
-        const fl::u32 total_us = t1 - t0;
-
-        const double cells_per_update = static_cast<double>(W) * H;
-        const double us_per_update =
-            static_cast<double>(total_us) / static_cast<double>(iterations);
-        const double us_per_cell_per_update =
-            us_per_update / cells_per_update;
-        const double fps_at_one_update_per_frame =
-            us_per_update > 0.0 ? (1.0e6 / us_per_update) : 0.0;
-
-        response.set("success", true);
-        response.set("total_us", static_cast<int64_t>(total_us));
-        response.set("us_per_update", us_per_update);
-        response.set("us_per_cell_per_update", us_per_cell_per_update);
+        response.set("success", bench.success);
+        response.set("total_us", static_cast<int64_t>(bench.total_us));
+        response.set("us_per_update", bench.us_per_update);
+        response.set("us_per_cell_per_update", bench.us_per_cell_per_update);
         response.set("fps_at_one_update_per_frame",
-                     fps_at_one_update_per_frame);
+                     bench.fps_at_one_update_per_frame);
         return response;
     });
 }
