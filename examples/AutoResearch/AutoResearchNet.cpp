@@ -5,6 +5,17 @@
 // Uses ESP-IDF native APIs for WiFi Soft AP and HTTP client.
 // Guarded with FL_IS_ESP32 - no-op stubs on other platforms.
 
+// Gate out under low-memory mode -- the LowMemory bring-up surface
+// (AutoResearchLowMemory.h) doesn't expose any network endpoints and the
+// fl::net HTTP / asio machinery is several KB that won't fit on the
+// LPC845-BRK / similar Low + Tiny memory targets. Matches the conditional
+// structure in AutoResearch.ino itself.
+#include "fl/system/sketch_macros.h"
+#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
+#define FASTLED_AUTORESEARCH_LOW_MEMORY 1
+#endif
+#if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
+
 #include "AutoResearchNet.h"
 #include "fl/stl/json.h"
 #include "fl/log/log.h"
@@ -480,3 +491,5 @@ fl::json stopNet() {
 }
 
 #endif  // FL_IS_ESP32
+
+#endif  // !FASTLED_AUTORESEARCH_LOW_MEMORY

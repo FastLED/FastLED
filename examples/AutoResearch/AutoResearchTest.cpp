@@ -1,6 +1,17 @@
 // AutoResearchTest.cpp - Generic LED autoresearch testing infrastructure
 // Driver-agnostic test function implementations
 
+// Gate out under low-memory mode -- this file pulls in <FastLED.h> and
+// the full chipset / encoder matrix (UCS7604, wave3, pixel iterators).
+// LowMemory targets don't use those (their RPC surface is in
+// AutoResearchLowMemory.h, which only uses fl::Remote + the LPC SCT
+// driver). Matches the conditional structure in AutoResearch.ino itself.
+#include "fl/system/sketch_macros.h"
+#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
+#define FASTLED_AUTORESEARCH_LOW_MEMORY 1
+#endif
+#if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
+
 #include "AutoResearchTest.h"
 #include "LegacyClocklessProxy.h"
 #include <FastLED.h>
@@ -1263,3 +1274,5 @@ const char* getBitPatternName(int pattern_id) {
         default: return "Unknown Pattern";
     }
 }
+
+#endif  // !FASTLED_AUTORESEARCH_LOW_MEMORY

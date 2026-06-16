@@ -1,5 +1,16 @@
 // AutoResearchHelpers.cpp - Helper function implementations
 
+// Gate out under low-memory mode -- the LowMemory bring-up surface
+// (AutoResearchLowMemory.h) carries its own minimal helper inlined into
+// the .ino, and the full helpers here pull in fl/channels/manager.h and
+// the validation suite which exceed the LPC845 / Tiny-memory budgets.
+// Matches the conditional structure in AutoResearch.ino itself.
+#include "fl/system/sketch_macros.h"
+#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
+#define FASTLED_AUTORESEARCH_LOW_MEMORY 1
+#endif
+#if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
+
 #include "AutoResearchHelpers.h"
 #include "fl/channels/manager.h"
 #include "fl/stl/sstream.h"
@@ -102,3 +113,5 @@ void printSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results) {
 }
 
 // Build test matrix configuration from preprocessor defines and available drivers
+
+#endif  // !FASTLED_AUTORESEARCH_LOW_MEMORY
