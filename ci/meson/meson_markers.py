@@ -8,8 +8,6 @@ optimizations to the STATIC_LINKER rule: ``restat=1`` (lets ninja skip the
 relink cascade when the archive is unchanged) and the
 ``ar_content_preserving.py`` wrapper (preserves the archive's mtime when
 content is unchanged).
-
-Also contains stale-lockfile cleanup for the Windows DirectoryLock bug.
 """
 # pyright: reportMissingImports=false, reportUnknownVariableType=false
 
@@ -22,47 +20,6 @@ from ci.meson.io_utils import atomic_write_text
 from ci.meson.path_normalization import _ar_opt_status_cache
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.timestamp_print import ts_print as _ts_print
-
-
-def cleanup_stale_meson_lockfile(build_dir: Path) -> bool:
-    """Remove a stale ``meson-private/meson.lock`` left by a killed meson process.
-
-    On Windows, meson <= 1.10.x crashed cryptically in ``DirectoryLock.__enter__``
-    when the underlying lockfile open() raised an OSError (e.g., from a stale
-    lockfile left by a killed/abandoned meson process). meson 1.11.0 fixed the
-    crash itself, but the underlying cause — a stale ``meson-private/meson.lock``
-    file — still produces an avoidable setup failure on Windows. Deleting the
-    stale lockfile before invoking ``meson setup`` avoids the failure entirely.
-
-    Args:
-        build_dir: The meson build directory (parent of ``meson-private``).
-
-    Returns:
-        True if a stale lockfile was found and successfully removed, False
-        otherwise (including when no lockfile exists or removal failed).
-    """
-    # Stale lockfile cleanup is intended for the Windows DirectoryLock bug.
-    # On POSIX, meson uses fcntl/flock (advisory) — removing an in-use lockfile
-    # could let a concurrent meson setup bypass the intended lock.
-    if os.name != "nt":
-        return False
-
-    lockfile = build_dir / "meson-private" / "meson.lock"
-    if not lockfile.exists():
-        return False
-    try:
-        lockfile.unlink()
-        _ts_print(f"[MESON] Removed stale lockfile: {lockfile}")
-        return True
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-        raise
-    except OSError as e:
-        # Be tolerant of file-in-use errors on Windows — if removal fails, log
-        # and continue. The caller will hit the original OSError from meson,
-        # which is now visible thanks to the 1.11.0 bump.
-        _ts_print(f"[MESON] Warning: Could not remove stale lockfile {lockfile}: {e}")
-        return False
 
 
 def _write_configuration_markers(
