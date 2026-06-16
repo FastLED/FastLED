@@ -143,6 +143,22 @@ class WaveSimulation2D_Real {
     //  - dampening: exponent so that the damping factor is 2^dampening.
     WaveSimulation2D_Real(u32 W, u32 H, float speed = 0.16f,
                           float dampening = 6.0f) FL_NOEXCEPT;
+
+    // Tag for explicit PSRAM-backed grid storage. Use the tagged
+    // constructor overload when you genuinely need a grid larger than
+    // SRAM can hold AND accept the per-cell perf cost (~5-10x slower
+    // on ESP32-S3 without L2 cache; ~no cost on ESP32-P4 with L2 +
+    // cached PSRAM). See #3114 / #3117 for the SRAM-default rationale.
+    //
+    // Example:
+    //   WaveSimulation2D_Real sim{
+    //       WaveSimulation2D_Real::PsramStorage{}, 256, 256};
+    struct PsramStorage {};
+
+    WaveSimulation2D_Real(PsramStorage, u32 W, u32 H,
+                          float speed = 0.16f,
+                          float dampening = 6.0f) FL_NOEXCEPT;
+
     ~WaveSimulation2D_Real() FL_NOEXCEPT = default;
 
     // Set the simulation speed (Courant squared). Clamped to [0.0, 0.5] — see
