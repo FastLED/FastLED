@@ -224,8 +224,24 @@ class WaveSimulation2D_Real {
     u32 stride; // Row length (width + 2 for the borders).
 
     // Two separate grids stored in fixed Q15 format.
-    fl::vector_psram<i16> grid1;
-    fl::vector_psram<i16> grid2;
+    //
+    // SRAM, not PSRAM. The previous `fl::vector_psram<i16>` default
+    // landed both grids in PSRAM on every ESP32 with PSRAM available —
+    // including ESP32-S3, which has no L2 cache and pays the full
+    // ~80 ns PSRAM latency per cell access. The 5-point stencil reads
+    // 5 cells per inner cell, so a 64×64 update was reading ~80 KB per
+    // step at ~50 MB/s practical PSRAM throughput → ~1.6 ms per step
+    // on memory alone, cratering frame rate at the grid sizes users
+    // actually want. SRAM is predictable everywhere: ESP32-S3 has
+    // 320 KB SRAM (64×64 i16 = 8 KB, 128×128 = 32 KB, both fit
+    // easily); ESP32-P4 ~750 KB SRAM (256×256 fits); Teensy 4 OCRAM
+    // is faster still.
+    //
+    // Users with grids genuinely too large for SRAM can construct a
+    // parallel large-grid variant that re-enables PSRAM as an explicit,
+    // documented opt-in (see #3114 follow-up).
+    fl::vector<i16> grid1;
+    fl::vector<i16> grid2;
 
     fl::size whichGrid; // Indicates the active grid (0 or 1).
 
