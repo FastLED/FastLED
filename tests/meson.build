@@ -35,7 +35,6 @@ test_pch = custom_target('test_pch',
   input: 'test_pch.h',
   output: 'test_pch.h.pch',      # Only PCH is an output; .d file is depfile only
   depfile: 'test_pch.h.d',
-  depends: [fastled_lib],         # Ensure library is built first (tests link against it)
   command: [
     uv, 'run', 'python',
     meson.project_source_root() / 'ci/compile_pch.py',
