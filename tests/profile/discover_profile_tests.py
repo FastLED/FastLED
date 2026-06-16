@@ -38,7 +38,19 @@ def discover(source_dir: str) -> list[str]:
 
 
 def main() -> int:
-    source_dir = sys.argv[1] if len(sys.argv) > 1 else "."
+    if len(sys.argv) != 2:
+        print(
+            f"usage: {sys.argv[0]} <source_root>",
+            file=sys.stderr,
+        )
+        return 2
+    source_dir = sys.argv[1]
+    if not os.path.isdir(source_dir):
+        print(
+            f"error: source_root does not exist or is not a directory: {source_dir}",
+            file=sys.stderr,
+        )
+        return 2
     files = discover(source_dir)
     if files:
         print(";".join(files))

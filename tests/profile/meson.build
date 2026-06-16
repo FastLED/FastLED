@@ -12,11 +12,14 @@
 
 # Discover all profile test files. Extracted to a dedicated script per the
 # "NO Embedded Python Scripts" rule (agents/docs/build-system.md).
+# python_exe is defined in tests/meson.build:164 and inherited via subdir().
+# check: true so broken discovery fails configure instead of silently
+# evaluating to "no profile tests found".
 profile_test_files = run_command(
-  'python',
+  python_exe,
   meson.project_source_root() / 'tests/profile/discover_profile_tests.py',
   meson.project_source_root(),
-  check: false
+  check: true
 ).stdout().strip()
 
 if profile_test_files != ''
