@@ -52,26 +52,61 @@ class CompileResult:
     error_snippet: Optional[str] = None
 
 
-# Error patterns that indicate stale build state recoverable by reconfiguration
-STALE_BUILD_PATTERNS = [
+# Stale-build patterns matched ONLY against lines that begin with
+# `ninja: error:`. The previous loose substring match misfired on routine
+# compiler errors that happen to contain "file not found" / "does not exist",
+# each false positive costing a ~20-30s full artifact wipe + reconfigure on
+# the retry. See #3129 A2.
+_NINJA_STALE_BUILD_PATTERNS = (
     "file not found",
     "no such file or directory",
     "missing and no known rule to make it",
     "does not exist",
-    "has been modified since the precompiled header",
     "target not found",  # e.g., all-with-examples missing after enable_examples config change
+)
+
+# Ninja-graph-level phrases that always indicate stale build state regardless
+# of which line prefix they appear on.
+_NINJA_GRAPH_STALE_PHRASES = (
+    "manifest contains a cycle",
+    "failed: regen",
+)
+
+# Backwards-compat re-export. Tests or external scripts that imported the old
+# name still see the same iterable.
+STALE_BUILD_PATTERNS = list(_NINJA_STALE_BUILD_PATTERNS) + [
+    "has been modified since the precompiled header",
 ]
 
 
 def is_stale_build_error(output: str) -> bool:
     """Check if compilation output indicates a stale build state error.
 
-    These errors typically occur when source/header files are renamed or deleted
-    but the build system still references the old paths. They are recoverable
-    by cleaning stale deps and reconfiguring.
+    A line counts as a stale-build trigger only if EITHER:
+    - it starts with ``ninja: error:`` and contains one of the
+      ``_NINJA_STALE_BUILD_PATTERNS`` keywords, OR
+    - it matches one of ``_NINJA_GRAPH_STALE_PHRASES`` (ninja-graph cycle,
+      regen failure), OR
+    - it contains ``has been modified since the precompiled header`` — a
+      clang PCH-staleness error that survives without ninja's prefix.
+
+    Narrowing to ninja's own error output stops the previous loose substring
+    match from misfiring on legitimate compiler errors that happen to contain
+    routine phrases like "file not found" or "does not exist". See #3129 A2.
     """
-    output_lower = output.lower()
-    return any(pattern in output_lower for pattern in STALE_BUILD_PATTERNS)
+    for raw_line in output.splitlines():
+        line_lower = raw_line.strip().lower()
+        if not line_lower:
+            continue
+        if "has been modified since the precompiled header" in line_lower:
+            return True
+        if any(phrase in line_lower for phrase in _NINJA_GRAPH_STALE_PHRASES):
+            return True
+        if line_lower.startswith("ninja: error:") and any(
+            pattern in line_lower for pattern in _NINJA_STALE_BUILD_PATTERNS
+        ):
+            return True
+    return False
 
 
 def _is_compilation_error(line: str) -> bool:
