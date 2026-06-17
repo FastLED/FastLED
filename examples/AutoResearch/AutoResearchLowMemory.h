@@ -152,17 +152,14 @@ inline void autoResearchLowMemorySetup() {
             const fl::u32 expected_edges =
                 2u * static_cast<fl::u32>(freq_hz) *
                      static_cast<fl::u32>(duration_ms) / 1000u;
-            // Cap the captured edge count at kLowMemEdgeBufSize so the
-            // static buffer below stays small enough to fit alongside .bss
-            // on a 16 KB SRAM part. See FastLED #3125 -- the previous
-            // 2048-entry buffer was 8 KB stack on top of an already-8.5 KB
-            // .bss, which overflowed SRAM the moment this handler ran.
-            // 512 entries = 256 period pairs is plenty for the bench's
-            // 1 / 10 / 100 kHz sigma measurement (sample count converges
-            // well before 256 pairs at any of those rates).
-            constexpr fl::u32 kLowMemEdgeBufSize = 512u;
+            // Keep both the RX vector and diagnostic copy buffer small on
+            // 16 KB SRAM LPC8xx parts. Larger static buffers regressed early
+            // init by leaving too little room for stack/heap (FastLED #3200),
+            // while stack buffers previously overflowed during this handler
+            // (FastLED #3125).
+            constexpr fl::u32 kLowMemEdgeBufSize = 64u;
             fl::u32 cap = expected_edges + (expected_edges / 2u);
-            if (cap < 256u)  cap = 256u;
+            if (cap < 2u) cap = 2u;
             if (cap > kLowMemEdgeBufSize) cap = kLowMemEdgeBufSize;
 
             auto rx = fl::LpcSctRxChannel::create(rx_pin);
@@ -193,10 +190,8 @@ inline void autoResearchLowMemorySetup() {
             }
             rx->wait(1);
 
-            // Static storage so the 2 KB buffer (512 * 4 B) lives in .bss
-            // instead of bloating the lambda's stack frame on a 16 KB
-            // SRAM part. The handler is invoked serially over JSON-RPC,
-            // so sharing across calls is safe. See FastLED #3125.
+            // Static storage keeps this off the stack; the small fixed size
+            // keeps .bss below the LPC845-BRK early-init failure threshold.
             static fl::EdgeTime edges_buf[kLowMemEdgeBufSize];
             const fl::size n_read = rx->getRawEdgeTimes(
                 fl::span<fl::EdgeTime>(edges_buf, sizeof(edges_buf) / sizeof(edges_buf[0])));
@@ -258,8 +253,13 @@ inline void autoResearchLowMemorySetup() {
             fl::RxConfig cfg;
             const fl::u32 expected_edges = (fl::u32)num_leds * 24u * 2u;
             fl::u32 cap = expected_edges + (expected_edges / 2u);
-            if (cap < 256u)  cap = 256u;
-            if (cap > 2048u) cap = 2048u;
+            // The low-memory sketch cannot afford the old 2048-edge reserve
+            // on a 16 KB SRAM LPC845. 192 edges covers the 1- and 3-LED
+            // sanity cases and fails the larger diagnostic cases without
+            // starving setup()/loop() stack.
+            constexpr fl::u32 kLowMemWs2812EdgeCapacity = 192u;
+            if (cap < 48u) cap = 48u;
+            if (cap > kLowMemWs2812EdgeCapacity) cap = kLowMemWs2812EdgeCapacity;
             cfg.buffer_size = cap;
             cfg.start_low   = true;
             if (!rx->begin(cfg)) return fl::string("0,0,0,0,0,0,0,0");
@@ -296,13 +296,9 @@ inline void autoResearchLowMemorySetup() {
             const fl::u32 missing = (fl::u32)expected_bytes - decoded_bytes;
             mismatched += missing;
 
-            // Static storage so the diagnostic probe (4 KB at 1024 entries,
-            // now 2 KB at 512) lives in .bss rather than the lambda's
-            // stack frame. See FastLED #3125 -- same pattern as the
-            // pinToggleRx handler above. Diagnostic-only; truncating at
-            // 512 doesn't affect decode correctness (the decoder uses
-            // its own count via cfg.buffer_size).
-            constexpr fl::size kLowMemWs2812ProbeSize = 512u;
+            // Diagnostic-only raw-edge sample. Keep this small in .bss; the
+            // decoder uses the RX channel's bounded capture vector above.
+            constexpr fl::size kLowMemWs2812ProbeSize = 64u;
             static fl::EdgeTime probe[kLowMemWs2812ProbeSize];
             const fl::size edges_captured = rx->getRawEdgeTimes(
                 fl::span<fl::EdgeTime>(probe, kLowMemWs2812ProbeSize));
