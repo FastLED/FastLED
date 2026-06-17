@@ -33,6 +33,7 @@
 #include "AutoResearchAnimartrixBench.h"
 #include "AutoResearchWave8Expand.h"
 #include "AutoResearchParlioEncode.h"
+#include "AutoResearchTimingDrift.h"
 #include "AutoResearchParlioStream.h"
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"

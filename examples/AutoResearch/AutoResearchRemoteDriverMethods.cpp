@@ -39,6 +39,7 @@
 #include "AutoResearchWave8Expand.h"
 #include "AutoResearchParlioEncode.h"
 #include "AutoResearchParlioStream.h"
+#include "AutoResearchTimingDrift.h"  // timingDriftTest RPC (#2994 repro)
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
 #include <Arduino.h>
@@ -570,6 +571,66 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         response.set("first_edges", edges_arr);
         return response;
 #endif
+    });
+
+    // Register "timingDriftTest" — issue #2994 reproducer for compounded
+    // per-sequence timing drift on master vs 3.10.3. Replays the reporter's
+    // minimal sketch (35-LED WS2812B ring, setMaxRefreshRate(800),
+    // millisDelay-gated 255-step fade, delay(1000) between sequences) and
+    // returns per-sequence wall time so the host can build a histogram.
+    // Args: [{pin, numLeds, iterations}] (all optional;
+    //        default pin=4, numLeds=35, iterations=10; iterations clamped to
+    //        autoresearch::timing_drift::kMaxIterations)
+    remote.bind("timingDriftTest", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+
+        int pin = 4;
+        int num_leds = 35;
+        int iterations = 10;
+
+        fl::json config;
+        if (args.is_object()) {
+            config = args;
+        } else if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            config = args[0];
+        }
+        if (!config.is_null()) {
+            if (config.contains("pin") && config["pin"].is_int()) {
+                pin = static_cast<int>(config["pin"].as_int().value());
+            }
+            if (config.contains("numLeds") && config["numLeds"].is_int()) {
+                num_leds = static_cast<int>(config["numLeds"].as_int().value());
+            }
+            if (config.contains("iterations") && config["iterations"].is_int()) {
+                iterations = static_cast<int>(config["iterations"].as_int().value());
+            }
+        }
+
+        auto r = autoresearch::timing_drift::run(pin, num_leds, iterations);
+
+        response.set("success", r.valid_pin);
+        if (!r.valid_pin) {
+            response.set("error", "InvalidPin");
+            response.set("message",
+                         "pin is outside LegacyClocklessProxy range");
+            response.set("pin", r.pin);
+            return response;
+        }
+        response.set("pin", r.pin);
+        response.set("num_leds", r.num_leds);
+        response.set("iterations", r.iterations);
+        response.set("cpu_mhz", static_cast<int64_t>(r.cpu_mhz));
+        response.set("show_count", static_cast<int64_t>(r.show_count));
+        response.set("show_min_us", static_cast<int64_t>(r.show_min_us));
+        response.set("show_max_us", static_cast<int64_t>(r.show_max_us));
+        response.set("show_total_us", static_cast<int64_t>(r.show_total_us));
+
+        fl::json iter_ms_arr = fl::json::array();
+        for (int i = 0; i < r.iterations; ++i) {
+            iter_ms_arr.push_back(static_cast<int64_t>(r.iter_ms[i]));
+        }
+        response.set("iter_ms", iter_ms_arr);
+        return response;
     });
 }
 
