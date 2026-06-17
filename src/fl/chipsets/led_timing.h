@@ -314,13 +314,17 @@ struct TIMING_SM16703 {
     };
 };
 
-/// SM16824E RGB controller (high-speed variant)
-/// Four-phase: TH0=300ns, TH1=1200ns, TL0=1000ns, TL1=100ns
+/// SM16824E RGBW controller @ 800 kHz
+/// Four-phase: TH0=300ns, TH1=900ns, TL0=900ns, TL1=300ns, TRST=200µs
+/// Datasheet typicals are identical to the SM16703 / WS2811-800kHz RZ family,
+/// so this timing also lets SM16824E and SM16703 chips share a single data line.
+/// Prior values (T2=900, T3=100) emitted T1H=1200ns / T1L=100ns — out of spec
+/// against both this chip's own datasheet and SM16703. See issue #3203.
 struct TIMING_SM16824E {
     enum : u32 {
         T1 = 300,
-        T2 = 900,
-        T3 = 100,
+        T2 = 600,
+        T3 = 300,
         RESET = 200
     };
 };

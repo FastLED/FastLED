@@ -106,9 +106,9 @@ static constexpr AVRChipsetTimingLegacy AVR_TIMING_LPD1886_1250KHZ = {2, 3, 2, "
 /// FMUL-based: 350ns/125 = 2.8 ≈ 3×FMUL, 1010ns/125 = 8.08 ≈ 8×FMUL, 350ns/125 = 2.8 ≈ 3×FMUL
 static constexpr AVRChipsetTimingLegacy AVR_TIMING_PL9823 = {3, 8, 3, "PL9823"};
 
-/// SM16824E high-speed variant
-/// FMUL-based: 300ns/125 = 2.4 ≈ 3×FMUL, 900ns/125 = 7.2 ≈ 9×FMUL, 100ns/125 = 0.8 ≈ 1×FMUL
-static constexpr AVRChipsetTimingLegacy AVR_TIMING_SM16824E = {3, 9, 1, "SM16824E"};
+/// SM16824E @ 800 kHz (datasheet identical to SM16703 / WS2811 family — see issue #3203)
+/// FMUL-based: 300ns/125 = 2.4 ≈ 3×FMUL, 600ns/125 = 4.8 ≈ 4×FMUL, 300ns/125 = 2.4 ≈ 3×FMUL
+static constexpr AVRChipsetTimingLegacy AVR_TIMING_SM16824E = {3, 4, 3, "SM16824E"};
 
 // ============================================================================
 // Medium-Speed AVR Chipsets (400kHz - 600kHz equivalent)
