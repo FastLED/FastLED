@@ -36,6 +36,7 @@
 #include "AutoResearchAnimartrixBench.h"
 #include "AutoResearchWave8Expand.h"
 #include "AutoResearchParlioEncode.h"
+#include "AutoResearchTimingDrift.h"
 #include "AutoResearchParlioStream.h"
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
@@ -571,6 +572,14 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
         parlioEncodeBenchmark_fn.set("returns", "{success, iters, lanes, leds_per_lane, scratchPsramOk, outputPsramOk, perpos_ss_us, perpos_sp_us, perpos_ps_us, perpos_pp_us, frame_ss_us, frame_sp_us, frame_ps_us, frame_pp_us, sink}");
         parlioEncodeBenchmark_fn.set("description", "Bench full PARLIO encode hot loop (16-lane gather + BF1 pipe4 direct encode) with SRAM and optional PSRAM placements; answers PSRAM hypothesis + ISR-streaming feasibility");
         functions.push_back(parlioEncodeBenchmark_fn);
+
+        fl::json timingDriftTest_fn = fl::json::object();
+        timingDriftTest_fn.set("name", "timingDriftTest");
+        timingDriftTest_fn.set("phase", "Phase 4: Utility");
+        timingDriftTest_fn.set("args", "[{pin, numLeds, iterations}] (all optional; default pin=4, numLeds=35, iterations=10)");
+        timingDriftTest_fn.set("returns", "{success, pin, num_leds, iterations, cpu_mhz, show_count, show_min_us, show_max_us, show_total_us, iter_ms:[...]}");
+        timingDriftTest_fn.set("description", "Issue #2994 repro for compounded per-sequence timing drift on master vs 3.10.3. Replays the reporter's WS2812B-ring + millisDelay-gated fade sketch and returns per-sequence wall time (theoretical 2495 ms; on 3.10.3 rock-steady, on master 2563-2752).");
+        functions.push_back(timingDriftTest_fn);
 
         fl::json parlioStreamValidate_fn = fl::json::object();
         parlioStreamValidate_fn.set("name", "parlioStreamValidate");

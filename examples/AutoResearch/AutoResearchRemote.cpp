@@ -46,6 +46,7 @@
 #include "AutoResearchAnimartrixBench.h"  // animartrixPerlinBench RPC (#2628 follow-up)
 #include "AutoResearchWave8Expand.h"  // #2526 wave8ExpandBenchmark RPC
 #include "AutoResearchParlioEncode.h" // parlioEncodeBenchmark RPC (#2526 follow-up)
+#include "AutoResearchTimingDrift.h"  // timingDriftTest RPC (#2994 repro)
 #include "AutoResearchParlioStream.h" // parlioStreamValidate RPC (#2548 follow-up)
 #include "fl/system/heap.h"
 #include "fl/chipsets/spi.h"
