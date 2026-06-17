@@ -90,14 +90,20 @@ inline DriftResult run(int pin, int num_leds, int iterations) {
         leds[i] = CRGB::Black;
     }
 
+    // Probe whether the requested pin is dispatchable BEFORE mutating any
+    // global state — invalid pins must not clear other RPC tests' channels.
+    {
+        LegacyClocklessProxy probe(pin, leds, num_leds);
+        if (!probe.valid()) {
+            return r;  // valid_pin stays false; no side effects
+        }
+    }
+
     // Clean slate: drop any channels left over from earlier RPC tests so
     // show() drives only the legacy controller under test.
     FastLED.clear(ClearFlags::CHANNELS);
 
     LegacyClocklessProxy proxy(pin, leds, num_leds);
-    if (!proxy.valid()) {
-        return r;  // valid_pin stays false
-    }
     r.valid_pin = true;
 
 #if defined(ARDUINO_ARCH_ESP32)
@@ -142,6 +148,19 @@ inline DriftResult run(int pin, int num_leds, int iterations) {
     const int i_ring_end = num_leds - 1;
     const int i_ring_divisor = 7;
 
+    // Each sequence runs ~2.5 s and we may queue up to kMaxIterations of
+    // them, so feed the AutoResearch watchdog (5 s timeout) on a coarse
+    // cadence to keep the device alive through long runs.
+    uint32_t last_wdt_feed_ms = millis();
+    constexpr uint32_t kWdtFeedIntervalMs = 1000;
+    auto maybeFeedWatchdog = [&]() {
+        const uint32_t now = millis();
+        if (now - last_wdt_feed_ms >= kWdtFeedIntervalMs) {
+            FastLED.watchdog().feed();
+            last_wdt_feed_ms = now;
+        }
+    };
+
     // Transliteration of the sketch's loop(); `continue` stands in for the
     // sketch's early `return` (Arduino re-enters loop()).
     while (completed < iterations) {
@@ -171,7 +190,10 @@ inline DriftResult run(int pin, int num_leds, int iterations) {
                 }
 
                 updateLEDs();
+                FastLED.watchdog().feed();  // before the 1 s sleep
                 delay(1000);
+                FastLED.watchdog().feed();  // after the 1 s sleep
+                last_wdt_feed_ms = millis();
                 i_post_fade = 255;
                 ms_delay_post.start(225);
                 continue;
@@ -180,6 +202,7 @@ inline DriftResult run(int pin, int num_leds, int iterations) {
             }
         }
         updateLEDs();
+        maybeFeedWatchdog();
     }
 
     r.iterations = completed;

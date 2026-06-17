@@ -607,7 +607,7 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
 
         fl::json response = fl::json::object();
         response.set("success", true);
-        response.set("totalFunctions", static_cast<int64_t>(28));
+        response.set("totalFunctions", static_cast<int64_t>(functions.size()));
         response.set("functions", functions);
         return response;
     });
