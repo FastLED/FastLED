@@ -57,6 +57,13 @@ if TYPE_CHECKING:
 # ============================================================
 
 MAX_AUTORESEARCH_LANES = 16
+LPC_BRING_UP_ENVS = {
+    "lpc845brk",
+    "lpc845",
+    "lpcxpresso845max",
+    "lpcxpresso804",
+}
+LPC_WS2812_ENVS = {"lpc845brk", "lpc845", "lpcxpresso845max"}
 
 
 def _is_native_platform(environment: str | None) -> bool:
@@ -915,6 +922,7 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
     args = ctx.args
     build_dir = ctx.build_dir
     final_environment = ctx.final_environment
+    final_environment_norm = (final_environment or "").lower()
     upload_port = ctx.upload_port
     build_driver = ctx.build_driver
     assert build_driver is not None
@@ -937,14 +945,13 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
     # Phase 2+3: Build + Deploy
     print(f"\U0001f4e6 Using {build_driver.name}")
 
-    bring_up_envs = {"lpc845brk", "lpcxpresso845max", "lpcxpresso804"}
-    if final_environment in bring_up_envs:
+    if final_environment_norm in LPC_BRING_UP_ENVS:
         # fbuild's nxplpc orchestrator does not yet ship a deployer
         # (`daemon/.../deploy.rs` only dispatches avr/teensy). Bring-up boards
         # run `fbuild build` followed by a pyocd-based flash + sw-reset here.
         if not _build_and_flash_nxplpc(
             build_dir,
-            environment=final_environment,
+            environment=final_environment_norm or final_environment,
             upload_port=upload_port,
             verbose=args.verbose,
         ):
@@ -1127,8 +1134,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     # so pin discovery would hang. Skip it for those boards — the bring-up
     # short-circuit later in `_run_full_autoresearch_pipeline` will run
     # `_run_bring_up_tests` directly against the configured upload port.
-    bring_up_envs = {"lpc845brk", "lpcxpresso845max", "lpcxpresso804"}
-    if ctx.final_environment in bring_up_envs:
+    final_environment = (ctx.final_environment or "").lower()
+    if final_environment in LPC_BRING_UP_ENVS:
         print(
             f"\n\U0001f4cc LPC bring-up mode ({ctx.final_environment}): "
             "skipping pin discovery and GPIO pre-test"
@@ -1189,7 +1196,7 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         )
 
     # GPIO connectivity pre-test
-    if ctx.final_environment in bring_up_envs:
+    if final_environment in LPC_BRING_UP_ENVS:
         # LPC bring-up: no jumper wire / pin loop, the bring-up RPC test
         # itself is the only check we run.
         pass
@@ -1263,17 +1270,22 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     # GPIO + LED-protocol matrix that ESP32/Teensy targets use. Must come
     # BEFORE the gpio_only_mode early-return so the harness actually runs the
     # echo check instead of bailing with a "no tests requested" success.
-    bring_up_envs = {"lpc845brk", "lpcxpresso845max", "lpcxpresso804"}
-    if ctx.final_environment in bring_up_envs:
+    final_environment = (ctx.final_environment or "").lower()
+    if final_environment in LPC_BRING_UP_ENVS:
         # FastLED #3021 Phase 1: --pin-toggle-rx runs the SCT-RX
         # loopback bench instead of the default echo bring-up.
         if getattr(ctx.args, "pin_toggle_rx", False):
             return await _run_lpc_pin_toggle_rx_tests(ctx)
         # FastLED #3021 Phase 2: --ws2812-loopback runs the WS2812
-        # byte-match loopback bench. Requires the sketch to be
-        # rebuilt with -DFASTLED_LPC_RX_SCT_WS2812=1 (gated due to
-        # flash budget — see issue #3002).
+        # byte-match loopback bench. LPC845 low-memory builds bind the
+        # required RPC automatically from the platform predicate.
         if getattr(ctx.args, "ws2812_loopback", False):
+            if final_environment not in LPC_WS2812_ENVS:
+                print(
+                    "--ws2812-loopback is only supported on LPC845 boards "
+                    "(lpc845brk, lpc845, lpcxpresso845max)."
+                )
+                return 1
             return await _run_lpc_ws2812_loopback_tests(ctx)
         return await _run_bring_up_tests(ctx)
 
@@ -1890,15 +1902,18 @@ async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:
 async def _run_lpc_ws2812_loopback_tests(ctx: RunContext) -> int:
     """Run the FastLED #3021 Phase-2 SCT-RX WS2812 byte-match bench.
 
-    Delegates to `ci/autoresearch/test_lpc_ws2812_loopback.py`. The
-    sketch must be built with `-DFASTLED_LPC_RX_SCT_WS2812=1` for the
-    `ws2812SctTest` RPC to be bound — without that flag the RPC is
-    absent from the sketch's `fl::Remote` registry and the orchestrator
-    will report `no response` for every test case. This is by design:
-    the WS2812 driver pulls in `<FastLED.h>` which overflows the
-    LPC845 64 KB flash budget until #3002 (fl::json soft-FP cleanup)
-    lands.
+    Delegates to `ci/autoresearch/test_lpc_ws2812_loopback.py`. LPC845
+    low-memory builds bind `ws2812SctTest` automatically from the platform
+    predicate; no manual WS2812 build flag is required.
     """
+    final_environment = (ctx.final_environment or "").lower()
+    if final_environment not in LPC_WS2812_ENVS:
+        print(
+            "--ws2812-loopback is only supported on LPC845 boards "
+            "(lpc845brk, lpc845, lpcxpresso845max)."
+        )
+        return 1
+
     upload_port = ctx.upload_port
     assert upload_port is not None
 
@@ -1909,7 +1924,7 @@ async def _run_lpc_ws2812_loopback_tests(ctx: RunContext) -> int:
     print("=" * 60)
     print("LPC SCT-RX MODE — WS2812 byte-match loopback (#3021 Phase 2)")
     print(f"   Wiring required: jumper P0_{tx_pin} ↔ P0_{rx_pin} on LPC845-BRK")
-    print("   Sketch must be built with -DFASTLED_LPC_RX_SCT_WS2812=1")
+    print("   ws2812SctTest RPC is platform-enabled on LPC845 builds")
     print("=" * 60)
     print()
 

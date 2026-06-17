@@ -20,6 +20,8 @@
 // See FastLED #3021 for the SCT-RX bring-up flags.
 //
 
+#include "platforms/arm/lpc/is_lpc.h"  // ok platform headers - LPC RX driver gate
+
 // Gate FL_DBG to no-op. Without `RELEASE`, fl/log/log.h auto-sets
 // FASTLED_FORCE_DBG=1, which expands every FL_DBG call site (inside
 // fl::Remote etc.) through the fl::println formatting machinery and
@@ -37,9 +39,15 @@
 #define FASTLED_LPC_RX_SCT 1
 #endif
 
-// Opt in to the SCT->DMA RX capture path. Required for WS2812 hardware
-// loopback. Auto-enabled when WS2812 mode is on.
-#if defined(FASTLED_LPC_RX_SCT_WS2812) && !defined(FASTLED_LPC_RX_SCT_DMA)
+// The LPC845-BRK low-memory build now fits FastLED + Remote + the WS2812
+// loopback RPC. Derive that surface from the platform instead of requiring a
+// user-set build flag.
+#if defined(FL_IS_ARM_LPC_845)
+#define FASTLED_AUTORESEARCH_LPC_WS2812 1
+#endif
+
+// The WS2812 loopback uses the SCT->DMA RX capture path.
+#if defined(FASTLED_AUTORESEARCH_LPC_WS2812) && !defined(FASTLED_LPC_RX_SCT_DMA)
 #define FASTLED_LPC_RX_SCT_DMA 1
 #endif
 
@@ -55,13 +63,12 @@
 // types are platform-gated behind `FL_IS_ARM_LPC` -- they only exist on
 // the real LPC build. So the include + every RX usage below must be gated
 // the same way.
-#include "platforms/arm/lpc/is_lpc.h"  // ok platform headers - LPC RX driver gate
 #if defined(FL_IS_ARM_LPC)
 #include "fl/channels/rx_sct_capture.h"
 #include "fl/stl/strstream.h"
 #endif
 
-#if defined(FASTLED_LPC_RX_SCT_WS2812)
+#if defined(FASTLED_AUTORESEARCH_LPC_WS2812)
 #include "FastLED.h"
 #include "fl/chipsets/timing_traits.h"
 #endif
@@ -206,7 +213,7 @@ inline void autoResearchLowMemorySetup() {
             return s.str();
         });
 
-#if defined(FASTLED_LPC_RX_SCT_WS2812)
+#if defined(FASTLED_AUTORESEARCH_LPC_WS2812)
     // ws2812SctTest (FastLED #3021 Phase 2) -- WS2812 byte-match loopback.
     remote.bind("ws2812SctTest",
         [](int test_case, int tx_pin, int rx_pin, int capture_ms) -> fl::string {
@@ -312,7 +319,7 @@ inline void autoResearchLowMemorySetup() {
               << static_cast<fl::u32>(edges_captured);
             return s.str();
         });
-#endif  // FASTLED_LPC_RX_SCT_WS2812
+#endif  // FASTLED_AUTORESEARCH_LPC_WS2812
 #endif  // FL_IS_ARM_LPC
 }
 

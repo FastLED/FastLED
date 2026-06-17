@@ -1035,6 +1035,46 @@ RPI_PICO2 = Board(
     board_build_filesystem_size="0.5m",
 )
 
+# NXP LPC8xx family. PlatformIO has no native Arduino-capable nxplpc
+# platform, so use the zackees fork that layers ArduinoCore-LPC8xx on top of
+# platformio/platform-nxplpc.
+_NXPLPC_PLATFORM = "https://github.com/zackees/platform-nxplpc-arduino.git#2ee527ae80de98e9105329a7260edb003289dfda"
+
+LPC845BRK = Board(
+    board_name="lpc845brk",
+    platform=_NXPLPC_PLATFORM,
+    platform_needs_install=True,
+    framework="arduino",
+)
+
+LPC845 = Board(
+    board_name="lpc845",
+    platform=_NXPLPC_PLATFORM,
+    platform_needs_install=True,
+    framework="arduino",
+)
+
+LPC804 = Board(
+    board_name="lpc804",
+    platform=_NXPLPC_PLATFORM,
+    platform_needs_install=True,
+    framework="arduino",
+)
+
+LPCXPRESSO845MAX = Board(
+    board_name="lpcxpresso845max",
+    platform=_NXPLPC_PLATFORM,
+    platform_needs_install=True,
+    framework="arduino",
+)
+
+LPCXPRESSO804 = Board(
+    board_name="lpcxpresso804",
+    platform=_NXPLPC_PLATFORM,
+    platform_needs_install=True,
+    framework="arduino",
+)
+
 STM32F103C8_BLUEPILL = Board(
     board_name="stm32f103c8",
     real_board_name="bluepill_f103c8",
