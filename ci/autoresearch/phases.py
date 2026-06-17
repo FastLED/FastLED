@@ -1127,8 +1127,9 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     # so pin discovery would hang. Skip it for those boards — the bring-up
     # short-circuit later in `_run_full_autoresearch_pipeline` will run
     # `_run_bring_up_tests` directly against the configured upload port.
-    bring_up_envs = {"lpc845brk", "lpcxpresso845max", "lpcxpresso804"}
-    if ctx.final_environment in bring_up_envs:
+    bring_up_envs = {"lpc845brk", "lpc845", "lpcxpresso845max", "lpcxpresso804"}
+    final_environment = (ctx.final_environment or "").lower()
+    if final_environment in bring_up_envs:
         print(
             f"\n\U0001f4cc LPC bring-up mode ({ctx.final_environment}): "
             "skipping pin discovery and GPIO pre-test"
@@ -1189,7 +1190,7 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         )
 
     # GPIO connectivity pre-test
-    if ctx.final_environment in bring_up_envs:
+    if final_environment in bring_up_envs:
         # LPC bring-up: no jumper wire / pin loop, the bring-up RPC test
         # itself is the only check we run.
         pass
@@ -1263,8 +1264,10 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     # GPIO + LED-protocol matrix that ESP32/Teensy targets use. Must come
     # BEFORE the gpio_only_mode early-return so the harness actually runs the
     # echo check instead of bailing with a "no tests requested" success.
-    bring_up_envs = {"lpc845brk", "lpcxpresso845max", "lpcxpresso804"}
-    if ctx.final_environment in bring_up_envs:
+    bring_up_envs = {"lpc845brk", "lpc845", "lpcxpresso845max", "lpcxpresso804"}
+    lpc_ws2812_envs = {"lpc845brk", "lpc845", "lpcxpresso845max"}
+    final_environment = (ctx.final_environment or "").lower()
+    if final_environment in bring_up_envs:
         # FastLED #3021 Phase 1: --pin-toggle-rx runs the SCT-RX
         # loopback bench instead of the default echo bring-up.
         if getattr(ctx.args, "pin_toggle_rx", False):
@@ -1273,6 +1276,12 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
         # byte-match loopback bench. LPC845 low-memory builds bind the
         # required RPC automatically from the platform predicate.
         if getattr(ctx.args, "ws2812_loopback", False):
+            if final_environment not in lpc_ws2812_envs:
+                print(
+                    "--ws2812-loopback is only supported on LPC845 boards "
+                    "(lpc845brk, lpc845, lpcxpresso845max)."
+                )
+                return 1
             return await _run_lpc_ws2812_loopback_tests(ctx)
         return await _run_bring_up_tests(ctx)
 
@@ -1893,6 +1902,15 @@ async def _run_lpc_ws2812_loopback_tests(ctx: RunContext) -> int:
     low-memory builds bind `ws2812SctTest` automatically from the platform
     predicate; no manual WS2812 build flag is required.
     """
+    final_environment = (ctx.final_environment or "").lower()
+    lpc_ws2812_envs = {"lpc845brk", "lpc845", "lpcxpresso845max"}
+    if final_environment not in lpc_ws2812_envs:
+        print(
+            "--ws2812-loopback is only supported on LPC845 boards "
+            "(lpc845brk, lpc845, lpcxpresso845max)."
+        )
+        return 1
+
     upload_port = ctx.upload_port
     assert upload_port is not None
 
