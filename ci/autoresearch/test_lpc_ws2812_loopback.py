@@ -27,9 +27,8 @@ gap is observable.
 Usage:
     uv run python ci/autoresearch/test_lpc_ws2812_loopback.py [--port COM10]
 
-The orchestrator also requires the firmware to be built with
-`-DFASTLED_LPC_RX_SCT_WS2812=1` (default off — see flash budget note
-in `examples/AutoResearchLpc/AutoResearchLpc.ino`).
+The LPC845 low-memory firmware binds the `ws2812SctTest` RPC automatically
+from the platform predicate; no manual WS2812 build flag is required.
 
 Exits 0 on success, 1 on any failed assertion / RPC error.
 """

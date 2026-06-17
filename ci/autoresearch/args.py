@@ -362,8 +362,8 @@ See Also:
             action="store_true",
             help="LPC845-only: WS2812 byte-match loopback via "
             "FastLED.show() (bit-bang TX) → SCT input-capture RX "
-            "(FastLED #3021 Phase 2). Requires the sketch to be built "
-            "with -DFASTLED_LPC_RX_SCT_WS2812=1.",
+            "(FastLED #3021 Phase 2). The LPC845 low-memory sketch binds "
+            "the RPC automatically.",
         )
 
         # Standard options

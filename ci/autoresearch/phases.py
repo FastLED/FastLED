@@ -1270,9 +1270,8 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
         if getattr(ctx.args, "pin_toggle_rx", False):
             return await _run_lpc_pin_toggle_rx_tests(ctx)
         # FastLED #3021 Phase 2: --ws2812-loopback runs the WS2812
-        # byte-match loopback bench. Requires the sketch to be
-        # rebuilt with -DFASTLED_LPC_RX_SCT_WS2812=1 (gated due to
-        # flash budget — see issue #3002).
+        # byte-match loopback bench. LPC845 low-memory builds bind the
+        # required RPC automatically from the platform predicate.
         if getattr(ctx.args, "ws2812_loopback", False):
             return await _run_lpc_ws2812_loopback_tests(ctx)
         return await _run_bring_up_tests(ctx)
@@ -1890,14 +1889,9 @@ async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:
 async def _run_lpc_ws2812_loopback_tests(ctx: RunContext) -> int:
     """Run the FastLED #3021 Phase-2 SCT-RX WS2812 byte-match bench.
 
-    Delegates to `ci/autoresearch/test_lpc_ws2812_loopback.py`. The
-    sketch must be built with `-DFASTLED_LPC_RX_SCT_WS2812=1` for the
-    `ws2812SctTest` RPC to be bound — without that flag the RPC is
-    absent from the sketch's `fl::Remote` registry and the orchestrator
-    will report `no response` for every test case. This is by design:
-    the WS2812 driver pulls in `<FastLED.h>` which overflows the
-    LPC845 64 KB flash budget until #3002 (fl::json soft-FP cleanup)
-    lands.
+    Delegates to `ci/autoresearch/test_lpc_ws2812_loopback.py`. LPC845
+    low-memory builds bind `ws2812SctTest` automatically from the platform
+    predicate; no manual WS2812 build flag is required.
     """
     upload_port = ctx.upload_port
     assert upload_port is not None
@@ -1909,7 +1903,7 @@ async def _run_lpc_ws2812_loopback_tests(ctx: RunContext) -> int:
     print("=" * 60)
     print("LPC SCT-RX MODE — WS2812 byte-match loopback (#3021 Phase 2)")
     print(f"   Wiring required: jumper P0_{tx_pin} ↔ P0_{rx_pin} on LPC845-BRK")
-    print("   Sketch must be built with -DFASTLED_LPC_RX_SCT_WS2812=1")
+    print("   ws2812SctTest RPC is platform-enabled on LPC845 builds")
     print("=" * 60)
     print()
 
