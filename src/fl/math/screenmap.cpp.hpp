@@ -370,7 +370,7 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
                        fl::json *doc) {
 
 #if FASTLED_NO_JSON
-    FL_WARN_F("ScreenMap::toJson called with FASTLED_NO_JSON");
+    FL_WARN("ScreenMap::toJson called with FASTLED_NO_JSON");
     return;
 #else
     if (!doc) {
@@ -412,11 +412,11 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
 
         fl::json xArray = fl::json::array();
         for (u16 i = 0; i < segment.getLength(); i++) {
-            xArray.push_back(fl::json(static_cast<double>(segment[i].x)));
+            xArray.push_back(fl::json(segment[i].x));
         }
         fl::json yArray = fl::json::array();
         for (u16 i = 0; i < segment.getLength(); i++) {
-            yArray.push_back(fl::json(static_cast<double>(segment[i].y)));
+            yArray.push_back(fl::json(segment[i].y));
         }
 
         fl::json groupObj = fl::json::object();
@@ -429,13 +429,13 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
         segmentObj.set("group", fl::json(fl::string(name)));
         segmentObj.set("x", xArray);
         segmentObj.set("y", yArray);
-        segmentObj.set("diameter", fl::json(static_cast<double>(diameter)));
+        segmentObj.set("diameter", fl::json(diameter));
         segmentsArr.push_back(segmentObj);
 
         idx++;
     }
 
-    doc->set("version", fl::json(static_cast<double>(2)));
+    doc->set("version", fl::json(i64(2)));
     doc->set("groups", groupsObj);
     doc->set("segments", segmentsArr);
 

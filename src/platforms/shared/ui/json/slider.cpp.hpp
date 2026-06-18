@@ -9,6 +9,8 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 
+#if FL_JSON_FLOAT_ENABLED
+
 FL_DISABLE_WARNING(deprecated-declarations)
 namespace fl {
 
@@ -150,3 +152,5 @@ int JsonSliderImpl::id() const FL_NOEXCEPT {
 }
 
 } // namespace fl
+
+#endif  // FL_JSON_FLOAT_ENABLED
