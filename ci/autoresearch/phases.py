@@ -243,7 +243,18 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             )
             sys.exit(2)
 
-    if args.all:
+    is_teensy4 = final_environment is not None and final_environment.lower() in (
+        "teensy40",
+        "teensy41",
+    )
+
+    if args.all and is_teensy4:
+        drivers = [
+            "OBJECT_FLED",
+            "FLEX_IO",
+            "LPUART",
+        ]
+    elif args.all:
         drivers = [
             "PARLIO",
             "RMT",
@@ -570,132 +581,10 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         # Serial2 TX) so the engine accepts the request when --tx-pin is not
         # supplied. Mirrors the FLEX_IO override above.
         lpuart_tx_pin = 1
-        # OBJECT_FLED on Teensy 4 cannot be exercised through the generic
-        # runSingleTest path (FastLED#3059: the FlexPWM-RX backend produces
-        # bimodal pulse widths the WS2812 decoder rejects, AND the FlexIO RX
-        # alternative hangs the runSingleTest dispatcher entirely — proven
-        # across six device-side workarounds with status heartbeats showing
-        # the test never returns within 10 minutes). The dedicated
-        # `flexioObjectFledTest` RPC is hardware-verified to capture and
-        # decode the same OBJECT_FLED waveform via the FlexIO RX backend.
-        # Route OBJECT_FLED on Teensy 4 to that RPC so the autoresearch
-        # wrapper gets a fast deterministic result instead of timing out.
-        is_teensy4 = final_environment is not None and final_environment.lower() in (
-            "teensy40",
-            "teensy41",
-        )
-
         for driver in drivers_list:
             for lane_count in range(lane_range["min"], lane_range["max"] + 1):
                 for strip_size in strip_sizes:
                     lane_sizes = [strip_size] * lane_count
-
-                    # Skip OBJECT_FLED on Teensy 4 entirely. Both paths to
-                    # exercise OBJECT_FLED loopback are broken inside the
-                    # autoresearch session: runSingleTest hangs the
-                    # dispatcher (FastLED#3059 device-side investigation
-                    # comments), and flexioObjectFledTest fails with
-                    # RxBeginFailed because FastLED#2772 leaves FLEXIO1's
-                    # clock-gate de-asserted once FlexPWM RX has been
-                    # touched earlier in the dispatch sequence (e.g.
-                    # findConnectedPins). Both bugs need bench-side fixes
-                    # that are out of scope for the autoresearch wrapper.
-                    # Substitute a `ping` so the wrapper still gets a
-                    # successful RPC round-trip and reports the OBJECT_FLED
-                    # driver as covered-by-this-session without blocking on
-                    # the broken loopback. Byte-level OBJECT_FLED
-                    # validation has to come from a hardware-verified path
-                    # that doesn't share state with the rest of the
-                    # autoresearch dispatch sequence (run
-                    # `flexioObjectFledTest` directly on a fresh boot).
-                    if is_teensy4 and driver == "OBJECT_FLED":
-                        # Marker fields are picked up by the dispatch loop
-                        # below and produce a synthetic PASS without ever
-                        # sending the RPC. They survive
-                        # `parse_json_rpc_commands` because the parser
-                        # round-trips through `json.loads` and preserves all
-                        # extra keys.
-                        skip_reason = (
-                            "OBJECT_FLED on Teensy 4 wrapper-skipped "
-                            "(FastLED#3059 runSingleTest hang + "
-                            "FastLED#2772 FLEXIO1 clock-gate)"
-                        )
-                        rpc_commands_list.append(
-                            {
-                                "method": "ping",
-                                "params": [],
-                                "__skip_with_pass": True,
-                                "__skip_driver": driver,
-                                "__skip_lane_sizes": lane_sizes,
-                                "__skip_reason": skip_reason,
-                            }
-                        )
-                        continue
-
-                    # FastLED #3066 Phase 3+4: extend the wrapper-skip pattern
-                    # to (a) the other Teensy 4 clockless drivers (FLEX_IO,
-                    # LPUART) that share the same FlexPWM-RX bimodal-edge
-                    # blocker, and (b) the drivers that simply don't exist on
-                    # Teensy 4 silicon (PARLIO/RMT/SPI/UART/LCD_*). Without
-                    # this, `bash autoresearch teensy40 --all` round-trips an
-                    # RPC for every driver, hangs at the first FlexPWM-RX
-                    # bimodal mismatch, and never reaches the next driver in
-                    # the matrix. The TX-side regression coverage for the
-                    # Teensy-supported drivers still runs end-to-end at boot
-                    # (channel-engine bring-up + show()) so a TX-side hang
-                    # would still surface as a boot timeout.
-                    if is_teensy4:
-                        teensy4_clockless_drivers = {
-                            "FLEX_IO",
-                            "LPUART",
-                            "BIT_BANG",
-                        }
-                        teensy4_unsupported_drivers = {
-                            "PARLIO",
-                            "RMT",
-                            "SPI",
-                            "UART",
-                            "LCD_CLOCKLESS",
-                            "LCD_SPI",
-                            "LCD_RGB",
-                        }
-                        if driver in teensy4_clockless_drivers:
-                            skip_reason = (
-                                f"{driver} on Teensy 4 wrapper-skipped pending "
-                                "the Phase 4 FlexPWM-RX bimodal-edge fix "
-                                "tracked in FastLED#3066. TX side still runs "
-                                "end-to-end through the production channel "
-                                "engine at boot; only byte-level decode of "
-                                "the captured RX buffer is deferred."
-                            )
-                            rpc_commands_list.append(
-                                {
-                                    "method": "ping",
-                                    "params": [],
-                                    "__skip_with_pass": True,
-                                    "__skip_driver": driver,
-                                    "__skip_lane_sizes": lane_sizes,
-                                    "__skip_reason": skip_reason,
-                                }
-                            )
-                            continue
-                        if driver in teensy4_unsupported_drivers:
-                            skip_reason = (
-                                f"{driver} is not supported on Teensy 4 "
-                                "silicon (driver targets ESP32 variants only)."
-                            )
-                            rpc_commands_list.append(
-                                {
-                                    "method": "ping",
-                                    "params": [],
-                                    "__skip_with_pass": True,
-                                    "__skip_driver": driver,
-                                    "__skip_lane_sizes": lane_sizes,
-                                    "__skip_reason": skip_reason,
-                                }
-                            )
-                            continue
-
                     test_config: dict[str, Any] = {
                         "driver": driver,
                         "laneSizes": lane_sizes,
@@ -2392,40 +2281,6 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
             params = cmd.get("params", [])
 
             print(f"\n[{i}/{len(json_rpc_commands)}] Calling {method}()...")
-
-            # Wrapper-side known-issue skip: synthesise a passing test_data
-            # without touching the device. This is used by the OBJECT_FLED-on-
-            # Teensy-4 substitution above (FastLED#3059 + #2772). The skipped
-            # marker survives the json_rpc_commands transformation because it
-            # gets set alongside `method`/`params` on the raw dict.
-            if cmd.get("__skip_with_pass"):
-                print(
-                    f"{Fore.YELLOW}⚠️  {cmd.get('__skip_reason', 'skipped')}"
-                    f"{Style.RESET_ALL}"
-                )
-                test_data: dict[str, Any] = {
-                    "success": True,
-                    "passed": True,
-                    "skipped": True,
-                    "driver": cmd.get("__skip_driver", "unknown"),
-                    "laneCount": 1,
-                    "laneSizes": cmd.get("__skip_lane_sizes", [0]),
-                    "duration_ms": 0,
-                    "pattern": "skipped",
-                    "totalTests": 0,
-                    "passedTests": 0,
-                    "skipReason": cmd.get("__skip_reason", "skipped"),
-                }
-                _driver = test_data["driver"]
-                _lanes = test_data["laneCount"]
-                _leds = sum(test_data["laneSizes"])
-                _dur = test_data["duration_ms"]
-                stop_word_found = "OK"
-                print(f"{Fore.GREEN}✅ Test passed (wrapper-skipped){Style.RESET_ALL}")
-                qctx.emit(
-                    f"TEST {_driver} lanes={_lanes} leds={_leds} PASS {_dur}ms (wrapper-skipped)"
-                )
-                continue
 
             try:
                 response = await client.send(
