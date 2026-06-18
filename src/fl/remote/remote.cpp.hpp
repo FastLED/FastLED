@@ -31,7 +31,12 @@ bool Remote::has(const fl::string& name) const {
 }
 
 // Async Response Support
+// All three sendAsync* methods touch mAsyncRequests, which Low-memory drops
+// (see #3224 Tier 1B RAM-side companion). On Low-memory these methods
+// become no-ops with a one-line FL_WARN; they remain in the API surface so
+// callers don't break, but they're link-DCE-friendly if no caller exists.
 
+#if FL_PLATFORM_HAS_LARGE_MEMORY
 void Remote::sendAsyncResponse(const char* method, const fl::json& result) {
     fl::string methodName(method);
     auto it = mAsyncRequests.find(methodName);
@@ -110,6 +115,19 @@ void Remote::sendStreamFinal(const char* method, const fl::json& result) {
         FL_DBG_F("Sent stream final for %s (id=%s)", method, requestId);
     }
 }
+#else  // !FL_PLATFORM_HAS_LARGE_MEMORY
+// Low-memory: async-tracking storage is dropped (#3224 Tier 1B RAM-side).
+// Keep the public API for source-compat; they no-op on this tier.
+void Remote::sendAsyncResponse(const char* /*method*/, const fl::json& /*result*/) {
+    FL_WARN_LIT("sendAsyncResponse: async dispatch not supported on Low-memory targets");
+}
+void Remote::sendStreamUpdate(const char* /*method*/, const fl::json& /*update*/) {
+    FL_WARN_LIT("sendStreamUpdate: async streams not supported on Low-memory targets");
+}
+void Remote::sendStreamFinal(const char* /*method*/, const fl::json& /*result*/) {
+    FL_WARN_LIT("sendStreamFinal: async streams not supported on Low-memory targets");
+}
+#endif
 
 // Error Reporting
 
@@ -214,6 +232,7 @@ fl::json Remote::processRpc(const fl::json& request) {
     return response;
 }
 
+#if FL_PLATFORM_HAS_LARGE_MEMORY
 void Remote::scheduleFunction(u32 timestamp, u32 receivedAt, const fl::json& jsonRpcRequest) {
     // Make explicit copy for capture (avoid reference issues)
     fl::json requestCopy = jsonRpcRequest;
@@ -238,24 +257,35 @@ void Remote::scheduleFunction(u32 timestamp, u32 receivedAt, const fl::json& jso
 void Remote::recordResult(const fl::string& funcName, const fl::json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled) {
     mResults.push_back({funcName, result, scheduledAt, receivedAt, executedAt, wasScheduled});
 }
+#endif
 
 // Update Loop
 
 size_t Remote::tick(u32 currentTimeMs) {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
     // Clear previous results
     mResults.clear();
 
     // Delegate to generic scheduler - tasks handle their own execution and result recording
     return mScheduler.tick(currentTimeMs);
+#else
+    (void)currentTimeMs;
+    return 0;
+#endif
 }
 
 // Utility Methods
 
 size_t Remote::pendingCount() const {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
     return mScheduler.pendingCount();
+#else
+    return 0;
+#endif
 }
 
 void Remote::clear(ClearFlags flags) {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
     if ((flags & ClearFlags::Results) != ClearFlags::None) {
         mResults.clear();
         FL_DBG_F("Cleared RPC results");
@@ -264,6 +294,7 @@ void Remote::clear(ClearFlags flags) {
         mScheduler.clear();
         FL_DBG_F("Cleared scheduled RPC calls");
     }
+#endif
     if ((flags & ClearFlags::Functions) != ClearFlags::None) {
         mRpc.clear();
         FL_DBG_F("Cleared registered RPC functions");
@@ -295,7 +326,9 @@ size_t Remote::update(u32 currentTimeMs) {
     size_t processed = Server::pull();   // Pull requests from Server
     size_t executed = tick(currentTimeMs);  // Process scheduled tasks
 
-    // Push scheduled results as JSON-RPC responses
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    // Push scheduled results as JSON-RPC responses. Gated on Low-memory
+    // because mResults is dropped there (see #3224 Tier 1B).
     for (const auto& r : mResults) {
         fl::json response = fl::json::object();
         response.set("result", r.result);
@@ -303,6 +336,7 @@ size_t Remote::update(u32 currentTimeMs) {
         // This could be improved by storing the ID with RpcResult
         mOutgoingQueue.push_back(response);
     }
+#endif
 
     size_t sent = Server::push();        // Push responses from Server
     return processed + executed + sent;

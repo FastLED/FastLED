@@ -32,22 +32,32 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
 
-// CMSIS interrupt-control intrinsics used by `showLedData`. These live in
-// `cmsis_gcc.h` in each vendor's CMSIS bundle (LPC8xx / SAMD / nRF / STM32 /
-// ...). Without forward declarations gcc 15.2+ `-Wtemplate-body` errors on
-// the function-template instantiation because `__get_PRIMASK` is an
-// undeclared name at the time the template body is parsed. Forward-declare
-// only when the names aren't already provided as macros / inline definitions
-// by a transitively-included platform header (Arduino-AVR's WString.h is
-// known to expand `__enable_irq` to a macro, e.g.).
+// CMSIS interrupt-control intrinsics used by `showLedData`. These live as
+// `__STATIC_INLINE` functions in `cmsis_gcc.h` per Cortex-M CMSIS bundle.
+// gcc 15.2+ `-Wtemplate-body` errors on the function-template instantiation
+// when `__get_PRIMASK` is an undeclared name at template-body parse time,
+// so provide static-inline fallbacks here that match the canonical CMSIS
+// semantics (inline asm against the PRIMASK SCS register). Guarded with
+// `#ifndef` so a transitively-included `cmsis_gcc.h` wins -- on platforms
+// where CMSIS is on the include path (LPC8xx, SAMD, nRF, STM32) the local
+// definitions below are skipped. On Arduino-AVR where `__enable_irq` is a
+// preprocessor macro from `WString.h`, the macro guard also wins.
 #ifndef __get_PRIMASK
-extern "C" fl::u32 __get_PRIMASK(void);
+static inline fl::u32 __get_PRIMASK(void) FL_NOEXCEPT {
+    fl::u32 primask;
+    __asm volatile ("MRS %0, primask" : "=r" (primask) :: "memory");
+    return primask;
+}
 #endif
 #ifndef __enable_irq
-extern "C" void __enable_irq(void);
+static inline void __enable_irq(void) FL_NOEXCEPT {
+    __asm volatile ("cpsie i" ::: "memory");
+}
 #endif
 #ifndef __disable_irq
-extern "C" void __disable_irq(void);
+static inline void __disable_irq(void) FL_NOEXCEPT {
+    __asm volatile ("cpsid i" ::: "memory");
+}
 #endif
 
 FL_EXTERN_C_BEGIN
