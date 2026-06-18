@@ -5,6 +5,7 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/assert.h"  // IWYU pragma: keep
 #include "fl/stl/comparators.h"
+#include "fl/stl/flat_map_basic.h"  // type-erased binary-search helpers (#3235 Tier 2D)
 #include "fl/stl/pair.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/allocator.h"
@@ -162,77 +163,51 @@ class flat_map {
         return contains(key);
     }
 
-    // Bounds - binary search using pointer arithmetic
-    iterator lower_bound(const Key& key) FL_NOEXCEPT {
-        // Binary search: find first element where !(element < key)
-        iterator first = mData.begin();
-        size_type count = mData.size();
+    // Bounds - delegate to the type-erased binary-search core. The per-Sig
+    // tax (~80-150 B of duplicated binary-search code per instantiation)
+    // shifts to a one-time ~80 B body in `fl/stl/flat_map_basic.cpp.hpp`
+    // shared across every `flat_map<K, V, Less>` instantiation in the
+    // binary. See FastLED #3235 Tier 2D.
+private:
+    template <typename L = Less>
+    static bool less_thunk(const void* ctx, const void* a, const void* b) FL_NOEXCEPT {
+        const L* less = static_cast<const L*>(ctx);
+        const Key* ka = static_cast<const Key*>(a);
+        const Key* kb = static_cast<const Key*>(b);
+        return (*less)(*ka, *kb);
+    }
 
-        while (count > 0) {
-            size_type step = count / 2;
-            iterator it = first + step;
-            if (mLess(it->first, key)) {
-                first = it + 1;
-                count -= step + 1;
-            } else {
-                count = step;
-            }
-        }
-        return first;
+    detail::flat_map_ops make_ops() const FL_NOEXCEPT {
+        detail::flat_map_ops ops;
+        ops.less_fn = &less_thunk<Less>;
+        ops.less_ctx = static_cast<const void*>(&mLess);
+        ops.element_size = sizeof(value_type);
+        return ops;
+    }
+
+public:
+    iterator lower_bound(const Key& key) FL_NOEXCEPT {
+        fl::size idx = detail::flat_map_lower_bound_idx(
+            mData.data(), mData.size(), &key, make_ops());
+        return mData.begin() + idx;
     }
 
     const_iterator lower_bound(const Key& key) const FL_NOEXCEPT {
-        // Binary search: find first element where !(element < key)
-        const_iterator first = mData.begin();
-        size_type count = mData.size();
-
-        while (count > 0) {
-            size_type step = count / 2;
-            const_iterator it = first + step;
-            if (mLess(it->first, key)) {
-                first = it + 1;
-                count -= step + 1;
-            } else {
-                count = step;
-            }
-        }
-        return first;
+        fl::size idx = detail::flat_map_lower_bound_idx(
+            mData.data(), mData.size(), &key, make_ops());
+        return mData.begin() + idx;
     }
 
     iterator upper_bound(const Key& key) FL_NOEXCEPT {
-        // Binary search: find first element where key < element
-        iterator first = mData.begin();
-        size_type count = mData.size();
-
-        while (count > 0) {
-            size_type step = count / 2;
-            iterator it = first + step;
-            if (!mLess(key, it->first)) {
-                first = it + 1;
-                count -= step + 1;
-            } else {
-                count = step;
-            }
-        }
-        return first;
+        fl::size idx = detail::flat_map_upper_bound_idx(
+            mData.data(), mData.size(), &key, make_ops());
+        return mData.begin() + idx;
     }
 
     const_iterator upper_bound(const Key& key) const FL_NOEXCEPT {
-        // Binary search: find first element where key < element
-        const_iterator first = mData.begin();
-        size_type count = mData.size();
-
-        while (count > 0) {
-            size_type step = count / 2;
-            const_iterator it = first + step;
-            if (!mLess(key, it->first)) {
-                first = it + 1;
-                count -= step + 1;
-            } else {
-                count = step;
-            }
-        }
-        return first;
+        fl::size idx = detail::flat_map_upper_bound_idx(
+            mData.data(), mData.size(), &key, make_ops());
+        return mData.begin() + idx;
     }
 
     fl::pair<iterator, iterator> equal_range(const Key& key) FL_NOEXCEPT {
