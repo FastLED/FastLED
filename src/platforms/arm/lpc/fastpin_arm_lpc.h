@@ -48,8 +48,9 @@ namespace fl {
 
 typedef struct {
     volatile u8  B[2][32];         // 0x0000 byte-pin access
+    volatile u8 RESERVED00[4032];  // pad to 0x1000 word-pin access
     volatile u32 W[2][32];         // 0x1000 word-pin access (0x80 bytes per port)
-    volatile u32 RESERVED0[1024 - 256];
+    volatile u8 RESERVED0[3840];   // pad to 0x2000 DIR/MASK/PIN/MPIN/SET/CLR/NOT access
     volatile u32 DIR[2];           // 0x2000
     volatile u32 RESERVED1[30];
     volatile u32 MASK[2];          // 0x2080
