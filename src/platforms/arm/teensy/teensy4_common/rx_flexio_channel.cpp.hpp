@@ -2,7 +2,7 @@
 /// @brief Teensy 4.x FlexIO shifter-based RX implementation
 ///
 /// ============================================================================
-/// ⚠️  STATUS: ARCHITECTURALLY BLOCKED — DO NOT TWIST KNOBS HERE (#3066 iter 9)
+/// WARNING: ARCHITECTURALLY BLOCKED — DO NOT TWIST KNOBS HERE (#3066 iter 9)
 /// ============================================================================
 ///
 /// This driver tries to capture WS281x-style pulse-width data from an LED
