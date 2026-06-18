@@ -123,9 +123,142 @@
 
 // Implementation details - users should not rely on these directly
 #include "fl/stl/json/types.h"
+#include "fl/stl/bit_cast.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
+
+namespace detail {
+
+template <typename T, typename = void>
+struct is_fl_fixed_point : fl::false_type {};
+
+template <typename T>
+struct is_fl_fixed_point<T, decltype(
+    static_cast<void>(T::INT_BITS),
+    static_cast<void>(T::FRAC_BITS),
+    static_cast<void>(fl::declval<const T&>().raw()),
+    static_cast<void>(T::from_raw(fl::declval<const T&>().raw())),
+    void()
+)> : fl::true_type {};
+
+inline u32 round_shift_right_u64(u64 value, int shift) FL_NOEXCEPT {
+    if (shift <= 0) {
+        return static_cast<u32>(value);
+    }
+    if (shift >= 64) {
+        return 0;
+    }
+    const u64 half = u64(1) << (shift - 1);
+    const u64 mask = (u64(1) << shift) - 1;
+    const u64 truncated = value >> shift;
+    const u64 remainder = value & mask;
+    const bool round_up = remainder > half || (remainder == half && (truncated & 1));
+    return static_cast<u32>(truncated + (round_up ? 1 : 0));
+}
+
+inline u32 ieee754_bits_from_scaled_u64(
+    u32 sign, u64 magnitude, int binary_exp) FL_NOEXCEPT {
+    if (magnitude == 0) {
+        return sign;
+    }
+
+    const int top_bit = json_floor_log2_u64(magnitude);
+    int exponent = top_bit + binary_exp;
+    if (exponent > 127) {
+        return sign | 0x7F800000u;
+    }
+
+    if (exponent >= -126) {
+        const int shift = top_bit - 23;
+        u32 significand = 0;
+        if (shift > 0) {
+            significand = round_shift_right_u64(magnitude, shift);
+        } else {
+            significand = static_cast<u32>(magnitude << -shift);
+        }
+        if (significand >= 0x01000000u) {
+            significand >>= 1;
+            ++exponent;
+            if (exponent > 127) {
+                return sign | 0x7F800000u;
+            }
+        }
+        return sign | (static_cast<u32>(exponent + 127) << 23) |
+               (significand & 0x007FFFFFu);
+    }
+
+    const int subnormal_shift = -(binary_exp + 149);
+    u32 mantissa = 0;
+    if (subnormal_shift > 0) {
+        mantissa = round_shift_right_u64(magnitude, subnormal_shift);
+    } else {
+        const int left_shift = -subnormal_shift;
+        if (left_shift >= 64 || magnitude > (u64(-1) >> left_shift)) {
+            return sign | 0x7F800000u;
+        }
+        const u64 shifted = magnitude << left_shift;
+        mantissa = shifted > 0x007FFFFFu ? 0x00800000u : static_cast<u32>(shifted);
+    }
+    if (mantissa >= 0x00800000u) {
+        return sign | 0x00800000u;
+    }
+    return sign | mantissa;
+}
+
+inline u32 ieee754_bits_from_fixed_raw(i64 raw, int frac_bits) FL_NOEXCEPT {
+    const u32 sign = raw < 0 ? 0x80000000u : 0u;
+    const u64 magnitude = raw < 0
+        ? static_cast<u64>(-(raw + 1)) + 1u
+        : static_cast<u64>(raw);
+    return ieee754_bits_from_scaled_u64(sign, magnitude, -frac_bits);
+}
+
+inline bool fixed_raw_from_ieee754_bits(u32 bits, int frac_bits, i64* out) FL_NOEXCEPT {
+    const bool negative = (bits & 0x80000000u) != 0;
+    const u32 exp_bits = (bits >> 23) & 0xFFu;
+    const u32 mantissa_bits = bits & 0x007FFFFFu;
+    if (exp_bits == 0xFFu) {
+        return false;
+    }
+
+    u64 significand = mantissa_bits;
+    int exponent = -126;
+    if (exp_bits != 0) {
+        significand |= 0x00800000u;
+        exponent = static_cast<int>(exp_bits) - 127;
+    }
+
+    const int shift = exponent + frac_bits - 23;
+    u64 magnitude = 0;
+    if (shift >= 0) {
+        if (shift >= 63 || significand > (u64(0x7FFFFFFFFFFFFFFF) >> shift)) {
+            return false;
+        }
+        magnitude = significand << shift;
+    } else {
+        magnitude = round_shift_right_u64(significand, -shift);
+    }
+    if ((!negative && magnitude > u64(0x7FFFFFFFFFFFFFFF)) ||
+        (negative && magnitude > (u64(0x7FFFFFFFFFFFFFFF) + 1u))) {
+        return false;
+    }
+    *out = negative
+        ? (magnitude == (u64(0x7FFFFFFFFFFFFFFF) + 1u)
+            ? static_cast<i64>(0x8000000000000000ull)
+            : -static_cast<i64>(magnitude))
+        : static_cast<i64>(magnitude);
+    return true;
+}
+
+template <typename FP>
+float fixed_point_to_float(FP value) FL_NOEXCEPT {
+    return fl::bit_cast<float>(
+        ieee754_bits_from_fixed_raw(static_cast<i64>(value.raw()), FP::FRAC_BITS));
+}
+
+}  // namespace detail
 
 class json {
 private:
@@ -139,7 +272,9 @@ public:
     json(int i) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(static_cast<i64>(i))) {}
     json(i64 i) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(i)) {}
     json(float f) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(f)) {}  // Use float directly
-    json(double d) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(static_cast<float>(d))) {}  // Convert double to float
+    json(double d) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(detail::json_double_to_float(d))) {}
+    template <typename FP, typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, int>::type = 0>
+    json(FP v) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(detail::fixed_point_to_float(v))) {}
     json(const fl::string& s) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(s)) {}
     json(const char* s) FL_NOEXCEPT : json(fl::string(s)) {}
     json(json_array a) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(fl::move(a))) {}
@@ -210,7 +345,13 @@ public:
     }
     
     json& operator=(double value) FL_NOEXCEPT {
-        mValue = fl::make_shared<json_value>(static_cast<float>(value));
+        mValue = fl::make_shared<json_value>(detail::json_double_to_float(value));
+        return *this;
+    }
+
+    template <typename FP, typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, int>::type = 0>
+    json& operator=(FP v) FL_NOEXCEPT {
+        mValue = fl::make_shared<json_value>(detail::fixed_point_to_float(v));
         return *this;
     }
     
@@ -279,6 +420,24 @@ public:
     fl::optional<FloatType> as_float() const FL_NOEXCEPT {
         if (!mValue) return fl::nullopt;
         return mValue->template as_float<FloatType>(); 
+    }
+
+    template <typename FP>
+    typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, fl::optional<FP>>::type
+    as_fixed_point() const FL_NOEXCEPT {
+        if (!mValue) return fl::nullopt;
+        if (auto raw = mValue->data.template ptr<i64>()) {
+            return FP::from_raw(static_cast<decltype(FP().raw())>(*raw));
+        }
+        if (auto f = mValue->data.template ptr<float>()) {
+            i64 raw = 0;
+            if (!detail::fixed_raw_from_ieee754_bits(
+                    fl::bit_cast<u32>(*f), FP::FRAC_BITS, &raw)) {
+                return fl::nullopt;
+            }
+            return FP::from_raw(static_cast<decltype(FP().raw())>(raw));
+        }
+        return fl::nullopt;
     }
     
     fl::optional<fl::string> as_string() const FL_NOEXCEPT {
@@ -722,6 +881,8 @@ public:
     void set(const fl::string& key, i64 value) FL_NOEXCEPT { set(key, json(value)); }
     void set(const fl::string& key, float value) FL_NOEXCEPT { set(key, json(value)); }
     void set(const fl::string& key, double value) FL_NOEXCEPT { set(key, json(value)); }
+    template <typename FP, typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, int>::type = 0>
+    void set(const fl::string& key, FP value) FL_NOEXCEPT { set(key, json(value)); }
     void set(const fl::string& key, const fl::string& value) FL_NOEXCEPT { set(key, json(value)); }
     void set(const fl::string& key, const char* value) FL_NOEXCEPT { set(key, json(value)); }
     template<typename T, typename = fl::enable_if_t<fl::is_same<T, char>::value>>

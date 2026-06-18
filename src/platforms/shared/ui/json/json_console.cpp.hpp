@@ -1,13 +1,13 @@
 // IWYU pragma: private
 
 #include "fl/system/sketch_macros.h"
+#include "fl/stl/json/types.h"
 
-#if SKETCH_HAS_LARGE_MEMORY
+#if SKETCH_HAS_LARGE_MEMORY && FL_JSON_FLOAT_ENABLED
 
 
 #include "platforms/shared/ui/json/json_console.h"
 #include "fl/log/log.h"
-#include "fl/stl/json.h"
 #include "fl/stl/json.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/stdint.h"
@@ -349,4 +349,4 @@ void JsonConsole::dump(fl::sstream& out) FL_NOEXCEPT {
 
 } // namespace fl
 
-#endif // SKETCH_HAS_LARGE_MEMORY
+#endif // SKETCH_HAS_LARGE_MEMORY && FL_JSON_FLOAT_ENABLED

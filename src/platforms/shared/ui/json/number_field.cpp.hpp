@@ -7,6 +7,9 @@
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "platforms/shared/ui/json/ui.h"
 #include "fl/stl/noexcept.h"
+
+#if FL_JSON_FLOAT_ENABLED
+
 namespace fl {
 
 // Definition of the internal class that was previously in number_field_internal.h
@@ -131,3 +134,5 @@ bool JsonNumberFieldImpl::operator!=(float v) const FL_NOEXCEPT { return !fl::al
 bool JsonNumberFieldImpl::operator!=(int v) const FL_NOEXCEPT { return !fl::almost_equal(value(), static_cast<float>(v)); }
 
 } // namespace fl
+
+#endif  // FL_JSON_FLOAT_ENABLED

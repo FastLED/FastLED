@@ -21,10 +21,27 @@
 #include "fl/log/log.h"
 #include "fl/task/promise.h" // For fl::task::Error type
 #include "fl/stl/string_view.h"
+#include "fl/stl/bit_cast.h"
 
+#include "fl/system/sketch_macros.h"
 #include "fl/stl/noexcept.h"
 
+#ifndef FL_JSON_FLOAT_ENABLED
+#define FL_JSON_FLOAT_ENABLED FL_PLATFORM_HAS_LARGE_MEMORY
+#endif
+
 namespace fl {
+
+namespace detail {
+
+inline u32 json_round_shift_right_u64(u64 value, int shift) FL_NOEXCEPT;
+inline int json_floor_log2_u64(u64 value) FL_NOEXCEPT;
+inline u32 json_ieee754_float_bits_from_scaled_u64(
+    u32 sign, u64 magnitude, int binary_exp) FL_NOEXCEPT;
+inline u32 json_ieee754_float_bits_from_double_bits(u64 bits) FL_NOEXCEPT;
+inline float json_double_to_float(double value) FL_NOEXCEPT;
+
+} // namespace detail
 
 struct json_value;
 
@@ -788,7 +805,7 @@ struct json_value {
     }
 
     json_value& operator=(double d) FL_NOEXCEPT {
-        data = static_cast<float>(d);
+        data = detail::json_double_to_float(d);
         return *this;
     }
     
@@ -1739,3 +1756,5 @@ private:
 // Main json class that provides a more fluid and user-friendly interface
 
 } // namespace fl
+
+#include "fl/stl/json/types.impl.hpp"
