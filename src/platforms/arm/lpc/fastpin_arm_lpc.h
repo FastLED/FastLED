@@ -4,7 +4,9 @@
 #ifndef __INC_FASTPIN_ARM_LPC_H
 #define __INC_FASTPIN_ARM_LPC_H
 
+#include "fl/stl/bit_cast.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/system/fastpin_base.h"
 #include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
@@ -57,10 +59,10 @@ constexpr u32 FL_LPC_GPIO_NOT_OFFSET    = 0x2300u;
 constexpr u32 FL_LPC_GPIO_DIRSET_OFFSET = 0x2380u;
 constexpr u32 FL_LPC_GPIO_DIRCLR_OFFSET = 0x2400u;
 
-static_assert(FL_LPC_GPIO_SET_OFFSET - FL_LPC_GPIO_PIN_OFFSET == 0x100u,
-              "LPC SET offset must match clockless HI offset");
-static_assert(FL_LPC_GPIO_CLR_OFFSET - FL_LPC_GPIO_PIN_OFFSET == 0x180u,
-              "LPC CLR offset must match clockless LO offset");
+FL_STATIC_ASSERT(FL_LPC_GPIO_SET_OFFSET - FL_LPC_GPIO_PIN_OFFSET == 0x100u,
+                 "LPC SET offset must match clockless HI offset");
+FL_STATIC_ASSERT(FL_LPC_GPIO_CLR_OFFSET - FL_LPC_GPIO_PIN_OFFSET == 0x180u,
+                 "LPC CLR offset must match clockless LO offset");
 
 #if defined(FL_LPC_GPIO_HW)
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_pin() { return &FL_LPC_GPIO_HW->PIN[0]; }
@@ -71,7 +73,10 @@ static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_dirset() { return &FL_LPC_GPI
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_dirclr() { return &FL_LPC_GPIO_HW->DIRCLR[0]; }
 #else
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_reg(u32 offset) {
-    return reinterpret_cast<volatile u32*>(FL_LPC_GPIO_BASE + offset);
+    // Constructing a peripheral pointer from a numeric base + offset is the
+    // canonical CMSIS pattern. `fl::bit_cast` is the FastLED-blessed alternative
+    // to `reinterpret_cast` for this conversion; both lower to the same load.
+    return fl::bit_cast<volatile u32*>(FL_LPC_GPIO_BASE + offset);
 }
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_pin() { return lpc_gpio_reg(FL_LPC_GPIO_PIN_OFFSET); }
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_set() { return lpc_gpio_reg(FL_LPC_GPIO_SET_OFFSET); }
