@@ -36,7 +36,7 @@
 namespace fl {
 
 /// @brief Represents a group of consecutive GPIO pins for parallel output
-struct PinGroup {
+struct Rp2040PinGroup {
     fl::u8 base_pin;      ///< Starting GPIO pin
     fl::u8 num_pins;      ///< Number of consecutive pins (2, 4, or 8)
     fl::vector<fl::u8> pins;  ///< List of all pins in this group (sorted)
@@ -48,9 +48,9 @@ struct PinGroup {
     fl::unique_ptr<fl::u8[]> transpose_buffer;  ///< Bit-transposed output buffer
     fl::u32 buffer_size;  ///< Size of transpose buffer
 
-    PinGroup() : base_pin(0), num_pins(0), pio(nullptr), sm(-1), dma_chan(-1), buffer_size(0) {}
+    Rp2040PinGroup() : base_pin(0), num_pins(0), pio(nullptr), sm(-1), dma_chan(-1), buffer_size(0) {}
 
-    ~PinGroup() {
+    ~Rp2040PinGroup() {
         cleanup();
     }
 
@@ -113,7 +113,7 @@ class RP2040ParallelGroup {
     bool mDrawn = false;
 
     // Pin groups detected from consecutive pins
-    fl::vector<fl::unique_ptr<PinGroup>> mPinGroups;
+    fl::vector<fl::unique_ptr<Rp2040PinGroup>> mPinGroups;
 
     // Map from pin number to group index
     fl::flat_map<fl::u8, fl::u32> mPinToGroupIndex;
@@ -197,7 +197,7 @@ class RP2040ParallelGroup {
             }
 
             // Create group
-            fl::unique_ptr<PinGroup> group(new PinGroup());  // ok bare allocation
+            fl::unique_ptr<Rp2040PinGroup> group(new Rp2040PinGroup());  // ok bare allocation
             group->base_pin = start_pin;
             group->num_pins = group_size;
 
@@ -246,7 +246,7 @@ class RP2040ParallelGroup {
 
             // Allocate resources for each group
             for (auto it = mPinGroups.begin(); it != mPinGroups.end(); ++it) {
-                PinGroup* group = it->get();
+                Rp2040PinGroup* group = it->get();
                 if (group->num_pins > 1) {
                     // Parallel group - allocate PIO/DMA
                     if (!group->allocateResources()) {
@@ -259,7 +259,7 @@ class RP2040ParallelGroup {
 
         // Output each group
         for (auto it = mPinGroups.begin(); it != mPinGroups.end(); ++it) {
-            PinGroup* group = it->get();
+            Rp2040PinGroup* group = it->get();
 
             if (group->num_pins == 1) {
                 // Single pin - sequential output (fallback)
@@ -273,7 +273,7 @@ class RP2040ParallelGroup {
 
   private:
     /// @brief Output a single pin (non-parallel fallback)
-    void outputSinglePin(PinGroup* group) {
+    void outputSinglePin(Rp2040PinGroup* group) {
         fl::u8 pin = group->base_pin;
 
         // Get LED data for this pin from RectangularDrawBuffer
@@ -288,7 +288,7 @@ class RP2040ParallelGroup {
     }
 
     /// @brief Output a parallel group with bit transposition
-    void outputParallelGroup(PinGroup* group) {
+    void outputParallelGroup(Rp2040PinGroup* group) {
         if (group->sm == -1 || group->dma_chan == -1) {
             FL_WARN_F("Parallel group at GPIO %s has no allocated resources, skipping", (int)group->base_pin);
             return;
