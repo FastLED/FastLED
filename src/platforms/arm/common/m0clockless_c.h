@@ -32,6 +32,24 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
 
+// CMSIS interrupt-control intrinsics used by `showLedData`. These live in
+// `cmsis_gcc.h` in each vendor's CMSIS bundle (LPC8xx / SAMD / nRF / STM32 /
+// ...). Without forward declarations gcc 15.2+ `-Wtemplate-body` errors on
+// the function-template instantiation because `__get_PRIMASK` is an
+// undeclared name at the time the template body is parsed. Forward-declare
+// only when the names aren't already provided as macros / inline definitions
+// by a transitively-included platform header (Arduino-AVR's WString.h is
+// known to expand `__enable_irq` to a macro, e.g.).
+#ifndef __get_PRIMASK
+extern "C" fl::u32 __get_PRIMASK(void);
+#endif
+#ifndef __enable_irq
+extern "C" void __enable_irq(void);
+#endif
+#ifndef __disable_irq
+extern "C" void __disable_irq(void);
+#endif
+
 FL_EXTERN_C_BEGIN
 
 // Some platforms have a missing definition for SysTick, in that

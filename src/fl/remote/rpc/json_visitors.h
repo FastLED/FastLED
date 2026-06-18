@@ -5,6 +5,7 @@
 #include "fl/stl/string.h"  // IWYU pragma: keep
 #include "fl/stl/cstdlib.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
+#include "fl/system/sketch_macros.h"  // FL_PLATFORM_HAS_LARGE_MEMORY -- gates float overloads
 namespace fl {
 namespace detail {
 
@@ -41,6 +42,7 @@ struct JsonToIntegerVisitor {
 
     // Float to integer
     void operator()(const float& raw) {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
         mValue = static_cast<T>(raw);
         // Keep the precision check in single precision. The natural
         // formulation `(double)raw != (double)mValue` drags libgcc's
@@ -51,6 +53,17 @@ struct JsonToIntegerVisitor {
             mResult.addWarning("float " + fl::to_string(raw, 6) +
                               " truncated to int " + fl::to_string(static_cast<i64>(mValue)));
         }
+#else
+        // Low-memory gate per FastLED #3224 Tier 1A. The integer-only RPC
+        // contract on LPC8xx / AVR never receives JSON float values, so this
+        // overload is unreachable at runtime. The legacy body referenced
+        // `__aeabi_f2iz`, `__aeabi_fcmp*`, and `fl::to_string(float, 6)` (which
+        // anchors `__aeabi_fadd/fsub/fmul` via `format_float`), accounting for
+        // ~3 KB of single-prec soft-FP. Saturate to zero; warnings dropped.
+        (void)raw;
+        mValue = T(0);
+        mResult.setError("float -> int not supported on Low-memory");
+#endif
     }
 
     // String to integer
@@ -121,9 +134,16 @@ struct JsonToBoolVisitor {
 
     // Float to bool
     void operator()(const float& raw) {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
         mValue = raw != 0.0f;
         // No double promotion (see JsonToIntVisitor — same #3002 reason).
         mResult.addWarning("float " + fl::to_string(raw, 6) + " converted to bool " + (mValue ? "true" : "false"));
+#else
+        // Low-memory gate per FastLED #3224 Tier 1A; see JsonToIntegerVisitor.
+        (void)raw;
+        mValue = false;
+        mResult.setError("float -> bool not supported on Low-memory");
+#endif
     }
 
     // String to bool
@@ -275,9 +295,16 @@ struct JsonToStringVisitor {
 
     // Float to string
     void operator()(const float& raw) {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
         // Format in float (see JsonToIntVisitor — same #3002 reason).
         mValue = fl::to_string(raw, 6);
         mResult.addWarning("float " + mValue + " converted to string");
+#else
+        // Low-memory gate per FastLED #3224 Tier 1A; see JsonToIntegerVisitor.
+        (void)raw;
+        mValue = "0";
+        mResult.setError("float -> string not supported on Low-memory");
+#endif
     }
 
     // Bool to string
