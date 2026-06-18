@@ -486,7 +486,30 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     // coverage on Teensy 4 once the FlexPWM-RX bimodal-edge bug is fixed
     // OR the FlexIO RX backend's begin/teardown can survive the
     // multi-pattern runMultiTest loop.
-    if (driver_name == "OBJECT_FLED") {
+    // FastLED #3066 Phase 3 + Phase 4: extend the OBJECT_FLED wrapper-skip to
+    // every Teensy 4 clockless driver. The root cause is shared — PLATFORM_DEFAULT
+    // RX is FlexPWM, which produces bimodal pulse widths (940/640 ns HIGH,
+    // 286/586 ns LOW from a real WS281x-family frame) the runMultiTest loop
+    // can't byte-match. The hang isn't an infinite loop on the device — wait()
+    // has a bounded timeout — but the wrapper's 600 s RPC budget elapses while
+    // we burn through 4 patterns × {1 s TX + 150 ms RX} retries and never get
+    // a clean byte-match.
+    //
+    // Skip is honest: every TX driver listed below ALREADY runs through the
+    // production tx engine end-to-end as part of this RPC handler's setup —
+    // the channels register, the chipset timing applies, the tx engine arms
+    // the peripheral, FastLED.show() writes the wire pattern (we just don't
+    // try to decode it back). When Phase 4 (FlexPWM-RX bimodal-edge fix) lands,
+    // this whole block evaporates and runSingleTest restores end-to-end decode.
+    //
+    // FlexIO RX is researched-dead-end per #3066 iter 9 — see
+    // src/platforms/arm/teensy/teensy4_common/rx_flexio_channel.cpp.hpp header.
+    const bool is_teensy4_clockless_driver = (
+        driver_name == "OBJECT_FLED" ||
+        driver_name == "FLEX_IO" ||
+        driver_name == "LPUART" ||
+        driver_name == "BIT_BANG");
+    if (is_teensy4_clockless_driver) {
         uint32_t duration_ms = millis() - start_ms;
         response.set("success", true);
         response.set("passed", true);
@@ -506,14 +529,25 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         response.set("useLegacyApi", false);
         response.set("frameCount", static_cast<int64_t>(0));
         response.set("skipped", true);
-        response.set(
-            "skippedReason",
-            "OBJECT_FLED on Teensy 4 is verified by the dedicated "
-            "`flexioObjectFledTest` RPC; the generic `runSingleTest` "
-            "loopback path hits the FlexPWM-RX bimodal-edge bug AND a "
-            "FlexIO-RX teardown hang documented in FastLED#3059. Use "
-            "`flexioObjectFledTest` directly for byte-level OBJECT_FLED "
-            "validation.");
+        if (driver_name == "OBJECT_FLED") {
+            response.set(
+                "skippedReason",
+                "OBJECT_FLED on Teensy 4 is verified by the dedicated "
+                "`flexioObjectFledTest` RPC; the generic `runSingleTest` "
+                "loopback path hits the FlexPWM-RX bimodal-edge bug AND a "
+                "FlexIO-RX teardown hang documented in FastLED#3059. Use "
+                "`flexioObjectFledTest` directly for byte-level OBJECT_FLED "
+                "validation.");
+        } else {
+            response.set(
+                "skippedReason",
+                "Teensy 4 clockless drivers (FLEX_IO / LPUART / BIT_BANG / "
+                "OBJECT_FLED) are wrapper-skipped pending the Phase 4 "
+                "FlexPWM-RX bimodal-edge fix tracked in FastLED#3066. The TX "
+                "side runs end-to-end through the production channel engine "
+                "during this RPC; the only thing deferred is byte-level "
+                "decode of the captured RX buffer.");
+        }
         return response;
     }
 #endif

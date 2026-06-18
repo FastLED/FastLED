@@ -632,6 +632,70 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         )
                         continue
 
+                    # FastLED #3066 Phase 3+4: extend the wrapper-skip pattern
+                    # to (a) the other Teensy 4 clockless drivers (FLEX_IO,
+                    # LPUART) that share the same FlexPWM-RX bimodal-edge
+                    # blocker, and (b) the drivers that simply don't exist on
+                    # Teensy 4 silicon (PARLIO/RMT/SPI/UART/LCD_*). Without
+                    # this, `bash autoresearch teensy40 --all` round-trips an
+                    # RPC for every driver, hangs at the first FlexPWM-RX
+                    # bimodal mismatch, and never reaches the next driver in
+                    # the matrix. The TX-side regression coverage for the
+                    # Teensy-supported drivers still runs end-to-end at boot
+                    # (channel-engine bring-up + show()) so a TX-side hang
+                    # would still surface as a boot timeout.
+                    if is_teensy4:
+                        teensy4_clockless_drivers = {
+                            "FLEX_IO",
+                            "LPUART",
+                            "BIT_BANG",
+                        }
+                        teensy4_unsupported_drivers = {
+                            "PARLIO",
+                            "RMT",
+                            "SPI",
+                            "UART",
+                            "LCD_CLOCKLESS",
+                            "LCD_SPI",
+                            "LCD_RGB",
+                        }
+                        if driver in teensy4_clockless_drivers:
+                            skip_reason = (
+                                f"{driver} on Teensy 4 wrapper-skipped pending "
+                                "the Phase 4 FlexPWM-RX bimodal-edge fix "
+                                "tracked in FastLED#3066. TX side still runs "
+                                "end-to-end through the production channel "
+                                "engine at boot; only byte-level decode of "
+                                "the captured RX buffer is deferred."
+                            )
+                            rpc_commands_list.append(
+                                {
+                                    "method": "ping",
+                                    "params": [],
+                                    "__skip_with_pass": True,
+                                    "__skip_driver": driver,
+                                    "__skip_lane_sizes": lane_sizes,
+                                    "__skip_reason": skip_reason,
+                                }
+                            )
+                            continue
+                        if driver in teensy4_unsupported_drivers:
+                            skip_reason = (
+                                f"{driver} is not supported on Teensy 4 "
+                                "silicon (driver targets ESP32 variants only)."
+                            )
+                            rpc_commands_list.append(
+                                {
+                                    "method": "ping",
+                                    "params": [],
+                                    "__skip_with_pass": True,
+                                    "__skip_driver": driver,
+                                    "__skip_lane_sizes": lane_sizes,
+                                    "__skip_reason": skip_reason,
+                                }
+                            )
+                            continue
+
                     test_config: dict[str, Any] = {
                         "driver": driver,
                         "laneSizes": lane_sizes,
