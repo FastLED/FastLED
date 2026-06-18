@@ -1,8 +1,7 @@
 #pragma once
-#include "fl/stl/shared_ptr.h"  // For shared_ptr
+#include "fl/stl/shared_ptr.h"  // For shared_ptr (heap fallback for over-SBO lambdas)
 #include "fl/stl/type_traits.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/stl/variant.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/new.h"   // for placement new operator  // IWYU pragma: keep
 #include "fl/stl/align.h"
@@ -13,29 +12,10 @@
 #include "fl/stl/static_assert.h"
 #include "fl/system/sketch_macros.h"  // for FL_PLATFORM_HAS_LARGE_MEMORY
 
-// Low-memory targets (FL_PLATFORM_HAS_LARGE_MEMORY == 0) collapse the fl::function
-// callable variant from 5 alternatives to 2 (free fn + inlined lambda). The dropped
-// alternatives -- shared_ptr<CallableBase> heap fallback and NonConst/Const member
-// callables -- are dead code on Low-memory targets (audited 2026-06-15: only
-// tests/fl/stl/functional.cpp constructs from member functions; no production code
-// path on LPC8xx / AVR / similar targets). Saves ~3 KB of per-signature codegen tax
-// from per-alternative copy/move/destroy variant clones. See FastLED #3077.
-#if FL_PLATFORM_HAS_LARGE_MEMORY
-  #define FL_FUNCTION_FULL_VARIANT 1
-#else
-  #define FL_FUNCTION_FULL_VARIANT 0
-#endif
-
 #ifndef FASTLED_INLINE_LAMBDA_SIZE
-  // Unified 64 B SBO across LargeMemory and Low-memory builds. The original
-  // #3084 fix bumped this to 96 B on Low-memory to absorb UIButton::onClicked's
-  // wrapping closure (which captures a 72 B fl::function<void()>), but the
-  // bump regressed the base LowMemory build by ~3 KB because every
-  // fl::function instance's variant storage / copy / move / destroy paths
-  // grew. The no-op heap-fallback branch (see construct_lambda_or_functor
-  // false_type below on Low-memory) lets large-lambda paths compile without
-  // a static_assert, so SBO=64 stays safe -- unreached paths get linker-DCE'd.
-  // See FastLED #3079.
+  // Small-buffer-optimization size for stored callables. 64 B fits every
+  // production lambda observed across the codebase audit; larger captures
+  // hit a static_assert in init_with(). User overridable.
   #define FASTLED_INLINE_LAMBDA_SIZE 64
 #endif
 
@@ -51,356 +31,323 @@ template <typename T> struct is_function_pointer {
     static constexpr bool value = false;
 };
 
-template <typename R, typename... Args> 
+template <typename R, typename... Args>
 struct is_function_pointer<R(*)(Args...)> {
     static constexpr bool value = true;
 };
 
 //----------------------------------------------------------------------------
-// More or less a drop in replacement for std::function
-// function<R(Args...)>: type‐erasing "std::function" replacement
-// Supports free functions, lambdas/functors, member functions (const &
-// non‑const)
-// 
-// NEW: Uses inline storage for member functions, free functions, and small
-// lambdas/functors. Only large lambdas/functors use heap allocation.
+// function<R(Args...)>: type-erasing "std::function" replacement
+//
+// Design (FastLED #3235 Tier 1 item B, "Option B"):
+//   Single small-buffer storage + two function pointers (invoker + manager).
+//   The previous 5-alternative `fl::variant<>` based design emitted ~25 thunks
+//   per signature; this collapses that to a single invoker pointer set at
+//   construction and a single manager pointer that multiplexes copy/move/
+//   destroy through an Op enum. Estimated cumulative flash savings: 25-35 KB
+//   on Large-memory builds (audited across ~25-30 distinct signatures in
+//   src/ + examples/).
+//
+// Supports free functions, lambdas/functors, and member functions (const &
+// non-const) -- the public API is unchanged from the legacy variant-based
+// implementation. Member-function support is provided via a thin wrapper
+// stored in the SBO; the legacy MemberCallableBase / NonConstMemberCallable /
+// ConstMemberCallable class hierarchy goes away.
 //----------------------------------------------------------------------------
 template <typename> class function;
 
 template <typename R, typename... Args>
 class FL_ALIGN function<R(Args...)> {
 private:
-#if FL_FUNCTION_FULL_VARIANT
-    struct CallableBase {
-        virtual R invoke(Args... args) FL_NOEXCEPT = 0;
-        virtual ~CallableBase() FL_NOEXCEPT = default;
-    };
+    static constexpr fl::size kSboSize = FASTLED_INLINE_LAMBDA_SIZE;
 
-    template <typename F>
-    struct Callable : CallableBase {
-        F f;
-        Callable(F fn) FL_NOEXCEPT : f(fn) {}
-        R invoke(Args... args) FL_NOEXCEPT override { return f(args...); }
-    };
-#endif  // FL_FUNCTION_FULL_VARIANT
+    // Multiplexed callable operations -- one entry per phase of the storage's
+    // lifecycle. Routed through a single Manager fn ptr to avoid having to
+    // emit separate copy/move/destroy thunks per signature.
+    enum class Op : fl::u8 { Destroy, Copy, Move };
 
-    // Type-erased free function callable - stored inline!
-    struct FreeFunctionCallable {
-        R (*func_ptr)(Args...);
-        
-        FreeFunctionCallable(R (*fp)(Args...)) FL_NOEXCEPT : func_ptr(fp) {}
-        
-        R invoke(Args... args) const FL_NOEXCEPT {
-            return func_ptr(args...);
-        }
-    };
+    // Invoker: knows how to call the stored callable with (Args...).
+    using Invoker = R (*)(const void* src, Args...);
+    // Manager: multiplexes copy/move/destroy. The semantics by op:
+    //   Op::Destroy: invoke ~F() on the object at `dst` (storage bytes).
+    //                `src` ignored.
+    //   Op::Copy:    copy-construct *this from *other.
+    //                `dst` = this->mBytes, `src` = other.mBytes.
+    //   Op::Move:    move-construct *this from *other (and leave *other in
+    //                a valid-but-unspecified state; reset() handles teardown).
+    //                `dst` = this->mBytes, `src` = other.mBytes.
+    using Manager = void (*)(void* dst, void* src, Op op);
 
-    // Type-erased small lambda/functor callable - stored inline!
-    // Size limit for inline storage - configurable via preprocessor define
+    // SBO + bookkeeping
+    FL_ALIGN_MAX char mBytes[kSboSize];
+    Invoker mInvoker;
+    Manager mManager;
+    bool mHasValue;
 
-    static constexpr fl::size kInlineLambdaSize = FASTLED_INLINE_LAMBDA_SIZE;
-    
-    struct InlinedLambda {
-        // Storage for the lambda/functor object
-        // Use aligned storage to ensure proper alignment for any type
-        FL_ALIGN_MAX char bytes[kInlineLambdaSize];
-        
-        // Type-erased invoker and destructor function pointers
-        R (*invoker)(const InlinedLambda& storage, Args... args);
-        void (*destructor)(InlinedLambda& storage);
-        
-        template <typename Function>
-        InlinedLambda(Function f) FL_NOEXCEPT {
-            FL_STATIC_ASSERT(sizeof(Function) <= kInlineLambdaSize,
-                         "Lambda/functor too large for inline storage");
-            FL_STATIC_ASSERT(alignof(Function) <= alignof(max_align_t),
-                         "Lambda/functor requires stricter alignment than storage provides");
-            
-            // Initialize the entire storage to zero to avoid copying uninitialized memory
-            fl::memset(bytes, 0, kInlineLambdaSize);
-            
-            // Construct the lambda/functor in-place
-            new (bytes) Function(fl::move(f));
-            
-            // Set up type-erased function pointers
-            invoker = &invoke_lambda<Function>;
-            destructor = &destroy_lambda<Function>;
+    // ---- Helpers: default-construct R for the "empty function called" path ---
+    // void R needs special handling because `return R{};` doesn't compile when
+    // R is void. Tag-dispatch on is_void<R>.
+    template <typename R2>
+    static typename enable_if<!is_void<R2>::value, R2>::type
+    null_return_impl() FL_NOEXCEPT { return R2{}; }
+
+    template <typename R2>
+    static typename enable_if<is_void<R2>::value, R2>::type
+    null_return_impl() FL_NOEXCEPT { return; }
+
+    static R null_invoker(const void* /*src*/, Args... /*args*/) FL_NOEXCEPT {
+        return null_return_impl<R>();
+    }
+    static void null_manager(void* /*dst*/, void* /*src*/, Op /*op*/) FL_NOEXCEPT {}
+
+    // ---- Per-F invoker --------------------------------------------------------
+    // Copies F out of storage so that mutable lambdas remain callable through a
+    // const operator(). The previous variant-based implementation used the same
+    // pattern.
+    template <typename Func>
+    static R functor_invoker(const void* src, Args... args) FL_NOEXCEPT {
+        FL_ALIGN_AS(Func) char tmp[sizeof(Func)];
+        fl::memcpy(tmp, src, sizeof(Func));
+        Func* f = static_cast<Func*>(static_cast<void*>(tmp));
+        return (*f)(args...);
+    }
+
+    // ---- Trivial manager: F is trivially copyable; memcpy semantics. ----------
+    // Shared across all trivially-copyable types of the same size, so the
+    // linker collapses many F's into one body (per-size, not per-F).
+    template <fl::size N>
+    static void trivial_manager(void* dst, void* src, Op op) FL_NOEXCEPT {
+        switch (op) {
+            case Op::Destroy:
+                // Trivially destructible: nothing to do.
+                break;
+            case Op::Copy:
+            case Op::Move:
+                fl::memcpy(dst, src, N);
+                break;
         }
-        
-        // Copy constructor
-        InlinedLambda(const InlinedLambda& other) FL_NOEXCEPT
-            : invoker(other.invoker), destructor(other.destructor) {
-            // This is tricky - we need to copy the stored object
-            // For now, we'll use memcopy (works for trivially copyable types)
-            fl::memcpy(bytes, other.bytes, kInlineLambdaSize);
-        }
-        
-        // Move constructor
-        InlinedLambda(InlinedLambda&& other) FL_NOEXCEPT
-            : invoker(other.invoker), destructor(other.destructor) {
-            fl::memcpy(bytes, other.bytes, kInlineLambdaSize);
-            // Reset the other object to prevent double destruction
-            other.destructor = nullptr;
-        }
-        
-        ~InlinedLambda() FL_NOEXCEPT {
-            if (destructor) {
-                destructor(*this);
+    }
+
+    // ---- Non-trivial manager: real placement-new + destructor. ----------------
+    template <typename Func>
+    static void non_trivial_manager(void* dst, void* src, Op op) FL_NOEXCEPT {
+        switch (op) {
+            case Op::Destroy: {
+                Func* f = static_cast<Func*>(dst);
+                f->~Func();
+                break;
+            }
+            case Op::Copy: {
+                const Func* sf = static_cast<const Func*>(static_cast<const void*>(src));
+                new (dst) Func(*sf);
+                break;
+            }
+            case Op::Move: {
+                Func* sf = static_cast<Func*>(src);
+                new (dst) Func(fl::move(*sf));
+                break;
             }
         }
-        
-        template <typename FUNCTOR>
-        static R invoke_lambda(const InlinedLambda& storage, Args... args) FL_NOEXCEPT {
-            // Use placement new to safely access the stored lambda
-            FL_ALIGN_AS(FUNCTOR) char temp_storage[sizeof(FUNCTOR)];
-            // Copy the lambda from storage
-            fl::memcpy(temp_storage, storage.bytes, sizeof(FUNCTOR));
-            // Get a properly typed pointer to the copied lambda (non-const for mutable lambdas)
-            FUNCTOR* f = static_cast<FUNCTOR*>(static_cast<void*>(temp_storage));
-            // Invoke the lambda
-            return (*f)(args...);
-        }
-        
-        template <typename FUNCTOR>
-        static void destroy_lambda(InlinedLambda& storage) FL_NOEXCEPT {
-            // For destruction, we need to call the destructor on the actual object
-            // that was constructed with placement new in storage.bytes
-            // We use the standard library approach: create a properly typed pointer
-            // using placement new, then call the destructor through that pointer
-            
-            // This is the standard-compliant way to get a properly typed pointer
-            // to an object that was constructed with placement new
-            FUNCTOR* obj_ptr = static_cast<FUNCTOR*>(static_cast<void*>(storage.bytes));
-            obj_ptr->~FUNCTOR();
-        }
-        
-        R invoke(Args... args) const FL_NOEXCEPT {
-            return invoker(*this, args...);
-        }
-    };
-
-#if FL_FUNCTION_FULL_VARIANT
-    // Type-erased member function callable base
-    struct MemberCallableBase {
-        virtual R invoke(Args... args) const FL_NOEXCEPT = 0;
-        virtual ~MemberCallableBase() FL_NOEXCEPT = default;
-    };
-
-    // Type-erased non-const member function callable
-    struct NonConstMemberCallable : MemberCallableBase {
-        void* obj;
-        // Union to store member function pointer as raw bytes
-        union MemberFuncStorage {
-            char bytes[sizeof(R (NonConstMemberCallable::*)(Args...))];
-            // Ensure proper alignment
-            void* alignment_dummy;
-        } member_func_storage;
-        
-        // Type-erased invoker function - set at construction time
-        R (*invoker)(void* obj, const MemberFuncStorage& mfp, Args... args);
-        
-        template <typename C>
-        NonConstMemberCallable(C* o, R (C::*mf)(Args...)) FL_NOEXCEPT : obj(o) {
-            // Store the member function pointer as raw bytes
-            FL_STATIC_ASSERT(sizeof(mf) <= sizeof(member_func_storage),
-                         "Member function pointer too large");
-            fl::memcpy(member_func_storage.bytes, &mf, sizeof(mf));
-            // Set the invoker to a function that knows how to cast back and call
-            invoker = &invoke_nonconst_member<C>;
-        }
-        
-        template <typename C>
-        static R invoke_nonconst_member(void* obj, const MemberFuncStorage& mfp, Args... args) FL_NOEXCEPT {
-            C* typed_obj = static_cast<C*>(obj);
-            R (C::*typed_mf)(Args...);
-            fl::memcpy(&typed_mf, mfp.bytes, sizeof(typed_mf));
-            return (typed_obj->*typed_mf)(args...);
-        }
-        
-        R invoke(Args... args) const FL_NOEXCEPT override {
-            return invoker(obj, member_func_storage, args...);
-        }
-    };
-
-    // Type-erased const member function callable  
-    struct ConstMemberCallable : MemberCallableBase {
-        const void* obj;
-        // Union to store member function pointer as raw bytes
-        union MemberFuncStorage {
-            char bytes[sizeof(R (ConstMemberCallable::*)(Args...) const)];
-            // Ensure proper alignment
-            void* alignment_dummy;
-        } member_func_storage;
-        
-        // Type-erased invoker function - set at construction time
-        R (*invoker)(const void* obj, const MemberFuncStorage& mfp, Args... args);
-        
-        template <typename C>
-        ConstMemberCallable(const C* o, R (C::*mf)(Args...) const) FL_NOEXCEPT : obj(o) {
-            // Store the member function pointer as raw bytes
-            FL_STATIC_ASSERT(sizeof(mf) <= sizeof(member_func_storage),
-                         "Member function pointer too large");
-            fl::memcpy(member_func_storage.bytes, &mf, sizeof(mf));
-            // Set the invoker to a function that knows how to cast back and call
-            invoker = &invoke_const_member<C>;
-        }
-        
-        template <typename C>
-        static R invoke_const_member(const void* obj, const MemberFuncStorage& mfp, Args... args) FL_NOEXCEPT {
-            const C* typed_obj = static_cast<const C*>(obj);
-            R (C::*typed_mf)(Args...) const;
-            fl::memcpy(&typed_mf, mfp.bytes, sizeof(typed_mf));
-            return (typed_obj->*typed_mf)(args...);
-        }
-        
-        R invoke(Args... args) const FL_NOEXCEPT override {
-            return invoker(obj, member_func_storage, args...);
-        }
-    };
-#endif  // FL_FUNCTION_FULL_VARIANT
-
-    // variant to store any of our callable types inline.
-    // Low-memory targets drop the heap-fallback CallableBase and the two
-    // MemberCallable alternatives (audited dead on those targets) to save
-    // ~3 KB of per-signature variant codegen tax. See FastLED #3077.
-#if FL_FUNCTION_FULL_VARIANT
-    using Storage = variant<fl::shared_ptr<CallableBase>, FreeFunctionCallable, InlinedLambda, NonConstMemberCallable, ConstMemberCallable>;
-#else
-    using Storage = variant<FreeFunctionCallable, InlinedLambda>;
-#endif
-    Storage mStorage;
-
-    // Helper function to handle default return value for void and non-void types
-    template<typename ReturnType>
-    typename enable_if<!is_void<ReturnType>::value, ReturnType>::type
-    default_return_helper() const FL_NOEXCEPT {
-        return ReturnType{};
     }
-    
-    template<typename ReturnType>
-    typename enable_if<is_void<ReturnType>::value, ReturnType>::type
-    default_return_helper() const FL_NOEXCEPT {
-        return;
+
+    // ---- Heap fallback: shared_ptr-wrapping holder for over-SBO callables. ---
+    // When the user passes a callable bigger than kSboSize, we wrap it in a
+    // `HeapHolder<Func>` and store *that* in the SBO. The holder is small
+    // (sizeof(shared_ptr<Func>) ~= 8-16 B) and its operator() dispatches through
+    // the shared_ptr to call the heap-allocated F. Copy/move/destroy of
+    // HeapHolder are handled by shared_ptr's own refcount machinery, so the
+    // non_trivial_manager template handles it cleanly.
+    template <typename Func>
+    struct HeapHolder {
+        fl::shared_ptr<Func> ptr;
+        R operator()(Args... args) const FL_NOEXCEPT {
+            return (*ptr)(args...);
+        }
+    };
+
+    // ---- init_with: place F into storage, wire up invoker/manager ------------
+    // Tag-dispatches between in-SBO storage (when sizeof(F) fits) and the
+    // HeapHolder fallback for larger callables. Both paths go through the same
+    // functor_invoker / manager dispatch.
+    template <typename Func>
+    void init_with(Func&& f) FL_NOEXCEPT {
+        using FBare = typename remove_reference<Func>::type;
+        FL_STATIC_ASSERT(alignof(FBare) <= alignof(max_align_t),
+                         "Callable requires stricter alignment than SBO provides.");
+        init_with_impl(fl::forward<Func>(f),
+                       integral_constant<bool, (sizeof(FBare) <= kSboSize)>{});
     }
+
+    template <typename Func>
+    void init_with_impl(Func&& f, true_type /* fits in SBO */) FL_NOEXCEPT {
+        using FBare = typename remove_reference<Func>::type;
+        new (mBytes) FBare(fl::forward<Func>(f));
+        mInvoker = &functor_invoker<FBare>;
+        mManager = is_trivially_copyable<FBare>::value
+                        ? &trivial_manager<sizeof(FBare)>
+                        : &non_trivial_manager<FBare>;
+        mHasValue = true;
+    }
+
+    template <typename Func>
+    void init_with_impl(Func&& f, false_type /* over-SBO; use HeapHolder */) FL_NOEXCEPT {
+        using FBare = typename remove_reference<Func>::type;
+        using Holder = HeapHolder<FBare>;
+        FL_STATIC_ASSERT(sizeof(Holder) <= kSboSize,
+                         "shared_ptr too large for SBO; bump FASTLED_INLINE_LAMBDA_SIZE.");
+        new (mBytes) Holder{fl::make_shared<FBare>(fl::forward<Func>(f))};
+        mInvoker = &functor_invoker<Holder>;
+        // shared_ptr is not trivially copyable (its copy ctor touches the
+        // refcount), so always use the non_trivial_manager path here.
+        mManager = &non_trivial_manager<Holder>;
+        mHasValue = true;
+    }
+
+    // Reset to empty state; calls destructor on the stored callable if any.
+    void reset() FL_NOEXCEPT {
+        if (mHasValue) {
+            mManager(mBytes, nullptr, Op::Destroy);
+            mHasValue = false;
+        }
+        mInvoker = &null_invoker;
+        mManager = &null_manager;
+    }
+
+    // ---- Member-function wrappers (stored in the SBO like any other functor) -
+    // Each member-fn constructor packages (obj, mf) into a wrapper struct that
+    // the SBO path treats as a regular callable. The struct is at class scope
+    // so it has external linkage and template instantiation rules are clean.
+    template <typename C>
+    struct NonConstMemberWrapper {
+        C* obj;
+        R (C::*mf)(Args...);
+        R operator()(Args... args) const FL_NOEXCEPT {
+            return (obj->*mf)(args...);
+        }
+    };
+
+    template <typename C>
+    struct ConstMemberWrapper {
+        const C* obj;
+        R (C::*mf)(Args...) const;
+        R operator()(Args... args) const FL_NOEXCEPT {
+            return (obj->*mf)(args...);
+        }
+    };
 
 public:
-    function() FL_NOEXCEPT = default;
-    
-    // Copy constructor - properly handle variant alignment
-    function(const function& other) FL_NOEXCEPT : mStorage(other.mStorage) {}
-    
-    // Move constructor - properly handle variant alignment  
-    function(function&& other) FL_NOEXCEPT : mStorage(fl::move(other.mStorage)) {}
-    
+    function() FL_NOEXCEPT
+        : mInvoker(&null_invoker), mManager(&null_manager), mHasValue(false) {
+        // Initialize storage to zero so a copy of an empty function doesn't
+        // memcpy uninitialized memory. (Matches the legacy behavior.)
+        fl::memset(mBytes, 0, kSboSize);
+    }
+
+    // Copy constructor
+    function(const function& other) FL_NOEXCEPT
+        : mInvoker(other.mInvoker), mManager(other.mManager), mHasValue(other.mHasValue) {
+        fl::memset(mBytes, 0, kSboSize);
+        if (mHasValue) {
+            // other's bytes are logically const here, but the Manager signature
+            // takes void* for the unified copy/move/destroy contract. Casting
+            // away const is safe because Op::Copy reads only from src.
+            mManager(mBytes, const_cast<char*>(other.mBytes), Op::Copy);
+        }
+    }
+
+    // Move constructor
+    function(function&& other) FL_NOEXCEPT
+        : mInvoker(other.mInvoker), mManager(other.mManager), mHasValue(other.mHasValue) {
+        fl::memset(mBytes, 0, kSboSize);
+        if (mHasValue) {
+            mManager(mBytes, other.mBytes, Op::Move);
+            // Destroy the moved-from object's storage and leave *other empty.
+            other.reset();
+        }
+    }
+
     // Copy assignment
     function& operator=(const function& other) FL_NOEXCEPT {
-        if (this != &other) {
-            mStorage = other.mStorage;
+        if (this == &other) return *this;
+        reset();
+        mInvoker = other.mInvoker;
+        mManager = other.mManager;
+        mHasValue = other.mHasValue;
+        if (mHasValue) {
+            mManager(mBytes, const_cast<char*>(other.mBytes), Op::Copy);
         }
         return *this;
     }
-    
+
     // Move assignment
     function& operator=(function&& other) FL_NOEXCEPT {
-        if (this != &other) {
-            mStorage = fl::move(other.mStorage);
+        if (this == &other) return *this;
+        reset();
+        mInvoker = other.mInvoker;
+        mManager = other.mManager;
+        mHasValue = other.mHasValue;
+        if (mHasValue) {
+            mManager(mBytes, other.mBytes, Op::Move);
+            other.reset();
         }
         return *this;
     }
-    
-    // 1) Free function constructor - stored inline!
-    function(R (*fp)(Args...)) FL_NOEXCEPT {
-        mStorage = FreeFunctionCallable(fp);
-    }
-    
-    // 2) Lambda/functor constructor - inline if small, heap if large
-    template <typename F, typename = enable_if_t<!is_member_function_pointer<F>::value && !is_function_pointer<F>::value>>
-    function(F f) FL_NOEXCEPT {
-        // Use template specialization instead of if constexpr for C++14 compatibility
-        construct_lambda_or_functor(fl::move(f), typename conditional<sizeof(F) <= kInlineLambdaSize, true_type, false_type>::type{});
-    }
-    
-#if FL_FUNCTION_FULL_VARIANT
-    // 3) non‑const member function - stored inline!
-    template <typename C>
-    function(R (C::*mf)(Args...), C* obj) FL_NOEXCEPT {
-        mStorage = NonConstMemberCallable(obj, mf);
+
+    ~function() FL_NOEXCEPT {
+        reset();
     }
 
-    // 4) const member function - stored inline!
-    template <typename C>
-    function(R (C::*mf)(Args...) const, const C* obj) FL_NOEXCEPT {
-        mStorage = ConstMemberCallable(obj, mf);
+    // 1) Free function pointer
+    function(R (*fp)(Args...)) FL_NOEXCEPT
+        : mInvoker(&null_invoker), mManager(&null_manager), mHasValue(false) {
+        fl::memset(mBytes, 0, kSboSize);
+        if (fp) {
+            init_with(fp);
+        }
     }
-#endif  // FL_FUNCTION_FULL_VARIANT
+
+    // 2) Lambda / functor (SFINAE excludes fn ptrs, member fn ptrs, and self
+    //    to avoid hijacking copy/move construction)
+    template <typename Func,
+              typename = enable_if_t<!is_member_function_pointer<Func>::value &&
+                                     !is_function_pointer<Func>::value &&
+                                     !is_same<typename remove_reference<Func>::type, function>::value>>
+    function(Func f) FL_NOEXCEPT
+        : mInvoker(&null_invoker), mManager(&null_manager), mHasValue(false) {
+        fl::memset(mBytes, 0, kSboSize);
+        init_with(fl::move(f));
+    }
+
+    // 3) Non-const member function
+    template <typename C>
+    function(R (C::*mf)(Args...), C* obj) FL_NOEXCEPT
+        : mInvoker(&null_invoker), mManager(&null_manager), mHasValue(false) {
+        fl::memset(mBytes, 0, kSboSize);
+        init_with(NonConstMemberWrapper<C>{obj, mf});
+    }
+
+    // 4) Const member function
+    template <typename C>
+    function(R (C::*mf)(Args...) const, const C* obj) FL_NOEXCEPT
+        : mInvoker(&null_invoker), mManager(&null_manager), mHasValue(false) {
+        fl::memset(mBytes, 0, kSboSize);
+        init_with(ConstMemberWrapper<C>{obj, mf});
+    }
 
     R operator()(Args... args) const FL_NOEXCEPT {
-        // Direct dispatch using type checking - efficient and simple
-#if FL_FUNCTION_FULL_VARIANT
-        if (auto* heap_callable = mStorage.template ptr<fl::shared_ptr<CallableBase>>()) {
-            return (*heap_callable)->invoke(args...);
-        } else if (auto* free_func = mStorage.template ptr<FreeFunctionCallable>()) {
-#else
-        if (auto* free_func = mStorage.template ptr<FreeFunctionCallable>()) {
-#endif
-            return free_func->invoke(args...);
-        } else if (auto* inlined_lambda = mStorage.template ptr<InlinedLambda>()) {
-            return inlined_lambda->invoke(args...);
-#if FL_FUNCTION_FULL_VARIANT
-        } else if (auto* nonconst_member = mStorage.template ptr<NonConstMemberCallable>()) {
-            return nonconst_member->invoke(args...);
-        } else if (auto* const_member = mStorage.template ptr<ConstMemberCallable>()) {
-            return const_member->invoke(args...);
-#endif
-        }
-        // This should never happen if the function is properly constructed
-        return default_return_helper<R>();
+        return mInvoker(mBytes, args...);
     }
-    
-    explicit operator bool() const FL_NOEXCEPT {
-        return !mStorage.empty();
-    }
-    
-    void clear() FL_NOEXCEPT {
-        mStorage = Storage{};  // Reset to empty variant
-    }
-    
+
+    explicit operator bool() const FL_NOEXCEPT { return mHasValue; }
+
+    void clear() FL_NOEXCEPT { reset(); }
+
     bool operator==(const function& o) const FL_NOEXCEPT {
-        // For simplicity, just check if both are empty or both are non-empty
-        // Full equality would require more complex comparison logic
-        return mStorage.empty() == o.mStorage.empty();
-    }
-    
-    bool operator!=(const function& o) const FL_NOEXCEPT {
-        return !(*this == o);
+        // Mirrors legacy semantics: just empty / non-empty equality.
+        return mHasValue == o.mHasValue;
     }
 
-private:
-    // Helper for small lambdas/functors - inline storage
-    template <typename F>
-    void construct_lambda_or_functor(F f, true_type /* small */) FL_NOEXCEPT {
-        mStorage = InlinedLambda(fl::move(f));
-    }
-
-#if FL_FUNCTION_FULL_VARIANT
-    // Helper for large lambdas/functors - heap storage
-    template <typename F>
-    void construct_lambda_or_functor(F f, false_type /* large */) FL_NOEXCEPT {
-        mStorage = fl::shared_ptr<CallableBase>(fl::make_shared<Callable<F>>(fl::move(f)));
-    }
-#else
-    // Low-memory targets: heap fallback dropped per FastLED #3077 to save flash.
-    // Large lambdas (>kInlineLambdaSize) compile but leave the storage empty;
-    // operator() returns the default-constructed R. This degrades gracefully
-    // for link-dead code paths (e.g. UIButton::onClicked which the LPC845
-    // LowMemory build never reaches), and the linker DCE's the unreached
-    // instantiations. Code paths reachable at runtime should pre-validate that
-    // their lambdas fit in kInlineLambdaSize.
-    template <typename F>
-    void construct_lambda_or_functor(F /*f*/, false_type /* large */) FL_NOEXCEPT {
-        mStorage = Storage{};
-    }
-#endif
+    bool operator!=(const function& o) const FL_NOEXCEPT { return !(*this == o); }
 };
 
 //----------------------------------------------------------------------------
