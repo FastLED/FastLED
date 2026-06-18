@@ -91,8 +91,8 @@ inline u32 json_ieee754_float_bits_from_double_bits(u64 bits) FL_NOEXCEPT {
 template <typename To, typename From>
 inline To json_bit_copy(const From& value) FL_NOEXCEPT {
     To out = 0;
-    const char* src = reinterpret_cast<const char*>(&value);
-    char* dst = reinterpret_cast<char*>(&out);
+    const char* src = fl::bit_cast_ptr<const char>(&value);
+    char* dst = fl::bit_cast_ptr<char>(&out);
     const fl::size n = sizeof(To) < sizeof(From) ? sizeof(To) : sizeof(From);
     for (fl::size i = 0; i < n; ++i) {
         dst[i] = src[i];

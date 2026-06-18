@@ -969,7 +969,9 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
         # run `fbuild build` followed by a pyocd-based flash + sw-reset here.
         if not _build_and_flash_nxplpc(
             build_dir,
-            environment=build_environment or final_environment_norm or final_environment,
+            environment=build_environment
+            or final_environment_norm
+            or final_environment,
             upload_port=upload_port,
             verbose=args.verbose,
         ):
@@ -1164,7 +1166,9 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     elif ctx.coroutine_test_mode:
         print("\n\U0001f4cc Coroutine mode: skipping pin discovery and GPIO pre-test")
     elif ctx.ieee754_test_mode:
-        print("\n\U0001f4cc IEEE754 codec mode: skipping pin discovery and GPIO pre-test")
+        print(
+            "\n\U0001f4cc IEEE754 codec mode: skipping pin discovery and GPIO pre-test"
+        )
     elif ctx.net_server_mode or ctx.net_client_mode or ctx.net_loopback_mode:
         print("\n\U0001f4cc Network mode: skipping pin discovery and GPIO pre-test")
     elif ctx.ota_mode:
@@ -1616,7 +1620,9 @@ async def _run_ieee754_tests(ctx: RunContext) -> int:
         print()
 
         if data.get("success", False) and tests_failed == 0 and tests_run > 0:
-            print(f"{Fore.GREEN}IEEE754 CODEC TEST PASSED ({tests_run} checks){Style.RESET_ALL}")
+            print(
+                f"{Fore.GREEN}IEEE754 CODEC TEST PASSED ({tests_run} checks){Style.RESET_ALL}"
+            )
             return 0
 
         print(

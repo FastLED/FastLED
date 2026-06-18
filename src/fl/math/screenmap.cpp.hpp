@@ -370,7 +370,7 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
                        fl::json *doc) {
 
 #if FASTLED_NO_JSON
-    FL_WARN("ScreenMap::toJson called with FASTLED_NO_JSON");
+    FL_WARN_F("ScreenMap::toJson called with FASTLED_NO_JSON");
     return;
 #else
     if (!doc) {
