@@ -34,49 +34,54 @@ FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
 
-// Minimal "modern" LPC GPIO controller view used by the FastPin templates
-// (LPC8xx/LPC11Uxx/LPC15xx share the same DIR/MASK/PIN/SET/CLR/NOT layout at
-// 0xA0000000 — legacy LPC11xx at 0x50000000 is gated out above). The
-// MCUXpresso CMSIS device header defines an equivalent LPC_GPIO_Type; when
-// that header is on the include path (i.e. inside led_sysdefs_arm_lpc.h via
-// <LPC845.h>) the real struct is what code links against. This local mirror
-// is only consulted when the device header could not be located, which is
-// useful for host-side IDE introspection.
+// LPC GPIO register base. Prefer the vendor/CMSIS register definition when a
+// board package provides one. Reduced host-side builds can still use the
+// documented LPC offset constants below without carrying a padded register
+// mirror solely to reach the handful of FastPin registers.
 #ifndef FL_LPC_GPIO_BASE
 #define FL_LPC_GPIO_BASE 0xA0000000UL
 #endif
 
-typedef struct {
-    volatile u8  B[2][32];         // 0x0000 byte-pin access
-    volatile u8 RESERVED00[4032];  // pad to 0x1000 word-pin access
-    volatile u32 W[2][32];         // 0x1000 word-pin access (0x80 bytes per port)
-    volatile u8 RESERVED0[3840];   // pad to 0x2000 DIR/MASK/PIN/MPIN/SET/CLR/NOT access
-    volatile u32 DIR[2];           // 0x2000
-    volatile u32 RESERVED1[30];
-    volatile u32 MASK[2];          // 0x2080
-    volatile u32 RESERVED2[30];
-    volatile u32 PIN[2];           // 0x2100
-    volatile u32 RESERVED3[30];
-    volatile u32 MPIN[2];          // 0x2180
-    volatile u32 RESERVED4[30];
-    volatile u32 SET[2];           // 0x2200
-    volatile u32 RESERVED5[30];
-    volatile u32 CLR[2];           // 0x2280
-    volatile u32 RESERVED6[30];
-    volatile u32 NOT[2];           // 0x2300
-    volatile u32 RESERVED7[30];
-    volatile u32 DIRSET[2];        // 0x2380
-    volatile u32 RESERVED8[30];
-    volatile u32 DIRCLR[2];        // 0x2400
-    volatile u32 RESERVED9[30];
-    volatile u32 DIRNOT[2];        // 0x2480
-} FL_LPC_GPIO_Type;
-
-// Use the CMSIS-supplied LPC_GPIO pointer when available; fall back to our
-// own typed pointer when only the local struct is in scope.
-#ifndef LPC_GPIO
-#define LPC_GPIO ((FL_LPC_GPIO_Type*)FL_LPC_GPIO_BASE)
+#if defined(LPC_GPIO)
+#define FL_LPC_GPIO_HW LPC_GPIO
+#elif defined(GPIO)
+#define FL_LPC_GPIO_HW GPIO
 #endif
+
+namespace lpc_detail {
+
+constexpr u32 FL_LPC_GPIO_PIN_OFFSET    = 0x2100u;
+constexpr u32 FL_LPC_GPIO_SET_OFFSET    = 0x2200u;
+constexpr u32 FL_LPC_GPIO_CLR_OFFSET    = 0x2280u;
+constexpr u32 FL_LPC_GPIO_NOT_OFFSET    = 0x2300u;
+constexpr u32 FL_LPC_GPIO_DIRSET_OFFSET = 0x2380u;
+constexpr u32 FL_LPC_GPIO_DIRCLR_OFFSET = 0x2400u;
+
+static_assert(FL_LPC_GPIO_SET_OFFSET - FL_LPC_GPIO_PIN_OFFSET == 0x100u,
+              "LPC SET offset must match clockless HI offset");
+static_assert(FL_LPC_GPIO_CLR_OFFSET - FL_LPC_GPIO_PIN_OFFSET == 0x180u,
+              "LPC CLR offset must match clockless LO offset");
+
+#if defined(FL_LPC_GPIO_HW)
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_pin() { return &FL_LPC_GPIO_HW->PIN[0]; }
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_set() { return &FL_LPC_GPIO_HW->SET[0]; }
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_clr() { return &FL_LPC_GPIO_HW->CLR[0]; }
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_not() { return &FL_LPC_GPIO_HW->NOT[0]; }
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_dirset() { return &FL_LPC_GPIO_HW->DIRSET[0]; }
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_dirclr() { return &FL_LPC_GPIO_HW->DIRCLR[0]; }
+#else
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_reg(u32 offset) {
+    return reinterpret_cast<volatile u32*>(FL_LPC_GPIO_BASE + offset);
+}
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_pin() { return lpc_gpio_reg(FL_LPC_GPIO_PIN_OFFSET); }
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_set() { return lpc_gpio_reg(FL_LPC_GPIO_SET_OFFSET); }
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_clr() { return lpc_gpio_reg(FL_LPC_GPIO_CLR_OFFSET); }
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_not() { return lpc_gpio_reg(FL_LPC_GPIO_NOT_OFFSET); }
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_dirset() { return lpc_gpio_reg(FL_LPC_GPIO_DIRSET_OFFSET); }
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_dirclr() { return lpc_gpio_reg(FL_LPC_GPIO_DIRCLR_OFFSET); }
+#endif
+
+}  // namespace lpc_detail
 
 // FastPin template for "modern" LPC GPIO pins (LPC8xx / LPC11Uxx / LPC15xx).
 // PORT0 is the primary port populated on the LPC845/LPC804 packages this
@@ -89,24 +94,24 @@ public:
     typedef u32           port_t;
 
     inline static void setOutput() __attribute__((always_inline)) {
-        LPC_GPIO->DIRSET[0] = _MASK;
+        *lpc_detail::lpc_gpio_dirset() = _MASK;
     }
     inline static void setInput() __attribute__((always_inline)) {
-        LPC_GPIO->DIRCLR[0] = _MASK;
+        *lpc_detail::lpc_gpio_dirclr() = _MASK;
     }
 
     inline static void hi() __attribute__((always_inline)) {
-        LPC_GPIO->SET[0] = _MASK;
+        *lpc_detail::lpc_gpio_set() = _MASK;
     }
     inline static void lo() __attribute__((always_inline)) {
-        LPC_GPIO->CLR[0] = _MASK;
+        *lpc_detail::lpc_gpio_clr() = _MASK;
     }
     inline static void set(FASTLED_REGISTER port_t val) __attribute__((always_inline)) {
-        LPC_GPIO->PIN[0] = val;
+        *lpc_detail::lpc_gpio_pin() = val;
     }
 
     inline static void strobe() __attribute__((always_inline)) { toggle(); toggle(); }
-    inline static void toggle() __attribute__((always_inline)) { LPC_GPIO->NOT[0] = _MASK; }
+    inline static void toggle() __attribute__((always_inline)) { *lpc_detail::lpc_gpio_not() = _MASK; }
 
     inline static void hi(FASTLED_REGISTER port_ptr_t /*port*/) __attribute__((always_inline)) { hi(); }
     inline static void lo(FASTLED_REGISTER port_ptr_t /*port*/) __attribute__((always_inline)) { lo(); }
@@ -114,18 +119,18 @@ public:
         *port = val;
     }
 
-    inline static port_t hival() __attribute__((always_inline)) { return LPC_GPIO->PIN[0] |  _MASK; }
-    inline static port_t loval() __attribute__((always_inline)) { return LPC_GPIO->PIN[0] & ~_MASK; }
+    inline static port_t hival() __attribute__((always_inline)) { return *lpc_detail::lpc_gpio_pin() |  _MASK; }
+    inline static port_t loval() __attribute__((always_inline)) { return *lpc_detail::lpc_gpio_pin() & ~_MASK; }
     // Expose PIN[0] as the "port" so the clockless C++ driver can derive the
     // SET / CLR offsets at compile time (it uses HI_OFFSET / LO_OFFSET as
     // byte offsets from this pointer).
-    inline static port_ptr_t port()  __attribute__((always_inline)) { return &LPC_GPIO->PIN[0]; }
-    inline static port_ptr_t sport() __attribute__((always_inline)) { return &LPC_GPIO->SET[0]; }
-    inline static port_ptr_t cport() __attribute__((always_inline)) { return &LPC_GPIO->CLR[0]; }
+    inline static port_ptr_t port()  __attribute__((always_inline)) { return lpc_detail::lpc_gpio_pin(); }
+    inline static port_ptr_t sport() __attribute__((always_inline)) { return lpc_detail::lpc_gpio_set(); }
+    inline static port_ptr_t cport() __attribute__((always_inline)) { return lpc_detail::lpc_gpio_clr(); }
     inline static port_t     mask()  __attribute__((always_inline)) { return _MASK; }
 
     inline static bool isset() __attribute__((always_inline)) {
-        return (LPC_GPIO->PIN[0] & _MASK) != 0;
+        return (*lpc_detail::lpc_gpio_pin() & _MASK) != 0;
     }
 };
 
@@ -147,6 +152,10 @@ _FL_DEFPIN(28); _FL_DEFPIN(29); _FL_DEFPIN(30); _FL_DEFPIN(31);
 #define HAS_HARDWARE_PIN_SUPPORT
 
 }  // namespace fl
+
+#ifdef FL_LPC_GPIO_HW
+#undef FL_LPC_GPIO_HW
+#endif
 
 #endif  // FL_IS_ARM_LPC_845 || FL_IS_ARM_LPC_804 || FL_IS_ARM_LPC_11_USB || FL_IS_ARM_LPC_15
 
