@@ -64,17 +64,35 @@ void Rpc::bindAsync(const char* name,
 // Rpc::handle() - Process JSON-RPC requests
 // =============================================================================
 
+// Compact error-message constants. Long error strings inflate the
+// per-call-site `fl::string` ctor + concat code on Cortex-M0+ /
+// no-FPU targets where every `.text` byte counts. Large-memory targets
+// keep the descriptive form; Low-memory targets use the short form.
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+#  define FL_RPC_ERR_NO_METHOD       "Invalid Request: missing 'method'"
+#  define FL_RPC_ERR_METHOD_NOT_STR  "Invalid Request: 'method' must be a string"
+#  define FL_RPC_ERR_METHOD_NOT_FOUND_PREFIX "Method not found: "
+#  define FL_RPC_ERR_PARAMS_NOT_ARRAY "Invalid params: must be an array"
+#  define FL_RPC_ERR_INVALID_PARAMS_PREFIX  "Invalid params: "
+#else
+#  define FL_RPC_ERR_NO_METHOD       "method"
+#  define FL_RPC_ERR_METHOD_NOT_STR  "method"
+#  define FL_RPC_ERR_METHOD_NOT_FOUND_PREFIX "404: "
+#  define FL_RPC_ERR_PARAMS_NOT_ARRAY "params"
+#  define FL_RPC_ERR_INVALID_PARAMS_PREFIX  "params: "
+#endif
+
 json Rpc::handle(const json& request) {
     // Extract method name
     if (!request.contains("method")) {
         FL_ERROR_F("RPC: Invalid Request - missing 'method' field");
-        return detail::makeJsonRpcError(-32600, "Invalid Request: missing 'method'", request["id"]);
+        return detail::makeJsonRpcError(-32600, FL_RPC_ERR_NO_METHOD, request["id"]);
     }
 
     auto methodOpt = request["method"].as_string();
     if (!methodOpt.has_value()) {
         FL_ERROR_F("RPC: Invalid Request - 'method' must be a string");
-        return detail::makeJsonRpcError(-32600, "Invalid Request: 'method' must be a string", request["id"]);
+        return detail::makeJsonRpcError(-32600, FL_RPC_ERR_METHOD_NOT_STR, request["id"]);
     }
     fl::string methodName = methodOpt.value();
 
@@ -100,14 +118,14 @@ json Rpc::handle(const json& request) {
     auto it = mRegistry.find(methodName);
     if (it == mRegistry.end()) {
         FL_WARN_F("RPC: Method not found: %s", methodName.c_str());
-        return detail::makeJsonRpcError(-32601, "Method not found: " + methodName, request["id"]);
+        return detail::makeJsonRpcError(-32601, fl::string(FL_RPC_ERR_METHOD_NOT_FOUND_PREFIX) + methodName, request["id"]);
     }
 
     // Extract params (default to empty array)
     json params = request.contains("params") ? request["params"] : json::parse("[]");
     if (!params.is_array()) {
         FL_ERROR_F("RPC: Invalid params - must be an array for method: %s", methodName.c_str());
-        return detail::makeJsonRpcError(-32602, "Invalid params: must be an array", request["id"]);
+        return detail::makeJsonRpcError(-32602, FL_RPC_ERR_PARAMS_NOT_ARRAY, request["id"]);
     }
 
     // Check if this is an async function
@@ -164,7 +182,7 @@ json Rpc::handle(const json& request) {
     // Check for conversion errors
     if (!convResult.ok()) {
         FL_ERROR_F("RPC: Invalid params for method '%s': %s", methodName.c_str(), convResult.errorMessage().c_str());
-        return detail::makeJsonRpcError(-32602, "Invalid params: " + convResult.errorMessage(), request["id"]);
+        return detail::makeJsonRpcError(-32602, fl::string(FL_RPC_ERR_INVALID_PARAMS_PREFIX) + convResult.errorMessage(), request["id"]);
     }
 
     // Build success response
