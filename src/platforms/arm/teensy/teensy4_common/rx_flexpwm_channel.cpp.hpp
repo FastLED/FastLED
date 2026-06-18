@@ -24,6 +24,22 @@
 
 #if defined(FL_IS_TEENSY_4X)
 
+// FastLED #3066 Phase 4 sub-task 2: enable the per-frame raw-capture dumps
+// in this file by default. These FL_DEBUG-gated FL_WARN_F sites surface the
+// bimodal-edge symptom (940/640 ns HIGH, 286/586 ns LOW from an OBJECT_FLED
+// frame) over the serial RPC link so bench operators can characterise the
+// FIFO-watermark / merging hypothesis without rebuilding.
+//
+// Users who need silent FlexPWM RX can `#define FL_RX_FLEXPWM_QUIET 1`
+// upstream of this include — that path #undef's FL_DEBUG so the production
+// fast path is unchanged.
+#ifndef FL_RX_FLEXPWM_QUIET
+#ifndef FL_DEBUG
+#define FL_DEBUG 1
+#define FL_DEBUG_DEFINED_BY_RX_FLEXPWM 1
+#endif
+#endif
+
 #define FASTLED_INTERNAL
 #include "fl/system/fastled.h"
 #include "platforms/arm/teensy/teensy4_common/rx_flexpwm_channel.h"
@@ -497,7 +513,7 @@ void FlexPwmRxChannelImpl::configureDma() {
 #ifdef FL_DEBUG
     // Debug: dump DMA channel and DMAMUX state
     volatile u32 *dmamux_reg = &DMAMUX_CHCFG0 + mDma.channel;
-    uintptr_t dma_daddr = mDma.TCD->DADDR; // ok reading register
+    uintptr_t dma_daddr = reinterpret_cast<uintptr_t>(const_cast<void*>(mDma.TCD->DADDR)); // ok reinterpret cast - reading register
     uintptr_t buf_addr = reinterpret_cast<uintptr_t>(mCaptureBuffer.data()); // ok reinterpret cast
     FL_WARN_F("[FlexPWM DMA] ch=%s src=%d DMAMUX=0x%x CITER=%d ERQ=%d DADDR_match=%s",
               mDma.channel, static_cast<int>(mPinInfo->dma_source),
@@ -744,5 +760,10 @@ fl::shared_ptr<FlexPwmRxChannel> FlexPwmRxChannel::create(int pin) {
 }
 
 } // namespace fl
+
+#ifdef FL_DEBUG_DEFINED_BY_RX_FLEXPWM
+#undef FL_DEBUG_DEFINED_BY_RX_FLEXPWM
+#undef FL_DEBUG
+#endif
 
 #endif // FL_IS_TEENSY_4X
