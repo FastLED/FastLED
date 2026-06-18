@@ -112,6 +112,7 @@ json Rpc::handle(const json& request) {
 
     // Check if this is an async function
     const detail::RpcEntry& entry = it->second;
+#if FL_PLATFORM_HAS_LARGE_MEMORY
     bool isAsync = (entry.mMode == RpcMode::ASYNC || entry.mMode == RpcMode::ASYNC_STREAM);
 
     // Check if this is a response-aware function (uses ResponseSend&)
@@ -130,9 +131,11 @@ json Rpc::handle(const json& request) {
         mResponseSink(ack);
         FL_DBG_F("RPC: Sent ACK for async method: %s", methodName.c_str());
     }
+#endif
 
     fl::tuple<TypeConversionResult, json> resultTuple;
 
+#if FL_PLATFORM_HAS_LARGE_MEMORY
     // Handle response-aware methods (with ResponseSend& parameter)
     if (isResponseAware) {
         // Create ResponseSend instance
@@ -148,6 +151,12 @@ json Rpc::handle(const json& request) {
         // Regular invocation
         resultTuple = entry.mInvoker->invoke(params);
     }
+#else
+    // Low-memory targets only register regular (non-response-aware) sync RPCs;
+    // the bindAsync path is gated out (see #3224 Tier 1B). Drop the
+    // isResponseAware branch entirely to slim Rpc::handle.
+    resultTuple = entry.mInvoker->invoke(params);
+#endif
 
     TypeConversionResult convResult = fl::get<0>(resultTuple);
     json returnVal = fl::get<1>(resultTuple);
@@ -168,7 +177,12 @@ json Rpc::handle(const json& request) {
         response.set("id", request["id"]);
     }
 
-    // Include warnings if any
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    // Include warnings if any. Low-memory targets emit warnings only as
+    // explicit error returns (e.g. our gated `float -> int not supported`
+    // path in #3224 Tier 1A) -- the warnings-array variant emplace + nested
+    // json::array() builder + push_back path was a measurable contributor
+    // to the LowMemory .text mass on its own.
     if (convResult.hasWarning()) {
         json warnings = json::array();
         for (fl::size i = 0; i < convResult.warnings().size(); ++i) {
@@ -181,6 +195,7 @@ json Rpc::handle(const json& request) {
     if (isAsync) {
         response.set("__async", true);  // Internal marker
     }
+#endif
 
     return response;
 }
