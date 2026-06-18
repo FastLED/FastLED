@@ -93,7 +93,12 @@ FL_EXTERN_C_END
 
 // RMT driver availability - use SoC capability macro
 #if !defined(FASTLED_ESP32_HAS_RMT)
+#if defined(FL_IS_ESP_32C2)
+// ESP32-C2's IDF package does not expose the direct RMT register header used by FastLED's RMT backends.
+#define FASTLED_ESP32_HAS_RMT 0
+#else
 #define FASTLED_ESP32_HAS_RMT SOC_RMT_SUPPORTED
+#endif
 #endif
 
 // Helper macro: Platforms that ONLY support RMT5 (no RMT4 fallback)
@@ -108,7 +113,11 @@ FL_EXTERN_C_END
 // Note that FASTLED_RMT5 is a legacy name,
 // so we keep it because "RMT" is specific to ESP32
 // Auto-detect RMT5 based on ESP-IDF version if not explicitly defined
-#if !defined(FASTLED_RMT5)
+#if defined(FL_IS_ESP_32C2)
+// The esp32c2 PlatformIO env currently passes -DFASTLED_RMT5=1; force the unsupported backend off.
+#undef FASTLED_RMT5
+#define FASTLED_RMT5 0
+#elif !defined(FASTLED_RMT5)
 #if FASTLED_ESP32_RMT5_ONLY_PLATFORM
 #define FASTLED_RMT5 1  // RMT5-only chips must use new driver
 #elif ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0) && FASTLED_ESP32_HAS_RMT
