@@ -3,6 +3,7 @@
 #include "fl/stl/noexcept.h"
 #include "fl/stl/span.h"
 #include "fl/stl/string_view.h"
+#include "fl/system/sketch_macros.h"  // FL_PLATFORM_HAS_LARGE_MEMORY -- gates int64 itoa path
 
 namespace fl {
 
@@ -320,13 +321,33 @@ fl::size basic_string::write(const fl::u32& val) {
 
 fl::size basic_string::write(const u64& val) {
     char buf[64] = {0};
+#if FL_PLATFORM_HAS_LARGE_MEMORY
     int len = fl::utoa64(val, buf, 10);
+#else
+    // Low-memory gate per #3224 Tier 3G: route through the 32-bit utoa to
+    // avoid `__udivmoddi4` + `__clzdi2` (libgcc-nofp's 64-bit divmod cascade,
+    // ~1.5 KB on Cortex-M0+). Values larger than UINT32_MAX saturate.
+    int len = fl::utoa32(val > 0xFFFFFFFFull ? 0xFFFFFFFFu
+                                              : static_cast<fl::u32>(val),
+                         buf, 10);
+#endif
     return write(buf, len);
 }
 
 fl::size basic_string::write(const i64& val) {
     char buf[64] = {0};
+#if FL_PLATFORM_HAS_LARGE_MEMORY
     int len = fl::itoa64(val, buf, 10);
+#else
+    // Low-memory gate per #3224 Tier 3G: route through the 32-bit itoa to
+    // avoid `__udivmoddi4` + `__clzdi2`. Values outside INT32 range saturate
+    // to INT32_MIN / INT32_MAX. Sketches that need full int64 formatting on
+    // Low-memory can opt in by defining FL_PLATFORM_HAS_LARGE_MEMORY=1.
+    fl::i32 narrow = val >  2147483647LL ?  2147483647
+                   : val < -2147483648LL ? -2147483648
+                                          : static_cast<fl::i32>(val);
+    int len = fl::itoa(narrow, buf, 10);
+#endif
     return write(buf, len);
 }
 
