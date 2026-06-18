@@ -164,18 +164,25 @@ fl::json Remote::processRpc(const fl::json& request) {
 #endif
 
     // Immediate execution path (always reached on Low-memory).
+
+#if FL_PLATFORM_HAS_LARGE_MEMORY
     // Store request ID BEFORE invoking function (needed for async functions).
-    // This allows sendAsyncResponse() to find the request ID while function is running.
+    // This allows sendAsyncResponse() to find the request ID while function is
+    // running. Low-memory drops the async-tracking machinery (no production
+    // LowMemory sketch uses bindAsync / sendAsyncResponse today) -- see
+    // #3224 Tier 1B.
     if (request.contains("id") && request.contains("method")) {
         fl::string methodName = request["method"].as_string().value_or("");
         int requestId = request["id"].as_int().value_or(0);
         mAsyncRequests[methodName] = {requestId, receivedAt};
         FL_DBG_F("Stored request ID for %s (id=%s)", methodName.c_str(), requestId);
     }
+#endif
 
     // Immediate execution - pass directly to Rpc
     fl::json response = mRpc.handle(request);
 
+#if FL_PLATFORM_HAS_LARGE_MEMORY
     // For async functions, response already sent via sendAsyncResponse()
     if (response.contains("__async") && response["__async"].as_bool().value_or(false)) {
         // Don't return response (ACK already sent by Rpc)
@@ -190,6 +197,7 @@ fl::json Remote::processRpc(const fl::json& request) {
         fl::string methodName = request["method"].as_string().value_or("");
         mAsyncRequests.erase(methodName);
     }
+#endif
 
 #if FL_PLATFORM_HAS_LARGE_MEMORY
     // Record result for the post-call results vector. LowMemory targets drop
