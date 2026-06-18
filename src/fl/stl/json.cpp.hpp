@@ -330,6 +330,7 @@ private:
                 mPos++;
                 return JsonToken::RBRACE;
             case '[': {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
                 size_t saved_pos = mPos;
                 mPos++;  // Skip '['
                 JsonToken array_token = scan_array_lookahead(out_value);
@@ -343,6 +344,17 @@ private:
                 out_value = fl::span<const char>(&mInput[mPos], 1);
                 mPos++;
                 return JsonToken::LBRACKET;
+#else
+                // Low-memory gate per #3224 Tier 2E: skip the array-packing
+                // lookahead. The packed-array tokens (ARRAY_UINT8 / INT16 /
+                // FLOAT) are gated out of JsonBuilder::on_token on Low-memory,
+                // so scanning ahead to detect them anyway is dead work. Drops
+                // `scan_array_lookahead` + `classify_array_token` + friends
+                // (~700 B of state-machine code).
+                out_value = fl::span<const char>(&mInput[mPos], 1);
+                mPos++;
+                return JsonToken::LBRACKET;
+#endif
             }
             case ']':
                 out_value = fl::span<const char>(&mInput[mPos], 1);
