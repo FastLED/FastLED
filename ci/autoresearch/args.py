@@ -27,6 +27,7 @@ class Args:
     all: bool
     simd: bool
     coroutine: bool
+    ieee754: bool
     # Wave2D perf benchmark — accepts "<W>x<H>" (e.g. "32x32") or None.
     # Cf. issue #3124 for the future --perf-XX / --test-XX convention.
     wave2d_perf: str | None
@@ -267,6 +268,11 @@ See Also:
             "--coroutine",
             action="store_true",
             help="Test coroutine/task creation, stop, and await (no LED drivers needed)",
+        )
+        driver_group.add_argument(
+            "--ieee754",
+            action="store_true",
+            help="Run on-device integer IEEE 754 decimal codec verification (#3039)",
         )
         driver_group.add_argument(
             "--wave2d-perf",
@@ -608,6 +614,7 @@ See Also:
             all=parsed.all,
             simd=parsed.simd,
             coroutine=parsed.coroutine,
+            ieee754=parsed.ieee754,
             wave2d_perf=parsed.wave2d_perf,
             environment=parsed.environment,
             verbose=parsed.verbose,

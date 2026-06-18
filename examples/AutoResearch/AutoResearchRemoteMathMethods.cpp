@@ -39,6 +39,7 @@
 #include "AutoResearchParlioEncode.h"
 #include "AutoResearchTimingDrift.h"
 #include "AutoResearchParlioStream.h"
+#include "AutoResearchIeee754.h"
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
 #include <Arduino.h>
@@ -212,6 +213,21 @@ void AutoResearchRemoteControl::bindMathMethods(fl::Remote& remote) {
         response.set("transpose16_nibble_us", static_cast<int64_t>(r.transpose16_nibble_us));
         response.set("transpose16_byte_us", static_cast<int64_t>(r.transpose16_byte_us));
         response.set("sink", static_cast<int64_t>(r.sink));
+        return response;
+    });
+
+    // Register "ieee754CodecTest" - on-device integer IEEE 754 decimal codec
+    // verification for #3039. No strtof/libm reference is used by the test.
+    remote.bind("ieee754CodecTest", [](const fl::json& args) -> fl::json {
+        (void)args;
+        const auto r = autoresearch::ieee754_check::run();
+        fl::json response = fl::json::object();
+        response.set("success", r.success);
+        response.set("tests_run", static_cast<int64_t>(r.tests_run));
+        response.set("tests_failed", static_cast<int64_t>(r.tests_failed));
+        response.set("first_failure", r.first_failure ? r.first_failure : "");
+        response.set("expected_bits", static_cast<int64_t>(r.expected_bits));
+        response.set("actual_bits", static_cast<int64_t>(r.actual_bits));
         return response;
     });
 

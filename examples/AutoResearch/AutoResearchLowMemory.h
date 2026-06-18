@@ -31,18 +31,26 @@
 #define RELEASE 1
 #endif
 
+// Dedicated #3039 codec-test builds keep the low-memory surface to echo +
+// IEEE754 only. The SCT/WS2812 handlers are useful diagnostics, but they are
+// unrelated to the codec and push LPC845 past its flash budget when combined.
+#if defined(FL_AUTORESEARCH_IEEE754) && FL_AUTORESEARCH_IEEE754
+#define FASTLED_AUTORESEARCH_IEEE754_MODE 1
+#endif
+
 // Opt in to the SCT input-capture RX backend (FastLED #3021). With this
 // flag set, `LpcSctRxChannel::begin()` programs the SCT for hardware
 // edge-capture; without it the driver is a no-op stub (host tests still
 // work via `injectEdges()`).
+#if !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
 #ifndef FASTLED_LPC_RX_SCT
 #define FASTLED_LPC_RX_SCT 1
 #endif
+#endif
 
-// The LPC845-BRK low-memory build now fits FastLED + Remote + the WS2812
-// loopback RPC. Derive that surface from the platform instead of requiring a
-// user-set build flag.
-#if defined(FL_IS_ARM_LPC_845)
+// The LPC845-BRK low-memory build fits FastLED + Remote + the WS2812 loopback
+// RPC in normal mode. The dedicated IEEE754 mode deliberately omits it.
+#if defined(FL_IS_ARM_LPC_845) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
 #define FASTLED_AUTORESEARCH_LPC_WS2812 1
 #endif
 
@@ -58,12 +66,16 @@
 #include "fl/log/log.h"
 #include "fl/stl/cstdio.h"  // fl::serial_begin -- HWCDC-safe Serial.begin wrapper
 
+#if defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
+#include "AutoResearchIeee754.h"
+#endif
+
 // The host-stub example DLL build (`tests/shared/example_dll_wrapper_template.cpp`)
 // compiles this sketch on Linux to surface ABI breaks. The RX SCT driver
 // types are platform-gated behind `FL_IS_ARM_LPC` -- they only exist on
 // the real LPC build. So the include + every RX usage below must be gated
 // the same way.
-#if defined(FL_IS_ARM_LPC)
+#if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
 #include "fl/channels/rx_sct_capture.h"
 #include "fl/stl/strstream.h"
 #endif
@@ -76,7 +88,7 @@
 namespace {
 fl::Remote* g_low_memory_remote = nullptr;
 
-#if defined(FL_IS_ARM_LPC)
+#if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
 // Period-stat helpers for `pinToggleRx`. Mirrors the FlexIO RX benchmark
 // logic in `examples/AutoResearch/AutoResearchRemote.cpp::flexioRxBenchmark`
 // but inline so we don't pull in the AutoResearch ObjectFLED bus.
@@ -120,7 +132,7 @@ inline LowMemPinTogglePeriodStats computeLowMemPeriodStats(
     s.max_ns   = max_ns;
     return s;
 }
-#endif  // FL_IS_ARM_LPC
+#endif  // FL_IS_ARM_LPC && !FASTLED_AUTORESEARCH_IEEE754_MODE
 
 }  // namespace
 
@@ -148,7 +160,22 @@ inline void autoResearchLowMemorySetup() {
         return v;
     });
 
-#if defined(FL_IS_ARM_LPC)
+#if defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
+    remote.bind("ieee754CodecTest", [](const fl::json& args) -> fl::json {
+        (void)args;
+        const auto r = autoresearch::ieee754_check::run();
+        fl::json response = fl::json::object();
+        response.set("success", r.success);
+        response.set("tests_run", static_cast<int64_t>(r.tests_run));
+        response.set("tests_failed", static_cast<int64_t>(r.tests_failed));
+        response.set("first_failure", r.first_failure ? r.first_failure : "");
+        response.set("expected_bits", static_cast<int64_t>(r.expected_bits));
+        response.set("actual_bits", static_cast<int64_t>(r.actual_bits));
+        return response;
+    });
+#endif
+
+#if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
     // pinToggleRx (FastLED #3021 Phase 1) — bit-bang square wave on tx_pin
     // and capture SCT edges on rx_pin. CSV stats out.
     remote.bind("pinToggleRx",
@@ -320,7 +347,7 @@ inline void autoResearchLowMemorySetup() {
             return s.str();
         });
 #endif  // FASTLED_AUTORESEARCH_LPC_WS2812
-#endif  // FL_IS_ARM_LPC
+#endif  // FL_IS_ARM_LPC && !FASTLED_AUTORESEARCH_IEEE754_MODE
 }
 
 inline void autoResearchLowMemoryLoop() {
