@@ -8,6 +8,7 @@ formatter work is centralized in `fl::printf` instead of instantiating a fresh
 
 import re
 from pathlib import Path
+from typing import cast
 
 from ci.util.check_files import FileContent, FileContentChecker
 from ci.util.paths import PROJECT_ROOT
@@ -47,10 +48,9 @@ LEGACY_MACROS = (
     "FL_LOG_OBJECTFLED_ASYNC_MAIN",
 )
 
+_LEGACY_SORTED = cast(list[str], sorted(LEGACY_MACROS, key=len, reverse=True))
 _LEGACY_PATTERN = re.compile(
-    r"\b("
-    + "|".join(re.escape(name) for name in sorted(LEGACY_MACROS, key=len, reverse=True))
-    + r")\s*\("
+    r"\b(" + "|".join(re.escape(name) for name in _LEGACY_SORTED) + r")\s*\("
 )
 
 

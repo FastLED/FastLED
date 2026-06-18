@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import re
 from pathlib import Path
+from typing import cast
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -48,10 +49,9 @@ MACROS: dict[str, str] = {
     "FL_LOG_OBJECTFLED_ASYNC_MAIN": "FL_LOG_OBJECTFLED_ASYNC_MAIN_F",
 }
 
+_MACRO_NAMES_SORTED = cast(list[str], sorted(MACROS, key=len, reverse=True))
 MACRO_RE = re.compile(
-    r"\b("
-    + "|".join(re.escape(name) for name in sorted(MACROS, key=len, reverse=True))
-    + r")\s*\("
+    r"\b(" + "|".join(re.escape(name) for name in _MACRO_NAMES_SORTED) + r")\s*\("
 )
 
 
