@@ -49,6 +49,7 @@ Python linting includes:
 
 C++ linting includes:
   - clang-format and custom checkers
+  - AST ratchets for FL_NOEXCEPT and decayed array parameters
   - IWYU (Include-What-You-Use) runs with --full, --iwyu, or --strict
   - clang-tidy static analysis runs with --tidy
 

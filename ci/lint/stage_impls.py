@@ -133,7 +133,7 @@ def run_clang_tidy(no_fingerprint: bool, run_tidy: bool) -> bool:
 
 def run_noexcept_check(run_tidy: bool) -> bool:
     """
-    Report where FL_NOEXCEPT enforcement lives.
+    Report where AST-backed C++ enforcement lives.
 
     Args:
         run_tidy: Preserved for CLI compatibility
@@ -142,9 +142,12 @@ def run_noexcept_check(run_tidy: bool) -> bool:
         Always True; the default unified C++ linter owns this check.
     """
     print("")
-    print("FL_NOEXCEPT AST CHECK")
-    print("---------------------")
-    print("Handled by the default unified C++ linter: ci/tools/check_noexcept.py")
+    print("C++ AST CHECKS")
+    print("--------------")
+    print(
+        "Handled by the default unified C++ linter: "
+        "ci/tools/check_noexcept.py and ci/tools/check_array_params.py"
+    )
     return True
 
 

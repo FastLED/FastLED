@@ -60,6 +60,30 @@ reviews:
           - ❌ `-DFASTLED_NEW_FEATURE=1` in build_flags →  ✅ `-DFL_NEW_FEATURE=1`
         Reference: `agents/docs/cpp-standards.md` → "Type 3: Component Capability Flags".
 
+        Decayed fixed-size array parameter rule (HIGH severity):
+        Do not allow function parameters spelled as `T value[N]` or `T value[]`.
+        In C++, those parameters decay to pointers, so the declared extent is not
+        enforced. Flag these in declarations, definitions, callback signatures, and
+        small output-buffer APIs.
+
+        Replacements:
+          - For ISR / `FL_IRAM` APIs, require an array reference:
+            `T (&value)[N]`.
+          - For non-ISR APIs, use either `fl::span<T, N>` or `T (&value)[N]`.
+          - For domain values like xy pairs, a concrete value type such as
+            `fl::vec2f` is also acceptable.
+
+        Examples:
+          - Bad: `void cct_to_xy(int cct, float out[2]);`
+          - Bad: `void encode(fl::u8 output[4]);`
+          - Good: `void cct_to_xy(int cct, fl::span<float, 2> out);`
+          - Good for ISR: `FL_IRAM void encode(fl::u8 (&output)[4]);`
+
+        Suppress only intentional C ABI or platform compatibility cases with
+        `// ok array parameter`. Reference: `agents/docs/cpp-standards.md` ->
+        "`fl::span` for Callback Typedefs and Small Fixed-Size Arrays" and
+        FastLED issue #3233.
+
     - path: "**/platformio.ini"
       instructions: |
         PlatformIO `build_flags` macro prefix rule (matches the `FL_*` vs `FASTLED_*`
