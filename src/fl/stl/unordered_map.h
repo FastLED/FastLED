@@ -23,6 +23,7 @@ and removals.
 #include "fl/stl/pair.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/unordered_map_basic.h"  // type-erased probing helper (#3235 Tier 1C)
 #include "fl/stl/initializer_list.h"  // IWYU pragma: keep
 #include "fl/stl/memory_resource.h"
 #include "fl/stl/noexcept.h"
@@ -850,56 +851,31 @@ class FL_ALIGN unordered_map {
         const fl::size h = _hash(key) & mask;
         fl::size first_tomb = npos();
 
-        if (cap <= 8) {
-            // linear probing
-            for (fl::size i = 0; i < cap; ++i) {
-                const fl::size idx = (h + i) & mask;
+        // Probe sequence comes from the shared (non-template) helper -- avoids
+        // duplicating the (cap <= 8 ? linear : quadratic-then-linear)
+        // branch logic across every unordered_map<K, V, Hash, Equal>
+        // instantiation. See FastLED #3235 Tier 1C.
+        for (fl::size i = 0; i < cap; ++i) {
+            const fl::size idx = detail::unordered_map_probe_idx(h, i, mask, cap);
 
-                if (is_empty(idx))
-                    return {first_tomb != npos() ? first_tomb : idx, true};
-                if (is_deleted(idx)) {
-                    if (first_tomb == npos())
-                        first_tomb = idx;
-                } else if (is_occupied(idx) && _equal(_buckets[idx].key, key)) {
-                    return {idx, false};
-                }
-            }
-        } else {
-            // quadratic probing up to 8 tries
-            fl::size i = 0;
-            for (; i < 8; ++i) {
-                const fl::size idx = (h + i + i * i) & mask;
-
-                if (is_empty(idx))
-                    return {first_tomb != npos() ? first_tomb : idx, true};
-                if (is_deleted(idx)) {
-                    if (first_tomb == npos())
-                        first_tomb = idx;
-                } else if (is_occupied(idx) && _equal(_buckets[idx].key, key)) {
-                    return {idx, false};
-                }
-            }
-            // fallback to linear for the rest
-            for (; i < cap; ++i) {
-                const fl::size idx = (h + i) & mask;
-
-                if (is_empty(idx))
-                    return {first_tomb != npos() ? first_tomb : idx, true};
-                if (is_deleted(idx)) {
-                    if (first_tomb == npos())
-                        first_tomb = idx;
-                } else if (is_occupied(idx) && _equal(_buckets[idx].key, key)) {
-                    return {idx, false};
-                }
+            if (is_empty(idx))
+                return {first_tomb != npos() ? first_tomb : idx, true};
+            if (is_deleted(idx)) {
+                if (first_tomb == npos())
+                    first_tomb = idx;
+            } else if (is_occupied(idx) && _equal(_buckets[idx].key, key)) {
+                return {idx, false};
             }
         }
 
         return {npos(), false};
     }
 
+    // Re-export probing constants for backward compat (they used to live as
+    // a local enum here). Sourced from the shared helper.
     enum {
-        kLinearProbingOnlySize = 8,
-        kQuadraticProbingTries = 8,
+        kLinearProbingOnlySize  = detail::kUnorderedMapLinearProbeOnlyThreshold,
+        kQuadraticProbingTries  = detail::kUnorderedMapQuadraticProbingTries,
     };
 
     fl::size find_index(const Key &key) const {
@@ -907,33 +883,13 @@ class FL_ALIGN unordered_map {
         const fl::size mask = cap - 1;
         const fl::size h = _hash(key) & mask;
 
-        if (cap <= kLinearProbingOnlySize) {
-            // linear probing
-            for (fl::size i = 0; i < cap; ++i) {
-                const fl::size idx = (h + i) & mask;
-                if (is_empty(idx))
-                    return npos();
-                if (is_occupied(idx) && _equal(_buckets[idx].key, key))
-                    return idx;
-            }
-        } else {
-            // quadratic probing up to 8 tries
-            fl::size i = 0;
-            for (; i < kQuadraticProbingTries; ++i) {
-                const fl::size idx = (h + i + i * i) & mask;
-                if (is_empty(idx))
-                    return npos();
-                if (is_occupied(idx) && _equal(_buckets[idx].key, key))
-                    return idx;
-            }
-            // fallback to linear for the rest
-            for (; i < cap; ++i) {
-                const fl::size idx = (h + i) & mask;
-                if (is_empty(idx))
-                    return npos();
-                if (is_occupied(idx) && _equal(_buckets[idx].key, key))
-                    return idx;
-            }
+        // Probe via the shared helper -- see find_slot() comment above.
+        for (fl::size i = 0; i < cap; ++i) {
+            const fl::size idx = detail::unordered_map_probe_idx(h, i, mask, cap);
+            if (is_empty(idx))
+                return npos();
+            if (is_occupied(idx) && _equal(_buckets[idx].key, key))
+                return idx;
         }
 
         return npos();
@@ -945,34 +901,10 @@ class FL_ALIGN unordered_map {
         const fl::size mask = cap - 1;
         const fl::size h = _hash(key) & mask;
 
-        if (cap <= kLinearProbingOnlySize) {
-            // linear probing
-            for (fl::size i = 0; i < cap; ++i) {
-                const fl::size idx = (h + i) & mask;
-                bool occupied = occupied_set.test(idx);
-                if (occupied) {
-                    continue;
-                }
-                return idx;
-            }
-        } else {
-            // quadratic probing up to 8 tries
-            fl::size i = 0;
-            for (; i < kQuadraticProbingTries; ++i) {
-                const fl::size idx = (h + i + i * i) & mask;
-                bool occupied = occupied_set.test(idx);
-                if (occupied) {
-                    continue;
-                }
-                return idx;
-            }
-            // fallback to linear for the rest
-            for (; i < cap; ++i) {
-                const fl::size idx = (h + i) & mask;
-                bool occupied = occupied_set.test(idx);
-                if (occupied) {
-                    continue;
-                }
+        // Probe via the shared helper -- see find_slot() comment above.
+        for (fl::size i = 0; i < cap; ++i) {
+            const fl::size idx = detail::unordered_map_probe_idx(h, i, mask, cap);
+            if (!occupied_set.test(idx)) {
                 return idx;
             }
         }
