@@ -7,6 +7,40 @@ from pathlib import Path
 from typing import IO, Protocol, runtime_checkable
 
 
+def fbuild_firmware_path_candidates(build_dir: Path, environment: str) -> list[Path]:
+    """Return known fbuild firmware.bin artifact locations for a project."""
+    return [
+        build_dir / ".fbuild" / "build" / "release" / "firmware.bin",
+        build_dir / ".fbuild" / "build" / environment / "release" / "firmware.bin",
+        build_dir
+        / ".build"
+        / "pio"
+        / environment
+        / ".fbuild"
+        / "build"
+        / "release"
+        / "firmware.bin",
+        build_dir
+        / ".build"
+        / "pio"
+        / environment
+        / ".fbuild"
+        / "build"
+        / environment
+        / "release"
+        / "firmware.bin",
+    ]
+
+
+def find_fbuild_firmware_path(build_dir: Path, environment: str) -> Path:
+    """Return the existing fbuild firmware.bin path, or the primary candidate."""
+    candidates = fbuild_firmware_path_candidates(build_dir, environment)
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return candidates[0]
+
+
 @runtime_checkable
 class BuildDriver(Protocol):
     """Abstract build system driver for compile + deploy.
@@ -80,7 +114,7 @@ class FbuildDriver:
         )
 
     def firmware_path(self, build_dir: Path, environment: str) -> Path:
-        return build_dir / ".fbuild" / "build" / environment / "firmware.bin"
+        return find_fbuild_firmware_path(build_dir, environment)
 
 
 class PlatformIODriver:

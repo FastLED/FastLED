@@ -18,7 +18,10 @@ from typing import TYPE_CHECKING, Any
 from colorama import Fore, Style
 
 from ci.autoresearch.args import Args
-from ci.autoresearch.build_driver import select_build_driver
+from ci.autoresearch.build_driver import (
+    find_fbuild_firmware_path,
+    select_build_driver,
+)
 from ci.autoresearch.context import (
     DEFAULT_EXPECT_PATTERNS,
     DEFAULT_FAIL_ON_PATTERN,
@@ -67,6 +70,8 @@ LPC_WS2812_ENVS = {"lpc845brk", "lpc845", "lpcxpresso845max"}
 LPC_IEEE754_BUILD_ENVS = {
     "lpc845brk": "lpc845brk_ieee754",
 }
+LPC_PIN_TOGGLE_DEFAULT_TX_PIN = 14
+LPC_PIN_TOGGLE_DEFAULT_RX_PIN = 15
 
 
 def _is_native_platform(environment: str | None) -> bool:
@@ -1838,14 +1843,7 @@ def _build_and_flash_nxplpc(
         )
         return False
 
-    firmware_bin = (
-        build_dir
-        / ".fbuild"
-        / "build"
-        / (environment or "lpc845brk")
-        / "release"
-        / "firmware.bin"
-    )
+    firmware_bin = find_fbuild_firmware_path(build_dir, environment or "lpc845brk")
     if not firmware_bin.is_file():
         print(f"{Fore.RED}❌ firmware.bin not found at {firmware_bin}{Style.RESET_ALL}")
         return False
@@ -2040,8 +2038,16 @@ async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:
     upload_port = ctx.upload_port
     assert upload_port is not None
 
-    tx_pin = ctx.args.tx_pin if ctx.args.tx_pin is not None else 10
-    rx_pin = ctx.args.rx_pin if ctx.args.rx_pin is not None else 11
+    tx_pin = (
+        ctx.args.tx_pin
+        if ctx.args.tx_pin is not None
+        else LPC_PIN_TOGGLE_DEFAULT_TX_PIN
+    )
+    rx_pin = (
+        ctx.args.rx_pin
+        if ctx.args.rx_pin is not None
+        else LPC_PIN_TOGGLE_DEFAULT_RX_PIN
+    )
 
     print()
     print("=" * 60)
@@ -2084,8 +2090,16 @@ async def _run_lpc_ws2812_loopback_tests(ctx: RunContext) -> int:
     upload_port = ctx.upload_port
     assert upload_port is not None
 
-    tx_pin = ctx.args.tx_pin if ctx.args.tx_pin is not None else 10
-    rx_pin = ctx.args.rx_pin if ctx.args.rx_pin is not None else 11
+    tx_pin = (
+        ctx.args.tx_pin
+        if ctx.args.tx_pin is not None
+        else LPC_PIN_TOGGLE_DEFAULT_TX_PIN
+    )
+    rx_pin = (
+        ctx.args.rx_pin
+        if ctx.args.rx_pin is not None
+        else LPC_PIN_TOGGLE_DEFAULT_RX_PIN
+    )
 
     print()
     print("=" * 60)

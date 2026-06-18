@@ -96,18 +96,32 @@ namespace {
 
 constexpr fl::u32 kSysconBase   = 0x40048000u;
 constexpr fl::u32 kSwmBase      = 0x4000C000u;
+constexpr fl::u32 kIoconBase    = 0x40044000u;
+constexpr fl::u32 kGpioBase     = 0xA0000000u;
 constexpr fl::u32 kInputMuxBase = 0x4002C000u;
 constexpr fl::u32 kSctBase      = 0x50004000u;
 constexpr fl::u32 kDmaBase      = 0x50008000u;
 
 constexpr fl::u32 kOffSYSAHBCLKCTRL0 = 0x080u;
+constexpr fl::u32 kOffSCTCLKSEL      = 0x06Cu;
+constexpr fl::u32 kOffSCTCLKDIV      = 0x070u;
 constexpr fl::u32 kOffPRESETCTRL0    = 0x088u;
 constexpr fl::u32 kClkSWM = (1u <<  7);
 constexpr fl::u32 kClkSCT = (1u <<  8);
+constexpr fl::u32 kClkIOCON = (1u << 18);
 constexpr fl::u32 kClkDMA = (1u << 29);
-constexpr fl::u32 kRstSWM = (1u <<  7);
 constexpr fl::u32 kRstSCT = (1u <<  8);
 constexpr fl::u32 kRstDMA = (1u << 29);
+
+constexpr fl::u32 kOffGpioDir = 0x2000u;
+constexpr fl::u32 kIoconModeMask = (0x3u << 3);
+constexpr fl::u32 kIoconModePullup = (0x2u << 3);
+constexpr fl::u32 kIoconInv = (1u << 6);
+constexpr fl::u32 kIoconSModeMask = (0x3u << 11);
+constexpr fl::u32 kOffSctInputMux0 = 0x020u;
+constexpr fl::u32 kSctInputMuxSctPin0 = 0x0u;
+constexpr fl::u32 kSctClkMain = 0x1u;
+constexpr fl::u32 kSctClkDiv1 = 0x1u;
 
 constexpr fl::u32 kOffPINASSIGN6 = 0x018u;
 constexpr fl::u32 kOffPINASSIGN7 = 0x01Cu;
@@ -204,9 +218,32 @@ inline fl::u32* sct_cap_addr(fl::u32 n) FL_NOEXCEPT {
 }
 inline volatile fl::u32& dma(fl::u32 offset) FL_NOEXCEPT { return reg(kDmaBase, offset); }
 
-// Assign or unassign the user's GPIO pin to SCT input 0 (SCT0_GPIO_IN_A_I)
-// via SWM PINASSIGN6 byte[31:24]. The byte value is the encoded pin number
-// (PIO0_n -> n; PIO1_n -> 0x20+n).
+inline fl::u32 ioconOffsetPio0(fl::u8 pin) FL_NOEXCEPT {
+    static const fl::u8 offsets[] = {
+        0x44u, 0x2Cu, 0x18u, 0x14u, 0x10u, 0x0Cu, 0x40u, 0x3Cu,
+        0x38u, 0x34u, 0x20u, 0x1Cu, 0x08u, 0x04u, 0x48u, 0x28u,
+        0x24u, 0x00u, 0x78u, 0x74u, 0x70u, 0x6Cu, 0x68u, 0x64u,
+        0x60u, 0x5Cu, 0x58u, 0x54u, 0x50u, 0xC8u, 0xCCu, 0x8Cu,
+    };
+    return (pin < sizeof(offsets)) ? offsets[pin] : 0xFFFFFFFFu;
+}
+
+inline void configureDigitalInput(fl::u8 pin) FL_NOEXCEPT {
+    // SCT input routing samples the pad path configured by IOCON. LPC84x
+    // IOCON registers are not ordered by pin number, and the Arduino core's
+    // direct PIO[n] indexing misses pins like P0_10/P0_11.
+    const fl::u32 offset = ioconOffsetPio0(pin);
+    if (offset != 0xFFFFFFFFu) {
+        reg(kIoconBase, offset) =
+            (reg(kIoconBase, offset) & ~(kIoconModeMask | kIoconInv | kIoconSModeMask))
+            | kIoconModePullup;
+    }
+    reg(kGpioBase, kOffGpioDir) &= ~(1u << pin);
+}
+
+// Assign or unassign the user's GPIO pin to SCT_PIN0 via SWM PINASSIGN6
+// byte[31:24]. The byte value is the encoded pin number (PIO0_n -> n;
+// PIO1_n -> 0x20+n).
 inline void swmAssignSctInput0(fl::u8 swm_byte) FL_NOEXCEPT {
     volatile fl::u32& r = reg(kSwmBase, kOffPINASSIGN6);
     fl::u32 v = r;
@@ -360,28 +397,35 @@ bool LpcSctRxChannel::begin(const RxConfig& config) FL_NOEXCEPT {
 #if defined(FASTLED_LPC_RX_SCT) && defined(FL_IS_ARM_LPC_845)
     // ---- 1. Power up SCT + SWM (and DMA when the DMA path is opted in),
     //         then pulse their resets. ----
-    reg(kSysconBase, kOffSYSAHBCLKCTRL0) |= (kClkSCT | kClkSWM
+    reg(kSysconBase, kOffSYSAHBCLKCTRL0) |= (kClkSCT | kClkSWM | kClkIOCON
 #if defined(FASTLED_LPC_RX_SCT_DMA)
         | kClkDMA
 #endif
         );
+    reg(kSysconBase, kOffSCTCLKSEL) = kSctClkMain;
+    reg(kSysconBase, kOffSCTCLKDIV) = kSctClkDiv1;
     volatile fl::u32& presetctrl = reg(kSysconBase, kOffPRESETCTRL0);
-    presetctrl &= ~(kRstSCT | kRstSWM
+    presetctrl &= ~(kRstSCT
 #if defined(FASTLED_LPC_RX_SCT_DMA)
         | kRstDMA
 #endif
         );   // assert reset (low pulse)
-    presetctrl |=  (kRstSCT | kRstSWM
+    presetctrl |=  (kRstSCT
 #if defined(FASTLED_LPC_RX_SCT_DMA)
         | kRstDMA
 #endif
         );   // release reset
 
-    // ---- 2. Route mPin -> SCT input 0 via SWM PINASSIGN6 byte[31:24]. ----
-    swmAssignSctInput0(static_cast<fl::u8>(mPin & 0xFFu));
+    // ---- 2. Prepare the pad as a digital input, then route it to SCT input 0
+    //         via SWM PINASSIGN6 byte[31:24]. ----
+    const fl::u8 rx_pin = static_cast<fl::u8>(mPin & 0xFFu);
+    configureDigitalInput(rx_pin);
+    swmAssignSctInput0(rx_pin);
+    reg(kInputMuxBase, kOffSctInputMux0) = kSctInputMuxSctPin0;
 
     // ---- 3. Configure SCT: UNIFY counter + INSYNC for input 0. ----
-    // The 2-clock synchronizer adds ~67 ns of capture jitter at F_CPU=30 MHz,
+    // The 2-clock synchronizer adds a small fixed capture jitter at the SCT
+    // clock rate, but removes asynchronous input metastability risk.
     // well below the WS2812 T0H/T1H discrimination window (~500 ns margin).
     sct(kOffCTRL)    = kCtrlHaltL | kCtrlClrCtrL;   // halted, counter zeroed
     sct(kOffCONFIG)  = kCfgUnify  | kCfgInsync0;

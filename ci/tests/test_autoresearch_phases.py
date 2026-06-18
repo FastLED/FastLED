@@ -746,6 +746,48 @@ class TestRunTestsOrSpecialMode:
         assert rc == 0
         mock_ble.assert_called_once()
 
+    def test_lpc_pin_toggle_rx_defaults_to_normal_gpio_pair(self) -> None:
+        args = _make_args(parlio=False, pin_toggle_rx=True)
+        ctx = _make_ctx(args=args, final_environment="lpc845brk")
+        qctx = QuietContext(quiet=False)
+        completed = MagicMock(returncode=0)
+
+        with patch(f"{_PATCH_MOD}.subprocess.run", return_value=completed) as run:
+            rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
+
+        assert rc == 0
+        cmd = run.call_args.args[0]
+        assert cmd[cmd.index("--tx-pin") + 1] == "14"
+        assert cmd[cmd.index("--rx-pin") + 1] == "15"
+
+    def test_lpc_pin_toggle_rx_cli_pins_override_defaults(self) -> None:
+        args = _make_args(parlio=False, pin_toggle_rx=True, tx_pin=8, rx_pin=9)
+        ctx = _make_ctx(args=args, final_environment="lpc845brk")
+        qctx = QuietContext(quiet=False)
+        completed = MagicMock(returncode=0)
+
+        with patch(f"{_PATCH_MOD}.subprocess.run", return_value=completed) as run:
+            rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
+
+        assert rc == 0
+        cmd = run.call_args.args[0]
+        assert cmd[cmd.index("--tx-pin") + 1] == "8"
+        assert cmd[cmd.index("--rx-pin") + 1] == "9"
+
+    def test_lpc_ws2812_loopback_defaults_to_normal_gpio_pair(self) -> None:
+        args = _make_args(parlio=False, ws2812_loopback=True)
+        ctx = _make_ctx(args=args, final_environment="lpc845brk")
+        qctx = QuietContext(quiet=False)
+        completed = MagicMock(returncode=0)
+
+        with patch(f"{_PATCH_MOD}.subprocess.run", return_value=completed) as run:
+            rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
+
+        assert rc == 0
+        cmd = run.call_args.args[0]
+        assert cmd[cmd.index("--tx-pin") + 1] == "14"
+        assert cmd[cmd.index("--rx-pin") + 1] == "15"
+
     def test_ota_mode_delegates(self) -> None:
         ctx = _make_ctx(ota_mode=True)
         qctx = QuietContext(quiet=False)
