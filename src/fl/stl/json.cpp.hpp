@@ -924,7 +924,15 @@ public:
         }
 
         switch (token) {
-            // Specialized array tokens - parse directly into typed vectors
+            // Specialized array tokens - parse directly into typed vectors.
+            // Gated on Low-memory per #3224 Tier 2D: these packed-array tokens
+            // only fire when the tokenizer's `scan_array_lookahead` decides an
+            // array is uniformly-typed and small. LowMemory targets don't use
+            // the array-packing optimization (the integer-only RPC contract on
+            // LPC8xx never sends packed vectors), so dropping these cases
+            // collapses 3 large make_shared<json_value>(vector<T>) variant
+            // emplace instantiations + parse_int_array + parse_float_array.
+#if FL_PLATFORM_HAS_LARGE_MEMORY
             case JsonToken::ARRAY_UINT8: {
                 fl::vector<u8> vec;
                 if (!parse_int_array(value, vec)) return ParseState::ERROR;
@@ -948,6 +956,7 @@ public:
                 push_value(arr_val);
                 return ParseState::KEEP_GOING;
             }
+#endif
 
             case JsonToken::LBRACE: {
                 auto obj_val = fl::make_shared<json_value>(json_object{});
@@ -1024,25 +1033,32 @@ public:
                 }
 
                 fl::shared_ptr<json_value> num_val;
-                if (is_float) {
 #if FL_PLATFORM_HAS_LARGE_MEMORY
+                if (is_float) {
                     // Bit-twiddling parse -> IEEE 754 bits -> store as float in the
                     // variant. The `bit_cast<float>` is a `memcpy` -- no libgcc
                     // soft-FP helper is reached on the parser hot path
                     // (FastLED #3022 phase 2).
                     const u32 bits = fl::ieee754_parse_decimal(value.data(), value.size());
                     num_val = fl::make_shared<json_value>(fl::bit_cast<float>(bits));
-#else
-                    // Low-memory gate per FastLED #3082: float JSON literals
-                    // parse to 0.0f, no `ieee754_parse_decimal` / kPow10Mant
-                    // anchored. Integer-only RPC contract on LPC8xx / AVR.
-                    num_val = fl::make_shared<json_value>(0.0f);
-#endif
                 } else {
                     int i = fl::parseInt(value.data(), value.size());
                     i64 i64_val = static_cast<i64>(i);
                     num_val = fl::make_shared<json_value>(i64_val);
                 }
+#else
+                // Low-memory gate per FastLED #3224 Tier 2D: drop the float
+                // store entirely. JSON float literals on LowMemory parse to
+                // i64(0), avoiding the variant `float` emplace instantiation
+                // that #3082's `0.0f` store used to anchor. Combined with
+                // the ARRAY_FLOAT case gate above, LowMemory's JsonBuilder
+                // never instantiates a `make_shared<json_value>(float)` or
+                // `make_shared<json_value>(vector<float>)` path.
+                (void)is_float;
+                int i = fl::parseInt(value.data(), value.size());
+                i64 i64_val = static_cast<i64>(i);
+                num_val = fl::make_shared<json_value>(i64_val);
+#endif
 
                 push_value(num_val);
                 return ParseState::KEEP_GOING;
