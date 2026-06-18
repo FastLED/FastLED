@@ -704,29 +704,13 @@ struct StringConversionVisitor {
     }
 };
 
-// Visitor for getting size of arrays and objects
-struct SizeVisitor {
-    size_t result = 0;
-
-    template<typename U>
-    void accept(const U& value) FL_NOEXCEPT {
-        // Dispatch to the correct operator() overload
-        (*this)(value);
-    }
-
-    void operator()(const json_array& arr) FL_NOEXCEPT { result = arr.size(); }
-    void operator()(const json_object& obj) FL_NOEXCEPT { result = obj.size(); }
-    void operator()(const fl::vector<i16>& vec) FL_NOEXCEPT { result = vec.size(); }
-    void operator()(const fl::vector<u8>& vec) FL_NOEXCEPT { result = vec.size(); }
-    void operator()(const fl::vector<float>& vec) FL_NOEXCEPT { result = vec.size(); }
-
-    // Generic fallback for other types (primitives, null)
-    void operator()(const fl::nullptr_t&) FL_NOEXCEPT { result = 0; }
-    void operator()(const bool&) FL_NOEXCEPT { result = 0; }
-    void operator()(const i64&) FL_NOEXCEPT { result = 0; }
-    void operator()(const float&) FL_NOEXCEPT { result = 0; }
-    void operator()(const fl::string&) FL_NOEXCEPT { result = 0; }
-};
+// SizeVisitor was removed in FastLED #3235 Tier 2E Phase 1; `json::size()`
+// now uses direct `data.ptr<T>()` tag checks (see below). Keeping a stub
+// for any external code that referenced the type by name.
+//
+// NOTE: removing this struct also removes the per-(T × SizeVisitor)
+// `visit_fn` thunk instantiations the variant would otherwise emit for
+// each of the 10 alternatives.
 
 // Forward declarations for visitors (defined after json_value)
 template<typename T> struct NumericExtractVisitor;
@@ -918,46 +902,15 @@ struct json_value {
         //FL_WARN("is_string called, tag=" << data.tag());
         return data.is<fl::string>(); 
     }
-    // Visitor for array type checking
-    struct IsArrayVisitor {
-        bool result = false;
-        
-        template<typename T>
-        void accept(const T& value) FL_NOEXCEPT {
-            // Dispatch to the correct operator() overload
-            (*this)(value);
-        }
-        
-        // json_array is an array
-        void operator()(const json_array&) FL_NOEXCEPT {
-            result = true;
-        }
-        
-        // Specialized array types ARE arrays
-        void operator()(const fl::vector<i16>&) FL_NOEXCEPT {
-            result = true;  // Audio data is still an array
-        }
-        
-        void operator()(const fl::vector<u8>&) FL_NOEXCEPT {
-            result = true;  // Byte data is still an array
-        }
-        
-        void operator()(const fl::vector<float>&) FL_NOEXCEPT {
-            result = true;  // Float data is still an array
-        }
-        
-        // Generic handler for all other types
-        template<typename T>
-        void operator()(const T&) FL_NOEXCEPT {
-            result = false;
-        }
-    };
-    
-    bool is_array() const FL_NOEXCEPT { 
-        //FL_WARN("is_array called, tag=" << data.tag());
-        IsArrayVisitor visitor;
-        data.visit(visitor);
-        return visitor.result;
+    bool is_array() const FL_NOEXCEPT {
+        // FastLED #3235 Tier 2E Phase 1: replace `IsArrayVisitor` +
+        // `data.visit(visitor)` (which would emit 10 per-alternative
+        // `visit_fn<T, IsArrayVisitor>` thunks) with direct tag checks
+        // via `data.is<T>()`. Same behavior; no visitor instantiation.
+        return data.is<json_array>() ||
+               data.is<fl::vector<i16>>() ||
+               data.is<fl::vector<u8>>() ||
+               data.is<fl::vector<float>>();
     }
     
     // Returns true only for json_array (not specialized array types)
@@ -1539,9 +1492,16 @@ struct json_value {
 
     // Size methods
     size_t size() const FL_NOEXCEPT {
-        SizeVisitor visitor;
-        data.visit(visitor);
-        return visitor.result;
+        // FastLED #3235 Tier 2E Phase 1: replace `SizeVisitor` +
+        // `data.visit(visitor)` with direct `data.ptr<T>()` tag
+        // checks. Same behavior, no per-(T × SizeVisitor) `visit_fn`
+        // thunk instantiation.
+        if (auto* arr = data.template ptr<json_array>()) return arr->size();
+        if (auto* obj = data.template ptr<json_object>()) return obj->size();
+        if (auto* v = data.template ptr<fl::vector<i16>>()) return v->size();
+        if (auto* v = data.template ptr<fl::vector<u8>>()) return v->size();
+        if (auto* v = data.template ptr<fl::vector<float>>()) return v->size();
+        return 0;
     }
 
     // Serialization
