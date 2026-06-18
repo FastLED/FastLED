@@ -47,10 +47,9 @@ LEGACY_MACROS = (
     "FL_LOG_OBJECTFLED_ASYNC_MAIN",
 )
 
+_SORTED_MACROS: list[str] = sorted(LEGACY_MACROS, key=lambda s: len(s), reverse=True)
 _LEGACY_PATTERN = re.compile(
-    r"\b("
-    + "|".join(re.escape(name) for name in sorted(LEGACY_MACROS, key=len, reverse=True))
-    + r")\s*\("
+    r"\b(" + "|".join(re.escape(name) for name in _SORTED_MACROS) + r")\s*\("
 )
 
 
