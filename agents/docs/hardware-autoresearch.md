@@ -16,6 +16,7 @@ You **must** specify at least one LED driver to test using one of these flags:
 - `--lcd-rgb` - Test LCD RGB driver (ESP32-P4 only)
 - `--all` - Test all drivers (equivalent to `--parlio --rmt --spi --uart --i2s --lcd-rgb`)
 - `--parallel` - Test multiple drivers simultaneously (requires 2+ drivers)
+- `--ieee754` - Special mode: run integer IEEE 754 decimal codec verification without LED driver loopback
 
 ### Usage Examples
 ```bash
@@ -27,6 +28,7 @@ bash autoresearch --spi
 bash autoresearch --uart
 bash autoresearch --i2s                       # ESP32-S3 only
 bash autoresearch --lcd-rgb                   # ESP32-P4 only
+bash autoresearch lpc845brk --ieee754         # LPC low-memory IEEE 754 codec check
 
 # Test multiple drivers (sequentially)
 bash autoresearch --parlio --rmt              # Auto-detect environment

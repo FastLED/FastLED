@@ -565,6 +565,14 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
         wave8ExpandBenchmark_fn.set("description", "Bench PARLIO Wave8 expansion (#2526): nibble vs byte vs batched LUT, plus full per-byte-position cost (expansion + 16-lane transpose)");
         functions.push_back(wave8ExpandBenchmark_fn);
 
+        fl::json ieee754CodecTest_fn = fl::json::object();
+        ieee754CodecTest_fn.set("name", "ieee754CodecTest");
+        ieee754CodecTest_fn.set("phase", "Phase 4: Utility");
+        ieee754CodecTest_fn.set("args", "[]");
+        ieee754CodecTest_fn.set("returns", "{success, tests_run, tests_failed, first_failure, expected_bits, actual_bits}");
+        ieee754CodecTest_fn.set("description", "On-device verification of the integer-only IEEE 754 decimal codec (#3039): parse, format, round-trip, overflow/underflow, and NaN rejection without strtof/libm.");
+        functions.push_back(ieee754CodecTest_fn);
+
         fl::json parlioEncodeBenchmark_fn = fl::json::object();
         parlioEncodeBenchmark_fn.set("name", "parlioEncodeBenchmark");
         parlioEncodeBenchmark_fn.set("phase", "Phase 4: Utility");

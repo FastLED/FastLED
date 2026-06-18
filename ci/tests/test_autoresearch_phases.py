@@ -20,6 +20,7 @@ from ci.autoresearch.args import Args
 from ci.autoresearch.build_driver import BuildDriver
 from ci.autoresearch.context import QuietContext, RunContext
 from ci.autoresearch.phases import (
+    _build_environment_for_mode,
     _parse_args_and_build_commands,
     _resolve_port_and_environment,
     _run_build_deploy,
@@ -55,6 +56,7 @@ def _make_args(**overrides) -> Args:
         all=False,
         simd=False,
         coroutine=False,
+        ieee754=False,
         wave2d_perf=None,
         environment=None,
         verbose=False,
@@ -135,6 +137,7 @@ def _make_ctx(**overrides) -> RunContext:
         build_dir=Path("/fake/project"),
         simd_test_mode=False,
         coroutine_test_mode=False,
+        ieee754_test_mode=False,
         wave2d_perf_grid=None,
         net_server_mode=False,
         net_client_mode=False,
@@ -579,6 +582,26 @@ class TestRunBuildDeploy:
             rc = asyncio.run(_run_build_deploy(ctx, qctx))
         assert rc == 1
 
+    def test_lpc_ieee754_uses_dedicated_build_environment(self) -> None:
+        mock_driver = _make_mock_driver()
+        ctx = _make_ctx(
+            args=_make_args(skip_lint=True, ieee754=True),
+            build_driver=mock_driver,
+            final_environment="lpc845brk",
+            ieee754_test_mode=True,
+        )
+        qctx = QuietContext(quiet=False)
+        with patch(f"{_PATCH_MOD}._build_and_flash_nxplpc", return_value=True) as flash:
+            rc = asyncio.run(_run_build_deploy(ctx, qctx))
+        assert rc is None
+        assert _build_environment_for_mode(ctx) == "lpc845brk_ieee754"
+        mock_driver.install_packages.assert_called_once_with(
+            Path("/fake/project"), "lpc845brk_ieee754"
+        )
+        flash.assert_called_once()
+        assert flash.call_args.kwargs["environment"] == "lpc845brk_ieee754"
+        mock_driver.deploy.assert_not_called()
+
 
 # ============================================================
 # Tests: _run_schema_and_pin_setup
@@ -633,6 +656,23 @@ class TestRunSchemaAndPinSetup:
         assert rc is None
         assert ctx.effective_tx_pin is None
         assert ctx.effective_rx_pin is None
+
+    def test_lpc_fbuild_uses_pyserial_for_rpc(self) -> None:
+        args = _make_args(skip_schema=True)
+        ctx = _make_ctx(
+            args=args,
+            final_environment="lpc845brk",
+            use_fbuild=True,
+        )
+        mock_serial = MagicMock()
+        with patch(
+            "ci.util.serial_interface.create_serial_interface",
+            return_value=mock_serial,
+        ) as create_serial:
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.serial_iface is mock_serial
+        create_serial.assert_called_once_with(port="COM5", use_pyserial=True)
 
     def test_auto_discover_pins_success(self) -> None:
         args = _make_args(auto_discover_pins=True, skip_schema=True)

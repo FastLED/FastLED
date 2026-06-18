@@ -123,6 +123,7 @@ class RunContext:
     # Mode flags
     simd_test_mode: bool
     coroutine_test_mode: bool
+    ieee754_test_mode: bool
     # Wave2D perf benchmark — None disables, otherwise (W, H).
     # See issue #3124 for the planned --perf-XX convention rename.
     wave2d_perf_grid: tuple[int, int] | None

@@ -64,6 +64,9 @@ LPC_BRING_UP_ENVS = {
     "lpcxpresso804",
 }
 LPC_WS2812_ENVS = {"lpc845brk", "lpc845", "lpcxpresso845max"}
+LPC_IEEE754_BUILD_ENVS = {
+    "lpc845brk": "lpc845brk_ieee754",
+}
 
 
 def _is_native_platform(environment: str | None) -> bool:
@@ -71,6 +74,16 @@ def _is_native_platform(environment: str | None) -> bool:
     if not environment:
         return False
     return environment.lower() in ("native", "stub", "host")
+
+
+def _build_environment_for_mode(ctx: RunContext) -> str | None:
+    """Return the PlatformIO/fbuild environment to compile for this run mode."""
+    environment = ctx.final_environment
+    if not environment:
+        return None
+    if ctx.ieee754_test_mode:
+        return LPC_IEEE754_BUILD_ENVS.get(environment.lower(), environment)
+    return environment
 
 
 async def _run_native_autoresearch(args: Args, build_mode: str = "quick") -> int:
@@ -206,6 +219,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     drivers: list[str] = []
     simd_test_mode = args.simd
     coroutine_test_mode = args.coroutine
+    ieee754_test_mode = args.ieee754
 
     # Parse --wave2d-perf "<W>x<H>" — None disables the mode.
     # Cf. #3124 for the planned --perf-XX convention rename.
@@ -288,6 +302,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             bool(drivers)
             or simd_test_mode
             or coroutine_test_mode
+            or ieee754_test_mode
             or net_server_mode
             or net_client_mode
             or net_loopback_mode
@@ -303,7 +318,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     # Validate mutual exclusivity
     if (
         net_server_mode or net_client_mode or net_loopback_mode or ota_mode or ble_mode
-    ) and (drivers or simd_test_mode or coroutine_test_mode):
+    ) and (drivers or simd_test_mode or coroutine_test_mode or ieee754_test_mode):
         print(
             f"{Fore.RED}\u274c Error: --net/--net-server/--net-client/--ota/--ble cannot be combined with driver flags, --simd, or --coroutine{Style.RESET_ALL}"
         )
@@ -329,6 +344,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         not drivers
         and not simd_test_mode
         and not coroutine_test_mode
+        and not ieee754_test_mode
         and not net_server_mode
         and not net_client_mode
         and not net_loopback_mode
@@ -733,6 +749,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         build_dir=build_dir,
         simd_test_mode=simd_test_mode,
         coroutine_test_mode=coroutine_test_mode,
+        ieee754_test_mode=ieee754_test_mode,
         wave2d_perf_grid=wave2d_perf_grid,
         net_server_mode=net_server_mode,
         net_client_mode=net_client_mode,
@@ -923,12 +940,13 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
     build_dir = ctx.build_dir
     final_environment = ctx.final_environment
     final_environment_norm = (final_environment or "").lower()
+    build_environment = _build_environment_for_mode(ctx)
     upload_port = ctx.upload_port
     build_driver = ctx.build_driver
     assert build_driver is not None
 
     # Phase 0: Package Installation
-    if not build_driver.install_packages(build_dir, final_environment):
+    if not build_driver.install_packages(build_dir, build_environment):
         print("\n\u274c Package installation failed")
         return 1
     print()
@@ -951,7 +969,7 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
         # run `fbuild build` followed by a pyocd-based flash + sw-reset here.
         if not _build_and_flash_nxplpc(
             build_dir,
-            environment=final_environment_norm or final_environment,
+            environment=build_environment or final_environment_norm or final_environment,
             upload_port=upload_port,
             verbose=args.verbose,
         ):
@@ -960,7 +978,7 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
             return 1
     elif not build_driver.deploy(
         build_dir,
-        environment=final_environment,
+        environment=build_environment,
         upload_port=upload_port,
         verbose=args.verbose,
         clean=args.clean,
@@ -1117,8 +1135,10 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     # Create serial interface
     from ci.util.serial_interface import create_serial_interface
 
+    final_environment = (ctx.final_environment or "").lower()
+    use_pyserial = (not use_fbuild) or final_environment in LPC_BRING_UP_ENVS
     ctx.serial_iface = create_serial_interface(
-        port=upload_port, use_pyserial=not use_fbuild
+        port=upload_port, use_pyserial=use_pyserial
     )
 
     # Create crash trace decoder
@@ -1134,7 +1154,6 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     # so pin discovery would hang. Skip it for those boards — the bring-up
     # short-circuit later in `_run_full_autoresearch_pipeline` will run
     # `_run_bring_up_tests` directly against the configured upload port.
-    final_environment = (ctx.final_environment or "").lower()
     if final_environment in LPC_BRING_UP_ENVS:
         print(
             f"\n\U0001f4cc LPC bring-up mode ({ctx.final_environment}): "
@@ -1144,6 +1163,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print("\n\U0001f4cc SIMD mode: skipping pin discovery and GPIO pre-test")
     elif ctx.coroutine_test_mode:
         print("\n\U0001f4cc Coroutine mode: skipping pin discovery and GPIO pre-test")
+    elif ctx.ieee754_test_mode:
+        print("\n\U0001f4cc IEEE754 codec mode: skipping pin discovery and GPIO pre-test")
     elif ctx.net_server_mode or ctx.net_client_mode or ctx.net_loopback_mode:
         print("\n\U0001f4cc Network mode: skipping pin discovery and GPIO pre-test")
     elif ctx.ota_mode:
@@ -1203,6 +1224,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     elif ctx.simd_test_mode:
         pass
     elif ctx.coroutine_test_mode:
+        pass
+    elif ctx.ieee754_test_mode:
         pass
     elif ctx.net_server_mode or ctx.net_client_mode or ctx.net_loopback_mode:
         pass
@@ -1272,6 +1295,8 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     # echo check instead of bailing with a "no tests requested" success.
     final_environment = (ctx.final_environment or "").lower()
     if final_environment in LPC_BRING_UP_ENVS:
+        if ctx.ieee754_test_mode:
+            return await _run_ieee754_tests(ctx)
         # FastLED #3021 Phase 1: --pin-toggle-rx runs the SCT-RX
         # loopback bench instead of the default echo bring-up.
         if getattr(ctx.args, "pin_toggle_rx", False):
@@ -1370,6 +1395,10 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     # Coroutine test mode
     if ctx.coroutine_test_mode:
         return await _run_coroutine_tests(ctx)
+
+    # IEEE 754 codec test mode
+    if ctx.ieee754_test_mode:
+        return await _run_ieee754_tests(ctx)
 
     # Wave2D perf benchmark mode (#3113 Task 1 / #3122 A1)
     if ctx.wave2d_perf_grid is not None:
@@ -1544,6 +1573,74 @@ async def _run_wave2d_perf_tests(ctx: RunContext) -> int:
     except Exception as e:
         print()
         print(f"{Fore.RED}WAVE2D PERF ERROR: {e}{Style.RESET_ALL}")
+        return 1
+    finally:
+        if client is not None:
+            await client.close()
+
+
+async def _run_ieee754_tests(ctx: RunContext) -> int:
+    """Run integer IEEE 754 decimal codec verification via RPC."""
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+    serial_iface = ctx.serial_iface
+
+    print()
+    print("=" * 60)
+    print("IEEE754 CODEC TEST MODE")
+    print("=" * 60)
+    print()
+
+    client: RpcClient | None = None
+    try:
+        print("   Connecting to device...", end="", flush=True)
+        client = RpcClient(upload_port, timeout=30.0, serial_interface=serial_iface)
+        await client.connect(boot_wait=1.0, drain_boot=True)
+        print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
+
+        print("   Sending ieee754CodecTest RPC...", end="", flush=True)
+        response = await client.send_and_match(
+            "ieee754CodecTest", match_key="success", retries=3
+        )
+        print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
+        print()
+
+        data = response.data
+        tests_run = int(data.get("tests_run", 0))
+        tests_failed = int(data.get("tests_failed", 0))
+        first_failure = str(data.get("first_failure", ""))
+        expected_bits = int(data.get("expected_bits", 0))
+        actual_bits = int(data.get("actual_bits", 0))
+
+        print(json.dumps(data, indent=2))
+        print()
+
+        if data.get("success", False) and tests_failed == 0 and tests_run > 0:
+            print(f"{Fore.GREEN}IEEE754 CODEC TEST PASSED ({tests_run} checks){Style.RESET_ALL}")
+            return 0
+
+        print(
+            f"{Fore.RED}IEEE754 CODEC TEST FAILED"
+            f" ({tests_failed}/{tests_run} failures){Style.RESET_ALL}"
+        )
+        if first_failure:
+            print(
+                f"   first_failure={first_failure} "
+                f"expected=0x{expected_bits:08x} actual=0x{actual_bits:08x}"
+            )
+        return 1
+
+    except RpcTimeoutError:
+        print()
+        print(f"{Fore.RED}IEEE754 CODEC TEST TIMEOUT{Style.RESET_ALL}")
+        print("   No response from device within 30 seconds")
+        return 1
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:
+        print()
+        print(f"{Fore.RED}IEEE754 CODEC TEST ERROR: {e}{Style.RESET_ALL}")
         return 1
     finally:
         if client is not None:
