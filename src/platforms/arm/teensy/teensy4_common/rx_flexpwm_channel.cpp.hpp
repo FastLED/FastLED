@@ -4,10 +4,11 @@
 /// Hardware pipeline (based on Paul Stoffregen's WS2812Capture):
 ///   1. FlexPWM submodule runs a free-running 16-bit counter at F_BUS_ACTUAL
 ///      (150 MHz on Teensy 4.x, giving ~6.67 ns per tick).
-///   2. Single-circuit any-edge capture (EDGA0=3) latches the counter value
-///      into CVAL2 (channel A) or CVAL4 (channel B) on every edge.
-///   3. Each capture event triggers a DMA request (CA0DE or CB0DE). A Teensy
-///      DMAChannel copies the 16-bit capture value into a RAM buffer.
+///   2. Dual-circuit capture latches rising edges into CVAL2/CVAL4 and
+///      falling edges into CVAL3/CVAL5.
+///   3. Each falling-edge capture triggers a DMA request after both registers
+///      are valid. A Teensy DMAChannel copies the 16-bit rising and falling
+///      capture values into a RAM buffer as one 32-bit minor loop.
 ///   4. After the DMA transfer completes (buffer full or auto-disable), an ISR
 ///      sets a completion flag.
 ///   5. Software computes pulse widths as 16-bit deltas between consecutive
@@ -65,8 +66,8 @@ namespace fl {
 // needed to route the pin to the FlexPWM capture input.
 //
 // The capture values come from the FlexPWM CVAL registers:
-//   Channel A capture: CVAL2 (any edge, single-circuit mode EDGA0=3)
-//   Channel B capture: CVAL4 (any edge, single-circuit mode EDGB0=3)
+//   Channel A capture: CVAL2 (rising edge) + CVAL3 (falling edge)
+//   Channel B capture: CVAL4 (rising edge) + CVAL5 (falling edge)
 //
 // DMA trigger sources are from the i.MXRT1062 reference manual Table 4-3.
 
@@ -201,6 +202,20 @@ static inline int decodeBit(u32 high_ns, u32 low_ns,
     return -1;
 }
 
+/// Decode a bit when the following LOW phase is a reset/gap or was not
+/// captured. WS2812 bit value is encoded by HIGH width; LOW validation is only
+/// possible for intra-frame bit periods.
+static inline int decodeBitFromHigh(u32 high_ns,
+                                    const ChipsetTiming4Phase &timing) {
+    if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns) {
+        return 0;
+    }
+    if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns) {
+        return 1;
+    }
+    return -1;
+}
+
 /// Check if a low-duration pulse qualifies as a reset.
 static inline bool isResetPulse(u32 low_ns,
                                 const ChipsetTiming4Phase &timing) {
@@ -254,10 +269,15 @@ decodeEdges(const ChipsetTiming4Phase &timing,
         }
 
         u32 high_ns = edges[i].ns;
-        u32 low_ns = edges[i + 1].ns;
-        i += 2;
-
-        int bit = decodeBit(high_ns, low_ns, timing);
+        int bit = -1;
+        if (i + 1 < edges.size() && !edges[i + 1].high) {
+            u32 low_ns = edges[i + 1].ns;
+            bit = decodeBit(high_ns, low_ns, timing);
+            i += 2;
+        } else {
+            bit = decodeBitFromHigh(high_ns, timing);
+            i += 1;
+        }
         ++total_bits;
 
         if (bit < 0) {
@@ -436,27 +456,28 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
 
     if (!mPinInfo->channel_b) {
         // Channel A capture configuration (CAPTCTRLA / CAPTCOMPA)
-        // EDGA0 = 3 (any edge on circuit 0), captures to CVAL2
-        // Using single circuit ensures DMA always reads the correct register.
-        // CFAWM = 0 (FIFO watermark = 1 entry → DMA fires on each capture)
-        // ARM = 1 (arm capture), ONESHOTA = 0 (free-running)
-        pwm->SM[sm].CAPTCTRLA = FLEXPWM_SMCAPTCTRLA_EDGA0(3) |
+        // EDGA0 = 2 captures rising edges to CVAL2.
+        // EDGA1 = 1 captures falling edges to CVAL3.
+        // DMA fires on CA1DE after both registers for the bit are valid.
+        pwm->SM[sm].CAPTCTRLA = FLEXPWM_SMCAPTCTRLA_EDGA0(2) |
+                                 FLEXPWM_SMCAPTCTRLA_EDGA1(1) |
                                  FLEXPWM_SMCAPTCTRLA_CFAWM(0) |
                                  FLEXPWM_SMCAPTCTRLA_ARMA;
         pwm->SM[sm].CAPTCOMPA = 0;
 
-        // Enable both per-event DMA (CA0DE) and FIFO watermark DMA (CAPTDE=1)
-        // to ensure the DMAMUX_SOURCE_FLEXPWMn_READm trigger fires.
-        pwm->SM[sm].DMAEN = FLEXPWM_SMDMAEN_CA0DE | FLEXPWM_SMDMAEN_CAPTDE(1);
+        // CAPTDE selects channel A capture DMA for the submodule read source.
+        pwm->SM[sm].DMAEN = FLEXPWM_SMDMAEN_CAPTDE(1) | FLEXPWM_SMDMAEN_CA1DE;
     } else {
         // Channel B capture configuration (CAPTCTRLB / CAPTCOMPB)
-        // EDGB0 = 3 (any edge on circuit 0), captures to CVAL4
-        pwm->SM[sm].CAPTCTRLB = FLEXPWM_SMCAPTCTRLB_EDGB0(3) |
+        // EDGB0 = 2 captures rising edges to CVAL4.
+        // EDGB1 = 1 captures falling edges to CVAL5.
+        pwm->SM[sm].CAPTCTRLB = FLEXPWM_SMCAPTCTRLB_EDGB0(2) |
+                                 FLEXPWM_SMCAPTCTRLB_EDGB1(1) |
                                  FLEXPWM_SMCAPTCTRLB_ARMB;
         pwm->SM[sm].CAPTCOMPB = 0;
 
-        // Enable both per-event DMA (CB0DE) and FIFO watermark DMA (CAPTDE=2)
-        pwm->SM[sm].DMAEN = FLEXPWM_SMDMAEN_CB0DE | FLEXPWM_SMDMAEN_CAPTDE(2);
+        // CAPTDE selects channel B capture DMA for the submodule read source.
+        pwm->SM[sm].DMAEN = FLEXPWM_SMDMAEN_CAPTDE(2) | FLEXPWM_SMDMAEN_CB1DE;
     }
 
     // Start the submodule counter
@@ -486,9 +507,11 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
 void FlexPwmRxChannelImpl::configureDma() {
     sActiveInstance = this;
 
-    // Source: FlexPWM capture value register (single-circuit any-edge mode)
-    // Channel A: CVAL2 (all edges captured to circuit 0)
-    // Channel B: CVAL4 (all edges captured to circuit 0)
+    // Source: first FlexPWM capture value register in the rising/falling pair.
+    // Channel A: CVAL2 then CVAL3. Channel B: CVAL4 then CVAL5.
+    // The source offset advances to the falling-edge register for the second
+    // 16-bit read; the minor-loop offset rewinds to the rising-edge register
+    // for the next hardware request.
     volatile u16 *capture_reg;
     if (!mPinInfo->channel_b) {
         capture_reg = &(mPinInfo->pwm->SM[mPinInfo->submodule].CVAL2);
@@ -497,15 +520,21 @@ void FlexPwmRxChannelImpl::configureDma() {
     }
 
     mDma.begin();
-    mDma.source(*capture_reg);
-    mDma.destinationBuffer(mCaptureBuffer.data(),
-                           mCaptureBuffer.size() * sizeof(u16));
-    mDma.transferSize(2);                   // 16-bit transfers
-    mDma.transferCount(mCaptureBuffer.size());
+    mDma.TCD->SADDR = const_cast<u16 *>(capture_reg);
+    mDma.TCD->SOFF = 4;
+    mDma.TCD->ATTR = DMA_TCD_ATTR_SSIZE(1) | DMA_TCD_ATTR_DSIZE(1);
+    mDma.TCD->NBYTES_MLNO =
+        DMA_TCD_NBYTES_MLOFFYES_NBYTES(4) |
+        DMA_TCD_NBYTES_MLOFFYES_MLOFF(-8) |
+        DMA_TCD_NBYTES_SMLOE;
+    mDma.TCD->SLAST = 0;
+    mDma.TCD->DADDR = mCaptureBuffer.data();
+    mDma.TCD->DOFF = 2;
+    mDma.TCD->CITER = mCaptureBuffer.size() / 2;
+    mDma.TCD->DLASTSGA = 0;
+    mDma.TCD->BITER = mCaptureBuffer.size() / 2;
+    mDma.TCD->CSR = DMA_TCD_CSR_DREQ;
     mDma.triggerAtHardwareEvent(mPinInfo->dma_source);
-
-    // Auto-disable DMA after all iterations (DREQ)
-    mDma.disableOnCompletion();
     mDma.interruptAtCompletion();
     mDma.attachInterrupt(dmaIsr);
     mDma.enable();
@@ -611,7 +640,7 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
     //      was filled. CITER has already reloaded from BITER, so BITER-CITER=0
     //      is misleading — we actually have a full buffer.
     //   2. If DMA is still running or timed out, BITER-CITER gives the number
-    //      of completed transfers.
+    //      of completed bit-pair transfers. Each transfer writes two captures.
     //
     // We also check the DONE bit in TCD->CSR as a secondary indicator.
     u16 biter = mDma.TCD->BITER;
@@ -623,7 +652,7 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
         // DMA completed a full major loop — entire buffer is valid
         captures_written = mCaptureBuffer.size();
     } else if (biter >= citer) {
-        captures_written = biter - citer;
+        captures_written = static_cast<size_t>(biter - citer) * 2u;
     }
     if (captures_written > mCaptureBuffer.size()) {
         captures_written = mCaptureBuffer.size();
@@ -655,31 +684,34 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
         return;
     }
 
-    // Build EdgeTime pairs from consecutive capture deltas.
-    // Gap-aware polarity tracker: ObjectFLED transmits in DMA blocks
-    // with ~300µs LOW gaps between them. These gaps shift even/odd
-    // polarity alignment. We detect gaps (>5µs) and reset polarity
-    // since the signal idles LOW during gaps, so the first edge
-    // after a gap is always rising (HIGH).
+    // Build EdgeTime pairs from paired rising/falling captures. DMA writes
+    // [rise0, fall0, rise1, fall1, ...]. High time is the delta inside a pair;
+    // low time is the delta from one pair's falling edge to the next pair's
+    // rising edge.
 
     mEdges.reserve(captures_written);
 
-    bool next_is_high = true; // First edge after idle/start is rising = HIGH
-    for (size_t i = 0; i + 1 < captures_written; ++i) {
-        u16 t0 = mCaptureBuffer[i];
-        u16 t1 = mCaptureBuffer[i + 1];
-        u32 ns = tickDeltaNs(t0, t1);
+    for (size_t i = 0; i + 3 < captures_written; i += 2) {
+        u16 rise = mCaptureBuffer[i];
+        u16 fall = mCaptureBuffer[i + 1];
+        u16 next_rise = mCaptureBuffer[i + 2];
 
-        // Skip gaps (ObjectFLED DMA block boundaries, ~300µs)
-        // and reset polarity since signal returns to LOW during gap
-        if (ns > 5000) { // 5µs threshold
-            next_is_high = true; // After gap, next edge is rising
+        u32 high_ns = tickDeltaNs(rise, fall);
+        u32 low_ns = tickDeltaNs(fall, next_rise);
+
+        mEdges.push_back(EdgeTime(true, high_ns));
+
+        if (low_ns > 5000) {
             continue;
         }
 
-        mEdges.push_back(EdgeTime(next_is_high, ns));
-        next_is_high = !next_is_high;
+        mEdges.push_back(EdgeTime(false, low_ns));
     }
+
+    size_t last_pair = captures_written - 2;
+    u32 final_high_ns =
+        tickDeltaNs(mCaptureBuffer[last_pair], mCaptureBuffer[last_pair + 1]);
+    mEdges.push_back(EdgeTime(true, final_high_ns));
 
 #ifdef FL_DEBUG
     FL_WARN_F("[FlexPWM EDGE] total=%s", mEdges.size());
