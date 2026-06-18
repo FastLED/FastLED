@@ -608,6 +608,50 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
     return results
 
 
+def run_array_param_ast_check(file_path: str | None = None) -> CheckerResults:
+    """Run the clang-query decayed array parameter ratchet."""
+    from ci.tools.check_array_params import (
+        DEFAULT_BASELINE,
+        ArrayParamCheckError,
+        _diagnostic_for_hit,
+        diff_against_baseline,
+        find_decayed_array_params,
+        load_baseline,
+    )
+
+    results = CheckerResults()
+
+    scope = "all"
+    rel_file: str | None = None
+    if file_path is not None:
+        rel_file = os.path.relpath(str(Path(file_path).resolve()), PROJECT_ROOT)
+        rel_file = rel_file.replace("\\", "/")
+        if rel_file.startswith("src/fl/"):
+            scope = "fl"
+        elif rel_file.startswith("src/platforms/"):
+            scope = "platforms"
+        elif rel_file.startswith("src/third_party/"):
+            scope = "third_party"
+        else:
+            return results
+
+    try:
+        hits = find_decayed_array_params(scope)
+    except ArrayParamCheckError as exc:
+        results.add_violation("ci/tools/check_array_params.py", 0, str(exc))
+        return results
+
+    if rel_file is not None:
+        hits = [hit for hit in hits if hit.path == rel_file]
+
+    new_hits, _stale = diff_against_baseline(hits, load_baseline(DEFAULT_BASELINE))
+    for hit in new_hits:
+        abs_path = str(PROJECT_ROOT / hit.path)
+        results.add_violation(abs_path, hit.line, _diagnostic_for_hit(hit))
+
+    return results
+
+
 @dataclass(frozen=True)
 class LegacyViolationLineContent:
     line_number: int
@@ -911,6 +955,10 @@ def main() -> int:
         if noexcept_results.has_violations():
             results["NoexceptAstChecker"] = noexcept_results
 
+        array_param_results = run_array_param_ast_check(str(file_path))
+        if array_param_results.has_violations():
+            results["ArrayParamAstChecker"] = array_param_results
+
         # Format and print results
         if rust_ab and not run_rust_ab_check(results, [str(file_path)]):
             return 1
@@ -968,6 +1016,10 @@ def main() -> int:
         noexcept_results = run_noexcept_ast_check()
         if noexcept_results.has_violations():
             results["NoexceptAstChecker"] = noexcept_results
+
+        array_param_results = run_array_param_ast_check()
+        if array_param_results.has_violations():
+            results["ArrayParamAstChecker"] = array_param_results
 
         # Format and print results
         if rust_ab and not run_rust_ab_check(results, None):

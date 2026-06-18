@@ -368,11 +368,21 @@ class CFastLED {
    - ❌ Bad: `void set_input_gamut(DiodeProfile* p, InputGamut g, const float white_xy[2]);`
    - ✅ Good: `void set_input_gamut(DiodeProfile* p, InputGamut g, fl::span<const float, 2> white_xy);`
    - ✅ Good (alternative — by-value pair): `void set_white_point(DiodeProfile* p, fl::vec2f white_xy);`
-3. ✅ **For RGBW / RGBWW multi-channel output**, prefer a `fl::span<u8, 4>` (or `5`) over five separate `u8*` parameters.
+3. ❌ **NEVER use function parameter array spelling (`T value[N]` or `T value[]`).**
+   - C++ adjusts these to `T* value`; the extent is not part of the function type and is not enforced.
+   - ❌ Bad: `void cct_to_xy(int cct, float out[2]);`
+   - ❌ Bad: `void encode(fl::u8 output[4]);`
+   - ✅ Good for normal APIs: `void cct_to_xy(int cct, fl::span<float, 2> out);`
+   - ✅ Good for ISR / `FL_IRAM` APIs: `void encode(fl::u8 (&output)[4]);`
+   - ✅ Good where a wrapper type would obscure the domain: `void set_white_point(DiodeProfile* p, fl::vec2f white_xy);`
+   - Suppress only intentional C ABI or platform compatibility cases with `// ok array parameter`.
+4. ⚠️ **For ISR / `FL_IRAM` callgraphs, prefer array references over `fl::span<T, N>`.**
+   - `fl::span<T, N>` is the right general API shape, but current span accessors are not explicitly `FASTLED_FORCE_INLINE` / `FL_IRAM`. Until an explicitly ISR-safe span exists, ISR-facing fixed-size output buffers should use `T (&value)[N]`.
+5. ✅ **For RGBW / RGBWW multi-channel output**, prefer a `fl::span<u8, 4>` (or `5`) over five separate `u8*` parameters, except inside ISR / `FL_IRAM` callgraphs where `u8 (&out)[4]` / `[5]` is preferred.
 
 **Scoped exception — deferred legacy migrations**: A `(ptr, size)` callback typedef MAY be temporarily retained in a legacy layer when migrating it would force a synchronized rewrite of every caller and the migration is being deferred to a follow-up PR. The exception requires (a) a comment at the typedef site referencing the migration plan / tracking issue, (b) naming the legacy location (current example: `src/fl/stl/cstdio.h` retains raw pointer+length handler signatures intentionally), and (c) the exception is timeboxed — it must be revisited at the next layer-wide migration window. Permanent divergence is not permitted; the goal is "all-or-nothing per-layer sweep when the engineering budget allows."
 
-**Rationale**: The base span rule prevents most of the pattern but CodeRabbit caught these two shapes in #2560, #2683, #2711. Just adding the two shapes to the canonical examples will close most remaining gaps. The scoped exception accommodates the real-world case where touching every caller in one PR isn't tractable; without it the rule pushes engineers toward unprincipled mixed APIs.
+**Rationale**: The base span rule prevents most of the pattern but CodeRabbit caught these two shapes in #2560, #2683, #2711. Issue #3233 adds clang-query lint coverage for source-spelled array parameters because `T value[N]` is especially misleading: it looks fixed-size but compiles as a pointer. The scoped exception accommodates the real-world case where touching every caller in one PR isn't tractable; without it the rule pushes engineers toward unprincipled mixed APIs.
 
 ## ISR-Shared State: `fl::atomic` or Critical Section, Never Bare `volatile`
 
