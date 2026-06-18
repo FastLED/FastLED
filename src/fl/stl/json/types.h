@@ -511,6 +511,7 @@ struct float_conversion_visitor {
                 }
             }
 
+#if FL_PLATFORM_HAS_LARGE_MEMORY
             if (isSimpleDecimal) {
                 // For simple decimals, we can do a more direct conversion
                 float parsed = fl::parseFloat(str.c_str(), str.length());
@@ -520,9 +521,18 @@ struct float_conversion_visitor {
                 float parsed = fl::parseFloat(str.c_str(), str.length());
                 result = static_cast<FloatType>(parsed);
             }
+#else
+            // Low-memory gate per FastLED #3224 Tier 1A: drop the string -> float
+            // path. `fl::parseFloat` uses float arithmetic (mul/add/div) which
+            // anchors `__aeabi_fmul / fadd / fsub / fdiv` (~4.5 KB of single-prec
+            // soft-FP on no-FPU targets). The integer-only LPC8xx RPC contract
+            // never receives JSON float strings, so saturate to zero.
+            (void)isSimpleDecimal;
+            result = static_cast<FloatType>(0);
+#endif
         }
     }
-    
+
     template<typename T>
     void operator()(const T&) FL_NOEXCEPT {
         // Do nothing for other types
@@ -608,6 +618,7 @@ struct float_conversion_visitor<double> {
                 }
             }
             
+#if FL_PLATFORM_HAS_LARGE_MEMORY
             if (isSimpleDecimal) {
                 // For simple decimals, we can do a more direct conversion
                 float parsed = fl::parseFloat(str.c_str(), str.length());
@@ -617,9 +628,14 @@ struct float_conversion_visitor<double> {
                 float parsed = fl::parseFloat(str.c_str(), str.length());
                 result = static_cast<double>(parsed);
             }
+#else
+            // Low-memory gate per FastLED #3224 Tier 1A; see scalar specialization.
+            (void)isSimpleDecimal;
+            result = 0.0;
+#endif
         }
     }
-    
+
     template<typename T>
     void operator()(const T&) FL_NOEXCEPT {
         // Do nothing for other types
@@ -646,13 +662,30 @@ struct StringConversionVisitor {
     }
 
     void operator()(const double& value) FL_NOEXCEPT {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
         // Convert double to string with higher precision for JSON representation
         result = fl::to_string(static_cast<float>(value), 6);
+#else
+        // Low-memory gate per FastLED #3224 Tier 1A: drop the float -> string
+        // path. `fl::to_string(float, prec)` calls `basic_string::append(float,
+        // int)` which calls `ftoa` -> `printf_detail::format_float` -- that
+        // anchors `__aeabi_fadd/fsub/fmul/f2iz/fcmp*` (~3 KB single-prec
+        // soft-FP on no-FPU). LPC8xx integer-only RPC contract never emits
+        // floats so this path is unreachable; saturate to "0".
+        (void)value;
+        result = "0";
+#endif
     }
 
     void operator()(const float& value) FL_NOEXCEPT {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
         // Convert float to string with higher precision for JSON representation
         result = fl::to_string(value, 6);
+#else
+        // Low-memory gate per FastLED #3224 Tier 1A; see double overload.
+        (void)value;
+        result = "0";
+#endif
     }
 
     void operator()(const bool& value) FL_NOEXCEPT {
