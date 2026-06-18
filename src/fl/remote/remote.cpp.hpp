@@ -2,6 +2,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/json.h"
 #include "fl/log/log.h"
+#include "fl/system/sketch_macros.h"  // FL_PLATFORM_HAS_LARGE_MEMORY -- gates scheduled-RPC + result-tracking
 #include "fl/remote/rpc/rpc.h"
 #include "fl/remote/rpc/server.h"
 #include "fl/remote/types.h"
@@ -30,7 +31,12 @@ bool Remote::has(const fl::string& name) const {
 }
 
 // Async Response Support
+// All three sendAsync* methods touch mAsyncRequests, which Low-memory drops
+// (see #3224 Tier 1B RAM-side companion). On Low-memory these methods
+// become no-ops with a one-line FL_WARN; they remain in the API surface so
+// callers don't break, but they're link-DCE-friendly if no caller exists.
 
+#if FL_PLATFORM_HAS_LARGE_MEMORY
 void Remote::sendAsyncResponse(const char* method, const fl::json& result) {
     fl::string methodName(method);
     auto it = mAsyncRequests.find(methodName);
@@ -109,6 +115,19 @@ void Remote::sendStreamFinal(const char* method, const fl::json& result) {
         FL_DBG_F("Sent stream final for %s (id=%s)", method, requestId);
     }
 }
+#else  // !FL_PLATFORM_HAS_LARGE_MEMORY
+// Low-memory: async-tracking storage is dropped (#3224 Tier 1B RAM-side).
+// Keep the public API for source-compat; they no-op on this tier.
+void Remote::sendAsyncResponse(const char* /*method*/, const fl::json& /*result*/) {
+    FL_WARN_LIT("sendAsyncResponse: async dispatch not supported on Low-memory targets");
+}
+void Remote::sendStreamUpdate(const char* /*method*/, const fl::json& /*update*/) {
+    FL_WARN_LIT("sendStreamUpdate: async streams not supported on Low-memory targets");
+}
+void Remote::sendStreamFinal(const char* /*method*/, const fl::json& /*result*/) {
+    FL_WARN_LIT("sendStreamFinal: async streams not supported on Low-memory targets");
+}
+#endif
 
 // Error Reporting
 
@@ -132,51 +151,21 @@ void Remote::reportError(const fl::json& data) {
 // RPC Processing
 
 fl::json Remote::processRpc(const fl::json& request) {
-    // Extract optional timestamp field (0 = immediate, >0 = scheduled)
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    // Extract optional timestamp field (0 = immediate, >0 = scheduled).
+    // Low-memory builds drop the scheduling path entirely (see #3224 Tier 1B):
+    // the LPC8xx integer-only RPC contract is invoked immediate-only.
     u32 timestamp = 0;
     if (request.contains("timestamp") && request["timestamp"].is_int()) {
         timestamp = static_cast<u32>(request["timestamp"].as_int().value());
     }
+#endif
 
     u32 receivedAt = fl::millis();
 
+#if FL_PLATFORM_HAS_LARGE_MEMORY
     // Execute or schedule
-    if (timestamp == 0) {
-        // Store request ID BEFORE invoking function (needed for async functions)
-        // This allows sendAsyncResponse() to find the request ID while function is running
-        if (request.contains("id") && request.contains("method")) {
-            fl::string methodName = request["method"].as_string().value_or("");
-            int requestId = request["id"].as_int().value_or(0);
-            mAsyncRequests[methodName] = {requestId, receivedAt};
-            FL_DBG_F("Stored request ID for %s (id=%s)", methodName.c_str(), requestId);
-        }
-
-        // Immediate execution - pass directly to Rpc
-        fl::json response = mRpc.handle(request);
-
-        // For async functions, response already sent via sendAsyncResponse()
-        if (response.contains("__async") && response["__async"].as_bool().value_or(false)) {
-            // Don't return response (ACK already sent by Rpc)
-            // Return null to prevent Server from queuing it
-            fl::json nullResponse = fl::json::object();
-            nullResponse.set("__skip", true);  // Marker to skip queueing
-            return nullResponse;
-        }
-
-        // For sync functions, remove request ID (not needed)
-        if (request.contains("method")) {
-            fl::string methodName = request["method"].as_string().value_or("");
-            mAsyncRequests.erase(methodName);
-        }
-
-        // Record result if successful
-        if (response.contains("result") && request.contains("method")) {
-            fl::string funcName = request["method"].as_string().value_or("");
-            recordResult(funcName, response["result"], 0, receivedAt, receivedAt, false);
-        }
-
-        return response;
-    } else {
+    if (timestamp != 0) {
         // Scheduled execution - result will be pushed to ResponseSink after execution
         scheduleFunction(timestamp, receivedAt, request);
         FL_DBG_F("RPC: Scheduled function - result will be pushed after execution");
@@ -190,8 +179,60 @@ fl::json Remote::processRpc(const fl::json& request) {
         response.set("scheduled", true);  // Marker to not queue this response
         return response;
     }
+#endif
+
+    // Immediate execution path (always reached on Low-memory).
+
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    // Store request ID BEFORE invoking function (needed for async functions).
+    // This allows sendAsyncResponse() to find the request ID while function is
+    // running. Low-memory drops the async-tracking machinery (no production
+    // LowMemory sketch uses bindAsync / sendAsyncResponse today) -- see
+    // #3224 Tier 1B.
+    if (request.contains("id") && request.contains("method")) {
+        fl::string methodName = request["method"].as_string().value_or("");
+        int requestId = request["id"].as_int().value_or(0);
+        mAsyncRequests[methodName] = {requestId, receivedAt};
+        FL_DBG_F("Stored request ID for %s (id=%s)", methodName.c_str(), requestId);
+    }
+#endif
+
+    // Immediate execution - pass directly to Rpc
+    fl::json response = mRpc.handle(request);
+
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    // For async functions, response already sent via sendAsyncResponse()
+    if (response.contains("__async") && response["__async"].as_bool().value_or(false)) {
+        // Don't return response (ACK already sent by Rpc)
+        // Return null to prevent Server from queuing it
+        fl::json nullResponse = fl::json::object();
+        nullResponse.set("__skip", true);  // Marker to skip queueing
+        return nullResponse;
+    }
+
+    // For sync functions, remove request ID (not needed)
+    if (request.contains("method")) {
+        fl::string methodName = request["method"].as_string().value_or("");
+        mAsyncRequests.erase(methodName);
+    }
+#endif
+
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    // Record result for the post-call results vector. LowMemory targets drop
+    // mResults entirely (see #3224 Tier 1B) -- RPC callers there receive
+    // results directly via the response sink, not through Remote::mResults.
+    if (response.contains("result") && request.contains("method")) {
+        fl::string funcName = request["method"].as_string().value_or("");
+        recordResult(funcName, response["result"], 0, receivedAt, receivedAt, false);
+    }
+#else
+    (void)receivedAt;
+#endif
+
+    return response;
 }
 
+#if FL_PLATFORM_HAS_LARGE_MEMORY
 void Remote::scheduleFunction(u32 timestamp, u32 receivedAt, const fl::json& jsonRpcRequest) {
     // Make explicit copy for capture (avoid reference issues)
     fl::json requestCopy = jsonRpcRequest;
@@ -216,24 +257,35 @@ void Remote::scheduleFunction(u32 timestamp, u32 receivedAt, const fl::json& jso
 void Remote::recordResult(const fl::string& funcName, const fl::json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled) {
     mResults.push_back({funcName, result, scheduledAt, receivedAt, executedAt, wasScheduled});
 }
+#endif
 
 // Update Loop
 
 size_t Remote::tick(u32 currentTimeMs) {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
     // Clear previous results
     mResults.clear();
 
     // Delegate to generic scheduler - tasks handle their own execution and result recording
     return mScheduler.tick(currentTimeMs);
+#else
+    (void)currentTimeMs;
+    return 0;
+#endif
 }
 
 // Utility Methods
 
 size_t Remote::pendingCount() const {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
     return mScheduler.pendingCount();
+#else
+    return 0;
+#endif
 }
 
 void Remote::clear(ClearFlags flags) {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
     if ((flags & ClearFlags::Results) != ClearFlags::None) {
         mResults.clear();
         FL_DBG_F("Cleared RPC results");
@@ -242,6 +294,7 @@ void Remote::clear(ClearFlags flags) {
         mScheduler.clear();
         FL_DBG_F("Cleared scheduled RPC calls");
     }
+#endif
     if ((flags & ClearFlags::Functions) != ClearFlags::None) {
         mRpc.clear();
         FL_DBG_F("Cleared registered RPC functions");
@@ -273,7 +326,9 @@ size_t Remote::update(u32 currentTimeMs) {
     size_t processed = Server::pull();   // Pull requests from Server
     size_t executed = tick(currentTimeMs);  // Process scheduled tasks
 
-    // Push scheduled results as JSON-RPC responses
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    // Push scheduled results as JSON-RPC responses. Gated on Low-memory
+    // because mResults is dropped there (see #3224 Tier 1B).
     for (const auto& r : mResults) {
         fl::json response = fl::json::object();
         response.set("result", r.result);
@@ -281,6 +336,7 @@ size_t Remote::update(u32 currentTimeMs) {
         // This could be improved by storing the ID with RpcResult
         mOutgoingQueue.push_back(response);
     }
+#endif
 
     size_t sent = Server::push();        // Push responses from Server
     return processed + executed + sent;

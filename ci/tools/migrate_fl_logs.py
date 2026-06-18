@@ -48,10 +48,9 @@ MACROS: dict[str, str] = {
     "FL_LOG_OBJECTFLED_ASYNC_MAIN": "FL_LOG_OBJECTFLED_ASYNC_MAIN_F",
 }
 
+_SORTED_MACRO_KEYS: list[str] = sorted(MACROS, key=lambda s: len(s), reverse=True)
 MACRO_RE = re.compile(
-    r"\b("
-    + "|".join(re.escape(name) for name in sorted(MACROS, key=len, reverse=True))
-    + r")\s*\("
+    r"\b(" + "|".join(re.escape(name) for name in _SORTED_MACRO_KEYS) + r")\s*\("
 )
 
 
