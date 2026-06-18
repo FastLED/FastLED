@@ -1,6 +1,46 @@
 ﻿/// @file rx_flexio_channel.cpp.hpp
 /// @brief Teensy 4.x FlexIO shifter-based RX implementation
 ///
+/// ============================================================================
+/// ⚠️  STATUS: ARCHITECTURALLY BLOCKED — DO NOT TWIST KNOBS HERE (#3066 iter 9)
+/// ============================================================================
+///
+/// This driver tries to capture WS281x-style pulse-width data from an LED
+/// strip's data line by latching a FlexIO timer's count into the shifter on
+/// every pin edge. **That use case is not supported by the iMXRT1062 FlexIO
+/// silicon.** SMOD=1 (Receive mode) and SMOD=3/4 (Match Store / Match
+/// Continuous) all shift the *pin value* into the shifter; the timer
+/// dictates *when* to shift, not *what* to shift. There is no SMOD that
+/// snapshots a peer timer's count into SHIFTBUF.
+///
+/// Further, per NXP's own FlexIO documentation, "shift registers cannot
+/// shift and store on the same clock, so input data may be lost" — which
+/// means the single-timer SMOD=1 + TIMOD=3 design pattern below collides
+/// the shift and the SHIFTBUF-store on the same compare event, producing
+/// the all-zero captures that PRs #3067 / #3068 / #3069 / #3070 / #3071
+/// chased without success.
+///
+/// **Recommended path forward:** use FlexPWM RX (`rx_flexpwm_channel.cpp.hpp`)
+/// which has dedicated `SMx_CAPTCTRL` input-capture silicon. The current
+/// blocker on the FlexPWM path is the bimodal-edge bug tracked as Phase 4
+/// of the #3066 ledger (FIFO watermark / merging) — a smaller surface area
+/// than continuing to fight FlexIO's architectural limit.
+///
+/// **Iter-9 (2026-06-18) cross-check** against NXP AN12174 / AN5275, the
+/// FTF-ACC-F1179 *Introduction to FlexIO* deck, and the NXP Community
+/// thread *"FlexIO not working in Match Continuous Mode"* documented the
+/// architectural mismatch in detail. See `#3066` issue comment
+/// `4740201201` for the full register-by-register analysis.
+///
+/// Until someone with NXP application-engineering contacts can clarify
+/// whether there's a canonical iMXRT FlexIO pattern for true input
+/// capture (latching a timer's count on a pin edge), this file should
+/// remain frozen as research code.
+///
+/// ============================================================================
+/// Original design intent (preserved for historical context):
+/// ============================================================================
+///
 /// **Phase 1B** of FastLED#2764 â€” replaces the Phase 1A skeleton with real
 /// FLEXIO1 register programming, IOMUXC pin muxing, and an eDMA-driven
 /// capture pipeline that mirrors the FlexIO TX driver's structure but in
