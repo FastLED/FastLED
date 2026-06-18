@@ -30,6 +30,8 @@
 #define FL_JSON_FLOAT_ENABLED FL_PLATFORM_HAS_LARGE_MEMORY
 #endif
 
+#include "fl/stl/json/types_impl.h"
+
 namespace fl {
 
 namespace detail {
@@ -1756,5 +1758,3 @@ private:
 // Main json class that provides a more fluid and user-friendly interface
 
 } // namespace fl
-
-#include "fl/stl/json/types.impl.hpp"
