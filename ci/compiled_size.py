@@ -1,6 +1,7 @@
 import argparse
 import json
 import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -141,21 +142,117 @@ def _run_pio_size(build_dir: Path) -> int | None:
     return None
 
 
+def _parse_size_tool_text(output: str) -> int | None:
+    """Parse a `size` tool Berkeley-format header into text + data flash usage."""
+    # Format: "   text	   data	    bss	    dec	    hex	filename"
+    m = re.search(r"^\s*(\d+)\s+(\d+)\s+\d+\s+\d+\s+\w+\s+", output, re.MULTILINE)
+    if m:
+        return int(m.group(1)) + int(m.group(2))
+    return None
+
+
+def _run_size_on_elf(size_tool: Path, elf: Path) -> int | None:
+    """Run the cross-toolchain `size` tool on an ELF and return text+data bytes.
+
+    Used to read the fbuild-produced firmware directly, bypassing
+    `pio run -t size` (which triggers a fresh PlatformIO compile and reports
+    PIO's binary instead of fbuild's). PIO's binary on ESP32 carries
+    `.eh_frame` and other libstdc++ machinery that fbuild's link strips,
+    so the two diverge by ~169 KB on esp32dev — measuring the wrong one
+    inflates the budget check (FastLED/FastLED#3258 fix).
+    """
+    try:
+        result = subprocess.run(
+            [str(size_tool), str(elf)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except (FileNotFoundError, OSError):
+        return None
+    output = (result.stdout or "") + "\n" + (result.stderr or "")
+    return _parse_size_tool_text(output)
+
+
+def _find_fbuild_elf(board_info: dict[str, Any], build_dir: Path) -> Path | None:
+    """Locate the ELF that fbuild produced for this build, if any.
+
+    Checks (in order):
+      1. `prog_path` from `build_info.json` if it lives under a `.fbuild/`
+         directory — covers builds where `_override_prog_path_for_fbuild`
+         already rewrote the metadata (or where fbuild emitted the
+         metadata itself).
+      2. Standard fbuild output locations under `<build_dir>/.fbuild/build/`,
+         both with and without the `<env>/` segment (the layout changed
+         between fbuild releases; we accept either).
+
+    Returns the resolved ELF path, or None if no fbuild artifact is present
+    (i.e. the build was driven by PlatformIO and the old `_run_pio_size`
+    path should win).
+    """
+    prog_path_raw = board_info.get("prog_path")
+    if isinstance(prog_path_raw, str) and prog_path_raw:
+        prog_path = Path(prog_path_raw)
+        if ".fbuild" in prog_path.parts:
+            # prog_path may end in .bin (what fbuild emits as `prog_path`)
+            # or .elf (what `_override_prog_path_for_fbuild` writes). The
+            # size tool only takes ELF, so normalise to .elf.
+            elf_candidate = prog_path.with_suffix(".elf")
+            if elf_candidate.exists():
+                return elf_candidate
+
+    fbuild_root = build_dir / ".fbuild" / "build"
+    if not fbuild_root.is_dir():
+        return None
+
+    env_name = list(board_info.keys())[0] if isinstance(board_info, dict) else None
+    candidates: list[Path] = [
+        # Current fbuild layout (no env_name segment).
+        fbuild_root / "release" / "firmware.elf",
+        fbuild_root / "debug" / "firmware.elf",
+    ]
+    if env_name:
+        # Legacy layout with `<env>/` segment.
+        candidates.extend(
+            [
+                fbuild_root / env_name / "release" / "firmware.elf",
+                fbuild_root / env_name / "debug" / "firmware.elf",
+            ]
+        )
+    existing = [c for c in candidates if c.exists()]
+    if not existing:
+        return None
+    return max(existing, key=lambda p: p.stat().st_mtime)
+
+
 def check_firmware_size(board: str, example: str | None = None) -> int:
     build_info_json = _find_build_info(board, example)
     board_info = _create_board_info(build_info_json)
     assert board_info, f"Board {board} not found in {build_info_json}"
 
-    # PRIORITY 1: Use PlatformIO's size command for accurate flash usage
-    # This is essential for AVR boards where .hex files are ASCII format
-    # and their file size is much larger than actual flash usage
     build_dir = build_info_json.parent
+
+    # PRIORITY 1: When fbuild produced the binary, measure IT directly via
+    # the cross-toolchain `size` tool — `pio run -t size` would (a) trigger
+    # a fresh PlatformIO compile that bypasses fbuild's tighter link flags
+    # (e.g. `-Wl,--gc-sections`, `.eh_frame` stripping) and (b) report the
+    # PIO binary which is ~169 KB larger on esp32dev. Without this branch
+    # the CI size-check measures the wrong build.
+    fbuild_elf = _find_fbuild_elf(board_info, build_dir)
+    size_tool = board_info.get("size_path")
+    if fbuild_elf is not None and isinstance(size_tool, str) and size_tool:
+        size = _run_size_on_elf(Path(size_tool), fbuild_elf)
+        if size is not None:
+            return size
+
+    # PRIORITY 2: PlatformIO's size command. This was previously priority 1;
+    # AVR boards still need it because `.hex` file sizes are ASCII-inflated
+    # and the toolchain `size` tool path isn't always in build_info.json.
     size = _run_pio_size(build_dir)
     if size is not None:
         return size
 
-    # PRIORITY 2: Only use .bin or .uf2 files (which have accurate file sizes)
-    # DO NOT use .hex files - they're ASCII Intel HEX format
+    # PRIORITY 3: Fall back to .bin or .uf2 file size. Never .hex.
     prog_path = Path(board_info["prog_path"])
     base_path = prog_path.parent
     suffixes = [".bin", ".uf2"]
@@ -164,10 +261,10 @@ def check_firmware_size(board: str, example: str | None = None) -> int:
         if candidate.exists():
             return candidate.stat().st_size
 
-    # Unable to determine size accurately
     raise FileNotFoundError(
         f"Unable to determine firmware size for {board}. "
-        f"PlatformIO size command failed and no .bin/.uf2 file found in {base_path}"
+        f"fbuild ELF probe + PlatformIO size command both failed and no "
+        f".bin/.uf2 file found in {base_path}"
     )
 
 
