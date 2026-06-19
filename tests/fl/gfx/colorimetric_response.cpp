@@ -58,7 +58,7 @@ FL_TEST_CASE("invert3x3: M * M^-1 == I on a non-trivial matrix") {
     float Minv[3][3];
     FL_CHECK(invert3x3(M, Minv));
 
-    // P = M * Minv — should be identity within float tolerance.
+    // P = M * Minv -- should be identity within float tolerance.
     float P[3][3] = {{0}};
     for (int r = 0; r < 3; ++r) {
         for (int c = 0; c < 3; ++c) {
@@ -77,7 +77,7 @@ FL_TEST_CASE("invert3x3: M * M^-1 == I on a non-trivial matrix") {
 
 
 FL_TEST_CASE("invert3x3: singular matrix returns false") {
-    // Two identical rows — determinant is zero.
+    // Two identical rows -- determinant is zero.
     const float singular[3][3] = {
         {1.0f, 2.0f, 3.0f},
         {1.0f, 2.0f, 3.0f},
@@ -163,7 +163,7 @@ FL_TEST_CASE("quantize_u8: rounding + saturation") {
 }
 
 
-FL_TEST_CASE("build_source_matrix: Rec.709 + D65 reproduces published sRGB → XYZ") {
+FL_TEST_CASE("build_source_matrix: Rec.709 + D65 reproduces published sRGB -> XYZ") {
     // Rec.709 / sRGB primary chromaticities + D65 white.
     const float xy_r[2] = {0.640f, 0.330f};
     const float xy_g[2] = {0.300f, 0.600f};
@@ -172,7 +172,7 @@ FL_TEST_CASE("build_source_matrix: Rec.709 + D65 reproduces published sRGB → X
     float M[3][3];
     FL_CHECK(build_source_matrix(xy_r, xy_g, xy_b, xy_w, M));
 
-    // M · [1, 1, 1] must land at D65 in XYZ-at-Y=1.
+    // M * [1, 1, 1] must land at D65 in XYZ-at-Y=1.
     const float one[3] = {1.0f, 1.0f, 1.0f};
     float white_xyz[3];
     matvec3(M, one, white_xyz);
@@ -183,7 +183,7 @@ FL_TEST_CASE("build_source_matrix: Rec.709 + D65 reproduces published sRGB → X
     FL_CHECK_CLOSE(white_xyz[1], d65_xyz[1], 1e-4f);
     FL_CHECK_CLOSE(white_xyz[2], d65_xyz[2], 1e-4f);
 
-    // Compare against the published linear sRGB → XYZ D65 matrix (Bruce
+    // Compare against the published linear sRGB -> XYZ D65 matrix (Bruce
     // Lindbloom). Loose tolerance because Lindbloom's published constants
     // use rounded primaries; the construction is exact from the inputs.
     FL_CHECK_CLOSE(M[0][0], 0.4124f, 5e-3f);
@@ -193,7 +193,7 @@ FL_TEST_CASE("build_source_matrix: Rec.709 + D65 reproduces published sRGB → X
 
 
 FL_TEST_CASE("build_source_matrix: singular primaries return false") {
-    // Three identical primary chromaticities — all columns of the primary
+    // Three identical primary chromaticities -- all columns of the primary
     // matrix collapse to one vector, det is exactly zero in float
     // arithmetic, so invert3x3() bails and build_source_matrix() reports
     // failure. Near-collinear but distinct primaries can still pass float
@@ -206,9 +206,9 @@ FL_TEST_CASE("build_source_matrix: singular primaries return false") {
 
 
 FL_TEST_CASE("nnls3: identity system trivial recovery") {
-    // M = I, b = (1, 2, 3) → t ≈ (1, 2, 3), residual ≈ 0.
-    // Tolerance reflects the documented solver shape — 500 iterations at
-    // step 0.01 has geometric convergence 0.99^500 ≈ 0.66 %, so the gap
+    // M = I, b = (1, 2, 3) -> t ~= (1, 2, 3), residual ~= 0.
+    // Tolerance reflects the documented solver shape -- 500 iterations at
+    // step 0.01 has geometric convergence 0.99^500 ~= 0.66 %, so the gap
     // for target 3 is ~0.02. Use a comfortable 3 % bound.
     const float M[3][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
     const float b[3] = {1.0f, 2.0f, 3.0f};
@@ -263,7 +263,7 @@ FL_TEST_CASE("hermite_basis: node values at t = 0, 0.5, 1") {
 
 
 FL_TEST_CASE("hermite_basis: partition-of-unity at every node") {
-    // h00(t) + h01(t) must equal 1 for ALL t — they're the value basis.
+    // h00(t) + h01(t) must equal 1 for ALL t -- they're the value basis.
     for (int i = 0; i <= 10; ++i) {
         const float t = static_cast<float>(i) / 10.0f;
         float b[4];
@@ -274,8 +274,8 @@ FL_TEST_CASE("hermite_basis: partition-of-unity at every node") {
 
 
 FL_TEST_CASE("quantize_lut_cell: round-trip via kLutQ") {
-    // value v → i16(v * kLutQ + 0.5), then dequantize via i16 * (1/kLutQ).
-    // Round-trip error ≤ 0.5 / kLutQ ≈ 1.2e-4.
+    // value v -> i16(v * kLutQ + 0.5), then dequantize via i16 * (1/kLutQ).
+    // Round-trip error <= 0.5 / kLutQ ~= 1.2e-4.
     const float v_in = 0.7531f;
     const i16 q = quantize_lut_cell(v_in);
     const float v_out = static_cast<float>(q) / static_cast<float>(kLutQ);
