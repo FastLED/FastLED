@@ -29,22 +29,5 @@ jobs:
     uses: ./.github/workflows/build_template_binary_size.yml
     with:
       board: esp32dev
-      # Current fbuild-measured size sits at ~631 KB. The 330 KB ceiling
-      # set in e646657d01 was an intentional regression-signal that
-      # presumed a ~300 KB worth of pending memory work would land
-      # alongside it; it never did, and the workflow has been red on
-      # master continuously since 2026-06-17.
-      #
-      # The proximate measurement bug (PIO re-link reintroducing
-      # .eh_frame machinery) is fixed in ci/compiled_size.py on this PR,
-      # but the actual fbuild link itself produces ~631 KB. Bump the
-      # ceiling to 640 KB so the workflow:
-      #   - goes green at today's actual footprint, and
-      #   - still catches any +1.5% regression from this baseline.
-      #
-      # When the memory work referenced in e646657d01 resumes, tighten
-      # this back down as savings land.
-      max_size: 640000
-      # Apa102 carries the SPI chipset code on top of Blink's baseline and
-      # measures ~687520 B today; give it ~2% headroom.
-      max_size_apa102: 700000
+      max_size: 330000
+      max_size_apa102: 330000
