@@ -36,7 +36,7 @@ jobs:
       # fbuild — they relied on the legacy merge that has been removed.
       # The fbuild build path needs its own flag-port mechanism that
       # actually propagates these to the underlying ESP32 toolchain
-      # (see follow-up issue #TBD). Until then, raise the cap to 700 KB
+      # (tracked in #3298). Until then, raise the cap to 700 KB
       # to match the pre-#3268 ceiling (PR #2790 / #2608) so CI runs to
       # completion and we can measure real regressions. Today's fbuild
       # esp32dev Blink size is ~401 KB; Apa102 sits a bit higher.
