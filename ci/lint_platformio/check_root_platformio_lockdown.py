@@ -41,9 +41,7 @@ ROOT_PIO_INI = PROJECT_ROOT / "platformio.ini"
 # as comment leaders; only ";" is canonical for this file.
 _SECTION_HEADER_RE = re.compile(r"^\s*\[[^\]]+\]\s*$")
 _JUSTIFICATION_RE = re.compile(r";\s*justification\s*:", re.IGNORECASE)
-_ADDED_IN_RE = re.compile(
-    r";\s*added-in\s*:\s*(?:PR-\d+|[0-9a-f]{7,40})", re.IGNORECASE
-)
+_ADDED_IN_RE = re.compile(r";\s*added-in\s*:\s*(?:PR-\d+|[0-9a-f]{40})", re.IGNORECASE)
 
 
 class Violation(NamedTuple):
@@ -138,24 +136,36 @@ def _has_adjacent_justification(
     target_line_no: int, all_lines: Iterable[str]
 ) -> tuple[bool, bool]:
     """Look at the full new file for a `; justification:` and `; added-in:`
-    comment within 5 lines before or after `target_line_no` (1-indexed).
+    comment within 3 lines before or after `target_line_no` (1-indexed).
 
     Returns (has_justification, has_added_in).
+
+    Window is ±3 — tight enough that an unrelated nearby comment cannot
+    satisfy the rule by accident, loose enough that a 2-line
+    `; justification: / ; added-in:` block immediately above (or below)
+    a small added env block still covers every line of the block.
     """
     lines = list(all_lines)
-    lo = max(0, target_line_no - 1 - 5)
-    hi = min(len(lines), target_line_no - 1 + 6)
+    lo = max(0, target_line_no - 1 - 3)
+    hi = min(len(lines), target_line_no - 1 + 4)
     window = lines[lo:hi]
-    has_just = any(_JUSTIFICATION_RE.search(l) for l in window)
-    has_added = any(_ADDED_IN_RE.search(l) for l in window)
+    has_just = any(_JUSTIFICATION_RE.search(line) for line in window)
+    has_added = any(_ADDED_IN_RE.search(line) for line in window)
     return has_just, has_added
 
 
-def check(warn_only: bool | None = None) -> bool:
-    """Run the lockdown check. Return True if clean (or warn-only mode)."""
-    if warn_only is None:
-        warn_only = os.environ.get("FASTLED_LINT_ROOT_PLATFORMIO_ERROR", "") != "1"
+def _warn_only_from_env() -> bool:
+    """Resolve warn-only mode from FASTLED_LINT_ROOT_PLATFORMIO_ERROR.
 
+    Returns True (warn-only) unless the env var is explicitly set to "1".
+    Callers that have an explicit preference (e.g. `--error` CLI flag)
+    should bypass this helper and pass their own bool to `check`.
+    """
+    return os.environ.get("FASTLED_LINT_ROOT_PLATFORMIO_ERROR", "") != "1"
+
+
+def check(warn_only: bool) -> bool:
+    """Run the lockdown check. Return True if clean (or warn-only mode)."""
     if not ROOT_PIO_INI.exists():
         return True
 
@@ -243,7 +253,7 @@ def check(warn_only: bool | None = None) -> bool:
     return False
 
 
-def main() -> int:
+def main(argv: list[str] | None) -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Enforce justification comments on every change to root "
@@ -255,10 +265,12 @@ def main() -> int:
         action="store_true",
         help="Fail (exit 1) on any unjustified change. Default is warn-only.",
     )
-    args = parser.parse_args()
-    ok = check(warn_only=not args.error)
+    args = parser.parse_args(argv)
+    # CLI --error always wins; otherwise honour the env-var fallback.
+    warn_only = False if args.error else _warn_only_from_env()
+    ok = check(warn_only=warn_only)
     return 0 if ok else 1
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(None))

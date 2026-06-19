@@ -28,6 +28,9 @@ from ci.lint.stage_impls import (
 )
 from ci.lint.stages import LintStage
 from ci.lint_meson.run_all_checkers import run_meson_lint
+from ci.lint_platformio.check_root_platformio_lockdown import (
+    _warn_only_from_env as _root_pio_warn_only_from_env,
+)
 from ci.lint_platformio.run_all_checkers import (
     run_platformio_lint,
     run_root_platformio_lockdown_lint,
@@ -268,7 +271,9 @@ def create_stages(args: LintArgs) -> list[LintStage]:
             LintStage(
                 name="root_platformio_ini_lockdown",
                 display_name="ROOT-PLATFORMIO.INI LOCKDOWN",
-                run_fn=lambda: run_root_platformio_lockdown_lint(),
+                run_fn=lambda: run_root_platformio_lockdown_lint(
+                    warn_only=_root_pio_warn_only_from_env()
+                ),
                 timeout=10.0,
             )
         )
