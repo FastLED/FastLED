@@ -28,7 +28,13 @@ from ci.lint.stage_impls import (
 )
 from ci.lint.stages import LintStage
 from ci.lint_meson.run_all_checkers import run_meson_lint
-from ci.lint_platformio.run_all_checkers import run_platformio_lint
+from ci.lint_platformio.check_root_platformio_lockdown import (
+    _warn_only_from_env as _root_pio_warn_only_from_env,
+)
+from ci.lint_platformio.run_all_checkers import (
+    run_platformio_lint,
+    run_root_platformio_lockdown_lint,
+)
 from ci.util.global_interrupt_handler import install_signal_handler, wait_for_cleanup
 
 
@@ -255,6 +261,20 @@ def create_stages(args: LintArgs) -> list[LintStage]:
                 display_name="PLATFORMIO-INTERNAL-USAGE LINT",
                 run_fn=lambda: run_platformio_lint(),
                 timeout=30.0,
+            )
+        )
+        # Root ./platformio.ini lockdown: every diff line needs an adjacent
+        # `; justification:` + `; added-in:` comment. See #3274 and the
+        # matching CodeRabbit rule. No-op on master and when the file is
+        # unchanged against origin/master.
+        stages.append(
+            LintStage(
+                name="root_platformio_ini_lockdown",
+                display_name="ROOT-PLATFORMIO.INI LOCKDOWN",
+                run_fn=lambda: run_root_platformio_lockdown_lint(
+                    warn_only=_root_pio_warn_only_from_env()
+                ),
+                timeout=10.0,
             )
         )
 
