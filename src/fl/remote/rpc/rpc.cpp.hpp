@@ -209,9 +209,12 @@ json Rpc::handle(const json& request) {
         response.set("warnings", warnings);
     }
 
-    // For async functions, mark response to not queue it (ACK already sent)
+    // For async functions, mark response to signal "ACK already sent" so
+    // downstream queue machinery skips pushing a duplicate response.
+    // Renamed from `__async` in #3228 -- field is a public envelope-control
+    // marker, not a reserved-namespace identifier.
     if (isAsync) {
-        response.set("__async", true);  // Internal marker
+        response.set("ackOnly", true);
     }
 #endif
 

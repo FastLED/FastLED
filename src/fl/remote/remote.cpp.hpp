@@ -201,12 +201,16 @@ fl::json Remote::processRpc(const fl::json& request) {
     fl::json response = mRpc.handle(request);
 
 #if FL_PLATFORM_HAS_LARGE_MEMORY
-    // For async functions, response already sent via sendAsyncResponse()
-    if (response.contains("__async") && response["__async"].as_bool().value_or(false)) {
-        // Don't return response (ACK already sent by Rpc)
-        // Return null to prevent Server from queuing it
+    // For async functions, response already sent via sendAsyncResponse().
+    // Envelope marker names renamed in #3228 -- accept legacy `__async` for
+    // one release of back-compat in case external Server forks set it.
+    bool ackAlready = (response.contains("ackOnly") && response["ackOnly"].as_bool().value_or(false))
+                  || (response.contains("__async") && response["__async"].as_bool().value_or(false));
+    if (ackAlready) {
+        // Don't return response (ACK already sent by Rpc).
+        // Return a skip-envelope to prevent Server from queueing it.
         fl::json nullResponse = fl::json::object();
-        nullResponse.set("__skip", true);  // Marker to skip queueing
+        nullResponse.set("noEnqueue", true);
         return nullResponse;
     }
 
