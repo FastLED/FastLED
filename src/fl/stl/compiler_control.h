@@ -147,7 +147,8 @@
 
 // Escape hatch for platform-specific pragmas.
 // Place FL_ALLOW_PLATFORM_PRAGMA on the line before a raw #pragma directive
-// to suppress the platform_pragma_checker lint. Use only when the FL_DISABLE_WARNING
+// to suppress the PlatformPragmaChecker lint (Rust crate
+// ci/lint_cpp_rs/src/checkers/style.rs). Use only when the FL_DISABLE_WARNING
 // macros above cannot express the needed pragma (e.g. non-diagnostic pragmas).
 // Prefer FL_DISABLE_WARNING_PUSH / FL_DISABLE_WARNING(name) / FL_DISABLE_WARNING_POP.
 #define FL_ALLOW_PLATFORM_PRAGMA /* platform-specific pragma — lint escape hatch */

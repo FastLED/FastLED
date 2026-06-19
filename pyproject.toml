@@ -190,6 +190,12 @@ dependencies = [
     "colorama>=0.4.6",
     "ty>=0.0.15",
     "bleak>=0.22.3",
+    # soldr drives the Rust C++ linter's cold-build rebuild path (zccache +
+    # shared target tree). Pinned floor matches the version FastLED currently
+    # tests against; the binary-cache layer in ci/lint_cpp/rust_binary_cache.py
+    # only invokes soldr when the crate sources change, so the per-call cost
+    # of having soldr installed but unused is zero. See FastLED #3288.
+    "soldr>=0.7.55",
 ]
 
 [build-system]

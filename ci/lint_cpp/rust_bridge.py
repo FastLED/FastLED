@@ -9,6 +9,7 @@ from typing import Any
 
 from running_process import RunningProcess
 
+from ci.lint_cpp.rust_binary_cache import ensure_rust_lint_binary
 from ci.util.check_files import CheckerResults, FileContentChecker
 from ci.util.paths import PROJECT_ROOT
 
@@ -19,12 +20,17 @@ RUST_SUPPORTED_CHECKERS = frozenset(
         "AsmJsLocationChecker",
         "AttributeChecker",
         "BareAllocationChecker",
+        "BareLibmChecker",
+        "BareNoInlineChecker",
+        "BareSnprintfChecker",
         "BareUsingChecker",
         "BannedDefineChecker",
         "BannedHeadersChecker",
         "BannedMacrosChecker",
         "BannedNamespaceChecker",
         "BuiltinMemcpyChecker",
+        "FlNoUnderscoreChecker",
+        "LegacyLogMacroChecker",
         "CppHppHeaderPairChecker",
         "CppHppIncludesChecker",
         "CppIncludeChecker",
@@ -40,6 +46,7 @@ RUST_SUPPORTED_CHECKERS = frozenset(
         "ImplHppIncludesChecker",
         "IsHeaderIncludeChecker",
         "IwyuPragmaBlockChecker",
+        "IwyuPragmaPrivateChecker",
         "LoggingInIramChecker",
         "MemberStyleChecker",
         "NamespaceFlDeclarationChecker",
@@ -51,8 +58,11 @@ RUST_SUPPORTED_CHECKERS = frozenset(
         "PlatformIncludesChecker",
         "PlatformsFlNamespaceChecker",
         "PragmaOnceChecker",
+        "PchFileChecker",
         "PlatformPragmaChecker",
         "PlatformTrampolineChecker",
+        "PublicSettingsPatternChecker",
+        "UnityBuildChecker",
         "RawNoexceptChecker",
         "RawPragmaChecker",
         "ReinterpretCastChecker",
@@ -92,17 +102,15 @@ def remove_rust_supported_checkers(
 
 
 def run_rust_linter(files: list[str] | None) -> dict[str, CheckerResults]:
-    """Run the Rust linter and return results in the Python linter shape."""
-    cmd = [
-        "soldr",
-        "cargo",
-        "run",
-        "--release",
-        "--bin",
-        "fastled-lint",
-        "--manifest-path",
-        "ci/lint_cpp_rs/Cargo.toml",
-        "--",
+    """Run the Rust linter and return results in the Python linter shape.
+
+    The binary is rebuilt only when the Rust crate sources change; otherwise
+    it is invoked directly with no soldr/cargo overhead per call. See
+    :mod:`ci.lint_cpp.rust_binary_cache`.
+    """
+    binary = ensure_rust_lint_binary()
+    cmd: list[str] = [
+        str(binary),
         "--format",
         "json",
         "--project-root",

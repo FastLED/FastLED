@@ -21,6 +21,7 @@ defaults:
 jobs:
   build:
     runs-on: ${{ inputs.os }}
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,9 +53,30 @@ jobs:
         run: ./install
         shell: bash
 
-      - name: No namespace after headers
+      - name: Cache Rust C++ linter build
+        # Skips the ~60-180s soldr cargo build on every CI run when the
+        # crate sources haven't changed. Keyed on Cargo.lock + every .rs
+        # under the crate's src/ tree so any meaningful change forces a
+        # rebuild. Persists the cached fastled-lint binary plus the
+        # native-Python fingerprint that the build-on-change wrapper
+        # consults at lint time. See FastLED #3288.
+        uses: actions/cache@v4
+        with:
+          path: |
+            ci/lint_cpp_rs/target
+            .cache/rust_lint_binary.fingerprint
+          key: rust-lint-${{ runner.os }}-${{ hashFiles('ci/lint_cpp_rs/Cargo.lock', 'ci/lint_cpp_rs/src/**/*.rs', 'ci/lint_cpp_rs/Cargo.toml') }}
+          restore-keys: |
+            rust-lint-${{ runner.os }}-
+
+      - name: C++ lint (Rust path)
+        # Exercises the Rust C++ linter (`fastled-lint`) end-to-end via the
+        # default `bash lint --cpp` path on every PR. The binary is rebuilt
+        # only if the crate sources changed; otherwise it runs directly.
+        # See FastLED #3288.
         run: |
-          uv run python ci/lint_cpp/no_using_namespace_fl_in_headers.py
+          bash lint --cpp
+        shell: bash
 
       - name: Run All Unit Tests
         id: run_tests

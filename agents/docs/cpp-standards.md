@@ -212,7 +212,7 @@ For a subsystem (e.g., `Watchdog`, `Audio`, `Codec`) that has multi-tier platfor
 - **Alternative Solution (header files)**: Move static initialization to corresponding `.cpp` file
   - Example: See `src/platforms/shared/spi_hw_1.{h,cpp}` for the correct pattern
 - **Exception**: Statics inside template functions are allowed (each template instantiation gets its own static, avoiding conflicts)
-- **Linter**: Enforced by `ci/lint_cpp/test_no_static_in_headers.py` for critical directories (`src/platforms/shared/`, `src/fl/`, `src/fx/`)
+- **Linter**: Enforced by `StaticInHeaderChecker` in the Rust crate (`ci/lint_cpp_rs/src/checkers/style.rs`) for critical directories (`src/platforms/shared/`, `src/fl/`, `src/fx/`)
 - **Suppression**: Add `// okay static in header` comment if absolutely necessary (use sparingly)
 
 ## Channel Engine DMA Wait Pattern

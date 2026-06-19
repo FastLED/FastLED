@@ -121,12 +121,17 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "asm_js_location",
         "attribute",
         "bare_allocation",
+        "bare_libm",
+        "bare_noinline",
+        "bare_snprintf",
         "bare_using",
         "banned_headers",
         "banned_define",
         "banned_macros",
         "banned_namespace",
         "builtin_memcpy",
+        "fl_no_underscore",
+        "legacy_log_macro",
         "cpp_hpp_includes",
         "cpp_hpp_header_pair",
         "cpp_include",
@@ -142,6 +147,7 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "logging_in_iram",
         "is_header_include",
         "iwyu_pragma_block",
+        "iwyu_pragma_private",
         "member_style",
         "namespace_fl_declaration",
         "namespace_includes",
@@ -152,8 +158,11 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "platform_includes",
         "platforms_fl_namespace",
         "pragma_once",
+        "pch_file",
         "platform_pragma",
         "platform_trampoline",
+        "public_settings_pattern",
+        "unity_build",
         "raw_noexcept",
         "raw_pragma",
         "reinterpret_cast",
@@ -186,12 +195,17 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "AsmJsLocationChecker",
         "AttributeChecker",
         "BareAllocationChecker",
+        "BareLibmChecker",
+        "BareNoInlineChecker",
+        "BareSnprintfChecker",
         "BareUsingChecker",
         "BannedDefineChecker",
         "BannedHeadersChecker",
         "BannedMacrosChecker",
         "BannedNamespaceChecker",
         "BuiltinMemcpyChecker",
+        "FlNoUnderscoreChecker",
+        "LegacyLogMacroChecker",
         "CppHppIncludesChecker",
         "CppHppHeaderPairChecker",
         "CppIncludeChecker",
@@ -207,6 +221,7 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "ImplHppIncludesChecker",
         "IsHeaderIncludeChecker",
         "IwyuPragmaBlockChecker",
+        "IwyuPragmaPrivateChecker",
         "LoggingInIramChecker",
         "MemberStyleChecker",
         "NamespaceFlDeclarationChecker",
@@ -218,8 +233,11 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "PlatformIncludesChecker",
         "PlatformsFlNamespaceChecker",
         "PragmaOnceChecker",
+        "PchFileChecker",
         "PlatformPragmaChecker",
         "PlatformTrampolineChecker",
+        "PublicSettingsPatternChecker",
+        "UnityBuildChecker",
         "RawNoexceptChecker",
         "RawPragmaChecker",
         "ReinterpretCastChecker",
@@ -253,6 +271,9 @@ pub fn create_checkers(
         ("asm_js_location", Box::new(AsmJsLocationChecker)),
         ("attribute", Box::new(AttributeChecker)),
         ("bare_allocation", Box::new(BareAllocationChecker)),
+        ("bare_libm", Box::new(BareLibmChecker)),
+        ("bare_noinline", Box::new(BareNoInlineChecker)),
+        ("bare_snprintf", Box::new(BareSnprintfChecker)),
         ("bare_using", Box::new(BareUsingChecker)),
         (
             "banned_headers",
@@ -314,6 +335,8 @@ pub fn create_checkers(
         ("banned_macros", Box::new(BannedMacrosChecker)),
         ("banned_namespace", Box::new(BannedNamespaceChecker)),
         ("builtin_memcpy", Box::new(BuiltinMemcpyChecker)),
+        ("fl_no_underscore", Box::new(FlNoUnderscoreChecker)),
+        ("legacy_log_macro", Box::new(LegacyLogMacroChecker)),
         ("cpp_hpp_includes", Box::new(CppHppIncludesChecker)),
         ("cpp_hpp_header_pair", Box::new(CppHppHeaderPairChecker)),
         ("cpp_include", Box::new(CppIncludeChecker)),
@@ -332,6 +355,7 @@ pub fn create_checkers(
         ("impl_hpp_includes", Box::new(ImplHppIncludesChecker)),
         ("is_header_include", Box::new(IsHeaderIncludeChecker)),
         ("iwyu_pragma_block", Box::new(IwyuPragmaBlockChecker)),
+        ("iwyu_pragma_private", Box::new(IwyuPragmaPrivateChecker)),
         ("logging_in_iram", Box::new(LoggingInIramChecker)),
         ("member_style", Box::new(MemberStyleChecker)),
         (
@@ -357,6 +381,8 @@ pub fn create_checkers(
         ("pragma_once", Box::new(PragmaOnceChecker)),
         ("platform_pragma", Box::new(PlatformPragmaChecker)),
         ("platform_trampoline", Box::new(PlatformTrampolineChecker)),
+        ("public_settings_pattern", Box::new(PublicSettingsPatternChecker)),
+        ("unity_build", Box::new(UnityBuildChecker)),
         ("raw_noexcept", Box::new(RawNoexceptChecker)),
         ("raw_pragma", Box::new(RawPragmaChecker)),
         ("reinterpret_cast", Box::new(ReinterpretCastChecker)),
@@ -431,8 +457,21 @@ where
     let checkers = create_checkers(selected)?;
     let files = collect_input_files(&config.project_root, &config.paths)?;
     let mut processor = MultiCheckerFileProcessor::new();
-    let violations =
+    let mut violations =
         processor.process_files_with_checkers(&files, &checkers, &config.project_root)?;
+
+    // Structural passes only fire in whole-project mode (no explicit paths) —
+    // single-file mode shouldn't see cross-file walks, mirroring the Python
+    // orchestrator's behaviour.
+    if config.paths.is_empty() {
+        let mut structural = run_structural_passes(&config.project_root);
+        if let Some(selected) = selected {
+            structural.retain(|violation| selected.contains(violation.checker.as_str())
+                || selected_contains_structural_alias(selected, &violation.checker));
+        }
+        violations.extend(structural);
+        violations.sort();
+    }
 
     match config.output_format {
         OutputFormat::Json => {
@@ -442,6 +481,16 @@ where
     }
 
     Ok(if violations.is_empty() { 0 } else { 1 })
+}
+
+fn selected_contains_structural_alias(selected: &HashSet<String>, checker_name: &str) -> bool {
+    // Structural passes are referenced by their snake_case alias in the
+    // --checker selector (e.g. `pch_file`) just like per-file checkers; both
+    // the alias and the class name should activate them.
+    match checker_name {
+        "PchFileChecker" => selected.contains("pch_file"),
+        _ => false,
+    }
 }
 
 #[derive(Debug)]

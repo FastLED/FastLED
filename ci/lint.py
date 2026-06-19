@@ -152,7 +152,8 @@ def print_ai_hints() -> None:
     print("  - Use 'bash lint --js' for JavaScript linting only")
     print("  - Use 'bash lint --cpp' for C++ linting only")
     print(
-        "  - Use 'bash lint --cpp --rust' to use Rust-backed C++ checkers where available"
+        "  - C++ linting uses the Rust-backed `fastled-lint` binary by default; "
+        "pass --no-rust to fall back to the legacy Python-only path"
     )
     print("  - Use 'bash lint --full' to include IWYU (Include-What-You-Use) analysis")
     print("  - Use 'bash lint --iwyu' to run IWYU analysis only")
