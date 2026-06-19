@@ -19,14 +19,6 @@ from ci.lint_cpp.rust_bridge import (
     run_rust_ab_check,
     run_rust_linter,
 )
-from ci.lint_cpp.test_aggregation_checker import check as check_test_aggregation
-from ci.lint_cpp.test_aggregation_checker import (
-    check_single_file as check_test_aggregation_single_file,
-)
-from ci.lint_cpp.test_unity_build import check as check_unity_build
-from ci.lint_cpp.test_unity_build import (
-    check_single_file as check_unity_build_single_file,
-)
 from ci.util.check_files import (
     CheckerResults,
     FileContentChecker,
@@ -352,26 +344,6 @@ def format_and_print_results(
         print("✅ All C++ linting checks passed!")
         print("=" * 80)
         return 0
-
-
-def run_unity_build_check() -> tuple[int, list[str]]:
-    """Run unity build structure check (formerly standalone test_unity_build.py).
-
-    Returns:
-        (violation_count, violation_messages)
-    """
-    result = check_unity_build()
-    return (len(result.violations), result.violations)
-
-
-def run_test_aggregation_check() -> tuple[int, list[str]]:
-    """Run test aggregation structure check.
-
-    Returns:
-        (violation_count, violation_messages)
-    """
-    success, violations = check_test_aggregation()
-    return (len(violations), violations)
 
 
 def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
@@ -728,26 +700,13 @@ def main() -> int:
         results = run_checkers_on_single_file(str(file_path), checkers_by_scope)
         merge_checker_results(results, rust_results)
 
-        # Run targeted unity build check for .cpp.hpp files and build files in src/fl/build/
-        is_build_file = "/fl/build/" in str(file_path).replace("\\", "/")
-        if file_path.name.endswith(".cpp.hpp") or is_build_file:
-            unity_result = check_unity_build_single_file(file_path)
-            if not unity_result.success:
-                unity_checker_results = CheckerResults()
-                for violation in unity_result.violations:
-                    unity_checker_results.add_violation(
-                        "unity_build_structure", 0, violation
-                    )
-                results["UnityBuildChecker"] = unity_checker_results
+        # Per-file UnityBuildChecker now lives in the Rust crate
+        # (ci/lint_cpp_rs/src/checkers/unity_build.rs); its violations
+        # arrive via the merge_checker_results step above.
 
-        # Run targeted test aggregation check for test .cpp/.hpp files
-        if "/tests/" in str(file_path).replace("\\", "/"):
-            agg_success, agg_violations = check_test_aggregation_single_file(file_path)
-            if not agg_success:
-                agg_results = CheckerResults()
-                for violation in agg_violations:
-                    agg_results.add_violation("test_aggregation", 0, violation)
-                results["TestAggregationChecker"] = agg_results
+        # Per-file TestAggregationChecker now lives in the Rust crate
+        # (ci/lint_cpp_rs/src/checkers/test_structure.rs); its violations
+        # arrive via the merge_checker_results step above.
 
         noexcept_results = run_noexcept_ast_check(str(file_path))
         if noexcept_results.has_violations():
@@ -784,24 +743,10 @@ def main() -> int:
         results = run_checkers(files_by_dir, checkers_by_scope)
         merge_checker_results(results, rust_results)
 
-        # Run unity build structure check (formerly standalone subprocess)
-        unity_violation_count, unity_violations = run_unity_build_check()
-        if unity_violation_count > 0:
-            unity_results = CheckerResults()
-            for violation in unity_violations:
-                unity_results.add_violation("unity_build_structure", 0, violation)
-            results["UnityBuildChecker"] = unity_results
-
-        # Run test aggregation structure check
-        agg_count, agg_violations = run_test_aggregation_check()
-        if agg_count > 0:
-            agg_results = CheckerResults()
-            for violation in agg_violations:
-                agg_results.add_violation("test_aggregation", 0, violation)
-            results["TestAggregationChecker"] = agg_results
-
-        # PchFileChecker now ships as a Rust structural pass (#3297); the
-        # standalone Python walker was retired alongside this PR. Violations
+        # UnityBuildChecker (whole-project structural pass),
+        # TestAggregationChecker (whole-project structural pass), and
+        # PchFileChecker now ship in the Rust binary's run_structural_passes()
+        # — see ci/lint_cpp_rs/src/checkers/structural_passes.rs. Violations
         # arrive via `merge_checker_results` above.
 
         # Run AST-backed FL_NO_EXCEPT enforcement from normal C++ lint.

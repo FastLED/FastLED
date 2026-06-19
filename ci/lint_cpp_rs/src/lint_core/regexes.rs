@@ -583,6 +583,28 @@ fn regex_class_or_struct_forward_decl() -> &'static Regex {
     VALUE.get_or_init(|| Regex::new(r"\b(class|struct)\b\s+\w+\s*;").unwrap())
 }
 
+fn regex_unity_build_hpp_include() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        Regex::new(r#"(?m)^\s*#include\s+"([^"]+/_build\.cpp\.hpp)""#).unwrap()
+    })
+}
+
+fn regex_unity_cpp_hpp_include() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r#"(?m)^\s*#include\s+"[^"]+\.cpp\.hpp""#).unwrap())
+}
+
+fn regex_unity_cpp_hpp_include_capture() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r#"(?m)^\s*#include\s+"([^"]+\.cpp\.hpp)""#).unwrap())
+}
+
+fn regex_unity_any_include() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r#"(?m)^\s*#include\s+"([^"]+)""#).unwrap())
+}
+
 fn regex_simple_identifier() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"^[a-zA-Z_]\w*$").unwrap())

@@ -258,29 +258,13 @@ def run_cpp_lint(
 
 
 def run_iwyu_pragma_check() -> bool:
-    """
-    Run IWYU pragma checker on platform headers.
-
-    Returns:
-        True if all platform headers have IWYU pragma markings, False otherwise
-    """
-    print("")
-    print("🔍 IWYU PRAGMA CHECK")
-    print("--------------------")
-
-    if not ENABLE_IWYU:
-        print("⏭️  IWYU pragma check disabled (ENABLE_IWYU = False)")
-        return True
-
-    result = subprocess.run(
-        ["uv", "run", "python", "ci/lint_cpp/iwyu_pragma_check.py"],
-        capture_output=False,
-    )
-
-    if result.returncode == 0:
-        return True
-    else:
-        return False
+    """No-op: the IWYU "// IWYU pragma: private" check now ships as the
+    `IwyuPragmaPrivateChecker` per-file checker in the Rust crate
+    (`ci/lint_cpp_rs/src/checkers/bare_legacy.rs`) and runs as part of
+    `run_cpp_lint()` above. Kept as a stub so existing callers
+    (`ci/lint.py` orchestrator) don't need to lose the call site during
+    the migration window. See FastLED #3297."""
+    return True
 
 
 def run_iwyu_analysis(
@@ -710,31 +694,11 @@ def run_cpp_lint_single_file(
 
 
 def run_iwyu_pragma_check_single_file(file_path: str) -> bool:
-    """
-    Check IWYU pragma on a single file.
-
-    Args:
-        file_path: Absolute path to the file
-
-    Returns:
-        True if file has IWYU pragma or is not in platforms/, False otherwise
-    """
-    if not ENABLE_IWYU:
-        return True
-
-    result = RunningProcess.run(
-        ["uv", "run", "python", "ci/lint_cpp/iwyu_pragma_check.py", file_path],
-        cwd=None,
-        check=False,
-        timeout=30,
-    )
-
-    if result.returncode != 0:
-        # Print the error message from the checker
-        if result.stdout:
-            print(result.stdout, end="")
-        return False
-
+    """No-op single-file variant. The `IwyuPragmaPrivateChecker` per-file
+    Rust checker already runs on the single-file `bash lint <file>` path
+    via the normal cpp-lint dispatch, so the legacy subprocess shim is
+    redundant. See FastLED #3297."""
+    del file_path  # accepted for API compatibility
     return True
 
 

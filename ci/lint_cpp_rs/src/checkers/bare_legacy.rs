@@ -351,6 +351,61 @@ fn legacy_log_replacement(macro_name: &str) -> String {
     format!("{macro_name}_F")
 }
 
+// --- IwyuPragmaPrivateChecker -----------------------------------------------
+//
+// Ensures every header in `src/platforms/<subdir>/...` carries an IWYU pragma
+// marker so include-what-you-use treats it as a private implementation detail.
+// Root-level files in `src/platforms/` are public by default and don't need
+// the marker. Origin: ci/lint_cpp/iwyu_pragma_check.py.
+
+struct IwyuPragmaPrivateChecker;
+
+impl FileContentChecker for IwyuPragmaPrivateChecker {
+    fn name(&self) -> &'static str {
+        "IwyuPragmaPrivateChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        if !ends_with_any(file_path, &[".h", ".hpp"]) {
+            return false;
+        }
+        let normalized = normalize_path(file_path);
+        let project_normalized = normalize_path(&path_to_string(project_root));
+        let platforms_root = format!("{project_normalized}/src/platforms");
+        let platforms_relative_prefix = "src/platforms";
+
+        // Must be under src/platforms/ (absolute or repo-relative form).
+        let under_platforms = normalized.starts_with(&format!("{platforms_root}/"))
+            || normalized.starts_with(&format!("{platforms_relative_prefix}/"));
+        if !under_platforms {
+            return false;
+        }
+
+        // Skip root-level files directly under src/platforms/. Python's
+        // `file.parent != platforms_dir` check is equivalent to "the path
+        // under src/platforms/ has at least one more `/` separator".
+        let relative_to_platforms = normalized
+            .strip_prefix(&format!("{platforms_root}/"))
+            .or_else(|| normalized.strip_prefix(&format!("{platforms_relative_prefix}/")))
+            .unwrap_or("");
+        relative_to_platforms.contains('/')
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        // Python's check is a flat `"IWYU pragma:" in content` substring scan.
+        // Mirror it exactly so binary / unicode-decode-error files behave
+        // the same (Rust's read_to_string would have already failed earlier
+        // and the file would be silently skipped by the dispatcher).
+        if file_content.content.contains("IWYU pragma:") {
+            return Vec::new();
+        }
+        vec![(
+            0,
+            "Should be marked: // IWYU pragma: private".to_string(),
+        )]
+    }
+}
+
 // --- Shared helpers ----------------------------------------------------------
 //
 // All five checkers share the same Python-style "skip line on block comment
