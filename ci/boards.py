@@ -79,6 +79,14 @@ class Board:
     extra_scripts: list[str] | None = (
         None  # Custom build scripts to run (e.g., ['pre:script.py'] for pre-build hooks)
     )
+    # Serial monitor filters (e.g., ["default", "esp32_exception_decoder"]).
+    # ESP32-family boards auto-default to ["default", "esp32_exception_decoder"]
+    # in to_platformio_ini() when this is left None — see #3274 Phase 1. Set to
+    # [] to suppress the auto-default; set to a custom list to override.
+    monitor_filters: list[str] | None = None
+    # PlatformIO static-analysis tool name (e.g., "clangtidy"). Opt-in per-board;
+    # not auto-defaulted. Only consumed by `pio check`, not the compile path.
+    check_tool: str | None = None
     # Opt-in for GCC -fopt-info-all -> optimization_report.txt. Default OFF
     # because the file accumulates across every example in the matrix and can
     # exceed 100 MB on no-LTO boards with a large sketch set (nrf52840 with
@@ -651,6 +659,29 @@ class Board:
                 lines.append("lib_ignore =")
                 for lib in self.lib_ignore:
                     lines.append(f"    {lib}")
+
+        # Serial monitor filters. ESP32-family boards auto-default to
+        # ["default", "esp32_exception_decoder"] so that crash backtraces
+        # decode to file:line under `bash debug` / `pio device monitor`
+        # without depending on the root platformio.ini merge (see #3274
+        # Phase 1). An explicit `monitor_filters=[]` on a Board suppresses
+        # the auto-default; any non-None value overrides it.
+        is_esp32_family = self.board_name.startswith("esp32") or (
+            self.real_board_name is not None
+            and self.real_board_name.startswith("esp32")
+        )
+        effective_monitor_filters = self.monitor_filters
+        if effective_monitor_filters is None and is_esp32_family:
+            effective_monitor_filters = ["default", "esp32_exception_decoder"]
+        if effective_monitor_filters:
+            lines.append("monitor_filters =")
+            for mf in effective_monitor_filters:
+                lines.append(f"    {mf}")
+
+        # PlatformIO static-analysis tool (consumed by `pio check`, not the
+        # compile path). Opt-in per-board; not auto-defaulted.
+        if self.check_tool:
+            lines.append(f"check_tool = {self.check_tool}")
 
         # Add FastLED-specific configurations if project_root is provided
         if project_root:
