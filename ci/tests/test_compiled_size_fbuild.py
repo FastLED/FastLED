@@ -57,21 +57,30 @@ def test_find_fbuild_elf_prefers_prog_path_when_under_fbuild(tmp_path: Path) -> 
     assert _find_fbuild_elf(board_info, tmp_path) == elf
 
 
-def test_find_fbuild_elf_probes_modern_layout_without_env_segment(
+def test_find_fbuild_elf_probes_arm_layout_without_env_segment(
     tmp_path: Path,
 ) -> None:
-    """Current fbuild layout: `<build_dir>/.fbuild/build/release/firmware.elf`.
-
-    Older fbuild releases used `<env>/release/firmware.elf`. The probe
-    must accept the modern layout so the override and downstream size
-    measurement keep working after fbuild's path simplification.
-    """
+    """`bash compile <arm-board>` path: `<build_dir>/.fbuild/build/release/firmware.elf`."""
     fbuild_dir = tmp_path / ".fbuild" / "build" / "release"
     elf = _make_fake_elf(fbuild_dir / "firmware.elf")
 
     board_info = {"prog_path": "stale.pio/build/lpc/firmware.elf"}
-    # board_info has no .fbuild prog_path AND no env_name keyed entry,
-    # so the function should still find the standalone fbuild ELF.
+    assert _find_fbuild_elf(board_info, tmp_path) == elf
+
+
+def test_find_fbuild_elf_probes_pio_wrapper_layout_with_env_segment(
+    tmp_path: Path,
+) -> None:
+    """`PioCompiler._build_fbuild_sync` path (ESP32 / Arduino): the ELF lands
+    at `<build_dir>/.fbuild/build/<env>/release/firmware.elf`. This is the
+    layout `_artifacts_dir` reports for `use_fbuild=True` in `ci/compiler/pio.py`
+    — and the one that broke the first attempt at this fix when the probe
+    only looked at `<build_dir>/.fbuild/build/release/firmware.elf`.
+    """
+    fbuild_dir = tmp_path / ".fbuild" / "build" / "esp32dev" / "release"
+    elf = _make_fake_elf(fbuild_dir / "firmware.elf")
+
+    board_info = {"prog_path": "stale.pio/build/esp32dev/firmware.elf"}
     assert _find_fbuild_elf(board_info, tmp_path) == elf
 
 

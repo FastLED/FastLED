@@ -182,9 +182,14 @@ def _find_fbuild_elf(board_info: dict[str, Any], build_dir: Path) -> Path | None
          directory — covers builds where `_override_prog_path_for_fbuild`
          already rewrote the metadata (or where fbuild emitted the
          metadata itself).
-      2. Standard fbuild output locations under `<build_dir>/.fbuild/build/`,
-         both with and without the `<env>/` segment (the layout changed
-         between fbuild releases; we accept either).
+      2. A recursive glob under `<build_dir>/.fbuild/build/**/firmware.elf`
+         covering both fbuild layouts:
+           - `<build_dir>/.fbuild/build/release/firmware.elf` (used by
+             `bash compile <arm-board>` on the standalone driver path)
+           - `<build_dir>/.fbuild/build/<env>/release/firmware.elf` (used
+             by `PioCompiler._build_fbuild_sync` on the PIO-wrapper path
+             that handles ESP32 boards) — see `ci/compiler/pio.py`
+             `_artifacts_dir`.
 
     Returns the resolved ELF path, or None if no fbuild artifact is present
     (i.e. the build was driven by PlatformIO and the old `_run_pio_size`
@@ -205,24 +210,13 @@ def _find_fbuild_elf(board_info: dict[str, Any], build_dir: Path) -> Path | None
     if not fbuild_root.is_dir():
         return None
 
-    env_name = list(board_info.keys())[0] if isinstance(board_info, dict) else None
-    candidates: list[Path] = [
-        # Current fbuild layout (no env_name segment).
-        fbuild_root / "release" / "firmware.elf",
-        fbuild_root / "debug" / "firmware.elf",
-    ]
-    if env_name:
-        # Legacy layout with `<env>/` segment.
-        candidates.extend(
-            [
-                fbuild_root / env_name / "release" / "firmware.elf",
-                fbuild_root / env_name / "debug" / "firmware.elf",
-            ]
-        )
-    existing = [c for c in candidates if c.exists()]
-    if not existing:
+    # Glob both `release/firmware.elf` and `<env>/release/firmware.elf` plus
+    # their `debug/` siblings. Picking the newest mtime handles the case
+    # where a `--release` build was followed by `--quick`.
+    candidates: list[Path] = list(fbuild_root.glob("**/firmware.elf"))
+    if not candidates:
         return None
-    return max(existing, key=lambda p: p.stat().st_mtime)
+    return max(candidates, key=lambda p: p.stat().st_mtime)
 
 
 def check_firmware_size(board: str, example: str | None = None) -> int:
@@ -243,7 +237,21 @@ def check_firmware_size(board: str, example: str | None = None) -> int:
     if fbuild_elf is not None and isinstance(size_tool, str) and size_tool:
         size = _run_size_on_elf(Path(size_tool), fbuild_elf)
         if size is not None:
+            print(
+                f"[compiled_size] measured fbuild ELF: {fbuild_elf} "
+                f"(text+data={size} B)"
+            )
             return size
+        print(
+            f"[compiled_size] WARNING: found fbuild ELF {fbuild_elf} "
+            f"but size tool {size_tool!r} returned no parsable output; "
+            f"falling through to pio size."
+        )
+    elif fbuild_elf is None:
+        print(
+            f"[compiled_size] no fbuild ELF found under {build_dir / '.fbuild' / 'build'}; "
+            f"falling through to pio size."
+        )
 
     # PRIORITY 2: PlatformIO's size command. This was previously priority 1;
     # AVR boards still need it because `.hex` file sizes are ASCII-inflated
