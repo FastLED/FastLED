@@ -466,7 +466,7 @@ static bool solve_strict_subgamut_from_XYZ(const ProfileCache& cache,
         t[1] = fl::max(t[1], 0.0f);
         t[2] = fl::max(t[2], 0.0f);
         const float m = max3f(t[0], t[1], t[2]);
-        if (m > 1.0f) {
+        if (m > 1e-9f) {
             const float inv_m = 1.0f / m;
             t[0] *= inv_m; t[1] *= inv_m; t[2] *= inv_m;
         }
@@ -531,14 +531,14 @@ bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
 }
 
 bool solve_strict_subgamut_xy(const ProfileCache& cache,
-                              const float xy_t[2], float Y_t,
+                              const float xy_t[2], float source_value,
                               float out_rgbw[4]) FL_NOEXCEPT {
     out_rgbw[0] = out_rgbw[1] = out_rgbw[2] = out_rgbw[3] = 0.0f;
-    if (Y_t < 1e-9f) {
+    if (source_value < 1e-9f) {
         return true;
     }
     float X_t[3];
-    xyY_to_XYZ(xy_t[0], xy_t[1], Y_t, X_t);
+    xyY_to_XYZ(xy_t[0], xy_t[1], 1.0f, X_t);
 
     // Out-of-hull projection (#2708). xy_t arrives directly (this variant is
     // called by the LUT builder), so we must project here before routing.
@@ -576,6 +576,13 @@ bool solve_strict_subgamut_xy(const ProfileCache& cache,
         t[0] = fl::max(t[0], 0.0f);
         t[1] = fl::max(t[1], 0.0f);
         t[2] = fl::max(t[2], 0.0f);
+        const float m = max3f(t[0], t[1], t[2]);
+        if (m > 1e-9f) {
+            const float endpoint_scale = source_value / m;
+            t[0] *= endpoint_scale;
+            t[1] *= endpoint_scale;
+            t[2] *= endpoint_scale;
+        }
         out_rgbw[sg.idx_a] = t[0];
         out_rgbw[sg.idx_b] = t[1];
         out_rgbw[sg.idx_c] = t[2];
@@ -944,7 +951,7 @@ LutTable build_lut(const ProfileCache& cache, int grid_n,
     return lut;
 }
 
-void lookup_lut(const LutTable& lut, const float xy_t[2], float Y_t,
+void lookup_lut(const LutTable& lut, const float xy_t[2], float source_value,
                 float out_rgbw[4]) FL_NOEXCEPT {
     // Defend against degenerate LUTs (empty table, unbuilt cells, zero span).
     // build_lut() returns an empty LutTable on bad input â€” without these
@@ -1002,7 +1009,7 @@ void lookup_lut(const LutTable& lut, const float xy_t[2], float Y_t,
             const float dy01 = c01[8 + k] * inv_Q;
             const float dy11 = c11[8 + k] * inv_Q;
 
-            const float per_Y =
+            const float endpoint =
                   v00 * h00x * h00y + v10 * h01x * h00y
                 + v01 * h00x * h01y + v11 * h01x * h01y
                 + dx00 * h10x * h00y + dx10 * h11x * h00y
@@ -1010,7 +1017,7 @@ void lookup_lut(const LutTable& lut, const float xy_t[2], float Y_t,
                 + dy00 * h00x * h10y + dy10 * h01x * h10y
                 + dy01 * h00x * h11y + dy11 * h01x * h11y;
 
-            float t = per_Y * Y_t;
+            float t = endpoint * source_value;
             if (t < 0.0f) t = 0.0f;
             out_rgbw[k] = t;
         }
@@ -1020,9 +1027,9 @@ void lookup_lut(const LutTable& lut, const float xy_t[2], float Y_t,
         const float w01 = (1 - fx) * fy;
         const float w11 = fx * fy;
         for (int k = 0; k < 4; ++k) {
-            const float per_Y = (w00 * c00[k] + w10 * c10[k]
-                               + w01 * c01[k] + w11 * c11[k]) * inv_Q;
-            float t = per_Y * Y_t;
+            const float endpoint = (w00 * c00[k] + w10 * c10[k]
+                                  + w01 * c01[k] + w11 * c11[k]) * inv_Q;
+            float t = endpoint * source_value;
             if (t < 0.0f) t = 0.0f;
             out_rgbw[k] = t;
         }

@@ -264,5 +264,118 @@ struct EmitterProfile {
     float input_xy_w[2];  // source white chromaticity (default D65)
 };
 
+// Backward-compat alias for the original PR vocabulary (issue #3231 → PR 2
+// of #3255). New code should prefer the topology-independent
+// `EmitterProfile` name; existing call sites that spell out
+// `RgbColorimetricProfile` keep compiling.
+using RgbColorimetricProfile = EmitterProfile;
+
+// Cache derived from `EmitterProfile`: precomputed XYZ primaries, inverse
+// primary matrix, and source-space matrix when an input gamut is supplied.
+// Built once per profile and reused across pixels.
+struct RgbColorimetricCache {
+    float P_R[3], P_G[3], P_B[3];
+    float P_RGB_inv[3][3];
+    float M_src[3][3];
+    bool has_source_space;
+};
+
+// Build the precomputed primaries / inverse matrices for `p`. Returns false
+// only when the device-emitter primary matrix is singular (collinear
+// chromaticities); the cache is still populated with zeros so callers can
+// safely fall back to the no-op solve.
+//
+// Source-space handling matches the RGBW path (#2705 semantics): when
+// `input_xy_w[1]` is effectively zero, the input RGB triple IS treated as
+// drive coordinates. Otherwise a source-primary matrix is built and
+// normalized so that the source white at unit drive lands on the maximum
+// per-channel column — keeping outputs in [0, 1] for in-gamut inputs.
+inline bool build_rgb_colorimetric_cache(const EmitterProfile& p,
+                                         RgbColorimetricCache* cache) FL_NOEXCEPT {
+    xyY_to_XYZ(p.xy_r[0], p.xy_r[1], p.lum_r, cache->P_R);
+    xyY_to_XYZ(p.xy_g[0], p.xy_g[1], p.lum_g, cache->P_G);
+    xyY_to_XYZ(p.xy_b[0], p.xy_b[1], p.lum_b, cache->P_B);
+
+    const float P_RGB[3][3] = {
+        { cache->P_R[0], cache->P_G[0], cache->P_B[0] },
+        { cache->P_R[1], cache->P_G[1], cache->P_B[1] },
+        { cache->P_R[2], cache->P_G[2], cache->P_B[2] },
+    };
+    const bool ok_rgb = invert3x3(P_RGB, cache->P_RGB_inv);
+    cache->has_source_space = (p.input_xy_w[1] > 1e-6f)
+                           && build_source_matrix(p.input_xy_r, p.input_xy_g,
+                                                  p.input_xy_b, p.input_xy_w,
+                                                  cache->M_src);
+    if (cache->has_source_space && ok_rgb) {
+        float X_w[3];
+        xyY_to_XYZ(p.input_xy_w[0], p.input_xy_w[1], 1.0f, X_w);
+        float t[3];
+        matvec3(cache->P_RGB_inv, X_w, t);
+        const float mt = fl::max(fl::max(fl::fabs(t[0]), fl::fabs(t[1])),
+                                 fl::fabs(t[2]));
+        if (mt > 1e-6f) {
+            const float scale_k = 1.0f / mt;
+            for (int i = 0; i < 3; ++i) {
+                for (int j = 0; j < 3; ++j) {
+                    cache->M_src[i][j] *= scale_k;
+                }
+            }
+        }
+    }
+    if (!ok_rgb) {
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                cache->P_RGB_inv[i][j] = 0.0f;
+            }
+        }
+    }
+    if (!cache->has_source_space) {
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                cache->M_src[i][j] = 0.0f;
+            }
+        }
+    }
+    return ok_rgb;
+}
+
+// Map a source-space RGB triple to absolute XYZ. With a configured source
+// gamut, this is the M_src multiplication; without one, the device-emitter
+// primary columns are used directly (the input is treated as drive
+// coordinates).
+inline void rgb_source_to_XYZ(const RgbColorimetricCache& cache, float s_r,
+                              float s_g, float s_b,
+                              float X_t[3]) FL_NOEXCEPT {
+    if (cache.has_source_space) {
+        const float s[3] = { s_r, s_g, s_b };
+        matvec3(cache.M_src, s, X_t);
+    } else {
+        X_t[0] = cache.P_R[0] * s_r + cache.P_G[0] * s_g + cache.P_B[0] * s_b;
+        X_t[1] = cache.P_R[1] * s_r + cache.P_G[1] * s_g + cache.P_B[1] * s_b;
+        X_t[2] = cache.P_R[2] * s_r + cache.P_G[2] * s_g + cache.P_B[2] * s_b;
+    }
+}
+
+// Solve a source-space RGB target for the device RGB drives. The result is
+// clamped to non-negative and normalized so the per-channel max ≤ 1.
+inline bool solve_rgb_colorimetric(const RgbColorimetricCache& cache,
+                                   float s_r, float s_g, float s_b,
+                                   float out_rgb[3]) FL_NOEXCEPT {
+    float X_t[3];
+    rgb_source_to_XYZ(cache, s_r, s_g, s_b, X_t);
+    matvec3(cache.P_RGB_inv, X_t, out_rgb);
+    out_rgb[0] = fl::max(out_rgb[0], 0.0f);
+    out_rgb[1] = fl::max(out_rgb[1], 0.0f);
+    out_rgb[2] = fl::max(out_rgb[2], 0.0f);
+    const float m = fl::max(fl::max(out_rgb[0], out_rgb[1]), out_rgb[2]);
+    if (m > 1.0f) {
+        const float inv_m = 1.0f / m;
+        out_rgb[0] *= inv_m;
+        out_rgb[1] *= inv_m;
+        out_rgb[2] *= inv_m;
+    }
+    return true;
+}
+
 } // namespace colorimetric_response
 } // namespace fl
