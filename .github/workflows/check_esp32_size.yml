@@ -45,4 +45,6 @@ jobs:
       # When the memory work referenced in e646657d01 resumes, tighten
       # this back down as savings land.
       max_size: 640000
-      max_size_apa102: 640000
+      # Apa102 carries the SPI chipset code on top of Blink's baseline and
+      # measures ~687520 B today; give it ~2% headroom.
+      max_size_apa102: 700000
