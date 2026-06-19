@@ -105,22 +105,24 @@ Every `addLeds<>` variant also accepts an optional trailing `fl::Bus B = fl::Bus
 
 The `fl::Bus` enum (in `fl/channels/bus.h`) is the single identifier that flows through both the templated APIs and the runtime registry overrides. Each value names exactly one concrete driver:
 
-| `fl::Bus::X` | Driver string (`busName(X)` / `IChannelDriver::getName()`) |
-|---|---|
-| `RMT` | `"RMT"` |
-| `PARLIO` | `"PARLIO"` |
-| `SPI` | `"SPI"` |
-| `I2S` | `"I2S"` |
-| `I2S_SPI` | `"I2S_SPI"` |
-| `LCD_RGB` | `"LCD_RGB"` |
-| `LCD_SPI` | `"LCD_SPI"` |
-| `LCD_CLOCKLESS` | `"LCD_CLOCKLESS"` |
-| `UART` | `"UART"` |
-| `FLEX_IO` | `"FLEX_IO"` |
-| `OBJECT_FLED` | `"OBJECT_FLED"` |
-| `BIT_BANG` | `"BIT_BANG"` |
-| `STUB` | `"STUB"` |
-| `AUTO` | sentinel - resolves to `DefaultBus<Chipset>::value` for the platform |
+| `fl::Bus::X` | Driver string (`busName(X)` / `IChannelDriver::getName()`) | Supported on |
+|---|---|---|
+| `RMT` | `"RMT"` | All ESP32 variants |
+| `PARLIO` | `"PARLIO"` | ESP32-C5, ESP32-C6, ESP32-H2, ESP32-P4 (chips with the PARLIO peripheral — `SOC_PARLIO_SUPPORTED=1`; **NOT** S3/S2/C3/original) |
+| `SPI` | `"SPI"` | ESP32, S2, S3 |
+| `I2S` | `"I2S"` | ESP32-S3 (LCD_CAM I80 bus, experimental) |
+| `I2S_SPI` | `"I2S_SPI"` | ESP32-dev (original) |
+| `LCD_RGB` | `"LCD_RGB"` | ESP32-P4 |
+| `LCD_SPI` | `"LCD_SPI"` | ESP32-S3 |
+| `LCD_CLOCKLESS` | `"LCD_CLOCKLESS"` | ESP32-S3 |
+| `UART` | `"UART"` | All ESP32 variants (experimental) |
+| `FLEX_IO` | `"FLEX_IO"` | Teensy 4.x |
+| `OBJECT_FLED` | `"OBJECT_FLED"` | Teensy 4.x |
+| `BIT_BANG` | `"BIT_BANG"` | Portable fallback (all platforms) |
+| `STUB` | `"STUB"` | Host tests only |
+| `AUTO` | sentinel - resolves to `DefaultBus<Chipset>::value` for the platform | — |
+
+> **PARLIO** is only available on chips that ship Espressif's PARLIO peripheral. The driver compilation is guarded by `FASTLED_ESP32_HAS_PARLIO` which maps to ESP-IDF's `SOC_PARLIO_SUPPORTED` capability bit. On any other chip the driver TU is empty even if you `enableDrivers<fl::Bus::PARLIO>()` — `BusTraits<Bus::PARLIO>` reports the bus as unavailable and dispatch falls back to the priority next-best.
 
 `busName(Bus)` returns the canonical string literal. This is what `ChannelManager::findDriverByName` matches against each driver's `getName()`. Driver names match the enumerator exactly, including underscores (`"BIT_BANG"`, `"FLEX_IO"`, `"OBJECT_FLED"`).
 
