@@ -756,6 +756,14 @@ ESP32DEV = Board(
     # depending on root (which CI no longer reads — see #3274). The root
     # esp32dev section is kept minimal for `bash debug` (it still extends
     # generic-esp for debug output).
+    #
+    # build_unflags strips the default pioarduino debug profile (-Og -g)
+    # that would otherwise blow the 330 KB ceiling on Blink; build_flags
+    # then forces a size-optimised release build matching #3268's intent.
+    build_unflags=[
+        "-Og",
+        "-g",
+    ],
     build_flags=[
         "-Os",
         "-fno-exceptions",
@@ -765,6 +773,8 @@ ESP32DEV = Board(
         "-ffunction-sections",
         "-fdata-sections",
         "-DNDEBUG",
+        "-UDEBUG",
+        "-UFASTLED_DEBUG",
         "-DCORE_DEBUG_LEVEL=0",
         "-DLOG_LOCAL_LEVEL=ESP_LOG_NONE",
     ],
