@@ -19,6 +19,19 @@
   #define FASTLED_INLINE_LAMBDA_SIZE 64
 #endif
 
+// `FL_FUNCTION_NO_HEAP_FALLBACK` opt-out (FastLED #3237):
+// When defined, constructing an `fl::function` from a callable whose
+// captured state exceeds `FASTLED_INLINE_LAMBDA_SIZE` triggers a
+// compile-time error instead of silently routing through the
+// `HeapHolder<F>` + `shared_ptr<F>` heap fallback. Memory-constrained
+// users who cannot tolerate the heap allocation can `#define` this
+// before including FastLED headers; the compile failure points to the
+// over-SBO call site with a suggestion to either reduce the capture or
+// bump `FASTLED_INLINE_LAMBDA_SIZE`. The default behaviour (heap
+// fallback via `shared_ptr<F>`) is preserved when the macro is not
+// defined -- see the #3237 investigation comment for the audit and
+// decision rationale.
+
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(float-equal)
 
@@ -192,6 +205,19 @@ private:
     template <typename Func>
     void init_with_impl(Func&& f, false_type /* over-SBO; use HeapHolder */) FL_NOEXCEPT {
         using FBare = typename remove_reference<Func>::type;
+#ifdef FL_FUNCTION_NO_HEAP_FALLBACK
+        // Opt-out for memory-constrained users (FastLED #3237). The default
+        // heap-fallback path is suppressed and over-SBO callables fail at
+        // compile time. Suggested fixes are baked into the message.
+        (void)f;
+        FL_STATIC_ASSERT(sizeof(FBare) <= kSboSize,
+                         "fl::function: capture exceeds FASTLED_INLINE_LAMBDA_SIZE "
+                         "and FL_FUNCTION_NO_HEAP_FALLBACK is defined. "
+                         "Either reduce the captured state, or bump "
+                         "FASTLED_INLINE_LAMBDA_SIZE for this build, or "
+                         "undef FL_FUNCTION_NO_HEAP_FALLBACK to re-enable "
+                         "the shared_ptr-backed heap fallback.");
+#else
         using Holder = HeapHolder<FBare>;
         FL_STATIC_ASSERT(sizeof(Holder) <= kSboSize,
                          "shared_ptr too large for SBO; bump FASTLED_INLINE_LAMBDA_SIZE.");
@@ -201,6 +227,7 @@ private:
         // refcount), so always use the non_trivial_manager path here.
         mManager = &non_trivial_manager<Holder>;
         mHasValue = true;
+#endif
     }
 
     // Reset to empty state; calls destructor on the stored callable if any.
