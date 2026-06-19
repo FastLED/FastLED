@@ -32,6 +32,18 @@ APOLLO3_2_2_0 = "https://github.com/nigelb/platform-apollo3blue"
 # Old fork that we were using
 # ESP32_IDF_5_1_PIOARDUINO = "https://github.com/zackees/platform-espressif32#Arduino/IDF5"
 
+# PARLIO TX ISR placement flags. Required on every PARLIO-capable ESP32 target
+# (SOC_PARLIO_SUPPORTED): without them the TX ISR sits in flash, takes cache-miss
+# stalls mid-execution, and violates LED protocol timing. The driver #warning's
+# when CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM is missing
+# (src/platforms/esp/32/drivers/parlio/parlio_peripheral_esp.cpp.hpp). Apply this
+# to the build_flags of every PARLIO board so the next one added cannot silently
+# miss them. See #3271.
+ESP32_PARLIO_BUILD_FLAGS = [
+    "-DCONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM=1",
+    "-DCONFIG_PARLIO_TX_ISR_CACHE_SAFE=1",
+]
+
 # ALL will be auto populated in the Board constructor whenever a
 # board is defined.
 ALL: list["Board"] = []
@@ -796,6 +808,7 @@ ESP32_C5_DEVKITC_1 = Board(
     board_name="esp32c5",
     real_board_name="esp32-c5-devkitc-1",
     platform=ESP32_IDF_5_5_1_PIOARDUINO,
+    build_flags=[*ESP32_PARLIO_BUILD_FLAGS],
 )
 
 ESP32_C6_DEVKITC_1 = Board(
@@ -809,6 +822,7 @@ ESP32_C6_DEVKITC_1 = Board(
         "-DARDUINO_USB_MODE=1",  # Select HWCDC (USB-Serial/JTAG) over OTG
         "-DARDUINO_USB_CDC_ON_BOOT=1",  # Route Serial to HWCDC. Safe with setTxTimeoutMs(0); see #2668
         "-DARDUINO_LOOP_STACK_SIZE=16384",  # AutoResearch PARLIO init plus JSON-RPC exceeds the Arduino 8KB default on C6
+        *ESP32_PARLIO_BUILD_FLAGS,
     ],
 )
 
@@ -824,6 +838,7 @@ ESP32_S3_DEVKITC_1 = Board(
         "-DARDUINO_USB_MODE=1",  # Route Serial over native USB for AutoResearch RPC on the upload port
         "-DARDUINO_USB_CDC_ON_BOOT=1",
         "-DARDUINO_LOOP_STACK_SIZE=16384",  # AutoResearch RPC plus ESP driver setup is deep enough to exceed the Arduino 8KB default
+        *ESP32_PARLIO_BUILD_FLAGS,
     ],
 )
 
@@ -845,6 +860,7 @@ ESP32H2 = Board(
     real_board_name="esp32-h2-devkitm-1",
     platform_needs_install=True,  # Install platform package to get the boards
     platform=ESP32_IDF_5_3_PIOARDUINO,
+    build_flags=[*ESP32_PARLIO_BUILD_FLAGS],
 )
 
 ESP32_P4 = Board(
@@ -860,6 +876,7 @@ ESP32_P4 = Board(
         "ARDUINO_USB_MODE=1",
         "ARDUINO_USB_CDC_ON_BOOT=1",
     ],
+    build_flags=[*ESP32_PARLIO_BUILD_FLAGS],
 )
 
 ADA_FEATHER_NRF52840_SENSE = Board(
