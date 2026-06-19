@@ -5,6 +5,7 @@ This module provides high-level orchestration for compiling examples across boar
 It handles compilation workflow, result collection, and statistics reporting.
 """
 
+import os
 import time
 from concurrent.futures import Future, as_completed
 from dataclasses import dataclass, field
@@ -20,9 +21,44 @@ from ci.compiler.pio import FastLEDPaths, PioCompiler
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
-# Default when the caller does not pass `use_fbuild=` explicitly. The
-# ci-compile.py CLI now exposes a `--backend` flag that overrides this.
+# fbuild is the only supported board build backend. The legacy PioCompiler
+# ``pio run`` path is retained as a *comparison-only* tool for users who
+# pass ``bash compile <board> --backend platformio`` explicitly. See
+# #3279 (Phase 3 deprecation) and #3274.
 BOARD_BUILDS_USE_FBUILD = True
+
+# Env var the CLI sets when the user passes ``--backend platformio`` (or
+# the ``--platformio`` / ``--pio`` shortcuts). Programmatic callers that
+# try to flip ``use_fbuild=False`` without that explicit user intent are
+# rejected by ``_assert_explicit_platformio_backend`` below.
+PLATFORMIO_BACKEND_OPT_IN_ENV = "FASTLED_BACKEND_PLATFORMIO_EXPLICIT"
+
+
+def _assert_explicit_platformio_backend() -> None:
+    """Reject programmatic ``use_fbuild=False`` flips without the explicit
+    ``--backend platformio`` CLI opt-in.
+
+    The PlatformIO ``pio run`` backend is a *comparison-only* tool kept
+    around so users can reproduce PlatformIO-native size / link behaviour
+    and diagnose fbuild gaps. Library / CI code MUST NOT silently route
+    around fbuild — every board build in production CI runs through
+    fbuild. If a new caller needs the PIO backend, the user must say so
+    on the command line so the choice is visible in CI logs.
+    """
+    if os.environ.get(PLATFORMIO_BACKEND_OPT_IN_ENV, "").lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    ):
+        return
+    raise RuntimeError(
+        "compile_board_examples(use_fbuild=False) requires the explicit "
+        "`bash compile <board> --backend platformio` CLI flag (which sets "
+        f"{PLATFORMIO_BACKEND_OPT_IN_ENV}=1). The PlatformIO `pio run` "
+        "backend is a comparison-only tool — production CI compiles ALL "
+        "boards via fbuild. See #3279 (Phase 3 deprecation) and #3274."
+    )
 
 
 @typechecked
@@ -54,11 +90,18 @@ def compile_board_examples(
     """Compile examples for a single board using PioCompiler.
 
     Args:
-        use_fbuild: If None, uses BOARD_BUILDS_USE_FBUILD (default True).
-            If True, uses fbuild. If False, uses PlatformIO's `pio run`.
+        use_fbuild: If None, uses BOARD_BUILDS_USE_FBUILD (default True,
+            i.e. fbuild). If True, uses fbuild. ``False`` is only honoured
+            when the user passed ``--backend platformio`` on the CLI (which
+            sets ``FASTLED_BACKEND_PLATFORMIO_EXPLICIT=1``); programmatic
+            flips without that opt-in raise ``RuntimeError``. The PIO
+            ``pio run`` backend is a comparison-only tool — see #3279.
     """
     if use_fbuild is None:
         use_fbuild = BOARD_BUILDS_USE_FBUILD
+
+    if not use_fbuild:
+        _assert_explicit_platformio_backend()
 
     # Resolve global cache directory immediately for display
     resolved_cache_dir = None
@@ -119,10 +162,10 @@ def compile_board_examples(
     print(f"{'=' * 60}")
 
     try:
-        # Create PioCompiler instance.
-        # merge_root_platformio=False (#3278): CI compile paths must be
-        # hermetic w.r.t. the repo-root platformio.ini. Per-board flags
-        # live in ci/boards.py.
+        # Create PioCompiler instance. CI compile is hermetic w.r.t. the
+        # repo-root platformio.ini — per-board flags live in ci/boards.py
+        # (#3274, sever in #3278, legacy opt-in parameter removed in
+        # #3279 Phase 4).
         compiler = PioCompiler(
             board=board,
             verbose=verbose,
@@ -130,7 +173,6 @@ def compile_board_examples(
             additional_defines=defines,
             additional_libs=extra_packages,
             use_fbuild=use_fbuild,
-            merge_root_platformio=False,
         )
 
         # Build all examples - use merged-bin method if requested

@@ -749,6 +749,35 @@ ESP32DEV = Board(
     board_name="esp32dev",
     platform=ESP32_IDF_5_3_PIOARDUINO,
     board_partitions="huge_app.csv",
+    # Size-strip flags for the CI binary-size reference target
+    # (check_esp32_size.yml — 330 KB ceiling). Previously these lived in
+    # root platformio.ini as PR #3268 "band-aid" overrides; #3279 Phase 4
+    # ports them to ci/boards.py so CI can shrink the binary without
+    # depending on root (which CI no longer reads — see #3274). The root
+    # esp32dev section is kept minimal for `bash debug` (it still extends
+    # generic-esp for debug output).
+    #
+    # build_unflags strips the default pioarduino debug profile (-Og -g)
+    # that would otherwise blow the 330 KB ceiling on Blink; build_flags
+    # then forces a size-optimised release build matching #3268's intent.
+    build_unflags=[
+        "-Og",
+        "-g",
+    ],
+    build_flags=[
+        "-Os",
+        "-fno-exceptions",
+        "-fno-rtti",
+        "-fno-unwind-tables",
+        "-fno-asynchronous-unwind-tables",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-DNDEBUG",
+        "-UDEBUG",
+        "-UFASTLED_DEBUG",
+        "-DCORE_DEBUG_LEVEL=0",
+        "-DLOG_LOCAL_LEVEL=ESP_LOG_NONE",
+    ],
 )
 
 # TODO: esp32dev_qemu remove when possible, we don't want an extra board definition unless we need it

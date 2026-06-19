@@ -12,6 +12,8 @@
 
 All board compiles use `fbuild`. Do not add board allowlists or PlatformIO fallback paths when a board does not compile; file board build compatibility problems at https://github.com/FastLED/fbuild/issues and fix them in fbuild.
 
+**`--backend platformio` is a comparison-only tool (#3279).** `bash compile <board> --backend platformio` (and the `--platformio` / `--pio` shortcuts) drives the legacy `PioCompiler` `pio run` backend. Use ONLY to compare fbuild output and find gaps in fbuild's flag / output reproduction. Production CI always uses fbuild — any binary you ship goes through fbuild. Programmatic callers are blocked unless they explicitly opt in via `FASTLED_BACKEND_PLATFORMIO_EXPLICIT=1`; the `--backend platformio` CLI flag is the supported path that sets this automatically. The PIO backend is retained as a diagnostic; do not build new functionality on top of it.
+
 ### Root `./platformio.ini` is a frozen surface (#3274)
 
 Root `./platformio.ini` is owned by `bash autoresearch` and `bash debug` (and raw `pio run`). CI compile, size-check, bloat, and regression tests consume `ci/boards.py` — NOT root `platformio.ini`. The two surfaces are orthogonal and must NOT be conflated.

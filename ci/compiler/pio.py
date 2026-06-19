@@ -31,7 +31,6 @@ from ci.boards import Board, create_board
 from ci.compiler.build_config import (
     apply_board_specific_config,
     generate_build_info_json_from_existing_build,
-    get_root_platformio_build_flags,
 )
 from ci.compiler.build_utils import (
     create_building_banner,
@@ -56,6 +55,49 @@ from ci.compiler.source_manager import (
 from ci.util.output_formatter import create_sketch_path_formatter
 
 
+def _probe_root_platformio_build_flags(
+    board_name: str, project_root: Path
+) -> list[str]:
+    """Return ``build_flags`` from the matching ``[env:<board_name>]``
+    section of the repo-root ``platformio.ini``, used by the
+    ``FASTLED_FAIL_ON_ROOT_MERGE`` tripwire to detect per-board flags
+    that should have been ported to ``ci/boards.py``.
+
+    This is a tripwire-only probe — CI compile no longer merges root flags
+    into synthesised envs (severed by #3278; legacy bridge fully removed
+    in #3279 Phase 4). It exists solely so the tripwire can name the
+    offending flags in its error message when it fires.
+
+    Behaviour:
+    - Returns ``[]`` if the root ``platformio.ini`` is missing, malformed,
+      or has no matching ``[env:<board_name>]`` section.
+    - Never raises: parse errors are swallowed and logged so a broken
+      root file cannot block a build via the tripwire path.
+    """
+    root_ini = project_root / "platformio.ini"
+    if not root_ini.exists():
+        return []
+    try:
+        # Local import to avoid a circular import at module load.
+        from ci.compiler.platformio_ini import PlatformIOIni
+
+        pio_ini = PlatformIOIni.parseFile(root_ini)
+        env = pio_ini.parsed.environments.get(board_name)
+        if env is None:
+            return []
+        # `parsed` already has extends + [env] inheritance applied and
+        # ${env:...} substitutions resolved.
+        return list(env.build_flags)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:
+        print(
+            f"Warning: failed to probe root platformio.ini for env '{board_name}': {e}"
+        )
+        return []
+
+
 def _init_platformio_build(
     board: Board,
     verbose: bool,
@@ -66,7 +108,6 @@ def _init_platformio_build(
     additional_include_dirs: Optional[list[str]] = None,
     additional_libs: Optional[list[str]] = None,
     use_fbuild: bool = False,
-    merge_root_platformio: bool = False,
 ) -> InitResult:
     """Initialize the PlatformIO build directory. Assumes lock is already held by caller.
 
@@ -74,19 +115,18 @@ def _init_platformio_build(
     The build directory, platformio.ini, and source files are still set up since fbuild
     uses the same project structure.
 
-    When ``merge_root_platformio=True``, ``build_flags`` from the matching
-    ``[env:<board>]`` section of the repo-root ``platformio.ini`` are
-    appended to the synthesised env (legacy behaviour for issue #2664).
-    Defaults to ``False`` as of #3278 — CI must remain hermetic w.r.t. the
-    root ini so that edits to ``platformio.ini`` (an "orthogonal" surface
-    used by `bash debug` / `bash autoresearch`) cannot silently change CI
-    binaries. The intended per-board flags live in ``ci/boards.py``.
+    Root ``platformio.ini`` is NEVER merged into the synthesised env (the
+    legacy bridge was severed in #3278 and the opt-in ``merge_root_platformio``
+    parameter was removed in #3279 Phase 4 — no production caller used it).
+    Per-board flags belong in ``ci/boards.py``; the root file is owned by
+    ``bash autoresearch`` and ``bash debug`` only (#3274).
 
-    When the ``FASTLED_FAIL_ON_ROOT_MERGE=1`` env var is set, this function
-    additionally probes the root ini even when ``merge_root_platformio`` is
-    ``False`` and raises if any flags would have been silently merged.
-    That canary catches any per-board flag we forgot to port to
-    ``ci/boards.py`` during the #3274 sever.
+    The ``FASTLED_FAIL_ON_ROOT_MERGE=1`` env var enables a diagnostic
+    probe that raises if any flag would historically have been merged.
+    The CI tripwire that used to set this during the migration was
+    retired in #3279 Phase 4 (root genuinely has ``bash debug``-targeted
+    flags that the orthogonality rule says not to remove). Users can
+    still opt into the probe manually for debugging suspected leakage.
     """
     project_root = resolve_project_root()
     build_dir = build_dir or (project_root / ".build" / "pio" / board.board_name)
@@ -161,50 +201,46 @@ def _init_platformio_build(
         # Non-fatal: continue without optimization artifacts if path resolution fails
         pass
 
-    # Root-platformio.ini merge (issue #2664 / sever tracked in #3278).
+    # Root-platformio.ini tripwire (issue #2664 history; sever #3278; legacy
+    # opt-in merge removed in #3279 Phase 4).
     #
-    # Historically every build silently appended ``[env:<board>].build_flags``
-    # from the repo-root ``platformio.ini`` to the synthesised env. CI now
-    # opts OUT by default (``merge_root_platformio=False``) so the root file
-    # cannot quietly change CI binaries — per-board flags belong in
-    # ``ci/boards.py``. Interactive entry points (`bash debug`, ad-hoc
-    # ``bash compile --use-root-ini`` invocations) can still opt back in.
+    # The synthesised env NEVER inherits ``build_flags`` from the repo-root
+    # ``platformio.ini`` — that file is owned by ``bash autoresearch`` and
+    # ``bash debug`` only (#3274 orthogonality). Per-board flags belong in
+    # ``ci/boards.py``.
     #
-    # The ``FASTLED_FAIL_ON_ROOT_MERGE=1`` env var turns this into a tripwire:
-    # we still probe the root ini and raise if any flag would have been
-    # silently merged, which catches per-board flags that should have been
-    # ported to ``ci/boards.py`` but were not.
+    # The ``FASTLED_FAIL_ON_ROOT_MERGE=1`` env var enables a diagnostic
+    # probe that raises if any flag would historically have been merged.
+    # CI workflows used to set it as a tripwire during the migration,
+    # but #3279 Phase 4 retired that setup — root genuinely has
+    # ``bash debug``-targeted flags that the orthogonality rule says
+    # NOT to remove, and the simple "any flag => raise" probe cannot
+    # distinguish ported-and-also-in-root from unported-and-only-in-root.
+    # The hook is preserved here so users can opt into the diagnostic
+    # manually (``FASTLED_FAIL_ON_ROOT_MERGE=1 bash compile <board>``)
+    # when debugging suspected root-leakage.
     fail_on_root_merge = os.environ.get("FASTLED_FAIL_ON_ROOT_MERGE", "").lower() in (
         "1",
         "true",
         "yes",
         "on",
     )
-    if merge_root_platformio or fail_on_root_merge:
-        root_build_flags = get_root_platformio_build_flags(
+    if fail_on_root_merge:
+        root_build_flags = _probe_root_platformio_build_flags(
             board.board_name, project_root
         )
-    else:
-        root_build_flags = []
-
-    if root_build_flags and not merge_root_platformio and fail_on_root_merge:
-        # Tripwire fired: CI compile produced flags from the root ini that
-        # were NOT supposed to reach the build. Raise so the build fails
-        # loudly with the missing per-board flags listed.
-        raise RuntimeError(
-            f"FASTLED_FAIL_ON_ROOT_MERGE=1: root platformio.ini "
-            f"[env:{board.board_name}] would silently inject "
-            f"{len(root_build_flags)} build_flag(s) into the CI build: "
-            f"{root_build_flags}. These must be ported to ci/boards.py "
-            f"(see #3278) before the sever can complete."
-        )
-
-    if root_build_flags and merge_root_platformio:
-        print(
-            f"Merging {len(root_build_flags)} build_flag(s) from root "
-            f"platformio.ini [env:{board.board_name}]: {root_build_flags}"
-        )
-        board_with_sketch_include.build_flags.extend(root_build_flags)
+        if root_build_flags:
+            # Tripwire fired: the root ini still defines per-board flags
+            # that CI compile would historically have silently inherited.
+            # Raise so the build fails loudly with the offending flags
+            # listed; port them to ``ci/boards.py``.
+            raise RuntimeError(
+                f"FASTLED_FAIL_ON_ROOT_MERGE=1: root platformio.ini "
+                f"[env:{board.board_name}] would silently inject "
+                f"{len(root_build_flags)} build_flag(s) into the CI build: "
+                f"{root_build_flags}. These must be ported to ci/boards.py "
+                f"(see #3274 / #3278 / #3279)."
+            )
 
     # Apply board-specific configuration
     if not apply_board_specific_config(
@@ -364,16 +400,14 @@ class PioCompiler(Compiler):
         additional_include_dirs: Optional[list[str]] = None,
         additional_libs: Optional[list[str]] = None,
         use_fbuild: bool = False,
-        merge_root_platformio: bool = False,
     ) -> None:
         """Construct a PlatformIO compiler driver.
 
-        ``merge_root_platformio`` (default ``False`` per #3278) controls
-        whether ``[env:<board>].build_flags`` from the repo-root
-        ``platformio.ini`` are appended to the synthesised env. CI compile
-        paths must keep this ``False`` so the root file cannot silently
-        change CI binaries; interactive entry points (`bash debug`,
-        ad-hoc `bash compile --use-root-ini`) can opt back in.
+        The synthesised env never inherits flags from the repo-root
+        ``platformio.ini``. The legacy opt-in ``merge_root_platformio``
+        parameter (added in #3278) was removed in #3279 Phase 4 because no
+        production caller passed ``True`` — root `platformio.ini` is owned
+        by ``bash autoresearch`` / ``bash debug`` only, per #3274.
         """
         # Call parent constructor
         super().__init__()
@@ -388,7 +422,6 @@ class PioCompiler(Compiler):
         self.additional_include_dirs = additional_include_dirs
         self.additional_libs = additional_libs
         self.use_fbuild = use_fbuild
-        self.merge_root_platformio = merge_root_platformio
 
         # Global cache directory is already resolved by caller
         self.global_cache_dir = global_cache_dir
@@ -428,7 +461,6 @@ class PioCompiler(Compiler):
             additional_include_dirs=self.additional_include_dirs,
             additional_libs=self.additional_libs,
             use_fbuild=self.use_fbuild,
-            merge_root_platformio=self.merge_root_platformio,
         )
         if result.success:
             self.initialized = True
@@ -574,7 +606,6 @@ class PioCompiler(Compiler):
                 additional_include_dirs=self.additional_include_dirs,
                 additional_libs=self.additional_libs,
                 use_fbuild=True,
-                merge_root_platformio=self.merge_root_platformio,
             )
             if not init_result.success:
                 raise RuntimeError(init_result.output)
@@ -1717,6 +1748,5 @@ def run_pio_build(
         additional_defines,
         additional_include_dirs,
         None,
-        merge_root_platformio=False,  # #3278: CI must be hermetic w.r.t. root platformio.ini
     )
     return pio.build(examples)
