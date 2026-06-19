@@ -2,27 +2,30 @@
 
 // json_dispatch: type-erased core helpers for JSON-to-primitive conversion.
 //
-// `fl::detail::JsonToIntegerVisitor<T>`, `JsonToFloatVisitor<T>`,
-// `JsonToBoolVisitor`, and `JsonToStringVisitor` each contain ~10
-// `operator()` overloads (one per `json_value::variant_t` alternative).
-// When invoked via `data.visit(visitor)`, the variant emits a
-// `visit_fn<T, Visitor>` thunk per (alternative × visitor) pair. With ~6
-// distinct visitor instantiations × 10 alternatives that's ~60+ thunks,
-// plus the per-T body fan-out for the templated visitors -- the audit
-// in #3235 catalogued ~2-3 KB of visitor codegen on LPC845 alone.
+// Legacy `fl::detail::JsonToIntegerVisitor<T>` / `JsonToFloatVisitor<T>` /
+// `JsonToBoolVisitor` / `JsonToStringVisitor` (formerly in
+// `fl/remote/rpc/json_visitors.h`) each contained ~10 `operator()`
+// overloads (one per `json_value::variant_t` alternative). When invoked
+// via `data.visit(visitor)`, the variant emitted a `visit_fn<T, Visitor>`
+// thunk per (alternative × visitor) pair, plus the per-T body fan-out for
+// the templated visitors -- the audit in #3235 catalogued ~2-3 KB of
+// visitor codegen on LPC845.
 //
-// This dispatch layer collapses the per-(visitor × alternative) explosion
-// to **one** shared non-template body per output type. The thin templated
-// `JsonToType<T>::convert` (in `json_to_type.h`) calls the appropriate
-// core, gets back the canonical type (`i64` / `bool` / `float` / `string`)
-// plus a `TypeConversionResult`, and applies per-T narrowing + range
-// checking. The per-(T × alternative) thunk explosion goes away.
+// This dispatch layer collapses that per-(visitor × alternative)
+// explosion to **one** shared non-template body per output type. The
+// thin templated `JsonToType<T>::convert` (in `json_to_type.h`) calls
+// the appropriate core, gets back the canonical type
+// (`i64` / `bool` / `float` / `string`) plus a `TypeConversionResult`,
+// and applies per-T narrowing + range checking. The per-(T × alternative)
+// thunk explosion is gone, which is why the visitor classes themselves
+// were deleted in #3251 (no remaining callers).
 //
 // `FL_NO_INLINE` on the implementations is load-bearing under LTO --
 // without it the compiler inlines the body back at each call site,
 // defeating dedup.
 //
-// See FastLED #3247 / #3244 Tier 2E Phase 2.
+// See FastLED #3247 / #3244 Tier 2E Phase 2, plus #3251 / Tier 3I dead-code
+// removal of the formerly-templated visitor classes.
 
 #include "fl/remote/rpc/type_conversion_result.h"  // IWYU pragma: keep
 #include "fl/stl/int.h"
