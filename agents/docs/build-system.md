@@ -21,7 +21,7 @@ Rules:
 - **No new CI code path may depend on `./platformio.ini`.** Reading, parsing, or importing it from anywhere under `ci/` (other than `ci/autoresearch/` and `ci/debug_attached.py`) is forbidden. See parent #3274.
 - **Every change to `./platformio.ini` requires justification.** Each added non-comment line must carry an adjacent `; justification: <reason>` comment plus `; added-in: PR-<NNN>` (or 40-char SHA). The `bash lint` stage `root_platformio_ini_lockdown` and the matching CodeRabbit rule (`.coderabbit.yaml` path: `platformio.ini`) enforce this.
 - **When porting a flag from root → `ci/boards.py`, do NOT remove it from root.** Both surfaces independently need it (CI vs. local-dev). Removing from one because it's "now in the other" silently breaks the audience the file actually serves.
-- **Roadmap:** `bash autoresearch` is on a path to stop consuming this file entirely and synthesise its own `platformio.ini` from `ci/boards.py` prior to launch (see #3280). Once that lands, root `./platformio.ini` becomes append-only for `bash debug` use cases with a clear path to retirement. Any new functionality should plan for this — prefer extending `ci/boards.py` first and only touch root if `bash debug` truly needs it.
+- **Roadmap:** `bash autoresearch` is on a path to stop consuming this file entirely and synthesise its own `platformio.ini` from `ci/boards.py` prior to launch (see #3281). Once that lands, root `./platformio.ini` becomes append-only for `bash debug` use cases with a clear path to retirement. Any new functionality should plan for this — prefer extending `ci/boards.py` first and only touch root if `bash debug` truly needs it.
 
 ### Use These Commands
 

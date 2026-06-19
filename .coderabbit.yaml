@@ -111,7 +111,7 @@ reviews:
            ```
            +  -D NEW_THING=1
            +  ; justification: bash autoresearch needs NEW_THING for the FOO RPC
-           +  ; added-in: PR-3280
+           +  ; added-in: PR-3281
            ```
 
         3. **Non-autoresearch dependencies are forbidden.** If this PR adds any
@@ -127,7 +127,7 @@ reviews:
 
         AUTORESEARCH MIGRATION NOTE: `bash autoresearch` is on a roadmap to stop
         consuming this file entirely and synthesise its own `platformio.ini` from
-        `ci/boards.py` (see #3280). Until that lands, additions here are accepted
+        `ci/boards.py` (see #3281). Until that lands, additions here are accepted
         with justification. After it lands, this file should be append-only for
         `bash debug` use cases only.
 
