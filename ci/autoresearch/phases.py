@@ -773,12 +773,61 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         print(f"\u274c Error: {e}")
         return 1
 
-    # Validate project directory
-    build_dir = args.project_dir.resolve()
-    if not (build_dir / "platformio.ini").exists():
-        print(f"\u274c Error: platformio.ini not found in {build_dir}")
-        print("   Make sure you're running this from a PlatformIO project directory")
-        return 1
+    # Resolve project root (always the user's invocation cwd) and build_dir.
+    #
+    # Two code paths (#3281):
+    #
+    # 1. Default (``args.use_root_platformio_ini == False``): synthesise
+    #    ``.build/pio/<board>/platformio.ini`` from ``ci/boards.py`` if the
+    #    board is already known at parse time; otherwise defer synthesis to
+    #    :func:`_resolve_port_and_environment` after chip auto-detect.
+    # 2. Legacy (``args.use_root_platformio_ini == True``): read root
+    #    ``./platformio.ini``. The flag is deprecated and emits a warning at
+    #    parse time (see ci/autoresearch/args.py).
+    #
+    # In the deferred-synthesis case we keep ``build_dir`` pointing at the
+    # invocation cwd so the sketch source can still be located under
+    # ``examples/AutoResearch/``. Synthesis happens later, and ``ctx.build_dir``
+    # is rewritten before fbuild is invoked.
+    project_root = args.project_dir.resolve()
+
+    if args.use_root_platformio_ini:
+        build_dir = project_root
+        if not (build_dir / "platformio.ini").exists():
+            print(f"\u274c Error: platformio.ini not found in {build_dir}")
+            print(
+                "   Make sure you're running this from a PlatformIO project directory"
+            )
+            return 1
+    elif final_environment:
+        # Board known up-front \u2014 synthesise now so downstream callers (chip
+        # auto-detect log lines, default_envs probes) see the staged file.
+        from ci.autoresearch.staging import synthesise_autoresearch_project
+
+        try:
+            build_dir = synthesise_autoresearch_project(
+                final_environment,
+                project_root=project_root,
+                verbose=args.verbose,
+            )
+        except KeyboardInterrupt:
+            # Let user-initiated interrupts propagate; never swallow them
+            # under the broad Exception handler below (CodeRabbit feedback,
+            # PR #3290).
+            raise
+        except Exception as e:
+            print(
+                f"\u274c Error: failed to synthesise platformio.ini for "
+                f"board '{final_environment}': {e}"
+            )
+            return 1
+    else:
+        # Board not yet known \u2014 defer synthesis to _resolve_port_and_environment
+        # once chip auto-detect resolves the environment. Use project_root as
+        # the build_dir so the sketch-resolver fallback below picks up
+        # examples/AutoResearch/. The build_dir is rewritten before fbuild is
+        # invoked.
+        build_dir = project_root
 
     # Sketch selection.
     #
@@ -789,17 +838,29 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     # standalone examples/AutoResearchLpc/ harness was retired by FastLED #3030
     # once the soft-FP cascade from #3022 phase 2 freed up the LPC845 flash
     # budget.
+    #
+    # For the synthesised path the staged tree lives under ``build_dir/src/sketch/``
+    # (populated by ``_init_platformio_build`` \u2192 ``copy_example_source``);
+    # for the legacy and deferred-synthesis paths the in-tree
+    # ``examples/AutoResearch/`` source applies.
     sketch_path = build_dir / "examples" / "AutoResearch"
     if not sketch_path.exists():
         staged_sketch_path = build_dir / "src" / "sketch"
         if staged_sketch_path.exists():
             sketch_path = staged_sketch_path
         else:
-            print(
-                "\u274c Error: AutoResearch sketch not found at "
-                f"{sketch_path} or {staged_sketch_path}"
-            )
-            return 1
+            # Fall back to <project_root>/examples/AutoResearch/ when we're in
+            # the synthesised path and the staged sketch isn't laid down yet
+            # (shouldn't happen, but keeps the error message useful).
+            repo_sketch_path = project_root / "examples" / "AutoResearch"
+            if repo_sketch_path.exists():
+                sketch_path = repo_sketch_path
+            else:
+                print(
+                    "\u274c Error: AutoResearch sketch not found at "
+                    f"{sketch_path} or {staged_sketch_path} or {repo_sketch_path}"
+                )
+                return 1
 
     os.environ["PLATFORMIO_SRC_DIR"] = str(sketch_path)
 
@@ -944,26 +1005,86 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                 f"\u2705 Detected {chip_result.chip_type} \u2192 using environment '{ctx.final_environment}'"
             )
         if not ctx.final_environment:
-            from ci.util.pio_package_daemon import get_default_environment
+            # Fall back to <build_dir>/platformio.ini's `default_envs` value.
+            # In the legacy (--use-root-platformio-ini) path this reads root
+            # ./platformio.ini; in the synthesised path (#3281) this reads
+            # nothing if the board isn't already known (deferred synthesis
+            # hasn't run yet). That fallback is fine \u2014 we just don't have a
+            # platformio.ini to consult yet, so we bail with a clear error.
+            if args.use_root_platformio_ini:
+                from ci.util.pio_package_daemon import get_default_environment
 
-            default_env = get_default_environment(str(ctx.build_dir))
-            if default_env:
-                ctx.final_environment = default_env
-                error_msg = "Chip detection failed"
-                print(
-                    f"\u26a0\ufe0f  {error_msg}, "
-                    f"using platformio.ini default: '{ctx.final_environment}'"
-                )
+                default_env = get_default_environment(str(ctx.build_dir))
+                if default_env:
+                    ctx.final_environment = default_env
+                    error_msg = "Chip detection failed"
+                    print(
+                        f"\u26a0\ufe0f  {error_msg}, "
+                        f"using platformio.ini default: '{ctx.final_environment}'"
+                    )
+                else:
+                    print(
+                        "\u26a0\ufe0f  Chip detection failed and no default_envs in platformio.ini"
+                    )
             else:
+                # Synthesised path with no env known and chip detect failed:
+                # there is no platformio.ini to fall back to and nothing
+                # downstream can recover. Fail fast with a clear error
+                # (CodeRabbit feedback, PR #3290) so callers don't silently
+                # proceed with an unset final_environment.
                 print(
-                    "\u26a0\ufe0f  Chip detection failed and no default_envs in platformio.ini"
+                    "\u274c Chip detection failed and no environment given. "
+                    "Pass a positional environment (e.g. `bash autoresearch esp32c6 ...`) "
+                    "or attach a recognisable device."
                 )
+                return 1
         print()
 
-    # Platform mismatch warning
-    from ci.util.pio_package_daemon import get_default_environment
+    # Deferred synthesis (#3281). When --use-root-platformio-ini is NOT set
+    # and the board wasn't known at parse time, the build_dir is still pointing
+    # at the project root. Now that chip auto-detect has resolved the
+    # environment we can synthesise .build/pio/<board>/platformio.ini and
+    # redirect build_dir so fbuild reads the synthesised file instead of root.
+    if (
+        not args.use_root_platformio_ini
+        and ctx.final_environment
+        and ctx.build_dir == args.project_dir.resolve()
+    ):
+        from ci.autoresearch.staging import synthesise_autoresearch_project
 
-    default_env = get_default_environment(str(ctx.build_dir))
+        try:
+            ctx.build_dir = synthesise_autoresearch_project(
+                ctx.final_environment,
+                project_root=args.project_dir.resolve(),
+                verbose=args.verbose,
+            )
+            # The staged sketch lives under <build_dir>/src/sketch \u2014 point
+            # PLATFORMIO_SRC_DIR at it so fbuild and any downstream sketch
+            # resolver pick up the freshly-copied source.
+            staged_sketch = ctx.build_dir / "src" / "sketch"
+            if staged_sketch.exists():
+                os.environ["PLATFORMIO_SRC_DIR"] = str(staged_sketch)
+        except KeyboardInterrupt:
+            # Let user-initiated interrupts propagate; never swallow them
+            # under the broad Exception handler below (CodeRabbit feedback,
+            # PR #3290).
+            raise
+        except Exception as e:
+            print(
+                f"\u274c Error: failed to synthesise platformio.ini for "
+                f"board '{ctx.final_environment}': {e}"
+            )
+            return 1
+
+    # Platform mismatch warning (legacy path only \u2014 synthesised platformio.ini
+    # is generated from ci/boards.py, so `default_envs` always matches the
+    # detected board by construction and the warning would be noise).
+    if args.use_root_platformio_ini:
+        from ci.util.pio_package_daemon import get_default_environment
+
+        default_env = get_default_environment(str(ctx.build_dir))
+    else:
+        default_env = None
     if detected_environment and default_env and detected_environment != default_env:
         print(f"{Fore.YELLOW}{'=' * 60}")
         print(f"{Fore.YELLOW}\u26a0\ufe0f  PLATFORM MISMATCH WARNING")

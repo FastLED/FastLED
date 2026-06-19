@@ -109,6 +109,12 @@ class Args:
     tight_timing_iterations: int
     tight_timing_max_overhead_us: int
 
+    # Legacy escape hatch (#3281): consume root ./platformio.ini instead of
+    # synthesising .build/pio/<board>/platformio.ini from ci/boards.py.
+    # Emits a deprecation warning when set. Slated for removal one release
+    # cycle after #3281 lands.
+    use_root_platformio_ini: bool
+
     @staticmethod
     def parse_args(argv: list[str] | None = None) -> "Args":
         """Parse command-line arguments and return Args dataclass instance."""
@@ -588,6 +594,21 @@ See Also:
             help="Maximum allowed max(show()+wait()-wire_time) overhead for --tight-timing (default: 2000us).",
         )
 
+        # Legacy root platformio.ini escape hatch (#3281). Default flow
+        # synthesises .build/pio/<board>/platformio.ini from ci/boards.py,
+        # matching `bash compile`. This flag re-enables the legacy
+        # consume-root-./platformio.ini behavior for one release cycle.
+        parser.add_argument(
+            "--use-root-platformio-ini",
+            action="store_true",
+            help=(
+                "[DEPRECATED, #3281] Use root ./platformio.ini instead of "
+                "synthesising .build/pio/<board>/platformio.ini from "
+                "ci/boards.py. Legacy escape hatch; will be removed in a "
+                "future release."
+            ),
+        )
+
         parsed = parser.parse_args(argv)
 
         if parsed.use_fbuild or parsed.no_fbuild:
@@ -595,6 +616,14 @@ See Also:
             print(
                 f"warning: {flag} is deprecated and has no effect; "
                 "fbuild is always used for board builds.",
+                file=sys.stderr,
+            )
+
+        if parsed.use_root_platformio_ini:
+            # Deprecation telemetry, per issue #3281.
+            print(
+                "DEPRECATION: --use-root-platformio-ini will be removed in a "
+                "future release. See #3281.",
                 file=sys.stderr,
             )
 
@@ -654,4 +683,5 @@ See Also:
             tight_timing=parsed.tight_timing,
             tight_timing_iterations=parsed.tight_timing_iterations,
             tight_timing_max_overhead_us=parsed.tight_timing_max_overhead_us,
+            use_root_platformio_ini=parsed.use_root_platformio_ini,
         )

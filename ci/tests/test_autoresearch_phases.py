@@ -95,6 +95,11 @@ def _make_args(**overrides) -> Args:
         tight_timing_max_overhead_us=2000,
         pin_toggle_rx=False,
         ws2812_loopback=False,
+        # Default existing-test behavior: use the legacy root-platformio.ini
+        # path so the ``fake_project_dir`` fixture's hand-written ini is the
+        # one read. Tests that exercise the new synthesised-ini path (#3281)
+        # override this explicitly.
+        use_root_platformio_ini=True,
     )
     defaults.update(overrides)
     return Args(**defaults)
@@ -367,6 +372,83 @@ class TestParseArgsAndBuildCommands:
         assert isinstance(result, RunContext)
         assert result.final_environment == "esp32s3"
         assert "LCD_CLOCKLESS" in result.drivers
+
+    # ============================================================
+    # #3281: synthesised .build/pio/<board>/platformio.ini path
+    # ============================================================
+
+    def test_synthesised_path_calls_staging_when_board_known(
+        self, tmp_path: Path
+    ) -> None:
+        """When the board is known up-front and the legacy flag is OFF,
+        ``_parse_args_and_build_commands`` should synthesise the staged
+        ``.build/pio/<board>/`` project and use it as ``build_dir`` — NO
+        root ``./platformio.ini`` is required."""
+        # Note: NO platformio.ini in tmp_path on purpose. The synthesis path
+        # must NOT require one to exist.
+        (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
+
+        fake_build_dir = tmp_path / ".build" / "pio" / "esp32s3"
+        fake_build_dir.mkdir(parents=True)
+
+        args = _make_args(
+            environment_positional="esp32s3",
+            project_dir=tmp_path,
+            use_root_platformio_ini=False,
+        )
+
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_build_dir,
+        ) as mock_synth:
+            result = _parse_args_and_build_commands(args)
+
+        assert isinstance(result, RunContext), result
+        mock_synth.assert_called_once_with(
+            "esp32s3", project_root=tmp_path.resolve(), verbose=False
+        )
+        assert result.build_dir == fake_build_dir
+
+    def test_synthesised_path_defers_when_board_unknown(self, tmp_path: Path) -> None:
+        """When the board is NOT known up-front (no positional, no --env,
+        no --lcd*) and the legacy flag is OFF, parse-time synthesis must NOT
+        happen — synthesis is deferred to ``_resolve_port_and_environment``
+        after chip auto-detect."""
+        # No platformio.ini in tmp_path — synthesised path must tolerate that.
+        (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
+
+        args = _make_args(
+            environment_positional=None,
+            project_dir=tmp_path,
+            use_root_platformio_ini=False,
+        )
+
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project"
+        ) as mock_synth:
+            result = _parse_args_and_build_commands(args)
+
+        assert isinstance(result, RunContext), result
+        mock_synth.assert_not_called()
+        # build_dir falls back to project_root so the sketch resolver still
+        # finds examples/AutoResearch/.
+        assert result.build_dir == tmp_path.resolve()
+        assert result.final_environment is None
+
+    def test_legacy_flag_still_requires_root_platformio_ini(
+        self, tmp_path: Path
+    ) -> None:
+        """With ``--use-root-platformio-ini`` set, the legacy
+        ``platformio.ini`` existence check still fires and a missing file is
+        an error — proving the escape hatch keeps the old behavior."""
+        # No platformio.ini in tmp_path.
+        args = _make_args(
+            project_dir=tmp_path,
+            use_root_platformio_ini=True,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, int)
+        assert result == 1
 
     def test_timeout_parsing(self, fake_project_dir: Path) -> None:
         args = _make_args(timeout="2m", project_dir=fake_project_dir)
