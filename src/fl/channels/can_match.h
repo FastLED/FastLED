@@ -35,6 +35,6 @@ namespace fl {
 HandleResult canMatch(
     const DriverCapabilities& caps,
     fl::span<const PinGroup>  groups,
-    const ChannelRequest&     request) FL_NOEXCEPT;
+    const ChannelRequest&     request) FL_NO_EXCEPT;
 
 }  // namespace fl

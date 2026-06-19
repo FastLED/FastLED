@@ -2,8 +2,8 @@
 # pyright: reportUnknownMemberType=false
 """Checker to detect raw 'noexcept' keyword in src/ files.
 
-FastLED wraps the noexcept specifier behind the FL_NOEXCEPT macro
-(defined in src/fl/stl/noexcept.h).  FL_NOEXCEPT is currently a noop
+FastLED wraps the noexcept specifier behind the FL_NO_EXCEPT macro
+(defined in src/fl/stl/noexcept.h).  FL_NO_EXCEPT is currently a noop
 on all platforms due to compatibility issues across AVR, WASM, etc.
 Using the macro rather than the bare keyword ensures that enabling
 noexcept in the future only requires a change in one place.
@@ -16,7 +16,7 @@ Exemptions:
   - src/fl/stl/noexcept.h  (the macro definition itself)
   - Lines entirely inside // or /* */ comments
   - #include directives (e.g. #include "fl/stl/noexcept.h")
-  - Lines where 'noexcept' appears only as the RHS of #define FL_NOEXCEPT
+  - Lines where 'noexcept' appears only as the RHS of #define FL_NO_EXCEPT
   - Lines with suppression comment "// ok noexcept" or "// nolint"
 """
 
@@ -29,16 +29,16 @@ from ci.util.paths import PROJECT_ROOT
 # Match the bare noexcept keyword (not inside a word)
 _RAW_NOEXCEPT = re.compile(r"\bnoexcept\b")
 
-# The definition line in noexcept.h: "#define FL_NOEXCEPT noexcept"
+# The definition line in noexcept.h: "#define FL_NO_EXCEPT noexcept"
 # We want to allow this exact pattern (the macro that expands to noexcept)
-_DEFINE_FL_NOEXCEPT = re.compile(r"#\s*define\s+FL_NOEXCEPT\b")
+_DEFINE_FL_NOEXCEPT = re.compile(r"#\s*define\s+FL_NO_EXCEPT\b")
 
 # Suppression comments accepted on the same line
 _SUPPRESSION = re.compile(r"//\s*(?:ok\s+noexcept|nolint)\b", re.IGNORECASE)
 
 
 class RawNoexceptChecker(FileContentChecker):
-    """Checker that flags raw 'noexcept' keyword — use FL_NOEXCEPT instead."""
+    """Checker that flags raw 'noexcept' keyword — use FL_NO_EXCEPT instead."""
 
     def __init__(self) -> None:
         self.violations: dict[str, list[tuple[int, str]]] = {}
@@ -99,7 +99,7 @@ class RawNoexceptChecker(FileContentChecker):
             if re.match(r"^#\s*include\b", code):
                 continue
 
-            # Skip the #define FL_NOEXCEPT noexcept line (legal definition)
+            # Skip the #define FL_NO_EXCEPT noexcept line (legal definition)
             if _DEFINE_FL_NOEXCEPT.search(code):
                 continue
 
@@ -109,9 +109,9 @@ class RawNoexceptChecker(FileContentChecker):
 
             # Allow noexcept(expr) — the noexcept operator/conditional specifier.
             # Only flag bare 'noexcept' (specifier without parentheses).
-            # After stripping FL_NOEXCEPT occurrences, check if remaining
+            # After stripping FL_NO_EXCEPT occurrences, check if remaining
             # noexcept keywords are all followed by '('.
-            temp = code.replace("FL_NOEXCEPT", "")
+            temp = code.replace("FL_NO_EXCEPT", "")
             remaining = list(_RAW_NOEXCEPT.finditer(temp))
             all_operator_form = all(
                 temp[m.end() :].lstrip().startswith("(") for m in remaining
@@ -126,7 +126,7 @@ class RawNoexceptChecker(FileContentChecker):
             violations.append(
                 (
                     line_number,
-                    f"Raw 'noexcept' keyword — use FL_NOEXCEPT macro instead "
+                    f"Raw 'noexcept' keyword — use FL_NO_EXCEPT macro instead "
                     f"(defined in fl/stl/noexcept.h, currently a noop everywhere "
                     f"for cross-platform compatibility): {stripped}",
                 )
@@ -146,7 +146,7 @@ def main() -> None:
     run_checker_standalone(
         checker,
         [str(PROJECT_ROOT / "src")],
-        "Found raw 'noexcept' keyword — use FL_NOEXCEPT macro instead",
+        "Found raw 'noexcept' keyword — use FL_NO_EXCEPT macro instead",
         extensions=[".h", ".hpp", ".cpp", ".cpp.hpp"],
     )
 

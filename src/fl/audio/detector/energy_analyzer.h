@@ -11,8 +11,8 @@ namespace detector {
 
 class EnergyAnalyzer : public Detector {
 public:
-    EnergyAnalyzer() FL_NOEXCEPT;
-    ~EnergyAnalyzer() FL_NOEXCEPT override;
+    EnergyAnalyzer() FL_NO_EXCEPT;
+    ~EnergyAnalyzer() FL_NO_EXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

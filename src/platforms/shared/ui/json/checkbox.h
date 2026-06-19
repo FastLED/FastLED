@@ -16,23 +16,23 @@ class JsonUiCheckboxInternal;
 
 class JsonCheckboxImpl {
   public:
-    JsonCheckboxImpl(const fl::string &, bool value) FL_NOEXCEPT;
+    JsonCheckboxImpl(const fl::string &, bool value) FL_NO_EXCEPT;
     ~JsonCheckboxImpl();
-    JsonCheckboxImpl &Group(const fl::string &name) FL_NOEXCEPT;
+    JsonCheckboxImpl &Group(const fl::string &name) FL_NO_EXCEPT;
 
-    const fl::string &name() const FL_NOEXCEPT;
-    void toJson(fl::json &json) const FL_NOEXCEPT;
-    bool value() const FL_NOEXCEPT;
-    void setValue(bool value) FL_NOEXCEPT;
-    fl::string groupName() const FL_NOEXCEPT;
+    const fl::string &name() const FL_NO_EXCEPT;
+    void toJson(fl::json &json) const FL_NO_EXCEPT;
+    bool value() const FL_NO_EXCEPT;
+    void setValue(bool value) FL_NO_EXCEPT;
+    fl::string groupName() const FL_NO_EXCEPT;
     
     // Method to allow parent UIElement class to set the group
-    void setGroup(const fl::string &groupName) FL_NOEXCEPT;
+    void setGroup(const fl::string &groupName) FL_NO_EXCEPT;
 
-    int id() const FL_NOEXCEPT;
+    int id() const FL_NO_EXCEPT;
 
-    JsonCheckboxImpl &operator=(bool value) FL_NOEXCEPT;
-    JsonCheckboxImpl &operator=(int value) FL_NOEXCEPT;
+    JsonCheckboxImpl &operator=(bool value) FL_NO_EXCEPT;
+    JsonCheckboxImpl &operator=(int value) FL_NO_EXCEPT;
 
   private:
     // Change to use the specific internal implementation

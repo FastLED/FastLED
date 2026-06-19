@@ -91,7 +91,7 @@ FetchRequest::FetchRequest(const fl::string& url, const FetchOptions& opts, fl::
     mPath = p.empty() ? fl::string("/") : fl::string(p.data(), p.size());
 }
 
-FetchRequest::~FetchRequest() FL_NOEXCEPT {
+FetchRequest::~FetchRequest() FL_NO_EXCEPT {
     close_socket();
 }
 

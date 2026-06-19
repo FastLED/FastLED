@@ -336,7 +336,7 @@ fl::shared_ptr<audio::IInput> teensy_create_audio_input(
 fl::shared_ptr<audio::IInput> teensy_create_audio_input(
     const audio::Config& config,
     fl::string* error_message
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     FL_UNUSED(config);
     const char* ERROR_MESSAGE = "Teensy Audio Library not found. Install from Arduino Library Manager.";
     FL_WARN_F("%s", ERROR_MESSAGE);

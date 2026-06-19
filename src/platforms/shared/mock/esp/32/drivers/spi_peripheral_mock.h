@@ -96,7 +96,7 @@ public:
     ///
     /// This mirrors the hardware constraint that there is only one SPI peripheral.
     /// The instance is created on first access and persists for the program lifetime.
-    static SpiPeripheralMock& instance() FL_NOEXCEPT;
+    static SpiPeripheralMock& instance() FL_NO_EXCEPT;
 
     //=========================================================================
     // Lifecycle
@@ -108,18 +108,18 @@ public:
     // ISpiPeripheral Interface Implementation
     //=========================================================================
 
-    bool initializeBus(const SpiBusConfig& config) FL_NOEXCEPT override = 0;
-    bool addDevice(const SpiDeviceConfig& config) FL_NOEXCEPT override = 0;
-    bool removeDevice() FL_NOEXCEPT override = 0;
-    bool freeBus() FL_NOEXCEPT override = 0;
-    bool isInitialized() const FL_NOEXCEPT override = 0;
-    bool queueTransaction(const SpiTransaction& trans) FL_NOEXCEPT override = 0;
-    bool pollTransaction(u32 timeout_ms) FL_NOEXCEPT override = 0;
-    bool registerCallback(void* callback, void* user_ctx) FL_NOEXCEPT override = 0;
-    u8* allocateDma(size_t size) FL_NOEXCEPT override = 0;
-    void freeDma(u8* buffer) FL_NOEXCEPT override = 0;
-    void delay(u32 ms) FL_NOEXCEPT override = 0;
-    u64 getMicroseconds() FL_NOEXCEPT override = 0;
+    bool initializeBus(const SpiBusConfig& config) FL_NO_EXCEPT override = 0;
+    bool addDevice(const SpiDeviceConfig& config) FL_NO_EXCEPT override = 0;
+    bool removeDevice() FL_NO_EXCEPT override = 0;
+    bool freeBus() FL_NO_EXCEPT override = 0;
+    bool isInitialized() const FL_NO_EXCEPT override = 0;
+    bool queueTransaction(const SpiTransaction& trans) FL_NO_EXCEPT override = 0;
+    bool pollTransaction(u32 timeout_ms) FL_NO_EXCEPT override = 0;
+    bool registerCallback(void* callback, void* user_ctx) FL_NO_EXCEPT override = 0;
+    u8* allocateDma(size_t size) FL_NO_EXCEPT override = 0;
+    void freeDma(u8* buffer) FL_NO_EXCEPT override = 0;
+    void delay(u32 ms) FL_NO_EXCEPT override = 0;
+    u64 getMicroseconds() FL_NO_EXCEPT override = 0;
 
     //=========================================================================
     // Mock-Specific API (for unit tests)
@@ -142,7 +142,7 @@ public:
     /// @param microseconds Delay in microseconds (0 = instant)
     ///
     /// Simulates hardware transmission time. Affects pollTransaction() behavior.
-    virtual void setTransactionDelay(u32 microseconds) FL_NOEXCEPT = 0;
+    virtual void setTransactionDelay(u32 microseconds) FL_NO_EXCEPT = 0;
 
     /// @brief Manually trigger transaction completion (fire callback)
     ///
@@ -155,7 +155,7 @@ public:
     /// mock.simulateTransactionComplete();  // Trigger callback
     /// driver.poll();  // Process completion
     /// ```
-    virtual void simulateTransactionComplete() FL_NOEXCEPT = 0;
+    virtual void simulateTransactionComplete() FL_NO_EXCEPT = 0;
 
     /// @brief Inject transaction failure for negative testing
     /// @param should_fail true = fail next queueTransaction(), false = succeed
@@ -166,7 +166,7 @@ public:
     /// bool result = driver.queueTransaction(...);
     /// CHECK_FALSE(result);  // Should fail
     /// ```
-    virtual void setTransactionFailure(bool should_fail) FL_NOEXCEPT = 0;
+    virtual void setTransactionFailure(bool should_fail) FL_NO_EXCEPT = 0;
 
     //-------------------------------------------------------------------------
     // Waveform Capture (for validation)
@@ -177,42 +177,42 @@ public:
     ///
     /// Each record contains a copy of the transmitted buffer, allowing
     /// tests to validate waveform correctness.
-    virtual const fl::vector<TransactionRecord>& getTransactionHistory() const FL_NOEXCEPT = 0;
+    virtual const fl::vector<TransactionRecord>& getTransactionHistory() const FL_NO_EXCEPT = 0;
 
     /// @brief Clear transaction history (reset for next test)
-    virtual void clearTransactionHistory() FL_NOEXCEPT = 0;
+    virtual void clearTransactionHistory() FL_NO_EXCEPT = 0;
 
     /// @brief Get the most recent transaction data
     /// @return Span of the most recent transaction buffer (empty if no transactions)
     ///
     /// Returns the captured data from the most recent queueTransaction() call.
     /// Useful for quick validation without iterating through history.
-    virtual fl::span<const u8> getLastTransactionData() const FL_NOEXCEPT = 0;
+    virtual fl::span<const u8> getLastTransactionData() const FL_NO_EXCEPT = 0;
 
     //-------------------------------------------------------------------------
     // State Inspection
     //-------------------------------------------------------------------------
 
     /// @brief Check if device is added to bus
-    virtual bool hasDevice() const FL_NOEXCEPT = 0;
+    virtual bool hasDevice() const FL_NO_EXCEPT = 0;
 
     /// @brief Check if transaction queue has space
-    virtual bool canQueueTransaction() const FL_NOEXCEPT = 0;
+    virtual bool canQueueTransaction() const FL_NO_EXCEPT = 0;
 
     /// @brief Get number of queued transactions (not yet completed)
-    virtual size_t getQueuedTransactionCount() const FL_NOEXCEPT = 0;
+    virtual size_t getQueuedTransactionCount() const FL_NO_EXCEPT = 0;
 
     /// @brief Get total number of queueTransaction() calls
-    virtual size_t getTransactionCount() const FL_NOEXCEPT = 0;
+    virtual size_t getTransactionCount() const FL_NO_EXCEPT = 0;
 
     /// @brief Get current bus configuration
-    virtual const SpiBusConfig& getBusConfig() const FL_NOEXCEPT = 0;
+    virtual const SpiBusConfig& getBusConfig() const FL_NO_EXCEPT = 0;
 
     /// @brief Get current device configuration
-    virtual const SpiDeviceConfig& getDeviceConfig() const FL_NOEXCEPT = 0;
+    virtual const SpiDeviceConfig& getDeviceConfig() const FL_NO_EXCEPT = 0;
 
     /// @brief Reset mock to uninitialized state (for testing)
-    virtual void reset() FL_NOEXCEPT = 0;
+    virtual void reset() FL_NO_EXCEPT = 0;
 };
 
 } // namespace detail

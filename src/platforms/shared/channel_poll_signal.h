@@ -15,11 +15,11 @@ namespace platforms {
 
 class ChannelPollSignal {
   public:
-    ChannelPollSignal() FL_NOEXCEPT : mPending(false) {}
+    ChannelPollSignal() FL_NO_EXCEPT : mPending(false) {}
 
-    void notify() FL_NOEXCEPT { mPending.store(true); }
+    void notify() FL_NO_EXCEPT { mPending.store(true); }
 
-    bool wait(fl::u32 timeoutMs) FL_NOEXCEPT {
+    bool wait(fl::u32 timeoutMs) FL_NO_EXCEPT {
         (void)timeoutMs;
         return mPending.exchange(false);
     }

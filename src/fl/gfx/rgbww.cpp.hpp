@@ -33,7 +33,7 @@
 namespace fl {
 
 namespace {
-inline void zero_out(u8 *r, u8 *g, u8 *b, u8 *ww, u8 *wc) FL_NOEXCEPT {
+inline void zero_out(u8 *r, u8 *g, u8 *b, u8 *ww, u8 *wc) FL_NO_EXCEPT {
     *r = 0; *g = 0; *b = 0; *ww = 0; *wc = 0;
 }
 } // namespace
@@ -95,7 +95,7 @@ struct RgbwwColorimetricState {
 };
 } // namespace
 
-void set_rgbww_colorimetric_profile(const colorimetric_detail::RgbcctProfile* profile) FL_NOEXCEPT {
+void set_rgbww_colorimetric_profile(const colorimetric_detail::RgbcctProfile* profile) FL_NO_EXCEPT {
     RgbwwColorimetricState& state = fl::Singleton<RgbwwColorimetricState>::instance();
     if (profile == nullptr) {
         state.has_profile = false;
@@ -105,7 +105,7 @@ void set_rgbww_colorimetric_profile(const colorimetric_detail::RgbcctProfile* pr
     state.has_profile = true;
 }
 
-const colorimetric_detail::RgbcctProfile* get_rgbww_colorimetric_profile() FL_NOEXCEPT {
+const colorimetric_detail::RgbcctProfile* get_rgbww_colorimetric_profile() FL_NO_EXCEPT {
     const RgbwwColorimetricState& state = fl::Singleton<RgbwwColorimetricState>::instance();
     return state.has_profile ? &state.profile : &kRgbwwDefaultProfile;
 }
@@ -120,7 +120,7 @@ struct Rgb2RgbwwUserState {
 };
 } // namespace
 
-void set_rgb_2_rgbww_function(rgb_2_rgbww_function func) FL_NOEXCEPT {
+void set_rgb_2_rgbww_function(rgb_2_rgbww_function func) FL_NO_EXCEPT {
     fl::Singleton<Rgb2RgbwwUserState>::instance().fn = func;
 }
 
@@ -128,7 +128,7 @@ void rgbww_partial_reorder(EOrderWW ww_placement,
                            u8 b0, u8 b1, u8 b2,
                            u8 ww, u8 wc,
                            u8 *out_b0, u8 *out_b1, u8 *out_b2,
-                           u8 *out_b3, u8 *out_b4) FL_NOEXCEPT {
+                           u8 *out_b3, u8 *out_b4) FL_NO_EXCEPT {
     // Five output slots: out[0..4].
     u8 out[5];
     const u8 enc = static_cast<u8>(ww_placement);
@@ -155,7 +155,7 @@ void rgb_2_rgbww_user_function(const Rgbww& cfg,
                                u8 r, u8 g, u8 b,
                                u8 r_scale, u8 g_scale, u8 b_scale,
                                u8 *out_r, u8 *out_g, u8 *out_b,
-                               u8 *out_ww, u8 *out_wc) FL_NOEXCEPT {
+                               u8 *out_ww, u8 *out_wc) FL_NO_EXCEPT {
     rgb_2_rgbww_function fn = fl::Singleton<Rgb2RgbwwUserState>::instance().fn;
     if (fn == nullptr) {
         // No user function installed â€” produce safe zero output.
@@ -191,12 +191,12 @@ struct EtaSourceMatrixCache {
     bool initialized = false;
 };
 
-inline bool xy_equal(const float a[2], const float b[2]) FL_NOEXCEPT {
+inline bool xy_equal(const float a[2], const float b[2]) FL_NO_EXCEPT {
     return a[0] == b[0] && a[1] == b[1];
 }
 
 inline float compute_eta_from_input(const colorimetric_detail::RgbcctProfile& profile,
-                                    float s_r, float s_g, float s_b) FL_NOEXCEPT {
+                                    float s_r, float s_g, float s_b) FL_NO_EXCEPT {
     // Compute the input chromaticity in the *source* color space (#2705) when
     // the warm path carries populated input_xy_* fields. Falling back to the
     // emitter-space projection used previously would bias eta toward the LED
@@ -263,7 +263,7 @@ inline float compute_eta_from_input(const colorimetric_detail::RgbcctProfile& pr
 // short-circuit to the global default to avoid the per-pixel xy recompute.
 inline const colorimetric_detail::RgbcctProfile&
 resolve_active_rgbcct_profile(const Rgbww& cfg,
-                              colorimetric_detail::RgbcctProfile& scratch) FL_NOEXCEPT {
+                              colorimetric_detail::RgbcctProfile& scratch) FL_NO_EXCEPT {
     if (cfg.profile != nullptr) {
         return *cfg.profile;
     }
@@ -297,7 +297,7 @@ void rgb_2_rgbww_colorimetric(const Rgbww& cfg,
                               u8 r, u8 g, u8 b,
                               u8 r_scale, u8 g_scale, u8 b_scale,
                               u8 *out_r, u8 *out_g, u8 *out_b,
-                              u8 *out_ww, u8 *out_wc) FL_NOEXCEPT {
+                              u8 *out_ww, u8 *out_wc) FL_NO_EXCEPT {
     r = scale8(r, r_scale);
     g = scale8(g, g_scale);
     b = scale8(b, b_scale);
@@ -326,7 +326,7 @@ void rgb_2_rgbww_colorimetric_boosted(const Rgbww& cfg,
                                       u8 r, u8 g, u8 b,
                                       u8 r_scale, u8 g_scale, u8 b_scale,
                                       u8 *out_r, u8 *out_g, u8 *out_b,
-                                      u8 *out_ww, u8 *out_wc) FL_NOEXCEPT {
+                                      u8 *out_ww, u8 *out_wc) FL_NO_EXCEPT {
     // Phase D MVP: the boosted variant uses the same RGBCCT line-blend as the
     // strict path but skews eta toward 0.5 (equal warm+cool) so the combined
     // W contribution is larger when the input chromaticity sits near neutral.
@@ -367,7 +367,7 @@ void rgb_2_rgbww_colorimetric(const Rgbww& cfg,
                               u8 r, u8 g, u8 b,
                               u8 r_scale, u8 g_scale, u8 b_scale,
                               u8 *out_r, u8 *out_g, u8 *out_b,
-                              u8 *out_ww, u8 *out_wc) FL_NOEXCEPT {
+                              u8 *out_ww, u8 *out_wc) FL_NO_EXCEPT {
     (void)cfg; (void)r; (void)g; (void)b;
     (void)r_scale; (void)g_scale; (void)b_scale;
 #ifndef FASTLED_SUPPRESS_RGBWW_FALLBACK_WARNING
@@ -381,7 +381,7 @@ void rgb_2_rgbww_colorimetric_boosted(const Rgbww& cfg,
                                       u8 r, u8 g, u8 b,
                                       u8 r_scale, u8 g_scale, u8 b_scale,
                                       u8 *out_r, u8 *out_g, u8 *out_b,
-                                      u8 *out_ww, u8 *out_wc) FL_NOEXCEPT {
+                                      u8 *out_ww, u8 *out_wc) FL_NO_EXCEPT {
     (void)cfg; (void)r; (void)g; (void)b;
     (void)r_scale; (void)g_scale; (void)b_scale;
 #ifndef FASTLED_SUPPRESS_RGBWW_FALLBACK_WARNING

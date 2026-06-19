@@ -23,7 +23,7 @@ namespace detail {
 // =============================================================================
 
 struct CallableHolderBase {
-    virtual ~CallableHolderBase() FL_NOEXCEPT = default;
+    virtual ~CallableHolderBase() FL_NO_EXCEPT = default;
 };
 
 // =============================================================================

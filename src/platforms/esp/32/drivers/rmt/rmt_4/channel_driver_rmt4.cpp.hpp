@@ -28,7 +28,7 @@ namespace fl {
 // Factory Method
 // ═══════════════════════════════════════════════════════════════════════════
 
-ChannelEngineRMT4Ptr ChannelEngineRMT4::create() FL_NOEXCEPT {
+ChannelEngineRMT4Ptr ChannelEngineRMT4::create() FL_NO_EXCEPT {
     return fl::make_shared<ChannelEngineRMT4Impl>();
 }
 
@@ -36,7 +36,7 @@ ChannelEngineRMT4Ptr ChannelEngineRMT4::create() FL_NOEXCEPT {
 // Constructor
 // ═══════════════════════════════════════════════════════════════════════════
 
-ChannelEngineRMT4Impl::ChannelEngineRMT4Impl() FL_NOEXCEPT
+ChannelEngineRMT4Impl::ChannelEngineRMT4Impl() FL_NO_EXCEPT
     : mRMT_intr_handle(nullptr)
     , mRmtSpinlock(portMUX_INITIALIZER_UNLOCKED)
     , mInitialized(false)
@@ -105,7 +105,7 @@ ChannelEngineRMT4Impl::~ChannelEngineRMT4Impl() {
 // IChannelDriver Interface
 // ═══════════════════════════════════════════════════════════════════════════
 
-bool ChannelEngineRMT4Impl::canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT {
+bool ChannelEngineRMT4Impl::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
     if (!data) {
         return false;
     }
@@ -117,7 +117,7 @@ bool ChannelEngineRMT4Impl::canHandle(const ChannelDataPtr& data) const FL_NOEXC
 // Timing Symbol Helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
-rmt_item32_t ChannelEngineRMT4Impl::makeZeroSymbol(const ChipsetTimingConfig& timing) FL_NOEXCEPT {
+rmt_item32_t ChannelEngineRMT4Impl::makeZeroSymbol(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
     // Zero bit timing: T0H (high) + T0L (low)
     // For WS2812: T0H=400ns, T0L=850ns
 
@@ -139,7 +139,7 @@ rmt_item32_t ChannelEngineRMT4Impl::makeZeroSymbol(const ChipsetTimingConfig& ti
     return zero;
 }
 
-rmt_item32_t ChannelEngineRMT4Impl::makeOneSymbol(const ChipsetTimingConfig& timing) FL_NOEXCEPT {
+rmt_item32_t ChannelEngineRMT4Impl::makeOneSymbol(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
     // One bit timing: T1H (high) + T1L (low)
     // For WS2812: T1H=850ns, T1L=400ns
 
@@ -172,7 +172,7 @@ rmt_item32_t ChannelEngineRMT4Impl::makeOneSymbol(const ChipsetTimingConfig& tim
 ChannelEngineRMT4Impl::ChannelState* ChannelEngineRMT4Impl::acquireChannel(
     gpio_num_t pin,
     const ChipsetTimingConfig& timing
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     // Three-tier channel allocation strategy (same as RMT5):
     // Strategy 1: Reuse channel with matching pin (zero-cost reuse)
     // Strategy 2: Reconfigure any idle channel (requires hardware reconfiguration)
@@ -254,7 +254,7 @@ ChannelEngineRMT4Impl::ChannelState* ChannelEngineRMT4Impl::acquireChannel(
     return stablePtr;
 }
 
-void ChannelEngineRMT4Impl::releaseChannel(ChannelState* state) FL_NOEXCEPT {
+void ChannelEngineRMT4Impl::releaseChannel(ChannelState* state) FL_NO_EXCEPT {
     // Release channel back to idle state (mark as available for reuse)
     // NOTE: We do NOT destroy the RMT channel - keep it configured for fast reuse
 
@@ -311,7 +311,7 @@ bool ChannelEngineRMT4Impl::configureChannel(
     ChannelState* state,
     gpio_num_t pin,
     const ChipsetTimingConfig& timing
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     // Port of ESP32RMTController::init() and startOnChannel() logic
     // Configures RMT hardware for the given pin and timing
 
@@ -395,7 +395,7 @@ bool ChannelEngineRMT4Impl::configureChannel(
     return true;
 }
 
-void ChannelEngineRMT4Impl::processPendingChannels() FL_NOEXCEPT {
+void ChannelEngineRMT4Impl::processPendingChannels() FL_NO_EXCEPT {
     // Process the pending channel queue and start as many transmissions
     // as the hardware allows (up to FASTLED_RMT_MAX_CHANNELS concurrent)
     //
@@ -427,7 +427,7 @@ void ChannelEngineRMT4Impl::processPendingChannels() FL_NOEXCEPT {
     }
 }
 
-void ChannelEngineRMT4Impl::startTransmission(ChannelState* state, const ChannelDataPtr& data) FL_NOEXCEPT {
+void ChannelEngineRMT4Impl::startTransmission(ChannelState* state, const ChannelDataPtr& data) FL_NO_EXCEPT {
     // Initialize channel state and start RMT transmission
     // Port of: ESP32RMTController::startOnChannel() from idf4_rmt_impl.cpp
     //
@@ -494,7 +494,7 @@ void ChannelEngineRMT4Impl::startTransmission(ChannelState* state, const Channel
 // IChannelDriver Interface Implementation
 // ═══════════════════════════════════════════════════════════════════════════
 
-void ChannelEngineRMT4Impl::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
+void ChannelEngineRMT4Impl::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     // Store channel data for later transmission
     // Called by ChannelManager for each LED strip
     if (channelData) {
@@ -504,7 +504,7 @@ void ChannelEngineRMT4Impl::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
     }
 }
 
-void ChannelEngineRMT4Impl::show() FL_NOEXCEPT {
+void ChannelEngineRMT4Impl::show() FL_NO_EXCEPT {
     // Trigger transmission of all enqueued data
     // Called by ChannelManager when user calls FastLED.show()
 
@@ -519,7 +519,7 @@ void ChannelEngineRMT4Impl::show() FL_NOEXCEPT {
     }
 }
 
-IChannelDriver::DriverState ChannelEngineRMT4Impl::poll() FL_NOEXCEPT {
+IChannelDriver::DriverState ChannelEngineRMT4Impl::poll() FL_NO_EXCEPT {
     // Query hardware state and manage channel lifecycle
     // Port of: Polling logic that replaced gTX_sem blocking in legacy RMT4
     //
@@ -597,7 +597,7 @@ IChannelDriver::DriverState ChannelEngineRMT4Impl::poll() FL_NOEXCEPT {
     return anyBusy ? DriverState::BUSY : DriverState::READY;
 }
 
-void ChannelEngineRMT4Impl::beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT {
+void ChannelEngineRMT4Impl::beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT {
     // Main entry point for LED data transmission
     // Called by ChannelManager when user calls FastLED.show()
     //

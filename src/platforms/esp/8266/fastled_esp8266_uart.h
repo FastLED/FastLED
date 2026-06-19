@@ -43,12 +43,12 @@ public:
     void setBaud(u32 baud) { mBaud = baud; }
     void setResetTimeUs(u16 us) { mResetUs = us; }
 
-    virtual void init() FL_NOEXCEPT override;
-    virtual void clearLeds(int nLeds) FL_NOEXCEPT override;
+    virtual void init() FL_NO_EXCEPT override;
+    virtual void clearLeds(int nLeds) FL_NO_EXCEPT override;
     virtual u16 getMaxRefreshRate() const override { return 400; }
 
 protected:
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT override;
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override;
 
 private:
     int mDataPin;
@@ -57,23 +57,23 @@ private:
 
     // Encodes two WS2812 bits into one UART byte using 4-bit symbols:
     // 0 -> 1000, 1 -> 1100 ; packed as pairs: 00->0x88, 01->0x8C, 10->0xC8, 11->0xCC.
-    static inline u8 encode2Bits(u8 twoBits) FL_NOEXCEPT;
+    static inline u8 encode2Bits(u8 twoBits) FL_NO_EXCEPT;
 
     // Encode one 8-bit color to 4 UART bytes (MSB first).
-    static inline void encodeByte(u8 b, u8* out4) FL_NOEXCEPT;
+    static inline void encodeByte(u8 b, u8* out4) FL_NO_EXCEPT;
 
     // Block until UART TX finishes.
-    static inline void uartFlush() FL_NOEXCEPT;
+    static inline void uartFlush() FL_NO_EXCEPT;
 
     // Setup Serial1 safely (TX-only).
-    void beginUartIfNeeded() FL_NOEXCEPT;
+    void beginUartIfNeeded() FL_NO_EXCEPT;
 };
 
 // ---- Template Implementation -----------------------------------------------
 
 // Helper to extract a 2-bit group from a byte, MSB-first.
 // group 0: bits 7..6, group 1: 5..4, group 2: 3..2, group 3: 1..0
-static inline u8 _pair_from_byte(u8 b, u8 groupIdx) FL_NOEXCEPT {
+static inline u8 _pair_from_byte(u8 b, u8 groupIdx) FL_NO_EXCEPT {
     u8 shift = 6 - (groupIdx * 2);
     return (b >> shift) & 0x03;
 }

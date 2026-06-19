@@ -21,7 +21,7 @@ namespace fl {
 namespace third_party {
 
 // Helper function to convert YUV to RGB
-static void yuv_to_rgb(const fl::third_party::plm_frame_t* frame, fl::u8* rgb_buffer) FL_NOEXCEPT {
+static void yuv_to_rgb(const fl::third_party::plm_frame_t* frame, fl::u8* rgb_buffer) FL_NO_EXCEPT {
     fl::u32 width = frame->width;
     fl::u32 height = frame->height;
 
@@ -93,7 +93,7 @@ struct SoftwareMpeg1Decoder::Mpeg1DecoderData {
 };
 
 // Static callback wrapper for pl_mpeg
-void SoftwareMpeg1Decoder::videoDecodeCallback(fl::third_party::plm_t* plm_ptr, fl::third_party::plm_frame_t* frame, void* user) FL_NOEXCEPT {
+void SoftwareMpeg1Decoder::videoDecodeCallback(fl::third_party::plm_t* plm_ptr, fl::third_party::plm_frame_t* frame, void* user) FL_NO_EXCEPT {
     FL_UNUSED(plm_ptr);
     auto* decoder = static_cast<SoftwareMpeg1Decoder*>(user);
 
@@ -109,7 +109,7 @@ void SoftwareMpeg1Decoder::videoDecodeCallback(fl::third_party::plm_t* plm_ptr, 
 }
 
 // Static callback for audio decoding
-void SoftwareMpeg1Decoder::audioDecodeCallback(fl::third_party::plm_t* plm_ptr, fl::third_party::plm_samples_t* samples, void* user) FL_NOEXCEPT {
+void SoftwareMpeg1Decoder::audioDecodeCallback(fl::third_party::plm_t* plm_ptr, fl::third_party::plm_samples_t* samples, void* user) FL_NO_EXCEPT {
     FL_UNUSED(plm_ptr);
     auto* decoder = static_cast<SoftwareMpeg1Decoder*>(user);
 
@@ -137,7 +137,7 @@ void SoftwareMpeg1Decoder::audioDecodeCallback(fl::third_party::plm_t* plm_ptr, 
     decoder->config_.audioCallback(audioSample);
 }
 
-SoftwareMpeg1Decoder::SoftwareMpeg1Decoder(const Mpeg1Config& config) FL_NOEXCEPT
+SoftwareMpeg1Decoder::SoftwareMpeg1Decoder(const Mpeg1Config& config) FL_NO_EXCEPT
     : config_(config)
     , decoderData_(new Mpeg1DecoderData()) {
     // Set target frame duration based on config
@@ -151,7 +151,7 @@ SoftwareMpeg1Decoder::~SoftwareMpeg1Decoder() {
     delete decoderData_;
 }
 
-bool SoftwareMpeg1Decoder::begin(fl::filebuf_ptr stream) FL_NOEXCEPT {
+bool SoftwareMpeg1Decoder::begin(fl::filebuf_ptr stream) FL_NO_EXCEPT {
     if (!stream) {
         setError("Invalid filebuf provided");
         return false;
@@ -171,20 +171,20 @@ bool SoftwareMpeg1Decoder::begin(fl::filebuf_ptr stream) FL_NOEXCEPT {
     return true;
 }
 
-void SoftwareMpeg1Decoder::end() FL_NOEXCEPT {
+void SoftwareMpeg1Decoder::end() FL_NO_EXCEPT {
     cleanupDecoder();
     ready_ = false;
     stream_.reset();
 }
 
-bool SoftwareMpeg1Decoder::hasError(fl::string* msg) const FL_NOEXCEPT {
+bool SoftwareMpeg1Decoder::hasError(fl::string* msg) const FL_NO_EXCEPT {
     if (msg && hasError_) {
         *msg = errorMessage_;
     }
     return hasError_;
 }
 
-DecodeResult SoftwareMpeg1Decoder::decode() FL_NOEXCEPT {
+DecodeResult SoftwareMpeg1Decoder::decode() FL_NO_EXCEPT {
     if (!ready_) {
         return DecodeResult::Error;
     }
@@ -208,7 +208,7 @@ DecodeResult SoftwareMpeg1Decoder::decode() FL_NOEXCEPT {
     return DecodeResult::Success;
 }
 
-Frame SoftwareMpeg1Decoder::getCurrentFrame() FL_NOEXCEPT {
+Frame SoftwareMpeg1Decoder::getCurrentFrame() FL_NO_EXCEPT {
     if (config_.mode == Mpeg1Config::Streaming && !config_.immediateMode && !frameBuffer_.empty() && currentFrameIndex_ > 0) {
         Frame result = *frameBuffer_[lastDecodedIndex_];
         return result;
@@ -221,34 +221,34 @@ Frame SoftwareMpeg1Decoder::getCurrentFrame() FL_NOEXCEPT {
     return Frame(0);
 }
 
-bool SoftwareMpeg1Decoder::hasMoreFrames() const FL_NOEXCEPT {
+bool SoftwareMpeg1Decoder::hasMoreFrames() const FL_NO_EXCEPT {
     return !endOfStream_ && ready_ && !hasError_;
 }
 
-fl::u32 SoftwareMpeg1Decoder::getFrameCount() const FL_NOEXCEPT {
+fl::u32 SoftwareMpeg1Decoder::getFrameCount() const FL_NO_EXCEPT {
     // For streaming mode, we don't know total frames in advance
     return 0;
 }
 
-bool SoftwareMpeg1Decoder::seek(fl::u32 frameIndex) FL_NOEXCEPT {
+bool SoftwareMpeg1Decoder::seek(fl::u32 frameIndex) FL_NO_EXCEPT {
     (void)frameIndex; // Suppress unused parameter warning
     // Seeking not supported in this simplified implementation
     return false;
 }
 
-fl::u16 SoftwareMpeg1Decoder::getWidth() const FL_NOEXCEPT {
+fl::u16 SoftwareMpeg1Decoder::getWidth() const FL_NO_EXCEPT {
     return decoderData_->width;
 }
 
-fl::u16 SoftwareMpeg1Decoder::getHeight() const FL_NOEXCEPT {
+fl::u16 SoftwareMpeg1Decoder::getHeight() const FL_NO_EXCEPT {
     return decoderData_->height;
 }
 
-fl::u16 SoftwareMpeg1Decoder::getFrameRate() const FL_NOEXCEPT {
+fl::u16 SoftwareMpeg1Decoder::getFrameRate() const FL_NO_EXCEPT {
     return decoderData_->frameRate;
 }
 
-bool SoftwareMpeg1Decoder::initializeDecoder() FL_NOEXCEPT {
+bool SoftwareMpeg1Decoder::initializeDecoder() FL_NO_EXCEPT {
     if (!stream_) {
         setError("No input stream available");
         return false;
@@ -348,12 +348,12 @@ bool SoftwareMpeg1Decoder::initializeDecoder() FL_NOEXCEPT {
     return true;
 }
 
-bool SoftwareMpeg1Decoder::parseSequenceHeader() FL_NOEXCEPT {
+bool SoftwareMpeg1Decoder::parseSequenceHeader() FL_NO_EXCEPT {
     // This is now handled by pl_mpeg in initializeDecoder()
     return decoderData_->headerParsed;
 }
 
-bool SoftwareMpeg1Decoder::decodeNextFrame() FL_NOEXCEPT {
+bool SoftwareMpeg1Decoder::decodeNextFrame() FL_NO_EXCEPT {
     if (!decoderData_->headerParsed || !decoderData_->plmpeg) {
         return false;
     }
@@ -377,12 +377,12 @@ bool SoftwareMpeg1Decoder::decodeNextFrame() FL_NOEXCEPT {
     return false;
 }
 
-bool SoftwareMpeg1Decoder::decodePictureHeader() FL_NOEXCEPT {
+bool SoftwareMpeg1Decoder::decodePictureHeader() FL_NO_EXCEPT {
     // This is now handled by pl_mpeg internally
     return true;
 }
 
-bool SoftwareMpeg1Decoder::decodeFrame() FL_NOEXCEPT {
+bool SoftwareMpeg1Decoder::decodeFrame() FL_NO_EXCEPT {
     // The actual frame decoding is handled by pl_mpeg via the callback
     // This method just updates our Frame objects with the decoded data
 
@@ -416,7 +416,7 @@ bool SoftwareMpeg1Decoder::decodeFrame() FL_NOEXCEPT {
     return true;
 }
 
-void SoftwareMpeg1Decoder::allocateFrameBuffers() FL_NOEXCEPT {
+void SoftwareMpeg1Decoder::allocateFrameBuffers() FL_NO_EXCEPT {
     fl::size frameSize = decoderData_->width * decoderData_->height * 3; // RGB888
     decoderData_->rgbFrameSize = frameSize;
 
@@ -432,7 +432,7 @@ void SoftwareMpeg1Decoder::allocateFrameBuffers() FL_NOEXCEPT {
     }
 }
 
-void SoftwareMpeg1Decoder::cleanupDecoder() FL_NOEXCEPT {
+void SoftwareMpeg1Decoder::cleanupDecoder() FL_NO_EXCEPT {
     if (decoderData_) {
         // Destroy pl_mpeg instance
         if (decoderData_->plmpeg) {
@@ -451,21 +451,21 @@ void SoftwareMpeg1Decoder::cleanupDecoder() FL_NOEXCEPT {
     frameBuffer_.clear();
 }
 
-void SoftwareMpeg1Decoder::setError(const fl::string& message) FL_NOEXCEPT {
+void SoftwareMpeg1Decoder::setError(const fl::string& message) FL_NO_EXCEPT {
     hasError_ = true;
     errorMessage_ = message;
     ready_ = false;
 }
 
 // IDecoder audio interface implementations
-bool SoftwareMpeg1Decoder::hasAudio() const FL_NOEXCEPT {
+bool SoftwareMpeg1Decoder::hasAudio() const FL_NO_EXCEPT {
     if (!decoderData_ || !decoderData_->plmpeg) {
         return false;
     }
     return fl::third_party::plm_get_num_audio_streams(decoderData_->plmpeg) > 0;
 }
 
-void SoftwareMpeg1Decoder::setAudioCallback(AudioFrameCallback callback) FL_NOEXCEPT {
+void SoftwareMpeg1Decoder::setAudioCallback(AudioFrameCallback callback) FL_NO_EXCEPT {
     config_.audioCallback = callback;
 
     // If decoder is already initialized, update the callback
@@ -480,7 +480,7 @@ void SoftwareMpeg1Decoder::setAudioCallback(AudioFrameCallback callback) FL_NOEX
     }
 }
 
-int SoftwareMpeg1Decoder::getAudioSampleRate() const FL_NOEXCEPT {
+int SoftwareMpeg1Decoder::getAudioSampleRate() const FL_NO_EXCEPT {
     if (!decoderData_ || !decoderData_->plmpeg) {
         return 0;
     }

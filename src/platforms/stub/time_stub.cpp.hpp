@@ -28,15 +28,15 @@ extern "C" {
 
 // Global millis() and micros() forward to fl:: layer (which handles time injection in tests)
 // These are needed for Arduino API compatibility
-fl::u32 millis() FL_NOEXCEPT {
+fl::u32 millis() FL_NO_EXCEPT {
     return fl::millis();
 }
 
-fl::u32 micros() FL_NOEXCEPT {
+fl::u32 micros() FL_NO_EXCEPT {
     return fl::micros();
 }
 
-void yield() FL_NOEXCEPT {
+void yield() FL_NO_EXCEPT {
 #ifdef FASTLED_USE_PTHREAD_YIELD
     // POSIX thread yield to allow other threads to run
     sched_yield();
@@ -50,17 +50,17 @@ void yield() FL_NOEXCEPT {
 } // extern "C"
 
 // Function to set delay override (C++ linkage for test runner)
-void setDelayFunction(const fl::function<void(fl::u32)>& delayFunc) FL_NOEXCEPT {
+void setDelayFunction(const fl::function<void(fl::u32)>& delayFunc) FL_NO_EXCEPT {
     g_delay_override = delayFunc;
 }
 
 // Clear the delay override (must be called before unloading DLLs that set it)
-void clearDelayFunction() FL_NOEXCEPT {
+void clearDelayFunction() FL_NO_EXCEPT {
     g_delay_override.clear();
 }
 
 // Check if delay override is active
-bool isDelayOverrideActive(void) FL_NOEXCEPT {
+bool isDelayOverrideActive(void) FL_NO_EXCEPT {
     return static_cast<bool>(g_delay_override);
 }
 

@@ -18,7 +18,7 @@
 // IWYU pragma: begin_keep
 #include <esp32-hal.h>  // Relies on the Arduino core for ESP32
 // IWYU pragma: end_keep
-inline fl::u32 __cpu_hal_get_cycle_count() FL_NOEXCEPT {
+inline fl::u32 __cpu_hal_get_cycle_count() FL_NO_EXCEPT {
   return static_cast<fl::u32>(cpu_hal_get_cycle_count());
 }
 #elif FL_HAS_INCLUDE(<hal/cpu_ll.h>)
@@ -26,21 +26,21 @@ inline fl::u32 __cpu_hal_get_cycle_count() FL_NOEXCEPT {
 // IWYU pragma: begin_keep
 #include <hal/cpu_ll.h>
 // IWYU pragma: end_keep
-inline fl::u32 __cpu_hal_get_cycle_count() FL_NOEXCEPT {
+inline fl::u32 __cpu_hal_get_cycle_count() FL_NO_EXCEPT {
   return static_cast<fl::u32>(cpu_ll_get_cycle_count());
 }
 #elif FL_HAS_INCLUDE(<esp_cpu.h>)  // First Fallback
 // IWYU pragma: begin_keep
 #include <esp_cpu.h>
 // IWYU pragma: end_keep
-inline fl::u32 __cpu_hal_get_cycle_count() FL_NOEXCEPT {
+inline fl::u32 __cpu_hal_get_cycle_count() FL_NO_EXCEPT {
   return static_cast<uint32>(esp_cpu_get_cycle_count());
 }
 #elif FL_HAS_INCLUDE(<xtensa/hal.h>)  // Second fallback
 // IWYU pragma: begin_keep
 #include <xtensa/hal.h>
 // IWYU pragma: end_keep
-inline fl::u32 __cpu_hal_get_cycle_count() FL_NOEXCEPT {
+inline fl::u32 __cpu_hal_get_cycle_count() FL_NO_EXCEPT {
   return static_cast<fl::u32>(xthal_get_ccount());
 }
 #else // Last fallback, if this fails then please file a bug at github.com/fastled/FastLED/issues and let us know what board you are using.
@@ -48,7 +48,7 @@ inline fl::u32 __cpu_hal_get_cycle_count() FL_NOEXCEPT {
 #include <esp32-hal.h>  // Relies on the Arduino core for ESP32
 #include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
-inline fl::u32 __cpu_hal_get_cycle_count() FL_NOEXCEPT {
+inline fl::u32 __cpu_hal_get_cycle_count() FL_NO_EXCEPT {
   return static_cast<fl::u32>(cpu_hal_get_cycle_count());
 }
 #endif  // ESP_IDF_VERSION
@@ -58,7 +58,7 @@ inline fl::u32 __cpu_hal_get_cycle_count() FL_NOEXCEPT {
 __attribute__ ((always_inline)) inline static fl::u32 __clock_cycles() {
   fl::u32 cyc;
 #ifdef FASTLED_XTENSA
-  __asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc)) FL_NOEXCEPT;
+  __asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc)) FL_NO_EXCEPT;
 #else
   cyc = __cpu_hal_get_cycle_count();
 #endif

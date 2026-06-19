@@ -149,7 +149,7 @@ impl FileContentChecker for RawNoexceptChecker {
                 continue;
             }
 
-            let temp = code.replace("FL_NOEXCEPT", "");
+            let temp = code.replace("FL_NO_EXCEPT", "");
             let remaining: Vec<_> = regex_raw_noexcept().find_iter(&temp).collect();
             let all_operator_form = remaining
                 .iter()
@@ -164,7 +164,7 @@ impl FileContentChecker for RawNoexceptChecker {
             violations.push((
                 index + 1,
                 format!(
-                    "Raw 'noexcept' keyword — use FL_NOEXCEPT macro instead (defined in fl/stl/noexcept.h, currently a noop everywhere for cross-platform compatibility): {stripped}"
+                    "Raw 'noexcept' keyword — use FL_NO_EXCEPT macro instead (defined in fl/stl/noexcept.h, currently a noop everywhere for cross-platform compatibility): {stripped}"
                 ),
             ));
         }

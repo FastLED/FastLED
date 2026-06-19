@@ -38,7 +38,7 @@ namespace colorimetric_response {
 // Krystek's outputs are (u, v) in the CIE 1960 UCS; convert to xy via the
 // standard 1960->xy formulas. Reference: Krystek, "An algorithm to calculate
 // correlated color temperature", Color Research & Application, 1985.
-inline void cct_to_xy(int cct, float out[2]) FL_NOEXCEPT {
+inline void cct_to_xy(int cct, float out[2]) FL_NO_EXCEPT {
     const float T = static_cast<float>(
         (cct < 1500) ? 1500 : ((cct > 15000) ? 15000 : cct));
     const float T2 = T * T;
@@ -53,7 +53,7 @@ inline void cct_to_xy(int cct, float out[2]) FL_NOEXCEPT {
     out[1] = 2.0f * v / den;
 }
 
-inline void xyY_to_XYZ(float x, float y, float Y, float out[3]) FL_NOEXCEPT {
+inline void xyY_to_XYZ(float x, float y, float Y, float out[3]) FL_NO_EXCEPT {
     if (y < 1e-12f) {
         out[0] = out[1] = out[2] = 0.0f;
         return;
@@ -64,7 +64,7 @@ inline void xyY_to_XYZ(float x, float y, float Y, float out[3]) FL_NOEXCEPT {
     out[2] = (1.0f - x - y) * Y * inv_y;
 }
 
-inline bool invert3x3(const float in[3][3], float out[3][3]) FL_NOEXCEPT {
+inline bool invert3x3(const float in[3][3], float out[3][3]) FL_NO_EXCEPT {
     const float a = in[0][0], b = in[0][1], c = in[0][2];
     const float d = in[1][0], e = in[1][1], f = in[1][2];
     const float g = in[2][0], h = in[2][1], i = in[2][2];
@@ -85,14 +85,14 @@ inline bool invert3x3(const float in[3][3], float out[3][3]) FL_NOEXCEPT {
     return true;
 }
 
-inline void matvec3(const float M[3][3], const float v[3], float out[3]) FL_NOEXCEPT {
+inline void matvec3(const float M[3][3], const float v[3], float out[3]) FL_NO_EXCEPT {
     out[0] = M[0][0] * v[0] + M[0][1] * v[1] + M[0][2] * v[2];
     out[1] = M[1][0] * v[0] + M[1][1] * v[1] + M[1][2] * v[2];
     out[2] = M[2][0] * v[0] + M[2][1] * v[1] + M[2][2] * v[2];
 }
 
 inline bool barycentric_xy(const float t[2], const float A[2], const float B[2],
-                           const float C[2], float bary[3]) FL_NOEXCEPT {
+                           const float C[2], float bary[3]) FL_NO_EXCEPT {
     const float v0x = B[0] - A[0], v0y = B[1] - A[1];
     const float v1x = C[0] - A[0], v1y = C[1] - A[1];
     const float v2x = t[0] - A[0], v2y = t[1] - A[1];
@@ -114,7 +114,7 @@ inline bool barycentric_xy(const float t[2], const float A[2], const float B[2],
     return true;
 }
 
-inline u8 quantize_u8(float v) FL_NOEXCEPT {
+inline u8 quantize_u8(float v) FL_NO_EXCEPT {
     const float scaled = v * 255.0f + 0.5f;
     if (scaled <= 0.0f) return 0;
     if (scaled >= 255.0f) return 255;
@@ -130,7 +130,7 @@ inline u8 quantize_u8(float v) FL_NOEXCEPT {
 // Returns false if the primary matrix is singular (collinear chromaticities).
 inline bool build_source_matrix(const float xy_r[2], const float xy_g[2],
                                 const float xy_b[2], const float xy_w[2],
-                                float M_out[3][3]) FL_NOEXCEPT {
+                                float M_out[3][3]) FL_NO_EXCEPT {
     float xyz_R[3], xyz_G[3], xyz_B[3], xyz_W[3];
     xyY_to_XYZ(xy_r[0], xy_r[1], 1.0f, xyz_R);
     xyY_to_XYZ(xy_g[0], xy_g[1], 1.0f, xyz_G);
@@ -163,7 +163,7 @@ inline bool build_source_matrix(const float xy_r[2], const float xy_g[2],
 // dynamic allocation, which makes it safe to inline behind the colorimetric
 // solvers' rare-branch.
 inline void nnls3(const float M[3][3], const float b[3],   // ok array parameter
-                  float t_out[3], float* residual_out) FL_NOEXCEPT {
+                  float t_out[3], float* residual_out) FL_NO_EXCEPT {
     float t[3] = {0.0f, 0.0f, 0.0f};
     constexpr float kStep = 0.01f;
     constexpr int kIters = 500;
@@ -221,7 +221,7 @@ enum class LutInterp : u8 {
 // Lifted into a header inline so `lookup_lut` and the test suite consume
 // exactly the same evaluator (CodeRabbit #2707: tests that redefine basis
 // locally cannot catch regressions in the production code).
-inline void hermite_basis(float t, float out[4]) FL_NOEXCEPT {
+inline void hermite_basis(float t, float out[4]) FL_NO_EXCEPT {
     const float t2 = t * t;
     const float t3 = t2 * t;
     out[0] = 2.0f * t3 - 3.0f * t2 + 1.0f;
@@ -230,7 +230,7 @@ inline void hermite_basis(float t, float out[4]) FL_NOEXCEPT {
     out[3] = t3 - t2;
 }
 
-inline i16 quantize_lut_cell(float v) FL_NOEXCEPT {
+inline i16 quantize_lut_cell(float v) FL_NO_EXCEPT {
     const float scaled = v * static_cast<float>(kLutQ) + 0.5f;
     if (scaled <= -32768.0f) return -32768;
     if (scaled >= 32767.0f) return 32767;

@@ -7,13 +7,13 @@ namespace fl {
 
 // fl::begin for arrays
 template <typename T, fl::size N>
-constexpr T* begin(T (&array)[N]) FL_NOEXCEPT {
+constexpr T* begin(T (&array)[N]) FL_NO_EXCEPT {
     return array;
 }
 
 // fl::end for arrays
 template <typename T, fl::size N>
-constexpr T* end(T (&array)[N]) FL_NOEXCEPT {
+constexpr T* end(T (&array)[N]) FL_NO_EXCEPT {
     return array + N;
 }
 

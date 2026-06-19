@@ -48,7 +48,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     CMinWait<WAIT_TIME> mWait;
 
 public:
-    virtual void init() FL_NOEXCEPT {
+    virtual void init() FL_NO_EXCEPT {
         FastPin<DATA_PIN>::setOutput();
         mPinMask = FastPin<DATA_PIN>::mask();
         mPort = FastPin<DATA_PIN>::port();
@@ -57,7 +57,7 @@ public:
     virtual u16 getMaxRefreshRate() const { return 400; }
 
 protected:
-    virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NOEXCEPT {
+    virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
         mWait.wait();
 
         // Compute timing from actual CPU frequency (just-in-time per-frame calculation)
@@ -89,7 +89,7 @@ protected:
     inline static void writeBits(
         FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER data_ptr_t port,
         FASTLED_REGISTER data_t hi, FASTLED_REGISTER data_t lo, FASTLED_REGISTER u8 & b,
-        u32 t1_clocks, u32 t1t2_clocks, u32 t1t2t3_clocks) FL_NOEXCEPT {
+        u32 t1_clocks, u32 t1t2_clocks, u32 t1t2t3_clocks) FL_NO_EXCEPT {
         for(FASTLED_REGISTER u32 i = BITS-1; i > 0; --i) {
             while(_CYCCNT < (t1t2t3_clocks-ADJ));
             FastPin<DATA_PIN>::fastset(port, hi);
@@ -119,7 +119,7 @@ protected:
 
     static u32 showRGBInternal(
             PixelController<RGB_ORDER> pixels, Rgbw rgbw,
-            u32 t1_clocks, u32 t2_clocks, u32 t3_clocks, u32 clks_per_us) FL_NOEXCEPT {
+            u32 t1_clocks, u32 t2_clocks, u32 t3_clocks, u32 clks_per_us) FL_NO_EXCEPT {
         // Pre-calculate combined timing values for the hot loop
         const u32 t1t2_clocks = t1_clocks + t2_clocks;
         const u32 t1t2t3_clocks = t1t2_clocks + t3_clocks;

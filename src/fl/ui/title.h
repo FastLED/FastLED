@@ -16,11 +16,11 @@ namespace fl {
 
 class UITitleImpl {
   public:
-    UITitleImpl(const char *name) FL_NOEXCEPT { FASTLED_UNUSED(name); }
-    ~UITitleImpl() FL_NOEXCEPT {}
+    UITitleImpl(const char *name) FL_NO_EXCEPT { FASTLED_UNUSED(name); }
+    ~UITitleImpl() FL_NO_EXCEPT {}
 
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroup(const fl::string& groupName) FL_NOEXCEPT { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) FL_NO_EXCEPT { FASTLED_UNUSED(groupName); }
 };
 
 #endif
@@ -28,11 +28,11 @@ class UITitleImpl {
 class UITitle : public UIElement {
   public:
     FL_NO_COPY(UITitle);
-    UITitle(const char *name) FL_NOEXCEPT;
-    ~UITitle() FL_NOEXCEPT;
+    UITitle(const char *name) FL_NO_EXCEPT;
+    ~UITitle() FL_NO_EXCEPT;
 
     // Override setGroup to also update the implementation
-    void setGroup(const fl::string& groupName) FL_NOEXCEPT override {
+    void setGroup(const fl::string& groupName) FL_NO_EXCEPT override {
         UIElement::setGroup(groupName);
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);

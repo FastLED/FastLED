@@ -27,27 +27,27 @@ public:
         float targetValue = 0.0f;
     };
 
-    SilenceEnvelope() FL_NOEXCEPT;
-    explicit SilenceEnvelope(const Config& cfg) FL_NOEXCEPT;
+    SilenceEnvelope() FL_NO_EXCEPT;
+    explicit SilenceEnvelope(const Config& cfg) FL_NO_EXCEPT;
 
-    void configure(const Config& cfg) FL_NOEXCEPT { mConfig = cfg; }
+    void configure(const Config& cfg) FL_NO_EXCEPT { mConfig = cfg; }
 
     // Pass-through when !isSilent (returns currentValue, caches it internally).
     // Exponential decay toward Config::targetValue when isSilent. Snaps back
     // to currentValue on silence→audio transition so re-attack has no lag.
     // `dt` is seconds since last call; use computeAudioDt() from audio_context.h.
-    float update(bool isSilent, float currentValue, float dt) FL_NOEXCEPT;
+    float update(bool isSilent, float currentValue, float dt) FL_NO_EXCEPT;
 
     // Snap the envelope to `initialValue` (used on reset or explicit jumps).
-    void reset(float initialValue = 0.0f) FL_NOEXCEPT;
+    void reset(float initialValue = 0.0f) FL_NO_EXCEPT;
 
     // True once the envelope has decayed to within `epsilon` of targetValue.
-    bool isGated(float epsilon = 1e-4f) const FL_NOEXCEPT;
+    bool isGated(float epsilon = 1e-4f) const FL_NO_EXCEPT;
 
     // Current envelope output (last value returned by update()).
-    float value() const FL_NOEXCEPT { return mCurrent; }
+    float value() const FL_NO_EXCEPT { return mCurrent; }
 
-    const Config& config() const FL_NOEXCEPT { return mConfig; }
+    const Config& config() const FL_NO_EXCEPT { return mConfig; }
 
 private:
     Config mConfig;

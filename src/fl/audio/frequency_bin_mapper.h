@@ -70,9 +70,9 @@ struct FrequencyBinMapperConfig {
 /// @endcode
 class FrequencyBinMapper {
 public:
-    FrequencyBinMapper() FL_NOEXCEPT;
+    FrequencyBinMapper() FL_NO_EXCEPT;
     explicit FrequencyBinMapper(const FrequencyBinMapperConfig& config);
-    ~FrequencyBinMapper() FL_NOEXCEPT;
+    ~FrequencyBinMapper() FL_NO_EXCEPT;
 
     /// Configure the frequency bin mapper
     /// This calculates bin boundaries and FFT-to-frequency bin mappings

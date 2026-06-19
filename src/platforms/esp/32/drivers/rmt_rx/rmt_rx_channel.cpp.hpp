@@ -533,7 +533,7 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
  */
 class RmtRxChannelImpl : public RmtRxChannel {
   public:
-    RmtRxChannelImpl(int pin) FL_NOEXCEPT
+    RmtRxChannelImpl(int pin) FL_NO_EXCEPT
         : mChannel(nullptr), mPin(static_cast<gpio_num_t>(pin)),
           mResolutionHz(0), mBufferSize(0), mReceiveDone(false),
           mSymbolsReceived(0), mSignalRangeMinNs(100),
@@ -605,7 +605,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         }
     }
 
-    bool begin(const RxConfig &config) FL_NOEXCEPT override {
+    bool begin(const RxConfig &config) FL_NO_EXCEPT override {
         // If the DMA setting changed on an already-created channel, we have to
         // tear it down â€” ESP-IDF bakes `flags.with_dma` into the channel at
         // rmt_new_rx_channel() time, so toggling on a later begin() is a no-op
@@ -866,9 +866,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
         return true;
     }
 
-    bool finished() const FL_NOEXCEPT override { return mReceiveDone; }
+    bool finished() const FL_NO_EXCEPT override { return mReceiveDone; }
 
-    RxWaitResult wait(u32 timeout_ms) FL_NOEXCEPT override {
+    RxWaitResult wait(u32 timeout_ms) FL_NO_EXCEPT override {
         if (!mChannel) {
             FL_WARN_F("wait(): channel not initialized");
             return RxWaitResult::TIMEOUT; // Treat as timeout
@@ -926,10 +926,10 @@ class RmtRxChannelImpl : public RmtRxChannel {
         return RxWaitResult::SUCCESS;
     }
 
-    u32 getResolutionHz() const FL_NOEXCEPT override { return mResolutionHz; }
+    u32 getResolutionHz() const FL_NO_EXCEPT override { return mResolutionHz; }
 
     fl::result<u32, DecodeError> decode(const ChipsetTiming4Phase &timing,
-                                             fl::span<u8> out) FL_NOEXCEPT override {
+                                             fl::span<u8> out) FL_NO_EXCEPT override {
         // Get received symbols (spurious symbols already filtered by wait())
         fl::span<const RmtSymbol> symbols = getReceivedSymbols();
 
@@ -944,11 +944,11 @@ class RmtRxChannelImpl : public RmtRxChannel {
         return decodeRmtSymbols(timing, mResolutionHz, symbols, out, true);
     }
 
-    const char *name() const FL_NOEXCEPT override { return "RMT"; }
+    const char *name() const FL_NO_EXCEPT override { return "RMT"; }
 
-    int getPin() const FL_NOEXCEPT override { return static_cast<int>(mPin); }
+    int getPin() const FL_NO_EXCEPT override { return static_cast<int>(mPin); }
 
-    size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) FL_NOEXCEPT override {
+    size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) FL_NO_EXCEPT override {
         // Get received symbols (spurious symbols already filtered by wait())
         fl::span<const RmtSymbol> symbols = getReceivedSymbols();
 
@@ -1014,7 +1014,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         return write_index;
     }
 
-    bool injectEdges(fl::span<const EdgeTime> edges) FL_NOEXCEPT override {
+    bool injectEdges(fl::span<const EdgeTime> edges) FL_NO_EXCEPT override {
         if (edges.empty()) {
             FL_WARN_F("injectEdges(): empty edges span");
             return false;
@@ -1103,7 +1103,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
      * allocating the full buffer. This ensures we don't buffer unwanted
      * symbols. Only allocates memory temporarily during the skip phase.
      */
-    bool handleSkipPhase() FL_NOEXCEPT {
+    bool handleSkipPhase() FL_NO_EXCEPT {
         if (mSkipCounter == 0) {
             FL_LOG_RX("No symbols to skip, skip phase complete");
             return true;
@@ -1218,7 +1218,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
      * - ISR callback copies from DMA buffer to accumulation buffer on each
      * partial RX callback
      */
-    bool allocateAndArm() FL_NOEXCEPT {
+    bool allocateAndArm() FL_NO_EXCEPT {
         // Per-receive buffer that ESP-IDF writes into. In non-DMA mode this is
         // sized for a single mem-block fill; in DMA mode ESP-IDF requires the
         // user buffer to be â‰¤ mem_block_symbols (the DRAM ping-pong size),
@@ -1328,7 +1328,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
      * next receive
      *   - rmt_disable() â†’ "init" state (ready for next enable/receive cycle)
      */
-    bool enable() FL_NOEXCEPT {
+    bool enable() FL_NO_EXCEPT {
         if (!mChannel) {
             FL_WARN_F("enable(): RX channel not initialized");
             return false;
@@ -1356,7 +1356,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
      * The accumulation buffer contains the complete data stream assembled from
      * multiple partial RX callbacks.
      */
-    fl::span<const RmtSymbol> getReceivedSymbols() const FL_NOEXCEPT {
+    fl::span<const RmtSymbol> getReceivedSymbols() const FL_NO_EXCEPT {
         if (mAccumulationBuffer.empty()) {
             return fl::span<const RmtSymbol>();
         }
@@ -1367,7 +1367,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
     /**
      * @brief Clear receive state (internal method)
      */
-    void clear() FL_NOEXCEPT {
+    void clear() FL_NO_EXCEPT {
         mReceiveDone = false;
         mSymbolsReceived = 0;
         mAccumulationOffset = 0;
@@ -1386,7 +1386,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
      * accumulation buffer. The ISR callback will copy from DMA buffer â†’
      * accumulation buffer on each partial RX callback.
      */
-    bool startReceive(RmtSymbol *buffer, size_t buffer_size) FL_NOEXCEPT {
+    bool startReceive(RmtSymbol *buffer, size_t buffer_size) FL_NO_EXCEPT {
         if (!mChannel) {
             FL_WARN_F("RX channel not initialized (call begin() first)");
             return false;
@@ -1468,7 +1468,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
      */
     static bool IRAM_ATTR rxDoneCallback(rmt_channel_handle_t channel,
                                          const rmt_rx_done_event_data_t *data,
-                                         void *user_data) FL_NOEXCEPT {
+                                         void *user_data) FL_NO_EXCEPT {
         RmtRxChannelImpl *self = static_cast<RmtRxChannelImpl *>(user_data);
         if (!self) {
             return false;
@@ -1615,7 +1615,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 };
 
 // Factory method implementation
-fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NOEXCEPT {
+fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NO_EXCEPT {
     return fl::make_shared<RmtRxChannelImpl>(pin);
 }
 
@@ -1627,7 +1627,7 @@ fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NOEXCEPT {
 // RX functionality requires RMT5 driver (ESP-IDF 5.0+)
 namespace fl {
 
-fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NOEXCEPT {
+fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NO_EXCEPT {
     (void)pin; // Suppress unused parameter warning
     FL_WARN_F("RmtRxChannel::create() requires RMT5 driver (ESP-IDF 5.0+). "
             "Returning nullptr.");

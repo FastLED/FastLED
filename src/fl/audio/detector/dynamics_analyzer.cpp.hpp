@@ -28,7 +28,7 @@ DynamicsAnalyzer::DynamicsAnalyzer()
     mRMSHistory.reserve(mHistorySize);
 }
 
-DynamicsAnalyzer::~DynamicsAnalyzer() FL_NOEXCEPT = default;
+DynamicsAnalyzer::~DynamicsAnalyzer() FL_NO_EXCEPT = default;
 
 void DynamicsAnalyzer::update(shared_ptr<Context> context) {
     mCurrentRMS = context->getRMS();

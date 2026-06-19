@@ -18,14 +18,14 @@ namespace fl {
 class EngineListener : public fl::EngineEvents::Listener {
   public:
     friend class fl::Singleton<EngineListener>;
-    static void Init() FL_NOEXCEPT;
+    static void Init() FL_NO_EXCEPT;
 
   private:
-    void onEndFrame() FL_NOEXCEPT override;
-    void onStripAdded(CLEDController *strip, u32 num_leds) FL_NOEXCEPT override;
+    void onEndFrame() FL_NO_EXCEPT override;
+    void onStripAdded(CLEDController *strip, u32 num_leds) FL_NO_EXCEPT override;
     void onCanvasUiSet(CLEDController *strip,
-                       const fl::ScreenMap &screenmap) override FL_NOEXCEPT;
-    EngineListener() FL_NOEXCEPT;
+                       const fl::ScreenMap &screenmap) override FL_NO_EXCEPT;
+    EngineListener() FL_NO_EXCEPT;
     ~EngineListener();
 };
 

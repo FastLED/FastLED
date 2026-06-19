@@ -26,9 +26,9 @@ public:
     using TaskFunction = fl::function<void()>;
 
     virtual ~ICoroutineTask() = default;
-    virtual void stop() FL_NOEXCEPT = 0;
-    virtual bool isRunning() const FL_NOEXCEPT = 0;
-    static void exitCurrent() FL_NOEXCEPT;  // Platform-specific static method
+    virtual void stop() FL_NO_EXCEPT = 0;
+    virtual bool isRunning() const FL_NO_EXCEPT = 0;
+    static void exitCurrent() FL_NO_EXCEPT;  // Platform-specific static method
 };
 
 /// @brief Owning smart pointer for task coroutines
@@ -39,7 +39,7 @@ TaskCoroutinePtr createTaskCoroutine(fl::string name,
                                       ICoroutineTask::TaskFunction function,
                                       size_t stack_size,
                                       u8 priority,
-                                      int core_id = -1) FL_NOEXCEPT;
+                                      int core_id = -1) FL_NO_EXCEPT;
 
 } // namespace platforms
 } // namespace fl

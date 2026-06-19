@@ -50,7 +50,7 @@ struct Key {
     u32 timestamp;           // Detection timestamp (ms)
     u32 duration;            // How long this key has been active (ms)
 
-    Key() FL_NOEXCEPT : rootNote(0), isMinor(false), confidence(0.0f), timestamp(0), duration(0) {}
+    Key() FL_NO_EXCEPT : rootNote(0), isMinor(false), confidence(0.0f), timestamp(0), duration(0) {}
 
     Key(u8 root, bool minor, float conf, u32 time)
         : rootNote(root), isMinor(minor), confidence(conf), timestamp(time), duration(0) {}
@@ -80,8 +80,8 @@ struct Key {
 // KeyDetector - Detects musical key using chroma analysis
 class KeyDetector : public Detector {
 public:
-    KeyDetector() FL_NOEXCEPT;
-    ~KeyDetector() FL_NOEXCEPT override;
+    KeyDetector() FL_NO_EXCEPT;
+    ~KeyDetector() FL_NO_EXCEPT override;
 
     // Detector interface
     void update(shared_ptr<Context> context) override;

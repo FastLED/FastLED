@@ -18,7 +18,7 @@ FrequencyBinMapper::FrequencyBinMapper(const FrequencyBinMapperConfig& config) {
     configure(config);
 }
 
-FrequencyBinMapper::~FrequencyBinMapper() FL_NOEXCEPT = default;
+FrequencyBinMapper::~FrequencyBinMapper() FL_NO_EXCEPT = default;
 
 void FrequencyBinMapper::configure(const FrequencyBinMapperConfig& config) {
     mConfig = config;

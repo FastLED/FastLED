@@ -92,7 +92,7 @@ class Context {
         }
     }
 
-    ~Context() FL_NOEXCEPT {
+    ~Context() FL_NO_EXCEPT {
         if (mFftrCfg) {
             kiss_fftr_free(mFftrCfg);
         }
@@ -1136,7 +1136,7 @@ Impl::Impl(const Args &args) {
                                           args.mode, args.window);
 }
 
-Impl::~Impl() FL_NOEXCEPT { mContext.reset(); }
+Impl::~Impl() FL_NO_EXCEPT { mContext.reset(); }
 
 fl::string Impl::info() const {
     if (mContext) {

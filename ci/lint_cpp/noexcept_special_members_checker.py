@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false
-"""Checker and auto-fixer for FL_NOEXCEPT on special member functions.
+"""Checker and auto-fixer for FL_NO_EXCEPT on special member functions.
 
 Detects special member functions (destructors, default/copy/move constructors,
-copy/move assignment operators) that are missing FL_NOEXCEPT in src/fl/.
+copy/move assignment operators) that are missing FL_NO_EXCEPT in src/fl/.
 
-FL_NOEXCEPT is currently a noop on all platforms for cross-platform
+FL_NO_EXCEPT is currently a noop on all platforms for cross-platform
 compatibility. Enforcing its use on special member functions ensures that
 when noexcept is re-enabled, all the right places are already annotated.
 
@@ -14,7 +14,7 @@ Scope: src/fl/** (all .h / .hpp / .cpp / .cpp.hpp files)
 Exemptions:
   - src/fl/stl/noexcept.h  (the macro definition itself)
   - Lines inside // or /* */ comments
-  - Lines with suppression comment "// ok no FL_NOEXCEPT" or "// nolint"
+  - Lines with suppression comment "// ok no FL_NO_EXCEPT" or "// nolint"
   - Third-party code (third_party/)
 
 Usage:
@@ -41,13 +41,13 @@ from ci.util.paths import PROJECT_ROOT
 # ── Regex patterns ──────────────────────────────────────────────────────────
 
 # Suppression comments
-_SUPPRESS = re.compile(r"//\s*(?:ok\s+no\s+FL_NOEXCEPT|nolint)\b", re.IGNORECASE)
+_SUPPRESS = re.compile(r"//\s*(?:ok\s+no\s+FL_NO_EXCEPT|nolint)\b", re.IGNORECASE)
 
 # Class/struct name extraction (captures identifier after class/struct keyword)
 _CLASS_DEF = re.compile(r"\b(?:class|struct)\s+(\w+)")
 
-# FL_NOEXCEPT or bare noexcept (either satisfies the check)
-_HAS_NOEXCEPT = re.compile(r"\b(?:FL_NOEXCEPT|noexcept)\b")
+# FL_NO_EXCEPT or bare noexcept (either satisfies the check)
+_HAS_NOEXCEPT = re.compile(r"\b(?:FL_NO_EXCEPT|noexcept)\b")
 
 # Destructor: ~Name(
 _DTOR = re.compile(r"~(\w+)\s*\(")
@@ -76,7 +76,7 @@ _CTOR_QUALS = frozenset(
     }
 )
 
-# Include line that provides FL_NOEXCEPT
+# Include line that provides FL_NO_EXCEPT
 _NOEXCEPT_INCLUDE = '#include "fl/stl/noexcept.h"'
 
 
@@ -275,7 +275,7 @@ def _join_multiline_signature(lines: list[str], start: int) -> str | None:
 
 
 def signature_has_noexcept(lines: list[str], start: int, open_paren: int) -> bool:
-    """Return True if FL_NOEXCEPT / noexcept appears between ')' and body/';'."""
+    """Return True if FL_NO_EXCEPT / noexcept appears between ')' and body/';'."""
     close_line, close_col = _find_close_paren_multiline(lines, start, open_paren)
     if close_line < 0:
         return False  # can't find closing paren, skip
@@ -308,7 +308,7 @@ def signature_has_noexcept(lines: list[str], start: int, open_paren: int) -> boo
 
 
 class NoexceptSpecialMembersChecker(FileContentChecker):
-    """Lint checker: every special member function in src/fl/ must have FL_NOEXCEPT."""
+    """Lint checker: every special member function in src/fl/ must have FL_NO_EXCEPT."""
 
     def __init__(self) -> None:
         self.violations: dict[str, list[tuple[int, str]]] = {}
@@ -361,7 +361,7 @@ class NoexceptSpecialMembersChecker(FileContentChecker):
                 continue
 
             self.violations.setdefault(path, []).append(
-                (i + 1, f"Missing FL_NOEXCEPT on {kind}: {stripped}")
+                (i + 1, f"Missing FL_NO_EXCEPT on {kind}: {stripped}")
             )
 
         return []
@@ -371,24 +371,24 @@ class NoexceptSpecialMembersChecker(FileContentChecker):
 
 
 def _insert_noexcept_at(line: str, close_paren_col: int) -> str:
-    """Insert ' FL_NOEXCEPT' immediately after ')' at *close_paren_col*."""
+    """Insert ' FL_NO_EXCEPT' immediately after ')' at *close_paren_col*."""
     before = line[: close_paren_col + 1]
     after = line[close_paren_col + 1 :]
     # No trailing space needed when followed by ; or { directly
     if not after or after[0] in (";", "{"):
-        return before + " FL_NOEXCEPT" + after
+        return before + " FL_NO_EXCEPT" + after
     # Already has a space → insert keyword before existing space
     if after[0] == " ":
-        return before + " FL_NOEXCEPT" + after
+        return before + " FL_NO_EXCEPT" + after
     # Otherwise add a space after
-    return before + " FL_NOEXCEPT " + after
+    return before + " FL_NO_EXCEPT " + after
 
 
 def _ensure_include(content: str) -> str:
-    """Ensure ``#include "fl/stl/noexcept.h"`` is present when FL_NOEXCEPT is used."""
+    """Ensure ``#include "fl/stl/noexcept.h"`` is present when FL_NO_EXCEPT is used."""
     if "fl/stl/noexcept.h" in content:
         return content
-    if "FL_NOEXCEPT" not in content:
+    if "FL_NO_EXCEPT" not in content:
         return content
 
     lines = content.split("\n")
@@ -404,7 +404,7 @@ def _ensure_include(content: str) -> str:
 
 
 def fix_file(path: Path, dry_run: bool = False) -> tuple[int, list[str]]:
-    """Fix missing FL_NOEXCEPT in *path*.
+    """Fix missing FL_NO_EXCEPT in *path*.
 
     Returns ``(number_of_fixes, list_of_descriptions)``.
     """
@@ -458,7 +458,7 @@ def fix_file(path: Path, dry_run: bool = False) -> tuple[int, list[str]]:
     descriptions: list[str] = []
     for cl, cc, kind in fixes:
         verb = "Would add" if dry_run else "Add"
-        descriptions.append(f"  Line {cl + 1}: {verb} FL_NOEXCEPT to {kind}")
+        descriptions.append(f"  Line {cl + 1}: {verb} FL_NO_EXCEPT to {kind}")
     for line_num, kind in skipped:
         descriptions.append(f"  Line {line_num}: MANUAL: multi-line {kind}")
 
@@ -521,7 +521,7 @@ def main() -> int:
     run_checker_standalone(
         checker,
         [str(PROJECT_ROOT / "src" / "fl")],
-        "Missing FL_NOEXCEPT on special member functions",
+        "Missing FL_NO_EXCEPT on special member functions",
         extensions=[".h", ".hpp", ".cpp", ".cpp.hpp"],
     )
     return 0

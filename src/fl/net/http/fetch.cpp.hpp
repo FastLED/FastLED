@@ -425,10 +425,10 @@ fl::task::Promise<Response> execute_fetch_request(const fl::string& url, const F
 
 class FetchEngineListener : public EngineEvents::Listener {
 public:
-    FetchEngineListener() FL_NOEXCEPT {
+    FetchEngineListener() FL_NO_EXCEPT {
         EngineEvents::addListener(this);
     };
-    ~FetchEngineListener() FL_NOEXCEPT override {
+    ~FetchEngineListener() FL_NO_EXCEPT override {
         // Listener base class automatically removes itself
         EngineEvents::removeListener(this);
     }

@@ -48,7 +48,7 @@ struct Device::Impl {
         , owns_backend(false) {}
 
     /// @brief Destructor
-    ~Impl() FL_NOEXCEPT {
+    ~Impl() FL_NO_EXCEPT {
         FL_LOG_SPI_F("Device::Impl: Destructor called");
         // Members will be destroyed in reverse order of declaration:
         // 1. owns_backend (bool) - trivial

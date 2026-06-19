@@ -63,7 +63,7 @@ private:
     FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 public:
-    ClocklessIdf4() FL_NOEXCEPT
+    ClocklessIdf4() FL_NO_EXCEPT
         : mDriver(getRmtEngine())
     {
         // Create channel data with pin and timing configuration
@@ -71,13 +71,13 @@ public:
         mChannelData = ChannelData::create(DATA_PIN, timing);
     }
 
-    void init() FL_NOEXCEPT override { }
-    virtual u16 getMaxRefreshRate() const FL_NOEXCEPT { return 400; }
+    void init() FL_NO_EXCEPT override { }
+    virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT { return 400; }
 
 protected:
     // -- Show pixels
     //    This is the main entry point for the controller.
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT override
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override
     {
         if (!mDriver) {
             FL_WARN_F_EVERY(100, "No Engine");
@@ -107,7 +107,7 @@ protected:
         mDriver->enqueue(mChannelData);
     }
 
-    static fl::shared_ptr<IChannelDriver> getRmtEngine() FL_NOEXCEPT {
+    static fl::shared_ptr<IChannelDriver> getRmtEngine() FL_NO_EXCEPT {
         // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
         // the `BusTraits<Bus::RMT>` singleton. Naming
         // `BusTraits<Bus::RMT>::instancePtr()` here is the ODR-use that

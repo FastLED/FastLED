@@ -42,17 +42,17 @@ private:
     fl::size mSize = 0;            // total elements
     memory_resource* mResource = default_memory_resource();
 
-    T* allocate_chunk() FL_NOEXCEPT {
+    T* allocate_chunk() FL_NO_EXCEPT {
         return static_cast<T*>(mResource->allocate(kChunkSize * sizeof(T)));
     }
 
-    void deallocate_chunk(T* chunk) FL_NOEXCEPT {
+    void deallocate_chunk(T* chunk) FL_NO_EXCEPT {
         if (chunk) {
             mResource->deallocate(chunk, kChunkSize * sizeof(T));
         }
     }
 
-    T** allocate_map(fl::size capacity) FL_NOEXCEPT {
+    T** allocate_map(fl::size capacity) FL_NO_EXCEPT {
         T** m = static_cast<T**>(mResource->allocate(capacity * sizeof(T*)));
         if (m) {
             for (fl::size i = 0; i < capacity; ++i) {
@@ -62,7 +62,7 @@ private:
         return m;
     }
 
-    void deallocate_map(T** map, fl::size capacity) FL_NOEXCEPT {
+    void deallocate_map(T** map, fl::size capacity) FL_NO_EXCEPT {
         if (map) {
             mResource->deallocate(map, capacity * sizeof(T*));
         }
@@ -70,14 +70,14 @@ private:
 
     // Translate logical index -> (chunk_idx in mMap, offset within chunk).
     // Caller validates `logical_idx < mSize` (or == mSize for end-position).
-    void locate(fl::size logical_idx, fl::size& chunk_idx, fl::size& offset) const FL_NOEXCEPT {
+    void locate(fl::size logical_idx, fl::size& chunk_idx, fl::size& offset) const FL_NO_EXCEPT {
         fl::size global = mFrontOffset + logical_idx;
         chunk_idx = mFrontMapIdx + global / kChunkSize;
         offset = global % kChunkSize;
     }
 
     // Number of currently-used chunk slots [mFrontMapIdx .. back_chunk_idx].
-    fl::size used_chunks() const FL_NOEXCEPT {
+    fl::size used_chunks() const FL_NO_EXCEPT {
         if (mSize == 0) return 0;
         fl::size last_global = mFrontOffset + mSize - 1;
         fl::size last_chunk = mFrontMapIdx + last_global / kChunkSize;
@@ -89,7 +89,7 @@ private:
     //   - mMap has at least `extra_back` empty slots after the back chunk
     // Existing chunk pointers are preserved (chunks themselves are never moved).
     // mFrontMapIdx may shift to a new position within the new map.
-    void grow_map(fl::size extra_front, fl::size extra_back) FL_NOEXCEPT {
+    void grow_map(fl::size extra_front, fl::size extra_back) FL_NO_EXCEPT {
         fl::size used = used_chunks();
         fl::size needed = used + extra_front + extra_back;
         fl::size new_cap = detail::deque_grow_map_capacity(mMapCapacity, needed);
@@ -114,7 +114,7 @@ private:
 
     // Ensure the chunk that will hold the next push_back exists. May grow
     // the map if the back chunk lies past mMapCapacity.
-    void ensure_back_room() FL_NOEXCEPT {
+    void ensure_back_room() FL_NO_EXCEPT {
         fl::size global = mFrontOffset + mSize;
         fl::size need_chunk_idx = mFrontMapIdx + global / kChunkSize;
         if (need_chunk_idx >= mMapCapacity) {
@@ -130,7 +130,7 @@ private:
 
     // Ensure the chunk that will hold the next push_front exists. May grow
     // the map if push_front would step before mMap[0].
-    void ensure_front_room() FL_NOEXCEPT {
+    void ensure_front_room() FL_NO_EXCEPT {
         if (mFrontOffset > 0) {
             // Stays within current front chunk; that chunk is guaranteed
             // allocated when mSize > 0, and allocated below for empty deque.
@@ -368,19 +368,19 @@ public:
     typedef fl::reverse_iterator<const_iterator> const_reverse_iterator;
 
     // Constructors
-    deque() FL_NOEXCEPT {}
+    deque() FL_NO_EXCEPT {}
 
-    explicit deque(memory_resource* resource) FL_NOEXCEPT : mResource(resource) {}
+    explicit deque(memory_resource* resource) FL_NO_EXCEPT : mResource(resource) {}
 
     explicit deque(fl::size count, const T& value = T()) : deque() {
         resize(count, value);
     }
 
-    deque(const deque& other) FL_NOEXCEPT : deque() {
+    deque(const deque& other) FL_NO_EXCEPT : deque() {
         *this = other;
     }
 
-    deque(deque&& other) FL_NOEXCEPT : deque() {
+    deque(deque&& other) FL_NO_EXCEPT : deque() {
         *this = fl::move(other);
     }
 
@@ -390,7 +390,7 @@ public:
         }
     }
 
-    ~deque() FL_NOEXCEPT {
+    ~deque() FL_NO_EXCEPT {
         clear();
         // Deallocate any remaining chunk pointers (clear() releases element
         // storage but may leave the map intact for reuse on a still-live deque;
@@ -401,7 +401,7 @@ public:
         deallocate_map(mMap, mMapCapacity);
     }
 
-    deque& operator=(const deque& other) FL_NOEXCEPT {
+    deque& operator=(const deque& other) FL_NO_EXCEPT {
         if (this != &other) {
             clear();
             for (fl::size i = 0; i < other.size(); ++i) {
@@ -411,7 +411,7 @@ public:
         return *this;
     }
 
-    deque& operator=(deque&& other) FL_NOEXCEPT {
+    deque& operator=(deque&& other) FL_NO_EXCEPT {
         if (this != &other) {
             // Tear down current state.
             clear();
@@ -483,23 +483,23 @@ public:
         return mMap[c][o];
     }
 
-    iterator begin() FL_NOEXCEPT { return iterator(this, 0); }
-    const_iterator begin() const FL_NOEXCEPT { return const_iterator(this, 0); }
-    iterator end() FL_NOEXCEPT { return iterator(this, mSize); }
-    const_iterator end() const FL_NOEXCEPT { return const_iterator(this, mSize); }
+    iterator begin() FL_NO_EXCEPT { return iterator(this, 0); }
+    const_iterator begin() const FL_NO_EXCEPT { return const_iterator(this, 0); }
+    iterator end() FL_NO_EXCEPT { return iterator(this, mSize); }
+    const_iterator end() const FL_NO_EXCEPT { return const_iterator(this, mSize); }
 
-    reverse_iterator rbegin() FL_NOEXCEPT { return reverse_iterator(end()); }
-    const_reverse_iterator rbegin() const FL_NOEXCEPT { return const_reverse_iterator(end()); }
-    reverse_iterator rend() FL_NOEXCEPT { return reverse_iterator(begin()); }
-    const_reverse_iterator rend() const FL_NOEXCEPT { return const_reverse_iterator(begin()); }
+    reverse_iterator rbegin() FL_NO_EXCEPT { return reverse_iterator(end()); }
+    const_reverse_iterator rbegin() const FL_NO_EXCEPT { return const_reverse_iterator(end()); }
+    reverse_iterator rend() FL_NO_EXCEPT { return reverse_iterator(begin()); }
+    const_reverse_iterator rend() const FL_NO_EXCEPT { return const_reverse_iterator(begin()); }
 
-    const_iterator cbegin() const FL_NOEXCEPT { return const_iterator(this, 0); }
-    const_iterator cend() const FL_NOEXCEPT { return const_iterator(this, mSize); }
-    const_reverse_iterator crbegin() const FL_NOEXCEPT { return const_reverse_iterator(cend()); }
-    const_reverse_iterator crend() const FL_NOEXCEPT { return const_reverse_iterator(cbegin()); }
+    const_iterator cbegin() const FL_NO_EXCEPT { return const_iterator(this, 0); }
+    const_iterator cend() const FL_NO_EXCEPT { return const_iterator(this, mSize); }
+    const_reverse_iterator crbegin() const FL_NO_EXCEPT { return const_reverse_iterator(cend()); }
+    const_reverse_iterator crend() const FL_NO_EXCEPT { return const_reverse_iterator(cbegin()); }
 
-    bool empty() const FL_NOEXCEPT { return mSize == 0; }
-    fl::size size() const FL_NOEXCEPT { return mSize; }
+    bool empty() const FL_NO_EXCEPT { return mSize == 0; }
+    fl::size size() const FL_NO_EXCEPT { return mSize; }
 
     // Total addressable storage in the currently-allocated chunks. Returns
     // a chunk-size-quantized value (multiple of kChunkSize). The old
@@ -519,7 +519,7 @@ public:
 
     // Ensure capacity for at least `n` elements from the current front.
     // Chunked: pre-allocates ceil(n / kChunkSize) chunks at the back.
-    void reserve(fl::size n) FL_NOEXCEPT {
+    void reserve(fl::size n) FL_NO_EXCEPT {
         if (n <= capacity()) return;
         // Allocate enough chunks behind the current front-offset to hold n total.
         fl::size needed_chunks = (mFrontOffset + n + kChunkSize - 1) / kChunkSize;
@@ -569,7 +569,7 @@ public:
         }
     }
 
-    memory_resource* get_memory_resource() const FL_NOEXCEPT { return mResource; }
+    memory_resource* get_memory_resource() const FL_NO_EXCEPT { return mResource; }
 
     void clear() {
         for (fl::size i = 0; i < mSize; ++i) {
@@ -821,7 +821,7 @@ public:
         return true;
     }
 
-    bool operator!=(const deque& other) const FL_NOEXCEPT { return !(*this == other); }
+    bool operator!=(const deque& other) const FL_NO_EXCEPT { return !(*this == other); }
 
     bool operator<(const deque& other) const {
         fl::size min_size = mSize < other.mSize ? mSize : other.mSize;
@@ -832,9 +832,9 @@ public:
         return mSize < other.mSize;
     }
 
-    bool operator<=(const deque& other) const FL_NOEXCEPT { return *this < other || *this == other; }
-    bool operator>(const deque& other) const FL_NOEXCEPT { return other < *this; }
-    bool operator>=(const deque& other) const FL_NOEXCEPT { return *this > other || *this == other; }
+    bool operator<=(const deque& other) const FL_NO_EXCEPT { return *this < other || *this == other; }
+    bool operator>(const deque& other) const FL_NO_EXCEPT { return other < *this; }
+    bool operator>=(const deque& other) const FL_NO_EXCEPT { return *this > other || *this == other; }
 };
 
 typedef deque<int> deque_int;

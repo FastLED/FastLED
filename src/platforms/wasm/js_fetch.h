@@ -27,11 +27,11 @@ private:
     fl::string mUrl;
     
 public:
-    explicit WasmFetchRequest(const fl::string& url) FL_NOEXCEPT : mUrl(url) {}
+    explicit WasmFetchRequest(const fl::string& url) FL_NO_EXCEPT : mUrl(url) {}
     
     /// Execute the fetch request and call the response callback
     /// @param callback Function to call with the response object
-    void response(const FetchResponseCallback& callback) FL_NOEXCEPT;
+    void response(const FetchResponseCallback& callback) FL_NO_EXCEPT;
 };
 
 /// Internal WASM fetch object (renamed to avoid conflicts)
@@ -40,7 +40,7 @@ public:
     /// Create a GET request
     /// @param url The URL to fetch
     /// @returns WasmFetchRequest object for chaining
-    WasmFetchRequest get(const fl::string& url) FL_NOEXCEPT {
+    WasmFetchRequest get(const fl::string& url) FL_NO_EXCEPT {
         return WasmFetchRequest(url);
     }
 };

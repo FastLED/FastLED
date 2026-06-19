@@ -47,13 +47,13 @@ public:
         mChannelData = ChannelData::create(DATA_PIN, timing);
     }
 
-    void init() FL_NOEXCEPT override { }
-    virtual u16 getMaxRefreshRate() const FL_NOEXCEPT { return 800; }
+    void init() FL_NO_EXCEPT override { }
+    virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT { return 800; }
 
 protected:
     // -- Show pixels
     //    This is the main entry point for the controller.
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT override
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override
     {
         if (!mDriver) {
             FL_WARN_F_EVERY(100, "No Engine");
@@ -82,7 +82,7 @@ protected:
         mDriver->enqueue(mChannelData);
     }
 
-    static fl::shared_ptr<IChannelDriver> getClocklessSpiEngine() FL_NOEXCEPT {
+    static fl::shared_ptr<IChannelDriver> getClocklessSpiEngine() FL_NO_EXCEPT {
         // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
         // the `BusTraits<Bus::SPI>` singleton. Naming
         // `BusTraits<Bus::SPI>::instancePtr()` here is the ODR-use that

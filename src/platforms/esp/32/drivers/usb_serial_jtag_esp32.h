@@ -23,14 +23,14 @@ struct UsbSerialJtagConfig {
     /**
      * @brief Default configuration (4096-byte buffers)
      */
-    static UsbSerialJtagConfig defaults() FL_NOEXCEPT {
+    static UsbSerialJtagConfig defaults() FL_NO_EXCEPT {
         return UsbSerialJtagConfig{};
     }
 
     /**
      * @brief High-throughput configuration (larger buffers)
      */
-    static UsbSerialJtagConfig highThroughput() FL_NOEXCEPT {
+    static UsbSerialJtagConfig highThroughput() FL_NO_EXCEPT {
         UsbSerialJtagConfig config;
         config.txBufferSize = 4096*4;
         config.rxBufferSize = 4096*4;
@@ -76,7 +76,7 @@ public:
      * 3. If not installed, installs driver with buffer sizes from config
      * 4. If installation fails, falls back to ROM UART
      */
-    explicit UsbSerialJtagEsp32(const UsbSerialJtagConfig& config) FL_NOEXCEPT;
+    explicit UsbSerialJtagEsp32(const UsbSerialJtagConfig& config) FL_NO_EXCEPT;
 
     /**
      * @brief Destructor - uninstalls driver if we installed it
@@ -88,8 +88,8 @@ public:
     UsbSerialJtagEsp32& operator=(const UsbSerialJtagEsp32&) = delete;
 
     // Enable move
-    UsbSerialJtagEsp32(UsbSerialJtagEsp32&& other) FL_NOEXCEPT;
-    UsbSerialJtagEsp32& operator=(UsbSerialJtagEsp32&& other) FL_NOEXCEPT;
+    UsbSerialJtagEsp32(UsbSerialJtagEsp32&& other) FL_NO_EXCEPT;
+    UsbSerialJtagEsp32& operator=(UsbSerialJtagEsp32&& other) FL_NO_EXCEPT;
 
     /**
      * @brief Write string to USB-Serial JTAG
@@ -98,7 +98,7 @@ public:
      * Buffered mode: Copies to TX ring buffer (non-blocking)
      * Fallback mode: Writes directly via ROM UART (may block if full)
      */
-    void write(const char* str) FL_NOEXCEPT;
+    void write(const char* str) FL_NO_EXCEPT;
 
     /**
      * @brief Write raw bytes to USB-Serial JTAG (binary data)
@@ -109,13 +109,13 @@ public:
      * Buffered mode: Copies to TX ring buffer (non-blocking)
      * Fallback mode: Writes directly via ROM UART (may block if full)
      */
-    size_t write(const u8* buffer, size_t size) FL_NOEXCEPT;
+    size_t write(const u8* buffer, size_t size) FL_NO_EXCEPT;
 
     /**
      * @brief Write string with newline to USB-Serial JTAG
      * @param str Null-terminated string to write
      */
-    void writeln(const char* str) FL_NOEXCEPT;
+    void writeln(const char* str) FL_NO_EXCEPT;
 
     /**
      * @brief Check how many bytes are available to read
@@ -123,7 +123,7 @@ public:
      *
      * Only works in buffered mode. Returns 0 in fallback mode.
      */
-    int available() FL_NOEXCEPT;
+    int available() FL_NO_EXCEPT;
 
     /**
      * @brief Read single byte from USB-Serial JTAG
@@ -132,7 +132,7 @@ public:
      * Non-blocking read (timeout=0).
      * Only works in buffered mode. Returns -1 in fallback mode.
      */
-    int read() FL_NOEXCEPT;
+    int read() FL_NO_EXCEPT;
 
     /**
      * @brief Flush TX buffer and wait for transmission to complete
@@ -142,7 +142,7 @@ public:
      * Blocks until all buffered data is transmitted.
      * Only works in buffered mode.
      */
-    bool flush(u32 timeoutMs = 1000) FL_NOEXCEPT;
+    bool flush(u32 timeoutMs = 1000) FL_NO_EXCEPT;
 
     /**
      * @brief Check if USB-Serial JTAG is connected to host
@@ -151,13 +151,13 @@ public:
      * Uses usb_serial_jtag_is_connected() ESP-IDF function.
      * Returns false if driver not installed.
      */
-    bool isConnected() const FL_NOEXCEPT;
+    bool isConnected() const FL_NO_EXCEPT;
 
     /**
      * @brief Check if driver is in buffered mode
      * @return true if driver successfully installed, false if using ROM fallback
      */
-    bool isBuffered() const FL_NOEXCEPT { return mBuffered; }
+    bool isBuffered() const FL_NO_EXCEPT { return mBuffered; }
 
     /**
      * @brief Outcome of the constructor's driver-install attempt
@@ -177,9 +177,9 @@ public:
         kNotAvailable,          ///< chip lacks USB-Serial JTAG support
     };
 
-    InitOutcome initOutcome() const FL_NOEXCEPT { return mInitOutcome; }
+    InitOutcome initOutcome() const FL_NO_EXCEPT { return mInitOutcome; }
     // esp_err_t == int32_t. Returns ESP_OK (0) unless initOutcome() == kInstallFailed.
-    i32 initError() const FL_NOEXCEPT { return mInitError; }
+    i32 initError() const FL_NO_EXCEPT { return mInitError; }
 
 private:
     UsbSerialJtagConfig mConfig;  // Configuration parameters
@@ -195,8 +195,8 @@ private:
     size_t mRxCacheCount;         // number of valid cached bytes
 
     // Helper: Initialize USB-Serial JTAG driver (called by constructor)
-    bool initDriver() FL_NOEXCEPT;
-    void fillRxCache() FL_NOEXCEPT;
+    bool initDriver() FL_NO_EXCEPT;
+    void fillRxCache() FL_NO_EXCEPT;
 };
 
 } // namespace fl

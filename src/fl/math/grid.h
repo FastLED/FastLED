@@ -13,7 +13,7 @@ template <typename T> class allocator_psram;
 
 template <typename T> class Grid {
   public:
-    Grid() FL_NOEXCEPT = default;
+    Grid() FL_NO_EXCEPT = default;
 
     Grid(u32 width, u32 height) { reset(width, height); }
 

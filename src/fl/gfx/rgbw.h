@@ -89,7 +89,7 @@ enum class InputGamut : u8 {
 // Mutates `profile` in place; subsequent solver calls observe the new gamut
 // (the cache is keyed on the profile pointer and rebuilds automatically).
 // No-op if `profile == nullptr`.
-void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NOEXCEPT;
+void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NO_EXCEPT;
 
 // Same as the above, but lets you optionally override the input white point.
 // `white_xy` either points to a 2-float (x, y) chromaticity OR is `nullptr`
@@ -98,7 +98,7 @@ void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NOEXCEPT;
 // photography workflow, D60 ACES cinema, a custom calibration target) where
 // the standard gamut's reference white doesn't match your content.
 void set_input_gamut(DiodeProfile* profile, InputGamut g,
-                     const float white_xy[2]) FL_NOEXCEPT;
+                     const float white_xy[2]) FL_NO_EXCEPT;
 
 // Default profile: SK6812 RGBW3535 @ ~6000K (datasheet wavelengths -> xy +
 // typical luminance ratios). Always declared so user code referencing it
@@ -108,10 +108,10 @@ extern const DiodeProfile kRgbwDefaultProfile;
 // Install a user-supplied profile. The pointer is stored — caller must keep
 // the DiodeProfile alive for as long as a colorimetric mode is active.
 // No-op when FASTLED_RGBW_COLORIMETRIC is undefined.
-void set_rgbw_colorimetric_profile(const DiodeProfile* profile) FL_NOEXCEPT;
+void set_rgbw_colorimetric_profile(const DiodeProfile* profile) FL_NO_EXCEPT;
 
 // Currently active profile (defaults to &kRgbwDefaultProfile).
-const DiodeProfile* get_rgbw_colorimetric_profile() FL_NOEXCEPT;
+const DiodeProfile* get_rgbw_colorimetric_profile() FL_NO_EXCEPT;
 
 // Interpolation scheme used by the colorimetric LUT (#2720). Bilinear stores
 // 4 channel values per grid cell (8 B/cell at i16 quantization) — cheapest in
@@ -141,14 +141,14 @@ enum class RgbwLutInterp : u8 {
 // The single-arg overload preserves source compatibility and forwards to
 // RgbwLutInterp::Hermite (the historical default since #2707).
 bool enable_rgbw_colorimetric_lut(int grid_n,
-                                  RgbwLutInterp interp) FL_NOEXCEPT;
-bool enable_rgbw_colorimetric_lut(int grid_n) FL_NOEXCEPT;
+                                  RgbwLutInterp interp) FL_NO_EXCEPT;
+bool enable_rgbw_colorimetric_lut(int grid_n) FL_NO_EXCEPT;
 
 // Free the LUT and revert colorimetric calls to the closed-form solver.
-void disable_rgbw_colorimetric_lut() FL_NOEXCEPT;
+void disable_rgbw_colorimetric_lut() FL_NO_EXCEPT;
 
 // Returns true if the LUT path is currently active.
-bool rgbw_colorimetric_lut_enabled() FL_NOEXCEPT;
+bool rgbw_colorimetric_lut_enabled() FL_NO_EXCEPT;
 
 // Compile-time memory-cost accessor. Mirrors the storage math used by the
 // LUT builder so users can size their RAM/flash budget before calling
@@ -156,7 +156,7 @@ bool rgbw_colorimetric_lut_enabled() FL_NOEXCEPT;
 // so this helper applies the same clamp so callers do not under-estimate
 // for grid_n < 4 or over-estimate for grid_n > 256. Returns 0 for grid_n < 1.
 constexpr unsigned long rgbw_colorimetric_lut_memory_bytes(
-    int grid_n, RgbwLutInterp interp) FL_NOEXCEPT {
+    int grid_n, RgbwLutInterp interp) FL_NO_EXCEPT {
     return (grid_n < 1)
         ? 0UL
         : (static_cast<unsigned long>(
@@ -174,16 +174,16 @@ struct Rgbw {
     explicit Rgbw(u16 white_color_temp = fl::kRGBWDefaultColorTemp,
                   fl::RGBW_MODE rgbw_mode = fl::RGBW_MODE::kRGBWExactColors,
                   fl::EOrderW _w_placement = EOrderW::WDefault)
- FL_NOEXCEPT : white_color_temp(white_color_temp), w_placement(_w_placement),
+ FL_NO_EXCEPT : white_color_temp(white_color_temp), w_placement(_w_placement),
           rgbw_mode(rgbw_mode) {}
     u16 white_color_temp = kRGBWDefaultColorTemp;
     fl::EOrderW w_placement = EOrderW::WDefault;
     RGBW_MODE rgbw_mode = RGBW_MODE::kRGBWExactColors;
-    FASTLED_FORCE_INLINE bool active() const FL_NOEXCEPT {
+    FASTLED_FORCE_INLINE bool active() const FL_NO_EXCEPT {
         return rgbw_mode != RGBW_MODE::kRGBWInvalid;
     }
 
-    static u32 size_as_rgb(u32 num_of_rgbw_pixels) FL_NOEXCEPT {
+    static u32 size_as_rgb(u32 num_of_rgbw_pixels) FL_NO_EXCEPT {
         // The ObjectFLED controller expects the raw pixel byte data in
         // multiples of 3. In the case of src data not a multiple of 3, then we
         // need to add pad bytes so that the delegate controller doesn't walk
@@ -196,33 +196,33 @@ struct Rgbw {
 };
 
 struct RgbwInvalid : public Rgbw {
-    RgbwInvalid() FL_NOEXCEPT {
+    RgbwInvalid() FL_NO_EXCEPT {
         white_color_temp = kRGBWDefaultColorTemp;
         rgbw_mode = RGBW_MODE::kRGBWInvalid;
     }
-    static Rgbw value() FL_NOEXCEPT {
+    static Rgbw value() FL_NO_EXCEPT {
         RgbwInvalid invalid;
         return invalid;
     }
 };
 
 struct RgbwDefault : public Rgbw {
-    RgbwDefault() FL_NOEXCEPT {
+    RgbwDefault() FL_NO_EXCEPT {
         white_color_temp = kRGBWDefaultColorTemp;
         rgbw_mode = RGBW_MODE::kRGBWExactColors;
     }
-    static Rgbw value() FL_NOEXCEPT {
+    static Rgbw value() FL_NO_EXCEPT {
         RgbwDefault _default;
         return _default;
     }
 };
 
 struct RgbwWhiteIsOff : public Rgbw {
-    RgbwWhiteIsOff() FL_NOEXCEPT {
+    RgbwWhiteIsOff() FL_NO_EXCEPT {
         white_color_temp = kRGBWDefaultColorTemp;
         rgbw_mode = RGBW_MODE::kRGBWNullWhitePixel;
     }
-    static Rgbw value() FL_NOEXCEPT {
+    static Rgbw value() FL_NO_EXCEPT {
         RgbwWhiteIsOff _default;
         return _default;
     }
@@ -250,7 +250,7 @@ typedef void (*rgb_2_rgbw_function)(u16 w_color_temperature, u8 r,
 void rgb_2_rgbw_exact(u16 w_color_temperature, u8 r, u8 g,
                       u8 b, u8 r_scale, u8 g_scale,
                       u8 b_scale, u8 *out_r, u8 *out_g,
-                      u8 *out_b, u8 *out_w) FL_NOEXCEPT;
+                      u8 *out_b, u8 *out_w) FL_NO_EXCEPT;
 
 /// The minimum brigthness of the RGB channels is used to set the W channel.
 /// This will allow the max brightness of the led chipset to be used. However
@@ -263,7 +263,7 @@ void rgb_2_rgbw_exact(u16 w_color_temperature, u8 r, u8 g,
 void rgb_2_rgbw_max_brightness(u16 w_color_temperature, u8 r,
                                u8 g, u8 b, u8 r_scale,
                                u8 g_scale, u8 b_scale, u8 *out_r,
-                               u8 *out_g, u8 *out_b, u8 *out_w) FL_NOEXCEPT;
+                               u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT;
 
 /// @brief Converts RGB to RGBW with the W channel set to black, always.
 ///
@@ -274,18 +274,18 @@ void rgb_2_rgbw_null_white_pixel(u16 w_color_temperature, u8 r,
                                  u8 g, u8 b, u8 r_scale,
                                  u8 g_scale, u8 b_scale,
                                  u8 *out_r, u8 *out_g, u8 *out_b,
-                                 u8 *out_w) FL_NOEXCEPT;
+                                 u8 *out_w) FL_NO_EXCEPT;
 
 /// @brief Converts RGB to RGBW with a boosted white channel.
 void rgb_2_rgbw_white_boosted(u16 w_color_temperature, u8 r,
                               u8 g, u8 b, u8 r_scale,
                               u8 g_scale, u8 b_scale, u8 *out_r,
-                              u8 *out_g, u8 *out_b, u8 *out_w) FL_NOEXCEPT;
+                              u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT;
 
 void rgb_2_rgbw_user_function(u16 w_color_temperature, u8 r,
                               u8 g, u8 b, u8 r_scale,
                               u8 g_scale, u8 b_scale, u8 *out_r,
-                              u8 *out_g, u8 *out_b, u8 *out_w) FL_NOEXCEPT;
+                              u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT;
 
 // Strict sub-gamut colorimetric solver (gist sec 5, issue #2545). Maps the
 // input through the diode chromaticity model; routes the chromaticity to one
@@ -296,7 +296,7 @@ void rgb_2_rgbw_user_function(u16 w_color_temperature, u8 r,
 void rgb_2_rgbw_colorimetric(u16 w_color_temperature, u8 r,
                              u8 g, u8 b, u8 r_scale,
                              u8 g_scale, u8 b_scale, u8 *out_r,
-                             u8 *out_g, u8 *out_b, u8 *out_w) FL_NOEXCEPT;
+                             u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT;
 
 // White-overdrive colorimetric solver (wx_lp_legacy from gist sec 9).
 // Closed-form scalar LP: maximize W subject to RGB residual >= 0. Brighter
@@ -306,9 +306,9 @@ void rgb_2_rgbw_colorimetric(u16 w_color_temperature, u8 r,
 void rgb_2_rgbw_colorimetric_boosted(u16 w_color_temperature, u8 r,
                                      u8 g, u8 b, u8 r_scale,
                                      u8 g_scale, u8 b_scale, u8 *out_r,
-                                     u8 *out_g, u8 *out_b, u8 *out_w) FL_NOEXCEPT;
+                                     u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT;
 
-void set_rgb_2_rgbw_function(rgb_2_rgbw_function func) FL_NOEXCEPT;
+void set_rgb_2_rgbw_function(rgb_2_rgbw_function func) FL_NO_EXCEPT;
 
 /// @brief   Converts RGB to RGBW using one of the functions.
 /// @details Dynamic version of the rgb_w_rgbw function with less chance for
@@ -316,7 +316,7 @@ void set_rgb_2_rgbw_function(rgb_2_rgbw_function func) FL_NOEXCEPT;
 FASTLED_FORCE_INLINE void
 rgb_2_rgbw(RGBW_MODE mode, u16 w_color_temperature, u8 r, u8 g,
            u8 b, u8 r_scale, u8 g_scale, u8 b_scale,
-           u8 *out_r, u8 *out_g, u8 *out_b, u8 *out_w) FL_NOEXCEPT {
+           u8 *out_r, u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
     switch (mode) {
     case RGBW_MODE::kRGBWInvalid:
     case RGBW_MODE::kRGBWNullWhitePixel:
@@ -359,7 +359,7 @@ template <RGBW_MODE MODE>
 FASTLED_FORCE_INLINE void
 rgb_2_rgbw(u16 w_color_temperature, u8 r, u8 g, u8 b,
            u8 r_scale, u8 g_scale, u8 b_scale, u8 *out_r,
-           u8 *out_g, u8 *out_b, u8 *out_w) FL_NOEXCEPT {
+           u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
     // We trust that the compiler will inline all of this.
     rgb_2_rgbw(MODE, w_color_temperature, r, g, b, r_scale, g_scale, b_scale,
                out_r, out_g, out_b, out_w);
@@ -373,6 +373,6 @@ rgb_2_rgbw(u16 w_color_temperature, u8 r, u8 g, u8 b,
 // the correct position.
 void rgbw_partial_reorder(fl::EOrderW w_placement, u8 b0, u8 b1,
                           u8 b2, u8 w, u8 *out_b0,
-                          u8 *out_b1, u8 *out_b2, u8 *out_b3) FL_NOEXCEPT;
+                          u8 *out_b1, u8 *out_b2, u8 *out_b3) FL_NO_EXCEPT;
 
 } // namespace fl

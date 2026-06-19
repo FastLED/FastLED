@@ -83,7 +83,7 @@ ConditionVariableESP32::~ConditionVariableESP32() {
     }
 }
 
-void ConditionVariableESP32::notify_one() FL_NOEXCEPT {
+void ConditionVariableESP32::notify_one() FL_NO_EXCEPT {
     if (mMutex == nullptr || mWaitQueue == nullptr) {
         return;
     }
@@ -106,7 +106,7 @@ void ConditionVariableESP32::notify_one() FL_NOEXCEPT {
     xSemaphoreGive(mutex);
 }
 
-void ConditionVariableESP32::notify_all() FL_NOEXCEPT {
+void ConditionVariableESP32::notify_all() FL_NO_EXCEPT {
     if (mMutex == nullptr || mWaitQueue == nullptr) {
         return;
     }

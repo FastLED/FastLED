@@ -21,7 +21,7 @@ namespace fl {
 /// @{
 
 /// Fast 16-bit approximation of sin(x) (AVR implementation)
-LIB8STATIC i16 sin16_avr(u16 theta) FL_NOEXCEPT {
+LIB8STATIC i16 sin16_avr(u16 theta) FL_NO_EXCEPT {
     static const u8 data[] = {
         0,           0,           49, 0, 6393 % 256,  6393 / 256,  48, 0,
         12539 % 256, 12539 / 256, 44, 0, 18204 % 256, 18204 / 256, 38, 0,
@@ -35,9 +35,9 @@ LIB8STATIC i16 sin16_avr(u16 theta) FL_NOEXCEPT {
     // Inserting empty volatile statements between each
     // bit shift forces gcc to unroll the loop.
     offset >>= 1; // 0..8191
-    asm volatile("") FL_NOEXCEPT;
+    asm volatile("") FL_NO_EXCEPT;
     offset >>= 1; // 0..4095
-    asm volatile("") FL_NOEXCEPT;
+    asm volatile("") FL_NO_EXCEPT;
     offset >>= 1; // 0..2047
 
     if (theta & 0x4000)
@@ -78,7 +78,7 @@ const u8 b_m16_interleave[] = {0, 49, 49, 41, 90, 27, 117, 10};
 
 /// Fast 8-bit approximation of sin(x) (AVR implementation)
 #ifndef FL_IS_AVR_ATTINY
-LIB8STATIC u8 sin8_avr(u8 theta) FL_NOEXCEPT {
+LIB8STATIC u8 sin8_avr(u8 theta) FL_NO_EXCEPT {
     u8 offset = theta;
 
     asm volatile("sbrc %[theta],6         \n\t"
@@ -131,7 +131,7 @@ LIB8STATIC u8 sin8_avr(u8 theta) FL_NOEXCEPT {
 }
 #else
 // ATtiny fallback - C implementation (no mul instruction)
-LIB8STATIC u8 sin8_avr(u8 theta) FL_NOEXCEPT {
+LIB8STATIC u8 sin8_avr(u8 theta) FL_NO_EXCEPT {
     static const u8 b_m16_interleave[] = {0, 49, 49, 41, 90, 27, 117, 10};
     u8 offset = theta;
     if (theta & 0x40) offset = ~offset;

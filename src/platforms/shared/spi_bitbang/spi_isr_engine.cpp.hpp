@@ -54,15 +54,15 @@
 FL_EXTERN_C_BEGIN
 
 /* Single instance via Singleton for safe initialization. */
-static FastLED_SPI_ISR_State& g_isr_state() FL_NOEXCEPT {
+static FastLED_SPI_ISR_State& g_isr_state() FL_NO_EXCEPT {
     return fl::Singleton<FastLED_SPI_ISR_State>::instance();
 }
 
 /* --- Host-side convenience (optional, small & header-free) ------------------ */
-FastLED_SPI_ISR_State* fl_spi_state(void) FL_NOEXCEPT { return &g_isr_state(); }
+FastLED_SPI_ISR_State* fl_spi_state(void) FL_NO_EXCEPT { return &g_isr_state(); }
 
 /* Visibility: crude ~microsecond spin (portable). Replace with platform fence if desired. */
-void fl_spi_visibility_delay_us(fl::u32 approx_us) FL_NOEXCEPT {
+void fl_spi_visibility_delay_us(fl::u32 approx_us) FL_NO_EXCEPT {
   volatile fl::u32 spin = 0;
   /* Tune constant per CPU; here ~100 cycles/us at 240 MHz, coarse. */
   FL_DISABLE_WARNING_PUSH
@@ -73,29 +73,29 @@ void fl_spi_visibility_delay_us(fl::u32 approx_us) FL_NOEXCEPT {
 }
 
 /* Arm: ring the doorbell AFTER payload & delay */
-void fl_spi_arm(void) FL_NOEXCEPT {
+void fl_spi_arm(void) FL_NO_EXCEPT {
   g_isr_state().doorbell_counter++;
 }
 
 /* Status accessors (main thread) */
-fl::u32 fl_spi_status_flags(void) FL_NOEXCEPT {
+fl::u32 fl_spi_status_flags(void) FL_NO_EXCEPT {
   return g_isr_state().status_flags;
 }
-void fl_spi_ack_done(void) FL_NOEXCEPT {
+void fl_spi_ack_done(void) FL_NO_EXCEPT {
   g_isr_state().status_flags &= ~FASTLED_STATUS_DONE;
 }
 
 /* Payload setters (main thread) */
-void fl_spi_set_clock_mask(fl::u32 mask) FL_NOEXCEPT { g_isr_state().clock_pin_mask = mask; }
-void fl_spi_set_total_bytes(fl::u16 n) FL_NOEXCEPT { g_isr_state().total_bytes_to_send = n; }
-void fl_spi_set_data_byte(fl::u16 i, fl::u8 v) FL_NOEXCEPT { g_isr_state().spi_data_bytes[i] = v; }
-void fl_spi_set_lut_entry(fl::u8 v, fl::u32 set_m, fl::u32 clr_m) FL_NOEXCEPT {
+void fl_spi_set_clock_mask(fl::u32 mask) FL_NO_EXCEPT { g_isr_state().clock_pin_mask = mask; }
+void fl_spi_set_total_bytes(fl::u16 n) FL_NO_EXCEPT { g_isr_state().total_bytes_to_send = n; }
+void fl_spi_set_data_byte(fl::u16 i, fl::u8 v) FL_NO_EXCEPT { g_isr_state().spi_data_bytes[i] = v; }
+void fl_spi_set_lut_entry(fl::u8 v, fl::u32 set_m, fl::u32 clr_m) FL_NO_EXCEPT {
   g_isr_state().pin_lookup_table[v].set_mask  = set_m;
   g_isr_state().pin_lookup_table[v].clear_mask= clr_m;
 }
 
 /* Optional reset (safe between runs) */
-void fl_spi_reset_state(void) FL_NOEXCEPT {
+void fl_spi_reset_state(void) FL_NO_EXCEPT {
   g_isr_state().current_position       = 0;
   g_isr_state().last_processed_counter = g_isr_state().doorbell_counter;
   g_isr_state().status_flags           = 0;
@@ -107,11 +107,11 @@ void fl_spi_reset_state(void) FL_NOEXCEPT {
 }
 
 /* Direct array accessors (main thread) */
-PinMaskEntry* fl_spi_get_lut_array(void) FL_NOEXCEPT {
+PinMaskEntry* fl_spi_get_lut_array(void) FL_NO_EXCEPT {
   return g_isr_state().pin_lookup_table;
 }
 
-fl::u8* fl_spi_get_data_array(void) FL_NOEXCEPT {
+fl::u8* fl_spi_get_data_array(void) FL_NO_EXCEPT {
   return g_isr_state().spi_data_bytes;
 }
 
@@ -140,7 +140,7 @@ fl::u16 fl_spi_get_validation_event_count(void) {
 /* --- The ISR body (zero volatile reads) ------------------------------------ */
 /* Place in IRAM (attribute depends on platform). For .S generation, just -S.  */
 /* Note: Function has C linkage via extern "C" block above                      */
-FL_IRAM void fl_parallel_spi_isr(void) FL_NOEXCEPT {
+FL_IRAM void fl_parallel_spi_isr(void) FL_NO_EXCEPT {
   FastLED_SPI_ISR_State& st = g_isr_state();
   /* 1) Edge detect: new work? */
   fl::u32 current_doorbell = st.doorbell_counter;

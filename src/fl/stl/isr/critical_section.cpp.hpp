@@ -21,7 +21,7 @@ critical_section::critical_section() {
     fl::interrupt_disable();
 }
 
-critical_section::~critical_section() FL_NOEXCEPT {
+critical_section::~critical_section() FL_NO_EXCEPT {
     fl::interrupt_enable();
 }
 

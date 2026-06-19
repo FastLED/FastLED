@@ -27,7 +27,7 @@ namespace {
 namespace fl {
 namespace platforms {
 
-void delay(fl::u32 ms) FL_NOEXCEPT {
+void delay(fl::u32 ms) FL_NO_EXCEPT {
     // Check for test override first (for fast testing)
     if (g_delay_override) {
         g_delay_override(ms);
@@ -36,19 +36,19 @@ void delay(fl::u32 ms) FL_NOEXCEPT {
     fl::this_thread::sleep_for(fl::chrono::milliseconds(ms));
 }
 
-void delayMicroseconds(fl::u32 us) FL_NOEXCEPT {
+void delayMicroseconds(fl::u32 us) FL_NO_EXCEPT {
     // No override for microseconds (precise hardware timing)
     fl::this_thread::sleep_for(fl::chrono::microseconds(us));
 }
 
-fl::u32 millis() FL_NOEXCEPT {
+fl::u32 millis() FL_NO_EXCEPT {
     auto current = std::chrono::system_clock::now();  // okay std namespace
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(  // okay std namespace
         current - start_time);
     return static_cast<fl::u32>(elapsed.count());
 }
 
-fl::u32 micros() FL_NOEXCEPT {
+fl::u32 micros() FL_NO_EXCEPT {
     auto current = std::chrono::system_clock::now();  // okay std namespace
     auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(  // okay std namespace
         current - start_time);

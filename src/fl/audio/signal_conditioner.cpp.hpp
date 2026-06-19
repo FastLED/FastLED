@@ -16,7 +16,7 @@ SignalConditioner::SignalConditioner(const SignalConditionerConfig& config) {
     configure(config);
 }
 
-SignalConditioner::~SignalConditioner() FL_NOEXCEPT = default;
+SignalConditioner::~SignalConditioner() FL_NO_EXCEPT = default;
 
 void SignalConditioner::configure(const SignalConditionerConfig& config) {
     mConfig = config;

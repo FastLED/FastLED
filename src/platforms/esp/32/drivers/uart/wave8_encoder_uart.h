@@ -65,7 +65,7 @@ struct Wave10Lut {
     /// @brief Compute the baud rate required for this timing
     /// @param timing Chipset timing configuration
     /// @return Baud rate in bits per second
-    static u32 computeBaudRate(const ChipsetTimingConfig& timing) FL_NOEXCEPT {
+    static u32 computeBaudRate(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
         // 10 UART bits encode 2 LED bits
         // baud = 10 / (2 * bit_period) * 1e9
         // = 10e9 / (2 * period_ns)
@@ -90,7 +90,7 @@ struct Wave10Lut {
 ///
 /// @param timing Chipset timing configuration
 /// @return Populated Wave10Lut, or all-zero LUT if timing is infeasible
-Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NOEXCEPT;
+Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NO_EXCEPT;
 
 /// @brief Check if a chipset timing can be accurately represented by UART
 ///
@@ -104,7 +104,7 @@ Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NOEXCEPT;
 ///
 /// @param timing Chipset timing configuration
 /// @return true if timing is representable, false otherwise
-bool canRepresentTiming(const ChipsetTimingConfig& timing) FL_NOEXCEPT;
+bool canRepresentTiming(const ChipsetTimingConfig& timing) FL_NO_EXCEPT;
 
 namespace detail {
 
@@ -113,7 +113,7 @@ namespace detail {
 /// @param lut Wave10 lookup table
 /// @return UART data byte (8 bits)
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
-u8 encodeUart2Bits(u8 two_bits, const Wave10Lut& lut) FL_NOEXCEPT {
+u8 encodeUart2Bits(u8 two_bits, const Wave10Lut& lut) FL_NO_EXCEPT {
     return lut.lut[two_bits & 0x03];
 }
 
@@ -122,7 +122,7 @@ u8 encodeUart2Bits(u8 two_bits, const Wave10Lut& lut) FL_NOEXCEPT {
 /// @param output Output buffer (must have space for 4 bytes)
 /// @param lut Wave10 lookup table
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
-void encodeUartByte(u8 led_byte, u8* output, const Wave10Lut& lut) FL_NOEXCEPT {
+void encodeUartByte(u8 led_byte, u8* output, const Wave10Lut& lut) FL_NO_EXCEPT {
     output[0] = encodeUart2Bits((led_byte >> 6) & 0x03, lut);  // Bits 7-6
     output[1] = encodeUart2Bits((led_byte >> 4) & 0x03, lut);  // Bits 5-4
     output[2] = encodeUart2Bits((led_byte >> 2) & 0x03, lut);  // Bits 3-2
@@ -133,7 +133,7 @@ void encodeUartByte(u8 led_byte, u8* output, const Wave10Lut& lut) FL_NOEXCEPT {
 /// @param two_bits 2-bit value (0-3)
 /// @return UART data byte (8 bits)
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
-u8 encodeUart2Bits(u8 two_bits) FL_NOEXCEPT {
+u8 encodeUart2Bits(u8 two_bits) FL_NO_EXCEPT {
     // Hardcoded WS2812 LUT for backward compatibility with existing tests
     static constexpr u8 kWs2812Lut[4] = {0xEF, 0x8F, 0xEC, 0x8C};
     return kWs2812Lut[two_bits & 0x03];
@@ -143,7 +143,7 @@ u8 encodeUart2Bits(u8 two_bits) FL_NOEXCEPT {
 /// @param led_byte LED data byte (8 bits)
 /// @param output Output buffer (must have space for 4 bytes)
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
-void encodeUartByte(u8 led_byte, u8* output) FL_NOEXCEPT {
+void encodeUartByte(u8 led_byte, u8* output) FL_NO_EXCEPT {
     output[0] = encodeUart2Bits((led_byte >> 6) & 0x03);  // Bits 7-6
     output[1] = encodeUart2Bits((led_byte >> 4) & 0x03);  // Bits 5-4
     output[2] = encodeUart2Bits((led_byte >> 2) & 0x03);  // Bits 3-2
@@ -165,20 +165,20 @@ size_t encodeLedsToUart(const u8* input,
                         size_t input_size,
                         u8* output,
                         size_t output_capacity,
-                        const Wave10Lut& lut) FL_NOEXCEPT;
+                        const Wave10Lut& lut) FL_NO_EXCEPT;
 
 /// @brief Legacy encoding using hardcoded WS2812 LUT (backward compat)
 FL_IRAM FL_OPTIMIZE_FUNCTION
 size_t encodeLedsToUart(const u8* input,
                         size_t input_size,
                         u8* output,
-                        size_t output_capacity) FL_NOEXCEPT;
+                        size_t output_capacity) FL_NO_EXCEPT;
 
 /// @brief Calculate required output buffer size for LED encoding
 /// @param input_size Input size in bytes (LED pixel data)
 /// @return Required output buffer size in bytes
 FASTLED_FORCE_INLINE
-constexpr size_t calculateUartBufferSize(size_t input_size) FL_NOEXCEPT {
+constexpr size_t calculateUartBufferSize(size_t input_size) FL_NO_EXCEPT {
     return input_size * 4;
 }
 
@@ -186,7 +186,7 @@ constexpr size_t calculateUartBufferSize(size_t input_size) FL_NOEXCEPT {
 /// @param num_leds Number of RGB LEDs
 /// @return Required output buffer size in bytes
 FASTLED_FORCE_INLINE
-constexpr size_t calculateUartBufferSizeForLeds(size_t num_leds) FL_NOEXCEPT {
+constexpr size_t calculateUartBufferSizeForLeds(size_t num_leds) FL_NO_EXCEPT {
     return num_leds * 3 * 4;  // 12 bytes per RGB LED
 }
 

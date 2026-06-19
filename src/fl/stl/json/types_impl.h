@@ -3,7 +3,7 @@
 namespace fl {
 namespace detail {
 
-inline u32 json_round_shift_right_u64(u64 value, int shift) FL_NOEXCEPT {
+inline u32 json_round_shift_right_u64(u64 value, int shift) FL_NO_EXCEPT {
     if (shift <= 0) {
         return static_cast<u32>(value);
     }
@@ -18,7 +18,7 @@ inline u32 json_round_shift_right_u64(u64 value, int shift) FL_NOEXCEPT {
     return static_cast<u32>(truncated + (round_up ? 1 : 0));
 }
 
-inline int json_floor_log2_u64(u64 value) FL_NOEXCEPT {
+inline int json_floor_log2_u64(u64 value) FL_NO_EXCEPT {
     int bit = -1;
     while (value != 0) {
         value >>= 1;
@@ -28,7 +28,7 @@ inline int json_floor_log2_u64(u64 value) FL_NOEXCEPT {
 }
 
 inline u32 json_ieee754_float_bits_from_scaled_u64(
-    u32 sign, u64 magnitude, int binary_exp) FL_NOEXCEPT {
+    u32 sign, u64 magnitude, int binary_exp) FL_NO_EXCEPT {
     if (magnitude == 0) {
         return sign;
     }
@@ -73,7 +73,7 @@ inline u32 json_ieee754_float_bits_from_scaled_u64(
     return sign | mantissa;
 }
 
-inline u32 json_ieee754_float_bits_from_double_bits(u64 bits) FL_NOEXCEPT {
+inline u32 json_ieee754_float_bits_from_double_bits(u64 bits) FL_NO_EXCEPT {
     const u32 sign = (bits >> 63) ? 0x80000000u : 0u;
     const u32 exp_bits = static_cast<u32>((bits >> 52) & 0x7FFu);
     const u64 mantissa_bits = bits & 0x000FFFFFFFFFFFFFull;
@@ -89,7 +89,7 @@ inline u32 json_ieee754_float_bits_from_double_bits(u64 bits) FL_NOEXCEPT {
 }
 
 template <typename To, typename From>
-inline To json_bit_copy(const From& value) FL_NOEXCEPT {
+inline To json_bit_copy(const From& value) FL_NO_EXCEPT {
     To out = 0;
     const char* src = fl::bit_cast_ptr<const char>(&value);
     char* dst = fl::bit_cast_ptr<char>(&out);
@@ -100,7 +100,7 @@ inline To json_bit_copy(const From& value) FL_NOEXCEPT {
     return out;
 }
 
-inline float json_double_to_float(double value) FL_NOEXCEPT {
+inline float json_double_to_float(double value) FL_NO_EXCEPT {
     if (sizeof(double) == sizeof(u32)) {
         return fl::bit_cast<float>(json_bit_copy<u32>(value));
     }

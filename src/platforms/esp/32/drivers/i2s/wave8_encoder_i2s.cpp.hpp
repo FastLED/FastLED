@@ -16,7 +16,7 @@ namespace fl {
 size_t wave8EncodeI2sSingleLane(
     fl::span<const u8> input,
     fl::span<u16> output,
-    const Wave8BitExpansionLut& lut) FL_NOEXCEPT {
+    const Wave8BitExpansionLut& lut) FL_NO_EXCEPT {
 
     // Calculate required output size
     const size_t required_words = wave8CalculateI2sOutputSize(input.size());
@@ -61,7 +61,7 @@ size_t wave8EncodeI2sMultiLane(
     fl::span<const u8>* lanes,
     int num_lanes,
     fl::span<u16> output,
-    const Wave8BitExpansionLut& lut) FL_NOEXCEPT {
+    const Wave8BitExpansionLut& lut) FL_NO_EXCEPT {
 
     if (num_lanes < 1 || num_lanes > 16 || lanes == nullptr) {
         return 0;
@@ -121,7 +121,7 @@ size_t wave8EncodeI2sMultiLane(
     return output_idx;
 }
 
-u32 calculateI2sClockHz(const ChipsetTiming& timing) FL_NOEXCEPT {
+u32 calculateI2sClockHz(const ChipsetTiming& timing) FL_NO_EXCEPT {
     // Calculate total period for one LED bit
     // WS2812: T1 (T0H/T1H start) + T2 (middle) + T3 (T0L/T1L end)
     // Total period = T1 + T2 + T3 nanoseconds

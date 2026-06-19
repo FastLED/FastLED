@@ -94,11 +94,11 @@ bool IRAM_ATTR lcd_spi_flush_ready(
 // Singleton
 //=============================================================================
 
-LcdSpiPeripheralEsp &LcdSpiPeripheralEsp::instance() FL_NOEXCEPT {
+LcdSpiPeripheralEsp &LcdSpiPeripheralEsp::instance() FL_NO_EXCEPT {
     return Singleton<LcdSpiPeripheralEsp>::instance();
 }
 
-LcdSpiPeripheralEsp::LcdSpiPeripheralEsp() FL_NOEXCEPT
+LcdSpiPeripheralEsp::LcdSpiPeripheralEsp() FL_NO_EXCEPT
     : mInitialized(false), mConfig(), mI80Bus(nullptr), mPanelIo(nullptr),
       mCompleteSem(nullptr), mCallback(nullptr), mUserCtx(nullptr),
       mBusy(false), mPendingTransmits(0), mLastTransmitSize(0),
@@ -112,7 +112,7 @@ LcdSpiPeripheralEsp::~LcdSpiPeripheralEsp() { deinitialize(); }
 // Lifecycle
 //=============================================================================
 
-bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NOEXCEPT {
+bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NO_EXCEPT {
     // Issue #2270: when the owning driver changes between calls (e.g. the
     // clocked-SPI driver handed the peripheral over to the clockless
     // driver, or vice-versa) we MUST fully tear down even if the lane
@@ -228,7 +228,7 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NOEXCEPT {
     return true;
 }
 
-void LcdSpiPeripheralEsp::teardownLocked() FL_NOEXCEPT {
+void LcdSpiPeripheralEsp::teardownLocked() FL_NO_EXCEPT {
     // Clear the ISR callback BEFORE deleting the panel_io so a late
     // DMA-done interrupt from the previous owner can't dispatch into a
     // stale context. The ESP-IDF LCD driver invokes our callback via
@@ -269,11 +269,11 @@ void LcdSpiPeripheralEsp::teardownLocked() FL_NOEXCEPT {
     mLastTxColorError = ESP_OK;
 }
 
-void LcdSpiPeripheralEsp::deinitialize() FL_NOEXCEPT {
+void LcdSpiPeripheralEsp::deinitialize() FL_NO_EXCEPT {
     teardownLocked();
 }
 
-bool LcdSpiPeripheralEsp::isInitialized() const FL_NOEXCEPT {
+bool LcdSpiPeripheralEsp::isInitialized() const FL_NO_EXCEPT {
     return mInitialized;
 }
 
@@ -281,7 +281,7 @@ bool LcdSpiPeripheralEsp::isInitialized() const FL_NOEXCEPT {
 // Buffer Management
 //=============================================================================
 
-u16 *LcdSpiPeripheralEsp::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
+u16 *LcdSpiPeripheralEsp::allocateBuffer(size_t size_bytes) FL_NO_EXCEPT {
     size_t aligned_size = ((size_bytes + 63) / 64) * 64;
     void *buffer = nullptr;
 
@@ -301,7 +301,7 @@ u16 *LcdSpiPeripheralEsp::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
     return static_cast<u16 *>(buffer);
 }
 
-void LcdSpiPeripheralEsp::freeBuffer(u16 *buffer) FL_NOEXCEPT {
+void LcdSpiPeripheralEsp::freeBuffer(u16 *buffer) FL_NO_EXCEPT {
     if (buffer != nullptr) {
         heap_caps_free(buffer);
     }
@@ -312,17 +312,17 @@ void LcdSpiPeripheralEsp::freeBuffer(u16 *buffer) FL_NOEXCEPT {
 //=============================================================================
 
 bool FL_IRAM LcdSpiPeripheralEsp::transmit(const u16 *buffer,
-                                   size_t size_bytes) FL_NOEXCEPT {
+                                   size_t size_bytes) FL_NO_EXCEPT {
     return transmitInternal(buffer, size_bytes, true);
 }
 
 bool FL_IRAM LcdSpiPeripheralEsp::queueTransmit(const u16 *buffer,
-                                                size_t size_bytes) FL_NOEXCEPT {
+                                                size_t size_bytes) FL_NO_EXCEPT {
     return transmitInternal(buffer, size_bytes, false);
 }
 
 bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
-    const u16 *buffer, size_t size_bytes, bool wait_for_slot) FL_NOEXCEPT {
+    const u16 *buffer, size_t size_bytes, bool wait_for_slot) FL_NO_EXCEPT {
     if (!mInitialized || mI80Bus == nullptr) {
         return false;
     }
@@ -446,7 +446,7 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
     return true;
 }
 
-bool LcdSpiPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
+bool LcdSpiPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT {
     if (!mInitialized || mCompleteSem == nullptr) {
         return false;
     }
@@ -488,7 +488,7 @@ bool LcdSpiPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
     return true;
 }
 
-bool LcdSpiPeripheralEsp::isBusy() const FL_NOEXCEPT {
+bool LcdSpiPeripheralEsp::isBusy() const FL_NO_EXCEPT {
     return mBusy || mPendingTransmits > 0;
 }
 
@@ -497,7 +497,7 @@ bool LcdSpiPeripheralEsp::isBusy() const FL_NOEXCEPT {
 //=============================================================================
 
 bool LcdSpiPeripheralEsp::registerTransmitCallback(
-    void *callback, void *user_ctx) FL_NOEXCEPT {
+    void *callback, void *user_ctx) FL_NO_EXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -506,15 +506,15 @@ bool LcdSpiPeripheralEsp::registerTransmitCallback(
     return true;
 }
 
-const LcdSpiConfig &LcdSpiPeripheralEsp::getConfig() const FL_NOEXCEPT {
+const LcdSpiConfig &LcdSpiPeripheralEsp::getConfig() const FL_NO_EXCEPT {
     return mConfig;
 }
 
-u64 LcdSpiPeripheralEsp::getMicroseconds() FL_NOEXCEPT {
+u64 LcdSpiPeripheralEsp::getMicroseconds() FL_NO_EXCEPT {
     return esp_timer_get_time();
 }
 
-void LcdSpiPeripheralEsp::delay(u32 ms) FL_NOEXCEPT {
+void LcdSpiPeripheralEsp::delay(u32 ms) FL_NO_EXCEPT {
     vTaskDelay(pdMS_TO_TICKS(ms));
 }
 

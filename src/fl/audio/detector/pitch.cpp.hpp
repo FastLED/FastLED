@@ -27,7 +27,7 @@ Pitch::Pitch()
     mAutocorrelation.reserve(static_cast<size>(mMaxPeriod + 1));
 }
 
-Pitch::~Pitch() FL_NOEXCEPT = default;
+Pitch::~Pitch() FL_NO_EXCEPT = default;
 
 void Pitch::update(shared_ptr<Context> context) {
     // Get PCM data from context

@@ -19,7 +19,7 @@
 namespace fl {
 namespace platforms {
 
-inline void enableAllChannelDrivers() FL_NOEXCEPT {
+inline void enableAllChannelDrivers() FL_NO_EXCEPT {
     fl::enableDrivers<
         fl::Bus::BIT_BANG
 #if defined(FL_IS_TEENSY_4X)

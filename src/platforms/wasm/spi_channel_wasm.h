@@ -78,7 +78,7 @@ protected:
         mDriver->enqueue(mChannelData);
     }
 
-    static fl::shared_ptr<IChannelDriver> getWasmSpiEngine() FL_NOEXCEPT {
+    static fl::shared_ptr<IChannelDriver> getWasmSpiEngine() FL_NO_EXCEPT {
         // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
         // the `BusTraits<Bus::STUB>` singleton. WASM uses the stub driver
         // for both clockless and SPI chipsets (no real hardware in the

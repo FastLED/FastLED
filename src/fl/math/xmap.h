@@ -37,10 +37,10 @@ class XMap {
     // is_reverse is false by default for linear layout
     XMap(u16 length, bool is_reverse = false, u16 offset = 0);
 
-    XMap(const XMap &other) FL_NOEXCEPT;
+    XMap(const XMap &other) FL_NO_EXCEPT;
 
     // define the assignment operator
-    XMap &operator=(const XMap &other) FL_NOEXCEPT;
+    XMap &operator=(const XMap &other) FL_NO_EXCEPT;
 
     void convertToLookUpTable();
 

@@ -27,34 +27,34 @@ namespace platforms {
 
 #if defined(ARDUINO)
 
-void begin(u32 baudRate) FL_NOEXCEPT {
+void begin(u32 baudRate) FL_NO_EXCEPT {
     Serial.begin(baudRate);
 }
 
-void print(const char* str) FL_NOEXCEPT {
+void print(const char* str) FL_NO_EXCEPT {
     if (!Serial) return;
     Serial.print(str);
 }
 
-void println(const char* str) FL_NOEXCEPT {
+void println(const char* str) FL_NO_EXCEPT {
     if (!Serial) return;
     Serial.println(str);
 }
 
-int available() FL_NOEXCEPT {
+int available() FL_NO_EXCEPT {
     return Serial.available();
 }
 
-int peek() FL_NOEXCEPT {
+int peek() FL_NO_EXCEPT {
     return Serial.peek();
 }
 
-int read() FL_NOEXCEPT {
+int read() FL_NO_EXCEPT {
     return Serial.read();
 }
 
 // LPC's HardwareSerial lacks readStringUntil(), so read the line manually.
-int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
+int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
     if (outLen <= 0) {
         return 0;
     }
@@ -86,75 +86,75 @@ int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
     return len;
 }
 
-bool flush(u32 timeoutMs) FL_NOEXCEPT {
+bool flush(u32 timeoutMs) FL_NO_EXCEPT {
     (void)timeoutMs;
     if (!Serial) return true;
     Serial.flush();
     return true;
 }
 
-size_t write_bytes(const u8* buffer, size_t size) FL_NOEXCEPT {
+size_t write_bytes(const u8* buffer, size_t size) FL_NO_EXCEPT {
     if (!Serial) return 0;
     return Serial.write(buffer, size);
 }
 
-bool serial_ready() FL_NOEXCEPT {
+bool serial_ready() FL_NO_EXCEPT {
     return Serial ? true : false;
 }
 
-bool serial_is_buffered() FL_NOEXCEPT {
+bool serial_is_buffered() FL_NO_EXCEPT {
     return true;  // LPC Arduino uses buffered UART
 }
 
 #else  // bare-metal: no Serial available yet
 
-void begin(u32 baudRate) FL_NOEXCEPT {
+void begin(u32 baudRate) FL_NO_EXCEPT {
     (void)baudRate;
 }
 
-void print(const char* str) FL_NOEXCEPT {
+void print(const char* str) FL_NO_EXCEPT {
     (void)str;
 }
 
-void println(const char* str) FL_NOEXCEPT {
+void println(const char* str) FL_NO_EXCEPT {
     (void)str;
 }
 
-int available() FL_NOEXCEPT {
+int available() FL_NO_EXCEPT {
     return 0;
 }
 
-int peek() FL_NOEXCEPT {
+int peek() FL_NO_EXCEPT {
     return -1;
 }
 
-int read() FL_NOEXCEPT {
+int read() FL_NO_EXCEPT {
     return -1;
 }
 
-int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
+int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
     (void)delimiter;
     (void)out;
     (void)outLen;
     return -1;
 }
 
-bool flush(u32 timeoutMs) FL_NOEXCEPT {
+bool flush(u32 timeoutMs) FL_NO_EXCEPT {
     (void)timeoutMs;
     return true;
 }
 
-size_t write_bytes(const u8* buffer, size_t size) FL_NOEXCEPT {
+size_t write_bytes(const u8* buffer, size_t size) FL_NO_EXCEPT {
     (void)buffer;
     (void)size;
     return 0;
 }
 
-bool serial_ready() FL_NOEXCEPT {
+bool serial_ready() FL_NO_EXCEPT {
     return false;
 }
 
-bool serial_is_buffered() FL_NOEXCEPT {
+bool serial_is_buffered() FL_NO_EXCEPT {
     return false;
 }
 

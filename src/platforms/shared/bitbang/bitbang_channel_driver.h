@@ -29,26 +29,26 @@ namespace fl {
 
 class BitBangChannelDriver : public IChannelDriver {
 public:
-    BitBangChannelDriver() FL_NOEXCEPT;
+    BitBangChannelDriver() FL_NO_EXCEPT;
     ~BitBangChannelDriver() override;
 
-    bool canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT override;
-    void enqueue(ChannelDataPtr channelData) FL_NOEXCEPT override;
-    void show() FL_NOEXCEPT override;
-    DriverState poll() FL_NOEXCEPT override;
+    bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
+    void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
+    void show() FL_NO_EXCEPT override;
+    DriverState poll() FL_NO_EXCEPT override;
 
-    fl::string getName() const FL_NOEXCEPT override;
-    Capabilities getCapabilities() const FL_NOEXCEPT override;
+    fl::string getName() const FL_NO_EXCEPT override;
+    Capabilities getCapabilities() const FL_NO_EXCEPT override;
 
     /// @brief Access the pre-initialized DigitalMultiWrite8 for external use
     /// @return Reference to the multi-writer (valid after show() calls rebuildPinConfig)
-    const DigitalMultiWrite8& getMultiWriter() const FL_NOEXCEPT { return mMultiWriter; }
+    const DigitalMultiWrite8& getMultiWriter() const FL_NO_EXCEPT { return mMultiWriter; }
 
     /// @brief Access the pre-initialized DigitalMultiWrite8 (mutable)
-    DigitalMultiWrite8& getMultiWriter() FL_NOEXCEPT { return mMultiWriter; }
+    DigitalMultiWrite8& getMultiWriter() FL_NO_EXCEPT { return mMultiWriter; }
 
 private:
-    void rebuildPinConfig(fl::span<const ChannelDataPtr> channels) FL_NOEXCEPT;
+    void rebuildPinConfig(fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
 
     // Pin management: maps pin numbers to slot indices and back.
     // mSlotForPin: indexed by pin number (0-255), value is slot index (0-7) or -1.
@@ -60,11 +60,11 @@ private:
     DigitalMultiWrite8 mMultiWriter;
 
     // Clockless transmission
-    void transmitClockless(fl::span<const ChannelDataPtr> channels) FL_NOEXCEPT;
-    void transmitClocklessBit(u8 onesMask, u32 t1_ns, u32 t2_ns, u32 t3_ns) FL_NOEXCEPT;
+    void transmitClockless(fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
+    void transmitClocklessBit(u8 onesMask, u32 t1_ns, u32 t2_ns, u32 t3_ns) FL_NO_EXCEPT;
 
     // SPI transmission
-    void transmitSpi(fl::span<const ChannelDataPtr> channels) FL_NOEXCEPT;
+    void transmitSpi(fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
 
     // Two-queue pattern
     fl::vector<ChannelDataPtr> mEnqueuedChannels;

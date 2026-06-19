@@ -90,12 +90,12 @@ namespace platforms {
 class EspIO {
 public:
     // Get singleton instance
-    static EspIO& instance() FL_NOEXCEPT {
+    static EspIO& instance() FL_NO_EXCEPT {
         return fl::Singleton<EspIO>::instance();
     }
 
     // Initialize/reconfigure serial
-    void begin(u32 baudRate) FL_NOEXCEPT {
+    void begin(u32 baudRate) FL_NO_EXCEPT {
         // Both drivers are already initialized in constructor with default baud rate
         // USB-Serial JTAG doesn't support baud rate configuration (fixed USB speed)
         // UART reconfiguration after initialization is not currently supported
@@ -104,24 +104,24 @@ public:
     }
 
     // Print string to serial
-    void print(const char* str) FL_NOEXCEPT {
+    void print(const char* str) FL_NO_EXCEPT {
         reportInitDiagnosticsIfNeeded();
         mDriver.write(str);
     }
 
     // Print string with newline to serial
-    void println(const char* str) FL_NOEXCEPT {
+    void println(const char* str) FL_NO_EXCEPT {
         reportInitDiagnosticsIfNeeded();
         mDriver.writeln(str);
     }
 
     // Check input availability
-    int available() FL_NOEXCEPT {
+    int available() FL_NO_EXCEPT {
         return mDriver.available();
     }
 
     // Peek at next character without removing it
-    int peek() FL_NOEXCEPT {
+    int peek() FL_NO_EXCEPT {
         if (mHasPeek) {
             return mPeekByte;
         }
@@ -133,7 +133,7 @@ public:
     }
 
     // Read single character
-    int read() FL_NOEXCEPT {
+    int read() FL_NO_EXCEPT {
         if (mHasPeek) {
             mHasPeek = false;
             return mPeekByte;
@@ -142,40 +142,40 @@ public:
     }
 
     // Write raw bytes to serial (binary data)
-    size_t writeBytes(const u8* buffer, size_t size) FL_NOEXCEPT {
+    size_t writeBytes(const u8* buffer, size_t size) FL_NO_EXCEPT {
         return mDriver.write(buffer, size);
     }
 
     // Flush TX buffer and wait for transmission to complete
-    bool flush(u32 timeoutMs = 1000) FL_NOEXCEPT {
+    bool flush(u32 timeoutMs = 1000) FL_NO_EXCEPT {
         return mDriver.flush(timeoutMs);
     }
 
     // Check if serial is ready
-    bool isReady() const FL_NOEXCEPT {
+    bool isReady() const FL_NO_EXCEPT {
         return mDriver.isBuffered();
     }
 
     // Check if using buffered mode (for testing/diagnostics)
-    bool isBufferedMode() const FL_NOEXCEPT {
+    bool isBufferedMode() const FL_NO_EXCEPT {
         return mDriver.isBuffered();
     }
 
     // Compile-time: which backend is the active one in this build?
-    static constexpr bool isUsingUsbSerialJtag() FL_NOEXCEPT {
+    static constexpr bool isUsingUsbSerialJtag() FL_NO_EXCEPT {
         return FL_ESP_IO_USE_USB_SERIAL_JTAG;
     }
 
 #if FL_ESP_IO_USE_USB_SERIAL_JTAG
     // Get reference to USB-Serial JTAG driver (for advanced use).
     // Available only when this build was configured with the JTAG backend.
-    UsbSerialJtagEsp32& getUsbSerialJtag() FL_NOEXCEPT {
+    UsbSerialJtagEsp32& getUsbSerialJtag() FL_NO_EXCEPT {
         return mDriver;
     }
 #else
     // Get reference to underlying UART driver (for advanced use).
     // Available only when this build was configured with the UART backend.
-    UartEsp32& getUart() FL_NOEXCEPT {
+    UartEsp32& getUart() FL_NO_EXCEPT {
         return mDriver;
     }
 #endif
@@ -186,12 +186,12 @@ private:
     // code is dead and dropped by `--gc-sections`. See the comment block
     // at the top of this file (#2773 item 1.4).
     using ActiveDriver = UsbSerialJtagEsp32;
-    static UsbSerialJtagConfig defaultConfig() FL_NOEXCEPT {
+    static UsbSerialJtagConfig defaultConfig() FL_NO_EXCEPT {
         return UsbSerialJtagConfig::defaults();
     }
 #else
     using ActiveDriver = UartEsp32;
-    static UartConfig defaultConfig() FL_NOEXCEPT {
+    static UartConfig defaultConfig() FL_NO_EXCEPT {
         return UartConfig::reliable(UartPort::UART0);
     }
 #endif
@@ -210,7 +210,7 @@ private:
 
     // Emit a one-shot human-readable summary of the compile-time backend
     // choice on the first user-facing print/println.
-    void reportInitDiagnosticsIfNeeded() FL_NOEXCEPT {
+    void reportInitDiagnosticsIfNeeded() FL_NO_EXCEPT {
         if (mDiagnosticsReported) {
             return;
         }

@@ -32,7 +32,7 @@ ChannelManager& ChannelManager::instance() {
     return out;
 }
 
-ChannelManager::ChannelManager() FL_NOEXCEPT
+ChannelManager::ChannelManager() FL_NO_EXCEPT
     : mPollNeededCallback(&ChannelManager::notifyPollNeededThunk, this),
       mPollNeededSignal() {
     FL_DBG_F("ChannelManager: Initializing");
@@ -41,7 +41,7 @@ ChannelManager::ChannelManager() FL_NOEXCEPT
     EngineEvents::addListener(this);
 }
 
-ChannelManager::~ChannelManager() FL_NOEXCEPT {
+ChannelManager::~ChannelManager() FL_NO_EXCEPT {
     FL_DBG_F("ChannelManager: Destructor called");
 
     // Remove self from EngineEvents listener list
@@ -56,22 +56,22 @@ ChannelManager::~ChannelManager() FL_NOEXCEPT {
     // Shared drivers automatically cleaned up by shared_ptr destructors
 }
 
-void ChannelManager::notifyPollNeeded() FL_NOEXCEPT {
+void ChannelManager::notifyPollNeeded() FL_NO_EXCEPT {
     mPollNeededSignal.notify();
 }
 
-void ChannelManager::notifyPollNeededThunk(void* context) FL_NOEXCEPT {
+void ChannelManager::notifyPollNeededThunk(void* context) FL_NO_EXCEPT {
     if (context == nullptr) {
         return;
     }
     static_cast<ChannelManager*>(context)->notifyPollNeeded();
 }
 
-bool ChannelManager::waitForPollNeededSignal(u32 timeoutMs) FL_NOEXCEPT {
+bool ChannelManager::waitForPollNeededSignal(u32 timeoutMs) FL_NO_EXCEPT {
     return mPollNeededSignal.wait(timeoutMs);
 }
 
-u32 ChannelManager::pollNeededWaitSliceMs(u32 startTime, u32 timeoutMs) const FL_NOEXCEPT {
+u32 ChannelManager::pollNeededWaitSliceMs(u32 startTime, u32 timeoutMs) const FL_NO_EXCEPT {
     constexpr u32 kPollNeededFallbackSliceMs = 1;
     if (timeoutMs == 0) {
         return kPollNeededFallbackSliceMs;

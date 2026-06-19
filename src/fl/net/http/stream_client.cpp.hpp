@@ -27,7 +27,7 @@ HttpStreamClient::HttpStreamClient(const fl::string& host, u16 port, u32 heartbe
     mNativeClient = fl::make_unique<NativeHttpClient>(mHost, mPort, config);
 }
 
-HttpStreamClient::~HttpStreamClient() FL_NOEXCEPT {
+HttpStreamClient::~HttpStreamClient() FL_NO_EXCEPT {
     disconnect();
 }
 

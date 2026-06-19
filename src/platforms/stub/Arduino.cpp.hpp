@@ -19,12 +19,12 @@
 // Arduino map() function - in global namespace (NOT in fl::)
 // fl::map refers to the map container (red-black tree)
 // Delegates to fl::map_range() for consistent behavior and overflow protection
-long map(long x, long in_min, long in_max, long out_min, long out_max) FL_NOEXCEPT {
+long map(long x, long in_min, long in_max, long out_min, long out_max) FL_NO_EXCEPT {
     return fl::map_range<long, long>(x, in_min, in_max, out_min, out_max);
 }
 
 // Random number generation functions
-long random(long min, long max) FL_NOEXCEPT {
+long random(long min, long max) FL_NO_EXCEPT {
     if (min == max) {
         return min;
     }
@@ -42,7 +42,7 @@ long random(long min, long max) FL_NOEXCEPT {
     return min + (rand() % range);
 }
 
-long random(long max) FL_NOEXCEPT {
+long random(long max) FL_NO_EXCEPT {
     return random(0, max);
 }
 
@@ -50,7 +50,7 @@ long random(long max) FL_NOEXCEPT {
 // Key: pin number, Value: analog value (or -1 for unset/random)
 static fl::flat_map<int, int> g_analog_values;
 
-int analogRead(int pin) FL_NOEXCEPT {
+int analogRead(int pin) FL_NO_EXCEPT {
     // Check if a test value has been set for this pin
     auto it = g_analog_values.find(pin);
     if (it != g_analog_values.end() && it->second >= 0) {
@@ -61,11 +61,11 @@ int analogRead(int pin) FL_NOEXCEPT {
 }
 
 // Test helper functions for analog value injection
-void setAnalogValue(int pin, int value) FL_NOEXCEPT {
+void setAnalogValue(int pin, int value) FL_NO_EXCEPT {
     g_analog_values[pin] = value;
 }
 
-int getAnalogValue(int pin) FL_NOEXCEPT {
+int getAnalogValue(int pin) FL_NO_EXCEPT {
     auto it = g_analog_values.find(pin);
     if (it != g_analog_values.end()) {
         return it->second;
@@ -73,39 +73,39 @@ int getAnalogValue(int pin) FL_NOEXCEPT {
     return -1;  // Not set
 }
 
-void clearAnalogValues() FL_NOEXCEPT {
+void clearAnalogValues() FL_NO_EXCEPT {
     g_analog_values.clear();
 }
 
 // Arduino hardware initialization (stub: does nothing)
-void init() FL_NOEXCEPT {
+void init() FL_NO_EXCEPT {
     // On real Arduino platforms, init() sets up timers, interrupts, and other hardware.
     // On stub platform, there's no hardware to initialize, so this is a no-op.
 }
 
 // Digital I/O functions
-void digitalWrite(int, int) FL_NOEXCEPT {}
-void analogWrite(int, int) FL_NOEXCEPT {}
-void analogReference(int) FL_NOEXCEPT {}
-int digitalRead(int) FL_NOEXCEPT { return LOW; }
-void pinMode(int, int) FL_NOEXCEPT {}
+void digitalWrite(int, int) FL_NO_EXCEPT {}
+void analogWrite(int, int) FL_NO_EXCEPT {}
+void analogReference(int) FL_NO_EXCEPT {}
+int digitalRead(int) FL_NO_EXCEPT { return LOW; }
+void pinMode(int, int) FL_NO_EXCEPT {}
 
 // SerialEmulation member functions
-void SerialEmulation::begin(int) FL_NOEXCEPT {}
+void SerialEmulation::begin(int) FL_NO_EXCEPT {}
 
-void SerialEmulation::println() FL_NOEXCEPT {
+void SerialEmulation::println() FL_NO_EXCEPT {
     fl::printf("\n");
 }
 
-int SerialEmulation::available() FL_NOEXCEPT {
+int SerialEmulation::available() FL_NO_EXCEPT {
     return 0;
 }
 
-int SerialEmulation::read() FL_NOEXCEPT {
+int SerialEmulation::read() FL_NO_EXCEPT {
     return 0;
 }
 
-fl::string SerialEmulation::readStringUntil(char terminator) FL_NOEXCEPT {
+fl::string SerialEmulation::readStringUntil(char terminator) FL_NO_EXCEPT {
     (void)terminator;
     // Stub implementation: returns empty string since there's no actual serial input
     // In a real implementation, this would read from stdin until the terminator is found
@@ -113,25 +113,25 @@ fl::string SerialEmulation::readStringUntil(char terminator) FL_NOEXCEPT {
     return fl::string();
 }
 
-void SerialEmulation::write(fl::u8) FL_NOEXCEPT {}
+void SerialEmulation::write(fl::u8) FL_NO_EXCEPT {}
 
-void SerialEmulation::write(const char *s) FL_NOEXCEPT {
+void SerialEmulation::write(const char *s) FL_NO_EXCEPT {
     fl::printf("%s", s);
 }
 
-void SerialEmulation::write(const fl::u8 *s, size_t n) FL_NOEXCEPT {
+void SerialEmulation::write(const fl::u8 *s, size_t n) FL_NO_EXCEPT {
     fl::write_bytes(s, n);
 }
 
-void SerialEmulation::write(const char *s, size_t n) FL_NOEXCEPT {
+void SerialEmulation::write(const char *s, size_t n) FL_NO_EXCEPT {
     fl::write_bytes(reinterpret_cast<const fl::u8 *>(s), n); // ok reinterpret cast
 }
 
-void SerialEmulation::flush() FL_NOEXCEPT {}
+void SerialEmulation::flush() FL_NO_EXCEPT {}
 
-void SerialEmulation::end() FL_NOEXCEPT {}
+void SerialEmulation::end() FL_NO_EXCEPT {}
 
-fl::u8 SerialEmulation::peek() FL_NOEXCEPT {
+fl::u8 SerialEmulation::peek() FL_NO_EXCEPT {
     return 0;
 }
 

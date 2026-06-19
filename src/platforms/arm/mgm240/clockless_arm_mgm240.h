@@ -69,7 +69,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 public:
     /// @brief Initialize the LED controller
     /// Sets up the data pin as output and caches pin mask and port address
-    virtual void init() FL_NOEXCEPT {
+    virtual void init() FL_NO_EXCEPT {
         FastPin<DATA_PIN>::setOutput();
         mPinMask = FastPin<DATA_PIN>::mask();
         mPort = FastPin<DATA_PIN>::port();
@@ -82,7 +82,7 @@ public:
 protected:
     /// @brief Output pixel data to LED strip
     /// @param pixels Pixel controller containing RGB data and scaling
-    virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NOEXCEPT {
+    virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
         mWait.wait();
         if(!showRGBInternal(pixels)) {
             // If timing was interrupted, wait and retry once
@@ -101,7 +101,7 @@ protected:
     /// @param hi Port value with data pin high
     /// @param lo Port value with data pin low
     /// @param b Reference to byte containing bits to send (MSB first)
-    template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER data_t hi, FASTLED_REGISTER data_t lo, FASTLED_REGISTER u8 & b) FL_NOEXCEPT {
+    template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER data_t hi, FASTLED_REGISTER data_t lo, FASTLED_REGISTER u8 & b) FL_NO_EXCEPT {
         for(FASTLED_REGISTER u32 i = BITS-1; i > 0; --i) {
             while(ARM_DWT_CYCCNT < next_mark);
             next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
@@ -132,7 +132,7 @@ protected:
     /// @brief Internal RGB data output with DWT cycle-accurate timing
     /// @param pixels Pixel controller with RGB data
     /// @return DWT cycle count when completed (0 if interrupted)
-    static u32 showRGBInternal(PixelController<RGB_ORDER> pixels) FL_NOEXCEPT {
+    static u32 showRGBInternal(PixelController<RGB_ORDER> pixels) FL_NO_EXCEPT {
         // Enable ARM DWT cycle counter for precise timing
         ARM_DEMCR    |= ARM_DEMCR_TRCENA;
         ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;

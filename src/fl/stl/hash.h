@@ -78,7 +78,7 @@ static inline u32 MurmurHash3_x86_32(const void *key, fl::size len,
 //-----------------------------------------------------------------------------
 // Fast, cheap 32-bit integer hash (Thomas Wang)
 //-----------------------------------------------------------------------------
-static inline u32 fast_hash32(u32 x) FL_NOEXCEPT {
+static inline u32 fast_hash32(u32 x) FL_NO_EXCEPT {
     x = (x ^ 61u) ^ (x >> 16);
     x = x + (x << 3);
     x = x ^ (x >> 4);
@@ -89,13 +89,13 @@ static inline u32 fast_hash32(u32 x) FL_NOEXCEPT {
 
 // 3) Handy two-word hasher
 static inline u32 hash_pair(u32 a, u32 b,
-                                 u32 seed = 0) FL_NOEXCEPT {
+                                 u32 seed = 0) FL_NO_EXCEPT {
     // mix in 'a', then mix in 'b'
     u32 h = fast_hash32(seed ^ a);
     return fast_hash32(h ^ b);
 }
 
-static inline u32 fast_hash64(u64 x) FL_NOEXCEPT {
+static inline u32 fast_hash64(u64 x) FL_NO_EXCEPT {
     u32 x1 = static_cast<u32>(x & 0x00000000FFFFFFFF);
     u32 x2 = static_cast<u32>(x >> 32);
     return hash_pair(x1, x2);
@@ -109,7 +109,7 @@ template <typename T> struct Hash {
     FL_STATIC_ASSERT(fl::is_pod<T>::value,
                   "fl::Hash<T> only supports POD types (integrals, floats, "
                   "etc.), you need to define your own hash.");
-    u32 operator()(const T &key) const FL_NOEXCEPT {
+    u32 operator()(const T &key) const FL_NO_EXCEPT {
         return MurmurHash3_x86_32(&key, sizeof(T));
     }
 };
@@ -118,13 +118,13 @@ template <typename T> struct FastHash {
     FL_STATIC_ASSERT(fl::is_pod<T>::value,
                   "fl::FastHash<T> only supports POD types (integrals, floats, "
                   "etc.), you need to define your own hash.");
-    u32 operator()(const T &key) const FL_NOEXCEPT {
+    u32 operator()(const T &key) const FL_NO_EXCEPT {
         return fast_hash32(key);
     }
 };
 
 template <typename T> struct FastHash<vec2<T>> {
-    u32 operator()(const vec2<T> &key) const FL_NOEXCEPT {
+    u32 operator()(const vec2<T> &key) const FL_NO_EXCEPT {
         if (sizeof(T) == sizeof(fl::u8)) {
             u32 x = static_cast<u32>(key.x) +
                          (static_cast<u32>(key.y) << 8);
@@ -143,7 +143,7 @@ template <typename T> struct FastHash<vec2<T>> {
 };
 
 template <typename T> struct Hash<T *> {
-    u32 operator()(T *key) const FL_NOEXCEPT {
+    u32 operator()(T *key) const FL_NO_EXCEPT {
         if (sizeof(T *) == sizeof(u32)) {
             u32 key_u = static_cast<u32>(fl::ptr_to_int(key));
             return fast_hash32(key_u);
@@ -155,7 +155,7 @@ template <typename T> struct Hash<T *> {
 };
 
 template <typename T> struct Hash<vec2<T>> {
-    u32 operator()(const vec2<T> &key) const FL_NOEXCEPT {
+    u32 operator()(const vec2<T> &key) const FL_NO_EXCEPT {
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_MAYBE_UNINITIALIZED
         T packed[2] = {key.x, key.y};
@@ -166,65 +166,65 @@ FL_DISABLE_WARNING_POP
 };
 
 template <typename T> struct Hash<fl::shared_ptr<T>> {
-    u32 operator()(const fl::shared_ptr<T> &key) const FL_NOEXCEPT {
+    u32 operator()(const fl::shared_ptr<T> &key) const FL_NO_EXCEPT {
         auto hasher = Hash<T *>();
         return hasher(key.get());
     }
 };
 
 template<> struct Hash<float> {
-    u32 operator()(const float key) const FL_NOEXCEPT {
+    u32 operator()(const float key) const FL_NO_EXCEPT {
         u32 ikey = fl::bit_cast<u32>(key);
         return fast_hash32(ikey);
     }
 };
 
 template<> struct Hash<double> {
-    u32 operator()(const double& key) const FL_NOEXCEPT {
+    u32 operator()(const double& key) const FL_NO_EXCEPT {
         return MurmurHash3_x86_32(&key, sizeof(double));
     }
 };
 
 template<> struct Hash<i32> {
-    u32 operator()(const i32 key) const FL_NOEXCEPT {
+    u32 operator()(const i32 key) const FL_NO_EXCEPT {
         u32 ukey = static_cast<u32>(key);
         return fast_hash32(ukey);
     }
 };
 
 template<> struct Hash<bool> {
-    u32 operator()(const bool key) const FL_NOEXCEPT {
+    u32 operator()(const bool key) const FL_NO_EXCEPT {
         return fast_hash32(key);
     }
 };
 
 template<> struct Hash<fl::u8> {
-    u32 operator()(const fl::u8 &key) const FL_NOEXCEPT {
+    u32 operator()(const fl::u8 &key) const FL_NO_EXCEPT {
         return fast_hash32(key);
     }
 };
 
 template<> struct Hash<u16> {
-    u32 operator()(const u16 &key) const FL_NOEXCEPT {
+    u32 operator()(const u16 &key) const FL_NO_EXCEPT {
         return fast_hash32(key);
     }
 };
 
 template<> struct Hash<u32> {
-    u32 operator()(const u32 &key) const FL_NOEXCEPT {
+    u32 operator()(const u32 &key) const FL_NO_EXCEPT {
         return fast_hash32(key);
     }
 };
 
 template<> struct Hash<i8> {
-    u32 operator()(const i8 &key) const FL_NOEXCEPT {
+    u32 operator()(const i8 &key) const FL_NO_EXCEPT {
         u8 v = static_cast<u8>(key);
         return fast_hash32(v);
     }
 };
 
 template<> struct Hash<i16> {
-    u32 operator()(const i16 &key) const FL_NOEXCEPT {
+    u32 operator()(const i16 &key) const FL_NO_EXCEPT {
         u16 ukey = static_cast<u16>(key);
         return fast_hash32(ukey);
     }
@@ -243,13 +243,13 @@ template<> struct Hash<i16> {
 // Convenience for string types → u32
 //----------------------------------------------------------------------------
 template <> struct Hash<fl::string> {
-    u32 operator()(const fl::string &key) const FL_NOEXCEPT {
+    u32 operator()(const fl::string &key) const FL_NO_EXCEPT {
         return MurmurHash3_x86_32(key.data(), key.size());
     }
 };
 
 template <> struct Hash<fl::string_view> {
-    u32 operator()(const fl::string_view& sv) const FL_NOEXCEPT {
+    u32 operator()(const fl::string_view& sv) const FL_NO_EXCEPT {
         return MurmurHash3_x86_32(sv.data(), sv.size());
     }
 };

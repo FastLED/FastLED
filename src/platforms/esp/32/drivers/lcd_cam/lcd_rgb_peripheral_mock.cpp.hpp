@@ -33,43 +33,43 @@ public:
     // Lifecycle
     //=========================================================================
 
-    LcdRgbPeripheralMockImpl() FL_NOEXCEPT;
+    LcdRgbPeripheralMockImpl() FL_NO_EXCEPT;
     ~LcdRgbPeripheralMockImpl() override;
 
     //=========================================================================
     // ILcdRgbPeripheral Interface Implementation
     //=========================================================================
 
-    bool initialize(const LcdRgbPeripheralConfig& config) FL_NOEXCEPT override;
-    void deinitialize() FL_NOEXCEPT override;
-    bool isInitialized() const FL_NOEXCEPT override;
+    bool initialize(const LcdRgbPeripheralConfig& config) FL_NO_EXCEPT override;
+    void deinitialize() FL_NO_EXCEPT override;
+    bool isInitialized() const FL_NO_EXCEPT override;
 
-    u16* allocateFrameBuffer(size_t size_bytes) FL_NOEXCEPT override;
-    void freeFrameBuffer(u16* buffer) FL_NOEXCEPT override;
+    u16* allocateFrameBuffer(size_t size_bytes) FL_NO_EXCEPT override;
+    void freeFrameBuffer(u16* buffer) FL_NO_EXCEPT override;
 
-    bool drawFrame(const u16* buffer, size_t size_bytes) FL_NOEXCEPT override;
-    bool waitFrameDone(u32 timeout_ms) FL_NOEXCEPT override;
-    bool isBusy() const FL_NOEXCEPT override;
+    bool drawFrame(const u16* buffer, size_t size_bytes) FL_NO_EXCEPT override;
+    bool waitFrameDone(u32 timeout_ms) FL_NO_EXCEPT override;
+    bool isBusy() const FL_NO_EXCEPT override;
 
-    bool registerDrawCallback(void* callback, void* user_ctx) FL_NOEXCEPT override;
-    const LcdRgbPeripheralConfig& getConfig() const FL_NOEXCEPT override;
+    bool registerDrawCallback(void* callback, void* user_ctx) FL_NO_EXCEPT override;
+    const LcdRgbPeripheralConfig& getConfig() const FL_NO_EXCEPT override;
 
-    u64 getMicroseconds() FL_NOEXCEPT override;
-    void delay(u32 ms) FL_NOEXCEPT override;
+    u64 getMicroseconds() FL_NO_EXCEPT override;
+    void delay(u32 ms) FL_NO_EXCEPT override;
 
     //=========================================================================
     // Mock-Specific API
     //=========================================================================
 
-    void simulateDrawComplete() FL_NOEXCEPT override;
-    void setDrawFailure(bool should_fail) FL_NOEXCEPT override;
-    void setDrawDelay(u32 microseconds) FL_NOEXCEPT override;
-    const fl::vector<FrameRecord>& getFrameHistory() const FL_NOEXCEPT override;
-    void clearFrameHistory() FL_NOEXCEPT override;
-    fl::span<const u16> getLastFrameData() const FL_NOEXCEPT override;
-    bool isEnabled() const FL_NOEXCEPT override;
-    size_t getDrawCount() const FL_NOEXCEPT override;
-    void reset() FL_NOEXCEPT override;
+    void simulateDrawComplete() FL_NO_EXCEPT override;
+    void setDrawFailure(bool should_fail) FL_NO_EXCEPT override;
+    void setDrawDelay(u32 microseconds) FL_NO_EXCEPT override;
+    const fl::vector<FrameRecord>& getFrameHistory() const FL_NO_EXCEPT override;
+    void clearFrameHistory() FL_NO_EXCEPT override;
+    fl::span<const u16> getLastFrameData() const FL_NO_EXCEPT override;
+    bool isEnabled() const FL_NO_EXCEPT override;
+    size_t getDrawCount() const FL_NO_EXCEPT override;
+    void reset() FL_NO_EXCEPT override;
 
 private:
     //=========================================================================
@@ -104,15 +104,15 @@ private:
     size_t mDeferredCallbackCount;  // Count of pending callbacks to fire
 
     // Synchronous callback pumping (matches I2S mock pattern)
-    void pumpDeferredCallbacks() FL_NOEXCEPT;
-    void fireCallback() FL_NOEXCEPT;
+    void pumpDeferredCallbacks() FL_NO_EXCEPT;
+    void fireCallback() FL_NO_EXCEPT;
 };
 
 //=============================================================================
 // Singleton Instance
 //=============================================================================
 
-LcdRgbPeripheralMock& LcdRgbPeripheralMock::instance() FL_NOEXCEPT {
+LcdRgbPeripheralMock& LcdRgbPeripheralMock::instance() FL_NO_EXCEPT {
     return Singleton<LcdRgbPeripheralMockImpl>::instance();
 }
 
@@ -120,7 +120,7 @@ LcdRgbPeripheralMock& LcdRgbPeripheralMock::instance() FL_NOEXCEPT {
 // Constructor / Destructor
 //=============================================================================
 
-LcdRgbPeripheralMockImpl::LcdRgbPeripheralMockImpl() FL_NOEXCEPT
+LcdRgbPeripheralMockImpl::LcdRgbPeripheralMockImpl() FL_NO_EXCEPT
     : mInitialized(false),
       mEnabled(false),
       mBusy(false),
@@ -145,7 +145,7 @@ LcdRgbPeripheralMockImpl::~LcdRgbPeripheralMockImpl() {
 // Lifecycle Methods
 //=============================================================================
 
-bool LcdRgbPeripheralMockImpl::initialize(const LcdRgbPeripheralConfig& config) FL_NOEXCEPT {
+bool LcdRgbPeripheralMockImpl::initialize(const LcdRgbPeripheralConfig& config) FL_NO_EXCEPT {
     // Validate config
     if (config.num_lanes == 0 || config.num_lanes > 16) {
         FL_WARN_F("LcdRgbPeripheralMock: Invalid num_lanes: %s", config.num_lanes);
@@ -158,7 +158,7 @@ bool LcdRgbPeripheralMockImpl::initialize(const LcdRgbPeripheralConfig& config) 
     return true;
 }
 
-void LcdRgbPeripheralMockImpl::deinitialize() FL_NOEXCEPT {
+void LcdRgbPeripheralMockImpl::deinitialize() FL_NO_EXCEPT {
     mInitialized = false;
     mEnabled = false;
     mBusy = false;
@@ -166,7 +166,7 @@ void LcdRgbPeripheralMockImpl::deinitialize() FL_NOEXCEPT {
     mDeferredCallbackCount = 0;
 }
 
-bool LcdRgbPeripheralMockImpl::isInitialized() const FL_NOEXCEPT {
+bool LcdRgbPeripheralMockImpl::isInitialized() const FL_NO_EXCEPT {
     return mInitialized;
 }
 
@@ -174,7 +174,7 @@ bool LcdRgbPeripheralMockImpl::isInitialized() const FL_NOEXCEPT {
 // Buffer Management
 //=============================================================================
 
-u16* LcdRgbPeripheralMockImpl::allocateFrameBuffer(size_t size_bytes) FL_NOEXCEPT {
+u16* LcdRgbPeripheralMockImpl::allocateFrameBuffer(size_t size_bytes) FL_NO_EXCEPT {
     // Round up to 64-byte alignment
     size_t aligned_size = ((size_bytes + 63) / 64) * 64;
 
@@ -192,7 +192,7 @@ u16* LcdRgbPeripheralMockImpl::allocateFrameBuffer(size_t size_bytes) FL_NOEXCEP
     return static_cast<u16*>(buffer);
 }
 
-void LcdRgbPeripheralMockImpl::freeFrameBuffer(u16* buffer) FL_NOEXCEPT {
+void LcdRgbPeripheralMockImpl::freeFrameBuffer(u16* buffer) FL_NO_EXCEPT {
     if (buffer != nullptr) {
 #ifdef FL_IS_WIN
         _aligned_free(buffer);
@@ -206,7 +206,7 @@ void LcdRgbPeripheralMockImpl::freeFrameBuffer(u16* buffer) FL_NOEXCEPT {
 // Transmission Methods
 //=============================================================================
 
-bool LcdRgbPeripheralMockImpl::drawFrame(const u16* buffer, size_t size_bytes) FL_NOEXCEPT {
+bool LcdRgbPeripheralMockImpl::drawFrame(const u16* buffer, size_t size_bytes) FL_NO_EXCEPT {
     if (!mInitialized) {
         FL_WARN_F("LcdRgbPeripheralMock: Cannot draw - not initialized");
         return false;
@@ -254,7 +254,7 @@ bool LcdRgbPeripheralMockImpl::drawFrame(const u16* buffer, size_t size_bytes) F
     return true;
 }
 
-bool LcdRgbPeripheralMockImpl::waitFrameDone(u32 timeout_ms) FL_NOEXCEPT {
+bool LcdRgbPeripheralMockImpl::waitFrameDone(u32 timeout_ms) FL_NO_EXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -270,7 +270,7 @@ bool LcdRgbPeripheralMockImpl::waitFrameDone(u32 timeout_ms) FL_NOEXCEPT {
     return false;
 }
 
-bool LcdRgbPeripheralMockImpl::isBusy() const FL_NOEXCEPT {
+bool LcdRgbPeripheralMockImpl::isBusy() const FL_NO_EXCEPT {
     return mBusy;
 }
 
@@ -278,7 +278,7 @@ bool LcdRgbPeripheralMockImpl::isBusy() const FL_NOEXCEPT {
 // Callback Registration
 //=============================================================================
 
-bool LcdRgbPeripheralMockImpl::registerDrawCallback(void* callback, void* user_ctx) FL_NOEXCEPT {
+bool LcdRgbPeripheralMockImpl::registerDrawCallback(void* callback, void* user_ctx) FL_NO_EXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -292,15 +292,15 @@ bool LcdRgbPeripheralMockImpl::registerDrawCallback(void* callback, void* user_c
 // State Inspection
 //=============================================================================
 
-const LcdRgbPeripheralConfig& LcdRgbPeripheralMockImpl::getConfig() const FL_NOEXCEPT {
+const LcdRgbPeripheralConfig& LcdRgbPeripheralMockImpl::getConfig() const FL_NO_EXCEPT {
     return mConfig;
 }
 
-u64 LcdRgbPeripheralMockImpl::getMicroseconds() FL_NOEXCEPT {
+u64 LcdRgbPeripheralMockImpl::getMicroseconds() FL_NO_EXCEPT {
     return mSimulatedTimeUs;
 }
 
-void LcdRgbPeripheralMockImpl::delay(u32 ms) FL_NOEXCEPT {
+void LcdRgbPeripheralMockImpl::delay(u32 ms) FL_NO_EXCEPT {
     mSimulatedTimeUs += static_cast<u64>(ms) * 1000;
 }
 
@@ -308,7 +308,7 @@ void LcdRgbPeripheralMockImpl::delay(u32 ms) FL_NOEXCEPT {
 // Mock-Specific API
 //=============================================================================
 
-void LcdRgbPeripheralMockImpl::simulateDrawComplete() FL_NOEXCEPT {
+void LcdRgbPeripheralMockImpl::simulateDrawComplete() FL_NO_EXCEPT {
     if (mPendingDraws == 0) {
         return;
     }
@@ -317,42 +317,42 @@ void LcdRgbPeripheralMockImpl::simulateDrawComplete() FL_NOEXCEPT {
     fireCallback();
 }
 
-void LcdRgbPeripheralMockImpl::setDrawFailure(bool should_fail) FL_NOEXCEPT {
+void LcdRgbPeripheralMockImpl::setDrawFailure(bool should_fail) FL_NO_EXCEPT {
     mShouldFailDraw = should_fail;
 }
 
-void LcdRgbPeripheralMockImpl::setDrawDelay(u32 microseconds) FL_NOEXCEPT {
+void LcdRgbPeripheralMockImpl::setDrawDelay(u32 microseconds) FL_NO_EXCEPT {
     mDrawDelayUs = microseconds;
     mDrawDelayForced = true;  // Mark as explicitly set - don't recalculate in drawFrame()
 }
 
-const fl::vector<LcdRgbPeripheralMock::FrameRecord>& LcdRgbPeripheralMockImpl::getFrameHistory() const FL_NOEXCEPT {
+const fl::vector<LcdRgbPeripheralMock::FrameRecord>& LcdRgbPeripheralMockImpl::getFrameHistory() const FL_NO_EXCEPT {
     return mHistory;
 }
 
-void LcdRgbPeripheralMockImpl::clearFrameHistory() FL_NOEXCEPT {
+void LcdRgbPeripheralMockImpl::clearFrameHistory() FL_NO_EXCEPT {
     mHistory.clear();
     mPendingDraws = 0;
     mDeferredCallbackCount = 0;
     mBusy = false;
 }
 
-fl::span<const u16> LcdRgbPeripheralMockImpl::getLastFrameData() const FL_NOEXCEPT {
+fl::span<const u16> LcdRgbPeripheralMockImpl::getLastFrameData() const FL_NO_EXCEPT {
     if (mHistory.empty()) {
         return fl::span<const u16>();
     }
     return fl::span<const u16>(mHistory.back().buffer_copy);
 }
 
-bool LcdRgbPeripheralMockImpl::isEnabled() const FL_NOEXCEPT {
+bool LcdRgbPeripheralMockImpl::isEnabled() const FL_NO_EXCEPT {
     return mEnabled;
 }
 
-size_t LcdRgbPeripheralMockImpl::getDrawCount() const FL_NOEXCEPT {
+size_t LcdRgbPeripheralMockImpl::getDrawCount() const FL_NO_EXCEPT {
     return mDrawCount;
 }
 
-void LcdRgbPeripheralMockImpl::reset() FL_NOEXCEPT {
+void LcdRgbPeripheralMockImpl::reset() FL_NO_EXCEPT {
     mInitialized = false;
     mEnabled = false;
     mBusy = false;
@@ -374,7 +374,7 @@ void LcdRgbPeripheralMockImpl::reset() FL_NOEXCEPT {
 // Synchronous Callback Pumping
 //=============================================================================
 
-void LcdRgbPeripheralMockImpl::pumpDeferredCallbacks() FL_NOEXCEPT {
+void LcdRgbPeripheralMockImpl::pumpDeferredCallbacks() FL_NO_EXCEPT {
     // Re-entrancy guard: if we're already firing callbacks (from within
     // a callback that called drawFrame()), just let the outer loop handle it.
     if (mFiringCallbacks) {
@@ -392,7 +392,7 @@ void LcdRgbPeripheralMockImpl::pumpDeferredCallbacks() FL_NOEXCEPT {
     mFiringCallbacks = false;
 }
 
-void LcdRgbPeripheralMockImpl::fireCallback() FL_NOEXCEPT {
+void LcdRgbPeripheralMockImpl::fireCallback() FL_NO_EXCEPT {
     if (mPendingDraws > 0) {
         mPendingDraws--;
     }

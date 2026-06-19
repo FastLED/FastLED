@@ -23,10 +23,10 @@ struct RxChannelConfig {
     bool io_loop_back = false;
     bool use_dma = false;
 
-    RxChannelConfig() FL_NOEXCEPT = default;
-    explicit RxChannelConfig(int pin_param) FL_NOEXCEPT
+    RxChannelConfig() FL_NO_EXCEPT = default;
+    explicit RxChannelConfig(int pin_param) FL_NO_EXCEPT
         : pin(pin_param) {}
-    RxChannelConfig(int pin_param, RxBackend backend_param) FL_NOEXCEPT
+    RxChannelConfig(int pin_param, RxBackend backend_param) FL_NO_EXCEPT
         : pin(pin_param)
         , backend(backend_param) {}
 };

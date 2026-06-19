@@ -44,7 +44,7 @@ namespace detail {
 
 // Function-pointer-with-context comparator: returns true iff *a < *b.
 using flat_map_less_thunk_t = bool (*)(const void* ctx,
-                                       const void* a, const void* b) FL_NOEXCEPT;
+                                       const void* a, const void* b) FL_NO_EXCEPT;
 
 struct flat_map_ops {
     flat_map_less_thunk_t less_fn;
@@ -59,7 +59,7 @@ struct flat_map_ops {
 FL_NO_INLINE
 fl::size flat_map_lower_bound_idx(const void* data, fl::size n,
                                   const void* key,
-                                  const flat_map_ops& ops) FL_NOEXCEPT;
+                                  const flat_map_ops& ops) FL_NO_EXCEPT;
 
 // upper_bound returns the index of the first element in [0, n) whose
 // `.first` is strictly greater than `*key` (equivalently: `less(*key,
@@ -67,7 +67,7 @@ fl::size flat_map_lower_bound_idx(const void* data, fl::size n,
 FL_NO_INLINE
 fl::size flat_map_upper_bound_idx(const void* data, fl::size n,
                                   const void* key,
-                                  const flat_map_ops& ops) FL_NOEXCEPT;
+                                  const flat_map_ops& ops) FL_NO_EXCEPT;
 
 } // namespace detail
 } // namespace fl

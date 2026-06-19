@@ -108,11 +108,11 @@ void IRAM_ATTR I2sSpiPeripheralEsp::isrHandler(void *arg) {
 // Singleton
 //=============================================================================
 
-I2sSpiPeripheralEsp &I2sSpiPeripheralEsp::instance() FL_NOEXCEPT {
+I2sSpiPeripheralEsp &I2sSpiPeripheralEsp::instance() FL_NO_EXCEPT {
     return Singleton<I2sSpiPeripheralEsp>::instance();
 }
 
-I2sSpiPeripheralEsp::I2sSpiPeripheralEsp() FL_NOEXCEPT
+I2sSpiPeripheralEsp::I2sSpiPeripheralEsp() FL_NO_EXCEPT
     : mI2s(nullptr), mDmaDescs(nullptr), mDmaDescCount(0),
       mDmaBuffer(nullptr), mDmaBufferWords(0),
       mIntrHandle(nullptr), mCompleteSem(nullptr), mInitialized(false),
@@ -124,7 +124,7 @@ I2sSpiPeripheralEsp::~I2sSpiPeripheralEsp() { deinitialize(); }
 // Reset Helpers
 //=============================================================================
 
-void I2sSpiPeripheralEsp::resetI2s() FL_NOEXCEPT {
+void I2sSpiPeripheralEsp::resetI2s() FL_NO_EXCEPT {
     const unsigned long lc_conf_reset_flags =
         I2S_IN_RST_M | I2S_OUT_RST_M | I2S_AHBM_RST_M |
         I2S_AHBM_FIFO_RST_M;
@@ -137,12 +137,12 @@ void I2sSpiPeripheralEsp::resetI2s() FL_NOEXCEPT {
     mI2s->conf.val &= ~conf_reset_flags;
 }
 
-void I2sSpiPeripheralEsp::resetDma() FL_NOEXCEPT {
+void I2sSpiPeripheralEsp::resetDma() FL_NO_EXCEPT {
     mI2s->lc_conf.out_rst = 1;
     mI2s->lc_conf.out_rst = 0;
 }
 
-void I2sSpiPeripheralEsp::resetFifo() FL_NOEXCEPT {
+void I2sSpiPeripheralEsp::resetFifo() FL_NO_EXCEPT {
     mI2s->conf.tx_fifo_reset = 1;
     mI2s->conf.tx_fifo_reset = 0;
 }
@@ -151,7 +151,7 @@ void I2sSpiPeripheralEsp::resetFifo() FL_NOEXCEPT {
 // Lifecycle
 //=============================================================================
 
-bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NOEXCEPT {
+bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NO_EXCEPT {
     if (mInitialized) {
         if (mConfig.num_lanes == config.num_lanes &&
             mConfig.clock_hz == config.clock_hz &&
@@ -354,7 +354,7 @@ bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NOEXCEPT {
     return true;
 }
 
-void I2sSpiPeripheralEsp::deinitialize() FL_NOEXCEPT {
+void I2sSpiPeripheralEsp::deinitialize() FL_NO_EXCEPT {
     if (mIntrHandle != nullptr) {
         esp_intr_disable(mIntrHandle);
         esp_intr_free(mIntrHandle);
@@ -388,7 +388,7 @@ void I2sSpiPeripheralEsp::deinitialize() FL_NOEXCEPT {
     mBusy = false;
 }
 
-bool I2sSpiPeripheralEsp::isInitialized() const FL_NOEXCEPT {
+bool I2sSpiPeripheralEsp::isInitialized() const FL_NO_EXCEPT {
     return mInitialized;
 }
 
@@ -396,7 +396,7 @@ bool I2sSpiPeripheralEsp::isInitialized() const FL_NOEXCEPT {
 // Buffer Management
 //=============================================================================
 
-u8 *I2sSpiPeripheralEsp::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
+u8 *I2sSpiPeripheralEsp::allocateBuffer(size_t size_bytes) FL_NO_EXCEPT {
     size_t aligned_size = ((size_bytes + 3) / 4) * 4;
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
     void *buffer = heap_caps_aligned_calloc(4, aligned_size, 1,
@@ -411,7 +411,7 @@ u8 *I2sSpiPeripheralEsp::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
     return static_cast<u8 *>(buffer);
 }
 
-void I2sSpiPeripheralEsp::freeBuffer(u8 *buffer) FL_NOEXCEPT {
+void I2sSpiPeripheralEsp::freeBuffer(u8 *buffer) FL_NO_EXCEPT {
     if (buffer != nullptr) {
         heap_caps_free(buffer);
     }
@@ -422,7 +422,7 @@ void I2sSpiPeripheralEsp::freeBuffer(u8 *buffer) FL_NOEXCEPT {
 //=============================================================================
 
 void I2sSpiPeripheralEsp::transposeToI2sBuffer(const u8 *src,
-                                                size_t srcSize) FL_NOEXCEPT {
+                                                size_t srcSize) FL_NO_EXCEPT {
     // Input: interleaved bytes [lane0_b0, lane1_b0, ..., lane0_b1, ...]
     // Output: 16-bit words where each bit position = one lane
     //
@@ -473,7 +473,7 @@ void I2sSpiPeripheralEsp::transposeToI2sBuffer(const u8 *src,
 //=============================================================================
 
 bool I2sSpiPeripheralEsp::transmit(const u8 *buffer,
-                                   size_t size_bytes) FL_NOEXCEPT {
+                                   size_t size_bytes) FL_NO_EXCEPT {
     if (!mInitialized || mDmaBuffer == nullptr) {
         return false;
     }
@@ -550,7 +550,7 @@ bool I2sSpiPeripheralEsp::transmit(const u8 *buffer,
     return true;
 }
 
-bool I2sSpiPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
+bool I2sSpiPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -565,10 +565,10 @@ bool I2sSpiPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
     return false;
 }
 
-bool I2sSpiPeripheralEsp::isBusy() const FL_NOEXCEPT { return mBusy; }
+bool I2sSpiPeripheralEsp::isBusy() const FL_NO_EXCEPT { return mBusy; }
 
 bool I2sSpiPeripheralEsp::registerTransmitCallback(
-    void *callback, void *user_ctx) FL_NOEXCEPT {
+    void *callback, void *user_ctx) FL_NO_EXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -577,15 +577,15 @@ bool I2sSpiPeripheralEsp::registerTransmitCallback(
     return true;
 }
 
-const I2sSpiConfig &I2sSpiPeripheralEsp::getConfig() const FL_NOEXCEPT {
+const I2sSpiConfig &I2sSpiPeripheralEsp::getConfig() const FL_NO_EXCEPT {
     return mConfig;
 }
 
-u64 I2sSpiPeripheralEsp::getMicroseconds() FL_NOEXCEPT {
+u64 I2sSpiPeripheralEsp::getMicroseconds() FL_NO_EXCEPT {
     return esp_timer_get_time();
 }
 
-void I2sSpiPeripheralEsp::delay(u32 ms) FL_NOEXCEPT {
+void I2sSpiPeripheralEsp::delay(u32 ms) FL_NO_EXCEPT {
     vTaskDelay(pdMS_TO_TICKS(ms));
 }
 

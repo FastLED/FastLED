@@ -60,19 +60,19 @@ struct RpcTypeOps {
 // exist for `T` (which is exactly the set of RPC-supported types today).
 template <typename T>
 struct RpcTypeOpsFor {
-    static void default_construct_(void* p) FL_NOEXCEPT { new (p) T(); }
-    static void destroy_(void* p) FL_NOEXCEPT { static_cast<T*>(p)->~T(); }
+    static void default_construct_(void* p) FL_NO_EXCEPT { new (p) T(); }
+    static void destroy_(void* p) FL_NO_EXCEPT { static_cast<T*>(p)->~T(); }
 
-    static TypeConversionResult decode_(const json& src, void* dst) FL_NOEXCEPT {
+    static TypeConversionResult decode_(const json& src, void* dst) FL_NO_EXCEPT {
         fl::tuple<T, TypeConversionResult> tup = JsonToType<T>::convert(src);
         *static_cast<T*>(dst) = fl::move(fl::get<0>(tup));
         return fl::get<1>(tup);
     }
-    static json encode_(const void* src) FL_NOEXCEPT {
+    static json encode_(const void* src) FL_NO_EXCEPT {
         return TypeToJson<T>::convert(*static_cast<const T*>(src));
     }
 
-    static const RpcTypeOps* ops() FL_NOEXCEPT {
+    static const RpcTypeOps* ops() FL_NO_EXCEPT {
         static const RpcTypeOps kOps = {
             sizeof(T), alignof(T),
             &default_construct_,
@@ -88,7 +88,7 @@ struct RpcTypeOpsFor {
 // branches on a null `mResultType`.
 template <>
 struct RpcTypeOpsFor<void> {
-    static const RpcTypeOps* ops() FL_NOEXCEPT { return nullptr; }
+    static const RpcTypeOps* ops() FL_NO_EXCEPT { return nullptr; }
 };
 
 // =============================================================================
@@ -121,14 +121,14 @@ struct TrampolineHelper {
     using FunctionType = fl::function<R(Args...)>;
 
     template <fl::size... Is>
-    static R invoke_(FunctionType& fn, void* const* arg_slots, index_sequence<Is...>) FL_NOEXCEPT {
+    static R invoke_(FunctionType& fn, void* const* arg_slots, index_sequence<Is...>) FL_NO_EXCEPT {
         // Each slot stores a `rpc_storage_type<Args>::type` value;
         // implicit conversion (ConstCharPtrWrapper -> const char*,
         // ConstSpanWrapper<T> -> span<const T>) yields the original Args.
         return fn(*static_cast<typename rpc_storage_type<Args>::type*>(arg_slots[Is])...);
     }
 
-    static void trampoline(void* user_fn, void* result_slot, void* const* arg_slots) FL_NOEXCEPT {
+    static void trampoline(void* user_fn, void* result_slot, void* const* arg_slots) FL_NO_EXCEPT {
         FunctionType& fn = *static_cast<FunctionType*>(user_fn);
         R value = invoke_(fn, arg_slots, make_index_sequence<sizeof...(Args)>{});
         if (result_slot) {
@@ -136,7 +136,7 @@ struct TrampolineHelper {
         }
     }
 
-    static void destroy(void* user_fn) FL_NOEXCEPT {
+    static void destroy(void* user_fn) FL_NO_EXCEPT {
         delete static_cast<FunctionType*>(user_fn);  // ok bare allocation
     }
 };
@@ -147,17 +147,17 @@ struct TrampolineHelper<void, Args...> {
     using FunctionType = fl::function<void(Args...)>;
 
     template <fl::size... Is>
-    static void invoke_(FunctionType& fn, void* const* arg_slots, index_sequence<Is...>) FL_NOEXCEPT {
+    static void invoke_(FunctionType& fn, void* const* arg_slots, index_sequence<Is...>) FL_NO_EXCEPT {
         fn(*static_cast<typename rpc_storage_type<Args>::type*>(arg_slots[Is])...);
     }
 
-    static void trampoline(void* user_fn, void* result_slot, void* const* arg_slots) FL_NOEXCEPT {
+    static void trampoline(void* user_fn, void* result_slot, void* const* arg_slots) FL_NO_EXCEPT {
         (void)result_slot;
         FunctionType& fn = *static_cast<FunctionType*>(user_fn);
         invoke_(fn, arg_slots, make_index_sequence<sizeof...(Args)>{});
     }
 
-    static void destroy(void* user_fn) FL_NOEXCEPT {
+    static void destroy(void* user_fn) FL_NO_EXCEPT {
         delete static_cast<FunctionType*>(user_fn);  // ok bare allocation
     }
 };
@@ -169,7 +169,7 @@ struct TrampolineHelper<void, Args...> {
 // entry to keep ISO C++ happy (no zero-sized array).
 template <typename... Args>
 struct ArgTypesTable {
-    static const RpcTypeOps* const* table() FL_NOEXCEPT {
+    static const RpcTypeOps* const* table() FL_NO_EXCEPT {
         static const RpcTypeOps* const kTable[] = {
             RpcTypeOpsFor<typename rpc_storage_type<Args>::type>::ops()...
         };
@@ -179,7 +179,7 @@ struct ArgTypesTable {
 
 template <>
 struct ArgTypesTable<> {
-    static const RpcTypeOps* const* table() FL_NOEXCEPT {
+    static const RpcTypeOps* const* table() FL_NO_EXCEPT {
         // 0-arg signatures pass `arg_count == 0`; the table is never
         // dereferenced, but we still need a valid (non-null) pointer.
         static const RpcTypeOps* const kTable[1] = { nullptr };
@@ -208,7 +208,7 @@ public:
                       RpcDestroyFn destroy_user_fn,
                       const RpcTypeOps* const* arg_types,
                       fl::size arg_count,
-                      const RpcTypeOps* result_type) FL_NOEXCEPT
+                      const RpcTypeOps* result_type) FL_NO_EXCEPT
         : mUserFn(user_fn),
           mTrampoline(trampoline),
           mDestroyUserFn(destroy_user_fn),
@@ -216,14 +216,14 @@ public:
           mArgCount(arg_count),
           mResultType(result_type) {}
 
-    ~RuntimeRpcBinding() FL_NOEXCEPT override {
+    ~RuntimeRpcBinding() FL_NO_EXCEPT override {
         if (mUserFn && mDestroyUserFn) mDestroyUserFn(mUserFn);
     }
 
-    RuntimeRpcBinding(const RuntimeRpcBinding&) FL_NOEXCEPT = delete;
-    RuntimeRpcBinding& operator=(const RuntimeRpcBinding&) FL_NOEXCEPT = delete;
+    RuntimeRpcBinding(const RuntimeRpcBinding&) FL_NO_EXCEPT = delete;
+    RuntimeRpcBinding& operator=(const RuntimeRpcBinding&) FL_NO_EXCEPT = delete;
 
-    fl::tuple<TypeConversionResult, json> invoke(const json& jsonArgs) FL_NOEXCEPT override;
+    fl::tuple<TypeConversionResult, json> invoke(const json& jsonArgs) FL_NO_EXCEPT override;
 
 private:
     void* mUserFn;
@@ -244,7 +244,7 @@ private:
 // invokeWithReturn body) is gone.
 
 template <typename R, typename... Args>
-fl::shared_ptr<RuntimeRpcBinding> makeRuntimeRpcBinding(fl::function<R(Args...)> fn) FL_NOEXCEPT {
+fl::shared_ptr<RuntimeRpcBinding> makeRuntimeRpcBinding(fl::function<R(Args...)> fn) FL_NO_EXCEPT {
     using Helper = runtime_rpc::TrampolineHelper<R, Args...>;
     using FunctionType = fl::function<R(Args...)>;
     // user_fn is owned by the RuntimeRpcBinding via mDestroyUserFn (see Helper::destroy).

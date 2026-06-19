@@ -45,7 +45,7 @@ struct is_bitcast_compatible<T*> {
 // Uses memcpy which is the standard-compliant way to type-pun safely.
 // Compilers recognize this pattern and optimize it to a single register move.
 template <typename To, typename From>
-To bit_cast(const From& from) FL_NOEXCEPT {
+To bit_cast(const From& from) FL_NO_EXCEPT {
     FL_STATIC_ASSERT(sizeof(To) == sizeof(From), "bit_cast: types must have the same size");
     FL_STATIC_ASSERT(is_bitcast_compatible<To>::value, "bit_cast: destination type must be bitcast compatible");
     FL_STATIC_ASSERT(is_bitcast_compatible<From>::value, "bit_cast: source type must be bitcast compatible");
@@ -57,23 +57,23 @@ To bit_cast(const From& from) FL_NOEXCEPT {
 
 // Overload for pointer types - converts storage pointer to typed pointer safely
 template <typename To>
-To* bit_cast_ptr(void* storage) FL_NOEXCEPT {
+To* bit_cast_ptr(void* storage) FL_NO_EXCEPT {
     return bit_cast<To*>(storage);
 }
 
 template <typename To>
-const To* bit_cast_ptr(const void* storage) FL_NOEXCEPT {
+const To* bit_cast_ptr(const void* storage) FL_NO_EXCEPT {
     return bit_cast<const To*>(storage);
 }
 
 // Additional utility for uptr conversions (common pattern in the codebase)
 template <typename T>
-uptr ptr_to_int(T* ptr) FL_NOEXCEPT {
+uptr ptr_to_int(T* ptr) FL_NO_EXCEPT {
     return bit_cast<uptr>(ptr);
 }
 
 template <typename T>
-T* int_to_ptr(uptr value) FL_NOEXCEPT {
+T* int_to_ptr(uptr value) FL_NO_EXCEPT {
     return bit_cast<T*>(value);
 }
 
@@ -85,7 +85,7 @@ T* int_to_ptr(uptr value) FL_NOEXCEPT {
 // safety guarantees of bit_cast against strict aliasing violations.
 
 template <typename To, typename From>
-To reinterpret_cast_(const From& from) FL_NOEXCEPT { // ok reinterpret cast - defining the wrapper
+To reinterpret_cast_(const From& from) FL_NO_EXCEPT { // ok reinterpret cast - defining the wrapper
     return bit_cast<To>(from);
 }
 

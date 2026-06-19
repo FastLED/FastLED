@@ -7,13 +7,13 @@
 
 // ESP8266 ROM UART functions
 extern "C" {
-    void ets_putc(char c) FL_NOEXCEPT;
+    void ets_putc(char c) FL_NO_EXCEPT;
 }
 
 namespace fl {
 namespace platforms {
 
-void print(const char* str) FL_NOEXCEPT {
+void print(const char* str) FL_NO_EXCEPT {
     if (!str)
         return;
 
@@ -23,7 +23,7 @@ void print(const char* str) FL_NOEXCEPT {
     }
 }
 
-void println(const char* str) FL_NOEXCEPT {
+void println(const char* str) FL_NO_EXCEPT {
     if (!str)
         return;
 
@@ -35,17 +35,17 @@ void println(const char* str) FL_NOEXCEPT {
 }
 
 // Input functions
-int available() FL_NOEXCEPT {
+int available() FL_NO_EXCEPT {
     // ESP8266 ROM functions don't provide input availability checking
     return 0;
 }
 
-int read() FL_NOEXCEPT {
+int read() FL_NO_EXCEPT {
     // ESP8266 ROM functions don't provide convenient input reading
     return -1;
 }
 
-int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
+int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
     (void)delimiter; (void)out; (void)outLen;
     return -1;  // Not supported on ESP8266 (non-Arduino) builds
 }

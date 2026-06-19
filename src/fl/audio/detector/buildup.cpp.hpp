@@ -35,7 +35,7 @@ BuildupDetector::BuildupDetector()
     }
 }
 
-BuildupDetector::~BuildupDetector() FL_NOEXCEPT = default;
+BuildupDetector::~BuildupDetector() FL_NO_EXCEPT = default;
 
 void BuildupDetector::update(shared_ptr<Context> context) {
     if (!context) {

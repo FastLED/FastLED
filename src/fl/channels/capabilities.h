@@ -48,23 +48,23 @@ struct FreqRange {
     fl::u32 min_hz;
     fl::u32 max_hz;
 
-    static constexpr FreqRange any() FL_NOEXCEPT {
+    static constexpr FreqRange any() FL_NO_EXCEPT {
         return {0u, 0xFFFFFFFFu};
     }
-    static constexpr FreqRange exactly(fl::u32 hz) FL_NOEXCEPT {
+    static constexpr FreqRange exactly(fl::u32 hz) FL_NO_EXCEPT {
         return {hz, hz};
     }
-    static constexpr FreqRange atLeast(fl::u32 hz) FL_NOEXCEPT {
+    static constexpr FreqRange atLeast(fl::u32 hz) FL_NO_EXCEPT {
         return {hz, 0xFFFFFFFFu};
     }
-    static constexpr FreqRange atMost(fl::u32 hz) FL_NOEXCEPT {
+    static constexpr FreqRange atMost(fl::u32 hz) FL_NO_EXCEPT {
         return {0u, hz};
     }
 
-    constexpr bool isUnspecified() const FL_NOEXCEPT {
+    constexpr bool isUnspecified() const FL_NO_EXCEPT {
         return min_hz == 0u && max_hz == 0xFFFFFFFFu;
     }
-    constexpr bool contains(fl::u32 hz) const FL_NOEXCEPT {
+    constexpr bool contains(fl::u32 hz) const FL_NO_EXCEPT {
         return hz >= min_hz && hz <= max_hz;
     }
 };
@@ -73,23 +73,23 @@ struct NanosRange {
     fl::u32 min_ns;
     fl::u32 max_ns;
 
-    static constexpr NanosRange any() FL_NOEXCEPT {
+    static constexpr NanosRange any() FL_NO_EXCEPT {
         return {0u, 0xFFFFFFFFu};
     }
-    static constexpr NanosRange exactly(fl::u32 ns) FL_NOEXCEPT {
+    static constexpr NanosRange exactly(fl::u32 ns) FL_NO_EXCEPT {
         return {ns, ns};
     }
-    static constexpr NanosRange atLeast(fl::u32 ns) FL_NOEXCEPT {
+    static constexpr NanosRange atLeast(fl::u32 ns) FL_NO_EXCEPT {
         return {ns, 0xFFFFFFFFu};
     }
-    static constexpr NanosRange atMost(fl::u32 ns) FL_NOEXCEPT {
+    static constexpr NanosRange atMost(fl::u32 ns) FL_NO_EXCEPT {
         return {0u, ns};
     }
 
-    constexpr bool isUnspecified() const FL_NOEXCEPT {
+    constexpr bool isUnspecified() const FL_NO_EXCEPT {
         return min_ns == 0u && max_ns == 0xFFFFFFFFu;
     }
-    constexpr bool contains(fl::u32 ns) const FL_NOEXCEPT {
+    constexpr bool contains(fl::u32 ns) const FL_NO_EXCEPT {
         return ns >= min_ns && ns <= max_ns;
     }
 };
@@ -122,20 +122,20 @@ struct PinSet {
     PinSetKind kind;
     PinBitset pins;  ///< only meaningful when kind == Allowlist
 
-    constexpr PinSet() FL_NOEXCEPT : kind(PinSetKind::None), pins() {}
-    constexpr PinSet(PinSetKind k) FL_NOEXCEPT : kind(k), pins() {}
-    constexpr PinSet(PinSetKind k, const PinBitset& b) FL_NOEXCEPT : kind(k), pins(b) {}
+    constexpr PinSet() FL_NO_EXCEPT : kind(PinSetKind::None), pins() {}
+    constexpr PinSet(PinSetKind k) FL_NO_EXCEPT : kind(k), pins() {}
+    constexpr PinSet(PinSetKind k, const PinBitset& b) FL_NO_EXCEPT : kind(k), pins(b) {}
 
     /// Factory: slot is not applicable.
-    static constexpr PinSet none() FL_NOEXCEPT { return PinSet(PinSetKind::None); }
+    static constexpr PinSet none() FL_NO_EXCEPT { return PinSet(PinSetKind::None); }
 
     /// Factory: any GPIO output pin in [0, kPinSetCapacity).
-    static constexpr PinSet anyOutput() FL_NOEXCEPT { return PinSet(PinSetKind::AnyOutputPin); }
+    static constexpr PinSet anyOutput() FL_NO_EXCEPT { return PinSet(PinSetKind::AnyOutputPin); }
 
     /// Factory: allowlist of pins, constructed from a static array.
     /// Pin numbers >= kPinSetCapacity are ignored.
     template <fl::size N>
-    static PinSet allowlist(const fl::i16 (&arr)[N]) FL_NOEXCEPT {
+    static PinSet allowlist(const fl::i16 (&arr)[N]) FL_NO_EXCEPT {
         PinSet ps(PinSetKind::Allowlist);
         for (fl::size i = 0; i < N; ++i) {
             if (arr[i] >= 0 && static_cast<fl::u32>(arr[i]) < kPinSetCapacity) {
@@ -147,17 +147,17 @@ struct PinSet {
 
     /// Factory: allowlist with a single pin (the "fixed pin" idiom).
     /// Definition in capabilities.cpp.hpp.
-    static PinSet fixed(fl::i16 pin) FL_NOEXCEPT;
+    static PinSet fixed(fl::i16 pin) FL_NO_EXCEPT;
 
     /// True iff this set accepts the given single pin.
     /// Definition in capabilities.cpp.hpp.
-    bool accepts(fl::i16 pin) const FL_NOEXCEPT;
+    bool accepts(fl::i16 pin) const FL_NO_EXCEPT;
 
     /// True iff every set bit in `request` is also accepted here.
     /// For AnyOutputPin: trivially true. For Allowlist: bitset
     /// inclusion check.
     /// Definition in capabilities.cpp.hpp.
-    bool acceptsAll(const PinBitset& request) const FL_NOEXCEPT;
+    bool acceptsAll(const PinBitset& request) const FL_NO_EXCEPT;
 };
 
 
@@ -180,10 +180,10 @@ struct ClocklessTimingCapability {
     fl::u16 max_divider;        ///< largest divider  -> coarsest tick width
     fl::u16 max_phase_ticks;    ///< counter-width cap per phase
 
-    static constexpr ClocklessTimingCapability unspecified() FL_NOEXCEPT {
+    static constexpr ClocklessTimingCapability unspecified() FL_NO_EXCEPT {
         return {0u, 0u, 0u, 0u};
     }
-    constexpr bool isUnspecified() const FL_NOEXCEPT {
+    constexpr bool isUnspecified() const FL_NO_EXCEPT {
         return base_clock_hz == 0u;
     }
 };
@@ -237,7 +237,7 @@ struct PinGroup {
     /// trivially satisfy this. Default false.
     bool pins_must_be_contiguous;
 
-    constexpr PinGroup() FL_NOEXCEPT
+    constexpr PinGroup() FL_NO_EXCEPT
         : instance_id(0)
         , protocol(Protocol::Clockless)
         , data_pins()
@@ -285,7 +285,7 @@ struct DriverCapabilities {
     } flags;
 
     /// Definition in capabilities.cpp.hpp.
-    DriverCapabilities() FL_NOEXCEPT;
+    DriverCapabilities() FL_NO_EXCEPT;
 };
 
 
@@ -304,7 +304,7 @@ struct ChipsetClocklessTiming {
     NanosRange t1h_window;
     NanosRange t1l_window;
 
-    static constexpr ChipsetClocklessTiming unspecified() FL_NOEXCEPT {
+    static constexpr ChipsetClocklessTiming unspecified() FL_NO_EXCEPT {
         return {NanosRange::any(), NanosRange::any(),
                 NanosRange::any(), NanosRange::any()};
     }
@@ -332,7 +332,7 @@ struct ChannelRequest {
     ChipsetClocklessTiming timing;          ///< unspecified/any for Spi requests
     fl::optional<fl::u32> frequency_hz;     ///< mostly SPI override
 
-    ChannelRequest() FL_NOEXCEPT
+    ChannelRequest() FL_NO_EXCEPT
         : protocol(Protocol::Clockless)
         , data_pins()
         , clock_pin(-1)
@@ -344,7 +344,7 @@ struct ChannelRequest {
     static ChannelRequest singlePin(
             Protocol p, fl::i16 data, fl::i16 clock,
             const ChipsetClocklessTiming& t = ChipsetClocklessTiming::unspecified(),
-            fl::optional<fl::u32> freq = fl::optional<fl::u32>()) FL_NOEXCEPT;
+            fl::optional<fl::u32> freq = fl::optional<fl::u32>()) FL_NO_EXCEPT;
 };
 
 
@@ -363,7 +363,7 @@ enum class HandleResult : fl::u8 {
 };
 
 /// Convenience: most call sites really want a bool.
-constexpr bool isYes(HandleResult r) FL_NOEXCEPT {
+constexpr bool isYes(HandleResult r) FL_NO_EXCEPT {
     return r == HandleResult::Yes;
 }
 

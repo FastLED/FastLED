@@ -53,20 +53,20 @@ private:
 
     /// @brief Convert WS2812 bit to SPI signal for '1' bit
     /// @return SPI byte pattern for logical '1'
-    FASTLED_FORCE_INLINE u8 spi_one() const FL_NOEXCEPT {
+    FASTLED_FORCE_INLINE u8 spi_one() const FL_NO_EXCEPT {
         return 0xF8; // 11111000 - ~0.78us high at 6.4MHz
     }
 
     /// @brief Convert WS2812 bit to SPI signal for '0' bit
     /// @return SPI byte pattern for logical '0'
-    FASTLED_FORCE_INLINE u8 spi_zero() const FL_NOEXCEPT {
+    FASTLED_FORCE_INLINE u8 spi_zero() const FL_NO_EXCEPT {
         return 0xC0; // 11000000 - ~0.31us high at 6.4MHz
     }
 
     /// @brief Convert 8-bit color value to SPI bit pattern array
     /// @param color 8-bit color channel value
     /// @param buffer Output buffer for SPI bytes (8 bytes)
-    FASTLED_FORCE_INLINE void colorToSPI(u8 color, u8* buffer) const FL_NOEXCEPT {
+    FASTLED_FORCE_INLINE void colorToSPI(u8 color, u8* buffer) const FL_NO_EXCEPT {
         // Convert each bit to SPI pattern (MSB first)
         buffer[0] = (color & 0x80) ? spi_one() : spi_zero(); // bit 7
         buffer[1] = (color & 0x40) ? spi_one() : spi_zero(); // bit 6
@@ -91,19 +91,19 @@ public:
     }
 
     /// @brief Initialize the controller
-    virtual void init() FL_NOEXCEPT override {
+    virtual void init() FL_NO_EXCEPT override {
         // Driver will be created when showPixels is first called
     }
 
     /// @brief Get maximum refresh rate
-    virtual u16 getMaxRefreshRate() const FL_NOEXCEPT override {
+    virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT override {
         return 1000; // SPI allows high refresh rates
     }
 
 protected:
     /// @brief Output pixels to LED strip using SPI acceleration
     /// @param pixels FastLED pixel controller with RGB data
-    virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NOEXCEPT override {
+    virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT override {
         // Create driver on first use
         if (!mDriver) {
             mNumLeds = pixels.size();

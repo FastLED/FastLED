@@ -28,45 +28,45 @@ void resetMockState() {
 fl::shared_ptr<ILcdSpiPeripheral> createMockPeripheral() {
     class MockWrapper : public ILcdSpiPeripheral {
       public:
-        bool initialize(const LcdSpiConfig &config) FL_NOEXCEPT override {
+        bool initialize(const LcdSpiConfig &config) FL_NO_EXCEPT override {
             return LcdSpiPeripheralMock::instance().initialize(config);
         }
-        void deinitialize() FL_NOEXCEPT override {
+        void deinitialize() FL_NO_EXCEPT override {
             LcdSpiPeripheralMock::instance().deinitialize();
         }
-        bool isInitialized() const FL_NOEXCEPT override {
+        bool isInitialized() const FL_NO_EXCEPT override {
             return LcdSpiPeripheralMock::instance().isInitialized();
         }
-        u16 *allocateBuffer(size_t size_bytes) FL_NOEXCEPT override {
+        u16 *allocateBuffer(size_t size_bytes) FL_NO_EXCEPT override {
             return LcdSpiPeripheralMock::instance().allocateBuffer(size_bytes);
         }
-        void freeBuffer(u16 *buffer) FL_NOEXCEPT override {
+        void freeBuffer(u16 *buffer) FL_NO_EXCEPT override {
             LcdSpiPeripheralMock::instance().freeBuffer(buffer);
         }
         bool transmit(const u16 *buffer,
-                      size_t size_bytes) FL_NOEXCEPT override {
+                      size_t size_bytes) FL_NO_EXCEPT override {
             return LcdSpiPeripheralMock::instance().transmit(buffer,
                                                              size_bytes);
         }
-        bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT override {
+        bool waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT override {
             return LcdSpiPeripheralMock::instance().waitTransmitDone(
                 timeout_ms);
         }
-        bool isBusy() const FL_NOEXCEPT override {
+        bool isBusy() const FL_NO_EXCEPT override {
             return LcdSpiPeripheralMock::instance().isBusy();
         }
         bool registerTransmitCallback(void *callback,
-                                      void *user_ctx) FL_NOEXCEPT override {
+                                      void *user_ctx) FL_NO_EXCEPT override {
             return LcdSpiPeripheralMock::instance().registerTransmitCallback(
                 callback, user_ctx);
         }
-        const LcdSpiConfig &getConfig() const FL_NOEXCEPT override {
+        const LcdSpiConfig &getConfig() const FL_NO_EXCEPT override {
             return LcdSpiPeripheralMock::instance().getConfig();
         }
-        u64 getMicroseconds() FL_NOEXCEPT override {
+        u64 getMicroseconds() FL_NO_EXCEPT override {
             return LcdSpiPeripheralMock::instance().getMicroseconds();
         }
-        void delay(u32 ms) FL_NOEXCEPT override {
+        void delay(u32 ms) FL_NO_EXCEPT override {
             LcdSpiPeripheralMock::instance().delay(ms);
         }
     };

@@ -22,7 +22,7 @@ namespace fl {
 JsonConsole::JsonConsole(ReadAvailableCallback ReadAvailableCallback, 
                          ReadCallback readCallback, 
                          WriteCallback writeCallback)
- FL_NOEXCEPT : mReadAvailableCallback(ReadAvailableCallback)
+ FL_NO_EXCEPT : mReadAvailableCallback(ReadAvailableCallback)
     , mReadCallback(readCallback)
     , mWriteCallback(writeCallback) {
 }
@@ -46,7 +46,7 @@ JsonConsole::~JsonConsole() {
     // with other components. The manager will handle cleanup automatically.
 }
 
-void JsonConsole::init() FL_NOEXCEPT {
+void JsonConsole::init() FL_NO_EXCEPT {
     // Set up JsonUI handlers - we capture component data but don't send it anywhere
     mUpdateEngineState = setJsonUiHandlers([this](const char* jsonStr) {
         this->processJsonFromUI(jsonStr);
@@ -60,7 +60,7 @@ void JsonConsole::init() FL_NOEXCEPT {
     writeOutput("JsonConsole initialized. Type 'help' for commands.");
 }
 
-void JsonConsole::update() FL_NOEXCEPT {
+void JsonConsole::update() FL_NO_EXCEPT {
     if (!mUpdateEngineState) {
         return; // Not initialized
     }
@@ -68,7 +68,7 @@ void JsonConsole::update() FL_NOEXCEPT {
     readInputFromSerial();
 }
 
-bool JsonConsole::executeCommand(const fl::string& command) FL_NOEXCEPT {
+bool JsonConsole::executeCommand(const fl::string& command) FL_NO_EXCEPT {
     FL_WARN_F("JsonConsole::executeCommand called with: '%s'", command.c_str());
     
     if (command.empty()) {
@@ -112,7 +112,7 @@ bool JsonConsole::executeCommand(const fl::string& command) FL_NOEXCEPT {
     return true;
 }
 
-void JsonConsole::processJsonFromUI(const char* jsonStr) FL_NOEXCEPT {
+void JsonConsole::processJsonFromUI(const char* jsonStr) FL_NO_EXCEPT {
     if (!jsonStr) {
         return;
     }
@@ -121,7 +121,7 @@ void JsonConsole::processJsonFromUI(const char* jsonStr) FL_NOEXCEPT {
     updateComponentMapping(jsonStr);
 }
 
-void JsonConsole::readInputFromSerial() FL_NOEXCEPT {
+void JsonConsole::readInputFromSerial() FL_NO_EXCEPT {
     if (!mReadAvailableCallback || !mReadCallback) {
         return;
     }
@@ -152,7 +152,7 @@ void JsonConsole::readInputFromSerial() FL_NOEXCEPT {
     }
 }
 
-void JsonConsole::parseCommand(const fl::string& command) FL_NOEXCEPT {
+void JsonConsole::parseCommand(const fl::string& command) FL_NO_EXCEPT {
     FL_WARN_F("JsonConsole::parseCommand: Parsing command '%s'", command.c_str());
     
     // Look for pattern: "name: value"
@@ -213,7 +213,7 @@ void JsonConsole::parseCommand(const fl::string& command) FL_NOEXCEPT {
     }
 }
 
-bool JsonConsole::setSliderValue(const fl::string& name, float value) FL_NOEXCEPT {
+bool JsonConsole::setSliderValue(const fl::string& name, float value) FL_NO_EXCEPT {
     FL_WARN_F("JsonConsole::setSliderValue: Looking for component '%s' with value %s", name.c_str(), value);
     FL_WARN_F("JsonConsole: Component mapping size: %s", mComponentNameToId.size());
     for (const auto& pair : mComponentNameToId) {
@@ -277,7 +277,7 @@ bool JsonConsole::setSliderValue(const fl::string& name, float value) FL_NOEXCEP
     return true;
 }
 
-void JsonConsole::updateComponentMapping(const char* jsonStr) FL_NOEXCEPT {
+void JsonConsole::updateComponentMapping(const char* jsonStr) FL_NO_EXCEPT {
     if (!jsonStr) {
         return;
     }
@@ -309,13 +309,13 @@ void JsonConsole::updateComponentMapping(const char* jsonStr) FL_NOEXCEPT {
     }
 }
 
-void JsonConsole::writeOutput(const fl::string& message) FL_NOEXCEPT {
+void JsonConsole::writeOutput(const fl::string& message) FL_NO_EXCEPT {
     if (mWriteCallback) {
         mWriteCallback(message.c_str());
     }
 }
 
-void JsonConsole::dump(fl::sstream& out) FL_NOEXCEPT {
+void JsonConsole::dump(fl::sstream& out) FL_NO_EXCEPT {
     out << "=== JsonConsole State Dump ===\n";
     
     // Initialization status

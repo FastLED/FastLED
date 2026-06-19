@@ -30,14 +30,14 @@
 
 /// Forward declaration
 template<fl::cycle_t CYCLES>
-inline void delaycycles() FL_NOEXCEPT;
+inline void delaycycles() FL_NO_EXCEPT;
 
 /// AVR-specific worker template for cycle delays
 /// This template uses a loop to generate the desired cycle count
 /// @tparam LOOP number of loop iterations (each iteration is 3 cycles)
 /// @tparam PAD additional padding cycles (0-2)
 template<int LOOP, fl::cycle_t PAD>
-inline void _delaycycles_avr() FL_NOEXCEPT {
+inline void _delaycycles_avr() FL_NO_EXCEPT {
   delaycycles<PAD>();
   // The loop below generates 3 cycles * LOOP:
   // - LDI (1 cycle) loads the counter
@@ -49,14 +49,14 @@ inline void _delaycycles_avr() FL_NOEXCEPT {
       "    BRNE L_%=\n"
       : /* no outputs */
       : "M"(LOOP)
-      : "r16") FL_NOEXCEPT;
+      : "r16") FL_NO_EXCEPT;
 }
 
 /// Delay for N clock cycles (AVR implementation)
 /// The base case specializations (0, 1, 2) are defined in fl/delay.cpp
 /// to ensure they are compiled once and available to the linker.
 template<fl::cycle_t CYCLES>
-FASTLED_FORCE_INLINE void delaycycles() FL_NOEXCEPT {
+FASTLED_FORCE_INLINE void delaycycles() FL_NO_EXCEPT {
   _delaycycles_avr<CYCLES / 3, CYCLES % 3>();
 }
 

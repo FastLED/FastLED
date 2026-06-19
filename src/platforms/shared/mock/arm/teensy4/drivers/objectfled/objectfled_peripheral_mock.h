@@ -26,19 +26,19 @@ namespace fl {
 class ObjectFLEDInstanceMock : public IObjectFLEDInstance {
 public:
     ObjectFLEDInstanceMock(u32 totalBytes)
- FL_NOEXCEPT : mBuffer(totalBytes, 0), mShowCount(0) {}
+ FL_NO_EXCEPT : mBuffer(totalBytes, 0), mShowCount(0) {}
 
     ~ObjectFLEDInstanceMock() override = default;
 
-    u8* getFrameBuffer() FL_NOEXCEPT override {
+    u8* getFrameBuffer() FL_NO_EXCEPT override {
         return mBuffer.data();
     }
 
-    u32 getFrameBufferSize() const FL_NOEXCEPT override {
+    u32 getFrameBufferSize() const FL_NO_EXCEPT override {
         return static_cast<u32>(mBuffer.size());
     }
 
-    void show() FL_NOEXCEPT override {
+    void show() FL_NO_EXCEPT override {
         ++mShowCount;
     }
 
@@ -47,10 +47,10 @@ public:
     // =========================================================================
 
     /// @brief Get number of show() calls
-    u32 getShowCount() const FL_NOEXCEPT { return mShowCount; }
+    u32 getShowCount() const FL_NO_EXCEPT { return mShowCount; }
 
     /// @brief Get raw buffer contents (written by channel engine before show())
-    const fl::vector<u8>& getRawBuffer() const FL_NOEXCEPT { return mBuffer; }
+    const fl::vector<u8>& getRawBuffer() const FL_NO_EXCEPT { return mBuffer; }
 
 private:
     fl::vector<u8> mBuffer;
@@ -72,14 +72,14 @@ public:
         u32 t1_ns, t2_ns, t3_ns, reset_us;
     };
 
-    ObjectFLEDPeripheralMock() FL_NOEXCEPT : mForceCreateFailure(false) {}
+    ObjectFLEDPeripheralMock() FL_NO_EXCEPT : mForceCreateFailure(false) {}
     ~ObjectFLEDPeripheralMock() override = default;
 
     // =========================================================================
     // IObjectFLEDPeripheral Interface
     // =========================================================================
 
-    ObjectFLEDPinResult validatePin(u8 pin) const FL_NOEXCEPT override {
+    ObjectFLEDPinResult validatePin(u8 pin) const FL_NO_EXCEPT override {
         for (auto& p : mInvalidPins) {
             if (p.pin == pin) {
                 return {false, p.message};
@@ -90,7 +90,7 @@ public:
 
     fl::unique_ptr<IObjectFLEDInstance> createInstance(
             int totalLeds, bool isRgbw, u32 numPins, const u8* pinList,
-            u32 t1_ns, u32 t2_ns, u32 t3_ns, u32 reset_us) FL_NOEXCEPT override {
+            u32 t1_ns, u32 t2_ns, u32 t3_ns, u32 reset_us) FL_NO_EXCEPT override {
 
         // Record the call
         CreateRecord record;
@@ -121,33 +121,33 @@ public:
     // =========================================================================
 
     /// @brief Mark a pin as invalid (for error path testing)
-    void setInvalidPin(u8 pin, const char* message = "Pin invalid (mock)") FL_NOEXCEPT {
+    void setInvalidPin(u8 pin, const char* message = "Pin invalid (mock)") FL_NO_EXCEPT {
         mInvalidPins.push_back({pin, message});
     }
 
     /// @brief Clear all invalid pin settings
-    void clearInvalidPins() FL_NOEXCEPT { mInvalidPins.clear(); }
+    void clearInvalidPins() FL_NO_EXCEPT { mInvalidPins.clear(); }
 
     /// @brief Force createInstance() to return nullptr
-    void setCreateFailure(bool fail) FL_NOEXCEPT { mForceCreateFailure = fail; }
+    void setCreateFailure(bool fail) FL_NO_EXCEPT { mForceCreateFailure = fail; }
 
     /// @brief Get total number of createInstance() calls
-    size_t getCreateCount() const FL_NOEXCEPT { return mCreateRecords.size(); }
+    size_t getCreateCount() const FL_NO_EXCEPT { return mCreateRecords.size(); }
 
     /// @brief Get all createInstance() call records
-    const fl::vector<CreateRecord>& getCreateRecords() const FL_NOEXCEPT { return mCreateRecords; }
+    const fl::vector<CreateRecord>& getCreateRecords() const FL_NO_EXCEPT { return mCreateRecords; }
 
     /// @brief Get the most recent createInstance() record
-    const CreateRecord* getLastCreateRecord() const FL_NOEXCEPT {
+    const CreateRecord* getLastCreateRecord() const FL_NO_EXCEPT {
         if (mCreateRecords.empty()) return nullptr;
         return &mCreateRecords[mCreateRecords.size() - 1];
     }
 
     /// @brief Get the last created instance (raw pointer, not owned)
-    ObjectFLEDInstanceMock* getLastInstance() const FL_NOEXCEPT { return mLastInstance; }
+    ObjectFLEDInstanceMock* getLastInstance() const FL_NO_EXCEPT { return mLastInstance; }
 
     /// @brief Reset all mock state
-    void reset() FL_NOEXCEPT {
+    void reset() FL_NO_EXCEPT {
         mInvalidPins.clear();
         mCreateRecords.clear();
         mLastInstance = nullptr;

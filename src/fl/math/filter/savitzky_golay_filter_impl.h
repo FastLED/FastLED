@@ -15,7 +15,7 @@ class SavitzkyGolayFilterImpl {
     FL_STATIC_ASSERT(N == 0 || (N % 2 == 1),
                   "SavitzkyGolayFilter: N must be odd for symmetric polynomial fit");
   public:
-    SavitzkyGolayFilterImpl() FL_NOEXCEPT : mLastValue(T(0)) {}
+    SavitzkyGolayFilterImpl() FL_NO_EXCEPT : mLastValue(T(0)) {}
     explicit SavitzkyGolayFilterImpl(fl::size capacity)
         : mBuf(capacity), mLastValue(T(0)) {
         if (capacity % 2 == 0) {

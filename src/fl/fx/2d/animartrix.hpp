@@ -218,7 +218,7 @@ class Animartrix : public Fx2d {
         // cross-DLL static initialization order issues on Windows.
     }
 
-    Animartrix(const Animartrix &) FL_NOEXCEPT = delete;
+    Animartrix(const Animartrix &) FL_NO_EXCEPT = delete;
 
     void draw(DrawContext ctx) override {
         if (!mXyMap.isLUT()) {

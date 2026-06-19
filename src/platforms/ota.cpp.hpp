@@ -30,53 +30,53 @@ public:
     NullOTA() = default;
     ~NullOTA() override = default;
 
-    bool beginWiFi(const char*, const char*, const char*, const char*) FL_NOEXCEPT override {
+    bool beginWiFi(const char*, const char*, const char*, const char*) FL_NO_EXCEPT override {
         FL_WARN_F("OTA not supported on this platform");
         return false;  // Not supported
     }
 
-    bool begin(const char*, const char*) FL_NOEXCEPT override {
+    bool begin(const char*, const char*) FL_NO_EXCEPT override {
         FL_WARN_F("OTA not supported on this platform");
         return false;  // Not supported
     }
 
-    bool enableApFallback(const char*, const char*) FL_NOEXCEPT override {
+    bool enableApFallback(const char*, const char*) FL_NO_EXCEPT override {
         FL_WARN_F("OTA not supported on this platform");
         return false;  // Not supported
     }
 
-    void onProgress(fl::function<void(size_t, size_t)>) FL_NOEXCEPT override {
+    void onProgress(fl::function<void(size_t, size_t)>) FL_NO_EXCEPT override {
         FL_WARN_F("OTA not supported on this platform");
         // No-op
     }
 
-    void onError(fl::function<void(const char*)>) FL_NOEXCEPT override {
+    void onError(fl::function<void(const char*)>) FL_NO_EXCEPT override {
         FL_WARN_F("OTA not supported on this platform");
         // No-op
     }
 
-    void onState(fl::function<void(u8)>) FL_NOEXCEPT override {
+    void onState(fl::function<void(u8)>) FL_NO_EXCEPT override {
         FL_WARN_F("OTA not supported on this platform");
         // No-op
     }
 
-    void onBeforeReboot(void (*callback)()) FL_NOEXCEPT override {
+    void onBeforeReboot(void (*callback)()) FL_NO_EXCEPT override {
         FL_WARN_F("OTA not supported on this platform");
         // No-op
         (void)callback;  // Suppress unused parameter warning
     }
 
-    void poll() FL_NOEXCEPT override {
+    void poll() FL_NO_EXCEPT override {
         FL_WARN_F("OTA not supported on this platform");
         // No-op
     }
 
-    bool isConnected() const FL_NOEXCEPT override {
+    bool isConnected() const FL_NO_EXCEPT override {
         FL_WARN_F("OTA not supported on this platform");
         return false;  // Not supported
     }
 
-    u8 getFailedServices() const FL_NOEXCEPT override {
+    u8 getFailedServices() const FL_NO_EXCEPT override {
         return 0;  // No services on unsupported platforms
     }
 };
@@ -88,7 +88,7 @@ public:
 // Guarded out when a platform-specific implementation exists (e.g., ESP32).
 // Unity builds place both in the same TU, so we use conditional compilation.
 #if !FL_OTA_HAS_PLATFORM_IMPL
-fl::shared_ptr<IOTA> platform_create_ota() FL_NOEXCEPT {
+fl::shared_ptr<IOTA> platform_create_ota() FL_NO_EXCEPT {
     return fl::make_shared<NullOTA>();
 }
 #endif
@@ -97,7 +97,7 @@ fl::shared_ptr<IOTA> platform_create_ota() FL_NOEXCEPT {
 // Factory Method Implementation
 // ============================================================================
 
-fl::shared_ptr<IOTA> IOTA::create() FL_NOEXCEPT {
+fl::shared_ptr<IOTA> IOTA::create() FL_NO_EXCEPT {
     return platform_create_ota();
 }
 

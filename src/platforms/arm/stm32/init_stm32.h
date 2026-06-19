@@ -29,7 +29,7 @@ namespace platforms {
 /// multiple times (subsequent calls are no-ops).
 ///
 /// @note Implementation is in src/platforms/arm/stm32/init_stm32.cpp
-void init() FL_NOEXCEPT;
+void init() FL_NO_EXCEPT;
 
 } // namespace platforms
 } // namespace fl

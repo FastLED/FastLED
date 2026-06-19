@@ -22,5 +22,5 @@
     #include "fl/stl/stdint.h"
     #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
-    inline void *operator new(fl::size, void *ptr) FL_NOEXCEPT { return ptr; }
+    inline void *operator new(fl::size, void *ptr) FL_NO_EXCEPT { return ptr; }
 #endif

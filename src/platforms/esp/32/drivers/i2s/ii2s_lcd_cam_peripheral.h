@@ -62,7 +62,7 @@ struct I2sLcdCamConfig {
     bool use_psram;                         ///< Allocate buffers in PSRAM
 
     /// @brief Default constructor
-    I2sLcdCamConfig() FL_NOEXCEPT
+    I2sLcdCamConfig() FL_NO_EXCEPT
         : data_gpios(),
           num_lanes(0),
           pclk_hz(0),
@@ -75,7 +75,7 @@ struct I2sLcdCamConfig {
     }
 
     /// @brief Constructor with mandatory parameters
-    I2sLcdCamConfig(int lanes, u32 freq, size_t max_bytes) FL_NOEXCEPT
+    I2sLcdCamConfig(int lanes, u32 freq, size_t max_bytes) FL_NO_EXCEPT
         : data_gpios(),
           num_lanes(lanes),
           pclk_hz(freq),
@@ -142,16 +142,16 @@ public:
     /// - Creates panel IO with PCLK frequency
     /// - Registers internal callback
     /// - Allocates hardware resources
-    virtual bool initialize(const I2sLcdCamConfig& config) FL_NOEXCEPT = 0;
+    virtual bool initialize(const I2sLcdCamConfig& config) FL_NO_EXCEPT = 0;
 
     /// @brief Shutdown and release all resources
     ///
     /// Maps to ESP-IDF: esp_lcd_panel_io_del() + esp_lcd_del_i80_bus()
-    virtual void deinitialize() FL_NOEXCEPT = 0;
+    virtual void deinitialize() FL_NO_EXCEPT = 0;
 
     /// @brief Check if peripheral is initialized
     /// @return true if initialized, false otherwise
-    virtual bool isInitialized() const FL_NOEXCEPT = 0;
+    virtual bool isInitialized() const FL_NO_EXCEPT = 0;
 
     //=========================================================================
     // Buffer Management
@@ -167,13 +167,13 @@ public:
     /// - Is 64-byte aligned (PSRAM alignment requirement)
     /// - Is DMA-capable and in PSRAM
     /// - Must be freed via freeBuffer()
-    virtual u16* allocateBuffer(size_t size_bytes) FL_NOEXCEPT = 0;
+    virtual u16* allocateBuffer(size_t size_bytes) FL_NO_EXCEPT = 0;
 
     /// @brief Free buffer allocated via allocateBuffer()
     /// @param buffer Buffer pointer (nullptr is safe, no-op)
     ///
     /// Maps to ESP-IDF: heap_caps_free()
-    virtual void freeBuffer(u16* buffer) FL_NOEXCEPT = 0;
+    virtual void freeBuffer(u16* buffer) FL_NO_EXCEPT = 0;
 
     //=========================================================================
     // Transmission Methods
@@ -188,16 +188,16 @@ public:
     ///
     /// This method queues a DMA transfer of the buffer.
     /// The buffer must remain valid until the transfer completes (callback fires).
-    virtual bool transmit(const u16* buffer, size_t size_bytes) FL_NOEXCEPT = 0;
+    virtual bool transmit(const u16* buffer, size_t size_bytes) FL_NO_EXCEPT = 0;
 
     /// @brief Wait for all pending transmissions to complete
     /// @param timeout_ms Timeout in milliseconds (0 = non-blocking poll)
     /// @return true if complete, false on timeout
-    virtual bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT = 0;
+    virtual bool waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT = 0;
 
     /// @brief Check if a transmission is in progress
     /// @return true if busy, false if idle
-    virtual bool isBusy() const FL_NOEXCEPT = 0;
+    virtual bool isBusy() const FL_NO_EXCEPT = 0;
 
     //=========================================================================
     // Callback Registration
@@ -216,7 +216,7 @@ public:
     /// The callback:
     /// - Runs in ISR context (MUST be ISR-safe)
     /// - Returns true if high-priority task woken, false otherwise
-    virtual bool registerTransmitCallback(void* callback, void* user_ctx) FL_NOEXCEPT = 0;
+    virtual bool registerTransmitCallback(void* callback, void* user_ctx) FL_NO_EXCEPT = 0;
 
     //=========================================================================
     // State Inspection
@@ -224,7 +224,7 @@ public:
 
     /// @brief Get current configuration
     /// @return Reference to configuration
-    virtual const I2sLcdCamConfig& getConfig() const FL_NOEXCEPT = 0;
+    virtual const I2sLcdCamConfig& getConfig() const FL_NO_EXCEPT = 0;
 
     //=========================================================================
     // Platform Utilities
@@ -232,11 +232,11 @@ public:
 
     /// @brief Get current timestamp in microseconds
     /// @return Current timestamp (monotonic clock)
-    virtual u64 getMicroseconds() FL_NOEXCEPT = 0;
+    virtual u64 getMicroseconds() FL_NO_EXCEPT = 0;
 
     /// @brief Portable delay
     /// @param ms Delay duration in milliseconds
-    virtual void delay(u32 ms) FL_NOEXCEPT = 0;
+    virtual void delay(u32 ms) FL_NO_EXCEPT = 0;
 };
 
 } // namespace detail

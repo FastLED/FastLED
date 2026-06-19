@@ -22,7 +22,7 @@ static fl::mutex& global_interner_mutex() {
 
 StringInterner::StringInterner() {}
 
-StringInterner::~StringInterner() FL_NOEXCEPT {
+StringInterner::~StringInterner() FL_NO_EXCEPT {
     clear();
 }
 

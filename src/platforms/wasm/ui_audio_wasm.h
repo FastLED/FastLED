@@ -23,16 +23,16 @@ class JsonUiAudioInternal;
  */
 class WasmAudioImpl {
   public:
-    WasmAudioImpl(const fl::string& name) FL_NOEXCEPT;
-    WasmAudioImpl(const fl::string& name, const fl::url& url) FL_NOEXCEPT;
-    WasmAudioImpl(const fl::string& name, const fl::audio::Config& config) FL_NOEXCEPT;
+    WasmAudioImpl(const fl::string& name) FL_NO_EXCEPT;
+    WasmAudioImpl(const fl::string& name, const fl::url& url) FL_NO_EXCEPT;
+    WasmAudioImpl(const fl::string& name, const fl::audio::Config& config) FL_NO_EXCEPT;
     ~WasmAudioImpl();
 
-    audio::Sample next() FL_NOEXCEPT;
-    bool hasNext() FL_NOEXCEPT;
+    audio::Sample next() FL_NO_EXCEPT;
+    bool hasNext() FL_NO_EXCEPT;
 
     // Group setting (used by JSON UI system)
-    void setGroup(const fl::string& groupName) FL_NOEXCEPT;
+    void setGroup(const fl::string& groupName) FL_NO_EXCEPT;
 
     // Expose underlying audio input for FastLED.add() auto-pump
     fl::shared_ptr<audio::IInput> audioInput() { return mWasmInputOwner; }

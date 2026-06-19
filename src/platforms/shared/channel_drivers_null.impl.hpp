@@ -10,7 +10,7 @@
 namespace fl {
 namespace platforms {
 
-inline void enableAllChannelDrivers() FL_NOEXCEPT {}
+inline void enableAllChannelDrivers() FL_NO_EXCEPT {}
 
 }  // namespace platforms
 }  // namespace fl

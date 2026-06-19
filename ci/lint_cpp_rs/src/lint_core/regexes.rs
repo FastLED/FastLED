@@ -315,12 +315,12 @@ fn regex_noexcept_class_def() -> &'static Regex {
 
 fn regex_noexcept_suppress_special() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
-    VALUE.get_or_init(|| Regex::new(r"(?i)//\s*(?:ok\s+no\s+FL_NOEXCEPT|nolint)\b").unwrap())
+    VALUE.get_or_init(|| Regex::new(r"(?i)//\s*(?:ok\s+no\s+FL_NO_EXCEPT|nolint)\b").unwrap())
 }
 
 fn regex_has_noexcept_special() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
-    VALUE.get_or_init(|| Regex::new(r"\b(?:FL_NOEXCEPT|noexcept)\b").unwrap())
+    VALUE.get_or_init(|| Regex::new(r"\b(?:FL_NO_EXCEPT|noexcept)\b").unwrap())
 }
 
 fn regex_destructor_decl() -> &'static Regex {
@@ -443,7 +443,7 @@ fn regex_raw_noexcept() -> &'static Regex {
 
 fn regex_define_fl_noexcept() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
-    VALUE.get_or_init(|| Regex::new(r"#\s*define\s+FL_NOEXCEPT\b").unwrap())
+    VALUE.get_or_init(|| Regex::new(r"#\s*define\s+FL_NO_EXCEPT\b").unwrap())
 }
 
 fn regex_noexcept_suppression() -> &'static Regex {

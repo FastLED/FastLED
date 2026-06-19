@@ -157,7 +157,7 @@ static constexpr AVRChipsetTimingLegacy AVR_TIMING_UCS1912 = {2, 8, 3, "UCS1912"
 /// @brief Get total bit period in FMUL units
 /// @param timing AVR chipset timing structure
 /// @return Total bit period (T1 + T2 + T3) in FMUL units
-constexpr u32 get_avr_bit_period_fmul(const AVRChipsetTimingLegacy& timing) FL_NOEXCEPT {
+constexpr u32 get_avr_bit_period_fmul(const AVRChipsetTimingLegacy& timing) FL_NO_EXCEPT {
     return timing.T1 + timing.T2 + timing.T3;
 }
 
@@ -165,7 +165,7 @@ constexpr u32 get_avr_bit_period_fmul(const AVRChipsetTimingLegacy& timing) FL_N
 /// @param fmul_cycles FMUL multiplier value
 /// @param frequency_hz CPU frequency in Hz
 /// @return Approximate nanoseconds
-constexpr u32 avr_fmul_to_ns(u32 fmul_cycles, u32 frequency_hz) FL_NOEXCEPT {
+constexpr u32 avr_fmul_to_ns(u32 fmul_cycles, u32 frequency_hz) FL_NO_EXCEPT {
     // At frequency_hz, each cycle = 1000000000 / frequency_hz nanoseconds
     // fmul represents cycles at 8MHz = 125ns per cycle
     // So: ns = fmul_cycles * 125 / FMUL = fmul_cycles * (8000000 / frequency_hz) * 125 / (frequency_hz / 8000000)

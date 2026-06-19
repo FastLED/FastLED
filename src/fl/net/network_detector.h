@@ -61,19 +61,19 @@ namespace net {
 /// wait loops (refs #2493, #2815).
 class NetworkDetector {
   public:
-    static bool isWiFiActive() FL_NOEXCEPT { return false; }
-    static bool isWiFiConnected() FL_NOEXCEPT { return false; }
-    static bool isEthernetActive() FL_NOEXCEPT { return false; }
-    static bool isEthernetConnected() FL_NOEXCEPT { return false; }
-    static bool isBluetoothActive() FL_NOEXCEPT { return false; }
-    static bool isAnyNetworkActive() FL_NOEXCEPT { return false; }
-    static bool isAnyNetworkConnected() FL_NOEXCEPT { return false; }
+    static bool isWiFiActive() FL_NO_EXCEPT { return false; }
+    static bool isWiFiConnected() FL_NO_EXCEPT { return false; }
+    static bool isEthernetActive() FL_NO_EXCEPT { return false; }
+    static bool isEthernetConnected() FL_NO_EXCEPT { return false; }
+    static bool isBluetoothActive() FL_NO_EXCEPT { return false; }
+    static bool isAnyNetworkActive() FL_NO_EXCEPT { return false; }
+    static bool isAnyNetworkConnected() FL_NO_EXCEPT { return false; }
 
   private:
-    NetworkDetector() FL_NOEXCEPT = delete;
-    ~NetworkDetector() FL_NOEXCEPT = delete;
-    NetworkDetector(const NetworkDetector &) FL_NOEXCEPT = delete;
-    NetworkDetector &operator=(const NetworkDetector &) FL_NOEXCEPT = delete;
+    NetworkDetector() FL_NO_EXCEPT = delete;
+    ~NetworkDetector() FL_NO_EXCEPT = delete;
+    NetworkDetector(const NetworkDetector &) FL_NO_EXCEPT = delete;
+    NetworkDetector &operator=(const NetworkDetector &) FL_NO_EXCEPT = delete;
 };
 
 } // namespace net

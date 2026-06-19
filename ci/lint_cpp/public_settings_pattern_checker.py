@@ -90,7 +90,7 @@ FUNCTION_POINTER_SETTERS: frozenset[str] = frozenset(
 # `(set|enable|disable|use)_[a-z]` pattern.
 _SETTER_DECL = re.compile(
     r"^"
-    r"(?:(?:inline|static|virtual|explicit|constexpr|FL_NOEXCEPT|FASTLED_FORCE_INLINE)\s+)*"  # optional qualifiers
+    r"(?:(?:inline|static|virtual|explicit|constexpr|FL_NO_EXCEPT|FASTLED_FORCE_INLINE)\s+)*"  # optional qualifiers
     r"(?:[\w:]+(?:<[^>]*>)?(?:\s*[*&])?\s+)+"  # return type (e.g. "void ", "bool ", "int ")
     r"(?P<name>(set|enable|disable|use)_[a-z][a-zA-Z0-9_]*)"  # the setter name
     r"\s*\("  # open paren

@@ -74,7 +74,7 @@ XYPath::XYPath(XYPathGeneratorPtr path, TransformFloat transform)
     mPathRenderer = fl::make_shared<XYPathRenderer>(path, transform);
 }
 
-XYPath::~XYPath() FL_NOEXCEPT {}
+XYPath::~XYPath() FL_NO_EXCEPT {}
 
 void XYPathRenderer::rasterize(
     float from, float to, int steps, XYRaster &raster,

@@ -191,23 +191,23 @@ constexpr fl::u32 evCtrlInputCapture(fl::u32 iosel, fl::u32 iocond) {
 constexpr fl::u32 kIoCondRise = 1u;
 constexpr fl::u32 kIoCondFall = 2u;
 
-inline volatile fl::u32& reg(fl::u32 base, fl::u32 offset) FL_NOEXCEPT {
+inline volatile fl::u32& reg(fl::u32 base, fl::u32 offset) FL_NO_EXCEPT {
     return *reinterpret_cast<volatile fl::u32*>(base + offset);  // ok reinterpret cast — MMIO addressing
 }
-inline volatile fl::u32& sct(fl::u32 offset) FL_NOEXCEPT { return reg(kSctBase, offset); }
-inline volatile fl::u32& sct_cap(fl::u32 n) FL_NOEXCEPT { return reg(kSctBase, kOffMATCH0    + 4u * n); }
-inline volatile fl::u32& sct_capctrl(fl::u32 n) FL_NOEXCEPT { return reg(kSctBase, kOffMATCHREL0 + 4u * n); }
-inline volatile fl::u32& sct_ev_state(fl::u32 n) FL_NOEXCEPT { return reg(kSctBase, kOffEV0_STATE + 8u * n); }
-inline volatile fl::u32& sct_ev_ctrl(fl::u32 n) FL_NOEXCEPT { return reg(kSctBase, kOffEV0_CTRL  + 8u * n); }
-inline fl::u32* sct_cap_addr(fl::u32 n) FL_NOEXCEPT {
+inline volatile fl::u32& sct(fl::u32 offset) FL_NO_EXCEPT { return reg(kSctBase, offset); }
+inline volatile fl::u32& sct_cap(fl::u32 n) FL_NO_EXCEPT { return reg(kSctBase, kOffMATCH0    + 4u * n); }
+inline volatile fl::u32& sct_capctrl(fl::u32 n) FL_NO_EXCEPT { return reg(kSctBase, kOffMATCHREL0 + 4u * n); }
+inline volatile fl::u32& sct_ev_state(fl::u32 n) FL_NO_EXCEPT { return reg(kSctBase, kOffEV0_STATE + 8u * n); }
+inline volatile fl::u32& sct_ev_ctrl(fl::u32 n) FL_NO_EXCEPT { return reg(kSctBase, kOffEV0_CTRL  + 8u * n); }
+inline fl::u32* sct_cap_addr(fl::u32 n) FL_NO_EXCEPT {
     return reinterpret_cast<fl::u32*>(kSctBase + kOffMATCH0 + 4u * n);  // ok reinterpret cast — DMA src address
 }
-inline volatile fl::u32& dma(fl::u32 offset) FL_NOEXCEPT { return reg(kDmaBase, offset); }
+inline volatile fl::u32& dma(fl::u32 offset) FL_NO_EXCEPT { return reg(kDmaBase, offset); }
 
 // Assign or unassign the user's GPIO pin to SCT input 0 (SCT0_GPIO_IN_A_I)
 // via SWM PINASSIGN6 byte[31:24]. The byte value is the encoded pin number
 // (PIO0_n -> n; PIO1_n -> 0x20+n).
-inline void swmAssignSctInput0(fl::u8 swm_byte) FL_NOEXCEPT {
+inline void swmAssignSctInput0(fl::u8 swm_byte) FL_NO_EXCEPT {
     volatile fl::u32& r = reg(kSwmBase, kOffPINASSIGN6);
     fl::u32 v = r;
     v = (v & 0x00FFFFFFu) | (static_cast<fl::u32>(swm_byte) << 24);
@@ -221,7 +221,7 @@ inline void swmAssignSctInput0(fl::u8 swm_byte) FL_NOEXCEPT {
 // extreme: a full 32-bit tick wrap at 30 MHz is ~143 s = 1.43e11 ns, which
 // fits u64 with margin. EdgeTime.ns is a 31-bit bitfield (max ~2.1 s) so
 // we saturate above that.
-inline fl::u32 ticksToNs(fl::u32 ticks) FL_NOEXCEPT {
+inline fl::u32 ticksToNs(fl::u32 ticks) FL_NO_EXCEPT {
     constexpr fl::u32 kFcpuMHz = (F_CPU + 500000u) / 1000000u;  // 30 on LPC845
     fl::u64 ns64 = (static_cast<fl::u64>(ticks) * 1000u + (kFcpuMHz / 2)) / kFcpuMHz;
     if (ns64 > 0x7FFFFFFFull) ns64 = 0x7FFFFFFFull;
@@ -285,7 +285,7 @@ FL_ALIGNAS(512) DmaDescriptor g_dma_descriptors[25];
 // count and the CFGVALID flag (UM11029 §16.6 Table 321):
 //   * While the channel is armed, residual = (N-1) - K where K = writes done
 //   * On natural completion (K == N), CFGVALID drops to 0 and residual = 0
-inline fl::u32 dmaChannelEdgeCount(fl::u32 ch) FL_NOEXCEPT {
+inline fl::u32 dmaChannelEdgeCount(fl::u32 ch) FL_NO_EXCEPT {
     const fl::u32 cfgnow = dma(kDmaChXferCfg(ch));
     const fl::u32 residual = (cfgnow >> 16) & 0x3FFu;
     const bool completed = (cfgnow & kXferCfgValid) == 0;
@@ -307,7 +307,7 @@ inline fl::u32 dmaChannelEdgeCount(fl::u32 ch) FL_NOEXCEPT {
 // Factory
 // ============================================================================
 
-fl::shared_ptr<LpcSctRxChannel> LpcSctRxChannel::create(int pin) FL_NOEXCEPT {
+fl::shared_ptr<LpcSctRxChannel> LpcSctRxChannel::create(int pin) FL_NO_EXCEPT {
     return fl::make_shared<LpcSctRxChannel>(pin);
 }
 
@@ -315,7 +315,7 @@ fl::shared_ptr<LpcSctRxChannel> LpcSctRxChannel::create(int pin) FL_NOEXCEPT {
 // Constructor
 // ============================================================================
 
-LpcSctRxChannel::LpcSctRxChannel(int pin) FL_NOEXCEPT
+LpcSctRxChannel::LpcSctRxChannel(int pin) FL_NO_EXCEPT
     : mPin(pin)
     , mFinished(false)
     , mCapacity(0)
@@ -324,7 +324,7 @@ LpcSctRxChannel::LpcSctRxChannel(int pin) FL_NOEXCEPT
     , mLastRising(false) {
 }
 
-LpcSctRxChannel::~LpcSctRxChannel() FL_NOEXCEPT {
+LpcSctRxChannel::~LpcSctRxChannel() FL_NO_EXCEPT {
 #if defined(FASTLED_LPC_RX_SCT) && defined(FL_IS_ARM_LPC_845)
     // Release the pin from SCT input 0 so a follow-up driver can claim it.
     // Leave the SCT/SWM clocks gated on — turning them off would require
@@ -348,7 +348,7 @@ LpcSctRxChannel::~LpcSctRxChannel() FL_NOEXCEPT {
 // RxDevice interface
 // ============================================================================
 
-bool LpcSctRxChannel::begin(const RxConfig& config) FL_NOEXCEPT {
+bool LpcSctRxChannel::begin(const RxConfig& config) FL_NO_EXCEPT {
     mFinished = false;
     mCapacity = config.buffer_size > 0 ? config.buffer_size : 4096u;
     mPrevTick = 0;
@@ -478,11 +478,11 @@ bool LpcSctRxChannel::begin(const RxConfig& config) FL_NOEXCEPT {
     return true;
 }
 
-bool LpcSctRxChannel::finished() const FL_NOEXCEPT {
+bool LpcSctRxChannel::finished() const FL_NO_EXCEPT {
     return mFinished;
 }
 
-fl::size LpcSctRxChannel::pollOnce() FL_NOEXCEPT {
+fl::size LpcSctRxChannel::pollOnce() FL_NO_EXCEPT {
 #if defined(FASTLED_LPC_RX_SCT) && defined(FL_IS_ARM_LPC_845)
     // Drain SCT EVFLAG into the edge buffer. For each event that has
     // fired since the last poll:
@@ -541,7 +541,7 @@ fl::size LpcSctRxChannel::pollOnce() FL_NOEXCEPT {
 #endif
 }
 
-RxWaitResult LpcSctRxChannel::wait(u32 timeout_ms) FL_NOEXCEPT {
+RxWaitResult LpcSctRxChannel::wait(u32 timeout_ms) FL_NO_EXCEPT {
 #if defined(FASTLED_LPC_RX_SCT_DMA) && defined(FL_IS_ARM_LPC_845)
     // DMA capture path. The two DMA channels are autonomously latching
     // SCT->CAP[0..1] into the rings via the SCT_DMAn trigger lines —
@@ -634,7 +634,7 @@ RxWaitResult LpcSctRxChannel::wait(u32 timeout_ms) FL_NOEXCEPT {
 // `fl/channels/rx/decode_ws2812.h` (formerly an inline copy here; see
 // FastLED #3035 Phase 3 for the consolidation history).
 fl::result<u32, DecodeError> LpcSctRxChannel::decode(const ChipsetTiming4Phase& timing,
-                                                     fl::span<u8> out) FL_NOEXCEPT {
+                                                     fl::span<u8> out) FL_NO_EXCEPT {
     if (mEdges.empty()) {
         FL_WARN_F("LpcSctRxChannel::decode: No edges recorded for pin %s", mPin);
         return fl::result<u32, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
@@ -643,7 +643,7 @@ fl::result<u32, DecodeError> LpcSctRxChannel::decode(const ChipsetTiming4Phase& 
         timing, fl::span<const EdgeTime>(mEdges), out);
 }
 
-size_t LpcSctRxChannel::getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset) FL_NOEXCEPT {
+size_t LpcSctRxChannel::getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset) FL_NO_EXCEPT {
     size_t total = mEdges.size();
     if (offset >= total) return 0;
 
@@ -656,15 +656,15 @@ size_t LpcSctRxChannel::getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset) F
     return count;
 }
 
-const char* LpcSctRxChannel::name() const FL_NOEXCEPT {
+const char* LpcSctRxChannel::name() const FL_NO_EXCEPT {
     return "LPC_SCT_CAPTURE";
 }
 
-int LpcSctRxChannel::getPin() const FL_NOEXCEPT {
+int LpcSctRxChannel::getPin() const FL_NO_EXCEPT {
     return mPin;
 }
 
-bool LpcSctRxChannel::injectEdges(fl::span<const EdgeTime> edges) FL_NOEXCEPT {
+bool LpcSctRxChannel::injectEdges(fl::span<const EdgeTime> edges) FL_NO_EXCEPT {
     for (size_t i = 0; i < edges.size(); i++) {
         mEdges.push_back(edges[i]);
     }

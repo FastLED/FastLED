@@ -26,7 +26,7 @@ struct PDMContext {
     bool valid;
 };
 
-PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NOEXCEPT {
+PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NO_EXCEPT {
     int pin_clk = config.mPinClk;
     int pin_din = config.mPinDin;
     u16 sample_rate = config.mSampleRate;
@@ -72,7 +72,7 @@ PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NOEXCEPT {
 
 size_t pdm_read_raw_samples(const PDMContext &ctx,
                             audio_sample_t (&buffer)[I2S_AUDIO_BUFFER_LEN])
-    FL_NOEXCEPT {
+    FL_NO_EXCEPT {
     size_t bytes_read = 0;
 
     esp_err_t result =
@@ -86,7 +86,7 @@ size_t pdm_read_raw_samples(const PDMContext &ctx,
     return 0;
 }
 
-void pdm_audio_destroy(const PDMContext &ctx) FL_NOEXCEPT {
+void pdm_audio_destroy(const PDMContext &ctx) FL_NO_EXCEPT {
     if (ctx.valid) {
         i2s_driver_uninstall(ctx.i2s_port);
     }

@@ -66,7 +66,7 @@ private:
 public:
     /// @brief Construct a counting semaphore with an initial count
     /// @param desired Initial count (must be >= 0 and <= LeastMaxValue)
-    explicit CountingSemaphoreSAMD(ptrdiff_t desired) FL_NOEXCEPT;
+    explicit CountingSemaphoreSAMD(ptrdiff_t desired) FL_NO_EXCEPT;
 
     ~CountingSemaphoreSAMD() = default;
 
@@ -78,15 +78,15 @@ public:
 
     /// @brief Increment the semaphore count by update
     /// @param update Number to add to the count (default 1)
-    void release(ptrdiff_t update = 1) FL_NOEXCEPT;
+    void release(ptrdiff_t update = 1) FL_NO_EXCEPT;
 
     /// @brief Decrement the semaphore count (warns if count is 0)
     /// @note In single-threaded environment, this cannot block
-    void acquire() FL_NOEXCEPT;
+    void acquire() FL_NO_EXCEPT;
 
     /// @brief Try to decrement the semaphore count without blocking
     /// @return true if successful, false if count was 0
-    bool try_acquire() FL_NOEXCEPT;
+    bool try_acquire() FL_NO_EXCEPT;
 
     /// @brief Try to acquire with a timeout (immediate return on bare metal)
     /// @tparam Rep Duration representation type
@@ -94,7 +94,7 @@ public:
     /// @param rel_time Maximum time to wait (ignored - no blocking)
     /// @return true if acquired, false if count was 0
     template<class Rep, class Period>
-    bool try_acquire_for(const std::chrono::duration<Rep, Period>& rel_time) FL_NOEXCEPT;  // okay std namespace
+    bool try_acquire_for(const std::chrono::duration<Rep, Period>& rel_time) FL_NO_EXCEPT;  // okay std namespace
 
     /// @brief Try to acquire until an absolute time point (immediate return on bare metal)
     /// @tparam Clock Clock type
@@ -102,11 +102,11 @@ public:
     /// @param abs_time Absolute time point to wait until (ignored - no blocking)
     /// @return true if acquired, false if count was 0
     template<class Clock, class Duration>
-    bool try_acquire_until(const std::chrono::time_point<Clock, Duration>& abs_time) FL_NOEXCEPT;  // okay std namespace
+    bool try_acquire_until(const std::chrono::time_point<Clock, Duration>& abs_time) FL_NO_EXCEPT;  // okay std namespace
 
     /// @brief Get the maximum value the semaphore can hold
     /// @return LeastMaxValue
-    static constexpr ptrdiff_t max() FL_NOEXCEPT {
+    static constexpr ptrdiff_t max() FL_NO_EXCEPT {
         return LeastMaxValue;
     }
 };

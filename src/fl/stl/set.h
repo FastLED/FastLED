@@ -36,7 +36,7 @@ template <typename Key, size N> class VectorSetFixed {
     typedef typename VectorType::const_iterator const_iterator;
 
     // Constructor
-    constexpr VectorSetFixed() FL_NOEXCEPT = default;
+    constexpr VectorSetFixed() FL_NO_EXCEPT = default;
 
     iterator begin() { return data.begin(); }
     iterator end() { return data.end(); }
@@ -209,17 +209,17 @@ template <typename Key> class VectorSet {
     typedef typename VectorType::reverse_iterator reverse_iterator;
 
     // Constructor
-    constexpr VectorSet() FL_NOEXCEPT = default;
+    constexpr VectorSet() FL_NO_EXCEPT = default;
 
     // Copy constructor
     VectorSet(const VectorSet &other) : data(other.data) {}
 
     // Move constructor
-    VectorSet(VectorSet &&other) FL_NOEXCEPT
+    VectorSet(VectorSet &&other) FL_NO_EXCEPT
         : data(fl::move(other.data)) {}
 
     // Copy assignment operator
-    VectorSet &operator=(const VectorSet &other) FL_NOEXCEPT {
+    VectorSet &operator=(const VectorSet &other) FL_NO_EXCEPT {
         if (this != &other) {
             data = other.data;
         }
@@ -227,7 +227,7 @@ template <typename Key> class VectorSet {
     }
 
     // Move assignment operator
-    VectorSet &operator=(VectorSet &&other) FL_NOEXCEPT {
+    VectorSet &operator=(VectorSet &&other) FL_NO_EXCEPT {
         if (this != &other) {
             data = fl::move(other.data);
         }
@@ -388,12 +388,12 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     using allocator_type = Allocator;
 
     // Constructors
-    set() FL_NOEXCEPT = default;
+    set() FL_NO_EXCEPT = default;
     explicit set(const Allocator& alloc) : mTree(fl::less<Key>(), alloc) {}
-    set(const set& other) FL_NOEXCEPT = default;
-    set(set&& other) FL_NOEXCEPT = default;
-    set& operator=(const set& other) FL_NOEXCEPT = default;
-    set& operator=(set&& other) FL_NOEXCEPT = default;
+    set(const set& other) FL_NO_EXCEPT = default;
+    set(set&& other) FL_NO_EXCEPT = default;
+    set& operator=(const set& other) FL_NO_EXCEPT = default;
+    set& operator=(set&& other) FL_NO_EXCEPT = default;
 
     // Initializer list constructor
     set(fl::initializer_list<Key> init) {
@@ -403,7 +403,7 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     }
 
     // Initializer list assignment
-    set& operator=(fl::initializer_list<Key> init) FL_NOEXCEPT {
+    set& operator=(fl::initializer_list<Key> init) FL_NO_EXCEPT {
         clear();
         for (const auto& elem : init) {
             insert(elem);

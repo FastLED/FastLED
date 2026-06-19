@@ -102,23 +102,23 @@ private:
     // R is void. Tag-dispatch on is_void<R>.
     template <typename R2>
     static typename enable_if<!is_void<R2>::value, R2>::type
-    null_return_impl() FL_NOEXCEPT { return R2{}; }
+    null_return_impl() FL_NO_EXCEPT { return R2{}; }
 
     template <typename R2>
     static typename enable_if<is_void<R2>::value, R2>::type
-    null_return_impl() FL_NOEXCEPT { return; }
+    null_return_impl() FL_NO_EXCEPT { return; }
 
-    static R null_invoker(const void* /*src*/, Args... /*args*/) FL_NOEXCEPT {
+    static R null_invoker(const void* /*src*/, Args... /*args*/) FL_NO_EXCEPT {
         return null_return_impl<R>();
     }
-    static void null_manager(void* /*dst*/, void* /*src*/, Op /*op*/) FL_NOEXCEPT {}
+    static void null_manager(void* /*dst*/, void* /*src*/, Op /*op*/) FL_NO_EXCEPT {}
 
     // ---- Per-F invoker --------------------------------------------------------
     // Copies F out of storage so that mutable lambdas remain callable through a
     // const operator(). The previous variant-based implementation used the same
     // pattern.
     template <typename Func>
-    static R functor_invoker(const void* src, Args... args) FL_NOEXCEPT {
+    static R functor_invoker(const void* src, Args... args) FL_NO_EXCEPT {
         FL_ALIGN_AS(Func) char tmp[sizeof(Func)];
         fl::memcpy(tmp, src, sizeof(Func));
         Func* f = static_cast<Func*>(static_cast<void*>(tmp));
@@ -129,7 +129,7 @@ private:
     // Shared across all trivially-copyable types of the same size, so the
     // linker collapses many F's into one body (per-size, not per-F).
     template <fl::size N>
-    static void trivial_manager(void* dst, void* src, Op op) FL_NOEXCEPT {
+    static void trivial_manager(void* dst, void* src, Op op) FL_NO_EXCEPT {
         switch (op) {
             case Op::Destroy:
                 // Trivially destructible: nothing to do.
@@ -143,7 +143,7 @@ private:
 
     // ---- Non-trivial manager: real placement-new + destructor. ----------------
     template <typename Func>
-    static void non_trivial_manager(void* dst, void* src, Op op) FL_NOEXCEPT {
+    static void non_trivial_manager(void* dst, void* src, Op op) FL_NO_EXCEPT {
         switch (op) {
             case Op::Destroy: {
                 Func* f = static_cast<Func*>(dst);
@@ -173,7 +173,7 @@ private:
     template <typename Func>
     struct HeapHolder {
         fl::shared_ptr<Func> ptr;
-        R operator()(Args... args) const FL_NOEXCEPT {
+        R operator()(Args... args) const FL_NO_EXCEPT {
             return (*ptr)(args...);
         }
     };
@@ -183,7 +183,7 @@ private:
     // HeapHolder fallback for larger callables. Both paths go through the same
     // functor_invoker / manager dispatch.
     template <typename Func>
-    void init_with(Func&& f) FL_NOEXCEPT {
+    void init_with(Func&& f) FL_NO_EXCEPT {
         using FBare = typename remove_reference<Func>::type;
         FL_STATIC_ASSERT(alignof(FBare) <= alignof(max_align_t),
                          "Callable requires stricter alignment than SBO provides.");
@@ -192,7 +192,7 @@ private:
     }
 
     template <typename Func>
-    void init_with_impl(Func&& f, true_type /* fits in SBO */) FL_NOEXCEPT {
+    void init_with_impl(Func&& f, true_type /* fits in SBO */) FL_NO_EXCEPT {
         using FBare = typename remove_reference<Func>::type;
         new (mBytes) FBare(fl::forward<Func>(f));
         mInvoker = &functor_invoker<FBare>;
@@ -203,7 +203,7 @@ private:
     }
 
     template <typename Func>
-    void init_with_impl(Func&& f, false_type /* over-SBO; use HeapHolder */) FL_NOEXCEPT {
+    void init_with_impl(Func&& f, false_type /* over-SBO; use HeapHolder */) FL_NO_EXCEPT {
         using FBare = typename remove_reference<Func>::type;
 #ifdef FL_FUNCTION_NO_HEAP_FALLBACK
         // Opt-out for memory-constrained users (FastLED #3237). The default
@@ -231,7 +231,7 @@ private:
     }
 
     // Reset to empty state; calls destructor on the stored callable if any.
-    void reset() FL_NOEXCEPT {
+    void reset() FL_NO_EXCEPT {
         if (mHasValue) {
             mManager(mBytes, nullptr, Op::Destroy);
             mHasValue = false;
@@ -248,7 +248,7 @@ private:
     struct NonConstMemberWrapper {
         C* obj;
         R (C::*mf)(Args...);
-        R operator()(Args... args) const FL_NOEXCEPT {
+        R operator()(Args... args) const FL_NO_EXCEPT {
             return (obj->*mf)(args...);
         }
     };
@@ -257,13 +257,13 @@ private:
     struct ConstMemberWrapper {
         const C* obj;
         R (C::*mf)(Args...) const;
-        R operator()(Args... args) const FL_NOEXCEPT {
+        R operator()(Args... args) const FL_NO_EXCEPT {
             return (obj->*mf)(args...);
         }
     };
 
 public:
-    function() FL_NOEXCEPT
+    function() FL_NO_EXCEPT
         : mInvoker(&null_invoker), mManager(&null_manager), mHasValue(false) {
         // Initialize storage to zero so a copy of an empty function doesn't
         // memcpy uninitialized memory. (Matches the legacy behavior.)
@@ -271,7 +271,7 @@ public:
     }
 
     // Copy constructor
-    function(const function& other) FL_NOEXCEPT
+    function(const function& other) FL_NO_EXCEPT
         : mInvoker(other.mInvoker), mManager(other.mManager), mHasValue(other.mHasValue) {
         fl::memset(mBytes, 0, kSboSize);
         if (mHasValue) {
@@ -283,7 +283,7 @@ public:
     }
 
     // Move constructor
-    function(function&& other) FL_NOEXCEPT
+    function(function&& other) FL_NO_EXCEPT
         : mInvoker(other.mInvoker), mManager(other.mManager), mHasValue(other.mHasValue) {
         fl::memset(mBytes, 0, kSboSize);
         if (mHasValue) {
@@ -294,7 +294,7 @@ public:
     }
 
     // Copy assignment
-    function& operator=(const function& other) FL_NOEXCEPT {
+    function& operator=(const function& other) FL_NO_EXCEPT {
         if (this == &other) return *this;
         reset();
         mInvoker = other.mInvoker;
@@ -307,7 +307,7 @@ public:
     }
 
     // Move assignment
-    function& operator=(function&& other) FL_NOEXCEPT {
+    function& operator=(function&& other) FL_NO_EXCEPT {
         if (this == &other) return *this;
         reset();
         mInvoker = other.mInvoker;
@@ -320,12 +320,12 @@ public:
         return *this;
     }
 
-    ~function() FL_NOEXCEPT {
+    ~function() FL_NO_EXCEPT {
         reset();
     }
 
     // 1) Free function pointer
-    function(R (*fp)(Args...)) FL_NOEXCEPT
+    function(R (*fp)(Args...)) FL_NO_EXCEPT
         : mInvoker(&null_invoker), mManager(&null_manager), mHasValue(false) {
         fl::memset(mBytes, 0, kSboSize);
         if (fp) {
@@ -339,7 +339,7 @@ public:
               typename = enable_if_t<!is_member_function_pointer<Func>::value &&
                                      !is_function_pointer<Func>::value &&
                                      !is_same<typename remove_reference<Func>::type, function>::value>>
-    function(Func f) FL_NOEXCEPT
+    function(Func f) FL_NO_EXCEPT
         : mInvoker(&null_invoker), mManager(&null_manager), mHasValue(false) {
         fl::memset(mBytes, 0, kSboSize);
         init_with(fl::move(f));
@@ -347,7 +347,7 @@ public:
 
     // 3) Non-const member function
     template <typename C>
-    function(R (C::*mf)(Args...), C* obj) FL_NOEXCEPT
+    function(R (C::*mf)(Args...), C* obj) FL_NO_EXCEPT
         : mInvoker(&null_invoker), mManager(&null_manager), mHasValue(false) {
         fl::memset(mBytes, 0, kSboSize);
         init_with(NonConstMemberWrapper<C>{obj, mf});
@@ -355,26 +355,26 @@ public:
 
     // 4) Const member function
     template <typename C>
-    function(R (C::*mf)(Args...) const, const C* obj) FL_NOEXCEPT
+    function(R (C::*mf)(Args...) const, const C* obj) FL_NO_EXCEPT
         : mInvoker(&null_invoker), mManager(&null_manager), mHasValue(false) {
         fl::memset(mBytes, 0, kSboSize);
         init_with(ConstMemberWrapper<C>{obj, mf});
     }
 
-    R operator()(Args... args) const FL_NOEXCEPT {
+    R operator()(Args... args) const FL_NO_EXCEPT {
         return mInvoker(mBytes, args...);
     }
 
-    explicit operator bool() const FL_NOEXCEPT { return mHasValue; }
+    explicit operator bool() const FL_NO_EXCEPT { return mHasValue; }
 
-    void clear() FL_NOEXCEPT { reset(); }
+    void clear() FL_NO_EXCEPT { reset(); }
 
-    bool operator==(const function& o) const FL_NOEXCEPT {
+    bool operator==(const function& o) const FL_NO_EXCEPT {
         // Mirrors legacy semantics: just empty / non-empty equality.
         return mHasValue == o.mHasValue;
     }
 
-    bool operator!=(const function& o) const FL_NOEXCEPT { return !(*this == o); }
+    bool operator!=(const function& o) const FL_NO_EXCEPT { return !(*this == o); }
 };
 
 //----------------------------------------------------------------------------
@@ -401,8 +401,8 @@ class function_list<void(Args...)> {
         int priority;
         FunctionType fn;
 
-        FunctionEntry() FL_NOEXCEPT : id(0), priority(0), fn() {}
-        FunctionEntry(int idParam, int priorityParam, FunctionType fnParam) FL_NOEXCEPT
+        FunctionEntry() FL_NO_EXCEPT : id(0), priority(0), fn() {}
+        FunctionEntry(int idParam, int priorityParam, FunctionType fnParam) FL_NO_EXCEPT
             : id(idParam), priority(priorityParam), fn(fnParam) {}
     };
 
@@ -414,12 +414,12 @@ class function_list<void(Args...)> {
     bool mNeedsCompact = false;  // True when functions have been cleared during invocation
 
   public:
-    function_list() FL_NOEXCEPT : mFunctions(), mIdCounter(0), mNeedsCompact(false) {}
-    function_list(const function_list& other) FL_NOEXCEPT
+    function_list() FL_NO_EXCEPT : mFunctions(), mIdCounter(0), mNeedsCompact(false) {}
+    function_list(const function_list& other) FL_NO_EXCEPT
         : mFunctions(other.mFunctions), mIdCounter(other.mIdCounter), mNeedsCompact(other.mNeedsCompact) {}
-    function_list(function_list&& other) FL_NOEXCEPT
+    function_list(function_list&& other) FL_NO_EXCEPT
         : mFunctions(fl::move(other.mFunctions)), mIdCounter(other.mIdCounter), mNeedsCompact(other.mNeedsCompact) {}
-    function_list& operator=(const function_list& other) FL_NOEXCEPT {
+    function_list& operator=(const function_list& other) FL_NO_EXCEPT {
         if (this != &other) {
             mFunctions = other.mFunctions;
             mIdCounter = other.mIdCounter;
@@ -427,7 +427,7 @@ class function_list<void(Args...)> {
         }
         return *this;
     }
-    function_list& operator=(function_list&& other) FL_NOEXCEPT {
+    function_list& operator=(function_list&& other) FL_NO_EXCEPT {
         if (this != &other) {
             mFunctions = fl::move(other.mFunctions);
             mIdCounter = other.mIdCounter;
@@ -437,13 +437,13 @@ class function_list<void(Args...)> {
     }
     ~function_list() = default;
 
-    int add(function<void(Args...)> fn, int priority = 0) FL_NOEXCEPT {
+    int add(function<void(Args...)> fn, int priority = 0) FL_NO_EXCEPT {
         int id = mIdCounter++;
         mFunctions.push_back(FunctionEntry(id, priority, fn));
         return id;
     }
 
-    void remove(int id) FL_NOEXCEPT {
+    void remove(int id) FL_NO_EXCEPT {
         // During invocation: clear the function for deferred removal
         for (size_t i = 0; i < mFunctions.size(); ++i) {
             if (mFunctions[i].id == id) {
@@ -453,13 +453,13 @@ class function_list<void(Args...)> {
         }
     }
 
-    void clear() FL_NOEXCEPT {
+    void clear() FL_NO_EXCEPT {
         mFunctions.clear();
     }
 
     // Compact the storage by removing invalid (cleared) callbacks
     // Used internally after invocation if removals occurred
-    void compact() FL_NOEXCEPT {
+    void compact() FL_NO_EXCEPT {
         if (!mNeedsCompact) return;
         size_t write_pos = 0;
         for (size_t read_pos = 0; read_pos < mFunctions.size(); ++read_pos) {
@@ -475,7 +475,7 @@ class function_list<void(Args...)> {
     }
 
     // Size information - counts only valid (non-cleared) functions
-    fl::size size() const FL_NOEXCEPT {
+    fl::size size() const FL_NO_EXCEPT {
         fl::size count = 0;
         for (const auto& entry : mFunctions) {
             if (entry.fn) {
@@ -484,12 +484,12 @@ class function_list<void(Args...)> {
         }
         return count;
     }
-    bool empty() const FL_NOEXCEPT { return size() == 0; }
+    bool empty() const FL_NO_EXCEPT { return size() == 0; }
 
     // Boolean conversion for if (callback) checks
-    explicit operator bool() const FL_NOEXCEPT { return !empty(); }
+    explicit operator bool() const FL_NO_EXCEPT { return !empty(); }
 
-    void invoke(Args... args) FL_NOEXCEPT {
+    void invoke(Args... args) FL_NO_EXCEPT {
         if (mFunctions.empty()) return;
         // Compact the storage by removing invalid (cleared) callbacks
         compact();
@@ -513,7 +513,7 @@ class function_list<void(Args...)> {
         }
 
         // Sort priorities (higher priority first) - cheap since there are usually very few unique priorities
-        fl::sort(priorities.begin(), priorities.end(), [](int a, int b) FL_NOEXCEPT { return a > b; });
+        fl::sort(priorities.begin(), priorities.end(), [](int a, int b) FL_NO_EXCEPT { return a > b; });
 
         // Iterate through priorities (highest first), then through functions matching each priority
         for (size_t p_idx = 0; p_idx < priorities.size(); ++p_idx) {
@@ -531,7 +531,7 @@ class function_list<void(Args...)> {
     }
 
     // Call operator - syntactic sugar for invoke()
-    void operator()(Args... args) FL_NOEXCEPT {
+    void operator()(Args... args) FL_NO_EXCEPT {
         invoke(args...);
     }
 };

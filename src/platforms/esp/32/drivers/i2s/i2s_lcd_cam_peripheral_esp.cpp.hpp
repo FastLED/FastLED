@@ -70,7 +70,7 @@ bool IRAM_ATTR i2s_lcd_cam_flush_ready(
 // Singleton Instance
 //=============================================================================
 
-I2sLcdCamPeripheralEsp& I2sLcdCamPeripheralEsp::instance() FL_NOEXCEPT {
+I2sLcdCamPeripheralEsp& I2sLcdCamPeripheralEsp::instance() FL_NO_EXCEPT {
     return Singleton<I2sLcdCamPeripheralEsp>::instance();
 }
 
@@ -78,7 +78,7 @@ I2sLcdCamPeripheralEsp& I2sLcdCamPeripheralEsp::instance() FL_NOEXCEPT {
 // Constructor / Destructor
 //=============================================================================
 
-I2sLcdCamPeripheralEsp::I2sLcdCamPeripheralEsp() FL_NOEXCEPT
+I2sLcdCamPeripheralEsp::I2sLcdCamPeripheralEsp() FL_NO_EXCEPT
     : mInitialized(false),
       mConfig(),
       mI80Bus(nullptr),
@@ -96,7 +96,7 @@ I2sLcdCamPeripheralEsp::~I2sLcdCamPeripheralEsp() {
 // Lifecycle Methods
 //=============================================================================
 
-bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NOEXCEPT {
+bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NO_EXCEPT {
     if (mInitialized) {
         // Check if config matches - if so, reuse existing peripheral
         if (mConfig.num_lanes == config.num_lanes &&
@@ -191,7 +191,7 @@ bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NOEXCE
     return true;
 }
 
-void I2sLcdCamPeripheralEsp::deinitialize() FL_NOEXCEPT {
+void I2sLcdCamPeripheralEsp::deinitialize() FL_NO_EXCEPT {
     if (mPanelIo != nullptr) {
         esp_lcd_panel_io_del(mPanelIo);
         mPanelIo = nullptr;
@@ -206,7 +206,7 @@ void I2sLcdCamPeripheralEsp::deinitialize() FL_NOEXCEPT {
     mBusy = false;
 }
 
-bool I2sLcdCamPeripheralEsp::isInitialized() const FL_NOEXCEPT {
+bool I2sLcdCamPeripheralEsp::isInitialized() const FL_NO_EXCEPT {
     return mInitialized;
 }
 
@@ -214,7 +214,7 @@ bool I2sLcdCamPeripheralEsp::isInitialized() const FL_NOEXCEPT {
 // Buffer Management
 //=============================================================================
 
-u16* I2sLcdCamPeripheralEsp::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
+u16* I2sLcdCamPeripheralEsp::allocateBuffer(size_t size_bytes) FL_NO_EXCEPT {
     // Round up to 64-byte alignment
     size_t aligned_size = ((size_bytes + 63) / 64) * 64;
 
@@ -242,7 +242,7 @@ u16* I2sLcdCamPeripheralEsp::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
     return static_cast<u16*>(buffer);
 }
 
-void I2sLcdCamPeripheralEsp::freeBuffer(u16* buffer) FL_NOEXCEPT {
+void I2sLcdCamPeripheralEsp::freeBuffer(u16* buffer) FL_NO_EXCEPT {
     if (buffer != nullptr) {
         heap_caps_free(buffer);
     }
@@ -252,7 +252,7 @@ void I2sLcdCamPeripheralEsp::freeBuffer(u16* buffer) FL_NOEXCEPT {
 // Transmission Methods
 //=============================================================================
 
-bool I2sLcdCamPeripheralEsp::transmit(const u16* buffer, size_t size_bytes) FL_NOEXCEPT {
+bool I2sLcdCamPeripheralEsp::transmit(const u16* buffer, size_t size_bytes) FL_NO_EXCEPT {
     if (!mInitialized || mPanelIo == nullptr) {
         return false;
     }
@@ -272,7 +272,7 @@ bool I2sLcdCamPeripheralEsp::transmit(const u16* buffer, size_t size_bytes) FL_N
     return true;
 }
 
-bool I2sLcdCamPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
+bool I2sLcdCamPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -291,7 +291,7 @@ bool I2sLcdCamPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
     return true;
 }
 
-bool I2sLcdCamPeripheralEsp::isBusy() const FL_NOEXCEPT {
+bool I2sLcdCamPeripheralEsp::isBusy() const FL_NO_EXCEPT {
     return mBusy;
 }
 
@@ -299,7 +299,7 @@ bool I2sLcdCamPeripheralEsp::isBusy() const FL_NOEXCEPT {
 // Callback Registration
 //=============================================================================
 
-bool I2sLcdCamPeripheralEsp::registerTransmitCallback(void* callback, void* user_ctx) FL_NOEXCEPT {
+bool I2sLcdCamPeripheralEsp::registerTransmitCallback(void* callback, void* user_ctx) FL_NO_EXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -314,7 +314,7 @@ bool I2sLcdCamPeripheralEsp::registerTransmitCallback(void* callback, void* user
 // State Inspection
 //=============================================================================
 
-const I2sLcdCamConfig& I2sLcdCamPeripheralEsp::getConfig() const FL_NOEXCEPT {
+const I2sLcdCamConfig& I2sLcdCamPeripheralEsp::getConfig() const FL_NO_EXCEPT {
     return mConfig;
 }
 
@@ -322,11 +322,11 @@ const I2sLcdCamConfig& I2sLcdCamPeripheralEsp::getConfig() const FL_NOEXCEPT {
 // Platform Utilities
 //=============================================================================
 
-u64 I2sLcdCamPeripheralEsp::getMicroseconds() FL_NOEXCEPT {
+u64 I2sLcdCamPeripheralEsp::getMicroseconds() FL_NO_EXCEPT {
     return esp_timer_get_time();
 }
 
-void I2sLcdCamPeripheralEsp::delay(u32 ms) FL_NOEXCEPT {
+void I2sLcdCamPeripheralEsp::delay(u32 ms) FL_NO_EXCEPT {
     vTaskDelay(pdMS_TO_TICKS(ms));
 }
 

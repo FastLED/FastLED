@@ -55,7 +55,7 @@ namespace rx {
 fl::result<u32, DecodeError>
 decodeWs2812Edges(const ChipsetTiming4Phase& timing,
                   fl::span<const EdgeTime> edges,
-                  fl::span<u8> out) FL_NOEXCEPT;
+                  fl::span<u8> out) FL_NO_EXCEPT;
 
 }  // namespace rx
 }  // namespace channels

@@ -27,13 +27,13 @@ static constexpr u32 kFlexIOMaxPeriodNs = 2500;
 // ============================================================================
 
 ChannelEngineFlexIO::ChannelEngineFlexIO()
- FL_NOEXCEPT : mPeripheral(IFlexIOPeripheral::create()),
+ FL_NO_EXCEPT : mPeripheral(IFlexIOPeripheral::create()),
       mHwInitialized(false), mCurrentPin(0xFF) {
     FL_LOG_FLEXIO_F("ChannelEngineFlexIO: created");
 }
 
 ChannelEngineFlexIO::ChannelEngineFlexIO(fl::shared_ptr<IFlexIOPeripheral> peripheral)
- FL_NOEXCEPT : mPeripheral(fl::move(peripheral)),
+ FL_NO_EXCEPT : mPeripheral(fl::move(peripheral)),
       mHwInitialized(false), mCurrentPin(0xFF) {
     FL_LOG_FLEXIO_F("ChannelEngineFlexIO: created (injected peripheral)");
 }
@@ -45,7 +45,7 @@ ChannelEngineFlexIO::~ChannelEngineFlexIO() {
     FL_LOG_FLEXIO_F("ChannelEngineFlexIO: destroyed");
 }
 
-bool ChannelEngineFlexIO::canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT {
+bool ChannelEngineFlexIO::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
     if (!data || !data->isClockless()) {
         return false;
     }
@@ -64,14 +64,14 @@ bool ChannelEngineFlexIO::canHandle(const ChannelDataPtr& data) const FL_NOEXCEP
     return mPeripheral->canHandlePin(pin);
 }
 
-void ChannelEngineFlexIO::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
+void ChannelEngineFlexIO::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     if (channelData) {
         channelData->setInUse(true);
         mEnqueuedChannels.push_back(fl::move(channelData));
     }
 }
 
-void ChannelEngineFlexIO::show() FL_NOEXCEPT {
+void ChannelEngineFlexIO::show() FL_NO_EXCEPT {
     if (!mPeripheral) {
         return;
     }
@@ -137,7 +137,7 @@ void ChannelEngineFlexIO::show() FL_NOEXCEPT {
     mTransmittingChannels.clear();
 }
 
-IChannelDriver::DriverState ChannelEngineFlexIO::poll() FL_NOEXCEPT {
+IChannelDriver::DriverState ChannelEngineFlexIO::poll() FL_NO_EXCEPT {
     if (!mTransmittingChannels.empty()) {
         if (mPeripheral && mPeripheral->isDone()) {
             // Transfer complete — clean up

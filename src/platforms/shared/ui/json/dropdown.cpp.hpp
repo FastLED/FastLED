@@ -19,10 +19,10 @@ private:
 public:
     // Constructor: Initializes the base JsonUiInternal with name and sets initial values.
     JsonUiDropdownInternal(const fl::string& name, const fl::vector<fl::string>& options, size_t selectedIndex = 0)
- FL_NOEXCEPT : JsonUiInternal(name), mOptions(options), mSelectedIndex(selectedIndex) {}
+ FL_NO_EXCEPT : JsonUiInternal(name), mOptions(options), mSelectedIndex(selectedIndex) {}
 
     // Override toJson to serialize the dropdown's data directly.
-    void toJson(fl::json& json) const FL_NOEXCEPT override {
+    void toJson(fl::json& json) const FL_NO_EXCEPT override {
         json.set("name", name());
         json.set("type", "dropdown");
         json.set("group", groupName());
@@ -37,7 +37,7 @@ public:
     }
 
     // Override updateInternal to handle updates from JSON.
-    void updateInternal(const fl::json& json) FL_NOEXCEPT override {
+    void updateInternal(const fl::json& json) FL_NO_EXCEPT override {
         int index = json | 0;
         if (index >= 0 && static_cast<size_t>(index) < mOptions.size()) {
             mSelectedIndex = static_cast<size_t>(index);
@@ -45,15 +45,15 @@ public:
     }
 
     // Accessors for the dropdown state.
-    const fl::vector<fl::string>& options() const FL_NOEXCEPT { return mOptions; }
-    size_t selectedIndex() const FL_NOEXCEPT { return mSelectedIndex; }
-    void setSelectedIndex(size_t index) FL_NOEXCEPT { 
+    const fl::vector<fl::string>& options() const FL_NO_EXCEPT { return mOptions; }
+    size_t selectedIndex() const FL_NO_EXCEPT { return mSelectedIndex; }
+    void setSelectedIndex(size_t index) FL_NO_EXCEPT { 
         if (index < mOptions.size()) {
             mSelectedIndex = index;
         }
     }
     
-    fl::string value() const FL_NOEXCEPT {
+    fl::string value() const FL_NO_EXCEPT {
         if (mSelectedIndex < mOptions.size()) {
             return mOptions[mSelectedIndex];
         }
@@ -62,7 +62,7 @@ public:
 };
 
 // Constructor with array of options and count
-JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, const fl::string* options, size_t count) FL_NOEXCEPT {
+JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, const fl::string* options, size_t count) FL_NO_EXCEPT {
     // Convert options to fl::vector
     fl::vector<fl::string> optionsVector;
     for (size_t i = 0; i < count; ++i) {
@@ -77,7 +77,7 @@ JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, const fl::string* opt
 }
 
 // Constructor with fl::span<fl::string>
-JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, fl::span<fl::string> options) FL_NOEXCEPT {
+JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, fl::span<fl::string> options) FL_NO_EXCEPT {
     // Convert options to fl::vector
     fl::vector<fl::string> optionsVector;
     for (const auto &option : options) {
@@ -92,7 +92,7 @@ JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, fl::span<fl::string> 
 }
 
 // Constructor with initializer_list (only available if C++11 support exists)
-JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options) FL_NOEXCEPT {
+JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options) FL_NO_EXCEPT {
     // Convert options to fl::vector
     fl::vector<fl::string> optionsVector;
     for (const auto &option : options) {
@@ -111,52 +111,52 @@ JsonDropdownImpl::~JsonDropdownImpl() {
     removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
-JsonDropdownImpl &JsonDropdownImpl::Group(const fl::string &name) FL_NOEXCEPT {
+JsonDropdownImpl &JsonDropdownImpl::Group(const fl::string &name) FL_NO_EXCEPT {
     mInternal->setGroup(name);
     return *this;
 }
 
-const fl::string &JsonDropdownImpl::name() const FL_NOEXCEPT { return mInternal->name(); }
+const fl::string &JsonDropdownImpl::name() const FL_NO_EXCEPT { return mInternal->name(); }
 
-void JsonDropdownImpl::toJson(fl::json &json) const FL_NOEXCEPT {
+void JsonDropdownImpl::toJson(fl::json &json) const FL_NO_EXCEPT {
     mInternal->toJson(json);
 }
 
-fl::string JsonDropdownImpl::value() const FL_NOEXCEPT {
+fl::string JsonDropdownImpl::value() const FL_NO_EXCEPT {
     return mInternal->value();
 }
 
-int JsonDropdownImpl::value_int() const FL_NOEXCEPT {
+int JsonDropdownImpl::value_int() const FL_NO_EXCEPT {
     return static_cast<int>(mInternal->selectedIndex());
 }
 
-void JsonDropdownImpl::setSelectedIndex(int index) FL_NOEXCEPT {
+void JsonDropdownImpl::setSelectedIndex(int index) FL_NO_EXCEPT {
     if (index >= 0) {
         mInternal->setSelectedIndex(static_cast<size_t>(index));
     }
 }
 
-size_t JsonDropdownImpl::getOptionCount() const FL_NOEXCEPT { 
+size_t JsonDropdownImpl::getOptionCount() const FL_NO_EXCEPT { 
     return mInternal->options().size(); 
 }
 
-fl::string JsonDropdownImpl::getOption(size_t index) const FL_NOEXCEPT {
+fl::string JsonDropdownImpl::getOption(size_t index) const FL_NO_EXCEPT {
     if (index < mInternal->options().size()) {
         return mInternal->options()[index];
     }
     return fl::string();
 }
 
-fl::string JsonDropdownImpl::groupName() const FL_NOEXCEPT { return mInternal->groupName(); }
+fl::string JsonDropdownImpl::groupName() const FL_NO_EXCEPT { return mInternal->groupName(); }
 
-void JsonDropdownImpl::setGroup(const fl::string &groupName) FL_NOEXCEPT { mInternal->setGroup(groupName); }
+void JsonDropdownImpl::setGroup(const fl::string &groupName) FL_NO_EXCEPT { mInternal->setGroup(groupName); }
 
-JsonDropdownImpl &JsonDropdownImpl::operator=(int index) FL_NOEXCEPT {
+JsonDropdownImpl &JsonDropdownImpl::operator=(int index) FL_NO_EXCEPT {
     setSelectedIndex(index);
     return *this;
 }
 
-int JsonDropdownImpl::id() const FL_NOEXCEPT {
+int JsonDropdownImpl::id() const FL_NO_EXCEPT {
     return mInternal->id();
 }
 

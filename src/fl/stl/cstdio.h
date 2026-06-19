@@ -30,12 +30,12 @@ enum class LogLevel : u8 {
 
 /// Get the current global log level
 /// @return Current log level (0-4)
-u8 getLogLevel() FL_NOEXCEPT;
+u8 getLogLevel() FL_NO_EXCEPT;
 
 /// Set the global log level
 /// @param level New log level (use LogLevel enum values)
 /// @note Setting to LogLevel::FL_LOG_LEVEL_NONE disables all logging output
-void setLogLevel(u8 level) FL_NOEXCEPT;
+void setLogLevel(u8 level) FL_NO_EXCEPT;
 
 // =============================================================================
 // RAII Scoped Log Control
@@ -65,26 +65,26 @@ void setLogLevel(u8 level) FL_NOEXCEPT;
 class ScopedLogDisable {
 public:
     /// Constructor - saves current log level and disables logging
-    ScopedLogDisable() FL_NOEXCEPT : mPreviousLevel(getLogLevel()) {
+    ScopedLogDisable() FL_NO_EXCEPT : mPreviousLevel(getLogLevel()) {
         setLogLevel(static_cast<u8>(LogLevel::FL_LOG_LEVEL_NONE));
     }
 
     /// Destructor - restores previous log level
-    ~ScopedLogDisable() FL_NOEXCEPT {
+    ~ScopedLogDisable() FL_NO_EXCEPT {
         setLogLevel(mPreviousLevel);
     }
 
     // Non-copyable (prevent accidental copies that would corrupt state)
-    ScopedLogDisable(const ScopedLogDisable&) FL_NOEXCEPT = delete;
-    ScopedLogDisable& operator=(const ScopedLogDisable&) FL_NOEXCEPT = delete;
+    ScopedLogDisable(const ScopedLogDisable&) FL_NO_EXCEPT = delete;
+    ScopedLogDisable& operator=(const ScopedLogDisable&) FL_NO_EXCEPT = delete;
 
     // Move-only (allow transfer of ownership)
-    ScopedLogDisable(ScopedLogDisable&& other) FL_NOEXCEPT
+    ScopedLogDisable(ScopedLogDisable&& other) FL_NO_EXCEPT
         : mPreviousLevel(other.mPreviousLevel) {
         // Mark other as "moved-from" by setting to current level (no-op restore)
         other.mPreviousLevel = static_cast<u8>(LogLevel::FL_LOG_LEVEL_NONE);
     }
-    ScopedLogDisable& operator=(ScopedLogDisable&&) FL_NOEXCEPT = delete;
+    ScopedLogDisable& operator=(ScopedLogDisable&&) FL_NO_EXCEPT = delete;
 
 private:
     u8 mPreviousLevel;
@@ -95,7 +95,7 @@ private:
 // =============================================================================
 // Initialize serial communication with specified baud rate
 // Note: On some platforms (host), this is a no-op
-void serial_begin(u32 baudRate = 115200) FL_NOEXCEPT;
+void serial_begin(u32 baudRate = 115200) FL_NO_EXCEPT;
 
 // =============================================================================
 // Low-Level Print Functions
@@ -104,36 +104,36 @@ void serial_begin(u32 baudRate = 115200) FL_NOEXCEPT;
 // output method for each platform.
 
 // Print a string without newline
-void print(const char* str) FL_NOEXCEPT;
+void print(const char* str) FL_NO_EXCEPT;
 
 // Print a string with newline
 #ifndef FL_DBG_PRINTLN_DECLARED
-void println(const char* str) FL_NOEXCEPT;
+void println(const char* str) FL_NO_EXCEPT;
 #else
 // Declaration already exists from fl/dbg.h
 #endif
 
 // Write raw bytes (binary data)
 // Returns number of bytes written
-size_t write_bytes(const u8* buffer, size_t size) FL_NOEXCEPT;
+size_t write_bytes(const u8* buffer, size_t size) FL_NO_EXCEPT;
 
 // Low-level input functions that provide Serial-style read functionality
 // These use the most efficient input method for each platform
 
 // Returns the number of bytes available to read from input stream
 // Returns 0 if no data is available
-int available() FL_NOEXCEPT;
+int available() FL_NO_EXCEPT;
 
 // Peeks at the next byte without removing it from input stream
 // Returns the byte value (0-255) if data is available
 // Returns -1 if no data is available
 // Note: Not all platforms support peek (may return -1 always)
-int peek() FL_NOEXCEPT;
+int peek() FL_NO_EXCEPT;
 
 // Reads the next byte from input stream
 // Returns the byte value (0-255) if data is available
 // Returns -1 if no data is available
-int read() FL_NOEXCEPT;
+int read() FL_NO_EXCEPT;
 
 // Reads from input stream until delimiter is found, writing to sstream (blocking with optional timeout)
 // Returns true when delimiter is found, false only if timeout occurs
@@ -142,7 +142,7 @@ int read() FL_NOEXCEPT;
 // @param skipChar Character to skip during reading (default: '\r' for cross-platform line endings)
 // @param timeoutMs Optional timeout in milliseconds (nullopt = wait forever)
 // @note Follows Arduino Serial.readStringUntil() API
-bool readStringUntil(sstream& out, char delimiter = '\n', char skipChar = '\r', fl::optional<u32> timeoutMs = fl::nullopt) FL_NOEXCEPT;
+bool readStringUntil(sstream& out, char delimiter = '\n', char skipChar = '\r', fl::optional<u32> timeoutMs = fl::nullopt) FL_NO_EXCEPT;
 
 // Reads from input stream until delimiter is found, returning as string (blocking with optional timeout)
 // Returns the string (without delimiter) when delimiter is found
@@ -152,17 +152,17 @@ bool readStringUntil(sstream& out, char delimiter = '\n', char skipChar = '\r', 
 // @param timeoutMs Optional timeout in milliseconds (nullopt = wait forever)
 // @note Follows Arduino Serial.readStringUntil() API
 // @note Delegates to readStringUntil(sstream&, ...) version
-fl::optional<fl::string> readLine(char delimiter = '\n', char skipChar = '\r', fl::optional<u32> timeoutMs = fl::nullopt) FL_NOEXCEPT;
+fl::optional<fl::string> readLine(char delimiter = '\n', char skipChar = '\r', fl::optional<u32> timeoutMs = fl::nullopt) FL_NO_EXCEPT;
 
 // Flush serial output buffer
 // Waits for all buffered data to be transmitted
 // Returns true if flush completed successfully, false on timeout
 // Note: On platforms without buffering, this returns immediately
-bool flush(u32 timeoutMs = 1000) FL_NOEXCEPT;
+bool flush(u32 timeoutMs = 1000) FL_NO_EXCEPT;
 
 // Check if serial port is ready for I/O
 // Returns true if serial is initialized and available
-bool serial_ready() FL_NOEXCEPT;
+bool serial_ready() FL_NO_EXCEPT;
 
 // =============================================================================
 // Timing Functions
@@ -181,23 +181,23 @@ using flush_handler_t = fl::function<bool(u32)>;
 using write_bytes_handler_t = fl::function<size_t(const u8*, size_t)>;
 
 // Inject function handlers for testing
-void inject_print_handler(const print_handler_t& handler) FL_NOEXCEPT;
-void inject_println_handler(const println_handler_t& handler) FL_NOEXCEPT;
-void inject_available_handler(const available_handler_t& handler) FL_NOEXCEPT;
-void inject_read_handler(const read_handler_t& handler) FL_NOEXCEPT;
-void inject_flush_handler(const flush_handler_t& handler) FL_NOEXCEPT;
-void inject_write_bytes_handler(const write_bytes_handler_t& handler) FL_NOEXCEPT;
+void inject_print_handler(const print_handler_t& handler) FL_NO_EXCEPT;
+void inject_println_handler(const println_handler_t& handler) FL_NO_EXCEPT;
+void inject_available_handler(const available_handler_t& handler) FL_NO_EXCEPT;
+void inject_read_handler(const read_handler_t& handler) FL_NO_EXCEPT;
+void inject_flush_handler(const flush_handler_t& handler) FL_NO_EXCEPT;
+void inject_write_bytes_handler(const write_bytes_handler_t& handler) FL_NO_EXCEPT;
 
 // Clear all injected handlers (restores default behavior)
-void clear_io_handlers() FL_NOEXCEPT;
+void clear_io_handlers() FL_NO_EXCEPT;
 
 // Clear individual handlers
-void clear_print_handler() FL_NOEXCEPT;
-void clear_println_handler() FL_NOEXCEPT;
-void clear_available_handler() FL_NOEXCEPT;
-void clear_read_handler() FL_NOEXCEPT;
-void clear_flush_handler() FL_NOEXCEPT;
-void clear_write_bytes_handler() FL_NOEXCEPT;
+void clear_print_handler() FL_NO_EXCEPT;
+void clear_println_handler() FL_NO_EXCEPT;
+void clear_available_handler() FL_NO_EXCEPT;
+void clear_read_handler() FL_NO_EXCEPT;
+void clear_flush_handler() FL_NO_EXCEPT;
+void clear_write_bytes_handler() FL_NO_EXCEPT;
 
 #endif // FASTLED_TESTING
 

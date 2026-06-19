@@ -17,7 +17,7 @@ namespace fl {
 namespace {
 
 /// @brief Absolute value of difference (unsigned-safe)
-u32 absDiff(u32 a, u32 b) FL_NOEXCEPT {
+u32 absDiff(u32 a, u32 b) FL_NO_EXCEPT {
     return (a > b) ? (a - b) : (b - a);
 }
 
@@ -31,7 +31,7 @@ u32 absDiff(u32 a, u32 b) FL_NOEXCEPT {
 /// HIGH time shorter — safer for most LED protocols. For example, WS2812
 /// T1H=875ns at 250ns/pulse: floor=3 (750ns, err=125), ceil=4 (1000ns,
 /// err=125) → picks 3 (shorter HIGH time).
-u8 computePulseCount(u32 timing_ns, u32 pulse_width_ns) FL_NOEXCEPT {
+u8 computePulseCount(u32 timing_ns, u32 pulse_width_ns) FL_NO_EXCEPT {
     if (pulse_width_ns == 0) return 0;
     u8 lo = static_cast<u8>(timing_ns / pulse_width_ns);
     u8 hi = lo + 1;
@@ -61,7 +61,7 @@ u8 computePulseCount(u32 timing_ns, u32 pulse_width_ns) FL_NOEXCEPT {
 /// @param pulses_a HIGH pulse count for LED bit A [1, 4]
 /// @param pulses_b HIGH pulse count for LED bit B [1, 4]
 /// @return UART data byte value
-u8 buildUartByte(u8 pulses_a, u8 pulses_b) FL_NOEXCEPT {
+u8 buildUartByte(u8 pulses_a, u8 pulses_b) FL_NO_EXCEPT {
     // Build the desired 10-bit wire pattern (with TX inversion)
     // Wire positions: [0=START] [1=~D0] ... [8=~D7] [9=STOP]
     //
@@ -97,7 +97,7 @@ u8 buildUartByte(u8 pulses_a, u8 pulses_b) FL_NOEXCEPT {
 
 } // anonymous namespace
 
-Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NOEXCEPT {
+Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
     Wave10Lut result = {};
 
     const u32 period_ns = timing.total_period_ns();
@@ -130,7 +130,7 @@ Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NOEXCEPT {
     return result;
 }
 
-bool canRepresentTiming(const ChipsetTimingConfig& timing) FL_NOEXCEPT {
+bool canRepresentTiming(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
     const u32 period_ns = timing.total_period_ns();
     if (period_ns == 0) return false;
 
@@ -175,7 +175,7 @@ size_t encodeLedsToUart(const u8* input,
                         size_t input_size,
                         u8* output,
                         size_t output_capacity,
-                        const Wave10Lut& lut) FL_NOEXCEPT {
+                        const Wave10Lut& lut) FL_NO_EXCEPT {
     size_t required_size = input_size * 4;
 
     if (required_size > output_capacity) {
@@ -193,7 +193,7 @@ FL_IRAM FL_OPTIMIZE_FUNCTION
 size_t encodeLedsToUart(const u8* input,
                         size_t input_size,
                         u8* output,
-                        size_t output_capacity) FL_NOEXCEPT {
+                        size_t output_capacity) FL_NO_EXCEPT {
     size_t required_size = input_size * 4;
 
     if (required_size > output_capacity) {

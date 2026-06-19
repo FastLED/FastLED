@@ -280,21 +280,21 @@ class CFastLED {
    - ❌ Bad:
      ```cpp
      namespace { const RgbcctProfile* sActive = nullptr; }
-     void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NOEXCEPT {
+     void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NO_EXCEPT {
          sActive = p;  // caller's lifetime, BOOM if they pass a stack temporary
      }
      ```
    - ✅ Good (value semantics, preferred):
      ```cpp
      namespace { RgbcctProfile sActive = kRgbwwDefaultProfile; }
-     void set_rgbww_colorimetric_profile(const RgbcctProfile& p) FL_NOEXCEPT {
+     void set_rgbww_colorimetric_profile(const RgbcctProfile& p) FL_NO_EXCEPT {
          sActive = p;  // copy, lifetime owned by library
      }
      ```
    - ✅ Good (nullable-reset exception — `const T*` allowed when null means "reset"):
      ```cpp
      namespace { RgbcctProfile sActive = kRgbwwDefaultProfile; }
-     void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NOEXCEPT {
+     void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NO_EXCEPT {
          sActive = (p != nullptr) ? *p : kRgbwwDefaultProfile;  // copy on non-null, reset on null
      }
      ```
@@ -316,14 +316,14 @@ class CFastLED {
 1. ❌ **NEVER mutate a profile field in place without bumping a version counter** when a cache exists keyed on the profile pointer.
    - ❌ Bad:
      ```cpp
-     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NOEXCEPT {
+     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NO_EXCEPT {
          apply_gamut(p, g);  // rewrites p->input_xy_*
          // …no version bump; ProfileCache keyed on (p, cct) still returns stale M_src
      }
      ```
    - ✅ Good:
      ```cpp
-     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NOEXCEPT {
+     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NO_EXCEPT {
          apply_gamut(p, g);
          ++p->mCacheVersion;  // forces any derived-value cache to rebuild
      }

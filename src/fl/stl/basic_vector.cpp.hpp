@@ -454,7 +454,7 @@ void vector_basic::swap_impl(vector_basic& other) {
 
 // ======= COPY / MOVE HELPERS =======
 
-void vector_basic::copy_from(const vector_basic& other) FL_NOEXCEPT {
+void vector_basic::copy_from(const vector_basic& other) FL_NO_EXCEPT {
     clear_impl();
     if (other.mSize == 0) return;
 
@@ -471,7 +471,7 @@ void vector_basic::copy_from(const vector_basic& other) FL_NOEXCEPT {
     mSize = other.mSize;
 }
 
-void vector_basic::move_from(vector_basic& other) FL_NOEXCEPT {
+void vector_basic::move_from(vector_basic& other) FL_NO_EXCEPT {
     if (other.isInline()) {
         // Can't steal inline buffer — must move elements
         reserve_impl(other.mSize);
@@ -504,7 +504,7 @@ void vector_basic::move_from(vector_basic& other) FL_NOEXCEPT {
     }
 }
 
-void vector_basic::move_assign(vector_basic& other) FL_NOEXCEPT {
+void vector_basic::move_assign(vector_basic& other) FL_NO_EXCEPT {
     if (this == &other) return;
     clear_impl();
     if (!isInline() && mArray) {
@@ -521,7 +521,7 @@ void vector_basic::move_assign(vector_basic& other) FL_NOEXCEPT {
 
 // ======= DESTRUCTOR =======
 
-vector_basic::~vector_basic() FL_NOEXCEPT {
+vector_basic::~vector_basic() FL_NO_EXCEPT {
     clear_impl();
     if (!isInline() && mArray) {
         mResource->deallocate(mArray, mCapacity * mElementSize);

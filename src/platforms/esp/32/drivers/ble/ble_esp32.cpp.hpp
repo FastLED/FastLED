@@ -125,7 +125,7 @@ static const struct ble_gatt_svc_def fl_gatt_svr_svcs[] = {
 static struct ble_gatt_svc_def fl_gatt_svr_svcs_mut[2];
 static struct ble_gatt_chr_def fl_gatt_chr_defs_mut[3];
 
-static void fl_ble_patch_gatt_table(TransportState *state) FL_NOEXCEPT {
+static void fl_ble_patch_gatt_table(TransportState *state) FL_NO_EXCEPT {
     // Copy service table
     fl::memcpy(fl_gatt_svr_svcs_mut, fl_gatt_svr_svcs, sizeof(fl_gatt_svr_svcs));
     // Copy characteristic table
@@ -206,7 +206,7 @@ static int fl_ble_gatt_access_cb(u16 conn_handle, u16 attr_handle, // ok no noex
 // GAP event callback — handles connect, disconnect, adv complete
 // ---------------------------------------------------------------------------
 
-static void fl_ble_start_advertise(TransportState *state) FL_NOEXCEPT;
+static void fl_ble_start_advertise(TransportState *state) FL_NO_EXCEPT;
 
 static int fl_ble_gap_event_cb(struct ble_gap_event *event, void *arg) { // ok no noexcept
     auto *state = static_cast<TransportState *>(arg);
@@ -257,7 +257,7 @@ static int fl_ble_gap_event_cb(struct ble_gap_event *event, void *arg) { // ok n
 // Advertising
 // ---------------------------------------------------------------------------
 
-static void fl_ble_start_advertise(TransportState *state) FL_NOEXCEPT {
+static void fl_ble_start_advertise(TransportState *state) FL_NO_EXCEPT {
     const char *name = ble_svc_gap_device_name();
 
     // Advertising packet: flags + device name (required for scanner discovery)
@@ -333,7 +333,7 @@ static void fl_ble_host_task(void *param) { // ok no noexcept
 // Public API implementation
 // ---------------------------------------------------------------------------
 
-TransportState* createTransport(const char* deviceName) FL_NOEXCEPT {
+TransportState* createTransport(const char* deviceName) FL_NO_EXCEPT {
     auto uptr = fl::make_unique<TransportState>();
     auto* state = uptr.get();
 
@@ -386,7 +386,7 @@ TransportState* createTransport(const char* deviceName) FL_NOEXCEPT {
     return state;
 }
 
-void destroyTransport(TransportState* state) FL_NOEXCEPT {
+void destroyTransport(TransportState* state) FL_NO_EXCEPT {
     if (!state) return;
     fl::unique_ptr<TransportState> guard(state); // ok no noexcept
 
@@ -409,7 +409,7 @@ void destroyTransport(TransportState* state) FL_NOEXCEPT {
     FL_WARN_F("[BLE] GATT server stopped");
 }
 
-StatusInfo queryStatus(const TransportState* state) FL_NOEXCEPT {
+StatusInfo queryStatus(const TransportState* state) FL_NO_EXCEPT {
     StatusInfo info;
     if (!state) return info;
     info.connected = state->connected;
@@ -422,7 +422,7 @@ StatusInfo queryStatus(const TransportState* state) FL_NOEXCEPT {
 }
 
 fl::pair<fl::function<fl::optional<fl::json>()>, fl::function<void(const fl::json&)>>
-getTransportCallbacks(TransportState* state) FL_NOEXCEPT {
+getTransportCallbacks(TransportState* state) FL_NO_EXCEPT {
     // RequestSource: polls ring buffer for incoming JSON-RPC
     auto requestSource = [state]() -> fl::optional<fl::json> {
         if (state->tail == state->head) {

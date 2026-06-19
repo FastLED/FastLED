@@ -109,16 +109,16 @@ class TestShouldFlag(unittest.TestCase):
 
 class TestShouldPass(unittest.TestCase):
     def test_fl_noexcept_declaration(self) -> None:
-        self.assertEqual(len(_violations("void foo() FL_NOEXCEPT;")), 0)
+        self.assertEqual(len(_violations("void foo() FL_NO_EXCEPT;")), 0)
 
     def test_fl_noexcept_definition(self) -> None:
-        self.assertEqual(len(_violations("void foo() FL_NOEXCEPT {")), 0)
+        self.assertEqual(len(_violations("void foo() FL_NO_EXCEPT {")), 0)
 
     def test_fl_noexcept_const(self) -> None:
-        self.assertEqual(len(_violations("bool bar() const FL_NOEXCEPT;")), 0)
+        self.assertEqual(len(_violations("bool bar() const FL_NO_EXCEPT;")), 0)
 
     def test_fl_noexcept_override(self) -> None:
-        self.assertEqual(len(_violations("void run() FL_NOEXCEPT override;")), 0)
+        self.assertEqual(len(_violations("void run() FL_NO_EXCEPT override;")), 0)
 
     def test_code_without_noexcept(self) -> None:
         self.assertEqual(len(_violations("int add(int a, int b) { return a + b; }")), 0)
@@ -134,7 +134,7 @@ class TestShouldPass(unittest.TestCase):
 
     def test_fl_noexcept_macro_expansion_in_other_file(self) -> None:
         """A file that defines its own alias must not trigger for the #define line."""
-        code = "#define FL_NOEXCEPT noexcept\nvoid foo() FL_NOEXCEPT;"
+        code = "#define FL_NO_EXCEPT noexcept\nvoid foo() FL_NO_EXCEPT;"
         # The #define line should be allowed, the declaration uses the macro
         self.assertEqual(len(_violations(code)), 0)
 
@@ -210,8 +210,8 @@ class TestEdgeCases(unittest.TestCase):
         self.assertEqual(len(_violations("void foo() noexceptkeyword;")), 0)
 
     def test_fl_noexcept_macro_not_double_flagged(self) -> None:
-        """FL_NOEXCEPT itself must never trigger the checker."""
-        self.assertEqual(len(_violations("void foo() FL_NOEXCEPT;")), 0)
+        """FL_NO_EXCEPT itself must never trigger the checker."""
+        self.assertEqual(len(_violations("void foo() FL_NO_EXCEPT;")), 0)
 
     def test_cpp_file_extension(self) -> None:
         c = RawNoexceptChecker()

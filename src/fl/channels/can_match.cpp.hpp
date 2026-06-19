@@ -14,7 +14,7 @@ namespace can_match_detail {
 // across an entire driver's groups. We surface the most informative
 // reason: pin/pair > frequency > timing > capacity > protocol.
 // Yes always wins.
-inline fl::u8 strength(HandleResult r) FL_NOEXCEPT {
+inline fl::u8 strength(HandleResult r) FL_NO_EXCEPT {
     switch (r) {
         case HandleResult::Yes:         return 100u;
         case HandleResult::NoPinPair:   return 50u;
@@ -31,7 +31,7 @@ inline fl::u8 strength(HandleResult r) FL_NOEXCEPT {
 // falling back to the driver-level *_frequency when the group doesn't
 // constrain it.
 inline FreqRange effectiveFrequencyRange(
-        const DriverCapabilities& caps, const PinGroup& g) FL_NOEXCEPT {
+        const DriverCapabilities& caps, const PinGroup& g) FL_NO_EXCEPT {
     if (!g.frequency.isUnspecified()) {
         return g.frequency;
     }
@@ -53,7 +53,7 @@ inline FreqRange effectiveFrequencyRange(
 // mis-ranked tight windows near boundaries (CodeRabbit #3197).
 inline bool canHitPhase(
         fl::u32 effective_clock_hz, fl::u16 max_ticks,
-        const NanosRange& window) FL_NOEXCEPT {
+        const NanosRange& window) FL_NO_EXCEPT {
     if (window.isUnspecified()) {
         // No chipset constraint on this phase.
         return true;
@@ -83,7 +83,7 @@ inline bool canHitPhase(
 // SOME divider value within [min_divider, max_divider].
 inline bool isClocklessTimingCompatible(
         const ClocklessTimingCapability& cap,
-        const ChipsetClocklessTiming& chip) FL_NOEXCEPT {
+        const ChipsetClocklessTiming& chip) FL_NO_EXCEPT {
     if (cap.isUnspecified()) {
         // Driver doesn't constrain timing — treat as "any chipset fits"
         // (e.g. DMA-fed pattern shifters where any tick width is OK).
@@ -118,7 +118,7 @@ inline bool isClocklessTimingCompatible(
 
 // True iff the set bits in `b` form one contiguous run (no gaps).
 // Empty bitset and single-bit bitsets are trivially contiguous.
-inline bool isContiguousBitset(const PinBitset& b) FL_NOEXCEPT {
+inline bool isContiguousBitset(const PinBitset& b) FL_NO_EXCEPT {
     fl::u32 lo = 0u;
     fl::u32 hi = 0u;
     bool found_lo = false;
@@ -139,7 +139,7 @@ inline bool isContiguousBitset(const PinBitset& b) FL_NOEXCEPT {
 
 // Driver-level protocol pre-filter — fast-out before walking groups.
 inline bool driverProtocolGate(
-        const DriverCapabilities& caps, Protocol p) FL_NOEXCEPT {
+        const DriverCapabilities& caps, Protocol p) FL_NO_EXCEPT {
     return (p == Protocol::Clockless) ? caps.supports_clockless
                                       : caps.supports_spi;
 }
@@ -149,7 +149,7 @@ inline bool driverProtocolGate(
 inline HandleResult checkOneGroup(
         const DriverCapabilities& caps,
         const PinGroup& g,
-        const ChannelRequest& r) FL_NOEXCEPT {
+        const ChannelRequest& r) FL_NO_EXCEPT {
     if (g.protocol != r.protocol) {
         return HandleResult::NoProtocol;
     }
@@ -194,7 +194,7 @@ inline HandleResult checkOneGroup(
 HandleResult canMatch(
     const DriverCapabilities& caps,
     fl::span<const PinGroup>  groups,
-    const ChannelRequest&     request) FL_NOEXCEPT {
+    const ChannelRequest&     request) FL_NO_EXCEPT {
     if (!can_match_detail::driverProtocolGate(caps, request.protocol)) {
         return HandleResult::NoProtocol;
     }

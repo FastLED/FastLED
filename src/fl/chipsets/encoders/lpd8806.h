@@ -30,7 +30,7 @@ namespace fl {
 /// @param out Output iterator for encoded bytes
 /// @note LPD8806 uses GRB wire order: pixel[0]=Green, pixel[1]=Red, pixel[2]=Blue
 template <typename InputIterator, typename OutputIterator>
-void encodeLPD8806(InputIterator first, InputIterator last, OutputIterator out) FL_NOEXCEPT {
+void encodeLPD8806(InputIterator first, InputIterator last, OutputIterator out) FL_NO_EXCEPT {
     // LED data: GRB with MSB set (count as we go)
     size_t num_leds = 0;
     while (first != last) {

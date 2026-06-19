@@ -33,19 +33,19 @@ typedef struct {
     fl::u32 overflow_count;
 } FL_GPIO_RingBuffer;
 
-static FL_GPIO_RingBuffer& g_gpio_ring() FL_NOEXCEPT {
+static FL_GPIO_RingBuffer& g_gpio_ring() FL_NO_EXCEPT {
     return fl::Singleton<FL_GPIO_RingBuffer>::instance();
 }
 
 extern "C" {
 
 /* Initialize ring buffer */
-void fl_gpio_sim_init(void) FL_NOEXCEPT {
+void fl_gpio_sim_init(void) FL_NO_EXCEPT {
     fl::memset(&g_gpio_ring(), 0, sizeof(g_gpio_ring()));
 }
 
 /* Capture SET event */
-void fl_gpio_sim_write_set(fl::u32 mask) FL_NOEXCEPT {
+void fl_gpio_sim_write_set(fl::u32 mask) FL_NO_EXCEPT {
     fl::u32 pos = g_gpio_ring().write_pos;
     g_gpio_ring().events[pos].event_type = 0;  /* SET */
     g_gpio_ring().events[pos].gpio_mask = mask;
@@ -58,7 +58,7 @@ void fl_gpio_sim_write_set(fl::u32 mask) FL_NOEXCEPT {
 }
 
 /* Capture CLEAR event */
-void fl_gpio_sim_write_clear(fl::u32 mask) FL_NOEXCEPT {
+void fl_gpio_sim_write_clear(fl::u32 mask) FL_NO_EXCEPT {
     fl::u32 pos = g_gpio_ring().write_pos;
     g_gpio_ring().events[pos].event_type = 1;  /* CLEAR */
     g_gpio_ring().events[pos].gpio_mask = mask;
@@ -71,12 +71,12 @@ void fl_gpio_sim_write_clear(fl::u32 mask) FL_NOEXCEPT {
 }
 
 /* Advance simulation time (called by test harness) */
-void fl_gpio_sim_tick(void) FL_NOEXCEPT {
+void fl_gpio_sim_tick(void) FL_NO_EXCEPT {
     g_gpio_ring().tick_counter++;
 }
 
 /* Read event from ring buffer (returns false if empty) */
-bool fl_gpio_sim_read_event(FL_GPIO_Event* out) FL_NOEXCEPT {
+bool fl_gpio_sim_read_event(FL_GPIO_Event* out) FL_NO_EXCEPT {
     if (g_gpio_ring().read_pos == g_gpio_ring().write_pos) {
         return false;  /* Empty */
     }
@@ -87,7 +87,7 @@ bool fl_gpio_sim_read_event(FL_GPIO_Event* out) FL_NOEXCEPT {
 }
 
 /* Get event count */
-fl::u32 fl_gpio_sim_get_event_count(void) FL_NOEXCEPT {
+fl::u32 fl_gpio_sim_get_event_count(void) FL_NO_EXCEPT {
     if (g_gpio_ring().write_pos >= g_gpio_ring().read_pos) {
         return g_gpio_ring().write_pos - g_gpio_ring().read_pos;
     } else {
@@ -96,14 +96,14 @@ fl::u32 fl_gpio_sim_get_event_count(void) FL_NOEXCEPT {
 }
 
 /* Clear ring buffer */
-void fl_gpio_sim_clear(void) FL_NOEXCEPT {
+void fl_gpio_sim_clear(void) FL_NO_EXCEPT {
     g_gpio_ring().write_pos = 0;
     g_gpio_ring().read_pos = 0;
     g_gpio_ring().overflow_count = 0;
 }
 
 /* Get overflow count (for diagnostics) */
-fl::u32 fl_gpio_sim_get_overflow_count(void) FL_NOEXCEPT {
+fl::u32 fl_gpio_sim_get_overflow_count(void) FL_NO_EXCEPT {
     return g_gpio_ring().overflow_count;
 }
 

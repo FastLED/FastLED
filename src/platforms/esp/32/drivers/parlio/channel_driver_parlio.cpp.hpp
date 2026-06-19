@@ -39,7 +39,7 @@ namespace fl {
 
 namespace {
 
-inline bool isValidParlioOutputPin(int pin) FL_NOEXCEPT {
+inline bool isValidParlioOutputPin(int pin) FL_NO_EXCEPT {
     if (pin < 0 || pin >= 64) {
         return false;
     }
@@ -56,7 +56,7 @@ inline bool isValidParlioOutputPin(int pin) FL_NOEXCEPT {
 // Constructors / Destructors - Implementation Class
 //=============================================================================
 
-ChannelDriverPARLIOImpl::ChannelDriverPARLIOImpl(size_t data_width) FL_NOEXCEPT
+ChannelDriverPARLIOImpl::ChannelDriverPARLIOImpl(size_t data_width) FL_NO_EXCEPT
     : mDriver(detail::ParlioEngine::getInstance()),
       mInitialized(false),
       mDataWidth(data_width),
@@ -94,7 +94,7 @@ ChannelDriverPARLIOImpl::~ChannelDriverPARLIOImpl() {
     mCurrentGroupIndex = 0;
 }
 
-bool ChannelDriverPARLIOImpl::canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT {
+bool ChannelDriverPARLIOImpl::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
     if (!data) {
         return false;
     }
@@ -111,17 +111,17 @@ bool ChannelDriverPARLIOImpl::canHandle(const ChannelDataPtr& data) const FL_NOE
 // Public Interface - IChannelDriver Implementation
 //=============================================================================
 
-void ChannelDriverPARLIOImpl::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
+void ChannelDriverPARLIOImpl::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     if (channelData) {
         mEnqueuedChannels.push_back(channelData);
     }
 }
 
-void ChannelDriverPARLIOImpl::setReversedPinOrder(bool reversed_pin_order) FL_NOEXCEPT {
+void ChannelDriverPARLIOImpl::setReversedPinOrder(bool reversed_pin_order) FL_NO_EXCEPT {
     mReversedPinOrder = reversed_pin_order;
 }
 
-void ChannelDriverPARLIOImpl::show() FL_NOEXCEPT {
+void ChannelDriverPARLIOImpl::show() FL_NO_EXCEPT {
     FL_SCOPED_TRACE;
     if (!mEnqueuedChannels.empty()) {
         // Wait for previous transmission to complete
@@ -168,7 +168,7 @@ void ChannelDriverPARLIOImpl::show() FL_NOEXCEPT {
         // This allows faster transmissions to complete first, reducing latency
         // for shorter/faster strips while longer/slower strips are still being prepared
         fl::sort(mChipsetGroups.begin(), mChipsetGroups.end(),
-                 [](const ChipsetGroup& a, const ChipsetGroup& b) FL_NOEXCEPT {
+                 [](const ChipsetGroup& a, const ChipsetGroup& b) FL_NO_EXCEPT {
                      // Find max channel size in group a
                      size_t maxSizeA = 0;
                      for (const auto& channel : a.mChannels) {
@@ -199,7 +199,7 @@ void ChannelDriverPARLIOImpl::show() FL_NOEXCEPT {
         for (auto& group : mChipsetGroups) {
             // sort each member of the group by their pin orders.
             bool reversed = mReversedPinOrder;
-            fl::sort(group.mChannels.begin(), group.mChannels.end(), [reversed](const ChannelDataPtr& a, const ChannelDataPtr& b) FL_NOEXCEPT {
+            fl::sort(group.mChannels.begin(), group.mChannels.end(), [reversed](const ChannelDataPtr& a, const ChannelDataPtr& b) FL_NO_EXCEPT {
                 if (reversed) {
                     return b->getPin() < a->getPin();
                 }
@@ -229,7 +229,7 @@ void ChannelDriverPARLIOImpl::show() FL_NOEXCEPT {
     }
 }
 
-IChannelDriver::DriverState ChannelDriverPARLIOImpl::poll() FL_NOEXCEPT {
+IChannelDriver::DriverState ChannelDriverPARLIOImpl::poll() FL_NO_EXCEPT {
     // If not initialized, we're ready (no hardware to poll)
     if (!mInitialized) {
         return DriverState::READY;
@@ -288,7 +288,7 @@ IChannelDriver::DriverState ChannelDriverPARLIOImpl::poll() FL_NOEXCEPT {
     }
 }
 
-void ChannelDriverPARLIOImpl::setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT {
+void ChannelDriverPARLIOImpl::setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT {
     mDriver.setPollNeededCallback(callback);
 }
 
@@ -297,7 +297,7 @@ void ChannelDriverPARLIOImpl::setPollNeededCallback(PollNeededCallback callback)
 //=============================================================================
 
 void ChannelDriverPARLIOImpl::beginTransmission(
-    fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT {
+    fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT {
 
     // Validate channel data first (before initialization)
     if (channelData.size() == 0) {
@@ -392,7 +392,7 @@ void ChannelDriverPARLIOImpl::beginTransmission(
 
 void ChannelDriverPARLIOImpl::prepareScratchBuffer(
     fl::span<const ChannelDataPtr> channelData,
-    size_t maxChannelSize) FL_NOEXCEPT {
+    size_t maxChannelSize) FL_NO_EXCEPT {
 
     // Resize scratch buffer (per-lane layout)
     size_t totalSize = channelData.size() * maxChannelSize;
@@ -425,7 +425,7 @@ void ChannelDriverPARLIOImpl::prepareScratchBuffer(
 // Polymorphic Wrapper Class Implementation
 //=============================================================================
 
-ChannelDriverPARLIO::ChannelDriverPARLIO() FL_NOEXCEPT
+ChannelDriverPARLIO::ChannelDriverPARLIO() FL_NO_EXCEPT
     : mCurrentDataWidth(0),
       mPhase(TransmitPhase::IDLE),
       mPollNeededCallback(),
@@ -436,7 +436,7 @@ ChannelDriverPARLIO::~ChannelDriverPARLIO() {
     mCurrentDataWidth = 0;
 }
 
-bool ChannelDriverPARLIO::canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT {
+bool ChannelDriverPARLIO::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
     if (!data) {
         return false;
     }
@@ -444,13 +444,13 @@ bool ChannelDriverPARLIO::canHandle(const ChannelDataPtr& data) const FL_NOEXCEP
     return true;
 }
 
-void ChannelDriverPARLIO::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
+void ChannelDriverPARLIO::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     if (channelData) {
         mTransmittingChannels.push_back(channelData);
     }
 }
 
-void ChannelDriverPARLIO::show() FL_NOEXCEPT {
+void ChannelDriverPARLIO::show() FL_NO_EXCEPT {
     FL_SCOPED_TRACE;
     if (mTransmittingChannels.empty()) return;
 
@@ -481,7 +481,7 @@ void ChannelDriverPARLIO::show() FL_NOEXCEPT {
     }
 }
 
-IChannelDriver::DriverState ChannelDriverPARLIO::poll() FL_NOEXCEPT {
+IChannelDriver::DriverState ChannelDriverPARLIO::poll() FL_NO_EXCEPT {
     switch (mPhase) {
         case TransmitPhase::IDLE:
             return DriverState::READY;
@@ -555,7 +555,7 @@ IChannelDriver::DriverState ChannelDriverPARLIO::poll() FL_NOEXCEPT {
     }
 }
 
-void ChannelDriverPARLIO::setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT {
+void ChannelDriverPARLIO::setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT {
     mPollNeededCallback = callback;
     detail::ParlioEngine::getInstance().setPollNeededCallback(mPollNeededCallback);
     if (mClocklessDriver) {
@@ -564,7 +564,7 @@ void ChannelDriverPARLIO::setPollNeededCallback(PollNeededCallback callback) FL_
 }
 
 void ChannelDriverPARLIO::beginClocklessTransmission(
-    fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT {
+    fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT {
     if (channelData.size() == 0) {
         return;
     }
@@ -595,14 +595,14 @@ void ChannelDriverPARLIO::beginClocklessTransmission(
     mClocklessDriver->show();
 }
 
-void ChannelDriverPARLIO::beginSpiTransmission() FL_NOEXCEPT {
+void ChannelDriverPARLIO::beginSpiTransmission() FL_NO_EXCEPT {
     if (mPendingSpi.empty()) return;
 
     mCurrentSpiChannelIndex = 0;
     beginSingleSpiChannel(mPendingSpi[0]);
 }
 
-void ChannelDriverPARLIO::beginSingleSpiChannel(const ChannelDataPtr& channelData) FL_NOEXCEPT {
+void ChannelDriverPARLIO::beginSingleSpiChannel(const ChannelDataPtr& channelData) FL_NO_EXCEPT {
     if (!channelData || !channelData->isSpi()) return;
 
     // Extract SPI config from channel data
@@ -642,7 +642,7 @@ void ChannelDriverPARLIO::beginSingleSpiChannel(const ChannelDataPtr& channelDat
     }
 }
 
-ParlioDebugMetrics getParlioDebugMetrics() FL_NOEXCEPT {
+ParlioDebugMetrics getParlioDebugMetrics() FL_NO_EXCEPT {
     const detail::ParlioDebugMetrics engine_metrics =
         detail::ParlioEngine::getInstance().getDebugMetrics();
     ParlioDebugMetrics metrics = {};

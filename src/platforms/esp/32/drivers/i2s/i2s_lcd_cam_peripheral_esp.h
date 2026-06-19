@@ -37,7 +37,7 @@ public:
     /// @return Reference to singleton
     ///
     /// ESP32-S3 has only one LCD_CAM peripheral, so we use singleton pattern.
-    static I2sLcdCamPeripheralEsp& instance() FL_NOEXCEPT;
+    static I2sLcdCamPeripheralEsp& instance() FL_NO_EXCEPT;
 
     ~I2sLcdCamPeripheralEsp() override;
 
@@ -45,22 +45,22 @@ public:
     // II2sLcdCamPeripheral Implementation
     //=========================================================================
 
-    bool initialize(const I2sLcdCamConfig& config) FL_NOEXCEPT override;
-    void deinitialize() FL_NOEXCEPT override;
-    bool isInitialized() const FL_NOEXCEPT override;
+    bool initialize(const I2sLcdCamConfig& config) FL_NO_EXCEPT override;
+    void deinitialize() FL_NO_EXCEPT override;
+    bool isInitialized() const FL_NO_EXCEPT override;
 
-    u16* allocateBuffer(size_t size_bytes) FL_NOEXCEPT override;
-    void freeBuffer(u16* buffer) FL_NOEXCEPT override;
+    u16* allocateBuffer(size_t size_bytes) FL_NO_EXCEPT override;
+    void freeBuffer(u16* buffer) FL_NO_EXCEPT override;
 
-    bool transmit(const u16* buffer, size_t size_bytes) FL_NOEXCEPT override;
-    bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT override;
-    bool isBusy() const FL_NOEXCEPT override;
+    bool transmit(const u16* buffer, size_t size_bytes) FL_NO_EXCEPT override;
+    bool waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT override;
+    bool isBusy() const FL_NO_EXCEPT override;
 
-    bool registerTransmitCallback(void* callback, void* user_ctx) FL_NOEXCEPT override;
-    const I2sLcdCamConfig& getConfig() const FL_NOEXCEPT override;
+    bool registerTransmitCallback(void* callback, void* user_ctx) FL_NO_EXCEPT override;
+    const I2sLcdCamConfig& getConfig() const FL_NO_EXCEPT override;
 
-    u64 getMicroseconds() FL_NOEXCEPT override;
-    void delay(u32 ms) FL_NOEXCEPT override;
+    u64 getMicroseconds() FL_NO_EXCEPT override;
+    void delay(u32 ms) FL_NO_EXCEPT override;
 
 private:
     // Allow Singleton to call private constructor
@@ -73,7 +73,7 @@ private:
         esp_lcd_panel_io_event_data_t* edata,
         void* user_ctx);
 
-    I2sLcdCamPeripheralEsp() FL_NOEXCEPT;
+    I2sLcdCamPeripheralEsp() FL_NO_EXCEPT;
 
     // Non-copyable
     I2sLcdCamPeripheralEsp(const I2sLcdCamPeripheralEsp&) = delete;
