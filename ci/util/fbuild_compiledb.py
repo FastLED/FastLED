@@ -26,11 +26,17 @@ def _candidate_fbuild_release_dirs(
 
     FastLED compiles fbuild with ``build_dir=<repo>/.build/pio/<board>/`` (see
     ``ci/compiler/pio.py::_artifacts_dir``), so fbuild's output lives at
-    ``.build/pio/<board>/.fbuild/build/<env>/release/``. The standalone CLI
-    (``fbuild <repo> build --target compiledb``) instead emits
-    ``<repo>/.fbuild/build/<env>/release/`` — we treat both as valid so that a
-    direct ``--target compiledb`` invocation (no prior FastLED compile) also
-    works. An older ``.build/.fbuild/…`` layout is kept as a tail fallback.
+    ``.build/pio/<board>/.fbuild/build/<env>/release/`` — except when the
+    FastLED orchestrator invokes fbuild without an explicit ``-e <env>``
+    (the common case for boards where the fbuild env name matches the
+    build_dir's board name), in which case fbuild collapses the ``<env>``
+    segment and emits to ``.build/pio/<board>/.fbuild/build/release/``
+    directly. The latter is what every current LPC8xx CI workflow produces.
+    The standalone CLI (``fbuild <repo> build --target compiledb``) instead
+    emits ``<repo>/.fbuild/build/<env>/release/`` — we treat all variants as
+    valid so that a direct ``--target compiledb`` invocation (no prior
+    FastLED compile) also works. An older ``.build/.fbuild/…`` layout is
+    kept as a tail fallback.
 
     ``project_root`` is passed explicitly rather than derived from
     ``build_root.name == ".build"`` — callers always know their repo root
@@ -42,6 +48,11 @@ def _candidate_fbuild_release_dirs(
     """
     return [
         build_root / "pio" / board_name / ".fbuild" / "build" / board_name / "release",
+        # FastLED-CI-orchestrated builds where fbuild collapses the <env>
+        # segment. See #3264 — without this, every LPC8xx CI build falls
+        # through to `pio check`, which then fails for boards the PIO
+        # platform doesn't register (e.g. `lpc804`).
+        build_root / "pio" / board_name / ".fbuild" / "build" / "release",
         project_root / ".fbuild" / "build" / board_name / "release",
         build_root / ".fbuild" / "build" / board_name / "release",
     ]
