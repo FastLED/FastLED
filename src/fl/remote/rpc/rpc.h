@@ -75,6 +75,8 @@
 #include "fl/remote/rpc/rpc_handle.h"
 #include "fl/remote/rpc/rpc_registry.h"
 #include "fl/remote/rpc/rpc_mode.h"
+#include "fl/remote/rpc/runtime_rpc_binding.h"  // RuntimeRpcBinding (low-memory dispatch, #3246)
+#include "fl/system/sketch_macros.h"             // FL_PLATFORM_HAS_LARGE_MEMORY
 
 // STL headers required for public API
 #include "fl/stl/stdint.h"
@@ -358,7 +360,15 @@ public:
 
         detail::RpcEntry entry;
         entry.mTypeTag = detail::TypeTag<Sig>::id();
+        // Per-Sig dispatch fork (FastLED #3246). Low-memory targets pay only
+        // a ~50-150 B trampoline per signature via RuntimeRpcBinding instead
+        // of the ~2.1 KB TypedRpcBinding<Sig>::invokeWithReturn instantiation.
+        // Large-memory targets keep the existing fast inline-dispatch path.
+#if FL_PLATFORM_HAS_LARGE_MEMORY
         entry.mInvoker = fl::make_shared<detail::TypedInvoker<Sig>>(fn);
+#else
+        entry.mInvoker = detail::makeRuntimeRpcBinding(fn);
+#endif
         entry.mTypedCallable = fl::make_shared<detail::TypedCallableHolder<Sig>>(fn);
 #if FL_PLATFORM_HAS_LARGE_MEMORY
         // Schema generator construction gated on Low-memory targets per
