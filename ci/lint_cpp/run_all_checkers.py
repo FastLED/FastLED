@@ -346,6 +346,23 @@ def format_and_print_results(
         return 0
 
 
+def _ast_tool_unavailable(message: str) -> bool:
+    """Return True iff *message* signals that the clang-query AST tool is
+    absent from the runtime (vs. an actual lint violation).
+
+    Captures both the "tool not found at resolve time" path inside
+    ``_find_clang_query`` and the "uv resolved but couldn't spawn the
+    inner binary" path that surfaces on CI runners without the full
+    clang-tool-chain wheel installed.
+    """
+    lower = message.lower()
+    return (
+        "clang-query not found" in lower
+        or "failed to spawn" in lower
+        or "no such file or directory" in lower
+    )
+
+
 def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
     """Run the clang-query FL_NO_EXCEPT ratchet used by default C++ lint."""
     from ci.tools.check_noexcept import (
@@ -376,7 +393,22 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
     try:
         hits = find_missing_noexcept(scope)
     except NoexceptCheckError as exc:
-        results.add_violation("ci/tools/check_noexcept.py", 0, str(exc))
+        # If the underlying clang-query tool simply isn't on PATH (common on
+        # CI runners without a full LLVM toolchain install), skip the AST
+        # ratchet with a stderr warning rather than turning it into a hard
+        # lint failure. The ratchet is one of the Tier-4 entries explicitly
+        # out-of-scope per #3288 and is best effort outside dev boxes.
+        # The two flavors we see in the wild:
+        #   - "clang-query not found. Install LLVM or the clang-tool-chain ..."
+        #     (raised by _find_clang_query returning empty)
+        #   - "error: Failed to spawn: `clang-tool-chain-query` Caused by ..."
+        #     (raised by uv when it can resolve uv itself but not the inner
+        #     clang-tool-chain entry-point)
+        message = str(exc)
+        if _ast_tool_unavailable(message):
+            print(f"⚠️  Skipping FL_NO_EXCEPT AST ratchet — {message}", file=sys.stderr)
+            return results
+        results.add_violation("ci/tools/check_noexcept.py", 0, message)
         return results
 
     if rel_file is not None:
@@ -422,7 +454,16 @@ def run_array_param_ast_check(file_path: str | None = None) -> CheckerResults:
     try:
         hits = find_decayed_array_params(scope)
     except ArrayParamCheckError as exc:
-        results.add_violation("ci/tools/check_array_params.py", 0, str(exc))
+        # Same fallback as run_noexcept_ast_check above — skip when the
+        # underlying tool is missing rather than failing the whole lint.
+        message = str(exc)
+        if _ast_tool_unavailable(message):
+            print(
+                f"⚠️  Skipping decayed-array-param AST ratchet — {message}",
+                file=sys.stderr,
+            )
+            return results
+        results.add_violation("ci/tools/check_array_params.py", 0, message)
         return results
 
     if rel_file is not None:

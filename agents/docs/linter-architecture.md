@@ -77,6 +77,8 @@ impl FileContentChecker for YourRuleChecker {
 
 Helpers like `ends_with_any`, `is_under_dir`, `normalize_path`, `split_line_comment`, and `strip_string_literals` live in `ci/lint_cpp_rs/src/lint_core/`. Pre-compiled regexes go in `ci/lint_cpp_rs/src/lint_core/regexes.rs`.
 
+> **Crate layout note.** All `ci/lint_cpp_rs/src/lint_core/*.rs` helpers — plus the `FileContent` struct and the `FileContentChecker` trait — are declared with module-private visibility (`fn`, not `pub fn`). They reach your new checker only because `ci/lint_cpp_rs/src/lib.rs` `include!()`s every source file into a single compilation unit. Treat the whole crate as one big module: add new files under `ci/lint_cpp_rs/src/checkers/`, hook them up with another `include!()` in `lib.rs`, and rely on the existing helpers in-place — do not try to add `pub` qualifiers or import them via `use crate::...` paths. (See `ci/lint_cpp_rs/src/checkers/README.md` for the policy-area grouping.)
+
 **b) Register it in `ci/lint_cpp_rs/src/lint_core/processor_registry_cli.rs`.** Add a short snake_case name and a class-style name in two places:
 
 ```rust
