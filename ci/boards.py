@@ -91,6 +91,14 @@ class Board:
     extra_scripts: list[str] | None = (
         None  # Custom build scripts to run (e.g., ['pre:script.py'] for pre-build hooks)
     )
+    # Serial monitor filters (e.g., ["default", "esp32_exception_decoder"]).
+    # ESP32-family boards auto-default to ["default", "esp32_exception_decoder"]
+    # in to_platformio_ini() when this is left None — see #3274 Phase 1. Set to
+    # [] to suppress the auto-default; set to a custom list to override.
+    monitor_filters: list[str] | None = None
+    # PlatformIO static-analysis tool name (e.g., "clangtidy"). Opt-in per-board;
+    # not auto-defaulted. Only consumed by `pio check`, not the compile path.
+    check_tool: str | None = None
     # Opt-in for GCC -fopt-info-all -> optimization_report.txt. Default OFF
     # because the file accumulates across every example in the matrix and can
     # exceed 100 MB on no-LTO boards with a large sketch set (nrf52840 with
@@ -664,6 +672,29 @@ class Board:
                 for lib in self.lib_ignore:
                     lines.append(f"    {lib}")
 
+        # Serial monitor filters. ESP32-family boards auto-default to
+        # ["default", "esp32_exception_decoder"] so that crash backtraces
+        # decode to file:line under `bash debug` / `pio device monitor`
+        # without depending on the root platformio.ini merge (see #3274
+        # Phase 1). An explicit `monitor_filters=[]` on a Board suppresses
+        # the auto-default; any non-None value overrides it.
+        is_esp32_family = self.board_name.startswith("esp32") or (
+            self.real_board_name is not None
+            and self.real_board_name.startswith("esp32")
+        )
+        effective_monitor_filters = self.monitor_filters
+        if effective_monitor_filters is None and is_esp32_family:
+            effective_monitor_filters = ["default", "esp32_exception_decoder"]
+        if effective_monitor_filters:
+            lines.append("monitor_filters =")
+            for mf in effective_monitor_filters:
+                lines.append(f"    {mf}")
+
+        # PlatformIO static-analysis tool (consumed by `pio check`, not the
+        # compile path). Opt-in per-board; not auto-defaulted.
+        if self.check_tool:
+            lines.append(f"check_tool = {self.check_tool}")
+
         # Add FastLED-specific configurations if project_root is provided
         if project_root:
             # Only add default lib_ldf_mode if board doesn't specify its own
@@ -777,6 +808,19 @@ STM32H747XI_GIGA = Board(
 #     platform=ESP32_IDF_5_1_PIOARDUINO,
 # )
 
+# Required on every PARLIO-capable ESP32 target (C5/C6/H2/P4/S3). Without these,
+# the PARLIO TX ISR is placed in flash and may take cache-miss stalls during
+# execution — long enough to violate LED protocol timing. The driver emits a
+# #warning at compile time when CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM is missing
+# (src/platforms/esp/32/drivers/parlio/parlio_peripheral_esp.cpp.hpp:46-48).
+# Historically these lived only in root platformio.ini under [env:esp32c6] and
+# reached CI only via the implicit root-merge — leaving every other PARLIO
+# board (S3, H2, P4, C5) compiling without them. See #3271.
+_ESP32_PARLIO_BUILD_FLAGS = [
+    "-DCONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM=1",
+    "-DCONFIG_PARLIO_TX_ISR_CACHE_SAFE=1",
+]
+
 # ESP32-C2: Use Arduino framework only (not "arduino, espidf")
 # The dual framework mode causes PlatformIO to use ESP-IDF's component-based build system,
 # which does not automatically discover and compile .cpp files in example subdirectories
@@ -809,6 +853,7 @@ ESP32_C5_DEVKITC_1 = Board(
     real_board_name="esp32-c5-devkitc-1",
     platform=ESP32_IDF_5_5_1_PIOARDUINO,
     build_flags=[*ESP32_PARLIO_BUILD_FLAGS],
+    build_flags=list(_ESP32_PARLIO_BUILD_FLAGS),
 )
 
 ESP32_C6_DEVKITC_1 = Board(
@@ -818,6 +863,7 @@ ESP32_C6_DEVKITC_1 = Board(
     board_build_flash_size="4MB",  # ESP32-C6FH4 actual flash size confirmed by esptool
     board_partitions="huge_app.csv",
     build_flags=[
+        *_ESP32_PARLIO_BUILD_FLAGS,
         "-funwind-tables",  # Better stack traces for RISC-V crash decoding
         "-DARDUINO_USB_MODE=1",  # Select HWCDC (USB-Serial/JTAG) over OTG
         "-DARDUINO_USB_CDC_ON_BOOT=1",  # Route Serial to HWCDC. Safe with setTxTimeoutMs(0); see #2668
@@ -835,6 +881,7 @@ ESP32_S3_DEVKITC_1 = Board(
     board_partitions="huge_app.csv",  # 3MB app partition (default.csv only has 1.25MB, too small for Validation)
     build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
     build_flags=[
+        *_ESP32_PARLIO_BUILD_FLAGS,
         "-DARDUINO_USB_MODE=1",  # Route Serial over native USB for AutoResearch RPC on the upload port
         "-DARDUINO_USB_CDC_ON_BOOT=1",
         "-DARDUINO_LOOP_STACK_SIZE=16384",  # AutoResearch RPC plus ESP driver setup is deep enough to exceed the Arduino 8KB default
@@ -861,6 +908,7 @@ ESP32H2 = Board(
     platform_needs_install=True,  # Install platform package to get the boards
     platform=ESP32_IDF_5_3_PIOARDUINO,
     build_flags=[*ESP32_PARLIO_BUILD_FLAGS],
+    build_flags=list(_ESP32_PARLIO_BUILD_FLAGS),
 )
 
 ESP32_P4 = Board(
@@ -868,6 +916,7 @@ ESP32_P4 = Board(
     real_board_name="esp32-p4-evboard",
     platform=ESP32_IDF_5_5_1_PIOARDUINO,
     board_partitions="huge_app.csv",
+    build_flags=list(_ESP32_PARLIO_BUILD_FLAGS),
     # Route Serial → USB-Serial-JTAG (HWCDCSerial) instead of UART0 (pins 37/38).
     # Without these the AutoResearch firmware listens on UART0 while the host
     # tool talks to the USB-Serial-JTAG COM port — every RPC write times out.

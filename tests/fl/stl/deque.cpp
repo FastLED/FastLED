@@ -5,6 +5,23 @@
 #include "test.h"
 #include "fl/stl/move.h"
 
+// FastLED #3270: a tag type whose deque_traits<> specialization pins chunk
+// size to 4. Used by the per-type chunk-size override test below. Must be
+// declared at namespace scope (specializations cannot live inside a class
+// or function body), so it lives above the FL_TEST_FILE block.
+struct SmallChunkTag {
+    int v;
+    SmallChunkTag() : v(0) {}
+    explicit SmallChunkTag(int x) : v(x) {}
+};
+
+namespace fl {
+template <>
+struct deque_traits<SmallChunkTag> {
+    static constexpr fl::size chunk_size = 4u;
+};
+} // namespace fl
+
 FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
@@ -754,12 +771,16 @@ FL_TEST_CASE("fl::deque - shrink_to_fit") {
         dq.pop_back();
     }
 
-    // Capacity should still be large
+    // Capacity should still be large (pop_back doesn't deallocate chunks).
     FL_CHECK_EQ(dq.capacity(), large_capacity);
 
-    // Shrink
+    // Shrink. Chunked deque capacity is chunk-quantized: after shrink_to_fit
+    // the remaining chunks span [front .. back] only. 5 contiguous elements
+    // fit in a single chunk, so capacity() == kChunkSize after shrink.
+    // (See FastLED #3270 -- capacity is no longer element-exact.)
     dq.shrink_to_fit();
-    FL_CHECK_EQ(dq.capacity(), 5u);
+    FL_CHECK_GE(dq.capacity(), 5u);
+    FL_CHECK_LE(dq.capacity(), large_capacity);
     FL_CHECK_EQ(dq.size(), 5u);
 
     // Data should still be intact
@@ -864,6 +885,122 @@ FL_TEST_CASE("fl::deque - mixed operations with new methods") {
     FL_CHECK_EQ(dq[3], 88);
     FL_CHECK_EQ(dq[4], 3);
     FL_CHECK_EQ(dq[5], 4);
+}
+
+// ---- FastLED #3270 chunked-deque acceptance tests ----
+
+// Pointer stability across grow: an element's address taken at insertion
+// time must remain valid (and dereference to the same value) after many
+// subsequent push_back calls that span multiple chunk boundaries. The old
+// vector-style deque would have invalidated this pointer on every doubling
+// realloc; the chunked deque never moves existing elements.
+FL_TEST_CASE("fl::deque - pointer stability across push_back grow (#3270)") {
+    deque<int> dq;
+    constexpr int kChunkSize = static_cast<int>(deque_traits<int>::chunk_size);
+
+    dq.push_back(42);
+    int* anchor = &dq[0];
+
+    // Push enough elements to allocate ~10 chunks, well past the initial
+    // chunk-map capacity and forcing the map itself to grow several times.
+    for (int i = 1; i < 10 * kChunkSize; ++i) {
+        dq.push_back(i);
+    }
+
+    // anchor must still address the original element with the original value.
+    FL_CHECK_EQ(*anchor, 42);
+    FL_CHECK_EQ(&dq[0], anchor);
+}
+
+// Pointer stability across push_front: same contract, exercising the
+// front-grow path which touches mFrontMapIdx and mFrontOffset rather than
+// the back of the map.
+FL_TEST_CASE("fl::deque - pointer stability across push_front grow (#3270)") {
+    deque<int> dq;
+    constexpr int kChunkSize = static_cast<int>(deque_traits<int>::chunk_size);
+
+    dq.push_back(1234);
+    int* anchor = &dq[0];
+
+    // Push many elements at the front -- chunks get allocated before the
+    // initial chunk, and the chunk-map gets grown leftward.
+    for (int i = 0; i < 10 * kChunkSize; ++i) {
+        dq.push_front(i);
+    }
+
+    // anchor must still address the same element (now the back of the deque).
+    FL_CHECK_EQ(*anchor, 1234);
+    FL_CHECK_EQ(&dq.back(), anchor);
+}
+
+// Push across an exact chunk boundary: with kChunkSize elements pushed,
+// the next push_back must allocate a new chunk without disturbing the
+// previous chunk's contents.
+FL_TEST_CASE("fl::deque - push_back across chunk boundary (#3270)") {
+    deque<int> dq;
+    constexpr int kChunkSize = static_cast<int>(deque_traits<int>::chunk_size);
+
+    for (int i = 0; i < kChunkSize; ++i) {
+        dq.push_back(i);
+    }
+    FL_CHECK_EQ(dq.size(), static_cast<fl::size>(kChunkSize));
+
+    // Anchor a pointer in the first chunk before the boundary-crossing push.
+    int* anchor = &dq[kChunkSize / 2];
+    int anchor_value = *anchor;
+
+    // This push must trigger a new-chunk allocation, not a move of existing elements.
+    dq.push_back(kChunkSize);
+    FL_CHECK_EQ(*anchor, anchor_value);
+    FL_CHECK_EQ(dq.size(), static_cast<fl::size>(kChunkSize + 1));
+    FL_CHECK_EQ(dq[kChunkSize], kChunkSize);
+}
+
+// Multi-element insert that spans more than one chunk: insert(pos, count, v)
+// must allocate ceil(count / kChunkSize) chunks and not move existing
+// elements outside the shift range. We check elements before the shift
+// retain stable addresses.
+FL_TEST_CASE("fl::deque - insert(count) allocating multiple chunks (#3270)") {
+    deque<int> dq;
+    constexpr int kChunkSize = static_cast<int>(deque_traits<int>::chunk_size);
+
+    // Start with one element so the leading anchor is in the front chunk
+    // and won't be shifted by the insert below.
+    dq.push_back(-1);
+    int* anchor = &dq[0];
+
+    // Insert 3 * kChunkSize copies at position 1. This needs at least 3
+    // more chunks past the front chunk.
+    dq.insert(dq.begin() + 1, 3 * kChunkSize, 7);
+
+    FL_CHECK_EQ(dq.size(), static_cast<fl::size>(1 + 3 * kChunkSize));
+    FL_CHECK_EQ(*anchor, -1);
+    FL_CHECK_EQ(&dq[0], anchor);
+    for (fl::size i = 1; i < dq.size(); ++i) {
+        FL_CHECK_EQ(dq[i], 7);
+    }
+}
+
+// Per-type chunk_size override via deque_traits partial specialization.
+// SmallChunkTag is declared at namespace scope above the FL_TEST_FILE block;
+// its deque_traits specialization pins chunk_size = 4.
+FL_TEST_CASE("fl::deque_traits<T> chunk_size override (#3270)") {
+    deque<SmallChunkTag> dq;
+
+    // Push 12 elements; with chunk_size=4 that's 3 chunks. Capacity is
+    // chunk-quantized: 12 elements fit in exactly 3 chunks.
+    for (int i = 0; i < 12; ++i) dq.push_back(SmallChunkTag(i));
+    dq.shrink_to_fit();
+    FL_CHECK_EQ(dq.capacity(), 12u);
+
+    // Add one more -- needs a 4th chunk.
+    dq.push_back(SmallChunkTag(12));
+    dq.shrink_to_fit();
+    FL_CHECK_EQ(dq.capacity(), 16u);
+    FL_CHECK_EQ(dq.size(), 13u);
+    for (int i = 0; i < 13; ++i) {
+        FL_CHECK_EQ(dq[i].v, i);
+    }
 }
 
 } // FL_TEST_FILE

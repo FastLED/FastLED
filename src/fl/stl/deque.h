@@ -2,74 +2,165 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/stl/deque_basic.h"  // detail::deque_grow_capacity / deque_physical_index (#3250)
+#include "fl/stl/deque_basic.h"  // detail::deque_grow_map_capacity (#3270)
 #include "fl/stl/move.h"
 #include "fl/stl/iterator.h"
 #include "fl/stl/memory_resource.h"
 #include "fl/stl/new.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
+#include "fl/system/sketch_macros.h"  // FL_PLATFORM_HAS_LARGE_MEMORY
 
 namespace fl {
+
+// Per-type chunk-size trait. Specialize to override the default chunk size
+// for a particular T (e.g. when the typical deque<T> sliding window has a
+// known fixed extent that should match the chunk size). See FastLED #3270.
+template <typename T>
+struct deque_traits {
+    static constexpr fl::size chunk_size =
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+        64u;
+#else
+        16u;
+#endif
+};
 
 template <typename T>
 class deque {
 private:
-    T* mData = nullptr;
-    fl::size mCapacity = 0;
-    fl::size mSize = 0;
-    fl::size mFront = 0;  // Index of the front element
+    // Map-of-fixed-size-chunks layout. Existing elements are NEVER moved on
+    // grow; only the chunk-pointer map is reallocated when one side runs out
+    // of room. push_back / push_front allocate a new chunk at the active
+    // end as needed; intermediate chunks (between front and back) are
+    // always allocated. See FastLED #3270.
+    static constexpr fl::size kChunkSize = deque_traits<T>::chunk_size;
+
+    T** mMap = nullptr;            // array of T* chunk pointers, length mMapCapacity
+    fl::size mMapCapacity = 0;     // number of chunk slots in mMap
+    fl::size mFrontMapIdx = 0;     // index in mMap of the chunk holding the front element
+    fl::size mFrontOffset = 0;     // offset within front chunk of the front element [0, kChunkSize)
+    fl::size mSize = 0;            // total elements
     memory_resource* mResource = default_memory_resource();
 
-    // Grow-policy + ring-buffer-index arithmetic lives in `fl::detail`
-    // (deque_basic) so the body is emitted once per build regardless of
-    // how many `deque<T>` instantiations exist. See #3250 / #3244 Tier 3H.
-    static const fl::size kInitialCapacity = detail::kDequeInitialCapacity;
-
-    void ensure_capacity(fl::size min_capacity) {
-        if (mCapacity >= min_capacity) {
-            return;
-        }
-
-        fl::size new_capacity = detail::deque_grow_capacity(mCapacity, min_capacity);
-
-        // Guard `new_capacity * sizeof(T)` against overflow before the
-        // allocator sees a wrapped byte-size and hands us a too-small buffer
-        // (which the move loop below would then run past). Treat as
-        // allocation failure -- same observable behavior as `allocate`
-        // returning nullptr.
-        if (new_capacity > static_cast<fl::size>(-1) / sizeof(T)) {
-            return;
-        }
-
-        T* new_data = static_cast<T*>(mResource->allocate(new_capacity * sizeof(T)));
-        if (!new_data) {
-            return; // Allocation failed
-        }
-
-        // Copy existing elements to new buffer in linear order. The per-step
-        // index computation uses the shared helper so the inner loop's
-        // arithmetic is deduplicated across `deque<T>` instantiations.
-        for (fl::size i = 0; i < mSize; ++i) {
-            fl::size old_idx = detail::deque_physical_index(mFront, i, mCapacity);
-            new (&new_data[i]) T(fl::move(mData[old_idx]));
-            mData[old_idx].~T();
-        }
-
-        if (mData) {
-            mResource->deallocate(mData, mCapacity * sizeof(T));
-        }
-
-        mData = new_data;
-        mCapacity = new_capacity;
-        mFront = 0; // Reset front to 0 after reallocation
+    T* allocate_chunk() FL_NOEXCEPT {
+        return static_cast<T*>(mResource->allocate(kChunkSize * sizeof(T)));
     }
 
-    fl::size get_index(fl::size logical_index) const {
-        return detail::deque_physical_index(mFront, logical_index, mCapacity);
+    void deallocate_chunk(T* chunk) FL_NOEXCEPT {
+        if (chunk) {
+            mResource->deallocate(chunk, kChunkSize * sizeof(T));
+        }
+    }
+
+    T** allocate_map(fl::size capacity) FL_NOEXCEPT {
+        T** m = static_cast<T**>(mResource->allocate(capacity * sizeof(T*)));
+        if (m) {
+            for (fl::size i = 0; i < capacity; ++i) {
+                m[i] = nullptr;
+            }
+        }
+        return m;
+    }
+
+    void deallocate_map(T** map, fl::size capacity) FL_NOEXCEPT {
+        if (map) {
+            mResource->deallocate(map, capacity * sizeof(T*));
+        }
+    }
+
+    // Translate logical index -> (chunk_idx in mMap, offset within chunk).
+    // Caller validates `logical_idx < mSize` (or == mSize for end-position).
+    void locate(fl::size logical_idx, fl::size& chunk_idx, fl::size& offset) const FL_NOEXCEPT {
+        fl::size global = mFrontOffset + logical_idx;
+        chunk_idx = mFrontMapIdx + global / kChunkSize;
+        offset = global % kChunkSize;
+    }
+
+    // Number of currently-used chunk slots [mFrontMapIdx .. back_chunk_idx].
+    fl::size used_chunks() const FL_NOEXCEPT {
+        if (mSize == 0) return 0;
+        fl::size last_global = mFrontOffset + mSize - 1;
+        fl::size last_chunk = mFrontMapIdx + last_global / kChunkSize;
+        return last_chunk - mFrontMapIdx + 1;
+    }
+
+    // Grow the chunk-pointer map. After return:
+    //   - mMap has at least `extra_front` empty slots before mFrontMapIdx
+    //   - mMap has at least `extra_back` empty slots after the back chunk
+    // Existing chunk pointers are preserved (chunks themselves are never moved).
+    // mFrontMapIdx may shift to a new position within the new map.
+    void grow_map(fl::size extra_front, fl::size extra_back) FL_NOEXCEPT {
+        fl::size used = used_chunks();
+        fl::size needed = used + extra_front + extra_back;
+        fl::size new_cap = detail::deque_grow_map_capacity(mMapCapacity, needed);
+        // Center the existing chunks within the new map, biased to leave the
+        // requested extra room on each side.
+        fl::size new_front = extra_front + (new_cap - needed) / 2;
+        T** new_map = allocate_map(new_cap);
+        if (!new_map) {
+            // Allocation failure: match the silent-fail behavior of the prior
+            // vector-style ensure_capacity. Callers must defensively check
+            // capacity / size after push_*.
+            return;
+        }
+        for (fl::size i = 0; i < used; ++i) {
+            new_map[new_front + i] = mMap[mFrontMapIdx + i];
+        }
+        deallocate_map(mMap, mMapCapacity);
+        mMap = new_map;
+        mMapCapacity = new_cap;
+        mFrontMapIdx = new_front;
+    }
+
+    // Ensure the chunk that will hold the next push_back exists. May grow
+    // the map if the back chunk lies past mMapCapacity.
+    void ensure_back_room() FL_NOEXCEPT {
+        fl::size global = mFrontOffset + mSize;
+        fl::size need_chunk_idx = mFrontMapIdx + global / kChunkSize;
+        if (need_chunk_idx >= mMapCapacity) {
+            grow_map(0, 1);
+            global = mFrontOffset + mSize;
+            need_chunk_idx = mFrontMapIdx + global / kChunkSize;
+            if (need_chunk_idx >= mMapCapacity) return;  // grow failed
+        }
+        if (mMap[need_chunk_idx] == nullptr) {
+            mMap[need_chunk_idx] = allocate_chunk();
+        }
+    }
+
+    // Ensure the chunk that will hold the next push_front exists. May grow
+    // the map if push_front would step before mMap[0].
+    void ensure_front_room() FL_NOEXCEPT {
+        if (mFrontOffset > 0) {
+            // Stays within current front chunk; that chunk is guaranteed
+            // allocated when mSize > 0, and allocated below for empty deque.
+            if (mMapCapacity == 0) {
+                grow_map(1, 0);
+                if (mMapCapacity == 0) return;
+            }
+            if (mMap[mFrontMapIdx] == nullptr) {
+                mMap[mFrontMapIdx] = allocate_chunk();
+            }
+            return;
+        }
+        // mFrontOffset == 0: need the previous chunk.
+        if (mFrontMapIdx == 0) {
+            grow_map(1, 0);
+            if (mFrontMapIdx == 0) return;  // grow failed
+        }
+        if (mMap[mFrontMapIdx - 1] == nullptr) {
+            mMap[mFrontMapIdx - 1] = allocate_chunk();
+        }
     }
 
 public:
-    // Iterator implementation (RandomAccessIterator)
+    // Iterator implementation (RandomAccessIterator). The iterator carries
+    // only `(deque*, logical_index)` and resolves to a chunk pointer at
+    // dereference time. Pointer stability for T* taken at insertion time is
+    // provided by chunks themselves never being moved; iterator stability
+    // is preserved across push at either end (logical_index of pre-existing
+    // elements doesn't change for push_back, and is adjusted internally by
+    // mFrontOffset / mFrontMapIdx for push_front).
     class iterator {
     public:
         typedef T value_type;
@@ -277,9 +368,9 @@ public:
     typedef fl::reverse_iterator<const_iterator> const_reverse_iterator;
 
     // Constructors
-    deque() FL_NOEXCEPT : mData(nullptr), mCapacity(0), mSize(0), mFront(0) {}
+    deque() FL_NOEXCEPT {}
 
-    explicit deque(memory_resource* resource) : mData(nullptr), mCapacity(0), mSize(0), mFront(0), mResource(resource) {}
+    explicit deque(memory_resource* resource) FL_NOEXCEPT : mResource(resource) {}
 
     explicit deque(fl::size count, const T& value = T()) : deque() {
         resize(count, value);
@@ -299,15 +390,17 @@ public:
         }
     }
 
-    // Destructor
     ~deque() FL_NOEXCEPT {
         clear();
-        if (mData) {
-            mResource->deallocate(mData, mCapacity * sizeof(T));
+        // Deallocate any remaining chunk pointers (clear() releases element
+        // storage but may leave the map intact for reuse on a still-live deque;
+        // here we tear it down for good).
+        for (fl::size i = 0; i < mMapCapacity; ++i) {
+            deallocate_chunk(mMap[i]);
         }
+        deallocate_map(mMap, mMapCapacity);
     }
 
-    // Assignment operators
     deque& operator=(const deque& other) FL_NOEXCEPT {
         if (this != &other) {
             clear();
@@ -320,229 +413,235 @@ public:
 
     deque& operator=(deque&& other) FL_NOEXCEPT {
         if (this != &other) {
+            // Tear down current state.
             clear();
-            if (mData) {
-                mResource->deallocate(mData, mCapacity * sizeof(T));
+            for (fl::size i = 0; i < mMapCapacity; ++i) {
+                deallocate_chunk(mMap[i]);
             }
+            deallocate_map(mMap, mMapCapacity);
 
-            mData = other.mData;
-            mCapacity = other.mCapacity;
+            mMap = other.mMap;
+            mMapCapacity = other.mMapCapacity;
+            mFrontMapIdx = other.mFrontMapIdx;
+            mFrontOffset = other.mFrontOffset;
             mSize = other.mSize;
-            mFront = other.mFront;
             mResource = other.mResource;
 
-            other.mData = nullptr;
-            other.mCapacity = 0;
+            other.mMap = nullptr;
+            other.mMapCapacity = 0;
+            other.mFrontMapIdx = 0;
+            other.mFrontOffset = 0;
             other.mSize = 0;
-            other.mFront = 0;
         }
         return *this;
     }
 
     // Element access
     T& operator[](fl::size index) {
-        return mData[get_index(index)];
+        fl::size c, o; locate(index, c, o);
+        return mMap[c][o];
     }
 
     const T& operator[](fl::size index) const {
-        return mData[get_index(index)];
+        fl::size c, o; locate(index, c, o);
+        return mMap[c][o];
     }
 
     T& at(fl::size index) {
         if (index >= mSize) {
-            // Handle bounds error - in embedded context, we'll just return the first element
-            // In a real implementation, this might throw an exception
-            return mData[mFront];
+            // Bounds error: return front in embedded context (matching the
+            // pre-#3270 deque's documented fallback).
+            return front();
         }
-        return mData[get_index(index)];
+        fl::size c, o; locate(index, c, o);
+        return mMap[c][o];
     }
 
     const T& at(fl::size index) const {
         if (index >= mSize) {
-            // Handle bounds error - in embedded context, we'll just return the first element
-            return mData[mFront];
+            return front();
         }
-        return mData[get_index(index)];
+        fl::size c, o; locate(index, c, o);
+        return mMap[c][o];
     }
 
     T& front() {
-        return mData[mFront];
+        return mMap[mFrontMapIdx][mFrontOffset];
     }
 
     const T& front() const {
-        return mData[mFront];
+        return mMap[mFrontMapIdx][mFrontOffset];
     }
 
     T& back() {
-        return mData[get_index(mSize - 1)];
+        fl::size c, o; locate(mSize - 1, c, o);
+        return mMap[c][o];
     }
 
     const T& back() const {
-        return mData[get_index(mSize - 1)];
+        fl::size c, o; locate(mSize - 1, c, o);
+        return mMap[c][o];
     }
 
-    // Iterators
-    iterator begin() {
-        return iterator(this, 0);
-    }
+    iterator begin() FL_NOEXCEPT { return iterator(this, 0); }
+    const_iterator begin() const FL_NOEXCEPT { return const_iterator(this, 0); }
+    iterator end() FL_NOEXCEPT { return iterator(this, mSize); }
+    const_iterator end() const FL_NOEXCEPT { return const_iterator(this, mSize); }
 
-    const_iterator begin() const {
-        return const_iterator(this, 0);
-    }
+    reverse_iterator rbegin() FL_NOEXCEPT { return reverse_iterator(end()); }
+    const_reverse_iterator rbegin() const FL_NOEXCEPT { return const_reverse_iterator(end()); }
+    reverse_iterator rend() FL_NOEXCEPT { return reverse_iterator(begin()); }
+    const_reverse_iterator rend() const FL_NOEXCEPT { return const_reverse_iterator(begin()); }
 
-    iterator end() {
-        return iterator(this, mSize);
-    }
+    const_iterator cbegin() const FL_NOEXCEPT { return const_iterator(this, 0); }
+    const_iterator cend() const FL_NOEXCEPT { return const_iterator(this, mSize); }
+    const_reverse_iterator crbegin() const FL_NOEXCEPT { return const_reverse_iterator(cend()); }
+    const_reverse_iterator crend() const FL_NOEXCEPT { return const_reverse_iterator(cbegin()); }
 
-    const_iterator end() const {
-        return const_iterator(this, mSize);
-    }
+    bool empty() const FL_NOEXCEPT { return mSize == 0; }
+    fl::size size() const FL_NOEXCEPT { return mSize; }
 
-    // Reverse iterators
-    reverse_iterator rbegin() {
-        return reverse_iterator(end());
-    }
-
-    const_reverse_iterator rbegin() const {
-        return const_reverse_iterator(end());
-    }
-
-    reverse_iterator rend() {
-        return reverse_iterator(begin());
-    }
-
-    const_reverse_iterator rend() const {
-        return const_reverse_iterator(begin());
-    }
-
-    // Explicit const iterator accessors
-    const_iterator cbegin() const {
-        return const_iterator(this, 0);
-    }
-
-    const_iterator cend() const {
-        return const_iterator(this, mSize);
-    }
-
-    const_reverse_iterator crbegin() const {
-        return const_reverse_iterator(cend());
-    }
-
-    const_reverse_iterator crend() const {
-        return const_reverse_iterator(cbegin());
-    }
-
-    // Capacity
-    bool empty() const {
-        return mSize == 0;
-    }
-
-    fl::size size() const {
-        return mSize;
-    }
-
+    // Total addressable storage in the currently-allocated chunks. Returns
+    // a chunk-size-quantized value (multiple of kChunkSize). The old
+    // vector-style deque reported exact element capacity; chunked deques
+    // report whole-chunk capacity. See FastLED #3270 migration plan.
     fl::size capacity() const {
-        return mCapacity;
+        fl::size allocated = 0;
+        for (fl::size i = 0; i < mMapCapacity; ++i) {
+            if (mMap[i] != nullptr) ++allocated;
+        }
+        return allocated * kChunkSize;
     }
 
     fl::size max_size() const {
-        // Return a reasonable max size (limited by size_t or memory)
         return static_cast<fl::size>(-1) / sizeof(T);
     }
 
-    void reserve(fl::size new_capacity) {
-        if (new_capacity > mCapacity) {
-            ensure_capacity(new_capacity);
-        }
-    }
-
-    void shrink_to_fit() {
-        if (mSize < mCapacity) {
-            if (mSize == 0) {
-                if (mData) {
-                    mResource->deallocate(mData, mCapacity * sizeof(T));
+    // Ensure capacity for at least `n` elements from the current front.
+    // Chunked: pre-allocates ceil(n / kChunkSize) chunks at the back.
+    void reserve(fl::size n) FL_NOEXCEPT {
+        if (n <= capacity()) return;
+        // Allocate enough chunks behind the current front-offset to hold n total.
+        fl::size needed_chunks = (mFrontOffset + n + kChunkSize - 1) / kChunkSize;
+        fl::size cur_chunks = used_chunks();
+        if (cur_chunks < needed_chunks) {
+            fl::size extra = needed_chunks - cur_chunks;
+            // Ensure mMap has room for `extra` more chunks past current back.
+            fl::size last_used_idx = (mSize == 0) ? mFrontMapIdx : (mFrontMapIdx + used_chunks() - 1);
+            if (last_used_idx + extra >= mMapCapacity) {
+                grow_map(0, extra);
+            }
+            // Allocate chunks at the back to cover [front .. front+n).
+            fl::size first_new = (mSize == 0) ? mFrontMapIdx : (mFrontMapIdx + cur_chunks);
+            for (fl::size i = 0; i < extra; ++i) {
+                if (first_new + i >= mMapCapacity) break;
+                if (mMap[first_new + i] == nullptr) {
+                    mMap[first_new + i] = allocate_chunk();
                 }
-                mData = nullptr;
-                mCapacity = 0;
-                mFront = 0;
-            } else {
-                // Reallocate to exact size
-                T* new_data = static_cast<T*>(mResource->allocate(mSize * sizeof(T)));
-                if (!new_data) {
-                    return; // Allocation failed
-                }
-
-                // Copy elements to new buffer
-                for (fl::size i = 0; i < mSize; ++i) {
-                    fl::size old_idx = (mFront + i) % mCapacity;
-                    new (&new_data[i]) T(fl::move(mData[old_idx]));
-                    mData[old_idx].~T();
-                }
-
-                if (mData) {
-                    mResource->deallocate(mData, mCapacity * sizeof(T));
-                }
-
-                mData = new_data;
-                mCapacity = mSize;
-                mFront = 0;
             }
         }
     }
 
-    memory_resource* get_memory_resource() const {
-        return mResource;
-    }
-
-    // Modifiers
-    void clear() {
-        while (!empty()) {
-            pop_back();
+    // Release chunks that hold no live elements. After return, only the
+    // chunks spanning [front .. back] remain allocated. Capacity is
+    // quantized to kChunkSize and equals ceil(size / kChunkSize) * kChunkSize.
+    void shrink_to_fit() {
+        if (mSize == 0) {
+            // Release every chunk and the map itself.
+            for (fl::size i = 0; i < mMapCapacity; ++i) {
+                deallocate_chunk(mMap[i]);
+                mMap[i] = nullptr;
+            }
+            deallocate_map(mMap, mMapCapacity);
+            mMap = nullptr;
+            mMapCapacity = 0;
+            mFrontMapIdx = 0;
+            mFrontOffset = 0;
+            return;
+        }
+        // Release chunks outside [front .. back].
+        fl::size last_used = mFrontMapIdx + used_chunks() - 1;
+        for (fl::size i = 0; i < mMapCapacity; ++i) {
+            if (i < mFrontMapIdx || i > last_used) {
+                deallocate_chunk(mMap[i]);
+                mMap[i] = nullptr;
+            }
         }
     }
 
+    memory_resource* get_memory_resource() const FL_NOEXCEPT { return mResource; }
+
+    void clear() {
+        for (fl::size i = 0; i < mSize; ++i) {
+            fl::size c, o; locate(i, c, o);
+            mMap[c][o].~T();
+        }
+        mSize = 0;
+        // Reset front to the start of its current chunk so subsequent
+        // pushes don't waste leading-chunk space. Chunks themselves stay
+        // allocated for reuse; callers wanting deallocation should call
+        // shrink_to_fit() afterward.
+        mFrontOffset = 0;
+    }
+
     void push_back(const T& value) {
-        ensure_capacity(mSize + 1);
-        fl::size back_index = get_index(mSize);
-        new (&mData[back_index]) T(value);
+        ensure_back_room();
+        fl::size global = mFrontOffset + mSize;
+        fl::size c = mFrontMapIdx + global / kChunkSize;
+        fl::size o = global % kChunkSize;
+        new (&mMap[c][o]) T(value);
         ++mSize;
     }
 
     void push_back(T&& value) {
-        ensure_capacity(mSize + 1);
-        fl::size back_index = get_index(mSize);
-        new (&mData[back_index]) T(fl::move(value));
+        ensure_back_room();
+        fl::size global = mFrontOffset + mSize;
+        fl::size c = mFrontMapIdx + global / kChunkSize;
+        fl::size o = global % kChunkSize;
+        new (&mMap[c][o]) T(fl::move(value));
         ++mSize;
     }
 
     void push_front(const T& value) {
-        ensure_capacity(mSize + 1);
-        mFront = (mFront - 1 + mCapacity) % mCapacity;
-        new (&mData[mFront]) T(value);
+        ensure_front_room();
+        if (mFrontOffset == 0) {
+            --mFrontMapIdx;
+            mFrontOffset = kChunkSize - 1;
+        } else {
+            --mFrontOffset;
+        }
+        new (&mMap[mFrontMapIdx][mFrontOffset]) T(value);
         ++mSize;
     }
 
     void push_front(T&& value) {
-        ensure_capacity(mSize + 1);
-        mFront = (mFront - 1 + mCapacity) % mCapacity;
-        new (&mData[mFront]) T(fl::move(value));
+        ensure_front_room();
+        if (mFrontOffset == 0) {
+            --mFrontMapIdx;
+            mFrontOffset = kChunkSize - 1;
+        } else {
+            --mFrontOffset;
+        }
+        new (&mMap[mFrontMapIdx][mFrontOffset]) T(fl::move(value));
         ++mSize;
     }
 
     void pop_back() {
-        if (mSize > 0) {
-            fl::size back_index = get_index(mSize - 1);
-            mData[back_index].~T();
-            --mSize;
-        }
+        if (mSize == 0) return;
+        fl::size c, o; locate(mSize - 1, c, o);
+        mMap[c][o].~T();
+        --mSize;
     }
 
     void pop_front() {
-        if (mSize > 0) {
-            mData[mFront].~T();
-            mFront = (mFront + 1) % mCapacity;
-            --mSize;
+        if (mSize == 0) return;
+        mMap[mFrontMapIdx][mFrontOffset].~T();
+        ++mFrontOffset;
+        if (mFrontOffset == kChunkSize) {
+            mFrontOffset = 0;
+            ++mFrontMapIdx;
         }
+        --mSize;
     }
 
     void resize(fl::size new_size) {
@@ -550,245 +649,194 @@ public:
     }
 
     void resize(fl::size new_size, const T& value) {
-        if (new_size > mSize) {
-            // Add elements
-            ensure_capacity(new_size);
-            while (mSize < new_size) {
-                push_back(value);
-            }
-        } else if (new_size < mSize) {
-            // Remove elements
-            while (mSize > new_size) {
-                pop_back();
-            }
-        }
-        // If new_size == mSize, do nothing
+        while (mSize < new_size) push_back(value);
+        while (mSize > new_size) pop_back();
     }
 
     void swap(deque& other) {
         if (this != &other) {
-            T* temp_data = mData;
-            fl::size temp_capacity = mCapacity;
-            fl::size temp_size = mSize;
-            fl::size temp_front = mFront;
-            memory_resource* temp_resource = mResource;
+            T** t_map = mMap;
+            fl::size t_cap = mMapCapacity;
+            fl::size t_idx = mFrontMapIdx;
+            fl::size t_off = mFrontOffset;
+            fl::size t_size = mSize;
+            memory_resource* t_res = mResource;
 
-            mData = other.mData;
-            mCapacity = other.mCapacity;
+            mMap = other.mMap;
+            mMapCapacity = other.mMapCapacity;
+            mFrontMapIdx = other.mFrontMapIdx;
+            mFrontOffset = other.mFrontOffset;
             mSize = other.mSize;
-            mFront = other.mFront;
             mResource = other.mResource;
 
-            other.mData = temp_data;
-            other.mCapacity = temp_capacity;
-            other.mSize = temp_size;
-            other.mFront = temp_front;
-            other.mResource = temp_resource;
+            other.mMap = t_map;
+            other.mMapCapacity = t_cap;
+            other.mFrontMapIdx = t_idx;
+            other.mFrontOffset = t_off;
+            other.mSize = t_size;
+            other.mResource = t_res;
         }
     }
 
-    // Insert operations
+    // Insert / emplace / erase use a higher-level strategy than the
+    // vector-style deque: instead of manual ~T() + placement-new bookkeeping
+    // across un-allocated chunk slots, they (1) extend the deque by pushing
+    // a copy of the current back (or the new value when the deque is
+    // empty), which routes through push_back's chunk-allocation path, then
+    // (2) shift via operator[] assignment. Erase is symmetric: shift via
+    // assignment then pop_back. Requires CopyConstructible + CopyAssignable
+    // T, the same contract as std::deque::insert.
+
     iterator insert(const_iterator pos, const T& value) {
-        fl::size index = pos.mIndex;
-        ensure_capacity(mSize + 1);
-
-        // Shift elements from pos to end one position to the right
-        for (fl::size i = mSize; i > index; --i) {
-            fl::size from_idx = get_index(i - 1);
-            fl::size to_idx = get_index(i);
-            new (&mData[to_idx]) T(fl::move(mData[from_idx]));
-            mData[from_idx].~T();
+        fl::size idx = pos.mIndex;
+        if (idx == mSize) {
+            push_back(value);
+            return iterator(this, idx);
         }
-
-        // Insert new element
-        fl::size insert_idx = get_index(index);
-        new (&mData[insert_idx]) T(value);
-        ++mSize;
-
-        return iterator(this, index);
+        // Push a copy of the current back to extend by one; chunk alloc
+        // is handled inside push_back.
+        push_back((*this)[mSize - 1]);
+        for (fl::size i = mSize - 1; i > idx + 1; --i) {
+            (*this)[i - 1] = fl::move((*this)[i - 2]);
+        }
+        (*this)[idx] = value;
+        return iterator(this, idx);
     }
 
     iterator insert(const_iterator pos, T&& value) {
-        fl::size index = pos.mIndex;
-        ensure_capacity(mSize + 1);
-
-        // Shift elements from pos to end one position to the right
-        for (fl::size i = mSize; i > index; --i) {
-            fl::size from_idx = get_index(i - 1);
-            fl::size to_idx = get_index(i);
-            new (&mData[to_idx]) T(fl::move(mData[from_idx]));
-            mData[from_idx].~T();
+        fl::size idx = pos.mIndex;
+        if (idx == mSize) {
+            push_back(fl::move(value));
+            return iterator(this, idx);
         }
-
-        // Insert new element
-        fl::size insert_idx = get_index(index);
-        new (&mData[insert_idx]) T(fl::move(value));
-        ++mSize;
-
-        return iterator(this, index);
+        // Move-extend at the back so move-only T works. The moved-from
+        // slot at old logical mSize-1 is overwritten by the shift loop.
+        push_back(fl::move((*this)[mSize - 1]));
+        for (fl::size i = mSize - 1; i > idx + 1; --i) {
+            (*this)[i - 1] = fl::move((*this)[i - 2]);
+        }
+        (*this)[idx] = fl::move(value);
+        return iterator(this, idx);
     }
 
     iterator insert(const_iterator pos, fl::size count, const T& value) {
-        fl::size index = pos.mIndex;
-        ensure_capacity(mSize + count);
-
-        // Shift elements from pos to end 'count' positions to the right
-        for (fl::size i = mSize + count - 1; i >= index + count; --i) {
-            fl::size from_idx = get_index(i - count);
-            fl::size to_idx = get_index(i);
-            new (&mData[to_idx]) T(fl::move(mData[from_idx]));
-            mData[from_idx].~T();
+        fl::size idx = pos.mIndex;
+        if (count == 0) return iterator(this, idx);
+        fl::size old_size = mSize;
+        // Extend by `count` slots. First push uses `value` if the deque
+        // is empty, else copies the current back; subsequent pushes copy
+        // whatever's at the back now. All these copies will be overwritten
+        // by the shift + fill below.
+        for (fl::size k = 0; k < count; ++k) {
+            if (mSize == 0) push_back(value);
+            else push_back((*this)[mSize - 1]);
         }
-
-        // Insert new elements
+        // Shift elements [idx .. old_size) right by `count` slots.
+        for (fl::size i = old_size; i > idx; --i) {
+            (*this)[i - 1 + count] = fl::move((*this)[i - 1]);
+        }
         for (fl::size i = 0; i < count; ++i) {
-            fl::size insert_idx = get_index(index + i);
-            new (&mData[insert_idx]) T(value);
+            (*this)[idx + i] = value;
         }
-        mSize += count;
-
-        return iterator(this, index);
+        return iterator(this, idx);
     }
 
-    // Erase operations
     iterator erase(const_iterator pos) {
         if (pos == end()) return end();
-
-        fl::size index = pos.mIndex;
-
-        // Destroy element at pos
-        fl::size erase_idx = get_index(index);
-        mData[erase_idx].~T();
-
-        // Shift elements from pos+1 to end one position to the left
-        for (fl::size i = index; i < mSize - 1; ++i) {
-            fl::size from_idx = get_index(i + 1);
-            fl::size to_idx = get_index(i);
-            new (&mData[to_idx]) T(fl::move(mData[from_idx]));
-            mData[from_idx].~T();
+        fl::size idx = pos.mIndex;
+        for (fl::size i = idx; i + 1 < mSize; ++i) {
+            (*this)[i] = fl::move((*this)[i + 1]);
         }
-
-        --mSize;
-        return iterator(this, index);
+        pop_back();
+        return iterator(this, idx);
     }
 
     iterator erase(const_iterator first, const_iterator last) {
-        if (first == last) return iterator(this, first.mIndex);
-
         fl::size start_idx = first.mIndex;
+        if (first == last) return iterator(this, start_idx);
         fl::size count = last.mIndex - first.mIndex;
-
-        // Destroy elements in range
-        for (fl::size i = 0; i < count; ++i) {
-            fl::size destroy_idx = get_index(start_idx + i);
-            mData[destroy_idx].~T();
+        for (fl::size i = start_idx; i + count < mSize; ++i) {
+            (*this)[i] = fl::move((*this)[i + count]);
         }
-
-        // Shift remaining elements left
-        for (fl::size i = start_idx; i < mSize - count; ++i) {
-            fl::size from_idx = get_index(i + count);
-            fl::size to_idx = get_index(i);
-            new (&mData[to_idx]) T(fl::move(mData[from_idx]));
-            mData[from_idx].~T();
+        for (fl::size k = 0; k < count; ++k) {
+            pop_back();
         }
-
-        mSize -= count;
         return iterator(this, start_idx);
     }
 
-    // Emplace operations
     template<typename... Args>
     iterator emplace(const_iterator pos, Args&&... args) {
-        fl::size index = pos.mIndex;
-        ensure_capacity(mSize + 1);
-
-        // Shift elements from pos to end one position to the right
-        for (fl::size i = mSize; i > index; --i) {
-            fl::size from_idx = get_index(i - 1);
-            fl::size to_idx = get_index(i);
-            new (&mData[to_idx]) T(fl::move(mData[from_idx]));
-            mData[from_idx].~T();
+        fl::size idx = pos.mIndex;
+        if (idx == mSize) {
+            emplace_back(fl::forward<Args>(args)...);
+            return iterator(this, idx);
         }
-
-        // Construct new element in place
-        fl::size emplace_idx = get_index(index);
-        new (&mData[emplace_idx]) T(fl::forward<Args>(args)...);
-        ++mSize;
-
-        return iterator(this, index);
+        // Move-extend at the back so move-only T works. The moved-from
+        // slot at old logical mSize-1 is overwritten by the shift loop.
+        push_back(fl::move((*this)[mSize - 1]));
+        for (fl::size i = mSize - 1; i > idx + 1; --i) {
+            (*this)[i - 1] = fl::move((*this)[i - 2]);
+        }
+        (*this)[idx] = T(fl::forward<Args>(args)...);
+        return iterator(this, idx);
     }
 
     template<typename... Args>
     T& emplace_back(Args&&... args) {
-        ensure_capacity(mSize + 1);
-        fl::size back_index = get_index(mSize);
-        new (&mData[back_index]) T(fl::forward<Args>(args)...);
+        ensure_back_room();
+        fl::size global = mFrontOffset + mSize;
+        fl::size c = mFrontMapIdx + global / kChunkSize;
+        fl::size o = global % kChunkSize;
+        new (&mMap[c][o]) T(fl::forward<Args>(args)...);
         ++mSize;
-        return mData[back_index];
+        return mMap[c][o];
     }
 
     template<typename... Args>
     T& emplace_front(Args&&... args) {
-        ensure_capacity(mSize + 1);
-        mFront = (mFront - 1 + mCapacity) % mCapacity;
-        new (&mData[mFront]) T(fl::forward<Args>(args)...);
+        ensure_front_room();
+        if (mFrontOffset == 0) {
+            --mFrontMapIdx;
+            mFrontOffset = kChunkSize - 1;
+        } else {
+            --mFrontOffset;
+        }
+        new (&mMap[mFrontMapIdx][mFrontOffset]) T(fl::forward<Args>(args)...);
         ++mSize;
-        return mData[mFront];
+        return mMap[mFrontMapIdx][mFrontOffset];
     }
 
-    // Assign operations
     void assign(fl::size count, const T& value) {
         clear();
-        ensure_capacity(count);
         for (fl::size i = 0; i < count; ++i) {
             push_back(value);
         }
     }
 
-    // Comparison operators
     bool operator==(const deque& other) const {
-        if (mSize != other.mSize) {
-            return false;
-        }
+        if (mSize != other.mSize) return false;
         for (fl::size i = 0; i < mSize; ++i) {
-            if ((*this)[i] != other[i]) {
-                return false;
-            }
+            if ((*this)[i] != other[i]) return false;
         }
         return true;
     }
 
-    bool operator!=(const deque& other) const {
-        return !(*this == other);
-    }
+    bool operator!=(const deque& other) const FL_NOEXCEPT { return !(*this == other); }
 
     bool operator<(const deque& other) const {
         fl::size min_size = mSize < other.mSize ? mSize : other.mSize;
         for (fl::size i = 0; i < min_size; ++i) {
-            if ((*this)[i] < other[i]) {
-                return true;
-            }
-            if ((*this)[i] > other[i]) {
-                return false;
-            }
+            if ((*this)[i] < other[i]) return true;
+            if ((*this)[i] > other[i]) return false;
         }
         return mSize < other.mSize;
     }
 
-    bool operator<=(const deque& other) const {
-        return *this < other || *this == other;
-    }
-
-    bool operator>(const deque& other) const {
-        return other < *this;
-    }
-
-    bool operator>=(const deque& other) const {
-        return *this > other || *this == other;
-    }
+    bool operator<=(const deque& other) const FL_NOEXCEPT { return *this < other || *this == other; }
+    bool operator>(const deque& other) const FL_NOEXCEPT { return other < *this; }
+    bool operator>=(const deque& other) const FL_NOEXCEPT { return *this > other || *this == other; }
 };
 
-// Convenience typedef for the most common use case
 typedef deque<int> deque_int;
 typedef deque<float> deque_float;
 typedef deque<double> deque_double;
