@@ -23,6 +23,10 @@ bool PatternPlayer::begin(int cs_pin, int numLeds, float fps) {
 }
 
 bool PatternPlayer::begin(FileSystem& fs, int numLeds, float fps) {
+    mHasScreenMap = false;
+    if (fps <= 0.0f) {
+        return false;
+    }
     mFs = fs;
     mFps = fps;
     mVideo = mFs.openVideo(mFilepath.c_str(), numLeds, fps, 2);
@@ -65,10 +69,10 @@ bool PatternPlayer::hasNewFrame() const {
     return (fl::millis() - mLastDrawTime) >= (1000.0f / mFps);
 }
 
-void PatternPlayer::drawFrame(CRGB* leds, int numLeds) {
+void PatternPlayer::drawFrame(fl::span<CRGB> leds) {
     if (mVideo) {
         mLastDrawTime = fl::millis();
-        mVideo.draw(mLastDrawTime, fl::span<CRGB>(leds, numLeds));
+        mVideo.draw(mLastDrawTime, leds);
     }
 }
 

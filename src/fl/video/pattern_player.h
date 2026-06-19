@@ -4,6 +4,7 @@
 #include "fl/fx/video.h"
 #include "fl/math/screenmap.h"
 #include "fl/stl/string.h"
+#include "fl/stl/span.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -19,7 +20,7 @@ public:
     void end();
 
     bool hasNewFrame() const;
-    void drawFrame(CRGB* leds, int numLeds);
+    void drawFrame(fl::span<CRGB> leds);
 
     const ScreenMap& getScreenMap() const;
     bool hasScreenMap() const;

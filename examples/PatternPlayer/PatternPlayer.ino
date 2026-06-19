@@ -31,7 +31,7 @@ void setup() {
 
 void loop() {
     if (player.hasNewFrame()) {
-        player.drawFrame(leds, NUM_LEDS);
+        player.drawFrame(leds);
         FastLED.show();
     }
 }
