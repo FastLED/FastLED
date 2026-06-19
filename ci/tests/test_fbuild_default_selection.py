@@ -5,7 +5,11 @@ from typing import Any
 import pytest
 
 from ci.autoresearch.args import Args
-from ci.autoresearch.build_driver import FbuildDriver, select_build_driver
+from ci.autoresearch.build_driver import (
+    FbuildDriver,
+    find_fbuild_firmware_path,
+    select_build_driver,
+)
 from ci.boards import Board
 from ci.compiler.compilation_orchestrator import compile_board_examples
 from ci.compiler.compiler import SketchResult
@@ -82,6 +86,37 @@ def test_autoresearch_fbuild_install_packages_does_not_call_platformio(
     )
 
     assert FbuildDriver().install_packages(Path("."), "esp32s3") is True
+
+
+def test_autoresearch_fbuild_firmware_path_points_to_release_dir() -> None:
+    """fbuild writes firmware.bin under the release artifact directory."""
+    assert FbuildDriver().firmware_path(Path("/project"), "lpc845brk") == (
+        Path("/project")
+        / ".fbuild"
+        / "build"
+        / "release"
+        / "firmware.bin"
+    )
+
+
+def test_find_fbuild_firmware_path_finds_staged_pio_artifact(
+    tmp_path: Path,
+) -> None:
+    """ci-compile stages fbuild artifacts below .build/pio/<env>."""
+    firmware = (
+        tmp_path
+        / ".build"
+        / "pio"
+        / "lpc845brk"
+        / ".fbuild"
+        / "build"
+        / "release"
+        / "firmware.bin"
+    )
+    firmware.parent.mkdir(parents=True)
+    firmware.write_bytes(b"firmware")
+
+    assert find_fbuild_firmware_path(tmp_path, "lpc845brk") == firmware
 
 
 def test_autoresearch_parse_args_warns_for_deprecated_fbuild_flags(

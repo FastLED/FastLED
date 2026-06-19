@@ -166,16 +166,15 @@ def main() -> int:
     p.add_argument("--baud", default=DEFAULT_BAUD, type=int)
     p.add_argument(
         "--tx-pin",
-        default=10,
+        default=14,
         type=int,
-        help="LPC845 GPIO PIO0_n driven by bit-bang WS2812 TX (default: P0_10, "
-        "must match the compile-time constant in the sketch handler)",
+        help="LPC845 GPIO PIO0_n driven by bit-bang WS2812 TX (default: P0_14)",
     )
     p.add_argument(
         "--rx-pin",
-        default=11,
+        default=15,
         type=int,
-        help="LPC845 GPIO PIO0_n routed to SCT input 0 for capture (default: P0_11)",
+        help="LPC845 GPIO PIO0_n routed to SCT input 0 for capture (default: P0_15)",
     )
     p.add_argument(
         "--capture-ms",

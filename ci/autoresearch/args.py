@@ -361,7 +361,7 @@ See Also:
             action="store_true",
             help="LPC845-only: bit-bang TX → SCT-RX pin-toggle loopback "
             "(closes Phase 1 of FastLED #3021). Requires a jumper from "
-            "--tx-pin (default P0_10) to --rx-pin (default P0_11).",
+            "--tx-pin (default P0_14) to --rx-pin (default P0_15).",
         )
         lpc_group.add_argument(
             "--ws2812-loopback",
