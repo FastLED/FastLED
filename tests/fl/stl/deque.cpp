@@ -1003,4 +1003,80 @@ FL_TEST_CASE("fl::deque_traits<T> chunk_size override (#3270)") {
     }
 }
 
+// FastLED #3286: regression test for the chunked-deque grow_map leak.
+//
+// Original bug (introduced in #3282 / commit a8b5cac9a):
+//
+//   pop_front() advances mFrontMapIdx past the now-empty front chunk
+//   without freeing it -- the chunk pointer is left orphaned in
+//   mMap[mFrontMapIdx-1]. The destructor catches this (it iterates the
+//   entire mMap), so the orphan is harmless as long as the map itself
+//   survives.
+//
+//   But when later push_back() forces grow_map(), the old map is
+//   deallocated and ONLY pointers in [mFrontMapIdx, mFrontMapIdx+used)
+//   are copied forward. Every orphaned pointer below mFrontMapIdx is
+//   silently lost -- and its backing chunk leaks.
+//
+//   macOS-arm64 ASAN's LeakSanitizer caught this; Linux x86-64 didn't,
+//   because that job ran without leak detection enabled. The
+//   TempoAnalyzer's sliding mBPMHistory / mOnsetTimes exercise exactly
+//   this push/pop/push-grow pattern.
+//
+// This test pins chunk_size=4 (via SmallChunkTag) to make the bug
+// reproducible in a few dozen ops instead of the thousands needed at
+// the default chunk_size=64.
+FL_TEST_CASE("fl::deque - grow_map releases orphaned chunks (#3286)") {
+    deque<SmallChunkTag> dq;
+
+    // Phase 1: fill chunks 0..3 (initial map capacity is 4, chunk_size=4
+    // -> 16 elements fills the map exactly).
+    for (int i = 0; i < 16; ++i) dq.push_back(SmallChunkTag(i));
+    FL_CHECK_EQ(dq.size(), 16u);
+
+    // Phase 2: pop_front 12 elements (3 full chunks). After this,
+    // mFrontMapIdx advances to 3; the chunks at mMap[0], mMap[1],
+    // mMap[2] are now orphans -- still allocated, still in the map,
+    // but no live element lives there.
+    for (int i = 0; i < 12; ++i) dq.pop_front();
+    FL_CHECK_EQ(dq.size(), 4u);
+    FL_CHECK_EQ(dq[0].v, 12);
+    FL_CHECK_EQ(dq[3].v, 15);
+
+    // Phase 3: push_back enough to force grow_map(). At this point the
+    // back is in chunk 3 (the only live chunk); pushing past the end
+    // of chunk 3 needs chunk 4, which is past mMapCapacity=4, so
+    // grow_map runs.
+    //
+    // Before the #3286 fix this is where the leak happened: orphans at
+    // mMap[0..2] were never freed and never copied forward; only the
+    // live chunk at mMap[3] survived into the new map. Three chunk
+    // allocations were lost on the floor every time this pattern fired.
+    //
+    // After the fix, grow_map proactively releases orphans before
+    // deallocating the old map -- no chunk pointers go missing.
+    for (int i = 0; i < 20; ++i) dq.push_back(SmallChunkTag(100 + i));
+    FL_CHECK_EQ(dq.size(), 24u);
+
+    // The grow-triggering pattern is the leak path. We don't try to
+    // detect the leak in-test (that's ASAN's job); we just exercise
+    // the path so that any leak reproduces under sanitizers. The data
+    // invariants below also verify that the surviving live chunks
+    // weren't accidentally double-freed by the fix.
+    FL_CHECK_EQ(dq[0].v, 12);
+    FL_CHECK_EQ(dq[3].v, 15);
+    FL_CHECK_EQ(dq[4].v, 100);
+    FL_CHECK_EQ(dq[23].v, 119);
+
+    // Phase 4: hammer the slide pattern across many grow cycles to
+    // exercise the path the audio detector hits (mOnsetTimes /
+    // mBPMHistory pop_front + push_back loop for ~hundreds of frames).
+    for (int round = 0; round < 50; ++round) {
+        dq.pop_front();
+        dq.push_back(SmallChunkTag(1000 + round));
+    }
+    FL_CHECK_EQ(dq.size(), 24u);
+    FL_CHECK_EQ(dq[23].v, 1049);
+}
+
 } // FL_TEST_FILE

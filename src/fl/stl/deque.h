@@ -87,7 +87,12 @@ private:
     // Grow the chunk-pointer map. After return:
     //   - mMap has at least `extra_front` empty slots before mFrontMapIdx
     //   - mMap has at least `extra_back` empty slots after the back chunk
-    // Existing chunk pointers are preserved (chunks themselves are never moved).
+    // Live chunk pointers in [mFrontMapIdx, mFrontMapIdx+used) are preserved
+    // (chunks themselves are never moved). Orphaned chunks outside that range
+    // (left behind by prior pop_front / pop_back when a chunk emptied without
+    // being released) are FREED here -- otherwise the old `mMap` is
+    // deallocated below and those chunk pointers are lost forever, leaking
+    // their backing storage. See FastLED #3286.
     // mFrontMapIdx may shift to a new position within the new map.
     void grow_map(fl::size extra_front, fl::size extra_back) FL_NO_EXCEPT {
         fl::size used = used_chunks();
@@ -102,6 +107,16 @@ private:
             // vector-style ensure_capacity. Callers must defensively check
             // capacity / size after push_*.
             return;
+        }
+        // Free any chunk pointers in the OLD map that live outside the
+        // [mFrontMapIdx, mFrontMapIdx+used) live range; those are orphans
+        // and would otherwise leak when the old map is deallocated.
+        fl::size live_end = mFrontMapIdx + used;
+        for (fl::size i = 0; i < mMapCapacity; ++i) {
+            if (i < mFrontMapIdx || i >= live_end) {
+                deallocate_chunk(mMap[i]);
+                mMap[i] = nullptr;
+            }
         }
         for (fl::size i = 0; i < used; ++i) {
             new_map[new_front + i] = mMap[mFrontMapIdx + i];
