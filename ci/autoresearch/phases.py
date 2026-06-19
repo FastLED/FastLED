@@ -810,6 +810,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 project_root=project_root,
                 verbose=args.verbose,
             )
+        except KeyboardInterrupt:
+            # Let user-initiated interrupts propagate; never swallow them
+            # under the broad Exception handler below (CodeRabbit feedback,
+            # PR #3290).
+            raise
         except Exception as e:
             print(
                 f"\u274c Error: failed to synthesise platformio.ini for "
@@ -1022,11 +1027,17 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                         "\u26a0\ufe0f  Chip detection failed and no default_envs in platformio.ini"
                     )
             else:
+                # Synthesised path with no env known and chip detect failed:
+                # there is no platformio.ini to fall back to and nothing
+                # downstream can recover. Fail fast with a clear error
+                # (CodeRabbit feedback, PR #3290) so callers don't silently
+                # proceed with an unset final_environment.
                 print(
-                    "\u26a0\ufe0f  Chip detection failed and no environment given. "
+                    "\u274c Chip detection failed and no environment given. "
                     "Pass a positional environment (e.g. `bash autoresearch esp32c6 ...`) "
                     "or attach a recognisable device."
                 )
+                return 1
         print()
 
     # Deferred synthesis (#3281). When --use-root-platformio-ini is NOT set
@@ -1053,6 +1064,11 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
             staged_sketch = ctx.build_dir / "src" / "sketch"
             if staged_sketch.exists():
                 os.environ["PLATFORMIO_SRC_DIR"] = str(staged_sketch)
+        except KeyboardInterrupt:
+            # Let user-initiated interrupts propagate; never swallow them
+            # under the broad Exception handler below (CodeRabbit feedback,
+            # PR #3290).
+            raise
         except Exception as e:
             print(
                 f"\u274c Error: failed to synthesise platformio.ini for "

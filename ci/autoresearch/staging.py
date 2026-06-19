@@ -65,8 +65,8 @@ def _suppress_root_platformio_merge(project_root: Path) -> Iterator[None]:
 
 def synthesise_autoresearch_project(
     board_name: str,
-    project_root: Path | None = None,
-    verbose: bool = False,
+    project_root: Path | None,
+    verbose: bool,
 ) -> Path:
     """Stage ``.build/pio/<board>/`` and write a synthesised ``platformio.ini``.
 
