@@ -18,6 +18,12 @@ on:
       - 'platformio.ini'
       - 'library.json'
       - 'library.properties'
+  pull_request:
+    paths:
+      - 'ci/compiled_size.py'
+      - 'ci/compiler/build_config.py'
+      - '.github/workflows/check_esp32_size.yml'
+      - '.github/workflows/build_template_binary_size.yml'
 jobs:
   build:
     uses: ./.github/workflows/build_template_binary_size.yml
