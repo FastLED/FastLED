@@ -32,6 +32,15 @@ private:
 
         fl::size new_capacity = detail::deque_grow_capacity(mCapacity, min_capacity);
 
+        // Guard `new_capacity * sizeof(T)` against overflow before the
+        // allocator sees a wrapped byte-size and hands us a too-small buffer
+        // (which the move loop below would then run past). Treat as
+        // allocation failure -- same observable behavior as `allocate`
+        // returning nullptr.
+        if (new_capacity > static_cast<fl::size>(-1) / sizeof(T)) {
+            return;
+        }
+
         T* new_data = static_cast<T*>(mResource->allocate(new_capacity * sizeof(T)));
         if (!new_data) {
             return; // Allocation failed
