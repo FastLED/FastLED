@@ -334,6 +334,11 @@ impl FileContentChecker for IwyuPragmaBlockChecker {
     }
 
     fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        // Matches the EFFECTIVE Python scope, which was `fl/` + `platforms/`
+        // via dispatch (checkers_by_scope["fl"] + ["platforms"]), not the
+        // wider `should_process_file` that the Python class declared. The
+        // dispatch layer pruned files outside fl/ and platforms/ before they
+        // ever reached the Python checker.
         let normalized = normalize_path(file_path);
         if !is_under_project_subpath(&normalized, project_root, "src/fl")
             && !is_under_project_subpath(&normalized, project_root, "src/platforms")

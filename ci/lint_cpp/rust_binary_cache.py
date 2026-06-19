@@ -34,11 +34,13 @@ RUST_BINARY_NAME = "fastled-lint"
 
 _FINGERPRINT_FILE = PROJECT_ROOT / ".cache" / "rust_lint_binary.fingerprint"
 _FINGERPRINT_INPUTS = (
-    # Files (relative to PROJECT_ROOT) and recursive source globs that, when
-    # changed, require a rebuild. Order is irrelevant — sorted for determinism.
+    # Discrete files (relative to PROJECT_ROOT) whose change requires a rebuild.
+    # All `.rs` files under the crate's `src/` tree are picked up separately by
+    # `_iter_source_files`. Add any new top-level input that affects rustc
+    # output (e.g. `rust-toolchain.toml`, `build.rs`, `.cargo/config.toml`)
+    # here when introduced — current crate has none of those.
     "ci/lint_cpp_rs/Cargo.toml",
     "ci/lint_cpp_rs/Cargo.lock",
-    "ci/lint_cpp_rs/rust-toolchain.toml",
 )
 _SRC_DIR = RUST_CRATE_DIR / "src"
 
@@ -170,7 +172,12 @@ def _load_cached_fingerprint() -> str | None:
 def _store_fingerprint(value: str) -> None:
     try:
         _FINGERPRINT_FILE.parent.mkdir(parents=True, exist_ok=True)
-        _FINGERPRINT_FILE.write_text(value, encoding="utf-8")
+        # Atomic write: tmp file under the same dir, then os.replace. Prevents
+        # a concurrent invocation (e.g. Stop hook racing manual `bash lint`)
+        # from observing a torn read mid-write on Windows.
+        tmp_path = _FINGERPRINT_FILE.with_suffix(_FINGERPRINT_FILE.suffix + ".tmp")
+        tmp_path.write_text(value, encoding="utf-8")
+        os.replace(tmp_path, _FINGERPRINT_FILE)
     except OSError as exc:
         print(
             f"warning: failed to persist Rust lint fingerprint to {_FINGERPRINT_FILE}: {exc}",
