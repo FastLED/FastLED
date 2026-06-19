@@ -415,7 +415,8 @@ void rgb_2_rgbw_colorimetric(u16 w_color_temperature, u8 r,
             return;
         }
         const float xy_t[2] = { X_t[0] / sum, X_t[1] / sum };
-        colorimetric_detail::lookup_lut(*lut_state.table, xy_t, X_t[1], rgbw);
+        const float source_value = fl::max(fl::max(s_r, s_g), s_b);
+        colorimetric_detail::lookup_lut(*lut_state.table, xy_t, source_value, rgbw);
         *out_r = colorimetric_detail::quantize_u8(rgbw[0]);
         *out_g = colorimetric_detail::quantize_u8(rgbw[1]);
         *out_b = colorimetric_detail::quantize_u8(rgbw[2]);

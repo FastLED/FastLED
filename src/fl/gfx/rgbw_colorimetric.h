@@ -75,6 +75,14 @@ constexpr i16 kLutQ = colorimetric_response::kLutQ;
 constexpr int kLutStrideBilinear = colorimetric_response::kLutStrideBilinear;
 constexpr int kLutStrideHermite = colorimetric_response::kLutStrideHermite;
 
+// ===== RGB colorimetric layer — re-exported for backward-compat callers =====
+using colorimetric_response::EmitterProfile;                // ok bare using
+using colorimetric_response::RgbColorimetricProfile;        // ok bare using
+using colorimetric_response::RgbColorimetricCache;          // ok bare using
+using colorimetric_response::build_rgb_colorimetric_cache;  // ok bare using
+using colorimetric_response::rgb_source_to_XYZ;             // ok bare using
+using colorimetric_response::solve_rgb_colorimetric;        // ok bare using
+
 // ===== RGBW-specific topology helpers =======================================
 
 // Native-gamut detection (#2748). Returns true when the source primaries
@@ -235,7 +243,7 @@ bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
 // because there is no source RGB active-channel mask attached to an arbitrary
 // xy sample.
 bool solve_strict_subgamut_xy(const ProfileCache& cache,
-                              const float xy_t[2], float Y_t,
+                              const float xy_t[2], float source_value,
                               float out_rgbw[4]) FL_NOEXCEPT;
 
 // Reference wx_lp_legacy solver.
@@ -283,7 +291,7 @@ inline LutTable build_lut(const ProfileCache& cache, int grid_n) FL_NOEXCEPT {
 }
 
 // Bilinear lookup + Y multiply + normalize.
-void lookup_lut(const LutTable& lut, const float xy_t[2], float Y_t,
+void lookup_lut(const LutTable& lut, const float xy_t[2], float source_value,
                 float out_rgbw[4]) FL_NOEXCEPT;
 
 // RGBCCT layered solver: solve target against each W diode separately, then
