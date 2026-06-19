@@ -119,7 +119,10 @@ def compile_board_examples(
     print(f"{'=' * 60}")
 
     try:
-        # Create PioCompiler instance
+        # Create PioCompiler instance.
+        # merge_root_platformio=False (#3278): CI compile paths must be
+        # hermetic w.r.t. the repo-root platformio.ini. Per-board flags
+        # live in ci/boards.py.
         compiler = PioCompiler(
             board=board,
             verbose=verbose,
@@ -127,6 +130,7 @@ def compile_board_examples(
             additional_defines=defines,
             additional_libs=extra_packages,
             use_fbuild=use_fbuild,
+            merge_root_platformio=False,
         )
 
         # Build all examples - use merged-bin method if requested

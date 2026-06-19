@@ -26,6 +26,11 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Tripwire for #3278: any board still relying on the legacy
+    # root-platformio.ini merge raises instead of silently inheriting
+    # flags. Port the missing flag to ci/boards.py.
+    env:
+      FASTLED_FAIL_ON_ROOT_MERGE: "1"
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -10,6 +10,7 @@ Provides a clean interface for building FastLED projects with PlatformIO.
 
 import gc
 import hashlib
+import os
 import platform
 import shutil
 import subprocess
@@ -65,12 +66,27 @@ def _init_platformio_build(
     additional_include_dirs: Optional[list[str]] = None,
     additional_libs: Optional[list[str]] = None,
     use_fbuild: bool = False,
+    merge_root_platformio: bool = False,
 ) -> InitResult:
     """Initialize the PlatformIO build directory. Assumes lock is already held by caller.
 
     When use_fbuild=True, skips PIO-specific package management and the pio run build.
     The build directory, platformio.ini, and source files are still set up since fbuild
     uses the same project structure.
+
+    When ``merge_root_platformio=True``, ``build_flags`` from the matching
+    ``[env:<board>]`` section of the repo-root ``platformio.ini`` are
+    appended to the synthesised env (legacy behaviour for issue #2664).
+    Defaults to ``False`` as of #3278 — CI must remain hermetic w.r.t. the
+    root ini so that edits to ``platformio.ini`` (an "orthogonal" surface
+    used by `bash debug` / `bash autoresearch`) cannot silently change CI
+    binaries. The intended per-board flags live in ``ci/boards.py``.
+
+    When the ``FASTLED_FAIL_ON_ROOT_MERGE=1`` env var is set, this function
+    additionally probes the root ini even when ``merge_root_platformio`` is
+    ``False`` and raises if any flags would have been silently merged.
+    That canary catches any per-board flag we forgot to port to
+    ``ci/boards.py`` during the #3274 sever.
     """
     project_root = resolve_project_root()
     build_dir = build_dir or (project_root / ".build" / "pio" / board.board_name)
@@ -145,15 +161,45 @@ def _init_platformio_build(
         # Non-fatal: continue without optimization artifacts if path resolution fails
         pass
 
-    # Merge any per-env build_flags the user has declared in the root
-    # platformio.ini (issue #2664). Without this step, flags in
-    # [env:<board>].build_flags of the root file are silently discarded
-    # when bash compile --backend platformio synthesises a fresh project
-    # from ci/boards.py. Board flags come first, root flags are appended,
-    # so root values take precedence per PlatformIO's "last wins" semantics
-    # for repeated -D / linker flags.
-    root_build_flags = get_root_platformio_build_flags(board.board_name, project_root)
-    if root_build_flags:
+    # Root-platformio.ini merge (issue #2664 / sever tracked in #3278).
+    #
+    # Historically every build silently appended ``[env:<board>].build_flags``
+    # from the repo-root ``platformio.ini`` to the synthesised env. CI now
+    # opts OUT by default (``merge_root_platformio=False``) so the root file
+    # cannot quietly change CI binaries — per-board flags belong in
+    # ``ci/boards.py``. Interactive entry points (`bash debug`, ad-hoc
+    # ``bash compile --use-root-ini`` invocations) can still opt back in.
+    #
+    # The ``FASTLED_FAIL_ON_ROOT_MERGE=1`` env var turns this into a tripwire:
+    # we still probe the root ini and raise if any flag would have been
+    # silently merged, which catches per-board flags that should have been
+    # ported to ``ci/boards.py`` but were not.
+    fail_on_root_merge = os.environ.get("FASTLED_FAIL_ON_ROOT_MERGE", "").lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
+    if merge_root_platformio or fail_on_root_merge:
+        root_build_flags = get_root_platformio_build_flags(
+            board.board_name, project_root
+        )
+    else:
+        root_build_flags = []
+
+    if root_build_flags and not merge_root_platformio and fail_on_root_merge:
+        # Tripwire fired: CI compile produced flags from the root ini that
+        # were NOT supposed to reach the build. Raise so the build fails
+        # loudly with the missing per-board flags listed.
+        raise RuntimeError(
+            f"FASTLED_FAIL_ON_ROOT_MERGE=1: root platformio.ini "
+            f"[env:{board.board_name}] would silently inject "
+            f"{len(root_build_flags)} build_flag(s) into the CI build: "
+            f"{root_build_flags}. These must be ported to ci/boards.py "
+            f"(see #3278) before the sever can complete."
+        )
+
+    if root_build_flags and merge_root_platformio:
         print(
             f"Merging {len(root_build_flags)} build_flag(s) from root "
             f"platformio.ini [env:{board.board_name}]: {root_build_flags}"
@@ -318,7 +364,17 @@ class PioCompiler(Compiler):
         additional_include_dirs: Optional[list[str]] = None,
         additional_libs: Optional[list[str]] = None,
         use_fbuild: bool = False,
+        merge_root_platformio: bool = False,
     ) -> None:
+        """Construct a PlatformIO compiler driver.
+
+        ``merge_root_platformio`` (default ``False`` per #3278) controls
+        whether ``[env:<board>].build_flags`` from the repo-root
+        ``platformio.ini`` are appended to the synthesised env. CI compile
+        paths must keep this ``False`` so the root file cannot silently
+        change CI binaries; interactive entry points (`bash debug`,
+        ad-hoc `bash compile --use-root-ini`) can opt back in.
+        """
         # Call parent constructor
         super().__init__()
 
@@ -332,6 +388,7 @@ class PioCompiler(Compiler):
         self.additional_include_dirs = additional_include_dirs
         self.additional_libs = additional_libs
         self.use_fbuild = use_fbuild
+        self.merge_root_platformio = merge_root_platformio
 
         # Global cache directory is already resolved by caller
         self.global_cache_dir = global_cache_dir
@@ -371,6 +428,7 @@ class PioCompiler(Compiler):
             additional_include_dirs=self.additional_include_dirs,
             additional_libs=self.additional_libs,
             use_fbuild=self.use_fbuild,
+            merge_root_platformio=self.merge_root_platformio,
         )
         if result.success:
             self.initialized = True
@@ -516,6 +574,7 @@ class PioCompiler(Compiler):
                 additional_include_dirs=self.additional_include_dirs,
                 additional_libs=self.additional_libs,
                 use_fbuild=True,
+                merge_root_platformio=self.merge_root_platformio,
             )
             if not init_result.success:
                 raise RuntimeError(init_result.output)
@@ -1658,5 +1717,6 @@ def run_pio_build(
         additional_defines,
         additional_include_dirs,
         None,
+        merge_root_platformio=False,  # #3278: CI must be hermetic w.r.t. root platformio.ini
     )
     return pio.build(examples)
