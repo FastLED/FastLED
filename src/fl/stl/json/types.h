@@ -41,7 +41,9 @@ inline int json_floor_log2_u64(u64 value) FL_NO_EXCEPT;
 inline u32 json_ieee754_float_bits_from_scaled_u64(
     u32 sign, u64 magnitude, int binary_exp) FL_NO_EXCEPT;
 inline u32 json_ieee754_float_bits_from_double_bits(u64 bits) FL_NO_EXCEPT;
+inline u64 json_ieee754_double_bits_from_float_bits(u32 bits) FL_NO_EXCEPT;
 inline float json_double_to_float(double value) FL_NO_EXCEPT;
+inline double json_float_to_double(float value) FL_NO_EXCEPT;
 
 } // namespace detail
 
@@ -433,18 +435,24 @@ struct float_conversion_visitor {
         result = value;
     }
     
-    // Special handling to avoid conflict when FloatType is double
+    // Special handling to avoid conflict when FloatType is double.
+    // Narrowing path: double -> float (FloatType resolves to float here).
+    // Use the integer IEEE-754 bit-codec from #3038 so this never anchors
+    // `__aeabi_d2f` on no-FPU targets. See FastLED #3022 / #3002.
     template<typename T = FloatType>
     typename fl::enable_if<!fl::is_same<T, double>::value, void>::type
     operator()(const double& value) FL_NO_EXCEPT {
-        result = static_cast<FloatType>(value);
+        result = static_cast<FloatType>(detail::json_double_to_float(value));
     }
-    
-    // Special handling to avoid conflict when FloatType is float
+
+    // Special handling to avoid conflict when FloatType is float.
+    // Widening path: float -> double (FloatType resolves to double here).
+    // Use the integer IEEE-754 bit-codec companion so this never anchors
+    // `__aeabi_f2d` on no-FPU targets. See FastLED #3022 / #3002.
     template<typename T = FloatType>
     typename fl::enable_if<!fl::is_same<T, float>::value, void>::type
     operator()(const float& value) FL_NO_EXCEPT {
-        result = static_cast<FloatType>(value);
+        result = static_cast<FloatType>(detail::json_float_to_double(value));
     }
     
     void operator()(const i64& value) FL_NO_EXCEPT {
@@ -553,9 +561,15 @@ struct float_conversion_visitor<double> {
     void operator()(const double& value) FL_NO_EXCEPT {
         result = value;
     }
-    
+
     void operator()(const float& value) FL_NO_EXCEPT {
-        result = static_cast<double>(value);
+        // Widening float -> double via the integer IEEE-754 bit-codec
+        // companion to `json_double_to_float`. Even though `as_double()`
+        // is DCE'd from LowMemory builds today (per line 564 below),
+        // routing through the bit-codec means a future caller that keeps
+        // `as_double()` alive on a no-FPU target won't drag in
+        // `__aeabi_f2d`. See FastLED #3022 / #3002.
+        result = detail::json_float_to_double(value);
     }
     
     void operator()(const i64& value) FL_NO_EXCEPT {
