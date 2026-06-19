@@ -39,7 +39,7 @@ APOLLO3_2_2_0 = "https://github.com/nigelb/platform-apollo3blue"
 # (src/platforms/esp/32/drivers/parlio/parlio_peripheral_esp.cpp.hpp). Apply this
 # to the build_flags of every PARLIO board so the next one added cannot silently
 # miss them. See #3271.
-ESP32_PARLIO_BUILD_FLAGS = [
+ESP32_PARLIO_BUILD_FLAGS: list[str] = [
     "-DCONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM=1",
     "-DCONFIG_PARLIO_TX_ISR_CACHE_SAFE=1",
 ]
