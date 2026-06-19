@@ -23,6 +23,10 @@ fl::size deque_grow_capacity(fl::size current_capacity,
                         ? static_cast<fl::size>(kDequeInitialCapacity)
                         : current_capacity * 2;
     while (next < min_required) {
+        if (next > static_cast<fl::size>(-1) / 2) {
+            // Saturate to requested capacity to avoid wraparound/infinite loop.
+            return min_required;
+        }
         next *= 2;
     }
     return next;
