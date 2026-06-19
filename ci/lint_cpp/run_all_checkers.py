@@ -13,13 +13,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
-from ci.lint_cpp.bare_libm_checker import BareLibmChecker
-from ci.lint_cpp.bare_noinline_checker import BareNoInlineChecker
-from ci.lint_cpp.bare_snprintf_checker import BareSnprintfChecker
-from ci.lint_cpp.fl_no_underscore_checker import FlNoUnderscoreChecker
-from ci.lint_cpp.legacy_log_macro_checker import LegacyLogMacroChecker
-from ci.lint_cpp.pch_file_checker import check as check_pch_files
-from ci.lint_cpp.public_settings_pattern_checker import PublicSettingsPatternChecker
 from ci.lint_cpp.rust_bridge import (
     merge_checker_results,
     remove_rust_supported_checkers,
@@ -116,14 +109,11 @@ def create_checkers(
 
     checkers_by_scope: dict[str, list[FileContentChecker]] = {}
 
-    # Global checkers (run on all src/, examples/, tests/ files)
-    checkers_by_scope["global"] = [
-        LegacyLogMacroChecker(),
-        BareSnprintfChecker(),  # Bans bare C ::snprintf/::printf/::sprintf in src/ — use fl::snprintf (#2773 item 1.5)
-        BareLibmChecker(),  # Bans bare C libm calls (::sqrtf, ::atan2, ::powf, ::ldexpf, ...) — use fl::sqrt/fl::atan2/... (#3002, #3012)
-        BareNoInlineChecker(),  # Bans bare __attribute__((noinline)) in src/ — use FL_NO_INLINE (#2773 item 2.1 follow-up)
-        FlNoUnderscoreChecker(),  # Enforces FL_NO_<WORD> convention; bans bare FL_NO<WORD> (#3283)
-    ]
+    # Global checkers — all retired to Rust (#3297). The list is kept as an
+    # empty placeholder so the dispatch loop and the empty-list shortcut
+    # in run_checkers() still work; a future port can land its first new
+    # Python-only checker here without re-introducing the scope key.
+    checkers_by_scope["global"] = []
 
     # Src-only checkers — all retired to Rust.
     checkers_by_scope["src"] = []
@@ -143,10 +133,9 @@ def create_checkers(
     # Examples-only checkers — retired to Rust.
     checkers_by_scope["examples"] = []
 
-    # fl/ directory — only PublicSettingsPatternChecker remains on the Python side.
-    checkers_by_scope["fl"] = [
-        PublicSettingsPatternChecker(),  # Checks fl::set_*/enable_*/disable_*/use_* free functions have CFastLED wrappers
-    ]
+    # fl/ directory — retired to Rust (#3297). Empty placeholder kept so the
+    # dispatch loop's empty-list shortcut works without scope-key churn.
+    checkers_by_scope["fl"] = []
 
     # lib8tion/, fx_sensors_platforms_shared, platforms_banned, examples_banned,
     # third_party — all banned-header variants retired to Rust.
@@ -811,13 +800,9 @@ def main() -> int:
                 agg_results.add_violation("test_aggregation", 0, violation)
             results["TestAggregationChecker"] = agg_results
 
-        # Run .pch file check (precompiled headers should not be in the repo)
-        pch_success, pch_violations = check_pch_files()
-        if not pch_success:
-            pch_results = CheckerResults()
-            for violation in pch_violations:
-                pch_results.add_violation("pch_files", 0, violation)
-            results["PchFileChecker"] = pch_results
+        # PchFileChecker now ships as a Rust structural pass (#3297); the
+        # standalone Python walker was retired alongside this PR. Violations
+        # arrive via `merge_checker_results` above.
 
         # Run AST-backed FL_NO_EXCEPT enforcement from normal C++ lint.
         noexcept_results = run_noexcept_ast_check()
