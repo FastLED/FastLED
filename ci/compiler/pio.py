@@ -121,11 +121,12 @@ def _init_platformio_build(
     Per-board flags belong in ``ci/boards.py``; the root file is owned by
     ``bash autoresearch`` and ``bash debug`` only (#3274).
 
-    The ``FASTLED_FAIL_ON_ROOT_MERGE=1`` env var enables a tripwire that
-    probes the root ini and raises if any flags would historically have
-    been merged. CI workflows set this so that a per-board flag we forgot
-    to port to ``ci/boards.py`` surfaces loudly instead of silently
-    disappearing from CI binaries.
+    The ``FASTLED_FAIL_ON_ROOT_MERGE=1`` env var enables a diagnostic
+    probe that raises if any flag would historically have been merged.
+    The CI tripwire that used to set this during the migration was
+    retired in #3279 Phase 4 (root genuinely has ``bash debug``-targeted
+    flags that the orthogonality rule says not to remove). Users can
+    still opt into the probe manually for debugging suspected leakage.
     """
     project_root = resolve_project_root()
     build_dir = build_dir or (project_root / ".build" / "pio" / board.board_name)
@@ -208,11 +209,16 @@ def _init_platformio_build(
     # ``bash debug`` only (#3274 orthogonality). Per-board flags belong in
     # ``ci/boards.py``.
     #
-    # When ``FASTLED_FAIL_ON_ROOT_MERGE=1`` (CI sets this in every per-
-    # board size-check workflow), we still probe the root ini and raise
-    # if any flags would historically have been merged — that catches
-    # per-board flags someone added to root but forgot to port to
-    # ``ci/boards.py``.
+    # The ``FASTLED_FAIL_ON_ROOT_MERGE=1`` env var enables a diagnostic
+    # probe that raises if any flag would historically have been merged.
+    # CI workflows used to set it as a tripwire during the migration,
+    # but #3279 Phase 4 retired that setup — root genuinely has
+    # ``bash debug``-targeted flags that the orthogonality rule says
+    # NOT to remove, and the simple "any flag => raise" probe cannot
+    # distinguish ported-and-also-in-root from unported-and-only-in-root.
+    # The hook is preserved here so users can opt into the diagnostic
+    # manually (``FASTLED_FAIL_ON_ROOT_MERGE=1 bash compile <board>``)
+    # when debugging suspected root-leakage.
     fail_on_root_merge = os.environ.get("FASTLED_FAIL_ON_ROOT_MERGE", "").lower() in (
         "1",
         "true",
