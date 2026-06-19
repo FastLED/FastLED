@@ -1,15 +1,18 @@
-"""Tests for the Phase-2 sever of the root-platformio.ini merge (issue #3278).
+"""Tests for the root-platformio.ini sever + tripwire on CI compile (#3278/#3279).
 
-Until #3278 landed, ``_init_platformio_build`` in ``ci/compiler/pio.py``
-*always* appended ``[env:<board>].build_flags`` from the repo-root
-``platformio.ini`` to the synthesised env. That made the root file an
-implicit input to every CI binary — edits to root could silently change
-CI behaviour. #3278 inverts the default: ``merge_root_platformio=False``
-on every CI entry point, and ``FASTLED_FAIL_ON_ROOT_MERGE=1`` turns the
-probe into a tripwire that fires when any flag would have been merged
-silently.
+The legacy bridge that appended ``[env:<board>].build_flags`` from the
+repo-root ``platformio.ini`` into the synthesised env was severed in
+#3278 (opt-in default ``False``). #3279 Phase 4 removed the opt-in
+parameter entirely because no production caller ever passed ``True`` —
+the synthesised env now NEVER inherits root flags.
 
-These tests exercise that behaviour directly against
+What remains is the ``FASTLED_FAIL_ON_ROOT_MERGE=1`` tripwire: CI
+workflows set this env var, and ``_init_platformio_build`` probes the
+root ini and raises if any flag would historically have been merged.
+The tripwire catches per-board flags someone added to root but forgot
+to port to ``ci/boards.py``.
+
+These tests exercise both behaviours directly against
 ``_init_platformio_build`` so we don't have to spin up real PlatformIO.
 """
 
@@ -22,7 +25,6 @@ from tempfile import TemporaryDirectory
 from unittest import mock
 
 from ci.boards import Board
-from ci.compiler import build_config as build_config_module
 from ci.compiler import pio as pio_module
 from ci.compiler.path_manager import FastLEDPaths
 
@@ -43,20 +45,12 @@ def _write_root_ini_with_esp32c6_flag(root: Path, flag: str) -> None:
     )
 
 
-def _patch_no_op_pipeline(
-    stack: "mock._patch_dict.__class__ | unittest.mock._patch",
-) -> None:  # pragma: no cover - signature placeholder, see callers
-    """Placeholder kept for future shared patching helpers."""
-    raise NotImplementedError
-
-
 class TestRootPlatformioSever(unittest.TestCase):
-    """Verify the #3278 sever semantics on _init_platformio_build."""
+    """Verify the sever + tripwire semantics on _init_platformio_build."""
 
     def _run_init(
         self,
         tmp: Path,
-        merge_root_platformio: bool,
         fail_on_root_merge: bool,
         captured_flags: list[list[str]],
     ) -> object:
@@ -67,14 +61,12 @@ class TestRootPlatformioSever(unittest.TestCase):
         ``apply_board_specific_config`` would have written, so each test
         can assert what reached the synthesised env.
         """
-        # Patch resolve_project_root() so the root platformio.ini probe
-        # reads from our tempdir and the build directory lands there too.
-        env_patch = {}
+        env_patch: dict[str, str] = {}
         if fail_on_root_merge:
             env_patch["FASTLED_FAIL_ON_ROOT_MERGE"] = "1"
         else:
-            # Ensure inherited env from the host doesn't accidentally turn
-            # the tripwire on for the merge=False/probe=off cases.
+            # Ensure inherited env from the host doesn't accidentally
+            # turn the tripwire on for the probe=off case.
             env_patch["FASTLED_FAIL_ON_ROOT_MERGE"] = ""
 
         def fake_apply(
@@ -117,18 +109,16 @@ class TestRootPlatformioSever(unittest.TestCase):
                 paths=paths,
                 build_dir=build_dir,
                 use_fbuild=True,  # skip ensure_platform_installed / pio run
-                merge_root_platformio=merge_root_platformio,
             )
 
     def test_default_skips_root_merge(self) -> None:
-        """``merge_root_platformio=False`` does not append root flags."""
+        """Without the tripwire, root flags never reach the synthesised env."""
         with TemporaryDirectory() as tmp_str:
             tmp = Path(tmp_str)
             _write_root_ini_with_esp32c6_flag(tmp, "-D LEGACY_ROOT_ONLY=1")
             captured: list[list[str]] = []
             result = self._run_init(
                 tmp,
-                merge_root_platformio=False,
                 fail_on_root_merge=False,
                 captured_flags=captured,
             )
@@ -140,25 +130,6 @@ class TestRootPlatformioSever(unittest.TestCase):
                 f"Root-only flag leaked into synthesised env: {captured[0]!r}",
             )
 
-    def test_opt_in_appends_root_flags(self) -> None:
-        """``merge_root_platformio=True`` restores the legacy merge."""
-        with TemporaryDirectory() as tmp_str:
-            tmp = Path(tmp_str)
-            _write_root_ini_with_esp32c6_flag(tmp, "-D ROOT_OPT_IN=1")
-            captured: list[list[str]] = []
-            result = self._run_init(
-                tmp,
-                merge_root_platformio=True,
-                fail_on_root_merge=False,
-                captured_flags=captured,
-            )
-            self.assertTrue(result.success, msg=getattr(result, "output", ""))
-            self.assertEqual(len(captured), 1)
-            self.assertTrue(
-                any("ROOT_OPT_IN" in flag for flag in captured[0]),
-                f"Opt-in root flag did not reach synthesised env: {captured[0]!r}",
-            )
-
     def test_tripwire_raises_when_root_would_merge(self) -> None:
         """``FASTLED_FAIL_ON_ROOT_MERGE=1`` + non-empty root => raise."""
         with TemporaryDirectory() as tmp_str:
@@ -168,7 +139,6 @@ class TestRootPlatformioSever(unittest.TestCase):
             with self.assertRaises(RuntimeError) as ctx:
                 self._run_init(
                     tmp,
-                    merge_root_platformio=False,
                     fail_on_root_merge=True,
                     captured_flags=captured,
                 )
@@ -186,7 +156,6 @@ class TestRootPlatformioSever(unittest.TestCase):
             captured: list[list[str]] = []
             result = self._run_init(
                 tmp,
-                merge_root_platformio=False,
                 fail_on_root_merge=True,
                 captured_flags=captured,
             )
@@ -197,35 +166,76 @@ class TestRootPlatformioSever(unittest.TestCase):
                 f"Unrelated env flag leaked: {captured[0]!r}",
             )
 
-    def test_tripwire_allows_opt_in_merge(self) -> None:
-        """``merge_root_platformio=True`` + tripwire set => still merges, no raise.
-
-        The tripwire only fires when a flag would have been SILENTLY merged.
-        Opt-in callers (e.g. `bash debug --use-root-ini`) are explicit and
-        should not be blocked by the canary.
-        """
+    def test_tripwire_silent_when_root_missing(self) -> None:
+        """Tripwire is a no-op when the root ini doesn't exist at all."""
         with TemporaryDirectory() as tmp_str:
             tmp = Path(tmp_str)
-            _write_root_ini_with_esp32c6_flag(tmp, "-D EXPLICIT_OPT_IN=1")
+            # No platformio.ini at all.
             captured: list[list[str]] = []
             result = self._run_init(
                 tmp,
-                merge_root_platformio=True,
                 fail_on_root_merge=True,
                 captured_flags=captured,
             )
             self.assertTrue(result.success, msg=getattr(result, "output", ""))
-            self.assertTrue(
-                any("EXPLICIT_OPT_IN" in flag for flag in captured[0]),
-                f"Opt-in flag did not reach synthesised env: {captured[0]!r}",
+
+
+class TestProbeRootPlatformioBuildFlags(unittest.TestCase):
+    """The tripwire-only probe moved to ``ci/compiler/pio.py`` in #3279
+    Phase 4. Verify its surface still behaves correctly in isolation.
+    """
+
+    def test_missing_file_returns_empty(self) -> None:
+        with TemporaryDirectory() as tmp_str:
+            tmp = Path(tmp_str)
+            self.assertEqual(
+                pio_module._probe_root_platformio_build_flags("esp32c6", tmp),
+                [],
+            )
+
+    def test_no_matching_env_returns_empty(self) -> None:
+        with TemporaryDirectory() as tmp_str:
+            tmp = Path(tmp_str)
+            (tmp / "platformio.ini").write_text(
+                "[env:uno]\nplatform = atmelavr\nbuild_flags = -DUNO_ONLY\n",
+            )
+            self.assertEqual(
+                pio_module._probe_root_platformio_build_flags("esp32c6", tmp),
+                [],
+            )
+
+    def test_direct_build_flags_returned(self) -> None:
+        with TemporaryDirectory() as tmp_str:
+            tmp = Path(tmp_str)
+            (tmp / "platformio.ini").write_text(
+                "[env:esp32c6]\n"
+                "platform = espressif32\n"
+                "build_flags =\n"
+                "    -D ARDUINO_USB_MODE=1\n"
+                "    -D PIN_DATA=21\n",
+            )
+            flags = pio_module._probe_root_platformio_build_flags("esp32c6", tmp)
+            self.assertIn("-D ARDUINO_USB_MODE=1", flags)
+            self.assertIn("-D PIN_DATA=21", flags)
+
+    def test_malformed_file_returns_empty(self) -> None:
+        """A broken root ini must never block a build — it returns []."""
+        with TemporaryDirectory() as tmp_str:
+            tmp = Path(tmp_str)
+            (tmp / "platformio.ini").write_text(
+                "= = = not actually ini = = =\n[env:esp32c6\nbuild_flags = -DX\n",
+            )
+            self.assertEqual(
+                pio_module._probe_root_platformio_build_flags("esp32c6", tmp),
+                [],
             )
 
 
 class TestPioCompilerConstructor(unittest.TestCase):
-    """Verify the new constructor parameter defaults to False."""
+    """Verify the constructor no longer exposes ``merge_root_platformio``."""
 
-    def test_default_merge_root_platformio_is_false(self) -> None:
-        """Constructing PioCompiler without the kwarg gives the sever default."""
+    def test_no_merge_root_platformio_attribute(self) -> None:
+        """Constructing PioCompiler should NOT carry the removed kwarg."""
         with TemporaryDirectory() as tmp_str:
             tmp = Path(tmp_str)
             compiler = pio_module.PioCompiler(
@@ -234,20 +244,23 @@ class TestPioCompilerConstructor(unittest.TestCase):
                 global_cache_dir=tmp / "cache",
                 use_fbuild=True,
             )
-            self.assertFalse(compiler.merge_root_platformio)
+            self.assertFalse(
+                hasattr(compiler, "merge_root_platformio"),
+                "merge_root_platformio attribute should be removed in #3279 Phase 4",
+            )
 
-    def test_opt_in_keyword_is_stored(self) -> None:
-        """Passing merge_root_platformio=True is preserved on the instance."""
+    def test_passing_removed_kwarg_raises(self) -> None:
+        """``merge_root_platformio=`` was removed; passing it now raises."""
         with TemporaryDirectory() as tmp_str:
             tmp = Path(tmp_str)
-            compiler = pio_module.PioCompiler(
-                board=Board(board_name="uno"),
-                verbose=False,
-                global_cache_dir=tmp / "cache",
-                use_fbuild=True,
-                merge_root_platformio=True,
-            )
-            self.assertTrue(compiler.merge_root_platformio)
+            with self.assertRaises(TypeError):
+                pio_module.PioCompiler(  # type: ignore[call-arg]
+                    board=Board(board_name="uno"),
+                    verbose=False,
+                    global_cache_dir=tmp / "cache",
+                    use_fbuild=True,
+                    merge_root_platformio=True,
+                )
 
 
 if __name__ == "__main__":

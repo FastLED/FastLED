@@ -1,0 +1,132 @@
+# Nightly fbuild <-> PlatformIO size/symbol-count parity sweep (#3279 Phase 3).
+#
+# Background: fbuild is the sole supported production backend; the
+# PlatformIO `pio run` path is retained as a *comparison-only* escape
+# hatch (see `agents/docs/build-system.md` -> "Board Build Backend").
+# To keep an eye on output drift between the two backends — flag set,
+# linker behaviour, dead-code elimination — this workflow runs a small
+# board sweep nightly and surfaces ELF size + symbol count differences.
+#
+# Scope:
+# - Failures here DO NOT block merges. The job is `continue-on-error:
+#   true`; any drift is filed as a gap-tracking issue, not a regression.
+# - Board set is intentionally small (one esp32 variant + one teensy +
+#   one tiny avr) — exercises a representative cross-section of platform
+#   toolchains without billing the entire matrix.
+# - Mirrors the structure of `backend_flag_drift_teensy40.yml` (which
+#   covers a single board on every push) but runs the broader sweep on
+#   a cron so it does not noise PR CI.
+#
+# When this workflow fails, the failure is informational: open a gap
+# issue against the failing board / backend mismatch and link the
+# uploaded artifact. Do NOT silently re-enable the PIO backend in
+# production CI — `compile_board_examples` rejects programmatic flips
+# without `FASTLED_BACKEND_PLATFORMIO_EXPLICIT=1` for a reason.
+
+name: nightly-fbuild-pio-parity
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+on:
+  # 09:00 UTC daily — runs once per day, off-peak for everyone.
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        # Representative cross-section: ESP32 (toolchain via pioarduino),
+        # Teensy 4.x (ARM EABI), and a tiny AVR (avr-gcc). One example
+        # per board to keep the run cost bounded.
+        include:
+          - board: esp32dev
+            example: Blink
+          - board: teensy40
+            example: Blink
+          - board: uno
+            example: Blink
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install Python deps
+        run: uv sync
+
+      - name: fbuild compile (baseline)
+        id: fbuild
+        run: |
+          set -o pipefail
+          mkdir -p .build/parity
+          uv run ci/ci-compile.py ${{ matrix.board }} \
+            --examples ${{ matrix.example }} \
+            --backend fbuild \
+            -o .build/parity/fbuild_${{ matrix.board }}_${{ matrix.example }}.elf \
+            2>&1 | tee .build/parity/fbuild_${{ matrix.board }}.log
+
+      - name: PlatformIO compile (comparison)
+        id: pio
+        run: |
+          set -o pipefail
+          uv run ci/ci-compile.py ${{ matrix.board }} \
+            --examples ${{ matrix.example }} \
+            --backend platformio \
+            -o .build/parity/pio_${{ matrix.board }}_${{ matrix.example }}.elf \
+            2>&1 | tee .build/parity/pio_${{ matrix.board }}.log
+
+      - name: Compare ELF size + symbol counts
+        if: always()
+        run: |
+          {
+            echo "## Parity — ${{ matrix.board }} / ${{ matrix.example }}"
+            echo ""
+            echo "| Backend | ELF size (bytes) | Symbol count |"
+            echo "| --- | ---: | ---: |"
+            for backend in fbuild pio; do
+              elf=".build/parity/${backend}_${{ matrix.board }}_${{ matrix.example }}.elf"
+              if [ -f "$elf" ]; then
+                size=$(stat -c '%s' "$elf")
+                # symbol count uses readelf; the host runner has GNU
+                # binutils, which is enough for a coarse comparison even
+                # against an ESP32 ELF (cross-ELF reading is fine).
+                syms=$(readelf -s "$elf" 2>/dev/null | grep -c -E '^\s*[0-9]+:' || echo 0)
+                echo "| ${backend} | ${size} | ${syms} |"
+              else
+                echo "| ${backend} | (build failed) | n/a |"
+              fi
+            done
+            echo ""
+            echo "_Drift here is informational — file a gap-tracking issue, do not"
+            echo " block merges. PlatformIO is a comparison-only backend (#3279)._"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload parity artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-parity-${{ matrix.board }}-${{ matrix.example }}
+          path: .build/parity/
+          if-no-files-found: warn
+          retention-days: 30
