@@ -1313,10 +1313,17 @@ fl::string json::to_string_native() const {
     SerializerVisitor visitor{json_chars};
     visitor.serialize_value(mValue.get());
 
-    // Convert deque to fl::string efficiently
+    // Convert deque to fl::string. With FastLED #3270 the deque is chunked,
+    // so its storage is no longer contiguous -- treating `&json_chars[0]`
+    // as a buffer would walk off the first chunk. Reserve + per-element
+    // append is correct for the chunked layout (and was correct for the
+    // pre-#3270 layout too whenever a wraparound occurred).
     fl::string result;
     if (!json_chars.empty()) {
-        result.assign(&json_chars[0], json_chars.size());
+        result.reserve(json_chars.size());
+        for (fl::size i = 0; i < json_chars.size(); ++i) {
+            result.push_back(json_chars[i]);
+        }
     }
 
     return result;
