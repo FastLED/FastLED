@@ -36,84 +36,84 @@ class string_view {
 
     // ======= CONSTRUCTORS =======
     // Default constructor - empty view
-    constexpr string_view() FL_NOEXCEPT : mData(nullptr), mSize(0) {}
+    constexpr string_view() FL_NO_EXCEPT : mData(nullptr), mSize(0) {}
 
     // Constructor from null-terminated C string
-    constexpr string_view(const char* str) FL_NOEXCEPT
+    constexpr string_view(const char* str) FL_NO_EXCEPT
         : mData(str), mSize(str ? strlen(str) : 0) {}
 
     // Constructor from pointer and length
-    constexpr string_view(const char* str, fl::size len) FL_NOEXCEPT
+    constexpr string_view(const char* str, fl::size len) FL_NO_EXCEPT
         : mData(str), mSize(len) {}
 
     // Constructor from C-array
     template <fl::size N>
-    constexpr string_view(const char (&arr)[N]) FL_NOEXCEPT
+    constexpr string_view(const char (&arr)[N]) FL_NO_EXCEPT
         : mData(arr), mSize(N - 1) {}  // Subtract 1 for null terminator
 
     // Constructor from fl::basic_string (and therefore fl::string).
     // Defined in basic_string.cpp.hpp where basic_string is complete.
-    string_view(const basic_string& str) FL_NOEXCEPT;
+    string_view(const basic_string& str) FL_NO_EXCEPT;
 
     // Copy constructor
-    string_view(const string_view& other) FL_NOEXCEPT = default;
+    string_view(const string_view& other) FL_NO_EXCEPT = default;
 
     // Assignment operator
     string_view& operator=(const string_view& other) = default;
 
     // ======= ITERATORS =======
-    constexpr iterator begin() const FL_NOEXCEPT { return mData; }
-    constexpr iterator end() const FL_NOEXCEPT { return mData + mSize; }
-    constexpr const_iterator cbegin() const FL_NOEXCEPT { return mData; }
-    constexpr const_iterator cend() const FL_NOEXCEPT { return mData + mSize; }
+    constexpr iterator begin() const FL_NO_EXCEPT { return mData; }
+    constexpr iterator end() const FL_NO_EXCEPT { return mData + mSize; }
+    constexpr const_iterator cbegin() const FL_NO_EXCEPT { return mData; }
+    constexpr const_iterator cend() const FL_NO_EXCEPT { return mData + mSize; }
 
-    constexpr reverse_iterator rbegin() const FL_NOEXCEPT { return mData + mSize - 1; }
-    constexpr reverse_iterator rend() const FL_NOEXCEPT { return mData - 1; }
-    constexpr const_reverse_iterator crbegin() const FL_NOEXCEPT { return mData + mSize - 1; }
-    constexpr const_reverse_iterator crend() const FL_NOEXCEPT { return mData - 1; }
+    constexpr reverse_iterator rbegin() const FL_NO_EXCEPT { return mData + mSize - 1; }
+    constexpr reverse_iterator rend() const FL_NO_EXCEPT { return mData - 1; }
+    constexpr const_reverse_iterator crbegin() const FL_NO_EXCEPT { return mData + mSize - 1; }
+    constexpr const_reverse_iterator crend() const FL_NO_EXCEPT { return mData - 1; }
 
     // ======= ELEMENT ACCESS =======
-    constexpr const char& operator[](fl::size index) const FL_NOEXCEPT {
+    constexpr const char& operator[](fl::size index) const FL_NO_EXCEPT {
         // No bounds checking in embedded environment
         return mData[index];
     }
 
-    constexpr const char& at(fl::size index) const FL_NOEXCEPT {
+    constexpr const char& at(fl::size index) const FL_NO_EXCEPT {
         // Basic bounds checking
         return (index < mSize) ? mData[index] : mData[0];
     }
 
-    constexpr const char& front() const FL_NOEXCEPT {
+    constexpr const char& front() const FL_NO_EXCEPT {
         return mData[0];
     }
 
-    constexpr const char& back() const FL_NOEXCEPT {
+    constexpr const char& back() const FL_NO_EXCEPT {
         return mData[mSize - 1];
     }
 
-    constexpr const char* data() const FL_NOEXCEPT {
+    constexpr const char* data() const FL_NO_EXCEPT {
         return mData;
     }
 
     // ======= CAPACITY =======
-    constexpr fl::size size() const FL_NOEXCEPT { return mSize; }
-    constexpr fl::size length() const FL_NOEXCEPT { return mSize; }
-    constexpr fl::size max_size() const FL_NOEXCEPT { return npos - 1; }
-    constexpr bool empty() const FL_NOEXCEPT { return mSize == 0; }
+    constexpr fl::size size() const FL_NO_EXCEPT { return mSize; }
+    constexpr fl::size length() const FL_NO_EXCEPT { return mSize; }
+    constexpr fl::size max_size() const FL_NO_EXCEPT { return npos - 1; }
+    constexpr bool empty() const FL_NO_EXCEPT { return mSize == 0; }
 
     // ======= MODIFIERS (modify the view, not the data) =======
-    void remove_prefix(fl::size n) FL_NOEXCEPT {
+    void remove_prefix(fl::size n) FL_NO_EXCEPT {
         if (n > mSize) n = mSize;
         mData += n;
         mSize -= n;
     }
 
-    void remove_suffix(fl::size n) FL_NOEXCEPT {
+    void remove_suffix(fl::size n) FL_NO_EXCEPT {
         if (n > mSize) n = mSize;
         mSize -= n;
     }
 
-    void swap(string_view& other) FL_NOEXCEPT {
+    void swap(string_view& other) FL_NO_EXCEPT {
         const char* tmp_data = mData;
         fl::size tmp_size = mSize;
         mData = other.mData;
@@ -124,7 +124,7 @@ class string_view {
 
     // ======= STRING OPERATIONS =======
     // Copy substring to buffer
-    fl::size copy(char* dest, fl::size count, fl::size pos = 0) const FL_NOEXCEPT {
+    fl::size copy(char* dest, fl::size count, fl::size pos = 0) const FL_NO_EXCEPT {
         if (!dest || pos >= mSize) {
             return 0;
         }
@@ -139,7 +139,7 @@ class string_view {
     }
 
     // Substring operations
-    string_view substr(fl::size pos = 0, fl::size count = npos) const FL_NOEXCEPT {
+    string_view substr(fl::size pos = 0, fl::size count = npos) const FL_NO_EXCEPT {
         if (pos >= mSize) {
             return string_view();
         }
@@ -151,7 +151,7 @@ class string_view {
     }
 
     // ======= COMPARISON OPERATIONS =======
-    int compare(string_view other) const FL_NOEXCEPT {
+    int compare(string_view other) const FL_NO_EXCEPT {
         fl::size min_len = (mSize < other.mSize) ? mSize : other.mSize;
         for (fl::size i = 0; i < min_len; ++i) {
             if (mData[i] < other.mData[i]) return -1;
@@ -162,30 +162,30 @@ class string_view {
         return 0;
     }
 
-    int compare(fl::size pos1, fl::size count1, string_view other) const FL_NOEXCEPT {
+    int compare(fl::size pos1, fl::size count1, string_view other) const FL_NO_EXCEPT {
         return substr(pos1, count1).compare(other);
     }
 
     int compare(fl::size pos1, fl::size count1, string_view other,
-                         fl::size pos2, fl::size count2) const FL_NOEXCEPT {
+                         fl::size pos2, fl::size count2) const FL_NO_EXCEPT {
         return substr(pos1, count1).compare(other.substr(pos2, count2));
     }
 
-    int compare(const char* s) const FL_NOEXCEPT {
+    int compare(const char* s) const FL_NO_EXCEPT {
         return compare(string_view(s));
     }
 
-    int compare(fl::size pos1, fl::size count1, const char* s) const FL_NOEXCEPT {
+    int compare(fl::size pos1, fl::size count1, const char* s) const FL_NO_EXCEPT {
         return substr(pos1, count1).compare(string_view(s));
     }
 
-    int compare(fl::size pos1, fl::size count1, const char* s, fl::size count2) const FL_NOEXCEPT {
+    int compare(fl::size pos1, fl::size count1, const char* s, fl::size count2) const FL_NO_EXCEPT {
         return substr(pos1, count1).compare(string_view(s, count2));
     }
 
     // ======= SEARCH OPERATIONS =======
     // Find character
-    fl::size find(char ch, fl::size pos = 0) const FL_NOEXCEPT {
+    fl::size find(char ch, fl::size pos = 0) const FL_NO_EXCEPT {
         if (pos >= mSize) return npos;
         for (fl::size i = pos; i < mSize; ++i) {
             if (mData[i] == ch) {
@@ -196,7 +196,7 @@ class string_view {
     }
 
     // Find substring
-    fl::size find(string_view sv, fl::size pos = 0) const FL_NOEXCEPT {
+    fl::size find(string_view sv, fl::size pos = 0) const FL_NO_EXCEPT {
         if (sv.empty()) return pos;
         if (pos >= mSize || sv.mSize > mSize - pos) return npos;
 
@@ -213,16 +213,16 @@ class string_view {
         return npos;
     }
 
-    fl::size find(const char* s, fl::size pos, fl::size count) const FL_NOEXCEPT {
+    fl::size find(const char* s, fl::size pos, fl::size count) const FL_NO_EXCEPT {
         return find(string_view(s, count), pos);
     }
 
-    fl::size find(const char* s, fl::size pos = 0) const FL_NOEXCEPT {
+    fl::size find(const char* s, fl::size pos = 0) const FL_NO_EXCEPT {
         return find(string_view(s), pos);
     }
 
     // Reverse find
-    fl::size rfind(char ch, fl::size pos = npos) const FL_NOEXCEPT {
+    fl::size rfind(char ch, fl::size pos = npos) const FL_NO_EXCEPT {
         if (mSize == 0) return npos;
         fl::size search_pos = (pos >= mSize || pos == npos) ? (mSize - 1) : pos;
         for (fl::size i = search_pos + 1; i > 0; --i) {
@@ -233,7 +233,7 @@ class string_view {
         return npos;
     }
 
-    fl::size rfind(string_view sv, fl::size pos = npos) const FL_NOEXCEPT {
+    fl::size rfind(string_view sv, fl::size pos = npos) const FL_NO_EXCEPT {
         if (sv.empty()) return (pos > mSize) ? mSize : pos;
         if (sv.mSize > mSize) return npos;
 
@@ -258,16 +258,16 @@ class string_view {
         return npos;
     }
 
-    fl::size rfind(const char* s, fl::size pos, fl::size count) const FL_NOEXCEPT {
+    fl::size rfind(const char* s, fl::size pos, fl::size count) const FL_NO_EXCEPT {
         return rfind(string_view(s, count), pos);
     }
 
-    fl::size rfind(const char* s, fl::size pos = npos) const FL_NOEXCEPT {
+    fl::size rfind(const char* s, fl::size pos = npos) const FL_NO_EXCEPT {
         return rfind(string_view(s), pos);
     }
 
     // Find first of any character in set
-    fl::size find_first_of(string_view sv, fl::size pos = 0) const FL_NOEXCEPT {
+    fl::size find_first_of(string_view sv, fl::size pos = 0) const FL_NO_EXCEPT {
         if (pos >= mSize || sv.empty()) return npos;
         for (fl::size i = pos; i < mSize; ++i) {
             for (fl::size j = 0; j < sv.mSize; ++j) {
@@ -279,20 +279,20 @@ class string_view {
         return npos;
     }
 
-    fl::size find_first_of(char ch, fl::size pos = 0) const FL_NOEXCEPT {
+    fl::size find_first_of(char ch, fl::size pos = 0) const FL_NO_EXCEPT {
         return find(ch, pos);
     }
 
-    fl::size find_first_of(const char* s, fl::size pos, fl::size count) const FL_NOEXCEPT {
+    fl::size find_first_of(const char* s, fl::size pos, fl::size count) const FL_NO_EXCEPT {
         return find_first_of(string_view(s, count), pos);
     }
 
-    fl::size find_first_of(const char* s, fl::size pos = 0) const FL_NOEXCEPT {
+    fl::size find_first_of(const char* s, fl::size pos = 0) const FL_NO_EXCEPT {
         return find_first_of(string_view(s), pos);
     }
 
     // Find last of any character in set
-    fl::size find_last_of(string_view sv, fl::size pos = npos) const FL_NOEXCEPT {
+    fl::size find_last_of(string_view sv, fl::size pos = npos) const FL_NO_EXCEPT {
         if (mSize == 0 || sv.empty()) return npos;
         fl::size search_pos = (pos >= mSize || pos == npos) ? (mSize - 1) : pos;
         for (fl::size i = search_pos + 1; i > 0; --i) {
@@ -305,20 +305,20 @@ class string_view {
         return npos;
     }
 
-    fl::size find_last_of(char ch, fl::size pos = npos) const FL_NOEXCEPT {
+    fl::size find_last_of(char ch, fl::size pos = npos) const FL_NO_EXCEPT {
         return rfind(ch, pos);
     }
 
-    fl::size find_last_of(const char* s, fl::size pos, fl::size count) const FL_NOEXCEPT {
+    fl::size find_last_of(const char* s, fl::size pos, fl::size count) const FL_NO_EXCEPT {
         return find_last_of(string_view(s, count), pos);
     }
 
-    fl::size find_last_of(const char* s, fl::size pos = npos) const FL_NOEXCEPT {
+    fl::size find_last_of(const char* s, fl::size pos = npos) const FL_NO_EXCEPT {
         return find_last_of(string_view(s), pos);
     }
 
     // Find first not of any character in set
-    fl::size find_first_not_of(string_view sv, fl::size pos = 0) const FL_NOEXCEPT {
+    fl::size find_first_not_of(string_view sv, fl::size pos = 0) const FL_NO_EXCEPT {
         if (pos >= mSize) return npos;
         for (fl::size i = pos; i < mSize; ++i) {
             bool found = false;
@@ -333,7 +333,7 @@ class string_view {
         return npos;
     }
 
-    fl::size find_first_not_of(char ch, fl::size pos = 0) const FL_NOEXCEPT {
+    fl::size find_first_not_of(char ch, fl::size pos = 0) const FL_NO_EXCEPT {
         if (pos >= mSize) return npos;
         for (fl::size i = pos; i < mSize; ++i) {
             if (mData[i] != ch) return i;
@@ -341,16 +341,16 @@ class string_view {
         return npos;
     }
 
-    fl::size find_first_not_of(const char* s, fl::size pos, fl::size count) const FL_NOEXCEPT {
+    fl::size find_first_not_of(const char* s, fl::size pos, fl::size count) const FL_NO_EXCEPT {
         return find_first_not_of(string_view(s, count), pos);
     }
 
-    fl::size find_first_not_of(const char* s, fl::size pos = 0) const FL_NOEXCEPT {
+    fl::size find_first_not_of(const char* s, fl::size pos = 0) const FL_NO_EXCEPT {
         return find_first_not_of(string_view(s), pos);
     }
 
     // Find last not of any character in set
-    fl::size find_last_not_of(string_view sv, fl::size pos = npos) const FL_NOEXCEPT {
+    fl::size find_last_not_of(string_view sv, fl::size pos = npos) const FL_NO_EXCEPT {
         if (mSize == 0) return npos;
         fl::size search_pos = (pos >= mSize || pos == npos) ? (mSize - 1) : pos;
         for (fl::size i = search_pos + 1; i > 0; --i) {
@@ -366,7 +366,7 @@ class string_view {
         return npos;
     }
 
-    fl::size find_last_not_of(char ch, fl::size pos = npos) const FL_NOEXCEPT {
+    fl::size find_last_not_of(char ch, fl::size pos = npos) const FL_NO_EXCEPT {
         if (mSize == 0) return npos;
         fl::size search_pos = (pos >= mSize || pos == npos) ? (mSize - 1) : pos;
         for (fl::size i = search_pos + 1; i > 0; --i) {
@@ -375,16 +375,16 @@ class string_view {
         return npos;
     }
 
-    fl::size find_last_not_of(const char* s, fl::size pos, fl::size count) const FL_NOEXCEPT {
+    fl::size find_last_not_of(const char* s, fl::size pos, fl::size count) const FL_NO_EXCEPT {
         return find_last_not_of(string_view(s, count), pos);
     }
 
-    fl::size find_last_not_of(const char* s, fl::size pos = npos) const FL_NOEXCEPT {
+    fl::size find_last_not_of(const char* s, fl::size pos = npos) const FL_NO_EXCEPT {
         return find_last_not_of(string_view(s), pos);
     }
 
     // ======= C++20/C++23 CONVENIENCE METHODS =======
-    bool starts_with(string_view sv) const FL_NOEXCEPT {
+    bool starts_with(string_view sv) const FL_NO_EXCEPT {
         if (sv.mSize > mSize) return false;
         for (fl::size i = 0; i < sv.mSize; ++i) {
             if (mData[i] != sv.mData[i]) return false;
@@ -392,15 +392,15 @@ class string_view {
         return true;
     }
 
-    bool starts_with(char ch) const FL_NOEXCEPT {
+    bool starts_with(char ch) const FL_NO_EXCEPT {
         return !empty() && mData[0] == ch;
     }
 
-    bool starts_with(const char* s) const FL_NOEXCEPT {
+    bool starts_with(const char* s) const FL_NO_EXCEPT {
         return starts_with(string_view(s));
     }
 
-    bool ends_with(string_view sv) const FL_NOEXCEPT {
+    bool ends_with(string_view sv) const FL_NO_EXCEPT {
         if (sv.mSize > mSize) return false;
         for (fl::size i = 0; i < sv.mSize; ++i) {
             if (mData[mSize - sv.mSize + i] != sv.mData[i]) return false;
@@ -408,23 +408,23 @@ class string_view {
         return true;
     }
 
-    bool ends_with(char ch) const FL_NOEXCEPT {
+    bool ends_with(char ch) const FL_NO_EXCEPT {
         return !empty() && mData[mSize - 1] == ch;
     }
 
-    bool ends_with(const char* s) const FL_NOEXCEPT {
+    bool ends_with(const char* s) const FL_NO_EXCEPT {
         return ends_with(string_view(s));
     }
 
-    bool contains(string_view sv) const FL_NOEXCEPT {
+    bool contains(string_view sv) const FL_NO_EXCEPT {
         return find(sv) != npos;
     }
 
-    bool contains(char ch) const FL_NOEXCEPT {
+    bool contains(char ch) const FL_NO_EXCEPT {
         return find(ch) != npos;
     }
 
-    bool contains(const char* s) const FL_NOEXCEPT {
+    bool contains(const char* s) const FL_NO_EXCEPT {
         return find(s) != npos;
     }
 
@@ -434,33 +434,33 @@ class string_view {
 };
 
 // ======= COMPARISON OPERATORS =======
-inline bool operator==(string_view lhs, string_view rhs) FL_NOEXCEPT {
+inline bool operator==(string_view lhs, string_view rhs) FL_NO_EXCEPT {
     return lhs.compare(rhs) == 0;
 }
 
-inline bool operator!=(string_view lhs, string_view rhs) FL_NOEXCEPT {
+inline bool operator!=(string_view lhs, string_view rhs) FL_NO_EXCEPT {
     return lhs.compare(rhs) != 0;
 }
 
-inline bool operator<(string_view lhs, string_view rhs) FL_NOEXCEPT {
+inline bool operator<(string_view lhs, string_view rhs) FL_NO_EXCEPT {
     return lhs.compare(rhs) < 0;
 }
 
-inline bool operator<=(string_view lhs, string_view rhs) FL_NOEXCEPT {
+inline bool operator<=(string_view lhs, string_view rhs) FL_NO_EXCEPT {
     return lhs.compare(rhs) <= 0;
 }
 
-inline bool operator>(string_view lhs, string_view rhs) FL_NOEXCEPT {
+inline bool operator>(string_view lhs, string_view rhs) FL_NO_EXCEPT {
     return lhs.compare(rhs) > 0;
 }
 
-inline bool operator>=(string_view lhs, string_view rhs) FL_NOEXCEPT {
+inline bool operator>=(string_view lhs, string_view rhs) FL_NO_EXCEPT {
     return lhs.compare(rhs) >= 0;
 }
 
 // ======= OUTPUT HELPER =======
 // Inline hash function for string_view
-inline u32 hash_string_view(string_view sv) FL_NOEXCEPT {
+inline u32 hash_string_view(string_view sv) FL_NO_EXCEPT {
     // FNV-1a 32-bit hash algorithm
     u32 hash = 2166136261u;
     for (fl::size i = 0; i < sv.size(); ++i) {

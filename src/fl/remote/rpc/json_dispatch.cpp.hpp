@@ -15,7 +15,7 @@ namespace detail {
 
 FL_NO_INLINE
 TypeConversionResult json_convert_to_i64_core(const json_value& val,
-                                              fl::i64* out_value) FL_NOEXCEPT {
+                                              fl::i64* out_value) FL_NO_EXCEPT {
     TypeConversionResult result;
     if (auto* p = val.data.template ptr<i64>()) {
         *out_value = *p;
@@ -65,7 +65,7 @@ TypeConversionResult json_convert_to_i64_core(const json_value& val,
 
 FL_NO_INLINE
 TypeConversionResult json_convert_to_bool_core(const json_value& val,
-                                               bool* out_value) FL_NOEXCEPT {
+                                               bool* out_value) FL_NO_EXCEPT {
     TypeConversionResult result;
     if (auto* p = val.data.template ptr<bool>()) {
         *out_value = *p;
@@ -114,7 +114,7 @@ TypeConversionResult json_convert_to_bool_core(const json_value& val,
 
 FL_NO_INLINE
 TypeConversionResult json_convert_to_float_core(const json_value& val,
-                                                float* out_value) FL_NOEXCEPT {
+                                                float* out_value) FL_NO_EXCEPT {
     TypeConversionResult result;
     if (auto* p = val.data.template ptr<float>()) {
         *out_value = *p;
@@ -175,7 +175,7 @@ TypeConversionResult json_convert_to_float_core(const json_value& val,
 
 FL_NO_INLINE
 TypeConversionResult json_convert_to_string_core(const json_value& val,
-                                                 fl::string* out_value) FL_NOEXCEPT {
+                                                 fl::string* out_value) FL_NO_EXCEPT {
     TypeConversionResult result;
     if (auto* p = val.data.template ptr<fl::string>()) {
         *out_value = *p;

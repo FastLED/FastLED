@@ -93,7 +93,7 @@ KeyDetector::KeyDetector()
     initializeProfileStats();
 }
 
-KeyDetector::~KeyDetector() FL_NOEXCEPT = default;
+KeyDetector::~KeyDetector() FL_NO_EXCEPT = default;
 
 void KeyDetector::initializeProfileStats() {
     // Pre-compute statistics for MAJOR_PROFILE

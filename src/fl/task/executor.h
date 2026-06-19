@@ -87,7 +87,7 @@ int& await_depth_tls();
 /// @brief Generic task runner interface
 class Runner {
 public:
-    virtual ~Runner() FL_NOEXCEPT = default;
+    virtual ~Runner() FL_NO_EXCEPT = default;
 
     /// Update this runner (called during task pumping)
     virtual void update() = 0;

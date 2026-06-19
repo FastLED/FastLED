@@ -105,17 +105,17 @@ class TestDestructors:
         assert len(viols) == 1
 
     def test_has_fl_noexcept(self):
-        code = "class Foo {\n    ~Foo() FL_NOEXCEPT;\n};"
+        code = "class Foo {\n    ~Foo() FL_NO_EXCEPT;\n};"
         viols = _check(code)
         assert len(viols) == 0
 
     def test_has_fl_noexcept_inline(self):
-        code = "class Foo {\n    ~Foo() FL_NOEXCEPT {}\n};"
+        code = "class Foo {\n    ~Foo() FL_NO_EXCEPT {}\n};"
         viols = _check(code)
         assert len(viols) == 0
 
     def test_has_fl_noexcept_default(self):
-        code = "class Foo {\n    ~Foo() FL_NOEXCEPT = default;\n};"
+        code = "class Foo {\n    ~Foo() FL_NO_EXCEPT = default;\n};"
         viols = _check(code)
         assert len(viols) == 0
 
@@ -158,12 +158,12 @@ class TestDefaultConstructors:
         assert len(viols) == 1
 
     def test_has_fl_noexcept(self):
-        code = "class Foo {\n    Foo() FL_NOEXCEPT;\n};"
+        code = "class Foo {\n    Foo() FL_NO_EXCEPT;\n};"
         viols = _check(code)
         assert len(viols) == 0
 
     def test_has_fl_noexcept_default(self):
-        code = "class Foo {\n    Foo() FL_NOEXCEPT = default;\n};"
+        code = "class Foo {\n    Foo() FL_NO_EXCEPT = default;\n};"
         viols = _check(code)
         assert len(viols) == 0
 
@@ -201,12 +201,12 @@ class TestCopyConstructors:
         assert len(viols) == 1
 
     def test_has_fl_noexcept(self):
-        code = "class Foo {\n    Foo(const Foo&) FL_NOEXCEPT;\n};"
+        code = "class Foo {\n    Foo(const Foo&) FL_NO_EXCEPT;\n};"
         viols = _check(code)
         assert len(viols) == 0
 
     def test_has_fl_noexcept_default(self):
-        code = "class Foo {\n    Foo(const Foo&) FL_NOEXCEPT = default;\n};"
+        code = "class Foo {\n    Foo(const Foo&) FL_NO_EXCEPT = default;\n};"
         viols = _check(code)
         assert len(viols) == 0
 
@@ -232,12 +232,12 @@ class TestMoveConstructors:
         assert len(viols) == 1
 
     def test_has_fl_noexcept(self):
-        code = "class Foo {\n    Foo(Foo&&) FL_NOEXCEPT;\n};"
+        code = "class Foo {\n    Foo(Foo&&) FL_NO_EXCEPT;\n};"
         viols = _check(code)
         assert len(viols) == 0
 
     def test_has_fl_noexcept_default(self):
-        code = "class Foo {\n    Foo(Foo&&) FL_NOEXCEPT = default;\n};"
+        code = "class Foo {\n    Foo(Foo&&) FL_NO_EXCEPT = default;\n};"
         viols = _check(code)
         assert len(viols) == 0
 
@@ -258,12 +258,12 @@ class TestCopyAssignment:
         assert len(viols) == 1
 
     def test_has_fl_noexcept(self):
-        code = "class Foo {\n    Foo& operator=(const Foo&) FL_NOEXCEPT;\n};"
+        code = "class Foo {\n    Foo& operator=(const Foo&) FL_NO_EXCEPT;\n};"
         viols = _check(code)
         assert len(viols) == 0
 
     def test_has_fl_noexcept_default(self):
-        code = "class Foo {\n    Foo& operator=(const Foo&) FL_NOEXCEPT = default;\n};"
+        code = "class Foo {\n    Foo& operator=(const Foo&) FL_NO_EXCEPT = default;\n};"
         viols = _check(code)
         assert len(viols) == 0
 
@@ -284,7 +284,7 @@ class TestMoveAssignment:
         assert len(viols) == 1
 
     def test_has_fl_noexcept(self):
-        code = "class Foo {\n    Foo& operator=(Foo&&) FL_NOEXCEPT;\n};"
+        code = "class Foo {\n    Foo& operator=(Foo&&) FL_NO_EXCEPT;\n};"
         viols = _check(code)
         assert len(viols) == 0
 
@@ -294,14 +294,14 @@ class TestMoveAssignment:
 
 class TestMultiLine:
     def test_dtor_fl_noexcept_next_line(self):
-        code = "class Foo {\n    ~Foo()\n        FL_NOEXCEPT;\n};"
+        code = "class Foo {\n    ~Foo()\n        FL_NO_EXCEPT;\n};"
         viols = _check(code)
         assert len(viols) == 0
 
     def test_move_ctor_multiline_init(self):
         code = (
             "class Foo {\n"
-            "    Foo(Foo&& other) FL_NOEXCEPT\n"
+            "    Foo(Foo&& other) FL_NO_EXCEPT\n"
             "        : member(other.member) {}\n"
             "};"
         )
@@ -315,7 +315,7 @@ class TestMultiLine:
         assert len(viols) == 1
 
     def test_multiline_params_has_noexcept(self):
-        code = "class Foo {\n    Foo(\n        const Foo& other) FL_NOEXCEPT;\n};"
+        code = "class Foo {\n    Foo(\n        const Foo& other) FL_NO_EXCEPT;\n};"
         viols = _check(code)
         assert len(viols) == 0
 
@@ -325,7 +325,7 @@ class TestMultiLine:
 
 class TestSuppression:
     def test_ok_no_fl_noexcept(self):
-        code = "class Foo {\n    ~Foo(); // ok no FL_NOEXCEPT\n};"
+        code = "class Foo {\n    ~Foo(); // ok no FL_NO_EXCEPT\n};"
         viols = _check(code)
         assert len(viols) == 0
 
@@ -335,7 +335,7 @@ class TestSuppression:
         assert len(viols) == 0
 
     def test_case_insensitive(self):
-        code = "class Foo {\n    ~Foo(); // OK NO FL_NOEXCEPT\n};"
+        code = "class Foo {\n    ~Foo(); // OK NO FL_NO_EXCEPT\n};"
         viols = _check(code)
         assert len(viols) == 0
 
@@ -402,7 +402,7 @@ class TestEdgeCases:
         assert "destructor" in viols[0][1]
 
     def test_multiple_classes(self):
-        code = "class Foo {\n    ~Foo();\n};\nclass Bar {\n    ~Bar() FL_NOEXCEPT;\n};"
+        code = "class Foo {\n    ~Foo();\n};\nclass Bar {\n    ~Bar() FL_NO_EXCEPT;\n};"
         viols = _check(code)
         assert len(viols) == 1
         assert "Foo" in viols[0][1]
@@ -496,7 +496,7 @@ class TestAutoFix:
         n, descs = fix_file(p)
         assert n == 1
         fixed = p.read_text()
-        assert "~Foo() FL_NOEXCEPT;" in fixed
+        assert "~Foo() FL_NO_EXCEPT;" in fixed
 
     def test_fix_default_ctor(self, tmp_path):
         p = tmp_path / "test.h"
@@ -507,7 +507,7 @@ class TestAutoFix:
         n, descs = fix_file(p)
         assert n == 1
         fixed = p.read_text()
-        assert "Foo() FL_NOEXCEPT = default;" in fixed
+        assert "Foo() FL_NO_EXCEPT = default;" in fixed
 
     def test_fix_copy_ctor(self, tmp_path):
         p = tmp_path / "test.h"
@@ -518,7 +518,7 @@ class TestAutoFix:
         n, descs = fix_file(p)
         assert n == 1
         fixed = p.read_text()
-        assert "Foo(const Foo& other) FL_NOEXCEPT;" in fixed
+        assert "Foo(const Foo& other) FL_NO_EXCEPT;" in fixed
 
     def test_fix_move_assign(self, tmp_path):
         p = tmp_path / "test.h"
@@ -529,13 +529,13 @@ class TestAutoFix:
         n, descs = fix_file(p)
         assert n == 1
         fixed = p.read_text()
-        assert "operator=(Foo&&) FL_NOEXCEPT = default;" in fixed
+        assert "operator=(Foo&&) FL_NO_EXCEPT = default;" in fixed
 
     def test_no_double_fix(self, tmp_path):
         p = tmp_path / "test.h"
         p.write_text(
             '#pragma once\n#include "fl/stl/noexcept.h"\n'
-            "class Foo {\n    ~Foo() FL_NOEXCEPT;\n};\n"
+            "class Foo {\n    ~Foo() FL_NO_EXCEPT;\n};\n"
         )
         n, descs = fix_file(p)
         assert n == 0
@@ -562,7 +562,7 @@ class TestAutoFix:
 
 class TestSignatureHasNoexcept:
     def test_same_line(self):
-        lines = ["    ~Foo() FL_NOEXCEPT;"]
+        lines = ["    ~Foo() FL_NO_EXCEPT;"]
         # open paren is at index where ( is
         idx = lines[0].index("(")
         assert signature_has_noexcept(lines, 0, idx) is True
@@ -573,7 +573,7 @@ class TestSignatureHasNoexcept:
         assert signature_has_noexcept(lines, 0, idx) is False
 
     def test_next_line(self):
-        lines = ["    ~Foo()", "        FL_NOEXCEPT;"]
+        lines = ["    ~Foo()", "        FL_NO_EXCEPT;"]
         idx = lines[0].index("(")
         assert signature_has_noexcept(lines, 0, idx) is True
 

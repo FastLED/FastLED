@@ -101,7 +101,7 @@ struct LowMemPinTogglePeriodStats {
 };
 
 inline LowMemPinTogglePeriodStats computeLowMemPeriodStats(
-    const fl::EdgeTime* edges, fl::size edge_count) FL_NOEXCEPT {
+    const fl::EdgeTime* edges, fl::size edge_count) FL_NO_EXCEPT {
     LowMemPinTogglePeriodStats s{0, 0, 0, 0, 0};
     fl::u64 sum    = 0;
     fl::u64 sum_sq = 0;

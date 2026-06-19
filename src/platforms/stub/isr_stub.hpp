@@ -78,8 +78,8 @@ struct stub_isr_handle_data {
 
 // Track interrupt enable state for stub platform (starts enabled)
 // Uses function-local static to ensure single instance across translation units (C++11 compatible)
-inline fl::atomic<bool>& getGlobalInterruptState() FL_NOEXCEPT {
-    static fl::atomic<bool> g_interrupts_enabled(true) FL_NOEXCEPT;  // okay static in header
+inline fl::atomic<bool>& getGlobalInterruptState() FL_NO_EXCEPT {
+    static fl::atomic<bool> g_interrupts_enabled(true) FL_NO_EXCEPT;  // okay static in header
     return g_interrupts_enabled;
 }
 
@@ -89,28 +89,28 @@ inline fl::atomic<bool>& getGlobalInterruptState() FL_NOEXCEPT {
 
 class TimerThreadManager {
 public:
-    static TimerThreadManager& instance() FL_NOEXCEPT {
+    static TimerThreadManager& instance() FL_NO_EXCEPT {
         static TimerThreadManager inst;
         return inst;
     }
 
     // Test synchronization support - allows tests to wait for ISR execution
     // Returns a condition variable that is notified after each ISR handler execution
-    fl::condition_variable& get_test_sync_cv() FL_NOEXCEPT {
+    fl::condition_variable& get_test_sync_cv() FL_NO_EXCEPT {
         return mTestSyncCV;
     }
 
-    fl::mutex& get_test_sync_mutex() FL_NOEXCEPT {
+    fl::mutex& get_test_sync_mutex() FL_NO_EXCEPT {
         return mTestSyncMutex;
     }
 
     // Notify waiting tests that an ISR has executed
-    void notify_test_waiters() FL_NOEXCEPT {
+    void notify_test_waiters() FL_NO_EXCEPT {
         mTestSyncCV.notify_all();
     }
 
-    void add_handler(stub_isr_handle_data* handler) FL_NOEXCEPT {
-        fl::unique_lock<fl::mutex> lock(mMutex) FL_NOEXCEPT;
+    void add_handler(stub_isr_handle_data* handler) FL_NO_EXCEPT {
+        fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
 
         // Assign unique ID
         handler->mHandleId = mNextHandleId++;
@@ -132,8 +132,8 @@ public:
         }
     }
 
-    void reschedule_handler(stub_isr_handle_data* handler) FL_NOEXCEPT {
-        fl::unique_lock<fl::mutex> lock(mMutex) FL_NOEXCEPT;
+    void reschedule_handler(stub_isr_handle_data* handler) FL_NO_EXCEPT {
+        fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
         u64 now = get_time_us();
         u64 period_us = handler->mFrequencyHz > 0 ? (1000000ULL / handler->mFrequencyHz) : 0;
         handler->mNextTickUs = now + period_us;
@@ -141,8 +141,8 @@ public:
         mCondVar.notify_one();
     }
 
-    void remove_handler(stub_isr_handle_data* handler) FL_NOEXCEPT {
-        fl::unique_lock<fl::mutex> lock(mMutex) FL_NOEXCEPT;
+    void remove_handler(stub_isr_handle_data* handler) FL_NO_EXCEPT {
+        fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
 
         // Remove from vector
         for (size_t i = 0; i < mHandlers.size(); ++i) {
@@ -167,7 +167,7 @@ public:
     ~TimerThreadManager() {
         if (mTimerThread) {
             {
-                fl::unique_lock<fl::mutex> lock(mMutex) FL_NOEXCEPT;
+                fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
                 mShouldStop = true;
                 mCondVar.notify_one();  // Wake the thread so it can exit
             }
@@ -182,13 +182,13 @@ private:
     TimerThreadManager(const TimerThreadManager&) = delete;
     TimerThreadManager& operator=(const TimerThreadManager&) = delete;
 
-    static u64 get_time_us() FL_NOEXCEPT {
+    static u64 get_time_us() FL_NO_EXCEPT {
         auto tp = fl::chrono::steady_clock::now();
         return static_cast<u64>(tp.time_since_epoch().count());
     }
 
-    void timer_thread_func() FL_NOEXCEPT {
-        fl::unique_lock<fl::mutex> lock(mMutex) FL_NOEXCEPT;
+    void timer_thread_func() FL_NO_EXCEPT {
+        fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
 
         while (!mShouldStop) {
             u64 now = get_time_us();
@@ -272,7 +272,7 @@ private:
 // Stub ISR Implementation (Free Functions)
 // =============================================================================
 
-inline int stub_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
+inline int stub_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
         if (!config.handler) {
             STUB_LOG("attachTimerHandler: handler is null");
             return -1;  // Invalid parameter
@@ -316,7 +316,7 @@ inline int stub_attach_timer_handler(const isr_config_t& config, isr_handle_t* o
         return 0;  // Success
 }
 
-inline int stub_attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
+inline int stub_attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
         (void)pin;  // Unused in stub implementation
         if (!config.handler) {
             STUB_LOG("attachExternalHandler: handler is null");
@@ -351,7 +351,7 @@ inline int stub_attach_external_handler(u8 pin, const isr_config_t& config, isr_
         return 0;  // Success
 }
 
-inline int stub_detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
+inline int stub_detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
         if (!handle.is_valid() || handle.platform_id != STUB_PLATFORM_ID) {
             STUB_LOG("detachHandler: invalid handle");
             return -1;  // Invalid handle
@@ -376,7 +376,7 @@ inline int stub_detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
         return 0;  // Success
 }
 
-inline int stub_enable_handler(isr_handle_t& handle) FL_NOEXCEPT {
+inline int stub_enable_handler(isr_handle_t& handle) FL_NO_EXCEPT {
         if (!handle.is_valid() || handle.platform_id != STUB_PLATFORM_ID) {
             STUB_LOG("enableHandler: invalid handle");
             return -1;  // Invalid handle
@@ -400,7 +400,7 @@ inline int stub_enable_handler(isr_handle_t& handle) FL_NOEXCEPT {
         return 0;  // Success
 }
 
-inline int stub_disable_handler(isr_handle_t& handle) FL_NOEXCEPT {
+inline int stub_disable_handler(isr_handle_t& handle) FL_NO_EXCEPT {
         if (!handle.is_valid() || handle.platform_id != STUB_PLATFORM_ID) {
             STUB_LOG("disableHandler: invalid handle");
             return -1;  // Invalid handle
@@ -418,7 +418,7 @@ inline int stub_disable_handler(isr_handle_t& handle) FL_NOEXCEPT {
         return 0;  // Success
 }
 
-inline bool stub_is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
+inline bool stub_is_handler_enabled(const isr_handle_t& handle) FL_NO_EXCEPT {
         if (!handle.is_valid() || handle.platform_id != STUB_PLATFORM_ID) {
             return false;
         }
@@ -432,7 +432,7 @@ inline bool stub_is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
         return handle_data->mIsEnabled.load(fl::memory_order_acquire);
 }
 
-inline const char* stub_get_error_string(int error_code) FL_NOEXCEPT {
+inline const char* stub_get_error_string(int error_code) FL_NO_EXCEPT {
         switch (error_code) {
             case 0: return "Success";
             case -1: return "Invalid parameter";
@@ -443,7 +443,7 @@ inline const char* stub_get_error_string(int error_code) FL_NOEXCEPT {
         }
 }
 
-inline const char* stub_get_platform_name() FL_NOEXCEPT {
+inline const char* stub_get_platform_name() FL_NO_EXCEPT {
 #if defined(FL_IS_WASM)
     return "WASM";
 #else
@@ -451,19 +451,19 @@ inline const char* stub_get_platform_name() FL_NOEXCEPT {
 #endif
 }
 
-inline u32 stub_get_max_timer_frequency() FL_NOEXCEPT {
+inline u32 stub_get_max_timer_frequency() FL_NO_EXCEPT {
     return 0;  // Unlimited in host-based simulation
 }
 
-inline u32 stub_get_min_timer_frequency() FL_NOEXCEPT {
+inline u32 stub_get_min_timer_frequency() FL_NO_EXCEPT {
     return 1;  // 1 Hz
 }
 
-inline u8 stub_get_max_priority() FL_NOEXCEPT {
+inline u8 stub_get_max_priority() FL_NO_EXCEPT {
     return 1;  // No priority in host-based platforms
 }
 
-inline bool stub_requires_assembly_handler(u8 priority) FL_NOEXCEPT {
+inline bool stub_requires_assembly_handler(u8 priority) FL_NO_EXCEPT {
     (void)priority;
     return false;  // Host-based platforms never require assembly
 }
@@ -474,51 +474,51 @@ inline bool stub_requires_assembly_handler(u8 priority) FL_NOEXCEPT {
 namespace isr {
 namespace platforms {
 
-inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) FL_NOEXCEPT {
+inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) FL_NO_EXCEPT {
     return stub_attach_timer_handler(config, handle);
 }
 
-inline int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* handle) FL_NOEXCEPT {
+inline int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* handle) FL_NO_EXCEPT {
     return stub_attach_external_handler(pin, config, handle);
 }
 
-inline int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
+inline int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
     return stub_detach_handler(handle);
 }
 
-inline int enable_handler(isr_handle_t& handle) FL_NOEXCEPT {
+inline int enable_handler(isr_handle_t& handle) FL_NO_EXCEPT {
     return stub_enable_handler(handle);
 }
 
-inline int disable_handler(isr_handle_t& handle) FL_NOEXCEPT {
+inline int disable_handler(isr_handle_t& handle) FL_NO_EXCEPT {
     return stub_disable_handler(handle);
 }
 
-inline bool is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
+inline bool is_handler_enabled(const isr_handle_t& handle) FL_NO_EXCEPT {
     return stub_is_handler_enabled(handle);
 }
 
-inline const char* get_error_string(int error_code) FL_NOEXCEPT {
+inline const char* get_error_string(int error_code) FL_NO_EXCEPT {
     return stub_get_error_string(error_code);
 }
 
-inline const char* get_platform_name() FL_NOEXCEPT {
+inline const char* get_platform_name() FL_NO_EXCEPT {
     return stub_get_platform_name();
 }
 
-inline u32 get_max_timer_frequency() FL_NOEXCEPT {
+inline u32 get_max_timer_frequency() FL_NO_EXCEPT {
     return stub_get_max_timer_frequency();
 }
 
-inline u32 get_min_timer_frequency() FL_NOEXCEPT {
+inline u32 get_min_timer_frequency() FL_NO_EXCEPT {
     return stub_get_min_timer_frequency();
 }
 
-inline u8 get_max_priority() FL_NOEXCEPT {
+inline u8 get_max_priority() FL_NO_EXCEPT {
     return stub_get_max_priority();
 }
 
-inline bool requires_assembly_handler(u8 priority) FL_NOEXCEPT {
+inline bool requires_assembly_handler(u8 priority) FL_NO_EXCEPT {
     return stub_requires_assembly_handler(priority);
 }
 
@@ -530,22 +530,22 @@ inline bool requires_assembly_handler(u8 priority) FL_NOEXCEPT {
 // =============================================================================
 
 /// Disable interrupts on stub/host platform (simulated)
-inline void interruptsDisable() FL_NOEXCEPT {
+inline void interruptsDisable() FL_NO_EXCEPT {
     isr::getGlobalInterruptState() = false;
 }
 
 /// Enable interrupts on stub/host platform (simulated)
-inline void interruptsEnable() FL_NOEXCEPT {
+inline void interruptsEnable() FL_NO_EXCEPT {
     isr::getGlobalInterruptState() = true;
 }
 
 /// Query if interrupts are currently enabled
-inline bool interruptsEnabled() FL_NOEXCEPT {
+inline bool interruptsEnabled() FL_NO_EXCEPT {
     return isr::getGlobalInterruptState().load();
 }
 
 /// Query if interrupts are currently disabled
-inline bool interruptsDisabled() FL_NOEXCEPT {
+inline bool interruptsDisabled() FL_NO_EXCEPT {
     return !isr::getGlobalInterruptState().load();
 }
 

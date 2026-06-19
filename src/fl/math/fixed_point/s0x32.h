@@ -35,11 +35,11 @@ class s0x32 {
 
     // ---- Construction ------------------------------------------------------
 
-    constexpr s0x32() FL_NOEXCEPT = default;
+    constexpr s0x32() FL_NO_EXCEPT = default;
 
     // Construct from float (clamps to [-1.0, 1.0] range)
     // Q31 format: max value is 0x7FFFFFFF (just under 1.0), min is 0x80000000 (-1.0)
-    explicit constexpr s0x32(float f) FL_NOEXCEPT
+    explicit constexpr s0x32(float f) FL_NO_EXCEPT
         : mValue(f <= -1.0f ? (i32)0x80000000 :     // Exactly -1.0
                  f >= 1.0f ? (i32)0x7FFFFFFF :      // Max positive (0.9999999995...)
                  static_cast<i32>(f * 2147483648.0f)) {}
@@ -55,72 +55,72 @@ class s0x32 {
                         (OtherFP::FRAC_BITS <= FRAC_BITS) &&
                         (OtherFP::INT_BITS != INT_BITS || OtherFP::FRAC_BITS != FRAC_BITS),
                         int>::type = 0)
- FL_NOEXCEPT : mValue(static_cast<i32>(
+ FL_NO_EXCEPT : mValue(static_cast<i32>(
             static_cast<i64>(other.raw()) << (FRAC_BITS - OtherFP::FRAC_BITS))) {}
 
     // Construct from raw i32 value (Q31 format)
     // Raw constructor for C++11 constexpr from_raw
     struct RawTag {};
-    constexpr explicit s0x32(i32 raw, RawTag) FL_NOEXCEPT : mValue(raw) {}
+    constexpr explicit s0x32(i32 raw, RawTag) FL_NO_EXCEPT : mValue(raw) {}
 
-    static constexpr FASTLED_FORCE_INLINE s0x32 from_raw(i32 raw) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE s0x32 from_raw(i32 raw) FL_NO_EXCEPT {
         return s0x32(raw, RawTag());
     }
 
     // ---- Access ------------------------------------------------------------
 
-    constexpr i32 raw() const FL_NOEXCEPT { return mValue; }
+    constexpr i32 raw() const FL_NO_EXCEPT { return mValue; }
 
     // Convert to integer (always 0 or -1 since range is [-1.0, 1.0])
-    constexpr i32 to_int() const FL_NOEXCEPT { return mValue >> 31; }
+    constexpr i32 to_int() const FL_NO_EXCEPT { return mValue >> 31; }
 
-    constexpr float to_float() const FL_NOEXCEPT {
+    constexpr float to_float() const FL_NO_EXCEPT {
         return static_cast<float>(mValue) / (1LL << 31);
     }
 
     // ---- Same-type arithmetic (s0x32 OP s0x32 → s0x32) --------------------
 
-    constexpr FASTLED_FORCE_INLINE s0x32 operator+(s0x32 b) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE s0x32 operator+(s0x32 b) const FL_NO_EXCEPT {
         return from_raw(static_cast<i32>(
             static_cast<u32>(mValue) + static_cast<u32>(b.mValue)));
     }
 
-    constexpr FASTLED_FORCE_INLINE s0x32 operator-(s0x32 b) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE s0x32 operator-(s0x32 b) const FL_NO_EXCEPT {
         return from_raw(static_cast<i32>(
             static_cast<u32>(mValue) - static_cast<u32>(b.mValue)));
     }
 
-    constexpr FASTLED_FORCE_INLINE s0x32 operator-() const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE s0x32 operator-() const FL_NO_EXCEPT {
         return from_raw(static_cast<i32>(0u - static_cast<u32>(mValue)));
     }
 
     // Multiply two normalized values: s0x32 × s0x32 → s0x32
     // Both inputs ≤ 1.0, so product ≤ 1.0
-    constexpr FASTLED_FORCE_INLINE s0x32 operator*(s0x32 b) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE s0x32 operator*(s0x32 b) const FL_NO_EXCEPT {
         // Q31 × Q31 = Q62 → shift right 31 → Q31
         return from_raw(static_cast<i32>(
             (static_cast<i64>(mValue) * b.mValue) >> 31));
     }
 
     // Divide normalized values: s0x32 / s0x32 → s0x32
-    constexpr FASTLED_FORCE_INLINE s0x32 operator/(s0x32 b) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE s0x32 operator/(s0x32 b) const FL_NO_EXCEPT {
         // Q31 / Q31: shift dividend left 31 bits then divide
         // (a / 2^31) / (b / 2^31) = a / b → need (a << 31) / b
         return from_raw(static_cast<i32>(
             (static_cast<i64>(mValue) << 31) / b.mValue));
     }
 
-    constexpr FASTLED_FORCE_INLINE s0x32 operator>>(int shift) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE s0x32 operator>>(int shift) const FL_NO_EXCEPT {
         return from_raw(mValue >> shift);
     }
 
-    constexpr FASTLED_FORCE_INLINE s0x32 operator<<(int shift) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE s0x32 operator<<(int shift) const FL_NO_EXCEPT {
         return from_raw(mValue << shift);
     }
 
     // ---- Scalar arithmetic (s0x32 × raw integer → s0x32) ------------------
 
-    constexpr FASTLED_FORCE_INLINE s0x32 operator*(i32 scalar) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE s0x32 operator*(i32 scalar) const FL_NO_EXCEPT {
         // Q31 * scalar with clamping to prevent overflow
         return (static_cast<i64>(mValue) * scalar > 0x7FFFFFFFLL)
             ? from_raw(0x7FFFFFFF)
@@ -129,11 +129,11 @@ class s0x32 {
                 : from_raw(static_cast<i32>(static_cast<i64>(mValue) * scalar));
     }
 
-    friend constexpr s0x32 operator*(i32 scalar, s0x32 a) FL_NOEXCEPT {
+    friend constexpr s0x32 operator*(i32 scalar, s0x32 a) FL_NO_EXCEPT {
         return a * scalar;  // Commutative
     }
 
-    constexpr FASTLED_FORCE_INLINE s0x32 operator/(i32 scalar) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE s0x32 operator/(i32 scalar) const FL_NO_EXCEPT {
         return from_raw(mValue / scalar);
     }
 
@@ -143,32 +143,32 @@ class s0x32 {
     // Common pattern: sin/cos × distance
     // Math: Q31 × Q16 = Q47 → shift right 31 → Q16
     // Implemented in fixed_point.h after s16x16 is fully defined
-    constexpr FASTLED_FORCE_INLINE s16x16 operator*(s16x16 b) const FL_NOEXCEPT;
+    constexpr FASTLED_FORCE_INLINE s16x16 operator*(s16x16 b) const FL_NO_EXCEPT;
 
-    friend constexpr s16x16 operator*(s16x16 a, s0x32 b) FL_NOEXCEPT;
+    friend constexpr s16x16 operator*(s16x16 a, s0x32 b) FL_NO_EXCEPT;
 
     // ---- Math functions ----------------------------------------------------
 
-    static constexpr FASTLED_FORCE_INLINE s0x32 abs(s0x32 x) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE s0x32 abs(s0x32 x) FL_NO_EXCEPT {
         return from_raw(x.mValue < 0 ? -x.mValue : x.mValue);
     }
 
-    static constexpr FASTLED_FORCE_INLINE s0x32 min(s0x32 a, s0x32 b) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE s0x32 min(s0x32 a, s0x32 b) FL_NO_EXCEPT {
         return from_raw(a.mValue < b.mValue ? a.mValue : b.mValue);
     }
 
-    static constexpr FASTLED_FORCE_INLINE s0x32 max(s0x32 a, s0x32 b) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE s0x32 max(s0x32 a, s0x32 b) FL_NO_EXCEPT {
         return from_raw(a.mValue > b.mValue ? a.mValue : b.mValue);
     }
 
     // ---- Comparisons -------------------------------------------------------
 
-    constexpr bool operator<(s0x32 b) const FL_NOEXCEPT { return mValue < b.mValue; }
-    constexpr bool operator>(s0x32 b) const FL_NOEXCEPT { return mValue > b.mValue; }
-    constexpr bool operator<=(s0x32 b) const FL_NOEXCEPT { return mValue <= b.mValue; }
-    constexpr bool operator>=(s0x32 b) const FL_NOEXCEPT { return mValue >= b.mValue; }
-    constexpr bool operator==(s0x32 b) const FL_NOEXCEPT { return mValue == b.mValue; }
-    constexpr bool operator!=(s0x32 b) const FL_NOEXCEPT { return mValue != b.mValue; }
+    constexpr bool operator<(s0x32 b) const FL_NO_EXCEPT { return mValue < b.mValue; }
+    constexpr bool operator>(s0x32 b) const FL_NO_EXCEPT { return mValue > b.mValue; }
+    constexpr bool operator<=(s0x32 b) const FL_NO_EXCEPT { return mValue <= b.mValue; }
+    constexpr bool operator>=(s0x32 b) const FL_NO_EXCEPT { return mValue >= b.mValue; }
+    constexpr bool operator==(s0x32 b) const FL_NO_EXCEPT { return mValue == b.mValue; }
+    constexpr bool operator!=(s0x32 b) const FL_NO_EXCEPT { return mValue != b.mValue; }
 
   private:
     i32 mValue = 0;

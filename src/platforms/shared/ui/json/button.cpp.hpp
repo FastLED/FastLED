@@ -17,10 +17,10 @@ private:
 public:
     // Constructor: Initializes the base JsonUiInternal with name, and sets initial pressed state.
     JsonUiButtonInternal(const fl::string& name, bool pressed = false)
- FL_NOEXCEPT : JsonUiInternal(name), mPressed(pressed) {}
+ FL_NO_EXCEPT : JsonUiInternal(name), mPressed(pressed) {}
 
     // Override toJson to serialize the button's data directly.
-    void toJson(fl::json& json) const FL_NOEXCEPT override {
+    void toJson(fl::json& json) const FL_NO_EXCEPT override {
         json.set("name", name());
         json.set("type", "button");
         json.set("group", groupName());
@@ -29,16 +29,16 @@ public:
     }
 
     // Override updateInternal to handle updates from JSON.
-    void updateInternal(const fl::json& json) FL_NOEXCEPT override {
+    void updateInternal(const fl::json& json) FL_NO_EXCEPT override {
         mPressed = json | false;
     }
 
     // Accessors for the button state.
-    bool isPressed() const FL_NOEXCEPT { return mPressed; }
-    void setPressed(bool pressed) FL_NOEXCEPT { mPressed = pressed; }
+    bool isPressed() const FL_NO_EXCEPT { return mPressed; }
+    void setPressed(bool pressed) FL_NO_EXCEPT { mPressed = pressed; }
 };
 
-JsonButtonImpl::JsonButtonImpl(const string &name) FL_NOEXCEPT {
+JsonButtonImpl::JsonButtonImpl(const string &name) FL_NO_EXCEPT {
     // Create an instance of the new internal class
     mInternal = fl::make_shared<JsonUiButtonInternal>(name, false);
 
@@ -52,20 +52,20 @@ JsonButtonImpl::~JsonButtonImpl() {
     removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
-JsonButtonImpl &JsonButtonImpl::Group(const fl::string &name) FL_NOEXCEPT {
+JsonButtonImpl &JsonButtonImpl::Group(const fl::string &name) FL_NO_EXCEPT {
     mInternal->setGroup(name);
     return *this;
 }
 
-bool JsonButtonImpl::clicked() const FL_NOEXCEPT { return mClickedHappened; }
+bool JsonButtonImpl::clicked() const FL_NO_EXCEPT { return mClickedHappened; }
 
-const string &JsonButtonImpl::name() const FL_NOEXCEPT { return mInternal->name(); }
+const string &JsonButtonImpl::name() const FL_NO_EXCEPT { return mInternal->name(); }
 
-void JsonButtonImpl::toJson(fl::json &json) const FL_NOEXCEPT {
+void JsonButtonImpl::toJson(fl::json &json) const FL_NO_EXCEPT {
     mInternal->toJson(json);
 }
 
-bool JsonButtonImpl::isPressed() const FL_NOEXCEPT {
+bool JsonButtonImpl::isPressed() const FL_NO_EXCEPT {
     if (!mInternal) {
         FL_ASSERT(false, "JsonButtonImpl::isPressed() called before initialization");
         return false;  // Return default value if not initialized
@@ -73,24 +73,24 @@ bool JsonButtonImpl::isPressed() const FL_NOEXCEPT {
     return mInternal->isPressed();
 }
 
-int JsonButtonImpl::clickedCount() const FL_NOEXCEPT { return mClickedCount; }
+int JsonButtonImpl::clickedCount() const FL_NO_EXCEPT { return mClickedCount; }
 
-fl::string JsonButtonImpl::groupName() const FL_NOEXCEPT { return mInternal->groupName(); }
+fl::string JsonButtonImpl::groupName() const FL_NO_EXCEPT { return mInternal->groupName(); }
 
-void JsonButtonImpl::setGroup(const fl::string &groupName) FL_NOEXCEPT { mInternal->setGroup(groupName); }
+void JsonButtonImpl::setGroup(const fl::string &groupName) FL_NO_EXCEPT { mInternal->setGroup(groupName); }
 
-void JsonButtonImpl::click() FL_NOEXCEPT { 
+void JsonButtonImpl::click() FL_NO_EXCEPT { 
     mInternal->setPressed(true); 
 }
 
-void JsonButtonImpl::Updater::init(JsonButtonImpl *owner) FL_NOEXCEPT {
+void JsonButtonImpl::Updater::init(JsonButtonImpl *owner) FL_NO_EXCEPT {
     mOwner = owner;
     fl::EngineEvents::addListener(this);
 }
 
 JsonButtonImpl::Updater::~Updater() { fl::EngineEvents::removeListener(this); }
 
-void JsonButtonImpl::Updater::onPlatformPreLoop2() FL_NOEXCEPT {
+void JsonButtonImpl::Updater::onPlatformPreLoop2() FL_NO_EXCEPT {
     bool currentPressed = mOwner->mInternal->isPressed();
     mOwner->mClickedHappened =
         currentPressed && (currentPressed != mOwner->mPressedLast);
@@ -100,7 +100,7 @@ void JsonButtonImpl::Updater::onPlatformPreLoop2() FL_NOEXCEPT {
     }
 }
 
-int JsonButtonImpl::id() const FL_NOEXCEPT {
+int JsonButtonImpl::id() const FL_NO_EXCEPT {
     return mInternal->id();
 }
 

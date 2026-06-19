@@ -163,8 +163,8 @@ class TestShouldFlag(unittest.TestCase):
         self.assertEqual(len(v), 2)
 
     def test_fl_noexcept_decorated_setter_flagged(self) -> None:
-        """FL_NOEXCEPT attribute must not suppress the violation."""
-        code = "namespace fl {\nvoid set_bright(int v) FL_NOEXCEPT;\n}"
+        """FL_NO_EXCEPT attribute must not suppress the violation."""
+        code = "namespace fl {\nvoid set_bright(int v) FL_NO_EXCEPT;\n}"
         v = _violations(code)
         self.assertEqual(len(v), 1)
 
@@ -293,7 +293,7 @@ class TestGrandfatheredAllowlist(unittest.TestCase):
     def test_set_rgbw_colorimetric_profile_not_flagged(self) -> None:
         code = (
             "namespace fl {\n"
-            "void set_rgbw_colorimetric_profile(const DiodeProfile* p) FL_NOEXCEPT;\n"
+            "void set_rgbw_colorimetric_profile(const DiodeProfile* p) FL_NO_EXCEPT;\n"
             "}"
         )
         self.assertEqual(len(_violations(code)), 0)
@@ -301,7 +301,7 @@ class TestGrandfatheredAllowlist(unittest.TestCase):
     def test_set_input_gamut_not_flagged(self) -> None:
         code = (
             "namespace fl {\n"
-            "void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NOEXCEPT;\n"
+            "void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NO_EXCEPT;\n"
             "}"
         )
         self.assertEqual(len(_violations(code)), 0)
@@ -309,19 +309,19 @@ class TestGrandfatheredAllowlist(unittest.TestCase):
     def test_enable_rgbw_colorimetric_lut_not_flagged(self) -> None:
         code = (
             "namespace fl {\n"
-            "bool enable_rgbw_colorimetric_lut(int grid_n) FL_NOEXCEPT;\n"
+            "bool enable_rgbw_colorimetric_lut(int grid_n) FL_NO_EXCEPT;\n"
             "}"
         )
         self.assertEqual(len(_violations(code)), 0)
 
     def test_disable_rgbw_colorimetric_lut_not_flagged(self) -> None:
-        code = "namespace fl {\nvoid disable_rgbw_colorimetric_lut() FL_NOEXCEPT;\n}"
+        code = "namespace fl {\nvoid disable_rgbw_colorimetric_lut() FL_NO_EXCEPT;\n}"
         self.assertEqual(len(_violations(code)), 0)
 
     def test_set_rgbww_colorimetric_profile_not_flagged(self) -> None:
         code = (
             "namespace fl {\n"
-            "void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NOEXCEPT;\n"
+            "void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NO_EXCEPT;\n"
             "}"
         )
         self.assertEqual(len(_violations(code)), 0)
@@ -380,7 +380,7 @@ class TestFunctionPointerCarveout(unittest.TestCase):
     def test_set_rgb_2_rgbw_function_not_flagged(self) -> None:
         code = (
             "namespace fl {\n"
-            "void set_rgb_2_rgbw_function(rgb_2_rgbw_function func) FL_NOEXCEPT;\n"
+            "void set_rgb_2_rgbw_function(rgb_2_rgbw_function func) FL_NO_EXCEPT;\n"
             "}"
         )
         self.assertEqual(len(_violations(code)), 0)
@@ -388,7 +388,7 @@ class TestFunctionPointerCarveout(unittest.TestCase):
     def test_set_rgb_2_rgbww_function_not_flagged(self) -> None:
         code = (
             "namespace fl {\n"
-            "void set_rgb_2_rgbww_function(rgb_2_rgbww_function func) FL_NOEXCEPT;\n"
+            "void set_rgb_2_rgbww_function(rgb_2_rgbww_function func) FL_NO_EXCEPT;\n"
             "}"
         )
         self.assertEqual(len(_violations(code)), 0)
@@ -535,10 +535,10 @@ class TestEdgeCases(unittest.TestCase):
         """Simulate rgbw.h: grandfathered setters inside namespace fl."""
         code = (
             "namespace fl {\n"
-            "void set_rgbw_colorimetric_profile(const DiodeProfile* p) FL_NOEXCEPT;\n"
-            "bool enable_rgbw_colorimetric_lut(int grid_n) FL_NOEXCEPT;\n"
-            "void disable_rgbw_colorimetric_lut() FL_NOEXCEPT;\n"
-            "void set_rgb_2_rgbw_function(rgb_2_rgbw_function func) FL_NOEXCEPT;\n"
+            "void set_rgbw_colorimetric_profile(const DiodeProfile* p) FL_NO_EXCEPT;\n"
+            "bool enable_rgbw_colorimetric_lut(int grid_n) FL_NO_EXCEPT;\n"
+            "void disable_rgbw_colorimetric_lut() FL_NO_EXCEPT;\n"
+            "void set_rgb_2_rgbw_function(rgb_2_rgbw_function func) FL_NO_EXCEPT;\n"
             "}"
         )
         v = _violations(code)

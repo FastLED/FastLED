@@ -27,11 +27,11 @@ inline void pinMode(int /*pin*/, PinMode /*mode*/) {
 // Digital I/O
 // ============================================================================
 
-inline void digitalWrite(int pin, PinValue val) FL_NOEXCEPT {
+inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
     fl::stub::setPinState(pin, val == PinValue::High);
 }
 
-inline PinValue digitalRead(int pin) FL_NOEXCEPT {
+inline PinValue digitalRead(int pin) FL_NO_EXCEPT {
     return fl::stub::getPinState(pin) ? PinValue::High : PinValue::Low;
 }
 

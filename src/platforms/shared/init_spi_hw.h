@@ -17,7 +17,7 @@ namespace platforms {
 ///
 /// This is a no-op function for platforms that don't have SPI hardware.
 /// Platform-specific implementations should replace this with actual registration code.
-inline void initSpiHardware() FL_NOEXCEPT {
+inline void initSpiHardware() FL_NO_EXCEPT {
     // No-op: This platform doesn't have SPI hardware
 }
 

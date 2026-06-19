@@ -12,7 +12,7 @@ TimeWarp::TimeWarp(fl::u32 realTimeNow, float initialTimeScale)
     : mLastRealTime(realTimeNow), mStartTime(realTimeNow),
       mTimeScale(initialTimeScale) {}
 
-TimeWarp::~TimeWarp() FL_NOEXCEPT {}
+TimeWarp::~TimeWarp() FL_NO_EXCEPT {}
 
 void TimeWarp::setSpeed(float timeScale) { mTimeScale = timeScale; }
 

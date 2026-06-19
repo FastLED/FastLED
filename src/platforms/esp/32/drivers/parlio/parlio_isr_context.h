@@ -86,7 +86,7 @@ struct FL_ALIGNAS(64) ParlioIsrContext {
     volatile u64 mDebugLastTxDoneTime;    // esp_timer_get_time() at last txDone
     volatile u64 mDebugLastWorkerIsrTime; // esp_timer_get_time() at last worker ISR
 
-    ParlioIsrContext() FL_NOEXCEPT
+    ParlioIsrContext() FL_NO_EXCEPT
         : mStreamComplete(false), mTransmitting(false), mCurrentByte(0),
           mRingReadIdx(0), mRingWriteIdx(0), mRingCount(0), mRingError(false),
           mHardwareIdle(false), mUnderrunCount(0), mNextByteOffset(0),

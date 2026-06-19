@@ -31,7 +31,7 @@ namespace detail {
 struct UartBusHolder {
     fl::shared_ptr<UartPeripheralEsp> peripheral;
     fl::shared_ptr<ChannelEngineUART> driver;
-    UartBusHolder() FL_NOEXCEPT
+    UartBusHolder() FL_NO_EXCEPT
         : peripheral(fl::make_shared<UartPeripheralEsp>()),
           driver(fl::make_shared<ChannelEngineUART>(peripheral)) {}
 };
@@ -40,14 +40,14 @@ struct UartBusHolder {
 template<> struct BusTraits<Bus::UART> {
     using Driver = ChannelEngineUART;
 
-    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
         static detail::UartBusHolder gHolder;
         return gHolder.driver;
     }
 
-    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
+    static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
-    static void registerWithManager() FL_NOEXCEPT {
+    static void registerWithManager() FL_NO_EXCEPT {
         ChannelManager::instance().addDriver(default_bus_priority(Bus::UART), instancePtr());
     }
 };

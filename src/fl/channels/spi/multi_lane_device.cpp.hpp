@@ -36,7 +36,7 @@ struct MultiLaneDevice::Impl : public DeviceImplBase {
         }
     }
 
-    ~Impl() FL_NOEXCEPT {
+    ~Impl() FL_NO_EXCEPT {
         if (initialized && backend) {
             releaseBackend();
         }
@@ -68,7 +68,7 @@ MultiLaneDevice::MultiLaneDevice(const Config& config)
     FL_DBG_F("MultiLaneDevice: Created with %s lane(s)", num_lanes);
 }
 
-MultiLaneDevice::~MultiLaneDevice() FL_NOEXCEPT {
+MultiLaneDevice::~MultiLaneDevice() FL_NO_EXCEPT {
     if (pImpl && pImpl->initialized) {
         end();
     }

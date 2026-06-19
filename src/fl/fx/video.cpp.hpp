@@ -31,9 +31,9 @@ void Video::pause(fl::u32 now) { mImpl->pause(now); }
 
 void Video::resume(fl::u32 now) { mImpl->resume(now); }
 
-Video::~Video() FL_NOEXCEPT = default;
+Video::~Video() FL_NO_EXCEPT = default;
 Video::Video(const Video &) = default;
-Video &Video::operator=(const Video &) FL_NOEXCEPT = default;
+Video &Video::operator=(const Video &) FL_NO_EXCEPT = default;
 
 bool Video::begin(filebuf_ptr handle) {
     if (!mImpl) {
@@ -121,12 +121,12 @@ size_t Video::pixelsPerFrame() const {
     return mImpl->pixelsPerFrame();
 }
 
-bool Video::hasEmbeddedScreenMap() const FL_NOEXCEPT {
+bool Video::hasEmbeddedScreenMap() const FL_NO_EXCEPT {
     if (!mImpl) return false;
     return mImpl->hasEmbeddedScreenMap();
 }
 
-const fl::string &Video::embeddedScreenMapJson() const FL_NOEXCEPT {
+const fl::string &Video::embeddedScreenMapJson() const FL_NO_EXCEPT {
     static const fl::string kEmpty;
     if (!mImpl) return kEmpty;
     return mImpl->embeddedScreenMapJson();
@@ -157,7 +157,7 @@ VideoFxWrapper::VideoFxWrapper(fl::shared_ptr<Fx> fx) : Fx1d(fx->getNumLeds()), 
     mVideo->begin(mByteStream);
 }
 
-VideoFxWrapper::~VideoFxWrapper() FL_NOEXCEPT = default;
+VideoFxWrapper::~VideoFxWrapper() FL_NO_EXCEPT = default;
 
 string VideoFxWrapper::fxName() const {
     string out = "video_fx_wrapper: ";

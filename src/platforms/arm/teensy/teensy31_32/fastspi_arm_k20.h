@@ -57,7 +57,7 @@ struct SPIState {
 
 
 // Templated function to translate a clock divider value into the prescalar, scalar, and clock doubling setting for the world.
-template <int VAL> void getScalars(u32 & preScalar, u32 & scalar, u32 & dbl) FL_NOEXCEPT {
+template <int VAL> void getScalars(u32 & preScalar, u32 & scalar, u32 & dbl) FL_NO_EXCEPT {
 	switch(VAL) {
 		// Handle the dbl clock cases
 		case 0: case 1:
@@ -111,7 +111,7 @@ class ARMHardwareSPIOutput {
 
 	// Borrowed from the teensy3 SPSR emulation code -- note, enabling pin 7 disables pin 11 (and vice versa),
 	// and likewise enabling pin 14 disables pin 13 (and vice versa)
-	inline void enable_pins(void) FL_NOEXCEPT __attribute__((always_inline)) {
+	inline void enable_pins(void) FL_NO_EXCEPT __attribute__((always_inline)) {
 		//serial_print("enable_pins\n");
 		switch(_DATA_PIN) {
 			case 7:
@@ -137,7 +137,7 @@ class ARMHardwareSPIOutput {
 	}
 
 	// Borrowed from the teensy3 SPSR emulation code.  We disable the pins that we're using, and restore the state on the pins that we aren't using
-	inline void disable_pins(void) FL_NOEXCEPT __attribute__((always_inline)) {
+	inline void disable_pins(void) FL_NO_EXCEPT __attribute__((always_inline)) {
 		switch(_DATA_PIN) {
 			case 7: CORE_PIN7_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1); CORE_PIN11_CONFIG = gState.pins[1]; break;
 			case 11: CORE_PIN11_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1); CORE_PIN7_CONFIG = gState.pins[0]; break;
@@ -149,7 +149,7 @@ class ARMHardwareSPIOutput {
 		}
 	}
 
-	static inline void update_ctars(u32 ctar0, u32 ctar1) FL_NOEXCEPT __attribute__((always_inline)) {
+	static inline void update_ctars(u32 ctar0, u32 ctar1) FL_NO_EXCEPT __attribute__((always_inline)) {
 		if(SPIX.CTAR0 == ctar0 && SPIX.CTAR1 == ctar1) return;
 		u32 mcr = SPIX.MCR;
 		if(mcr & SPI_MCR_MDIS) {
@@ -163,7 +163,7 @@ class ARMHardwareSPIOutput {
 		}
 	}
 
-	static inline void update_ctar0(u32 ctar) FL_NOEXCEPT __attribute__((always_inline)) {
+	static inline void update_ctar0(u32 ctar) FL_NO_EXCEPT __attribute__((always_inline)) {
 		if (SPIX.CTAR0 == ctar) return;
 		u32 mcr = SPIX.MCR;
 		if (mcr & SPI_MCR_MDIS) {
@@ -176,7 +176,7 @@ class ARMHardwareSPIOutput {
 		}
 	}
 
-	static inline void update_ctar1(u32 ctar) FL_NOEXCEPT __attribute__((always_inline)) {
+	static inline void update_ctar1(u32 ctar) FL_NO_EXCEPT __attribute__((always_inline)) {
 		if (SPIX.CTAR1 == ctar) return;
 		u32 mcr = SPIX.MCR;
 		if (mcr & SPI_MCR_MDIS) {
@@ -189,7 +189,7 @@ class ARMHardwareSPIOutput {
 		}
 	}
 
-	void setSPIRate() FL_NOEXCEPT {
+	void setSPIRate() FL_NO_EXCEPT {
 		// Configure CTAR0, defaulting to 8 bits and CTAR1, defaulting to 16 bits
 		u32 _PBR = 0;
 		u32 _BR = 0;
@@ -227,7 +227,7 @@ class ARMHardwareSPIOutput {
 		update_ctars(ctar0,ctar1);
 	}
 
-	void inline save_spi_state() FL_NOEXCEPT __attribute__ ((always_inline)) {
+	void inline save_spi_state() FL_NO_EXCEPT __attribute__ ((always_inline)) {
 		// save ctar data
 		gState._ctar0 = SPIX.CTAR0;
 		gState._ctar1 = SPIX.CTAR1;
@@ -239,7 +239,7 @@ class ARMHardwareSPIOutput {
 		gState.pins[3] = CORE_PIN14_CONFIG;
 	}
 
-	void inline restore_spi_state() FL_NOEXCEPT __attribute__ ((always_inline)) {
+	void inline restore_spi_state() FL_NO_EXCEPT __attribute__ ((always_inline)) {
 		// restore ctar data
 		update_ctars(gState._ctar0,gState._ctar1);
 
@@ -256,7 +256,7 @@ public:
 	ARMHardwareSPIOutput(Selectable *pSelect) { mPSelect = pSelect; }
 	void setSelect(Selectable *pSelect) { mPSelect = pSelect; }
 
-	void init() FL_NOEXCEPT {
+	void init() FL_NO_EXCEPT {
 		// set the pins to output
 		FastPin<_DATA_PIN>::setOutput();
 		FastPin<_CLOCK_PIN>::setOutput();
@@ -284,7 +284,7 @@ public:
 		// pin/spi configuration happens on select
 	}
 
-	static void waitFully() FL_NOEXCEPT __attribute__((always_inline)) {
+	static void waitFully() FL_NO_EXCEPT __attribute__((always_inline)) {
 		// Wait for the last byte to get shifted into the register
 		bool empty = false;
 
@@ -321,7 +321,7 @@ public:
 
 	template<ECont CONT_STATE, EWait WAIT_STATE, ELast LAST_STATE> class Write {
 	public:
-		static void writeWord(u16 w) FL_NOEXCEPT __attribute__((always_inline)) {
+		static void writeWord(u16 w) FL_NO_EXCEPT __attribute__((always_inline)) {
 			if(WAIT_STATE == PRE) { wait(); }
 			cli();
 			SPIX.PUSHR = ((LAST_STATE == LAST) ? SPI_PUSHR_EOQ : 0) |
@@ -332,7 +332,7 @@ public:
 			if(WAIT_STATE == POST) { wait(); }
 		}
 
-		static void writeByte(u8 b) FL_NOEXCEPT __attribute__((always_inline)) {
+		static void writeByte(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
 			if(WAIT_STATE == PRE) { wait(); }
 			cli();
 			SPIX.PUSHR = ((LAST_STATE == LAST) ? SPI_PUSHR_EOQ : 0) |
@@ -359,7 +359,7 @@ public:
 	static void writeByteContNoWait(u8 b) __attribute__((always_inline)) { cli(); SPIX.PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(0) | (b & 0xFF); SPIX.SR |= SPI_SR_TCF; sei(); }
 
 	// not the most efficient mechanism in the world - but should be enough for sm16716 and friends
-	template <u8 BIT> inline static void writeBit(u8 b) FL_NOEXCEPT {
+	template <u8 BIT> inline static void writeBit(u8 b) FL_NO_EXCEPT {
 		u32 ctar1_save = SPIX.CTAR1;
 
 		// Clear out the FMSZ bits, reset them for 1 bit transferd for the start bit
@@ -371,29 +371,29 @@ public:
 		update_ctar1(ctar1_save);
 	}
 
-	void inline select() FL_NOEXCEPT __attribute__((always_inline)) {
+	void inline select() FL_NO_EXCEPT __attribute__((always_inline)) {
 		save_spi_state();
 		if(mPSelect != nullptr) { mPSelect->select(); }
 		setSPIRate();
 		enable_pins();
 	}
 
-	void inline release() FL_NOEXCEPT __attribute__((always_inline)) {
+	void inline release() FL_NO_EXCEPT __attribute__((always_inline)) {
 		disable_pins();
 		if(mPSelect != nullptr) { mPSelect->release(); }
 		restore_spi_state();
 	}
 
-	void endTransaction() FL_NOEXCEPT {
+	void endTransaction() FL_NO_EXCEPT {
 		waitFully();
 		release();
 	}
 
-	static void writeBytesValueRaw(u8 value, int len) FL_NOEXCEPT {
+	static void writeBytesValueRaw(u8 value, int len) FL_NO_EXCEPT {
 		while(len--) { Write<CM, WM, NOTLAST>::writeByte(value); }
 	}
 
-	void writeBytesValue(u8 value, int len) FL_NOEXCEPT {
+	void writeBytesValue(u8 value, int len) FL_NO_EXCEPT {
 		select();
 		while(len--) {
 			writeByte(value);
@@ -403,7 +403,7 @@ public:
 	}
 
 	// Write a block of n uint8_ts out
-	template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) FL_NOEXCEPT {
+	template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) FL_NO_EXCEPT {
 		u8 *end = data + len;
 		select();
 		// could be optimized to write 16bit words out instead of 8bit bytes
@@ -419,7 +419,7 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NOEXCEPT {
+	template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NO_EXCEPT {
 		select();
 		int len = pixels.mLen;
 

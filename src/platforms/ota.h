@@ -26,7 +26,7 @@ public:
 
     /// @brief Factory method to create platform-specific OTA instance
     /// @return Shared pointer to IOTA implementation (may be null/no-op on unsupported platforms)
-    static fl::shared_ptr<IOTA> create() FL_NOEXCEPT;
+    static fl::shared_ptr<IOTA> create() FL_NO_EXCEPT;
 
     // ========== Network Setup Methods ==========
 
@@ -38,14 +38,14 @@ public:
     /// @return true if setup successful, false otherwise
     /// @note Returns immediately - Wi-Fi connects asynchronously
     virtual bool beginWiFi(const char* hostname, const char* password,
-                          const char* ssid, const char* wifi_pass) FL_NOEXCEPT = 0;
+                          const char* ssid, const char* wifi_pass) FL_NO_EXCEPT = 0;
 
     /// @brief Start OTA services only (network already configured)
     /// @param hostname Device hostname (used for mDNS)
     /// @param password Password for OTA authentication
     /// @return true if setup successful, false otherwise
     /// @note For Ethernet users: Call ETH.begin() first, then use this method
-    virtual bool begin(const char* hostname, const char* password) FL_NOEXCEPT = 0;
+    virtual bool begin(const char* hostname, const char* password) FL_NO_EXCEPT = 0;
 
     // ========== Optional Configuration ==========
 
@@ -53,42 +53,42 @@ public:
     /// @param ap_ssid Access Point SSID
     /// @param ap_pass Access Point password (minimum 8 characters, nullptr for open AP)
     /// @return true if parameters are valid, false if validation fails
-    virtual bool enableApFallback(const char* ap_ssid, const char* ap_pass = nullptr) FL_NOEXCEPT = 0;
+    virtual bool enableApFallback(const char* ap_ssid, const char* ap_pass = nullptr) FL_NO_EXCEPT = 0;
 
     // ========== Callback Registration ==========
 
     /// @brief Set progress callback (called during firmware upload)
     /// @param callback Callback function (written, total)
-    virtual void onProgress(fl::function<void(size_t, size_t)> callback) FL_NOEXCEPT = 0;
+    virtual void onProgress(fl::function<void(size_t, size_t)> callback) FL_NO_EXCEPT = 0;
 
     /// @brief Set error callback (called on OTA errors)
     /// @param callback Callback function (error message)
-    virtual void onError(fl::function<void(const char*)> callback) FL_NOEXCEPT = 0;
+    virtual void onError(fl::function<void(const char*)> callback) FL_NO_EXCEPT = 0;
 
     /// @brief Set state callback (called on state transitions)
     /// @param callback Callback function (state code)
-    virtual void onState(fl::function<void(u8)> callback) FL_NOEXCEPT = 0;
+    virtual void onState(fl::function<void(u8)> callback) FL_NO_EXCEPT = 0;
 
     /// @brief Set callback to be called before device reboots after OTA update
     /// @param callback Callback function to call (e.g., to save state)
-    virtual void onBeforeReboot(void (*callback)()) FL_NOEXCEPT = 0;
+    virtual void onBeforeReboot(void (*callback)()) FL_NO_EXCEPT = 0;
 
     // ========== Runtime Methods ==========
 
     /// @brief Poll OTA handlers (must be called regularly in loop())
-    virtual void poll() FL_NOEXCEPT = 0;
+    virtual void poll() FL_NO_EXCEPT = 0;
 
     /// @brief Check if WiFi is connected
     /// @return true if WiFi connection is established
-    virtual bool isConnected() const FL_NOEXCEPT = 0;
+    virtual bool isConnected() const FL_NO_EXCEPT = 0;
 
     /// @brief Get bitmask of services that failed to initialize
     /// @return Bitfield of OTAService flags indicating which services failed
-    virtual u8 getFailedServices() const FL_NOEXCEPT = 0;
+    virtual u8 getFailedServices() const FL_NO_EXCEPT = 0;
 };
 
 // Platform-specific factory function - can be overridden via strong linkage
-fl::shared_ptr<IOTA> platform_create_ota() FL_NOEXCEPT FL_LINK_WEAK;
+fl::shared_ptr<IOTA> platform_create_ota() FL_NO_EXCEPT FL_LINK_WEAK;
 
 }  // namespace platforms
 }  // namespace fl

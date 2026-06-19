@@ -83,7 +83,7 @@ private:
     CMinWait<WAIT_TIME> mWait;
 
 public:
-    virtual void init() FL_NOEXCEPT {
+    virtual void init() FL_NO_EXCEPT {
         // Warn once that generic fallback controller is being used
         // This may indicate missing platform-specific optimizations
         static bool warned = false;  // okay static in header
@@ -100,14 +100,14 @@ public:
         fl::FastPin<DATA_PIN>::lo();
     }
 
-    virtual u16 getMaxRefreshRate() const FL_NOEXCEPT {
+    virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT {
         // Rough estimate: about 300-400 Hz for typical 60 LED WS2812 strings
         // Actual rate depends on T1+T2 timing and LED count
         return 300;
     }
 
 protected:
-    virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NOEXCEPT {
+    virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
         // Wait for minimum time since last frame
         mWait.wait();
 

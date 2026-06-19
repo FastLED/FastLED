@@ -11,7 +11,7 @@ namespace detail {
 
 FL_NO_INLINE
 fl::size deque_grow_map_capacity(fl::size current_map_capacity,
-                                 fl::size min_required_chunks) FL_NOEXCEPT {
+                                 fl::size min_required_chunks) FL_NO_EXCEPT {
     fl::size next = current_map_capacity == 0
                         ? static_cast<fl::size>(kDequeInitialMapCapacity)
                         : current_map_capacity * 2;

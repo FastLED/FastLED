@@ -59,12 +59,12 @@ inline ResetCause rpDetectResetCause() {
 
 } // namespace platforms
 
-Watchdog& Watchdog::instance() FL_NOEXCEPT {
+Watchdog& Watchdog::instance() FL_NO_EXCEPT {
     static Watchdog sInstance;
     return sInstance;
 }
 
-void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
+void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
     if (timeout_ms == 0) timeout_ms = 1000;
     if (timeout_ms > FL_WATCHDOG_MAX_TIMEOUT_MS) timeout_ms = FL_WATCHDOG_MAX_TIMEOUT_MS;
     // Second arg `pause_on_debug` defaults to true — useful in dev so a
@@ -73,11 +73,11 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     platforms::rpWatchdogState().armed = true;
 }
 
-void Watchdog::feed() FL_NOEXCEPT {
+void Watchdog::feed() FL_NO_EXCEPT {
     watchdog_update();
 }
 
-void Watchdog::disable() FL_NOEXCEPT {
+void Watchdog::disable() FL_NO_EXCEPT {
     // Pico SDK's `watchdog_disable()` clears WATCHDOG_CTRL_ENABLE_BITS, which
     // halts the counter. Subsequent `feed()` calls are still safe (they only
     // write LOAD).
@@ -85,7 +85,7 @@ void Watchdog::disable() FL_NOEXCEPT {
     platforms::rpWatchdogState().armed = false;
 }
 
-ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
+ResetCause Watchdog::lastResetCause() const FL_NO_EXCEPT {
     auto& s = platforms::rpWatchdogState();
     if (!s.cause_cached) {
         s.cached_cause = platforms::rpDetectResetCause();
@@ -97,18 +97,18 @@ ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
     return s.cached_cause;
 }
 
-bool Watchdog::lastResetWasWatchdog() const FL_NOEXCEPT {
+bool Watchdog::lastResetWasWatchdog() const FL_NO_EXCEPT {
     return lastResetCause() == ResetCause::WATCHDOG;
 }
 
-fl::u8 Watchdog::persistRead(fl::size idx) const FL_NOEXCEPT {
+fl::u8 Watchdog::persistRead(fl::size idx) const FL_NO_EXCEPT {
     if (idx >= FL_WATCHDOG_PERSIST_BYTES) return 0;
     // Pack 4 bytes per scratch register, little-endian.
     fl::u32 word = watchdog_hw->scratch[idx >> 2];
     return static_cast<fl::u8>((word >> ((idx & 0x3) * 8)) & 0xFF);
 }
 
-void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NOEXCEPT {
+void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NO_EXCEPT {
     if (idx >= FL_WATCHDOG_PERSIST_BYTES) return;
     fl::u32 mask = static_cast<fl::u32>(0xFFu) << ((idx & 0x3) * 8);
     fl::u32 word = watchdog_hw->scratch[idx >> 2] & ~mask;
@@ -116,41 +116,41 @@ void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NOEXCEPT {
     watchdog_hw->scratch[idx >> 2] = word;
 }
 
-fl::u16 Watchdog::consecutiveCrashCount() const FL_NOEXCEPT {
+fl::u16 Watchdog::consecutiveCrashCount() const FL_NO_EXCEPT {
     (void)lastResetCause();
     return platforms::rpWatchdogState().crash_count;
 }
-void Watchdog::markCleanShutdown() FL_NOEXCEPT { platforms::rpWatchdogState().crash_count = 0; }
-bool Watchdog::isInSafeMode() const FL_NOEXCEPT { return consecutiveCrashCount() >= mSafeModeThreshold; }
-fl::u16 Watchdog::safeModeThreshold() const FL_NOEXCEPT { return mSafeModeThreshold; }
-void    Watchdog::setSafeModeThreshold(fl::u16 t) FL_NOEXCEPT { mSafeModeThreshold = t; }
+void Watchdog::markCleanShutdown() FL_NO_EXCEPT { platforms::rpWatchdogState().crash_count = 0; }
+bool Watchdog::isInSafeMode() const FL_NO_EXCEPT { return consecutiveCrashCount() >= mSafeModeThreshold; }
+fl::u16 Watchdog::safeModeThreshold() const FL_NO_EXCEPT { return mSafeModeThreshold; }
+void    Watchdog::setSafeModeThreshold(fl::u16 t) FL_NO_EXCEPT { mSafeModeThreshold = t; }
 
-FL_NORETURN void Watchdog::reboot() FL_NOEXCEPT {
+FL_NO_RETURN void Watchdog::reboot() FL_NO_EXCEPT {
     watchdog_reboot(0, 0, 0);  // pc=0, sp=0, delay=0 — immediate
     while (true) {}
 }
 
-bool Watchdog::onTimeout(WatchdogTimeoutCallback, void*) FL_NOEXCEPT { return false; }
-bool Watchdog::onTimeout(fl::function<void()>) FL_NOEXCEPT { return false; }
-bool Watchdog::setPauseOnDebug(bool) FL_NOEXCEPT {
+bool Watchdog::onTimeout(WatchdogTimeoutCallback, void*) FL_NO_EXCEPT { return false; }
+bool Watchdog::onTimeout(fl::function<void()>) FL_NO_EXCEPT { return false; }
+bool Watchdog::setPauseOnDebug(bool) FL_NO_EXCEPT {
     // Already set on begin() — caller would need to re-begin() to change it.
     return false;
 }
-bool Watchdog::writeCrashLog(fl::span<const fl::u8>) FL_NOEXCEPT { return false; }
-fl::size Watchdog::readCrashLog(fl::span<fl::u8>) const FL_NOEXCEPT { return 0; }
+bool Watchdog::writeCrashLog(fl::span<const fl::u8>) FL_NO_EXCEPT { return false; }
+fl::size Watchdog::readCrashLog(fl::span<fl::u8>) const FL_NO_EXCEPT { return 0; }
 
-bool Watchdog::rebootIntoBootloader() FL_NOEXCEPT {
+bool Watchdog::rebootIntoBootloader() FL_NO_EXCEPT {
     // Force BOOTSEL/UF2 mode. Arg 0 = no LED activity GPIO mask, arg 0 =
     // both USB MSC and PICOBOOT interfaces enabled.
     reset_usb_boot(0, 0);
     return true;  // Should be unreachable, but contract is satisfied.
 }
 
-bool Watchdog::setWindow(fl::u32, fl::u32) FL_NOEXCEPT { return false; }
-bool Watchdog::hasCrashReport() const FL_NOEXCEPT { return false; }
-WatchdogCrashReport Watchdog::readCrashReport() const FL_NOEXCEPT {
+bool Watchdog::setWindow(fl::u32, fl::u32) FL_NO_EXCEPT { return false; }
+bool Watchdog::hasCrashReport() const FL_NO_EXCEPT { return false; }
+WatchdogCrashReport Watchdog::readCrashReport() const FL_NO_EXCEPT {
     WatchdogCrashReport r{}; r.valid = false; r.fault_type = ""; return r;
 }
-void Watchdog::clearCrashReport() FL_NOEXCEPT {}
+void Watchdog::clearCrashReport() FL_NO_EXCEPT {}
 
 } // namespace fl

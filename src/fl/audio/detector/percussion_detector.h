@@ -9,8 +9,8 @@ namespace detector {
 
 class Percussion {
 public:
-    Percussion() FL_NOEXCEPT;
-    ~Percussion() FL_NOEXCEPT;
+    Percussion() FL_NO_EXCEPT;
+    ~Percussion() FL_NO_EXCEPT;
 
     void update(shared_ptr<Context> context);
     void reset();

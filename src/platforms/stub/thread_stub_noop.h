@@ -38,15 +38,15 @@ class ThreadFake {
       private:
         int mId;
         friend class ThreadFake;
-        explicit id(int val) FL_NOEXCEPT : mId(val) {}
+        explicit id(int val) FL_NO_EXCEPT : mId(val) {}
       public:
-        id() FL_NOEXCEPT : mId(0) {}
-        bool operator==(const id& other) const FL_NOEXCEPT { return mId == other.mId; }
-        bool operator!=(const id& other) const FL_NOEXCEPT { return mId != other.mId; }
-        bool operator<(const id& other) const FL_NOEXCEPT { return mId < other.mId; }
-        bool operator<=(const id& other) const FL_NOEXCEPT { return mId <= other.mId; }
-        bool operator>(const id& other) const FL_NOEXCEPT { return mId > other.mId; }
-        bool operator>=(const id& other) const FL_NOEXCEPT { return mId >= other.mId; }
+        id() FL_NO_EXCEPT : mId(0) {}
+        bool operator==(const id& other) const FL_NO_EXCEPT { return mId == other.mId; }
+        bool operator!=(const id& other) const FL_NO_EXCEPT { return mId != other.mId; }
+        bool operator<(const id& other) const FL_NO_EXCEPT { return mId < other.mId; }
+        bool operator<=(const id& other) const FL_NO_EXCEPT { return mId <= other.mId; }
+        bool operator>(const id& other) const FL_NO_EXCEPT { return mId > other.mId; }
+        bool operator>=(const id& other) const FL_NO_EXCEPT { return mId >= other.mId; }
     };
 
     ThreadFake() = default;
@@ -60,7 +60,7 @@ class ThreadFake {
     /// In single-threaded mode, the function executes immediately and
     /// synchronously. The thread is marked as not joinable after execution.
     template<typename Function, typename... Args>
-    explicit ThreadFake(Function&& f, Args&&... args) FL_NOEXCEPT : mJoinable(true), mThreadId(1) {
+    explicit ThreadFake(Function&& f, Args&&... args) FL_NO_EXCEPT : mJoinable(true), mThreadId(1) {
         // In single-threaded mode, execute immediately
         fl::invoke(fl::forward<Function>(f), fl::forward<Args>(args)...);
         // Immediately mark as not joinable since we executed synchronously
@@ -72,13 +72,13 @@ class ThreadFake {
     ThreadFake& operator=(const ThreadFake&) = delete;
 
     // Movable
-    ThreadFake(ThreadFake&& other) FL_NOEXCEPT
+    ThreadFake(ThreadFake&& other) FL_NO_EXCEPT
         : mJoinable(other.mJoinable), mThreadId(other.mThreadId) {
         other.mJoinable = false;
         other.mThreadId = 0;
     }
 
-    ThreadFake& operator=(ThreadFake&& other) FL_NOEXCEPT {
+    ThreadFake& operator=(ThreadFake&& other) FL_NO_EXCEPT {
         if (this != &other) {
             mJoinable = other.mJoinable;
             mThreadId = other.mThreadId;
@@ -95,30 +95,30 @@ class ThreadFake {
     ///
     /// Since the function executed synchronously in the constructor,
     /// join() is a no-op.
-    void join() FL_NOEXCEPT {
+    void join() FL_NO_EXCEPT {
         mJoinable = false;
     }
 
     /// @brief Detach (no-op in single-threaded mode)
-    void detach() FL_NOEXCEPT {
+    void detach() FL_NO_EXCEPT {
         mJoinable = false;
     }
 
     /// @brief Check if thread is joinable
     /// @return true if joinable, false otherwise
-    bool joinable() const FL_NOEXCEPT {
+    bool joinable() const FL_NO_EXCEPT {
         return mJoinable;
     }
 
     /// @brief Get thread ID
     /// @return Thread ID
-    id get_id() const FL_NOEXCEPT {
+    id get_id() const FL_NO_EXCEPT {
         return id(mThreadId);
     }
 
     /// @brief Swap with another thread
     /// @param other Thread to swap with
-    void swap(ThreadFake& other) FL_NOEXCEPT {
+    void swap(ThreadFake& other) FL_NO_EXCEPT {
         bool temp_joinable = mJoinable;
         int temp_id = mThreadId;
         mJoinable = other.mJoinable;
@@ -129,7 +129,7 @@ class ThreadFake {
 
     /// @brief Get hardware concurrency
     /// @return Always returns 1 in single-threaded mode
-    static unsigned int hardware_concurrency() FL_NOEXCEPT {
+    static unsigned int hardware_concurrency() FL_NO_EXCEPT {
         return 1;
     }
 
@@ -138,7 +138,7 @@ class ThreadFake {
 
     /// @brief Get native handle (returns nullptr in fake mode)
     /// @return nullptr
-    native_handle_type native_handle() FL_NOEXCEPT {
+    native_handle_type native_handle() FL_NO_EXCEPT {
         return nullptr;
     }
 };
@@ -158,12 +158,12 @@ namespace this_thread {
     /// symbol conflicts when static locals are used in header files. Since this
     /// is single-threaded mode and thread_id() always returns the same value
     /// (mId=0), we just return a fresh default-constructed thread_id each time.
-    inline thread_id get_id() FL_NOEXCEPT {
+    inline thread_id get_id() FL_NO_EXCEPT {
         return thread_id();
     }
 
     /// @brief Yield (no-op in single-threaded mode)
-    inline void yield() FL_NOEXCEPT {
+    inline void yield() FL_NO_EXCEPT {
         // No-op
     }
 
@@ -172,7 +172,7 @@ namespace this_thread {
     /// @tparam Period Duration period type (unused)
     /// @param sleep_duration Duration to sleep (unused)
     template<typename Rep, typename Period>
-    void sleep_for(const Rep& /* sleep_duration */) FL_NOEXCEPT {
+    void sleep_for(const Rep& /* sleep_duration */) FL_NO_EXCEPT {
         // No-op - can't actually sleep in single-threaded mode
     }
 
@@ -181,7 +181,7 @@ namespace this_thread {
     /// @tparam Duration Duration type (unused)
     /// @param sleep_time Time point to sleep until (unused)
     template<typename Clock, typename Duration>
-    void sleep_until(const Clock& /* sleep_time */) FL_NOEXCEPT {
+    void sleep_until(const Clock& /* sleep_time */) FL_NO_EXCEPT {
         // No-op - can't actually sleep in single-threaded mode
     }
 } // namespace this_thread

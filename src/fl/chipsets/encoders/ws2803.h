@@ -18,7 +18,7 @@ namespace fl {
 
 // Forward declaration of WS2801 encoder
 template <typename InputIterator, typename OutputIterator>
-void encodeWS2801(InputIterator first, InputIterator last, OutputIterator out) FL_NOEXCEPT;
+void encodeWS2801(InputIterator first, InputIterator last, OutputIterator out) FL_NO_EXCEPT;
 
 /// @brief Encode pixel data in WS2803 format (alias for WS2801)
 /// @tparam InputIterator Iterator yielding fl::array<u8, 3> (3 bytes in wire order)
@@ -28,7 +28,7 @@ void encodeWS2801(InputIterator first, InputIterator last, OutputIterator out) F
 /// @param out Output iterator for encoded bytes
 /// @note WS2803 protocol is identical to WS2801
 template <typename InputIterator, typename OutputIterator>
-void encodeWS2803(InputIterator first, InputIterator last, OutputIterator out) FL_NOEXCEPT {
+void encodeWS2803(InputIterator first, InputIterator last, OutputIterator out) FL_NO_EXCEPT {
     // WS2803 uses identical protocol to WS2801
     encodeWS2801(first, last, out);
 }

@@ -8,7 +8,7 @@
 
 namespace fl {
 
-void JsonUiAudioInternal::toJson(fl::json &json) const FL_NOEXCEPT {
+void JsonUiAudioInternal::toJson(fl::json &json) const FL_NO_EXCEPT {
     json.set("name", name());
     json.set("group", groupName());
     json.set("type", "audio");
@@ -20,7 +20,7 @@ void JsonUiAudioInternal::toJson(fl::json &json) const FL_NOEXCEPT {
     // Echoing would create a feedback loop of growing JSON payloads.
 }
 
-void JsonUiAudioInternal::updateInternal(const fl::json &value) FL_NOEXCEPT {
+void JsonUiAudioInternal::updateInternal(const fl::json &value) FL_NO_EXCEPT {
     if (value.contains("audioData")) {
         fl::json audioDataArray = value["audioData"];
 

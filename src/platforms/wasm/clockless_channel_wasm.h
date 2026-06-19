@@ -95,7 +95,7 @@ protected:
         mDriver->enqueue(mChannelData);
     }
 
-    static fl::shared_ptr<IChannelDriver> getWasmEngine() FL_NOEXCEPT {
+    static fl::shared_ptr<IChannelDriver> getWasmEngine() FL_NO_EXCEPT {
         // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
         // the `BusTraits<Bus::STUB>` singleton -- the stub driver is the
         // platform default for both stub and WASM builds. Naming the

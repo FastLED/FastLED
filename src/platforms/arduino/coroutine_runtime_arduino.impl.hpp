@@ -19,13 +19,13 @@ namespace platforms {
 
 class CoroutineRuntimeArduino : public ICoroutineRuntime {
 public:
-    void pumpCoroutines(fl::u32 us) FL_NOEXCEPT override {
+    void pumpCoroutines(fl::u32 us) FL_NO_EXCEPT override {
         // Generic Arduino: no background coroutines, nothing to pump.
         (void)us;
     }
 };
 
-ICoroutineRuntime& ICoroutineRuntime::instance() FL_NOEXCEPT {
+ICoroutineRuntime& ICoroutineRuntime::instance() FL_NO_EXCEPT {
     return fl::Singleton<CoroutineRuntimeArduino>::instance();
 }
 

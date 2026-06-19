@@ -29,7 +29,7 @@ FASTLED_SHARED_PTR(WaveCrgbGradientMap);
 /// into CRGB color values for LED display.
 class WaveCrgbMap {
   public:
-    virtual ~WaveCrgbMap() FL_NOEXCEPT = default;
+    virtual ~WaveCrgbMap() FL_NO_EXCEPT = default;
 
     /// @brief Convert wave simulation values to LED colors
     /// @param xymap Coordinate mapping from 2D grid to 1D LED array
@@ -79,7 +79,7 @@ class WaveCrgbGradientMap : public WaveCrgbMap {
     WaveCrgbGradientMap(const CRGBPalette16 &palette) : mGradient(palette) {}
 
     /// @brief Default constructor with no initial gradient
-    WaveCrgbGradientMap() FL_NOEXCEPT = default;
+    WaveCrgbGradientMap() FL_NO_EXCEPT = default;
 
     /// @brief Map wave values to gradient-colored LEDs
     /// @param xymap Coordinate mapping from 2D grid to 1D LED array
@@ -101,7 +101,7 @@ class WaveCrgbGradientMap : public WaveCrgbMap {
 /// Defines all the settings that control wave behavior including
 /// simulation quality, physics parameters, and color mapping.
 struct WaveFxArgs {
-    WaveFxArgs() FL_NOEXCEPT = default;
+    WaveFxArgs() FL_NO_EXCEPT = default;
 
     /// @brief Construct with all parameters
     /// @param factor Supersampling quality (higher = smoother but slower)
@@ -114,8 +114,8 @@ struct WaveFxArgs {
                float speed, float dampening, WaveCrgbMapPtr crgbMap)
         : factor(factor), half_duplex(half_duplex), auto_updates(auto_updates),
           speed(speed), dampening(dampening), crgbMap(crgbMap) {}
-    WaveFxArgs(const WaveFxArgs &) FL_NOEXCEPT = default;
-    WaveFxArgs &operator=(const WaveFxArgs &) FL_NOEXCEPT = default;
+    WaveFxArgs(const WaveFxArgs &) FL_NO_EXCEPT = default;
+    WaveFxArgs &operator=(const WaveFxArgs &) FL_NO_EXCEPT = default;
 
     /// Supersampling quality (SUPER_SAMPLE_2X recommended for balance)
     SuperSample factor = SuperSample::SUPER_SAMPLE_2X;
@@ -208,12 +208,12 @@ class WaveFx : public Fx2d {
     /// ~1.2x scalar cost vs 8-512x for SuperSample with broadly
     /// comparable visual quality on smooth fields. See #3112 research
     /// doc §A1 for the rationale.
-    void setOutputBlur(fl::u8 amount, fl::u8 passes = 1) FL_NOEXCEPT {
+    void setOutputBlur(fl::u8 amount, fl::u8 passes = 1) FL_NO_EXCEPT {
         mOutputBlurAmount = amount;
         mOutputBlurPasses = (passes < 1) ? 1 : passes;
     }
-    fl::u8 getOutputBlurAmount() const FL_NOEXCEPT { return mOutputBlurAmount; }
-    fl::u8 getOutputBlurPasses() const FL_NOEXCEPT { return mOutputBlurPasses; }
+    fl::u8 getOutputBlurAmount() const FL_NO_EXCEPT { return mOutputBlurAmount; }
+    fl::u8 getOutputBlurPasses() const FL_NO_EXCEPT { return mOutputBlurPasses; }
 
     /// @brief Enable/disable cylindrical topology on x-axis
     /// @param on If true, waves wrap around from right edge to left edge
@@ -287,12 +287,12 @@ class WaveFx : public Fx2d {
     /// Calling this marks the choice as user-set, so subsequent
     /// setSuperSample() calls preserve it instead of re-applying the
     /// multiplier-based default.
-    void setStencil(LaplacianStencil s) FL_NOEXCEPT {
+    void setStencil(LaplacianStencil s) FL_NO_EXCEPT {
         mWaveSim.setStencil(s);
     }
 
     /// @brief Get the currently active Laplacian stencil
-    LaplacianStencil getStencil() const FL_NOEXCEPT {
+    LaplacianStencil getStencil() const FL_NO_EXCEPT {
         return mWaveSim.getStencil();
     }
 

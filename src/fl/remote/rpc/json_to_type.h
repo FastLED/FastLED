@@ -18,7 +18,7 @@ namespace fl {
 struct ConstCharPtrWrapper {
     fl::string value;
 
-    ConstCharPtrWrapper() FL_NOEXCEPT = default;
+    ConstCharPtrWrapper() FL_NO_EXCEPT = default;
     ConstCharPtrWrapper(const fl::string& s) : value(s) {}
     ConstCharPtrWrapper(fl::string&& s) : value(fl::move(s)) {}
 
@@ -32,7 +32,7 @@ template <typename T>
 struct ConstSpanWrapper {
     fl::vector<T> value;
 
-    ConstSpanWrapper() FL_NOEXCEPT = default;
+    ConstSpanWrapper() FL_NO_EXCEPT = default;
     ConstSpanWrapper(fl::vector<T>&& v) : value(fl::move(v)) {}
     ConstSpanWrapper(const fl::vector<T>& v) : value(v) {}
 

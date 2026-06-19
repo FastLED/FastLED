@@ -15,7 +15,7 @@
 namespace fl {
 
 // Factory: create mock peripheral on non-Teensy platforms
-fl::shared_ptr<IFlexIOPeripheral> IFlexIOPeripheral::create() FL_NOEXCEPT {
+fl::shared_ptr<IFlexIOPeripheral> IFlexIOPeripheral::create() FL_NO_EXCEPT {
     return fl::make_shared<FlexIOPeripheralMock>();
 }
 

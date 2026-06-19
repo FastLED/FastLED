@@ -31,6 +31,6 @@ namespace fl {
 /// **Performance vs. binary size.** Calling this brings every driver TU
 /// into the link, which is exactly what the default build avoids (see
 /// #2428). Only call when you actually need runtime driver flexibility.
-void enableAllDrivers() FL_NOEXCEPT;
+void enableAllDrivers() FL_NO_EXCEPT;
 
 }  // namespace fl

@@ -50,7 +50,7 @@ class json;
 
 class FileSystem {
   public:
-    FileSystem() FL_NOEXCEPT;
+    FileSystem() FL_NO_EXCEPT;
     bool beginSd(int cs_pin); // Signal to begin using the filesystem resource.
     bool begin(FsImplPtr platform_filesystem); // Signal to begin using the
                                                // filesystem resource.
@@ -86,11 +86,11 @@ class FileSystem {
 class FsImpl {
   public:
     struct Visitor {
-        virtual ~Visitor() FL_NOEXCEPT {}
+        virtual ~Visitor() FL_NO_EXCEPT {}
         virtual void accept(const char *path) = 0;
     };
-    FsImpl() FL_NOEXCEPT = default;
-    virtual ~FsImpl() FL_NOEXCEPT {} // Use default pins for spi.
+    FsImpl() FL_NO_EXCEPT = default;
+    virtual ~FsImpl() FL_NO_EXCEPT {} // Use default pins for spi.
     virtual bool begin() = 0;
     //  End use of card
     virtual void end() = 0;

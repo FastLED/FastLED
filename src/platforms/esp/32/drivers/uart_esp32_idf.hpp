@@ -37,11 +37,11 @@ namespace fl {
 // Helper: Convert fl enum classes to ESP-IDF types
 // ============================================================================
 
-static uart_port_t convertPort(UartPort port) FL_NOEXCEPT {
+static uart_port_t convertPort(UartPort port) FL_NO_EXCEPT {
     return static_cast<uart_port_t>(static_cast<u8>(port));
 }
 
-static uart_word_length_t convertDataBits(UartDataBits bits) FL_NOEXCEPT {
+static uart_word_length_t convertDataBits(UartDataBits bits) FL_NO_EXCEPT {
     switch (bits) {
         case UartDataBits::BITS_5: return UART_DATA_5_BITS;
         case UartDataBits::BITS_6: return UART_DATA_6_BITS;
@@ -51,7 +51,7 @@ static uart_word_length_t convertDataBits(UartDataBits bits) FL_NOEXCEPT {
     }
 }
 
-static uart_parity_t convertParity(UartParity parity) FL_NOEXCEPT {
+static uart_parity_t convertParity(UartParity parity) FL_NO_EXCEPT {
     switch (parity) {
         case UartParity::NONE: return UART_PARITY_DISABLE;
         case UartParity::ODD:  return UART_PARITY_ODD;
@@ -60,7 +60,7 @@ static uart_parity_t convertParity(UartParity parity) FL_NOEXCEPT {
     }
 }
 
-static uart_stop_bits_t convertStopBits(UartStopBits bits) FL_NOEXCEPT {
+static uart_stop_bits_t convertStopBits(UartStopBits bits) FL_NO_EXCEPT {
     switch (bits) {
         case UartStopBits::BITS_1:   return UART_STOP_BITS_1;
         case UartStopBits::BITS_1_5: return UART_STOP_BITS_1_5;
@@ -69,7 +69,7 @@ static uart_stop_bits_t convertStopBits(UartStopBits bits) FL_NOEXCEPT {
     }
 }
 
-static uart_hw_flowcontrol_t convertFlowControl(UartFlowControl ctrl) FL_NOEXCEPT {
+static uart_hw_flowcontrol_t convertFlowControl(UartFlowControl ctrl) FL_NO_EXCEPT {
     switch (ctrl) {
         case UartFlowControl::NONE:    return UART_HW_FLOWCTRL_DISABLE;
         case UartFlowControl::RTS:     return UART_HW_FLOWCTRL_RTS;
@@ -79,7 +79,7 @@ static uart_hw_flowcontrol_t convertFlowControl(UartFlowControl ctrl) FL_NOEXCEP
     }
 }
 
-static int convertIntrFlags(UartIntrPriority priority, UartIntrFlags flags) FL_NOEXCEPT {
+static int convertIntrFlags(UartIntrPriority priority, UartIntrFlags flags) FL_NO_EXCEPT {
     int esp_flags = 0;
 
     // Add priority level (LEVEL1-5)
@@ -109,13 +109,13 @@ static int convertIntrFlags(UartIntrPriority priority, UartIntrFlags flags) FL_N
 // - IDF 5.0+: UART_SCLK_DEFAULT exists on all variants (maps to chip's preferred clock)
 // - IDF 4.x: UART_SCLK_APB is the universal clock source
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-static uart_sclk_t convertClockSource(UartClockSource) FL_NOEXCEPT {
+static uart_sclk_t convertClockSource(UartClockSource) FL_NO_EXCEPT {
     // UART_SCLK_DEFAULT is the portable choice on IDF 5.x — it resolves to
     // the chip's preferred clock (APB on ESP32/S3/C3, PLL_F80M on C6, etc.)
     return UART_SCLK_DEFAULT;
 }
 #elif ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
-static uart_sclk_t convertClockSource(UartClockSource) FL_NOEXCEPT {
+static uart_sclk_t convertClockSource(UartClockSource) FL_NO_EXCEPT {
     return UART_SCLK_APB;
 }
 #endif
@@ -136,11 +136,11 @@ namespace {
  */
 class UartManager {
 public:
-    static UartManager& instance() FL_NOEXCEPT {
+    static UartManager& instance() FL_NO_EXCEPT {
         return fl::Singleton<UartManager>::instance();
     }
 
-    bool allocateUart(UartPort port) FL_NOEXCEPT {
+    bool allocateUart(UartPort port) FL_NO_EXCEPT {
         int index = static_cast<int>(port);
         FL_ASSERT(index >= 0 && index < 3, "Invalid UART port");
         FL_ASSERT(!mAllocated[index], "UART port already allocated");
@@ -149,14 +149,14 @@ public:
         return true;
     }
 
-    void deallocateUart(UartPort port) FL_NOEXCEPT {
+    void deallocateUart(UartPort port) FL_NO_EXCEPT {
         int index = static_cast<int>(port);
         if (index >= 0 && index < 3) {
             mAllocated[index] = false;
         }
     }
 
-    bool isAllocated(UartPort port) const FL_NOEXCEPT {
+    bool isAllocated(UartPort port) const FL_NO_EXCEPT {
         int index = static_cast<int>(port);
         if (index < 0 || index >= 3) {
             return false;
@@ -177,7 +177,7 @@ private:
 // UartEsp32 Implementation
 // ============================================================================
 
-UartEsp32::UartEsp32(const UartConfig& config) FL_NOEXCEPT
+UartEsp32::UartEsp32(const UartConfig& config) FL_NO_EXCEPT
     : mConfig(config)
     , mPortInt(static_cast<int>(convertPort(config.port)))
     , mBuffered(false)
@@ -203,7 +203,7 @@ UartEsp32::~UartEsp32() {
     }
 }
 
-UartEsp32::UartEsp32(UartEsp32&& other) FL_NOEXCEPT
+UartEsp32::UartEsp32(UartEsp32&& other) FL_NO_EXCEPT
     : mConfig(other.mConfig)
     , mPortInt(other.mPortInt)
     , mBuffered(other.mBuffered)
@@ -213,7 +213,7 @@ UartEsp32::UartEsp32(UartEsp32&& other) FL_NOEXCEPT
     other.mEventQueue = nullptr;
 }
 
-UartEsp32& UartEsp32::operator=(UartEsp32&& other) FL_NOEXCEPT {
+UartEsp32& UartEsp32::operator=(UartEsp32&& other) FL_NO_EXCEPT {
     if (this != &other) {
         // Deallocate our current UART
         if (mPortInt >= 0) {
@@ -234,7 +234,7 @@ UartEsp32& UartEsp32::operator=(UartEsp32&& other) FL_NOEXCEPT {
     return *this;
 }
 
-bool UartEsp32::initDriver() FL_NOEXCEPT {
+bool UartEsp32::initDriver() FL_NO_EXCEPT {
     uart_port_t port = static_cast<uart_port_t>(mPortInt);
 
     // ROBUST DRIVER DETECTION:
@@ -347,7 +347,7 @@ bool UartEsp32::initDriver() FL_NOEXCEPT {
     return false;
 }
 
-void UartEsp32::write(const char* str) FL_NOEXCEPT {
+void UartEsp32::write(const char* str) FL_NO_EXCEPT {
     if (!str)
         return;
 
@@ -369,7 +369,7 @@ void UartEsp32::write(const char* str) FL_NOEXCEPT {
     }
 }
 
-size_t UartEsp32::write(const u8* buffer, size_t size) FL_NOEXCEPT {
+size_t UartEsp32::write(const u8* buffer, size_t size) FL_NO_EXCEPT {
     if (!buffer || size == 0)
         return 0;
 
@@ -389,7 +389,7 @@ size_t UartEsp32::write(const u8* buffer, size_t size) FL_NOEXCEPT {
     }
 }
 
-void UartEsp32::writeln(const char* str) FL_NOEXCEPT {
+void UartEsp32::writeln(const char* str) FL_NO_EXCEPT {
     if (!str)
         return;
 
@@ -412,7 +412,7 @@ void UartEsp32::writeln(const char* str) FL_NOEXCEPT {
     }
 }
 
-int UartEsp32::available() FL_NOEXCEPT {
+int UartEsp32::available() FL_NO_EXCEPT {
     if (!mBuffered) {
         return 0;  // Driver not installed, no data available
     }
@@ -427,7 +427,7 @@ int UartEsp32::available() FL_NOEXCEPT {
     return static_cast<int>(available);
 }
 
-int UartEsp32::read() FL_NOEXCEPT {
+int UartEsp32::read() FL_NO_EXCEPT {
     if (!mBuffered) {
         return -1;  // Driver not installed, cannot read
     }
@@ -443,7 +443,7 @@ int UartEsp32::read() FL_NOEXCEPT {
     }
 }
 
-bool UartEsp32::flush(u32 timeoutMs) FL_NOEXCEPT {
+bool UartEsp32::flush(u32 timeoutMs) FL_NO_EXCEPT {
     if (!mBuffered) {
         return false;  // Driver not installed, cannot flush
     }

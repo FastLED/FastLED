@@ -143,7 +143,7 @@ struct is_fl_fixed_point<T, decltype(
     void()
 )> : fl::true_type {};
 
-inline u32 round_shift_right_u64(u64 value, int shift) FL_NOEXCEPT {
+inline u32 round_shift_right_u64(u64 value, int shift) FL_NO_EXCEPT {
     if (shift <= 0) {
         return static_cast<u32>(value);
     }
@@ -159,7 +159,7 @@ inline u32 round_shift_right_u64(u64 value, int shift) FL_NOEXCEPT {
 }
 
 inline u32 ieee754_bits_from_scaled_u64(
-    u32 sign, u64 magnitude, int binary_exp) FL_NOEXCEPT {
+    u32 sign, u64 magnitude, int binary_exp) FL_NO_EXCEPT {
     if (magnitude == 0) {
         return sign;
     }
@@ -207,7 +207,7 @@ inline u32 ieee754_bits_from_scaled_u64(
     return sign | mantissa;
 }
 
-inline u32 ieee754_bits_from_fixed_raw(i64 raw, int frac_bits) FL_NOEXCEPT {
+inline u32 ieee754_bits_from_fixed_raw(i64 raw, int frac_bits) FL_NO_EXCEPT {
     const u32 sign = raw < 0 ? 0x80000000u : 0u;
     const u64 magnitude = raw < 0
         ? static_cast<u64>(-(raw + 1)) + 1u
@@ -215,7 +215,7 @@ inline u32 ieee754_bits_from_fixed_raw(i64 raw, int frac_bits) FL_NOEXCEPT {
     return ieee754_bits_from_scaled_u64(sign, magnitude, -frac_bits);
 }
 
-inline bool fixed_raw_from_ieee754_bits(u32 bits, int frac_bits, i64* out) FL_NOEXCEPT {
+inline bool fixed_raw_from_ieee754_bits(u32 bits, int frac_bits, i64* out) FL_NO_EXCEPT {
     const bool negative = (bits & 0x80000000u) != 0;
     const u32 exp_bits = (bits >> 23) & 0xFFu;
     const u32 mantissa_bits = bits & 0x007FFFFFu;
@@ -253,7 +253,7 @@ inline bool fixed_raw_from_ieee754_bits(u32 bits, int frac_bits, i64* out) FL_NO
 }
 
 template <typename FP>
-float fixed_point_to_float(FP value) FL_NOEXCEPT {
+float fixed_point_to_float(FP value) FL_NO_EXCEPT {
     return fl::bit_cast<float>(
         ieee754_bits_from_fixed_raw(static_cast<i64>(value.raw()), FP::FRAC_BITS));
 }
@@ -266,31 +266,31 @@ private:
 
 public:
     // Constructors
-    json() FL_NOEXCEPT : mValue() {}  // Default initialize to nullptr
-    json(fl::nullptr_t) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(nullptr)) {}
-    json(bool b) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(b)) {}
-    json(int i) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(static_cast<i64>(i))) {}
-    json(i64 i) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(i)) {}
-    json(float f) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(f)) {}  // Use float directly
-    json(double d) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(detail::json_double_to_float(d))) {}
+    json() FL_NO_EXCEPT : mValue() {}  // Default initialize to nullptr
+    json(fl::nullptr_t) FL_NO_EXCEPT : mValue(fl::make_shared<json_value>(nullptr)) {}
+    json(bool b) FL_NO_EXCEPT : mValue(fl::make_shared<json_value>(b)) {}
+    json(int i) FL_NO_EXCEPT : mValue(fl::make_shared<json_value>(static_cast<i64>(i))) {}
+    json(i64 i) FL_NO_EXCEPT : mValue(fl::make_shared<json_value>(i)) {}
+    json(float f) FL_NO_EXCEPT : mValue(fl::make_shared<json_value>(f)) {}  // Use float directly
+    json(double d) FL_NO_EXCEPT : mValue(fl::make_shared<json_value>(detail::json_double_to_float(d))) {}
     template <typename FP, typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, int>::type = 0>
-    json(FP v) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(detail::fixed_point_to_float(v))) {}
-    json(const fl::string& s) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(s)) {}
-    json(const char* s) FL_NOEXCEPT : json(fl::string(s)) {}
-    json(json_array a) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(fl::move(a))) {}
-    json(json_object o) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(fl::move(o))) {}
+    json(FP v) FL_NO_EXCEPT : mValue(fl::make_shared<json_value>(detail::fixed_point_to_float(v))) {}
+    json(const fl::string& s) FL_NO_EXCEPT : mValue(fl::make_shared<json_value>(s)) {}
+    json(const char* s) FL_NO_EXCEPT : json(fl::string(s)) {}
+    json(json_array a) FL_NO_EXCEPT : mValue(fl::make_shared<json_value>(fl::move(a))) {}
+    json(json_object o) FL_NO_EXCEPT : mValue(fl::make_shared<json_value>(fl::move(o))) {}
     // Constructor from shared_ptr<json_value>
-    json(const fl::shared_ptr<json_value>& value) FL_NOEXCEPT : mValue(value) {}
+    json(const fl::shared_ptr<json_value>& value) FL_NO_EXCEPT : mValue(value) {}
     
     // Factory method to create a json from a json_value
-    static json fromValue(const json_value& value) FL_NOEXCEPT {
+    static json fromValue(const json_value& value) FL_NO_EXCEPT {
         json result;
         result.mValue = fl::make_shared<json_value>(value);
         return result;
     }
     
     // Constructor for fl::vector<float> - converts to JSON array
-    json(const fl::vector<float>& vec) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(json_array{})) {
+    json(const fl::vector<float>& vec) FL_NO_EXCEPT : mValue(fl::make_shared<json_value>(json_array{})) {
         auto ptr = mValue->data.ptr<json_array>();
         if (ptr) {
             for (const auto& item : vec) {
@@ -300,7 +300,7 @@ public:
     }
     
     // Special constructor for char values
-    static json from_char(char c) FL_NOEXCEPT {
+    static json from_char(char c) FL_NO_EXCEPT {
         json result;
         auto value = fl::make_shared<json_value>(fl::string(1, c));
         //FL_WARN("Created json_value with string: " << value->is_string() << ", int: " << value->is_int());
@@ -310,10 +310,10 @@ public:
     }
 
     // Copy constructor
-    json(const json& other) FL_NOEXCEPT : mValue(other.mValue) {}
+    json(const json& other) FL_NO_EXCEPT : mValue(other.mValue) {}
 
     // Assignment operator
-    json& operator=(const json& other) FL_NOEXCEPT {
+    json& operator=(const json& other) FL_NO_EXCEPT {
         //FL_WARN("json& operator=(const json& other): " << (other.mValue ? other.mValue.get() : 0));
         if (this != &other) {
             mValue = other.mValue;
@@ -321,7 +321,7 @@ public:
         return *this;
     }
 
-    json& operator=(json&& other) FL_NOEXCEPT {
+    json& operator=(json&& other) FL_NO_EXCEPT {
         if (this != &other) {
             mValue = fl::move(other.mValue);
         }
@@ -329,44 +329,44 @@ public:
     }
     
     // Assignment operators for primitive types to avoid ambiguity
-    json& operator=(bool value) FL_NOEXCEPT {
+    json& operator=(bool value) FL_NO_EXCEPT {
         mValue = fl::make_shared<json_value>(value);
         return *this;
     }
     
-    json& operator=(int value) FL_NOEXCEPT {
+    json& operator=(int value) FL_NO_EXCEPT {
         mValue = fl::make_shared<json_value>(static_cast<i64>(value));
         return *this;
     }
     
-    json& operator=(float value) FL_NOEXCEPT {
+    json& operator=(float value) FL_NO_EXCEPT {
         mValue = fl::make_shared<json_value>(value);
         return *this;
     }
     
-    json& operator=(double value) FL_NOEXCEPT {
+    json& operator=(double value) FL_NO_EXCEPT {
         mValue = fl::make_shared<json_value>(detail::json_double_to_float(value));
         return *this;
     }
 
     template <typename FP, typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, int>::type = 0>
-    json& operator=(FP v) FL_NOEXCEPT {
+    json& operator=(FP v) FL_NO_EXCEPT {
         mValue = fl::make_shared<json_value>(detail::fixed_point_to_float(v));
         return *this;
     }
     
-    json& operator=(const fl::string& value) FL_NOEXCEPT {
+    json& operator=(const fl::string& value) FL_NO_EXCEPT {
         mValue = fl::make_shared<json_value>(value);
         return *this;
     }
     
-    json& operator=(const char* value) FL_NOEXCEPT {
+    json& operator=(const char* value) FL_NO_EXCEPT {
         mValue = fl::make_shared<json_value>(fl::string(value));
         return *this;
     }
     
     // Assignment operator for fl::vector<float>
-    json& operator=(fl::vector<float> vec) FL_NOEXCEPT {
+    json& operator=(fl::vector<float> vec) FL_NO_EXCEPT {
         mValue = fl::make_shared<json_value>(json_array{});
         auto ptr = mValue->data.ptr<json_array>();
         if (ptr) {
@@ -378,53 +378,53 @@ public:
     }
 
     // Type queries
-    bool is_null() const FL_NOEXCEPT { return mValue ? mValue->is_null() : true; }
-    bool is_bool() const FL_NOEXCEPT { return mValue && mValue->is_bool(); }
-    bool is_int() const FL_NOEXCEPT { return mValue && (mValue->is_int() || mValue->is_bool()); }
-    bool is_float() const FL_NOEXCEPT { return mValue && mValue->is_float(); }
-    bool is_double() const FL_NOEXCEPT { return mValue && mValue->is_double(); }
+    bool is_null() const FL_NO_EXCEPT { return mValue ? mValue->is_null() : true; }
+    bool is_bool() const FL_NO_EXCEPT { return mValue && mValue->is_bool(); }
+    bool is_int() const FL_NO_EXCEPT { return mValue && (mValue->is_int() || mValue->is_bool()); }
+    bool is_float() const FL_NO_EXCEPT { return mValue && mValue->is_float(); }
+    bool is_double() const FL_NO_EXCEPT { return mValue && mValue->is_double(); }
     // is_number() returns true if the value is any numeric type (int or float)
-    bool is_number() const FL_NOEXCEPT { return mValue && mValue->is_number(); }
-    bool is_string() const FL_NOEXCEPT { return mValue && mValue->is_string(); }
-    bool is_array() const FL_NOEXCEPT { return mValue && mValue->is_array(); }
-    bool is_generic_array() const FL_NOEXCEPT { return mValue && mValue->is_generic_array(); }
-    bool is_object() const FL_NOEXCEPT { return mValue && mValue->is_object(); }
-    bool is_audio() const FL_NOEXCEPT { return mValue && mValue->is_audio(); }
-    bool is_bytes() const FL_NOEXCEPT { return mValue && mValue->is_bytes(); }
-    bool is_floats() const FL_NOEXCEPT { return mValue && mValue->is_floats(); }
+    bool is_number() const FL_NO_EXCEPT { return mValue && mValue->is_number(); }
+    bool is_string() const FL_NO_EXCEPT { return mValue && mValue->is_string(); }
+    bool is_array() const FL_NO_EXCEPT { return mValue && mValue->is_array(); }
+    bool is_generic_array() const FL_NO_EXCEPT { return mValue && mValue->is_generic_array(); }
+    bool is_object() const FL_NO_EXCEPT { return mValue && mValue->is_object(); }
+    bool is_audio() const FL_NO_EXCEPT { return mValue && mValue->is_audio(); }
+    bool is_bytes() const FL_NO_EXCEPT { return mValue && mValue->is_bytes(); }
+    bool is_floats() const FL_NO_EXCEPT { return mValue && mValue->is_floats(); }
 
     // Safe extractors
-    fl::optional<bool> as_bool() const FL_NOEXCEPT { return mValue ? mValue->as_bool() : fl::nullopt; }
-    fl::optional<i64> as_int() const FL_NOEXCEPT {
+    fl::optional<bool> as_bool() const FL_NO_EXCEPT { return mValue ? mValue->as_bool() : fl::nullopt; }
+    fl::optional<i64> as_int() const FL_NO_EXCEPT {
         if (!mValue) return fl::nullopt;
         return mValue->as_int(); 
     }
     
     template<typename IntType>
-    fl::optional<IntType> as_int() const FL_NOEXCEPT {
+    fl::optional<IntType> as_int() const FL_NO_EXCEPT {
         if (!mValue) return fl::nullopt;
         return mValue->template as_int<IntType>(); 
     }
     
-    fl::optional<float> as_float() const FL_NOEXCEPT {
+    fl::optional<float> as_float() const FL_NO_EXCEPT {
         if (!mValue) return fl::nullopt;
         return mValue->as_float();
     }
     
-    fl::optional<double> as_double() const FL_NOEXCEPT {
+    fl::optional<double> as_double() const FL_NO_EXCEPT {
         if (!mValue) return fl::nullopt;
         return mValue->as_double();
     }
     
     template<typename FloatType>
-    fl::optional<FloatType> as_float() const FL_NOEXCEPT {
+    fl::optional<FloatType> as_float() const FL_NO_EXCEPT {
         if (!mValue) return fl::nullopt;
         return mValue->template as_float<FloatType>(); 
     }
 
     template <typename FP>
     typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, fl::optional<FP>>::type
-    as_fixed_point() const FL_NOEXCEPT {
+    as_fixed_point() const FL_NO_EXCEPT {
         if (!mValue) return fl::nullopt;
         if (auto raw = mValue->data.template ptr<i64>()) {
             return FP::from_raw(static_cast<decltype(FP().raw())>(*raw));
@@ -440,23 +440,23 @@ public:
         return fl::nullopt;
     }
     
-    fl::optional<fl::string> as_string() const FL_NOEXCEPT {
+    fl::optional<fl::string> as_string() const FL_NO_EXCEPT {
         if (!mValue) return fl::nullopt;
         return mValue->as_string(); 
     }
     // Zero-copy pointer accessors
-    const json_array*        as_array()   const FL_NOEXCEPT { return mValue ? mValue->as_array() : nullptr; }
-    const json_object*       as_object()  const FL_NOEXCEPT { return mValue ? mValue->as_object() : nullptr; }
+    const json_array*        as_array()   const FL_NO_EXCEPT { return mValue ? mValue->as_array() : nullptr; }
+    const json_object*       as_object()  const FL_NO_EXCEPT { return mValue ? mValue->as_object() : nullptr; }
 
     // Explicit copy methods - use when you need an owned copy or type conversion
-    fl::optional<json_array>        clone_array()  const FL_NOEXCEPT { return mValue ? mValue->clone_array() : fl::nullopt; }
-    fl::optional<json_object>       clone_object() const FL_NOEXCEPT { return mValue ? mValue->clone_object() : fl::nullopt; }
+    fl::optional<json_array>        clone_array()  const FL_NO_EXCEPT { return mValue ? mValue->clone_array() : fl::nullopt; }
+    fl::optional<json_object>       clone_object() const FL_NO_EXCEPT { return mValue ? mValue->clone_object() : fl::nullopt; }
 
     // Copy packed-array elements into a caller-owned span with type conversion.
     // Returns number of elements copied (min of array size and span size).
     // Returns 0 if not a numeric array or json is null.
     template<typename T>
-    size_t copy_to(fl::span<T> out) const FL_NOEXCEPT {
+    size_t copy_to(fl::span<T> out) const FL_NO_EXCEPT {
         return mValue ? mValue->copy_to(out) : 0;
     }
 
@@ -464,20 +464,20 @@ public:
     // Use with fl::back_inserter(container) to append to any container.
     // Returns number of elements written. Returns 0 if not a numeric array.
     template<typename T, typename OutputIt>
-    size_t copy_to_output_iterator(OutputIt out) const FL_NOEXCEPT {
+    size_t copy_to_output_iterator(OutputIt out) const FL_NO_EXCEPT {
         return mValue ? mValue->template copy_to_output_iterator<T, OutputIt>(out) : 0;
     }
 
     // Overload for back_insert_iterator: T deduced from container's value_type
     template<typename Container>
-    size_t copy_to_output_iterator(fl::back_insert_iterator<Container> out) const FL_NOEXCEPT {
+    size_t copy_to_output_iterator(fl::back_insert_iterator<Container> out) const FL_NO_EXCEPT {
         return mValue ? mValue->copy_to_output_iterator(out) : 0;
     }
 
     // NEW ERGONOMIC API: try_as<T>() - Explicit optional handling
     // Use when you need to explicitly handle conversion failure
     template<typename T>
-    fl::optional<T> try_as() const FL_NOEXCEPT {
+    fl::optional<T> try_as() const FL_NO_EXCEPT {
         if (!mValue) {
             return fl::nullopt;
         }
@@ -487,14 +487,14 @@ public:
     // BACKWARD COMPATIBILITY: Keep existing as<T>() that returns fl::optional<T>
     // This maintains compatibility with existing code
     template<typename T>
-    fl::optional<T> as() const FL_NOEXCEPT {
+    fl::optional<T> as() const FL_NO_EXCEPT {
         return try_as<T>();
     }
 
     // NEW ERGONOMIC API: value<T>() - Direct conversion with sensible defaults
     // Use when you want a value immediately with reasonable defaults on failure
     template<typename T>
-    T value() const FL_NOEXCEPT {
+    T value() const FL_NO_EXCEPT {
         auto result = try_as<T>();
         return result.has_value() ? *result : get_default_value<T>();
     }
@@ -503,21 +503,21 @@ private:
     // Integer types (excluding bool)
     template<typename T>
     typename fl::enable_if<fl::is_integral<T>::value && !fl::is_same<T, bool>::value, fl::optional<T>>::type
-    as_impl() const FL_NOEXCEPT {
+    as_impl() const FL_NO_EXCEPT {
         return mValue->template as_int<T>();
     }
     
     // Boolean type
     template<typename T>
     typename fl::enable_if<fl::is_same<T, bool>::value, fl::optional<T>>::type
-    as_impl() const FL_NOEXCEPT {
+    as_impl() const FL_NO_EXCEPT {
         return mValue->as_bool();
     }
     
     // Floating point types
     template<typename T>
     typename fl::enable_if<fl::is_floating_point<T>::value, fl::optional<T>>::type
-    as_impl() const FL_NOEXCEPT {
+    as_impl() const FL_NO_EXCEPT {
         // Force template call by explicitly using the templated method
         return mValue->template as_float<T>();
     }
@@ -525,21 +525,21 @@ private:
     // String type
     template<typename T>
     typename fl::enable_if<fl::is_same<T, fl::string>::value, fl::optional<T>>::type
-    as_impl() const FL_NOEXCEPT {
+    as_impl() const FL_NO_EXCEPT {
         return mValue->as_string();
     }
     
     // Array type - clone_array() provides packed-array conversion for try_as
     template<typename T>
     typename fl::enable_if<fl::is_same<T, json_array>::value, fl::optional<T>>::type
-    as_impl() const FL_NOEXCEPT {
+    as_impl() const FL_NO_EXCEPT {
         return mValue->clone_array();
     }
 
     // Object type
     template<typename T>
     typename fl::enable_if<fl::is_same<T, json_object>::value, fl::optional<T>>::type
-    as_impl() const FL_NOEXCEPT {
+    as_impl() const FL_NO_EXCEPT {
         auto ptr = mValue->as_object();
         return ptr ? fl::optional<T>(*ptr) : fl::nullopt;
     }
@@ -548,7 +548,7 @@ private:
     // e.g., try_as<vector<float>>() works on u8/i16/float packed arrays
     template<typename T>
     typename fl::enable_if<fl::is_same<T, fl::vector<i16>>::value, fl::optional<T>>::type
-    as_impl() const FL_NOEXCEPT {
+    as_impl() const FL_NO_EXCEPT {
         if (!mValue->is_array()) return fl::nullopt;
         T result;
         size_t n = mValue->copy_to_output_iterator(fl::back_inserter(result));
@@ -557,7 +557,7 @@ private:
 
     template<typename T>
     typename fl::enable_if<fl::is_same<T, fl::vector<u8>>::value, fl::optional<T>>::type
-    as_impl() const FL_NOEXCEPT {
+    as_impl() const FL_NO_EXCEPT {
         if (!mValue->is_array()) return fl::nullopt;
         T result;
         size_t n = mValue->copy_to_output_iterator(fl::back_inserter(result));
@@ -566,7 +566,7 @@ private:
 
     template<typename T>
     typename fl::enable_if<fl::is_same<T, fl::vector<float>>::value, fl::optional<T>>::type
-    as_impl() const FL_NOEXCEPT {
+    as_impl() const FL_NO_EXCEPT {
         if (!mValue->is_array()) return fl::nullopt;
         T result;
         size_t n = mValue->copy_to_output_iterator(fl::back_inserter(result));
@@ -576,111 +576,111 @@ private:
     // Helper methods for getting default values for each type
     template<typename T>
     typename fl::enable_if<fl::is_integral<T>::value && !fl::is_same<T, bool>::value, T>::type
-    get_default_value() const FL_NOEXCEPT {
+    get_default_value() const FL_NO_EXCEPT {
         return T(0);  // All integer types default to 0
     }
     
     template<typename T>
     typename fl::enable_if<fl::is_same<T, bool>::value, T>::type
-    get_default_value() const FL_NOEXCEPT {
+    get_default_value() const FL_NO_EXCEPT {
         return false;  // Boolean defaults to false
     }
     
     template<typename T>
     typename fl::enable_if<fl::is_floating_point<T>::value, T>::type
-    get_default_value() const FL_NOEXCEPT {
+    get_default_value() const FL_NO_EXCEPT {
         return T(0.0);  // Floating point types default to 0.0
     }
     
     template<typename T>
     typename fl::enable_if<fl::is_same<T, fl::string>::value, T>::type
-    get_default_value() const FL_NOEXCEPT {
+    get_default_value() const FL_NO_EXCEPT {
         return fl::string();  // String defaults to empty string
     }
     
     template<typename T>
     typename fl::enable_if<fl::is_same<T, json_array>::value, T>::type
-    get_default_value() const FL_NOEXCEPT {
+    get_default_value() const FL_NO_EXCEPT {
         return json_array();  // Array defaults to empty array
     }
     
     template<typename T>
     typename fl::enable_if<fl::is_same<T, json_object>::value, T>::type
-    get_default_value() const FL_NOEXCEPT {
+    get_default_value() const FL_NO_EXCEPT {
         return json_object();  // Object defaults to empty object
     }
     
     template<typename T>
     typename fl::enable_if<fl::is_same<T, fl::vector<i16>>::value, T>::type
-    get_default_value() const FL_NOEXCEPT {
+    get_default_value() const FL_NO_EXCEPT {
         return fl::vector<i16>();  // Audio vector defaults to empty
     }
     
     template<typename T>
     typename fl::enable_if<fl::is_same<T, fl::vector<u8>>::value, T>::type
-    get_default_value() const FL_NOEXCEPT {
+    get_default_value() const FL_NO_EXCEPT {
         return fl::vector<u8>();  // Bytes vector defaults to empty
     }
     
     template<typename T>
     typename fl::enable_if<fl::is_same<T, fl::vector<float>>::value, T>::type
-    get_default_value() const FL_NOEXCEPT {
+    get_default_value() const FL_NO_EXCEPT {
         return fl::vector<float>();  // Float vector defaults to empty
     }
 
 public:
 
     // Iterator support for objects
-    json_value::iterator begin() FL_NOEXCEPT {
+    json_value::iterator begin() FL_NO_EXCEPT {
         if (!mValue) return json_value::iterator(json_object().begin());
         return mValue->begin(); 
     }
-    json_value::iterator end() FL_NOEXCEPT {
+    json_value::iterator end() FL_NO_EXCEPT {
         if (!mValue) return json_value::iterator(json_object().end());
         return mValue->end(); 
     }
-    json_value::const_iterator begin() const FL_NOEXCEPT {
+    json_value::const_iterator begin() const FL_NO_EXCEPT {
         if (!mValue) return json_value::const_iterator::from_iterator(json_object().begin());
         return json_value::const_iterator::from_object_iterator(mValue->begin()); 
     }
-    json_value::const_iterator end() const FL_NOEXCEPT {
+    json_value::const_iterator end() const FL_NO_EXCEPT {
         if (!mValue) return json_value::const_iterator::from_iterator(json_object().end());
         return json_value::const_iterator::from_object_iterator(mValue->end()); 
     }
     
     // Iterator support for arrays with type conversion
     template<typename T>
-    typename json_value::template array_iterator<T> begin_array() FL_NOEXCEPT {
+    typename json_value::template array_iterator<T> begin_array() FL_NO_EXCEPT {
         if (!mValue) return typename json_value::template array_iterator<T>();
         return mValue->template begin_array<T>();
     }
     
     template<typename T>
-    typename json_value::template array_iterator<T> end_array() FL_NOEXCEPT {
+    typename json_value::template array_iterator<T> end_array() FL_NO_EXCEPT {
         if (!mValue) return typename json_value::template array_iterator<T>();
         return mValue->template end_array<T>();
     }
     
     template<typename T>
-    typename json_value::template array_iterator<T> begin_array() const FL_NOEXCEPT {
+    typename json_value::template array_iterator<T> begin_array() const FL_NO_EXCEPT {
         if (!mValue) return typename json_value::template array_iterator<T>();
         return mValue->template begin_array<T>();
     }
     
     template<typename T>
-    typename json_value::template array_iterator<T> end_array() const FL_NOEXCEPT {
+    typename json_value::template array_iterator<T> end_array() const FL_NO_EXCEPT {
         if (!mValue) return typename json_value::template array_iterator<T>();
         return mValue->template end_array<T>();
     }
     
     // Free functions for range-based for loops
-    friend json_value::iterator begin(json& j) FL_NOEXCEPT { return j.begin(); }
-    friend json_value::iterator end(json& j) FL_NOEXCEPT { return j.end(); }
-    friend json_value::const_iterator begin(const json& j) FL_NOEXCEPT { return j.begin(); }
-    friend json_value::const_iterator end(const json& j) FL_NOEXCEPT { return j.end(); }
+    friend json_value::iterator begin(json& j) FL_NO_EXCEPT { return j.begin(); }
+    friend json_value::iterator end(json& j) FL_NO_EXCEPT { return j.end(); }
+    friend json_value::const_iterator begin(const json& j) FL_NO_EXCEPT { return j.begin(); }
+    friend json_value::const_iterator end(const json& j) FL_NO_EXCEPT { return j.end(); }
 
     // Object iteration support (needed for screenmap conversion)
-    fl::vector<fl::string> keys() const FL_NOEXCEPT {
+    fl::vector<fl::string> keys() const FL_NO_EXCEPT {
         fl::vector<fl::string> result;
         if (mValue && mValue->is_object()) {
             for (auto it = begin(); it != end(); ++it) {
@@ -692,11 +692,11 @@ public:
     }
     
     // Backward compatibility methods
-    fl::vector<fl::string> get_object_keys() const FL_NOEXCEPT { return keys(); }
-    fl::vector<fl::string> getObjectKeys() const FL_NOEXCEPT { return keys(); }
+    fl::vector<fl::string> get_object_keys() const FL_NO_EXCEPT { return keys(); }
+    fl::vector<fl::string> getObjectKeys() const FL_NO_EXCEPT { return keys(); }
 
     // Indexing for fluid chaining
-    json operator[](size_t idx) FL_NOEXCEPT {
+    json operator[](size_t idx) FL_NO_EXCEPT {
         if (!mValue) {
             mValue = fl::make_shared<json_value>(json_array{});
         }
@@ -724,7 +724,7 @@ public:
         return json(nullptr);
     }
     
-    const json operator[](size_t idx) const FL_NOEXCEPT {
+    const json operator[](size_t idx) const FL_NO_EXCEPT {
         if (!mValue) {
             return json(nullptr);
         }
@@ -747,7 +747,7 @@ public:
         return json(nullptr);
     }
     
-    json operator[](const fl::string &key) FL_NOEXCEPT {
+    json operator[](const fl::string &key) FL_NO_EXCEPT {
         if (!mValue || !mValue->is_object()) {
             mValue = fl::make_shared<json_value>(json_object{});
         }
@@ -766,7 +766,7 @@ public:
         return json(nullptr);
     }
     
-    const json operator[](const fl::string &key) const FL_NOEXCEPT {
+    const json operator[](const fl::string &key) const FL_NO_EXCEPT {
         if (!mValue || !mValue->is_object()) {
             return json(nullptr);
         }
@@ -783,21 +783,21 @@ public:
     }
 
     // Contains methods for checking existence
-    bool contains(size_t idx) const FL_NOEXCEPT {
+    bool contains(size_t idx) const FL_NO_EXCEPT {
         return mValue && mValue->contains(idx); 
     }
-    bool contains(const fl::string &key) const FL_NOEXCEPT {
+    bool contains(const fl::string &key) const FL_NO_EXCEPT {
         return mValue && mValue->contains(key); 
     }
 
     // Size method
-    size_t size() const FL_NOEXCEPT {
+    size_t size() const FL_NO_EXCEPT {
         return mValue ? mValue->size() : 0; 
     }
 
     // Default-value operator (pipe)
     template<typename T>
-    T operator|(const T& fallback) const FL_NOEXCEPT {
+    T operator|(const T& fallback) const FL_NO_EXCEPT {
         if (!mValue) return fallback;
         return (*mValue) | fallback;
     }
@@ -806,36 +806,36 @@ public:
     // Use when you want to specify your own default value
     // This method uses try_as<T>() for proper string-to-number conversion
     template<typename T>
-    T as_or(const T& fallback) const FL_NOEXCEPT {
+    T as_or(const T& fallback) const FL_NO_EXCEPT {
         auto result = try_as<T>();
         return result.has_value() ? *result : fallback;
     }
 
     // has_value method for compatibility
-    bool has_value() const FL_NOEXCEPT {
+    bool has_value() const FL_NO_EXCEPT {
         return mValue && !mValue->is_null();
     }
 
     // Get access to the internal json_value for direct variant visiting
     // Returns nullptr if no value is set
-    const json_value* internal_value() const FL_NOEXCEPT { return mValue.get(); }
+    const json_value* internal_value() const FL_NO_EXCEPT { return mValue.get(); }
 
     // Method to set the internal value (for json_value::to_string())
-    void set_value(const fl::shared_ptr<json_value>& value) FL_NOEXCEPT {
+    void set_value(const fl::shared_ptr<json_value>& value) FL_NO_EXCEPT {
         mValue = value;
     }
     
     // Public method to access to_string_native for json_value::to_string()
-    fl::string to_string_native_public() const FL_NOEXCEPT { return to_string_native(); }
+    fl::string to_string_native_public() const FL_NO_EXCEPT { return to_string_native(); }
 
     // Serialization - now delegates to native implementation
-    fl::string to_string() const FL_NOEXCEPT { return to_string_native(); }
+    fl::string to_string() const FL_NO_EXCEPT { return to_string_native(); }
     
     // Native serialization (without external libraries)
-    fl::string to_string_native() const FL_NOEXCEPT;
+    fl::string to_string_native() const FL_NO_EXCEPT;
 
     // Parsing factory method - uses native parser
-    static json parse(const fl::string &txt) FL_NOEXCEPT {
+    static json parse(const fl::string &txt) FL_NO_EXCEPT {
         auto parsed = json_value::parse2(txt);
         if (parsed) {
             json result;
@@ -846,20 +846,20 @@ public:
     }
 
     // Convenience methods for creating arrays and objects
-    static json array() FL_NOEXCEPT {
+    static json array() FL_NO_EXCEPT {
         return json(json_array{});
     }
 
-    static json object() FL_NOEXCEPT {
+    static json object() FL_NO_EXCEPT {
         return json(json_object{});
     }
     
     // Compatibility with existing API for array/object access
-    size_t get_size() const FL_NOEXCEPT { return size(); }
-    size_t getSize() const FL_NOEXCEPT { return size(); }
+    size_t get_size() const FL_NO_EXCEPT { return size(); }
+    size_t getSize() const FL_NO_EXCEPT { return size(); }
     
     // Set methods for building objects
-    void set(const fl::string& key, const json& value) FL_NOEXCEPT {
+    void set(const fl::string& key, const json& value) FL_NO_EXCEPT {
         if (!mValue || !mValue->is_object()) {
             mValue = fl::make_shared<json_value>(json_object{});
         }
@@ -876,17 +876,17 @@ public:
         }
     }
     
-    void set(const fl::string& key, bool value) FL_NOEXCEPT { set(key, json(value)); }
-    void set(const fl::string& key, int value) FL_NOEXCEPT { set(key, json(value)); }
-    void set(const fl::string& key, i64 value) FL_NOEXCEPT { set(key, json(value)); }
-    void set(const fl::string& key, float value) FL_NOEXCEPT { set(key, json(value)); }
-    void set(const fl::string& key, double value) FL_NOEXCEPT { set(key, json(value)); }
+    void set(const fl::string& key, bool value) FL_NO_EXCEPT { set(key, json(value)); }
+    void set(const fl::string& key, int value) FL_NO_EXCEPT { set(key, json(value)); }
+    void set(const fl::string& key, i64 value) FL_NO_EXCEPT { set(key, json(value)); }
+    void set(const fl::string& key, float value) FL_NO_EXCEPT { set(key, json(value)); }
+    void set(const fl::string& key, double value) FL_NO_EXCEPT { set(key, json(value)); }
     template <typename FP, typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, int>::type = 0>
-    void set(const fl::string& key, FP value) FL_NOEXCEPT { set(key, json(value)); }
-    void set(const fl::string& key, const fl::string& value) FL_NOEXCEPT { set(key, json(value)); }
-    void set(const fl::string& key, const char* value) FL_NOEXCEPT { set(key, json(value)); }
+    void set(const fl::string& key, FP value) FL_NO_EXCEPT { set(key, json(value)); }
+    void set(const fl::string& key, const fl::string& value) FL_NO_EXCEPT { set(key, json(value)); }
+    void set(const fl::string& key, const char* value) FL_NO_EXCEPT { set(key, json(value)); }
     template<typename T, typename = fl::enable_if_t<fl::is_same<T, char>::value>>
-    void set(const fl::string& key, T value) FL_NOEXCEPT { set(key, json(value)); }
+    void set(const fl::string& key, T value) FL_NO_EXCEPT { set(key, json(value)); }
 
     // Generic setter for all integer types (excluding bool, int, and i64 which have explicit overloads)
     // Converts to i64 for internal storage
@@ -899,13 +899,13 @@ public:
         !fl::is_same<IntType, char>::value,
         void
     >::type
-    set(const fl::string& key, IntType value) FL_NOEXCEPT {
+    set(const fl::string& key, IntType value) FL_NO_EXCEPT {
         // Convert to i64 for storage
         set(key, json(static_cast<i64>(value)));
     }
     
     // Array push_back methods
-    void push_back(const json& value) FL_NOEXCEPT {
+    void push_back(const json& value) FL_NO_EXCEPT {
         if (!mValue || !mValue->is_array()) {
             mValue = fl::make_shared<json_value>(json_array{});
         }
@@ -929,17 +929,17 @@ public:
     }
     
     // Create methods for compatibility
-    static json create_array() FL_NOEXCEPT { return json::array(); }
-    static json create_object() FL_NOEXCEPT { return json::object(); }
-    static json createArray() FL_NOEXCEPT { return json::array(); }
-    static json createObject() FL_NOEXCEPT { return json::object(); }
+    static json create_array() FL_NO_EXCEPT { return json::array(); }
+    static json create_object() FL_NO_EXCEPT { return json::object(); }
+    static json createArray() FL_NO_EXCEPT { return json::array(); }
+    static json createObject() FL_NO_EXCEPT { return json::object(); }
 
     // Serialize method for compatibility
-    fl::string serialize() const FL_NOEXCEPT { return to_string(); }
+    fl::string serialize() const FL_NO_EXCEPT { return to_string(); }
 
     // Helper function to normalize JSON string (remove whitespace)
-    static fl::string normalize_json_string(const char* jsonStr) FL_NOEXCEPT;
-    static fl::string normalizeJsonString(const char* jsonStr) FL_NOEXCEPT { return normalize_json_string(jsonStr); }
+    static fl::string normalize_json_string(const char* jsonStr) FL_NO_EXCEPT;
+    static fl::string normalizeJsonString(const char* jsonStr) FL_NO_EXCEPT { return normalize_json_string(jsonStr); }
 };
 
 // JSON memory profiling support - defined in json.cpp.hpp

@@ -63,45 +63,45 @@ ChannelDataPtr createClocklessTestChannelData(int pin, size_t numLeds) {
 fl::shared_ptr<II2sSpiPeripheral> createMockPeripheral() {
     class MockWrapper : public II2sSpiPeripheral {
       public:
-        bool initialize(const I2sSpiConfig &config) FL_NOEXCEPT override {
+        bool initialize(const I2sSpiConfig &config) FL_NO_EXCEPT override {
             return I2sSpiPeripheralMock::instance().initialize(config);
         }
-        void deinitialize() FL_NOEXCEPT override {
+        void deinitialize() FL_NO_EXCEPT override {
             I2sSpiPeripheralMock::instance().deinitialize();
         }
-        bool isInitialized() const FL_NOEXCEPT override {
+        bool isInitialized() const FL_NO_EXCEPT override {
             return I2sSpiPeripheralMock::instance().isInitialized();
         }
-        u8 *allocateBuffer(size_t size_bytes) FL_NOEXCEPT override {
+        u8 *allocateBuffer(size_t size_bytes) FL_NO_EXCEPT override {
             return I2sSpiPeripheralMock::instance().allocateBuffer(size_bytes);
         }
-        void freeBuffer(u8 *buffer) FL_NOEXCEPT override {
+        void freeBuffer(u8 *buffer) FL_NO_EXCEPT override {
             I2sSpiPeripheralMock::instance().freeBuffer(buffer);
         }
         bool transmit(const u8 *buffer,
-                      size_t size_bytes) FL_NOEXCEPT override {
+                      size_t size_bytes) FL_NO_EXCEPT override {
             return I2sSpiPeripheralMock::instance().transmit(buffer,
                                                             size_bytes);
         }
-        bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT override {
+        bool waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT override {
             return I2sSpiPeripheralMock::instance().waitTransmitDone(
                 timeout_ms);
         }
-        bool isBusy() const FL_NOEXCEPT override {
+        bool isBusy() const FL_NO_EXCEPT override {
             return I2sSpiPeripheralMock::instance().isBusy();
         }
         bool registerTransmitCallback(void *callback,
-                                      void *user_ctx) FL_NOEXCEPT override {
+                                      void *user_ctx) FL_NO_EXCEPT override {
             return I2sSpiPeripheralMock::instance().registerTransmitCallback(
                 callback, user_ctx);
         }
-        const I2sSpiConfig &getConfig() const FL_NOEXCEPT override {
+        const I2sSpiConfig &getConfig() const FL_NO_EXCEPT override {
             return I2sSpiPeripheralMock::instance().getConfig();
         }
-        u64 getMicroseconds() FL_NOEXCEPT override {
+        u64 getMicroseconds() FL_NO_EXCEPT override {
             return I2sSpiPeripheralMock::instance().getMicroseconds();
         }
-        void delay(u32 ms) FL_NOEXCEPT override {
+        void delay(u32 ms) FL_NO_EXCEPT override {
             I2sSpiPeripheralMock::instance().delay(ms);
         }
     };

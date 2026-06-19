@@ -40,36 +40,36 @@ namespace detail {
 /// output. PCLK serves as the SPI clock, D0-D15 as parallel data lanes.
 class LcdSpiPeripheralEsp : public ILcdSpiPeripheral {
   public:
-    static LcdSpiPeripheralEsp &instance() FL_NOEXCEPT;
+    static LcdSpiPeripheralEsp &instance() FL_NO_EXCEPT;
 
     ~LcdSpiPeripheralEsp() override;
 
-    bool initialize(const LcdSpiConfig &config) FL_NOEXCEPT override;
-    void deinitialize() FL_NOEXCEPT override;
-    bool isInitialized() const FL_NOEXCEPT override;
+    bool initialize(const LcdSpiConfig &config) FL_NO_EXCEPT override;
+    void deinitialize() FL_NO_EXCEPT override;
+    bool isInitialized() const FL_NO_EXCEPT override;
 
-    u16 *allocateBuffer(size_t size_bytes) FL_NOEXCEPT override;
-    void freeBuffer(u16 *buffer) FL_NOEXCEPT override;
+    u16 *allocateBuffer(size_t size_bytes) FL_NO_EXCEPT override;
+    void freeBuffer(u16 *buffer) FL_NO_EXCEPT override;
 
     // FL_IRAM: ChannelDriverLcdClockless::isrChunkDone re-arms the next
     // chunk from ISR context, so transmit() must be IRAM-resident to survive
     // a flash-cache stall (NVS commit, SPI flash erase, etc.).
-    bool FL_IRAM transmit(const u16 *buffer, size_t size_bytes) FL_NOEXCEPT override;
-    bool FL_IRAM queueTransmit(const u16 *buffer, size_t size_bytes) FL_NOEXCEPT override;
-    bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT override;
-    bool isBusy() const FL_NOEXCEPT override;
+    bool FL_IRAM transmit(const u16 *buffer, size_t size_bytes) FL_NO_EXCEPT override;
+    bool FL_IRAM queueTransmit(const u16 *buffer, size_t size_bytes) FL_NO_EXCEPT override;
+    bool waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT override;
+    bool isBusy() const FL_NO_EXCEPT override;
 
     bool registerTransmitCallback(void *callback,
-                                  void *user_ctx) FL_NOEXCEPT override;
-    const LcdSpiConfig &getConfig() const FL_NOEXCEPT override;
+                                  void *user_ctx) FL_NO_EXCEPT override;
+    const LcdSpiConfig &getConfig() const FL_NO_EXCEPT override;
 
-    u64 getMicroseconds() FL_NOEXCEPT override;
-    void delay(u32 ms) FL_NOEXCEPT override;
+    u64 getMicroseconds() FL_NO_EXCEPT override;
+    void delay(u32 ms) FL_NO_EXCEPT override;
 
     /// @brief Currently-recorded owning driver (issue #2270).
     /// Exposed for diagnostics and tests — production callers should set
     /// `LcdSpiConfig::owner` and let initialize() manage the transition.
-    LcdSpiOwnerDriver getOwner() const FL_NOEXCEPT { return mOwner; }
+    LcdSpiOwnerDriver getOwner() const FL_NO_EXCEPT { return mOwner; }
 
   private:
     template <typename T, int N>
@@ -79,7 +79,7 @@ class LcdSpiPeripheralEsp : public ILcdSpiPeripheral {
         esp_lcd_panel_io_handle_t panel_io,
         esp_lcd_panel_io_event_data_t *edata, void *user_ctx);
 
-    LcdSpiPeripheralEsp() FL_NOEXCEPT;
+    LcdSpiPeripheralEsp() FL_NO_EXCEPT;
 
     LcdSpiPeripheralEsp(const LcdSpiPeripheralEsp &) = delete;
     LcdSpiPeripheralEsp &operator=(const LcdSpiPeripheralEsp &) = delete;
@@ -87,9 +87,9 @@ class LcdSpiPeripheralEsp : public ILcdSpiPeripheral {
     /// @brief Tear down every piece of peripheral state held by this
     /// singleton. Called from deinitialize() and from initialize() when
     /// the owning driver changes (issue #2270).
-    void teardownLocked() FL_NOEXCEPT;
+    void teardownLocked() FL_NO_EXCEPT;
     bool FL_IRAM transmitInternal(const u16 *buffer, size_t size_bytes,
-                                  bool wait_for_slot) FL_NOEXCEPT;
+                                  bool wait_for_slot) FL_NO_EXCEPT;
 
     bool mInitialized;
     LcdSpiConfig mConfig;

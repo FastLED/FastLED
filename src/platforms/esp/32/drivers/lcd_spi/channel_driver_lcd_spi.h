@@ -42,19 +42,19 @@ namespace fl {
 class ChannelDriverLcdSpi : public IChannelDriver {
   public:
     explicit ChannelDriverLcdSpi(
-        fl::shared_ptr<detail::ILcdSpiPeripheral> peripheral) FL_NOEXCEPT;
+        fl::shared_ptr<detail::ILcdSpiPeripheral> peripheral) FL_NO_EXCEPT;
     ~ChannelDriverLcdSpi() override;
 
-    bool canHandle(const ChannelDataPtr &data) const FL_NOEXCEPT override;
-    void enqueue(ChannelDataPtr channelData) FL_NOEXCEPT override;
-    void show() FL_NOEXCEPT override;
-    DriverState poll() FL_NOEXCEPT override;
+    bool canHandle(const ChannelDataPtr &data) const FL_NO_EXCEPT override;
+    void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
+    void show() FL_NO_EXCEPT override;
+    DriverState poll() FL_NO_EXCEPT override;
 
-    fl::string getName() const FL_NOEXCEPT override {
+    fl::string getName() const FL_NO_EXCEPT override {
         return fl::string::from_literal("LCD_SPI");
     }
 
-    Capabilities getCapabilities() const FL_NOEXCEPT override {
+    Capabilities getCapabilities() const FL_NO_EXCEPT override {
         return Capabilities(false, true); // SPI only
     }
 
@@ -70,13 +70,13 @@ class ChannelDriverLcdSpi : public IChannelDriver {
     static constexpr size_t kDefaultChunkInputBytes = 408;
 
     /// Override chunk input bytes for testing (0 = use default).
-    void setChunkInputBytesForTest(size_t bytes) FL_NOEXCEPT {
+    void setChunkInputBytesForTest(size_t bytes) FL_NO_EXCEPT {
         mChunkInputBytesOverride = bytes;
     }
 
   private:
     bool beginTransmission(
-        fl::span<const ChannelDataPtr> channels) FL_NOEXCEPT;
+        fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
 
     /// @brief Transpose a range of source bytes into 16-bit words
     /// @param channels Source channel data spans
@@ -85,13 +85,13 @@ class ChannelDriverLcdSpi : public IChannelDriver {
     /// @param byteCount Number of source bytes to transpose
     void transposeToWords(fl::span<const ChannelDataPtr> channels,
                           u16 *output, size_t startByte,
-                          size_t byteCount) FL_NOEXCEPT;
+                          size_t byteCount) FL_NO_EXCEPT;
 
     /// @brief Free all ring buffer allocations
-    void freeRingBuffers() FL_NOEXCEPT;
+    void freeRingBuffers() FL_NO_EXCEPT;
 
     /// @brief Allocate ring buffers with given per-slot capacity
-    bool allocateRingBuffers(size_t slotCapacityBytes) FL_NOEXCEPT;
+    bool allocateRingBuffers(size_t slotCapacityBytes) FL_NO_EXCEPT;
 
     //=========================================================================
     // ISR callback — called when a DMA chunk completes
@@ -107,7 +107,7 @@ class ChannelDriverLcdSpi : public IChannelDriver {
     /// @param user_ctx Pointer to ChannelDriverLcdSpi instance
     /// @return false (no higher-priority task woken by this callback)
     static bool isrChunkDone(void *panel_io, const void *edata,
-                             void *user_ctx) FL_NOEXCEPT;
+                             void *user_ctx) FL_NO_EXCEPT;
 
     //=========================================================================
     // ISR context — coordinates chunked streaming between ISR and main
@@ -129,7 +129,7 @@ class ChannelDriverLcdSpi : public IChannelDriver {
         size_t mTotalBytes;       // max source bytes across all channels
         size_t mChunkInputBytes;  // source bytes per chunk
 
-        void reset() FL_NOEXCEPT {
+        void reset() FL_NO_EXCEPT {
             mStreamComplete = false;
             mNextByteOffset = 0;
             mRingWriteIdx = 0;
@@ -158,6 +158,6 @@ class ChannelDriverLcdSpi : public IChannelDriver {
 };
 
 /// @brief Factory function to create LCD_SPI driver with real hardware
-fl::shared_ptr<IChannelDriver> createLcdSpiEngine() FL_NOEXCEPT;
+fl::shared_ptr<IChannelDriver> createLcdSpiEngine() FL_NO_EXCEPT;
 
 } // namespace fl

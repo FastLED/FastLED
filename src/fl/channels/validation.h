@@ -31,7 +31,7 @@ struct SingleTestConfig {
     int pin_tx;                   ///< TX pin (base pin for multi-lane)
     int pin_rx;                   ///< RX pin
 
-    SingleTestConfig() FL_NOEXCEPT
+    SingleTestConfig() FL_NO_EXCEPT
         : pattern("MSB_LSB_A")
         , iterations(1)
         , pin_tx(1)
@@ -55,7 +55,7 @@ struct SingleTestResult {
     optional<string> failure_pattern;     ///< Pattern that failed if !passed
     optional<string> failure_details;     ///< Failure details
 
-    SingleTestResult() FL_NOEXCEPT
+    SingleTestResult() FL_NO_EXCEPT
         : success(false)
         , passed(false)
         , total_tests(0)
@@ -77,7 +77,7 @@ struct DriverTestResult {
         , passed_tests(0)
         , skipped(false) {}
 
-    DriverTestResult() FL_NOEXCEPT
+    DriverTestResult() FL_NO_EXCEPT
         : total_tests(0)
         , passed_tests(0)
         , skipped(false) {}

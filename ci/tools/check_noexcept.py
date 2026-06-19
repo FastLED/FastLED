@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""AST-backed FL_NOEXCEPT enforcement for FastLED-owned src/ code.
+"""AST-backed FL_NO_EXCEPT enforcement for FastLED-owned src/ code.
 
 The check uses clang-query to find function declarations/definitions in
 src/fl/**, src/platforms/**, and src/third_party/** whose parsed AST is not
 nothrow, then filters source signatures that are already annotated with
-FL_NOEXCEPT/noexcept or have an explicit suppression comment.
+FL_NO_EXCEPT/noexcept or have an explicit suppression comment.
 
 Default mode compares current findings against a checked-in baseline. This
 keeps normal C++ lint strict for newly introduced misses while allowing the
@@ -61,11 +61,11 @@ _COMPILER_ARGS = [
 
 _MATCH_OUTPUT_RE = re.compile(r"(src[\\/]\S+):(\d+):\d+: note: .root. binds here")
 _SUPPRESS_RE = re.compile(
-    r"//\s*(?:ok\s+no\s+(?:noexcept|FL_NOEXCEPT)|"
+    r"//\s*(?:ok\s+no\s+(?:noexcept|FL_NO_EXCEPT)|"
     r"noexcept\s+not\s+required|nolint)\b",
     re.IGNORECASE,
 )
-_HAS_NOEXCEPT_RE = re.compile(r"\b(?:FL_NOEXCEPT|noexcept)\b")
+_HAS_NOEXCEPT_RE = re.compile(r"\b(?:FL_NO_EXCEPT|noexcept)\b")
 _LAMBDA_SOURCE_RE = re.compile(r"\[[^\]]*\]\s*\(")
 _DESTRUCTOR_SOURCE_RE = re.compile(r"(?:^|[^\w:])~\w+\s*\(")
 _MACRO_INVOCATION_RE = re.compile(r"^\s*[A-Z][A-Z0-9_]*\s*\(")
@@ -77,7 +77,7 @@ class NoexceptCheckError(RuntimeError):
 
 @dataclass(frozen=True)
 class NoexceptHit:
-    """One source signature that still needs an FL_NOEXCEPT decision."""
+    """One source signature that still needs an FL_NO_EXCEPT decision."""
 
     path: str
     line: int
@@ -130,7 +130,7 @@ def write_baseline(hits: list[NoexceptHit], path: Path = DEFAULT_BASELINE) -> No
     """Write a deterministic baseline for the current AST findings."""
     keys = sorted(hit.baseline_key for hit in hits)
     content = [
-        "# Known missing FL_NOEXCEPT signatures for ci/tools/check_noexcept.py.",
+        "# Known missing FL_NO_EXCEPT signatures for ci/tools/check_noexcept.py.",
         "# Generated with:",
         "#   uv run python ci/tools/check_noexcept.py --scope all --update-baseline",
         "#",
@@ -246,7 +246,7 @@ def _signature_is_exempt(signature: str) -> bool:
 def _run_clang_query(
     clang_query: list[str], tu: str, file_regex: str
 ) -> list[NoexceptHit]:
-    """Run clang-query and return filtered missing-FL_NOEXCEPT hits."""
+    """Run clang-query and return filtered missing-FL_NO_EXCEPT hits."""
     result = subprocess.run(
         [*clang_query, tu, "--", *_COMPILER_ARGS],
         input=build_query(file_regex),
@@ -290,7 +290,7 @@ def _run_clang_query(
 
 
 def find_missing_noexcept(scope: str = "all") -> list[NoexceptHit]:
-    """Find current non-exempt missing-FL_NOEXCEPT signatures."""
+    """Find current non-exempt missing-FL_NO_EXCEPT signatures."""
     clang_query = _find_clang_query()
     if not clang_query:
         raise NoexceptCheckError(
@@ -320,7 +320,7 @@ def _print_hits(hits: list[NoexceptHit]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Check for missing FL_NOEXCEPT in src/fl, src/platforms, and "
+            "Check for missing FL_NO_EXCEPT in src/fl, src/platforms, and "
             "src/third_party using clang-query AST analysis."
         )
     )
@@ -356,7 +356,7 @@ def main() -> int:
 
     if args.update_baseline:
         write_baseline(hits, args.baseline)
-        print(f"Wrote {len(hits)} FL_NOEXCEPT baseline entries to {args.baseline}")
+        print(f"Wrote {len(hits)} FL_NO_EXCEPT baseline entries to {args.baseline}")
         return 0
 
     if args.no_baseline:
@@ -366,20 +366,22 @@ def main() -> int:
         report_hits, stale = diff_against_baseline(hits, load_baseline(args.baseline))
 
     if stale:
-        print(f"NOTE: {len(stale)} stale FL_NOEXCEPT baseline entrie(s) can be pruned.")
+        print(
+            f"NOTE: {len(stale)} stale FL_NO_EXCEPT baseline entrie(s) can be pruned."
+        )
         print("      Re-run with --update-baseline after intentional cleanup.")
         print()
 
     if not report_hits:
-        print("All non-baselined owned src functions have FL_NOEXCEPT.")
+        print("All non-baselined owned src functions have FL_NO_EXCEPT.")
         print(f"Known baseline entries: {len(hits) - len(report_hits)}")
         return 0
 
-    print(f"Found {len(report_hits)} non-baselined function(s) missing FL_NOEXCEPT:")
+    print(f"Found {len(report_hits)} non-baselined function(s) missing FL_NO_EXCEPT:")
     print()
     _print_hits(report_hits)
     print(
-        "Add FL_NOEXCEPT, add a documented suppression comment, or update the "
+        "Add FL_NO_EXCEPT, add a documented suppression comment, or update the "
         "baseline only for deliberate existing debt."
     )
     return 1

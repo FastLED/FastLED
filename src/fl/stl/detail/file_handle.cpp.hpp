@@ -37,18 +37,18 @@ posix_filebuf::posix_filebuf(const char* path, const char* mode)
     }
 }
 
-posix_filebuf::~posix_filebuf() FL_NOEXCEPT {
+posix_filebuf::~posix_filebuf() FL_NO_EXCEPT {
     close();
 }
 
-posix_filebuf::posix_filebuf(posix_filebuf&& other) FL_NOEXCEPT
+posix_filebuf::posix_filebuf(posix_filebuf&& other) FL_NO_EXCEPT
     : mFile(other.mFile), mLastError(other.mLastError),
       mPath(fl::move(other.mPath)) {
     other.mFile = nullptr;
     other.mLastError = 0;
 }
 
-posix_filebuf& posix_filebuf::operator=(posix_filebuf&& other) FL_NOEXCEPT {
+posix_filebuf& posix_filebuf::operator=(posix_filebuf&& other) FL_NO_EXCEPT {
     if (this != &other) {
         close();
         mFile = other.mFile;

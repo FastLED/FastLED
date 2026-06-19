@@ -21,43 +21,43 @@ namespace fl {
 // unsupported or unnecessary (AVR, ESP8266).
 // Defined in cstdlib.cpp.hpp.
 
-void *aligned_alloc(fl::size_t alignment, fl::size_t size) FL_NOEXCEPT;
+void *aligned_alloc(fl::size_t alignment, fl::size_t size) FL_NO_EXCEPT;
 
 // Portable free for memory obtained from fl::aligned_alloc.
 // On POSIX, std::free suffices; on Windows, _aligned_free is required.
-void aligned_free(void *ptr) FL_NOEXCEPT;
+void aligned_free(void *ptr) FL_NO_EXCEPT;
 
 // Convert string to long integer
 // Similar to standard strtol but without locale support
-long strtol(const char* str, char** endptr, int base) FL_NOEXCEPT;
+long strtol(const char* str, char** endptr, int base) FL_NO_EXCEPT;
 
 // Convert string to unsigned long integer
-unsigned long strtoul(const char* str, char** endptr, int base) FL_NOEXCEPT;
+unsigned long strtoul(const char* str, char** endptr, int base) FL_NO_EXCEPT;
 
 // Convert string to integer
-int atoi(const char* str) FL_NOEXCEPT;
+int atoi(const char* str) FL_NO_EXCEPT;
 
 // Convert string to long
-long atol(const char* str) FL_NOEXCEPT;
+long atol(const char* str) FL_NO_EXCEPT;
 
 // Convert string to double
-double strtod(const char* str, char** endptr) FL_NOEXCEPT;
+double strtod(const char* str, char** endptr) FL_NO_EXCEPT;
 
 // C-style comparison function type for qsort
 typedef int (*qsort_compare_fn)(const void*, const void*);
 
 // qsort - Quick sort function compatible with C stdlib qsort
 // Sorts an array of elements using the provided comparison function
-void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NOEXCEPT;
+void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NO_EXCEPT;
 
 // Pseudo-random number generator (mirrors ::rand()).
 // Returns u32 — values are always non-negative [0, RAND_MAX].
 // Fixed-width avoids AVR's 16-bit int truncation.
-u32 rand() FL_NOEXCEPT;
+u32 rand() FL_NO_EXCEPT;
 
 // Get the value of an environment variable
 // Only functional on FASTLED_TESTING (stub platform), returns nullptr otherwise
 // This avoids std:: namespace dependencies on embedded platforms
-const char* getenv(const char* name) FL_NOEXCEPT;
+const char* getenv(const char* name) FL_NO_EXCEPT;
 
 } // namespace fl

@@ -83,7 +83,7 @@ protected:
         mDriver->enqueue(mChannelData);
     }
 
-    static fl::shared_ptr<IChannelDriver> getStubSpiEngine() FL_NOEXCEPT {
+    static fl::shared_ptr<IChannelDriver> getStubSpiEngine() FL_NO_EXCEPT {
         // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
         // the `BusTraits<Bus::STUB>` singleton. Stub builds route every
         // clockless/SPI chipset through the same no-op driver. Naming the

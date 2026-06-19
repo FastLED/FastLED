@@ -72,12 +72,12 @@ uint32_t maxLaneLeds(const fl::vector<fl::ChannelConfig>& tx_configs) {
 
 class ScopedFastLedBrightness {
   public:
-    explicit ScopedFastLedBrightness(uint8_t brightness) FL_NOEXCEPT
+    explicit ScopedFastLedBrightness(uint8_t brightness) FL_NO_EXCEPT
         : mSavedBrightness(FastLED.getBrightness()) {
         FastLED.setBrightness(brightness);
     }
 
-    ~ScopedFastLedBrightness() FL_NOEXCEPT {
+    ~ScopedFastLedBrightness() FL_NO_EXCEPT {
         FastLED.setBrightness(mSavedBrightness);
     }
 

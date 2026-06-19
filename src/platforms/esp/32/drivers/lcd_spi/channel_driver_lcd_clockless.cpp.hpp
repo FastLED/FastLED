@@ -59,7 +59,7 @@ namespace fl {
 //=============================================================================
 
 ChannelDriverLcdClockless::ChannelDriverLcdClockless(
-    fl::shared_ptr<detail::ILcdSpiPeripheral> peripheral) FL_NOEXCEPT
+    fl::shared_ptr<detail::ILcdSpiPeripheral> peripheral) FL_NO_EXCEPT
     : mPeripheral(fl::move(peripheral)), mInitialized(false),
       mEnqueuedChannels(), mTransmittingChannels(),
       mRingBuffers{nullptr, nullptr, nullptr}, mRingCapacity(0),
@@ -92,7 +92,7 @@ ChannelDriverLcdClockless::~ChannelDriverLcdClockless() {
 // Ring Buffer Management
 //=============================================================================
 
-void ChannelDriverLcdClockless::freeRingBuffers() FL_NOEXCEPT {
+void ChannelDriverLcdClockless::freeRingBuffers() FL_NO_EXCEPT {
     for (size_t i = 0; i < kRingBufferCount; i++) {
         if (mPeripheral && mRingBuffers[i] != nullptr) {
             mPeripheral->freeBuffer(mRingBuffers[i]);
@@ -103,7 +103,7 @@ void ChannelDriverLcdClockless::freeRingBuffers() FL_NOEXCEPT {
 }
 
 bool ChannelDriverLcdClockless::allocateRingBuffers(
-    size_t slotCapacityBytes) FL_NOEXCEPT {
+    size_t slotCapacityBytes) FL_NO_EXCEPT {
     if (mRingCapacity >= slotCapacityBytes && mRingBuffers[0] != nullptr) {
         return true;
     }
@@ -126,7 +126,7 @@ bool ChannelDriverLcdClockless::allocateRingBuffers(
 // Worker Task
 //=============================================================================
 
-bool ChannelDriverLcdClockless::ensureWorkerTask() FL_NOEXCEPT {
+bool ChannelDriverLcdClockless::ensureWorkerTask() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
     if (mWorkerTaskHandle != nullptr) {
         return true;
@@ -152,7 +152,7 @@ bool ChannelDriverLcdClockless::ensureWorkerTask() FL_NOEXCEPT {
 #endif
 }
 
-void ChannelDriverLcdClockless::stopWorkerTask() FL_NOEXCEPT {
+void ChannelDriverLcdClockless::stopWorkerTask() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
     TaskHandle_t handle = static_cast<TaskHandle_t>(mWorkerTaskHandle);
     if (handle == nullptr) {
@@ -178,7 +178,7 @@ void ChannelDriverLcdClockless::stopWorkerTask() FL_NOEXCEPT {
 #endif
 }
 
-void ChannelDriverLcdClockless::workerTaskEntry(void *arg) FL_NOEXCEPT {
+void ChannelDriverLcdClockless::workerTaskEntry(void *arg) FL_NO_EXCEPT {
 #if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
     auto *self = static_cast<ChannelDriverLcdClockless *>(arg);
     if (self == nullptr) {
@@ -203,7 +203,7 @@ void ChannelDriverLcdClockless::workerTaskEntry(void *arg) FL_NOEXCEPT {
 #endif
 }
 
-bool ChannelDriverLcdClockless::notifyWorker() FL_NOEXCEPT {
+bool ChannelDriverLcdClockless::notifyWorker() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
     TaskHandle_t handle = static_cast<TaskHandle_t>(mWorkerTaskHandle);
     if (handle == nullptr) {
@@ -218,7 +218,7 @@ bool ChannelDriverLcdClockless::notifyWorker() FL_NOEXCEPT {
 #endif
 }
 
-bool ChannelDriverLcdClockless::notifyWorkerFromIsr() FL_NOEXCEPT {
+bool ChannelDriverLcdClockless::notifyWorkerFromIsr() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
     TaskHandle_t handle = static_cast<TaskHandle_t>(mWorkerTaskHandle);
     if (handle == nullptr) {
@@ -235,7 +235,7 @@ bool ChannelDriverLcdClockless::notifyWorkerFromIsr() FL_NOEXCEPT {
 }
 
 bool ChannelDriverLcdClockless::submitChunk(size_t chunkIndex,
-                                            bool waitForSlot) FL_NOEXCEPT {
+                                            bool waitForSlot) FL_NO_EXCEPT {
     size_t ringIdx = chunkIndex % kRingBufferCount;
     size_t startByte = chunkIndex * mIsrCtx.mChunkInputBytes;
     u16 *buf = mRingBuffers[ringIdx];
@@ -254,7 +254,7 @@ bool ChannelDriverLcdClockless::submitChunk(size_t chunkIndex,
     return mPeripheral->queueTransmit(buf, dmaBytes);
 }
 
-void ChannelDriverLcdClockless::processWorkerQueue() FL_NOEXCEPT {
+void ChannelDriverLcdClockless::processWorkerQueue() FL_NO_EXCEPT {
     IsrContext &ctx = mIsrCtx;
 
     while (mBusy && !ctx.mStreamComplete && !ctx.mStreamError) {
@@ -287,7 +287,7 @@ void ChannelDriverLcdClockless::processWorkerQueue() FL_NOEXCEPT {
 //=============================================================================
 
 bool ChannelDriverLcdClockless::canHandle(
-    const ChannelDataPtr &data) const FL_NOEXCEPT {
+    const ChannelDataPtr &data) const FL_NO_EXCEPT {
     if (!data) {
         return false;
     }
@@ -295,11 +295,11 @@ bool ChannelDriverLcdClockless::canHandle(
 }
 
 void ChannelDriverLcdClockless::enqueue(
-    ChannelDataPtr channelData) FL_NOEXCEPT {
+    ChannelDataPtr channelData) FL_NO_EXCEPT {
     mEnqueuedChannels.push_back(fl::move(channelData));
 }
 
-void ChannelDriverLcdClockless::show() FL_NOEXCEPT {
+void ChannelDriverLcdClockless::show() FL_NO_EXCEPT {
     poll();
 
     if (mEnqueuedChannels.empty()) {
@@ -326,7 +326,7 @@ void ChannelDriverLcdClockless::show() FL_NOEXCEPT {
     }
 }
 
-IChannelDriver::DriverState ChannelDriverLcdClockless::poll() FL_NOEXCEPT {
+IChannelDriver::DriverState ChannelDriverLcdClockless::poll() FL_NO_EXCEPT {
     if (mTransmittingChannels.empty()) {
         return DriverState::READY;
     }
@@ -366,7 +366,7 @@ IChannelDriver::DriverState ChannelDriverLcdClockless::poll() FL_NOEXCEPT {
 // Encoding â€” wave3 or wave8 transpose into u16 DMA words
 //=============================================================================
 
-void ChannelDriverLcdClockless::setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT {
+void ChannelDriverLcdClockless::setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT {
     mPollNeededCallback.set(callback);
 }
 
@@ -375,7 +375,7 @@ void ChannelDriverLcdClockless::setPollNeededCallback(PollNeededCallback callbac
 // code is part of the time-critical refill path.
 size_t FL_IRAM ChannelDriverLcdClockless::encodeChunk(
     fl::span<const ChannelDataPtr> channels, u16 *output,
-    size_t startByte, size_t byteCount) FL_NOEXCEPT {
+    size_t startByte, size_t byteCount) FL_NO_EXCEPT {
     size_t outputIdx = 0; // bytes written
 
     for (size_t byteIdx = startByte; byteIdx < startByte + byteCount;
@@ -428,7 +428,7 @@ size_t FL_IRAM ChannelDriverLcdClockless::encodeChunk(
 // on CPU1" in ISR context.
 bool FL_IRAM ChannelDriverLcdClockless::isrChunkDone(void *panel_io,
                                               const void *edata,
-                                              void *user_ctx) FL_NOEXCEPT {
+                                              void *user_ctx) FL_NO_EXCEPT {
     (void)panel_io;
     (void)edata;
 
@@ -456,7 +456,7 @@ bool FL_IRAM ChannelDriverLcdClockless::isrChunkDone(void *panel_io,
 //=============================================================================
 
 bool ChannelDriverLcdClockless::beginTransmission(
-    fl::span<const ChannelDataPtr> channels) FL_NOEXCEPT {
+    fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT {
     if (channels.empty() || !mPeripheral) {
         return false;
     }
@@ -636,52 +636,52 @@ bool ChannelDriverLcdClockless::beginTransmission(
 // Factory
 //=============================================================================
 
-fl::shared_ptr<IChannelDriver> createLcdClocklessEngine() FL_NOEXCEPT {
+fl::shared_ptr<IChannelDriver> createLcdClocklessEngine() FL_NO_EXCEPT {
 #if FL_LCD_CLOCKLESS_HAS_ESP_PERIPHERAL
     class EspWrapper : public detail::ILcdSpiPeripheral {
       public:
-        bool initialize(const detail::LcdSpiConfig &c) FL_NOEXCEPT override {
+        bool initialize(const detail::LcdSpiConfig &c) FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().initialize(c);
         }
-        void deinitialize() FL_NOEXCEPT override {
+        void deinitialize() FL_NO_EXCEPT override {
             detail::LcdSpiPeripheralEsp::instance().deinitialize();
         }
-        bool isInitialized() const FL_NOEXCEPT override {
+        bool isInitialized() const FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().isInitialized();
         }
-        u16 *allocateBuffer(size_t s) FL_NOEXCEPT override {
+        u16 *allocateBuffer(size_t s) FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().allocateBuffer(s);
         }
-        void freeBuffer(u16 *b) FL_NOEXCEPT override {
+        void freeBuffer(u16 *b) FL_NO_EXCEPT override {
             detail::LcdSpiPeripheralEsp::instance().freeBuffer(b);
         }
         // FL_IRAM: forwarded into LcdSpiPeripheralEsp::transmit(); keep the
         // thunk IRAM-safe because the shared peripheral also services LCD_SPI
         // ISR re-arm paths.
-        bool FL_IRAM transmit(const u16 *b, size_t s) FL_NOEXCEPT override {
+        bool FL_IRAM transmit(const u16 *b, size_t s) FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().transmit(b, s);
         }
         bool FL_IRAM queueTransmit(const u16 *b,
-                                   size_t s) FL_NOEXCEPT override {
+                                   size_t s) FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().queueTransmit(b, s);
         }
-        bool waitTransmitDone(u32 t) FL_NOEXCEPT override {
+        bool waitTransmitDone(u32 t) FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().waitTransmitDone(t);
         }
-        bool isBusy() const FL_NOEXCEPT override {
+        bool isBusy() const FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().isBusy();
         }
-        bool registerTransmitCallback(void *cb, void *ctx) FL_NOEXCEPT override {
+        bool registerTransmitCallback(void *cb, void *ctx) FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance()
                 .registerTransmitCallback(cb, ctx);
         }
-        const detail::LcdSpiConfig &getConfig() const FL_NOEXCEPT override {
+        const detail::LcdSpiConfig &getConfig() const FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().getConfig();
         }
-        u64 getMicroseconds() FL_NOEXCEPT override {
+        u64 getMicroseconds() FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().getMicroseconds();
         }
-        void delay(u32 ms) FL_NOEXCEPT override {
+        void delay(u32 ms) FL_NO_EXCEPT override {
             detail::LcdSpiPeripheralEsp::instance().delay(ms);
         }
     };

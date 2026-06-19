@@ -148,7 +148,7 @@ namespace detail {
 // 5 decimal digits for float, 10 for double — more than enough for color
 // space and rotational math.
 template <typename F>
-inline F sqrt_newton_(F value) FL_NOEXCEPT {
+inline F sqrt_newton_(F value) FL_NO_EXCEPT {
     if (value <= F(0)) return F(0);
     // Initial estimate: x_0 = value / 2. Pure-arithmetic, no bit-cast needed.
     // Newton converges quadratically so 5-6 iterations is plenty even from a
@@ -167,21 +167,21 @@ inline F sqrt_newton_(F value) FL_NOEXCEPT {
 // Reduce input to [-π/4, π/4] then evaluate degree-7 Taylor polynomial.
 // Max error ~1e-5 for float, ~1e-10 for double on the reduced range.
 template <typename F>
-inline F sin_poly_quarterturn_(F x) FL_NOEXCEPT {
+inline F sin_poly_quarterturn_(F x) FL_NO_EXCEPT {
     // sin(x) ≈ x - x³/6 + x⁵/120 - x⁷/5040
     const F x2 = x * x;
     return x * (F(1) - x2 * (F(1.0 / 6.0) - x2 * (F(1.0 / 120.0) - x2 * F(1.0 / 5040.0))));
 }
 
 template <typename F>
-inline F cos_poly_quarterturn_(F x) FL_NOEXCEPT {
+inline F cos_poly_quarterturn_(F x) FL_NO_EXCEPT {
     // cos(x) ≈ 1 - x²/2 + x⁴/24 - x⁶/720
     const F x2 = x * x;
     return F(1) - x2 * (F(0.5) - x2 * (F(1.0 / 24.0) - x2 * F(1.0 / 720.0)));
 }
 
 template <typename F>
-inline F sin_reduce_(F x) FL_NOEXCEPT {
+inline F sin_reduce_(F x) FL_NO_EXCEPT {
     const F kPi      = F(3.14159265358979323846);
     const F kTwoPi   = F(6.28318530717958647692);
     const F kPiHalf  = F(1.57079632679489661923);
@@ -199,7 +199,7 @@ inline F sin_reduce_(F x) FL_NOEXCEPT {
 }
 
 template <typename F>
-inline F cos_reduce_(F x) FL_NOEXCEPT {
+inline F cos_reduce_(F x) FL_NO_EXCEPT {
     // cos(x) = sin(π/2 - x)
     const F kPiHalf = F(1.57079632679489661923);
     return sin_reduce_(kPiHalf - x);
@@ -211,7 +211,7 @@ inline F cos_reduce_(F x) FL_NOEXCEPT {
 // Repeatedly multiply/divide by 2 to bring x into [1, 2), then evaluate
 // log(m) via a polynomial in (m-1) on [0, 1].
 template <typename F>
-inline F log_natural_(F value) FL_NOEXCEPT {
+inline F log_natural_(F value) FL_NO_EXCEPT {
     if (value <= F(0)) return F(-1e30);  // -inf surrogate
     int e = 0;
     while (value >= F(2)) { value *= F(0.5); ++e; }
@@ -451,7 +451,7 @@ double fmod_impl_double(double x, double y) {
 // only when they actually need it.
 namespace detail {
 template <typename F>
-inline F atan_poly_unit_(F u) FL_NOEXCEPT {
+inline F atan_poly_unit_(F u) FL_NO_EXCEPT {
     // Polynomial approximation of atan on [-1, 1].
     // Coefficients from Padé-style minimax fit; max abs error ~1.5e-3.
     const F u2 = u * u;
@@ -464,7 +464,7 @@ inline F atan_poly_unit_(F u) FL_NOEXCEPT {
 }
 
 template <typename F>
-inline F atan_full_(F u) FL_NOEXCEPT {
+inline F atan_full_(F u) FL_NO_EXCEPT {
     const F kPiHalf = F(1.57079632679489661923);
     // Reduce to |u| <= 1 via the reciprocal identity.
     if (u > F(1)) {
@@ -476,7 +476,7 @@ inline F atan_full_(F u) FL_NOEXCEPT {
 }
 
 template <typename F>
-inline F atan2_full_(F y, F x) FL_NOEXCEPT {
+inline F atan2_full_(F y, F x) FL_NO_EXCEPT {
     const F kPi     = F(3.14159265358979323846);
     const F kPiHalf = F(1.57079632679489661923);
     // x == 0 special case: angle is ±π/2 (sign of y), or 0 when both are 0.
@@ -620,7 +620,7 @@ double tan_impl_double(double value) {
 // a small integer (|exp| < 30), so the bounded loop is cheap (≤ 30 mults).
 namespace detail {
 template <typename F>
-inline F ldexp_loop_(F value, int exp) FL_NOEXCEPT {
+inline F ldexp_loop_(F value, int exp) FL_NO_EXCEPT {
     if (value == F(0)) return value;
     if (exp == 0) return value;
     if (exp > 0) {

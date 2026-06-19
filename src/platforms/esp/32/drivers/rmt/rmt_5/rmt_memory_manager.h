@@ -97,7 +97,7 @@ class RmtMemoryManager {
 public:
     /// @brief Get singleton instance
     /// @return Reference to the global RMT memory manager
-    static RmtMemoryManager& instance() FL_NOEXCEPT;
+    static RmtMemoryManager& instance() FL_NO_EXCEPT;
 
     // ========================================================================
     // Testing Support - Allows mocking platform limits for unit tests
@@ -124,19 +124,19 @@ public:
     /// // Mock ESP32: 512 words global pool
     /// RmtMemoryManager mgr_esp32(512, 0, true);
     /// @endcode
-    RmtMemoryManager(size_t total_tx, size_t total_rx, bool is_global) FL_NOEXCEPT;
+    RmtMemoryManager(size_t total_tx, size_t total_rx, bool is_global) FL_NO_EXCEPT;
 
     /// @brief Get platform-specific TX memory limit
     /// @return Number of TX words available on this platform
-    static size_t getPlatformTxWords() FL_NOEXCEPT;
+    static size_t getPlatformTxWords() FL_NO_EXCEPT;
 
     /// @brief Get platform-specific RX memory limit
     /// @return Number of RX words available on this platform (0 for global pool)
-    static size_t getPlatformRxWords() FL_NOEXCEPT;
+    static size_t getPlatformRxWords() FL_NO_EXCEPT;
 
     /// @brief Check if platform uses global memory pool
     /// @return true for ESP32/S2 (global pool), false for S3/C3/C6/H2 (dedicated pools)
-    static bool isPlatformGlobalPool() FL_NOEXCEPT;
+    static bool isPlatformGlobalPool() FL_NO_EXCEPT;
 
     /// @brief Allocate memory for TX channel with adaptive buffering policy
     /// @param channel_id RMT channel ID (0-7 for ESP32, 0-3 for S3, 0-1 for C3/C6/H2)
@@ -155,7 +155,7 @@ public:
     ///
     /// When with_dma=true in rmt_tx_channel_config_t, mem_block_symbols controls
     /// the DRAM buffer size, NOT on-chip RMT memory.
-    result<size_t, RmtMemoryError> allocateTx(u8 channel_id, bool use_dma, bool networkActive = false) FL_NOEXCEPT;
+    result<size_t, RmtMemoryError> allocateTx(u8 channel_id, bool use_dma, bool networkActive = false) FL_NO_EXCEPT;
 
     /// @brief Allocate memory for RX channel with user-specified size
     /// @param channel_id RMT channel ID (0-7 for ESP32, 0-3 for S3, 0-1 for C3/C6/H2)
@@ -169,7 +169,7 @@ public:
     ///
     /// When with_dma=true in rmt_rx_channel_config_t, mem_block_symbols controls
     /// the DRAM buffer size, NOT on-chip RMT memory.
-    result<size_t, RmtMemoryError> allocateRx(u8 channel_id, size_t symbols, bool use_dma = false) FL_NOEXCEPT;
+    result<size_t, RmtMemoryError> allocateRx(u8 channel_id, size_t symbols, bool use_dma = false) FL_NO_EXCEPT;
 
     /// @brief Status-code variant of allocateTx (no error discriminator).
     /// @return true on success, writing the allocated word count to out_words.
@@ -180,16 +180,16 @@ public:
     /// to distinguish CHANNEL_ALREADY_ALLOCATED vs INSUFFICIENT_TX_MEMORY.
     /// See #2856 item 3.5.
     bool tryAllocateTx(u8 channel_id, bool use_dma, bool networkActive,
-                       size_t& out_words) FL_NOEXCEPT;
+                       size_t& out_words) FL_NO_EXCEPT;
 
     /// @brief Status-code variant of allocateRx. See tryAllocateTx for rationale.
     bool tryAllocateRx(u8 channel_id, size_t symbols, bool use_dma,
-                       size_t& out_words) FL_NOEXCEPT;
+                       size_t& out_words) FL_NO_EXCEPT;
 
     /// @brief Free allocated memory for a channel
     /// @param channel_id RMT channel ID
     /// @param is_tx true for TX channel, false for RX channel
-    void free(u8 channel_id, bool is_tx) FL_NOEXCEPT;  // ok bare allocation
+    void free(u8 channel_id, bool is_tx) FL_NO_EXCEPT;  // ok bare allocation
 
     /// @brief Record allocation after recovery (channel already created externally)
     /// @param channel_id RMT channel ID
@@ -199,32 +199,32 @@ public:
     /// This is used during memory recovery when the ESP-IDF channel was created
     /// successfully but our internal allocation attempt had already been freed.
     /// Adds the allocation to the ledger without re-allocating memory.
-    void recordRecoveryAllocation(u8 channel_id, size_t words, bool is_tx) FL_NOEXCEPT;
+    void recordRecoveryAllocation(u8 channel_id, size_t words, bool is_tx) FL_NO_EXCEPT;
 
     /// @brief Query available TX memory
     /// @return Number of words available for TX allocation
-    size_t availableTxWords() const FL_NOEXCEPT;
+    size_t availableTxWords() const FL_NO_EXCEPT;
 
     /// @brief Query available RX memory
     /// @return Number of words available for RX allocation
-    size_t availableRxWords() const FL_NOEXCEPT;
+    size_t availableRxWords() const FL_NO_EXCEPT;
 
     /// @brief Check if TX allocation would succeed
     /// @param use_dma Whether DMA would be used (always succeeds)
     /// @param networkActive Whether any network is currently active (affects buffer size)
     /// @return true if allocation would succeed, false otherwise
-    bool canAllocateTx(bool use_dma, bool networkActive = false) const FL_NOEXCEPT;
+    bool canAllocateTx(bool use_dma, bool networkActive = false) const FL_NO_EXCEPT;
 
     /// @brief Check if RX allocation would succeed
     /// @param symbols Number of symbols requested
     /// @return true if allocation would succeed, false otherwise
-    bool canAllocateRx(size_t symbols) const FL_NOEXCEPT;
+    bool canAllocateRx(size_t symbols) const FL_NO_EXCEPT;
 
     /// @brief Get allocation info for a channel (debug/logging)
     /// @param channel_id RMT channel ID
     /// @param is_tx true for TX channel, false for RX channel
     /// @return Number of words allocated, or 0 if not found
-    size_t getAllocatedWords(u8 channel_id, bool is_tx) const FL_NOEXCEPT;
+    size_t getAllocatedWords(u8 channel_id, bool is_tx) const FL_NO_EXCEPT;
 
     // ========================================================================
     // State Inspection Methods - For Testing and Debugging
@@ -232,19 +232,19 @@ public:
 
     /// @brief Get total TX memory words configured
     /// @return Total TX words (for dedicated pools or global pool)
-    size_t getTotalTxWords() const FL_NOEXCEPT;
+    size_t getTotalTxWords() const FL_NO_EXCEPT;
 
     /// @brief Get total RX memory words configured
     /// @return Total RX words (0 for global pool platforms)
-    size_t getTotalRxWords() const FL_NOEXCEPT;
+    size_t getTotalRxWords() const FL_NO_EXCEPT;
 
     /// @brief Get currently allocated TX memory words
     /// @return Allocated TX words
-    size_t getAllocatedTxWords() const FL_NOEXCEPT;
+    size_t getAllocatedTxWords() const FL_NO_EXCEPT;
 
     /// @brief Get currently allocated RX memory words
     /// @return Allocated RX words
-    size_t getAllocatedRxWords() const FL_NOEXCEPT;
+    size_t getAllocatedRxWords() const FL_NO_EXCEPT;
 
     /// @brief Check if any RX channels are currently active (registered)
     /// @return true if at least one RX channel is allocated
@@ -252,18 +252,18 @@ public:
     /// Used by TX driver to detect RX activity and avoid DMA conflicts.
     /// On ESP32-S3, simultaneous RMT TX (with DMA) and RMT RX can cause
     /// transmission issues. When RX is active, TX should use non-DMA mode.
-    bool hasActiveRxChannels() const FL_NOEXCEPT;
+    bool hasActiveRxChannels() const FL_NO_EXCEPT;
 
     /// @brief Get number of active allocations
     /// @return Count of allocated channels (TX + RX)
-    size_t getAllocationCount() const FL_NOEXCEPT;
+    size_t getAllocationCount() const FL_NO_EXCEPT;
 
     /// @brief Check if using global pool architecture
     /// @return true for global pool (ESP32/S2), false for dedicated pools (S3/C3/C6/H2)
-    bool isGlobalPool() const FL_NOEXCEPT;
+    bool isGlobalPool() const FL_NO_EXCEPT;
 
     /// @brief Reset all allocations (for testing or error recovery)
-    void reset() FL_NOEXCEPT;
+    void reset() FL_NO_EXCEPT;
 
     /// @brief Reserve memory for external RMT usage (user-controlled accounting)
     /// @param tx_words Number of TX memory words to reserve (reduce available pool)
@@ -278,12 +278,12 @@ public:
     /// auto& mgr = fl::RmtMemoryManager::instance();
     /// mgr.reserveExternalMemory(64, 0);  // Reserve 64 TX words, 0 RX words
     /// @endcode
-    void reserveExternalMemory(size_t tx_words, size_t rx_words) FL_NOEXCEPT;
+    void reserveExternalMemory(size_t tx_words, size_t rx_words) FL_NO_EXCEPT;
 
     /// @brief Get currently reserved external memory (debug/logging)
     /// @param tx_words Output: Reserved TX words
     /// @param rx_words Output: Reserved RX words
-    void getReservedMemory(size_t& tx_words, size_t& rx_words) const FL_NOEXCEPT;
+    void getReservedMemory(size_t& tx_words, size_t& rx_words) const FL_NO_EXCEPT;
 
     /// @brief Calculate adaptive memory blocks based on network state
     /// @param networkActive Whether any network (WiFi, Ethernet, or Bluetooth) is currently active
@@ -296,7 +296,7 @@ public:
     ///
     /// C3/C6/H2/C5 platforms have only 96 words (2 channels × 48 words) of TX memory.
     /// Triple-buffering would require 144 words (3 × 48), which exceeds capacity.
-    static size_t calculateMemoryBlocks(bool networkActive) FL_NOEXCEPT;
+    static size_t calculateMemoryBlocks(bool networkActive) FL_NO_EXCEPT;
 
     /// @brief Configure custom memory block strategy
     /// @param idleBlocks Number of memory blocks when network is inactive (idle state)
@@ -318,7 +318,7 @@ public:
     /// auto& mgr = fl::RmtMemoryManager::instance();
     /// mgr.setMemoryBlockStrategy(1, 2);  // 1× idle, 2× network-active
     /// @endcode
-    void setMemoryBlockStrategy(size_t idleBlocks, size_t networkBlocks) FL_NOEXCEPT;
+    void setMemoryBlockStrategy(size_t idleBlocks, size_t networkBlocks) FL_NO_EXCEPT;
 
     /// @brief Query current memory block strategy
     /// @param idleBlocks Output: Number of blocks for network-idle state
@@ -334,7 +334,7 @@ public:
     /// mgr.getMemoryBlockStrategy(idle, network);
     /// FL_DBG("Strategy: " << idle << "× idle, " << network << "× network");
     /// @endcode
-    void getMemoryBlockStrategy(size_t& idleBlocks, size_t& networkBlocks) const FL_NOEXCEPT;
+    void getMemoryBlockStrategy(size_t& idleBlocks, size_t& networkBlocks) const FL_NO_EXCEPT;
 
     // ========================================================================
     // DMA Channel Management (ESP32-S3 only - 1 DMA channel shared TX/RX)
@@ -345,7 +345,7 @@ public:
     ///
     /// ESP32-S3 has only 1 DMA channel shared between all TX and RX channels.
     /// This checks if the DMA slot is currently available.
-    bool isDMAAvailable() const FL_NOEXCEPT;
+    bool isDMAAvailable() const FL_NO_EXCEPT;
 
     /// @brief Allocate the DMA channel slot
     /// @param channel_id Channel ID requesting DMA
@@ -354,21 +354,21 @@ public:
     ///
     /// Only one channel (TX or RX) can hold the DMA slot at a time.
     /// Subsequent allocations will fail until the DMA channel is freed.
-    bool allocateDMA(u8 channel_id, bool is_tx) FL_NOEXCEPT;
+    bool allocateDMA(u8 channel_id, bool is_tx) FL_NO_EXCEPT;
 
     /// @brief Free the DMA channel slot
     /// @param channel_id Channel ID releasing DMA
     /// @param is_tx true for TX channel, false for RX channel
     ///
     /// Allows another channel to use DMA after this channel releases it.
-    void freeDMA(u8 channel_id, bool is_tx) FL_NOEXCEPT;
+    void freeDMA(u8 channel_id, bool is_tx) FL_NO_EXCEPT;
 
     /// @brief Get current DMA allocation info (debug/logging)
     /// @return Number of DMA channels in use (0 or 1)
-    int getDMAChannelsInUse() const FL_NOEXCEPT;
+    int getDMAChannelsInUse() const FL_NO_EXCEPT;
 
 private:
-    RmtMemoryManager() FL_NOEXCEPT;
+    RmtMemoryManager() FL_NO_EXCEPT;
     ~RmtMemoryManager() = default;
 
     // Prevent copying
@@ -411,7 +411,7 @@ private:
 
         fl::vector_inlined<ChannelAllocation, 8> allocations;  ///< Active allocations
 
-        MemoryLedger() FL_NOEXCEPT;
+        MemoryLedger() FL_NO_EXCEPT;
     };
 
     /// @brief DMA channel allocation tracking (ESP32-S3: 1 channel shared TX/RX)
@@ -432,29 +432,29 @@ private:
     /// @param channel_id RMT channel ID
     /// @param is_tx true for TX, false for RX
     /// @return Pointer to allocation, or nullptr if not found
-    ChannelAllocation* findAllocation(u8 channel_id, bool is_tx) FL_NOEXCEPT;
+    ChannelAllocation* findAllocation(u8 channel_id, bool is_tx) FL_NO_EXCEPT;
 
     /// @brief Find allocation record for a channel (const version)
-    const ChannelAllocation* findAllocation(u8 channel_id, bool is_tx) const FL_NOEXCEPT;
+    const ChannelAllocation* findAllocation(u8 channel_id, bool is_tx) const FL_NO_EXCEPT;
 
     /// @brief Initialize platform-specific memory limits
-    static void initPlatformLimits(size_t& total_tx, size_t& total_rx) FL_NOEXCEPT;
+    static void initPlatformLimits(size_t& total_tx, size_t& total_rx) FL_NO_EXCEPT;
 
     /// @brief Helper to get available memory for TX or RX
     /// @param is_tx true for TX pool, false for RX pool
     /// @return Available words (accounting for reservations)
-    size_t getAvailableWords(bool is_tx) const FL_NOEXCEPT;
+    size_t getAvailableWords(bool is_tx) const FL_NO_EXCEPT;
 
     /// @brief Helper to allocate words from the appropriate pool
     /// @param words_needed Number of words to allocate
     /// @param is_tx true for TX pool, false for RX pool
     /// @return true if allocation succeeded, false otherwise
-    bool tryAllocateWords(size_t words_needed, bool is_tx) FL_NOEXCEPT;
+    bool tryAllocateWords(size_t words_needed, bool is_tx) FL_NO_EXCEPT;
 
     /// @brief Helper to free words from the appropriate pool
     /// @param words Number of words to free
     /// @param is_tx true for TX pool, false for RX pool
-    void freeWords(size_t words, bool is_tx) FL_NOEXCEPT;
+    void freeWords(size_t words, bool is_tx) FL_NO_EXCEPT;
 
     /// @brief Cold-path fallback + diagnostic for failed TX allocations.
     /// Extracted from allocateTx so the hot path (initial tryAllocateWords
@@ -464,7 +464,7 @@ private:
     /// failure result on hard failure. See #2773 item 2.5.
     result<size_t, RmtMemoryError> handleAllocateTxFailure(
         u8 channel_id, size_t mem_blocks, size_t words_needed,
-        bool networkActive) FL_NOEXCEPT;
+        bool networkActive) FL_NO_EXCEPT;
 };
 
 } // namespace fl

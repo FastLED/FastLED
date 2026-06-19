@@ -24,7 +24,7 @@ namespace platforms {
 ///
 /// Registers platform-specific SPI hardware instances with the appropriate registries.
 /// Implementation is in platforms/esp/32/drivers/spi_hw_manager_esp32.cpp.hpp
-void initSpiHardware() FL_NOEXCEPT;
+void initSpiHardware() FL_NO_EXCEPT;
 
 }  // namespace platforms
 }  // namespace fl
@@ -36,7 +36,7 @@ namespace fl {
 namespace platforms {
 
 /// @brief No-op SPI hardware initialization for non-ESP32 platforms
-inline void initSpiHardware() FL_NOEXCEPT {
+inline void initSpiHardware() FL_NO_EXCEPT {
     // No-op: This platform doesn't have ESP32 SPI hardware
 }
 

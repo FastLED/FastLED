@@ -17,7 +17,7 @@ namespace fl {
 class UIDescriptionImpl {
   public:
     UIDescriptionImpl(const char *name) { FASTLED_UNUSED(name); }
-    ~UIDescriptionImpl() FL_NOEXCEPT {}
+    ~UIDescriptionImpl() FL_NO_EXCEPT {}
 
     // Stub method for group setting (does nothing on non-WASM platforms)
     void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
@@ -28,11 +28,11 @@ class UIDescriptionImpl {
 class UIDescription : public UIElement {
   public:
     FL_NO_COPY(UIDescription);
-    UIDescription(const char *name) FL_NOEXCEPT;
-    ~UIDescription() FL_NOEXCEPT;
+    UIDescription(const char *name) FL_NO_EXCEPT;
+    ~UIDescription() FL_NO_EXCEPT;
 
     // Override setGroup to also update the implementation
-    void setGroup(const fl::string& groupName) FL_NOEXCEPT override {
+    void setGroup(const fl::string& groupName) FL_NO_EXCEPT override {
         UIElement::setGroup(groupName);
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);

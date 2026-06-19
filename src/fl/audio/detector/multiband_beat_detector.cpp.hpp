@@ -12,7 +12,7 @@ MultiBandBeat::MultiBandBeat(const MultiBandBeatDetectorConfig& config) {
     configure(config);
 }
 
-MultiBandBeat::~MultiBandBeat() FL_NOEXCEPT = default;
+MultiBandBeat::~MultiBandBeat() FL_NO_EXCEPT = default;
 
 void MultiBandBeat::configure(const MultiBandBeatDetectorConfig& config) {
     mConfig = config;

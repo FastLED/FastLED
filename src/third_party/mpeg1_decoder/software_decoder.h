@@ -22,7 +22,7 @@ struct Mpeg1Config {
     AudioFrameCallback audioCallback;  // Optional callback for audio frames (default-constructed is empty)
 
     Mpeg1Config() = default;
-    Mpeg1Config(FrameMode m, fl::u16 fps = 30) FL_NOEXCEPT
+    Mpeg1Config(FrameMode m, fl::u16 fps = 30) FL_NO_EXCEPT
         : mode(m), targetFps(fps) {}
 };
 
@@ -46,49 +46,49 @@ private:
     bool endOfStream_ = false;
 
     // Internal methods
-    bool initializeDecoder() FL_NOEXCEPT;
-    bool decodeNextFrame() FL_NOEXCEPT;
-    void cleanupDecoder() FL_NOEXCEPT;
-    void setError(const fl::string& message) FL_NOEXCEPT;
-    bool parseSequenceHeader() FL_NOEXCEPT;
-    bool decodePictureHeader() FL_NOEXCEPT;
-    bool decodeFrame() FL_NOEXCEPT;
-    void allocateFrameBuffers() FL_NOEXCEPT;
+    bool initializeDecoder() FL_NO_EXCEPT;
+    bool decodeNextFrame() FL_NO_EXCEPT;
+    void cleanupDecoder() FL_NO_EXCEPT;
+    void setError(const fl::string& message) FL_NO_EXCEPT;
+    bool parseSequenceHeader() FL_NO_EXCEPT;
+    bool decodePictureHeader() FL_NO_EXCEPT;
+    bool decodeFrame() FL_NO_EXCEPT;
+    void allocateFrameBuffers() FL_NO_EXCEPT;
 
 public:
-    explicit SoftwareMpeg1Decoder(const Mpeg1Config& config) FL_NOEXCEPT;
+    explicit SoftwareMpeg1Decoder(const Mpeg1Config& config) FL_NO_EXCEPT;
     ~SoftwareMpeg1Decoder();
 
     // IDecoder interface
-    bool begin(fl::filebuf_ptr stream) FL_NOEXCEPT override;
-    void end() FL_NOEXCEPT override;
-    bool isReady() const FL_NOEXCEPT override { return ready_; }
-    bool hasError(fl::string* msg = nullptr) const FL_NOEXCEPT override;
+    bool begin(fl::filebuf_ptr stream) FL_NO_EXCEPT override;
+    void end() FL_NO_EXCEPT override;
+    bool isReady() const FL_NO_EXCEPT override { return ready_; }
+    bool hasError(fl::string* msg = nullptr) const FL_NO_EXCEPT override;
 
-    DecodeResult decode() FL_NOEXCEPT override;
-    Frame getCurrentFrame() FL_NOEXCEPT override;
-    bool hasMoreFrames() const FL_NOEXCEPT override;
+    DecodeResult decode() FL_NO_EXCEPT override;
+    Frame getCurrentFrame() FL_NO_EXCEPT override;
+    bool hasMoreFrames() const FL_NO_EXCEPT override;
 
     // MPEG1-specific methods
-    fl::u32 getFrameCount() const FL_NOEXCEPT override;
-    fl::u32 getCurrentFrameIndex() const FL_NOEXCEPT override { return currentFrameIndex_; }
-    bool seek(fl::u32 frameIndex) FL_NOEXCEPT override;
+    fl::u32 getFrameCount() const FL_NO_EXCEPT override;
+    fl::u32 getCurrentFrameIndex() const FL_NO_EXCEPT override { return currentFrameIndex_; }
+    bool seek(fl::u32 frameIndex) FL_NO_EXCEPT override;
 
     // Get video properties
-    fl::u16 getWidth() const FL_NOEXCEPT;
-    fl::u16 getHeight() const FL_NOEXCEPT;
-    fl::u16 getFrameRate() const FL_NOEXCEPT;
+    fl::u16 getWidth() const FL_NO_EXCEPT;
+    fl::u16 getHeight() const FL_NO_EXCEPT;
+    fl::u16 getFrameRate() const FL_NO_EXCEPT;
 
     // Static callback for pl_mpeg video decoding
-    static void videoDecodeCallback(fl::third_party::plm_t* plm, fl::third_party::plm_frame_t* frame, void* user) FL_NOEXCEPT;
+    static void videoDecodeCallback(fl::third_party::plm_t* plm, fl::third_party::plm_frame_t* frame, void* user) FL_NO_EXCEPT;
 
     // Static callback for pl_mpeg audio decoding
-    static void audioDecodeCallback(fl::third_party::plm_t* plm, fl::third_party::plm_samples_t* samples, void* user) FL_NOEXCEPT;
+    static void audioDecodeCallback(fl::third_party::plm_t* plm, fl::third_party::plm_samples_t* samples, void* user) FL_NO_EXCEPT;
 
     // IDecoder audio interface overrides
-    bool hasAudio() const FL_NOEXCEPT override;
-    void setAudioCallback(AudioFrameCallback callback) FL_NOEXCEPT override;
-    int getAudioSampleRate() const FL_NOEXCEPT override;
+    bool hasAudio() const FL_NO_EXCEPT override;
+    void setAudioCallback(AudioFrameCallback callback) FL_NO_EXCEPT override;
+    int getAudioSampleRate() const FL_NO_EXCEPT override;
 };
 
 } // namespace third_party

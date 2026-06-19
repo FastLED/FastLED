@@ -127,7 +127,7 @@
 #ifndef FL_PRINTLN_DECLARED
 #define FL_PRINTLN_DECLARED
 namespace fl {
-    void println(const char* str) FL_NOEXCEPT;
+    void println(const char* str) FL_NO_EXCEPT;
 }
 #endif
 
@@ -138,7 +138,7 @@ namespace fl {
 namespace fl {
 // ".build/src/fl/dbg.h" -> "src/fl/dbg.h"
 // "blah/blah/blah.h" -> "blah.h"
-const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
+const char *fastled_file_offset(const char *file) FL_NO_EXCEPT;
 } // namespace fl
 
 // =============================================================================
@@ -177,7 +177,7 @@ enum class log_kind : fl::u8 {
     INFO  = 2,
 };
 
-inline const char* log_kind_name(log_kind kind) FL_NOEXCEPT {
+inline const char* log_kind_name(log_kind kind) FL_NO_EXCEPT {
     switch (kind) {
         case log_kind::WARN:
             return "WARN";
@@ -191,14 +191,14 @@ inline const char* log_kind_name(log_kind kind) FL_NOEXCEPT {
 
 template <typename... Args>
 void log_emit_f(log_kind kind, const char* file, int line, const char* format,
-                const Args&... args) FL_NOEXCEPT {
+                const Args&... args) FL_NO_EXCEPT {
     fl::printf("%s(%d): %s: ", file, line, log_kind_name(kind));
     fl::printf(format, args...);
     fl::printf("\n");
 }
 
 template <typename... Args>
-fl::string log_format_string(const char* format, const Args&... args) FL_NOEXCEPT {
+fl::string log_format_string(const char* format, const Args&... args) FL_NO_EXCEPT {
     char buffer[256];
     fl::snprintf(buffer, sizeof(buffer), format, args...);
     return fl::string(buffer);
@@ -216,7 +216,7 @@ fl::string log_format_string(const char* format, const Args&... args) FL_NOEXCEP
 // site - defeating the whole point of moving the prefix chain
 // out-of-line. The noinline attribute is what makes this proposal
 // actually win bytes; bare centralisation alone isn't enough.
-void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_NO_INLINE FL_NOEXCEPT;
+void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_NO_INLINE FL_NO_EXCEPT;
 
 } } // namespace fl::detail
 
@@ -900,7 +900,7 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 /// Call this from your main loop() if using enableBackgroundFlush()
 /// This function is lightweight - returns immediately if no flush needed
 namespace fl {
-    void async_log_service() FL_NOEXCEPT;
+    void async_log_service() FL_NO_EXCEPT;
 
     /// @brief Configure async logger automatic servicing task
     /// @param interval_ms Service interval in milliseconds (default 16ms = 60fps)
@@ -921,7 +921,7 @@ namespace fl {
     ///     fl::delay(10);  // Loggers serviced automatically!
     /// }
     /// ```
-    void configureAsyncLogService(u32 interval_ms = 16, fl::size messages_per_tick = 5) FL_NOEXCEPT;
+    void configureAsyncLogService(u32 interval_ms = 16, fl::size messages_per_tick = 5) FL_NO_EXCEPT;
 }
 
 /// @}

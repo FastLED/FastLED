@@ -16,7 +16,7 @@ def test_query_excludes_non_actionable_ast_nodes() -> None:
 
 
 def test_signature_exemptions() -> None:
-    assert check_noexcept._signature_is_exempt("void foo() FL_NOEXCEPT;")
+    assert check_noexcept._signature_is_exempt("void foo() FL_NO_EXCEPT;")
     assert check_noexcept._signature_is_exempt("void foo() noexcept;")
     assert check_noexcept._signature_is_exempt("void foo(); // ok no noexcept")
     assert check_noexcept._signature_is_exempt("auto fn = [x]() { return x; };")

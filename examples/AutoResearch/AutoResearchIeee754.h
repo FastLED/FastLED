@@ -32,11 +32,11 @@ struct FormatCase {
     const char* expected_text;
 };
 
-inline fl::u32 absDiff(fl::u32 a, fl::u32 b) FL_NOEXCEPT {
+inline fl::u32 absDiff(fl::u32 a, fl::u32 b) FL_NO_EXCEPT {
     return a > b ? a - b : b - a;
 }
 
-inline bool withinOneUlp(fl::u32 actual, fl::u32 expected) FL_NOEXCEPT {
+inline bool withinOneUlp(fl::u32 actual, fl::u32 expected) FL_NO_EXCEPT {
     if (actual == expected) {
         return true;
     }
@@ -47,7 +47,7 @@ inline bool withinOneUlp(fl::u32 actual, fl::u32 expected) FL_NOEXCEPT {
 }
 
 inline void recordCheck(Result& r, const char* name, bool passed,
-                        fl::u32 expected = 0, fl::u32 actual = 0) FL_NOEXCEPT {
+                        fl::u32 expected = 0, fl::u32 actual = 0) FL_NO_EXCEPT {
     ++r.tests_run;
     if (passed) {
         return;

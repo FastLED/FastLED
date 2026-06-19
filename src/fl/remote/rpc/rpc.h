@@ -209,14 +209,14 @@ public:
               description(fl::move(desc)), tags(fl::move(t)) {}
     };
 
-    Rpc() FL_NOEXCEPT = default;
-    ~Rpc() FL_NOEXCEPT = default;
+    Rpc() FL_NO_EXCEPT = default;
+    ~Rpc() FL_NO_EXCEPT = default;
 
     // Non-copyable but movable
-    Rpc(const Rpc&) FL_NOEXCEPT = delete;
-    Rpc& operator=(const Rpc&) FL_NOEXCEPT = delete;
-    Rpc(Rpc&&) FL_NOEXCEPT = default;
-    Rpc& operator=(Rpc&&) FL_NOEXCEPT = default;
+    Rpc(const Rpc&) FL_NO_EXCEPT = delete;
+    Rpc& operator=(const Rpc&) FL_NO_EXCEPT = delete;
+    Rpc(Rpc&&) FL_NO_EXCEPT = default;
+    Rpc& operator=(Rpc&&) FL_NO_EXCEPT = default;
 
     // =========================================================================
     // Response Sink for Async ACKs

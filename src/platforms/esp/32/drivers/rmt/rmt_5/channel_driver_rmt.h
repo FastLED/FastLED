@@ -53,7 +53,7 @@ public:
      * @brief Factory method to create RMT channel driver
      * @return Shared pointer to ChannelEngineRMT instance
      */
-    static fl::shared_ptr<ChannelEngineRMT> create() FL_NOEXCEPT;
+    static fl::shared_ptr<ChannelEngineRMT> create() FL_NO_EXCEPT;
 
     /**
      * @brief Virtual destructor
@@ -65,38 +65,38 @@ public:
      * @param data Channel data to check
      * @return true if clockless channel (rejects SPI), false otherwise
      */
-    virtual bool canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT override = 0;
+    virtual bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Enqueue channel data for transmission
      * @param channelData Channel data to transmit
      */
-    virtual void enqueue(ChannelDataPtr channelData) FL_NOEXCEPT override = 0;
+    virtual void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Trigger transmission of enqueued data
      */
-    virtual void show() FL_NOEXCEPT override = 0;
+    virtual void show() FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Query driver state and perform maintenance
      * @return Current driver state (READY, BUSY, DRAINING, or ERROR)
      */
-    virtual DriverState poll() FL_NOEXCEPT override = 0;
+    virtual DriverState poll() FL_NO_EXCEPT override = 0;
 
-    virtual void setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT override = 0;
+    virtual void setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Get the driver name for affinity binding
      * @return "RMT"
      */
-    fl::string getName() const FL_NOEXCEPT override { return fl::string::from_literal("RMT"); }
+    fl::string getName() const FL_NO_EXCEPT override { return fl::string::from_literal("RMT"); }
 
     /**
      * @brief Get driver capabilities (CLOCKLESS protocols only)
      * @return Capabilities with supportsClockless=true, supportsSpi=false
      */
-    Capabilities getCapabilities() const FL_NOEXCEPT override {
+    Capabilities getCapabilities() const FL_NO_EXCEPT override {
         return Capabilities(true, false);  // Clockless only
     }
 

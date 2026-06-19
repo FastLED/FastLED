@@ -29,7 +29,7 @@ NativeHttpClient::NativeHttpClient(const string& host, u16 port, const Connectio
 {
 }
 
-NativeHttpClient::~NativeHttpClient() FL_NOEXCEPT {
+NativeHttpClient::~NativeHttpClient() FL_NO_EXCEPT {
     disconnect();
 }
 

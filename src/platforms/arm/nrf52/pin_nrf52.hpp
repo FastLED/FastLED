@@ -33,7 +33,7 @@ FL_EXTERN_C_END
 namespace fl {
 namespace platforms {
 
-inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
+inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
     switch (mode) {
         case PinMode::Input:
             nrf_gpio_cfg_input(pin, NRF_GPIO_PIN_NOPULL);
@@ -50,7 +50,7 @@ inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
     }
 }
 
-inline void digitalWrite(int pin, PinValue val) FL_NOEXCEPT {
+inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
     if (val == PinValue::High) {
         nrf_gpio_pin_set(pin);
     } else {
@@ -58,11 +58,11 @@ inline void digitalWrite(int pin, PinValue val) FL_NOEXCEPT {
     }
 }
 
-inline PinValue digitalRead(int pin) FL_NOEXCEPT {
+inline PinValue digitalRead(int pin) FL_NO_EXCEPT {
     return nrf_gpio_pin_read(pin) ? PinValue::High : PinValue::Low;
 }
 
-inline u16 analogRead(int pin) FL_NOEXCEPT {
+inline u16 analogRead(int pin) FL_NO_EXCEPT {
     // SAADC (Successive Approximation ADC) requires complex initialization
     // For now, return 0 as a safe default - full implementation would require:
     // 1. SAADC channel configuration
@@ -74,7 +74,7 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
     return 0;
 }
 
-inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
+inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
     // PWM on nRF52 requires complex PWM peripheral configuration
     // For now, this is a no-op - full implementation would require:
     // 1. PWM instance allocation
@@ -86,7 +86,7 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
     (void)val;
 }
 
-inline void setPwm16(int pin, u16 val) FL_NOEXCEPT {
+inline void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
     // nRF52 PWM peripheral natively supports 15-bit resolution (0-32767)
     // For 16-bit input, scale down by 1 bit
     // However, without Arduino core support, we'd need direct PWM peripheral access
@@ -94,7 +94,7 @@ inline void setPwm16(int pin, u16 val) FL_NOEXCEPT {
     (void)val;
 }
 
-inline void setAdcRange(AdcRange range) FL_NOEXCEPT {
+inline void setAdcRange(AdcRange range) FL_NO_EXCEPT {
     // SAADC reference voltage configuration
     // nRF52 SAADC supports: 0.6V internal, VDD/4 (default)
     // Full implementation requires SAADC peripheral configuration

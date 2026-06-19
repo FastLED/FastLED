@@ -25,7 +25,7 @@ public:
     HttpStreamClient(const fl::string& host, u16 port = 8080, u32 heartbeatIntervalMs = 30000);
 
     /// Virtual destructor
-    ~HttpStreamClient() FL_NOEXCEPT override;
+    ~HttpStreamClient() FL_NO_EXCEPT override;
 
     // Connection Management (override from HttpStreamTransport)
 

@@ -49,19 +49,19 @@ namespace detail {
 
 FL_NO_INLINE
 TypeConversionResult json_convert_to_i64_core(const json_value& val,
-                                              fl::i64* out_value) FL_NOEXCEPT;
+                                              fl::i64* out_value) FL_NO_EXCEPT;
 
 FL_NO_INLINE
 TypeConversionResult json_convert_to_bool_core(const json_value& val,
-                                               bool* out_value) FL_NOEXCEPT;
+                                               bool* out_value) FL_NO_EXCEPT;
 
 FL_NO_INLINE
 TypeConversionResult json_convert_to_float_core(const json_value& val,
-                                                float* out_value) FL_NOEXCEPT;
+                                                float* out_value) FL_NO_EXCEPT;
 
 FL_NO_INLINE
 TypeConversionResult json_convert_to_string_core(const json_value& val,
-                                                 fl::string* out_value) FL_NOEXCEPT;
+                                                 fl::string* out_value) FL_NO_EXCEPT;
 
 } // namespace detail
 } // namespace fl

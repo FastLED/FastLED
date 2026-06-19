@@ -57,7 +57,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 
 public:
 	virtual int size() { return CLEDController::size() * LANES; }
-	virtual void init() FL_NOEXCEPT {
+	virtual void init() FL_NO_EXCEPT {
         FL_STATIC_ASSERT(LANES <= 8, "Maximum of 8 lanes for Due parallel controllers!");
         if(FIRST_PIN == PORTA_FIRST_PIN) {
             switch(LANES) {
@@ -99,14 +99,14 @@ public:
 
     virtual u16 getMaxRefreshRate() const { return 400; }
 
-    virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) FL_NOEXCEPT {
+    virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) FL_NO_EXCEPT {
         mWait.wait();
         showRGBInternal(pixels);
         sei();
         mWait.mark();
     }
 
-    static u32 showRGBInternal(PixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels) FL_NOEXCEPT {
+    static u32 showRGBInternal(PixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels) FL_NO_EXCEPT {
         // Serial.println("Entering show");
 
         int nLeds = allpixels.mLen;
@@ -120,9 +120,9 @@ public:
         }
 
         // Setup and start the clock
-        TC_Configure(DUE_TIMER,DUE_TIMER_CHANNEL,TC_CMR_TCCLKS_TIMER_CLOCK1) FL_NOEXCEPT;
+        TC_Configure(DUE_TIMER,DUE_TIMER_CHANNEL,TC_CMR_TCCLKS_TIMER_CLOCK1) FL_NO_EXCEPT;
         pmc_enable_periph_clk(DUE_TIMER_ID);
-        TC_Start(DUE_TIMER,DUE_TIMER_CHANNEL) FL_NOEXCEPT;
+        TC_Start(DUE_TIMER,DUE_TIMER_CHANNEL) FL_NO_EXCEPT;
 
         #if (FASTLED_ALLOW_INTERRUPTS == 1)
         cli();
@@ -157,7 +157,7 @@ public:
         return DUE_TIMER_VAL;
     }
 
-    template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER Lines & b, Lines & b3, PixelController<RGB_ORDER,LANES, PORT_MASK> &pixels) FL_NOEXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
+    template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER Lines & b, Lines & b3, PixelController<RGB_ORDER,LANES, PORT_MASK> &pixels) FL_NO_EXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
         Lines b2;
         fl::transpose8x1(b.bytes,b2.bytes);
 

@@ -162,7 +162,7 @@ def print_ai_hints() -> None:
     print("  - Use --strict to also run pyright (strict type checking)")
     print(
         "  - C++ linting includes: clang-format, custom checkers, and default AST ratchets"
-        " for FL_NOEXCEPT and decayed array parameters"
+        " for FL_NO_EXCEPT and decayed array parameters"
     )
     print("  - IWYU runs with --full, --iwyu, or --strict flags")
     print("  - clang-tidy runs with --tidy flag")

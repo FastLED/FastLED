@@ -601,11 +601,11 @@ bool CFastLED::wait(fl::u32 timeout_ms) {
 
 // Tiered-wait spin-budget shims (#2818). Storage in
 // src/fl/channels/detail/wait_spin_budget.cpp.hpp.
-void CFastLED::_setWaitSpinBudgetUs(fl::u32 budget_us) FL_NOEXCEPT {
+void CFastLED::_setWaitSpinBudgetUs(fl::u32 budget_us) FL_NO_EXCEPT {
 	fl::detail::setWaitSpinBudgetUs(budget_us);
 }
 
-fl::u32 CFastLED::_getWaitSpinBudgetUs() FL_NOEXCEPT {
+fl::u32 CFastLED::_getWaitSpinBudgetUs() FL_NO_EXCEPT {
 	return fl::detail::getWaitSpinBudgetUs();
 }
 

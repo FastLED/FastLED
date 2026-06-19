@@ -193,7 +193,7 @@ public:
     typedef fl::reverse_iterator<const_iterator> const_reverse_iterator;
 
     // Constructors
-    list() FL_NOEXCEPT {
+    list() FL_NO_EXCEPT {
         init_sentinel();
     }
 
@@ -208,14 +208,14 @@ public:
         }
     }
 
-    list(const list& other) FL_NOEXCEPT {
+    list(const list& other) FL_NO_EXCEPT {
         init_sentinel();
         for (const auto& value : other) {
             push_back(value);
         }
     }
 
-    list(list&& other) FL_NOEXCEPT {
+    list(list&& other) FL_NO_EXCEPT {
         init_sentinel();
         swap(other);
     }
@@ -228,13 +228,13 @@ public:
     }
 
     // Destructor
-    ~list() FL_NOEXCEPT {
+    ~list() FL_NO_EXCEPT {
         clear();
         destroy_sentinel();
     }
 
     // Assignment operators
-    list& operator=(const list& other) FL_NOEXCEPT {
+    list& operator=(const list& other) FL_NO_EXCEPT {
         if (this != &other) {
             clear();
             for (const auto& value : other) {
@@ -244,7 +244,7 @@ public:
         return *this;
     }
 
-    list& operator=(list&& other) FL_NOEXCEPT {
+    list& operator=(list&& other) FL_NO_EXCEPT {
         if (this != &other) {
             clear();
             swap(other);

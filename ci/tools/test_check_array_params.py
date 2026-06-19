@@ -79,7 +79,7 @@ def test_handles_multiline_signature_and_top_level_commas() -> None:
         fl::span<const fl::pair<int, int>> pairs,
         float out[2],
         void (*callback)(int, int)
-    ) FL_NOEXCEPT;
+    ) FL_NO_EXCEPT;
     """
 
     findings = check_array_params._find_array_params_in_signature(signature)
@@ -89,13 +89,13 @@ def test_handles_multiline_signature_and_top_level_commas() -> None:
 
 def test_marks_iram_signatures_for_array_reference_recommendation() -> None:
     findings = check_array_params._find_array_params_in_signature(
-        "FL_IRAM void f(fl::u8 out[4]) FL_NOEXCEPT;"
+        "FL_IRAM void f(fl::u8 out[4]) FL_NO_EXCEPT;"
     )
     hit = check_array_params.ArrayParamHit(
         path="src/platforms/example.h",
         line=10,
-        line_text="FL_IRAM void f(fl::u8 out[4]) FL_NOEXCEPT;",
-        signature="FL_IRAM void f(fl::u8 out[4]) FL_NOEXCEPT;",
+        line_text="FL_IRAM void f(fl::u8 out[4]) FL_NO_EXCEPT;",
+        signature="FL_IRAM void f(fl::u8 out[4]) FL_NO_EXCEPT;",
         findings=findings,
     )
 
@@ -107,13 +107,13 @@ def test_marks_iram_signatures_for_array_reference_recommendation() -> None:
 
 def test_non_iram_diagnostic_allows_span_or_array_reference() -> None:
     findings = check_array_params._find_array_params_in_signature(
-        "void f(fl::u8 out[4]) FL_NOEXCEPT;"
+        "void f(fl::u8 out[4]) FL_NO_EXCEPT;"
     )
     hit = check_array_params.ArrayParamHit(
         path="src/fl/example.h",
         line=10,
-        line_text="void f(fl::u8 out[4]) FL_NOEXCEPT;",
-        signature="void f(fl::u8 out[4]) FL_NOEXCEPT;",
+        line_text="void f(fl::u8 out[4]) FL_NO_EXCEPT;",
+        signature="void f(fl::u8 out[4]) FL_NO_EXCEPT;",
         findings=findings,
     )
 

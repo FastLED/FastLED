@@ -13,7 +13,7 @@ namespace fl {
 
 // ---------- PinSet ---------------------------------------------------
 
-PinSet PinSet::fixed(fl::i16 pin) FL_NOEXCEPT {
+PinSet PinSet::fixed(fl::i16 pin) FL_NO_EXCEPT {
     PinSet ps(PinSetKind::Allowlist);
     if (pin >= 0 && static_cast<fl::u32>(pin) < kPinSetCapacity) {
         ps.pins.set(static_cast<fl::u32>(pin));
@@ -21,7 +21,7 @@ PinSet PinSet::fixed(fl::i16 pin) FL_NOEXCEPT {
     return ps;
 }
 
-bool PinSet::accepts(fl::i16 pin) const FL_NOEXCEPT {
+bool PinSet::accepts(fl::i16 pin) const FL_NO_EXCEPT {
     if (kind == PinSetKind::None) {
         return false;
     }
@@ -34,7 +34,7 @@ bool PinSet::accepts(fl::i16 pin) const FL_NOEXCEPT {
     return pins.test(static_cast<fl::u32>(pin));
 }
 
-bool PinSet::acceptsAll(const PinBitset& request) const FL_NOEXCEPT {
+bool PinSet::acceptsAll(const PinBitset& request) const FL_NO_EXCEPT {
     if (kind == PinSetKind::None) {
         return request.none();
     }
@@ -53,7 +53,7 @@ bool PinSet::acceptsAll(const PinBitset& request) const FL_NOEXCEPT {
 
 // ---------- DriverCapabilities ---------------------------------------
 
-DriverCapabilities::DriverCapabilities() FL_NOEXCEPT
+DriverCapabilities::DriverCapabilities() FL_NO_EXCEPT
     : name()
     , priority(0)
     , supports_clockless(false)
@@ -76,7 +76,7 @@ DriverCapabilities::DriverCapabilities() FL_NOEXCEPT
 ChannelRequest ChannelRequest::singlePin(
         Protocol p, fl::i16 data, fl::i16 clock,
         const ChipsetClocklessTiming& t,
-        fl::optional<fl::u32> freq) FL_NOEXCEPT {
+        fl::optional<fl::u32> freq) FL_NO_EXCEPT {
     ChannelRequest r;
     r.protocol = p;
     if (data >= 0 && static_cast<fl::u32>(data) < kPinSetCapacity) {

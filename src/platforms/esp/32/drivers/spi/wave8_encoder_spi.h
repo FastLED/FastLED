@@ -49,7 +49,7 @@ namespace fl {
 inline size_t wave8EncodeSingleLane(
     fl::span<const u8> input,
     fl::span<u8> output,
-    const Wave8BitExpansionLut& lut) FL_NOEXCEPT {
+    const Wave8BitExpansionLut& lut) FL_NO_EXCEPT {
 
     const size_t required_size = input.size() * 8;
     if (output.size() < required_size) {
@@ -82,7 +82,7 @@ inline size_t wave8EncodeDualLane(
     fl::span<const u8> lane0,
     fl::span<const u8> lane1,
     fl::span<u8> output,
-    const Wave8BitExpansionLut& lut) FL_NOEXCEPT {
+    const Wave8BitExpansionLut& lut) FL_NO_EXCEPT {
 
     if (lane0.size() != lane1.size()) {
         FL_WARN_F("wave8EncodeDualLane: Lane sizes mismatch (lane0=%s bytes, lane1=%s bytes)", lane0.size(), lane1.size());
@@ -124,7 +124,7 @@ inline size_t wave8EncodeDualLane(
 inline size_t wave8EncodeQuadLane(
     fl::span<const u8> lanes[4],
     fl::span<u8> output,
-    const Wave8BitExpansionLut& lut) FL_NOEXCEPT {
+    const Wave8BitExpansionLut& lut) FL_NO_EXCEPT {
 
     const size_t lane_size = lanes[0].size();
     for (int i = 1; i < 4; i++) {
@@ -167,7 +167,7 @@ inline size_t wave8EncodeQuadLane(
 /// @param input_bytes Number of input LED bytes
 /// @param num_lanes Number of SPI lanes (1, 2, or 4)
 /// @return Required output buffer size in bytes
-constexpr size_t wave8CalculateOutputSize(size_t input_bytes, u8 num_lanes) FL_NOEXCEPT {
+constexpr size_t wave8CalculateOutputSize(size_t input_bytes, u8 num_lanes) FL_NO_EXCEPT {
     return input_bytes * 8 * num_lanes;
 }
 

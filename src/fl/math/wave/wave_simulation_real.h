@@ -24,7 +24,7 @@ float fixed_to_float(i16 f);
 // Compute the Q15 damping decay factor for a power-of-two damping
 // exponent. Equivalent (modulo 1-LSB rounding) to the arithmetic-shift
 // form `f -= f >> damp` used by the kernel before #3099/§6.
-i16 compute_damp_decay_q15(int damp) FL_NOEXCEPT;
+i16 compute_damp_decay_q15(int damp) FL_NO_EXCEPT;
 } // namespace wave_detail
 
 class WaveSimulation1D_Real {
@@ -38,15 +38,15 @@ class WaveSimulation1D_Real {
     //  - dampening: exponent so that the effective damping factor is
     //  2^(dampening).
     WaveSimulation1D_Real(u32 length, float speed = 0.16f,
-                          int dampening = 6) FL_NOEXCEPT;
-    ~WaveSimulation1D_Real() FL_NOEXCEPT = default;
+                          int dampening = 6) FL_NO_EXCEPT;
+    ~WaveSimulation1D_Real() FL_NO_EXCEPT = default;
 
     // Set simulation speed (Courant squared). Clamped to [0.0, 1.0] — see
     // constructor for rationale.
     void setSpeed(float something);
 
     // Set the dampening exponent (effective damping factor is 2^(dampening)).
-    void setDampening(int damp) FL_NOEXCEPT;
+    void setDampening(int damp) FL_NO_EXCEPT;
 
     // Get the current dampening exponent.
     int getDampenening() const;
@@ -142,7 +142,7 @@ class WaveSimulation2D_Real {
     //    silently clamped.
     //  - dampening: exponent so that the damping factor is 2^dampening.
     WaveSimulation2D_Real(u32 W, u32 H, float speed = 0.16f,
-                          float dampening = 6.0f) FL_NOEXCEPT;
+                          float dampening = 6.0f) FL_NO_EXCEPT;
 
     // Tag for explicit PSRAM-backed grid storage. Use the tagged
     // constructor overload when you genuinely need a grid larger than
@@ -157,9 +157,9 @@ class WaveSimulation2D_Real {
 
     WaveSimulation2D_Real(PsramStorage, u32 W, u32 H,
                           float speed = 0.16f,
-                          float dampening = 6.0f) FL_NOEXCEPT;
+                          float dampening = 6.0f) FL_NO_EXCEPT;
 
-    ~WaveSimulation2D_Real() FL_NOEXCEPT = default;
+    ~WaveSimulation2D_Real() FL_NO_EXCEPT = default;
 
     // Set the simulation speed (Courant squared). Clamped to [0.0, 0.5] — see
     // constructor for rationale.
@@ -167,7 +167,7 @@ class WaveSimulation2D_Real {
 
     // Set the dampening factor exponent.
     // The dampening factor used is 2^(dampening).
-    void setDampening(int damp) FL_NOEXCEPT;
+    void setDampening(int damp) FL_NO_EXCEPT;
 
     // Get the current dampening exponent.
     int getDampenening() const;
@@ -209,8 +209,8 @@ class WaveSimulation2D_Real {
     // FivePoint (backward compatible). NinePointIsotropic costs ~2x reads
     // + ALU per cell but produces visibly rounder ripples at high super-
     // sample factors; the wrapper class auto-selects it when appropriate.
-    void setStencil(LaplacianStencil s) FL_NOEXCEPT { mStencil = s; }
-    LaplacianStencil getStencil() const FL_NOEXCEPT { return mStencil; }
+    void setStencil(LaplacianStencil s) FL_NO_EXCEPT { mStencil = s; }
+    LaplacianStencil getStencil() const FL_NO_EXCEPT { return mStencil; }
 
     void setXCylindrical(bool on) { mXCylindrical = on; }
 

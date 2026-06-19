@@ -31,75 +31,75 @@ namespace fl {
 // Standard String Functions
 // ============================================================================
 
-size_t strlen(const char* s) FL_NOEXCEPT {
+size_t strlen(const char* s) FL_NO_EXCEPT {
     return ::strlen(s);
 }
 
-int strcmp(const char* s1, const char* s2) FL_NOEXCEPT {
+int strcmp(const char* s1, const char* s2) FL_NO_EXCEPT {
     return ::strcmp(s1, s2);
 }
 
-int strncmp(const char* s1, const char* s2, size_t n) FL_NOEXCEPT {
+int strncmp(const char* s1, const char* s2, size_t n) FL_NO_EXCEPT {
     return ::strncmp(s1, s2, n);
 }
 
-char* strcpy(char* dest, const char* src) FL_NOEXCEPT {
+char* strcpy(char* dest, const char* src) FL_NO_EXCEPT {
     return ::strcpy(dest, src);
 }
 
-char* strncpy(char* dest, const char* src, size_t n) FL_NOEXCEPT {
+char* strncpy(char* dest, const char* src, size_t n) FL_NO_EXCEPT {
     return ::strncpy(dest, src, n);
 }
 
-char* strcat(char* dest, const char* src) FL_NOEXCEPT {
+char* strcat(char* dest, const char* src) FL_NO_EXCEPT {
     return ::strcat(dest, src);
 }
 
-char* strncat(char* dest, const char* src, size_t n) FL_NOEXCEPT {
+char* strncat(char* dest, const char* src, size_t n) FL_NO_EXCEPT {
     return ::strncat(dest, src, n);
 }
 
-const char* strstr(const char* haystack, const char* needle) FL_NOEXCEPT {
+const char* strstr(const char* haystack, const char* needle) FL_NO_EXCEPT {
     return ::strstr(haystack, needle);
 }
 
-char* strchr(char* s, int c) FL_NOEXCEPT {
+char* strchr(char* s, int c) FL_NO_EXCEPT {
     return ::strchr(s, c);
 }
 
-const char* strchr(const char* s, int c) FL_NOEXCEPT {
+const char* strchr(const char* s, int c) FL_NO_EXCEPT {
     return ::strchr(s, c);
 }
 
-char* strrchr(char* s, int c) FL_NOEXCEPT {
+char* strrchr(char* s, int c) FL_NO_EXCEPT {
     return ::strrchr(s, c);
 }
 
-const char* strrchr(const char* s, int c) FL_NOEXCEPT {
+const char* strrchr(const char* s, int c) FL_NO_EXCEPT {
     return ::strrchr(s, c);
 }
 
-size_t strspn(const char* s1, const char* s2) FL_NOEXCEPT {
+size_t strspn(const char* s1, const char* s2) FL_NO_EXCEPT {
     return ::strspn(s1, s2);
 }
 
-size_t strcspn(const char* s1, const char* s2) FL_NOEXCEPT {
+size_t strcspn(const char* s1, const char* s2) FL_NO_EXCEPT {
     return ::strcspn(s1, s2);
 }
 
-char* strpbrk(char* s1, const char* s2) FL_NOEXCEPT {
+char* strpbrk(char* s1, const char* s2) FL_NO_EXCEPT {
     return ::strpbrk(s1, s2);
 }
 
-const char* strpbrk(const char* s1, const char* s2) FL_NOEXCEPT {
+const char* strpbrk(const char* s1, const char* s2) FL_NO_EXCEPT {
     return ::strpbrk(s1, s2);
 }
 
-char* strtok(char* s1, const char* s2) FL_NOEXCEPT {
+char* strtok(char* s1, const char* s2) FL_NO_EXCEPT {
     return ::strtok(s1, s2);
 }
 
-char* strerror(int errnum) FL_NOEXCEPT {
+char* strerror(int errnum) FL_NO_EXCEPT {
     return ::strerror(errnum);
 }
 
@@ -107,32 +107,32 @@ char* strerror(int errnum) FL_NOEXCEPT {
 // Memory Functions
 // ============================================================================
 
-void* memcpy(void* dest, const void* src, size_t n) FL_NOEXCEPT {
+void* memcpy(void* dest, const void* src, size_t n) FL_NO_EXCEPT {
     if (n == 0) return dest;
     return ::memcpy(dest, src, n);
 }
 
-int memcmp(const void* s1, const void* s2, size_t n) FL_NOEXCEPT {
+int memcmp(const void* s1, const void* s2, size_t n) FL_NO_EXCEPT {
     if (n == 0) return 0;
     return ::memcmp(s1, s2, n);
 }
 
-void* memmove(void* dest, const void* src, size_t n) FL_NOEXCEPT {
+void* memmove(void* dest, const void* src, size_t n) FL_NO_EXCEPT {
     if (n == 0) return dest;
     return ::memmove(dest, src, n);
 }
 
-void* memset(void* s, int c, size_t n) FL_NOEXCEPT {
+void* memset(void* s, int c, size_t n) FL_NO_EXCEPT {
     if (n == 0) return s;
     return ::memset(s, c, n);
 }
 
-void* memchr(void* s, int c, size_t n) FL_NOEXCEPT {
+void* memchr(void* s, int c, size_t n) FL_NO_EXCEPT {
     if (n == 0) return nullptr;
     return ::memchr(s, c, n);
 }
 
-const void* memchr(const void* s, int c, size_t n) FL_NOEXCEPT {
+const void* memchr(const void* s, int c, size_t n) FL_NO_EXCEPT {
     if (n == 0) return nullptr;
     return ::memchr(s, c, n);
 }
@@ -144,19 +144,19 @@ const void* memchr(const void* s, int c, size_t n) FL_NOEXCEPT {
 
 #if defined(ARDUINO) && defined(FL_IS_AVR)
 
-size_t strlen_P(detail::pgm_p s) FL_NOEXCEPT {
+size_t strlen_P(detail::pgm_p s) FL_NO_EXCEPT {
     return ::strlen_P(fl::bit_cast<const char*>(s));
 }
 
-int strcmp_P(const char* a, detail::pgm_p b) FL_NOEXCEPT {
+int strcmp_P(const char* a, detail::pgm_p b) FL_NO_EXCEPT {
     return ::strcmp_P(a, fl::bit_cast<const char*>(b));
 }
 
-int memcmp_P(const void* a, detail::pgm_p b, size_t n) FL_NOEXCEPT {
+int memcmp_P(const void* a, detail::pgm_p b, size_t n) FL_NO_EXCEPT {
     return ::memcmp_P(a, b, n);
 }
 
-void* memcpy_P(void* dest, detail::pgm_p src, size_t n) FL_NOEXCEPT {
+void* memcpy_P(void* dest, detail::pgm_p src, size_t n) FL_NO_EXCEPT {
     return ::memcpy_P(dest, src, n);
 }
 

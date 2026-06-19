@@ -25,7 +25,7 @@ constexpr fl::size_t kFledMaxJsonBytes = 1u * 1024u * 1024u;
 PixelStream::PixelStream(int bytes_per_frame)
     : mbytesPerFrame(bytes_per_frame), mType(kFile) {}
 
-PixelStream::~PixelStream() FL_NOEXCEPT { close(); }
+PixelStream::~PixelStream() FL_NO_EXCEPT { close(); }
 
 bool PixelStream::begin(filebuf_ptr h) {
     close();
@@ -209,11 +209,11 @@ PixelStream::Type PixelStream::getType() const {
     return mType;
 }
 
-bool PixelStream::hasEmbeddedScreenMap() const FL_NOEXCEPT {
+bool PixelStream::hasEmbeddedScreenMap() const FL_NO_EXCEPT {
     return !mEmbeddedScreenMapJson.empty();
 }
 
-const fl::string &PixelStream::embeddedScreenMapJson() const FL_NOEXCEPT {
+const fl::string &PixelStream::embeddedScreenMapJson() const FL_NO_EXCEPT {
     return mEmbeddedScreenMapJson;
 }
 

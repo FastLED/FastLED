@@ -72,10 +72,10 @@ public:
     Remote(RequestSource source, ResponseSink sink);
 
     // Non-copyable, non-movable (lambda captures 'this')
-    Remote(const Remote&) FL_NOEXCEPT = delete;
-    Remote(Remote&&) FL_NOEXCEPT = delete;
-    Remote& operator=(const Remote&) FL_NOEXCEPT = delete;
-    Remote& operator=(Remote&&) FL_NOEXCEPT = delete;
+    Remote(const Remote&) FL_NO_EXCEPT = delete;
+    Remote(Remote&&) FL_NO_EXCEPT = delete;
+    Remote& operator=(const Remote&) FL_NO_EXCEPT = delete;
+    Remote& operator=(Remote&&) FL_NO_EXCEPT = delete;
 
     // =========================================================================
     // Method Registration

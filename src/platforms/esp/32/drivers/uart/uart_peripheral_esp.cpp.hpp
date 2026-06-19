@@ -73,7 +73,7 @@ UartPeripheralEsp::~UartPeripheralEsp() {
 // Lifecycle Methods
 //=============================================================================
 
-bool UartPeripheralEsp::initialize(const UartPeripheralConfig& config) FL_NOEXCEPT {
+bool UartPeripheralEsp::initialize(const UartPeripheralConfig& config) FL_NO_EXCEPT {
     FL_DBG_F("UART_PERIPH: initialize() called - uart_num=%s baud=%s", config.mUartNum, config.mBaudRate);
 
     // Validate not already initialized
@@ -174,7 +174,7 @@ bool UartPeripheralEsp::initialize(const UartPeripheralConfig& config) FL_NOEXCE
     return true;
 }
 
-void UartPeripheralEsp::deinitialize() FL_NOEXCEPT {
+void UartPeripheralEsp::deinitialize() FL_NO_EXCEPT {
     if (!mInitialized) {
         return;
     }
@@ -200,7 +200,7 @@ void UartPeripheralEsp::deinitialize() FL_NOEXCEPT {
     FL_DBG_F("UART: Deinitialized (uart_num=%s)", mConfig.mUartNum);
 }
 
-bool UartPeripheralEsp::isInitialized() const FL_NOEXCEPT {
+bool UartPeripheralEsp::isInitialized() const FL_NO_EXCEPT {
     return mInitialized;
 }
 
@@ -208,7 +208,7 @@ bool UartPeripheralEsp::isInitialized() const FL_NOEXCEPT {
 // Transmission Methods
 //=============================================================================
 
-bool UartPeripheralEsp::writeBytes(const u8* data, size_t length) FL_NOEXCEPT {
+bool UartPeripheralEsp::writeBytes(const u8* data, size_t length) FL_NO_EXCEPT {
     if (!mInitialized) {
         FL_WARN_F("UartPeripheralEsp: Cannot write - not initialized");
         return false;
@@ -253,7 +253,7 @@ bool UartPeripheralEsp::writeBytes(const u8* data, size_t length) FL_NOEXCEPT {
     return true;
 }
 
-bool UartPeripheralEsp::waitTxDone(u32 timeout_ms) FL_NOEXCEPT {
+bool UartPeripheralEsp::waitTxDone(u32 timeout_ms) FL_NO_EXCEPT {
     if (!mInitialized) {
         FL_WARN_F("UartPeripheralEsp: Cannot wait - not initialized");
         return false;
@@ -290,7 +290,7 @@ bool UartPeripheralEsp::waitTxDone(u32 timeout_ms) FL_NOEXCEPT {
     return (err == ESP_OK);
 }
 
-bool UartPeripheralEsp::isBusy() const FL_NOEXCEPT {
+bool UartPeripheralEsp::isBusy() const FL_NO_EXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -311,7 +311,7 @@ bool UartPeripheralEsp::isBusy() const FL_NOEXCEPT {
 // State Queries
 //=============================================================================
 
-const UartPeripheralConfig& UartPeripheralEsp::getConfig() const FL_NOEXCEPT {
+const UartPeripheralConfig& UartPeripheralEsp::getConfig() const FL_NO_EXCEPT {
     return mConfig;
 }
 

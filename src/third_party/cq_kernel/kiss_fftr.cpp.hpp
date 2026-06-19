@@ -32,7 +32,7 @@ struct kiss_fftr_state{
 #endif
 };
 
-kiss_fftr_cfg kiss_fftr_alloc(int nfft,int inverse_fft,void * mem,size_t * lenmem) FL_NOEXCEPT
+kiss_fftr_cfg kiss_fftr_alloc(int nfft,int inverse_fft,void * mem,size_t * lenmem) FL_NO_EXCEPT
 {
     int i;
     kiss_fftr_cfg st = NULL;
@@ -79,7 +79,7 @@ kiss_fftr_cfg kiss_fftr_alloc(int nfft,int inverse_fft,void * mem,size_t * lenme
     return st;
 }
 
-void kiss_fftr(kiss_fftr_cfg st,const kiss_fft_scalar *timedata,kiss_fft_cpx *freqdata) FL_NOEXCEPT
+void kiss_fftr(kiss_fftr_cfg st,const kiss_fft_scalar *timedata,kiss_fft_cpx *freqdata) FL_NO_EXCEPT
 {
     /* input buffer timedata is stored row-wise */
     int k,ncfft;
@@ -136,7 +136,7 @@ void kiss_fftr(kiss_fftr_cfg st,const kiss_fft_scalar *timedata,kiss_fft_cpx *fr
     }
 }
 
-void kiss_fftri(kiss_fftr_cfg st,const kiss_fft_cpx *freqdata,kiss_fft_scalar *timedata) FL_NOEXCEPT
+void kiss_fftri(kiss_fftr_cfg st,const kiss_fft_cpx *freqdata,kiss_fft_scalar *timedata) FL_NO_EXCEPT
 {
     /* input buffer timedata is stored row-wise */
     int k, ncfft;

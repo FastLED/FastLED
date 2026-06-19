@@ -44,41 +44,41 @@ namespace detail {
 /// mode. Uses DMA for non-blocking transfer with ISR completion signaling.
 class I2sSpiPeripheralEsp : public II2sSpiPeripheral {
   public:
-    static I2sSpiPeripheralEsp &instance() FL_NOEXCEPT;
+    static I2sSpiPeripheralEsp &instance() FL_NO_EXCEPT;
 
     ~I2sSpiPeripheralEsp() override;
 
-    bool initialize(const I2sSpiConfig &config) FL_NOEXCEPT override;
-    void deinitialize() FL_NOEXCEPT override;
-    bool isInitialized() const FL_NOEXCEPT override;
+    bool initialize(const I2sSpiConfig &config) FL_NO_EXCEPT override;
+    void deinitialize() FL_NO_EXCEPT override;
+    bool isInitialized() const FL_NO_EXCEPT override;
 
-    u8 *allocateBuffer(size_t size_bytes) FL_NOEXCEPT override;
-    void freeBuffer(u8 *buffer) FL_NOEXCEPT override;
+    u8 *allocateBuffer(size_t size_bytes) FL_NO_EXCEPT override;
+    void freeBuffer(u8 *buffer) FL_NO_EXCEPT override;
 
-    bool transmit(const u8 *buffer, size_t size_bytes) FL_NOEXCEPT override;
-    bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT override;
-    bool isBusy() const FL_NOEXCEPT override;
+    bool transmit(const u8 *buffer, size_t size_bytes) FL_NO_EXCEPT override;
+    bool waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT override;
+    bool isBusy() const FL_NO_EXCEPT override;
 
     bool registerTransmitCallback(void *callback,
-                                  void *user_ctx) FL_NOEXCEPT override;
-    const I2sSpiConfig &getConfig() const FL_NOEXCEPT override;
+                                  void *user_ctx) FL_NO_EXCEPT override;
+    const I2sSpiConfig &getConfig() const FL_NO_EXCEPT override;
 
-    u64 getMicroseconds() FL_NOEXCEPT override;
-    void delay(u32 ms) FL_NOEXCEPT override;
+    u64 getMicroseconds() FL_NO_EXCEPT override;
+    void delay(u32 ms) FL_NO_EXCEPT override;
 
   private:
     template <typename T, int N>
     friend class ::fl::Singleton;
 
-    I2sSpiPeripheralEsp() FL_NOEXCEPT;
+    I2sSpiPeripheralEsp() FL_NO_EXCEPT;
 
     I2sSpiPeripheralEsp(const I2sSpiPeripheralEsp &) = delete;
     I2sSpiPeripheralEsp &operator=(const I2sSpiPeripheralEsp &) = delete;
 
-    void resetI2s() FL_NOEXCEPT;
-    void resetDma() FL_NOEXCEPT;
-    void resetFifo() FL_NOEXCEPT;
-    void transposeToI2sBuffer(const u8 *src, size_t srcSize) FL_NOEXCEPT;
+    void resetI2s() FL_NO_EXCEPT;
+    void resetDma() FL_NO_EXCEPT;
+    void resetFifo() FL_NO_EXCEPT;
+    void transposeToI2sBuffer(const u8 *src, size_t srcSize) FL_NO_EXCEPT;
 
     // ISR callback (must be friend for IRAM_ATTR access)
     static void IRAM_ATTR isrHandler(void *arg);

@@ -15,7 +15,7 @@ class TriangularFilterImpl {
     FL_STATIC_ASSERT(N == 0 || (N % 2 == 1),
                   "TriangularFilter: N must be odd for a symmetric tent shape");
   public:
-    TriangularFilterImpl() FL_NOEXCEPT : mLastValue(T(0)) {}
+    TriangularFilterImpl() FL_NO_EXCEPT : mLastValue(T(0)) {}
     explicit TriangularFilterImpl(fl::size capacity)
         : mBuf(capacity), mLastValue(T(0)) {
         if (capacity % 2 == 0) {

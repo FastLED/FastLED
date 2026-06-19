@@ -12,7 +12,7 @@ namespace detail {
 
 FL_NO_INLINE
 fl::size unordered_map_probe_idx(fl::size h, fl::size i,
-                                 fl::size mask, fl::size cap) FL_NOEXCEPT {
+                                 fl::size mask, fl::size cap) FL_NO_EXCEPT {
     if (cap <= kUnorderedMapLinearProbeOnlyThreshold) {
         return (h + i) & mask;
     }

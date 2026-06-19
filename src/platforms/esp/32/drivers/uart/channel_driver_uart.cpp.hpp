@@ -25,7 +25,7 @@ namespace fl {
 // Constructor / Destructor
 //=============================================================================
 
-ChannelEngineUART::ChannelEngineUART(fl::shared_ptr<IUartPeripheral> peripheral) FL_NOEXCEPT
+ChannelEngineUART::ChannelEngineUART(fl::shared_ptr<IUartPeripheral> peripheral) FL_NO_EXCEPT
     : mPeripheral(fl::move(peripheral)),
       mInitialized(false),
       mCurrentBaudRate(0),
@@ -56,7 +56,7 @@ ChannelEngineUART::~ChannelEngineUART() {
     mCurrentGroupIndex = 0;
 }
 
-bool ChannelEngineUART::canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT {
+bool ChannelEngineUART::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
     if (!data) {
         return false;
     }
@@ -73,13 +73,13 @@ bool ChannelEngineUART::canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT 
 // Public Interface - IChannelDriver Implementation
 //=============================================================================
 
-void ChannelEngineUART::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
+void ChannelEngineUART::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     if (channelData) {
         mEnqueuedChannels.push_back(channelData);
     }
 }
 
-void ChannelEngineUART::show() FL_NOEXCEPT {
+void ChannelEngineUART::show() FL_NO_EXCEPT {
     FL_SCOPED_TRACE;
 
     if (!mEnqueuedChannels.empty()) {
@@ -115,7 +115,7 @@ void ChannelEngineUART::show() FL_NOEXCEPT {
 
         // Sort groups by transmission time (fastest first)
         fl::sort(mChipsetGroups.begin(), mChipsetGroups.end(),
-                 [](const ChipsetGroup& a, const ChipsetGroup& b) FL_NOEXCEPT {
+                 [](const ChipsetGroup& a, const ChipsetGroup& b) FL_NO_EXCEPT {
                      size_t maxSizeA = 0;
                      for (const auto& channel : a.mChannels) {
                          size_t size = channel->getSize();
@@ -167,7 +167,7 @@ void ChannelEngineUART::show() FL_NOEXCEPT {
     }
 }
 
-IChannelDriver::DriverState ChannelEngineUART::poll() FL_NOEXCEPT {
+IChannelDriver::DriverState ChannelEngineUART::poll() FL_NO_EXCEPT {
     // If not initialized, we're ready (no hardware to poll)
     if (!mInitialized) {
         return DriverState::READY;
@@ -208,7 +208,7 @@ IChannelDriver::DriverState ChannelEngineUART::poll() FL_NOEXCEPT {
 // Private Methods - LUT Cache
 //=============================================================================
 
-const Wave10Lut& ChannelEngineUART::getOrBuildLut(const ChipsetTimingConfig& timing) FL_NOEXCEPT {
+const Wave10Lut& ChannelEngineUART::getOrBuildLut(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
     // Search cache
     for (const auto& entry : mLutCache) {
         if (entry.mTiming == timing) {
@@ -230,7 +230,7 @@ const Wave10Lut& ChannelEngineUART::getOrBuildLut(const ChipsetTimingConfig& tim
 //=============================================================================
 
 void ChannelEngineUART::beginTransmission(
-    fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT {
+    fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT {
 
     FL_DBG_F("UART: beginTransmission() called with %s channel(s)", channelData.size());
 
@@ -326,7 +326,7 @@ void ChannelEngineUART::beginTransmission(
 
 void ChannelEngineUART::prepareScratchBuffer(
     fl::span<const ChannelDataPtr> channelData,
-    size_t maxChannelSize) FL_NOEXCEPT {
+    size_t maxChannelSize) FL_NO_EXCEPT {
 
     mScratchBuffer.resize(maxChannelSize);
 
@@ -340,7 +340,7 @@ void ChannelEngineUART::prepareScratchBuffer(
 
 fl::shared_ptr<IChannelDriver> createUartEngine(int uart_num,
                                                 int tx_pin,
-                                                u32 baud_rate) FL_NOEXCEPT {
+                                                u32 baud_rate) FL_NO_EXCEPT {
     (void)uart_num;
     (void)tx_pin;
     (void)baud_rate;

@@ -9,7 +9,7 @@ namespace fl {
 
 // Out-of-line destructor: ensures unique_ptr<MultiLaneDevice> destruction
 // happens here (in fl.spi+), not in every TU that includes spi.h.
-Spi::~Spi() FL_NOEXCEPT = default;
+Spi::~Spi() FL_NO_EXCEPT = default;
 
 // ============================================================================
 // Spi Constructors
@@ -59,14 +59,14 @@ Spi::Spi(const SpiConfig& config)
     is_ok = true;
 }
 
-Spi::Spi(Spi&& other) FL_NOEXCEPT
+Spi::Spi(Spi&& other) FL_NO_EXCEPT
     : device(fl::move(other.device))
     , is_ok(other.is_ok)
     , error_code(other.error_code) {
     other.is_ok = false;
 }
 
-Spi& Spi::operator=(Spi&& other) FL_NOEXCEPT {
+Spi& Spi::operator=(Spi&& other) FL_NO_EXCEPT {
     if (this != &other) {
         device = fl::move(other.device);
         is_ok = other.is_ok;

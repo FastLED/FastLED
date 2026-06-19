@@ -17,23 +17,23 @@ namespace fl {
 // Concrete implementation of IAdafruitNeoPixelDriver
 class AdafruitNeoPixelDriverFake : public IAdafruitNeoPixelDriver {
 public:
-    AdafruitNeoPixelDriverFake() FL_NOEXCEPT {}
+    AdafruitNeoPixelDriverFake() FL_NO_EXCEPT {}
     
     ~AdafruitNeoPixelDriverFake() override = default;
     
-    void init(int dataPin) FL_NOEXCEPT override {
+    void init(int dataPin) FL_NO_EXCEPT override {
         FL_UNUSED(dataPin);
         FL_WARN_F("Please install adafruit neopixel package to use this api bridge.");
     }
     
-    void showPixels(PixelIterator& pixelIterator) FL_NOEXCEPT override {
+    void showPixels(PixelIterator& pixelIterator) FL_NO_EXCEPT override {
         FL_UNUSED(pixelIterator);
         FL_WARN_F("Please install adafruit neopixel package to use this api bridge.");
     }
 };
 
 // Static factory method implementation
-fl::unique_ptr<IAdafruitNeoPixelDriver> IAdafruitNeoPixelDriver::create() FL_NOEXCEPT {
+fl::unique_ptr<IAdafruitNeoPixelDriver> IAdafruitNeoPixelDriver::create() FL_NO_EXCEPT {
     return fl::unique_ptr<IAdafruitNeoPixelDriver>(new AdafruitNeoPixelDriverFake());  // ok bare allocation
 }
 

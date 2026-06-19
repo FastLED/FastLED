@@ -217,10 +217,10 @@ FL_EXTERN_C_BEGIN
  */
 
 // Official FastLED handler (priority 1-3) - RECOMMENDED
-void FL_IRAM fastled_riscv_official_handler(void *arg) FL_NOEXCEPT;
+void FL_IRAM fastled_riscv_official_handler(void *arg) FL_NO_EXCEPT;
 
 // Experimental high priority handler (priority 4-7) - CUSTOM only
-void FL_IRAM fastled_riscv_experimental_handler(void *arg) FL_NOEXCEPT;
+void FL_IRAM fastled_riscv_experimental_handler(void *arg) FL_NO_EXCEPT;
 
 //=============================================================================
 // ESP32-C3/C6 INTERRUPT CONTROLLER INTERFACE (NOT PLIC)
@@ -273,22 +273,22 @@ void FL_IRAM fastled_riscv_experimental_handler(void *arg) FL_NOEXCEPT;
 #endif
 
 // INVALID FUNCTIONS - Do not use with ESP32-C3/C6
-static inline void fastled_plic_set_priority(int source, int priority) FL_NOEXCEPT {
+static inline void fastled_plic_set_priority(int source, int priority) FL_NO_EXCEPT {
     // ESP32-C3/C6 use ESP-IDF APIs, not direct PLIC access
     (void)source; (void)priority;
 }
 
-static inline void fastled_plic_enable_interrupt(int source) FL_NOEXCEPT {
+static inline void fastled_plic_enable_interrupt(int source) FL_NO_EXCEPT {
     // ESP32-C3/C6 use ESP-IDF APIs, not direct PLIC access
     (void)source;
 }
 
-static inline fl::u32 fastled_plic_claim(void) FL_NOEXCEPT {
+static inline fl::u32 fastled_plic_claim(void) FL_NO_EXCEPT {
     // ESP32-C3/C6 use ESP-IDF APIs, not direct PLIC access
     return 0;
 }
 
-static inline void fastled_plic_complete(fl::u32 interrupt_id) FL_NOEXCEPT {
+static inline void fastled_plic_complete(fl::u32 interrupt_id) FL_NO_EXCEPT {
     // ESP32-C3/C6 use ESP-IDF APIs, not direct PLIC access
     (void)interrupt_id;
 }
@@ -328,7 +328,7 @@ esp_err_t fastled_riscv_install_interrupt(
     void (*handler)(void *),
     void *arg,
     intr_handle_t *handle
-) FL_NOEXCEPT;
+) FL_NO_EXCEPT;
 
 /*
  * Install Official Priority Interrupt (RECOMMENDED)
@@ -341,7 +341,7 @@ esp_err_t fastled_riscv_install_official_interrupt(
     void (*handler)(void *),
     void *arg,
     intr_handle_t *handle
-) FL_NOEXCEPT;
+) FL_NO_EXCEPT;
 
 /*
  * Install Experimental Priority Interrupt
@@ -355,7 +355,7 @@ esp_err_t fastled_riscv_install_experimental_interrupt(
     void (*handler)(void *),
     void *arg,
     intr_handle_t *handle
-) FL_NOEXCEPT;
+) FL_NO_EXCEPT;
 
 //=============================================================================
 // RMT-SPECIFIC INTEGRATION (RISC-V)
@@ -396,7 +396,7 @@ esp_err_t fastled_riscv_rmt_init_official(
     fl::u32 resolution_hz,
     size_t mem_block_symbols,
     int priority_level  // 1-3, recommend FASTLED_RISCV_PRIORITY_RECOMMENDED
-) FL_NOEXCEPT;
+) FL_NO_EXCEPT;
 
 // Initialize RMT with EXPERIMENTAL high-priority (4-7, bypasses driver)
 esp_err_t fastled_riscv_rmt_init_experimental(
@@ -405,13 +405,13 @@ esp_err_t fastled_riscv_rmt_init_experimental(
     fl::u32 resolution_hz,
     size_t mem_block_symbols,
     int priority_level  // 4-7, custom implementation required
-) FL_NOEXCEPT;
+) FL_NO_EXCEPT;
 
 // RMT official handler prototype (priority 1-3)
-void FL_IRAM fastled_riscv_rmt_official_handler(void *arg) FL_NOEXCEPT;
+void FL_IRAM fastled_riscv_rmt_official_handler(void *arg) FL_NO_EXCEPT;
 
 // RMT experimental handler prototype (priority 4-7)
-void FL_IRAM fastled_riscv_rmt_experimental_handler(void *arg) FL_NOEXCEPT;
+void FL_IRAM fastled_riscv_rmt_experimental_handler(void *arg) FL_NO_EXCEPT;
 
 //=============================================================================
 // INTERRUPT TRAMPOLINE MACRO (OPTIONAL FOR RISC-V)
@@ -648,7 +648,7 @@ void FL_IRAM fastled_riscv_rmt_experimental_handler(void *arg) FL_NOEXCEPT;
  * https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md
  */
 
-extern void riscv_critical_isr(void) FL_NOEXCEPT;  // Optional assembly handler
+extern void riscv_critical_isr(void) FL_NO_EXCEPT;  // Optional assembly handler
 
 //=============================================================================
 // SAFETY AND BEST PRACTICES

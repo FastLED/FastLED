@@ -35,16 +35,16 @@ typedef struct {
 } FL_GPIO_Event;
 
 /* Ring buffer management */
-void fl_gpio_sim_init(void) FL_NOEXCEPT;
-void fl_gpio_sim_clear(void) FL_NOEXCEPT;
-void fl_gpio_sim_tick(void) FL_NOEXCEPT;
-bool fl_gpio_sim_read_event(FL_GPIO_Event* out) FL_NOEXCEPT;
-fl::u32 fl_gpio_sim_get_event_count(void) FL_NOEXCEPT;
-fl::u32 fl_gpio_sim_get_overflow_count(void) FL_NOEXCEPT;
+void fl_gpio_sim_init(void) FL_NO_EXCEPT;
+void fl_gpio_sim_clear(void) FL_NO_EXCEPT;
+void fl_gpio_sim_tick(void) FL_NO_EXCEPT;
+bool fl_gpio_sim_read_event(FL_GPIO_Event* out) FL_NO_EXCEPT;
+fl::u32 fl_gpio_sim_get_event_count(void) FL_NO_EXCEPT;
+fl::u32 fl_gpio_sim_get_overflow_count(void) FL_NO_EXCEPT;
 
 /* Timer simulation */
-bool fl_spi_host_timer_is_running(void) FL_NOEXCEPT;
-fl::u32 fl_spi_host_timer_get_hz(void) FL_NOEXCEPT;
+bool fl_spi_host_timer_is_running(void) FL_NO_EXCEPT;
+fl::u32 fl_spi_host_timer_get_hz(void) FL_NO_EXCEPT;
 
 FL_EXTERN_C_END
 

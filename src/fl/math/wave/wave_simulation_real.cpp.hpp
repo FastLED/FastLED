@@ -46,7 +46,7 @@ float fixed_to_float(i16 f) {
 // it as Q15 here lets the kernel use a single Q15 multiply per cell and
 // opens the door to non-power-of-two damping if the public API ever
 // needs it (today it's still int-only). damp <= 0 means no decay.
-i16 compute_damp_decay_q15(int damp) FL_NOEXCEPT {
+i16 compute_damp_decay_q15(int damp) FL_NO_EXCEPT {
     if (damp <= 0) return INT16_POS;  // ~1.0 — no decay
     const float decay = 1.0f - 1.0f / static_cast<float>(1 << damp);
     return float_to_fixed(decay);
@@ -54,7 +54,7 @@ i16 compute_damp_decay_q15(int damp) FL_NOEXCEPT {
 } // namespace wave_detail
 
 WaveSimulation1D_Real::WaveSimulation1D_Real(u32 len, float courantSq,
-                                             int dampening) FL_NOEXCEPT
+                                             int dampening) FL_NO_EXCEPT
     : length(len),
       grid1(length + 2), // Initialize vector with correct size
       grid2(length + 2), // Initialize vector with correct size
@@ -74,7 +74,7 @@ void WaveSimulation1D_Real::setSpeed(float something) {
     mCourantSq = wave_detail::float_to_fixed(fl::clamp(something, 0.0f, 1.0f));
 }
 
-void WaveSimulation1D_Real::setDampening(int damp) FL_NOEXCEPT {
+void WaveSimulation1D_Real::setDampening(int damp) FL_NO_EXCEPT {
     mDampenening = damp;
     mDampDecayQ15 = wave_detail::compute_damp_decay_q15(damp);
 }
@@ -180,7 +180,7 @@ void WaveSimulation1D_Real::update() {
 }
 
 WaveSimulation2D_Real::WaveSimulation2D_Real(u32 W, u32 H,
-                                             float speed, float dampening) FL_NOEXCEPT
+                                             float speed, float dampening) FL_NO_EXCEPT
     : width(W), height(H), stride(W + 2),
       grid1((W + 2) * (H + 2)),
       grid2((W + 2) * (H + 2)), whichGrid(0),
@@ -200,7 +200,7 @@ WaveSimulation2D_Real::WaveSimulation2D_Real(u32 W, u32 H,
 WaveSimulation2D_Real::WaveSimulation2D_Real(PsramStorage,
                                              u32 W, u32 H,
                                              float speed,
-                                             float dampening) FL_NOEXCEPT
+                                             float dampening) FL_NO_EXCEPT
     : width(W), height(H), stride(W + 2),
       grid1(psram_memory_resource()),
       grid2(psram_memory_resource()), whichGrid(0),
@@ -216,7 +216,7 @@ void WaveSimulation2D_Real::setSpeed(float something) {
     mCourantSq = wave_detail::float_to_fixed(fl::clamp(something, 0.0f, 0.5f));
 }
 
-void WaveSimulation2D_Real::setDampening(int damp) FL_NOEXCEPT {
+void WaveSimulation2D_Real::setDampening(int damp) FL_NO_EXCEPT {
     mDampening = damp;
     mDampDecayQ15 = wave_detail::compute_damp_decay_q15(damp);
 }

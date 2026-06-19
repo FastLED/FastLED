@@ -606,7 +606,7 @@ impl FileContentChecker for NoexceptSpecialMembersChecker {
             }
             violations.push((
                 index + 1,
-                format!("Missing FL_NOEXCEPT on {kind}: {stripped}"),
+                format!("Missing FL_NO_EXCEPT on {kind}: {stripped}"),
             ));
         }
 

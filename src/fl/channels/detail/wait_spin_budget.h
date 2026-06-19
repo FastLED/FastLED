@@ -25,10 +25,10 @@ namespace fl {
 namespace detail {
 
 /// @brief Get the current tiered-wait spin budget (microseconds).
-fl::u32 getWaitSpinBudgetUs() FL_NOEXCEPT;
+fl::u32 getWaitSpinBudgetUs() FL_NO_EXCEPT;
 
 /// @brief Set the tiered-wait spin budget (microseconds).
-void setWaitSpinBudgetUs(fl::u32 budget_us) FL_NOEXCEPT;
+void setWaitSpinBudgetUs(fl::u32 budget_us) FL_NO_EXCEPT;
 
 } // namespace detail
 } // namespace fl

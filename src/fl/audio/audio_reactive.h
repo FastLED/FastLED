@@ -90,8 +90,8 @@ struct ReactiveConfig {
 
 class Reactive {
 public:
-    Reactive() FL_NOEXCEPT;
-    ~Reactive() FL_NOEXCEPT;
+    Reactive() FL_NO_EXCEPT;
+    ~Reactive() FL_NO_EXCEPT;
     
     // Setup
     void begin(const ReactiveConfig& config = ReactiveConfig{});
@@ -298,8 +298,8 @@ private:
 // Spectral flux-based onset detection for enhanced beat detection
 class SpectralFluxDetector {
 public:
-    SpectralFluxDetector() FL_NOEXCEPT;
-    ~SpectralFluxDetector() FL_NOEXCEPT;
+    SpectralFluxDetector() FL_NO_EXCEPT;
+    ~SpectralFluxDetector() FL_NO_EXCEPT;
     
     void reset();
     bool detectOnset(span<const float, 16> currentBins);
@@ -320,8 +320,8 @@ private:
 
 // Multi-band beat detection for different frequency ranges
 struct BeatDetectors {
-    BeatDetectors() FL_NOEXCEPT;
-    ~BeatDetectors() FL_NOEXCEPT;
+    BeatDetectors() FL_NO_EXCEPT;
+    ~BeatDetectors() FL_NO_EXCEPT;
     
     void reset();
     void detectBeats(span<const float, 16> frequencyBins, Data& audioData);
@@ -348,8 +348,8 @@ private:
 // Perceptual audio weighting for psychoacoustic processing
 class PerceptualWeighting {
 public:
-    PerceptualWeighting() FL_NOEXCEPT;
-    ~PerceptualWeighting() FL_NOEXCEPT;
+    PerceptualWeighting() FL_NO_EXCEPT;
+    ~PerceptualWeighting() FL_NO_EXCEPT;
     
     void applyAWeighting(Data& data) const;
     void applyLoudnessCompensation(Data& data, float referenceLevel) const;

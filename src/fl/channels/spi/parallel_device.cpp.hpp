@@ -52,7 +52,7 @@ struct ParallelDevice::Impl {
         , backend_width(0) {
     }
 
-    ~Impl() FL_NOEXCEPT {
+    ~Impl() FL_NO_EXCEPT {
         if (initialized && backend) {
             releaseBackend();
         }
@@ -145,7 +145,7 @@ ParallelDevice::ParallelDevice(const Config& config)
     FL_DBG_F("ParallelDevice: Created with %s GPIO pins", num_pins);
 }
 
-ParallelDevice::~ParallelDevice() FL_NOEXCEPT {
+ParallelDevice::~ParallelDevice() FL_NO_EXCEPT {
     if (pImpl && pImpl->initialized) {
         end();
     }

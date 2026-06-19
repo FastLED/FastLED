@@ -91,7 +91,7 @@ struct PwmPinState {
     u16 tick_counter;       // Current tick (0 to period_ticks-1)
     bool pin_state;         // Current GPIO state (ISR only)
 
-    PwmPinState() FL_NOEXCEPT : pin(-1), frequency_hz(0), backend(PwmBackend::None),
+    PwmPinState() FL_NO_EXCEPT : pin(-1), frequency_hz(0), backend(PwmBackend::None),
         duty_cycle(0), period_ticks(0), high_ticks(0),
         tick_counter(0), pin_state(false) {}
 };
@@ -102,7 +102,7 @@ struct PwmStateData {
     fl::isr::handle isr_handle;
     bool isr_active;
 
-    PwmStateData() FL_NOEXCEPT : isr_active(false) {}
+    PwmStateData() FL_NO_EXCEPT : isr_active(false) {}
 };
 
 // Access singleton state

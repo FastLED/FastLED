@@ -61,7 +61,7 @@ public:
 	void setSelect(Selectable *pSelect) { mPSelect = pSelect; }
 
 	/// Set the clock/data pins to output and make sure the chip select is released.
-	void init() FL_NOEXCEPT {
+	void init() FL_NO_EXCEPT {
 		// set the pins to output and make sure the select is released (which apparently means hi?  This is a bit
 		// confusing to me)
 		fl::FastPin<DATA_PIN>::setOutput();
@@ -89,7 +89,7 @@ public:
 
 	/// Write a single byte over SPI.
 	/// Naive implelentation, simply calls writeBit() on the 8 bits in the byte.
-	static void writeByte(u8 b) FL_NOEXCEPT {
+	static void writeByte(u8 b) FL_NO_EXCEPT {
 		writeBit<7>(b);
 		writeBit<6>(b);
 		writeBit<5>(b);
@@ -102,7 +102,7 @@ public:
 
 private:
 	/// writeByte() implementation with data/clock registers passed in.
-	static void writeByte(u8 b, clock_ptr_t clockpin, data_ptr_t datapin) FL_NOEXCEPT {
+	static void writeByte(u8 b, clock_ptr_t clockpin, data_ptr_t datapin) FL_NO_EXCEPT {
 		writeBit<7>(b, clockpin, datapin);
 		writeBit<6>(b, clockpin, datapin);
 		writeBit<5>(b, clockpin, datapin);
@@ -118,7 +118,7 @@ private:
 	/// can get close to getting a bit out the door in 2 clock cycles!
 	static void writeByte(u8 b, data_ptr_t datapin,
 						  data_t hival, data_t loval,
-						  clock_t hiclock, clock_t loclock) FL_NOEXCEPT {
+						  clock_t hiclock, clock_t loclock) FL_NO_EXCEPT {
 		writeBit<7>(b, datapin, hival, loval, hiclock, loclock);
 		writeBit<6>(b, datapin, hival, loval, hiclock, loclock);
 		writeBit<5>(b, datapin, hival, loval, hiclock, loclock);
@@ -135,7 +135,7 @@ private:
 	/// the data and clock pins are on the same port!  Don't do that!
 	static void writeByte(u8 b, clock_ptr_t clockpin, data_ptr_t datapin,
 						  data_t hival, data_t loval,
-						  clock_t hiclock, clock_t loclock) FL_NOEXCEPT {
+						  clock_t hiclock, clock_t loclock) FL_NO_EXCEPT {
 		writeBit<7>(b, clockpin, datapin, hival, loval, hiclock, loclock);
 		writeBit<6>(b, clockpin, datapin, hival, loval, hiclock, loclock);
 		writeBit<5>(b, clockpin, datapin, hival, loval, hiclock, loclock);
@@ -165,7 +165,7 @@ public:
 	/// Write the BIT'th bit out via SPI, setting the data pin then strobing the clock
 	/// @tparam BIT the bit index in the byte
 	/// @param b the byte to read the bit from
-	template <u8 BIT> __attribute__((always_inline, hot)) inline static void writeBit(u8 b) FL_NOEXCEPT {
+	template <u8 BIT> __attribute__((always_inline, hot)) inline static void writeBit(u8 b) FL_NO_EXCEPT {
 		//cli();
 		if(b & (1 << BIT)) {
 			fl::FastPin<DATA_PIN>::hi();
@@ -193,7 +193,7 @@ public:
 
 private:
 	/// Write the BIT'th bit out via SPI, setting the data pin then strobing the clock, using the passed in pin registers to accelerate access if needed
-	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBit(u8 b, clock_ptr_t clockpin, data_ptr_t datapin) FL_NOEXCEPT {
+	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBit(u8 b, clock_ptr_t clockpin, data_ptr_t datapin) FL_NO_EXCEPT {
 		if(b & (1 << BIT)) {
 			fl::FastPin<DATA_PIN>::hi(datapin);
 			fl::FastPin<CLOCK_PIN>::hi(clockpin); CLOCK_HI_DELAY;
@@ -209,7 +209,7 @@ private:
 	/// The version of writeBit() to use when clock and data are on separate pins with precomputed values for setting
 	/// the clock and data pins
 	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBit(u8 b, clock_ptr_t clockpin, data_ptr_t datapin,
-													data_t hival, data_t loval, clock_t hiclock, clock_t loclock) FL_NOEXCEPT {
+													data_t hival, data_t loval, clock_t hiclock, clock_t loclock) FL_NO_EXCEPT {
 		// // only need to explicitly set clock hi if clock and data are on different ports
 		if(b & (1 << BIT)) {
 			fl::FastPin<DATA_PIN>::fastset(datapin, hival);
@@ -227,7 +227,7 @@ private:
 	/// combinations
 	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBit(u8 b, data_ptr_t clockdatapin,
 													data_t datahiclockhi, data_t dataloclockhi,
-													data_t datahiclocklo, data_t dataloclocklo) FL_NOEXCEPT {
+													data_t datahiclocklo, data_t dataloclocklo) FL_NO_EXCEPT {
 #if 0
 		writeBit<BIT>(b);
 #else
@@ -256,7 +256,7 @@ public:
 	/// Release the SPI chip select line
 	void release() { if(mPSelect != nullptr) { mPSelect->release(); } } // fl::FastPin<SELECT_PIN>::lo(); }
 
-	void endTransaction() FL_NOEXCEPT {
+	void endTransaction() FL_NO_EXCEPT {
 		waitFully();
 		release();
 	}
@@ -265,7 +265,7 @@ public:
 	/// Useful for quickly flushing, say, a line of 0's down the line.
 	/// @param value the value to write to the bus
 	/// @param len how many copies of the value to write
-	void writeBytesValue(fl::u8 value, int len) FL_NOEXCEPT {
+	void writeBytesValue(fl::u8 value, int len) FL_NO_EXCEPT {
 		select();
 		writeBytesValueRaw(value, len);
 		release();
@@ -273,7 +273,7 @@ public:
 
 	/// Write multiple bytes of the given value over SPI, without selecting the interface.
 	/// @copydetails GenericSoftwareSPIOutput::writeBytesValue(uint8_t, int)
-	static void writeBytesValueRaw(fl::u8 value, int len) FL_NOEXCEPT {
+	static void writeBytesValueRaw(fl::u8 value, int len) FL_NO_EXCEPT {
 #ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
 		// TODO: Weird things may happen if software bitbanging SPI output and other pins on the output reigsters are being twiddled.  Need
 		// to allow specifying whether or not exclusive i/o access is allowed during this process, and if i/o access is not allowed fall
@@ -315,7 +315,7 @@ public:
 	/// @param data pointer to data to write
 	/// @param len number of bytes to write
 	/// @todo Need to type this better so that explicit casts into the call aren't required.
-	template <class D> void writeBytes(FASTLED_REGISTER fl::u8 *data, int len) FL_NOEXCEPT {
+	template <class D> void writeBytes(FASTLED_REGISTER fl::u8 *data, int len) FL_NO_EXCEPT {
 		select();
 #ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
 		fl::u8 *end = data + len;
@@ -375,7 +375,7 @@ public:
 	/// @tparam D Per-byte modifier class, e.g. ::DATA_NOP
 	/// @tparam RGB_ORDER the rgb ordering for the LED data (e.g. what order red, green, and blue data is written out in)
 	/// @param pixels a ::PixelController with the LED data and modifier options
-	template <fl::u8 FLAGS, class D, EOrder RGB_ORDER>  FL_NO_INLINE void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NOEXCEPT {
+	template <fl::u8 FLAGS, class D, EOrder RGB_ORDER>  FL_NO_INLINE void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NO_EXCEPT {
 		FASTLED_UNUSED(context);
 		select();
 		int len = pixels.mLen;

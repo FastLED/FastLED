@@ -46,6 +46,7 @@ from ci.lint_cpp.esp_rom_printf_checker import EspRomPrintfChecker
 from ci.lint_cpp.example_serial_checker import ExampleSerialChecker
 from ci.lint_cpp.fastled_header_usage_checker import FastLEDHeaderUsageChecker
 from ci.lint_cpp.fl_is_defined_checker import FlIsDefinedChecker
+from ci.lint_cpp.fl_no_underscore_checker import FlNoUnderscoreChecker
 from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
 from ci.lint_cpp.impl_hpp_includes_checker import ImplHppIncludesChecker
 from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
@@ -205,12 +206,13 @@ def create_checkers(
         BareSnprintfChecker(),  # Bans bare C ::snprintf/::printf/::sprintf in src/ — use fl::snprintf (#2773 item 1.5)
         BareLibmChecker(),  # Bans bare C libm calls (::sqrtf, ::atan2, ::powf, ::ldexpf, ...) — use fl::sqrt/fl::atan2/... (#3002, #3012)
         BareNoInlineChecker(),  # Bans bare __attribute__((noinline)) in src/ — use FL_NO_INLINE (#2773 item 2.1 follow-up)
+        FlNoUnderscoreChecker(),  # Enforces FL_NO_<WORD> convention; bans bare FL_NO<WORD> (#3283)
         SleepForChecker(),  # Checks for sleep_for() — bypasses async runner, use fl::yield/fl::async_run
         ThreadLocalKeywordChecker(),  # Checks for thread_local keyword — use fl::SingletonThreadLocal<T>::instance()
         BannedDefineChecker(),  # Checks for wrong #if patterns (e.g., #if ESP32 → #ifdef ESP32)
         PlatformPragmaChecker(),  # Checks for raw #pragma GCC/clang/warning — use FL_DISABLE_WARNING macros
         RawPragmaChecker(),  # Checks for raw _Pragma() — use FL_DISABLE_WARNING macros
-        RawNoexceptChecker(),  # Checks for raw noexcept keyword — use FL_NOEXCEPT macro
+        RawNoexceptChecker(),  # Checks for raw noexcept keyword — use FL_NO_EXCEPT macro
         # Note: Private libc++ headers checking is now integrated into BannedHeadersChecker
         # Note: _build.hpp hierarchy checking is now integrated into test_unity_build.py
     ]
@@ -283,7 +285,7 @@ def create_checkers(
         # namespace for backward compatibility. Using inline namespace math
         # causes cascading ambiguity with fl::detail, fl::simd, etc.
         EnumClassChecker(),  # Checks for plain enum — use enum class for type safety
-        NoexceptSpecialMembersChecker(),  # Checks special member functions have FL_NOEXCEPT
+        NoexceptSpecialMembersChecker(),  # Checks special member functions have FL_NO_EXCEPT
         PublicSettingsPatternChecker(),  # Checks fl::set_*/enable_*/disable_*/use_* free functions have CFastLED wrappers
     ]
 
@@ -563,7 +565,7 @@ def run_test_aggregation_check() -> tuple[int, list[str]]:
 
 
 def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
-    """Run the clang-query FL_NOEXCEPT ratchet used by default C++ lint."""
+    """Run the clang-query FL_NO_EXCEPT ratchet used by default C++ lint."""
     from ci.tools.check_noexcept import (
         DEFAULT_BASELINE,
         NoexceptCheckError,
@@ -602,7 +604,7 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
     for hit in new_hits:
         abs_path = str(PROJECT_ROOT / hit.path)
         results.add_violation(
-            abs_path, hit.line, f"Missing FL_NOEXCEPT: {hit.line_text}"
+            abs_path, hit.line, f"Missing FL_NO_EXCEPT: {hit.line_text}"
         )
 
     return results
@@ -1012,7 +1014,7 @@ def main() -> int:
                 pch_results.add_violation("pch_files", 0, violation)
             results["PchFileChecker"] = pch_results
 
-        # Run AST-backed FL_NOEXCEPT enforcement from normal C++ lint.
+        # Run AST-backed FL_NO_EXCEPT enforcement from normal C++ lint.
         noexcept_results = run_noexcept_ast_check()
         if noexcept_results.has_violations():
             results["NoexceptAstChecker"] = noexcept_results

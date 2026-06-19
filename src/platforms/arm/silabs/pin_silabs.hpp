@@ -29,10 +29,10 @@ namespace fl {
 namespace platforms {
 
 // GPIO clock initialization - required for Silicon Labs devices
-inline void _silabs_gpio_init() FL_NOEXCEPT {
+inline void _silabs_gpio_init() FL_NO_EXCEPT {
     static bool initialized = false;  // okay static in header
     if (!initialized) {
-        CMU_ClockEnable(cmuClock_GPIO, true) FL_NOEXCEPT;
+        CMU_ClockEnable(cmuClock_GPIO, true) FL_NO_EXCEPT;
         initialized = true;
     }
 }
@@ -45,7 +45,7 @@ struct SilabsPinMapping {
 
 // Get GPIO port and pin for Arduino pin number
 // This is a simplified implementation - real board definitions should provide accurate mappings
-inline SilabsPinMapping getSilabsPinMapping(int pin) FL_NOEXCEPT {
+inline SilabsPinMapping getSilabsPinMapping(int pin) FL_NO_EXCEPT {
     // Simple heuristic mapping for common Silicon Labs boards
     // Most Arduino-compatible Silicon Labs boards follow a sequential port mapping
     // Port A: pins 0-15, Port B: pins 16-31, Port C: pins 32-47, Port D: pins 48-63
@@ -66,53 +66,53 @@ inline SilabsPinMapping getSilabsPinMapping(int pin) FL_NOEXCEPT {
     }
 }
 
-inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
+inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
     _silabs_gpio_init();
 
     SilabsPinMapping mapping = getSilabsPinMapping(pin);
 
     switch (mode) {
         case PinMode::Output:
-            GPIO_PinModeSet(mapping.port, mapping.pin, gpioModePushPull, 0) FL_NOEXCEPT;
+            GPIO_PinModeSet(mapping.port, mapping.pin, gpioModePushPull, 0) FL_NO_EXCEPT;
             break;
 
         case PinMode::Input:
-            GPIO_PinModeSet(mapping.port, mapping.pin, gpioModeInput, 0) FL_NOEXCEPT;
+            GPIO_PinModeSet(mapping.port, mapping.pin, gpioModeInput, 0) FL_NO_EXCEPT;
             break;
 
         case PinMode::InputPullup:
-            GPIO_PinModeSet(mapping.port, mapping.pin, gpioModeInputPull, 1) FL_NOEXCEPT;
+            GPIO_PinModeSet(mapping.port, mapping.pin, gpioModeInputPull, 1) FL_NO_EXCEPT;
             break;
 
         case PinMode::InputPulldown:
-            GPIO_PinModeSet(mapping.port, mapping.pin, gpioModeInputPull, 0) FL_NOEXCEPT;
+            GPIO_PinModeSet(mapping.port, mapping.pin, gpioModeInputPull, 0) FL_NO_EXCEPT;
             break;
 
         default:
             // Unknown mode, default to input
-            GPIO_PinModeSet(mapping.port, mapping.pin, gpioModeInput, 0) FL_NOEXCEPT;
+            GPIO_PinModeSet(mapping.port, mapping.pin, gpioModeInput, 0) FL_NO_EXCEPT;
             break;
     }
 }
 
-inline void digitalWrite(int pin, PinValue val) FL_NOEXCEPT {
+inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
     SilabsPinMapping mapping = getSilabsPinMapping(pin);
 
     if (val == PinValue::High) {
-        GPIO_PinOutSet(mapping.port, mapping.pin) FL_NOEXCEPT;
+        GPIO_PinOutSet(mapping.port, mapping.pin) FL_NO_EXCEPT;
     } else {
-        GPIO_PinOutClear(mapping.port, mapping.pin) FL_NOEXCEPT;
+        GPIO_PinOutClear(mapping.port, mapping.pin) FL_NO_EXCEPT;
     }
 }
 
-inline PinValue digitalRead(int pin) FL_NOEXCEPT {
+inline PinValue digitalRead(int pin) FL_NO_EXCEPT {
     SilabsPinMapping mapping = getSilabsPinMapping(pin);
 
     u32 result = GPIO_PinInGet(mapping.port, mapping.pin);
     return result ? PinValue::High : PinValue::Low;
 }
 
-inline u16 analogRead(int pin) FL_NOEXCEPT {
+inline u16 analogRead(int pin) FL_NO_EXCEPT {
     // Silicon Labs ADC implementation would go here
     // For now, return 0 as placeholder - ADC requires more complex EMLIB setup
     // (ADC_Init, ADC_Start, ADC_DataSingleGet, etc.)
@@ -120,21 +120,21 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
     return 0;
 }
 
-inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
+inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
     // Silicon Labs PWM/Timer implementation would go here
     // For now, no-op - PWM requires TIMER peripheral setup via EMLIB
     (void)pin;
     (void)val;
 }
 
-inline void setPwm16(int pin, u16 val) FL_NOEXCEPT {
+inline void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
     // Silicon Labs 16-bit PWM implementation would go here
     // For now, no-op - PWM requires TIMER peripheral setup via EMLIB
     (void)pin;
     (void)val;
 }
 
-inline void setAdcRange(AdcRange range) FL_NOEXCEPT {
+inline void setAdcRange(AdcRange range) FL_NO_EXCEPT {
     // Silicon Labs ADC reference configuration would go here
     // Requires ADC_Init with proper reference settings
     (void)range;

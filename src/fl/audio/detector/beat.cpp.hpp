@@ -23,7 +23,7 @@ Beat::Beat()
     mPreviousMagnitudes.resize(16, 0.0f);
 }
 
-Beat::~Beat() FL_NOEXCEPT = default;
+Beat::~Beat() FL_NO_EXCEPT = default;
 
 void Beat::update(shared_ptr<Context> context) {
     // Use 30 Hz min frequency so bass bins actually cover sub-bass (20-60 Hz).

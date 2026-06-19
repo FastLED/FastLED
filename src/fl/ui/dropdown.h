@@ -70,7 +70,7 @@ class UIDropdownImpl {
         }
     }
 
-    ~UIDropdownImpl() FL_NOEXCEPT {}
+    ~UIDropdownImpl() FL_NO_EXCEPT {}
 
     fl::string value() const {
         if (mSelectedIndex < mOptions.size()) {
@@ -119,25 +119,25 @@ class UIDropdown : public UIElement {
   public:
     FL_NO_COPY(UIDropdown)
 
-    UIDropdown(const char *name, fl::span<fl::string> options) FL_NOEXCEPT;
-    UIDropdown(const char *name, fl::initializer_list<fl::string> options) FL_NOEXCEPT;
-    ~UIDropdown() FL_NOEXCEPT;
+    UIDropdown(const char *name, fl::span<fl::string> options) FL_NO_EXCEPT;
+    UIDropdown(const char *name, fl::initializer_list<fl::string> options) FL_NO_EXCEPT;
+    ~UIDropdown() FL_NO_EXCEPT;
 
-    fl::string value() const FL_NOEXCEPT { return mImpl.value(); }
-    int as_int() const FL_NOEXCEPT { return mImpl.value_int(); }
-    fl::string as_string() const FL_NOEXCEPT { return value(); }
+    fl::string value() const FL_NO_EXCEPT { return mImpl.value(); }
+    int as_int() const FL_NO_EXCEPT { return mImpl.value_int(); }
+    fl::string as_string() const FL_NO_EXCEPT { return value(); }
 
-    void setSelectedIndex(int index) FL_NOEXCEPT {
+    void setSelectedIndex(int index) FL_NO_EXCEPT {
         mImpl.setSelectedIndex(index);
     }
 
-    fl::size getOptionCount() const FL_NOEXCEPT { return mImpl.getOptionCount(); }
-    fl::string getOption(fl::size index) const FL_NOEXCEPT { return mImpl.getOption(index); }
+    fl::size getOptionCount() const FL_NO_EXCEPT { return mImpl.getOptionCount(); }
+    fl::string getOption(fl::size index) const FL_NO_EXCEPT { return mImpl.getOption(index); }
 
-    operator fl::string() const FL_NOEXCEPT { return value(); }
-    operator int() const FL_NOEXCEPT { return as_int(); }
+    operator fl::string() const FL_NO_EXCEPT { return value(); }
+    operator int() const FL_NO_EXCEPT { return as_int(); }
 
-    UIDropdown &operator=(int index) FL_NOEXCEPT {
+    UIDropdown &operator=(int index) FL_NO_EXCEPT {
         setSelectedIndex(index);
         return *this;
     }
@@ -145,44 +145,44 @@ class UIDropdown : public UIElement {
     // Add a physical button that will advance to the next option when pressed.
     // Concrete implementation lives in fl/sensors/ui_button_integration.cpp.hpp
     // to keep the Button dependency out of the fl.cpp link chain.
-    void addNextButton(int pin) FL_NOEXCEPT;
+    void addNextButton(int pin) FL_NO_EXCEPT;
 
-    void nextOption() FL_NOEXCEPT {
+    void nextOption() FL_NO_EXCEPT {
         int currentIndex = as_int();
         int nextIndex = (currentIndex + 1) % static_cast<int>(getOptionCount());
         setSelectedIndex(nextIndex);
     }
 
-    void setGroup(const fl::string& groupName) FL_NOEXCEPT override {
+    void setGroup(const fl::string& groupName) FL_NO_EXCEPT override {
         UIElement::setGroup(groupName);
         mImpl.setGroup(groupName);
     }
 
-    int onChanged(function<void(UIDropdown &)> callback) FL_NOEXCEPT {
+    int onChanged(function<void(UIDropdown &)> callback) FL_NO_EXCEPT {
         int out = mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
         return out;
     }
-    void clearCallbacks() FL_NOEXCEPT { mCallbacks.clear(); }
+    void clearCallbacks() FL_NO_EXCEPT { mCallbacks.clear(); }
 
   protected:
     UIDropdownImpl mImpl;
 
     struct Listener : public EngineEvents::Listener {
-        Listener(UIDropdown *owner) FL_NOEXCEPT : mOwner(owner) {}
-        ~Listener() FL_NOEXCEPT {
+        Listener(UIDropdown *owner) FL_NO_EXCEPT : mOwner(owner) {}
+        ~Listener() FL_NO_EXCEPT {
             if (added) {
                 EngineEvents::removeListener(this);
             }
         }
-        void addToEngineEventsOnce() FL_NOEXCEPT {
+        void addToEngineEventsOnce() FL_NO_EXCEPT {
             if (added) {
                 return;
             }
             EngineEvents::addListener(this);
             added = true;
         }
-        void onBeginFrame() FL_NOEXCEPT override;
+        void onBeginFrame() FL_NO_EXCEPT override;
 
       private:
         UIDropdown *mOwner;

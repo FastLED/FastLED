@@ -44,13 +44,13 @@ struct WavePerfRepeatResult {
 // Bench config range gates. Tight enough to refuse pathological RPC
 // payloads (e.g. accidentally requesting a 256-MB grid) without
 // constraining real experiments.
-inline bool isValidGrid(u32 W, u32 H) FL_NOEXCEPT {
+inline bool isValidGrid(u32 W, u32 H) FL_NO_EXCEPT {
     return W >= 4 && H >= 4 && W <= 1024 && H <= 1024;
 }
-inline bool isValidIterations(u32 iterations) FL_NOEXCEPT {
+inline bool isValidIterations(u32 iterations) FL_NO_EXCEPT {
     return iterations >= 1 && iterations <= 100000;
 }
-inline bool isValidRepeats(u32 repeats) FL_NOEXCEPT {
+inline bool isValidRepeats(u32 repeats) FL_NO_EXCEPT {
     return repeats >= 2 && repeats <= 64;
 }
 
@@ -59,7 +59,7 @@ inline bool isValidRepeats(u32 repeats) FL_NOEXCEPT {
 // The +/-0.5 amplitude is deliberate — avoids the +/-1.0 float_to_fixed
 // asymmetry noted in #3083's audit.
 inline fl::unique_ptr<WaveSimulation2D_Real> makeBenchSim(
-    u32 W, u32 H, LaplacianStencil stencil) FL_NOEXCEPT {
+    u32 W, u32 H, LaplacianStencil stencil) FL_NO_EXCEPT {
     auto sim = fl::make_unique<WaveSimulation2D_Real>(W, H, 0.16f, 6.0f);
     sim->setHalfDuplex(false);
     sim->setStencil(stencil);
@@ -81,7 +81,7 @@ inline fl::unique_ptr<WaveSimulation2D_Real> makeBenchSim(
 // vs compute cost (critical for the ESP32-S3 PSRAM analysis from
 // #3114).
 inline WavePerfResult runWavePerf(u32 W, u32 H, u32 iterations,
-                                  LaplacianStencil stencil) FL_NOEXCEPT {
+                                  LaplacianStencil stencil) FL_NO_EXCEPT {
     WavePerfResult r;
     if (!isValidGrid(W, H) || !isValidIterations(iterations)) {
         return r;
@@ -108,7 +108,7 @@ inline WavePerfResult runWavePerf(u32 W, u32 H, u32 iterations,
 // none of the kernel arithmetic. The gap between this and runWavePerf
 // is the memory-vs-compute breakdown.
 inline WavePerfResult runWavePerfLoadsOnly(u32 W, u32 H, u32 iterations,
-                                           LaplacianStencil stencil) FL_NOEXCEPT {
+                                           LaplacianStencil stencil) FL_NO_EXCEPT {
     WavePerfResult r;
     if (!isValidGrid(W, H) || !isValidIterations(iterations)) {
         return r;
@@ -145,7 +145,7 @@ inline WavePerfResult runWavePerfLoadsOnly(u32 W, u32 H, u32 iterations,
 // contaminating the data, mark UNTRUSTED.
 inline WavePerfRepeatResult runWavePerfRepeat(
     u32 W, u32 H, u32 iterations, u32 repeats,
-    LaplacianStencil stencil) FL_NOEXCEPT {
+    LaplacianStencil stencil) FL_NO_EXCEPT {
     WavePerfRepeatResult r;
     if (!isValidGrid(W, H) || !isValidIterations(iterations)
         || !isValidRepeats(repeats)) {

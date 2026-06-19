@@ -50,7 +50,7 @@ namespace fl {
 //=============================================================================
 
 ChannelDriverLcdSpi::ChannelDriverLcdSpi(
-    fl::shared_ptr<detail::ILcdSpiPeripheral> peripheral) FL_NOEXCEPT
+    fl::shared_ptr<detail::ILcdSpiPeripheral> peripheral) FL_NO_EXCEPT
     : mPeripheral(fl::move(peripheral)), mInitialized(false),
       mEnqueuedChannels(), mTransmittingChannels(),
       mRingBuffers{nullptr, nullptr, nullptr}, mRingCapacity(0),
@@ -80,7 +80,7 @@ ChannelDriverLcdSpi::~ChannelDriverLcdSpi() {
 // Ring Buffer Management
 //=============================================================================
 
-void ChannelDriverLcdSpi::freeRingBuffers() FL_NOEXCEPT {
+void ChannelDriverLcdSpi::freeRingBuffers() FL_NO_EXCEPT {
     for (size_t i = 0; i < kRingBufferCount; i++) {
         if (mPeripheral && mRingBuffers[i] != nullptr) {
             mPeripheral->freeBuffer(mRingBuffers[i]);
@@ -91,7 +91,7 @@ void ChannelDriverLcdSpi::freeRingBuffers() FL_NOEXCEPT {
 }
 
 bool ChannelDriverLcdSpi::allocateRingBuffers(
-    size_t slotCapacityBytes) FL_NOEXCEPT {
+    size_t slotCapacityBytes) FL_NO_EXCEPT {
     if (mRingCapacity >= slotCapacityBytes && mRingBuffers[0] != nullptr) {
         return true; // already big enough
     }
@@ -115,18 +115,18 @@ bool ChannelDriverLcdSpi::allocateRingBuffers(
 //=============================================================================
 
 bool ChannelDriverLcdSpi::canHandle(
-    const ChannelDataPtr &data) const FL_NOEXCEPT {
+    const ChannelDataPtr &data) const FL_NO_EXCEPT {
     if (!data) {
         return false;
     }
     return data->isSpi();
 }
 
-void ChannelDriverLcdSpi::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
+void ChannelDriverLcdSpi::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     mEnqueuedChannels.push_back(fl::move(channelData));
 }
 
-void ChannelDriverLcdSpi::show() FL_NOEXCEPT {
+void ChannelDriverLcdSpi::show() FL_NO_EXCEPT {
     // Release channels from any completed previous transmission
     poll();
 
@@ -160,7 +160,7 @@ void ChannelDriverLcdSpi::show() FL_NOEXCEPT {
     }
 }
 
-IChannelDriver::DriverState ChannelDriverLcdSpi::poll() FL_NOEXCEPT {
+IChannelDriver::DriverState ChannelDriverLcdSpi::poll() FL_NO_EXCEPT {
     if (mTransmittingChannels.empty()) {
         return DriverState::READY;
     }
@@ -188,7 +188,7 @@ IChannelDriver::DriverState ChannelDriverLcdSpi::poll() FL_NOEXCEPT {
 
 void ChannelDriverLcdSpi::transposeToWords(
     fl::span<const ChannelDataPtr> channels, u16 *output,
-    size_t startByte, size_t byteCount) FL_NOEXCEPT {
+    size_t startByte, size_t byteCount) FL_NO_EXCEPT {
     // For each byte position in [startByte, startByte+byteCount),
     // create 8 u16 words (one per bit, MSB first).
     // Each bit N of the output word = corresponding bit of byte from lane N.
@@ -222,7 +222,7 @@ void ChannelDriverLcdSpi::transposeToWords(
 //=============================================================================
 
 bool ChannelDriverLcdSpi::isrChunkDone(void *panel_io, const void *edata,
-                                       void *user_ctx) FL_NOEXCEPT {
+                                       void *user_ctx) FL_NO_EXCEPT {
     (void)panel_io;
     (void)edata;
 
@@ -276,7 +276,7 @@ bool ChannelDriverLcdSpi::isrChunkDone(void *panel_io, const void *edata,
 //=============================================================================
 
 bool ChannelDriverLcdSpi::beginTransmission(
-    fl::span<const ChannelDataPtr> channels) FL_NOEXCEPT {
+    fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT {
     if (channels.empty() || !mPeripheral) {
         return false;
     }
@@ -406,48 +406,48 @@ bool ChannelDriverLcdSpi::beginTransmission(
 // Factory
 //=============================================================================
 
-fl::shared_ptr<IChannelDriver> createLcdSpiEngine() FL_NOEXCEPT {
+fl::shared_ptr<IChannelDriver> createLcdSpiEngine() FL_NO_EXCEPT {
 #if FL_LCD_SPI_HAS_ESP_PERIPHERAL
     class EspWrapper : public detail::ILcdSpiPeripheral {
       public:
-        bool initialize(const detail::LcdSpiConfig &c) FL_NOEXCEPT override {
+        bool initialize(const detail::LcdSpiConfig &c) FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().initialize(c);
         }
-        void deinitialize() FL_NOEXCEPT override {
+        void deinitialize() FL_NO_EXCEPT override {
             detail::LcdSpiPeripheralEsp::instance().deinitialize();
         }
-        bool isInitialized() const FL_NOEXCEPT override {
+        bool isInitialized() const FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().isInitialized();
         }
-        u16 *allocateBuffer(size_t s) FL_NOEXCEPT override {
+        u16 *allocateBuffer(size_t s) FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().allocateBuffer(s);
         }
-        void freeBuffer(u16 *b) FL_NOEXCEPT override {
+        void freeBuffer(u16 *b) FL_NO_EXCEPT override {
             detail::LcdSpiPeripheralEsp::instance().freeBuffer(b);
         }
-        bool transmit(const u16 *b, size_t s) FL_NOEXCEPT override {
+        bool transmit(const u16 *b, size_t s) FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().transmit(b, s);
         }
-        bool queueTransmit(const u16 *b, size_t s) FL_NOEXCEPT override {
+        bool queueTransmit(const u16 *b, size_t s) FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().queueTransmit(b, s);
         }
-        bool waitTransmitDone(u32 t) FL_NOEXCEPT override {
+        bool waitTransmitDone(u32 t) FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().waitTransmitDone(t);
         }
-        bool isBusy() const FL_NOEXCEPT override {
+        bool isBusy() const FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().isBusy();
         }
-        bool registerTransmitCallback(void *cb, void *ctx) FL_NOEXCEPT override {
+        bool registerTransmitCallback(void *cb, void *ctx) FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance()
                 .registerTransmitCallback(cb, ctx);
         }
-        const detail::LcdSpiConfig &getConfig() const FL_NOEXCEPT override {
+        const detail::LcdSpiConfig &getConfig() const FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().getConfig();
         }
-        u64 getMicroseconds() FL_NOEXCEPT override {
+        u64 getMicroseconds() FL_NO_EXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().getMicroseconds();
         }
-        void delay(u32 ms) FL_NOEXCEPT override {
+        void delay(u32 ms) FL_NO_EXCEPT override {
             detail::LcdSpiPeripheralEsp::instance().delay(ms);
         }
     };

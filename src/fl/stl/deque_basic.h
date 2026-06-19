@@ -41,7 +41,7 @@ enum {
 // the doubling loop isn't duplicated per `deque<T>` instantiation.
 FL_NO_INLINE
 fl::size deque_grow_map_capacity(fl::size current_map_capacity,
-                                 fl::size min_required_chunks) FL_NOEXCEPT;
+                                 fl::size min_required_chunks) FL_NO_EXCEPT;
 
 } // namespace detail
 } // namespace fl

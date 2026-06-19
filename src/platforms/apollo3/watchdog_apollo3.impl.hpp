@@ -35,12 +35,12 @@ inline Apollo3WatchdogState& apollo3WatchdogState() {
 
 } // namespace platforms
 
-Watchdog& Watchdog::instance() FL_NOEXCEPT {
+Watchdog& Watchdog::instance() FL_NO_EXCEPT {
     static Watchdog sInstance;
     return sInstance;
 }
 
-void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
+void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
     if (timeout_ms == 0) timeout_ms = 1000;
     if (timeout_ms > FL_WATCHDOG_MAX_TIMEOUT_MS) timeout_ms = FL_WATCHDOG_MAX_TIMEOUT_MS;
     // LFRC ticks at ~1 kHz so `ui32ResetCount` in ms ≈ timeout in counts.
@@ -53,16 +53,16 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     platforms::apollo3WatchdogState().armed = true;
 }
 
-void Watchdog::feed() FL_NOEXCEPT {
+void Watchdog::feed() FL_NO_EXCEPT {
     am_hal_wdt_restart();
 }
 
-void Watchdog::disable() FL_NOEXCEPT {
+void Watchdog::disable() FL_NO_EXCEPT {
     am_hal_wdt_halt();
     platforms::apollo3WatchdogState().armed = false;
 }
 
-ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
+ResetCause Watchdog::lastResetCause() const FL_NO_EXCEPT {
     auto& s = platforms::apollo3WatchdogState();
     if (!s.cause_cached) {
         // Read the Apollo3 reset status register directly. `RSTGEN->STAT`
@@ -107,45 +107,45 @@ ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
     return s.cached_cause;
 }
 
-bool Watchdog::lastResetWasWatchdog() const FL_NOEXCEPT {
+bool Watchdog::lastResetWasWatchdog() const FL_NO_EXCEPT {
     return lastResetCause() == ResetCause::WATCHDOG;
 }
 
-fl::u8 Watchdog::persistRead(fl::size idx) const FL_NOEXCEPT {
+fl::u8 Watchdog::persistRead(fl::size idx) const FL_NO_EXCEPT {
     if (idx >= FL_WATCHDOG_PERSIST_BYTES) return 0;
     return platforms::apollo3WatchdogState().persist[idx];
 }
-void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NOEXCEPT {
+void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NO_EXCEPT {
     if (idx >= FL_WATCHDOG_PERSIST_BYTES) return;
     platforms::apollo3WatchdogState().persist[idx] = v;
 }
 
-fl::u16 Watchdog::consecutiveCrashCount() const FL_NOEXCEPT {
+fl::u16 Watchdog::consecutiveCrashCount() const FL_NO_EXCEPT {
     (void)lastResetCause();
     return platforms::apollo3WatchdogState().crash_count;
 }
-void Watchdog::markCleanShutdown() FL_NOEXCEPT { platforms::apollo3WatchdogState().crash_count = 0; }
-bool Watchdog::isInSafeMode() const FL_NOEXCEPT { return consecutiveCrashCount() >= mSafeModeThreshold; }
-fl::u16 Watchdog::safeModeThreshold() const FL_NOEXCEPT { return mSafeModeThreshold; }
-void    Watchdog::setSafeModeThreshold(fl::u16 t) FL_NOEXCEPT { mSafeModeThreshold = t; }
+void Watchdog::markCleanShutdown() FL_NO_EXCEPT { platforms::apollo3WatchdogState().crash_count = 0; }
+bool Watchdog::isInSafeMode() const FL_NO_EXCEPT { return consecutiveCrashCount() >= mSafeModeThreshold; }
+fl::u16 Watchdog::safeModeThreshold() const FL_NO_EXCEPT { return mSafeModeThreshold; }
+void    Watchdog::setSafeModeThreshold(fl::u16 t) FL_NO_EXCEPT { mSafeModeThreshold = t; }
 
-FL_NORETURN void Watchdog::reboot() FL_NOEXCEPT {
+FL_NO_RETURN void Watchdog::reboot() FL_NO_EXCEPT {
     am_hal_reset_control(AM_HAL_RESET_CONTROL_SWPOR, 0);
     while (true) {}
 }
 
-bool Watchdog::onTimeout(WatchdogTimeoutCallback, void*) FL_NOEXCEPT { return false; }
-bool Watchdog::onTimeout(fl::function<void()>) FL_NOEXCEPT { return false; }
-bool Watchdog::setPauseOnDebug(bool) FL_NOEXCEPT { return false; }
-bool Watchdog::writeCrashLog(fl::span<const fl::u8>) FL_NOEXCEPT { return false; }
-fl::size Watchdog::readCrashLog(fl::span<fl::u8>) const FL_NOEXCEPT { return 0; }
-bool Watchdog::rebootIntoBootloader() FL_NOEXCEPT { return false; }
+bool Watchdog::onTimeout(WatchdogTimeoutCallback, void*) FL_NO_EXCEPT { return false; }
+bool Watchdog::onTimeout(fl::function<void()>) FL_NO_EXCEPT { return false; }
+bool Watchdog::setPauseOnDebug(bool) FL_NO_EXCEPT { return false; }
+bool Watchdog::writeCrashLog(fl::span<const fl::u8>) FL_NO_EXCEPT { return false; }
+fl::size Watchdog::readCrashLog(fl::span<fl::u8>) const FL_NO_EXCEPT { return 0; }
+bool Watchdog::rebootIntoBootloader() FL_NO_EXCEPT { return false; }
 
-bool Watchdog::setWindow(fl::u32, fl::u32) FL_NOEXCEPT { return false; }
-bool Watchdog::hasCrashReport() const FL_NOEXCEPT { return false; }
-WatchdogCrashReport Watchdog::readCrashReport() const FL_NOEXCEPT {
+bool Watchdog::setWindow(fl::u32, fl::u32) FL_NO_EXCEPT { return false; }
+bool Watchdog::hasCrashReport() const FL_NO_EXCEPT { return false; }
+WatchdogCrashReport Watchdog::readCrashReport() const FL_NO_EXCEPT {
     WatchdogCrashReport r{}; r.valid = false; r.fault_type = ""; return r;
 }
-void Watchdog::clearCrashReport() FL_NOEXCEPT {}
+void Watchdog::clearCrashReport() FL_NO_EXCEPT {}
 
 } // namespace fl
