@@ -301,7 +301,7 @@ class TestGrandfatheredAllowlist(unittest.TestCase):
     def test_set_input_gamut_not_flagged(self) -> None:
         code = (
             "namespace fl {\n"
-            "void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NOEXCEPT;\n"
+            "void set_input_gamut(DiodeProfile& p, InputGamut g) FL_NOEXCEPT;\n"
             "}"
         )
         self.assertEqual(len(_violations(code)), 0)
@@ -343,8 +343,13 @@ class TestGrandfatheredAllowlist(unittest.TestCase):
 class TestPerObjectSetterCarveout(unittest.TestCase):
     """_is_per_object_setter() and the checker integration."""
 
-    def test_non_const_ptr_first_param_is_per_object(self) -> None:
-        # Non-const pointer to user type → per-object, not flagged
+    def test_non_const_ref_first_param_is_per_object(self) -> None:
+        # Non-const reference to user type -> per-object, not flagged
+        line = "void set_input_gamut(DiodeProfile& obj, InputGamut g);"
+        self.assertTrue(_is_per_object_setter(line))
+
+    def test_non_const_ptr_first_param_is_per_object_compatibility(self) -> None:
+        # Legacy compatibility overloads may still be nullable per-object mutators.
         line = "void set_input_gamut(DiodeProfile* obj, InputGamut g);"
         self.assertTrue(_is_per_object_setter(line))
 

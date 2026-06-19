@@ -8,6 +8,7 @@
 #include "eorder.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/span.h"
 
 namespace fl {
 
@@ -88,17 +89,26 @@ enum class InputGamut : u8 {
 // standard published primary chromaticities + that gamut's reference white.
 // Mutates `profile` in place; subsequent solver calls observe the new gamut
 // (the cache is keyed on the profile pointer and rebuilds automatically).
-// No-op if `profile == nullptr`.
-void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NOEXCEPT;
+void set_input_gamut(DiodeProfile& profile, InputGamut g) FL_NOEXCEPT;
 
-// Same as the above, but lets you optionally override the input white point.
-// `white_xy` either points to a 2-float (x, y) chromaticity OR is `nullptr`
-// to fall back to the gamut's standard reference white (equivalent to the
-// 2-argument overload above). Use the override for niche cases (D50
+// Same as the above, but lets you override the input white point with an
+// exactly two-float (x, y) chromaticity. Omit this argument to fall back to
+// the gamut's standard reference white. Use the override for niche cases (D50
 // photography workflow, D60 ACES cinema, a custom calibration target) where
 // the standard gamut's reference white doesn't match your content.
+void set_input_gamut(DiodeProfile& profile, InputGamut g,
+                     fl::span<const float, 2> white_xy) FL_NOEXCEPT;
+
+// Compatibility overloads for existing sketches. Prefer the reference
+// overloads above for new code; passing a null profile is intentionally a
+// no-op here to preserve the old API contract.
+void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NOEXCEPT;
 void set_input_gamut(DiodeProfile* profile, InputGamut g,
-                     const float white_xy[2]) FL_NOEXCEPT;
+                     fl::span<const float, 2> white_xy) FL_NOEXCEPT;
+void set_input_gamut(DiodeProfile& profile, InputGamut g,
+                     decltype(nullptr) white_xy) FL_NOEXCEPT;
+void set_input_gamut(DiodeProfile* profile, InputGamut g,
+                     decltype(nullptr) white_xy) FL_NOEXCEPT;
 
 // Default profile: SK6812 RGBW3535 @ ~6000K (datasheet wavelengths -> xy +
 // typical luminance ratios). Always declared so user code referencing it

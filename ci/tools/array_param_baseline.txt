@@ -5,8 +5,6 @@
 # Format: src/path|normalized source signature
 # New entries fail the default unified C++ linter.
 
-src/fl/gfx/rgbw.cpp.hpp|void set_input_gamut(DiodeProfile* profile, InputGamut g, const float white_xy[2]) FL_NOEXCEPT {
-src/fl/gfx/rgbw.h|void set_input_gamut(DiodeProfile* profile, InputGamut g, const float white_xy[2]) FL_NOEXCEPT;
 src/fl/gfx/rgbw_colorimetric.h|inline void nnls3(const float M[3][3], const float b[3], float t_out[3], float* residual_out) FL_NOEXCEPT {
 src/fl/math/transposition.cpp.hpp|bool SPITransposer::transpose16(const fl::optional<LaneData> lanes[16], fl::span<u8> output, const char** error) {
 src/fl/math/transposition.cpp.hpp|bool SPITransposer::transpose8(const fl::optional<LaneData> lanes[8], fl::span<u8> output, const char** error) {

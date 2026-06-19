@@ -239,15 +239,15 @@ constexpr NamedGamut kDciP3D60  = {{0.6800f, 0.3200f}, {0.2650f, 0.6900f},
 // after a gamut switch on the currently active profile.
 namespace { void invalidate_colorimetric_caches_for(const DiodeProfile* profile) FL_NOEXCEPT; }
 
-void set_input_gamut(DiodeProfile* profile, InputGamut g,
-                     const float white_xy[2]) FL_NOEXCEPT {
-    if (profile == nullptr) return;
-    auto apply = [profile](const float r[2], const float gp[2],
+namespace {
+void set_input_gamut_impl(DiodeProfile& profile, InputGamut g,
+                          const float* white_xy) FL_NOEXCEPT {
+    auto apply = [&profile](const float r[2], const float gp[2],
                            const float b[2], const float w[2]) {
-        profile->input_xy_r[0] = r[0];  profile->input_xy_r[1] = r[1];
-        profile->input_xy_g[0] = gp[0]; profile->input_xy_g[1] = gp[1];
-        profile->input_xy_b[0] = b[0];  profile->input_xy_b[1] = b[1];
-        profile->input_xy_w[0] = w[0];  profile->input_xy_w[1] = w[1];
+        profile.input_xy_r[0] = r[0];  profile.input_xy_r[1] = r[1];
+        profile.input_xy_g[0] = gp[0]; profile.input_xy_g[1] = gp[1];
+        profile.input_xy_b[0] = b[0];  profile.input_xy_b[1] = b[1];
+        profile.input_xy_w[0] = w[0];  profile.input_xy_w[1] = w[1];
     };
     switch (g) {
     case InputGamut::Native: {
@@ -255,29 +255,58 @@ void set_input_gamut(DiodeProfile* profile, InputGamut g,
         // copy them over rather than picking a fixed sRGB-like fallback.
         const float d65[2] = {0.31272f, 0.32903f};
         const float* w = (white_xy != nullptr) ? white_xy : d65;
-        apply(profile->xy_r, profile->xy_g, profile->xy_b, w);
-        invalidate_colorimetric_caches_for(profile);
+        apply(profile.xy_r, profile.xy_g, profile.xy_b, w);
+        invalidate_colorimetric_caches_for(&profile);
         return;
     }
     case InputGamut::Rec709:   apply(kRec709.xy_r,   kRec709.xy_g,   kRec709.xy_b,
                                      white_xy != nullptr ? white_xy : kRec709.xy_w);
-                                invalidate_colorimetric_caches_for(profile);   return;
+                                invalidate_colorimetric_caches_for(&profile);   return;
     case InputGamut::Rec2020:  apply(kRec2020.xy_r,  kRec2020.xy_g,  kRec2020.xy_b,
                                      white_xy != nullptr ? white_xy : kRec2020.xy_w);
-                                invalidate_colorimetric_caches_for(profile);  return;
+                                invalidate_colorimetric_caches_for(&profile);  return;
     case InputGamut::DciP3D65: apply(kDciP3D65.xy_r, kDciP3D65.xy_g, kDciP3D65.xy_b,
                                      white_xy != nullptr ? white_xy : kDciP3D65.xy_w);
-                                invalidate_colorimetric_caches_for(profile); return;
+                                invalidate_colorimetric_caches_for(&profile); return;
     case InputGamut::DciP3D60: apply(kDciP3D60.xy_r, kDciP3D60.xy_g, kDciP3D60.xy_b,
                                      white_xy != nullptr ? white_xy : kDciP3D60.xy_w);
-                                invalidate_colorimetric_caches_for(profile); return;
+                                invalidate_colorimetric_caches_for(&profile); return;
     }
     // Default-fallthrough for forward-compat with future enum additions:
     // leave the profile's input_xy_* untouched — also nothing to invalidate.
 }
+} // namespace
+
+void set_input_gamut(DiodeProfile& profile, InputGamut g,
+                     fl::span<const float, 2> white_xy) FL_NOEXCEPT {
+    set_input_gamut_impl(profile, g, white_xy.data());
+}
+
+void set_input_gamut(DiodeProfile& profile, InputGamut g) FL_NOEXCEPT {
+    set_input_gamut_impl(profile, g, nullptr);
+}
+
+void set_input_gamut(DiodeProfile* profile, InputGamut g,
+                     fl::span<const float, 2> white_xy) FL_NOEXCEPT {
+    if (profile == nullptr) return;
+    set_input_gamut(*profile, g, white_xy);
+}
 
 void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NOEXCEPT {
-    set_input_gamut(profile, g, nullptr);
+    if (profile == nullptr) return;
+    set_input_gamut(*profile, g);
+}
+
+void set_input_gamut(DiodeProfile& profile, InputGamut g,
+                     decltype(nullptr) white_xy) FL_NOEXCEPT {
+    (void)white_xy;
+    set_input_gamut(profile, g);
+}
+
+void set_input_gamut(DiodeProfile* profile, InputGamut g,
+                     decltype(nullptr) white_xy) FL_NOEXCEPT {
+    (void)white_xy;
+    set_input_gamut(profile, g);
 }
 
 #if FASTLED_RGBW_COLORIMETRIC

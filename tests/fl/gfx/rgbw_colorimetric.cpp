@@ -325,7 +325,7 @@ FL_TEST_CASE("source matrix matches published sRGB->XYZ matrix (Rec709 opt-in)")
     //   Y = 0.2126729 R + 0.7151522 G + 0.0721750 B
     //   Z = 0.0193339 R + 0.1191920 G + 0.9503041 B
     DiodeProfile p = kRgbwDefaultProfile;
-    set_input_gamut(&p, InputGamut::Rec709);
+    set_input_gamut(p, InputGamut::Rec709);
     float M[3][3];
     FL_CHECK(build_source_matrix(p.input_xy_r, p.input_xy_g,
                                  p.input_xy_b, p.input_xy_w, M));
@@ -351,7 +351,7 @@ FL_TEST_CASE("set_input_gamut: Native copies LED primaries") {
     p.input_xy_g[0] = 0; p.input_xy_g[1] = 0;
     p.input_xy_b[0] = 0; p.input_xy_b[1] = 0;
     p.input_xy_w[0] = 0; p.input_xy_w[1] = 0;
-    set_input_gamut(&p, InputGamut::Native);
+    set_input_gamut(p, InputGamut::Native);
     FL_CHECK_CLOSE(p.input_xy_r[0], p.xy_r[0], 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_g[0], p.xy_g[0], 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_b[0], p.xy_b[0], 1e-6f);
@@ -363,21 +363,21 @@ FL_TEST_CASE("set_input_gamut: Native copies LED primaries") {
 
 FL_TEST_CASE("set_input_gamut: named gamuts populate canonical primaries") {
     DiodeProfile p = kRgbwDefaultProfile;
-    set_input_gamut(&p, InputGamut::Rec709);
+    set_input_gamut(p, InputGamut::Rec709);
     FL_CHECK_CLOSE(p.input_xy_r[0], 0.6400f, 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_g[1], 0.6000f, 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_w[0], 0.31272f, 1e-5f);
 
-    set_input_gamut(&p, InputGamut::Rec2020);
+    set_input_gamut(p, InputGamut::Rec2020);
     FL_CHECK_CLOSE(p.input_xy_r[0], 0.7080f, 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_g[0], 0.1700f, 1e-6f);
 
-    set_input_gamut(&p, InputGamut::DciP3D65);
+    set_input_gamut(p, InputGamut::DciP3D65);
     FL_CHECK_CLOSE(p.input_xy_r[0], 0.6800f, 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_g[0], 0.2650f, 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_w[0], 0.31272f, 1e-5f);  // D65
 
-    set_input_gamut(&p, InputGamut::DciP3D60);
+    set_input_gamut(p, InputGamut::DciP3D60);
     // Same primaries as DciP3D65, different white (ACES D60).
     FL_CHECK_CLOSE(p.input_xy_r[0], 0.6800f, 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_w[0], 0.32168f, 1e-5f);
@@ -388,17 +388,16 @@ FL_TEST_CASE("set_input_gamut: named gamuts populate canonical primaries") {
 FL_TEST_CASE("set_input_gamut: white override honored") {
     DiodeProfile p = kRgbwDefaultProfile;
     const float custom_white[2] = {0.34567f, 0.35850f};  // D50
-    set_input_gamut(&p, InputGamut::Rec709, custom_white);
+    set_input_gamut(p, InputGamut::Rec709, custom_white);
     FL_CHECK_CLOSE(p.input_xy_r[0], 0.6400f, 1e-6f);  // primaries: Rec709
     FL_CHECK_CLOSE(p.input_xy_w[0], 0.34567f, 1e-6f); // white: override
     FL_CHECK_CLOSE(p.input_xy_w[1], 0.35850f, 1e-6f);
 }
 
 
-FL_TEST_CASE("set_input_gamut: null profile is a no-op") {
-    // Defensive guard so caller code that passes a nullptr by mistake
-    // doesn't fault; consistent with set_rgbw_colorimetric_profile(nullptr)
-    // semantics.
+FL_TEST_CASE("set_input_gamut: compatibility pointer overload no-ops on null") {
+    // Legacy pointer-profile overloads keep the old null contract while new
+    // code uses the reference overload above.
     set_input_gamut(nullptr, InputGamut::Rec709);
     set_input_gamut(nullptr, InputGamut::Native);
     // No assertions — just verify the calls don't crash.
@@ -1189,7 +1188,7 @@ inline DiodeProfile native_profile() {
     // can just copy it. Explicit set_input_gamut(InputGamut::Native) makes
     // the contract obvious in the test source.
     DiodeProfile p = kRgbwDefaultProfile;
-    set_input_gamut(&p, InputGamut::Native);
+    set_input_gamut(p, InputGamut::Native);
     return p;
 }
 
@@ -1362,7 +1361,7 @@ FL_TEST_CASE("issue #2748: non-native input gamut bypasses topology guard") {
     // contract, sRGB pure blue (out of LED hull) would be passed through
     // verbatim and produce a black output once quantized.
     DiodeProfile p = kRgbwDefaultProfile;
-    set_input_gamut(&p, InputGamut::Rec709);  // input != LED native
+    set_input_gamut(p, InputGamut::Rec709);  // input != LED native
     ProfileCache cache; fastled_mirror::build_cache(&p, &cache);
 
     float rgbw[4] = {0};
@@ -1455,20 +1454,20 @@ FL_TEST_CASE("issue #2748: public dispatch — boosted mode preserves native top
 
 FL_TEST_CASE("issue #2748: is_native_input_gamut helper agrees with profile flags") {
     DiodeProfile p = kRgbwDefaultProfile;
-    set_input_gamut(&p, InputGamut::Native);
+    set_input_gamut(p, InputGamut::Native);
     FL_CHECK(is_native_input_gamut(p));
 
-    set_input_gamut(&p, InputGamut::Rec709);
+    set_input_gamut(p, InputGamut::Rec709);
     FL_CHECK(!is_native_input_gamut(p));
 
-    set_input_gamut(&p, InputGamut::Rec2020);
+    set_input_gamut(p, InputGamut::Rec2020);
     FL_CHECK(!is_native_input_gamut(p));
 
-    set_input_gamut(&p, InputGamut::DciP3D65);
+    set_input_gamut(p, InputGamut::DciP3D65);
     FL_CHECK(!is_native_input_gamut(p));
 
     // Restore Native so subsequent tests in this TU see expected defaults.
-    set_input_gamut(&p, InputGamut::Native);
+    set_input_gamut(p, InputGamut::Native);
     FL_CHECK(is_native_input_gamut(p));
 }
 
@@ -1485,4 +1484,3 @@ FL_TEST_CASE("issue #2748: count_active_channels classification") {
     // Below LSB-eps — counted as inactive.
     FL_CHECK(count_active_channels(1.0e-6f, 1.0f, 1.0f) == 2);
 }
-

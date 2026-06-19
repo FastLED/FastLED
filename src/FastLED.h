@@ -1502,19 +1502,43 @@ public:
 
 	/// Reconfigure `profile`'s input gamut to one of the named source
 	/// chromaticity sets (Native / Rec709 / Rec2020 / DCI-P3 D65 / D60).
-	/// Mutates `profile` in place; no-op if `profile == nullptr`.
+	/// Mutates `profile` in place.
 	/// @code
-	/// FastLED.setInputGamut(&my_profile, fl::InputGamut::Rec709);
+	/// FastLED.setInputGamut(my_profile, fl::InputGamut::Rec709);
 	/// @endcode
+	inline void setInputGamut(fl::DiodeProfile& profile, fl::InputGamut g) FL_NOEXCEPT {
+		fl::set_input_gamut(profile, g);
+	}
+
+	/// Compatibility overload for existing sketches. Prefer the reference
+	/// overload above for new code; passing `nullptr` is a no-op.
 	inline void setInputGamut(fl::DiodeProfile* profile, fl::InputGamut g) FL_NOEXCEPT {
 		fl::set_input_gamut(profile, g);
 	}
 
-	/// Same as above with an explicit input white-point override. Pass
-	/// `nullptr` for `white_xy` to fall back to the gamut's standard
-	/// reference white (equivalent to the 2-argument overload).
+	/// Same as above with an explicit two-float input white-point override.
+	inline void setInputGamut(fl::DiodeProfile& profile, fl::InputGamut g,
+	                          fl::span<const float, 2> white_xy) FL_NOEXCEPT {
+		fl::set_input_gamut(profile, g, white_xy);
+	}
+
+	/// Compatibility overload for existing pointer-profile call sites.
 	inline void setInputGamut(fl::DiodeProfile* profile, fl::InputGamut g,
-	                          const float white_xy[2]) FL_NOEXCEPT {
+	                          fl::span<const float, 2> white_xy) FL_NOEXCEPT {
+		fl::set_input_gamut(profile, g, white_xy);
+	}
+
+	/// Compatibility overload for old callers that passed `nullptr` for the
+	/// white override. Prefer the 2-argument overload for new code.
+	inline void setInputGamut(fl::DiodeProfile& profile, fl::InputGamut g,
+	                          decltype(nullptr) white_xy) FL_NOEXCEPT {
+		fl::set_input_gamut(profile, g, white_xy);
+	}
+
+	/// Compatibility overload for old callers that passed `nullptr` for the
+	/// profile and/or white override.
+	inline void setInputGamut(fl::DiodeProfile* profile, fl::InputGamut g,
+	                          decltype(nullptr) white_xy) FL_NOEXCEPT {
 		fl::set_input_gamut(profile, g, white_xy);
 	}
 
