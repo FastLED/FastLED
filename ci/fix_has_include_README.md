@@ -8,11 +8,7 @@ Files that use the `FL_HAS_INCLUDE()` macro need to include `"fl/stl/has_include
 
 ## Solution
 
-Two scripts have been created to prevent this issue:
-
-### 1. `ci/fix_has_include.py` - Auto-Fixer (Manual Tool)
-
-**Purpose:** Find and fix files missing the `fl/stl/has_include.h` include.
+`ci/fix_has_include.py` is a manual auto-fix tool — find and fix files missing the `fl/stl/has_include.h` include.
 
 **Usage:**
 ```bash
@@ -38,20 +34,7 @@ uv run python ci/fix_has_include.py --help
 - Adds IWYU pragma to prevent removal
 - Handles indentation matching
 
-### 2. `ci/lint_cpp/has_include_checker.py` - CI Linter
-
-**Purpose:** Prevent the issue from happening again by checking in CI.
-
-**Usage:**
-```bash
-# Run the checker
-uv run python ci/lint_cpp/has_include_checker.py
-
-# Returns 0 if all files are OK
-# Returns 1 if any files are missing the include
-```
-
-**Integration:** This checker can be integrated into the unified C++ linting system.
+A standalone CI linter for this rule has not (yet) been ported to the Rust crate (`ci/lint_cpp_rs/`). The original Python `has_include_checker.py` was retired with the wider Rust migration (FastLED #3288); add a Rust checker under `ci/lint_cpp_rs/src/checkers/preprocessor.rs` if the rule needs CI enforcement again — see `agents/docs/linter-architecture.md` for the workflow.
 
 ## How It Works
 
@@ -120,7 +103,7 @@ This is necessary because IWYU doesn't understand that preprocessor macros need 
 
 ## Future Improvements
 
-1. **Integrate into unified C++ linter** - Add to `ci/lint_cpp/run_all_checkers.py`
+1. **Add a Rust checker for CI enforcement** — port the original include-presence check to `ci/lint_cpp_rs/src/checkers/preprocessor.rs` (see `agents/docs/linter-architecture.md`).
 2. **Pre-commit hook** - Prevent commits with missing includes
 3. **Generic macro checker** - Extend to other project-specific macros
 4. **IDE integration** - VSCode/clangd diagnostics
@@ -128,10 +111,10 @@ This is necessary because IWYU doesn't understand that preprocessor macros need 
 ## Related Files
 
 - `src/fl/stl/has_include.h` - Defines `FL_HAS_INCLUDE` macro
-- `ci/lint_cpp/banned_macros_checker.py` - Bans raw `__has_include` usage
-- `ci/lint_cpp/attribute_checker.py` - Similar pattern checker for attributes
+- `ci/lint_cpp_rs/src/checkers/basic.rs` — `BannedMacrosChecker` (bans raw `__has_include`)
+- `ci/lint_cpp_rs/src/checkers/runtime.rs` — `AttributeChecker` (similar attribute-pattern enforcement)
 
 ## See Also
 
-- Python banned macro linter: `ci/lint_cpp/banned_macros_checker.py`
+- Rust banned-macro checker: `ci/lint_cpp_rs/src/checkers/basic.rs`
 - IWYU pragma documentation: https://github.com/include-what-you-use/include-what-you-use/blob/master/docs/IWYUPragmas.md
