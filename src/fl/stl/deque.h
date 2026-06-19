@@ -2,6 +2,7 @@
 
 #include "fl/stl/stdint.h"
 
+#include "fl/stl/deque_basic.h"  // detail::deque_grow_capacity / deque_physical_index (#3250)
 #include "fl/stl/move.h"
 #include "fl/stl/iterator.h"
 #include "fl/stl/memory_resource.h"
@@ -19,26 +20,28 @@ private:
     fl::size mFront = 0;  // Index of the front element
     memory_resource* mResource = default_memory_resource();
 
-    static const fl::size kInitialCapacity = 8;
+    // Grow-policy + ring-buffer-index arithmetic lives in `fl::detail`
+    // (deque_basic) so the body is emitted once per build regardless of
+    // how many `deque<T>` instantiations exist. See #3250 / #3244 Tier 3H.
+    static const fl::size kInitialCapacity = detail::kDequeInitialCapacity;
 
     void ensure_capacity(fl::size min_capacity) {
         if (mCapacity >= min_capacity) {
             return;
         }
 
-        fl::size new_capacity = mCapacity == 0 ? kInitialCapacity : mCapacity * 2;
-        while (new_capacity < min_capacity) {
-            new_capacity *= 2;
-        }
+        fl::size new_capacity = detail::deque_grow_capacity(mCapacity, min_capacity);
 
         T* new_data = static_cast<T*>(mResource->allocate(new_capacity * sizeof(T)));
         if (!new_data) {
             return; // Allocation failed
         }
 
-        // Copy existing elements to new buffer in linear order
+        // Copy existing elements to new buffer in linear order. The per-step
+        // index computation uses the shared helper so the inner loop's
+        // arithmetic is deduplicated across `deque<T>` instantiations.
         for (fl::size i = 0; i < mSize; ++i) {
-            fl::size old_idx = (mFront + i) % mCapacity;
+            fl::size old_idx = detail::deque_physical_index(mFront, i, mCapacity);
             new (&new_data[i]) T(fl::move(mData[old_idx]));
             mData[old_idx].~T();
         }
@@ -53,7 +56,7 @@ private:
     }
 
     fl::size get_index(fl::size logical_index) const {
-        return (mFront + logical_index) % mCapacity;
+        return detail::deque_physical_index(mFront, logical_index, mCapacity);
     }
 
 public:
