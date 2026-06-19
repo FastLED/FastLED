@@ -86,21 +86,22 @@ reviews:
 
     - path: "platformio.ini"
       instructions: |
-        ROOT `./platformio.ini` LOCKDOWN (#3274 follow-up).
+        ROOT `./platformio.ini` LOCKDOWN (#3274 / #3281 follow-up).
 
-        Root `./platformio.ini` is a frozen surface, owned only by `bash autoresearch`
-        and `bash debug` (and raw `pio run`). CI compile, size-check, bloat, and
-        regression tests consume `ci/boards.py` — NOT this file. Any change here is
-        HIGH severity unless every added/modified non-comment line is justified.
+        Root `./platformio.ini` is a frozen surface, owned only by `bash debug`
+        (and raw `pio run` if a user invokes it directly). CI compile,
+        size-check, bloat, regression tests, AND `bash autoresearch` all consume
+        synthesised platformio.ini files derived from `ci/boards.py` — NOT this
+        file. Any change here is HIGH severity unless every added/modified
+        non-comment line is justified.
 
         REQUIRED for every change to this file:
 
         1. **Justification comment.** Each new or modified non-comment line must be
            accompanied by an adjacent `; justification: <reason>` comment explaining
-           WHY the change is needed in the file that only `bash autoresearch` /
-           `bash debug` consume. Vague justifications like "needed for build" or
-           "matches boards.py" are insufficient — say which interactive flow breaks
-           without it.
+           WHY the change is needed in the file that only `bash debug` consumes.
+           Vague justifications like "needed for build" or "matches boards.py" are
+           insufficient — say which `bash debug` flow breaks without it.
 
         2. **Commit / PR reference.** Each justification comment should include
            `; added-in: <40-char-sha>` OR `; added-in: PR-<NNN>` so future readers
@@ -110,26 +111,27 @@ reviews:
            Example acceptable diff:
            ```
            +  -D NEW_THING=1
-           +  ; justification: bash autoresearch needs NEW_THING for the FOO RPC
+           +  ; justification: bash debug needs NEW_THING for the FOO sketch
            +  ; added-in: PR-3281
            ```
 
-        3. **Non-autoresearch dependencies are forbidden.** If this PR adds any
-           NEW code path under `ci/` (other than `ci/autoresearch/` or
-           `ci/debug_attached.py`) that reads, parses, or imports this file —
-           flag as HIGH severity. CI compile must remain `ci/boards.py`-only.
-           See parent #3274.
+        3. **Non-`bash-debug` dependencies are forbidden.** If this PR adds any
+           NEW code path under `ci/` (other than `ci/debug_attached.py`) that
+           reads, parses, or imports this file — flag as HIGH severity. CI
+           compile and `bash autoresearch` must remain `ci/boards.py`-only.
+           `ci/autoresearch/` is NOT a sanctioned reader after #3281; see parent
+           #3274. The only remaining exception is the `--use-root-platformio-ini`
+           legacy escape hatch in `ci/autoresearch/`, which is deprecated and
+           scheduled for removal.
 
         4. **Bulk reformatting / no-op churn is forbidden.** Comment reflow,
            whitespace cleanup, or moving lines around without a behavioral change
            is a HIGH severity nit — that kind of edit invalidates the
            justification-comment audit trail without buying anything.
 
-        AUTORESEARCH MIGRATION NOTE: `bash autoresearch` is on a roadmap to stop
-        consuming this file entirely and synthesise its own `platformio.ini` from
-        `ci/boards.py` (see #3281). Until that lands, additions here are accepted
-        with justification. After it lands, this file should be append-only for
-        `bash debug` use cases only.
+        FUTURE: `bash debug` is the last sanctioned consumer. A follow-up may
+        migrate it off root too, at which point this file becomes a pure
+        no-CI-dependency reference for raw `pio run` invocations.
 
     - path: "**/platformio.ini"
       instructions: |
