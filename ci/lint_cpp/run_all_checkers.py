@@ -13,98 +13,27 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
-from ci.lint_cpp.arduino_macro_usage_checker import ArduinoMacroUsageChecker
-from ci.lint_cpp.asm_js_location_checker import AsmJsLocationChecker
-from ci.lint_cpp.attribute_checker import AttributeChecker
-from ci.lint_cpp.banned_define_checker import BannedDefineChecker
-from ci.lint_cpp.banned_headers_checker import (
-    BANNED_HEADERS_COMMON,
-    BANNED_HEADERS_CORE,
-    BANNED_HEADERS_PLATFORMS,
-    BannedHeadersChecker,
-)
-from ci.lint_cpp.banned_macros_checker import BannedMacrosChecker
-from ci.lint_cpp.banned_namespace_checker import BannedNamespaceChecker
-from ci.lint_cpp.bare_allocation_checker import BareAllocationChecker
 from ci.lint_cpp.bare_libm_checker import BareLibmChecker
 from ci.lint_cpp.bare_noinline_checker import BareNoInlineChecker
 from ci.lint_cpp.bare_snprintf_checker import BareSnprintfChecker
-from ci.lint_cpp.bare_using_checker import BareUsingChecker
-from ci.lint_cpp.builtin_memcpy_checker import BuiltinMemcpyChecker
-
-# Import all checker classes
-from ci.lint_cpp.check_namespace_includes import NamespaceIncludesChecker
-from ci.lint_cpp.check_platform_includes import PlatformTrampolineChecker
-from ci.lint_cpp.check_platforms_fl_namespace import PlatformsFlNamespaceChecker
-from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
-from ci.lint_cpp.cpp_hpp_header_pair_checker import CppHppHeaderPairChecker
-from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
-from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
-from ci.lint_cpp.ctype_global_checker import CtypeGlobalChecker
-from ci.lint_cpp.enum_class_checker import EnumClassChecker
-from ci.lint_cpp.esp_rom_printf_checker import EspRomPrintfChecker
-from ci.lint_cpp.example_serial_checker import ExampleSerialChecker
-from ci.lint_cpp.fastled_header_usage_checker import FastLEDHeaderUsageChecker
-from ci.lint_cpp.fl_is_defined_checker import FlIsDefinedChecker
 from ci.lint_cpp.fl_no_underscore_checker import FlNoUnderscoreChecker
-from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
-from ci.lint_cpp.impl_hpp_includes_checker import ImplHppIncludesChecker
-from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
-from ci.lint_cpp.include_paths_checker import IncludePathsChecker
-from ci.lint_cpp.is_header_include_checker import IsHeaderIncludeChecker
-from ci.lint_cpp.iwyu_pragma_block_checker import IwyuPragmaBlockChecker
 from ci.lint_cpp.legacy_log_macro_checker import LegacyLogMacroChecker
-from ci.lint_cpp.logging_in_iram_checker import LoggingInIramChecker
-from ci.lint_cpp.member_style_checker import MemberStyleChecker
-from ci.lint_cpp.namespace_platforms_checker import NamespacePlatformsChecker
-from ci.lint_cpp.native_platform_defines_checker import NativePlatformDefinesChecker
-from ci.lint_cpp.no_namespace_fl_declaration import NamespaceFlDeclarationChecker
-from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
-from ci.lint_cpp.noexcept_special_members_checker import NoexceptSpecialMembersChecker
-from ci.lint_cpp.numeric_limit_macros_checker import NumericLimitMacroChecker
 from ci.lint_cpp.pch_file_checker import check as check_pch_files
-from ci.lint_cpp.platform_includes_checker import PlatformIncludesChecker
-from ci.lint_cpp.platform_pragma_checker import PlatformPragmaChecker
-from ci.lint_cpp.pragma_once_checker import PragmaOnceChecker
 from ci.lint_cpp.public_settings_pattern_checker import PublicSettingsPatternChecker
-from ci.lint_cpp.raw_noexcept_checker import RawNoexceptChecker
-from ci.lint_cpp.raw_pragma_checker import RawPragmaChecker
-from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
-from ci.lint_cpp.relative_include_checker import RelativeIncludeChecker
 from ci.lint_cpp.rust_bridge import (
     merge_checker_results,
     remove_rust_supported_checkers,
     run_rust_ab_check,
     run_rust_linter,
 )
-from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
-from ci.lint_cpp.simd_intrinsics_checker import SimdIntrinsicsChecker
-from ci.lint_cpp.singleton_in_headers_checker import SingletonInHeadersChecker
-from ci.lint_cpp.sleep_for_checker import SleepForChecker
-from ci.lint_cpp.span_from_pointer_checker import SpanFromPointerChecker
-from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
-from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
-from ci.lint_cpp.stdint_type_checker import (
-    StdintTypeChecker,
-)
-from ci.lint_cpp.subdir_namespace_checker import SubdirNamespaceChecker
-from ci.lint_cpp.test_aggregation_checker import TestAggregationChecker
 from ci.lint_cpp.test_aggregation_checker import check as check_test_aggregation
 from ci.lint_cpp.test_aggregation_checker import (
     check_single_file as check_test_aggregation_single_file,
 )
-from ci.lint_cpp.test_include_paths_checker import TestIncludePathsChecker
-from ci.lint_cpp.test_path_structure_checker import TestPathStructureChecker
 from ci.lint_cpp.test_unity_build import check as check_unity_build
 from ci.lint_cpp.test_unity_build import (
     check_single_file as check_unity_build_single_file,
 )
-from ci.lint_cpp.thread_local_keyword_checker import ThreadLocalKeywordChecker
-from ci.lint_cpp.unit_test_checker import UnitTestChecker
-from ci.lint_cpp.using_namespace_fl_in_examples_checker import (
-    UsingNamespaceFlInExamplesChecker,
-)
-from ci.lint_cpp.weak_attribute_checker import WeakAttributeChecker
 from ci.util.check_files import (
     CheckerResults,
     FileContentChecker,
@@ -177,169 +106,61 @@ def create_checkers(
         all_headers: Optional frozenset of all header file paths in the project
                     (used for cross-file validation in some checkers)
     """
+    # NOTE: The bulk of the legacy Python checker fleet was retired in favor
+    # of the Rust C++ linter (see ``ci/lint_cpp/rust_bridge.py`` and
+    # ``ci/lint_cpp_rs/``). Only the small set of Python-only checkers that
+    # have no Rust port yet remain instantiated here. The ``all_headers``
+    # argument is kept for API compatibility — it is no longer consumed by
+    # any Python-side checker.
+    del all_headers  # currently unused; kept for API compatibility
+
     checkers_by_scope: dict[str, list[FileContentChecker]] = {}
 
     # Global checkers (run on all src/, examples/, tests/ files)
     checkers_by_scope["global"] = [
-        CppIncludeChecker(),
-        CppHppIncludesChecker(),
-        ImplHppIncludesChecker(),
-        IncludeAfterNamespaceChecker(),
-        MemberStyleChecker(),
-        NumericLimitMacroChecker(),
-        StaticInHeaderChecker(),
-        LoggingInIramChecker(),
         LegacyLogMacroChecker(),
-        PlatformIncludesChecker(),
-        PlatformTrampolineChecker(),  # Enforce trampoline architecture in src/fl/** and root src/
-        WeakAttributeChecker(),
-        AttributeChecker(),  # Checks all C++ standard attributes (replaces MaybeUnusedChecker)
-        AsmJsLocationChecker(),  # Checks EM_JS / EM_ASYNC_JS / EM_ASM live only in *.js.cpp.hpp
-        BannedMacrosChecker(),  # Checks for banned preprocessor macros like __has_include
-        BuiltinMemcpyChecker(),  # Checks for raw __builtin_memcpy — use FL_BUILTIN_MEMCPY
-        EspRomPrintfChecker(),  # Checks for raw esp_rom_printf — use FastLED logging
-        FlIsDefinedChecker(),
-        BannedNamespaceChecker(),  # Checks for banned namespace patterns like fl::fl
-        SingletonInHeadersChecker(),  # Checks for Singleton<T> in headers (must use SingletonShared<T>)
-        SpanFromPointerChecker(),  # Checks for span<T>(container.data(), container.size()) → span<T>(container)
-        BareAllocationChecker(),  # Checks for bare new/delete/malloc/free — use fl::unique_ptr/fl::shared_ptr
         BareSnprintfChecker(),  # Bans bare C ::snprintf/::printf/::sprintf in src/ — use fl::snprintf (#2773 item 1.5)
         BareLibmChecker(),  # Bans bare C libm calls (::sqrtf, ::atan2, ::powf, ::ldexpf, ...) — use fl::sqrt/fl::atan2/... (#3002, #3012)
         BareNoInlineChecker(),  # Bans bare __attribute__((noinline)) in src/ — use FL_NO_INLINE (#2773 item 2.1 follow-up)
         FlNoUnderscoreChecker(),  # Enforces FL_NO_<WORD> convention; bans bare FL_NO<WORD> (#3283)
-        SleepForChecker(),  # Checks for sleep_for() — bypasses async runner, use fl::yield/fl::async_run
-        ThreadLocalKeywordChecker(),  # Checks for thread_local keyword — use fl::SingletonThreadLocal<T>::instance()
-        BannedDefineChecker(),  # Checks for wrong #if patterns (e.g., #if ESP32 → #ifdef ESP32)
-        PlatformPragmaChecker(),  # Checks for raw #pragma GCC/clang/warning — use FL_DISABLE_WARNING macros
-        RawPragmaChecker(),  # Checks for raw _Pragma() — use FL_DISABLE_WARNING macros
-        RawNoexceptChecker(),  # Checks for raw noexcept keyword — use FL_NO_EXCEPT macro
-        # Note: Private libc++ headers checking is now integrated into BannedHeadersChecker
-        # Note: _build.hpp hierarchy checking is now integrated into test_unity_build.py
     ]
 
-    # Src-only checkers
-    checkers_by_scope["src"] = [
-        ArduinoMacroUsageChecker(),  # Checks for banned Arduino macros (INPUT, OUTPUT, DEFAULT)
-        UsingNamespaceFlChecker(),
-        StdNamespaceChecker(),
-        NamespaceIncludesChecker(),
-        ReinterpretCastChecker(),
-        RelativeIncludeChecker(),
-        FastLEDHeaderUsageChecker(),
-        StdintTypeChecker(),  # Covers all src/ (excludes third_party/ internally)
-        CtypeGlobalChecker(),  # Checks for global-scope ctype functions (use fl:: variants)
-        SimdIntrinsicsChecker(),  # Checks for direct platform SIMD intrinsics — use fl::simd
-        PragmaOnceChecker(),  # Checks headers have #pragma once, .cpp files don't
-    ]
+    # Src-only checkers — all retired to Rust.
+    checkers_by_scope["src"] = []
 
-    # Platforms-specific checkers
-    checkers_by_scope["platforms"] = [
-        PlatformsFlNamespaceChecker(),
-        NamespacePlatformsChecker(),
-        IsHeaderIncludeChecker(),
-        IwyuPragmaBlockChecker(all_headers=all_headers),
-        EnumClassChecker(),  # Checks for plain enum — use enum class for type safety
-    ]
+    # Platforms-specific checkers — all retired to Rust.
+    checkers_by_scope["platforms"] = []
 
-    # Native platform defines checker — runs on ALL src/ files (including third_party/)
-    # (the checker internally filters to src/ and excludes dispatch headers,
-    # is_*.h detection headers, etc.)
-    checkers_by_scope["native_platform_defines"] = [
-        NativePlatformDefinesChecker(),
-    ]
+    # Native platform defines checker — retired to Rust.
+    checkers_by_scope["native_platform_defines"] = []
 
-    # Include paths checker (for fl/ and platforms/ directories)
-    # Ensures include paths use "fl/", "platforms/", etc. prefixes
-    checkers_by_scope["fl_platforms_include_paths"] = [
-        IncludePathsChecker(),
-    ]
+    # Include paths checker (fl/ and platforms/) — retired to Rust.
+    checkers_by_scope["fl_platforms_include_paths"] = []
 
-    # Src root-only checkers
-    checkers_by_scope["src_root"] = [
-        NamespaceFlDeclarationChecker(),
-    ]
+    # Src root-only checkers — retired to Rust.
+    checkers_by_scope["src_root"] = []
 
-    # Examples-only checkers
-    checkers_by_scope["examples"] = [
-        SerialPrintfChecker(),
-        ExampleSerialChecker(),
-        UsingNamespaceFlInExamplesChecker(),
-    ]
+    # Examples-only checkers — retired to Rust.
+    checkers_by_scope["examples"] = []
 
-    # fl/ directory checkers with STRICT enforcement
+    # fl/ directory — only PublicSettingsPatternChecker remains on the Python side.
     checkers_by_scope["fl"] = [
-        BannedHeadersChecker(banned_headers_list=BANNED_HEADERS_CORE, strict_mode=True),
-        CppHppHeaderPairChecker(),  # Checks that *.cpp.hpp files have corresponding *.h headers
-        IwyuPragmaBlockChecker(all_headers=all_headers),
-        BareUsingChecker(),  # Checks for bare using declarations in headers (unity build safety)
-        SubdirNamespaceChecker(
-            "net"
-        ),  # Checks fl/net/ headers use proper fl::net:: namespaces
-        SubdirNamespaceChecker(
-            "video"
-        ),  # Checks fl/video/ headers use proper fl::video:: namespaces
-        SubdirNamespaceChecker(
-            "task"
-        ),  # Checks fl/task/ headers use proper fl::task:: namespaces
-        # NOTE: fl/math/ is NOT checked — types there intentionally live in fl::
-        # namespace for backward compatibility. Using inline namespace math
-        # causes cascading ambiguity with fl::detail, fl::simd, etc.
-        EnumClassChecker(),  # Checks for plain enum — use enum class for type safety
-        NoexceptSpecialMembersChecker(),  # Checks special member functions have FL_NO_EXCEPT
         PublicSettingsPatternChecker(),  # Checks fl::set_*/enable_*/disable_*/use_* free functions have CFastLED wrappers
     ]
 
-    # lib8tion/ directory checkers with STRICT enforcement
-    checkers_by_scope["lib8tion"] = [
-        BannedHeadersChecker(banned_headers_list=BANNED_HEADERS_CORE, strict_mode=True),
-    ]
+    # lib8tion/, fx_sensors_platforms_shared, platforms_banned, examples_banned,
+    # third_party — all banned-header variants retired to Rust.
+    checkers_by_scope["lib8tion"] = []
+    checkers_by_scope["fx_sensors_platforms_shared"] = []
+    checkers_by_scope["platforms_banned"] = []
+    checkers_by_scope["examples_banned"] = []
+    checkers_by_scope["third_party"] = []
 
-    # fx/, sensors/, platforms/shared/ checkers
-    checkers_by_scope["fx_sensors_platforms_shared"] = [
-        BannedHeadersChecker(
-            banned_headers_list=BANNED_HEADERS_CORE, strict_mode=False
-        ),
-    ]
+    # fl/ header-only checker — retired to Rust.
+    checkers_by_scope["fl_headers"] = []
 
-    # platforms/ directory checkers
-    checkers_by_scope["platforms_banned"] = [
-        BannedHeadersChecker(
-            banned_headers_list=BANNED_HEADERS_PLATFORMS, strict_mode=False
-        ),
-    ]
-
-    # examples/ directory checkers
-    checkers_by_scope["examples_banned"] = [
-        BannedHeadersChecker(
-            banned_headers_list=BANNED_HEADERS_COMMON, strict_mode=False
-        ),
-    ]
-
-    # third_party/ directory checkers
-    checkers_by_scope["third_party"] = [
-        BannedHeadersChecker(
-            banned_headers_list=BANNED_HEADERS_COMMON, strict_mode=True
-        ),
-    ]
-
-    # Specialized checker for src/fl/ header files only
-    checkers_by_scope["fl_headers"] = [
-        UsingNamespaceChecker(),
-    ]
-
-    # Tests-only checkers - FL compatibility now enforced
-    checkers_by_scope["tests"] = [
-        HeadersExistChecker(),
-        BannedHeadersChecker(
-            banned_headers_list=BANNED_HEADERS_CORE, strict_mode=False
-        ),
-        StdNamespaceChecker(),
-        TestPathStructureChecker(),
-        UnitTestChecker(),
-        CtypeGlobalChecker(),  # Checks for bare C ctype/cstring functions (use fl:: variants)
-        TestAggregationChecker(),  # Checks that .hpp files in excluded test dirs have parent aggregators
-        TestIncludePathsChecker(),  # Checks for bare/relative includes in tests (use full paths)
-    ]
+    # Tests-only checkers — all retired to Rust.
+    checkers_by_scope["tests"] = []
 
     return checkers_by_scope
 
@@ -899,8 +720,12 @@ def main() -> int:
     )
     parser.add_argument(
         "--rust",
-        action="store_true",
-        help="Use the Rust linter for the checker subset it currently supports",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Use the Rust linter for the checker subset it currently supports "
+            "(default: on). Pass --no-rust to fall back to the Python-only path."
+        ),
     )
     args = parser.parse_args()
     rust_ab = os.environ.get("FL_LINT_AB") == "1"

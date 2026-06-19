@@ -52,9 +52,14 @@ jobs:
         run: ./install
         shell: bash
 
-      - name: No namespace after headers
+      - name: C++ lint (Rust path)
+        # Exercises the Rust C++ linter (`fastled-lint`) end-to-end via the
+        # default `bash lint --cpp` path on every PR. The binary is rebuilt
+        # only if the crate sources changed; otherwise it runs directly.
+        # See FastLED #3288.
         run: |
-          uv run python ci/lint_cpp/no_using_namespace_fl_in_headers.py
+          bash lint --cpp
+        shell: bash
 
       - name: Run All Unit Tests
         id: run_tests

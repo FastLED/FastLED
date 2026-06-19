@@ -23,7 +23,6 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from ci.util.check_files import FileContent, FileContentChecker
 from ci.util.paths import PROJECT_ROOT
 
 
@@ -231,22 +230,11 @@ def check_single_file(file_path: Path) -> tuple[bool, list[str]]:
     return True, []
 
 
-class TestAggregationChecker(FileContentChecker):
-    """FileContentChecker wrapper for integration with run_all_checkers.py."""
-
-    def __init__(self) -> None:
-        self.violations: dict[str, list[tuple[int, str]]] = {}
-
-    def should_process_file(self, file_path: str) -> bool:
-        if "/tests/" not in file_path.replace("\\", "/"):
-            return False
-        return file_path.endswith((".cpp", ".hpp"))
-
-    def check_file_content(self, file_content: FileContent) -> list[str]:
-        success, violations = check_single_file(Path(file_content.path))
-        if not success:
-            self.violations[file_content.path] = [(0, v) for v in violations]
-        return []
+# NOTE: The runtime TestAggregationChecker class has been retired in favor
+# of the Rust implementation (see ci/lint_cpp_rs/). The standalone
+# ``check()``/``check_single_file()`` helpers above remain because the
+# orchestrator in ``run_all_checkers.py`` still invokes them for the
+# whole-project structural pass.
 
 
 def main() -> int:
