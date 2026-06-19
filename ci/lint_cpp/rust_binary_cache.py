@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -42,24 +43,74 @@ _FINGERPRINT_INPUTS = (
 _SRC_DIR = RUST_CRATE_DIR / "src"
 
 
+def _guess_host_triple() -> str | None:
+    """Best-effort guess of the host's Rust target triple.
+
+    Used to prioritize the matching ``target/<triple>/release/`` directory
+    when multiple cross-compile outputs exist. A miss is harmless — the
+    function only influences ordering, never correctness.
+    """
+    machine = platform.machine().lower()
+    arch = {
+        "amd64": "x86_64",
+        "x86_64": "x86_64",
+        "x64": "x86_64",
+        "arm64": "aarch64",
+        "aarch64": "aarch64",
+        "armv7l": "armv7",
+    }.get(machine, machine)
+    system = sys.platform
+    if system == "win32":
+        return f"{arch}-pc-windows-msvc"
+    if system == "darwin":
+        return f"{arch}-apple-darwin"
+    if system.startswith("linux"):
+        return f"{arch}-unknown-linux-gnu"
+    return None
+
+
 def _binary_candidate_paths() -> list[Path]:
     """Return candidate locations of the built fastled-lint binary.
 
-    soldr drives cargo with a host-triple ``CARGO_BUILD_TARGET``, so the
-    binary lands under ``target/<triple>/release/`` rather than the plain
-    ``target/release/``. We check both so callers don't have to care.
+    soldr drives cargo with ``CARGO_BUILD_TARGET`` pinned to the host triple,
+    so the binary lands under ``target/<triple>/release/`` rather than the
+    plain ``target/release/``. Ordering matters because the first existing
+    candidate wins: prefer the explicitly-requested triple
+    (``CARGO_BUILD_TARGET``), then the host triple, then the plain
+    ``target/release/``, then any other triple discovered on disk (sorted
+    for determinism — never let directory-iteration order pick a binary
+    silently on a multi-triple checkout).
     """
     suffix = ".exe" if os.name == "nt" else ""
     name = f"{RUST_BINARY_NAME}{suffix}"
     target_root = RUST_CRATE_DIR / "target"
-    candidates: list[Path] = [target_root / "release" / name]
+    plain_release = target_root / "release" / name
+
+    ordered: list[Path] = []
+    seen: set[Path] = set()
+
+    def _add(path: Path) -> None:
+        if path not in seen:
+            ordered.append(path)
+            seen.add(path)
+
+    env_target = os.environ.get("CARGO_BUILD_TARGET")
+    if env_target:
+        _add(target_root / env_target / "release" / name)
+
+    host_triple = _guess_host_triple()
+    if host_triple:
+        _add(target_root / host_triple / "release" / name)
+
+    _add(plain_release)
+
     if target_root.is_dir():
-        for triple_dir in target_root.iterdir():
+        for triple_dir in sorted(target_root.iterdir(), key=lambda p: p.name):
             if not triple_dir.is_dir() or triple_dir.name == "release":
                 continue
-            candidate = triple_dir / "release" / name
-            candidates.append(candidate)
-    return candidates
+            _add(triple_dir / "release" / name)
+
+    return ordered
 
 
 def _binary_path() -> Path:

@@ -648,26 +648,6 @@ def _determine_file_scopes(file_path: str) -> set[str]:
     return scopes
 
 
-def _collect_all_headers(files_by_dir: dict[str, list[str]]) -> frozenset[str]:
-    """Collect all header files from the project for cross-file validation.
-
-    Args:
-        files_by_dir: Dictionary of files organized by directory
-
-    Returns:
-        Immutable frozenset of all header file paths
-    """
-    all_headers: set[str] = set()
-
-    # Collect all header files from all directories
-    for file_list in files_by_dir.values():
-        for file_path in file_list:
-            if file_path.endswith((".h", ".hpp", ".hh", ".hxx")):
-                all_headers.add(file_path)
-
-    return frozenset(all_headers)
-
-
 def run_checkers_on_single_file(
     file_path: str, checkers_by_scope: dict[str, list[FileContentChecker]]
 ) -> dict[str, CheckerResults]:
@@ -742,12 +722,14 @@ def main() -> int:
         print(f"File: {file_path}")
         print()
 
-        # Collect all headers for cross-file validation (even in single-file mode)
+        # Collect files by directory so the file/scope dispatch below knows
+        # which checkers to apply. Cross-file header collection used to feed
+        # into create_checkers() but is no longer needed — every checker
+        # that consumed it has been retired to the Rust binary.
         files_by_dir = collect_all_files_by_directory()
-        all_headers = _collect_all_headers(files_by_dir)
 
         # Create all checker instances
-        checkers_by_scope = create_checkers(all_headers=all_headers)
+        checkers_by_scope = create_checkers()
         rust_results: dict[str, CheckerResults] = {}
         if use_rust_fast_path:
             rust_results = run_rust_linter([str(file_path)])
@@ -801,11 +783,9 @@ def main() -> int:
         # Collect all files by directory
         files_by_dir = collect_all_files_by_directory()
 
-        # Extract all headers for cross-file validation
-        all_headers = _collect_all_headers(files_by_dir)
-
-        # Create all checker instances
-        checkers_by_scope = create_checkers(all_headers=all_headers)
+        # Create all checker instances. The previous all_headers
+        # cross-file collection has been retired with its consumers.
+        checkers_by_scope = create_checkers()
         rust_results: dict[str, CheckerResults] = {}
         if use_rust_fast_path:
             rust_results = run_rust_linter(None)
