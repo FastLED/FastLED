@@ -236,6 +236,13 @@ reviews:
         `src/FastLED.h` and document the god-instance form in the PR
         description / examples.
 
+        Mutable caller-owned objects SHOULD be passed as `T&`, not `T*`,
+        unless `nullptr` has an explicit documented meaning such as reset,
+        no-op compatibility, or another nullable contract. Flag new mutable
+        pointer parameters that merely express mutation; the fix is usually a
+        non-const reference overload plus a documented compatibility wrapper
+        only when preserving an existing nullable API.
+
     - path: "src/fl/log/**"
       instructions: |
         FL_WARN / FL_ERROR default-visibility invariant (#2886 Stage 1):

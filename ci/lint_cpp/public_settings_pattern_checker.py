@@ -190,7 +190,7 @@ def _is_per_object_setter(decl_line: str) -> bool:
     is likely mutating an object the caller owns, not global state.
 
     Examples that return True (per-object — skip):
-        void set_input_gamut(DiodeProfile* obj, InputGamut g)
+        void set_input_gamut(DiodeProfile& obj, InputGamut g)
         void set_color(CRGB& out, uint8_t r, uint8_t g, uint8_t b)
 
     Examples that return False (global state — flag):

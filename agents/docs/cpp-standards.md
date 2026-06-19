@@ -254,8 +254,8 @@ class CFastLED {
 
 **Rules**:
 1. ❌ **NEVER ship a new `fl::set_*` / `fl::enable_*` / `fl::disable_*` / `fl::use_*` free function that mutates library-wide state without a matching `CFastLED::setX()` / `enableX()` wrapper.**
-   - ❌ Bad: `fl::set_input_gamut(&profile, fl::InputGamut::Rec709);` as the documented call site
-   - ✅ Good: `FastLED.setInputGamut(&profile, fl::InputGamut::Rec709);` (god instance), with a `fl::set_input_gamut(...)` free function backing it
+   - ❌ Bad: `fl::set_input_gamut(profile, fl::InputGamut::Rec709);` as the documented call site
+   - ✅ Good: `FastLED.setInputGamut(profile, fl::InputGamut::Rec709);` (god instance), with a `fl::set_input_gamut(...)` free function backing it
 2. ✅ **The wrapper is a `inline` one-liner that delegates** — no logic, no validation, no error handling. The free function holds all behavior.
 3. ✅ **Per-object configuration (e.g. one strip's diode profile, one controller's correction) MAY live on the per-object API.** This rule targets *library-wide / process-wide / default-profile* state.
 4. ✅ **Documentation, examples, and PR descriptions reference the god-instance form.** The free function is an implementation detail.
@@ -308,35 +308,53 @@ class CFastLED {
 2. If the parameter is `const T*` AND the storage is `const T*`, flag as HIGH severity (pointer storage = use-after-scope).
 3. If the parameter is `const T*` but the storage is `T` and the body copies on non-null + resets on null, that's the allowed nullable-reset shape — no violation.
 
+## Mutating Caller-Owned Objects: Prefer References Over Pointers
+
+**Core Principle**: Public APIs that mutate a required caller-owned object SHOULD take `T&`, not `T*`. A mutable pointer is permitted only when null has an explicit semantic contract, such as "reset to default" for a global setting or a temporary compatibility overload that preserves an older no-op-on-null API.
+
+**Rules**:
+1. ❌ **NEVER use a mutable pointer merely because the function mutates the object.**
+   - ❌ Bad: `void set_input_gamut(DiodeProfile* profile, InputGamut g);`
+   - ✅ Good: `void set_input_gamut(DiodeProfile& profile, InputGamut g);`
+2. ✅ **Keep pointer overloads only when null behavior is intentionally documented.**
+   - ✅ Compatibility: `void set_input_gamut(DiodeProfile* profile, InputGamut g);  // nullptr is a no-op for legacy callers`
+   - ✅ Nullable reset: `void set_rgbww_colorimetric_profile(const RgbcctProfile* p);  // nullptr resets to default`
+3. ✅ **For read-only required inputs, use `const T&`; for required mutations, use `T&`; for optional inputs, prefer an overload or a named optional type over a raw pointer when practical.**
+
+**Check Process**:
+1. For every new public function taking `T*`, ask whether `nullptr` is meaningful and documented.
+2. If null is not meaningful, require `T&` or `const T&`.
+3. If the pointer remains for compatibility, add the reference overload as the preferred API and document the pointer overload as legacy/nullable.
+
 ## In-Place Profile Mutation Bumps a Version (Cache Invalidation Contract)
 
-**Core Principle**: If `set_X(T* obj, ...)` writes into the fields of a caller-owned `*obj`, and any subsystem caches values *derived from* `*obj` keyed only on `(obj_ptr, ...)`, then the setter MUST bump `obj->mCacheVersion` (or call `obj->invalidate()`) and the cache key MUST include that version. Otherwise the cache returns stale data the next time the same pointer is passed in.
+**Core Principle**: If `set_X(T& obj, ...)` writes into the fields of a caller-owned `obj`, and any subsystem caches values *derived from* `obj` keyed only on `(&obj, ...)`, then the setter MUST bump `obj.mCacheVersion` (or call `obj.invalidate()`) and the cache key MUST include that version. Otherwise the cache returns stale data the next time the same object is passed in.
 
 **Rules**:
 1. ❌ **NEVER mutate a profile field in place without bumping a version counter** when a cache exists keyed on the profile pointer.
    - ❌ Bad:
      ```cpp
-     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NOEXCEPT {
-         apply_gamut(p, g);  // rewrites p->input_xy_*
-         // …no version bump; ProfileCache keyed on (p, cct) still returns stale M_src
+     void set_input_gamut(DiodeProfile& p, InputGamut g) FL_NOEXCEPT {
+         apply_gamut(p, g);  // rewrites p.input_xy_*
+         // …no version bump; ProfileCache keyed on (&p, cct) still returns stale M_src
      }
      ```
    - ✅ Good:
      ```cpp
-     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NOEXCEPT {
+     void set_input_gamut(DiodeProfile& p, InputGamut g) FL_NOEXCEPT {
          apply_gamut(p, g);
-         ++p->mCacheVersion;  // forces any derived-value cache to rebuild
+         ++p.mCacheVersion;  // forces any derived-value cache to rebuild
      }
      // and:
      struct CacheKey { const DiodeProfile* p; u32 version; int cct; };
      ```
-2. ✅ **Document the cache-invalidation contract** in the setter's doxygen: "Mutates `*p` in place; bumps `p->mCacheVersion` so derived caches rebuild on next access."
+2. ✅ **Document the cache-invalidation contract** in the setter's doxygen: "Mutates `p` in place; bumps `p.mCacheVersion` so derived caches rebuild on next access."
 3. ✅ **Prefer immutable profiles when possible.** A `DiodeProfile` that ships as `const` to all consumers and is replaced wholesale (`set_profile(const T&)`) eliminates this entire class of bug — see Singleton-Stored Configuration rule above.
 
 **Rationale**: Drove four CodeRabbit findings in the survey window (#2554, #2589, #2707, #2711) and is the root cause of the colorimetric "looks right in tests but stale in production" class. Tests typically construct one profile per test case so the cache never hits — the bug only shows up in real applications that mutate one shared profile across frames.
 
 **Check Process**:
-1. For each `fl::set_*(T* obj, ...)` where the body mutates `*obj`, search the codebase for a cache keyed on `obj` (typical names: `ProfileCache`, `kCache`, `sCachedDerived`).
+1. For each `fl::set_*(T& obj, ...)` where the body mutates `obj`, search the codebase for a cache keyed on `&obj` (typical names: `ProfileCache`, `kCache`, `sCachedDerived`).
 2. If a cache exists and the setter doesn't bump a version field, flag as HIGH severity.
 
 ## Contract Change Fanout (API Surface Changes Touch All Layers in One PR)
@@ -365,16 +383,16 @@ class CFastLED {
    - ❌ Bad: `using write_bytes_handler_t = fl::function<size_t(const u8*, size_t)>;`
    - ✅ Good: `using write_bytes_handler_t = fl::function<size_t(fl::span<const u8>)>;`
 2. ❌ **NEVER take small fixed-size arrays as raw pointers.**
-   - ❌ Bad: `void set_input_gamut(DiodeProfile* p, InputGamut g, const float white_xy[2]);`
-   - ✅ Good: `void set_input_gamut(DiodeProfile* p, InputGamut g, fl::span<const float, 2> white_xy);`
-   - ✅ Good (alternative — by-value pair): `void set_white_point(DiodeProfile* p, fl::vec2f white_xy);`
+   - ❌ Bad: `void set_input_gamut(DiodeProfile& p, InputGamut g, const float white_xy[2]);`
+   - ✅ Good: `void set_input_gamut(DiodeProfile& p, InputGamut g, fl::span<const float, 2> white_xy);`
+   - ✅ Good (alternative — by-value pair): `void set_white_point(DiodeProfile& p, fl::vec2f white_xy);`
 3. ❌ **NEVER use function parameter array spelling (`T value[N]` or `T value[]`).**
    - C++ adjusts these to `T* value`; the extent is not part of the function type and is not enforced.
    - ❌ Bad: `void cct_to_xy(int cct, float out[2]);`
    - ❌ Bad: `void encode(fl::u8 output[4]);`
    - ✅ Good for normal APIs: `void cct_to_xy(int cct, fl::span<float, 2> out);`
    - ✅ Good for ISR / `FL_IRAM` APIs: `void encode(fl::u8 (&output)[4]);`
-   - ✅ Good where a wrapper type would obscure the domain: `void set_white_point(DiodeProfile* p, fl::vec2f white_xy);`
+   - ✅ Good where a wrapper type would obscure the domain: `void set_white_point(DiodeProfile& p, fl::vec2f white_xy);`
    - Suppress only intentional C ABI or platform compatibility cases with `// ok array parameter`.
 4. ⚠️ **For ISR / `FL_IRAM` callgraphs, prefer array references over `fl::span<T, N>`.**
    - `fl::span<T, N>` is the right general API shape, but current span accessors are not explicitly `FASTLED_FORCE_INLINE` / `FL_IRAM`. Until an explicitly ISR-safe span exists, ISR-facing fixed-size output buffers should use `T (&value)[N]`.
