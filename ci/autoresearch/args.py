@@ -128,7 +128,7 @@ Examples:
   %(prog)s --rmt --spi                 # Test RMT and SPI drivers
   %(prog)s --all                       # Test all drivers
   %(prog)s --parlio --skip-lint        # Skip linting for faster iteration
-  %(prog)s --rmt --timeout 120         # Custom timeout (default: 60s)
+  %(prog)s --rmt --timeout 2m          # Custom timeout (default: 30s; supports s/m/h/ms)
   %(prog)s --lcd --lanes 2 --strip-sizes 100,300  # Test LCD_CLOCKLESS with 2 lanes, strips of 100 and 300 LEDs
   %(prog)s --lcd-spi --strip-sizes 100,500   # Test LCD_SPI (APA102) on ESP32-S3
   %(prog)s --parlio --lanes 1-4        # Test PARLIO with 1-4 lanes
@@ -405,8 +405,23 @@ See Also:
             "--timeout",
             "-t",
             type=str,
-            default="60",
-            help="Timeout for monitor phase. Supports: plain number (seconds), '120s', '2m', '5000ms' (default: 60)",
+            default=None,
+            help=(
+                "Timeout for monitor phase. Supports: plain number (seconds), "
+                "'30s', '2m', '1h', '5000ms'. "
+                "Default: 30s with a yellow advisory banner (FastLED #3309). "
+                "Pass --no-timeout to disable."
+            ),
+        )
+        parser.add_argument(
+            "--no-timeout",
+            action="store_true",
+            help=(
+                "Disable the monitor-phase timeout entirely. Use for debugger "
+                "sessions or interactive bring-up where the device may legitimately "
+                "stay quiet for a long time. Suppresses the default-timeout banner. "
+                "FastLED #3309."
+            ),
         )
         parser.add_argument(
             "--project-dir",

@@ -766,12 +766,34 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         if args.fail_keywords:
             fail_keywords.extend(args.fail_keywords)
 
-    # Parse timeout
-    try:
-        timeout_seconds = parse_timeout(args.timeout)
-    except ValueError as e:
-        print(f"\u274c Error: {e}")
-        return 1
+    # Parse timeout (FastLED #3309: 30s default with advisory banner;
+    # --no-timeout to disable; supports 30s / 10m / 1h / 5000ms notation).
+    AUTORESEARCH_DEFAULT_TIMEOUT_S = 30
+    no_timeout = bool(getattr(args, "no_timeout", False))
+    quiet = bool(getattr(args, "quiet", False))
+    if no_timeout:
+        # Effectively unbounded: a year-of-seconds is "no timeout" for any
+        # practical bring-up session and stays well within int range.
+        timeout_seconds = 365 * 24 * 3600
+    elif args.timeout is None:
+        timeout_seconds = AUTORESEARCH_DEFAULT_TIMEOUT_S
+        if not quiet:
+            # Yellow advisory banner so the user sees the default is in effect
+            # and knows how to override. Suppressed under --quiet. Fore/Style
+            # are imported at module level above.
+            print(
+                f"{Fore.YELLOW}"
+                f"[default {AUTORESEARCH_DEFAULT_TIMEOUT_S}s timeout in effect "
+                f"-- pass --timeout <duration> (e.g. 30s / 2m / 1h) or "
+                f"--no-timeout to override]"
+                f"{Style.RESET_ALL}"
+            )
+    else:
+        try:
+            timeout_seconds = parse_timeout(args.timeout)
+        except ValueError as e:
+            print(f"\u274c Error: {e}")
+            return 1
 
     # Resolve project root (always the user's invocation cwd) and build_dir.
     #
