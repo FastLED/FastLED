@@ -30,15 +30,20 @@ jobs:
     uses: ./.github/workflows/build_template_binary_size.yml
     with:
       board: esp32dev
-      # 330 KB was the aspirational PR #3268 ceiling. After the #3278
-      # root-platformio.ini sever (and #3279 Phase 4 cleanup), the band-
-      # aid `-Os` / `-fno-exceptions` flags from root no longer reach
-      # fbuild — they relied on the legacy merge that has been removed.
-      # The fbuild build path needs its own flag-port mechanism that
-      # actually propagates these to the underlying ESP32 toolchain
-      # (tracked in #3298). Until then, raise the cap to 700 KB
-      # to match the pre-#3268 ceiling (PR #2790 / #2608) so CI runs to
-      # completion and we can measure real regressions. Today's fbuild
-      # esp32dev Blink size is ~401 KB; Apa102 sits a bit higher.
-      max_size: 700000
-      max_size_apa102: 700000
+      # ==========================================================================
+      # FROZEN SIZE THRESHOLD — DO NOT RAISE TO MAKE CI GREEN.
+      #
+      # 330 KB is the canonical ceiling. CI being red on esp32dev means a real
+      # regression that must be FIXED (in code or in the build system), not
+      # hidden by raising the cap. The known cause of current redness is #3298
+      # (fbuild does not propagate ESP32 board-level build_flags/build_unflags
+      # to the toolchain) — fix #3298, do not raise this number.
+      #
+      # The value here is mirror-locked by `ci/lint/check_size_thresholds.py`:
+      # changing this number without updating the frozen-list constant in that
+      # script will fail `bash lint`. The matching CodeRabbit rule on path
+      # `.github/workflows/check_*_size.yml` flags any raise as HIGH severity
+      # and requires an explicit issue reference + maintainer sign-off.
+      # ==========================================================================
+      max_size: 330000
+      max_size_apa102: 330000

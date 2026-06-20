@@ -84,6 +84,51 @@ reviews:
         "`fl::span` for Callback Typedefs and Small Fixed-Size Arrays" and
         FastLED issue #3233.
 
+    - path: ".github/workflows/check_*_size.yml"
+      instructions: |
+        BINARY-SIZE THRESHOLD LOCKDOWN.
+
+        The `max_size` and `max_size_apa102` values in every
+        `.github/workflows/check_*_size.yml` workflow are FROZEN. CI agents
+        have repeatedly tried to "fix" a red size-check by raising the cap
+        to make the threshold pass. THAT IS A HIGH SEVERITY VIOLATION.
+
+        A red size check means a real regression in the binary. The correct
+        responses are:
+          1. Revert the change that caused the regression.
+          2. Fix the build flag / linker / over-link / symbol-leak that
+             grew the binary.
+          3. (Only when (1) and (2) are demonstrably impossible) raise the
+             cap, AND in the SAME PR update `ci/lint/check_size_thresholds.py`
+             FROZEN_THRESHOLDS to match, AND link an open issue justifying
+             the new ceiling, AND get explicit maintainer sign-off.
+
+        Flag as HIGH SEVERITY any PR that:
+        - Raises `max_size` or `max_size_apa102` without ALSO modifying
+          `ci/lint/check_size_thresholds.py` in the same diff.
+        - Adds a comment like "bump cap to clear CI" / "temporary raise" /
+          "pending follow-up issue" without a referenced merged-issue
+          explaining the actual architectural reason.
+        - Removes the FROZEN SIZE THRESHOLD banner.
+        - Adds a new `check_*_size.yml` workflow without registering its
+          thresholds in `ci/lint/check_size_thresholds.py`.
+
+        Mirror enforcement: `bash lint` runs `ci/lint/check_size_thresholds.py`
+        which fails (exit 1, ERROR mode — no warn-only) on any value that
+        doesn't match the frozen constant in the lint script. This makes the
+        "two-file friction" deliberate — agents trying to silently bump the
+        YAML will hit the lint failure.
+
+    - path: "ci/lint/check_size_thresholds.py"
+      instructions: |
+        BINARY-SIZE THRESHOLD LOCKDOWN — companion to
+        `.github/workflows/check_*_size.yml`.
+
+        Changes to `FROZEN_THRESHOLDS` here MUST be paired with the matching
+        YAML edit in the same PR, AND require an open issue link explaining
+        why the new ceiling is correct. A PR that raises a frozen value
+        without an issue ref + maintainer sign-off is HIGH SEVERITY.
+
     - path: "platformio.ini"
       instructions: |
         ROOT `./platformio.ini` LOCKDOWN (#3274 / #3281 follow-up).
