@@ -363,7 +363,16 @@ struct ChannelConfigOf {
 /// config.add(channel1);
 /// config.add(channel2);
 /// ```
+class Fled;  // fwd - fl/fled/fled.h, for fromFled factory
+
 struct MultiChannelConfig {
+    // Bidirectional factory for the .fled bundle subsystem (#3311 PR4).
+    // One-line forwarder to fl::Fled::channels(); kept here so call sites
+    // can spell either fled.channels() or
+    // fl::MultiChannelConfig::fromFled(fled) interchangeably. Returns
+    // nullptr until fl::Fled::channels() body lands (currently a stub).
+    static fl::shared_ptr<MultiChannelConfig> fromFled(const Fled& fled) FL_NO_EXCEPT;
+
     MultiChannelConfig() FL_NO_EXCEPT = default;
     MultiChannelConfig(const MultiChannelConfig&) FL_NO_EXCEPT = default;
     MultiChannelConfig(MultiChannelConfig&&) FL_NO_EXCEPT = default;
