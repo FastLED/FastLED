@@ -601,6 +601,12 @@ inline ClearFlags& operator|=(ClearFlags& a, ClearFlags b) {
 	return a;
 }
 
+// Forward declaration for the .fled bundle handle (#3311). The fwd
+// header is intentionally microscopic; the full fl::Fled definition
+// in fl/fled/fled.h is NOT pulled in so sketches that never touch
+// .fled bundles pay nothing for the CFastLED::load* entry points.
+#include "fl/fled/fwd.h"
+
 /// High level controller interface for FastLED.
 /// This class manages controllers, global settings, and trackings such as brightness
 /// and refresh rates, and provides access functions for driving led data to controllers
@@ -785,6 +791,32 @@ public:
 	/// auto channels = FastLED.add(multiConfig);
 	/// @endcode
 	static fl::vector<fl::ChannelPtr> add(const fl::MultiChannelConfig& multiConfig);
+
+	/// @name .fled Bundle Load API
+	/// @{
+	/// Bundle-load surface for the .fled subsystem (#3311 PR5). Each
+	/// method lives in its own translation unit so the linker can drop
+	/// it (and the FledDispatcher singleton it transitively pulls) when
+	/// the sketch never calls it. Pass a default-constructed fl::Fled
+	/// (or one that failed to parse) and every method is a no-op.
+
+	/// @brief Load a parsed .fled bundle: registers channels, binds the
+	///        screen map, and dispatches any embedded script to the
+	///        runtime installed via enableWasm/enableMicroPy (PR6).
+	/// @param fled Parsed bundle (use fl::Fled::load / loadFromStatic /
+	///             loadFromVector to construct).
+	void load(const fl::Fled& fled);
+
+	/// @brief Channels-only portion of load(): iterates fled.channels()
+	///        and calls FastLED.add(ChannelConfig) for each entry.
+	void loadChannels(const fl::Fled& fled);
+
+	/// @brief Screen-map portion of load(). PR5 ships this as a stub;
+	///        the EngineEvents broadcast lands in a follow-up once the
+	///        bind-target policy (all controllers vs first/default vs a
+	///        new controller-less API) is decided. See #3311.
+	void loadScreenMap(const fl::Fled& fled);
+	/// @}
 
 	/// @brief Add an RX channel with runtime configuration
 	///
