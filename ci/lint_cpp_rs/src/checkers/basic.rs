@@ -414,6 +414,12 @@ impl FileContentChecker for IncludePathsChecker {
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        // Whole-file early exit: every violation this checker can report
+        // is gated on the line containing `#include`. Files without any
+        // #include at all (rare but possible) skip the per-line walk.
+        if !file_content.content.contains("#include") {
+            return Vec::new();
+        }
         let mut violations = Vec::new();
         let mut in_multiline_comment = false;
 
