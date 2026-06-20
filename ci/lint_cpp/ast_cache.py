@@ -37,25 +37,34 @@ _CACHE_DIR = PROJECT_ROOT / ".cache" / "ast_lint"
 _TRACKED_EXTENSIONS = (".h", ".hpp", ".cpp", ".cc", ".cxx", ".cpp.hpp")
 
 # Scope -> list of src/ subdirectories to fingerprint.
-_SCOPE_DIRS: dict[str, tuple[str, ...]] = {
-    "fl": ("src/fl",),
-    "platforms": ("src/platforms",),
-    "third_party": ("src/third_party",),
-    "all": ("src/fl", "src/platforms", "src/third_party"),
-}
+#
+# IMPORTANT: clang-query parses each TU's TRANSITIVE include closure -
+# not just the files under the named scope. A change to a header that's
+# not directly in scope (e.g. src/FastLED.h, src/crgb.h, src/lib8tion/*)
+# can change clang-query's output. To stay correct, we walk the entire
+# src/ tree regardless of scope and fingerprint every C/C++ source +
+# header. The scope name is preserved as a key for the cache file name
+# but no longer narrows the file set.
+#
+# Cost: ~100 extra files vs the previous scope-narrow walk (~2000 ->
+# ~2100). Fingerprint is per-file os.stat (mtime+size); ~50ms total.
+_SRC_ROOT = "src"
 
 
 def _iter_scope_files(scope: str) -> Iterable[Path]:
-    for subdir in _SCOPE_DIRS.get(scope, ()):
-        root = PROJECT_ROOT / subdir
-        if not root.is_dir():
+    # `scope` retained in the signature for API stability + cache-key
+    # differentiation, but we always walk the full src/ tree because
+    # any header anywhere can affect a TU's parse.
+    del scope
+    root = PROJECT_ROOT / _SRC_ROOT
+    if not root.is_dir():
+        return
+    for path in root.rglob("*"):
+        if not path.is_file():
             continue
-        for path in root.rglob("*"):
-            if not path.is_file():
-                continue
-            name = path.name.lower()
-            if any(name.endswith(ext) for ext in _TRACKED_EXTENSIONS):
-                yield path
+        name = path.name.lower()
+        if any(name.endswith(ext) for ext in _TRACKED_EXTENSIONS):
+            yield path
 
 
 def _compute_fingerprint(scope: str, extra_inputs: list[Path]) -> str:
