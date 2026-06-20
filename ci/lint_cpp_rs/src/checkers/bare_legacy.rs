@@ -406,6 +406,112 @@ impl FileContentChecker for IwyuPragmaPrivateChecker {
     }
 }
 
+// --- BareDigitSeparatorChecker ----------------------------------------------
+//
+// Bans C++14 digit separators (e.g. `999'999'999`) in src/. Some downstream
+// PlatformIO environments (LPC8xx in particular, see FastLED #3329) still
+// default to `-std=gnu++11`. Under gnu++11 the compiler reads the single
+// quote as a character-literal delimiter, so a literal like `999'999'999`
+// becomes `'999'` + stray digits — fatal parse error. Keep src/ portable
+// across C++11/14/17 by spelling out the digits.
+//
+// Comments are stripped before matching (via the shared
+// `python_style_pass_through_line` helper) so doxygen comments that mention
+// the formula in pseudocode (`// = (ns * hz + 999'999'999) / 1'000'000'000`)
+// stay legal — the compiler never sees them.
+//
+// Suppression: append `// ok digit-separator` at end of the line.
+
+struct BareDigitSeparatorChecker;
+
+impl FileContentChecker for BareDigitSeparatorChecker {
+    fn name(&self) -> &'static str {
+        "BareDigitSeparatorChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        if !is_under_dir(file_path, "src") {
+            return false;
+        }
+        if !ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".cpp.hpp"]) {
+            return false;
+        }
+        let normalized = normalize_path(file_path);
+        !normalized.contains("/third_party/")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        const SUPPRESS: &str = "// ok digit-separator";
+        let mut violations = Vec::new();
+        let mut in_block_comment = false;
+        for (index, line) in file_content.lines.iter().enumerate() {
+            // Strip all `/* ... */` block comments (single-line AND multi-line),
+            // advancing in_block_comment across line boundaries. This is what
+            // makes inline doxygen `/* note 9'9 */` skip cleanly.
+            let stripped = strip_block_comments_from_line(line, &mut in_block_comment);
+            // Trailing `// ok digit-separator` opts the line out, but ONLY
+            // after we've advanced the block-comment state. (Checking the
+            // SUPPRESS text on the original line — pre-strip — keeps the
+            // suppression honest if the line is part of a `/* ... */` block.)
+            if line.contains(SUPPRESS) {
+                continue;
+            }
+            // Drop the trailing `// comment` portion so digit-separator-style
+            // pseudocode in doxygen-comment lines doesn't fire.
+            let code = split_line_comment(&stripped);
+            // Strip ONLY double-quoted string literals so `"don't 9'9"`
+            // doesn't fire. The shared `strip_string_literals` also blanks
+            // single-quoted CHARs, which would eat the very digit-separator
+            // we want to flag (`'9'` inside `999'999'999ULL`).
+            let code_no_strings = strip_double_quoted_strings(code);
+            if regex_bare_digit_separator().is_match(&code_no_strings) {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "{}  [C++14 digit separator — use plain digits for gnu++11 portability \
+(suppress with `// ok digit-separator` if intentional)]",
+                        line.trim_end()
+                    ),
+                ));
+            }
+        }
+        violations
+    }
+}
+
+fn strip_double_quoted_strings(code: &str) -> String {
+    // Replace the contents of every `"..."` literal with empty space while
+    // preserving the surrounding code positions. Unlike the shared
+    // `strip_string_literals`, single-quoted char literals are left alone so
+    // a digit separator like `'9'` inside `999'999'999ULL` still surfaces.
+    let mut out = String::with_capacity(code.len());
+    let mut in_string = false;
+    let mut escaped = false;
+    for ch in code.chars() {
+        if in_string {
+            if escaped {
+                escaped = false;
+                continue;
+            }
+            if ch == '\\' {
+                escaped = true;
+                continue;
+            }
+            if ch == '"' {
+                in_string = false;
+                out.push('"');
+                continue;
+            }
+            continue;
+        }
+        if ch == '"' {
+            in_string = true;
+        }
+        out.push(ch);
+    }
+    out
+}
+
 // --- Shared helpers ----------------------------------------------------------
 //
 // All five checkers share the same Python-style "skip line on block comment
