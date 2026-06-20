@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from typing import Any, cast
 
@@ -32,12 +33,20 @@ def run_rust_linter(files: list[str] | None) -> dict[str, CheckerResults]:
     if files:
         cmd.extend(files)
 
+    # Force a full backtrace on panic. The binary is built with the
+    # cargo dev profile + debug="line-tables-only" so traces resolve to
+    # file:line without dragging in the full-DWARF compile-time tax. If
+    # the caller already set RUST_BACKTRACE we respect their choice.
+    env = os.environ.copy()
+    env.setdefault("RUST_BACKTRACE", "full")
+
     result = RunningProcess.run(
         cmd,
         cwd=str(PROJECT_ROOT),
         capture_output=True,
         check=False,
         timeout=300,
+        env=env,
     )
 
     if result.stderr:
