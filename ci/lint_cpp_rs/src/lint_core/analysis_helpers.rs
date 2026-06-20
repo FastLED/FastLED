@@ -357,7 +357,22 @@ impl ClassNameRegex {
             let alternation: Vec<String> =
                 names.iter().map(|n| regex::escape(n)).collect();
             let pattern = format!(r"\b({})\s*\(", alternation.join("|"));
-            Regex::new(&pattern).ok()
+            match Regex::new(&pattern) {
+                Ok(re) => Some(re),
+                Err(err) => {
+                    // Loud failure: silently dropping this regex would skip
+                    // copy/move/default-ctor detection for every file with no
+                    // signal to the user. Stderr warning surfaces the bug.
+                    eprintln!(
+                        "warning: ClassNameRegex::build failed to compile pattern for {} class names ({}): {}; \
+                         constructor noexcept checks will be skipped",
+                        names.len(),
+                        names.iter().take(3).cloned().collect::<Vec<_>>().join(", "),
+                        err
+                    );
+                    None
+                }
+            }
         };
         Self { names, combined }
     }

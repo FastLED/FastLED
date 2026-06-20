@@ -569,7 +569,10 @@ where
     I: IntoIterator<Item = String>,
 {
     let t_total = std::time::Instant::now();
-    let profile = std::env::var("FASTLED_LINT_PROFILE").ok().is_some();
+    let profile = matches!(
+        std::env::var("FASTLED_LINT_PROFILE").as_deref(),
+        Ok("1") | Ok("true") | Ok("yes") | Ok("on")
+    );
 
     let config = CliConfig::parse(args)?;
 
