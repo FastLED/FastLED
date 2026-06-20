@@ -112,6 +112,82 @@ mod tests {
     }
 
     #[test]
+    fn em_asm_without_clang_format_off_in_wasm_triggers_violation() {
+        let checker = EmAsmClangFormatChecker;
+        let project_root = std::env::current_dir().unwrap();
+        let project_root = project_root
+            .ancestors()
+            .find(|candidate| candidate.join("src").join("platforms").join("wasm").exists())
+            .map(|path| path.to_path_buf())
+            .unwrap_or(project_root);
+        let path = project_root
+            .join("src")
+            .join("platforms")
+            .join("wasm")
+            .join("synthetic_em_asm_test.cpp");
+        let path_str = normalize_path(&path.to_string_lossy());
+        let content = "#include <emscripten.h>\nvoid foo() {\n    EM_ASM_({ console.log($0); }, 42);\n}\n";
+
+        assert!(checker.should_process_file(&path_str, &project_root));
+        let violations = checker.check_file_content(&file(&path_str, content));
+        assert_eq!(violations.len(), 1);
+        assert_eq!(violations[0].0, 1);
+        assert!(violations[0].1.contains("Missing clang-format off"));
+    }
+
+    #[test]
+    fn em_asm_with_clang_format_off_in_wasm_passes() {
+        let checker = EmAsmClangFormatChecker;
+        let project_root = std::env::current_dir().unwrap();
+        let project_root = project_root
+            .ancestors()
+            .find(|candidate| candidate.join("src").join("platforms").join("wasm").exists())
+            .map(|path| path.to_path_buf())
+            .unwrap_or(project_root);
+        let path = project_root
+            .join("src")
+            .join("platforms")
+            .join("wasm")
+            .join("synthetic_em_asm_test.cpp");
+        let path_str = normalize_path(&path.to_string_lossy());
+        let content = "// clang-format off\n#include <emscripten.h>\nvoid foo() {\n    EM_ASM_({ console.log($0); }, 42);\n}\n";
+
+        assert!(checker.should_process_file(&path_str, &project_root));
+        let violations = checker.check_file_content(&file(&path_str, content));
+        assert!(violations.is_empty());
+    }
+
+    #[test]
+    fn em_asm_outside_wasm_scope_is_ignored() {
+        let checker = EmAsmClangFormatChecker;
+        let project_root = std::env::current_dir().unwrap();
+        let project_root = project_root
+            .ancestors()
+            .find(|candidate| candidate.join("src").join("fl").exists())
+            .map(|path| path.to_path_buf())
+            .unwrap_or(project_root);
+        let path = project_root
+            .join("src")
+            .join("fl")
+            .join("synthetic_em_asm_test.cpp");
+        let path_str = normalize_path(&path.to_string_lossy());
+        let content = "void foo() {\n    EM_ASM_({ console.log($0); }, 42);\n}\n";
+
+        // Out of scope: should_process_file must reject src/fl/* paths even
+        // though the file contains EM_ASM_ without a clang-format-off marker.
+        assert!(!checker.should_process_file(&path_str, &project_root));
+        // Defensive: even if a caller invoked check_file_content directly, the
+        // checker would still report the violation — guard scoping is enforced
+        // by should_process_file alone, which is the contract we just verified.
+        assert_eq!(
+            checker
+                .check_file_content(&file(&path_str, content))
+                .len(),
+            1
+        );
+    }
+
+    #[test]
     fn lint_violation_json_shape_stays_stable() {
         let violation = LintViolation {
             checker: "ExampleChecker".to_string(),

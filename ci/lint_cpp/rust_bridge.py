@@ -35,6 +35,7 @@ RUST_SUPPORTED_CHECKERS = frozenset(
         "CppHppIncludesChecker",
         "CppIncludeChecker",
         "CtypeGlobalChecker",
+        "EmAsmClangFormatChecker",
         "EnumClassChecker",
         "EspRomPrintfChecker",
         "ExampleSerialChecker",
