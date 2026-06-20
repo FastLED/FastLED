@@ -25,9 +25,6 @@ using vec2f = vec2<float>;
 // Forward declare XYMap for optional source storage
 class XYMap;
 
-// Forward declare Fled (fl/fled/fled.h) for the bidirectional fromFled factory.
-class Fled;
-
 // Forward declare LUT types and smart pointers
 template<typename T> class LUT;
 using LUTXYFLOAT = LUT<vec2f>;
@@ -47,12 +44,6 @@ class ScreenMap {
     static ScreenMap DefaultStrip(int numLeds, float cm_between_leds = 1.5f,
                                   float cm_led_diameter = 0.2f,
                                   float completion = .9f) FL_NO_EXCEPT;
-
-    // Bidirectional factory for the .fled bundle subsystem (#3311 PR4).
-    // One-line forwarder to fl::Fled::screenMap(); kept here so call sites
-    // can spell either fled.screenMap() or fl::ScreenMap::fromFled(fled)
-    // interchangeably.
-    static fl::shared_ptr<ScreenMap> fromFled(const Fled& fled) FL_NO_EXCEPT;
 
     // Constructors and destructor - implemented in .cpp for proper smart_ptr handling
     ScreenMap() FL_NO_EXCEPT;
