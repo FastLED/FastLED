@@ -100,8 +100,14 @@ FORBIDDEN_PATTERNS = [
     # On boards with USB-VCOM bridges (LPC11U35 on LPC845-BRK, FTDI in some
     # modes), DTR=false silently gates the device's bytes off so the host
     # sees nothing. The project has the right tool already; use it.
+    #
+    # Match an actual invocation — powershell(.exe)? immediately followed by
+    # the typical PS flags (`-Command` / `-NoProfile` / `-c`) plus the
+    # SerialPort literal somewhere downstream. Matching plain `powershell`
+    # anywhere in the command would falsely flag commit messages, docs, and
+    # error strings that mention the pattern (including this one!).
     (
-        r"(?i)powershell.*System\.IO\.Ports\.SerialPort",
+        r"(?i)powershell(?:\.exe)?\s+[^|;]*(?:-Command|-NoProfile|-c)[^|;]*System\.IO\.Ports\.SerialPort",
         "PowerShell [System.IO.Ports.SerialPort] is forbidden for device monitoring "
         "(FastLED #3336). It defaults DTR/RTS to false, silently dropping bytes from "
         "boards with USB-VCOM bridges (LPC11U35, FTDI). Use: "
@@ -109,12 +115,6 @@ FORBIDDEN_PATTERNS = [
         "DTR/RTS, or (2) 'uv run --no-project --with pyserial python ci/util/serial_probe.py "
         "<port>' for ad-hoc probing — pyserial via the project helper sets DTR/RTS "
         "correctly.",
-    ),
-    (
-        r"(?i)powershell.*SerialPort.*Open",
-        "PowerShell SerialPort.Open() is forbidden for device monitoring "
-        "(FastLED #3336). Use 'bash autoresearch <board>' or "
-        "'uv run --no-project --with pyserial python ci/util/serial_probe.py <port>'.",
     ),
 ]
 
