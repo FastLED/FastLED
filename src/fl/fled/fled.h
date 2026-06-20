@@ -5,8 +5,10 @@
 // and evaluate to false. See FLED_FORMAT.md for the on-disk format.
 //
 // PR1 surface: factories, raw json()/blob() accessors, version/sectionCount,
-// and the null-state contract. Typed accessors (video/screenMap/channels)
-// arrive in PR2.
+// and the null-state contract. PR2 adds the four typed section accessors
+// (screenMap/video/channels/script). Of these, only screenMap() has a real
+// body in PR2; the other three are stubs whose implementations land in
+// later PRs once the corresponding deserializers exist.
 
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
@@ -19,6 +21,16 @@ namespace fl {
 class FileSystem;
 class json;
 class FledImpl;
+
+// Forward decls for the typed section accessors below. Defined in:
+//   Video              - fl/fx/video.h
+//   ScreenMap          - fl/math/screenmap.h
+//   MultiChannelConfig - fl/channels/config.h (declared as struct there)
+//   FledScript         - fl/fled/fled_script.h
+class Video;
+class ScreenMap;
+struct MultiChannelConfig;
+struct FledScript;
 
 class Fled {
   public:
@@ -54,6 +66,16 @@ class Fled {
     // those still depend on the caller's span outliving every use.
     fl::shared_ptr<const fl::u8> blob(const char *sectionName,
                                       fl::size *outLen) const FL_NO_EXCEPT;
+
+    // Typed section accessors. Each returns nullptr if the bundle has no
+    // section of that type. Construction touches NO global state (no
+    // controller registration, no EngineEvents broadcast, no scheduler).
+    // PR4 fills in video() and adds Video::fromFled. PR5 fills in channels()
+    // once the MultiChannelConfig JSON deserializer lands.
+    fl::shared_ptr<Video>              video()     const FL_NO_EXCEPT;
+    fl::shared_ptr<ScreenMap>          screenMap() const FL_NO_EXCEPT;
+    fl::shared_ptr<MultiChannelConfig> channels()  const FL_NO_EXCEPT;
+    fl::shared_ptr<FledScript>         script()    const FL_NO_EXCEPT;
 
     // Header version byte. Returns 0 for null Fled, 1 for valid v1.
     fl::u8 version() const FL_NO_EXCEPT;

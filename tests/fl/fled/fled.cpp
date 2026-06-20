@@ -1,12 +1,18 @@
-// Unit tests for fl::Fled PR1 surface: factories, raw json()/blob(),
-// version/sectionCount, null-state contract. No on-disk fixtures -
-// each test hand-builds its byte buffer.
+// Unit tests for fl::Fled. PR1 surface: factories, raw json()/blob(),
+// version/sectionCount, null-state contract. PR2 surface: the four
+// typed section accessors (screenMap/video/channels/script).
+// No on-disk fixtures - each test hand-builds its byte buffer.
 
+#include "fl/channels/config.h"
 #include "fl/fled/fled.h"
+#include "fl/fled/fled_script.h"
+#include "fl/fx/video.h"
+#include "fl/math/screenmap.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/int.h"
 #include "fl/stl/json.h"
 #include "fl/stl/move.h"
+#include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
@@ -22,6 +28,26 @@ namespace {
 const char kEnvelope[] = "{\"map\":{},\"video\":{\"fps\":30}}";
 // Five-byte frame payload - value doesn't matter, just length.
 const fl::u8 kPayload[5] = {0x01, 0x02, 0x03, 0x04, 0x05};
+
+// Build a v1 .fled buffer wrapping an arbitrary JSON envelope (no payload).
+fl::vector<fl::u8> buildBundleFromEnvelope(const char *envelope,
+                                            fl::size envelopeLen) {
+    const fl::u32 jsonLen = static_cast<fl::u32>(envelopeLen);
+    fl::vector<fl::u8> out;
+    out.resize(12 + envelopeLen);
+    out[0] = 'F'; out[1] = 'L'; out[2] = 'E'; out[3] = 'D';
+    out[4] = 1;        // version
+    out[5] = 0x00;     // pixel_format = rgb8
+    out[6] = 0; out[7] = 0;  // reserved
+    out[8]  = static_cast<fl::u8>(jsonLen & 0xff);
+    out[9]  = static_cast<fl::u8>((jsonLen >> 8) & 0xff);
+    out[10] = static_cast<fl::u8>((jsonLen >> 16) & 0xff);
+    out[11] = static_cast<fl::u8>((jsonLen >> 24) & 0xff);
+    for (fl::size i = 0; i < envelopeLen; ++i) {
+        out[12 + i] = static_cast<fl::u8>(envelope[i]);
+    }
+    return out;
+}
 
 // Build a valid v1 .fled byte buffer in a fl::vector<u8>.
 fl::vector<fl::u8> buildValidBundle() {
@@ -180,6 +206,69 @@ FL_TEST_CASE("fl::Fled - malformed JSON rejected") {
     buf[12 + jsonLen + 2] = 0xCC;
     Fled f = Fled::loadFromVector(fl::move(buf));
     FL_CHECK_FALSE(static_cast<bool>(f));
+}
+
+
+// ---- PR2: typed section accessors ----
+
+FL_TEST_CASE("fl::Fled - screenMap() returns null on default-constructed Fled") {
+    Fled f;
+    fl::shared_ptr<ScreenMap> sm = f.screenMap();
+    FL_CHECK(sm == nullptr);
+}
+
+FL_TEST_CASE("fl::Fled - screenMap() returns null when envelope has no 'map' key") {
+    // Envelope with only a 'video' key - no 'map'.
+    const char env[] = "{\"video\":{\"fps\":30}}";
+    fl::vector<fl::u8> buf = buildBundleFromEnvelope(env, sizeof(env) - 1);
+    Fled f = Fled::loadFromVector(fl::move(buf));
+    FL_CHECK(static_cast<bool>(f));
+    fl::shared_ptr<ScreenMap> sm = f.screenMap();
+    FL_CHECK(sm == nullptr);
+}
+
+FL_TEST_CASE("fl::Fled - screenMap() returns null when 'map' is an empty object") {
+    // The shipped buildValidBundle uses {\"map\":{}} which has no segments,
+    // so the parser should yield no entries and screenMap() must report null.
+    fl::vector<fl::u8> buf = buildValidBundle();
+    Fled f = Fled::loadFromVector(fl::move(buf));
+    FL_CHECK(static_cast<bool>(f));
+    fl::shared_ptr<ScreenMap> sm = f.screenMap();
+    FL_CHECK(sm == nullptr);
+}
+
+FL_TEST_CASE("fl::Fled - screenMap() parses a real v1 map") {
+    // v1 ScreenMap shape: top-level \"map\" key holding one or more named
+    // strips with x[], y[], optional diameter. See tests/fl/math/screenmap.cpp.
+    const char env[] =
+        "{\"map\":{\"strip1\":{\"x\":[10.5,30.5,50.5],"
+        "\"y\":[20.5,40.5,60.5],\"diameter\":2.5}}}";
+    fl::vector<fl::u8> buf = buildBundleFromEnvelope(env, sizeof(env) - 1);
+    Fled f = Fled::loadFromVector(fl::move(buf));
+    FL_CHECK(static_cast<bool>(f));
+    fl::shared_ptr<ScreenMap> sm = f.screenMap();
+    FL_CHECK(sm != nullptr);
+    FL_CHECK_EQ(sm->getLength(), fl::u32(3));
+    FL_CHECK(sm->getDiameter() == 2.5f);
+    FL_CHECK((*sm)[0].x == 10.5f);
+    FL_CHECK((*sm)[2].y == 60.5f);
+}
+
+FL_TEST_CASE("fl::Fled - video()/channels()/script() are stubs returning nullptr") {
+    fl::vector<fl::u8> buf = buildValidBundle();
+    Fled f = Fled::loadFromVector(fl::move(buf));
+    FL_CHECK(static_cast<bool>(f));
+    // All three are PR2 stubs; full implementations land in PR4/PR5/v2 bundle.
+    FL_CHECK(f.video() == nullptr);
+    FL_CHECK(f.channels() == nullptr);
+    FL_CHECK(f.script() == nullptr);
+}
+
+FL_TEST_CASE("fl::Fled - video()/channels()/script() return null on null Fled") {
+    Fled f;
+    FL_CHECK(f.video() == nullptr);
+    FL_CHECK(f.channels() == nullptr);
+    FL_CHECK(f.script() == nullptr);
 }
 
 } // FL_TEST_FILE
