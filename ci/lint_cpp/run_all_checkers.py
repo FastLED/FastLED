@@ -15,8 +15,6 @@ from typing import Any, cast
 
 from ci.lint_cpp.rust_bridge import (
     merge_checker_results,
-    remove_rust_supported_checkers,
-    run_rust_ab_check,
     run_rust_linter,
 )
 from ci.util.check_files import (
@@ -356,11 +354,8 @@ def _ast_tool_unavailable(message: str) -> bool:
     clang-tool-chain wheel installed.
     """
     lower = message.lower()
-    return (
-        "clang-query not found" in lower
-        or "failed to spawn" in lower
-        or "no such file or directory" in lower
-    )
+    tool_named = "clang-query" in lower or "clang-tool-chain-query" in lower
+    return tool_named and ("not found" in lower or "failed to spawn" in lower)
 
 
 def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
@@ -710,8 +705,7 @@ def main() -> int:
         ),
     )
     args = parser.parse_args()
-    rust_ab = os.environ.get("FL_LINT_AB") == "1"
-    use_rust_fast_path = args.rust and not rust_ab
+    use_rust_fast_path = args.rust
 
     if args.file:
         # Single file mode
@@ -735,7 +729,6 @@ def main() -> int:
         rust_results: dict[str, CheckerResults] = {}
         if use_rust_fast_path:
             rust_results = run_rust_linter([str(file_path)])
-            remove_rust_supported_checkers(checkers_by_scope)
 
         # Run all applicable checkers on the single file
         results = run_checkers_on_single_file(str(file_path), checkers_by_scope)
@@ -758,8 +751,6 @@ def main() -> int:
             results["ArrayParamAstChecker"] = array_param_results
 
         # Format and print results
-        if rust_ab and not run_rust_ab_check(results, [str(file_path)]):
-            return 1
         exit_code = format_and_print_results(results)
 
         return exit_code
@@ -778,7 +769,6 @@ def main() -> int:
         rust_results: dict[str, CheckerResults] = {}
         if use_rust_fast_path:
             rust_results = run_rust_linter(None)
-            remove_rust_supported_checkers(checkers_by_scope)
 
         # Run all checkers in a single pass per scope
         results = run_checkers(files_by_dir, checkers_by_scope)
@@ -800,8 +790,6 @@ def main() -> int:
             results["ArrayParamAstChecker"] = array_param_results
 
         # Format and print results
-        if rust_ab and not run_rust_ab_check(results, None):
-            return 1
         exit_code = format_and_print_results(results)
 
         return exit_code

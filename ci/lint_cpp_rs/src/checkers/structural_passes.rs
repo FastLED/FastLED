@@ -132,10 +132,10 @@ fn pch_file_pass(project_root: &Path, violations: &mut Vec<LintViolation>) {
                 continue;
             }
             let path = entry.path();
-            let Some(ext) = path.extension().and_then(|value| value.to_str()) else {
-                continue;
-            };
-            if ext.eq_ignore_ascii_case("pch") {
+            // Mirror Python's case-sensitive `scan_dir.rglob("*.pch")` so
+            // capital-suffix files (e.g. `Foo.PCH`) are not over-flagged on
+            // Linux/macOS where Python skipped them.
+            if path.extension().and_then(|value| value.to_str()) == Some("pch") {
                 let rel = path.strip_prefix(project_root).unwrap_or(path);
                 let rel_display = normalize_path(&path_to_string(rel));
                 // Python emits one violation per .pch with path="pch_files"
