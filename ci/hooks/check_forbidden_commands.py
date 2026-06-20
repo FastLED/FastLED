@@ -94,6 +94,28 @@ FORBIDDEN_PATTERNS = [
         r" ninja ",
         "ninja is forbidden - use 'bash test' instead (FastLED build system handles ninja invocation)",
     ),
+    # PowerShell SerialPort is forbidden — see FastLED #3336. Multiple sessions
+    # have wasted hours on what looked like "silent firmware" but was actually
+    # PowerShell's `[System.IO.Ports.SerialPort]` defaulting DTR/RTS to false.
+    # On boards with USB-VCOM bridges (LPC11U35 on LPC845-BRK, FTDI in some
+    # modes), DTR=false silently gates the device's bytes off so the host
+    # sees nothing. The project has the right tool already; use it.
+    #
+    # Match an actual invocation — powershell(.exe)? immediately followed by
+    # the typical PS flags (`-Command` / `-NoProfile` / `-c`) plus the
+    # SerialPort literal somewhere downstream. Matching plain `powershell`
+    # anywhere in the command would falsely flag commit messages, docs, and
+    # error strings that mention the pattern (including this one!).
+    (
+        r"(?i)powershell(?:\.exe)?\s+[^|;]*(?:-Command\b|-NoProfile\b|-c\b)[^|;]*System\.IO\.Ports\.SerialPort",
+        "PowerShell [System.IO.Ports.SerialPort] is forbidden for device monitoring "
+        "(FastLED #3336). It defaults DTR/RTS to false, silently dropping bytes from "
+        "boards with USB-VCOM bridges (LPC11U35, FTDI). Use: "
+        "(1) 'bash autoresearch <board>' — full build+flash+monitor cycle with correct "
+        "DTR/RTS, or (2) 'uv run --no-project --with pyserial python ci/util/serial_probe.py "
+        "<port>' for ad-hoc probing — pyserial via the project helper sets DTR/RTS "
+        "correctly.",
+    ),
 ]
 
 FORBIDDEN_ENV_VARS = [
