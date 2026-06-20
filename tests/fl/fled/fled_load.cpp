@@ -1,7 +1,6 @@
 // Unit tests for the CFastLED::load / loadChannels / loadScreenMap
-// bundle-load surface (#3311 PR5). PR5 ships the API shape and a
-// FledDispatcher singleton; the wasm/micropy back-ends and the
-// loadScreenMap broadcast policy land in later PRs. These tests verify
+// bundle-load surface (#3311 PR5). PR5 ships only the API shape; the
+// loadScreenMap broadcast policy lands in a follow-up. These tests verify
 // that the entry points are reachable, accept null/empty input, and
 // don't crash. We do NOT register real controllers here - that path is
 // covered by the channel-API integration tests.
@@ -9,7 +8,6 @@
 #include "FastLED.h"
 #include "fl/channels/config.h"
 #include "fl/fled/fled.h"
-#include "fl/fled/fled_dispatch.h"
 #include "fl/stl/int.h"
 #include "fl/stl/move.h"
 #include "fl/stl/vector.h"
@@ -92,17 +90,6 @@ FL_TEST_CASE("CFastLED::loadScreenMap - valid bundle with empty map") {
     Fled f = Fled::loadFromVector(fl::move(buf));
     FL_CHECK(static_cast<bool>(f));
     FastLED.loadScreenMap(f);
-}
-
-FL_TEST_CASE("fl::detail::fledDispatcher - singleton accessor is reachable") {
-    // Slots default to empty fl::function instances. PR6 will install
-    // real loaders via FastLED.enableWasm() / FastLED.enableMicroPy().
-    fl::detail::FledDispatcher& d = fl::detail::fledDispatcher();
-    FL_CHECK_FALSE(static_cast<bool>(d.wasmLoader));
-    FL_CHECK_FALSE(static_cast<bool>(d.microPyLoader));
-    // Accessor is stable across calls (same instance).
-    fl::detail::FledDispatcher& d2 = fl::detail::fledDispatcher();
-    FL_CHECK_EQ(&d, &d2);
 }
 
 } // FL_TEST_FILE
