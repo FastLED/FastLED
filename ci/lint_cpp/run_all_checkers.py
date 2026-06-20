@@ -766,28 +766,46 @@ def main() -> int:
         # Create all checker instances. The previous all_headers
         # cross-file collection has been retired with its consumers.
         checkers_by_scope = create_checkers()
-        rust_results: dict[str, CheckerResults] = {}
-        if use_rust_fast_path:
-            rust_results = run_rust_linter(None)
 
-        # Run all checkers in a single pass per scope
-        results = run_checkers(files_by_dir, checkers_by_scope)
-        merge_checker_results(results, rust_results)
+        # Fan out the three independent heavy stages in parallel:
+        #   - the Rust fastled-lint pass        (~5s, all-cores rayon-parallel)
+        #   - the clang-query FL_NO_EXCEPT pass (~17s, single clang-query subprocess)
+        #   - the clang-query decayed-array pass(~10s, single clang-query subprocess)
+        # Wall time collapses from ~32s sequential to ~17s (clang-query bound).
+        # The Python per-file run_checkers() pass is run on the foreground thread
+        # since most of its scopes are currently empty buckets - kept separate so
+        # any future heavy Python checker re-enables fast.
+        from concurrent.futures import ThreadPoolExecutor
 
-        # UnityBuildChecker (whole-project structural pass),
-        # TestAggregationChecker (whole-project structural pass), and
-        # PchFileChecker now ship in the Rust binary's run_structural_passes()
-        # — see ci/lint_cpp_rs/src/checkers/structural_passes.rs. Violations
-        # arrive via `merge_checker_results` above.
+        with ThreadPoolExecutor(max_workers=3) as pool:
+            rust_future = (
+                pool.submit(run_rust_linter, None) if use_rust_fast_path else None
+            )
+            noexcept_future = pool.submit(run_noexcept_ast_check)
+            array_param_future = pool.submit(run_array_param_ast_check)
 
-        # Run AST-backed FL_NO_EXCEPT enforcement from normal C++ lint.
-        noexcept_results = run_noexcept_ast_check()
-        if noexcept_results.has_violations():
-            results["NoexceptAstChecker"] = noexcept_results
+            # Run the Python per-file pass on the foreground thread; the three
+            # background subprocess-bound futures make progress in parallel.
+            results = run_checkers(files_by_dir, checkers_by_scope)
 
-        array_param_results = run_array_param_ast_check()
-        if array_param_results.has_violations():
-            results["ArrayParamAstChecker"] = array_param_results
+            rust_results: dict[str, CheckerResults] = (
+                rust_future.result() if rust_future is not None else {}
+            )
+            merge_checker_results(results, rust_results)
+
+            # UnityBuildChecker (whole-project structural pass),
+            # TestAggregationChecker (whole-project structural pass), and
+            # PchFileChecker now ship in the Rust binary's run_structural_passes()
+            # — see ci/lint_cpp_rs/src/checkers/structural_passes.rs. Violations
+            # arrive via `merge_checker_results` above.
+
+            noexcept_results = noexcept_future.result()
+            if noexcept_results.has_violations():
+                results["NoexceptAstChecker"] = noexcept_results
+
+            array_param_results = array_param_future.result()
+            if array_param_results.has_violations():
+                results["ArrayParamAstChecker"] = array_param_results
 
         # Format and print results
         exit_code = format_and_print_results(results)
