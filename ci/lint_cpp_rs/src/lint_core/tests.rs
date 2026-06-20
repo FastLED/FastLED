@@ -188,6 +188,54 @@ mod tests {
     }
 
     #[test]
+    fn bare_digit_separator_flags_cpp14_literal() {
+        let checker = BareDigitSeparatorChecker;
+        let project_root = std::env::current_dir().unwrap();
+        let path_str = normalize_path("src/fl/synthetic.cpp");
+        let content = "u32 x = 999'999'999ULL;\n";
+        let violations = checker.check_file_content(&file(&path_str, content));
+        assert_eq!(violations.len(), 1);
+        assert_eq!(violations[0].0, 1);
+        assert!(violations[0].1.contains("digit separator"));
+        let _ = project_root; // touch to keep the binding live
+    }
+
+    #[test]
+    fn bare_digit_separator_skips_comments() {
+        let checker = BareDigitSeparatorChecker;
+        let path_str = normalize_path("src/fl/synthetic.cpp");
+        // Single-line `//` comment + doxygen `///<` comment + block comment all
+        // mention `999'999'999` as documentation — none should fire.
+        let content = "// Using: (ns * hz + 999'999'999) / 1'000'000'000\n\
+                       u32 y = 0; ///< base 80'000'000 Hz\n\
+                       /* documenting 9'9 */ u32 z = 1;\n";
+        let violations = checker.check_file_content(&file(&path_str, content));
+        assert!(violations.is_empty(), "comments must not trigger: {violations:?}");
+    }
+
+    #[test]
+    fn bare_digit_separator_skips_string_literals_and_suppression() {
+        let checker = BareDigitSeparatorChecker;
+        let path_str = normalize_path("src/fl/synthetic.cpp");
+        // 1) `"don't 9'9"` is inside a string literal — must not fire.
+        // 2) Trailing `// ok digit-separator` opts a line out explicitly.
+        let content = "const char* s = \"don't 9'9\";\n\
+                       u32 q = 1'234ULL; // ok digit-separator\n";
+        let violations = checker.check_file_content(&file(&path_str, content));
+        assert!(violations.is_empty(), "string + suppression must pass: {violations:?}");
+    }
+
+    #[test]
+    fn bare_digit_separator_scope_excludes_third_party() {
+        let checker = BareDigitSeparatorChecker;
+        let project_root = std::env::current_dir().unwrap();
+        let third_party_path = normalize_path("src/third_party/foo/bar.cpp");
+        assert!(!checker.should_process_file(&third_party_path, &project_root));
+        let in_scope = normalize_path("src/fl/example.cpp");
+        assert!(checker.should_process_file(&in_scope, &project_root));
+    }
+
+    #[test]
     fn lint_violation_json_shape_stays_stable() {
         let violation = LintViolation {
             checker: "ExampleChecker".to_string(),

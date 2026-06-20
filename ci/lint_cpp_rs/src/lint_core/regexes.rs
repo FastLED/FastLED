@@ -500,6 +500,16 @@ fn regex_deep_platform_include() -> &'static Regex {
 
 // --- Patterns for the bare/legacy ports (FastLED #3297) ----------------------
 
+fn regex_bare_digit_separator() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    // `\d'\d` — digit, apostrophe, digit. Won't match `'1'` (char literal
+    // of one digit) because the trailing apostrophe isn't a digit. Won't
+    // match `0x1ULL` or other suffixes. Catches the C++14 separator pattern
+    // verbatim. See `BareDigitSeparatorChecker` for the comment / string
+    // exclusion that wraps this regex.
+    VALUE.get_or_init(|| Regex::new(r"\d'\d").unwrap())
+}
+
 fn regex_bare_noinline() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| {

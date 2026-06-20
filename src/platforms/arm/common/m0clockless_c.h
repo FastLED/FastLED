@@ -355,7 +355,14 @@ FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING
 
 
 static constexpr fl::u32 ns_to_cycles(fl::u32 ns) FL_NO_EXCEPT {
-  return (fl::u32)(((u64)ns * (u64)F_CPU + 999'999'999ULL) / 1'000'000'000ULL);
+  // C++14 digit separators (e.g. 999'999'999) break under -std=gnu++11 — the
+  // single-quote is read as a character-literal delimiter and the next 3
+  // digits become a stray multibyte char. Some downstream PlatformIO
+  // environments (LPC8xx in particular, see issue #3329) still default to
+  // gnu++11. Keep the constants in plain digits so the header stays portable
+  // across both C++11 and C++14+ builds. Enforced by BareDigitSeparatorChecker
+  // in ci/lint_cpp_rs/src/checkers/.
+  return (fl::u32)(((u64)ns * (u64)F_CPU + 999999999ULL) / 1000000000ULL);
 }
 
 template<int HI_OFFSET, int LO_OFFSET, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME>
