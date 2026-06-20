@@ -48,9 +48,27 @@ impl MultiCheckerFileProcessor {
         checkers: &[Box<dyn FileContentChecker>],
         project_root: &Path,
     ) -> Result<Vec<LintViolation>, DynError> {
+        self.process_files_with_checkers_profiled(file_paths, checkers, project_root, false)
+    }
+
+    pub fn process_files_with_checkers_profiled(
+        &mut self,
+        file_paths: &[PathBuf],
+        checkers: &[Box<dyn FileContentChecker>],
+        project_root: &Path,
+        profile: bool,
+    ) -> Result<Vec<LintViolation>, DynError> {
+        let t_unique = std::time::Instant::now();
         let mut unique_paths = BTreeSet::new();
         for path in file_paths {
             unique_paths.insert(path.clone());
+        }
+        if profile {
+            eprintln!(
+                "[PROFILE]   unique_paths build: {:?} ({} unique)",
+                t_unique.elapsed(),
+                unique_paths.len()
+            );
         }
 
         let pending_paths: Vec<PathBuf> = unique_paths
@@ -59,6 +77,7 @@ impl MultiCheckerFileProcessor {
             .cloned()
             .collect();
 
+        let t_read = std::time::Instant::now();
         let loaded_files: Vec<(PathBuf, Result<FileContent, DynError>)> = pending_paths
             .par_iter()
             .map(|path| (path.clone(), FileContent::read(path)))
@@ -77,12 +96,28 @@ impl MultiCheckerFileProcessor {
                 }
             }
         }
+        if profile {
+            eprintln!(
+                "[PROFILE]   file read+parse (par): {:?} ({} files)",
+                t_read.elapsed(),
+                pending_paths.len()
+            );
+        }
 
+        let t_collect = std::time::Instant::now();
         let files: Vec<FileContent> = unique_paths
             .iter()
             .filter_map(|path| self.file_cache.get(path).cloned())
             .collect();
+        if profile {
+            eprintln!(
+                "[PROFILE]   clone-from-cache: {:?} ({} files)",
+                t_collect.elapsed(),
+                files.len()
+            );
+        }
 
+        let t_dispatch = std::time::Instant::now();
         let mut violations: Vec<LintViolation> = files
             .par_iter()
             .flat_map_iter(|file_content| {
@@ -103,8 +138,24 @@ impl MultiCheckerFileProcessor {
                 file_violations
             })
             .collect();
+        if profile {
+            eprintln!(
+                "[PROFILE]   checker dispatch (par): {:?} ({} files x {} checkers)",
+                t_dispatch.elapsed(),
+                files.len(),
+                checkers.len()
+            );
+        }
 
+        let t_sort = std::time::Instant::now();
         violations.sort();
+        if profile {
+            eprintln!(
+                "[PROFILE]   sort violations: {:?} ({} violations)",
+                t_sort.elapsed(),
+                violations.len()
+            );
+        }
         Ok(violations)
     }
 }
@@ -446,6 +497,9 @@ pub fn run_cli<I>(args: I) -> Result<u8, DynError>
 where
     I: IntoIterator<Item = String>,
 {
+    let t_total = std::time::Instant::now();
+    let profile = std::env::var("FASTLED_LINT_PROFILE").ok().is_some();
+
     let config = CliConfig::parse(args)?;
 
     if config.show_help {
@@ -460,23 +514,58 @@ where
     }
 
     let selected = config.selected_checkers.as_ref();
+
+    let t = std::time::Instant::now();
     let checkers = create_checkers(selected)?;
+    if profile {
+        eprintln!(
+            "[PROFILE] create_checkers: {:?} ({} checkers)",
+            t.elapsed(),
+            checkers.len()
+        );
+    }
+
+    let t = std::time::Instant::now();
     let files = collect_input_files(&config.project_root, &config.paths)?;
+    if profile {
+        eprintln!(
+            "[PROFILE] collect_input_files: {:?} ({} files)",
+            t.elapsed(),
+            files.len()
+        );
+    }
+
     let mut processor = MultiCheckerFileProcessor::new();
-    let mut violations =
-        processor.process_files_with_checkers(&files, &checkers, &config.project_root)?;
+    let mut violations = processor.process_files_with_checkers_profiled(
+        &files,
+        &checkers,
+        &config.project_root,
+        profile,
+    )?;
 
     // Structural passes only fire in whole-project mode (no explicit paths) —
     // single-file mode shouldn't see cross-file walks, mirroring the Python
     // orchestrator's behaviour.
     if config.paths.is_empty() {
+        let t = std::time::Instant::now();
         let mut structural = run_structural_passes(&config.project_root);
+        if profile {
+            eprintln!(
+                "[PROFILE] run_structural_passes: {:?} ({} violations)",
+                t.elapsed(),
+                structural.len()
+            );
+        }
         if let Some(selected) = selected {
             structural.retain(|violation| selected.contains(violation.checker.as_str())
                 || selected_contains_structural_alias(selected, &violation.checker));
         }
         violations.extend(structural);
         violations.sort();
+    }
+
+    if profile {
+        eprintln!("[PROFILE] TOTAL run_cli: {:?}", t_total.elapsed());
     }
 
     match config.output_format {
