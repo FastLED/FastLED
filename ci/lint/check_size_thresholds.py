@@ -45,7 +45,9 @@ WORKFLOWS_DIR = PROJECT_ROOT / ".github" / "workflows"
 #      not "CI is red and I want it green").
 #   2. Edit the matching `.github/workflows/check_<board>_size.yml` value.
 #   3. Edit the matching entry below to match.
-#   4. Reference the issue # in the PR body. CodeRabbit will flag the diff
+#   4. Update the row in `docs/SIZE_THRESHOLD_HISTORY.md` (status, notes,
+#      historical bump table for that board).
+#   5. Reference the issue # in the PR body. CodeRabbit will flag the diff
 #      and the lockdown rule in `.coderabbit.yaml` will require maintainer
 #      sign-off.
 #
@@ -53,47 +55,72 @@ WORKFLOWS_DIR = PROJECT_ROOT / ".github" / "workflows"
 # workflows that legitimately run the same target with different configs
 # (see `check_uno_size.yml`'s `build_no_forced_inline` job which uses -1
 # as a "no check" sentinel).
+#
+# Each entry is annotated as one of:
+#   - real ceiling — actual chip / framework limit, no follow-up required.
+#   - band-aid (#NNNN) — value was raised to clear CI; real ceiling is lower
+#     and would be restored once the linked regression is fixed.
+#
+# See `docs/SIZE_THRESHOLD_HISTORY.md` for the full audit and per-board bump
+# history.
 # ============================================================================
 FROZEN_THRESHOLDS: dict[str, dict[str, frozenset[int]]] = {
     "check_bluepill_size.yml": {
+        # real ceiling — STM32F103C8 has 64 KB flash; never bumped.
         "max_size": frozenset({55000}),
         "max_size_apa102": frozenset({45000}),
     },
     "check_esp32_size.yml": {
+        # real ceiling (currently RED on #3298) — 330 KB is the canonical
+        # ceiling restored by PR #3268 / preserved by PR #3303. CI stays red
+        # until #3298 (fbuild ESP32 board-flag propagation) is fixed; the
+        # red signal is the point — DO NOT raise to make CI green. The 700K
+        # band-aids (PR #2790, PR #3295) were both reverted.
         "max_size": frozenset({330000}),
         "max_size_apa102": frozenset({330000}),
     },
     "check_teensy30_size.yml": {
+        # real ceiling — Teensy 3.0 (MK20DX128) 128 KB flash; never bumped.
         "max_size": frozenset({60000}),
         "max_size_apa102": frozenset({50000}),
     },
     "check_teensy31_size.yml": {
+        # real ceiling — Teensy 3.1 (MK20DX256) 256 KB flash; never bumped.
         "max_size": frozenset({80000}),
         "max_size_apa102": frozenset({65000}),
     },
     "check_teensy32_size.yml": {
+        # real ceiling — Teensy 3.2 (MK20DX256) 256 KB flash; never bumped.
         "max_size": frozenset({80000}),
         "max_size_apa102": frozenset({65000}),
     },
     "check_teensy35_size.yml": {
+        # real ceiling — Teensy 3.5 (MK64FX512) 512 KB flash; never bumped.
         "max_size": frozenset({100000}),
         "max_size_apa102": frozenset({85000}),
     },
     "check_teensy36_size.yml": {
+        # real ceiling — Teensy 3.6 (MK66FX1M0) 1 MB flash; never bumped.
         "max_size": frozenset({120000}),
         "max_size_apa102": frozenset({100000}),
     },
     "check_teensy41_size.yml": {
+        # real ceiling — Teensy 4.1 (MIMXRT1062) Blink reflects real growth.
         "max_size": frozenset({120000}),
-        # 165000 was bumped from 88000 per #2802; the real ceiling is 88000
-        # once #2802's fl::ifstream / fl::AsyncLog* over-link is fixed.
+        # band-aid (#2802) — bumped from 88000 in PR #2804 to clear CI
+        # after fl::ifstream / fl::posix_filebuf / fl::strerror /
+        # fl::AsyncLog* over-linked into the Apa102 build. Real ceiling is
+        # 88000 once #2802 is fixed; current real size ≈148476 B.
         "max_size_apa102": frozenset({165000}),
     },
     "check_teensylc_size.yml": {
+        # real ceiling — Teensy LC (MKL26Z64) 64 KB flash; never bumped.
         "max_size": frozenset({35000}),
         "max_size_apa102": frozenset({30000}),
     },
     "check_uno_size.yml": {
+        # real ceiling — ATmega328P 32 KB flash. Apa102 was tightened
+        # 12050 → 9300 in 7edaf80f0 (real optimisation, not a bump).
         # `build` job: hard check. `build_no_forced_inline` job: -1 (no check).
         "max_size": frozenset({11000, -1}),
         "max_size_apa102": frozenset({9300, -1}),
