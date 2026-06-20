@@ -31,6 +31,7 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/fl.channels+.cpp",
     "fl/build/fl.chipsets+.cpp",
     "fl/build/fl.codec+.cpp",
+    "fl/build/fl.fled+.cpp",
     "fl/build/fl.font+.cpp",
     "fl/build/fl.fx+.cpp",
     "fl/build/fl.gfx+.cpp",
