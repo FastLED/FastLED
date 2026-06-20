@@ -2076,8 +2076,17 @@ async def _run_bring_up_tests(ctx: RunContext) -> int:
     try:
         print("   Opening serial port...", end="", flush=True)
         ser = _serial.Serial(upload_port, 115200, timeout=2)
-        ser.dtr = False  # type: ignore[assignment]
-        ser.rts = False  # type: ignore[assignment]
+        # Assert DTR/RTS = True (universal "host ready" idle state).
+        # ESP32 native USB CDC tolerates this (it's the post-reset idle state);
+        # LPC845-BRK *requires* DTR=True because the LPC11U35 USB-VCOM bridge
+        # uses DTR as a flow gate. Previously hardcoded to False here, which
+        # silently dropped every byte the LPC845 transmitted and produced the
+        # bring-up "zero bytes" false alarm under FastLED #3300 / #3325.
+        # See ci/util/pyserial_monitor.py for the same fix on the monitor path,
+        # and ci/util/serial_probe.py for the agent-facing helper that mirrors
+        # this default.
+        ser.dtr = True  # type: ignore[assignment]
+        ser.rts = True  # type: ignore[assignment]
         await asyncio.sleep(0.5)
         ser.reset_input_buffer()
         await asyncio.sleep(2.0)  # let boot banner drain
