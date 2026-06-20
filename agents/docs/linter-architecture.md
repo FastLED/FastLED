@@ -152,7 +152,7 @@ FL_LINT_AB=1 bash lint --cpp                      # A/B parity check vs Python o
 
 ## When to still use Python
 
-As of PR #3293, **all single-file content checkers and cross-file structural checks run in the Rust crate** (`ci/lint_cpp_rs/`). The Python tier is reserved exclusively for the three remaining Tier-4 AST ratchets that need libclang / clang-query, which the Rust binary cannot model today:
+As of PR #3293, **all single-file content checkers and cross-file structural checks run in the Rust crate** (`ci/lint_cpp_rs/`). The Python tier is reserved exclusively for the two remaining Tier-4 AST ratchets (across three Python files) that need libclang / clang-query, which the Rust binary cannot model today:
 
 - **AST ratchets only**: `run_noexcept_ast_check` and `run_array_param_ast_check` in `ci/lint_cpp/run_all_checkers.py`, backed by `ci/lint_cpp/noexcept_checker.py`, `ci/tools/check_noexcept.py`, and `ci/tools/check_array_params.py`. These compare AST query output against a checked-in baseline so the violation count can only drop, not grow.
 
