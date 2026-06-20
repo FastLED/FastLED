@@ -333,8 +333,9 @@
 
 // Unconditional "do not inline this function" attribute, portable across
 // GCC/Clang/MSVC. Prefer this over a bare `__attribute__((noinline))` in
-// `src/` — a lint check in `ci/lint_cpp/bare_noinline_checker.py` enforces
-// the use of the macro so the GCC-only syntax doesn't sneak in.
+// `src/` — a lint check in `ci/lint_cpp_rs/src/checkers/bare_legacy.rs`
+// (`BareNoInlineChecker`) enforces the use of the macro so the GCC-only
+// syntax doesn't sneak in.
 //
 // Typical use: cold helpers extracted out of a hot path so the compiler
 // can't fold them back via inline expansion. Pair with the lint guard.
