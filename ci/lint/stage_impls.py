@@ -226,11 +226,15 @@ def run_cpp_lint(
         if use_rust_cpp_lint:
             cmd.append("--rust")
 
+        # 900s (15 min) covers cold CI runners that must `cargo install`
+        # the zccache binary from source — happens on macOS when soldr's
+        # GitHub release fetch hits the per-IP API rate limit and falls
+        # back to cargo. Well under the workflow's 30-min cap.
         result = RunningProcess.run(
             cmd,
             cwd=None,
             check=False,
-            timeout=300,
+            timeout=900,
         )
         if result.stdout:
             print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
@@ -662,7 +666,9 @@ def run_cpp_lint_single_file(
     if use_rust_cpp_lint:
         cmd.append("--rust")
     cmd.append(file_path)
-    result = RunningProcess.run(cmd, cwd=None, check=False, timeout=300)
+    # 900s (15 min) — see full-pass call above for rationale (cold cargo
+    # install fallback when soldr can't fetch zccache prebuilt binary).
+    result = RunningProcess.run(cmd, cwd=None, check=False, timeout=900)
     if result.stdout:
         print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
     if result.stderr:
