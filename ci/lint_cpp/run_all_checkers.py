@@ -806,7 +806,12 @@ def main() -> int:
         # any future heavy Python checker re-enables fast.
         from concurrent.futures import ThreadPoolExecutor
 
-        with ThreadPoolExecutor(max_workers=3) as pool:
+        # Default to host CPU count. ThreadPoolExecutor caps at the
+        # submitted future count, so a 3-stage fan-out (rust binary +
+        # noexcept + array-param) naturally serializes nothing on small
+        # boxes either. The constant is set high so we don't have to
+        # re-touch this when more parallel stages get added.
+        with ThreadPoolExecutor(max_workers=os.cpu_count() or 3) as pool:
             rust_future = (
                 pool.submit(run_rust_linter, None) if use_rust_fast_path else None
             )

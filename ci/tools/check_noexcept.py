@@ -19,6 +19,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -312,8 +313,16 @@ def find_missing_noexcept(scope: str = "all") -> list[NoexceptHit]:
 
     from concurrent.futures import ThreadPoolExecutor
 
+    # max_workers defaults to host CPU count so the pool scales when
+    # we split big TUs (e.g. fl/) into multiple parallel chunks. For
+    # today's 3-TU shape ThreadPoolExecutor naturally caps at 3 (it
+    # never spawns more workers than submitted futures), so this is a
+    # no-op on current scopes - it's the right default for the next
+    # round of TU splitting.
+    max_workers = max(len(tus), os.cpu_count() or len(tus))
+
     all_hits: list[NoexceptHit] = []
-    with ThreadPoolExecutor(max_workers=len(tus)) as pool:
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = [
             pool.submit(_run_clang_query, clang_query, tu, file_regex)
             for tu, file_regex in tus

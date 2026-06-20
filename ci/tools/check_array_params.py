@@ -16,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -382,8 +383,14 @@ def find_decayed_array_params(scope: str = "all") -> list[ArrayParamHit]:
 
     from concurrent.futures import ThreadPoolExecutor
 
+    # See note in check_noexcept.find_missing_noexcept - default to host
+    # CPU count so the pool scales when TUs are split into more parallel
+    # chunks; ThreadPoolExecutor caps at the submitted future count so
+    # this is a no-op for the current 3-TU shape.
+    max_workers = max(len(tus), os.cpu_count() or len(tus))
+
     all_hits: list[ArrayParamHit] = []
-    with ThreadPoolExecutor(max_workers=len(tus)) as pool:
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = [
             pool.submit(_run_clang_query, clang_query, tu, file_regex)
             for tu, file_regex in tus
