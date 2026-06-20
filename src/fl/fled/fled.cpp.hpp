@@ -1,7 +1,9 @@
 #include "fl/fled/fled.h"
 
+#include "fl/channels/config.h"
 #include "fl/fled/fled_impl.hpp"
 #include "fl/fled/fled_script.h"
+#include "fl/fx/video.h"
 #include "fl/math/screenmap.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/cstring.h"
@@ -219,6 +221,25 @@ fl::u8 Fled::version() const FL_NO_EXCEPT {
 fl::size Fled::sectionCount() const FL_NO_EXCEPT {
     if (!mImpl) return 0;
     return static_cast<fl::size>(mImpl->envelope().keys().size());
+}
+
+// ---- bidirectional fromFled factories (PR4) ----
+// Each is a one-line forwarder to the corresponding Fled accessor; the
+// only purpose is to let call sites spell the call site-first
+// (Type::fromFled(fled)) as well as fled-first (fled.video()) - same
+// data, same return type, same null/empty contract.
+
+fl::shared_ptr<Video> Video::fromFled(const Fled &fled) FL_NO_EXCEPT {
+    return fled.video();
+}
+
+fl::shared_ptr<ScreenMap> ScreenMap::fromFled(const Fled &fled) FL_NO_EXCEPT {
+    return fled.screenMap();
+}
+
+fl::shared_ptr<MultiChannelConfig>
+MultiChannelConfig::fromFled(const Fled &fled) FL_NO_EXCEPT {
+    return fled.channels();
 }
 
 } // namespace fl
