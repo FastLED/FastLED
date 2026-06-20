@@ -118,33 +118,98 @@ impl MultiCheckerFileProcessor {
         }
 
         let t_dispatch = std::time::Instant::now();
-        let mut violations: Vec<LintViolation> = files
-            .par_iter()
-            .flat_map_iter(|file_content| {
-                let mut file_violations = Vec::new();
-                for checker in checkers {
-                    if !checker.should_process_file(&file_content.path, project_root) {
-                        continue;
+        // Per-checker timing aggregates (only allocated when profiling is on).
+        // Returned alongside the per-file violations via flat_map_iter so we
+        // can roll them up after the parallel pass without an atomic-counter
+        // dance per checker. Each per-file work item produces a Vec<u128>
+        // (nanos of check_file_content time per checker) and a Vec<bool>
+        // (whether check_file_content ran for that checker on this file).
+        let mut violations: Vec<LintViolation>;
+        if profile {
+            let per_file: Vec<(Vec<LintViolation>, Vec<u128>, Vec<bool>)> = files
+                .par_iter()
+                .map(|file_content| {
+                    let mut file_violations = Vec::new();
+                    let mut checker_ns = vec![0u128; checkers.len()];
+                    let mut checker_ran = vec![false; checkers.len()];
+                    for (idx, checker) in checkers.iter().enumerate() {
+                        if !checker.should_process_file(&file_content.path, project_root) {
+                            continue;
+                        }
+                        checker_ran[idx] = true;
+                        let t = std::time::Instant::now();
+                        let results = checker.check_file_content(file_content);
+                        checker_ns[idx] = t.elapsed().as_nanos();
+                        for (line, message) in results {
+                            file_violations.push(LintViolation {
+                                checker: checker.name().to_string(),
+                                path: file_content.path.clone(),
+                                line,
+                                message,
+                            });
+                        }
                     }
-                    for (line, message) in checker.check_file_content(file_content) {
-                        file_violations.push(LintViolation {
-                            checker: checker.name().to_string(),
-                            path: file_content.path.clone(),
-                            line,
-                            message,
-                        });
+                    (file_violations, checker_ns, checker_ran)
+                })
+                .collect();
+
+            let mut totals_ns = vec![0u128; checkers.len()];
+            let mut ran_counts = vec![0usize; checkers.len()];
+            violations = Vec::new();
+            for (v, ns, ran) in per_file {
+                violations.extend(v);
+                for (i, n) in ns.iter().enumerate() {
+                    totals_ns[i] += n;
+                }
+                for (i, r) in ran.iter().enumerate() {
+                    if *r {
+                        ran_counts[i] += 1;
                     }
                 }
-                file_violations
-            })
-            .collect();
-        if profile {
+            }
             eprintln!(
                 "[PROFILE]   checker dispatch (par): {:?} ({} files x {} checkers)",
                 t_dispatch.elapsed(),
                 files.len(),
                 checkers.len()
             );
+            // Per-checker top spenders. Sort by total nanos desc; print top 20.
+            let mut idx_by_ns: Vec<usize> = (0..checkers.len()).collect();
+            idx_by_ns.sort_by(|a, b| totals_ns[*b].cmp(&totals_ns[*a]));
+            eprintln!("[PROFILE]   per-checker top 20 by total time:");
+            for &idx in idx_by_ns.iter().take(20) {
+                if totals_ns[idx] == 0 {
+                    break;
+                }
+                let ms = totals_ns[idx] as f64 / 1_000_000.0;
+                eprintln!(
+                    "[PROFILE]     {:>8.1}ms  {:>5} files  {}",
+                    ms,
+                    ran_counts[idx],
+                    checkers[idx].name()
+                );
+            }
+        } else {
+            violations = files
+                .par_iter()
+                .flat_map_iter(|file_content| {
+                    let mut file_violations = Vec::new();
+                    for checker in checkers {
+                        if !checker.should_process_file(&file_content.path, project_root) {
+                            continue;
+                        }
+                        for (line, message) in checker.check_file_content(file_content) {
+                            file_violations.push(LintViolation {
+                                checker: checker.name().to_string(),
+                                path: file_content.path.clone(),
+                                line,
+                                message,
+                            });
+                        }
+                    }
+                    file_violations
+                })
+                .collect();
         }
 
         let t_sort = std::time::Instant::now();
