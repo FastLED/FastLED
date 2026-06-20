@@ -369,11 +369,27 @@ def find_decayed_array_params(scope: str = "all") -> list[ArrayParamHit]:
             "clang-query not found. Install LLVM or the clang-tool-chain package."
         )
 
-    all_hits: list[ArrayParamHit] = []
-    for tu, file_regex in _SCOPES[scope]:
+    tus = _SCOPES[scope]
+    for tu, _ in tus:
         if not (PROJECT_ROOT / tu).exists():
             raise ArrayParamCheckError(f"translation unit not found: {tu}")
-        all_hits.extend(_run_clang_query(clang_query, tu, file_regex))
+
+    # Same pattern as check_noexcept.find_missing_noexcept: 3 independent
+    # clang-query subprocesses for the "all" scope, trivially parallel.
+    if len(tus) == 1:
+        tu, file_regex = tus[0]
+        return _run_clang_query(clang_query, tu, file_regex)
+
+    from concurrent.futures import ThreadPoolExecutor
+
+    all_hits: list[ArrayParamHit] = []
+    with ThreadPoolExecutor(max_workers=len(tus)) as pool:
+        futures = [
+            pool.submit(_run_clang_query, clang_query, tu, file_regex)
+            for tu, file_regex in tus
+        ]
+        for future in futures:
+            all_hits.extend(future.result())
     return all_hits
 
 

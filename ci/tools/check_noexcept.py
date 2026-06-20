@@ -297,11 +297,29 @@ def find_missing_noexcept(scope: str = "all") -> list[NoexceptHit]:
             "clang-query not found. Install LLVM or the clang-tool-chain package."
         )
 
-    all_hits: list[NoexceptHit] = []
-    for tu, file_regex in _SCOPES[scope]:
+    tus = _SCOPES[scope]
+    for tu, _ in tus:
         if not (PROJECT_ROOT / tu).exists():
             raise NoexceptCheckError(f"translation unit not found: {tu}")
-        all_hits.extend(_run_clang_query(clang_query, tu, file_regex))
+
+    # The "all" scope dispatches 3 independent clang-query subprocesses
+    # (platforms / fl / third_party). Each parses its own TU - they share
+    # no state and can run concurrently. Sequential wall was ~17s on a
+    # cold AST run; parallel is ~max(per-TU) instead of sum.
+    if len(tus) == 1:
+        tu, file_regex = tus[0]
+        return _run_clang_query(clang_query, tu, file_regex)
+
+    from concurrent.futures import ThreadPoolExecutor
+
+    all_hits: list[NoexceptHit] = []
+    with ThreadPoolExecutor(max_workers=len(tus)) as pool:
+        futures = [
+            pool.submit(_run_clang_query, clang_query, tu, file_regex)
+            for tu, file_regex in tus
+        ]
+        for future in futures:
+            all_hits.extend(future.result())
     return all_hits
 
 
