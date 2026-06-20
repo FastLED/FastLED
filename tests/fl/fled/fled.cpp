@@ -134,6 +134,18 @@ FL_TEST_CASE("fl::Fled - wrong version rejected") {
     FL_CHECK_FALSE(static_cast<bool>(f));
 }
 
+FL_TEST_CASE("fl::Fled - version=0 rejected") {
+    fl::vector<fl::u8> buf = buildValidBundle();
+    buf[4] = 0;  // accidental zero-init
+    Fled f = Fled::loadFromVector(fl::move(buf));
+    FL_CHECK_FALSE(static_cast<bool>(f));
+}
+
+FL_TEST_CASE("fl::Fled - empty static span rejected") {
+    Fled f = Fled::loadFromStatic(fl::span<const fl::u8>());
+    FL_CHECK_FALSE(static_cast<bool>(f));
+}
+
 FL_TEST_CASE("fl::Fled - oversize json_length rejected") {
     fl::vector<fl::u8> buf = buildValidBundle();
     // Set json_length to a value larger than remaining bytes.

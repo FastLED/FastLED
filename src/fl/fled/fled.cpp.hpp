@@ -153,7 +153,9 @@ fl::shared_ptr<const fl::u8> Fled::blob(const char *sectionName,
     }
     const fl::u8 *raw = mImpl->bytes() + mImpl->payloadOffset();
     if (outLen) *outLen = n;
-    // Aliasing ctor: share lifetime with mImpl, expose pointer-into-bytes.
+    // Aliasing ctor: pins mImpl alive while the returned ptr is held.
+    // NOTE: for loadFromStatic, the bytes themselves still live in the
+    // caller's static span — see Fled::loadFromStatic contract.
     return fl::shared_ptr<const fl::u8>(mImpl, raw);
 }
 

@@ -48,6 +48,10 @@ class Fled {
     // the named section. PR1 recognizes "frame_payload" (alias "payload"),
     // which maps to the raw bytes after the JSON envelope. Any other name
     // returns nullptr and writes 0 to *outLen (if non-null).
+    //
+    // Lifetime: the returned shared_ptr extends FledImpl's lifetime, but
+    // does NOT extend the lifetime of bytes loaded via loadFromStatic —
+    // those still depend on the caller's span outliving every use.
     fl::shared_ptr<const fl::u8> blob(const char *sectionName,
                                       fl::size *outLen) const FL_NO_EXCEPT;
 
