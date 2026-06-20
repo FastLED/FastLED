@@ -59,7 +59,7 @@ class FileSystem {
     // chain straight into loadFled / openVideo / openRead.
     static FileSystem sd(int cs_pin) FL_NO_EXCEPT;
 
-    bool beginSd(int cs_pin); // Signal to begin using the filesystem resource.
+    bool beginSd(int cs_pin) FL_NO_EXCEPT; // Signal to begin using the filesystem resource.
     bool begin(FsImplPtr platform_filesystem); // Signal to begin using the
                                                // filesystem resource.
     void end(); // Signal to end use of the file system.
