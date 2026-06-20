@@ -13,6 +13,11 @@ impl FileContentChecker for WeakAttributeChecker {
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        // Whole-file early exit: the regex only matches if both
+        // "__attribute__" and "weak" appear; most files have neither.
+        if !file_content.content.contains("weak") {
+            return Vec::new();
+        }
         let mut violations = Vec::new();
         let mut in_multiline_comment = false;
 
@@ -68,6 +73,13 @@ impl FileContentChecker for BannedDefineChecker {
                 "Use #ifdef FASTLED_ESP_HAS_CLOCKLESS_SPI instead of #if defined(FASTLED_ESP_HAS_CLOCKLESS_SPI)",
             ),
         ];
+
+        // Whole-file early exit: every needle starts with "#if " and
+        // most files have no `#if` at all (or only `#ifdef`/`#ifndef`).
+        // The per-line walk would burn nontrivial time on these.
+        if !file_content.content.contains("#if ") {
+            return Vec::new();
+        }
 
         let mut violations = Vec::new();
         let mut in_multiline_comment = false;

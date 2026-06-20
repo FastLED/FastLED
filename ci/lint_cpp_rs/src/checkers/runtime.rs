@@ -22,6 +22,11 @@ impl FileContentChecker for SleepForChecker {
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        // Whole-file early exit: 99%+ of files have no "sleep_for" at all
+        // and the per-line walk below is pure waste for them.
+        if !file_content.content.contains("sleep_for") {
+            return Vec::new();
+        }
         let mut violations = Vec::new();
         let mut in_multiline_comment = false;
 
@@ -489,6 +494,13 @@ impl FileContentChecker for NumericLimitMacroChecker {
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        // Whole-file early exit: most files have neither _MAX nor _MIN
+        // anywhere; the per-line walk is pure overhead for them.
+        if !file_content.content.contains("_MAX")
+            && !file_content.content.contains("_MIN")
+        {
+            return Vec::new();
+        }
         let mut violations = Vec::new();
         let mut in_multiline_comment = false;
 
