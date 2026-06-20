@@ -810,10 +810,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 project_root=project_root,
                 verbose=args.verbose,
             )
-        except KeyboardInterrupt:
-            # Let user-initiated interrupts propagate; never swallow them
-            # under the broad Exception handler below (CodeRabbit feedback,
-            # PR #3290).
+        except KeyboardInterrupt as ki:
+            # Let user-initiated interrupts propagate via the project's
+            # canonical handler; never swallow them under the broad
+            # Exception handler below (CodeRabbit feedback, PR #3290).
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(
@@ -1064,10 +1065,11 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
             staged_sketch = ctx.build_dir / "src" / "sketch"
             if staged_sketch.exists():
                 os.environ["PLATFORMIO_SRC_DIR"] = str(staged_sketch)
-        except KeyboardInterrupt:
-            # Let user-initiated interrupts propagate; never swallow them
-            # under the broad Exception handler below (CodeRabbit feedback,
-            # PR #3290).
+        except KeyboardInterrupt as ki:
+            # Let user-initiated interrupts propagate via the project's
+            # canonical handler; never swallow them under the broad
+            # Exception handler below (CodeRabbit feedback, PR #3290).
+            handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
             print(

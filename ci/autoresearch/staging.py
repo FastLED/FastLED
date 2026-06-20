@@ -24,43 +24,10 @@ auto-detect).
 
 from __future__ import annotations
 
-from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator
 
 from ci.boards import create_board
 from ci.compiler.path_manager import FastLEDPaths, resolve_project_root
-
-
-@contextmanager
-def _suppress_root_platformio_merge(project_root: Path) -> Iterator[None]:
-    """Make ``get_root_platformio_build_flags`` see no root ``platformio.ini``.
-
-    ``ci/compiler/pio.py::_init_platformio_build`` unconditionally merges
-    ``build_flags`` from root ``./platformio.ini`` via
-    :func:`get_root_platformio_build_flags`. That behaviour is exactly what
-    issue #3281 wants to eliminate from the autoresearch path. Until #3278
-    introduces an opt-out parameter, the simplest non-invasive bridge is to
-    point ``get_root_platformio_build_flags`` at a project root with no root
-    ``platformio.ini`` for the duration of the synthesis call — which is the
-    documented "missing root ini" code path the function already handles
-    correctly (returns ``[]``).
-
-    We do this by monkey-patching the function symbol in ``ci.compiler.pio``
-    (the import site used by ``_init_platformio_build``) to a stub that
-    returns an empty list. Restoration is unconditional, even on exception.
-    """
-    # Local import — keeps the autoresearch import graph slim until staging
-    # is actually requested.
-    from ci.compiler import pio as _pio
-
-    _ = project_root  # currently unused; reserved for future direct-arg suppression
-    original = _pio.get_root_platformio_build_flags
-    _pio.get_root_platformio_build_flags = lambda _board, _root: []  # type: ignore[assignment]
-    try:
-        yield
-    finally:
-        _pio.get_root_platformio_build_flags = original  # type: ignore[assignment]
 
 
 def synthesise_autoresearch_project(
@@ -94,15 +61,19 @@ def synthesise_autoresearch_project(
     paths = FastLEDPaths(board.board_name, project_root=root)
     build_dir = paths.build_dir
 
-    with _suppress_root_platformio_merge(root):
-        init_result = _init_platformio_build(
-            board,
-            verbose,
-            "AutoResearch",
-            paths,
-            build_dir=build_dir,
-            use_fbuild=True,
-        )
+    # PR #3291 (#3278 Phase 2) severed the root platformio.ini merge in
+    # `_init_platformio_build`; PR #3295 (#3279 Phase 4) deleted the
+    # `get_root_platformio_build_flags` function entirely. The previous
+    # monkeypatch bridge that lived here is obsolete — autoresearch's
+    # fbuild path no longer reads root platformio.ini regardless.
+    init_result = _init_platformio_build(
+        board,
+        verbose,
+        "AutoResearch",
+        paths,
+        build_dir=build_dir,
+        use_fbuild=True,
+    )
     if not init_result.success:
         raise RuntimeError(
             f"Failed to synthesise autoresearch project for board "
