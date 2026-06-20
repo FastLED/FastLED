@@ -441,7 +441,7 @@ impl FileContentChecker for BareDigitSeparatorChecker {
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
-        const SUPPRESS: &str = "// ok digit-separator";
+        const SUPPRESS_TAIL: &str = "ok digit-separator";
         let mut violations = Vec::new();
         let mut in_block_comment = false;
         for (index, line) in file_content.lines.iter().enumerate() {
@@ -449,22 +449,21 @@ impl FileContentChecker for BareDigitSeparatorChecker {
             // advancing in_block_comment across line boundaries. This is what
             // makes inline doxygen `/* note 9'9 */` skip cleanly.
             let stripped = strip_block_comments_from_line(line, &mut in_block_comment);
-            // Trailing `// ok digit-separator` opts the line out, but ONLY
-            // after we've advanced the block-comment state. (Checking the
-            // SUPPRESS text on the original line — pre-strip — keeps the
-            // suppression honest if the line is part of a `/* ... */` block.)
-            if line.contains(SUPPRESS) {
+            // Blank double-quoted string contents BEFORE splitting on `//` so
+            // that a literal like `"http://..."` can't fool the comment split,
+            // and so the SUPPRESS check never matches text that lives inside
+            // a string. Single-quoted CHARs are left alone (the shared
+            // `strip_string_literals` blanks those too, which would eat the
+            // very digit-separator we want to flag).
+            let no_strings = strip_double_quoted_strings(&stripped);
+            let (code_no_strings, comment_tail) = no_strings
+                .split_once("//")
+                .map_or((no_strings.as_str(), ""), |(code, comment)| (code, comment));
+            // Trailing `// ok digit-separator` opts the line out.
+            if comment_tail.contains(SUPPRESS_TAIL) {
                 continue;
             }
-            // Drop the trailing `// comment` portion so digit-separator-style
-            // pseudocode in doxygen-comment lines doesn't fire.
-            let code = split_line_comment(&stripped);
-            // Strip ONLY double-quoted string literals so `"don't 9'9"`
-            // doesn't fire. The shared `strip_string_literals` also blanks
-            // single-quoted CHARs, which would eat the very digit-separator
-            // we want to flag (`'9'` inside `999'999'999ULL`).
-            let code_no_strings = strip_double_quoted_strings(code);
-            if regex_bare_digit_separator().is_match(&code_no_strings) {
+            if regex_bare_digit_separator().is_match(code_no_strings) {
                 violations.push((
                     index + 1,
                     format!(
