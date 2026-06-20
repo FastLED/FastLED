@@ -19,6 +19,7 @@
 #include "fl/stl/json.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/string.h" // ok include
+#include "fl/math/math.h"
 #include "test.h"
 #include "test.h"
 #include "fl/log/log.h"
@@ -1087,6 +1088,62 @@ FL_TEST_CASE("UI Bug - Memory Corruption") {
         // Process pending updates again to verify everything still works
         fl::processJsonUiPendingUpdates();
     } // Components go out of scope here and should be properly destroyed
+}
+
+FL_TEST_CASE("UIAudioReactive basic functionality") {
+    fl::string capturedJsonOutput;
+    auto updateEngineState = fl::setJsonUiHandlers(
+        [&](const char* jsonStr) {
+            if (jsonStr) {
+                capturedJsonOutput = jsonStr;
+            }
+        }
+    );
+    FL_CHECK(updateEngineState);
+
+    fl::UIAudioReactive audio("SoundReactive");
+    
+    FL_CHECK(audio.getVolume() == 0.0f);
+    FL_CHECK(audio.getBass() == 0.0f);
+    FL_CHECK(audio.getMid() == 0.0f);
+    FL_CHECK(audio.getTreble() == 0.0f);
+    FL_CHECK_FALSE(audio.isBeat());
+
+    fl::string pcmList = "[";
+    for (int i = 0; i < 512; ++i) {
+        float phase = 2.0f * 3.14159265f * 1000.0f * i / 44100.0f;
+        int16_t val = static_cast<int16_t>(16000.0f * fl::sinf(phase));
+        if (i > 0) {
+            pcmList += ",";
+        }
+        pcmList += val;
+    }
+    pcmList += "]";
+
+    fl::string updateJson = "{\"SoundReactive\": {\"audioData\": [{\"timestamp\": 100, \"samples\": " + pcmList + "}]}}";
+
+    updateEngineState(updateJson.c_str());
+    fl::processJsonUiPendingUpdates();
+
+    float volume = audio.getVolume();
+    float bass = audio.getBass();
+    float mid = audio.getMid();
+    float treble = audio.getTreble();
+
+    FL_CHECK_GT(volume, 0.0f);
+    FL_CHECK_GT(bass, 0.0f);
+    FL_CHECK_GT(mid, 0.0f);
+    FL_CHECK_GT(treble, 0.0f);
+
+    FL_CHECK(audio.getBand(fl::UIAudioReactive::kNumBands) == 0.0f);
+
+    float bandEnergy = 0.0f;
+    for (fl::u8 i = 0; i < fl::UIAudioReactive::kNumBands; ++i) {
+        float band = audio.getBand(i);
+        FL_CHECK_GE(band, 0.0f);
+        bandEnergy += band;
+    }
+    FL_CHECK_GT(bandEnergy, 0.0f);
 }
 
 } // FL_TEST_FILE

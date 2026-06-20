@@ -7,6 +7,7 @@
 /// them so consumers can include the entire UI surface with one include.
 
 #include "fl/ui/audio.h"
+#include "fl/ui/audio_reactive.h"
 #include "fl/ui/button.h"
 #include "fl/ui/checkbox.h"
 #include "fl/ui/description.h"
