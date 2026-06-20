@@ -4,11 +4,16 @@
 // PIMPL; cheap to copy. Default-constructed instances are in a null state
 // and evaluate to false. See FLED_FORMAT.md for the on-disk format.
 //
-// PR1 surface: factories, raw json()/blob() accessors, version/sectionCount,
-// and the null-state contract. PR2 adds the four typed section accessors
-// (screenMap/video/channels/script). Of these, only screenMap() has a real
-// body in PR2; the other three are stubs whose implementations land in
-// later PRs once the corresponding deserializers exist.
+// What Fled exposes:
+//   - Header info: version(), pixelFormat().
+//   - Raw JSON envelope: json(), sectionCount().
+//   - Raw byte ranges: blob(name, &outLen) for the post-JSON frame payload.
+//   - Fully constructed objects: screenMap(), channels().
+//
+// What Fled deliberately does NOT expose (purged from v1):
+//   - No video() accessor. Video access is via blob("frame_payload", &n) plus
+//     json()["video"] for metadata. No Video object is reconstructed here.
+//   - No script() accessor. Scripting is a future-v2 surface (docs only).
 
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
@@ -20,17 +25,12 @@ namespace fl {
 
 class FileSystem;
 class json;
-class FledImpl;
-
-// Forward decls for the typed section accessors below. Defined in:
-//   Video              - fl/fx/video.h
-//   ScreenMap          - fl/math/screenmap.h
-//   MultiChannelConfig - fl/channels/config.h (declared as struct there)
-//   FledScript         - fl/fled/fled_script.h
-class Video;
 class ScreenMap;
 struct MultiChannelConfig;
-struct FledScript;
+
+namespace fled {
+class FledImpl;
+}
 
 class Fled {
   public:
@@ -52,12 +52,43 @@ class Fled {
     // True iff load succeeded and produced a valid v1 envelope.
     explicit operator bool() const FL_NO_EXCEPT;
 
+    // Header version byte. Returns 0 for null Fled, 1 for valid v1.
+    fl::u8 version() const FL_NO_EXCEPT;
+
+    // Header pixel-format byte (offset 5). 0x00 = rgb8. Returns 0 for null.
+    fl::u8 pixelFormat() const FL_NO_EXCEPT;
+
+    // Bytes-per-LED for the configured pixel_format, per FLED_FORMAT.md.
+    // Returns 0 for unknown / reserved pixel formats (0x05 - 0xff) - the
+    // FLED_FORMAT.md spec says consumers should reject before reading
+    // frame bytes in that case.
+    fl::u8 bytesPerLed() const FL_NO_EXCEPT;
+
+    // Length of the frame_payload byte range (everything after the JSON
+    // envelope). Returns 0 for null Fled.
+    fl::size payloadBytes() const FL_NO_EXCEPT;
+
+    // Derived frame count per FLED_FORMAT.md:
+    //   frame_count = payload_bytes / (led_count * bytes_per_led)
+    // The caller supplies led_count (typically from screenMap()->getLength()).
+    // Returns 0 if led_count is 0, bytes-per-LED is 0, or the bundle is null.
+    fl::size frameCount(fl::size ledCount) const FL_NO_EXCEPT;
+
+    // Reads video.fps from the JSON envelope, falling back to defaultFps
+    // (30 by default) if the key is absent or not a number. FLED_FORMAT.md:
+    // "If video.fps is absent, consumers may use an application default,
+    // sketch parameter, or external playback setting."
+    float videoFps(float defaultFps = 30.0f) const FL_NO_EXCEPT;
+
     // Parsed JSON envelope. For null Fled, returns a reference to a static
     // empty json (safe to chain into).
     const fl::json &json() const FL_NO_EXCEPT;
 
+    // Number of top-level keys in the parsed JSON envelope. 0 for null.
+    fl::size sectionCount() const FL_NO_EXCEPT;
+
     // Returns a shared pointer aliased to the underlying byte storage for
-    // the named section. PR1 recognizes "frame_payload" (alias "payload"),
+    // the named section. Recognizes "frame_payload" (alias "payload"),
     // which maps to the raw bytes after the JSON envelope. Any other name
     // returns nullptr and writes 0 to *outLen (if non-null).
     //
@@ -70,22 +101,12 @@ class Fled {
     // Typed section accessors. Each returns nullptr if the bundle has no
     // section of that type. Construction touches NO global state (no
     // controller registration, no EngineEvents broadcast, no scheduler).
-    // PR4 fills in video() and adds Video::fromFled. PR5 fills in channels()
-    // once the MultiChannelConfig JSON deserializer lands.
-    fl::shared_ptr<Video>              video()     const FL_NO_EXCEPT;
     fl::shared_ptr<ScreenMap>          screenMap() const FL_NO_EXCEPT;
     fl::shared_ptr<MultiChannelConfig> channels()  const FL_NO_EXCEPT;
-    fl::shared_ptr<FledScript>         script()    const FL_NO_EXCEPT;
-
-    // Header version byte. Returns 0 for null Fled, 1 for valid v1.
-    fl::u8 version() const FL_NO_EXCEPT;
-
-    // Number of top-level keys in the parsed JSON envelope. 0 for null.
-    fl::size sectionCount() const FL_NO_EXCEPT;
 
   private:
-    explicit Fled(fl::shared_ptr<FledImpl> impl) FL_NO_EXCEPT;
-    fl::shared_ptr<FledImpl> mImpl;
+    explicit Fled(fl::shared_ptr<fled::FledImpl> impl) FL_NO_EXCEPT;
+    fl::shared_ptr<fled::FledImpl> mImpl;
 };
 
 } // namespace fl

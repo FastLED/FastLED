@@ -1,12 +1,10 @@
 #include "fl/fled/fled.h"
 
 #include "fl/channels/config.h"
-#include "fl/fled/fled_impl.hpp"
-#include "fl/fled/fled_script.h"
-#include "fl/fx/video.h"
+#include "fl/fled/detail/fled_impl.hpp"
+#include "fl/fled/detail/parser.h"
+#include "fl/fled/detail/pixel_format.h"
 #include "fl/math/screenmap.h"
-#include "fl/stl/bit_cast.h"
-#include "fl/stl/cstring.h"
 #include "fl/stl/flat_map.h"
 #include "fl/stl/json.h"
 #include "fl/stl/move.h"
@@ -21,72 +19,12 @@ namespace fl {
 
 namespace {
 
-// Mirrors src/fl/video/pixel_stream.cpp.hpp constants. Kept local on
-// purpose; sharing the parser with fl::Video is a future refactor.
-constexpr fl::u8 kMagic[4] = {'F', 'L', 'E', 'D'};
-constexpr fl::u8 kVersionV1 = 1;
-constexpr fl::size kHeaderBytes = 12;
-constexpr fl::size kMaxJsonBytes = 1u * 1024u * 1024u;
-
 const fl::json &nullJson() FL_NO_EXCEPT {
     static fl::json sEmpty;
     return sEmpty;
 }
 
-// Parse header + JSON from a byte buffer. On success populates outVersion,
-// outPayloadOffset, outEnvelope and returns true.
-bool parseHeaderAndEnvelope(const fl::u8 *data, fl::size len,
-                            fl::u8 *outVersion, fl::size *outPayloadOffset,
-                            fl::json *outEnvelope) FL_NO_EXCEPT {
-    if (len < kHeaderBytes) {
-        return false;
-    }
-    if (data[0] != kMagic[0] || data[1] != kMagic[1] ||
-        data[2] != kMagic[2] || data[3] != kMagic[3]) {
-        return false;
-    }
-    const fl::u8 ver = data[4];
-    if (ver != kVersionV1) {
-        return false;
-    }
-    const fl::u32 jsonLen =
-        static_cast<fl::u32>(data[8]) |
-        (static_cast<fl::u32>(data[9]) << 8) |
-        (static_cast<fl::u32>(data[10]) << 16) |
-        (static_cast<fl::u32>(data[11]) << 24);
-    // Bound-check in u32 BEFORE narrowing to fl::size - on 16-bit targets
-    // (AVR) fl::size is 16 bits and naive narrowing would wraparound.
-    if (jsonLen > static_cast<fl::u32>(kMaxJsonBytes)) {
-        return false;
-    }
-    if (jsonLen > static_cast<fl::u32>(len - kHeaderBytes)) {
-        return false;
-    }
-    const fl::size jsonLenSz = static_cast<fl::size>(jsonLen);
-    // Build a string view over the JSON bytes (fl::string copies the bytes
-    // internally - required because json::parse takes const string&).
-    fl::string jsonText(fl::reinterpret_cast_<const char *>(data + kHeaderBytes),
-                        jsonLenSz);
-    fl::json parsed = fl::json::parse(jsonText);
-    // parse() returns json(nullptr) on failure - that flags an envelope
-    // that is not a valid JSON document. Strict-reject per design.
-    if (!parsed.has_value()) {
-        return false;
-    }
-    *outVersion = ver;
-    *outPayloadOffset = kHeaderBytes + jsonLenSz;
-    *outEnvelope = parsed;
-    return true;
-}
-
-bool sectionNameIsPayload(const char *name) FL_NO_EXCEPT {
-    if (!name) return false;
-    if (fl::strcmp(name, "frame_payload") == 0) return true;
-    if (fl::strcmp(name, "payload") == 0) return true;
-    return false;
-}
-
-} // namespace
+}  // namespace
 
 // ---- factories ----
 
@@ -108,35 +46,64 @@ Fled Fled::load(FileSystem &fs, const char *path) FL_NO_EXCEPT {
 }
 
 Fled Fled::loadFromStatic(fl::span<const fl::u8> bytes) FL_NO_EXCEPT {
-    fl::u8 ver = 0;
-    fl::size payloadOffset = 0;
+    fl::fled::ParsedHeader hdr{};
     fl::json env;
-    if (!parseHeaderAndEnvelope(bytes.data(), bytes.size(), &ver,
-                                 &payloadOffset, &env)) {
+    if (!fl::fled::parseHeaderAndEnvelope(bytes.data(), bytes.size(), &hdr,
+                                          &env)) {
         return Fled();
     }
-    return Fled(fl::make_shared<FledImpl>(bytes, ver, payloadOffset, env));
+    return Fled(fl::make_shared<fl::fled::FledImpl>(
+        bytes, hdr.version, hdr.pixelFormat, hdr.payloadOffset, env));
 }
 
 Fled Fled::loadFromVector(fl::vector<fl::u8> &&bytes) FL_NO_EXCEPT {
-    fl::u8 ver = 0;
-    fl::size payloadOffset = 0;
+    fl::fled::ParsedHeader hdr{};
     fl::json env;
-    if (!parseHeaderAndEnvelope(bytes.data(), bytes.size(), &ver,
-                                 &payloadOffset, &env)) {
+    if (!fl::fled::parseHeaderAndEnvelope(bytes.data(), bytes.size(), &hdr,
+                                          &env)) {
         return Fled();
     }
-    return Fled(fl::make_shared<FledImpl>(fl::move(bytes), ver, payloadOffset,
-                                           env));
+    return Fled(fl::make_shared<fl::fled::FledImpl>(
+        fl::move(bytes), hdr.version, hdr.pixelFormat, hdr.payloadOffset, env));
 }
 
 // ---- ctors / observers ----
 
 Fled::Fled() FL_NO_EXCEPT : mImpl() {}
 
-Fled::Fled(fl::shared_ptr<FledImpl> impl) FL_NO_EXCEPT : mImpl(impl) {}
+Fled::Fled(fl::shared_ptr<fl::fled::FledImpl> impl) FL_NO_EXCEPT
+    : mImpl(impl) {}
 
 Fled::operator bool() const FL_NO_EXCEPT { return static_cast<bool>(mImpl); }
+
+// ---- header info ----
+
+fl::u8 Fled::version() const FL_NO_EXCEPT {
+    return mImpl ? mImpl->versionByte() : fl::u8(0);
+}
+
+fl::u8 Fled::pixelFormat() const FL_NO_EXCEPT {
+    return mImpl ? mImpl->pixelFormatByte() : fl::u8(0);
+}
+
+fl::u8 Fled::bytesPerLed() const FL_NO_EXCEPT {
+    return mImpl ? fl::fled::bytesPerLed(mImpl->pixelFormatByte()) : fl::u8(0);
+}
+
+fl::size Fled::payloadBytes() const FL_NO_EXCEPT {
+    return mImpl ? mImpl->payloadLen() : fl::size(0);
+}
+
+fl::size Fled::frameCount(fl::size ledCount) const FL_NO_EXCEPT {
+    if (!mImpl || ledCount == 0) return 0;
+    const fl::u8 bpp = fl::fled::bytesPerLed(mImpl->pixelFormatByte());
+    if (bpp == 0) return 0;
+    const fl::size perFrame = ledCount * static_cast<fl::size>(bpp);
+    if (perFrame == 0) return 0;
+    return mImpl->payloadLen() / perFrame;
+}
+
+// ---- JSON ----
 
 const fl::json &Fled::json() const FL_NO_EXCEPT {
     if (!mImpl) {
@@ -145,13 +112,35 @@ const fl::json &Fled::json() const FL_NO_EXCEPT {
     return mImpl->envelope();
 }
 
+fl::size Fled::sectionCount() const FL_NO_EXCEPT {
+    if (!mImpl) return 0;
+    return static_cast<fl::size>(mImpl->envelope().keys().size());
+}
+
+float Fled::videoFps(float defaultFps) const FL_NO_EXCEPT {
+    if (!mImpl) return defaultFps;
+    const fl::json &env = mImpl->envelope();
+    if (!env.contains(fl::string("video")) || !env["video"].is_object()) {
+        return defaultFps;
+    }
+    const fl::json videoNode = env["video"];
+    if (!videoNode.contains(fl::string("fps"))) {
+        return defaultFps;
+    }
+    auto fpsOpt = videoNode["fps"].as_float();
+    if (!fpsOpt) return defaultFps;
+    return static_cast<float>(*fpsOpt);
+}
+
+// ---- blobs ----
+
 fl::shared_ptr<const fl::u8> Fled::blob(const char *sectionName,
                                         fl::size *outLen) const FL_NO_EXCEPT {
     if (outLen) *outLen = 0;
     if (!mImpl) {
         return fl::shared_ptr<const fl::u8>();
     }
-    if (!sectionNameIsPayload(sectionName)) {
+    if (!fl::fled::sectionNameIsPayload(sectionName)) {
         return fl::shared_ptr<const fl::u8>();
     }
     const fl::size n = mImpl->payloadLen();
@@ -168,78 +157,36 @@ fl::shared_ptr<const fl::u8> Fled::blob(const char *sectionName,
 
 // ---- typed section accessors ----
 
-fl::shared_ptr<Video> Fled::video() const FL_NO_EXCEPT {
-    // TODO(#3311 PR4): construct Video from bundle bytes via Video::fromBytes
-    return fl::shared_ptr<Video>();
-}
-
 fl::shared_ptr<ScreenMap> Fled::screenMap() const FL_NO_EXCEPT {
     if (!mImpl) {
         return fl::shared_ptr<ScreenMap>();
     }
     const fl::json &env = mImpl->envelope();
-    // Only attempt a parse if "map" is present AND is an object. A missing
-    // key, null value, or non-object value all read as "no screen map".
+    // The v1 envelope carries the screen map under the "map" key. The
+    // canonical parser is ScreenMap::ParseJson, which takes a JSON
+    // document containing a top-level "map" object - exactly the shape
+    // of the envelope, so we hand it straight to ParseJson.
     if (!env.contains(fl::string("map")) || !env["map"].is_object()) {
         return fl::shared_ptr<ScreenMap>();
     }
-    // ScreenMap::ParseJson expects a JSON document containing a top-level
-    // "map" key (v1 shape) - the bundle envelope already has that shape,
-    // so we can hand the envelope's serialization straight to the parser.
-    fl::string jsonStr = env.to_string();
+    fl::string envText = env.to_string();
     fl::flat_map<fl::string, ScreenMap> segments;
-    if (!ScreenMap::ParseJson(jsonStr.c_str(), &segments)) {
+    if (!ScreenMap::ParseJson(envText.c_str(), &segments)) {
         return fl::shared_ptr<ScreenMap>();
     }
     if (segments.empty()) {
         return fl::shared_ptr<ScreenMap>();
     }
-    // PR2 returns the first segment. Multi-strip bundles will get a
-    // dedicated multi-segment accessor in a later PR; this path keeps the
-    // single-strip case working today without committing to that API.
+    // Single-strip path: return the first segment. Multi-strip support
+    // would be a dedicated accessor (out of scope here).
     ScreenMap &first = segments.begin()->second;
-    if (first.getLength() == 0) {
-        return fl::shared_ptr<ScreenMap>();
-    }
     return fl::make_shared<ScreenMap>(first);
 }
 
 fl::shared_ptr<MultiChannelConfig> Fled::channels() const FL_NO_EXCEPT {
-    // TODO(#3311 PR5): construct MultiChannelConfig from envelope["channels"] once the JSON deserializer lands
+    // TODO: construct MultiChannelConfig from envelope["channels"] once
+    // the MultiChannelConfig JSON deserializer lands in fl/channels/.
     return fl::shared_ptr<MultiChannelConfig>();
 }
 
-fl::shared_ptr<FledScript> Fled::script() const FL_NO_EXCEPT {
-    // TODO(#3311 v2): v1 bundles do not carry script sections
-    return fl::shared_ptr<FledScript>();
-}
-
-fl::u8 Fled::version() const FL_NO_EXCEPT {
-    return mImpl ? mImpl->versionByte() : fl::u8(0);
-}
-
-fl::size Fled::sectionCount() const FL_NO_EXCEPT {
-    if (!mImpl) return 0;
-    return static_cast<fl::size>(mImpl->envelope().keys().size());
-}
-
-// ---- bidirectional fromFled factories (PR4) ----
-// Each is a one-line forwarder to the corresponding Fled accessor; the
-// only purpose is to let call sites spell the call site-first
-// (Type::fromFled(fled)) as well as fled-first (fled.video()) - same
-// data, same return type, same null/empty contract.
-
-fl::shared_ptr<Video> Video::fromFled(const Fled &fled) FL_NO_EXCEPT {
-    return fled.video();
-}
-
-fl::shared_ptr<ScreenMap> ScreenMap::fromFled(const Fled &fled) FL_NO_EXCEPT {
-    return fled.screenMap();
-}
-
-fl::shared_ptr<MultiChannelConfig>
-MultiChannelConfig::fromFled(const Fled &fled) FL_NO_EXCEPT {
-    return fled.channels();
-}
-
-} // namespace fl
+}  // namespace fl

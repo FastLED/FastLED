@@ -30,16 +30,8 @@ using VideoImplPtr = fl::shared_ptr<VideoImpl>;
 // Video represents a video file that can be played back on a LED strip.
 // The video file is expected to be a sequence of frames. Pass any filebuf
 // to begin() — streaming vs seekable is auto-detected.
-class Fled;  // fwd - fl/fled/fled.h
-
 class Video : public Fx1d { // Fx1d because video can be irregular.
   public:
-    // Bidirectional factory for the .fled bundle subsystem (#3311 PR4).
-    // One-line forwarder to fl::Fled::video(); kept here so call sites can
-    // spell either fled.video() or fl::Video::fromFled(fled) interchangeably.
-    // Returns nullptr until fl::Fled::video() body lands (currently a stub).
-    static fl::shared_ptr<Video> fromFled(const Fled& fled) FL_NO_EXCEPT;
-
     static size_t DefaultFrameHistoryCount() {
 #ifdef FL_IS_AVR
         return 1;
