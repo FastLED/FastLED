@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 from ci.lint.args_parser import LintArgs, parse_lint_args
+from ci.lint.check_size_thresholds import run as run_size_thresholds_check
 from ci.lint.duration_tracker import DurationTracker
 from ci.lint.orchestrator import LintOrchestrator
 from ci.lint.stage_impls import (
@@ -274,6 +275,19 @@ def create_stages(args: LintArgs) -> list[LintStage]:
                 run_fn=lambda: run_root_platformio_lockdown_lint(
                     warn_only=_root_pio_warn_only_from_env()
                 ),
+                timeout=10.0,
+            )
+        )
+        # check_*_size.yml threshold lockdown: every max_size{,_apa102} value
+        # in .github/workflows/check_*_size.yml must match the frozen list
+        # in ci/lint/check_size_thresholds.py. Prevents agents from silently
+        # raising the ceiling to make CI green. ALWAYS error mode — no
+        # warn-only escape hatch.
+        stages.append(
+            LintStage(
+                name="size_thresholds_locked",
+                display_name="SIZE-CHECK YML THRESHOLDS LOCKED",
+                run_fn=run_size_thresholds_check,
                 timeout=10.0,
             )
         )
