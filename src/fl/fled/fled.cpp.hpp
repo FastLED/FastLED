@@ -1,8 +1,11 @@
 #include "fl/fled/fled.h"
 
 #include "fl/fled/fled_impl.hpp"
+#include "fl/fled/fled_script.h"
+#include "fl/math/screenmap.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/flat_map.h"
 #include "fl/stl/json.h"
 #include "fl/stl/move.h"
 #include "fl/stl/noexcept.h"
@@ -159,6 +162,54 @@ fl::shared_ptr<const fl::u8> Fled::blob(const char *sectionName,
     // NOTE: for loadFromStatic, the bytes themselves still live in the
     // caller's static span - see Fled::loadFromStatic contract.
     return fl::shared_ptr<const fl::u8>(mImpl, raw);
+}
+
+// ---- typed section accessors ----
+
+fl::shared_ptr<Video> Fled::video() const FL_NO_EXCEPT {
+    // TODO(#3311 PR4): construct Video from bundle bytes via Video::fromBytes
+    return fl::shared_ptr<Video>();
+}
+
+fl::shared_ptr<ScreenMap> Fled::screenMap() const FL_NO_EXCEPT {
+    if (!mImpl) {
+        return fl::shared_ptr<ScreenMap>();
+    }
+    const fl::json &env = mImpl->envelope();
+    // Only attempt a parse if "map" is present AND is an object. A missing
+    // key, null value, or non-object value all read as "no screen map".
+    if (!env.contains(fl::string("map")) || !env["map"].is_object()) {
+        return fl::shared_ptr<ScreenMap>();
+    }
+    // ScreenMap::ParseJson expects a JSON document containing a top-level
+    // "map" key (v1 shape) - the bundle envelope already has that shape,
+    // so we can hand the envelope's serialization straight to the parser.
+    fl::string jsonStr = env.to_string();
+    fl::flat_map<fl::string, ScreenMap> segments;
+    if (!ScreenMap::ParseJson(jsonStr.c_str(), &segments)) {
+        return fl::shared_ptr<ScreenMap>();
+    }
+    if (segments.empty()) {
+        return fl::shared_ptr<ScreenMap>();
+    }
+    // PR2 returns the first segment. Multi-strip bundles will get a
+    // dedicated multi-segment accessor in a later PR; this path keeps the
+    // single-strip case working today without committing to that API.
+    ScreenMap &first = segments.begin()->second;
+    if (first.getLength() == 0) {
+        return fl::shared_ptr<ScreenMap>();
+    }
+    return fl::make_shared<ScreenMap>(first);
+}
+
+fl::shared_ptr<MultiChannelConfig> Fled::channels() const FL_NO_EXCEPT {
+    // TODO(#3311 PR5): construct MultiChannelConfig from envelope["channels"] once the JSON deserializer lands
+    return fl::shared_ptr<MultiChannelConfig>();
+}
+
+fl::shared_ptr<FledScript> Fled::script() const FL_NO_EXCEPT {
+    // TODO(#3311 v2): v1 bundles do not carry script sections
+    return fl::shared_ptr<FledScript>();
 }
 
 fl::u8 Fled::version() const FL_NO_EXCEPT {
