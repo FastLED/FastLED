@@ -1,5 +1,5 @@
 // Unit tests for fl::Fled PR1 surface: factories, raw json()/blob(),
-// version/sectionCount, null-state contract. No on-disk fixtures —
+// version/sectionCount, null-state contract. No on-disk fixtures -
 // each test hand-builds its byte buffer.
 
 #include "fl/fled/fled.h"
@@ -20,7 +20,7 @@ namespace {
 
 // JSON envelope used by the valid-bundle tests. 29 bytes, two top-level keys.
 const char kEnvelope[] = "{\"map\":{},\"video\":{\"fps\":30}}";
-// Five-byte frame payload — value doesn't matter, just length.
+// Five-byte frame payload - value doesn't matter, just length.
 const fl::u8 kPayload[5] = {0x01, 0x02, 0x03, 0x04, 0x05};
 
 // Build a valid v1 .fled byte buffer in a fl::vector<u8>.
@@ -105,7 +105,7 @@ FL_TEST_CASE("fl::Fled - loadFromVector happy path") {
 FL_TEST_CASE("fl::Fled - copy is cheap (shares impl)") {
     fl::vector<fl::u8> buf = buildValidBundle();
     Fled a = Fled::loadFromVector(fl::move(buf));
-    Fled b = a;  // copy — both should be valid.
+    Fled b = a;  // copy - both should be valid.
     FL_CHECK(static_cast<bool>(a));
     FL_CHECK(static_cast<bool>(b));
     FL_CHECK_EQ(b.version(), fl::u8(1));
@@ -149,7 +149,7 @@ FL_TEST_CASE("fl::Fled - empty static span rejected") {
 FL_TEST_CASE("fl::Fled - oversize json_length rejected") {
     fl::vector<fl::u8> buf = buildValidBundle();
     // Set json_length to a value larger than remaining bytes.
-    const fl::u32 huge = 0x00100000u;  // 1 MiB — > remaining 34 bytes
+    const fl::u32 huge = 0x00100000u;  // 1 MiB - > remaining 34 bytes
     buf[8]  = static_cast<fl::u8>(huge & 0xff);
     buf[9]  = static_cast<fl::u8>((huge >> 8) & 0xff);
     buf[10] = static_cast<fl::u8>((huge >> 16) & 0xff);

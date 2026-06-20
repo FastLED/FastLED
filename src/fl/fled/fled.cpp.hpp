@@ -1,6 +1,6 @@
 #include "fl/fled/fled.h"
 
-#include "fl/fled/fled_impl.h"
+#include "fl/fled/fled_impl.hpp"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/json.h"
@@ -49,19 +49,21 @@ bool parseHeaderAndEnvelope(const fl::u8 *data, fl::size len,
         (static_cast<fl::u32>(data[9]) << 8) |
         (static_cast<fl::u32>(data[10]) << 16) |
         (static_cast<fl::u32>(data[11]) << 24);
+    // Bound-check in u32 BEFORE narrowing to fl::size - on 16-bit targets
+    // (AVR) fl::size is 16 bits and naive narrowing would wraparound.
+    if (jsonLen > static_cast<fl::u32>(kMaxJsonBytes)) {
+        return false;
+    }
+    if (jsonLen > static_cast<fl::u32>(len - kHeaderBytes)) {
+        return false;
+    }
     const fl::size jsonLenSz = static_cast<fl::size>(jsonLen);
-    if (jsonLenSz > kMaxJsonBytes) {
-        return false;
-    }
-    if (jsonLenSz > len - kHeaderBytes) {
-        return false;
-    }
     // Build a string view over the JSON bytes (fl::string copies the bytes
-    // internally — required because json::parse takes const string&).
+    // internally - required because json::parse takes const string&).
     fl::string jsonText(fl::reinterpret_cast_<const char *>(data + kHeaderBytes),
                         jsonLenSz);
     fl::json parsed = fl::json::parse(jsonText);
-    // parse() returns json(nullptr) on failure — that flags an envelope
+    // parse() returns json(nullptr) on failure - that flags an envelope
     // that is not a valid JSON document. Strict-reject per design.
     if (!parsed.has_value()) {
         return false;
@@ -155,7 +157,7 @@ fl::shared_ptr<const fl::u8> Fled::blob(const char *sectionName,
     if (outLen) *outLen = n;
     // Aliasing ctor: pins mImpl alive while the returned ptr is held.
     // NOTE: for loadFromStatic, the bytes themselves still live in the
-    // caller's static span — see Fled::loadFromStatic contract.
+    // caller's static span - see Fled::loadFromStatic contract.
     return fl::shared_ptr<const fl::u8>(mImpl, raw);
 }
 

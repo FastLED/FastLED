@@ -1,6 +1,6 @@
 #pragma once
 
-// fl::Fled — value-type handle to a parsed .fled v1 container.
+// fl::Fled - value-type handle to a parsed .fled v1 container.
 // PIMPL; cheap to copy. Default-constructed instances are in a null state
 // and evaluate to false. See FLED_FORMAT.md for the on-disk format.
 //
@@ -50,7 +50,7 @@ class Fled {
     // returns nullptr and writes 0 to *outLen (if non-null).
     //
     // Lifetime: the returned shared_ptr extends FledImpl's lifetime, but
-    // does NOT extend the lifetime of bytes loaded via loadFromStatic —
+    // does NOT extend the lifetime of bytes loaded via loadFromStatic -
     // those still depend on the caller's span outliving every use.
     fl::shared_ptr<const fl::u8> blob(const char *sectionName,
                                       fl::size *outLen) const FL_NO_EXCEPT;
