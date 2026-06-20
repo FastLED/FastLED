@@ -94,6 +94,13 @@ class Board:
     # down — see PR #2658). Set True when the board's workflow genuinely
     # needs the optimization-info dump for size/perf debugging.
     generate_optimization_report: bool = False
+    # Set True on chips where Espressif's `SOC_PARLIO_SUPPORTED=1` (per
+    # `components/soc/<chip>/include/soc/soc_caps.h`). The canonical chip
+    # family list lives in `src/platforms/esp/32/drivers/parlio/bus_traits.h:6`
+    # — keep these two lists in sync. When True, `to_platformio_ini()`
+    # auto-prepends `_ESP32_PARLIO_BUILD_FLAGS` to `build_flags` so the PARLIO
+    # TX ISR is pinned in IRAM and cache-safe (see #3271, #3304).
+    parlio_capable: bool = False
 
     def __post_init__(self) -> None:
         # Check if framework is set, warn and auto-set to arduino if missing (except for native/stub platforms)
@@ -610,6 +617,14 @@ class Board:
         if additional_defines:
             build_flags_elements.extend(f"-D{define}" for define in additional_defines)
 
+        # Auto-emit PARLIO IRAM flags on chips with SOC_PARLIO_SUPPORTED=1
+        # (capability declared via `parlio_capable=True` on the Board). Mirrors
+        # the auto-default pattern used above for ESP32-family `monitor_filters`
+        # — moves the flag list off a hand-maintained allowlist of board names
+        # and onto the per-chip capability bit. See #3304.
+        if self.parlio_capable:
+            build_flags_elements.extend(_ESP32_PARLIO_BUILD_FLAGS)
+
         # Use static build flags
         if self.build_flags:
             build_flags_elements.extend(self.build_flags)
@@ -869,7 +884,7 @@ ESP32_C5_DEVKITC_1 = Board(
     board_name="esp32c5",
     real_board_name="esp32-c5-devkitc-1",
     platform=ESP32_IDF_5_5_1_PIOARDUINO,
-    build_flags=list(_ESP32_PARLIO_BUILD_FLAGS),
+    parlio_capable=True,  # SOC_PARLIO_SUPPORTED=1 — flags auto-emitted by to_platformio_ini()
 )
 
 ESP32_C6_DEVKITC_1 = Board(
@@ -878,8 +893,8 @@ ESP32_C6_DEVKITC_1 = Board(
     platform=ESP32_IDF_5_5_1_PIOARDUINO,
     board_build_flash_size="4MB",  # ESP32-C6FH4 actual flash size confirmed by esptool
     board_partitions="huge_app.csv",
+    parlio_capable=True,  # SOC_PARLIO_SUPPORTED=1 — flags auto-emitted by to_platformio_ini()
     build_flags=[
-        *_ESP32_PARLIO_BUILD_FLAGS,
         "-funwind-tables",  # Better stack traces for RISC-V crash decoding
         "-DARDUINO_USB_MODE=1",  # Select HWCDC (USB-Serial/JTAG) over OTG
         "-DARDUINO_USB_CDC_ON_BOOT=1",  # Route Serial to HWCDC. Safe with setTxTimeoutMs(0); see #2668
@@ -895,8 +910,10 @@ ESP32_S3_DEVKITC_1 = Board(
     board_build_flash_size="4MB",  # Set to 4MB for QEMU compatibility (default is 8MB)
     board_partitions="huge_app.csv",  # 3MB app partition (default.csv only has 1.25MB, too small for Validation)
     build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
+    # NOTE: esp32s3 has NO PARLIO peripheral (SOC_PARLIO_SUPPORTED is unset in
+    # soc_caps.h). Do NOT set parlio_capable=True here — PR #3276 historically
+    # had this wrong; #3304 fixes it.
     build_flags=[
-        *_ESP32_PARLIO_BUILD_FLAGS,
         "-DARDUINO_USB_MODE=1",  # Route Serial over native USB for AutoResearch RPC on the upload port
         "-DARDUINO_USB_CDC_ON_BOOT=1",
         "-DARDUINO_LOOP_STACK_SIZE=16384",  # AutoResearch RPC plus ESP driver setup is deep enough to exceed the Arduino 8KB default
@@ -921,7 +938,7 @@ ESP32H2 = Board(
     real_board_name="esp32-h2-devkitm-1",
     platform_needs_install=True,  # Install platform package to get the boards
     platform=ESP32_IDF_5_3_PIOARDUINO,
-    build_flags=list(_ESP32_PARLIO_BUILD_FLAGS),
+    parlio_capable=True,  # SOC_PARLIO_SUPPORTED=1 — flags auto-emitted by to_platformio_ini()
 )
 
 ESP32_P4 = Board(
@@ -929,7 +946,7 @@ ESP32_P4 = Board(
     real_board_name="esp32-p4-evboard",
     platform=ESP32_IDF_5_5_1_PIOARDUINO,
     board_partitions="huge_app.csv",
-    build_flags=list(_ESP32_PARLIO_BUILD_FLAGS),
+    parlio_capable=True,  # SOC_PARLIO_SUPPORTED=1 — flags auto-emitted by to_platformio_ini()
     # Route Serial → USB-Serial-JTAG (HWCDCSerial) instead of UART0 (pins 37/38).
     # Without these the AutoResearch firmware listens on UART0 while the host
     # tool talks to the USB-Serial-JTAG COM port — every RPC write times out.
