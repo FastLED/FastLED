@@ -58,20 +58,11 @@
       ],
       "tools": [
         "clang-format",
-        "ci/lint_cpp_rs/ (Rust fastled-lint binary — primary checker fleet)",
-        "ci/lint_cpp/run_all_checkers.py (Python orchestrator: invokes Rust, then runs remaining Python-only checkers + AST ratchets)",
+        "ci/lint_cpp_rs/ (Rust fastled-lint crate — primary checker fleet; all single-file and cross-file structural checks)",
+        "ci/lint_cpp/run_all_checkers.py (Python orchestrator: invokes Rust, then runs AST ratchets)",
         "ci/lint_cpp/rust_binary_cache.py (build-on-change cache for fastled-lint)",
-        "ci/lint_cpp/rust_bridge.py (Rust ↔ Python result bridge)",
-        "ci/lint_cpp/bare_libm_checker.py (Python-only)",
-        "ci/lint_cpp/bare_noinline_checker.py (Python-only)",
-        "ci/lint_cpp/bare_snprintf_checker.py (Python-only)",
-        "ci/lint_cpp/fl_no_underscore_checker.py (Python-only)",
-        "ci/lint_cpp/legacy_log_macro_checker.py (Python-only)",
-        "ci/lint_cpp/public_settings_pattern_checker.py (Python-only)",
-        "ci/lint_cpp/noexcept_checker.py (AST ratchet)",
-        "ci/lint_cpp/pch_file_checker.py (cross-file structural)",
-        "ci/lint_cpp/test_unity_build.py (cross-file structural)",
-        "ci/lint_cpp/test_aggregation_checker.py (cross-file structural)"
+        "ci/lint_cpp/rust_bridge.py (Rust to Python result bridge)",
+        "ci/lint_cpp/noexcept_checker.py (AST ratchet — clang-query)"
       ],
       "script": "ci/cpp_lint_cache.py",
       "lint_command": "bash lint --cpp (default-on Rust path; --no-rust falls back to Python-only)"

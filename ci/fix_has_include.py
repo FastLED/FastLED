@@ -9,6 +9,16 @@ This script:
 4. Optionally fixes them by adding the include
 """
 
+"""Manual one-shot fixer for the FL_HAS_INCLUDE include rule (issue #3308).
+
+This tool is retained as a manual utility — no orchestrator or hook
+invokes it automatically. The corresponding CI lint rule was retired
+along with the broader Python-checker migration (#3293) and has not
+been ported to the Rust crate yet. Re-port the rule under
+`ci/lint_cpp_rs/src/checkers/preprocessor.rs` if CI enforcement is
+needed again.
+"""
+
 import _thread
 import re
 import sys

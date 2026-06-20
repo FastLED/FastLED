@@ -186,6 +186,6 @@ Then one edit in `ci/lint_cpp/rust_bridge.py`:
 Only use the Python tier (`ci/lint_cpp/`) for cases the Rust binary cannot model:
 
 - **AST ratchets** (libclang / clang-query): copy the pattern in `ci/tools/check_noexcept.py` or `ci/tools/check_array_params.py`. Wire it into `run_noexcept_ast_check` / `run_array_param_ast_check` in `run_all_checkers.py`.
-- **Cross-file structural checks**: see `ci/lint_cpp/test_unity_build.py`, `ci/lint_cpp/test_aggregation_checker.py`, `ci/lint_cpp/pch_file_checker.py` for the shape.
+- **Cross-file structural checks**: see `ci/lint_cpp_rs/src/checkers/unity_build.rs` and `ci/lint_cpp_rs/src/checkers/structural_passes.rs` for the shape. (These were ported from Python in #3293.)
 
 If you find yourself porting a per-line content rule to Python, stop — write it in Rust instead.

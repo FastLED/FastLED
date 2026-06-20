@@ -152,22 +152,13 @@ FL_LINT_AB=1 bash lint --cpp                      # A/B parity check vs Python o
 
 ## When to still use Python
 
-The Python tier is reserved for cases the Rust binary can't model today:
+As of PR #3293, **all single-file content checkers and cross-file structural checks run in the Rust crate** (`ci/lint_cpp_rs/`). The Python tier is reserved exclusively for the two remaining Tier-4 AST ratchets (across three Python files) that need libclang / clang-query, which the Rust binary cannot model today:
 
-- **AST ratchets** (require libclang / clang-query): `run_noexcept_ast_check` and `run_array_param_ast_check` in `ci/lint_cpp/run_all_checkers.py` (backed by `ci/tools/check_noexcept.py` and `ci/tools/check_array_params.py`). These compare AST query output against a checked-in baseline so the violation count can only drop, not grow.
-- **Cross-file structural checks** that have to reason about the whole tree at once:
-  - `ci/lint_cpp/test_unity_build.py::check` — validates `.cpp.hpp` / `_build.cpp.hpp` unity structure.
-  - `ci/lint_cpp/test_aggregation_checker.py::check` — validates test aggregation rules.
-  - `ci/lint_cpp/pch_file_checker.py::check` — validates precompiled-header file shape.
-- **The six remaining Python-only single-file checkers** that have not been ported yet (all wired in `create_checkers()` in `run_all_checkers.py`):
-  - `BareLibmChecker` (`bare_libm_checker.py`)
-  - `BareNoInlineChecker` (`bare_noinline_checker.py`)
-  - `BareSnprintfChecker` (`bare_snprintf_checker.py`)
-  - `LegacyLogMacroChecker` (`legacy_log_macro_checker.py`)
-  - `PublicSettingsPatternChecker` (`public_settings_pattern_checker.py`)
-  - `FlNoUnderscoreChecker` (`fl_no_underscore_checker.py`)
+- **AST ratchets only**: `run_noexcept_ast_check` and `run_array_param_ast_check` in `ci/lint_cpp/run_all_checkers.py`, backed by `ci/lint_cpp/noexcept_checker.py`, `ci/tools/check_noexcept.py`, and `ci/tools/check_array_params.py`. These compare AST query output against a checked-in baseline so the violation count can only drop, not grow.
 
-If your rule is single-file and content-based, it does **not** belong in this list — write it in Rust.
+Everything else — unity-build structure, test aggregation, PCH file shape, `BareLibmChecker`, `BareNoInlineChecker`, `BareSnprintfChecker`, `LegacyLogMacroChecker`, `PublicSettingsPatternChecker`, `FlNoUnderscoreChecker`, etc. — now lives under `ci/lint_cpp_rs/src/checkers/`.
+
+If your rule is single-file and content-based, write it in Rust. Cross-file structural rules also belong in Rust (see `ci/lint_cpp_rs/src/checkers/unity_build.rs` and `structural_passes.rs`).
 
 ## DO NOT
 

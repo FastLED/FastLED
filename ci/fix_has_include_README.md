@@ -34,7 +34,7 @@ uv run python ci/fix_has_include.py --help
 - Adds IWYU pragma to prevent removal
 - Handles indentation matching
 
-A standalone CI linter for this rule has not (yet) been ported to the Rust crate (`ci/lint_cpp_rs/`). The original Python `has_include_checker.py` was retired with the wider Rust migration (FastLED #3288); add a Rust checker under `ci/lint_cpp_rs/src/checkers/preprocessor.rs` if the rule needs CI enforcement again — see `agents/docs/linter-architecture.md` for the workflow.
+The standalone `ci/fix_has_include.py` tool remains as a one-shot manual fixer; the CI lint rule it once paired with was retired in #3293 and has not been ported to the Rust crate — see issue #3308 acceptance criterion for `fix_has_include.py`. Add a Rust checker under `ci/lint_cpp_rs/src/checkers/preprocessor.rs` if the rule needs CI enforcement again — see `agents/docs/linter-architecture.md` for the workflow.
 
 ## How It Works
 
