@@ -57,7 +57,7 @@ class FileSystem {
     // default-constructed FileSystem if the SD card could not be opened
     // (the typical begin() failure case). Sugar for code that wants to
     // chain straight into loadFled / openVideo / openRead.
-    static FileSystem sd(int cs_pin);
+    static FileSystem sd(int cs_pin) FL_NO_EXCEPT;
 
     bool beginSd(int cs_pin); // Signal to begin using the filesystem resource.
     bool begin(FsImplPtr platform_filesystem); // Signal to begin using the
@@ -89,7 +89,7 @@ class FileSystem {
     // One-line sugar for fl::Fled::load(*this, path). Returns a null
     // Fled if the file could not be opened or is malformed - the Fled
     // class itself owns all the failure-mode bookkeeping.
-    fl::Fled loadFled(const char *path);
+    fl::Fled loadFled(const char *path) FL_NO_EXCEPT;
 
   private:
     FsImplPtr mFs; // System dependent filesystem.

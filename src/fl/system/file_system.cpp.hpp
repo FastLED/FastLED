@@ -102,7 +102,7 @@ bool FileSystem::begin(FsImplPtr platform_filesystem) {
     return true;
 }
 
-Fled FileSystem::loadFled(const char *path) {
+Fled FileSystem::loadFled(const char *path) FL_NO_EXCEPT {
     return Fled::load(*this, path);
 }
 

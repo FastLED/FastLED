@@ -74,7 +74,7 @@ bool FileSystem::beginSd(int cs_pin) {
     return true;
 }
 
-FileSystem FileSystem::sd(int cs_pin) {
+FileSystem FileSystem::sd(int cs_pin) FL_NO_EXCEPT {
     FileSystem fs;
     fs.beginSd(cs_pin);
     return fs;
