@@ -52,7 +52,17 @@ BOARD_FINGERPRINTS: dict[tuple[int, int], str] = {
     # NXP LPC845-BRK ships with an LPC11U35 carrying both the CMSIS-DAP
     # debug interface AND a USB-VCOM bridge for the LPC845's USART0.
     (0x1FC9, 0x0132): "NXP CMSIS-DAP debug (LPC845-BRK / LPC11U35)",
-    (0x16C0, 0x0483): "LPC11U35 VCOM bridge (LPC845-BRK USART0)",
+    # 16C0:0483 is shared between the LPC11U35 VCOM bridge (when used on
+    # LPC845-BRK) and PJRC Teensy USB-Serial. Disambiguation requires
+    # additional signal — e.g. presence of a sibling CMSIS-DAP port for
+    # LPC, or `manufacturer.startswith("Teensyduino")` for PJRC. The
+    # fingerprint table only carries the joint hint; callers that need
+    # to act on the difference must inspect `manufacturer` / `serial_number`
+    # or the companion-port heuristic in `find_lpc845brk_vcom`.
+    (
+        0x16C0,
+        0x0483,
+    ): "LPC11U35 VCOM bridge (LPC845-BRK USART0) OR PJRC Teensy USB-Serial",
     # Espressif native USB CDC across ESP32-S3/C3/C6/H2/P4 variants.
     (0x303A, 0x1001): "Espressif native USB CDC (ESP32-S3/C3/C6/H2/P4)",
     # CP2102 from Silicon Labs — common on ESP32-WROOM dev kits.
@@ -65,7 +75,6 @@ BOARD_FINGERPRINTS: dict[tuple[int, int], str] = {
     (0x0403, 0x6010): "FTDI FT2232 dual UART",
     (0x0403, 0x6014): "FTDI FT232H USB-UART",
     # Teensy 3.x/4.x.
-    (0x16C0, 0x0483): "PJRC / Teensy USB-Serial (also LPC11U35 VCOM)",
     (0x16C0, 0x0486): "PJRC / Teensy USB-Serial (alt)",
 }
 
@@ -121,17 +130,30 @@ def find_by_vid_pid(vid: int, pid: int) -> list[PortInfo]:
 
 
 def find_lpc845brk_vcom() -> PortInfo | None:
-    """Return the LPC845-BRK USART0 VCOM port (LPC11U35 bridge), or None."""
+    """Return the LPC845-BRK USART0 VCOM port (LPC11U35 bridge), or None.
+
+    Returns None on ambiguity — `16C0:0483` is shared between the LPC11U35
+    VCOM bridge and PJRC Teensy USB-Serial, so when multiple matches are
+    detected we cannot pick one safely without additional signal. The
+    caller should require an explicit `--port` instead. (Per the
+    no-silent-fallback rule; see PR #3339 review.)
+    """
     matches = find_by_vid_pid(0x16C0, 0x0483)
     if not matches:
         return None
-    # If multiple boards present (e.g. Teensy + LPC sharing the VID:PID),
-    # prefer one whose CMSIS-DAP debug companion is also detected.
-    if len(matches) > 1:
-        cmsis_dap_ports = find_by_vid_pid(0x1FC9, 0x0132)
-        if cmsis_dap_ports:
-            return matches[0]
-    return matches[0]
+    if len(matches) == 1:
+        return matches[0]
+    # Ambiguous: filter to ports whose `manufacturer` looks like the LPC's
+    # mbed/DAPLink stack (rather than PJRC's "Teensyduino"). If exactly one
+    # remains, that's our LPC. Otherwise fail fast.
+    lpc_like = [
+        p
+        for p in matches
+        if p.manufacturer and not p.manufacturer.lower().startswith("teensy")
+    ]
+    if len(lpc_like) == 1:
+        return lpc_like[0]
+    return None
 
 
 def read_port(

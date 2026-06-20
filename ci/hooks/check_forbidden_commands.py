@@ -107,7 +107,7 @@ FORBIDDEN_PATTERNS = [
     # anywhere in the command would falsely flag commit messages, docs, and
     # error strings that mention the pattern (including this one!).
     (
-        r"(?i)powershell(?:\.exe)?\s+[^|;]*(?:-Command|-NoProfile|-c)[^|;]*System\.IO\.Ports\.SerialPort",
+        r"(?i)powershell(?:\.exe)?\s+[^|;]*(?:-Command\b|-NoProfile\b|-c\b)[^|;]*System\.IO\.Ports\.SerialPort",
         "PowerShell [System.IO.Ports.SerialPort] is forbidden for device monitoring "
         "(FastLED #3336). It defaults DTR/RTS to false, silently dropping bytes from "
         "boards with USB-VCOM bridges (LPC11U35, FTDI). Use: "
