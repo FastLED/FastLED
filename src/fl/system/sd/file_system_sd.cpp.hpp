@@ -74,4 +74,10 @@ bool FileSystem::beginSd(int cs_pin) {
     return true;
 }
 
+FileSystem FileSystem::sd(int cs_pin) {
+    FileSystem fs;
+    fs.beginSd(cs_pin);
+    return fs;
+}
+
 } // namespace fl

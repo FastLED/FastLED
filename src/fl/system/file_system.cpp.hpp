@@ -1,4 +1,5 @@
 ﻿#include "fl/system/file_system.h"
+#include "fl/fled/fled.h"
 #include "fl/stl/has_include.h"
 #include "fl/log/log.h"
 #include "fl/stl/vector.h"
@@ -99,6 +100,10 @@ bool FileSystem::begin(FsImplPtr platform_filesystem) {
     }
     mFs->begin();
     return true;
+}
+
+Fled FileSystem::loadFled(const char *path) {
+    return Fled::load(*this, path);
 }
 
 FileSystem::FileSystem() : mFs() {}
