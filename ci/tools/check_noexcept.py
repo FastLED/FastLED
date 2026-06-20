@@ -19,6 +19,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -32,19 +33,87 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_BASELINE = PROJECT_ROOT / "ci" / "tools" / "noexcept_baseline.txt"
 
 _TU_PLATFORMS = "ci/tools/_noexcept_check_platforms_tu.cpp"
-_TU_FL = "ci/tools/_noexcept_check_fl_tu.cpp"
-_TU_THIRD_PARTY = "ci/tools/_noexcept_check_third_party_tu.cpp"
+_TU_FL_ALL = "ci/tools/_noexcept_check_fl_tu.cpp"  # legacy fallback only
+_TU_THIRD_PARTY = "ci/tools/_noexcept_check_third_party_tu.cpp"  # legacy fallback only
+
+# Canonical per-subdir TU shims live in src/fl/build/ - the same files
+# the meson unity build already maintains. Reusing them for clang-query
+# means we get one parallel work unit per fl/<subdir> (~23 of them today)
+# without inventing or generating any new TU files.
+_FL_BUILD_DIR = "src/fl/build"
+_FL_BUILD_PLATFORMS = "src/fl/build/platforms+.cpp"
+_FL_BUILD_THIRD_PARTY = "src/fl/build/third_party+.cpp"
+
+
+def _fl_subdir_tus() -> list[tuple[str, str]]:
+    """Enumerate src/fl/build/fl.*+.cpp as (tu_path, file_regex) pairs.
+
+    Each shim under src/fl/build/ matches `fl.<subdir>+.cpp` (with `.`
+    as the path separator, so fl.system.sd+.cpp -> src/fl/system/sd/).
+    Returns a list of (relative_tu_path, narrowing_file_regex) so each
+    clang-query invocation only fires matches against files actually
+    parsed by that TU.
+    """
+    build_dir = PROJECT_ROOT / _FL_BUILD_DIR
+    if not build_dir.is_dir():
+        return [(_TU_FL_ALL, ".*src.fl.*")]
+    entries: list[tuple[str, str]] = []
+    for path in sorted(build_dir.glob("fl.*+.cpp")):
+        name = path.name  # e.g. "fl.system.sd+.cpp"
+        # strip leading "fl." and trailing "+.cpp"
+        subdir_dotted = name[3 : -len("+.cpp")]  # "system.sd"
+        # `.` in clang-query's file_regex matches any char including /
+        file_regex = f".*src.fl.{subdir_dotted}.*"
+        rel_tu = path.relative_to(PROJECT_ROOT).as_posix()
+        entries.append((rel_tu, file_regex))
+    if not entries:
+        return [(_TU_FL_ALL, ".*src.fl.*")]
+    return entries
+
+
+def _scope_tus(scope: str) -> list[tuple[str, str]]:
+    """Resolve a scope name to its concrete TU list.
+
+    fl/ expands to ~23 per-subdir TUs via src/fl/build/fl.*+.cpp so
+    clang-query can fan out across cores instead of parsing the
+    whole subsystem in one shot.
+    """
+    platforms_tu = (
+        _FL_BUILD_PLATFORMS
+        if (PROJECT_ROOT / _FL_BUILD_PLATFORMS).is_file()
+        else _TU_PLATFORMS
+    )
+    third_party_tu = (
+        _FL_BUILD_THIRD_PARTY
+        if (PROJECT_ROOT / _FL_BUILD_THIRD_PARTY).is_file()
+        else _TU_THIRD_PARTY
+    )
+    if scope == "platforms":
+        return [(platforms_tu, ".*src.platforms.*")]
+    if scope == "third_party":
+        return [(third_party_tu, ".*src.third_party.*")]
+    if scope == "fl":
+        return _fl_subdir_tus()
+    if scope == "all":
+        return [
+            (platforms_tu, ".*src.platforms.*"),
+            *_fl_subdir_tus(),
+            (third_party_tu, ".*src.third_party.*"),
+        ]
+    return _SCOPES[scope]
+
 
 _SCOPES: dict[str, list[tuple[str, str]]] = {
     "platforms": [(_TU_PLATFORMS, ".*src.platforms.*")],
-    "fl": [(_TU_FL, ".*src.fl.*")],
+    "fl": [(_TU_FL_ALL, ".*src.fl.*")],
     "third_party": [(_TU_THIRD_PARTY, ".*src.third_party.*")],
     "all": [
         (_TU_PLATFORMS, ".*src.platforms.*"),
-        (_TU_FL, ".*src.fl.*"),
+        (_TU_FL_ALL, ".*src.fl.*"),
         (_TU_THIRD_PARTY, ".*src.third_party.*"),
     ],
 }
+
 
 _COMPILER_ARGS = [
     "-std=c++17",
@@ -297,11 +366,37 @@ def find_missing_noexcept(scope: str = "all") -> list[NoexceptHit]:
             "clang-query not found. Install LLVM or the clang-tool-chain package."
         )
 
-    all_hits: list[NoexceptHit] = []
-    for tu, file_regex in _SCOPES[scope]:
+    tus = _scope_tus(scope)
+    for tu, _ in tus:
         if not (PROJECT_ROOT / tu).exists():
             raise NoexceptCheckError(f"translation unit not found: {tu}")
-        all_hits.extend(_run_clang_query(clang_query, tu, file_regex))
+
+    # The "all" scope dispatches 3 independent clang-query subprocesses
+    # (platforms / fl / third_party). Each parses its own TU - they share
+    # no state and can run concurrently. Sequential wall was ~17s on a
+    # cold AST run; parallel is ~max(per-TU) instead of sum.
+    if len(tus) == 1:
+        tu, file_regex = tus[0]
+        return _run_clang_query(clang_query, tu, file_regex)
+
+    from concurrent.futures import ThreadPoolExecutor
+
+    # max_workers defaults to host CPU count so the pool scales when
+    # we split big TUs (e.g. fl/) into multiple parallel chunks. For
+    # today's 3-TU shape ThreadPoolExecutor naturally caps at 3 (it
+    # never spawns more workers than submitted futures), so this is a
+    # no-op on current scopes - it's the right default for the next
+    # round of TU splitting.
+    max_workers = max(len(tus), os.cpu_count() or len(tus))
+
+    all_hits: list[NoexceptHit] = []
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = [
+            pool.submit(_run_clang_query, clang_query, tu, file_regex)
+            for tu, file_regex in tus
+        ]
+        for future in futures:
+            all_hits.extend(future.result())
     return all_hits
 
 

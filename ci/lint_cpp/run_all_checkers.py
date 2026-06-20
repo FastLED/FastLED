@@ -368,8 +368,6 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
         load_baseline,
     )
 
-    results = CheckerResults()
-
     scope = "all"
     rel_file: str | None = None
     if file_path is not None:
@@ -383,40 +381,176 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
             scope = "third_party"
         else:
             # Outside owned src scopes — nothing to check for this file.
+            return CheckerResults()
+
+    def _run() -> CheckerResults:
+        results = CheckerResults()
+        try:
+            hits = find_missing_noexcept(scope)
+        except NoexceptCheckError as exc:
+            # If the underlying clang-query tool simply isn't on PATH (common on
+            # CI runners without a full LLVM toolchain install), skip the AST
+            # ratchet with a stderr warning rather than turning it into a hard
+            # lint failure. The ratchet is one of the Tier-4 entries explicitly
+            # out-of-scope per #3288 and is best effort outside dev boxes.
+            # The two flavors we see in the wild:
+            #   - "clang-query not found. Install LLVM or the clang-tool-chain ..."
+            #     (raised by _find_clang_query returning empty)
+            #   - "error: Failed to spawn: `clang-tool-chain-query` Caused by ..."
+            #     (raised by uv when it can resolve uv itself but not the inner
+            #     clang-tool-chain entry-point)
+            message = str(exc)
+            if _ast_tool_unavailable(message):
+                print(
+                    f"⚠️  Skipping FL_NO_EXCEPT AST ratchet — {message}", file=sys.stderr
+                )
+                return results
+            results.add_violation("ci/tools/check_noexcept.py", 0, message)
             return results
 
-    try:
-        hits = find_missing_noexcept(scope)
-    except NoexceptCheckError as exc:
-        # If the underlying clang-query tool simply isn't on PATH (common on
-        # CI runners without a full LLVM toolchain install), skip the AST
-        # ratchet with a stderr warning rather than turning it into a hard
-        # lint failure. The ratchet is one of the Tier-4 entries explicitly
-        # out-of-scope per #3288 and is best effort outside dev boxes.
-        # The two flavors we see in the wild:
-        #   - "clang-query not found. Install LLVM or the clang-tool-chain ..."
-        #     (raised by _find_clang_query returning empty)
-        #   - "error: Failed to spawn: `clang-tool-chain-query` Caused by ..."
-        #     (raised by uv when it can resolve uv itself but not the inner
-        #     clang-tool-chain entry-point)
-        message = str(exc)
-        if _ast_tool_unavailable(message):
-            print(f"⚠️  Skipping FL_NO_EXCEPT AST ratchet — {message}", file=sys.stderr)
-            return results
-        results.add_violation("ci/tools/check_noexcept.py", 0, message)
+        if rel_file is not None:
+            hits = [hit for hit in hits if hit.path == rel_file]
+
+        new_hits, _stale = diff_against_baseline(hits, load_baseline(DEFAULT_BASELINE))
+        for hit in new_hits:
+            abs_path = str(PROJECT_ROOT / hit.path)
+            results.add_violation(
+                abs_path, hit.line, f"Missing FL_NO_EXCEPT: {hit.line_text}"
+            )
         return results
 
-    if rel_file is not None:
-        hits = [hit for hit in hits if hit.path == rel_file]
+    # Single-file mode bypasses the cache - the fingerprint is built over
+    # the whole scope and would cost more to compute than the per-file
+    # check itself saves.
+    if file_path is not None:
+        return _run()
 
-    new_hits, _stale = diff_against_baseline(hits, load_baseline(DEFAULT_BASELINE))
-    for hit in new_hits:
-        abs_path = str(PROJECT_ROOT / hit.path)
-        results.add_violation(
-            abs_path, hit.line, f"Missing FL_NO_EXCEPT: {hit.line_text}"
+    from ci.lint_cpp.ast_cache import cached_ast_check
+
+    return cached_ast_check(
+        name="noexcept_ast",
+        scope=scope,
+        tool_sources=[PROJECT_ROOT / "ci" / "tools" / "check_noexcept.py"],
+        baseline_path=PROJECT_ROOT / DEFAULT_BASELINE if DEFAULT_BASELINE else None,
+        runner=_run,
+    )
+
+
+def run_combined_ast_check() -> tuple[CheckerResults, CheckerResults]:
+    """Run noexcept + array-param matchers in ONE clang-query session per TU.
+
+    Returns (noexcept_results, array_param_results) so the orchestrator can
+    bucket them under their separate checker names.
+
+    The combined dispatch halves the peak clang-query process count
+    (~50 -> ~25 for the "all" scope) by sharing the parsed AST between
+    the two matchers per TU. Each result is still individually cached
+    via cached_ast_check so a warm run skips clang-query entirely.
+
+    Single-file mode is NOT handled here - the caller falls back to the
+    per-check run_*_ast_check functions when a file_path is supplied.
+    """
+    from ci.lint_cpp.ast_cache import cached_ast_check
+    from ci.tools.check_array_params import (
+        DEFAULT_BASELINE as ARRAY_BASELINE,
+    )
+    from ci.tools.check_array_params import (
+        ArrayParamCheckError,
+        _diagnostic_for_hit,
+    )
+    from ci.tools.check_array_params import (
+        diff_against_baseline as array_diff,
+    )
+    from ci.tools.check_array_params import (
+        load_baseline as load_array_baseline,
+    )
+    from ci.tools.check_ast_combined import find_combined_hits
+    from ci.tools.check_noexcept import (
+        DEFAULT_BASELINE as NOEXCEPT_BASELINE,
+    )
+    from ci.tools.check_noexcept import (
+        NoexceptCheckError,
+    )
+    from ci.tools.check_noexcept import (
+        diff_against_baseline as noexcept_diff,
+    )
+    from ci.tools.check_noexcept import (
+        load_baseline as load_noexcept_baseline,
+    )
+
+    def _shape() -> tuple[CheckerResults, CheckerResults]:
+        noexcept_results = CheckerResults()
+        array_param_results = CheckerResults()
+        try:
+            noexcept_hits, array_param_hits = find_combined_hits("all")
+        except (NoexceptCheckError, ArrayParamCheckError) as exc:
+            message = str(exc)
+            if _ast_tool_unavailable(message):
+                print(
+                    f"⚠️  Skipping combined AST ratchet — {message}",
+                    file=sys.stderr,
+                )
+                return noexcept_results, array_param_results
+            noexcept_results.add_violation("ci/tools/check_ast_combined.py", 0, message)
+            return noexcept_results, array_param_results
+
+        new_noexcept, _stale_n = noexcept_diff(
+            noexcept_hits, load_noexcept_baseline(NOEXCEPT_BASELINE)
         )
+        for hit in new_noexcept:
+            abs_path = str(PROJECT_ROOT / hit.path)
+            noexcept_results.add_violation(
+                abs_path, hit.line, f"Missing FL_NO_EXCEPT: {hit.line_text}"
+            )
 
-    return results
+        new_array, _stale_a = array_diff(
+            array_param_hits, load_array_baseline(ARRAY_BASELINE)
+        )
+        for hit in new_array:
+            abs_path = str(PROJECT_ROOT / hit.path)
+            array_param_results.add_violation(
+                abs_path, hit.line, _diagnostic_for_hit(hit)
+            )
+        return noexcept_results, array_param_results
+
+    # Cache wrapper. Fingerprint over the same inputs both checks share
+    # (src/fl + platforms + third_party + both tool sources + both
+    # baselines). cached_ast_check stores ONE CheckerResults at a time,
+    # so we wrap each direction separately around the same _shape()
+    # call - first hit populates both caches, subsequent hits replay
+    # without re-running clang-query.
+    cache: dict[str, tuple[CheckerResults, CheckerResults]] = {}
+
+    def _runner_noexcept() -> CheckerResults:
+        if "value" not in cache:
+            cache["value"] = _shape()
+        return cache["value"][0]
+
+    def _runner_array_param() -> CheckerResults:
+        if "value" not in cache:
+            cache["value"] = _shape()
+        return cache["value"][1]
+
+    tool_sources = [
+        PROJECT_ROOT / "ci" / "tools" / "check_noexcept.py",
+        PROJECT_ROOT / "ci" / "tools" / "check_array_params.py",
+        PROJECT_ROOT / "ci" / "tools" / "check_ast_combined.py",
+    ]
+    noexcept_cached = cached_ast_check(
+        name="noexcept_ast",
+        scope="all",
+        tool_sources=tool_sources,
+        baseline_path=PROJECT_ROOT / NOEXCEPT_BASELINE if NOEXCEPT_BASELINE else None,
+        runner=_runner_noexcept,
+    )
+    array_param_cached = cached_ast_check(
+        name="array_param_ast",
+        scope="all",
+        tool_sources=tool_sources,
+        baseline_path=PROJECT_ROOT / ARRAY_BASELINE if ARRAY_BASELINE else None,
+        runner=_runner_array_param,
+    )
+    return noexcept_cached, array_param_cached
 
 
 def run_array_param_ast_check(file_path: str | None = None) -> CheckerResults:
@@ -430,8 +564,6 @@ def run_array_param_ast_check(file_path: str | None = None) -> CheckerResults:
         load_baseline,
     )
 
-    results = CheckerResults()
-
     scope = "all"
     rel_file: str | None = None
     if file_path is not None:
@@ -444,32 +576,46 @@ def run_array_param_ast_check(file_path: str | None = None) -> CheckerResults:
         elif rel_file.startswith("src/third_party/"):
             scope = "third_party"
         else:
+            return CheckerResults()
+
+    def _run() -> CheckerResults:
+        results = CheckerResults()
+        try:
+            hits = find_decayed_array_params(scope)
+        except ArrayParamCheckError as exc:
+            # Same fallback as run_noexcept_ast_check above — skip when the
+            # underlying tool is missing rather than failing the whole lint.
+            message = str(exc)
+            if _ast_tool_unavailable(message):
+                print(
+                    f"⚠️  Skipping decayed-array-param AST ratchet — {message}",
+                    file=sys.stderr,
+                )
+                return results
+            results.add_violation("ci/tools/check_array_params.py", 0, message)
             return results
 
-    try:
-        hits = find_decayed_array_params(scope)
-    except ArrayParamCheckError as exc:
-        # Same fallback as run_noexcept_ast_check above — skip when the
-        # underlying tool is missing rather than failing the whole lint.
-        message = str(exc)
-        if _ast_tool_unavailable(message):
-            print(
-                f"⚠️  Skipping decayed-array-param AST ratchet — {message}",
-                file=sys.stderr,
-            )
-            return results
-        results.add_violation("ci/tools/check_array_params.py", 0, message)
+        if rel_file is not None:
+            hits = [hit for hit in hits if hit.path == rel_file]
+
+        new_hits, _stale = diff_against_baseline(hits, load_baseline(DEFAULT_BASELINE))
+        for hit in new_hits:
+            abs_path = str(PROJECT_ROOT / hit.path)
+            results.add_violation(abs_path, hit.line, _diagnostic_for_hit(hit))
         return results
 
-    if rel_file is not None:
-        hits = [hit for hit in hits if hit.path == rel_file]
+    if file_path is not None:
+        return _run()
 
-    new_hits, _stale = diff_against_baseline(hits, load_baseline(DEFAULT_BASELINE))
-    for hit in new_hits:
-        abs_path = str(PROJECT_ROOT / hit.path)
-        results.add_violation(abs_path, hit.line, _diagnostic_for_hit(hit))
+    from ci.lint_cpp.ast_cache import cached_ast_check
 
-    return results
+    return cached_ast_check(
+        name="array_param_ast",
+        scope=scope,
+        tool_sources=[PROJECT_ROOT / "ci" / "tools" / "check_array_params.py"],
+        baseline_path=PROJECT_ROOT / DEFAULT_BASELINE if DEFAULT_BASELINE else None,
+        runner=_run,
+    )
 
 
 @dataclass(frozen=True)
@@ -766,28 +912,54 @@ def main() -> int:
         # Create all checker instances. The previous all_headers
         # cross-file collection has been retired with its consumers.
         checkers_by_scope = create_checkers()
-        rust_results: dict[str, CheckerResults] = {}
-        if use_rust_fast_path:
-            rust_results = run_rust_linter(None)
 
-        # Run all checkers in a single pass per scope
-        results = run_checkers(files_by_dir, checkers_by_scope)
-        merge_checker_results(results, rust_results)
+        # Fan out the three independent heavy stages in parallel:
+        #   - the Rust fastled-lint pass        (~5s, all-cores rayon-parallel)
+        #   - the clang-query FL_NO_EXCEPT pass (~17s, single clang-query subprocess)
+        #   - the clang-query decayed-array pass(~10s, single clang-query subprocess)
+        # Wall time collapses from ~32s sequential to ~17s (clang-query bound).
+        # The Python per-file run_checkers() pass is run on the foreground thread
+        # since most of its scopes are currently empty buckets - kept separate so
+        # any future heavy Python checker re-enables fast.
+        from concurrent.futures import ThreadPoolExecutor
 
-        # UnityBuildChecker (whole-project structural pass),
-        # TestAggregationChecker (whole-project structural pass), and
-        # PchFileChecker now ship in the Rust binary's run_structural_passes()
-        # — see ci/lint_cpp_rs/src/checkers/structural_passes.rs. Violations
-        # arrive via `merge_checker_results` above.
+        # Default to host CPU count. ThreadPoolExecutor caps at the
+        # submitted future count, so a 2-stage fan-out (rust binary +
+        # combined AST) naturally serializes nothing on small boxes
+        # either. The constant is set high so we don't have to re-touch
+        # this when more parallel stages get added.
+        #
+        # AST consolidation: noexcept + array-param matchers now run
+        # against the SAME parsed AST per TU via run_combined_ast_check
+        # (one clang-query session per TU instead of two). Halves the
+        # peak clang-query process count from ~50 to ~25 on the "all"
+        # scope, which matters on machines with fewer cores than TUs.
+        with ThreadPoolExecutor(max_workers=os.cpu_count() or 3) as pool:
+            rust_future = (
+                pool.submit(run_rust_linter, None) if use_rust_fast_path else None
+            )
+            ast_future = pool.submit(run_combined_ast_check)
 
-        # Run AST-backed FL_NO_EXCEPT enforcement from normal C++ lint.
-        noexcept_results = run_noexcept_ast_check()
-        if noexcept_results.has_violations():
-            results["NoexceptAstChecker"] = noexcept_results
+            # Run the Python per-file pass on the foreground thread; the
+            # background subprocess-bound futures make progress in parallel.
+            results = run_checkers(files_by_dir, checkers_by_scope)
 
-        array_param_results = run_array_param_ast_check()
-        if array_param_results.has_violations():
-            results["ArrayParamAstChecker"] = array_param_results
+            rust_results: dict[str, CheckerResults] = (
+                rust_future.result() if rust_future is not None else {}
+            )
+            merge_checker_results(results, rust_results)
+
+            # UnityBuildChecker (whole-project structural pass),
+            # TestAggregationChecker (whole-project structural pass), and
+            # PchFileChecker now ship in the Rust binary's run_structural_passes()
+            # — see ci/lint_cpp_rs/src/checkers/structural_passes.rs. Violations
+            # arrive via `merge_checker_results` above.
+
+            noexcept_results, array_param_results = ast_future.result()
+            if noexcept_results.has_violations():
+                results["NoexceptAstChecker"] = noexcept_results
+            if array_param_results.has_violations():
+                results["ArrayParamAstChecker"] = array_param_results
 
         # Format and print results
         exit_code = format_and_print_results(results)

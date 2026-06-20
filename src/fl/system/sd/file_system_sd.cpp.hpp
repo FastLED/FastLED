@@ -65,7 +65,7 @@ FL_LINK_WEAK FsImplPtr make_sdcard_filesystem(int cs_pin) {
 }
 #endif
 
-bool FileSystem::beginSd(int cs_pin) {
+bool FileSystem::beginSd(int cs_pin) FL_NO_EXCEPT {
     mFs = make_sdcard_filesystem(cs_pin);
     if (!mFs) {
         return false;

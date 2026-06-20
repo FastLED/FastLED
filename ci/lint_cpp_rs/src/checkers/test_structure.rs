@@ -569,6 +569,11 @@ impl FileContentChecker for NoexceptSpecialMembersChecker {
         if class_names.is_empty() {
             return Vec::new();
         }
+        // Compile the combined class-name regex ONCE per file. Doing this
+        // inside classify_noexcept_line (the old behaviour) compiled
+        // class_names.len() regexes for every non-blank line in the file,
+        // costing 250+ seconds across the src/fl tree.
+        let class_names = ClassNameRegex::build(&class_names);
 
         let comment_mask = compute_block_comment_mask(&file_content.lines);
         let mut violations = Vec::new();

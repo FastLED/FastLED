@@ -61,7 +61,7 @@ Output:
 ## Phase 3: Run Across Codebase (Dry Run)
 
 1. **Run the Rust binary directly against the tree**:
-   `uv run python ci/lint_cpp/rust_binary_cache.py` then `./ci/lint_cpp_rs/target/release/fastled-lint --checker your_rule`
+   `uv run python ci/lint_cpp/rust_binary_cache.py` then `./ci/lint_cpp_rs/target/debug/fastled-lint --checker your_rule`
    (or just `bash lint --cpp` and grep for your checker name)
 2. **Count violations**: Report how many files/lines are affected
 3. **Sample review**: Show 5-10 representative violations to verify correctness

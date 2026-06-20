@@ -369,6 +369,23 @@ fn ctype_header(func: &str) -> &'static str {
     }
 }
 
+// Single combined regex matching any ctype-or-cstring function name as a
+// whole word. Built once via OnceLock and shared across all files. Used
+// as the cheap pre-flight gate before the per-line dispatch, instead of
+// doing 28 separate `contains()` scans of the whole file content.
+fn ctype_any_function_regex() -> &'static Regex {
+    static RE: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    RE.get_or_init(|| {
+        let names: Vec<&str> = CTYPE_FUNCTIONS
+            .iter()
+            .chain(CSTRING_FUNCTIONS.iter())
+            .copied()
+            .collect();
+        let pattern = format!(r"\b({})\b", names.join("|"));
+        Regex::new(&pattern).expect("static ctype function regex must compile")
+    })
+}
+
 fn find_ctype_calls(code_part: &str) -> Vec<(&'static str, bool)> {
     let bytes = code_part.as_bytes();
     let mut calls = Vec::new();
@@ -553,47 +570,87 @@ fn is_under_config_excluded_test_dir(path: &str) -> bool {
         .any(|dir| project_rel == *dir || project_rel.strip_prefix(&format!("{dir}/")).is_some())
 }
 
+// Per-(root_prefix, subdir) cache for top_level_headers. Filled on first
+// call, served from memory thereafter. TestIncludePathsChecker called
+// this per file (368 files), each call did a fresh fs::read_dir; the
+// cache turns it into a single read_dir for the whole lint run.
+fn top_level_headers_cache(
+) -> &'static std::sync::Mutex<HashMap<(String, String), std::sync::Arc<HashSet<String>>>> {
+    static CACHE: std::sync::OnceLock<
+        std::sync::Mutex<HashMap<(String, String), std::sync::Arc<HashSet<String>>>>,
+    > = std::sync::OnceLock::new();
+    CACHE.get_or_init(|| std::sync::Mutex::new(HashMap::new()))
+}
+
 fn top_level_headers(root_prefix: &str, dir: &str) -> HashSet<String> {
-    let mut headers = HashSet::new();
-    let root = join_project_path(root_prefix, dir);
-    let Ok(entries) = fs::read_dir(root) else {
-        return headers;
-    };
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if !path.is_file() {
-            continue;
-        }
-        let name = path
-            .file_name()
-            .and_then(|value| value.to_str())
-            .unwrap_or("");
-        if name.ends_with(".h") || name.ends_with(".hpp") {
-            headers.insert(name.to_string());
+    let key = (root_prefix.to_string(), dir.to_string());
+    {
+        let guard = top_level_headers_cache().lock().unwrap();
+        if let Some(cached) = guard.get(&key) {
+            return (**cached).clone();
         }
     }
+    let mut headers = HashSet::new();
+    let root = join_project_path(root_prefix, dir);
+    if let Ok(entries) = fs::read_dir(root) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if !path.is_file() {
+                continue;
+            }
+            let name = path
+                .file_name()
+                .and_then(|value| value.to_str())
+                .unwrap_or("");
+            if name.ends_with(".h") || name.ends_with(".hpp") {
+                headers.insert(name.to_string());
+            }
+        }
+    }
+    let shared = std::sync::Arc::new(headers.clone());
+    let mut guard = top_level_headers_cache().lock().unwrap();
+    guard.insert(key, shared);
     headers
 }
 
+// Per-root_prefix cache for all_test_header_filenames. The uncached
+// version walked the entire tests/ tree on every call - TestIncludePaths
+// called this 368 times. Now it's a single WalkDir per lint run.
+fn all_test_header_filenames_cache(
+) -> &'static std::sync::Mutex<HashMap<String, std::sync::Arc<HashSet<String>>>> {
+    static CACHE: std::sync::OnceLock<
+        std::sync::Mutex<HashMap<String, std::sync::Arc<HashSet<String>>>>,
+    > = std::sync::OnceLock::new();
+    CACHE.get_or_init(|| std::sync::Mutex::new(HashMap::new()))
+}
+
 fn all_test_header_filenames(root_prefix: &str) -> HashSet<String> {
+    {
+        let guard = all_test_header_filenames_cache().lock().unwrap();
+        if let Some(cached) = guard.get(root_prefix) {
+            return (**cached).clone();
+        }
+    }
     let root = join_project_path(root_prefix, "tests");
     let mut filenames = HashSet::new();
-    if !root.exists() {
-        return filenames;
+    if root.exists() {
+        for entry in WalkDir::new(root).into_iter().filter_map(Result::ok) {
+            if !entry.file_type().is_file() {
+                continue;
+            }
+            let path = entry.path();
+            let path_str = normalize_path(&path_to_string(path));
+            if !ends_with_any(&path_str, &[".h", ".hpp", ".cpp.hpp"]) {
+                continue;
+            }
+            if let Some(name) = path.file_name().and_then(|value| value.to_str()) {
+                filenames.insert(name.to_string());
+            }
+        }
     }
-    for entry in WalkDir::new(root).into_iter().filter_map(Result::ok) {
-        if !entry.file_type().is_file() {
-            continue;
-        }
-        let path = entry.path();
-        let path_str = normalize_path(&path_to_string(path));
-        if !ends_with_any(&path_str, &[".h", ".hpp", ".cpp.hpp"]) {
-            continue;
-        }
-        if let Some(name) = path.file_name().and_then(|value| value.to_str()) {
-            filenames.insert(name.to_string());
-        }
-    }
+    let shared = std::sync::Arc::new(filenames.clone());
+    let mut guard = all_test_header_filenames_cache().lock().unwrap();
+    guard.insert(root_prefix.to_string(), shared);
     filenames
 }
 

@@ -48,7 +48,7 @@ _SRC_DIR = RUST_CRATE_DIR / "src"
 def _guess_host_triple() -> str | None:
     """Best-effort guess of the host's Rust target triple.
 
-    Used to prioritize the matching ``target/<triple>/release/`` directory
+    Used to prioritize the matching ``target/<triple>/debug/`` directory
     when multiple cross-compile outputs exist. A miss is harmless — the
     function only influences ordering, never correctness.
     """
@@ -75,18 +75,23 @@ def _binary_candidate_paths() -> list[Path]:
     """Return candidate locations of the built fastled-lint binary.
 
     soldr drives cargo with ``CARGO_BUILD_TARGET`` pinned to the host triple,
-    so the binary lands under ``target/<triple>/release/`` rather than the
-    plain ``target/release/``. Ordering matters because the first existing
+    so the binary lands under ``target/<triple>/debug/`` rather than the
+    plain ``target/debug/``. Ordering matters because the first existing
     candidate wins: prefer the explicitly-requested triple
     (``CARGO_BUILD_TARGET``), then the host triple, then the plain
-    ``target/release/``, then any other triple discovered on disk (sorted
+    ``target/debug/``, then any other triple discovered on disk (sorted
     for determinism — never let directory-iteration order pick a binary
     silently on a multi-triple checkout).
+
+    NOTE: this is the cargo ``dev`` profile, not ``release``. The lint
+    binary is disk-I/O bound (it reads + parses source files); cargo dev
+    runs are fast enough at runtime and cut cold-build wall time by an
+    order of magnitude vs release.
     """
     suffix = ".exe" if os.name == "nt" else ""
     name = f"{RUST_BINARY_NAME}{suffix}"
     target_root = RUST_CRATE_DIR / "target"
-    plain_release = target_root / "release" / name
+    plain_debug = target_root / "debug" / name
 
     ordered: list[Path] = []
     seen: set[Path] = set()
@@ -98,19 +103,19 @@ def _binary_candidate_paths() -> list[Path]:
 
     env_target = os.environ.get("CARGO_BUILD_TARGET")
     if env_target:
-        _add(target_root / env_target / "release" / name)
+        _add(target_root / env_target / "debug" / name)
 
     host_triple = _guess_host_triple()
     if host_triple:
-        _add(target_root / host_triple / "release" / name)
+        _add(target_root / host_triple / "debug" / name)
 
-    _add(plain_release)
+    _add(plain_debug)
 
     if target_root.is_dir():
         for triple_dir in sorted(target_root.iterdir(), key=lambda p: p.name):
-            if not triple_dir.is_dir() or triple_dir.name == "release":
+            if not triple_dir.is_dir() or triple_dir.name == "debug":
                 continue
-            _add(triple_dir / "release" / name)
+            _add(triple_dir / "debug" / name)
 
     return ordered
 
@@ -197,13 +202,17 @@ def _resolve_soldr() -> str:
 
 
 def _run_build(verbose: bool = True) -> None:
-    """Invoke ``soldr cargo build --release`` for the fastled-lint binary."""
+    """Invoke ``soldr cargo build`` for the fastled-lint binary.
+
+    Uses the cargo ``dev`` profile (no ``--release``). The lint binary
+    is disk-I/O bound; release-mode codegen does not measurably speed up
+    runtime but costs ~10x cold-build wall time vs dev. See module docstring.
+    """
     soldr = _resolve_soldr()
     cmd = [
         soldr,
         "cargo",
         "build",
-        "--release",
         "--manifest-path",
         str(RUST_MANIFEST),
         "--bin",

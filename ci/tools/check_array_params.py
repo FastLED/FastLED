@@ -16,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -28,17 +29,70 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_BASELINE = PROJECT_ROOT / "ci" / "tools" / "array_param_baseline.txt"
 
-_TU_PLATFORMS = "ci/tools/_noexcept_check_platforms_tu.cpp"
-_TU_FL = "ci/tools/_noexcept_check_fl_tu.cpp"
-_TU_THIRD_PARTY = "ci/tools/_noexcept_check_third_party_tu.cpp"
+_TU_PLATFORMS = "ci/tools/_noexcept_check_platforms_tu.cpp"  # legacy fallback only
+_TU_FL_ALL = "ci/tools/_noexcept_check_fl_tu.cpp"  # legacy fallback only
+_TU_THIRD_PARTY = "ci/tools/_noexcept_check_third_party_tu.cpp"  # legacy fallback only
+
+# See check_noexcept._scope_tus for the design notes. Reuse the existing
+# per-subdir TU shims under src/fl/build/ so each clang-query invocation
+# parses just one fl/<subdir>; 23 fl shims + platforms + third_party
+# gives ~25 parallel work units instead of 3.
+_FL_BUILD_DIR = "src/fl/build"
+_FL_BUILD_PLATFORMS = "src/fl/build/platforms+.cpp"
+_FL_BUILD_THIRD_PARTY = "src/fl/build/third_party+.cpp"
+
+
+def _fl_subdir_tus() -> list[tuple[str, str]]:
+    """Enumerate src/fl/build/fl.*+.cpp as (tu_path, file_regex) pairs."""
+    build_dir = PROJECT_ROOT / _FL_BUILD_DIR
+    if not build_dir.is_dir():
+        return [(_TU_FL_ALL, ".*src.fl.*")]
+    entries: list[tuple[str, str]] = []
+    for path in sorted(build_dir.glob("fl.*+.cpp")):
+        name = path.name
+        subdir_dotted = name[3 : -len("+.cpp")]
+        file_regex = f".*src.fl.{subdir_dotted}.*"
+        rel_tu = path.relative_to(PROJECT_ROOT).as_posix()
+        entries.append((rel_tu, file_regex))
+    if not entries:
+        return [(_TU_FL_ALL, ".*src.fl.*")]
+    return entries
+
+
+def _scope_tus(scope: str) -> list[tuple[str, str]]:
+    """Resolve scope -> list of (tu, file_regex). fl/ expands to ~23 TUs."""
+    platforms_tu = (
+        _FL_BUILD_PLATFORMS
+        if (PROJECT_ROOT / _FL_BUILD_PLATFORMS).is_file()
+        else _TU_PLATFORMS
+    )
+    third_party_tu = (
+        _FL_BUILD_THIRD_PARTY
+        if (PROJECT_ROOT / _FL_BUILD_THIRD_PARTY).is_file()
+        else _TU_THIRD_PARTY
+    )
+    if scope == "platforms":
+        return [(platforms_tu, ".*src.platforms.*")]
+    if scope == "third_party":
+        return [(third_party_tu, ".*src.third_party.*")]
+    if scope == "fl":
+        return _fl_subdir_tus()
+    if scope == "all":
+        return [
+            (platforms_tu, ".*src.platforms.*"),
+            *_fl_subdir_tus(),
+            (third_party_tu, ".*src.third_party.*"),
+        ]
+    return _SCOPES[scope]
+
 
 _SCOPES: dict[str, list[tuple[str, str]]] = {
     "platforms": [(_TU_PLATFORMS, ".*src.platforms.*")],
-    "fl": [(_TU_FL, ".*src.fl.*")],
+    "fl": [(_TU_FL_ALL, ".*src.fl.*")],
     "third_party": [(_TU_THIRD_PARTY, ".*src.third_party.*")],
     "all": [
         (_TU_PLATFORMS, ".*src.platforms.*"),
-        (_TU_FL, ".*src.fl.*"),
+        (_TU_FL_ALL, ".*src.fl.*"),
         (_TU_THIRD_PARTY, ".*src.third_party.*"),
     ],
 }
@@ -369,11 +423,33 @@ def find_decayed_array_params(scope: str = "all") -> list[ArrayParamHit]:
             "clang-query not found. Install LLVM or the clang-tool-chain package."
         )
 
-    all_hits: list[ArrayParamHit] = []
-    for tu, file_regex in _SCOPES[scope]:
+    tus = _scope_tus(scope)
+    for tu, _ in tus:
         if not (PROJECT_ROOT / tu).exists():
             raise ArrayParamCheckError(f"translation unit not found: {tu}")
-        all_hits.extend(_run_clang_query(clang_query, tu, file_regex))
+
+    # Same pattern as check_noexcept.find_missing_noexcept: 3 independent
+    # clang-query subprocesses for the "all" scope, trivially parallel.
+    if len(tus) == 1:
+        tu, file_regex = tus[0]
+        return _run_clang_query(clang_query, tu, file_regex)
+
+    from concurrent.futures import ThreadPoolExecutor
+
+    # See note in check_noexcept.find_missing_noexcept - default to host
+    # CPU count so the pool scales when TUs are split into more parallel
+    # chunks; ThreadPoolExecutor caps at the submitted future count so
+    # this is a no-op for the current 3-TU shape.
+    max_workers = max(len(tus), os.cpu_count() or len(tus))
+
+    all_hits: list[ArrayParamHit] = []
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = [
+            pool.submit(_run_clang_query, clang_query, tu, file_regex)
+            for tu, file_regex in tus
+        ]
+        for future in futures:
+            all_hits.extend(future.result())
     return all_hits
 
 
