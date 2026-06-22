@@ -25,21 +25,18 @@
 
 #if defined(FL_IS_TEENSY_4X)
 
-// FastLED #3066 Phase 4 sub-task 2: enable the per-frame raw-capture dumps
-// in this file by default. These FL_DEBUG-gated FL_WARN_F sites surface the
-// bimodal-edge symptom (940/640 ns HIGH, 286/586 ns LOW from an OBJECT_FLED
-// frame) over the serial RPC link so bench operators can characterise the
-// FIFO-watermark / merging hypothesis without rebuilding.
-//
-// Users who need silent FlexPWM RX can `#define FL_RX_FLEXPWM_QUIET 1`
-// upstream of this include — that path #undef's FL_DEBUG so the production
-// fast path is unchanged.
-#ifndef FL_RX_FLEXPWM_QUIET
-#ifndef FL_DEBUG
-#define FL_DEBUG 1
-#define FL_DEBUG_DEFINED_BY_RX_FLEXPWM 1
-#endif
-#endif
+// FastLED #3219: the per-frame `[FlexPWM CFG]`/`DMA`/`RAW`/`EDGE`/`E`/
+// `DECODE` FL_WARN_F dumps that PR #3216 enabled by default in this
+// file have been removed. They were instrumentation added during the
+// bimodal-edge investigation (#3066 Phase 4) and produced 18 of the
+// 75 serial lines per OBJECT_FLED autoresearch frame -- ~24 % of the
+// device's UART output volume. On a 100-LED frame that volume blocked
+// the device's UART TX FIFO and stalled the test between patterns.
+// The dual-circuit capture refactor + midpoint classifier fix landed
+// in this PR series, so the bench-debug surface is no longer needed
+// to characterize the previous root cause. If diagnostic dumps are
+// needed again, add them behind a `-DFL_RX_FLEXPWM_VERBOSE=1` build
+// flag, NOT a hardcoded `#define FL_DEBUG 1` in this header.
 
 #define FASTLED_INTERNAL
 #include "fl/system/fastled.h"
@@ -306,13 +303,6 @@ decodeEdges(const ChipsetTiming4Phase &timing,
             static_cast<u8>(current_byte << (8 - bit_count));
     }
 
-#ifdef FL_DEBUG
-    FL_WARN_F("[FlexPWM DECODE] bytes=%s total_bits=%s errors=%s resyncs=%s edges=%s", byte_index, total_bits, error_count, resync_count, edges.size());
-    if (edges.size() >= 4) {
-        FL_WARN_F("[FlexPWM DECODE] e[0]=%s%s e[1]=%s%s e[2]=%s%s e[3]=%s%s", (edges[0].high?"H":"L"), edges[0].ns, (edges[1].high?"H":"L"), edges[1].ns, (edges[2].high?"H":"L"), edges[2].ns, (edges[3].high?"H":"L"), edges[3].ns);
-    }
-#endif
-
     // Check error rate (>10% is considered too high)
     if (total_bits > 0 &&
         (error_count * 10) > total_bits) {
@@ -483,22 +473,6 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
 
     // Start the submodule counter
     pwm->MCTRL |= FLEXPWM_MCTRL_RUN(1 << sm);
-
-#ifdef FL_DEBUG
-    FL_WARN_F("[FlexPWM CFG] pin=%s pwm%s sm=%s chB=%s", static_cast<int>(mPinInfo->pin), (pwm == &IMXRT_FLEXPWM1 ? 1 : pwm == &IMXRT_FLEXPWM2 ? 2 : pwm == &IMXRT_FLEXPWM3 ? 3 : 4), static_cast<int>(sm), mPinInfo->channel_b);
-    FL_WARN_F("[FlexPWM CFG] MCTRL=0x%x CTRL2=0x%x CTRL=0x%x",
-              pwm->MCTRL, pwm->SM[sm].CTRL2, pwm->SM[sm].CTRL);
-    if (!mPinInfo->channel_b) {
-        FL_WARN_F("[FlexPWM CFG] CAPTCTRLA=0x%x DMAEN=0x%x STS=0x%x",
-                  pwm->SM[sm].CAPTCTRLA, pwm->SM[sm].DMAEN,
-                  pwm->SM[sm].STS);
-    } else {
-        FL_WARN_F("[FlexPWM CFG] CAPTCTRLB=0x%x DMAEN=0x%x STS=0x%x",
-                  pwm->SM[sm].CAPTCTRLB, pwm->SM[sm].DMAEN,
-                  pwm->SM[sm].STS);
-    }
-    FL_WARN_F("[FlexPWM CFG] MUX=0x%x", *(mPinInfo->mux_register));
-#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -539,18 +513,6 @@ void FlexPwmRxChannelImpl::configureDma() {
     mDma.interruptAtCompletion();
     mDma.attachInterrupt(dmaIsr);
     mDma.enable();
-
-#ifdef FL_DEBUG
-    // Debug: dump DMA channel and DMAMUX state
-    volatile u32 *dmamux_reg = &DMAMUX_CHCFG0 + mDma.channel;
-    uintptr_t dma_daddr = reinterpret_cast<uintptr_t>(const_cast<void*>(mDma.TCD->DADDR)); // ok reinterpret cast - reading register
-    uintptr_t buf_addr = reinterpret_cast<uintptr_t>(mCaptureBuffer.data()); // ok reinterpret cast
-    FL_WARN_F("[FlexPWM DMA] ch=%s src=%d DMAMUX=0x%x CITER=%d ERQ=%d DADDR_match=%s",
-              mDma.channel, static_cast<int>(mPinInfo->dma_source),
-              *dmamux_reg, static_cast<int>(mDma.TCD->CITER),
-              (DMA_ERQ & (1 << mDma.channel) ? 1 : 0),
-              (dma_daddr == buf_addr ? "YES" : "NO"));
-#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -673,10 +635,6 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
         captures_written = mCaptureBuffer.size();
     }
 
-#ifdef FL_DEBUG
-    FL_WARN_F("[FlexPWM RX] DMA captures_written=%s BITER=%s CITER=%s done=%s mReceiveDone=%s ch=%s pin=%s", captures_written, biter, citer, (dma_done ? 1 : 0), (mReceiveDone ? 1 : 0), mDma.channel, static_cast<int>(mPinInfo->pin));
-#endif
-
     // CRITICAL: Invalidate D-cache for the capture buffer region.
     // DMA writes bypass the CPU cache, so we must invalidate to see
     // the data DMA actually wrote. Without this, the CPU reads stale
@@ -685,14 +643,6 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
         arm_dcache_delete(mCaptureBuffer.data(),
                           captures_written * sizeof(u16));
     }
-
-#ifdef FL_DEBUG
-    if (captures_written >= 8) {
-        FL_WARN_F("[FlexPWM RAW] first: %s %s %s %s", mCaptureBuffer[0], mCaptureBuffer[1], mCaptureBuffer[2], mCaptureBuffer[3]);
-        size_t mid = captures_written / 2;
-        FL_WARN_F("[FlexPWM RAW] mid[%s]: %s %s %s %s", mid, mCaptureBuffer[mid], mCaptureBuffer[mid+1], mCaptureBuffer[mid+2], mCaptureBuffer[mid+3]);
-    }
-#endif
 
     if (captures_written < 2) {
         mEdgesValid = true;
@@ -750,15 +700,6 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
     u32 final_high_ns =
         tickDeltaNs(mCaptureBuffer[last_pair], mCaptureBuffer[last_pair + 1]);
     mEdges.push_back(EdgeTime(true, final_high_ns));
-
-#ifdef FL_DEBUG
-    FL_WARN_F("[FlexPWM EDGE] total=%s", mEdges.size());
-    if (mEdges.size() >= 8) {
-        FL_WARN_F("[FlexPWM E] 0:%s%s 1:%s%s 2:%s%s 3:%s%s", (mEdges[0].high?"H":"L"), mEdges[0].ns, (mEdges[1].high?"H":"L"), mEdges[1].ns, (mEdges[2].high?"H":"L"), mEdges[2].ns, (mEdges[3].high?"H":"L"), mEdges[3].ns);
-        size_t mid = mEdges.size() / 2;
-        FL_WARN_F("[FlexPWM E@%s] %s%s %s%s %s%s %s%s", mid, (mEdges[mid].high?"H":"L"), mEdges[mid].ns, (mEdges[mid+1].high?"H":"L"), mEdges[mid+1].ns, (mEdges[mid+2].high?"H":"L"), mEdges[mid+2].ns, (mEdges[mid+3].high?"H":"L"), mEdges[mid+3].ns);
-    }
-#endif
 
     mEdgesValid = true;
 }
@@ -830,10 +771,5 @@ fl::shared_ptr<FlexPwmRxChannel> FlexPwmRxChannel::create(int pin) {
 }
 
 } // namespace fl
-
-#ifdef FL_DEBUG_DEFINED_BY_RX_FLEXPWM
-#undef FL_DEBUG_DEFINED_BY_RX_FLEXPWM
-#undef FL_DEBUG
-#endif
 
 #endif // FL_IS_TEENSY_4X
