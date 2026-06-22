@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import _thread
 import asyncio
+import threading
 import time
 import warnings
 from collections.abc import AsyncIterator
@@ -187,19 +188,39 @@ class FbuildSerialAdapter:
     async def read_lines(self, timeout: float) -> AsyncIterator[str]:
         loop = asyncio.get_running_loop()
         queue: asyncio.Queue[str | None] = asyncio.Queue()
+        # `stop_event` lets the async-generator consumer signal the
+        # producer thread to exit promptly when the consumer breaks /
+        # returns / is aclose()d. Without this, the producer kept
+        # running for the FULL `timeout` window after the consumer
+        # exited, draining serial bytes into a dead queue -- so the
+        # NEXT call to `read_lines()` (queued behind the OLD producer
+        # in the single-worker `_executor`) found the response line
+        # already consumed. Symptom: every 2nd RPC in a session timed
+        # out even though the device responded in milliseconds. See
+        # FastLED #3219 goal session 2026-06-22.
+        stop_event = threading.Event()
 
         def _producer() -> None:
-            # fbuild's native read_lines() returns the first batch of lines
-            # then exits (it does NOT keep reading until timeout). We must
-            # loop over multiple read_lines() calls to cover the full timeout.
+            # fbuild's native read_lines() returns the first batch of
+            # lines then exits (it does NOT keep reading until timeout).
+            # We loop over multiple read_lines() calls to cover the full
+            # timeout, but bail out promptly when stop_event is set so
+            # the executor's single worker is free for the next call.
             deadline = time.monotonic() + timeout
             try:
-                while True:
+                while not stop_event.is_set():
                     remaining = deadline - time.monotonic()
                     if remaining <= 0:
                         break
-                    for line in self._monitor.read_lines(timeout=remaining):
+                    # Cap each inner read at 0.25s so we re-check
+                    # stop_event regularly -- otherwise a quiet serial
+                    # line lets read_lines(timeout=remaining) block for
+                    # minutes ignoring the cancel signal.
+                    inner = min(remaining, 0.25)
+                    for line in self._monitor.read_lines(timeout=inner):
                         loop.call_soon_threadsafe(queue.put_nowait, line)
+                        if stop_event.is_set():
+                            break
             except KeyboardInterrupt:
                 _thread.interrupt_main()
                 raise
@@ -214,11 +235,19 @@ class FbuildSerialAdapter:
         # Start producer in thread
         self._executor.submit(_producer)
 
-        while True:
-            item = await queue.get()
-            if item is None:
-                break
-            yield item
+        try:
+            while True:
+                item = await queue.get()
+                if item is None:
+                    break
+                yield item
+        finally:
+            # Consumer exited (normal break, return, GeneratorExit from
+            # aclose()). Tell the producer to drop its leftover
+            # deadline and finish ASAP so the next read_lines() call
+            # isn't queued behind a zombie producer in our single-
+            # worker executor.
+            stop_event.set()
 
     async def reset_device(self, board: str | None) -> bool:
         """Reset device via fbuild daemon's reset endpoint.
