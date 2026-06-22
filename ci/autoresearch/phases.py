@@ -11,6 +11,7 @@ import json
 import os
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -33,6 +34,7 @@ from ci.autoresearch.context import (
 from ci.autoresearch.gpio import run_gpio_pretest, run_pin_discovery
 from ci.debug_attached import run_cpp_lint
 from ci.rpc_client import RpcClient, RpcCrashError, RpcTimeoutError
+from ci.util.blocker_alert import blocker_alert
 from ci.util.crash_trace_decoder import CrashTraceDecoder
 from ci.util.global_interrupt_handler import (
     handle_keyboard_interrupt,
@@ -55,6 +57,178 @@ if TYPE_CHECKING:
 # ============================================================
 # Helpers
 # ============================================================
+
+# Grace period added on top of the user's --timeout before the wrapper-level
+# watchdog force-terminates. The deadline_epoch in RunContext is the user's
+# hard wall; this is the additional headroom for any in-flight RPC to
+# unwind cleanly before we kill the process. Per session 2026-06-22 spec.
+WATCHDOG_GRACE_SECONDS = 20.0
+
+
+def _autoresearch_watchdog_thread(
+    ctx: "RunContext", cancel_event: "threading.Event"
+) -> None:
+    """Force-terminate the process if --timeout + grace expires.
+
+    Runs on a daemon `threading.Thread` -- deliberately NOT on the
+    asyncio event loop, because the failure modes we're guarding
+    against (wedged DMA, hung serial monitor, blocking call that never
+    yields control to the loop) can starve the loop's coroutines. A
+    real OS thread keeps ticking even when the loop is dead.
+
+    Steps:
+      1. Sleeps until `deadline_epoch + WATCHDOG_GRACE_SECONDS`,
+         in 1 s steps so a cancelled run can still bail quickly.
+      2. Emits a red `blocker_alert` banner with the trigger reason.
+      3. Best-effort closes the serial port from a side-thread with a
+         bounded join so the close itself can't hang us.
+      4. `os._exit(2)` -- bypasses any stuck asyncio cleanup. Clean
+         exit would be preferable, but the whole point of this
+         watchdog is to escape cases where clean exit doesn't happen.
+    """
+    assert ctx.deadline_epoch is not None, "watchdog started without deadline_epoch set"
+
+    # Re-read `ctx.deadline_epoch` every iteration so that
+    # `extend_autoresearch_watchdog_deadline()` can grant additional
+    # runway to long-running cleanup paths (e.g. an `await client.close()`
+    # that legitimately needs a few seconds) WITHOUT disarming the
+    # safety net. If close() itself wedges, the watchdog still fires
+    # after the new (extended) deadline.
+    while True:
+        now = time.monotonic()
+        fire_at = ctx.deadline_epoch + WATCHDOG_GRACE_SECONDS
+        if now >= fire_at:
+            break
+        if cancel_event.wait(min(fire_at - now, 1.0)):
+            return  # normal shutdown: caller signaled cancel
+
+    total = ctx.timeout_seconds + WATCHDOG_GRACE_SECONDS
+    blocker_alert(
+        f"AUTORESEARCH WATCHDOG: --timeout ({ctx.timeout_seconds:.0f}s) + "
+        f"{WATCHDOG_GRACE_SECONDS:.0f}s grace exceeded -- force-terminating.",
+        details=[
+            f"total wall-clock budget: {total:.0f}s",
+            "the per-RPC deadline path did not unwind in time",
+            "best-effort closing serial port before exit",
+            f"upload_port={ctx.upload_port!r}",
+        ],
+    )
+
+    # Forensic stack dump across every live Python thread (top 4 frames
+    # each) so we can post-mortem WHERE the wedge happened. Walks
+    # `sys._current_frames()` directly rather than using
+    # `faulthandler.dump_traceback()` so we control the depth and have
+    # the per-thread name in the header. Output goes to stderr right
+    # next to the red banner; piped logs keep the dump in order.
+    sys.stderr.write("\n--- WATCHDOG STACK DUMP (top 4 frames per thread) ---\n")
+    threads_by_id = {t.ident: t for t in threading.enumerate()}
+    for tid, frame in sys._current_frames().items():
+        thread_obj = threads_by_id.get(tid)
+        name = thread_obj.name if thread_obj is not None else "?"
+        daemon_marker = (
+            " [daemon]" if thread_obj is not None and thread_obj.daemon else ""
+        )
+        sys.stderr.write(f"\nThread {name!r} (tid={tid}){daemon_marker}:\n")
+        try:
+            import traceback as _traceback
+
+            stack_frames = _traceback.extract_stack(frame, limit=4)
+            for entry in _traceback.format_list(stack_frames):
+                sys.stderr.write(entry)
+        except KeyboardInterrupt as ki:  # noqa: BLE001
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as dump_exc:  # never let the dump itself kill us
+            sys.stderr.write(f"  <stack dump failed: {dump_exc}>\n")
+    sys.stderr.write("--- END WATCHDOG STACK DUMP ---\n\n")
+
+    # Best-effort serial close -- run in yet another thread so a wedged
+    # close() can't keep us from exiting. 2 s join cap, then we exit.
+    serial_iface = ctx.serial_iface
+
+    def _close_target() -> None:
+        if serial_iface is None:
+            return
+        # The async adapter wraps a sync fbuild SerialMonitor; reach for
+        # the sync underlying object first since we're off the loop.
+        # We swallow ALL exceptions here -- we're about to os._exit and
+        # the caller cannot interrupt us via Ctrl-C anyway (watchdog
+        # thread does not own the main-thread interrupt handler).
+        try:
+            mon = getattr(serial_iface, "_monitor", None)
+            if mon is not None and hasattr(mon, "__exit__"):
+                mon.__exit__(None, None, None)
+                return
+        except KeyboardInterrupt as ki:  # noqa: BLE001
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception:
+            pass
+        try:
+            close = getattr(serial_iface, "close", None)
+            if callable(close):
+                close()  # may return a coroutine; we ignore it
+        except KeyboardInterrupt as ki:  # noqa: BLE001
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception:
+            pass
+
+    closer = threading.Thread(
+        target=_close_target,
+        name="autoresearch-watchdog-closer",
+        daemon=True,
+    )
+    closer.start()
+    closer.join(timeout=2.0)
+
+    sys.stderr.flush()
+    os._exit(2)
+
+
+def start_autoresearch_watchdog(ctx: "RunContext") -> None:
+    """Spawn the watchdog daemon thread. Call once per run, after deploy.
+
+    Uses a real OS thread (not an asyncio task) so a wedged event loop
+    can't disable the safety net. The cancel signal is a
+    `threading.Event` stored on `ctx._watchdog_task`. Clean-exit paths
+    do NOT disarm the watchdog -- if cleanup itself wedges we still
+    want the force-kill. They call
+    `extend_autoresearch_watchdog_deadline(ctx, N)` to grant the
+    cleanup phase additional runway without disarming the bomb.
+    """
+    if ctx._watchdog_task is not None:
+        return  # already running
+    cancel_event = threading.Event()
+    ctx._watchdog_task = cancel_event
+    thread = threading.Thread(
+        target=_autoresearch_watchdog_thread,
+        args=(ctx, cancel_event),
+        name="autoresearch-watchdog",
+        daemon=True,
+    )
+    thread.start()
+
+
+def extend_autoresearch_watchdog_deadline(
+    ctx: "RunContext", extra_seconds: float
+) -> None:
+    """Push the watchdog deadline forward by `extra_seconds`.
+
+    Use this around long-running cleanup work that legitimately needs
+    more time than the user's `--timeout` allows (e.g. an `await
+    client.close()` that may take a couple seconds). The watchdog
+    stays armed; if the cleanup itself wedges past the new deadline
+    plus `WATCHDOG_GRACE_SECONDS`, it still force-terminates.
+
+    This is preferred over a `stop_autoresearch_watchdog` because
+    disabling the bomb during cleanup risks an indefinite hang if
+    cleanup itself is the wedge.
+    """
+    if ctx.deadline_epoch is None:
+        return
+    ctx.deadline_epoch += extra_seconds
+
 
 MAX_AUTORESEARCH_LANES = 16
 LPC_BRING_UP_ENVS = {
@@ -1151,6 +1325,24 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
             print(
                 f"\u26a0\ufe0f  Port {upload_port} not available after 3s, proceeding anyway..."
             )
+
+    # POST-FLASH, PRE-CONNECT EPOCH. From here on, every downstream RPC
+    # call computes its per-call timeout via `ctx.remaining_seconds()`
+    # so that the user-supplied `--timeout N` is a HARD WALL on the
+    # post-flash budget rather than a per-call value that could be
+    # silently inflated by hardcoded callsites (the previous bug --
+    # `--timeout 60` then 120 s hardcoded at the runSingleTest call
+    # site stretched real wall-clock to 15+ min). The watchdog kicks
+    # in `WATCHDOG_GRACE_SECONDS` after that hard wall to force-kill
+    # if normal teardown wedges. See goal session 2026-06-22.
+    ctx.start_timeout_epoch()
+    start_autoresearch_watchdog(ctx)
+    if ctx.deadline_epoch is not None:
+        print(
+            f"\u23f1  Post-flash deadline armed: "
+            f"--timeout={ctx.timeout_seconds:.0f}s "
+            f"(+ {WATCHDOG_GRACE_SECONDS:.0f}s watchdog grace)"
+        )
 
     return None
 
@@ -2283,10 +2475,19 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
             print(f"\n[{i}/{len(json_rpc_commands)}] Calling {method}()...")
 
             try:
+                # Per-RPC budget = TIME REMAINING UNTIL ctx.deadline_epoch.
+                # `--timeout N` is a TOTAL wall-clock budget from the post-
+                # flash epoch (not a per-call value), so each call shrinks
+                # the remaining window. Previously this site hardcoded
+                # 120.0 (ignoring --timeout entirely) and PR #3219 first
+                # changed it to `ctx.timeout_seconds` (still per-call, not
+                # decrementing) -- both let runs blow well past the user's
+                # stated budget. The watchdog thread enforces a hard
+                # ceiling at `deadline_epoch + WATCHDOG_GRACE_SECONDS`.
                 response = await client.send(
                     method,
                     args=params if params else [],
-                    timeout=120.0,
+                    timeout=ctx.remaining_seconds(minimum=1.0),
                 )
 
                 test_data = response.data
@@ -2415,6 +2616,13 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
         print(f"\n{Fore.RED}\u274c RPC client error: {e}{Style.RESET_ALL}")
         return 1
     finally:
+        # Grant the cleanup phase 10s of additional runway BUT keep the
+        # watchdog armed. If `await client.close()` itself wedges (which
+        # is the exact failure mode that motivated the watchdog), the
+        # force-kill still fires after deadline_epoch+10+grace. Per
+        # user spec 2026-06-22: never disarm the bomb, just give it
+        # more fuse when we're entering a known-slow phase.
+        extend_autoresearch_watchdog_deadline(ctx, 10.0)
         if client is not None:
             await client.close()
             print(f"\n\u2705 RPC connection closed")
