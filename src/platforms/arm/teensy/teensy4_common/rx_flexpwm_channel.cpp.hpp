@@ -186,34 +186,35 @@ static inline u32 tickDeltaNs(u16 t0, u16 t1) {
 }
 
 /// Decode a single bit from high/low nanosecond durations.
-/// Returns 0, 1, or -1 (unrecognised).
+///
+/// **Always returns 0 or 1** (never -1). Bench evidence (#3219, 5-LED test):
+/// when a single bit's HIGH duration landed marginally outside T0H_max but
+/// also outside T1H_min, the old "return -1" path made the decoder `continue`
+/// past that bit -- which dropped one bit from the stream and SHIFTED every
+/// downstream bit forward by one position in its byte. A single edge-of-
+/// tolerance pulse then propagated through the rest of the frame as
+/// cascading byte/LED errors (e.g. Pattern B 5-LED: one bit error caused
+/// all 5 LEDs to fail with `R: 0x55 -> 0xAB` left-shift). Classifying by
+/// the midpoint between t0h_max and t1h_min keeps byte alignment intact;
+/// at worst a single LSB flips in the affected bit's byte instead of
+/// poisoning everything that follows.
 static inline int decodeBit(u32 high_ns, u32 low_ns,
                             const ChipsetTiming4Phase &timing) {
-    // Check bit-0 thresholds
-    if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns &&
-        low_ns >= timing.t0l_min_ns && low_ns <= timing.t0l_max_ns) {
-        return 0;
-    }
-    // Check bit-1 thresholds
-    if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns &&
-        low_ns >= timing.t1l_min_ns && low_ns <= timing.t1l_max_ns) {
-        return 1;
-    }
-    return -1;
+    (void)low_ns;  // HIGH-only classification is more robust to TX/RX skew
+    const u32 midpoint =
+        (timing.t0h_max_ns + timing.t1h_min_ns) / 2u;
+    return (high_ns >= midpoint) ? 1 : 0;
 }
 
 /// Decode a bit when the following LOW phase is a reset/gap or was not
 /// captured. WS2812 bit value is encoded by HIGH width; LOW validation is only
-/// possible for intra-frame bit periods.
+/// possible for intra-frame bit periods. Always returns 0 or 1 -- see the
+/// rationale on `decodeBit()`.
 static inline int decodeBitFromHigh(u32 high_ns,
                                     const ChipsetTiming4Phase &timing) {
-    if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns) {
-        return 0;
-    }
-    if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns) {
-        return 1;
-    }
-    return -1;
+    const u32 midpoint =
+        (timing.t0h_max_ns + timing.t1h_min_ns) / 2u;
+    return (high_ns >= midpoint) ? 1 : 0;
 }
 
 /// Check if a low-duration pulse qualifies as a reset.
