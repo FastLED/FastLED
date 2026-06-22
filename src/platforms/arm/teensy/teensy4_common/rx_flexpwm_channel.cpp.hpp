@@ -585,14 +585,20 @@ bool FlexPwmRxChannelImpl::finished() const {
 
 RxWaitResult FlexPwmRxChannelImpl::wait(u32 timeout_ms) {
     u32 start = millis();
-    u16 last_citer = mDma.TCD->CITER;
+    const u16 initial_citer = mDma.TCD->CITER;
+    u16 last_citer = initial_citer;
     u32 last_change_time = micros();
+    bool exited_on_timeout = false;
 
     while (!mReceiveDone) {
         u32 now_ms = millis();
         if ((now_ms - start) >= timeout_ms) {
-            // Timeout -- but we may have partial data; treat it as success
-            // if DMA has captured any edges.
+            // Hit caller's timeout. Don't claim SUCCESS unless DMA actually
+            // moved -- if CITER is still at its initial value we got zero
+            // edges and must report TIMEOUT honestly so capture() can bail
+            // and runMultiTest() can emit a real failure instead of decoding
+            // a stale/empty buffer.
+            exited_on_timeout = true;
             break;
         }
 
@@ -617,9 +623,17 @@ RxWaitResult FlexPwmRxChannelImpl::wait(u32 timeout_ms) {
         yield();
     }
 
-    // Calculate how many captures DMA actually wrote
-    // (This is handled in buildEdgeTimesFromCaptures)
-
+    // Honesty: distinguish "actually got data" from "timeout with nothing".
+    //   - mReceiveDone     -> full buffer, definitely SUCCESS
+    //   - CITER moved      -> partial buffer, SUCCESS (caller decodes what
+    //                          arrived; inactivity-detection path lands here)
+    //   - CITER unchanged  -> nothing arrived; do not pretend it did
+    const u16 current_citer = mDma.TCD->CITER;
+    const bool dma_progressed = mReceiveDone || (current_citer != initial_citer);
+    if (!dma_progressed) {
+        return RxWaitResult::TIMEOUT;
+    }
+    (void)exited_on_timeout;  // retained for future telemetry; see #3219
     return RxWaitResult::SUCCESS;
 }
 
@@ -684,14 +698,37 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
         return;
     }
 
+    // Skip leading phantom pairs. Empirically (#3219, 2026-06-22 bench
+    // capture on Teensy 4.0), the IOMUXC pad-mux switch + DMA arm sequence
+    // sometimes latches a stray rising+falling pair before the OBJECT_FLED
+    // TX driver emits its first real bit. That phantom pair has a
+    // plausible-looking HIGH duration (~226 ns) but is followed by a
+    // multi-microsecond IDLE before the real frame starts. The original
+    // loop pushed the phantom HIGH unconditionally, then skipped the
+    // subsequent gap as a "long LOW" via the `low_ns > 5000` branch --
+    // leaving a stray leading HIGH in `mEdges` that shifted every bit
+    // decoded downstream by one. We must drop ANY leading pair whose
+    // following LOW is a reset/idle gap, not just the LOW itself.
+    size_t start_i = 0;
+    while (start_i + 3 < captures_written) {
+        u16 fall = mCaptureBuffer[start_i + 1];
+        u16 next_rise = mCaptureBuffer[start_i + 2];
+        u32 low_ns = tickDeltaNs(fall, next_rise);
+        if (low_ns > 5000) {
+            start_i += 2;  // phantom pair + its trailing gap; resume search
+        } else {
+            break;  // first real intra-frame pair starts here
+        }
+    }
+
     // Build EdgeTime pairs from paired rising/falling captures. DMA writes
     // [rise0, fall0, rise1, fall1, ...]. High time is the delta inside a pair;
     // low time is the delta from one pair's falling edge to the next pair's
     // rising edge.
 
-    mEdges.reserve(captures_written);
+    mEdges.reserve(captures_written - start_i);
 
-    for (size_t i = 0; i + 3 < captures_written; i += 2) {
+    for (size_t i = start_i; i + 3 < captures_written; i += 2) {
         u16 rise = mCaptureBuffer[i];
         u16 fall = mCaptureBuffer[i + 1];
         u16 next_rise = mCaptureBuffer[i + 2];
