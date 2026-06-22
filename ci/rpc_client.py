@@ -161,12 +161,29 @@ class RpcClient:
         self._next_id: int = (
             1  # Request ID counter for JSON-RPC 2.0 correlation (uint32 range)
         )
+        # Wrapper-side RPC send counter (fbuild#755 follow-up). Increments
+        # on every send() / send_and_match() attempt. Surfaces via the
+        # `sent_count` property; printed in verbose mode when the wrapper
+        # session exits. Lets us correlate session-end "wrapper saw N
+        # responses" against the device's reported "Remote handled M
+        # requests" to detect daemon/wrapper drops.
+        self._sent_count: int = 0
         self._crash_decoder: CrashTraceDecoder | None = crash_decoder
 
     @property
     def is_connected(self) -> bool:
         """Check if serial connection is open."""
         return self._serial is not None and self._connected
+
+    @property
+    def sent_count(self) -> int:
+        """Total RPC send attempts this session (fbuild#755 follow-up).
+
+        Increments on every `send()` / `send_and_match()` attempt,
+        including retries. Use to correlate against device-reported
+        receive counts when diagnosing daemon-side drops.
+        """
+        return self._sent_count
 
     async def connect(
         self,
@@ -283,6 +300,11 @@ class RpcClient:
     async def close(self) -> None:
         """Close serial connection (async)."""
         self._connected = False
+        if self.verbose and self._sent_count > 0:
+            # fbuild#755 follow-up: surface the session's RPC traffic
+            # volume so drops can be correlated against device-reported
+            # receive counts.
+            print(f"📊 [RPC] Session sent {self._sent_count} request(s)")
         if self._serial is not None:
             await self._serial.close()
             self._serial = None
@@ -385,6 +407,7 @@ class RpcClient:
             try:
                 # Write command via serial interface
                 await self._serial.write(cmd_str + "\n")
+                self._sent_count += 1  # fbuild#755 follow-up: track sent RPCs
 
                 # Await response with ID matching (mandatory)
                 response = await self._wait_for_response(
@@ -457,6 +480,7 @@ class RpcClient:
 
             # Write command via serial interface
             await self._serial.write(cmd_str + "\n")
+            self._sent_count += 1  # fbuild#755 follow-up: track sent RPCs
 
             start = time.time()
             try:

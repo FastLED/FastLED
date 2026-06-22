@@ -644,51 +644,36 @@ RxWaitResult FlexIoRxChannelImpl::wait(u32 timeout_ms) {
     const u32 start = millis();
     while (!mReceiveDone) {
         if ((millis() - start) >= timeout_ms) {
-            // FastLED#3066 Phase 1 sub-task 1 diagnostic: when the
-            // completion ISR never fires, dump the DMA channel state +
-            // FLEXIO1 shifter/timer status so the host can see why.
-            // Reading `mDma.complete()`, `mDma.error()`, and the live TCD
-            // CITER/BITER tells us whether the channel even started, how
-            // many transfers it processed, and whether it errored. The
-            // FLEXIO1 SHIFTSTAT/SHIFTERR/TIMSTAT reads tell us whether
-            // the shifter ever latched a captured value to trigger DMA.
+            // Single collated diagnostic. Was 3 FL_WARN_F lines on
+            // every timeout (DMA/CITER state + FLEXIO1 reg state +
+            // mCaptureBuffer[0..7] hex). FlexIO RX is architecturally
+            // dead-end per #3066 iter 9; we keep ONE line for forensic
+            // value but drop the verbose register dump that was
+            // bloating the UART TX FIFO on bursty failure paths
+            // (fbuild#755 follow-up FL_WARN audit).
             const u32 citer = mDma.TCD->CITER & 0x7FFFu;
             const u32 biter = mDma.TCD->BITER & 0x7FFFu;
             const u32 transfers_done = (biter > citer) ? (biter - citer) : 0u;
-            FL_WARN_F("[FlexIO RX] wait() TIMEOUT after %sms: DMA complete=%s error=%s CITER=%s/%s (transfers_done=%s)", timeout_ms, (mDma.complete() ? 1 : 0), (mDma.error() ? 1 : 0), citer, biter, transfers_done);
-            FL_WARN_F("[FlexIO RX] post-timeout FLEXIO1: SHIFTSTAT=0x%x SHIFTERR=0x%x TIMSTAT=0x%x CTRL=0x%x",
-                      FLEXIO1_SHIFTSTAT, FLEXIO1_SHIFTERR, FLEXIO1_TIMSTAT,
-                      FLEXIO1_CTRL);
-            // FastLED#3066 Phase 1 diagnostic: also dump the first few
-            // words of mCaptureBuffer so subsequent iterations can see
-            // whether the DMA actually copied any non-zero data into RAM
-            // â€” distinguishing "shifter never fired" from "shifter fired
-            // but latched all-zero pin samples".
-            if (mCaptureBuffer.size() >= 8u) {
-                FL_WARN_F("[FlexIO RX] mCaptureBuffer[0..7]: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x",
-                          mCaptureBuffer[0], mCaptureBuffer[1],
-                          mCaptureBuffer[2], mCaptureBuffer[3],
-                          mCaptureBuffer[4], mCaptureBuffer[5],
-                          mCaptureBuffer[6], mCaptureBuffer[7]);
-            }
+            FL_WARN_F("[FlexIO RX] TIMEOUT %sms done=%s/%s err=%s SHIFTSTAT=0x%x",
+                      timeout_ms, transfers_done, biter,
+                      (mDma.error() ? 1 : 0), FLEXIO1_SHIFTSTAT);
             return RxWaitResult::TIMEOUT;
         }
     }
-    // FastLED#3066 Phase 1 diagnostic: also dump on SUCCESS so future
-    // iterations can compare buffer-fill behaviour between the timeout
-    // path and the completion path. Iter 4 surfaced a surprise: DMA can
-    // signal "complete" with `transfers_done=0/N` when the channel
-    // already reloaded CITER=BITER and the buffer is all-zero â€” meaning
-    // either the shifter never fired or the ISR was misfired.
-    if (mCaptureBuffer.size() >= 8u) {
-        const u32 citer = mDma.TCD->CITER & 0x7FFFu;
-        const u32 biter = mDma.TCD->BITER & 0x7FFFu;
-        const u32 transfers_done = (biter > citer) ? (biter - citer) : 0u;
-        FL_WARN_F("[FlexIO RX] wait() SUCCESS: transfers_done=%s/%s", transfers_done, biter);
-        FL_WARN_F("[FlexIO RX] mCaptureBuffer[0..7]: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x",
-                  mCaptureBuffer[0], mCaptureBuffer[1], mCaptureBuffer[2],
-                  mCaptureBuffer[3], mCaptureBuffer[4], mCaptureBuffer[5],
-                  mCaptureBuffer[6], mCaptureBuffer[7]);
+    // SUCCESS gate: the ISR-set `mReceiveDone=true` is necessary but
+    // not sufficient. DMA can also signal completion with
+    // `transfers_done=0/N` when the channel reloaded CITER=BITER and
+    // the buffer is all-zero (the "shifter never fired but ISR
+    // misfired" case documented in #3066 iter 4). Returning SUCCESS
+    // there is the same cheat the FlexPWM driver had pre-#3219:
+    // caller decodes a stale/empty buffer and reports fake errors.
+    // Treat zero captures as TIMEOUT (honest).
+    const u32 citer = mDma.TCD->CITER & 0x7FFFu;
+    const u32 biter = mDma.TCD->BITER & 0x7FFFu;
+    const u32 transfers_done = (biter > citer) ? (biter - citer) : 0u;
+    if (transfers_done == 0u) {
+        FL_WARN_F("[FlexIO RX] empty-buffer SUCCESS reclassified as TIMEOUT (transfers=0/%s)", biter);
+        return RxWaitResult::TIMEOUT;
     }
     return RxWaitResult::SUCCESS;
 }
