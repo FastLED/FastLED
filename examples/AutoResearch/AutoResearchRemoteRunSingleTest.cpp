@@ -38,6 +38,7 @@
 #include "AutoResearchParlioStream.h"
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
+#include "fl/channels/manager.h"  // ChannelManager::getDriverInfos() for DriverNotRegistered diagnostic
 #include <Arduino.h>
 
 #include "fl/net/ble.h"
@@ -466,10 +467,29 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
 
     // Set driver as exclusive (by-name path: driver_name comes from RPC)
     if (!autoResearchSetExclusiveDriverByName(driver_name.c_str())) {
+        // Enumerate registered drivers so the host sees a useful error
+        // rather than generic "DriverSetupFailed". Diagnoses the case
+        // where a CLI flag (e.g. `--lpuart`) maps to a driver that's
+        // scaffolded in `src/platforms/.../lpuart/` but not actually
+        // enrolled at boot. fbuild#755 follow-up: was previously
+        // wrapper-skipped; the wrapper-skip removal in FastLED#3341
+        // exposed the generic error, this is its proper fix.
+        fl::span<const fl::DriverInfo> infos =
+            fl::ChannelManager::instance().getDriverInfos();
+        fl::sstream registered;
+        bool first = true;
+        for (const auto& info : infos) {
+            if (!info.enabled) continue;
+            if (!first) registered << ", ";
+            registered << info.name.c_str();
+            first = false;
+        }
         response.set("success", false);
-        response.set("error", "DriverSetupFailed");
+        response.set("error", "DriverNotRegistered");
         fl::sstream msg;
-        msg << "Failed to set " << driver_name.c_str() << " as exclusive driver";
+        msg << "Driver '" << driver_name.c_str()
+            << "' is not registered on this build. Registered drivers: "
+            << (first ? "(none)" : registered.str().c_str());
         response.set("message", msg.str().c_str());
         return response;
     }
