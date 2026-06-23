@@ -30,7 +30,7 @@ namespace vb = third_party::vorbis;
 // StbVorbisDecoder implementation
 StbVorbisDecoder::StbVorbisDecoder() : mVorbis(nullptr) {}
 
-StbVorbisDecoder::~StbVorbisDecoder() FL_NOEXCEPT {
+StbVorbisDecoder::~StbVorbisDecoder() FL_NO_EXCEPT {
     close();
 }
 
@@ -105,8 +105,8 @@ fl::u32 StbVorbisDecoder::getTotalSamples() const {
 // VorbisDecoderImpl - internal implementation
 class VorbisDecoderImpl {
 public:
-    VorbisDecoderImpl() FL_NOEXCEPT;
-    ~VorbisDecoderImpl() FL_NOEXCEPT;
+    VorbisDecoderImpl() FL_NO_EXCEPT;
+    ~VorbisDecoderImpl() FL_NO_EXCEPT;
 
     bool begin(fl::filebuf_ptr stream);
     void end();
@@ -132,7 +132,7 @@ VorbisDecoderImpl::VorbisDecoderImpl() : mPosition(0), mEndOfStream(false) {
     mPcmBuffer.resize(FRAME_SIZE * 2);  // Stereo
 }
 
-VorbisDecoderImpl::~VorbisDecoderImpl() FL_NOEXCEPT {
+VorbisDecoderImpl::~VorbisDecoderImpl() FL_NO_EXCEPT {
     end();
 }
 
@@ -243,7 +243,7 @@ void VorbisDecoderImpl::reset() {
 
 // VorbisDecoder public implementation
 VorbisDecoder::VorbisDecoder() : mImpl(fl::make_unique<VorbisDecoderImpl>()) {}
-VorbisDecoder::~VorbisDecoder() FL_NOEXCEPT = default;
+VorbisDecoder::~VorbisDecoder() FL_NO_EXCEPT = default;
 
 bool VorbisDecoder::begin(fl::filebuf_ptr stream) { return mImpl->begin(stream); }
 void VorbisDecoder::end() { mImpl->end(); }

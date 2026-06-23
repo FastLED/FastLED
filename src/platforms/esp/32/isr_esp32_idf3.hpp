@@ -97,7 +97,7 @@ constexpr u8 ESP32_IDF3_PLATFORM_ID = 1;
  * Allocate an available timer
  * Returns true if a timer was successfully allocated
  */
-static bool allocate_timer(timer_group_t* out_group, timer_idx_t* out_idx) FL_NOEXCEPT {
+static bool allocate_timer(timer_group_t* out_group, timer_idx_t* out_idx) FL_NO_EXCEPT {
     portENTER_CRITICAL(&timer_alloc_mutex);
     for (int g = 0; g < 2; g++) {
         for (int t = 0; t < 2; t++) {
@@ -117,7 +117,7 @@ static bool allocate_timer(timer_group_t* out_group, timer_idx_t* out_idx) FL_NO
 /**
  * Free a previously allocated timer
  */
-static void free_timer(timer_group_t group, timer_idx_t idx) FL_NOEXCEPT {
+static void free_timer(timer_group_t group, timer_idx_t idx) FL_NO_EXCEPT {
     portENTER_CRITICAL(&timer_alloc_mutex);
     timer_allocated[group][idx] = false;
     portEXIT_CRITICAL(&timer_alloc_mutex);
@@ -181,7 +181,7 @@ static void FL_IRAM gpio_isr_wrapper_idf3(void* arg)
 // ESP32 IDF3 ISR Implementation (fl::platform namespace)
 // =============================================================================
 
-inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
+inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
     if (!config.handler) {
         ESP_LOGW(ESP32_IDF3_ISR_TAG, "attachTimerHandler: handler is null");
         return -1;  // Invalid parameter
@@ -322,7 +322,7 @@ inline int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_ha
     return 0;  // Success
 }
 
-inline int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
+inline int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
     if (!config.handler) {
         ESP_LOGW(ESP32_IDF3_ISR_TAG, "attachExternalHandler: handler is null");
         return -1;  // Invalid parameter
@@ -411,7 +411,7 @@ inline int attach_external_handler(u8 pin, const isr_config_t& config, isr_handl
     return 0;  // Success
 }
 
-inline int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
+inline int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != ESP32_IDF3_PLATFORM_ID) {
         ESP_LOGW(ESP32_IDF3_ISR_TAG, "detachHandler: invalid handle");
         return -1;  // Invalid handle
@@ -447,7 +447,7 @@ inline int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
     return 0;  // Success
 }
 
-inline int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
+inline int enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != ESP32_IDF3_PLATFORM_ID) {
         ESP_LOGW(ESP32_IDF3_ISR_TAG, "enableHandler: invalid handle");
         return -1;  // Invalid handle
@@ -478,7 +478,7 @@ inline int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     return 0;  // Success
 }
 
-inline int disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
+inline int disable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != ESP32_IDF3_PLATFORM_ID) {
         ESP_LOGW(ESP32_IDF3_ISR_TAG, "disableHandler: invalid handle");
         return -1;  // Invalid handle
@@ -509,7 +509,7 @@ inline int disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     return 0;  // Success
 }
 
-inline bool is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
+inline bool is_handler_enabled(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != ESP32_IDF3_PLATFORM_ID) {
         return false;
     }
@@ -522,7 +522,7 @@ inline bool is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
     return handle_data->is_enabled;
 }
 
-inline const char* get_error_string(int error_code) FL_NOEXCEPT {
+inline const char* get_error_string(int error_code) FL_NO_EXCEPT {
     switch (error_code) {
         case 0: return "Success";
         case -1: return "Invalid parameter";
@@ -544,26 +544,26 @@ inline const char* get_error_string(int error_code) FL_NOEXCEPT {
     }
 }
 
-inline const char* get_platform_name() FL_NOEXCEPT {
+inline const char* get_platform_name() FL_NO_EXCEPT {
     return "ESP32 (IDF3)";
 }
 
-inline u32 get_max_timer_frequency() FL_NOEXCEPT {
+inline u32 get_max_timer_frequency() FL_NO_EXCEPT {
     // With divider=8, timer clock is 10MHz
     // Minimum alarm value of 1 gives max frequency of 10MHz
     return 10000000;  // 10 MHz
 }
 
-inline u32 get_min_timer_frequency() FL_NOEXCEPT {
+inline u32 get_min_timer_frequency() FL_NO_EXCEPT {
     return 1;  // 1 Hz
 }
 
-inline u8 get_max_priority() FL_NOEXCEPT {
+inline u8 get_max_priority() FL_NO_EXCEPT {
     // Xtensa: Priority 1-3 (official), 4-5 (experimental, requires assembly)
     return 5;
 }
 
-inline bool requires_assembly_handler(u8 priority) FL_NOEXCEPT {
+inline bool requires_assembly_handler(u8 priority) FL_NO_EXCEPT {
     // Xtensa: Priority 4+ requires assembly handlers
     return priority >= 4;
 }
@@ -576,12 +576,12 @@ inline bool requires_assembly_handler(u8 priority) FL_NOEXCEPT {
 // =============================================================================
 
 /// Disable interrupts on ESP32
-inline void interruptsDisable() FL_NOEXCEPT {
+inline void interruptsDisable() FL_NO_EXCEPT {
     portDISABLE_INTERRUPTS();
 }
 
 /// Enable interrupts on ESP32
-inline void interruptsEnable() FL_NOEXCEPT {
+inline void interruptsEnable() FL_NO_EXCEPT {
     portENABLE_INTERRUPTS();
 }
 

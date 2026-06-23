@@ -53,7 +53,7 @@ EqualizerDetector::EqualizerDetector()
     recomputePinkNoiseGains();
 }
 
-EqualizerDetector::~EqualizerDetector() FL_NOEXCEPT = default;
+EqualizerDetector::~EqualizerDetector() FL_NO_EXCEPT = default;
 
 void EqualizerDetector::configure(const EqualizerConfig& config) {
     mConfig = config;

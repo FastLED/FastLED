@@ -13,7 +13,7 @@ namespace fl {
 
 // Implementation of UI-specific append method
 // This will only be linked if JsonUiInternal is actually used somewhere
-string &string::append(const JsonUiInternal& val) FL_NOEXCEPT {
+string &string::append(const JsonUiInternal& val) FL_NO_EXCEPT {
     append(val.name());
     return *this;
 }

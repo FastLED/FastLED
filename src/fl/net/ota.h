@@ -124,10 +124,10 @@ enum class Service : u8 {
 class OTA {
 public:
     /// @brief Default constructor (lazy initialization)
-    OTA() FL_NOEXCEPT;
+    OTA() FL_NO_EXCEPT;
 
     /// @brief Destructor - cleans up resources
-    ~OTA() FL_NOEXCEPT;
+    ~OTA() FL_NO_EXCEPT;
 
     // ========== Network Setup Methods ==========
 

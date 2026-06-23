@@ -52,13 +52,13 @@ public:
     /// @brief Get the global singleton instance
     /// @return Reference to the singleton ChannelManager
     /// @note Thread-safe singleton initialization
-    static ChannelManager& instance() FL_NOEXCEPT;
+    static ChannelManager& instance() FL_NO_EXCEPT;
 
     /// @brief Constructor
-    ChannelManager() FL_NOEXCEPT;
+    ChannelManager() FL_NO_EXCEPT;
 
     /// @brief Destructor - cleanup shared drivers (automatic via shared_ptr)
-    ~ChannelManager() FL_NOEXCEPT override;
+    ~ChannelManager() FL_NO_EXCEPT override;
 
     /// @brief Add a driver with priority (higher priority = preferred)
     /// @param priority Driver priority (higher values = higher priority)
@@ -72,20 +72,20 @@ public:
     ///       2. All drivers polled until READY state (1 second timeout)
     ///       3. Old driver removed (shared_ptr may trigger deletion)
     ///       4. New driver added with specified priority
-    void addDriver(int priority, fl::shared_ptr<IChannelDriver> driver) FL_NOEXCEPT;
+    void addDriver(int priority, fl::shared_ptr<IChannelDriver> driver) FL_NO_EXCEPT;
 
     /// @brief Remove a driver from the manager
     /// @param driver Shared pointer to the driver to remove
     /// @return true if driver was found and removed, false if not found
     /// @note Emits FL_WARN if driver is not found
     /// @note Useful for test cleanup
-    bool removeDriver(fl::shared_ptr<IChannelDriver> driver) FL_NOEXCEPT;
+    bool removeDriver(fl::shared_ptr<IChannelDriver> driver) FL_NO_EXCEPT;
 
     /// @brief Remove all drivers from the manager
     /// @note Clears the entire driver registry
     /// @note Useful for FastLED.reset() with CHANNEL_DRIVERS flag
     /// @note Waits for all drivers to become READY before clearing (1 second timeout)
-    void clearAllDrivers() FL_NOEXCEPT;
+    void clearAllDrivers() FL_NO_EXCEPT;
 
     /// @brief Enable or disable a driver by name at runtime
     /// @param name Driver name to control (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
@@ -93,7 +93,7 @@ public:
     /// @note Disabled drivers are skipped during selection
     /// @note Changes take effect immediately on next enqueue()
     /// @note If name is not found, this is a no-op (does not warn)
-    void setDriverEnabled(const char* name, bool enabled) FL_NOEXCEPT;
+    void setDriverEnabled(const char* name, bool enabled) FL_NO_EXCEPT;
 
     /// @brief Register a single driver at a priority above the platform default
     ///        and disable all others (compile-time TU-linking variant).
@@ -116,7 +116,7 @@ public:
     ///       to the platform default via Phase 5b will continue to use that
     ///       pre-bind -- this template does not rewrite existing controllers.
     template<fl::Bus B>
-    void setExclusiveDriver() FL_NOEXCEPT;
+    void setExclusiveDriver() FL_NO_EXCEPT;
 
     /// @brief Enable only one driver exclusively, by `fl::Bus` enum (runtime form).
     /// @param bus Bus enum identifying the driver to enable (typed, typo-safe)
@@ -125,7 +125,7 @@ public:
     ///       built-in drivers. Delegates to `setExclusiveDriverByName(busName(bus))`.
     /// @note Does NOT ODR-use `BusTraits<bus>::instancePtr()` — for compile-time
     ///       TU-linking, use the `setExclusiveDriver<fl::Bus B>()` template overload.
-    bool setExclusiveDriver(Bus bus) FL_NOEXCEPT;
+    bool setExclusiveDriver(Bus bus) FL_NO_EXCEPT;
 
     /// @brief Enable only one driver exclusively (disables all others) — by-name escape hatch
     /// @param name Driver name to enable exclusively (case-sensitive, e.g., "MOCK_SPI")
@@ -146,7 +146,7 @@ public:
     /// @note If name is not found, all drivers remain disabled (defensive behavior)
     /// @note Use nullptr or empty string to disable all drivers (returns false)
     /// @warning This will disable ALL other registered drivers, including future additions
-    bool setExclusiveDriverByName(const char* name) FL_NOEXCEPT;
+    bool setExclusiveDriverByName(const char* name) FL_NO_EXCEPT;
 
     /// @brief Change the priority of a registered driver
     /// @param name Driver name (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
@@ -155,12 +155,12 @@ public:
     /// @note Triggers automatic re-sort of driver list by priority (descending)
     /// @note Changes take effect immediately on next enqueue()
     /// @note Higher priority drivers are selected first during canHandle() iteration
-    bool setDriverPriority(const fl::string& name, int priority) FL_NOEXCEPT;
+    bool setDriverPriority(const fl::string& name, int priority) FL_NO_EXCEPT;
 
     /// @brief Check if a driver is enabled by name
     /// @param name Driver name to query (case-sensitive)
     /// @return true if enabled, false if disabled or not registered
-    bool isDriverEnabled(const char* name) const FL_NOEXCEPT;
+    bool isDriverEnabled(const char* name) const FL_NO_EXCEPT;
 
     /// @brief Registration status of a driver by name (silent lookup)
     /// @note Values are prefixed (`STATUS_*`) because Arduino-ESP32's
@@ -179,32 +179,32 @@ public:
     /// @note Companion to `findDriverByName()` — same silent-on-miss behavior.
     ///       Used by `Channel::showPixels()` to detect the #2517 silent-drop
     ///       case (enqueued data routed to a disabled / unregistered driver).
-    DriverStatus driverStatus(const fl::string& name) const FL_NOEXCEPT;
+    DriverStatus driverStatus(const fl::string& name) const FL_NO_EXCEPT;
 
     /// @brief Get the currently-active exclusive-driver selection (if any).
     /// @return Driver name set via `setExclusiveDriver(...)`, or empty string
     ///         if no exclusive mode is active.
     /// @note Diagnostic accessor — used by the #2517 silent-drop FL_ERROR to
     ///       name the current exclusive-driver setting in its remediation hint.
-    const fl::string& exclusiveDriverName() const FL_NOEXCEPT { return mExclusiveDriver; }
+    const fl::string& exclusiveDriverName() const FL_NO_EXCEPT { return mExclusiveDriver; }
 
     /// @brief Get count of registered drivers (including unnamed ones)
     /// @return Total number of registered drivers
-    fl::size getDriverCount() const FL_NOEXCEPT;
+    fl::size getDriverCount() const FL_NO_EXCEPT;
 
     /// @brief Get full state of all registered drivers
     /// @return Span of driver info (sorted by priority descending)
     /// @note Returned span is valid until next call to any non-const method
     /// @note This method updates an internal cache - not thread-safe
     /// @note fl::string copies are cheap (shared pointer internally, no heap allocation)
-    fl::span<const DriverInfo> getDriverInfos() const FL_NOEXCEPT;
+    fl::span<const DriverInfo> getDriverInfos() const FL_NO_EXCEPT;
 
     /// @brief Get driver by name for affinity binding
     /// @param name Engine name to look up (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
     /// @return Shared pointer to driver if found and enabled, nullptr otherwise
     /// @note Used by Channel affinity system to bind channels to specific drivers
     /// @note Logs `FL_ERROR` on miss — call `findDriverByName()` for silent lookup.
-    fl::shared_ptr<IChannelDriver> getDriverByName(const fl::string& name) const FL_NOEXCEPT;
+    fl::shared_ptr<IChannelDriver> getDriverByName(const fl::string& name) const FL_NO_EXCEPT;
 
     /// @brief Silent counterpart to `getDriverByName()`.
     ///
@@ -212,7 +212,7 @@ public:
     /// driver" case themselves (e.g. `Channel::showPixels()`'s one-shot
     /// affinity-miss diagnostic from #2455) probe the registry without
     /// triggering the per-frame `FL_ERROR` stream that `getDriverByName()` emits.
-    fl::shared_ptr<IChannelDriver> findDriverByName(const fl::string& name) const FL_NOEXCEPT;
+    fl::shared_ptr<IChannelDriver> findDriverByName(const fl::string& name) const FL_NO_EXCEPT;
 
     /// @brief Select best driver for channel data (used by Channel::showPixels)
     /// @param data Channel data to route (chipset configuration)
@@ -220,31 +220,31 @@ public:
     /// @return Shared pointer to selected driver, or nullptr if none compatible
     /// @note Iterates drivers by priority (already sorted descending) and returns first that canHandle()
     /// @note This is called lazily in Channel::showPixels() if no driver is bound
-    fl::shared_ptr<IChannelDriver> selectDriverForChannel(const ChannelDataPtr& data, const fl::string& affinity) FL_NOEXCEPT;
+    fl::shared_ptr<IChannelDriver> selectDriverForChannel(const ChannelDataPtr& data, const fl::string& affinity) FL_NO_EXCEPT;
 
     /// @brief Poll all registered drivers and return aggregate state
     /// @return Aggregate state (READY if all ready, BUSY if any busy, ERROR if any error)
     /// @note This is NOT an IChannelDriver override - it's a diagnostic/test helper
     /// @note Polls all drivers and returns the "worst" state (ERROR > BUSY > READY)
-    IChannelDriver::DriverState poll() FL_NOEXCEPT;
+    IChannelDriver::DriverState poll() FL_NO_EXCEPT;
 
     /// @brief Wait for all drivers to become READY
     /// @note Polls drivers in a loop, calling async_run() and yielding with minimal delay
     /// @note Uses time-based delays to avoid busy-waiting while allowing async tasks to run
-    bool waitForReady(u32 timeoutMs = 1000) FL_NOEXCEPT;
-    bool waitForReadyOrDraining(u32 timeoutMs = 1000) FL_NOEXCEPT;
+    bool waitForReady(u32 timeoutMs = 1000) FL_NO_EXCEPT;
+    bool waitForReadyOrDraining(u32 timeoutMs = 1000) FL_NO_EXCEPT;
 
     /// @brief Poll drivers before frame starts to clear previous frame state
     /// @note Called at the beginning of each frame to ensure buffers from previous frame are released
-    void onBeginFrame() FL_NOEXCEPT override;
+    void onBeginFrame() FL_NO_EXCEPT override;
 
     /// @brief Trigger transmission of batched channel data
     /// @note Called at frame boundaries to flush enqueued channels
-    void onEndFrame() FL_NOEXCEPT override;
+    void onEndFrame() FL_NO_EXCEPT override;
 
     /// @brief Reset bus manager state, clearing all enqueued and transmitting channels
     /// @note Call this between test cases or when reinitializing the LED system
-    void reset() FL_NOEXCEPT;
+    void reset() FL_NO_EXCEPT;
 
 private:
     /// @brief Wait until a condition is met, with check-pump-delay logic
@@ -253,12 +253,12 @@ private:
     /// @return true if condition was met, false if timeout occurred
     /// @note Runs async_run() on each iteration and delays intelligently to avoid busy-waiting
     template<typename Condition>
-    bool waitForCondition(Condition condition, u32 timeoutMs = 1000) FL_NOEXCEPT;
+    bool waitForCondition(Condition condition, u32 timeoutMs = 1000) FL_NO_EXCEPT;
 
-    void notifyPollNeeded() FL_NOEXCEPT;
-    bool waitForPollNeededSignal(u32 timeoutMs) FL_NOEXCEPT;
-    u32 pollNeededWaitSliceMs(u32 startTime, u32 timeoutMs) const FL_NOEXCEPT;
-    static void notifyPollNeededThunk(void* context) FL_NOEXCEPT;
+    void notifyPollNeeded() FL_NO_EXCEPT;
+    bool waitForPollNeededSignal(u32 timeoutMs) FL_NO_EXCEPT;
+    u32 pollNeededWaitSliceMs(u32 startTime, u32 timeoutMs) const FL_NO_EXCEPT;
+    static void notifyPollNeededThunk(void* context) FL_NO_EXCEPT;
 
 private:
     /// @brief Engine registry entry (priority + shared pointer + runtime control)
@@ -270,7 +270,7 @@ private:
 
         /// @brief Sort by priority descending (higher numbers first)
         /// @note Higher priority values = higher precedence (e.g., 50 > 10)
-        bool operator<(const EngineEntry& other) const FL_NOEXCEPT {
+        bool operator<(const EngineEntry& other) const FL_NO_EXCEPT {
             return priority > other.priority;  // Sort descending: higher values first
         }
     };
@@ -280,7 +280,7 @@ private:
     /// @return Pointer to selected driver, or nullptr if none available
     /// @note Selects highest priority driver from registry that can handle the channel data
     /// @note If data is nullptr, selects based on priority only (no predicate filtering)
-    IChannelDriver* selectDriver(const ChannelDataPtr& data = nullptr) FL_NOEXCEPT;
+    IChannelDriver* selectDriver(const ChannelDataPtr& data = nullptr) FL_NO_EXCEPT;
 
     /// @brief Shared drivers sorted by priority descending (higher values first)
     /// @note Each entry contains priority value and shared_ptr to driver
@@ -302,16 +302,16 @@ private:
     platforms::ChannelPollSignal mPollNeededSignal;
 
     // Non-copyable, non-movable
-    ChannelManager(const ChannelManager&) FL_NOEXCEPT = delete;
-    ChannelManager& operator=(const ChannelManager&) FL_NOEXCEPT = delete;
-    ChannelManager(ChannelManager&&) FL_NOEXCEPT = delete;
-    ChannelManager& operator=(ChannelManager&&) FL_NOEXCEPT = delete;
+    ChannelManager(const ChannelManager&) FL_NO_EXCEPT = delete;
+    ChannelManager& operator=(const ChannelManager&) FL_NO_EXCEPT = delete;
+    ChannelManager(ChannelManager&&) FL_NO_EXCEPT = delete;
+    ChannelManager& operator=(ChannelManager&&) FL_NO_EXCEPT = delete;
 };
 
 /// @brief Get the global ChannelManager singleton instance
 /// @return Reference to the singleton ChannelManager
 /// @note Available on all platforms (has 0 drivers on non-ESP32)
-ChannelManager& channelManager() FL_NOEXCEPT;
+ChannelManager& channelManager() FL_NO_EXCEPT;
 
 // Inline template definition for ChannelManager::setExclusiveDriver<B>().
 // Defined here so the ODR-use of `BusTraits<B>::instancePtr()` happens in the
@@ -319,7 +319,7 @@ ChannelManager& channelManager() FL_NOEXCEPT;
 // the per-driver `bus_traits.h` (which provides `BusTraits<B>::instancePtr`)
 // visible at the call site.
 template<fl::Bus B>
-inline void ChannelManager::setExclusiveDriver() FL_NOEXCEPT {
+inline void ChannelManager::setExclusiveDriver() FL_NO_EXCEPT {
     // Priority above any platform default — see `bus_priorities.h` for the
     // default-priority constants (highest there is ~10 for native LCD/I2S SPI).
     constexpr int kExclusivePriority = 10000;

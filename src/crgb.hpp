@@ -22,7 +22,7 @@ FL_DISABLE_WARNING_FLOAT_CONVERSION
 FL_DISABLE_WARNING_SIGN_CONVERSION
 
 
-FASTLED_FORCE_INLINE CRGB& CRGB::addToRGB (fl::u8 d ) FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB& CRGB::addToRGB (fl::u8 d ) FL_NO_EXCEPT
 {
     r = fl::qadd8( r, d);
     g = fl::qadd8( g, d);
@@ -30,7 +30,7 @@ FASTLED_FORCE_INLINE CRGB& CRGB::addToRGB (fl::u8 d ) FL_NOEXCEPT
     return *this;
 }
 
-FASTLED_FORCE_INLINE CRGB& CRGB::operator-= (const CRGB& rhs ) FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB& CRGB::operator-= (const CRGB& rhs ) FL_NO_EXCEPT
 {
     r = fl::qsub8( r, rhs.r);
     g = fl::qsub8( g, rhs.g);
@@ -39,21 +39,21 @@ FASTLED_FORCE_INLINE CRGB& CRGB::operator-= (const CRGB& rhs ) FL_NOEXCEPT
 }
 
 /// Add a constant of '1' from each channel, saturating at 0xFF
-FASTLED_FORCE_INLINE CRGB& CRGB::operator++ () FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB& CRGB::operator++ () FL_NO_EXCEPT
 {
     addToRGB(1);
     return *this;
 }
 
 /// @copydoc operator++
-FASTLED_FORCE_INLINE CRGB CRGB::operator++ (int ) FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB CRGB::operator++ (int ) FL_NO_EXCEPT
 {
     CRGB retval(*this);
     ++(*this);
     return retval;
 }
 
-FASTLED_FORCE_INLINE CRGB& CRGB::subtractFromRGB(fl::u8 d) FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB& CRGB::subtractFromRGB(fl::u8 d) FL_NO_EXCEPT
 {
     r = fl::qsub8( r, d);
     g = fl::qsub8( g, d);
@@ -61,7 +61,7 @@ FASTLED_FORCE_INLINE CRGB& CRGB::subtractFromRGB(fl::u8 d) FL_NOEXCEPT
     return *this;
 }
 
-FASTLED_FORCE_INLINE CRGB& CRGB::operator*= (fl::u8 d ) FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB& CRGB::operator*= (fl::u8 d ) FL_NO_EXCEPT
 {
     r = fl::qmul8( r, d);
     g = fl::qmul8( g, d);
@@ -69,33 +69,33 @@ FASTLED_FORCE_INLINE CRGB& CRGB::operator*= (fl::u8 d ) FL_NOEXCEPT
     return *this;
 }
 
-FASTLED_FORCE_INLINE CRGB& CRGB::nscale8_video(fl::u8 scaledown ) FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB& CRGB::nscale8_video(fl::u8 scaledown ) FL_NO_EXCEPT
 {
     nscale8x3_video( r, g, b, scaledown);
     return *this;
 }
 
-FASTLED_FORCE_INLINE CRGB& CRGB::operator%= (fl::u8 scaledown ) FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB& CRGB::operator%= (fl::u8 scaledown ) FL_NO_EXCEPT
 {
     nscale8x3_video( r, g, b, scaledown);
     return *this;
 }
 
-FASTLED_FORCE_INLINE CRGB& CRGB::fadeLightBy (fl::u8 fadefactor ) FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB& CRGB::fadeLightBy (fl::u8 fadefactor ) FL_NO_EXCEPT
 {
     nscale8x3_video( r, g, b, 255 - fadefactor);
     return *this;
 }
 
 /// Subtract a constant of '1' from each channel, saturating at 0x00
-FASTLED_FORCE_INLINE CRGB& CRGB::operator-- () FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB& CRGB::operator-- () FL_NO_EXCEPT
 {
     subtractFromRGB(1);
     return *this;
 }
 
 /// @copydoc operator--
-FASTLED_FORCE_INLINE CRGB CRGB::operator-- (int ) FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB CRGB::operator-- (int ) FL_NO_EXCEPT
 {
     CRGB retval(*this);
     --(*this);
@@ -103,7 +103,7 @@ FASTLED_FORCE_INLINE CRGB CRGB::operator-- (int ) FL_NOEXCEPT
 }
 
 
-constexpr CRGB CRGB::nscale8_constexpr(const CRGB scaledown) const FL_NOEXCEPT
+constexpr CRGB CRGB::nscale8_constexpr(const CRGB scaledown) const FL_NO_EXCEPT
 {
     return CRGB(
         (((fl::u16)r) * (1 + (fl::u16)(scaledown.r))) >> 8,
@@ -113,7 +113,7 @@ constexpr CRGB CRGB::nscale8_constexpr(const CRGB scaledown) const FL_NOEXCEPT
 }
 
 
-FASTLED_FORCE_INLINE CRGB& CRGB::nscale8 (const CRGB & scaledown ) FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB& CRGB::nscale8 (const CRGB & scaledown ) FL_NO_EXCEPT
 {
     r = FUNCTION_SCALE8(r, scaledown.r);
     g = FUNCTION_SCALE8(g, scaledown.g);
@@ -121,14 +121,14 @@ FASTLED_FORCE_INLINE CRGB& CRGB::nscale8 (const CRGB & scaledown ) FL_NOEXCEPT
     return *this;
 }
 
-FASTLED_FORCE_INLINE CRGB CRGB::scale8 (fl::u8 scaledown ) const FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB CRGB::scale8 (fl::u8 scaledown ) const FL_NO_EXCEPT
 {
     CRGB out = *this;
     fl::nscale8x3( out.r, out.g, out.b, scaledown);
     return out;
 }
 
-FASTLED_FORCE_INLINE CRGB CRGB::scale8 (const CRGB & scaledown ) const FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB CRGB::scale8 (const CRGB & scaledown ) const FL_NO_EXCEPT
 {
     CRGB out;
     out.r = FUNCTION_SCALE8(r, scaledown.r);
@@ -138,7 +138,7 @@ FASTLED_FORCE_INLINE CRGB CRGB::scale8 (const CRGB & scaledown ) const FL_NOEXCE
 }
 
 
-FASTLED_FORCE_INLINE fl::u8 CRGB::getLuma( ) const FL_NOEXCEPT {
+FASTLED_FORCE_INLINE fl::u8 CRGB::getLuma( ) const FL_NO_EXCEPT {
     //Y' = 0.2126 R' + 0.7152 G' + 0.0722 B'
     //     54            183       18 (!)
 
@@ -149,7 +149,7 @@ FASTLED_FORCE_INLINE fl::u8 CRGB::getLuma( ) const FL_NOEXCEPT {
     return luma;
 }
 
-FASTLED_FORCE_INLINE fl::u8 CRGB::getAverageLight( ) const FL_NOEXCEPT {
+FASTLED_FORCE_INLINE fl::u8 CRGB::getAverageLight( ) const FL_NO_EXCEPT {
 #if FASTLED_SCALE8_FIXED == 1
     const fl::u8 eightyfive = 85;
 #else
@@ -164,7 +164,7 @@ FASTLED_FORCE_INLINE fl::u8 CRGB::getAverageLight( ) const FL_NOEXCEPT {
 
 
 
-FASTLED_FORCE_INLINE CRGB CRGB::lerp16( const CRGB& other, fract16 frac) const FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB CRGB::lerp16( const CRGB& other, fract16 frac) const FL_NO_EXCEPT
 {
     CRGB ret;
 
@@ -179,7 +179,7 @@ FASTLED_FORCE_INLINE CRGB CRGB::lerp16( const CRGB& other, fract16 frac) const F
 namespace fl {
 
 /// @copydoc CRGB::operator+=
-FASTLED_FORCE_INLINE CRGB operator+( const CRGB& p1, const CRGB& p2) FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB operator+( const CRGB& p1, const CRGB& p2) FL_NO_EXCEPT
 {
     return CRGB( fl::qadd8( p1.r, p2.r),
                  fl::qadd8( p1.g, p2.g),
@@ -187,7 +187,7 @@ FASTLED_FORCE_INLINE CRGB operator+( const CRGB& p1, const CRGB& p2) FL_NOEXCEPT
 }
 
 /// @copydoc CRGB::operator-=
-FASTLED_FORCE_INLINE CRGB operator-( const CRGB& p1, const CRGB& p2) FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB operator-( const CRGB& p1, const CRGB& p2) FL_NO_EXCEPT
 {
     return CRGB( fl::qsub8( p1.r, p2.r),
                  fl::qsub8( p1.g, p2.g),
@@ -195,7 +195,7 @@ FASTLED_FORCE_INLINE CRGB operator-( const CRGB& p1, const CRGB& p2) FL_NOEXCEPT
 }
 
 /// @copydoc CRGB::operator*=
-FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, u8 d) FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, u8 d) FL_NO_EXCEPT
 {
     return CRGB( qmul8( p1.r, d),
                  qmul8( p1.g, d),
@@ -203,7 +203,7 @@ FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, u8 d) FL_NOEXCEPT
 }
 
 /// Scale using CRGB::nscale8_video()
-FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, u8 d) FL_NOEXCEPT
+FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, u8 d) FL_NO_EXCEPT
 {
     CRGB retval( p1);
     retval.nscale8_video( d);

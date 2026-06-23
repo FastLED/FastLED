@@ -28,14 +28,14 @@ static void initWasmAudio(const char* name, WasmAudioInput*& wasmInput,
             wasmInputOwner->start();
             wasmInput = wasm_get_audio_input();  // Get the created instance
             ownsInput = true;
-            FL_WARN("WasmAudioImpl: Created and started WasmAudioInput for '" << name << "'");
+            FL_WARN_F("WasmAudioImpl: Created and started WasmAudioInput for '%s'", name);
         } else {
-            FL_WARN("WasmAudioImpl: Failed to create WasmAudioInput: " << error.c_str());
+            FL_WARN_F("WasmAudioImpl: Failed to create WasmAudioInput: %s", error.c_str());
         }
     } else {
         // Ensure the existing input is started
         wasmInput->start();
-        FL_WARN("WasmAudioImpl: Using existing WasmAudioInput for '" << name << "'");
+        FL_WARN_F("WasmAudioImpl: Using existing WasmAudioInput for '%s'", name);
     }
 }
 

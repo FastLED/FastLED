@@ -16,7 +16,7 @@ ButtonLowLevel::ButtonLowLevel(int pin, ButtonStrategy strategy)
     setStrategy(strategy);
 }
 
-ButtonLowLevel::~ButtonLowLevel() FL_NOEXCEPT {}
+ButtonLowLevel::~ButtonLowLevel() FL_NO_EXCEPT {}
 
 bool ButtonLowLevel::highLowFloating() {
     // High-low floating detection: Set pin to high, check if high,
@@ -75,7 +75,7 @@ Button::Listener::Listener(Button *owner) : mOwner(owner) {
     addToEngineEventsOnce();
 }
 
-Button::Listener::~Listener() FL_NOEXCEPT {
+Button::Listener::~Listener() FL_NO_EXCEPT {
     if (added) {
         EngineEvents::removeListener(this);
     }

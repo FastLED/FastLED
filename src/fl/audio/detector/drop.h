@@ -20,7 +20,7 @@ struct Drop {
     float energyIncrease;   // Energy increase from previous state
     u32 timestamp;     // When drop occurred
 
-    Drop() FL_NOEXCEPT
+    Drop() FL_NO_EXCEPT
         : impact(0.0f)
         , bassEnergy(0.0f)
         , energyIncrease(0.0f)
@@ -50,8 +50,8 @@ struct Drop {
 //
 class DropDetector : public Detector {
 public:
-    DropDetector() FL_NOEXCEPT;
-    ~DropDetector() FL_NOEXCEPT override;
+    DropDetector() FL_NO_EXCEPT;
+    ~DropDetector() FL_NO_EXCEPT override;
 
     // Detector interface
     void update(shared_ptr<Context> context) override;

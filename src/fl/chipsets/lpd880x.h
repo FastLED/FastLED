@@ -43,7 +43,7 @@ class LPD8806Controller : public CPixelLEDController<RGB_ORDER> {
 	SPI mSPI;
 
 public:
-	LPD8806Controller() FL_NOEXCEPT  {}
+	LPD8806Controller() FL_NO_EXCEPT  {}
 	virtual void init() {
 		mSPI.init();
 	}
@@ -108,7 +108,7 @@ class LPD6803Controller : public CPixelLEDController<RGB_ORDER> {
 	void endBoundary(int nLeds) { int nDWords = (nLeds/32); do { mSPI.writeByte(0xFF); mSPI.writeByte(0x00); mSPI.writeByte(0x00); mSPI.writeByte(0x00); } while(nDWords--); }
 
 public:
-	LPD6803Controller() FL_NOEXCEPT {}
+	LPD6803Controller() FL_NO_EXCEPT {}
 
 	virtual void init() {
 		mSPI.init();

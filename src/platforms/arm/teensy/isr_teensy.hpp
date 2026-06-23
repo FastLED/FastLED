@@ -55,7 +55,7 @@ struct teensy_isr_handle_data {
 constexpr u8 TEENSY_PLATFORM_ID = 5;
 
 // Helper to convert isr_handle_t to platform data
-static teensy_isr_handle_data* get_handle_data(const isr_handle_t& handle) FL_NOEXCEPT {
+static teensy_isr_handle_data* get_handle_data(const isr_handle_t& handle) FL_NO_EXCEPT {
     return static_cast<teensy_isr_handle_data*>(handle.platform_handle);
 }
 
@@ -72,7 +72,7 @@ static teensy_isr_handle_data* get_handle_data(const isr_handle_t& handle) FL_NO
 static teensy_isr_handle_data* g_active_timer_data = nullptr;
 
 // Actual ISR wrapper that has access to handle data
-static void teensy_isr_trampoline() FL_NOEXCEPT {
+static void teensy_isr_trampoline() FL_NO_EXCEPT {
     if (g_active_timer_data && g_active_timer_data->handler) {
         g_active_timer_data->handler(g_active_timer_data->user_data);
     }
@@ -82,7 +82,7 @@ static void teensy_isr_trampoline() FL_NOEXCEPT {
 // Platform-specific API implementation
 // ============================================================================
 
-int teensy_attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) FL_NOEXCEPT {
+int teensy_attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) FL_NO_EXCEPT {
     if (!config.handler) {
         return -1;  // Invalid handler
     }
@@ -93,7 +93,7 @@ int teensy_attach_timer_handler(const isr_config_t& config, isr_handle_t* handle
 
     // Check frequency bounds (Teensy IntervalTimer supports ~1 Hz to ~150 kHz typical)
     if (config.frequency_hz > 150000) {
-        FL_WARN("Teensy timer frequency " << config.frequency_hz << " Hz may be too high (max ~150 kHz)");
+        FL_WARN_F("Teensy timer frequency %s Hz may be too high (max ~150 kHz)", config.frequency_hz);
     }
 
     // Allocate platform handle data
@@ -160,7 +160,7 @@ int teensy_attach_timer_handler(const isr_config_t& config, isr_handle_t* handle
     return 0;  // Success
 }
 
-int teensy_attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* handle) FL_NOEXCEPT {
+int teensy_attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* handle) FL_NO_EXCEPT {
     // External interrupts on Teensy use attachInterrupt() from Arduino core
     // Not implemented yet - return "not implemented"
     (void)pin;
@@ -169,7 +169,7 @@ int teensy_attach_external_handler(u8 pin, const isr_config_t& config, isr_handl
     return -100;  // Not implemented
 }
 
-int teensy_detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
+int teensy_detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
     teensy_isr_handle_data* data = get_handle_data(handle);
     if (!data) {
         return -1;  // Invalid handle
@@ -192,7 +192,7 @@ int teensy_detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
     return 0;  // Success
 }
 
-int teensy_enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
+int teensy_enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     teensy_isr_handle_data* data = get_handle_data(handle);
     if (!data) {
         return -1;  // Invalid handle
@@ -217,7 +217,7 @@ int teensy_enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     return 0;  // Success
 }
 
-int teensy_disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
+int teensy_disable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     teensy_isr_handle_data* data = get_handle_data(handle);
     if (!data) {
         return -1;  // Invalid handle
@@ -239,7 +239,7 @@ int teensy_disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     return 0;  // Success
 }
 
-bool teensy_is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
+bool teensy_is_handler_enabled(const isr_handle_t& handle) FL_NO_EXCEPT {
     teensy_isr_handle_data* data = get_handle_data(handle);
     if (!data) {
         return false;
@@ -247,7 +247,7 @@ bool teensy_is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
     return data->enabled;
 }
 
-const char* teensy_get_error_string(int error_code) FL_NOEXCEPT {
+const char* teensy_get_error_string(int error_code) FL_NO_EXCEPT {
     switch (error_code) {
         case 0: return "Success";
         case -1: return "Invalid handler or handle";
@@ -259,7 +259,7 @@ const char* teensy_get_error_string(int error_code) FL_NOEXCEPT {
     }
 }
 
-const char* teensy_get_platform_name() FL_NOEXCEPT {
+const char* teensy_get_platform_name() FL_NO_EXCEPT {
 #if defined(FL_IS_TEENSY_LC)
     return "Teensy LC";
 #elif defined(FL_IS_TEENSY_30)
@@ -279,20 +279,20 @@ const char* teensy_get_platform_name() FL_NOEXCEPT {
 #endif
 }
 
-u32 teensy_get_max_timer_frequency() FL_NOEXCEPT {
+u32 teensy_get_max_timer_frequency() FL_NO_EXCEPT {
     // Conservative estimate for all Teensy variants
     return 150000;  // 150 kHz
 }
 
-u32 teensy_get_min_timer_frequency() FL_NOEXCEPT {
+u32 teensy_get_min_timer_frequency() FL_NO_EXCEPT {
     return 1;  // 1 Hz minimum
 }
 
-u8 teensy_get_max_priority() FL_NOEXCEPT {
+u8 teensy_get_max_priority() FL_NO_EXCEPT {
     return 7;  // Teensy supports 0-255, but we map to 1-7 range
 }
 
-bool teensy_requires_assembly_handler(u8 priority) FL_NOEXCEPT {
+bool teensy_requires_assembly_handler(u8 priority) FL_NO_EXCEPT {
     (void)priority;
     return false;  // Teensy IntervalTimer handles ISR registration internally
 }
@@ -300,51 +300,51 @@ bool teensy_requires_assembly_handler(u8 priority) FL_NOEXCEPT {
 // fl::isr::platform namespace wrappers (call fl::isr:: functions)
 namespace platforms {
 
-int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) FL_NOEXCEPT {
+int attach_timer_handler(const isr_config_t& config, isr_handle_t* handle) FL_NO_EXCEPT {
     return teensy_attach_timer_handler(config, handle);
 }
 
-int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* handle) FL_NOEXCEPT {
+int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* handle) FL_NO_EXCEPT {
     return teensy_attach_external_handler(pin, config, handle);
 }
 
-int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
+int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
     return teensy_detach_handler(handle);
 }
 
-int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
+int enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     return teensy_enable_handler(handle);
 }
 
-int disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
+int disable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     return teensy_disable_handler(handle);
 }
 
-bool is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
+bool is_handler_enabled(const isr_handle_t& handle) FL_NO_EXCEPT {
     return teensy_is_handler_enabled(handle);
 }
 
-const char* get_error_string(int error_code) FL_NOEXCEPT {
+const char* get_error_string(int error_code) FL_NO_EXCEPT {
     return teensy_get_error_string(error_code);
 }
 
-const char* get_platform_name() FL_NOEXCEPT {
+const char* get_platform_name() FL_NO_EXCEPT {
     return teensy_get_platform_name();
 }
 
-u32 get_max_timer_frequency() FL_NOEXCEPT {
+u32 get_max_timer_frequency() FL_NO_EXCEPT {
     return teensy_get_max_timer_frequency();
 }
 
-u32 get_min_timer_frequency() FL_NOEXCEPT {
+u32 get_min_timer_frequency() FL_NO_EXCEPT {
     return teensy_get_min_timer_frequency();
 }
 
-u8 get_max_priority() FL_NOEXCEPT {
+u8 get_max_priority() FL_NO_EXCEPT {
     return teensy_get_max_priority();
 }
 
-bool requires_assembly_handler(u8 priority) FL_NOEXCEPT {
+bool requires_assembly_handler(u8 priority) FL_NO_EXCEPT {
     return teensy_requires_assembly_handler(priority);
 }
 
@@ -356,13 +356,13 @@ bool requires_assembly_handler(u8 priority) FL_NOEXCEPT {
 // =============================================================================
 
 /// Disable interrupts on ARM Cortex-M (Teensy)
-inline void interruptsDisable() FL_NOEXCEPT {
-    __asm__ __volatile__("cpsid i" ::: "memory") FL_NOEXCEPT;
+inline void interruptsDisable() FL_NO_EXCEPT {
+    __asm__ __volatile__("cpsid i" ::: "memory") FL_NO_EXCEPT;
 }
 
 /// Enable interrupts on ARM Cortex-M (Teensy)
-inline void interruptsEnable() FL_NOEXCEPT {
-    __asm__ __volatile__("cpsie i" ::: "memory") FL_NOEXCEPT;
+inline void interruptsEnable() FL_NO_EXCEPT {
+    __asm__ __volatile__("cpsie i" ::: "memory") FL_NO_EXCEPT;
 }
 
 } // namespace fl

@@ -1,8 +1,8 @@
-#define FASTLED_INTERNAL
+﻿#define FASTLED_INTERNAL
 // IWYU pragma: begin_keep
 #include <stdint.h>
 // IWYU pragma: end_keep  // for u8, u32, u16
-#include "FastLED.h"
+#include "FastLED.h"  // ok include: this file implements CFastLED, declared in FastLED.h
 #include "fl/system/engine_events.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/channels/all_drivers.h"
@@ -601,11 +601,11 @@ bool CFastLED::wait(fl::u32 timeout_ms) {
 
 // Tiered-wait spin-budget shims (#2818). Storage in
 // src/fl/channels/detail/wait_spin_budget.cpp.hpp.
-void CFastLED::_setWaitSpinBudgetUs(fl::u32 budget_us) FL_NOEXCEPT {
+void CFastLED::_setWaitSpinBudgetUs(fl::u32 budget_us) FL_NO_EXCEPT {
 	fl::detail::setWaitSpinBudgetUs(budget_us);
 }
 
-fl::u32 CFastLED::_getWaitSpinBudgetUs() FL_NOEXCEPT {
+fl::u32 CFastLED::_getWaitSpinBudgetUs() FL_NO_EXCEPT {
 	return fl::detail::getWaitSpinBudgetUs();
 }
 
@@ -618,7 +618,7 @@ fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) {
     // selection mode. To make sure `cfg.options.mBus` (or priority dispatch
     // when `mBus == Bus::AUTO`) can actually find the requested driver at
     // runtime, we eagerly enroll every driver available on this platform.
-    // That trades binary size for ergonomics — the user wanted runtime
+    // That trades binary size for ergonomics â€” the user wanted runtime
     // selection, so they get runtime selection.
     //
     // For minimum binary size, callers should use the compile-time path:
@@ -629,7 +629,7 @@ fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) {
     // The warning fires at most once per process (FL_WARN_ONCE) and can be
     // disabled with `-DFASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING`.
     #ifndef FASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING
-    FL_WARN_ONCE("FastLED.add(cfg): runtime-selection mode — enrolling every "
+    FL_WARN_F_ONCE("FastLED.add(cfg): runtime-selection mode â€” enrolling every "
                  "available driver via fl::enableAllDrivers(). For minimum "
                  "binary size, prefer FastLED.addLeds<CHIPSET, PIN, ORDER, "
                  "fl::Bus::X>(leds, n) which links only the named driver. "

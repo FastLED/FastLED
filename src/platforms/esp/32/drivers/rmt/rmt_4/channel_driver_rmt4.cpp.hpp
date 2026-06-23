@@ -28,7 +28,7 @@ namespace fl {
 // Factory Method
 // ═══════════════════════════════════════════════════════════════════════════
 
-ChannelEngineRMT4Ptr ChannelEngineRMT4::create() FL_NOEXCEPT {
+ChannelEngineRMT4Ptr ChannelEngineRMT4::create() FL_NO_EXCEPT {
     return fl::make_shared<ChannelEngineRMT4Impl>();
 }
 
@@ -36,12 +36,12 @@ ChannelEngineRMT4Ptr ChannelEngineRMT4::create() FL_NOEXCEPT {
 // Constructor
 // ═══════════════════════════════════════════════════════════════════════════
 
-ChannelEngineRMT4Impl::ChannelEngineRMT4Impl() FL_NOEXCEPT
+ChannelEngineRMT4Impl::ChannelEngineRMT4Impl() FL_NO_EXCEPT
     : mRMT_intr_handle(nullptr)
     , mRmtSpinlock(portMUX_INITIALIZER_UNLOCKED)
     , mInitialized(false)
 {
-    FL_WARN("ChannelEngineRMT4: Initializing RMT4 driver for IDF 4.x");
+    FL_WARN_F("ChannelEngineRMT4: Initializing RMT4 driver for IDF 4.x");
 
     // Reserve space for channels (inlined vector, no heap allocation)
     mChannels.reserve(FASTLED_RMT_MAX_CHANNELS);
@@ -59,12 +59,12 @@ ChannelEngineRMT4Impl::ChannelEngineRMT4Impl() FL_NOEXCEPT
     );
 
     if (err != ESP_OK) {
-        FL_WARN("ChannelEngineRMT4: Failed to allocate RMT interrupt, error=" << err);
+        FL_WARN_F("ChannelEngineRMT4: Failed to allocate RMT interrupt, error=%s", err);
         return;
     }
 
     mInitialized = true;
-    FL_WARN("ChannelEngineRMT4: Initialized successfully");
+    FL_WARN_F("ChannelEngineRMT4: Initialized successfully");
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -72,7 +72,7 @@ ChannelEngineRMT4Impl::ChannelEngineRMT4Impl() FL_NOEXCEPT
 // ═══════════════════════════════════════════════════════════════════════════
 
 ChannelEngineRMT4Impl::~ChannelEngineRMT4Impl() {
-    FL_WARN("ChannelEngineRMT4: Shutting down");
+    FL_WARN_F("ChannelEngineRMT4: Shutting down");
 
     // Free the interrupt handler
     if (mRMT_intr_handle != nullptr) {
@@ -98,14 +98,14 @@ ChannelEngineRMT4Impl::~ChannelEngineRMT4Impl() {
     mPendingChannels.clear();
     mInitialized = false;
 
-    FL_WARN("ChannelEngineRMT4: Shutdown complete");
+    FL_WARN_F("ChannelEngineRMT4: Shutdown complete");
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // IChannelDriver Interface
 // ═══════════════════════════════════════════════════════════════════════════
 
-bool ChannelEngineRMT4Impl::canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT {
+bool ChannelEngineRMT4Impl::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
     if (!data) {
         return false;
     }
@@ -117,7 +117,7 @@ bool ChannelEngineRMT4Impl::canHandle(const ChannelDataPtr& data) const FL_NOEXC
 // Timing Symbol Helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
-rmt_item32_t ChannelEngineRMT4Impl::makeZeroSymbol(const ChipsetTimingConfig& timing) FL_NOEXCEPT {
+rmt_item32_t ChannelEngineRMT4Impl::makeZeroSymbol(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
     // Zero bit timing: T0H (high) + T0L (low)
     // For WS2812: T0H=400ns, T0L=850ns
 
@@ -139,7 +139,7 @@ rmt_item32_t ChannelEngineRMT4Impl::makeZeroSymbol(const ChipsetTimingConfig& ti
     return zero;
 }
 
-rmt_item32_t ChannelEngineRMT4Impl::makeOneSymbol(const ChipsetTimingConfig& timing) FL_NOEXCEPT {
+rmt_item32_t ChannelEngineRMT4Impl::makeOneSymbol(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
     // One bit timing: T1H (high) + T1L (low)
     // For WS2812: T1H=850ns, T1L=400ns
 
@@ -172,7 +172,7 @@ rmt_item32_t ChannelEngineRMT4Impl::makeOneSymbol(const ChipsetTimingConfig& tim
 ChannelEngineRMT4Impl::ChannelState* ChannelEngineRMT4Impl::acquireChannel(
     gpio_num_t pin,
     const ChipsetTimingConfig& timing
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     // Three-tier channel allocation strategy (same as RMT5):
     // Strategy 1: Reuse channel with matching pin (zero-cost reuse)
     // Strategy 2: Reconfigure any idle channel (requires hardware reconfiguration)
@@ -195,8 +195,7 @@ ChannelEngineRMT4Impl::ChannelState* ChannelEngineRMT4Impl::acquireChannel(
             state.lastFill = 0;
             state.transmissionStartTime = 0;
 
-            FL_WARN("acquireChannel: Reusing channel " << state.channel
-                   << " for pin " << static_cast<int>(pin));
+            FL_WARN_F("acquireChannel: Reusing channel %s for pin %s", state.channel, static_cast<int>(pin));
             return &state;
         }
     }
@@ -208,21 +207,19 @@ ChannelEngineRMT4Impl::ChannelState* ChannelEngineRMT4Impl::acquireChannel(
 
             // Reconfigure hardware for new pin/timing
             if (!configureChannel(&state, pin, timing)) {
-                FL_WARN("acquireChannel: Failed to reconfigure channel " << state.channel);
+                FL_WARN_F("acquireChannel: Failed to reconfigure channel %s", state.channel);
                 state.inUse = false;
                 return nullptr;
             }
 
-            FL_WARN("acquireChannel: Reconfigured channel " << state.channel
-                   << " for pin " << static_cast<int>(pin));
+            FL_WARN_F("acquireChannel: Reconfigured channel %s for pin %s", state.channel, static_cast<int>(pin));
             return &state;
         }
     }
 
     // Strategy 3: Create new channel if hardware available
     if (mChannels.size() >= FASTLED_RMT_MAX_CHANNELS) {
-        FL_WARN("acquireChannel: All " << FASTLED_RMT_MAX_CHANNELS
-               << " RMT channels in use, time-multiplexing required");
+        FL_WARN_F("acquireChannel: All %s RMT channels in use, time-multiplexing required", FASTLED_RMT_MAX_CHANNELS);
         return nullptr;
     }
 
@@ -244,7 +241,7 @@ ChannelEngineRMT4Impl::ChannelState* ChannelEngineRMT4Impl::acquireChannel(
 
     // Configure the hardware
     if (!configureChannel(&newState, pin, timing)) {
-        FL_WARN("acquireChannel: Failed to configure new channel " << newState.channel);
+        FL_WARN_F("acquireChannel: Failed to configure new channel %s", newState.channel);
         return nullptr;
     }
 
@@ -252,24 +249,22 @@ ChannelEngineRMT4Impl::ChannelState* ChannelEngineRMT4Impl::acquireChannel(
     mChannels.push_back(newState);
     ChannelState* stablePtr = &mChannels.back();
 
-    FL_WARN("acquireChannel: Created new channel " << stablePtr->channel
-           << " for pin " << static_cast<int>(pin)
-           << " (total: " << mChannels.size() << "/" << FASTLED_RMT_MAX_CHANNELS << ")");
+    FL_WARN_F("acquireChannel: Created new channel %s for pin %s (total: %s/%s)", stablePtr->channel, static_cast<int>(pin), mChannels.size(), FASTLED_RMT_MAX_CHANNELS);
 
     return stablePtr;
 }
 
-void ChannelEngineRMT4Impl::releaseChannel(ChannelState* state) FL_NOEXCEPT {
+void ChannelEngineRMT4Impl::releaseChannel(ChannelState* state) FL_NO_EXCEPT {
     // Release channel back to idle state (mark as available for reuse)
     // NOTE: We do NOT destroy the RMT channel - keep it configured for fast reuse
 
     if (!state) {
-        FL_WARN("releaseChannel: null state pointer");
+        FL_WARN_F("releaseChannel: null state pointer");
         return;
     }
 
     if (!state->inUse) {
-        FL_WARN("releaseChannel: Channel " << state->channel << " already released");
+        FL_WARN_F("releaseChannel: Channel %s already released", state->channel);
         return;
     }
 
@@ -309,20 +304,19 @@ void ChannelEngineRMT4Impl::releaseChannel(ChannelState* state) FL_NOEXCEPT {
     // - state->memStart, state->memPtr (hardware memory pointers)
     // - RMT driver remains installed (fast reacquisition)
 
-    FL_WARN("releaseChannel: Released channel " << state->channel
-           << " on pin " << static_cast<int>(state->pin));
+    FL_WARN_F("releaseChannel: Released channel %s on pin %s", state->channel, static_cast<int>(state->pin));
 }
 
 bool ChannelEngineRMT4Impl::configureChannel(
     ChannelState* state,
     gpio_num_t pin,
     const ChipsetTimingConfig& timing
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     // Port of ESP32RMTController::init() and startOnChannel() logic
     // Configures RMT hardware for the given pin and timing
 
     if (!state) {
-        FL_WARN("configureChannel: null state pointer");
+        FL_WARN_F("configureChannel: null state pointer");
         return false;
     }
 
@@ -361,21 +355,21 @@ bool ChannelEngineRMT4Impl::configureChannel(
     // Apply the configuration
     err = rmt_config(&rmt_tx);
     if (err != ESP_OK) {
-        FL_WARN("configureChannel: rmt_config failed, error=" << err);
+        FL_WARN_F("configureChannel: rmt_config failed, error=%s", err);
         return false;
     }
 
     // Install RMT driver (no internal buffer - we use custom ISR)
     err = rmt_driver_install(state->channel, 0, 0);
     if (err != ESP_OK) {
-        FL_WARN("configureChannel: rmt_driver_install failed, error=" << err);
+        FL_WARN_F("configureChannel: rmt_driver_install failed, error=%s", err);
         return false;
     }
 
     // Set up threshold interrupt for double-buffer refill
     err = rmt_set_tx_thr_intr_en(state->channel, true, PULSES_PER_FILL_RMT4);
     if (err != ESP_OK) {
-        FL_WARN("configureChannel: rmt_set_tx_thr_intr_en failed, error=" << err);
+        FL_WARN_F("configureChannel: rmt_set_tx_thr_intr_en failed, error=%s", err);
         rmt_driver_uninstall(state->channel);
         return false;
     }
@@ -391,18 +385,17 @@ bool ChannelEngineRMT4Impl::configureChannel(
     err = rmt_set_pin(state->channel, RMT_MODE_TX, pin);
 #endif
     if (err != ESP_OK) {
-        FL_WARN("configureChannel: rmt_set_gpio/rmt_set_pin failed, error=" << err);
+        FL_WARN_F("configureChannel: rmt_set_gpio/rmt_set_pin failed, error=%s", err);
         rmt_driver_uninstall(state->channel);
         return false;
     }
 
-    FL_WARN("configureChannel: Configured channel " << state->channel
-           << " on pin " << static_cast<int>(pin));
+    FL_WARN_F("configureChannel: Configured channel %s on pin %s", state->channel, static_cast<int>(pin));
 
     return true;
 }
 
-void ChannelEngineRMT4Impl::processPendingChannels() FL_NOEXCEPT {
+void ChannelEngineRMT4Impl::processPendingChannels() FL_NO_EXCEPT {
     // Process the pending channel queue and start as many transmissions
     // as the hardware allows (up to FASTLED_RMT_MAX_CHANNELS concurrent)
     //
@@ -420,9 +413,7 @@ void ChannelEngineRMT4Impl::processPendingChannels() FL_NOEXCEPT {
 
         if (state == nullptr) {
             // All channels busy - time-multiplexing will resume later in poll()
-            FL_WARN("processPendingChannels: All " << FASTLED_RMT_MAX_CHANNELS
-                   << " channels busy, deferring " << (mPendingChannels.size() - i)
-                   << " pending strips");
+            FL_WARN_F("processPendingChannels: All %s channels busy, deferring %s pending strips", FASTLED_RMT_MAX_CHANNELS, (mPendingChannels.size() - i));
             break;
         }
 
@@ -436,7 +427,7 @@ void ChannelEngineRMT4Impl::processPendingChannels() FL_NOEXCEPT {
     }
 }
 
-void ChannelEngineRMT4Impl::startTransmission(ChannelState* state, const ChannelDataPtr& data) FL_NOEXCEPT {
+void ChannelEngineRMT4Impl::startTransmission(ChannelState* state, const ChannelDataPtr& data) FL_NO_EXCEPT {
     // Initialize channel state and start RMT transmission
     // Port of: ESP32RMTController::startOnChannel() from idf4_rmt_impl.cpp
     //
@@ -448,7 +439,7 @@ void ChannelEngineRMT4Impl::startTransmission(ChannelState* state, const Channel
     // 5. Kick off transmission via tx_start()
 
     if (!state) {
-        FL_WARN("startTransmission: null state pointer");
+        FL_WARN_F("startTransmission: null state pointer");
         return;
     }
 
@@ -464,11 +455,7 @@ void ChannelEngineRMT4Impl::startTransmission(ChannelState* state, const Channel
     state->pixelDataSize = dataBuffer.size();
 
     // DEBUG: Log pixel data details
-    FL_DBG("RMT4: startTransmission() called with " << state->pixelDataSize
-           << " bytes, first 3 bytes: "
-           << (state->pixelDataSize > 0 ? static_cast<int>(state->pixelData[0]) : -1) << " "
-           << (state->pixelDataSize > 1 ? static_cast<int>(state->pixelData[1]) : -1) << " "
-           << (state->pixelDataSize > 2 ? static_cast<int>(state->pixelData[2]) : -1));
+    FL_DBG_F("RMT4: startTransmission() called with %s bytes, first 3 bytes: %s %s %s", state->pixelDataSize, (state->pixelDataSize > 0 ? static_cast<int>(state->pixelData[0]) : -1), (state->pixelDataSize > 1 ? static_cast<int>(state->pixelData[1]) : -1), (state->pixelDataSize > 2 ? static_cast<int>(state->pixelData[2]) : -1));
 
     // Reset transmission state
     state->pixelDataPos = 0;
@@ -486,7 +473,7 @@ void ChannelEngineRMT4Impl::startTransmission(ChannelState* state, const Channel
     // Enable TX interrupts for this channel
     esp_err_t err = rmt_set_tx_intr_en(state->channel, true);
     if (err != ESP_OK) {
-        FL_WARN("startTransmission: rmt_set_tx_intr_en failed, error=" << err);
+        FL_WARN_F("startTransmission: rmt_set_tx_intr_en failed, error=%s", err);
         // Mark complete to trigger cleanup in poll()
         state->transmissionComplete = true;
         data->setInUse(false);
@@ -498,9 +485,7 @@ void ChannelEngineRMT4Impl::startTransmission(ChannelState* state, const Channel
     tx_start(state);
     portEXIT_CRITICAL(&mRmtSpinlock);
 
-    FL_DBG("RMT4: Transmission started on channel " << state->channel
-           << ", pin " << static_cast<int>(state->pin)
-           << ", " << state->pixelDataSize << " bytes");
+    FL_DBG_F("RMT4: Transmission started on channel %s, pin %s, %s bytes", state->channel, static_cast<int>(state->pin), state->pixelDataSize);
 }
 
 // Note: findChannelByNumber() and tx_start() are now inlined in the header
@@ -509,21 +494,21 @@ void ChannelEngineRMT4Impl::startTransmission(ChannelState* state, const Channel
 // IChannelDriver Interface Implementation
 // ═══════════════════════════════════════════════════════════════════════════
 
-void ChannelEngineRMT4Impl::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
+void ChannelEngineRMT4Impl::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     // Store channel data for later transmission
     // Called by ChannelManager for each LED strip
     if (channelData) {
         mEnqueuedChannels.push_back(channelData);
     } else {
-        FL_WARN("enqueue: Received null ChannelData");
+        FL_WARN_F("enqueue: Received null ChannelData");
     }
 }
 
-void ChannelEngineRMT4Impl::show() FL_NOEXCEPT {
+void ChannelEngineRMT4Impl::show() FL_NO_EXCEPT {
     // Trigger transmission of all enqueued data
     // Called by ChannelManager when user calls FastLED.show()
 
-    FL_WARN("show: Transmitting " << mEnqueuedChannels.size() << " enqueued channels");
+    FL_WARN_F("show: Transmitting %s enqueued channels", mEnqueuedChannels.size());
 
     if (!mEnqueuedChannels.empty()) {
         // Pass batched data to internal transmission handler
@@ -534,7 +519,7 @@ void ChannelEngineRMT4Impl::show() FL_NOEXCEPT {
     }
 }
 
-IChannelDriver::DriverState ChannelEngineRMT4Impl::poll() FL_NOEXCEPT {
+IChannelDriver::DriverState ChannelEngineRMT4Impl::poll() FL_NO_EXCEPT {
     // Query hardware state and manage channel lifecycle
     // Port of: Polling logic that replaced gTX_sem blocking in legacy RMT4
     //
@@ -556,7 +541,7 @@ IChannelDriver::DriverState ChannelEngineRMT4Impl::poll() FL_NOEXCEPT {
 
         if (state.transmissionComplete) {
             // Transmission complete - release channel and mark data available
-            FL_WARN("poll: Channel " << state.channel << " completed");
+            FL_WARN_F("poll: Channel %s completed", state.channel);
 
             // Clear in-use flag on source data
             if (state.sourceData) {
@@ -571,8 +556,7 @@ IChannelDriver::DriverState ChannelEngineRMT4Impl::poll() FL_NOEXCEPT {
             u32 elapsed = fl::millis() - state.transmissionStartTime;
             if (elapsed > FASTLED_RMT4_TRANSMISSION_TIMEOUT_MS) {
                 // Timeout detected - force channel reset
-                FL_WARN("poll: Channel " << state.channel << " timed out after "
-                       << elapsed << "ms (limit: " << FASTLED_RMT4_TRANSMISSION_TIMEOUT_MS << "ms)");
+                FL_WARN_F("poll: Channel %s timed out after %sms (limit: %sms)", state.channel, elapsed, FASTLED_RMT4_TRANSMISSION_TIMEOUT_MS);
 
                 // Disable interrupts for this channel
                 rmt_set_tx_intr_en(state.channel, false);
@@ -613,7 +597,7 @@ IChannelDriver::DriverState ChannelEngineRMT4Impl::poll() FL_NOEXCEPT {
     return anyBusy ? DriverState::BUSY : DriverState::READY;
 }
 
-void ChannelEngineRMT4Impl::beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT {
+void ChannelEngineRMT4Impl::beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT {
     // Main entry point for LED data transmission
     // Called by ChannelManager when user calls FastLED.show()
     //
@@ -626,7 +610,7 @@ void ChannelEngineRMT4Impl::beginTransmission(fl::span<const ChannelDataPtr> cha
     // 4. Start as many transmissions as hardware allows
     // 5. Release flash lock after transmission starts
 
-    FL_WARN("beginTransmission: Queueing " << channelData.size() << " channels");
+    FL_WARN_F("beginTransmission: Queueing %s channels", channelData.size());
 
 #if FASTLED_ESP32_FLASH_LOCK == 1
     // Block flash operations during LED transmission to prevent timing glitches
@@ -635,11 +619,11 @@ void ChannelEngineRMT4Impl::beginTransmission(fl::span<const ChannelDataPtr> cha
     // IDF 4.x+ uses esp_flash_app_disable_protect()
     // Note: This API may not be available on all IDF versions
     // For now, we'll skip the flash lock and document the limitation
-    FL_DBG("RMT4: Flash lock not yet implemented for IDF 4.x+");
+    FL_DBG_F("RMT4: Flash lock not yet implemented for IDF 4.x+");
     #else
     // IDF 3.x uses spi_flash_op_lock()
     spi_flash_op_lock();
-    FL_DBG("RMT4: Flash operations locked");
+    FL_DBG_F("RMT4: Flash operations locked");
     #endif
 #endif
 
@@ -651,7 +635,7 @@ void ChannelEngineRMT4Impl::beginTransmission(fl::span<const ChannelDataPtr> cha
         if (data) {
             mPendingChannels.push_back(data);
         } else {
-            FL_WARN("beginTransmission: Null ChannelData in span");
+            FL_WARN_F("beginTransmission: Null ChannelData in span");
         }
     }
 
@@ -662,7 +646,7 @@ void ChannelEngineRMT4Impl::beginTransmission(fl::span<const ChannelDataPtr> cha
     #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 0, 0)
     // Release flash lock after transmission starts
     spi_flash_op_unlock();
-    FL_DBG("RMT4: Flash operations unlocked");
+    FL_DBG_F("RMT4: Flash operations unlocked");
     #endif
 #endif
 }

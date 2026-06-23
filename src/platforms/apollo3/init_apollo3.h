@@ -18,7 +18,7 @@ namespace platforms {
 ///
 /// Apollo3 platforms (SparkFun Artemis) rely on core initialization.
 /// This function is a no-op and exists for API consistency.
-inline void init() FL_NOEXCEPT {
+inline void init() FL_NO_EXCEPT {
     // No-op: Apollo3 platforms rely on core initialization
 }
 

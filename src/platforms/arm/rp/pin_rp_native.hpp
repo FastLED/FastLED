@@ -26,7 +26,7 @@ namespace platforms {
 /// @brief Configure a GPIO pin mode
 /// @param pin GPIO pin number (0-29 for RP2040, 0-47 for RP2350)
 /// @param mode Pin mode: Input, Output, InputPullup, or InputPulldown
-inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
+inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
     gpio_init(pin);
 
     switch (mode) {
@@ -55,14 +55,14 @@ inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
 /// @brief Write a digital value to a GPIO pin
 /// @param pin GPIO pin number
 /// @param val Digital level: Low or High
-inline void digitalWrite(int pin, PinValue val) FL_NOEXCEPT {
+inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
     gpio_put(pin, val == PinValue::High);
 }
 
 /// @brief Read a digital value from a GPIO pin
 /// @param pin GPIO pin number
 /// @return Digital level: Low or High
-inline PinValue digitalRead(int pin) FL_NOEXCEPT {
+inline PinValue digitalRead(int pin) FL_NO_EXCEPT {
     return gpio_get(pin) ? PinValue::High : PinValue::Low;
 }
 
@@ -76,7 +76,7 @@ inline PinValue digitalRead(int pin) FL_NOEXCEPT {
 /// - GPIO28 = ADC2
 /// - GPIO29 = ADC3 (also VSYS/3 on Pico)
 /// - ADC4 = Internal temperature sensor (virtual pin 4)
-inline u16 analogRead(int pin) FL_NOEXCEPT {
+inline u16 analogRead(int pin) FL_NO_EXCEPT {
     static bool adc_initialized = false; // okay static in header
 
     // Initialize ADC hardware on first use
@@ -111,7 +111,7 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
 ///
 /// Uses hardware PWM. Each PWM slice controls 2 pins (A/B channels).
 /// PWM frequency is approximately 244 Hz (system clock / 65536).
-inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
+inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
     // Check if pin supports PWM
     if (pin >= NUM_BANK0_GPIOS) {
         return;  // Invalid pin for PWM
@@ -142,7 +142,7 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
 /// WARNING: All pins on the same PWM slice share the same period (wrap value).
 /// Setting 16-bit resolution on one pin affects all pins on that slice.
 /// PWM frequency is approximately 1.9 Hz @ 125 MHz (system clock / 65536).
-inline void setPwm16(int pin, u16 val) FL_NOEXCEPT {
+inline void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
     // Check if pin supports PWM
     if (pin >= NUM_BANK0_GPIOS) {
         return;  // Invalid pin for PWM
@@ -187,7 +187,7 @@ namespace {
     // Zero-initialized: pin=0 and freq_hz=0 means "not configured"
     // We use freq_hz==0 to indicate unconfigured rather than pin==-1,
     // since zero-init gives us pin=0 which is a valid GPIO.
-    inline Rp2040PwmFreq* rp_pwm_freq_table() FL_NOEXCEPT {
+    inline Rp2040PwmFreq* rp_pwm_freq_table() FL_NO_EXCEPT {
         static Rp2040PwmFreq g_rp_pwm[MAX_RP_PWM_PINS] = {};
         return g_rp_pwm;
     }
@@ -224,7 +224,7 @@ inline bool needsPwmIsrFallback(int /*pin*/, u32 frequency_hz) {
 ///
 /// Configures the PWM slice for the given pin but does NOT enable it.
 /// The PWM output is enabled when analogWrite() or setPwm16() is called.
-inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NOEXCEPT {
+inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NO_EXCEPT {
     // Validate pin
     if (pin < 0 || pin >= NUM_BANK0_GPIOS) {
         return -1;
@@ -281,7 +281,7 @@ inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NOEXCEPT {
 /// @brief Get the configured PWM frequency for a pin
 /// @param pin GPIO pin number (0-29)
 /// @return Configured frequency in Hz, or 0 if not configured
-inline u32 getPwmFrequencyNative(int pin) FL_NOEXCEPT {
+inline u32 getPwmFrequencyNative(int pin) FL_NO_EXCEPT {
     if (pin < 0 || pin >= NUM_BANK0_GPIOS) {
         return 0;
     }

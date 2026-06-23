@@ -46,43 +46,43 @@ public:
     // Lifecycle
     //=========================================================================
 
-    I2sLcdCamPeripheralMockImpl() FL_NOEXCEPT;
+    I2sLcdCamPeripheralMockImpl() FL_NO_EXCEPT;
     ~I2sLcdCamPeripheralMockImpl() override;
 
     //=========================================================================
     // II2sLcdCamPeripheral Interface Implementation
     //=========================================================================
 
-    bool initialize(const I2sLcdCamConfig& config) FL_NOEXCEPT override;
-    void deinitialize() FL_NOEXCEPT override;
-    bool isInitialized() const FL_NOEXCEPT override;
+    bool initialize(const I2sLcdCamConfig& config) FL_NO_EXCEPT override;
+    void deinitialize() FL_NO_EXCEPT override;
+    bool isInitialized() const FL_NO_EXCEPT override;
 
-    u16* allocateBuffer(size_t size_bytes) FL_NOEXCEPT override;
-    void freeBuffer(u16* buffer) FL_NOEXCEPT override;
+    u16* allocateBuffer(size_t size_bytes) FL_NO_EXCEPT override;
+    void freeBuffer(u16* buffer) FL_NO_EXCEPT override;
 
-    bool transmit(const u16* buffer, size_t size_bytes) FL_NOEXCEPT override;
-    bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT override;
-    bool isBusy() const FL_NOEXCEPT override;
+    bool transmit(const u16* buffer, size_t size_bytes) FL_NO_EXCEPT override;
+    bool waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT override;
+    bool isBusy() const FL_NO_EXCEPT override;
 
-    bool registerTransmitCallback(void* callback, void* user_ctx) FL_NOEXCEPT override;
-    const I2sLcdCamConfig& getConfig() const FL_NOEXCEPT override;
+    bool registerTransmitCallback(void* callback, void* user_ctx) FL_NO_EXCEPT override;
+    const I2sLcdCamConfig& getConfig() const FL_NO_EXCEPT override;
 
-    u64 getMicroseconds() FL_NOEXCEPT override;
-    void delay(u32 ms) FL_NOEXCEPT override;
+    u64 getMicroseconds() FL_NO_EXCEPT override;
+    void delay(u32 ms) FL_NO_EXCEPT override;
 
     //=========================================================================
     // Mock-Specific API
     //=========================================================================
 
-    void simulateTransmitComplete() FL_NOEXCEPT override;
-    void setTransmitFailure(bool should_fail) FL_NOEXCEPT override;
-    void setTransmitDelay(u32 microseconds) FL_NOEXCEPT override;
-    const fl::vector<TransmitRecord>& getTransmitHistory() const FL_NOEXCEPT override;
-    void clearTransmitHistory() FL_NOEXCEPT override;
-    fl::span<const u16> getLastTransmitData() const FL_NOEXCEPT override;
-    bool isEnabled() const FL_NOEXCEPT override;
-    size_t getTransmitCount() const FL_NOEXCEPT override;
-    void reset() FL_NOEXCEPT override;
+    void simulateTransmitComplete() FL_NO_EXCEPT override;
+    void setTransmitFailure(bool should_fail) FL_NO_EXCEPT override;
+    void setTransmitDelay(u32 microseconds) FL_NO_EXCEPT override;
+    const fl::vector<TransmitRecord>& getTransmitHistory() const FL_NO_EXCEPT override;
+    void clearTransmitHistory() FL_NO_EXCEPT override;
+    fl::span<const u16> getLastTransmitData() const FL_NO_EXCEPT override;
+    bool isEnabled() const FL_NO_EXCEPT override;
+    size_t getTransmitCount() const FL_NO_EXCEPT override;
+    void reset() FL_NO_EXCEPT override;
 
 private:
     //=========================================================================
@@ -117,15 +117,15 @@ private:
     size_t mDeferredCallbackCount;  // Count of pending callbacks to fire
 
     // Helper methods for synchronous callback firing
-    void pumpDeferredCallbacks() FL_NOEXCEPT;
-    void fireCallback() FL_NOEXCEPT;
+    void pumpDeferredCallbacks() FL_NO_EXCEPT;
+    void fireCallback() FL_NO_EXCEPT;
 };
 
 //=============================================================================
 // Singleton Instance
 //=============================================================================
 
-I2sLcdCamPeripheralMock& I2sLcdCamPeripheralMock::instance() FL_NOEXCEPT {
+I2sLcdCamPeripheralMock& I2sLcdCamPeripheralMock::instance() FL_NO_EXCEPT {
     return Singleton<I2sLcdCamPeripheralMockImpl>::instance();
 }
 
@@ -133,7 +133,7 @@ I2sLcdCamPeripheralMock& I2sLcdCamPeripheralMock::instance() FL_NOEXCEPT {
 // Constructor / Destructor
 //=============================================================================
 
-I2sLcdCamPeripheralMockImpl::I2sLcdCamPeripheralMockImpl() FL_NOEXCEPT
+I2sLcdCamPeripheralMockImpl::I2sLcdCamPeripheralMockImpl() FL_NO_EXCEPT
     : mInitialized(false),
       mEnabled(false),
       mBusy(false),
@@ -158,10 +158,10 @@ I2sLcdCamPeripheralMockImpl::~I2sLcdCamPeripheralMockImpl() {
 // Lifecycle Methods
 //=============================================================================
 
-bool I2sLcdCamPeripheralMockImpl::initialize(const I2sLcdCamConfig& config) FL_NOEXCEPT {
+bool I2sLcdCamPeripheralMockImpl::initialize(const I2sLcdCamConfig& config) FL_NO_EXCEPT {
     // Validate config
     if (config.num_lanes == 0 || config.num_lanes > 16) {
-        FL_WARN("I2sLcdCamPeripheralMock: Invalid num_lanes: " << config.num_lanes);
+        FL_WARN_F("I2sLcdCamPeripheralMock: Invalid num_lanes: %s", config.num_lanes);
         return false;
     }
 
@@ -171,14 +171,14 @@ bool I2sLcdCamPeripheralMockImpl::initialize(const I2sLcdCamConfig& config) FL_N
     return true;
 }
 
-void I2sLcdCamPeripheralMockImpl::deinitialize() FL_NOEXCEPT {
+void I2sLcdCamPeripheralMockImpl::deinitialize() FL_NO_EXCEPT {
     mInitialized = false;
     mEnabled = false;
     mBusy = false;
     mPendingTransmits = 0;
 }
 
-bool I2sLcdCamPeripheralMockImpl::isInitialized() const FL_NOEXCEPT {
+bool I2sLcdCamPeripheralMockImpl::isInitialized() const FL_NO_EXCEPT {
     return mInitialized;
 }
 
@@ -186,7 +186,7 @@ bool I2sLcdCamPeripheralMockImpl::isInitialized() const FL_NOEXCEPT {
 // Buffer Management
 //=============================================================================
 
-u16* I2sLcdCamPeripheralMockImpl::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
+u16* I2sLcdCamPeripheralMockImpl::allocateBuffer(size_t size_bytes) FL_NO_EXCEPT {
     // Round up to 64-byte alignment (PSRAM requirement)
     size_t aligned_size = ((size_bytes + 63) / 64) * 64;
 
@@ -198,13 +198,13 @@ u16* I2sLcdCamPeripheralMockImpl::allocateBuffer(size_t size_bytes) FL_NOEXCEPT 
 #endif
 
     if (buffer == nullptr) {
-        FL_WARN("I2sLcdCamPeripheralMock: Failed to allocate buffer (" << aligned_size << " bytes)");
+        FL_WARN_F("I2sLcdCamPeripheralMock: Failed to allocate buffer (%s bytes)", aligned_size);
     }
 
     return static_cast<u16*>(buffer);
 }
 
-void I2sLcdCamPeripheralMockImpl::freeBuffer(u16* buffer) FL_NOEXCEPT {
+void I2sLcdCamPeripheralMockImpl::freeBuffer(u16* buffer) FL_NO_EXCEPT {
     if (buffer != nullptr) {
 #ifdef FL_IS_WIN
         _aligned_free(buffer);
@@ -218,9 +218,9 @@ void I2sLcdCamPeripheralMockImpl::freeBuffer(u16* buffer) FL_NOEXCEPT {
 // Transmission Methods
 //=============================================================================
 
-bool I2sLcdCamPeripheralMockImpl::transmit(const u16* buffer, size_t size_bytes) FL_NOEXCEPT {
+bool I2sLcdCamPeripheralMockImpl::transmit(const u16* buffer, size_t size_bytes) FL_NO_EXCEPT {
     if (!mInitialized) {
-        FL_WARN("I2sLcdCamPeripheralMock: Cannot transmit - not initialized");
+        FL_WARN_F("I2sLcdCamPeripheralMock: Cannot transmit - not initialized");
         return false;
     }
 
@@ -250,7 +250,7 @@ bool I2sLcdCamPeripheralMockImpl::transmit(const u16* buffer, size_t size_bytes)
     return true;
 }
 
-bool I2sLcdCamPeripheralMockImpl::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
+bool I2sLcdCamPeripheralMockImpl::waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -266,7 +266,7 @@ bool I2sLcdCamPeripheralMockImpl::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
     return false;
 }
 
-bool I2sLcdCamPeripheralMockImpl::isBusy() const FL_NOEXCEPT {
+bool I2sLcdCamPeripheralMockImpl::isBusy() const FL_NO_EXCEPT {
     return mBusy;
 }
 
@@ -274,7 +274,7 @@ bool I2sLcdCamPeripheralMockImpl::isBusy() const FL_NOEXCEPT {
 // Callback Registration
 //=============================================================================
 
-bool I2sLcdCamPeripheralMockImpl::registerTransmitCallback(void* callback, void* user_ctx) FL_NOEXCEPT {
+bool I2sLcdCamPeripheralMockImpl::registerTransmitCallback(void* callback, void* user_ctx) FL_NO_EXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -288,15 +288,15 @@ bool I2sLcdCamPeripheralMockImpl::registerTransmitCallback(void* callback, void*
 // State Inspection
 //=============================================================================
 
-const I2sLcdCamConfig& I2sLcdCamPeripheralMockImpl::getConfig() const FL_NOEXCEPT {
+const I2sLcdCamConfig& I2sLcdCamPeripheralMockImpl::getConfig() const FL_NO_EXCEPT {
     return mConfig;
 }
 
-u64 I2sLcdCamPeripheralMockImpl::getMicroseconds() FL_NOEXCEPT {
+u64 I2sLcdCamPeripheralMockImpl::getMicroseconds() FL_NO_EXCEPT {
     return mSimulatedTimeUs;
 }
 
-void I2sLcdCamPeripheralMockImpl::delay(u32 ms) FL_NOEXCEPT {
+void I2sLcdCamPeripheralMockImpl::delay(u32 ms) FL_NO_EXCEPT {
     mSimulatedTimeUs += static_cast<u64>(ms) * 1000;
 }
 
@@ -304,7 +304,7 @@ void I2sLcdCamPeripheralMockImpl::delay(u32 ms) FL_NOEXCEPT {
 // Mock-Specific API
 //=============================================================================
 
-void I2sLcdCamPeripheralMockImpl::simulateTransmitComplete() FL_NOEXCEPT {
+void I2sLcdCamPeripheralMockImpl::simulateTransmitComplete() FL_NO_EXCEPT {
     if (mPendingTransmits == 0) {
         return;
     }
@@ -323,41 +323,41 @@ void I2sLcdCamPeripheralMockImpl::simulateTransmitComplete() FL_NOEXCEPT {
     }
 }
 
-void I2sLcdCamPeripheralMockImpl::setTransmitFailure(bool should_fail) FL_NOEXCEPT {
+void I2sLcdCamPeripheralMockImpl::setTransmitFailure(bool should_fail) FL_NO_EXCEPT {
     mShouldFailTransmit = should_fail;
 }
 
-void I2sLcdCamPeripheralMockImpl::setTransmitDelay(u32 microseconds) FL_NOEXCEPT {
+void I2sLcdCamPeripheralMockImpl::setTransmitDelay(u32 microseconds) FL_NO_EXCEPT {
     mTransmitDelayUs = microseconds;
     mTransmitDelayForced = true;  // Mark as explicitly set - don't recalculate in transmit()
 }
 
-const fl::vector<I2sLcdCamPeripheralMock::TransmitRecord>& I2sLcdCamPeripheralMockImpl::getTransmitHistory() const FL_NOEXCEPT {
+const fl::vector<I2sLcdCamPeripheralMock::TransmitRecord>& I2sLcdCamPeripheralMockImpl::getTransmitHistory() const FL_NO_EXCEPT {
     return mHistory;
 }
 
-void I2sLcdCamPeripheralMockImpl::clearTransmitHistory() FL_NOEXCEPT {
+void I2sLcdCamPeripheralMockImpl::clearTransmitHistory() FL_NO_EXCEPT {
     mHistory.clear();
     mPendingTransmits = 0;
     mBusy = false;
 }
 
-fl::span<const u16> I2sLcdCamPeripheralMockImpl::getLastTransmitData() const FL_NOEXCEPT {
+fl::span<const u16> I2sLcdCamPeripheralMockImpl::getLastTransmitData() const FL_NO_EXCEPT {
     if (mHistory.empty()) {
         return fl::span<const u16>();
     }
     return fl::span<const u16>(mHistory.back().buffer_copy);
 }
 
-bool I2sLcdCamPeripheralMockImpl::isEnabled() const FL_NOEXCEPT {
+bool I2sLcdCamPeripheralMockImpl::isEnabled() const FL_NO_EXCEPT {
     return mEnabled;
 }
 
-size_t I2sLcdCamPeripheralMockImpl::getTransmitCount() const FL_NOEXCEPT {
+size_t I2sLcdCamPeripheralMockImpl::getTransmitCount() const FL_NO_EXCEPT {
     return mTransmitCount;
 }
 
-void I2sLcdCamPeripheralMockImpl::reset() FL_NOEXCEPT {
+void I2sLcdCamPeripheralMockImpl::reset() FL_NO_EXCEPT {
     // Reset all state (synchronous mock, no threads)
     mInitialized = false;
     mEnabled = false;
@@ -384,7 +384,7 @@ void I2sLcdCamPeripheralMockImpl::reset() FL_NOEXCEPT {
 // Synchronous Callback Pumping
 //=============================================================================
 
-void I2sLcdCamPeripheralMockImpl::pumpDeferredCallbacks() FL_NOEXCEPT {
+void I2sLcdCamPeripheralMockImpl::pumpDeferredCallbacks() FL_NO_EXCEPT {
     // Re-entrancy guard: if we're already firing callbacks (from within
     // a callback that called transmit()), just let the outer loop handle it.
     if (mFiringCallbacks) {
@@ -402,7 +402,7 @@ void I2sLcdCamPeripheralMockImpl::pumpDeferredCallbacks() FL_NOEXCEPT {
     mFiringCallbacks = false;
 }
 
-void I2sLcdCamPeripheralMockImpl::fireCallback() FL_NOEXCEPT {
+void I2sLcdCamPeripheralMockImpl::fireCallback() FL_NO_EXCEPT {
     if (mPendingTransmits > 0) {
         mPendingTransmits--;
     }

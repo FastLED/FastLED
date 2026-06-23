@@ -12,28 +12,28 @@
 
 namespace fl {
 
-ActiveStripData &ActiveStripData::Instance() FL_NOEXCEPT {
+ActiveStripData &ActiveStripData::Instance() FL_NO_EXCEPT {
     return fl::Singleton<ActiveStripData>::instance();
 }
 
-void ActiveStripData::update(int id, u32 now, fl::span<const u8> pixel_data) FL_NOEXCEPT {
+void ActiveStripData::update(int id, u32 now, fl::span<const u8> pixel_data) FL_NO_EXCEPT {
     FL_UNUSED(now);
     mStripMap.update(id, pixel_data);
 }
 
-void ActiveStripData::updateScreenMap(int id, const ScreenMap &screenmap) FL_NOEXCEPT {
+void ActiveStripData::updateScreenMap(int id, const ScreenMap &screenmap) FL_NO_EXCEPT {
     mScreenMap.update(id, screenmap);
 }
 
 void ActiveStripData::onCanvasUiSet(CLEDController *strip,
-                                   const ScreenMap &screenmap) FL_NOEXCEPT {
+                                   const ScreenMap &screenmap) FL_NO_EXCEPT {
     // Use the IdTracker for consistent strip ID management across all platforms
     int id = mIdTracker.getOrCreateId(strip);
     updateScreenMap(id, screenmap);
 }
 
 // NEW: JSON parsing using fl::json API (WORKING - parsing is fully functional)
-bool ActiveStripData::parseStripJsonInfo(const char* jsonStr) FL_NOEXCEPT {
+bool ActiveStripData::parseStripJsonInfo(const char* jsonStr) FL_NO_EXCEPT {
     if (!jsonStr) return false;
     
     // Use the working fl::json parsing API
@@ -70,11 +70,11 @@ bool ActiveStripData::parseStripJsonInfo(const char* jsonStr) FL_NOEXCEPT {
     return true;
 }
 
-fl::string ActiveStripData::infoJsonString() FL_NOEXCEPT {
+fl::string ActiveStripData::infoJsonString() FL_NO_EXCEPT {
     return infoJsonStringNew();
 }
 
-fl::string ActiveStripData::infoJsonStringNew() FL_NOEXCEPT {
+fl::string ActiveStripData::infoJsonStringNew() FL_NO_EXCEPT {
     // NEW API - Using fl::json creation API (PROPER IMPLEMENTATION)
     // 
     // This is the target implementation that the JSON creation API must support

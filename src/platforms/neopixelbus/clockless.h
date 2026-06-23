@@ -133,14 +133,14 @@ public:
 
     /// Initialize the controller
     /// Creates the NeoPixelBus instance with appropriate color feature and method
-    virtual void init() FL_NOEXCEPT override {
+    virtual void init() FL_NO_EXCEPT override {
         if (!mInitialized) {
             try {
                 // Create NeoPixelBus instance
                 // Note: numPixels will be set when FastLED calls setLeds()
                 mPixelBus = createPixelBus();
                 if (!mPixelBus) {
-                    FL_WARN("Failed to create NeoPixelBus instance");
+                    FL_WARN_F("Failed to create NeoPixelBus instance");
                     return;
                 }
                 
@@ -150,7 +150,7 @@ public:
                 // Allow derived classes to perform additional initialization
                 onInitialized();
             } catch (...) {
-                FL_WARN("NeoPixelBus initialization failed");
+                FL_WARN_F("NeoPixelBus initialization failed");
                 mInitialized = false;
             }
         }
@@ -159,7 +159,7 @@ public:
     /// Output pixels to the LED strip
     /// Converts FastLED pixel data to NeoPixelBus format and displays
     /// @param pixels the pixel controller containing LED data
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT override {
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override {
         if (!mPixelBus || !mInitialized) {
             return;
         }
@@ -170,7 +170,7 @@ public:
             mPixelBus.reset();
             mPixelBus = createPixelBus(pixels.size());
             if (!mPixelBus) {
-                FL_WARN("Failed to recreate NeoPixelBus with new size");
+                FL_WARN_F("Failed to recreate NeoPixelBus with new size");
                 return;
             }
             mPixelBus->Begin();
@@ -197,12 +197,12 @@ public:
 
 protected:
     /// Get the NeoPixelBus instance (for derived classes)
-    BusType* getPixelBus() const FL_NOEXCEPT {
+    BusType* getPixelBus() const FL_NO_EXCEPT {
         return mPixelBus.get();
     }
     
     /// Check if the controller is initialized
-    bool isInitialized() const FL_NOEXCEPT {
+    bool isInitialized() const FL_NO_EXCEPT {
         return mInitialized;
     }
     
@@ -210,34 +210,34 @@ protected:
     /// Override this in derived classes to customize bus creation
     /// @param pixelCount number of pixels (0 for default)
     /// @return unique pointer to the created bus
-    virtual fl::unique_ptr<BusType> createPixelBus(u16 pixelCount = 0) FL_NOEXCEPT {
+    virtual fl::unique_ptr<BusType> createPixelBus(u16 pixelCount = 0) FL_NO_EXCEPT {
         return fl::make_unique<BusType>(pixelCount, DATA_PIN);
     }
     
     /// Called after successful initialization
     /// Override in derived classes for additional setup
-    virtual void onInitialized() FL_NOEXCEPT {
+    virtual void onInitialized() FL_NO_EXCEPT {
         // Default: no additional initialization
     }
     
     /// Called before showing pixels
     /// Override in derived classes for pre-show operations
     /// @param pixels the pixel controller containing LED data
-    virtual void beforeShow(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT {
+    virtual void beforeShow(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT {
         // Default: no pre-show operations
     }
     
     /// Convert and set pixels in the NeoPixelBus instance
     /// Override in derived classes to customize pixel conversion
     /// @param pixels the pixel controller containing LED data
-    virtual void convertAndSetPixels(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT {
+    virtual void convertAndSetPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT {
         auto iterator = pixels.as_iterator(RgbwInvalid());
         for (int i = 0; iterator.has(1); ++i) {
             u8 r, g, b;
             iterator.loadAndScaleRGB(&r, &g, &b);
             
             // Convert to NeoPixelBus color type
-            RgbColor color(r, g, b) FL_NOEXCEPT;
+            RgbColor color(r, g, b) FL_NO_EXCEPT;
             mPixelBus->SetPixelColor(i, color);
             
             iterator.advanceData();
@@ -247,14 +247,14 @@ protected:
     /// Called after pixel conversion but before show()
     /// Override in derived classes for post-conversion operations
     /// @param pixels the pixel controller containing LED data
-    virtual void afterConversion(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT {
+    virtual void afterConversion(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT {
         // Default: no post-conversion operations
     }
     
     /// Called after showing pixels
     /// Override in derived classes for post-show operations
     /// @param pixels the pixel controller containing LED data
-    virtual void afterShow(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT {
+    virtual void afterShow(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT {
         // Default: no post-show operations
     }
 };
@@ -318,12 +318,12 @@ public:
     virtual ~NeoPixelBusRGBWController() = default;
 
     /// Initialize the controller
-    virtual void init() FL_NOEXCEPT override {
+    virtual void init() FL_NO_EXCEPT override {
         if (!mInitialized) {
             try {
                 mPixelBus = fl::make_unique<BusType>(0, DATA_PIN);
                 if (!mPixelBus) {
-                    FL_WARN("Failed to create RGBW NeoPixelBus instance");
+                    FL_WARN_F("Failed to create RGBW NeoPixelBus instance");
                     return;
                 }
                 
@@ -332,14 +332,14 @@ public:
                 
                 onInitialized();
             } catch (...) {
-                FL_WARN("RGBW NeoPixelBus initialization failed");
+                FL_WARN_F("RGBW NeoPixelBus initialization failed");
                 mInitialized = false;
             }
         }
     }
 
     /// Output pixels to the LED strip with RGBW conversion
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT override {
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override {
         if (!mPixelBus || !mInitialized) {
             return;
         }
@@ -349,7 +349,7 @@ public:
             mPixelBus.reset();
             mPixelBus = fl::make_unique<BusType>(pixels.size(), DATA_PIN);
             if (!mPixelBus) {
-                FL_WARN("Failed to recreate RGBW NeoPixelBus with new size");
+                FL_WARN_F("Failed to recreate RGBW NeoPixelBus with new size");
                 return;
             }
             mPixelBus->Begin();
@@ -368,27 +368,27 @@ public:
 
 protected:
     /// Get the NeoPixelBus instance (for derived classes)
-    BusType* getPixelBus() const FL_NOEXCEPT {
+    BusType* getPixelBus() const FL_NO_EXCEPT {
         return mPixelBus.get();
     }
     
     /// Check if the controller is initialized
-    bool isInitialized() const FL_NOEXCEPT {
+    bool isInitialized() const FL_NO_EXCEPT {
         return mInitialized;
     }
     
     /// Called after successful initialization
-    virtual void onInitialized() FL_NOEXCEPT {
+    virtual void onInitialized() FL_NO_EXCEPT {
         // Default: no additional initialization
     }
     
     /// Called before showing pixels
-    virtual void beforeShow(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT {
+    virtual void beforeShow(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT {
         // Default: no pre-show operations
     }
     
     /// Convert RGB to RGBW with white channel extraction
-    virtual void convertAndSetPixels(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT {
+    virtual void convertAndSetPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT {
         auto iterator = pixels.as_iterator(RgbwInvalid());
         for (int i = 0; iterator.has(1); ++i) {
             u8 r, g, b;
@@ -401,7 +401,7 @@ protected:
             b -= white;
             
             // Convert to NeoPixelBus RGBW color type
-            RgbwColor color(r, g, b, white) FL_NOEXCEPT;
+            RgbwColor color(r, g, b, white) FL_NO_EXCEPT;
             mPixelBus->SetPixelColor(i, color);
             
             iterator.advanceData();
@@ -409,12 +409,12 @@ protected:
     }
     
     /// Called after pixel conversion but before show()
-    virtual void afterConversion(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT {
+    virtual void afterConversion(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT {
         // Default: no post-conversion operations
     }
     
     /// Called after showing pixels
-    virtual void afterShow(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT {
+    virtual void afterShow(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT {
         // Default: no post-show operations
     }
 };

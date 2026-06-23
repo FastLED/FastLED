@@ -136,7 +136,7 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
 
     // Helper: Promote fixed-point value to higher precision with fractional bit shift
     template <int OtherFrac, typename OtherRawType>
-    static constexpr RawType promote_fp(OtherRawType other_raw) FL_NOEXCEPT {
+    static constexpr RawType promote_fp(OtherRawType other_raw) FL_NO_EXCEPT {
         return static_cast<RawType>(
             static_cast<PromotionType>(other_raw) << (FracBits - OtherFrac));
     }
@@ -153,13 +153,13 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
 
     // Default constructor — value is zero.
     //   FP x;  // x == 0
-    FASTLED_FORCE_INLINE constexpr fixed_point() FL_NOEXCEPT : Base() {}
+    FASTLED_FORCE_INLINE constexpr fixed_point() FL_NO_EXCEPT : Base() {}
 
     // Construct from a floating-point literal. Conversion is done at compile
     // time when used in a constexpr context.
     //   FP x(3.14f);   // x ≈ 3.14
     //   FP y(-0.5f);   // y = -0.5
-    FASTLED_FORCE_INLINE explicit constexpr fixed_point(float f) FL_NOEXCEPT : Base(f) {}
+    FASTLED_FORCE_INLINE explicit constexpr fixed_point(float f) FL_NO_EXCEPT : Base(f) {}
 
     // Construct from any integer type. Delegates to Base's template integer
     // constructor which handles int-width portability (AVR 16-bit int vs
@@ -167,11 +167,11 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
     //   FP x(5);      // x == 5.0
     //   FP y(-3);     // y == -3.0
     template <typename IntT, detail::enable_if_integer_t<IntT> = 0>
-    FASTLED_FORCE_INLINE explicit constexpr fixed_point(IntT n) FL_NOEXCEPT : Base(n) {}
+    FASTLED_FORCE_INLINE explicit constexpr fixed_point(IntT n) FL_NO_EXCEPT : Base(n) {}
 
     // Construct from a raw integer value (used internally by from_raw).
     //   FP x(0x00028000, FP::Base::RawTag());  // prefer from_raw() instead
-    constexpr explicit fixed_point(RawType raw, typename Base::RawTag tag) FL_NOEXCEPT : Base(raw, tag) {}
+    constexpr explicit fixed_point(RawType raw, typename Base::RawTag tag) FL_NO_EXCEPT : Base(raw, tag) {}
 
     // Implicit widening promotion from a narrower fixed-point type.
     // Only enabled when both IntBits and FracBits of the source are <=
@@ -187,14 +187,14 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
                 fixed_point<IntBits, FracBits, S>
             >::value,
             int>::type = 0)
- FL_NOEXCEPT : Base(Base::from_raw(promote_fp<OtherFrac>(other.raw()))) {}
+ FL_NO_EXCEPT : Base(Base::from_raw(promote_fp<OtherFrac>(other.raw()))) {}
 
     // ---- Factory methods ----
 
     // Construct from the underlying raw integer representation.
     // For s16x16 the value 0x00018000 represents 1.5 (0x0001 integer, 0x8000 = 0.5).
     //   auto x = FP::from_raw(0x00028000);  // 2.5 in 16.16 format
-    static constexpr FASTLED_FORCE_INLINE fixed_point from_raw(RawType raw) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE fixed_point from_raw(RawType raw) FL_NO_EXCEPT {
         return fixed_point(raw, typename Base::RawTag());
     }
 
@@ -203,16 +203,16 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
     // Returns the underlying raw integer representation.
     //   FP x(2.5f);
     //   i32 r = x.raw();  // 0x00028000 for s16x16
-    FASTLED_FORCE_INLINE constexpr RawType raw() const FL_NOEXCEPT { return Base::raw(); }
+    FASTLED_FORCE_INLINE constexpr RawType raw() const FL_NO_EXCEPT { return Base::raw(); }
 
     // Truncates toward zero, returning only the integer part.
     //   FP(3.75f).to_int()   // 3
     //   FP(-2.25f).to_int()  // -2
-    constexpr FASTLED_FORCE_INLINE i32 to_int() const FL_NOEXCEPT { return Base::to_int(); }
+    constexpr FASTLED_FORCE_INLINE i32 to_int() const FL_NO_EXCEPT { return Base::to_int(); }
 
     // Converts to a float. Useful for debugging or interop with float APIs.
     //   FP(3.14f).to_float()  // ≈ 3.14f
-    constexpr FASTLED_FORCE_INLINE float to_float() const FL_NOEXCEPT { return Base::to_float(); }
+    constexpr FASTLED_FORCE_INLINE float to_float() const FL_NO_EXCEPT { return Base::to_float(); }
 
     // ---- Arithmetic operators ----
     // All arithmetic is integer-only in the hot path.
@@ -223,26 +223,26 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
     //   FP quot = a / b;   // 2.0
     //   FP neg  = -a;      // -3.0
 
-    constexpr FASTLED_FORCE_INLINE fixed_point operator+(fixed_point b) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE fixed_point operator+(fixed_point b) const FL_NO_EXCEPT {
         return from_raw((Base::operator+(b)).raw());
     }
 
-    constexpr FASTLED_FORCE_INLINE fixed_point operator-(fixed_point b) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE fixed_point operator-(fixed_point b) const FL_NO_EXCEPT {
         return from_raw((Base::operator-(b)).raw());
     }
 
-    constexpr FASTLED_FORCE_INLINE fixed_point operator*(fixed_point b) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE fixed_point operator*(fixed_point b) const FL_NO_EXCEPT {
         return from_raw((Base::operator*(b)).raw());
     }
 
-    constexpr FASTLED_FORCE_INLINE fixed_point operator/(fixed_point b) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE fixed_point operator/(fixed_point b) const FL_NO_EXCEPT {
         return from_raw((Base::operator/(b)).raw());
     }
 
     // Unary negation.
     //   FP x(2.0f);
     //   FP y = -x;  // -2.0
-    constexpr FASTLED_FORCE_INLINE fixed_point operator-() const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE fixed_point operator-() const FL_NO_EXCEPT {
         return from_raw((Base::operator-()).raw());
     }
 
@@ -250,11 +250,11 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
     //   FP x(4.0f);
     //   FP half    = x >> 1;  // 2.0  (divide by 2)
     //   FP doubled = x << 1;  // 8.0  (multiply by 2)
-    constexpr FASTLED_FORCE_INLINE fixed_point operator>>(int shift) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE fixed_point operator>>(int shift) const FL_NO_EXCEPT {
         return from_raw((Base::operator>>(shift)).raw());
     }
 
-    constexpr FASTLED_FORCE_INLINE fixed_point operator<<(int shift) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE fixed_point operator<<(int shift) const FL_NO_EXCEPT {
         return from_raw((Base::operator<<(shift)).raw());
     }
 
@@ -264,11 +264,11 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
     //   FP a = x * 3;   // 4.5
     //   FP b = 3 * x;   // 4.5
 
-    constexpr FASTLED_FORCE_INLINE fixed_point operator*(i32 scalar) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE fixed_point operator*(i32 scalar) const FL_NO_EXCEPT {
         return from_raw((Base::operator*(scalar)).raw());
     }
 
-    friend constexpr fixed_point operator*(i32 scalar, fixed_point fp) FL_NOEXCEPT {
+    friend constexpr fixed_point operator*(i32 scalar, fixed_point fp) FL_NO_EXCEPT {
         return from_raw((scalar * static_cast<Base>(fp)).raw());
     }
 
@@ -279,27 +279,27 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
     //   a == a;  // true
     //   a != b;  // true
 
-    constexpr FASTLED_FORCE_INLINE bool operator<(fixed_point b) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE bool operator<(fixed_point b) const FL_NO_EXCEPT {
         return Base::operator<(b);
     }
 
-    constexpr FASTLED_FORCE_INLINE bool operator>(fixed_point b) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE bool operator>(fixed_point b) const FL_NO_EXCEPT {
         return Base::operator>(b);
     }
 
-    constexpr FASTLED_FORCE_INLINE bool operator<=(fixed_point b) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE bool operator<=(fixed_point b) const FL_NO_EXCEPT {
         return Base::operator<=(b);
     }
 
-    constexpr FASTLED_FORCE_INLINE bool operator>=(fixed_point b) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE bool operator>=(fixed_point b) const FL_NO_EXCEPT {
         return Base::operator>=(b);
     }
 
-    constexpr FASTLED_FORCE_INLINE bool operator==(fixed_point b) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE bool operator==(fixed_point b) const FL_NO_EXCEPT {
         return Base::operator==(b);
     }
 
-    constexpr FASTLED_FORCE_INLINE bool operator!=(fixed_point b) const FL_NOEXCEPT {
+    constexpr FASTLED_FORCE_INLINE bool operator!=(fixed_point b) const FL_NO_EXCEPT {
         return Base::operator!=(b);
     }
 
@@ -307,52 +307,52 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
     // These are also available as free functions: fl::floor(x), fl::mod(a,b), etc.
 
     // Remainder after division: mod(5.5, 2.0) → 1.5
-    static constexpr FASTLED_FORCE_INLINE fixed_point mod(fixed_point a, fixed_point b) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE fixed_point mod(fixed_point a, fixed_point b) FL_NO_EXCEPT {
         return from_raw(Base::mod(a, b).raw());
     }
 
     // Round down to the nearest integer: floor(3.7) → 3.0, floor(-1.2) → -2.0
-    static constexpr FASTLED_FORCE_INLINE fixed_point floor(fixed_point x) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE fixed_point floor(fixed_point x) FL_NO_EXCEPT {
         return from_raw(Base::floor(x).raw());
     }
 
     // Round up to the nearest integer: ceil(3.2) → 4.0, ceil(-1.8) → -1.0
-    static constexpr FASTLED_FORCE_INLINE fixed_point ceil(fixed_point x) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE fixed_point ceil(fixed_point x) FL_NO_EXCEPT {
         return from_raw(Base::ceil(x).raw());
     }
 
     // Fractional part: fract(3.75) → 0.75, fract(-1.25) → 0.75
-    static constexpr FASTLED_FORCE_INLINE fixed_point fract(fixed_point x) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE fixed_point fract(fixed_point x) FL_NO_EXCEPT {
         return from_raw(Base::fract(x).raw());
     }
 
     // Absolute value: abs(-2.5) → 2.5
-    static constexpr FASTLED_FORCE_INLINE fixed_point abs(fixed_point x) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE fixed_point abs(fixed_point x) FL_NO_EXCEPT {
         return from_raw(Base::abs(x).raw());
     }
 
     // Sign function: returns -1, 0, or +1.
     //   sign(-3.5) → -1.0, sign(0) → 0.0, sign(2.0) → 1.0
-    static constexpr FASTLED_FORCE_INLINE fixed_point sign(fixed_point x) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE fixed_point sign(fixed_point x) FL_NO_EXCEPT {
         return from_raw(Base::sign(x).raw());
     }
 
     // Linear interpolation: lerp(a, b, t) = a + t*(b - a), where t is in [0, 1].
     //   lerp(0, 10, 0.5) → 5.0
     //   lerp(0, 10, 0.25) → 2.5
-    static constexpr FASTLED_FORCE_INLINE fixed_point lerp(fixed_point a, fixed_point b, fixed_point t) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE fixed_point lerp(fixed_point a, fixed_point b, fixed_point t) FL_NO_EXCEPT {
         return from_raw(Base::lerp(a, b, t).raw());
     }
 
     // Clamp x to the range [lo, hi]: clamp(5.0, 0.0, 3.0) → 3.0
-    static constexpr FASTLED_FORCE_INLINE fixed_point clamp(fixed_point x, fixed_point lo, fixed_point hi) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE fixed_point clamp(fixed_point x, fixed_point lo, fixed_point hi) FL_NO_EXCEPT {
         return from_raw(Base::clamp(x, lo, hi).raw());
     }
 
     // Step function: returns 0.0 if x < edge, 1.0 otherwise.
     //   step(0.5, 0.3) → 0.0
     //   step(0.5, 0.7) → 1.0
-    static constexpr FASTLED_FORCE_INLINE fixed_point step(fixed_point edge, fixed_point x) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE fixed_point step(fixed_point edge, fixed_point x) FL_NO_EXCEPT {
         return from_raw(Base::step(edge, x).raw());
     }
 
@@ -360,17 +360,17 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
     //   smoothstep(0.0, 1.0, 0.5) ≈ 0.5
     //   smoothstep(0.0, 1.0, 0.0) → 0.0
     //   smoothstep(0.0, 1.0, 1.0) → 1.0
-    static FASTLED_FORCE_INLINE fixed_point smoothstep(fixed_point edge0, fixed_point edge1, fixed_point x) FL_NOEXCEPT {
+    static FASTLED_FORCE_INLINE fixed_point smoothstep(fixed_point edge0, fixed_point edge1, fixed_point x) FL_NO_EXCEPT {
         return from_raw(Base::smoothstep(edge0, edge1, x).raw());
     }
 
     // Component-wise minimum: min(3.0, 1.5) → 1.5
-    static constexpr FASTLED_FORCE_INLINE fixed_point min(fixed_point a, fixed_point b) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE fixed_point min(fixed_point a, fixed_point b) FL_NO_EXCEPT {
         return from_raw(Base::min(a, b).raw());
     }
 
     // Component-wise maximum: max(3.0, 1.5) → 3.0
-    static constexpr FASTLED_FORCE_INLINE fixed_point max(fixed_point a, fixed_point b) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE fixed_point max(fixed_point a, fixed_point b) FL_NO_EXCEPT {
         return from_raw(Base::max(a, b).raw());
     }
 
@@ -381,20 +381,20 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
     // Sine: sin(π/2) → 1.0
     //   FP angle(1.5708f);  // π/2
     //   FP s = FP::sin(angle);  // ≈ 1.0
-    static FASTLED_FORCE_INLINE fixed_point sin(fixed_point angle) FL_NOEXCEPT {
+    static FASTLED_FORCE_INLINE fixed_point sin(fixed_point angle) FL_NO_EXCEPT {
         return from_raw(Base::sin(angle).raw());
     }
 
     // Cosine: cos(0) → 1.0
     //   FP c = FP::cos(FP(0.0f));  // 1.0
-    static FASTLED_FORCE_INLINE fixed_point cos(fixed_point angle) FL_NOEXCEPT {
+    static FASTLED_FORCE_INLINE fixed_point cos(fixed_point angle) FL_NO_EXCEPT {
         return from_raw(Base::cos(angle).raw());
     }
 
     // Compute sin and cos simultaneously (more efficient than calling each).
     //   FP s, c;
     //   FP::sincos(FP(1.0f), s, c);  // s ≈ 0.841, c ≈ 0.540
-    static FASTLED_FORCE_INLINE void sincos(fixed_point angle, fixed_point& out_sin, fixed_point& out_cos) FL_NOEXCEPT {
+    static FASTLED_FORCE_INLINE void sincos(fixed_point angle, fixed_point& out_sin, fixed_point& out_cos) FL_NO_EXCEPT {
         Base base_sin, base_cos;
         Base::sincos(angle, base_sin, base_cos);
         out_sin = from_raw(base_sin.raw());
@@ -402,23 +402,23 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
     }
 
     // Arctangent: atan(1.0) ≈ π/4 ≈ 0.785
-    static FASTLED_FORCE_INLINE fixed_point atan(fixed_point x) FL_NOEXCEPT {
+    static FASTLED_FORCE_INLINE fixed_point atan(fixed_point x) FL_NO_EXCEPT {
         return from_raw(Base::atan(x).raw());
     }
 
     // Two-argument arctangent: atan2(y, x) returns angle in [-π, π].
     //   FP::atan2(FP(1.0f), FP(1.0f))  // ≈ π/4 ≈ 0.785
-    static FASTLED_FORCE_INLINE fixed_point atan2(fixed_point y, fixed_point x) FL_NOEXCEPT {
+    static FASTLED_FORCE_INLINE fixed_point atan2(fixed_point y, fixed_point x) FL_NO_EXCEPT {
         return from_raw(Base::atan2(y, x).raw());
     }
 
     // Arc sine: asin(1.0) ≈ π/2. Input must be in [-1, 1].
-    static FASTLED_FORCE_INLINE fixed_point asin(fixed_point x) FL_NOEXCEPT {
+    static FASTLED_FORCE_INLINE fixed_point asin(fixed_point x) FL_NO_EXCEPT {
         return from_raw(Base::asin(x).raw());
     }
 
     // Arc cosine: acos(0.0) ≈ π/2. Input must be in [-1, 1].
-    static FASTLED_FORCE_INLINE fixed_point acos(fixed_point x) FL_NOEXCEPT {
+    static FASTLED_FORCE_INLINE fixed_point acos(fixed_point x) FL_NO_EXCEPT {
         return from_raw(Base::acos(x).raw());
     }
 
@@ -426,19 +426,19 @@ class fixed_point : protected fixed_point_impl<IntBits, FracBits, S>::type {
 
     // Square root: sqrt(4.0) → 2.0, sqrt(2.0) ≈ 1.414
     //   FP r = FP::sqrt(FP(9.0f));  // 3.0
-    static constexpr FASTLED_FORCE_INLINE fixed_point sqrt(fixed_point x) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE fixed_point sqrt(fixed_point x) FL_NO_EXCEPT {
         return from_raw(Base::sqrt(x).raw());
     }
 
     // Reciprocal square root: rsqrt(4.0) → 0.5, rsqrt(x) ≈ 1/sqrt(x)
     //   FP r = FP::rsqrt(FP(4.0f));  // 0.5
-    static constexpr FASTLED_FORCE_INLINE fixed_point rsqrt(fixed_point x) FL_NOEXCEPT {
+    static constexpr FASTLED_FORCE_INLINE fixed_point rsqrt(fixed_point x) FL_NO_EXCEPT {
         return from_raw(Base::rsqrt(x).raw());
     }
 
     // Power: pow(2.0, 3.0) → 8.0. Uses exp2/log2 LUTs internally.
     //   FP r = FP::pow(FP(2.0f), FP(10.0f));  // 1024.0
-    static FASTLED_FORCE_INLINE fixed_point pow(fixed_point base, fixed_point exp) FL_NOEXCEPT {
+    static FASTLED_FORCE_INLINE fixed_point pow(fixed_point base, fixed_point exp) FL_NO_EXCEPT {
         return from_raw(Base::pow(base, exp).raw());
     }
 };
@@ -500,73 +500,73 @@ template <typename T> struct is_fixed_point<T&> : is_fixed_point<T> {};
 // Round down: fl::floor(FP(2.7f)) → 2.0
 template <typename T>
 inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
-floor(T x) FL_NOEXCEPT { return T::floor(x); }
+floor(T x) FL_NO_EXCEPT { return T::floor(x); }
 
 // Round up: fl::ceil(FP(2.1f)) → 3.0
 template <typename T>
 inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
-ceil(T x) FL_NOEXCEPT { return T::ceil(x); }
+ceil(T x) FL_NO_EXCEPT { return T::ceil(x); }
 
 // Fractional part: fl::fract(FP(2.75f)) → 0.75
 template <typename T>
 inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
-fract(T x) FL_NOEXCEPT { return T::fract(x); }
+fract(T x) FL_NO_EXCEPT { return T::fract(x); }
 
 // Remainder: fl::mod(FP(5.5f), FP(2.0f)) → 1.5
 template <typename T>
 inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
-mod(T a, T b) FL_NOEXCEPT { return T::mod(a, b); }
+mod(T a, T b) FL_NO_EXCEPT { return T::mod(a, b); }
 
 // ---- Absolute value / sign ----
 
 // Absolute value: fl::abs(FP(-3.0f)) → 3.0
 template <typename T>
 inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
-abs(T x) FL_NOEXCEPT { return T::abs(x); }
+abs(T x) FL_NO_EXCEPT { return T::abs(x); }
 
 // Sign: fl::sign(FP(-5.0f)) → -1
 template <typename T>
 inline constexpr typename enable_if<is_fixed_point<T>::value, int>::type
-sign(T x) FL_NOEXCEPT { return T::sign(x); }
+sign(T x) FL_NO_EXCEPT { return T::sign(x); }
 
 // ---- Interpolation / clamping ----
 
 // Linear interpolation: fl::lerp(FP(0.0f), FP(10.0f), FP(0.5f)) → 5.0
 template <typename T>
 inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
-lerp(T a, T b, T t) FL_NOEXCEPT { return T::lerp(a, b, t); }
+lerp(T a, T b, T t) FL_NO_EXCEPT { return T::lerp(a, b, t); }
 
 // Clamp to range: fl::clamp(FP(5.0f), FP(0.0f), FP(3.0f)) → 3.0
 template <typename T>
 inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
-clamp(T x, T lo, T hi) FL_NOEXCEPT { return T::clamp(x, lo, hi); }
+clamp(T x, T lo, T hi) FL_NO_EXCEPT { return T::clamp(x, lo, hi); }
 
 // Step: fl::step(FP(0.5f), FP(0.7f)) → 1.0
 template <typename T>
 inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
-step(T edge, T x) FL_NOEXCEPT { return T::step(edge, x); }
+step(T edge, T x) FL_NO_EXCEPT { return T::step(edge, x); }
 
 // Smooth Hermite interpolation: fl::smoothstep(FP(0.0f), FP(1.0f), FP(0.5f)) ≈ 0.5
 template <typename T>
 inline typename enable_if<is_fixed_point<T>::value, T>::type
-smoothstep(T edge0, T edge1, T x) FL_NOEXCEPT { return T::smoothstep(edge0, edge1, x); }
+smoothstep(T edge0, T edge1, T x) FL_NO_EXCEPT { return T::smoothstep(edge0, edge1, x); }
 
 // ---- Roots / powers ----
 
 // Square root: fl::sqrt(FP(9.0f)) → 3.0
 template <typename T>
 inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
-sqrt(T x) FL_NOEXCEPT { return T::sqrt(x); }
+sqrt(T x) FL_NO_EXCEPT { return T::sqrt(x); }
 
 // Reciprocal square root: fl::rsqrt(FP(4.0f)) → 0.5
 template <typename T>
 inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
-rsqrt(T x) FL_NOEXCEPT { return T::rsqrt(x); }
+rsqrt(T x) FL_NO_EXCEPT { return T::rsqrt(x); }
 
 // Power: fl::pow(FP(2.0f), FP(3.0f)) → 8.0
 template <typename T>
 inline typename enable_if<is_fixed_point<T>::value, T>::type
-pow(T base, T exp) FL_NOEXCEPT { return T::pow(base, exp); }
+pow(T base, T exp) FL_NO_EXCEPT { return T::pow(base, exp); }
 
 // ---- Trigonometry ----
 // All angles are in radians.
@@ -574,39 +574,39 @@ pow(T base, T exp) FL_NOEXCEPT { return T::pow(base, exp); }
 // Sine: fl::sin(FP(1.5708f)) ≈ 1.0  (π/2)
 template <typename T>
 inline typename enable_if<is_fixed_point<T>::value, T>::type
-sin(T angle) FL_NOEXCEPT { return T::sin(angle); }
+sin(T angle) FL_NO_EXCEPT { return T::sin(angle); }
 
 // Cosine: fl::cos(FP(0.0f)) → 1.0
 template <typename T>
 inline typename enable_if<is_fixed_point<T>::value, T>::type
-cos(T angle) FL_NOEXCEPT { return T::cos(angle); }
+cos(T angle) FL_NO_EXCEPT { return T::cos(angle); }
 
 // Simultaneous sin+cos (faster than calling each separately).
 //   FP s, c;
 //   fl::sincos(FP(1.0f), s, c);
 template <typename T>
 inline typename enable_if<is_fixed_point<T>::value, void>::type
-sincos(T angle, T& out_sin, T& out_cos) FL_NOEXCEPT { T::sincos(angle, out_sin, out_cos); }
+sincos(T angle, T& out_sin, T& out_cos) FL_NO_EXCEPT { T::sincos(angle, out_sin, out_cos); }
 
 // Arctangent: fl::atan(FP(1.0f)) ≈ π/4 ≈ 0.785
 template <typename T>
 inline typename enable_if<is_fixed_point<T>::value, T>::type
-atan(T x) FL_NOEXCEPT { return T::atan(x); }
+atan(T x) FL_NO_EXCEPT { return T::atan(x); }
 
 // Two-argument arctangent: fl::atan2(FP(1.0f), FP(1.0f)) ≈ π/4
 template <typename T>
 inline typename enable_if<is_fixed_point<T>::value, T>::type
-atan2(T y, T x) FL_NOEXCEPT { return T::atan2(y, x); }
+atan2(T y, T x) FL_NO_EXCEPT { return T::atan2(y, x); }
 
 // Arc sine: fl::asin(FP(1.0f)) ≈ π/2. Input in [-1, 1].
 template <typename T>
 inline typename enable_if<is_fixed_point<T>::value, T>::type
-asin(T x) FL_NOEXCEPT { return T::asin(x); }
+asin(T x) FL_NO_EXCEPT { return T::asin(x); }
 
 // Arc cosine: fl::acos(FP(0.0f)) ≈ π/2. Input in [-1, 1].
 template <typename T>
 inline typename enable_if<is_fixed_point<T>::value, T>::type
-acos(T x) FL_NOEXCEPT { return T::acos(x); }
+acos(T x) FL_NO_EXCEPT { return T::acos(x); }
 
 //-------------------------------------------------------------------------------
 // powfp<T>(base, exp) — free-function power for fixed_point types.
@@ -617,7 +617,7 @@ acos(T x) FL_NOEXCEPT { return T::acos(x); }
 //-------------------------------------------------------------------------------
 template <typename T>
 inline typename enable_if<is_fixed_point<T>::value, T>::type
-powfp(T base, T exp) FL_NOEXCEPT {
+powfp(T base, T exp) FL_NO_EXCEPT {
     return T::pow(base, exp);
 }
 
@@ -630,7 +630,7 @@ powfp(T base, T exp) FL_NOEXCEPT {
 //-------------------------------------------------------------------------------
 template <typename T>
 inline typename enable_if<is_fixed_point<T>::value, T>::type
-expfp(T x) FL_NOEXCEPT {
+expfp(T x) FL_NO_EXCEPT {
     static const T e_val(static_cast<float>(FL_E));
     return powfp(e_val, x);
 }
@@ -639,7 +639,7 @@ expfp(T x) FL_NOEXCEPT {
 //   fl::exp(FP(1.0f))  // ≈ 2.718
 template <typename T>
 inline typename enable_if<is_fixed_point<T>::value, T>::type
-exp(T x) FL_NOEXCEPT { return fl::expfp(x); }
+exp(T x) FL_NO_EXCEPT { return fl::expfp(x); }
 
 // ---- Cross-type operator implementations ----
 // Mixed-type multiplication between different fixed-point widths.
@@ -650,14 +650,14 @@ exp(T x) FL_NOEXCEPT { return fl::expfp(x); }
 //   s0x32 frac(0.5f);
 //   s16x16 val(10.0f);
 //   s16x16 result = frac * val;  // 5.0
-constexpr FASTLED_FORCE_INLINE s16x16 s0x32::operator*(s16x16 b) const FL_NOEXCEPT {
+constexpr FASTLED_FORCE_INLINE s16x16 s0x32::operator*(s16x16 b) const FL_NO_EXCEPT {
     return s16x16::from_raw(static_cast<i32>(
         (static_cast<i64>(mValue) * b.raw()) >> 31));
 }
 
 // s16x16 × s0x32 → s16x16 (commutative)
 //   s16x16 result = val * frac;  // same as frac * val
-constexpr FASTLED_FORCE_INLINE s16x16 operator*(s16x16 a, s0x32 b) FL_NOEXCEPT {
+constexpr FASTLED_FORCE_INLINE s16x16 operator*(s16x16 a, s0x32 b) FL_NO_EXCEPT {
     return b * a;
 }
 

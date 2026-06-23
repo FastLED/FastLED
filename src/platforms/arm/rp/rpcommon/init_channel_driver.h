@@ -18,7 +18,7 @@ namespace platforms {
 /// This function is called lazily on first access to the ChannelManager singleton.
 ///
 /// @note Implementation is in src/platforms/arm/rp/rpcommon/init_channel_driver_rp.cpp.hpp
-void initChannelDrivers() FL_NOEXCEPT;
+void initChannelDrivers() FL_NO_EXCEPT;
 
 }  // namespace platforms
 }  // namespace fl

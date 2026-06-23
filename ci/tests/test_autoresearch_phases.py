@@ -20,6 +20,7 @@ from ci.autoresearch.args import Args
 from ci.autoresearch.build_driver import BuildDriver
 from ci.autoresearch.context import QuietContext, RunContext
 from ci.autoresearch.phases import (
+    _build_environment_for_mode,
     _parse_args_and_build_commands,
     _resolve_port_and_environment,
     _run_build_deploy,
@@ -55,6 +56,8 @@ def _make_args(**overrides) -> Args:
         all=False,
         simd=False,
         coroutine=False,
+        ieee754=False,
+        wave2d_perf=None,
         environment=None,
         verbose=False,
         skip_lint=True,
@@ -92,6 +95,11 @@ def _make_args(**overrides) -> Args:
         tight_timing_max_overhead_us=2000,
         pin_toggle_rx=False,
         ws2812_loopback=False,
+        # Default existing-test behavior: use the legacy root-platformio.ini
+        # path so the ``fake_project_dir`` fixture's hand-written ini is the
+        # one read. Tests that exercise the new synthesised-ini path (#3281)
+        # override this explicitly.
+        use_root_platformio_ini=True,
     )
     defaults.update(overrides)
     return Args(**defaults)
@@ -134,6 +142,8 @@ def _make_ctx(**overrides) -> RunContext:
         build_dir=Path("/fake/project"),
         simd_test_mode=False,
         coroutine_test_mode=False,
+        ieee754_test_mode=False,
+        wave2d_perf_grid=None,
         net_server_mode=False,
         net_client_mode=False,
         net_loopback_mode=False,
@@ -207,6 +217,23 @@ class TestParseArgsAndBuildCommands:
             "FLEX_IO",
             "LPUART",
         }
+
+    def test_all_drivers_teensy4_only_real_teensy_drivers(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            all=True,
+            parlio=False,
+            environment_positional="teensy40",
+            project_dir=fake_project_dir,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["OBJECT_FLED", "FLEX_IO", "LPUART"]
+        assert {cmd["method"] for cmd in result.json_rpc_commands} == {
+            "runSingleTest"
+        }
+        assert not any("__skip_with_pass" in cmd for cmd in result.json_rpc_commands)
 
     def test_multiple_drivers(self, fake_project_dir: Path) -> None:
         args = _make_args(parlio=True, rmt=True, spi=True, project_dir=fake_project_dir)
@@ -362,6 +389,83 @@ class TestParseArgsAndBuildCommands:
         assert isinstance(result, RunContext)
         assert result.final_environment == "esp32s3"
         assert "LCD_CLOCKLESS" in result.drivers
+
+    # ============================================================
+    # #3281: synthesised .build/pio/<board>/platformio.ini path
+    # ============================================================
+
+    def test_synthesised_path_calls_staging_when_board_known(
+        self, tmp_path: Path
+    ) -> None:
+        """When the board is known up-front and the legacy flag is OFF,
+        ``_parse_args_and_build_commands`` should synthesise the staged
+        ``.build/pio/<board>/`` project and use it as ``build_dir`` — NO
+        root ``./platformio.ini`` is required."""
+        # Note: NO platformio.ini in tmp_path on purpose. The synthesis path
+        # must NOT require one to exist.
+        (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
+
+        fake_build_dir = tmp_path / ".build" / "pio" / "esp32s3"
+        fake_build_dir.mkdir(parents=True)
+
+        args = _make_args(
+            environment_positional="esp32s3",
+            project_dir=tmp_path,
+            use_root_platformio_ini=False,
+        )
+
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_build_dir,
+        ) as mock_synth:
+            result = _parse_args_and_build_commands(args)
+
+        assert isinstance(result, RunContext), result
+        mock_synth.assert_called_once_with(
+            "esp32s3", project_root=tmp_path.resolve(), verbose=False
+        )
+        assert result.build_dir == fake_build_dir
+
+    def test_synthesised_path_defers_when_board_unknown(self, tmp_path: Path) -> None:
+        """When the board is NOT known up-front (no positional, no --env,
+        no --lcd*) and the legacy flag is OFF, parse-time synthesis must NOT
+        happen — synthesis is deferred to ``_resolve_port_and_environment``
+        after chip auto-detect."""
+        # No platformio.ini in tmp_path — synthesised path must tolerate that.
+        (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
+
+        args = _make_args(
+            environment_positional=None,
+            project_dir=tmp_path,
+            use_root_platformio_ini=False,
+        )
+
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project"
+        ) as mock_synth:
+            result = _parse_args_and_build_commands(args)
+
+        assert isinstance(result, RunContext), result
+        mock_synth.assert_not_called()
+        # build_dir falls back to project_root so the sketch resolver still
+        # finds examples/AutoResearch/.
+        assert result.build_dir == tmp_path.resolve()
+        assert result.final_environment is None
+
+    def test_legacy_flag_still_requires_root_platformio_ini(
+        self, tmp_path: Path
+    ) -> None:
+        """With ``--use-root-platformio-ini`` set, the legacy
+        ``platformio.ini`` existence check still fires and a missing file is
+        an error — proving the escape hatch keeps the old behavior."""
+        # No platformio.ini in tmp_path.
+        args = _make_args(
+            project_dir=tmp_path,
+            use_root_platformio_ini=True,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, int)
+        assert result == 1
 
     def test_timeout_parsing(self, fake_project_dir: Path) -> None:
         args = _make_args(timeout="2m", project_dir=fake_project_dir)
@@ -577,6 +681,26 @@ class TestRunBuildDeploy:
             rc = asyncio.run(_run_build_deploy(ctx, qctx))
         assert rc == 1
 
+    def test_lpc_ieee754_uses_dedicated_build_environment(self) -> None:
+        mock_driver = _make_mock_driver()
+        ctx = _make_ctx(
+            args=_make_args(skip_lint=True, ieee754=True),
+            build_driver=mock_driver,
+            final_environment="lpc845brk",
+            ieee754_test_mode=True,
+        )
+        qctx = QuietContext(quiet=False)
+        with patch(f"{_PATCH_MOD}._build_and_flash_nxplpc", return_value=True) as flash:
+            rc = asyncio.run(_run_build_deploy(ctx, qctx))
+        assert rc is None
+        assert _build_environment_for_mode(ctx) == "lpc845brk_ieee754"
+        mock_driver.install_packages.assert_called_once_with(
+            Path("/fake/project"), "lpc845brk_ieee754"
+        )
+        flash.assert_called_once()
+        assert flash.call_args.kwargs["environment"] == "lpc845brk_ieee754"
+        mock_driver.deploy.assert_not_called()
+
 
 # ============================================================
 # Tests: _run_schema_and_pin_setup
@@ -631,6 +755,23 @@ class TestRunSchemaAndPinSetup:
         assert rc is None
         assert ctx.effective_tx_pin is None
         assert ctx.effective_rx_pin is None
+
+    def test_lpc_fbuild_uses_pyserial_for_rpc(self) -> None:
+        args = _make_args(skip_schema=True)
+        ctx = _make_ctx(
+            args=args,
+            final_environment="lpc845brk",
+            use_fbuild=True,
+        )
+        mock_serial = MagicMock()
+        with patch(
+            "ci.util.serial_interface.create_serial_interface",
+            return_value=mock_serial,
+        ) as create_serial:
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.serial_iface is mock_serial
+        create_serial.assert_called_once_with(port="COM5", use_pyserial=True)
 
     def test_auto_discover_pins_success(self) -> None:
         args = _make_args(auto_discover_pins=True, skip_schema=True)

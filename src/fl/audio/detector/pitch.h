@@ -32,8 +32,8 @@ namespace detector {
  */
 class Pitch : public Detector {
 public:
-    Pitch() FL_NOEXCEPT;
-    ~Pitch() FL_NOEXCEPT override;
+    Pitch() FL_NO_EXCEPT;
+    ~Pitch() FL_NO_EXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

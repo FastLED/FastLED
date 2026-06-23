@@ -148,7 +148,7 @@ static const int32_t dcttab[48] = {
  *                enough registers)
  **************************************************************************************/
 // about 1ms faster in RAM
-void FDCT32(int32_t *buf, int32_t *dest, int32_t offset, int32_t oddBlock, int32_t gb) FL_NOEXCEPT
+void FDCT32(int32_t *buf, int32_t *dest, int32_t offset, int32_t oddBlock, int32_t gb) FL_NO_EXCEPT
 {
     int32_t i, s, tmp, es;
     const int32_t *cptr = dcttab;

@@ -19,7 +19,7 @@ struct JpegInfo {
     bool is_grayscale = false;
     bool is_valid = false;
 
-    JpegInfo() FL_NOEXCEPT = default;
+    JpegInfo() FL_NO_EXCEPT = default;
     JpegInfo(fl::u16 w, fl::u16 h, fl::u8 comp);
 };
 
@@ -30,7 +30,7 @@ struct JpegConfig {
     Quality quality = High;
     PixelFormat format = PixelFormat::RGB888;
 
-    JpegConfig() FL_NOEXCEPT = default;
+    JpegConfig() FL_NO_EXCEPT = default;
     JpegConfig(Quality q, PixelFormat fmt = PixelFormat::RGB888);
 };
 
@@ -41,7 +41,7 @@ struct ProgressiveConfig {
     fl::size input_buffer_size = 512;
     bool yield_on_row_complete = false;
 
-    ProgressiveConfig() FL_NOEXCEPT = default;
+    ProgressiveConfig() FL_NO_EXCEPT = default;
 };
 
 // JPEG decoder with progressive processing support
@@ -62,7 +62,7 @@ public:
     }
     
     explicit JpegDecoder(const JpegConfig& config);
-    ~JpegDecoder() FL_NOEXCEPT override;
+    ~JpegDecoder() FL_NO_EXCEPT override;
 
     // IDecoder interface
     bool begin(fl::filebuf_ptr stream) override;

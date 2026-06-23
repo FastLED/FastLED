@@ -22,27 +22,27 @@ class JsonUiInternal {
     // Constructor: Initializes the base JsonUiInternal with name.
     // This constructor is protected because JsonUiInternal is now an abstract base class.
     public:
-    JsonUiInternal(const fl::string &name) FL_NOEXCEPT : mName(name), mId(nextId()) {}
+    JsonUiInternal(const fl::string &name) FL_NO_EXCEPT : mName(name), mId(nextId()) {}
 
   public:
     virtual ~JsonUiInternal() = default;
 
-    const fl::string &name() const FL_NOEXCEPT;
-    virtual void updateInternal(const fl::json &json) FL_NOEXCEPT { FL_UNUSED(json); }
-    virtual void toJson(fl::json &json) const FL_NOEXCEPT { FL_UNUSED(json); }
-    int id() const FL_NOEXCEPT;
+    const fl::string &name() const FL_NO_EXCEPT;
+    virtual void updateInternal(const fl::json &json) FL_NO_EXCEPT { FL_UNUSED(json); }
+    virtual void toJson(fl::json &json) const FL_NO_EXCEPT { FL_UNUSED(json); }
+    int id() const FL_NO_EXCEPT;
 
     // Group functionality
-    void setGroup(const fl::string &groupName) FL_NOEXCEPT;
-    fl::string groupName() const FL_NOEXCEPT;
+    void setGroup(const fl::string &groupName) FL_NO_EXCEPT;
+    fl::string groupName() const FL_NO_EXCEPT;
 
     // Change tracking for polling (eliminates need for manual notifications)
-    bool hasChanged() const FL_NOEXCEPT;
-    void markChanged() FL_NOEXCEPT;
-    void clearChanged() FL_NOEXCEPT;
+    bool hasChanged() const FL_NO_EXCEPT;
+    void markChanged() FL_NO_EXCEPT;
+    void clearChanged() FL_NO_EXCEPT;
 
   private:
-    static int nextId() FL_NOEXCEPT;
+    static int nextId() FL_NO_EXCEPT;
     fl::string mName;
     int mId;
     fl::string mGroup;

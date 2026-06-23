@@ -1,4 +1,4 @@
-// IWYU pragma: private
+﻿// IWYU pragma: private
 
 /// @file bitbang_channel_driver.cpp.hpp
 /// @brief Implementation of BitBangChannelDriver
@@ -14,7 +14,7 @@
 namespace fl {
 
 BitBangChannelDriver::BitBangChannelDriver()
- FL_NOEXCEPT : mNumActiveSlots(0), mActiveSlotMask(0) {
+ FL_NO_EXCEPT : mNumActiveSlots(0), mActiveSlotMask(0) {
     for (int i = 0; i < 256; ++i) {
         mSlotForPin[i] = -1;
     }
@@ -25,31 +25,31 @@ BitBangChannelDriver::BitBangChannelDriver()
 
 BitBangChannelDriver::~BitBangChannelDriver() = default;
 
-bool BitBangChannelDriver::canHandle(const ChannelDataPtr& /*data*/) const FL_NOEXCEPT {
+bool BitBangChannelDriver::canHandle(const ChannelDataPtr& /*data*/) const FL_NO_EXCEPT {
     return true;
 }
 
-void BitBangChannelDriver::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
+void BitBangChannelDriver::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     if (channelData) {
         mEnqueuedChannels.push_back(fl::move(channelData));
     }
 }
 
-IChannelDriver::DriverState BitBangChannelDriver::poll() FL_NOEXCEPT {
+IChannelDriver::DriverState BitBangChannelDriver::poll() FL_NO_EXCEPT {
     return DriverState(DriverState::READY);
 }
 
-fl::string BitBangChannelDriver::getName() const FL_NOEXCEPT {
+fl::string BitBangChannelDriver::getName() const FL_NO_EXCEPT {
     // Matches the `fl::Bus::BIT_BANG` enumerator spelling.
     return fl::string::from_literal("BIT_BANG");
 }
 
-IChannelDriver::Capabilities BitBangChannelDriver::getCapabilities() const FL_NOEXCEPT {
+IChannelDriver::Capabilities BitBangChannelDriver::getCapabilities() const FL_NO_EXCEPT {
     return Capabilities(true, true);
 }
 
 void BitBangChannelDriver::rebuildPinConfig(
-    fl::span<const ChannelDataPtr> channels) FL_NOEXCEPT {
+    fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT {
     // Clear previous mapping
     for (int i = 0; i < 256; ++i) {
         mSlotForPin[i] = -1;
@@ -67,7 +67,7 @@ void BitBangChannelDriver::rebuildPinConfig(
 
         int pin = ch->getPin();
         if (pin < 0 || pin > 255) {
-            FL_WARN("BitBangChannelDriver: pin " << pin << " out of range, skipping");
+            FL_WARN_F("BitBangChannelDriver: pin %s out of range, skipping", pin);
             continue;
         }
 
@@ -76,8 +76,8 @@ void BitBangChannelDriver::rebuildPinConfig(
         }
 
         if (mNumActiveSlots >= 8) {
-            FL_WARN("BitBangChannelDriver: more than 8 unique data pins, "
-                     "pin " << pin << " will be skipped");
+            FL_WARN_F("BitBangChannelDriver: more than 8 unique data pins, "
+                     "pin %s will be skipped", pin);
             continue;
         }
 
@@ -110,7 +110,7 @@ void BitBangChannelDriver::rebuildPinConfig(
 }
 
 void BitBangChannelDriver::transmitClocklessBit(u8 onesMask, u32 t1_ns,
-                                                  u32 t2_ns, u32 t3_ns) FL_NOEXCEPT {
+                                                  u32 t2_ns, u32 t3_ns) FL_NO_EXCEPT {
     // Phase 1: ALL active lines HIGH
     mMultiWriter.writeByte(mActiveSlotMask);
 
@@ -127,7 +127,7 @@ void BitBangChannelDriver::transmitClocklessBit(u8 onesMask, u32 t1_ns,
 }
 
 void BitBangChannelDriver::transmitClockless(
-    fl::span<const ChannelDataPtr> channels) FL_NOEXCEPT {
+    fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT {
     if (channels.empty()) return;
 
     // Group channels by timing config.
@@ -214,7 +214,7 @@ void BitBangChannelDriver::transmitClockless(
 }
 
 void BitBangChannelDriver::transmitSpi(
-    fl::span<const ChannelDataPtr> channels) FL_NOEXCEPT {
+    fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT {
     if (channels.empty()) return;
 
     // Group channels by clock pin
@@ -291,7 +291,7 @@ void BitBangChannelDriver::transmitSpi(
     }
 }
 
-void BitBangChannelDriver::show() FL_NOEXCEPT {
+void BitBangChannelDriver::show() FL_NO_EXCEPT {
     if (mEnqueuedChannels.empty()) return;
 
     // Move enqueued to transmitting
@@ -333,7 +333,7 @@ void BitBangChannelDriver::show() FL_NOEXCEPT {
         transmitSpi(spi);
     }
 
-    // Done — clear in-use flags
+    // Done â€” clear in-use flags
     for (fl::size i = 0; i < mTransmittingChannels.size(); ++i) {
         if (mTransmittingChannels[i]) {
             mTransmittingChannels[i]->setInUse(false);

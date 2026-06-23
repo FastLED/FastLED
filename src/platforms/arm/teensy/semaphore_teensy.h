@@ -59,7 +59,7 @@ private:
 public:
     /// @brief Construct a counting semaphore with an initial count
     /// @param desired Initial count (must be >= 0 and <= LeastMaxValue)
-    explicit CountingSemaphoreTeensy(ptrdiff_t desired) FL_NOEXCEPT;
+    explicit CountingSemaphoreTeensy(ptrdiff_t desired) FL_NO_EXCEPT;
 
     ~CountingSemaphoreTeensy() = default;
 
@@ -71,16 +71,16 @@ public:
 
     /// @brief Increment the semaphore count by update (ISR-safe)
     /// @param update Number to add to the count (default 1)
-    void release(ptrdiff_t update = 1) FL_NOEXCEPT;
+    void release(ptrdiff_t update = 1) FL_NO_EXCEPT;
 
     /// @brief Decrement the semaphore count (PANICS if count is 0)
     /// WARNING: On single-threaded platforms, blocking would deadlock.
     /// This function will ASSERT if count is 0. Use try_acquire() for safe operation.
-    void acquire() FL_NOEXCEPT;
+    void acquire() FL_NO_EXCEPT;
 
     /// @brief Try to decrement the semaphore count without blocking (ISR-safe)
     /// @return true if successful, false if count was 0
-    bool try_acquire() FL_NOEXCEPT;
+    bool try_acquire() FL_NO_EXCEPT;
 
     /// @brief Try to acquire with a timeout (no-op on single-threaded, same as try_acquire)
     /// @tparam Rep Duration representation type
@@ -88,7 +88,7 @@ public:
     /// @param rel_time Maximum time to wait (ignored on single-threaded)
     /// @return true if acquired, false if count was 0
     template<class Rep, class Period>
-    bool try_acquire_for(const fl::chrono::duration<Rep, Period>& rel_time) FL_NOEXCEPT;
+    bool try_acquire_for(const fl::chrono::duration<Rep, Period>& rel_time) FL_NO_EXCEPT;
 
     /// @brief Try to acquire until an absolute time point (no-op on single-threaded)
     /// @tparam Clock Clock type
@@ -96,11 +96,11 @@ public:
     /// @param abs_time Absolute time point to wait until (ignored on single-threaded)
     /// @return true if acquired, false if count was 0
     template<class Clock, class Duration>
-    bool try_acquire_until(const fl::chrono::time_point<Clock, Duration>& abs_time) FL_NOEXCEPT;
+    bool try_acquire_until(const fl::chrono::time_point<Clock, Duration>& abs_time) FL_NO_EXCEPT;
 
     /// @brief Get the maximum value the semaphore can hold
     /// @return LeastMaxValue
-    static constexpr ptrdiff_t max() FL_NOEXCEPT {
+    static constexpr ptrdiff_t max() FL_NO_EXCEPT {
         return LeastMaxValue;
     }
 };

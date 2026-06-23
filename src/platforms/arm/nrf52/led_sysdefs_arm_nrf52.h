@@ -87,10 +87,10 @@ extern "C" {
 #endif
 
 // Declare the malloc wrapper functions from heap_3.c
-extern void* __wrap_malloc(size_t size) FL_NOEXCEPT;
-extern void __wrap_free(void* ptr) FL_NOEXCEPT;
-extern void* __wrap_realloc(void* ptr, size_t size) FL_NOEXCEPT;
-extern void* __wrap_calloc(size_t nmemb, size_t size) FL_NOEXCEPT;
+extern void* __wrap_malloc(size_t size) FL_NO_EXCEPT;
+extern void __wrap_free(void* ptr) FL_NO_EXCEPT;
+extern void* __wrap_realloc(void* ptr, size_t size) FL_NO_EXCEPT;
+extern void* __wrap_calloc(size_t nmemb, size_t size) FL_NO_EXCEPT;
 
 // Dummy function that references the malloc wrappers
 // __attribute__((used)) prevents the compiler from optimizing it away
@@ -99,7 +99,7 @@ extern void* __wrap_calloc(size_t nmemb, size_t size) FL_NOEXCEPT;
 // The function is never actually called, but its existence forces the linker
 // to resolve the __wrap_* symbols, pulling in heap_3.c.o
 __attribute__((used, noinline))
-static volatile void* fastled_nrf52_force_malloc_wrappers_link(void) FL_NOEXCEPT {
+static volatile void* fastled_nrf52_force_malloc_wrappers_link(void) FL_NO_EXCEPT {
     // Cast function pointers to volatile void* to prevent optimization
     // while avoiding type mismatch errors with volatile function pointers
     volatile void* ptrs[] = {

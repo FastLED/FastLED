@@ -27,7 +27,7 @@ namespace platforms {
 
 /// @brief Get free heap memory (ESP32 implementation)
 /// @return Number of free bytes in heap
-inline size_t getFreeHeap() FL_NOEXCEPT {
+inline size_t getFreeHeap() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP32)
     #if defined(ARDUINO)
         // Arduino ESP32 - use esp_get_free_heap_size from SDK
@@ -44,7 +44,7 @@ inline size_t getFreeHeap() FL_NOEXCEPT {
 /// @brief Get total heap size (ESP32 implementation)
 /// @return Total heap size (not available on all ESP32 variants)
 /// @note esp_get_heap_size() is not available on ESP32-C6 and some other variants
-inline size_t getHeapSize() FL_NOEXCEPT {
+inline size_t getHeapSize() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP32)
     // esp_get_heap_size() is not available on all ESP32 variants (e.g., ESP32-C6)
     // Return 0 for now - could use esp_get_free_heap_size() as approximation if needed
@@ -56,7 +56,7 @@ inline size_t getHeapSize() FL_NOEXCEPT {
 
 /// @brief Get minimum free heap (ESP32 implementation)
 /// @return Minimum free heap ever recorded (low water mark)
-inline size_t getMinFreeHeap() FL_NOEXCEPT {
+inline size_t getMinFreeHeap() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP32)
     #if defined(ARDUINO)
         return esp_get_minimum_free_heap_size();

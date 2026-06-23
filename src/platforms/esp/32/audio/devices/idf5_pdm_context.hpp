@@ -27,7 +27,7 @@ struct PDMContext {
     bool valid;
 };
 
-PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NOEXCEPT {
+PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NO_EXCEPT {
     int pin_clk = config.mPinClk;
     int pin_din = config.mPinDin;
     u16 sample_rate = config.mSampleRate;
@@ -48,7 +48,7 @@ PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NOEXCEPT {
     // Create RX channel
     esp_err_t ret = i2s_new_channel(&chan_cfg, nullptr, &ctx.rx_handle);
     if (ret != ESP_OK) {
-        FL_WARN("Failed to create PDM I2S channel: " << ret);
+        FL_WARN_F("Failed to create PDM I2S channel: %s", ret);
         return ctx;
     }
 
@@ -71,7 +71,7 @@ PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NOEXCEPT {
     // Initialize channel with PDM RX mode configuration
     ret = i2s_channel_init_pdm_rx_mode(ctx.rx_handle, &pdm_rx_cfg);
     if (ret != ESP_OK) {
-        FL_WARN("Failed to initialize PDM RX mode: " << ret);
+        FL_WARN_F("Failed to initialize PDM RX mode: %s", ret);
         i2s_del_channel(ctx.rx_handle);
         ctx.rx_handle = nullptr;
         return ctx;
@@ -80,7 +80,7 @@ PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NOEXCEPT {
     // Enable the channel
     ret = i2s_channel_enable(ctx.rx_handle);
     if (ret != ESP_OK) {
-        FL_WARN("Failed to enable PDM channel: " << ret);
+        FL_WARN_F("Failed to enable PDM channel: %s", ret);
         i2s_del_channel(ctx.rx_handle);
         ctx.rx_handle = nullptr;
         return ctx;
@@ -92,7 +92,7 @@ PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NOEXCEPT {
 
 size_t pdm_read_raw_samples(const PDMContext &ctx,
                             audio_sample_t (&buffer)[I2S_AUDIO_BUFFER_LEN])
-    FL_NOEXCEPT {
+    FL_NO_EXCEPT {
     size_t bytes_read = 0;
 
     esp_err_t result =
@@ -106,7 +106,7 @@ size_t pdm_read_raw_samples(const PDMContext &ctx,
     return 0;
 }
 
-void pdm_audio_destroy(const PDMContext &ctx) FL_NOEXCEPT {
+void pdm_audio_destroy(const PDMContext &ctx) FL_NO_EXCEPT {
     if (ctx.valid && ctx.rx_handle != nullptr) {
         i2s_channel_disable(ctx.rx_handle);
         i2s_del_channel(ctx.rx_handle);

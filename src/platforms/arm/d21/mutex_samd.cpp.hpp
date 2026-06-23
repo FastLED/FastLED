@@ -36,7 +36,7 @@ void MutexSAMD::lock() {
     // Check if already locked
     if (mLocked) {
         __enable_irq();
-        FL_WARN("MutexSAMD::lock() called when already locked (would deadlock on threaded system)");
+        FL_WARN_F("MutexSAMD::lock() called when already locked (would deadlock on threaded system)");
         return;
     }
 
@@ -53,7 +53,7 @@ void MutexSAMD::unlock() {
     // Check if already unlocked
     if (!mLocked) {
         __enable_irq();
-        FL_WARN("MutexSAMD::unlock() called when not locked");
+        FL_WARN_F("MutexSAMD::unlock() called when not locked");
         return;
     }
 
@@ -105,7 +105,7 @@ void RecursiveMutexSAMD::unlock() {
     // Check if already unlocked
     if (mLockCount == 0) {
         __enable_irq();
-        FL_WARN("RecursiveMutexSAMD::unlock() called when not locked");
+        FL_WARN_F("RecursiveMutexSAMD::unlock() called when not locked");
         return;
     }
 

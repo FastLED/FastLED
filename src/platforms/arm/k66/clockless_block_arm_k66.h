@@ -68,7 +68,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 public:
 	virtual int size() { return CLEDController::size() * LANES; }
 
-	virtual void showPixels(PixelController<RGB_ORDER, LANES, LANE_MASK> & pixels) FL_NOEXCEPT {
+	virtual void showPixels(PixelController<RGB_ORDER, LANES, LANE_MASK> & pixels) FL_NO_EXCEPT {
 		mWait.wait();
 		u32 clocks = showRGBInternal(pixels);
 		#if FASTLED_ALLOW_INTERRUPTS == 0
@@ -80,7 +80,7 @@ public:
 		mWait.mark();
 	}
 
-	virtual void init() FL_NOEXCEPT {
+	virtual void init() FL_NO_EXCEPT {
 		if(FIRST_PIN == PORTC_FIRST_PIN) { // PORTC
 			switch(USED_LANES) {
 				case 12: FastPin<30>::setOutput();
@@ -131,7 +131,7 @@ public:
 		u32 raw[3];
 	} Lines;
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER, LANES, LANE_MASK> &pixels) FL_NOEXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER, LANES, LANE_MASK> &pixels) FL_NO_EXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
 		FASTLED_REGISTER Lines b2;
 		if(USED_LANES>8) {
 			transpose8<1,2>(b.bytes,b2.bytes);
@@ -188,7 +188,7 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static u32 showRGBInternal(PixelController<RGB_ORDER, LANES, LANE_MASK> &allpixels) FL_NOEXCEPT {
+	static u32 showRGBInternal(PixelController<RGB_ORDER, LANES, LANE_MASK> &allpixels) FL_NO_EXCEPT {
 		// Get access to the clock
 		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
 		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
@@ -248,7 +248,7 @@ class SixteenWayInlineBlockClocklessController : public CPixelLEDController<RGB_
 	CMinWait<WAIT_TIME> mWait;
 
 public:
-	virtual void init() FL_NOEXCEPT {
+	virtual void init() FL_NO_EXCEPT {
 		FL_STATIC_ASSERT(LANES <= 16, "Maximum of 16 lanes for Teensy parallel controllers!");
 		// FastPin<30>::setOutput();
 		// FastPin<29>::setOutput();
@@ -275,7 +275,7 @@ public:
 		}
 	}
 
-	virtual void showPixels(PixelController<RGB_ORDER, LANES, PMASK> & pixels) FL_NOEXCEPT {
+	virtual void showPixels(PixelController<RGB_ORDER, LANES, PMASK> & pixels) FL_NO_EXCEPT {
 		mWait.wait();
 		u32 clocks = showRGBInternal(pixels);
 	#if FASTLED_ALLOW_INTERRUPTS == 0
@@ -293,7 +293,7 @@ public:
 		u32 raw[4];
 	} Lines;
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER,LANES, PMASK> &pixels) FL_NOEXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER,LANES, PMASK> &pixels) FL_NO_EXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
 		FASTLED_REGISTER Lines b2;
 		transpose8x1(b.bytes,b2.bytes);
 		transpose8x1(b.bytes+8,b2.bytes+8);
@@ -324,7 +324,7 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static u32 showRGBInternal(PixelController<RGB_ORDER,LANES, PMASK> &allpixels) FL_NOEXCEPT {
+	static u32 showRGBInternal(PixelController<RGB_ORDER,LANES, PMASK> &allpixels) FL_NO_EXCEPT {
 		// Get access to the clock
 		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
 		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;

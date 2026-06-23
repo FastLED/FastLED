@@ -21,6 +21,7 @@ defaults:
 jobs:
   build:
     runs-on: ${{ inputs.os }}
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,21 +53,29 @@ jobs:
         run: ./install
         shell: bash
 
-      - name: No namespace after headers
-        run: |
-          uv run python ci/lint_cpp/no_using_namespace_fl_in_headers.py
+      - name: Cache Rust C++ linter build
+        # Skips the ~60-180s soldr cargo build on every CI run when the
+        # crate sources haven't changed. Keyed on Cargo.lock + every .rs
+        # under the crate's src/ tree so any meaningful change forces a
+        # rebuild. Persists the cached fastled-lint binary plus the
+        # native-Python fingerprint that the build-on-change wrapper
+        # consults at lint time. See FastLED #3288.
+        uses: actions/cache@v4
+        with:
+          path: |
+            ci/lint_cpp_rs/target
+            .cache/rust_lint_binary.fingerprint
+          key: rust-lint-${{ runner.os }}-${{ hashFiles('ci/lint_cpp_rs/Cargo.lock', 'ci/lint_cpp_rs/src/**/*.rs', 'ci/lint_cpp_rs/Cargo.toml') }}
+          restore-keys: |
+            rust-lint-${{ runner.os }}-
 
-      - name: Reset zccache daemon (Windows flake mitigation, FastLED#2805)
-        if: runner.os == 'Windows'
+      - name: C++ lint (Rust path)
+        # Exercises the Rust C++ linter (`fastled-lint`) end-to-end via the
+        # default `bash lint --cpp` path on every PR. The binary is rebuilt
+        # only if the crate sources changed; otherwise it runs directly.
+        # See FastLED #3288.
         run: |
-          # The zccache daemon's named-pipe IPC drops mid-link under heavy
-          # parallel link load on Windows hosted runners — the daemon's own
-          # diagnostic emits 'lost connection to daemon ... try `zccache stop`'.
-          # Start each Windows job with a known-clean daemon state so the
-          # first wave of test-DLL links doesn't race a stale/partially-
-          # initialized daemon. `|| true` because there may be no daemon to
-          # stop on a fresh runner — that's the desired end state anyway.
-          zccache stop || true
+          bash lint --cpp
         shell: bash
 
       - name: Run All Unit Tests

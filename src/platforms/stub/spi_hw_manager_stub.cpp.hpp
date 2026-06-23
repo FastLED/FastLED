@@ -20,11 +20,11 @@ namespace fl {
 namespace platforms {
 
 // Forward declare stub initialization functions from spi_*_stub.cpp.hpp
-void initSpiHw1Instances() FL_NOEXCEPT;
-void initSpiHw2Instances() FL_NOEXCEPT;
-void initSpiHw4Instances() FL_NOEXCEPT;
-void initSpiHw8Instances() FL_NOEXCEPT;
-void initSpiHw16Instances() FL_NOEXCEPT;
+void initSpiHw1Instances() FL_NO_EXCEPT;
+void initSpiHw2Instances() FL_NO_EXCEPT;
+void initSpiHw4Instances() FL_NO_EXCEPT;
+void initSpiHw8Instances() FL_NO_EXCEPT;
+void initSpiHw16Instances() FL_NO_EXCEPT;
 
 /// @brief Initialize stub SPI hardware instances for testing
 ///
@@ -33,7 +33,7 @@ void initSpiHw16Instances() FL_NOEXCEPT;
 ///
 /// Uses a static initialization flag to ensure initialization happens only once,
 /// even when called from multiple SpiHw* classes.
-void initSpiHardware() FL_NOEXCEPT {
+void initSpiHardware() FL_NO_EXCEPT {
     // C++11 guarantees thread-safe static initialization
     static bool sInitialized = false;
     if (sInitialized) {

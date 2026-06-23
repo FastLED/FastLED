@@ -23,7 +23,7 @@ struct config {
     u8 priority;                  // Priority level (platform-dependent range)
     u32 flags;                    // Platform-specific flags (see constants.h)
 
-    config() FL_NOEXCEPT
+    config() FL_NO_EXCEPT
         : handler(nullptr)
         , user_data(nullptr)
         , frequency_hz(0)
@@ -39,7 +39,7 @@ struct handle {
     void* user_data;              // User data (for validation)
     u8 platform_id;               // Platform identifier (for runtime checks)
 
-    handle() FL_NOEXCEPT
+    handle() FL_NO_EXCEPT
         : platform_handle(nullptr)
         , handler(nullptr)
         , user_data(nullptr)

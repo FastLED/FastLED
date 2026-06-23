@@ -48,7 +48,7 @@ inline i16 cos16(u16 theta) { return fl::cos16lut(theta); }
 // sin16 returns i16 [-32768..32767], offset to u16 [0..65535],
 // then use int_scale for proper u16→u8 downscale (bit-replication
 // rounding, not naive truncation).
-inline u8 sin8(u8 theta) FL_NOEXCEPT {
+inline u8 sin8(u8 theta) FL_NO_EXCEPT {
 	u16 unsigned_result = static_cast<u16>(sin16(static_cast<u16>(theta) << 8)) + 32768;
 	return fl::int_scale<u16, u8>(unsigned_result);
 }

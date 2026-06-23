@@ -23,43 +23,43 @@ namespace detail {
 
 class LcdSpiPeripheralMockImpl : public LcdSpiPeripheralMock {
   public:
-    LcdSpiPeripheralMockImpl() FL_NOEXCEPT;
+    LcdSpiPeripheralMockImpl() FL_NO_EXCEPT;
     ~LcdSpiPeripheralMockImpl() override;
 
-    bool initialize(const LcdSpiConfig &config) FL_NOEXCEPT override;
-    void deinitialize() FL_NOEXCEPT override;
-    bool isInitialized() const FL_NOEXCEPT override;
+    bool initialize(const LcdSpiConfig &config) FL_NO_EXCEPT override;
+    void deinitialize() FL_NO_EXCEPT override;
+    bool isInitialized() const FL_NO_EXCEPT override;
 
-    u16 *allocateBuffer(size_t size_bytes) FL_NOEXCEPT override;
-    void freeBuffer(u16 *buffer) FL_NOEXCEPT override;
+    u16 *allocateBuffer(size_t size_bytes) FL_NO_EXCEPT override;
+    void freeBuffer(u16 *buffer) FL_NO_EXCEPT override;
 
-    bool transmit(const u16 *buffer, size_t size_bytes) FL_NOEXCEPT override;
-    bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT override;
-    bool isBusy() const FL_NOEXCEPT override;
+    bool transmit(const u16 *buffer, size_t size_bytes) FL_NO_EXCEPT override;
+    bool waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT override;
+    bool isBusy() const FL_NO_EXCEPT override;
 
     bool registerTransmitCallback(void *callback,
-                                  void *user_ctx) FL_NOEXCEPT override;
-    const LcdSpiConfig &getConfig() const FL_NOEXCEPT override;
+                                  void *user_ctx) FL_NO_EXCEPT override;
+    const LcdSpiConfig &getConfig() const FL_NO_EXCEPT override;
 
-    u64 getMicroseconds() FL_NOEXCEPT override;
-    void delay(u32 ms) FL_NOEXCEPT override;
+    u64 getMicroseconds() FL_NO_EXCEPT override;
+    void delay(u32 ms) FL_NO_EXCEPT override;
 
-    void simulateTransmitComplete() FL_NOEXCEPT override;
-    void setTransmitFailure(bool should_fail) FL_NOEXCEPT override;
-    void setTransmitDelay(u32 microseconds) FL_NOEXCEPT override;
-    void setAutoComplete(bool auto_complete) FL_NOEXCEPT override;
+    void simulateTransmitComplete() FL_NO_EXCEPT override;
+    void setTransmitFailure(bool should_fail) FL_NO_EXCEPT override;
+    void setTransmitDelay(u32 microseconds) FL_NO_EXCEPT override;
+    void setAutoComplete(bool auto_complete) FL_NO_EXCEPT override;
     const fl::vector<TransmitRecord> &
-    getTransmitHistory() const FL_NOEXCEPT override;
-    void clearTransmitHistory() FL_NOEXCEPT override;
-    fl::span<const u16> getLastTransmitData() const FL_NOEXCEPT override;
-    bool isEnabled() const FL_NOEXCEPT override;
-    size_t getTransmitCount() const FL_NOEXCEPT override;
-    size_t getDeinitCount() const FL_NOEXCEPT override;
-    void reset() FL_NOEXCEPT override;
+    getTransmitHistory() const FL_NO_EXCEPT override;
+    void clearTransmitHistory() FL_NO_EXCEPT override;
+    fl::span<const u16> getLastTransmitData() const FL_NO_EXCEPT override;
+    bool isEnabled() const FL_NO_EXCEPT override;
+    size_t getTransmitCount() const FL_NO_EXCEPT override;
+    size_t getDeinitCount() const FL_NO_EXCEPT override;
+    void reset() FL_NO_EXCEPT override;
 
   private:
-    void pumpDeferredCallbacks() FL_NOEXCEPT;
-    void fireCallback() FL_NOEXCEPT;
+    void pumpDeferredCallbacks() FL_NO_EXCEPT;
+    void fireCallback() FL_NO_EXCEPT;
 
     bool mInitialized;
     bool mEnabled;
@@ -79,11 +79,11 @@ class LcdSpiPeripheralMockImpl : public LcdSpiPeripheralMock {
     size_t mDeinitCount;
 };
 
-LcdSpiPeripheralMock &LcdSpiPeripheralMock::instance() FL_NOEXCEPT {
+LcdSpiPeripheralMock &LcdSpiPeripheralMock::instance() FL_NO_EXCEPT {
     return Singleton<LcdSpiPeripheralMockImpl>::instance();
 }
 
-LcdSpiPeripheralMockImpl::LcdSpiPeripheralMockImpl() FL_NOEXCEPT
+LcdSpiPeripheralMockImpl::LcdSpiPeripheralMockImpl() FL_NO_EXCEPT
     : mInitialized(false), mEnabled(false), mBusy(false), mTransmitCount(0),
       mConfig(), mCallback(nullptr), mUserCtx(nullptr), mTransmitDelayUs(0),
       mShouldFailTransmit(false), mHistory(), mPendingTransmits(0),
@@ -94,10 +94,9 @@ LcdSpiPeripheralMockImpl::LcdSpiPeripheralMockImpl() FL_NOEXCEPT
 LcdSpiPeripheralMockImpl::~LcdSpiPeripheralMockImpl() {}
 
 bool LcdSpiPeripheralMockImpl::initialize(
-    const LcdSpiConfig &config) FL_NOEXCEPT {
+    const LcdSpiConfig &config) FL_NO_EXCEPT {
     if (config.num_lanes == 0 || config.num_lanes > 16) {
-        FL_WARN("LcdSpiPeripheralMock: Invalid num_lanes: "
-                << config.num_lanes);
+        FL_WARN_F("LcdSpiPeripheralMock: Invalid num_lanes: %s", config.num_lanes);
         return false;
     }
     // Issue #2270: mirror the real peripheral's owner-aware teardown so
@@ -114,7 +113,7 @@ bool LcdSpiPeripheralMockImpl::initialize(
     return true;
 }
 
-void LcdSpiPeripheralMockImpl::deinitialize() FL_NOEXCEPT {
+void LcdSpiPeripheralMockImpl::deinitialize() FL_NO_EXCEPT {
     mInitialized = false;
     mEnabled = false;
     mBusy = false;
@@ -122,11 +121,11 @@ void LcdSpiPeripheralMockImpl::deinitialize() FL_NOEXCEPT {
     mDeinitCount++;
 }
 
-bool LcdSpiPeripheralMockImpl::isInitialized() const FL_NOEXCEPT {
+bool LcdSpiPeripheralMockImpl::isInitialized() const FL_NO_EXCEPT {
     return mInitialized;
 }
 
-u16 *LcdSpiPeripheralMockImpl::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
+u16 *LcdSpiPeripheralMockImpl::allocateBuffer(size_t size_bytes) FL_NO_EXCEPT {
     size_t aligned_size = ((size_bytes + 63) / 64) * 64;
     void *buffer = nullptr;
 #ifdef FL_IS_WIN
@@ -135,13 +134,12 @@ u16 *LcdSpiPeripheralMockImpl::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
     buffer = aligned_alloc(64, aligned_size);
 #endif
     if (buffer == nullptr) {
-        FL_WARN("LcdSpiPeripheralMock: Failed to allocate buffer ("
-                << aligned_size << " bytes)");
+        FL_WARN_F("LcdSpiPeripheralMock: Failed to allocate buffer (%s bytes)", aligned_size);
     }
     return static_cast<u16 *>(buffer);
 }
 
-void LcdSpiPeripheralMockImpl::freeBuffer(u16 *buffer) FL_NOEXCEPT {
+void LcdSpiPeripheralMockImpl::freeBuffer(u16 *buffer) FL_NO_EXCEPT {
     if (buffer != nullptr) {
 #ifdef FL_IS_WIN
         _aligned_free(buffer);
@@ -152,9 +150,9 @@ void LcdSpiPeripheralMockImpl::freeBuffer(u16 *buffer) FL_NOEXCEPT {
 }
 
 bool LcdSpiPeripheralMockImpl::transmit(const u16 *buffer,
-                                        size_t size_bytes) FL_NOEXCEPT {
+                                        size_t size_bytes) FL_NO_EXCEPT {
     if (!mInitialized) {
-        FL_WARN("LcdSpiPeripheralMock: Cannot transmit - not initialized");
+        FL_WARN_F("LcdSpiPeripheralMock: Cannot transmit - not initialized");
         return false;
     }
     if (mShouldFailTransmit) {
@@ -179,7 +177,7 @@ bool LcdSpiPeripheralMockImpl::transmit(const u16 *buffer,
     return true;
 }
 
-bool LcdSpiPeripheralMockImpl::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
+bool LcdSpiPeripheralMockImpl::waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -191,10 +189,10 @@ bool LcdSpiPeripheralMockImpl::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
     return false;
 }
 
-bool LcdSpiPeripheralMockImpl::isBusy() const FL_NOEXCEPT { return mBusy; }
+bool LcdSpiPeripheralMockImpl::isBusy() const FL_NO_EXCEPT { return mBusy; }
 
 bool LcdSpiPeripheralMockImpl::registerTransmitCallback(
-    void *callback, void *user_ctx) FL_NOEXCEPT {
+    void *callback, void *user_ctx) FL_NO_EXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -203,19 +201,19 @@ bool LcdSpiPeripheralMockImpl::registerTransmitCallback(
     return true;
 }
 
-const LcdSpiConfig &LcdSpiPeripheralMockImpl::getConfig() const FL_NOEXCEPT {
+const LcdSpiConfig &LcdSpiPeripheralMockImpl::getConfig() const FL_NO_EXCEPT {
     return mConfig;
 }
 
-u64 LcdSpiPeripheralMockImpl::getMicroseconds() FL_NOEXCEPT {
+u64 LcdSpiPeripheralMockImpl::getMicroseconds() FL_NO_EXCEPT {
     return mSimulatedTimeUs;
 }
 
-void LcdSpiPeripheralMockImpl::delay(u32 ms) FL_NOEXCEPT {
+void LcdSpiPeripheralMockImpl::delay(u32 ms) FL_NO_EXCEPT {
     mSimulatedTimeUs += static_cast<u64>(ms) * 1000;
 }
 
-void LcdSpiPeripheralMockImpl::simulateTransmitComplete() FL_NOEXCEPT {
+void LcdSpiPeripheralMockImpl::simulateTransmitComplete() FL_NO_EXCEPT {
     if (mPendingTransmits == 0) {
         return;
     }
@@ -242,52 +240,52 @@ void LcdSpiPeripheralMockImpl::simulateTransmitComplete() FL_NOEXCEPT {
 }
 
 void LcdSpiPeripheralMockImpl::setTransmitFailure(
-    bool should_fail) FL_NOEXCEPT {
+    bool should_fail) FL_NO_EXCEPT {
     mShouldFailTransmit = should_fail;
 }
 
 void LcdSpiPeripheralMockImpl::setTransmitDelay(
-    u32 microseconds) FL_NOEXCEPT {
+    u32 microseconds) FL_NO_EXCEPT {
     mTransmitDelayUs = microseconds;
 }
 
 void LcdSpiPeripheralMockImpl::setAutoComplete(
-    bool auto_complete) FL_NOEXCEPT {
+    bool auto_complete) FL_NO_EXCEPT {
     mAutoComplete = auto_complete;
 }
 
 const fl::vector<LcdSpiPeripheralMock::TransmitRecord> &
-LcdSpiPeripheralMockImpl::getTransmitHistory() const FL_NOEXCEPT {
+LcdSpiPeripheralMockImpl::getTransmitHistory() const FL_NO_EXCEPT {
     return mHistory;
 }
 
-void LcdSpiPeripheralMockImpl::clearTransmitHistory() FL_NOEXCEPT {
+void LcdSpiPeripheralMockImpl::clearTransmitHistory() FL_NO_EXCEPT {
     mHistory.clear();
     mPendingTransmits = 0;
     mBusy = false;
 }
 
 fl::span<const u16>
-LcdSpiPeripheralMockImpl::getLastTransmitData() const FL_NOEXCEPT {
+LcdSpiPeripheralMockImpl::getLastTransmitData() const FL_NO_EXCEPT {
     if (mHistory.empty()) {
         return fl::span<const u16>();
     }
     return fl::span<const u16>(mHistory.back().buffer_copy);
 }
 
-bool LcdSpiPeripheralMockImpl::isEnabled() const FL_NOEXCEPT {
+bool LcdSpiPeripheralMockImpl::isEnabled() const FL_NO_EXCEPT {
     return mEnabled;
 }
 
-size_t LcdSpiPeripheralMockImpl::getTransmitCount() const FL_NOEXCEPT {
+size_t LcdSpiPeripheralMockImpl::getTransmitCount() const FL_NO_EXCEPT {
     return mTransmitCount;
 }
 
-size_t LcdSpiPeripheralMockImpl::getDeinitCount() const FL_NOEXCEPT {
+size_t LcdSpiPeripheralMockImpl::getDeinitCount() const FL_NO_EXCEPT {
     return mDeinitCount;
 }
 
-void LcdSpiPeripheralMockImpl::reset() FL_NOEXCEPT {
+void LcdSpiPeripheralMockImpl::reset() FL_NO_EXCEPT {
     mInitialized = false;
     mEnabled = false;
     mBusy = false;
@@ -306,7 +304,7 @@ void LcdSpiPeripheralMockImpl::reset() FL_NOEXCEPT {
     mDeinitCount = 0;
 }
 
-void LcdSpiPeripheralMockImpl::pumpDeferredCallbacks() FL_NOEXCEPT {
+void LcdSpiPeripheralMockImpl::pumpDeferredCallbacks() FL_NO_EXCEPT {
     if (mFiringCallbacks) {
         return;
     }
@@ -318,7 +316,7 @@ void LcdSpiPeripheralMockImpl::pumpDeferredCallbacks() FL_NOEXCEPT {
     mFiringCallbacks = false;
 }
 
-void LcdSpiPeripheralMockImpl::fireCallback() FL_NOEXCEPT {
+void LcdSpiPeripheralMockImpl::fireCallback() FL_NO_EXCEPT {
     if (mPendingTransmits > 0) {
         mPendingTransmits--;
     }

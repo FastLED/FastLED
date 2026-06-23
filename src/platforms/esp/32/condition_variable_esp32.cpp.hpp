@@ -56,7 +56,7 @@ ConditionVariableESP32::ConditionVariableESP32()
     // Create internal mutex for protecting the wait queue
     SemaphoreHandle_t mutex = xSemaphoreCreateMutex();
     if (mutex == nullptr) {
-        FL_WARN("ConditionVariableESP32: Failed to create internal mutex");
+        FL_WARN_F("ConditionVariableESP32: Failed to create internal mutex");
     }
     mMutex = static_cast<void*>(mutex);
 
@@ -64,7 +64,7 @@ ConditionVariableESP32::ConditionVariableESP32()
     // Queue can hold up to 10 waiting tasks (configurable if needed)
     QueueHandle_t queue = xQueueCreate(10, sizeof(WaitingTask));
     if (queue == nullptr) {
-        FL_WARN("ConditionVariableESP32: Failed to create wait queue");
+        FL_WARN_F("ConditionVariableESP32: Failed to create wait queue");
     }
     mWaitQueue = static_cast<void*>(queue);
 }
@@ -83,7 +83,7 @@ ConditionVariableESP32::~ConditionVariableESP32() {
     }
 }
 
-void ConditionVariableESP32::notify_one() FL_NOEXCEPT {
+void ConditionVariableESP32::notify_one() FL_NO_EXCEPT {
     if (mMutex == nullptr || mWaitQueue == nullptr) {
         return;
     }
@@ -106,7 +106,7 @@ void ConditionVariableESP32::notify_one() FL_NOEXCEPT {
     xSemaphoreGive(mutex);
 }
 
-void ConditionVariableESP32::notify_all() FL_NOEXCEPT {
+void ConditionVariableESP32::notify_all() FL_NO_EXCEPT {
     if (mMutex == nullptr || mWaitQueue == nullptr) {
         return;
     }
@@ -155,7 +155,7 @@ void ConditionVariableESP32::wait(unique_lock<Mutex>& lock) {
     // Add to wait queue
     BaseType_t result = xQueueSend(queue, &waiter, 0);
     if (result != pdTRUE) {
-        FL_WARN("ConditionVariableESP32: Wait queue full");
+        FL_WARN_F("ConditionVariableESP32: Wait queue full");
         xSemaphoreGive(internal_mutex);
         return;
     }
@@ -209,7 +209,7 @@ cv_status ConditionVariableESP32::wait_for(
     // Add to wait queue
     BaseType_t result = xQueueSend(queue, &waiter, 0);
     if (result != pdTRUE) {
-        FL_WARN("ConditionVariableESP32: Wait queue full");
+        FL_WARN_F("ConditionVariableESP32: Wait queue full");
         xSemaphoreGive(internal_mutex);
         return cv_status::timeout;
     }

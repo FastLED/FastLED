@@ -93,6 +93,28 @@ def main():
         # Matching header found, allow the write
         sys.exit(0)
 
+    # Sibling-split allowance: if this looks like a split of an existing paired
+    # test file (e.g. tests/fl/math/fixed_point_misc.cpp alongside
+    # tests/fl/math/fixed_point.cpp + src/fl/math/fixed_point.h), allow it.
+    # The split file shares its base name with the paired test; we look for
+    # the longest base prefix that has both a paired test file and matching
+    # src header.
+    last_slash = stem.rfind("/")
+    if last_slash >= 0:
+        dir_part = stem[: last_slash + 1]  # e.g. "fl/math/"
+        name_part = stem[last_slash + 1 :]  # e.g. "fixed_point_misc"
+    else:
+        dir_part = ""
+        name_part = stem
+    while "_" in name_part:
+        name_part = name_part.rsplit("_", 1)[0]
+        candidate_stem = dir_part + name_part
+        candidate_test = os.path.join(project_root, f"tests/{candidate_stem}{ext}")
+        candidate_header = os.path.join(project_root, f"src/{candidate_stem}.h")
+        if os.path.exists(candidate_test) and os.path.exists(candidate_header):
+            # Allowed: this is a split of an existing paired test file.
+            sys.exit(0)
+
     # No matching header - block with helpful error message
     error_lines = [
         f"BLOCKED: Creating unpaired test file '{rel_path}'.",

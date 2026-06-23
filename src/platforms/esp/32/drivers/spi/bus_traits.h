@@ -33,14 +33,14 @@ namespace fl {
 template<> struct BusTraits<Bus::SPI> {
     using Driver = ChannelEngineSpi;
 
-    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
         static fl::shared_ptr<Driver> gHolder = fl::make_shared<Driver>();
         return gHolder;
     }
 
-    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
+    static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
-    static void registerWithManager() FL_NOEXCEPT {
+    static void registerWithManager() FL_NO_EXCEPT {
         ChannelManager::instance().addDriver(default_bus_priority(Bus::SPI), instancePtr());
     }
 };

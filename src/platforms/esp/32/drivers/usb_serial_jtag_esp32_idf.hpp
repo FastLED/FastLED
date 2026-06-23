@@ -70,7 +70,7 @@ UsbSerialJtagEsp32::~UsbSerialJtagEsp32() {
 #endif
 }
 
-UsbSerialJtagEsp32::UsbSerialJtagEsp32(UsbSerialJtagEsp32&& other) FL_NOEXCEPT
+UsbSerialJtagEsp32::UsbSerialJtagEsp32(UsbSerialJtagEsp32&& other) FL_NO_EXCEPT
     : mConfig(other.mConfig)
     , mBuffered(other.mBuffered)
     , mInstalledDriver(other.mInstalledDriver)
@@ -92,7 +92,7 @@ UsbSerialJtagEsp32::UsbSerialJtagEsp32(UsbSerialJtagEsp32&& other) FL_NOEXCEPT
     other.mRxCacheCount = 0;
 }
 
-UsbSerialJtagEsp32& UsbSerialJtagEsp32::operator=(UsbSerialJtagEsp32&& other) FL_NOEXCEPT {
+UsbSerialJtagEsp32& UsbSerialJtagEsp32::operator=(UsbSerialJtagEsp32&& other) FL_NO_EXCEPT {
     if (this != &other) {
 #ifdef FL_HAS_USB_SERIAL_JTAG
         // Uninstall our current driver if we own it
@@ -126,7 +126,7 @@ UsbSerialJtagEsp32& UsbSerialJtagEsp32::operator=(UsbSerialJtagEsp32&& other) FL
     return *this;
 }
 
-bool UsbSerialJtagEsp32::initDriver() FL_NOEXCEPT {
+bool UsbSerialJtagEsp32::initDriver() FL_NO_EXCEPT {
     // NOTE: this runs from the UsbSerialJtagEsp32 / EspIO singleton
     // constructor — FL_PRINT would re-enter the in-progress singleton. All
     // outcome state is recorded in mInitOutcome / mInitError; EspIO surfaces
@@ -200,7 +200,7 @@ bool UsbSerialJtagEsp32::initDriver() FL_NOEXCEPT {
 #endif
 }
 
-void UsbSerialJtagEsp32::write(const char* str) FL_NOEXCEPT {
+void UsbSerialJtagEsp32::write(const char* str) FL_NO_EXCEPT {
     if (!str)
         return;
 
@@ -222,7 +222,7 @@ void UsbSerialJtagEsp32::write(const char* str) FL_NOEXCEPT {
                 src += (size_t)written;
                 remaining -= (size_t)written;
             } else if (written < 0) {
-                FL_WARN("USB-Serial JTAG write failed: err=" << written);
+                FL_WARN_F("USB-Serial JTAG write failed: err=%s", written);
                 break;
             }
             // written == 0: buffer full, will retry after timeout
@@ -237,7 +237,7 @@ void UsbSerialJtagEsp32::write(const char* str) FL_NOEXCEPT {
     }
 }
 
-size_t UsbSerialJtagEsp32::write(const u8* buffer, size_t size) FL_NOEXCEPT {
+size_t UsbSerialJtagEsp32::write(const u8* buffer, size_t size) FL_NO_EXCEPT {
     if (!buffer || size == 0)
         return 0;
 
@@ -270,7 +270,7 @@ size_t UsbSerialJtagEsp32::write(const u8* buffer, size_t size) FL_NOEXCEPT {
     return size;
 }
 
-void UsbSerialJtagEsp32::writeln(const char* str) FL_NOEXCEPT {
+void UsbSerialJtagEsp32::writeln(const char* str) FL_NO_EXCEPT {
     if (!str)
         return;
 
@@ -293,7 +293,7 @@ void UsbSerialJtagEsp32::writeln(const char* str) FL_NOEXCEPT {
                 src += (size_t)written;
                 remaining -= (size_t)written;
             } else if (written < 0) {
-                FL_WARN("USB-Serial JTAG writeln failed: err=" << written);
+                FL_WARN_F("USB-Serial JTAG writeln failed: err=%s", written);
                 break;
             }
             // written == 0: buffer full after timeout, retry
@@ -312,7 +312,7 @@ void UsbSerialJtagEsp32::writeln(const char* str) FL_NOEXCEPT {
     esp_rom_output_tx_one_char('\n');
 }
 
-int UsbSerialJtagEsp32::available() FL_NOEXCEPT {
+int UsbSerialJtagEsp32::available() FL_NO_EXCEPT {
 #ifdef FL_HAS_USB_SERIAL_JTAG
     if (!mBuffered) {
         return 0;  // Driver not installed, no data available
@@ -325,7 +325,7 @@ int UsbSerialJtagEsp32::available() FL_NOEXCEPT {
 #endif
 }
 
-int UsbSerialJtagEsp32::read() FL_NOEXCEPT {
+int UsbSerialJtagEsp32::read() FL_NO_EXCEPT {
 #ifdef FL_HAS_USB_SERIAL_JTAG
     if (!mBuffered) {
         return -1;  // Driver not installed, cannot read
@@ -356,7 +356,7 @@ int UsbSerialJtagEsp32::read() FL_NOEXCEPT {
 #endif
 }
 
-void UsbSerialJtagEsp32::fillRxCache() FL_NOEXCEPT {
+void UsbSerialJtagEsp32::fillRxCache() FL_NO_EXCEPT {
 #ifdef FL_HAS_USB_SERIAL_JTAG
     if (!mBuffered) {
         return;
@@ -386,7 +386,7 @@ void UsbSerialJtagEsp32::fillRxCache() FL_NOEXCEPT {
 #endif
 }
 
-bool UsbSerialJtagEsp32::flush(u32 timeoutMs) FL_NOEXCEPT {
+bool UsbSerialJtagEsp32::flush(u32 timeoutMs) FL_NO_EXCEPT {
 #ifdef FL_HAS_USB_SERIAL_JTAG
     if (!mBuffered) {
         return false;  // Driver not installed, cannot flush
@@ -411,7 +411,7 @@ bool UsbSerialJtagEsp32::flush(u32 timeoutMs) FL_NOEXCEPT {
 #endif
 }
 
-bool UsbSerialJtagEsp32::isConnected() const FL_NOEXCEPT {
+bool UsbSerialJtagEsp32::isConnected() const FL_NO_EXCEPT {
 #ifdef FL_HAS_USB_SERIAL_JTAG
     if (!mBuffered) {
         return false;  // Driver not installed, cannot check connection

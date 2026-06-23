@@ -17,7 +17,7 @@
 /// @param ns Number of nanoseconds
 /// @param cpu_hz CPU frequency in Hz
 /// @return Number of cycles (rounded up)
-constexpr fl::u32 cycles_from_ns_stub(fl::u32 ns, fl::u32 cpu_hz) FL_NOEXCEPT {
+constexpr fl::u32 cycles_from_ns_stub(fl::u32 ns, fl::u32 cpu_hz) FL_NO_EXCEPT {
   // Round up: cycles = ceil(ns * cpu_hz / 1e9)
   // = (ns * cpu_hz + 999'999'999) / 1'000'000'000
   return ((fl::u64)ns * (fl::u64)cpu_hz + 999999999UL) / 1000000000UL;
@@ -28,7 +28,7 @@ namespace fl {
 /// Platform-specific implementation of nanosecond delay with runtime frequency (stub)
 /// @param ns Number of nanoseconds
 /// @param hz CPU frequency in Hz
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz) FL_NOEXCEPT {
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz) FL_NO_EXCEPT {
   u32 cycles = cycles_from_ns_stub(ns, hz);
   if (cycles == 0) return;
   delay_cycles_generic(cycles);
@@ -36,7 +36,7 @@ FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz) FL_NOEXCEPT {
 
 /// Platform-specific implementation of nanosecond delay with auto-detected frequency (stub)
 /// @param ns Number of nanoseconds
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns) FL_NOEXCEPT {
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns) FL_NO_EXCEPT {
   #if defined(F_CPU)
   u32 hz = F_CPU;
   #else

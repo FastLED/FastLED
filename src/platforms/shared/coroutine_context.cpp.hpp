@@ -22,14 +22,14 @@ namespace platforms {
 
 static ICoroutinePlatform* sCoroutinePlatformInstance = nullptr;
 
-ICoroutinePlatform& ICoroutinePlatform::instance() FL_NOEXCEPT {
+ICoroutinePlatform& ICoroutinePlatform::instance() FL_NO_EXCEPT {
     if (sCoroutinePlatformInstance) {
         return *sCoroutinePlatformInstance;
     }
     return fl::Singleton<NullCoroutinePlatform>::instance();
 }
 
-void ICoroutinePlatform::setInstance(ICoroutinePlatform* p) FL_NOEXCEPT {
+void ICoroutinePlatform::setInstance(ICoroutinePlatform* p) FL_NO_EXCEPT {
     sCoroutinePlatformInstance = p;
 }
 
@@ -43,12 +43,12 @@ struct CoroutineGlobals {
     CoroutineContext* current = nullptr; ///< Currently executing coroutine
 };
 
-static CoroutineGlobals& globals() FL_NOEXCEPT {
+static CoroutineGlobals& globals() FL_NO_EXCEPT {
     return fl::Singleton<CoroutineGlobals>::instance();
 }
 
 /// @brief Lazy-init the runner's platform context (created on first use)
-static void* get_runner_ctx() FL_NOEXCEPT {
+static void* get_runner_ctx() FL_NO_EXCEPT {
     auto& g = globals();
     if (!g.runner_ctx) {
         g.runner_ctx = ICoroutinePlatform::instance().createRunnerContext();
@@ -60,7 +60,7 @@ static void* get_runner_ctx() FL_NOEXCEPT {
 // CoroutineContext Implementation
 //=============================================================================
 
-void CoroutineContext::entry_trampoline() FL_NOEXCEPT {
+void CoroutineContext::entry_trampoline() FL_NO_EXCEPT {
     CoroutineContext* self = globals().current;
     if (self && self->mFunction) {
         self->mFunction();
@@ -82,7 +82,7 @@ void CoroutineContext::entry_trampoline() FL_NOEXCEPT {
 }
 
 CoroutineContext* CoroutineContext::create(fl::function<void()> func,
-                                           size_t stack_size) FL_NOEXCEPT {
+                                           size_t stack_size) FL_NO_EXCEPT {
     auto& platform = ICoroutinePlatform::instance();
 
     void* pctx = platform.createContext(entry_trampoline, stack_size);
@@ -107,7 +107,7 @@ CoroutineContext::~CoroutineContext() {
     }
 }
 
-void CoroutineContext::resume() FL_NOEXCEPT {
+void CoroutineContext::resume() FL_NO_EXCEPT {
     if (mCompleted) {
         return;
     }
@@ -137,11 +137,11 @@ void CoroutineContext::resume() FL_NOEXCEPT {
     globals().current = nullptr;
 }
 
-CoroutineContext* CoroutineContext::runningCoroutine() FL_NOEXCEPT {
+CoroutineContext* CoroutineContext::runningCoroutine() FL_NO_EXCEPT {
     return globals().current;
 }
 
-void CoroutineContext::suspend() FL_NOEXCEPT {
+void CoroutineContext::suspend() FL_NO_EXCEPT {
     auto& platform = ICoroutinePlatform::instance();
 
     // ISR guard
@@ -161,7 +161,7 @@ void CoroutineContext::suspend() FL_NOEXCEPT {
 
     // Check stack health before switching — catch overflow early
     if (!platform.checkStackHealth(self->mPlatformCtx)) {
-        FL_WARN("FATAL: Stack overflow detected in coroutine");
+        FL_WARN_F("FATAL: Stack overflow detected in coroutine");
         while (true) {}  // Halt — memory is already corrupted
     }
 
@@ -175,11 +175,11 @@ void CoroutineContext::suspend() FL_NOEXCEPT {
 // CoroutineRunner Implementation
 //=============================================================================
 
-CoroutineRunner& CoroutineRunner::instance() FL_NOEXCEPT {
+CoroutineRunner& CoroutineRunner::instance() FL_NO_EXCEPT {
     return fl::Singleton<CoroutineRunner>::instance();
 }
 
-void CoroutineRunner::enqueue(CoroutineContext* ctx) FL_NOEXCEPT {
+void CoroutineRunner::enqueue(CoroutineContext* ctx) FL_NO_EXCEPT {
     if (!ctx) return;
 
     // Check for duplicates
@@ -188,14 +188,14 @@ void CoroutineRunner::enqueue(CoroutineContext* ctx) FL_NOEXCEPT {
     }
 
     if (mCount >= kMaxCoroutines) {
-        FL_WARN("CoroutineRunner: Queue full, cannot enqueue");
+        FL_WARN_F("CoroutineRunner: Queue full, cannot enqueue");
         return;
     }
 
     mQueue[mCount++] = ctx;
 }
 
-void CoroutineRunner::remove(CoroutineContext* ctx) FL_NOEXCEPT {
+void CoroutineRunner::remove(CoroutineContext* ctx) FL_NO_EXCEPT {
     for (size_t i = 0; i < mCount; ++i) {
         if (mQueue[i] == ctx) {
             // Shift remaining entries down
@@ -217,7 +217,7 @@ void CoroutineRunner::remove(CoroutineContext* ctx) FL_NOEXCEPT {
     }
 }
 
-void CoroutineRunner::run(fl::u32 us) FL_NOEXCEPT {
+void CoroutineRunner::run(fl::u32 us) FL_NO_EXCEPT {
     if (mCount == 0) return;
 
     auto& platform = ICoroutinePlatform::instance();
@@ -262,7 +262,7 @@ void CoroutineRunner::run(fl::u32 us) FL_NOEXCEPT {
     }
 }
 
-void CoroutineRunner::stop_all() FL_NOEXCEPT {
+void CoroutineRunner::stop_all() FL_NO_EXCEPT {
     for (size_t i = 0; i < mCount; ++i) {
         if (mQueue[i]) {
             mQueue[i]->stop_and_complete();

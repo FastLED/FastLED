@@ -25,7 +25,7 @@ public:
     }
 
     // Fake DMA transmission (just captures data)
-    void transmitDMA(const u8* buffer, size_t length) FL_NOEXCEPT {
+    void transmitDMA(const u8* buffer, size_t length) FL_NO_EXCEPT {
         mLastDMABuffer.clear();
         mLastDMABuffer.reserve(length);
         for (size_t i = 0; i < length; ++i) {
@@ -36,33 +36,33 @@ public:
     }
 
     // Wait for transmission to complete (simulated)
-    void waitComplete() FL_NOEXCEPT {
+    void waitComplete() FL_NO_EXCEPT {
         mTransmissionActive = false;
     }
 
     // Test inspection methods
-    const fl::vector<u8>& getLastTransmission() const FL_NOEXCEPT {
+    const fl::vector<u8>& getLastTransmission() const FL_NO_EXCEPT {
         return mLastDMABuffer;
     }
 
-    u32 getTransmissionCount() const FL_NOEXCEPT {
+    u32 getTransmissionCount() const FL_NO_EXCEPT {
         return mTransmissionCount;
     }
 
-    bool isTransmissionActive() const FL_NOEXCEPT {
+    bool isTransmissionActive() const FL_NO_EXCEPT {
         return mTransmissionActive;
     }
 
-    void setClockSpeed(u32 hz) FL_NOEXCEPT {
+    void setClockSpeed(u32 hz) FL_NO_EXCEPT {
         mClockSpeed = hz;
     }
 
-    u32 getClockSpeed() const FL_NOEXCEPT {
+    u32 getClockSpeed() const FL_NO_EXCEPT {
         return mClockSpeed;
     }
 
     // Clear history
-    void reset() FL_NOEXCEPT {
+    void reset() FL_NO_EXCEPT {
         mLastDMABuffer.clear();
         mTransmissionCount = 0;
         mTransmissionActive = false;
@@ -70,8 +70,8 @@ public:
 
     // Simulate de-interleaving to verify each lane's data
     // This reverses the bit-interleaving to extract per-lane data
-    fl::vector<fl::vector<u8>> extractLanes(u8 num_lanes, size_t bytes_per_lane) const FL_NOEXCEPT {
-        fl::vector<fl::vector<u8>> lanes(num_lanes) FL_NOEXCEPT;
+    fl::vector<fl::vector<u8>> extractLanes(u8 num_lanes, size_t bytes_per_lane) const FL_NO_EXCEPT {
+        fl::vector<fl::vector<u8>> lanes(num_lanes) FL_NO_EXCEPT;
 
         // Pre-allocate per-lane buffers
         for (u8 lane = 0; lane < num_lanes; ++lane) {
@@ -104,7 +104,7 @@ public:
     }
 
     // Timing simulation
-    u64 estimateTransmissionTimeMicros(size_t buffer_size) const FL_NOEXCEPT {
+    u64 estimateTransmissionTimeMicros(size_t buffer_size) const FL_NO_EXCEPT {
         // Calculate based on clock speed
         // Time = (bytes * 8 bits/byte) / (clock_hz) * 1,000,000 us/s
         return (buffer_size * 8 * 1000000ULL) / mClockSpeed;

@@ -25,7 +25,7 @@ DropDetector::DropDetector()
     mLastDrop.timestamp = 0;  // Initialize to allow immediate first drop
 }
 
-DropDetector::~DropDetector() FL_NOEXCEPT = default;
+DropDetector::~DropDetector() FL_NO_EXCEPT = default;
 
 void DropDetector::update(shared_ptr<Context> context) {
     if (!context) {
@@ -66,9 +66,7 @@ void DropDetector::update(shared_ptr<Context> context) {
         mLastDrop = dropEvent;
         mDropDetectedThisFrame = true;
 
-        FL_DBG("DropDetector: Drop detected! Impact=" << impact
-               << ", Bass=" << bassEnergy
-               << ", Energy flux=" << energyFlux);
+        FL_DBG_F("DropDetector: Drop detected! Impact=%s, Bass=%s, Energy flux=%s", impact, bassEnergy, energyFlux);
     }
 
     // Update baselines (exponential moving average)

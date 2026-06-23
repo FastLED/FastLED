@@ -61,7 +61,7 @@ struct Rgbww {
     explicit Rgbww(fl::u16 warm = kRGBWWDefaultWarmCct,
                    fl::u16 cool = kRGBWWDefaultCoolCct,
                    RGBWW_MODE mode = RGBWW_MODE::kRGBWWColorimetric,
-                   EOrderWW placement = EOrderWW::WWDefault) FL_NOEXCEPT
+                   EOrderWW placement = EOrderWW::WWDefault) FL_NO_EXCEPT
         : warm_cct(warm), cool_cct(cool),
           rgbww_mode(mode), w_placement(placement),
           profile(nullptr) {}
@@ -76,7 +76,7 @@ struct Rgbww {
     /// the lifetime of any controller using this Rgbww.
     const colorimetric_detail::RgbcctProfile* profile;
 
-    FASTLED_FORCE_INLINE bool active() const FL_NOEXCEPT {
+    FASTLED_FORCE_INLINE bool active() const FL_NO_EXCEPT {
         return rgbww_mode != RGBWW_MODE::kRGBWWInvalid;
     }
 };
@@ -84,17 +84,17 @@ struct Rgbww {
 /// Sentinel: disables RGBWW (variant should hold fl::Empty instead, but this
 /// is kept for symmetry with RgbwInvalid).
 struct RgbwwInvalid : public Rgbww {
-    RgbwwInvalid() FL_NOEXCEPT : Rgbww() {
+    RgbwwInvalid() FL_NO_EXCEPT : Rgbww() {
         rgbww_mode = RGBWW_MODE::kRGBWWInvalid;
     }
-    static Rgbww value() FL_NOEXCEPT { return RgbwwInvalid(); }
+    static Rgbww value() FL_NO_EXCEPT { return RgbwwInvalid(); }
 };
 
 /// Default RGBWW configuration: colorimetric mode at warm=2700K / cool=6500K,
 /// default profile, end-aligned warm-then-cool W byte placement.
 struct RgbwwDefault : public Rgbww {
-    RgbwwDefault() FL_NOEXCEPT : Rgbww() {}
-    static Rgbww value() FL_NOEXCEPT { return RgbwwDefault(); }
+    RgbwwDefault() FL_NO_EXCEPT : Rgbww() {}
+    static Rgbww value() FL_NO_EXCEPT { return RgbwwDefault(); }
 };
 
 // ===== rgb_2_rgbww dispatch surface (#2558) =================================
@@ -120,7 +120,7 @@ void rgb_2_rgbww_colorimetric(const Rgbww& cfg,
                               fl::u8 r, fl::u8 g, fl::u8 b,
                               fl::u8 r_scale, fl::u8 g_scale, fl::u8 b_scale,
                               fl::u8 *out_r, fl::u8 *out_g, fl::u8 *out_b,
-                              fl::u8 *out_ww, fl::u8 *out_wc) FL_NOEXCEPT;
+                              fl::u8 *out_ww, fl::u8 *out_wc) FL_NO_EXCEPT;
 
 /// Colorimetric white-overdrive solver for RGBWW (wx_lp_legacy + RGBCCT
 /// layered blend). Requires FASTLED_RGBW_COLORIMETRIC; stub emits FL_WARN_ONCE + zeros.
@@ -128,7 +128,7 @@ void rgb_2_rgbww_colorimetric_boosted(const Rgbww& cfg,
                                       fl::u8 r, fl::u8 g, fl::u8 b,
                                       fl::u8 r_scale, fl::u8 g_scale, fl::u8 b_scale,
                                       fl::u8 *out_r, fl::u8 *out_g, fl::u8 *out_b,
-                                      fl::u8 *out_ww, fl::u8 *out_wc) FL_NOEXCEPT;
+                                      fl::u8 *out_ww, fl::u8 *out_wc) FL_NO_EXCEPT;
 
 /// User-installable RGB->RGBWW function. Set via set_rgb_2_rgbww_function().
 /// Falls back to all-zero output when no user function has been installed.
@@ -136,9 +136,9 @@ void rgb_2_rgbww_user_function(const Rgbww& cfg,
                                fl::u8 r, fl::u8 g, fl::u8 b,
                                fl::u8 r_scale, fl::u8 g_scale, fl::u8 b_scale,
                                fl::u8 *out_r, fl::u8 *out_g, fl::u8 *out_b,
-                               fl::u8 *out_ww, fl::u8 *out_wc) FL_NOEXCEPT;
+                               fl::u8 *out_ww, fl::u8 *out_wc) FL_NO_EXCEPT;
 
-void set_rgb_2_rgbww_function(rgb_2_rgbww_function func) FL_NOEXCEPT;
+void set_rgb_2_rgbww_function(rgb_2_rgbww_function func) FL_NO_EXCEPT;
 
 // ===== Default RGBCCT profile + active-profile API (Phase D of #2558) =======
 //
@@ -150,8 +150,8 @@ void set_rgb_2_rgbww_function(rgb_2_rgbww_function func) FL_NOEXCEPT;
 
 extern const colorimetric_detail::RgbcctProfile kRgbwwDefaultProfile;
 
-void set_rgbww_colorimetric_profile(const colorimetric_detail::RgbcctProfile* profile) FL_NOEXCEPT;
-const colorimetric_detail::RgbcctProfile* get_rgbww_colorimetric_profile() FL_NOEXCEPT;
+void set_rgbww_colorimetric_profile(const colorimetric_detail::RgbcctProfile* profile) FL_NO_EXCEPT;
+const colorimetric_detail::RgbcctProfile* get_rgbww_colorimetric_profile() FL_NO_EXCEPT;
 
 /// @brief Dispatch RGB->RGBWW for a given mode.
 /// Reorder a 5-channel pixel given an EOrderWW placement. The three RGB bytes
@@ -167,14 +167,14 @@ void rgbww_partial_reorder(EOrderWW ww_placement,
                            fl::u8 b0, fl::u8 b1, fl::u8 b2,
                            fl::u8 ww, fl::u8 wc,
                            fl::u8 *out_b0, fl::u8 *out_b1, fl::u8 *out_b2,
-                           fl::u8 *out_b3, fl::u8 *out_b4) FL_NOEXCEPT;
+                           fl::u8 *out_b3, fl::u8 *out_b4) FL_NO_EXCEPT;
 
 FASTLED_FORCE_INLINE void
 rgb_2_rgbww(const Rgbww& cfg,
             fl::u8 r, fl::u8 g, fl::u8 b,
             fl::u8 r_scale, fl::u8 g_scale, fl::u8 b_scale,
             fl::u8 *out_r, fl::u8 *out_g, fl::u8 *out_b,
-            fl::u8 *out_ww, fl::u8 *out_wc) FL_NOEXCEPT {
+            fl::u8 *out_ww, fl::u8 *out_wc) FL_NO_EXCEPT {
     switch (cfg.rgbww_mode) {
     case RGBWW_MODE::kRGBWWInvalid:
         // Inactive: emit zeros across all five channels.

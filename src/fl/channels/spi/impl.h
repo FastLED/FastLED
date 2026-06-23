@@ -48,8 +48,8 @@ struct Device::Impl {
         , owns_backend(false) {}
 
     /// @brief Destructor
-    ~Impl() FL_NOEXCEPT {
-        FL_LOG_SPI("Device::Impl: Destructor called");
+    ~Impl() FL_NO_EXCEPT {
+        FL_LOG_SPI_F("Device::Impl: Destructor called");
         // Members will be destroyed in reverse order of declaration:
         // 1. owns_backend (bool) - trivial
         // 2. hw_backend (void*) - trivial (pointer not owned here)
@@ -57,7 +57,7 @@ struct Device::Impl {
         // 4. initialized (bool) - trivial
         // 5. bus_handle (struct) - trivial
         // 6. config (Config) - contains fl::vector which might cause issues
-        FL_LOG_SPI("Device::Impl: Destructor complete");
+        FL_LOG_SPI_F("Device::Impl: Destructor complete");
     }
 };
 

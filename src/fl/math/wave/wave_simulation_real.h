@@ -24,7 +24,7 @@ float fixed_to_float(i16 f);
 // Compute the Q15 damping decay factor for a power-of-two damping
 // exponent. Equivalent (modulo 1-LSB rounding) to the arithmetic-shift
 // form `f -= f >> damp` used by the kernel before #3099/§6.
-i16 compute_damp_decay_q15(int damp) FL_NOEXCEPT;
+i16 compute_damp_decay_q15(int damp) FL_NO_EXCEPT;
 } // namespace wave_detail
 
 class WaveSimulation1D_Real {
@@ -38,15 +38,15 @@ class WaveSimulation1D_Real {
     //  - dampening: exponent so that the effective damping factor is
     //  2^(dampening).
     WaveSimulation1D_Real(u32 length, float speed = 0.16f,
-                          int dampening = 6) FL_NOEXCEPT;
-    ~WaveSimulation1D_Real() FL_NOEXCEPT = default;
+                          int dampening = 6) FL_NO_EXCEPT;
+    ~WaveSimulation1D_Real() FL_NO_EXCEPT = default;
 
     // Set simulation speed (Courant squared). Clamped to [0.0, 1.0] — see
     // constructor for rationale.
     void setSpeed(float something);
 
     // Set the dampening exponent (effective damping factor is 2^(dampening)).
-    void setDampening(int damp) FL_NOEXCEPT;
+    void setDampening(int damp) FL_NO_EXCEPT;
 
     // Get the current dampening exponent.
     int getDampenening() const;
@@ -142,8 +142,24 @@ class WaveSimulation2D_Real {
     //    silently clamped.
     //  - dampening: exponent so that the damping factor is 2^dampening.
     WaveSimulation2D_Real(u32 W, u32 H, float speed = 0.16f,
-                          float dampening = 6.0f) FL_NOEXCEPT;
-    ~WaveSimulation2D_Real() FL_NOEXCEPT = default;
+                          float dampening = 6.0f) FL_NO_EXCEPT;
+
+    // Tag for explicit PSRAM-backed grid storage. Use the tagged
+    // constructor overload when you genuinely need a grid larger than
+    // SRAM can hold AND accept the per-cell perf cost (~5-10x slower
+    // on ESP32-S3 without L2 cache; ~no cost on ESP32-P4 with L2 +
+    // cached PSRAM). See #3114 / #3117 for the SRAM-default rationale.
+    //
+    // Example:
+    //   WaveSimulation2D_Real sim{
+    //       WaveSimulation2D_Real::PsramStorage{}, 256, 256};
+    struct PsramStorage {};
+
+    WaveSimulation2D_Real(PsramStorage, u32 W, u32 H,
+                          float speed = 0.16f,
+                          float dampening = 6.0f) FL_NO_EXCEPT;
+
+    ~WaveSimulation2D_Real() FL_NO_EXCEPT = default;
 
     // Set the simulation speed (Courant squared). Clamped to [0.0, 0.5] — see
     // constructor for rationale.
@@ -151,7 +167,7 @@ class WaveSimulation2D_Real {
 
     // Set the dampening factor exponent.
     // The dampening factor used is 2^(dampening).
-    void setDampening(int damp) FL_NOEXCEPT;
+    void setDampening(int damp) FL_NO_EXCEPT;
 
     // Get the current dampening exponent.
     int getDampenening() const;
@@ -193,8 +209,8 @@ class WaveSimulation2D_Real {
     // FivePoint (backward compatible). NinePointIsotropic costs ~2x reads
     // + ALU per cell but produces visibly rounder ripples at high super-
     // sample factors; the wrapper class auto-selects it when appropriate.
-    void setStencil(LaplacianStencil s) FL_NOEXCEPT { mStencil = s; }
-    LaplacianStencil getStencil() const FL_NOEXCEPT { return mStencil; }
+    void setStencil(LaplacianStencil s) FL_NO_EXCEPT { mStencil = s; }
+    LaplacianStencil getStencil() const FL_NO_EXCEPT { return mStencil; }
 
     void setXCylindrical(bool on) { mXCylindrical = on; }
 
@@ -224,8 +240,24 @@ class WaveSimulation2D_Real {
     u32 stride; // Row length (width + 2 for the borders).
 
     // Two separate grids stored in fixed Q15 format.
-    fl::vector_psram<i16> grid1;
-    fl::vector_psram<i16> grid2;
+    //
+    // SRAM, not PSRAM. The previous `fl::vector_psram<i16>` default
+    // landed both grids in PSRAM on every ESP32 with PSRAM available —
+    // including ESP32-S3, which has no L2 cache and pays the full
+    // ~80 ns PSRAM latency per cell access. The 5-point stencil reads
+    // 5 cells per inner cell, so a 64×64 update was reading ~80 KB per
+    // step at ~50 MB/s practical PSRAM throughput → ~1.6 ms per step
+    // on memory alone, cratering frame rate at the grid sizes users
+    // actually want. SRAM is predictable everywhere: ESP32-S3 has
+    // 320 KB SRAM (64×64 i16 = 8 KB, 128×128 = 32 KB, both fit
+    // easily); ESP32-P4 ~750 KB SRAM (256×256 fits); Teensy 4 OCRAM
+    // is faster still.
+    //
+    // Users with grids genuinely too large for SRAM can construct a
+    // parallel large-grid variant that re-enables PSRAM as an explicit,
+    // documented opt-in (see #3114 follow-up).
+    fl::vector<i16> grid1;
+    fl::vector<i16> grid2;
 
     fl::size whichGrid; // Indicates the active grid (0 or 1).
 

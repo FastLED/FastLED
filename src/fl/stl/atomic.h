@@ -47,32 +47,32 @@ enum memory_order { // ok plain enum
 
 template <typename T> class AtomicFake {
   public:
-    AtomicFake() FL_NOEXCEPT : mValue{} {}
-    explicit AtomicFake(T value) FL_NOEXCEPT : mValue(value) {}
+    AtomicFake() FL_NO_EXCEPT : mValue{} {}
+    explicit AtomicFake(T value) FL_NO_EXCEPT : mValue(value) {}
 
     // Non-copyable and non-movable
-    AtomicFake(const AtomicFake&) FL_NOEXCEPT = delete;
-    AtomicFake& operator=(const AtomicFake&) FL_NOEXCEPT = delete;
-    AtomicFake(AtomicFake&&) FL_NOEXCEPT = delete;
-    AtomicFake& operator=(AtomicFake&&) FL_NOEXCEPT = delete;
+    AtomicFake(const AtomicFake&) FL_NO_EXCEPT = delete;
+    AtomicFake& operator=(const AtomicFake&) FL_NO_EXCEPT = delete;
+    AtomicFake(AtomicFake&&) FL_NO_EXCEPT = delete;
+    AtomicFake& operator=(AtomicFake&&) FL_NO_EXCEPT = delete;
 
     // Basic atomic operations - fake implementation (not actually atomic)
     // Memory order parameters are accepted but ignored (no-op in single-threaded mode)
-    T load(memory_order = memory_order_seq_cst) const FL_NOEXCEPT {
+    T load(memory_order = memory_order_seq_cst) const FL_NO_EXCEPT {
         return mValue;
     }
 
-    void store(T value, memory_order = memory_order_seq_cst) FL_NOEXCEPT {
+    void store(T value, memory_order = memory_order_seq_cst) FL_NO_EXCEPT {
         mValue = value;
     }
     
-    T exchange(T value, memory_order = memory_order_seq_cst) FL_NOEXCEPT {
+    T exchange(T value, memory_order = memory_order_seq_cst) FL_NO_EXCEPT {
         T old = mValue;
         mValue = value;
         return old;
     }
     
-    bool compare_exchange_weak(T& expected, T desired, memory_order = memory_order_seq_cst) FL_NOEXCEPT {
+    bool compare_exchange_weak(T& expected, T desired, memory_order = memory_order_seq_cst) FL_NO_EXCEPT {
         if (mValue == expected) {
             mValue = desired;
             return true;
@@ -82,107 +82,107 @@ template <typename T> class AtomicFake {
         }
     }
 
-    bool compare_exchange_strong(T& expected, T desired, memory_order = memory_order_seq_cst) FL_NOEXCEPT {
+    bool compare_exchange_strong(T& expected, T desired, memory_order = memory_order_seq_cst) FL_NO_EXCEPT {
         return compare_exchange_weak(expected, desired);
     }
     
     // Assignment operator
-    T operator=(T value) FL_NOEXCEPT {
+    T operator=(T value) FL_NO_EXCEPT {
         store(value);
         return value;
     }
     
     // Conversion operator
-    operator T() const FL_NOEXCEPT {
+    operator T() const FL_NO_EXCEPT {
         return load();
     }
     
     // Arithmetic operators (for integral and floating point types)
     // Avoid deprecated volatile increment/decrement (C++20)
-    T operator++() FL_NOEXCEPT {
+    T operator++() FL_NO_EXCEPT {
         T temp = mValue + 1;
         mValue = temp;
         return temp;
     }
     
-    T operator++(int) FL_NOEXCEPT {
+    T operator++(int) FL_NO_EXCEPT {
         T temp = mValue;
         mValue = temp + 1;
         return temp;
     }
     
-    T operator--() FL_NOEXCEPT {
+    T operator--() FL_NO_EXCEPT {
         T temp = mValue - 1;
         mValue = temp;
         return temp;
     }
     
-    T operator--(int) FL_NOEXCEPT {
+    T operator--(int) FL_NO_EXCEPT {
         T temp = mValue;
         mValue = temp - 1;
         return temp;
     }
     
-    T operator+=(T value) FL_NOEXCEPT {
+    T operator+=(T value) FL_NO_EXCEPT {
         T temp = mValue + value;
         mValue = temp;
         return temp;
     }
     
-    T operator-=(T value) FL_NOEXCEPT {
+    T operator-=(T value) FL_NO_EXCEPT {
         T temp = mValue - value;
         mValue = temp;
         return temp;
     }
     
-    T operator&=(T value) FL_NOEXCEPT {
+    T operator&=(T value) FL_NO_EXCEPT {
         T temp = mValue & value;
         mValue = temp;
         return temp;
     }
     
-    T operator|=(T value) FL_NOEXCEPT {
+    T operator|=(T value) FL_NO_EXCEPT {
         T temp = mValue | value;
         mValue = temp;
         return temp;
     }
     
-    T operator^=(T value) FL_NOEXCEPT {
+    T operator^=(T value) FL_NO_EXCEPT {
         T temp = mValue ^ value;
         mValue = temp;
         return temp;
     }
     
     // Fetch operations
-    T fetch_add(T value) FL_NOEXCEPT {
+    T fetch_add(T value) FL_NO_EXCEPT {
         T old = mValue;
         T temp = old + value;
         mValue = temp;
         return old;
     }
     
-    T fetch_sub(T value) FL_NOEXCEPT {
+    T fetch_sub(T value) FL_NO_EXCEPT {
         T old = mValue;
         T temp = old - value;
         mValue = temp;
         return old;
     }
     
-    T fetch_and(T value) FL_NOEXCEPT {
+    T fetch_and(T value) FL_NO_EXCEPT {
         T old = mValue;
         T temp = old & value;
         mValue = temp;
         return old;
     }
     
-    T fetch_or(T value) FL_NOEXCEPT {
+    T fetch_or(T value) FL_NO_EXCEPT {
         T old = mValue;
         T temp = old | value;
         mValue = temp;
         return old;
     }
     
-    T fetch_xor(T value) FL_NOEXCEPT {
+    T fetch_xor(T value) FL_NO_EXCEPT {
         T old = mValue;
         T temp = old ^ value;
         mValue = temp;

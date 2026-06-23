@@ -52,7 +52,7 @@ struct Engine {
     fl::optional<fl::u32> currentTime;
 
     Engine(Context *ctx) : mCtx(ctx) {}
-    ~Engine() FL_NOEXCEPT;
+    ~Engine() FL_NO_EXCEPT;
 
     void setTime(fl::u32 t) { currentTime = t; }
     fl::u32 getTime() { return currentTime.has_value() ? currentTime.value() : fl::millis(); }
@@ -125,9 +125,9 @@ struct Engine {
     }
 };
 
-inline Engine::~Engine() FL_NOEXCEPT = default;
+inline Engine::~Engine() FL_NO_EXCEPT = default;
 
-inline Context::~Context() FL_NOEXCEPT = default;
+inline Context::~Context() FL_NO_EXCEPT = default;
 
 // Initialize context with grid dimensions
 inline void init(Context &ctx, int w, int h) {

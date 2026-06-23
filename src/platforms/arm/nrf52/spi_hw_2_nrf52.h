@@ -75,7 +75,7 @@ public:
     /// @brief Construct a new SPIDualNRF52 controller
     /// @param bus_id Logical bus identifier (0 or 1)
     /// @param name Human-readable name for this controller
-    explicit SPIDualNRF52(int bus_id = -1, const char* name = "Unknown") FL_NOEXCEPT;
+    explicit SPIDualNRF52(int bus_id = -1, const char* name = "Unknown") FL_NO_EXCEPT;
 
     /// @brief Destroy the controller and release all resources
     ~SPIDualNRF52();
@@ -84,66 +84,66 @@ public:
     /// @param config Configuration including pins, clock speed, and bus number
     /// @return true if initialization successful, false on error
     /// @note Validates pin assignments and allocates SPIM/TIMER/PPI resources
-    bool begin(const SpiHw2::Config& config) FL_NOEXCEPT override;
+    bool begin(const SpiHw2::Config& config) FL_NO_EXCEPT override;
 
     /// @brief Deinitialize the controller and release resources
-    void end() FL_NOEXCEPT override;
+    void end() FL_NO_EXCEPT override;
 
     /// @brief Acquire a DMA buffer for zero-copy data preparation
     /// @param bytes_per_lane Number of bytes per lane to allocate
     /// @return DMABuffer containing span to buffer or error code
     /// @note Automatically waits if previous transmission still active
     /// @note Reallocates only if requested size exceeds current capacity
-    DMABuffer acquireDMABuffer(size_t bytes_per_lane) FL_NOEXCEPT override;
+    DMABuffer acquireDMABuffer(size_t bytes_per_lane) FL_NO_EXCEPT override;
 
     /// @brief Start non-blocking transmission using internal DMA buffer
     /// @return true if transfer started successfully, false on error
     /// @note Must call acquireDMABuffer() first
     /// @note Returns immediately - use waitComplete() to block until done
-    bool transmit(TransmitMode mode = TransmitMode::ASYNC) FL_NOEXCEPT override;
+    bool transmit(TransmitMode mode = TransmitMode::ASYNC) FL_NO_EXCEPT override;
 
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @return true if transmission completed, false on timeout
-    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) FL_NOEXCEPT override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) FL_NO_EXCEPT override;
 
     /// @brief Check if transmission is currently in progress
     /// @return true if busy, false if idle
-    bool isBusy() const FL_NOEXCEPT override;
+    bool isBusy() const FL_NO_EXCEPT override;
 
     /// @brief Check if controller has been initialized
     /// @return true if initialized, false otherwise
-    bool isInitialized() const FL_NOEXCEPT override;
+    bool isInitialized() const FL_NO_EXCEPT override;
 
     /// @brief Get the bus identifier for this controller
     /// @return Bus ID (0 or 1)
-    int getBusId() const FL_NOEXCEPT override;
+    int getBusId() const FL_NO_EXCEPT override;
 
     /// @brief Get the human-readable name for this controller
     /// @return Controller name string
-    const char* getName() const FL_NOEXCEPT override;
+    const char* getName() const FL_NO_EXCEPT override;
 
 private:
     /// @brief Release all allocated resources (SPIM, TIMER, PPI, GPIOTE, buffers)
-    void cleanup() FL_NOEXCEPT;
+    void cleanup() FL_NO_EXCEPT;
 
     /// @brief Allocate or resize internal DMA buffers for dual-lane operation
     /// @param required_size Size needed in bytes (per lane)
     /// @return true if buffers allocated successfully
-    bool allocateDMABuffers(size_t required_size) FL_NOEXCEPT;
+    bool allocateDMABuffers(size_t required_size) FL_NO_EXCEPT;
 
     /// @brief Configure TIMER0 for clock generation
     /// @param clock_speed_hz Desired clock frequency
-    void configureTimer(u32 clock_speed_hz) FL_NOEXCEPT;
+    void configureTimer(u32 clock_speed_hz) FL_NO_EXCEPT;
 
     /// @brief Configure PPI channels for synchronization
-    void configurePPI() FL_NOEXCEPT;
+    void configurePPI() FL_NO_EXCEPT;
 
     /// @brief Configure GPIOTE for clock output
-    void configureGPIOTE() FL_NOEXCEPT;
+    void configureGPIOTE() FL_NO_EXCEPT;
 
     /// @brief Start synchronized transmission on both SPIM peripherals
-    void startTransmission() FL_NOEXCEPT;
+    void startTransmission() FL_NO_EXCEPT;
 
     int mBusId;  ///< Logical bus identifier
     const char* mName;  ///< Human-readable controller name

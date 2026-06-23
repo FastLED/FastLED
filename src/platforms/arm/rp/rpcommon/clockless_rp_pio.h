@@ -60,7 +60,7 @@ namespace fl {
 
 #if FASTLED_RP2040_CLOCKLESS_PIO
 static CMinWait<0> *dma_chan_waits[NUM_DMA_CHANNELS] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-static inline void __isr clockless_dma_complete_handler() FL_NOEXCEPT {
+static inline void __isr clockless_dma_complete_handler() FL_NO_EXCEPT {
     for (u32 i = 0; i < NUM_DMA_CHANNELS; i++) {
         // if dma triggered for this channel and it's been used (has a CMinWait)
         if ((dma_hw->ints0 & (1 << i)) && dma_chan_waits[i]) {
@@ -99,14 +99,14 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     CMinWait<WAIT_TIME + ( ((T1 + T2 + T3) * 32 * 4) / (CLOCKLESS_FREQUENCY / 1000000) )> mWait;
     
     // start a DMA transfer to the PIO state machine from addr (transfer count 32 bit words)
-    static void do_dma_transfer(int channel, const void *addr, uint count) FL_NOEXCEPT {
+    static void do_dma_transfer(int channel, const void *addr, uint count) FL_NO_EXCEPT {
         dma_channel_set_read_addr(channel, addr, false);
         dma_channel_set_trans_count(channel, count, true);
     }
     
     // writes bits to an in-memory buffer (to DMA from)
     // pico has enough memory to not really care about using a buffer for DMA
-    template<int BITS> __attribute__ ((always_inline)) inline static int writeBitsToBuf(i32 *out_buf, u32 bitpos, u8 b) FL_NOEXCEPT {
+    template<int BITS> __attribute__ ((always_inline)) inline static int writeBitsToBuf(i32 *out_buf, u32 bitpos, u8 b) FL_NO_EXCEPT {
         // not really optimised and I haven't checked output assembly, but this should take ~50 cycles worst case
         // (and on average substantially fewer -- LEDs without XTRA0 should never trigger the second half of the function)
         
@@ -141,7 +141,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     CMinWait<WAIT_TIME> mWait;
 #endif
 public:
-    virtual void init() FL_NOEXCEPT {
+    virtual void init() FL_NO_EXCEPT {
 #if FASTLED_RP2040_CLOCKLESS_PIO
         if (dma_channel != -1) return; // maybe init was called twice somehow? not sure if possible
 #endif
@@ -259,7 +259,7 @@ public:
 
     virtual u16 getMaxRefreshRate() const { return 400; }
 
-    virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NOEXCEPT {
+    virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
 #if FASTLED_RP2040_CLOCKLESS_PIO
         if (dma_channel == -1) { // setup failed, so fall back to a blocking implementation
 #if FASTLED_RP2040_CLOCKLESS_M0_FALLBACK
@@ -297,7 +297,7 @@ public:
     }
 
 #if FASTLED_RP2040_CLOCKLESS_PIO
-    void showRGBInternal(PixelController<RGB_ORDER> pixels) FL_NOEXCEPT {
+    void showRGBInternal(PixelController<RGB_ORDER> pixels) FL_NO_EXCEPT {
         // Detect RGBW mode using pattern from ESP32 drivers
         const Rgbw rgbw = this->getRgbw();
         const bool is_rgbw = rgbw.active();
@@ -373,7 +373,7 @@ public:
 #endif // FASTLED_RP2040_CLOCKLESS_PIO
     
 #if FASTLED_RP2040_CLOCKLESS_M0_FALLBACK
-    void showRGBBlocking(PixelController<RGB_ORDER> pixels) FL_NOEXCEPT {
+    void showRGBBlocking(PixelController<RGB_ORDER> pixels) FL_NO_EXCEPT {
         struct M0ClocklessData data;
         data.d[0] = pixels.d[0];
         data.d[1] = pixels.d[1];

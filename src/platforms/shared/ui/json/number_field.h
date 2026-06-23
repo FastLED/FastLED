@@ -17,28 +17,28 @@ class JsonUiNumberFieldInternal;
 
 class JsonNumberFieldImpl {
   public:
-    JsonNumberFieldImpl(const fl::string &name, float value, float min, float max) FL_NOEXCEPT;
+    JsonNumberFieldImpl(const fl::string &name, float value, float min, float max) FL_NO_EXCEPT;
     ~JsonNumberFieldImpl();
-    JsonNumberFieldImpl &Group(const fl::string &name) FL_NOEXCEPT;
+    JsonNumberFieldImpl &Group(const fl::string &name) FL_NO_EXCEPT;
 
-    const fl::string &name() const FL_NOEXCEPT;
-    void toJson(fl::json &json) const FL_NOEXCEPT;
-    float value() const FL_NOEXCEPT;
-    void setValue(float value) FL_NOEXCEPT;
-    fl::string groupName() const FL_NOEXCEPT;
+    const fl::string &name() const FL_NO_EXCEPT;
+    void toJson(fl::json &json) const FL_NO_EXCEPT;
+    float value() const FL_NO_EXCEPT;
+    void setValue(float value) FL_NO_EXCEPT;
+    fl::string groupName() const FL_NO_EXCEPT;
     
     // Method to allow parent UIElement class to set the group
-    void setGroup(const fl::string &groupName) FL_NOEXCEPT;
+    void setGroup(const fl::string &groupName) FL_NO_EXCEPT;
 
-    int id() const FL_NOEXCEPT;
+    int id() const FL_NO_EXCEPT;
 
-    JsonNumberFieldImpl &operator=(float value) FL_NOEXCEPT;
-    JsonNumberFieldImpl &operator=(int value) FL_NOEXCEPT;
+    JsonNumberFieldImpl &operator=(float value) FL_NO_EXCEPT;
+    JsonNumberFieldImpl &operator=(int value) FL_NO_EXCEPT;
     // Use ALMOST_EQUAL_FLOAT for floating-point comparison
-    bool operator==(float v) const FL_NOEXCEPT;
-    bool operator==(int v) const FL_NOEXCEPT;
-    bool operator!=(float v) const FL_NOEXCEPT;
-    bool operator!=(int v) const FL_NOEXCEPT;
+    bool operator==(float v) const FL_NO_EXCEPT;
+    bool operator==(int v) const FL_NO_EXCEPT;
+    bool operator!=(float v) const FL_NO_EXCEPT;
+    bool operator!=(int v) const FL_NO_EXCEPT;
 
   private:
     // Change to use the specific internal implementation

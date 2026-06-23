@@ -150,7 +150,7 @@ FL_TEST_CASE("rgb_2_rgbww: user function path dispatches to installed callback")
                       u8 r, u8 g, u8 b,
                       u8 /*r_scale*/, u8 /*g_scale*/, u8 /*b_scale*/,
                       u8* out_r, u8* out_g, u8* out_b,
-                      u8* out_ww, u8* out_wc) FL_NOEXCEPT {
+                      u8* out_ww, u8* out_wc) FL_NO_EXCEPT {
         called = true;
         captured_r = r; captured_g = g; captured_b = b;
         *out_r = 1; *out_g = 2; *out_b = 3; *out_ww = 4; *out_wc = 5;

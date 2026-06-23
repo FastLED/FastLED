@@ -13,9 +13,9 @@ public:
     static constexpr u8 A4_MIDI_NOTE = 69;
 
     // Constructors
-    Note() FL_NOEXCEPT;
+    Note() FL_NO_EXCEPT;
     explicit Note(shared_ptr<Pitch> pitchDetector);
-    ~Note() FL_NOEXCEPT;
+    ~Note() FL_NO_EXCEPT;
 
     // Update and reset
     void update(shared_ptr<Context> context);

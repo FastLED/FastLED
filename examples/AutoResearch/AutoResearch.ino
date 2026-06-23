@@ -213,6 +213,7 @@ void loop()  { autoResearchLowMemoryLoop(); }
 #include "AutoResearchSimd.h"
 #include "AutoResearchWave8Expand.h"  // boot-time #2526 micro-bench
 #include "AutoResearchParlioEncode.h" // full parlio encode bench (post-byte-LUT)
+#include "AutoResearchTimingDrift.h"  // #2994 compounded-timing-drift repro
 #include "AutoResearchParlioStream.h" // #2548 PARLIO streaming validation (RPC-driven)
 
 // ============================================================================

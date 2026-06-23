@@ -107,13 +107,13 @@ typedef union {
 ///
 /// @param A Input array (8 bytes)
 /// @param B Output array (8 bytes, transposed)
-void transpose8x1_noinline(unsigned char *A, unsigned char *B) FL_NOEXCEPT;
+void transpose8x1_noinline(unsigned char *A, unsigned char *B) FL_NO_EXCEPT;
 
 /// Simplified 8x1 bit transpose (inline version)
 ///
 /// @param A Input array (8 bytes)
 /// @param B Output array (8 bytes, transposed)
-FASTLED_FORCE_INLINE void transpose8x1(unsigned char *A, unsigned char *B) FL_NOEXCEPT {
+FASTLED_FORCE_INLINE void transpose8x1(unsigned char *A, unsigned char *B) FL_NO_EXCEPT {
     fl::u32 x, y, t;
 
     // Load the array and pack it into x and y.
@@ -143,7 +143,7 @@ FASTLED_FORCE_INLINE void transpose8x1(unsigned char *A, unsigned char *B) FL_NO
 ///
 /// @param A Input array (8 bytes)
 /// @param B Output array (8 bytes, transposed MSB-first)
-FASTLED_FORCE_INLINE void transpose8x1_MSB(unsigned char *A, unsigned char *B) FL_NOEXCEPT {
+FASTLED_FORCE_INLINE void transpose8x1_MSB(unsigned char *A, unsigned char *B) FL_NO_EXCEPT {
     fl::u32 x, y, t;
 
     // Load the array and pack it into x and y.
@@ -183,7 +183,7 @@ FASTLED_FORCE_INLINE void transpose8x1_MSB(unsigned char *A, unsigned char *B) F
 /// @param A Input array (8 bytes at stride m)
 /// @param B Output array (8 bytes at stride n, transposed)
 template<int m, int n>
-FASTLED_FORCE_INLINE void transpose8(unsigned char *A, unsigned char *B) FL_NOEXCEPT {
+FASTLED_FORCE_INLINE void transpose8(unsigned char *A, unsigned char *B) FL_NO_EXCEPT {
     fl::u32 x, y, t;
 
     // Load the array and pack it into x and y.
@@ -241,7 +241,7 @@ inline void transpose_2lane_inline(
     const u8* lane1_byte,
     u8* output,
     size_t num_bytes
-) FL_NOEXCEPT;
+) FL_NO_EXCEPT;
 
 /// @brief Low-level bit-interleaving primitive for 4 lanes (ISR-safe)
 ///
@@ -259,7 +259,7 @@ inline void transpose_4lane_inline(
     const u8* const lanes[4],
     u8* output,
     size_t num_bytes
-) FL_NOEXCEPT;
+) FL_NO_EXCEPT;
 
 /// @brief Low-level bit-interleaving primitive for 8 lanes (ISR-safe)
 ///
@@ -277,7 +277,7 @@ inline void transpose_8lane_inline(
     const u8* const lanes[8],
     u8* output,
     size_t num_bytes
-) FL_NOEXCEPT;
+) FL_NO_EXCEPT;
 
 /// @brief Low-level bit-interleaving primitive for 16 lanes (ISR-safe)
 ///
@@ -295,7 +295,7 @@ inline void transpose_16lane_inline(
     const u8* const lanes[16],
     u8* output,
     size_t num_bytes
-) FL_NOEXCEPT;
+) FL_NO_EXCEPT;
 
 /// @brief Generic bit-interleaving primitive for N lanes with M-bit source data (ISR-safe)
 ///
@@ -322,7 +322,7 @@ inline void transpose_generic_inline(
     size_t num_lanes,
     u8* output,
     size_t num_items
-) FL_NOEXCEPT;
+) FL_NO_EXCEPT;
 
 // Implementation of inline ISR-safe primitives
 
@@ -331,7 +331,7 @@ inline void transpose_2lane_inline(
     const u8* lane1_byte,
     u8* output,
     size_t num_bytes
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     for (size_t byte_idx = 0; byte_idx < num_bytes; byte_idx++) {
         u8 a = lane0_byte[byte_idx];
         u8 b = lane1_byte[byte_idx];
@@ -356,7 +356,7 @@ inline void transpose_4lane_inline(
     const u8* const lanes[4],
     u8* output,
     size_t num_bytes
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     for (size_t byte_idx = 0; byte_idx < num_bytes; byte_idx++) {
         u8 a = lanes[0][byte_idx];
         u8 b = lanes[1][byte_idx];
@@ -383,7 +383,7 @@ inline void transpose_8lane_inline(
     const u8* const lanes[8],
     u8* output,
     size_t num_bytes
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     for (size_t byte_idx = 0; byte_idx < num_bytes; byte_idx++) {
         // Pack 8 bytes into a single 64-bit register
         // This reduces register pressure and enables parallel bit extraction
@@ -418,7 +418,7 @@ inline void transpose_16lane_inline(
     const u8* const lanes[16],
     u8* output,
     size_t num_bytes
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     for (size_t byte_idx = 0; byte_idx < num_bytes; byte_idx++) {
         // Pack lanes 0-7 into first 64-bit register
         u64 packed_lo =
@@ -475,7 +475,7 @@ inline void transpose_generic_inline(
     size_t num_lanes,
     u8* output,
     size_t num_items
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     constexpr size_t bits_per_item = sizeof(TSource) * 8;
 
     for (size_t item_idx = 0; item_idx < num_items; item_idx++) {
@@ -602,7 +602,7 @@ public:
     static bool transpose2(const fl::optional<LaneData>& lane0,
                           const fl::optional<LaneData>& lane1,
                           fl::span<u8> output,
-                          const char** error = nullptr) FL_NOEXCEPT;
+                          const char** error = nullptr) FL_NO_EXCEPT;
 
     /// Transpose 4 lanes of data into interleaved quad-SPI format
     ///
@@ -622,7 +622,7 @@ public:
                           const fl::optional<LaneData>& lane2,
                           const fl::optional<LaneData>& lane3,
                           fl::span<u8> output,
-                          const char** error = nullptr) FL_NOEXCEPT;
+                          const char** error = nullptr) FL_NO_EXCEPT;
 
     /// Transpose 8 lanes of data into interleaved octal-SPI format
     ///
@@ -636,7 +636,7 @@ public:
     /// @note Empty lanes (nullopt) are filled with zeros or first lane's padding
     static bool transpose8(const fl::optional<LaneData> lanes[8],
                           fl::span<u8> output,
-                          const char** error = nullptr) FL_NOEXCEPT;
+                          const char** error = nullptr) FL_NO_EXCEPT;
 
     /// Transpose 16 lanes of data into interleaved hex-SPI format
     ///
@@ -650,11 +650,11 @@ public:
     /// @note Empty lanes (nullopt) are filled with zeros or first lane's padding
     static bool transpose16(const fl::optional<LaneData> lanes[16],
                            fl::span<u8> output,
-                           const char** error = nullptr) FL_NOEXCEPT;
+                           const char** error = nullptr) FL_NO_EXCEPT;
 
 private:
     /// Get byte from lane at given index, handling padding automatically
-    static u8 getLaneByte(const LaneData& lane, size_t byte_idx, size_t max_size) FL_NOEXCEPT;
+    static u8 getLaneByte(const LaneData& lane, size_t byte_idx, size_t max_size) FL_NO_EXCEPT;
 };
 
 // ============================================================================
@@ -682,7 +682,7 @@ FASTLED_FORCE_INLINE void transpose_8strips(
     u8* output,
     u16 num_leds,
     u8 bytes_per_led
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     // Process each LED
     for (u16 led = 0; led < num_leds; led++) {
         u8 temp_input[8];
@@ -724,7 +724,7 @@ FASTLED_FORCE_INLINE void transpose_4strips(
     u8* output,
     u16 num_leds,
     u8 bytes_per_led
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     // Process each LED
     for (u16 led = 0; led < num_leds; led++) {
         // Process each byte in the LED
@@ -769,7 +769,7 @@ FASTLED_FORCE_INLINE void transpose_2strips(
     u8* output,
     u16 num_leds,
     u8 bytes_per_led
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     // Process each LED
     for (u16 led = 0; led < num_leds; led++) {
         // Process each byte in the LED
@@ -797,7 +797,7 @@ FASTLED_FORCE_INLINE void transpose_2strips(
 /// @param num_leds Maximum number of LEDs across all strips
 /// @param bytes_per_led Number of bytes per LED (3 for RGB, 4 for RGBW, etc.)
 /// @return Required output buffer size in bytes
-FASTLED_FORCE_INLINE u32 calculate_transpose_buffer_size(u16 num_leds, u8 bytes_per_led) FL_NOEXCEPT {
+FASTLED_FORCE_INLINE u32 calculate_transpose_buffer_size(u16 num_leds, u8 bytes_per_led) FL_NO_EXCEPT {
     return num_leds * bytes_per_led * 8;
 }
 
@@ -815,7 +815,7 @@ inline bool transpose_strips(
     u8* output,
     u16 num_leds,
     u8 bytes_per_led
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     switch (num_strips) {
         case 8:
             transpose_8strips(input, output, num_leds, bytes_per_led);
@@ -845,7 +845,7 @@ template<size_t DATA_WIDTH>
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION size_t transpose_wave8byte_parlio_template(
     const u8* FL_RESTRICT_PARAM laneWaveforms,
     u8* FL_RESTRICT_PARAM outputBuffer
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     constexpr size_t bytes_per_lane = 8;   // sizeof(Wave8Byte)
     constexpr size_t pulsesPerByte = 64;   // 8 bits × 8 pulses per bit
     size_t outputIdx = 0;
@@ -1065,7 +1065,7 @@ FASTLED_FORCE_INLINE FL_IRAM size_t transpose_wave8byte_parlio(
     const u8* FL_RESTRICT_PARAM laneWaveforms,
     size_t data_width,
     u8* FL_RESTRICT_PARAM outputBuffer
-) FL_NOEXCEPT {
+) FL_NO_EXCEPT {
     // Dispatch to template specialization based on runtime data_width
     // Compiler generates optimized code for each specialization (no runtime branching)
     switch (data_width) {

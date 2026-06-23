@@ -60,17 +60,17 @@ protected:
     virtual void showPixels(PixelController<RGB_ORDER>& pixels) override
     {
         if (!mDriver) {
-            FL_WARN_EVERY(100, "No Engine");
+            FL_WARN_F_EVERY(100, "No Engine");
             return;
         }
         // Wait for previous transmission to complete and release buffer
         // This prevents race conditions when show() is called faster than hardware can transmit
         u32 startTime = fl::millis();
         if (mChannelData->isInUse()) {
-            FL_WARN_EVERY(100, "ClocklessController(wasm): driver should have finished transmitting by now - waiting");
+            FL_WARN_F_EVERY(100, "ClocklessController(wasm): driver should have finished transmitting by now - waiting");
             bool finished = mDriver->waitForReady();
             if (!finished) {
-                FL_ERROR("ClocklessController(wasm): Engine still busy after " << fl::millis() - startTime << "ms");
+                FL_ERROR_F("ClocklessController(wasm): Engine still busy after %sms", fl::millis() - startTime);
                 return;
             }
         }
@@ -95,7 +95,7 @@ protected:
         mDriver->enqueue(mChannelData);
     }
 
-    static fl::shared_ptr<IChannelDriver> getWasmEngine() FL_NOEXCEPT {
+    static fl::shared_ptr<IChannelDriver> getWasmEngine() FL_NO_EXCEPT {
         // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
         // the `BusTraits<Bus::STUB>` singleton -- the stub driver is the
         // platform default for both stub and WASM builds. Naming the

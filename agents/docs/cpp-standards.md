@@ -212,7 +212,7 @@ For a subsystem (e.g., `Watchdog`, `Audio`, `Codec`) that has multi-tier platfor
 - **Alternative Solution (header files)**: Move static initialization to corresponding `.cpp` file
   - Example: See `src/platforms/shared/spi_hw_1.{h,cpp}` for the correct pattern
 - **Exception**: Statics inside template functions are allowed (each template instantiation gets its own static, avoiding conflicts)
-- **Linter**: Enforced by `ci/lint_cpp/test_no_static_in_headers.py` for critical directories (`src/platforms/shared/`, `src/fl/`, `src/fx/`)
+- **Linter**: Enforced by `StaticInHeaderChecker` in the Rust crate (`ci/lint_cpp_rs/src/checkers/style.rs`) for critical directories (`src/platforms/shared/`, `src/fl/`, `src/fx/`)
 - **Suppression**: Add `// okay static in header` comment if absolutely necessary (use sparingly)
 
 ## Channel Engine DMA Wait Pattern
@@ -259,12 +259,12 @@ class CFastLED {
 2. ✅ **The wrapper is a `inline` one-liner that delegates** — no logic, no validation, no error handling. The free function holds all behavior.
 3. ✅ **Per-object configuration (e.g. one strip's diode profile, one controller's correction) MAY live on the per-object API.** This rule targets *library-wide / process-wide / default-profile* state.
 4. ✅ **Documentation, examples, and PR descriptions reference the god-instance form.** The free function is an implementation detail.
-5. ⚠️ **Strict for new code; transitional allowlist for legacy names only.** Every *new* public global setter under `fl::` must ship with a `CFastLED` wrapper. A small transitional allowlist (`GRANDFATHERED_NAMES` in `ci/lint_cpp/public_settings_pattern_checker.py`) exempts pre-existing bare setters (e.g. `fl::set_input_gamut` #2710, `fl::enable_rgbw_colorimetric_lut`, `fl::set_rgbww_colorimetric_profile`) until their wrappers land. Entries are removed as each name is wrapped — the goal is an empty allowlist. New additions do NOT get grandfathered.
+5. ⚠️ **Strict for new code; transitional allowlist for legacy names only.** Every *new* public global setter under `fl::` must ship with a `CFastLED` wrapper. A small transitional allowlist (`PUBLIC_SETTINGS_GRANDFATHERED` in `ci/lint_cpp_rs/src/checkers/public_settings.rs`) exempts pre-existing bare setters (e.g. `fl::set_input_gamut` #2710, `fl::enable_rgbw_colorimetric_lut`, `fl::set_rgbww_colorimetric_profile`) until their wrappers land. Entries are removed as each name is wrapped — the goal is an empty allowlist. New additions do NOT get grandfathered.
 
 **Check Process**:
 1. For every new public function in `src/fl/**/*.h` whose name matches `^set_|^enable_|^disable_|^use_` and that mutates a static / global / namespace-scope variable, grep `src/FastLED.h` for a `CFastLED` method that delegates to it.
 2. If none exists: violation — add the wrapper in the same PR.
-3. Enforced by `ci/lint_cpp/public_settings_pattern_checker.py`. The checker carries a shrinking `GRANDFATHERED_NAMES` allowlist for legacy bare setters; remove a name from the list once its `CFastLED` wrapper is merged.
+3. Enforced by `PublicSettingsPatternChecker` in `ci/lint_cpp_rs/src/checkers/public_settings.rs`. The checker carries a shrinking `PUBLIC_SETTINGS_GRANDFATHERED` allowlist for legacy bare setters; remove a name from the list once its `CFastLED` wrapper is merged.
 
 **Where the rule does NOT apply**:
 - Helpers, constructors, factory functions — these are not setters of global state.
@@ -280,21 +280,21 @@ class CFastLED {
    - ❌ Bad:
      ```cpp
      namespace { const RgbcctProfile* sActive = nullptr; }
-     void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NOEXCEPT {
+     void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NO_EXCEPT {
          sActive = p;  // caller's lifetime, BOOM if they pass a stack temporary
      }
      ```
    - ✅ Good (value semantics, preferred):
      ```cpp
      namespace { RgbcctProfile sActive = kRgbwwDefaultProfile; }
-     void set_rgbww_colorimetric_profile(const RgbcctProfile& p) FL_NOEXCEPT {
+     void set_rgbww_colorimetric_profile(const RgbcctProfile& p) FL_NO_EXCEPT {
          sActive = p;  // copy, lifetime owned by library
      }
      ```
    - ✅ Good (nullable-reset exception — `const T*` allowed when null means "reset"):
      ```cpp
      namespace { RgbcctProfile sActive = kRgbwwDefaultProfile; }
-     void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NOEXCEPT {
+     void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NO_EXCEPT {
          sActive = (p != nullptr) ? *p : kRgbwwDefaultProfile;  // copy on non-null, reset on null
      }
      ```
@@ -316,14 +316,14 @@ class CFastLED {
 1. ❌ **NEVER mutate a profile field in place without bumping a version counter** when a cache exists keyed on the profile pointer.
    - ❌ Bad:
      ```cpp
-     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NOEXCEPT {
+     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NO_EXCEPT {
          apply_gamut(p, g);  // rewrites p->input_xy_*
          // …no version bump; ProfileCache keyed on (p, cct) still returns stale M_src
      }
      ```
    - ✅ Good:
      ```cpp
-     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NOEXCEPT {
+     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NO_EXCEPT {
          apply_gamut(p, g);
          ++p->mCacheVersion;  // forces any derived-value cache to rebuild
      }
@@ -368,11 +368,21 @@ class CFastLED {
    - ❌ Bad: `void set_input_gamut(DiodeProfile* p, InputGamut g, const float white_xy[2]);`
    - ✅ Good: `void set_input_gamut(DiodeProfile* p, InputGamut g, fl::span<const float, 2> white_xy);`
    - ✅ Good (alternative — by-value pair): `void set_white_point(DiodeProfile* p, fl::vec2f white_xy);`
-3. ✅ **For RGBW / RGBWW multi-channel output**, prefer a `fl::span<u8, 4>` (or `5`) over five separate `u8*` parameters.
+3. ❌ **NEVER use function parameter array spelling (`T value[N]` or `T value[]`).**
+   - C++ adjusts these to `T* value`; the extent is not part of the function type and is not enforced.
+   - ❌ Bad: `void cct_to_xy(int cct, float out[2]);`
+   - ❌ Bad: `void encode(fl::u8 output[4]);`
+   - ✅ Good for normal APIs: `void cct_to_xy(int cct, fl::span<float, 2> out);`
+   - ✅ Good for ISR / `FL_IRAM` APIs: `void encode(fl::u8 (&output)[4]);`
+   - ✅ Good where a wrapper type would obscure the domain: `void set_white_point(DiodeProfile* p, fl::vec2f white_xy);`
+   - Suppress only intentional C ABI or platform compatibility cases with `// ok array parameter`.
+4. ⚠️ **For ISR / `FL_IRAM` callgraphs, prefer array references over `fl::span<T, N>`.**
+   - `fl::span<T, N>` is the right general API shape, but current span accessors are not explicitly `FASTLED_FORCE_INLINE` / `FL_IRAM`. Until an explicitly ISR-safe span exists, ISR-facing fixed-size output buffers should use `T (&value)[N]`.
+5. ✅ **For RGBW / RGBWW multi-channel output**, prefer a `fl::span<u8, 4>` (or `5`) over five separate `u8*` parameters, except inside ISR / `FL_IRAM` callgraphs where `u8 (&out)[4]` / `[5]` is preferred.
 
 **Scoped exception — deferred legacy migrations**: A `(ptr, size)` callback typedef MAY be temporarily retained in a legacy layer when migrating it would force a synchronized rewrite of every caller and the migration is being deferred to a follow-up PR. The exception requires (a) a comment at the typedef site referencing the migration plan / tracking issue, (b) naming the legacy location (current example: `src/fl/stl/cstdio.h` retains raw pointer+length handler signatures intentionally), and (c) the exception is timeboxed — it must be revisited at the next layer-wide migration window. Permanent divergence is not permitted; the goal is "all-or-nothing per-layer sweep when the engineering budget allows."
 
-**Rationale**: The base span rule prevents most of the pattern but CodeRabbit caught these two shapes in #2560, #2683, #2711. Just adding the two shapes to the canonical examples will close most remaining gaps. The scoped exception accommodates the real-world case where touching every caller in one PR isn't tractable; without it the rule pushes engineers toward unprincipled mixed APIs.
+**Rationale**: The base span rule prevents most of the pattern but CodeRabbit caught these two shapes in #2560, #2683, #2711. Issue #3233 adds clang-query lint coverage for source-spelled array parameters because `T value[N]` is especially misleading: it looks fixed-size but compiles as a pointer. The scoped exception accommodates the real-world case where touching every caller in one PR isn't tractable; without it the rule pushes engineers toward unprincipled mixed APIs.
 
 ## ISR-Shared State: `fl::atomic` or Critical Section, Never Bare `volatile`
 

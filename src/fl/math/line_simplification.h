@@ -34,11 +34,11 @@ template <typename NumberT = float> class LineSimplifier {
     using Point = fl::vec2<NumberT>;
     using VectorPoint = fl::vector<Point>;
 
-    LineSimplifier() FL_NOEXCEPT : mMinDistance(FL_EPSILON_F) {}
-    LineSimplifier(const LineSimplifier &other) FL_NOEXCEPT = default;
-    LineSimplifier &operator=(const LineSimplifier &other) FL_NOEXCEPT = default;
-    LineSimplifier(LineSimplifier &&other) FL_NOEXCEPT = default;
-    LineSimplifier &operator=(LineSimplifier &&other) FL_NOEXCEPT = default;
+    LineSimplifier() FL_NO_EXCEPT : mMinDistance(FL_EPSILON_F) {}
+    LineSimplifier(const LineSimplifier &other) FL_NO_EXCEPT = default;
+    LineSimplifier &operator=(const LineSimplifier &other) FL_NO_EXCEPT = default;
+    LineSimplifier(LineSimplifier &&other) FL_NO_EXCEPT = default;
+    LineSimplifier &operator=(LineSimplifier &&other) FL_NO_EXCEPT = default;
 
     explicit LineSimplifier(NumberT e) : mMinDistance(e) {}
     void setMinimumDistance(NumberT eps) { mMinDistance = eps; }
@@ -235,7 +235,7 @@ template <typename NumberT = float> class LineSimplifier {
 
 template <typename NumberT = float> class LineSimplifierExact {
   public:
-    LineSimplifierExact() FL_NOEXCEPT = default;
+    LineSimplifierExact() FL_NO_EXCEPT = default;
     using Point = vec2<NumberT>;
 
     LineSimplifierExact(int count) : mCount(count) {}

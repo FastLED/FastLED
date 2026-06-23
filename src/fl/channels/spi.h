@@ -53,7 +53,7 @@ namespace fl {
 class Spi {
 public:
     /// @brief Default constructor - creates device in error state
-    Spi() FL_NOEXCEPT : is_ok(false), error_code(SPIError::NOT_INITIALIZED) {}
+    Spi() FL_NO_EXCEPT : is_ok(false), error_code(SPIError::NOT_INITIALIZED) {}
 
     /// @brief Construct and initialize SPI device
     /// @param clock_pin Clock pin number
@@ -69,14 +69,14 @@ public:
     explicit Spi(const SpiConfig& config);
 
     /// @brief Move constructor
-    Spi(Spi&& other) FL_NOEXCEPT;
+    Spi(Spi&& other) FL_NO_EXCEPT;
 
     /// @brief Move assignment
-    Spi& operator=(Spi&& other) FL_NOEXCEPT;
+    Spi& operator=(Spi&& other) FL_NO_EXCEPT;
 
     /// @brief Destructor (defined out-of-line in spi.cpp.hpp to keep
     ///        MultiLaneDevice destructor out of callers' compilation units)
-    ~Spi() FL_NOEXCEPT;
+    ~Spi() FL_NO_EXCEPT;
 
     /// @brief Check if device was created and initialized successfully
     bool ok() const { return is_ok; }

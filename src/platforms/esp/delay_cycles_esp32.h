@@ -30,7 +30,7 @@
 
 /// Forward declaration
 template<fl::cycle_t CYCLES>
-inline void delaycycles() FL_NOEXCEPT;
+inline void delaycycles() FL_NO_EXCEPT;
 
 /// ESP32 specialization for very large cycle counts
 /// This prevents stack overflow on ESP32 with cycles = 4294966398

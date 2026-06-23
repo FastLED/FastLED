@@ -130,7 +130,7 @@ struct TIMING_WS2812_800KHZ {
         T3 = FASTLED_WS2812_T3,
         RESET = 280
     };
-    static constexpr const char* name() FL_NOEXCEPT { return "WS2812_800KHZ"; }
+    static constexpr const char* name() FL_NO_EXCEPT { return "WS2812_800KHZ"; }
 };
 
 /// Convenience alias for WS2812 timing (commonly used name)
@@ -314,13 +314,17 @@ struct TIMING_SM16703 {
     };
 };
 
-/// SM16824E RGB controller (high-speed variant)
-/// Four-phase: TH0=300ns, TH1=1200ns, TL0=1000ns, TL1=100ns
+/// SM16824E RGBW controller @ 800 kHz
+/// Four-phase: TH0=300ns, TH1=900ns, TL0=900ns, TL1=300ns, TRST=200µs
+/// Datasheet typicals are identical to the SM16703 / WS2811-800kHz RZ family,
+/// so this timing also lets SM16824E and SM16703 chips share a single data line.
+/// Prior values (T2=900, T3=100) emitted T1H=1200ns / T1L=100ns — out of spec
+/// against both this chip's own datasheet and SM16703. See issue #3203.
 struct TIMING_SM16824E {
     enum : u32 {
         T1 = 300,
-        T2 = 900,
-        T3 = 100,
+        T2 = 600,
+        T3 = 300,
         RESET = 200
     };
 };
@@ -518,35 +522,35 @@ struct TIMING_UCS7604_8BIT_800KHZ {
 /// @tparam TIMING Timing type with enum-based T1, T2, T3, RESET values
 /// @return Runtime ChipsetTiming struct initialized from timing type
 template <typename TIMING>
-constexpr ChipsetTiming to_runtime_timing() FL_NOEXCEPT {
+constexpr ChipsetTiming to_runtime_timing() FL_NO_EXCEPT {
     return {TIMING::T1, TIMING::T2, TIMING::T3, TIMING::RESET, "timing"};
 }
 
 /// @brief Get total bit period (T1 + T2 + T3) in nanoseconds
 /// @param timing Chipset timing structure
 /// @return Total bit period in nanoseconds
-constexpr u32 get_bit_period_ns(const ChipsetTiming& timing) FL_NOEXCEPT {
+constexpr u32 get_bit_period_ns(const ChipsetTiming& timing) FL_NO_EXCEPT {
     return timing.T1 + timing.T2 + timing.T3;
 }
 
 /// @brief Extract T1 (high time for bit 0) from timing constant
 /// @param timing Chipset timing structure
 /// @return T1 value in nanoseconds
-constexpr u32 get_timing_t1(const ChipsetTiming& timing) FL_NOEXCEPT {
+constexpr u32 get_timing_t1(const ChipsetTiming& timing) FL_NO_EXCEPT {
     return timing.T1;
 }
 
 /// @brief Extract T2 (additional high time for bit 1) from timing constant
 /// @param timing Chipset timing structure
 /// @return T2 value in nanoseconds
-constexpr u32 get_timing_t2(const ChipsetTiming& timing) FL_NOEXCEPT {
+constexpr u32 get_timing_t2(const ChipsetTiming& timing) FL_NO_EXCEPT {
     return timing.T2;
 }
 
 /// @brief Extract T3 (low tail duration) from timing constant
 /// @param timing Chipset timing structure
 /// @return T3 value in nanoseconds
-constexpr u32 get_timing_t3(const ChipsetTiming& timing) FL_NOEXCEPT {
+constexpr u32 get_timing_t3(const ChipsetTiming& timing) FL_NO_EXCEPT {
     return timing.T3;
 }
 
@@ -554,6 +558,6 @@ constexpr u32 get_timing_t3(const ChipsetTiming& timing) FL_NOEXCEPT {
 /// @param name Chipset name string
 /// @return Pointer to ChipsetTiming or nullptr if not found
 /// Note: This is a runtime function and should only be used during initialization
-const ChipsetTiming* get_timing_by_name(const char* name) FL_NOEXCEPT;
+const ChipsetTiming* get_timing_by_name(const char* name) FL_NO_EXCEPT;
 
 }  // namespace fl

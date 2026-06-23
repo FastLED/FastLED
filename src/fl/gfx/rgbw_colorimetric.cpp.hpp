@@ -1,4 +1,4 @@
-/// @file rgbw_colorimetric.cpp.hpp
+﻿/// @file rgbw_colorimetric.cpp.hpp
 /// Heavy implementations for the colorimetric RGBW solvers (issue #2545).
 /// Gated by FASTLED_RGBW_COLORIMETRIC so the float math + simplex solver
 /// + LUT machinery only land in the binary when the user opts in.
@@ -60,7 +60,7 @@ namespace colorimetric_detail {
 // a Y=1 source target against hundreds/thousands of device-Y emitter units.
 // The result is underpowered solves and the wrong active-channel ratios.
 void build_profile_cache(const DiodeProfile* p, int cct_override,
-                         ProfileCache* cache) FL_NOEXCEPT {
+                         ProfileCache* cache) FL_NO_EXCEPT {
     cache->profile = p;
     xyY_to_XYZ(p->xy_r[0], p->xy_r[1], p->lum_r, cache->P_R);
     xyY_to_XYZ(p->xy_g[0], p->xy_g[1], p->lum_g, cache->P_G);
@@ -73,7 +73,7 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
     xyY_to_XYZ(cache->xy_w[0], cache->xy_w[1], p->lum_w, cache->P_W);
 
     auto pack = [](const float* a, const float* b, const float* c,
-                   float out[3][3]) FL_NOEXCEPT {
+                   float out[3][3]) FL_NO_EXCEPT {
         out[0][0] = a[0]; out[0][1] = b[0]; out[0][2] = c[0];
         out[1][0] = a[1]; out[1][1] = b[1]; out[1][2] = c[1];
         out[2][0] = a[2]; out[2][1] = b[2]; out[2][2] = c[2];
@@ -86,7 +86,7 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
     pack(cache->P_B, cache->P_G, cache->P_W, P_BGW);
 
     // Inverting a singular matrix leaves the destination with whatever
-    // invert3x3 wrote — solvers reading it would silently produce garbage.
+    // invert3x3 wrote â€” solvers reading it would silently produce garbage.
     // Warn once if any inversion fails so the user knows their profile has
     // degenerate primaries (colinear chromaticities, near-zero luminance, etc).
     const bool ok_rgb = invert3x3(P_RGB, cache->P_RGB_inv);
@@ -94,12 +94,12 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
     const bool ok_rbw = invert3x3(P_RBW, cache->P_RBW_inv);
     const bool ok_bgw = invert3x3(P_BGW, cache->P_BGW_inv);
     if (!(ok_rgb && ok_rgw && ok_rbw && ok_bgw)) {
-        FL_WARN_ONCE("RGBW colorimetric: profile has degenerate primaries — "
+        FL_WARN_F_ONCE("RGBW colorimetric: profile has degenerate primaries â€” "
                      "one or more sub-gamut matrix inversions failed. Output "
                      "colors will be incorrect. Check DiodeProfile xy/lum values.");
         // Zero-init any failed inverse so downstream matvec3() output is
         // deterministic (zero) rather than UB-valued garbage.
-        auto zero3x3 = [](float m[3][3]) FL_NOEXCEPT {
+        auto zero3x3 = [](float m[3][3]) FL_NO_EXCEPT {
             for (int i = 0; i < 3; ++i)
                 for (int j = 0; j < 3; ++j) m[i][j] = 0.0f;
         };
@@ -124,7 +124,7 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
         // measured-device absolute XYZ units, so scale M_src by the same
         // white-fit factor used by the reference math model:
         //   K = 1 / max(solve_subgamut(source_white_Y1))
-        // This makes M_src·[1,1,1] land at the brightest achievable device
+        // This makes M_srcÂ·[1,1,1] land at the brightest achievable device
         // white instead of an underpowered Y=1 target. Without this scale,
         // native/D65 dual-edge and LP solves cannot match the Python model.
         float X_w[3];
@@ -171,7 +171,7 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
 }
 
 // Project an out-of-hull target XYZ onto the achievable LED gamut (#2708,
-// math-model gist §3). Returns true if a projection was applied, in which
+// math-model gist Â§3). Returns true if a projection was applied, in which
 // case `X_t` and `xy_t` are updated to the projected point at unit Y. When
 // the target is already inside the full RGB triangle, returns false and
 // leaves `X_t` / `xy_t` untouched.
@@ -181,7 +181,7 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
 // 1.0 per sub-gamut, then pick the sub-gamut with smallest residual. Use
 // the achieved chromaticity as the new target xy.
 static bool project_to_hull(const ProfileCache& cache,
-                            float X_t[3], float xy_t[2]) FL_NOEXCEPT {
+                            float X_t[3], float xy_t[2]) FL_NO_EXCEPT {
     const float sum = X_t[0] + X_t[1] + X_t[2];
     if (sum < 1e-12f) return false;
     xy_t[0] = X_t[0] / sum;
@@ -189,7 +189,7 @@ static bool project_to_hull(const ProfileCache& cache,
 
     const DiodeProfile& p = *cache.profile;
     float bary[3];
-    // Test the full RGB triangle (not the sub-gamut triangles) — a target
+    // Test the full RGB triangle (not the sub-gamut triangles) â€” a target
     // can be outside a single sub-gamut yet still inside the full hull.
     if (barycentric_xy(xy_t, p.xy_r, p.xy_g, p.xy_b, bary)
         && bary[0] >= -1e-9f && bary[1] >= -1e-9f && bary[2] >= -1e-9f) {
@@ -229,7 +229,7 @@ static bool project_to_hull(const ProfileCache& cache,
         }
     }
     if (best_xyz[1] <= 1e-12f) {
-        // All sub-gamut projections collapsed to zero — pathological
+        // All sub-gamut projections collapsed to zero â€” pathological
         // profile or extreme target. Leave the original X_t alone; the
         // strict solver will return false and the dispatch falls back.
         return false;
@@ -247,15 +247,15 @@ static bool project_to_hull(const ProfileCache& cache,
 // Small leaf helpers used by the solvers below.  They are kept local to this
 // translation unit so the public header stays focused on reusable math helpers
 // and type declarations.
-static float max3f(float a, float b, float c) FL_NOEXCEPT {
+static float max3f(float a, float b, float c) FL_NO_EXCEPT {
     return fl::max(fl::max(a, b), c);
 }
 
-static void zero4(float out[4]) FL_NOEXCEPT {
+static void zero4(float out[4]) FL_NO_EXCEPT {
     out[0] = out[1] = out[2] = out[3] = 0.0f;
 }
 
-static void normalize4_if_needed(float out[4]) FL_NOEXCEPT {
+static void normalize4_if_needed(float out[4]) FL_NO_EXCEPT {
     const float m = fl::max(fl::max(out[0], out[1]), fl::max(out[2], out[3]));
     if (m > 1.0f) {
         const float inv_m = 1.0f / m;
@@ -263,7 +263,7 @@ static void normalize4_if_needed(float out[4]) FL_NOEXCEPT {
     }
 }
 
-static const float* column_for_idx(const ProfileCache& cache, int idx) FL_NOEXCEPT {
+static const float* column_for_idx(const ProfileCache& cache, int idx) FL_NO_EXCEPT {
     switch (idx) {
     case 0: return cache.P_R;
     case 1: return cache.P_G;
@@ -281,7 +281,7 @@ static const float* column_for_idx(const ProfileCache& cache, int idx) FL_NOEXCE
 // drive fractions.
 static void source_rgb_to_XYZ(const ProfileCache& cache, float s_r,
                               float s_g, float s_b,
-                              float X_t[3]) FL_NOEXCEPT {
+                              float X_t[3]) FL_NO_EXCEPT {
     if (cache.has_source_space) {
         const float s[3] = { s_r, s_g, s_b };
         matvec3(cache.M_src, s, X_t);
@@ -297,7 +297,7 @@ static void source_rgb_to_XYZ(const ProfileCache& cache, float s_r,
 // Do not route it through RGW/RBW/BGW or W/LP paths, since that can introduce
 // W or another primary due to white-point/source-matrix differences.
 static bool native_single_identity(float s_r, float s_g, float s_b,
-                                   float out[4]) FL_NOEXCEPT {
+                                   float out[4]) FL_NO_EXCEPT {
     out[0] = fl::clamp(s_r, 0.0f, 1.0f);
     out[1] = fl::clamp(s_g, 0.0f, 1.0f);
     out[2] = fl::clamp(s_b, 0.0f, 1.0f);
@@ -316,7 +316,7 @@ static bool solve_fixed_topology_least_squares(const ProfileCache& cache,
                                                const float X[3],
                                                const int* idx,
                                                int n,
-                                               float out[4]) FL_NOEXCEPT {
+                                               float out[4]) FL_NO_EXCEPT {
     zero4(out);
     constexpr float kEps = 1e-9f;
 
@@ -374,7 +374,7 @@ static bool solve_fixed_topology_least_squares(const ProfileCache& cache,
 static bool solve_native_dual_edge_fixed_topology(const ProfileCache& cache,
                                                   float s_r, float s_g,
                                                   float s_b,
-                                                  float out[4]) FL_NOEXCEPT {
+                                                  float out[4]) FL_NO_EXCEPT {
     zero4(out);
     constexpr float kEps = 1.0f / 65535.0f;
     const float value = max3f(s_r, s_g, s_b);
@@ -424,7 +424,7 @@ static bool solve_native_dual_edge_fixed_topology(const ProfileCache& cache,
 // in the public solve_strict_subgamut() wrapper after this endpoint is found.
 static bool solve_strict_subgamut_from_XYZ(const ProfileCache& cache,
                                            float X_t[3],
-                                           float out_rgbw[4]) FL_NOEXCEPT {
+                                           float out_rgbw[4]) FL_NO_EXCEPT {
     zero4(out_rgbw);
     const float sum_xyz = X_t[0] + X_t[1] + X_t[2];
     if (sum_xyz < 1e-9f) {
@@ -480,7 +480,7 @@ static bool solve_strict_subgamut_from_XYZ(const ProfileCache& cache,
 
 bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
                            float s_g, float s_b,
-                           float out_rgbw[4]) FL_NOEXCEPT {
+                           float out_rgbw[4]) FL_NO_EXCEPT {
     zero4(out_rgbw);
 
     const float value = max3f(s_r, s_g, s_b);
@@ -532,7 +532,7 @@ bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
 
 bool solve_strict_subgamut_xy(const ProfileCache& cache,
                               const float xy_t[2], float Y_t,
-                              float out_rgbw[4]) FL_NOEXCEPT {
+                              float out_rgbw[4]) FL_NO_EXCEPT {
     out_rgbw[0] = out_rgbw[1] = out_rgbw[2] = out_rgbw[3] = 0.0f;
     if (Y_t < 1e-9f) {
         return true;
@@ -600,7 +600,7 @@ bool solve_strict_subgamut_xy(const ProfileCache& cache,
 // better for white-like / neutral values in wall-reflected profiles.
 static bool solve_wx_balanced_fraction_for_xy(const ProfileCache& cache,
                                               const float target_xy[2],
-                                              float out[4]) FL_NOEXCEPT {
+                                              float out[4]) FL_NO_EXCEPT {
     zero4(out);
     if (!(target_xy[0] == target_xy[0]) || !(target_xy[1] == target_xy[1])) {
         return false;
@@ -723,7 +723,7 @@ static bool solve_wx_balanced_fraction_for_xy(const ProfileCache& cache,
 // overdrive's objective is "more W/luminance, accepting controlled xy drift".
 bool solve_wx_lp_legacy(const ProfileCache& cache, float s_r,
                         float s_g, float s_b,
-                        float out_rgbw[4]) FL_NOEXCEPT {
+                        float out_rgbw[4]) FL_NO_EXCEPT {
     zero4(out_rgbw);
 
     const float value = max3f(s_r, s_g, s_b);
@@ -788,7 +788,7 @@ bool solve_wx_lp_legacy(const ProfileCache& cache, float s_r,
 // accepts the corresponding drift toward the W diode.
 void solve_wx_overdrive(const ProfileCache& cache, float s_r, float s_g,
                         float s_b, float overdrive_ratio,
-                        float out_rgbw[4]) FL_NOEXCEPT {
+                        float out_rgbw[4]) FL_NO_EXCEPT {
     zero4(out_rgbw);
 
     const float value = max3f(s_r, s_g, s_b);
@@ -859,7 +859,7 @@ void solve_wx_overdrive(const ProfileCache& cache, float s_r, float s_g,
 }
 
 LutTable build_lut(const ProfileCache& cache, int grid_n,
-                   LutInterp interp) FL_NOEXCEPT {
+                   LutInterp interp) FL_NO_EXCEPT {
     LutTable lut;
     // Guard against degenerate grids: N < 2 would divide-by-zero in the
     // 1/(N-1) step below, and negative N would overflow the allocation size.
@@ -894,7 +894,7 @@ LutTable build_lut(const ProfileCache& cache, int grid_n,
     const float cell_dx = (lut.xy_max[0] - lut.xy_min[0]) * inv_Nm1;
     const float cell_dy = (lut.xy_max[1] - lut.xy_min[1]) * inv_Nm1;
 
-    auto sample = [&](float x, float y, float out[4]) FL_NOEXCEPT {
+    auto sample = [&](float x, float y, float out[4]) FL_NO_EXCEPT {
         const float xy[2] = {x, y};
         solve_strict_subgamut_xy(cache, xy, 1.0f, out);
     };
@@ -945,9 +945,9 @@ LutTable build_lut(const ProfileCache& cache, int grid_n,
 }
 
 void lookup_lut(const LutTable& lut, const float xy_t[2], float Y_t,
-                float out_rgbw[4]) FL_NOEXCEPT {
+                float out_rgbw[4]) FL_NO_EXCEPT {
     // Defend against degenerate LUTs (empty table, unbuilt cells, zero span).
-    // build_lut() returns an empty LutTable on bad input — without these
+    // build_lut() returns an empty LutTable on bad input â€” without these
     // guards the divide-by-zero and OOB reads would corrupt random memory.
     out_rgbw[0] = out_rgbw[1] = out_rgbw[2] = out_rgbw[3] = 0.0f;
     if (lut.N < 2 || lut.cells.get() == nullptr) {
@@ -1040,7 +1040,7 @@ void lookup_lut(const LutTable& lut, const float xy_t[2], float Y_t,
 }
 
 void solve_rgbcct(const RgbcctProfile& profile, float s_r, float s_g,
-                  float s_b, float eta, float out[5]) FL_NOEXCEPT {
+                  float s_b, float eta, float out[5]) FL_NO_EXCEPT {
     ProfileCache warm_cache;
     ProfileCache cool_cache;
     build_profile_cache(&profile.warm_path, 0, &warm_cache);

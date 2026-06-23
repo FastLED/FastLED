@@ -20,22 +20,22 @@ public:
     explicit scope_exit(EFP &&f)
         : mExitFunction(fl::forward<EFP>(f)), mActive(true) {}
 
-    scope_exit(scope_exit &&rhs) FL_NOEXCEPT
+    scope_exit(scope_exit &&rhs) FL_NO_EXCEPT
         : mExitFunction(fl::move(rhs.mExitFunction)), mActive(rhs.mActive) {
         rhs.release();
     }
 
-    scope_exit(const scope_exit &) FL_NOEXCEPT = delete;
-    scope_exit &operator=(const scope_exit &) FL_NOEXCEPT = delete;
-    scope_exit &operator=(scope_exit &&) FL_NOEXCEPT = delete;
+    scope_exit(const scope_exit &) FL_NO_EXCEPT = delete;
+    scope_exit &operator=(const scope_exit &) FL_NO_EXCEPT = delete;
+    scope_exit &operator=(scope_exit &&) FL_NO_EXCEPT = delete;
 
-    ~scope_exit() FL_NOEXCEPT {
+    ~scope_exit() FL_NO_EXCEPT {
         if (mActive) {
             mExitFunction();
         }
     }
 
-    void release() FL_NOEXCEPT { mActive = false; }
+    void release() FL_NO_EXCEPT { mActive = false; }
 
 private:
     EF mExitFunction;

@@ -28,8 +28,8 @@ struct TraceEntry {
     const char* function;
     int line;
 
-    TraceEntry() FL_NOEXCEPT : function(nullptr), line(0) {}
-    TraceEntry(const char* f, int l) FL_NOEXCEPT : function(f), line(l) {}
+    TraceEntry() FL_NO_EXCEPT : function(nullptr), line(0) {}
+    TraceEntry(const char* f, int l) FL_NO_EXCEPT : function(f), line(l) {}
 };
 
 /// @brief Internal storage for the trace system
@@ -45,12 +45,12 @@ struct TraceStorage {
 
 // Thread-local storage for trace data
 // When trace functions are not used, the optimizer can eliminate this entirely
-static TraceStorage& getTraceStorage() FL_NOEXCEPT {
+static TraceStorage& getTraceStorage() FL_NO_EXCEPT {
     return SingletonThreadLocal<TraceStorage>::instance();
 }
 
 // ScopedTrace static method implementations
-void ScopedTrace::push(const char* function, int line) FL_NOEXCEPT {
+void ScopedTrace::push(const char* function, int line) FL_NO_EXCEPT {
     if (!function) {
         return;  // Ignore null function names
     }
@@ -67,7 +67,7 @@ void ScopedTrace::push(const char* function, int line) FL_NOEXCEPT {
     // If size >= MAX_DEPTH, we're in overflow - just track depth
 }
 
-void ScopedTrace::pop() FL_NOEXCEPT {
+void ScopedTrace::pop() FL_NO_EXCEPT {
     auto& storage = getTraceStorage();
 
     // Guard against underflow
@@ -88,11 +88,11 @@ void ScopedTrace::pop() FL_NOEXCEPT {
     }
 }
 
-fl::size ScopedTrace::depth() FL_NOEXCEPT {
+fl::size ScopedTrace::depth() FL_NO_EXCEPT {
     return getTraceStorage().stackDepth;
 }
 
-fl::string ScopedTrace::dump() FL_NOEXCEPT {
+fl::string ScopedTrace::dump() FL_NO_EXCEPT {
     auto& storage = getTraceStorage();
     fl::string result = "Stack trace (depth ";
 
@@ -132,7 +132,7 @@ fl::string ScopedTrace::dump() FL_NOEXCEPT {
     return result;
 }
 
-void ScopedTrace::dump(fl::vector<TracePoint>* out) FL_NOEXCEPT {
+void ScopedTrace::dump(fl::vector<TracePoint>* out) FL_NO_EXCEPT {
     if (!out) {
         return;
     }
@@ -149,18 +149,18 @@ void ScopedTrace::dump(fl::vector<TracePoint>* out) FL_NOEXCEPT {
     }
 }
 
-void ScopedTrace::clear() FL_NOEXCEPT {
+void ScopedTrace::clear() FL_NO_EXCEPT {
     auto& storage = getTraceStorage();
     storage.callStack.resize(0);
     storage.stackDepth = 0;
 }
 
 // ScopedTrace RAII implementation
-ScopedTrace::ScopedTrace(const char* function, int line) FL_NOEXCEPT {
+ScopedTrace::ScopedTrace(const char* function, int line) FL_NO_EXCEPT {
     push(function, line);
 }
 
-ScopedTrace::~ScopedTrace() FL_NOEXCEPT {
+ScopedTrace::~ScopedTrace() FL_NO_EXCEPT {
     pop();
 }
 

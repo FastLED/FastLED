@@ -11,7 +11,7 @@ namespace fl {
  *
  * @param jsonStr JSON string containing UI component updates (null-terminated)
  */
-void jsUpdateUiComponents(const char* jsonStr) FL_NOEXCEPT;
+void jsUpdateUiComponents(const char* jsonStr) FL_NO_EXCEPT;
 
 /**
  * Async-aware WASM UI system initializer
@@ -23,6 +23,6 @@ void jsUpdateUiComponents(const char* jsonStr) FL_NOEXCEPT;
  * Note: This function is safe to call multiple times and includes
  * comprehensive exception handling for async initialization scenarios.
  */
-void ensureWasmUiSystemInitialized() FL_NOEXCEPT;
+void ensureWasmUiSystemInitialized() FL_NO_EXCEPT;
 
 } // namespace fl

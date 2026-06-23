@@ -74,29 +74,29 @@ public:
     ConditionVariableFake& operator=(ConditionVariableFake&&) = delete;
 
     /// @brief Notify operations are no-ops in single-threaded mode
-    void notify_one() FL_NOEXCEPT {
+    void notify_one() FL_NO_EXCEPT {
         // No-op in single-threaded mode
     }
 
-    void notify_all() FL_NOEXCEPT {
+    void notify_all() FL_NO_EXCEPT {
         // No-op in single-threaded mode
     }
 
     /// @brief Wait would deadlock in single-threaded mode
     template<typename Mutex>
-    void wait(unique_lock<Mutex>& lock) FL_NOEXCEPT {
+    void wait(unique_lock<Mutex>& lock) FL_NO_EXCEPT {
         FL_ASSERT(false, "ConditionVariableFake::wait() called in single-threaded mode would deadlock");
     }
 
     template<typename Mutex, typename Predicate>
-    void wait(unique_lock<Mutex>& lock, Predicate pred) FL_NOEXCEPT {
+    void wait(unique_lock<Mutex>& lock, Predicate pred) FL_NO_EXCEPT {
         FL_ASSERT(false, "ConditionVariableFake::wait(pred) called in single-threaded mode would deadlock");
     }
 
     /// @brief wait_for would deadlock in single-threaded mode
     /// Templated on Duration to avoid requiring <chrono> include in fake implementation
     template<typename Mutex, typename Duration>
-    cv_status wait_for(unique_lock<Mutex>& lock, const Duration& timeout_duration) FL_NOEXCEPT {
+    cv_status wait_for(unique_lock<Mutex>& lock, const Duration& timeout_duration) FL_NO_EXCEPT {
         FL_ASSERT(false, "ConditionVariableFake::wait_for() called in single-threaded mode would deadlock");
         return cv_status::timeout;
     }

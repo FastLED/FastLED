@@ -20,7 +20,7 @@ shared_ptr<Processor> AudioManager::add(const Config &config) {
     fl::string errorMsg;
     auto input = IInput::create(config, &errorMsg);
     if (!input) {
-        FL_WARN("Failed to create audio input: " << errorMsg);
+        FL_WARN_F("Failed to create audio input: %s", errorMsg);
         return nullptr;
     }
     input->start();
@@ -29,7 +29,7 @@ shared_ptr<Processor> AudioManager::add(const Config &config) {
         proc->setMicProfile(config.getMicProfile());
     }
     if (processor()) {
-        FL_WARN("Replacing existing audio processor");
+        FL_WARN_F("Replacing existing audio processor");
     }
     processor() = proc;
     return proc;
@@ -37,7 +37,7 @@ shared_ptr<Processor> AudioManager::add(const Config &config) {
     (void)config;
     auto proc = fl::make_shared<Processor>();
     if (processor()) {
-        FL_WARN("Replacing existing audio processor");
+        FL_WARN_F("Replacing existing audio processor");
     }
     processor() = proc;
     return proc;
@@ -46,13 +46,13 @@ shared_ptr<Processor> AudioManager::add(const Config &config) {
 
 shared_ptr<Processor> AudioManager::add(shared_ptr<IInput> input) {
     if (!input) {
-        FL_WARN("Cannot add null audio input");
+        FL_WARN_F("Cannot add null audio input");
         return nullptr;
     }
     input->start();
     auto proc = Processor::createWithAutoInput(fl::move(input));
     if (processor()) {
-        FL_WARN("Replacing existing audio processor");
+        FL_WARN_F("Replacing existing audio processor");
     }
     processor() = proc;
     return proc;
@@ -69,7 +69,7 @@ shared_ptr<Processor> AudioManager::add(UIAudio &uiAudio) {
     if (cfg.has_value()) {
         return add(*cfg);
     }
-    FL_WARN("UIAudio has no audio input and no hardware config");
+    FL_WARN_F("UIAudio has no audio input and no hardware config");
     return nullptr;
 }
 

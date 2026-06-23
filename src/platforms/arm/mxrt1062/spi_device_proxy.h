@@ -84,7 +84,7 @@ public:
 
     /// Initialize SPI device and register with bus manager
     /// Called by LED controller's init() method
-    void init() FL_NOEXCEPT {
+    void init() FL_NO_EXCEPT {
         if (mInitialized) {
             return;  // Already initialized
         }
@@ -98,8 +98,7 @@ public:
         mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, SPI_CLOCK_RATE, this);
 
         if (!mHandle.is_valid) {
-            FL_LOG_SPI("SPIDeviceProxy: Failed to register with bus manager (pin "
-                    << static_cast<int>(CLOCK_PIN) << ":" << static_cast<int>(DATA_PIN) << ")");
+            FL_LOG_SPI_F("SPIDeviceProxy: Failed to register with bus manager (pin %s:%s)", static_cast<int>(CLOCK_PIN), static_cast<int>(DATA_PIN));
             return;
         }
 
@@ -115,7 +114,7 @@ public:
 
     /// Initialize bus manager (lazy initialization)
     /// Called on first transmit to allow all devices to register
-    void ensureBusInitialized() FL_NOEXCEPT {
+    void ensureBusInitialized() FL_NO_EXCEPT {
         if (mBusInitialized || !mBusManager || !mHandle.is_valid) {
             return;
         }
@@ -136,7 +135,7 @@ public:
 
     /// Begin SPI transaction
     /// Mirrors Teensy4HardwareSPIOutput::select()
-    void select() FL_NOEXCEPT {
+    void select() FL_NO_EXCEPT {
         if (!mInitialized) {
             return;
         }
@@ -156,7 +155,7 @@ public:
 
     /// End SPI transaction
     /// Mirrors Teensy4HardwareSPIOutput::release()
-    void release() FL_NOEXCEPT {
+    void release() FL_NO_EXCEPT {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -172,13 +171,13 @@ public:
 
     /// End SPI transaction (alias for release)
     /// Added to match the new endTransaction() API used by chipset controllers
-    void endTransaction() FL_NOEXCEPT {
+    void endTransaction() FL_NO_EXCEPT {
         release();
     }
 
     /// Write single byte
     /// Mirrors Teensy4HardwareSPIOutput::writeByte()
-    void writeByte(u8 b) FL_NOEXCEPT {
+    void writeByte(u8 b) FL_NO_EXCEPT {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -198,7 +197,7 @@ public:
 
     /// Write 16-bit word (big-endian)
     /// Mirrors Teensy4HardwareSPIOutput::writeWord()
-    void writeWord(u16 w) FL_NOEXCEPT {
+    void writeWord(u16 w) FL_NO_EXCEPT {
         writeByte(static_cast<u8>(w >> 8));
         writeByte(static_cast<u8>(w & 0xFF));
     }
@@ -209,7 +208,7 @@ public:
     /// Finalize transmission - flush buffered Dual/Quad-SPI writes
     /// Must be called after all pixel data is written
     /// Called by chipset controller at end of showPixels()
-    void finalizeTransmission() FL_NOEXCEPT {
+    void finalizeTransmission() FL_NO_EXCEPT {
         if (!mInitialized) {
             return;
         }
@@ -227,7 +226,7 @@ public:
     }
 
     /// Check if device is enabled (not disabled due to conflicts)
-    bool isEnabled() const FL_NOEXCEPT {
+    bool isEnabled() const FL_NO_EXCEPT {
         if (!mBusManager || !mHandle.is_valid) {
             return false;
         }
@@ -235,7 +234,7 @@ public:
     }
 
     /// Get bus type for debugging/testing
-    SPIBusType getBusType() const FL_NOEXCEPT {
+    SPIBusType getBusType() const FL_NO_EXCEPT {
         if (!mBusManager || !mHandle.is_valid) {
             return SPIBusType::SOFT_SPI;
         }

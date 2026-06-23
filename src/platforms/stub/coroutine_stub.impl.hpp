@@ -32,22 +32,22 @@ namespace detail {
 class CoroutineContextImpl : public CoroutineContext {
 public:
     CoroutineContextImpl()
- FL_NOEXCEPT : mWakeupSema(0), mShouldStop(false), mCompleted(false), mThreadReady(false) {}
+ FL_NO_EXCEPT : mWakeupSema(0), mShouldStop(false), mCompleted(false), mThreadReady(false) {}
 
-    void wait() FL_NOEXCEPT override {
+    void wait() FL_NO_EXCEPT override {
         mWakeupSema.acquire();
     }
 
-    fl::binary_semaphore& wakeup_semaphore() FL_NOEXCEPT override {
+    fl::binary_semaphore& wakeup_semaphore() FL_NO_EXCEPT override {
         return mWakeupSema;
     }
 
-    bool should_stop() const FL_NOEXCEPT override { return mShouldStop.load(); }
-    void set_should_stop(bool value) FL_NOEXCEPT override { mShouldStop.store(value); }
-    bool is_completed() const FL_NOEXCEPT override { return mCompleted.load(); }
-    void set_completed(bool value) FL_NOEXCEPT override { mCompleted.store(value); }
-    bool is_thread_ready() const FL_NOEXCEPT override { return mThreadReady.load(); }
-    void set_thread_ready(bool value) FL_NOEXCEPT override { mThreadReady.store(value); }
+    bool should_stop() const FL_NO_EXCEPT override { return mShouldStop.load(); }
+    void set_should_stop(bool value) FL_NO_EXCEPT override { mShouldStop.store(value); }
+    bool is_completed() const FL_NO_EXCEPT override { return mCompleted.load(); }
+    void set_completed(bool value) FL_NO_EXCEPT override { mCompleted.store(value); }
+    bool is_thread_ready() const FL_NO_EXCEPT override { return mThreadReady.load(); }
+    void set_thread_ready(bool value) FL_NO_EXCEPT override { mThreadReady.store(value); }
 
 private:
     fl::binary_semaphore mWakeupSema;
@@ -56,7 +56,7 @@ private:
     fl::atomic<bool> mThreadReady;
 };
 
-fl::shared_ptr<CoroutineContext> CoroutineContext::create() FL_NOEXCEPT {
+fl::shared_ptr<CoroutineContext> CoroutineContext::create() FL_NO_EXCEPT {
     return fl::make_shared<CoroutineContextImpl>();
 }
 
@@ -66,18 +66,18 @@ fl::shared_ptr<CoroutineContext> CoroutineContext::create() FL_NOEXCEPT {
 
 class CoroutineRunnerImpl : public CoroutineRunner {
 public:
-    CoroutineRunnerImpl() FL_NOEXCEPT : mMainThreadSema(0) {}
+    CoroutineRunnerImpl() FL_NO_EXCEPT : mMainThreadSema(0) {}
 
-    fl::counting_semaphore<2>& get_main_thread_semaphore() FL_NOEXCEPT override {
+    fl::counting_semaphore<2>& get_main_thread_semaphore() FL_NO_EXCEPT override {
         return mMainThreadSema;
     }
 
-    void enqueue(fl::shared_ptr<CoroutineContext> ctx) FL_NOEXCEPT override {
-        fl::unique_lock<fl::mutex> lock(mQueueMutex) FL_NOEXCEPT;
+    void enqueue(fl::shared_ptr<CoroutineContext> ctx) FL_NO_EXCEPT override {
+        fl::unique_lock<fl::mutex> lock(mQueueMutex) FL_NO_EXCEPT;
         mQueue.push(fl::weak_ptr<CoroutineContext>(ctx));
     }
 
-    void stop(fl::shared_ptr<CoroutineContext> ctx) FL_NOEXCEPT override {
+    void stop(fl::shared_ptr<CoroutineContext> ctx) FL_NO_EXCEPT override {
         if (ctx) {
             ctx->set_should_stop(true);
             // Wake it so it can check should_stop and exit
@@ -87,11 +87,11 @@ public:
 
     // Run the next coroutine using two-phase semaphore handoff.
     // Returns true if a job ran, false if queue is empty.
-    bool run_next_job() FL_NOEXCEPT {
+    bool run_next_job() FL_NO_EXCEPT {
         fl::shared_ptr<CoroutineContext> ctx;
 
         {
-            fl::unique_lock<fl::mutex> lock(mQueueMutex) FL_NOEXCEPT;
+            fl::unique_lock<fl::mutex> lock(mQueueMutex) FL_NO_EXCEPT;
 
             // Remove expired/completed coroutines from front
             while (!mQueue.empty()) {
@@ -130,9 +130,9 @@ public:
         return true;
     }
 
-    void run(fl::u32 us) FL_NOEXCEPT override {
+    void run(fl::u32 us) FL_NO_EXCEPT override {
         u32 begin = fl::millis();
-        auto expired = [begin, us]() FL_NOEXCEPT {
+        auto expired = [begin, us]() FL_NO_EXCEPT {
             u32 diff = fl::millis() - begin;
             return diff < us;
         };
@@ -145,9 +145,9 @@ public:
         }
     }
 
-    void remove(fl::shared_ptr<CoroutineContext> ctx) FL_NOEXCEPT override {
+    void remove(fl::shared_ptr<CoroutineContext> ctx) FL_NO_EXCEPT override {
         fl::queue<fl::weak_ptr<CoroutineContext>> temp;
-        fl::unique_lock<fl::mutex> lock(mQueueMutex) FL_NOEXCEPT;
+        fl::unique_lock<fl::mutex> lock(mQueueMutex) FL_NO_EXCEPT;
         while (!mQueue.empty()) {
             fl::weak_ptr<CoroutineContext> weak_front = mQueue.front();
             mQueue.pop();
@@ -159,8 +159,8 @@ public:
         mQueue = fl::move(temp);
     }
 
-    void stop_all() FL_NOEXCEPT override {
-        fl::unique_lock<fl::mutex> lock(mQueueMutex) FL_NOEXCEPT;
+    void stop_all() FL_NO_EXCEPT override {
+        fl::unique_lock<fl::mutex> lock(mQueueMutex) FL_NO_EXCEPT;
         fl::queue<fl::weak_ptr<CoroutineContext>> temp = mQueue;
         while (!temp.empty()) {
             fl::weak_ptr<CoroutineContext> weak_ctx = temp.front();
@@ -182,7 +182,7 @@ private:
     fl::counting_semaphore<2> mMainThreadSema;
 };
 
-CoroutineRunner& CoroutineRunner::instance() FL_NOEXCEPT {
+CoroutineRunner& CoroutineRunner::instance() FL_NO_EXCEPT {
     return fl::Singleton<CoroutineRunnerImpl>::instance();
 }
 
@@ -194,7 +194,7 @@ namespace platforms {
 // Coroutine Runtime singleton
 //=============================================================================
 
-ICoroutineRuntime& ICoroutineRuntime::instance() FL_NOEXCEPT {
+ICoroutineRuntime& ICoroutineRuntime::instance() FL_NO_EXCEPT {
     return fl::Singleton<CoroutineRuntimeStub>::instance();
 }
 
@@ -206,7 +206,7 @@ struct BackgroundThreadRegistry {
     fl::vector<fl::thread> threads;
     fl::mutex mtx;
 
-    static BackgroundThreadRegistry& instance() FL_NOEXCEPT {
+    static BackgroundThreadRegistry& instance() FL_NO_EXCEPT {
         return fl::Singleton<BackgroundThreadRegistry>::instance();
     }
 };
@@ -216,25 +216,25 @@ struct CoroutineThreadRegistry {
     fl::vector<fl::thread> threads;
     fl::mutex mtx;
 
-    static CoroutineThreadRegistry& instance() FL_NOEXCEPT {
+    static CoroutineThreadRegistry& instance() FL_NO_EXCEPT {
         return fl::Singleton<CoroutineThreadRegistry>::instance();
     }
 
-    void add(fl::thread&& t) FL_NOEXCEPT {
-        fl::unique_lock<fl::mutex> lock(mtx) FL_NOEXCEPT;
+    void add(fl::thread&& t) FL_NO_EXCEPT {
+        fl::unique_lock<fl::mutex> lock(mtx) FL_NO_EXCEPT;
         threads.push_back(fl::move(t));
     }
 };
 #endif
 
-void cleanup_coroutine_threads() FL_NOEXCEPT {
+void cleanup_coroutine_threads() FL_NO_EXCEPT {
     fl::detail::CoroutineRunner::instance().stop_all();
 
     // Join coroutine threads (DLL mode only)
 #ifdef TEST_DLL_MODE
     {
         auto& creg = CoroutineThreadRegistry::instance();
-        fl::unique_lock<fl::mutex> lock(creg.mtx) FL_NOEXCEPT;
+        fl::unique_lock<fl::mutex> lock(creg.mtx) FL_NO_EXCEPT;
         for (auto& t : creg.threads) {
             if (t.joinable()) t.join();
         }
@@ -246,7 +246,7 @@ void cleanup_coroutine_threads() FL_NOEXCEPT {
     auto& bg = ICoroutineRuntime::instance();
     bg.requestShutdown();
     auto& reg = BackgroundThreadRegistry::instance();
-    fl::unique_lock<fl::mutex> lock(reg.mtx) FL_NOEXCEPT;
+    fl::unique_lock<fl::mutex> lock(reg.mtx) FL_NO_EXCEPT;
     for (auto& t : reg.threads) {
         if (t.joinable()) t.join();
     }
@@ -254,17 +254,17 @@ void cleanup_coroutine_threads() FL_NOEXCEPT {
     bg.resetShutdown();
 }
 
-void register_background_thread(fl::thread&& t) FL_NOEXCEPT {
+void register_background_thread(fl::thread&& t) FL_NO_EXCEPT {
     auto& reg = BackgroundThreadRegistry::instance();
-    fl::unique_lock<fl::mutex> lock(reg.mtx) FL_NOEXCEPT;
+    fl::unique_lock<fl::mutex> lock(reg.mtx) FL_NO_EXCEPT;
     reg.threads.push_back(fl::move(t));
 }
 
-void cleanup_background_threads() FL_NOEXCEPT {
+void cleanup_background_threads() FL_NO_EXCEPT {
     auto& bg = ICoroutineRuntime::instance();
     bg.requestShutdown();
     auto& reg = BackgroundThreadRegistry::instance();
-    fl::unique_lock<fl::mutex> lock(reg.mtx) FL_NOEXCEPT;
+    fl::unique_lock<fl::mutex> lock(reg.mtx) FL_NO_EXCEPT;
     for (auto& t : reg.threads) {
         if (t.joinable()) t.join();
     }
@@ -272,7 +272,7 @@ void cleanup_background_threads() FL_NOEXCEPT {
     bg.resetShutdown();
 }
 
-bool is_shutdown_requested() FL_NOEXCEPT {
+bool is_shutdown_requested() FL_NO_EXCEPT {
     return ICoroutineRuntime::instance().isShutdownRequested();
 }
 
@@ -280,7 +280,7 @@ bool is_shutdown_requested() FL_NOEXCEPT {
 // Thread-local coroutine context — lets exitCurrent() find its context
 //=============================================================================
 
-fl::detail::CoroutineContext*& runningStubCoroutineContext() FL_NOEXCEPT {
+fl::detail::CoroutineContext*& runningStubCoroutineContext() FL_NO_EXCEPT {
     return SingletonThreadLocal<fl::detail::CoroutineContext*>::instance();
 }
 
@@ -294,7 +294,7 @@ public:
                           TaskFunction function,
                           size_t /*stack_size*/,
                           u8 /*priority*/)
- FL_NOEXCEPT : mName(fl::move(name))
+ FL_NO_EXCEPT : mName(fl::move(name))
         , mFunction(fl::move(function)) {
 
         mContext = fl::detail::CoroutineContext::create();
@@ -349,7 +349,7 @@ public:
         stop();
     }
 
-    void stop() FL_NOEXCEPT override {
+    void stop() FL_NO_EXCEPT override {
         if (!mContext) return;
 
         auto& runner = fl::detail::CoroutineRunner::instance();
@@ -362,7 +362,7 @@ public:
         mContext.reset();
     }
 
-    bool isRunning() const FL_NOEXCEPT override {
+    bool isRunning() const FL_NO_EXCEPT override {
         return mContext != nullptr;
     }
 
@@ -379,7 +379,7 @@ private:
 TaskCoroutinePtr TaskCoroutineStub::create(fl::string name,
                                             TaskFunction function,
                                             size_t stack_size,
-                                            u8 priority) FL_NOEXCEPT {
+                                            u8 priority) FL_NO_EXCEPT {
     return TaskCoroutinePtr(
         new TaskCoroutineStubImpl(fl::move(name), fl::move(function), stack_size, priority));  // ok bare allocation
 }
@@ -388,11 +388,11 @@ TaskCoroutinePtr createTaskCoroutine(fl::string name,
                                       ICoroutineTask::TaskFunction function,
                                       size_t stack_size,
                                       u8 priority,
-                                      int /*core_id*/) FL_NOEXCEPT {
+                                      int /*core_id*/) FL_NO_EXCEPT {
     return TaskCoroutineStub::create(fl::move(name), fl::move(function), stack_size, priority);
 }
 
-void ICoroutineTask::exitCurrent() FL_NOEXCEPT {
+void ICoroutineTask::exitCurrent() FL_NO_EXCEPT {
     auto* ctx = runningStubCoroutineContext();
     if (ctx) {
         ctx->set_completed(true);

@@ -41,35 +41,35 @@ class IFlexIOPeripheral;
 class ChannelEngineFlexIO : public IChannelDriver {
 public:
     /// @brief Construct with platform-default peripheral
-    ChannelEngineFlexIO() FL_NOEXCEPT;
+    ChannelEngineFlexIO() FL_NO_EXCEPT;
 
     /// @brief Construct with injected peripheral (for testing)
-    explicit ChannelEngineFlexIO(fl::shared_ptr<IFlexIOPeripheral> peripheral) FL_NOEXCEPT;
+    explicit ChannelEngineFlexIO(fl::shared_ptr<IFlexIOPeripheral> peripheral) FL_NO_EXCEPT;
 
     ~ChannelEngineFlexIO() override;
 
     /// @brief Check if this engine can handle the given channel data
     /// @return true for clockless chipsets on FlexIO2-capable pins with period 1000-2500ns
-    bool canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT override;
+    bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
 
     /// @brief Enqueue channel data for transmission
-    void enqueue(ChannelDataPtr channelData) FL_NOEXCEPT override;
+    void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
 
     /// @brief Trigger transmission of enqueued data (asynchronous DMA)
-    void show() FL_NOEXCEPT override;
+    void show() FL_NO_EXCEPT override;
 
     /// @brief Query engine state
     /// @return READY when idle, BUSY during DMA transfer
-    DriverState poll() FL_NOEXCEPT override;
+    DriverState poll() FL_NO_EXCEPT override;
 
     /// @brief Get engine name
     /// @return "FLEX_IO" — matches the `fl::Bus::FLEX_IO` enumerator spelling.
-    fl::string getName() const FL_NOEXCEPT override {
+    fl::string getName() const FL_NO_EXCEPT override {
         return fl::string::from_literal("FLEX_IO");
     }
 
     /// @brief Get capabilities (clockless only)
-    Capabilities getCapabilities() const FL_NOEXCEPT override {
+    Capabilities getCapabilities() const FL_NO_EXCEPT override {
         return Capabilities(true, false);
     }
 

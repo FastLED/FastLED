@@ -18,7 +18,7 @@ FASTLED_SHARED_PTR(PerlinParticlePunch);
 class PerlinParticlePunch : public Fx1d {
   public:
     PerlinParticlePunch(u16 num_leds);
-    ~PerlinParticlePunch() FL_NOEXCEPT;
+    ~PerlinParticlePunch() FL_NO_EXCEPT;
 
     void draw(DrawContext context) override;
     fl::string fxName() const override;

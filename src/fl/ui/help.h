@@ -16,7 +16,7 @@ namespace fl {
 class UIHelpImpl {
   public:
     UIHelpImpl(const char *markdownContent) : mContent(markdownContent) { FASTLED_UNUSED(markdownContent); }
-    ~UIHelpImpl() FL_NOEXCEPT {}
+    ~UIHelpImpl() FL_NO_EXCEPT {}
 
     // Stub method for group setting (does nothing on non-WASM platforms)
     void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
@@ -32,18 +32,18 @@ class UIHelpImpl {
 class UIHelp : public UIElement {
   public:
     FL_NO_COPY(UIHelp);
-    UIHelp(const char *markdownContent) FL_NOEXCEPT;
-    ~UIHelp() FL_NOEXCEPT;
+    UIHelp(const char *markdownContent) FL_NO_EXCEPT;
+    ~UIHelp() FL_NO_EXCEPT;
 
     // Override setGroup to also update the implementation
-    void setGroup(const fl::string& groupName) FL_NOEXCEPT override {
+    void setGroup(const fl::string& groupName) FL_NO_EXCEPT override {
         UIElement::setGroup(groupName);
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
 
     // Access to the markdown content
-    const fl::string& markdownContent() const FL_NOEXCEPT { return mImpl.markdownContent(); }
+    const fl::string& markdownContent() const FL_NO_EXCEPT { return mImpl.markdownContent(); }
 
   protected:
     UIHelpImpl mImpl;

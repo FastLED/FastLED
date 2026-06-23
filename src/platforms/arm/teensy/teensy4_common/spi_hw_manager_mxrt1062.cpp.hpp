@@ -41,7 +41,7 @@ constexpr int PRIORITY_SPI_HW_2 = 6;   // Lower (2-lane dual-SPI)
 static void addSpiHw2IfPossible() {
     // Note: SpiHw2MXRT1062 class is defined in spi_hw_2_mxrt1062.cpp.hpp
     // which is included by _build.hpp before this file
-    FL_DBG("Teensy 4.x: Registering SpiHw2 instances");
+    FL_DBG_F("Teensy 4.x: Registering SpiHw2 instances");
 
     // Teensy 4.x has 3 LPSPI peripherals available
     // SPI (bus 0), SPI1 (bus 1), SPI2 (bus 2)
@@ -53,14 +53,14 @@ static void addSpiHw2IfPossible() {
     SpiHw2::registerInstance(controller1);
     SpiHw2::registerInstance(controller2);
 
-    FL_DBG("Teensy 4.x: SpiHw2 instances registered");
+    FL_DBG_F("Teensy 4.x: SpiHw2 instances registered");
 }
 
 /// @brief Register Teensy 4.x SpiHw4 instances
 static void addSpiHw4IfPossible() {
     // Note: SpiHw4MXRT1062 class is defined in spi_hw_4_mxrt1062.cpp.hpp
     // which is included by _build.hpp before this file
-    FL_DBG("Teensy 4.x: Registering SpiHw4 instances");
+    FL_DBG_F("Teensy 4.x: Registering SpiHw4 instances");
 
     // Teensy 4.x has 3 LPSPI peripherals available
     // SPI (bus 0), SPI1 (bus 1), SPI2 (bus 2)
@@ -72,7 +72,7 @@ static void addSpiHw4IfPossible() {
     SpiHw4::registerInstance(controller1);
     SpiHw4::registerInstance(controller2);
 
-    FL_DBG("Teensy 4.x: SpiHw4 instances registered");
+    FL_DBG_F("Teensy 4.x: SpiHw4 instances registered");
 }
 
 }  // namespace detail
@@ -91,13 +91,13 @@ namespace platforms {
 /// Platform availability:
 /// - Teensy 4.0/4.1: Both SpiHw2 and SpiHw4 (3 LPSPI controllers)
 void initSpiHardware() {
-    FL_DBG("Teensy 4.x: Initializing SPI hardware");
+    FL_DBG_F("Teensy 4.x: Initializing SPI hardware");
 
     // Register in priority order (highest to lowest)
     detail::addSpiHw4IfPossible();  // Priority 7
     detail::addSpiHw2IfPossible();  // Priority 6
 
-    FL_DBG("Teensy 4.x: SPI hardware initialized");
+    FL_DBG_F("Teensy 4.x: SPI hardware initialized");
 }
 
 }  // namespace platforms

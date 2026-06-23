@@ -8,7 +8,7 @@
 namespace fl {
 
 IDecoderPtr H264::createDecoder(const H264Config& config,
-                                fl::string* error_message) FL_NOEXCEPT {
+                                fl::string* error_message) FL_NO_EXCEPT {
     FL_UNUSED(config);
     if (error_message) {
         *error_message = "H.264 decoding not supported on this platform";

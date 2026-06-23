@@ -104,4 +104,16 @@ private:
     fl::json runSingleTestImpl(const fl::json& args);
     fl::json runParallelTestImpl(const fl::json& args);
     fl::json findConnectedPinsImpl(const fl::json& args);
+
+    // RPC binding helpers — each implemented in its own .cpp file to keep
+    // file sizes below 1 K LOC (#3132 / meta #3127). The Remote target is
+    // passed explicitly so the same partitioning can be used for the BLE
+    // Remote (mBleRemote) or any future transport.
+    void bindSystemMethods(fl::Remote& remote);
+    void bindDriverMethods(fl::Remote& remote);
+    void bindPinMethods(fl::Remote& remote);
+    void bindMathMethods(fl::Remote& remote);
+    void bindNetworkMethods(fl::Remote& remote);
+    void bindAsyncMethods(fl::Remote& remote);
+    void bindBenchmarkMethods(fl::Remote& remote);
 };

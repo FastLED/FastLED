@@ -49,20 +49,20 @@ namespace fl {
 class ChannelDriverLcdClockless : public IChannelDriver {
   public:
     explicit ChannelDriverLcdClockless(
-        fl::shared_ptr<detail::ILcdSpiPeripheral> peripheral) FL_NOEXCEPT;
+        fl::shared_ptr<detail::ILcdSpiPeripheral> peripheral) FL_NO_EXCEPT;
     ~ChannelDriverLcdClockless() override;
 
-    bool canHandle(const ChannelDataPtr &data) const FL_NOEXCEPT override;
-    void enqueue(ChannelDataPtr channelData) FL_NOEXCEPT override;
-    void show() FL_NOEXCEPT override;
-    DriverState poll() FL_NOEXCEPT override;
-    void setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT override;
+    bool canHandle(const ChannelDataPtr &data) const FL_NO_EXCEPT override;
+    void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
+    void show() FL_NO_EXCEPT override;
+    DriverState poll() FL_NO_EXCEPT override;
+    void setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT override;
 
-    fl::string getName() const FL_NOEXCEPT override {
+    fl::string getName() const FL_NO_EXCEPT override {
         return fl::string::from_literal("LCD_CLOCKLESS");
     }
 
-    Capabilities getCapabilities() const FL_NOEXCEPT override {
+    Capabilities getCapabilities() const FL_NO_EXCEPT override {
         return Capabilities(true, false); // clockless only
     }
 
@@ -79,13 +79,13 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     static constexpr size_t kDefaultChunkInputBytes = 1024;
 
     /// Override chunk input bytes for testing (0 = use default).
-    void setChunkInputBytesForTest(size_t bytes) FL_NOEXCEPT {
+    void setChunkInputBytesForTest(size_t bytes) FL_NO_EXCEPT {
         mChunkInputBytesOverride = bytes;
     }
 
   private:
     bool beginTransmission(
-        fl::span<const ChannelDataPtr> channels) FL_NOEXCEPT;
+        fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
 
     /// @brief Encode and transpose a range of source bytes using wave3 or wave8
     /// @param channels Source channel data spans
@@ -99,17 +99,17 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     /// etc.). Without FL_IRAM the ISR stalls and the interrupt watchdog trips.
     size_t FL_IRAM encodeChunk(fl::span<const ChannelDataPtr> channels,
                        u16 *output, size_t startByte,
-                       size_t byteCount) FL_NOEXCEPT;
+                       size_t byteCount) FL_NO_EXCEPT;
 
-    void freeRingBuffers() FL_NOEXCEPT;
-    bool allocateRingBuffers(size_t slotCapacityBytes) FL_NOEXCEPT;
-    bool submitChunk(size_t chunkIndex, bool waitForSlot) FL_NOEXCEPT;
-    void processWorkerQueue() FL_NOEXCEPT;
-    bool ensureWorkerTask() FL_NOEXCEPT;
-    void stopWorkerTask() FL_NOEXCEPT;
-    bool notifyWorker() FL_NOEXCEPT;
-    bool notifyWorkerFromIsr() FL_NOEXCEPT;
-    static void workerTaskEntry(void *arg) FL_NOEXCEPT;
+    void freeRingBuffers() FL_NO_EXCEPT;
+    bool allocateRingBuffers(size_t slotCapacityBytes) FL_NO_EXCEPT;
+    bool submitChunk(size_t chunkIndex, bool waitForSlot) FL_NO_EXCEPT;
+    void processWorkerQueue() FL_NO_EXCEPT;
+    bool ensureWorkerTask() FL_NO_EXCEPT;
+    void stopWorkerTask() FL_NO_EXCEPT;
+    bool notifyWorker() FL_NO_EXCEPT;
+    bool notifyWorkerFromIsr() FL_NO_EXCEPT;
+    static void workerTaskEntry(void *arg) FL_NO_EXCEPT;
 
     //=========================================================================
     // ISR callback
@@ -122,7 +122,7 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     /// 300 ms interrupt watchdog window, and the device panics with "Interrupt
     /// wdt timeout on CPU1" in ISR context.
     static bool FL_IRAM isrChunkDone(void *panel_io, const void *edata,
-                             void *user_ctx) FL_NOEXCEPT;
+                             void *user_ctx) FL_NO_EXCEPT;
 
     //=========================================================================
     // ISR context
@@ -138,7 +138,7 @@ class ChannelDriverLcdClockless : public IChannelDriver {
         size_t mChunkInputBytes;
         size_t mTotalChunks;
 
-        void reset() FL_NOEXCEPT {
+        void reset() FL_NO_EXCEPT {
             mStreamComplete = false;
             mStreamError = false;
             mSubmittedChunks = 0;
@@ -179,6 +179,6 @@ class ChannelDriverLcdClockless : public IChannelDriver {
 };
 
 /// @brief Factory function to create LCD clockless driver
-fl::shared_ptr<IChannelDriver> createLcdClocklessEngine() FL_NOEXCEPT;
+fl::shared_ptr<IChannelDriver> createLcdClocklessEngine() FL_NO_EXCEPT;
 
 } // namespace fl

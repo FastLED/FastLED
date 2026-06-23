@@ -21,10 +21,31 @@
 #include "fl/log/log.h"
 #include "fl/task/promise.h" // For fl::task::Error type
 #include "fl/stl/string_view.h"
+#include "fl/stl/bit_cast.h"
 
+#include "fl/system/sketch_macros.h"
 #include "fl/stl/noexcept.h"
 
+#ifndef FL_JSON_FLOAT_ENABLED
+#define FL_JSON_FLOAT_ENABLED FL_PLATFORM_HAS_LARGE_MEMORY
+#endif
+
+#include "fl/stl/json/types_impl.h"
+
 namespace fl {
+
+namespace detail {
+
+inline u32 json_round_shift_right_u64(u64 value, int shift) FL_NO_EXCEPT;
+inline int json_floor_log2_u64(u64 value) FL_NO_EXCEPT;
+inline u32 json_ieee754_float_bits_from_scaled_u64(
+    u32 sign, u64 magnitude, int binary_exp) FL_NO_EXCEPT;
+inline u32 json_ieee754_float_bits_from_double_bits(u64 bits) FL_NO_EXCEPT;
+inline u64 json_ieee754_double_bits_from_float_bits(u32 bits) FL_NO_EXCEPT;
+inline float json_double_to_float(double value) FL_NO_EXCEPT;
+inline double json_float_to_double(float value) FL_NO_EXCEPT;
+
+} // namespace detail
 
 struct json_value;
 
@@ -39,15 +60,15 @@ struct parse_result {
     T value;
     task::Error error;
     
-    parse_result(const T& val) FL_NOEXCEPT : value(val), error() {}
-    parse_result(const task::Error& err) FL_NOEXCEPT : value(), error(err) {}
+    parse_result(const T& val) FL_NO_EXCEPT : value(val), error() {}
+    parse_result(const task::Error& err) FL_NO_EXCEPT : value(), error(err) {}
     
-    bool has_error() const FL_NOEXCEPT { return !error.is_empty(); }
-    const T& get_value() const FL_NOEXCEPT { return value; }
-    const task::Error& get_error() const FL_NOEXCEPT { return error; }
+    bool has_error() const FL_NO_EXCEPT { return !error.is_empty(); }
+    const T& get_value() const FL_NO_EXCEPT { return value; }
+    const task::Error& get_error() const FL_NO_EXCEPT { return error; }
     
     // Implicit conversion operator to allow using parse_result as T directly
-    operator const T&() const FL_NOEXCEPT {
+    operator const T&() const FL_NO_EXCEPT {
         if (has_error()) {
             // This should ideally trigger some kind of error handling
             // For now, we'll just return the value (which might be default-initialized)
@@ -57,10 +78,10 @@ struct parse_result {
 };
 
 // Function to get a reference to a static null json_value
-json_value& get_null_json_value() FL_NOEXCEPT;
+json_value& get_null_json_value() FL_NO_EXCEPT;
 
 // Function to get a reference to a static empty json_object
-json_object& get_empty_json_obj() FL_NOEXCEPT;
+json_object& get_empty_json_obj() FL_NO_EXCEPT;
 
 // AI - pay attention to this - implementing visitor pattern
 template<typename T>
@@ -69,24 +90,24 @@ struct default_value_visitor {
     const T* result = nullptr;
     T storage; // Use instance storage instead of static
 
-    default_value_visitor(const T& fb) FL_NOEXCEPT : fallback(fb) {}
+    default_value_visitor(const T& fb) FL_NO_EXCEPT : fallback(fb) {}
 
     // This is the method that fl::variant expects
     template<typename U>
-    void accept(const U& value) FL_NOEXCEPT {
+    void accept(const U& value) FL_NO_EXCEPT {
         // Dispatch to the correct operator() overload
         (*this)(value);
     }
 
     // Specific overload for the type T
-    void operator()(const T& value) FL_NOEXCEPT {
+    void operator()(const T& value) FL_NO_EXCEPT {
         result = &value;
     }
     
     // Special handling for integer conversions
     template<typename U>
     typename fl::enable_if<fl::is_integral<T>::value && fl::is_integral<U>::value, void>::type
-    operator()(const U& value) FL_NOEXCEPT {
+    operator()(const U& value) FL_NO_EXCEPT {
         // Convert between integer types
         storage = static_cast<T>(value);
         result = &storage;
@@ -95,7 +116,7 @@ struct default_value_visitor {
     // Special handling for floating point to integer conversion
     template<typename U>
     typename fl::enable_if<fl::is_integral<T>::value && fl::is_floating_point<U>::value, void>::type
-    operator()(const U& value) FL_NOEXCEPT {
+    operator()(const U& value) FL_NO_EXCEPT {
         // Convert float to integer
         storage = static_cast<T>(value);
         result = &storage;
@@ -104,7 +125,7 @@ struct default_value_visitor {
     // Special handling for integer to floating point conversion
     template<typename U>
     typename fl::enable_if<fl::is_floating_point<T>::value && fl::is_integral<U>::value, void>::type
-    operator()(const U& value) FL_NOEXCEPT {
+    operator()(const U& value) FL_NO_EXCEPT {
         // Convert integer to float
         storage = static_cast<T>(value);
         result = &storage;
@@ -113,7 +134,7 @@ struct default_value_visitor {
     // Special handling for floating point to floating point conversion
     template<typename U>
     typename fl::enable_if<fl::is_floating_point<T>::value && fl::is_floating_point<U>::value && !fl::is_same<T, U>::value, void>::type
-    operator()(const U& value) FL_NOEXCEPT {
+    operator()(const U& value) FL_NO_EXCEPT {
         // Convert between floating point types (e.g., double to float)
         storage = static_cast<T>(value);
         result = &storage;
@@ -122,7 +143,7 @@ struct default_value_visitor {
     // Generic overload for all other types
     template<typename U>
     typename fl::enable_if<
-        !(fl::is_integral<T>::value && fl::is_integral<U>::value) FL_NOEXCEPT &&
+        !(fl::is_integral<T>::value && fl::is_integral<U>::value) FL_NO_EXCEPT &&
         !(fl::is_integral<T>::value && fl::is_floating_point<U>::value) &&
         !(fl::is_floating_point<T>::value && fl::is_integral<U>::value) &&
         !(fl::is_floating_point<T>::value && fl::is_floating_point<U>::value && !fl::is_same<T, U>::value),
@@ -141,9 +162,32 @@ struct default_value_visitor {
 template<typename IntType = i64>
 struct int_conversion_visitor {
     fl::optional<IntType> result;
+
+    template<typename Target>
+    typename fl::enable_if<fl::is_signed<Target>::value, bool>::type
+    is_i64_out_of_range(const i64& value) FL_NO_EXCEPT {
+        const i64 min_val = static_cast<i64>((fl::numeric_limits<Target>::min)());
+        const i64 max_val = static_cast<i64>((fl::numeric_limits<Target>::max)());
+        if (value < min_val || value > max_val) {
+            FL_WARN_F("JSON integer overflow: value %s does not fit in target type (range: %s to %s), truncating", value, min_val, max_val);
+            return true;
+        }
+        return false;
+    }
+
+    template<typename Target>
+    typename fl::enable_if<!fl::is_signed<Target>::value, bool>::type
+    is_i64_out_of_range(const i64& value) FL_NO_EXCEPT {
+        const u64 max_val = static_cast<u64>((fl::numeric_limits<Target>::max)());
+        if (value < 0 || static_cast<u64>(value) > max_val) {
+            FL_WARN_F("JSON integer overflow: value %s does not fit in target type (range: 0 to %s), truncating", value, max_val);
+            return true;
+        }
+        return false;
+    }
     
     template<typename U>
-    void accept(const U& value) FL_NOEXCEPT {
+    void accept(const U& value) FL_NO_EXCEPT {
         // Dispatch to the correct operator() overload
         (*this)(value);
     }
@@ -151,21 +195,21 @@ struct int_conversion_visitor {
     // Special handling to avoid conflict when IntType is i64
     template<typename T = IntType>
     typename fl::enable_if<!fl::is_same<T, i64>::value && !fl::is_same<T, double>::value, void>::type
-    operator()(const IntType& value) FL_NOEXCEPT {
+    operator()(const IntType& value) FL_NO_EXCEPT {
         result = value;
     }
     
     // Special handling for i64 case
     template<typename T = IntType>
     typename fl::enable_if<fl::is_same<T, i64>::value, void>::type
-    operator()(const i64& value) FL_NOEXCEPT {
+    operator()(const i64& value) FL_NO_EXCEPT {
         result = value;
     }
     
     // Special handling for double case (when IntType is double)
     template<typename T = IntType>
     typename fl::enable_if<fl::is_same<T, double>::value, void>::type
-    operator()(const double& value) FL_NOEXCEPT {
+    operator()(const double& value) FL_NO_EXCEPT {
         result = value;
     }
     
@@ -173,30 +217,17 @@ struct int_conversion_visitor {
     // With overflow detection and logging
     template<typename T = IntType>
     typename fl::enable_if<!fl::is_same<T, i64>::value, void>::type
-    operator()(const i64& value) FL_NOEXCEPT {
-        // Check for overflow before casting
-        // For signed types: check if value is within [min, max] range
-        // For unsigned types: check if value is non-negative and within [0, max] range
-        // Use parentheses around min/max to protect against Arduino min/max macros
-        const i64 min_val = static_cast<i64>((fl::numeric_limits<IntType>::min)());
-        const i64 max_val = static_cast<i64>((fl::numeric_limits<IntType>::max)());
-
-        if (value < min_val || value > max_val) {
-            // Log overflow error but still perform conversion (value will be truncated)
-            FL_ERROR("JSON integer overflow: value " << value << " does not fit in target type (range: "
-                     << min_val << " to " << max_val << "), truncating");
-        }
-
-        // Always perform conversion, even if overflow detected
+    operator()(const i64& value) FL_NO_EXCEPT {
+        is_i64_out_of_range<IntType>(value);
         result = static_cast<IntType>(value);
     }
     
-    void operator()(const bool& value) FL_NOEXCEPT {
+    void operator()(const bool& value) FL_NO_EXCEPT {
         result = static_cast<IntType>(value ? 1 : 0);
     }
 
     // Special handling for float to int conversion
-    void operator()(const float& value) FL_NOEXCEPT {
+    void operator()(const float& value) FL_NO_EXCEPT {
         // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO INT
         result = static_cast<IntType>(value);
     }
@@ -204,12 +235,12 @@ struct int_conversion_visitor {
     // Special handling for double to int conversion
     template<typename T = IntType>
     typename fl::enable_if<!fl::is_same<T, double>::value, void>::type
-    operator()(const double& value) FL_NOEXCEPT {
+    operator()(const double& value) FL_NO_EXCEPT {
         // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO INT
         result = static_cast<IntType>(value);
     }
 
-    void operator()(const fl::string& str) FL_NOEXCEPT {
+    void operator()(const fl::string& str) FL_NO_EXCEPT {
         // NEW INSTRUCTIONS: AUTO CONVERT STRING TO INT
         // Try to parse the string as an integer using FastLED's StringFormatter
         // Validate by checking if string contains only digits (and optional +/- sign)
@@ -237,7 +268,7 @@ struct int_conversion_visitor {
     }
     
     template<typename T>
-    void operator()(const T&) FL_NOEXCEPT {
+    void operator()(const T&) FL_NO_EXCEPT {
         // Do nothing for other types
     }
 };
@@ -248,20 +279,20 @@ struct int_conversion_visitor<i64> {
     fl::optional<i64> result;
     
     template<typename U>
-    void accept(const U& value) FL_NOEXCEPT {
+    void accept(const U& value) FL_NO_EXCEPT {
         // Dispatch to the correct operator() overload
         (*this)(value);
     }
     
-    void operator()(const i64& value) FL_NOEXCEPT {
+    void operator()(const i64& value) FL_NO_EXCEPT {
         result = value;
     }
     
-    void operator()(const bool& value) FL_NOEXCEPT {
+    void operator()(const bool& value) FL_NO_EXCEPT {
         result = value ? 1 : 0;
     }
 
-    void operator()(const float& value) FL_NOEXCEPT {
+    void operator()(const float& value) FL_NO_EXCEPT {
         // AUTO CONVERT FLOAT TO INT. Route through int32 first to avoid the
         // direct (i64)float cast — libgcc's `__aeabi_f2lz` helper internally
         // chains through `_fixunssfdi.o` which anchors `__aeabi_dmul/dsub`
@@ -278,14 +309,14 @@ struct int_conversion_visitor<i64> {
         }
     }
 
-    void operator()(const double& value) FL_NOEXCEPT {
+    void operator()(const double& value) FL_NO_EXCEPT {
         // Same #3002 reasoning — but the variant never holds `double`, so
         // this overload is dead code in practice. Keep the direct cast for
         // semantic completeness; LTO will remove it.
         result = static_cast<i64>(value);
     }
 
-    void operator()(const fl::string& str) FL_NOEXCEPT {
+    void operator()(const fl::string& str) FL_NO_EXCEPT {
         // NEW INSTRUCTIONS: AUTO CONVERT STRING TO INT
         // Try to parse the string as an integer using FastLED's StringFormatter
         // Validate by checking if string contains only digits (and optional +/- sign)
@@ -313,7 +344,7 @@ struct int_conversion_visitor<i64> {
     }
     
     template<typename T>
-    void operator()(const T&) FL_NOEXCEPT {
+    void operator()(const T&) FL_NO_EXCEPT {
         // Do nothing for other types
     }
 };
@@ -323,34 +354,34 @@ struct BoolConversionVisitor {
     fl::optional<bool> result;
 
     template<typename U>
-    void accept(const U& value) FL_NOEXCEPT {
+    void accept(const U& value) FL_NO_EXCEPT {
         // Dispatch to the correct operator() overload
         (*this)(value);
     }
 
-    void operator()(const bool& value) FL_NOEXCEPT {
+    void operator()(const bool& value) FL_NO_EXCEPT {
         result = value;
     }
 
-    void operator()(const i64& value) FL_NOEXCEPT {
+    void operator()(const i64& value) FL_NO_EXCEPT {
         // NEW INSTRUCTIONS: AUTO CONVERT INT TO BOOL
         // 0 → false, non-zero → true
         result = (value != 0);
     }
 
-    void operator()(const float& value) FL_NOEXCEPT {
+    void operator()(const float& value) FL_NO_EXCEPT {
         // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO BOOL
         // 0.0 → false, non-zero → true
         result = (value != 0.0f);
     }
 
-    void operator()(const double& value) FL_NOEXCEPT {
+    void operator()(const double& value) FL_NO_EXCEPT {
         // NEW INSTRUCTIONS: AUTO CONVERT DOUBLE TO BOOL
         // 0.0 → false, non-zero → true
         result = (value != 0.0);
     }
 
-    void operator()(const fl::string& str) FL_NOEXCEPT {
+    void operator()(const fl::string& str) FL_NO_EXCEPT {
         // NEW INSTRUCTIONS: AUTO CONVERT STRING TO BOOL
         // "true", "1", "yes", "on" (case insensitive) → true
         // "false", "0", "no", "off" (case insensitive) → false
@@ -384,7 +415,7 @@ struct BoolConversionVisitor {
     }
 
     template<typename T>
-    void operator()(const T&) FL_NOEXCEPT {
+    void operator()(const T&) FL_NO_EXCEPT {
         // Do nothing for other types (arrays, objects, null)
     }
 };
@@ -395,30 +426,36 @@ struct float_conversion_visitor {
     fl::optional<FloatType> result;
     
     template<typename U>
-    void accept(const U& value) FL_NOEXCEPT {
+    void accept(const U& value) FL_NO_EXCEPT {
         // Dispatch to the correct operator() overload
         (*this)(value);
     }
     
-    void operator()(const FloatType& value) FL_NOEXCEPT {
+    void operator()(const FloatType& value) FL_NO_EXCEPT {
         result = value;
     }
     
-    // Special handling to avoid conflict when FloatType is double
+    // Special handling to avoid conflict when FloatType is double.
+    // Narrowing path: double -> float (FloatType resolves to float here).
+    // Use the integer IEEE-754 bit-codec from #3038 so this never anchors
+    // `__aeabi_d2f` on no-FPU targets. See FastLED #3022 / #3002.
     template<typename T = FloatType>
     typename fl::enable_if<!fl::is_same<T, double>::value, void>::type
-    operator()(const double& value) FL_NOEXCEPT {
-        result = static_cast<FloatType>(value);
+    operator()(const double& value) FL_NO_EXCEPT {
+        result = static_cast<FloatType>(detail::json_double_to_float(value));
     }
-    
-    // Special handling to avoid conflict when FloatType is float
+
+    // Special handling to avoid conflict when FloatType is float.
+    // Widening path: float -> double (FloatType resolves to double here).
+    // Use the integer IEEE-754 bit-codec companion so this never anchors
+    // `__aeabi_f2d` on no-FPU targets. See FastLED #3022 / #3002.
     template<typename T = FloatType>
     typename fl::enable_if<!fl::is_same<T, float>::value, void>::type
-    operator()(const float& value) FL_NOEXCEPT {
-        result = static_cast<FloatType>(value);
+    operator()(const float& value) FL_NO_EXCEPT {
+        result = static_cast<FloatType>(detail::json_float_to_double(value));
     }
     
-    void operator()(const i64& value) FL_NOEXCEPT {
+    void operator()(const i64& value) FL_NO_EXCEPT {
         // AUTO CONVERT INT TO FLOAT. Route through int32 first to avoid the
         // direct (FloatType)i64 cast — libgcc-nofp's `__aeabi_l2f` helper lives
         // in `_floatdisf.o` which anchors `__aeabi_dadd / dmul / i2d / ui2d / d2f`
@@ -434,13 +471,13 @@ struct float_conversion_visitor {
         }
     }
 
-    void operator()(const bool& value) FL_NOEXCEPT {
+    void operator()(const bool& value) FL_NO_EXCEPT {
         // Use float literals (1.0f / 0.0f), not double (1.0 / 0.0), to avoid
         // pulling the soft-double helpers. See FastLED #3076.
         result = static_cast<FloatType>(value ? 1.0f : 0.0f);
     }
 
-    void operator()(const fl::string& str) FL_NOEXCEPT {
+    void operator()(const fl::string& str) FL_NO_EXCEPT {
         // NEW INSTRUCTIONS: AUTO CONVERT STRING TO FLOAT
         // Try to parse the string as a float using FastLED's StringFormatter
         // Validate by checking if string contains valid float characters
@@ -482,6 +519,7 @@ struct float_conversion_visitor {
                 }
             }
 
+#if FL_PLATFORM_HAS_LARGE_MEMORY
             if (isSimpleDecimal) {
                 // For simple decimals, we can do a more direct conversion
                 float parsed = fl::parseFloat(str.c_str(), str.length());
@@ -491,11 +529,20 @@ struct float_conversion_visitor {
                 float parsed = fl::parseFloat(str.c_str(), str.length());
                 result = static_cast<FloatType>(parsed);
             }
+#else
+            // Low-memory gate per FastLED #3224 Tier 1A: drop the string -> float
+            // path. `fl::parseFloat` uses float arithmetic (mul/add/div) which
+            // anchors `__aeabi_fmul / fadd / fsub / fdiv` (~4.5 KB of single-prec
+            // soft-FP on no-FPU targets). The integer-only LPC8xx RPC contract
+            // never receives JSON float strings, so saturate to zero.
+            (void)isSimpleDecimal;
+            result = static_cast<FloatType>(0);
+#endif
         }
     }
-    
+
     template<typename T>
-    void operator()(const T&) FL_NOEXCEPT {
+    void operator()(const T&) FL_NO_EXCEPT {
         // Do nothing for other types
     }
 };
@@ -506,20 +553,26 @@ struct float_conversion_visitor<double> {
     fl::optional<double> result;
     
     template<typename U>
-    void accept(const U& value) FL_NOEXCEPT {
+    void accept(const U& value) FL_NO_EXCEPT {
         // Dispatch to the correct operator() overload
         (*this)(value);
     }
     
-    void operator()(const double& value) FL_NOEXCEPT {
+    void operator()(const double& value) FL_NO_EXCEPT {
         result = value;
     }
-    
-    void operator()(const float& value) FL_NOEXCEPT {
-        result = static_cast<double>(value);
+
+    void operator()(const float& value) FL_NO_EXCEPT {
+        // Widening float -> double via the integer IEEE-754 bit-codec
+        // companion to `json_double_to_float`. Even though `as_double()`
+        // is DCE'd from LowMemory builds today (per line 564 below),
+        // routing through the bit-codec means a future caller that keeps
+        // `as_double()` alive on a no-FPU target won't drag in
+        // `__aeabi_f2d`. See FastLED #3022 / #3002.
+        result = detail::json_float_to_double(value);
     }
     
-    void operator()(const i64& value) FL_NOEXCEPT {
+    void operator()(const i64& value) FL_NO_EXCEPT {
         // AUTO CONVERT INT TO FLOAT. Route through int32 to avoid pulling
         // libgcc-nofp's `_floatdisf.o` soft-double cascade on no-FPU targets.
         // The double path (`as_double()`) is DCE'd from LowMemory builds today,
@@ -533,11 +586,11 @@ struct float_conversion_visitor<double> {
         }
     }
     
-    void operator()(const bool& value) FL_NOEXCEPT {
+    void operator()(const bool& value) FL_NO_EXCEPT {
         result = value ? 1.0 : 0.0;
     }
     
-    void operator()(const fl::string& str) FL_NOEXCEPT {
+    void operator()(const fl::string& str) FL_NO_EXCEPT {
         // NEW INSTRUCTIONS: AUTO CONVERT STRING TO FLOAT
         // Try to parse the string as a float using FastLED's StringFormatter
         // Validate by checking if string contains valid float characters
@@ -579,6 +632,7 @@ struct float_conversion_visitor<double> {
                 }
             }
             
+#if FL_PLATFORM_HAS_LARGE_MEMORY
             if (isSimpleDecimal) {
                 // For simple decimals, we can do a more direct conversion
                 float parsed = fl::parseFloat(str.c_str(), str.length());
@@ -588,11 +642,16 @@ struct float_conversion_visitor<double> {
                 float parsed = fl::parseFloat(str.c_str(), str.length());
                 result = static_cast<double>(parsed);
             }
+#else
+            // Low-memory gate per FastLED #3224 Tier 1A; see scalar specialization.
+            (void)isSimpleDecimal;
+            result = 0.0;
+#endif
         }
     }
-    
+
     template<typename T>
-    void operator()(const T&) FL_NOEXCEPT {
+    void operator()(const T&) FL_NO_EXCEPT {
         // Do nothing for other types
     }
 };
@@ -602,69 +661,70 @@ struct StringConversionVisitor {
     fl::optional<fl::string> result;
 
     template<typename U>
-    void accept(const U& value) FL_NOEXCEPT {
+    void accept(const U& value) FL_NO_EXCEPT {
         // Dispatch to the correct operator() overload
         (*this)(value);
     }
 
-    void operator()(const fl::string& value) FL_NOEXCEPT {
+    void operator()(const fl::string& value) FL_NO_EXCEPT {
         result = value;
     }
 
-    void operator()(const i64& value) FL_NOEXCEPT {
+    void operator()(const i64& value) FL_NO_EXCEPT {
         // Convert integer to string
         result = fl::to_string(value);
     }
 
-    void operator()(const double& value) FL_NOEXCEPT {
+    void operator()(const double& value) FL_NO_EXCEPT {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
         // Convert double to string with higher precision for JSON representation
         result = fl::to_string(static_cast<float>(value), 6);
+#else
+        // Low-memory gate per FastLED #3224 Tier 1A: drop the float -> string
+        // path. `fl::to_string(float, prec)` calls `basic_string::append(float,
+        // int)` which calls `ftoa` -> `printf_detail::format_float` -- that
+        // anchors `__aeabi_fadd/fsub/fmul/f2iz/fcmp*` (~3 KB single-prec
+        // soft-FP on no-FPU). LPC8xx integer-only RPC contract never emits
+        // floats so this path is unreachable; saturate to "0".
+        (void)value;
+        result = "0";
+#endif
     }
 
-    void operator()(const float& value) FL_NOEXCEPT {
+    void operator()(const float& value) FL_NO_EXCEPT {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
         // Convert float to string with higher precision for JSON representation
         result = fl::to_string(value, 6);
+#else
+        // Low-memory gate per FastLED #3224 Tier 1A; see double overload.
+        (void)value;
+        result = "0";
+#endif
     }
 
-    void operator()(const bool& value) FL_NOEXCEPT {
+    void operator()(const bool& value) FL_NO_EXCEPT {
         // Convert bool to string
         result = value ? "true" : "false";
     }
 
-    void operator()(const fl::nullptr_t&) FL_NOEXCEPT {
+    void operator()(const fl::nullptr_t&) FL_NO_EXCEPT {
         // Convert null to string
         result = "null";
     }
 
     template<typename T>
-    void operator()(const T&) FL_NOEXCEPT {
+    void operator()(const T&) FL_NO_EXCEPT {
         // Do nothing for other types (arrays, objects)
     }
 };
 
-// Visitor for getting size of arrays and objects
-struct SizeVisitor {
-    size_t result = 0;
-
-    template<typename U>
-    void accept(const U& value) FL_NOEXCEPT {
-        // Dispatch to the correct operator() overload
-        (*this)(value);
-    }
-
-    void operator()(const json_array& arr) FL_NOEXCEPT { result = arr.size(); }
-    void operator()(const json_object& obj) FL_NOEXCEPT { result = obj.size(); }
-    void operator()(const fl::vector<i16>& vec) FL_NOEXCEPT { result = vec.size(); }
-    void operator()(const fl::vector<u8>& vec) FL_NOEXCEPT { result = vec.size(); }
-    void operator()(const fl::vector<float>& vec) FL_NOEXCEPT { result = vec.size(); }
-
-    // Generic fallback for other types (primitives, null)
-    void operator()(const fl::nullptr_t&) FL_NOEXCEPT { result = 0; }
-    void operator()(const bool&) FL_NOEXCEPT { result = 0; }
-    void operator()(const i64&) FL_NOEXCEPT { result = 0; }
-    void operator()(const float&) FL_NOEXCEPT { result = 0; }
-    void operator()(const fl::string&) FL_NOEXCEPT { result = 0; }
-};
+// SizeVisitor was removed in FastLED #3235 Tier 2E Phase 1; `json::size()`
+// now uses direct `data.ptr<T>()` tag checks (see below). Keeping a stub
+// for any external code that referenced the type by name.
+//
+// NOTE: removing this struct also removes the per-(T × SizeVisitor)
+// `visit_fn` thunk instantiations the variant would otherwise emit for
+// each of the 10 alternatives.
 
 // Forward declarations for visitors (defined after json_value)
 template<typename T> struct NumericExtractVisitor;
@@ -700,228 +760,197 @@ struct json_value {
     variant_t data;
 
     // Constructors
-    json_value() FL_NOEXCEPT : data(nullptr) {}
-    json_value(fl::nullptr_t) FL_NOEXCEPT : data(nullptr) {}
-    json_value(bool b) FL_NOEXCEPT : data(b) {}
-    json_value(i64 i) FL_NOEXCEPT : data(i) {}
+    json_value() FL_NO_EXCEPT : data(nullptr) {}
+    json_value(fl::nullptr_t) FL_NO_EXCEPT : data(nullptr) {}
+    json_value(bool b) FL_NO_EXCEPT : data(b) {}
+    json_value(i64 i) FL_NO_EXCEPT : data(i) {}
     // Explicit int/unsigned constructors to prevent ambiguity on platforms where
     // int != i64 (e.g., 32-bit ARM with GCC). Without these, int is equally
     // convertible to bool, i64, and float.
-    json_value(int i) FL_NOEXCEPT : data(static_cast<i64>(i)) {}
-    json_value(unsigned int i) FL_NOEXCEPT : data(static_cast<i64>(i)) {}
-    json_value(float f) FL_NOEXCEPT : data(f) {}  // Changed from double to float
-    json_value(const fl::string& s) FL_NOEXCEPT : data(s) {
+    json_value(int i) FL_NO_EXCEPT : data(static_cast<i64>(i)) {}
+    json_value(unsigned int i) FL_NO_EXCEPT : data(static_cast<i64>(i)) {}
+    json_value(float f) FL_NO_EXCEPT : data(f) {}  // Changed from double to float
+    json_value(const fl::string& s) FL_NO_EXCEPT : data(s) {
     }
-    json_value(const json_array& a) FL_NOEXCEPT : data(a) {
+    json_value(const json_array& a) FL_NO_EXCEPT : data(a) {
         //FL_WARN("Created json_value with array");
     }
-    json_value(const json_object& o) FL_NOEXCEPT : data(o) {
+    json_value(const json_object& o) FL_NO_EXCEPT : data(o) {
         //FL_WARN("Created json_value with object");
     }
-    json_value(const fl::vector<i16>& audio) FL_NOEXCEPT : data(audio) {
+    json_value(const fl::vector<i16>& audio) FL_NO_EXCEPT : data(audio) {
         //FL_WARN("Created json_value with audio data");
     }
     
-    json_value(fl::vector<i16>&& audio) FL_NOEXCEPT : data(fl::move(audio)) {
+    json_value(fl::vector<i16>&& audio) FL_NO_EXCEPT : data(fl::move(audio)) {
         //FL_WARN("Created json_value with moved audio data");
     }
     
-    json_value(const fl::vector<u8>& bytes) FL_NOEXCEPT : data(bytes) {
+    json_value(const fl::vector<u8>& bytes) FL_NO_EXCEPT : data(bytes) {
         //FL_WARN("Created json_value with byte data");
     }
     
-    json_value(fl::vector<u8>&& bytes) FL_NOEXCEPT : data(fl::move(bytes)) {
+    json_value(fl::vector<u8>&& bytes) FL_NO_EXCEPT : data(fl::move(bytes)) {
         //FL_WARN("Created json_value with moved byte data");
     }
     
-    json_value(const fl::vector<float>& floats) FL_NOEXCEPT : data(floats) {
+    json_value(const fl::vector<float>& floats) FL_NO_EXCEPT : data(floats) {
         //FL_WARN("Created json_value with float data");
     }
     
-    json_value(fl::vector<float>&& floats) FL_NOEXCEPT : data(fl::move(floats)) {
+    json_value(fl::vector<float>&& floats) FL_NO_EXCEPT : data(fl::move(floats)) {
         //FL_WARN("Created json_value with moved float data");
     }
 
     // Copy constructor
-    json_value(const json_value& other) FL_NOEXCEPT : data(other.data) {}
+    json_value(const json_value& other) FL_NO_EXCEPT : data(other.data) {}
 
-    json_value& operator=(const json_value& other) FL_NOEXCEPT {
+    json_value& operator=(const json_value& other) FL_NO_EXCEPT {
         data = other.data;
         return *this;
     }
 
-    json_value& operator=(json_value&& other) FL_NOEXCEPT {
+    json_value& operator=(json_value&& other) FL_NO_EXCEPT {
         data = fl::move(other.data);
         return *this;
     }
 
     template<typename T>
     typename fl::enable_if<!fl::is_same<typename fl::remove_cv<typename fl::remove_reference<T>::type>::type, json_value>::value, json_value&>::type
-    operator=(T&& value) FL_NOEXCEPT {
+    operator=(T&& value) FL_NO_EXCEPT {
         data = fl::forward<T>(value);
         return *this;
     }
 
-    json_value& operator=(fl::nullptr_t) FL_NOEXCEPT {
+    json_value& operator=(fl::nullptr_t) FL_NO_EXCEPT {
         data = nullptr;
         return *this;
     }
 
-    json_value& operator=(bool b) FL_NOEXCEPT {
+    json_value& operator=(bool b) FL_NO_EXCEPT {
         data = b;
         return *this;
     }
 
-    json_value& operator=(i64 i) FL_NOEXCEPT {
+    json_value& operator=(i64 i) FL_NO_EXCEPT {
         data = i;
         return *this;
     }
 
-    json_value& operator=(double d) FL_NOEXCEPT {
-        data = static_cast<float>(d);
+    json_value& operator=(double d) FL_NO_EXCEPT {
+        data = detail::json_double_to_float(d);
         return *this;
     }
     
-    json_value& operator=(float f) FL_NOEXCEPT {
+    json_value& operator=(float f) FL_NO_EXCEPT {
         data = f;
         return *this;
     }
 
-    json_value& operator=(fl::string s) FL_NOEXCEPT {
+    json_value& operator=(fl::string s) FL_NO_EXCEPT {
         data = fl::move(s);
         return *this;
     }
 
-    json_value& operator=(json_array a) FL_NOEXCEPT {
+    json_value& operator=(json_array a) FL_NO_EXCEPT {
         data = fl::move(a);
         return *this;
     }
     
-    json_value& operator=(fl::vector<i16> audio) FL_NOEXCEPT {
+    json_value& operator=(fl::vector<i16> audio) FL_NO_EXCEPT {
         data = fl::move(audio);
         return *this;
     }
     
-    json_value& operator=(fl::vector<u8> bytes) FL_NOEXCEPT {
+    json_value& operator=(fl::vector<u8> bytes) FL_NO_EXCEPT {
         data = fl::move(bytes);
         return *this;
     }
     
-    json_value& operator=(fl::vector<float> floats) FL_NOEXCEPT {
+    json_value& operator=(fl::vector<float> floats) FL_NO_EXCEPT {
         data = fl::move(floats);
         return *this;
     }
 
     // Special constructor for char values
-    static fl::shared_ptr<json_value> from_char(char c) FL_NOEXCEPT {
+    static fl::shared_ptr<json_value> from_char(char c) FL_NO_EXCEPT {
         return fl::make_shared<json_value>(fl::string(1, c));
     }
     
     // Visitor pattern implementation
     template<typename Visitor>
-    auto visit(Visitor&& visitor) FL_NOEXCEPT -> decltype(visitor(fl::nullptr_t{})) {
+    auto visit(Visitor&& visitor) FL_NO_EXCEPT -> decltype(visitor(fl::nullptr_t{})) {
         return data.visit(fl::forward<Visitor>(visitor));
     }
     
     template<typename Visitor>
-    auto visit(Visitor&& visitor) const FL_NOEXCEPT -> decltype(visitor(fl::nullptr_t{})) {
+    auto visit(Visitor&& visitor) const FL_NO_EXCEPT -> decltype(visitor(fl::nullptr_t{})) {
         return data.visit(fl::forward<Visitor>(visitor));
     }
 
     // Type queries - using is<T>() instead of index() for fl::variant
-    bool is_null() const FL_NOEXCEPT { 
+    bool is_null() const FL_NO_EXCEPT { 
         //FL_WARN("is_null called, tag=" << data.tag());
         return data.is<fl::nullptr_t>(); 
     }
-    bool is_bool() const FL_NOEXCEPT { 
+    bool is_bool() const FL_NO_EXCEPT { 
         //FL_WARN("is_bool called, tag=" << data.tag());
         return data.is<bool>(); 
     }
-    bool is_int() const FL_NOEXCEPT {
+    bool is_int() const FL_NO_EXCEPT {
         //FL_WARN("is_int called, tag=" << data.tag());
         return data.is<i64>();
     }
-    bool is_double() const FL_NOEXCEPT { 
+    bool is_double() const FL_NO_EXCEPT { 
         //FL_WARN("is_double called, tag=" << data.tag());
         return data.is<float>(); 
     }
-    bool is_float() const FL_NOEXCEPT {
+    bool is_float() const FL_NO_EXCEPT {
         return data.is<float>();
     }
     // is_number() returns true if the value is any numeric type (int or float)
-    bool is_number() const FL_NOEXCEPT {
+    bool is_number() const FL_NO_EXCEPT {
         return is_int() || is_float();
     }
-    bool is_string() const FL_NOEXCEPT { 
+    bool is_string() const FL_NO_EXCEPT { 
         //FL_WARN("is_string called, tag=" << data.tag());
         return data.is<fl::string>(); 
     }
-    // Visitor for array type checking
-    struct IsArrayVisitor {
-        bool result = false;
-        
-        template<typename T>
-        void accept(const T& value) FL_NOEXCEPT {
-            // Dispatch to the correct operator() overload
-            (*this)(value);
-        }
-        
-        // json_array is an array
-        void operator()(const json_array&) FL_NOEXCEPT {
-            result = true;
-        }
-        
-        // Specialized array types ARE arrays
-        void operator()(const fl::vector<i16>&) FL_NOEXCEPT {
-            result = true;  // Audio data is still an array
-        }
-        
-        void operator()(const fl::vector<u8>&) FL_NOEXCEPT {
-            result = true;  // Byte data is still an array
-        }
-        
-        void operator()(const fl::vector<float>&) FL_NOEXCEPT {
-            result = true;  // Float data is still an array
-        }
-        
-        // Generic handler for all other types
-        template<typename T>
-        void operator()(const T&) FL_NOEXCEPT {
-            result = false;
-        }
-    };
-    
-    bool is_array() const FL_NOEXCEPT { 
-        //FL_WARN("is_array called, tag=" << data.tag());
-        IsArrayVisitor visitor;
-        data.visit(visitor);
-        return visitor.result;
+    bool is_array() const FL_NO_EXCEPT {
+        // FastLED #3235 Tier 2E Phase 1: replace `IsArrayVisitor` +
+        // `data.visit(visitor)` (which would emit 10 per-alternative
+        // `visit_fn<T, IsArrayVisitor>` thunks) with direct tag checks
+        // via `data.is<T>()`. Same behavior; no visitor instantiation.
+        return data.is<json_array>() ||
+               data.is<fl::vector<i16>>() ||
+               data.is<fl::vector<u8>>() ||
+               data.is<fl::vector<float>>();
     }
     
     // Returns true only for json_array (not specialized array types)
-    bool is_generic_array() const FL_NOEXCEPT {
+    bool is_generic_array() const FL_NO_EXCEPT {
         return data.is<json_array>();
     }
     
-    bool is_object() const FL_NOEXCEPT { 
+    bool is_object() const FL_NO_EXCEPT { 
         //FL_WARN("is_object called, tag=" << data.tag());
         return data.is<json_object>(); 
     }
-    bool is_audio() const FL_NOEXCEPT {
+    bool is_audio() const FL_NO_EXCEPT {
         //FL_WARN("is_audio called, tag=" << data.tag());
         return data.is<fl::vector<i16>>();
     }
-    bool is_bytes() const FL_NOEXCEPT {
+    bool is_bytes() const FL_NO_EXCEPT {
         //FL_WARN("is_bytes called, tag=" << data.tag());
         return data.is<fl::vector<u8>>();
     }
-    bool is_floats() const FL_NOEXCEPT {
+    bool is_floats() const FL_NO_EXCEPT {
         //FL_WARN("is_floats called, tag=" << data.tag());
         return data.is<fl::vector<float>>();
     }
 
     // Safe extractors (return optional values, not references)
-    fl::optional<bool> as_bool() FL_NOEXCEPT {
+    fl::optional<bool> as_bool() FL_NO_EXCEPT {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
@@ -932,7 +961,7 @@ struct json_value {
         return visitor.result;
     }
     
-    fl::optional<i64> as_int() FL_NOEXCEPT {
+    fl::optional<i64> as_int() FL_NO_EXCEPT {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
@@ -944,7 +973,7 @@ struct json_value {
     }
     
     template<typename IntType>
-    fl::optional<IntType> as_int() FL_NOEXCEPT {
+    fl::optional<IntType> as_int() FL_NO_EXCEPT {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
@@ -955,7 +984,7 @@ struct json_value {
         return visitor.result;
     }
     
-    fl::optional<double> as_double() const FL_NOEXCEPT {
+    fl::optional<double> as_double() const FL_NO_EXCEPT {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
@@ -966,12 +995,12 @@ struct json_value {
         return visitor.result;
     }
     
-    fl::optional<float> as_float() FL_NOEXCEPT {
+    fl::optional<float> as_float() FL_NO_EXCEPT {
         return as_float<float>();
     }
     
     template<typename FloatType>
-    fl::optional<FloatType> as_float() FL_NOEXCEPT {
+    fl::optional<FloatType> as_float() FL_NO_EXCEPT {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
@@ -982,7 +1011,7 @@ struct json_value {
         return visitor.result;
     }
     
-    fl::optional<fl::string> as_string() FL_NOEXCEPT {
+    fl::optional<fl::string> as_string() FL_NO_EXCEPT {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
@@ -994,11 +1023,11 @@ struct json_value {
     }
     
     // Zero-copy pointer accessors (non-const)
-    json_array*           as_array() FL_NOEXCEPT { return data.ptr<json_array>(); }
-    json_object*          as_object() FL_NOEXCEPT { return data.ptr<json_object>(); }
+    json_array*           as_array() FL_NO_EXCEPT { return data.ptr<json_array>(); }
+    json_object*          as_object() FL_NO_EXCEPT { return data.ptr<json_object>(); }
 
     // Const overloads
-    fl::optional<bool> as_bool() const FL_NOEXCEPT {
+    fl::optional<bool> as_bool() const FL_NO_EXCEPT {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
@@ -1009,7 +1038,7 @@ struct json_value {
         return visitor.result;
     }
     
-    fl::optional<i64> as_int() const FL_NOEXCEPT {
+    fl::optional<i64> as_int() const FL_NO_EXCEPT {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
@@ -1021,7 +1050,7 @@ struct json_value {
     }
     
     template<typename IntType>
-    fl::optional<IntType> as_int() const FL_NOEXCEPT {
+    fl::optional<IntType> as_int() const FL_NO_EXCEPT {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
@@ -1032,12 +1061,12 @@ struct json_value {
         return visitor.result;
     }
     
-    fl::optional<float> as_float() const FL_NOEXCEPT {
+    fl::optional<float> as_float() const FL_NO_EXCEPT {
         return as_float<float>();
     }
     
     template<typename FloatType>
-    fl::optional<FloatType> as_float() const FL_NOEXCEPT {
+    fl::optional<FloatType> as_float() const FL_NO_EXCEPT {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
@@ -1048,7 +1077,7 @@ struct json_value {
         return visitor.result;
     }
     
-    fl::optional<fl::string> as_string() const FL_NOEXCEPT {
+    fl::optional<fl::string> as_string() const FL_NO_EXCEPT {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
@@ -1060,11 +1089,11 @@ struct json_value {
     }
     
     // Zero-copy pointer accessors (const)
-    const json_array*           as_array()   const FL_NOEXCEPT { return data.ptr<json_array>(); }
-    const json_object*          as_object()  const FL_NOEXCEPT { return data.ptr<json_object>(); }
+    const json_array*           as_array()   const FL_NO_EXCEPT { return data.ptr<json_array>(); }
+    const json_object*          as_object()  const FL_NO_EXCEPT { return data.ptr<json_object>(); }
 
     // Explicit copy methods - use when you need an owned copy or packed-array conversion
-    fl::optional<json_array> clone_array() const FL_NOEXCEPT {
+    fl::optional<json_array> clone_array() const FL_NO_EXCEPT {
         auto ptr = data.ptr<json_array>();
         if (ptr) return fl::optional<json_array>(*ptr);
         // Handle specialized array types by converting them to regular json_array
@@ -1094,7 +1123,7 @@ struct json_value {
         }
         return fl::nullopt;
     }
-    fl::optional<json_object> clone_object() const FL_NOEXCEPT {
+    fl::optional<json_object> clone_object() const FL_NO_EXCEPT {
         auto ptr = data.ptr<json_object>();
         return ptr ? fl::optional<json_object>(*ptr) : fl::nullopt;
     }
@@ -1103,7 +1132,7 @@ struct json_value {
     // Returns number of elements copied (min of array size and span size).
     // Returns 0 if this value is not a numeric array.
     template<typename T>
-    size_t copy_to(fl::span<T> out) const FL_NOEXCEPT {
+    size_t copy_to(fl::span<T> out) const FL_NO_EXCEPT {
         CopyToVisitor<T> visitor(out);
         data.visit(visitor);
         return visitor.result;
@@ -1113,7 +1142,7 @@ struct json_value {
     // Use with fl::back_inserter(container) to append to any container.
     // Returns number of elements written. Returns 0 if not a numeric array.
     template<typename T, typename OutputIt>
-    size_t copy_to_output_iterator(OutputIt out) const FL_NOEXCEPT {
+    size_t copy_to_output_iterator(OutputIt out) const FL_NO_EXCEPT {
         CopyToOutputIteratorVisitor<T, OutputIt> visitor(out);
         data.visit(visitor);
         return visitor.result;
@@ -1121,7 +1150,7 @@ struct json_value {
 
     // Overload for back_insert_iterator: T deduced from container's value_type
     template<typename Container>
-    size_t copy_to_output_iterator(fl::back_insert_iterator<Container> out) const FL_NOEXCEPT {
+    size_t copy_to_output_iterator(fl::back_insert_iterator<Container> out) const FL_NO_EXCEPT {
         using T = typename Container::value_type;
         CopyToOutputIteratorVisitor<T, fl::back_insert_iterator<Container>> visitor(out);
         data.visit(visitor);
@@ -1130,19 +1159,19 @@ struct json_value {
 
     // Generic getter template method
     template<typename T>
-    fl::optional<T> get() const FL_NOEXCEPT {
+    fl::optional<T> get() const FL_NO_EXCEPT {
         auto ptr = data.ptr<T>();
         return ptr ? fl::optional<T>(*ptr) : fl::nullopt;
     }
     
     template<typename T>
-    fl::optional<T> get() FL_NOEXCEPT {
+    fl::optional<T> get() FL_NO_EXCEPT {
         auto ptr = data.ptr<T>();
         return ptr ? fl::optional<T>(*ptr) : fl::nullopt;
     }
 
     // Iterator support for objects and arrays
-    iterator begin() FL_NOEXCEPT {
+    iterator begin() FL_NO_EXCEPT {
         if (is_object()) {
             auto ptr = data.ptr<json_object>();
             return iterator(ptr->begin());
@@ -1151,7 +1180,7 @@ struct json_value {
         return iterator(json_object().begin());
     }
     
-    iterator end() FL_NOEXCEPT {
+    iterator end() FL_NO_EXCEPT {
         if (is_object()) {
             auto ptr = data.ptr<json_object>();
             return iterator(ptr->end());
@@ -1160,7 +1189,7 @@ struct json_value {
         return iterator(json_object().end());
     }
     
-    const_iterator begin() const FL_NOEXCEPT {
+    const_iterator begin() const FL_NO_EXCEPT {
         if (is_object()) {
             auto ptr = data.ptr<const json_object>();
             if (!ptr) return const_iterator::from_iterator(json_object().begin());
@@ -1170,7 +1199,7 @@ struct json_value {
         return const_iterator::from_iterator(json_object().begin());
     }
     
-    const_iterator end() const FL_NOEXCEPT {
+    const_iterator end() const FL_NO_EXCEPT {
         if (is_object()) {
             auto ptr = data.ptr<const json_object>();
             if (!ptr) return const_iterator::from_iterator(json_object().end());
@@ -1189,7 +1218,7 @@ struct json_value {
         size_t mIndex;
         
         // Helper to get the size of the array regardless of its type
-        size_t get_size() const FL_NOEXCEPT {
+        size_t get_size() const FL_NO_EXCEPT {
             if (!mVariant) return 0;
             
             if (mVariant->is<json_array>()) {
@@ -1216,7 +1245,7 @@ struct json_value {
         }
         
         // Helper to convert current element to target type T
-        parse_result<T> get_value() const FL_NOEXCEPT {
+        parse_result<T> get_value() const FL_NO_EXCEPT {
             if (!mVariant || mIndex >= get_size()) {
                 return parse_result<T>(task::Error("Index out of bounds"));
             }
@@ -1294,36 +1323,36 @@ struct json_value {
         }
         
     public:
-        array_iterator() FL_NOEXCEPT : mVariant(nullptr), mIndex(0) {}
-        array_iterator(variant_t* variant, size_t index) FL_NOEXCEPT : mVariant(variant), mIndex(index) {}
+        array_iterator() FL_NO_EXCEPT : mVariant(nullptr), mIndex(0) {}
+        array_iterator(variant_t* variant, size_t index) FL_NO_EXCEPT : mVariant(variant), mIndex(index) {}
         
-        parse_result<T> operator*() const FL_NOEXCEPT {
+        parse_result<T> operator*() const FL_NO_EXCEPT {
             return get_value();
         }
         
-        array_iterator& operator++() FL_NOEXCEPT {
+        array_iterator& operator++() FL_NO_EXCEPT {
             ++mIndex;
             return *this;
         }
         
-        array_iterator operator++(int) FL_NOEXCEPT {
+        array_iterator operator++(int) FL_NO_EXCEPT {
             array_iterator tmp(*this);
             ++(*this);
             return tmp;
         }
         
-        bool operator!=(const array_iterator& other) const FL_NOEXCEPT {
+        bool operator!=(const array_iterator& other) const FL_NO_EXCEPT {
             return mIndex != other.mIndex || mVariant != other.mVariant;
         }
         
-        bool operator==(const array_iterator& other) const FL_NOEXCEPT {
+        bool operator==(const array_iterator& other) const FL_NO_EXCEPT {
             return mIndex == other.mIndex && mVariant == other.mVariant;
         }
     };
     
     // Begin/end methods for array iteration
     template<typename T>
-    array_iterator<T> begin_array() FL_NOEXCEPT {
+    array_iterator<T> begin_array() FL_NO_EXCEPT {
         if (is_array()) {
             return array_iterator<T>(&data, 0);
         }
@@ -1331,7 +1360,7 @@ struct json_value {
     }
     
     template<typename T>
-    array_iterator<T> end_array() FL_NOEXCEPT {
+    array_iterator<T> end_array() FL_NO_EXCEPT {
         if (is_array()) {
             return array_iterator<T>(&data, size());
         }
@@ -1339,7 +1368,7 @@ struct json_value {
     }
     
     template<typename T>
-    array_iterator<T> begin_array() const FL_NOEXCEPT {
+    array_iterator<T> begin_array() const FL_NO_EXCEPT {
         if (is_array()) {
             return array_iterator<T>(const_cast<variant_t*>(&data), 0);
         }
@@ -1347,7 +1376,7 @@ struct json_value {
     }
     
     template<typename T>
-    array_iterator<T> end_array() const FL_NOEXCEPT {
+    array_iterator<T> end_array() const FL_NO_EXCEPT {
         if (is_array()) {
             return array_iterator<T>(const_cast<variant_t*>(&data), size());
         }
@@ -1355,13 +1384,13 @@ struct json_value {
     }
     
     // Free functions for range-based for loops
-    friend iterator begin(json_value& v) FL_NOEXCEPT { return v.begin(); }
-    friend iterator end(json_value& v) FL_NOEXCEPT { return v.end(); }
-    friend const_iterator begin(const json_value& v) FL_NOEXCEPT { return v.begin(); }
-    friend const_iterator end(const json_value& v) FL_NOEXCEPT { return v.end(); }
+    friend iterator begin(json_value& v) FL_NO_EXCEPT { return v.begin(); }
+    friend iterator end(json_value& v) FL_NO_EXCEPT { return v.end(); }
+    friend const_iterator begin(const json_value& v) FL_NO_EXCEPT { return v.begin(); }
+    friend const_iterator end(const json_value& v) FL_NO_EXCEPT { return v.end(); }
 
     // Indexing for fluid chaining
-    json_value& operator[](size_t idx) FL_NOEXCEPT {
+    json_value& operator[](size_t idx) FL_NO_EXCEPT {
         if (!is_array()) data = json_array{};
         // Handle regular json_array
         if (data.is<json_array>()) {
@@ -1402,7 +1431,7 @@ struct json_value {
         return get_null_json_value();
     }
     
-    json_value& operator[](const fl::string &key) FL_NOEXCEPT {
+    json_value& operator[](const fl::string &key) FL_NO_EXCEPT {
         if (!is_object()) data = json_object{};
         auto ptr = data.ptr<json_object>();
         if (!ptr) return get_null_json_value(); // Handle error case
@@ -1416,7 +1445,7 @@ struct json_value {
 
     // Default-value operator (pipe)
     template<typename T>
-    T operator|(const T& fallback) const FL_NOEXCEPT {
+    T operator|(const T& fallback) const FL_NO_EXCEPT {
         default_value_visitor<T> visitor(fallback);
         data.visit(visitor);
         return visitor.result ? *visitor.result : fallback;
@@ -1424,14 +1453,14 @@ struct json_value {
     
     // Explicit method for default values (alternative to operator|)
     template<typename T>
-    T as_or(const T& fallback) const FL_NOEXCEPT {
+    T as_or(const T& fallback) const FL_NO_EXCEPT {
         default_value_visitor<T> visitor(fallback);
         data.visit(visitor);
         return visitor.result ? *visitor.result : fallback;
     }
 
     // Contains methods for checking existence
-    bool contains(size_t idx) const FL_NOEXCEPT {
+    bool contains(size_t idx) const FL_NO_EXCEPT {
         // Handle regular json_array first
         if (data.is<json_array>()) {
             auto ptr = data.ptr<json_array>();
@@ -1454,14 +1483,14 @@ struct json_value {
         return false;
     }
     
-    bool contains(const fl::string &key) const FL_NOEXCEPT {
+    bool contains(const fl::string &key) const FL_NO_EXCEPT {
         if (!is_object()) return false;
         auto ptr = data.ptr<json_object>();
         return ptr && ptr->find(key) != ptr->end();
     }
 
     // Object iteration support (needed for screenmap conversion)
-    fl::vector<fl::string> keys() const FL_NOEXCEPT {
+    fl::vector<fl::string> keys() const FL_NO_EXCEPT {
         fl::vector<fl::string> result;
         if (is_object()) {
             for (auto it = begin(); it != end(); ++it) {
@@ -1473,17 +1502,24 @@ struct json_value {
     }
     
     // Backward compatibility method
-    fl::vector<fl::string> get_object_keys() const FL_NOEXCEPT { return keys(); }
+    fl::vector<fl::string> get_object_keys() const FL_NO_EXCEPT { return keys(); }
 
     // Size methods
-    size_t size() const FL_NOEXCEPT {
-        SizeVisitor visitor;
-        data.visit(visitor);
-        return visitor.result;
+    size_t size() const FL_NO_EXCEPT {
+        // FastLED #3235 Tier 2E Phase 1: replace `SizeVisitor` +
+        // `data.visit(visitor)` with direct `data.ptr<T>()` tag
+        // checks. Same behavior, no per-(T × SizeVisitor) `visit_fn`
+        // thunk instantiation.
+        if (auto* arr = data.template ptr<json_array>()) return arr->size();
+        if (auto* obj = data.template ptr<json_object>()) return obj->size();
+        if (auto* v = data.template ptr<fl::vector<i16>>()) return v->size();
+        if (auto* v = data.template ptr<fl::vector<u8>>()) return v->size();
+        if (auto* v = data.template ptr<fl::vector<float>>()) return v->size();
+        return 0;
     }
 
     // Serialization
-    fl::string to_string() const FL_NOEXCEPT;
+    fl::string to_string() const FL_NO_EXCEPT;
     
     // Visitor-based serialization helper
     friend struct SerializerVisitor;
@@ -1495,10 +1531,10 @@ struct json_value {
     //   - Zero-copy tokenization with fl::span<const char>
     //   - ~608 bytes stack overhead, recursion depth limit 32
     //   - Identical behavior to parse() (validated with A/B tests)
-    static fl::shared_ptr<json_value> parse2(const fl::string &txt) FL_NOEXCEPT;
-    static fl::shared_ptr<json_value> parse2(fl::string_view txt) FL_NOEXCEPT;  // Zero-copy version
-    static bool parse2_validate_only(const fl::string &txt) FL_NOEXCEPT;  // Phase 1 validation only (for testing)
-    static bool parse2_validate_only(fl::string_view txt) FL_NOEXCEPT;  // Zero-copy version (no allocation)
+    static fl::shared_ptr<json_value> parse2(const fl::string &txt) FL_NO_EXCEPT;
+    static fl::shared_ptr<json_value> parse2(fl::string_view txt) FL_NO_EXCEPT;  // Zero-copy version
+    static bool parse2_validate_only(const fl::string &txt) FL_NO_EXCEPT;  // Phase 1 validation only (for testing)
+    static bool parse2_validate_only(fl::string_view txt) FL_NO_EXCEPT;  // Zero-copy version (no allocation)
 
     // Iterator support for objects
     class iterator {
@@ -1509,27 +1545,27 @@ struct json_value {
         using iterator_category = fl::forward_iterator_tag;
 
         iterator() = default;
-        iterator(json_object::iterator iter) FL_NOEXCEPT : mIter(iter) {}
+        iterator(json_object::iterator iter) FL_NO_EXCEPT : mIter(iter) {}
         
         // Getter for const iterator conversion
-        json_object::iterator get_iter() const FL_NOEXCEPT { return mIter; }
+        json_object::iterator get_iter() const FL_NO_EXCEPT { return mIter; }
         
-        iterator& operator++() FL_NOEXCEPT {
+        iterator& operator++() FL_NO_EXCEPT {
             ++mIter;
             return *this;
         }
         
-        iterator operator++(int) FL_NOEXCEPT {
+        iterator operator++(int) FL_NO_EXCEPT {
             iterator tmp(*this);
             ++(*this);
             return tmp;
         }
         
-        bool operator!=(const iterator& other) const FL_NOEXCEPT {
+        bool operator!=(const iterator& other) const FL_NO_EXCEPT {
             return mIter != other.mIter;
         }
         
-        bool operator==(const iterator& other) const FL_NOEXCEPT {
+        bool operator==(const iterator& other) const FL_NO_EXCEPT {
             return mIter == other.mIter;
         }
         
@@ -1537,11 +1573,11 @@ struct json_value {
             fl::string first;
             json_value& second;
             
-            KeyValue(const fl::string& key, const fl::shared_ptr<json_value>& value_ptr) FL_NOEXCEPT
+            KeyValue(const fl::string& key, const fl::shared_ptr<json_value>& value_ptr) FL_NO_EXCEPT
                 : first(key), second(value_ptr ? *value_ptr : get_null_json_value()) {}
         };
         
-        KeyValue operator*() const FL_NOEXCEPT {
+        KeyValue operator*() const FL_NO_EXCEPT {
             return KeyValue(mIter->first, mIter->second);
         }
         
@@ -1557,35 +1593,35 @@ struct json_value {
         using iterator_category = fl::forward_iterator_tag;
 
         const_iterator() = default;
-        const_iterator(json_object::const_iterator iter) FL_NOEXCEPT : mIter(iter) {}
+        const_iterator(json_object::const_iterator iter) FL_NO_EXCEPT : mIter(iter) {}
         
         // Factory method for conversion from iterator
-        static const_iterator from_object_iterator(const iterator& other) FL_NOEXCEPT {
+        static const_iterator from_object_iterator(const iterator& other) FL_NO_EXCEPT {
             json_object::const_iterator const_iter(other.get_iter());
             return const_iterator(const_iter);
         }
         
         // Factory method for conversion from Object::iterator
-        static const_iterator from_iterator(json_object::const_iterator iter) FL_NOEXCEPT {
+        static const_iterator from_iterator(json_object::const_iterator iter) FL_NO_EXCEPT {
             return const_iterator(iter);
         }
         
-        const_iterator& operator++() FL_NOEXCEPT {
+        const_iterator& operator++() FL_NO_EXCEPT {
             ++mIter;
             return *this;
         }
         
-        const_iterator operator++(int) FL_NOEXCEPT {
+        const_iterator operator++(int) FL_NO_EXCEPT {
             const_iterator tmp(*this);
             ++(*this);
             return tmp;
         }
         
-        bool operator!=(const const_iterator& other) const FL_NOEXCEPT {
+        bool operator!=(const const_iterator& other) const FL_NO_EXCEPT {
             return mIter != other.mIter;
         }
         
-        bool operator==(const const_iterator& other) const FL_NOEXCEPT {
+        bool operator==(const const_iterator& other) const FL_NO_EXCEPT {
             return mIter == other.mIter;
         }
         
@@ -1593,11 +1629,11 @@ struct json_value {
             fl::string first;
             const json_value& second;
             
-            KeyValue(const fl::string& key, const fl::shared_ptr<json_value>& value_ptr) FL_NOEXCEPT
+            KeyValue(const fl::string& key, const fl::shared_ptr<json_value>& value_ptr) FL_NO_EXCEPT
                 : first(key), second(value_ptr ? *value_ptr : get_null_json_value()) {}
         };
         
-        KeyValue operator*() const FL_NOEXCEPT {
+        KeyValue operator*() const FL_NO_EXCEPT {
             return KeyValue(mIter->first, mIter->second);
         }
         
@@ -1606,7 +1642,7 @@ struct json_value {
 };
 
 // Function to get a reference to a static null json_value
-json_value& get_null_json_value() FL_NOEXCEPT;
+json_value& get_null_json_value() FL_NO_EXCEPT;
 
 // Visitor to extract a numeric value from a single json_value element
 template<typename T>
@@ -1614,19 +1650,19 @@ struct NumericExtractVisitor {
     T result = T(0);
 
     template<typename U>
-    void accept(const U& value) FL_NOEXCEPT { (*this)(value); }
+    void accept(const U& value) FL_NO_EXCEPT { (*this)(value); }
 
-    void operator()(const i64& v) FL_NOEXCEPT { result = static_cast<T>(v); }
-    void operator()(const float& v) FL_NOEXCEPT { result = static_cast<T>(v); }
-    void operator()(const bool& v) FL_NOEXCEPT { result = static_cast<T>(v ? 1 : 0); }
+    void operator()(const i64& v) FL_NO_EXCEPT { result = static_cast<T>(v); }
+    void operator()(const float& v) FL_NO_EXCEPT { result = static_cast<T>(v); }
+    void operator()(const bool& v) FL_NO_EXCEPT { result = static_cast<T>(v ? 1 : 0); }
     // Non-numeric types → zero
-    void operator()(const fl::nullptr_t&) FL_NOEXCEPT {}
-    void operator()(const fl::string&) FL_NOEXCEPT {}
-    void operator()(const json_array&) FL_NOEXCEPT {}
-    void operator()(const json_object&) FL_NOEXCEPT {}
-    void operator()(const fl::vector<u8>&) FL_NOEXCEPT {}
-    void operator()(const fl::vector<i16>&) FL_NOEXCEPT {}
-    void operator()(const fl::vector<float>&) FL_NOEXCEPT {}
+    void operator()(const fl::nullptr_t&) FL_NO_EXCEPT {}
+    void operator()(const fl::string&) FL_NO_EXCEPT {}
+    void operator()(const json_array&) FL_NO_EXCEPT {}
+    void operator()(const json_object&) FL_NO_EXCEPT {}
+    void operator()(const fl::vector<u8>&) FL_NO_EXCEPT {}
+    void operator()(const fl::vector<i16>&) FL_NO_EXCEPT {}
+    void operator()(const fl::vector<float>&) FL_NO_EXCEPT {}
 };
 
 // Visitor to copy array elements into a span<T> with type conversion
@@ -1635,18 +1671,18 @@ struct CopyToVisitor {
     fl::span<T> dst;
     size_t result;
 
-    explicit CopyToVisitor(fl::span<T> d) FL_NOEXCEPT : dst(d), result(0) {}
+    explicit CopyToVisitor(fl::span<T> d) FL_NO_EXCEPT : dst(d), result(0) {}
 
     template<typename U>
-    void accept(const U& value) FL_NOEXCEPT { (*this)(value); }
+    void accept(const U& value) FL_NO_EXCEPT { (*this)(value); }
 
     // Packed vectors: element-wise static_cast
-    void operator()(const fl::vector<u8>& v) FL_NOEXCEPT { copy_vec(v); }
-    void operator()(const fl::vector<i16>& v) FL_NOEXCEPT { copy_vec(v); }
-    void operator()(const fl::vector<float>& v) FL_NOEXCEPT { copy_vec(v); }
+    void operator()(const fl::vector<u8>& v) FL_NO_EXCEPT { copy_vec(v); }
+    void operator()(const fl::vector<i16>& v) FL_NO_EXCEPT { copy_vec(v); }
+    void operator()(const fl::vector<float>& v) FL_NO_EXCEPT { copy_vec(v); }
 
     // Generic json_array: visitor-based per-element extraction
-    void operator()(const json_array& arr) FL_NOEXCEPT {
+    void operator()(const json_array& arr) FL_NO_EXCEPT {
         size_t n = (arr.size() < dst.size()) ? arr.size() : dst.size();
         for (size_t i = 0; i < n; ++i) {
             const auto& elem = arr[i];
@@ -1659,16 +1695,16 @@ struct CopyToVisitor {
     }
 
     // Non-array types: nothing to copy
-    void operator()(const fl::nullptr_t&) FL_NOEXCEPT {}
-    void operator()(const bool&) FL_NOEXCEPT {}
-    void operator()(const i64&) FL_NOEXCEPT {}
-    void operator()(const float&) FL_NOEXCEPT {}
-    void operator()(const fl::string&) FL_NOEXCEPT {}
-    void operator()(const json_object&) FL_NOEXCEPT {}
+    void operator()(const fl::nullptr_t&) FL_NO_EXCEPT {}
+    void operator()(const bool&) FL_NO_EXCEPT {}
+    void operator()(const i64&) FL_NO_EXCEPT {}
+    void operator()(const float&) FL_NO_EXCEPT {}
+    void operator()(const fl::string&) FL_NO_EXCEPT {}
+    void operator()(const json_object&) FL_NO_EXCEPT {}
 
 private:
     template<typename ElemT>
-    void copy_vec(const fl::vector<ElemT>& vec) FL_NOEXCEPT {
+    void copy_vec(const fl::vector<ElemT>& vec) FL_NO_EXCEPT {
         size_t n = (vec.size() < dst.size()) ? vec.size() : dst.size();
         for (size_t i = 0; i < n; ++i) {
             dst[i] = static_cast<T>(vec[i]);
@@ -1684,18 +1720,18 @@ struct CopyToOutputIteratorVisitor {
     OutputIt out;
     size_t result;
 
-    explicit CopyToOutputIteratorVisitor(OutputIt o) FL_NOEXCEPT : out(o), result(0) {}
+    explicit CopyToOutputIteratorVisitor(OutputIt o) FL_NO_EXCEPT : out(o), result(0) {}
 
     template<typename U>
-    void accept(const U& value) FL_NOEXCEPT { (*this)(value); }
+    void accept(const U& value) FL_NO_EXCEPT { (*this)(value); }
 
     // Packed vectors: element-wise static_cast
-    void operator()(const fl::vector<u8>& v) FL_NOEXCEPT { write_vec(v); }
-    void operator()(const fl::vector<i16>& v) FL_NOEXCEPT { write_vec(v); }
-    void operator()(const fl::vector<float>& v) FL_NOEXCEPT { write_vec(v); }
+    void operator()(const fl::vector<u8>& v) FL_NO_EXCEPT { write_vec(v); }
+    void operator()(const fl::vector<i16>& v) FL_NO_EXCEPT { write_vec(v); }
+    void operator()(const fl::vector<float>& v) FL_NO_EXCEPT { write_vec(v); }
 
     // Generic json_array: visitor-based per-element extraction
-    void operator()(const json_array& arr) FL_NOEXCEPT {
+    void operator()(const json_array& arr) FL_NO_EXCEPT {
         for (size_t i = 0; i < arr.size(); ++i) {
             const auto& elem = arr[i];
             if (!elem) { *out = T(0); ++out; ++result; continue; }
@@ -1708,16 +1744,16 @@ struct CopyToOutputIteratorVisitor {
     }
 
     // Non-array types: nothing to write
-    void operator()(const fl::nullptr_t&) FL_NOEXCEPT {}
-    void operator()(const bool&) FL_NOEXCEPT {}
-    void operator()(const i64&) FL_NOEXCEPT {}
-    void operator()(const float&) FL_NOEXCEPT {}
-    void operator()(const fl::string&) FL_NOEXCEPT {}
-    void operator()(const json_object&) FL_NOEXCEPT {}
+    void operator()(const fl::nullptr_t&) FL_NO_EXCEPT {}
+    void operator()(const bool&) FL_NO_EXCEPT {}
+    void operator()(const i64&) FL_NO_EXCEPT {}
+    void operator()(const float&) FL_NO_EXCEPT {}
+    void operator()(const fl::string&) FL_NO_EXCEPT {}
+    void operator()(const json_object&) FL_NO_EXCEPT {}
 
 private:
     template<typename ElemT>
-    void write_vec(const fl::vector<ElemT>& vec) FL_NOEXCEPT {
+    void write_vec(const fl::vector<ElemT>& vec) FL_NO_EXCEPT {
         for (size_t i = 0; i < vec.size(); ++i) {
             *out = static_cast<T>(vec[i]);
             ++out;

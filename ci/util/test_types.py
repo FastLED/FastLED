@@ -383,7 +383,7 @@ def _hash_directory(start_directory: Path, glob: str) -> str:
 
 
 def fingerprint_code_base(
-    start_directory: Path, glob: str = "**/*.h,**/*.cpp,**/*.hpp"
+    start_directory: Path, glob: str = "**/*.h,**/*.cpp,**/*.hpp,**/*.c"
 ) -> FingerprintResult:
     """
     Create a fingerprint of the code base by hashing file contents.
@@ -452,13 +452,15 @@ def calculate_cpp_test_fingerprint(
     # Process src/ directory (C++ source files)
     src_dir = cwd / "src"
     if src_dir.exists():
-        src_result = fingerprint_code_base(src_dir, "**/*.h,**/*.cpp,**/*.hpp")
+        src_result = fingerprint_code_base(src_dir, "**/*.h,**/*.cpp,**/*.hpp,**/*.c")
         hasher.update(f"src:{src_result.hash}".encode("utf-8"))
 
     # Process tests/ directory (test files)
     tests_dir = cwd / "tests"
     if tests_dir.exists():
-        tests_result = fingerprint_code_base(tests_dir, "**/*.h,**/*.cpp,**/*.hpp")
+        tests_result = fingerprint_code_base(
+            tests_dir, "**/*.h,**/*.cpp,**/*.hpp,**/*.c"
+        )
         hasher.update(f"tests:{tests_result.hash}".encode("utf-8"))
 
     # Include meson.build files that affect build configuration
@@ -516,14 +518,14 @@ def calculate_examples_fingerprint(
     # Process src/ directory (affects example compilation)
     src_dir = cwd / "src"
     if src_dir.exists():
-        src_result = fingerprint_code_base(src_dir, "**/*.h,**/*.cpp,**/*.hpp")
+        src_result = fingerprint_code_base(src_dir, "**/*.h,**/*.cpp,**/*.hpp,**/*.c")
         hasher.update(f"src:{src_result.hash}".encode("utf-8"))
 
     # Process examples/ directory
     examples_dir = cwd / "examples"
     if examples_dir.exists():
         examples_result = fingerprint_code_base(
-            examples_dir, "**/*.ino,**/*.h,**/*.cpp,**/*.hpp"
+            examples_dir, "**/*.ino,**/*.h,**/*.cpp,**/*.hpp,**/*.c"
         )
         hasher.update(f"examples:{examples_result.hash}".encode("utf-8"))
 
@@ -644,14 +646,15 @@ def calculate_wasm_fingerprint() -> FingerprintResult:
     # Process src/ directory (affects WASM compilation)
     src_dir = cwd / "src"
     if src_dir.exists():
-        src_result = fingerprint_code_base(src_dir, "**/*.h,**/*.cpp,**/*.hpp")
+        src_result = fingerprint_code_base(src_dir, "**/*.h,**/*.cpp,**/*.hpp,**/*.c")
         hasher.update(f"src:{src_result.hash}".encode("utf-8"))
 
     # Process examples/wasm directory (the default WASM test example)
     wasm_example_dir = cwd / "examples" / "wasm"
     if wasm_example_dir.exists():
         wasm_result = fingerprint_code_base(
-            wasm_example_dir, "**/*.ino,**/*.h,**/*.cpp,**/*.hpp,**/*.js,**/*.html"
+            wasm_example_dir,
+            "**/*.ino,**/*.h,**/*.cpp,**/*.hpp,**/*.c,**/*.js,**/*.html",
         )
         hasher.update(f"wasm_example:{wasm_result.hash}".encode("utf-8"))
 

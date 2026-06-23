@@ -6,12 +6,12 @@
 namespace fl {
 namespace audio {
 
-SilenceEnvelope::SilenceEnvelope() FL_NOEXCEPT : mConfig{}, mCurrent(0.0f) {}
+SilenceEnvelope::SilenceEnvelope() FL_NO_EXCEPT : mConfig{}, mCurrent(0.0f) {}
 
-SilenceEnvelope::SilenceEnvelope(const Config& cfg) FL_NOEXCEPT
+SilenceEnvelope::SilenceEnvelope(const Config& cfg) FL_NO_EXCEPT
     : mConfig(cfg), mCurrent(cfg.targetValue) {}
 
-float SilenceEnvelope::update(bool isSilent, float currentValue, float dt) FL_NOEXCEPT {
+float SilenceEnvelope::update(bool isSilent, float currentValue, float dt) FL_NO_EXCEPT {
     if (!isSilent) {
         // Pass-through during audio; cache for decay if silence starts next frame.
         mCurrent = currentValue;
@@ -31,11 +31,11 @@ float SilenceEnvelope::update(bool isSilent, float currentValue, float dt) FL_NO
     return mCurrent;
 }
 
-void SilenceEnvelope::reset(float initialValue) FL_NOEXCEPT {
+void SilenceEnvelope::reset(float initialValue) FL_NO_EXCEPT {
     mCurrent = initialValue;
 }
 
-bool SilenceEnvelope::isGated(float epsilon) const FL_NOEXCEPT {
+bool SilenceEnvelope::isGated(float epsilon) const FL_NO_EXCEPT {
     float delta = mCurrent - mConfig.targetValue;
     if (delta < 0.0f) delta = -delta;
     return delta <= epsilon;

@@ -20,7 +20,7 @@
 
 namespace fl {
 
-fl::shared_ptr<ILPUARTPeripheral> ILPUARTPeripheral::create() FL_NOEXCEPT {
+fl::shared_ptr<ILPUARTPeripheral> ILPUARTPeripheral::create() FL_NO_EXCEPT {
     return fl::make_shared<LPUARTPeripheralMock>();
 }
 

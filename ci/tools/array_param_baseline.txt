@@ -1,0 +1,43 @@
+# Known decayed C array parameters for ci/tools/check_array_params.py.
+# Generated with:
+#   uv run python ci/tools/check_array_params.py --scope all --update-baseline
+#
+# Format: src/path|normalized source signature
+# New entries fail the default unified C++ linter.
+
+src/fl/gfx/rgbw.cpp.hpp|void set_input_gamut(DiodeProfile* profile, InputGamut g, const float white_xy[2]) FL_NO_EXCEPT {
+src/fl/gfx/rgbw.h|void set_input_gamut(DiodeProfile* profile, InputGamut g, const float white_xy[2]) FL_NO_EXCEPT;
+src/fl/gfx/rgbw_colorimetric.h|inline void nnls3(const float M[3][3], const float b[3], float t_out[3], float* residual_out) FL_NO_EXCEPT {
+src/fl/math/transposition.cpp.hpp|bool SPITransposer::transpose16(const fl::optional<LaneData> lanes[16], fl::span<u8> output, const char** error) {
+src/fl/math/transposition.cpp.hpp|bool SPITransposer::transpose8(const fl::optional<LaneData> lanes[8], fl::span<u8> output, const char** error) {
+src/fl/math/transposition.h|FASTLED_FORCE_INLINE void transpose_2strips( const u8* const input[2], u8* output, u16 num_leds, u8 bytes_per_led ) FL_NO_EXCEPT {
+src/fl/math/transposition.h|FASTLED_FORCE_INLINE void transpose_4strips( const u8* const input[4], u8* output, u16 num_leds, u8 bytes_per_led ) FL_NO_EXCEPT {
+src/fl/math/transposition.h|FASTLED_FORCE_INLINE void transpose_8strips( const u8* const input[8], u8* output, u16 num_leds, u8 bytes_per_led ) FL_NO_EXCEPT {
+src/fl/math/transposition.h|inline void transpose_16lane_inline( const u8* const lanes[16], u8* output, size_t num_bytes ) FL_NO_EXCEPT {
+src/fl/math/transposition.h|inline void transpose_16lane_inline( const u8* const lanes[16], u8* output, size_t num_bytes ) FL_NO_EXCEPT;
+src/fl/math/transposition.h|inline void transpose_4lane_inline( const u8* const lanes[4], u8* output, size_t num_bytes ) FL_NO_EXCEPT {
+src/fl/math/transposition.h|inline void transpose_4lane_inline( const u8* const lanes[4], u8* output, size_t num_bytes ) FL_NO_EXCEPT;
+src/fl/math/transposition.h|inline void transpose_8lane_inline( const u8* const lanes[8], u8* output, size_t num_bytes ) FL_NO_EXCEPT {
+src/fl/math/transposition.h|inline void transpose_8lane_inline( const u8* const lanes[8], u8* output, size_t num_bytes ) FL_NO_EXCEPT;
+src/fl/math/transposition.h|inline void transpose_generic_inline( const TSource* const lanes[], size_t num_lanes, u8* output, size_t num_items ) FL_NO_EXCEPT {
+src/fl/math/transposition.h|inline void transpose_generic_inline( const TSource* const lanes[], size_t num_lanes, u8* output, size_t num_items ) FL_NO_EXCEPT;
+src/fl/math/transposition.h|static bool transpose16(const fl::optional<LaneData> lanes[16], fl::span<u8> output, const char** error = nullptr) FL_NO_EXCEPT;
+src/fl/math/transposition.h|static bool transpose8(const fl::optional<LaneData> lanes[8], fl::span<u8> output, const char** error = nullptr) FL_NO_EXCEPT;
+src/third_party/TJpg_Decoder/src/TJpg_Decoder.cpp.hpp|JRESULT TJpg_Decoder::getJpgSize(uint16_t *w, uint16_t *h, const uint8_t jpeg_data[], size_t data_size) FL_NO_EXCEPT {
+src/third_party/TJpg_Decoder/src/TJpg_Decoder.h|JRESULT getJpgSize(uint16_t *w, uint16_t *h, const uint8_t array[], size_t array_size) FL_NO_EXCEPT;
+src/third_party/libhelix_mp3/mp3dec.hpp|static int MP3FindFreeSync(const unsigned char *buf, const unsigned char firstFH[4], int nBytes) FL_NO_EXCEPT {
+src/third_party/libhelix_mp3/real/coder.h|void IntensityProcMPEG1(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis, CriticalBandInfo *cbi, int32_t midSideFlag, int32_t mixFlag, int32_t mOut[2]) FL_NO_EXCEPT;
+src/third_party/libhelix_mp3/real/coder.h|void IntensityProcMPEG2(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis, CriticalBandInfo *cbi, ScaleFactorJS *sfjs, int32_t midSideFlag, int32_t mixFlag, int32_t mOut[2]) FL_NO_EXCEPT;
+src/third_party/libhelix_mp3/real/imdct.hpp|static int32_t HybridTransform(int32_t *xCurr, int32_t *xPrev, int32_t y[BLOCK_SIZE][NBANDS], SideInfoSub *sis, BlockCount *bc) FL_NO_EXCEPT {
+src/third_party/libhelix_mp3/real/stproc.hpp|void IntensityProcMPEG1(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis, CriticalBandInfo *cbi, int32_t midSideFlag, int32_t mixFlag, int32_t mOut[2]) FL_NO_EXCEPT {
+src/third_party/libhelix_mp3/real/stproc.hpp|void IntensityProcMPEG2(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis, CriticalBandInfo *cbi, ScaleFactorJS *sfjs, int32_t midSideFlag, int32_t mixFlag, int32_t mOut[2]) FL_NO_EXCEPT {
+src/third_party/libnsgif/include/nsgif.hpp|bool nsgif_local_palette( const nsgif_t *gif, fl::u32 frame, fl::u32 table[NSGIF_MAX_COLOURS], fl::size *entries) FL_NO_EXCEPT;
+src/third_party/libnsgif/include/nsgif.hpp|void nsgif_global_palette( const nsgif_t *gif, fl::u32 table[NSGIF_MAX_COLOURS], fl::size *entries) FL_NO_EXCEPT;
+src/third_party/libnsgif/src/gif.cpp.hpp|bool nsgif_local_palette( const nsgif_t *gif, fl::u32 frame, fl::u32 table[NSGIF_MAX_COLOURS], fl::size *entries) FL_NO_EXCEPT {
+src/third_party/libnsgif/src/gif.cpp.hpp|static inline nsgif_error nsgif__colour_table_extract( fl::u32 colour_table[NSGIF_MAX_COLOURS], const struct nsgif_colour_layout *layout, fl::size colour_table_entries, const fl::u8 *data, fl::size data_len, fl::size *used, bool decode) FL_NO_EXCEPT {
+src/third_party/libnsgif/src/gif.cpp.hpp|static void nsgif__colour_table_decode( fl::u32 colour_table[NSGIF_MAX_COLOURS], const struct nsgif_colour_layout *layout, fl::size colour_table_entries, const fl::u8 *data) FL_NO_EXCEPT {
+src/third_party/libnsgif/src/gif.cpp.hpp|void nsgif_global_palette( const nsgif_t *gif, fl::u32 table[NSGIF_MAX_COLOURS], fl::size *entries) FL_NO_EXCEPT {
+src/third_party/pl_mpeg/src/pl_mpeg.hpp|void plm_audio_idct36(int s[32][3], int ss, float *d, int dp) FL_NO_EXCEPT {
+src/third_party/pl_mpeg/src/pl_mpeg.hpp|void plm_audio_idct36(int s[32][3], int ss, float *d, int dp) FL_NO_EXCEPT;
+src/third_party/stb/hexwave/stb_hexwave.cpp.hpp|static void hexwave_generate_linesegs(hexvert vert[9], HexWave *hex, float dt) FL_NO_EXCEPT {
+src/third_party/stb/stb_vorbis.cpp.hpp|static void decode_residue(vorb *f, float *residue_buffers[], int32_t ch, int32_t n, int32_t rn, uint8 *do_not_decode) FL_NO_EXCEPT {

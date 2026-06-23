@@ -5,7 +5,7 @@
 #include "fl/stl/noexcept.h"
 
 namespace fl {
-fl::u16 cled_contoller_size() FL_NOEXCEPT {
+fl::u16 cled_contoller_size() FL_NO_EXCEPT {
 	return sizeof(CLEDController);
 }
 }  // namespace fl

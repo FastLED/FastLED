@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false
-"""Unified checker to ensure functions are marked FL_NOEXCEPT.
+"""Unified checker to ensure functions are marked FL_NO_EXCEPT.
 
 FastLED compiles with C++ exceptions disabled (-fno-exceptions) on all
-embedded platforms. Marking functions FL_NOEXCEPT communicates this intent
+embedded platforms. Marking functions FL_NO_EXCEPT communicates this intent
 and allows the compiler to skip generating unwind tables.
 
 Uses fast regex-based detection to find function declarations missing
-FL_NOEXCEPT across both src/fl/ and src/platforms/.
+FL_NO_EXCEPT across both src/fl/ and src/platforms/.
 
 Scope: src/fl/** and src/platforms/** (header files: .h / .hpp)
 
@@ -19,7 +19,7 @@ function calls in implementation code. Use the AST-based refactor tool
 Exemptions:
   - src/fl/stl/noexcept.h (the macro definition itself)
   - Third-party code (third_party/)
-  - Lines with suppression comment "// ok no noexcept", "// ok no FL_NOEXCEPT",
+  - Lines with suppression comment "// ok no noexcept", "// ok no FL_NO_EXCEPT",
     "// noexcept not required", or "// nolint"
   - Destructors (implicitly noexcept since C++11)
   - operator overloads
@@ -122,8 +122,8 @@ _STATEMENT_KEYWORDS = frozenset(
 # Matches: [qualifiers] [return_type] func_name(
 _FUNC_DECL_PATTERN = re.compile(r"^((?:[\w:*&<>,\s]+\s+)?)(~?\w[\w:]*)\s*\(")
 
-# Matches noexcept or FL_NOEXCEPT already present
-_HAS_NOEXCEPT = re.compile(r"\b(?:noexcept|FL_NOEXCEPT)\b")
+# Matches noexcept or FL_NO_EXCEPT already present
+_HAS_NOEXCEPT = re.compile(r"\b(?:noexcept|FL_NO_EXCEPT)\b")
 
 # Matches = delete, = default, = 0
 _SPECIAL_SUFFIX = re.compile(r"=\s*(?:delete|default|0)\s*;")
@@ -140,7 +140,7 @@ _FUNC_END_PATTERN = re.compile(
 
 # Suppression comments
 _SUPPRESS = re.compile(
-    r"//\s*(?:ok\s+no\s+(?:noexcept|FL_NOEXCEPT)|noexcept\s+not\s+required|nolint)\b",
+    r"//\s*(?:ok\s+no\s+(?:noexcept|FL_NO_EXCEPT)|noexcept\s+not\s+required|nolint)\b",
     re.IGNORECASE,
 )
 
@@ -218,7 +218,7 @@ def _is_function_declaration(code: str) -> bool:
 
 
 class NoexceptFunctionChecker(FileContentChecker):
-    """Checker that enforces FL_NOEXCEPT on functions in src/fl/ and src/platforms/.
+    """Checker that enforces FL_NO_EXCEPT on functions in src/fl/ and src/platforms/.
 
     Supersedes the former NoexceptFlChecker, NoexceptEsp32Checker, and
     NoexceptPlatformsChecker — all consolidated into this single class.
@@ -320,7 +320,7 @@ def main() -> None:
     run_checker_standalone(
         checker,
         target_dirs,
-        "Found functions missing FL_NOEXCEPT in src/fl/ or src/platforms/",
+        "Found functions missing FL_NO_EXCEPT in src/fl/ or src/platforms/",
         extensions=[".h", ".hpp"],
     )
 

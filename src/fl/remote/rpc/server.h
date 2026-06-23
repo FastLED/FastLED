@@ -36,7 +36,7 @@ public:
      * Creates Server with no-op callbacks. Use setRequestSource/setResponseSink
      * to configure I/O, or call setRequestHandler() manually.
      */
-    Server() FL_NOEXCEPT;
+    Server() FL_NO_EXCEPT;
 
     /**
      * @brief Construct with I/O callbacks
@@ -45,13 +45,13 @@ public:
      */
     Server(RequestSource source, ResponseSink sink);
 
-    virtual ~Server() FL_NOEXCEPT = default;
+    virtual ~Server() FL_NO_EXCEPT = default;
 
     // Non-copyable but movable
-    Server(const Server&) FL_NOEXCEPT = delete;
-    Server& operator=(const Server&) FL_NOEXCEPT = delete;
-    Server(Server&&) FL_NOEXCEPT = default;
-    Server& operator=(Server&&) FL_NOEXCEPT = default;
+    Server(const Server&) FL_NO_EXCEPT = delete;
+    Server& operator=(const Server&) FL_NO_EXCEPT = delete;
+    Server(Server&&) FL_NO_EXCEPT = default;
+    Server& operator=(Server&&) FL_NO_EXCEPT = default;
 
     /**
      * @brief Set request handler

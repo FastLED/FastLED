@@ -185,13 +185,13 @@ bool SPIDualSAMD51::begin(const SpiHw2::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
-        FL_WARN("SPIDualSAMD51: Bus ID mismatch");
+        FL_WARN_F("SPIDualSAMD51: Bus ID mismatch");
         return false;
     }
 
     // Validate pin assignments
     if (config.clock_pin < 0 || config.data0_pin < 0 || config.data1_pin < 0) {
-        FL_WARN("SPIDualSAMD51: Invalid pin configuration");
+        FL_WARN_F("SPIDualSAMD51: Invalid pin configuration");
         return false;
     }
 
@@ -204,7 +204,7 @@ bool SPIDualSAMD51::begin(const SpiHw2::Config& config) {
     // Map bus_num to SERCOM instance
     int sercom_num = (mBusId != -1) ? mBusId : config.bus_num;
     if (sercom_num < 0 || sercom_num > 7) {
-        FL_WARN("SPIDualSAMD51: Invalid SERCOM number");
+        FL_WARN_F("SPIDualSAMD51: Invalid SERCOM number");
         return false;
     }
 
@@ -228,12 +228,12 @@ bool SPIDualSAMD51::begin(const SpiHw2::Config& config) {
         case 7: mSercom = SERCOM7; break;
 #endif
         default:
-            FL_WARN("SPIDualSAMD51: Invalid SERCOM");
+            FL_WARN_F("SPIDualSAMD51: Invalid SERCOM");
             return false;
     }
 
     if (mSercom == nullptr) {
-        FL_WARN("SPIDualSAMD51: SERCOM not available");
+        FL_WARN_F("SPIDualSAMD51: SERCOM not available");
         return false;
     }
 
@@ -359,9 +359,7 @@ bool SPIDualSAMD51::begin(const SpiHw2::Config& config) {
     // For now, we'll use polling mode and document the DMA requirements
     mDmaChannel = -1;  // Mark as not using DMA
 
-    FL_WARN("SPIDualSAMD51: Initialized on SERCOM" << sercom_num
-            << " at " << (f_cpu / (2 * (baud_div + 1)) / 1000000.0) << " MHz"
-            << " (polling mode - DMA can be added later)");
+    FL_WARN_F("SPIDualSAMD51: Initialized on SERCOM%s at %s MHz (polling mode - DMA can be added later)", sercom_num, (f_cpu / (2 * (baud_div + 1)) / 1000000.0));
 
     mInitialized = true;
     return true;
@@ -469,7 +467,7 @@ bool SPIDualSAMD51::waitComplete(u32 timeout_ms) {
     // Check TXC (Transmit Complete) flag in INTFLAG register
     while (mSercom && !mSercom->SPI.INTFLAG.bit.TXC) {
         if ((fl::millis() - start_time) >= timeout_ms) {
-            FL_WARN("SPIDualSAMD51: waitComplete timeout");
+            FL_WARN_F("SPIDualSAMD51: waitComplete timeout");
             return false;  // Timeout
         }
     }

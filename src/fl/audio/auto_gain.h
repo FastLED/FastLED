@@ -84,9 +84,9 @@ struct AutoGainConfig {
 /// @endcode
 class AutoGain {
 public:
-    AutoGain() FL_NOEXCEPT;
+    AutoGain() FL_NO_EXCEPT;
     explicit AutoGain(const AutoGainConfig& config);
-    ~AutoGain() FL_NOEXCEPT;
+    ~AutoGain() FL_NO_EXCEPT;
 
     /// Configure the auto gain controller
     void configure(const AutoGainConfig& config);

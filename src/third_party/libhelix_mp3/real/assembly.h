@@ -452,7 +452,7 @@ __inline int32_t MULSHIFT32(int32_t x, int32_t y)
 #else
 
 // Fallback for Xtensa without MUL32_HIGH (e.g., ESP8266)
-__inline int32_t MULSHIFT32(int32_t x, int32_t y) FL_NOEXCEPT
+__inline int32_t MULSHIFT32(int32_t x, int32_t y) FL_NO_EXCEPT
 {
     Word64 result = ((Word64) x) * y;
     return (int32_t)(result >> 32);
@@ -483,7 +483,7 @@ __inline int FASTABS(int x)
 
 #endif
 
-__inline Word64 SAR64(Word64 x, int n) FL_NOEXCEPT
+__inline Word64 SAR64(Word64 x, int n) FL_NO_EXCEPT
 {
     return x >> n;
 }
@@ -500,7 +500,7 @@ typedef long long Word64;
 /**
  * Multiply together two 32-bit numbers and return the top 32-bits of the result.
  */
-__inline int32_t MULSHIFT32(int32_t x, int32_t y) FL_NOEXCEPT
+__inline int32_t MULSHIFT32(int32_t x, int32_t y) FL_NO_EXCEPT
 {
     Word64 result = ((Word64) x) * y;
 
@@ -510,7 +510,7 @@ __inline int32_t MULSHIFT32(int32_t x, int32_t y) FL_NOEXCEPT
 /**
  * Absolute value of x
  */
-__inline int32_t FASTABS(int32_t x) FL_NOEXCEPT
+__inline int32_t FASTABS(int32_t x) FL_NO_EXCEPT
 {
     int32_t sign;
 
@@ -524,7 +524,7 @@ __inline int32_t FASTABS(int32_t x) FL_NOEXCEPT
 /**
  * Leading zeros
  */
-__inline int32_t CLZ(int32_t x) FL_NOEXCEPT
+__inline int32_t CLZ(int32_t x) FL_NO_EXCEPT
 {
     int32_t numZeros;
 
@@ -543,7 +543,7 @@ __inline int32_t CLZ(int32_t x) FL_NOEXCEPT
 /**
  * Increase sum by x * y
  */
-__inline Word64 MADD64(Word64 sum64, int x, int y) FL_NOEXCEPT
+__inline Word64 MADD64(Word64 sum64, int x, int y) FL_NO_EXCEPT
 {
     sum64 += (Word64)x * (Word64)y;
 
@@ -553,7 +553,7 @@ __inline Word64 MADD64(Word64 sum64, int x, int y) FL_NOEXCEPT
 /**
  * Shift left
  */
-__inline Word64 SHL64(Word64 x, int n) FL_NOEXCEPT
+__inline Word64 SHL64(Word64 x, int n) FL_NO_EXCEPT
 {
     return ((Word64) x) << n;
 }
@@ -561,7 +561,7 @@ __inline Word64 SHL64(Word64 x, int n) FL_NOEXCEPT
 /**
  * Shift right
  */
-__inline Word64 SAR64(Word64 x, int n) FL_NOEXCEPT
+__inline Word64 SAR64(Word64 x, int n) FL_NO_EXCEPT
 {
     return x >> n;
 }

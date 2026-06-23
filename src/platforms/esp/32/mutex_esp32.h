@@ -47,7 +47,7 @@ private:
     void* mHandle;  // SemaphoreHandle_t (opaque pointer to avoid including FreeRTOS headers)
 
 public:
-    MutexESP32() FL_NOEXCEPT;
+    MutexESP32() FL_NO_EXCEPT;
     ~MutexESP32();
 
     // Non-copyable and non-movable
@@ -56,9 +56,9 @@ public:
     MutexESP32(MutexESP32&&) = delete;
     MutexESP32& operator=(MutexESP32&&) = delete;
 
-    void lock() FL_NOEXCEPT;
-    void unlock() FL_NOEXCEPT;
-    bool try_lock() FL_NOEXCEPT;
+    void lock() FL_NO_EXCEPT;
+    void unlock() FL_NO_EXCEPT;
+    bool try_lock() FL_NO_EXCEPT;
 };
 
 // ESP32 FreeRTOS recursive mutex wrapper
@@ -67,7 +67,7 @@ private:
     void* mHandle;  // SemaphoreHandle_t (opaque pointer to avoid including FreeRTOS headers)
 
 public:
-    RecursiveMutexESP32() FL_NOEXCEPT;
+    RecursiveMutexESP32() FL_NO_EXCEPT;
     ~RecursiveMutexESP32();
 
     // Non-copyable and non-movable
@@ -76,9 +76,9 @@ public:
     RecursiveMutexESP32(RecursiveMutexESP32&&) = delete;
     RecursiveMutexESP32& operator=(RecursiveMutexESP32&&) = delete;
 
-    void lock() FL_NOEXCEPT;
-    void unlock() FL_NOEXCEPT;
-    bool try_lock() FL_NOEXCEPT;
+    void lock() FL_NO_EXCEPT;
+    void unlock() FL_NO_EXCEPT;
+    bool try_lock() FL_NO_EXCEPT;
 };
 
 // Define FASTLED_MULTITHREADED for ESP32 (has FreeRTOS)

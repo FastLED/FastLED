@@ -30,7 +30,7 @@ namespace platforms {
 /// - Early Winsock initialization (WSAStartup)
 /// - High-resolution timer setup
 /// - COM library initialization for advanced features
-inline void init() FL_NOEXCEPT {
+inline void init() FL_NO_EXCEPT {
     // No-op: Winsock is currently initialized on-demand
     // Future: Consider early WSAStartup() for networking predictability
 }

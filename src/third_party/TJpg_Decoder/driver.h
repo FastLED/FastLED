@@ -91,52 +91,52 @@ private:
     fl::u16 operations_this_tick_ = 0;
 
     // Internal methods
-    bool readStreamData() FL_NOEXCEPT;
-    bool initializeDecoder() FL_NOEXCEPT;
-    void allocateFrameBuffer(fl::u16 width, fl::u16 height) FL_NOEXCEPT;
-    fl::size getBytesPerPixel() const FL_NOEXCEPT;
-    void setError(const fl::string& msg) FL_NOEXCEPT;
-    bool shouldYield() const FL_NOEXCEPT;
-    void startTick() FL_NOEXCEPT;
+    bool readStreamData() FL_NO_EXCEPT;
+    bool initializeDecoder() FL_NO_EXCEPT;
+    void allocateFrameBuffer(fl::u16 width, fl::u16 height) FL_NO_EXCEPT;
+    fl::size getBytesPerPixel() const FL_NO_EXCEPT;
+    void setError(const fl::string& msg) FL_NO_EXCEPT;
+    bool shouldYield() const FL_NO_EXCEPT;
+    void startTick() FL_NO_EXCEPT;
 
     // Static callbacks that use instance context
-    static fl::size inputCallback(JDEC* jd, fl::u8* buff, fl::size nbyte) FL_NOEXCEPT;
-    static int outputCallback(JDEC* jd, void* bitmap, JRECT* rect) FL_NOEXCEPT;
+    static fl::size inputCallback(JDEC* jd, fl::u8* buff, fl::size nbyte) FL_NO_EXCEPT;
+    static int outputCallback(JDEC* jd, void* bitmap, JRECT* rect) FL_NO_EXCEPT;
 
 public:
-    TJpgInstanceDecoder() FL_NOEXCEPT;
+    TJpgInstanceDecoder() FL_NO_EXCEPT;
     ~TJpgInstanceDecoder();
 
     // Main decoding interface
-    bool beginDecodingStream(fl::filebuf_ptr stream, PixelFormat format) FL_NOEXCEPT;
-    bool processChunk() FL_NOEXCEPT;  // Process one chunk with time budget
-    void endDecoding() FL_NOEXCEPT;
+    bool beginDecodingStream(fl::filebuf_ptr stream, PixelFormat format) FL_NO_EXCEPT;
+    bool processChunk() FL_NO_EXCEPT;  // Process one chunk with time budget
+    void endDecoding() FL_NO_EXCEPT;
 
     // Progressive configuration
-    void setProgressiveConfig(const TJpgProgressiveConfig& config) FL_NOEXCEPT {
+    void setProgressiveConfig(const TJpgProgressiveConfig& config) FL_NO_EXCEPT {
         progressive_config_ = config;
     }
 
     // Scale configuration for quality settings
-    void setScale(fl::u8 scale) FL_NOEXCEPT {
+    void setScale(fl::u8 scale) FL_NO_EXCEPT {
         embedded_tjpg_.jpg_scale = scale;
     }
 
     // State queries
-    State getState() const FL_NOEXCEPT { return state_; }
-    bool hasError(fl::string* msg = nullptr) const FL_NOEXCEPT;
-    float getProgress() const FL_NOEXCEPT { return progress_; }
-    Frame getCurrentFrame() const FL_NOEXCEPT;
+    State getState() const FL_NO_EXCEPT { return state_; }
+    bool hasError(fl::string* msg = nullptr) const FL_NO_EXCEPT;
+    float getProgress() const FL_NO_EXCEPT { return progress_; }
+    Frame getCurrentFrame() const FL_NO_EXCEPT;
 
     // Progressive features
-    bool hasPartialImage() const FL_NOEXCEPT;
-    Frame getPartialFrame() const FL_NOEXCEPT;
-    fl::u16 getDecodedRows() const FL_NOEXCEPT;
-    fl::size getBytesProcessed() const FL_NOEXCEPT;
+    bool hasPartialImage() const FL_NO_EXCEPT;
+    Frame getPartialFrame() const FL_NO_EXCEPT;
+    fl::u16 getDecodedRows() const FL_NO_EXCEPT;
+    fl::size getBytesProcessed() const FL_NO_EXCEPT;
 };
 
 // Factory function
-TJpgInstanceDecoderPtr createTJpgInstanceDecoder() FL_NOEXCEPT;
+TJpgInstanceDecoderPtr createTJpgInstanceDecoder() FL_NO_EXCEPT;
 
 } // namespace third_party
 } // namespace fl

@@ -12,7 +12,7 @@ TimeWarp::TimeWarp(fl::u32 realTimeNow, float initialTimeScale)
     : mLastRealTime(realTimeNow), mStartTime(realTimeNow),
       mTimeScale(initialTimeScale) {}
 
-TimeWarp::~TimeWarp() FL_NOEXCEPT {}
+TimeWarp::~TimeWarp() FL_NO_EXCEPT {}
 
 void TimeWarp::setSpeed(float timeScale) { mTimeScale = timeScale; }
 
@@ -20,7 +20,7 @@ float TimeWarp::scale() const { return mTimeScale; }
 
 void TimeWarp::pause(fl::u32 now) {
     if (mPauseTime) {
-        FL_WARN("TimeWarp::pause: already paused");
+        FL_WARN_F("TimeWarp::pause: already paused");
         return;
     }
     mPauseTime = now;
@@ -52,7 +52,7 @@ void TimeWarp::reset(fl::u32 realTimeNow) {
 void TimeWarp::applyExact(fl::u32 timeNow) {
     // Handle time going backwards - reset if this happens
     if (timeNow < mLastRealTime) {
-        FL_WARN("TimeWarp::applyExact: time went backwards, resetting");
+        FL_WARN_F("TimeWarp::applyExact: time went backwards, resetting");
         reset(timeNow);
         return;
     }

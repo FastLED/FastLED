@@ -17,29 +17,29 @@ namespace detail {
 /// @brief Mock LCD_CAM SPI peripheral for unit testing
 class LcdSpiPeripheralMock : public ILcdSpiPeripheral {
   public:
-    static LcdSpiPeripheralMock &instance() FL_NOEXCEPT;
+    static LcdSpiPeripheralMock &instance() FL_NO_EXCEPT;
 
     ~LcdSpiPeripheralMock() override = default;
 
     // ILcdSpiPeripheral interface
-    bool initialize(const LcdSpiConfig &config) FL_NOEXCEPT override = 0;
-    void deinitialize() FL_NOEXCEPT override = 0;
-    bool isInitialized() const FL_NOEXCEPT override = 0;
+    bool initialize(const LcdSpiConfig &config) FL_NO_EXCEPT override = 0;
+    void deinitialize() FL_NO_EXCEPT override = 0;
+    bool isInitialized() const FL_NO_EXCEPT override = 0;
 
-    u16 *allocateBuffer(size_t size_bytes) FL_NOEXCEPT override = 0;
-    void freeBuffer(u16 *buffer) FL_NOEXCEPT override = 0;
+    u16 *allocateBuffer(size_t size_bytes) FL_NO_EXCEPT override = 0;
+    void freeBuffer(u16 *buffer) FL_NO_EXCEPT override = 0;
 
     bool transmit(const u16 *buffer,
-                  size_t size_bytes) FL_NOEXCEPT override = 0;
-    bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT override = 0;
-    bool isBusy() const FL_NOEXCEPT override = 0;
+                  size_t size_bytes) FL_NO_EXCEPT override = 0;
+    bool waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT override = 0;
+    bool isBusy() const FL_NO_EXCEPT override = 0;
 
     bool registerTransmitCallback(void *callback,
-                                  void *user_ctx) FL_NOEXCEPT override = 0;
-    const LcdSpiConfig &getConfig() const FL_NOEXCEPT override = 0;
+                                  void *user_ctx) FL_NO_EXCEPT override = 0;
+    const LcdSpiConfig &getConfig() const FL_NO_EXCEPT override = 0;
 
-    u64 getMicroseconds() FL_NOEXCEPT override = 0;
-    void delay(u32 ms) FL_NOEXCEPT override = 0;
+    u64 getMicroseconds() FL_NO_EXCEPT override = 0;
+    void delay(u32 ms) FL_NO_EXCEPT override = 0;
 
     // Mock-specific API
     struct TransmitRecord {
@@ -48,20 +48,20 @@ class LcdSpiPeripheralMock : public ILcdSpiPeripheral {
         u64 timestamp_us;
     };
 
-    virtual void simulateTransmitComplete() FL_NOEXCEPT = 0;
-    virtual void setTransmitFailure(bool should_fail) FL_NOEXCEPT = 0;
-    virtual void setTransmitDelay(u32 microseconds) FL_NOEXCEPT = 0;
-    virtual void setAutoComplete(bool auto_complete) FL_NOEXCEPT = 0;
+    virtual void simulateTransmitComplete() FL_NO_EXCEPT = 0;
+    virtual void setTransmitFailure(bool should_fail) FL_NO_EXCEPT = 0;
+    virtual void setTransmitDelay(u32 microseconds) FL_NO_EXCEPT = 0;
+    virtual void setAutoComplete(bool auto_complete) FL_NO_EXCEPT = 0;
 
     virtual const fl::vector<TransmitRecord> &
-    getTransmitHistory() const FL_NOEXCEPT = 0;
-    virtual void clearTransmitHistory() FL_NOEXCEPT = 0;
-    virtual fl::span<const u16> getLastTransmitData() const FL_NOEXCEPT = 0;
+    getTransmitHistory() const FL_NO_EXCEPT = 0;
+    virtual void clearTransmitHistory() FL_NO_EXCEPT = 0;
+    virtual fl::span<const u16> getLastTransmitData() const FL_NO_EXCEPT = 0;
 
-    virtual bool isEnabled() const FL_NOEXCEPT = 0;
-    virtual size_t getTransmitCount() const FL_NOEXCEPT = 0;
-    virtual size_t getDeinitCount() const FL_NOEXCEPT = 0;
-    virtual void reset() FL_NOEXCEPT = 0;
+    virtual bool isEnabled() const FL_NO_EXCEPT = 0;
+    virtual size_t getTransmitCount() const FL_NO_EXCEPT = 0;
+    virtual size_t getDeinitCount() const FL_NO_EXCEPT = 0;
+    virtual void reset() FL_NO_EXCEPT = 0;
 };
 
 } // namespace detail

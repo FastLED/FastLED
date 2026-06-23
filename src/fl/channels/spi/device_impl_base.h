@@ -22,7 +22,7 @@ struct DeviceImplBase {
     bool owns_backend;                  ///< Whether this device owns the backend (for cleanup)
 
     /// @brief Constructor
-    DeviceImplBase() FL_NOEXCEPT
+    DeviceImplBase() FL_NO_EXCEPT
         : backend()
         , initialized(false)
         , owns_backend(false) {}
