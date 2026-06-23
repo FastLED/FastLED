@@ -27,7 +27,7 @@ namespace platforms {
 ///
 /// This function is called once during FastLED::init() and is safe to call
 /// multiple times (subsequent calls are no-ops).
-inline void init() FL_NOEXCEPT {
+inline void init() FL_NO_EXCEPT {
     // No-op: GPIO system is initialized on first pin access
     // Future: Consider early GPIO system initialization for predictability
 }

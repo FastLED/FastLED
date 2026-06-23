@@ -36,7 +36,7 @@ WasmAudioInput::WasmAudioInput()
     // Set global instance for C callback
     g_wasmAudioInput = this;
 
-    FL_DBG("WasmAudioInput created - ring buffer: " << RING_BUFFER_SLOTS << " slots x " << BLOCK_SIZE << " samples");
+    FL_DBG_F("WasmAudioInput created - ring buffer: %s slots x %s samples", RING_BUFFER_SLOTS, BLOCK_SIZE);
 }
 
 WasmAudioInput::~WasmAudioInput() {
@@ -48,14 +48,14 @@ WasmAudioInput::~WasmAudioInput() {
 
 void WasmAudioInput::start() {
     if (mRunning) {
-        FL_DBG("WasmAudioInput already running - skipping start");
+        FL_DBG_F("WasmAudioInput already running - skipping start");
         return;  // Already running, don't re-initialize
     }
 
     mRunning = true;
     mHasError = false;
     mErrorMessage.clear();
-    FL_DBG("WasmAudioInput started");
+    FL_DBG_F("WasmAudioInput started");
 }
 
 void WasmAudioInput::stop() {
@@ -66,7 +66,7 @@ void WasmAudioInput::stop() {
     for (int i = 0; i < RING_BUFFER_SLOTS; i++) {
         mRingBuffer[i].valid = false;
     }
-    FL_DBG("WasmAudioInput stopped");
+    FL_DBG_F("WasmAudioInput stopped");
 }
 
 bool WasmAudioInput::error(fl::string* msg) {
@@ -117,7 +117,7 @@ void WasmAudioInput::pushSamples(const fl::i16* samples, int count, fl::u32 time
     }
 
     if (count <= 0 || count > BLOCK_SIZE) {
-        FL_WARN("WasmAudioInput::pushSamples - invalid block size: " << count << " (max " << BLOCK_SIZE << ")");
+        FL_WARN_F("WasmAudioInput::pushSamples - invalid block size: %s (max %s)", count, BLOCK_SIZE);
         return;
     }
 
@@ -144,7 +144,7 @@ void WasmAudioInput::flushAccumBuffer() {
     if (isFull()) {
         mDroppedBlocks++;
         if (mDroppedBlocks % 100 == 1) {
-            FL_WARN("WasmAudioInput ring buffer overflow - dropped " << mDroppedBlocks << " blocks total");
+            FL_WARN_F("WasmAudioInput ring buffer overflow - dropped %s blocks total", mDroppedBlocks);
         }
         mRingBuffer[mTail].valid = false;
         mTail = nextIndex(mTail);
@@ -191,7 +191,7 @@ fl::shared_ptr<audio::IInput> wasm_create_audio_input(const audio::Config& confi
         error_message->clear();
     }
 
-    FL_DBG("Created WASM audio input");
+    FL_DBG_F("Created WASM audio input");
     return input;
 }
 
@@ -225,7 +225,7 @@ void pushAudioSamples(const fl::i16* samples, int count, fl::u32 timestamp) {
     }
 
     if (!samples) {
-        FL_WARN("pushAudioSamples called with null samples pointer");
+        FL_WARN_F("pushAudioSamples called with null samples pointer");
         return;
     }
 

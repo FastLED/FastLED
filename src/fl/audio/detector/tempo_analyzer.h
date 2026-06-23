@@ -14,8 +14,8 @@ namespace detector {
 
 class TempoAnalyzer : public Detector {
 public:
-    TempoAnalyzer() FL_NOEXCEPT;
-    ~TempoAnalyzer() FL_NOEXCEPT override;
+    TempoAnalyzer() FL_NO_EXCEPT;
+    ~TempoAnalyzer() FL_NO_EXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

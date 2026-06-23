@@ -28,7 +28,7 @@ public:
     using function_type = fl::function<R(Args...)>;
 
     // Default constructor - creates invalid handle
-    RpcHandle() FL_NOEXCEPT : mValid(false) {}
+    RpcHandle() FL_NO_EXCEPT : mValid(false) {}
 
     // Constructor from function (internal use by RpcFactory)
     explicit RpcHandle(function_type fn) : mFn(fn), mValid(true) {}

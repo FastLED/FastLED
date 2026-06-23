@@ -18,10 +18,13 @@
 
 #pragma once
 
-#include "fl/stl/shared_ptr.h"
-#include "fl/stl/string.h"  // IWYU pragma: keep
-#include "fl/stl/noexcept.h"
+#include "fl/channels/can_match.h"      // free fl::canMatch / canMatchBulk
+#include "fl/channels/capabilities.h"   // DriverCapabilities, PinGroup, ChannelRequest, HandleResult
 #include "fl/stl/atomic.h"
+#include "fl/stl/noexcept.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/span.h"
+#include "fl/stl/string.h"  // IWYU pragma: keep
 
 namespace fl {
 
@@ -56,19 +59,19 @@ public:
     /// means the manager should wake and poll. Drivers that do not have such a
     /// signal leave this unused; the manager's timed wait slice is the fallback.
     struct PollNeededCallback {
-        using Callback = void (*)(void*) FL_NOEXCEPT;
+        using Callback = void (*)(void*) FL_NO_EXCEPT;
 
         Callback callback = nullptr;
         void* context = nullptr;
 
-        constexpr PollNeededCallback() FL_NOEXCEPT = default;
-        constexpr PollNeededCallback(Callback cb, void* ctx) FL_NOEXCEPT
+        constexpr PollNeededCallback() FL_NO_EXCEPT = default;
+        constexpr PollNeededCallback(Callback cb, void* ctx) FL_NO_EXCEPT
             : callback(cb), context(ctx) {}
 
-        bool isValid() const FL_NOEXCEPT { return callback != nullptr; }
-        explicit operator bool() const FL_NOEXCEPT { return isValid(); }
+        bool isValid() const FL_NO_EXCEPT { return callback != nullptr; }
+        explicit operator bool() const FL_NO_EXCEPT { return isValid(); }
 
-        void invoke() const FL_NOEXCEPT {
+        void invoke() const FL_NO_EXCEPT {
             if (callback != nullptr) {
                 callback(context);
             }
@@ -84,7 +87,7 @@ public:
     class PollNeededCallbackSlot {
       private:
         struct Snapshot {
-            explicit Snapshot(PollNeededCallback cb) FL_NOEXCEPT
+            explicit Snapshot(PollNeededCallback cb) FL_NO_EXCEPT
                 : callback(cb), next(nullptr) {}
 
             PollNeededCallback callback;
@@ -92,10 +95,10 @@ public:
         };
 
       public:
-        PollNeededCallbackSlot() FL_NOEXCEPT
+        PollNeededCallbackSlot() FL_NO_EXCEPT
             : mSnapshot(nullptr), mRetired(nullptr) {}
 
-        ~PollNeededCallbackSlot() FL_NOEXCEPT {
+        ~PollNeededCallbackSlot() FL_NO_EXCEPT {
             Snapshot* active =
                 mSnapshot.exchange(nullptr, fl::memory_order_acq_rel);
             destroySnapshots(active);
@@ -103,7 +106,7 @@ public:
             mRetired = nullptr;
         }
 
-        void set(PollNeededCallback callback) FL_NOEXCEPT {
+        void set(PollNeededCallback callback) FL_NO_EXCEPT {
             if (callback.callback == nullptr) {
                 clear();
                 return;
@@ -112,11 +115,11 @@ public:
             retire(mSnapshot.exchange(snapshot, fl::memory_order_acq_rel));
         }
 
-        void clear() FL_NOEXCEPT {
+        void clear() FL_NO_EXCEPT {
             retire(mSnapshot.exchange(nullptr, fl::memory_order_acq_rel));
         }
 
-        void invoke() const FL_NOEXCEPT {
+        void invoke() const FL_NO_EXCEPT {
             Snapshot* snapshot = mSnapshot.load(fl::memory_order_acquire);
             if (snapshot == nullptr) {
                 return;
@@ -125,7 +128,7 @@ public:
         }
 
       private:
-        void retire(Snapshot* snapshot) FL_NOEXCEPT {
+        void retire(Snapshot* snapshot) FL_NO_EXCEPT {
             if (snapshot == nullptr) {
                 return;
             }
@@ -135,7 +138,7 @@ public:
             mRetired = snapshot;
         }
 
-        static void destroySnapshots(Snapshot* snapshot) FL_NOEXCEPT {
+        static void destroySnapshots(Snapshot* snapshot) FL_NO_EXCEPT {
             while (snapshot != nullptr) {
                 Snapshot* next = snapshot->next;
                 delete snapshot; // ok bare allocation
@@ -153,10 +156,10 @@ public:
         bool supportsSpi;        ///< Supports SPI protocols (APA102, SK9822, etc.)
 
         /// @brief Default constructor (no capabilities)
-        constexpr Capabilities() FL_NOEXCEPT : supportsClockless(false), supportsSpi(false) {}
+        constexpr Capabilities() FL_NO_EXCEPT : supportsClockless(false), supportsSpi(false) {}
 
         /// @brief Constructor with explicit capabilities
-        constexpr Capabilities(bool clockless, bool spi) FL_NOEXCEPT
+        constexpr Capabilities(bool clockless, bool spi) FL_NO_EXCEPT
             : supportsClockless(clockless), supportsSpi(spi) {}
     };
 
@@ -174,17 +177,17 @@ public:
         fl::string error;   ///< Error message (only populated when state == ERROR)
 
         /// @brief Construct from state only (no error)
-        DriverState(Value v) FL_NOEXCEPT : state(v), error() {}
+        DriverState(Value v) FL_NO_EXCEPT : state(v), error() {}
 
         /// @brief Construct from state and error message
-        DriverState(Value v, const fl::string& e) FL_NOEXCEPT : state(v), error(e) {}
+        DriverState(Value v, const fl::string& e) FL_NO_EXCEPT : state(v), error(e) {}
 
         /// @brief Implicit conversion to Value for backward compatibility
-        operator Value() const FL_NOEXCEPT { return state; }
+        operator Value() const FL_NO_EXCEPT { return state; }
 
         /// @brief Comparison operators for backward compatibility
-        bool operator==(Value v) const FL_NOEXCEPT { return state == v; }
-        bool operator!=(Value v) const FL_NOEXCEPT { return state != v; }
+        bool operator==(Value v) const FL_NO_EXCEPT { return state == v; }
+        bool operator!=(Value v) const FL_NO_EXCEPT { return state != v; }
     };
 
     /// @brief Enqueue channel data for transmission
@@ -192,12 +195,12 @@ public:
     /// @note Behavior depends on implementation - may batch or transmit immediately
     /// @note Non-blocking. Data is stored until show() is called (typical pattern).
     /// @note Clever implementations may begin transmission early to save memory.
-    virtual void enqueue(ChannelDataPtr channelData) FL_NOEXCEPT = 0;
+    virtual void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT = 0;
 
     /// @brief Trigger transmission of enqueued data
     /// @note May block depending on current driver state (poll() returns BUSY/DRAINING)
     /// @note Typical behavior: Wait for hardware to be READY, then transmit all enqueued data
-    virtual void show() FL_NOEXCEPT = 0;
+    virtual void show() FL_NO_EXCEPT = 0;
 
     /// @brief Query driver state and perform maintenance
     /// @return DriverState containing state and optional error message
@@ -206,30 +209,72 @@ public:
     ///   - Check hardware transmission status
     ///   - Clear channel "in use" flags when transmission completes
     ///   - Return error message via DriverState when state == ERROR
-    virtual DriverState poll() FL_NOEXCEPT = 0;
+    virtual DriverState poll() FL_NO_EXCEPT = 0;
 
     /// @brief Get the driver name for affinity binding
     /// @return Driver name (e.g., "RMT", "SPI", "PARLIO"), or empty string if unnamed
     /// @note Used by Channel affinity system to bind channels to specific drivers
-    virtual fl::string getName() const FL_NOEXCEPT { return fl::string::from_literal(""); }
+    virtual fl::string getName() const FL_NO_EXCEPT { return fl::string::from_literal(""); }
 
     /// @brief Get driver capabilities (clockless, SPI, or both)
     /// @return Capabilities struct with bool flags for supported protocols
     /// @note Used by diagnostic logging to show which protocols each driver supports
-    virtual Capabilities getCapabilities() const FL_NOEXCEPT = 0;
+    virtual Capabilities getCapabilities() const FL_NO_EXCEPT = 0;
 
     /// @brief Check if this driver can handle the given channel data
     /// @param data Channel data to check (chipset configuration, pin, timing)
     /// @return true if this driver can render the channel data, false otherwise
     /// @note Drivers must implement this to filter by chipset type (e.g., SPI-only, clockless-only)
     /// @note Used by ChannelManager to route channels to compatible drivers
-    virtual bool canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT = 0;
+    virtual bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT = 0;
+
+    // ================================================================
+    // #3186 declarative-capabilities surface — drivers publish data;
+    // the base class implements the matching virtuals by delegating to
+    // free fl::canMatch / fl::canMatchBulk against the published data.
+    // ================================================================
+
+    /// @brief Driver-wide capability descriptor (declarative form).
+    /// @return Small constant-header descriptor; safe to return by value.
+    /// @note Drivers SHOULD override to publish real protocol gates,
+    ///       frequency ranges, clock-tree model, and flags. The default
+    ///       synthesizes a minimal descriptor from getCapabilities() so
+    ///       unmigrated drivers stay queryable but may match poorly.
+    virtual DriverCapabilities getDriverCapabilities() const FL_NO_EXCEPT {
+        Capabilities legacy = getCapabilities();
+        DriverCapabilities caps;
+        caps.supports_clockless = legacy.supportsClockless;
+        caps.supports_spi       = legacy.supportsSpi;
+        return caps;
+    }
+
+    /// @brief Per-resource group enumeration.
+    /// @return Non-owning span into driver-owned storage.
+    /// @note Drivers SHOULD override and return a span over a
+    ///       `static constexpr PinGroup kGroups[N]` (or a member-owned
+    ///       table built at construction). The default returns an empty
+    ///       span — manager code falls back to legacy canHandle() for
+    ///       unmigrated drivers.
+    virtual fl::span<const PinGroup> getPinGroups() const FL_NO_EXCEPT {
+        return fl::span<const PinGroup>();
+    }
+
+    /// @brief Predicate: can this driver match a (single- or multi-pin) request?
+    /// @note Base default delegates to free fl::canMatch on the
+    ///       published capability data. Drivers should NOT override
+    ///       unless they have dynamic constraints unrepresentable in
+    ///       static data.
+    /// @note A single-pin request has exactly one bit set in
+    ///       request.data_pins (use ChannelRequest::singlePin() factory).
+    virtual HandleResult canMatch(const ChannelRequest& request) const FL_NO_EXCEPT {
+        return fl::canMatch(getDriverCapabilities(), getPinGroups(), request);
+    }
 
     /// @brief Wait for driver to become READY
     /// @param timeoutMs Optional timeout in milliseconds (0 = no timeout)
     /// @return true if driver became READY, false if timeout occurred
-    bool waitForReady(u32 timeoutMs = 1000) FL_NOEXCEPT;
-    bool waitForReadyOrDraining(u32 timeoutMs = 1000) FL_NOEXCEPT;
+    bool waitForReady(u32 timeoutMs = 1000) FL_NO_EXCEPT;
+    bool waitForReadyOrDraining(u32 timeoutMs = 1000) FL_NO_EXCEPT;
 
     /// @brief Install the manager-owned poll-needed callback for ISR wakeups.
     ///
@@ -237,7 +282,7 @@ public:
     /// and invoke it after updating their own state. Implementations without
     /// such a signal can ignore it; the manager will still make progress via
     /// bounded timeout slices.
-    virtual void setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT {
+    virtual void setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT {
         (void)callback;
     }
 
@@ -250,24 +295,24 @@ public:
     ///
     /// @param timeoutMs Optional timeout in milliseconds (0 = no timeout)
     /// @return true if driver became READY, false if timeout occurred
-    virtual bool waitDone(u32 timeoutMs = 1000) FL_NOEXCEPT {
+    virtual bool waitDone(u32 timeoutMs = 1000) FL_NO_EXCEPT {
         return waitForReady(timeoutMs);
     }
 
     /// @brief Virtual destructor
-    virtual ~IChannelDriver() FL_NOEXCEPT = default;
+    virtual ~IChannelDriver() FL_NO_EXCEPT = default;
 
 protected:
-    IChannelDriver() FL_NOEXCEPT = default;
+    IChannelDriver() FL_NO_EXCEPT = default;
 
     // Non-copyable, non-movable
-    IChannelDriver(const IChannelDriver&) FL_NOEXCEPT = delete;
-    IChannelDriver& operator=(const IChannelDriver&) FL_NOEXCEPT = delete;
-    IChannelDriver(IChannelDriver&&) FL_NOEXCEPT = delete;
-    IChannelDriver& operator=(IChannelDriver&&) FL_NOEXCEPT = delete;
+    IChannelDriver(const IChannelDriver&) FL_NO_EXCEPT = delete;
+    IChannelDriver& operator=(const IChannelDriver&) FL_NO_EXCEPT = delete;
+    IChannelDriver(IChannelDriver&&) FL_NO_EXCEPT = delete;
+    IChannelDriver& operator=(IChannelDriver&&) FL_NO_EXCEPT = delete;
 
     template<typename Condition>
-    bool waitForCondition(Condition condition, u32 timeoutMs = 1000) FL_NOEXCEPT;
+    bool waitForCondition(Condition condition, u32 timeoutMs = 1000) FL_NO_EXCEPT;
 };
 
 }  // namespace fl

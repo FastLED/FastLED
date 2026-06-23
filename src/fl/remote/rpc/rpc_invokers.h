@@ -30,7 +30,7 @@ struct TypeTag {
 
 class ErasedInvoker {
 public:
-    virtual ~ErasedInvoker() FL_NOEXCEPT = default;
+    virtual ~ErasedInvoker() FL_NO_EXCEPT = default;
     virtual fl::tuple<TypeConversionResult, json> invoke(const json& args) = 0;
 };
 
@@ -40,7 +40,7 @@ public:
 
 class ErasedSchemaGenerator {
 public:
-    virtual ~ErasedSchemaGenerator() FL_NOEXCEPT = default;
+    virtual ~ErasedSchemaGenerator() FL_NO_EXCEPT = default;
     virtual void setParamNames(const fl::vector<fl::string>& names) = 0;
 
     // Flat tuple format: [["name", "type"], ...] optimized for low-memory devices

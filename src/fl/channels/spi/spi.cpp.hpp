@@ -9,7 +9,7 @@ namespace fl {
 
 // Out-of-line destructor: ensures unique_ptr<MultiLaneDevice> destruction
 // happens here (in fl.spi+), not in every TU that includes spi.h.
-Spi::~Spi() FL_NOEXCEPT = default;
+Spi::~Spi() FL_NO_EXCEPT = default;
 
 // ============================================================================
 // Spi Constructors
@@ -27,7 +27,7 @@ Spi::Spi(const SpiConfig& config)
     // Validate number of lanes
     size_t num_lanes = config.data_pins.size();
     if (num_lanes < 1 || num_lanes > 8) {
-        FL_WARN("fl::Spi: Invalid number of data pins (" << num_lanes << "), must be 1-8");
+        FL_WARN_F("fl::Spi: Invalid number of data pins (%s), must be 1-8", num_lanes);
         error_code = SPIError::NOT_INITIALIZED;
         return;
     }
@@ -44,13 +44,13 @@ Spi::Spi(const SpiConfig& config)
 
     // Create device
     device = fl::make_unique<spi::MultiLaneDevice>(ml_config);
-    FL_DBG("fl::Spi: Created MultiLaneDevice with " << num_lanes << " lane(s)");
+    FL_DBG_F("fl::Spi: Created MultiLaneDevice with %s lane(s)", num_lanes);
 
     // Initialize device
     auto begin_result = device->begin();
     if (begin_result) {
         // begin() returned an error (optional has a value)
-        FL_WARN("fl::Spi: begin() failed");
+        FL_WARN_F("fl::Spi: begin() failed");
         error_code = SPIError::NOT_INITIALIZED;
         device.reset();
         return;
@@ -59,14 +59,14 @@ Spi::Spi(const SpiConfig& config)
     is_ok = true;
 }
 
-Spi::Spi(Spi&& other) FL_NOEXCEPT
+Spi::Spi(Spi&& other) FL_NO_EXCEPT
     : device(fl::move(other.device))
     , is_ok(other.is_ok)
     , error_code(other.error_code) {
     other.is_ok = false;
 }
 
-Spi& Spi::operator=(Spi&& other) FL_NOEXCEPT {
+Spi& Spi::operator=(Spi&& other) FL_NO_EXCEPT {
     if (this != &other) {
         device = fl::move(other.device);
         is_ok = other.is_ok;

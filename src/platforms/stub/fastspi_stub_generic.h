@@ -23,22 +23,22 @@ class CLEDController;
 
 class StubSPIOutput : public fl::EngineEvents::Listener {
 public:
-    StubSPIOutput() FL_NOEXCEPT;
+    StubSPIOutput() FL_NO_EXCEPT;
     ~StubSPIOutput();
-    void select() FL_NOEXCEPT;
-    void init() FL_NOEXCEPT;
-    void waitFully() FL_NOEXCEPT;
-    void release() FL_NOEXCEPT;
-    void endTransaction() FL_NOEXCEPT { release(); }  // For compatibility with chipsets that use endTransaction
-    void writeByte(u8 byte) FL_NOEXCEPT;
-    void writeWord(u16 word) FL_NOEXCEPT;
-    static void finalizeTransmission() FL_NOEXCEPT { }
+    void select() FL_NO_EXCEPT;
+    void init() FL_NO_EXCEPT;
+    void waitFully() FL_NO_EXCEPT;
+    void release() FL_NO_EXCEPT;
+    void endTransaction() FL_NO_EXCEPT { release(); }  // For compatibility with chipsets that use endTransaction
+    void writeByte(u8 byte) FL_NO_EXCEPT;
+    void writeWord(u16 word) FL_NO_EXCEPT;
+    static void finalizeTransmission() FL_NO_EXCEPT { }
 
     // Access captured SPI transmission bytes for testing
-    const fl::vector<u8>& getCapturedBytes() const FL_NOEXCEPT { return mBytes; }
+    const fl::vector<u8>& getCapturedBytes() const FL_NO_EXCEPT { return mBytes; }
 
 private:
-    void onEndShowLeds() FL_NOEXCEPT override;
+    void onEndShowLeds() FL_NO_EXCEPT override;
 
     ActiveStripTracker mTracker;
     fl::vector<u8> mBytes;  // Captures all raw SPI transmission bytes

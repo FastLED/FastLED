@@ -52,26 +52,61 @@ class CompileResult:
     error_snippet: Optional[str] = None
 
 
-# Error patterns that indicate stale build state recoverable by reconfiguration
-STALE_BUILD_PATTERNS = [
+# Stale-build patterns matched ONLY against lines that begin with
+# `ninja: error:`. The previous loose substring match misfired on routine
+# compiler errors that happen to contain "file not found" / "does not exist",
+# each false positive costing a ~20-30s full artifact wipe + reconfigure on
+# the retry. See #3129 A2.
+_NINJA_STALE_BUILD_PATTERNS = (
     "file not found",
     "no such file or directory",
     "missing and no known rule to make it",
     "does not exist",
-    "has been modified since the precompiled header",
     "target not found",  # e.g., all-with-examples missing after enable_examples config change
+)
+
+# Ninja-graph-level phrases that always indicate stale build state regardless
+# of which line prefix they appear on.
+_NINJA_GRAPH_STALE_PHRASES = (
+    "manifest contains a cycle",
+    "failed: regen",
+)
+
+# Backwards-compat re-export. Tests or external scripts that imported the old
+# name still see the same iterable.
+STALE_BUILD_PATTERNS = list(_NINJA_STALE_BUILD_PATTERNS) + [
+    "has been modified since the precompiled header",
 ]
 
 
 def is_stale_build_error(output: str) -> bool:
     """Check if compilation output indicates a stale build state error.
 
-    These errors typically occur when source/header files are renamed or deleted
-    but the build system still references the old paths. They are recoverable
-    by cleaning stale deps and reconfiguring.
+    A line counts as a stale-build trigger only if EITHER:
+    - it starts with ``ninja: error:`` and contains one of the
+      ``_NINJA_STALE_BUILD_PATTERNS`` keywords, OR
+    - it matches one of ``_NINJA_GRAPH_STALE_PHRASES`` (ninja-graph cycle,
+      regen failure), OR
+    - it contains ``has been modified since the precompiled header`` — a
+      clang PCH-staleness error that survives without ninja's prefix.
+
+    Narrowing to ninja's own error output stops the previous loose substring
+    match from misfiring on legitimate compiler errors that happen to contain
+    routine phrases like "file not found" or "does not exist". See #3129 A2.
     """
-    output_lower = output.lower()
-    return any(pattern in output_lower for pattern in STALE_BUILD_PATTERNS)
+    for raw_line in output.splitlines():
+        line_lower = raw_line.strip().lower()
+        if not line_lower:
+            continue
+        if "has been modified since the precompiled header" in line_lower:
+            return True
+        if any(phrase in line_lower for phrase in _NINJA_GRAPH_STALE_PHRASES):
+            return True
+        if line_lower.startswith("ninja: error:") and any(
+            pattern in line_lower for pattern in _NINJA_STALE_BUILD_PATTERNS
+        ):
+            return True
+    return False
 
 
 def _is_compilation_error(line: str) -> bool:
@@ -102,6 +137,60 @@ def _invalidate_stale_pchs(build_dir: Path) -> None:
 
     for pch_file in build_dir.rglob("*.pch"):
         invalidate_stale_pch(pch_file)
+
+
+# Sidecar marker recording the build.ninja mtime as of the last successful
+# pre-compile pass (PCH invalidation + zccache strict-path normalize). When
+# build.ninja hasn't changed since that mtime, the pre-compile work is a
+# guaranteed no-op and can be skipped. See #3129 A5.
+_PRECOMPILE_MTIME_MARKER = ".last-precompile-build-ninja-mtime"
+
+
+def _read_precompile_mtime_marker(build_dir: Path) -> "float | None":
+    """Read the saved build.ninja mtime from the sidecar marker.
+
+    Returns None if the marker is missing or unreadable — caller should
+    treat that as "run the pre-compile passes".
+    """
+    marker = build_dir / _PRECOMPILE_MTIME_MARKER
+    try:
+        return float(marker.read_text(encoding="utf-8").strip())
+    except (OSError, ValueError):
+        return None
+
+
+def _write_precompile_mtime_marker(build_dir: Path, mtime: float) -> None:
+    """Persist the current build.ninja mtime to the sidecar marker.
+
+    Best-effort: write failures are non-fatal — worst case is the next
+    compile redoes the (idempotent) pre-compile work.
+    """
+    marker = build_dir / _PRECOMPILE_MTIME_MARKER
+    try:
+        marker.write_text(f"{mtime}", encoding="utf-8")
+    except OSError:
+        pass
+
+
+def _precompile_passes_can_be_skipped(build_dir: Path) -> bool:
+    """Return True iff build.ninja mtime matches the marker.
+
+    When True, both ``_invalidate_stale_pchs`` and the strict-path
+    normalize call are no-ops by construction (no meson reconfigure has
+    rewritten build.ninja since they last ran), and the ~5-20 ms cost
+    can be skipped. See #3129 A5.
+    """
+    build_ninja = build_dir / "build.ninja"
+    if not build_ninja.exists():
+        return False
+    saved = _read_precompile_mtime_marker(build_dir)
+    if saved is None:
+        return False
+    try:
+        current = build_ninja.stat().st_mtime
+    except OSError:
+        return False
+    return abs(current - saved) < 1e-6
 
 
 def compile_meson(
@@ -159,34 +248,54 @@ def compile_meson(
             error_log_file=None,
         )
 
-    # Check for stale PCH before invoking Ninja.  Compilers on Windows emit
-    # absolute backslash paths in depfiles which Ninja may fail to track
-    # correctly, leaving the PCH stale even though headers changed.
-    _invalidate_stale_pchs(build_dir)
+    # Pre-compile passes (PCH staleness check + strict-path normalize) run
+    # in two cases:
+    #   1. First build of this build_dir (marker absent).
+    #   2. build.ninja mtime changed since the last successful pass (meson
+    #      reconfigured, or build.ninja was edited externally).
+    # When neither is true, both passes are guaranteed no-ops by construction
+    # and the ~5-20 ms cost is skipped. See #3129 A5.
+    if not _precompile_passes_can_be_skipped(build_dir):
+        # Check for stale PCH before invoking Ninja.  Compilers on Windows
+        # emit absolute backslash paths in depfiles which Ninja may fail to
+        # track correctly, leaving the PCH stale even though headers changed.
+        _invalidate_stale_pchs(build_dir)
 
-    # Re-normalize strict-path include flags before every compile (#2378).
-    # Meson setup already normalizes once, but ninja can regenerate
-    # build.ninja silently when meson.build files change — that regeneration
-    # re-introduces the relative + backslash `-Ici/meson/native\fastled.dll.p`
-    # form that zccache's --strict-paths=absolute rejects. Running the
-    # normalizer here costs ~5-20 ms and is idempotent when nothing changed.
-    from ci.meson.build_config import normalize_meson_private_include_paths
+        # Re-normalize strict-path include flags before every compile (#2378).
+        # Meson setup already normalizes once, but ninja can regenerate
+        # build.ninja silently when meson.build files change — that
+        # regeneration re-introduces the relative + backslash
+        # `-Ici/meson/native\fastled.dll.p` form that zccache's
+        # --strict-paths=absolute rejects. Running the normalizer here costs
+        # ~5-20 ms and is idempotent when nothing changed.
+        from ci.meson.build_config import normalize_meson_private_include_paths
 
-    try:
-        normalize_meson_private_include_paths(build_dir)
-    except KeyboardInterrupt as ki:
-        # Ctrl-C during normalization — propagate cleanly so the watchdog
-        # and signal-handler chain runs to completion (KBI001).
-        handle_keyboard_interrupt(ki)
-        raise
-    except Exception as e:
-        # Non-fatal: if the normalizer fails for any reason, fall through
-        # to the compile — the worst case is the original zccache strict-
-        # paths error surfaces, which is still better than silently breaking
-        # the build at the normalize step.
-        _ts_print(
-            f"[MESON] ⚠️  Pre-compile normalize_meson_private_include_paths failed: {e}"
-        )
+        normalize_succeeded = False
+        try:
+            normalize_meson_private_include_paths(build_dir)
+            normalize_succeeded = True
+        except KeyboardInterrupt as ki:
+            # Ctrl-C during normalization — propagate cleanly so the watchdog
+            # and signal-handler chain runs to completion (KBI001).
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as e:
+            # Non-fatal: if the normalizer fails for any reason, fall through
+            # to the compile — the worst case is the original zccache strict-
+            # paths error surfaces, which is still better than silently
+            # breaking the build at the normalize step.
+            _ts_print(
+                f"[MESON] ⚠️  Pre-compile normalize_meson_private_include_paths failed: {e}"
+            )
+
+        # Persist the marker only when both passes succeeded — otherwise the
+        # next compile retries.
+        if normalize_succeeded:
+            build_ninja = build_dir / "build.ninja"
+            try:
+                _write_precompile_mtime_marker(build_dir, build_ninja.stat().st_mtime)
+            except OSError:
+                pass
 
     if target:
         cmd.append(target)

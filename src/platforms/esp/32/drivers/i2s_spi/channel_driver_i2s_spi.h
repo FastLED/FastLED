@@ -29,25 +29,25 @@ namespace fl {
 class ChannelDriverI2sSpi : public IChannelDriver {
   public:
     explicit ChannelDriverI2sSpi(
-        fl::shared_ptr<detail::II2sSpiPeripheral> peripheral) FL_NOEXCEPT;
+        fl::shared_ptr<detail::II2sSpiPeripheral> peripheral) FL_NO_EXCEPT;
     ~ChannelDriverI2sSpi() override;
 
-    bool canHandle(const ChannelDataPtr &data) const FL_NOEXCEPT override;
-    void enqueue(ChannelDataPtr channelData) FL_NOEXCEPT override;
-    void show() FL_NOEXCEPT override;
-    DriverState poll() FL_NOEXCEPT override;
+    bool canHandle(const ChannelDataPtr &data) const FL_NO_EXCEPT override;
+    void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
+    void show() FL_NO_EXCEPT override;
+    DriverState poll() FL_NO_EXCEPT override;
 
-    fl::string getName() const FL_NOEXCEPT override {
+    fl::string getName() const FL_NO_EXCEPT override {
         return fl::string::from_literal("I2S_SPI");
     }
 
-    Capabilities getCapabilities() const FL_NOEXCEPT override {
+    Capabilities getCapabilities() const FL_NO_EXCEPT override {
         return Capabilities(false, true); // SPI only
     }
 
   private:
     bool beginTransmission(
-        fl::span<const ChannelDataPtr> channels) FL_NOEXCEPT;
+        fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
 
     fl::shared_ptr<detail::II2sSpiPeripheral> mPeripheral;
     bool mInitialized;
@@ -60,6 +60,6 @@ class ChannelDriverI2sSpi : public IChannelDriver {
 };
 
 /// @brief Factory function to create I2S_SPI driver with real hardware
-fl::shared_ptr<IChannelDriver> createI2sSpiEngine() FL_NOEXCEPT;
+fl::shared_ptr<IChannelDriver> createI2sSpiEngine() FL_NO_EXCEPT;
 
 } // namespace fl

@@ -53,7 +53,7 @@ namespace fl {
 // We treat NaN / inf as "beyond precision" so the caller's safe-fallback path
 // is taken -- matches the previous `canBeRepresentedAsFloat(double)` semantics
 // before this code was bit-twiddled (FastLED #3022 phase 2).
-static inline bool float_bits_magnitude_exceeds_2_24(u32 bits) FL_NOEXCEPT {
+static inline bool float_bits_magnitude_exceeds_2_24(u32 bits) FL_NO_EXCEPT {
     const u32 biased_exp = (bits >> 23) & 0xFFu;
     const u32 mantissa = bits & 0x7FFFFFu;
     return biased_exp == 0xFFu || biased_exp > 151u ||
@@ -114,7 +114,7 @@ enum class ParseState : u8 { KEEP_GOING = 0, ERROR = 1 };
 class JsonVisitor {
 public:
     virtual ParseState on_token(JsonToken token, const fl::span<const char>& value) = 0;
-    virtual ~JsonVisitor() FL_NOEXCEPT = default;
+    virtual ~JsonVisitor() FL_NO_EXCEPT = default;
 };
 
 // Character-by-character tokenizer
@@ -330,6 +330,7 @@ private:
                 mPos++;
                 return JsonToken::RBRACE;
             case '[': {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
                 size_t saved_pos = mPos;
                 mPos++;  // Skip '['
                 JsonToken array_token = scan_array_lookahead(out_value);
@@ -343,6 +344,17 @@ private:
                 out_value = fl::span<const char>(&mInput[mPos], 1);
                 mPos++;
                 return JsonToken::LBRACKET;
+#else
+                // Low-memory gate per #3224 Tier 2E: skip the array-packing
+                // lookahead. The packed-array tokens (ARRAY_UINT8 / INT16 /
+                // FLOAT) are gated out of JsonBuilder::on_token on Low-memory,
+                // so scanning ahead to detect them anyway is dead work. Drops
+                // `scan_array_lookahead` + `classify_array_token` + friends
+                // (~700 B of state-machine code).
+                out_value = fl::span<const char>(&mInput[mPos], 1);
+                mPos++;
+                return JsonToken::LBRACKET;
+#endif
             }
             case ']':
                 out_value = fl::span<const char>(&mInput[mPos], 1);
@@ -515,14 +527,14 @@ private:
     int mDepth;
 
 public:
-    JsonValidator() FL_NOEXCEPT : mExpectKey(false), mExpectValue(false), mExpectColon(false), mDepth(0) {}
+    JsonValidator() FL_NO_EXCEPT : mExpectKey(false), mExpectValue(false), mExpectColon(false), mDepth(0) {}
 
     ParseState on_token(JsonToken token, const fl::span<const char>& value) override {
         (void)value;  // Suppress unused parameter warning
 
         // Recursion depth check
         if (mDepth > MAX_JSON_DEPTH) {
-            FL_ERROR("JSON parser: FATAL - recursion depth exceeded " << MAX_JSON_DEPTH);
+            FL_ERROR_F("JSON parser: FATAL - recursion depth exceeded %s", MAX_JSON_DEPTH);
             return ParseState::ERROR;
         }
 
@@ -914,17 +926,25 @@ private:
     }
 
 public:
-    JsonBuilder() FL_NOEXCEPT : mRoot(), mDepth(0) {}
+    JsonBuilder() FL_NO_EXCEPT : mRoot(), mDepth(0) {}
 
     ParseState on_token(JsonToken token, const fl::span<const char>& value) override {
         // Recursion depth check
         if (mDepth > MAX_JSON_DEPTH) {
-            FL_ERROR("JSON parser: FATAL - recursion depth exceeded " << MAX_JSON_DEPTH);
+            FL_ERROR_F("JSON parser: FATAL - recursion depth exceeded %s", MAX_JSON_DEPTH);
             return ParseState::ERROR;
         }
 
         switch (token) {
-            // Specialized array tokens - parse directly into typed vectors
+            // Specialized array tokens - parse directly into typed vectors.
+            // Gated on Low-memory per #3224 Tier 2D: these packed-array tokens
+            // only fire when the tokenizer's `scan_array_lookahead` decides an
+            // array is uniformly-typed and small. LowMemory targets don't use
+            // the array-packing optimization (the integer-only RPC contract on
+            // LPC8xx never sends packed vectors), so dropping these cases
+            // collapses 3 large make_shared<json_value>(vector<T>) variant
+            // emplace instantiations + parse_int_array + parse_float_array.
+#if FL_PLATFORM_HAS_LARGE_MEMORY
             case JsonToken::ARRAY_UINT8: {
                 fl::vector<u8> vec;
                 if (!parse_int_array(value, vec)) return ParseState::ERROR;
@@ -948,6 +968,7 @@ public:
                 push_value(arr_val);
                 return ParseState::KEEP_GOING;
             }
+#endif
 
             case JsonToken::LBRACE: {
                 auto obj_val = fl::make_shared<json_value>(json_object{});
@@ -1024,25 +1045,32 @@ public:
                 }
 
                 fl::shared_ptr<json_value> num_val;
-                if (is_float) {
 #if FL_PLATFORM_HAS_LARGE_MEMORY
+                if (is_float) {
                     // Bit-twiddling parse -> IEEE 754 bits -> store as float in the
                     // variant. The `bit_cast<float>` is a `memcpy` -- no libgcc
                     // soft-FP helper is reached on the parser hot path
                     // (FastLED #3022 phase 2).
                     const u32 bits = fl::ieee754_parse_decimal(value.data(), value.size());
                     num_val = fl::make_shared<json_value>(fl::bit_cast<float>(bits));
-#else
-                    // Low-memory gate per FastLED #3082: float JSON literals
-                    // parse to 0.0f, no `ieee754_parse_decimal` / kPow10Mant
-                    // anchored. Integer-only RPC contract on LPC8xx / AVR.
-                    num_val = fl::make_shared<json_value>(0.0f);
-#endif
                 } else {
                     int i = fl::parseInt(value.data(), value.size());
                     i64 i64_val = static_cast<i64>(i);
                     num_val = fl::make_shared<json_value>(i64_val);
                 }
+#else
+                // Low-memory gate per FastLED #3224 Tier 2D: drop the float
+                // store entirely. JSON float literals on LowMemory parse to
+                // i64(0), avoiding the variant `float` emplace instantiation
+                // that #3082's `0.0f` store used to anchor. Combined with
+                // the ARRAY_FLOAT case gate above, LowMemory's JsonBuilder
+                // never instantiates a `make_shared<json_value>(float)` or
+                // `make_shared<json_value>(vector<float>)` path.
+                (void)is_float;
+                int i = fl::parseInt(value.data(), value.size());
+                i64 i64_val = static_cast<i64>(i);
+                num_val = fl::make_shared<json_value>(i64_val);
+#endif
 
                 push_value(num_val);
                 return ParseState::KEEP_GOING;
@@ -1285,10 +1313,17 @@ fl::string json::to_string_native() const {
     SerializerVisitor visitor{json_chars};
     visitor.serialize_value(mValue.get());
 
-    // Convert deque to fl::string efficiently
+    // Convert deque to fl::string. With FastLED #3270 the deque is chunked,
+    // so its storage is no longer contiguous -- treating `&json_chars[0]`
+    // as a buffer would walk off the first chunk. Reserve + per-element
+    // append is correct for the chunked layout (and was correct for the
+    // pre-#3270 layout too whenever a wraparound occurred).
     fl::string result;
     if (!json_chars.empty()) {
-        result.assign(&json_chars[0], json_chars.size());
+        result.reserve(json_chars.size());
+        for (fl::size i = 0; i < json_chars.size(); ++i) {
+            result.push_back(json_chars[i]);
+        }
     }
 
     return result;

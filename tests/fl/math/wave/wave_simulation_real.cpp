@@ -207,4 +207,26 @@ FL_TEST_CASE("WaveSimulation2D_Real 9-point produces different output than 5-poi
     FL_CHECK(nine.geti16(cx + 1, cy + 1) != 0);
 }
 
+FL_TEST_CASE("WaveSimulation2D_Real PSRAM opt-in constructor builds and runs") {
+    // A3 of meta #3122 — psram_storage tag explicitly opts a grid into
+    // PSRAM (on platforms where it's available). On host where there's
+    // no real PSRAM, psram_memory_resource() falls back to the default
+    // allocator — so the test still exercises the constructor path.
+    WaveSimulation2D_Real sim(
+        WaveSimulation2D_Real::PsramStorage{}, 16, 16, 0.16f, 6.0f);
+    sim.setHalfDuplex(false);
+    sim.setf(8, 8, 1.0f);
+    sim.update();
+    bool any_nonzero = false;
+    for (u32 y = 0; y < 16; ++y) {
+        for (u32 x = 0; x < 16; ++x) {
+            const i16 v = sim.geti16(x, y);
+            FL_CHECK_GE(static_cast<int>(v), -32768);
+            FL_CHECK_LE(static_cast<int>(v), 32767);
+            if (v != 0) any_nonzero = true;
+        }
+    }
+    FL_CHECK(any_nonzero);
+}
+
 }  // FL_TEST_FILE

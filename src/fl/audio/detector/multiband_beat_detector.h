@@ -73,9 +73,9 @@ struct MultiBandBeatDetectorConfig {
 /// @endcode
 class MultiBandBeat {
 public:
-    MultiBandBeat() FL_NOEXCEPT;
+    MultiBandBeat() FL_NO_EXCEPT;
     explicit MultiBandBeat(const MultiBandBeatDetectorConfig& config);
-    ~MultiBandBeat() FL_NOEXCEPT;
+    ~MultiBandBeat() FL_NO_EXCEPT;
 
     /// Configure the multi-band beat detector
     void configure(const MultiBandBeatDetectorConfig& config);

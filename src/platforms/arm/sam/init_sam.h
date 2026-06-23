@@ -18,7 +18,7 @@ namespace platforms {
 ///
 /// SAM platforms (Arduino Due) rely on Arduino core for initialization.
 /// This function is a no-op and exists for API consistency.
-inline void init() FL_NOEXCEPT {
+inline void init() FL_NO_EXCEPT {
     // No-op: SAM platforms rely on Arduino core initialization
 }
 

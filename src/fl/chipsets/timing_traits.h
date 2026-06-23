@@ -74,7 +74,7 @@ struct CustomTimingTraits {
 inline void convert_fastled_timings_to_timedeltas(u16 t1_in, u16 t2_in,
                                                   u16 t3_in, u16 *out_t0h,
                                                   u16 *out_t0l, u16 *out_t1h,
-                                                  u16 *out_t1l) FL_NOEXCEPT {
+                                                  u16 *out_t1l) FL_NO_EXCEPT {
     *out_t0h = t1_in;
     *out_t0l = t2_in + t3_in;
     *out_t1h = t1_in + t2_in;

@@ -111,6 +111,6 @@
 
 namespace fl {
 /// Get the size of the CLEDController object for introspection
-u16 cled_contoller_size() FL_NOEXCEPT;
+u16 cled_contoller_size() FL_NO_EXCEPT;
 }  // namespace fl
 

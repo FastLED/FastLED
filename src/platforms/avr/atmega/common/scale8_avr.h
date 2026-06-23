@@ -25,7 +25,7 @@ namespace fl {
 
 /// Scale one byte by a second one (AVR assembly with MUL)
 /// @note Takes 4 clocks on AVR with MUL, 2 clocks on ARM
-FL_ALWAYS_INLINE u8 scale8(u8 i, fract8 scale) FL_NOEXCEPT {
+FL_ALWAYS_INLINE u8 scale8(u8 i, fract8 scale) FL_NO_EXCEPT {
     asm volatile(
 #if (FASTLED_SCALE8_FIXED == 1)
         // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
@@ -54,7 +54,7 @@ FL_ALWAYS_INLINE u8 scale8(u8 i, fract8 scale) FL_NOEXCEPT {
 }
 
 /// The "video" version of scale8() (AVR assembly with MUL)
-FL_ALWAYS_INLINE u8 scale8_video(u8 i, fract8 scale) FL_NOEXCEPT {
+FL_ALWAYS_INLINE u8 scale8_video(u8 i, fract8 scale) FL_NO_EXCEPT {
     u8 j = 0;
     asm volatile("  tst %[i]\n\t"
                  "  breq L_%=\n\t"
@@ -73,7 +73,7 @@ FL_ALWAYS_INLINE u8 scale8_video(u8 i, fract8 scale) FL_NOEXCEPT {
 /// This version of scale8() does not clean up the R1 register on AVR (AVR assembly with MUL)
 /// @warning You **MUST** call cleanup_R1() after using this function!
 FL_ALWAYS_INLINE u8 scale8_LEAVING_R1_DIRTY(u8 i,
-                                                         fract8 scale) FL_NOEXCEPT {
+                                                         fract8 scale) FL_NO_EXCEPT {
     asm volatile(
 #if (FASTLED_SCALE8_FIXED == 1)
         // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
@@ -103,7 +103,7 @@ FL_ALWAYS_INLINE u8 scale8_LEAVING_R1_DIRTY(u8 i,
 /// In place modifying version of scale8() that does not clean up the R1 (AVR assembly with MUL)
 /// @warning You **MUST** call cleanup_R1() after using this function!
 FL_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(u8 &i,
-                                                       fract8 scale) FL_NOEXCEPT {
+                                                       fract8 scale) FL_NO_EXCEPT {
     asm volatile(
 #if (FASTLED_SCALE8_FIXED == 1)
         // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
@@ -132,7 +132,7 @@ FL_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(u8 &i,
 /// This version of scale8_video() does not clean up the R1 register on AVR (AVR assembly with MUL)
 /// @warning You **MUST** call cleanup_R1() after using this function!
 FL_ALWAYS_INLINE u8 scale8_video_LEAVING_R1_DIRTY(u8 i,
-                                                               fract8 scale) FL_NOEXCEPT {
+                                                               fract8 scale) FL_NO_EXCEPT {
     u8 j = 0;
     asm volatile("  tst %[i]\n\t"
                  "  breq L_%=\n\t"
@@ -150,7 +150,7 @@ FL_ALWAYS_INLINE u8 scale8_video_LEAVING_R1_DIRTY(u8 i,
 /// In place modifying version of scale8_video() that does not clean up the R1 (AVR assembly with MUL)
 /// @warning You **MUST** call cleanup_R1() after using this function!
 FL_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY(u8 &i,
-                                                             fract8 scale) FL_NOEXCEPT {
+                                                             fract8 scale) FL_NO_EXCEPT {
     asm volatile("  tst %[i]\n\t"
                  "  breq L_%=\n\t"
                  "  mul %[i], %[scale]\n\t"
@@ -164,13 +164,13 @@ FL_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY(u8 &i,
 }
 
 /// Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls (AVR assembly)
-FL_ALWAYS_INLINE void cleanup_R1() FL_NOEXCEPT {
+FL_ALWAYS_INLINE void cleanup_R1() FL_NO_EXCEPT {
     // Restore r1 to "0"; it's expected to always be that
-    asm volatile("clr __zero_reg__  \n\t" : : : "r1") FL_NOEXCEPT;
+    asm volatile("clr __zero_reg__  \n\t" : : : "r1") FL_NO_EXCEPT;
 }
 
 /// Scale a 16-bit unsigned value by an 8-bit value (AVR assembly with MUL)
-FL_ALWAYS_INLINE u16 scale16by8(u16 i, fract8 scale) FL_NOEXCEPT {
+FL_ALWAYS_INLINE u16 scale16by8(u16 i, fract8 scale) FL_NO_EXCEPT {
     if (scale == 0) {
         return 0; // Fixes non zero output when scale == 0 and
                   // FASTLED_SCALE8_FIXED==1
@@ -222,7 +222,7 @@ FL_ALWAYS_INLINE u16 scale16by8(u16 i, fract8 scale) FL_NOEXCEPT {
 }
 
 /// Scale a 16-bit unsigned value by an 16-bit value (AVR assembly with MUL)
-LIB8STATIC u16 scale16(u16 i, fract16 scale) FL_NOEXCEPT {
+LIB8STATIC u16 scale16(u16 i, fract16 scale) FL_NO_EXCEPT {
 #if FASTLED_SCALE8_FIXED == 1
     // implemented sort of like
     //   result = ((i * scale) + i ) / 65536
@@ -332,7 +332,7 @@ LIB8STATIC u16 scale16(u16 i, fract16 scale) FL_NOEXCEPT {
 /// Scale a 32-bit unsigned value by an 8-bit value (C implementation for AVR)
 /// Promotes to 64-bit to prevent overflow during multiplication
 /// @note Uses C implementation on AVR since 64-bit assembly would be very slow
-FL_ALWAYS_INLINE u32 scale32by8(u32 i, fract8 scale) FL_NOEXCEPT {
+FL_ALWAYS_INLINE u32 scale32by8(u32 i, fract8 scale) FL_NO_EXCEPT {
     if (scale == 0) {
         return 0;
     }

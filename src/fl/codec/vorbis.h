@@ -20,7 +20,7 @@ struct VorbisInfo {
     fl::u32 maxFrameSize = 0;     // Maximum frame size in samples
     bool isValid = false;         // True if metadata was successfully parsed
 
-    VorbisInfo() FL_NOEXCEPT = default;
+    VorbisInfo() FL_NO_EXCEPT = default;
     VorbisInfo(fl::u32 rate, fl::u8 ch)
         : sampleRate(rate), channels(ch), isValid(true) {}
 };
@@ -39,8 +39,8 @@ struct VorbisFrame {
 // Low-level stb_vorbis wrapper for testing
 class StbVorbisDecoder {
 public:
-    StbVorbisDecoder() FL_NOEXCEPT;
-    ~StbVorbisDecoder() FL_NOEXCEPT;
+    StbVorbisDecoder() FL_NO_EXCEPT;
+    ~StbVorbisDecoder() FL_NO_EXCEPT;
 
     // Open from memory buffer (entire file must be in memory)
     bool openMemory(fl::span<const fl::u8> data);
@@ -78,8 +78,8 @@ private:
 // This decoder consumes Vorbis data from a filebuf and decodes audio frames on demand
 class VorbisDecoder {
 public:
-    VorbisDecoder() FL_NOEXCEPT;
-    ~VorbisDecoder() FL_NOEXCEPT;
+    VorbisDecoder() FL_NO_EXCEPT;
+    ~VorbisDecoder() FL_NO_EXCEPT;
 
     // Initialize the decoder with a byte stream
     // Note: stb_vorbis requires the entire stream in memory for pulldata API

@@ -66,7 +66,7 @@ public:
         mDriver = fl::third_party::createTJpgInstanceDecoder();
     }
 
-    ~Impl() FL_NOEXCEPT = default;
+    ~Impl() FL_NO_EXCEPT = default;
 
     bool begin(fl::filebuf_ptr stream) {
         if (!mDriver) {
@@ -215,7 +215,7 @@ public:
 JpegDecoder::JpegDecoder(const JpegConfig& config)
     : mImpl(fl::make_unique<Impl>(config)) {}
 
-JpegDecoder::~JpegDecoder() FL_NOEXCEPT = default;
+JpegDecoder::~JpegDecoder() FL_NO_EXCEPT = default;
 
 bool JpegDecoder::begin(fl::filebuf_ptr stream) {
     return mImpl->begin(stream);

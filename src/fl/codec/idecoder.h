@@ -34,7 +34,7 @@ using AudioFrameCallback = fl::function<void(const audio::Sample&)>;
 // - Future codec implementations
 class IDecoder {
 public:
-    virtual ~IDecoder() FL_NOEXCEPT = default;
+    virtual ~IDecoder() FL_NO_EXCEPT = default;
 
     // Lifecycle methods
     virtual bool begin(fl::filebuf_ptr stream) = 0;

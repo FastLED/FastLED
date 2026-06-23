@@ -32,7 +32,7 @@ namespace fl {
 /// @param out Output iterator for encoded bytes
 /// @note LPD6803 uses RGB wire order: pixel[0]=Red, pixel[1]=Green, pixel[2]=Blue
 template <typename InputIterator, typename OutputIterator>
-void encodeLPD6803(InputIterator first, InputIterator last, OutputIterator out) FL_NOEXCEPT {
+void encodeLPD6803(InputIterator first, InputIterator last, OutputIterator out) FL_NO_EXCEPT {
     // Start boundary: 4 bytes of 0x00
     *out++ = 0x00;
     *out++ = 0x00;

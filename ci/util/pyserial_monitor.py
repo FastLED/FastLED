@@ -89,6 +89,16 @@ class SerialMonitor:
                 timeout=0.1,  # Short timeout for non-blocking reads
                 write_timeout=1.0,
             )
+            # Assert DTR/RTS to the universal "host ready" idle state.
+            # Critical for LPC845-BRK (#3300): the LPC11U35 USB-VCOM bridge
+            # gates serial data through DTR. _pyserial_dtr_reset ends with
+            # dtr=False (esptool ClassicReset convention — correct for ESP32
+            # native USB CDC) but that leaves the LPC11U35 in "host not
+            # ready" mode and the device's transmissions are silently
+            # dropped. Forcing DTR=True+RTS=True is safe for ESP32 (it's
+            # the post-reset idle state) and necessary for LPC.
+            self._ser.dtr = True
+            self._ser.rts = True
             # Flush any stale data from previous sessions (crash output, etc.)
             # This prevents false positives from old crash messages in the buffer
             self._ser.reset_input_buffer()

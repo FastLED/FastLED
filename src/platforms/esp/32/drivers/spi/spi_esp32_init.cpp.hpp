@@ -22,9 +22,9 @@ namespace fl {
 
 // Forward declare the singleton getter functions from spi_hw_1_esp32.cpp
 class SpiHw1;  // Full declaration from spi_hw_1.h above
-extern fl::shared_ptr<SpiHw1>& getController2() FL_NOEXCEPT;
+extern fl::shared_ptr<SpiHw1>& getController2() FL_NO_EXCEPT;
 #if SOC_SPI_PERIPH_NUM > 2
-extern fl::shared_ptr<SpiHw1>& getController3() FL_NOEXCEPT;
+extern fl::shared_ptr<SpiHw1>& getController3() FL_NO_EXCEPT;
 #endif
 
 // ============================================================================

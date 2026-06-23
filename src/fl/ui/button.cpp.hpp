@@ -4,17 +4,17 @@
 
 namespace fl {
 
-UIButton::UIButton(const char *name) FL_NOEXCEPT : mImpl(name), mListener(this) {
+UIButton::UIButton(const char *name) FL_NO_EXCEPT : mImpl(name), mListener(this) {
     mListener.addToEngineEventsOnce();
 }
 
-UIButton::~UIButton() FL_NOEXCEPT {}
+UIButton::~UIButton() FL_NO_EXCEPT {}
 
-int UIButton::clickedCount() const FL_NOEXCEPT {
+int UIButton::clickedCount() const FL_NO_EXCEPT {
     return mImpl.clickedCount() + mListener.realButtonClickCount();
 }
 
-void UIButton::Listener::onBeginFrame() FL_NOEXCEPT {
+void UIButton::Listener::onBeginFrame() FL_NO_EXCEPT {
     bool clicked_this_frame = mOwner->clicked();
     bool pressed_this_frame = mOwner->isPressed();
 

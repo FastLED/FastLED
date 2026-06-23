@@ -179,7 +179,7 @@ struct nsgif {
  * \param[in]  l_res  LZW response code.
  * \return GIF result code.
  */
-static nsgif_error nsgif__error_from_lzw(lzw_result l_res) FL_NOEXCEPT
+static nsgif_error nsgif__error_from_lzw(lzw_result l_res) FL_NO_EXCEPT
 {
 	static const nsgif_error g_res[] = {
 		NSGIF_OK,                 /* LZW_OK */
@@ -208,7 +208,7 @@ static nsgif_error nsgif__error_from_lzw(lzw_result l_res) FL_NOEXCEPT
 static nsgif_error nsgif__initialise_sprite(
 		struct nsgif *gif,
 		fl::u32 width,
-		fl::u32 height) FL_NOEXCEPT
+		fl::u32 height) FL_NO_EXCEPT
 {
 	/* Already allocated? */
 	if (gif->frame_image) {
@@ -231,7 +231,7 @@ static nsgif_error nsgif__initialise_sprite(
  * \return Client pixel buffer for rendering into.
  */
 static inline fl::u32* nsgif__bitmap_get(
-		struct nsgif *gif) FL_NOEXCEPT
+		struct nsgif *gif) FL_NO_EXCEPT
 {
 	nsgif_error ret;
 
@@ -257,7 +257,7 @@ static inline fl::u32* nsgif__bitmap_get(
  * \param[in]  gif  The gif object we're decoding.
  */
 static inline void nsgif__bitmap_modified(
-		const struct nsgif *gif) FL_NOEXCEPT
+		const struct nsgif *gif) FL_NO_EXCEPT
 {
 	if (gif->bitmap.modified) {
 		gif->bitmap.modified(gif->frame_image);
@@ -272,7 +272,7 @@ static inline void nsgif__bitmap_modified(
  */
 static inline void nsgif__bitmap_set_opaque(
 		const struct nsgif *gif,
-		const struct nsgif_frame *frame) FL_NOEXCEPT
+		const struct nsgif_frame *frame) FL_NO_EXCEPT
 {
 	if (gif->bitmap.set_opaque) {
 		gif->bitmap.set_opaque(
@@ -289,7 +289,7 @@ static inline void nsgif__bitmap_set_opaque(
  * \return true if the bitmap is opaque, false otherwise.
  */
 static inline bool nsgif__bitmap_get_opaque(
-		const struct nsgif *gif) FL_NOEXCEPT
+		const struct nsgif *gif) FL_NO_EXCEPT
 {
 	if (gif->bitmap.test_opaque) {
 		return gif->bitmap.test_opaque(
@@ -301,7 +301,7 @@ static inline bool nsgif__bitmap_get_opaque(
 
 static void nsgif__record_frame(
 		struct nsgif *gif,
-		const fl::u32 *bitmap) FL_NOEXCEPT
+		const fl::u32 *bitmap) FL_NO_EXCEPT
 {
 	fl::size pixel_bytes = sizeof(*bitmap);
 	fl::size height = gif->info.height;
@@ -337,7 +337,7 @@ static void nsgif__record_frame(
 
 static nsgif_error nsgif__recover_frame(
 		const struct nsgif *gif,
-		fl::u32 *bitmap) FL_NOEXCEPT
+		fl::u32 *bitmap) FL_NO_EXCEPT
 {
 	const fl::u32 *prev_frame = static_cast<const fl::u32*>(gif->prev_frame);
 	fl::size pixel_bytes = sizeof(*bitmap);
@@ -362,7 +362,7 @@ static nsgif_error nsgif__recover_frame(
  * \param[in,out] step       Current step starting with 24, updated on exit.
  * \return true if there is a row to process, false at the end of the frame.
  */
-static inline bool nsgif__deinterlace(fl::u32 height, fl::u32 *y, fl::u8 *step) FL_NOEXCEPT
+static inline bool nsgif__deinterlace(fl::u32 height, fl::u32 *y, fl::u8 *step) FL_NO_EXCEPT
 {
 	*y += *step & 0xf;
 
@@ -392,7 +392,7 @@ static inline bool nsgif__deinterlace(fl::u32 height, fl::u32 *y, fl::u8 *step) 
  * \return true if there is a row to process, false at the end of the frame.
  */
 static inline bool nsgif__next_row(fl::u32 interlace,
-		fl::u32 height, fl::u32 *y, fl::u8 *step) FL_NOEXCEPT
+		fl::u32 height, fl::u32 *y, fl::u8 *step) FL_NO_EXCEPT
 {
 	if (!interlace) {
 		return (++*y != height);
@@ -413,7 +413,7 @@ static inline bool nsgif__next_row(fl::u32 interlace,
 static inline fl::u32 gif__clip(
 		fl::u32 frame_off,
 		fl::u32 frame_dim,
-		fl::u32 image_ext) FL_NOEXCEPT
+		fl::u32 image_ext) FL_NO_EXCEPT
 {
 	fl::u32 frame_ext = frame_off + frame_dim;
 
@@ -434,7 +434,7 @@ static inline fl::u32 gif__clip(
 static inline void gif__jump_data(
 		fl::u32 *skip,
 		fl::u32 *available,
-		const fl::u8 **pos) FL_NOEXCEPT
+		const fl::u8 **pos) FL_NO_EXCEPT
 {
 	fl::u32 jump = (*skip < *available) ? *skip : *available;
 
@@ -453,7 +453,7 @@ static nsgif_error nsgif__decode_complex(
 		const fl::u8 *data,
 		fl::u32 transparency_index,
 		fl::u32 * frame_data,
-		fl::u32 * colour_table) FL_NOEXCEPT
+		fl::u32 * colour_table) FL_NO_EXCEPT
 {
 	lzw_result res;
 	nsgif_error ret = NSGIF_OK;
@@ -550,7 +550,7 @@ static nsgif_error nsgif__decode_simple(
 		const fl::u8 *data,
 		fl::u32 transparency_index,
 		fl::u32 * frame_data,
-		fl::u32 * colour_table) FL_NOEXCEPT
+		fl::u32 * colour_table) FL_NO_EXCEPT
 {
 	fl::u32 pixels;
 	fl::u32 written = 0;
@@ -606,7 +606,7 @@ static inline nsgif_error nsgif__decode(
 		struct nsgif *gif,
 		struct nsgif_frame *frame,
 		const fl::u8 *data,
-		fl::u32 * frame_data) FL_NOEXCEPT
+		fl::u32 * frame_data) FL_NO_EXCEPT
 {
 	nsgif_error ret;
 	fl::u32 width  = frame->info.rect.x1 - frame->info.rect.x0;
@@ -647,7 +647,7 @@ static inline nsgif_error nsgif__decode(
 static void nsgif__restore_bg(
 		struct nsgif *gif,
 		struct nsgif_frame *frame,
-		fl::u32 *bitmap) FL_NOEXCEPT
+		fl::u32 *bitmap) FL_NO_EXCEPT
 {
 	fl::size pixel_bytes = sizeof(*bitmap);
 
@@ -695,7 +695,7 @@ static nsgif_error nsgif__update_bitmap(
 		struct nsgif *gif,
 		struct nsgif_frame *frame,
 		const fl::u8 *data,
-		fl::u32 frame_idx) FL_NOEXCEPT
+		fl::u32 frame_idx) FL_NO_EXCEPT
 {
 	nsgif_error ret;
 	fl::u32 *bitmap;
@@ -756,7 +756,7 @@ static nsgif_error nsgif__update_bitmap(
 static nsgif_error nsgif__parse_extension_graphic_control(
 		struct nsgif_frame *frame,
 		const fl::u8 *data,
-		fl::size len) FL_NOEXCEPT
+		fl::size len) FL_NO_EXCEPT
 {
 	enum {
 		GIF_MASK_TRANSPARENCY = 0x01,
@@ -815,7 +815,7 @@ static nsgif_error nsgif__parse_extension_graphic_control(
  */
 static bool nsgif__app_ext_is_loop_count(
 		const fl::u8 *data,
-		fl::size len) FL_NOEXCEPT
+		fl::size len) FL_NO_EXCEPT
 {
 	enum {
 		EXT_LOOP_COUNT_BLOCK_SIZE = 0x0b,
@@ -846,7 +846,7 @@ static bool nsgif__app_ext_is_loop_count(
 static nsgif_error nsgif__parse_extension_application(
 		struct nsgif *gif,
 		const fl::u8 *data,
-		fl::size len) FL_NOEXCEPT
+		fl::size len) FL_NO_EXCEPT
 {
 	/* 14-byte+ Application Extension is:
 	 *
@@ -897,7 +897,7 @@ static nsgif_error nsgif__parse_frame_extensions(
 		struct nsgif *gif,
 		struct nsgif_frame *frame,
 		const fl::u8 **pos,
-		bool decode) FL_NOEXCEPT
+		bool decode) FL_NO_EXCEPT
 {
 	enum {
 		GIF_EXT_INTRODUCER      = 0x21,
@@ -1016,7 +1016,7 @@ static nsgif_error nsgif__parse_image_descriptor(
 		struct nsgif *gif,
 		struct nsgif_frame *frame,
 		const fl::u8 **pos,
-		bool decode) FL_NOEXCEPT
+		bool decode) FL_NO_EXCEPT
 {
 	const fl::u8 *data = *pos;
 	fl::size len = gif->buf + gif->buf_len - data;
@@ -1080,7 +1080,7 @@ static void nsgif__colour_table_decode(
 		fl::u32 colour_table[NSGIF_MAX_COLOURS],
 		const struct nsgif_colour_layout *layout,
 		fl::size colour_table_entries,
-		const fl::u8 *data) FL_NOEXCEPT
+		const fl::u8 *data) FL_NO_EXCEPT
 {
 	fl::u8 *entry = (fl::u8 *)colour_table;
 
@@ -1119,7 +1119,7 @@ static inline nsgif_error nsgif__colour_table_extract(
 		const fl::u8 *data,
 		fl::size data_len,
 		fl::size *used,
-		bool decode) FL_NOEXCEPT
+		bool decode) FL_NO_EXCEPT
 {
 	if (data_len < colour_table_entries * 3) {
 		return NSGIF_ERR_END_OF_DATA;
@@ -1149,7 +1149,7 @@ static nsgif_error nsgif__parse_colour_table(
 		struct nsgif *gif,
 		struct nsgif_frame *frame,
 		const fl::u8 **pos,
-		bool decode) FL_NOEXCEPT
+		bool decode) FL_NO_EXCEPT
 {
 	nsgif_error ret;
 	const fl::u8 *data = *pos;
@@ -1201,7 +1201,7 @@ static nsgif_error nsgif__parse_image_data(
 		struct nsgif *gif,
 		struct nsgif_frame *frame,
 		const fl::u8 **pos,
-		bool decode) FL_NOEXCEPT
+		bool decode) FL_NO_EXCEPT
 {
 	const fl::u8 *data = *pos;
 	fl::size len = gif->buf + gif->buf_len - data;
@@ -1272,7 +1272,7 @@ static nsgif_error nsgif__parse_image_data(
 
 static struct nsgif_frame *nsgif__get_frame(
 		struct nsgif *gif,
-		fl::u32 frame_idx) FL_NOEXCEPT
+		fl::u32 frame_idx) FL_NO_EXCEPT
 {
 	struct nsgif_frame *frame;
 
@@ -1323,7 +1323,7 @@ static struct nsgif_frame *nsgif__get_frame(
 static nsgif_error nsgif__process_frame(
 		struct nsgif *gif,
 		fl::u32 frame_idx,
-		bool decode) FL_NOEXCEPT
+		bool decode) FL_NO_EXCEPT
 {
 	nsgif_error ret;
 	const fl::u8 *pos;
@@ -1392,7 +1392,7 @@ cleanup:
 }
 
 /* exported function documented in nsgif.h */
-void nsgif_destroy(nsgif_t *gif) FL_NOEXCEPT
+void nsgif_destroy(nsgif_t *gif) FL_NO_EXCEPT
 {
 	if (gif == nullptr) {
 		return;
@@ -1424,7 +1424,7 @@ void nsgif_destroy(nsgif_t *gif) FL_NOEXCEPT
  *
  * \return true if host is little endian.
  */
-static inline bool nsgif__host_is_little_endian(void) FL_NOEXCEPT
+static inline bool nsgif__host_is_little_endian(void) FL_NO_EXCEPT
 {
 	const fl::u16 test = 1;
 
@@ -1432,7 +1432,7 @@ static inline bool nsgif__host_is_little_endian(void) FL_NOEXCEPT
 }
 
 static struct nsgif_colour_layout nsgif__bitmap_fmt_to_colour_layout(
-		nsgif_bitmap_fmt_t bitmap_fmt) FL_NOEXCEPT
+		nsgif_bitmap_fmt_t bitmap_fmt) FL_NO_EXCEPT
 {
 	bool le = nsgif__host_is_little_endian();
 
@@ -1493,7 +1493,7 @@ static struct nsgif_colour_layout nsgif__bitmap_fmt_to_colour_layout(
 nsgif_error nsgif_create(
 		const nsgif_bitmap_cb_vt *bitmap_vt,
 		nsgif_bitmap_fmt_t bitmap_fmt,
-		nsgif_t **gif_out) FL_NOEXCEPT
+		nsgif_t **gif_out) FL_NO_EXCEPT
 {
 	nsgif_t *gif;
 
@@ -1522,7 +1522,7 @@ nsgif_error nsgif_create(
 void nsgif_set_frame_delay_behaviour(
 		nsgif_t *gif,
 		fl::u16 delay_min,
-		fl::u16 delay_default) FL_NOEXCEPT
+		fl::u16 delay_default) FL_NO_EXCEPT
 {
 	gif->delay_min = delay_min;
 	gif->delay_default = delay_default;
@@ -1544,7 +1544,7 @@ void nsgif_set_frame_delay_behaviour(
 static nsgif_error nsgif__parse_header(
 		struct nsgif *gif,
 		const fl::u8 **pos,
-		bool strict) FL_NOEXCEPT
+		bool strict) FL_NO_EXCEPT
 {
 	const fl::u8 *data = *pos;
 	fl::size len = gif->buf + gif->buf_len - data;
@@ -1591,7 +1591,7 @@ static nsgif_error nsgif__parse_header(
  */
 static nsgif_error nsgif__parse_logical_screen_descriptor(
 		struct nsgif *gif,
-		const fl::u8 **pos) FL_NOEXCEPT
+		const fl::u8 **pos) FL_NO_EXCEPT
 {
 	const fl::u8 *data = *pos;
 	fl::size len = gif->buf + gif->buf_len - data;
@@ -1616,7 +1616,7 @@ static nsgif_error nsgif__parse_logical_screen_descriptor(
 nsgif_error nsgif_data_scan(
 		nsgif_t *gif,
 		fl::size size,
-		const fl::u8 *data) FL_NOEXCEPT
+		const fl::u8 *data) FL_NO_EXCEPT
 {
 	const fl::u8 *nsgif_data;
 	nsgif_error ret;
@@ -1770,7 +1770,7 @@ nsgif_error nsgif_data_scan(
 
 /* exported function documented in nsgif.h */
 void nsgif_data_complete(
-		nsgif_t *gif) FL_NOEXCEPT
+		nsgif_t *gif) FL_NO_EXCEPT
 {
 	if (gif->data_complete == false) {
 		fl::u32 start = gif->info.frame_count;
@@ -1796,7 +1796,7 @@ void nsgif_data_complete(
 
 static void nsgif__redraw_rect_extend(
 		const nsgif_rect_t *frame,
-		nsgif_rect_t *redraw) FL_NOEXCEPT
+		nsgif_rect_t *redraw) FL_NO_EXCEPT
 {
 	if (redraw->x1 == 0 || redraw->y1 == 0) {
 		*redraw = *frame;
@@ -1819,7 +1819,7 @@ static void nsgif__redraw_rect_extend(
 static fl::u32 nsgif__frame_next(
 		const nsgif_t *gif,
 		bool partial,
-		fl::u32 frame) FL_NOEXCEPT
+		fl::u32 frame) FL_NO_EXCEPT
 {
 	fl::u32 frames = partial ?
 			gif->frame_count_partial :
@@ -1836,7 +1836,7 @@ static fl::u32 nsgif__frame_next(
 static nsgif_error nsgif__next_displayable_frame(
 		const nsgif_t *gif,
 		fl::u32 *frame,
-		fl::u32 *delay) FL_NOEXCEPT
+		fl::u32 *delay) FL_NO_EXCEPT
 {
 	fl::u32 next = *frame;
 
@@ -1860,7 +1860,7 @@ static nsgif_error nsgif__next_displayable_frame(
 	return NSGIF_OK;
 }
 
-static inline bool nsgif__animation_complete(int count, int max) FL_NOEXCEPT
+static inline bool nsgif__animation_complete(int count, int max) FL_NO_EXCEPT
 {
 	if (max == 0) {
 		return false;
@@ -1870,7 +1870,7 @@ static inline bool nsgif__animation_complete(int count, int max) FL_NOEXCEPT
 }
 
 nsgif_error nsgif_reset(
-		nsgif_t *gif) FL_NOEXCEPT
+		nsgif_t *gif) FL_NO_EXCEPT
 {
 	gif->loop_count = 0;
 	gif->frame = NSGIF_FRAME_INVALID;
@@ -1883,7 +1883,7 @@ nsgif_error nsgif_frame_prepare(
 		nsgif_t *gif,
 		nsgif_rect_t *area,
 		fl::u32 *delay_cs,
-		fl::u32 *frame_new) FL_NOEXCEPT
+		fl::u32 *frame_new) FL_NO_EXCEPT
 {
 	nsgif_error ret;
 	nsgif_rect_t rect = {0, 0, 0, 0};
@@ -1953,7 +1953,7 @@ nsgif_error nsgif_frame_prepare(
 nsgif_error nsgif_frame_decode(
 		nsgif_t *gif,
 		fl::u32 frame,
-		nsgif_bitmap_t **bitmap) FL_NOEXCEPT
+		nsgif_bitmap_t **bitmap) FL_NO_EXCEPT
 {
 	fl::u32 start_frame;
 	nsgif_error ret = NSGIF_OK;
@@ -1987,7 +1987,7 @@ nsgif_error nsgif_frame_decode(
 }
 
 /* exported function documented in nsgif.h */
-const nsgif_info_t *nsgif_get_info(const nsgif_t *gif) FL_NOEXCEPT
+const nsgif_info_t *nsgif_get_info(const nsgif_t *gif) FL_NO_EXCEPT
 {
 	return &gif->info;
 }
@@ -1995,7 +1995,7 @@ const nsgif_info_t *nsgif_get_info(const nsgif_t *gif) FL_NOEXCEPT
 /* exported function documented in nsgif.h */
 const nsgif_frame_info_t *nsgif_get_frame_info(
 		const nsgif_t *gif,
-		fl::u32 frame) FL_NOEXCEPT
+		fl::u32 frame) FL_NO_EXCEPT
 {
 	if (frame >= gif->info.frame_count) {
 		return nullptr;
@@ -2008,7 +2008,7 @@ const nsgif_frame_info_t *nsgif_get_frame_info(
 void nsgif_global_palette(
 		const nsgif_t *gif,
 		fl::u32 table[NSGIF_MAX_COLOURS],
-		fl::size *entries) FL_NOEXCEPT
+		fl::size *entries) FL_NO_EXCEPT
 {
 	fl::size len = sizeof(*table) * NSGIF_MAX_COLOURS;
 
@@ -2021,7 +2021,7 @@ bool nsgif_local_palette(
 		const nsgif_t *gif,
 		fl::u32 frame,
 		fl::u32 table[NSGIF_MAX_COLOURS],
-		fl::size *entries) FL_NOEXCEPT
+		fl::size *entries) FL_NO_EXCEPT
 {
 	const nsgif_frame *f;
 
@@ -2042,7 +2042,7 @@ bool nsgif_local_palette(
 }
 
 /* exported function documented in nsgif.h */
-const char *nsgif_strerror(nsgif_error err) FL_NOEXCEPT
+const char *nsgif_strerror(nsgif_error err) FL_NO_EXCEPT
 {
 	static const char *const str[] = {
 		"Success",                             /* NSGIF_OK */
@@ -2064,7 +2064,7 @@ const char *nsgif_strerror(nsgif_error err) FL_NOEXCEPT
 }
 
 /* exported function documented in nsgif.h */
-const char *nsgif_str_disposal(enum nsgif_disposal disposal) FL_NOEXCEPT
+const char *nsgif_str_disposal(enum nsgif_disposal disposal) FL_NO_EXCEPT
 {
 	static const char *const str[] = {
 		"Unspecified",        /* NSGIF_DISPOSAL_UNSPECIFIED */

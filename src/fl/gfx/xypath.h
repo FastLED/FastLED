@@ -93,7 +93,7 @@ class XYPath {
     XYPath(XYPathGeneratorPtr path,
            TransformFloat transform = TransformFloat());
 
-    virtual ~XYPath() FL_NOEXCEPT;
+    virtual ~XYPath() FL_NO_EXCEPT;
     vec2f at(float alpha);
     Tile2x2_u8 at_subpixel(float alpha);
 

@@ -67,9 +67,6 @@ async def run_gpio_pretest(
                 # Try DTR reset and retry — device may be booted but idle
                 print(f"\u26a0\ufe0f  Ping failed ({e}), attempting DTR reset...")
                 try:
-                    await client.close()
-                    client = None  # Prevent double-close in outer finally
-
                     # Use SerialInterface.reset_device(wait_for_output=True)
                     # to block until the device starts producing serial output
                     reset_ok = False
@@ -86,13 +83,18 @@ async def run_gpio_pretest(
                     # Use longer boot_wait if reset reported failure
                     boot_wait = 1.0 if reset_ok else 3.0
 
-                    client = RpcClient(
-                        port,
-                        timeout=timeout,
-                        serial_interface=serial_interface,
-                        verbose=True,
-                    )
-                    await client.connect(boot_wait=boot_wait, drain_boot=True)
+                    if serial_interface is None:
+                        await client.close()
+                        client = None  # Prevent double-close in outer finally
+                        client = RpcClient(
+                            port,
+                            timeout=timeout,
+                            serial_interface=serial_interface,
+                            verbose=True,
+                        )
+                        await client.connect(boot_wait=boot_wait, drain_boot=True)
+                    else:
+                        await client.drain_boot_output(verbose=True)
                     ping_response = await client.send("ping", retries=3)
                     print(
                         f"\u2705 Ping successful after DTR reset: {ping_response.data}"
@@ -265,10 +267,6 @@ async def run_pin_discovery(
             # Try DTR reset and retry — device may be booted but idle
             print(f"\u26a0\ufe0f  Ping failed ({e}), attempting DTR reset...")
             try:
-                if client:
-                    await client.close()
-                client = None
-
                 # Use SerialInterface.reset_device(wait_for_output=True)
                 reset_ok = False
                 if serial_interface is not None:
@@ -283,13 +281,19 @@ async def run_pin_discovery(
 
                 boot_wait = 1.0 if reset_ok else 3.0
 
-                client = RpcClient(
-                    port,
-                    timeout=timeout,
-                    serial_interface=serial_interface,
-                    verbose=True,
-                )
-                await client.connect(boot_wait=boot_wait, drain_boot=True)
+                if serial_interface is None:
+                    if client:
+                        await client.close()
+                    client = None
+                    client = RpcClient(
+                        port,
+                        timeout=timeout,
+                        serial_interface=serial_interface,
+                        verbose=True,
+                    )
+                    await client.connect(boot_wait=boot_wait, drain_boot=True)
+                else:
+                    await client.drain_boot_output(verbose=True)
                 ping_response = await client.send("ping", timeout=30.0, retries=3)
                 print(f"\u2705 Ping successful after DTR reset: {ping_response.data}")
             except KeyboardInterrupt as ki:

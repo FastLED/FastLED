@@ -35,7 +35,7 @@ public:
         u32 reset_us;        ///< Reset time
     };
 
-    FlexIOPeripheralMock() FL_NOEXCEPT : mInitialized(false), mCurrentPin(0xFF),
+    FlexIOPeripheralMock() FL_NO_EXCEPT : mInitialized(false), mCurrentPin(0xFF),
                               mForceInitFailure(false), mForceShowFailure(false) {}
     ~FlexIOPeripheralMock() override = default;
 
@@ -43,7 +43,7 @@ public:
     // IFlexIOPeripheral Interface
     // =========================================================================
 
-    bool canHandlePin(u8 teensy_pin) const FL_NOEXCEPT override {
+    bool canHandlePin(u8 teensy_pin) const FL_NO_EXCEPT override {
         // Same pins as real FlexIO2: 6, 7, 8, 9, 10, 11, 12, 13, 32
         static const u8 kValidPins[] = {6, 7, 8, 9, 10, 11, 12, 13, 32};
         for (u8 p : kValidPins) {
@@ -53,7 +53,7 @@ public:
     }
 
     bool init(u8 teensy_pin, u32 t0h_ns, u32 t1h_ns,
-              u32 period_ns, u32 reset_us) FL_NOEXCEPT override {
+              u32 period_ns, u32 reset_us) FL_NO_EXCEPT override {
         if (mForceInitFailure) return false;
         if (!canHandlePin(teensy_pin)) return false;
 
@@ -66,7 +66,7 @@ public:
         return true;
     }
 
-    bool show(const u8* pixel_data, u32 num_bytes) FL_NOEXCEPT override {
+    bool show(const u8* pixel_data, u32 num_bytes) FL_NO_EXCEPT override {
         if (mForceShowFailure) return false;
         if (!mInitialized || !pixel_data || num_bytes == 0) return false;
 
@@ -83,15 +83,15 @@ public:
         return true;
     }
 
-    bool isDone() const FL_NOEXCEPT override {
+    bool isDone() const FL_NO_EXCEPT override {
         return true;  // Mock completes instantly
     }
 
-    void wait() FL_NOEXCEPT override {
+    void wait() FL_NO_EXCEPT override {
         // No-op: mock completes instantly
     }
 
-    void deinit() FL_NOEXCEPT override {
+    void deinit() FL_NO_EXCEPT override {
         mInitialized = false;
         mCurrentPin = 0xFF;
     }
@@ -101,27 +101,27 @@ public:
     // =========================================================================
 
     /// @brief Get all transmission records
-    const fl::vector<TransmissionRecord>& getTransmissions() const FL_NOEXCEPT {
+    const fl::vector<TransmissionRecord>& getTransmissions() const FL_NO_EXCEPT {
         return mTransmissions;
     }
 
     /// @brief Get the most recent transmission data
-    const TransmissionRecord* getLastTransmission() const FL_NOEXCEPT {
+    const TransmissionRecord* getLastTransmission() const FL_NO_EXCEPT {
         if (mTransmissions.empty()) return nullptr;
         return &mTransmissions[mTransmissions.size() - 1];
     }
 
     /// @brief Get total number of show() calls
-    size_t getTransmissionCount() const FL_NOEXCEPT { return mTransmissions.size(); }
+    size_t getTransmissionCount() const FL_NO_EXCEPT { return mTransmissions.size(); }
 
     /// @brief Check if hardware is currently initialized
-    bool isInitialized() const FL_NOEXCEPT { return mInitialized; }
+    bool isInitialized() const FL_NO_EXCEPT { return mInitialized; }
 
     /// @brief Get currently configured pin
-    u8 getCurrentPin() const FL_NOEXCEPT { return mCurrentPin; }
+    u8 getCurrentPin() const FL_NO_EXCEPT { return mCurrentPin; }
 
     /// @brief Clear all state for next test
-    void reset() FL_NOEXCEPT {
+    void reset() FL_NO_EXCEPT {
         mTransmissions.clear();
         mInitialized = false;
         mCurrentPin = 0xFF;
@@ -130,10 +130,10 @@ public:
     }
 
     /// @brief Force init() to fail (for error path testing)
-    void setInitFailure(bool fail) FL_NOEXCEPT { mForceInitFailure = fail; }
+    void setInitFailure(bool fail) FL_NO_EXCEPT { mForceInitFailure = fail; }
 
     /// @brief Force show() to fail (for error path testing)
-    void setShowFailure(bool fail) FL_NOEXCEPT { mForceShowFailure = fail; }
+    void setShowFailure(bool fail) FL_NO_EXCEPT { mForceShowFailure = fail; }
 
 private:
     bool mInitialized;

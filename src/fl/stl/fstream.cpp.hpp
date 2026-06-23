@@ -21,7 +21,7 @@ ifstream::ifstream(filebuf_ptr handle)
     updateState();
 }
 
-ifstream::~ifstream() FL_NOEXCEPT {
+ifstream::~ifstream() FL_NO_EXCEPT {
     close();
 }
 
@@ -121,7 +121,7 @@ ofstream::ofstream(filebuf_ptr handle)
     updateState();
 }
 
-ofstream::~ofstream() FL_NOEXCEPT {
+ofstream::~ofstream() FL_NO_EXCEPT {
     close();
 }
 
@@ -230,7 +230,7 @@ fstream::fstream(filebuf_ptr handle)
     updateState();
 }
 
-fstream::~fstream() FL_NOEXCEPT {
+fstream::~fstream() FL_NO_EXCEPT {
     close();
 }
 

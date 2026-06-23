@@ -1518,10 +1518,10 @@ def runner(
         if active_flags:
             ts_print(f"Active flags: {', '.join(active_flags)}")
 
-    # Clear zccache stats at start to show only metrics from this build
-    from ci.util.zccache_config import clear_zccache_stats
-
-    clear_zccache_stats()
+    # Per-build zccache metrics are provided via the session mechanism in
+    # ci/meson/runner_helpers.py::_start_zccache_session (sets ZCCACHE_SESSION_ID),
+    # then surfaced by show_zccache_stats() at teardown. zccache 1.12.7 has no
+    # global "zero-stats" command, so there is nothing to clear at start.
 
     # Determine test categories first to check if we should use meson
     test_categories = determine_test_categories(args)

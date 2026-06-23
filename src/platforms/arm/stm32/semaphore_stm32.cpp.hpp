@@ -46,7 +46,7 @@ CountingSemaphoreSTM32<LeastMaxValue>::CountingSemaphoreSTM32(ptrdiff_t desired)
     );
 
     if (handle == nullptr) {
-        FL_WARN("CountingSemaphoreSTM32: Failed to create counting semaphore");
+        FL_WARN_F("CountingSemaphoreSTM32: Failed to create counting semaphore");
     }
 
     mHandle = static_cast<void*>(handle);

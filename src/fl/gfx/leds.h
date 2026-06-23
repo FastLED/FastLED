@@ -16,9 +16,9 @@ class Leds {
     Leds(CRGB *leds, const XYMap &xymap);
 
     // Copy constructor and assignment operator.
-    Leds(const Leds &) FL_NOEXCEPT = default;
-    Leds &operator=(const Leds &) FL_NOEXCEPT = default;
-    Leds(Leds &&) FL_NOEXCEPT = default;
+    Leds(const Leds &) FL_NO_EXCEPT = default;
+    Leds &operator=(const Leds &) FL_NO_EXCEPT = default;
+    Leds(Leds &&) FL_NO_EXCEPT = default;
 
     // out of bounds access returns empty() led and is safe to read/write.
     CRGB &operator()(int x, int y);
@@ -59,12 +59,12 @@ class Leds {
 
 template <fl::size W, fl::size H> class LedsXY : public Leds {
   public:
-    LedsXY() FL_NOEXCEPT : Leds(mLedsData, XYMap::constructSerpentine(W, H)) {}
+    LedsXY() FL_NO_EXCEPT : Leds(mLedsData, XYMap::constructSerpentine(W, H)) {}
     explicit LedsXY(bool is_serpentine)
         : Leds(mLedsData, is_serpentine ? XYMap::constructSerpentine(W, H)
                                         : XYMap::constructRectangularGrid(W, H)) {}
-    LedsXY(const LedsXY &) FL_NOEXCEPT = default;
-    LedsXY &operator=(const LedsXY &) FL_NOEXCEPT = default;
+    LedsXY(const LedsXY &) FL_NO_EXCEPT = default;
+    LedsXY &operator=(const LedsXY &) FL_NO_EXCEPT = default;
     void setXyMap(const XYMap &xymap) { mXyMap = xymap; }
     void setSerpentine(bool is_serpentine) {
         mXyMap = is_serpentine ? XYMap::constructSerpentine(W, H)

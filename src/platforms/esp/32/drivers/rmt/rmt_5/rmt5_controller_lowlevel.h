@@ -50,13 +50,13 @@ public:
     RmtController5LowLevel(
         int data_pin,
         const ChipsetTiming& timing
-    ) FL_NOEXCEPT;
+    ) FL_NO_EXCEPT;
 
     ~RmtController5LowLevel();
 
     // FastLED interface
-    void loadPixelData(PixelIterator& pixels) FL_NOEXCEPT;
-    void showPixels() FL_NOEXCEPT;
+    void loadPixelData(PixelIterator& pixels) FL_NO_EXCEPT;
+    void showPixels() FL_NO_EXCEPT;
 
 private:
     // Channel data for transmission

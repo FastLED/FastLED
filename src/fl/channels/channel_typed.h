@@ -80,7 +80,7 @@ public:
     /// The factory returns a `ChannelPtr` to the existing non-template
     /// `fl::Channel` runtime object so the rest of the system (events,
     /// manager, draw list) is unchanged.
-    static ChannelPtr create(const ChannelConfigOf<Chipset>& cfg) FL_NOEXCEPT {
+    static ChannelPtr create(const ChannelConfigOf<Chipset>& cfg) FL_NO_EXCEPT {
         // Naming `BusTraits<kBus>::instance` here is the ODR-use that links
         // the driver translation unit even in the static-only `--gc-sections`
         // mode (issue #2428 Phase 5 binary-size fix).
@@ -95,13 +95,13 @@ public:
     /// compile-time bus/chipset validation. The runtime chipset variant must
     /// match `Chipset` -- there's no compile-time guarantee at this overload,
     /// so the static_assert above is the only contract.
-    static ChannelPtr create(const ChannelConfig& cfg) FL_NOEXCEPT {
+    static ChannelPtr create(const ChannelConfig& cfg) FL_NO_EXCEPT {
         (void)&BusTraits<kBus>::instance;
         return Channel::create(cfg);
     }
 
 private:
-    TypedChannel() FL_NOEXCEPT = delete;
+    TypedChannel() FL_NO_EXCEPT = delete;
 };
 
 }  // namespace fl

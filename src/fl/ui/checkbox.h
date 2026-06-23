@@ -21,14 +21,14 @@ class UICheckboxImpl {
     UICheckboxImpl(const char *name, bool value = false) : mValue(value) {
         FASTLED_UNUSED(name);
     }
-    ~UICheckboxImpl() FL_NOEXCEPT {}
+    ~UICheckboxImpl() FL_NO_EXCEPT {}
     operator bool() const { return mValue; }
     explicit operator int() const { return mValue ? 1 : 0; }
-    UICheckboxImpl &operator=(bool value) FL_NOEXCEPT {
+    UICheckboxImpl &operator=(bool value) FL_NO_EXCEPT {
         setValue(value);
         return *this;
     }
-    UICheckboxImpl &operator=(int value) FL_NOEXCEPT {
+    UICheckboxImpl &operator=(int value) FL_NO_EXCEPT {
         setValue(value != 0);
         return *this;
     }
@@ -47,51 +47,51 @@ class UICheckboxImpl {
 class UICheckbox : public UIElement {
   public:
     FL_NO_COPY(UICheckbox);
-    UICheckbox(const char *name, bool value = false) FL_NOEXCEPT;
-    ~UICheckbox() FL_NOEXCEPT;
+    UICheckbox(const char *name, bool value = false) FL_NO_EXCEPT;
+    ~UICheckbox() FL_NO_EXCEPT;
 
-    operator bool() const FL_NOEXCEPT { return value(); }
-    explicit operator int() const FL_NOEXCEPT { return static_cast<int>(value()); }
-    UICheckbox &operator=(bool value) FL_NOEXCEPT {
+    operator bool() const FL_NO_EXCEPT { return value(); }
+    explicit operator int() const FL_NO_EXCEPT { return static_cast<int>(value()); }
+    UICheckbox &operator=(bool value) FL_NO_EXCEPT {
         mImpl = value;
         return *this;
     }
-    bool value() const FL_NOEXCEPT { return mImpl.value(); }
+    bool value() const FL_NO_EXCEPT { return mImpl.value(); }
 
     // Override setGroup to also update the implementation
-    void setGroup(const fl::string& groupName) FL_NOEXCEPT override {
+    void setGroup(const fl::string& groupName) FL_NO_EXCEPT override {
         UIElement::setGroup(groupName);
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
 
 
-    void onChanged(function<void(UICheckbox &)> callback) FL_NOEXCEPT {
+    void onChanged(function<void(UICheckbox &)> callback) FL_NO_EXCEPT {
         mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
     }
-    void clearCallbacks() FL_NOEXCEPT { mCallbacks.clear(); }
+    void clearCallbacks() FL_NO_EXCEPT { mCallbacks.clear(); }
 
   protected:
     UICheckboxImpl mImpl;
 
     struct Listener : public EngineEvents::Listener {
-        Listener(UICheckbox *owner) FL_NOEXCEPT : mOwner(owner) {
+        Listener(UICheckbox *owner) FL_NO_EXCEPT : mOwner(owner) {
             // Don't register in constructor - prevents callbacks before owner is fully initialized
         }
-        ~Listener() FL_NOEXCEPT {
+        ~Listener() FL_NO_EXCEPT {
             if (added) {
                 EngineEvents::removeListener(this);
             }
         }
-        void addToEngineEventsOnce() FL_NOEXCEPT {
+        void addToEngineEventsOnce() FL_NO_EXCEPT {
             if (added) {
                 return;
             }
             EngineEvents::addListener(this);
             added = true;
         }
-        void onBeginFrame() FL_NOEXCEPT override;
+        void onBeginFrame() FL_NO_EXCEPT override;
 
       private:
         UICheckbox *mOwner;

@@ -161,12 +161,29 @@ class RpcClient:
         self._next_id: int = (
             1  # Request ID counter for JSON-RPC 2.0 correlation (uint32 range)
         )
+        # Wrapper-side RPC send counter (fbuild#755 follow-up). Increments
+        # on every send() / send_and_match() attempt. Surfaces via the
+        # `sent_count` property; printed in verbose mode when the wrapper
+        # session exits. Lets us correlate session-end "wrapper saw N
+        # responses" against the device's reported "Remote handled M
+        # requests" to detect daemon/wrapper drops.
+        self._sent_count: int = 0
         self._crash_decoder: CrashTraceDecoder | None = crash_decoder
 
     @property
     def is_connected(self) -> bool:
         """Check if serial connection is open."""
         return self._serial is not None and self._connected
+
+    @property
+    def sent_count(self) -> int:
+        """Total RPC send attempts this session (fbuild#755 follow-up).
+
+        Increments on every `send()` / `send_and_match()` attempt,
+        including retries. Use to correlate against device-reported
+        receive counts when diagnosing daemon-side drops.
+        """
+        return self._sent_count
 
     async def connect(
         self,
@@ -283,6 +300,11 @@ class RpcClient:
     async def close(self) -> None:
         """Close serial connection (async)."""
         self._connected = False
+        if self.verbose and self._sent_count > 0:
+            # fbuild#755 follow-up: surface the session's RPC traffic
+            # volume so drops can be correlated against device-reported
+            # receive counts.
+            print(f"📊 [RPC] Session sent {self._sent_count} request(s)")
         if self._serial is not None:
             await self._serial.close()
             self._serial = None
@@ -385,6 +407,7 @@ class RpcClient:
             try:
                 # Write command via serial interface
                 await self._serial.write(cmd_str + "\n")
+                self._sent_count += 1  # fbuild#755 follow-up: track sent RPCs
 
                 # Await response with ID matching (mandatory)
                 response = await self._wait_for_response(
@@ -457,6 +480,7 @@ class RpcClient:
 
             # Write command via serial interface
             await self._serial.write(cmd_str + "\n")
+            self._sent_count += 1  # fbuild#755 follow-up: track sent RPCs
 
             start = time.time()
             try:
@@ -571,9 +595,20 @@ class RpcClient:
         assert self._serial is not None
 
         start = time.time()
+        saw_ack = False
+        # The caller's `timeout` IS the wall. Do not inflate it with
+        # `max(timeout, ASYNC_POST_ACK_TIMEOUT)` -- that silently bought
+        # every RPC up to 600 s regardless of `--timeout`, and made the
+        # wrapper accumulate time across calls. The outer
+        # `ctx.remaining_seconds()` machinery + the watchdog thread
+        # together enforce the hard ceiling; the wrapper's job is just
+        # to honor whatever budget it was handed. See #3219 goal session
+        # 2026-06-22 (post-design overhaul).
+        producer_budget = timeout
+        current_deadline = start + timeout
 
         try:
-            async for line in self._serial.read_lines(timeout=timeout):
+            async for line in self._serial.read_lines(timeout=producer_budget):
                 self._check_interrupt()
 
                 if not line.startswith(self.RESPONSE_PREFIX):
@@ -589,8 +624,9 @@ class RpcClient:
                                 "Device crashed during RPC operation",
                                 decoded_lines=decoded,
                             )
-                    # Check timeout for non-REMOTE lines
-                    if time.time() - start >= timeout:
+                    # Check active deadline (caller-timeout pre-ACK,
+                    # post-ACK timeout after ACK has landed).
+                    if time.time() >= current_deadline:
                         break
                     continue
 
@@ -647,28 +683,27 @@ class RpcClient:
                         and "acknowledged" in response_data
                         and response_data["acknowledged"] is True
                     ):
-                        # Async RPCs (Phase 3: runSingleTest, runParallelTest,
-                        # all testCoroutine*, the net/ble test runners) can run
-                        # for tens of seconds — the runSingleTest path through
-                        # 100 LEDs × 4 patterns takes ~80s on Teensy 4. Folding
-                        # both the ACK-wait and the result-wait into the single
-                        # caller-supplied `timeout` caused
-                        # `RpcTimeoutError('No response with ID N within 60s')`
-                        # for tests that genuinely needed 70-90s of post-ACK
-                        # time. Restart the wait with a budget large enough to
-                        # cover any reasonable test: the caller's own timeout
-                        # if they bumped it above the async floor, else
-                        # `ASYNC_POST_ACK_TIMEOUT` (10 min). See FastLED#3060.
-                        post_ack_timeout = max(timeout, self.ASYNC_POST_ACK_TIMEOUT)
-                        if self.verbose:
-                            print(
-                                f"[RPC] ACK received for request {expected_id}, "
-                                f"restarting wait for final response "
-                                f"(post-ACK timeout={post_ack_timeout}s)..."
-                            )
-                        return await self._wait_for_response(
-                            post_ack_timeout, expected_id
-                        )
+                        # ACK -> keep iterating the SAME generator so the
+                        # final REMOTE response line goes to the SAME
+                        # consumer. (Pre-#3219 fix recursed into a fresh
+                        # `_wait_for_response` here, which spawned a 2nd
+                        # producer behind the 1st in the single-worker
+                        # executor and lost the in-flight response.)
+                        # The previous post-ACK timeout extension was
+                        # removed -- the caller's deadline is the wall.
+                        # If a test legitimately needs more time, the
+                        # caller (autoresearch.phases) must pass a larger
+                        # `--timeout` rather than letting the wrapper
+                        # silently add 10 minutes of grace.
+                        if not saw_ack:
+                            saw_ack = True
+                            if self.verbose:
+                                print(
+                                    f"[RPC] ACK received for request {expected_id}, "
+                                    f"continuing wait for final response within "
+                                    f"caller deadline..."
+                                )
+                        continue
 
                     # Determine success: void functions return null, treat as success
                     success: bool  # Explicit type declaration

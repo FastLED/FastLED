@@ -32,7 +32,6 @@ from ci.meson.meson_cleanup import (
     detect_system_llvm_tools,
 )
 from ci.meson.meson_markers import (
-    cleanup_stale_meson_lockfile,
     inject_ar_optimization_patches,
 )
 from ci.meson.meson_setup_execute import (
@@ -81,7 +80,6 @@ __all__ = [
     "_ensure_emcc_native_launcher",
     "_find_zccache_binary",
     "cleanup_build_artifacts",
-    "cleanup_stale_meson_lockfile",
     "detect_system_llvm_tools",
     "find_strict_path_violations",
     "get_zccache_version",
@@ -297,7 +295,11 @@ def setup_meson_build(
                 force_reconfigure = True
                 force_reconfigure_reason = zccache_version_reason
                 skip_meson_setup = False
-                cleanup_build_artifacts(build_dir, "zccache version changed")
+                # NOTE (#3129 A3): no longer wipes build artifacts on zccache
+                # version delta. zccache is a cache layer, not a codegen layer
+                # — a version bump that doesn't change the cache key just
+                # forces a miss-and-recompile, which is what the reconfigure
+                # is for. Compiler-version deltas (line 275) still wipe.
 
         # If compiler/zccache version forced reconfigure but we hadn't built a cmd yet
         if force_reconfigure and cmd is None:

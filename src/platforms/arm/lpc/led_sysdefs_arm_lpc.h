@@ -93,16 +93,18 @@ typedef fl::u8           boolean;
 #define NO_PROGMEM
 #define NEED_CXX_BITS
 
-// CMSIS device header from MCUXpresso SDK provides __disable_irq / __enable_irq
-// via core_cm0plus.h. Some integrations only pull in the SoC header (e.g.
-// LPC845.h / LPC804.h), which transitively includes the core header.
-// IWYU pragma: begin_keep
-#if defined(FL_IS_ARM_LPC_845)
-#include <LPC845.h>
-#elif defined(FL_IS_ARM_LPC_804)
-#include <LPC804.h>
+// CMSIS device headers provide these intrinsics when they are on the include
+// path. ArduinoCore-LPC8xx's PlatformIO binding exposes only the active variant
+// directory, so board aliases such as lpc845brk may not make LPC845.h directly
+// includable. Keep the IRQ primitives local so FastLED does not depend on that
+// package-specific include layout.
+#ifndef __disable_irq
+#define __disable_irq() __asm volatile("cpsid i" ::: "memory")
 #endif
-// IWYU pragma: end_keep
+
+#ifndef __enable_irq
+#define __enable_irq() __asm volatile("cpsie i" ::: "memory")
+#endif
 
 #define cli() __disable_irq()
 #define sei() __enable_irq()

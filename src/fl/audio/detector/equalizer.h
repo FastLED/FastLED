@@ -84,8 +84,8 @@ class EqualizerDetector : public Detector {
 public:
     static constexpr int kNumBins = 16;
 
-    EqualizerDetector() FL_NOEXCEPT;
-    ~EqualizerDetector() FL_NOEXCEPT override;
+    EqualizerDetector() FL_NO_EXCEPT;
+    ~EqualizerDetector() FL_NO_EXCEPT override;
 
     /// Reconfigure equalizer tuning parameters at runtime.
     void configure(const EqualizerConfig& config);

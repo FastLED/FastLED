@@ -25,7 +25,6 @@ from ci.meson.compiler import (
 from ci.meson.io_utils import write_if_different
 from ci.meson.meson_markers import (
     _write_configuration_markers,
-    cleanup_stale_meson_lockfile,
     inject_ar_optimization_patches,
     inject_zccache_wrapping,
 )
@@ -628,7 +627,6 @@ def run_meson_setup_command(
                     )
 
     try:
-        cleanup_stale_meson_lockfile(build_dir)
         returncode, stdout = _run_meson_setup()
 
         if returncode != 0 and "does not exist" in stdout:
@@ -637,7 +635,6 @@ def run_meson_setup_command(
             )
             _clear_stale_caches()
             _ts_print("[MESON] 🔄 Retrying meson setup...")
-            cleanup_stale_meson_lockfile(build_dir)
             returncode, stdout = _run_meson_setup()
 
         if returncode != 0:

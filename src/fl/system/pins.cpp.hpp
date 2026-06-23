@@ -193,10 +193,7 @@ void DigitalMultiWrite8::init(const Pins8& pins) {
                 continue;
             }
             if (port_ids[i] != best_port) {
-                FL_WARN("digitalMultiWrite8: pin "
-                        << mPins[i] << " (port " << port_ids[i]
-                        << ") disabled — not on majority port "
-                        << best_port);
+                FL_WARN_F("digitalMultiWrite8: pin %s (port %s) disabled — not on majority port %s", mPins[i], port_ids[i], best_port);
                 mPins[i] = -1;
             }
         }
@@ -311,10 +308,7 @@ void DigitalMultiWrite16::init(const Pins16& pins) {
                 continue;
             }
             if (port_ids[i] != best_port) {
-                FL_WARN("digitalMultiWrite16: pin "
-                        << mPins[i] << " (port " << port_ids[i]
-                        << ") disabled — not on majority port "
-                        << best_port);
+                FL_WARN_F("digitalMultiWrite16: pin %s (port %s) disabled — not on majority port %s", mPins[i], port_ids[i], best_port);
                 mPins[i] = -1;
             }
         }

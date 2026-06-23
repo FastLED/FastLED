@@ -16,7 +16,7 @@ OTA::OTA() : mImpl(nullptr) {
     // Lazy initialization - mImpl will be created on first method call
 }
 
-OTA::~OTA() FL_NOEXCEPT {
+OTA::~OTA() FL_NO_EXCEPT {
     // shared_ptr handles cleanup automatically
 }
 

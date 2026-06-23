@@ -65,13 +65,13 @@ struct PercussionState {
 // ---------------------------------------------------------------------------
 class AudioBatch {
   public:
-    AudioBatch() FL_NOEXCEPT = default;
+    AudioBatch() FL_NO_EXCEPT = default;
     explicit AudioBatch(fl::span<const AudioFrame> frames,
                         audio::Processor *proc = nullptr)
         : mFrames(frames), mProc(proc) {}
 
-    AudioBatch(const AudioBatch &) FL_NOEXCEPT = delete;
-    AudioBatch &operator=(const AudioBatch &) FL_NOEXCEPT = delete;
+    AudioBatch(const AudioBatch &) FL_NO_EXCEPT = delete;
+    AudioBatch &operator=(const AudioBatch &) FL_NO_EXCEPT = delete;
 
     // --- Cheap: peak aggregates over AudioFrames (compute-once) ---
     float bass() const { ensurePeaks(); return mPeaks.bass; }

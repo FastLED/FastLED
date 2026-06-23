@@ -87,7 +87,7 @@ public:
 
     /// Initialize SPI device and register with bus manager
     /// Called by LED controller's init() method
-    void init() FL_NOEXCEPT {
+    void init() FL_NO_EXCEPT {
         if (mInitialized) {
             return;  // Already initialized
         }
@@ -102,8 +102,7 @@ public:
         mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, SPI_CLOCK_DIVIDER, this);
 
         if (!mHandle.is_valid) {
-            FL_WARN("SPIDeviceProxy: Failed to register with bus manager (pin "
-                    << static_cast<int>(CLOCK_PIN) << ":" << static_cast<int>(DATA_PIN) << ")");
+            FL_WARN_F("SPIDeviceProxy: Failed to register with bus manager (pin %s:%s)", static_cast<int>(CLOCK_PIN), static_cast<int>(DATA_PIN));
             return;
         }
 
@@ -119,7 +118,7 @@ public:
 
     /// Initialize bus manager (lazy initialization)
     /// Called on first transmit to allow all devices to register
-    void ensureBusInitialized() FL_NOEXCEPT {
+    void ensureBusInitialized() FL_NO_EXCEPT {
         if (mBusInitialized || !mBusManager || !mHandle.is_valid) {
             return;
         }
@@ -140,7 +139,7 @@ public:
 
     /// Begin SPI transaction
     /// Mirrors NRF52HardwareSPIOutput::select()
-    void select() FL_NOEXCEPT {
+    void select() FL_NO_EXCEPT {
         if (!mInitialized) {
             return;
         }
@@ -160,7 +159,7 @@ public:
 
     /// End SPI transaction
     /// Mirrors NRF52HardwareSPIOutput::release()
-    void release() FL_NOEXCEPT {
+    void release() FL_NO_EXCEPT {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -176,7 +175,7 @@ public:
 
     /// Write single byte
     /// Mirrors NRF52HardwareSPIOutput::writeByte()
-    void writeByte(u8 b) FL_NOEXCEPT {
+    void writeByte(u8 b) FL_NO_EXCEPT {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -196,7 +195,7 @@ public:
 
     /// Write 16-bit word (big-endian)
     /// Mirrors NRF52HardwareSPIOutput::writeWord()
-    void writeWord(u16 w) FL_NOEXCEPT {
+    void writeWord(u16 w) FL_NO_EXCEPT {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -217,7 +216,7 @@ public:
 
     /// Write byte values (repeated value)
     /// Mirrors NRF52HardwareSPIOutput::writeBytesValue()
-    void writeBytesValue(u8 value, int len) FL_NOEXCEPT {
+    void writeBytesValue(u8 value, int len) FL_NO_EXCEPT {
         if (!mInitialized) {
             return;
         }
@@ -243,7 +242,7 @@ public:
 
     /// Write byte buffer
     /// Mirrors NRF52HardwareSPIOutput::writeBytes()
-    void writeBytes(u8* data, int len) FL_NOEXCEPT {
+    void writeBytes(u8* data, int len) FL_NO_EXCEPT {
         if (!mInitialized) {
             return;
         }
@@ -270,7 +269,7 @@ public:
     /// Write byte buffer with adjustment
     /// Mirrors NRF52HardwareSPIOutput::writeBytes<D>()
     template<class D>
-    void writeBytes(u8* data, int len) FL_NOEXCEPT {
+    void writeBytes(u8* data, int len) FL_NO_EXCEPT {
         if (!mInitialized) {
             return;
         }
@@ -298,7 +297,7 @@ public:
     /// Write a single bit
     /// Mirrors NRF52HardwareSPIOutput::writeBit()
     template <u8 BIT>
-    void writeBit(u8 b) FL_NOEXCEPT {
+    void writeBit(u8 b) FL_NO_EXCEPT {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -313,35 +312,35 @@ public:
         } else {
             // Multi-lane SPI doesn't support bit-level operations
             // This is typically only used for specific LED protocols
-            FL_WARN("SPIDeviceProxy: writeBit() not supported for multi-lane SPI");
+            FL_WARN_F("SPIDeviceProxy: writeBit() not supported for multi-lane SPI");
         }
     }
 
     /// Wait for SPI to be ready (NOP for buffered writes)
-    static void wait() FL_NOEXCEPT {
+    static void wait() FL_NO_EXCEPT {
         // NOP for buffered multi-lane writes
         // Single-SPI instances handle their own waits
     }
 
-    static void waitFully() FL_NOEXCEPT {
+    static void waitFully() FL_NO_EXCEPT {
         // NOP for buffered multi-lane writes
         // Single-SPI instances handle their own waits
     }
 
     /// Raw byte write value (static for use by adjustment classes)
     /// Mirrors NRF52HardwareSPIOutput::writeBytesValueRaw()
-    static void writeBytesValueRaw(u8 value, int len) FL_NOEXCEPT {
+    static void writeBytesValueRaw(u8 value, int len) FL_NO_EXCEPT {
         // This is a static method used by adjustment classes
         // For the proxy, we can't easily support this in multi-lane mode
         // since we need the instance's buffer
         // This should only be called from within writeBytes<D>() which handles buffering
-        FL_WARN("SPIDeviceProxy: writeBytesValueRaw() should not be called directly");
+        FL_WARN_F("SPIDeviceProxy: writeBytesValueRaw() should not be called directly");
     }
 
     /// Finalize transmission - flush buffered multi-lane SPI writes
     /// Must be called after all pixel data is written
     /// Called by chipset controller at end of showPixels()
-    void finalizeTransmission() FL_NOEXCEPT {
+    void finalizeTransmission() FL_NO_EXCEPT {
         if (!mInitialized) {
             return;
         }
@@ -359,7 +358,7 @@ public:
     }
 
     /// Check if device is enabled (not disabled due to conflicts)
-    bool isEnabled() const FL_NOEXCEPT {
+    bool isEnabled() const FL_NO_EXCEPT {
         if (!mBusManager || !mHandle.is_valid) {
             return false;
         }
@@ -367,7 +366,7 @@ public:
     }
 
     /// Get bus type for debugging/testing
-    SPIBusType getBusType() const FL_NOEXCEPT {
+    SPIBusType getBusType() const FL_NO_EXCEPT {
         if (!mBusManager || !mHandle.is_valid) {
             return SPIBusType::SOFT_SPI;
         }

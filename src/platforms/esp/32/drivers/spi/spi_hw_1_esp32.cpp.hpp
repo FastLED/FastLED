@@ -37,21 +37,21 @@ namespace fl {
 /// This implementation uses async DMA via spi_device_queue_trans()
 class SPISingleESP32 : public SpiHw1 {
 public:
-    explicit SPISingleESP32(int bus_id = -1, const char* name = "Unknown") FL_NOEXCEPT;
+    explicit SPISingleESP32(int bus_id = -1, const char* name = "Unknown") FL_NO_EXCEPT;
     ~SPISingleESP32();
 
-    bool begin(const SpiHw1::Config& config) FL_NOEXCEPT override;
-    void end() FL_NOEXCEPT override;
-    DMABuffer acquireDMABuffer(size_t bytes_per_lane) FL_NOEXCEPT override;
-    bool transmit(TransmitMode mode = TransmitMode::ASYNC) FL_NOEXCEPT override;
-    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) FL_NOEXCEPT override;
-    bool isBusy() const FL_NOEXCEPT override;
-    bool isInitialized() const FL_NOEXCEPT override;
-    int getBusId() const FL_NOEXCEPT override;
-    const char* getName() const FL_NOEXCEPT override;
+    bool begin(const SpiHw1::Config& config) FL_NO_EXCEPT override;
+    void end() FL_NO_EXCEPT override;
+    DMABuffer acquireDMABuffer(size_t bytes_per_lane) FL_NO_EXCEPT override;
+    bool transmit(TransmitMode mode = TransmitMode::ASYNC) FL_NO_EXCEPT override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) FL_NO_EXCEPT override;
+    bool isBusy() const FL_NO_EXCEPT override;
+    bool isInitialized() const FL_NO_EXCEPT override;
+    int getBusId() const FL_NO_EXCEPT override;
+    const char* getName() const FL_NO_EXCEPT override;
 
 private:
-    void cleanup() FL_NOEXCEPT;
+    void cleanup() FL_NO_EXCEPT;
 
     int mBusId;
     const char* mName;
@@ -76,7 +76,7 @@ private:
 // SPISingleESP32 Implementation
 // ============================================================================
 
-SPISingleESP32::SPISingleESP32(int bus_id, const char* name) FL_NOEXCEPT
+SPISingleESP32::SPISingleESP32(int bus_id, const char* name) FL_NO_EXCEPT
     : mBusId(bus_id)
     , mName(name)
     , mSPIHandle(nullptr)
@@ -92,7 +92,7 @@ SPISingleESP32::~SPISingleESP32() {
     cleanup();
 }
 
-bool SPISingleESP32::begin(const SpiHw1::Config& config) FL_NOEXCEPT {
+bool SPISingleESP32::begin(const SpiHw1::Config& config) FL_NO_EXCEPT {
     if (mInitialized) {
         return true;  // Already initialized
     }
@@ -171,11 +171,11 @@ bool SPISingleESP32::begin(const SpiHw1::Config& config) FL_NOEXCEPT {
     return true;
 }
 
-void SPISingleESP32::end() FL_NOEXCEPT {
+void SPISingleESP32::end() FL_NO_EXCEPT {
     cleanup();
 }
 
-DMABuffer SPISingleESP32::acquireDMABuffer(size_t bytes_per_lane) FL_NOEXCEPT {
+DMABuffer SPISingleESP32::acquireDMABuffer(size_t bytes_per_lane) FL_NO_EXCEPT {
     if (!mInitialized) {
         return DMABuffer(SPIError::NOT_INITIALIZED);
     }
@@ -209,7 +209,7 @@ DMABuffer SPISingleESP32::acquireDMABuffer(size_t bytes_per_lane) FL_NOEXCEPT {
     return mDMABuffer;
 }
 
-bool SPISingleESP32::transmit(TransmitMode mode) FL_NOEXCEPT {
+bool SPISingleESP32::transmit(TransmitMode mode) FL_NO_EXCEPT {
     if (!mInitialized || !mBufferAcquired) {
         return false;
     }
@@ -239,7 +239,7 @@ bool SPISingleESP32::transmit(TransmitMode mode) FL_NOEXCEPT {
     return true;
 }
 
-bool SPISingleESP32::waitComplete(u32 timeout_ms) FL_NOEXCEPT {
+bool SPISingleESP32::waitComplete(u32 timeout_ms) FL_NO_EXCEPT {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }
@@ -260,23 +260,23 @@ bool SPISingleESP32::waitComplete(u32 timeout_ms) FL_NOEXCEPT {
     return (ret == ESP_OK);
 }
 
-bool SPISingleESP32::isBusy() const FL_NOEXCEPT {
+bool SPISingleESP32::isBusy() const FL_NO_EXCEPT {
     return mTransactionActive;
 }
 
-bool SPISingleESP32::isInitialized() const FL_NOEXCEPT {
+bool SPISingleESP32::isInitialized() const FL_NO_EXCEPT {
     return mInitialized;
 }
 
-int SPISingleESP32::getBusId() const FL_NOEXCEPT {
+int SPISingleESP32::getBusId() const FL_NO_EXCEPT {
     return mBusId;
 }
 
-const char* SPISingleESP32::getName() const FL_NOEXCEPT {
+const char* SPISingleESP32::getName() const FL_NO_EXCEPT {
     return mName;
 }
 
-void SPISingleESP32::cleanup() FL_NOEXCEPT {
+void SPISingleESP32::cleanup() FL_NO_EXCEPT {
     if (mInitialized) {
         // Wait for any pending transmission
         if (mTransactionActive) {
@@ -308,13 +308,13 @@ void SPISingleESP32::cleanup() FL_NOEXCEPT {
 // Singleton getters for controller instances (Meyer's Singleton pattern)
 // These are called from the centralized registration in spi_esp32_init.cpp
 // Return as SpiHw1 base class pointer to avoid forward declaration issues
-fl::shared_ptr<SpiHw1>& getController2() FL_NOEXCEPT {
+fl::shared_ptr<SpiHw1>& getController2() FL_NO_EXCEPT {
     static fl::shared_ptr<SpiHw1> instance = fl::make_shared<SPISingleESP32>(2, "SPI2");
     return instance;
 }
 
 #if SOC_SPI_PERIPH_NUM > 2
-fl::shared_ptr<SpiHw1>& getController3() FL_NOEXCEPT {
+fl::shared_ptr<SpiHw1>& getController3() FL_NO_EXCEPT {
     static fl::shared_ptr<SpiHw1> instance = fl::make_shared<SPISingleESP32>(3, "SPI3");
     return instance;
 }

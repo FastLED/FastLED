@@ -1,4 +1,4 @@
-// IWYU pragma: private
+﻿// IWYU pragma: private
 
 /// @file lcd_spi_peripheral_esp.cpp
 /// @brief ESP32-S3 LCD_CAM SPI peripheral implementation
@@ -58,7 +58,7 @@ namespace detail {
 bool IRAM_ATTR lcd_spi_flush_ready(
     esp_lcd_panel_io_handle_t panel_io,
     esp_lcd_panel_io_event_data_t *edata,
-    void *user_ctx) { // ok no noexcept — matches friend decl
+    void *user_ctx) { // ok no noexcept â€” matches friend decl
     LcdSpiPeripheralEsp *self =
         static_cast<LcdSpiPeripheralEsp *>(user_ctx);
     if (self->mPendingTransmits > 0) {
@@ -75,7 +75,7 @@ bool IRAM_ATTR lcd_spi_flush_ready(
 
     bool result = false;
     if (self->mCallback) {
-        // WARNING: callback MUST be in IRAM — called from ISR context.
+        // WARNING: callback MUST be in IRAM â€” called from ISR context.
         using CallbackType = bool (*)(void *, const void *, void *);
         auto fn =
             reinterpret_cast<CallbackType>(self->mCallback); // ok reinterpret cast
@@ -94,11 +94,11 @@ bool IRAM_ATTR lcd_spi_flush_ready(
 // Singleton
 //=============================================================================
 
-LcdSpiPeripheralEsp &LcdSpiPeripheralEsp::instance() FL_NOEXCEPT {
+LcdSpiPeripheralEsp &LcdSpiPeripheralEsp::instance() FL_NO_EXCEPT {
     return Singleton<LcdSpiPeripheralEsp>::instance();
 }
 
-LcdSpiPeripheralEsp::LcdSpiPeripheralEsp() FL_NOEXCEPT
+LcdSpiPeripheralEsp::LcdSpiPeripheralEsp() FL_NO_EXCEPT
     : mInitialized(false), mConfig(), mI80Bus(nullptr), mPanelIo(nullptr),
       mCompleteSem(nullptr), mCallback(nullptr), mUserCtx(nullptr),
       mBusy(false), mPendingTransmits(0), mLastTransmitSize(0),
@@ -112,7 +112,7 @@ LcdSpiPeripheralEsp::~LcdSpiPeripheralEsp() { deinitialize(); }
 // Lifecycle
 //=============================================================================
 
-bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NOEXCEPT {
+bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NO_EXCEPT {
     // Issue #2270: when the owning driver changes between calls (e.g. the
     // clocked-SPI driver handed the peripheral over to the clockless
     // driver, or vice-versa) we MUST fully tear down even if the lane
@@ -147,18 +147,17 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NOEXCEPT {
     }
 
     if (config.num_lanes < 1 || config.num_lanes > 16) {
-        FL_WARN("LcdSpiPeripheralEsp: Invalid num_lanes: "
-                << config.num_lanes);
+        FL_WARN_F("LcdSpiPeripheralEsp: Invalid num_lanes: %s", config.num_lanes);
         return false;
     }
 
     if (config.clock_gpio < 0) {
-        FL_WARN("LcdSpiPeripheralEsp: Invalid clock_gpio");
+        FL_WARN_F("LcdSpiPeripheralEsp: Invalid clock_gpio");
         return false;
     }
 
     if (config.clock_hz == 0) {
-        FL_WARN("LcdSpiPeripheralEsp: Invalid clock_hz: 0");
+        FL_WARN_F("LcdSpiPeripheralEsp: Invalid clock_hz: 0");
         return false;
     }
 
@@ -170,13 +169,13 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NOEXCEPT {
     // DC pin is not functionally needed for LED data streaming but
     // the I80 bus API requires a valid GPIO.  GPIO 0 is used as a
     // dummy (matching i2s_lcd_cam_peripheral_esp.cpp.hpp convention).
-    // NOTE: GPIO 0 is a strapping pin — if your board uses GPIO 0 for
+    // NOTE: GPIO 0 is a strapping pin â€” if your board uses GPIO 0 for
     // boot-mode selection, set dc_gpio in LcdSpiConfig to an unused pin.
     if (config.dc_gpio >= 0) {
         bus_config.dc_gpio_num = static_cast<gpio_num_t>(config.dc_gpio);
     } else {
         bus_config.dc_gpio_num = static_cast<gpio_num_t>(0);
-        FL_WARN("LcdSpiPeripheralEsp: dc_gpio not set, defaulting to "
+        FL_WARN_F("LcdSpiPeripheralEsp: dc_gpio not set, defaulting to "
                 "GPIO 0 (strapping pin). Set LcdSpiConfig::dc_gpio to "
                 "an unused pin to avoid boot issues.");
     }
@@ -206,7 +205,7 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NOEXCEPT {
 
     esp_err_t err = esp_lcd_new_i80_bus(&bus_config, &mI80Bus);
     if (err != ESP_OK) {
-        FL_WARN("LcdSpiPeripheralEsp: Failed to create I80 bus: " << err);
+        FL_WARN_F("LcdSpiPeripheralEsp: Failed to create I80 bus: %s", err);
         return false;
     }
 
@@ -225,13 +224,11 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NOEXCEPT {
     mLastTransmitSize = 0;
     mInitialized = true;
     mOwner = config.owner;
-    FL_DBG("LcdSpiPeripheralEsp: Initialized with " << config.num_lanes
-           << " lanes, " << config.clock_hz << " Hz clock, owner="
-           << static_cast<int>(config.owner));
+    FL_DBG_F("LcdSpiPeripheralEsp: Initialized with %s lanes, %s Hz clock, owner=%s", config.num_lanes, config.clock_hz, static_cast<int>(config.owner));
     return true;
 }
 
-void LcdSpiPeripheralEsp::teardownLocked() FL_NOEXCEPT {
+void LcdSpiPeripheralEsp::teardownLocked() FL_NO_EXCEPT {
     // Clear the ISR callback BEFORE deleting the panel_io so a late
     // DMA-done interrupt from the previous owner can't dispatch into a
     // stale context. The ESP-IDF LCD driver invokes our callback via
@@ -272,11 +269,11 @@ void LcdSpiPeripheralEsp::teardownLocked() FL_NOEXCEPT {
     mLastTxColorError = ESP_OK;
 }
 
-void LcdSpiPeripheralEsp::deinitialize() FL_NOEXCEPT {
+void LcdSpiPeripheralEsp::deinitialize() FL_NO_EXCEPT {
     teardownLocked();
 }
 
-bool LcdSpiPeripheralEsp::isInitialized() const FL_NOEXCEPT {
+bool LcdSpiPeripheralEsp::isInitialized() const FL_NO_EXCEPT {
     return mInitialized;
 }
 
@@ -284,7 +281,7 @@ bool LcdSpiPeripheralEsp::isInitialized() const FL_NOEXCEPT {
 // Buffer Management
 //=============================================================================
 
-u16 *LcdSpiPeripheralEsp::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
+u16 *LcdSpiPeripheralEsp::allocateBuffer(size_t size_bytes) FL_NO_EXCEPT {
     size_t aligned_size = ((size_bytes + 63) / 64) * 64;
     void *buffer = nullptr;
 
@@ -304,7 +301,7 @@ u16 *LcdSpiPeripheralEsp::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
     return static_cast<u16 *>(buffer);
 }
 
-void LcdSpiPeripheralEsp::freeBuffer(u16 *buffer) FL_NOEXCEPT {
+void LcdSpiPeripheralEsp::freeBuffer(u16 *buffer) FL_NO_EXCEPT {
     if (buffer != nullptr) {
         heap_caps_free(buffer);
     }
@@ -315,17 +312,17 @@ void LcdSpiPeripheralEsp::freeBuffer(u16 *buffer) FL_NOEXCEPT {
 //=============================================================================
 
 bool FL_IRAM LcdSpiPeripheralEsp::transmit(const u16 *buffer,
-                                   size_t size_bytes) FL_NOEXCEPT {
+                                   size_t size_bytes) FL_NO_EXCEPT {
     return transmitInternal(buffer, size_bytes, true);
 }
 
 bool FL_IRAM LcdSpiPeripheralEsp::queueTransmit(const u16 *buffer,
-                                                size_t size_bytes) FL_NOEXCEPT {
+                                                size_t size_bytes) FL_NO_EXCEPT {
     return transmitInternal(buffer, size_bytes, false);
 }
 
 bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
-    const u16 *buffer, size_t size_bytes, bool wait_for_slot) FL_NOEXCEPT {
+    const u16 *buffer, size_t size_bytes, bool wait_for_slot) FL_NO_EXCEPT {
     if (!mInitialized || mI80Bus == nullptr) {
         return false;
     }
@@ -339,7 +336,7 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
     // next chunk from the on_color_trans_done callback, transmit() runs in
     // interrupt context. lcd_spi_flush_ready() already did xSemaphoreGiveFromISR
     // *before* invoking our user callback, so the take is guaranteed to be
-    // non-blocking — but we MUST use the FromISR variant because the regular
+    // non-blocking â€” but we MUST use the FromISR variant because the regular
     // xSemaphoreTake() asserts (configASSERT) when called from ISR.
     if (wait_for_slot && mCompleteSem) {
         if (xPortInIsrContext()) {
@@ -347,7 +344,7 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
             if (xSemaphoreTakeFromISR(mCompleteSem, &hpw) != pdTRUE) {
                 // Semaphore should always be available here because
                 // lcd_spi_flush_ready already gave it before invoking our
-                // callback. If not, abort the re-arm — the next CPU-side
+                // callback. If not, abort the re-arm â€” the next CPU-side
                 // transmit() will pick up where we left off.
                 mBusy = false;
                 return false;
@@ -357,7 +354,7 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
             }
         } else {
             if (xSemaphoreTake(mCompleteSem, pdMS_TO_TICKS(2000)) != pdTRUE) {
-                // Latch — LoggingInIramChecker forbids FL_WARN anywhere in an
+                // Latch â€” LoggingInIramChecker forbids FL_WARN anywhere in an
                 // FL_IRAM function, even on a branch that's provably task-only.
                 // Reported from waitTransmitDone() in task context.
                 mLastWaitForSlotTimeout = true;
@@ -389,8 +386,8 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
         // trans_queue_depth=2: ChannelDriverLcdClockless::isrChunkDone calls
         // back into tx_color() from on_color_trans_done. With depth=1 the
         // currently-running transaction has not been retired from the I80
-        // queue yet, so the re-arm blocks waiting for a queue slot — from
-        // ISR context — and trips the interrupt watchdog. Depth=2 leaves
+        // queue yet, so the re-arm blocks waiting for a queue slot â€” from
+        // ISR context â€” and trips the interrupt watchdog. Depth=2 leaves
         // a free slot for the ISR-driven re-arm.
         io_config.trans_queue_depth = 2;
         io_config.dc_levels = {
@@ -407,7 +404,7 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
         esp_err_t err =
             esp_lcd_new_panel_io_i80(mI80Bus, &io_config, &mPanelIo);
         if (err != ESP_OK) {
-            // Latch — transmit() can be entered from ISR context. Reported
+            // Latch â€” transmit() can be entered from ISR context. Reported
             // from waitTransmitDone() in task context.
             mLastPanelIoRecreateError = err;
             return false;
@@ -440,7 +437,7 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
             mPendingTransmits = mPendingTransmits - 1;
         }
         mBusy = mPendingTransmits > 0;
-        // Latch — transmit() can be entered from ISR context. Reported
+        // Latch â€” transmit() can be entered from ISR context. Reported
         // from waitTransmitDone() in task context.
         mLastTxColorError = err;
         return false;
@@ -449,7 +446,7 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
     return true;
 }
 
-bool LcdSpiPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
+bool LcdSpiPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT {
     if (!mInitialized || mCompleteSem == nullptr) {
         return false;
     }
@@ -473,25 +470,25 @@ bool LcdSpiPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
     }
     mBusy = false;
 
-    // Drain errors latched by the FL_IRAM transmit path. Safe here — this
+    // Drain errors latched by the FL_IRAM transmit path. Safe here â€” this
     // function is task-only (xSemaphoreTake above would fail configASSERT
     // from ISR context).
     if (mLastWaitForSlotTimeout) {
-        FL_WARN("LcdSpiPeripheralEsp: timed out waiting for previous transmit to complete");
+        FL_WARN_F("LcdSpiPeripheralEsp: timed out waiting for previous transmit to complete");
         mLastWaitForSlotTimeout = false;
     }
     if (mLastPanelIoRecreateError != ESP_OK) {
-        FL_WARN("LcdSpiPeripheralEsp: panel IO recreate failed: " << static_cast<int>(mLastPanelIoRecreateError));
+        FL_WARN_F("LcdSpiPeripheralEsp: panel IO recreate failed: %s", static_cast<int>(mLastPanelIoRecreateError));
         mLastPanelIoRecreateError = ESP_OK;
     }
     if (mLastTxColorError != ESP_OK) {
-        FL_WARN("LcdSpiPeripheralEsp: tx_color failed: " << static_cast<int>(mLastTxColorError));
+        FL_WARN_F("LcdSpiPeripheralEsp: tx_color failed: %s", static_cast<int>(mLastTxColorError));
         mLastTxColorError = ESP_OK;
     }
     return true;
 }
 
-bool LcdSpiPeripheralEsp::isBusy() const FL_NOEXCEPT {
+bool LcdSpiPeripheralEsp::isBusy() const FL_NO_EXCEPT {
     return mBusy || mPendingTransmits > 0;
 }
 
@@ -500,7 +497,7 @@ bool LcdSpiPeripheralEsp::isBusy() const FL_NOEXCEPT {
 //=============================================================================
 
 bool LcdSpiPeripheralEsp::registerTransmitCallback(
-    void *callback, void *user_ctx) FL_NOEXCEPT {
+    void *callback, void *user_ctx) FL_NO_EXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -509,15 +506,15 @@ bool LcdSpiPeripheralEsp::registerTransmitCallback(
     return true;
 }
 
-const LcdSpiConfig &LcdSpiPeripheralEsp::getConfig() const FL_NOEXCEPT {
+const LcdSpiConfig &LcdSpiPeripheralEsp::getConfig() const FL_NO_EXCEPT {
     return mConfig;
 }
 
-u64 LcdSpiPeripheralEsp::getMicroseconds() FL_NOEXCEPT {
+u64 LcdSpiPeripheralEsp::getMicroseconds() FL_NO_EXCEPT {
     return esp_timer_get_time();
 }
 
-void LcdSpiPeripheralEsp::delay(u32 ms) FL_NOEXCEPT {
+void LcdSpiPeripheralEsp::delay(u32 ms) FL_NO_EXCEPT {
     vTaskDelay(pdMS_TO_TICKS(ms));
 }
 

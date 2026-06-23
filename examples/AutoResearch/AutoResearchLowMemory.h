@@ -20,6 +20,8 @@
 // See FastLED #3021 for the SCT-RX bring-up flags.
 //
 
+#include "platforms/arm/lpc/is_lpc.h"  // ok platform headers - LPC RX driver gate
+
 // Gate FL_DBG to no-op. Without `RELEASE`, fl/log/log.h auto-sets
 // FASTLED_FORCE_DBG=1, which expands every FL_DBG call site (inside
 // fl::Remote etc.) through the fl::println formatting machinery and
@@ -29,17 +31,31 @@
 #define RELEASE 1
 #endif
 
+// Dedicated #3039 codec-test builds keep the low-memory surface to echo +
+// IEEE754 only. The SCT/WS2812 handlers are useful diagnostics, but they are
+// unrelated to the codec and push LPC845 past its flash budget when combined.
+#if defined(FL_AUTORESEARCH_IEEE754) && FL_AUTORESEARCH_IEEE754
+#define FASTLED_AUTORESEARCH_IEEE754_MODE 1
+#endif
+
 // Opt in to the SCT input-capture RX backend (FastLED #3021). With this
 // flag set, `LpcSctRxChannel::begin()` programs the SCT for hardware
 // edge-capture; without it the driver is a no-op stub (host tests still
 // work via `injectEdges()`).
+#if !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
 #ifndef FASTLED_LPC_RX_SCT
 #define FASTLED_LPC_RX_SCT 1
 #endif
+#endif
 
-// Opt in to the SCT->DMA RX capture path. Required for WS2812 hardware
-// loopback. Auto-enabled when WS2812 mode is on.
-#if defined(FASTLED_LPC_RX_SCT_WS2812) && !defined(FASTLED_LPC_RX_SCT_DMA)
+// The LPC845-BRK low-memory build fits FastLED + Remote + the WS2812 loopback
+// RPC in normal mode. The dedicated IEEE754 mode deliberately omits it.
+#if defined(FL_IS_ARM_LPC_845) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
+#define FASTLED_AUTORESEARCH_LPC_WS2812 1
+#endif
+
+// The WS2812 loopback uses the SCT->DMA RX capture path.
+#if defined(FASTLED_AUTORESEARCH_LPC_WS2812) && !defined(FASTLED_LPC_RX_SCT_DMA)
 #define FASTLED_LPC_RX_SCT_DMA 1
 #endif
 
@@ -50,18 +66,21 @@
 #include "fl/log/log.h"
 #include "fl/stl/cstdio.h"  // fl::serial_begin -- HWCDC-safe Serial.begin wrapper
 
+#if defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
+#include "AutoResearchIeee754.h"
+#endif
+
 // The host-stub example DLL build (`tests/shared/example_dll_wrapper_template.cpp`)
 // compiles this sketch on Linux to surface ABI breaks. The RX SCT driver
 // types are platform-gated behind `FL_IS_ARM_LPC` -- they only exist on
 // the real LPC build. So the include + every RX usage below must be gated
 // the same way.
-#include "platforms/arm/lpc/is_lpc.h"  // ok platform headers - LPC RX driver gate
-#if defined(FL_IS_ARM_LPC)
+#if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
 #include "fl/channels/rx_sct_capture.h"
 #include "fl/stl/strstream.h"
 #endif
 
-#if defined(FASTLED_LPC_RX_SCT_WS2812)
+#if defined(FASTLED_AUTORESEARCH_LPC_WS2812)
 #include "FastLED.h"
 #include "fl/chipsets/timing_traits.h"
 #endif
@@ -69,7 +88,7 @@
 namespace {
 fl::Remote* g_low_memory_remote = nullptr;
 
-#if defined(FL_IS_ARM_LPC)
+#if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
 // Period-stat helpers for `pinToggleRx`. Mirrors the FlexIO RX benchmark
 // logic in `examples/AutoResearch/AutoResearchRemote.cpp::flexioRxBenchmark`
 // but inline so we don't pull in the AutoResearch ObjectFLED bus.
@@ -82,7 +101,7 @@ struct LowMemPinTogglePeriodStats {
 };
 
 inline LowMemPinTogglePeriodStats computeLowMemPeriodStats(
-    const fl::EdgeTime* edges, fl::size edge_count) FL_NOEXCEPT {
+    const fl::EdgeTime* edges, fl::size edge_count) FL_NO_EXCEPT {
     LowMemPinTogglePeriodStats s{0, 0, 0, 0, 0};
     fl::u64 sum    = 0;
     fl::u64 sum_sq = 0;
@@ -113,7 +132,7 @@ inline LowMemPinTogglePeriodStats computeLowMemPeriodStats(
     s.max_ns   = max_ns;
     return s;
 }
-#endif  // FL_IS_ARM_LPC
+#endif  // FL_IS_ARM_LPC && !FASTLED_AUTORESEARCH_IEEE754_MODE
 
 }  // namespace
 
@@ -141,7 +160,22 @@ inline void autoResearchLowMemorySetup() {
         return v;
     });
 
-#if defined(FL_IS_ARM_LPC)
+#if defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
+    remote.bind("ieee754CodecTest", [](const fl::json& args) -> fl::json {
+        (void)args;
+        const auto r = autoresearch::ieee754_check::run();
+        fl::json response = fl::json::object();
+        response.set("success", r.success);
+        response.set("tests_run", static_cast<int64_t>(r.tests_run));
+        response.set("tests_failed", static_cast<int64_t>(r.tests_failed));
+        response.set("first_failure", r.first_failure ? r.first_failure : "");
+        response.set("expected_bits", static_cast<int64_t>(r.expected_bits));
+        response.set("actual_bits", static_cast<int64_t>(r.actual_bits));
+        return response;
+    });
+#endif
+
+#if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
     // pinToggleRx (FastLED #3021 Phase 1) — bit-bang square wave on tx_pin
     // and capture SCT edges on rx_pin. CSV stats out.
     remote.bind("pinToggleRx",
@@ -152,9 +186,15 @@ inline void autoResearchLowMemorySetup() {
             const fl::u32 expected_edges =
                 2u * static_cast<fl::u32>(freq_hz) *
                      static_cast<fl::u32>(duration_ms) / 1000u;
+            // Keep both the RX vector and diagnostic copy buffer small on
+            // 16 KB SRAM LPC8xx parts. Larger static buffers regressed early
+            // init by leaving too little room for stack/heap (FastLED #3200),
+            // while stack buffers previously overflowed during this handler
+            // (FastLED #3125).
+            constexpr fl::u32 kLowMemEdgeBufSize = 64u;
             fl::u32 cap = expected_edges + (expected_edges / 2u);
-            if (cap < 256u)  cap = 256u;
-            if (cap > 2048u) cap = 2048u;
+            if (cap < 2u) cap = 2u;
+            if (cap > kLowMemEdgeBufSize) cap = kLowMemEdgeBufSize;
 
             auto rx = fl::LpcSctRxChannel::create(rx_pin);
             if (!rx) return fl::string("0,0,0,0,0,0,0");
@@ -184,7 +224,9 @@ inline void autoResearchLowMemorySetup() {
             }
             rx->wait(1);
 
-            fl::EdgeTime edges_buf[2048];
+            // Static storage keeps this off the stack; the small fixed size
+            // keeps .bss below the LPC845-BRK early-init failure threshold.
+            static fl::EdgeTime edges_buf[kLowMemEdgeBufSize];
             const fl::size n_read = rx->getRawEdgeTimes(
                 fl::span<fl::EdgeTime>(edges_buf, sizeof(edges_buf) / sizeof(edges_buf[0])));
 
@@ -198,7 +240,7 @@ inline void autoResearchLowMemorySetup() {
             return s.str();
         });
 
-#if defined(FASTLED_LPC_RX_SCT_WS2812)
+#if defined(FASTLED_AUTORESEARCH_LPC_WS2812)
     // ws2812SctTest (FastLED #3021 Phase 2) -- WS2812 byte-match loopback.
     remote.bind("ws2812SctTest",
         [](int test_case, int tx_pin, int rx_pin, int capture_ms) -> fl::string {
@@ -245,8 +287,13 @@ inline void autoResearchLowMemorySetup() {
             fl::RxConfig cfg;
             const fl::u32 expected_edges = (fl::u32)num_leds * 24u * 2u;
             fl::u32 cap = expected_edges + (expected_edges / 2u);
-            if (cap < 256u)  cap = 256u;
-            if (cap > 2048u) cap = 2048u;
+            // The low-memory sketch cannot afford the old 2048-edge reserve
+            // on a 16 KB SRAM LPC845. 192 edges covers the 1- and 3-LED
+            // sanity cases and fails the larger diagnostic cases without
+            // starving setup()/loop() stack.
+            constexpr fl::u32 kLowMemWs2812EdgeCapacity = 192u;
+            if (cap < 48u) cap = 48u;
+            if (cap > kLowMemWs2812EdgeCapacity) cap = kLowMemWs2812EdgeCapacity;
             cfg.buffer_size = cap;
             cfg.start_low   = true;
             if (!rx->begin(cfg)) return fl::string("0,0,0,0,0,0,0,0");
@@ -283,9 +330,12 @@ inline void autoResearchLowMemorySetup() {
             const fl::u32 missing = (fl::u32)expected_bytes - decoded_bytes;
             mismatched += missing;
 
-            fl::EdgeTime probe[1024];
+            // Diagnostic-only raw-edge sample. Keep this small in .bss; the
+            // decoder uses the RX channel's bounded capture vector above.
+            constexpr fl::size kLowMemWs2812ProbeSize = 64u;
+            static fl::EdgeTime probe[kLowMemWs2812ProbeSize];
             const fl::size edges_captured = rx->getRawEdgeTimes(
-                fl::span<fl::EdgeTime>(probe, 1024));
+                fl::span<fl::EdgeTime>(probe, kLowMemWs2812ProbeSize));
 
             const bool success = (mismatched == 0 && decoded_bytes == (fl::u32)expected_bytes);
 
@@ -296,8 +346,8 @@ inline void autoResearchLowMemorySetup() {
               << static_cast<fl::u32>(edges_captured);
             return s.str();
         });
-#endif  // FASTLED_LPC_RX_SCT_WS2812
-#endif  // FL_IS_ARM_LPC
+#endif  // FASTLED_AUTORESEARCH_LPC_WS2812
+#endif  // FL_IS_ARM_LPC && !FASTLED_AUTORESEARCH_IEEE754_MODE
 }
 
 inline void autoResearchLowMemoryLoop() {

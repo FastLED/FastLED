@@ -44,7 +44,7 @@ class DefaultMemoryResource : public memory_resource {
         return result;
     }
 
-    bool do_is_equal(const memory_resource& other) const FL_NOEXCEPT override {
+    bool do_is_equal(const memory_resource& other) const FL_NO_EXCEPT override {
         return this == &other;
     }
 };
@@ -63,14 +63,14 @@ class PSRamMemoryResource : public memory_resource {
     // PSRAM does not support realloc — returns nullptr to trigger alloc-copy-free path
     // do_reallocate uses the base default (returns nullptr)
 
-    bool do_is_equal(const memory_resource& other) const FL_NOEXCEPT override {
+    bool do_is_equal(const memory_resource& other) const FL_NO_EXCEPT override {
         return this == &other;
     }
 };
 
 } // anonymous namespace
 
-memory_resource* default_memory_resource() FL_NOEXCEPT {
+memory_resource* default_memory_resource() FL_NO_EXCEPT {
     static DefaultMemoryResource instance;
     return &instance;
 }

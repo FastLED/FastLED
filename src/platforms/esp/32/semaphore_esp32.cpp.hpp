@@ -47,7 +47,7 @@ CountingSemaphoreESP32<LeastMaxValue>::CountingSemaphoreESP32(ptrdiff_t desired)
     );
 
     if (handle == nullptr) {
-        FL_WARN("CountingSemaphoreESP32: Failed to create counting semaphore");
+        FL_WARN_F("CountingSemaphoreESP32: Failed to create counting semaphore");
     }
 
     mHandle = static_cast<void*>(handle);
@@ -117,7 +117,7 @@ bool CountingSemaphoreESP32<LeastMaxValue>::try_acquire() {
 }
 
 template<ptrdiff_t LeastMaxValue>
-bool CountingSemaphoreESP32<LeastMaxValue>::try_acquire_for_ms(fl::u32 timeout_ms) FL_NOEXCEPT {
+bool CountingSemaphoreESP32<LeastMaxValue>::try_acquire_for_ms(fl::u32 timeout_ms) FL_NO_EXCEPT {
     if (mHandle == nullptr) {
         return false;
     }

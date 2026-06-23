@@ -40,7 +40,7 @@ FrequencyBands::FrequencyBands()
     , mTrebleMax(20000.0f)
 {}
 
-FrequencyBands::~FrequencyBands() FL_NOEXCEPT = default;
+FrequencyBands::~FrequencyBands() FL_NO_EXCEPT = default;
 
 void FrequencyBands::update(shared_ptr<Context> context) {
     // Use sample rate from context if available

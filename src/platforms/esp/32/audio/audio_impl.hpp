@@ -22,10 +22,10 @@ namespace fl {
 // ESP32-specific audio input creation function
 fl::shared_ptr<audio::IInput>
 esp32_create_audio_input(const audio::Config &config,
-                         fl::string *error_message) FL_NOEXCEPT {
+                         fl::string *error_message) FL_NO_EXCEPT {
     if (config.is<audio::ConfigI2S>()) {
 #if FASTLED_ESP32_I2S_SUPPORTED
-        FL_WARN("Creating I2S standard mode audio source");
+        FL_WARN_F("Creating I2S standard mode audio source");
         audio::ConfigI2S std_config = config.get<audio::ConfigI2S>();
         fl::shared_ptr<audio::IInput> out =
             fl::make_shared<fl::I2S_Audio>(std_config);
@@ -33,7 +33,7 @@ esp32_create_audio_input(const audio::Config &config,
 #else
         const char *ERROR_MESSAGE =
             "I2S audio not supported on this ESP32 variant (no I2S hardware)";
-        FL_WARN(ERROR_MESSAGE);
+        FL_WARN_F("%s", ERROR_MESSAGE);
         if (error_message) {
             *error_message = ERROR_MESSAGE;
         }
@@ -41,7 +41,7 @@ esp32_create_audio_input(const audio::Config &config,
 #endif
     } else if (config.is<audio::ConfigPdm>()) {
 #if FASTLED_ESP32_PDM_SUPPORTED
-        FL_WARN("Creating PDM mode audio source");
+        FL_WARN_F("Creating PDM mode audio source");
         audio::ConfigPdm pdm_config = config.get<audio::ConfigPdm>();
         fl::shared_ptr<audio::IInput> out =
             fl::make_shared<fl::PDM_Audio>(pdm_config);
@@ -49,7 +49,7 @@ esp32_create_audio_input(const audio::Config &config,
 #else
         const char *ERROR_MESSAGE = "PDM audio not supported on this ESP32 "
                                     "variant (no PDM RX hardware)";
-        FL_WARN(ERROR_MESSAGE);
+        FL_WARN_F("%s", ERROR_MESSAGE);
         if (error_message) {
             *error_message = ERROR_MESSAGE;
         }
@@ -57,7 +57,7 @@ esp32_create_audio_input(const audio::Config &config,
 #endif
     }
     const char *ERROR_MESSAGE = "Unsupported audio configuration";
-    FL_WARN(ERROR_MESSAGE);
+    FL_WARN_F("%s", ERROR_MESSAGE);
     if (error_message) {
         *error_message = ERROR_MESSAGE;
     }

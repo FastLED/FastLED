@@ -30,7 +30,7 @@ bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) {
                     return true;
                 }
                 if (timeoutMs > 0 && (millis() - startTime) >= timeoutMs) {
-                    FL_ERROR("Timeout occurred while waiting for condition");
+                    FL_ERROR_F("Timeout occurred while waiting for condition");
                     return false;
                 }
             }
@@ -40,7 +40,7 @@ bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) {
     while (!condition()) {
         // Check timeout if specified
         if (timeoutMs > 0 && (millis() - startTime >= timeoutMs)) {
-            FL_ERROR("Timeout occurred while waiting for condition");
+            FL_ERROR_F("Timeout occurred while waiting for condition");
             return false;  // Timeout occurred
         }
 

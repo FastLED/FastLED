@@ -101,7 +101,7 @@ static nrf52_isr_handle_data* gpiote_handles[MAX_GPIOTE_CHANNELS] = {};
 // =============================================================================
 
 // Get timer instance index (0-4) from pointer
-static int get_timer_index(NRF_TIMER_Type* timer) FL_NOEXCEPT {
+static int get_timer_index(NRF_TIMER_Type* timer) FL_NO_EXCEPT {
     if (timer == NRF_TIMER0) return 0;
     if (timer == NRF_TIMER1) return 1;
     if (timer == NRF_TIMER2) return 2;
@@ -115,7 +115,7 @@ static int get_timer_index(NRF_TIMER_Type* timer) FL_NOEXCEPT {
 }
 
 // Get timer pointer from index
-static NRF_TIMER_Type* get_timer_instance(int index) FL_NOEXCEPT {
+static NRF_TIMER_Type* get_timer_instance(int index) FL_NO_EXCEPT {
     switch (index) {
         case 0: return NRF_TIMER0;
         case 1: return NRF_TIMER1;
@@ -131,7 +131,7 @@ static NRF_TIMER_Type* get_timer_instance(int index) FL_NOEXCEPT {
 }
 
 // Get timer IRQ from index
-static IRQn_Type get_timer_irq(int index) FL_NOEXCEPT {
+static IRQn_Type get_timer_irq(int index) FL_NO_EXCEPT {
     switch (index) {
         case 0: return TIMER0_IRQn;
         case 1: return TIMER1_IRQn;
@@ -147,13 +147,13 @@ static IRQn_Type get_timer_irq(int index) FL_NOEXCEPT {
 }
 
 // Get max channels for timer instance
-static u8 get_timer_max_channels(int index) FL_NOEXCEPT {
+static u8 get_timer_max_channels(int index) FL_NO_EXCEPT {
     // TIMER0-2 have 4 channels, TIMER3-4 have 6 channels
     return (index >= 3) ? 6 : 4;
 }
 
 // Allocate a timer channel
-static bool allocate_timer_channel(int& timer_idx, u8& channel) FL_NOEXCEPT {
+static bool allocate_timer_channel(int& timer_idx, u8& channel) FL_NO_EXCEPT {
     for (int i = 0; i < MAX_TIMER_INSTANCES; i++) {
         u8 max_channels = get_timer_max_channels(i);
         for (u8 ch = 0; ch < max_channels; ch++) {
@@ -169,7 +169,7 @@ static bool allocate_timer_channel(int& timer_idx, u8& channel) FL_NOEXCEPT {
 }
 
 // Free a timer channel
-static void free_timer_channel(int timer_idx, u8 channel) FL_NOEXCEPT {
+static void free_timer_channel(int timer_idx, u8 channel) FL_NO_EXCEPT {
     if (timer_idx >= 0 && timer_idx < MAX_TIMER_INSTANCES && channel < 6) {
         timer_allocated[timer_idx][channel] = false;
         timer_handles[timer_idx][channel] = nullptr;
@@ -177,7 +177,7 @@ static void free_timer_channel(int timer_idx, u8 channel) FL_NOEXCEPT {
 }
 
 // Allocate a GPIOTE channel
-static i8 allocate_gpiote_channel() FL_NOEXCEPT {
+static i8 allocate_gpiote_channel() FL_NO_EXCEPT {
     for (u8 i = 0; i < MAX_GPIOTE_CHANNELS; i++) {
         if (!gpiote_allocated[i]) {
             gpiote_allocated[i] = true;
@@ -188,7 +188,7 @@ static i8 allocate_gpiote_channel() FL_NOEXCEPT {
 }
 
 // Free a GPIOTE channel
-static void free_gpiote_channel(i8 channel) FL_NOEXCEPT {
+static void free_gpiote_channel(i8 channel) FL_NO_EXCEPT {
     if (channel >= 0 && channel < MAX_GPIOTE_CHANNELS) {
         gpiote_allocated[channel] = false;
         gpiote_handles[channel] = nullptr;
@@ -206,7 +206,7 @@ static void free_gpiote_channel(i8 channel) FL_NOEXCEPT {
 // - Interrupts at priority 5-7 CAN call SoftDevice APIs
 // - When SoftDevice is enabled, use sd_nvic_* functions instead of NVIC_* functions
 // - This implementation assumes NO SoftDevice (uses direct NVIC access)
-static u8 map_priority_to_nvic(u8 isr_priority) FL_NOEXCEPT {
+static u8 map_priority_to_nvic(u8 isr_priority) FL_NO_EXCEPT {
     // Clamp to valid range
     if (isr_priority < 1) isr_priority = 1;
     if (isr_priority > 7) isr_priority = 7;
@@ -221,7 +221,7 @@ static u8 map_priority_to_nvic(u8 isr_priority) FL_NOEXCEPT {
 // =============================================================================
 
 // Map channel index to timer event enum
-static nrf_timer_event_t get_timer_event(u8 channel) FL_NOEXCEPT {
+static nrf_timer_event_t get_timer_event(u8 channel) FL_NO_EXCEPT {
     // Use proper enum values defined by Nordic SDK (offsetof-based)
     switch (channel) {
         case 0: return NRF_TIMER_EVENT_COMPARE0;
@@ -239,7 +239,7 @@ static nrf_timer_event_t get_timer_event(u8 channel) FL_NOEXCEPT {
 }
 
 // Common timer interrupt handler
-static void timer_interrupt_handler(int timer_idx, u8 channel) FL_NOEXCEPT {
+static void timer_interrupt_handler(int timer_idx, u8 channel) FL_NO_EXCEPT {
     NRF_TIMER_Type* timer = get_timer_instance(timer_idx);
     if (!timer) return;
 
@@ -257,7 +257,7 @@ static void timer_interrupt_handler(int timer_idx, u8 channel) FL_NOEXCEPT {
 }
 
 // Map GPIOTE channel index to event enum
-static nrf_gpiote_event_t get_gpiote_event(u8 channel) FL_NOEXCEPT {
+static nrf_gpiote_event_t get_gpiote_event(u8 channel) FL_NO_EXCEPT {
     // Use proper enum values defined by Nordic SDK (offsetof-based)
     switch (channel) {
         case 0: return NRF_GPIOTE_EVENT_IN_0;
@@ -277,7 +277,7 @@ static nrf_gpiote_event_t get_gpiote_event(u8 channel) FL_NOEXCEPT {
 // Timer ISR wrappers for each instance
 // Marked as weak to allow Arduino framework or user code to override
 extern "C" {
-    FL_LINK_WEAK void TIMER0_IRQHandler(void) FL_NOEXCEPT {
+    FL_LINK_WEAK void TIMER0_IRQHandler(void) FL_NO_EXCEPT {
         for (u8 ch = 0; ch < 4; ch++) {
             if (timer_handles[0][ch]) {
                 timer_interrupt_handler(0, ch);
@@ -285,7 +285,7 @@ extern "C" {
         }
     }
 
-    FL_LINK_WEAK void TIMER1_IRQHandler(void) FL_NOEXCEPT {
+    FL_LINK_WEAK void TIMER1_IRQHandler(void) FL_NO_EXCEPT {
         for (u8 ch = 0; ch < 4; ch++) {
             if (timer_handles[1][ch]) {
                 timer_interrupt_handler(1, ch);
@@ -293,7 +293,7 @@ extern "C" {
         }
     }
 
-    FL_LINK_WEAK void TIMER2_IRQHandler(void) FL_NOEXCEPT {
+    FL_LINK_WEAK void TIMER2_IRQHandler(void) FL_NO_EXCEPT {
         for (u8 ch = 0; ch < 4; ch++) {
             if (timer_handles[2][ch]) {
                 timer_interrupt_handler(2, ch);
@@ -302,7 +302,7 @@ extern "C" {
     }
 
 #ifdef TIMER3_IRQn
-    FL_LINK_WEAK void TIMER3_IRQHandler(void) FL_NOEXCEPT {
+    FL_LINK_WEAK void TIMER3_IRQHandler(void) FL_NO_EXCEPT {
         for (u8 ch = 0; ch < 6; ch++) {
             if (timer_handles[3][ch]) {
                 timer_interrupt_handler(3, ch);
@@ -312,7 +312,7 @@ extern "C" {
 #endif
 
 #ifdef TIMER4_IRQn
-    FL_LINK_WEAK void TIMER4_IRQHandler(void) FL_NOEXCEPT {
+    FL_LINK_WEAK void TIMER4_IRQHandler(void) FL_NO_EXCEPT {
         for (u8 ch = 0; ch < 6; ch++) {
             if (timer_handles[4][ch]) {
                 timer_interrupt_handler(4, ch);
@@ -322,7 +322,7 @@ extern "C" {
 #endif
 
     // GPIOTE handler - weak to allow Arduino framework (WInterrupts.c) to override
-    FL_LINK_WEAK void GPIOTE_IRQHandler(void) FL_NOEXCEPT {
+    FL_LINK_WEAK void GPIOTE_IRQHandler(void) FL_NO_EXCEPT {
         for (u8 ch = 0; ch < MAX_GPIOTE_CHANNELS; ch++) {
             nrf_gpiote_event_t event = get_gpiote_event(ch);
 
@@ -341,14 +341,14 @@ extern "C" {
 // NRF52 ISR Implementation (fl::isr::platform namespace)
 // =============================================================================
 
-int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
+int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
     if (!config.handler) {
-        FL_WARN("attachTimerHandler: handler is null");
+        FL_WARN_F("attachTimerHandler: handler is null");
         return -1;  // Invalid parameter
     }
 
     if (config.frequency_hz == 0) {
-        FL_WARN("attachTimerHandler: frequency_hz is 0");
+        FL_WARN_F("attachTimerHandler: frequency_hz is 0");
         return -2;  // Invalid frequency
     }
 
@@ -356,14 +356,14 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     int timer_idx = -1;
     u8 channel = 0;
     if (!allocate_timer_channel(timer_idx, channel)) {
-        FL_WARN("attachTimerHandler: no free timer channels");
+        FL_WARN_F("attachTimerHandler: no free timer channels");
         return -3;  // Out of resources
     }
 
     NRF_TIMER_Type* timer = get_timer_instance(timer_idx);
     if (!timer) {
         free_timer_channel(timer_idx, channel);
-        FL_WARN("attachTimerHandler: invalid timer instance");
+        FL_WARN_F("attachTimerHandler: invalid timer instance");
         return -4;  // Internal error
     }
 
@@ -372,7 +372,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     auto* handle_data = handle_owner.get();
     if (!handle_data) {
         free_timer_channel(timer_idx, channel);
-        FL_WARN("attachTimerHandler: failed to allocate handle data");
+        FL_WARN_F("attachTimerHandler: failed to allocate handle data");
         return -5;  // Out of memory
     }
 
@@ -466,8 +466,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
         nrf_timer_task_trigger(timer, NRF_TIMER_TASK_START);
     }
 
-    FL_DBG("Timer started at " << config.frequency_hz << " Hz on TIMER" << timer_idx
-           << " channel " << static_cast<int>(channel));
+    FL_DBG_F("Timer started at %s Hz on TIMER%s channel %s", config.frequency_hz, timer_idx, static_cast<int>(channel));
 
     // Release ownership - pointer is now managed by the C API (timer_handles + out_handle)
     handle_owner.release();
@@ -483,16 +482,16 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     return 0;  // Success
 }
 
-int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
+int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
     if (!config.handler) {
-        FL_WARN("attachExternalHandler: handler is null");
+        FL_WARN_F("attachExternalHandler: handler is null");
         return -1;  // Invalid parameter
     }
 
     // Allocate a GPIOTE channel
     i8 gpiote_ch = allocate_gpiote_channel();
     if (gpiote_ch < 0) {
-        FL_WARN("attachExternalHandler: no free GPIOTE channels");
+        FL_WARN_F("attachExternalHandler: no free GPIOTE channels");
         return -3;  // Out of resources
     }
 
@@ -501,7 +500,7 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     auto* handle_data = handle_owner.get();
     if (!handle_data) {
         free_gpiote_channel(gpiote_ch);
-        FL_WARN("attachExternalHandler: failed to allocate handle data");
+        FL_WARN_F("attachExternalHandler: failed to allocate handle data");
         return -5;  // Out of memory
     }
 
@@ -537,11 +536,10 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
 
     // Set NVIC priority and enable IRQ
     u8 nvic_priority = map_priority_to_nvic(config.priority);
-    NVIC_SetPriority(GPIOTE_IRQn, nvic_priority) FL_NOEXCEPT;
-    NVIC_EnableIRQ(GPIOTE_IRQn) FL_NOEXCEPT;
+    NVIC_SetPriority(GPIOTE_IRQn, nvic_priority) FL_NO_EXCEPT;
+    NVIC_EnableIRQ(GPIOTE_IRQn) FL_NO_EXCEPT;
 
-    FL_DBG("GPIO interrupt attached on pin " << static_cast<int>(pin)
-           << " GPIOTE channel " << static_cast<int>(gpiote_ch));
+    FL_DBG_F("GPIO interrupt attached on pin %s GPIOTE channel %s", static_cast<int>(pin), static_cast<int>(gpiote_ch));
 
     // Release ownership - pointer is now managed by the C API (gpiote_handles + out_handle)
     handle_owner.release();
@@ -557,15 +555,15 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     return 0;  // Success
 }
 
-int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
+int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != NRF52_PLATFORM_ID) {
-        FL_WARN("detachHandler: invalid handle");
+        FL_WARN_F("detachHandler: invalid handle");
         return -1;  // Invalid handle
     }
 
     nrf52_isr_handle_data* handle_data = static_cast<nrf52_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN("detachHandler: null handle data");
+        FL_WARN_F("detachHandler: null handle data");
         return -1;  // Invalid handle
     }
 
@@ -592,19 +590,19 @@ int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
     handle.platform_handle = nullptr;
     handle.platform_id = 0;
 
-    FL_DBG("Handler detached");
+    FL_DBG_F("Handler detached");
     return 0;  // Success
 }
 
-int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
+int enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != NRF52_PLATFORM_ID) {
-        FL_WARN("enableHandler: invalid handle");
+        FL_WARN_F("enableHandler: invalid handle");
         return -1;  // Invalid handle
     }
 
     nrf52_isr_handle_data* handle_data = static_cast<nrf52_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN("enableHandler: null handle data");
+        FL_WARN_F("enableHandler: null handle data");
         return -1;  // Invalid handle
     }
 
@@ -621,15 +619,15 @@ int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     return 0;  // Success
 }
 
-int disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
+int disable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != NRF52_PLATFORM_ID) {
-        FL_WARN("disableHandler: invalid handle");
+        FL_WARN_F("disableHandler: invalid handle");
         return -1;  // Invalid handle
     }
 
     nrf52_isr_handle_data* handle_data = static_cast<nrf52_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN("disableHandler: null handle data");
+        FL_WARN_F("disableHandler: null handle data");
         return -1;  // Invalid handle
     }
 
@@ -646,7 +644,7 @@ int disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     return 0;  // Success
 }
 
-bool is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
+bool is_handler_enabled(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != NRF52_PLATFORM_ID) {
         return false;
     }
@@ -659,7 +657,7 @@ bool is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
     return handle_data->is_enabled;
 }
 
-const char* get_error_string(int error_code) FL_NOEXCEPT {
+const char* get_error_string(int error_code) FL_NO_EXCEPT {
     switch (error_code) {
         case 0: return "Success";
         case -1: return "Invalid parameter";
@@ -671,7 +669,7 @@ const char* get_error_string(int error_code) FL_NOEXCEPT {
     }
 }
 
-const char* get_platform_name() FL_NOEXCEPT {
+const char* get_platform_name() FL_NO_EXCEPT {
 #if defined(FL_IS_NRF52840)
     return "NRF52840";
 #elif defined(FL_IS_NRF52833)
@@ -683,21 +681,21 @@ const char* get_platform_name() FL_NOEXCEPT {
 #endif
 }
 
-u32 get_max_timer_frequency() FL_NOEXCEPT {
+u32 get_max_timer_frequency() FL_NO_EXCEPT {
     return 16000000;  // 16 MHz (maximum timer frequency)
 }
 
-u32 get_min_timer_frequency() FL_NOEXCEPT {
+u32 get_min_timer_frequency() FL_NO_EXCEPT {
     return 1;  // 1 Hz (practical minimum)
 }
 
-u8 get_max_priority() FL_NOEXCEPT {
+u8 get_max_priority() FL_NO_EXCEPT {
     // Return 7 (highest user priority in ISR numbering)
     // Note: NVIC priorities 0-1 reserved for SoftDevice when BLE is active
     return 7;
 }
 
-bool requires_assembly_handler(u8 priority) FL_NOEXCEPT {
+bool requires_assembly_handler(u8 priority) FL_NO_EXCEPT {
     // ARM Cortex-M4F: All priority levels support C handlers
     (void)priority;
     return false;
@@ -711,13 +709,13 @@ bool requires_assembly_handler(u8 priority) FL_NOEXCEPT {
 // =============================================================================
 
 /// Disable interrupts on ARM Cortex-M (NRF52)
-inline void interruptsDisable() FL_NOEXCEPT {
-    __asm__ __volatile__("cpsid i" ::: "memory") FL_NOEXCEPT;
+inline void interruptsDisable() FL_NO_EXCEPT {
+    __asm__ __volatile__("cpsid i" ::: "memory") FL_NO_EXCEPT;
 }
 
 /// Enable interrupts on ARM Cortex-M (NRF52)
-inline void interruptsEnable() FL_NOEXCEPT {
-    __asm__ __volatile__("cpsie i" ::: "memory") FL_NOEXCEPT;
+inline void interruptsEnable() FL_NO_EXCEPT {
+    __asm__ __volatile__("cpsie i" ::: "memory") FL_NO_EXCEPT;
 }
 
 } // namespace fl

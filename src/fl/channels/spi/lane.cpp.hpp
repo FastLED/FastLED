@@ -12,7 +12,7 @@ Lane::Lane(size_t lane_id, MultiLaneDevice* parent)
 
 void Lane::write(const u8* data, size_t size) {
     if (!data || size == 0) {
-        FL_WARN("Lane " << mLaneId << ": Invalid data or size");
+        FL_WARN_F("Lane %s: Invalid data or size", mLaneId);
         return;
     }
 
@@ -24,7 +24,7 @@ void Lane::write(const u8* data, size_t size) {
         mBuffer[i] = data[i];
     }
 
-    FL_DBG("Lane " << mLaneId << ": Buffered " << size << " bytes");
+    FL_DBG_F("Lane %s: Buffered %s bytes", mLaneId, size);
 }
 
 fl::span<u8> Lane::getBuffer(size_t size) {

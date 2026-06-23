@@ -18,7 +18,7 @@ namespace fl {
 
 
 // Constructor is inline in header, just add logging to destructor
-JsonUiManager::JsonUiManager(Callback updateJs) FL_NOEXCEPT : mUpdateJs(updateJs) {
+JsonUiManager::JsonUiManager(Callback updateJs) FL_NO_EXCEPT : mUpdateJs(updateJs) {
     fl::EngineEvents::addListener(this);
 }
 
@@ -38,7 +38,7 @@ JsonUiManager::~JsonUiManager() {
     fl::EngineEvents::removeListener(this);
 }
 
-void JsonUiManager::addComponent(fl::weak_ptr<JsonUiInternal> component) FL_NOEXCEPT {
+void JsonUiManager::addComponent(fl::weak_ptr<JsonUiInternal> component) FL_NO_EXCEPT {
     //FL_WARN("*** JsonUiManager::addComponent ENTRY ***");
     fl::unique_lock<fl::mutex> lock(mMutex);
     mComponents.insert(component);
@@ -51,12 +51,12 @@ void JsonUiManager::addComponent(fl::weak_ptr<JsonUiInternal> component) FL_NOEX
     }
 }
 
-void JsonUiManager::removeComponent(fl::weak_ptr<JsonUiInternal> component) FL_NOEXCEPT {
+void JsonUiManager::removeComponent(fl::weak_ptr<JsonUiInternal> component) FL_NO_EXCEPT {
     fl::unique_lock<fl::mutex> lock(mMutex);
     mComponents.erase(component);
 }
 
-void JsonUiManager::processPendingUpdates() FL_NOEXCEPT {
+void JsonUiManager::processPendingUpdates() FL_NO_EXCEPT {
     // Force immediate processing of pending updates (for testing)
 
     if (mHasPendingUpdate) {
@@ -109,24 +109,24 @@ void JsonUiManager::processPendingUpdates() FL_NOEXCEPT {
 
 }
 
-fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() FL_NOEXCEPT {
+fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() FL_NO_EXCEPT {
     fl::unique_lock<fl::mutex> lock(mMutex);
     fl::vector<JsonUiInternalPtr> out;
     for (auto &component : mComponents) {
         if (auto ptr = component.lock()) {
             out.push_back(ptr);
         } else {
-            FL_WARN("*** WARNING: Component weak_ptr is expired, skipping");
+            FL_WARN_F("*** WARNING: Component weak_ptr is expired, skipping");
         }
     }
     // Sort components by ID to ensure consistent serialization order
-    fl::sort(out.begin(), out.end(), [](const JsonUiInternalPtr& a, const JsonUiInternalPtr& b) FL_NOEXCEPT {
+    fl::sort(out.begin(), out.end(), [](const JsonUiInternalPtr& a, const JsonUiInternalPtr& b) FL_NO_EXCEPT {
         return a->id() < b->id();
     });
     return out;
 }
 
-JsonUiInternalPtr JsonUiManager::findUiComponent(const char* id_or_name) FL_NOEXCEPT {
+JsonUiInternalPtr JsonUiManager::findUiComponent(const char* id_or_name) FL_NO_EXCEPT {
     auto components = getComponents();
     
     for (auto &component : components) {
@@ -150,7 +150,7 @@ JsonUiInternalPtr JsonUiManager::findUiComponent(const char* id_or_name) FL_NOEX
     return JsonUiInternalPtr(); // Return null pointer if not found
 }
 
-void JsonUiManager::updateUiComponents(const char* jsonStr) FL_NOEXCEPT {
+void JsonUiManager::updateUiComponents(const char* jsonStr) FL_NO_EXCEPT {
     //FL_WARN("*** JsonUiManager::updateUiComponents ENTRY ***");
     // FL_WARN("*** INCOMING JSON: " << (jsonStr ? jsonStr : "nullptr"));
     // FL_WARN("*** JSON LENGTH: " << (jsonStr ? strlen(jsonStr) : 0));
@@ -172,7 +172,7 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) FL_NOEXCEPT {
 }
 
 
-void JsonUiManager::executeUiUpdates(const fl::json &doc) FL_NOEXCEPT {
+void JsonUiManager::executeUiUpdates(const fl::json &doc) FL_NO_EXCEPT {
 
     if (doc.is_object()) {
 
@@ -185,26 +185,24 @@ void JsonUiManager::executeUiUpdates(const fl::json &doc) FL_NOEXCEPT {
                 const fl::json v = doc[key.c_str()];
                 component->updateInternal(v);
             } else {
-                FL_ERROR("could not find component with ID or name: " << id_or_name);
+                FL_ERROR_F("could not find component with ID or name: %s", id_or_name);
             }
         }
     } else {
         // Debug: Show what we actually received instead of just asserting
         fl::string debugJson = doc.to_string();
-        FL_WARN("*** UI UPDATE ERROR: Expected JSON object but got " << 
-               (doc.is_array() ? "array" : "non-object") << 
-               ": " << debugJson.substr(0, 200).c_str() << "...");
+        FL_WARN_F("*** UI UPDATE ERROR: Expected JSON object but got %s: %s...", (doc.is_array() ? "array" : "non-object"), debugJson.substr(0, 200).c_str());
         
         // Use a warning instead of assertion to prevent crashes
         // FL_ASSERT(false, "JSON document is not an object, cannot execute UI updates");
     }
 }
 
-void JsonUiManager::onEndFrame() FL_NOEXCEPT {
+void JsonUiManager::onEndFrame() FL_NO_EXCEPT {
     processPendingUpdates();
 }
 
-void JsonUiManager::toJson(fl::json &doc) FL_NOEXCEPT {
+void JsonUiManager::toJson(fl::json &doc) FL_NO_EXCEPT {
     auto components = getComponents();
     for (const auto &component : components) {
         fl::json componentJson = fl::json::object();

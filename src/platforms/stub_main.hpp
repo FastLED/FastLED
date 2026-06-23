@@ -22,9 +22,9 @@
 #include "fl/stl/noexcept.h"
 #endif
 
-extern void init() FL_NOEXCEPT;
-extern void setup() FL_NOEXCEPT;
-extern void loop() FL_NOEXCEPT;
+extern void init() FL_NO_EXCEPT;
+extern void setup() FL_NO_EXCEPT;
+extern void loop() FL_NO_EXCEPT;
 
 // Note: The .ino file should be included BEFORE this file provides main()
 // The .ino file provides: void setup() and void loop()
@@ -72,11 +72,11 @@ bool ScopedEngineCleanup::exit_called = false;  // okay static definition in hea
 static bool g_should_stop = false;  // okay static in header
 
 // Function examples can call to signal completion
-inline void stop_loop() FL_NOEXCEPT {
+inline void stop_loop() FL_NO_EXCEPT {
     g_should_stop = true;
 }
 
-bool keep_going() FL_NOEXCEPT {
+bool keep_going() FL_NO_EXCEPT {
     // Check if example requested stop
     if (g_should_stop) {
         return false;
@@ -93,7 +93,7 @@ bool keep_going() FL_NOEXCEPT {
 
 // Helper function to set delay to zero for fast testing
 // Only sets delay to zero when FASTLED_STUB_MAIN_FAST_EXIT is defined
-static inline void maybe_set_delay_to_zero() FL_NOEXCEPT {
+static inline void maybe_set_delay_to_zero() FL_NO_EXCEPT {
 #if defined(FASTLED_STUB_MAIN_FAST_EXIT) && (!defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO))
     setDelayFunction([](u32 ms) {
         (void)ms; // Suppress unused parameter warning
@@ -101,13 +101,13 @@ static inline void maybe_set_delay_to_zero() FL_NOEXCEPT {
 #endif
 }
 
-void setup() FL_NOEXCEPT {
+void setup() FL_NO_EXCEPT {
     maybe_set_delay_to_zero();
     ::init();
     ::setup();
 }
 
-bool next_loop() FL_NOEXCEPT {
+bool next_loop() FL_NO_EXCEPT {
     loop();
     delay(0);  // Needed for watchdog timers not to fail
     return keep_going();
@@ -119,7 +119,7 @@ bool next_loop() FL_NOEXCEPT {
 // Only provide main() for non-Arduino platforms (stub platforms)
 // Real Arduino platforms (ESP32, etc.) have their own main() in the framework
 #if !defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO)
-int main() FL_NOEXCEPT {
+int main() FL_NO_EXCEPT {
     // Scoped cleanup - destructor calls EngineEvents::onExit() automatically
     fl::stub_main::ScopedEngineCleanup cleanup;
 

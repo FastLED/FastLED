@@ -73,9 +73,9 @@ namespace fl {
 
 
 // Variations on the functions in delay.h - w/a loop var passed in to preserve registers across calls by the optimizer/compiler
-template<int CYCLES> inline void _dc(FASTLED_REGISTER u8 & loopvar) FL_NOEXCEPT;
+template<int CYCLES> inline void _dc(FASTLED_REGISTER u8 & loopvar) FL_NO_EXCEPT;
 
-template<int _LOOP, int PAD> FASTLED_FORCE_INLINE void _dc_AVR(FASTLED_REGISTER u8 & loopvar) FL_NOEXCEPT {
+template<int _LOOP, int PAD> FASTLED_FORCE_INLINE void _dc_AVR(FASTLED_REGISTER u8 & loopvar) FL_NO_EXCEPT {
 	_dc<PAD>(loopvar);
 	// The convolution in here is to ensure that the state of the carry flag coming into the delay loop is preserved
 	asm __volatile__ (  "BRCS L_PC%=\n\t"
@@ -86,7 +86,7 @@ template<int _LOOP, int PAD> FASTLED_FORCE_INLINE void _dc_AVR(FASTLED_REGISTER 
 							[loopvar] "+d" (loopvar) : [_LOOP] "M" (_LOOP) : );
 }
 
-template<int CYCLES> FASTLED_FORCE_INLINE void _dc(FASTLED_REGISTER u8 & loopvar) FL_NOEXCEPT {
+template<int CYCLES> FASTLED_FORCE_INLINE void _dc(FASTLED_REGISTER u8 & loopvar) FL_NO_EXCEPT {
 	_dc_AVR<CYCLES/6,CYCLES%6>(loopvar);
 }
 template<> FASTLED_FORCE_INLINE void _dc<-6>(FASTLED_REGISTER u8 & ) {}
@@ -175,14 +175,14 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	CMinWait<WAIT_TIME> mWait;
 
 public:
-	virtual void init() FL_NOEXCEPT {
+	virtual void init() FL_NO_EXCEPT {
 		FastPin<DATA_PIN>::setOutput();
 	}
 
 	virtual u16 getMaxRefreshRate() const { return 400; }
 
 protected:
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NOEXCEPT {
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
 
 		mWait.wait();
 #if (!defined(FASTLED_ALLOW_INTERRUPTS) || FASTLED_ALLOW_INTERRUPTS == 0)

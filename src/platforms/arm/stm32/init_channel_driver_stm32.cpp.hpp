@@ -40,7 +40,7 @@ namespace detail {
 
 /// @brief Add HW SPI drivers if supported by platform (UNIFIED VERSION)
 static void addSpiHardwareIfPossible(ChannelManager& manager) {
-    FL_DBG("STM32: Registering unified HW SPI channel driver");
+    FL_DBG_F("STM32: Registering unified HW SPI channel driver");
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers;
     fl::vector<int> priorities;
@@ -50,7 +50,7 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
     // Collect SpiHw8 controllers (highest priority: 8)
     // ========================================================================
     const auto& hw8Controllers = SpiHw8::getAll();
-    FL_DBG("STM32: Found " << hw8Controllers.size() << " SpiHw8 controllers");
+    FL_DBG_F("STM32: Found %s SpiHw8 controllers", hw8Controllers.size());
 
     for (const auto& ctrl : hw8Controllers) {
         if (ctrl) {
@@ -64,7 +64,7 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
     // Collect SpiHw4 controllers (medium priority: 7)
     // ========================================================================
     const auto& hw4Controllers = SpiHw4::getAll();
-    FL_DBG("STM32: Found " << hw4Controllers.size() << " SpiHw4 controllers");
+    FL_DBG_F("STM32: Found %s SpiHw4 controllers", hw4Controllers.size());
 
     for (const auto& ctrl : hw4Controllers) {
         if (ctrl) {
@@ -78,7 +78,7 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
     // Collect SpiHw2 controllers (lower priority: 6)
     // ========================================================================
     const auto& hw2Controllers = SpiHw2::getAll();
-    FL_DBG("STM32: Found " << hw2Controllers.size() << " SpiHw2 controllers");
+    FL_DBG_F("STM32: Found %s SpiHw2 controllers", hw2Controllers.size());
 
     for (const auto& ctrl : hw2Controllers) {
         if (ctrl) {
@@ -110,14 +110,12 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
 
             manager.addDriver(maxPriority, adapter);
 
-            FL_DBG("STM32: Registered unified SPI driver with "
-                   << controllers.size() << " controllers (priority "
-                   << maxPriority << ")");
+            FL_DBG_F("STM32: Registered unified SPI driver with %s controllers (priority %s)", controllers.size(), maxPriority);
         } else {
-            FL_WARN("STM32: Failed to create unified SPI adapter");
+            FL_WARN_F("STM32: Failed to create unified SPI adapter");
         }
     } else {
-        FL_DBG("STM32: No SPI hardware controllers available");
+        FL_DBG_F("STM32: No SPI hardware controllers available");
     }
 }
 
@@ -130,7 +128,7 @@ namespace platforms {
 /// Called lazily on first access to ChannelManager::instance().
 /// Registers platform-specific drivers (SPI hardware) with the bus manager.
 void initChannelDrivers() {
-    FL_DBG("STM32: Lazy initialization of channel drivers");
+    FL_DBG_F("STM32: Lazy initialization of channel drivers");
 
     auto& manager = channelManager();
 
@@ -138,7 +136,7 @@ void initChannelDrivers() {
     // STM32 currently has no clockless drivers, so only SPI hardware is registered
     detail::addSpiHardwareIfPossible(manager);
 
-    FL_DBG("STM32: Channel drivers initialized");
+    FL_DBG_F("STM32: Channel drivers initialized");
 }
 
 } // namespace platforms

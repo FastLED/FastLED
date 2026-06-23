@@ -18,8 +18,8 @@ namespace detail {
 // On Windows, inline functions with static locals create per-DLL copies.
 // This registry ensures all DLLs share the same singleton instance.
 // Defined in singleton.cpp.hpp.
-void* singleton_registry_get(const char* key) FL_NOEXCEPT;
-void singleton_registry_set(const char* key, void* value) FL_NOEXCEPT;
+void* singleton_registry_get(const char* key) FL_NO_EXCEPT;
+void singleton_registry_set(const char* key, void* value) FL_NO_EXCEPT;
 
 } // namespace detail
 
@@ -38,7 +38,7 @@ void singleton_registry_set(const char* key, void* value) FL_NOEXCEPT;
 // LSAN COMPATIBILITY: Uses __lsan::ScopedDisabler to prevent false positives.
 template <typename T, int N = 0> class Singleton {
   public:
-    static T &instance() FL_NOEXCEPT {
+    static T &instance() FL_NO_EXCEPT {
         // Aligned char buffer storage — never destroyed
         struct FL_ALIGN_AS_T(alignof(T)) AlignedStorage {
             char data[sizeof(T)];
@@ -55,14 +55,14 @@ template <typename T, int N = 0> class Singleton {
         return *ptr;
     }
 
-    static T *instanceRef() FL_NOEXCEPT { return &instance(); }
+    static T *instanceRef() FL_NO_EXCEPT { return &instance(); }
 
-    Singleton(const Singleton &) FL_NOEXCEPT = delete;
-    Singleton &operator=(const Singleton &) FL_NOEXCEPT = delete;
+    Singleton(const Singleton &) FL_NO_EXCEPT = delete;
+    Singleton &operator=(const Singleton &) FL_NO_EXCEPT = delete;
 
   private:
-    Singleton() FL_NOEXCEPT = default;
-    ~Singleton() FL_NOEXCEPT = default;
+    Singleton() FL_NO_EXCEPT = default;
+    ~Singleton() FL_NO_EXCEPT = default;
 };
 
 // Cross-DLL singleton — WITH FL_PRETTY_FUNCTION registry. For use in header
@@ -78,7 +78,7 @@ template <typename T, int N = 0> class Singleton {
 // LSAN COMPATIBILITY: Uses __lsan::ScopedDisabler to prevent false positives.
 template <typename T, int N = 0> class SingletonShared {
   public:
-    static T &instance() FL_NOEXCEPT {
+    static T &instance() FL_NO_EXCEPT {
         // Check the process-wide registry first (handles cross-DLL sharing).
         // FL_PRETTY_FUNCTION produces a unique string per template instantiation
         // (includes template parameters in the signature).
@@ -92,16 +92,16 @@ template <typename T, int N = 0> class SingletonShared {
         return *ptr;
     }
 
-    static T *instanceRef() FL_NOEXCEPT { return &instance(); }
+    static T *instanceRef() FL_NO_EXCEPT { return &instance(); }
 
-    SingletonShared(const SingletonShared &) FL_NOEXCEPT = delete;
-    SingletonShared &operator=(const SingletonShared &) FL_NOEXCEPT = delete;
+    SingletonShared(const SingletonShared &) FL_NO_EXCEPT = delete;
+    SingletonShared &operator=(const SingletonShared &) FL_NO_EXCEPT = delete;
 
   private:
-    SingletonShared() FL_NOEXCEPT = default;
-    ~SingletonShared() FL_NOEXCEPT = default;
+    SingletonShared() FL_NO_EXCEPT = default;
+    ~SingletonShared() FL_NO_EXCEPT = default;
 
-    static T* instanceInner() FL_NOEXCEPT {
+    static T* instanceInner() FL_NO_EXCEPT {
         // Aligned char buffer storage — never destroyed
         struct FL_ALIGN_AS_T(alignof(T)) AlignedStorage {
             char data[sizeof(T)];
@@ -130,7 +130,7 @@ template <typename T, int N = 0> class SingletonShared {
 // LSAN COMPATIBILITY: Uses __lsan::ScopedDisabler to prevent false positives.
 template <typename T, int N = 0> class SingletonThreadLocal {
   public:
-    static T &instance() FL_NOEXCEPT {
+    static T &instance() FL_NO_EXCEPT {
         // Aligned char buffer storage — never destroyed
         struct FL_ALIGN_AS_T(alignof(ThreadLocal<T>)) AlignedStorage {
             char data[sizeof(ThreadLocal<T>)];
@@ -150,14 +150,14 @@ template <typename T, int N = 0> class SingletonThreadLocal {
         return ptr->access();
     }
 
-    static T *instanceRef() FL_NOEXCEPT { return &instance(); }
+    static T *instanceRef() FL_NO_EXCEPT { return &instance(); }
 
-    SingletonThreadLocal(const SingletonThreadLocal &) FL_NOEXCEPT = delete;
-    SingletonThreadLocal &operator=(const SingletonThreadLocal &) FL_NOEXCEPT = delete;
+    SingletonThreadLocal(const SingletonThreadLocal &) FL_NO_EXCEPT = delete;
+    SingletonThreadLocal &operator=(const SingletonThreadLocal &) FL_NO_EXCEPT = delete;
 
   private:
-    SingletonThreadLocal() FL_NOEXCEPT = default;
-    ~SingletonThreadLocal() FL_NOEXCEPT = default;
+    SingletonThreadLocal() FL_NO_EXCEPT = default;
+    ~SingletonThreadLocal() FL_NO_EXCEPT = default;
 };
 
 } // namespace fl

@@ -10,12 +10,12 @@ namespace fl {
 
 // Explicitly define constructor and destructor
 EngineEvents::EngineEvents() = default;
-EngineEvents::~EngineEvents() FL_NOEXCEPT = default;
+EngineEvents::~EngineEvents() FL_NO_EXCEPT = default;
 
 
 EngineEvents::Listener::Listener() {}
 
-EngineEvents::Listener::~Listener() FL_NOEXCEPT {
+EngineEvents::Listener::~Listener() FL_NO_EXCEPT {
 #if FASTLED_HAS_ENGINE_EVENTS
     EngineEvents *ptr = EngineEvents::getInstance();
     const bool has_listener = ptr && ptr->_hasListener(this);

@@ -13,7 +13,7 @@ FxEngine::FxEngine(u16 numLeds, bool interpolate)
     mEffects.reserve(FASTLED_FX_ENGINE_MAX_FX);
 }
 
-FxEngine::~FxEngine() FL_NOEXCEPT {}
+FxEngine::~FxEngine() FL_NO_EXCEPT {}
 
 void FxEngine::pushAudioFrame(const AudioFrame &frame) {
     mAudioBack.push_back(frame);

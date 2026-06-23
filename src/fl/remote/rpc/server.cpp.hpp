@@ -49,9 +49,12 @@ size_t Server::pull() {
         // Process request through handler
         fl::json response = mRequestHandler(request);
 
-        // Queue response (skip scheduled acknowledgments and async skip markers)
+        // Queue response (skip scheduled acknowledgments and async skip markers).
+        // `noEnqueue` is the new envelope marker (#3228); accept legacy `__skip`
+        // for one release of back-compat.
         bool isScheduledAck = response.contains("scheduled") && response["scheduled"].as_bool().value_or(false);
-        bool isAsyncSkip = response.contains("__skip") && response["__skip"].as_bool().value_or(false);
+        bool isAsyncSkip = (response.contains("noEnqueue") && response["noEnqueue"].as_bool().value_or(false))
+                       || (response.contains("__skip") && response["__skip"].as_bool().value_or(false));
         if (!response.is_null() && !isScheduledAck && !isAsyncSkip) {
             mOutgoingQueue.push_back(fl::move(response));
         }

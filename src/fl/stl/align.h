@@ -123,7 +123,7 @@
 namespace fl {
 
 template <fl::size_t N, typename T>
-inline T *assume_aligned(T *ptr) FL_NOEXCEPT {
+inline T *assume_aligned(T *ptr) FL_NO_EXCEPT {
 #if defined(FL_IS_AVR)
     return ptr;
 #elif defined(FL_IS_CLANG) || defined(FL_IS_GCC)
@@ -139,7 +139,7 @@ inline T *assume_aligned(T *ptr) FL_NOEXCEPT {
 }
 
 template <fl::size_t N, typename T>
-inline const T *assume_aligned(const T *ptr) FL_NOEXCEPT {
+inline const T *assume_aligned(const T *ptr) FL_NO_EXCEPT {
 #if defined(FL_IS_AVR)
     return ptr;
 #elif defined(FL_IS_CLANG) || defined(FL_IS_GCC)
@@ -163,12 +163,12 @@ class aligned_ptr {
     T *mPtr;
 
   public:
-    aligned_ptr() FL_NOEXCEPT : mPtr(nullptr) {}
-    explicit aligned_ptr(T *p) FL_NOEXCEPT : mPtr(assume_aligned<N>(p)) {}
+    aligned_ptr() FL_NO_EXCEPT : mPtr(nullptr) {}
+    explicit aligned_ptr(T *p) FL_NO_EXCEPT : mPtr(assume_aligned<N>(p)) {}
 
-    T *get() const FL_NOEXCEPT { return assume_aligned<N>(mPtr); }
-    T &operator[](fl::size_t i) const FL_NOEXCEPT { return get()[i]; }
-    explicit operator bool() const FL_NOEXCEPT { return mPtr != nullptr; }
+    T *get() const FL_NO_EXCEPT { return assume_aligned<N>(mPtr); }
+    T &operator[](fl::size_t i) const FL_NO_EXCEPT { return get()[i]; }
+    explicit operator bool() const FL_NO_EXCEPT { return mPtr != nullptr; }
 };
 
 } // namespace fl

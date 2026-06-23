@@ -123,6 +123,10 @@ class RunContext:
     # Mode flags
     simd_test_mode: bool
     coroutine_test_mode: bool
+    ieee754_test_mode: bool
+    # Wave2D perf benchmark — None disables, otherwise (W, H).
+    # See issue #3124 for the planned --perf-XX convention rename.
+    wave2d_perf_grid: tuple[int, int] | None
     net_server_mode: bool
     net_client_mode: bool
     net_loopback_mode: bool
@@ -147,6 +151,40 @@ class RunContext:
     effective_rx_pin: int | None = None
     discovery_client: Any = None
     pins_discovered: bool = False
+
+    # `--timeout N` is a TOTAL post-flash budget, not a per-call timeout.
+    # `deadline_epoch` is set to `time.monotonic() + timeout_seconds`
+    # immediately after deploy returns and the board has entered its
+    # pre-connect state. Every downstream RPC call computes its own
+    # per-call budget as `remaining_seconds()` so the user-supplied
+    # `--timeout` is honored as a hard wall. A wrapper-level watchdog
+    # task (`_watchdog_task`) fires at `deadline_epoch + 20s` to force
+    # an error + serial-port release if normal teardown wedges.
+    deadline_epoch: float | None = None
+    _watchdog_task: Any = None  # asyncio.Task[None] set by start_watchdog()
+
+    def start_timeout_epoch(self) -> None:
+        """Stamp the post-flash deadline. Call exactly once, after deploy."""
+        import time as _time
+
+        self.deadline_epoch = _time.monotonic() + self.timeout_seconds
+
+    def remaining_seconds(self, *, minimum: float = 0.0) -> float:
+        """Time left until the user-supplied --timeout expires.
+
+        Returns 0.0 if the deadline has already passed (so an RPC call
+        will fail fast rather than block). `minimum` clamps the returned
+        value upward for callers that need a non-zero budget to do
+        anything useful at all (e.g. a 0.5 s floor for ping).
+        """
+        import time as _time
+
+        if self.deadline_epoch is None:
+            # Not in a deadline-tracked phase (e.g. compile-only).
+            # Fall back to the full timeout so legacy callers still work.
+            return max(minimum, float(self.timeout_seconds))
+        remaining = self.deadline_epoch - _time.monotonic()
+        return max(minimum, remaining)
 
 
 # ============================================================

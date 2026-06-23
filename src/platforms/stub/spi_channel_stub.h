@@ -54,7 +54,7 @@ protected:
     virtual void showPixels(PixelController<RGB_ORDER>& pixels) override
     {
         if (!mDriver) {
-            FL_WARN_EVERY(100, "No Engine");
+            FL_WARN_F_EVERY(100, "No Engine");
             return;
         }
         // Wait for previous transmission to complete and release buffer
@@ -63,10 +63,10 @@ protected:
         u32 lastWarnTime = startTime;
         if (mChannelData->isInUse()) {
 
-                FL_WARN_EVERY(100, "ClocklessSPI(stub): driver should have finished transmitting by now - waiting");
+                FL_WARN_F_EVERY(100, "ClocklessSPI(stub): driver should have finished transmitting by now - waiting");
                 bool finished = mDriver->waitForReady();
                 if (!finished) {
-                    FL_ERROR("ClocklessSPI(stub): Engine still busy after " << fl::millis() - startTime << "ms");
+                    FL_ERROR_F("ClocklessSPI(stub): Engine still busy after %sms", fl::millis() - startTime);
                     return;
                 }
 
@@ -83,7 +83,7 @@ protected:
         mDriver->enqueue(mChannelData);
     }
 
-    static fl::shared_ptr<IChannelDriver> getStubSpiEngine() FL_NOEXCEPT {
+    static fl::shared_ptr<IChannelDriver> getStubSpiEngine() FL_NO_EXCEPT {
         // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
         // the `BusTraits<Bus::STUB>` singleton. Stub builds route every
         // clockless/SPI chipset through the same no-op driver. Naming the

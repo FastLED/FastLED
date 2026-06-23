@@ -254,7 +254,7 @@ void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg) {
                     color.push_back(b);
                     seg.mColors.push_back(color);
                 } else {
-                    FL_WARN("WLED: invalid hex color string: " << hexStr);
+                    FL_WARN_F("WLED: invalid hex color string: %s", hexStr);
                 }
             }
         }
@@ -297,13 +297,13 @@ void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg) {
                     char* endptr;
                     long startVal = fl::strtol(startStr.c_str(), &endptr, 10);
                     if (endptr == startStr.c_str() || startVal < 0) {
-                        FL_WARN("WLED: invalid range start index: " << startStr);
+                        FL_WARN_F("WLED: invalid range start index: %s", startStr);
                         continue;
                     }
 
                     long endVal = fl::strtol(endStr.c_str(), &endptr, 10);
                     if (endptr == endStr.c_str() || endVal < 0) {
-                        FL_WARN("WLED: invalid range end index: " << endStr);
+                        FL_WARN_F("WLED: invalid range end index: %s", endStr);
                         continue;
                     }
 
@@ -314,7 +314,7 @@ void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg) {
                     char* endptr;
                     long idxVal = fl::strtol(indexStr.c_str(), &endptr, 10);
                     if (endptr == indexStr.c_str() || idxVal < 0) {
-                        FL_WARN("WLED: invalid LED index: " << indexStr);
+                        FL_WARN_F("WLED: invalid LED index: %s", indexStr);
                         continue;
                     }
                     startIdx = endIdx = static_cast<size_t>(idxVal);
@@ -328,7 +328,7 @@ void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg) {
             // Parse hex color
             u8 r, g, b;
             if (!parseHexColor(hexStr, r, g, b)) {
-                FL_WARN("WLED: invalid hex color in individual LED: " << hexStr);
+                FL_WARN_F("WLED: invalid hex color in individual LED: %s", hexStr);
                 continue;
             }
 

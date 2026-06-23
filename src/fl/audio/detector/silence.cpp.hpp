@@ -24,7 +24,7 @@ Silence::Silence()
     mRMSHistory.reserve(mHistorySize);
 }
 
-Silence::~Silence() FL_NOEXCEPT = default;
+Silence::~Silence() FL_NO_EXCEPT = default;
 
 void Silence::update(shared_ptr<Context> context) {
     mCurrentRMS = context->getRMS();

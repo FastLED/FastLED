@@ -20,11 +20,11 @@ class DigitalPin {
     };
 
     DigitalPin(int pin);
-    ~DigitalPin() FL_NOEXCEPT;
-    DigitalPin(const DigitalPin &other) FL_NOEXCEPT;
-    DigitalPin &operator=(const DigitalPin &other) FL_NOEXCEPT;
+    ~DigitalPin() FL_NO_EXCEPT;
+    DigitalPin(const DigitalPin &other) FL_NO_EXCEPT;
+    DigitalPin &operator=(const DigitalPin &other) FL_NO_EXCEPT;
 
-    DigitalPin(DigitalPin &&other) FL_NOEXCEPT = delete;
+    DigitalPin(DigitalPin &&other) FL_NO_EXCEPT = delete;
 
     void setPinMode(Mode mode);
     bool high() const;  // true if high, false if low

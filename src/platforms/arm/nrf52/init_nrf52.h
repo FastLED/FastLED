@@ -29,7 +29,7 @@ namespace platforms {
 /// multiple times (subsequent calls are no-ops).
 ///
 /// @note Implementation is in src/platforms/arm/nrf52/init_nrf52.cpp
-void init() FL_NOEXCEPT;
+void init() FL_NO_EXCEPT;
 
 } // namespace platforms
 } // namespace fl

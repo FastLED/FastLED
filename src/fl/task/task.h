@@ -85,7 +85,7 @@ auto t = fl::task::coroutine({
             // Process the data
             process_data(data);
         } else {
-            FL_WARN("Fetch failed: " << result.error().message);
+            FL_WARN_F("Fetch failed: %s", result.error().message);
         }
 
         // Task completes and automatically cleans up
@@ -140,84 +140,84 @@ class Handle {
 public:
 
     // Default constructor
-    Handle() FL_NOEXCEPT = default;
+    Handle() FL_NO_EXCEPT = default;
 
     // Copy and Move semantics (now possible with shared_ptr)
-    Handle(const Handle&) FL_NOEXCEPT = default;
-    Handle& operator=(const Handle&) FL_NOEXCEPT = default;
-    Handle(Handle&&) FL_NOEXCEPT = default;
-    Handle& operator=(Handle&&) FL_NOEXCEPT = default;
+    Handle(const Handle&) FL_NO_EXCEPT = default;
+    Handle& operator=(const Handle&) FL_NO_EXCEPT = default;
+    Handle(Handle&&) FL_NO_EXCEPT = default;
+    Handle& operator=(Handle&&) FL_NO_EXCEPT = default;
 
     // Constructor from impl - public because ITaskImpl is only forward-declared
     // in the header, making this effectively private to external consumers
-    explicit Handle(shared_ptr<ITaskImpl> impl) FL_NOEXCEPT;
+    explicit Handle(shared_ptr<ITaskImpl> impl) FL_NO_EXCEPT;
 
     // Fluent API
-    Handle& then(function<void()> on_then) FL_NOEXCEPT;
-    Handle& catch_(function<void(const Error&)> on_catch) FL_NOEXCEPT;
-    Handle& cancel() FL_NOEXCEPT;
+    Handle& then(function<void()> on_then) FL_NO_EXCEPT;
+    Handle& catch_(function<void(const Error&)> on_catch) FL_NO_EXCEPT;
+    Handle& cancel() FL_NO_EXCEPT;
 
     // Getters
-    int id() const FL_NOEXCEPT;
-    bool has_then() const FL_NOEXCEPT;
-    bool has_catch() const FL_NOEXCEPT;
-    string trace_label() const FL_NOEXCEPT;
-    TaskType type() const FL_NOEXCEPT;
-    int interval_ms() const FL_NOEXCEPT;
-    void set_interval_ms(int interval_ms) FL_NOEXCEPT;
-    u32 last_run_time() const FL_NOEXCEPT;
-    void set_last_run_time(u32 time) FL_NOEXCEPT;
-    bool ready_to_run(u32 current_time) const FL_NOEXCEPT;
-    bool is_valid() const FL_NOEXCEPT;
-    bool isCoroutine() const FL_NOEXCEPT;
+    int id() const FL_NO_EXCEPT;
+    bool has_then() const FL_NO_EXCEPT;
+    bool has_catch() const FL_NO_EXCEPT;
+    string trace_label() const FL_NO_EXCEPT;
+    TaskType type() const FL_NO_EXCEPT;
+    int interval_ms() const FL_NO_EXCEPT;
+    void set_interval_ms(int interval_ms) FL_NO_EXCEPT;
+    u32 last_run_time() const FL_NO_EXCEPT;
+    void set_last_run_time(u32 time) FL_NO_EXCEPT;
+    bool ready_to_run(u32 current_time) const FL_NO_EXCEPT;
+    bool is_valid() const FL_NO_EXCEPT;
+    bool isCoroutine() const FL_NO_EXCEPT;
 
     // Coroutine control (only valid if isCoroutine() == true)
-    void stop() FL_NOEXCEPT;
-    bool isRunning() const FL_NOEXCEPT;
+    void stop() FL_NO_EXCEPT;
+    bool isRunning() const FL_NO_EXCEPT;
 
 private:
     friend class Scheduler;
 
     // Internal methods for Scheduler (friend access only)
-    void _set_id(int id) FL_NOEXCEPT;
-    int _id() const FL_NOEXCEPT;
-    bool _is_canceled() const FL_NOEXCEPT;
-    bool _ready_to_run(u32 current_time) const FL_NOEXCEPT;
-    bool _ready_to_run_frame_task(u32 current_time) const FL_NOEXCEPT;
-    void _set_last_run_time(u32 time) FL_NOEXCEPT;
-    bool _has_then() const FL_NOEXCEPT;
-    void _execute_then() FL_NOEXCEPT;
-    void _execute_catch(const Error& error) FL_NOEXCEPT;
-    TaskType _type() const FL_NOEXCEPT;
-    string _trace_label() const FL_NOEXCEPT;
+    void _set_id(int id) FL_NO_EXCEPT;
+    int _id() const FL_NO_EXCEPT;
+    bool _is_canceled() const FL_NO_EXCEPT;
+    bool _ready_to_run(u32 current_time) const FL_NO_EXCEPT;
+    bool _ready_to_run_frame_task(u32 current_time) const FL_NO_EXCEPT;
+    void _set_last_run_time(u32 time) FL_NO_EXCEPT;
+    bool _has_then() const FL_NO_EXCEPT;
+    void _execute_then() FL_NO_EXCEPT;
+    void _execute_catch(const Error& error) FL_NO_EXCEPT;
+    TaskType _type() const FL_NO_EXCEPT;
+    string _trace_label() const FL_NO_EXCEPT;
 
     shared_ptr<ITaskImpl> mImpl;
 };
 
 // Free function builders (were static methods on class fl::task)
-Handle every_ms(int interval_ms) FL_NOEXCEPT;
-Handle every_ms(int interval_ms, const TracePoint& trace) FL_NOEXCEPT;
+Handle every_ms(int interval_ms) FL_NO_EXCEPT;
+Handle every_ms(int interval_ms, const TracePoint& trace) FL_NO_EXCEPT;
 
-Handle at_framerate(int fps) FL_NOEXCEPT;
-Handle at_framerate(int fps, const TracePoint& trace) FL_NOEXCEPT;
+Handle at_framerate(int fps) FL_NO_EXCEPT;
+Handle at_framerate(int fps, const TracePoint& trace) FL_NO_EXCEPT;
 
 // For most cases you want after_frame() instead of before_frame(), unless you
 // are doing operations that need to happen right before the frame is rendered.
 // Most of the time for ui stuff (button clicks, etc) you want after_frame(), so it
 // can be available for the next iteration of loop().
-Handle before_frame() FL_NOEXCEPT;
-Handle before_frame(const TracePoint& trace) FL_NOEXCEPT;
+Handle before_frame() FL_NO_EXCEPT;
+Handle before_frame(const TracePoint& trace) FL_NO_EXCEPT;
 
 // Example: auto t = fl::task::after_frame().then([]() {...}
-Handle after_frame() FL_NOEXCEPT;
-Handle after_frame(const TracePoint& trace) FL_NOEXCEPT;
+Handle after_frame() FL_NO_EXCEPT;
+Handle after_frame(const TracePoint& trace) FL_NO_EXCEPT;
 // Example: auto t = fl::task::after_frame([]() {...}
-Handle after_frame(function<void()> on_then) FL_NOEXCEPT;
-Handle after_frame(function<void()> on_then, const TracePoint& trace) FL_NOEXCEPT;
-Handle coroutine(const CoroutineConfig& config) FL_NOEXCEPT;
+Handle after_frame(function<void()> on_then) FL_NO_EXCEPT;
+Handle after_frame(function<void()> on_then, const TracePoint& trace) FL_NO_EXCEPT;
+Handle coroutine(const CoroutineConfig& config) FL_NO_EXCEPT;
 
 // Static coroutine control
-void exit_current() FL_NOEXCEPT;
+void exit_current() FL_NO_EXCEPT;
 
 /// @brief Internal RAII wrapper for OS-level tasks (implementation detail)
 /// @note Users should use fl::task::coroutine() instead of Coroutine directly

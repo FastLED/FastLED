@@ -46,7 +46,7 @@ float fixed_to_float(i16 f) {
 // it as Q15 here lets the kernel use a single Q15 multiply per cell and
 // opens the door to non-power-of-two damping if the public API ever
 // needs it (today it's still int-only). damp <= 0 means no decay.
-i16 compute_damp_decay_q15(int damp) FL_NOEXCEPT {
+i16 compute_damp_decay_q15(int damp) FL_NO_EXCEPT {
     if (damp <= 0) return INT16_POS;  // ~1.0 — no decay
     const float decay = 1.0f - 1.0f / static_cast<float>(1 << damp);
     return float_to_fixed(decay);
@@ -54,7 +54,7 @@ i16 compute_damp_decay_q15(int damp) FL_NOEXCEPT {
 } // namespace wave_detail
 
 WaveSimulation1D_Real::WaveSimulation1D_Real(u32 len, float courantSq,
-                                             int dampening) FL_NOEXCEPT
+                                             int dampening) FL_NO_EXCEPT
     : length(len),
       grid1(length + 2), // Initialize vector with correct size
       grid2(length + 2), // Initialize vector with correct size
@@ -74,7 +74,7 @@ void WaveSimulation1D_Real::setSpeed(float something) {
     mCourantSq = wave_detail::float_to_fixed(fl::clamp(something, 0.0f, 1.0f));
 }
 
-void WaveSimulation1D_Real::setDampening(int damp) FL_NOEXCEPT {
+void WaveSimulation1D_Real::setDampening(int damp) FL_NO_EXCEPT {
     mDampenening = damp;
     mDampDecayQ15 = wave_detail::compute_damp_decay_q15(damp);
 }
@@ -87,7 +87,7 @@ float WaveSimulation1D_Real::getSpeed() const {
 
 i16 WaveSimulation1D_Real::geti16(fl::size x) const {
     if (x >= length) {
-        FL_WARN("Out of range.");
+        FL_WARN_F("Out of range.");
         return 0;
     }
     const i16 *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
@@ -96,7 +96,7 @@ i16 WaveSimulation1D_Real::geti16(fl::size x) const {
 
 i16 WaveSimulation1D_Real::geti16Previous(fl::size x) const {
     if (x >= length) {
-        FL_WARN("Out of range.");
+        FL_WARN_F("Out of range.");
         return 0;
     }
     const i16 *prev = (whichGrid == 0) ? grid2.data() : grid1.data();
@@ -105,7 +105,7 @@ i16 WaveSimulation1D_Real::geti16Previous(fl::size x) const {
 
 float WaveSimulation1D_Real::getf(fl::size x) const {
     if (x >= length) {
-        FL_WARN("Out of range.");
+        FL_WARN_F("Out of range.");
         return 0.0f;
     }
     // Retrieve value from the active grid (offset by 1 for boundary).
@@ -117,7 +117,7 @@ bool WaveSimulation1D_Real::has(fl::size x) const { return (x < length); }
 
 void WaveSimulation1D_Real::set(fl::size x, float value) {
     if (x >= length) {
-        FL_WARN("warning X value too high");
+        FL_WARN_F("warning X value too high");
         return;
     }
     i16 *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
@@ -180,7 +180,7 @@ void WaveSimulation1D_Real::update() {
 }
 
 WaveSimulation2D_Real::WaveSimulation2D_Real(u32 W, u32 H,
-                                             float speed, float dampening) FL_NOEXCEPT
+                                             float speed, float dampening) FL_NO_EXCEPT
     : width(W), height(H), stride(W + 2),
       grid1((W + 2) * (H + 2)),
       grid2((W + 2) * (H + 2)), whichGrid(0),
@@ -193,12 +193,30 @@ WaveSimulation2D_Real::WaveSimulation2D_Real(u32 W, u32 H,
       mDampening(static_cast<int>(dampening)),
       mDampDecayQ15(wave_detail::compute_damp_decay_q15(static_cast<int>(dampening))) {}
 
+// PSRAM-backed overload. Identical to the SRAM constructor above but
+// constructs grid1 / grid2 with the PSRAM memory resource so the
+// (potentially large) cell buffers don't compete with SRAM. The grids
+// then `resize()` to the requested cell count from PSRAM.
+WaveSimulation2D_Real::WaveSimulation2D_Real(PsramStorage,
+                                             u32 W, u32 H,
+                                             float speed,
+                                             float dampening) FL_NO_EXCEPT
+    : width(W), height(H), stride(W + 2),
+      grid1(psram_memory_resource()),
+      grid2(psram_memory_resource()), whichGrid(0),
+      mCourantSq(wave_detail::float_to_fixed(fl::clamp(speed, 0.0f, 0.5f))),
+      mDampening(static_cast<int>(dampening)),
+      mDampDecayQ15(wave_detail::compute_damp_decay_q15(static_cast<int>(dampening))) {
+    grid1.resize((W + 2) * (H + 2));
+    grid2.resize((W + 2) * (H + 2));
+}
+
 void WaveSimulation2D_Real::setSpeed(float something) {
     // See constructor for clamp rationale.
     mCourantSq = wave_detail::float_to_fixed(fl::clamp(something, 0.0f, 0.5f));
 }
 
-void WaveSimulation2D_Real::setDampening(int damp) FL_NOEXCEPT {
+void WaveSimulation2D_Real::setDampening(int damp) FL_NO_EXCEPT {
     mDampening = damp;
     mDampDecayQ15 = wave_detail::compute_damp_decay_q15(damp);
 }
@@ -211,7 +229,7 @@ float WaveSimulation2D_Real::getSpeed() const {
 
 float WaveSimulation2D_Real::getf(fl::size x, fl::size y) const {
     if (x >= width || y >= height) {
-        FL_WARN("Out of range: " << x << ", " << y);
+        FL_WARN_F("Out of range: %s, %s", x, y);
         return 0.0f;
     }
     const i16 *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
@@ -220,7 +238,7 @@ float WaveSimulation2D_Real::getf(fl::size x, fl::size y) const {
 
 i16 WaveSimulation2D_Real::geti16(fl::size x, fl::size y) const {
     if (x >= width || y >= height) {
-        FL_WARN("Out of range: " << x << ", " << y);
+        FL_WARN_F("Out of range: %s, %s", x, y);
         return 0;
     }
     const i16 *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
@@ -229,7 +247,7 @@ i16 WaveSimulation2D_Real::geti16(fl::size x, fl::size y) const {
 
 i16 WaveSimulation2D_Real::geti16Previous(fl::size x, fl::size y) const {
     if (x >= width || y >= height) {
-        FL_WARN("Out of range: " << x << ", " << y);
+        FL_WARN_F("Out of range: %s, %s", x, y);
         return 0;
     }
     const i16 *prev = (whichGrid == 0 ? grid2.data() : grid1.data());
@@ -247,7 +265,7 @@ void WaveSimulation2D_Real::setf(fl::size x, fl::size y, float value) {
 
 void WaveSimulation2D_Real::seti16(fl::size x, fl::size y, i16 value) {
     if (x >= width || y >= height) {
-        FL_WARN("Out of range: " << x << ", " << y);
+        FL_WARN_F("Out of range: %s, %s", x, y);
         return;
     }
     i16 *curr = (whichGrid == 0 ? grid1.data() : grid2.data());

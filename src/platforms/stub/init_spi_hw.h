@@ -19,7 +19,7 @@ namespace platforms {
 /// for testing environments.
 ///
 /// Implementation is in spi_hw_manager_stub.cpp.hpp
-void initSpiHardware() FL_NOEXCEPT;
+void initSpiHardware() FL_NO_EXCEPT;
 
 }  // namespace platforms
 }  // namespace fl
@@ -31,7 +31,7 @@ namespace fl {
 namespace platforms {
 
 /// @brief No-op SPI hardware initialization for non-testing platforms
-inline void initSpiHardware() FL_NOEXCEPT {
+inline void initSpiHardware() FL_NO_EXCEPT {
     // No-op: Not in testing mode
 }
 

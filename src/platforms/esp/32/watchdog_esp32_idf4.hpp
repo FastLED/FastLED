@@ -70,7 +70,7 @@ constexpr u32 USB_DISCONNECT_DELAY_US = 150000;
 namespace detail {
 
 // Performs hardware-level USB disconnect sequence
-void disconnect_usb_hardware() FL_NOEXCEPT {
+void disconnect_usb_hardware() FL_NO_EXCEPT {
 #if HAS_USB_SERIAL_JTAG
     // Clear D+ pullup to signal USB disconnect
     CLEAR_PERI_REG_MASK(USB_SERIAL_JTAG_CONF0_REG, USB_SERIAL_JTAG_DP_PULLUP);
@@ -86,24 +86,24 @@ void disconnect_usb_hardware() FL_NOEXCEPT {
 }
 
 // Invokes user callback if registered
-void invoke_user_callback() FL_NOEXCEPT {
+void invoke_user_callback() FL_NO_EXCEPT {
     if (s_user_callback != nullptr) {
         s_user_callback(s_user_data);
     }
 }
 
 // Common reset handler logic
-void handle_system_reset(const char* handler_name) FL_NOEXCEPT {
+void handle_system_reset(const char* handler_name) FL_NO_EXCEPT {
     invoke_user_callback();
 
-    FL_DBG("\n[" << handler_name << "] System reset detected - performing safe USB disconnect");
+    FL_DBG_F("\n[%s] System reset detected - performing safe USB disconnect", handler_name);
 
     disconnect_usb_hardware();
 
 #if HAS_USB_SERIAL_JTAG
-    FL_DBG("[" << handler_name << "] ✓ USB disconnected - proceeding with reset");
+    FL_DBG_F("[%s] ✓ USB disconnected - proceeding with reset", handler_name);
 #else
-    FL_DBG("[" << handler_name << "] No USB Serial JTAG hardware - using default reset behavior");
+    FL_DBG_F("[%s] No USB Serial JTAG hardware - using default reset behavior", handler_name);
 #endif
 }
 
@@ -119,7 +119,7 @@ namespace {
 // Returns true on successful deinit (or if no deinit is needed because the
 // scheduler isn't running), false if `esp_task_wdt_deinit()` reported an
 // error (e.g., other tasks still subscribed, already deinitialized).
-bool deinit_existing_watchdog() FL_NOEXCEPT {
+bool deinit_existing_watchdog() FL_NO_EXCEPT {
     if (xTaskGetSchedulerState() != taskSCHEDULER_RUNNING) {
         return true;
     }
@@ -128,7 +128,7 @@ bool deinit_existing_watchdog() FL_NOEXCEPT {
 }
 
 // Initializes watchdog with specified timeout
-bool init_task_watchdog(u32 timeout_ms) FL_NOEXCEPT {
+bool init_task_watchdog(u32 timeout_ms) FL_NO_EXCEPT {
     // ESP-IDF v4.x uses simple parameters: esp_task_wdt_init(timeout_seconds, panic)
     // Convert milliseconds to seconds (ESP-IDF v4.x uses seconds, not milliseconds)
     u32 timeout_s = (timeout_ms + 999) / 1000;  // Round up to nearest second
@@ -138,7 +138,7 @@ bool init_task_watchdog(u32 timeout_ms) FL_NOEXCEPT {
         err = ESP_OK;  // Already armed; keep the existing IDF4 timeout.
     }
     if (err != ESP_OK) {
-        FL_DBG("[WATCHDOG] Failed to initialize (error: " << err << ")");
+        FL_DBG_F("[WATCHDOG] Failed to initialize (error: %s)", err);
         return false;
     }
 
@@ -146,20 +146,20 @@ bool init_task_watchdog(u32 timeout_ms) FL_NOEXCEPT {
 }
 
 // Logs watchdog configuration status
-void log_watchdog_status(u32 timeout_ms, watchdog_callback_t callback) FL_NOEXCEPT {
-    FL_DBG("[WATCHDOG] ✓ " << timeout_ms << "ms watchdog active with reset on timeout");
+void log_watchdog_status(u32 timeout_ms, watchdog_callback_t callback) FL_NO_EXCEPT {
+    FL_DBG_F("[WATCHDOG] ✓ %sms watchdog active with reset on timeout", timeout_ms);
     if (callback != nullptr) {
-        FL_DBG("[WATCHDOG] ℹ️  User callback registered");
+        FL_DBG_F("[WATCHDOG] ℹ️  User callback registered");
     }
-    FL_DBG("[WATCHDOG] Monitors the loop task plus idle-task CPU starvation");
+    FL_DBG_F("[WATCHDOG] Monitors the loop task plus idle-task CPU starvation");
 }
 
 } // anonymous namespace
 
 void watchdog_setup(u32 timeout_ms,
                     watchdog_callback_t callback,
-                    void* user_data) FL_NOEXCEPT {
-    FL_DBG("\n[WATCHDOG] Configuring ESP32 custom " << timeout_ms << "ms watchdog (IDF v4.x)");
+                    void* user_data) FL_NO_EXCEPT {
+    FL_DBG_F("\n[WATCHDOG] Configuring ESP32 custom %sms watchdog (IDF v4.x)", timeout_ms);
 
     // Store callback for reset handlers
     detail::s_user_callback = callback;
@@ -176,7 +176,7 @@ void watchdog_setup(u32 timeout_ms,
     log_watchdog_status(timeout_ms, callback);
 }
 
-bool watchdog_disable() FL_NOEXCEPT {
+bool watchdog_disable() FL_NO_EXCEPT {
     if (!deinit_existing_watchdog()) {
         return false;
     }

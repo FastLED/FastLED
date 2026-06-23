@@ -2,7 +2,7 @@
 
 #include "fl/stl/json.h"
 #include "fl/remote/rpc/type_conversion_result.h"
-#include "fl/remote/rpc/json_visitors.h"
+#include "fl/remote/rpc/json_dispatch.h"  // type-erased conversion cores (#3247)
 #include "fl/stl/tuple.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/string.h"
@@ -18,7 +18,7 @@ namespace fl {
 struct ConstCharPtrWrapper {
     fl::string value;
 
-    ConstCharPtrWrapper() FL_NOEXCEPT = default;
+    ConstCharPtrWrapper() FL_NO_EXCEPT = default;
     ConstCharPtrWrapper(const fl::string& s) : value(s) {}
     ConstCharPtrWrapper(fl::string&& s) : value(fl::move(s)) {}
 
@@ -32,7 +32,7 @@ template <typename T>
 struct ConstSpanWrapper {
     fl::vector<T> value;
 
-    ConstSpanWrapper() FL_NOEXCEPT = default;
+    ConstSpanWrapper() FL_NO_EXCEPT = default;
     ConstSpanWrapper(fl::vector<T>&& v) : value(fl::move(v)) {}
     ConstSpanWrapper(const fl::vector<T>& v) : value(v) {}
 
@@ -62,75 +62,78 @@ struct JsonToType {
     }
 };
 
-// Integer conversion (excluding bool) - uses visitor pattern
+// Integer conversion (excluding bool) - dispatches through the shared
+// non-template `json_convert_to_i64_core` (FastLED #3247). Per-T narrowing
+// + overflow detection happen here; the heavy variant-walking lives once
+// in the core.
 template <typename T>
 struct JsonToType<T, typename fl::enable_if<fl::is_integral<T>::value && !fl::is_same<T, bool>::value>::type> {
     static fl::tuple<T, TypeConversionResult> convert(const json& j) {
-        // Access internal json_value directly instead of re-parsing
         const json_value* val = j.internal_value();
         if (!val) {
             TypeConversionResult result;
             result.setError("failed to access JSON value");
             return fl::make_tuple(T(), result);
         }
-
-        JsonToIntegerVisitor<T> visitor;
-        val->data.visit(visitor);
-        return fl::make_tuple(visitor.mValue, visitor.mResult);
+        fl::i64 raw = 0;
+        TypeConversionResult result = json_convert_to_i64_core(*val, &raw);
+        T narrowed = static_cast<T>(raw);
+        if (static_cast<fl::i64>(narrowed) != raw) {
+            result.addWarning(fl::string("integer overflow/truncation: ") +
+                              fl::to_string(raw) + " converted to " +
+                              fl::to_string(static_cast<fl::i64>(narrowed)));
+        }
+        return fl::make_tuple(narrowed, result);
     }
 };
 
-// Boolean conversion - uses visitor pattern
+// Boolean conversion - dispatches through `json_convert_to_bool_core`.
 template <>
 struct JsonToType<bool, void> {
     static fl::tuple<bool, TypeConversionResult> convert(const json& j) {
-        // Access internal json_value directly instead of re-parsing
         const json_value* val = j.internal_value();
         if (!val) {
             TypeConversionResult result;
             result.setError("failed to access JSON value");
             return fl::make_tuple(bool(false), result);
         }
-
-        JsonToBoolVisitor visitor;
-        val->data.visit(visitor);
-        return fl::make_tuple(visitor.mValue, visitor.mResult);
+        bool out = false;
+        TypeConversionResult result = json_convert_to_bool_core(*val, &out);
+        return fl::make_tuple(out, result);
     }
 };
 
-// Float/double conversion - uses visitor pattern
+// Float / double conversion - dispatches through `json_convert_to_float_core`.
+// The core works in float precision (no double soft-FP on no-FPU targets);
+// the per-T narrowing here lifts to double for `T == double` if requested.
 template <typename T>
 struct JsonToType<T, typename fl::enable_if<fl::is_floating_point<T>::value>::type> {
     static fl::tuple<T, TypeConversionResult> convert(const json& j) {
-        // Access internal json_value directly instead of re-parsing
         const json_value* val = j.internal_value();
         if (!val) {
             TypeConversionResult result;
             result.setError("failed to access JSON value");
             return fl::make_tuple(T(), result);
         }
-
-        JsonToFloatVisitor<T> visitor;
-        val->data.visit(visitor);
-        return fl::make_tuple(visitor.mValue, visitor.mResult);
+        float raw = 0.0f;
+        TypeConversionResult result = json_convert_to_float_core(*val, &raw);
+        return fl::make_tuple(static_cast<T>(raw), result);
     }
 };
 
-// String conversion - uses visitor pattern
+// String conversion - dispatches through `json_convert_to_string_core`.
 template <>
 struct JsonToType<fl::string, void> {
     static fl::tuple<fl::string, TypeConversionResult> convert(const json& j) {
-        // Access internal json_value directly instead of re-parsing
         const json_value* val = j.internal_value();
         if (!val) {
             TypeConversionResult result;
             result.setError("failed to access JSON value");
             return fl::make_tuple(fl::string(), result);
         }
-
-        JsonToStringVisitor visitor;
-        val->data.visit(visitor);
-        return fl::make_tuple(visitor.mValue, visitor.mResult);
+        fl::string out;
+        TypeConversionResult result = json_convert_to_string_core(*val, &out);
+        return fl::make_tuple(out, result);
     }
 };
 

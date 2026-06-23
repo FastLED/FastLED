@@ -12,6 +12,8 @@
 #include "fl/stl/cstdio.cpp.hpp"
 #include "fl/stl/cstdlib.cpp.hpp"
 #include "fl/stl/cstring.cpp.hpp"
+#include "fl/stl/deque_basic.cpp.hpp"
+#include "fl/stl/flat_map_basic.cpp.hpp"
 #include "fl/stl/fstream.cpp.hpp"
 #include "fl/stl/ieee754_string.cpp.hpp"
 #include "fl/stl/ios.cpp.hpp"
@@ -23,11 +25,13 @@
 #include "fl/stl/ostream.cpp.hpp"
 #include "fl/stl/shared_ptr.cpp.hpp"
 #include "fl/stl/singleton.cpp.hpp"
+#include "fl/stl/stdio.cpp.hpp"
 #include "fl/stl/string.cpp.hpp"
 #include "fl/stl/string_interner.cpp.hpp"
 #include "fl/stl/string_view.cpp.hpp"
 #include "fl/stl/strstream.cpp.hpp"
 #include "fl/stl/type_traits.cpp.hpp"
+#include "fl/stl/unordered_map_basic.cpp.hpp"
 
 // begin sub directory includes
 #include "fl/stl/asio/_build.cpp.hpp"

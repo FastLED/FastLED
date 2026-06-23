@@ -53,7 +53,7 @@ struct PinMapping {
 ///       should provide accurate mappings via g_APinDescription table.
 /// @param pin Arduino pin number
 /// @return PinMapping with group and bit, or {0xFF, 0xFF} if invalid
-inline PinMapping getPinMapping(int pin) FL_NOEXCEPT {
+inline PinMapping getPinMapping(int pin) FL_NO_EXCEPT {
     // Simple default mapping for common SAMD boards
     // In a real implementation, this would use the variant's g_APinDescription table
     // or compile-time board-specific lookup tables.
@@ -79,7 +79,7 @@ inline PinMapping getPinMapping(int pin) FL_NOEXCEPT {
 /// Set pin mode (input, output, input_pullup, input_pulldown)
 /// @param pin Arduino pin number
 /// @param mode Pin mode (PinMode enum)
-inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
+inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
     PinMapping pm = getPinMapping(pin);
     if (pm.group == 0xFF) {
         return;  // Invalid pin
@@ -130,7 +130,7 @@ inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
 /// Write digital output value
 /// @param pin Arduino pin number
 /// @param val Output value (PinValue enum)
-inline void digitalWrite(int pin, PinValue val) FL_NOEXCEPT {
+inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
     PinMapping pm = getPinMapping(pin);
     if (pm.group == 0xFF) {
         return;  // Invalid pin
@@ -151,7 +151,7 @@ inline void digitalWrite(int pin, PinValue val) FL_NOEXCEPT {
 /// Read digital input value
 /// @param pin Arduino pin number
 /// @return Pin value (PinValue enum: Low or High)
-inline PinValue digitalRead(int pin) FL_NOEXCEPT {
+inline PinValue digitalRead(int pin) FL_NO_EXCEPT {
     PinMapping pm = getPinMapping(pin);
     if (pm.group == 0xFF) {
         return PinValue::Low;  // Invalid pin

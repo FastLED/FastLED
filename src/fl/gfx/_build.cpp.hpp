@@ -5,6 +5,7 @@
 
 // begin current directory includes
 #include "fl/gfx/blur.cpp.hpp"
+#include "fl/gfx/colorimetric_response.cpp.hpp"
 #include "fl/gfx/colorutils.cpp.hpp"
 #include "fl/gfx/corkscrew.cpp.hpp"
 #include "fl/gfx/crgb_extra.cpp.hpp"

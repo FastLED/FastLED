@@ -267,7 +267,7 @@ bool configurePinAsTimerAF(u8 pin, TIM_TypeDef* timer, u32 speed) {
 
     if (af_mode == (u32)NC) {
         // Pin doesn't support Timer AF
-        FL_WARN("STM32: Pin " << pin << " does not support Timer AF");
+        FL_WARN_F("STM32: Pin %s does not support Timer AF", pin);
         return false;
     }
 
@@ -478,7 +478,7 @@ bool initTimerPWM(TIM_HandleTypeDef* htim, TIM_TypeDef* timer, u32 frequency_hz)
     // Get timer clock frequency
     u32 timer_clock = getTimerClockFreq(timer);
     if (timer_clock == 0) {
-        FL_WARN("STM32: Failed to get timer clock frequency");
+        FL_WARN_F("STM32: Failed to get timer clock frequency");
         return false;
     }
 
@@ -496,7 +496,7 @@ bool initTimerPWM(TIM_HandleTypeDef* htim, TIM_TypeDef* timer, u32 frequency_hz)
     u32 max_period = is_32bit ? 0xFFFFFFFF : 0xFFFF;
 
     if (period > max_period) {
-        FL_WARN("STM32: Timer period " << period << " exceeds max " << max_period);
+        FL_WARN_F("STM32: Timer period %s exceeds max %s", period, max_period);
         return false;
     }
 
@@ -510,7 +510,7 @@ bool initTimerPWM(TIM_HandleTypeDef* htim, TIM_TypeDef* timer, u32 frequency_hz)
     htim->Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 
     if (HAL_TIM_Base_Init(htim) != HAL_OK) {
-        FL_WARN("STM32: Timer base init failed");
+        FL_WARN_F("STM32: Timer base init failed");
         return false;
     }
 
@@ -522,7 +522,7 @@ bool initTimerPWM(TIM_HandleTypeDef* htim, TIM_TypeDef* timer, u32 frequency_hz)
     sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
 
     if (HAL_TIM_PWM_ConfigChannel(htim, &sConfigOC, TIM_CHANNEL_1) != HAL_OK) {
-        FL_WARN("STM32: Timer PWM config failed");
+        FL_WARN_F("STM32: Timer PWM config failed");
         return false;
     }
 
@@ -543,7 +543,7 @@ bool startTimer(TIM_HandleTypeDef* htim) {
 
     // Start PWM on channel 1
     if (HAL_TIM_PWM_Start(htim, TIM_CHANNEL_1) != HAL_OK) {
-        FL_WARN("STM32: Failed to start timer PWM");
+        FL_WARN_F("STM32: Failed to start timer PWM");
         return false;
     }
 
@@ -821,17 +821,17 @@ bool initDMA(DMA_Stream_TypeDef* stream, const void* src, volatile void* dst, u3
     hdma.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
 
     if (HAL_DMA_Init(&hdma) != HAL_OK) {
-        FL_WARN("STM32: DMA init failed");
+        FL_WARN_F("STM32: DMA init failed");
         return false;
     }
 
     // Configure transfer addresses and size
     if (HAL_DMA_Start(&hdma, (u32)src, (u32)dst, size) != HAL_OK) {
-        FL_WARN("STM32: DMA start failed");
+        FL_WARN_F("STM32: DMA start failed");
         return false;
     }
 
-    FL_DBG("STM32: DMA stream configured successfully");
+    FL_DBG_F("STM32: DMA stream configured successfully");
     return true;
 #else
     (void)stream;
@@ -976,7 +976,7 @@ void stopDMA(DMA_Stream_TypeDef* stream) {
     // Clear flags
     clearDMAFlags(stream);
 
-    FL_DBG("STM32: DMA stream stopped");
+    FL_DBG_F("STM32: DMA stream stopped");
 #else
     (void)stream;
 #endif

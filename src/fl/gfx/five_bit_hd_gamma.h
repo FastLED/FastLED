@@ -26,11 +26,11 @@ enum class FiveBitGammaCorrectionMode {
 // Two-span output variant (separate color and brightness arrays).
 void five_bit_hd_gamma_bitshift(
     fl::span<const CRGB> colors, CRGB colors_scale, fl::u8 global_brightness,
-    fl::span<CRGB> out_colors, fl::span<fl::u8> out_power_5bit) FL_NOEXCEPT;
+    fl::span<CRGB> out_colors, fl::span<fl::u8> out_power_5bit) FL_NO_EXCEPT;
 
 // Packed CRGBA5 output variant (cache-friendly single array).
 void five_bit_hd_gamma_bitshift(
     fl::span<const CRGB> colors, CRGB colors_scale, fl::u8 global_brightness,
-    fl::span<CRGBA5> out) FL_NOEXCEPT;
+    fl::span<CRGBA5> out) FL_NO_EXCEPT;
 
 } // namespace fl

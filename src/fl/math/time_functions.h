@@ -15,7 +15,7 @@ namespace fl {
 /// @{
 
 /// Return the current seconds since boot in a 16-bit value.
-LIB8STATIC u16 seconds16() FL_NOEXCEPT {
+LIB8STATIC u16 seconds16() FL_NO_EXCEPT {
     u32 ms = fl::millis();
     u16 s16;
     s16 = ms / 1000;
@@ -23,7 +23,7 @@ LIB8STATIC u16 seconds16() FL_NOEXCEPT {
 }
 
 /// Return the current minutes since boot in a 16-bit value.
-LIB8STATIC u16 minutes16() FL_NOEXCEPT {
+LIB8STATIC u16 minutes16() FL_NO_EXCEPT {
     u32 ms = fl::millis();
     u16 m16;
     m16 = (ms / (60000L)) & 0xFFFF;
@@ -31,7 +31,7 @@ LIB8STATIC u16 minutes16() FL_NOEXCEPT {
 }
 
 /// Return the current hours since boot in an 8-bit value.
-LIB8STATIC u8 hours8() FL_NOEXCEPT {
+LIB8STATIC u8 hours8() FL_NO_EXCEPT {
     u32 ms = fl::millis();
     u8 h8;
     h8 = (ms / (3600000L)) & 0xFF;
@@ -42,7 +42,7 @@ LIB8STATIC u8 hours8() FL_NOEXCEPT {
 /// only the low 16 bits.
 /// On AVR, uses optimized assembly (6 shifts vs 40).
 /// Used to convert millis to "binary seconds" (1 bsecond == 1024 millis).
-LIB8STATIC u16 div1024_32_16(u32 in32) FL_NOEXCEPT {
+LIB8STATIC u16 div1024_32_16(u32 in32) FL_NO_EXCEPT {
     u16 out16;
 #if defined(FL_IS_AVR)
     asm volatile("  lsr %D[in]  \n\t"
@@ -63,7 +63,7 @@ LIB8STATIC u16 div1024_32_16(u32 in32) FL_NOEXCEPT {
 /// Returns the current time-since-boot in
 /// "binary seconds", which are actually 1024/1000 of a
 /// second long.
-LIB8STATIC u16 bseconds16() FL_NOEXCEPT {
+LIB8STATIC u16 bseconds16() FL_NO_EXCEPT {
     u32 ms = fl::millis();
     u16 s16;
     s16 = div1024_32_16(ms);

@@ -167,7 +167,7 @@ struct FlowFieldFPState {
     int width = 0;
     int height = 0;
 
-    FlowFieldFPState() FL_NOEXCEPT {}
+    FlowFieldFPState() FL_NO_EXCEPT {}
 
     void init(int w, int h) {
         width = w;
@@ -227,7 +227,7 @@ class FlowField : public Fx2d {
   public:
     using Params = FlowFieldParams;
 
-    ~FlowField() FL_NOEXCEPT override = default;
+    ~FlowField() FL_NO_EXCEPT override = default;
 
     /// Handles timing, then delegates to drawImpl().
     /// Caps dt to prevent huge jumps when effect was inactive.

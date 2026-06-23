@@ -31,15 +31,15 @@ class UIAudioImpl {
         FASTLED_UNUSED(name);
         FASTLED_UNUSED(config);
     }
-    ~UIAudioImpl() FL_NOEXCEPT {}
+    ~UIAudioImpl() FL_NO_EXCEPT {}
 
     audio::Sample next() {
-        FL_WARN("Audio sample not implemented");
+        FL_WARN_F("Audio sample not implemented");
         return audio::Sample();
     }
 
     bool hasNext() {
-        FL_WARN("Audio sample not implemented");
+        FL_WARN_F("Audio sample not implemented");
         return false;
     }
 
@@ -54,31 +54,31 @@ class UIAudioImpl {
 class UIAudio : public UIElement {
   public:
     FL_NO_COPY(UIAudio)
-    UIAudio(const fl::string& name) FL_NOEXCEPT;
-    UIAudio(const fl::string& name, const fl::url& url) FL_NOEXCEPT;
+    UIAudio(const fl::string& name) FL_NO_EXCEPT;
+    UIAudio(const fl::string& name, const fl::url& url) FL_NO_EXCEPT;
     /// Asset-handle overload (issue #2284). Resolves `asset` via
     /// `fl::resolve_asset()` at construction time: the manifest/registry
     /// is consulted first, then (on host/stub) the local filesystem and
     /// sibling `.lnk`. If resolution succeeds, forwards to the url()
     /// constructor; otherwise behaves like the name-only constructor.
-    UIAudio(const fl::string& name, const fl::asset_ref& asset) FL_NOEXCEPT;
-    UIAudio(const fl::string& name, const fl::audio::Config& config) FL_NOEXCEPT;
-    ~UIAudio() FL_NOEXCEPT;
-    audio::Sample next() FL_NOEXCEPT { return mImpl.next(); }
-    bool hasNext() FL_NOEXCEPT { return mImpl.hasNext(); }
+    UIAudio(const fl::string& name, const fl::asset_ref& asset) FL_NO_EXCEPT;
+    UIAudio(const fl::string& name, const fl::audio::Config& config) FL_NO_EXCEPT;
+    ~UIAudio() FL_NO_EXCEPT;
+    audio::Sample next() FL_NO_EXCEPT { return mImpl.next(); }
+    bool hasNext() FL_NO_EXCEPT { return mImpl.hasNext(); }
 
     // Expose underlying audio input for FastLED.add() auto-pump
-    fl::shared_ptr<audio::IInput> audioInput() FL_NOEXCEPT { return mImpl.audioInput(); }
+    fl::shared_ptr<audio::IInput> audioInput() FL_NO_EXCEPT { return mImpl.audioInput(); }
 
     // Returns the hardware microphone config, if one was provided.
-    const fl::optional<audio::Config>& config() const FL_NOEXCEPT { return mConfig; }
+    const fl::optional<audio::Config>& config() const FL_NO_EXCEPT { return mConfig; }
 
     // Lazily registers with CFastLED::add() on first call and returns the
     // auto-pumped audio::Processor. Subsequent calls return the cached processor.
-    fl::shared_ptr<audio::Processor> processor() FL_NOEXCEPT;
+    fl::shared_ptr<audio::Processor> processor() FL_NO_EXCEPT;
 
     // Override setGroup to also update the implementation
-    void setGroup(const fl::string& groupName) FL_NOEXCEPT override {
+    void setGroup(const fl::string& groupName) FL_NO_EXCEPT override {
         UIElement::setGroup(groupName);
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);

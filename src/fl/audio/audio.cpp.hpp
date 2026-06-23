@@ -64,7 +64,7 @@ struct AudioSamplePool {
 
 } // namespace
 
-Sample::~Sample() FL_NOEXCEPT {
+Sample::~Sample() FL_NO_EXCEPT {
     if (mImpl) {
         fl::Singleton<AudioSamplePool>::instance().put(fl::move(mImpl));
     }
@@ -78,7 +78,7 @@ const Sample::VectorPCM &Sample::pcm() const {
     return empty;
 }
 
-Sample &Sample::operator=(const Sample &other) FL_NOEXCEPT {
+Sample &Sample::operator=(const Sample &other) FL_NO_EXCEPT {
     mImpl = other.mImpl;
     return *this;
 }

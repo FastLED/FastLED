@@ -50,17 +50,17 @@ namespace detail {
 /// it would have pulled in. See #2931 / #2886.
 struct NoOpChannelEvent {
     template <typename... Args>
-    void operator()(Args&&...) const FL_NOEXCEPT {}
+    void operator()(Args&&...) const FL_NO_EXCEPT {}
 
     template <typename F>
-    int add(F&& /*f*/, int /*priority*/ = 0) const FL_NOEXCEPT { return -1; }
+    int add(F&& /*f*/, int /*priority*/ = 0) const FL_NO_EXCEPT { return -1; }
 
-    void remove(int /*id*/) const FL_NOEXCEPT {}
+    void remove(int /*id*/) const FL_NO_EXCEPT {}
 };
 }  // namespace detail
 
 struct ChannelEvents {
-    static ChannelEvents& instance() FL_NOEXCEPT {
+    static ChannelEvents& instance() FL_NO_EXCEPT {
         static ChannelEvents s;
         return s;
     }

@@ -10,7 +10,7 @@ namespace detail {
 template <typename T, fl::size N = 0>
 class WeightedMovingAverageImpl {
   public:
-    WeightedMovingAverageImpl() FL_NOEXCEPT : mLastValue(T(0)) {}
+    WeightedMovingAverageImpl() FL_NO_EXCEPT : mLastValue(T(0)) {}
     explicit WeightedMovingAverageImpl(fl::size capacity)
         : mBuf(capacity), mLastValue(T(0)) {}
 

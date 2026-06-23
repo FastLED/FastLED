@@ -22,20 +22,20 @@ struct ServerClientConnection {
     u32 clientId;  // Unique identifier for this client
 
     // Default constructor (required for fl::vector operations)
-    ServerClientConnection() FL_NOEXCEPT
+    ServerClientConnection() FL_NO_EXCEPT
         : connection(ConnectionConfig())
         , clientId(0)
     {
     }
 
-    ServerClientConnection(ServerClientConnection&& other) FL_NOEXCEPT
+    ServerClientConnection(ServerClientConnection&& other) FL_NO_EXCEPT
         : socket(fl::move(other.socket))
         , connection(other.connection)
         , clientId(other.clientId)
     {
     }
 
-    ServerClientConnection& operator=(ServerClientConnection&& other) FL_NOEXCEPT {
+    ServerClientConnection& operator=(ServerClientConnection&& other) FL_NO_EXCEPT {
         if (this != &other) {
             socket = fl::move(other.socket);
             connection = other.connection;
@@ -45,8 +45,8 @@ struct ServerClientConnection {
     }
 
     // Not copyable (socket is not copyable)
-    ServerClientConnection(const ServerClientConnection&) FL_NOEXCEPT = delete;
-    ServerClientConnection& operator=(const ServerClientConnection&) FL_NOEXCEPT = delete;
+    ServerClientConnection(const ServerClientConnection&) FL_NO_EXCEPT = delete;
+    ServerClientConnection& operator=(const ServerClientConnection&) FL_NO_EXCEPT = delete;
 };
 
 // Native HTTP server using POSIX sockets
@@ -55,11 +55,11 @@ class NativeHttpServer {
 public:
     // Constructor
     NativeHttpServer(u16 port, const ConnectionConfig& config = ConnectionConfig());
-    ~NativeHttpServer() FL_NOEXCEPT;
+    ~NativeHttpServer() FL_NO_EXCEPT;
 
     // Disable copy (socket ownership)
-    NativeHttpServer(const NativeHttpServer&) FL_NOEXCEPT = delete;
-    NativeHttpServer& operator=(const NativeHttpServer&) FL_NOEXCEPT = delete;
+    NativeHttpServer(const NativeHttpServer&) FL_NO_EXCEPT = delete;
+    NativeHttpServer& operator=(const NativeHttpServer&) FL_NO_EXCEPT = delete;
 
     // Server lifecycle
     bool start();             // Start listening for connections

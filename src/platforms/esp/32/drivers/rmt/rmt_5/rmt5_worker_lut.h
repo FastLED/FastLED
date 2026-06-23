@@ -31,7 +31,7 @@ typedef rmt_item32_t rmt_nibble_lut_t[16][4];
  * @param zero_val RMT item value for '0' bit (uint32_t)
  * @param one_val RMT item value for '1' bit (uint32_t)
  */
-inline void buildNibbleLut(rmt_nibble_lut_t& lut, u32 zero_val, u32 one_val) FL_NOEXCEPT {
+inline void buildNibbleLut(rmt_nibble_lut_t& lut, u32 zero_val, u32 one_val) FL_NO_EXCEPT {
     for (int nibble = 0; nibble < 16; nibble++) {
         // Nibble LUT: MSB first (bit 3 → bit 2 → bit 1 → bit 0)
         lut[nibble][0].val = (nibble & 0x8) ? one_val : zero_val;  // bit 3 (MSB)

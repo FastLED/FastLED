@@ -18,10 +18,32 @@ on:
       - 'platformio.ini'
       - 'library.json'
       - 'library.properties'
+  pull_request:
+    paths:
+      - 'ci/compiled_size.py'
+      - 'ci/compiler/build_config.py'
+      - '.github/workflows/check_esp32_size.yml'
+      - '.github/workflows/build_template_binary_size.yml'
+      - 'platformio.ini'
 jobs:
   build:
     uses: ./.github/workflows/build_template_binary_size.yml
     with:
       board: esp32dev
+      # ==========================================================================
+      # FROZEN SIZE THRESHOLD — DO NOT RAISE TO MAKE CI GREEN.
+      #
+      # 330 KB is the canonical ceiling. CI being red on esp32dev means a real
+      # regression that must be FIXED (in code or in the build system), not
+      # hidden by raising the cap. The known cause of current redness is #3298
+      # (fbuild does not propagate ESP32 board-level build_flags/build_unflags
+      # to the toolchain) — fix #3298, do not raise this number.
+      #
+      # The value here is mirror-locked by `ci/lint/check_size_thresholds.py`:
+      # changing this number without updating the frozen-list constant in that
+      # script will fail `bash lint`. The matching CodeRabbit rule on path
+      # `.github/workflows/check_*_size.yml` flags any raise as HIGH severity
+      # and requires an explicit issue reference + maintainer sign-off.
+      # ==========================================================================
       max_size: 330000
       max_size_apa102: 330000

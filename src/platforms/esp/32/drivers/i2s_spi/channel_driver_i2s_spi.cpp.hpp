@@ -40,7 +40,7 @@ namespace fl {
 //=============================================================================
 
 ChannelDriverI2sSpi::ChannelDriverI2sSpi(
-    fl::shared_ptr<detail::II2sSpiPeripheral> peripheral) FL_NOEXCEPT
+    fl::shared_ptr<detail::II2sSpiPeripheral> peripheral) FL_NO_EXCEPT
     : mPeripheral(fl::move(peripheral)), mInitialized(false),
       mEnqueuedChannels(), mTransmittingChannels(), mBuffer(nullptr),
       mBufferSize(0), mBusy(false) {}
@@ -62,18 +62,18 @@ ChannelDriverI2sSpi::~ChannelDriverI2sSpi() {
 //=============================================================================
 
 bool ChannelDriverI2sSpi::canHandle(
-    const ChannelDataPtr &data) const FL_NOEXCEPT {
+    const ChannelDataPtr &data) const FL_NO_EXCEPT {
     if (!data) {
         return false;
     }
     return data->isSpi(); // Only handle true SPI chipsets
 }
 
-void ChannelDriverI2sSpi::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
+void ChannelDriverI2sSpi::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     mEnqueuedChannels.push_back(fl::move(channelData));
 }
 
-void ChannelDriverI2sSpi::show() FL_NOEXCEPT {
+void ChannelDriverI2sSpi::show() FL_NO_EXCEPT {
     // Release channels from any completed previous transmission
     poll();
 
@@ -89,7 +89,7 @@ void ChannelDriverI2sSpi::show() FL_NOEXCEPT {
         fl::task::run(250, fl::task::ExecFlags::SYSTEM);
     }
     if (mBusy) {
-        FL_WARN("ChannelDriverI2sSpi: DMA hung — forcing release");
+        FL_WARN_F("ChannelDriverI2sSpi: DMA hung — forcing release");
         mBusy = false;
         for (auto &channel : mTransmittingChannels) {
             channel->setInUse(false);
@@ -109,7 +109,7 @@ void ChannelDriverI2sSpi::show() FL_NOEXCEPT {
     }
 }
 
-IChannelDriver::DriverState ChannelDriverI2sSpi::poll() FL_NOEXCEPT {
+IChannelDriver::DriverState ChannelDriverI2sSpi::poll() FL_NO_EXCEPT {
     if (mTransmittingChannels.empty()) {
         return DriverState::READY;
     }
@@ -131,7 +131,7 @@ IChannelDriver::DriverState ChannelDriverI2sSpi::poll() FL_NOEXCEPT {
 //=============================================================================
 
 bool ChannelDriverI2sSpi::beginTransmission(
-    fl::span<const ChannelDataPtr> channels) FL_NOEXCEPT {
+    fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT {
     if (channels.empty() || !mPeripheral) {
         return false;
     }
@@ -187,14 +187,14 @@ bool ChannelDriverI2sSpi::beginTransmission(
         }
 
         if (!mPeripheral->initialize(config)) {
-            FL_WARN("ChannelDriverI2sSpi: Failed to initialize peripheral");
+            FL_WARN_F("ChannelDriverI2sSpi: Failed to initialize peripheral");
             return false;
         }
 
         // Allocate buffer
         mBuffer = mPeripheral->allocateBuffer(interleavedSize);
         if (mBuffer == nullptr) {
-            FL_WARN("ChannelDriverI2sSpi: Failed to allocate buffer");
+            FL_WARN_F("ChannelDriverI2sSpi: Failed to allocate buffer");
             return false;
         }
         mBufferSize = interleavedSize;
@@ -224,7 +224,7 @@ bool ChannelDriverI2sSpi::beginTransmission(
         for (const auto &channel : channels) {
             channel->setInUse(false);
         }
-        FL_WARN("ChannelDriverI2sSpi: Transmit failed");
+        FL_WARN_F("ChannelDriverI2sSpi: Transmit failed");
         return false;
     }
 
@@ -236,46 +236,46 @@ bool ChannelDriverI2sSpi::beginTransmission(
 // Factory Function
 //=============================================================================
 
-fl::shared_ptr<IChannelDriver> createI2sSpiEngine() FL_NOEXCEPT {
+fl::shared_ptr<IChannelDriver> createI2sSpiEngine() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_I2S
     // Wrap singleton ESP peripheral in shared_ptr via delegating wrapper
     class EspWrapper : public detail::II2sSpiPeripheral {
       public:
-        bool initialize(const detail::I2sSpiConfig &c) FL_NOEXCEPT override {
+        bool initialize(const detail::I2sSpiConfig &c) FL_NO_EXCEPT override {
             return detail::I2sSpiPeripheralEsp::instance().initialize(c);
         }
-        void deinitialize() FL_NOEXCEPT override {
+        void deinitialize() FL_NO_EXCEPT override {
             detail::I2sSpiPeripheralEsp::instance().deinitialize();
         }
-        bool isInitialized() const FL_NOEXCEPT override {
+        bool isInitialized() const FL_NO_EXCEPT override {
             return detail::I2sSpiPeripheralEsp::instance().isInitialized();
         }
-        u8 *allocateBuffer(size_t s) FL_NOEXCEPT override {
+        u8 *allocateBuffer(size_t s) FL_NO_EXCEPT override {
             return detail::I2sSpiPeripheralEsp::instance().allocateBuffer(s);
         }
-        void freeBuffer(u8 *b) FL_NOEXCEPT override {
+        void freeBuffer(u8 *b) FL_NO_EXCEPT override {
             detail::I2sSpiPeripheralEsp::instance().freeBuffer(b);
         }
-        bool transmit(const u8 *b, size_t s) FL_NOEXCEPT override {
+        bool transmit(const u8 *b, size_t s) FL_NO_EXCEPT override {
             return detail::I2sSpiPeripheralEsp::instance().transmit(b, s);
         }
-        bool waitTransmitDone(u32 t) FL_NOEXCEPT override {
+        bool waitTransmitDone(u32 t) FL_NO_EXCEPT override {
             return detail::I2sSpiPeripheralEsp::instance().waitTransmitDone(t);
         }
-        bool isBusy() const FL_NOEXCEPT override {
+        bool isBusy() const FL_NO_EXCEPT override {
             return detail::I2sSpiPeripheralEsp::instance().isBusy();
         }
-        bool registerTransmitCallback(void *cb, void *ctx) FL_NOEXCEPT override {
+        bool registerTransmitCallback(void *cb, void *ctx) FL_NO_EXCEPT override {
             return detail::I2sSpiPeripheralEsp::instance()
                 .registerTransmitCallback(cb, ctx);
         }
-        const detail::I2sSpiConfig &getConfig() const FL_NOEXCEPT override {
+        const detail::I2sSpiConfig &getConfig() const FL_NO_EXCEPT override {
             return detail::I2sSpiPeripheralEsp::instance().getConfig();
         }
-        u64 getMicroseconds() FL_NOEXCEPT override {
+        u64 getMicroseconds() FL_NO_EXCEPT override {
             return detail::I2sSpiPeripheralEsp::instance().getMicroseconds();
         }
-        void delay(u32 ms) FL_NOEXCEPT override {
+        void delay(u32 ms) FL_NO_EXCEPT override {
             detail::I2sSpiPeripheralEsp::instance().delay(ms);
         }
     };

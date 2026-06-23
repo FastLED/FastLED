@@ -268,6 +268,25 @@ def main() -> int:
         f"Starting compilation for {len(boards)} boards with {len(examples)} examples"
     )
 
+    # Signal the orchestrator that the user has explicitly opted into the
+    # PlatformIO comparison backend. Without this env var, any programmatic
+    # ``use_fbuild=False`` would be rejected by
+    # ``_assert_explicit_platformio_backend`` — see #3279 (Phase 3).
+    from ci.compiler.argument_parser import BuildBackend as _BuildBackend
+    from ci.compiler.compilation_orchestrator import (
+        PLATFORMIO_BACKEND_OPT_IN_ENV as _PLATFORMIO_OPT_IN,
+    )
+
+    if config.backend == _BuildBackend.PLATFORMIO:
+        os.environ[_PLATFORMIO_OPT_IN] = "1"
+        print(
+            yellow_text(
+                "⚠️  --backend platformio: PlatformIO `pio run` is a "
+                "comparison-only tool. Use ONLY to compare fbuild output "
+                "and find gaps; production CI always uses fbuild."
+            )
+        )
+
     compilation_errors: list[str] = []
     failed_example_names: list[str] = []
     failure_logs_dir: Optional[Path] = config.log_failures

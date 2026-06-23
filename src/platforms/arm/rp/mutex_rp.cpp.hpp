@@ -33,7 +33,7 @@ MutexRP::MutexRP() : mSpinlock(nullptr), mOwnerCore(0xFFFFFFFF), mLocked(false) 
     int spinlock_num = spin_lock_claim_unused(true);  // true = required (panic if none available)
 
     if (spinlock_num < 0) {
-        FL_WARN("MutexRP: Failed to claim hardware spinlock");
+        FL_WARN_F("MutexRP: Failed to claim hardware spinlock");
         return;
     }
 
@@ -116,7 +116,7 @@ RecursiveMutexRP::RecursiveMutexRP() : mSpinlock(nullptr), mOwnerCore(0xFFFFFFFF
     int spinlock_num = spin_lock_claim_unused(true);  // true = required (panic if none available)
 
     if (spinlock_num < 0) {
-        FL_WARN("RecursiveMutexRP: Failed to claim hardware spinlock");
+        FL_WARN_F("RecursiveMutexRP: Failed to claim hardware spinlock");
         return;
     }
 

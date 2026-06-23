@@ -17,7 +17,7 @@ PotentiometerLowLevel::PotentiometerLowLevel(int pin)
     : mPin(pin) {
 }
 
-PotentiometerLowLevel::~PotentiometerLowLevel() FL_NOEXCEPT {}
+PotentiometerLowLevel::~PotentiometerLowLevel() FL_NO_EXCEPT {}
 
 u16 PotentiometerLowLevel::read() {
     return fl::analogRead(mPin);
@@ -162,7 +162,7 @@ Potentiometer::Listener::Listener(Potentiometer *owner) : mOwner(owner) {
     addToEngineEventsOnce();
 }
 
-Potentiometer::Listener::~Listener() FL_NOEXCEPT {
+Potentiometer::Listener::~Listener() FL_NO_EXCEPT {
     if (added) {
         EngineEvents::removeListener(this);
     }

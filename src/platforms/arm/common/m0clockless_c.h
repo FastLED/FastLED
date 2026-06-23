@@ -32,6 +32,34 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
 
+// CMSIS interrupt-control intrinsics used by `showLedData`. These live as
+// `__STATIC_INLINE` functions in `cmsis_gcc.h` per Cortex-M CMSIS bundle.
+// gcc 15.2+ `-Wtemplate-body` errors on the function-template instantiation
+// when `__get_PRIMASK` is an undeclared name at template-body parse time,
+// so provide static-inline fallbacks here that match the canonical CMSIS
+// semantics (inline asm against the PRIMASK SCS register). Guarded with
+// `#ifndef` so a transitively-included `cmsis_gcc.h` wins -- on platforms
+// where CMSIS is on the include path (LPC8xx, SAMD, nRF, STM32) the local
+// definitions below are skipped. On Arduino-AVR where `__enable_irq` is a
+// preprocessor macro from `WString.h`, the macro guard also wins.
+#ifndef __get_PRIMASK
+static inline fl::u32 __get_PRIMASK(void) FL_NO_EXCEPT {
+    fl::u32 primask;
+    __asm volatile ("MRS %0, primask" : "=r" (primask) :: "memory");
+    return primask;
+}
+#endif
+#ifndef __enable_irq
+static inline void __enable_irq(void) FL_NO_EXCEPT {
+    __asm volatile ("cpsie i" ::: "memory");
+}
+#endif
+#ifndef __disable_irq
+static inline void __disable_irq(void) FL_NO_EXCEPT {
+    __asm volatile ("cpsid i" ::: "memory");
+}
+#endif
+
 FL_EXTERN_C_BEGIN
 
 // Some platforms have a missing definition for SysTick, in that
@@ -129,7 +157,7 @@ FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING
  *
  * @return Current cycle count (32-bit, wraps around)
  */
-FL_FORCE_INLINE fl::u32 get_cycle_count() FL_NOEXCEPT {
+FL_FORCE_INLINE fl::u32 get_cycle_count() FL_NO_EXCEPT {
 #if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__) || \
     defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
     // M3/M4/M7/M23/M33: Use DWT CYCCNT (Data Watchpoint and Trace cycle counter)
@@ -159,7 +187,7 @@ FL_FORCE_INLINE fl::u32 get_cycle_count() FL_NOEXCEPT {
  *
  * @param cycles Number of CPU cycles to delay
  */
-FL_FORCE_INLINE void delay_cycles(fl::u32 cycles) FL_NOEXCEPT {
+FL_FORCE_INLINE void delay_cycles(fl::u32 cycles) FL_NO_EXCEPT {
     if (cycles == 0) return;
 
     fl::u32 start = get_cycle_count();
@@ -169,15 +197,15 @@ FL_FORCE_INLINE void delay_cycles(fl::u32 cycles) FL_NOEXCEPT {
     if (target >= start) {
         // No wraparound: wait until counter >= target
         while (get_cycle_count() < target) {
-            __asm__ volatile("nop") FL_NOEXCEPT;
+            __asm__ volatile("nop") FL_NO_EXCEPT;
         }
     } else {
         // Wraparound: wait for counter to wrap, then reach target
         while (get_cycle_count() >= start) {
-            __asm__ volatile("nop") FL_NOEXCEPT;
+            __asm__ volatile("nop") FL_NO_EXCEPT;
         }
         while (get_cycle_count() < target) {
-            __asm__ volatile("nop") FL_NOEXCEPT;
+            __asm__ volatile("nop") FL_NO_EXCEPT;
         }
     }
 }
@@ -216,7 +244,7 @@ FL_FORCE_INLINE void delay_cycles(fl::u32 cycles) FL_NOEXCEPT {
  * @param byte Reference to byte being output (will be shifted left by 1)
  */
 FL_FORCE_INLINE fl::u8 gpio_conditional_low(fl::u8 byte, volatile fl::u32* port,
-                                           fl::u32 bitmask, int lo_offset) FL_NOEXCEPT {
+                                           fl::u32 bitmask, int lo_offset) FL_NO_EXCEPT {
     // Shift left to get bit 7 into bit 8 position, check if it was set
     fl::u16 temp = (fl::u16)byte << 1;
     fl::u8 shifted_byte = (fl::u8)temp;  // Get shifted value
@@ -237,7 +265,7 @@ FL_FORCE_INLINE fl::u8 gpio_conditional_low(fl::u8 byte, volatile fl::u32* port,
  * load_led_byte - Load byte from LED array
  * Equivalent to: loadleds3 macro
  */
-FL_FORCE_INLINE fl::u8 load_led_byte(const fl::u8* leds, int offset) FL_NOEXCEPT {
+FL_FORCE_INLINE fl::u8 load_led_byte(const fl::u8* leds, int offset) FL_NO_EXCEPT {
     return leds[offset];
 }
 
@@ -254,7 +282,7 @@ FL_FORCE_INLINE fl::u8 load_led_byte(const fl::u8* leds, int offset) FL_NOEXCEPT
  * @param channel Channel index (0, 1, or 2 for R, G, B)
  * @return Dither value to add to pixel
  */
-FL_FORCE_INLINE fl::u8 load_and_prepare_dither(fl::u8 pixel, M0ClocklessData* data, int channel) FL_NOEXCEPT {
+FL_FORCE_INLINE fl::u8 load_and_prepare_dither(fl::u8 pixel, M0ClocklessData* data, int channel) FL_NO_EXCEPT {
     fl::u8 dither = data->d[channel];
 
     // Optimization: if pixel is black, skip dithering
@@ -272,7 +300,7 @@ FL_FORCE_INLINE fl::u8 load_and_prepare_dither(fl::u8 pixel, M0ClocklessData* da
  * The assembly version stores scale factors as 32-bit fixed-point multipliers.
  * After multiplication, the high 16 bits contain the scaled result.
  */
-FL_FORCE_INLINE fl::u8 apply_scale(fl::u8 pixel, fl::u32 scale_factor) FL_NOEXCEPT {
+FL_FORCE_INLINE fl::u8 apply_scale(fl::u8 pixel, fl::u32 scale_factor) FL_NO_EXCEPT {
     fl::u32 result = (fl::u32)pixel * scale_factor;
     // Extract high byte (bits 23:16) as the scaled result
     return (fl::u8)(result >> 16);
@@ -285,7 +313,7 @@ FL_FORCE_INLINE fl::u8 apply_scale(fl::u8 pixel, fl::u32 scale_factor) FL_NOEXCE
  * Implements Floyd-Steinberg-style error diffusion:
  * new_dither = error - old_dither
  */
-FL_FORCE_INLINE void adjust_dither(M0ClocklessData* data, int channel) FL_NOEXCEPT {
+FL_FORCE_INLINE void adjust_dither(M0ClocklessData* data, int channel) FL_NO_EXCEPT {
     // Calculate: d = e - d
     fl::i16 new_dither = (fl::i16)data->e[channel] - (fl::i16)data->d[channel];
     data->d[channel] = (fl::u8)new_dither;
@@ -295,7 +323,7 @@ FL_FORCE_INLINE void adjust_dither(M0ClocklessData* data, int channel) FL_NOEXCE
  * advance_led_pointer - Move to next pixel in LED array
  * Equivalent to: incleds3 macro
  */
-FL_FORCE_INLINE const fl::u8* advance_led_pointer(const fl::u8* leds, M0ClocklessData* data) FL_NOEXCEPT {
+FL_FORCE_INLINE const fl::u8* advance_led_pointer(const fl::u8* leds, M0ClocklessData* data) FL_NO_EXCEPT {
     return leds + data->adj;
 }
 
@@ -307,7 +335,7 @@ FL_FORCE_INLINE const fl::u8* advance_led_pointer(const fl::u8* leds, M0Clockles
  * left-shifts move each bit into the carry flag. In C++, we just need to
  * ensure the byte is ready for our gpio_conditional_low to extract bits.
  */
-FL_FORCE_INLINE fl::u8 prepare_byte_for_output(fl::u8 byte) FL_NOEXCEPT {
+FL_FORCE_INLINE fl::u8 prepare_byte_for_output(fl::u8 byte) FL_NO_EXCEPT {
     // In C++ version, we don't need special positioning since gpio_conditional_low
     // handles bit extraction differently (checks bit 7 after left shift)
     return byte;
@@ -326,14 +354,21 @@ FL_END_OPTIMIZE_FOR_EXACT_TIMING
 FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING
 
 
-static constexpr fl::u32 ns_to_cycles(fl::u32 ns) FL_NOEXCEPT {
-  return (fl::u32)(((u64)ns * (u64)F_CPU + 999'999'999ULL) / 1'000'000'000ULL);
+static constexpr fl::u32 ns_to_cycles(fl::u32 ns) FL_NO_EXCEPT {
+  // C++14 digit separators (e.g. 999'999'999) break under -std=gnu++11 — the
+  // single-quote is read as a character-literal delimiter and the next 3
+  // digits become a stray multibyte char. Some downstream PlatformIO
+  // environments (LPC8xx in particular, see issue #3329) still default to
+  // gnu++11. Keep the constants in plain digits so the header stays portable
+  // across both C++11 and C++14+ builds. Enforced by BareDigitSeparatorChecker
+  // in ci/lint_cpp_rs/src/checkers/.
+  return (fl::u32)(((u64)ns * (u64)F_CPU + 999999999ULL) / 1000000000ULL);
 }
 
 template<int HI_OFFSET, int LO_OFFSET, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME>
 int showLedData(volatile fl::u32* port, fl::u32 bitmask,
                 const fl::u8* leds, fl::u32 num_leds,
-                M0ClocklessData* pData) FL_NOEXCEPT {
+                M0ClocklessData* pData) FL_NO_EXCEPT {
 
     // Compile-time validation of GPIO offsets
     FL_STATIC_ASSERT((HI_OFFSET & 3) == 0 && (LO_OFFSET & 3) == 0,

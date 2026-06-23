@@ -74,7 +74,7 @@ public:
      * Initializes the 256-entry LUT to map byte values to GPIO masks
      * for the specified data pin.
      */
-    void setPinMapping(u8 data, u8 clk) FL_NOEXCEPT {
+    void setPinMapping(u8 data, u8 clk) FL_NO_EXCEPT {
         // Store clock mask
         mClockMask = 1u << clk;
 
@@ -108,7 +108,7 @@ public:
      * Each byte in the buffer represents 1 bit to output on the data pin.
      * Only bit 0 of each byte is used.
      */
-    void loadBuffer(const u8* data, u16 n) FL_NOEXCEPT {
+    void loadBuffer(const u8* data, u16 n) FL_NO_EXCEPT {
         if (!data) return;
         if (n > MAX_BUFFER_SIZE) n = MAX_BUFFER_SIZE;
 
@@ -126,7 +126,7 @@ public:
      *
      * Performance: Higher throughput than ISR due to no interrupt overhead
      */
-    void transmit() FL_NOEXCEPT {
+    void transmit() FL_NO_EXCEPT {
         if (!mBuffer || mBufferLen == 0) return;
 
         // Inline bit-banging loop (same logic as ISR implementation)
@@ -148,21 +148,21 @@ public:
     /**
      * Get buffer pointer (for inspection)
      */
-    const u8* getBuffer() const FL_NOEXCEPT {
+    const u8* getBuffer() const FL_NO_EXCEPT {
         return mBuffer;
     }
 
     /**
      * Get buffer length (for inspection)
      */
-    u16 getBufferLength() const FL_NOEXCEPT {
+    u16 getBufferLength() const FL_NO_EXCEPT {
         return mBufferLen;
     }
 
     /**
      * Get LUT array (for advanced users who want direct LUT control)
      */
-    PinMaskEntry* getLUTArray() FL_NOEXCEPT {
+    PinMaskEntry* getLUTArray() FL_NO_EXCEPT {
         return mLUT;
     }
 

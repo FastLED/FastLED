@@ -10,7 +10,7 @@ namespace detail {
 template <typename T, fl::size N = 0>
 class MovingAverageImpl {
   public:
-    MovingAverageImpl() FL_NOEXCEPT : mSum(T(0)) {}
+    MovingAverageImpl() FL_NO_EXCEPT : mSum(T(0)) {}
     explicit MovingAverageImpl(fl::size capacity) : mBuf(capacity), mSum(T(0)) {}
 
     T update(T input) {

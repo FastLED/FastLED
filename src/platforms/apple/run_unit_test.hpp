@@ -45,7 +45,7 @@ namespace runner_watchdog {
 static volatile bool g_active = false;
 static double g_timeout_seconds = 20.0;
 
-static void alarm_handler(int) FL_NOEXCEPT {
+static void alarm_handler(int) FL_NO_EXCEPT {
     if (!g_active) {
         return;
     }
@@ -71,7 +71,7 @@ static void alarm_handler(int) FL_NOEXCEPT {
     _exit(1);
 }
 
-static void setup(double timeout_seconds = 20.0) FL_NOEXCEPT {
+static void setup(double timeout_seconds = 20.0) FL_NO_EXCEPT {
     const char* disable_env = getenv("FASTLED_DISABLE_TIMEOUT_WATCHDOG");
     if (disable_env && (strcmp(disable_env, "1") == 0 || strcmp(disable_env, "true") == 0)) {
         return;
@@ -100,7 +100,7 @@ static void setup(double timeout_seconds = 20.0) FL_NOEXCEPT {
     }
 }
 
-static void cancel() FL_NOEXCEPT {
+static void cancel() FL_NO_EXCEPT {
     if (!g_active) {
         return;
     }
@@ -114,7 +114,7 @@ static void cancel() FL_NOEXCEPT {
 // Function signature for the test entry point exported by test DLLs/SOs
 typedef int (*RunTestsFunc)(int argc, const char** argv);
 
-int main(int argc, char** argv) FL_NOEXCEPT {
+int main(int argc, char** argv) FL_NO_EXCEPT {
     // Setup crash handler BEFORE loading any shared libraries
     runner_setup_crash_handler();
 

@@ -40,7 +40,7 @@ class NetworkStateTracker {
 public:
     /// @brief Get singleton instance (uses fl::Singleton for no-destructor semantics)
     /// @return Reference to the global network state tracker
-    static NetworkStateTracker& instance() FL_NOEXCEPT {
+    static NetworkStateTracker& instance() FL_NO_EXCEPT {
         return Singleton<NetworkStateTracker>::instance();
     }
 
@@ -49,18 +49,18 @@ public:
     ///
     /// **Side Effect:** Updates internal last-known state to current state.
     /// Subsequent calls will return false until state changes again.
-    bool hasChanged() FL_NOEXCEPT;
+    bool hasChanged() FL_NO_EXCEPT;
 
     /// @brief Get current network state (without affecting change tracking)
     /// @return true if any network (WiFi, Ethernet, or Bluetooth) is active
-    bool isActive() const FL_NOEXCEPT;
+    bool isActive() const FL_NO_EXCEPT;
 
     /// @brief Get last known network state (cached value)
     /// @return Last network state returned by hasChanged()
-    bool lastKnownState() const FL_NOEXCEPT { return mLastKnownState; }
+    bool lastKnownState() const FL_NO_EXCEPT { return mLastKnownState; }
 
     /// @brief Reset tracker state (for testing)
-    void reset() FL_NOEXCEPT { mLastKnownState = false; }
+    void reset() FL_NO_EXCEPT { mLastKnownState = false; }
 
 private:
     friend class Singleton<NetworkStateTracker>;

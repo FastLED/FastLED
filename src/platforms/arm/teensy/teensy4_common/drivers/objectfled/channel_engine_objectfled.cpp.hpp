@@ -43,21 +43,21 @@ struct TimingGroup {
 // ============================================================================
 
 ChannelEngineObjectFLED::ChannelEngineObjectFLED()
- FL_NOEXCEPT : mPeripheral(IObjectFLEDPeripheral::create()) {
-    FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: created");
+ FL_NO_EXCEPT : mPeripheral(IObjectFLEDPeripheral::create()) {
+    FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: created");
 }
 
 ChannelEngineObjectFLED::ChannelEngineObjectFLED(
         fl::shared_ptr<IObjectFLEDPeripheral> peripheral)
- FL_NOEXCEPT : mPeripheral(fl::move(peripheral)) {
-    FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: created with injected peripheral");
+ FL_NO_EXCEPT : mPeripheral(fl::move(peripheral)) {
+    FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: created with injected peripheral");
 }
 
 ChannelEngineObjectFLED::~ChannelEngineObjectFLED() {
-    FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: destroyed");
+    FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: destroyed");
 }
 
-bool ChannelEngineObjectFLED::canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT {
+bool ChannelEngineObjectFLED::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
     if (!data || !data->isClockless()) {
         return false;
     }
@@ -65,14 +65,14 @@ bool ChannelEngineObjectFLED::canHandle(const ChannelDataPtr& data) const FL_NOE
     return period >= kMinPeriodNs && period <= kMaxPeriodNs;
 }
 
-void ChannelEngineObjectFLED::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
+void ChannelEngineObjectFLED::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     if (channelData) {
         channelData->setInUse(true);
         mEnqueuedChannels.push_back(fl::move(channelData));
     }
 }
 
-void ChannelEngineObjectFLED::show() FL_NOEXCEPT {
+void ChannelEngineObjectFLED::show() FL_NO_EXCEPT {
     // Wait for any previous transmission (per DMA Wait Pattern)
     while (poll() != DriverState::READY) {
         // ObjectFLED show() is synchronous, so this should be instant
@@ -132,8 +132,7 @@ void ChannelEngineObjectFLED::show() FL_NOEXCEPT {
             // Validate pin
             auto validation = mPeripheral->validatePin(pin);
             if (!validation.valid) {
-                FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: Pin " << (int)pin
-                        << " invalid: " << validation.error_message);
+                FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: Pin %s invalid: %s", (int)pin, validation.error_message);
                 continue;
             }
 
@@ -240,7 +239,7 @@ void ChannelEngineObjectFLED::show() FL_NOEXCEPT {
     mTransmittingChannels.clear();
 }
 
-IChannelDriver::DriverState ChannelEngineObjectFLED::poll() FL_NOEXCEPT {
+IChannelDriver::DriverState ChannelEngineObjectFLED::poll() FL_NO_EXCEPT {
     // ObjectFLED show() is synchronous - always READY after show() returns
     return DriverState::READY;
 }

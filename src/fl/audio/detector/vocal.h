@@ -20,8 +20,8 @@ namespace detector {
 
 class Vocal : public Detector {
 public:
-    Vocal() FL_NOEXCEPT;
-    ~Vocal() FL_NOEXCEPT override;
+    Vocal() FL_NO_EXCEPT;
+    ~Vocal() FL_NO_EXCEPT override;
 
     // Detector interface
     void update(shared_ptr<Context> context) override;

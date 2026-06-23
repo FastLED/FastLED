@@ -13,14 +13,14 @@ namespace test {
 // DefaultReporter implementation
 // =============================================================================
 
-void DefaultReporter::testRunStart() FL_NOEXCEPT {
+void DefaultReporter::testRunStart() FL_NO_EXCEPT {
     fl::printf("\n");
     fl::printf("===============================================================================\n");
     fl::printf("FL TEST: Running tests...\n");
     fl::printf("===============================================================================\n");
 }
 
-void DefaultReporter::testRunEnd(const TestStats& stats) FL_NOEXCEPT {
+void DefaultReporter::testRunEnd(const TestStats& stats) FL_NO_EXCEPT {
     fl::printf("\n");
     fl::printf("===============================================================================\n");
     fl::printf("FL TEST: Results\n");
@@ -48,11 +48,11 @@ void DefaultReporter::testRunEnd(const TestStats& stats) FL_NOEXCEPT {
     fl::printf("\n");
 }
 
-void DefaultReporter::testCaseStart(const char* name) FL_NOEXCEPT {
+void DefaultReporter::testCaseStart(const char* name) FL_NO_EXCEPT {
     fl::printf("\n--- Test: %s\n", name);
 }
 
-void DefaultReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NOEXCEPT {
+void DefaultReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NO_EXCEPT {
     if (passed) {
         if (durationMs > 0) {
             fl::printf("    [PASSED] (%u ms)\n", durationMs);
@@ -68,15 +68,15 @@ void DefaultReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NOEXCEPT {
     }
 }
 
-void DefaultReporter::subcaseStart(const char* name) FL_NOEXCEPT {
+void DefaultReporter::subcaseStart(const char* name) FL_NO_EXCEPT {
     fl::printf("  Subcase: %s\n", name);
 }
 
-void DefaultReporter::subcaseEnd() FL_NOEXCEPT {
+void DefaultReporter::subcaseEnd() FL_NO_EXCEPT {
     // Nothing needed
 }
 
-void DefaultReporter::assertResult(const AssertResult& result) FL_NOEXCEPT {
+void DefaultReporter::assertResult(const AssertResult& result) FL_NO_EXCEPT {
     if (!result.mPassed) {
         fl::printf("    FAILED: %s:%d\n", result.mLocation.mFile, result.mLocation.mLine);
         fl::printf("    Expression: %s\n", result.mExpression.c_str());
@@ -94,12 +94,12 @@ TestContext::TestContext() {
     mReporter = &mDefaultReporter;
 }
 
-TestContext& TestContext::instance() FL_NOEXCEPT {
+TestContext& TestContext::instance() FL_NO_EXCEPT {
     static TestContext ctx;
     return ctx;
 }
 
-int TestContext::registerTest(TestFunc func, const char* name, const char* file, int line) FL_NOEXCEPT {
+int TestContext::registerTest(TestFunc func, const char* name, const char* file, int line) FL_NO_EXCEPT {
     TestCaseInfo info;
     info.mFunc = func;
     info.mName = name;
@@ -109,7 +109,7 @@ int TestContext::registerTest(TestFunc func, const char* name, const char* file,
     return static_cast<int>(mTestCases.size());
 }
 
-int TestContext::run(int argc, const char* const* argv) FL_NOEXCEPT {
+int TestContext::run(int argc, const char* const* argv) FL_NO_EXCEPT {
     // Extract filter from first arg if present
     const char* filter = nullptr;
     if (argc > 1 && argv && argv[1]) {
@@ -118,7 +118,7 @@ int TestContext::run(int argc, const char* const* argv) FL_NOEXCEPT {
     return run(filter);
 }
 
-int TestContext::run(const char* filter) FL_NOEXCEPT {
+int TestContext::run(const char* filter) FL_NO_EXCEPT {
     mStats.reset();
     mReporter->testRunStart();
 
@@ -136,7 +136,7 @@ int TestContext::run(const char* filter) FL_NOEXCEPT {
     return mStats.allPassed() ? 0 : 1;
 }
 
-fl::size TestContext::listTests(const char* filter) const FL_NOEXCEPT {
+fl::size TestContext::listTests(const char* filter) const FL_NO_EXCEPT {
     fl::size count = 0;
     fl::printf("\nRegistered tests:\n");
     fl::printf("----------------\n");
@@ -158,7 +158,7 @@ fl::size TestContext::listTests(const char* filter) const FL_NOEXCEPT {
     return count;
 }
 
-bool TestContext::matchesFilter(const char* name, const char* filter) const FL_NOEXCEPT {
+bool TestContext::matchesFilter(const char* name, const char* filter) const FL_NO_EXCEPT {
     if (!filter || filter[0] == '\0') {
         return true;  // No filter means match all
     }
@@ -231,7 +231,7 @@ bool TestContext::matchesFilter(const char* name, const char* filter) const FL_N
 static bool sCurrentTestSkipped = false;
 static const char* sSkipReason = nullptr;
 
-void TestContext::runTestCase(const TestCaseInfo& info) FL_NOEXCEPT {
+void TestContext::runTestCase(const TestCaseInfo& info) FL_NO_EXCEPT {
     mStats.mTestCasesRun++;
     mReporter->testCaseStart(info.mName.c_str());
 
@@ -299,7 +299,7 @@ void TestContext::runTestCase(const TestCaseInfo& info) FL_NOEXCEPT {
     }
 }
 
-bool TestContext::checkTimeout() FL_NOEXCEPT {
+bool TestContext::checkTimeout() FL_NO_EXCEPT {
     if (!mGetMillis || mDefaultTimeoutMs == 0) {
         return false;  // No timeout configured
     }
@@ -323,14 +323,14 @@ bool TestContext::checkTimeout() FL_NOEXCEPT {
     return false;
 }
 
-fl::u32 TestContext::getElapsedMs() const FL_NOEXCEPT {
+fl::u32 TestContext::getElapsedMs() const FL_NO_EXCEPT {
     if (!mGetMillis) {
         return 0;
     }
     return mGetMillis() - mCurrentTestStartMs;
 }
 
-bool TestContext::enterSubcase(const SubcaseSignature& sig) FL_NOEXCEPT {
+bool TestContext::enterSubcase(const SubcaseSignature& sig) FL_NO_EXCEPT {
     // We're at subcase discovery depth mSubcaseDiscoveryDepth
     // mSubcaseStack contains the path we're following this iteration
 
@@ -376,7 +376,7 @@ bool TestContext::enterSubcase(const SubcaseSignature& sig) FL_NOEXCEPT {
     }
 }
 
-void TestContext::exitSubcase(const SubcaseSignature& sig) FL_NOEXCEPT {
+void TestContext::exitSubcase(const SubcaseSignature& sig) FL_NO_EXCEPT {
     mCurrentSubcaseDepth--;
     mSubcaseDiscoveryDepth--;
 
@@ -393,7 +393,7 @@ void TestContext::exitSubcase(const SubcaseSignature& sig) FL_NOEXCEPT {
     mReporter->subcaseEnd();
 }
 
-void TestContext::reportAssert(const AssertResult& result) FL_NOEXCEPT {
+void TestContext::reportAssert(const AssertResult& result) FL_NO_EXCEPT {
     if (result.mPassed) {
         mStats.mAssertsPassed++;
     } else {
@@ -403,19 +403,19 @@ void TestContext::reportAssert(const AssertResult& result) FL_NOEXCEPT {
     mReporter->assertResult(result);
 }
 
-void TestContext::checkFailed(const char* expr, const char* file, int line) FL_NOEXCEPT {
+void TestContext::checkFailed(const char* expr, const char* file, int line) FL_NO_EXCEPT {
     AssertResult result(false);
     result.mExpression = expr;
     result.mLocation = SourceLocation(file, line);
     reportAssert(result);
 }
 
-void TestContext::requireFailed(const char* expr, const char* file, int line) FL_NOEXCEPT {
+void TestContext::requireFailed(const char* expr, const char* file, int line) FL_NO_EXCEPT {
     checkFailed(expr, file, line);
     // Note: The return happens in the macro
 }
 
-fl::u32 TestContext::hashCurrentPath(const SubcaseSignature& sig) const FL_NOEXCEPT {
+fl::u32 TestContext::hashCurrentPath(const SubcaseSignature& sig) const FL_NO_EXCEPT {
     fl::u32 hash = 0;
     for (fl::size i = 0; i < mSubcaseDiscoveryDepth && i < mSubcaseStack.size(); ++i) {
         hash = hash * 31 + hashSubcaseSignature(mSubcaseStack[i]);
@@ -424,7 +424,7 @@ fl::u32 TestContext::hashCurrentPath(const SubcaseSignature& sig) const FL_NOEXC
     return hash;
 }
 
-bool TestContext::isFullyTraversed(fl::u32 hash) const FL_NOEXCEPT {
+bool TestContext::isFullyTraversed(fl::u32 hash) const FL_NO_EXCEPT {
     for (fl::size i = 0; i < mFullyTraversedHashes.size(); ++i) {
         if (mFullyTraversedHashes[i] == hash) {
             return true;
@@ -433,7 +433,7 @@ bool TestContext::isFullyTraversed(fl::u32 hash) const FL_NOEXCEPT {
     return false;
 }
 
-void TestContext::markFullyTraversed(fl::u32 hash) FL_NOEXCEPT {
+void TestContext::markFullyTraversed(fl::u32 hash) FL_NO_EXCEPT {
     if (!isFullyTraversed(hash)) {
         mFullyTraversedHashes.push_back(hash);
     }
@@ -443,13 +443,13 @@ void TestContext::markFullyTraversed(fl::u32 hash) FL_NOEXCEPT {
 // Subcase implementation
 // =============================================================================
 
-Subcase::Subcase(const char* name, const char* file, int line) FL_NOEXCEPT
+Subcase::Subcase(const char* name, const char* file, int line) FL_NO_EXCEPT
     : mSignature{name, file, line}
     , mEntered(false) {
     mEntered = TestContext::instance().enterSubcase(mSignature);
 }
 
-Subcase::~Subcase() FL_NOEXCEPT {
+Subcase::~Subcase() FL_NO_EXCEPT {
     if (mEntered) {
         TestContext::instance().exitSubcase(mSignature);
     }
@@ -459,15 +459,15 @@ Subcase::~Subcase() FL_NOEXCEPT {
 // Message/Capture/Fail helpers
 // =============================================================================
 
-void outputMessage(const char* msg, const char* file, int line) FL_NOEXCEPT {
+void outputMessage(const char* msg, const char* file, int line) FL_NO_EXCEPT {
     fl::printf("  [MESSAGE] %s:%d: %s\n", file, line, msg);
 }
 
-void outputCapture(const char* name, const char* value, const char* file, int line) FL_NOEXCEPT {
+void outputCapture(const char* name, const char* value, const char* file, int line) FL_NO_EXCEPT {
     fl::printf("  [CAPTURE] %s:%d: %s := %s\n", file, line, name, value);
 }
 
-void fail(const char* msg, const char* file, int line, bool isFatal) FL_NOEXCEPT {
+void fail(const char* msg, const char* file, int line, bool isFatal) FL_NO_EXCEPT {
     AssertResult result(false);
     result.mExpression = msg;
     result.mLocation = SourceLocation(file, line);
@@ -485,13 +485,13 @@ void fail(const char* msg, const char* file, int line, bool isFatal) FL_NOEXCEPT
 
 // Note: sCurrentTestSkipped and sSkipReason are defined above runTestCase()
 
-void skipTest(const char* reason, const char* file, int line) FL_NOEXCEPT {
+void skipTest(const char* reason, const char* file, int line) FL_NO_EXCEPT {
     sCurrentTestSkipped = true;
     sSkipReason = reason;
     fl::printf("  [SKIPPED] %s:%d: %s\n", file, line, reason);
 }
 
-bool isTestSkipped() FL_NOEXCEPT {
+bool isTestSkipped() FL_NO_EXCEPT {
     return sCurrentTestSkipped;
 }
 
@@ -500,7 +500,7 @@ bool isTestSkipped() FL_NOEXCEPT {
 // =============================================================================
 
 // Helper function to print using either custom print func or fl::printf
-void SerialReporter::print(const char* msg) FL_NOEXCEPT {
+void SerialReporter::print(const char* msg) FL_NO_EXCEPT {
     if (mPrintFunc) {
         mPrintFunc(msg);
     } else {
@@ -508,12 +508,12 @@ void SerialReporter::print(const char* msg) FL_NOEXCEPT {
     }
 }
 
-void SerialReporter::testRunStart() FL_NOEXCEPT {
+void SerialReporter::testRunStart() FL_NO_EXCEPT {
     print("\n");
     print("====== FL TEST: Running tests... ======\n");
 }
 
-void SerialReporter::testRunEnd(const TestStats& stats) FL_NOEXCEPT {
+void SerialReporter::testRunEnd(const TestStats& stats) FL_NO_EXCEPT {
     print("\n====== FL TEST: Results ======\n");
 
     // Format stats using snprintf-style approach
@@ -541,13 +541,13 @@ void SerialReporter::testRunEnd(const TestStats& stats) FL_NOEXCEPT {
     }
 }
 
-void SerialReporter::testCaseStart(const char* name) FL_NOEXCEPT {
+void SerialReporter::testCaseStart(const char* name) FL_NO_EXCEPT {
     fl::sstream ss;
     ss << "\n[TEST] " << name << "\n";
     print(ss.str().c_str());
 }
 
-void SerialReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NOEXCEPT {
+void SerialReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NO_EXCEPT {
     if (passed) {
         if (durationMs > 0) {
             fl::sstream ss;
@@ -567,17 +567,17 @@ void SerialReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NOEXCEPT {
     }
 }
 
-void SerialReporter::subcaseStart(const char* name) FL_NOEXCEPT {
+void SerialReporter::subcaseStart(const char* name) FL_NO_EXCEPT {
     fl::sstream ss;
     ss << "  [SUBCASE] " << name << "\n";
     print(ss.str().c_str());
 }
 
-void SerialReporter::subcaseEnd() FL_NOEXCEPT {
+void SerialReporter::subcaseEnd() FL_NO_EXCEPT {
     // Nothing needed
 }
 
-void SerialReporter::assertResult(const AssertResult& result) FL_NOEXCEPT {
+void SerialReporter::assertResult(const AssertResult& result) FL_NO_EXCEPT {
     if (!result.mPassed) {
         fl::sstream ss;
         ss << "  FAIL: " << result.mLocation.mFile
@@ -594,7 +594,7 @@ void SerialReporter::assertResult(const AssertResult& result) FL_NOEXCEPT {
 // XMLReporter implementation (JUnit format)
 // =============================================================================
 
-fl::string XMLReporter::escapeXml(const char* text) FL_NOEXCEPT {
+fl::string XMLReporter::escapeXml(const char* text) FL_NO_EXCEPT {
     if (!text) return fl::string();
 
     fl::string result;
@@ -611,11 +611,11 @@ fl::string XMLReporter::escapeXml(const char* text) FL_NOEXCEPT {
     return result;
 }
 
-void XMLReporter::testRunStart() FL_NOEXCEPT {
+void XMLReporter::testRunStart() FL_NO_EXCEPT {
     mTestCaseResults.clear();
 }
 
-void XMLReporter::testRunEnd(const TestStats& stats) FL_NOEXCEPT {
+void XMLReporter::testRunEnd(const TestStats& stats) FL_NO_EXCEPT {
     if (!mOutput) return;
 
     fl::sstream ss;
@@ -640,13 +640,13 @@ void XMLReporter::testRunEnd(const TestStats& stats) FL_NOEXCEPT {
     *mOutput = ss.str();
 }
 
-void XMLReporter::testCaseStart(const char* name) FL_NOEXCEPT {
+void XMLReporter::testCaseStart(const char* name) FL_NO_EXCEPT {
     mCurrentTestName = name ? name : "unknown";
     mCurrentTestFailures.clear();
     mCurrentTestPassed = true;
 }
 
-void XMLReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NOEXCEPT {
+void XMLReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NO_EXCEPT {
     fl::sstream ss;
     ss << "  <testcase name=\"" << escapeXml(mCurrentTestName.c_str()) << "\"";
 
@@ -671,15 +671,15 @@ void XMLReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NOEXCEPT {
     mTestCaseResults.push_back(ss.str());
 }
 
-void XMLReporter::subcaseStart(const char* /*name*/) FL_NOEXCEPT {
+void XMLReporter::subcaseStart(const char* /*name*/) FL_NO_EXCEPT {
     // Subcases are noted in the failure message if they fail
 }
 
-void XMLReporter::subcaseEnd() FL_NOEXCEPT {
+void XMLReporter::subcaseEnd() FL_NO_EXCEPT {
     // Nothing to do
 }
 
-void XMLReporter::assertResult(const AssertResult& result) FL_NOEXCEPT {
+void XMLReporter::assertResult(const AssertResult& result) FL_NO_EXCEPT {
     if (!result.mPassed) {
         mCurrentTestPassed = false;
 
@@ -698,7 +698,7 @@ void XMLReporter::assertResult(const AssertResult& result) FL_NOEXCEPT {
 // JSONReporter implementation
 // =============================================================================
 
-fl::string JSONReporter::escapeJson(const char* text) FL_NOEXCEPT {
+fl::string JSONReporter::escapeJson(const char* text) FL_NO_EXCEPT {
     if (!text) return fl::string();
 
     fl::string result;
@@ -728,11 +728,11 @@ fl::string JSONReporter::escapeJson(const char* text) FL_NOEXCEPT {
     return result;
 }
 
-void JSONReporter::testRunStart() FL_NOEXCEPT {
+void JSONReporter::testRunStart() FL_NO_EXCEPT {
     mTestResults.clear();
 }
 
-void JSONReporter::testRunEnd(const TestStats& stats) FL_NOEXCEPT {
+void JSONReporter::testRunEnd(const TestStats& stats) FL_NO_EXCEPT {
     if (!mOutput) return;
 
     fl::sstream ss;
@@ -762,13 +762,13 @@ void JSONReporter::testRunEnd(const TestStats& stats) FL_NOEXCEPT {
     *mOutput = ss.str();
 }
 
-void JSONReporter::testCaseStart(const char* name) FL_NOEXCEPT {
+void JSONReporter::testCaseStart(const char* name) FL_NO_EXCEPT {
     mCurrentTestName = name ? name : "unknown";
     mCurrentTestFailures.clear();
     mCurrentTestPassed = true;
 }
 
-void JSONReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NOEXCEPT {
+void JSONReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NO_EXCEPT {
     fl::sstream ss;
     ss << "    {\n";
     ss << "      \"name\": \"" << escapeJson(mCurrentTestName.c_str()) << "\",\n";
@@ -800,15 +800,15 @@ void JSONReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NOEXCEPT {
     mTestResults.push_back(ss.str());
 }
 
-void JSONReporter::subcaseStart(const char* /*name*/) FL_NOEXCEPT {
+void JSONReporter::subcaseStart(const char* /*name*/) FL_NO_EXCEPT {
     // Subcases are noted in failures
 }
 
-void JSONReporter::subcaseEnd() FL_NOEXCEPT {
+void JSONReporter::subcaseEnd() FL_NO_EXCEPT {
     // Nothing to do
 }
 
-void JSONReporter::assertResult(const AssertResult& result) FL_NOEXCEPT {
+void JSONReporter::assertResult(const AssertResult& result) FL_NO_EXCEPT {
     if (!result.mPassed) {
         mCurrentTestPassed = false;
 
@@ -832,7 +832,7 @@ void JSONReporter::assertResult(const AssertResult& result) FL_NOEXCEPT {
 // TAPReporter implementation (Test Anything Protocol)
 // =============================================================================
 
-void TAPReporter::output(const char* line) FL_NOEXCEPT {
+void TAPReporter::output(const char* line) FL_NO_EXCEPT {
     if (mPrintFunc) {
         mPrintFunc(line);
         mPrintFunc("\n");
@@ -842,7 +842,7 @@ void TAPReporter::output(const char* line) FL_NOEXCEPT {
     }
 }
 
-void TAPReporter::testRunStart() FL_NOEXCEPT {
+void TAPReporter::testRunStart() FL_NO_EXCEPT {
     mTestNumber = 0;
     mStreamingOutput.clear();
 
@@ -857,7 +857,7 @@ void TAPReporter::testRunStart() FL_NOEXCEPT {
     }
 }
 
-void TAPReporter::testRunEnd(const TestStats& stats) FL_NOEXCEPT {
+void TAPReporter::testRunEnd(const TestStats& stats) FL_NO_EXCEPT {
     // If we didn't know the total, output the plan at the end
     if (mTotalTests == 0) {
         fl::sstream ss;
@@ -881,14 +881,14 @@ void TAPReporter::testRunEnd(const TestStats& stats) FL_NOEXCEPT {
     }
 }
 
-void TAPReporter::testCaseStart(const char* name) FL_NOEXCEPT {
+void TAPReporter::testCaseStart(const char* name) FL_NO_EXCEPT {
     mTestNumber++;
     mCurrentTestName = name ? name : "unknown";
     mCurrentTestPassed = true;
     mDiagnostics.clear();
 }
 
-void TAPReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NOEXCEPT {
+void TAPReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NO_EXCEPT {
     fl::sstream ss;
 
     if (passed) {
@@ -911,18 +911,18 @@ void TAPReporter::testCaseEnd(bool passed, fl::u32 durationMs) FL_NOEXCEPT {
     }
 }
 
-void TAPReporter::subcaseStart(const char* name) FL_NOEXCEPT {
+void TAPReporter::subcaseStart(const char* name) FL_NO_EXCEPT {
     // TAP doesn't have native subcase support, but we can add diagnostics
     fl::sstream ss;
     ss << "  Subcase: " << (name ? name : "unknown");
     mDiagnostics.push_back(ss.str());
 }
 
-void TAPReporter::subcaseEnd() FL_NOEXCEPT {
+void TAPReporter::subcaseEnd() FL_NO_EXCEPT {
     // Nothing to do
 }
 
-void TAPReporter::assertResult(const AssertResult& result) FL_NOEXCEPT {
+void TAPReporter::assertResult(const AssertResult& result) FL_NO_EXCEPT {
     if (!result.mPassed) {
         mCurrentTestPassed = false;
 

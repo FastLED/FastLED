@@ -18,11 +18,11 @@ enum class RampPhase {
 
 // Use this function to compute the alpha value based on the time elapsed
 // 0 -> 255
-u8 time_alpha8(u32 now, u32 start, u32 end) FL_NOEXCEPT;
+u8 time_alpha8(u32 now, u32 start, u32 end) FL_NO_EXCEPT;
 // 0 -> 65535
-u16 time_alpha16(u32 now, u32 start, u32 end) FL_NOEXCEPT;
+u16 time_alpha16(u32 now, u32 start, u32 end) FL_NO_EXCEPT;
 
-inline float time_alphaf(u32 now, u32 start, u32 end) FL_NOEXCEPT {
+inline float time_alphaf(u32 now, u32 start, u32 end) FL_NO_EXCEPT {
     if (now < start) {
         return 0.0f;
     }
@@ -34,16 +34,16 @@ inline float time_alphaf(u32 now, u32 start, u32 end) FL_NOEXCEPT {
 
 class TimeAlpha {
   public:
-    virtual ~TimeAlpha() FL_NOEXCEPT = default;
-    virtual void trigger(u32 now) FL_NOEXCEPT = 0;
-    virtual u8 update8(u32 now) FL_NOEXCEPT = 0;
-    virtual u16 update16(u32 now) FL_NOEXCEPT {
+    virtual ~TimeAlpha() FL_NO_EXCEPT = default;
+    virtual void trigger(u32 now) FL_NO_EXCEPT = 0;
+    virtual u8 update8(u32 now) FL_NO_EXCEPT = 0;
+    virtual u16 update16(u32 now) FL_NO_EXCEPT {
         return static_cast<u16>(update8(now) << 8) + 0xFF;
     }
-    virtual float updatef(u32 now) FL_NOEXCEPT {
+    virtual float updatef(u32 now) FL_NO_EXCEPT {
         return static_cast<float>(update16(now)) / 65535.0f;
     }
-    virtual bool isActive(u32 now) const FL_NOEXCEPT = 0;
+    virtual bool isActive(u32 now) const FL_NO_EXCEPT = 0;
 };
 
 /*
@@ -65,7 +65,7 @@ class TimeRamp : public TimeAlpha {
     /// @param latchMs     total active time (ms)
     /// @param risingTime  time to ramp from 0→255 (ms)
     /// @param fallingTime time to ramp from 255→0 (ms)
-    TimeRamp(u32 risingTime, u32 latchMs, u32 fallingTime) FL_NOEXCEPT;
+    TimeRamp(u32 risingTime, u32 latchMs, u32 fallingTime) FL_NO_EXCEPT;
 
     /// Call this when you want to (re)start the ramp cycle.
     /// Smart re-trigger that preserves state when already active:
@@ -73,17 +73,17 @@ class TimeRamp : public TimeAlpha {
     /// - If falling: reverses back to plateau
     /// - If rising: continues rising
     /// - If inactive: starts new cycle
-    void trigger(u32 now) FL_NOEXCEPT override;
+    void trigger(u32 now) FL_NO_EXCEPT override;
 
     /// @return true iff we're still within the latch period.
-    bool isActive(u32 now) const FL_NOEXCEPT override;
+    bool isActive(u32 now) const FL_NO_EXCEPT override;
 
     /// Get the current phase of the ramp
-    RampPhase getCurrentPhase(u32 now) const FL_NOEXCEPT;
+    RampPhase getCurrentPhase(u32 now) const FL_NO_EXCEPT;
 
     /// Compute current 0–255 output based on how much time has elapsed since
     /// trigger().
-    u8 update8(u32 now) FL_NOEXCEPT override;
+    u8 update8(u32 now) FL_NO_EXCEPT override;
 
   private:
     u32 mLatchMs;
@@ -114,14 +114,14 @@ class TimeRamp : public TimeAlpha {
  */
 class TimeClampedTransition : public TimeAlpha {
   public:
-    TimeClampedTransition(u32 duration) FL_NOEXCEPT : mDuration(duration) {}
+    TimeClampedTransition(u32 duration) FL_NO_EXCEPT : mDuration(duration) {}
 
-    void trigger(u32 now) FL_NOEXCEPT override {
+    void trigger(u32 now) FL_NO_EXCEPT override {
         mStart = now;
         mEnd = now + mDuration;
     }
 
-    bool isActive(u32 now) const FL_NOEXCEPT override {
+    bool isActive(u32 now) const FL_NO_EXCEPT override {
         bool not_started = (mEnd == 0) && (mStart == 0);
         if (not_started) {
             // if we have not started, we are not active
@@ -138,7 +138,7 @@ class TimeClampedTransition : public TimeAlpha {
         return true;
     }
 
-    u8 update8(u32 now) FL_NOEXCEPT override {
+    u8 update8(u32 now) FL_NO_EXCEPT override {
         bool not_started = (mEnd == 0) && (mStart == 0);
         if (not_started) {
             // if we have not started, we are not active
@@ -148,7 +148,7 @@ class TimeClampedTransition : public TimeAlpha {
         return out;
     }
 
-    float updatef(u32 now) FL_NOEXCEPT override {
+    float updatef(u32 now) FL_NO_EXCEPT override {
         bool not_started = (mEnd == 0) && (mStart == 0);
         if (not_started) {
             return 0;
@@ -160,7 +160,7 @@ class TimeClampedTransition : public TimeAlpha {
         return out;
     }
 
-    void set_max_clamp(float max) FL_NOEXCEPT { mMaxClamp = max; }
+    void set_max_clamp(float max) FL_NO_EXCEPT { mMaxClamp = max; }
 
   private:
     u32 mStart = 0;

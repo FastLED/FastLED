@@ -15,11 +15,11 @@ class TriangularFilterImpl {
     FL_STATIC_ASSERT(N == 0 || (N % 2 == 1),
                   "TriangularFilter: N must be odd for a symmetric tent shape");
   public:
-    TriangularFilterImpl() FL_NOEXCEPT : mLastValue(T(0)) {}
+    TriangularFilterImpl() FL_NO_EXCEPT : mLastValue(T(0)) {}
     explicit TriangularFilterImpl(fl::size capacity)
         : mBuf(capacity), mLastValue(T(0)) {
         if (capacity % 2 == 0) {
-            FL_ERROR("TriangularFilter: capacity should be odd, adding 1");
+            FL_ERROR_F("TriangularFilter: capacity should be odd, adding 1");
             mBuf = circular_buffer<T, N>(capacity + 1);
         }
     }
@@ -45,7 +45,7 @@ class TriangularFilterImpl {
 
     void resize(fl::size new_capacity) {
         if (new_capacity % 2 == 0) {
-            FL_ERROR("TriangularFilter: capacity should be odd, adding 1");
+            FL_ERROR_F("TriangularFilter: capacity should be odd, adding 1");
             new_capacity += 1;
         }
         mBuf = circular_buffer<T, N>(new_capacity);
