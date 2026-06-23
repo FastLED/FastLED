@@ -18,27 +18,27 @@ class JsonUiSliderInternal;
 class JsonSliderImpl {
   public:
     JsonSliderImpl(const fl::string &name, float value, float min, float max,
-                 float step = -1) FL_NO_EXCEPT;
+                 float step = -1) FL_NOEXCEPT;
     ~JsonSliderImpl();
-    JsonSliderImpl &Group(const fl::string &name) FL_NO_EXCEPT;
+    JsonSliderImpl &Group(const fl::string &name) FL_NOEXCEPT;
 
-    const fl::string &name() const FL_NO_EXCEPT;
-    void toJson(fl::json &json) const FL_NO_EXCEPT;
-    float value() const FL_NO_EXCEPT;
-    float value_normalized() const FL_NO_EXCEPT;
-    float getMax() const FL_NO_EXCEPT;
-    float getMin() const FL_NO_EXCEPT;
-    void setValue(float value) FL_NO_EXCEPT;
-    fl::string groupName() const FL_NO_EXCEPT;
+    const fl::string &name() const FL_NOEXCEPT;
+    void toJson(fl::json &json) const FL_NOEXCEPT;
+    float value() const FL_NOEXCEPT;
+    float value_normalized() const FL_NOEXCEPT;
+    float getMax() const FL_NOEXCEPT;
+    float getMin() const FL_NOEXCEPT;
+    void setValue(float value) FL_NOEXCEPT;
+    fl::string groupName() const FL_NOEXCEPT;
     
     // Method to allow parent UIElement class to set the group
-    void setGroup(const fl::string &groupName) FL_NO_EXCEPT;
+    void setGroup(const fl::string &groupName) FL_NOEXCEPT;
 
-    int id() const FL_NO_EXCEPT;
+    int id() const FL_NOEXCEPT;
 
-    int as_int() const FL_NO_EXCEPT;
-    JsonSliderImpl &operator=(float value) FL_NO_EXCEPT;
-    JsonSliderImpl &operator=(int value) FL_NO_EXCEPT;
+    int as_int() const FL_NOEXCEPT;
+    JsonSliderImpl &operator=(float value) FL_NOEXCEPT;
+    JsonSliderImpl &operator=(int value) FL_NOEXCEPT;
 
   private:
     // Change to use the specific internal implementation

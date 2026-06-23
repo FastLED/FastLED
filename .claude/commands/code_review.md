@@ -336,7 +336,7 @@ inline void setPowerModel(const PowerModelRGB& model) {
 2. ✅ **The wrapper is a thin `inline` delegator** — no logic, validation, or error handling embedded.
 3. ✅ **Examples, README, and PR descriptions** should call `FastLED.setX(...)`, never `fl::set_x(...)`.
 
-**Strict for new code; transitional allowlist for legacy names only.** Every *new* public global setter under `fl::` must ship with a `CFastLED` wrapper in the same PR. A small transitional allowlist (`PUBLIC_SETTINGS_GRANDFATHERED` in `ci/lint_cpp_rs/src/checkers/public_settings.rs`) exempts pre-existing bare setters (e.g. `fl::set_input_gamut` #2710) until their wrappers land. Entries are removed as each name is wrapped; new additions block the PR.
+**Strict for new code; transitional allowlist for legacy names only.** Every *new* public global setter under `fl::` must ship with a `CFastLED` wrapper in the same PR. A small transitional allowlist (`GRANDFATHERED_NAMES` in `ci/lint_cpp/public_settings_pattern_checker.py`) exempts pre-existing bare setters (e.g. `fl::set_input_gamut` #2710) until their wrappers land. Entries are removed as each name is wrapped; new additions block the PR.
 
 **Does NOT apply to**:
 - Helpers, constructors, factories (not "setters of global state")

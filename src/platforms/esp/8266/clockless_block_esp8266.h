@@ -47,7 +47,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 public:
 	virtual int size() { return CLEDController::size() * LANES; }
 
-	virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) FL_NO_EXCEPT {
+	virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) FL_NOEXCEPT {
 		mWait.wait();
 		/*u32 clocks = */
 		int cnt=FASTLED_INTERRUPT_RETRY_COUNT;
@@ -68,11 +68,11 @@ public:
 		mWait.mark();
 	}
 
-	template<int PIN> static void initPin() FL_NO_EXCEPT {
+	template<int PIN> static void initPin() FL_NOEXCEPT {
 		_ESPPIN<PIN, 1<<(PIN & 0xFF)>::setOutput();
 	}
 
-	virtual void init() FL_NO_EXCEPT {
+	virtual void init() FL_NOEXCEPT {
 		void (* funcs[])() ={initPin<12>, initPin<13>, initPin<14>, initPin<15>, initPin<4>, initPin<5>};
 
 		for (u8 i = 0; i < USED_LANES; ++i) {
@@ -90,7 +90,7 @@ public:
 
 #define ESP_ADJUST 0 // (2*(F_CPU/24000000))
 #define ESP_ADJUST2 0
-  	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & last_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) FL_NO_EXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
+  	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & last_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) FL_NOEXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
 	  	Lines b2 = b;
 		transpose8x1_noinline(b.bytes,b2.bytes);
 
@@ -128,7 +128,7 @@ public:
 
   	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static u32 FL_IRAM showRGBInternal(PixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels) FL_NO_EXCEPT {
+	static u32 FL_IRAM showRGBInternal(PixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels) FL_NOEXCEPT {
 
 		// Setup the pixel controller and load/scale the first byte
 		Lines b0;

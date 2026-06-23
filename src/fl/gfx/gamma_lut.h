@@ -33,7 +33,7 @@ namespace fl {
 //
 // Example: gamma<u8x24>(2.2f) returns constexpr uint32_t
 template <typename Fixed>
-constexpr u32 gamma(float g) FL_NO_EXCEPT {
+constexpr u32 gamma(float g) FL_NOEXCEPT {
     return Fixed(g).raw();
 }
 
@@ -59,7 +59,7 @@ constexpr u32 SCALE = (u32)1 << FRAC; // 16777216
 
 // ---- Highest-bit finder (constexpr recursive) ----
 
-constexpr int hb_step(u32 v, int r) FL_NO_EXCEPT {
+constexpr int hb_step(u32 v, int r) FL_NOEXCEPT {
     return (v & 0xFFFF0000u) ? hb_step(v >> 16, r + 16)
          : (v & 0x0000FF00u) ? hb_step(v >> 8,  r + 8)
          : (v & 0x000000F0u) ? hb_step(v >> 4,  r + 4)
@@ -68,7 +68,7 @@ constexpr int hb_step(u32 v, int r) FL_NO_EXCEPT {
          : r;
 }
 
-constexpr int highest_bit(u32 v) FL_NO_EXCEPT {
+constexpr int highest_bit(u32 v) FL_NOEXCEPT {
     return v == 0 ? -1 : hb_step(v, 0);
 }
 
@@ -77,7 +77,7 @@ constexpr int highest_bit(u32 v) FL_NO_EXCEPT {
 // Minimax coefficients minimize max error over the full interval,
 // unlike Taylor which diverges badly near t=1.
 
-constexpr u32 log2_t(u32 val, int msb) FL_NO_EXCEPT {
+constexpr u32 log2_t(u32 val, int msb) FL_NOEXCEPT {
     return msb >= FRAC
         ? (val >> (msb - FRAC)) - SCALE
         : (val << (FRAC - msb)) - SCALE;
@@ -85,20 +85,20 @@ constexpr u32 log2_t(u32 val, int msb) FL_NO_EXCEPT {
 
 // Horner steps for log2(1+t) polynomial, split into separate
 // constexpr functions for C++11 single-return-statement compliance.
-constexpr i64 log2_h3(i64 t) FL_NO_EXCEPT {
+constexpr i64 log2_h3(i64 t) FL_NOEXCEPT {
     return (static_cast<i64>(-1788416LL) * t) >> FRAC;
 }
-constexpr i64 log2_h2(i64 t) FL_NO_EXCEPT {
+constexpr i64 log2_h2(i64 t) FL_NOEXCEPT {
     return ((6098176LL + log2_h3(t)) * t) >> FRAC;
 }
-constexpr i64 log2_h1(i64 t) FL_NO_EXCEPT {
+constexpr i64 log2_h1(i64 t) FL_NOEXCEPT {
     return ((-11728384LL + log2_h2(t)) * t) >> FRAC;
 }
-constexpr i64 log2_h0(i64 t) FL_NO_EXCEPT {
+constexpr i64 log2_h0(i64 t) FL_NOEXCEPT {
     return ((24189248LL + log2_h1(t)) * t) >> FRAC;
 }
 
-constexpr i32 log2_with_msb(u32 val, int msb) FL_NO_EXCEPT {
+constexpr i32 log2_with_msb(u32 val, int msb) FL_NOEXCEPT {
     // Use multiplication instead of left-shift to avoid UB when (msb - FRAC)
     // is negative (left-shifting a negative value is undefined in C++).
     return static_cast<i32>(
@@ -107,7 +107,7 @@ constexpr i32 log2_with_msb(u32 val, int msb) FL_NO_EXCEPT {
     );
 }
 
-constexpr i32 log2_fp(u32 val) FL_NO_EXCEPT {
+constexpr i32 log2_fp(u32 val) FL_NOEXCEPT {
     return val == 0 ? static_cast<i32>(0x80000000)
                     : log2_with_msb(val, highest_bit(val));
 }
@@ -116,24 +116,24 @@ constexpr i32 log2_fp(u32 val) FL_NO_EXCEPT {
 // Uses 4-term minimax polynomial for 2^t - 1, t in [0,1).
 // Minimax coefficients minimize max error over the full interval.
 
-constexpr u64 exp2_h3(u64 fr) FL_NO_EXCEPT {
+constexpr u64 exp2_h3(u64 fr) FL_NOEXCEPT {
     return (214016ULL * fr) >> FRAC;
 }
-constexpr u64 exp2_h2(u64 fr) FL_NO_EXCEPT {
+constexpr u64 exp2_h2(u64 fr) FL_NOEXCEPT {
     return ((895232ULL + exp2_h3(fr)) * fr) >> FRAC;
 }
-constexpr u64 exp2_h1(u64 fr) FL_NO_EXCEPT {
+constexpr u64 exp2_h1(u64 fr) FL_NOEXCEPT {
     return ((4038400ULL + exp2_h2(fr)) * fr) >> FRAC;
 }
-constexpr u64 exp2_h0(u64 fr) FL_NO_EXCEPT {
+constexpr u64 exp2_h0(u64 fr) FL_NOEXCEPT {
     return ((11629376ULL + exp2_h1(fr)) * fr) >> FRAC;
 }
-constexpr u64 exp2_frac(u64 fr) FL_NO_EXCEPT {
+constexpr u64 exp2_frac(u64 fr) FL_NOEXCEPT {
     return (1ULL << FRAC) + exp2_h0(fr);
 }
 
 // exp2 for non-negative 8.24 fixed-point input.
-constexpr u32 exp2_pos(u32 x) FL_NO_EXCEPT {
+constexpr u32 exp2_pos(u32 x) FL_NOEXCEPT {
     return (x >> FRAC) >= 8 ? 0xFFFFFFFFu
         : static_cast<u32>(
             (static_cast<u64>(SCALE << (x >> FRAC)) *
@@ -143,7 +143,7 @@ constexpr u32 exp2_pos(u32 x) FL_NO_EXCEPT {
 
 // exp2 for negative input: 2^(-P) = 2^(1-f) >> (n+1)
 // where P = n + f, n = integer part, f = fractional part.
-constexpr u32 exp2_neg(u32 pos_val) FL_NO_EXCEPT {
+constexpr u32 exp2_neg(u32 pos_val) FL_NOEXCEPT {
     return ((pos_val >> FRAC) + 1) >= 32 ? 0
         : static_cast<u32>(
             exp2_pos(SCALE - (pos_val & (SCALE - 1)))
@@ -151,14 +151,14 @@ constexpr u32 exp2_neg(u32 pos_val) FL_NO_EXCEPT {
           );
 }
 
-constexpr u32 exp2_fp(i32 x) FL_NO_EXCEPT {
+constexpr u32 exp2_fp(i32 x) FL_NOEXCEPT {
     return x >= 0 ? exp2_pos(static_cast<u32>(x))
                   : exp2_neg(static_cast<u32>(-x));
 }
 
 // ---- Fixed-point pow: base^exp via exp2(exp * log2(base)) ----
 
-constexpr u32 pow_fp(u32 base_raw, u32 exp_raw) FL_NO_EXCEPT {
+constexpr u32 pow_fp(u32 base_raw, u32 exp_raw) FL_NOEXCEPT {
     return base_raw == 0     ? 0
          : exp_raw == 0      ? SCALE
          : base_raw == SCALE ? SCALE
@@ -171,7 +171,7 @@ constexpr u32 pow_fp(u32 base_raw, u32 exp_raw) FL_NO_EXCEPT {
 // ---- 8-bit gamma correction for a single pixel value ----
 // Computes: clamp(round(pow(x/255, gamma) * 255), 0, 255)
 
-constexpr u8 eval(u8 x, u32 gamma_raw) FL_NO_EXCEPT {
+constexpr u8 eval(u8 x, u32 gamma_raw) FL_NOEXCEPT {
     return x == 0   ? static_cast<u8>(0)
          : x == 255 ? static_cast<u8>(255)
          : static_cast<u8>(
@@ -186,7 +186,7 @@ constexpr u8 eval(u8 x, u32 gamma_raw) FL_NO_EXCEPT {
 // Computes: clamp(round(pow(x/255, gamma) * 65535), 0, 65535)
 // Used by five-bit brightness and HD108 pipelines.
 
-constexpr u16 eval16(u8 x, u32 gamma_raw) FL_NO_EXCEPT {
+constexpr u16 eval16(u8 x, u32 gamma_raw) FL_NOEXCEPT {
     return x == 0   ? static_cast<u16>(0)
          : x == 255 ? static_cast<u16>(65535)
          : static_cast<u16>(
@@ -207,7 +207,7 @@ constexpr u16 eval16(u8 x, u32 gamma_raw) FL_NO_EXCEPT {
 // 8-bit output: input u8 [0,255] → output u8 [0,255]
 template <u32 GammaRaw>
 struct GammaEval {
-    constexpr u8 operator()(u8 x) const FL_NO_EXCEPT {
+    constexpr u8 operator()(u8 x) const FL_NOEXCEPT {
         return detail::gamma_constexpr::eval(x, GammaRaw);
     }
 };
@@ -216,7 +216,7 @@ struct GammaEval {
 // Use this for five-bit brightness and HD108 pipelines.
 template <u32 GammaRaw>
 struct GammaEval16 {
-    constexpr u16 operator()(u8 x) const FL_NO_EXCEPT {
+    constexpr u16 operator()(u8 x) const FL_NOEXCEPT {
         return detail::gamma_constexpr::eval16(x, GammaRaw);
     }
 };
@@ -232,13 +232,13 @@ struct LutArray {
 
 template <typename Fn, fl::size... Is>
 constexpr LutArray<u8, sizeof...(Is)>
-make_lut_u8(fl::index_sequence<Is...>) FL_NO_EXCEPT {
+make_lut_u8(fl::index_sequence<Is...>) FL_NOEXCEPT {
     return {{ Fn()(static_cast<u8>(Is))... }};
 }
 
 template <typename Fn, fl::size... Is>
 constexpr LutArray<u16, sizeof...(Is)>
-make_lut_u16(fl::index_sequence<Is...>) FL_NO_EXCEPT {
+make_lut_u16(fl::index_sequence<Is...>) FL_NOEXCEPT {
     return {{ Fn()(static_cast<u8>(Is))... }};
 }
 
@@ -248,7 +248,7 @@ make_lut_u16(fl::index_sequence<Is...>) FL_NO_EXCEPT {
 // Fn must be a functor with constexpr operator()(u8) returning u8.
 template <typename Fn, fl::size N>
 struct ProgmemLUT {
-    static u8 read(u8 index) FL_NO_EXCEPT {
+    static u8 read(u8 index) FL_NOEXCEPT {
         return FL_PGM_READ_BYTE_NEAR(&kData.values[index]);
     }
 
@@ -265,13 +265,13 @@ ProgmemLUT<Fn, N>::kData FL_PROGMEM =
 // Used by five-bit brightness and HD108 gamma pipelines.
 template <typename Fn, fl::size N>
 struct ProgmemLUT16 {
-    static u16 read(u8 index) FL_NO_EXCEPT {
+    static u16 read(u8 index) FL_NOEXCEPT {
         return FL_PGM_READ_WORD_NEAR(&kData.values[index]);
     }
 
     // Direct access to the raw PROGMEM array for hot-loop usage
     // (avoids per-element function call overhead).
-    static const u16* data() FL_NO_EXCEPT { return kData.values; }
+    static const u16* data() FL_NOEXCEPT { return kData.values; }
 
     static const detail::LutArray<u16, N> kData;
 };

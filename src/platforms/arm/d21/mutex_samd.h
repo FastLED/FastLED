@@ -67,7 +67,7 @@ private:
     volatile bool mLocked;  // Lock flag (volatile for ISR safety)
 
 public:
-    MutexSAMD() FL_NO_EXCEPT;
+    MutexSAMD() FL_NOEXCEPT;
     ~MutexSAMD() = default;
 
     // Non-copyable and non-movable
@@ -77,14 +77,14 @@ public:
     MutexSAMD& operator=(MutexSAMD&&) = delete;
 
     /// @brief Lock the mutex (warns if already locked)
-    void lock() FL_NO_EXCEPT;
+    void lock() FL_NOEXCEPT;
 
     /// @brief Unlock the mutex
-    void unlock() FL_NO_EXCEPT;
+    void unlock() FL_NOEXCEPT;
 
     /// @brief Try to lock the mutex without blocking
     /// @return true if lock acquired, false if already locked
-    bool try_lock() FL_NO_EXCEPT;
+    bool try_lock() FL_NOEXCEPT;
 };
 
 /// @brief SAMD interrupt-based recursive mutex
@@ -100,7 +100,7 @@ private:
     volatile u32 mLockCount;  // Number of times locked (0 = unlocked)
 
 public:
-    RecursiveMutexSAMD() FL_NO_EXCEPT;
+    RecursiveMutexSAMD() FL_NOEXCEPT;
     ~RecursiveMutexSAMD() = default;
 
     // Non-copyable and non-movable
@@ -110,14 +110,14 @@ public:
     RecursiveMutexSAMD& operator=(RecursiveMutexSAMD&&) = delete;
 
     /// @brief Lock the mutex (increments lock count)
-    void lock() FL_NO_EXCEPT;
+    void lock() FL_NOEXCEPT;
 
     /// @brief Unlock the mutex (decrements lock count)
-    void unlock() FL_NO_EXCEPT;
+    void unlock() FL_NOEXCEPT;
 
     /// @brief Try to lock the mutex without blocking
     /// @return Always true in single-threaded environment
-    bool try_lock() FL_NO_EXCEPT;
+    bool try_lock() FL_NOEXCEPT;
 };
 
 // Define FASTLED_MULTITHREADED=0 for SAMD (bare metal, no threading)

@@ -23,7 +23,7 @@ namespace fl {
 /// @warning The BPM parameter **MUST** be provided in Q8.8 format! E.g.
 /// for 120 BPM it would be 120*256 = 30720. If you just want to specify
 /// "120", use beat16() or beat8().
-LIB8STATIC u16 beat88(accum88 beats_per_minute_88, u32 timebase = 0) FL_NO_EXCEPT {
+LIB8STATIC u16 beat88(accum88 beats_per_minute_88, u32 timebase = 0) FL_NOEXCEPT {
     // BPM is 'beats per minute', or 'beats per 60000ms'.
     // To avoid using the (slower) division operator, we
     // want to convert 'beats per 60000ms' to 'beats per 65536ms',
@@ -38,7 +38,7 @@ LIB8STATIC u16 beat88(accum88 beats_per_minute_88, u32 timebase = 0) FL_NO_EXCEP
 /// Generates a 16-bit "sawtooth" wave at a given BPM
 /// @param beats_per_minute the frequency of the wave, in decimal
 /// @param timebase the time offset of the wave from the millis() timer
-LIB8STATIC u16 beat16(accum88 beats_per_minute, u32 timebase = 0) FL_NO_EXCEPT {
+LIB8STATIC u16 beat16(accum88 beats_per_minute, u32 timebase = 0) FL_NOEXCEPT {
     // Convert simple 8-bit BPM's to full Q8.8 accum88's if needed
     if (beats_per_minute < 256)
         beats_per_minute <<= 8;
@@ -48,7 +48,7 @@ LIB8STATIC u16 beat16(accum88 beats_per_minute, u32 timebase = 0) FL_NO_EXCEPT {
 /// Generates an 8-bit "sawtooth" wave at a given BPM
 /// @param beats_per_minute the frequency of the wave, in decimal
 /// @param timebase the time offset of the wave from the millis() timer
-LIB8STATIC u8 beat8(accum88 beats_per_minute, u32 timebase = 0) FL_NO_EXCEPT {
+LIB8STATIC u8 beat8(accum88 beats_per_minute, u32 timebase = 0) FL_NOEXCEPT {
     return beat16(beats_per_minute, timebase) >> 8;
 }
 
@@ -62,7 +62,7 @@ LIB8STATIC u8 beat8(accum88 beats_per_minute, u32 timebase = 0) FL_NO_EXCEPT {
 /// @warning The BPM parameter **MUST** be provided in Q8.8 format!
 LIB8STATIC u16 beatsin88(accum88 beats_per_minute_88, u16 lowest = 0,
                          u16 highest = 65535, u32 timebase = 0,
-                         u16 phase_offset = 0) FL_NO_EXCEPT {
+                         u16 phase_offset = 0) FL_NOEXCEPT {
     u16 beat = beat88(beats_per_minute_88, timebase);
     u16 beatsin = (sin16(beat + phase_offset) + 32768);
     u16 rangewidth = highest - lowest;
@@ -83,7 +83,7 @@ LIB8STATIC u16 beatsin88(accum88 beats_per_minute_88, u16 lowest = 0,
 /// @param phase_offset phase offset of the wave from the current position
 LIB8STATIC u16 beatsin16(accum88 beats_per_minute, u16 lowest = 0,
                          u16 highest = 65535, u32 timebase = 0,
-                         u16 phase_offset = 0) FL_NO_EXCEPT {
+                         u16 phase_offset = 0) FL_NOEXCEPT {
     u16 beat = beat16(beats_per_minute, timebase);
     u16 beatsin = (sin16(beat + phase_offset) + 32768);
     u16 rangewidth = highest - lowest;
@@ -104,7 +104,7 @@ LIB8STATIC u16 beatsin16(accum88 beats_per_minute, u16 lowest = 0,
 /// @param phase_offset phase offset of the wave from the current position
 LIB8STATIC u8 beatsin8(accum88 beats_per_minute, u8 lowest = 0,
                        u8 highest = 255, u32 timebase = 0,
-                       u8 phase_offset = 0) FL_NO_EXCEPT {
+                       u8 phase_offset = 0) FL_NOEXCEPT {
     u8 beat = beat8(beats_per_minute, timebase);
     u8 beatsin = sin8(beat + phase_offset);
     u8 rangewidth = highest - lowest;

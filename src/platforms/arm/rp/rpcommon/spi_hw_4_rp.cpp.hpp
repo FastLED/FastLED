@@ -256,13 +256,13 @@ bool SPIQuadRP2040::begin(const SpiHw4::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
-        FL_WARN_F("SPIQuadRP2040: Bus ID mismatch");
+        FL_WARN("SPIQuadRP2040: Bus ID mismatch");
         return false;
     }
 
     // Validate pin assignments - at least clock and D0 must be set
     if (config.clock_pin < 0 || config.data0_pin < 0) {
-        FL_WARN_F("SPIQuadRP2040: Invalid pin configuration (clock and D0 required)");
+        FL_WARN("SPIQuadRP2040: Invalid pin configuration (clock and D0 required)");
         return false;
     }
 
@@ -302,14 +302,14 @@ bool SPIQuadRP2040::begin(const SpiHw4::Config& config) {
     }
 
     if (mPIO == nullptr || mStateMachine == -1 || mPIOOffset == -1) {
-        FL_WARN_F("SPIQuadRP2040: No available PIO resources");
+        FL_WARN("SPIQuadRP2040: No available PIO resources");
         return false;
     }
 
     // Claim DMA channel
     mDMAChannel = dma_claim_unused_channel(false);
     if (mDMAChannel == -1) {
-        FL_WARN_F("SPIQuadRP2040: No available DMA channel");
+        FL_WARN("SPIQuadRP2040: No available DMA channel");
         pio_sm_unclaim(mPIO, mStateMachine);
         return false;
     }
@@ -319,7 +319,7 @@ bool SPIQuadRP2040::begin(const SpiHw4::Config& config) {
     if (mData1Pin >= 0 && mData2Pin >= 0 && mData3Pin >= 0) {
         // Full quad mode - all 4 pins must be consecutive
         if (mData1Pin != mData0Pin + 1 || mData2Pin != mData0Pin + 2 || mData3Pin != mData0Pin + 3) {
-            FL_WARN_F("SPIQuadRP2040: Data pins must be consecutive (D0, D0+1, D0+2, D0+3)");
+            FL_WARN("SPIQuadRP2040: Data pins must be consecutive (D0, D0+1, D0+2, D0+3)");
             dma_channel_unclaim(mDMAChannel);
             pio_sm_unclaim(mPIO, mStateMachine);
             return false;

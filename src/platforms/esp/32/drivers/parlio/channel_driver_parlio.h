@@ -199,7 +199,7 @@ struct parlio_tx_unit_t;
 typedef struct parlio_tx_unit_t *parlio_tx_unit_handle_t;
 
 // Forward declaration for heap_caps_free (defined in esp_heap_caps.h)
-extern "C" void heap_caps_free(void *ptr) FL_NO_EXCEPT;
+extern "C" void heap_caps_free(void *ptr) FL_NOEXCEPT;
 
 //=============================================================================
 // Hardware Capability Constants
@@ -244,7 +244,7 @@ namespace fl {
 ///       selection.
 /// @note Hardware capability validation happens at runtime in the .cpp file
 ///       using SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH.
-inline size_t selectDataWidth(size_t channel_count) FL_NO_EXCEPT {
+inline size_t selectDataWidth(size_t channel_count) FL_NOEXCEPT {
     // Validate input range (assume 16-bit max for all PARLIO chips)
     if (channel_count == 0 || channel_count > FASTLED_PARLIO_MAX_DATA_WIDTH)
         return 0;
@@ -269,7 +269,7 @@ inline size_t selectDataWidth(size_t channel_count) FL_NO_EXCEPT {
 /// transposeAndQueueNextChunk writes full bytes)
 /// @param data_width PARLIO data width (1, 2, 4, 8, or 16)
 /// @return Bytes per LED after waveform expansion
-inline size_t calculateBytesPerLed(size_t data_width) FL_NO_EXCEPT {
+inline size_t calculateBytesPerLed(size_t data_width) FL_NOEXCEPT {
     // WARNING: This formula is INCORRECT and caused 8x buffer overrun bug
     // (Iteration 2). Kept for reference only - DO NOT USE.
     // Bug: divided by 8 assuming bit-packing, but transposeAndQueueNextChunk()
@@ -286,7 +286,7 @@ inline size_t calculateBytesPerLed(size_t data_width) FL_NO_EXCEPT {
 /// runtime in initializeIfNeeded() (line 716) to use actual pulses_per_bit.
 /// @param data_width PARLIO data width (1, 2, 4, 8, or 16)
 /// @return LEDs per chunk (optimized for ~2KB buffer size)
-inline size_t calculateChunkSize(size_t data_width) FL_NO_EXCEPT {
+inline size_t calculateChunkSize(size_t data_width) FL_NOEXCEPT {
     // WARNING: This function uses calculateBytesPerLed() which is INCORRECT.
     // Kept for reference only - DO NOT USE.
     constexpr size_t target_buffer_size = 2048;
@@ -370,7 +370,7 @@ struct FL_ALIGNAS(64) ParlioIsrContext {
     fl::deque<u8> mDebugDmaOutput; ///< Copy of all DMA buffer data for validation (uses deque to avoid large contiguous allocation)
 
     // Constructor: Initialize all fields to safe defaults
-    ParlioIsrContext() FL_NO_EXCEPT
+    ParlioIsrContext() FL_NOEXCEPT
         : stream_complete(false)
         , transmitting(false)
         , current_led(0)
@@ -396,12 +396,12 @@ struct FL_ALIGNAS(64) ParlioIsrContext {
     {}
 
     // Singleton accessor for debug metrics
-    static ParlioIsrContext* getInstance() FL_NO_EXCEPT {
+    static ParlioIsrContext* getInstance() FL_NOEXCEPT {
         return s_instance;
     }
 
     // Singleton setter (called by ChannelDriverPARLIOImpl)
-    static void setInstance(ParlioIsrContext* instance) FL_NO_EXCEPT {
+    static void setInstance(ParlioIsrContext* instance) FL_NOEXCEPT {
         s_instance = instance;
     }
 
@@ -439,49 +439,49 @@ class ChannelDriverPARLIOImpl : public IChannelDriver {
   public:
     /// @brief Constructor with runtime data width selection
     /// @param data_width PARLIO data width (1, 2, 4, 8, or 16)
-    explicit ChannelDriverPARLIOImpl(size_t data_width) FL_NO_EXCEPT;
+    explicit ChannelDriverPARLIOImpl(size_t data_width) FL_NOEXCEPT;
     ~ChannelDriverPARLIOImpl() override;
 
     /// @brief Check if driver can handle channel data (clockless only)
     /// @param data Channel data to check
     /// @return true if clockless channel (rejects SPI), false otherwise
-    bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
+    bool canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT override;
 
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit
-    void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
+    void enqueue(ChannelDataPtr channelData) FL_NOEXCEPT override;
 
     /// @brief Trigger transmission of enqueued data
-    void show() FL_NO_EXCEPT override;
+    void show() FL_NOEXCEPT override;
 
     /// @brief Query driver state and perform maintenance
     /// @return Current driver state (READY, BUSY, DRAINING, or ERROR)
-    DriverState poll() FL_NO_EXCEPT override;
+    DriverState poll() FL_NOEXCEPT override;
 
-    void setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT override;
+    void setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT override;
 
     /// @brief Get the driver name for affinity binding
     /// @return "PARLIO"
-    fl::string getName() const FL_NO_EXCEPT override { return fl::string::from_literal("PARLIO"); }
+    fl::string getName() const FL_NOEXCEPT override { return fl::string::from_literal("PARLIO"); }
 
     /// @brief Get driver capabilities (CLOCKLESS protocols only)
     /// @return Capabilities with supportsClockless=true, supportsSpi=false
-    Capabilities getCapabilities() const FL_NO_EXCEPT override {
+    Capabilities getCapabilities() const FL_NOEXCEPT override {
         return Capabilities(true, false);  // Clockless only
     }
 
-    void setReversedPinOrder(bool reversed_pin_order) FL_NO_EXCEPT;
+    void setReversedPinOrder(bool reversed_pin_order) FL_NOEXCEPT;
 
   private:
     /// @brief Begin LED data transmission for all enqueued channels
     /// @param channelData Span of channel data to transmit
-    void beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT;
+    void beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT;
 
     /// @brief Prepare scratch buffer with per-lane data layout
     /// @param channelData Span of channel data to copy
     /// @param maxChannelSize Maximum channel size in bytes
     void prepareScratchBuffer(fl::span<const ChannelDataPtr> channelData,
-                             size_t maxChannelSize) FL_NO_EXCEPT;
+                             size_t maxChannelSize) FL_NOEXCEPT;
 
   private:
     /// @brief Group of channels sharing the same chipset timing
@@ -572,46 +572,46 @@ class ChannelDriverPARLIOImpl : public IChannelDriver {
 class ChannelDriverPARLIO : public IChannelDriver {
   public:
     /// @brief Constructor - lazy initialization (no driver created)
-    ChannelDriverPARLIO() FL_NO_EXCEPT;
+    ChannelDriverPARLIO() FL_NOEXCEPT;
     ~ChannelDriverPARLIO() override;
 
     /// @brief Check if driver can handle channel data (clockless and SPI)
     /// @param data Channel data to check
     /// @return true for both clockless and SPI channels
-    bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
+    bool canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT override;
 
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit
-    void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
+    void enqueue(ChannelDataPtr channelData) FL_NOEXCEPT override;
 
     /// @brief Trigger transmission of enqueued data
-    void show() FL_NO_EXCEPT override;
+    void show() FL_NOEXCEPT override;
 
     /// @brief Query driver state and perform maintenance
     /// @return Current driver state (READY, BUSY, DRAINING, or ERROR)
-    DriverState poll() FL_NO_EXCEPT override;
+    DriverState poll() FL_NOEXCEPT override;
 
-    void setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT override;
+    void setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT override;
 
     /// @brief Get the driver name for affinity binding
     /// @return "PARLIO"
-    fl::string getName() const FL_NO_EXCEPT override { return fl::string::from_literal("PARLIO"); }
+    fl::string getName() const FL_NOEXCEPT override { return fl::string::from_literal("PARLIO"); }
 
     /// @brief Get driver capabilities (both clockless and SPI)
     /// @return Capabilities with supportsClockless=true, supportsSpi=true
-    Capabilities getCapabilities() const FL_NO_EXCEPT override {
+    Capabilities getCapabilities() const FL_NOEXCEPT override {
         return Capabilities(true, true);  // Both clockless and SPI
     }
 
   private:
     /// @brief Begin clockless transmission with lazy init and reconfiguration
-    void beginClocklessTransmission(fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT;
+    void beginClocklessTransmission(fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT;
 
     /// @brief Begin SPI transmission (sequential per-channel)
-    void beginSpiTransmission() FL_NO_EXCEPT;
+    void beginSpiTransmission() FL_NOEXCEPT;
 
     /// @brief Begin SPI transmission for a single channel
-    void beginSingleSpiChannel(const ChannelDataPtr& channelData) FL_NO_EXCEPT;
+    void beginSingleSpiChannel(const ChannelDataPtr& channelData) FL_NOEXCEPT;
 
     /// @brief Transmission phase state machine
     enum class TransmitPhase { IDLE, CLOCKLESS, SPI };
@@ -672,7 +672,7 @@ struct ParlioDebugMetrics {
 /// @brief Get current PARLIO debug metrics
 /// @return Debug metrics structure with transmission statistics
 /// @note This function is safe to call from any context
-ParlioDebugMetrics getParlioDebugMetrics() FL_NO_EXCEPT;
+ParlioDebugMetrics getParlioDebugMetrics() FL_NOEXCEPT;
 
 //=============================================================================
 // Factory Function
@@ -685,6 +685,6 @@ ParlioDebugMetrics getParlioDebugMetrics() FL_NO_EXCEPT;
 /// @note Auto-selects optimal data width based on channel count (1, 2, 4, 8, or
 /// 16-bit)
 /// @note Reconfigures width dynamically if channel count changes significantly
-fl::shared_ptr<IChannelDriver> createParlioDriver() FL_NO_EXCEPT;
+fl::shared_ptr<IChannelDriver> createParlioDriver() FL_NOEXCEPT;
 
 } // namespace fl

@@ -19,8 +19,8 @@ enum class PercussionType : u8 {
 
 class Percussion : public Detector {
 public:
-    Percussion() FL_NO_EXCEPT;
-    ~Percussion() FL_NO_EXCEPT override;
+    Percussion() FL_NOEXCEPT;
+    ~Percussion() FL_NOEXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

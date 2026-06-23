@@ -23,8 +23,8 @@ One boolean field on `audio::Context` populated by `Processor`/`Reactive` from `
 
 ```cpp
 // audio_context.h — new methods
-void setSilent(bool silent) FL_NO_EXCEPT { mIsSilent = silent; }
-bool isSilent() const FL_NO_EXCEPT { return mIsSilent; }
+void setSilent(bool silent) FL_NOEXCEPT { mIsSilent = silent; }
+bool isSilent() const FL_NOEXCEPT { return mIsSilent; }
 
 // audio_processor.cpp.hpp — after NoiseFloorTracker.update()
 if (mNoiseFloorTrackingEnabled && conditioned.isValid()) {
@@ -49,18 +49,18 @@ public:
         float targetValue = 0.0f;       // What to decay toward (usually 0)
     };
 
-    SilenceEnvelope() FL_NO_EXCEPT;
-    explicit SilenceEnvelope(const Config& cfg) FL_NO_EXCEPT;
-    void configure(const Config& cfg) FL_NO_EXCEPT;
+    SilenceEnvelope() FL_NOEXCEPT;
+    explicit SilenceEnvelope(const Config& cfg) FL_NOEXCEPT;
+    void configure(const Config& cfg) FL_NOEXCEPT;
 
     // Pass-through during audio; exponential decay to targetValue during silence.
-    float update(bool isSilent, float currentValue, float dt) FL_NO_EXCEPT;
+    float update(bool isSilent, float currentValue, float dt) FL_NOEXCEPT;
 
     // Snap to a fresh value (called on re-attack or reset)
-    void reset(float initialValue = 0.0f) FL_NO_EXCEPT;
+    void reset(float initialValue = 0.0f) FL_NOEXCEPT;
 
     // True once the envelope has decayed to within epsilon of target
-    bool isGated(float epsilon = 1e-4f) const FL_NO_EXCEPT;
+    bool isGated(float epsilon = 1e-4f) const FL_NOEXCEPT;
 };
 ```
 
@@ -94,8 +94,8 @@ Semantics:
 
 ### `audio::Context`
 ```cpp
-void setSilent(bool silent) FL_NO_EXCEPT;
-bool isSilent() const FL_NO_EXCEPT;
+void setSilent(bool silent) FL_NOEXCEPT;
+bool isSilent() const FL_NOEXCEPT;
 ```
 - Default state is `false` (no silence claim).
 - Cleared to `false` on `setSample()` (per-frame reset — Processor/Reactive must re-populate after NFT update).

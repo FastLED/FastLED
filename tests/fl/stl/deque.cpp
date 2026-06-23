@@ -5,23 +5,6 @@
 #include "test.h"
 #include "fl/stl/move.h"
 
-// FastLED #3270: a tag type whose deque_traits<> specialization pins chunk
-// size to 4. Used by the per-type chunk-size override test below. Must be
-// declared at namespace scope (specializations cannot live inside a class
-// or function body), so it lives above the FL_TEST_FILE block.
-struct SmallChunkTag {
-    int v;
-    SmallChunkTag() : v(0) {}
-    explicit SmallChunkTag(int x) : v(x) {}
-};
-
-namespace fl {
-template <>
-struct deque_traits<SmallChunkTag> {
-    static constexpr fl::size chunk_size = 4u;
-};
-} // namespace fl
-
 FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
@@ -771,16 +754,12 @@ FL_TEST_CASE("fl::deque - shrink_to_fit") {
         dq.pop_back();
     }
 
-    // Capacity should still be large (pop_back doesn't deallocate chunks).
+    // Capacity should still be large
     FL_CHECK_EQ(dq.capacity(), large_capacity);
 
-    // Shrink. Chunked deque capacity is chunk-quantized: after shrink_to_fit
-    // the remaining chunks span [front .. back] only. 5 contiguous elements
-    // fit in a single chunk, so capacity() == kChunkSize after shrink.
-    // (See FastLED #3270 -- capacity is no longer element-exact.)
+    // Shrink
     dq.shrink_to_fit();
-    FL_CHECK_GE(dq.capacity(), 5u);
-    FL_CHECK_LE(dq.capacity(), large_capacity);
+    FL_CHECK_EQ(dq.capacity(), 5u);
     FL_CHECK_EQ(dq.size(), 5u);
 
     // Data should still be intact
@@ -885,198 +864,6 @@ FL_TEST_CASE("fl::deque - mixed operations with new methods") {
     FL_CHECK_EQ(dq[3], 88);
     FL_CHECK_EQ(dq[4], 3);
     FL_CHECK_EQ(dq[5], 4);
-}
-
-// ---- FastLED #3270 chunked-deque acceptance tests ----
-
-// Pointer stability across grow: an element's address taken at insertion
-// time must remain valid (and dereference to the same value) after many
-// subsequent push_back calls that span multiple chunk boundaries. The old
-// vector-style deque would have invalidated this pointer on every doubling
-// realloc; the chunked deque never moves existing elements.
-FL_TEST_CASE("fl::deque - pointer stability across push_back grow (#3270)") {
-    deque<int> dq;
-    constexpr int kChunkSize = static_cast<int>(deque_traits<int>::chunk_size);
-
-    dq.push_back(42);
-    int* anchor = &dq[0];
-
-    // Push enough elements to allocate ~10 chunks, well past the initial
-    // chunk-map capacity and forcing the map itself to grow several times.
-    for (int i = 1; i < 10 * kChunkSize; ++i) {
-        dq.push_back(i);
-    }
-
-    // anchor must still address the original element with the original value.
-    FL_CHECK_EQ(*anchor, 42);
-    FL_CHECK_EQ(&dq[0], anchor);
-}
-
-// Pointer stability across push_front: same contract, exercising the
-// front-grow path which touches mFrontMapIdx and mFrontOffset rather than
-// the back of the map.
-FL_TEST_CASE("fl::deque - pointer stability across push_front grow (#3270)") {
-    deque<int> dq;
-    constexpr int kChunkSize = static_cast<int>(deque_traits<int>::chunk_size);
-
-    dq.push_back(1234);
-    int* anchor = &dq[0];
-
-    // Push many elements at the front -- chunks get allocated before the
-    // initial chunk, and the chunk-map gets grown leftward.
-    for (int i = 0; i < 10 * kChunkSize; ++i) {
-        dq.push_front(i);
-    }
-
-    // anchor must still address the same element (now the back of the deque).
-    FL_CHECK_EQ(*anchor, 1234);
-    FL_CHECK_EQ(&dq.back(), anchor);
-}
-
-// Push across an exact chunk boundary: with kChunkSize elements pushed,
-// the next push_back must allocate a new chunk without disturbing the
-// previous chunk's contents.
-FL_TEST_CASE("fl::deque - push_back across chunk boundary (#3270)") {
-    deque<int> dq;
-    constexpr int kChunkSize = static_cast<int>(deque_traits<int>::chunk_size);
-
-    for (int i = 0; i < kChunkSize; ++i) {
-        dq.push_back(i);
-    }
-    FL_CHECK_EQ(dq.size(), static_cast<fl::size>(kChunkSize));
-
-    // Anchor a pointer in the first chunk before the boundary-crossing push.
-    int* anchor = &dq[kChunkSize / 2];
-    int anchor_value = *anchor;
-
-    // This push must trigger a new-chunk allocation, not a move of existing elements.
-    dq.push_back(kChunkSize);
-    FL_CHECK_EQ(*anchor, anchor_value);
-    FL_CHECK_EQ(dq.size(), static_cast<fl::size>(kChunkSize + 1));
-    FL_CHECK_EQ(dq[kChunkSize], kChunkSize);
-}
-
-// Multi-element insert that spans more than one chunk: insert(pos, count, v)
-// must allocate ceil(count / kChunkSize) chunks and not move existing
-// elements outside the shift range. We check elements before the shift
-// retain stable addresses.
-FL_TEST_CASE("fl::deque - insert(count) allocating multiple chunks (#3270)") {
-    deque<int> dq;
-    constexpr int kChunkSize = static_cast<int>(deque_traits<int>::chunk_size);
-
-    // Start with one element so the leading anchor is in the front chunk
-    // and won't be shifted by the insert below.
-    dq.push_back(-1);
-    int* anchor = &dq[0];
-
-    // Insert 3 * kChunkSize copies at position 1. This needs at least 3
-    // more chunks past the front chunk.
-    dq.insert(dq.begin() + 1, 3 * kChunkSize, 7);
-
-    FL_CHECK_EQ(dq.size(), static_cast<fl::size>(1 + 3 * kChunkSize));
-    FL_CHECK_EQ(*anchor, -1);
-    FL_CHECK_EQ(&dq[0], anchor);
-    for (fl::size i = 1; i < dq.size(); ++i) {
-        FL_CHECK_EQ(dq[i], 7);
-    }
-}
-
-// Per-type chunk_size override via deque_traits partial specialization.
-// SmallChunkTag is declared at namespace scope above the FL_TEST_FILE block;
-// its deque_traits specialization pins chunk_size = 4.
-FL_TEST_CASE("fl::deque_traits<T> chunk_size override (#3270)") {
-    deque<SmallChunkTag> dq;
-
-    // Push 12 elements; with chunk_size=4 that's 3 chunks. Capacity is
-    // chunk-quantized: 12 elements fit in exactly 3 chunks.
-    for (int i = 0; i < 12; ++i) dq.push_back(SmallChunkTag(i));
-    dq.shrink_to_fit();
-    FL_CHECK_EQ(dq.capacity(), 12u);
-
-    // Add one more -- needs a 4th chunk.
-    dq.push_back(SmallChunkTag(12));
-    dq.shrink_to_fit();
-    FL_CHECK_EQ(dq.capacity(), 16u);
-    FL_CHECK_EQ(dq.size(), 13u);
-    for (int i = 0; i < 13; ++i) {
-        FL_CHECK_EQ(dq[i].v, i);
-    }
-}
-
-// FastLED #3286: regression test for the chunked-deque grow_map leak.
-//
-// Original bug (introduced in #3282 / commit a8b5cac9a):
-//
-//   pop_front() advances mFrontMapIdx past the now-empty front chunk
-//   without freeing it -- the chunk pointer is left orphaned in
-//   mMap[mFrontMapIdx-1]. The destructor catches this (it iterates the
-//   entire mMap), so the orphan is harmless as long as the map itself
-//   survives.
-//
-//   But when later push_back() forces grow_map(), the old map is
-//   deallocated and ONLY pointers in [mFrontMapIdx, mFrontMapIdx+used)
-//   are copied forward. Every orphaned pointer below mFrontMapIdx is
-//   silently lost -- and its backing chunk leaks.
-//
-//   macOS-arm64 ASAN's LeakSanitizer caught this; Linux x86-64 didn't,
-//   because that job ran without leak detection enabled. The
-//   TempoAnalyzer's sliding mBPMHistory / mOnsetTimes exercise exactly
-//   this push/pop/push-grow pattern.
-//
-// This test pins chunk_size=4 (via SmallChunkTag) to make the bug
-// reproducible in a few dozen ops instead of the thousands needed at
-// the default chunk_size=64.
-FL_TEST_CASE("fl::deque - grow_map releases orphaned chunks (#3286)") {
-    deque<SmallChunkTag> dq;
-
-    // Phase 1: fill chunks 0..3 (initial map capacity is 4, chunk_size=4
-    // -> 16 elements fills the map exactly).
-    for (int i = 0; i < 16; ++i) dq.push_back(SmallChunkTag(i));
-    FL_CHECK_EQ(dq.size(), 16u);
-
-    // Phase 2: pop_front 12 elements (3 full chunks). After this,
-    // mFrontMapIdx advances to 3; the chunks at mMap[0], mMap[1],
-    // mMap[2] are now orphans -- still allocated, still in the map,
-    // but no live element lives there.
-    for (int i = 0; i < 12; ++i) dq.pop_front();
-    FL_CHECK_EQ(dq.size(), 4u);
-    FL_CHECK_EQ(dq[0].v, 12);
-    FL_CHECK_EQ(dq[3].v, 15);
-
-    // Phase 3: push_back enough to force grow_map(). At this point the
-    // back is in chunk 3 (the only live chunk); pushing past the end
-    // of chunk 3 needs chunk 4, which is past mMapCapacity=4, so
-    // grow_map runs.
-    //
-    // Before the #3286 fix this is where the leak happened: orphans at
-    // mMap[0..2] were never freed and never copied forward; only the
-    // live chunk at mMap[3] survived into the new map. Three chunk
-    // allocations were lost on the floor every time this pattern fired.
-    //
-    // After the fix, grow_map proactively releases orphans before
-    // deallocating the old map -- no chunk pointers go missing.
-    for (int i = 0; i < 20; ++i) dq.push_back(SmallChunkTag(100 + i));
-    FL_CHECK_EQ(dq.size(), 24u);
-
-    // The grow-triggering pattern is the leak path. We don't try to
-    // detect the leak in-test (that's ASAN's job); we just exercise
-    // the path so that any leak reproduces under sanitizers. The data
-    // invariants below also verify that the surviving live chunks
-    // weren't accidentally double-freed by the fix.
-    FL_CHECK_EQ(dq[0].v, 12);
-    FL_CHECK_EQ(dq[3].v, 15);
-    FL_CHECK_EQ(dq[4].v, 100);
-    FL_CHECK_EQ(dq[23].v, 119);
-
-    // Phase 4: hammer the slide pattern across many grow cycles to
-    // exercise the path the audio detector hits (mOnsetTimes /
-    // mBPMHistory pop_front + push_back loop for ~hundreds of frames).
-    for (int round = 0; round < 50; ++round) {
-        dq.pop_front();
-        dq.push_back(SmallChunkTag(1000 + round));
-    }
-    FL_CHECK_EQ(dq.size(), 24u);
-    FL_CHECK_EQ(dq[23].v, 1049);
 }
 
 } // FL_TEST_FILE

@@ -22,7 +22,7 @@ struct Mp3Info {
     fl::u8 layer = 0;             // MPEG layer (1, 2, or 3)
     bool isValid = false;         // True if metadata was successfully parsed
 
-    Mp3Info() FL_NO_EXCEPT = default;
+    Mp3Info() FL_NOEXCEPT = default;
 
     // Constructor for easy initialization
     Mp3Info(fl::u32 rate, fl::u8 ch, fl::u32 br)
@@ -49,8 +49,8 @@ namespace third_party {
     // This is exposed for testing purposes
     class Mp3HelixDecoder {
     public:
-        Mp3HelixDecoder() FL_NO_EXCEPT;
-        ~Mp3HelixDecoder() FL_NO_EXCEPT;
+        Mp3HelixDecoder() FL_NOEXCEPT;
+        ~Mp3HelixDecoder() FL_NOEXCEPT;
 
         // Initialize the decoder. Returns true on success.
         bool init();
@@ -135,8 +135,8 @@ namespace third_party {
 // This decoder consumes MP3 data from a filebuf and decodes audio frames on demand
 class Mp3Decoder {
 public:
-    Mp3Decoder() FL_NO_EXCEPT;
-    ~Mp3Decoder() FL_NO_EXCEPT;
+    Mp3Decoder() FL_NOEXCEPT;
+    ~Mp3Decoder() FL_NOEXCEPT;
 
     // Initialize the decoder with a byte stream
     // Returns true on success, false on failure

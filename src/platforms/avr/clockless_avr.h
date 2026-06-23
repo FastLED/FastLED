@@ -71,13 +71,13 @@ namespace fl {
 
 
 // Variations on the functions in delay.h - w/a loop var passed in to preserve registers across calls by the optimizer/compiler
-template<int CYCLES> inline void _dc(FASTLED_REGISTER u8 & loopvar) FL_NO_EXCEPT;
+template<int CYCLES> inline void _dc(FASTLED_REGISTER u8 & loopvar) FL_NOEXCEPT;
 
 // Delay function that consumes a specific number of CPU cycles while preserving carry flag state
 // _LOOP: Number of 6-cycle iterations to perform (each loop iteration = 6 cycles: MOV + DEC + BRNE = 1 + 1 + 2 cycles, loop overhead = 2)
 // PAD: Additional cycles to add (0-5) to fine-tune total delay
 // The function branches based on carry flag state and restores it after the delay
-template<int _LOOP, int PAD> FASTLED_FORCE_INLINE void _dc_AVR(FASTLED_REGISTER u8 & loopvar) FL_NO_EXCEPT {
+template<int _LOOP, int PAD> FASTLED_FORCE_INLINE void _dc_AVR(FASTLED_REGISTER u8 & loopvar) FL_NOEXCEPT {
 	_dc<PAD>(loopvar);  // First handle the padding cycles (remainder when CYCLES % 6)
 
 	// The convolution in here is to ensure that the state of the carry flag coming into the delay loop is preserved
@@ -100,7 +100,7 @@ template<int _LOOP, int PAD> FASTLED_FORCE_INLINE void _dc_AVR(FASTLED_REGISTER 
 }
 
 // Primary template: splits requested cycles into 6-cycle chunks (handled by loop) plus remainder (handled by specializations)
-template<int CYCLES> FASTLED_FORCE_INLINE void _dc(FASTLED_REGISTER u8 & loopvar) FL_NO_EXCEPT {
+template<int CYCLES> FASTLED_FORCE_INLINE void _dc(FASTLED_REGISTER u8 & loopvar) FL_NOEXCEPT {
 	_dc_AVR<CYCLES/6,CYCLES%6>(loopvar);
 }
 
@@ -209,7 +209,7 @@ template<> FASTLED_FORCE_INLINE void _dc<20>(FASTLED_REGISTER u8 & loopvar) { _d
 #endif
 
 
-inline u8& avr_time_accumulator() FL_NO_EXCEPT {
+inline u8& avr_time_accumulator() FL_NOEXCEPT {
 	static u8 gTimeErrorAccum256ths = 0;
 	return gTimeErrorAccum256ths;
 }
@@ -233,14 +233,14 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	CMinWait<WAIT_TIME> mWait;
 
 public:
-	virtual void init() FL_NO_EXCEPT {
+	virtual void init() FL_NOEXCEPT {
 		FastPin<DATA_PIN>::setOutput();
 	}
 
 	virtual u16 getMaxRefreshRate() const { return 400; }
 
 protected:
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NOEXCEPT {
 
 		mWait.wait();
 #if (!defined(FASTLED_ALLOW_INTERRUPTS) || FASTLED_ALLOW_INTERRUPTS == 0)

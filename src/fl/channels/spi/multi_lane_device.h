@@ -57,7 +57,7 @@ public:
         u32 clock_speed_hz;        ///< Clock speed in Hz (0xffffffff = as fast as possible)
         u8 mode;                   ///< SPI mode (CPOL/CPHA)
 
-        Config() FL_NO_EXCEPT : clock_pin(0xFF), clock_speed_hz(0xffffffff), mode(0) {}
+        Config() FL_NOEXCEPT : clock_pin(0xFF), clock_speed_hz(0xffffffff), mode(0) {}
     };
 
     /// @brief Construct multi-lane device
@@ -65,13 +65,13 @@ public:
     explicit MultiLaneDevice(const Config& config);
 
     /// @brief Destructor - releases hardware resources
-    ~MultiLaneDevice() FL_NO_EXCEPT;
+    ~MultiLaneDevice() FL_NOEXCEPT;
 
     // Disable copy/move
-    MultiLaneDevice(const MultiLaneDevice&) FL_NO_EXCEPT = delete;
-    MultiLaneDevice& operator=(const MultiLaneDevice&) FL_NO_EXCEPT = delete;
-    MultiLaneDevice(MultiLaneDevice&&) FL_NO_EXCEPT = delete;
-    MultiLaneDevice& operator=(MultiLaneDevice&&) FL_NO_EXCEPT = delete;
+    MultiLaneDevice(const MultiLaneDevice&) FL_NOEXCEPT = delete;
+    MultiLaneDevice& operator=(const MultiLaneDevice&) FL_NOEXCEPT = delete;
+    MultiLaneDevice(MultiLaneDevice&&) FL_NOEXCEPT = delete;
+    MultiLaneDevice& operator=(MultiLaneDevice&&) FL_NOEXCEPT = delete;
 
     // ========== Initialization ==========
 

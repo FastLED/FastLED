@@ -13,7 +13,7 @@
 namespace fl {
 
 SpiHw1Stub::SpiHw1Stub(int bus_id, const char* name)
- FL_NO_EXCEPT : mBusId(bus_id)
+ FL_NOEXCEPT : mBusId(bus_id)
     , mName(name)
     , mInitialized(false)
     , mClockSpeed(0)
@@ -22,7 +22,7 @@ SpiHw1Stub::SpiHw1Stub(int bus_id, const char* name)
     , mBufferAcquired(false) {
 }
 
-bool SpiHw1Stub::begin(const SpiHw1::Config& config) FL_NO_EXCEPT {
+bool SpiHw1Stub::begin(const SpiHw1::Config& config) FL_NOEXCEPT {
     if (mInitialized) {
         return true;  // Already initialized
     }
@@ -37,27 +37,27 @@ bool SpiHw1Stub::begin(const SpiHw1::Config& config) FL_NO_EXCEPT {
     return true;
 }
 
-void SpiHw1Stub::end() FL_NO_EXCEPT {
-    FL_LOG_SPI_F("SpiHw1Stub::end() called, mInitialized=%s", (mInitialized ? "true" : "false"));
+void SpiHw1Stub::end() FL_NOEXCEPT {
+    FL_LOG_SPI("SpiHw1Stub::end() called, mInitialized=" << (mInitialized ? "true" : "false"));
     if (!mInitialized) {
-        FL_LOG_SPI_F("SpiHw1Stub::end() already ended, returning");
+        FL_LOG_SPI("SpiHw1Stub::end() already ended, returning");
         return;  // Already ended - idempotent
     }
 
-    FL_LOG_SPI_F("SpiHw1Stub::end() setting mInitialized=false");
+    FL_LOG_SPI("SpiHw1Stub::end() setting mInitialized=false");
     mInitialized = false;
-    FL_LOG_SPI_F("SpiHw1Stub::end() clearing mLastBuffer");
+    FL_LOG_SPI("SpiHw1Stub::end() clearing mLastBuffer");
     mLastBuffer.clear();
 
-    FL_LOG_SPI_F("SpiHw1Stub::end() resetting mCurrentBuffer");
+    FL_LOG_SPI("SpiHw1Stub::end() resetting mCurrentBuffer");
     // Release current buffer
     mCurrentBuffer.reset();
-    FL_LOG_SPI_F("SpiHw1Stub::end() setting mBufferAcquired=false");
+    FL_LOG_SPI("SpiHw1Stub::end() setting mBufferAcquired=false");
     mBufferAcquired = false;
-    FL_LOG_SPI_F("SpiHw1Stub::end() complete");
+    FL_LOG_SPI("SpiHw1Stub::end() complete");
 }
 
-DMABuffer SpiHw1Stub::acquireDMABuffer(size_t bytes_per_lane) FL_NO_EXCEPT {
+DMABuffer SpiHw1Stub::acquireDMABuffer(size_t bytes_per_lane) FL_NOEXCEPT {
     if (!mInitialized) {
         return DMABuffer(SPIError::NOT_INITIALIZED);
     }
@@ -79,7 +79,7 @@ DMABuffer SpiHw1Stub::acquireDMABuffer(size_t bytes_per_lane) FL_NO_EXCEPT {
     return mCurrentBuffer;
 }
 
-bool SpiHw1Stub::transmit(TransmitMode mode) FL_NO_EXCEPT {
+bool SpiHw1Stub::transmit(TransmitMode mode) FL_NOEXCEPT {
     (void)mode;  // Unused in stub
 
     if (!mInitialized || !mBufferAcquired) {
@@ -104,7 +104,7 @@ bool SpiHw1Stub::transmit(TransmitMode mode) FL_NO_EXCEPT {
     return true;
 }
 
-bool SpiHw1Stub::waitComplete(u32 timeout_ms) FL_NO_EXCEPT {
+bool SpiHw1Stub::waitComplete(u32 timeout_ms) FL_NOEXCEPT {
     (void)timeout_ms;  // Unused in stub (transmission already complete)
 
     // AUTO-RELEASE DMA buffer
@@ -113,36 +113,36 @@ bool SpiHw1Stub::waitComplete(u32 timeout_ms) FL_NO_EXCEPT {
     return true;
 }
 
-bool SpiHw1Stub::isBusy() const FL_NO_EXCEPT {
+bool SpiHw1Stub::isBusy() const FL_NOEXCEPT {
     // Never busy since transmission is blocking
     return false;
 }
 
-bool SpiHw1Stub::isInitialized() const FL_NO_EXCEPT {
+bool SpiHw1Stub::isInitialized() const FL_NOEXCEPT {
     return mInitialized;
 }
 
-int SpiHw1Stub::getBusId() const FL_NO_EXCEPT {
+int SpiHw1Stub::getBusId() const FL_NOEXCEPT {
     return mBusId;
 }
 
-const char* SpiHw1Stub::getName() const FL_NO_EXCEPT {
+const char* SpiHw1Stub::getName() const FL_NOEXCEPT {
     return mName;
 }
 
-const fl::vector<u8>& SpiHw1Stub::getLastTransmission() const FL_NO_EXCEPT {
+const fl::vector<u8>& SpiHw1Stub::getLastTransmission() const FL_NOEXCEPT {
     return mLastBuffer;
 }
 
-u32 SpiHw1Stub::getTransmissionCount() const FL_NO_EXCEPT {
+u32 SpiHw1Stub::getTransmissionCount() const FL_NOEXCEPT {
     return mTransmitCount;
 }
 
-u32 SpiHw1Stub::getClockSpeed() const FL_NO_EXCEPT {
+u32 SpiHw1Stub::getClockSpeed() const FL_NOEXCEPT {
     return mClockSpeed;
 }
 
-void SpiHw1Stub::reset() FL_NO_EXCEPT {
+void SpiHw1Stub::reset() FL_NOEXCEPT {
     mLastBuffer.clear();
     mTransmitCount = 0;
 }
@@ -153,12 +153,12 @@ void SpiHw1Stub::reset() FL_NO_EXCEPT {
 
 namespace {
 // Singleton getters for mock controller instances (Meyer's Singleton pattern)
-fl::shared_ptr<SpiHw1Stub>& getController0_Spi1() FL_NO_EXCEPT {
+fl::shared_ptr<SpiHw1Stub>& getController0_Spi1() FL_NOEXCEPT {
     static fl::shared_ptr<SpiHw1Stub> instance = fl::make_shared<SpiHw1Stub>(0, "MockSingle0");
     return instance;
 }
 
-fl::shared_ptr<SpiHw1Stub>& getController1_Spi1() FL_NO_EXCEPT {
+fl::shared_ptr<SpiHw1Stub>& getController1_Spi1() FL_NOEXCEPT {
     static fl::shared_ptr<SpiHw1Stub> instance = fl::make_shared<SpiHw1Stub>(1, "MockSingle1");
     return instance;
 }
@@ -174,11 +174,11 @@ namespace platforms {
 ///
 /// Called lazily on first access to SpiHw1::getAll().
 /// Registers mock SpiHw1 controller instances for testing.
-void initSpiHw1Instances() FL_NO_EXCEPT {
-    FL_WARN_F("Registering SpiHw1 stub instances...");
+void initSpiHw1Instances() FL_NOEXCEPT {
+    FL_WARN("Registering SpiHw1 stub instances...");
     SpiHw1::registerInstance(getController0_Spi1());
     SpiHw1::registerInstance(getController1_Spi1());
-    FL_WARN_F("SpiHw1 stub instances registered!");
+    FL_WARN("SpiHw1 stub instances registered!");
 }
 
 }  // namespace platforms

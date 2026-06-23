@@ -427,24 +427,25 @@ bool checkBasicAuth(httpd_req_t *req, const char* password) {
 bool validateESP32Firmware(const u8* data, size_t len) {
     // Need at least 24 bytes for ESP32 image header
     if (len < 24) {
-        FL_WARN_F("Firmware validation: header too small (%s bytes)", len);
+        FL_WARN("Firmware validation: header too small (" << len << " bytes)");
         return false;
     }
 
     // Check ESP32 magic byte (0xE9)
     if (data[0] != 0xE9) {
-        FL_WARN_F("Firmware validation: invalid magic byte 0x%s (expected 0xE9)", (int)data[0]);
+        FL_WARN("Firmware validation: invalid magic byte 0x"
+                << (int)data[0] << " (expected 0xE9)");
         return false;
     }
 
     // Check segment count is reasonable (1-16)
     u8 segments = data[1];
     if (segments == 0 || segments > 16) {
-        FL_WARN_F("Firmware validation: invalid segment count %s", (int)segments);
+        FL_WARN("Firmware validation: invalid segment count " << (int)segments);
         return false;
     }
 
-    FL_DBG_F("Firmware validation passed: magic=0xE9, segments=%s", (int)segments);
+    FL_DBG("Firmware validation passed: magic=0xE9, segments=" << (int)segments);
     return true;
 }
 
@@ -667,7 +668,7 @@ public:
 
         // Connect to Wi-Fi using ESP-IDF WiFi API (async mode)
         if (!initEspIdfWifi(ssid, wifi_pass)) {
-            FL_WARN_F("ESP-IDF WiFi initialization failed");
+            FL_WARN("ESP-IDF WiFi initialization failed");
             // Continue anyway - some services might still work
         }
 
@@ -676,7 +677,7 @@ public:
 
         // Initialize mDNS
         if (!initMDNS(mHostname.c_str())) {
-            FL_WARN_F("mDNS init failed - device won't be discoverable at %s.local", mHostname.c_str());
+            FL_WARN("mDNS init failed - device won't be discoverable at " << mHostname.c_str() << ".local");
             mFailedServices |= (u8)fl::net::ota::Service::MDNS_FAILED;
         }
 
@@ -686,7 +687,7 @@ public:
         // Start HTTP server for Web OTA
         mHttpServer = startHttpServer(&mHttpContext);
         if (!mHttpServer) {
-            FL_WARN_F("HTTP server failed - Web OTA unavailable (TCP OTA still works)");
+            FL_WARN("HTTP server failed - Web OTA unavailable (TCP OTA still works)");
             mFailedServices |= (u8)fl::net::ota::Service::HTTP_FAILED;
         }
 
@@ -710,7 +711,7 @@ public:
 
         // Initialize mDNS
         if (!initMDNS(mHostname.c_str())) {
-            FL_WARN_F("mDNS init failed - device won't be discoverable at %s.local", mHostname.c_str());
+            FL_WARN("mDNS init failed - device won't be discoverable at " << mHostname.c_str() << ".local");
             mFailedServices |= (u8)fl::net::ota::Service::MDNS_FAILED;
         }
 
@@ -720,7 +721,7 @@ public:
         // Start HTTP server for Web OTA
         mHttpServer = startHttpServer(&mHttpContext);
         if (!mHttpServer) {
-            FL_WARN_F("HTTP server failed - Web OTA unavailable (TCP OTA still works)");
+            FL_WARN("HTTP server failed - Web OTA unavailable (TCP OTA still works)");
             mFailedServices |= (u8)fl::net::ota::Service::HTTP_FAILED;
         }
 
@@ -730,13 +731,13 @@ public:
     bool enableApFallback(const char* ap_ssid, const char* ap_pass) override {
         // Validate SSID
         if (!ap_ssid || strlen(ap_ssid) == 0) {
-            FL_WARN_F("AP SSID cannot be empty");
+            FL_WARN("AP SSID cannot be empty");
             return false;
         }
 
         // Validate password (WPA2 requires minimum 8 characters)
         if (ap_pass && strlen(ap_pass) > 0 && strlen(ap_pass) < 8) {
-            FL_WARN_F("AP password must be at least 8 characters or nullptr for open network");
+            FL_WARN("AP password must be at least 8 characters or nullptr for open network");
             return false;
         }
 
@@ -788,9 +789,9 @@ private:
 
         if (event_base == WIFI_EVENT) {
             if (event_id == WIFI_EVENT_STA_CONNECTED) {
-                FL_DBG_F("WiFi: Station connected to AP");
+                FL_DBG("WiFi: Station connected to AP");
             } else if (event_id == WIFI_EVENT_STA_DISCONNECTED) {
-                FL_DBG_F("WiFi: Station disconnected from AP");
+                FL_DBG("WiFi: Station disconnected from AP");
                 self->mWifiConnected = false;
             }
         } else if (event_base == IP_EVENT) {
@@ -800,7 +801,7 @@ private:
                 // differ across IDF versions; route through void* to avoid
                 // reinterpret_cast (project lint forbids it).
                 const void* ip_ptr = &event->ip_info.ip;
-                FL_DBG_F("WiFi: Got IP address: %s", ip4addr_ntoa(static_cast<const ip4_addr_t*>(ip_ptr)));
+                FL_DBG("WiFi: Got IP address: " << ip4addr_ntoa(static_cast<const ip4_addr_t*>(ip_ptr)));
                 self->mWifiConnected = true;
             }
         }
@@ -815,14 +816,14 @@ private:
         // Note: This is safe to call multiple times
         esp_err_t err = esp_netif_init();
         if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-            FL_WARN_F("esp_netif_init failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_netif_init failed: " << esp_err_to_name(err));
             return false;
         }
 
         // Create default event loop (if not already created)
         err = esp_event_loop_create_default();
         if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-            FL_WARN_F("esp_event_loop_create_default failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_event_loop_create_default failed: " << esp_err_to_name(err));
             return false;
         }
 
@@ -832,7 +833,7 @@ private:
         if (!sta_netif) {
             sta_netif = esp_netif_create_default_wifi_sta();
             if (!sta_netif) {
-                FL_WARN_F("esp_netif_create_default_wifi_sta failed");
+                FL_WARN("esp_netif_create_default_wifi_sta failed");
                 return false;
             }
         }
@@ -844,7 +845,7 @@ private:
                                                     this,
                                                     nullptr);
         if (err != ESP_OK) {
-            FL_WARN_F("Failed to register WIFI_EVENT handler: %s", esp_err_to_name(err));
+            FL_WARN("Failed to register WIFI_EVENT handler: " << esp_err_to_name(err));
             return false;
         }
 
@@ -854,7 +855,7 @@ private:
                                                     this,
                                                     nullptr);
         if (err != ESP_OK) {
-            FL_WARN_F("Failed to register IP_EVENT handler: %s", esp_err_to_name(err));
+            FL_WARN("Failed to register IP_EVENT handler: " << esp_err_to_name(err));
             return false;
         }
 
@@ -862,14 +863,14 @@ private:
         wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
         err = esp_wifi_init(&cfg);
         if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-            FL_WARN_F("esp_wifi_init failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_wifi_init failed: " << esp_err_to_name(err));
             return false;
         }
 
         // Set WiFi mode to STA (Station)
         err = esp_wifi_set_mode(WIFI_MODE_STA);
         if (err != ESP_OK) {
-            FL_WARN_F("esp_wifi_set_mode failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_wifi_set_mode failed: " << esp_err_to_name(err));
             return false;
         }
 
@@ -881,32 +882,32 @@ private:
 
         err = esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
         if (err != ESP_OK) {
-            FL_WARN_F("esp_wifi_set_config failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_wifi_set_config failed: " << esp_err_to_name(err));
             return false;
         }
 
         // Set hostname (must be done before starting WiFi)
         err = esp_netif_set_hostname(sta_netif, mHostname.c_str());
         if (err != ESP_OK) {
-            FL_WARN_F("esp_netif_set_hostname failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_netif_set_hostname failed: " << esp_err_to_name(err));
             // Non-fatal, continue
         }
 
         // Start WiFi
         err = esp_wifi_start();
         if (err != ESP_OK) {
-            FL_WARN_F("esp_wifi_start failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_wifi_start failed: " << esp_err_to_name(err));
             return false;
         }
 
         // Connect to AP (async)
         err = esp_wifi_connect();
         if (err != ESP_OK) {
-            FL_WARN_F("esp_wifi_connect failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_wifi_connect failed: " << esp_err_to_name(err));
             return false;
         }
 
-        FL_DBG_F("ESP-IDF WiFi initialization successful");
+        FL_DBG("ESP-IDF WiFi initialization successful");
         return true;
     }
 
@@ -995,7 +996,7 @@ private:
                              int expected_size, const char* expected_md5, int cmd) {
         // Only handle FLASH command (0) for now
         if (cmd != 0) {
-            FL_WARN_F("OTA: Unsupported command %s (only FLASH supported)", cmd);
+            FL_WARN("OTA: Unsupported command " << cmd << " (only FLASH supported)");
             if (mErrorCb) {
                 mErrorCb("Unsupported OTA command");
             }
@@ -1010,7 +1011,7 @@ private:
         // Create TCP socket to connect to client
         int tcp_socket = lwip_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
         if (tcp_socket < 0) {
-            FL_WARN_F("OTA: Failed to create TCP socket");
+            FL_WARN("OTA: Failed to create TCP socket");
             if (mErrorCb) {
                 mErrorCb("TCP socket creation failed");
             }
@@ -1031,9 +1032,9 @@ private:
         fl::memcpy(&tcp_addr, client_addr, sizeof(struct sockaddr_in));
         tcp_addr.sin_port = lwip_htons(port);
 
-        FL_DBG_F("OTA: Connecting to client TCP server on port %s", port);
+        FL_DBG("OTA: Connecting to client TCP server on port " << port);
         if (lwip_connect(tcp_socket, (struct sockaddr*)&tcp_addr, sizeof(tcp_addr)) < 0) {
-            FL_WARN_F("OTA: Failed to connect to client TCP server");
+            FL_WARN("OTA: Failed to connect to client TCP server");
             if (mErrorCb) {
                 mErrorCb("TCP connection failed");
             }
@@ -1044,12 +1045,12 @@ private:
             return;
         }
 
-        FL_DBG_F("OTA: TCP connected, receiving firmware (%s bytes)", expected_size);
+        FL_DBG("OTA: TCP connected, receiving firmware (" << expected_size << " bytes)");
 
         // Get OTA partition
         const esp_partition_t* update_partition = esp_ota_get_next_update_partition(nullptr);
         if (!update_partition) {
-            FL_WARN_F("OTA: No OTA partition found");
+            FL_WARN("OTA: No OTA partition found");
             if (mErrorCb) {
                 mErrorCb("No OTA partition");
             }
@@ -1064,7 +1065,7 @@ private:
         esp_ota_handle_t ota_handle;
         esp_err_t err = esp_ota_begin(update_partition, expected_size, &ota_handle);
         if (err != ESP_OK) {
-            FL_WARN_F("OTA: esp_ota_begin failed: %s", esp_err_to_name(err));
+            FL_WARN("OTA: esp_ota_begin failed: " << esp_err_to_name(err));
             if (mErrorCb) {
                 mErrorCb("OTA begin failed");
             }
@@ -1093,7 +1094,7 @@ private:
 
             int received = lwip_recv(tcp_socket, buffer, to_recv, 0);
             if (received <= 0) {
-                FL_WARN_F("OTA: TCP receive error or timeout");
+                FL_WARN("OTA: TCP receive error or timeout");
                 if (mErrorCb) {
                     mErrorCb("Upload interrupted");
                 }
@@ -1107,7 +1108,7 @@ private:
             // Write to flash
             err = esp_ota_write(ota_handle, buffer, received);
             if (err != ESP_OK) {
-                FL_WARN_F("OTA: esp_ota_write failed: %s", esp_err_to_name(err));
+                FL_WARN("OTA: esp_ota_write failed: " << esp_err_to_name(err));
                 if (mErrorCb) {
                     mErrorCb("Flash write failed");
                 }
@@ -1146,11 +1147,11 @@ private:
         }
         computed_md5[32] = '\0';
 
-        FL_DBG_F("OTA: Expected MD5: %s", expected_md5);
-        FL_DBG_F("OTA: Computed MD5: %s", computed_md5);
+        FL_DBG("OTA: Expected MD5: " << expected_md5);
+        FL_DBG("OTA: Computed MD5: " << computed_md5);
 
         if (strcmp(computed_md5, expected_md5) != 0) {
-            FL_WARN_F("OTA: MD5 mismatch!");
+            FL_WARN("OTA: MD5 mismatch!");
             if (mErrorCb) {
                 mErrorCb("MD5 verification failed");
             }
@@ -1161,12 +1162,12 @@ private:
             return;
         }
 
-        FL_DBG_F("OTA: MD5 verification passed");
+        FL_DBG("OTA: MD5 verification passed");
 
         // Finalize OTA
         err = esp_ota_end(ota_handle);
         if (err != ESP_OK) {
-            FL_WARN_F("OTA: esp_ota_end failed: %s", esp_err_to_name(err));
+            FL_WARN("OTA: esp_ota_end failed: " << esp_err_to_name(err));
             if (mErrorCb) {
                 mErrorCb("OTA finalization failed");
             }
@@ -1179,7 +1180,7 @@ private:
         // Set boot partition
         err = esp_ota_set_boot_partition(update_partition);
         if (err != ESP_OK) {
-            FL_WARN_F("OTA: Failed to set boot partition: %s", esp_err_to_name(err));
+            FL_WARN("OTA: Failed to set boot partition: " << esp_err_to_name(err));
             if (mErrorCb) {
                 mErrorCb("Failed to set boot partition");
             }
@@ -1189,7 +1190,7 @@ private:
             return;
         }
 
-        FL_DBG_F("OTA: Firmware update successful!");
+        FL_DBG("OTA: Firmware update successful!");
 
         // Call end state callback
         if (mStateCb) {
@@ -1214,7 +1215,7 @@ private:
         // Create UDP socket
         self->mOtaUdpSocket = lwip_socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
         if (self->mOtaUdpSocket < 0) {
-            FL_WARN_F("OTA: Failed to create UDP socket");
+            FL_WARN("OTA: Failed to create UDP socket");
             self->mOtaRunning = false;
             vTaskDelete(nullptr);
             return;
@@ -1228,7 +1229,7 @@ private:
         addr.sin_addr.s_addr = lwip_htonl(INADDR_ANY);
 
         if (lwip_bind(self->mOtaUdpSocket, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-            FL_WARN_F("OTA: Failed to bind UDP socket to port 3232");
+            FL_WARN("OTA: Failed to bind UDP socket to port 3232");
             lwip_close(self->mOtaUdpSocket);
             self->mOtaUdpSocket = -1;
             self->mOtaRunning = false;
@@ -1236,7 +1237,7 @@ private:
             return;
         }
 
-        FL_DBG_F("OTA: UDP server listening on port 3232");
+        FL_DBG("OTA: UDP server listening on port 3232");
 
         // Set receive timeout for responsive shutdown
         struct timeval timeout;
@@ -1257,13 +1258,13 @@ private:
             }
 
             buffer[len] = '\0';
-            FL_DBG_F("OTA: Received UDP packet: %s", buffer);
+            FL_DBG("OTA: Received UDP packet: " << buffer);
 
             // Parse command: "<cmd> <port> <size> <md5>\n"
             int cmd, port, size;
             char md5[33];
             if (sscanf(buffer, "%d %d %d %32s", &cmd, &port, &size, md5) != 4) {
-                FL_WARN_F("OTA: Invalid invitation format");
+                FL_WARN("OTA: Invalid invitation format");
                 continue;
             }
 
@@ -1278,24 +1279,24 @@ private:
                 fl::snprintf(auth_response, sizeof(auth_response), "AUTH %s", nonce);
                 lwip_sendto(self->mOtaUdpSocket, auth_response, strlen(auth_response), 0,
                       (struct sockaddr*)&client_addr, client_len);
-                FL_DBG_F("OTA: Sent AUTH challenge");
+                FL_DBG("OTA: Sent AUTH challenge");
 
                 // Wait for authentication response (with timeout)
                 len = lwip_recvfrom(self->mOtaUdpSocket, buffer, sizeof(buffer) - 1, 0,
                               (struct sockaddr*)&client_addr, &client_len);
                 if (len <= 0) {
-                    FL_WARN_F("OTA: Authentication timeout");
+                    FL_WARN("OTA: Authentication timeout");
                     continue;
                 }
 
                 buffer[len] = '\0';
-                FL_DBG_F("OTA: Received auth response: %s", buffer);
+                FL_DBG("OTA: Received auth response: " << buffer);
 
                 // Parse auth response: "200 <cnonce> <response>\n"
                 int auth_cmd;
                 char cnonce[65], auth_hash[65];
                 if (sscanf(buffer, "%d %64s %64s", &auth_cmd, cnonce, auth_hash) != 3 || auth_cmd != 200) {
-                    FL_WARN_F("OTA: Invalid auth response format");
+                    FL_WARN("OTA: Invalid auth response format");
                     lwip_sendto(self->mOtaUdpSocket, "FAIL", 4, 0,
                           (struct sockaddr*)&client_addr, client_len);
                     continue;
@@ -1303,7 +1304,7 @@ private:
 
                 // Verify authentication
                 if (!verifyAuth(self->mPassword.c_str(), nonce, cnonce, auth_hash)) {
-                    FL_WARN_F("OTA: Authentication failed");
+                    FL_WARN("OTA: Authentication failed");
                     if (self->mErrorCb) {
                         self->mErrorCb("Auth Failed");
                     }
@@ -1312,7 +1313,7 @@ private:
                     continue;
                 }
 
-                FL_DBG_F("OTA: Authentication successful");
+                FL_DBG("OTA: Authentication successful");
             }
 
             // Send OK response
@@ -1320,20 +1321,20 @@ private:
                   (struct sockaddr*)&client_addr, client_len);
 
             // Handle TCP connection for firmware upload
-            FL_DBG_F("OTA: Ready for TCP connection on client port %s", port);
+            FL_DBG("OTA: Ready for TCP connection on client port " << port);
             self->handleFirmwareUpload(&client_addr, port, size, md5, cmd);
         }
 
         lwip_close(self->mOtaUdpSocket);
         self->mOtaUdpSocket = -1;
-        FL_DBG_F("OTA: UDP server stopped");
+        FL_DBG("OTA: UDP server stopped");
         vTaskDelete(nullptr);
     }
 
     void setupArduinoOTA() {
         // Start custom OTA server (replaces ArduinoOTA)
         if (mOtaRunning) {
-            FL_WARN_F("OTA: Server already running");
+            FL_WARN("OTA: Server already running");
             return;
         }
 
@@ -1350,11 +1351,11 @@ private:
         );
 
         if (result != pdPASS) {
-            FL_WARN_F("OTA: Failed to create server task");
+            FL_WARN("OTA: Failed to create server task");
             mOtaRunning = false;
             mFailedServices |= static_cast<u8>(fl::net::ota::Service::ARDUINO_OTA_FAILED);
         } else {
-            FL_DBG_F("OTA: Custom server started (port 3232)");
+            FL_DBG("OTA: Custom server started (port 3232)");
         }
     }
 
@@ -1387,7 +1388,7 @@ private:
                 mOtaUdpSocket = -1;
             }
 
-            FL_DBG_F("OTA: Custom server stopped");
+            FL_DBG("OTA: Custom server stopped");
         }
     }
 

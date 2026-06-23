@@ -37,10 +37,10 @@ struct Context {
     // Internal engine (reuses original implementation for bit-identical output)
     fl::unique_ptr<Engine> mEngine;
 
-    Context() FL_NO_EXCEPT = default;
-    ~Context() FL_NO_EXCEPT;
-    Context(const Context &) FL_NO_EXCEPT = delete;
-    Context &operator=(const Context &) FL_NO_EXCEPT = delete;
+    Context() FL_NOEXCEPT = default;
+    ~Context() FL_NOEXCEPT;
+    Context(const Context &) FL_NOEXCEPT = delete;
+    Context &operator=(const Context &) FL_NOEXCEPT = delete;
 };
 
 }  // namespace fl

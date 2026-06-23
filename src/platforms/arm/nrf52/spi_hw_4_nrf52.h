@@ -70,7 +70,7 @@ public:
     /// @brief Construct a new SPIQuadNRF52 controller
     /// @param bus_id Logical bus identifier (0 or 1)
     /// @param name Human-readable name for this controller
-    explicit SPIQuadNRF52(int bus_id = -1, const char* name = "Unknown") FL_NO_EXCEPT;
+    explicit SPIQuadNRF52(int bus_id = -1, const char* name = "Unknown") FL_NOEXCEPT;
 
     /// @brief Destroy the controller and release all resources
     ~SPIQuadNRF52();
@@ -79,63 +79,63 @@ public:
     /// @param config Configuration including pins, clock speed, and bus number
     /// @return true if initialization successful, false on error
     /// @note Validates pin assignments and allocates SPIM/TIMER/PPI resources
-    bool begin(const SpiHw4::Config& config) FL_NO_EXCEPT override;
+    bool begin(const SpiHw4::Config& config) FL_NOEXCEPT override;
 
     /// @brief Deinitialize the controller and release resources
-    void end() FL_NO_EXCEPT override;
+    void end() FL_NOEXCEPT override;
 
     /// @brief Acquire a DMA buffer for zero-copy data preparation
     /// @param bytes_per_lane Number of bytes per lane to allocate
     /// @return DMABuffer containing span to buffer or error code
     /// @note Automatically waits if previous transmission still active
     /// @note Reallocates only if requested size exceeds current capacity
-    DMABuffer acquireDMABuffer(size_t bytes_per_lane) FL_NO_EXCEPT override;
+    DMABuffer acquireDMABuffer(size_t bytes_per_lane) FL_NOEXCEPT override;
 
     /// @brief Start non-blocking transmission using internal DMA buffer
     /// @return true if transfer started successfully, false on error
     /// @note Must call acquireDMABuffer() first
     /// @note Returns immediately - use waitComplete() to block until done
-    bool transmit(TransmitMode mode = TransmitMode::ASYNC) FL_NO_EXCEPT override;
+    bool transmit(TransmitMode mode = TransmitMode::ASYNC) FL_NOEXCEPT override;
 
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (fl::numeric_limits<uint32_t>::max() = infinite)
     /// @return true if transmission completed, false on timeout
-    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) FL_NO_EXCEPT override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) FL_NOEXCEPT override;
 
     /// @brief Check if transmission is currently in progress
     /// @return true if busy, false if idle
-    bool isBusy() const FL_NO_EXCEPT override;
+    bool isBusy() const FL_NOEXCEPT override;
 
     /// @brief Check if controller has been initialized
     /// @return true if initialized, false otherwise
-    bool isInitialized() const FL_NO_EXCEPT override;
+    bool isInitialized() const FL_NOEXCEPT override;
 
     /// @brief Get the bus identifier for this controller
     /// @return Bus ID (0 or 1)
-    int getBusId() const FL_NO_EXCEPT override;
+    int getBusId() const FL_NOEXCEPT override;
 
     /// @brief Get the human-readable name for this controller
     /// @return Controller name string
-    const char* getName() const FL_NO_EXCEPT override;
+    const char* getName() const FL_NOEXCEPT override;
 
 private:
     /// @brief Release all allocated resources (SPIM, TIMER, PPI, buffers)
-    void cleanup() FL_NO_EXCEPT;
+    void cleanup() FL_NOEXCEPT;
 
     /// @brief Allocate or resize internal DMA buffers for quad-lane operation
     /// @param required_size Size needed in bytes (per lane)
     /// @return true if buffers allocated successfully
-    bool allocateDMABuffers(size_t required_size) FL_NO_EXCEPT;
+    bool allocateDMABuffers(size_t required_size) FL_NOEXCEPT;
 
     /// @brief Configure TIMER1 for synchronization trigger
     /// @param clock_speed_hz Desired clock frequency
-    void configureTimer(u32 clock_speed_hz) FL_NO_EXCEPT;
+    void configureTimer(u32 clock_speed_hz) FL_NOEXCEPT;
 
     /// @brief Configure PPI channels for synchronization
-    void configurePPI() FL_NO_EXCEPT;
+    void configurePPI() FL_NOEXCEPT;
 
     /// @brief Start synchronized transmission on all SPIM peripherals
-    void startTransmission() FL_NO_EXCEPT;
+    void startTransmission() FL_NOEXCEPT;
 
     int mBusId;  ///< Logical bus identifier
     const char* mName;  ///< Human-readable controller name

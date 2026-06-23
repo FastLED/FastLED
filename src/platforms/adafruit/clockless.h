@@ -49,14 +49,14 @@ public:
     virtual ~AdafruitWS2812Controller() = default;
 
     /// Initialize the controller
-    virtual void init() FL_NO_EXCEPT override {
+    virtual void init() FL_NOEXCEPT override {
         // Driver will be initialized when showPixels is first called
     }
 
     /// Output pixels to the LED strip
     /// Converts FastLED pixel data to Adafruit format and displays
     /// @param pixels the pixel controller containing LED data
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override {
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT override {
         // Initialize driver if needed
         if (!mDriver) {
             mDriver = fl::IAdafruitNeoPixelDriver::create();
@@ -69,7 +69,7 @@ public:
 
 protected:
     /// Get the driver instance (for derived classes)
-    fl::IAdafruitNeoPixelDriver& getDriver() FL_NO_EXCEPT {
+    fl::IAdafruitNeoPixelDriver& getDriver() FL_NOEXCEPT {
         return *mDriver;
     }
 };

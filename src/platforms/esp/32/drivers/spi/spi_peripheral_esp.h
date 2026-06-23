@@ -65,7 +65,7 @@ public:
     /// @return Reference to the singleton peripheral
     ///
     /// Mirrors the hardware constraint that there is a limited number of SPI hosts.
-    static SpiPeripheralESP& instance() FL_NO_EXCEPT;
+    static SpiPeripheralESP& instance() FL_NOEXCEPT;
 
     /// @brief Destructor - frees ESP-IDF device handle
     ~SpiPeripheralESP() override;

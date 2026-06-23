@@ -15,16 +15,16 @@ namespace platforms {
 
 class ChannelPollSignal {
   public:
-    ChannelPollSignal() FL_NO_EXCEPT : mSignal(0), mPending(false) {}
+    ChannelPollSignal() FL_NOEXCEPT : mSignal(0), mPending(false) {}
 
-    void notify() FL_NO_EXCEPT {
+    void notify() FL_NOEXCEPT {
         const bool alreadyPending = mPending.exchange(true, fl::memory_order_acq_rel);
         if (!alreadyPending) {
             mSignal.release();
         }
     }
 
-    bool wait(fl::u32 timeoutMs) FL_NO_EXCEPT {
+    bool wait(fl::u32 timeoutMs) FL_NOEXCEPT {
         const bool signaled = (timeoutMs == 0) ? waitForever() : mSignal.try_acquire_for_ms(timeoutMs);
         if (signaled) {
             mPending.store(false, fl::memory_order_release);
@@ -33,7 +33,7 @@ class ChannelPollSignal {
     }
 
   private:
-    bool waitForever() FL_NO_EXCEPT {
+    bool waitForever() FL_NOEXCEPT {
         mSignal.acquire();
         return true;
     }

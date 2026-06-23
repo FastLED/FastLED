@@ -84,19 +84,19 @@ inline void k20UnlockAndConfigureWdog(fl::u32 timeout_ms) {
 
 } // namespace platforms
 
-Watchdog& Watchdog::instance() FL_NO_EXCEPT {
+Watchdog& Watchdog::instance() FL_NOEXCEPT {
     static Watchdog sInstance;
     return sInstance;
 }
 
-void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
+void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     if (timeout_ms == 0) timeout_ms = 1000;
     if (timeout_ms > FL_WATCHDOG_MAX_TIMEOUT_MS) timeout_ms = FL_WATCHDOG_MAX_TIMEOUT_MS;
     platforms::k20UnlockAndConfigureWdog(timeout_ms);
     platforms::k20WatchdogState().armed = true;
 }
 
-void Watchdog::feed() FL_NO_EXCEPT {
+void Watchdog::feed() FL_NOEXCEPT {
     // Refresh sequence: 0xA602 then 0xB480 with interrupts disabled.
     // PRIMASK save/restore so a caller that already had IRQs disabled
     // doesn't get them surprise-re-enabled (e.g. feed() from inside an ISR).
@@ -108,13 +108,13 @@ void Watchdog::feed() FL_NO_EXCEPT {
     __asm__ volatile ("msr primask, %0" :: "r" (primask) : "memory");
 }
 
-void Watchdog::disable() FL_NO_EXCEPT {
+void Watchdog::disable() FL_NOEXCEPT {
     // K20 WDOG is one-shot configurable. We cannot reliably disable mid-run.
     // Document the limitation: post-disable() the watchdog still ticks. The
     // caller must continue feeding it or accept a reset.
 }
 
-ResetCause Watchdog::lastResetCause() const FL_NO_EXCEPT {
+ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
     auto& s = platforms::k20WatchdogState();
     if (!s.cause_cached) {
         s.cached_cause = platforms::translateRcmSrs(RCM_SRS0, RCM_SRS1);
@@ -126,45 +126,45 @@ ResetCause Watchdog::lastResetCause() const FL_NO_EXCEPT {
     return s.cached_cause;
 }
 
-bool Watchdog::lastResetWasWatchdog() const FL_NO_EXCEPT {
+bool Watchdog::lastResetWasWatchdog() const FL_NOEXCEPT {
     return lastResetCause() == ResetCause::WATCHDOG;
 }
 
-fl::u8 Watchdog::persistRead(fl::size idx) const FL_NO_EXCEPT {
+fl::u8 Watchdog::persistRead(fl::size idx) const FL_NOEXCEPT {
     if (idx >= FL_WATCHDOG_PERSIST_BYTES) return 0;
     return platforms::k20WatchdogState().persist[idx];
 }
-void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NO_EXCEPT {
+void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NOEXCEPT {
     if (idx >= FL_WATCHDOG_PERSIST_BYTES) return;
     platforms::k20WatchdogState().persist[idx] = v;
 }
 
-fl::u16 Watchdog::consecutiveCrashCount() const FL_NO_EXCEPT {
+fl::u16 Watchdog::consecutiveCrashCount() const FL_NOEXCEPT {
     (void)lastResetCause();
     return platforms::k20WatchdogState().crash_count;
 }
-void Watchdog::markCleanShutdown() FL_NO_EXCEPT { platforms::k20WatchdogState().crash_count = 0; }
-bool Watchdog::isInSafeMode() const FL_NO_EXCEPT { return consecutiveCrashCount() >= mSafeModeThreshold; }
-fl::u16 Watchdog::safeModeThreshold() const FL_NO_EXCEPT { return mSafeModeThreshold; }
-void    Watchdog::setSafeModeThreshold(fl::u16 t) FL_NO_EXCEPT { mSafeModeThreshold = t; }
+void Watchdog::markCleanShutdown() FL_NOEXCEPT { platforms::k20WatchdogState().crash_count = 0; }
+bool Watchdog::isInSafeMode() const FL_NOEXCEPT { return consecutiveCrashCount() >= mSafeModeThreshold; }
+fl::u16 Watchdog::safeModeThreshold() const FL_NOEXCEPT { return mSafeModeThreshold; }
+void    Watchdog::setSafeModeThreshold(fl::u16 t) FL_NOEXCEPT { mSafeModeThreshold = t; }
 
-FL_NO_RETURN void Watchdog::reboot() FL_NO_EXCEPT {
+FL_NORETURN void Watchdog::reboot() FL_NOEXCEPT {
     SCB_AIRCR = 0x05FA0004;
     while (true) {}
 }
 
-bool Watchdog::onTimeout(WatchdogTimeoutCallback, void*) FL_NO_EXCEPT { return false; }
-bool Watchdog::onTimeout(fl::function<void()>) FL_NO_EXCEPT { return false; }
-bool Watchdog::setPauseOnDebug(bool) FL_NO_EXCEPT { return false; }
-bool Watchdog::writeCrashLog(fl::span<const fl::u8>) FL_NO_EXCEPT { return false; }
-fl::size Watchdog::readCrashLog(fl::span<fl::u8>) const FL_NO_EXCEPT { return 0; }
-bool Watchdog::rebootIntoBootloader() FL_NO_EXCEPT { return false; }
+bool Watchdog::onTimeout(WatchdogTimeoutCallback, void*) FL_NOEXCEPT { return false; }
+bool Watchdog::onTimeout(fl::function<void()>) FL_NOEXCEPT { return false; }
+bool Watchdog::setPauseOnDebug(bool) FL_NOEXCEPT { return false; }
+bool Watchdog::writeCrashLog(fl::span<const fl::u8>) FL_NOEXCEPT { return false; }
+fl::size Watchdog::readCrashLog(fl::span<fl::u8>) const FL_NOEXCEPT { return 0; }
+bool Watchdog::rebootIntoBootloader() FL_NOEXCEPT { return false; }
 
-bool Watchdog::setWindow(fl::u32, fl::u32) FL_NO_EXCEPT { return false; }
-bool Watchdog::hasCrashReport() const FL_NO_EXCEPT { return false; }
-WatchdogCrashReport Watchdog::readCrashReport() const FL_NO_EXCEPT {
+bool Watchdog::setWindow(fl::u32, fl::u32) FL_NOEXCEPT { return false; }
+bool Watchdog::hasCrashReport() const FL_NOEXCEPT { return false; }
+WatchdogCrashReport Watchdog::readCrashReport() const FL_NOEXCEPT {
     WatchdogCrashReport r{}; r.valid = false; r.fault_type = ""; return r;
 }
-void Watchdog::clearCrashReport() FL_NO_EXCEPT {}
+void Watchdog::clearCrashReport() FL_NOEXCEPT {}
 
 } // namespace fl

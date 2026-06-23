@@ -19,7 +19,7 @@ namespace platforms {
 /// This function is called lazily on first access to the ChannelManager singleton.
 ///
 /// @note Implementation is in src/platforms/esp/32/drivers/channel_manager_esp32.cpp
-void initChannelDrivers() FL_NO_EXCEPT;
+void initChannelDrivers() FL_NOEXCEPT;
 
 }  // namespace platforms
 }  // namespace fl

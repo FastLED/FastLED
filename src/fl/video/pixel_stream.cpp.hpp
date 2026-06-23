@@ -25,7 +25,7 @@ constexpr fl::size_t kFledMaxJsonBytes = 1u * 1024u * 1024u;
 PixelStream::PixelStream(int bytes_per_frame)
     : mbytesPerFrame(bytes_per_frame), mType(kFile) {}
 
-PixelStream::~PixelStream() FL_NO_EXCEPT { close(); }
+PixelStream::~PixelStream() FL_NOEXCEPT { close(); }
 
 bool PixelStream::begin(filebuf_ptr h) {
     close();
@@ -143,7 +143,7 @@ bool PixelStream::hasFrame(fl::u32 frameNumber) {
 bool PixelStream::readFrameAt(fl::u32 frameNumber, Frame *frame) {
     if (mType == kStreaming) {
         // Streaming handle doesn't support seeking
-        FL_DBG_F("Streaming handle doesn't support seeking");
+        FL_DBG("Streaming handle doesn't support seeking");
         return false;
     }
     fl::size_t frameBytes = static_cast<fl::size_t>(frameNumber)
@@ -209,11 +209,11 @@ PixelStream::Type PixelStream::getType() const {
     return mType;
 }
 
-bool PixelStream::hasEmbeddedScreenMap() const FL_NO_EXCEPT {
+bool PixelStream::hasEmbeddedScreenMap() const FL_NOEXCEPT {
     return !mEmbeddedScreenMapJson.empty();
 }
 
-const fl::string &PixelStream::embeddedScreenMapJson() const FL_NO_EXCEPT {
+const fl::string &PixelStream::embeddedScreenMapJson() const FL_NOEXCEPT {
     return mEmbeddedScreenMapJson;
 }
 

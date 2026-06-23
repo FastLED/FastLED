@@ -31,7 +31,7 @@
 // Stub ESP-IDF error types
 #define ESP_OK 0  // Success code
 using esp_err_t = int;  // Error type
-inline const char* esp_err_to_name(esp_err_t err) FL_NO_EXCEPT {
+inline const char* esp_err_to_name(esp_err_t err) FL_NOEXCEPT {
     return err == 0 ? "ESP_OK" : "ESP_ERR";
 }
 
@@ -53,7 +53,7 @@ namespace detail {
 /// Always returns false (no network active) since host tests don't have WiFi/BT.
 class NetworkDetector {
 public:
-    static bool isAnyNetworkActive() FL_NO_EXCEPT { return false; }
+    static bool isAnyNetworkActive() FL_NOEXCEPT { return false; }
 };
 
 //=============================================================================
@@ -65,12 +65,12 @@ public:
 /// No-op implementation - network state never changes in host tests.
 class NetworkStateTracker {
 public:
-    static NetworkStateTracker& instance() FL_NO_EXCEPT {
+    static NetworkStateTracker& instance() FL_NOEXCEPT {
         static NetworkStateTracker inst;
         return inst;
     }
-    bool hasChanged() FL_NO_EXCEPT { return false; }
-    bool isActive() FL_NO_EXCEPT { return false; }
+    bool hasChanged() FL_NOEXCEPT { return false; }
+    bool isActive() FL_NOEXCEPT { return false; }
 };
 
 //=============================================================================
@@ -84,34 +84,34 @@ public:
 class RmtMemoryManager {
 public:
     struct AllocationResult {
-        bool ok() const FL_NO_EXCEPT { return true; }
-        fl::size value() const FL_NO_EXCEPT { return 64; }
+        bool ok() const FL_NOEXCEPT { return true; }
+        fl::size value() const FL_NOEXCEPT { return 64; }
     };
 
-    static RmtMemoryManager& instance() FL_NO_EXCEPT {
+    static RmtMemoryManager& instance() FL_NOEXCEPT {
         static RmtMemoryManager mgr;
         return mgr;
     }
 
-    static fl::size calculateMemoryBlocks(bool) FL_NO_EXCEPT { return 2; }
+    static fl::size calculateMemoryBlocks(bool) FL_NOEXCEPT { return 2; }
 
-    AllocationResult allocateTx(u8, bool, bool) FL_NO_EXCEPT { return AllocationResult{}; }
-    bool tryAllocateTx(u8, bool, bool, fl::size& out_words) FL_NO_EXCEPT {
+    AllocationResult allocateTx(u8, bool, bool) FL_NOEXCEPT { return AllocationResult{}; }
+    bool tryAllocateTx(u8, bool, bool, fl::size& out_words) FL_NOEXCEPT {
         out_words = 64;
         return true;
     }
-    bool tryAllocateRx(u8, fl::size, bool, fl::size& out_words) FL_NO_EXCEPT {
+    bool tryAllocateRx(u8, fl::size, bool, fl::size& out_words) FL_NOEXCEPT {
         out_words = 64;
         return true;
     }
-    void free(u8, bool) FL_NO_EXCEPT {}  // ok bare allocation
-    void recordRecoveryAllocation(u8, fl::size, bool) FL_NO_EXCEPT {}
-    bool isDMAAvailable() FL_NO_EXCEPT { return false; }
-    bool allocateDMA(u8, bool) FL_NO_EXCEPT { return false; }
-    void freeDMA(u8, bool) FL_NO_EXCEPT {}
-    fl::size availableTxWords() FL_NO_EXCEPT { return 256; }
-    int getDMAChannelsInUse() FL_NO_EXCEPT { return 0; }
-    bool hasActiveRxChannels() const FL_NO_EXCEPT { return false; }
+    void free(u8, bool) FL_NOEXCEPT {}  // ok bare allocation
+    void recordRecoveryAllocation(u8, fl::size, bool) FL_NOEXCEPT {}
+    bool isDMAAvailable() FL_NOEXCEPT { return false; }
+    bool allocateDMA(u8, bool) FL_NOEXCEPT { return false; }
+    void freeDMA(u8, bool) FL_NOEXCEPT {}
+    fl::size availableTxWords() FL_NOEXCEPT { return 256; }
+    int getDMAChannelsInUse() FL_NOEXCEPT { return 0; }
+    bool hasActiveRxChannels() const FL_NOEXCEPT { return false; }
 };
 
 //=============================================================================
@@ -126,18 +126,18 @@ class RMTBufferPool {
     fl::vector<u8> mInternalBuffer;
     fl::vector<u8> mDMABuffer;
 public:
-    fl::span<u8> acquireInternal(fl::size size) FL_NO_EXCEPT {
+    fl::span<u8> acquireInternal(fl::size size) FL_NOEXCEPT {
         mInternalBuffer.resize(size);
         return fl::span<u8>(mInternalBuffer.data(), size);
     }
 
-    fl::span<u8> acquireDMA(fl::size size) FL_NO_EXCEPT {
+    fl::span<u8> acquireDMA(fl::size size) FL_NOEXCEPT {
         mDMABuffer.resize(size);
         return fl::span<u8>(mDMABuffer.data(), size);
     }
 
-    void releaseInternal(fl::span<u8>) FL_NO_EXCEPT {}
-    void releaseDMA() FL_NO_EXCEPT {}
+    void releaseInternal(fl::span<u8>) FL_NOEXCEPT {}
+    void releaseDMA() FL_NOEXCEPT {}
 };
 
 } // namespace detail

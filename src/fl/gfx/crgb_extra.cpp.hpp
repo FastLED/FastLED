@@ -31,7 +31,7 @@ CRGB::CRGB(const hsv8& rhs) {
 }
 
 /// Assignment operator from hsv8 - converts HSV color to RGB
-CRGB& CRGB::operator=(const hsv8& rhs) FL_NO_EXCEPT {
+CRGB& CRGB::operator=(const hsv8& rhs) FL_NOEXCEPT {
     CHSV hsv_color(rhs.h, rhs.s, rhs.v);
     CRGB rgb_result;
     hsv2rgb_rainbow(hsv_color, rgb_result);

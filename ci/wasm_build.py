@@ -95,6 +95,14 @@ def _normalize_meson_private_paths(build_dir: Path) -> None:
         raise RuntimeError(message)
 
 
+def _cleanup_stale_meson_lockfile(build_dir: Path) -> None:
+    """Remove stale meson-private/meson.lock before meson setup (see issue #2484)."""
+    from ci.meson.build_config import cleanup_stale_meson_lockfile
+
+    # Helper logs its own status message; we just call through.
+    cleanup_stale_meson_lockfile(build_dir)
+
+
 # ============================================================================
 # Library fingerprint — skip meson/ninja when source tree hasn't changed
 # ============================================================================
@@ -472,6 +480,8 @@ def _recover_stale_wasm_build(build_dir: Path) -> bool:
             str(build_dir),
             f"-Dbuild_mode={mode}",
         ]
+        # Remove any stale meson lockfile before reconfigure (see issue #2484).
+        _cleanup_stale_meson_lockfile(build_dir)
         result = subprocess.run(cmd, cwd=PROJECT_ROOT)
         if result.returncode == 0:
             _normalize_meson_private_paths(build_dir)
@@ -688,6 +698,8 @@ def ensure_meson_configured(build_dir: Path, mode: str, force: bool = False) -> 
             f"-Dbuild_mode={mode}",
         ]
         print(f"[WASM] Reconfiguring meson (mode: {mode})...")
+        # Remove any stale meson lockfile before reconfigure (see issue #2484).
+        _cleanup_stale_meson_lockfile(build_dir)
         result = subprocess.run(cmd, cwd=PROJECT_ROOT)
         if result.returncode != 0:
             print(f"[WASM] Meson reconfiguration failed (rc {result.returncode})")
@@ -717,6 +729,8 @@ def ensure_meson_configured(build_dir: Path, mode: str, force: bool = False) -> 
         cmd.insert(2, "--reconfigure")
 
     print(f"[WASM] Configuring meson (mode: {mode})...")
+    # Remove any stale meson lockfile before setup (see issue #2484).
+    _cleanup_stale_meson_lockfile(build_dir)
     result = subprocess.run(cmd, cwd=PROJECT_ROOT)
     if result.returncode != 0:
         print(f"[WASM] Meson setup failed with return code {result.returncode}")

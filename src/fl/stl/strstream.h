@@ -33,34 +33,34 @@ template <fl::u32 N> class bitset_inlined;  // IWYU pragma: keep
 
 class sstream {
   public:
-    sstream() FL_NO_EXCEPT = default;
-    sstream(const string &str) FL_NO_EXCEPT : mStr(str) {}
+    sstream() FL_NOEXCEPT = default;
+    sstream(const string &str) FL_NOEXCEPT : mStr(str) {}
 
-    void setTreatCharAsInt(bool treatCharAsInt) FL_NO_EXCEPT {
+    void setTreatCharAsInt(bool treatCharAsInt) FL_NOEXCEPT {
         mTreatCharAsInt = treatCharAsInt;
     }
 
-    string str() const FL_NO_EXCEPT { return mStr; }
-    const char *c_str() const FL_NO_EXCEPT { return mStr.c_str(); }
+    string str() const FL_NOEXCEPT { return mStr; }
+    const char *c_str() const FL_NOEXCEPT { return mStr.c_str(); }
 
-    sstream &operator<<(const CRGB &rgb) FL_NO_EXCEPT {
+    sstream &operator<<(const CRGB &rgb) FL_NOEXCEPT {
         mStr.append(rgb);
         return *this;
     }
-    sstream &operator<<(const sstream &strStream) FL_NO_EXCEPT {
+    sstream &operator<<(const sstream &strStream) FL_NOEXCEPT {
         mStr.append(strStream.str());
         return *this;
     }
 
-    sstream &operator<<(const Tile2x2_u8 &subpixel) FL_NO_EXCEPT;
-    sstream &operator<<(const Tile2x2_u8_wrap &tile) FL_NO_EXCEPT;  // New overload for wrapped tiles
+    sstream &operator<<(const Tile2x2_u8 &subpixel) FL_NOEXCEPT;
+    sstream &operator<<(const Tile2x2_u8_wrap &tile) FL_NOEXCEPT;  // New overload for wrapped tiles
 
     // Bins support - implemented in strstream.cpp.hpp
-    sstream &operator<<(const audio::fft::Bins &bins) FL_NO_EXCEPT;
+    sstream &operator<<(const audio::fft::Bins &bins) FL_NOEXCEPT;
 
     // vec2<T> support - format as (x,y)
     template<typename T>
-    sstream &operator<<(const vec2<T> &v) FL_NO_EXCEPT {
+    sstream &operator<<(const vec2<T> &v) FL_NOEXCEPT {
         mStr.append("(");
         mStr.append(v.x);
         mStr.append(",");
@@ -71,7 +71,7 @@ class sstream {
 
     // rect<T> support - format as rect((minx,miny), (maxx,maxy))
     template<typename T>
-    sstream &operator<<(const rect<T> &r) FL_NO_EXCEPT {
+    sstream &operator<<(const rect<T> &r) FL_NOEXCEPT {
         mStr.append("rect(");
         (*this) << r.mMin;
         mStr.append(", ");
@@ -82,7 +82,7 @@ class sstream {
 
     // Optional<T> support - format as nullopt or optional(value)
     template<typename T>
-    sstream &operator<<(const Optional<T> &opt) FL_NO_EXCEPT {
+    sstream &operator<<(const Optional<T> &opt) FL_NOEXCEPT {
         if (!opt.has_value()) {
             mStr.append("nullopt");
         } else {
@@ -95,7 +95,7 @@ class sstream {
 
     // vector<T> support - format as [item1, item2, ...]
     template<typename T>
-    sstream &operator<<(const fl::vector<T> &vec) FL_NO_EXCEPT {
+    sstream &operator<<(const fl::vector<T> &vec) FL_NOEXCEPT {
         mStr.append("[");
         for (fl::size i = 0; i < vec.size(); ++i) {
             if (i > 0) {
@@ -109,7 +109,7 @@ class sstream {
 
     // unordered_set<Key, Hash, KeyEqual> support - format as {item1, item2, ...}
     template<typename Key, typename Hash, typename KeyEqual>
-    sstream &operator<<(const fl::unordered_set<Key, Hash, KeyEqual> &set) FL_NO_EXCEPT {
+    sstream &operator<<(const fl::unordered_set<Key, Hash, KeyEqual> &set) FL_NOEXCEPT {
         mStr.append("{");
         bool first = true;
         for (auto it = set.begin(); it != set.end(); ++it) {
@@ -125,7 +125,7 @@ class sstream {
 
     // unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT> support - format as {key1: value1, key2: value2, ...}
     template<typename Key, typename T, typename Hash, typename KeyEqual, int INLINED_COUNT>
-    sstream &operator<<(const fl::unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT> &map) FL_NO_EXCEPT {
+    sstream &operator<<(const fl::unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT> &map) FL_NOEXCEPT {
         mStr.append("{");
         bool first = true;
         for (auto it = map.begin(); it != map.end(); ++it) {
@@ -143,7 +143,7 @@ class sstream {
 
     // unsorted_map_fixed<Key, Value, N> support - format as {key1: value1, key2: value2, ...}
     template<typename Key, typename Value, fl::size N>
-    sstream &operator<<(const fl::unsorted_map_fixed<Key, Value, N> &map) FL_NO_EXCEPT {
+    sstream &operator<<(const fl::unsorted_map_fixed<Key, Value, N> &map) FL_NOEXCEPT {
         mStr.append("{");
         bool first = true;
         for (auto it = map.begin(); it != map.end(); ++it) {
@@ -161,7 +161,7 @@ class sstream {
 
     // flat_map<Key, Value, Less> support - format as {key1: value1, key2: value2, ...}
     template<typename Key, typename Value, typename Less>
-    sstream &operator<<(const fl::flat_map<Key, Value, Less> &map) FL_NO_EXCEPT {
+    sstream &operator<<(const fl::flat_map<Key, Value, Less> &map) FL_NOEXCEPT {
         mStr.append("{");
         bool first = true;
         for (auto it = map.begin(); it != map.end(); ++it) {
@@ -180,7 +180,7 @@ class sstream {
     // span<T, Extent> support - format as span[item1, item2, ...]
     // Uses same format as vector but with "span" prefix for clarity
     template<typename T, fl::size Extent>
-    sstream &operator<<(const fl::span<T, Extent> &s) FL_NO_EXCEPT {
+    sstream &operator<<(const fl::span<T, Extent> &s) FL_NOEXCEPT {
         mStr.append("span[");
         for (fl::size i = 0; i < s.size(); ++i) {
             if (i > 0) {
@@ -194,7 +194,7 @@ class sstream {
 
     // pair<T1, T2> support - format as (first, second)
     template<typename T1, typename T2>
-    sstream &operator<<(const fl::pair<T1, T2> &p) FL_NO_EXCEPT {
+    sstream &operator<<(const fl::pair<T1, T2> &p) FL_NOEXCEPT {
         mStr.append("(");
         (*this) << p.first;
         mStr.append(", ");
@@ -203,51 +203,51 @@ class sstream {
         return *this;
     }
 
-    sstream &operator=(const fl::u16 &n) FL_NO_EXCEPT {
+    sstream &operator=(const fl::u16 &n) FL_NOEXCEPT {
         mStr.clear();
         (*this) << n;
         return *this;
     }
 
-    sstream &operator=(const fl::u8 &n) FL_NO_EXCEPT {
+    sstream &operator=(const fl::u8 &n) FL_NOEXCEPT {
         mStr.clear();
         (*this) << n;
         return *this;
     }
 
-    sstream &operator=(char c) FL_NO_EXCEPT {
+    sstream &operator=(char c) FL_NOEXCEPT {
         mStr.clear();
         (*this) << c;
         return *this;
     }
 
     // << operator section
-    sstream &operator<<(const string &str) FL_NO_EXCEPT {
+    sstream &operator<<(const string &str) FL_NOEXCEPT {
         mStr.append(str);
         return *this;
     }
 
-    sstream &operator<<(const char *str) FL_NO_EXCEPT {
+    sstream &operator<<(const char *str) FL_NOEXCEPT {
         if (str) {
             mStr.append(str);
         }
         return *this;
     }
 
-    sstream &operator<<(const float &f) FL_NO_EXCEPT {
+    sstream &operator<<(const float &f) FL_NOEXCEPT {
         // multiply by 100 and round to get 2 decimal places
         mStr.append(f);
         return *this;
     }
 
-    sstream &operator<<(const double &f) FL_NO_EXCEPT {
+    sstream &operator<<(const double &f) FL_NOEXCEPT {
         // multiply by 100 and round to get 2 decimal places
         mStr.append(f);
         return *this;
     }
 
     // Non-template overload for char - takes by value to ensure priority over templates
-    sstream &operator<<(char c) FL_NO_EXCEPT {
+    sstream &operator<<(char c) FL_NOEXCEPT {
         if (mTreatCharAsInt) {
             mStr.append(fl::i32(c));
         } else {
@@ -257,44 +257,44 @@ class sstream {
     }
 
     // Non-template overloads for signed/unsigned char to avoid template resolution issues
-    sstream &operator<<(signed char n) FL_NO_EXCEPT {
+    sstream &operator<<(signed char n) FL_NOEXCEPT {
         using target_t = typename int_cast_detail::cast_target<signed char>::type;
         appendFormatted(static_cast<target_t>(n));
         return *this;
     }
 
-    sstream &operator<<(unsigned char n) FL_NO_EXCEPT {
+    sstream &operator<<(unsigned char n) FL_NOEXCEPT {
         using target_t = typename int_cast_detail::cast_target<unsigned char>::type;
         appendFormatted(static_cast<target_t>(n));
         return *this;
     }
 
     template<fl::size N>
-    sstream &operator<<(const char (&str)[N]) FL_NO_EXCEPT {
+    sstream &operator<<(const char (&str)[N]) FL_NOEXCEPT {
         mStr.append(str);
         return *this;
     }
 
     template<fl::u32 N>
-    sstream &operator<<(const bitset_fixed<N> &bs) FL_NO_EXCEPT {
+    sstream &operator<<(const bitset_fixed<N> &bs) FL_NOEXCEPT {
         // mStr.append(bs);
         bs.to_string(&mStr);
         return *this;
     }
 
-    sstream &operator<<(const bitset_dynamic &bs) FL_NO_EXCEPT {
+    sstream &operator<<(const bitset_dynamic &bs) FL_NOEXCEPT {
         bs.to_string(&mStr);
         return *this;
     }
 
     template<fl::u32 N>
-    sstream &operator<<(const bitset_inlined<N> &bs) FL_NO_EXCEPT {
+    sstream &operator<<(const bitset_inlined<N> &bs) FL_NOEXCEPT {
         bs.to_string(&mStr);
         return *this;
     }
 
     // bool support - output as "true"/"false" for readability
-    sstream &operator<<(bool b) FL_NO_EXCEPT {
+    sstream &operator<<(bool b) FL_NOEXCEPT {
         mStr.append(b ? "true" : "false");
         return *this;
     }
@@ -304,7 +304,7 @@ class sstream {
     //-------------------------------------------------------------------------
     template<typename T>
     typename fl::enable_if<fl::is_enum<T>::value, sstream&>::type
-    operator<<(T e) FL_NO_EXCEPT {
+    operator<<(T e) FL_NOEXCEPT {
         using underlying_t = typename fl::underlying_type<T>::type;
         return (*this) << static_cast<underlying_t>(e);
     }
@@ -316,7 +316,7 @@ class sstream {
     // Uses is_multi_byte_integer trait to select only non-char integer types
     template<typename T>
     typename fl::enable_if<fl::is_multi_byte_integer<T>::value, sstream&>::type
-    operator<<(T val) FL_NO_EXCEPT {
+    operator<<(T val) FL_NOEXCEPT {
         using target_t = typename int_cast_detail::cast_target<T>::type;
         appendFormatted(static_cast<target_t>(val));
         return *this;
@@ -330,18 +330,18 @@ class sstream {
         fl::is_same<decltype(static_cast<const T*>(nullptr)->to_float()), float>::value
         && !fl::is_floating_point<T>::value,
         sstream&>::type
-    operator<<(const T &val) FL_NO_EXCEPT {
+    operator<<(const T &val) FL_NOEXCEPT {
         mStr.append(val.to_float());
         return *this;
     }
 
     // assignment operator completely replaces the current string
-    sstream &operator=(const string &str) FL_NO_EXCEPT {
+    sstream &operator=(const string &str) FL_NOEXCEPT {
         mStr = str;
         return *this;
     }
 
-    sstream &operator=(const char *str) FL_NO_EXCEPT {
+    sstream &operator=(const char *str) FL_NOEXCEPT {
         mStr.clear();
         mStr.append(str);
         return *this;
@@ -349,21 +349,21 @@ class sstream {
     
 
     // crgb
-    sstream &operator=(const CRGB &rgb) FL_NO_EXCEPT {
+    sstream &operator=(const CRGB &rgb) FL_NOEXCEPT {
         mStr.clear();
         (*this) << rgb;
         return *this;
     }
 
-    void clear() FL_NO_EXCEPT { mStr.clear(); }
+    void clear() FL_NOEXCEPT { mStr.clear(); }
 
     // Get current formatting base (10=decimal, 16=hex, 8=octal)
-    int getBase() const FL_NO_EXCEPT { return mBase; }
+    int getBase() const FL_NOEXCEPT { return mBase; }
 
     // Friend operators for manipulators
-    friend sstream& operator<<(sstream&, const hex_t&) FL_NO_EXCEPT;
-    friend sstream& operator<<(sstream&, const dec_t&) FL_NO_EXCEPT;
-    friend sstream& operator<<(sstream&, const oct_t&) FL_NO_EXCEPT;
+    friend sstream& operator<<(sstream&, const hex_t&) FL_NOEXCEPT;
+    friend sstream& operator<<(sstream&, const dec_t&) FL_NOEXCEPT;
+    friend sstream& operator<<(sstream&, const oct_t&) FL_NOEXCEPT;
 
   private:
     string mStr;
@@ -371,42 +371,42 @@ class sstream {
     int mBase = 10;  // Default to decimal
 
     // Helper methods to format integers based on current base
-    void appendFormatted(fl::i8 val) FL_NO_EXCEPT;
-    void appendFormatted(fl::i16 val) FL_NO_EXCEPT;
-    void appendFormatted(fl::i32 val) FL_NO_EXCEPT;
-    void appendFormatted(fl::i64 val) FL_NO_EXCEPT;
-    void appendFormatted(fl::u16 val) FL_NO_EXCEPT;
-    void appendFormatted(fl::u32 val) FL_NO_EXCEPT;
-    void appendFormatted(fl::u64 val) FL_NO_EXCEPT;
+    void appendFormatted(fl::i8 val) FL_NOEXCEPT;
+    void appendFormatted(fl::i16 val) FL_NOEXCEPT;
+    void appendFormatted(fl::i32 val) FL_NOEXCEPT;
+    void appendFormatted(fl::i64 val) FL_NOEXCEPT;
+    void appendFormatted(fl::u16 val) FL_NOEXCEPT;
+    void appendFormatted(fl::u32 val) FL_NOEXCEPT;
+    void appendFormatted(fl::u64 val) FL_NOEXCEPT;
 };
 
 class sstream_noop {
   public:
-    sstream_noop &operator<<(const char *) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const char *) FL_NOEXCEPT { return *this; }
 
     template<fl::size N>
-    sstream_noop &operator<<(const char (&)[N]) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const char (&)[N]) FL_NOEXCEPT { return *this; }
 
-    template <typename T> sstream_noop &operator=(const T &) FL_NO_EXCEPT { return *this; }
+    template <typename T> sstream_noop &operator=(const T &) FL_NOEXCEPT { return *this; }
 
-    sstream_noop &operator<<(const CRGB &) FL_NO_EXCEPT { return *this; }
-    sstream_noop &operator<<(const string &) FL_NO_EXCEPT { return *this; }
-    sstream_noop &operator<<(char) FL_NO_EXCEPT { return *this; }
-    sstream_noop &operator<<(signed char) FL_NO_EXCEPT { return *this; }
-    sstream_noop &operator<<(unsigned char) FL_NO_EXCEPT { return *this; }
-    sstream_noop &operator<<(short) FL_NO_EXCEPT { return *this; }
-    sstream_noop &operator<<(unsigned short) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const CRGB &) FL_NOEXCEPT { return *this; }
+    sstream_noop &operator<<(const string &) FL_NOEXCEPT { return *this; }
+    sstream_noop &operator<<(char) FL_NOEXCEPT { return *this; }
+    sstream_noop &operator<<(signed char) FL_NOEXCEPT { return *this; }
+    sstream_noop &operator<<(unsigned char) FL_NOEXCEPT { return *this; }
+    sstream_noop &operator<<(short) FL_NOEXCEPT { return *this; }
+    sstream_noop &operator<<(unsigned short) FL_NOEXCEPT { return *this; }
 
     // bool support to match sstream interface
-    sstream_noop &operator<<(bool) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(bool) FL_NOEXCEPT { return *this; }
 
     // Enum support to match sstream interface
     template<typename T>
     typename fl::enable_if<fl::is_enum<T>::value, sstream_noop&>::type
-    operator<<(T) FL_NO_EXCEPT { return *this; }
+    operator<<(T) FL_NOEXCEPT { return *this; }
 
-    sstream_noop &operator<<(float) FL_NO_EXCEPT { return *this; }
-    sstream_noop &operator<<(double) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(float) FL_NOEXCEPT { return *this; }
+    sstream_noop &operator<<(double) FL_NOEXCEPT { return *this; }
 
     //-------------------------------------------------------------------------
     // Generic integer type overload using SFINAE
@@ -415,77 +415,77 @@ class sstream_noop {
     // Handles all multi-byte integer types (excludes char types which are handled separately)
     template<typename T>
     typename fl::enable_if<fl::is_multi_byte_integer<T>::value, sstream_noop&>::type
-    operator<<(T) FL_NO_EXCEPT { return *this; }
+    operator<<(T) FL_NOEXCEPT { return *this; }
 
     // Generic pointer and other type support for compatibility
-    sstream_noop &operator<<(const void*) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const void*) FL_NOEXCEPT { return *this; }
 
     // Support for strings/characters in arrays
     template<fl::size N>
-    sstream_noop &operator<<(const sstream (&)[N]) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const sstream (&)[N]) FL_NOEXCEPT { return *this; }
 
-    sstream_noop &operator<<(const sstream &) FL_NO_EXCEPT { return *this; }
-    sstream_noop &operator<<(const Tile2x2_u8 &) FL_NO_EXCEPT { return *this; }
-    sstream_noop &operator<<(const Tile2x2_u8_wrap &) FL_NO_EXCEPT { return *this; }
-    sstream_noop &operator<<(const audio::fft::Bins &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const sstream &) FL_NOEXCEPT { return *this; }
+    sstream_noop &operator<<(const Tile2x2_u8 &) FL_NOEXCEPT { return *this; }
+    sstream_noop &operator<<(const Tile2x2_u8_wrap &) FL_NOEXCEPT { return *this; }
+    sstream_noop &operator<<(const audio::fft::Bins &) FL_NOEXCEPT { return *this; }
 
     // Vector support
     template<typename T>
-    sstream_noop &operator<<(const vec2<T> &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const vec2<T> &) FL_NOEXCEPT { return *this; }
 
     // rect support
     template<typename T>
-    sstream_noop &operator<<(const rect<T> &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const rect<T> &) FL_NOEXCEPT { return *this; }
 
     // Optional support
     template<typename T>
-    sstream_noop &operator<<(const Optional<T> &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const Optional<T> &) FL_NOEXCEPT { return *this; }
 
     // vector support
     template<typename T>
-    sstream_noop &operator<<(const fl::vector<T> &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const fl::vector<T> &) FL_NOEXCEPT { return *this; }
 
     // unordered_set support
     template<typename Key, typename Hash, typename KeyEqual>
-    sstream_noop &operator<<(const fl::unordered_set<Key, Hash, KeyEqual> &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const fl::unordered_set<Key, Hash, KeyEqual> &) FL_NOEXCEPT { return *this; }
 
     // unordered_map support
     template<typename Key, typename T, typename Hash, typename KeyEqual, int INLINED_COUNT>
-    sstream_noop &operator<<(const fl::unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT> &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const fl::unordered_map<Key, T, Hash, KeyEqual, INLINED_COUNT> &) FL_NOEXCEPT { return *this; }
 
     // unsorted_map_fixed support
     template<typename Key, typename Value, fl::size N>
-    sstream_noop &operator<<(const fl::unsorted_map_fixed<Key, Value, N> &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const fl::unsorted_map_fixed<Key, Value, N> &) FL_NOEXCEPT { return *this; }
 
     // flat_map support
     template<typename Key, typename Value, typename Less>
-    sstream_noop &operator<<(const fl::flat_map<Key, Value, Less> &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const fl::flat_map<Key, Value, Less> &) FL_NOEXCEPT { return *this; }
 
     // span support
     template<typename T, fl::size Extent>
-    sstream_noop &operator<<(const fl::span<T, Extent> &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const fl::span<T, Extent> &) FL_NOEXCEPT { return *this; }
 
     // pair support
     template<typename T1, typename T2>
-    sstream_noop &operator<<(const fl::pair<T1, T2> &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const fl::pair<T1, T2> &) FL_NOEXCEPT { return *this; }
 
     // Bitset support
     template<fl::u32 N>
-    sstream_noop &operator<<(const bitset_fixed<N> &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const bitset_fixed<N> &) FL_NOEXCEPT { return *this; }
 
-    sstream_noop &operator<<(const bitset_dynamic &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const bitset_dynamic &) FL_NOEXCEPT { return *this; }
 
     template<fl::u32 N>
-    sstream_noop &operator<<(const bitset_inlined<N> &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const bitset_inlined<N> &) FL_NOEXCEPT { return *this; }
 
     // Support for hex and dec formatters
-    sstream_noop &operator<<(const hex_t &) FL_NO_EXCEPT { return *this; }
-    sstream_noop &operator<<(const dec_t &) FL_NO_EXCEPT { return *this; }
-    sstream_noop &operator<<(const oct_t &) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator<<(const hex_t &) FL_NOEXCEPT { return *this; }
+    sstream_noop &operator<<(const dec_t &) FL_NOEXCEPT { return *this; }
+    sstream_noop &operator<<(const oct_t &) FL_NOEXCEPT { return *this; }
 
-    sstream_noop &operator=(const string &) FL_NO_EXCEPT { return *this; }
-    sstream_noop &operator=(const CRGB &) FL_NO_EXCEPT { return *this; }
-    sstream_noop &operator=(char) FL_NO_EXCEPT { return *this; }
+    sstream_noop &operator=(const string &) FL_NOEXCEPT { return *this; }
+    sstream_noop &operator=(const CRGB &) FL_NOEXCEPT { return *this; }
+    sstream_noop &operator=(char) FL_NOEXCEPT { return *this; }
 };
 
 

@@ -27,10 +27,6 @@ class Args:
     all: bool
     simd: bool
     coroutine: bool
-    ieee754: bool
-    # Wave2D perf benchmark — accepts "<W>x<H>" (e.g. "32x32") or None.
-    # Cf. issue #3124 for the future --perf-XX / --test-XX convention.
-    wave2d_perf: str | None
 
     # Standard options
     environment: str | None
@@ -109,12 +105,6 @@ class Args:
     tight_timing_iterations: int
     tight_timing_max_overhead_us: int
 
-    # Legacy escape hatch (#3281): consume root ./platformio.ini instead of
-    # synthesising .build/pio/<board>/platformio.ini from ci/boards.py.
-    # Emits a deprecation warning when set. Slated for removal one release
-    # cycle after #3281 lands.
-    use_root_platformio_ini: bool
-
     @staticmethod
     def parse_args(argv: list[str] | None = None) -> "Args":
         """Parse command-line arguments and return Args dataclass instance."""
@@ -128,7 +118,7 @@ Examples:
   %(prog)s --rmt --spi                 # Test RMT and SPI drivers
   %(prog)s --all                       # Test all drivers
   %(prog)s --parlio --skip-lint        # Skip linting for faster iteration
-  %(prog)s --rmt --timeout 2m          # Custom timeout (default: 30s; supports s/m/h/ms)
+  %(prog)s --rmt --timeout 120         # Custom timeout (default: 60s)
   %(prog)s --lcd --lanes 2 --strip-sizes 100,300  # Test LCD_CLOCKLESS with 2 lanes, strips of 100 and 300 LEDs
   %(prog)s --lcd-spi --strip-sizes 100,500   # Test LCD_SPI (APA102) on ESP32-S3
   %(prog)s --parlio --lanes 1-4        # Test PARLIO with 1-4 lanes
@@ -276,23 +266,6 @@ See Also:
             help="Test coroutine/task creation, stop, and await (no LED drivers needed)",
         )
         driver_group.add_argument(
-            "--ieee754",
-            action="store_true",
-            help="Run on-device integer IEEE 754 decimal codec verification (#3039)",
-        )
-        driver_group.add_argument(
-            "--wave2d-perf",
-            type=str,
-            default=None,
-            metavar="WxH",
-            help=(
-                "Run the Wave2D perf benchmark (meta #3113 Task 1). "
-                "Argument is grid size 'WxH', e.g. '32x32' or '64x64'. "
-                "Chains perfProbe* sanity probes before wave2dPerf; "
-                "marks results UNTRUSTED if probes fail."
-            ),
-        )
-        driver_group.add_argument(
             "--parallel",
             action="store_true",
             help="Test multiple drivers in parallel (e.g., --parlio --lcd-rgb --parallel --lanes 1)",
@@ -374,8 +347,8 @@ See Also:
             action="store_true",
             help="LPC845-only: WS2812 byte-match loopback via "
             "FastLED.show() (bit-bang TX) → SCT input-capture RX "
-            "(FastLED #3021 Phase 2). The LPC845 low-memory sketch binds "
-            "the RPC automatically.",
+            "(FastLED #3021 Phase 2). Requires the sketch to be built "
+            "with -DFASTLED_LPC_RX_SCT_WS2812=1.",
         )
 
         # Standard options
@@ -405,23 +378,8 @@ See Also:
             "--timeout",
             "-t",
             type=str,
-            default=None,
-            help=(
-                "Timeout for monitor phase. Supports: plain number (seconds), "
-                "'30s', '2m', '1h', '5000ms'. "
-                "Default: 30s with a yellow advisory banner (FastLED #3309). "
-                "Pass --no-timeout to disable."
-            ),
-        )
-        parser.add_argument(
-            "--no-timeout",
-            action="store_true",
-            help=(
-                "Disable the monitor-phase timeout entirely. Use for debugger "
-                "sessions or interactive bring-up where the device may legitimately "
-                "stay quiet for a long time. Suppresses the default-timeout banner. "
-                "FastLED #3309."
-            ),
+            default="60",
+            help="Timeout for monitor phase. Supports: plain number (seconds), '120s', '2m', '5000ms' (default: 60)",
         )
         parser.add_argument(
             "--project-dir",
@@ -609,21 +567,6 @@ See Also:
             help="Maximum allowed max(show()+wait()-wire_time) overhead for --tight-timing (default: 2000us).",
         )
 
-        # Legacy root platformio.ini escape hatch (#3281). Default flow
-        # synthesises .build/pio/<board>/platformio.ini from ci/boards.py,
-        # matching `bash compile`. This flag re-enables the legacy
-        # consume-root-./platformio.ini behavior for one release cycle.
-        parser.add_argument(
-            "--use-root-platformio-ini",
-            action="store_true",
-            help=(
-                "[DEPRECATED, #3281] Use root ./platformio.ini instead of "
-                "synthesising .build/pio/<board>/platformio.ini from "
-                "ci/boards.py. Legacy escape hatch; will be removed in a "
-                "future release."
-            ),
-        )
-
         parsed = parser.parse_args(argv)
 
         if parsed.use_fbuild or parsed.no_fbuild:
@@ -631,14 +574,6 @@ See Also:
             print(
                 f"warning: {flag} is deprecated and has no effect; "
                 "fbuild is always used for board builds.",
-                file=sys.stderr,
-            )
-
-        if parsed.use_root_platformio_ini:
-            # Deprecation telemetry, per issue #3281.
-            print(
-                "DEPRECATION: --use-root-platformio-ini will be removed in a "
-                "future release. See #3281.",
                 file=sys.stderr,
             )
 
@@ -658,8 +593,6 @@ See Also:
             all=parsed.all,
             simd=parsed.simd,
             coroutine=parsed.coroutine,
-            ieee754=parsed.ieee754,
-            wave2d_perf=parsed.wave2d_perf,
             environment=parsed.environment,
             verbose=parsed.verbose,
             skip_lint=parsed.skip_lint,
@@ -698,5 +631,4 @@ See Also:
             tight_timing=parsed.tight_timing,
             tight_timing_iterations=parsed.tight_timing_iterations,
             tight_timing_max_overhead_us=parsed.tight_timing_max_overhead_us,
-            use_root_platformio_ini=parsed.use_root_platformio_ini,
         )

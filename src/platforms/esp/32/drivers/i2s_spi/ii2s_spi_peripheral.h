@@ -29,7 +29,7 @@ struct I2sSpiConfig {
     u32 clock_hz;                          ///< SPI clock frequency in Hz
     size_t max_transfer_bytes;             ///< Maximum bytes per transfer
 
-    I2sSpiConfig() FL_NO_EXCEPT
+    I2sSpiConfig() FL_NOEXCEPT
         : data_gpios(),
           clock_gpio(-1),
           num_lanes(0),
@@ -41,7 +41,7 @@ struct I2sSpiConfig {
         }
     }
 
-    I2sSpiConfig(int lanes, int clk_gpio, u32 clk_hz, size_t max_bytes) FL_NO_EXCEPT
+    I2sSpiConfig(int lanes, int clk_gpio, u32 clk_hz, size_t max_bytes) FL_NOEXCEPT
         : data_gpios(),
           clock_gpio(clk_gpio),
           num_lanes(lanes),
@@ -64,30 +64,30 @@ public:
     virtual ~II2sSpiPeripheral() = default;
 
     // Lifecycle
-    virtual bool initialize(const I2sSpiConfig& config) FL_NO_EXCEPT = 0;
-    virtual void deinitialize() FL_NO_EXCEPT = 0;
-    virtual bool isInitialized() const FL_NO_EXCEPT = 0;
+    virtual bool initialize(const I2sSpiConfig& config) FL_NOEXCEPT = 0;
+    virtual void deinitialize() FL_NOEXCEPT = 0;
+    virtual bool isInitialized() const FL_NOEXCEPT = 0;
 
     // Buffer management (DMA-capable buffers)
-    virtual u8* allocateBuffer(size_t size_bytes) FL_NO_EXCEPT = 0;
-    virtual void freeBuffer(u8* buffer) FL_NO_EXCEPT = 0;
+    virtual u8* allocateBuffer(size_t size_bytes) FL_NOEXCEPT = 0;
+    virtual void freeBuffer(u8* buffer) FL_NOEXCEPT = 0;
 
     // Transmission
-    virtual bool transmit(const u8* buffer, size_t size_bytes) FL_NO_EXCEPT = 0;
-    virtual bool waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT = 0;
-    virtual bool isBusy() const FL_NO_EXCEPT = 0;
+    virtual bool transmit(const u8* buffer, size_t size_bytes) FL_NOEXCEPT = 0;
+    virtual bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT = 0;
+    virtual bool isBusy() const FL_NOEXCEPT = 0;
 
     // Callback — WARNING: callback is invoked from ISR context and
     // MUST be placed in IRAM (IRAM_ATTR) on ESP32 platforms.
     virtual bool registerTransmitCallback(void* callback,
-                                          void* user_ctx) FL_NO_EXCEPT = 0;
+                                          void* user_ctx) FL_NOEXCEPT = 0;
 
     // State
-    virtual const I2sSpiConfig& getConfig() const FL_NO_EXCEPT = 0;
+    virtual const I2sSpiConfig& getConfig() const FL_NOEXCEPT = 0;
 
     // Platform utilities
-    virtual u64 getMicroseconds() FL_NO_EXCEPT = 0;
-    virtual void delay(u32 ms) FL_NO_EXCEPT = 0;
+    virtual u64 getMicroseconds() FL_NOEXCEPT = 0;
+    virtual void delay(u32 ms) FL_NOEXCEPT = 0;
 };
 
 } // namespace detail

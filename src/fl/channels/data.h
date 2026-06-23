@@ -44,7 +44,7 @@ public:
     static ChannelDataPtr create(
         const ChipsetVariant& chipset,
         fl::vector_psram<u8>&& encodedData = fl::vector_psram<u8>()
-    ) FL_NO_EXCEPT;
+    ) FL_NOEXCEPT;
 
     /// @brief Create channel transmission data (backwards compatibility)
     /// @param pin GPIO pin number for this channel
@@ -55,44 +55,44 @@ public:
         int pin,
         const ChipsetTimingConfig& timing,
         fl::vector_psram<u8>&& encodedData = fl::vector_psram<u8>()
-    ) FL_NO_EXCEPT;
+    ) FL_NOEXCEPT;
 
     /// @brief Get the GPIO pin number
-    int getPin() const FL_NO_EXCEPT;
+    int getPin() const FL_NOEXCEPT;
 
     /// @brief Get the chipset configuration variant
-    const ChipsetVariant& getChipset() const FL_NO_EXCEPT { return mChipset; }
+    const ChipsetVariant& getChipset() const FL_NOEXCEPT { return mChipset; }
 
     /// @brief Check if this is a clockless chipset
-    bool isClockless() const FL_NO_EXCEPT { return mChipset.is<ClocklessChipset>(); }
+    bool isClockless() const FL_NOEXCEPT { return mChipset.is<ClocklessChipset>(); }
 
     /// @brief Check if this is an SPI chipset
-    bool isSpi() const FL_NO_EXCEPT { return mChipset.is<SpiChipsetConfig>(); }
+    bool isSpi() const FL_NOEXCEPT { return mChipset.is<SpiChipsetConfig>(); }
 
     /// @brief Get the timing configuration (clockless chipsets only)
     /// @deprecated Use getChipset() instead
-    const ChipsetTimingConfig& getTiming() const FL_NO_EXCEPT;
+    const ChipsetTimingConfig& getTiming() const FL_NOEXCEPT;
 
     /// @brief Get the encoded transmission data
-    const fl::vector_psram<u8>& getData() const FL_NO_EXCEPT { return mEncodedData; }
+    const fl::vector_psram<u8>& getData() const FL_NOEXCEPT { return mEncodedData; }
 
     /// @brief Get the encoded transmission data (mutable)
-    fl::vector_psram<u8>& getData() FL_NO_EXCEPT { return mEncodedData; }
+    fl::vector_psram<u8>& getData() FL_NOEXCEPT { return mEncodedData; }
 
     /// @brief Get the data size in bytes
-    size_t getSize() const FL_NO_EXCEPT { return mEncodedData.size(); }
+    size_t getSize() const FL_NOEXCEPT { return mEncodedData.size(); }
 
     /// @brief Check if channel data is currently in use by the driver
     /// @return true if driver is transmitting this data, false otherwise
-    bool isInUse() const FL_NO_EXCEPT { return mInUse; }
+    bool isInUse() const FL_NOEXCEPT { return mInUse; }
 
     /// @brief Mark channel data as in use by the driver
     /// @param inUse true to mark as in use, false to mark as available
-    void setInUse(bool inUse) FL_NO_EXCEPT { mInUse = inUse; }
+    void setInUse(bool inUse) FL_NOEXCEPT { mInUse = inUse; }
 
     /// @brief Set the padding generator for this channel
     /// @param generator Function that writes data with padding to destination (nullptr for default left-padding)
-    void setPaddingGenerator(PaddingGenerator generator) FL_NO_EXCEPT {
+    void setPaddingGenerator(PaddingGenerator generator) FL_NOEXCEPT {
         mPaddingGenerator = fl::move(generator);
     }
 
@@ -107,7 +107,7 @@ public:
     /// The destination buffer size must be >= current data size. If a padding
     /// generator is configured, it will be used to extend the data to fill the
     /// entire destination buffer.
-    void writeWithPadding(fl::span<u8> dst) FL_NO_EXCEPT;
+    void writeWithPadding(fl::span<u8> dst) FL_NOEXCEPT;
 
     /// @brief Calculate the size needed for writeWithPadding() without allocating
     ///
@@ -115,7 +115,7 @@ public:
     /// after writeWithPadding() will be dst.size() (fills entire destination).
     ///
     /// @return Current size of encoded data (minimum required dst size)
-    size_t getMinimumSize() const FL_NO_EXCEPT { return mEncodedData.size(); }
+    size_t getMinimumSize() const FL_NOEXCEPT { return mEncodedData.size(); }
 
     /// @brief Destructor with debug logging
     ~ChannelData();
@@ -123,13 +123,13 @@ public:
 private:
     /// @brief Friend declaration for make_shared to access private constructor
     template<typename T, typename... Args>
-    friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NO_EXCEPT;
+    friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NOEXCEPT;
 
     /// @brief Private constructor - variant-based (modern API)
     ChannelData(
         const ChipsetVariant& chipset,
         fl::vector_psram<u8>&& encodedData
-    ) FL_NO_EXCEPT;
+    ) FL_NOEXCEPT;
 
     /// @brief Private constructor - legacy API (backwards compatibility)
     /// @deprecated Use variant-based constructor
@@ -137,11 +137,11 @@ private:
         int pin,
         const ChipsetTimingConfig& timing,
         fl::vector_psram<u8>&& encodedData
-    ) FL_NO_EXCEPT;
+    ) FL_NOEXCEPT;
 
     // Non-copyable (move-only via shared_ptr)
-    ChannelData(const ChannelData&) FL_NO_EXCEPT = delete;
-    ChannelData& operator=(const ChannelData&) FL_NO_EXCEPT = delete;
+    ChannelData(const ChannelData&) FL_NOEXCEPT = delete;
+    ChannelData& operator=(const ChannelData&) FL_NOEXCEPT = delete;
 
     ChipsetVariant mChipset;                ///< Chipset configuration (clockless or SPI)
     PaddingGenerator mPaddingGenerator;     ///< Optional padding generator for block-size alignment

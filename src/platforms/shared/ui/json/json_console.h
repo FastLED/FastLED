@@ -44,7 +44,7 @@ public:
      */
     JsonConsole(ReadAvailableCallback availableCallback, 
                 ReadCallback readCallback, 
-                WriteCallback writeCallback) FL_NO_EXCEPT;
+                WriteCallback writeCallback) FL_NOEXCEPT;
     
     /**
      * Destructor - performs cleanup of internal state
@@ -56,40 +56,40 @@ public:
      * Initialize the console with the JsonUI system
      * This sets up the JsonUI handlers and gets the input function
      */
-    void init() FL_NO_EXCEPT;
+    void init() FL_NOEXCEPT;
     
     /**
      * Process any pending console input and execute commands
      * Should be called regularly (e.g., in main loop)
      */
-    void update() FL_NO_EXCEPT;
+    void update() FL_NOEXCEPT;
     
     /**
      * Parse and execute a console command
      * @param command The command string to execute
      * @return true if command was successfully parsed and executed
      */
-    bool executeCommand(const fl::string& command) FL_NO_EXCEPT;
+    bool executeCommand(const fl::string& command) FL_NOEXCEPT;
     
     /**
      * Process JSON from UI system (for testing)
      * @param jsonStr The JSON string containing component data
      */
-    void processJsonFromUI(const char* jsonStr) FL_NO_EXCEPT;
+    void processJsonFromUI(const char* jsonStr) FL_NOEXCEPT;
     
     /**
      * Manually update component mapping from JSON string
      * This is useful for testing or when component data is available outside the normal JsonUI flow
      * @param jsonStr JSON array of component data
      */
-    void updateComponentMapping(const char* jsonStr) FL_NO_EXCEPT;
+    void updateComponentMapping(const char* jsonStr) FL_NOEXCEPT;
     
     /**
      * Dump the current state of the JsonConsole to a string stream
      * This includes initialization status, component mappings, and input buffer state
      * @param out The string stream to write the dump information to
      */
-    void dump(fl::sstream& out) FL_NO_EXCEPT;
+    void dump(fl::sstream& out) FL_NOEXCEPT;
     
 private:
     // Serial interface callbacks
@@ -107,10 +107,10 @@ private:
     fl::flat_map<fl::string, int, fl::StringFastLess> mComponentNameToId;
     
     // Helper methods
-    void readInputFromSerial() FL_NO_EXCEPT;
-    void parseCommand(const fl::string& command) FL_NO_EXCEPT;
-    bool setSliderValue(const fl::string& name, float value) FL_NO_EXCEPT;
-    void writeOutput(const fl::string& message) FL_NO_EXCEPT;
+    void readInputFromSerial() FL_NOEXCEPT;
+    void parseCommand(const fl::string& command) FL_NOEXCEPT;
+    bool setSliderValue(const fl::string& name, float value) FL_NOEXCEPT;
+    void writeOutput(const fl::string& message) FL_NOEXCEPT;
 };
 
 } // namespace fl

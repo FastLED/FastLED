@@ -71,7 +71,7 @@ namespace third_party {
 #define DEF_NFRACBITS	(DQ_FRACBITS_OUT - 2 - 2 - 15)	
 #define CSHIFT	12	/* coefficients have 12 leading sign bits for early-terminating mulitplies */
 
-static __inline short ClipToShort(int x, int fracBits) FL_NO_EXCEPT
+static __inline short ClipToShort(int x, int fracBits) FL_NOEXCEPT
 {
 	int32_t x32 = (int32_t)x;
 	int32_t sign;
@@ -127,7 +127,7 @@ static __inline short ClipToShort(int x, int fracBits) FL_NO_EXCEPT
  * TODO:        add 32-bit version for platforms where 64-bit mul-acc is not supported
  *                (note max filter gain - see polyCoef[] comments)
  **************************************************************************************/
-void PolyphaseMono(short *pcm, int32_t *vbuf, const int32_t *coefBase) FL_NO_EXCEPT
+void PolyphaseMono(short *pcm, int32_t *vbuf, const int32_t *coefBase) FL_NOEXCEPT
 {
 	int i;
 	const int32_t *coef;
@@ -240,7 +240,7 @@ void PolyphaseMono(short *pcm, int32_t *vbuf, const int32_t *coefBase) FL_NO_EXC
  *
  * TODO:        add 32-bit version for platforms where 64-bit mul-acc is not supported
  **************************************************************************************/
-void PolyphaseStereo(short *pcm, int32_t *vbuf, const int32_t *coefBase) FL_NO_EXCEPT
+void PolyphaseStereo(short *pcm, int32_t *vbuf, const int32_t *coefBase) FL_NOEXCEPT
 {
 	int i;
 	const int32_t *coef;

@@ -20,35 +20,35 @@ namespace fl {
 class JsonUiManager : fl::EngineEvents::Listener {
   public:
     using Callback = fl::function<void(const char *)>;
-    JsonUiManager(Callback updateJs) FL_NO_EXCEPT;
+    JsonUiManager(Callback updateJs) FL_NOEXCEPT;
     ~JsonUiManager();
 
-    void addComponent(fl::weak_ptr<JsonUiInternal> component) FL_NO_EXCEPT;
-    void removeComponent(fl::weak_ptr<JsonUiInternal> component) FL_NO_EXCEPT;
+    void addComponent(fl::weak_ptr<JsonUiInternal> component) FL_NOEXCEPT;
+    void removeComponent(fl::weak_ptr<JsonUiInternal> component) FL_NOEXCEPT;
 
     // Force immediate processing of any pending updates (for testing)
-    void processPendingUpdates() FL_NO_EXCEPT;
+    void processPendingUpdates() FL_NOEXCEPT;
 
     // Internal representation.
-    void updateUiComponents(const char *jsonStr) FL_NO_EXCEPT;
-    void executeUiUpdates(const fl::json &doc) FL_NO_EXCEPT;
+    void updateUiComponents(const char *jsonStr) FL_NOEXCEPT;
+    void executeUiUpdates(const fl::json &doc) FL_NOEXCEPT;
 
-    void resetCallback(Callback updateJs) FL_NO_EXCEPT {
+    void resetCallback(Callback updateJs) FL_NOEXCEPT {
       mUpdateJs = updateJs;
     }
 
-    JsonUiInternalPtr findUiComponent(const char* id_or_name) FL_NO_EXCEPT;
+    JsonUiInternalPtr findUiComponent(const char* id_or_name) FL_NOEXCEPT;
 
 
   private:
     
     typedef fl::VectorSet<fl::weak_ptr<JsonUiInternal>> JsonUIRefSet;
 
-    void onEndFrame() FL_NO_EXCEPT override;
+    void onEndFrame() FL_NOEXCEPT override;
 
-    fl::vector<JsonUiInternalPtr> getComponents() FL_NO_EXCEPT;
-    void toJson(fl::json &json) FL_NO_EXCEPT;
-    JsonUiInternalPtr findUiComponent(const fl::string& idStr) FL_NO_EXCEPT;
+    fl::vector<JsonUiInternalPtr> getComponents() FL_NOEXCEPT;
+    void toJson(fl::json &json) FL_NOEXCEPT;
+    JsonUiInternalPtr findUiComponent(const fl::string& idStr) FL_NOEXCEPT;
 
     Callback mUpdateJs;
     JsonUIRefSet mComponents;

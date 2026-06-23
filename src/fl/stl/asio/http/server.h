@@ -47,7 +47,7 @@ namespace http {
 /// HTTP request object (immutable, passed by const reference)
 class Request {
 public:
-    Request() FL_NO_EXCEPT = default;
+    Request() FL_NOEXCEPT = default;
 
     /// Get HTTP method (e.g., "GET", "POST", "PUT", "DELETE")
     const string& method() const { return mMethod; }
@@ -94,7 +94,7 @@ private:
 /// HTTP response builder (fluent interface)
 class Response {
 public:
-    Response() FL_NO_EXCEPT;
+    Response() FL_NOEXCEPT;
 
     /// Set HTTP status code
     /// @param code Status code (e.g., 200, 404, 500)
@@ -167,14 +167,14 @@ using RouteHandler = function<Response(const Request&)>;
 class Server : public EngineEvents::Listener {
 public:
     /// Constructor
-    Server() FL_NO_EXCEPT;
+    Server() FL_NOEXCEPT;
 
     /// Destructor (stops server if running)
-    ~Server() FL_NO_EXCEPT;
+    ~Server() FL_NOEXCEPT;
 
     // Non-copyable
-    Server(const Server&) FL_NO_EXCEPT = delete;
-    Server& operator=(const Server&) FL_NO_EXCEPT = delete;
+    Server(const Server&) FL_NOEXCEPT = delete;
+    Server& operator=(const Server&) FL_NOEXCEPT = delete;
 
     /// Start server on specified port
     /// @param port Port to listen on (default: 8080)

@@ -47,7 +47,7 @@ static constexpr size_t kDefaultCoroutineStackSize = 4096;
 static constexpr fl::u32 kStackCanaryValue = 0xDEADC0DE;
 
 /// @brief Initialize a coroutine stack so context_switch will "return" into entry_fn
-inline void* init_coroutine_stack(void* stack_top, void (*entry_fn)()) FL_NO_EXCEPT {
+inline void* init_coroutine_stack(void* stack_top, void (*entry_fn)()) FL_NOEXCEPT {
     uintptr_t sp = reinterpret_cast<uintptr_t>(stack_top);  // ok reinterpret cast
     sp &= ~7u;  // align down to 8 bytes
     sp -= kContextFrameSize;
@@ -73,13 +73,13 @@ struct TeensyContextState {
 
 class CoroutinePlatformTeensy : public ICoroutinePlatform {
 public:
-    void* createContext(void (*entry_fn)(), size_t stack_size) FL_NO_EXCEPT override;
-    void* createRunnerContext() FL_NO_EXCEPT override;
-    void destroyContext(void* ctx) FL_NO_EXCEPT override;
-    void contextSwitch(void* from_ctx, void* to_ctx) FL_NO_EXCEPT override;
-    bool inInterruptContext() const FL_NO_EXCEPT override;
-    bool checkStackHealth(void* ctx) const FL_NO_EXCEPT override;
-    fl::u32 micros() const FL_NO_EXCEPT override;
+    void* createContext(void (*entry_fn)(), size_t stack_size) FL_NOEXCEPT override;
+    void* createRunnerContext() FL_NOEXCEPT override;
+    void destroyContext(void* ctx) FL_NOEXCEPT override;
+    void contextSwitch(void* from_ctx, void* to_ctx) FL_NOEXCEPT override;
+    bool inInterruptContext() const FL_NOEXCEPT override;
+    bool checkStackHealth(void* ctx) const FL_NOEXCEPT override;
+    fl::u32 micros() const FL_NOEXCEPT override;
 };
 
 //=============================================================================
@@ -88,7 +88,7 @@ public:
 
 class CoroutineRuntimeTeensy : public ICoroutineRuntime {
 public:
-    void pumpCoroutines(fl::u32 us) FL_NO_EXCEPT override {
+    void pumpCoroutines(fl::u32 us) FL_NOEXCEPT override {
         if (CoroutineContext::isInsideCoroutine()) {
             CoroutineContext::suspend();
         } else {
@@ -109,12 +109,12 @@ public:
     static TaskCoroutinePtr create(fl::string name,
                                     TaskFunction function,
                                     size_t stack_size = 4096,
-                                    u8 priority = 5) FL_NO_EXCEPT;
+                                    u8 priority = 5) FL_NOEXCEPT;
 
     ~TaskCoroutineTeensy() override;
 
-    void stop() FL_NO_EXCEPT override;
-    bool isRunning() const FL_NO_EXCEPT override;
+    void stop() FL_NOEXCEPT override;
+    bool isRunning() const FL_NOEXCEPT override;
 
 private:
     TaskCoroutineTeensy() = default;
@@ -191,14 +191,14 @@ void context_switch(void** /*old_sp*/, void* /*new_sp*/) {
 //=============================================================================
 
 void* CoroutinePlatformTeensy::createContext(void (*entry_fn)(),
-                                              size_t stack_size) FL_NO_EXCEPT {
+                                              size_t stack_size) FL_NOEXCEPT {
     if (stack_size < kMinCoroutineStackSize) {
         stack_size = kMinCoroutineStackSize;
     }
 
     fl::u8* stack = static_cast<fl::u8*>(malloc(stack_size));  // ok bare allocation
     if (!stack) {
-        FL_WARN_F("CoroutinePlatformTeensy: Failed to allocate stack");
+        FL_WARN("CoroutinePlatformTeensy: Failed to allocate stack");
         return nullptr;
     }
 
@@ -217,7 +217,7 @@ void* CoroutinePlatformTeensy::createContext(void (*entry_fn)(),
     return state;
 }
 
-void* CoroutinePlatformTeensy::createRunnerContext() FL_NO_EXCEPT {
+void* CoroutinePlatformTeensy::createRunnerContext() FL_NOEXCEPT {
     auto* state = new TeensyContextState();  // ok bare allocation
     // Runner uses main thread's MSP — saved_sp filled on first contextSwitch
     state->saved_sp = nullptr;
@@ -226,7 +226,7 @@ void* CoroutinePlatformTeensy::createRunnerContext() FL_NO_EXCEPT {
     return state;
 }
 
-void CoroutinePlatformTeensy::destroyContext(void* ctx) FL_NO_EXCEPT {
+void CoroutinePlatformTeensy::destroyContext(void* ctx) FL_NOEXCEPT {
     if (!ctx) return;
     auto* state = static_cast<TeensyContextState*>(ctx);
     if (state->stack_base) {
@@ -235,7 +235,7 @@ void CoroutinePlatformTeensy::destroyContext(void* ctx) FL_NO_EXCEPT {
     delete state;  // ok bare allocation
 }
 
-void CoroutinePlatformTeensy::contextSwitch(void* from_ctx, void* to_ctx) FL_NO_EXCEPT {
+void CoroutinePlatformTeensy::contextSwitch(void* from_ctx, void* to_ctx) FL_NOEXCEPT {
     auto* from = static_cast<TeensyContextState*>(from_ctx);
     auto* to = static_cast<TeensyContextState*>(to_ctx);
     // Naked asm: saves regs to from->saved_sp, restores from to->saved_sp,
@@ -243,13 +243,13 @@ void CoroutinePlatformTeensy::contextSwitch(void* from_ctx, void* to_ctx) FL_NO_
     context_switch(&from->saved_sp, to->saved_sp);
 }
 
-bool CoroutinePlatformTeensy::inInterruptContext() const FL_NO_EXCEPT {
+bool CoroutinePlatformTeensy::inInterruptContext() const FL_NOEXCEPT {
     fl::u32 ipsr;
-    __asm__ volatile("MRS %0, ipsr" : "=r"(ipsr)) FL_NO_EXCEPT;
+    __asm__ volatile("MRS %0, ipsr" : "=r"(ipsr)) FL_NOEXCEPT;
     return ipsr != 0;
 }
 
-bool CoroutinePlatformTeensy::checkStackHealth(void* ctx) const FL_NO_EXCEPT {
+bool CoroutinePlatformTeensy::checkStackHealth(void* ctx) const FL_NOEXCEPT {
     if (!ctx) return true;
     auto* state = static_cast<TeensyContextState*>(ctx);
     if (!state->stack_base) return true;  // runner has no managed stack
@@ -258,14 +258,14 @@ bool CoroutinePlatformTeensy::checkStackHealth(void* ctx) const FL_NO_EXCEPT {
     return *canary == kStackCanaryValue;
 }
 
-fl::u32 CoroutinePlatformTeensy::micros() const FL_NO_EXCEPT {
+fl::u32 CoroutinePlatformTeensy::micros() const FL_NOEXCEPT {
     return static_cast<fl::u32>(::micros());
 }
 
 // Register Teensy platform into generic coroutine_context code
 namespace {
 struct TeensyPlatformRegistrar {
-    TeensyPlatformRegistrar() FL_NO_EXCEPT {
+    TeensyPlatformRegistrar() FL_NOEXCEPT {
         ICoroutinePlatform::setInstance(
             &fl::Singleton<CoroutinePlatformTeensy>::instance());
     }
@@ -273,7 +273,7 @@ struct TeensyPlatformRegistrar {
 static TeensyPlatformRegistrar sTeensyPlatformRegistrar;
 } // namespace
 
-ICoroutineRuntime& ICoroutineRuntime::instance() FL_NO_EXCEPT {
+ICoroutineRuntime& ICoroutineRuntime::instance() FL_NOEXCEPT {
     return fl::Singleton<CoroutineRuntimeTeensy>::instance();
 }
 
@@ -285,14 +285,14 @@ TaskCoroutinePtr TaskCoroutineTeensy::create(
         fl::string name,
         TaskFunction function,
         size_t stack_size,
-        u8 /*priority*/) FL_NO_EXCEPT {
+        u8 /*priority*/) FL_NOEXCEPT {
     auto* ctx = CoroutineContext::create(fl::move(function), stack_size);
     if (!ctx) {
-        FL_WARN_F("TaskCoroutineTeensy: Failed to create context for '%s'", name);
+        FL_WARN("TaskCoroutineTeensy: Failed to create context for '" << name << "'");
         return nullptr;
     }
 
-    TaskCoroutinePtr task(new TaskCoroutineTeensy()) FL_NO_EXCEPT;  // ok bare allocation
+    TaskCoroutinePtr task(new TaskCoroutineTeensy()) FL_NOEXCEPT;  // ok bare allocation
     auto* impl = static_cast<TaskCoroutineTeensy*>(task.get());
     impl->mName = fl::move(name);
     impl->mContext.reset(ctx);
@@ -308,7 +308,7 @@ TaskCoroutineTeensy::~TaskCoroutineTeensy() {
     // mContext freed automatically by unique_ptr destructor
 }
 
-void TaskCoroutineTeensy::stop() FL_NO_EXCEPT {
+void TaskCoroutineTeensy::stop() FL_NOEXCEPT {
     if (!mContext) return;
 
     mContext->stop_and_complete();
@@ -317,7 +317,7 @@ void TaskCoroutineTeensy::stop() FL_NO_EXCEPT {
     CoroutineRunner::instance().remove(mContext.get());
 }
 
-bool TaskCoroutineTeensy::isRunning() const FL_NO_EXCEPT {
+bool TaskCoroutineTeensy::isRunning() const FL_NOEXCEPT {
     if (!mContext) return false;
     return !mContext->is_completed();
 }
@@ -330,7 +330,7 @@ TaskCoroutinePtr createTaskCoroutine(fl::string name,
                                       ICoroutineTask::TaskFunction function,
                                       size_t stack_size,
                                       u8 priority,
-                                      int /*core_id*/) FL_NO_EXCEPT {
+                                      int /*core_id*/) FL_NOEXCEPT {
     return TaskCoroutineTeensy::create(fl::move(name), fl::move(function), stack_size, priority);
 }
 
@@ -338,7 +338,7 @@ TaskCoroutinePtr createTaskCoroutine(fl::string name,
 // Static exitCurrent — suspend back to runner and mark completed
 //=============================================================================
 
-void ICoroutineTask::exitCurrent() FL_NO_EXCEPT {
+void ICoroutineTask::exitCurrent() FL_NOEXCEPT {
     CoroutineContext* ctx = CoroutineContext::runningCoroutine();
     if (ctx) {
         ctx->set_should_stop(true);

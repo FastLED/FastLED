@@ -105,7 +105,7 @@ FramePtr FileSystem::loadJpeg(const char *path, const JpegConfig &config,
     fl::ifstream file = openRead(path);
     if (!file.is_open()) {
         if (error_message) { *error_message = "Failed to open file: "; error_message->append(path); }
-        FL_WARN_F("Failed to open JPEG file: %s", path); return FramePtr();
+        FL_WARN("Failed to open JPEG file: " << path); return FramePtr();
     }
     fl::size fileSize = file.size();
     if (fileSize == 0) {
@@ -129,7 +129,7 @@ FramePtr FileSystem::loadJpeg(const char *path, const JpegConfig &config,
             error_message->append(" bytes, got ");
             error_message->append(static_cast<u32>(bytesRead));
         }
-        FL_WARN_F("Failed to read complete JPEG file: %s", path); return FramePtr();
+        FL_WARN("Failed to read complete JPEG file: " << path); return FramePtr();
     }
     fl::span<const u8> jpegData(buffer.data(), buffer.size());
     FramePtr frame = Jpeg::decode(config, jpegData, error_message);
@@ -143,13 +143,13 @@ fl::Mp3DecoderPtr FileSystem::openMp3(const char *path, fl::string *error_messag
     fl::ifstream file = openRead(path);
     if (!file.is_open()) {
         if (error_message) { *error_message = "Failed to open file: "; error_message->append(path); }
-        FL_WARN_F("Failed to open MP3 file: %s", path); return fl::Mp3DecoderPtr();
+        FL_WARN("Failed to open MP3 file: " << path); return fl::Mp3DecoderPtr();
     }
     fl::Mp3DecoderPtr decoder = fl::Mp3::createDecoder(error_message);
     if (!decoder->begin(file.rdbuf())) {
         fl::string decoder_error; decoder->hasError(&decoder_error);
         if (error_message) { *error_message = "Failed to initialize MP3 decoder: "; error_message->append(decoder_error); }
-        FL_WARN_F("Failed to initialize MP3 decoder for: %s", path); return fl::Mp3DecoderPtr();
+        FL_WARN("Failed to initialize MP3 decoder for: " << path); return fl::Mp3DecoderPtr();
     }
     return decoder;
 }

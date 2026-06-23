@@ -60,21 +60,21 @@ public:
 // callback and queues them for consumption by Teensy_I2S_Audio::read()
 class TeensyAudioRecorder : public AudioStream {
 public:
-    TeensyAudioRecorder() FL_NO_EXCEPT;
+    TeensyAudioRecorder() FL_NOEXCEPT;
     virtual ~TeensyAudioRecorder() = default;
 
-    void reset() FL_NO_EXCEPT;
+    void reset() FL_NOEXCEPT;
 
     // Called by Audio Library when new audio block is available
     // This runs in interrupt context - keep it fast!
-    void update() FL_NO_EXCEPT override;
+    void update() FL_NOEXCEPT override;
 
     // Queue a block for later consumption
     // Returns true if queued, false if queue is full
-    bool queueBlock(const audio_block_t* block, u8 channel) FL_NO_EXCEPT;
+    bool queueBlock(const audio_block_t* block, u8 channel) FL_NOEXCEPT;
 
     // Dequeue oldest block
-    bool dequeueBlock(fl::vector<fl::i16>& samples, u8& channel, u32& timestamp) FL_NO_EXCEPT;
+    bool dequeueBlock(fl::vector<fl::i16>& samples, u8& channel, u32& timestamp) FL_NOEXCEPT;
 
     fl::size getQueueSize() const { return mBlockQueue.size(); }
     u64 getTotalBlocksReceived() const { return mTotalBlocksReceived; }
@@ -116,13 +116,13 @@ public:
     static constexpr int BLOCKS_TO_ACCUMULATE = 4;  // 4 * 128 = 512 mono samples
     static constexpr int TARGET_BUFFER_SIZE = AUDIO_BLOCK_SAMPLES * BLOCKS_TO_ACCUMULATE;
 
-    Teensy_I2S_Audio(const audio::ConfigI2S& config) FL_NO_EXCEPT;
+    Teensy_I2S_Audio(const audio::ConfigI2S& config) FL_NOEXCEPT;
     ~Teensy_I2S_Audio() override;
 
-    void start() FL_NO_EXCEPT override;
-    void stop() FL_NO_EXCEPT override;
-    bool error(fl::string* msg = nullptr) FL_NO_EXCEPT override;
-    audio::Sample read() FL_NO_EXCEPT override;
+    void start() FL_NOEXCEPT override;
+    void stop() FL_NOEXCEPT override;
+    bool error(fl::string* msg = nullptr) FL_NOEXCEPT override;
+    audio::Sample read() FL_NOEXCEPT override;
 
 private:
     audio::ConfigI2S mConfig;
@@ -153,6 +153,6 @@ private:
 fl::shared_ptr<audio::IInput> teensy_create_audio_input(
     const audio::Config& config,
     fl::string* error_message
-) FL_NO_EXCEPT;
+) FL_NOEXCEPT;
 
 } // namespace fl

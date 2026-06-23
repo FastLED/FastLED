@@ -1,52 +1,12 @@
-﻿/// @file rx_flexio_channel.cpp.hpp
+/// @file rx_flexio_channel.cpp.hpp
 /// @brief Teensy 4.x FlexIO shifter-based RX implementation
 ///
-/// ============================================================================
-/// WARNING: ARCHITECTURALLY BLOCKED — DO NOT TWIST KNOBS HERE (#3066 iter 9)
-/// ============================================================================
-///
-/// This driver tries to capture WS281x-style pulse-width data from an LED
-/// strip's data line by latching a FlexIO timer's count into the shifter on
-/// every pin edge. **That use case is not supported by the iMXRT1062 FlexIO
-/// silicon.** SMOD=1 (Receive mode) and SMOD=3/4 (Match Store / Match
-/// Continuous) all shift the *pin value* into the shifter; the timer
-/// dictates *when* to shift, not *what* to shift. There is no SMOD that
-/// snapshots a peer timer's count into SHIFTBUF.
-///
-/// Further, per NXP's own FlexIO documentation, "shift registers cannot
-/// shift and store on the same clock, so input data may be lost" — which
-/// means the single-timer SMOD=1 + TIMOD=3 design pattern below collides
-/// the shift and the SHIFTBUF-store on the same compare event, producing
-/// the all-zero captures that PRs #3067 / #3068 / #3069 / #3070 / #3071
-/// chased without success.
-///
-/// **Recommended path forward:** use FlexPWM RX (`rx_flexpwm_channel.cpp.hpp`)
-/// which has dedicated `SMx_CAPTCTRL` input-capture silicon. The current
-/// blocker on the FlexPWM path is the bimodal-edge bug tracked as Phase 4
-/// of the #3066 ledger (FIFO watermark / merging) — a smaller surface area
-/// than continuing to fight FlexIO's architectural limit.
-///
-/// **Iter-9 (2026-06-18) cross-check** against NXP AN12174 / AN5275, the
-/// FTF-ACC-F1179 *Introduction to FlexIO* deck, and the NXP Community
-/// thread *"FlexIO not working in Match Continuous Mode"* documented the
-/// architectural mismatch in detail. See `#3066` issue comment
-/// `4740201201` for the full register-by-register analysis.
-///
-/// Until someone with NXP application-engineering contacts can clarify
-/// whether there's a canonical iMXRT FlexIO pattern for true input
-/// capture (latching a timer's count on a pin edge), this file should
-/// remain frozen as research code.
-///
-/// ============================================================================
-/// Original design intent (preserved for historical context):
-/// ============================================================================
-///
-/// **Phase 1B** of FastLED#2764 â€” replaces the Phase 1A skeleton with real
+/// **Phase 1B** of FastLED#2764 — replaces the Phase 1A skeleton with real
 /// FLEXIO1 register programming, IOMUXC pin muxing, and an eDMA-driven
 /// capture pipeline that mirrors the FlexIO TX driver's structure but in
 /// the reverse direction.
 ///
-/// Design (input-edge timing measurement, per NXP AN12686 Â§4 + iMXRT1062
+/// Design (input-edge timing measurement, per NXP AN12686 §4 + iMXRT1062
 /// reference manual chapter 50):
 ///
 /// 1.  **Timer 0** runs in 16-bit-counter mode (TIMOD=3), clocked by the
@@ -80,7 +40,7 @@
 /// **Status / scope:** this PR brings up the configuration code, the DMA
 /// channel, and the wait/decode flow. Bench validation against a
 /// `analogWriteFrequency`-generated reference signal (Phase 2) is the next
-/// step in the #2764 series â€” until then we keep `PLATFORM_DEFAULT` on
+/// step in the #2764 series — until then we keep `PLATFORM_DEFAULT` on
 /// `FLEXPWM` so the existing RX flows are untouched. The public API is
 /// identical to Phase 1A.
 
@@ -136,9 +96,9 @@ namespace {
 // `IMXRT_FLEXIO1.offsetNNN`):
 //
 //   FLEXIO1 base = 0x401AC000
-//   VERID      @ +0x000   (Version ID, read-only â€” NOT CTRL!)
+//   VERID      @ +0x000   (Version ID, read-only — NOT CTRL!)
 //   PARAM      @ +0x004   (Parameter, read-only)
-//   CTRL       @ +0x008   (Control register â€” module enable + SW reset bit)
+//   CTRL       @ +0x008   (Control register — module enable + SW reset bit)
 //   SHIFTSTAT  @ +0x010   (status flags)
 //   SHIFTERR   @ +0x014   (error flags)
 //   TIMSTAT    @ +0x018   (timer status)
@@ -152,11 +112,11 @@ namespace {
 //
 // **#2772 root cause:** the original Phase 1B code put CTRL at +0x000.
 // Writes to FLEXIO1 +0x000 (VERID) on iMXRT1062 with the FLEXIO1 clock
-// gated on are silently ignored â€” but the subsequent **read** of +0x000
+// gated on are silently ignored — but the subsequent **read** of +0x000
 // the spin loop performed to check the SW-reset bit produced an
-// imprecise data-bus error (IMPRECISERR, CFSR=0x400) â†’ LOCKUP HardFault
-// â†’ SYSRESETREQ. Cross-checked against `xtensa-esp32s3-elf-nm`-style
-// disassembly of `firmware.elf` (`addr2line 0x2D166` â†’ `FlexIoRxChannelImpl::begin`).
+// imprecise data-bus error (IMPRECISERR, CFSR=0x400) → LOCKUP HardFault
+// → SYSRESETREQ. Cross-checked against `xtensa-esp32s3-elf-nm`-style
+// disassembly of `firmware.elf` (`addr2line 0x2D166` → `FlexIoRxChannelImpl::begin`).
 
 static constexpr u32 kFLEXIO1_BASE = 0x401AC000u;
 
@@ -174,7 +134,7 @@ static volatile u32 *FLEXIO1_TIMCFG    = (volatile u32 *)(kFLEXIO1_BASE + 0x480)
 static volatile u32 *FLEXIO1_TIMCMP    = (volatile u32 *)(kFLEXIO1_BASE + 0x500);
 
 // ---------------------------------------------------------------------------
-// Teensy 4.0 â†’ FLEXIO1 pin mapping table
+// Teensy 4.0 → FLEXIO1 pin mapping table
 // ---------------------------------------------------------------------------
 //
 // Each entry maps a Teensy digital pin to its FLEXIO1 pin index. The IOMUXC
@@ -197,7 +157,7 @@ struct FlexIo1PinInfo {
 
 static constexpr u32 kFlexIo1IomuxcBase = 0x401F8000u;
 
-// Initial pin map â€” Teensy 4.0/4.1 pins whose ALT4 mux routes to FLEXIO1.
+// Initial pin map — Teensy 4.0/4.1 pins whose ALT4 mux routes to FLEXIO1.
 // Verified against the Teensy 4.0 pinout card + iMXRT1062 RM Table 11-1.
 // Phase 1C can extend this to additional pins (e.g. 2, 3, 5, the rest of the
 // GPIO_EMC_* bank) as bench validation proves them out.
@@ -221,12 +181,12 @@ static const FlexIo1PinInfo *lookupFlexIo1Pin(int teensy_pin) {
 }
 
 // ---------------------------------------------------------------------------
-// WS2812 bit decoder â€” mirrors the FlexPWM RX driver's decode path.
+// WS2812 bit decoder — mirrors the FlexPWM RX driver's decode path.
 // ---------------------------------------------------------------------------
 //
-// Phase 3 of FastLED#2764 wires the same edge-pair â†’ bit-cell decoder that
+// Phase 3 of FastLED#2764 wires the same edge-pair → bit-cell decoder that
 // the existing FlexPWM RX driver uses, so the new FlexIO RX backend can be
-// used as a drop-in source for AutoResearch's TXâ†’RX byte-verification flow.
+// used as a drop-in source for AutoResearch's TX→RX byte-verification flow.
 //
 // Kept as static helpers in this TU rather than extracting to a shared
 // header so the FlexPWM and FlexIO RX paths remain independently reviewable.
@@ -259,7 +219,7 @@ decodeEdgesFlexIo(const ChipsetTiming4Phase &timing,
     u32 total_bits = 0;
     size_t i = 0;
     while (i + 1 < edges.size()) {
-        // Each bit cell = (HIGH, LOW) pair. Polarity error â†’ skip + resync.
+        // Each bit cell = (HIGH, LOW) pair. Polarity error → skip + resync.
         if (!edges[i].high) {
             ++i;
             continue;
@@ -304,36 +264,36 @@ decodeEdgesFlexIo(const ChipsetTiming4Phase &timing,
 // **Source-clock choice**: we deliberately pick OSC (24 MHz, always-on) via
 // CCM_CDCDR_FLEXIO1_CLK_SEL(1) rather than PLL3_PFD3. Teensy 4's `startup.c`
 // programs the four PLL3 PFDs but leaves their CLKGATE bits **set** (line
-// 139â€“141: `CCM_ANALOG_PFD_480_SET = 0x80808080`). PFD3 is gated off post-
+// 139–141: `CCM_ANALOG_PFD_480_SET = 0x80808080`). PFD3 is gated off post-
 // boot. If FLEXIO1 selects a gated PFD as its source, the first write to
-// any FLEXIO1 register hits an imprecise data-bus error â†’ HardFault â†’
+// any FLEXIO1 register hits an imprecise data-bus error → HardFault →
 // LOCKUP reset. Confirmed against the dev-bench Teensy 4.0 in #2772.
 //
 // Cost of using OSC: ~41.7 ns/tick resolution instead of ~8.3 ns. Plenty
 // for WS2812 inter-edge timing (worst-case T0H ~350 ns) and for the bench
-// matrix (1 / 10 / 100 kHz square waves whose half-period is â‰¥5 Âµs).
+// matrix (1 / 10 / 100 kHz square waves whose half-period is ≥5 µs).
 
 static constexpr u32 kFlexIo1ClkMHz = 60u;
 
 static void flexio1_clock_init() {
     // Root cause of FastLED#2772 / #3059 FLEXIO1 hang (live-debugged
     // 2026-06-15): the CCM_CDCDR POR default `0x33f71f92` has
-    // FLEXIO1_CLK_SEL=2 (PLL5 â€” the video PLL), which Teensyduino does
+    // FLEXIO1_CLK_SEL=2 (PLL5 — the video PLL), which Teensyduino does
     // not enable. With no functional clock, the FLEXIO1 CTRL.SWRST bit
-    // can never self-clear (RM Â§50.5.1.1: "automatically cleared after
+    // can never self-clear (RM §50.5.1.1: "automatically cleared after
     // reset is complete, AS LONG AS THE FLEXIO IS BEING CLOCKED") and
-    // every previous code variant â€” including the original #2772 fix â€”
+    // every previous code variant — including the original #2772 fix —
     // hit the 1M-poll spin bound.
     //
     // Fix: gate the clock off, switch CLK_SEL to pll3_sw_clk (=3, the
-    // 480 MHz USB PLL â€” Teensyduino guarantees it is running because the
+    // 480 MHz USB PLL — Teensyduino guarantees it is running because the
     // core's USB CDC stack depends on it), pick a /1/8 divider so the
     // resulting 60 MHz ipg_clk_flexio is well under FLEXIO's ~120 MHz
     // ceiling, then gate the clock back on. Standard "change divider
     // while gated" sequence to avoid mid-divider glitches.
 
-    FL_WARN_F("[FlexIO RX] pre-init: CCGR5=0x%x CDCDR=0x%x",
-              CCM_CCGR5, CCM_CDCDR);
+    FL_WARN("[FlexIO RX] pre-init: CCGR5=0x" << fl::hex << CCM_CCGR5
+            << " CDCDR=0x" << CCM_CDCDR << fl::dec);
 
     // 1. Gate FLEXIO1 clock OFF so we can safely reprogram CDCDR.
     CCM_CCGR5 &= ~CCM_CCGR5_FLEXIO1(0x3);
@@ -356,32 +316,32 @@ static void flexio1_clock_init() {
     __asm__ volatile("dsb 0xF" ::: "memory");
     __asm__ volatile("isb 0xF" ::: "memory");
 
-    FL_WARN_F("[FlexIO RX] post-init: CCGR5=0x%x CDCDR=0x%x",
-              CCM_CCGR5, CCM_CDCDR);
+    FL_WARN("[FlexIO RX] post-init: CCGR5=0x" << fl::hex << CCM_CCGR5
+            << " CDCDR=0x" << CCM_CDCDR << fl::dec);
 
     // Diagnostic: read VERID @ +0x000 (should be non-zero if bus clock is on)
     volatile u32 *flexio1_verid = (volatile u32 *)(kFLEXIO1_BASE + 0x000);
-    FL_WARN_F("[FlexIO RX] FLEXIO1 VERID=0x%x PARAM=0x%x CTRL=0x%x",
-              *flexio1_verid, *(volatile u32 *)(kFLEXIO1_BASE + 0x004),
-              FLEXIO1_CTRL);
+    FL_WARN("[FlexIO RX] FLEXIO1 VERID=0x" << fl::hex << *flexio1_verid
+            << " PARAM=0x" << *(volatile u32 *)(kFLEXIO1_BASE + 0x004)
+            << " CTRL=0x" << FLEXIO1_CTRL << fl::dec);
 
     // Memory barrier so the CCM writes have actually committed before any
     // downstream code touches FLEXIO1_CTRL. Without this, the very next
     // read/write of FLEXIO1_CTRL on a fresh-from-reset chip can hit the
-    // module while its clock is still gated off â€” observed on the dev-bench
+    // module while its clock is still gated off — observed on the dev-bench
     // Teensy 4.0 as an infinite spin on the software-reset wait (#2772).
     __asm__ volatile("dsb 0xF" ::: "memory");        // step 6 (DSB)
     __asm__ volatile("isb 0xF" ::: "memory");        // step 6 (ISB)
 }
 
-// IOMUXC pad: ALT4 + hysteresis + 100 kÎ© pull-up keeper (matches FlexIO TX
+// IOMUXC pad: ALT4 + hysteresis + 100 kΩ pull-up keeper (matches FlexIO TX
 // pad config rationale: clean edge detection, no floating-input glitches
 // before the signal is driven).
 //
 // FastLED#3066 phase 1.7 root cause: also set the **SION** (Software Input
 // On) bit. Without SION, the IOMUX doesn't force the input path through
 // to the peripheral when the pad's MUX_MODE selects an alternate function
-// â€” so even though pin 4 is muxed to ALT4 (FLEXIO1_FLEXIO06), the FLEXIO1
+// — so even though pin 4 is muxed to ALT4 (FLEXIO1_FLEXIO06), the FLEXIO1
 // module never sees pad activity. The working FlexPWM RX driver sets
 // SION the same way (`rx_flexpwm_channel.cpp.hpp:405`); FlexIO RX needed
 // the same fix. Verified by `flexioRxLoopbackPing`: with SION cleared,
@@ -398,17 +358,19 @@ static void flexio1_pin_init(const FlexIo1PinInfo &pin_info) {
     // and FLEXIO1 PIN status so we can see whether the mux writes
     // committed and whether FLEXIO1 sees pad activity on the selected
     // input pin.
-    FL_WARN_F("[FlexIO RX] post-pin-init: pin=%d flexio_pin=%d mux_reg=0x%x pad_reg=0x%x",
-              (int)pin_info.teensy_pin, (int)pin_info.flexio_pin,
-              *(pin_info.mux_reg), *(pin_info.pad_reg));
+    FL_WARN("[FlexIO RX] post-pin-init: pin=" << (int)pin_info.teensy_pin
+            << " flexio_pin=" << (int)pin_info.flexio_pin
+            << " mux_reg=0x" << fl::hex << *(pin_info.mux_reg)
+            << " pad_reg=0x" << *(pin_info.pad_reg) << fl::dec);
 
     // FLEXIO1 PIN @ +0x00C reflects the live state of each input pin.
     // If our pad routing works, bit `flexio_pin` should track the pad.
-    // (offset 0x040 â€” used in the earlier iter 5 diagnostic â€” was the
+    // (offset 0x040 — used in the earlier iter 5 diagnostic — was the
     // wrong register and read 0 unconditionally.)
     volatile u32 *flexio1_pin_reg = (volatile u32 *)(kFLEXIO1_BASE + 0x00C);
-    FL_WARN_F("[FlexIO RX] FLEXIO1 PIN=0x%x (expect bit %d to track pad)",
-              *flexio1_pin_reg, (int)pin_info.flexio_pin);
+    FL_WARN("[FlexIO RX] FLEXIO1 PIN=0x" << fl::hex << *flexio1_pin_reg
+            << " (expect bit " << fl::dec << (int)pin_info.flexio_pin
+            << " to track pad)");
 }
 
 // ---------------------------------------------------------------------------
@@ -438,7 +400,7 @@ static void flexio1_pin_init(const FlexIo1PinInfo &pin_info) {
 
 /// @brief Configure FLEXIO1 for edge-timing capture on the given pin.
 /// @return true on success; false on hardware error. (The SWRST spin
-///         that historically returned false has been removed â€” see the
+///         that historically returned false has been removed — see the
 ///         comment block inside.)
 static bool flexio1_configure(u8 flexio_pin) {
     // FastLED#2772 / #3059 device-side root cause (live-debugged
@@ -475,7 +437,7 @@ static bool flexio1_configure(u8 flexio_pin) {
     // FastLED#3066 iter 6: drive the timer from its own PINSEL field
     // (not from TRGSEL). The TRGSEL=2*flexio_pin formula matches the RM
     // ("Pin 2N input") but the trigger source on this iMXRT1062 build
-    // doesn't actually engage TIMENA â€” iter 6 verified that 8 hand-
+    // doesn't actually engage TIMENA — iter 6 verified that 8 hand-
     // driven pin toggles produced zero TIMSTAT pulses even with
     // TRGSEL=12 (= Pin 6 edge). The TIMER PINSEL path (TIMCTL bits
     // [13:8]) bypasses TRGSEL entirely; TIMENA=4 then reads "Pin rising
@@ -497,8 +459,8 @@ static bool flexio1_configure(u8 flexio_pin) {
     // FastLED#3066 iter 6: TIMCMP=1 makes the timer reach compare
     // immediately after each TIMENA=4 pin-rising-edge enable. The
     // shifter then latches the pin state on each compare event
-    // (TIMPOL=0). This gives us a pin-edge sampler â€” not true
-    // inter-edge timing â€” but proves the chain CAN fire and DMA CAN
+    // (TIMPOL=0). This gives us a pin-edge sampler — not true
+    // inter-edge timing — but proves the chain CAN fire and DMA CAN
     // transfer. Future iterations will refine TIMCMP / SHIFTBUF
     // semantics for actual edge interval recovery.
     FLEXIO1_TIMCMP[0] = 10u;
@@ -579,14 +541,16 @@ void FlexIoRxChannelImpl::dmaIsr() {
 bool FlexIoRxChannelImpl::begin(const RxConfig &config) {
     mPinInfo = lookupFlexIo1Pin(mPin);
     if (!mPinInfo) {
-        FL_WARN_F("[FlexIO RX] Pin %s has no FLEXIO1 mux mapping on Teensy 4.x (only a small "
+        FL_WARN("[FlexIO RX] Pin "
+                << mPin
+                << " has no FLEXIO1 mux mapping on Teensy 4.x (only a small "
                    "subset is enabled; see rx_flexio_channel.cpp.hpp). See "
-                   "FastLED#2764.", mPin);
+                   "FastLED#2764.");
         return false;
     }
 
     if (sActiveInstance && sActiveInstance != this) {
-        FL_WARN_F("[FlexIO RX] Another FlexIoRxChannel is already active; only "
+        FL_WARN("[FlexIO RX] Another FlexIoRxChannel is already active; only "
                 "one RX channel may use FLEXIO1 at a time.");
         return false;
     }
@@ -601,7 +565,7 @@ bool FlexIoRxChannelImpl::begin(const RxConfig &config) {
     // one u32 per captured inter-edge delta. Cap at a safe upper bound so
     // we never balloon RAM during exploratory runs. The 16 384-entry cap
     // (64 KiB) covers a 100 ms window at 100 kHz square wave with 50 %
-    // headroom â€” see `flexioRxBenchmark` in `AutoResearchRemote.cpp`.
+    // headroom — see `flexioRxBenchmark` in `AutoResearchRemote.cpp`.
     const size_t requested = config.buffer_size > 0 ? config.buffer_size
                                                     : mBufferSize;
     mBufferSize = requested > 16384 ? 16384 : requested;
@@ -610,14 +574,14 @@ bool FlexIoRxChannelImpl::begin(const RxConfig &config) {
     flexio1_clock_init();
     flexio1_pin_init(*mPinInfo);
     if (!flexio1_configure(mPinInfo->flexio_pin)) {
-        // Reset spin hit its bound. Don't enable DMA â€” there's nothing on
+        // Reset spin hit its bound. Don't enable DMA — there's nothing on
         // the other end to feed it, and leaving the channel armed would
         // corrupt mCaptureBuffer if the FlexIO module came alive later.
         // The caller already got an FL_WARN with the diagnostic.
         return false;
     }
 
-    // DMA: copy SHIFTBUF[0] â†’ mCaptureBuffer on each shifter-status flag.
+    // DMA: copy SHIFTBUF[0] → mCaptureBuffer on each shifter-status flag.
     mDma.source((volatile u32 &)FLEXIO1_SHIFTBUF[0]);
     mDma.destinationBuffer(mCaptureBuffer.data(), mCaptureBuffer.size() * sizeof(u32));
     mDma.transferSize(4);
@@ -644,36 +608,68 @@ RxWaitResult FlexIoRxChannelImpl::wait(u32 timeout_ms) {
     const u32 start = millis();
     while (!mReceiveDone) {
         if ((millis() - start) >= timeout_ms) {
-            // Single collated diagnostic. Was 3 FL_WARN_F lines on
-            // every timeout (DMA/CITER state + FLEXIO1 reg state +
-            // mCaptureBuffer[0..7] hex). FlexIO RX is architecturally
-            // dead-end per #3066 iter 9; we keep ONE line for forensic
-            // value but drop the verbose register dump that was
-            // bloating the UART TX FIFO on bursty failure paths
-            // (fbuild#755 follow-up FL_WARN audit).
+            // FastLED#3066 Phase 1 sub-task 1 diagnostic: when the
+            // completion ISR never fires, dump the DMA channel state +
+            // FLEXIO1 shifter/timer status so the host can see why.
+            // Reading `mDma.complete()`, `mDma.error()`, and the live TCD
+            // CITER/BITER tells us whether the channel even started, how
+            // many transfers it processed, and whether it errored. The
+            // FLEXIO1 SHIFTSTAT/SHIFTERR/TIMSTAT reads tell us whether
+            // the shifter ever latched a captured value to trigger DMA.
             const u32 citer = mDma.TCD->CITER & 0x7FFFu;
             const u32 biter = mDma.TCD->BITER & 0x7FFFu;
             const u32 transfers_done = (biter > citer) ? (biter - citer) : 0u;
-            FL_WARN_F("[FlexIO RX] TIMEOUT %sms done=%s/%s err=%s SHIFTSTAT=0x%x",
-                      timeout_ms, transfers_done, biter,
-                      (mDma.error() ? 1 : 0), FLEXIO1_SHIFTSTAT);
+            FL_WARN("[FlexIO RX] wait() TIMEOUT after "
+                    << timeout_ms << "ms:"
+                    << " DMA complete=" << (mDma.complete() ? 1 : 0)
+                    << " error=" << (mDma.error() ? 1 : 0)
+                    << " CITER=" << citer << "/" << biter
+                    << " (transfers_done=" << transfers_done << ")");
+            FL_WARN("[FlexIO RX] post-timeout FLEXIO1:"
+                    << " SHIFTSTAT=0x" << fl::hex << FLEXIO1_SHIFTSTAT
+                    << " SHIFTERR=0x" << FLEXIO1_SHIFTERR
+                    << " TIMSTAT=0x" << FLEXIO1_TIMSTAT
+                    << " CTRL=0x" << FLEXIO1_CTRL << fl::dec);
+            // FastLED#3066 Phase 1 diagnostic: also dump the first few
+            // words of mCaptureBuffer so subsequent iterations can see
+            // whether the DMA actually copied any non-zero data into RAM
+            // — distinguishing "shifter never fired" from "shifter fired
+            // but latched all-zero pin samples".
+            if (mCaptureBuffer.size() >= 8u) {
+                FL_WARN("[FlexIO RX] mCaptureBuffer[0..7]: 0x"
+                        << fl::hex << mCaptureBuffer[0] << " 0x"
+                        << mCaptureBuffer[1] << " 0x"
+                        << mCaptureBuffer[2] << " 0x"
+                        << mCaptureBuffer[3] << " 0x"
+                        << mCaptureBuffer[4] << " 0x"
+                        << mCaptureBuffer[5] << " 0x"
+                        << mCaptureBuffer[6] << " 0x"
+                        << mCaptureBuffer[7] << fl::dec);
+            }
             return RxWaitResult::TIMEOUT;
         }
     }
-    // SUCCESS gate: the ISR-set `mReceiveDone=true` is necessary but
-    // not sufficient. DMA can also signal completion with
-    // `transfers_done=0/N` when the channel reloaded CITER=BITER and
-    // the buffer is all-zero (the "shifter never fired but ISR
-    // misfired" case documented in #3066 iter 4). Returning SUCCESS
-    // there is the same cheat the FlexPWM driver had pre-#3219:
-    // caller decodes a stale/empty buffer and reports fake errors.
-    // Treat zero captures as TIMEOUT (honest).
-    const u32 citer = mDma.TCD->CITER & 0x7FFFu;
-    const u32 biter = mDma.TCD->BITER & 0x7FFFu;
-    const u32 transfers_done = (biter > citer) ? (biter - citer) : 0u;
-    if (transfers_done == 0u) {
-        FL_WARN_F("[FlexIO RX] empty-buffer SUCCESS reclassified as TIMEOUT (transfers=0/%s)", biter);
-        return RxWaitResult::TIMEOUT;
+    // FastLED#3066 Phase 1 diagnostic: also dump on SUCCESS so future
+    // iterations can compare buffer-fill behaviour between the timeout
+    // path and the completion path. Iter 4 surfaced a surprise: DMA can
+    // signal "complete" with `transfers_done=0/N` when the channel
+    // already reloaded CITER=BITER and the buffer is all-zero — meaning
+    // either the shifter never fired or the ISR was misfired.
+    if (mCaptureBuffer.size() >= 8u) {
+        const u32 citer = mDma.TCD->CITER & 0x7FFFu;
+        const u32 biter = mDma.TCD->BITER & 0x7FFFu;
+        const u32 transfers_done = (biter > citer) ? (biter - citer) : 0u;
+        FL_WARN("[FlexIO RX] wait() SUCCESS: transfers_done="
+                << transfers_done << "/" << biter);
+        FL_WARN("[FlexIO RX] mCaptureBuffer[0..7]: 0x"
+                << fl::hex << mCaptureBuffer[0] << " 0x"
+                << mCaptureBuffer[1] << " 0x"
+                << mCaptureBuffer[2] << " 0x"
+                << mCaptureBuffer[3] << " 0x"
+                << mCaptureBuffer[4] << " 0x"
+                << mCaptureBuffer[5] << " 0x"
+                << mCaptureBuffer[6] << " 0x"
+                << mCaptureBuffer[7] << fl::dec);
     }
     return RxWaitResult::SUCCESS;
 }
@@ -683,11 +679,11 @@ void FlexIoRxChannelImpl::buildEdgeTimesFromCaptures() {
     mEdges.clear();
 
     // Each capture is a 16-bit tick count of the time the pin spent in its
-    // previous LEVEL â€” i.e. the duration of the segment THAT JUST ENDED at
+    // previous LEVEL — i.e. the duration of the segment THAT JUST ENDED at
     // the moment this edge fired. We convert to nanoseconds via
     //   delta_ns = (ticks * 1000) / kFlexIo1ClkMHz
     // and store one `EdgeTime{level, ns}` per segment. Level alternates
-    // starting from the pin's idle state (`mStartLow == true` â†’ first
+    // starting from the pin's idle state (`mStartLow == true` → first
     // recorded segment was LOW).
     bool high = !mStartLow;
     for (size_t i = 0; i < mCaptureBuffer.size(); ++i) {
@@ -746,9 +742,11 @@ bool FlexIoRxChannelImpl::injectEdges(fl::span<const EdgeTime> edges) {
 fl::shared_ptr<FlexIoRxChannel> FlexIoRxChannel::create(int pin) {
     const FlexIo1PinInfo *info = lookupFlexIo1Pin(pin);
     if (!info) {
-        FL_WARN_F("[FlexIO RX] Pin %s has no FLEXIO1 mux mapping (Phase 1B initial map is "
+        FL_WARN("[FlexIO RX] Pin "
+                << pin
+                << " has no FLEXIO1 mux mapping (Phase 1B initial map is "
                    "minimal; expand kFlexIo1Pins[] as bench tests qualify "
-                   "additional pins). See FastLED#2764.", pin);
+                   "additional pins). See FastLED#2764.");
         return fl::shared_ptr<FlexIoRxChannel>();
     }
     return fl::make_shared<FlexIoRxChannelImpl>(pin);

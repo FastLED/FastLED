@@ -211,8 +211,9 @@ async def run_sweep(
         )
     print()
 
+    # Connect to device using pyserial (avoids fbuild daemon port locking issues)
     print(f"Connecting to {port}...")
-    iface = create_serial_interface(port)
+    iface = create_serial_interface(port, use_pyserial=True)
     client = RpcClient(
         port,
         timeout=timeout,

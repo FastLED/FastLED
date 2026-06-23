@@ -29,7 +29,7 @@ struct Mood {
         NEUTRAL             // Near center, no strong mood
     };
 
-    Mood() FL_NO_EXCEPT : valence(0.0f), arousal(0.0f), confidence(0.0f), timestamp(0), duration(0) {}
+    Mood() FL_NOEXCEPT : valence(0.0f), arousal(0.0f), confidence(0.0f), timestamp(0), duration(0) {}
 
     bool isValid() const { return confidence > 0.0f; }
 
@@ -63,8 +63,8 @@ struct Mood {
 
 class MoodAnalyzer : public Detector {
 public:
-    MoodAnalyzer() FL_NO_EXCEPT;
-    ~MoodAnalyzer() FL_NO_EXCEPT override;
+    MoodAnalyzer() FL_NOEXCEPT;
+    ~MoodAnalyzer() FL_NOEXCEPT override;
 
     // Detector interface
     void update(shared_ptr<Context> context) override;

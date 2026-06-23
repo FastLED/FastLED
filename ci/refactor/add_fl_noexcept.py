@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Add FL_NO_EXCEPT to functions using clang-query AST + multi-line-aware insertion.
+"""Add FL_NOEXCEPT to functions using clang-query AST + multi-line-aware insertion.
 
 Uses clang-query to find the exact file:line of every function missing noexcept,
 then reads the file context to find the balanced closing paren across multiple
-lines, skips past cv-qualifiers, and inserts FL_NO_EXCEPT at the correct position.
+lines, skips past cv-qualifiers, and inserts FL_NOEXCEPT at the correct position.
 
 Handles cases the single-line inserter cannot:
   - Multi-line function signatures
@@ -131,7 +131,7 @@ def _run_clang_query(
 
 
 # ============================================================================
-# Step 3: Multi-line-aware FL_NO_EXCEPT insertion
+# Step 3: Multi-line-aware FL_NOEXCEPT insertion
 # ============================================================================
 
 
@@ -185,7 +185,7 @@ def _skip_cv_and_trailing_return(
     """Skip past const/volatile and trailing return types after ')'.
 
     Handles: ) const volatile -> decltype(...) {
-    Returns (line_idx, col) pointing to the insertion position for FL_NO_EXCEPT.
+    Returns (line_idx, col) pointing to the insertion position for FL_NOEXCEPT.
     """
     pos_line = line_idx
     pos_col = col + 1  # start after ')'
@@ -251,14 +251,14 @@ def _skip_cv_and_trailing_return(
 def _insert_fl_noexcept_multiline(
     lines: list[str], start_line: int
 ) -> list[tuple[int, str]] | None:
-    """Insert FL_NO_EXCEPT into a function signature starting at start_line.
+    """Insert FL_NOEXCEPT into a function signature starting at start_line.
 
     Returns list of (line_index, new_line_content) replacements, or None if
     insertion is not possible or not needed.
     """
     # Build the signature text from start_line through the end of the
     # function signature (up to the first ; or { after balanced parens).
-    # Stop precisely at the terminator to avoid picking up FL_NO_EXCEPT
+    # Stop precisely at the terminator to avoid picking up FL_NOEXCEPT
     # from a subsequent function on a nearby line.
     sig_text = ""
     depth = 0
@@ -279,7 +279,7 @@ def _insert_fl_noexcept_multiline(
             break
         sig_text += " "
 
-    if re.search(r"\b(?:FL_NO_EXCEPT|noexcept)\b", sig_text):
+    if re.search(r"\b(?:FL_NOEXCEPT|noexcept)\b", sig_text):
         return None
 
     # Skip destructors
@@ -334,20 +334,20 @@ def _insert_fl_noexcept_multiline(
 
     # Determine what follows and build insertion
     if not after:
-        new_line = before + " FL_NO_EXCEPT"
+        new_line = before + " FL_NOEXCEPT"
     elif after[0] == ";":
-        new_line = before + " FL_NO_EXCEPT;" + after[1:]
+        new_line = before + " FL_NOEXCEPT;" + after[1:]
     elif after[0] == "{":
-        new_line = before + " FL_NO_EXCEPT {" + after[1:]
+        new_line = before + " FL_NOEXCEPT {" + after[1:]
     elif after.startswith("override") or after.startswith("final"):
-        new_line = before + " FL_NO_EXCEPT " + after
+        new_line = before + " FL_NOEXCEPT " + after
     elif after.startswith("__attribute__"):
-        new_line = before + " FL_NO_EXCEPT " + after
+        new_line = before + " FL_NOEXCEPT " + after
     elif after.startswith(":"):
         # Constructor initializer list
-        new_line = before + " FL_NO_EXCEPT " + after
+        new_line = before + " FL_NOEXCEPT " + after
     else:
-        new_line = before + " FL_NO_EXCEPT " + after
+        new_line = before + " FL_NOEXCEPT " + after
 
     return [(insert_line, new_line)]
 
@@ -387,7 +387,7 @@ def _ensure_include(lines: list[str]) -> bool:
 
 @dataclass(slots=True)
 class FixResult:
-    """Result of applying FL_NO_EXCEPT fixes."""
+    """Result of applying FL_NOEXCEPT fixes."""
 
     changes: int = 0
     files: int = 0
@@ -395,7 +395,7 @@ class FixResult:
 
 
 def _apply_fixes(hits: list[tuple[str, int]], apply: bool) -> FixResult:
-    """Apply FL_NO_EXCEPT insertions."""
+    """Apply FL_NOEXCEPT insertions."""
     by_file: dict[str, list[int]] = {}
     for filepath, line_num in hits:
         by_file.setdefault(filepath, []).append(line_num)
@@ -468,7 +468,7 @@ def _apply_fixes(hits: list[tuple[str, int]], apply: bool) -> FixResult:
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Add FL_NO_EXCEPT to functions using clang-query AST analysis "
+            "Add FL_NOEXCEPT to functions using clang-query AST analysis "
             "with multi-line-aware insertion."
         )
     )
@@ -508,10 +508,10 @@ def main() -> int:
         all_hits.extend(hits)
 
     if not all_hits:
-        print("\nAll functions have FL_NO_EXCEPT. Nothing to do.")
+        print("\nAll functions have FL_NOEXCEPT. Nothing to do.")
         return 0
 
-    print(f"Found {len(all_hits)} functions missing FL_NO_EXCEPT")
+    print(f"Found {len(all_hits)} functions missing FL_NOEXCEPT")
     print()
 
     result = _apply_fixes(all_hits, args.apply)

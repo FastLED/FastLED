@@ -51,7 +51,7 @@ namespace detail {
 /// Each call ODR-uses `BusTraits<B>::registerWithManager()`, which lazily
 /// constructs the driver singleton AND registers it with `ChannelManager`.
 template<Bus B>
-inline int bus_register_one() FL_NO_EXCEPT {
+inline int bus_register_one() FL_NOEXCEPT {
     BusTraits<B>::registerWithManager();
     return 0;
 }
@@ -77,7 +77,7 @@ inline int bus_register_one() FL_NO_EXCEPT {
 ///   fl::enableDrivers<fl::Bus::RMT, fl::Bus::PARLIO>();
 /// @endcode
 template<Bus... Buses>
-inline void enableDrivers() FL_NO_EXCEPT {
+inline void enableDrivers() FL_NOEXCEPT {
     // C++11-compatible pack expansion via array initializer trick.
     using expand = int[];
     (void)expand{0, detail::bus_register_one<Buses>()...};
@@ -95,7 +95,7 @@ namespace detail {
 
 template<fl::Bus B>
 struct BusKeepAliveImpl {
-    static inline void odr_use() FL_NO_EXCEPT {
+    static inline void odr_use() FL_NOEXCEPT {
         // ODR-use the singleton accessor's address — sufficient to keep
         // the driver TU alive. We do NOT call `instance()` here because
         // some platforms construct the driver eagerly inside the Meyers
@@ -108,13 +108,13 @@ struct BusKeepAliveImpl {
 
 template<>
 struct BusKeepAliveImpl<fl::Bus::AUTO> {
-    static inline void odr_use() FL_NO_EXCEPT {}  // AUTO: no pinning, no ODR-use.
+    static inline void odr_use() FL_NOEXCEPT {}  // AUTO: no pinning, no ODR-use.
 };
 
 }  // namespace detail
 
 template<fl::Bus B>
-inline void busKeepAlive() FL_NO_EXCEPT {
+inline void busKeepAlive() FL_NOEXCEPT {
     detail::BusKeepAliveImpl<B>::odr_use();
 }
 

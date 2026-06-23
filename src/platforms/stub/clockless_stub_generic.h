@@ -25,7 +25,7 @@ public:
 	virtual void init() { }
 
 protected:
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NOEXCEPT {
 		// Capture LED data for simulation/testing
 		mRgb.clear();
 		PixelController<RGB> pixels_rgb = pixels; // Converts to RGB pixels
@@ -48,7 +48,7 @@ struct ClocklessControllerAdapter : public CPixelLEDController<RGB_ORDER> {
 	virtual void init() { }
 
 protected:
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NOEXCEPT {
 		// Capture LED data for simulation/testing
 		mRgb.clear();
 		PixelController<RGB> pixels_rgb = pixels; // Converts to RGB pixels
@@ -72,7 +72,7 @@ public:
 	virtual void init() { }
 
 protected:
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NOEXCEPT {
 		// Capture LED data for simulation/testing
 		mRgb.clear();
 		PixelController<RGB> pixels_rgb = pixels; // Converts to RGB pixels

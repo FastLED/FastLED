@@ -10,8 +10,8 @@ namespace detector {
 class Pitch {
 public:
     // Constructors and destructor
-    Pitch() FL_NO_EXCEPT;
-    ~Pitch() FL_NO_EXCEPT;
+    Pitch() FL_NOEXCEPT;
+    ~Pitch() FL_NOEXCEPT;
 
     // Update method
     void update(shared_ptr<Context> context);

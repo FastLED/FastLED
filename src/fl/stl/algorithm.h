@@ -8,14 +8,14 @@
 namespace fl {
 
 template <typename Iterator>
-void reverse(Iterator first, Iterator last) FL_NO_EXCEPT {
+void reverse(Iterator first, Iterator last) FL_NOEXCEPT {
     while ((first != last) && (first != --last)) {
         swap(*first++, *last);
     }
 }
 
 template <typename Iterator>
-Iterator max_element(Iterator first, Iterator last) FL_NO_EXCEPT {
+Iterator max_element(Iterator first, Iterator last) FL_NOEXCEPT {
     if (first == last) {
         return last;
     }
@@ -34,7 +34,7 @@ Iterator max_element(Iterator first, Iterator last) FL_NO_EXCEPT {
 }
 
 template <typename Iterator, typename Compare>
-Iterator max_element(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+Iterator max_element(Iterator first, Iterator last, Compare comp) FL_NOEXCEPT {
     if (first == last) {
         return last;
     }
@@ -53,7 +53,7 @@ Iterator max_element(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 }
 
 template <typename Iterator>
-Iterator min_element(Iterator first, Iterator last) FL_NO_EXCEPT {
+Iterator min_element(Iterator first, Iterator last) FL_NOEXCEPT {
     if (first == last) {
         return last;
     }
@@ -72,7 +72,7 @@ Iterator min_element(Iterator first, Iterator last) FL_NO_EXCEPT {
 }
 
 template <typename Iterator, typename Compare>
-Iterator min_element(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+Iterator min_element(Iterator first, Iterator last, Compare comp) FL_NOEXCEPT {
     if (first == last) {
         return last;
     }
@@ -93,7 +93,7 @@ Iterator min_element(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 
 
 template <typename Iterator1, typename Iterator2>
-bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2) FL_NO_EXCEPT {
+bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2) FL_NOEXCEPT {
     while (first1 != last1) {
         if (*first1 != *first2) {
             return false;
@@ -105,7 +105,7 @@ bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2) FL_NO_EXCEPT {
 }
 
 template <typename Iterator1, typename Iterator2, typename BinaryPredicate>
-bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, BinaryPredicate pred) FL_NO_EXCEPT {
+bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, BinaryPredicate pred) FL_NOEXCEPT {
     while (first1 != last1) {
         if (!pred(*first1, *first2)) {
             return false;
@@ -117,7 +117,7 @@ bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, BinaryPredicate 
 }
 
 template <typename Iterator1, typename Iterator2>
-bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2) FL_NO_EXCEPT {
+bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2) FL_NOEXCEPT {
     while (first1 != last1 && first2 != last2) {
         if (*first1 != *first2) {
             return false;
@@ -129,7 +129,7 @@ bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2)
 }
 
 template <typename Iterator1, typename Iterator2, typename BinaryPredicate>
-bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2, BinaryPredicate pred) FL_NO_EXCEPT {
+bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2, BinaryPredicate pred) FL_NOEXCEPT {
     while (first1 != last1 && first2 != last2) {
         if (!pred(*first1, *first2)) {
             return false;
@@ -143,7 +143,7 @@ bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2,
 // Lexicographical comparison - compares two ranges element by element
 // Returns true if the first range is lexicographically less than the second
 template <typename Iterator1, typename Iterator2>
-bool lexicographical_compare(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2) FL_NO_EXCEPT {
+bool lexicographical_compare(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2) FL_NOEXCEPT {
     while (first1 != last1 && first2 != last2) {
         if (*first1 < *first2) {
             return true;
@@ -162,7 +162,7 @@ bool lexicographical_compare(Iterator1 first1, Iterator1 last1, Iterator2 first2
 
 // Lexicographical comparison with custom comparator
 template <typename Iterator1, typename Iterator2, typename Compare>
-bool lexicographical_compare(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2, Compare comp) FL_NO_EXCEPT {
+bool lexicographical_compare(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2, Compare comp) FL_NOEXCEPT {
     while (first1 != last1 && first2 != last2) {
         if (comp(*first1, *first2)) {
             return true;
@@ -180,7 +180,7 @@ bool lexicographical_compare(Iterator1 first1, Iterator1 last1, Iterator2 first2
 }
 
 template <typename Container1, typename Container2>
-bool equal_container(const Container1& c1, const Container2& c2) FL_NO_EXCEPT {
+bool equal_container(const Container1& c1, const Container2& c2) FL_NOEXCEPT {
     fl::size size1 = c1.size();
     fl::size size2 = c2.size();
     if (size1 != size2) {
@@ -190,7 +190,7 @@ bool equal_container(const Container1& c1, const Container2& c2) FL_NO_EXCEPT {
 }
 
 template <typename Container1, typename Container2, typename BinaryPredicate>
-bool equal_container(const Container1& c1, const Container2& c2, BinaryPredicate pred) FL_NO_EXCEPT {
+bool equal_container(const Container1& c1, const Container2& c2, BinaryPredicate pred) FL_NOEXCEPT {
     fl::size size1 = c1.size();
     fl::size size2 = c2.size();
     if (size1 != size2) {
@@ -201,7 +201,7 @@ bool equal_container(const Container1& c1, const Container2& c2, BinaryPredicate
 
 
 template <typename Iterator, typename T>
-void fill(Iterator first, Iterator last, const T& value) FL_NO_EXCEPT {
+void fill(Iterator first, Iterator last, const T& value) FL_NOEXCEPT {
     while (first != last) {
         *first = value;
         ++first;
@@ -209,7 +209,7 @@ void fill(Iterator first, Iterator last, const T& value) FL_NO_EXCEPT {
 }
 
 template <typename Iterator, typename T>
-Iterator find(Iterator first, Iterator last, const T& value) FL_NO_EXCEPT {
+Iterator find(Iterator first, Iterator last, const T& value) FL_NOEXCEPT {
     while (first != last) {
         if (*first == value) {
             return first;
@@ -220,7 +220,7 @@ Iterator find(Iterator first, Iterator last, const T& value) FL_NO_EXCEPT {
 }
 
 template <typename Iterator, typename UnaryPredicate>
-Iterator find_if(Iterator first, Iterator last, UnaryPredicate pred) FL_NO_EXCEPT {
+Iterator find_if(Iterator first, Iterator last, UnaryPredicate pred) FL_NOEXCEPT {
     while (first != last) {
         if (pred(*first)) {
             return first;
@@ -231,7 +231,7 @@ Iterator find_if(Iterator first, Iterator last, UnaryPredicate pred) FL_NO_EXCEP
 }
 
 template <typename Iterator, typename UnaryPredicate>
-Iterator find_if_not(Iterator first, Iterator last, UnaryPredicate pred) FL_NO_EXCEPT {
+Iterator find_if_not(Iterator first, Iterator last, UnaryPredicate pred) FL_NOEXCEPT {
     while (first != last) {
         if (!pred(*first)) {
             return first;
@@ -242,7 +242,7 @@ Iterator find_if_not(Iterator first, Iterator last, UnaryPredicate pred) FL_NO_E
 }
 
 template <typename Iterator, typename T>
-void replace(Iterator first, Iterator last, const T& old_value, const T& new_value) FL_NO_EXCEPT {
+void replace(Iterator first, Iterator last, const T& old_value, const T& new_value) FL_NOEXCEPT {
     while (first != last) {
         if (*first == old_value) {
             *first = new_value;
@@ -252,7 +252,7 @@ void replace(Iterator first, Iterator last, const T& old_value, const T& new_val
 }
 
 template <typename Iterator, typename UnaryPredicate, typename T>
-void replace_if(Iterator first, Iterator last, UnaryPredicate pred, const T& new_value) FL_NO_EXCEPT {
+void replace_if(Iterator first, Iterator last, UnaryPredicate pred, const T& new_value) FL_NOEXCEPT {
     while (first != last) {
         if (pred(*first)) {
             *first = new_value;
@@ -262,7 +262,7 @@ void replace_if(Iterator first, Iterator last, UnaryPredicate pred, const T& new
 }
 
 template <typename Iterator, typename T>
-Iterator remove(Iterator first, Iterator last, const T& value) FL_NO_EXCEPT {
+Iterator remove(Iterator first, Iterator last, const T& value) FL_NOEXCEPT {
     Iterator result = first;
     while (first != last) {
         if (!(*first == value)) {
@@ -277,7 +277,7 @@ Iterator remove(Iterator first, Iterator last, const T& value) FL_NO_EXCEPT {
 }
 
 template <typename Iterator, typename UnaryPredicate>
-Iterator remove_if(Iterator first, Iterator last, UnaryPredicate pred) FL_NO_EXCEPT {
+Iterator remove_if(Iterator first, Iterator last, UnaryPredicate pred) FL_NOEXCEPT {
     Iterator result = first;
     while (first != last) {
         if (!pred(*first)) {
@@ -295,7 +295,7 @@ namespace detail {
 
 // Insertion sort implementation for small arrays
 template <typename Iterator, typename Compare>
-void insertion_sort(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+void insertion_sort(Iterator first, Iterator last, Compare comp) FL_NOEXCEPT {
     if (first == last) return;
     
     for (Iterator i = first + 1; i != last; ++i) {
@@ -313,7 +313,7 @@ void insertion_sort(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 
 // Median-of-three pivot selection
 template <typename Iterator, typename Compare>
-Iterator median_of_three(Iterator first, Iterator middle, Iterator last, Compare comp) FL_NO_EXCEPT {
+Iterator median_of_three(Iterator first, Iterator middle, Iterator last, Compare comp) FL_NOEXCEPT {
     if (comp(*middle, *first)) {
         if (comp(*last, *middle)) {
             return middle;
@@ -335,7 +335,7 @@ Iterator median_of_three(Iterator first, Iterator middle, Iterator last, Compare
 
 // Partition function for quicksort
 template <typename Iterator, typename Compare>
-Iterator partition(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+Iterator partition(Iterator first, Iterator last, Compare comp) FL_NOEXCEPT {
     Iterator middle = first + (last - first) / 2;
     Iterator pivot_iter = median_of_three(first, middle, last - 1, comp);
     
@@ -357,7 +357,7 @@ Iterator partition(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 
 // Heapsort implementation (fallback for deep recursion)
 template <typename Iterator, typename Compare>
-void sift_down(Iterator first, Iterator start, Iterator end, Compare comp) FL_NO_EXCEPT {
+void sift_down(Iterator first, Iterator start, Iterator end, Compare comp) FL_NOEXCEPT {
     Iterator root = start;
     
     while (root - first <= (end - first - 2) / 2) {
@@ -382,7 +382,7 @@ void sift_down(Iterator first, Iterator start, Iterator end, Compare comp) FL_NO
 }
 
 template <typename Iterator, typename Compare>
-void heapify(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+void heapify(Iterator first, Iterator last, Compare comp) FL_NOEXCEPT {
     Iterator start = first + (last - first - 2) / 2;
     
     while (true) {
@@ -395,7 +395,7 @@ void heapify(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 }
 
 template <typename Iterator, typename Compare>
-void heap_sort(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+void heap_sort(Iterator first, Iterator last, Compare comp) FL_NOEXCEPT {
     heapify(first, last, comp);
     
     Iterator end = last - 1;
@@ -408,7 +408,7 @@ void heap_sort(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 
 // Quicksort implementation
 template <typename Iterator, typename Compare>
-void quicksort_impl(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+void quicksort_impl(Iterator first, Iterator last, Compare comp) FL_NOEXCEPT {
     if (last - first <= 16) {  // Use insertion sort for small arrays
         insertion_sort(first, last, comp);
         return;
@@ -421,7 +421,7 @@ void quicksort_impl(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 
 // Rotate elements in range [first, last) so that middle becomes the new first
 template <typename Iterator>
-void rotate_impl(Iterator first, Iterator middle, Iterator last) FL_NO_EXCEPT {
+void rotate_impl(Iterator first, Iterator middle, Iterator last) FL_NOEXCEPT {
     if (first == middle || middle == last) {
         return;
     }
@@ -439,7 +439,7 @@ void rotate_impl(Iterator first, Iterator middle, Iterator last) FL_NO_EXCEPT {
 
 // Find the position where value should be inserted in sorted range [first, last)
 template <typename Iterator, typename T, typename Compare>
-Iterator lower_bound_impl(Iterator first, Iterator last, const T& value, Compare comp) FL_NO_EXCEPT {
+Iterator lower_bound_impl(Iterator first, Iterator last, const T& value, Compare comp) FL_NOEXCEPT {
     auto count = last - first;
     while (count > 0) {
         auto step = count / 2;
@@ -456,7 +456,7 @@ Iterator lower_bound_impl(Iterator first, Iterator last, const T& value, Compare
 
 // In-place merge operation for merge sort (stable sort)
 template <typename Iterator, typename Compare>
-void merge_inplace(Iterator first, Iterator middle, Iterator last, Compare comp) FL_NO_EXCEPT {
+void merge_inplace(Iterator first, Iterator middle, Iterator last, Compare comp) FL_NOEXCEPT {
     // If one of the ranges is empty, nothing to merge
     if (first == middle || middle == last) {
         return;
@@ -531,7 +531,7 @@ void merge_inplace(Iterator first, Iterator middle, Iterator last, Compare comp)
 
 // Merge sort implementation (stable, in-place)
 template <typename Iterator, typename Compare>
-void mergesort_impl(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+void mergesort_impl(Iterator first, Iterator last, Compare comp) FL_NOEXCEPT {
     auto size = last - first;
     if (size <= 16) {  // Use insertion sort for small arrays (it's stable)
         insertion_sort(first, last, comp);
@@ -548,12 +548,12 @@ void mergesort_impl(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 
 // Lower bound: find first position in sorted [first, last) where value could be inserted.
 template <typename Iterator, typename T, typename Compare>
-Iterator lower_bound(Iterator first, Iterator last, const T& value, Compare comp) FL_NO_EXCEPT {
+Iterator lower_bound(Iterator first, Iterator last, const T& value, Compare comp) FL_NOEXCEPT {
     return detail::lower_bound_impl(first, last, value, comp);
 }
 
 template <typename Iterator, typename T>
-Iterator lower_bound(Iterator first, Iterator last, const T& value) FL_NO_EXCEPT {
+Iterator lower_bound(Iterator first, Iterator last, const T& value) FL_NOEXCEPT {
     typedef typename fl::remove_reference<decltype(*first)>::type value_type;
     return detail::lower_bound_impl(first, last, value,
         [](const value_type& a, const T& b) { return a < b; });
@@ -561,7 +561,7 @@ Iterator lower_bound(Iterator first, Iterator last, const T& value) FL_NO_EXCEPT
 
 // Sort function with custom comparator (using quicksort)
 template <typename Iterator, typename Compare>
-void sort(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+void sort(Iterator first, Iterator last, Compare comp) FL_NOEXCEPT {
     if (first == last || first + 1 == last) {
         return;  // Already sorted or empty
     }
@@ -571,7 +571,7 @@ void sort(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 
 // Sort function with default comparator
 template <typename Iterator>
-void sort(Iterator first, Iterator last) FL_NO_EXCEPT {
+void sort(Iterator first, Iterator last) FL_NOEXCEPT {
     // Use explicit template parameter to avoid C++14 auto in lambda
     typedef typename fl::remove_reference<decltype(*first)>::type value_type;
     sort(first, last, [](const value_type& a, const value_type& b) { return a < b; });
@@ -579,7 +579,7 @@ void sort(Iterator first, Iterator last) FL_NO_EXCEPT {
 
 // Stable sort function with custom comparator (using merge sort)
 template <typename Iterator, typename Compare>
-void stable_sort(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+void stable_sort(Iterator first, Iterator last, Compare comp) FL_NOEXCEPT {
     if (first == last || first + 1 == last) {
         return;  // Already sorted or empty
     }
@@ -589,7 +589,7 @@ void stable_sort(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 
 // Stable sort function with default comparator
 template <typename Iterator>
-void stable_sort(Iterator first, Iterator last) FL_NO_EXCEPT {
+void stable_sort(Iterator first, Iterator last) FL_NOEXCEPT {
     // Use explicit template parameter to avoid C++14 auto in lambda
     typedef typename fl::remove_reference<decltype(*first)>::type value_type;
     stable_sort(first, last, [](const value_type& a, const value_type& b) { return a < b; });
@@ -609,7 +609,7 @@ void stable_sort(Iterator first, Iterator last) FL_NO_EXCEPT {
 //
 // Use `fl::sort` (quicksort) when the container is unbounded or large.
 template <typename Iterator, typename Compare>
-void sort_small(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+void sort_small(Iterator first, Iterator last, Compare comp) FL_NOEXCEPT {
     if (first == last || first + 1 == last) {
         return;  // Already sorted or empty
     }
@@ -617,7 +617,7 @@ void sort_small(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 }
 
 template <typename Iterator>
-void sort_small(Iterator first, Iterator last) FL_NO_EXCEPT {
+void sort_small(Iterator first, Iterator last) FL_NOEXCEPT {
     typedef typename fl::remove_reference<decltype(*first)>::type value_type;
     sort_small(first, last,
         [](const value_type& a, const value_type& b) { return a < b; });
@@ -625,7 +625,7 @@ void sort_small(Iterator first, Iterator last) FL_NO_EXCEPT {
 
 // Shuffle function with custom random generator (Fisher-Yates shuffle)
 template <typename Iterator, typename RandomGenerator>
-void shuffle(Iterator first, Iterator last, RandomGenerator& g) FL_NO_EXCEPT {
+void shuffle(Iterator first, Iterator last, RandomGenerator& g) FL_NOEXCEPT {
     if (first == last) {
         return;  // Empty range, nothing to shuffle
     }
@@ -642,7 +642,7 @@ void shuffle(Iterator first, Iterator last, RandomGenerator& g) FL_NO_EXCEPT {
 
 // Shuffle function with fl::math::random instance
 template <typename Iterator>
-void shuffle(Iterator first, Iterator last, math::random& rng) FL_NO_EXCEPT {
+void shuffle(Iterator first, Iterator last, math::random& rng) FL_NOEXCEPT {
     if (first == last) {
         return;  // Empty range, nothing to shuffle
     }
@@ -659,7 +659,7 @@ void shuffle(Iterator first, Iterator last, math::random& rng) FL_NO_EXCEPT {
 
 // Shuffle function with default random generator
 template <typename Iterator>
-void shuffle(Iterator first, Iterator last) FL_NO_EXCEPT {
+void shuffle(Iterator first, Iterator last) FL_NOEXCEPT {
     shuffle(first, last, default_random());
 }
 

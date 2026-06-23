@@ -59,7 +59,7 @@ namespace platforms {
 
 class CoroutineRuntimeEsp32 : public ICoroutineRuntime {
 public:
-    void pumpCoroutines(fl::u32 us) FL_NO_EXCEPT override {
+    void pumpCoroutines(fl::u32 us) FL_NOEXCEPT override {
         // Convert microseconds to ticks. On a 1 kHz tick rate 1 tick ≈ 1 ms;
         // on 100 Hz it's 10 ms.
         const fl::u32 tick_period_us = 1000000u / configTICK_RATE_HZ;
@@ -86,7 +86,7 @@ public:
         vTaskDelay(ticks);
     }
 
-    bool needsDeepYield() const FL_NO_EXCEPT override {
+    bool needsDeepYield() const FL_NOEXCEPT override {
         // Cache WiFi detection — recheck at most once per second.
         static TickType_t s_lastCheck = 0;
         static bool s_cached = false;
@@ -99,7 +99,7 @@ public:
     }
 
 private:
-    static bool isWiFiActive() FL_NO_EXCEPT {
+    static bool isWiFiActive() FL_NOEXCEPT {
 #if SOC_WIFI_SUPPORTED
         if (esp_wifi_get_mode == nullptr) {
             return false; // WiFi component not linked
@@ -135,17 +135,17 @@ public:
                                     TaskFunction function,
                                     size_t stack_size = 4096,
                                     u8 priority = 5,
-                                    int core_id = -1) FL_NO_EXCEPT;
+                                    int core_id = -1) FL_NOEXCEPT;
 
     ~TaskCoroutineESP32() override;
 
-    void stop() FL_NO_EXCEPT override;
-    bool isRunning() const FL_NO_EXCEPT override;
+    void stop() FL_NOEXCEPT override;
+    bool isRunning() const FL_NOEXCEPT override;
 
 private:
     TaskCoroutineESP32() = default;
 
-    static void task_entry(void* param) FL_NO_EXCEPT;
+    static void task_entry(void* param) FL_NOEXCEPT;
 
     fl::string mName;
     TaskFunction mFunction;
@@ -160,7 +160,7 @@ private:
 // Coroutine Runtime singleton
 //=============================================================================
 
-ICoroutineRuntime& ICoroutineRuntime::instance() FL_NO_EXCEPT {
+ICoroutineRuntime& ICoroutineRuntime::instance() FL_NOEXCEPT {
     return fl::Singleton<CoroutineRuntimeEsp32>::instance();
 }
 
@@ -168,7 +168,7 @@ ICoroutineRuntime& ICoroutineRuntime::instance() FL_NO_EXCEPT {
 // FreeRTOS task entry — runs user function, marks completed
 //=============================================================================
 
-void TaskCoroutineESP32::task_entry(void* param) FL_NO_EXCEPT {
+void TaskCoroutineESP32::task_entry(void* param) FL_NOEXCEPT {
     auto* self = static_cast<TaskCoroutineESP32*>(param);
     if (self->mFunction) {
         self->mFunction();
@@ -191,7 +191,7 @@ TaskCoroutinePtr TaskCoroutineESP32::create(
         TaskFunction function,
         size_t stack_size,
         u8 priority,
-        int core_id) FL_NO_EXCEPT {
+        int core_id) FL_NOEXCEPT {
     if (stack_size < kMinStackSize) {
         stack_size = kMinStackSize;
     }
@@ -205,7 +205,7 @@ TaskCoroutinePtr TaskCoroutineESP32::create(
         affinity = static_cast<BaseType_t>(core_id);
     }
 
-    TaskCoroutinePtr task(new TaskCoroutineESP32()) FL_NO_EXCEPT;  // ok bare allocation
+    TaskCoroutinePtr task(new TaskCoroutineESP32()) FL_NOEXCEPT;  // ok bare allocation
     auto* impl = static_cast<TaskCoroutineESP32*>(task.get());
     impl->mName = fl::move(name);
     impl->mFunction = fl::move(function);
@@ -219,7 +219,8 @@ TaskCoroutinePtr TaskCoroutineESP32::create(
         heap_caps_malloc(sizeof(StaticTask_t),
                          MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT)));
     if (!impl->mStackBuf || !impl->mTaskTcb) {
-        FL_WARN_F("TaskCoroutineESP32: Failed to allocate stack/TCB for '%s'", impl->mName);
+        FL_WARN("TaskCoroutineESP32: Failed to allocate stack/TCB for '"
+                << impl->mName << "'");
         task.reset();
         return nullptr;
     }
@@ -251,7 +252,8 @@ TaskCoroutinePtr TaskCoroutineESP32::create(
 #endif
 
     if (!impl->mTask) {
-        FL_WARN_F("TaskCoroutineESP32: Failed to create FreeRTOS task for '%s'", impl->mName);
+        FL_WARN("TaskCoroutineESP32: Failed to create FreeRTOS task for '"
+                << impl->mName << "'");
         task.reset();
         return nullptr;
     }
@@ -264,7 +266,7 @@ TaskCoroutineESP32::~TaskCoroutineESP32() {
     // mStackBuf and mTaskTcb are freed automatically by unique_ptr destructors
 }
 
-void TaskCoroutineESP32::stop() FL_NO_EXCEPT {
+void TaskCoroutineESP32::stop() FL_NOEXCEPT {
     if (!mTask) return;
     mShouldStop.store(true);
     vTaskDelete(mTask);
@@ -272,7 +274,7 @@ void TaskCoroutineESP32::stop() FL_NO_EXCEPT {
     mCompleted.store(true);
 }
 
-bool TaskCoroutineESP32::isRunning() const FL_NO_EXCEPT {
+bool TaskCoroutineESP32::isRunning() const FL_NOEXCEPT {
     return !mCompleted.load();
 }
 
@@ -284,7 +286,7 @@ TaskCoroutinePtr createTaskCoroutine(fl::string name,
                                       ICoroutineTask::TaskFunction function,
                                       size_t stack_size,
                                       u8 priority,
-                                      int core_id) FL_NO_EXCEPT {
+                                      int core_id) FL_NOEXCEPT {
     return TaskCoroutineESP32::create(fl::move(name), fl::move(function),
                                       stack_size, priority, core_id);
 }
@@ -293,7 +295,7 @@ TaskCoroutinePtr createTaskCoroutine(fl::string name,
 // Static exitCurrent — delete current FreeRTOS task
 //=============================================================================
 
-void ICoroutineTask::exitCurrent() FL_NO_EXCEPT {
+void ICoroutineTask::exitCurrent() FL_NOEXCEPT {
     vTaskDelete(nullptr);  // Delete the calling task
     while (true) {}        // Should never reach here
 }

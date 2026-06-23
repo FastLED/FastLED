@@ -164,7 +164,7 @@ template<> struct DefaultBus<ClocklessChipset> {
 ///
 /// **Lifetime.** Every returned pointer is to a string literal, so it has
 /// static storage duration — safe to feed to `fl::string::from_literal()`.
-inline const char* busName(Bus b) FL_NO_EXCEPT {
+inline const char* busName(Bus b) FL_NOEXCEPT {
     switch (b) {
         case Bus::AUTO:          return "AUTO";
         case Bus::RMT:           return "RMT";

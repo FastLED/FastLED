@@ -14,7 +14,7 @@ enum class RxBackend : u8 {
     LPC_SCT_CAPTURE = 5    ///< LPC8xx SCT input-capture + DMA edge backend (LPC845 et al). Capture path is a skeleton until follow-up bench validation lands — see FastLED#3015. Decoder + injectEdges() are fully functional and host-tested today.
 };
 
-inline const char* toString(RxBackend backend) FL_NO_EXCEPT {
+inline const char* toString(RxBackend backend) FL_NOEXCEPT {
     switch (backend) {
     case RxBackend::PLATFORM_DEFAULT: return "PLATFORM_DEFAULT";
     case RxBackend::RMT: return "RMT";

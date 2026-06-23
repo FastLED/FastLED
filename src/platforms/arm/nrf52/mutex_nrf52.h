@@ -65,7 +65,7 @@ private:
     SemaphoreHandle_t mHandle;
 
 public:
-    MutexNRF52() FL_NO_EXCEPT {
+    MutexNRF52() FL_NOEXCEPT {
         // Create a mutex semaphore (binary semaphore with priority inheritance)
         mHandle = xSemaphoreCreateMutex();
         FL_ASSERT(mHandle != nullptr, "MutexNRF52: failed to create mutex (out of heap memory?)");
@@ -85,7 +85,7 @@ public:
     MutexNRF52& operator=(MutexNRF52&&) = delete;
 
     // Lock the mutex (blocks until available)
-    void lock() FL_NO_EXCEPT {
+    void lock() FL_NOEXCEPT {
         FL_ASSERT(mHandle != nullptr, "MutexNRF52: lock called on destroyed mutex");
         BaseType_t result = xSemaphoreTake(mHandle, portMAX_DELAY);
         FL_ASSERT(result == pdTRUE, "MutexNRF52: lock failed unexpectedly");
@@ -93,7 +93,7 @@ public:
     }
 
     // Unlock the mutex
-    void unlock() FL_NO_EXCEPT {
+    void unlock() FL_NOEXCEPT {
         FL_ASSERT(mHandle != nullptr, "MutexNRF52: unlock called on destroyed mutex");
         BaseType_t result = xSemaphoreGive(mHandle);
         FL_ASSERT(result == pdTRUE, "MutexNRF52: unlock failed (mutex not owned?)");
@@ -102,7 +102,7 @@ public:
 
     // Try to lock the mutex (non-blocking)
     // Returns: true if lock acquired, false if already locked
-    bool try_lock() FL_NO_EXCEPT {
+    bool try_lock() FL_NOEXCEPT {
         FL_ASSERT(mHandle != nullptr, "MutexNRF52: try_lock called on destroyed mutex");
         BaseType_t result = xSemaphoreTake(mHandle, 0);
         return (result == pdTRUE);
@@ -118,7 +118,7 @@ private:
     SemaphoreHandle_t mHandle;
 
 public:
-    RecursiveMutexNRF52() FL_NO_EXCEPT {
+    RecursiveMutexNRF52() FL_NOEXCEPT {
         // Create a recursive mutex semaphore
         mHandle = xSemaphoreCreateRecursiveMutex();
         FL_ASSERT(mHandle != nullptr, "RecursiveMutexNRF52: failed to create mutex (out of heap memory?)");
@@ -138,7 +138,7 @@ public:
     RecursiveMutexNRF52& operator=(RecursiveMutexNRF52&&) = delete;
 
     // Lock the mutex (blocks until available, allows recursive locking)
-    void lock() FL_NO_EXCEPT {
+    void lock() FL_NOEXCEPT {
         FL_ASSERT(mHandle != nullptr, "RecursiveMutexNRF52: lock called on destroyed mutex");
         BaseType_t result = xSemaphoreTakeRecursive(mHandle, portMAX_DELAY);
         FL_ASSERT(result == pdTRUE, "RecursiveMutexNRF52: lock failed unexpectedly");
@@ -146,7 +146,7 @@ public:
     }
 
     // Unlock the mutex (must match number of lock calls)
-    void unlock() FL_NO_EXCEPT {
+    void unlock() FL_NOEXCEPT {
         FL_ASSERT(mHandle != nullptr, "RecursiveMutexNRF52: unlock called on destroyed mutex");
         BaseType_t result = xSemaphoreGiveRecursive(mHandle);
         FL_ASSERT(result == pdTRUE, "RecursiveMutexNRF52: unlock failed (mutex not owned?)");
@@ -155,7 +155,7 @@ public:
 
     // Try to lock the mutex (non-blocking, allows recursive locking)
     // Returns: true if lock acquired, false if already locked by another task
-    bool try_lock() FL_NO_EXCEPT {
+    bool try_lock() FL_NOEXCEPT {
         FL_ASSERT(mHandle != nullptr, "RecursiveMutexNRF52: try_lock called on destroyed mutex");
         BaseType_t result = xSemaphoreTakeRecursive(mHandle, 0);
         return (result == pdTRUE);

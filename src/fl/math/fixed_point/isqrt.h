@@ -26,11 +26,11 @@ FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-FL_OPTIMIZE_FUNCTION constexpr inline u64 _isqrt64_start(u64 x, u64 bit) FL_NO_EXCEPT {
+FL_OPTIMIZE_FUNCTION constexpr inline u64 _isqrt64_start(u64 x, u64 bit) FL_NOEXCEPT {
     return (bit == 0 || bit <= x) ? bit : _isqrt64_start(x, bit >> 2);
 }
 
-FL_OPTIMIZE_FUNCTION constexpr inline u32 _isqrt64_step(u64 x, u64 result, u64 bit) FL_NO_EXCEPT {
+FL_OPTIMIZE_FUNCTION constexpr inline u32 _isqrt64_step(u64 x, u64 result, u64 bit) FL_NOEXCEPT {
     return bit == 0
         ? static_cast<u32>(result)
         : (x >= result + bit)
@@ -38,11 +38,11 @@ FL_OPTIMIZE_FUNCTION constexpr inline u32 _isqrt64_step(u64 x, u64 result, u64 b
             : _isqrt64_step(x, result >> 1, bit >> 2);
 }
 
-FL_OPTIMIZE_FUNCTION constexpr inline u32 _isqrt32_start(u32 x, u32 bit) FL_NO_EXCEPT {
+FL_OPTIMIZE_FUNCTION constexpr inline u32 _isqrt32_start(u32 x, u32 bit) FL_NOEXCEPT {
     return (bit == 0 || bit <= x) ? bit : _isqrt32_start(x, bit >> 2);
 }
 
-FL_OPTIMIZE_FUNCTION constexpr inline u16 _isqrt32_step(u32 x, u32 result, u32 bit) FL_NO_EXCEPT {
+FL_OPTIMIZE_FUNCTION constexpr inline u16 _isqrt32_step(u32 x, u32 result, u32 bit) FL_NOEXCEPT {
     return bit == 0
         ? static_cast<u16>(result)
         : (x >= result + bit)
@@ -50,12 +50,12 @@ FL_OPTIMIZE_FUNCTION constexpr inline u16 _isqrt32_step(u32 x, u32 result, u32 b
             : _isqrt32_step(x, result >> 1, bit >> 2);
 }
 
-FL_OPTIMIZE_FUNCTION constexpr inline u16 isqrt32(u32 x) FL_NO_EXCEPT {
+FL_OPTIMIZE_FUNCTION constexpr inline u16 isqrt32(u32 x) FL_NOEXCEPT {
     return x == 0 ? u16(0)
                   : _isqrt32_step(x, 0, _isqrt32_start(x, u32(1) << 30));
 }
 
-FL_OPTIMIZE_FUNCTION constexpr inline u32 isqrt64(u64 x) FL_NO_EXCEPT {
+FL_OPTIMIZE_FUNCTION constexpr inline u32 isqrt64(u64 x) FL_NOEXCEPT {
     return x == 0 ? u32(0)
                   : _isqrt64_step(x, 0, _isqrt64_start(x, u64(1) << 62));
 }

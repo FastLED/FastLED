@@ -3,14 +3,14 @@
 
 namespace fl {
 
-UICheckbox::UICheckbox(const char *name, bool value) FL_NO_EXCEPT
+UICheckbox::UICheckbox(const char *name, bool value) FL_NOEXCEPT
     : mImpl(name, value), mLastFrameValue(false), mLastFrameValueValid(false), mListener(this) {
     mListener.addToEngineEventsOnce();
 }
 
-UICheckbox::~UICheckbox() FL_NO_EXCEPT {}
+UICheckbox::~UICheckbox() FL_NOEXCEPT {}
 
-void UICheckbox::Listener::onBeginFrame() FL_NO_EXCEPT {
+void UICheckbox::Listener::onBeginFrame() FL_NOEXCEPT {
     UICheckbox &owner = *mOwner;
     if (!owner.mLastFrameValueValid) {
         owner.mLastFrameValue = owner.value();

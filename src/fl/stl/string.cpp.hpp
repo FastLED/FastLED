@@ -29,23 +29,23 @@ const fl::size string::npos;
 
 // ======= STATIC FACTORY METHODS =======
 
-string string::from_literal(const char* literal) FL_NO_EXCEPT {
+string string::from_literal(const char* literal) FL_NOEXCEPT {
     string result;
     result.setLiteral(literal);
     return result;
 }
 
-string string::from_view(const char* data, fl::size len) FL_NO_EXCEPT {
+string string::from_view(const char* data, fl::size len) FL_NOEXCEPT {
     string result;
     result.setView(data, len);
     return result;
 }
 
-string string::from_view(const string_view& sv) FL_NO_EXCEPT {
+string string::from_view(const string_view& sv) FL_NOEXCEPT {
     return from_view(sv.data(), sv.size());
 }
 
-string string::interned(const char* str, fl::size len) FL_NO_EXCEPT {
+string string::interned(const char* str, fl::size len) FL_NOEXCEPT {
     if (!str || len == 0) return string();
     // Route through the global interner so identical content
     // returns the same shared StringHolder (O(1) average lookup,
@@ -55,16 +55,16 @@ string string::interned(const char* str, fl::size len) FL_NO_EXCEPT {
     return global_interner().intern(fl::string_view(str, len));
 }
 
-string string::interned(const char* str) FL_NO_EXCEPT {
+string string::interned(const char* str) FL_NOEXCEPT {
     if (!str) return string();
     return global_interner().intern(str);
 }
 
-string string::interned(const string_view& sv) FL_NO_EXCEPT {
+string string::interned(const string_view& sv) FL_NOEXCEPT {
     return global_interner().intern(sv);
 }
 
-string string::copy_no_view(const string& str) FL_NO_EXCEPT {
+string string::copy_no_view(const string& str) FL_NOEXCEPT {
     if (str.is_referencing()) {
         string result;
         result.copy(str.c_str(), str.size());
@@ -73,7 +73,7 @@ string string::copy_no_view(const string& str) FL_NO_EXCEPT {
     return str;
 }
 
-int string::strcmp(const string& a, const string& b) FL_NO_EXCEPT {
+int string::strcmp(const string& a, const string& b) FL_NOEXCEPT {
     return fl::strcmp(a.c_str(), b.c_str());
 }
 
@@ -82,52 +82,52 @@ int string::strcmp(const string& a, const string& b) FL_NO_EXCEPT {
 // own the actual initialisation logic. fl::string is just the
 // composite-formatter + factory layer on top.
 
-string::string() FL_NO_EXCEPT
+string::string() FL_NOEXCEPT
     : string_n<FASTLED_STR_INLINED_SIZE>() {}
 
-string::string(const char* str) FL_NO_EXCEPT
+string::string(const char* str) FL_NOEXCEPT
     : string_n<FASTLED_STR_INLINED_SIZE>(str) {}
 
-string::string(const char* str, fl::size len) FL_NO_EXCEPT
+string::string(const char* str, fl::size len) FL_NOEXCEPT
     : string_n<FASTLED_STR_INLINED_SIZE>(str, len) {}
 
-string::string(fl::size len, char c) FL_NO_EXCEPT
+string::string(fl::size len, char c) FL_NOEXCEPT
     : string_n<FASTLED_STR_INLINED_SIZE>(len, c) {}
 
-string::string(const string& other) FL_NO_EXCEPT
+string::string(const string& other) FL_NOEXCEPT
     : string_n<FASTLED_STR_INLINED_SIZE>(static_cast<const string_n<FASTLED_STR_INLINED_SIZE>&>(other)) {}
 
-string::string(string&& other) FL_NO_EXCEPT
+string::string(string&& other) FL_NOEXCEPT
     : string_n<FASTLED_STR_INLINED_SIZE>(static_cast<string_n<FASTLED_STR_INLINED_SIZE>&&>(other)) {}
 
-string::string(const basic_string& other) FL_NO_EXCEPT
+string::string(const basic_string& other) FL_NOEXCEPT
     : string_n<FASTLED_STR_INLINED_SIZE>(other) {}
 
-string::string(const string_view& sv) FL_NO_EXCEPT
+string::string(const string_view& sv) FL_NOEXCEPT
     : string_n<FASTLED_STR_INLINED_SIZE>(sv) {}
 
-string::string(const fl::span<const char>& s) FL_NO_EXCEPT
+string::string(const fl::span<const char>& s) FL_NOEXCEPT
     : string_n<FASTLED_STR_INLINED_SIZE>(s) {}
 
-string::string(const fl::span<char>& s) FL_NO_EXCEPT
+string::string(const fl::span<char>& s) FL_NOEXCEPT
     : string_n<FASTLED_STR_INLINED_SIZE>(s) {}
 
-string::string(const fl::shared_ptr<StringHolder>& holder) FL_NO_EXCEPT
+string::string(const fl::shared_ptr<StringHolder>& holder) FL_NOEXCEPT
     : string_n<FASTLED_STR_INLINED_SIZE>(holder) {}
 
 // ======= ASSIGNMENT =======
 
-string& string::operator=(const string& other) FL_NO_EXCEPT {
+string& string::operator=(const string& other) FL_NOEXCEPT {
     copy(static_cast<const basic_string&>(other));
     return *this;
 }
 
-string& string::operator=(string&& other) FL_NO_EXCEPT {
+string& string::operator=(string&& other) FL_NOEXCEPT {
     moveAssign(fl::move(other));
     return *this;
 }
 
-string& string::operator=(const char* str) FL_NO_EXCEPT {
+string& string::operator=(const char* str) FL_NOEXCEPT {
     // Match the string(const char*) ctor's contract: nullptr → empty.
     if (str) {
         copy(str, fl::strlen(str));
@@ -137,7 +137,7 @@ string& string::operator=(const char* str) FL_NO_EXCEPT {
     return *this;
 }
 
-string& string::assign(string_view sv) FL_NO_EXCEPT {
+string& string::assign(string_view sv) FL_NOEXCEPT {
     if (sv.empty()) {
         clear();
     } else {
@@ -148,7 +148,7 @@ string& string::assign(string_view sv) FL_NO_EXCEPT {
 
 // ======= SUBSTRING =======
 
-string string::substring(fl::size start, fl::size end) const FL_NO_EXCEPT {
+string string::substring(fl::size start, fl::size end) const FL_NOEXCEPT {
     if (start == 0 && end == size()) return *this;
     if (start >= size()) return string();
     if (end > size()) end = size();
@@ -158,7 +158,7 @@ string string::substring(fl::size start, fl::size end) const FL_NO_EXCEPT {
     return out;
 }
 
-string string::substr(fl::size start, fl::size length) const FL_NO_EXCEPT {
+string string::substr(fl::size start, fl::size length) const FL_NOEXCEPT {
     // Handle `npos` / overflow: when `length == npos` the caller
     // means "to end of string", and when `length` is large enough
     // that `start + length` would wrap, we clamp to the end before
@@ -173,11 +173,11 @@ string string::substr(fl::size start, fl::size length) const FL_NO_EXCEPT {
     return substring(start, end);
 }
 
-string string::substr(fl::size start) const FL_NO_EXCEPT {
+string string::substr(fl::size start) const FL_NOEXCEPT {
     return substring(start, size());
 }
 
-string string::trim() const FL_NO_EXCEPT {
+string string::trim() const FL_NOEXCEPT {
     fl::size start = 0;
     fl::size end_pos = size();
     while (start < size() && fl::isspace(c_str()[start])) start++;
@@ -191,7 +191,7 @@ string::string(const std::string& str)  // okay std namespace
     copy(str.c_str(), str.size());
 }
 
-string& string::operator=(const std::string& str) FL_NO_EXCEPT {  // okay std namespace
+string& string::operator=(const std::string& str) FL_NOEXCEPT {  // okay std namespace
     copy(str.c_str(), str.size());
     return *this;
 }
@@ -208,7 +208,7 @@ string& string::append(const std::string& str) {  // okay std namespace
 // NUL-termination, so view-backed strings (`setView`) and any
 // future embedded-NUL content compare correctly. Returns the same
 // sign convention as memcmp / strcmp.
-static inline int string_compare(const string& a, const string& b) FL_NO_EXCEPT {
+static inline int string_compare(const string& a, const string& b) FL_NOEXCEPT {
     fl::size n = (a.size() < b.size()) ? a.size() : b.size();
     int r = fl::memcmp(a.c_str(), b.c_str(), n);
     if (r != 0) return r;
@@ -217,36 +217,36 @@ static inline int string_compare(const string& a, const string& b) FL_NO_EXCEPT 
     return 0;
 }
 
-bool string::operator>(const string& other) const FL_NO_EXCEPT {
+bool string::operator>(const string& other) const FL_NOEXCEPT {
     return string_compare(*this, other) > 0;
 }
 
-bool string::operator>=(const string& other) const FL_NO_EXCEPT {
+bool string::operator>=(const string& other) const FL_NOEXCEPT {
     return string_compare(*this, other) >= 0;
 }
 
-bool string::operator<(const string& other) const FL_NO_EXCEPT {
+bool string::operator<(const string& other) const FL_NOEXCEPT {
     return string_compare(*this, other) < 0;
 }
 
-bool string::operator<=(const string& other) const FL_NO_EXCEPT {
+bool string::operator<=(const string& other) const FL_NOEXCEPT {
     return string_compare(*this, other) <= 0;
 }
 
-bool string::operator==(const string& other) const FL_NO_EXCEPT {
+bool string::operator==(const string& other) const FL_NOEXCEPT {
     if (size() != other.size()) {
         return false;
     }
     return fl::memcmp(c_str(), other.c_str(), size()) == 0;
 }
 
-bool string::operator!=(const string& other) const FL_NO_EXCEPT {
+bool string::operator!=(const string& other) const FL_NOEXCEPT {
     return !(*this == other);
 }
 
 // ======= CONCATENATION =======
 
-string& string::operator+=(const string& other) FL_NO_EXCEPT {
+string& string::operator+=(const string& other) FL_NOEXCEPT {
     append(other.c_str(), other.size());
     return *this;
 }
@@ -362,7 +362,7 @@ string::string(const ::String &str)
     copy(str.c_str(), strlen(str.c_str()));
 }
 
-string &string::operator=(const ::String &str) FL_NO_EXCEPT {
+string &string::operator=(const ::String &str) FL_NOEXCEPT {
     copy(str.c_str(), strlen(str.c_str()));
     return *this;
 }

@@ -118,7 +118,7 @@
 namespace fl {
 
 // Forward declaration for RGBW conversion scratchpad
-fl::vector<u8>& get_rgbw_scratchpad() FL_NO_EXCEPT;
+fl::vector<u8>& get_rgbw_scratchpad() FL_NOEXCEPT;
 
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 #define NUM_COLOR_CHANNELS 3
@@ -180,7 +180,7 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
   public:
     ClocklessI2S() = default;
 
-    void init() FL_NO_EXCEPT {
+    void init() FL_NOEXCEPT {
         // -- Allocate space to save the pixel controller
         //    during parallel output
         mPixels = (PixelController<RGB_ORDER> *)fl::malloc(
@@ -208,7 +208,7 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
         i2s_setup_pin(DATA_PIN, my_index);
     }
 
-    virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT { return 400; }
+    virtual u16 getMaxRefreshRate() const FL_NOEXCEPT { return 400; }
 
   protected:
     /** Clear DMA buffer
@@ -216,7 +216,7 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
      *  Yves' clever trick: initialize the bits that we know must be 0
      *  or 1 regardless of what bit they encode.
      */
-    static void empty(u32 *buf) FL_NO_EXCEPT { i2s_clear_dma_buffer(buf); }
+    static void empty(u32 *buf) FL_NOEXCEPT { i2s_clear_dma_buffer(buf); }
 
     /** Fill DMA buffer
      *
@@ -224,7 +224,7 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
      *  from each strip), transpose and encode the bits, and store
      *  them in the DMA buffer for the I2S peripheral to read.
      */
-    static void fillBuffer() FL_NO_EXCEPT {
+    static void fillBuffer() FL_NOEXCEPT {
         // -- Alternate between buffers
         volatile u32 *buf = (u32 *)dmaBuffers[gCurBuffer]->buffer;
         gCurBuffer = (gCurBuffer + 1) % NUM_DMA_BUFFERS;
@@ -269,7 +269,7 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
 
     // -- Show pixels
     //    This is the main entry point for the controller.
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT {
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT {
         if (gNumStarted == 0) {
             // -- First controller: make sure everything is set up
             i2s_begin();
@@ -363,12 +363,12 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
 
     /** Start I2S transmission
      */
-    static void i2sStart() FL_NO_EXCEPT // legacy, may not be called.
+    static void i2sStart() FL_NOEXCEPT // legacy, may not be called.
     {
         i2s_start();
     }
 
-    static void i2sReset() FL_NO_EXCEPT // legacy, may not be called.
+    static void i2sReset() FL_NOEXCEPT // legacy, may not be called.
     {
         /*
         // Serial.println("I2S reset");
@@ -383,17 +383,17 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
         i2s_reset();
     }
 
-    static void i2sReset_DMA() FL_NO_EXCEPT // legacy, may not be called.
+    static void i2sReset_DMA() FL_NOEXCEPT // legacy, may not be called.
     {
         i2s_reset_dma();
     }
 
-    static void i2sReset_FIFO() FL_NO_EXCEPT // legacy, may not be called.
+    static void i2sReset_FIFO() FL_NOEXCEPT // legacy, may not be called.
     {
         i2s_reset_fifo();
     }
 
-    static void i2sStop() FL_NO_EXCEPT // legacy, may not be called.
+    static void i2sStop() FL_NOEXCEPT // legacy, may not be called.
     {
         i2s_stop();
     }

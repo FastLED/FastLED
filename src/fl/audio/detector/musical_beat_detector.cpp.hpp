@@ -14,7 +14,7 @@ MusicalBeat::MusicalBeat(const MusicalBeatDetectorConfig& config) {
     configure(config);
 }
 
-MusicalBeat::~MusicalBeat() FL_NO_EXCEPT = default;
+MusicalBeat::~MusicalBeat() FL_NOEXCEPT = default;
 
 void MusicalBeat::configure(const MusicalBeatDetectorConfig& config) {
     mConfig = config;

@@ -48,31 +48,31 @@ namespace fl {
 /// LED data transmission. Uses wave10 encoding with dynamic LUT generation.
 class ChannelEngineUART : public IChannelDriver {
 public:
-    explicit ChannelEngineUART(fl::shared_ptr<IUartPeripheral> peripheral) FL_NO_EXCEPT;
+    explicit ChannelEngineUART(fl::shared_ptr<IUartPeripheral> peripheral) FL_NOEXCEPT;
     ~ChannelEngineUART() override;
 
-    bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
+    bool canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT override;
 
-    void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
-    void show() FL_NO_EXCEPT override;
-    DriverState poll() FL_NO_EXCEPT override;
+    void enqueue(ChannelDataPtr channelData) FL_NOEXCEPT override;
+    void show() FL_NOEXCEPT override;
+    DriverState poll() FL_NOEXCEPT override;
 
-    fl::string getName() const FL_NO_EXCEPT override { return fl::string::from_literal("UART"); }
+    fl::string getName() const FL_NOEXCEPT override { return fl::string::from_literal("UART"); }
 
-    Capabilities getCapabilities() const FL_NO_EXCEPT override {
+    Capabilities getCapabilities() const FL_NOEXCEPT override {
         return Capabilities(true, false);  // Clockless only
     }
 
 private:
-    void beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT;
+    void beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT;
 
     void prepareScratchBuffer(fl::span<const ChannelDataPtr> channelData,
-                              size_t maxChannelSize) FL_NO_EXCEPT;
+                              size_t maxChannelSize) FL_NOEXCEPT;
 
     /// @brief Get or create a Wave10Lut for the given timing
     /// @param timing Chipset timing configuration
     /// @return Reference to cached Wave10Lut
-    const Wave10Lut& getOrBuildLut(const ChipsetTimingConfig& timing) FL_NO_EXCEPT;
+    const Wave10Lut& getOrBuildLut(const ChipsetTimingConfig& timing) FL_NOEXCEPT;
 
 private:
     struct ChipsetGroup {
@@ -107,6 +107,6 @@ private:
 /// @brief Factory function to create UART driver with real hardware peripheral
 fl::shared_ptr<IChannelDriver> createUartEngine(int uart_num,
                                                 int tx_pin,
-                                                u32 baud_rate = 4000000) FL_NO_EXCEPT;
+                                                u32 baud_rate = 4000000) FL_NOEXCEPT;
 
 } // namespace fl

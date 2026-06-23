@@ -36,11 +36,11 @@ namespace fl {
 
 class ObjectFled {
   public:
-    static void SetOverclock(float overclock) FL_NO_EXCEPT;
-    static void SetLatchDelay(u16 latchDelayUs) FL_NO_EXCEPT;
-    void beginShowLeds(int data_pin, int nleds) FL_NO_EXCEPT;
-    void showPixels(u8 data_pin, PixelIterator& pixel_iterator) FL_NO_EXCEPT;
-    void endShowLeds() FL_NO_EXCEPT;
+    static void SetOverclock(float overclock) FL_NOEXCEPT;
+    static void SetLatchDelay(u16 latchDelayUs) FL_NOEXCEPT;
+    void beginShowLeds(int data_pin, int nleds) FL_NOEXCEPT;
+    void showPixels(u8 data_pin, PixelIterator& pixel_iterator) FL_NOEXCEPT;
+    void endShowLeds() FL_NOEXCEPT;
 };
 
 // TODO: RGBW support, should be pretty easy except the fact that ObjectFLED
@@ -53,12 +53,12 @@ class ClocklessController_ObjectFLED_WS2812
     ObjectFled mObjectFled;
 
   public:
-    ClocklessController_ObjectFLED_WS2812(float overclock = 1.0f, int latchDelayUs = FASTLED_OBJECTFLED_LATCH_DELAY) FL_NO_EXCEPT : Base() {
+    ClocklessController_ObjectFLED_WS2812(float overclock = 1.0f, int latchDelayUs = FASTLED_OBJECTFLED_LATCH_DELAY) FL_NOEXCEPT : Base() {
         // Warning - overwrites previous overclock value.
         // Warning latchDelayUs is GLOBAL!
-        ObjectFled::SetOverclock(overclock) FL_NO_EXCEPT;
+        ObjectFled::SetOverclock(overclock) FL_NOEXCEPT;
         if (latchDelayUs >= 0) {
-            ObjectFled::SetLatchDelay(latchDelayUs) FL_NO_EXCEPT;
+            ObjectFled::SetLatchDelay(latchDelayUs) FL_NOEXCEPT;
         }
     }
     void init() override {}
@@ -73,13 +73,13 @@ class ClocklessController_ObjectFLED_WS2812
     }
 
     // Prepares data for the draw.
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override {
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT override {
         auto pixel_iterator = pixels.as_iterator(this->getRgbw());
         mObjectFled.showPixels(DATA_PIN, pixel_iterator);
     }
 
     // Send the data to the strip
-    virtual void endShowLeds(void *data) FL_NO_EXCEPT override {
+    virtual void endShowLeds(void *data) FL_NOEXCEPT override {
         Base::endShowLeds(data);
         mObjectFled.endShowLeds();
     }

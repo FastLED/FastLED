@@ -13,7 +13,7 @@
 
 namespace fl {
 
-bool NetworkStateTracker::hasChanged() FL_NO_EXCEPT {
+bool NetworkStateTracker::hasChanged() FL_NOEXCEPT {
     bool currentState = NetworkDetector::isAnyNetworkActive();
 
     if (currentState != mLastKnownState) {
@@ -26,7 +26,7 @@ bool NetworkStateTracker::hasChanged() FL_NO_EXCEPT {
     return false;
 }
 
-bool NetworkStateTracker::isActive() const FL_NO_EXCEPT {
+bool NetworkStateTracker::isActive() const FL_NOEXCEPT {
     return NetworkDetector::isAnyNetworkActive();
 }
 

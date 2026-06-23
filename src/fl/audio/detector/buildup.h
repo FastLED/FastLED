@@ -22,7 +22,7 @@ struct Buildup {
     u32 timestamp;     // When buildup started
     bool active;            // Whether buildup is currently active
 
-    Buildup() FL_NO_EXCEPT
+    Buildup() FL_NOEXCEPT
         : intensity(0.0f)
         , progress(0.0f)
         , duration(0)
@@ -49,8 +49,8 @@ struct Buildup {
 //
 class BuildupDetector : public Detector {
 public:
-    BuildupDetector() FL_NO_EXCEPT;
-    ~BuildupDetector() FL_NO_EXCEPT override;
+    BuildupDetector() FL_NOEXCEPT;
+    ~BuildupDetector() FL_NOEXCEPT override;
 
     // Detector interface
     void update(shared_ptr<Context> context) override;

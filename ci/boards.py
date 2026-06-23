@@ -79,14 +79,6 @@ class Board:
     extra_scripts: list[str] | None = (
         None  # Custom build scripts to run (e.g., ['pre:script.py'] for pre-build hooks)
     )
-    # Serial monitor filters (e.g., ["default", "esp32_exception_decoder"]).
-    # ESP32-family boards auto-default to ["default", "esp32_exception_decoder"]
-    # in to_platformio_ini() when this is left None — see #3274 Phase 1. Set to
-    # [] to suppress the auto-default; set to a custom list to override.
-    monitor_filters: list[str] | None = None
-    # PlatformIO static-analysis tool name (e.g., "clangtidy"). Opt-in per-board;
-    # not auto-defaulted. Only consumed by `pio check`, not the compile path.
-    check_tool: str | None = None
     # Opt-in for GCC -fopt-info-all -> optimization_report.txt. Default OFF
     # because the file accumulates across every example in the matrix and can
     # exceed 100 MB on no-LTO boards with a large sketch set (nrf52840 with
@@ -94,13 +86,6 @@ class Board:
     # down — see PR #2658). Set True when the board's workflow genuinely
     # needs the optimization-info dump for size/perf debugging.
     generate_optimization_report: bool = False
-    # Set True on chips where Espressif's `SOC_PARLIO_SUPPORTED=1` (per
-    # `components/soc/<chip>/include/soc/soc_caps.h`). The canonical chip
-    # family list lives in `src/platforms/esp/32/drivers/parlio/bus_traits.h:6`
-    # — keep these two lists in sync. When True, `to_platformio_ini()`
-    # auto-prepends `_ESP32_PARLIO_BUILD_FLAGS` to `build_flags` so the PARLIO
-    # TX ISR is pinned in IRAM and cache-safe (see #3271, #3304).
-    parlio_capable: bool = False
 
     def __post_init__(self) -> None:
         # Check if framework is set, warn and auto-set to arduino if missing (except for native/stub platforms)
@@ -617,14 +602,6 @@ class Board:
         if additional_defines:
             build_flags_elements.extend(f"-D{define}" for define in additional_defines)
 
-        # Auto-emit PARLIO IRAM flags on chips with SOC_PARLIO_SUPPORTED=1
-        # (capability declared via `parlio_capable=True` on the Board). Mirrors
-        # the auto-default pattern used above for ESP32-family `monitor_filters`
-        # — moves the flag list off a hand-maintained allowlist of board names
-        # and onto the per-chip capability bit. See #3304.
-        if self.parlio_capable:
-            build_flags_elements.extend(_ESP32_PARLIO_BUILD_FLAGS)
-
         # Use static build flags
         if self.build_flags:
             build_flags_elements.extend(self.build_flags)
@@ -674,29 +651,6 @@ class Board:
                 lines.append("lib_ignore =")
                 for lib in self.lib_ignore:
                     lines.append(f"    {lib}")
-
-        # Serial monitor filters. ESP32-family boards auto-default to
-        # ["default", "esp32_exception_decoder"] so that crash backtraces
-        # decode to file:line under `bash debug` / `pio device monitor`
-        # without depending on the root platformio.ini merge (see #3274
-        # Phase 1). An explicit `monitor_filters=[]` on a Board suppresses
-        # the auto-default; any non-None value overrides it.
-        is_esp32_family = self.board_name.startswith("esp32") or (
-            self.real_board_name is not None
-            and self.real_board_name.startswith("esp32")
-        )
-        effective_monitor_filters = self.monitor_filters
-        if effective_monitor_filters is None and is_esp32_family:
-            effective_monitor_filters = ["default", "esp32_exception_decoder"]
-        if effective_monitor_filters:
-            lines.append("monitor_filters =")
-            for mf in effective_monitor_filters:
-                lines.append(f"    {mf}")
-
-        # PlatformIO static-analysis tool (consumed by `pio check`, not the
-        # compile path). Opt-in per-board; not auto-defaulted.
-        if self.check_tool:
-            lines.append(f"check_tool = {self.check_tool}")
 
         # Add FastLED-specific configurations if project_root is provided
         if project_root:
@@ -764,35 +718,6 @@ ESP32DEV = Board(
     board_name="esp32dev",
     platform=ESP32_IDF_5_3_PIOARDUINO,
     board_partitions="huge_app.csv",
-    # Size-strip flags for the CI binary-size reference target
-    # (check_esp32_size.yml — 330 KB ceiling). Previously these lived in
-    # root platformio.ini as PR #3268 "band-aid" overrides; #3279 Phase 4
-    # ports them to ci/boards.py so CI can shrink the binary without
-    # depending on root (which CI no longer reads — see #3274). The root
-    # esp32dev section is kept minimal for `bash debug` (it still extends
-    # generic-esp for debug output).
-    #
-    # build_unflags strips the default pioarduino debug profile (-Og -g)
-    # that would otherwise blow the 330 KB ceiling on Blink; build_flags
-    # then forces a size-optimised release build matching #3268's intent.
-    build_unflags=[
-        "-Og",
-        "-g",
-    ],
-    build_flags=[
-        "-Os",
-        "-fno-exceptions",
-        "-fno-rtti",
-        "-fno-unwind-tables",
-        "-fno-asynchronous-unwind-tables",
-        "-ffunction-sections",
-        "-fdata-sections",
-        "-DNDEBUG",
-        "-UDEBUG",
-        "-UFASTLED_DEBUG",
-        "-DCORE_DEBUG_LEVEL=0",
-        "-DLOG_LOCAL_LEVEL=ESP_LOG_NONE",
-    ],
 )
 
 # TODO: esp32dev_qemu remove when possible, we don't want an extra board definition unless we need it
@@ -840,19 +765,6 @@ STM32H747XI_GIGA = Board(
 #     platform=ESP32_IDF_5_1_PIOARDUINO,
 # )
 
-# Required on every PARLIO-capable ESP32 target (C5/C6/H2/P4/S3). Without these,
-# the PARLIO TX ISR is placed in flash and may take cache-miss stalls during
-# execution — long enough to violate LED protocol timing. The driver emits a
-# #warning at compile time when CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM is missing
-# (src/platforms/esp/32/drivers/parlio/parlio_peripheral_esp.cpp.hpp:46-48).
-# Historically these lived only in root platformio.ini under [env:esp32c6] and
-# reached CI only via the implicit root-merge — leaving every other PARLIO
-# board (S3, H2, P4, C5) compiling without them. See #3271.
-_ESP32_PARLIO_BUILD_FLAGS = [
-    "-DCONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM=1",
-    "-DCONFIG_PARLIO_TX_ISR_CACHE_SAFE=1",
-]
-
 # ESP32-C2: Use Arduino framework only (not "arduino, espidf")
 # The dual framework mode causes PlatformIO to use ESP-IDF's component-based build system,
 # which does not automatically discover and compile .cpp files in example subdirectories
@@ -884,7 +796,6 @@ ESP32_C5_DEVKITC_1 = Board(
     board_name="esp32c5",
     real_board_name="esp32-c5-devkitc-1",
     platform=ESP32_IDF_5_5_1_PIOARDUINO,
-    parlio_capable=True,  # SOC_PARLIO_SUPPORTED=1 — flags auto-emitted by to_platformio_ini()
 )
 
 ESP32_C6_DEVKITC_1 = Board(
@@ -893,7 +804,6 @@ ESP32_C6_DEVKITC_1 = Board(
     platform=ESP32_IDF_5_5_1_PIOARDUINO,
     board_build_flash_size="4MB",  # ESP32-C6FH4 actual flash size confirmed by esptool
     board_partitions="huge_app.csv",
-    parlio_capable=True,  # SOC_PARLIO_SUPPORTED=1 — flags auto-emitted by to_platformio_ini()
     build_flags=[
         "-funwind-tables",  # Better stack traces for RISC-V crash decoding
         "-DARDUINO_USB_MODE=1",  # Select HWCDC (USB-Serial/JTAG) over OTG
@@ -910,9 +820,6 @@ ESP32_S3_DEVKITC_1 = Board(
     board_build_flash_size="4MB",  # Set to 4MB for QEMU compatibility (default is 8MB)
     board_partitions="huge_app.csv",  # 3MB app partition (default.csv only has 1.25MB, too small for Validation)
     build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
-    # NOTE: esp32s3 has NO PARLIO peripheral (SOC_PARLIO_SUPPORTED is unset in
-    # soc_caps.h). Do NOT set parlio_capable=True here — PR #3276 historically
-    # had this wrong; #3304 fixes it.
     build_flags=[
         "-DARDUINO_USB_MODE=1",  # Route Serial over native USB for AutoResearch RPC on the upload port
         "-DARDUINO_USB_CDC_ON_BOOT=1",
@@ -938,7 +845,6 @@ ESP32H2 = Board(
     real_board_name="esp32-h2-devkitm-1",
     platform_needs_install=True,  # Install platform package to get the boards
     platform=ESP32_IDF_5_3_PIOARDUINO,
-    parlio_capable=True,  # SOC_PARLIO_SUPPORTED=1 — flags auto-emitted by to_platformio_ini()
 )
 
 ESP32_P4 = Board(
@@ -946,7 +852,6 @@ ESP32_P4 = Board(
     real_board_name="esp32-p4-evboard",
     platform=ESP32_IDF_5_5_1_PIOARDUINO,
     board_partitions="huge_app.csv",
-    parlio_capable=True,  # SOC_PARLIO_SUPPORTED=1 — flags auto-emitted by to_platformio_ini()
     # Route Serial → USB-Serial-JTAG (HWCDCSerial) instead of UART0 (pins 37/38).
     # Without these the AutoResearch firmware listens on UART0 while the host
     # tool talks to the USB-Serial-JTAG COM port — every RPC write times out.
@@ -1128,46 +1033,6 @@ RPI_PICO2 = Board(
     framework="arduino",
     board_build_core="earlephilhower",
     board_build_filesystem_size="0.5m",
-)
-
-# NXP LPC8xx family. PlatformIO has no native Arduino-capable nxplpc
-# platform, so use the zackees fork that layers ArduinoCore-LPC8xx on top of
-# platformio/platform-nxplpc.
-_NXPLPC_PLATFORM = "https://github.com/zackees/platform-nxplpc-arduino.git#2ee527ae80de98e9105329a7260edb003289dfda"
-
-LPC845BRK = Board(
-    board_name="lpc845brk",
-    platform=_NXPLPC_PLATFORM,
-    platform_needs_install=True,
-    framework="arduino",
-)
-
-LPC845 = Board(
-    board_name="lpc845",
-    platform=_NXPLPC_PLATFORM,
-    platform_needs_install=True,
-    framework="arduino",
-)
-
-LPC804 = Board(
-    board_name="lpc804",
-    platform=_NXPLPC_PLATFORM,
-    platform_needs_install=True,
-    framework="arduino",
-)
-
-LPCXPRESSO845MAX = Board(
-    board_name="lpcxpresso845max",
-    platform=_NXPLPC_PLATFORM,
-    platform_needs_install=True,
-    framework="arduino",
-)
-
-LPCXPRESSO804 = Board(
-    board_name="lpcxpresso804",
-    platform=_NXPLPC_PLATFORM,
-    platform_needs_install=True,
-    framework="arduino",
 )
 
 STM32F103C8_BLUEPILL = Board(

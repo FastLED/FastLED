@@ -31,9 +31,9 @@ namespace detector {
  */
 class Note : public Detector {
 public:
-    Note() FL_NO_EXCEPT;
+    Note() FL_NOEXCEPT;
     explicit Note(shared_ptr<Pitch> pitchDetector);
-    ~Note() FL_NO_EXCEPT override;
+    ~Note() FL_NOEXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

@@ -20,7 +20,7 @@ namespace fl {
 class UIButtonImpl {
   public:
     UIButtonImpl(const char *name) : mName(name ? name : "") {}
-    ~UIButtonImpl() FL_NO_EXCEPT {}
+    ~UIButtonImpl() FL_NOEXCEPT {}
     bool isPressed() const { return false; }
     bool clicked() const { return false; }
     int clickedCount() const { return 0; }
@@ -40,9 +40,9 @@ class UIButtonImpl {
 class UIButton : public UIElement {
   public:
     FL_NO_COPY(UIButton)
-    UIButton(const char *name) FL_NO_EXCEPT;
-    ~UIButton() FL_NO_EXCEPT;
-    bool isPressed() const FL_NO_EXCEPT {
+    UIButton(const char *name) FL_NOEXCEPT;
+    ~UIButton() FL_NOEXCEPT;
+    bool isPressed() const FL_NOEXCEPT {
         if (mImpl.isPressed()) {
             return true;
         }
@@ -51,7 +51,7 @@ class UIButton : public UIElement {
         }
         return false;
     }
-    bool clicked() const FL_NO_EXCEPT {
+    bool clicked() const FL_NOEXCEPT {
         if (mImpl.clicked()) {
             return true;
         }
@@ -60,28 +60,28 @@ class UIButton : public UIElement {
         }
         return false;
     }
-    int clickedCount() const FL_NO_EXCEPT;
-    operator bool() const FL_NO_EXCEPT { return clicked(); }
-    bool value() const FL_NO_EXCEPT { return clicked(); }
+    int clickedCount() const FL_NOEXCEPT;
+    operator bool() const FL_NOEXCEPT { return clicked(); }
+    bool value() const FL_NOEXCEPT { return clicked(); }
 
-    void addRealButton(fl::shared_ptr<IButtonInput> button) FL_NO_EXCEPT;
+    void addRealButton(fl::shared_ptr<IButtonInput> button) FL_NOEXCEPT;
 
-    void click() FL_NO_EXCEPT { mImpl.click(); }
+    void click() FL_NOEXCEPT { mImpl.click(); }
 
     // Override setGroup to also update the implementation
-    void setGroup(const fl::string& groupName) FL_NO_EXCEPT override {
+    void setGroup(const fl::string& groupName) FL_NOEXCEPT override {
         UIElement::setGroup(groupName);
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
 
-    int onChanged(function<void(UIButton &)> callback) FL_NO_EXCEPT {
+    int onChanged(function<void(UIButton &)> callback) FL_NOEXCEPT {
         int id = mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
         return id;
     }
 
-    int onClicked(function<void()> callback) FL_NO_EXCEPT {
+    int onClicked(function<void()> callback) FL_NOEXCEPT {
         int id = mCallbacks.add([callback](UIButton &btn) {
             if (btn.clicked()) {
                 callback();
@@ -91,13 +91,13 @@ class UIButton : public UIElement {
         return id;
     }
 
-    int onPressed(function<void()> callback) FL_NO_EXCEPT {
+    int onPressed(function<void()> callback) FL_NOEXCEPT {
         int id = mPressCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
         return id;
     }
 
-    int onReleased(function<void()> callback) FL_NO_EXCEPT {
+    int onReleased(function<void()> callback) FL_NOEXCEPT {
         int id = mReleaseCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
         return id;
@@ -109,12 +109,12 @@ class UIButton : public UIElement {
     // Note: onClicked() also registers into the changed-callbacks list, so
     // ids returned by onClicked() are removed via removeClickedCallback
     // (an alias for removeChangedCallback).
-    void removeChangedCallback(int id) FL_NO_EXCEPT { mCallbacks.remove(id); }
-    void removeClickedCallback(int id) FL_NO_EXCEPT { mCallbacks.remove(id); }
-    void removePressedCallback(int id) FL_NO_EXCEPT { mPressCallbacks.remove(id); }
-    void removeReleasedCallback(int id) FL_NO_EXCEPT { mReleaseCallbacks.remove(id); }
+    void removeChangedCallback(int id) FL_NOEXCEPT { mCallbacks.remove(id); }
+    void removeClickedCallback(int id) FL_NOEXCEPT { mCallbacks.remove(id); }
+    void removePressedCallback(int id) FL_NOEXCEPT { mPressCallbacks.remove(id); }
+    void removeReleasedCallback(int id) FL_NOEXCEPT { mReleaseCallbacks.remove(id); }
 
-    void clearCallbacks() FL_NO_EXCEPT {
+    void clearCallbacks() FL_NOEXCEPT {
         mCallbacks.clear();
         mPressCallbacks.clear();
         mReleaseCallbacks.clear();
@@ -124,22 +124,22 @@ class UIButton : public UIElement {
     UIButtonImpl mImpl;
 
     struct Listener : public EngineEvents::Listener {
-        Listener(UIButton *owner) FL_NO_EXCEPT : mOwner(owner) {
+        Listener(UIButton *owner) FL_NOEXCEPT : mOwner(owner) {
         }
-        ~Listener() FL_NO_EXCEPT {
+        ~Listener() FL_NOEXCEPT {
             if (added) {
                 EngineEvents::removeListener(this);
             }
         }
-        void addToEngineEventsOnce() FL_NO_EXCEPT {
+        void addToEngineEventsOnce() FL_NOEXCEPT {
             if (added) {
                 return;
             }
             EngineEvents::addListener(this);
             added = true;
         }
-        void onBeginFrame() FL_NO_EXCEPT override;
-        int realButtonClickCount() const FL_NO_EXCEPT { return mRealButtonClickCount; }
+        void onBeginFrame() FL_NOEXCEPT override;
+        int realButtonClickCount() const FL_NOEXCEPT { return mRealButtonClickCount; }
 
       private:
         UIButton *mOwner;

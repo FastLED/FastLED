@@ -36,7 +36,7 @@ class ActiveStripTracker {
 public:
     /// @brief Constructor - registers this tracker and gets a unique sequential ID
     /// Uses the tracker's own address to obtain a stable, unique identifier
-    ActiveStripTracker() FL_NO_EXCEPT {
+    ActiveStripTracker() FL_NOEXCEPT {
         uintptr_t tracker_addr = fl::ptr_to_int(this);
         int existing_id;
 
@@ -50,7 +50,7 @@ public:
 
     /// @brief Copy constructor - creates new tracker with fresh ID
     /// Each copy gets its own unique ID in the registry
-    ActiveStripTracker(const ActiveStripTracker& other) FL_NO_EXCEPT {
+    ActiveStripTracker(const ActiveStripTracker& other) FL_NOEXCEPT {
         (void)other; // Don't copy ID - get fresh one
         uintptr_t tracker_addr = fl::ptr_to_int(this);
         mId = getNextId().fetch_add(1);
@@ -58,7 +58,7 @@ public:
     }
 
     /// @brief Copy assignment - keeps same ID, updates address
-    ActiveStripTracker& operator=(const ActiveStripTracker& other) FL_NO_EXCEPT {
+    ActiveStripTracker& operator=(const ActiveStripTracker& other) FL_NOEXCEPT {
         if (this != &other) {
             uintptr_t addr = fl::ptr_to_int(this);
             getTrackerMap().erase(addr);
@@ -69,7 +69,7 @@ public:
     }
 
     /// @brief Move constructor - transfers ID to new address
-    ActiveStripTracker(ActiveStripTracker&& other) FL_NO_EXCEPT {
+    ActiveStripTracker(ActiveStripTracker&& other) FL_NOEXCEPT {
         mId = other.mId;
         uintptr_t old_addr = fl::ptr_to_int(&other);
         uintptr_t new_addr = fl::ptr_to_int(this);
@@ -78,7 +78,7 @@ public:
     }
 
     /// @brief Move assignment - transfers ID to new address
-    ActiveStripTracker& operator=(ActiveStripTracker&& other) FL_NO_EXCEPT {
+    ActiveStripTracker& operator=(ActiveStripTracker&& other) FL_NOEXCEPT {
         if (this != &other) {
             uintptr_t old_this = fl::ptr_to_int(this);
             uintptr_t old_other = fl::ptr_to_int(&other);
@@ -100,13 +100,13 @@ public:
 
     /// @brief Update strip data with RGB pixel data
     /// @param pixel_data Span of RGB pixel data (3 bytes per pixel: R, G, B)
-    void update(fl::span<const u8> pixel_data) FL_NO_EXCEPT {
-        fl::ActiveStripData::Instance() FL_NO_EXCEPT .update(mId, fl::millis(), pixel_data);
+    void update(fl::span<const u8> pixel_data) FL_NOEXCEPT {
+        fl::ActiveStripData::Instance() FL_NOEXCEPT .update(mId, fl::millis(), pixel_data);
     }
 
     /// @brief Update strip data with CRGB pixel data
     /// @param pixels Span of CRGB pixels
-    void update(fl::span<const CRGB> pixels) FL_NO_EXCEPT {
+    void update(fl::span<const CRGB> pixels) FL_NOEXCEPT {
         // Convert CRGB span to uint8_t span (safe because CRGB is packed RGB)
         const u8* data = fl::bit_cast<const u8*>(pixels.data());
         size_t size = pixels.size() * 3; // 3 bytes per CRGB
@@ -114,32 +114,32 @@ public:
     }
 
     /// @brief Update from a fl::vector<u8> (resolves ambiguity with CRGB overload)
-    void update(const fl::vector<u8>& container) FL_NO_EXCEPT {
+    void update(const fl::vector<u8>& container) FL_NOEXCEPT {
         update(fl::span<const u8>(container.data(), container.size())); // ok span from pointer
     }
 
     /// @brief Get the strip ID for this tracker
     /// @return The strip ID assigned to this controller
-    int getId() const FL_NO_EXCEPT { return mId; }
+    int getId() const FL_NOEXCEPT { return mId; }
 
     /// @brief Reset all tracker state (for testing)
     /// Clears the tracker map and resets the ID counter
     /// WARNING: Only use this in test environments!
-    static void resetForTesting() FL_NO_EXCEPT {
+    static void resetForTesting() FL_NOEXCEPT {
         getTrackerMap().clear();
         getNextId().store(0);
     }
 
 private:
     /// @brief Get the static tracker map (accessor for resetForTesting)
-    static fl::flat_map<uintptr_t, int>& getTrackerMap() FL_NO_EXCEPT {
+    static fl::flat_map<uintptr_t, int>& getTrackerMap() FL_NOEXCEPT {
         static fl::flat_map<uintptr_t, int> sTrackerMap;
         return sTrackerMap;
     }
 
     /// @brief Get the static ID counter (accessor for resetForTesting)
-    static fl::atomic_int& getNextId() FL_NO_EXCEPT {
-        static fl::atomic_int sNextId(0) FL_NO_EXCEPT;  // okay static in header
+    static fl::atomic_int& getNextId() FL_NOEXCEPT {
+        static fl::atomic_int sNextId(0) FL_NOEXCEPT;  // okay static in header
         return sNextId;
     }
 

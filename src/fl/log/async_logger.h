@@ -18,8 +18,8 @@ namespace fl {
 /// Registers itself automatically in ActiveLoggerRegistry on first access
 class AsyncLogger {
 public:
-    AsyncLogger() FL_NO_EXCEPT;
-    ~AsyncLogger() FL_NO_EXCEPT = default;  // No cleanup needed (embedded storage)
+    AsyncLogger() FL_NOEXCEPT;
+    ~AsyncLogger() FL_NOEXCEPT = default;  // No cleanup needed (embedded storage)
 
     void push(const fl::string& msg);
     void push(const char* msg);
@@ -229,8 +229,8 @@ namespace detail {
     private:
         friend class fl::SingletonShared<AsyncLoggerServiceTask>;
 
-        AsyncLoggerServiceTask() FL_NO_EXCEPT;
-        ~AsyncLoggerServiceTask() FL_NO_EXCEPT = default;
+        AsyncLoggerServiceTask() FL_NOEXCEPT;
+        ~AsyncLoggerServiceTask() FL_NOEXCEPT = default;
 
         u32 mIntervalMs;
         fl::size mMessagesPerTick;

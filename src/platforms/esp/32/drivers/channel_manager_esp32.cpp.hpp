@@ -131,8 +131,8 @@ constexpr int PRIORITY_LCD_CLOCKLESS = 2; ///< LCD_CAM clockless driver (ESP32-S
 #endif
 
 /// @brief Add HW SPI drivers if supported by platform (UNIFIED VERSION)
-static void addSpiHardwareIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
-    FL_DBG_F("ESP32: Registering unified HW SPI channel driver");
+static void addSpiHardwareIfPossible(ChannelManager& manager) FL_NOEXCEPT {
+    FL_DBG("ESP32: Registering unified HW SPI channel driver");
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers;
     fl::vector<int> priorities;
@@ -143,7 +143,7 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
     // Note: SpiHw16 (I2S parallel) replaced by I2S_SPI/LCD_SPI channel drivers
     // ========================================================================
     const auto& hw1Controllers = SpiHw1::getAll();
-    FL_DBG_F("ESP32: Found %s SpiHw1 controllers", hw1Controllers.size());
+    FL_DBG("ESP32: Found " << hw1Controllers.size() << " SpiHw1 controllers");
 
     for (const auto& ctrl : hw1Controllers) {
         if (ctrl) {
@@ -175,12 +175,14 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 
             manager.addDriver(maxPriority, adapter);
 
-            FL_DBG_F("ESP32: Registered unified SPI driver with %s controllers (priority %s)", controllers.size(), maxPriority);
+            FL_DBG("ESP32: Registered unified SPI driver with "
+                   << controllers.size() << " controllers (priority "
+                   << maxPriority << ")");
         } else {
-            FL_WARN_F("ESP32: Failed to create unified SPI adapter");
+            FL_WARN("ESP32: Failed to create unified SPI adapter");
         }
     } else {
-        FL_DBG_F("ESP32: No SPI hardware controllers available");
+        FL_DBG("ESP32: No SPI hardware controllers available");
     }
 }
 
@@ -192,24 +194,24 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 // twice. Phase 4 documented this caveat; Phase 5a (this commit) fixes it.
 
 /// @brief Add PARLIO driver if supported by platform
-static void addParlioIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
+static void addParlioIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_PARLIO
     manager.addDriver(PRIORITY_PARLIO, BusTraits<Bus::PARLIO>::instancePtr());
-    FL_DBG_F("ESP32: Added PARLIO driver (priority %s)", PRIORITY_PARLIO);
+    FL_DBG("ESP32: Added PARLIO driver (priority " << PRIORITY_PARLIO << ")");
 #else
     (void)manager;  // Suppress unused parameter warning
 #endif
 }
 
 /// @brief Add LCD RGB driver if supported by platform
-static void addLcdRgbIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
+static void addLcdRgbIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_LCD_RGB
     auto driver = BusTraits<Bus::LCD_RGB>::instancePtr();
     if (driver) {
         manager.addDriver(PRIORITY_LCD_RGB, driver);
-        FL_DBG_F("ESP32: Added LCD_RGB driver (priority %s)", PRIORITY_LCD_RGB);
+        FL_DBG("ESP32: Added LCD_RGB driver (priority " << PRIORITY_LCD_RGB << ")");
     } else {
-        FL_DBG_F("ESP32-P4: LCD_RGB driver creation failed");
+        FL_DBG("ESP32-P4: LCD_RGB driver creation failed");
     }
 #else
     (void)manager;  // Suppress unused parameter warning
@@ -217,31 +219,31 @@ static void addLcdRgbIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 }
 
 /// @brief Add SPI driver if supported by platform
-static void addSpiIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
+static void addSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
     manager.addDriver(PRIORITY_SPI, BusTraits<Bus::SPI>::instancePtr());
-    FL_DBG_F("ESP32: Added SPI driver (priority %s)", PRIORITY_SPI);
+    FL_DBG("ESP32: Added SPI driver (priority " << PRIORITY_SPI << ")");
 #else
     (void)manager;  // Suppress unused parameter warning
 #endif
 }
 
 /// @brief Add UART driver if supported by platform
-static void addUartIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
+static void addUartIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_UART
     // UART driver uses wave8 encoding adapted for UART framing.
     // Available on all ESP32 variants (C3, S3, C6, H2, P4) with ESP-IDF 4.0+.
     // BusTraits<Bus::UART>::instancePtr() also constructs the UartPeripheralEsp
     // dependency inside its UartBusHolder.
     manager.addDriver(PRIORITY_UART, BusTraits<Bus::UART>::instancePtr());
-    FL_DBG_F("ESP32: Added UART driver (priority %s)", PRIORITY_UART);
+    FL_DBG("ESP32: Added UART driver (priority " << PRIORITY_UART << ")");
 #else
     (void)manager;  // Suppress unused parameter warning
 #endif
 }
 
 /// @brief Add RMT driver if supported by platform
-static void addRmtIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
+static void addRmtIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_RMT
     // BusTraits<Bus::RMT> resolves to ChannelEngineRMT (RMT5) or
     // ChannelEngineRMT4 depending on the build path; the right header is
@@ -254,21 +256,21 @@ static void addRmtIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
     #endif
 
     manager.addDriver(PRIORITY_RMT, driver);
-    FL_DBG_F("ESP32: Added %s driver (priority %s)", version, PRIORITY_RMT);
+    FL_DBG("ESP32: Added " << version << " driver (priority " << PRIORITY_RMT << ")");
 #else
     (void)manager;  // Suppress unused parameter warning
 #endif
 }
 
 /// @brief Add I2S_SPI driver if supported by platform (ESP32dev true SPI)
-static void addI2sSpiIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
+static void addI2sSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_I2S
     auto driver = BusTraits<Bus::I2S_SPI>::instancePtr();
     if (driver) {
         manager.addDriver(PRIORITY_I2S_SPI, driver);
-        FL_DBG_F("ESP32: Added I2S_SPI driver (priority %s)", PRIORITY_I2S_SPI);
+        FL_DBG("ESP32: Added I2S_SPI driver (priority " << PRIORITY_I2S_SPI << ")");
     } else {
-        FL_DBG_F("ESP32: I2S_SPI driver creation deferred (no ESP peripheral yet)");
+        FL_DBG("ESP32: I2S_SPI driver creation deferred (no ESP peripheral yet)");
     }
 #else
     (void)manager;
@@ -276,14 +278,14 @@ static void addI2sSpiIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 }
 
 /// @brief Add LCD_SPI driver if supported by platform (ESP32-S3 true SPI)
-static void addLcdSpiIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
+static void addLcdSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_LCD_SPI
     auto driver = BusTraits<Bus::LCD_SPI>::instancePtr();
     if (driver) {
         manager.addDriver(PRIORITY_LCD_SPI, driver);
-        FL_DBG_F("ESP32-S3: Added LCD_SPI driver (priority %s)", PRIORITY_LCD_SPI);
+        FL_DBG("ESP32-S3: Added LCD_SPI driver (priority " << PRIORITY_LCD_SPI << ")");
     } else {
-        FL_DBG_F("ESP32-S3: LCD_SPI driver creation deferred (no ESP peripheral yet)");
+        FL_DBG("ESP32-S3: LCD_SPI driver creation deferred (no ESP peripheral yet)");
     }
 #else
     (void)manager;
@@ -291,14 +293,14 @@ static void addLcdSpiIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 }
 
 /// @brief Add LCD_CAM clockless driver if supported (ESP32-S3, replaces misnamed I2S)
-static void addLcdClocklessIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
+static void addLcdClocklessIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_LCD_SPI
     auto driver = BusTraits<Bus::LCD_CLOCKLESS>::instancePtr();
     if (driver) {
         manager.addDriver(PRIORITY_LCD_CLOCKLESS, driver);
-        FL_DBG_F("ESP32-S3: Added LCD_CLOCKLESS driver (priority %s)", PRIORITY_LCD_CLOCKLESS);
+        FL_DBG("ESP32-S3: Added LCD_CLOCKLESS driver (priority " << PRIORITY_LCD_CLOCKLESS << ")");
     } else {
-        FL_DBG_F("ESP32-S3: LCD_CLOCKLESS driver creation deferred");
+        FL_DBG("ESP32-S3: LCD_CLOCKLESS driver creation deferred");
     }
 #else
     (void)manager;
@@ -306,16 +308,16 @@ static void addLcdClocklessIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 }
 
 /// @brief Add I2S LCD_CAM driver if supported by platform
-static void addI2sIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
+static void addI2sIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_I2S_LCD_CAM
     // I2S LCD_CAM driver uses LCD_CAM peripheral via I80 bus (ESP32-S3 only).
     // Experimental driver - uses transpose encoding for parallel LED output.
     auto driver = BusTraits<Bus::I2S>::instancePtr();
     if (driver) {
         manager.addDriver(PRIORITY_I2S, driver);
-        FL_DBG_F("ESP32-S3: Added I2S LCD_CAM driver (priority %s)", PRIORITY_I2S);
+        FL_DBG("ESP32-S3: Added I2S LCD_CAM driver (priority " << PRIORITY_I2S << ")");
     } else {
-        FL_DBG_F("ESP32-S3: I2S LCD_CAM driver creation failed");
+        FL_DBG("ESP32-S3: I2S LCD_CAM driver creation failed");
     }
 #else
     (void)manager;  // Suppress unused parameter warning
@@ -333,7 +335,7 @@ namespace platforms {
 /// Phase 5b pre-bind via `BusTraits<DefaultBus<Chipset>>::instancePtr()`)
 /// links into the binary. Users who need additional drivers at runtime call
 /// `fl::enableDrivers<fl::Bus::X, ...>()` or `FastLED.enableAllDrivers()`.
-void initChannelDrivers() FL_NO_EXCEPT {
+void initChannelDrivers() FL_NOEXCEPT {
     // Intentionally empty. See `fl::enableDrivers<>()` / `enableAllDrivers()`
     // for the opt-in registration path.
 }

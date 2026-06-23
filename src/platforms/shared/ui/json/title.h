@@ -19,24 +19,24 @@ class JsonUiTitleInternal;
 class JsonTitleImpl {
   public:
     // Constructor: Now takes the text directly and creates JsonUiTitleInternal.
-    JsonTitleImpl(const fl::string& name, const fl::string& text) FL_NO_EXCEPT;
+    JsonTitleImpl(const fl::string& name, const fl::string& text) FL_NOEXCEPT;
 
     // Destructor: Handles cleanup of the internal component.
     ~JsonTitleImpl();
 
-    JsonTitleImpl &Group(const fl::string &name) FL_NO_EXCEPT;
+    JsonTitleImpl &Group(const fl::string &name) FL_NOEXCEPT;
 
-    const fl::string &name() const FL_NO_EXCEPT;
-    fl::string groupName() const FL_NO_EXCEPT;
+    const fl::string &name() const FL_NOEXCEPT;
+    fl::string groupName() const FL_NOEXCEPT;
     
     // Add accessors for the title text, delegating to mInternal.
-    const fl::string& text() const FL_NO_EXCEPT;
-    void setText(const fl::string& text) FL_NO_EXCEPT;
+    const fl::string& text() const FL_NOEXCEPT;
+    void setText(const fl::string& text) FL_NOEXCEPT;
     
     // Method to allow parent UIElement class to set the group
-    void setGroup(const fl::string &groupName) FL_NO_EXCEPT;
+    void setGroup(const fl::string &groupName) FL_NOEXCEPT;
 
-    int id() const FL_NO_EXCEPT;
+    int id() const FL_NOEXCEPT;
 
   private:
     // Change to use the specific internal implementation

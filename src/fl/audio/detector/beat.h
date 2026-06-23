@@ -12,8 +12,8 @@ namespace detector {
 
 class Beat : public Detector {
 public:
-    Beat() FL_NO_EXCEPT;
-    ~Beat() FL_NO_EXCEPT override;
+    Beat() FL_NOEXCEPT;
+    ~Beat() FL_NOEXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

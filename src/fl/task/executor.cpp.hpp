@@ -76,7 +76,7 @@ void run(fl::u32 microseconds, ExecFlags flags) {
     // Re-entrancy guard: detect if run is called from within run
     bool& running = SingletonThreadLocal<bool>::instance();
     if (running) {
-        FL_WARN_F_ONCE("task::run re-entrancy detected, skipping nested call");
+        FL_WARN_ONCE("task::run re-entrancy detected, skipping nested call");
         return;
     }
     running = true;

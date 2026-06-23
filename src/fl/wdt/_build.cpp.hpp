@@ -16,12 +16,12 @@ namespace platforms {
 // Print-sink implementation used by ScopedWatchdog's first-init path. Defined
 // here (in the unity TU) rather than in watchdog.cpp.hpp so that public
 // headers don't pull in fl/log/log.h.
-void scopedWatchdogPrintLine(fl::string_view sv) FL_NO_EXCEPT {
-    FL_WARN_F("%s", sv);
+void scopedWatchdogPrintLine(fl::string_view sv) FL_NOEXCEPT {
+    FL_WARN(sv);
 }
 
 // Wraps fl::delay() — portable across stub/WASM/embedded.
-void scopedWatchdogPause3s() FL_NO_EXCEPT {
+void scopedWatchdogPause3s() FL_NOEXCEPT {
     fl::delay(3000);
 }
 

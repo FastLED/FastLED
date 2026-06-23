@@ -67,7 +67,7 @@ HttpRequestParser::HttpRequestParser()
 {
 }
 
-HttpRequestParser::~HttpRequestParser() FL_NO_EXCEPT = default;
+HttpRequestParser::~HttpRequestParser() FL_NOEXCEPT = default;
 
 void HttpRequestParser::feed(fl::span<const u8> data) {
     mBuffer.insert(mBuffer.end(), data.begin(), data.end());
@@ -295,7 +295,7 @@ HttpResponseParser::HttpResponseParser()
 {
 }
 
-HttpResponseParser::~HttpResponseParser() FL_NO_EXCEPT = default;
+HttpResponseParser::~HttpResponseParser() FL_NOEXCEPT = default;
 
 void HttpResponseParser::feed(fl::span<const u8> data) {
     mBuffer.insert(mBuffer.end(), data.begin(), data.end());

@@ -20,7 +20,7 @@ class LintArgs:
     run_iwyu: bool = False
     run_pyright: bool = False
     run_tidy: bool = False
-    use_rust_cpp_lint: bool = True
+    use_rust_cpp_lint: bool = False
     iwyu_fix: bool = False
     skip_platformio_check: bool = False
     skip_meson: bool = False
@@ -49,7 +49,6 @@ Python linting includes:
 
 C++ linting includes:
   - clang-format and custom checkers
-  - AST ratchets for FL_NO_EXCEPT and decayed array parameters
   - IWYU (Include-What-You-Use) runs with --full, --iwyu, or --strict
   - clang-tidy static analysis runs with --tidy
 
@@ -61,7 +60,7 @@ Examples:
   bash lint --strict           # Also run pyright + IWYU on single files (strict mode)
   bash lint --js               # JavaScript linting only
   bash lint --cpp              # C++ linting only
-  bash lint --cpp --no-rust    # Fall back to the legacy Python-only C++ path
+  bash lint --cpp --rust       # Use Rust-backed checker subset where available
   bash lint --full             # Include IWYU (Include-What-You-Use) on all files
   bash lint --iwyu             # Run IWYU only
   bash lint --tidy             # Run clang-tidy static analysis
@@ -114,12 +113,8 @@ Examples:
 
     parser.add_argument(
         "--rust",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help=(
-            "Use the Rust C++ checker subset where available (default: on). "
-            "Pass --no-rust to fall back to the Python-only checker path."
-        ),
+        action="store_true",
+        help="Use the Rust C++ checker subset where available",
     )
 
     parser.add_argument(

@@ -35,11 +35,11 @@ class u0x32 {
 
     // ---- Construction ------------------------------------------------------
 
-    constexpr u0x32() FL_NO_EXCEPT = default;
+    constexpr u0x32() FL_NOEXCEPT = default;
 
     // Construct from float (clamps to [0.0, 1.0) range)
     // UQ32 format: max value is 0xFFFFFFFF (just under 1.0), min is 0 (exactly 0.0)
-    explicit constexpr u0x32(float f) FL_NO_EXCEPT
+    explicit constexpr u0x32(float f) FL_NOEXCEPT
         : mValue(f <= 0.0f ? 0U :                       // Exactly 0.0
                  f >= 1.0f ? 0xFFFFFFFFU :              // Max positive (0.9999999997...)
                  static_cast<u32>(f * 4294967296.0f)) {}
@@ -55,39 +55,39 @@ class u0x32 {
                         (OtherFP::FRAC_BITS <= FRAC_BITS) &&
                         (OtherFP::INT_BITS != INT_BITS || OtherFP::FRAC_BITS != FRAC_BITS),
                         int>::type = 0)
- FL_NO_EXCEPT : mValue(static_cast<u32>(
+ FL_NOEXCEPT : mValue(static_cast<u32>(
             static_cast<u64>(other.raw()) << (FRAC_BITS - OtherFP::FRAC_BITS))) {}
 
     // Construct from raw u32 value (UQ32 format)
     // Raw constructor for C++11 constexpr from_raw
     struct RawTag {};
-    constexpr explicit u0x32(u32 raw, RawTag) FL_NO_EXCEPT : mValue(raw) {}
+    constexpr explicit u0x32(u32 raw, RawTag) FL_NOEXCEPT : mValue(raw) {}
 
-    static constexpr FASTLED_FORCE_INLINE u0x32 from_raw(u32 raw) FL_NO_EXCEPT {
+    static constexpr FASTLED_FORCE_INLINE u0x32 from_raw(u32 raw) FL_NOEXCEPT {
         return u0x32(raw, RawTag());
     }
 
     // ---- Access ------------------------------------------------------------
 
-    constexpr u32 raw() const FL_NO_EXCEPT { return mValue; }
+    constexpr u32 raw() const FL_NOEXCEPT { return mValue; }
 
     // Convert to integer (always 0 since range is [0.0, 1.0))
-    constexpr u32 to_int() const FL_NO_EXCEPT { return 0; }
+    constexpr u32 to_int() const FL_NOEXCEPT { return 0; }
 
-    constexpr float to_float() const FL_NO_EXCEPT {
+    constexpr float to_float() const FL_NOEXCEPT {
         return static_cast<float>(mValue) / 4294967296.0f;
     }
 
     // ---- Same-type arithmetic (u0x32 OP u0x32 → u0x32) --------------------
 
-    FASTLED_FORCE_INLINE u0x32 operator+(u0x32 b) const FL_NO_EXCEPT {
+    FASTLED_FORCE_INLINE u0x32 operator+(u0x32 b) const FL_NOEXCEPT {
         // Saturating add to prevent overflow
         u32 result = mValue + b.mValue;
         if (result < mValue) return from_raw(0xFFFFFFFFU); // Overflow, clamp to max
         return from_raw(result);
     }
 
-    FASTLED_FORCE_INLINE u0x32 operator-(u0x32 b) const FL_NO_EXCEPT {
+    FASTLED_FORCE_INLINE u0x32 operator-(u0x32 b) const FL_NOEXCEPT {
         // Saturating subtract to prevent underflow
         if (b.mValue > mValue) return from_raw(0); // Underflow, clamp to 0
         return from_raw(mValue - b.mValue);
@@ -95,14 +95,14 @@ class u0x32 {
 
     // Multiply two normalized values: u0x32 × u0x32 → u0x32
     // Both inputs < 1.0, so product < 1.0
-    constexpr FASTLED_FORCE_INLINE u0x32 operator*(u0x32 b) const FL_NO_EXCEPT {
+    constexpr FASTLED_FORCE_INLINE u0x32 operator*(u0x32 b) const FL_NOEXCEPT {
         // UQ32 × UQ32 = UQ64 → shift right 32 → UQ32
         return from_raw(static_cast<u32>(
             (static_cast<u64>(mValue) * b.mValue) >> 32));
     }
 
     // Divide normalized values: u0x32 / u0x32 → u0x32
-    FASTLED_FORCE_INLINE u0x32 operator/(u0x32 b) const FL_NO_EXCEPT {
+    FASTLED_FORCE_INLINE u0x32 operator/(u0x32 b) const FL_NOEXCEPT {
         // UQ32 / UQ32: shift dividend left 32 bits then divide
         // (a / 2^32) / (b / 2^32) = a / b → need (a << 32) / b
         if (b.mValue == 0) return from_raw(0xFFFFFFFFU); // Division by zero, return max
@@ -111,53 +111,53 @@ class u0x32 {
         return from_raw(static_cast<u32>(result));
     }
 
-    constexpr FASTLED_FORCE_INLINE u0x32 operator>>(int shift) const FL_NO_EXCEPT {
+    constexpr FASTLED_FORCE_INLINE u0x32 operator>>(int shift) const FL_NOEXCEPT {
         return from_raw(mValue >> shift);
     }
 
-    constexpr FASTLED_FORCE_INLINE u0x32 operator<<(int shift) const FL_NO_EXCEPT {
+    constexpr FASTLED_FORCE_INLINE u0x32 operator<<(int shift) const FL_NOEXCEPT {
         return from_raw(mValue << shift);
     }
 
     // ---- Scalar arithmetic (u0x32 × raw integer → u0x32) ------------------
 
-    constexpr FASTLED_FORCE_INLINE u0x32 operator*(u32 scalar) const FL_NO_EXCEPT {
+    constexpr FASTLED_FORCE_INLINE u0x32 operator*(u32 scalar) const FL_NOEXCEPT {
         // UQ32 * scalar with saturation to prevent overflow
         return (static_cast<u64>(mValue) * scalar > 0xFFFFFFFFULL)
             ? from_raw(0xFFFFFFFFU)
             : from_raw(static_cast<u32>(static_cast<u64>(mValue) * scalar));
     }
 
-    friend constexpr u0x32 operator*(u32 scalar, u0x32 a) FL_NO_EXCEPT {
+    friend constexpr u0x32 operator*(u32 scalar, u0x32 a) FL_NOEXCEPT {
         return a * scalar;  // Commutative
     }
 
-    constexpr FASTLED_FORCE_INLINE u0x32 operator/(u32 scalar) const FL_NO_EXCEPT {
+    constexpr FASTLED_FORCE_INLINE u0x32 operator/(u32 scalar) const FL_NOEXCEPT {
         return (scalar == 0) ? from_raw(0xFFFFFFFFU) : from_raw(mValue / scalar);
     }
 
     // ---- Math functions ----------------------------------------------------
 
-    static constexpr FASTLED_FORCE_INLINE u0x32 min(u0x32 a, u0x32 b) FL_NO_EXCEPT {
+    static constexpr FASTLED_FORCE_INLINE u0x32 min(u0x32 a, u0x32 b) FL_NOEXCEPT {
         return from_raw(a.mValue < b.mValue ? a.mValue : b.mValue);
     }
 
-    static constexpr FASTLED_FORCE_INLINE u0x32 max(u0x32 a, u0x32 b) FL_NO_EXCEPT {
+    static constexpr FASTLED_FORCE_INLINE u0x32 max(u0x32 a, u0x32 b) FL_NOEXCEPT {
         return from_raw(a.mValue > b.mValue ? a.mValue : b.mValue);
     }
 
-    static constexpr FASTLED_FORCE_INLINE u0x32 clamp(u0x32 val, u0x32 low, u0x32 high) FL_NO_EXCEPT {
+    static constexpr FASTLED_FORCE_INLINE u0x32 clamp(u0x32 val, u0x32 low, u0x32 high) FL_NOEXCEPT {
         return max(low, min(val, high));
     }
 
     // ---- Comparisons -------------------------------------------------------
 
-    constexpr bool operator<(u0x32 b) const FL_NO_EXCEPT { return mValue < b.mValue; }
-    constexpr bool operator>(u0x32 b) const FL_NO_EXCEPT { return mValue > b.mValue; }
-    constexpr bool operator<=(u0x32 b) const FL_NO_EXCEPT { return mValue <= b.mValue; }
-    constexpr bool operator>=(u0x32 b) const FL_NO_EXCEPT { return mValue >= b.mValue; }
-    constexpr bool operator==(u0x32 b) const FL_NO_EXCEPT { return mValue == b.mValue; }
-    constexpr bool operator!=(u0x32 b) const FL_NO_EXCEPT { return mValue != b.mValue; }
+    constexpr bool operator<(u0x32 b) const FL_NOEXCEPT { return mValue < b.mValue; }
+    constexpr bool operator>(u0x32 b) const FL_NOEXCEPT { return mValue > b.mValue; }
+    constexpr bool operator<=(u0x32 b) const FL_NOEXCEPT { return mValue <= b.mValue; }
+    constexpr bool operator>=(u0x32 b) const FL_NOEXCEPT { return mValue >= b.mValue; }
+    constexpr bool operator==(u0x32 b) const FL_NOEXCEPT { return mValue == b.mValue; }
+    constexpr bool operator!=(u0x32 b) const FL_NOEXCEPT { return mValue != b.mValue; }
 
   private:
     u32 mValue = 0;

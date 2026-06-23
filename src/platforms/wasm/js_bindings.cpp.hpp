@@ -307,7 +307,7 @@ void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
     // JavaScript worker will cache this and avoid per-frame polling
     // NOTE: EM_JS has linking issues with partial linking - use polling approach instead
     // Worker will call getScreenMapData() during initialization to fetch this data
-    FL_DBG_F("Screenmap update available (worker will poll via getScreenMapData): %s", jsonBuffer.c_str());
+    FL_DBG("Screenmap update available (worker will poll via getScreenMapData): " << jsonBuffer.c_str());
 }
 
 EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_strips) {

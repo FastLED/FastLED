@@ -31,7 +31,7 @@ private:
     ptrdiff_t mCount;
 
 public:
-    explicit CountingSemaphoreFake(ptrdiff_t desired) FL_NO_EXCEPT : mCount(desired) {
+    explicit CountingSemaphoreFake(ptrdiff_t desired) FL_NOEXCEPT : mCount(desired) {
         FL_ASSERT(desired >= 0 && desired <= LeastMaxValue,
                  "CountingSemaphoreFake: initial count out of range");
     }
@@ -44,21 +44,21 @@ public:
 
     ~CountingSemaphoreFake() = default;
 
-    void release(ptrdiff_t update = 1) FL_NO_EXCEPT {
+    void release(ptrdiff_t update = 1) FL_NOEXCEPT {
         FL_ASSERT(update >= 0, "CountingSemaphoreFake: release update must be non-negative");
         FL_ASSERT(mCount + update <= LeastMaxValue,
                  "CountingSemaphoreFake: release would exceed max value");
         mCount += update;
     }
 
-    void acquire() FL_NO_EXCEPT {
+    void acquire() FL_NOEXCEPT {
         // In single-threaded mode, waiting would deadlock
         FL_ASSERT(mCount > 0,
                  "CountingSemaphoreFake: acquire() with count=0 would deadlock in single-threaded mode");
         --mCount;
     }
 
-    bool try_acquire() FL_NO_EXCEPT {
+    bool try_acquire() FL_NOEXCEPT {
         if (mCount > 0) {
             --mCount;
             return true;
@@ -69,16 +69,16 @@ public:
     // Timed acquire methods are no-ops in single-threaded mode
     // (same behavior as try_acquire since there's no waiting)
     template<class Rep, class Period>
-    bool try_acquire_for(const std::chrono::duration<Rep, Period>&) FL_NO_EXCEPT {  // okay std namespace
+    bool try_acquire_for(const std::chrono::duration<Rep, Period>&) FL_NOEXCEPT {  // okay std namespace
         return try_acquire();
     }
 
     template<class Clock, class Duration>
-    bool try_acquire_until(const std::chrono::time_point<Clock, Duration>&) FL_NO_EXCEPT {  // okay std namespace
+    bool try_acquire_until(const std::chrono::time_point<Clock, Duration>&) FL_NOEXCEPT {  // okay std namespace
         return try_acquire();
     }
 
-    static constexpr ptrdiff_t max() FL_NO_EXCEPT {
+    static constexpr ptrdiff_t max() FL_NOEXCEPT {
         return LeastMaxValue;
     }
 };

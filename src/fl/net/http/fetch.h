@@ -77,7 +77,7 @@ class Response;
 /// HTTP response class (unified interface)
 class Response {
 public:
-    Response() FL_NO_EXCEPT : mStatusCode(200), mStatusText("OK") {}
+    Response() FL_NOEXCEPT : mStatusCode(200), mStatusText("OK") {}
     Response(int status_code) : mStatusCode(status_code), mStatusText(get_default_status_text(status_code)) {}
     Response(int status_code, const fl::string& status_text)
         : mStatusCode(status_code), mStatusText(status_text) {}
@@ -187,7 +187,7 @@ struct RequestOptions {
     fl::string body;
     int timeout_ms = 10000;  // 10 second default
     
-    RequestOptions() FL_NO_EXCEPT = default;
+    RequestOptions() FL_NOEXCEPT = default;
     RequestOptions(const fl::string& method_name) : method(method_name) {}
 };
 

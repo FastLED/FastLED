@@ -17,13 +17,13 @@ namespace fl {
 namespace platforms {
 
 // Serial initialization (no-op on Windows)
-void begin(u32 baudRate) FL_NO_EXCEPT {
+void begin(u32 baudRate) FL_NOEXCEPT {
     (void)baudRate;
     // Windows host platform doesn't have serial ports - no-op
 }
 
 // Print functions
-void print(const char* str) FL_NO_EXCEPT {
+void print(const char* str) FL_NOEXCEPT {
     if (!str) return;
 
     // Windows: Use direct system calls to stderr
@@ -37,25 +37,25 @@ void print(const char* str) FL_NO_EXCEPT {
     _write(2, str, static_cast<unsigned int>(len));  // 2 = stderr
 }
 
-void println(const char* str) FL_NO_EXCEPT {
+void println(const char* str) FL_NOEXCEPT {
     if (!str) return;
     print(str);
     print("\n");
 }
 
 // Input functions
-int available() FL_NO_EXCEPT {
+int available() FL_NOEXCEPT {
     // Windows testing - no input available in most cases
     // This is mainly for testing environments
     return 0;
 }
 
-int peek() FL_NO_EXCEPT {
+int peek() FL_NOEXCEPT {
     // Windows testing - no peek support
     return -1;
 }
 
-int read() FL_NO_EXCEPT {
+int read() FL_NOEXCEPT {
     // Windows testing - no input available in most cases
     // This is mainly for testing environments
     return -1;
@@ -68,7 +68,7 @@ int read() FL_NO_EXCEPT {
 // so any positive `timeoutMs` is also satisfied trivially (no draining
 // work to perform). The explicit `timeoutMs == 0` branch documents the
 // contract and prevents future drift if a buffered sink is ever added.
-bool flush(u32 timeoutMs) FL_NO_EXCEPT {
+bool flush(u32 timeoutMs) FL_NOEXCEPT {
     if (timeoutMs == 0) {
         return true;
     }
@@ -76,7 +76,7 @@ bool flush(u32 timeoutMs) FL_NO_EXCEPT {
     return true;
 }
 
-size_t write_bytes(const u8* buffer, size_t size) FL_NO_EXCEPT {
+size_t write_bytes(const u8* buffer, size_t size) FL_NOEXCEPT {
     if (!buffer || size == 0) return 0;
 
     // Write raw bytes to stderr
@@ -84,17 +84,17 @@ size_t write_bytes(const u8* buffer, size_t size) FL_NO_EXCEPT {
     return (written >= 0) ? static_cast<size_t>(written) : 0;
 }
 
-bool serial_ready() FL_NO_EXCEPT {
+bool serial_ready() FL_NOEXCEPT {
     // Windows host platform always "ready" (stderr always available)
     return true;
 }
 
-bool serial_is_buffered() FL_NO_EXCEPT {
+bool serial_is_buffered() FL_NOEXCEPT {
     // Windows stderr is always "buffered" (not ROM UART - that's ESP32-specific)
     return true;
 }
 
-int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
+int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
     (void)delimiter; (void)out; (void)outLen;
     return -1;  // Not supported on Windows host builds
 }

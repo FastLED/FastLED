@@ -45,7 +45,7 @@
 namespace fl {
 
 // Factory method implementation - binds to MCPWM implementation
-fl::shared_ptr<GpioIsrRx> GpioIsrRx::create(int pin) FL_NO_EXCEPT {
+fl::shared_ptr<GpioIsrRx> GpioIsrRx::create(int pin) FL_NOEXCEPT {
     return GpioIsrRxMcpwm_create(pin);
 }
 
@@ -58,7 +58,7 @@ namespace fl {
 // No MCPWM hardware (or no RMT5 support) on this SoC — ISR RX not
 // available. Returning null lets the caller substitute DummyRxDevice
 // at runtime rather than failing to link.
-fl::shared_ptr<GpioIsrRx> GpioIsrRx::create(int pin) FL_NO_EXCEPT {
+fl::shared_ptr<GpioIsrRx> GpioIsrRx::create(int pin) FL_NOEXCEPT {
     (void)pin;
     return fl::shared_ptr<GpioIsrRx>();
 }

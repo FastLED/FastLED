@@ -53,10 +53,10 @@ public:
         : mRequestId(requestId), mResponseSink(fl::move(sink)), mIsFinal(false) {}
 
     // Non-copyable but movable
-    ResponseSend(const ResponseSend&) FL_NO_EXCEPT = delete;
-    ResponseSend& operator=(const ResponseSend&) FL_NO_EXCEPT = delete;
-    ResponseSend(ResponseSend&&) FL_NO_EXCEPT = default;
-    ResponseSend& operator=(ResponseSend&&) FL_NO_EXCEPT = default;
+    ResponseSend(const ResponseSend&) FL_NOEXCEPT = delete;
+    ResponseSend& operator=(const ResponseSend&) FL_NOEXCEPT = delete;
+    ResponseSend(ResponseSend&&) FL_NOEXCEPT = default;
+    ResponseSend& operator=(ResponseSend&&) FL_NOEXCEPT = default;
 
     /**
      * @brief Send a single response (for ASYNC mode)

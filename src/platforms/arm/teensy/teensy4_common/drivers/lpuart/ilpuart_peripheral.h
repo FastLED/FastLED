@@ -88,13 +88,13 @@ public:
     virtual ~ILPUARTInstance() = default;
 
     /// @brief Get a writable pointer to the TX buffer (wave8-encoded UART bytes).
-    virtual u8* getTxBuffer() FL_NO_EXCEPT = 0;
+    virtual u8* getTxBuffer() FL_NOEXCEPT = 0;
 
     /// @brief Get the TX buffer size in bytes.
-    virtual u32 getTxBufferSize() const FL_NO_EXCEPT = 0;
+    virtual u32 getTxBufferSize() const FL_NOEXCEPT = 0;
 
     /// @brief Trigger a synchronous eDMA transmission. Blocks until done.
-    virtual void show() FL_NO_EXCEPT = 0;
+    virtual void show() FL_NOEXCEPT = 0;
 
 protected:
     ILPUARTInstance() = default;
@@ -121,7 +121,7 @@ public:
     /// @brief Validate whether a pin can carry LPUART TX on the target board.
     /// @param pin Teensy digital pin number.
     /// @return Validation result with error message if invalid.
-    virtual LPUARTPinResult validatePin(u8 pin) const FL_NO_EXCEPT = 0;
+    virtual LPUARTPinResult validatePin(u8 pin) const FL_NOEXCEPT = 0;
 
     /// @brief Create an LPUART TX instance bound to a single pin.
     /// @param tx_pin Digital pin number (must be in `kLPUARTTxPins`).
@@ -134,11 +134,11 @@ public:
     /// @return Instance handle, or `nullptr` on failure.
     virtual fl::unique_ptr<ILPUARTInstance> createInstance(
         u8 tx_pin, u32 total_leds, bool is_rgbw,
-        u32 t1_ns, u32 t2_ns, u32 t3_ns, u32 reset_us) FL_NO_EXCEPT = 0;
+        u32 t1_ns, u32 t2_ns, u32 t3_ns, u32 reset_us) FL_NOEXCEPT = 0;
 
     /// @brief Get the platform-specific peripheral instance. Implemented in
     ///        the real driver TU (Teensy 4.x) and the host stub TU (tests).
-    static fl::shared_ptr<ILPUARTPeripheral> create() FL_NO_EXCEPT;
+    static fl::shared_ptr<ILPUARTPeripheral> create() FL_NOEXCEPT;
 
 protected:
     ILPUARTPeripheral() = default;

@@ -56,7 +56,7 @@ struct ConfigI2S {
     ConfigI2S(int pin_ws, int pin_sd, int pin_clk, int i2s_num,
               AudioChannel mic_channel, u16 sample_rate, u8 bit_resolution,
               I2SCommFormat comm_format = I2SCommFormat::Philips,
-              bool invert = false) FL_NO_EXCEPT : mPinWs(pin_ws),
+              bool invert = false) FL_NOEXCEPT : mPinWs(pin_ws),
                                                  mPinSd(pin_sd),
                                                  mPinClk(pin_clk),
                                                  mI2sNum(i2s_num),
@@ -76,7 +76,7 @@ struct ConfigPdm {
 
     ConfigPdm(int pin_din, int pin_clk, int i2s_num,
               u16 sample_rate = AUDIO_DEFAULT_SAMPLE_RATE,
-              bool invert = false) FL_NO_EXCEPT : mPinDin(pin_din),
+              bool invert = false) FL_NOEXCEPT : mPinDin(pin_din),
                                                  mPinClk(pin_clk),
                                                  mI2sNum(i2s_num),
                                                  mSampleRate(sample_rate),
@@ -102,7 +102,7 @@ enum class I2SPort {
 };
 
 // Get LRCLK (WS) pin for given I2S port
-constexpr int getPinWS(I2SPort port) FL_NO_EXCEPT {
+constexpr int getPinWS(I2SPort port) FL_NOEXCEPT {
 #if defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_35) ||                    \
     defined(FL_IS_TEENSY_36)
     // Teensy 3.x - only I2S1 available
@@ -117,7 +117,7 @@ constexpr int getPinWS(I2SPort port) FL_NO_EXCEPT {
 }
 
 // Get RX (SD) pin for given I2S port
-constexpr int getPinSD(I2SPort port) FL_NO_EXCEPT {
+constexpr int getPinSD(I2SPort port) FL_NOEXCEPT {
 #if defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_35) ||                    \
     defined(FL_IS_TEENSY_36)
     // Teensy 3.x
@@ -132,7 +132,7 @@ constexpr int getPinSD(I2SPort port) FL_NO_EXCEPT {
 }
 
 // Get BCLK pin for given I2S port
-constexpr int getPinCLK(I2SPort port) FL_NO_EXCEPT {
+constexpr int getPinCLK(I2SPort port) FL_NOEXCEPT {
 #if defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_35) ||                    \
     defined(FL_IS_TEENSY_36)
     // Teensy 3.x
@@ -152,7 +152,7 @@ class Config : public fl::variant<ConfigI2S, ConfigPdm> {
     // The most common microphone on Amazon as of 2025-September.
     static Config CreateInmp441(int pin_ws, int pin_sd, int pin_clk,
                                 AudioChannel channel, u16 sample_rate = 44100ul,
-                                int i2s_num = 0) FL_NO_EXCEPT {
+                                int i2s_num = 0) FL_NOEXCEPT {
         ConfigI2S config(pin_ws, pin_sd, pin_clk, i2s_num, channel, sample_rate,
                          16);
         Config out(config);
@@ -164,7 +164,7 @@ class Config : public fl::variant<ConfigI2S, ConfigPdm> {
     static Config CreateIcs43434(int pin_ws, int pin_sd, int pin_clk,
                                  AudioChannel channel,
                                  u16 sample_rate = 44100ul,
-                                 int i2s_num = 0) FL_NO_EXCEPT {
+                                 int i2s_num = 0) FL_NOEXCEPT {
         ConfigI2S config(pin_ws, pin_sd, pin_clk, i2s_num, channel, sample_rate,
                          16);
         Config out(config);
@@ -176,7 +176,7 @@ class Config : public fl::variant<ConfigI2S, ConfigPdm> {
     static Config CreateGenericMEMS(int pin_ws, int pin_sd, int pin_clk,
                                     AudioChannel channel,
                                     u16 sample_rate = 44100ul,
-                                    int i2s_num = 0) FL_NO_EXCEPT {
+                                    int i2s_num = 0) FL_NOEXCEPT {
         ConfigI2S config(pin_ws, pin_sd, pin_clk, i2s_num, channel, sample_rate,
                          16);
         Config out(config);
@@ -193,7 +193,7 @@ class Config : public fl::variant<ConfigI2S, ConfigPdm> {
         AudioChannel channel = AudioChannel::Right,
         u16 sample_rate = AUDIO_DEFAULT_SAMPLE_RATE,
         u8 bit_resolution = AUDIO_DEFAULT_BIT_RESOLUTION,
-        MicProfile profile = MicProfile::GenericMEMS) FL_NO_EXCEPT {
+        MicProfile profile = MicProfile::GenericMEMS) FL_NOEXCEPT {
         ConfigI2S config(
             TeensyI2S::getPinWS(port),  // pin_ws (LRCLK)
             TeensyI2S::getPinSD(port),  // pin_sd (RX)
@@ -212,7 +212,7 @@ class Config : public fl::variant<ConfigI2S, ConfigPdm> {
     static Config CreateSpm1423Pdm(int pin_din, int pin_clk,
                                    u16 sample_rate = AUDIO_DEFAULT_SAMPLE_RATE,
                                    int i2s_num = 0,
-                                   bool invert = false) FL_NO_EXCEPT {
+                                   bool invert = false) FL_NOEXCEPT {
         Config out(ConfigPdm(pin_din, pin_clk, i2s_num, sample_rate, invert));
         out.setMicProfile(MicProfile::SPM1423);
         return out;
@@ -223,28 +223,28 @@ class Config : public fl::variant<ConfigI2S, ConfigPdm> {
     static Config CreatePdm(int pin_din, int pin_clk,
                             u16 sample_rate = AUDIO_DEFAULT_SAMPLE_RATE,
                             int i2s_num = 0, bool invert = false,
-                            MicProfile profile = MicProfile::None) FL_NO_EXCEPT {
+                            MicProfile profile = MicProfile::None) FL_NOEXCEPT {
         Config out(
             ConfigPdm(pin_din, pin_clk, i2s_num, sample_rate, invert));
         out.setMicProfile(profile);
         return out;
     }
 
-    Config(const ConfigI2S &config) FL_NO_EXCEPT
+    Config(const ConfigI2S &config) FL_NOEXCEPT
         : fl::variant<ConfigI2S, ConfigPdm>(config) {}
-    Config(const ConfigPdm &config) FL_NO_EXCEPT
+    Config(const ConfigPdm &config) FL_NOEXCEPT
         : fl::variant<ConfigI2S, ConfigPdm>(config) {}
 
     /// Digital gain applied to all input samples. Default 1.0 (no change).
-    void setGain(float gain) FL_NO_EXCEPT { mGain = gain; }
-    float getGain() const FL_NO_EXCEPT { return mGain; }
+    void setGain(float gain) FL_NOEXCEPT { mGain = gain; }
+    float getGain() const FL_NOEXCEPT { return mGain; }
 
     /// Microphone pink noise correction profile.
     /// Compensates for the frequency response of specific microphones.
-    void setMicProfile(MicProfile profile) FL_NO_EXCEPT {
+    void setMicProfile(MicProfile profile) FL_NOEXCEPT {
         mMicProfile = profile;
     }
-    MicProfile getMicProfile() const FL_NO_EXCEPT { return mMicProfile; }
+    MicProfile getMicProfile() const FL_NOEXCEPT { return mMicProfile; }
 
   private:
     float mGain = 1.0f;
@@ -269,27 +269,27 @@ class IInput {
     //   queue and then they can just be popped off the queue.
     static fl::shared_ptr<IInput>
     create(const Config &config,
-           fl::string *error_message = nullptr) FL_NO_EXCEPT;
+           fl::string *error_message = nullptr) FL_NOEXCEPT;
 
-    virtual ~IInput() FL_NO_EXCEPT = default;
+    virtual ~IInput() FL_NOEXCEPT = default;
     // Starts the audio source.
-    virtual void start() FL_NO_EXCEPT = 0;
+    virtual void start() FL_NOEXCEPT = 0;
     // Stops the audio source, call this before light sleep.
-    virtual void stop() FL_NO_EXCEPT = 0;
+    virtual void stop() FL_NOEXCEPT = 0;
 
     virtual bool error(fl::string *msg = nullptr)
-        FL_NO_EXCEPT = 0; // if an error occured then query it here.
+        FL_NOEXCEPT = 0; // if an error occured then query it here.
     // Read audio data and return as Sample with calculated timestamp.
     // Returns invalid Sample on error or when no data is available.
-    virtual Sample read() FL_NO_EXCEPT = 0;
+    virtual Sample read() FL_NOEXCEPT = 0;
 
     /// Digital gain applied to raw PCM samples. Default 1.0 (no change).
-    void setGain(float gain) FL_NO_EXCEPT { mGain = gain; }
-    float getGain() const FL_NO_EXCEPT { return mGain; }
+    void setGain(float gain) FL_NOEXCEPT { mGain = gain; }
+    float getGain() const FL_NOEXCEPT { return mGain; }
 
     // Read all available audio data and return as Sample. All AudioSamples
     // returned by this will be valid. Gain is applied to each sample.
-    size_t readAll(fl::vector_inlined<Sample, 16> *out) FL_NO_EXCEPT {
+    size_t readAll(fl::vector_inlined<Sample, 16> *out) FL_NOEXCEPT {
         size_t count = 0;
         while (true) {
             Sample sample = read();
@@ -314,7 +314,7 @@ class IInput {
 // platform-specific implementations
 fl::shared_ptr<IInput> platform_create_audio_input(
     const Config &config,
-    fl::string *error_message = nullptr) FL_NO_EXCEPT FL_LINK_WEAK;
+    fl::string *error_message = nullptr) FL_NOEXCEPT FL_LINK_WEAK;
 
 } // namespace audio
 } // namespace fl

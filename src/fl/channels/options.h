@@ -52,13 +52,13 @@ struct ChannelOptions {
 
     /// @return The active Rgbw if mWhiteCfg holds one, else RgbwInvalid::value().
     /// Backward-compat shim for code paths that pre-date the variant migration.
-    Rgbw rgbw() const FL_NO_EXCEPT {
+    Rgbw rgbw() const FL_NOEXCEPT {
         if (auto* p = mWhiteCfg.ptr<Rgbw>()) return *p;
         return RgbwInvalid::value();
     }
 
     /// @return The active Rgbww if mWhiteCfg holds one, else RgbwwInvalid::value().
-    Rgbww rgbww() const FL_NO_EXCEPT {
+    Rgbww rgbww() const FL_NOEXCEPT {
         if (auto* p = mWhiteCfg.ptr<Rgbww>()) return *p;
         return RgbwwInvalid::value();
     }
@@ -67,13 +67,13 @@ struct ChannelOptions {
     /// variant alternative AND an active mode — a stored
     /// `RgbwInvalid::value()` does not count, mirroring the legacy
     /// `Rgbw::active()` semantics.
-    bool isRgbw() const FL_NO_EXCEPT {
+    bool isRgbw() const FL_NOEXCEPT {
         auto* p = mWhiteCfg.ptr<Rgbw>();
         return p != nullptr && p->active();
     }
     /// True if this channel emits 5-channel RGBWW. Same active-flag check as
     /// isRgbw() — a stored `RgbwwInvalid::value()` does not count.
-    bool isRgbww() const FL_NO_EXCEPT {
+    bool isRgbww() const FL_NOEXCEPT {
         auto* p = mWhiteCfg.ptr<Rgbww>();
         return p != nullptr && p->active();
     }

@@ -10,7 +10,7 @@ namespace detail {
 template <typename T, fl::size N = 0>
 class GaussianFilterImpl {
   public:
-    GaussianFilterImpl() FL_NO_EXCEPT : mLastValue(T(0)) {}
+    GaussianFilterImpl() FL_NOEXCEPT : mLastValue(T(0)) {}
     explicit GaussianFilterImpl(fl::size capacity)
         : mBuf(capacity), mLastValue(T(0)) {}
 

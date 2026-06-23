@@ -55,7 +55,7 @@ class Fire2012 : public Fx1d {
         heat.resize(num_leds); // Vector elements are default-initialized
     }
 
-    ~Fire2012() FL_NO_EXCEPT {}
+    ~Fire2012() FL_NOEXCEPT {}
 
     void draw(DrawContext context) override {
         fl::span<CRGB> leds = context.leds;

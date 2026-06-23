@@ -81,45 +81,6 @@ _ENV_PREFIX_RE = re.compile(
     r'^([A-Z_][A-Z0-9_]*)=((?:[^\s"\']|"[^"]*"|\'[^\']*\')+)\s+'
 )
 
-# Heredoc body matcher: opener line (<<EOF / <<'EOF' / <<-EOF / <<-"EOF")
-# through the matching closing-delimiter line. The body is *data* passed to
-# the program, not shell code that could invoke another tool, so we strip
-# bodies before scanning for `cargo`/`rustc`/etc.
-#
-# Without this, `git commit -m "$(cat <<'EOF' ... cargo install zccache ...
-# EOF)"` would trip on the literal word `cargo` inside the commit message
-# body and falsely block the commit. The hook is supposed to detect
-# *invocations*, not text content.
-_HEREDOC_BODY_RE = re.compile(
-    r"""
-    (?P<opener>
-      <<-?                          # <<DELIM or <<-DELIM (tab-stripped form)
-      (?P<q>['"]?)                  # optional surrounding quote on delimiter
-      (?P<delim>[A-Za-z_][A-Za-z0-9_]*)
-      (?P=q)                        # matching quote close
-      [^\n]*                        # rest of opener line (redirection target etc.)
-    )
-    \n                              # opener line ends
-    .*?                             # heredoc body (lazy)
-    ^[\t\ ]*(?P=delim)\s*$          # closing delimiter on its own line
-    """,
-    re.DOTALL | re.MULTILINE | re.VERBOSE,
-)
-
-
-def strip_heredoc_bodies(command: str) -> str:
-    """Replace heredoc body content with an empty body so the matcher only
-    scans actual shell code, not heredoc-borne data.
-
-    Preserves the opener line (so downstream tokenization still sees `cat
-    <<EOF` as a real command position) and the closing delimiter (so the
-    next command after the heredoc still has correct boundaries).
-    """
-    return _HEREDOC_BODY_RE.sub(
-        lambda m: m.group("opener") + "\n" + m.group("delim"),
-        command,
-    )
-
 
 def strip_env_prefix(command: str) -> tuple[str, dict[str, str]]:
     """Strip leading `VAR=value` env-var assignments. Return (rest, vars)."""
@@ -147,12 +108,7 @@ def _matches_rust_tool(command: str) -> str | None:
       1. First token (after env-var prefix) is one of RUST_TOOLS.
       2. Mid-chain occurrence: ` <tool> ` somewhere in the command
          (catches `cd /x && cargo build`, `(cd y; rustc …)`, etc.).
-
-    Heredoc bodies are stripped first so commit messages, generated docs,
-    and JSON payloads containing the literal word `cargo` don't trip a
-    false positive. The hook detects invocations, not text content.
     """
-    command = strip_heredoc_bodies(command)
     rest, _ = strip_env_prefix(command.lstrip())
     # If already running under soldr, treat as compliant.
     if re.match(r"soldr(\s|$)", rest):

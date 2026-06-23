@@ -52,7 +52,7 @@ private:
 public:
     /// @brief Construct a counting semaphore with an initial count
     /// @param desired Initial count (must be >= 0 and <= LeastMaxValue)
-    explicit CountingSemaphoreRP(ptrdiff_t desired) FL_NO_EXCEPT;
+    explicit CountingSemaphoreRP(ptrdiff_t desired) FL_NOEXCEPT;
 
     ~CountingSemaphoreRP();
 
@@ -64,14 +64,14 @@ public:
 
     /// @brief Increment the semaphore count by update
     /// @param update Number to add to the count (default 1)
-    void release(ptrdiff_t update = 1) FL_NO_EXCEPT;
+    void release(ptrdiff_t update = 1) FL_NOEXCEPT;
 
     /// @brief Decrement the semaphore count, blocking if count is 0
-    void acquire() FL_NO_EXCEPT;
+    void acquire() FL_NOEXCEPT;
 
     /// @brief Try to decrement the semaphore count without blocking
     /// @return true if successful, false if count was 0
-    bool try_acquire() FL_NO_EXCEPT;
+    bool try_acquire() FL_NOEXCEPT;
 
     /// @brief Try to acquire with a timeout
     /// @tparam Rep Duration representation type
@@ -79,7 +79,7 @@ public:
     /// @param rel_time Maximum time to wait
     /// @return true if acquired within timeout, false otherwise
     template<class Rep, class Period>
-    bool try_acquire_for(const std::chrono::duration<Rep, Period>& rel_time) FL_NO_EXCEPT;  // okay std namespace
+    bool try_acquire_for(const std::chrono::duration<Rep, Period>& rel_time) FL_NOEXCEPT;  // okay std namespace
 
     /// @brief Try to acquire until an absolute time point
     /// @tparam Clock Clock type
@@ -87,11 +87,11 @@ public:
     /// @param abs_time Absolute time point to wait until
     /// @return true if acquired before timeout, false otherwise
     template<class Clock, class Duration>
-    bool try_acquire_until(const std::chrono::time_point<Clock, Duration>& abs_time) FL_NO_EXCEPT;  // okay std namespace
+    bool try_acquire_until(const std::chrono::time_point<Clock, Duration>& abs_time) FL_NOEXCEPT;  // okay std namespace
 
     /// @brief Get the maximum value the semaphore can hold
     /// @return LeastMaxValue
-    static constexpr ptrdiff_t max() FL_NO_EXCEPT {
+    static constexpr ptrdiff_t max() FL_NOEXCEPT {
         return LeastMaxValue;
     }
 };

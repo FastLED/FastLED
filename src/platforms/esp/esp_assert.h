@@ -8,7 +8,7 @@
 
 // Forward declaration to avoid pulling in fl/stl/cstdio.h and causing fl/stl/cstdio.cpp to be compiled
 namespace fl {
-    void println(const char* str) FL_NO_EXCEPT;
+    void println(const char* str) FL_NOEXCEPT;
 }
 
 // Gate the entire macro body on FASTLED_LOG_RUNTIME_ENABLED so release

@@ -35,7 +35,7 @@ constexpr int PRIORITY_SPI_HW_2 = 6;   // Lower (2-lane dual-SPI)
 static void addSpiHw2IfPossible() {
     // Note: SPIDualSAMD51 class is defined in spi_hw_2_samd51.cpp.hpp
     // which is included by _build.hpp before this file
-    FL_DBG_F("SAMD51: Registering SpiHw2 instances");
+    FL_DBG("SAMD51: Registering SpiHw2 instances");
 
     // SAMD51 has multiple SERCOM peripherals available for SPI
     static auto controller0 = fl::make_shared<SPIDualSAMD51>(0, "SPI0");
@@ -44,14 +44,14 @@ static void addSpiHw2IfPossible() {
     SpiHw2::registerInstance(controller0);
     SpiHw2::registerInstance(controller1);
 
-    FL_DBG_F("SAMD51: SpiHw2 instances registered");
+    FL_DBG("SAMD51: SpiHw2 instances registered");
 }
 
 /// @brief Register SAMD51 SpiHw4 instances
 static void addSpiHw4IfPossible() {
     // Note: SPIQuadSAMD51 class is defined in spi_hw_4_samd51.cpp.hpp
     // which is included by _build.hpp before this file
-    FL_DBG_F("SAMD51: Registering SpiHw4 instances");
+    FL_DBG("SAMD51: Registering SpiHw4 instances");
 
     // SAMD51 has multiple SERCOM peripherals available for SPI
     static auto controller0 = fl::make_shared<SPIQuadSAMD51>(0, "SPI0");
@@ -60,7 +60,7 @@ static void addSpiHw4IfPossible() {
     SpiHw4::registerInstance(controller0);
     SpiHw4::registerInstance(controller1);
 
-    FL_DBG_F("SAMD51: SpiHw4 instances registered");
+    FL_DBG("SAMD51: SpiHw4 instances registered");
 }
 
 }  // namespace detail
@@ -79,13 +79,13 @@ namespace platforms {
 /// Platform availability:
 /// - SAMD51: Both SpiHw2 and SpiHw4 (via SERCOM)
 void initSpiHardware() {
-    FL_DBG_F("SAMD51: Initializing SPI hardware");
+    FL_DBG("SAMD51: Initializing SPI hardware");
 
     // Register in priority order (highest to lowest)
     detail::addSpiHw4IfPossible();  // Priority 7
     detail::addSpiHw2IfPossible();  // Priority 6
 
-    FL_DBG_F("SAMD51: SPI hardware initialized");
+    FL_DBG("SAMD51: SPI hardware initialized");
 }
 
 }  // namespace platforms

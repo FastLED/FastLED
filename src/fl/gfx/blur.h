@@ -27,10 +27,10 @@ namespace gfx {
 /// it can be used to (slowly) clear the LEDs to black.
 /// @param leds span of LEDs to blur
 /// @param blur_amount the amount of blur to apply
-void blur1d(fl::span<CRGB> leds, fract8 blur_amount) FL_NO_EXCEPT;
+void blur1d(fl::span<CRGB> leds, fract8 blur_amount) FL_NOEXCEPT;
 
 /// Legacy raw-pointer version of blur1d.
-inline void blur1d(CRGB *leds, u16 numLeds, fract8 blur_amount) FL_NO_EXCEPT {
+inline void blur1d(CRGB *leds, u16 numLeds, fract8 blur_amount) FL_NOEXCEPT {
     blur1d(fl::span<CRGB>(leds, numLeds), blur_amount);
 }
 
@@ -50,11 +50,11 @@ inline void blur1d(CRGB *leds, u16 numLeds, fract8 blur_amount) FL_NO_EXCEPT {
 /// @param height the height of the matrix
 /// @param blur_amount the amount of blur to apply
 void blur2d(fl::span<CRGB> leds, u8 width, u8 height, fract8 blur_amount,
-            const XYMap &xymap) FL_NO_EXCEPT;
+            const XYMap &xymap) FL_NOEXCEPT;
 
 /// Legacy raw-pointer version of blur2d.
 inline void blur2d(CRGB *leds, u8 width, u8 height, fract8 blur_amount,
-                   const XYMap &xymap) FL_NO_EXCEPT {
+                   const XYMap &xymap) FL_NOEXCEPT {
     blur2d(fl::span<CRGB>(leds, u16(width) * u16(height)), width, height,
            blur_amount, xymap);
 }
@@ -62,7 +62,7 @@ inline void blur2d(CRGB *leds, u8 width, u8 height, fract8 blur_amount,
 /// Legacy version of blur2d, which does not require an XYMap but instead
 /// implicitly binds to XY() function. If you are hitting a linker error here,
 /// then use blur2d(..., const fl::XYMap& xymap) instead.
-void blur2d(CRGB *leds, u8 width, u8 height, fract8 blur_amount) FL_NO_EXCEPT
+void blur2d(CRGB *leds, u8 width, u8 height, fract8 blur_amount) FL_NOEXCEPT
     FASTLED_DEPRECATED("Use blur2d(..., const XYMap& xymap) instead");
 
 /// Perform a blur1d() on every row of a rectangular matrix (span version).
@@ -72,11 +72,11 @@ void blur2d(CRGB *leds, u8 width, u8 height, fract8 blur_amount) FL_NO_EXCEPT
 /// @param height the height of the matrix
 /// @param blur_amount the amount of blur to apply
 void blurRows(fl::span<CRGB> leds, u8 width, u8 height, fract8 blur_amount,
-              const XYMap &xymap) FL_NO_EXCEPT;
+              const XYMap &xymap) FL_NOEXCEPT;
 
 /// Legacy raw-pointer version of blurRows.
 inline void blurRows(CRGB *leds, u8 width, u8 height, fract8 blur_amount,
-                     const XYMap &xymap) FL_NO_EXCEPT {
+                     const XYMap &xymap) FL_NOEXCEPT {
     blurRows(fl::span<CRGB>(leds, u16(width) * u16(height)), width, height,
              blur_amount, xymap);
 }
@@ -84,11 +84,11 @@ inline void blurRows(CRGB *leds, u8 width, u8 height, fract8 blur_amount,
 /// Perform a blur1d() on every column of a rectangular matrix (span version).
 /// @copydetails blurRows()
 void blurColumns(fl::span<CRGB> leds, u8 width, u8 height, fract8 blur_amount,
-                 const XYMap &xymap) FL_NO_EXCEPT;
+                 const XYMap &xymap) FL_NOEXCEPT;
 
 /// Legacy raw-pointer version of blurColumns.
 inline void blurColumns(CRGB *leds, u8 width, u8 height, fract8 blur_amount,
-                        const XYMap &xymap) FL_NO_EXCEPT {
+                        const XYMap &xymap) FL_NOEXCEPT {
     blurColumns(fl::span<CRGB>(leds, u16(width) * u16(height)), width, height,
                 blur_amount, xymap);
 }
@@ -97,17 +97,17 @@ inline void blurColumns(CRGB *leds, u8 width, u8 height, fract8 blur_amount,
 /// Uses direct rectangular indexing for cache-coherent access.
 /// @param canvas the canvas to blur in-place
 /// @param blur_amount alpha8 blur amount
-void blur2d(Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NO_EXCEPT;
+void blur2d(Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NOEXCEPT;
 
 /// Perform a blur1d() on every row of a rectangular matrix (Canvas version).
 /// @param canvas the canvas to blur in-place
 /// @param blur_amount alpha8 blur amount
-void blurRows(Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NO_EXCEPT;
+void blurRows(Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NOEXCEPT;
 
 /// Perform a blur1d() on every column of a rectangular matrix (Canvas version).
 /// @param canvas the canvas to blur in-place
 /// @param blur_amount alpha8 blur amount
-void blurColumns(Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NO_EXCEPT;
+void blurColumns(Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NOEXCEPT;
 
 /// @} ColorBlurs
 
@@ -118,16 +118,16 @@ void blurColumns(Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NO_EXCEPT;
 /// @param canvas The canvas to blur in-place.
 /// @param dimFactor UNORM8 brightness scale [0, 255] where 255 = no dim.
 template <int hRadius, int vRadius, typename RGB_T>
-void blurGaussian(Canvas<RGB_T> &canvas, alpha8 dimFactor) FL_NO_EXCEPT;
+void blurGaussian(Canvas<RGB_T> &canvas, alpha8 dimFactor) FL_NOEXCEPT;
 
 /// @brief Higher-precision dim overload (UNORM16).
 /// @param dimFactor UNORM16 brightness scale [0, 65535] where 65535 = no dim.
 template <int hRadius, int vRadius, typename RGB_T>
-void blurGaussian(Canvas<RGB_T> &canvas, alpha16 dimFactor) FL_NO_EXCEPT;
+void blurGaussian(Canvas<RGB_T> &canvas, alpha16 dimFactor) FL_NOEXCEPT;
 
 /// @brief Convenience overload with no dimming.
 template <int hRadius, int vRadius, typename RGB_T>
-inline void blurGaussian(Canvas<RGB_T> &canvas) FL_NO_EXCEPT {
+inline void blurGaussian(Canvas<RGB_T> &canvas) FL_NOEXCEPT {
     blurGaussian<hRadius, vRadius>(canvas, alpha8(255));
 }
 
@@ -138,51 +138,51 @@ inline void blurGaussian(Canvas<RGB_T> &canvas) FL_NO_EXCEPT {
 /// @param canvas The CanvasMapped to blur in-place.
 /// @param dimFactor UNORM8 brightness scale.
 template <int hRadius, int vRadius, typename RGB_T>
-void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha8 dimFactor) FL_NO_EXCEPT;
+void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha8 dimFactor) FL_NOEXCEPT;
 
 /// @brief Higher-precision dim overload for CanvasMapped (UNORM16).
 template <int hRadius, int vRadius, typename RGB_T>
-void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha16 dimFactor) FL_NO_EXCEPT;
+void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha16 dimFactor) FL_NOEXCEPT;
 
 } // namespace gfx
 
 // Span-based bindings — forward fl::blur* to fl::gfx::blur*
-inline void blur1d(fl::span<CRGB> leds, fract8 blur_amount) FL_NO_EXCEPT {
+inline void blur1d(fl::span<CRGB> leds, fract8 blur_amount) FL_NOEXCEPT {
     gfx::blur1d(leds, blur_amount);
 }
 inline void blur2d(fl::span<CRGB> leds, u8 width, u8 height,
-                   fract8 blur_amount, const XYMap &xymap) FL_NO_EXCEPT {
+                   fract8 blur_amount, const XYMap &xymap) FL_NOEXCEPT {
     gfx::blur2d(leds, width, height, blur_amount, xymap);
 }
 inline void blurRows(fl::span<CRGB> leds, u8 width, u8 height,
-                     fract8 blur_amount, const XYMap &xymap) FL_NO_EXCEPT {
+                     fract8 blur_amount, const XYMap &xymap) FL_NOEXCEPT {
     gfx::blurRows(leds, width, height, blur_amount, xymap);
 }
 inline void blurColumns(fl::span<CRGB> leds, u8 width, u8 height,
-                        fract8 blur_amount, const XYMap &xymap) FL_NO_EXCEPT {
+                        fract8 blur_amount, const XYMap &xymap) FL_NOEXCEPT {
     gfx::blurColumns(leds, width, height, blur_amount, xymap);
 }
 
 // Canvas-based bindings — forward fl::blur* to fl::gfx::blur*
-inline void blur2d(gfx::Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NO_EXCEPT {
+inline void blur2d(gfx::Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NOEXCEPT {
     gfx::blur2d(canvas, blur_amount);
 }
-inline void blurRows(gfx::Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NO_EXCEPT {
+inline void blurRows(gfx::Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NOEXCEPT {
     gfx::blurRows(canvas, blur_amount);
 }
-inline void blurColumns(gfx::Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NO_EXCEPT {
+inline void blurColumns(gfx::Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NOEXCEPT {
     gfx::blurColumns(canvas, blur_amount);
 }
 
 // Legacy raw-pointer bindings — forward fl::blur* to fl::gfx::blur*
-inline void blur1d(CRGB *leds, u16 numLeds, fract8 blur_amount) FL_NO_EXCEPT {
+inline void blur1d(CRGB *leds, u16 numLeds, fract8 blur_amount) FL_NOEXCEPT {
     gfx::blur1d(leds, numLeds, blur_amount);
 }
 inline void blur2d(CRGB *leds, u8 width, u8 height, fract8 blur_amount,
-                   const XYMap &xymap) FL_NO_EXCEPT {
+                   const XYMap &xymap) FL_NOEXCEPT {
     gfx::blur2d(leds, width, height, blur_amount, xymap);
 }
-FASTLED_DEPRECATED("Use blur2d(..., const XYMap& xymap) instead") FL_NO_EXCEPT
+FASTLED_DEPRECATED("Use blur2d(..., const XYMap& xymap) instead") FL_NOEXCEPT
 inline void blur2d(CRGB *leds, u8 width, u8 height, fract8 blur_amount) {
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING(deprecated-declarations)
@@ -190,11 +190,11 @@ inline void blur2d(CRGB *leds, u8 width, u8 height, fract8 blur_amount) {
     FL_DISABLE_WARNING_POP
 }
 inline void blurRows(CRGB *leds, u8 width, u8 height, fract8 blur_amount,
-                     const XYMap &xymap) FL_NO_EXCEPT {
+                     const XYMap &xymap) FL_NOEXCEPT {
     gfx::blurRows(leds, width, height, blur_amount, xymap);
 }
 inline void blurColumns(CRGB *leds, u8 width, u8 height, fract8 blur_amount,
-                        const XYMap &xymap) FL_NO_EXCEPT {
+                        const XYMap &xymap) FL_NOEXCEPT {
     gfx::blurColumns(leds, width, height, blur_amount, xymap);
 }
 

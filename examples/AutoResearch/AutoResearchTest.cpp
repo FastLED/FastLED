@@ -1,17 +1,6 @@
 // AutoResearchTest.cpp - Generic LED autoresearch testing infrastructure
 // Driver-agnostic test function implementations
 
-// Gate out under low-memory mode -- this file pulls in <FastLED.h> and
-// the full chipset / encoder matrix (UCS7604, wave3, pixel iterators).
-// LowMemory targets don't use those (their RPC surface is in
-// AutoResearchLowMemory.h, which only uses fl::Remote + the LPC SCT
-// driver). Matches the conditional structure in AutoResearch.ino itself.
-#include "fl/system/sketch_macros.h"
-#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
-#define FASTLED_AUTORESEARCH_LOW_MEMORY 1
-#endif
-#if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
-
 #include "AutoResearchTest.h"
 #include "LegacyClocklessProxy.h"
 #include <FastLED.h>
@@ -61,18 +50,13 @@ void dumpRawEdgeTiming(fl::shared_ptr<fl::RxChannel> rx_channel,
     size_t start_idx = range.offset;
     size_t end_idx = range.offset + edge_count;
 
-    // Single-line collated edge dump. Was one FL_WARN per edge (~32-256
-    // lines per call) which dominated the Teensy 4 UART TX FIFO on every
-    // decode-failure path. Compact format keeps the diagnostic value
-    // (each edge as `H580` or `L640`) while shipping in a single WS
-    // frame. See fbuild#755 follow-up FL_WARN audit.
-    {
-        fl::sstream edge_dump;
-        edge_dump << "[RAW EDGES " << start_idx << ".." << (end_idx - 1) << "]";
-        for (size_t i = 0; i < edge_count; i++) {
-            edge_dump << " " << (edges[i].high ? "H" : "L") << edges[i].ns;
-        }
-        FL_WARN(edge_dump.str());
+    FL_WARN("[RAW EDGES " << start_idx << ".." << (end_idx - 1) << "]");
+
+    // Display edges (edges buffer contains data starting from offset)
+    for (size_t i = 0; i < edge_count; i++) {
+        const char* level = edges[i].high ? "H" : "L";
+        size_t absolute_index = start_idx + i;
+        FL_WARN("  [" << absolute_index << "] " << level << " " << edges[i].ns);
     }
 
     // Pattern analysis (only if showing edges from start)
@@ -475,11 +459,7 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel, fl::span<uint8_t> rx_bu
         auto decode_result = rx_channel->decode(rx_timing, rx_buffer);
         if (!decode_result.ok()) {
             FL_WARN("[CAPTURE] UART decode failed (error: " << static_cast<int>(decode_result.error()) << ")");
-            // Was EdgeRange(0, 256) -- 257 FL_WARN lines per decode failure
-// drowned the Teensy 4 UART TX FIFO and stalled autoresearch
-// between patterns (fbuild#755). 32 edges is enough to see whether
-// the first transition is a clean bit-0 or a glitch.
-dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
+            dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 256));
             return 0;
         }
         FL_WARN("[CAPTURE] UART decoded " << decode_result.value() << " LED bytes");
@@ -498,11 +478,7 @@ dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
         size_t decoded = decodeSpiEdges(rx_channel, rx_buffer, spi_clock_hz);
         if (decoded == 0) {
             FL_WARN("[CAPTURE] SPI decode failed");
-            // Was EdgeRange(0, 256) -- 257 FL_WARN lines per decode failure
-// drowned the Teensy 4 UART TX FIFO and stalled autoresearch
-// between patterns (fbuild#755). 32 edges is enough to see whether
-// the first transition is a clean bit-0 or a glitch.
-dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
+            dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 256));
         }
         return decoded;
     }
@@ -613,11 +589,7 @@ dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
         // This can happen during warmup/setup and is not fatal
         FL_WARN("Decode failed (error code: " << static_cast<int>(decode_result.error()) << ")");
         // Print raw edge timing on decode failure to diagnose the issue
-        // Was EdgeRange(0, 256) -- 257 FL_WARN lines per decode failure
-// drowned the Teensy 4 UART TX FIFO and stalled autoresearch
-// between patterns (fbuild#755). 32 edges is enough to see whether
-// the first transition is a clean bit-0 or a glitch.
-dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
+        dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 256));
         return 0;
     }
 
@@ -823,23 +795,11 @@ void runMultiTest(const char* test_name,
             // Check pixel data
             int mismatches = 0;
 
-            // Diagnostic: single-line driver + first-24-bytes dump. Was 26
-            // FL_WARNs (one per byte) -- on a 4-pattern test that produced 104
-            // serial lines of pure hex dump, which dominated the Teensy 4 UART
-            // TX FIFO under bursty autoresearch loads (fbuild#755 followup,
-            // FastLED#3219 stack of fixes). Collapsing into a single
-            // space-separated hex string keeps the diagnostic value while
-            // dropping per-pattern serial overhead from ~2.1 KB to ~80 bytes.
-            {
-                fl::sstream hex_dump;
-                size_t dump_count = (bytes_captured < 24) ? bytes_captured : 24;
-                for (size_t i = 0; i < dump_count; i++) {
-                    if (i > 0) hex_dump << " ";
-                    hex_dump << fl::hex << static_cast<int>(config.rx_buffer[i]) << fl::dec;
-                }
-                FL_WARN("[RUN " << run << "] Driver=" << config.driver_name
-                        << " bytes_captured=" << bytes_captured
-                        << " first" << static_cast<int>(dump_count) << "=" << hex_dump.str());
+            // DEBUG: Print first 24 bytes of captured data
+            FL_WARN("[RUN " << run << "] Driver=" << config.driver_name << ", bytes_captured=" << bytes_captured);
+            FL_WARN("[RUN " << run << "] First 24 bytes:");
+            for (size_t i = 0; i < 24 && i < bytes_captured; i++) {
+                FL_WARN("  [" << i << "] = 0x" << fl::hex << static_cast<int>(config.rx_buffer[i]) << fl::dec);
             }
 
             if (isUCS7604(config.encoder)) {
@@ -1303,5 +1263,3 @@ const char* getBitPatternName(int pattern_id) {
         default: return "Unknown Pattern";
     }
 }
-
-#endif  // !FASTLED_AUTORESEARCH_LOW_MEMORY

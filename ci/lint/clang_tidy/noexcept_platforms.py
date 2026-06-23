@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Clang-tidy rule: enforce FL_NO_EXCEPT on all functions in src/platforms/.
+"""Clang-tidy rule: enforce FL_NOEXCEPT on all functions in src/platforms/.
 
 Embedded platforms compile with -fno-exceptions but toolchains may still
 generate .eh_frame unwind tables (~26KB bloat on ESP32). Marking functions
-FL_NO_EXCEPT lets the compiler skip unwind info.
+FL_NOEXCEPT lets the compiler skip unwind info.
 
-Uses clang-query (AST analysis) for zero false positives, then inserts FL_NO_EXCEPT
+Uses clang-query (AST analysis) for zero false positives, then inserts FL_NOEXCEPT
 at the correct position in function signatures.
 
 Usage:
@@ -38,7 +38,7 @@ _COMPILER_ARGS = [
     "-DFASTLED_TESTING",
     "-DFASTLED_NO_AUTO_NAMESPACE",
     "-fno-exceptions",
-    # Make existing FL_NO_EXCEPT visible as noexcept to clang-query
+    # Make existing FL_NOEXCEPT visible as noexcept to clang-query
     "-DFL_NOEXCEPT=noexcept",
 ]
 
@@ -143,16 +143,16 @@ def _find_missing_noexcept(clang_query: str) -> list[tuple[str, int, str]]:
 
 
 # ============================================================================
-# Step 3: Insert FL_NO_EXCEPT into function signatures
+# Step 3: Insert FL_NOEXCEPT into function signatures
 # ============================================================================
 
 
 def _insert_fl_noexcept(line: str) -> str | None:
-    """Insert FL_NO_EXCEPT into a function signature line.
+    """Insert FL_NOEXCEPT into a function signature line.
 
     Returns modified line, or None if insertion is not possible.
     """
-    if "FL_NO_EXCEPT" in line or "noexcept" in line:
+    if "FL_NOEXCEPT" in line or "noexcept" in line:
         return None
 
     code = line.rstrip()
@@ -209,19 +209,19 @@ def _insert_fl_noexcept(line: str) -> str | None:
     if re.search(r"~\w+\s*$", before):
         return None
 
-    # Insert FL_NO_EXCEPT at the correct position
+    # Insert FL_NOEXCEPT at the correct position
     if not after:
-        return before + " FL_NO_EXCEPT"
+        return before + " FL_NOEXCEPT"
     elif after[0] == ";":
-        return before + " FL_NO_EXCEPT;" + after[1:]
+        return before + " FL_NOEXCEPT;" + after[1:]
     elif after[0] == "{":
-        return before + " FL_NO_EXCEPT {" + after[1:]
+        return before + " FL_NOEXCEPT {" + after[1:]
     elif after.startswith("override") or after.startswith("final"):
-        return before + " FL_NO_EXCEPT " + after
+        return before + " FL_NOEXCEPT " + after
     elif after.startswith("__attribute__"):
-        return before + " FL_NO_EXCEPT " + after
+        return before + " FL_NOEXCEPT " + after
     else:
-        return before + " FL_NO_EXCEPT " + after
+        return before + " FL_NOEXCEPT " + after
 
 
 def _ensure_include(lines: list[str]) -> bool:
@@ -258,7 +258,7 @@ def _ensure_include(lines: list[str]) -> bool:
 
 
 def _apply_fixes(hits: list[tuple[str, int, str]], dry_run: bool) -> tuple[int, int]:
-    """Apply FL_NO_EXCEPT insertions to source files.
+    """Apply FL_NOEXCEPT insertions to source files.
 
     Returns (changes_applied, files_modified).
     """
@@ -320,14 +320,14 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(
         description=(
-            "Clang-tidy rule: enforce FL_NO_EXCEPT on platform functions. "
+            "Clang-tidy rule: enforce FL_NOEXCEPT on platform functions. "
             "Uses clang-query AST analysis for zero false positives."
         )
     )
     parser.add_argument(
         "--fix",
         action="store_true",
-        help="Auto-fix: insert FL_NO_EXCEPT into source files (default: check only)",
+        help="Auto-fix: insert FL_NOEXCEPT into source files (default: check only)",
     )
     args = parser.parse_args()
 
@@ -347,7 +347,7 @@ def main() -> int:
     hits = _find_missing_noexcept(clang_query)
 
     if not hits:
-        print("\nAll functions have FL_NO_EXCEPT. Nothing to do.")
+        print("\nAll functions have FL_NOEXCEPT. Nothing to do.")
         return 0
 
     # Group by file for display
@@ -356,7 +356,7 @@ def main() -> int:
         by_file.setdefault(filepath, []).append((line_num, line_text))
 
     print(
-        f"\nFound {len(hits)} functions missing FL_NO_EXCEPT in {len(by_file)} files:\n"
+        f"\nFound {len(hits)} functions missing FL_NOEXCEPT in {len(by_file)} files:\n"
     )
 
     if args.fix:

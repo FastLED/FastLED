@@ -30,7 +30,7 @@ namespace fl {
 /// @param out Output iterator for encoded bytes
 /// @note P9813 uses BGR wire order: pixel[0]=Blue, pixel[1]=Green, pixel[2]=Red
 template <typename InputIterator, typename OutputIterator>
-void encodeP9813(InputIterator first, InputIterator last, OutputIterator out) FL_NO_EXCEPT {
+void encodeP9813(InputIterator first, InputIterator last, OutputIterator out) FL_NOEXCEPT {
     // Start boundary: 4 bytes of 0x00
     *out++ = 0x00;
     *out++ = 0x00;

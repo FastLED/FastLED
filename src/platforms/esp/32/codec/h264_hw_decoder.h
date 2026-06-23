@@ -16,17 +16,17 @@ namespace fl {
 // Wraps the esp_h264 component from ESP-IDF.
 class H264HwDecoder : public IDecoder {
 public:
-    H264HwDecoder() FL_NO_EXCEPT;
+    H264HwDecoder() FL_NOEXCEPT;
     ~H264HwDecoder() override;
 
-    bool begin(fl::filebuf_ptr stream) FL_NO_EXCEPT override;
-    void end() FL_NO_EXCEPT override;
-    bool isReady() const FL_NO_EXCEPT override;
-    bool hasError(fl::string* msg = nullptr) const FL_NO_EXCEPT override;
+    bool begin(fl::filebuf_ptr stream) FL_NOEXCEPT override;
+    void end() FL_NOEXCEPT override;
+    bool isReady() const FL_NOEXCEPT override;
+    bool hasError(fl::string* msg = nullptr) const FL_NOEXCEPT override;
 
-    DecodeResult decode() FL_NO_EXCEPT override;
-    Frame getCurrentFrame() FL_NO_EXCEPT override;
-    bool hasMoreFrames() const FL_NO_EXCEPT override;
+    DecodeResult decode() FL_NOEXCEPT override;
+    Frame getCurrentFrame() FL_NOEXCEPT override;
+    bool hasMoreFrames() const FL_NOEXCEPT override;
 
 private:
     struct Impl;

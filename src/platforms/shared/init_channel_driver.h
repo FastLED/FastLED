@@ -21,7 +21,7 @@ namespace platforms {
 /// For platforms without hardware-specific channel drivers (stub, posix, tests),
 /// this registers the stub driver as a fallback. This allows the legacy API to work
 /// and enables LED capture for testing.
-inline void initChannelDrivers() FL_NO_EXCEPT {
+inline void initChannelDrivers() FL_NOEXCEPT {
     // Register the stub channel driver (low priority fallback)
     // This allows tests and unsupported platforms to use the channel API
     fl::ChannelManager& manager = fl::ChannelManager::instance();

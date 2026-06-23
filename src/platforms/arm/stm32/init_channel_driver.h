@@ -18,7 +18,7 @@ namespace platforms {
 /// This function is called lazily on first access to the ChannelManager singleton.
 ///
 /// @note Implementation is in src/platforms/arm/stm32/init_channel_driver_stm32.cpp.hpp
-void initChannelDrivers() FL_NO_EXCEPT;
+void initChannelDrivers() FL_NOEXCEPT;
 
 }  // namespace platforms
 }  // namespace fl

@@ -8,19 +8,19 @@ namespace platforms {
 
 /// Raw platform delay without async task pumping
 /// @param ms Milliseconds to delay
-void delay(fl::u32 ms) FL_NO_EXCEPT;
+void delay(fl::u32 ms) FL_NOEXCEPT;
 
 /// Raw platform microsecond delay
 /// @param us Microseconds to delay
-void delayMicroseconds(fl::u32 us) FL_NO_EXCEPT;
+void delayMicroseconds(fl::u32 us) FL_NOEXCEPT;
 
 /// Raw platform millisecond timer
 /// @return Milliseconds since system startup
-fl::u32 millis() FL_NO_EXCEPT;
+fl::u32 millis() FL_NOEXCEPT;
 
 /// Raw platform microsecond timer
 /// @return Microseconds since system startup
-fl::u32 micros() FL_NO_EXCEPT;
+fl::u32 micros() FL_NOEXCEPT;
 
 }  // namespace platforms
 }  // namespace fl

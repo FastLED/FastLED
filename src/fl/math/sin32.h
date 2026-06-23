@@ -27,7 +27,7 @@ struct SinCos32 {
 };
 
 // Read an i32 from the PROGMEM-qualified LUT.
-FASTLED_FORCE_INLINE i32 read_sin32_lut(const i32* addr) FL_NO_EXCEPT {
+FASTLED_FORCE_INLINE i32 read_sin32_lut(const i32* addr) FL_NOEXCEPT {
     return (i32)FL_PGM_READ_DWORD_ALIGNED(addr);
 }
 
@@ -37,7 +37,7 @@ FASTLED_FORCE_INLINE i32 read_sin32_lut(const i32* addr) FL_NO_EXCEPT {
 // dmask: 0x00000000 (direct) or 0xFFFFFFFF (mirrored, negates derivative)
 // t: fraction in [0, 65535]
 // offset: 0 for sin, 2 for cos (selects which pair within the stride-4 entry)
-FASTLED_FORCE_INLINE i32 sin32_interp(u8 qi, u8 qi_next, i32 dmask, u32 t, u8 offset = 0) FL_NO_EXCEPT {
+FASTLED_FORCE_INLINE i32 sin32_interp(u8 qi, u8 qi_next, i32 dmask, u32 t, u8 offset = 0) FL_NOEXCEPT {
     i32 y0 = read_sin32_lut(&sinCosPairedLut[qi * 4 + offset]);
     i32 m0 = read_sin32_lut(&sinCosPairedLut[qi * 4 + offset + 1]);
     i32 y1 = read_sin32_lut(&sinCosPairedLut[qi_next * 4 + offset]);
@@ -56,7 +56,7 @@ FASTLED_FORCE_INLINE i32 sin32_interp(u8 qi, u8 qi_next, i32 dmask, u32 t, u8 of
 // output is between -2147418112 and 2147418112
 // Branchless quarter-wave lookup with quadratic interpolation.
 // Cost: 3 table loads, 2 i64 multiplies, no branches.
-FASTLED_FORCE_INLINE i32 sin32(u32 angle) FL_NO_EXCEPT {
+FASTLED_FORCE_INLINE i32 sin32(u32 angle) FL_NOEXCEPT {
     u8 angle256 = static_cast<u8>(angle >> 16);  // 0..255
     u32 t = angle & 0xFFFF;                       // 0..65535
 
@@ -78,14 +78,14 @@ FASTLED_FORCE_INLINE i32 sin32(u32 angle) FL_NO_EXCEPT {
 
 // 0 to 16777216 is a full circle
 // output is between -2147418112 and 2147418112
-FASTLED_FORCE_INLINE i32 cos32(u32 angle) FL_NO_EXCEPT {
+FASTLED_FORCE_INLINE i32 cos32(u32 angle) FL_NOEXCEPT {
     return sin32(angle + 4194304u);
 }
 
 // Compute sin and cos simultaneously, faster than separate sin32+cos32 calls.
 // Uses paired LUT: sin and cos data colocated at same index (no qi_c computation).
 // Cost: 6 table loads, 4 i64 multiplies, no branches.
-FASTLED_FORCE_INLINE SinCos32 sincos32(u32 angle) FL_NO_EXCEPT {
+FASTLED_FORCE_INLINE SinCos32 sincos32(u32 angle) FL_NOEXCEPT {
     u8 angle256 = static_cast<u8>(angle >> 16);
     u32 t = angle & 0xFFFF;
 
@@ -118,14 +118,14 @@ FASTLED_FORCE_INLINE SinCos32 sincos32(u32 angle) FL_NO_EXCEPT {
 
 // 0 to 65536 is a full circle
 // output is between -32767 and 32767
-FASTLED_FORCE_INLINE i16 sin16lut(u16 angle) FL_NO_EXCEPT {
+FASTLED_FORCE_INLINE i16 sin16lut(u16 angle) FL_NOEXCEPT {
     u32 angle32 = static_cast<u32>(angle) << 8;
     return static_cast<i16>(sin32(angle32) >> 16);
 }
 
 // 0 to 65536 is a full circle
 // output is between -32767 and 32767
-FASTLED_FORCE_INLINE i16 cos16lut(u16 angle) FL_NO_EXCEPT {
+FASTLED_FORCE_INLINE i16 cos16lut(u16 angle) FL_NOEXCEPT {
     u32 angle32 = static_cast<u32>(angle) << 8;
     return static_cast<i16>(cos32(angle32) >> 16);
 }
@@ -142,7 +142,7 @@ struct FL_ALIGNAS(16) SinCos32_simd {
 ///
 /// @param angles 4 u32 angles (0 to 16777216 per angle is a full circle)
 /// @return SinCos32_simd with raw i32 values (range: -2147418112 to 2147418112)
-FASTLED_FORCE_INLINE SinCos32_simd sincos32_simd(simd::simd_u32x4 angles) FL_NO_EXCEPT {
+FASTLED_FORCE_INLINE SinCos32_simd sincos32_simd(simd::simd_u32x4 angles) FL_NOEXCEPT {
     // ========== Phase 1a: SIMD angle decomposition ==========
     // Break down each of the 4 angles into components needed for LUT lookup
 

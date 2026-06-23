@@ -35,6 +35,7 @@ test_pch = custom_target('test_pch',
   input: 'test_pch.h',
   output: 'test_pch.h.pch',      # Only PCH is an output; .d file is depfile only
   depfile: 'test_pch.h.d',
+  depends: [fastled_lib],         # Ensure library is built first (tests link against it)
   command: [
     uv, 'run', 'python',
     meson.project_source_root() / 'ci/compile_pch.py',
@@ -153,11 +154,11 @@ all_test_runners = []
 # Environment for test execution - ensure fastled.dll and runtime DLLs are discoverable
 test_env = environment()
 test_env.prepend('PATH', fastled_lib_dir)
-# Clang-tool-chain runtime DLL PATH injection removed as probe (#3129 A6).
-# ZCCACHE_LINK_DEPLOY_CMD=clang-tool-chain-libdeploy (zccache#33) is the
-# upstream-blessed replacement. If ASan/MinGW DLLs go missing in CI,
-# revert this hunk + ci/meson/native/meson.build to re-enable the
-# belt-and-suspenders injection.
+# Add clang-tool-chain runtime dirs so ASan/MinGW DLLs are found even when
+# zccache caches the link and skips ctc-clang++'s post-link deployment.
+foreach _rtdll_dir : runtime_dll_paths
+  test_env.prepend('PATH', _rtdll_dir)
+endforeach
 
 # Find python once for test wrapper (avoid 245 find_program calls inside loop)
 python_exe = find_program('python')
@@ -301,7 +302,9 @@ foreach test_name : test_names
   # timeout to match the meson timeout (runner defaults to 20s otherwise).
   this_test_env = environment()
   this_test_env.prepend('PATH', fastled_lib_dir)
-  # Runtime-DLL PATH injection removed — see test_env above and #3129 A6.
+  foreach _rtdll_dir : runtime_dll_paths
+    this_test_env.prepend('PATH', _rtdll_dir)
+  endforeach
   this_test_env.set('FASTLED_TEST_TIMEOUT', test_timeout.to_string())
 
   if use_wrapper

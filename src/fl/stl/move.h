@@ -25,7 +25,7 @@ using remove_reference_t = typename remove_reference<T>::type;
 
 // Implementation of move
 template <typename T>
-constexpr typename remove_reference<T>::type &&move(T &&t) FL_NO_EXCEPT {
+constexpr typename remove_reference<T>::type &&move(T &&t) FL_NOEXCEPT {
     return static_cast<typename remove_reference<T>::type &&>(t);
 }
 

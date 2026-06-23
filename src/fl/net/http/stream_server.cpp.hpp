@@ -25,7 +25,7 @@ HttpStreamServer::HttpStreamServer(u16 port, u32 heartbeatIntervalMs)
     mRecvBuffer.reserve(16384);
 }
 
-HttpStreamServer::~HttpStreamServer() FL_NO_EXCEPT {
+HttpStreamServer::~HttpStreamServer() FL_NOEXCEPT {
     disconnect();
 }
 

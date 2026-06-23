@@ -42,28 +42,28 @@ inline SamdWatchdogState& samdWatchdogState() {
 
 } // namespace platforms
 
-Watchdog& Watchdog::instance() FL_NO_EXCEPT {
+Watchdog& Watchdog::instance() FL_NOEXCEPT {
     static Watchdog sInstance;
     return sInstance;
 }
 
-void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
+void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     if (timeout_ms == 0) timeout_ms = 1000;
     if (timeout_ms > FL_WATCHDOG_MAX_TIMEOUT_MS) timeout_ms = FL_WATCHDOG_MAX_TIMEOUT_MS;
     ::Watchdog.enable(static_cast<int>(timeout_ms));
     platforms::samdWatchdogState().armed = true;
 }
 
-void Watchdog::feed() FL_NO_EXCEPT {
+void Watchdog::feed() FL_NOEXCEPT {
     ::Watchdog.reset();
 }
 
-void Watchdog::disable() FL_NO_EXCEPT {
+void Watchdog::disable() FL_NOEXCEPT {
     ::Watchdog.disable();
     platforms::samdWatchdogState().armed = false;
 }
 
-ResetCause Watchdog::lastResetCause() const FL_NO_EXCEPT {
+ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
     auto& s = platforms::samdWatchdogState();
     if (!s.cause_cached) {
         // Adafruit_SleepyDog's resetCause(): 0=POR, 1=BOD12, 2=BOD33,
@@ -86,45 +86,45 @@ ResetCause Watchdog::lastResetCause() const FL_NO_EXCEPT {
     return s.cached_cause;
 }
 
-bool Watchdog::lastResetWasWatchdog() const FL_NO_EXCEPT {
+bool Watchdog::lastResetWasWatchdog() const FL_NOEXCEPT {
     return lastResetCause() == ResetCause::WATCHDOG;
 }
 
-fl::u8 Watchdog::persistRead(fl::size idx) const FL_NO_EXCEPT {
+fl::u8 Watchdog::persistRead(fl::size idx) const FL_NOEXCEPT {
     if (idx >= FL_WATCHDOG_PERSIST_BYTES) return 0;
     return platforms::samdWatchdogState().persist[idx];
 }
-void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NO_EXCEPT {
+void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NOEXCEPT {
     if (idx >= FL_WATCHDOG_PERSIST_BYTES) return;
     platforms::samdWatchdogState().persist[idx] = v;
 }
 
-fl::u16 Watchdog::consecutiveCrashCount() const FL_NO_EXCEPT {
+fl::u16 Watchdog::consecutiveCrashCount() const FL_NOEXCEPT {
     (void)lastResetCause();
     return platforms::samdWatchdogState().crash_count;
 }
-void Watchdog::markCleanShutdown() FL_NO_EXCEPT { platforms::samdWatchdogState().crash_count = 0; }
-bool Watchdog::isInSafeMode() const FL_NO_EXCEPT { return consecutiveCrashCount() >= mSafeModeThreshold; }
-fl::u16 Watchdog::safeModeThreshold() const FL_NO_EXCEPT { return mSafeModeThreshold; }
-void    Watchdog::setSafeModeThreshold(fl::u16 t) FL_NO_EXCEPT { mSafeModeThreshold = t; }
+void Watchdog::markCleanShutdown() FL_NOEXCEPT { platforms::samdWatchdogState().crash_count = 0; }
+bool Watchdog::isInSafeMode() const FL_NOEXCEPT { return consecutiveCrashCount() >= mSafeModeThreshold; }
+fl::u16 Watchdog::safeModeThreshold() const FL_NOEXCEPT { return mSafeModeThreshold; }
+void    Watchdog::setSafeModeThreshold(fl::u16 t) FL_NOEXCEPT { mSafeModeThreshold = t; }
 
-FL_NO_RETURN void Watchdog::reboot() FL_NO_EXCEPT {
+FL_NORETURN void Watchdog::reboot() FL_NOEXCEPT {
     NVIC_SystemReset();
     while (true) {}
 }
 
-bool Watchdog::onTimeout(WatchdogTimeoutCallback, void*) FL_NO_EXCEPT { return false; }
-bool Watchdog::onTimeout(fl::function<void()>) FL_NO_EXCEPT { return false; }
-bool Watchdog::setPauseOnDebug(bool) FL_NO_EXCEPT { return false; }
-bool Watchdog::writeCrashLog(fl::span<const fl::u8>) FL_NO_EXCEPT { return false; }
-fl::size Watchdog::readCrashLog(fl::span<fl::u8>) const FL_NO_EXCEPT { return 0; }
-bool Watchdog::rebootIntoBootloader() FL_NO_EXCEPT { return false; }
+bool Watchdog::onTimeout(WatchdogTimeoutCallback, void*) FL_NOEXCEPT { return false; }
+bool Watchdog::onTimeout(fl::function<void()>) FL_NOEXCEPT { return false; }
+bool Watchdog::setPauseOnDebug(bool) FL_NOEXCEPT { return false; }
+bool Watchdog::writeCrashLog(fl::span<const fl::u8>) FL_NOEXCEPT { return false; }
+fl::size Watchdog::readCrashLog(fl::span<fl::u8>) const FL_NOEXCEPT { return 0; }
+bool Watchdog::rebootIntoBootloader() FL_NOEXCEPT { return false; }
 
-bool Watchdog::setWindow(fl::u32, fl::u32) FL_NO_EXCEPT { return false; }
-bool Watchdog::hasCrashReport() const FL_NO_EXCEPT { return false; }
-WatchdogCrashReport Watchdog::readCrashReport() const FL_NO_EXCEPT {
+bool Watchdog::setWindow(fl::u32, fl::u32) FL_NOEXCEPT { return false; }
+bool Watchdog::hasCrashReport() const FL_NOEXCEPT { return false; }
+WatchdogCrashReport Watchdog::readCrashReport() const FL_NOEXCEPT {
     WatchdogCrashReport r{}; r.valid = false; r.fault_type = ""; return r;
 }
-void Watchdog::clearCrashReport() FL_NO_EXCEPT {}
+void Watchdog::clearCrashReport() FL_NOEXCEPT {}
 
 } // namespace fl

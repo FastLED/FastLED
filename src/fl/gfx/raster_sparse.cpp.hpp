@@ -30,7 +30,7 @@ void XYRasterU8Sparse::rasterize(const span<const Tile2x2_u8> &tiles) {
     // Tile2x2_u8::Rasterize(tiles, this, mAbsoluteBoundsSet ? &mAbsoluteBounds
     // : nullptr);
     if (tiles.size() == 0) {
-        FL_WARN_F("Rasterize: no tiles");
+        FL_WARN("Rasterize: no tiles");
         return;
     }
     const rect<u16> *optional_bounds =

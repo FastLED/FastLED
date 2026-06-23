@@ -13,7 +13,7 @@ namespace fl {
 
 class TypeConversionResult {
 public:
-    TypeConversionResult() FL_NO_EXCEPT : mHasError(false) {}
+    TypeConversionResult() FL_NOEXCEPT : mHasError(false) {}
 
     static TypeConversionResult success() {
         return TypeConversionResult();

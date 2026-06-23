@@ -59,7 +59,7 @@ struct LcdRgbPeripheralConfig {
     bool use_psram;                      ///< Allocate buffers in PSRAM
 
     /// @brief Default constructor
-    LcdRgbPeripheralConfig() FL_NO_EXCEPT
+    LcdRgbPeripheralConfig() FL_NOEXCEPT
         : pclk_gpio(-1),
           vsync_gpio(-1),
           hsync_gpio(-1),
@@ -74,7 +74,7 @@ struct LcdRgbPeripheralConfig {
           use_psram(true) {}
 
     /// @brief Constructor with mandatory parameters
-    LcdRgbPeripheralConfig(int pclk, u32 freq, size_t lanes, size_t hres) FL_NO_EXCEPT
+    LcdRgbPeripheralConfig(int pclk, u32 freq, size_t lanes, size_t hres) FL_NOEXCEPT
         : pclk_gpio(pclk),
           vsync_gpio(-1),
           hsync_gpio(-1),
@@ -148,16 +148,16 @@ public:
     /// - Configures GPIO pins
     /// - Sets pixel clock frequency
     /// - Allocates hardware resources
-    virtual bool initialize(const LcdRgbPeripheralConfig& config) FL_NO_EXCEPT = 0;
+    virtual bool initialize(const LcdRgbPeripheralConfig& config) FL_NOEXCEPT = 0;
 
     /// @brief Shutdown and release all resources
     ///
     /// Maps to ESP-IDF: esp_lcd_panel_del()
-    virtual void deinitialize() FL_NO_EXCEPT = 0;
+    virtual void deinitialize() FL_NOEXCEPT = 0;
 
     /// @brief Check if peripheral is initialized
     /// @return true if initialized, false otherwise
-    virtual bool isInitialized() const FL_NO_EXCEPT = 0;
+    virtual bool isInitialized() const FL_NOEXCEPT = 0;
 
     //=========================================================================
     // Buffer Management
@@ -173,13 +173,13 @@ public:
     /// - Is 64-byte aligned (cache line alignment)
     /// - Is DMA-capable
     /// - Must be freed via freeFrameBuffer()
-    virtual u16* allocateFrameBuffer(size_t size_bytes) FL_NO_EXCEPT = 0;
+    virtual u16* allocateFrameBuffer(size_t size_bytes) FL_NOEXCEPT = 0;
 
     /// @brief Free frame buffer allocated via allocateFrameBuffer()
     /// @param buffer Buffer pointer (nullptr is safe, no-op)
     ///
     /// Maps to ESP-IDF: heap_caps_free()
-    virtual void freeFrameBuffer(u16* buffer) FL_NO_EXCEPT = 0;
+    virtual void freeFrameBuffer(u16* buffer) FL_NOEXCEPT = 0;
 
     //=========================================================================
     // Transmission Methods
@@ -194,16 +194,16 @@ public:
     ///
     /// This method queues a DMA transfer of the frame buffer to the LCD panel.
     /// The buffer must remain valid until the transfer completes (callback fires).
-    virtual bool drawFrame(const u16* buffer, size_t size_bytes) FL_NO_EXCEPT = 0;
+    virtual bool drawFrame(const u16* buffer, size_t size_bytes) FL_NOEXCEPT = 0;
 
     /// @brief Wait for all pending frame transfers to complete
     /// @param timeout_ms Timeout in milliseconds (0 = non-blocking poll)
     /// @return true if complete, false on timeout
-    virtual bool waitFrameDone(u32 timeout_ms) FL_NO_EXCEPT = 0;
+    virtual bool waitFrameDone(u32 timeout_ms) FL_NOEXCEPT = 0;
 
     /// @brief Check if a transfer is in progress
     /// @return true if busy, false if idle
-    virtual bool isBusy() const FL_NO_EXCEPT = 0;
+    virtual bool isBusy() const FL_NOEXCEPT = 0;
 
     //=========================================================================
     // Callback Registration
@@ -224,7 +224,7 @@ public:
     /// The callback:
     /// - Runs in ISR context (MUST be ISR-safe)
     /// - Returns true if high-priority task woken, false otherwise
-    virtual bool registerDrawCallback(void* callback, void* user_ctx) FL_NO_EXCEPT = 0;
+    virtual bool registerDrawCallback(void* callback, void* user_ctx) FL_NOEXCEPT = 0;
 
     //=========================================================================
     // State Inspection
@@ -232,7 +232,7 @@ public:
 
     /// @brief Get current configuration
     /// @return Reference to configuration
-    virtual const LcdRgbPeripheralConfig& getConfig() const FL_NO_EXCEPT = 0;
+    virtual const LcdRgbPeripheralConfig& getConfig() const FL_NOEXCEPT = 0;
 
     //=========================================================================
     // Platform Utilities
@@ -240,11 +240,11 @@ public:
 
     /// @brief Get current timestamp in microseconds
     /// @return Current timestamp (monotonic clock)
-    virtual u64 getMicroseconds() FL_NO_EXCEPT = 0;
+    virtual u64 getMicroseconds() FL_NOEXCEPT = 0;
 
     /// @brief Portable delay
     /// @param ms Delay duration in milliseconds
-    virtual void delay(u32 ms) FL_NO_EXCEPT = 0;
+    virtual void delay(u32 ms) FL_NOEXCEPT = 0;
 };
 
 } // namespace detail

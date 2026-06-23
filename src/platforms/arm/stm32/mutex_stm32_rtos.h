@@ -67,7 +67,7 @@ private:
 
 public:
     /// Constructor - creates mutex with default attributes (non-recursive, priority inherit)
-    explicit MutexSTM32_v2(const char* name = nullptr) FL_NO_EXCEPT : mMutexHandle(nullptr), mName(name) {
+    explicit MutexSTM32_v2(const char* name = nullptr) FL_NOEXCEPT : mMutexHandle(nullptr), mName(name) {
         osMutexAttr_t attr = {0};
         attr.name = mName;
         attr.attr_bits = osMutexPrioInherit; // Non-recursive, priority inheritance
@@ -93,14 +93,14 @@ public:
     MutexSTM32_v2& operator=(MutexSTM32_v2&&) = delete;
 
     /// Lock the mutex (blocks until acquired)
-    void lock() FL_NO_EXCEPT {
+    void lock() FL_NOEXCEPT {
         FL_ASSERT(mMutexHandle != nullptr, "Mutex not initialized");
         osStatus_t status = osMutexAcquire(mMutexHandle, osWaitForever);
         FL_ASSERT(status == osOK, "Failed to acquire mutex");
     }
 
     /// Unlock the mutex
-    void unlock() FL_NO_EXCEPT {
+    void unlock() FL_NOEXCEPT {
         FL_ASSERT(mMutexHandle != nullptr, "Mutex not initialized");
         osStatus_t status = osMutexRelease(mMutexHandle);
         FL_ASSERT(status == osOK, "Failed to release mutex");
@@ -108,7 +108,7 @@ public:
 
     /// Try to lock the mutex without blocking
     /// @return true if lock acquired, false if already locked
-    bool try_lock() FL_NO_EXCEPT {
+    bool try_lock() FL_NOEXCEPT {
         FL_ASSERT(mMutexHandle != nullptr, "Mutex not initialized");
         osStatus_t status = osMutexAcquire(mMutexHandle, 0); // No timeout
         return (status == osOK);
@@ -124,7 +124,7 @@ private:
 
 public:
     /// Constructor - creates recursive mutex with priority inheritance
-    explicit RecursiveMutexSTM32_v2(const char* name = nullptr) FL_NO_EXCEPT : mMutexHandle(nullptr), mName(name) {
+    explicit RecursiveMutexSTM32_v2(const char* name = nullptr) FL_NOEXCEPT : mMutexHandle(nullptr), mName(name) {
         osMutexAttr_t attr = {0};
         attr.name = mName;
         attr.attr_bits = osMutexRecursive | osMutexPrioInherit; // Recursive + priority inheritance
@@ -150,14 +150,14 @@ public:
     RecursiveMutexSTM32_v2& operator=(RecursiveMutexSTM32_v2&&) = delete;
 
     /// Lock the mutex (blocks until acquired, allows recursive locking)
-    void lock() FL_NO_EXCEPT {
+    void lock() FL_NOEXCEPT {
         FL_ASSERT(mMutexHandle != nullptr, "Recursive mutex not initialized");
         osStatus_t status = osMutexAcquire(mMutexHandle, osWaitForever);
         FL_ASSERT(status == osOK, "Failed to acquire recursive mutex");
     }
 
     /// Unlock the mutex (must be called once per lock() call)
-    void unlock() FL_NO_EXCEPT {
+    void unlock() FL_NOEXCEPT {
         FL_ASSERT(mMutexHandle != nullptr, "Recursive mutex not initialized");
         osStatus_t status = osMutexRelease(mMutexHandle);
         FL_ASSERT(status == osOK, "Failed to release recursive mutex");
@@ -165,7 +165,7 @@ public:
 
     /// Try to lock the mutex without blocking
     /// @return true if lock acquired, false if already locked by another thread
-    bool try_lock() FL_NO_EXCEPT {
+    bool try_lock() FL_NOEXCEPT {
         FL_ASSERT(mMutexHandle != nullptr, "Recursive mutex not initialized");
         osStatus_t status = osMutexAcquire(mMutexHandle, 0); // No timeout
         return (status == osOK);
@@ -224,14 +224,14 @@ public:
     MutexSTM32_v1& operator=(MutexSTM32_v1&&) = delete;
 
     /// Lock the mutex (blocks until acquired)
-    void lock() FL_NO_EXCEPT {
+    void lock() FL_NOEXCEPT {
         FL_ASSERT(mMutexHandle != nullptr, "Mutex not initialized");
         osStatus status = osMutexWait(mMutexHandle, osWaitForever);
         FL_ASSERT(status == osOK, "Failed to acquire mutex");
     }
 
     /// Unlock the mutex
-    void unlock() FL_NO_EXCEPT {
+    void unlock() FL_NOEXCEPT {
         FL_ASSERT(mMutexHandle != nullptr, "Mutex not initialized");
         osStatus status = osMutexRelease(mMutexHandle);
         FL_ASSERT(status == osOK, "Failed to release mutex");
@@ -239,7 +239,7 @@ public:
 
     /// Try to lock the mutex without blocking
     /// @return true if lock acquired, false if already locked
-    bool try_lock() FL_NO_EXCEPT {
+    bool try_lock() FL_NOEXCEPT {
         FL_ASSERT(mMutexHandle != nullptr, "Mutex not initialized");
         osStatus status = osMutexWait(mMutexHandle, 0); // No timeout
         return (status == osOK);
@@ -290,7 +290,7 @@ public:
     RecursiveMutexSTM32_v1& operator=(RecursiveMutexSTM32_v1&&) = delete;
 
     /// Lock the mutex (blocks until acquired, allows recursive locking)
-    void lock() FL_NO_EXCEPT {
+    void lock() FL_NOEXCEPT {
         FL_ASSERT(mMutexHandle != nullptr, "Recursive mutex not initialized");
 
         osThreadId currentThread = osThreadGetId();
@@ -311,7 +311,7 @@ public:
     }
 
     /// Unlock the mutex (must be called once per lock() call)
-    void unlock() FL_NO_EXCEPT {
+    void unlock() FL_NOEXCEPT {
         FL_ASSERT(mMutexHandle != nullptr, "Recursive mutex not initialized");
         FL_ASSERT(mLockCount > 0, "unlock() called without matching lock()");
         FL_ASSERT(mOwnerThread == osThreadGetId(), "unlock() called from non-owner thread");
@@ -328,7 +328,7 @@ public:
 
     /// Try to lock the mutex without blocking
     /// @return true if lock acquired, false if already locked by another thread
-    bool try_lock() FL_NO_EXCEPT {
+    bool try_lock() FL_NOEXCEPT {
         FL_ASSERT(mMutexHandle != nullptr, "Recursive mutex not initialized");
 
         osThreadId currentThread = osThreadGetId();
@@ -377,17 +377,17 @@ public:
     MutexSTM32Fake(MutexSTM32Fake&&) = delete;
     MutexSTM32Fake& operator=(MutexSTM32Fake&&) = delete;
 
-    void lock() FL_NO_EXCEPT {
+    void lock() FL_NOEXCEPT {
         FL_ASSERT(!mLocked, "MutexSTM32Fake: attempting to lock already locked mutex (non-recursive)");
         mLocked = true;
     }
 
-    void unlock() FL_NO_EXCEPT {
+    void unlock() FL_NOEXCEPT {
         FL_ASSERT(mLocked, "MutexSTM32Fake: unlock called on unlocked mutex");
         mLocked = false;
     }
 
-    bool try_lock() FL_NO_EXCEPT {
+    bool try_lock() FL_NOEXCEPT {
         if (mLocked) {
             return false;
         }
@@ -410,16 +410,16 @@ public:
     RecursiveMutexSTM32Fake(RecursiveMutexSTM32Fake&&) = delete;
     RecursiveMutexSTM32Fake& operator=(RecursiveMutexSTM32Fake&&) = delete;
 
-    void lock() FL_NO_EXCEPT {
+    void lock() FL_NOEXCEPT {
         mLockCount++;
     }
 
-    void unlock() FL_NO_EXCEPT {
+    void unlock() FL_NOEXCEPT {
         FL_ASSERT(mLockCount > 0, "RecursiveMutexSTM32Fake: unlock called without matching lock");
         mLockCount--;
     }
 
-    bool try_lock() FL_NO_EXCEPT {
+    bool try_lock() FL_NOEXCEPT {
         mLockCount++;
         return true;
     }

@@ -3,19 +3,19 @@
 
 namespace fl {
 
-UIDropdown::UIDropdown(const char *name, fl::span<fl::string> options) FL_NO_EXCEPT
+UIDropdown::UIDropdown(const char *name, fl::span<fl::string> options) FL_NOEXCEPT
     : mImpl(fl::string(name), options), mListener(this) {
     mListener.addToEngineEventsOnce();
 }
 
-UIDropdown::UIDropdown(const char *name, fl::initializer_list<fl::string> options) FL_NO_EXCEPT
+UIDropdown::UIDropdown(const char *name, fl::initializer_list<fl::string> options) FL_NOEXCEPT
     : mImpl(name, options), mListener(this) {
     mListener.addToEngineEventsOnce();
 }
 
-UIDropdown::~UIDropdown() FL_NO_EXCEPT {}
+UIDropdown::~UIDropdown() FL_NOEXCEPT {}
 
-void UIDropdown::Listener::onBeginFrame() FL_NO_EXCEPT {
+void UIDropdown::Listener::onBeginFrame() FL_NOEXCEPT {
     UIDropdown &owner = *mOwner;
 
     // Seed baseline before any first-frame advance so a nextOption() triggered

@@ -43,7 +43,7 @@ Note::Note(shared_ptr<Pitch> pitchDetector)
     , mVelocitySensitivity(1.0f)
 {}
 
-Note::~Note() FL_NO_EXCEPT = default;
+Note::~Note() FL_NOEXCEPT = default;
 
 void Note::update(shared_ptr<Context> context) {
     // Update pitch detector if we own it

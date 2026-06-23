@@ -12,7 +12,7 @@ FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
-template <int VAL> void getScalars(u8 & sppr, u8 & spr) FL_NO_EXCEPT {
+template <int VAL> void getScalars(u8 & sppr, u8 & spr) FL_NOEXCEPT {
   if(VAL > 4096) { sppr=7; spr=8; }
   else if(VAL > 3584) { sppr=6; spr=8; }
   else if(VAL > 3072) { sppr=5; spr=8; }
@@ -95,7 +95,7 @@ template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER, u32 pSPIX>
 class ARMHardwareSPIOutput {
   Selectable *mPSelect;
 
-  static inline void enable_pins(void) FL_NO_EXCEPT __attribute__((always_inline)) {
+  static inline void enable_pins(void) FL_NOEXCEPT __attribute__((always_inline)) {
     switch(_DATA_PIN) {
       case 0: CORE_PIN0_CONFIG =  PORT_PCR_MUX(2); break;
       case 1: CORE_PIN1_CONFIG =  PORT_PCR_MUX(5); break;
@@ -113,7 +113,7 @@ class ARMHardwareSPIOutput {
     }
   }
 
-  static inline void disable_pins(void) FL_NO_EXCEPT __attribute((always_inline)) {
+  static inline void disable_pins(void) FL_NOEXCEPT __attribute((always_inline)) {
     switch(_DATA_PIN) {
       case 0: CORE_PIN0_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1); break;
       case 1: CORE_PIN1_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1); break;
@@ -131,7 +131,7 @@ class ARMHardwareSPIOutput {
     }
   }
 
-  void setSPIRate() FL_NO_EXCEPT {
+  void setSPIRate() FL_NOEXCEPT {
     u8 sppr, spr;
     getScalars<_SPI_CLOCK_DIVIDER>(sppr, spr);
 
@@ -151,7 +151,7 @@ public:
   void setSelect(Selectable *pSelect) { mPSelect = pSelect; }
 
   // initialize the SPI subssytem
-  void init() FL_NO_EXCEPT {
+  void init() FL_NOEXCEPT {
     FastPin<_DATA_PIN>::setOutput();
     FastPin<_CLOCK_PIN>::setOutput();
 
@@ -171,7 +171,7 @@ public:
   }
 
   // latch the CS select
-  void inline select() FL_NO_EXCEPT __attribute__((always_inline)) {
+  void inline select() FL_NOEXCEPT __attribute__((always_inline)) {
     if(mPSelect != nullptr) { mPSelect->select(); }
     setSPIRate();
     enable_pins();
@@ -179,12 +179,12 @@ public:
 
 
   // release the CS select
-  void inline release() FL_NO_EXCEPT __attribute__((always_inline)) {
+  void inline release() FL_NOEXCEPT __attribute__((always_inline)) {
     disable_pins();
     if(mPSelect != nullptr) { mPSelect->release(); }
   }
 
-  void endTransaction() FL_NO_EXCEPT {
+  void endTransaction() FL_NOEXCEPT {
     waitFully();
     release();
   }
@@ -204,12 +204,12 @@ public:
   static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w & 0xFF); }
 
   // A raw set of writing byte values, assumes setup/init/waiting done elsewhere (static for use by adjustment classes)
-  static void writeBytesValueRaw(u8 value, int len) FL_NO_EXCEPT {
+  static void writeBytesValueRaw(u8 value, int len) FL_NOEXCEPT {
     while(len--) { writeByte(value); }
   }
 
   // A full cycle of writing a value for len bytes, including select, release, and waiting
-  void writeBytesValue(u8 value, int len) FL_NO_EXCEPT {
+  void writeBytesValue(u8 value, int len) FL_NOEXCEPT {
     setSPIRate();
     select();
     while(len--) {
@@ -220,7 +220,7 @@ public:
   }
 
   // A full cycle of writing a raw block of data out, including select, release, and waiting
-  template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) FL_NO_EXCEPT {
+  template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) FL_NOEXCEPT {
     setSPIRate();
     u8 *end = data + len;
     select();
@@ -236,7 +236,7 @@ public:
   void writeBytes(FASTLED_REGISTER u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 
-  template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NO_EXCEPT {
+  template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NOEXCEPT {
     int len = pixels.mLen;
 
     select();

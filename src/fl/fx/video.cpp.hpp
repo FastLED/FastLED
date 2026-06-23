@@ -1,4 +1,4 @@
-﻿#include "fl/fx/video.h"
+#include "fl/fx/video.h"
 
 #include "crgb.h"
 #include "fl/stl/detail/memory_file_handle.h"
@@ -31,23 +31,23 @@ void Video::pause(fl::u32 now) { mImpl->pause(now); }
 
 void Video::resume(fl::u32 now) { mImpl->resume(now); }
 
-Video::~Video() FL_NO_EXCEPT = default;
+Video::~Video() FL_NOEXCEPT = default;
 Video::Video(const Video &) = default;
-Video &Video::operator=(const Video &) FL_NO_EXCEPT = default;
+Video &Video::operator=(const Video &) FL_NOEXCEPT = default;
 
 bool Video::begin(filebuf_ptr handle) {
     if (!mImpl) {
-        FL_WARN_F("Video::begin: mImpl is null, manually constructed videos "
+        FL_WARN("Video::begin: mImpl is null, manually constructed videos "
                      "must include full parameters.");
         return false;
     }
     if (!handle) {
         mError = "filebuf is null";
-        FL_DBG_F("%s", mError.c_str());
+        FL_DBG(mError.c_str());
         return false;
     }
     if (mError.size()) {
-        FL_DBG_F("%s", mError.c_str());
+        FL_DBG(mError.c_str());
         return false;
     }
     mError.clear();
@@ -57,7 +57,7 @@ bool Video::begin(filebuf_ptr handle) {
 
 bool Video::draw(fl::u32 now, fl::span<CRGB> leds) {
     if (!mImpl) {
-        FL_WARN_F_IF(!mError.empty(), "%s", mError.c_str());
+        FL_WARN_IF(!mError.empty(), mError.c_str());
         return false;
     }
     bool ok = mImpl->draw(now, leds);
@@ -70,7 +70,7 @@ bool Video::draw(fl::u32 now, fl::span<CRGB> leds) {
 
 void Video::draw(DrawContext context) {
     if (!mImpl) {
-        FL_WARN_F_IF(!mError.empty(), "%s", mError.c_str());
+        FL_WARN_IF(!mError.empty(), mError.c_str());
         return;
     }
     mImpl->draw(context.now, context.leds);
@@ -121,12 +121,12 @@ size_t Video::pixelsPerFrame() const {
     return mImpl->pixelsPerFrame();
 }
 
-bool Video::hasEmbeddedScreenMap() const FL_NO_EXCEPT {
+bool Video::hasEmbeddedScreenMap() const FL_NOEXCEPT {
     if (!mImpl) return false;
     return mImpl->hasEmbeddedScreenMap();
 }
 
-const fl::string &Video::embeddedScreenMapJson() const FL_NO_EXCEPT {
+const fl::string &Video::embeddedScreenMapJson() const FL_NOEXCEPT {
     static const fl::string kEmpty;
     if (!mImpl) return kEmpty;
     return mImpl->embeddedScreenMapJson();
@@ -148,7 +148,7 @@ bool Video::rewind() {
 
 VideoFxWrapper::VideoFxWrapper(fl::shared_ptr<Fx> fx) : Fx1d(fx->getNumLeds()), mFx(fx) {
     if (!mFx->hasFixedFrameRate(&mFps)) {
-        FL_WARN_F("VideoFxWrapper: Fx does not have a fixed frame rate, "
+        FL_WARN("VideoFxWrapper: Fx does not have a fixed frame rate, "
                      "assuming 30fps.");
         mFps = 30.0f;
     }
@@ -157,7 +157,7 @@ VideoFxWrapper::VideoFxWrapper(fl::shared_ptr<Fx> fx) : Fx1d(fx->getNumLeds()), 
     mVideo->begin(mByteStream);
 }
 
-VideoFxWrapper::~VideoFxWrapper() FL_NO_EXCEPT = default;
+VideoFxWrapper::~VideoFxWrapper() FL_NOEXCEPT = default;
 
 string VideoFxWrapper::fxName() const {
     string out = "video_fx_wrapper: ";
@@ -174,7 +174,7 @@ void VideoFxWrapper::draw(DrawContext context) {
     }
     bool ok = mVideo->draw(context.now, context.leds);
     if (!ok) {
-        FL_WARN_F("VideoFxWrapper: draw failed.");
+        FL_WARN("VideoFxWrapper: draw failed.");
     }
 }
 

@@ -50,7 +50,7 @@ extern fl::u16 rand16seed; // = RAND16_SEED;
 
 /// Generate an 8-bit random number
 /// @returns random 8-bit number, in the range 0-255
-LIB8STATIC fl::u8 random8() FL_NO_EXCEPT {
+LIB8STATIC fl::u8 random8() FL_NOEXCEPT {
     rand16seed = APPLY_FASTLED_RAND16_2053(rand16seed) + FASTLED_RAND16_13849;
     // return the sum of the high and low bytes, for better
     //  mixing and non-sequential correlation
@@ -60,14 +60,14 @@ LIB8STATIC fl::u8 random8() FL_NO_EXCEPT {
 
 /// Generate a 16-bit random number
 /// @returns random 16-bit number, in the range 0-65535
-LIB8STATIC fl::u16 random16() FL_NO_EXCEPT {
+LIB8STATIC fl::u16 random16() FL_NOEXCEPT {
     rand16seed = APPLY_FASTLED_RAND16_2053(rand16seed) + FASTLED_RAND16_13849;
     return rand16seed;
 }
 
 /// Generate an 8-bit random number between 0 and lim
 /// @param lim the upper bound for the result, exclusive
-LIB8STATIC fl::u8 random8(fl::u8 lim) FL_NO_EXCEPT {
+LIB8STATIC fl::u8 random8(fl::u8 lim) FL_NOEXCEPT {
     fl::u8 r = random8();
     r = (r * lim) >> 8;
     return r;
@@ -76,7 +76,7 @@ LIB8STATIC fl::u8 random8(fl::u8 lim) FL_NO_EXCEPT {
 /// Generate an 8-bit random number in the given range
 /// @param min the lower bound for the random number, inclusive
 /// @param lim the upper bound for the random number, exclusive
-LIB8STATIC fl::u8 random8(fl::u8 min, fl::u8 lim) FL_NO_EXCEPT {
+LIB8STATIC fl::u8 random8(fl::u8 min, fl::u8 lim) FL_NOEXCEPT {
     fl::u8 delta = lim - min;
     fl::u8 r = random8(delta) + min;
     return r;
@@ -84,7 +84,7 @@ LIB8STATIC fl::u8 random8(fl::u8 min, fl::u8 lim) FL_NO_EXCEPT {
 
 /// Generate an 16-bit random number between 0 and lim
 /// @param lim the upper bound for the result, exclusive
-LIB8STATIC fl::u16 random16(fl::u16 lim) FL_NO_EXCEPT {
+LIB8STATIC fl::u16 random16(fl::u16 lim) FL_NOEXCEPT {
     fl::u16 r = random16();
     fl::u32 p = (fl::u32)lim * (fl::u32)r;
     r = p >> 16;
@@ -94,20 +94,20 @@ LIB8STATIC fl::u16 random16(fl::u16 lim) FL_NO_EXCEPT {
 /// Generate an 16-bit random number in the given range
 /// @param min the lower bound for the random number, inclusive
 /// @param lim the upper bound for the random number, exclusive
-LIB8STATIC fl::u16 random16(fl::u16 min, fl::u16 lim) FL_NO_EXCEPT {
+LIB8STATIC fl::u16 random16(fl::u16 min, fl::u16 lim) FL_NOEXCEPT {
     fl::u16 delta = lim - min;
     fl::u16 r = random16(delta) + min;
     return r;
 }
 
 /// Set the 16-bit seed used for the random number generator
-LIB8STATIC void random16_set_seed(fl::u16 seed) FL_NO_EXCEPT { rand16seed = seed; }
+LIB8STATIC void random16_set_seed(fl::u16 seed) FL_NOEXCEPT { rand16seed = seed; }
 
 /// Get the current seed value for the random number generator
-LIB8STATIC fl::u16 random16_get_seed() FL_NO_EXCEPT { return rand16seed; }
+LIB8STATIC fl::u16 random16_get_seed() FL_NOEXCEPT { return rand16seed; }
 
 /// Add entropy into the random number generator
-LIB8STATIC void random16_add_entropy(fl::u16 entropy) FL_NO_EXCEPT {
+LIB8STATIC void random16_add_entropy(fl::u16 entropy) FL_NOEXCEPT {
     rand16seed += entropy;
 }
 

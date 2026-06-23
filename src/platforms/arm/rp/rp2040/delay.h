@@ -18,7 +18,7 @@ namespace fl {
 /// @param ns Number of nanoseconds
 /// @param hz CPU frequency in Hz
 /// @return Number of cycles (rounded up)
-constexpr u32 cycles_from_ns_pico(u32 ns, u32 hz) FL_NO_EXCEPT {
+constexpr u32 cycles_from_ns_pico(u32 ns, u32 hz) FL_NOEXCEPT {
   // Round up: cycles = ceil(ns * hz / 1e9)
   // Using: (ns * hz + 999'999'999) / 1'000'000'000
   return ((u64)ns * (u64)hz + 999999999UL) / 1000000000UL;
@@ -27,7 +27,7 @@ constexpr u32 cycles_from_ns_pico(u32 ns, u32 hz) FL_NO_EXCEPT {
 /// Platform-specific implementation of nanosecond delay with runtime frequency (RP2040)
 /// @param ns Number of nanoseconds
 /// @param hz CPU frequency in Hz
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz) FL_NO_EXCEPT {
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz) FL_NOEXCEPT {
   u32 cycles = cycles_from_ns_pico(ns, hz);
   if (cycles == 0) return;
   delay_cycles_pico(cycles);
@@ -35,7 +35,7 @@ FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz) FL_NO_EXCEPT {
 
 /// Platform-specific implementation of nanosecond delay with auto-detected frequency (RP2040)
 /// @param ns Number of nanoseconds
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns) FL_NO_EXCEPT {
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns) FL_NOEXCEPT {
   // RP2040 clock is fixed at 125 MHz in normal mode
   constexpr u32 hz = 125000000UL;
   delayNanoseconds_impl(ns, hz);

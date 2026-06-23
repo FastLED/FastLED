@@ -24,4 +24,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: lpc845 Blink DemoReel100
+      args: lpc845 Blink DemoReel100 Fx/FxEngine

@@ -64,7 +64,7 @@ private:
 
     /// @brief Send '1' bit - optimized for 39MHz
     /// 0.8µs high (~31 cycles), 0.45µs low (~17 cycles)
-    FASTLED_FORCE_INLINE void send1() const FL_NO_EXCEPT {
+    FASTLED_FORCE_INLINE void send1() const FL_NOEXCEPT {
         FastPin<DATA_PIN>::hi();
         asm volatile(
             "nop; nop; nop; nop; nop; nop; nop; nop;"  // 8
@@ -82,7 +82,7 @@ private:
 
     /// @brief Send '0' bit - optimized for 39MHz
     /// 0.4µs high (~15 cycles), 0.85µs low (~33 cycles)
-    FASTLED_FORCE_INLINE void send0() const FL_NO_EXCEPT {
+    FASTLED_FORCE_INLINE void send0() const FL_NOEXCEPT {
         FastPin<DATA_PIN>::hi();
         asm volatile(
             "nop; nop; nop; nop; nop; nop; nop; nop;"  // 8
@@ -100,7 +100,7 @@ private:
 
     /// @brief Send byte with MSB first - optimized tight loop
     /// @param byte_value 8-bit value to send
-    FASTLED_FORCE_INLINE void sendByte(u8 byte_value) const FL_NO_EXCEPT {
+    FASTLED_FORCE_INLINE void sendByte(u8 byte_value) const FL_NOEXCEPT {
         // Unrolled loop for maximum performance
         if (byte_value & 0x80) send1(); else send0(); // bit 7
         if (byte_value & 0x40) send1(); else send0(); // bit 6
@@ -116,7 +116,7 @@ private:
     /// @param r Red channel value
     /// @param g Green channel value
     /// @param b Blue channel value
-    FASTLED_FORCE_INLINE void sendPixel(u8 r, u8 g, u8 b) const FL_NO_EXCEPT {
+    FASTLED_FORCE_INLINE void sendPixel(u8 r, u8 g, u8 b) const FL_NOEXCEPT {
         sendByte(g); // Green first
         sendByte(r); // Red second
         sendByte(b); // Blue third
@@ -127,20 +127,20 @@ public:
     ClocklessController_ezWS2812_GPIO_39MHz() : mNumLeds(0) {}
 
     /// @brief Initialize the controller
-    virtual void init() FL_NO_EXCEPT override {
+    virtual void init() FL_NOEXCEPT override {
         FastPin<DATA_PIN>::setOutput();
         FastPin<DATA_PIN>::lo();
     }
 
     /// @brief Get maximum refresh rate
-    virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT override {
+    virtual u16 getMaxRefreshRate() const FL_NOEXCEPT override {
         return 400; // Conservative rate for GPIO timing
     }
 
 protected:
     /// @brief Output pixels to LED strip - optimized for bulk processing
     /// @param pixels FastLED pixel controller with RGB data
-    virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT override {
+    virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NOEXCEPT override {
         mNumLeds = pixels.size();
 
         // Disable interrupts for precise timing - critical for WS2812

@@ -5,7 +5,6 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
-#include "fl/system/sketch_macros.h"  // FL_PLATFORM_HAS_LARGE_MEMORY -- gates RAM fields
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/strstream.h"  // IWYU pragma: keep
@@ -72,10 +71,10 @@ public:
     Remote(RequestSource source, ResponseSink sink);
 
     // Non-copyable, non-movable (lambda captures 'this')
-    Remote(const Remote&) FL_NO_EXCEPT = delete;
-    Remote(Remote&&) FL_NO_EXCEPT = delete;
-    Remote& operator=(const Remote&) FL_NO_EXCEPT = delete;
-    Remote& operator=(Remote&&) FL_NO_EXCEPT = delete;
+    Remote(const Remote&) FL_NOEXCEPT = delete;
+    Remote(Remote&&) FL_NOEXCEPT = delete;
+    Remote& operator=(const Remote&) FL_NOEXCEPT = delete;
+    Remote& operator=(Remote&&) FL_NOEXCEPT = delete;
 
     // =========================================================================
     // Method Registration
@@ -194,32 +193,23 @@ public:
     void reportError(const fl::json& data);
 
 protected:
-    // Storage for async request IDs (method name -> request ID).
-    // Gated on Low-memory per #3224 Tier 1B: the LowMemory async-tracking +
-    // scheduling + result-vector paths are all `#if`'d out of processRpc, so
-    // the corresponding instance state is dead RAM weight. Drop the field
-    // declarations entirely on Low-memory to recover several hundred bytes
-    // of .bss per Remote instance.
+    // Storage for async request IDs (method name -> request ID)
     struct AsyncRequest {
         int requestId;
         u32 timestamp;
     };
-#if FL_PLATFORM_HAS_LARGE_MEMORY
     fl::unordered_map<fl::string, AsyncRequest> mAsyncRequests;
     void scheduleFunction(u32 timestamp, u32 receivedAt, const fl::json& jsonRpcRequest);
     void recordResult(const fl::string& funcName, const fl::json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled);
-#endif
 
     // Method registry and execution
     fl::Rpc mRpc;
 
-#if FL_PLATFORM_HAS_LARGE_MEMORY
     // Generic task scheduler
     fl::net::RpcScheduler<> mScheduler;
 
     // RPC-specific result tracking
     fl::vector<RpcResult> mResults;
-#endif
 
     // Note: mRequestSource, mResponseSink, mOutgoingQueue inherited from Server
 };

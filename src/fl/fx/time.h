@@ -14,7 +14,7 @@ FASTLED_SHARED_PTR(TimeWarp);
 // Interface for time generation and time manipulation.
 class TimeFunction {
   public:
-    virtual ~TimeFunction() FL_NO_EXCEPT {}
+    virtual ~TimeFunction() FL_NOEXCEPT {}
     virtual fl::u32
     update(fl::u32 timeNow) = 0; // Inputs the real clock time and outputs the
                                   // virtual time.
@@ -31,7 +31,7 @@ class TimeFunction {
 class TimeWarp : public TimeFunction {
   public:
     TimeWarp(fl::u32 realTimeNow = 0, float initialTimeScale = 1.0f);
-    ~TimeWarp() FL_NO_EXCEPT;
+    ~TimeWarp() FL_NOEXCEPT;
     void setSpeed(float speedScale);
     void setScale(float speed)
         FASTLED_DEPRECATED("Use setSpeed(...) instead."); // Deprecated

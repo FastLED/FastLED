@@ -87,11 +87,11 @@ public:
         }
     }
 
-    void setSelect(Selectable* pSelect) FL_NO_EXCEPT {
+    void setSelect(Selectable* pSelect) FL_NOEXCEPT {
         mPSelect = pSelect;
     }
 
-    void init() FL_NO_EXCEPT {
+    void init() FL_NOEXCEPT {
         if (mInitialized) {
             return;
         }
@@ -109,7 +109,7 @@ public:
         // Initialize bus with auto DMA
         esp_err_t ret = spi_bus_initialize(mHost, &bus_config, SPI_DMA_CH_AUTO);
         if (ret != ESP_OK) {
-            FL_WARN_F("SPI bus init failed: %s", ret);
+            FL_WARN("SPI bus init failed: " << ret);
             return;
         }
 
@@ -124,7 +124,7 @@ public:
         // Add device to bus
         ret = spi_bus_add_device(mHost, &dev_config, &mSPIHandle);
         if (ret != ESP_OK) {
-            FL_WARN_F("SPI add device failed: %s", ret);
+            FL_WARN("SPI add device failed: " << ret);
             spi_bus_free(mHost);
             return;
         }
@@ -136,21 +136,21 @@ public:
     static void wait() {}
     static void waitFully() {}
 
-    void writeByteNoWait(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
+    void writeByteNoWait(u8 b) FL_NOEXCEPT __attribute__((always_inline)) {
         writeByte(b);
     }
 
-    void writeBytePostWait(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
+    void writeBytePostWait(u8 b) FL_NOEXCEPT __attribute__((always_inline)) {
         writeByte(b);
         wait();
     }
 
-    void writeWord(u16 w) FL_NO_EXCEPT __attribute__((always_inline)) {
+    void writeWord(u16 w) FL_NOEXCEPT __attribute__((always_inline)) {
         writeByte(static_cast<u8>(w >> 8));
         writeByte(static_cast<u8>(w & 0xFF));
     }
 
-    void writeByte(u8 b) FL_NO_EXCEPT {
+    void writeByte(u8 b) FL_NOEXCEPT {
         if (!mInitialized || !mSPIHandle) {
             return;
         }
@@ -163,7 +163,7 @@ public:
         spi_device_polling_transmit(mSPIHandle, &t);
     }
 
-    void writePixelsBulk(const CRGB* pixels, size_t n) FL_NO_EXCEPT {
+    void writePixelsBulk(const CRGB* pixels, size_t n) FL_NOEXCEPT {
         if (!mInitialized || !mSPIHandle || n == 0) {
             return;
         }
@@ -178,7 +178,7 @@ public:
         spi_device_polling_transmit(mSPIHandle, &t);
     }
 
-    void select() FL_NO_EXCEPT {
+    void select() FL_NOEXCEPT {
         if (!mInitialized) {
             return;
         }
@@ -192,7 +192,7 @@ public:
         }
     }
 
-    void release() FL_NO_EXCEPT {
+    void release() FL_NOEXCEPT {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -206,25 +206,25 @@ public:
         mInTransaction = false;
     }
 
-    void endTransaction() FL_NO_EXCEPT {
+    void endTransaction() FL_NOEXCEPT {
         waitFully();
         release();
     }
 
-    void writeBytesValue(u8 value, int len) FL_NO_EXCEPT {
+    void writeBytesValue(u8 value, int len) FL_NOEXCEPT {
         select();
         writeBytesValueRaw(value, len);
         release();
     }
 
-    void writeBytesValueRaw(u8 value, int len) FL_NO_EXCEPT {
+    void writeBytesValueRaw(u8 value, int len) FL_NOEXCEPT {
         while (len--) {
             writeByte(value);
         }
     }
 
     template <class D>
-    void writeBytes(FASTLED_REGISTER u8* data, int len) FL_NO_EXCEPT {
+    void writeBytes(FASTLED_REGISTER u8* data, int len) FL_NOEXCEPT {
         select();
         u8* end = data + len;
         while (data != end) {
@@ -234,14 +234,14 @@ public:
         release();
     }
 
-    void writeBytes(FASTLED_REGISTER u8* data, int len) FL_NO_EXCEPT {
+    void writeBytes(FASTLED_REGISTER u8* data, int len) FL_NOEXCEPT {
         writeBytes<DATA_NOP>(data, len);
     }
 
     static void finalizeTransmission() {}
 
     template <u8 BIT>
-    inline void writeBit(u8 b) FL_NO_EXCEPT {
+    inline void writeBit(u8 b) FL_NOEXCEPT {
         // Test bit BIT in value b, send 0xFF if set, 0x00 if clear
         writeByte((b & (1 << BIT)) ? 0xFF : 0x00);
     }
@@ -266,7 +266,7 @@ public:
                 D::adjust(pixels.loadAndScale0()),
                 D::adjust(pixels.loadAndScale1()),
                 D::adjust(pixels.loadAndScale2())
-            ) FL_NO_EXCEPT;
+            ) FL_NOEXCEPT;
             data_block[data_block_index++] = rgb;
             pixels.advanceData();
             pixels.stepDithering();

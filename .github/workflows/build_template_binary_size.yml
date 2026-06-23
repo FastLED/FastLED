@@ -26,14 +26,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # The ``FASTLED_FAIL_ON_ROOT_MERGE`` tripwire from #3278 was retired
-    # in #3279 Phase 4 along with the legacy merge code path it guarded.
-    # The merge function (``get_root_platformio_build_flags``) and the
-    # ``merge_root_platformio`` opt-in are gone — there is no longer any
-    # code path that can silently inject root ``platformio.ini`` flags
-    # into CI binaries, so the tripwire env var is no longer needed.
-    # The probe (``_probe_root_platformio_build_flags`` in pio.py) and
-    # the env-var hook are preserved for future diagnostic use.
     steps:
       - name: Checkout
         uses: actions/checkout@v4

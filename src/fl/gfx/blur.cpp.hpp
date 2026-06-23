@@ -35,7 +35,7 @@ fl::u16 XY(fl::u8 x, fl::u8 y) FL_LINK_WEAK;
 FL_LINK_WEAK fl::u16 XY(fl::u8 x, fl::u8 y) {
     FASTLED_UNUSED(x);
     FASTLED_UNUSED(y);
-    FL_ERROR_F("XY function not provided - using default [0][0]. Use blur2d with XYMap instead");
+    FL_ERROR("XY function not provided - using default [0][0]. Use blur2d with XYMap instead");
     return 0;
 }
 

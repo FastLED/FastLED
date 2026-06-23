@@ -9,7 +9,7 @@ namespace detail {
 template <typename T, int K = 2>
 class LeakyIntegratorImpl {
   public:
-    LeakyIntegratorImpl() FL_NO_EXCEPT : mY(T(0)) {}
+    LeakyIntegratorImpl() FL_NOEXCEPT : mY(T(0)) {}
     explicit LeakyIntegratorImpl(T initial) : mY(initial) {}
 
     T update(T input) {

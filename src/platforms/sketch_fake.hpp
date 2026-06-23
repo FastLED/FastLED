@@ -12,7 +12,7 @@
 
 CRGB leds[NUM_LEDS];
 
-void setup() FL_NO_EXCEPT {
+void setup() FL_NOEXCEPT {
     Serial.begin(9600);
     Serial.println("Platform-specific example - running in fallback mode");
     Serial.println("This example requires specific hardware/libraries not available on this platform");
@@ -22,7 +22,7 @@ void setup() FL_NO_EXCEPT {
     FastLED.setBrightness(60);
 }
 
-void loop() FL_NO_EXCEPT {
+void loop() FL_NOEXCEPT {
     // Simple rainbow animation for fallback
     static fl::u8 hue = 0; // okay static in header
     fill_rainbow(leds, NUM_LEDS, hue, 255/NUM_LEDS);

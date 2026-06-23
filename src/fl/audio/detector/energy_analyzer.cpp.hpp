@@ -18,7 +18,7 @@ EnergyAnalyzer::EnergyAnalyzer()
 {
 }
 
-EnergyAnalyzer::~EnergyAnalyzer() FL_NO_EXCEPT = default;
+EnergyAnalyzer::~EnergyAnalyzer() FL_NOEXCEPT = default;
 
 void EnergyAnalyzer::update(shared_ptr<Context> context) {
     // Get RMS directly from Sample (no fft::FFT needed)

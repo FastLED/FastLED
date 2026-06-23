@@ -8,8 +8,8 @@ namespace fl {
 // Logic to control the progression of a transition over time.
 class Transition {
   public:
-    Transition() FL_NO_EXCEPT : mStart(0), mDuration(0), mNotStarted(true) {}
-    ~Transition() FL_NO_EXCEPT {}
+    Transition() FL_NOEXCEPT : mStart(0), mDuration(0), mNotStarted(true) {}
+    ~Transition() FL_NOEXCEPT {}
 
     u8 getProgress(fl::u32 now) {
         if (mNotStarted) {

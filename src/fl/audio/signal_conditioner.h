@@ -53,20 +53,20 @@ struct SignalConditionerConfig {
 /// @endcode
 class SignalConditioner {
 public:
-    SignalConditioner() FL_NO_EXCEPT;
-    explicit SignalConditioner(const SignalConditionerConfig& config) FL_NO_EXCEPT;
-    ~SignalConditioner() FL_NO_EXCEPT;
+    SignalConditioner() FL_NOEXCEPT;
+    explicit SignalConditioner(const SignalConditionerConfig& config) FL_NOEXCEPT;
+    ~SignalConditioner() FL_NOEXCEPT;
 
     /// Configure the signal conditioner
-    void configure(const SignalConditionerConfig& config) FL_NO_EXCEPT;
+    void configure(const SignalConditionerConfig& config) FL_NOEXCEPT;
 
     /// Process a raw audio sample through the conditioning pipeline
     /// @param sample Raw audio sample from microphone/I2S
     /// @return Cleaned audio sample (DC-removed, spike-filtered, gated)
-    Sample processSample(const Sample& sample) FL_NO_EXCEPT;
+    Sample processSample(const Sample& sample) FL_NOEXCEPT;
 
     /// Reset internal state (DC estimate, noise gate state)
-    void reset() FL_NO_EXCEPT;
+    void reset() FL_NOEXCEPT;
 
     /// Get current statistics (for debugging/monitoring)
     struct Stats {
@@ -76,31 +76,31 @@ public:
         u32 samplesProcessed = 0;   // Total samples processed (lifetime)
     };
 
-    const Stats& getStats() const FL_NO_EXCEPT { return mStats; }
+    const Stats& getStats() const FL_NOEXCEPT { return mStats; }
 
 private:
     /// Detect and reject spike samples
     /// @param pcm Input PCM samples
     /// @param validMask Output mask (true = valid, false = spike)
     /// @return Count of valid samples
-    size filterSpikes(span<const i16> pcm, vector<bool>& validMask) FL_NO_EXCEPT;
+    size filterSpikes(span<const i16> pcm, vector<bool>& validMask) FL_NOEXCEPT;
 
     /// Calculate DC offset from valid samples only
     /// @param pcm Input PCM samples
     /// @param validMask Validity mask from spike filtering
     /// @return Estimated DC offset
-    i32 calculateDCOffset(span<const i16> pcm, const vector<bool>& validMask) FL_NO_EXCEPT;
+    i32 calculateDCOffset(span<const i16> pcm, const vector<bool>& validMask) FL_NOEXCEPT;
 
     /// Remove DC offset from samples
     /// @param pcm Input PCM samples
     /// @param dcOffset DC offset to remove
     /// @param output Output buffer for DC-removed samples
-    void removeDCOffset(span<const i16> pcm, i32 dcOffset, vector<i16>& output) FL_NO_EXCEPT;
+    void removeDCOffset(span<const i16> pcm, i32 dcOffset, vector<i16>& output) FL_NOEXCEPT;
 
     /// Apply noise gate with hysteresis
     /// @param pcm Input PCM samples (DC-removed)
     /// @param output Output buffer (gated samples, zero if gate closed)
-    void applyNoiseGate(span<const i16> pcm, vector<i16>& output) FL_NO_EXCEPT;
+    void applyNoiseGate(span<const i16> pcm, vector<i16>& output) FL_NOEXCEPT;
 
     SignalConditionerConfig mConfig;
     Stats mStats;

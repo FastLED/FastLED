@@ -115,7 +115,7 @@ struct MultiLanePinConfig {
     {}
 
     /// @brief Get number of active lanes
-    u8 getLaneCount() const FL_NO_EXCEPT {
+    u8 getLaneCount() const FL_NOEXCEPT {
         u8 count = (data0_pin >= 0) ? 1 : 0;
         if (data1_pin >= 0) count++;
         if (data2_pin >= 0) count++;
@@ -146,7 +146,7 @@ struct SpiTimingConfig {
     u32 achieved_t1l_ns;           ///< Actual T1L timing achieved
 
     /// @brief Create default WS2812 timing config
-    static SpiTimingConfig ws2812(u32 reset_us = 280) FL_NO_EXCEPT {
+    static SpiTimingConfig ws2812(u32 reset_us = 280) FL_NOEXCEPT {
         SpiTimingConfig cfg = {};
         cfg.protocol = WS2812;
         cfg.clock_hz = 6400000;
@@ -187,7 +187,7 @@ struct SpiTimingConfig {
 /// Managed by ChannelManager which handles frame lifecycle events.
 class ChannelEngineSpi : public IChannelDriver {
 public:
-    ChannelEngineSpi() FL_NO_EXCEPT;
+    ChannelEngineSpi() FL_NOEXCEPT;
     ~ChannelEngineSpi() override;
 
     /// @brief Configure multi-lane SPI pins for a specific data pin
@@ -201,21 +201,21 @@ public:
     /// // Quad-lane SPI (4x throughput, ESP32/S2/S3 only)
     /// driver.configureMultiLanePins(MultiLanePinConfig(23, 19, 18, 5));
     /// @endcode
-    void configureMultiLanePins(const MultiLanePinConfig& pinConfig) FL_NO_EXCEPT;
+    void configureMultiLanePins(const MultiLanePinConfig& pinConfig) FL_NOEXCEPT;
 
     // IChannelDriver interface implementation
-    void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
-    void show() FL_NO_EXCEPT override;
-    DriverState poll() FL_NO_EXCEPT override;
+    void enqueue(ChannelDataPtr channelData) FL_NOEXCEPT override;
+    void show() FL_NOEXCEPT override;
+    DriverState poll() FL_NOEXCEPT override;
 
     /// @brief Get the driver name for affinity binding
     /// @return "SPI"
-    fl::string getName() const FL_NO_EXCEPT override { return fl::string::from_literal("SPI"); }
+    fl::string getName() const FL_NOEXCEPT override { return fl::string::from_literal("SPI"); }
 
     /// @brief Get driver capabilities (CLOCKLESS protocols only)
     /// @return Capabilities with supportsClockless=true, supportsSpi=false
     /// @note This is a clockless-over-SPI driver, not a true SPI LED driver
-    Capabilities getCapabilities() const FL_NO_EXCEPT override {
+    Capabilities getCapabilities() const FL_NOEXCEPT override {
         return Capabilities(true, false);  // Clockless only
     }
 
@@ -226,7 +226,7 @@ public:
     /// This driver is a CLOCKLESS-over-SPI driver:
     ///   - Returns true for clockless protocols (WS2812, SK6812, etc.)
     ///   - Returns false for true SPI protocols (APA102, SK9822, etc.)
-    bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
+    bool canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT override;
 
 private:
     /// @brief Begin LED data transmission with internal batching (internal helper)
@@ -234,16 +234,16 @@ private:
     ///
     /// Groups channels by timing compatibility and batches them when N > K,
     /// where N = number of channels with compatible timings and K = available lanes.
-    void beginBatchedTransmission(fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT;
+    void beginBatchedTransmission(fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT;
 
     /// @brief Begin LED data transmission for all channels (internal helper)
     /// @param channelData Span of channel data to transmit
-    void beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT;
+    void beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT;
 
     /// @brief Determine maximum parallel transmission capacity
     /// @param channels Channels in a timing group (unused, for future extension)
     /// @return Number of SPI hosts available (2 for ESP32/S2/S3/P4, 1 for ESP32-C3)
-    u8 determineLaneCapacity(fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
+    u8 determineLaneCapacity(fl::span<const ChannelDataPtr> channels) FL_NOEXCEPT;
     /// @brief SPI channel state (per-pin tracking)
     struct SpiChannelState {
         spi_host_device_t spi_host;        ///< SPI peripheral (SPI2_HOST, SPI3_HOST, etc.)
@@ -343,13 +343,13 @@ private:
     };
 
     /// @brief Advance the DMA pipeline state machine (called from poll())
-    DriverState advancePipeline() FL_NO_EXCEPT;
+    DriverState advancePipeline() FL_NOEXCEPT;
 
     /// @brief Start transmitting the next channel in the pipeline
-    bool startNextChannel() FL_NO_EXCEPT;
+    bool startNextChannel() FL_NOEXCEPT;
 
     /// @brief Start the first DMA transaction for the active channel
-    void startFirstDma() FL_NO_EXCEPT;
+    void startFirstDma() FL_NOEXCEPT;
 
     /// @brief SPI post-transaction callback (ISR context)
     static void IRAM_ATTR spiPostTransactionCallback(spi_transaction_t *trans);
@@ -358,7 +358,7 @@ private:
     static void IRAM_ATTR timerEncodingISR(void *user_data);
 
     /// @brief Poll channel states for cleanup
-    DriverState pollChannels() FL_NO_EXCEPT;
+    DriverState pollChannels() FL_NOEXCEPT;
 
     /// @brief Pending channel data waiting for hardware availability
     struct PendingChannel {
@@ -378,7 +378,7 @@ private:
 
     /// @brief Hash function for ChipsetTimingConfig (timing group key)
     struct TimingHash {
-        size_t operator()(const ChipsetTimingConfig& t) const FL_NO_EXCEPT {
+        size_t operator()(const ChipsetTimingConfig& t) const FL_NOEXCEPT {
             size_t hash = 2166136261u;
             hash = (hash ^ t.t1_ns) * 16777619u;
             hash = (hash ^ t.t2_ns) * 16777619u;
@@ -390,14 +390,14 @@ private:
 
     /// @brief Equality function for ChipsetTimingConfig (hash map key)
     struct TimingEqual {
-        bool operator()(const ChipsetTimingConfig& a, const ChipsetTimingConfig& b) const FL_NO_EXCEPT {
+        bool operator()(const ChipsetTimingConfig& a, const ChipsetTimingConfig& b) const FL_NOEXCEPT {
             return a == b;
         }
     };
 
     /// @brief Less-than comparator for ChipsetTimingConfig (flat_map key)
     struct TimingLess {
-        bool operator()(const ChipsetTimingConfig& a, const ChipsetTimingConfig& b) const FL_NO_EXCEPT {
+        bool operator()(const ChipsetTimingConfig& a, const ChipsetTimingConfig& b) const FL_NOEXCEPT {
             if (a.t1_ns != b.t1_ns) return a.t1_ns < b.t1_ns;
             if (a.t2_ns != b.t2_ns) return a.t2_ns < b.t2_ns;
             if (a.t3_ns != b.t3_ns) return a.t3_ns < b.t3_ns;
@@ -408,10 +408,10 @@ private:
     /// @brief Acquire a channel for given pin and timing
     /// @param dataSize Size of LED data in bytes
     /// @return Pointer to channel state, or nullptr if no hardware available
-    SpiChannelState* acquireChannel(gpio_num_t pin, const ChipsetTimingConfig& timing, size_t dataSize) FL_NO_EXCEPT;
+    SpiChannelState* acquireChannel(gpio_num_t pin, const ChipsetTimingConfig& timing, size_t dataSize) FL_NOEXCEPT;
 
     /// @brief Release a channel (marks as available for reuse)
-    void releaseChannel(SpiChannelState* channel) FL_NO_EXCEPT;
+    void releaseChannel(SpiChannelState* channel) FL_NOEXCEPT;
 
     /// @brief Create new SPI channel with given configuration
     /// @param state Channel state to initialize
@@ -419,11 +419,11 @@ private:
     /// @param timing Clockless timing configuration (T1/T2/T3)
     /// @param dataSize Size of LED data in bytes
     /// @return true if channel created successfully
-    bool createChannel(SpiChannelState* state, gpio_num_t pin, const ChipsetTimingConfig& timing, size_t dataSize) FL_NO_EXCEPT;
+    bool createChannel(SpiChannelState* state, gpio_num_t pin, const ChipsetTimingConfig& timing, size_t dataSize) FL_NOEXCEPT;
 
     /// @brief Lightweight SPI bus + device re-initialization for reused channels.
     /// Only sets up SPI bus and device; staging buffers and timer ISR are kept.
-    bool reinitSpiHardware(SpiChannelState* state, gpio_num_t pin, size_t dataSize) FL_NO_EXCEPT;
+    bool reinitSpiHardware(SpiChannelState* state, gpio_num_t pin, size_t dataSize) FL_NOEXCEPT;
 
     /// @brief Encode one chunk of LED data into a staging buffer
     /// @param channel Channel state with LED data to encode
@@ -434,7 +434,7 @@ private:
     /// Used by transmitStreaming() for double-buffered DMA pipeline.
     /// Advances channel->ledSource and decrements channel->ledBytesRemaining.
     /// Appends reset zeros after the last chunk.
-    size_t encodeChunk(SpiChannelState* channel, u8* output, size_t output_capacity) FL_NO_EXCEPT;
+    size_t encodeChunk(SpiChannelState* channel, u8* output, size_t output_capacity) FL_NOEXCEPT;
 
     /// @brief Double-buffered streaming transmission
     /// @param channel Channel state with LED data to transmit
@@ -444,11 +444,11 @@ private:
     ///   2. Queue buffer A for DMA, encode chunk into buffer B
     ///   3. Wait for A to complete, queue B, encode into A
     ///   ... until all LED data is transmitted.
-    void transmitStreaming(SpiChannelState* channel) FL_NO_EXCEPT;
+    void transmitStreaming(SpiChannelState* channel) FL_NOEXCEPT;
 
     /// @brief Blocking polled transmission of pre-encoded staging buffer
     /// @param channel Channel state with encoded data in staging buffer
-    void transmitBlockingPolled(SpiChannelState* channel) FL_NO_EXCEPT;
+    void transmitBlockingPolled(SpiChannelState* channel) FL_NOEXCEPT;
 
     /// @brief Encode LED data into SPI buffer using dynamic timing config
     /// @param ledData Input LED data bytes
@@ -457,7 +457,7 @@ private:
     /// @return true if encoding succeeded
     bool encodeLedData(const fl::span<const u8>& ledData,
                        fl::vector<u8>& spiBuffer,
-                       const SpiTimingConfig& timing) FL_NO_EXCEPT;
+                       const SpiTimingConfig& timing) FL_NOEXCEPT;
 
     /// @brief Encode a single LED byte into SPI bit patterns
     /// @param data LED byte to encode
@@ -467,27 +467,27 @@ private:
     /// @return Number of bits written
     u32 encodeLedByte(u8 data, u8* buf,
                       const SpiTimingConfig& timing,
-                      u32 output_bit_offset) FL_NO_EXCEPT;
+                      u32 output_bit_offset) FL_NOEXCEPT;
 
     /// @brief Calculate SPI timing from chipset timing configuration
     /// @param chipsetTiming Chipset timing (T1/T2/T3)
     /// @return SPI timing configuration
-    static SpiTimingConfig calculateSpiTiming(const ChipsetTimingConfig& chipsetTiming) FL_NO_EXCEPT;
+    static SpiTimingConfig calculateSpiTiming(const ChipsetTimingConfig& chipsetTiming) FL_NOEXCEPT;
 
     /// @brief Get SPI timing from channel data
     /// @param data Channel data
     /// @return SPI timing configuration
-    static SpiTimingConfig getSpiTimingFromChannel(const ChannelDataPtr& data) FL_NO_EXCEPT;
+    static SpiTimingConfig getSpiTimingFromChannel(const ChannelDataPtr& data) FL_NOEXCEPT;
 
     /// @brief Acquire SPI host for new channel
     /// @return SPI host, or SPI_HOST_MAX on failure
-    spi_host_device_t acquireSpiHost() FL_NO_EXCEPT;
+    spi_host_device_t acquireSpiHost() FL_NOEXCEPT;
 
     /// @brief Release SPI host when channel is destroyed
-    void releaseSpiHost(spi_host_device_t host) FL_NO_EXCEPT;
+    void releaseSpiHost(spi_host_device_t host) FL_NOEXCEPT;
 
     /// @brief Process pending channels that couldn't be started earlier
-    void processPendingChannels() FL_NO_EXCEPT;
+    void processPendingChannels() FL_NOEXCEPT;
 
     /// @brief All SPI channels (active and idle)
     fl::vector_inlined<SpiChannelState, 16> mChannels;

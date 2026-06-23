@@ -42,35 +42,35 @@ class IObjectFLEDPeripheral;
 class ChannelEngineObjectFLED : public IChannelDriver {
 public:
     /// @brief Construct with platform-default peripheral
-    ChannelEngineObjectFLED() FL_NO_EXCEPT;
+    ChannelEngineObjectFLED() FL_NOEXCEPT;
 
     /// @brief Construct with injected peripheral (for testing)
-    explicit ChannelEngineObjectFLED(fl::shared_ptr<IObjectFLEDPeripheral> peripheral) FL_NO_EXCEPT;
+    explicit ChannelEngineObjectFLED(fl::shared_ptr<IObjectFLEDPeripheral> peripheral) FL_NOEXCEPT;
 
     ~ChannelEngineObjectFLED() override;
 
     /// @brief Check if this engine can handle the given channel data
     /// @return true for clockless chipsets with total period 1000-2500ns
-    bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
+    bool canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT override;
 
     /// @brief Enqueue channel data for transmission
-    void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
+    void enqueue(ChannelDataPtr channelData) FL_NOEXCEPT override;
 
     /// @brief Trigger transmission of enqueued data (synchronous DMA)
-    void show() FL_NO_EXCEPT override;
+    void show() FL_NOEXCEPT override;
 
     /// @brief Query engine state
     /// @return READY (ObjectFLED show() is synchronous, always completes before returning)
-    DriverState poll() FL_NO_EXCEPT override;
+    DriverState poll() FL_NOEXCEPT override;
 
     /// @brief Get engine name
     /// @return "OBJECT_FLED" — matches the `fl::Bus::OBJECT_FLED` enumerator spelling.
-    fl::string getName() const FL_NO_EXCEPT override {
+    fl::string getName() const FL_NOEXCEPT override {
         return fl::string::from_literal("OBJECT_FLED");
     }
 
     /// @brief Get capabilities (clockless only)
-    Capabilities getCapabilities() const FL_NO_EXCEPT override {
+    Capabilities getCapabilities() const FL_NOEXCEPT override {
         return Capabilities(true, false);
     }
 

@@ -33,7 +33,7 @@ class NativeRxDevice : public RxDevice {
 public:
     /// @brief Create a NativeRxDevice for the given pin
     /// @param pin GPIO pin number (used for identification only on native)
-    static fl::shared_ptr<NativeRxDevice> create(int pin) FL_NO_EXCEPT;
+    static fl::shared_ptr<NativeRxDevice> create(int pin) FL_NOEXCEPT;
 
     // -------------------------------------------------------------------------
     // RxDevice interface implementation
@@ -42,49 +42,49 @@ public:
     /// @brief Arm edge capture: register as SimEdgeObserver
     /// @param config RX configuration (ignored on native)
     /// @return true always (native capture always succeeds)
-    bool begin(const RxConfig& config) FL_NO_EXCEPT override;
+    bool begin(const RxConfig& config) FL_NOEXCEPT override;
 
     /// @brief Check if capture is complete (synchronous on native)
     /// @return true after wait() has been called
-    bool finished() const FL_NO_EXCEPT override;
+    bool finished() const FL_NOEXCEPT override;
 
     /// @brief Check if edges are available (synchronous on native)
     /// @param timeout_ms Ignored (native capture is synchronous)
     /// @return SUCCESS if edges were captured, TIMEOUT if no edges
-    RxWaitResult wait(u32 timeout_ms) FL_NO_EXCEPT override;
+    RxWaitResult wait(u32 timeout_ms) FL_NOEXCEPT override;
 
     /// @brief Decode captured WS2812 edge timing to bytes
     /// @param timing 4-phase timing thresholds for bit detection
     /// @param out Output buffer to write decoded bytes
     /// @return Result with total bytes decoded, or DecodeError
     fl::result<u32, DecodeError> decode(const ChipsetTiming4Phase& timing,
-                                        fl::span<u8> out) FL_NO_EXCEPT override;
+                                        fl::span<u8> out) FL_NOEXCEPT override;
 
     /// @brief Get raw edge timings (for debugging)
     /// @param out Output span to fill with EdgeTime entries
     /// @param offset Starting edge index
     /// @return Number of edges written
-    size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) FL_NO_EXCEPT override;
+    size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) FL_NOEXCEPT override;
 
     /// @brief Device type name
-    const char* name() const FL_NO_EXCEPT override;
+    const char* name() const FL_NOEXCEPT override;
 
     /// @brief Get the GPIO pin number
-    int getPin() const FL_NO_EXCEPT override;
+    int getPin() const FL_NOEXCEPT override;
 
     /// @brief Inject edges directly (for testing)
-    bool injectEdges(fl::span<const EdgeTime> edges) FL_NO_EXCEPT override;
+    bool injectEdges(fl::span<const EdgeTime> edges) FL_NOEXCEPT override;
 
     ~NativeRxDevice();
 
 private:
     template<typename T, typename... Args>
-    friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NO_EXCEPT;
+    friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NOEXCEPT;
 
-    explicit NativeRxDevice(int pin) FL_NO_EXCEPT;
+    explicit NativeRxDevice(int pin) FL_NOEXCEPT;
 
     /// @brief Receive a simulated GPIO edge (called by pin callback)
-    void onEdge(bool high, u32 duration_ns) FL_NO_EXCEPT;
+    void onEdge(bool high, u32 duration_ns) FL_NOEXCEPT;
 
     int mPin;
     bool mFinished;

@@ -15,7 +15,7 @@ namespace fl {
 
 namespace {
     /// Static registry of all registered instances
-    fl::vector<fl::shared_ptr<SpiHw1>>& getRegistrySpiHw1() FL_NO_EXCEPT {
+    fl::vector<fl::shared_ptr<SpiHw1>>& getRegistrySpiHw1() FL_NOEXCEPT {
         static fl::vector<fl::shared_ptr<SpiHw1>> registry;
         return registry;
     }
@@ -23,14 +23,14 @@ namespace {
 
 /// Register a platform-specific instance
 /// Called by platform implementations during static initialization
-void SpiHw1::registerInstance(fl::shared_ptr<SpiHw1> instance) FL_NO_EXCEPT {
+void SpiHw1::registerInstance(fl::shared_ptr<SpiHw1> instance) FL_NOEXCEPT {
     if (instance) {
         getRegistrySpiHw1().push_back(instance);
     }
 }
 
 /// Remove a registered instance
-bool SpiHw1::removeInstance(const fl::shared_ptr<SpiHw1>& instance) FL_NO_EXCEPT {
+bool SpiHw1::removeInstance(const fl::shared_ptr<SpiHw1>& instance) FL_NOEXCEPT {
     auto& registry = getRegistrySpiHw1();
     for (size_t i = 0; i < registry.size(); ++i) {
         if (registry[i] == instance) {
@@ -42,13 +42,13 @@ bool SpiHw1::removeInstance(const fl::shared_ptr<SpiHw1>& instance) FL_NO_EXCEPT
 }
 
 /// Clear all registered instances (primarily for testing)
-void SpiHw1::clearInstances() FL_NO_EXCEPT {
+void SpiHw1::clearInstances() FL_NOEXCEPT {
     getRegistrySpiHw1().clear();
 }
 
 /// Get all registered instances
 /// Implementation moved to cpp to avoid Teensy 3.x __cxa_guard linkage issues
-const fl::vector<fl::shared_ptr<SpiHw1>>& SpiHw1::getAll() FL_NO_EXCEPT {
+const fl::vector<fl::shared_ptr<SpiHw1>>& SpiHw1::getAll() FL_NOEXCEPT {
     // Lazy initialization of platform-specific SPI instances
     // C++11 guarantees thread-safe static initialization
     static bool sInitialized = false;

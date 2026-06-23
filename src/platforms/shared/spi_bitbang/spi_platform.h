@@ -34,8 +34,8 @@ FL_EXTERN_C_BEGIN
 
 #ifdef FASTLED_SPI_HOST_SIMULATION
     /* Host simulation - capture events to ring buffer */
-    void fl_gpio_sim_write_set(fl::u32 mask) FL_NO_EXCEPT;
-    void fl_gpio_sim_write_clear(fl::u32 mask) FL_NO_EXCEPT;
+    void fl_gpio_sim_write_set(fl::u32 mask) FL_NOEXCEPT;
+    void fl_gpio_sim_write_clear(fl::u32 mask) FL_NOEXCEPT;
 
     #define FL_GPIO_WRITE_SET(mask)   fl_gpio_sim_write_set(mask)
     #define FL_GPIO_WRITE_CLEAR(mask) fl_gpio_sim_write_clear(mask)

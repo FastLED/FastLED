@@ -43,24 +43,6 @@ CHIP_TO_ENVIRONMENT: dict[str, str] = {
 # ESP32 variants that lack WiFi hardware
 NO_WIFI_ENVIRONMENTS: set[str] = {"esp32h2", "esp32p4"}
 
-# PlatformIO environments → expected USB VID:PID for the data-bearing VCOM
-# port. This bypasses the description-string heuristic for boards whose USB
-# descriptors are too generic to disambiguate (e.g. "USB Serial Device" on
-# Windows for both the LPC845-BRK VCOM and any other Microsoft CDC device).
-# Add new entries here when porting to a new board. See FastLED #3300 for
-# the LPC845-BRK case that motivated this map. ci/util/serial_probe.py has
-# a richer fingerprint table; this map only carries the entries autoresearch
-# needs for default-port selection.
-ENVIRONMENT_TO_VCOM_VID_PID: dict[str, tuple[int, int]] = {
-    # LPC8xx family: LPC11U35-on-board USB-VCOM bridge for USART0.
-    # Same VID:PID across all four LPC8xx canary boards.
-    "lpc845brk": (0x16C0, 0x0483),
-    "lpc845": (0x16C0, 0x0483),
-    "lpc804": (0x16C0, 0x0483),
-    "lpcxpresso845max": (0x16C0, 0x0483),
-    "lpcxpresso804": (0x16C0, 0x0483),
-}
-
 
 def environment_has_wifi(environment: str) -> bool:
     """Check if a PlatformIO environment has WiFi hardware."""
@@ -148,44 +130,6 @@ def auto_detect_upload_port(expected_environment: str | None) -> ComportResult:
         )
 
     expected_env = expected_environment.lower() if expected_environment else None
-
-    # VID:PID-based detection takes precedence over chip-probe and description
-    # heuristics. For boards whose VCOM bridges have well-known IDs (LPC845-BRK
-    # via LPC11U35, see FastLED #3300), this is the only reliable signal on
-    # Windows where multiple boards report a generic "USB Serial Device" name.
-    expected_vid_pid = (
-        ENVIRONMENT_TO_VCOM_VID_PID.get(expected_env) if expected_env else None
-    )
-    if expected_vid_pid is not None:
-        for port in usb_ports:
-            if (port.vid, port.pid) == expected_vid_pid:
-                return ComportResult(
-                    ok=True,
-                    selected_port=port.device,
-                    error_message=None,
-                    all_ports=all_ports,
-                )
-        # Fingerprint expected but no port matched. Don't fall through to the
-        # ESP probe — the wrong port will fail later with PermissionError or
-        # silent timeout. Report explicitly so the user can plug the board in.
-        vid, pid = expected_vid_pid
-        return ComportResult(
-            ok=False,
-            selected_port=None,
-            error_message=(
-                f"No USB serial port matched expected VCOM fingerprint for "
-                f"'{expected_environment}' (VID:PID {vid:04X}:{pid:04X}). "
-                f"Detected USB ports: "
-                + ", ".join(
-                    f"{p.device}={p.vid:04X}:{p.pid:04X}"
-                    if p.vid and p.pid
-                    else f"{p.device}=----:----"
-                    for p in usb_ports
-                )
-            ),
-            all_ports=all_ports,
-        )
-
     esp_environments = {env.lower() for env in CHIP_TO_ENVIRONMENT.values()}
     if expected_env in esp_environments:
         probe_notes: list[str] = []

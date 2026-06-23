@@ -23,14 +23,14 @@ namespace fl {
 
 /// Disable interrupts on ARM Cortex-M (STM32)
 /// Uses CPSID instruction to set PRIMASK, blocking all exceptions except NMI and HardFault
-inline void interruptsDisable() FL_NO_EXCEPT {
-    __asm__ __volatile__("cpsid i" ::: "memory") FL_NO_EXCEPT;
+inline void interruptsDisable() FL_NOEXCEPT {
+    __asm__ __volatile__("cpsid i" ::: "memory") FL_NOEXCEPT;
 }
 
 /// Enable interrupts on ARM Cortex-M (STM32)
 /// Uses CPSIE instruction to clear PRIMASK, enabling all interrupts
-inline void interruptsEnable() FL_NO_EXCEPT {
-    __asm__ __volatile__("cpsie i" ::: "memory") FL_NO_EXCEPT;
+inline void interruptsEnable() FL_NOEXCEPT {
+    __asm__ __volatile__("cpsie i" ::: "memory") FL_NOEXCEPT;
 }
 
 } // namespace fl

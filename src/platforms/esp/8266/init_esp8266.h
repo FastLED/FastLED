@@ -22,7 +22,7 @@ namespace platforms {
 /// - DMA buffer pre-allocation
 /// - WiFi state tracking integration
 /// - UART hardware resource reservation
-inline void init() FL_NO_EXCEPT {
+inline void init() FL_NOEXCEPT {
     // Minimal or no-op: UART driver is initialized per-strip
     // Future: Consider pre-allocating DMA buffers or reserving UART resources
 }

@@ -33,14 +33,14 @@ namespace fl {
 template<> struct BusTraits<Bus::RMT> {
     using Driver = ChannelEngineRMT4;
 
-    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
         static fl::shared_ptr<Driver> gHolder = ChannelEngineRMT4::create();
         return gHolder;
     }
 
-    static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
+    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
 
-    static void registerWithManager() FL_NO_EXCEPT {
+    static void registerWithManager() FL_NOEXCEPT {
         ChannelManager::instance().addDriver(default_bus_priority(Bus::RMT), instancePtr());
     }
 };

@@ -26,7 +26,7 @@ class NRF51SPIOutput {
         fl::u32 enable;
     } mSavedData;
 
-    void saveSPIData() FL_NO_EXCEPT {
+    void saveSPIData() FL_NOEXCEPT {
         mSavedData.sck = NRF_SPI0->PSELSCK;
         mSavedData.mosi = NRF_SPI0->PSELMOSI;
         mSavedData.miso = NRF_SPI0->PSELMISO;
@@ -34,7 +34,7 @@ class NRF51SPIOutput {
         mSavedData.enable = NRF_SPI0->ENABLE;
     }
 
-    void restoreSPIData() FL_NO_EXCEPT {
+    void restoreSPIData() FL_NOEXCEPT {
         NRF_SPI0->PSELSCK = mSavedData.sck;
         NRF_SPI0->PSELMOSI = mSavedData.mosi;
         NRF_SPI0->PSELMISO = mSavedData.miso;
@@ -50,7 +50,7 @@ public:
     void setSelect(Selectable *pSelect) { /* TODO */ }
 
     // initialize the SPI subssytem
-    void init() FL_NO_EXCEPT {
+    void init() FL_NOEXCEPT {
         FastPin<_DATA_PIN>::setOutput();
         FastPin<_CLOCK_PIN>::setOutput();
         NRF_SPI0->PSELSCK = _CLOCK_PIN;
@@ -67,12 +67,12 @@ public:
     // release the CS select
     void release() { shouldWait(); restoreSPIData(); }
 
-    void endTransaction() FL_NO_EXCEPT {
+    void endTransaction() FL_NOEXCEPT {
         waitFully();
         release();
     }
 
-    static bool shouldWait(bool wait = false) FL_NO_EXCEPT __attribute__((always_inline)) __attribute__((always_inline)) {
+    static bool shouldWait(bool wait = false) FL_NOEXCEPT __attribute__((always_inline)) __attribute__((always_inline)) {
         // static bool sWait=false;
         // bool oldWait = sWait;
         // sWait = wait;
@@ -95,7 +95,7 @@ public:
     static void writeBytesValueRaw(fl::u8 value, int len) { while(len--) { writeByte(value);  } }
 
     // A full cycle of writing a value for len bytes, including select, release, and waiting
-    void writeBytesValue(fl::u8 value, int len) FL_NO_EXCEPT {
+    void writeBytesValue(fl::u8 value, int len) FL_NOEXCEPT {
         select();
         while(len--) {
             writeByte(value);
@@ -105,7 +105,7 @@ public:
     }
 
     // A full cycle of writing a raw block of data out, including select, release, and waiting
-    template<class D> void writeBytes(fl::u8 *data, int len) FL_NO_EXCEPT {
+    template<class D> void writeBytes(fl::u8 *data, int len) FL_NOEXCEPT {
         fl::u8 *end = data + len;
         select();
         while(data != end) {
@@ -116,12 +116,12 @@ public:
         release();
     }
 
-    void writeBytes(fl::u8 *data, int len) FL_NO_EXCEPT {
+    void writeBytes(fl::u8 *data, int len) FL_NOEXCEPT {
         writeBytes<DATA_NOP>(data, len);
     }
 
     // write a single bit out, which bit from the passed in byte is determined by template parameter
-    template <fl::u8 BIT> inline static void writeBit(fl::u8 b) FL_NO_EXCEPT {
+    template <fl::u8 BIT> inline static void writeBit(fl::u8 b) FL_NOEXCEPT {
         waitFully();
         NRF_SPI0->ENABLE = 0;
         if(b & 1<<BIT) {
@@ -134,7 +134,7 @@ public:
         NRF_SPI0->ENABLE = 1;
     }
 
-    template <fl::u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NO_EXCEPT {
+    template <fl::u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NOEXCEPT {
         select();
         int len = pixels.mLen;
         while(pixels.has(1)) {

@@ -30,21 +30,63 @@ def _get_project_root() -> Path:
     return _PROJECT_ROOT
 
 
-# NOTE: ``get_root_platformio_build_flags`` was deleted in #3279 Phase 4.
-#
-# The function read root ``platformio.ini`` so that
-# ``ci/compiler/pio.py::_init_platformio_build`` could either merge those
-# flags into the synthesised env (legacy #2664 behaviour) or detect them
-# for the ``FASTLED_FAIL_ON_ROOT_MERGE`` tripwire (#3278). Phase 2 of
-# #3274 made the merge opt-in and Phase 4 confirmed no production caller
-# ever opted in — every CI site passed ``merge_root_platformio=False``
-# and the ``PioCompiler`` constructor default was ``False``.
-#
-# The tripwire-only probe moved to ``ci/compiler/pio.py`` as a private
-# helper (``_probe_root_platformio_build_flags``) co-located with its
-# sole caller. Removing the public function here completes the Phase 4
-# cleanup and shrinks the API surface ``build_config`` exposes to the
-# rest of the codebase.
+def get_root_platformio_build_flags(board_name: str, project_root: Path) -> list[str]:
+    """Read the root ``platformio.ini`` and return ``build_flags`` for the
+    matching ``[env:<board_name>]`` section, with ``extends`` and ``[env]``
+    inheritance resolved.
+
+    This exists to fix issue #2664: ``bash compile --backend platformio``
+    synthesises a fresh PIO project at ``.build/pio/<env>/platformio.ini``
+    from ``ci/boards.py`` and was silently discarding ``build_flags`` defined
+    in the user's root ``platformio.ini``. Anyone editing the root file
+    reasonably expects those flags to take effect; without this merge step
+    they vanish, producing subtle "flags work under fbuild but not under
+    --backend=platformio" bugs.
+
+    Behaviour:
+    - Returns an empty list if the root ``platformio.ini`` is missing,
+      malformed, or has no matching ``[env:<board_name>]`` section.
+    - Substitution variables like ``${env:generic-esp.build_flags}`` and
+      ``extends = env:generic-esp`` are resolved using the existing
+      :class:`PlatformIOIni` parser, which already implements PlatformIO's
+      inheritance semantics.
+    - Never raises: parse errors are swallowed and logged so that a broken
+      root file cannot block a build.
+
+    Args:
+        board_name: The PlatformIO env name (e.g. ``"esp32c6"``). Matches
+            ``[env:<board_name>]`` in the root ini.
+        project_root: FastLED project root containing ``platformio.ini``.
+
+    Returns:
+        Ordered list of build_flags strings, or ``[]`` when nothing applies.
+    """
+    root_ini = project_root / "platformio.ini"
+    if not root_ini.exists():
+        return []
+
+    try:
+        # Local import to avoid a circular import at module load.
+        from ci.compiler.platformio_ini import PlatformIOIni
+
+        pio_ini = PlatformIOIni.parseFile(root_ini)
+        parsed = pio_ini.parsed
+        env = parsed.environments.get(board_name)
+        if env is None:
+            return []
+        # `parsed` already has extends + [env] inheritance applied, and
+        # ${env:...} substitutions resolved (see _resolve_list_variables in
+        # ci/compiler/platformio_ini.py).
+        return list(env.build_flags)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:
+        # Never let a malformed root platformio.ini block a build.
+        print(
+            f"Warning: failed to read root platformio.ini for env '{board_name}': {e}"
+        )
+        return []
 
 
 def _override_prog_path_for_fbuild(

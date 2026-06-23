@@ -32,7 +32,7 @@ MutexESP32::MutexESP32() : mHandle(nullptr) {
     SemaphoreHandle_t handle = xSemaphoreCreateMutex();
 
     if (handle == nullptr) {
-        FL_WARN_F("MutexESP32: Failed to create mutex");
+        FL_WARN("MutexESP32: Failed to create mutex");
     }
 
     mHandle = static_cast<void*>(handle);
@@ -89,7 +89,7 @@ RecursiveMutexESP32::RecursiveMutexESP32() : mHandle(nullptr) {
     SemaphoreHandle_t handle = xSemaphoreCreateRecursiveMutex();
 
     if (handle == nullptr) {
-        FL_WARN_F("RecursiveMutexESP32: Failed to create recursive mutex");
+        FL_WARN("RecursiveMutexESP32: Failed to create recursive mutex");
     }
 
     mHandle = static_cast<void*>(handle);

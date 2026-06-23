@@ -22,7 +22,7 @@ namespace fl {
 /// @brief Polymorphic identification base for any channel in the system.
 class IChannel {
 public:
-    virtual ~IChannel() FL_NO_EXCEPT = default;
+    virtual ~IChannel() FL_NOEXCEPT = default;
 
     /// @brief Stable monotonically-assigned identifier (starts at 0).
     virtual i32 id() const = 0;
@@ -31,13 +31,13 @@ public:
     virtual const fl::string& name() const = 0;
 
 protected:
-    IChannel() FL_NO_EXCEPT = default;
+    IChannel() FL_NOEXCEPT = default;
 
     // Non-copyable, non-movable -- concrete channels are owned by shared_ptr.
-    IChannel(const IChannel&) FL_NO_EXCEPT = delete;
-    IChannel& operator=(const IChannel&) FL_NO_EXCEPT = delete;
-    IChannel(IChannel&&) FL_NO_EXCEPT = delete;
-    IChannel& operator=(IChannel&&) FL_NO_EXCEPT = delete;
+    IChannel(const IChannel&) FL_NOEXCEPT = delete;
+    IChannel& operator=(const IChannel&) FL_NOEXCEPT = delete;
+    IChannel(IChannel&&) FL_NOEXCEPT = delete;
+    IChannel& operator=(IChannel&&) FL_NOEXCEPT = delete;
 };
 
 }  // namespace fl

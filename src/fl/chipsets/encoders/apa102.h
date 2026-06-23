@@ -43,7 +43,7 @@ namespace fl {
 /// @note APA102 uses BGR wire order: pixel[0]=Blue, pixel[1]=Green, pixel[2]=Red
 template <typename InputIterator, typename OutputIterator>
 void encodeAPA102(InputIterator first, InputIterator last, OutputIterator out,
-                  u8 global_brightness = 31) FL_NO_EXCEPT {
+                  u8 global_brightness = 31) FL_NOEXCEPT {
     // Clamp brightness to 5-bit range
     global_brightness = global_brightness & 0x1F;
 
@@ -84,7 +84,7 @@ void encodeAPA102(InputIterator first, InputIterator last, OutputIterator out,
 /// @note APA102 uses BGR wire order: pixel[0]=Blue, pixel[1]=Green, pixel[2]=Red
 template <typename InputIterator, typename BrightnessIterator, typename OutputIterator>
 void encodeAPA102_HD(InputIterator first, InputIterator last,
-                     BrightnessIterator brightness_first, OutputIterator out) FL_NO_EXCEPT {
+                     BrightnessIterator brightness_first, OutputIterator out) FL_NOEXCEPT {
     // Start frame: 4 bytes of 0x00
     *out++ = 0x00;
     *out++ = 0x00;
@@ -129,7 +129,7 @@ template <typename InputIterator, typename OutputIterator>
 FL_NO_INLINE_IF_AVR
 FL_OPTIMIZE_O2
 void encodeAPA102_AutoBrightness(InputIterator first, InputIterator last,
-                                 OutputIterator out) FL_NO_EXCEPT {
+                                 OutputIterator out) FL_NOEXCEPT {
     if (first == last) {
         // Empty range - just write start frame (no end frame needed for 0 LEDs)
         *out++ = 0x00; *out++ = 0x00; *out++ = 0x00; *out++ = 0x00;

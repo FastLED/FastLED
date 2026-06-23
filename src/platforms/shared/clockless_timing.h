@@ -65,7 +65,7 @@ public:
         u32 min_pclk_hz = 1000000,      // 1 MHz min
         u32 max_pclk_hz = 80000000,     // 80 MHz max
         bool round_to_mhz = true
-    ) FL_NO_EXCEPT {
+    ) FL_NOEXCEPT {
         ClocklessTimingResult result = {};
 
         // Validate inputs
@@ -166,7 +166,7 @@ public:
         u32 words_per_bit,
         u32 latch_us,
         u32 slot_ns
-    ) FL_NO_EXCEPT {
+    ) FL_NOEXCEPT {
         // Data size: num_leds × bits_per_led × words_per_bit × 2 bytes
         size_t data_size = num_leds * bits_per_led * words_per_bit * 2;
 
@@ -191,7 +191,7 @@ public:
         u32 words_per_bit,
         u32 slot_ns,
         u32 latch_us
-    ) FL_NO_EXCEPT {
+    ) FL_NOEXCEPT {
         // Transmission time: num_leds × bits × words × slot_ns
         u32 transmission_ns = num_leds * bits_per_led * words_per_bit * slot_ns;
         u32 transmission_us = transmission_ns / 1000;
@@ -207,7 +207,7 @@ public:
     static FL_CONSTEXPR14 bool is_timing_acceptable(
         const ClocklessTimingResult& result,
         float max_error_fraction = 0.30f  // 30% default (WS28xx are tolerant)
-    ) FL_NO_EXCEPT {
+    ) FL_NOEXCEPT {
         if (!result.valid) return false;
 
         return (result.error_T1 <= max_error_fraction &&
@@ -221,7 +221,7 @@ private:
     /// @param actual Actual measured/calculated value
     /// @param target Target desired value
     /// @return Relative error as fraction (e.g., 0.05 = 5% error)
-    static FL_CONSTEXPR14 float calculate_error(u32 actual, u32 target) FL_NO_EXCEPT {
+    static FL_CONSTEXPR14 float calculate_error(u32 actual, u32 target) FL_NOEXCEPT {
         if (target == 0) return 0.0f;
 
         i32 diff = (i32)actual - (i32)target;

@@ -20,7 +20,7 @@ namespace fl {
 /// @{
 
 /// Fast 16-bit approximation of sin(x) (C implementation)
-LIB8STATIC i16 sin16_C(u16 theta) FL_NO_EXCEPT {
+LIB8STATIC i16 sin16_C(u16 theta) FL_NOEXCEPT {
     static const u16 base[] = {0,     6393,  12539, 18204,
                                     23170, 27245, 30273, 32137};
     static const u8 slope[] = {49, 48, 44, 38, 31, 23, 14, 4};
@@ -45,16 +45,16 @@ LIB8STATIC i16 sin16_C(u16 theta) FL_NO_EXCEPT {
 }
 
 /// Platform-independent alias of the fast sin implementation
-LIB8STATIC i16 sin16(u16 theta) FL_NO_EXCEPT { return sin16_C(theta); }
+LIB8STATIC i16 sin16(u16 theta) FL_NOEXCEPT { return sin16_C(theta); }
 
 /// Fast 16-bit approximation of cos(x) (calls sin16)
-LIB8STATIC i16 cos16(u16 theta) FL_NO_EXCEPT { return sin16(theta + 16384); }
+LIB8STATIC i16 cos16(u16 theta) FL_NOEXCEPT { return sin16(theta + 16384); }
 
 /// Pre-calculated lookup table used in sin8() and cos8() functions
 const u8 b_m16_interleave[] = {0, 49, 49, 41, 90, 27, 117, 10};
 
 /// Fast 8-bit approximation of sin(x) (C implementation)
-LIB8STATIC u8 sin8_C(u8 theta) FL_NO_EXCEPT {
+LIB8STATIC u8 sin8_C(u8 theta) FL_NOEXCEPT {
     u8 offset = theta;
     if (theta & 0x40) {
         offset = (u8)255 - offset;
@@ -85,10 +85,10 @@ LIB8STATIC u8 sin8_C(u8 theta) FL_NO_EXCEPT {
 }
 
 /// Platform-independent alias of the fast sin implementation
-LIB8STATIC u8 sin8(u8 theta) FL_NO_EXCEPT { return sin8_C(theta); }
+LIB8STATIC u8 sin8(u8 theta) FL_NOEXCEPT { return sin8_C(theta); }
 
 /// Fast 8-bit approximation of cos(x) (calls sin8)
-LIB8STATIC u8 cos8(u8 theta) FL_NO_EXCEPT { return sin8(theta + 64); }
+LIB8STATIC u8 cos8(u8 theta) FL_NOEXCEPT { return sin8(theta + 64); }
 
 /// @} Trig_C
 

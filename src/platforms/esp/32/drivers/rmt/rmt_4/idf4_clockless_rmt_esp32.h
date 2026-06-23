@@ -63,7 +63,7 @@ private:
     FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 public:
-    ClocklessIdf4() FL_NO_EXCEPT
+    ClocklessIdf4() FL_NOEXCEPT
         : mDriver(getRmtEngine())
     {
         // Create channel data with pin and timing configuration
@@ -71,16 +71,16 @@ public:
         mChannelData = ChannelData::create(DATA_PIN, timing);
     }
 
-    void init() FL_NO_EXCEPT override { }
-    virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT { return 400; }
+    void init() FL_NOEXCEPT override { }
+    virtual u16 getMaxRefreshRate() const FL_NOEXCEPT { return 400; }
 
 protected:
     // -- Show pixels
     //    This is the main entry point for the controller.
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NOEXCEPT override
     {
         if (!mDriver) {
-            FL_WARN_F_EVERY(100, "No Engine");
+            FL_WARN_EVERY(100, "No Engine");
             return;
         }
         // Wait for previous transmission to complete and release buffer
@@ -88,10 +88,10 @@ protected:
         u32 startTime = fl::millis();
         u32 lastWarnTime = startTime;
         if (mChannelData->isInUse()) {
-            FL_WARN_F_EVERY(100, "ClocklessIdf4: driver should have finished transmitting by now - waiting");
+            FL_WARN_EVERY(100, "ClocklessIdf4: driver should have finished transmitting by now - waiting");
             bool finished = mDriver->waitForReady();
             if (!finished) {
-                FL_ERROR_F("ClocklessIdf4: Engine still busy after %sms", fl::millis() - startTime);
+                FL_ERROR("ClocklessIdf4: Engine still busy after " << fl::millis() - startTime << "ms");
                 return;
             }
 
@@ -107,7 +107,7 @@ protected:
         mDriver->enqueue(mChannelData);
     }
 
-    static fl::shared_ptr<IChannelDriver> getRmtEngine() FL_NO_EXCEPT {
+    static fl::shared_ptr<IChannelDriver> getRmtEngine() FL_NOEXCEPT {
         // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
         // the `BusTraits<Bus::RMT>` singleton. Naming
         // `BusTraits<Bus::RMT>::instancePtr()` here is the ODR-use that

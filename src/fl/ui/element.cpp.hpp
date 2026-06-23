@@ -3,6 +3,6 @@
 
 namespace fl {
 
-UIElement::UIElement() FL_NO_EXCEPT {}
+UIElement::UIElement() FL_NOEXCEPT {}
 
 } // namespace fl

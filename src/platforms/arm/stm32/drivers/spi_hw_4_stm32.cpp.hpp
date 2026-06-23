@@ -220,14 +220,14 @@ bool SPIQuadSTM32::begin(const SpiHw4::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
-        FL_WARN_F("SPIQuadSTM32: Bus ID mismatch");
+        FL_WARN("SPIQuadSTM32: Bus ID mismatch");
         return false;
     }
 
     // Validate pin assignments - require clock and all 4 data pins for full quad mode
     if (config.clock_pin < 0 || config.data0_pin < 0 || config.data1_pin < 0 ||
         config.data2_pin < 0 || config.data3_pin < 0) {
-        FL_WARN_F("SPIQuadSTM32: Invalid pin configuration (clock and D0-D3 required)");
+        FL_WARN("SPIQuadSTM32: Invalid pin configuration (clock and D0-D3 required)");
         return false;
     }
 
@@ -241,23 +241,23 @@ bool SPIQuadSTM32::begin(const SpiHw4::Config& config) {
 
     // Validate all pins using GPIO helper functions
     if (!isValidPin(mClockPin)) {
-        FL_WARN_F("SPIQuadSTM32: Invalid clock pin %s", static_cast<int>(mClockPin));
+        FL_WARN("SPIQuadSTM32: Invalid clock pin " << static_cast<int>(mClockPin));
         return false;
     }
     if (!isValidPin(mData0Pin)) {
-        FL_WARN_F("SPIQuadSTM32: Invalid data0 pin %s", static_cast<int>(mData0Pin));
+        FL_WARN("SPIQuadSTM32: Invalid data0 pin " << static_cast<int>(mData0Pin));
         return false;
     }
     if (!isValidPin(mData1Pin)) {
-        FL_WARN_F("SPIQuadSTM32: Invalid data1 pin %s", static_cast<int>(mData1Pin));
+        FL_WARN("SPIQuadSTM32: Invalid data1 pin " << static_cast<int>(mData1Pin));
         return false;
     }
     if (!isValidPin(mData2Pin)) {
-        FL_WARN_F("SPIQuadSTM32: Invalid data2 pin %s", static_cast<int>(mData2Pin));
+        FL_WARN("SPIQuadSTM32: Invalid data2 pin " << static_cast<int>(mData2Pin));
         return false;
     }
     if (!isValidPin(mData3Pin)) {
-        FL_WARN_F("SPIQuadSTM32: Invalid data3 pin %s", static_cast<int>(mData3Pin));
+        FL_WARN("SPIQuadSTM32: Invalid data3 pin " << static_cast<int>(mData3Pin));
         return false;
     }
 
@@ -265,25 +265,28 @@ bool SPIQuadSTM32::begin(const SpiHw4::Config& config) {
 #ifdef HAL_GPIO_MODULE_ENABLED
     // Configure all 4 data pins as outputs
     if (!configurePinAsOutput(mData0Pin, GPIO_SPEED_FREQ_HIGH)) {
-        FL_WARN_F("SPIQuadSTM32: Failed to configure data0 pin");
+        FL_WARN("SPIQuadSTM32: Failed to configure data0 pin");
         return false;
     }
     if (!configurePinAsOutput(mData1Pin, GPIO_SPEED_FREQ_HIGH)) {
-        FL_WARN_F("SPIQuadSTM32: Failed to configure data1 pin");
+        FL_WARN("SPIQuadSTM32: Failed to configure data1 pin");
         return false;
     }
     if (!configurePinAsOutput(mData2Pin, GPIO_SPEED_FREQ_HIGH)) {
-        FL_WARN_F("SPIQuadSTM32: Failed to configure data2 pin");
+        FL_WARN("SPIQuadSTM32: Failed to configure data2 pin");
         return false;
     }
     if (!configurePinAsOutput(mData3Pin, GPIO_SPEED_FREQ_HIGH)) {
-        FL_WARN_F("SPIQuadSTM32: Failed to configure data3 pin");
+        FL_WARN("SPIQuadSTM32: Failed to configure data3 pin");
         return false;
     }
 
-    FL_DBG_F("SPIQuadSTM32: GPIO pins configured successfully");
-    FL_DBG_F("  Clock pin: %s", static_cast<int>(mClockPin));
-    FL_DBG_F("  Data pins: %s, %s, %s, %s", static_cast<int>(mData0Pin), static_cast<int>(mData1Pin), static_cast<int>(mData2Pin), static_cast<int>(mData3Pin));
+    FL_DBG("SPIQuadSTM32: GPIO pins configured successfully");
+    FL_DBG("  Clock pin: " << static_cast<int>(mClockPin));
+    FL_DBG("  Data pins: " << static_cast<int>(mData0Pin) << ", "
+                           << static_cast<int>(mData1Pin) << ", "
+                           << static_cast<int>(mData2Pin) << ", "
+                           << static_cast<int>(mData3Pin));
 #endif
 
     // TODO: Implement remaining hardware initialization
@@ -299,8 +302,8 @@ bool SPIQuadSTM32::begin(const SpiHw4::Config& config) {
     // 3. Start Timer
 
     // For now, return error until Timer/DMA implementation is added
-    FL_WARN_F("SPIQuadSTM32: Timer/DMA initialization not yet implemented");
-    FL_WARN_F("SPIQuadSTM32: GPIO configuration complete - hardware integration not complete");
+    FL_WARN("SPIQuadSTM32: Timer/DMA initialization not yet implemented");
+    FL_WARN("SPIQuadSTM32: GPIO configuration complete - hardware integration not complete");
 
     // Uncomment when Timer/DMA implementation is ready:
     // mInitialized = true;
@@ -388,13 +391,13 @@ bool SPIQuadSTM32::allocateDMABuffer(size_t required_size) {
     // Allocate new buffers (word-aligned for DMA requirements)
     mDMABuffer0 = fl::malloc(required_size);
     if (mDMABuffer0 == nullptr) {
-        FL_WARN_F("SPIQuadSTM32: Failed to allocate DMA buffer 0");
+        FL_WARN("SPIQuadSTM32: Failed to allocate DMA buffer 0");
         return false;
     }
 
     mDMABuffer1 = fl::malloc(required_size);
     if (mDMABuffer1 == nullptr) {
-        FL_WARN_F("SPIQuadSTM32: Failed to allocate DMA buffer 1");
+        FL_WARN("SPIQuadSTM32: Failed to allocate DMA buffer 1");
         fl::free(mDMABuffer0);
         mDMABuffer0 = nullptr;
         return false;
@@ -402,7 +405,7 @@ bool SPIQuadSTM32::allocateDMABuffer(size_t required_size) {
 
     mDMABuffer2 = fl::malloc(required_size);
     if (mDMABuffer2 == nullptr) {
-        FL_WARN_F("SPIQuadSTM32: Failed to allocate DMA buffer 2");
+        FL_WARN("SPIQuadSTM32: Failed to allocate DMA buffer 2");
         fl::free(mDMABuffer0);
         fl::free(mDMABuffer1);
         mDMABuffer0 = nullptr;
@@ -412,7 +415,7 @@ bool SPIQuadSTM32::allocateDMABuffer(size_t required_size) {
 
     mDMABuffer3 = fl::malloc(required_size);
     if (mDMABuffer3 == nullptr) {
-        FL_WARN_F("SPIQuadSTM32: Failed to allocate DMA buffer 3");
+        FL_WARN("SPIQuadSTM32: Failed to allocate DMA buffer 3");
         fl::free(mDMABuffer0);
         fl::free(mDMABuffer1);
         fl::free(mDMABuffer2);
@@ -528,7 +531,7 @@ bool SPIQuadSTM32::transmit(TransmitMode mode) {
     // 5. Start Timer to trigger all 4 DMA channels at clock rate
     // 6. Set mTransactionActive = true
 
-    FL_WARN_F("SPIQuadSTM32: DMA transfer not yet implemented");
+    FL_WARN("SPIQuadSTM32: DMA transfer not yet implemented");
 
     // Uncomment when implementation is ready:
     // mTransactionActive = true;

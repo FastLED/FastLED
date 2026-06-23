@@ -35,7 +35,7 @@ Reactive::Reactive()
     mSpectralFluxEnvelope.configure(envCfg);
 }
 
-Reactive::~Reactive() FL_NO_EXCEPT = default;
+Reactive::~Reactive() FL_NOEXCEPT = default;
 
 void Reactive::begin(const ReactiveConfig& config) {
     setConfig(config);
@@ -781,7 +781,7 @@ SpectralFluxDetector::SpectralFluxDetector()
 #endif
 }
 
-SpectralFluxDetector::~SpectralFluxDetector() FL_NO_EXCEPT = default;
+SpectralFluxDetector::~SpectralFluxDetector() FL_NOEXCEPT = default;
 
 void SpectralFluxDetector::reset() {
     for (fl::size i = 0; i < mPreviousMagnitudes.size(); ++i) {
@@ -860,7 +860,7 @@ BeatDetectors::BeatDetectors()
 {
 }
 
-BeatDetectors::~BeatDetectors() FL_NO_EXCEPT = default;
+BeatDetectors::~BeatDetectors() FL_NOEXCEPT = default;
 
 void BeatDetectors::reset() {
 #if SKETCH_HAS_LARGE_MEMORY
@@ -922,7 +922,7 @@ PerceptualWeighting::PerceptualWeighting()
 #endif
 }
 
-PerceptualWeighting::~PerceptualWeighting() FL_NO_EXCEPT = default;
+PerceptualWeighting::~PerceptualWeighting() FL_NOEXCEPT = default;
 
 void PerceptualWeighting::applyAWeighting(Data& data) const {
     // Apply A-weighting coefficients to frequency bins

@@ -22,7 +22,7 @@ struct endpoint {
     fl::string host; // hostname or IP address
     u16 port;
 
-    endpoint() FL_NO_EXCEPT : port(0) {}
+    endpoint() FL_NOEXCEPT : port(0) {}
     endpoint(const fl::string &h, u16 p) : host(h), port(p) {}
     endpoint(const char *h, u16 p) : host(h), port(p) {}
 
@@ -41,16 +41,16 @@ struct endpoint {
 /// Movable, not copyable.
 class socket {
   public:
-    socket() FL_NO_EXCEPT;
-    ~socket() FL_NO_EXCEPT;
+    socket() FL_NOEXCEPT;
+    ~socket() FL_NOEXCEPT;
 
     // Movable
-    socket(socket &&other) FL_NO_EXCEPT;
-    socket &operator=(socket &&other) FL_NO_EXCEPT;
+    socket(socket &&other) FL_NOEXCEPT;
+    socket &operator=(socket &&other) FL_NOEXCEPT;
 
     // Not copyable
-    socket(const socket &) FL_NO_EXCEPT = delete;
-    socket &operator=(const socket &) FL_NO_EXCEPT = delete;
+    socket(const socket &) FL_NOEXCEPT = delete;
+    socket &operator=(const socket &) FL_NOEXCEPT = delete;
 
     /// True if the socket has a valid file descriptor.
     bool is_open() const;
@@ -105,12 +105,12 @@ class socket {
 /// Binds, listens, and accepts incoming connections.
 class acceptor {
   public:
-    acceptor() FL_NO_EXCEPT;
-    ~acceptor() FL_NO_EXCEPT;
+    acceptor() FL_NOEXCEPT;
+    ~acceptor() FL_NOEXCEPT;
 
     // Not copyable or movable (owns listening socket)
-    acceptor(const acceptor &) FL_NO_EXCEPT = delete;
-    acceptor &operator=(const acceptor &) FL_NO_EXCEPT = delete;
+    acceptor(const acceptor &) FL_NOEXCEPT = delete;
+    acceptor &operator=(const acceptor &) FL_NOEXCEPT = delete;
 
     /// Bind and prepare to listen on port.
     error_code open(u16 port);

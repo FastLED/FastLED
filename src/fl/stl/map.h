@@ -30,7 +30,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
     typedef typename VectorType::const_iterator const_iterator;
 
     // Constructor
-    constexpr unsorted_map_fixed() FL_NO_EXCEPT = default;
+    constexpr unsorted_map_fixed() FL_NOEXCEPT = default;
 
     iterator begin() { return data.begin(); }
     iterator end() { return data.end(); }

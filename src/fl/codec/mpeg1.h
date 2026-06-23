@@ -18,7 +18,7 @@ struct Mpeg1Info {
     bool hasAudio = false;       // True if MPEG1 contains audio track
     bool isValid = false;        // True if metadata was successfully parsed
 
-    Mpeg1Info() FL_NO_EXCEPT = default;
+    Mpeg1Info() FL_NOEXCEPT = default;
 
     // Constructor for easy initialization
     Mpeg1Info(fl::u16 w, fl::u16 h, fl::u16 fps)

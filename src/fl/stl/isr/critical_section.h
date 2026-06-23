@@ -25,10 +25,10 @@ namespace isr {
 ///   }  // Interrupts automatically re-enabled here
 class critical_section {
 public:
-    critical_section() FL_NO_EXCEPT;
-    ~critical_section() FL_NO_EXCEPT;
-    critical_section(const critical_section&) FL_NO_EXCEPT = delete;
-    critical_section& operator=(const critical_section&) FL_NO_EXCEPT = delete;
+    critical_section() FL_NOEXCEPT;
+    ~critical_section() FL_NOEXCEPT;
+    critical_section(const critical_section&) FL_NOEXCEPT = delete;
+    critical_section& operator=(const critical_section&) FL_NOEXCEPT = delete;
 };
 
 // Backward-compatible type alias

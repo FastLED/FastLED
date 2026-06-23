@@ -44,22 +44,22 @@ struct ISRContext {
     fl::atomic<bool> started;  // Signals when thread has begun execution
     fl::thread thread;
 
-    ISRContext(fl::u32 hz) FL_NO_EXCEPT : timer_hz(hz), running(false), started(false) {}
+    ISRContext(fl::u32 hz) FL_NOEXCEPT : timer_hz(hz), running(false), started(false) {}
 };
 
 /* Global ISR registry (for multi-instance support) */
-static fl::vector<ISRContext*>& get_isr_contexts() FL_NO_EXCEPT {
+static fl::vector<ISRContext*>& get_isr_contexts() FL_NOEXCEPT {
     static fl::vector<ISRContext*> contexts;
     return contexts;
 }
 
-static fl::mutex& get_isr_mutex() FL_NO_EXCEPT {
+static fl::mutex& get_isr_mutex() FL_NOEXCEPT {
     static fl::mutex mtx;
     return mtx;
 }
 
 /* Thread function that runs the ISR at configured frequency */
-static void isr_thread_func(ISRContext* ctx) FL_NO_EXCEPT {
+static void isr_thread_func(ISRContext* ctx) FL_NOEXCEPT {
     ISR_DBG("Thread started, frequency: %u Hz\n", ctx->timer_hz);
 
     // Signal that thread has started
@@ -102,7 +102,7 @@ static void isr_thread_func(ISRContext* ctx) FL_NO_EXCEPT {
 extern "C" {
 
 /* Start timer (launches ISR thread) */
-int fl_spi_platform_isr_start(fl::u32 timer_hz) FL_NO_EXCEPT {
+int fl_spi_platform_isr_start(fl::u32 timer_hz) FL_NOEXCEPT {
     ISR_DBG("fl_spi_platform_isr_start called, frequency: %u Hz\n", timer_hz);
     fl::unique_lock<fl::mutex> lock(get_isr_mutex());
 
@@ -127,7 +127,7 @@ int fl_spi_platform_isr_start(fl::u32 timer_hz) FL_NO_EXCEPT {
 }
 
 /* Stop timer (joins ISR thread) */
-void fl_spi_platform_isr_stop(void) FL_NO_EXCEPT {
+void fl_spi_platform_isr_stop(void) FL_NOEXCEPT {
     ISR_DBG("fl_spi_platform_isr_stop called, contexts count: %zu\n", get_isr_contexts().size());
     fl::unique_lock<fl::mutex> lock(get_isr_mutex());
 
@@ -146,12 +146,12 @@ void fl_spi_platform_isr_stop(void) FL_NO_EXCEPT {
 }
 
 /* Query timer state */
-bool fl_spi_host_timer_is_running(void) FL_NO_EXCEPT {
+bool fl_spi_host_timer_is_running(void) FL_NOEXCEPT {
     fl::unique_lock<fl::mutex> lock(get_isr_mutex());
     return !get_isr_contexts().empty();
 }
 
-fl::u32 fl_spi_host_timer_get_hz(void) FL_NO_EXCEPT {
+fl::u32 fl_spi_host_timer_get_hz(void) FL_NOEXCEPT {
     fl::unique_lock<fl::mutex> lock(get_isr_mutex());
     if (!get_isr_contexts().empty()) {
         return get_isr_contexts()[0]->timer_hz;

@@ -41,7 +41,7 @@ private:
         Key value;
         fl::size unique_id;
 
-        ValueWithId() FL_NO_EXCEPT = default;
+        ValueWithId() FL_NOEXCEPT = default;
         ValueWithId(const Key& v, fl::size id) : value(v), unique_id(id) {}
         ValueWithId(Key&& v, fl::size id) : value(fl::move(v)), unique_id(id) {}
 
@@ -79,7 +79,7 @@ private:
         typename TreeType::const_iterator mTreeIt;
 
     public:
-        ConstIteratorWrapper() FL_NO_EXCEPT = default;
+        ConstIteratorWrapper() FL_NOEXCEPT = default;
         explicit ConstIteratorWrapper(typename TreeType::const_iterator it) : mTreeIt(it) {}
 
         const value_type& operator*() const {
@@ -121,7 +121,7 @@ private:
         typename TreeType::const_reverse_iterator mTreeRIt;
 
     public:
-        ConstReverseIteratorWrapper() FL_NO_EXCEPT = default;
+        ConstReverseIteratorWrapper() FL_NOEXCEPT = default;
         explicit ConstReverseIteratorWrapper(typename TreeType::const_reverse_iterator it) : mTreeRIt(it) {}
 
         const value_type& operator*() const {
@@ -167,11 +167,11 @@ public:
     MultiSetTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator())
         : mTree(KeyCompareWithId(comp), alloc) {}
 
-    MultiSetTree(const MultiSetTree& other) FL_NO_EXCEPT = default;
-    MultiSetTree& operator=(const MultiSetTree& other) FL_NO_EXCEPT = default;
+    MultiSetTree(const MultiSetTree& other) FL_NOEXCEPT = default;
+    MultiSetTree& operator=(const MultiSetTree& other) FL_NOEXCEPT = default;
 
-    MultiSetTree(MultiSetTree&& other) FL_NO_EXCEPT = default;
-    MultiSetTree& operator=(MultiSetTree&& other) FL_NO_EXCEPT = default;
+    MultiSetTree(MultiSetTree&& other) FL_NOEXCEPT = default;
+    MultiSetTree& operator=(MultiSetTree&& other) FL_NOEXCEPT = default;
 
     // Initializer list constructor
     MultiSetTree(fl::initializer_list<value_type> init,
@@ -183,7 +183,7 @@ public:
         }
     }
 
-    ~MultiSetTree() FL_NO_EXCEPT = default;
+    ~MultiSetTree() FL_NOEXCEPT = default;
 
     // Iterators
     iterator begin() { return iterator(mTree.begin()); }

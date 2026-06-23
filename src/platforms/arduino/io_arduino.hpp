@@ -13,7 +13,7 @@ namespace fl {
 namespace platforms {
 
 // Serial initialization
-void begin(u32 baudRate) FL_NO_EXCEPT {
+void begin(u32 baudRate) FL_NOEXCEPT {
     Serial.begin(baudRate);
 #if defined(ARDUINO_USB_CDC_ON_BOOT) && ARDUINO_USB_CDC_ON_BOOT
     // ESP32 HWCDC/USBCDC: make writes drop instead of block when no host is reading.
@@ -25,33 +25,33 @@ void begin(u32 baudRate) FL_NO_EXCEPT {
 }
 
 // Print functions
-void print(const char* str) FL_NO_EXCEPT {
+void print(const char* str) FL_NOEXCEPT {
     if (!Serial) return;  // Non-blocking: skip if USB disconnected
     Serial.print(str);
 }
 
-void println(const char* str) FL_NO_EXCEPT {
+void println(const char* str) FL_NOEXCEPT {
     if (!Serial) return;  // Non-blocking: skip if USB disconnected
     Serial.println(str);
 }
 
 // Input functions
-int available() FL_NO_EXCEPT {
+int available() FL_NOEXCEPT {
     return Serial.available();
 }
 
-int peek() FL_NO_EXCEPT {
+int peek() FL_NOEXCEPT {
     return Serial.peek();
 }
 
-int read() FL_NO_EXCEPT {
+int read() FL_NOEXCEPT {
     return Serial.read();
 }
 
 // High-level line reading using Arduino's Serial.readStringUntil()
 // This handles USB CDC multi-packet transfers correctly via Stream::timedRead()
 // which uses yield() (immediate context switch) instead of delay(1) (1ms sleep).
-int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
+int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
     if (outLen <= 0) {
         return 0;
     }
@@ -95,7 +95,7 @@ int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
 }
 
 // Utility functions
-bool flush(u32 timeoutMs) FL_NO_EXCEPT {
+bool flush(u32 timeoutMs) FL_NOEXCEPT {
     (void)timeoutMs;
     // Skip flush when host is absent. On HWCDC, Serial.flush() can spin
     // indefinitely without a host (arduino-esp32 issue #7554). Returning
@@ -106,18 +106,18 @@ bool flush(u32 timeoutMs) FL_NO_EXCEPT {
     return true;
 }
 
-bool serial_ready() FL_NO_EXCEPT {
+bool serial_ready() FL_NOEXCEPT {
     return (bool)Serial;
 }
 
 // Binary write function
-size_t write_bytes(const u8* buffer, size_t size) FL_NO_EXCEPT {
+size_t write_bytes(const u8* buffer, size_t size) FL_NOEXCEPT {
     return Serial.write(buffer, size);
     //return 0;
 }
 
 // Test/diagnostic helper: Arduino Serial is always "buffered" (not ROM UART)
-bool serial_is_buffered() FL_NO_EXCEPT {
+bool serial_is_buffered() FL_NOEXCEPT {
     return true;  // Arduino Serial is always buffered
 }
 

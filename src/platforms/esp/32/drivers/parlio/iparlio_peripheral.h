@@ -87,7 +87,7 @@ struct ParlioPeripheralConfig {
     bool prefer_psram;                  ///< Prefer PSRAM for DMA buffers (falls back to internal RAM if unavailable)
 
     /// @brief Default constructor (for mock testing)
-    ParlioPeripheralConfig() FL_NO_EXCEPT
+    ParlioPeripheralConfig() FL_NOEXCEPT
         : data_width(0),
           gpio_pins(),
           clock_freq_hz(0),
@@ -109,7 +109,7 @@ struct ParlioPeripheralConfig {
                            size_t queue_depth_val,
                            size_t max_transfer,
                            ParlioBitPackOrder pack_order = ParlioBitPackOrder::FL_PARLIO_MSB,
-                           bool psram = true) FL_NO_EXCEPT
+                           bool psram = true) FL_NOEXCEPT
         : data_width(pins.size()),
           gpio_pins(),
           clock_freq_hz(clock_freq),
@@ -192,7 +192,7 @@ public:
     ///
     /// Call once during driver initialization. Must succeed before any
     /// other methods can be used.
-    virtual bool initialize(const ParlioPeripheralConfig& config) FL_NO_EXCEPT = 0;
+    virtual bool initialize(const ParlioPeripheralConfig& config) FL_NOEXCEPT = 0;
 
     /// @brief Deinitialize PARLIO peripheral and release hardware resources
     /// @return true on success, false on error
@@ -202,7 +202,7 @@ public:
     /// Releases the TX unit handle so that initialize() can be called again.
     /// Used for graceful cleanup when post-init steps (e.g., ring buffer
     /// allocation) fail, preventing the "Already initialized" error loop.
-    virtual bool deinitialize() FL_NO_EXCEPT = 0;
+    virtual bool deinitialize() FL_NOEXCEPT = 0;
 
     /// @brief Enable PARLIO TX unit for transmission
     /// @return true on success, false on error
@@ -212,7 +212,7 @@ public:
     /// Must be called before transmit(). The peripheral remains enabled
     /// until disable() is called. Multiple transmit() calls can occur
     /// while enabled.
-    virtual bool enable() FL_NO_EXCEPT = 0;
+    virtual bool enable() FL_NOEXCEPT = 0;
 
     /// @brief Disable PARLIO TX unit after transmission
     /// @return true on success, false on error
@@ -221,7 +221,7 @@ public:
     ///
     /// Call after waitAllDone() completes. Disabling while transmission
     /// is active may cause data corruption or hardware errors.
-    virtual bool disable() FL_NO_EXCEPT = 0;
+    virtual bool disable() FL_NOEXCEPT = 0;
 
     /// @brief Check if peripheral is initialized
     /// @return true if initialized, false otherwise
@@ -229,7 +229,7 @@ public:
     /// Used by ParlioEngine to detect if peripheral was reset (for testing).
     /// Production hardware: Always returns true after initialize() succeeds.
     /// Mock implementation: Returns false after reset() is called.
-    virtual bool isInitialized() const FL_NO_EXCEPT = 0;
+    virtual bool isInitialized() const FL_NOEXCEPT = 0;
 
     //=========================================================================
     // Transmission Methods
@@ -250,7 +250,7 @@ public:
     ///
     /// The peripheral will trigger the TX done callback when transmission
     /// completes. Multiple buffers can be queued (up to queue_depth).
-    virtual bool transmit(const u8* buffer, size_t bit_count, u16 idle_value) FL_NO_EXCEPT = 0;
+    virtual bool transmit(const u8* buffer, size_t bit_count, u16 idle_value) FL_NOEXCEPT = 0;
 
     /// @brief Wait for all queued transmissions to complete
     /// @param timeout_ms Timeout in milliseconds (0 = non-blocking poll)
@@ -268,7 +268,7 @@ public:
     /// Returns false if:
     /// - Timeout occurs before completion
     /// - Hardware error occurs during transmission
-    virtual bool waitAllDone(u32 timeout_ms) FL_NO_EXCEPT = 0;
+    virtual bool waitAllDone(u32 timeout_ms) FL_NOEXCEPT = 0;
 
     //=========================================================================
     // ISR Callback Registration
@@ -300,7 +300,7 @@ public:
     /// - Use atomic operations and memory barriers for shared state
     ///
     /// See ParlioIsrContext documentation for detailed ISR safety guidelines.
-    virtual bool registerTxDoneCallback(void* callback, void* user_ctx) FL_NO_EXCEPT = 0;
+    virtual bool registerTxDoneCallback(void* callback, void* user_ctx) FL_NOEXCEPT = 0;
 
     //=========================================================================
     // DMA Memory Management
@@ -319,7 +319,7 @@ public:
     ///
     /// Size is automatically rounded up to 64-byte multiple to ensure
     /// cache sync operations work correctly (address AND size must be aligned).
-    virtual u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT = 0;
+    virtual u8* allocateDmaBuffer(size_t size) FL_NOEXCEPT = 0;
 
     /// @brief Free DMA buffer allocated via allocateDmaBuffer()
     /// @param buffer Buffer pointer (must be from allocateDmaBuffer())
@@ -327,7 +327,7 @@ public:
     /// Maps to ESP-IDF: heap_caps_free()
     ///
     /// Safe to call with nullptr (no-op).
-    virtual void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT = 0;
+    virtual void freeDmaBuffer(u8* buffer) FL_NOEXCEPT = 0;
 
     //=========================================================================
     // Platform Utilities
@@ -352,7 +352,7 @@ public:
     ///
     /// ⚠️  NOT for timing-critical operations. Use hardware timers or busy-wait
     /// for sub-millisecond precision requirements.
-    virtual void delay(u32 ms) FL_NO_EXCEPT = 0;
+    virtual void delay(u32 ms) FL_NOEXCEPT = 0;
 
     /// @brief Portable microsecond delay
     /// @param us Delay duration in microseconds
@@ -360,7 +360,7 @@ public:
     /// Maps to platform-specific delay:
     /// - ESP32: ets_delay_us() or busy-wait
     /// - Mock: No-op (instant, advances simulated time)
-    virtual void delayMicroseconds(u32 us) FL_NO_EXCEPT = 0;
+    virtual void delayMicroseconds(u32 us) FL_NOEXCEPT = 0;
 
     /// @brief Get current time in milliseconds
     /// @return Current time in milliseconds (monotonic)
@@ -368,7 +368,7 @@ public:
     /// Maps to:
     /// - ESP32: esp_timer_get_time() / 1000
     /// - Mock: Simulated time (advances with delay calls)
-    virtual u32 millis() FL_NO_EXCEPT = 0;
+    virtual u32 millis() FL_NOEXCEPT = 0;
 
     //=========================================================================
     // Task Management (REMOVED - Use fl::TaskCoroutine directly)
@@ -407,7 +407,7 @@ public:
     ///
     /// Used for debug timestamps and performance measurement. Monotonic clock
     /// (does not jump backwards). Precision varies by platform (ESP32: ~1µs).
-    virtual u64 getMicroseconds() FL_NO_EXCEPT = 0;
+    virtual u64 getMicroseconds() FL_NOEXCEPT = 0;
 
     //=========================================================================
     // Memory Management
@@ -425,7 +425,7 @@ public:
     ///
     /// Thread-safe: Yes (can be called from any context)
     /// ISR-safe: No (may allocate/deallocate memory internally)
-    virtual void freeDmaBuffer(void* ptr) FL_NO_EXCEPT = 0;
+    virtual void freeDmaBuffer(void* ptr) FL_NOEXCEPT = 0;
 };
 
 } // namespace detail

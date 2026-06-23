@@ -18,7 +18,7 @@ namespace platforms {
 /// This function is called lazily on first access to the ChannelManager singleton.
 ///
 /// @note Implementation is in src/platforms/arm/nrf52/init_channel_driver_nrf52.cpp.hpp
-void initChannelDrivers() FL_NO_EXCEPT;
+void initChannelDrivers() FL_NOEXCEPT;
 
 }  // namespace platforms
 }  // namespace fl

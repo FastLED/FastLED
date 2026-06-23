@@ -38,14 +38,14 @@ namespace fl {
 template<> struct BusTraits<Bus::LCD_SPI> {
     using Driver = IChannelDriver;
 
-    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
         static fl::shared_ptr<Driver> gHolder = createLcdSpiEngine();
         return gHolder;
     }
 
-    static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
+    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
 
-    static void registerWithManager() FL_NO_EXCEPT {
+    static void registerWithManager() FL_NOEXCEPT {
         ChannelManager::instance().addDriver(default_bus_priority(Bus::LCD_SPI), instancePtr());
     }
 };
@@ -55,14 +55,14 @@ template<> struct BusSupports<Bus::LCD_SPI, SpiChipsetConfig> : fl::true_type {}
 template<> struct BusTraits<Bus::LCD_CLOCKLESS> {
     using Driver = IChannelDriver;
 
-    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
         static fl::shared_ptr<Driver> gHolder = createLcdClocklessEngine();
         return gHolder;
     }
 
-    static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
+    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
 
-    static void registerWithManager() FL_NO_EXCEPT {
+    static void registerWithManager() FL_NOEXCEPT {
         ChannelManager::instance().addDriver(default_bus_priority(Bus::LCD_CLOCKLESS), instancePtr());
     }
 };

@@ -16,12 +16,13 @@ namespace fl {
 size_t wave8EncodeI2sSingleLane(
     fl::span<const u8> input,
     fl::span<u16> output,
-    const Wave8BitExpansionLut& lut) FL_NO_EXCEPT {
+    const Wave8BitExpansionLut& lut) FL_NOEXCEPT {
 
     // Calculate required output size
     const size_t required_words = wave8CalculateI2sOutputSize(input.size());
     if (output.size() < required_words) {
-        FL_WARN_F("wave8EncodeI2sSingleLane: Output buffer too small (need %s words, have %s)", required_words, output.size());
+        FL_WARN("wave8EncodeI2sSingleLane: Output buffer too small (need "
+                << required_words << " words, have " << output.size() << ")");
         return 0;
     }
 
@@ -61,7 +62,7 @@ size_t wave8EncodeI2sMultiLane(
     fl::span<const u8>* lanes,
     int num_lanes,
     fl::span<u16> output,
-    const Wave8BitExpansionLut& lut) FL_NO_EXCEPT {
+    const Wave8BitExpansionLut& lut) FL_NOEXCEPT {
 
     if (num_lanes < 1 || num_lanes > 16 || lanes == nullptr) {
         return 0;
@@ -71,7 +72,7 @@ size_t wave8EncodeI2sMultiLane(
     const size_t lane_size = lanes[0].size();
     for (int i = 1; i < num_lanes; i++) {
         if (lanes[i].size() != lane_size) {
-            FL_WARN_F("wave8EncodeI2sMultiLane: Lane size mismatch");
+            FL_WARN("wave8EncodeI2sMultiLane: Lane size mismatch");
             return 0;
         }
     }
@@ -79,7 +80,7 @@ size_t wave8EncodeI2sMultiLane(
     // Calculate required output size
     const size_t required_words = wave8CalculateI2sOutputSize(lane_size);
     if (output.size() < required_words) {
-        FL_WARN_F("wave8EncodeI2sMultiLane: Output buffer too small");
+        FL_WARN("wave8EncodeI2sMultiLane: Output buffer too small");
         return 0;
     }
 
@@ -121,7 +122,7 @@ size_t wave8EncodeI2sMultiLane(
     return output_idx;
 }
 
-u32 calculateI2sClockHz(const ChipsetTiming& timing) FL_NO_EXCEPT {
+u32 calculateI2sClockHz(const ChipsetTiming& timing) FL_NOEXCEPT {
     // Calculate total period for one LED bit
     // WS2812: T1 (T0H/T1H start) + T2 (middle) + T3 (T0L/T1L end)
     // Total period = T1 + T2 + T3 nanoseconds

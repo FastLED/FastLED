@@ -81,7 +81,7 @@ public:
      * Configure GPIO clock mask (single bit for clock pin)
      * Example: setClockMask(1 << 32) for GPIO32
      */
-    void setClockMask(u32 mask) FL_NO_EXCEPT {
+    void setClockMask(u32 mask) FL_NOEXCEPT {
         fl_spi_set_clock_mask(mask);
     }
 
@@ -89,14 +89,14 @@ public:
      * Set number of bytes to transmit in next burst
      * Max: 256 bytes
      */
-    void setTotalBytes(u16 n) FL_NO_EXCEPT {
+    void setTotalBytes(u16 n) FL_NOEXCEPT {
         fl_spi_set_total_bytes(n);
     }
 
     /**
      * Set a single data byte at index i
      */
-    void setDataByte(u16 i, u8 v) FL_NO_EXCEPT {
+    void setDataByte(u16 i, u8 v) FL_NOEXCEPT {
         fl_spi_set_data_byte(i, v);
     }
 
@@ -106,7 +106,7 @@ public:
      * @param setMask GPIO bits to set high
      * @param clearMask GPIO bits to set low
      */
-    void setLUTEntry(u8 value, u32 setMask, u32 clearMask) FL_NO_EXCEPT {
+    void setLUTEntry(u8 value, u32 setMask, u32 clearMask) FL_NOEXCEPT {
         fl_spi_set_lut_entry(value, setMask, clearMask);
     }
 
@@ -115,7 +115,7 @@ public:
      * @param data Pointer to data bytes
      * @param n Number of bytes (max 256)
      */
-    void loadBuffer(const u8* data, u16 n) FL_NO_EXCEPT {
+    void loadBuffer(const u8* data, u16 n) FL_NOEXCEPT {
         if (!data) return;
         if (n > 256) n = 256;
         for (u16 i = 0; i < n; ++i) {
@@ -130,7 +130,7 @@ public:
      * @param clearMasks Array of 256 clear masks
      * @param count Number of entries to load (default 256)
      */
-    void loadLUT(const u32* setMasks, const u32* clearMasks, size_t count = 256) FL_NO_EXCEPT {
+    void loadLUT(const u32* setMasks, const u32* clearMasks, size_t count = 256) FL_NOEXCEPT {
         if (!setMasks || !clearMasks) return;
         if (count > 256) count = 256;
         for (size_t v = 0; v < count; ++v) {
@@ -143,14 +143,14 @@ public:
      * @param timer_hz Timer frequency in Hz (should be 2× target SPI bit rate)
      * @return 0 on success, error code on failure
      */
-    int setupISR(u32 timer_hz) FL_NO_EXCEPT {
+    int setupISR(u32 timer_hz) FL_NOEXCEPT {
         return fl_spi_platform_isr_start(timer_hz);
     }
 
     /**
      * Stop ISR and timer
      */
-    void stopISR() FL_NO_EXCEPT {
+    void stopISR() FL_NOEXCEPT {
         fl_spi_platform_isr_stop();
     }
 
@@ -158,28 +158,28 @@ public:
      * Arm a transfer (caller must ensure visibility delay first)
      * Increments doorbell counter to trigger ISR edge detection
      */
-    void arm() FL_NO_EXCEPT {
+    void arm() FL_NOEXCEPT {
         fl_spi_arm();
     }
 
     /**
      * Check if ISR is currently transmitting
      */
-    bool isBusy() const FL_NO_EXCEPT {
+    bool isBusy() const FL_NOEXCEPT {
         return (fl_spi_status_flags() & STATUS_BUSY) != 0;
     }
 
     /**
      * Get raw status flags
      */
-    u32 statusFlags() const FL_NO_EXCEPT {
+    u32 statusFlags() const FL_NOEXCEPT {
         return fl_spi_status_flags();
     }
 
     /**
      * Acknowledge DONE flag (clears it)
      */
-    void ackDone() FL_NO_EXCEPT {
+    void ackDone() FL_NOEXCEPT {
         fl_spi_ack_done();
     }
 
@@ -187,14 +187,14 @@ public:
      * Visibility delay (ensures memory writes are visible to ISR)
      * Typical value: 10 microseconds
      */
-    static void visibilityDelayUs(u32 us) FL_NO_EXCEPT {
+    static void visibilityDelayUs(u32 us) FL_NOEXCEPT {
         fl_spi_visibility_delay_us(us);
     }
 
     /**
      * Reset ISR state (between runs)
      */
-    static void resetState() FL_NO_EXCEPT {
+    static void resetState() FL_NOEXCEPT {
         fl_spi_reset_state();
     }
 
@@ -209,7 +209,7 @@ public:
      *       lut[v].clear_mask = ...;
      *   }
      */
-    static PinMaskEntry* getLUTArray() FL_NO_EXCEPT {
+    static PinMaskEntry* getLUTArray() FL_NOEXCEPT {
         return fl_spi_get_lut_array();
     }
 
@@ -221,7 +221,7 @@ public:
      *   uint8_t* data = spi.getDataArray();
      *   memcpy(data, source, length);
      */
-    static u8* getDataArray() FL_NO_EXCEPT {
+    static u8* getDataArray() FL_NOEXCEPT {
         return fl_spi_get_data_array();
     }
 
@@ -230,14 +230,14 @@ public:
      * Get GPIO event log (only available when FASTLED_SPI_VALIDATE is defined)
      * Returns pointer to array of GPIO events captured during ISR execution
      */
-    static const GPIOEvent* getValidationEvents() FL_NO_EXCEPT {
+    static const GPIOEvent* getValidationEvents() FL_NOEXCEPT {
         return fl::bit_cast<const GPIOEvent*>(fl_spi_get_validation_events());
     }
 
     /**
      * Get number of GPIO events captured
      */
-    static u16 getValidationEventCount() FL_NO_EXCEPT {
+    static u16 getValidationEventCount() FL_NOEXCEPT {
         return fl_spi_get_validation_event_count();
     }
 #endif

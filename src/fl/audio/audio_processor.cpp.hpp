@@ -34,7 +34,7 @@ void Processor::registerDetector(shared_ptr<Detector> detector) {
     mActiveDetectors.push_back(detector);
 }
 
-Processor::~Processor() FL_NO_EXCEPT = default;
+Processor::~Processor() FL_NOEXCEPT = default;
 
 void Processor::update(const Sample& sample) {
     // Signal conditioning pipeline: raw sample → conditioned sample

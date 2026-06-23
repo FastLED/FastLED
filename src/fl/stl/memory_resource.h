@@ -15,21 +15,21 @@ namespace fl {
 /// (default heap, PSRAM, DMA, slab, etc.)
 class memory_resource {
   public:
-    virtual ~memory_resource() FL_NO_EXCEPT = default;
+    virtual ~memory_resource() FL_NOEXCEPT = default;
 
-    void* allocate(fl::size bytes) FL_NO_EXCEPT {
+    void* allocate(fl::size bytes) FL_NOEXCEPT {
         if (bytes == 0) return nullptr;
         return do_allocate(bytes);
     }
 
-    void deallocate(void* p, fl::size bytes) FL_NO_EXCEPT {
+    void deallocate(void* p, fl::size bytes) FL_NOEXCEPT {
         if (!p) return;
         do_deallocate(p, bytes);
     }
 
     /// Try to resize in-place. Returns new pointer on success, nullptr on failure.
     /// On failure, caller must allocate-copy-deallocate manually.
-    void* reallocate(void* p, fl::size old_bytes, fl::size new_bytes) FL_NO_EXCEPT {
+    void* reallocate(void* p, fl::size old_bytes, fl::size new_bytes) FL_NOEXCEPT {
         if (new_bytes == 0) {
             deallocate(p, old_bytes);
             return nullptr;
@@ -38,26 +38,26 @@ class memory_resource {
         return do_reallocate(p, old_bytes, new_bytes);
     }
 
-    bool is_equal(const memory_resource& other) const FL_NO_EXCEPT {
+    bool is_equal(const memory_resource& other) const FL_NOEXCEPT {
         return do_is_equal(other);
     }
 
   protected:
-    virtual void* do_allocate(fl::size bytes) FL_NO_EXCEPT = 0;
-    virtual void do_deallocate(void* p, fl::size bytes) FL_NO_EXCEPT = 0;
+    virtual void* do_allocate(fl::size bytes) FL_NOEXCEPT = 0;
+    virtual void do_deallocate(void* p, fl::size bytes) FL_NOEXCEPT = 0;
 
     /// Default: returns nullptr (not supported). Override for realloc-capable resources.
-    virtual void* do_reallocate(void* p, fl::size old_bytes, fl::size new_bytes) FL_NO_EXCEPT;
+    virtual void* do_reallocate(void* p, fl::size old_bytes, fl::size new_bytes) FL_NOEXCEPT;
 
-    virtual bool do_is_equal(const memory_resource& other) const FL_NO_EXCEPT {
+    virtual bool do_is_equal(const memory_resource& other) const FL_NOEXCEPT {
         return this == &other;
     }
 };
 
 /// Get the default memory resource (wraps fl::Malloc / fl::Free / fl::realloc).
-memory_resource* default_memory_resource() FL_NO_EXCEPT;
+memory_resource* default_memory_resource() FL_NOEXCEPT;
 
 /// Get the PSRAM memory resource (wraps PSRamAllocate / PSRamDeallocate).
-memory_resource* psram_memory_resource() FL_NO_EXCEPT;
+memory_resource* psram_memory_resource() FL_NOEXCEPT;
 
 } // namespace fl

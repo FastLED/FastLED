@@ -22,7 +22,7 @@ namespace fl {
 //=============================================================================
 
 UartPeripheralMock::UartPeripheralMock()
- FL_NO_EXCEPT : mConfig(),
+ FL_NOEXCEPT : mConfig(),
       mInitialized(false),
       mBusy(false),
       mCapturedData(),
@@ -43,7 +43,7 @@ UartPeripheralMock::~UartPeripheralMock() {
 // IUartPeripheral Interface Implementation
 //=============================================================================
 
-bool UartPeripheralMock::initialize(const UartPeripheralConfig& config) FL_NO_EXCEPT {
+bool UartPeripheralMock::initialize(const UartPeripheralConfig& config) FL_NOEXCEPT {
     if (mInitialized) {
         // Already initialized - deinitialize first
         deinitialize();
@@ -69,7 +69,7 @@ bool UartPeripheralMock::initialize(const UartPeripheralConfig& config) FL_NO_EX
     return true;
 }
 
-void UartPeripheralMock::deinitialize() FL_NO_EXCEPT {
+void UartPeripheralMock::deinitialize() FL_NOEXCEPT {
     if (!mInitialized) {
         return;  // Already deinitialized
     }
@@ -80,11 +80,11 @@ void UartPeripheralMock::deinitialize() FL_NO_EXCEPT {
     mLastWriteTimestamp = 0;
 }
 
-bool UartPeripheralMock::isInitialized() const FL_NO_EXCEPT {
+bool UartPeripheralMock::isInitialized() const FL_NOEXCEPT {
     return mInitialized;
 }
 
-bool UartPeripheralMock::writeBytes(const u8* data, size_t length) FL_NO_EXCEPT {
+bool UartPeripheralMock::writeBytes(const u8* data, size_t length) FL_NOEXCEPT {
     if (!mInitialized) {
         return false;  // Not initialized
     }
@@ -124,7 +124,7 @@ bool UartPeripheralMock::writeBytes(const u8* data, size_t length) FL_NO_EXCEPT 
     return true;
 }
 
-bool UartPeripheralMock::waitTxDone(u32 timeout_ms) FL_NO_EXCEPT {
+bool UartPeripheralMock::waitTxDone(u32 timeout_ms) FL_NOEXCEPT {
     if (!mInitialized) {
         return false;  // Not initialized
     }
@@ -162,7 +162,7 @@ bool UartPeripheralMock::waitTxDone(u32 timeout_ms) FL_NO_EXCEPT {
     return true;
 }
 
-bool UartPeripheralMock::isBusy() const FL_NO_EXCEPT {
+bool UartPeripheralMock::isBusy() const FL_NOEXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -183,7 +183,7 @@ bool UartPeripheralMock::isBusy() const FL_NO_EXCEPT {
     return false;
 }
 
-const UartPeripheralConfig& UartPeripheralMock::getConfig() const FL_NO_EXCEPT {
+const UartPeripheralConfig& UartPeripheralMock::getConfig() const FL_NOEXCEPT {
     return mConfig;
 }
 
@@ -191,17 +191,17 @@ const UartPeripheralConfig& UartPeripheralMock::getConfig() const FL_NO_EXCEPT {
 // Mock-Specific API
 //=============================================================================
 
-void UartPeripheralMock::setTransmissionDelay(u32 microseconds) FL_NO_EXCEPT {
+void UartPeripheralMock::setTransmissionDelay(u32 microseconds) FL_NOEXCEPT {
     mTransmissionDelayUs = microseconds;
     mManualDelaySet = true;
 }
 
-void UartPeripheralMock::forceTransmissionComplete() FL_NO_EXCEPT {
+void UartPeripheralMock::forceTransmissionComplete() FL_NOEXCEPT {
     mBusy = false;
     mResetExpireTime = 0;  // Clear reset period
 }
 
-void UartPeripheralMock::reset() FL_NO_EXCEPT {
+void UartPeripheralMock::reset() FL_NOEXCEPT {
     mInitialized = false;
     mBusy = false;
     mCapturedData.clear();
@@ -215,23 +215,23 @@ void UartPeripheralMock::reset() FL_NO_EXCEPT {
     mConfig = UartPeripheralConfig();
 }
 
-fl::vector<u8> UartPeripheralMock::getCapturedBytes() const FL_NO_EXCEPT {
+fl::vector<u8> UartPeripheralMock::getCapturedBytes() const FL_NOEXCEPT {
     return mCapturedData;
 }
 
-size_t UartPeripheralMock::getCapturedByteCount() const FL_NO_EXCEPT {
+size_t UartPeripheralMock::getCapturedByteCount() const FL_NOEXCEPT {
     return mCapturedData.size();
 }
 
-void UartPeripheralMock::resetCapturedData() FL_NO_EXCEPT {
+void UartPeripheralMock::resetCapturedData() FL_NOEXCEPT {
     mCapturedData.clear();
 }
 
-u64 UartPeripheralMock::getLastCalculatedResetDurationUs() const FL_NO_EXCEPT {
+u64 UartPeripheralMock::getLastCalculatedResetDurationUs() const FL_NOEXCEPT {
     return mLastCalculatedResetDuration;
 }
 
-void UartPeripheralMock::setVirtualTimeMode(bool enabled) FL_NO_EXCEPT {
+void UartPeripheralMock::setVirtualTimeMode(bool enabled) FL_NOEXCEPT {
     mVirtualTimeEnabled = enabled;
     if (enabled && mVirtualTime == 0) {
         // Initialize virtual time to a non-zero value to avoid edge cases
@@ -239,7 +239,7 @@ void UartPeripheralMock::setVirtualTimeMode(bool enabled) FL_NO_EXCEPT {
     }
 }
 
-void UartPeripheralMock::advanceTime(u64 microseconds) FL_NO_EXCEPT {
+void UartPeripheralMock::advanceTime(u64 microseconds) FL_NOEXCEPT {
     if (mVirtualTimeEnabled) {
         mVirtualTime += microseconds;
         // Update transmission state after advancing time
@@ -247,26 +247,26 @@ void UartPeripheralMock::advanceTime(u64 microseconds) FL_NO_EXCEPT {
     }
 }
 
-void UartPeripheralMock::pumpTime(u64 microseconds) FL_NO_EXCEPT {
+void UartPeripheralMock::pumpTime(u64 microseconds) FL_NOEXCEPT {
     advanceTime(microseconds);
     // Note: advanceTime() already calls updateTransmissionState()
 }
 
-u64 UartPeripheralMock::getVirtualTime() const FL_NO_EXCEPT {
+u64 UartPeripheralMock::getVirtualTime() const FL_NOEXCEPT {
     return mVirtualTimeEnabled ? mVirtualTime : 0;
 }
 
-u64 UartPeripheralMock::getTransmissionDuration() const FL_NO_EXCEPT {
+u64 UartPeripheralMock::getTransmissionDuration() const FL_NOEXCEPT {
     return mTransmissionDelayUs;
 }
 
-u64 UartPeripheralMock::getResetDuration() const FL_NO_EXCEPT {
+u64 UartPeripheralMock::getResetDuration() const FL_NOEXCEPT {
     const u64 MIN_RESET_DURATION_US = 50;
     return (mTransmissionDelayUs > MIN_RESET_DURATION_US) ?
            mTransmissionDelayUs : MIN_RESET_DURATION_US;
 }
 
-u64 UartPeripheralMock::getRemainingTransmissionTime() const FL_NO_EXCEPT {
+u64 UartPeripheralMock::getRemainingTransmissionTime() const FL_NOEXCEPT {
     if (!mBusy) {
         return 0;
     }
@@ -275,12 +275,12 @@ u64 UartPeripheralMock::getRemainingTransmissionTime() const FL_NO_EXCEPT {
     return (now < target) ? (target - now) : 0;
 }
 
-u64 UartPeripheralMock::getRemainingResetTime() const FL_NO_EXCEPT {
+u64 UartPeripheralMock::getRemainingResetTime() const FL_NOEXCEPT {
     const u64 now = getCurrentTimestamp();
     return (now < mResetExpireTime) ? (mResetExpireTime - now) : 0;
 }
 
-fl::vector<bool> UartPeripheralMock::getWaveformWithFraming() const FL_NO_EXCEPT {
+fl::vector<bool> UartPeripheralMock::getWaveformWithFraming() const FL_NOEXCEPT {
     fl::vector<bool> waveform;
     waveform.reserve(mCapturedData.size() * 10);  // 10 bits per byte (8N1)
 
@@ -305,7 +305,7 @@ fl::vector<bool> UartPeripheralMock::getWaveformWithFraming() const FL_NO_EXCEPT
     return waveform;
 }
 
-bool UartPeripheralMock::verifyStartStopBits() const FL_NO_EXCEPT {
+bool UartPeripheralMock::verifyStartStopBits() const FL_NOEXCEPT {
     if (mCapturedData.empty()) {
         return false;  // No data to verify
     }
@@ -345,14 +345,14 @@ bool UartPeripheralMock::verifyStartStopBits() const FL_NO_EXCEPT {
 // Internal Helpers
 //=============================================================================
 
-u64 UartPeripheralMock::getCurrentTimestamp() const FL_NO_EXCEPT {
+u64 UartPeripheralMock::getCurrentTimestamp() const FL_NOEXCEPT {
     if (mVirtualTimeEnabled) {
         return mVirtualTime;
     }
     return fl::micros();
 }
 
-bool UartPeripheralMock::isTransmissionComplete() const FL_NO_EXCEPT {
+bool UartPeripheralMock::isTransmissionComplete() const FL_NOEXCEPT {
     if (!mBusy) {
         return true;
     }
@@ -369,7 +369,7 @@ bool UartPeripheralMock::isTransmissionComplete() const FL_NO_EXCEPT {
     return elapsed >= mTransmissionDelayUs;
 }
 
-void UartPeripheralMock::updateTransmissionState() FL_NO_EXCEPT {
+void UartPeripheralMock::updateTransmissionState() FL_NOEXCEPT {
     if (!mBusy) {
         return;
     }

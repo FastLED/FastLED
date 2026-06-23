@@ -68,16 +68,16 @@ namespace stm32 {
 /// @brief Get GPIO port from Arduino pin number
 /// @param pin Arduino pin number
 /// @return GPIO_TypeDef* or nullptr if invalid
-GPIO_TypeDef* getGPIOPort(u8 pin) FL_NO_EXCEPT;
+GPIO_TypeDef* getGPIOPort(u8 pin) FL_NOEXCEPT;
 
 /// @brief Get GPIO pin mask from Arduino pin number
 /// @param pin Arduino pin number
 /// @return GPIO pin mask (GPIO_PIN_x)
-u32 getGPIOPin(u8 pin) FL_NO_EXCEPT;
+u32 getGPIOPin(u8 pin) FL_NOEXCEPT;
 
 /// @brief Enable clock for a GPIO port
 /// @param port GPIO port (GPIOA, GPIOB, etc.)
-void enableGPIOClock(GPIO_TypeDef* port) FL_NO_EXCEPT;
+void enableGPIOClock(GPIO_TypeDef* port) FL_NOEXCEPT;
 
 /// @brief Configure pin as general purpose output
 /// @param pin Arduino pin number
@@ -95,7 +95,7 @@ bool configurePinAsTimerAF(u8 pin, TIM_TypeDef* timer, u32 speed = 0x03 /* GPIO_
 /// @brief Validate that a pin number is valid
 /// @param pin Arduino pin number
 /// @return true if valid
-bool isValidPin(u8 pin) FL_NO_EXCEPT;
+bool isValidPin(u8 pin) FL_NOEXCEPT;
 
 // ============================================================================
 // Timer Helper Functions
@@ -104,17 +104,17 @@ bool isValidPin(u8 pin) FL_NO_EXCEPT;
 /// @brief Select timer peripheral based on bus_id
 /// @param bus_id Logical bus identifier (0-3)
 /// @return TIM_TypeDef* or nullptr if invalid
-TIM_TypeDef* selectTimer(int bus_id) FL_NO_EXCEPT;
+TIM_TypeDef* selectTimer(int bus_id) FL_NOEXCEPT;
 
 /// @brief Enable RCC clock for a timer peripheral
 /// @param timer Timer peripheral (TIM2, TIM3, etc.)
-void enableTimerClock(TIM_TypeDef* timer) FL_NO_EXCEPT;
+void enableTimerClock(TIM_TypeDef* timer) FL_NOEXCEPT;
 
 /// @brief Get timer clock frequency for calculating prescaler
 /// @param timer Timer peripheral
 /// @return Timer clock frequency in Hz
 /// @note Uses HAL functions to query actual clock configuration
-u32 getTimerClockFreq(TIM_TypeDef* timer) FL_NO_EXCEPT;
+u32 getTimerClockFreq(TIM_TypeDef* timer) FL_NOEXCEPT;
 
 /// @brief Initialize timer for PWM clock generation
 /// @param htim Timer handle (must be persistent, e.g., class member)
@@ -122,22 +122,22 @@ u32 getTimerClockFreq(TIM_TypeDef* timer) FL_NO_EXCEPT;
 /// @param frequency_hz Desired PWM frequency in Hz (SPI clock rate)
 /// @return true if successful
 /// @note htim must remain valid for the lifetime of the timer usage
-bool initTimerPWM(TIM_HandleTypeDef* htim, TIM_TypeDef* timer, u32 frequency_hz) FL_NO_EXCEPT;
+bool initTimerPWM(TIM_HandleTypeDef* htim, TIM_TypeDef* timer, u32 frequency_hz) FL_NOEXCEPT;
 
 /// @brief Start timer PWM output
 /// @param htim Timer handle (must be previously initialized)
 /// @return true if successful
-bool startTimer(TIM_HandleTypeDef* htim) FL_NO_EXCEPT;
+bool startTimer(TIM_HandleTypeDef* htim) FL_NOEXCEPT;
 
 /// @brief Stop timer PWM output
 /// @param htim Timer handle
-void stopTimer(TIM_HandleTypeDef* htim) FL_NO_EXCEPT;
+void stopTimer(TIM_HandleTypeDef* htim) FL_NOEXCEPT;
 
 /// @brief Get timer channel number for a pin
 /// @param pin Arduino pin number
 /// @param timer Timer peripheral
 /// @return Timer channel (1-4) or 0 if not supported
-u8 getTimerChannel(u8 pin, TIM_TypeDef* timer) FL_NO_EXCEPT;
+u8 getTimerChannel(u8 pin, TIM_TypeDef* timer) FL_NOEXCEPT;
 
 // ============================================================================
 // DMA Helper Functions (Stream-based DMA for F2/F4/F7/H7/L4)
@@ -148,29 +148,29 @@ u8 getTimerChannel(u8 pin, TIM_TypeDef* timer) FL_NO_EXCEPT;
 
 /// @brief Enable RCC clock for DMA controller
 /// @param dma DMA controller (DMA1 or DMA2)
-void enableDMAClock(DMA_TypeDef* dma) FL_NO_EXCEPT;
+void enableDMAClock(DMA_TypeDef* dma) FL_NOEXCEPT;
 
 /// @brief Get DMA stream for a specific timer and lane
 /// @param timer Timer peripheral
 /// @param bus_id Bus identifier (0-3)
 /// @param lane Lane number (0-7 for different data lanes)
 /// @return DMA_Stream_TypeDef* or nullptr if not available
-DMA_Stream_TypeDef* getDMAStream(TIM_TypeDef* timer, int bus_id, int lane) FL_NO_EXCEPT;
+DMA_Stream_TypeDef* getDMAStream(TIM_TypeDef* timer, int bus_id, int lane) FL_NOEXCEPT;
 
 /// @brief Get DMA channel number for timer update event
 /// @param timer Timer peripheral
 /// @return DMA channel number or 0xFF if not available
-u32 getDMAChannel(TIM_TypeDef* timer) FL_NO_EXCEPT;
+u32 getDMAChannel(TIM_TypeDef* timer) FL_NOEXCEPT;
 
 /// @brief Get DMA controller for a stream
 /// @param stream DMA stream pointer
 /// @return DMA_TypeDef* (DMA1 or DMA2)
-DMA_TypeDef* getDMAController(DMA_Stream_TypeDef* stream) FL_NO_EXCEPT;
+DMA_TypeDef* getDMAController(DMA_Stream_TypeDef* stream) FL_NOEXCEPT;
 
 /// @brief Get stream index (0-7) within its controller
 /// @param stream DMA stream pointer
 /// @return Stream index (0-7) or 0xFF if invalid
-u8 getStreamIndex(DMA_Stream_TypeDef* stream) FL_NO_EXCEPT;
+u8 getStreamIndex(DMA_Stream_TypeDef* stream) FL_NOEXCEPT;
 
 /// @brief Initialize DMA stream for memory-to-peripheral transfer
 /// @param stream DMA stream
@@ -179,20 +179,20 @@ u8 getStreamIndex(DMA_Stream_TypeDef* stream) FL_NO_EXCEPT;
 /// @param size Transfer size in bytes
 /// @param channel DMA channel number for request routing
 /// @return true if successful
-bool initDMA(DMA_Stream_TypeDef* stream, const void* src, volatile void* dst, u32 size, u32 channel) FL_NO_EXCEPT;
+bool initDMA(DMA_Stream_TypeDef* stream, const void* src, volatile void* dst, u32 size, u32 channel) FL_NOEXCEPT;
 
 /// @brief Check if DMA transfer is complete
 /// @param stream DMA stream
 /// @return true if transfer complete, false if still busy
-bool isDMAComplete(DMA_Stream_TypeDef* stream) FL_NO_EXCEPT;
+bool isDMAComplete(DMA_Stream_TypeDef* stream) FL_NOEXCEPT;
 
 /// @brief Clear DMA transfer complete flags
 /// @param stream DMA stream
-void clearDMAFlags(DMA_Stream_TypeDef* stream) FL_NO_EXCEPT;
+void clearDMAFlags(DMA_Stream_TypeDef* stream) FL_NOEXCEPT;
 
 /// @brief Stop DMA transfer
 /// @param stream DMA stream
-void stopDMA(DMA_Stream_TypeDef* stream) FL_NO_EXCEPT;
+void stopDMA(DMA_Stream_TypeDef* stream) FL_NOEXCEPT;
 
 #endif  // FASTLED_STM32_HAS_DMA_STREAMS
 

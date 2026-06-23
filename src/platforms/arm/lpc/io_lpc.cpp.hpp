@@ -27,42 +27,34 @@ namespace platforms {
 
 #if defined(ARDUINO)
 
-void begin(u32 baudRate) FL_NO_EXCEPT {
+void begin(u32 baudRate) FL_NOEXCEPT {
     Serial.begin(baudRate);
 }
 
-void print(const char* str) FL_NO_EXCEPT {
+void print(const char* str) FL_NOEXCEPT {
     if (!Serial) return;
     Serial.print(str);
 }
 
-void println(const char* str) FL_NO_EXCEPT {
+void println(const char* str) FL_NOEXCEPT {
     if (!Serial) return;
-    // FastLED #3313: Serial.println silently drops on LPC8xx -- bytes
-    // never reach the USB-VCOM bridge. Empirically, splitting into two
-    // Serial.print calls (the same byte-write path FL_DBG_F uses via
-    // fl::printf -> platforms::print) reaches the host reliably. Root
-    // cause is in Print::println's path in the Arduino core; filed
-    // separately. This workaround unblocks every fl::println / FL_WARN_LIT
-    // call site on LPC.
-    Serial.print(str);
-    Serial.print("\r\n");
+    Serial.println(str);
 }
 
-int available() FL_NO_EXCEPT {
+int available() FL_NOEXCEPT {
     return Serial.available();
 }
 
-int peek() FL_NO_EXCEPT {
+int peek() FL_NOEXCEPT {
     return Serial.peek();
 }
 
-int read() FL_NO_EXCEPT {
+int read() FL_NOEXCEPT {
     return Serial.read();
 }
 
 // LPC's HardwareSerial lacks readStringUntil(), so read the line manually.
-int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
+int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
     if (outLen <= 0) {
         return 0;
     }
@@ -94,75 +86,75 @@ int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
     return len;
 }
 
-bool flush(u32 timeoutMs) FL_NO_EXCEPT {
+bool flush(u32 timeoutMs) FL_NOEXCEPT {
     (void)timeoutMs;
     if (!Serial) return true;
     Serial.flush();
     return true;
 }
 
-size_t write_bytes(const u8* buffer, size_t size) FL_NO_EXCEPT {
+size_t write_bytes(const u8* buffer, size_t size) FL_NOEXCEPT {
     if (!Serial) return 0;
     return Serial.write(buffer, size);
 }
 
-bool serial_ready() FL_NO_EXCEPT {
+bool serial_ready() FL_NOEXCEPT {
     return Serial ? true : false;
 }
 
-bool serial_is_buffered() FL_NO_EXCEPT {
+bool serial_is_buffered() FL_NOEXCEPT {
     return true;  // LPC Arduino uses buffered UART
 }
 
 #else  // bare-metal: no Serial available yet
 
-void begin(u32 baudRate) FL_NO_EXCEPT {
+void begin(u32 baudRate) FL_NOEXCEPT {
     (void)baudRate;
 }
 
-void print(const char* str) FL_NO_EXCEPT {
+void print(const char* str) FL_NOEXCEPT {
     (void)str;
 }
 
-void println(const char* str) FL_NO_EXCEPT {
+void println(const char* str) FL_NOEXCEPT {
     (void)str;
 }
 
-int available() FL_NO_EXCEPT {
+int available() FL_NOEXCEPT {
     return 0;
 }
 
-int peek() FL_NO_EXCEPT {
+int peek() FL_NOEXCEPT {
     return -1;
 }
 
-int read() FL_NO_EXCEPT {
+int read() FL_NOEXCEPT {
     return -1;
 }
 
-int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
+int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
     (void)delimiter;
     (void)out;
     (void)outLen;
     return -1;
 }
 
-bool flush(u32 timeoutMs) FL_NO_EXCEPT {
+bool flush(u32 timeoutMs) FL_NOEXCEPT {
     (void)timeoutMs;
     return true;
 }
 
-size_t write_bytes(const u8* buffer, size_t size) FL_NO_EXCEPT {
+size_t write_bytes(const u8* buffer, size_t size) FL_NOEXCEPT {
     (void)buffer;
     (void)size;
     return 0;
 }
 
-bool serial_ready() FL_NO_EXCEPT {
+bool serial_ready() FL_NOEXCEPT {
     return false;
 }
 
-bool serial_is_buffered() FL_NO_EXCEPT {
+bool serial_is_buffered() FL_NOEXCEPT {
     return false;
 }
 

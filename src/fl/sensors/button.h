@@ -32,10 +32,10 @@ enum class ButtonStrategy {
 class ButtonLowLevel {
   public:
     ButtonLowLevel(int pin, ButtonStrategy strategy = ButtonStrategy::kHighLowFloating);
-    ~ButtonLowLevel() FL_NO_EXCEPT;
-    ButtonLowLevel(const ButtonLowLevel &other) FL_NO_EXCEPT = default;
-    ButtonLowLevel &operator=(const ButtonLowLevel &other) FL_NO_EXCEPT = delete;
-    ButtonLowLevel(ButtonLowLevel &&other) FL_NO_EXCEPT = delete;
+    ~ButtonLowLevel() FL_NOEXCEPT;
+    ButtonLowLevel(const ButtonLowLevel &other) FL_NOEXCEPT = default;
+    ButtonLowLevel &operator=(const ButtonLowLevel &other) FL_NOEXCEPT = delete;
+    ButtonLowLevel(ButtonLowLevel &&other) FL_NOEXCEPT = delete;
     bool isPressed();
 
     bool highLowFloating();
@@ -64,18 +64,18 @@ class Button : public IButtonInput {
         mButton.setStrategy(strategy);
     }
 
-    bool isPressed() const FL_NO_EXCEPT override {
+    bool isPressed() const FL_NOEXCEPT override {
         return mButton.isPressed();
     }
 
-    bool clicked() const FL_NO_EXCEPT override {
+    bool clicked() const FL_NOEXCEPT override {
         return mClickedThisFrame;
     }
 
   protected:
     struct Listener : public EngineEvents::Listener {
         Listener(Button *owner);
-        ~Listener() FL_NO_EXCEPT;
+        ~Listener() FL_NOEXCEPT;
         void addToEngineEventsOnce();
 
         // We do an experiment here, what about listening to the end frame event

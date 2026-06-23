@@ -38,7 +38,7 @@ namespace asset_detail {
 
 /// Compile-time length of a null-terminated C string. Recursive constexpr
 /// form — compatible with C++11-only `constexpr` (no loops / locals).
-constexpr fl::size clen(const char* s, fl::size n = 0) FL_NO_EXCEPT {
+constexpr fl::size clen(const char* s, fl::size n = 0) FL_NOEXCEPT {
     return s[n] == '\0' ? n : clen(s, n + 1);
 }
 
@@ -47,7 +47,7 @@ constexpr fl::size clen(const char* s, fl::size n = 0) FL_NO_EXCEPT {
 /// A ".." segment is two consecutive dots at a segment boundary — i.e. the
 /// preceding character is `'/'`, `'\\'`, or the string start, and the
 /// following character is `'/'`, `'\\'`, or the string end.
-constexpr bool is_parent_at(const char* p, fl::size i) FL_NO_EXCEPT {
+constexpr bool is_parent_at(const char* p, fl::size i) FL_NOEXCEPT {
     // Segment start: either we're at the beginning, or preceded by a separator.
     return (i == 0 || p[i - 1] == '/' || p[i - 1] == '\\')
            && p[i] == '.' && p[i + 1] == '.'
@@ -55,7 +55,7 @@ constexpr bool is_parent_at(const char* p, fl::size i) FL_NO_EXCEPT {
 }
 
 /// Recursive constexpr walk looking for any ".." segment.
-constexpr bool path_has_parent_segment_at(const char* p, fl::size i) FL_NO_EXCEPT {
+constexpr bool path_has_parent_segment_at(const char* p, fl::size i) FL_NOEXCEPT {
     return p[i] == '\0'
                ? false
                : (is_parent_at(p, i) ? true : path_has_parent_segment_at(p, i + 1));
@@ -70,7 +70,7 @@ constexpr bool path_has_parent_segment_at(const char* p, fl::size i) FL_NO_EXCEP
 ///   - ".."
 /// Does NOT reject single dots (".") or dots inside filename segments
 /// ("foo..bar", "file.ext", "hidden.dotfile").
-constexpr bool path_has_parent_segment(const char* p) FL_NO_EXCEPT {
+constexpr bool path_has_parent_segment(const char* p) FL_NOEXCEPT {
     return (p == nullptr) ? false : path_has_parent_segment_at(p, 0);
 }
 
@@ -85,31 +85,31 @@ class asset_ref {
   public:
     /// Construct from a pointer to a null-terminated string with known length.
     /// The pointer MUST outlive the `asset_ref` — typically a string literal.
-    constexpr asset_ref(const char* path, fl::size length) FL_NO_EXCEPT
+    constexpr asset_ref(const char* path, fl::size length) FL_NOEXCEPT
         : mPath(path), mLength(length) {}
 
     /// Default-constructed handle refers to no asset.
-    constexpr asset_ref() FL_NO_EXCEPT : mPath(nullptr), mLength(0) {}
+    constexpr asset_ref() FL_NOEXCEPT : mPath(nullptr), mLength(0) {}
 
     /// Copy/move: trivial — pointer + length. Can't combine `constexpr` with
     /// `= default` on the assignment operator pre-C++14, so we leave these as
     /// the implicitly-declared operations (the class is trivially copyable).
-    asset_ref(const asset_ref&) FL_NO_EXCEPT = default;
-    asset_ref& operator=(const asset_ref&) FL_NO_EXCEPT = default;
+    asset_ref(const asset_ref&) FL_NOEXCEPT = default;
+    asset_ref& operator=(const asset_ref&) FL_NOEXCEPT = default;
 
     /// True if this handle refers to an asset path.
-    constexpr explicit operator bool() const FL_NO_EXCEPT {
+    constexpr explicit operator bool() const FL_NOEXCEPT {
         return mPath != nullptr && mLength > 0;
     }
 
     /// The relative asset path as a string view (e.g. "data/track.mp3").
-    fl::string_view path() const FL_NO_EXCEPT {
+    fl::string_view path() const FL_NOEXCEPT {
         return fl::string_view(mPath, mLength);
     }
 
     /// Pointer accessor — useful for JSON serialization.
-    constexpr const char* c_str() const FL_NO_EXCEPT { return mPath; }
-    constexpr fl::size size() const FL_NO_EXCEPT { return mLength; }
+    constexpr const char* c_str() const FL_NOEXCEPT { return mPath; }
+    constexpr fl::size size() const FL_NOEXCEPT { return mLength; }
 
   private:
     const char* mPath;
@@ -125,7 +125,7 @@ class asset_ref {
 /// pointers) and, for safety, returns an empty handle if the path contains
 /// a `..` segment. Runtime resolution also refuses to walk past `data/`, so
 /// this is defense-in-depth rather than the primary gate.
-constexpr asset_ref asset(const char* path) FL_NO_EXCEPT {
+constexpr asset_ref asset(const char* path) FL_NOEXCEPT {
     return asset_detail::path_has_parent_segment(path)
                ? asset_ref()
                : asset_ref(path, asset_detail::clen(path));
@@ -161,7 +161,7 @@ constexpr asset_ref asset(const char* path) FL_NO_EXCEPT {
 /// reserved for future integrity/retry features.
 ///
 /// Declared here; defined in `fl/asset/asset.cpp.hpp`.
-fl::url resolve_asset(const asset_ref& a) FL_NO_EXCEPT;
+fl::url resolve_asset(const asset_ref& a) FL_NOEXCEPT;
 
 /// Register an asset path → URL mapping at runtime.
 ///
@@ -172,6 +172,6 @@ fl::url resolve_asset(const asset_ref& a) FL_NO_EXCEPT;
 ///     running fbuild.
 ///
 /// Last writer wins for duplicate paths (scan then manually plug in tests).
-void register_asset(fl::string_view path, const fl::url& u) FL_NO_EXCEPT;
+void register_asset(fl::string_view path, const fl::url& u) FL_NOEXCEPT;
 
 } // namespace fl

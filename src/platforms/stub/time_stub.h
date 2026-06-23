@@ -15,17 +15,17 @@
 extern "C" {
     // Global timing functions for Arduino compatibility
     // These are provided by the platform layer but need to be declared globally
-    fl::u32 millis(void) FL_NO_EXCEPT;
-    fl::u32 micros(void) FL_NO_EXCEPT;
-    void yield(void) FL_NO_EXCEPT;
+    fl::u32 millis(void) FL_NOEXCEPT;
+    fl::u32 micros(void) FL_NOEXCEPT;
+    void yield(void) FL_NOEXCEPT;
 }
 
 // C++ function to override delay behavior for fast testing
-void setDelayFunction(const fl::function<void(fl::u32)>& delayFunc) FL_NO_EXCEPT;
+void setDelayFunction(const fl::function<void(fl::u32)>& delayFunc) FL_NOEXCEPT;
 
 // Clear the delay override (must be called before unloading DLLs that set it)
-void clearDelayFunction() FL_NO_EXCEPT;
+void clearDelayFunction() FL_NOEXCEPT;
 
 // Check if delay override is active (for fast testing)
-bool isDelayOverrideActive(void) FL_NO_EXCEPT;
+bool isDelayOverrideActive(void) FL_NOEXCEPT;
 #endif  // !ARDUINO || FASTLED_USE_STUB_ARDUINO

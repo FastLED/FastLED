@@ -120,7 +120,7 @@ static rp2040_isr_handle_data* alarm_handles[FL_NUM_ALARMS] = {};
 // =============================================================================
 
 // Initialize alarm lock (called once)
-static void init_alarm_lock() FL_NO_EXCEPT {
+static void init_alarm_lock() FL_NOEXCEPT {
     if (!alarm_lock_initialized) {
         critical_section_init(&alarm_lock);
         alarm_lock_initialized = true;
@@ -128,7 +128,7 @@ static void init_alarm_lock() FL_NO_EXCEPT {
 }
 
 // Allocate a hardware alarm (thread-safe, multi-core safe)
-static i8 allocate_alarm() FL_NO_EXCEPT {
+static i8 allocate_alarm() FL_NOEXCEPT {
     init_alarm_lock();
 
     critical_section_enter_blocking(&alarm_lock);
@@ -147,7 +147,7 @@ static i8 allocate_alarm() FL_NO_EXCEPT {
 }
 
 // Free a hardware alarm (thread-safe, multi-core safe)
-static void free_alarm(i8 alarm_num) FL_NO_EXCEPT {
+static void free_alarm(i8 alarm_num) FL_NOEXCEPT {
     if (alarm_num < 0 || alarm_num >= FL_NUM_ALARMS) {
         return;
     }
@@ -162,7 +162,7 @@ static void free_alarm(i8 alarm_num) FL_NO_EXCEPT {
 
 // Map ISR priority (1-7) to NVIC priority (0-3, lower = higher)
 // RP2040 Cortex-M0+ only supports 4 priority levels (0-3)
-static u8 map_priority_to_nvic(u8 isr_priority) FL_NO_EXCEPT {
+static u8 map_priority_to_nvic(u8 isr_priority) FL_NOEXCEPT {
     // Clamp to valid range
     if (isr_priority < 1) isr_priority = 1;
     if (isr_priority > 7) isr_priority = 7;
@@ -183,7 +183,7 @@ static u8 map_priority_to_nvic(u8 isr_priority) FL_NO_EXCEPT {
 // =============================================================================
 
 // Repeating alarm callback wrapper
-static i64 alarm_callback_wrapper(alarm_id_t id, void* user_data) FL_NO_EXCEPT {
+static i64 alarm_callback_wrapper(alarm_id_t id, void* user_data) FL_NOEXCEPT {
     rp2040_isr_handle_data* handle = static_cast<rp2040_isr_handle_data*>(user_data);
 
     if (handle && handle->user_handler && handle->is_enabled) {
@@ -206,7 +206,7 @@ static i64 alarm_callback_wrapper(alarm_id_t id, void* user_data) FL_NO_EXCEPT {
 static rp2040_isr_handle_data* gpio_handles[30] = {};  // 30 GPIO pins max
 
 // GPIO interrupt handler (shared callback for all GPIOs on this core)
-static void gpio_callback_wrapper(uint gpio, u32 events) FL_NO_EXCEPT {
+static void gpio_callback_wrapper(uint gpio, u32 events) FL_NOEXCEPT {
     if (gpio < 30 && gpio_handles[gpio]) {
         rp2040_isr_handle_data* handle = gpio_handles[gpio];
 
@@ -223,27 +223,27 @@ static void gpio_callback_wrapper(uint gpio, u32 events) FL_NO_EXCEPT {
 // RP2040 ISR Implementation (fl::isr::platform namespace)
 // =============================================================================
 
-int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
+int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
     if (!config.handler) {
-        FL_WARN_F("attachTimerHandler: handler is null");
+        FL_WARN("attachTimerHandler: handler is null");
         return -1;  // Invalid parameter
     }
 
     if (config.frequency_hz == 0) {
-        FL_WARN_F("attachTimerHandler: frequency_hz is 0");
+        FL_WARN("attachTimerHandler: frequency_hz is 0");
         return -2;  // Invalid frequency
     }
 
     // Check frequency bounds (practical limits for RP2040)
     if (config.frequency_hz > 1000000) {
-        FL_WARN_F("attachTimerHandler: frequency %s Hz exceeds 1 MHz limit", config.frequency_hz);
+        FL_WARN("attachTimerHandler: frequency " << config.frequency_hz << " Hz exceeds 1 MHz limit");
         return -2;  // Invalid frequency
     }
 
     // Allocate a hardware alarm
     i8 alarm_num = allocate_alarm();
     if (alarm_num < 0) {
-        FL_WARN_F("attachTimerHandler: no free hardware alarms (max 4)");
+        FL_WARN("attachTimerHandler: no free hardware alarms (max 4)");
         return -3;  // Out of resources
     }
 
@@ -252,7 +252,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     auto* handle_data = handle_owner.get();
     if (!handle_data) {
         free_alarm(alarm_num);
-        FL_WARN_F("attachTimerHandler: failed to allocate handle data");
+        FL_WARN("attachTimerHandler: failed to allocate handle data");
         return -5;  // Out of memory
     }
 
@@ -277,7 +277,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
         // Alarm creation failed
         free_alarm(alarm_num);
         alarm_handles[alarm_num] = nullptr;
-        FL_WARN_F("attachTimerHandler: add_alarm_in_us failed");
+        FL_WARN("attachTimerHandler: add_alarm_in_us failed");
         return -4;  // Internal error
     }
 
@@ -287,7 +287,8 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
         irq_set_priority(TIMER_IRQ_0 + alarm_num, nvic_priority);
     }
 
-    FL_DBG_F("Timer started at %s Hz on alarm %s", config.frequency_hz, static_cast<int>(alarm_num));
+    FL_DBG("Timer started at " << config.frequency_hz << " Hz on alarm "
+           << static_cast<int>(alarm_num));
 
     // Release ownership - pointer is now managed by the C API (alarm_handles + out_handle)
     handle_owner.release();
@@ -303,20 +304,22 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     return 0;  // Success
 }
 
-int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
+int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
     if (!config.handler) {
-        FL_WARN_F("attachExternalHandler: handler is null");
+        FL_WARN("attachExternalHandler: handler is null");
         return -1;  // Invalid parameter
     }
 
     if (pin >= 30) {
-        FL_WARN_F("attachExternalHandler: invalid pin %s (RP2040 has 30 GPIO pins)", static_cast<int>(pin));
+        FL_WARN("attachExternalHandler: invalid pin " << static_cast<int>(pin)
+                << " (RP2040 has 30 GPIO pins)");
         return -1;  // Invalid parameter
     }
 
     // Check if pin already has a handler
     if (gpio_handles[pin] != nullptr) {
-        FL_WARN_F("attachExternalHandler: pin %s already has an attached handler", static_cast<int>(pin));
+        FL_WARN("attachExternalHandler: pin " << static_cast<int>(pin)
+                << " already has an attached handler");
         return -3;  // Resource already in use
     }
 
@@ -324,7 +327,7 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     auto handle_owner = fl::make_unique<rp2040_isr_handle_data>();
     auto* handle_data = handle_owner.get();
     if (!handle_data) {
-        FL_WARN_F("attachExternalHandler: failed to allocate handle data");
+        FL_WARN("attachExternalHandler: failed to allocate handle data");
         return -5;  // Out of memory
     }
 
@@ -371,7 +374,8 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
         irq_set_priority(IO_IRQ_BANK0, nvic_priority);
     }
 
-    FL_DBG_F("GPIO interrupt attached on pin %s with events 0x%s", static_cast<int>(pin), fl::to_hex(events));
+    FL_DBG("GPIO interrupt attached on pin " << static_cast<int>(pin)
+           << " with events 0x" << fl::to_hex(events));
 
     // Release ownership - pointer is now managed by the C API (gpio_handles + out_handle)
     handle_owner.release();
@@ -387,15 +391,15 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     return 0;  // Success
 }
 
-int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
+int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
     if (!handle.is_valid() || handle.platform_id != RP2040_PLATFORM_ID) {
-        FL_WARN_F("detachHandler: invalid handle");
+        FL_WARN("detachHandler: invalid handle");
         return -1;  // Invalid handle
     }
 
     rp2040_isr_handle_data* handle_data = static_cast<rp2040_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN_F("detachHandler: null handle data");
+        FL_WARN("detachHandler: null handle data");
         return -1;  // Invalid handle
     }
 
@@ -419,19 +423,19 @@ int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
     handle.platform_handle = nullptr;
     handle.platform_id = 0;
 
-    FL_DBG_F("Handler detached");
+    FL_DBG("Handler detached");
     return 0;  // Success
 }
 
-int enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
+int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     if (!handle.is_valid() || handle.platform_id != RP2040_PLATFORM_ID) {
-        FL_WARN_F("enableHandler: invalid handle");
+        FL_WARN("enableHandler: invalid handle");
         return -1;  // Invalid handle
     }
 
     rp2040_isr_handle_data* handle_data = static_cast<rp2040_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN_F("enableHandler: null handle data");
+        FL_WARN("enableHandler: null handle data");
         return -1;  // Invalid handle
     }
 
@@ -445,7 +449,7 @@ int enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
         handle_data->alarm_id = add_alarm_in_us(interval_us, alarm_callback_wrapper,
                                                  handle_data, true);
         if (handle_data->alarm_id == 0 || handle_data->alarm_id == -1) {
-            FL_WARN_F("enableHandler: failed to restart alarm");
+            FL_WARN("enableHandler: failed to restart alarm");
             return -2;  // Failed to restart
         }
     } else {
@@ -457,15 +461,15 @@ int enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     return 0;  // Success
 }
 
-int disable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
+int disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     if (!handle.is_valid() || handle.platform_id != RP2040_PLATFORM_ID) {
-        FL_WARN_F("disableHandler: invalid handle");
+        FL_WARN("disableHandler: invalid handle");
         return -1;  // Invalid handle
     }
 
     rp2040_isr_handle_data* handle_data = static_cast<rp2040_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN_F("disableHandler: null handle data");
+        FL_WARN("disableHandler: null handle data");
         return -1;  // Invalid handle
     }
 
@@ -488,7 +492,7 @@ int disable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     return 0;  // Success
 }
 
-bool is_handler_enabled(const isr_handle_t& handle) FL_NO_EXCEPT {
+bool is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
     if (!handle.is_valid() || handle.platform_id != RP2040_PLATFORM_ID) {
         return false;
     }
@@ -501,7 +505,7 @@ bool is_handler_enabled(const isr_handle_t& handle) FL_NO_EXCEPT {
     return handle_data->is_enabled;
 }
 
-const char* get_error_string(int error_code) FL_NO_EXCEPT {
+const char* get_error_string(int error_code) FL_NOEXCEPT {
     switch (error_code) {
         case 0: return "Success";
         case -1: return "Invalid parameter";
@@ -513,25 +517,25 @@ const char* get_error_string(int error_code) FL_NO_EXCEPT {
     }
 }
 
-const char* get_platform_name() FL_NO_EXCEPT {
+const char* get_platform_name() FL_NOEXCEPT {
     return "RP2040";
 }
 
-u32 get_max_timer_frequency() FL_NO_EXCEPT {
+u32 get_max_timer_frequency() FL_NOEXCEPT {
     return 1000000;  // 1 MHz (limited by microsecond counter resolution)
 }
 
-u32 get_min_timer_frequency() FL_NO_EXCEPT {
+u32 get_min_timer_frequency() FL_NOEXCEPT {
     return 1;  // 1 Hz (practical minimum given 32-bit alarm period)
 }
 
-u8 get_max_priority() FL_NO_EXCEPT {
+u8 get_max_priority() FL_NOEXCEPT {
     // RP2040 Cortex-M0+ supports priority levels 0-3 in hardware
     // We expose 1-7 in the ISR API and map to 0-3 in NVIC
     return 7;
 }
 
-bool requires_assembly_handler(u8 priority) FL_NO_EXCEPT {
+bool requires_assembly_handler(u8 priority) FL_NOEXCEPT {
     // ARM Cortex-M0+: All priority levels support C handlers
     (void)priority;
     return false;

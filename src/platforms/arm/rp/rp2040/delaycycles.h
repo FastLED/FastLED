@@ -15,6 +15,6 @@
 
 /// Forward declaration for delay_cycles_pico
 /// Implementation is in delay.cpp which includes Arduino.h for Pico SDK access
-void delay_cycles_pico(fl::u32 cycles) FL_NO_EXCEPT;
+void delay_cycles_pico(fl::u32 cycles) FL_NOEXCEPT;
 
 #endif  // __INC_FASTLED_PLATFORMS_RP2040_DELAYCYCLES_H

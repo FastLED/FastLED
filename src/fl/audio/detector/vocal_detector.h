@@ -9,8 +9,8 @@ namespace detector {
 
 class Vocal {
 public:
-    Vocal() FL_NO_EXCEPT;
-    ~Vocal() FL_NO_EXCEPT;
+    Vocal() FL_NOEXCEPT;
+    ~Vocal() FL_NOEXCEPT;
 
     void update(shared_ptr<Context> context);
     void reset();

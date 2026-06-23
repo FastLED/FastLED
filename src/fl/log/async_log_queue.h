@@ -34,10 +34,10 @@ public:
         fl::u16 mLength;    ///< Length of message in bytes
         fl::u16 mPadding;   ///< Reserved for alignment (unused)
 
-        Descriptor() FL_NO_EXCEPT;
+        Descriptor() FL_NOEXCEPT;
     };
 
-    AsyncLogQueue() FL_NO_EXCEPT;
+    AsyncLogQueue() FL_NOEXCEPT;
 
     /// @brief Push a message from fl::string (ISR-safe)
     bool push(const fl::string& msg);

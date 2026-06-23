@@ -30,7 +30,7 @@ namespace fl {
 namespace {
 
 // Clamp integer to [0, 255] range.
-inline fl::u8 clampU8(int v) FL_NO_EXCEPT {
+inline fl::u8 clampU8(int v) FL_NOEXCEPT {
     if (v < 0) return 0;
     if (v > 255) return 255;
     return static_cast<fl::u8>(v);
@@ -43,7 +43,7 @@ struct NalUnit {
     fl::size len;
 };
 
-fl::vector<NalUnit> splitAnnexB(const fl::vector<fl::u8>& annexB) FL_NO_EXCEPT {
+fl::vector<NalUnit> splitAnnexB(const fl::vector<fl::u8>& annexB) FL_NOEXCEPT {
     fl::vector<NalUnit> units;
     const fl::size sz = annexB.size();
     if (sz < 4) return units;
@@ -105,7 +105,7 @@ H264HwDecoder::~H264HwDecoder() {
     end();
 }
 
-bool H264HwDecoder::begin(fl::filebuf_ptr stream) FL_NO_EXCEPT {
+bool H264HwDecoder::begin(fl::filebuf_ptr stream) FL_NOEXCEPT {
     if (!stream) {
         mImpl->error = true;
         mImpl->errorMsg = "Null stream";
@@ -187,7 +187,7 @@ bool H264HwDecoder::begin(fl::filebuf_ptr stream) FL_NO_EXCEPT {
     return true;
 }
 
-void H264HwDecoder::end() FL_NO_EXCEPT {
+void H264HwDecoder::end() FL_NOEXCEPT {
     if (mImpl->decoder) {
         esp_h264_dec_close(mImpl->decoder);
         esp_h264_dec_del(mImpl->decoder);
@@ -200,16 +200,16 @@ void H264HwDecoder::end() FL_NO_EXCEPT {
     mImpl->frameDecoded = false;
 }
 
-bool H264HwDecoder::isReady() const FL_NO_EXCEPT {
+bool H264HwDecoder::isReady() const FL_NOEXCEPT {
     return mImpl->ready;
 }
 
-bool H264HwDecoder::hasError(fl::string* msg) const FL_NO_EXCEPT {
+bool H264HwDecoder::hasError(fl::string* msg) const FL_NOEXCEPT {
     if (msg && mImpl->error) *msg = mImpl->errorMsg;
     return mImpl->error;
 }
 
-DecodeResult H264HwDecoder::decode() FL_NO_EXCEPT {
+DecodeResult H264HwDecoder::decode() FL_NOEXCEPT {
     if (!mImpl->ready || !mImpl->decoder) return DecodeResult::Error;
     if (mImpl->frameDecoded) return DecodeResult::EndOfStream;
 
@@ -244,7 +244,7 @@ DecodeResult H264HwDecoder::decode() FL_NO_EXCEPT {
             const fl::u8* uPlane = out_frame.outbuf + pixelCount;
             const fl::u8* vPlane = uPlane + pixelCount / 4;
 
-            fl::vector<fl::u8> rgbBuf(pixelCount * 3) FL_NO_EXCEPT;
+            fl::vector<fl::u8> rgbBuf(pixelCount * 3) FL_NOEXCEPT;
             fl::u8* dst = rgbBuf.data();
 
             for (fl::u16 row = 0; row < h; row++) {
@@ -273,11 +273,11 @@ DecodeResult H264HwDecoder::decode() FL_NO_EXCEPT {
     return DecodeResult::Error;
 }
 
-Frame H264HwDecoder::getCurrentFrame() FL_NO_EXCEPT {
+Frame H264HwDecoder::getCurrentFrame() FL_NOEXCEPT {
     return mImpl->currentFrame;
 }
 
-bool H264HwDecoder::hasMoreFrames() const FL_NO_EXCEPT {
+bool H264HwDecoder::hasMoreFrames() const FL_NOEXCEPT {
     return mImpl->ready && !mImpl->frameDecoded;
 }
 
@@ -298,7 +298,7 @@ H264HwDecoder::~H264HwDecoder() { end(); }
 bool H264HwDecoder::begin(fl::filebuf_ptr) { return false; }
 void H264HwDecoder::end() { mImpl->ready = false; mImpl->stream = nullptr; }
 bool H264HwDecoder::isReady() const { return false; }
-bool H264HwDecoder::hasError(fl::string* msg) const FL_NO_EXCEPT {
+bool H264HwDecoder::hasError(fl::string* msg) const FL_NOEXCEPT {
     if (msg) *msg = "esp_h264 component not installed. "
                      "Add espressif/esp_h264 to idf_component.yml";
     return true;
@@ -311,7 +311,7 @@ bool H264HwDecoder::hasMoreFrames() const { return false; }
 
 // Factory: on ESP32-P4 we return the hardware decoder.
 IDecoderPtr H264::createDecoder(const H264Config& config,
-                                fl::string* error_message) FL_NO_EXCEPT {
+                                fl::string* error_message) FL_NOEXCEPT {
     FL_UNUSED(config);
 #if !FL_H264_HW_AVAILABLE
     if (error_message) {
@@ -323,7 +323,7 @@ IDecoderPtr H264::createDecoder(const H264Config& config,
     return fl::make_shared<H264HwDecoder>();
 }
 
-bool H264::isSupported() FL_NO_EXCEPT {
+bool H264::isSupported() FL_NOEXCEPT {
 #if FL_H264_HW_AVAILABLE
     return true;
 #else

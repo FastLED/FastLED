@@ -26,7 +26,7 @@ class HashMapLru {
         T value;
         u32 last_access_time;
 
-        ValueWithTimestamp() FL_NO_EXCEPT : last_access_time(0) {}
+        ValueWithTimestamp() FL_NOEXCEPT : last_access_time(0) {}
         ValueWithTimestamp(const T &v, u32 time)
             : value(v), last_access_time(time) {}
     };

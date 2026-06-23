@@ -8,13 +8,13 @@
 
 namespace fl {
 
-void UIButton::addRealButton(fl::shared_ptr<IButtonInput> button) FL_NO_EXCEPT {
+void UIButton::addRealButton(fl::shared_ptr<IButtonInput> button) FL_NOEXCEPT {
     // Stored directly; no concrete-type dependency. Caller may pass any
     // IButtonInput implementation (Button, mock, etc.).
     mButtonInput = button;
 }
 
-void UIDropdown::addNextButton(int pin) FL_NO_EXCEPT {
+void UIDropdown::addNextButton(int pin) FL_NOEXCEPT {
     mNextButton = fl::make_shared<Button>(pin);
 }
 

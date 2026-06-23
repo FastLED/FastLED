@@ -1,12 +1,12 @@
-﻿// IWYU pragma: private
+// IWYU pragma: private
 
 
 #include "platforms/wasm/is_wasm.h"
 #ifdef FL_IS_WASM
 
-// âš ï¸âš ï¸âš ï¸ CRITICAL WARNING: C++ â†” JavaScript FILE SYSTEM BRIDGE - HANDLE WITH EXTREME CARE! âš ï¸âš ï¸âš ï¸
+// ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript FILE SYSTEM BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️
 //
-// ðŸš¨ THIS FILE CONTAINS C++ TO JAVASCRIPT FILE SYSTEM BINDINGS ðŸš¨
+// 🚨 THIS FILE CONTAINS C++ TO JAVASCRIPT FILE SYSTEM BINDINGS 🚨
 //
 // DO NOT MODIFY FUNCTION SIGNATURES WITHOUT UPDATING CORRESPONDING JAVASCRIPT CODE!
 //
@@ -32,7 +32,7 @@
 // 3. Verify JSON parsing for file declarations works correctly
 // 4. Check that file operations remain accessible from JavaScript
 //
-// âš ï¸âš ï¸âš ï¸ REMEMBER: File system errors prevent resource loading! âš ï¸âš ï¸âš ï¸
+// ⚠️⚠️⚠️ REMEMBER: File system errors prevent resource loading! ⚠️⚠️⚠️
 
 // IWYU pragma: begin_keep
 #include <emscripten.h>
@@ -146,7 +146,7 @@ class WasmFileHandle : public fl::filebuf {
             return false;
         }
         if (!mData->ready(mPos)) {
-            FL_WARN_F("File is not ready yet. This is a major error because "
+            FL_WARN("File is not ready yet. This is a major error because "
                          "FastLED-wasm does not support async yet, the file "
                          "will fail to read.");
             return false;
@@ -171,7 +171,7 @@ class WasmFileHandle : public fl::filebuf {
             bytesToRead = mData->capacity() - mPos;
         }
         if (!mData->ready(mPos)) {
-            FL_WARN_F("File is not ready yet. This is a major error because "
+            FL_WARN("File is not ready yet. This is a major error because "
                          "FastLED-wasm does not support async yet, the file "
                          "will fail to read.");
             return 0;
@@ -238,7 +238,7 @@ class FsImplWasm : public fl::FsImpl {
                 // FL_DBG("Opened file: " << _path);
             } else {
                 out = fl::filebuf_ptr();
-                FL_DBG_F("File not found: %s", _path);
+                FL_DBG("File not found: " << _path);
             }
         }
         return out;
@@ -288,7 +288,7 @@ EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const fl::u8 *data,
 
     auto inserted = fl::_createIfNotExists(fl::string(path), len);
     if (!inserted) {
-        FL_WARN_F("File can only be injected once.");
+        FL_WARN("File can only be injected once.");
         return false;
     }
     inserted->append(data, len);
@@ -299,7 +299,7 @@ EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const fl::u8 *data,
                                        size_t len) {
     auto entry = fl::_findIfExists(fl::string(path));
     if (!entry) {
-        FL_WARN_F("File must be declared before it can be appended.");
+        FL_WARN("File must be declared before it can be appended.");
         return false;
     }
     entry->append(data, len);
@@ -310,7 +310,7 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
     // declare a file and it's length. But don't fill it in yet
     auto inserted = fl::_createIfNotExists(fl::string(path), len);
     if (!inserted) {
-        FL_WARN_F("File can only be declared once.");
+        FL_WARN("File can only be declared once.");
         return false;
     }
     return true;

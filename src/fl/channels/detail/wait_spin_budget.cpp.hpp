@@ -26,11 +26,11 @@ namespace {
     fl::atomic<fl::u32> sWaitSpinBudgetUs{FASTLED_WAIT_SPIN_BUDGET_US};
 }
 
-fl::u32 getWaitSpinBudgetUs() FL_NO_EXCEPT {
+fl::u32 getWaitSpinBudgetUs() FL_NOEXCEPT {
     return sWaitSpinBudgetUs.load();
 }
 
-void setWaitSpinBudgetUs(fl::u32 budget_us) FL_NO_EXCEPT {
+void setWaitSpinBudgetUs(fl::u32 budget_us) FL_NOEXCEPT {
     sWaitSpinBudgetUs.store(budget_us);
 }
 

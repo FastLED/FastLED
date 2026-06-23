@@ -52,7 +52,7 @@ static HANDLE g_cancel_event = nullptr;
 static volatile bool g_active = false;
 static double g_timeout_seconds = 20.0;
 
-static DWORD WINAPI timer_thread_func(LPVOID) FL_NO_EXCEPT {
+static DWORD WINAPI timer_thread_func(LPVOID) FL_NOEXCEPT {
     DWORD sleep_ms = static_cast<DWORD>(g_timeout_seconds * 1000.0);
     // Wait on cancel event instead of Sleep so we can be woken immediately
     DWORD result = WaitForSingleObject(g_cancel_event, sleep_ms);
@@ -72,10 +72,10 @@ static DWORD WINAPI timer_thread_func(LPVOID) FL_NO_EXCEPT {
     fflush(stderr);
 
     if (g_main_thread != nullptr) {
-        SuspendThread(g_main_thread) FL_NO_EXCEPT;
+        SuspendThread(g_main_thread) FL_NOEXCEPT;
         // Use StackWalk64 to walk the suspended main thread's stack
         runner_print_stacktrace_for_thread((void*)g_main_thread);
-        ResumeThread(g_main_thread) FL_NO_EXCEPT;
+        ResumeThread(g_main_thread) FL_NOEXCEPT;
     } else {
         // Fallback: print calling thread's stack
         runner_print_stacktrace();
@@ -93,7 +93,7 @@ static DWORD WINAPI timer_thread_func(LPVOID) FL_NO_EXCEPT {
     return 0; // unreachable
 }
 
-static void setup(double timeout_seconds = 20.0) FL_NO_EXCEPT {
+static void setup(double timeout_seconds = 20.0) FL_NOEXCEPT {
     const char* disable_env = getenv("FASTLED_DISABLE_TIMEOUT_WATCHDOG");
     if (disable_env && (strcmp(disable_env, "1") == 0 || strcmp(disable_env, "true") == 0)) {
         return;
@@ -125,7 +125,7 @@ static void setup(double timeout_seconds = 20.0) FL_NO_EXCEPT {
     }
 }
 
-static void cancel() FL_NO_EXCEPT {
+static void cancel() FL_NOEXCEPT {
     if (!g_active) {
         return;
     }
@@ -133,20 +133,20 @@ static void cancel() FL_NO_EXCEPT {
 
     // Signal the cancel event to wake the timer thread from its wait
     if (g_cancel_event != nullptr) {
-        SetEvent(g_cancel_event) FL_NO_EXCEPT;
+        SetEvent(g_cancel_event) FL_NOEXCEPT;
     }
 
     if (g_timer_thread != nullptr) {
-        WaitForSingleObject(g_timer_thread, 2000) FL_NO_EXCEPT;
-        CloseHandle(g_timer_thread) FL_NO_EXCEPT;
+        WaitForSingleObject(g_timer_thread, 2000) FL_NOEXCEPT;
+        CloseHandle(g_timer_thread) FL_NOEXCEPT;
         g_timer_thread = nullptr;
     }
     if (g_cancel_event != nullptr) {
-        CloseHandle(g_cancel_event) FL_NO_EXCEPT;
+        CloseHandle(g_cancel_event) FL_NOEXCEPT;
         g_cancel_event = nullptr;
     }
     if (g_main_thread != nullptr) {
-        CloseHandle(g_main_thread) FL_NO_EXCEPT;
+        CloseHandle(g_main_thread) FL_NOEXCEPT;
         g_main_thread = nullptr;
     }
 }
@@ -156,7 +156,7 @@ static void cancel() FL_NO_EXCEPT {
 // Function signature for the test entry point exported by test DLLs/SOs
 typedef int (*RunTestsFunc)(int argc, const char** argv);
 
-int main(int argc, char** argv) FL_NO_EXCEPT {
+int main(int argc, char** argv) FL_NOEXCEPT {
     // Setup crash handler BEFORE loading any DLLs
     // This ensures crash handling is active for the entire process lifetime
     runner_setup_crash_handler();
@@ -177,7 +177,7 @@ int main(int argc, char** argv) FL_NO_EXCEPT {
         }
 
         // Extract directory and filename
-        std::string full_path(exe_path) FL_NO_EXCEPT;
+        std::string full_path(exe_path) FL_NOEXCEPT;
         size_t last_slash = full_path.find_last_of("\\/");
         std::string exe_dir = (last_slash != std::string::npos) ? full_path.substr(0, last_slash) : ".";
         std::string exe_file = (last_slash != std::string::npos) ? full_path.substr(last_slash + 1) : full_path;
@@ -217,7 +217,7 @@ int main(int argc, char** argv) FL_NO_EXCEPT {
                 // Also try SetDllDirectoryA as fallback
                 size_t last_slash = fastled_dll_path.find_last_of("\\/");
                 if (last_slash != std::string::npos) {
-                    SetDllDirectoryA(fastled_dll_path.substr(0, last_slash).c_str()) FL_NO_EXCEPT;
+                    SetDllDirectoryA(fastled_dll_path.substr(0, last_slash).c_str()) FL_NOEXCEPT;
                 }
             }
         }
@@ -235,7 +235,7 @@ int main(int argc, char** argv) FL_NO_EXCEPT {
     RunTestsFunc run_tests = (RunTestsFunc)GetProcAddress(dll, "run_tests");
     if (!run_tests) {
         std::cout << "Error: Failed to find run_tests() in " << dll_path << std::endl;
-        FreeLibrary(dll) FL_NO_EXCEPT;
+        FreeLibrary(dll) FL_NOEXCEPT;
         return 1;
     }
 

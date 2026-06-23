@@ -53,43 +53,43 @@ public:
     // Lifecycle
     //=========================================================================
 
-    SpiPeripheralMockImpl() FL_NO_EXCEPT;
+    SpiPeripheralMockImpl() FL_NOEXCEPT;
     ~SpiPeripheralMockImpl() override = default;
 
     //=========================================================================
     // ISpiPeripheral Interface Implementation
     //=========================================================================
 
-    bool initializeBus(const SpiBusConfig& config) FL_NO_EXCEPT override;
-    bool addDevice(const SpiDeviceConfig& config) FL_NO_EXCEPT override;
-    bool removeDevice() FL_NO_EXCEPT override;
-    bool freeBus() FL_NO_EXCEPT override;
-    bool isInitialized() const FL_NO_EXCEPT override;
-    bool queueTransaction(const SpiTransaction& trans) FL_NO_EXCEPT override;
-    bool pollTransaction(u32 timeout_ms) FL_NO_EXCEPT override;
-    bool registerCallback(void* callback, void* user_ctx) FL_NO_EXCEPT override;
-    u8* allocateDma(size_t size) FL_NO_EXCEPT override;
-    void freeDma(u8* buffer) FL_NO_EXCEPT override;
-    void delay(u32 ms) FL_NO_EXCEPT override;
-    u64 getMicroseconds() FL_NO_EXCEPT override;
+    bool initializeBus(const SpiBusConfig& config) FL_NOEXCEPT override;
+    bool addDevice(const SpiDeviceConfig& config) FL_NOEXCEPT override;
+    bool removeDevice() FL_NOEXCEPT override;
+    bool freeBus() FL_NOEXCEPT override;
+    bool isInitialized() const FL_NOEXCEPT override;
+    bool queueTransaction(const SpiTransaction& trans) FL_NOEXCEPT override;
+    bool pollTransaction(u32 timeout_ms) FL_NOEXCEPT override;
+    bool registerCallback(void* callback, void* user_ctx) FL_NOEXCEPT override;
+    u8* allocateDma(size_t size) FL_NOEXCEPT override;
+    void freeDma(u8* buffer) FL_NOEXCEPT override;
+    void delay(u32 ms) FL_NOEXCEPT override;
+    u64 getMicroseconds() FL_NOEXCEPT override;
 
     //=========================================================================
     // Mock-Specific API
     //=========================================================================
 
-    void setTransactionDelay(u32 microseconds) FL_NO_EXCEPT override;
-    void simulateTransactionComplete() FL_NO_EXCEPT override;
-    void setTransactionFailure(bool should_fail) FL_NO_EXCEPT override;
-    const fl::vector<TransactionRecord>& getTransactionHistory() const FL_NO_EXCEPT override;
-    void clearTransactionHistory() FL_NO_EXCEPT override;
-    fl::span<const u8> getLastTransactionData() const FL_NO_EXCEPT override;
-    bool hasDevice() const FL_NO_EXCEPT override;
-    bool canQueueTransaction() const FL_NO_EXCEPT override;
-    size_t getQueuedTransactionCount() const FL_NO_EXCEPT override;
-    size_t getTransactionCount() const FL_NO_EXCEPT override;
-    const SpiBusConfig& getBusConfig() const FL_NO_EXCEPT override;
-    const SpiDeviceConfig& getDeviceConfig() const FL_NO_EXCEPT override;
-    void reset() FL_NO_EXCEPT override;
+    void setTransactionDelay(u32 microseconds) FL_NOEXCEPT override;
+    void simulateTransactionComplete() FL_NOEXCEPT override;
+    void setTransactionFailure(bool should_fail) FL_NOEXCEPT override;
+    const fl::vector<TransactionRecord>& getTransactionHistory() const FL_NOEXCEPT override;
+    void clearTransactionHistory() FL_NOEXCEPT override;
+    fl::span<const u8> getLastTransactionData() const FL_NOEXCEPT override;
+    bool hasDevice() const FL_NOEXCEPT override;
+    bool canQueueTransaction() const FL_NOEXCEPT override;
+    size_t getQueuedTransactionCount() const FL_NOEXCEPT override;
+    size_t getTransactionCount() const FL_NOEXCEPT override;
+    const SpiBusConfig& getBusConfig() const FL_NOEXCEPT override;
+    const SpiDeviceConfig& getDeviceConfig() const FL_NOEXCEPT override;
+    void reset() FL_NOEXCEPT override;
 
 private:
     //=========================================================================
@@ -126,7 +126,7 @@ private:
 // Singleton Instance
 //=============================================================================
 
-SpiPeripheralMock& SpiPeripheralMock::instance() FL_NO_EXCEPT {
+SpiPeripheralMock& SpiPeripheralMock::instance() FL_NOEXCEPT {
     return Singleton<SpiPeripheralMockImpl>::instance();
 }
 
@@ -135,7 +135,7 @@ SpiPeripheralMock& SpiPeripheralMock::instance() FL_NO_EXCEPT {
 //=============================================================================
 
 SpiPeripheralMockImpl::SpiPeripheralMockImpl()
- FL_NO_EXCEPT : mInitialized(false),
+ FL_NOEXCEPT : mInitialized(false),
       mDeviceAdded(false),
       mBusConfig(),
       mDeviceConfig(),
@@ -155,15 +155,15 @@ SpiPeripheralMockImpl::SpiPeripheralMockImpl()
 // Bus Lifecycle Methods
 //=============================================================================
 
-bool SpiPeripheralMockImpl::initializeBus(const SpiBusConfig& config) FL_NO_EXCEPT {
+bool SpiPeripheralMockImpl::initializeBus(const SpiBusConfig& config) FL_NOEXCEPT {
     if (mInitialized) {
-        FL_WARN_F("SpiPeripheralMock: Already initialized");
+        FL_WARN("SpiPeripheralMock: Already initialized");
         return false;
     }
 
     // Validate config
     if (config.sclk_pin < 0) {
-        FL_WARN_F("SpiPeripheralMock: Invalid SCLK pin: %s", config.sclk_pin);
+        FL_WARN("SpiPeripheralMock: Invalid SCLK pin: " << config.sclk_pin);
         return false;
     }
 
@@ -174,25 +174,25 @@ bool SpiPeripheralMockImpl::initializeBus(const SpiBusConfig& config) FL_NO_EXCE
     return true;
 }
 
-bool SpiPeripheralMockImpl::addDevice(const SpiDeviceConfig& config) FL_NO_EXCEPT {
+bool SpiPeripheralMockImpl::addDevice(const SpiDeviceConfig& config) FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN_F("SpiPeripheralMock: Cannot add device - bus not initialized");
+        FL_WARN("SpiPeripheralMock: Cannot add device - bus not initialized");
         return false;
     }
 
     if (mDeviceAdded) {
-        FL_WARN_F("SpiPeripheralMock: Device already added");
+        FL_WARN("SpiPeripheralMock: Device already added");
         return false;
     }
 
     // Validate config
     if (config.clock_speed_hz <= 0) {
-        FL_WARN_F("SpiPeripheralMock: Invalid clock speed: %s", config.clock_speed_hz);
+        FL_WARN("SpiPeripheralMock: Invalid clock speed: " << config.clock_speed_hz);
         return false;
     }
 
     if (config.queue_size <= 0) {
-        FL_WARN_F("SpiPeripheralMock: Invalid queue size: %s", config.queue_size);
+        FL_WARN("SpiPeripheralMock: Invalid queue size: " << config.queue_size);
         return false;
     }
 
@@ -204,9 +204,9 @@ bool SpiPeripheralMockImpl::addDevice(const SpiDeviceConfig& config) FL_NO_EXCEP
     return true;
 }
 
-bool SpiPeripheralMockImpl::removeDevice() FL_NO_EXCEPT {
+bool SpiPeripheralMockImpl::removeDevice() FL_NOEXCEPT {
     if (!mDeviceAdded) {
-        FL_WARN_F("SpiPeripheralMock: No device to remove");
+        FL_WARN("SpiPeripheralMock: No device to remove");
         return false;
     }
 
@@ -215,14 +215,14 @@ bool SpiPeripheralMockImpl::removeDevice() FL_NO_EXCEPT {
     return true;
 }
 
-bool SpiPeripheralMockImpl::freeBus() FL_NO_EXCEPT {
+bool SpiPeripheralMockImpl::freeBus() FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN_F("SpiPeripheralMock: Bus not initialized");
+        FL_WARN("SpiPeripheralMock: Bus not initialized");
         return false;
     }
 
     if (mDeviceAdded) {
-        FL_WARN_F("SpiPeripheralMock: Must remove device before freeing bus");
+        FL_WARN("SpiPeripheralMock: Must remove device before freeing bus");
         return false;
     }
 
@@ -230,7 +230,7 @@ bool SpiPeripheralMockImpl::freeBus() FL_NO_EXCEPT {
     return true;
 }
 
-bool SpiPeripheralMockImpl::isInitialized() const FL_NO_EXCEPT {
+bool SpiPeripheralMockImpl::isInitialized() const FL_NOEXCEPT {
     return mInitialized;
 }
 
@@ -238,14 +238,14 @@ bool SpiPeripheralMockImpl::isInitialized() const FL_NO_EXCEPT {
 // Transaction Methods
 //=============================================================================
 
-bool SpiPeripheralMockImpl::queueTransaction(const SpiTransaction& trans) FL_NO_EXCEPT {
+bool SpiPeripheralMockImpl::queueTransaction(const SpiTransaction& trans) FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN_F("SpiPeripheralMock: Cannot queue transaction - not initialized");
+        FL_WARN("SpiPeripheralMock: Cannot queue transaction - not initialized");
         return false;
     }
 
     if (!mDeviceAdded) {
-        FL_WARN_F("SpiPeripheralMock: Cannot queue transaction - no device added");
+        FL_WARN("SpiPeripheralMock: Cannot queue transaction - no device added");
         return false;
     }
 
@@ -256,7 +256,7 @@ bool SpiPeripheralMockImpl::queueTransaction(const SpiTransaction& trans) FL_NO_
 
     // Check queue capacity
     if (mQueuedTransactions.size() >= mMaxQueueSize) {
-        FL_WARN_F("SpiPeripheralMock: Transaction queue full (%s)", mMaxQueueSize);
+        FL_WARN("SpiPeripheralMock: Transaction queue full (" << mMaxQueueSize << ")");
         return false;
     }
 
@@ -289,16 +289,16 @@ bool SpiPeripheralMockImpl::queueTransaction(const SpiTransaction& trans) FL_NO_
     return true;
 }
 
-bool SpiPeripheralMockImpl::pollTransaction(u32 timeout_ms) FL_NO_EXCEPT {
+bool SpiPeripheralMockImpl::pollTransaction(u32 timeout_ms) FL_NOEXCEPT {
     (void)timeout_ms;  // Unused in synchronous mock
 
     if (!mInitialized) {
-        FL_WARN_F("SpiPeripheralMock: Cannot poll - not initialized");
+        FL_WARN("SpiPeripheralMock: Cannot poll - not initialized");
         return false;
     }
 
     if (!mDeviceAdded) {
-        FL_WARN_F("SpiPeripheralMock: Cannot poll - no device added");
+        FL_WARN("SpiPeripheralMock: Cannot poll - no device added");
         return false;
     }
 
@@ -321,9 +321,9 @@ bool SpiPeripheralMockImpl::pollTransaction(u32 timeout_ms) FL_NO_EXCEPT {
 // Callback Registration
 //=============================================================================
 
-bool SpiPeripheralMockImpl::registerCallback(void* callback, void* user_ctx) FL_NO_EXCEPT {
+bool SpiPeripheralMockImpl::registerCallback(void* callback, void* user_ctx) FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN_F("SpiPeripheralMock: Cannot register callback - not initialized");
+        FL_WARN("SpiPeripheralMock: Cannot register callback - not initialized");
         return false;
     }
 
@@ -336,7 +336,7 @@ bool SpiPeripheralMockImpl::registerCallback(void* callback, void* user_ctx) FL_
 // DMA Memory Management
 //=============================================================================
 
-u8* SpiPeripheralMockImpl::allocateDma(size_t size) FL_NO_EXCEPT {
+u8* SpiPeripheralMockImpl::allocateDma(size_t size) FL_NOEXCEPT {
     // Round up to 4-byte multiple (SPI DMA alignment requirement)
     size_t aligned_size = ((size + 3) / 4) * 4;
 
@@ -360,13 +360,13 @@ u8* SpiPeripheralMockImpl::allocateDma(size_t size) FL_NO_EXCEPT {
 #endif
 
     if (buffer == nullptr) {
-        FL_WARN_F("SpiPeripheralMock: Failed to allocate buffer (%s bytes)", aligned_size);
+        FL_WARN("SpiPeripheralMock: Failed to allocate buffer (" << aligned_size << " bytes)");
     }
 
     return static_cast<u8*>(buffer);
 }
 
-void SpiPeripheralMockImpl::freeDma(u8* buffer) FL_NO_EXCEPT {
+void SpiPeripheralMockImpl::freeDma(u8* buffer) FL_NOEXCEPT {
     if (buffer != nullptr) {
 #ifdef FL_IS_WIN
         _aligned_free(buffer);
@@ -380,14 +380,14 @@ void SpiPeripheralMockImpl::freeDma(u8* buffer) FL_NO_EXCEPT {
 // Platform Utilities
 //=============================================================================
 
-void SpiPeripheralMockImpl::delay(u32 ms) FL_NO_EXCEPT {
+void SpiPeripheralMockImpl::delay(u32 ms) FL_NOEXCEPT {
     // Use portable delay abstraction:
     // - Arduino: Arduino delay() function
     // - Host: time_stub.h delay() (can be fast-forwarded for testing)
     fl::delay(ms);
 }
 
-u64 SpiPeripheralMockImpl::getMicroseconds() FL_NO_EXCEPT {
+u64 SpiPeripheralMockImpl::getMicroseconds() FL_NOEXCEPT {
     // Use the same timestamp source as queueTransaction() for consistency
     return fl::micros();
 }
@@ -396,11 +396,11 @@ u64 SpiPeripheralMockImpl::getMicroseconds() FL_NO_EXCEPT {
 // Mock-Specific API (for unit tests)
 //=============================================================================
 
-void SpiPeripheralMockImpl::setTransactionDelay(u32 microseconds) FL_NO_EXCEPT {
+void SpiPeripheralMockImpl::setTransactionDelay(u32 microseconds) FL_NOEXCEPT {
     mTransactionDelayUs = microseconds;
 }
 
-void SpiPeripheralMockImpl::simulateTransactionComplete() FL_NO_EXCEPT {
+void SpiPeripheralMockImpl::simulateTransactionComplete() FL_NOEXCEPT {
     if (mPendingTransactions == 0) {
         // No pending transactions - nothing to complete
         return;
@@ -427,23 +427,23 @@ void SpiPeripheralMockImpl::simulateTransactionComplete() FL_NO_EXCEPT {
     }
 }
 
-void SpiPeripheralMockImpl::setTransactionFailure(bool should_fail) FL_NO_EXCEPT {
+void SpiPeripheralMockImpl::setTransactionFailure(bool should_fail) FL_NOEXCEPT {
     mShouldFailTransaction = should_fail;
 }
 
 const fl::vector<SpiPeripheralMock::TransactionRecord>&
-SpiPeripheralMockImpl::getTransactionHistory() const FL_NO_EXCEPT {
+SpiPeripheralMockImpl::getTransactionHistory() const FL_NOEXCEPT {
     return mHistory;
 }
 
-void SpiPeripheralMockImpl::clearTransactionHistory() FL_NO_EXCEPT {
+void SpiPeripheralMockImpl::clearTransactionHistory() FL_NOEXCEPT {
     mHistory.clear();
     mTransactionCount = 0;
     mPendingTransactions = 0;
     mQueuedTransactions.clear();
 }
 
-fl::span<const u8> SpiPeripheralMockImpl::getLastTransactionData() const FL_NO_EXCEPT {
+fl::span<const u8> SpiPeripheralMockImpl::getLastTransactionData() const FL_NOEXCEPT {
     if (mHistory.empty()) {
         return fl::span<const u8>();
     }
@@ -456,31 +456,31 @@ fl::span<const u8> SpiPeripheralMockImpl::getLastTransactionData() const FL_NO_E
 // State Inspection
 //-------------------------------------------------------------------------
 
-bool SpiPeripheralMockImpl::hasDevice() const FL_NO_EXCEPT {
+bool SpiPeripheralMockImpl::hasDevice() const FL_NOEXCEPT {
     return mDeviceAdded;
 }
 
-bool SpiPeripheralMockImpl::canQueueTransaction() const FL_NO_EXCEPT {
+bool SpiPeripheralMockImpl::canQueueTransaction() const FL_NOEXCEPT {
     return mDeviceAdded && mQueuedTransactions.size() < mMaxQueueSize;
 }
 
-size_t SpiPeripheralMockImpl::getQueuedTransactionCount() const FL_NO_EXCEPT {
+size_t SpiPeripheralMockImpl::getQueuedTransactionCount() const FL_NOEXCEPT {
     return mQueuedTransactions.size();
 }
 
-size_t SpiPeripheralMockImpl::getTransactionCount() const FL_NO_EXCEPT {
+size_t SpiPeripheralMockImpl::getTransactionCount() const FL_NOEXCEPT {
     return mTransactionCount;
 }
 
-const SpiBusConfig& SpiPeripheralMockImpl::getBusConfig() const FL_NO_EXCEPT {
+const SpiBusConfig& SpiPeripheralMockImpl::getBusConfig() const FL_NOEXCEPT {
     return mBusConfig;
 }
 
-const SpiDeviceConfig& SpiPeripheralMockImpl::getDeviceConfig() const FL_NO_EXCEPT {
+const SpiDeviceConfig& SpiPeripheralMockImpl::getDeviceConfig() const FL_NOEXCEPT {
     return mDeviceConfig;
 }
 
-void SpiPeripheralMockImpl::reset() FL_NO_EXCEPT {
+void SpiPeripheralMockImpl::reset() FL_NOEXCEPT {
     mInitialized = false;
     mDeviceAdded = false;
     mBusConfig = SpiBusConfig();

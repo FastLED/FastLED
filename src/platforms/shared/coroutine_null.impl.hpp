@@ -38,7 +38,7 @@ TaskCoroutinePtr createTaskCoroutine(fl::string name,
                                       ICoroutineTask::TaskFunction function,
                                       size_t stack_size,
                                       u8 priority,
-                                      int /*core_id*/) FL_NO_EXCEPT {
+                                      int /*core_id*/) FL_NOEXCEPT {
     return TaskCoroutinePtr(
         new TaskCoroutineNull(fl::move(name), fl::move(function), stack_size, priority));  // ok bare allocation
 }
@@ -47,7 +47,7 @@ TaskCoroutinePtr createTaskCoroutine(fl::string name,
 // Static exitCurrent implementation
 //=============================================================================
 
-void ICoroutineTask::exitCurrent() FL_NO_EXCEPT {
+void ICoroutineTask::exitCurrent() FL_NOEXCEPT {
     // No-op: No task exists on platforms without OS support
 }
 

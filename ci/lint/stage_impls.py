@@ -133,7 +133,7 @@ def run_clang_tidy(no_fingerprint: bool, run_tidy: bool) -> bool:
 
 def run_noexcept_check(run_tidy: bool) -> bool:
     """
-    Report where AST-backed C++ enforcement lives.
+    Report where FL_NOEXCEPT enforcement lives.
 
     Args:
         run_tidy: Preserved for CLI compatibility
@@ -142,12 +142,9 @@ def run_noexcept_check(run_tidy: bool) -> bool:
         Always True; the default unified C++ linter owns this check.
     """
     print("")
-    print("C++ AST CHECKS")
-    print("--------------")
-    print(
-        "Handled by the default unified C++ linter: "
-        "ci/tools/check_noexcept.py and ci/tools/check_array_params.py"
-    )
+    print("FL_NOEXCEPT AST CHECK")
+    print("---------------------")
+    print("Handled by the default unified C++ linter: ci/tools/check_noexcept.py")
     return True
 
 
@@ -226,15 +223,11 @@ def run_cpp_lint(
         if use_rust_cpp_lint:
             cmd.append("--rust")
 
-        # 900s (15 min) covers cold CI runners that must `cargo install`
-        # the zccache binary from source — happens on macOS when soldr's
-        # GitHub release fetch hits the per-IP API rate limit and falls
-        # back to cargo. Well under the workflow's 30-min cap.
         result = RunningProcess.run(
             cmd,
             cwd=None,
             check=False,
-            timeout=900,
+            timeout=300,
         )
         if result.stdout:
             print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
@@ -262,13 +255,29 @@ def run_cpp_lint(
 
 
 def run_iwyu_pragma_check() -> bool:
-    """No-op: the IWYU "// IWYU pragma: private" check now ships as the
-    `IwyuPragmaPrivateChecker` per-file checker in the Rust crate
-    (`ci/lint_cpp_rs/src/checkers/bare_legacy.rs`) and runs as part of
-    `run_cpp_lint()` above. Kept as a stub so existing callers
-    (`ci/lint.py` orchestrator) don't need to lose the call site during
-    the migration window. See FastLED #3297."""
-    return True
+    """
+    Run IWYU pragma checker on platform headers.
+
+    Returns:
+        True if all platform headers have IWYU pragma markings, False otherwise
+    """
+    print("")
+    print("🔍 IWYU PRAGMA CHECK")
+    print("--------------------")
+
+    if not ENABLE_IWYU:
+        print("⏭️  IWYU pragma check disabled (ENABLE_IWYU = False)")
+        return True
+
+    result = subprocess.run(
+        ["uv", "run", "python", "ci/lint_cpp/iwyu_pragma_check.py"],
+        capture_output=False,
+    )
+
+    if result.returncode == 0:
+        return True
+    else:
+        return False
 
 
 def run_iwyu_analysis(
@@ -666,9 +675,7 @@ def run_cpp_lint_single_file(
     if use_rust_cpp_lint:
         cmd.append("--rust")
     cmd.append(file_path)
-    # 900s (15 min) — see full-pass call above for rationale (cold cargo
-    # install fallback when soldr can't fetch zccache prebuilt binary).
-    result = RunningProcess.run(cmd, cwd=None, check=False, timeout=900)
+    result = RunningProcess.run(cmd, cwd=None, check=False, timeout=300)
     if result.stdout:
         print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
     if result.stderr:
@@ -700,11 +707,31 @@ def run_cpp_lint_single_file(
 
 
 def run_iwyu_pragma_check_single_file(file_path: str) -> bool:
-    """No-op single-file variant. The `IwyuPragmaPrivateChecker` per-file
-    Rust checker already runs on the single-file `bash lint <file>` path
-    via the normal cpp-lint dispatch, so the legacy subprocess shim is
-    redundant. See FastLED #3297."""
-    del file_path  # accepted for API compatibility
+    """
+    Check IWYU pragma on a single file.
+
+    Args:
+        file_path: Absolute path to the file
+
+    Returns:
+        True if file has IWYU pragma or is not in platforms/, False otherwise
+    """
+    if not ENABLE_IWYU:
+        return True
+
+    result = RunningProcess.run(
+        ["uv", "run", "python", "ci/lint_cpp/iwyu_pragma_check.py", file_path],
+        cwd=None,
+        check=False,
+        timeout=30,
+    )
+
+    if result.returncode != 0:
+        # Print the error message from the checker
+        if result.stdout:
+            print(result.stdout, end="")
+        return False
+
     return True
 
 

@@ -60,12 +60,12 @@ struct CRGB {
         u8 raw[3];
     };
 
-    static CRGB blend(const CRGB& p1, const CRGB& p2, fract8 amountOfP2) FL_NO_EXCEPT;
-    static CRGB blendAlphaMaxChannel(const CRGB& upper, const CRGB& lower) FL_NO_EXCEPT;
+    static CRGB blend(const CRGB& p1, const CRGB& p2, fract8 amountOfP2) FL_NOEXCEPT;
+    static CRGB blendAlphaMaxChannel(const CRGB& upper, const CRGB& lower) FL_NOEXCEPT;
 
     /// Downscale a CRGB matrix (or strip) to the smaller size.
-    static void downscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY) FL_NO_EXCEPT;
-    static void upscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY) FL_NO_EXCEPT;
+    static void downscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY) FL_NOEXCEPT;
+    static void upscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY) FL_NOEXCEPT;
 
     // Are you using WS2812 (or other RGB8 LEDS) to display video?
     // Does it look washed out and under-saturated?
@@ -79,18 +79,18 @@ struct CRGB {
     // This function converts to HSV16, boosts the saturation, and converts back to RGB8.
     // Note that when both boost_saturation and boost_contrast are true the resulting
     // pixel will be nearly the same as if you had used gamma correction pow = 2.0.
-    CRGB colorBoost(EaseType saturation_function = EaseType::EASE_NONE, EaseType luminance_function = EaseType::EASE_NONE) const FL_NO_EXCEPT;
-    static void colorBoost(const CRGB* src, CRGB* dst, size_t count, EaseType saturation_function = EaseType::EASE_NONE, EaseType luminance_function = EaseType::EASE_NONE) FL_NO_EXCEPT;
+    CRGB colorBoost(EaseType saturation_function = EaseType::EASE_NONE, EaseType luminance_function = EaseType::EASE_NONE) const FL_NOEXCEPT;
+    static void colorBoost(const CRGB* src, CRGB* dst, size_t count, EaseType saturation_function = EaseType::EASE_NONE, EaseType luminance_function = EaseType::EASE_NONE) FL_NOEXCEPT;
 
     // Want to do advanced color manipulation in HSV and write back to CRGB?
     // You want to use HSV16, which is much better at preservering the color
     // space than hsv8.
-    HSV16 toHSV16() const FL_NO_EXCEPT;
+    HSV16 toHSV16() const FL_NOEXCEPT;
 
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)
     /// @returns the CRGB::raw value for the given index
-    FASTLED_FORCE_INLINE u8& operator[] (u8 x) FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE u8& operator[] (u8 x) FL_NOEXCEPT
     {
         return raw[x];
     }
@@ -98,17 +98,17 @@ struct CRGB {
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)
     /// @returns the CRGB::raw value for the given index
-    FASTLED_FORCE_INLINE const u8& operator[] (u8 x) const FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE const u8& operator[] (u8 x) const FL_NOEXCEPT
     {
         return raw[x];
     }
 
     #if defined(FL_IS_AVR)
     // Saves a surprising amount of memory on AVR devices.
-    CRGB() FL_NO_EXCEPT = default;
+    CRGB() FL_NOEXCEPT = default;
     #else
     /// Default constructor
-    FASTLED_FORCE_INLINE CRGB() FL_NO_EXCEPT {
+    FASTLED_FORCE_INLINE CRGB() FL_NOEXCEPT {
         r = 0;
         g = 0;
         b = 0;
@@ -119,19 +119,19 @@ struct CRGB {
     /// @param ir input red value
     /// @param ig input green value
     /// @param ib input blue value
-    constexpr CRGB(u8 ir, u8 ig, u8 ib) FL_NO_EXCEPT
+    constexpr CRGB(u8 ir, u8 ig, u8 ib) FL_NOEXCEPT
         : r(ir), g(ig), b(ib)
     {
     }
 
     /// Allow construction from 32-bit (really 24-bit) bit 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    constexpr CRGB(u32 colorcode) FL_NO_EXCEPT
+    constexpr CRGB(u32 colorcode) FL_NOEXCEPT
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
     }
 
-    constexpr u32 as_uint32_t() const FL_NO_EXCEPT {
+    constexpr u32 as_uint32_t() const FL_NOEXCEPT {
         return u32(0xff000000) |
                (u32{r} << 16) |
                (u32{g} << 8) |
@@ -140,14 +140,14 @@ struct CRGB {
 
     /// Allow construction from a LEDColorCorrection enum
     /// @param colorcode an LEDColorCorrect enumeration value
-    constexpr CRGB(LEDColorCorrection colorcode) FL_NO_EXCEPT
+    constexpr CRGB(LEDColorCorrection colorcode) FL_NOEXCEPT
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
     }
 
     /// Allow construction from a ColorTemperature enum
     /// @param colorcode an ColorTemperature enumeration value
-    constexpr CRGB(ColorTemperature colorcode) FL_NO_EXCEPT
+    constexpr CRGB(ColorTemperature colorcode) FL_NOEXCEPT
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
     }
@@ -156,18 +156,18 @@ struct CRGB {
     FASTLED_FORCE_INLINE CRGB(const CRGB& rhs) = default;
 
     /// Allow construction from a hsv8 color
-    CRGB(const hsv8& rhs) FL_NO_EXCEPT;
+    CRGB(const hsv8& rhs) FL_NOEXCEPT;
 
     /// Allow construction from a HSV16 color
     /// Enables automatic conversion from HSV16 to CRGB
-    CRGB(const HSV16& rhs) FL_NO_EXCEPT;
+    CRGB(const HSV16& rhs) FL_NOEXCEPT;
 
     /// Allow assignment from one RGB struct to another
-    FASTLED_FORCE_INLINE CRGB& operator= (const CRGB& rhs) FL_NO_EXCEPT = default;
+    FASTLED_FORCE_INLINE CRGB& operator= (const CRGB& rhs) FL_NOEXCEPT = default;
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    FASTLED_FORCE_INLINE CRGB& operator= (const u32 colorcode) FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE CRGB& operator= (const u32 colorcode) FL_NOEXCEPT
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -179,7 +179,7 @@ struct CRGB {
     /// @param nr new red value
     /// @param ng new green value
     /// @param nb new blue value
-    FASTLED_FORCE_INLINE CRGB& setRGB (u8 nr, u8 ng, u8 nb) FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE CRGB& setRGB (u8 nr, u8 ng, u8 nb) FL_NOEXCEPT
     {
         r = nr;
         g = ng;
@@ -194,19 +194,19 @@ struct CRGB {
     /// @note For array operations with many pixels, consider using fill_rainbow() or fill_gradient<>()
     /// in fl/fill.h instead, which are optimized for bulk HSV-to-RGB conversions and significantly
     /// faster on most platforms due to loop unrolling and SIMD opportunities.
-    CRGB& setHSV (u8 hue, u8 sat, u8 val) FL_NO_EXCEPT;
+    CRGB& setHSV (u8 hue, u8 sat, u8 val) FL_NOEXCEPT;
 
     /// Allow assignment from just a hue.
     /// Saturation and value (brightness) are set automatically to max.
     /// @param hue color hue
-    CRGB& setHue (u8 hue) FL_NO_EXCEPT;
+    CRGB& setHue (u8 hue) FL_NOEXCEPT;
 
     /// Allow assignment from HSV color
-    CRGB& operator= (const hsv8& rhs) FL_NO_EXCEPT;
+    CRGB& operator= (const hsv8& rhs) FL_NOEXCEPT;
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    FASTLED_FORCE_INLINE CRGB& setColorCode (u32 colorcode) FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE CRGB& setColorCode (u32 colorcode) FL_NOEXCEPT
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -215,37 +215,37 @@ struct CRGB {
     }
 
     /// Add one CRGB to another, saturating at 0xFF for each channel
-    CRGB& operator+= (const CRGB& rhs) FL_NO_EXCEPT;
+    CRGB& operator+= (const CRGB& rhs) FL_NOEXCEPT;
 
     /// Add a constant to each channel, saturating at 0xFF.
     /// @note This is NOT an operator+= overload because the compiler
     /// can't usefully decide when it's being passed a 32-bit
     /// constant (e.g. CRGB::Red) and an 8-bit one (CRGB::Blue)
-    FASTLED_FORCE_INLINE CRGB& addToRGB (u8 d) FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE CRGB& addToRGB (u8 d) FL_NOEXCEPT;
 
     /// Subtract one CRGB from another, saturating at 0x00 for each channel
-    FASTLED_FORCE_INLINE CRGB& operator-= (const CRGB& rhs) FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE CRGB& operator-= (const CRGB& rhs) FL_NOEXCEPT;
 
     /// Subtract a constant from each channel, saturating at 0x00.
     /// @note This is NOT an operator+= overload because the compiler
     /// can't usefully decide when it's being passed a 32-bit
     /// constant (e.g. CRGB::Red) and an 8-bit one (CRGB::Blue)
-    FASTLED_FORCE_INLINE CRGB& subtractFromRGB(u8 d) FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE CRGB& subtractFromRGB(u8 d) FL_NOEXCEPT;
 
     /// Subtract a constant of '1' from each channel, saturating at 0x00
-    FASTLED_FORCE_INLINE CRGB& operator-- () FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE CRGB& operator-- () FL_NOEXCEPT;
 
     /// @copydoc operator--
-    FASTLED_FORCE_INLINE CRGB operator-- (int ) FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE CRGB operator-- (int ) FL_NOEXCEPT;
 
     /// Add a constant of '1' from each channel, saturating at 0xFF
-    FASTLED_FORCE_INLINE CRGB& operator++ () FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE CRGB& operator++ () FL_NOEXCEPT;
 
     /// @copydoc operator++
-    FASTLED_FORCE_INLINE CRGB operator++ (int ) FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE CRGB operator++ (int ) FL_NOEXCEPT;
 
     /// Divide each of the channels by a constant
-    FASTLED_FORCE_INLINE CRGB& operator/= (u8 d ) FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE CRGB& operator/= (u8 d ) FL_NOEXCEPT
     {
         r /= d;
         g /= d;
@@ -254,7 +254,7 @@ struct CRGB {
     }
 
     /// Right shift each of the channels by a constant
-    FASTLED_FORCE_INLINE CRGB& operator>>= (u8 d) FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE CRGB& operator>>= (u8 d) FL_NOEXCEPT
     {
         r >>= d;
         g >>= d;
@@ -264,7 +264,7 @@ struct CRGB {
 
     /// Multiply each of the channels by a constant,
     /// saturating each channel at 0xFF.
-    FASTLED_FORCE_INLINE CRGB& operator*= (u8 d) FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE CRGB& operator*= (u8 d) FL_NOEXCEPT;
 
     /// Scale down a RGB to N/256ths of it's current brightness using
     /// "video" dimming rules. "Video" dimming rules means that unless the scale factor
@@ -275,45 +275,45 @@ struct CRGB {
     /// fl/colorutils.h instead, which is optimized for bulk scaling and can be 2-4x faster
     /// than per-pixel scaling due to compiler optimizations and register reuse patterns.
     /// @see nscale8x3_video
-    FASTLED_FORCE_INLINE CRGB& nscale8_video (u8 scaledown) FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE CRGB& nscale8_video (u8 scaledown) FL_NOEXCEPT;
 
     /// %= is a synonym for nscale8_video().  Think of it is scaling down
     /// by "a percentage"
-    FASTLED_FORCE_INLINE CRGB& operator%= (u8 scaledown) FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE CRGB& operator%= (u8 scaledown) FL_NOEXCEPT;
 
     /// fadeLightBy is a synonym for nscale8_video(), as a fade instead of a scale
     /// @param fadefactor the amount to fade, sent to nscale8_video() as (255 - fadefactor)
-    FASTLED_FORCE_INLINE CRGB& fadeLightBy (u8 fadefactor ) FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE CRGB& fadeLightBy (u8 fadefactor ) FL_NOEXCEPT;
 
     /// Scale down a RGB to N/256ths of its current brightness, using
     /// "plain math" dimming rules. "Plain math" dimming rules means that the low light
     /// levels may dim all the way to 100% black.
     /// @see nscale8x3
-    CRGB& nscale8 (u8 scaledown ) FL_NO_EXCEPT;
+    CRGB& nscale8 (u8 scaledown ) FL_NOEXCEPT;
 
     /// Generic scale — delegates to nscale8 for CRGB.
-    FASTLED_FORCE_INLINE CRGB& nscale(u8 scaledown) FL_NO_EXCEPT { return nscale8(scaledown); }
+    FASTLED_FORCE_INLINE CRGB& nscale(u8 scaledown) FL_NOEXCEPT { return nscale8(scaledown); }
 
     /// Scale down a RGB to N/256ths of its current brightness, using
     /// "plain math" dimming rules. "Plain math" dimming rules means that the low light
     /// levels may dim all the way to 100% black.
     /// @see ::scale8
-    FASTLED_FORCE_INLINE CRGB& nscale8 (const CRGB & scaledown ) FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE CRGB& nscale8 (const CRGB & scaledown ) FL_NOEXCEPT;
 
-    constexpr CRGB nscale8_constexpr (const CRGB scaledown ) const FL_NO_EXCEPT;
-
-    /// Return a CRGB object that is a scaled down version of this object
-    FASTLED_FORCE_INLINE CRGB scale8 (u8 scaledown ) const FL_NO_EXCEPT;
+    constexpr CRGB nscale8_constexpr (const CRGB scaledown ) const FL_NOEXCEPT;
 
     /// Return a CRGB object that is a scaled down version of this object
-    FASTLED_FORCE_INLINE CRGB scale8 (const CRGB & scaledown ) const FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE CRGB scale8 (u8 scaledown ) const FL_NOEXCEPT;
+
+    /// Return a CRGB object that is a scaled down version of this object
+    FASTLED_FORCE_INLINE CRGB scale8 (const CRGB & scaledown ) const FL_NOEXCEPT;
 
     /// fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale
     /// @param fadefactor the amount to fade, sent to nscale8() as (255 - fadefactor)
-    CRGB& fadeToBlackBy (u8 fadefactor ) FL_NO_EXCEPT;
+    CRGB& fadeToBlackBy (u8 fadefactor ) FL_NOEXCEPT;
 
     /// "or" operator brings each channel up to the higher of the two values
-    FASTLED_FORCE_INLINE CRGB& operator|= (const CRGB& rhs ) FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE CRGB& operator|= (const CRGB& rhs ) FL_NOEXCEPT
     {
         if( rhs.r > r) r = rhs.r;
         if( rhs.g > g) g = rhs.g;
@@ -322,7 +322,7 @@ struct CRGB {
     }
 
     /// @copydoc operator|=
-    FASTLED_FORCE_INLINE CRGB& operator|= (u8 d ) FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE CRGB& operator|= (u8 d ) FL_NOEXCEPT
     {
         if( d > r) r = d;
         if( d > g) g = d;
@@ -331,7 +331,7 @@ struct CRGB {
     }
 
     /// "and" operator brings each channel down to the lower of the two values
-    FASTLED_FORCE_INLINE CRGB& operator&= (const CRGB& rhs ) FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE CRGB& operator&= (const CRGB& rhs ) FL_NOEXCEPT
     {
         if( rhs.r < r) r = rhs.r;
         if( rhs.g < g) g = rhs.g;
@@ -340,7 +340,7 @@ struct CRGB {
     }
 
     /// @copydoc operator&=
-    FASTLED_FORCE_INLINE CRGB& operator&= (u8 d ) FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE CRGB& operator&= (u8 d ) FL_NOEXCEPT
     {
         if( d < r) r = d;
         if( d < g) g = d;
@@ -349,13 +349,13 @@ struct CRGB {
     }
 
     /// This allows testing a CRGB for zero-ness
-    constexpr explicit operator bool() const FL_NO_EXCEPT
+    constexpr explicit operator bool() const FL_NOEXCEPT
     {
         return r || g || b;
     }
 
     /// Converts a CRGB to a 32-bit color having an alpha of 255.
-    constexpr explicit operator u32() const FL_NO_EXCEPT
+    constexpr explicit operator u32() const FL_NOEXCEPT
     {
         return u32(0xff000000) |
                (u32{r} << 16) |
@@ -364,7 +364,7 @@ struct CRGB {
     }
 
     /// Invert each channel
-    constexpr CRGB operator-() const FL_NO_EXCEPT
+    constexpr CRGB operator-() const FL_NOEXCEPT
     {
         return CRGB(255 - r, 255 - g, 255 - b);
     }
@@ -381,21 +381,21 @@ struct CRGB {
     }
 #endif
 
-    string toString() const FL_NO_EXCEPT;
+    string toString() const FL_NOEXCEPT;
 
     /// Get the "luma" of a CRGB object. In other words, roughly how much
     /// light the CRGB pixel is putting out (from 0 to 255).
-    u8 getLuma() const FL_NO_EXCEPT;
+    u8 getLuma() const FL_NOEXCEPT;
 
     /// Get the average of the R, G, and B values
-    FASTLED_FORCE_INLINE u8 getAverageLight() const FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE u8 getAverageLight() const FL_NOEXCEPT;
 
     /// Maximize the brightness of this CRGB object.
     /// This makes the individual color channels as bright as possible
     /// while keeping the same value differences between channels.
     /// @note This does not keep the same ratios between channels,
     /// just the same difference in absolute values.
-    FASTLED_FORCE_INLINE void maximizeBrightness( u8 limit = 255 ) FL_NO_EXCEPT {
+    FASTLED_FORCE_INLINE void maximizeBrightness( u8 limit = 255 ) FL_NOEXCEPT {
         u8 max = red;
         if( green > max) max = green;
         if( blue > max) max = blue;
@@ -414,15 +414,15 @@ struct CRGB {
     /// @param colorCorrection color correction to apply
     /// @param colorTemperature color temperature to apply
     /// @returns a CRGB object representing the adjustment, including color correction and color temperature
-    static CRGB computeAdjustment(u8 scale, const CRGB & colorCorrection, const CRGB & colorTemperature) FL_NO_EXCEPT;
+    static CRGB computeAdjustment(u8 scale, const CRGB & colorCorrection, const CRGB & colorTemperature) FL_NOEXCEPT;
 
     /// Return a new CRGB object after performing a linear interpolation between this object and the passed in object
-    CRGB lerp8( const CRGB& other, fract8 amountOf2) const FL_NO_EXCEPT;
+    CRGB lerp8( const CRGB& other, fract8 amountOf2) const FL_NOEXCEPT;
 
     /// @copydoc lerp8
-    FASTLED_FORCE_INLINE CRGB lerp16( const CRGB& other, fract16 frac) const FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE CRGB lerp16( const CRGB& other, fract16 frac) const FL_NOEXCEPT;
     /// Returns 0 or 1, depending on the lowest bit of the sum of the color components.
-    FASTLED_FORCE_INLINE u8 getParity() FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE u8 getParity() FL_NOEXCEPT
     {
         u8 sum = r + g + b;
         return (sum & 0x01);
@@ -450,7 +450,7 @@ struct CRGB {
     /// the parity twice should generally result in the
     /// original color again.
     ///
-    FASTLED_FORCE_INLINE void setParity( u8 parity) FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE void setParity( u8 parity) FL_NOEXCEPT
     {
         u8 curparity = getParity();
 
@@ -730,19 +730,19 @@ struct CRGB {
 };
 
 /// Check if two CRGB objects have the same color data
-FASTLED_FORCE_INLINE bool operator== (const CRGB& lhs, const CRGB& rhs) FL_NO_EXCEPT
+FASTLED_FORCE_INLINE bool operator== (const CRGB& lhs, const CRGB& rhs) FL_NOEXCEPT
 {
     return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b);
 }
 
 /// Check if two CRGB objects do *not* have the same color data
-FASTLED_FORCE_INLINE bool operator!= (const CRGB& lhs, const CRGB& rhs) FL_NO_EXCEPT
+FASTLED_FORCE_INLINE bool operator!= (const CRGB& lhs, const CRGB& rhs) FL_NOEXCEPT
 {
     return !(lhs == rhs);
 }
 
 /// Check if the sum of the color channels in one CRGB object is less than another
-FASTLED_FORCE_INLINE bool operator< (const CRGB& lhs, const CRGB& rhs) FL_NO_EXCEPT
+FASTLED_FORCE_INLINE bool operator< (const CRGB& lhs, const CRGB& rhs) FL_NOEXCEPT
 {
     u16 sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -751,7 +751,7 @@ FASTLED_FORCE_INLINE bool operator< (const CRGB& lhs, const CRGB& rhs) FL_NO_EXC
 }
 
 /// Check if the sum of the color channels in one CRGB object is greater than another
-FASTLED_FORCE_INLINE bool operator> (const CRGB& lhs, const CRGB& rhs) FL_NO_EXCEPT
+FASTLED_FORCE_INLINE bool operator> (const CRGB& lhs, const CRGB& rhs) FL_NOEXCEPT
 {
     u16 sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -760,7 +760,7 @@ FASTLED_FORCE_INLINE bool operator> (const CRGB& lhs, const CRGB& rhs) FL_NO_EXC
 }
 
 /// Check if the sum of the color channels in one CRGB object is greater than or equal to another
-FASTLED_FORCE_INLINE bool operator>= (const CRGB& lhs, const CRGB& rhs) FL_NO_EXCEPT
+FASTLED_FORCE_INLINE bool operator>= (const CRGB& lhs, const CRGB& rhs) FL_NOEXCEPT
 {
     u16 sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -769,7 +769,7 @@ FASTLED_FORCE_INLINE bool operator>= (const CRGB& lhs, const CRGB& rhs) FL_NO_EX
 }
 
 /// Check if the sum of the color channels in one CRGB object is less than or equal to another
-FASTLED_FORCE_INLINE bool operator<= (const CRGB& lhs, const CRGB& rhs) FL_NO_EXCEPT
+FASTLED_FORCE_INLINE bool operator<= (const CRGB& lhs, const CRGB& rhs) FL_NOEXCEPT
 {
     u16 sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -778,13 +778,13 @@ FASTLED_FORCE_INLINE bool operator<= (const CRGB& lhs, const CRGB& rhs) FL_NO_EX
 }
 
 /// @copydoc CRGB::operator/=
-FASTLED_FORCE_INLINE CRGB operator/( const CRGB& p1, u8 d) FL_NO_EXCEPT
+FASTLED_FORCE_INLINE CRGB operator/( const CRGB& p1, u8 d) FL_NOEXCEPT
 {
     return CRGB( p1.r/d, p1.g/d, p1.b/d);
 }
 
 /// Combine two CRGB objects, taking the smallest value of each channel
-FASTLED_FORCE_INLINE CRGB operator&( const CRGB& p1, const CRGB& p2) FL_NO_EXCEPT
+FASTLED_FORCE_INLINE CRGB operator&( const CRGB& p1, const CRGB& p2) FL_NOEXCEPT
 {
     return CRGB( p1.r < p2.r ? p1.r : p2.r,
                  p1.g < p2.g ? p1.g : p2.g,
@@ -792,7 +792,7 @@ FASTLED_FORCE_INLINE CRGB operator&( const CRGB& p1, const CRGB& p2) FL_NO_EXCEP
 }
 
 /// Combine two CRGB objects, taking the largest value of each channel
-FASTLED_FORCE_INLINE CRGB operator|( const CRGB& p1, const CRGB& p2) FL_NO_EXCEPT
+FASTLED_FORCE_INLINE CRGB operator|( const CRGB& p1, const CRGB& p2) FL_NOEXCEPT
 {
     return CRGB( p1.r > p2.r ? p1.r : p2.r,
                  p1.g > p2.g ? p1.g : p2.g,
@@ -800,16 +800,16 @@ FASTLED_FORCE_INLINE CRGB operator|( const CRGB& p1, const CRGB& p2) FL_NO_EXCEP
 }
 
 /// @copydoc CRGB::operator+=
-FASTLED_FORCE_INLINE CRGB operator+( const CRGB& p1, const CRGB& p2) FL_NO_EXCEPT;
+FASTLED_FORCE_INLINE CRGB operator+( const CRGB& p1, const CRGB& p2) FL_NOEXCEPT;
 
 /// @copydoc CRGB::operator-=
-FASTLED_FORCE_INLINE CRGB operator-( const CRGB& p1, const CRGB& p2) FL_NO_EXCEPT;
+FASTLED_FORCE_INLINE CRGB operator-( const CRGB& p1, const CRGB& p2) FL_NOEXCEPT;
 
 /// @copydoc CRGB::operator*=
-FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, u8 d) FL_NO_EXCEPT;
+FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, u8 d) FL_NOEXCEPT;
 
 /// Scale using CRGB::nscale8_video()
-FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, u8 d) FL_NO_EXCEPT;
+FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, u8 d) FL_NOEXCEPT;
 
 /// @page CRGB_performance_guide RGB8 Performance Guide
 ///

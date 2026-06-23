@@ -65,8 +65,8 @@ static bool& getUiSystemInitialized() {
 
 // Add a periodic check function that can be called from JavaScript
 extern "C" void checkUpdateEngineState() {
-    FL_WARN_F("*** ASYNC PERIODIC CHECK: g_updateEngineState=%s", (getUpdateEngineState() ? "VALID" : "nullptr"));
-    FL_WARN_F("*** ASYNC PERIODIC CHECK: g_uiSystemInitialized=%s", (getUiSystemInitialized() ? "true" : "false"));
+    FL_WARN("*** ASYNC PERIODIC CHECK: g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "nullptr"));
+    FL_WARN("*** ASYNC PERIODIC CHECK: g_uiSystemInitialized=" << (getUiSystemInitialized() ? "true" : "false"));
 }
 
 /**
@@ -81,7 +81,7 @@ void jsUpdateUiComponents(const char* jsonStr) {
     
     // Only initialize if not already initialized - don't force reinitialization
     if (!getUiSystemInitialized()) {
-        FL_WARN_F("*** ASYNC WASM: UI system not initialized, initializing for first time");
+        FL_WARN("*** ASYNC WASM: UI system not initialized, initializing for first time");
         ensureWasmUiSystemInitialized();
     }
     
@@ -95,25 +95,25 @@ void jsUpdateUiComponents(const char* jsonStr) {
             getUpdateEngineState()(jsonStr);
             //FL_WARN("*** ASYNC WASM BACKEND CALL COMPLETED SUCCESSFULLY");
         } else {
-            FL_WARN_F("*** ASYNC WASM BACKEND CALL FAILED: updateEngineState is null");
+            FL_WARN("*** ASYNC WASM BACKEND CALL FAILED: updateEngineState is null");
             return; // Early return on error
         }
         
     } else {
-        FL_WARN_F("*** ASYNC WASM ERROR: No driver state updater available, attempting emergency reinitialization...");
+        FL_WARN("*** ASYNC WASM ERROR: No driver state updater available, attempting emergency reinitialization...");
         
         // Try to reinitialize as a recovery mechanism
         getUiSystemInitialized() = false;  // Force reinitialization
         ensureWasmUiSystemInitialized();
         
-        FL_WARN_F("*** ASYNC AFTER EMERGENCY REINIT: g_updateEngineState=%s", (getUpdateEngineState() ? "VALID" : "nullptr"));
+        FL_WARN("*** ASYNC AFTER EMERGENCY REINIT: g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "nullptr"));
         
         if (getUpdateEngineState()) {
-            FL_WARN_F("*** ASYNC EMERGENCY REINIT SUCCESSFUL - retrying JSON processing");
+            FL_WARN("*** ASYNC EMERGENCY REINIT SUCCESSFUL - retrying JSON processing");
             getUpdateEngineState()(jsonStr);
-            FL_WARN_F("*** ASYNC EMERGENCY RETRY COMPLETED SUCCESSFULLY");
+            FL_WARN("*** ASYNC EMERGENCY RETRY COMPLETED SUCCESSFULLY");
         } else {
-            FL_WARN_F("*** ASYNC EMERGENCY REINIT FAILED - g_updateEngineState still nullptr");
+            FL_WARN("*** ASYNC EMERGENCY REINIT FAILED - g_updateEngineState still nullptr");
             return; // Early return on failure
         }
     }
@@ -129,18 +129,18 @@ void ensureWasmUiSystemInitialized() {
     
     // Return early if already initialized - CRITICAL FIX
     if (getUiSystemInitialized()) {
-        FL_WARN_F("*** ensureWasmUiSystemInitialized ASYNC: Already initialized, returning early");
+        FL_WARN("*** ensureWasmUiSystemInitialized ASYNC: Already initialized, returning early");
         return;
     }
     
     if (!getUiSystemInitialized() || !getUpdateEngineState()) {
-        FL_WARN_F("*** ASYNC WASM INITIALIZING UI SYSTEM ***");
+        FL_WARN("*** ASYNC WASM INITIALIZING UI SYSTEM ***");
         
         // Create UI update handler that posts message to main thread
         // In PROXY_TO_PTHREAD mode, C++ runs in worker thread, UI manager runs on main thread
         JsonUiUpdateOutput updateJsHandler = [](const char* jsonStr) {
             if (!jsonStr) {
-                FL_WARN_F("*** UI UPDATE HANDLER ERROR: Received null jsonStr");
+                FL_WARN("*** UI UPDATE HANDLER ERROR: Received null jsonStr");
                 return; // Early return on error
             }
 
@@ -152,14 +152,14 @@ void ensureWasmUiSystemInitialized() {
         // Initialize with error checking via early return
         auto tempResult = setJsonUiHandlers(updateJsHandler);
         if (!tempResult) {
-            FL_WARN_F("*** ASYNC WASM UI SYSTEM INITIALIZATION FAILED: setJsonUiHandlers returned null");
+            FL_WARN("*** ASYNC WASM UI SYSTEM INITIALIZATION FAILED: setJsonUiHandlers returned null");
             return; // Early return on failure
         }
         
         getUpdateEngineState() = tempResult;
         getUiSystemInitialized() = true;
         
-        FL_WARN_F("*** ASYNC WASM UI SYSTEM INITIALIZATION COMPLETED ***");
+        FL_WARN("*** ASYNC WASM UI SYSTEM INITIALIZATION COMPLETED ***");
     }
 }
 
@@ -169,7 +169,7 @@ void ensureWasmUiSystemInitialized() {
  */
 __attribute__((constructor))
 void on_startup_initialize_wasm_ui() {
-    FL_WARN_F("*** ASYNC WASM UI STARTUP INITIALIZER CALLED ***");
+    FL_WARN("*** ASYNC WASM UI STARTUP INITIALIZER CALLED ***");
     ensureWasmUiSystemInitialized();
 }
 
@@ -184,7 +184,7 @@ extern "C" {
     EMSCRIPTEN_KEEPALIVE void jsUpdateUiComponents(const char* jsonStr) {
         // Input validation with early return
         if (!jsonStr) {
-            FL_WARN_F("*** ASYNC C BINDING: Received nullptr jsonStr");
+            FL_WARN("*** ASYNC C BINDING: Received nullptr jsonStr");
             return;
         }
         

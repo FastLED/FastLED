@@ -33,7 +33,7 @@ Downbeat::Downbeat()
     mOwnsBeatDetector = true;
 }
 
-Downbeat::~Downbeat() FL_NO_EXCEPT = default;
+Downbeat::~Downbeat() FL_NOEXCEPT = default;
 
 void Downbeat::update(shared_ptr<Context> context) {
     // Update Beat if we own it

@@ -96,7 +96,7 @@ struct Rmt5ChannelConfig {
     int intr_priority;              ///< Interrupt priority (0 = default, 1-7 = custom)
 
     /// @brief Default constructor (for mock testing)
-    Rmt5ChannelConfig() FL_NO_EXCEPT
+    Rmt5ChannelConfig() FL_NOEXCEPT
         : gpio_num(-1),
           resolution_hz(0),
           mem_block_symbols(0),
@@ -113,7 +113,7 @@ struct Rmt5ChannelConfig {
     /// @param use_dma Enable DMA
     /// @param intr_pri Interrupt priority
     Rmt5ChannelConfig(int pin, u32 res_hz, size_t mem_blocks,
-                      size_t queue_depth, bool use_dma, int intr_pri = 0) FL_NO_EXCEPT
+                      size_t queue_depth, bool use_dma, int intr_pri = 0) FL_NOEXCEPT
         : gpio_num(pin),
           resolution_hz(res_hz),
           mem_block_symbols(mem_blocks),
@@ -188,7 +188,7 @@ public:
     /// Real implementation: rmt_channel_handle_t
     /// Mock implementation: integer channel ID or dummy pointer
     virtual bool createTxChannel(const Rmt5ChannelConfig& config,
-                                 void** out_handle) FL_NO_EXCEPT = 0;
+                                 void** out_handle) FL_NOEXCEPT = 0;
 
     /// @brief Delete RMT channel and free resources
     /// @param channel_handle Channel handle from createTxChannel()
@@ -198,7 +198,7 @@ public:
     ///
     /// Frees all resources associated with the channel. The channel must
     /// be disabled before deletion.
-    virtual bool deleteChannel(void* channel_handle) FL_NO_EXCEPT = 0;
+    virtual bool deleteChannel(void* channel_handle) FL_NOEXCEPT = 0;
 
     /// @brief Enable RMT TX channel for transmission
     /// @param channel_handle Channel handle from createTxChannel()
@@ -209,7 +209,7 @@ public:
     /// Must be called before transmit(). The channel remains enabled
     /// until disableChannel() is called. Multiple transmit() calls can
     /// occur while enabled.
-    virtual bool enableChannel(void* channel_handle) FL_NO_EXCEPT = 0;
+    virtual bool enableChannel(void* channel_handle) FL_NOEXCEPT = 0;
 
     /// @brief Disable RMT TX channel after transmission
     /// @param channel_handle Channel handle from createTxChannel()
@@ -219,7 +219,7 @@ public:
     ///
     /// Call after waitAllDone() completes. Disabling while transmission
     /// is active may cause data corruption or hardware errors.
-    virtual bool disableChannel(void* channel_handle) FL_NO_EXCEPT = 0;
+    virtual bool disableChannel(void* channel_handle) FL_NOEXCEPT = 0;
 
     //=========================================================================
     // Transmission Methods
@@ -241,7 +241,7 @@ public:
     /// The encoder performs the pixel-to-waveform conversion. The peripheral
     /// will trigger the TX done callback when transmission completes.
     virtual bool transmit(void* channel_handle, void* encoder_handle,
-                          const u8* buffer, size_t buffer_size) FL_NO_EXCEPT = 0;
+                          const u8* buffer, size_t buffer_size) FL_NOEXCEPT = 0;
 
     /// @brief Wait for all queued transmissions to complete
     /// @param channel_handle Channel handle from createTxChannel()
@@ -260,7 +260,7 @@ public:
     /// Returns false if:
     /// - Timeout occurs before completion
     /// - Hardware error occurs during transmission
-    virtual bool waitAllDone(void* channel_handle, u32 timeout_ms) FL_NO_EXCEPT = 0;
+    virtual bool waitAllDone(void* channel_handle, u32 timeout_ms) FL_NOEXCEPT = 0;
 
     //=========================================================================
     // Encoder Management
@@ -286,7 +286,7 @@ public:
     /// The encoder can be reused across multiple transmit() calls and
     /// multiple channels (if they share the same timing and resolution).
     virtual void* createEncoder(const ChipsetTiming& timing,
-                                 u32 resolution_hz) FL_NO_EXCEPT = 0;
+                                 u32 resolution_hz) FL_NOEXCEPT = 0;
 
     /// @brief Delete encoder and free resources
     /// @param encoder_handle Encoder handle from createEncoder()
@@ -295,7 +295,7 @@ public:
     ///
     /// Frees all resources associated with the encoder. Safe to call with
     /// nullptr (no-op).
-    virtual void deleteEncoder(void* encoder_handle) FL_NO_EXCEPT = 0;
+    virtual void deleteEncoder(void* encoder_handle) FL_NOEXCEPT = 0;
 
     /// @brief Reset encoder state machine to initial state
     /// @param encoder_handle Encoder handle from createEncoder()
@@ -310,7 +310,7 @@ public:
     /// - No leftover state from previous transmissions
     ///
     /// Called by ChannelEngineRMT before each transmit() operation.
-    virtual bool resetEncoder(void* encoder_handle) FL_NO_EXCEPT = 0;
+    virtual bool resetEncoder(void* encoder_handle) FL_NOEXCEPT = 0;
 
     //=========================================================================
     // ISR Callback Registration
@@ -338,7 +338,7 @@ public:
     /// - Use atomic operations and memory barriers for shared state
     virtual bool registerTxCallback(void* channel_handle,
                                     Rmt5TxDoneCallback callback,
-                                    void* user_ctx) FL_NO_EXCEPT = 0;
+                                    void* user_ctx) FL_NOEXCEPT = 0;
 
     //=========================================================================
     // Platform Configuration
@@ -354,7 +354,7 @@ public:
     /// - Mock: No-op (host platforms don't have ESP-IDF logging)
     ///
     /// Called once during ChannelEngineRMT construction.
-    virtual void configureLogging() FL_NO_EXCEPT = 0;
+    virtual void configureLogging() FL_NOEXCEPT = 0;
 
     /// @brief Synchronize CPU cache to memory for DMA buffer
     /// @param buffer Pointer to buffer to sync
@@ -374,7 +374,7 @@ public:
     ///
     /// Even if cache sync fails, memory barriers ensure write ordering.
     /// Errors are logged but non-fatal.
-    virtual bool syncCache(void* buffer, size_t size) FL_NO_EXCEPT = 0;
+    virtual bool syncCache(void* buffer, size_t size) FL_NOEXCEPT = 0;
 
     //=========================================================================
     // DMA Memory Management
@@ -393,7 +393,7 @@ public:
     ///
     /// Size is automatically rounded up to 64-byte multiple to ensure
     /// cache sync operations work correctly (address AND size must be aligned).
-    virtual u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT = 0;
+    virtual u8* allocateDmaBuffer(size_t size) FL_NOEXCEPT = 0;
 
     /// @brief Free DMA buffer allocated via allocateDmaBuffer()
     /// @param buffer Buffer pointer (must be from allocateDmaBuffer())
@@ -401,7 +401,7 @@ public:
     /// Maps to ESP-IDF: heap_caps_free()
     ///
     /// Safe to call with nullptr (no-op).
-    virtual void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT = 0;
+    virtual void freeDmaBuffer(u8* buffer) FL_NOEXCEPT = 0;
 };
 
 } // namespace detail

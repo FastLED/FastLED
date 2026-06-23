@@ -503,19 +503,34 @@ fastled_lib = shared_library('fastled',
 fastled_lib_dir = meson.current_build_dir()
 
 # ============================================================================
-# CLANG-TOOL-CHAIN RUNTIME DLL PATHS — removed as probe (#3129 A6)
+# CLANG-TOOL-CHAIN RUNTIME DLL PATHS (Windows only)
 # ============================================================================
-# This block used to populate `runtime_dll_paths` by invoking
-# `ci/meson/get_runtime_dll_paths.py` and prepending its output to the test
-# environment's PATH in three call sites (tests/meson.build x2, examples/
-# meson.build x1). The upstream-blessed replacement is the
-# `ZCCACHE_LINK_DEPLOY_CMD=clang-tool-chain-libdeploy` env var (set at
-# ci/meson/runner_helpers.py:374-375 — zccache#33). Per #3129 A6 the local
-# PATH injection is belt-and-suspenders that may now be redundant; this
-# branch is the probe. The script itself
-# (ci/meson/get_runtime_dll_paths.py) is left in place in case revert is
-# needed.
+# When zccache caches link results, ctc-clang++'s post-link DLL deployment
+# is skipped (the cached binary is written directly without invoking the
+# compiler wrapper). This means ASan/MinGW runtime DLLs may not be deployed
+# alongside the output binary. We query clang-tool-chain for its runtime
+# directories and add them to the test PATH so DLLs are always discoverable.
 runtime_dll_paths = []
+if is_windows
+  # Use uv_prog to run the script via the project venv, ensuring clang_tool_chain
+  # is importable. A bare find_program('python3') may resolve to a system Python
+  # that lacks clang_tool_chain, silently returning no paths and causing
+  # 0xc0000135 (STATUS_DLL_NOT_FOUND) at runtime in debug mode.
+  _rtdll_script = meson.project_source_root() / 'ci' / 'meson' / 'get_runtime_dll_paths.py'
+  _rtdll_result = run_command(uv_prog, 'run', 'python', _rtdll_script, check: false)
+  if _rtdll_result.returncode() == 0
+    foreach _line : _rtdll_result.stdout().strip().split('\n')
+      if _line != ''
+        runtime_dll_paths += [_line]
+      endif
+    endforeach
+  else
+    warning('get_runtime_dll_paths.py failed (rc=' + _rtdll_result.returncode().to_string() + '): ' + _rtdll_result.stderr().strip())
+  endif
+  if runtime_dll_paths.length() > 0
+    message('clang-tool-chain runtime DLL paths: ' + ', '.join(runtime_dll_paths))
+  endif
+endif
 
 # ============================================================================
 # FASTLED PRECOMPILED HEADER (shared by tests and examples)

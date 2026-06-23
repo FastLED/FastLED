@@ -239,7 +239,7 @@ static constexpr fl::i16 kPow10BExp[kPow10Count] = {
 // Top 64 bits of the 128-bit product of two u64 values, computed via four
 // 32x32->64 widening multiplies. Portable to every Cortex-M target -- uses
 // only integer ops, never the libgcc soft-FP cascade.
-inline fl::u64 mul_hi_u64(fl::u64 a, fl::u64 b) FL_NO_EXCEPT {
+inline fl::u64 mul_hi_u64(fl::u64 a, fl::u64 b) FL_NOEXCEPT {
     const fl::u64 ah = a >> 32;
     const fl::u64 al = a & 0xFFFFFFFFull;
     const fl::u64 bh = b >> 32;
@@ -258,7 +258,7 @@ constexpr fl::u32 kInfBitsNeg  = 0xFF800000u;
 
 } // namespace
 
-u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed) FL_NO_EXCEPT {
+u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed) FL_NOEXCEPT {
     fl::size i = 0;
 
     auto fail = [&]() -> u32 {
@@ -428,7 +428,7 @@ u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed) FL_NO
 
 // Append the decimal digits of `value` to `out`. Reuses the integer-only
 // `fl::utoa64` helper from `fl/stl/charconv.h` -- no FP arithmetic.
-static void append_u64_decimal(fl::string& out, fl::u64 value) FL_NO_EXCEPT {
+static void append_u64_decimal(fl::string& out, fl::u64 value) FL_NOEXCEPT {
     char buf[24];
     const int n = fl::utoa64(value, buf, 10);
     for (int i = 0; i < n; ++i) {
@@ -436,7 +436,7 @@ static void append_u64_decimal(fl::string& out, fl::u64 value) FL_NO_EXCEPT {
     }
 }
 
-fl::string ieee754_format_decimal(u32 bits, int precision) FL_NO_EXCEPT {
+fl::string ieee754_format_decimal(u32 bits, int precision) FL_NOEXCEPT {
     if (precision < 0) precision = 0;
     if (precision > 9) precision = 9;
 

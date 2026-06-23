@@ -27,17 +27,17 @@ public:
 	void init() { _SPIObject.begin(); }
 
 	// latch the CS select
-	void inline select() FL_NO_EXCEPT __attribute__((always_inline)) {
+	void inline select() FL_NOEXCEPT __attribute__((always_inline)) {
 		// begin the SPI transaction
 		_SPIObject.beginTransaction(SPISettings(_SPI_CLOCK_RATE, MSBFIRST, SPI_MODE0));
 	}
 
 	// release the CS select
-	void inline release() FL_NO_EXCEPT __attribute__((always_inline)) {
+	void inline release() FL_NOEXCEPT __attribute__((always_inline)) {
 		_SPIObject.endTransaction();
 	}
 
-	void endTransaction() FL_NO_EXCEPT {
+	void endTransaction() FL_NOEXCEPT {
 		waitFully();
 		release();
 	}
@@ -46,27 +46,27 @@ public:
 	static void waitFully() { /* TODO */ }
 
 	// write a byte out via SPI (returns immediately on writing register) -
-	void inline writeByte(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
+	void inline writeByte(u8 b) FL_NOEXCEPT __attribute__((always_inline)) {
 		_SPIObject.transfer(b);
 	}
 
 	// write a word out via SPI (returns immediately on writing register)
-	void inline writeWord(u16 w) FL_NO_EXCEPT __attribute__((always_inline)) {
+	void inline writeWord(u16 w) FL_NOEXCEPT __attribute__((always_inline)) {
 		_SPIObject.transfer16(w);
 	}
 
 	// A raw set of writing byte values, assumes setup/init/waiting done elsewhere
-	static void writeBytesValueRaw(u8 value, int len) FL_NO_EXCEPT {
+	static void writeBytesValueRaw(u8 value, int len) FL_NOEXCEPT {
 		while(len--) { _SPIObject.transfer(value); }
 	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
-	void writeBytesValue(u8 value, int len) FL_NO_EXCEPT {
+	void writeBytesValue(u8 value, int len) FL_NOEXCEPT {
 		select(); writeBytesValueRaw(value, len); release();
 	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
-	template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) FL_NO_EXCEPT {
+	template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) FL_NOEXCEPT {
 		u8 *end = data + len;
 		select();
 		// could be optimized to write 16bit words out instead of 8bit bytes
@@ -82,13 +82,13 @@ public:
 	void writeBytes(FASTLED_REGISTER u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
-	template <u8 BIT> inline void writeBit(u8 b) FL_NO_EXCEPT {
+	template <u8 BIT> inline void writeBit(u8 b) FL_NOEXCEPT {
 		// todo
 	}
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NO_EXCEPT {
+	template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NOEXCEPT {
 		select();
     int len = pixels.mLen;
 

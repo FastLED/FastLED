@@ -66,7 +66,7 @@ public:
     /// @return Reference to the singleton peripheral
     ///
     /// Mirrors the hardware constraint that there is only one PARLIO peripheral.
-    static ParlioPeripheralESP& instance() FL_NO_EXCEPT;
+    static ParlioPeripheralESP& instance() FL_NOEXCEPT;
 
     /// @brief Destructor - frees ESP-IDF TX unit handle
     ~ParlioPeripheralESP() override;
@@ -79,19 +79,19 @@ public:
     // IParlioPeripheral Interface Implementation
     //=========================================================================
 
-    bool initialize(const ParlioPeripheralConfig& config) FL_NO_EXCEPT override = 0;
-    bool deinitialize() FL_NO_EXCEPT override = 0;
-    bool enable() FL_NO_EXCEPT override = 0;
-    bool disable() FL_NO_EXCEPT override = 0;
-    bool isInitialized() const FL_NO_EXCEPT override = 0;
-    bool transmit(const u8* buffer, size_t bit_count, u16 idle_value) FL_NO_EXCEPT override = 0;
-    bool waitAllDone(u32 timeout_ms) FL_NO_EXCEPT override = 0;
-    bool registerTxDoneCallback(void* callback, void* user_ctx) FL_NO_EXCEPT override = 0;
-    u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT override = 0;
-    void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override = 0;
-    void delay(u32 ms) FL_NO_EXCEPT override = 0;
-    u64 getMicroseconds() FL_NO_EXCEPT override = 0;
-    void freeDmaBuffer(void* ptr) FL_NO_EXCEPT override = 0;
+    bool initialize(const ParlioPeripheralConfig& config) FL_NOEXCEPT override = 0;
+    bool deinitialize() FL_NOEXCEPT override = 0;
+    bool enable() FL_NOEXCEPT override = 0;
+    bool disable() FL_NOEXCEPT override = 0;
+    bool isInitialized() const FL_NOEXCEPT override = 0;
+    bool transmit(const u8* buffer, size_t bit_count, u16 idle_value) FL_NOEXCEPT override = 0;
+    bool waitAllDone(u32 timeout_ms) FL_NOEXCEPT override = 0;
+    bool registerTxDoneCallback(void* callback, void* user_ctx) FL_NOEXCEPT override = 0;
+    u8* allocateDmaBuffer(size_t size) FL_NOEXCEPT override = 0;
+    void freeDmaBuffer(u8* buffer) FL_NOEXCEPT override = 0;
+    void delay(u32 ms) FL_NOEXCEPT override = 0;
+    u64 getMicroseconds() FL_NOEXCEPT override = 0;
+    void freeDmaBuffer(void* ptr) FL_NOEXCEPT override = 0;
 
 protected:
     /// @brief Protected constructor for singleton

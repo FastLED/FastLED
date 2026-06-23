@@ -81,7 +81,7 @@ XMap::Type XMap::getType() const { return type; }
 XMap::XMap(u16 length, Type type)
     : length(length), type(type), mOffset(0) {}
 
-XMap &XMap::operator=(const XMap &other) FL_NO_EXCEPT {
+XMap &XMap::operator=(const XMap &other) FL_NOEXCEPT {
     if (this != &other) {
         type = other.type;
         length = other.length;

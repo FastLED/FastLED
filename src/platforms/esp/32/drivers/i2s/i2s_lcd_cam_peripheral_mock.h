@@ -73,7 +73,7 @@ public:
     /// @return Reference to the singleton mock peripheral
     ///
     /// This mirrors the hardware constraint that there is only one I2S LCD_CAM peripheral.
-    static I2sLcdCamPeripheralMock& instance() FL_NO_EXCEPT;
+    static I2sLcdCamPeripheralMock& instance() FL_NOEXCEPT;
 
     //=========================================================================
     // Lifecycle
@@ -85,22 +85,22 @@ public:
     // II2sLcdCamPeripheral Interface Implementation
     //=========================================================================
 
-    bool initialize(const I2sLcdCamConfig& config) FL_NO_EXCEPT override = 0;
-    void deinitialize() FL_NO_EXCEPT override = 0;
-    bool isInitialized() const FL_NO_EXCEPT override = 0;
+    bool initialize(const I2sLcdCamConfig& config) FL_NOEXCEPT override = 0;
+    void deinitialize() FL_NOEXCEPT override = 0;
+    bool isInitialized() const FL_NOEXCEPT override = 0;
 
-    u16* allocateBuffer(size_t size_bytes) FL_NO_EXCEPT override = 0;
-    void freeBuffer(u16* buffer) FL_NO_EXCEPT override = 0;
+    u16* allocateBuffer(size_t size_bytes) FL_NOEXCEPT override = 0;
+    void freeBuffer(u16* buffer) FL_NOEXCEPT override = 0;
 
-    bool transmit(const u16* buffer, size_t size_bytes) FL_NO_EXCEPT override = 0;
-    bool waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT override = 0;
-    bool isBusy() const FL_NO_EXCEPT override = 0;
+    bool transmit(const u16* buffer, size_t size_bytes) FL_NOEXCEPT override = 0;
+    bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT override = 0;
+    bool isBusy() const FL_NOEXCEPT override = 0;
 
-    bool registerTransmitCallback(void* callback, void* user_ctx) FL_NO_EXCEPT override = 0;
-    const I2sLcdCamConfig& getConfig() const FL_NO_EXCEPT override = 0;
+    bool registerTransmitCallback(void* callback, void* user_ctx) FL_NOEXCEPT override = 0;
+    const I2sLcdCamConfig& getConfig() const FL_NOEXCEPT override = 0;
 
-    u64 getMicroseconds() FL_NO_EXCEPT override = 0;
-    void delay(u32 ms) FL_NO_EXCEPT override = 0;
+    u64 getMicroseconds() FL_NOEXCEPT override = 0;
+    void delay(u32 ms) FL_NOEXCEPT override = 0;
 
     //=========================================================================
     // Mock-Specific API (for unit tests)
@@ -121,15 +121,15 @@ public:
     ///
     /// Simulates the hardware "transmit complete" interrupt. Calls the
     /// registered callback if one is set.
-    virtual void simulateTransmitComplete() FL_NO_EXCEPT = 0;
+    virtual void simulateTransmitComplete() FL_NOEXCEPT = 0;
 
     /// @brief Inject transmit failure for negative testing
     /// @param should_fail true = fail next transmit(), false = succeed
-    virtual void setTransmitFailure(bool should_fail) FL_NO_EXCEPT = 0;
+    virtual void setTransmitFailure(bool should_fail) FL_NOEXCEPT = 0;
 
     /// @brief Set simulated transmit delay
     /// @param microseconds Delay in microseconds (0 = instant)
-    virtual void setTransmitDelay(u32 microseconds) FL_NO_EXCEPT = 0;
+    virtual void setTransmitDelay(u32 microseconds) FL_NOEXCEPT = 0;
 
     //-------------------------------------------------------------------------
     // Data Capture (for validation)
@@ -137,27 +137,27 @@ public:
 
     /// @brief Get history of all transmissions
     /// @return Vector of transmit records (chronological order)
-    virtual const fl::vector<TransmitRecord>& getTransmitHistory() const FL_NO_EXCEPT = 0;
+    virtual const fl::vector<TransmitRecord>& getTransmitHistory() const FL_NOEXCEPT = 0;
 
     /// @brief Clear transmit history (reset for next test)
-    virtual void clearTransmitHistory() FL_NO_EXCEPT = 0;
+    virtual void clearTransmitHistory() FL_NOEXCEPT = 0;
 
     /// @brief Get most recent transmitted data as span
     /// @return Span of uint16_t data (empty if no transmissions)
-    virtual fl::span<const u16> getLastTransmitData() const FL_NO_EXCEPT = 0;
+    virtual fl::span<const u16> getLastTransmitData() const FL_NOEXCEPT = 0;
 
     //-------------------------------------------------------------------------
     // State Inspection
     //-------------------------------------------------------------------------
 
     /// @brief Check if peripheral is enabled
-    virtual bool isEnabled() const FL_NO_EXCEPT = 0;
+    virtual bool isEnabled() const FL_NOEXCEPT = 0;
 
     /// @brief Get total number of transmit() calls
-    virtual size_t getTransmitCount() const FL_NO_EXCEPT = 0;
+    virtual size_t getTransmitCount() const FL_NOEXCEPT = 0;
 
     /// @brief Reset mock to uninitialized state
-    virtual void reset() FL_NO_EXCEPT = 0;
+    virtual void reset() FL_NOEXCEPT = 0;
 };
 
 } // namespace detail

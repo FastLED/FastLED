@@ -71,7 +71,7 @@ double get_time_since_epoch() {
     
     // Ensure we return a reasonable positive elapsed time
     if (elapsed < 0 || elapsed == 0xffffffff) {
-        FL_WARN_F("WARNING: Negative elapsed time detected, resetting start time");
+        FL_WARN("WARNING: Negative elapsed time detected, resetting start time");
         gStartTime = now;
         elapsed = 0;
     }
