@@ -1,7 +1,7 @@
 
 
 
-FastLED 3.10.4 (Next Release)
+FastLED 3.10.4
 ==============
   * **NEW: TrueType Font Rendering Support**: Full TrueType font (.ttf/.ttc) rendering API with embedded default font
     * **High-quality text rendering**: Render scalable TrueType fonts to LED matrices with antialiasing support
