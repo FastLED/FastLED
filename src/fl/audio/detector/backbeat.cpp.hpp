@@ -52,7 +52,7 @@ Backbeat::Backbeat()
     mOwnsBeatDetector = true;
 }
 
-Backbeat::~Backbeat() FL_NO_EXCEPT = default;
+Backbeat::~Backbeat() FL_NOEXCEPT = default;
 
 void Backbeat::update(shared_ptr<Context> context) {
     // Update Beat if we own it

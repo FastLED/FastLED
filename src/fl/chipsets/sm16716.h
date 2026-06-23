@@ -44,7 +44,7 @@ class SM16716Controller : public CPixelLEDController<RGB_ORDER> {
 	}
 
 public:
-	SM16716Controller() FL_NO_EXCEPT {}
+	SM16716Controller() FL_NOEXCEPT {}
 
 	virtual void init() {
 		mSPI.init();

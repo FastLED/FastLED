@@ -41,7 +41,7 @@ namespace detail {
 // Singleton Instance
 //=============================================================================
 
-LcdRgbPeripheralEsp& LcdRgbPeripheralEsp::instance() FL_NO_EXCEPT {
+LcdRgbPeripheralEsp& LcdRgbPeripheralEsp::instance() FL_NOEXCEPT {
     return Singleton<LcdRgbPeripheralEsp>::instance();
 }
 
@@ -66,9 +66,9 @@ LcdRgbPeripheralEsp::~LcdRgbPeripheralEsp() {
 // Lifecycle Methods
 //=============================================================================
 
-bool LcdRgbPeripheralEsp::initialize(const LcdRgbPeripheralConfig& config) FL_NO_EXCEPT {
+bool LcdRgbPeripheralEsp::initialize(const LcdRgbPeripheralConfig& config) FL_NOEXCEPT {
     if (mInitialized) {
-        FL_WARN_F("LcdRgbPeripheralEsp: Already initialized");
+        FL_WARN("LcdRgbPeripheralEsp: Already initialized");
         return false;
     }
 
@@ -76,12 +76,12 @@ bool LcdRgbPeripheralEsp::initialize(const LcdRgbPeripheralConfig& config) FL_NO
 
     // Validate configuration
     if (config.num_lanes < 1 || config.num_lanes > 16) {
-        FL_WARN_F("LcdRgbPeripheralEsp: Invalid num_lanes: %s", config.num_lanes);
+        FL_WARN("LcdRgbPeripheralEsp: Invalid num_lanes: " << config.num_lanes);
         return false;
     }
 
     if (config.pclk_hz == 0) {
-        FL_WARN_F("LcdRgbPeripheralEsp: Invalid pclk_hz: 0");
+        FL_WARN("LcdRgbPeripheralEsp: Invalid pclk_hz: 0");
         return false;
     }
 
@@ -137,14 +137,14 @@ bool LcdRgbPeripheralEsp::initialize(const LcdRgbPeripheralConfig& config) FL_NO
     // Create RGB panel
     esp_err_t err = esp_lcd_new_rgb_panel(&panel_config, &mPanelHandle);
     if (err != ESP_OK) {
-        FL_WARN_F("LcdRgbPeripheralEsp: Failed to create RGB panel: %s", err);
+        FL_WARN("LcdRgbPeripheralEsp: Failed to create RGB panel: " << err);
         return false;
     }
 
     // Initialize panel
     err = esp_lcd_panel_init(mPanelHandle);
     if (err != ESP_OK) {
-        FL_WARN_F("LcdRgbPeripheralEsp: Failed to initialize panel: %s", err);
+        FL_WARN("LcdRgbPeripheralEsp: Failed to initialize panel: " << err);
         esp_lcd_panel_del(mPanelHandle);
         mPanelHandle = nullptr;
         return false;
@@ -154,7 +154,7 @@ bool LcdRgbPeripheralEsp::initialize(const LcdRgbPeripheralConfig& config) FL_NO
     return true;
 }
 
-void LcdRgbPeripheralEsp::deinitialize() FL_NO_EXCEPT {
+void LcdRgbPeripheralEsp::deinitialize() FL_NOEXCEPT {
     if (mPanelHandle != nullptr) {
         esp_lcd_panel_del(mPanelHandle);
         mPanelHandle = nullptr;
@@ -165,7 +165,7 @@ void LcdRgbPeripheralEsp::deinitialize() FL_NO_EXCEPT {
     mBusy = false;
 }
 
-bool LcdRgbPeripheralEsp::isInitialized() const FL_NO_EXCEPT {
+bool LcdRgbPeripheralEsp::isInitialized() const FL_NOEXCEPT {
     return mInitialized;
 }
 
@@ -173,7 +173,7 @@ bool LcdRgbPeripheralEsp::isInitialized() const FL_NO_EXCEPT {
 // Buffer Management
 //=============================================================================
 
-u16* LcdRgbPeripheralEsp::allocateFrameBuffer(size_t size_bytes) FL_NO_EXCEPT {
+u16* LcdRgbPeripheralEsp::allocateFrameBuffer(size_t size_bytes) FL_NOEXCEPT {
     // Round up to 64-byte alignment
     size_t aligned_size = ((size_bytes + 63) / 64) * 64;
 
@@ -202,7 +202,7 @@ u16* LcdRgbPeripheralEsp::allocateFrameBuffer(size_t size_bytes) FL_NO_EXCEPT {
     return static_cast<u16*>(buffer);
 }
 
-void LcdRgbPeripheralEsp::freeFrameBuffer(u16* buffer) FL_NO_EXCEPT {
+void LcdRgbPeripheralEsp::freeFrameBuffer(u16* buffer) FL_NOEXCEPT {
     if (buffer != nullptr) {
         heap_caps_free(buffer);
     }
@@ -212,7 +212,7 @@ void LcdRgbPeripheralEsp::freeFrameBuffer(u16* buffer) FL_NO_EXCEPT {
 // Transmission Methods
 //=============================================================================
 
-bool LcdRgbPeripheralEsp::drawFrame(const u16* buffer, size_t size_bytes) FL_NO_EXCEPT {
+bool LcdRgbPeripheralEsp::drawFrame(const u16* buffer, size_t size_bytes) FL_NOEXCEPT {
     if (!mInitialized || mPanelHandle == nullptr) {
         return false;
     }
@@ -245,7 +245,7 @@ bool LcdRgbPeripheralEsp::drawFrame(const u16* buffer, size_t size_bytes) FL_NO_
     return true;
 }
 
-bool LcdRgbPeripheralEsp::waitFrameDone(u32 timeout_ms) FL_NO_EXCEPT {
+bool LcdRgbPeripheralEsp::waitFrameDone(u32 timeout_ms) FL_NOEXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -264,7 +264,7 @@ bool LcdRgbPeripheralEsp::waitFrameDone(u32 timeout_ms) FL_NO_EXCEPT {
     return true;
 }
 
-bool LcdRgbPeripheralEsp::isBusy() const FL_NO_EXCEPT {
+bool LcdRgbPeripheralEsp::isBusy() const FL_NOEXCEPT {
     return mBusy;
 }
 
@@ -299,7 +299,7 @@ static bool IRAM_ATTR vsyncIsrCallback( // ok no noexcept
     return false;
 }
 
-bool LcdRgbPeripheralEsp::registerDrawCallback(void* callback, void* user_ctx) FL_NO_EXCEPT {
+bool LcdRgbPeripheralEsp::registerDrawCallback(void* callback, void* user_ctx) FL_NOEXCEPT {
     if (!mInitialized || mPanelHandle == nullptr) {
         return false;
     }
@@ -324,7 +324,7 @@ bool LcdRgbPeripheralEsp::registerDrawCallback(void* callback, void* user_ctx) F
 // State Inspection
 //=============================================================================
 
-const LcdRgbPeripheralConfig& LcdRgbPeripheralEsp::getConfig() const FL_NO_EXCEPT {
+const LcdRgbPeripheralConfig& LcdRgbPeripheralEsp::getConfig() const FL_NOEXCEPT {
     return mConfig;
 }
 
@@ -332,11 +332,11 @@ const LcdRgbPeripheralConfig& LcdRgbPeripheralEsp::getConfig() const FL_NO_EXCEP
 // Platform Utilities
 //=============================================================================
 
-u64 LcdRgbPeripheralEsp::getMicroseconds() FL_NO_EXCEPT {
+u64 LcdRgbPeripheralEsp::getMicroseconds() FL_NOEXCEPT {
     return esp_timer_get_time();
 }
 
-void LcdRgbPeripheralEsp::delay(u32 ms) FL_NO_EXCEPT {
+void LcdRgbPeripheralEsp::delay(u32 ms) FL_NOEXCEPT {
     vTaskDelay(pdMS_TO_TICKS(ms));
 }
 

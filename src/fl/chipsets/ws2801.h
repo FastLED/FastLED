@@ -28,7 +28,7 @@ class WS2801Controller : public CPixelLEDController<RGB_ORDER> {
 	CMinWait<1000>  mWaitDelay;
 
 public:
-	WS2801Controller() FL_NO_EXCEPT {}
+	WS2801Controller() FL_NOEXCEPT {}
 
 	/// Initialize the controller
 	virtual void init() {

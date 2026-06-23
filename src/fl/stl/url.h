@@ -14,45 +14,45 @@ namespace fl {
 
 class url {
   public:
-    url() FL_NO_EXCEPT : mValid(false), mRepaired(false) { zeroOffsets(); }
+    url() FL_NOEXCEPT : mValid(false), mRepaired(false) { zeroOffsets(); }
 
-    explicit url(const char *url) FL_NO_EXCEPT
+    explicit url(const char *url) FL_NOEXCEPT
         : mUrl(url), mValid(false), mRepaired(false) {
         zeroOffsets();
         parse();
     }
 
-    explicit url(const fl::string &u) FL_NO_EXCEPT
+    explicit url(const fl::string &u) FL_NOEXCEPT
         : mUrl(u), mValid(false), mRepaired(false) {
         zeroOffsets();
         parse();
     }
 
-    explicit url(fl::string_view url) FL_NO_EXCEPT
+    explicit url(fl::string_view url) FL_NOEXCEPT
         : mUrl(url.data(), url.size()), mValid(false), mRepaired(false) {
         zeroOffsets();
         parse();
     }
 
-    bool isValid() const FL_NO_EXCEPT { return mValid; }
-    explicit operator bool() const FL_NO_EXCEPT { return mValid; }
+    bool isValid() const FL_NOEXCEPT { return mValid; }
+    explicit operator bool() const FL_NOEXCEPT { return mValid; }
 
     /// True if the URL was missing a scheme and "https://" was assumed.
-    bool wasRepaired() const FL_NO_EXCEPT { return mRepaired; }
+    bool wasRepaired() const FL_NOEXCEPT { return mRepaired; }
 
     // ---- Component accessors (return views into mUrl) ----
-    fl::string_view scheme() const FL_NO_EXCEPT { return view(mScheme); }
-    fl::string_view userinfo() const FL_NO_EXCEPT { return view(mUserinfo); }
-    fl::string_view host() const FL_NO_EXCEPT { return view(mHost); }
-    fl::string_view port_str() const FL_NO_EXCEPT { return view(mPort); }
-    fl::string_view path() const FL_NO_EXCEPT { return view(mPath); }
-    fl::string_view query() const FL_NO_EXCEPT { return view(mQuery); }
-    fl::string_view fragment() const FL_NO_EXCEPT { return view(mFragment); }
-    fl::string_view authority() const FL_NO_EXCEPT { return view(mAuthority); }
+    fl::string_view scheme() const FL_NOEXCEPT { return view(mScheme); }
+    fl::string_view userinfo() const FL_NOEXCEPT { return view(mUserinfo); }
+    fl::string_view host() const FL_NOEXCEPT { return view(mHost); }
+    fl::string_view port_str() const FL_NOEXCEPT { return view(mPort); }
+    fl::string_view path() const FL_NOEXCEPT { return view(mPath); }
+    fl::string_view query() const FL_NOEXCEPT { return view(mQuery); }
+    fl::string_view fragment() const FL_NOEXCEPT { return view(mFragment); }
+    fl::string_view authority() const FL_NOEXCEPT { return view(mAuthority); }
 
     /// Numeric port. Returns the explicit port if present, otherwise the
     /// well-known default for the scheme (80 for http, 443 for https, etc.).
-    fl::u16 port() const FL_NO_EXCEPT {
+    fl::u16 port() const FL_NOEXCEPT {
         fl::string_view p = port_str();
         if (p.empty()) {
             return defaultPort();
@@ -66,15 +66,15 @@ class url {
     }
 
     // ---- Whole-URL access ----
-    fl::string_view str() const FL_NO_EXCEPT {
+    fl::string_view str() const FL_NOEXCEPT {
         return fl::string_view(mUrl.c_str(), mUrl.size());
     }
-    const fl::string &string() const FL_NO_EXCEPT { return mUrl; }
-    const char *c_str() const FL_NO_EXCEPT { return mUrl.c_str(); }
+    const fl::string &string() const FL_NOEXCEPT { return mUrl; }
+    const char *c_str() const FL_NOEXCEPT { return mUrl.c_str(); }
 
     // ---- Comparison ----
-    bool operator==(const url &o) const FL_NO_EXCEPT { return mUrl == o.mUrl; }
-    bool operator!=(const url &o) const FL_NO_EXCEPT { return !(mUrl == o.mUrl); }
+    bool operator==(const url &o) const FL_NOEXCEPT { return mUrl == o.mUrl; }
+    bool operator!=(const url &o) const FL_NOEXCEPT { return !(mUrl == o.mUrl); }
 
   private:
     // A (offset, length) pair stored as uint16_t.
@@ -83,13 +83,13 @@ class url {
         fl::u16 len;
     };
 
-    fl::string_view view(const Span &s) const FL_NO_EXCEPT {
+    fl::string_view view(const Span &s) const FL_NOEXCEPT {
         if (s.len == 0)
             return fl::string_view();
         return fl::string_view(mUrl.c_str() + s.off, s.len);
     }
 
-    void zeroOffsets() FL_NO_EXCEPT {
+    void zeroOffsets() FL_NOEXCEPT {
         mScheme = {0, 0};
         mUserinfo = {0, 0};
         mHost = {0, 0};
@@ -100,14 +100,14 @@ class url {
         mAuthority = {0, 0};
     }
 
-    static Span makeSpan(fl::size off, fl::size len) FL_NO_EXCEPT {
+    static Span makeSpan(fl::size off, fl::size len) FL_NOEXCEPT {
         Span s;
         s.off = static_cast<fl::u16>(off);
         s.len = static_cast<fl::u16>(len);
         return s;
     }
 
-    fl::u16 defaultPort() const FL_NO_EXCEPT {
+    fl::u16 defaultPort() const FL_NOEXCEPT {
         fl::string_view s = scheme();
         if (s == "https" || s == "wss")
             return 443;
@@ -118,7 +118,7 @@ class url {
         return 0;
     }
 
-    void parse() FL_NO_EXCEPT {
+    void parse() FL_NOEXCEPT {
         if (mUrl.empty()) {
             return;
         }
@@ -191,7 +191,7 @@ class url {
         mValid = true;
     }
 
-    void parseAuthority(fl::string_view auth, fl::size baseOff) FL_NO_EXCEPT {
+    void parseAuthority(fl::string_view auth, fl::size baseOff) FL_NOEXCEPT {
         fl::size pos = 0;
 
         // userinfo — everything before '@'
@@ -254,8 +254,8 @@ struct LnkMetadata {
     fl::string sha256;     ///< Hex-encoded sha256 of the expected asset (reserved).
     fl::url fallback;      ///< Mirror URL used if `primary` fails (reserved).
 
-    bool isValid() const FL_NO_EXCEPT { return primary.isValid(); }
-    explicit operator bool() const FL_NO_EXCEPT { return primary.isValid(); }
+    bool isValid() const FL_NOEXCEPT { return primary.isValid(); }
+    explicit operator bool() const FL_NOEXCEPT { return primary.isValid(); }
 };
 
 /// Parse the contents of a `.lnk` file into a `fl::url`.
@@ -271,7 +271,7 @@ struct LnkMetadata {
 ///
 /// See also `parse_lnk_with_metadata()` which returns the URL alongside the
 /// (currently unenforced) metadata fields for forward-compat callers.
-inline url parse_lnk(fl::string_view content) FL_NO_EXCEPT {
+inline url parse_lnk(fl::string_view content) FL_NOEXCEPT {
     fl::size pos = 0;
     while (pos < content.size()) {
         fl::size eol = content.find('\n', pos);
@@ -322,7 +322,7 @@ inline url parse_lnk(fl::string_view content) FL_NO_EXCEPT {
 /// `sha256` is not verified and `fallback` is not retried. These fields
 /// are reserved for future integrity/retry features so existing `.lnk`
 /// files remain valid when richer behavior lands.
-inline LnkMetadata parse_lnk_with_metadata(fl::string_view content) FL_NO_EXCEPT {
+inline LnkMetadata parse_lnk_with_metadata(fl::string_view content) FL_NOEXCEPT {
     LnkMetadata out;
     bool gotPrimary = false;
     fl::size pos = 0;

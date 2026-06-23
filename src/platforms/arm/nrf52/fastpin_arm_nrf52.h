@@ -81,14 +81,14 @@
 // manually define two structures, to avoid fighting with preprocessor macros
 // These are defined at global scope so they can be used by macros outside the namespace
 struct __generated_struct_NRF_P0 {
-    FASTLED_NRF52_INLINE_ATTRIBUTE constexpr static uintptr_t r() FL_NO_EXCEPT {
+    FASTLED_NRF52_INLINE_ATTRIBUTE constexpr static uintptr_t r() FL_NOEXCEPT {
         return NRF_P0_BASE;
     }
 };
 // Not all NRF52 chips have two ports.  Only define if P1 is present.
 #if defined(NRF_P1_BASE)
 struct __generated_struct_NRF_P1 {
-    FASTLED_NRF52_INLINE_ATTRIBUTE constexpr static uintptr_t r() FL_NO_EXCEPT {
+    FASTLED_NRF52_INLINE_ATTRIBUTE constexpr static uintptr_t r() FL_NOEXCEPT {
         return NRF_P1_BASE;
     }
 };
@@ -102,7 +102,7 @@ public:
     typedef volatile u32 * port_ptr_t;
     typedef u32 port_t;
 
-    FASTLED_NRF52_INLINE_ATTRIBUTE static void       setOutput() FL_NO_EXCEPT {
+    FASTLED_NRF52_INLINE_ATTRIBUTE static void       setOutput() FL_NOEXCEPT {
         // OK for this to be more than one instruction, as unusual to quickly switch input/output modes
         nrf_gpio_cfg(
             nrf_pin(),
@@ -113,7 +113,7 @@ public:
             NRF_GPIO_PIN_NOSENSE            // pin sense level disabled
             );
     }
-    FASTLED_NRF52_INLINE_ATTRIBUTE static void       setInput() FL_NO_EXCEPT {
+    FASTLED_NRF52_INLINE_ATTRIBUTE static void       setInput() FL_NOEXCEPT {
         // OK for this to be more than one instruction, as unusual to quickly switch input/output modes
         nrf_gpio_cfg(
             nrf_pin(),
@@ -139,7 +139,7 @@ public:
     FASTLED_NRF52_INLINE_ATTRIBUTE static void set(FASTLED_REGISTER port_t     val ) { (reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUT = val;     } // sets entire port's value (optimization used by FastLED) // ok reinterpret cast
     FASTLED_NRF52_INLINE_ATTRIBUTE static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) { *port = val; }
     constexpr                      static u32   nrf_pin2() { return NRF_GPIO_PIN_MAP(_PORT_NUMBER, _PIN_NUMBER); }
-    constexpr                      static bool       LowSpeedOnlyRecommended() FL_NO_EXCEPT {
+    constexpr                      static bool       LowSpeedOnlyRecommended() FL_NOEXCEPT {
         // Caller must always determine if high speed use if allowed on a given pin,
         // because it depends on more than just the chip packaging ... it depends on entire board (and even system) design.
         return false; // choosing default to be FALSE, to allow users to ATTEMPT to use high-speed on pins where support is not known

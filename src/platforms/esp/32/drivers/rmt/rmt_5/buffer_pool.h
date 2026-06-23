@@ -34,7 +34,7 @@ namespace fl {
 /// **Thread Safety**: Not thread-safe. ChannelEngineRMT manages synchronization.
 class RMTBufferPool {
 public:
-    RMTBufferPool() FL_NO_EXCEPT;
+    RMTBufferPool() FL_NOEXCEPT;
     ~RMTBufferPool();
 
     // Disable copy/move (pool manages raw pointers)
@@ -48,7 +48,7 @@ public:
     ///
     /// @param size Minimum size needed in bytes
     /// @return Span of acquired buffer (capacity >= size), or empty span on failure
-    fl::span<u8> acquireInternal(fl::size size) FL_NO_EXCEPT;
+    fl::span<u8> acquireInternal(fl::size size) FL_NOEXCEPT;
 
     /// Acquire the DMA buffer (DMA-capable memory)
     /// - Only ONE DMA buffer exists (ESP32 hardware limitation: max 1 RMT channel with DMA)
@@ -57,19 +57,19 @@ public:
     ///
     /// @param size Minimum size needed in bytes
     /// @return Span of acquired DMA buffer (capacity >= size), or empty span on failure
-    fl::span<u8> acquireDMA(fl::size size) FL_NO_EXCEPT;
+    fl::span<u8> acquireDMA(fl::size size) FL_NOEXCEPT;
 
     /// Release an internal buffer back to the pool
     /// - Marks buffer as available for reuse
     /// - Buffer memory is NOT freed (kept for future reuse)
     ///
     /// @param buffer The buffer to release (must be from acquireInternal)
-    void releaseInternal(fl::span<u8> buffer) FL_NO_EXCEPT;
+    void releaseInternal(fl::span<u8> buffer) FL_NOEXCEPT;
 
     /// Release the DMA buffer back to the pool
     /// - Marks DMA buffer as available for reuse
     /// - Buffer memory is NOT freed (kept for future reuse)
-    void releaseDMA() FL_NO_EXCEPT;
+    void releaseDMA() FL_NOEXCEPT;
 
     /// Get pool statistics for debugging
     struct Stats {
@@ -78,7 +78,7 @@ public:
         fl::size dmaBufferCapacity;     // DMA buffer size (0 if not allocated)
         bool dmaBufferInUse;            // Whether DMA buffer is currently in use
     };
-    Stats getStats() const FL_NO_EXCEPT;
+    Stats getStats() const FL_NOEXCEPT;
 
 private:
     /// Internal buffer slot in the pool
@@ -104,11 +104,11 @@ private:
 
     /// Find a suitable buffer slot (exact size or larger, not in use)
     /// Returns -1 if no suitable buffer found
-    int findSuitableSlot(fl::size size) FL_NO_EXCEPT;
+    int findSuitableSlot(fl::size size) FL_NOEXCEPT;
 
     /// Allocate a new buffer slot or resize an existing one
     /// Returns -1 on allocation failure
-    int allocateOrResizeSlot(fl::size size) FL_NO_EXCEPT;
+    int allocateOrResizeSlot(fl::size size) FL_NOEXCEPT;
 };
 
 } // namespace fl

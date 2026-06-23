@@ -38,18 +38,18 @@ namespace fl {
 struct ValidPinBase {
 	/// All explicitly declared pins are valid by default
 	/// Platforms can override this in specific cases to mark pins as invalid (e.g., ground pins, UART pins)
-	static constexpr bool validpin() FL_NO_EXCEPT { return true; }
+	static constexpr bool validpin() FL_NOEXCEPT { return true; }
 };
 
 /// Abstract class for "selectable" things
 class Selectable {
 public:
 	#ifndef FL_IS_AVR
-	virtual ~Selectable() FL_NO_EXCEPT {}
+	virtual ~Selectable() FL_NOEXCEPT {}
 	#endif
-	virtual void select() FL_NO_EXCEPT = 0;      ///< Select this object
-	virtual void release() FL_NO_EXCEPT = 0;     ///< Release this object
-	virtual bool isSelected() FL_NO_EXCEPT = 0;  ///< Check if this object is currently selected
+	virtual void select() FL_NOEXCEPT = 0;      ///< Select this object
+	virtual void release() FL_NOEXCEPT = 0;     ///< Release this object
+	virtual bool isSelected() FL_NOEXCEPT = 0;  ///< Check if this object is currently selected
 };
 
 /// The simplest level of Pin class.  This relies on runtime functions during initialization to get the port/pin mask for the pin.  Most
@@ -133,11 +133,11 @@ template<fl::u8 PIN> class FastPin {
 	// or change what get's included for your particular build target.
 	// Keep in mind that these messages are cryptic, so it's best to define an invalid in type.
 #ifdef FASTLED_ALL_PINS_VALID
-	constexpr static bool validpin() FL_NO_EXCEPT { return true; }
+	constexpr static bool validpin() FL_NOEXCEPT { return true; }
 #else
 	constexpr static bool validpin() { return false; }
 #endif
-	constexpr static bool LowSpeedOnlyRecommended() FL_NO_EXCEPT {  // Some implementations assume this exists.
+	constexpr static bool LowSpeedOnlyRecommended() FL_NOEXCEPT {  // Some implementations assume this exists.
         // Caller must always determine if high speed use if allowed on a given pin,
         // because it depends on more than just the chip packaging ... it depends on entire board (and even system) design.
         return false; // choosing default to be FALSE, to allow users to ATTEMPT to use high-speed on pins where support is not known
@@ -145,55 +145,55 @@ template<fl::u8 PIN> class FastPin {
 
 	FL_STATIC_ASSERT(validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
-	static void _init() FL_NO_EXCEPT { }
+	static void _init() FL_NOEXCEPT { }
 
 public:
 	typedef volatile RwReg * port_ptr_t;  ///< @copydoc Pin::port_ptr_t
 	typedef RwReg port_t;  ///< @copydoc Pin::port_t
 
 	/// @copydoc Pin::setOutput()
-	inline static void setOutput() FL_NO_EXCEPT { }
+	inline static void setOutput() FL_NOEXCEPT { }
 	/// @copydoc Pin::setInput()
-	inline static void setInput() FL_NO_EXCEPT { }
+	inline static void setInput() FL_NOEXCEPT { }
 
 	/// @copydoc Pin::hi()
-	inline static void hi() FL_NO_EXCEPT __attribute__ ((always_inline)) { }
+	inline static void hi() FL_NOEXCEPT __attribute__ ((always_inline)) { }
 	/// @copydoc Pin::lo()
-	inline static void lo() FL_NO_EXCEPT __attribute__ ((always_inline)) { }
+	inline static void lo() FL_NOEXCEPT __attribute__ ((always_inline)) { }
 
 	/// @copydoc Pin::strobe()
-	inline static void strobe() FL_NO_EXCEPT __attribute__ ((always_inline)) { }
+	inline static void strobe() FL_NOEXCEPT __attribute__ ((always_inline)) { }
 
 	/// @copydoc Pin::toggle()
-	inline static void toggle() FL_NO_EXCEPT __attribute__ ((always_inline)) { }
+	inline static void toggle() FL_NOEXCEPT __attribute__ ((always_inline)) { }
 
 	/// @copydoc Pin::hi(FASTLED_REGISTER port_ptr_t)
-	inline static void hi(FASTLED_REGISTER port_ptr_t port) FL_NO_EXCEPT __attribute__ ((always_inline)) {
+	inline static void hi(FASTLED_REGISTER port_ptr_t port) FL_NOEXCEPT __attribute__ ((always_inline)) {
 		FASTLED_UNUSED(port);
 	}
 	/// @copydoc Pin::lo(FASTLED_REGISTER port_ptr_t)
-	inline static void lo(FASTLED_REGISTER port_ptr_t port) FL_NO_EXCEPT __attribute__ ((always_inline)) {
+	inline static void lo(FASTLED_REGISTER port_ptr_t port) FL_NOEXCEPT __attribute__ ((always_inline)) {
 		FASTLED_UNUSED(port);
 	}
 	/// @copydoc Pin::set(FASTLED_REGISTER port_t)
-	inline static void set(FASTLED_REGISTER port_t val) FL_NO_EXCEPT __attribute__ ((always_inline)) {
+	inline static void set(FASTLED_REGISTER port_t val) FL_NOEXCEPT __attribute__ ((always_inline)) {
 		FASTLED_UNUSED(val);
 	}
 
 	/// @copydoc Pin::fastset()
-	inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) FL_NO_EXCEPT __attribute__ ((always_inline)) {
+	inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) FL_NOEXCEPT __attribute__ ((always_inline)) {
 		FASTLED_UNUSED(port);
 		FASTLED_UNUSED(val);
 	}
 
 	/// @copydoc Pin::hival()
-	static port_t hival() FL_NO_EXCEPT __attribute__ ((always_inline)) { return 0; }
+	static port_t hival() FL_NOEXCEPT __attribute__ ((always_inline)) { return 0; }
 	/// @copydoc Pin::loval()
-	static port_t loval() FL_NO_EXCEPT __attribute__ ((always_inline)) { return 0;}
+	static port_t loval() FL_NOEXCEPT __attribute__ ((always_inline)) { return 0;}
 	/// @copydoc Pin::port()
-	static port_ptr_t  port() FL_NO_EXCEPT __attribute__ ((always_inline)) { return nullptr; }
+	static port_ptr_t  port() FL_NOEXCEPT __attribute__ ((always_inline)) { return nullptr; }
 	/// @copydoc Pin::mask()
-	static port_t mask() FL_NO_EXCEPT __attribute__ ((always_inline)) { return 0; }
+	static port_t mask() FL_NOEXCEPT __attribute__ ((always_inline)) { return 0; }
 };
 
 #endif
@@ -210,11 +210,11 @@ typedef volatile fl::u32 * ptr_reg32_t;  ///< Pointer to a 32-bit register, vola
 /// @tparam port the port to check information for
 template<fl::u8 port> struct __FL_PORT_INFO {
 	/// Checks whether a port exists
-	static bool hasPort() FL_NO_EXCEPT { return 0; }
+	static bool hasPort() FL_NOEXCEPT { return 0; }
 	/// Gets the name of the port, as a C-string
-	static const char *portName() FL_NO_EXCEPT { return "--"; }
+	static const char *portName() FL_NOEXCEPT { return "--"; }
 	/// Gets the raw address of the port
-	static const void *portAddr() FL_NO_EXCEPT { return nullptr; }
+	static const void *portAddr() FL_NOEXCEPT { return nullptr; }
 };
 
 

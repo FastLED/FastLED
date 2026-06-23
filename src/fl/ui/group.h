@@ -16,11 +16,11 @@ namespace fl {
 
 class UIGroupImpl {
   public:
-    UIGroupImpl(const char *name) FL_NO_EXCEPT : mGroupName(name) {
+    UIGroupImpl(const char *name) FL_NOEXCEPT : mGroupName(name) {
         FASTLED_UNUSED(name);
     }
-    ~UIGroupImpl() FL_NO_EXCEPT {}
-    fl::string name() const FL_NO_EXCEPT { return mGroupName; }
+    ~UIGroupImpl() FL_NOEXCEPT {}
+    fl::string name() const FL_NOEXCEPT { return mGroupName; }
 
   private:
     fl::string mGroupName;
@@ -32,22 +32,22 @@ class UIGroup {
   public:
     FL_NO_COPY(UIGroup);
 
-    UIGroup(const fl::string& groupName) FL_NO_EXCEPT;
+    UIGroup(const fl::string& groupName) FL_NOEXCEPT;
 
     template<typename... UIElements>
-    UIGroup(const fl::string& groupName, UIElements&... elements) FL_NO_EXCEPT
+    UIGroup(const fl::string& groupName, UIElements&... elements) FL_NOEXCEPT
         : mImpl(groupName.c_str()) {
         add(elements...);
     }
 
-    ~UIGroup() FL_NO_EXCEPT;
+    ~UIGroup() FL_NOEXCEPT;
 
-    fl::string name() const FL_NO_EXCEPT { return mImpl.name(); }
+    fl::string name() const FL_NOEXCEPT { return mImpl.name(); }
 
-    operator fl::string() const FL_NO_EXCEPT { return name(); }
+    operator fl::string() const FL_NOEXCEPT { return name(); }
 
     template<typename T>
-    void addControl(T* control) FL_NO_EXCEPT {
+    void addControl(T* control) FL_NOEXCEPT {
         control->setGroup(name());
     }
 
@@ -56,12 +56,12 @@ class UIGroup {
 
   private:
     template<typename T>
-    void add(T& control) FL_NO_EXCEPT {
+    void add(T& control) FL_NOEXCEPT {
         control.setGroup(name());
     }
 
     template<typename T, typename... Rest>
-    void add(T& control, Rest&... rest) FL_NO_EXCEPT {
+    void add(T& control, Rest&... rest) FL_NOEXCEPT {
         control.setGroup(name());
         add(rest...);
     }

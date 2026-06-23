@@ -22,7 +22,7 @@ class HttpStreamTransport;  // IWYU pragma: keep
 /// Provides onData() for intermediate updates, plus then()/catch_() for final result
 class StreamHandle {
 public:
-    StreamHandle() FL_NO_EXCEPT = default;
+    StreamHandle() FL_NOEXCEPT = default;
 
     /// Register callback for intermediate stream data
     StreamHandle& onData(fl::function<void(const fl::json&)> cb);
@@ -63,7 +63,7 @@ public:
     HttpStreamTransport(const fl::string& host, u16 port, u32 heartbeatIntervalMs = 30000);
 
     /// Virtual destructor
-    virtual ~HttpStreamTransport() FL_NO_EXCEPT;
+    virtual ~HttpStreamTransport() FL_NOEXCEPT;
 
     // Connection Management
 

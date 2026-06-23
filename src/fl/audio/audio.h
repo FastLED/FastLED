@@ -23,42 +23,42 @@ class Sample {
   public:
     using VectorPCM = fl::vector<fl::i16>;
     using const_iterator = VectorPCM::const_iterator;
-    Sample() FL_NO_EXCEPT {}
-    Sample(const Sample &other) FL_NO_EXCEPT : mImpl(other.mImpl) {}
-    Sample(SampleImplPtr impl) FL_NO_EXCEPT : mImpl(impl) {}
-    ~Sample() FL_NO_EXCEPT;
+    Sample() FL_NOEXCEPT {}
+    Sample(const Sample &other) FL_NOEXCEPT : mImpl(other.mImpl) {}
+    Sample(SampleImplPtr impl) FL_NOEXCEPT : mImpl(impl) {}
+    ~Sample() FL_NOEXCEPT;
 
     // Constructor that takes raw audio data and handles pooling internally
-    Sample(fl::span<const fl::i16> span, fl::u32 timestamp = 0) FL_NO_EXCEPT;
+    Sample(fl::span<const fl::i16> span, fl::u32 timestamp = 0) FL_NOEXCEPT;
 
-    Sample &operator=(const Sample &other) FL_NO_EXCEPT;
-    bool isValid() const FL_NO_EXCEPT { return mImpl != nullptr; }
+    Sample &operator=(const Sample &other) FL_NOEXCEPT;
+    bool isValid() const FL_NOEXCEPT { return mImpl != nullptr; }
 
-    fl::size size() const FL_NO_EXCEPT;
+    fl::size size() const FL_NOEXCEPT;
     // Raw pcm levels.
-    const VectorPCM &pcm() const FL_NO_EXCEPT;
+    const VectorPCM &pcm() const FL_NOEXCEPT;
     // Zero crossing factor between 0.0f -> 1.0f, detects "hiss"
     // and sounds like cloths rubbing. Useful for sound analysis.
-    float zcf() const FL_NO_EXCEPT;
-    float rms() const FL_NO_EXCEPT;
-    fl::u32 timestamp() const FL_NO_EXCEPT;  // Timestamp when sample became valid (millis)
+    float zcf() const FL_NOEXCEPT;
+    float rms() const FL_NOEXCEPT;
+    fl::u32 timestamp() const FL_NOEXCEPT;  // Timestamp when sample became valid (millis)
 
-    void fft(fft::Bins *out) const FL_NO_EXCEPT;
+    void fft(fft::Bins *out) const FL_NOEXCEPT;
 
-    const_iterator begin() const FL_NO_EXCEPT { return pcm().begin(); }
-    const_iterator end() const FL_NO_EXCEPT { return pcm().end(); }
-    const fl::i16 &at(fl::size i) const FL_NO_EXCEPT;
-    const fl::i16 &operator[](fl::size i) const FL_NO_EXCEPT;
-    operator bool() const FL_NO_EXCEPT { return isValid(); }
-    bool operator==(const Sample &other) const FL_NO_EXCEPT;
-    bool operator!=(const Sample &other) const FL_NO_EXCEPT;
+    const_iterator begin() const FL_NOEXCEPT { return pcm().begin(); }
+    const_iterator end() const FL_NOEXCEPT { return pcm().end(); }
+    const fl::i16 &at(fl::size i) const FL_NOEXCEPT;
+    const fl::i16 &operator[](fl::size i) const FL_NOEXCEPT;
+    operator bool() const FL_NOEXCEPT { return isValid(); }
+    bool operator==(const Sample &other) const FL_NOEXCEPT;
+    bool operator!=(const Sample &other) const FL_NOEXCEPT;
 
     /// Apply a digital gain multiplier to all PCM samples in-place.
     /// Clamps to i16 range to prevent overflow.
-    void applyGain(float gain) FL_NO_EXCEPT;
+    void applyGain(float gain) FL_NOEXCEPT;
 
   private:
-    static const VectorPCM &empty() FL_NO_EXCEPT;
+    static const VectorPCM &empty() FL_NOEXCEPT;
     SampleImplPtr mImpl;
 };
 
@@ -73,28 +73,28 @@ class SoundLevelMeter {
     /// @param spl_floor  The SPL (dB SPL) that corresponds to your true
     /// noise-floor.
     /// @param smoothing_alpha  [0…1] how quickly to adapt floor; 0=instant min.
-    SoundLevelMeter(double spl_floor = 33.0, double smoothing_alpha = 0.0) FL_NO_EXCEPT;
+    SoundLevelMeter(double spl_floor = 33.0, double smoothing_alpha = 0.0) FL_NOEXCEPT;
 
     /// Process a block of int16 PCM samples.
-    void processBlock(const fl::i16 *samples, fl::size count) FL_NO_EXCEPT;
-            void processBlock(fl::span<const fl::i16> samples) FL_NO_EXCEPT {
+    void processBlock(const fl::i16 *samples, fl::size count) FL_NOEXCEPT;
+            void processBlock(fl::span<const fl::i16> samples) FL_NOEXCEPT {
         processBlock(samples.data(), samples.size());
     }
 
     /// @returns most recent block's level in dBFS (≤ 0)
-    double getDBFS() const FL_NO_EXCEPT { return mCurrentDbfs; }
+    double getDBFS() const FL_NOEXCEPT { return mCurrentDbfs; }
 
     /// @returns calibrated estimate in dB SPL
-    double getSPL() const FL_NO_EXCEPT { return mCurrentSpl; }
+    double getSPL() const FL_NOEXCEPT { return mCurrentSpl; }
 
     /// change your known noise-floor SPL at runtime
-    void setFloorSPL(double spl_floor) FL_NO_EXCEPT {
+    void setFloorSPL(double spl_floor) FL_NOEXCEPT {
         mSplFloor = spl_floor;
         mOffset = mSplFloor - mDbfsFloorGlobal;
     }
 
     /// reset so the next quiet block will re-initialize your floor
-    void resetFloor() FL_NO_EXCEPT {
+    void resetFloor() FL_NOEXCEPT {
         mDbfsFloorGlobal = FL_INFINITY_DOUBLE; // infinity<double>
         mOffset = 0.0;
     }
@@ -112,11 +112,11 @@ class SoundLevelMeter {
 class SampleImpl {
   public:
     using VectorPCM = fl::vector<fl::i16>;
-    ~SampleImpl() FL_NO_EXCEPT {}
+    ~SampleImpl() FL_NOEXCEPT {}
     // template <typename It> void assign(It begin, It end) {
     //     assign(begin, end, 0);  // Default timestamp to 0
     // }
-    template <typename It> void assign(It begin, It end, fl::u32 timestamp) FL_NO_EXCEPT {
+    template <typename It> void assign(It begin, It end, fl::u32 timestamp) FL_NOEXCEPT {
         mSignedPcm.assign(begin, end);
         mTimestamp = timestamp;
         // Pre-compute zero crossings for O(1) access
@@ -124,12 +124,12 @@ class SampleImpl {
         // RMS is computed lazily on first access to avoid blocking
         mRmsComputed = false;
     }
-    const VectorPCM &pcm() const FL_NO_EXCEPT { return mSignedPcm; }
-    VectorPCM &pcm_mutable() FL_NO_EXCEPT { return mSignedPcm; }
-    fl::u32 timestamp() const FL_NO_EXCEPT { return mTimestamp; }
+    const VectorPCM &pcm() const FL_NOEXCEPT { return mSignedPcm; }
+    VectorPCM &pcm_mutable() FL_NOEXCEPT { return mSignedPcm; }
+    fl::u32 timestamp() const FL_NOEXCEPT { return mTimestamp; }
 
     // For object pool - reset internal state for reuse
-    void reset() FL_NO_EXCEPT {
+    void reset() FL_NOEXCEPT {
         mSignedPcm.clear();
         mZeroCrossings = 0;
         mRms = 0.0f;
@@ -147,7 +147,7 @@ class SampleImpl {
     //
     // Returns: a value -> [0.0f, 1.0f)
     // O(1) - pre-computed in constructor
-    float zcf() const FL_NO_EXCEPT {
+    float zcf() const FL_NOEXCEPT {
         const fl::size n = pcm().size();
         if (n < 2) {
             return 0.f;
@@ -157,7 +157,7 @@ class SampleImpl {
 
     // Root mean square amplitude of the audio signal
     // Returns: RMS value (computed lazily on first access)
-    float rms() const FL_NO_EXCEPT {
+    float rms() const FL_NOEXCEPT {
         if (!mRmsComputed) {
             const_cast<SampleImpl*>(this)->initRms();
             const_cast<SampleImpl*>(this)->mRmsComputed = true;
@@ -166,7 +166,7 @@ class SampleImpl {
     }
 
   private:
-    void initZeroCrossings() FL_NO_EXCEPT {
+    void initZeroCrossings() FL_NOEXCEPT {
         mZeroCrossings = 0;
         if (mSignedPcm.size() > 1) {
             for (fl::size i = 1; i < mSignedPcm.size(); ++i) {
@@ -180,7 +180,7 @@ class SampleImpl {
         }
     }
 
-    void initRms() FL_NO_EXCEPT {
+    void initRms() FL_NOEXCEPT {
         if (mSignedPcm.empty()) {
             mRms = 0.0f;
             return;

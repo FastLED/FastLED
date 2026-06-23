@@ -16,7 +16,7 @@ AutoGain::AutoGain(const AutoGainConfig& config) {
     configure(config);
 }
 
-AutoGain::~AutoGain() FL_NO_EXCEPT = default;
+AutoGain::~AutoGain() FL_NOEXCEPT = default;
 
 void AutoGain::configure(const AutoGainConfig& config) {
     mConfig = config;

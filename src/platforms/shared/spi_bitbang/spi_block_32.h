@@ -114,7 +114,7 @@ public:
                        u8 d20, u8 d21, u8 d22, u8 d23,
                        u8 d24, u8 d25, u8 d26, u8 d27,
                        u8 d28, u8 d29, u8 d30, u8 d31,
-                       u8 clk) FL_NO_EXCEPT {
+                       u8 clk) FL_NOEXCEPT {
         // Store clock mask
         mClockMask = 1u << clk;
 
@@ -191,7 +191,7 @@ public:
      * Only 8 bits of each byte are used (mapped to 32 pins via LUT).
      * Bits 8-31 are always cleared during transmission.
      */
-    void loadBuffer(const u8* data, u16 n) FL_NO_EXCEPT {
+    void loadBuffer(const u8* data, u16 n) FL_NOEXCEPT {
         if (!data) return;
         if (n > MAX_BUFFER_SIZE) n = MAX_BUFFER_SIZE;
 
@@ -209,7 +209,7 @@ public:
      *
      * Performance: Highest throughput with 32 parallel pins
      */
-    void transmit() FL_NO_EXCEPT {
+    void transmit() FL_NOEXCEPT {
         if (!mBuffer || mBufferLen == 0) return;
 
         // Inline bit-banging loop (same logic as 16-way implementation)
@@ -231,21 +231,21 @@ public:
     /**
      * Get buffer pointer (for inspection)
      */
-    const u8* getBuffer() const FL_NO_EXCEPT {
+    const u8* getBuffer() const FL_NOEXCEPT {
         return mBuffer;
     }
 
     /**
      * Get buffer length (for inspection)
      */
-    u16 getBufferLength() const FL_NO_EXCEPT {
+    u16 getBufferLength() const FL_NOEXCEPT {
         return mBufferLen;
     }
 
     /**
      * Get LUT array (for advanced users who want direct LUT control)
      */
-    PinMaskEntry* getLUTArray() FL_NO_EXCEPT {
+    PinMaskEntry* getLUTArray() FL_NOEXCEPT {
         return mLUT;
     }
 

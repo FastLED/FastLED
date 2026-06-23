@@ -15,12 +15,12 @@ class MedianFilterImpl {
     FL_STATIC_ASSERT(N == 0 || (N % 2 == 1),
                   "MedianFilter: N must be odd for an unambiguous median");
   public:
-    MedianFilterImpl() FL_NO_EXCEPT : mSortedCount(0), mLastMedian(T(0)) {}
+    MedianFilterImpl() FL_NOEXCEPT : mSortedCount(0), mLastMedian(T(0)) {}
     explicit MedianFilterImpl(fl::size capacity)
         : mRing(capacity), mSorted(capacity),
           mSortedCount(0), mLastMedian(T(0)) {
         if (capacity % 2 == 0) {
-            FL_ERROR_F("MedianFilter: capacity should be odd, adding 1");
+            FL_ERROR("MedianFilter: capacity should be odd, adding 1");
             mRing = circular_buffer<T, N>(capacity + 1);
             mSorted = circular_buffer<T, N>(capacity + 1);
         }
@@ -86,7 +86,7 @@ class MedianFilterImpl {
 
     void resize(fl::size new_capacity) {
         if (new_capacity % 2 == 0) {
-            FL_ERROR_F("MedianFilter: capacity should be odd, adding 1");
+            FL_ERROR("MedianFilter: capacity should be odd, adding 1");
             new_capacity += 1;
         }
         mRing = circular_buffer<T, N>(new_capacity);

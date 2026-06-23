@@ -11,7 +11,7 @@ namespace fl {
 
 template<typename T>
 struct default_delete {
-    void operator()(T* ptr) const FL_NO_EXCEPT {
+    void operator()(T* ptr) const FL_NOEXCEPT {
         FL_STATIC_ASSERT(sizeof(T) > 0,
             "Cannot delete pointer to incomplete type. "
             "Ensure the type is fully defined where unique_ptr destructor is instantiated.");
@@ -20,14 +20,14 @@ struct default_delete {
     
     // Allow conversion from derived to base type deleters
     template<typename U>
-    default_delete(const default_delete<U>&) FL_NO_EXCEPT {}
+    default_delete(const default_delete<U>&) FL_NOEXCEPT {}
     
-    default_delete() FL_NO_EXCEPT = default;
+    default_delete() FL_NOEXCEPT = default;
 };
 
 template<typename T>
 struct default_delete<T[]> {
-    void operator()(T* ptr) const FL_NO_EXCEPT {
+    void operator()(T* ptr) const FL_NOEXCEPT {
         delete[] ptr;
     }
 };
@@ -45,26 +45,26 @@ private:
 
 public:
     // Constructors
-    constexpr unique_ptr() FL_NO_EXCEPT : mPtr(nullptr), mDeleter() {}
-    constexpr unique_ptr(fl::nullptr_t) FL_NO_EXCEPT : mPtr(nullptr), mDeleter() {}
-    explicit unique_ptr(pointer p) FL_NO_EXCEPT : mPtr(p), mDeleter() {}
-    unique_ptr(pointer p, const Deleter& d) FL_NO_EXCEPT : mPtr(p), mDeleter(d) {}
-    unique_ptr(pointer p, Deleter&& d) FL_NO_EXCEPT : mPtr(p), mDeleter(fl::move(d)) {}
+    constexpr unique_ptr() FL_NOEXCEPT : mPtr(nullptr), mDeleter() {}
+    constexpr unique_ptr(fl::nullptr_t) FL_NOEXCEPT : mPtr(nullptr), mDeleter() {}
+    explicit unique_ptr(pointer p) FL_NOEXCEPT : mPtr(p), mDeleter() {}
+    unique_ptr(pointer p, const Deleter& d) FL_NOEXCEPT : mPtr(p), mDeleter(d) {}
+    unique_ptr(pointer p, Deleter&& d) FL_NOEXCEPT : mPtr(p), mDeleter(fl::move(d)) {}
     
     // Move constructor
-    unique_ptr(unique_ptr&& u) FL_NO_EXCEPT : mPtr(u.release()), mDeleter(fl::move(u.mDeleter)) {}
+    unique_ptr(unique_ptr&& u) FL_NOEXCEPT : mPtr(u.release()), mDeleter(fl::move(u.mDeleter)) {}
     
     // Converting move constructor
     template<typename U, typename E>
-    unique_ptr(unique_ptr<U, E>&& u) FL_NO_EXCEPT 
+    unique_ptr(unique_ptr<U, E>&& u) FL_NOEXCEPT 
         : mPtr(u.release()), mDeleter(fl::move(u.get_deleter())) {}
     
     // Copy semantics deleted
-    unique_ptr(const unique_ptr&) FL_NO_EXCEPT = delete;
-    unique_ptr& operator=(const unique_ptr&) FL_NO_EXCEPT = delete;
+    unique_ptr(const unique_ptr&) FL_NOEXCEPT = delete;
+    unique_ptr& operator=(const unique_ptr&) FL_NOEXCEPT = delete;
     
     // Move assignment
-    unique_ptr& operator=(unique_ptr&& u) FL_NO_EXCEPT {
+    unique_ptr& operator=(unique_ptr&& u) FL_NOEXCEPT {
         if (this != &u) {
             reset(u.release());
             mDeleter = fl::move(u.mDeleter);
@@ -74,43 +74,43 @@ public:
     
     // Converting move assignment
     template<typename U, typename E>
-    unique_ptr& operator=(unique_ptr<U, E>&& u) FL_NO_EXCEPT {
+    unique_ptr& operator=(unique_ptr<U, E>&& u) FL_NOEXCEPT {
         reset(u.release());
         mDeleter = fl::move(u.get_deleter());
         return *this;
     }
     
     // nullptr assignment
-    unique_ptr& operator=(fl::nullptr_t) FL_NO_EXCEPT {
+    unique_ptr& operator=(fl::nullptr_t) FL_NOEXCEPT {
         reset();
         return *this;
     }
     
     // Destructor
-    ~unique_ptr() FL_NO_EXCEPT {
+    ~unique_ptr() FL_NOEXCEPT {
         if (mPtr) {
             mDeleter(mPtr);
         }
     }
     
     // Observers
-    pointer get() const FL_NO_EXCEPT { return mPtr; }
-    Deleter& get_deleter() FL_NO_EXCEPT { return mDeleter; }
-    const Deleter& get_deleter() const FL_NO_EXCEPT { return mDeleter; }
-    explicit operator bool() const FL_NO_EXCEPT { return mPtr != nullptr; }
+    pointer get() const FL_NOEXCEPT { return mPtr; }
+    Deleter& get_deleter() FL_NOEXCEPT { return mDeleter; }
+    const Deleter& get_deleter() const FL_NOEXCEPT { return mDeleter; }
+    explicit operator bool() const FL_NOEXCEPT { return mPtr != nullptr; }
     
     // Access
-    T& operator*() const FL_NO_EXCEPT { return *mPtr; }
-    pointer operator->() const FL_NO_EXCEPT { return mPtr; }
+    T& operator*() const FL_NOEXCEPT { return *mPtr; }
+    pointer operator->() const FL_NOEXCEPT { return mPtr; }
     
     // Modifiers
-    pointer release() FL_NO_EXCEPT {
+    pointer release() FL_NOEXCEPT {
         pointer tmp = mPtr;
         mPtr = nullptr;
         return tmp;
     }
     
-    void reset(pointer p = nullptr) FL_NO_EXCEPT {
+    void reset(pointer p = nullptr) FL_NOEXCEPT {
         pointer old_ptr = mPtr;
         mPtr = p;
         if (old_ptr) {
@@ -118,7 +118,7 @@ public:
         }
     }
     
-    void swap(unique_ptr& u) FL_NO_EXCEPT {
+    void swap(unique_ptr& u) FL_NOEXCEPT {
         using fl::swap;
         swap(mPtr, u.mPtr);
         swap(mDeleter, u.mDeleter);
@@ -139,26 +139,26 @@ private:
 
 public:
     // Constructors
-    constexpr unique_ptr() FL_NO_EXCEPT : mPtr(nullptr), mDeleter() {}
-    constexpr unique_ptr(fl::nullptr_t) FL_NO_EXCEPT : mPtr(nullptr), mDeleter() {}
-    explicit unique_ptr(pointer p) FL_NO_EXCEPT : mPtr(p), mDeleter() {}
-    unique_ptr(pointer p, const Deleter& d) FL_NO_EXCEPT : mPtr(p), mDeleter(d) {}
-    unique_ptr(pointer p, Deleter&& d) FL_NO_EXCEPT : mPtr(p), mDeleter(fl::move(d)) {}
+    constexpr unique_ptr() FL_NOEXCEPT : mPtr(nullptr), mDeleter() {}
+    constexpr unique_ptr(fl::nullptr_t) FL_NOEXCEPT : mPtr(nullptr), mDeleter() {}
+    explicit unique_ptr(pointer p) FL_NOEXCEPT : mPtr(p), mDeleter() {}
+    unique_ptr(pointer p, const Deleter& d) FL_NOEXCEPT : mPtr(p), mDeleter(d) {}
+    unique_ptr(pointer p, Deleter&& d) FL_NOEXCEPT : mPtr(p), mDeleter(fl::move(d)) {}
     
     // Move constructor
-    unique_ptr(unique_ptr&& u) FL_NO_EXCEPT : mPtr(u.release()), mDeleter(fl::move(u.mDeleter)) {}
+    unique_ptr(unique_ptr&& u) FL_NOEXCEPT : mPtr(u.release()), mDeleter(fl::move(u.mDeleter)) {}
     
     // Converting move constructor
     template<typename U, typename E>
-    unique_ptr(unique_ptr<U, E>&& u) FL_NO_EXCEPT 
+    unique_ptr(unique_ptr<U, E>&& u) FL_NOEXCEPT 
         : mPtr(u.release()), mDeleter(fl::move(u.get_deleter())) {}
     
     // Copy semantics deleted
-    unique_ptr(const unique_ptr&) FL_NO_EXCEPT = delete;
-    unique_ptr& operator=(const unique_ptr&) FL_NO_EXCEPT = delete;
+    unique_ptr(const unique_ptr&) FL_NOEXCEPT = delete;
+    unique_ptr& operator=(const unique_ptr&) FL_NOEXCEPT = delete;
     
     // Move assignment
-    unique_ptr& operator=(unique_ptr&& u) FL_NO_EXCEPT {
+    unique_ptr& operator=(unique_ptr&& u) FL_NOEXCEPT {
         if (this != &u) {
             reset(u.release());
             mDeleter = fl::move(u.mDeleter);
@@ -168,42 +168,42 @@ public:
     
     // Converting move assignment
     template<typename U, typename E>
-    unique_ptr& operator=(unique_ptr<U, E>&& u) FL_NO_EXCEPT {
+    unique_ptr& operator=(unique_ptr<U, E>&& u) FL_NOEXCEPT {
         reset(u.release());
         mDeleter = fl::move(u.get_deleter());
         return *this;
     }
     
     // nullptr assignment
-    unique_ptr& operator=(fl::nullptr_t) FL_NO_EXCEPT {
+    unique_ptr& operator=(fl::nullptr_t) FL_NOEXCEPT {
         reset();
         return *this;
     }
     
     // Destructor
-    ~unique_ptr() FL_NO_EXCEPT {
+    ~unique_ptr() FL_NOEXCEPT {
         if (mPtr) {
             mDeleter(mPtr);
         }
     }
     
     // Observers
-    pointer get() const FL_NO_EXCEPT { return mPtr; }
-    Deleter& get_deleter() FL_NO_EXCEPT { return mDeleter; }
-    const Deleter& get_deleter() const FL_NO_EXCEPT { return mDeleter; }
-    explicit operator bool() const FL_NO_EXCEPT { return mPtr != nullptr; }
+    pointer get() const FL_NOEXCEPT { return mPtr; }
+    Deleter& get_deleter() FL_NOEXCEPT { return mDeleter; }
+    const Deleter& get_deleter() const FL_NOEXCEPT { return mDeleter; }
+    explicit operator bool() const FL_NOEXCEPT { return mPtr != nullptr; }
     
     // Array access (replaces scoped_array functionality)
-    T& operator[](fl::size_t i) const FL_NO_EXCEPT { return mPtr[i]; }
+    T& operator[](fl::size_t i) const FL_NOEXCEPT { return mPtr[i]; }
     
     // Modifiers
-    pointer release() FL_NO_EXCEPT {
+    pointer release() FL_NOEXCEPT {
         pointer tmp = mPtr;
         mPtr = nullptr;
         return tmp;
     }
     
-    void reset(pointer p = nullptr) FL_NO_EXCEPT {
+    void reset(pointer p = nullptr) FL_NOEXCEPT {
         pointer old_ptr = mPtr;
         mPtr = p;
         if (old_ptr) {
@@ -211,7 +211,7 @@ public:
         }
     }
     
-    void swap(unique_ptr& u) FL_NO_EXCEPT {
+    void swap(unique_ptr& u) FL_NOEXCEPT {
         using fl::swap;
         swap(mPtr, u.mPtr);
         swap(mDeleter, u.mDeleter);
@@ -220,52 +220,52 @@ public:
 
 // Non-member functions using FL equivalents
 template<typename T, typename Deleter>
-void swap(unique_ptr<T, Deleter>& lhs, unique_ptr<T, Deleter>& rhs) FL_NO_EXCEPT {
+void swap(unique_ptr<T, Deleter>& lhs, unique_ptr<T, Deleter>& rhs) FL_NOEXCEPT {
     lhs.swap(rhs);
 }
 
 // Comparison operators using FL equivalents
 template<typename T1, typename Deleter1, typename T2, typename Deleter2>
-bool operator==(const unique_ptr<T1, Deleter1>& lhs, const unique_ptr<T2, Deleter2>& rhs) FL_NO_EXCEPT {
+bool operator==(const unique_ptr<T1, Deleter1>& lhs, const unique_ptr<T2, Deleter2>& rhs) FL_NOEXCEPT {
     return lhs.get() == rhs.get();
 }
 
 template<typename T1, typename Deleter1, typename T2, typename Deleter2>
-bool operator!=(const unique_ptr<T1, Deleter1>& lhs, const unique_ptr<T2, Deleter2>& rhs) FL_NO_EXCEPT {
+bool operator!=(const unique_ptr<T1, Deleter1>& lhs, const unique_ptr<T2, Deleter2>& rhs) FL_NOEXCEPT {
     return !(lhs == rhs);
 }
 
 template<typename T, typename Deleter>
-bool operator==(const unique_ptr<T, Deleter>& ptr, fl::nullptr_t) FL_NO_EXCEPT {
+bool operator==(const unique_ptr<T, Deleter>& ptr, fl::nullptr_t) FL_NOEXCEPT {
     return !ptr;
 }
 
 template<typename T, typename Deleter>
-bool operator==(fl::nullptr_t, const unique_ptr<T, Deleter>& ptr) FL_NO_EXCEPT {
+bool operator==(fl::nullptr_t, const unique_ptr<T, Deleter>& ptr) FL_NOEXCEPT {
     return !ptr;
 }
 
 template<typename T, typename Deleter>
-bool operator!=(const unique_ptr<T, Deleter>& ptr, fl::nullptr_t) FL_NO_EXCEPT {
+bool operator!=(const unique_ptr<T, Deleter>& ptr, fl::nullptr_t) FL_NOEXCEPT {
     return static_cast<bool>(ptr);
 }
 
 template<typename T, typename Deleter>
-bool operator!=(fl::nullptr_t, const unique_ptr<T, Deleter>& ptr) FL_NO_EXCEPT {
+bool operator!=(fl::nullptr_t, const unique_ptr<T, Deleter>& ptr) FL_NOEXCEPT {
     return static_cast<bool>(ptr);
 }
 
 // make_unique function for consistency with std::make_unique
 template<typename T, typename... Args>
 typename fl::enable_if<!fl::is_array<T>::value, unique_ptr<T>>::type
-make_unique(Args&&... args) FL_NO_EXCEPT {
+make_unique(Args&&... args) FL_NOEXCEPT {
     return unique_ptr<T>(new T(fl::forward<Args>(args)...));
 }
 
 // make_unique for arrays
 template<typename T>
 typename fl::enable_if<fl::is_array<T>::value, unique_ptr<T>>::type
-make_unique(fl::size_t size) FL_NO_EXCEPT {
+make_unique(fl::size_t size) FL_NOEXCEPT {
     typedef typename fl::remove_extent<T>::type U;
     return unique_ptr<T>(new U[size]());
 }

@@ -27,7 +27,7 @@ public:
     HttpStreamServer(u16 port = 8080, u32 heartbeatIntervalMs = 30000);
 
     /// Virtual destructor
-    ~HttpStreamServer() FL_NO_EXCEPT override;
+    ~HttpStreamServer() FL_NOEXCEPT override;
 
     // Connection Management (override from HttpStreamTransport)
 
@@ -92,7 +92,7 @@ private:
         fl::string headerBuffer;     // Accumulates partial HTTP header reads
 
         // Default constructor (required for map operations)
-        ClientState() FL_NO_EXCEPT
+        ClientState() FL_NOEXCEPT
             : clientId(0)
             , httpHeaderReceived(false)
             , httpHeaderSent(false)

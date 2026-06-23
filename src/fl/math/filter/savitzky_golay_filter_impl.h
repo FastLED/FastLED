@@ -15,11 +15,11 @@ class SavitzkyGolayFilterImpl {
     FL_STATIC_ASSERT(N == 0 || (N % 2 == 1),
                   "SavitzkyGolayFilter: N must be odd for symmetric polynomial fit");
   public:
-    SavitzkyGolayFilterImpl() FL_NO_EXCEPT : mLastValue(T(0)) {}
+    SavitzkyGolayFilterImpl() FL_NOEXCEPT : mLastValue(T(0)) {}
     explicit SavitzkyGolayFilterImpl(fl::size capacity)
         : mBuf(capacity), mLastValue(T(0)) {
         if (capacity % 2 == 0) {
-            FL_ERROR_F("SavitzkyGolayFilter: capacity should be odd, adding 1");
+            FL_ERROR("SavitzkyGolayFilter: capacity should be odd, adding 1");
             mBuf = circular_buffer<T, N>(capacity + 1);
         }
     }
@@ -45,7 +45,7 @@ class SavitzkyGolayFilterImpl {
 
     void resize(fl::size new_capacity) {
         if (new_capacity % 2 == 0) {
-            FL_ERROR_F("SavitzkyGolayFilter: capacity should be odd, adding 1");
+            FL_ERROR("SavitzkyGolayFilter: capacity should be odd, adding 1");
             new_capacity += 1;
         }
         mBuf = circular_buffer<T, N>(new_capacity);

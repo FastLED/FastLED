@@ -27,44 +27,44 @@ namespace detail {
 
 class I2sSpiPeripheralMockImpl : public I2sSpiPeripheralMock {
   public:
-    I2sSpiPeripheralMockImpl() FL_NO_EXCEPT;
+    I2sSpiPeripheralMockImpl() FL_NOEXCEPT;
     ~I2sSpiPeripheralMockImpl() override;
 
     // II2sSpiPeripheral interface
-    bool initialize(const I2sSpiConfig &config) FL_NO_EXCEPT override;
-    void deinitialize() FL_NO_EXCEPT override;
-    bool isInitialized() const FL_NO_EXCEPT override;
+    bool initialize(const I2sSpiConfig &config) FL_NOEXCEPT override;
+    void deinitialize() FL_NOEXCEPT override;
+    bool isInitialized() const FL_NOEXCEPT override;
 
-    u8 *allocateBuffer(size_t size_bytes) FL_NO_EXCEPT override;
-    void freeBuffer(u8 *buffer) FL_NO_EXCEPT override;
+    u8 *allocateBuffer(size_t size_bytes) FL_NOEXCEPT override;
+    void freeBuffer(u8 *buffer) FL_NOEXCEPT override;
 
-    bool transmit(const u8 *buffer, size_t size_bytes) FL_NO_EXCEPT override;
-    bool waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT override;
-    bool isBusy() const FL_NO_EXCEPT override;
+    bool transmit(const u8 *buffer, size_t size_bytes) FL_NOEXCEPT override;
+    bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT override;
+    bool isBusy() const FL_NOEXCEPT override;
 
     bool registerTransmitCallback(void *callback,
-                                  void *user_ctx) FL_NO_EXCEPT override;
-    const I2sSpiConfig &getConfig() const FL_NO_EXCEPT override;
+                                  void *user_ctx) FL_NOEXCEPT override;
+    const I2sSpiConfig &getConfig() const FL_NOEXCEPT override;
 
-    u64 getMicroseconds() FL_NO_EXCEPT override;
-    void delay(u32 ms) FL_NO_EXCEPT override;
+    u64 getMicroseconds() FL_NOEXCEPT override;
+    void delay(u32 ms) FL_NOEXCEPT override;
 
     // Mock-specific API
-    void simulateTransmitComplete() FL_NO_EXCEPT override;
-    void setTransmitFailure(bool should_fail) FL_NO_EXCEPT override;
-    void setTransmitDelay(u32 microseconds) FL_NO_EXCEPT override;
-    void setAutoComplete(bool auto_complete) FL_NO_EXCEPT override;
+    void simulateTransmitComplete() FL_NOEXCEPT override;
+    void setTransmitFailure(bool should_fail) FL_NOEXCEPT override;
+    void setTransmitDelay(u32 microseconds) FL_NOEXCEPT override;
+    void setAutoComplete(bool auto_complete) FL_NOEXCEPT override;
     const fl::vector<TransmitRecord> &
-    getTransmitHistory() const FL_NO_EXCEPT override;
-    void clearTransmitHistory() FL_NO_EXCEPT override;
-    fl::span<const u8> getLastTransmitData() const FL_NO_EXCEPT override;
-    bool isEnabled() const FL_NO_EXCEPT override;
-    size_t getTransmitCount() const FL_NO_EXCEPT override;
-    void reset() FL_NO_EXCEPT override;
+    getTransmitHistory() const FL_NOEXCEPT override;
+    void clearTransmitHistory() FL_NOEXCEPT override;
+    fl::span<const u8> getLastTransmitData() const FL_NOEXCEPT override;
+    bool isEnabled() const FL_NOEXCEPT override;
+    size_t getTransmitCount() const FL_NOEXCEPT override;
+    void reset() FL_NOEXCEPT override;
 
   private:
-    void pumpDeferredCallbacks() FL_NO_EXCEPT;
-    void fireCallback() FL_NO_EXCEPT;
+    void pumpDeferredCallbacks() FL_NOEXCEPT;
+    void fireCallback() FL_NOEXCEPT;
 
     bool mInitialized;
     bool mEnabled;
@@ -90,7 +90,7 @@ class I2sSpiPeripheralMockImpl : public I2sSpiPeripheralMock {
 // Singleton
 //=============================================================================
 
-I2sSpiPeripheralMock &I2sSpiPeripheralMock::instance() FL_NO_EXCEPT {
+I2sSpiPeripheralMock &I2sSpiPeripheralMock::instance() FL_NOEXCEPT {
     return Singleton<I2sSpiPeripheralMockImpl>::instance();
 }
 
@@ -98,7 +98,7 @@ I2sSpiPeripheralMock &I2sSpiPeripheralMock::instance() FL_NO_EXCEPT {
 // Constructor / Destructor
 //=============================================================================
 
-I2sSpiPeripheralMockImpl::I2sSpiPeripheralMockImpl() FL_NO_EXCEPT
+I2sSpiPeripheralMockImpl::I2sSpiPeripheralMockImpl() FL_NOEXCEPT
     : mInitialized(false), mEnabled(false), mBusy(false), mTransmitCount(0),
       mConfig(), mCallback(nullptr), mUserCtx(nullptr), mTransmitDelayUs(0),
       mShouldFailTransmit(false), mHistory(), mPendingTransmits(0),
@@ -113,9 +113,9 @@ I2sSpiPeripheralMockImpl::~I2sSpiPeripheralMockImpl() {}
 //=============================================================================
 
 bool I2sSpiPeripheralMockImpl::initialize(
-    const I2sSpiConfig &config) FL_NO_EXCEPT {
+    const I2sSpiConfig &config) FL_NOEXCEPT {
     if (config.num_lanes == 0 || config.num_lanes > 16) {
-        FL_WARN_F("I2sSpiPeripheralMock: Invalid num_lanes: %s", config.num_lanes);
+        FL_WARN("I2sSpiPeripheralMock: Invalid num_lanes: " << config.num_lanes);
         return false;
     }
     mConfig = config;
@@ -124,14 +124,14 @@ bool I2sSpiPeripheralMockImpl::initialize(
     return true;
 }
 
-void I2sSpiPeripheralMockImpl::deinitialize() FL_NO_EXCEPT {
+void I2sSpiPeripheralMockImpl::deinitialize() FL_NOEXCEPT {
     mInitialized = false;
     mEnabled = false;
     mBusy = false;
     mPendingTransmits = 0;
 }
 
-bool I2sSpiPeripheralMockImpl::isInitialized() const FL_NO_EXCEPT {
+bool I2sSpiPeripheralMockImpl::isInitialized() const FL_NOEXCEPT {
     return mInitialized;
 }
 
@@ -139,7 +139,7 @@ bool I2sSpiPeripheralMockImpl::isInitialized() const FL_NO_EXCEPT {
 // Buffer Management
 //=============================================================================
 
-u8 *I2sSpiPeripheralMockImpl::allocateBuffer(size_t size_bytes) FL_NO_EXCEPT {
+u8 *I2sSpiPeripheralMockImpl::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
     size_t aligned_size = ((size_bytes + 63) / 64) * 64;
     void *buffer = nullptr;
 #ifdef FL_IS_WIN
@@ -148,12 +148,13 @@ u8 *I2sSpiPeripheralMockImpl::allocateBuffer(size_t size_bytes) FL_NO_EXCEPT {
     buffer = aligned_alloc(64, aligned_size);
 #endif
     if (buffer == nullptr) {
-        FL_WARN_F("I2sSpiPeripheralMock: Failed to allocate buffer (%s bytes)", aligned_size);
+        FL_WARN("I2sSpiPeripheralMock: Failed to allocate buffer ("
+                << aligned_size << " bytes)");
     }
     return static_cast<u8 *>(buffer);
 }
 
-void I2sSpiPeripheralMockImpl::freeBuffer(u8 *buffer) FL_NO_EXCEPT {
+void I2sSpiPeripheralMockImpl::freeBuffer(u8 *buffer) FL_NOEXCEPT {
     if (buffer != nullptr) {
 #ifdef FL_IS_WIN
         _aligned_free(buffer);
@@ -168,9 +169,9 @@ void I2sSpiPeripheralMockImpl::freeBuffer(u8 *buffer) FL_NO_EXCEPT {
 //=============================================================================
 
 bool I2sSpiPeripheralMockImpl::transmit(const u8 *buffer,
-                                        size_t size_bytes) FL_NO_EXCEPT {
+                                        size_t size_bytes) FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN_F("I2sSpiPeripheralMock: Cannot transmit - not initialized");
+        FL_WARN("I2sSpiPeripheralMock: Cannot transmit - not initialized");
         return false;
     }
     if (mShouldFailTransmit) {
@@ -194,7 +195,7 @@ bool I2sSpiPeripheralMockImpl::transmit(const u8 *buffer,
     return true;
 }
 
-bool I2sSpiPeripheralMockImpl::waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT {
+bool I2sSpiPeripheralMockImpl::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -206,14 +207,14 @@ bool I2sSpiPeripheralMockImpl::waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT {
     return false;
 }
 
-bool I2sSpiPeripheralMockImpl::isBusy() const FL_NO_EXCEPT { return mBusy; }
+bool I2sSpiPeripheralMockImpl::isBusy() const FL_NOEXCEPT { return mBusy; }
 
 //=============================================================================
 // Callback
 //=============================================================================
 
 bool I2sSpiPeripheralMockImpl::registerTransmitCallback(
-    void *callback, void *user_ctx) FL_NO_EXCEPT {
+    void *callback, void *user_ctx) FL_NOEXCEPT {
     if (!mInitialized) {
         return false;
     }
@@ -222,15 +223,15 @@ bool I2sSpiPeripheralMockImpl::registerTransmitCallback(
     return true;
 }
 
-const I2sSpiConfig &I2sSpiPeripheralMockImpl::getConfig() const FL_NO_EXCEPT {
+const I2sSpiConfig &I2sSpiPeripheralMockImpl::getConfig() const FL_NOEXCEPT {
     return mConfig;
 }
 
-u64 I2sSpiPeripheralMockImpl::getMicroseconds() FL_NO_EXCEPT {
+u64 I2sSpiPeripheralMockImpl::getMicroseconds() FL_NOEXCEPT {
     return mSimulatedTimeUs;
 }
 
-void I2sSpiPeripheralMockImpl::delay(u32 ms) FL_NO_EXCEPT {
+void I2sSpiPeripheralMockImpl::delay(u32 ms) FL_NOEXCEPT {
     mSimulatedTimeUs += static_cast<u64>(ms) * 1000;
 }
 
@@ -238,7 +239,7 @@ void I2sSpiPeripheralMockImpl::delay(u32 ms) FL_NO_EXCEPT {
 // Mock-Specific API
 //=============================================================================
 
-void I2sSpiPeripheralMockImpl::simulateTransmitComplete() FL_NO_EXCEPT {
+void I2sSpiPeripheralMockImpl::simulateTransmitComplete() FL_NOEXCEPT {
     if (mPendingTransmits == 0) {
         return;
     }
@@ -255,47 +256,47 @@ void I2sSpiPeripheralMockImpl::simulateTransmitComplete() FL_NO_EXCEPT {
 }
 
 void I2sSpiPeripheralMockImpl::setTransmitFailure(
-    bool should_fail) FL_NO_EXCEPT {
+    bool should_fail) FL_NOEXCEPT {
     mShouldFailTransmit = should_fail;
 }
 
-void I2sSpiPeripheralMockImpl::setTransmitDelay(u32 microseconds) FL_NO_EXCEPT {
+void I2sSpiPeripheralMockImpl::setTransmitDelay(u32 microseconds) FL_NOEXCEPT {
     mTransmitDelayUs = microseconds;
 }
 
 void I2sSpiPeripheralMockImpl::setAutoComplete(
-    bool auto_complete) FL_NO_EXCEPT {
+    bool auto_complete) FL_NOEXCEPT {
     mAutoComplete = auto_complete;
 }
 
 const fl::vector<I2sSpiPeripheralMock::TransmitRecord> &
-I2sSpiPeripheralMockImpl::getTransmitHistory() const FL_NO_EXCEPT {
+I2sSpiPeripheralMockImpl::getTransmitHistory() const FL_NOEXCEPT {
     return mHistory;
 }
 
-void I2sSpiPeripheralMockImpl::clearTransmitHistory() FL_NO_EXCEPT {
+void I2sSpiPeripheralMockImpl::clearTransmitHistory() FL_NOEXCEPT {
     mHistory.clear();
     mPendingTransmits = 0;
     mBusy = false;
 }
 
 fl::span<const u8>
-I2sSpiPeripheralMockImpl::getLastTransmitData() const FL_NO_EXCEPT {
+I2sSpiPeripheralMockImpl::getLastTransmitData() const FL_NOEXCEPT {
     if (mHistory.empty()) {
         return fl::span<const u8>();
     }
     return fl::span<const u8>(mHistory.back().buffer_copy);
 }
 
-bool I2sSpiPeripheralMockImpl::isEnabled() const FL_NO_EXCEPT {
+bool I2sSpiPeripheralMockImpl::isEnabled() const FL_NOEXCEPT {
     return mEnabled;
 }
 
-size_t I2sSpiPeripheralMockImpl::getTransmitCount() const FL_NO_EXCEPT {
+size_t I2sSpiPeripheralMockImpl::getTransmitCount() const FL_NOEXCEPT {
     return mTransmitCount;
 }
 
-void I2sSpiPeripheralMockImpl::reset() FL_NO_EXCEPT {
+void I2sSpiPeripheralMockImpl::reset() FL_NOEXCEPT {
     mInitialized = false;
     mEnabled = false;
     mBusy = false;
@@ -317,7 +318,7 @@ void I2sSpiPeripheralMockImpl::reset() FL_NO_EXCEPT {
 // Callback Pumping
 //=============================================================================
 
-void I2sSpiPeripheralMockImpl::pumpDeferredCallbacks() FL_NO_EXCEPT {
+void I2sSpiPeripheralMockImpl::pumpDeferredCallbacks() FL_NOEXCEPT {
     if (mFiringCallbacks) {
         return;
     }
@@ -329,7 +330,7 @@ void I2sSpiPeripheralMockImpl::pumpDeferredCallbacks() FL_NO_EXCEPT {
     mFiringCallbacks = false;
 }
 
-void I2sSpiPeripheralMockImpl::fireCallback() FL_NO_EXCEPT {
+void I2sSpiPeripheralMockImpl::fireCallback() FL_NOEXCEPT {
     if (mPendingTransmits > 0) {
         mPendingTransmits--;
     }

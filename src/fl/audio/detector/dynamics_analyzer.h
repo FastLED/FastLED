@@ -13,8 +13,8 @@ namespace detector {
 // diminuendos, and overall dynamic evolution.
 class DynamicsAnalyzer : public Detector {
 public:
-    DynamicsAnalyzer() FL_NO_EXCEPT;
-    ~DynamicsAnalyzer() FL_NO_EXCEPT override;
+    DynamicsAnalyzer() FL_NOEXCEPT;
+    ~DynamicsAnalyzer() FL_NOEXCEPT override;
 
     // Detector interface
     void update(shared_ptr<Context> context) override;

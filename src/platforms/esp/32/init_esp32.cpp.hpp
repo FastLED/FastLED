@@ -29,7 +29,7 @@ void init() {
         return;  // Already initialized
     }
 
-    FL_DBG_F("ESP32: Platform initialization starting");
+    FL_DBG("ESP32: Platform initialization starting");
 
     // Initialize channel bus manager (PARLIO, SPI, RMT, UART drivers)
     // Note: This is actually called lazily on first access to ChannelManager::instance()
@@ -42,7 +42,7 @@ void init() {
     (void)fl::getSPIBusManager();
 
     initialized = true;
-    FL_DBG_F("ESP32: Platform initialization complete");
+    FL_DBG("ESP32: Platform initialization complete");
 }
 
 } // namespace platforms

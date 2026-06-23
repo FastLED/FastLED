@@ -21,7 +21,7 @@ class HampelFilterImpl {
         : mRing(capacity), mSorted(capacity),
           mSortedCount(0), mThreshold(threshold), mLastValue(T(0)) {
         if (capacity % 2 == 0) {
-            FL_ERROR_F("HampelFilter: capacity should be odd, adding 1");
+            FL_ERROR("HampelFilter: capacity should be odd, adding 1");
             mRing = circular_buffer<T, N>(capacity + 1);
             mSorted = circular_buffer<T, N>(capacity + 1);
         }
@@ -99,7 +99,7 @@ class HampelFilterImpl {
 
     void resize(fl::size new_capacity) {
         if (new_capacity % 2 == 0) {
-            FL_ERROR_F("HampelFilter: capacity should be odd, adding 1");
+            FL_ERROR("HampelFilter: capacity should be odd, adding 1");
             new_capacity += 1;
         }
         mRing = circular_buffer<T, N>(new_capacity);

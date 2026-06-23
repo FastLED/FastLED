@@ -75,9 +75,9 @@ struct SpectralEqualizerConfig {
 /// @endcode
 class SpectralEqualizer {
 public:
-    SpectralEqualizer() FL_NO_EXCEPT;
+    SpectralEqualizer() FL_NOEXCEPT;
     explicit SpectralEqualizer(const SpectralEqualizerConfig& config);
-    ~SpectralEqualizer() FL_NO_EXCEPT;
+    ~SpectralEqualizer() FL_NOEXCEPT;
 
     /// Configure the spectral equalizer
     /// This calculates per-band gain multipliers based on the selected curve

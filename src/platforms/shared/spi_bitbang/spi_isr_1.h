@@ -64,7 +64,7 @@ public:
      * Automatically initializes the 256-entry LUT to map byte values
      * to GPIO mask for the specified data pin.
      */
-    void setPinMapping(u8 data, u8 clk) FL_NO_EXCEPT {
+    void setPinMapping(u8 data, u8 clk) FL_NOEXCEPT {
         // Store clock mask
         fl_spi_set_clock_mask(1u << clk);
 
@@ -97,7 +97,7 @@ public:
      * @param data GPIO number for data pin
      * @param clockMask Pre-computed GPIO mask for clock pin (e.g., 1 << 8)
      */
-    void setPinMappingWithMask(u8 data, u32 clockMask) FL_NO_EXCEPT {
+    void setPinMappingWithMask(u8 data, u32 clockMask) FL_NOEXCEPT {
         fl_spi_set_clock_mask(clockMask);
 
         u32 dataPinMask = 1u << data;
@@ -122,7 +122,7 @@ public:
      * Each byte in the buffer represents 1 bit to output on the data pin.
      * Only bit 0 of each byte is used.
      */
-    void loadBuffer(const u8* data, u16 n) FL_NO_EXCEPT {
+    void loadBuffer(const u8* data, u16 n) FL_NOEXCEPT {
         if (!data) return;
         if (n > 256) n = 256;
 
@@ -140,14 +140,14 @@ public:
      *
      * Example: For 800kHz SPI output, use 1600000 Hz timer
      */
-    int setupISR(u32 timer_hz) FL_NO_EXCEPT {
+    int setupISR(u32 timer_hz) FL_NOEXCEPT {
         return fl_spi_platform_isr_start(timer_hz);
     }
 
     /**
      * Stop ISR and timer
      */
-    void stopISR() FL_NO_EXCEPT {
+    void stopISR() FL_NOEXCEPT {
         fl_spi_platform_isr_stop();
     }
 
@@ -155,28 +155,28 @@ public:
      * Arm a transfer (caller must ensure visibility delay first)
      * Increments doorbell counter to trigger ISR edge detection
      */
-    void arm() FL_NO_EXCEPT {
+    void arm() FL_NOEXCEPT {
         fl_spi_arm();
     }
 
     /**
      * Check if ISR is currently transmitting
      */
-    bool isBusy() const FL_NO_EXCEPT {
+    bool isBusy() const FL_NOEXCEPT {
         return (fl_spi_status_flags() & STATUS_BUSY) != 0;
     }
 
     /**
      * Get raw status flags
      */
-    u32 statusFlags() const FL_NO_EXCEPT {
+    u32 statusFlags() const FL_NOEXCEPT {
         return fl_spi_status_flags();
     }
 
     /**
      * Acknowledge DONE flag (clears it)
      */
-    void ackDone() FL_NO_EXCEPT {
+    void ackDone() FL_NOEXCEPT {
         fl_spi_ack_done();
     }
 
@@ -184,14 +184,14 @@ public:
      * Visibility delay (ensures memory writes are visible to ISR)
      * Typical value: 10 microseconds
      */
-    static void visibilityDelayUs(u32 us) FL_NO_EXCEPT {
+    static void visibilityDelayUs(u32 us) FL_NOEXCEPT {
         fl_spi_visibility_delay_us(us);
     }
 
     /**
      * Reset ISR state (between runs)
      */
-    static void resetState() FL_NO_EXCEPT {
+    static void resetState() FL_NOEXCEPT {
         fl_spi_reset_state();
     }
 
@@ -199,7 +199,7 @@ public:
      * Get mutable reference to LUT array (256 entries)
      * For advanced users who want direct LUT control
      */
-    static PinMaskEntry* getLUTArray() FL_NO_EXCEPT {
+    static PinMaskEntry* getLUTArray() FL_NOEXCEPT {
         return fl_spi_get_lut_array();
     }
 
@@ -207,7 +207,7 @@ public:
      * Get mutable reference to data buffer array (256 bytes)
      * For advanced users who want direct buffer access
      */
-    static u8* getDataArray() FL_NO_EXCEPT {
+    static u8* getDataArray() FL_NOEXCEPT {
         return fl_spi_get_data_array();
     }
 
@@ -216,14 +216,14 @@ public:
      * Get GPIO event log (only available when FL_SPI_ISR_VALIDATE is defined)
      * Returns pointer to array of GPIO events captured during ISR execution
      */
-    static const FastLED_GPIO_Event* getValidationEvents() FL_NO_EXCEPT {
+    static const FastLED_GPIO_Event* getValidationEvents() FL_NOEXCEPT {
         return fl_spi_get_validation_events();
     }
 
     /**
      * Get number of GPIO events captured
      */
-    static u16 getValidationEventCount() FL_NO_EXCEPT {
+    static u16 getValidationEventCount() FL_NOEXCEPT {
         return fl_spi_get_validation_event_count();
     }
 
@@ -248,7 +248,7 @@ public:
         GPIOEventType type() const { return static_cast<GPIOEventType>(event_type); }
     };
 
-    static const GPIOEvent* getValidationEventsTyped() FL_NO_EXCEPT {
+    static const GPIOEvent* getValidationEventsTyped() FL_NOEXCEPT {
         return reinterpret_cast<const GPIOEvent*>(fl_spi_get_validation_events()); // ok reinterpret cast
     }
 #endif

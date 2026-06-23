@@ -13,48 +13,48 @@ namespace fl {
 namespace platforms {
 
 // External API functions - simple delegation to EspIO singleton
-void begin(u32 baudRate) FL_NO_EXCEPT {
+void begin(u32 baudRate) FL_NOEXCEPT {
     EspIO::instance().begin(baudRate);
 }
 
-void print(const char* str) FL_NO_EXCEPT {
+void print(const char* str) FL_NOEXCEPT {
     EspIO::instance().print(str);
 }
 
-void println(const char* str) FL_NO_EXCEPT {
+void println(const char* str) FL_NOEXCEPT {
     EspIO::instance().println(str);
 }
 
-int available() FL_NO_EXCEPT {
+int available() FL_NOEXCEPT {
     return EspIO::instance().available();
 }
 
-int peek() FL_NO_EXCEPT {
+int peek() FL_NOEXCEPT {
     return EspIO::instance().peek();
 }
 
-int read() FL_NO_EXCEPT {
+int read() FL_NOEXCEPT {
     return EspIO::instance().read();
 }
 
-bool flush(u32 timeoutMs = 1000) FL_NO_EXCEPT {
+bool flush(u32 timeoutMs = 1000) FL_NOEXCEPT {
     return EspIO::instance().flush(timeoutMs);
 }
 
-size_t write_bytes(const u8* buffer, size_t size) FL_NO_EXCEPT {
+size_t write_bytes(const u8* buffer, size_t size) FL_NOEXCEPT {
     return EspIO::instance().writeBytes(buffer, size);
 }
 
-bool serial_ready() FL_NO_EXCEPT {
+bool serial_ready() FL_NOEXCEPT {
     return EspIO::instance().isReady();
 }
 
 // Test/diagnostic helper: Check if using buffered mode (not ROM UART fallback)
-bool serial_is_buffered() FL_NO_EXCEPT {
+bool serial_is_buffered() FL_NOEXCEPT {
     return EspIO::instance().isBufferedMode();
 }
 
-int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
+int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
     (void)delimiter; (void)out; (void)outLen;
     return -1;  // Not supported on ESP-IDF (non-Arduino) builds
 }

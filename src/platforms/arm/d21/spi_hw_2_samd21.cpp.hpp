@@ -158,13 +158,13 @@ bool SPIDualSAMD21::begin(const SpiHw2::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
-        FL_WARN_F("SPIDualSAMD21: Bus ID mismatch");
+        FL_WARN("SPIDualSAMD21: Bus ID mismatch");
         return false;
     }
 
     // Validate pin assignments
     if (config.clock_pin < 0 || config.data0_pin < 0 || config.data1_pin < 0) {
-        FL_WARN_F("SPIDualSAMD21: Invalid pin configuration");
+        FL_WARN("SPIDualSAMD21: Invalid pin configuration");
         return false;
     }
 
@@ -177,7 +177,7 @@ bool SPIDualSAMD21::begin(const SpiHw2::Config& config) {
     // Map bus_num to SERCOM instance
     int sercom_num = (mBusId != -1) ? mBusId : config.bus_num;
     if (sercom_num < 0 || sercom_num > 5) {
-        FL_WARN_F("SPIDualSAMD21: Invalid SERCOM number");
+        FL_WARN("SPIDualSAMD21: Invalid SERCOM number");
         return false;
     }
 
@@ -191,12 +191,12 @@ bool SPIDualSAMD21::begin(const SpiHw2::Config& config) {
         case 4: mSercom = SERCOM4; break;
         case 5: mSercom = SERCOM5; break;
         default:
-            FL_WARN_F("SPIDualSAMD21: Invalid SERCOM");
+            FL_WARN("SPIDualSAMD21: Invalid SERCOM");
             return false;
     }
 
     if (mSercom == nullptr) {
-        FL_WARN_F("SPIDualSAMD21: SERCOM not available");
+        FL_WARN("SPIDualSAMD21: SERCOM not available");
         return false;
     }
 
@@ -308,7 +308,9 @@ bool SPIDualSAMD21::begin(const SpiHw2::Config& config) {
     mSercom->SPI.CTRLA.bit.ENABLE = 1;
     while (mSercom->SPI.SYNCBUSY.bit.ENABLE);
 
-    FL_WARN_F("SPIDualSAMD21: Initialized on SERCOM%s at %s MHz (polling mode, single-lane - true dual-lane TBD)", sercom_num, (f_cpu / (2 * (baud_div + 1)) / 1000000.0));
+    FL_WARN("SPIDualSAMD21: Initialized on SERCOM" << sercom_num
+            << " at " << (f_cpu / (2 * (baud_div + 1)) / 1000000.0) << " MHz"
+            << " (polling mode, single-lane - true dual-lane TBD)");
 
     // Note: This is a single-lane implementation like SAMD51
     // True dual-lane requires:
@@ -417,7 +419,7 @@ bool SPIDualSAMD21::waitComplete(u32 timeout_ms) {
     // Check TXC (Transmit Complete) flag in INTFLAG register
     while (mSercom && !mSercom->SPI.INTFLAG.bit.TXC) {
         if ((fl::millis() - start_time) >= timeout_ms) {
-            FL_WARN_F("SPIDualSAMD21: waitComplete timeout");
+            FL_WARN("SPIDualSAMD21: waitComplete timeout");
             return false;  // Timeout
         }
     }

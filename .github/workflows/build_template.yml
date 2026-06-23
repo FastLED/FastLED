@@ -81,11 +81,6 @@ jobs:
 
       - name: Build FastLED examples with "./compile --no-interactive  ${{ inputs.args }}"
         id: build_examples
-        # The ``FASTLED_FAIL_ON_ROOT_MERGE`` tripwire from #3278 was
-        # retired in #3279 Phase 4 along with the legacy merge code
-        # path it guarded. CI no longer has any code path that can
-        # silently inject root ``platformio.ini`` flags into the
-        # build, so the env var is no longer set by default.
         run: |
           set -o pipefail
           ./compile --no-interactive --no-parallel --log-failures failures --max-failures 3  ${{ inputs.args }} | tee build.log

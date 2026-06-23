@@ -333,7 +333,7 @@ struct LpcSctTicks {
 
 // Number of 32-bit words required to encode a single chunk of bits in
 // the DMA stream (one channel = one word per bit).
-inline constexpr u32 LpcPwmDmaChunkWords() FL_NO_EXCEPT {
+inline constexpr u32 LpcPwmDmaChunkWords() FL_NOEXCEPT {
     return FASTLED_LPC_PWM_DMA_CHUNK_BITS;
 }
 
@@ -367,7 +367,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     static u32 sChannelBuf[3 * FASTLED_LPC_PWM_DMA_CHUNK_BITS];
 
 public:
-    virtual void init() FL_NO_EXCEPT {
+    virtual void init() FL_NOEXCEPT {
         FastPin<DATA_PIN>::setOutput();
         mPinMask = FastPin<DATA_PIN>::mask();
         mPort    = FastPin<DATA_PIN>::port();
@@ -384,7 +384,7 @@ public:
 
     virtual u16 getMaxRefreshRate() const { return 400; }
 
-    virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT {
+    virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NOEXCEPT {
         mWait.wait();
         // CPU-free path: encode chunks ahead of the DMA stream, kick off
         // DMA, then either spin-wait on the DMA done flag or yield. We use
@@ -394,7 +394,7 @@ public:
         mWait.mark();
     }
 
-    void showRGBInternal(PixelController<RGB_ORDER> pixels) FL_NO_EXCEPT {
+    void showRGBInternal(PixelController<RGB_ORDER> pixels) FL_NOEXCEPT {
         // Detect RGBW (consistent with RP2040 PIO driver pattern).
         const Rgbw rgbw = this->getRgbw();
         const bool is_rgbw = rgbw.active();
@@ -440,7 +440,7 @@ private:
     //         sChannelBuf[CHUNK_BITS .. 2*CHUNK_BITS)  = T0_FALL stream
     //         sChannelBuf[2*CHUNK_BITS .. 3*CHUNK_BITS) = T1_FALL stream
     void encodeChunk(PixelController<RGB_ORDER>& pixels,
-                     u32 chunk_bits, bool first_byte) FL_NO_EXCEPT {
+                     u32 chunk_bits, bool first_byte) FL_NOEXCEPT {
         const u32 hi_mask = mPinMask;
         const u32 lo_mask = mPinMask;
         u32* rise_stream   = &sChannelBuf[0];
@@ -496,7 +496,7 @@ private:
                                   u32* t1fall_stream,
                                   u32 bit_idx,
                                   u32 chunk_bits,
-                                  u32 lo_mask) FL_NO_EXCEPT {
+                                  u32 lo_mask) FL_NOEXCEPT {
         // MSB first (WS2812 standard).
         for (u8 i = 0; i < 8; ++i) {
             const u32 dst = bit_idx + i;
@@ -512,7 +512,7 @@ private:
     // Configure SCT: 16-bit unified counter, MATCH0=T0_RISE, MATCH1=T0_FALL,
     // MATCH2=T1_FALL, MATCH3=BIT_END -> reload + DMAREQ pulse.
     // UM11029 §16.6.1 CONFIG, §16.6.6 MATCH, §16.6.21 EVx_CTRL.
-    void configureSct() FL_NO_EXCEPT {
+    void configureSct() FL_NOEXCEPT {
         // CONFIG: UNIFY (bit 0) - one 32-bit counter; CLKMODE = SYS clock.
         // TODO(2842): verify CONFIG layout vs UM11029 §16.6.1.
         LPC_SCT->CONFIG = 0x00000001UL;  // UNIFY
@@ -550,7 +550,7 @@ private:
 
     // Configure 3 DMA channels writing to GPIO SET[0]/CLR[0].
     // UM11029 §17.4 channel descriptor, §17.5 XFERCFG.
-    void configureDma() FL_NO_EXCEPT {
+    void configureDma() FL_NOEXCEPT {
         // Enable DMA.
         LPC_DMA->CTRL = 1UL;
         // SRAMBASE points at the channel descriptor table - must be 256-byte
@@ -578,7 +578,7 @@ private:
     // Arm one chunk: program each channel's source address to point at the
     // appropriate stream slice in sChannelBuf, set XFERCFG with the chunk's
     // word-count, then trigger.
-    void startDmaChunk(u32 chunk_bits) FL_NO_EXCEPT {
+    void startDmaChunk(u32 chunk_bits) FL_NOEXCEPT {
         const u32 base = FASTLED_LPC_PWM_DMA_BASECH;
         // TODO(2842): wire the per-channel descriptor block. The DMA on
         // LPC845 fetches the source-end / dest-end pointers from a 16-byte
@@ -611,7 +611,7 @@ private:
         LPC_SCT->CTRL &= ~0x00000004UL;
     }
 
-    void waitDmaChunk() FL_NO_EXCEPT {
+    void waitDmaChunk() FL_NOEXCEPT {
         const u32 mask = (7UL << FASTLED_LPC_PWM_DMA_BASECH);
         // Spin until all three channels report ACTIVE=0 (transfer done).
         while ((LPC_DMA->ACTIVE0 & mask) != 0) {

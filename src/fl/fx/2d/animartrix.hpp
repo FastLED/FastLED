@@ -218,7 +218,7 @@ class Animartrix : public Fx2d {
         // cross-DLL static initialization order issues on Windows.
     }
 
-    Animartrix(const Animartrix &) FL_NO_EXCEPT = delete;
+    Animartrix(const Animartrix &) FL_NOEXCEPT = delete;
 
     void draw(DrawContext ctx) override {
         if (!mXyMap.isLUT()) {
@@ -281,7 +281,7 @@ class Animartrix : public Fx2d {
         }
         fx = fx % static_cast<int>(AnimartrixAnim::NUM_ANIMATIONS);
         mCurrentAnimation = static_cast<AnimartrixAnim>(fx);
-        FL_DBG_F("Setting animation to %s", getAnimartrixName(static_cast<int>(mCurrentAnimation)));
+        FL_DBG("Setting animation to " << getAnimartrixName(static_cast<int>(mCurrentAnimation)));
     }
 
     int fxGet() const { return static_cast<int>(mCurrentAnimation); }

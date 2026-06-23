@@ -68,7 +68,7 @@ namespace fl {
 #if defined(ESP32)
 /// Get the current ESP32 CPU frequency at runtime
 /// @return CPU frequency in Hz
-u32 esp_clk_cpu_freq_impl() FL_NO_EXCEPT;
+u32 esp_clk_cpu_freq_impl() FL_NOEXCEPT;
 #endif
 
 } // namespace fl

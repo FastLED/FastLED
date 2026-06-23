@@ -13,7 +13,6 @@
 | Editing meson.build files | `agents/docs/build-system.md` |
 | Running tests, Docker, WASM, QEMU | `agents/docs/testing-commands.md` |
 | Test-Driven Development (TDD) | Use `/tdd` or `/tdd-implement` skills |
-| Editing `.fled` container docs or `src/fl/fled/` | `agents/docs/fled-format.md` |
 | Hardware autoresearch / `bash autoresearch` | `agents/docs/hardware-autoresearch.md` |
 | Debugging a C++ crash | `agents/docs/debugging.md` |
 | Investigating binary size / flash bloat | `agents/docs/binary-size-analysis.md` |
@@ -21,7 +20,7 @@
 | Detailed command reference | `agents/docs/commands-reference.md` |
 | Workflow and task management | `agents/docs/workflow.md` |
 
-**By directory:** `src/`/`tests/` → `agents/docs/cpp-standards.md` | `src/fl/fled/` → `agents/docs/fled-format.md` | `ci/` → `agents/docs/python-standards.md`, `agents/ci.md` | `tests/` → `agents/tests.md` | `examples/` → `agents/examples.md` | `meson.build` → `agents/docs/build-system.md`
+**By directory:** `src/`/`tests/` → `agents/docs/cpp-standards.md` | `ci/` → `agents/docs/python-standards.md`, `agents/ci.md` | `tests/` → `agents/tests.md` | `examples/` → `agents/examples.md` | `meson.build` → `agents/docs/build-system.md`
 
 ## Key Commands
 

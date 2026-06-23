@@ -13,8 +13,8 @@ namespace detector {
 
 class FrequencyBands : public Detector {
 public:
-    FrequencyBands() FL_NO_EXCEPT;
-    ~FrequencyBands() FL_NO_EXCEPT override;
+    FrequencyBands() FL_NOEXCEPT;
+    ~FrequencyBands() FL_NOEXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

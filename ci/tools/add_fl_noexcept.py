@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Add FL_NO_EXCEPT to function declarations/definitions in C++ files.
+"""Add FL_NOEXCEPT to function declarations/definitions in C++ files.
 
 Uses clang-query (AST analysis) to find the exact file:line of every function
-missing noexcept, then inserts FL_NO_EXCEPT at the correct position.
+missing noexcept, then inserts FL_NOEXCEPT at the correct position.
 
 Usage:
     uv run python ci/tools/add_fl_noexcept.py --scope fl/stl            # dry-run
@@ -83,7 +83,7 @@ def run_clang_query(scope: str) -> list[tuple[str, int]]:
         "-DFASTLED_TESTING",
         "-DFASTLED_NO_AUTO_NAMESPACE",
         "-fno-exceptions",
-        # Make FL_NO_EXCEPT expand to noexcept under stub mode
+        # Make FL_NOEXCEPT expand to noexcept under stub mode
         "-DFL_NOEXCEPT=noexcept",
     ]
 
@@ -119,16 +119,16 @@ def run_clang_query(scope: str) -> list[tuple[str, int]]:
 
 
 # ============================================================================
-# Step 2: Insert FL_NO_EXCEPT at the correct position
+# Step 2: Insert FL_NOEXCEPT at the correct position
 # ============================================================================
 
 
 def insert_fl_noexcept_in_line(line: str) -> str | None:
-    """Insert FL_NO_EXCEPT into a function signature line.
+    """Insert FL_NOEXCEPT into a function signature line.
 
     Returns modified line, or None if can't insert.
     """
-    if "FL_NO_EXCEPT" in line or "noexcept" in line:
+    if "FL_NOEXCEPT" in line or "noexcept" in line:
         return None
 
     code = line.rstrip()
@@ -194,17 +194,17 @@ def insert_fl_noexcept_in_line(line: str) -> str | None:
 
     # Build the new line
     if not after:
-        return before + " FL_NO_EXCEPT"
+        return before + " FL_NOEXCEPT"
     elif after[0] == ";":
-        return before + " FL_NO_EXCEPT;" + after[1:]
+        return before + " FL_NOEXCEPT;" + after[1:]
     elif after[0] == "{":
-        return before + " FL_NO_EXCEPT {" + after[1:]
+        return before + " FL_NOEXCEPT {" + after[1:]
     elif after.startswith("override") or after.startswith("final"):
-        return before + " FL_NO_EXCEPT " + after
+        return before + " FL_NOEXCEPT " + after
     elif after.startswith("__attribute__"):
-        return before + " FL_NO_EXCEPT " + after
+        return before + " FL_NOEXCEPT " + after
     else:
-        return before + " FL_NO_EXCEPT " + after
+        return before + " FL_NOEXCEPT " + after
 
 
 def ensure_include(lines: list[str]) -> bool:
@@ -239,7 +239,7 @@ def ensure_include(lines: list[str]) -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Add FL_NO_EXCEPT to functions using clang-query AST analysis"
+        description="Add FL_NOEXCEPT to functions using clang-query AST analysis"
     )
     parser.add_argument(
         "--scope",
@@ -253,7 +253,7 @@ def main() -> int:
 
     print(
         f"{'APPLYING' if args.apply else 'DRY RUN'}: "
-        f"Adding FL_NO_EXCEPT to functions in {args.scope}"
+        f"Adding FL_NOEXCEPT to functions in {args.scope}"
     )
     print()
 

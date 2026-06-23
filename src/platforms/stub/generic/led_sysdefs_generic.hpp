@@ -10,7 +10,7 @@
 
 // No timing-related includes needed here anymore
 
-void pinMode(fl::u8 pin, fl::u8 mode) FL_NO_EXCEPT {
+void pinMode(fl::u8 pin, fl::u8 mode) FL_NOEXCEPT {
     // Empty stub as we don't actually ever write anything
     FASTLED_UNUSED(pin);
     FASTLED_UNUSED(mode);

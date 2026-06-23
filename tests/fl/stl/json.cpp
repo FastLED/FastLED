@@ -5,7 +5,6 @@
 
 #include "fl/stl/json.h"
 #include "fl/math/screenmap.h"
-#include "fl/math/fixed_point.h"
 #include "fl/stl/map.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
@@ -543,31 +542,30 @@ FL_TEST_CASE("Json2 Tests") {
         
         // First verify that the serialized JSON has the correct structure
         FL_CHECK(doc.is_object());
-        FL_CHECK(doc.contains("version"));
-        FL_CHECK(doc.contains("groups"));
-        FL_CHECK(doc.contains("segments"));
-
-        json groupsObj = doc["groups"];
-        FL_CHECK(groupsObj.is_object());
-        FL_CHECK(groupsObj.contains("strip1"));
-        FL_CHECK(groupsObj.contains("strip2"));
-
-        json segmentsArr = doc["segments"];
-        FL_CHECK(segmentsArr.is_array());
-        FL_CHECK_EQ(segmentsArr.size(), 2);
-
-        json firstSegment = segmentsArr[0];
-        FL_CHECK(firstSegment.is_object());
-        FL_CHECK(firstSegment.contains("id"));
-        FL_CHECK(firstSegment.contains("x"));
-        FL_CHECK(firstSegment.contains("y"));
-        FL_CHECK(firstSegment.contains("diameter"));
+        FL_CHECK(doc.contains("map"));
+        
+        json mapObj = doc["map"];
+        FL_CHECK(mapObj.is_object());
+        FL_CHECK(mapObj.contains("strip1"));
+        FL_CHECK(mapObj.contains("strip2"));
+        
+        json strip1Obj = mapObj["strip1"];
+        json strip2Obj = mapObj["strip2"];
+        FL_CHECK(strip1Obj.is_object());
+        FL_CHECK(strip2Obj.is_object());
+        
+        FL_CHECK(strip1Obj.contains("x"));
+        FL_CHECK(strip1Obj.contains("y"));
+        FL_CHECK(strip1Obj.contains("diameter"));
+        FL_CHECK(strip2Obj.contains("x"));
+        FL_CHECK(strip2Obj.contains("y"));
+        FL_CHECK(strip2Obj.contains("diameter"));
         
         // Also test with string serialization
         fl::string jsonBuffer = doc.to_string();
         json parsedJson = json::parse(jsonBuffer.c_str());
         FL_CHECK(parsedJson.is_object());
-        FL_CHECK(parsedJson.contains("segments"));
+        FL_CHECK(parsedJson.contains("map"));
         
         // Parse it back using new json2 implementation
         fl::flat_map<fl::string, fl::ScreenMap> parsedSegmentMaps;
@@ -1597,64 +1595,6 @@ FL_TEST_CASE("json set() with various integer types") {
         FL_REQUIRE(underflow8.has_value()); // Still returns a value
         FL_CHECK_EQ(*underflow8, 127); // Wraps around to maximum value
     }
-}
-
-FL_TEST_CASE("json fixed_point converts through float storage") {
-    using FP = fl::fixed_point<16, 16>;
-    const FP original = FP::from_raw(0x00018000);
-
-    json value(original);
-    auto extracted = value.as_fixed_point<FP>();
-    FL_REQUIRE(extracted.has_value());
-    FL_CHECK_EQ(extracted->raw(), original.raw());
-
-    json assigned;
-    assigned = original;
-    auto assigned_value = assigned.as_fixed_point<FP>();
-    FL_REQUIRE(assigned_value.has_value());
-    FL_CHECK_EQ(assigned_value->raw(), original.raw());
-
-    json obj = json::object();
-    obj.set("gain", original);
-    auto object_value = obj["gain"].as_fixed_point<FP>();
-    FL_REQUIRE(object_value.has_value());
-    FL_CHECK_EQ(object_value->raw(), original.raw());
-}
-
-FL_TEST_CASE("json fixed_point IEEE conversion saturates oversized magnitudes") {
-    const u64 sixty_bit_magnitude = u64(1) << 59;
-    FL_CHECK_EQ(
-        fl::detail::json_ieee754_float_bits_from_scaled_u64(
-            0, sixty_bit_magnitude, 80),
-        0x7F800000u);
-    FL_CHECK_EQ(
-        fl::detail::json_ieee754_float_bits_from_scaled_u64(
-            0x80000000u, sixty_bit_magnitude, 80),
-        0xFF800000u);
-}
-
-FL_TEST_CASE("json double input uses IEEE bit conversion") {
-    const double one = fl::bit_cast<double>(0x3FF0000000000000ull);
-    json value(one);
-    auto as_float = value.as<float>();
-    FL_REQUIRE(as_float.has_value());
-    FL_CHECK_EQ(fl::bit_cast<u32>(*as_float), 0x3F800000u);
-
-    json assigned;
-    assigned = fl::bit_cast<double>(0x4004000000000000ull);
-    auto assigned_float = assigned.as<float>();
-    FL_REQUIRE(assigned_float.has_value());
-    FL_CHECK_EQ(fl::bit_cast<u32>(*assigned_float), 0x40200000u);
-
-    json overflow(fl::bit_cast<double>(0x7FEFFFFFFFFFFFFFull));
-    auto overflow_float = overflow.as<float>();
-    FL_REQUIRE(overflow_float.has_value());
-    FL_CHECK_EQ(fl::bit_cast<u32>(*overflow_float), 0x7F800000u);
-
-    json nan_value(fl::bit_cast<double>(0x7FF8000000000001ull));
-    auto nan_float = nan_value.as<float>();
-    FL_REQUIRE(nan_float.has_value());
-    FL_CHECK_EQ(fl::bit_cast<u32>(*nan_float), 0x7FC00000u);
 }
 
 FL_TEST_CASE("json generic integer setter comprehensive test") {

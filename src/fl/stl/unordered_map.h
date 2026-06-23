@@ -23,7 +23,6 @@ and removals.
 #include "fl/stl/pair.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/unordered_map_basic.h"  // type-erased probing helper (#3235 Tier 1C)
 #include "fl/stl/initializer_list.h"  // IWYU pragma: keep
 #include "fl/stl/memory_resource.h"
 #include "fl/stl/noexcept.h"
@@ -58,7 +57,7 @@ template <typename Key, typename T, typename Hash = Hash<Key>,
           int INLINED_COUNT = FASTLED_HASHMAP_INLINED_COUNT>
 class FL_ALIGN unordered_map {
   public:
-    unordered_map() FL_NO_EXCEPT : unordered_map(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {}
+    unordered_map() FL_NOEXCEPT : unordered_map(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {}
     unordered_map(fl::size initial_capacity) : unordered_map(initial_capacity, 0.7f) {}
 
     explicit unordered_map(memory_resource* resource)
@@ -77,7 +76,7 @@ class FL_ALIGN unordered_map {
     }
 
     // Copy constructor
-    unordered_map(const unordered_map& other) FL_NO_EXCEPT
+    unordered_map(const unordered_map& other) FL_NOEXCEPT
         : _buckets(other._buckets.size()), _size(0), _tombstones(0),
           mLoadFactor(other.mLoadFactor), _occupied(other._buckets.size()),
           _deleted(other._buckets.size()), _hash(other._hash), _equal(other._equal) {
@@ -90,7 +89,7 @@ class FL_ALIGN unordered_map {
     }
 
     // Move constructor
-    unordered_map(unordered_map&& other) FL_NO_EXCEPT
+    unordered_map(unordered_map&& other) FL_NOEXCEPT
         : _buckets(fl::move(other._buckets)), _size(other._size),
           _tombstones(other._tombstones), mLoadFactor(other.mLoadFactor),
           _occupied(fl::move(other._occupied)), _deleted(fl::move(other._deleted)),
@@ -122,7 +121,7 @@ class FL_ALIGN unordered_map {
     }
 
     // Copy assignment operator
-    unordered_map& operator=(const unordered_map& other) FL_NO_EXCEPT {
+    unordered_map& operator=(const unordered_map& other) FL_NOEXCEPT {
         if (this != &other) {
             // Clear current content
             clear();
@@ -154,7 +153,7 @@ class FL_ALIGN unordered_map {
     }
 
     // Move assignment operator
-    unordered_map& operator=(unordered_map&& other) FL_NO_EXCEPT {
+    unordered_map& operator=(unordered_map&& other) FL_NOEXCEPT {
         if (this != &other) {
             _buckets = fl::move(other._buckets);
             _size = other._size;
@@ -173,7 +172,7 @@ class FL_ALIGN unordered_map {
     }
 
     // Initializer list assignment operator
-    unordered_map& operator=(fl::initializer_list<pair<Key, T>> init) FL_NO_EXCEPT {
+    unordered_map& operator=(fl::initializer_list<pair<Key, T>> init) FL_NOEXCEPT {
         clear();
         insert(init);
         return *this;
@@ -193,7 +192,7 @@ class FL_ALIGN unordered_map {
         using reference = value_type &;
         using iterator_category = fl::forward_iterator_tag;
 
-        iterator() FL_NO_EXCEPT : _map(nullptr), _idx(0) {}
+        iterator() FL_NOEXCEPT : _map(nullptr), _idx(0) {}
         iterator(unordered_map *m, fl::size idx) : _map(m), _idx(idx) {
             advance_to_occupied();
         }
@@ -248,7 +247,7 @@ class FL_ALIGN unordered_map {
         using reference = const value_type &;
         using iterator_category = fl::forward_iterator_tag;
 
-        const_iterator() FL_NO_EXCEPT : _map(nullptr), _idx(0) {}
+        const_iterator() FL_NOEXCEPT : _map(nullptr), _idx(0) {}
         const_iterator(const unordered_map *m, fl::size idx) : _map(m), _idx(idx) {
             advance_to_occupied();
         }
@@ -344,7 +343,8 @@ class FL_ALIGN unordered_map {
             mark_occupied(idx);
             ++_size;
         } else {
-            FASTLED_ASSERT(idx != npos(), "unordered_map::insert: invalid index");
+            FASTLED_ASSERT(idx != npos(), "unordered_map::insert: invalid index at "
+                                            << idx << " which is " << npos());
             _buckets[idx].value = value;
         }
         return {iterator(this, idx), is_new};
@@ -374,7 +374,8 @@ class FL_ALIGN unordered_map {
             mark_occupied(idx);
             ++_size;
         } else {
-            FASTLED_ASSERT(idx != npos(), "unordered_map::insert: invalid index");
+            FASTLED_ASSERT(idx != npos(), "unordered_map::insert: invalid index at "
+                                            << idx << " which is " << npos());
             _buckets[idx].value = fl::move(value);
         }
         return {iterator(this, idx), is_new};
@@ -851,31 +852,56 @@ class FL_ALIGN unordered_map {
         const fl::size h = _hash(key) & mask;
         fl::size first_tomb = npos();
 
-        // Probe sequence comes from the shared (non-template) helper -- avoids
-        // duplicating the (cap <= 8 ? linear : quadratic-then-linear)
-        // branch logic across every unordered_map<K, V, Hash, Equal>
-        // instantiation. See FastLED #3235 Tier 1C.
-        for (fl::size i = 0; i < cap; ++i) {
-            const fl::size idx = detail::unordered_map_probe_idx(h, i, mask, cap);
+        if (cap <= 8) {
+            // linear probing
+            for (fl::size i = 0; i < cap; ++i) {
+                const fl::size idx = (h + i) & mask;
 
-            if (is_empty(idx))
-                return {first_tomb != npos() ? first_tomb : idx, true};
-            if (is_deleted(idx)) {
-                if (first_tomb == npos())
-                    first_tomb = idx;
-            } else if (is_occupied(idx) && _equal(_buckets[idx].key, key)) {
-                return {idx, false};
+                if (is_empty(idx))
+                    return {first_tomb != npos() ? first_tomb : idx, true};
+                if (is_deleted(idx)) {
+                    if (first_tomb == npos())
+                        first_tomb = idx;
+                } else if (is_occupied(idx) && _equal(_buckets[idx].key, key)) {
+                    return {idx, false};
+                }
+            }
+        } else {
+            // quadratic probing up to 8 tries
+            fl::size i = 0;
+            for (; i < 8; ++i) {
+                const fl::size idx = (h + i + i * i) & mask;
+
+                if (is_empty(idx))
+                    return {first_tomb != npos() ? first_tomb : idx, true};
+                if (is_deleted(idx)) {
+                    if (first_tomb == npos())
+                        first_tomb = idx;
+                } else if (is_occupied(idx) && _equal(_buckets[idx].key, key)) {
+                    return {idx, false};
+                }
+            }
+            // fallback to linear for the rest
+            for (; i < cap; ++i) {
+                const fl::size idx = (h + i) & mask;
+
+                if (is_empty(idx))
+                    return {first_tomb != npos() ? first_tomb : idx, true};
+                if (is_deleted(idx)) {
+                    if (first_tomb == npos())
+                        first_tomb = idx;
+                } else if (is_occupied(idx) && _equal(_buckets[idx].key, key)) {
+                    return {idx, false};
+                }
             }
         }
 
         return {npos(), false};
     }
 
-    // Re-export probing constants for backward compat (they used to live as
-    // a local enum here). Sourced from the shared helper.
     enum {
-        kLinearProbingOnlySize  = detail::kUnorderedMapLinearProbeOnlyThreshold,
-        kQuadraticProbingTries  = detail::kUnorderedMapQuadraticProbingTries,
+        kLinearProbingOnlySize = 8,
+        kQuadraticProbingTries = 8,
     };
 
     fl::size find_index(const Key &key) const {
@@ -883,13 +909,33 @@ class FL_ALIGN unordered_map {
         const fl::size mask = cap - 1;
         const fl::size h = _hash(key) & mask;
 
-        // Probe via the shared helper -- see find_slot() comment above.
-        for (fl::size i = 0; i < cap; ++i) {
-            const fl::size idx = detail::unordered_map_probe_idx(h, i, mask, cap);
-            if (is_empty(idx))
-                return npos();
-            if (is_occupied(idx) && _equal(_buckets[idx].key, key))
-                return idx;
+        if (cap <= kLinearProbingOnlySize) {
+            // linear probing
+            for (fl::size i = 0; i < cap; ++i) {
+                const fl::size idx = (h + i) & mask;
+                if (is_empty(idx))
+                    return npos();
+                if (is_occupied(idx) && _equal(_buckets[idx].key, key))
+                    return idx;
+            }
+        } else {
+            // quadratic probing up to 8 tries
+            fl::size i = 0;
+            for (; i < kQuadraticProbingTries; ++i) {
+                const fl::size idx = (h + i + i * i) & mask;
+                if (is_empty(idx))
+                    return npos();
+                if (is_occupied(idx) && _equal(_buckets[idx].key, key))
+                    return idx;
+            }
+            // fallback to linear for the rest
+            for (; i < cap; ++i) {
+                const fl::size idx = (h + i) & mask;
+                if (is_empty(idx))
+                    return npos();
+                if (is_occupied(idx) && _equal(_buckets[idx].key, key))
+                    return idx;
+            }
         }
 
         return npos();
@@ -901,10 +947,34 @@ class FL_ALIGN unordered_map {
         const fl::size mask = cap - 1;
         const fl::size h = _hash(key) & mask;
 
-        // Probe via the shared helper -- see find_slot() comment above.
-        for (fl::size i = 0; i < cap; ++i) {
-            const fl::size idx = detail::unordered_map_probe_idx(h, i, mask, cap);
-            if (!occupied_set.test(idx)) {
+        if (cap <= kLinearProbingOnlySize) {
+            // linear probing
+            for (fl::size i = 0; i < cap; ++i) {
+                const fl::size idx = (h + i) & mask;
+                bool occupied = occupied_set.test(idx);
+                if (occupied) {
+                    continue;
+                }
+                return idx;
+            }
+        } else {
+            // quadratic probing up to 8 tries
+            fl::size i = 0;
+            for (; i < kQuadraticProbingTries; ++i) {
+                const fl::size idx = (h + i + i * i) & mask;
+                bool occupied = occupied_set.test(idx);
+                if (occupied) {
+                    continue;
+                }
+                return idx;
+            }
+            // fallback to linear for the rest
+            for (; i < cap; ++i) {
+                const fl::size idx = (h + i) & mask;
+                bool occupied = occupied_set.test(idx);
+                if (occupied) {
+                    continue;
+                }
                 return idx;
             }
         }
@@ -973,7 +1043,8 @@ class FL_ALIGN unordered_map {
             if (idx == npos()) {
                 // no more space
                 FASTLED_ASSERT(
-                    false, "unordered_map::rehash_inline_no_resize: invalid index");
+                    false, "unordered_map::rehash_inline_no_resize: invalid index at "
+                               << idx << " which is " << npos());
                 return;
             }
             // if idx < pos then we are moving the entry to a new location
@@ -997,7 +1068,8 @@ class FL_ALIGN unordered_map {
                     // no more space
                     FASTLED_ASSERT(
                         false,
-                        "unordered_map::rehash_inline_no_resize: invalid index");
+                        "unordered_map::rehash_inline_no_resize: invalid index at "
+                            << new_idx << " which is " << npos());
                     return;
                 }
                 occupied.set(new_idx);
@@ -1014,9 +1086,9 @@ class FL_ALIGN unordered_map {
             }
             FASTLED_ASSERT(
                 occupied.test(i),
-                "unordered_map::rehash_inline_no_resize: invalid occupied");
+                "unordered_map::rehash_inline_no_resize: invalid occupied at " << i);
             FASTLED_ASSERT(
-                tmp.empty(), "unordered_map::rehash_inline_no_resize: invalid tmp");
+                tmp.empty(), "unordered_map::rehash_inline_no_resize: invalid tmp at " << i);
         }
         // Reset tombstones count since we've cleared all deleted entries
         _tombstones = 0;

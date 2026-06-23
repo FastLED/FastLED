@@ -128,25 +128,25 @@ struct EspDspRealCtx {
     fl::vector<float> sin_table;   // sin(2πk/N) for k in [1, N/2), size N/2-1
 };
 
-inline EspDspRealCtx &espDspRealCtx() FL_NO_EXCEPT {
+inline EspDspRealCtx &espDspRealCtx() FL_NOEXCEPT {
     static EspDspRealCtx ctx;
     return ctx;
 }
 
-inline bool espDspGlobalInit() FL_NO_EXCEPT {
+inline bool espDspGlobalInit() FL_NOEXCEPT {
     static bool initialized = false;
     if (initialized) return true;
     esp_err_t err =
         dsps_fft2r_init_fc32(nullptr, CONFIG_DSP_MAX_FFT_SIZE);
     if (err != ESP_OK) {
-        FL_WARN_F("dsps_fft2r_init_fc32 failed: %s", static_cast<int>(err));
+        FL_WARN("dsps_fft2r_init_fc32 failed: " << static_cast<int>(err));
         return false;
     }
     initialized = true;
     return true;
 }
 
-inline bool espDspEnsureTwiddles(int N) FL_NO_EXCEPT {
+inline bool espDspEnsureTwiddles(int N) FL_NOEXCEPT {
     EspDspRealCtx &ctx = espDspRealCtx();
     if (ctx.n == N) return true;
     if (!espDspGlobalInit()) return false;
@@ -180,7 +180,7 @@ inline bool espDspEnsureTwiddles(int N) FL_NO_EXCEPT {
 ///     X[k].r = ½·((Y[k].r + Y[N/2−k].r) + c·b − s·a)
 ///     X[k].i = ½·((Y[k].i − Y[N/2−k].i) − c·a − s·b)
 inline void espDspRealForward(int N, const float *in,
-                              kiss_fft_cpx *out) FL_NO_EXCEPT {
+                              kiss_fft_cpx *out) FL_NOEXCEPT {
     if (!espDspEnsureTwiddles(N)) return;
     EspDspRealCtx &ctx = espDspRealCtx();
 
@@ -236,7 +236,7 @@ inline void espDspRealForward(int N, const float *in,
 /// Output format matches kiss_fftr exactly regardless of backend.
 inline void fl_fft_real_forward(kiss_fftr_cfg cfg, int N,
                                 const kiss_fft_scalar *in,
-                                kiss_fft_cpx *out) FL_NO_EXCEPT {
+                                kiss_fft_cpx *out) FL_NOEXCEPT {
     // NOTE: even when FL_FFT_ESP_DSP_ACTIVE is 1, the dispatcher currently
     // stays on kiss_fftr. The ESP-DSP backend below is `float`-only but
     // kiss_fft_scalar is typedef'd to `int16_t` when FastLED's default

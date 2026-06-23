@@ -71,7 +71,7 @@ public:
         SpiParallelMode mode;           ///< Execution mode (ISR vs bit-bang)
         u32 timer_hz;              ///< Timer frequency for ISR mode
 
-        Config() FL_NO_EXCEPT;  // Implemented in .cpp to avoid circular dependency
+        Config() FL_NOEXCEPT;  // Implemented in .cpp to avoid circular dependency
     };
 
     /// @brief Construct parallel device
@@ -79,13 +79,13 @@ public:
     explicit ParallelDevice(const Config& config);
 
     /// @brief Destructor - releases hardware resources
-    ~ParallelDevice() FL_NO_EXCEPT;
+    ~ParallelDevice() FL_NOEXCEPT;
 
     // Disable copy/move
-    ParallelDevice(const ParallelDevice&) FL_NO_EXCEPT = delete;
-    ParallelDevice& operator=(const ParallelDevice&) FL_NO_EXCEPT = delete;
-    ParallelDevice(ParallelDevice&&) FL_NO_EXCEPT = delete;
-    ParallelDevice& operator=(ParallelDevice&&) FL_NO_EXCEPT = delete;
+    ParallelDevice(const ParallelDevice&) FL_NOEXCEPT = delete;
+    ParallelDevice& operator=(const ParallelDevice&) FL_NOEXCEPT = delete;
+    ParallelDevice(ParallelDevice&&) FL_NOEXCEPT = delete;
+    ParallelDevice& operator=(ParallelDevice&&) FL_NOEXCEPT = delete;
 
     // ========== Initialization ==========
 

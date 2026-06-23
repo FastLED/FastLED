@@ -20,7 +20,7 @@ namespace platforms {
 /// Registers the stub channel driver with the ChannelManager.
 /// WASM uses stub driver because there's no real hardware in browser.
 /// This allows the legacy API to work with channel drivers in web builds.
-inline void initChannelDrivers() FL_NO_EXCEPT {
+inline void initChannelDrivers() FL_NOEXCEPT {
     fl::ChannelManager& manager = fl::ChannelManager::instance();
 
     // Get the stub driver singleton

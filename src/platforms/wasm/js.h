@@ -12,8 +12,8 @@
 // NOTE: millis(), micros(), delayMicroseconds() moved to platform_time.cpp.hpp
 extern "C" {
 // Timer functions declared in timer.cpp.hpp
-fl::u32 millis() FL_NO_EXCEPT;
-fl::u32 micros() FL_NO_EXCEPT;
+fl::u32 millis() FL_NOEXCEPT;
+fl::u32 micros() FL_NOEXCEPT;
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -11,7 +11,7 @@
 #define FASTLED_ASSERT(x, MSG)                                                 \
     do {                                                                       \
         if (!(x)) {                                                            \
-            FL_WARN_F("%s", MSG);                                                 \
+            FL_WARN(MSG);                                                 \
             emscripten_debugger();                                             \
         }                                                                      \
     } while (0)

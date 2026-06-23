@@ -77,7 +77,7 @@ PerlinParticlePunch::PerlinParticlePunch(u16 num_leds) : Fx1d(num_leds) {
     mAmbientPalette = defaultPalette;
 }
 
-PerlinParticlePunch::~PerlinParticlePunch() FL_NO_EXCEPT = default;
+PerlinParticlePunch::~PerlinParticlePunch() FL_NOEXCEPT = default;
 
 fl::string PerlinParticlePunch::fxName() const {
     return "PerlinParticlePunch";

@@ -2,8 +2,6 @@
 
 Per-symbol flash / RAM bloat reports for FastLED builds. Use this doc when investigating "why is the firmware so big" or "what symbol regressed in this PR".
 
-For the per-workflow `max_size` / `max_size_apa102` thresholds in `.github/workflows/check_*_size.yml` and which ones are real ceilings vs. band-aids waiting on a tracked regression, see `docs/SIZE_THRESHOLD_HISTORY.md`.
-
 ## Quick start
 
 ```bash

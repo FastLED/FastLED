@@ -77,7 +77,7 @@ class PriorityQueue {
     using size_type = fl::size;
     using compare_type = Compare;
 
-    PriorityQueue() FL_NO_EXCEPT = default;
+    PriorityQueue() FL_NOEXCEPT = default;
     explicit PriorityQueue(memory_resource* resource) : _data(resource) {}
     explicit PriorityQueue(const Compare &comp) : _comp(comp) {}
     PriorityQueue(const Compare &comp, memory_resource* resource) : _data(resource), _comp(comp) {}
@@ -199,7 +199,7 @@ public:
     using value_type = T;
     using size_type = fl::size;
 
-    priority_queue_stable() FL_NO_EXCEPT : mNextSequence(0) {}
+    priority_queue_stable() FL_NOEXCEPT : mNextSequence(0) {}
 
     /**
      * @brief Push an element into the priority queue

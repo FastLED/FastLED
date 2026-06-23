@@ -13,19 +13,19 @@ WLED::WLED()
     ) {}
 
 fl::optional<fl::json> WLED::stubRequestSource() {
-    FL_ERROR_F("WLED::stubRequestSource: Not implemented - provide a real RequestSource callback");
+    FL_ERROR("WLED::stubRequestSource: Not implemented - provide a real RequestSource callback");
     return fl::nullopt;
 }
 
 void WLED::stubResponseSink(const fl::json& response) {
-    FL_ERROR_F("WLED::stubResponseSink: Not implemented - provide a real ResponseSink callback");
+    FL_ERROR("WLED::stubResponseSink: Not implemented - provide a real ResponseSink callback");
 }
 
 // WLED State Management
 
 void WLED::setState(const fl::json& wledState) {
     if (!wledState.has_value()) {
-        FL_WARN_F("WLED: setState called with invalid JSON");
+        FL_WARN("WLED: setState called with invalid JSON");
         return;
     }
 
@@ -34,7 +34,7 @@ void WLED::setState(const fl::json& wledState) {
         bool newOn = wledState["on"] | mWledOn;
         if (newOn != mWledOn) {
             mWledOn = newOn;
-            FL_DBG_F("WLED: on=%s", (mWledOn ? "true" : "false"));
+            FL_DBG("WLED: on=" << (mWledOn ? "true" : "false"));
         }
     }
 
@@ -44,19 +44,19 @@ void WLED::setState(const fl::json& wledState) {
             i64 briInt = wledState["bri"] | static_cast<i64>(mWledBri);
             // Clamp to valid range 0-255
             if (briInt < 0) {
-                FL_WARN_F("WLED: brightness %s out of range, clamping to 0", briInt);
+                FL_WARN("WLED: brightness " << briInt << " out of range, clamping to 0");
                 briInt = 0;
             } else if (briInt > 255) {
-                FL_WARN_F("WLED: brightness %s out of range, clamping to 255", briInt);
+                FL_WARN("WLED: brightness " << briInt << " out of range, clamping to 255");
                 briInt = 255;
             }
             u8 newBri = static_cast<u8>(briInt);
             if (newBri != mWledBri) {
                 mWledBri = newBri;
-                FL_DBG_F("WLED: bri=%s", static_cast<int>(mWledBri));
+                FL_DBG("WLED: bri=" << static_cast<int>(mWledBri));
             }
         } else {
-            FL_WARN_F("WLED: 'bri' field has invalid type (expected int)");
+            FL_WARN("WLED: 'bri' field has invalid type (expected int)");
         }
     }
 
@@ -66,19 +66,19 @@ void WLED::setState(const fl::json& wledState) {
             i64 transInt = wledState["transition"] | static_cast<i64>(mTransition);
             // Clamp to valid range 0-65535
             if (transInt < 0) {
-                FL_WARN_F("WLED: transition %s out of range, clamping to 0", transInt);
+                FL_WARN("WLED: transition " << transInt << " out of range, clamping to 0");
                 transInt = 0;
             } else if (transInt > 65535) {
-                FL_WARN_F("WLED: transition %s out of range, clamping to 65535", transInt);
+                FL_WARN("WLED: transition " << transInt << " out of range, clamping to 65535");
                 transInt = 65535;
             }
             u16 newTransition = static_cast<u16>(transInt);
             if (newTransition != mTransition) {
                 mTransition = newTransition;
-                FL_DBG_F("WLED: transition=%s", mTransition);
+                FL_DBG("WLED: transition=" << mTransition);
             }
         } else {
-            FL_WARN_F("WLED: 'transition' field has invalid type (expected int)");
+            FL_WARN("WLED: 'transition' field has invalid type (expected int)");
         }
     }
 
@@ -88,19 +88,19 @@ void WLED::setState(const fl::json& wledState) {
             i64 psInt = wledState["ps"] | static_cast<i64>(mPreset);
             // Clamp to valid range -1 to 250
             if (psInt < -1) {
-                FL_WARN_F("WLED: preset %s out of range, clamping to -1", psInt);
+                FL_WARN("WLED: preset " << psInt << " out of range, clamping to -1");
                 psInt = -1;
             } else if (psInt > 250) {
-                FL_WARN_F("WLED: preset %s out of range, clamping to 250", psInt);
+                FL_WARN("WLED: preset " << psInt << " out of range, clamping to 250");
                 psInt = 250;
             }
             i16 newPreset = static_cast<i16>(psInt);
             if (newPreset != mPreset) {
                 mPreset = newPreset;
-                FL_DBG_F("WLED: ps=%s", mPreset);
+                FL_DBG("WLED: ps=" << mPreset);
             }
         } else {
-            FL_WARN_F("WLED: 'ps' field has invalid type (expected int)");
+            FL_WARN("WLED: 'ps' field has invalid type (expected int)");
         }
     }
 
@@ -110,19 +110,19 @@ void WLED::setState(const fl::json& wledState) {
             i64 plInt = wledState["pl"] | static_cast<i64>(mPlaylist);
             // Clamp to valid range -1 to 250
             if (plInt < -1) {
-                FL_WARN_F("WLED: playlist %s out of range, clamping to -1", plInt);
+                FL_WARN("WLED: playlist " << plInt << " out of range, clamping to -1");
                 plInt = -1;
             } else if (plInt > 250) {
-                FL_WARN_F("WLED: playlist %s out of range, clamping to 250", plInt);
+                FL_WARN("WLED: playlist " << plInt << " out of range, clamping to 250");
                 plInt = 250;
             }
             i16 newPlaylist = static_cast<i16>(plInt);
             if (newPlaylist != mPlaylist) {
                 mPlaylist = newPlaylist;
-                FL_DBG_F("WLED: pl=%s", mPlaylist);
+                FL_DBG("WLED: pl=" << mPlaylist);
             }
         } else {
-            FL_WARN_F("WLED: 'pl' field has invalid type (expected int)");
+            FL_WARN("WLED: 'pl' field has invalid type (expected int)");
         }
     }
 
@@ -132,19 +132,19 @@ void WLED::setState(const fl::json& wledState) {
             i64 lorInt = wledState["lor"] | static_cast<i64>(mLiveOverride);
             // Clamp to valid range 0-2
             if (lorInt < 0) {
-                FL_WARN_F("WLED: live override %s out of range, clamping to 0", lorInt);
+                FL_WARN("WLED: live override " << lorInt << " out of range, clamping to 0");
                 lorInt = 0;
             } else if (lorInt > 2) {
-                FL_WARN_F("WLED: live override %s out of range, clamping to 2", lorInt);
+                FL_WARN("WLED: live override " << lorInt << " out of range, clamping to 2");
                 lorInt = 2;
             }
             u8 newLiveOverride = static_cast<u8>(lorInt);
             if (newLiveOverride != mLiveOverride) {
                 mLiveOverride = newLiveOverride;
-                FL_DBG_F("WLED: lor=%s", static_cast<int>(mLiveOverride));
+                FL_DBG("WLED: lor=" << static_cast<int>(mLiveOverride));
             }
         } else {
-            FL_WARN_F("WLED: 'lor' field has invalid type (expected int)");
+            FL_WARN("WLED: 'lor' field has invalid type (expected int)");
         }
     }
 
@@ -154,19 +154,19 @@ void WLED::setState(const fl::json& wledState) {
             i64 mainsegInt = wledState["mainseg"] | static_cast<i64>(mMainSegment);
             // Clamp to valid range 0-255
             if (mainsegInt < 0) {
-                FL_WARN_F("WLED: main segment %s out of range, clamping to 0", mainsegInt);
+                FL_WARN("WLED: main segment " << mainsegInt << " out of range, clamping to 0");
                 mainsegInt = 0;
             } else if (mainsegInt > 255) {
-                FL_WARN_F("WLED: main segment %s out of range, clamping to 255", mainsegInt);
+                FL_WARN("WLED: main segment " << mainsegInt << " out of range, clamping to 255");
                 mainsegInt = 255;
             }
             u8 newMainSegment = static_cast<u8>(mainsegInt);
             if (newMainSegment != mMainSegment) {
                 mMainSegment = newMainSegment;
-                FL_DBG_F("WLED: mainseg=%s", static_cast<int>(mMainSegment));
+                FL_DBG("WLED: mainseg=" << static_cast<int>(mMainSegment));
             }
         } else {
-            FL_WARN_F("WLED: 'mainseg' field has invalid type (expected int)");
+            FL_WARN("WLED: 'mainseg' field has invalid type (expected int)");
         }
     }
 
@@ -180,7 +180,7 @@ void WLED::setState(const fl::json& wledState) {
                 bool newNlOn = nl["on"] | mNightlightOn;
                 if (newNlOn != mNightlightOn) {
                     mNightlightOn = newNlOn;
-                    FL_DBG_F("WLED: nl.on=%s", (mNightlightOn ? "true" : "false"));
+                    FL_DBG("WLED: nl.on=" << (mNightlightOn ? "true" : "false"));
                 }
             }
 
@@ -190,19 +190,19 @@ void WLED::setState(const fl::json& wledState) {
                     i64 durInt = nl["dur"] | static_cast<i64>(mNightlightDuration);
                     // Clamp to valid range 1-255
                     if (durInt < 1) {
-                        FL_WARN_F("WLED: nl.dur %s out of range, clamping to 1", durInt);
+                        FL_WARN("WLED: nl.dur " << durInt << " out of range, clamping to 1");
                         durInt = 1;
                     } else if (durInt > 255) {
-                        FL_WARN_F("WLED: nl.dur %s out of range, clamping to 255", durInt);
+                        FL_WARN("WLED: nl.dur " << durInt << " out of range, clamping to 255");
                         durInt = 255;
                     }
                     u8 newDur = static_cast<u8>(durInt);
                     if (newDur != mNightlightDuration) {
                         mNightlightDuration = newDur;
-                        FL_DBG_F("WLED: nl.dur=%s", static_cast<int>(mNightlightDuration));
+                        FL_DBG("WLED: nl.dur=" << static_cast<int>(mNightlightDuration));
                     }
                 } else {
-                    FL_WARN_F("WLED: 'nl.dur' field has invalid type (expected int)");
+                    FL_WARN("WLED: 'nl.dur' field has invalid type (expected int)");
                 }
             }
 
@@ -212,19 +212,19 @@ void WLED::setState(const fl::json& wledState) {
                     i64 modeInt = nl["mode"] | static_cast<i64>(mNightlightMode);
                     // Clamp to valid range 0-3
                     if (modeInt < 0) {
-                        FL_WARN_F("WLED: nl.mode %s out of range, clamping to 0", modeInt);
+                        FL_WARN("WLED: nl.mode " << modeInt << " out of range, clamping to 0");
                         modeInt = 0;
                     } else if (modeInt > 3) {
-                        FL_WARN_F("WLED: nl.mode %s out of range, clamping to 3", modeInt);
+                        FL_WARN("WLED: nl.mode " << modeInt << " out of range, clamping to 3");
                         modeInt = 3;
                     }
                     u8 newMode = static_cast<u8>(modeInt);
                     if (newMode != mNightlightMode) {
                         mNightlightMode = newMode;
-                        FL_DBG_F("WLED: nl.mode=%s", static_cast<int>(mNightlightMode));
+                        FL_DBG("WLED: nl.mode=" << static_cast<int>(mNightlightMode));
                     }
                 } else {
-                    FL_WARN_F("WLED: 'nl.mode' field has invalid type (expected int)");
+                    FL_WARN("WLED: 'nl.mode' field has invalid type (expected int)");
                 }
             }
 
@@ -234,23 +234,23 @@ void WLED::setState(const fl::json& wledState) {
                     i64 tbriInt = nl["tbri"] | static_cast<i64>(mNightlightTargetBrightness);
                     // Clamp to valid range 0-255
                     if (tbriInt < 0) {
-                        FL_WARN_F("WLED: nl.tbri %s out of range, clamping to 0", tbriInt);
+                        FL_WARN("WLED: nl.tbri " << tbriInt << " out of range, clamping to 0");
                         tbriInt = 0;
                     } else if (tbriInt > 255) {
-                        FL_WARN_F("WLED: nl.tbri %s out of range, clamping to 255", tbriInt);
+                        FL_WARN("WLED: nl.tbri " << tbriInt << " out of range, clamping to 255");
                         tbriInt = 255;
                     }
                     u8 newTbri = static_cast<u8>(tbriInt);
                     if (newTbri != mNightlightTargetBrightness) {
                         mNightlightTargetBrightness = newTbri;
-                        FL_DBG_F("WLED: nl.tbri=%s", static_cast<int>(mNightlightTargetBrightness));
+                        FL_DBG("WLED: nl.tbri=" << static_cast<int>(mNightlightTargetBrightness));
                     }
                 } else {
-                    FL_WARN_F("WLED: 'nl.tbri' field has invalid type (expected int)");
+                    FL_WARN("WLED: 'nl.tbri' field has invalid type (expected int)");
                 }
             }
         } else {
-            FL_WARN_F("WLED: 'nl' field has invalid type (expected object)");
+            FL_WARN("WLED: 'nl' field has invalid type (expected object)");
         }
     }
 
@@ -264,7 +264,7 @@ void WLED::setState(const fl::json& wledState) {
                 bool newSend = udpn["send"] | mUdpSend;
                 if (newSend != mUdpSend) {
                     mUdpSend = newSend;
-                    FL_DBG_F("WLED: udpn.send=%s", (mUdpSend ? "true" : "false"));
+                    FL_DBG("WLED: udpn.send=" << (mUdpSend ? "true" : "false"));
                 }
             }
 
@@ -273,11 +273,11 @@ void WLED::setState(const fl::json& wledState) {
                 bool newRecv = udpn["recv"] | mUdpReceive;
                 if (newRecv != mUdpReceive) {
                     mUdpReceive = newRecv;
-                    FL_DBG_F("WLED: udpn.recv=%s", (mUdpReceive ? "true" : "false"));
+                    FL_DBG("WLED: udpn.recv=" << (mUdpReceive ? "true" : "false"));
                 }
             }
         } else {
-            FL_WARN_F("WLED: 'udpn' field has invalid type (expected object)");
+            FL_WARN("WLED: 'udpn' field has invalid type (expected object)");
         }
     }
 
@@ -298,7 +298,7 @@ void WLED::setState(const fl::json& wledState) {
                         mPlaylistPresets.push_back(static_cast<i16>(psInt));
                     }
                 }
-                FL_DBG_F("WLED: playlist.ps count=%s", mPlaylistPresets.size());
+                FL_DBG("WLED: playlist.ps count=" << mPlaylistPresets.size());
             }
 
             // Extract "dur" field (array of durations in seconds)
@@ -333,7 +333,7 @@ void WLED::setState(const fl::json& wledState) {
                 if (repeatInt < 0) repeatInt = 0;
                 if (repeatInt > 65535) repeatInt = 65535;
                 mPlaylistRepeat = static_cast<u16>(repeatInt);
-                FL_DBG_F("WLED: playlist.repeat=%s", mPlaylistRepeat);
+                FL_DBG("WLED: playlist.repeat=" << mPlaylistRepeat);
             }
 
             // Extract "end" field
@@ -342,16 +342,16 @@ void WLED::setState(const fl::json& wledState) {
                 if (endInt < -1) endInt = -1;
                 if (endInt > 250) endInt = 250;
                 mPlaylistEnd = static_cast<i16>(endInt);
-                FL_DBG_F("WLED: playlist.end=%s", mPlaylistEnd);
+                FL_DBG("WLED: playlist.end=" << mPlaylistEnd);
             }
 
             // Extract "r" field (randomize)
             if (pl.contains("r") && pl["r"].is_bool()) {
                 mPlaylistRandomize = pl["r"] | false;
-                FL_DBG_F("WLED: playlist.r=%s", (mPlaylistRandomize ? "true" : "false"));
+                FL_DBG("WLED: playlist.r=" << (mPlaylistRandomize ? "true" : "false"));
             }
         } else {
-            FL_WARN_F("WLED: 'playlist' field has invalid type (expected object)");
+            FL_WARN("WLED: 'playlist' field has invalid type (expected object)");
         }
     }
 
@@ -361,7 +361,7 @@ void WLED::setState(const fl::json& wledState) {
             for (size_t i = 0; i < wledState["seg"].size(); i++) {
                 const fl::json& segJson = wledState["seg"][i];
                 if (!segJson.is_object()) {
-                    FL_WARN_F("WLED: segment at index %s is not an object", i);
+                    FL_WARN("WLED: segment at index " << i << " is not an object");
                     continue;
                 }
 
@@ -397,7 +397,7 @@ void WLED::setState(const fl::json& wledState) {
                 wled::parseSegmentFields(segJson, *seg);
             }
         } else {
-            FL_WARN_F("WLED: 'seg' field has invalid type (expected array)");
+            FL_WARN("WLED: 'seg' field has invalid type (expected array)");
         }
     }
 }

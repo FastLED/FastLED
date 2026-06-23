@@ -16,7 +16,6 @@ You **must** specify at least one LED driver to test using one of these flags:
 - `--lcd-rgb` - Test LCD RGB driver (ESP32-P4 only)
 - `--all` - Test all drivers (equivalent to `--parlio --rmt --spi --uart --i2s --lcd-rgb`)
 - `--parallel` - Test multiple drivers simultaneously (requires 2+ drivers)
-- `--ieee754` - Special mode: run integer IEEE 754 decimal codec verification without LED driver loopback
 
 ### Usage Examples
 ```bash
@@ -28,7 +27,6 @@ bash autoresearch --spi
 bash autoresearch --uart
 bash autoresearch --i2s                       # ESP32-S3 only
 bash autoresearch --lcd-rgb                   # ESP32-P4 only
-bash autoresearch lpc845brk --ieee754         # LPC low-memory IEEE 754 codec check
 
 # Test multiple drivers (sequentially)
 bash autoresearch --parlio --rmt              # Auto-detect environment
@@ -56,29 +54,6 @@ bash autoresearch --all --skip-lint --timeout 180
 
 ### Build Backend
 `bash autoresearch` uses fbuild for all board compiles. Do not use board-specific PlatformIO fallback paths for compatibility issues; file board build compatibility problems at https://github.com/FastLED/fbuild/issues.
-
-### Synthesised `platformio.ini` (no root dependency)
-
-Since #3281, `bash autoresearch` synthesises its own `.build/pio/<board>/platformio.ini` from `ci/boards.py` before launching fbuild — the same pattern `bash compile` already uses. **Root `./platformio.ini` is NOT consulted in the default path.** The staged tree under `.build/pio/<board>/` contains:
-
-- `platformio.ini` — generated from `Board.to_platformio_ini()` for the resolved board.
-- `src/sketch/` — populated by copying `examples/AutoResearch/`.
-
-Board selection happens in this order:
-1. Positional environment (`bash autoresearch esp32c6 ...`) — synthesised immediately at parse time.
-2. `--env <name>` — same as positional.
-3. `--lcd` / `--lcd-spi` / `--lcd-rgb` — implies `esp32s3` / `esp32p4`; synthesised immediately.
-4. Auto-detect from attached USB device — synthesis deferred until after `detect_attached_chip()`.
-
-**Legacy escape hatch (deprecated):** `--use-root-platformio-ini` re-enables the old behavior of reading root `./platformio.ini` instead of synthesising. Emits a deprecation warning when used; slated for removal one release cycle after #3281. Use only if you have local edits to root `./platformio.ini` that the synthesised file misses — in which case the correct fix is to move those edits into `ci/boards.py`.
-
-```bash
-# Default (synthesised):
-bash autoresearch esp32c6 --parlio
-
-# Legacy (consumes root ./platformio.ini, deprecated):
-bash autoresearch esp32c6 --parlio --use-root-platformio-ini
-```
 
 ### Strip Size Configuration
 Configure LED strip sizes for autoresearch testing via JSON-RPC:

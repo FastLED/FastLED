@@ -16,13 +16,13 @@ struct XYDrawComposited {
     XYDrawComposited(const CRGB &color, const XYMap &xymap, fl::span<CRGB> out);
 
     // Copy constructor (assignment deleted due to const members)
-    XYDrawComposited(const XYDrawComposited &other) FL_NO_EXCEPT = default;
+    XYDrawComposited(const XYDrawComposited &other) FL_NOEXCEPT = default;
     XYDrawComposited &operator=(const XYDrawComposited &other) = delete;
 
     // Move constructor (assignment deleted due to const members)
-    XYDrawComposited(XYDrawComposited &&other) FL_NO_EXCEPT
+    XYDrawComposited(XYDrawComposited &&other) FL_NOEXCEPT
         : mColor(fl::move(other.mColor)), mXYMap(fl::move(other.mXYMap)), mOut(other.mOut) {}
-    XYDrawComposited &operator=(XYDrawComposited &&other) FL_NO_EXCEPT = delete;
+    XYDrawComposited &operator=(XYDrawComposited &&other) FL_NOEXCEPT = delete;
 
     void draw(const vec2<fl::u16> &pt, fl::u32 index, fl::u8 value);
     const CRGB mColor;
@@ -34,13 +34,13 @@ struct XYDrawGradient {
     XYDrawGradient(const Gradient &gradient, const XYMap &xymap, fl::span<CRGB> out);
 
     // Copy constructor (assignment deleted due to const members)
-    XYDrawGradient(const XYDrawGradient &other) FL_NO_EXCEPT = default;
+    XYDrawGradient(const XYDrawGradient &other) FL_NOEXCEPT = default;
     XYDrawGradient &operator=(const XYDrawGradient &other) = delete;
 
     // Move constructor (assignment deleted due to const members)
-    XYDrawGradient(XYDrawGradient &&other) FL_NO_EXCEPT
+    XYDrawGradient(XYDrawGradient &&other) FL_NOEXCEPT
         : mGradient(fl::move(other.mGradient)), mXYMap(fl::move(other.mXYMap)), mOut(other.mOut) {}
-    XYDrawGradient &operator=(XYDrawGradient &&other) FL_NO_EXCEPT = delete;
+    XYDrawGradient &operator=(XYDrawGradient &&other) FL_NOEXCEPT = delete;
 
     void draw(const vec2<fl::u16> &pt, fl::u32 index, fl::u8 value);
     const Gradient mGradient;

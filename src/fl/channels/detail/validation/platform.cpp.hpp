@@ -21,17 +21,20 @@ void printEngineValidation() {
     auto infos = channelManager().getDriverInfos();
 
     if (infos.empty()) {
-        FL_ERROR_F("[VALIDATION] No drivers registered with ChannelManager!");
+        FL_ERROR("[VALIDATION] No drivers registered with ChannelManager!");
         return;
     }
 
-    FL_WARN_F("\n[VALIDATION] Registered drivers: %s", infos.size());
+    FL_WARN("\n[VALIDATION] Registered drivers: " << infos.size());
     for (fl::size i = 0; i < infos.size(); i++) {
         const auto& info = infos[i];
         FL_UNUSED(info);  // silences -Wunused-variable when FL_WARN is a no-op
-        FL_WARN_F("  - %s (priority=%s, enabled=%s)", info.name.c_str(), info.priority, (info.enabled ? "true" : "false"));
+        FL_WARN("  - " << info.name.c_str()
+                        << " (priority=" << info.priority
+                        << ", enabled=" << (info.enabled ? "true" : "false")
+                        << ")");
     }
-    FL_WARN_F("[VALIDATION] Driver registration OK");
+    FL_WARN("[VALIDATION] Driver registration OK");
 }
 
 }  // namespace validation

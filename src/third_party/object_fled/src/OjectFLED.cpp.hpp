@@ -148,29 +148,29 @@ void ObjectFLED::begin(void) {
 		// Validate pin using validation helper
 		auto validation = objectfled::validate_teensy4_pin(pin);
 		if (!validation.valid) {
-			FL_WARN_F("================================================================================");
-			FL_WARN_F("FASTLED ERROR: Pin %s is INVALID and has been disabled", (int)pin);
-			FL_WARN_F("%s", validation.error_message);
-			FL_WARN_F("================================================================================");
+			FL_WARN("================================================================================");
+			FL_WARN("FASTLED ERROR: Pin " << (int)pin << " is INVALID and has been disabled");
+			FL_WARN(validation.error_message);
+			FL_WARN("================================================================================");
 			continue;
 		}
 
 		// Check for warnings (pin is valid but may have issues)
 		if (validation.error_message != nullptr) {
-			FL_WARN_F("================================================================================");
-			FL_WARN_F("FASTLED WARNING: Pin %s may have issues", (int)pin);
-			FL_WARN_F("%s", validation.error_message);
-			FL_WARN_F("================================================================================");
+			FL_WARN("================================================================================");
+			FL_WARN("FASTLED WARNING: Pin " << (int)pin << " may have issues");
+			FL_WARN(validation.error_message);
+			FL_WARN("================================================================================");
 		}
 
 		uint8_t bit = digitalPinToBit(pin);		// pin's bit index in word port DR
 		// which GPIO R controls this pin: 0-3 map to GPIO6-9 then map to DMA compat GPIO1-4
 		uint8_t offset = ((uint32_t)portOutputRegister(pin) - (uint32_t)&GPIO6_DR) >> 14;
 		if (offset > 3) {
-			FL_WARN_F("================================================================================");
-			FL_WARN_F("FASTLED ERROR: Pin %s does not map to GPIO6-9 (offset=%s)", (int)pin, (int)offset);
-			FL_WARN_F("This pin may be a ground/power/read-only pin - strip disabled");
-			FL_WARN_F("================================================================================");
+			FL_WARN("================================================================================");
+			FL_WARN("FASTLED ERROR: Pin " << (int)pin << " does not map to GPIO6-9 (offset=" << (int)offset << ")");
+			FL_WARN("This pin may be a ground/power/read-only pin - strip disabled");
+			FL_WARN("================================================================================");
 			continue;
 		}
 
@@ -190,19 +190,19 @@ void ObjectFLED::begin(void) {
 
 	// Check if any valid pins were configured
 	if (validPinCount == 0) {
-		FL_WARN_F("================================================================================");
-		FL_WARN_F("FASTLED CRITICAL ERROR: No valid pins configured!");
-		FL_WARN_F("All %s pins failed validation.", (int)numpinsLocal);
-		FL_WARN_F("ObjectFLED driver is disabled - no LEDs will be updated.");
-		FL_WARN_F("================================================================================");
+		FL_WARN("================================================================================");
+		FL_WARN("FASTLED CRITICAL ERROR: No valid pins configured!");
+		FL_WARN("All " << (int)numpinsLocal << " pins failed validation.");
+		FL_WARN("ObjectFLED driver is disabled - no LEDs will be updated.");
+		FL_WARN("================================================================================");
 		return;
 	}
 
 	if (validPinCount < numpinsLocal) {
-		FL_WARN_F("================================================================================");
-		FL_WARN_F("FASTLED WARNING: Only %s of %s pins are valid", (int)validPinCount, (int)numpinsLocal);
-		FL_WARN_F("Strips on invalid pins will not function.");
-		FL_WARN_F("================================================================================");
+		FL_WARN("================================================================================");
+		FL_WARN("FASTLED WARNING: Only " << (int)validPinCount << " of " << (int)numpinsLocal << " pins are valid");
+		FL_WARN("Strips on invalid pins will not function.");
+		FL_WARN("================================================================================");
 	}
 
 	//stash context for multi-show

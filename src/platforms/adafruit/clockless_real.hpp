@@ -32,14 +32,14 @@ public:
     
     ~AdafruitNeoPixelDriverImpl() override = default;
     
-    void init(int dataPin) FL_NO_EXCEPT override {
+    void init(int dataPin) FL_NOEXCEPT override {
         if (!mInitialized) {
             mDataPin = dataPin;
             mInitialized = true;
         }
     }
     
-    void showPixels(PixelIterator& pixelIterator) FL_NO_EXCEPT override {
+    void showPixels(PixelIterator& pixelIterator) FL_NOEXCEPT override {
         if (!mInitialized) {
             return;
         }
@@ -91,7 +91,7 @@ public:
 };
 
 // Static factory method implementation
-fl::unique_ptr<IAdafruitNeoPixelDriver> IAdafruitNeoPixelDriver::create() FL_NO_EXCEPT {
+fl::unique_ptr<IAdafruitNeoPixelDriver> IAdafruitNeoPixelDriver::create() FL_NOEXCEPT {
     return fl::make_unique<AdafruitNeoPixelDriverImpl>();
 }
 

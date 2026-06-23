@@ -98,7 +98,7 @@ class TestFileFiltering(unittest.TestCase):
 
 
 class TestMissingNoexcept(unittest.TestCase):
-    """Test that functions missing FL_NO_EXCEPT are flagged."""
+    """Test that functions missing FL_NOEXCEPT are flagged."""
 
     def test_void_func(self) -> None:
         self.assertEqual(len(_violations("void foo();")), 1)
@@ -129,11 +129,11 @@ class TestMissingNoexcept(unittest.TestCase):
         self.assertEqual(len(_violations("void foo();", path=_FL_HEADER)), 1)
 
 
-# ── Should pass (has noexcept / FL_NO_EXCEPT) ────────────────────────────────
+# ── Should pass (has noexcept / FL_NOEXCEPT) ────────────────────────────────
 
 
 class TestHasNoexcept(unittest.TestCase):
-    """Test that functions with noexcept/FL_NO_EXCEPT are not flagged."""
+    """Test that functions with noexcept/FL_NOEXCEPT are not flagged."""
 
     def test_noexcept(self) -> None:
         self.assertEqual(len(_violations("void foo() noexcept;")), 0)
@@ -145,16 +145,16 @@ class TestHasNoexcept(unittest.TestCase):
         self.assertEqual(len(_violations("bool bar() const noexcept;")), 0)
 
     def test_fl_noexcept(self) -> None:
-        self.assertEqual(len(_violations("void foo() FL_NO_EXCEPT;")), 0)
+        self.assertEqual(len(_violations("void foo() FL_NOEXCEPT;")), 0)
 
     def test_fl_noexcept_def(self) -> None:
-        self.assertEqual(len(_violations("void foo() FL_NO_EXCEPT {")), 0)
+        self.assertEqual(len(_violations("void foo() FL_NOEXCEPT {")), 0)
 
     def test_fl_noexcept_const(self) -> None:
-        self.assertEqual(len(_violations("bool bar() const FL_NO_EXCEPT;")), 0)
+        self.assertEqual(len(_violations("bool bar() const FL_NOEXCEPT;")), 0)
 
     def test_fl_noexcept_override(self) -> None:
-        self.assertEqual(len(_violations("void run() FL_NO_EXCEPT override;")), 0)
+        self.assertEqual(len(_violations("void run() FL_NOEXCEPT override;")), 0)
 
     def test_noexcept_override(self) -> None:
         self.assertEqual(len(_violations("void run() noexcept override;")), 0)
@@ -191,7 +191,7 @@ class TestExemptions(unittest.TestCase):
         self.assertEqual(len(_violations("void foo(); // ok no noexcept")), 0)
 
     def test_suppression_ok_no_fl_noexcept(self) -> None:
-        self.assertEqual(len(_violations("void foo(); // ok no FL_NO_EXCEPT")), 0)
+        self.assertEqual(len(_violations("void foo(); // ok no FL_NOEXCEPT")), 0)
 
     def test_suppression_noexcept_not_required(self) -> None:
         self.assertEqual(len(_violations("void foo(); // noexcept not required")), 0)
@@ -283,9 +283,9 @@ class Semaphore {
     def test_class_with_noexcept(self) -> None:
         code = """\
 class Semaphore {
-    void lock() FL_NO_EXCEPT;
-    void unlock() FL_NO_EXCEPT;
-    bool tryLock() const FL_NO_EXCEPT;
+    void lock() FL_NOEXCEPT;
+    void unlock() FL_NOEXCEPT;
+    bool tryLock() const FL_NOEXCEPT;
 };"""
         self.assertEqual(len(_violations(code)), 0)
 
@@ -295,7 +295,7 @@ class Foo {
     Foo();
     ~Foo();
     Foo(const Foo&) = delete;
-    void go() FL_NO_EXCEPT;
+    void go() FL_NOEXCEPT;
     void stop();
 };"""
         # Foo() constructor + stop() = 2 violations

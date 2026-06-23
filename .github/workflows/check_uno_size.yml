@@ -23,10 +23,6 @@ jobs:
     uses: ./.github/workflows/build_template_binary_size.yml
     with:
       board: uno
-      # FROZEN SIZE THRESHOLD — DO NOT RAISE TO MAKE CI GREEN.
-      # Mirror-locked by ci/lint/check_size_thresholds.py. Raising a value
-      # here without updating the frozen-list constant in that script will
-      # fail `bash lint`. Fix the regression instead.
       max_size: 11000
       max_size_apa102: 9300
   build_no_forced_inline:

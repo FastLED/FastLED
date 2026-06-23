@@ -11,8 +11,8 @@ namespace detector {
 
 class Silence : public Detector {
 public:
-    Silence() FL_NO_EXCEPT;
-    ~Silence() FL_NO_EXCEPT override;
+    Silence() FL_NOEXCEPT;
+    ~Silence() FL_NOEXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

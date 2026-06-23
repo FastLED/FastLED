@@ -120,7 +120,7 @@ static McpwmState& g_mcpwm_state() {
  * @note The returned address is a physical hardware register address
  * @note Fast ISR performs volatile read: *(volatile uint32_t*)addr
  */
-static u32 mcpwm_get_capture_reg_addr(int group_id, int cap_channel) FL_NO_EXCEPT {
+static u32 mcpwm_get_capture_reg_addr(int group_id, int cap_channel) FL_NOEXCEPT {
     // Validate group_id and cap_channel using ESP-IDF SOC headers
     #ifdef SOC_MCPWM_GROUPS_PER_CHIP
     if (group_id < 0 || group_id >= SOC_MCPWM_GROUPS_PER_CHIP) {
@@ -199,7 +199,7 @@ static u32 mcpwm_get_capture_reg_addr(int group_id, int cap_channel) FL_NO_EXCEP
  * @note Call this during GpioIsrRx initialization, before enabling interrupts
  * @note Timer starts in disabled state - call mcpwm_timer_start() to begin
  */
-int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) FL_NO_EXCEPT {
+int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) FL_NOEXCEPT {
     if (!ctx) {
         ESP_LOGE(MCPWM_TIMER_TAG, "Invalid context pointer");
         return -1;
@@ -307,7 +307,7 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) FL_NO_EXCEPT {
  * @note Must call mcpwm_timer_init() first
  * @note Timer must be started before fast ISR can capture timestamps
  */
-int mcpwm_timer_start() FL_NO_EXCEPT {
+int mcpwm_timer_start() FL_NOEXCEPT {
     if (!g_mcpwm_state().initialized || !g_mcpwm_state().timer_handle) {
         ESP_LOGE(MCPWM_TIMER_TAG, "MCPWM not initialized");
         return -1;
@@ -340,7 +340,7 @@ int mcpwm_timer_start() FL_NO_EXCEPT {
  * @note Safe to call multiple times
  * @note Call before cleanup to ensure clean shutdown
  */
-int mcpwm_timer_stop() FL_NO_EXCEPT {
+int mcpwm_timer_stop() FL_NOEXCEPT {
     if (!g_mcpwm_state().initialized || !g_mcpwm_state().timer_handle) {
         ESP_LOGW(MCPWM_TIMER_TAG, "MCPWM not initialized, nothing to stop");
         return 0;  // Not an error - already stopped
@@ -373,7 +373,7 @@ int mcpwm_timer_stop() FL_NO_EXCEPT {
  * @note Automatically stops timer if running
  * @note Safe to call multiple times (idempotent)
  */
-int mcpwm_timer_cleanup() FL_NO_EXCEPT {
+int mcpwm_timer_cleanup() FL_NOEXCEPT {
     if (!g_mcpwm_state().initialized) {
         return 0;  // Already cleaned up
     }
@@ -419,7 +419,7 @@ int mcpwm_timer_cleanup() FL_NO_EXCEPT {
  * @note This function has overhead - use for debugging only
  * @note Fast ISR should read ctx->mcpwm_capture_reg_addr directly
  */
-u32 mcpwm_timer_get_value() FL_NO_EXCEPT {
+u32 mcpwm_timer_get_value() FL_NOEXCEPT {
     if (!g_mcpwm_state().initialized || !g_mcpwm_state().timer_handle) {
         return 0;
     }

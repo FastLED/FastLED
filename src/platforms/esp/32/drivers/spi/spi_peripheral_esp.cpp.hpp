@@ -50,22 +50,22 @@ namespace detail {
 /// This class contains all ESP-IDF-specific implementation details.
 class SpiPeripheralESPImpl : public SpiPeripheralESP {
 public:
-    SpiPeripheralESPImpl() FL_NO_EXCEPT;
+    SpiPeripheralESPImpl() FL_NOEXCEPT;
     ~SpiPeripheralESPImpl() override;
 
     // ISpiPeripheral Interface Implementation
-    bool initializeBus(const SpiBusConfig& config) FL_NO_EXCEPT override;
-    bool addDevice(const SpiDeviceConfig& config) FL_NO_EXCEPT override;
-    bool removeDevice() FL_NO_EXCEPT override;
-    bool freeBus() FL_NO_EXCEPT override;
-    bool isInitialized() const FL_NO_EXCEPT override;
-    bool queueTransaction(const SpiTransaction& trans) FL_NO_EXCEPT override;
-    bool pollTransaction(u32 timeout_ms) FL_NO_EXCEPT override;
-    bool registerCallback(void* callback, void* user_ctx) FL_NO_EXCEPT override;
-    u8* allocateDma(size_t size) FL_NO_EXCEPT override;
-    void freeDma(u8* buffer) FL_NO_EXCEPT override;
-    void delay(u32 ms) FL_NO_EXCEPT override;
-    u64 getMicroseconds() FL_NO_EXCEPT override;
+    bool initializeBus(const SpiBusConfig& config) FL_NOEXCEPT override;
+    bool addDevice(const SpiDeviceConfig& config) FL_NOEXCEPT override;
+    bool removeDevice() FL_NOEXCEPT override;
+    bool freeBus() FL_NOEXCEPT override;
+    bool isInitialized() const FL_NOEXCEPT override;
+    bool queueTransaction(const SpiTransaction& trans) FL_NOEXCEPT override;
+    bool pollTransaction(u32 timeout_ms) FL_NOEXCEPT override;
+    bool registerCallback(void* callback, void* user_ctx) FL_NOEXCEPT override;
+    u8* allocateDma(size_t size) FL_NOEXCEPT override;
+    void freeDma(u8* buffer) FL_NOEXCEPT override;
+    void delay(u32 ms) FL_NOEXCEPT override;
+    u64 getMicroseconds() FL_NOEXCEPT override;
 
 private:
     ::spi_host_device_t mHost;           ///< SPI host (SPI2_HOST or SPI3_HOST)
@@ -80,7 +80,7 @@ private:
 // Singleton Instance
 //=============================================================================
 
-SpiPeripheralESP& SpiPeripheralESP::instance() FL_NO_EXCEPT {
+SpiPeripheralESP& SpiPeripheralESP::instance() FL_NOEXCEPT {
     return Singleton<SpiPeripheralESPImpl>::instance();
 }
 
@@ -96,7 +96,7 @@ SpiPeripheralESP::~SpiPeripheralESP() {
 // Constructor / Destructor (implementation)
 //=============================================================================
 
-SpiPeripheralESPImpl::SpiPeripheralESPImpl() FL_NO_EXCEPT
+SpiPeripheralESPImpl::SpiPeripheralESPImpl() FL_NOEXCEPT
     : mHost(SPI2_HOST)
     , mDeviceHandle(nullptr)
     , mBusInitialized(false)
@@ -121,10 +121,10 @@ SpiPeripheralESPImpl::~SpiPeripheralESPImpl() {
 // Bus Lifecycle Methods
 //=============================================================================
 
-bool SpiPeripheralESPImpl::initializeBus(const SpiBusConfig& config) FL_NO_EXCEPT {
+bool SpiPeripheralESPImpl::initializeBus(const SpiBusConfig& config) FL_NOEXCEPT {
     // Validate not already initialized
     if (mBusInitialized) {
-        FL_WARN_F("SpiPeripheralESP: Bus already initialized");
+        FL_WARN("SpiPeripheralESP: Bus already initialized");
         return false;
     }
 
@@ -145,24 +145,25 @@ bool SpiPeripheralESPImpl::initializeBus(const SpiBusConfig& config) FL_NO_EXCEP
     // Initialize bus with auto DMA channel selection (delegate to ESP-IDF)
     esp_err_t err = ::spi_bus_initialize(mHost, &bus_config, SPI_DMA_CH_AUTO);
     if (err != ESP_OK) {
-        FL_WARN_F("SpiPeripheralESP: Failed to initialize bus: %s", err);
+        FL_WARN("SpiPeripheralESP: Failed to initialize bus: " << err);
         return false;
     }
 
     mBusInitialized = true;
-    FL_DBG_F("SpiPeripheralESP: Bus initialized (MOSI=%s, SCLK=%s)", config.mosi_pin, config.sclk_pin);
+    FL_DBG("SpiPeripheralESP: Bus initialized (MOSI=" << config.mosi_pin
+           << ", SCLK=" << config.sclk_pin << ")");
 
     return true;
 }
 
-bool SpiPeripheralESPImpl::addDevice(const SpiDeviceConfig& config) FL_NO_EXCEPT {
+bool SpiPeripheralESPImpl::addDevice(const SpiDeviceConfig& config) FL_NOEXCEPT {
     if (!mBusInitialized) {
-        FL_WARN_F("SpiPeripheralESP: Cannot add device - bus not initialized");
+        FL_WARN("SpiPeripheralESP: Cannot add device - bus not initialized");
         return false;
     }
 
     if (mDeviceAdded) {
-        FL_WARN_F("SpiPeripheralESP: Device already added");
+        FL_WARN("SpiPeripheralESP: Device already added");
         return false;
     }
 
@@ -182,19 +183,20 @@ bool SpiPeripheralESPImpl::addDevice(const SpiDeviceConfig& config) FL_NO_EXCEPT
     // Add device to bus (delegate to ESP-IDF)
     esp_err_t err = ::spi_bus_add_device(mHost, &dev_config, &mDeviceHandle);
     if (err != ESP_OK) {
-        FL_WARN_F("SpiPeripheralESP: Failed to add device: %s", err);
+        FL_WARN("SpiPeripheralESP: Failed to add device: " << err);
         return false;
     }
 
     mDeviceAdded = true;
-    FL_DBG_F("SpiPeripheralESP: Device added (clock=%s Hz, queue=%s)", config.clock_speed_hz, config.queue_size);
+    FL_DBG("SpiPeripheralESP: Device added (clock=" << config.clock_speed_hz
+           << " Hz, queue=" << config.queue_size << ")");
 
     return true;
 }
 
-bool SpiPeripheralESPImpl::removeDevice() FL_NO_EXCEPT {
+bool SpiPeripheralESPImpl::removeDevice() FL_NOEXCEPT {
     if (!mDeviceAdded) {
-        FL_WARN_F("SpiPeripheralESP: No device to remove");
+        FL_WARN("SpiPeripheralESP: No device to remove");
         return false;
     }
 
@@ -209,7 +211,7 @@ bool SpiPeripheralESPImpl::removeDevice() FL_NO_EXCEPT {
         // Remove device (delegate to ESP-IDF)
         esp_err_t err = ::spi_bus_remove_device(mDeviceHandle);
         if (err != ESP_OK) {
-            FL_WARN_F("SpiPeripheralESP: Failed to remove device: %s", err);
+            FL_WARN("SpiPeripheralESP: Failed to remove device: " << err);
             return false;
         }
 
@@ -217,36 +219,36 @@ bool SpiPeripheralESPImpl::removeDevice() FL_NO_EXCEPT {
     }
 
     mDeviceAdded = false;
-    FL_DBG_F("SpiPeripheralESP: Device removed");
+    FL_DBG("SpiPeripheralESP: Device removed");
 
     return true;
 }
 
-bool SpiPeripheralESPImpl::freeBus() FL_NO_EXCEPT {
+bool SpiPeripheralESPImpl::freeBus() FL_NOEXCEPT {
     if (!mBusInitialized) {
-        FL_WARN_F("SpiPeripheralESP: Bus not initialized");
+        FL_WARN("SpiPeripheralESP: Bus not initialized");
         return false;
     }
 
     if (mDeviceAdded) {
-        FL_WARN_F("SpiPeripheralESP: Cannot free bus - device still attached");
+        FL_WARN("SpiPeripheralESP: Cannot free bus - device still attached");
         return false;
     }
 
     // Free bus resources (delegate to ESP-IDF)
     esp_err_t err = ::spi_bus_free(mHost);
     if (err != ESP_OK) {
-        FL_WARN_F("SpiPeripheralESP: Failed to free bus: %s", err);
+        FL_WARN("SpiPeripheralESP: Failed to free bus: " << err);
         return false;
     }
 
     mBusInitialized = false;
-    FL_DBG_F("SpiPeripheralESP: Bus freed");
+    FL_DBG("SpiPeripheralESP: Bus freed");
 
     return true;
 }
 
-bool SpiPeripheralESPImpl::isInitialized() const FL_NO_EXCEPT {
+bool SpiPeripheralESPImpl::isInitialized() const FL_NOEXCEPT {
     return mBusInitialized && mDeviceAdded;
 }
 
@@ -254,9 +256,9 @@ bool SpiPeripheralESPImpl::isInitialized() const FL_NO_EXCEPT {
 // Transaction Methods
 //=============================================================================
 
-bool SpiPeripheralESPImpl::queueTransaction(const SpiTransaction& trans) FL_NO_EXCEPT {
+bool SpiPeripheralESPImpl::queueTransaction(const SpiTransaction& trans) FL_NOEXCEPT {
     if (!mDeviceAdded) {
-        FL_WARN_F("SpiPeripheralESP: Cannot queue transaction - device not added");
+        FL_WARN("SpiPeripheralESP: Cannot queue transaction - device not added");
         return false;
     }
 
@@ -271,16 +273,16 @@ bool SpiPeripheralESPImpl::queueTransaction(const SpiTransaction& trans) FL_NO_E
     // portMAX_DELAY = block until queue has space
     esp_err_t err = ::spi_device_queue_trans(mDeviceHandle, &esp_trans, portMAX_DELAY);
     if (err != ESP_OK) {
-        FL_WARN_F("SpiPeripheralESP: Failed to queue transaction: %s", err);
+        FL_WARN("SpiPeripheralESP: Failed to queue transaction: " << err);
         return false;
     }
 
     return true;
 }
 
-bool SpiPeripheralESPImpl::pollTransaction(u32 timeout_ms) FL_NO_EXCEPT {
+bool SpiPeripheralESPImpl::pollTransaction(u32 timeout_ms) FL_NOEXCEPT {
     if (!mDeviceAdded) {
-        FL_WARN_F("SpiPeripheralESP: Cannot poll transaction - device not added");
+        FL_WARN("SpiPeripheralESP: Cannot poll transaction - device not added");
         return false;
     }
 
@@ -295,14 +297,14 @@ bool SpiPeripheralESPImpl::pollTransaction(u32 timeout_ms) FL_NO_EXCEPT {
     }
 
     if (err != ESP_OK) {
-        FL_WARN_F("SpiPeripheralESP: Failed to get transaction result: %s", err);
+        FL_WARN("SpiPeripheralESP: Failed to get transaction result: " << err);
         return false;
     }
 
     return true;
 }
 
-bool SpiPeripheralESPImpl::registerCallback(void* callback, void* user_ctx) FL_NO_EXCEPT {
+bool SpiPeripheralESPImpl::registerCallback(void* callback, void* user_ctx) FL_NOEXCEPT {
     // Store callback and user context
     mCallback = callback;
     mUserContext = user_ctx;
@@ -310,7 +312,7 @@ bool SpiPeripheralESPImpl::registerCallback(void* callback, void* user_ctx) FL_N
     // Note: The callback will be registered when addDevice() is called
     // (ESP-IDF requires callback to be set in device config)
 
-    FL_DBG_F("SpiPeripheralESP: Callback registered");
+    FL_DBG("SpiPeripheralESP: Callback registered");
     return true;
 }
 
@@ -318,7 +320,7 @@ bool SpiPeripheralESPImpl::registerCallback(void* callback, void* user_ctx) FL_N
 // DMA Memory Management
 //=============================================================================
 
-u8* SpiPeripheralESPImpl::allocateDma(size_t size) FL_NO_EXCEPT {
+u8* SpiPeripheralESPImpl::allocateDma(size_t size) FL_NOEXCEPT {
     // Round up to 4-byte multiple (ESP32 DMA alignment requirement)
     size_t aligned_size = (size + 3) & ~3;
 
@@ -328,13 +330,13 @@ u8* SpiPeripheralESPImpl::allocateDma(size_t size) FL_NO_EXCEPT {
     );
 
     if (buffer == nullptr) {
-        FL_WARN_F("SpiPeripheralESP: Failed to allocate DMA buffer (%s bytes)", size);
+        FL_WARN("SpiPeripheralESP: Failed to allocate DMA buffer (" << size << " bytes)");
     }
 
     return buffer;
 }
 
-void SpiPeripheralESPImpl::freeDma(u8* buffer) FL_NO_EXCEPT {
+void SpiPeripheralESPImpl::freeDma(u8* buffer) FL_NOEXCEPT {
     if (buffer != nullptr) {
         ::heap_caps_free(buffer);
     }
@@ -344,11 +346,11 @@ void SpiPeripheralESPImpl::freeDma(u8* buffer) FL_NO_EXCEPT {
 // Platform Utilities
 //=============================================================================
 
-void SpiPeripheralESPImpl::delay(u32 ms) FL_NO_EXCEPT {
+void SpiPeripheralESPImpl::delay(u32 ms) FL_NOEXCEPT {
     ::vTaskDelay(pdMS_TO_TICKS(ms));
 }
 
-u64 SpiPeripheralESPImpl::getMicroseconds() FL_NO_EXCEPT {
+u64 SpiPeripheralESPImpl::getMicroseconds() FL_NOEXCEPT {
     return ::esp_timer_get_time();
 }
 

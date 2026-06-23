@@ -34,7 +34,7 @@ void init() {
         return;  // Already initialized
     }
 
-    FL_DBG_F("WASM: Platform initialization starting");
+    FL_DBG("WASM: Platform initialization starting");
 
     // Initialize driver listener system
     // This connects FastLED driver events to the JavaScript runtime
@@ -45,7 +45,7 @@ void init() {
     platforms::initChannelDrivers();
 
     initialized = true;
-    FL_DBG_F("WASM: Platform initialization complete");
+    FL_DBG("WASM: Platform initialization complete");
 }
 
 } // namespace platforms

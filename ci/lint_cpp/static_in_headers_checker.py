@@ -1,0 +1,173 @@
+#!/usr/bin/env python3
+"""
+Lint check: Prevent function-local static variables in header files.
+
+This prevents compilation issues on platforms with older toolchains (e.g., Teensy 3.0)
+that have conflicting __cxa_guard function declarations used by C++11 static initialization.
+
+Example violation:
+    // In header.h
+    static const vector<Foo*>& getAll() {
+        static vector<Foo*> instances = create();  // ❌ FAIL: static local in header
+        return instances;
+    }
+
+Correct approach:
+    // In header.h
+    static const vector<Foo*>& getAll();  // ✅ PASS: declaration only
+
+    // In source.cpp
+    const vector<Foo*>& getAll() {
+        static vector<Foo*> instances = create();  // ✅ PASS: static local in cpp
+        return instances;
+    }
+
+Exception for template functions:
+    // In header.h
+    template<typename T>
+    const T& getSingleton() {
+        static T instance;  // ✅ PASS: static in template function is okay
+        return instance;
+    }
+
+    Template functions are instantiated per template parameter, so each instantiation
+    gets its own static variable without __cxa_guard conflicts.
+"""
+
+# pyright: reportUnknownMemberType=false
+import re
+
+from ci.util.check_files import EXCLUDED_FILES, FileContent, FileContentChecker
+
+
+class StaticInHeaderChecker(FileContentChecker):
+    """Checker for function-local static variables in header files."""
+
+    # Pre-compiled regexes (class-level to avoid re-compilation per file)
+    _INLINE_FUNC_PATTERN = re.compile(r"\w+\s*\([^)]*\)\s*\{")
+    _TEMPLATE_PATTERN = re.compile(r"^\s*template\s*<")
+    _STATIC_VAR_PATTERN = re.compile(
+        r"\bstatic\s+"  # "static" keyword
+        r"(?:const\s+)?"  # optional "const"
+        r"[\w:]+(?:<[^>]+>)?\s+"  # type (with optional template args)
+        r"\w+\s*"  # variable name
+        r"[=({]"  # followed by =, (, or {
+    )
+    _STATIC_FUNC_PATTERN = re.compile(
+        r"static\s+[\w:]+(?:<[^>]+>)?\s+\w+\s*\([^)]*\)\s*\{"
+    )
+
+    def __init__(self):
+        self.violations: dict[str, list[tuple[int, str]]] = {}
+
+    def should_process_file(self, file_path: str) -> bool:
+        """Only process header files (.h, .hpp)."""
+        # Only check header files
+        if not file_path.endswith((".h", ".hpp")):
+            return False
+
+        # Exclude .cpp.hpp files (unity build implementation files, not traditional headers)
+        if file_path.endswith(".cpp.hpp"):
+            return False
+
+        # Check if file is in excluded list
+        if any(file_path.endswith(excluded) for excluded in EXCLUDED_FILES):
+            return False
+
+        return True
+
+    def check_file_content(self, file_content: FileContent) -> list[str]:
+        """Check header file for function-local static variables."""
+        # Fast file-level check: skip if "static" not in file at all
+        if "static" not in file_content.content:
+            return []
+
+        violations: list[tuple[int, str]] = []
+        in_multiline_comment = False
+        brace_depth = 0  # Track brace nesting level
+        in_function = False  # Are we inside a function implementation?
+        in_template_function = False  # Are we inside a template function?
+
+        for line_number, line in enumerate(file_content.lines, 1):
+            stripped = line.strip()
+
+            # Track multi-line comment state
+            if "/*" in line:
+                in_multiline_comment = True
+            if "*/" in line:
+                in_multiline_comment = False
+                continue
+
+            # Skip if in multi-line comment
+            if in_multiline_comment:
+                continue
+
+            # Skip single-line comments
+            if stripped.startswith("//"):
+                continue
+
+            # Remove single-line comment portion
+            code_part = line.split("//")[0]
+
+            # Track brace depth
+            open_braces = code_part.count("{")
+            close_braces = code_part.count("}")
+
+            # Detect template declaration - next function will be a template function
+            # Fast first pass: skip regex if "template" not in line
+            if "template" in code_part and self._TEMPLATE_PATTERN.search(code_part):
+                in_template_function = True
+
+            # Detect entering a function body (inline implementation)
+            # Fast first pass: only run regex if line has both "(" and "{"
+            if (
+                "(" in code_part
+                and "{" in code_part
+                and self._INLINE_FUNC_PATTERN.search(code_part)
+            ):
+                in_function = True
+                brace_depth = open_braces - close_braces
+            elif in_function:
+                brace_depth += open_braces - close_braces
+
+            # Exit function when braces balance
+            if in_function and brace_depth <= 0:
+                in_function = False
+                in_template_function = False  # Reset template state when function ends
+                brace_depth = 0
+
+            # Look for "static" keyword followed by variable declaration inside functions
+            # But NOT: static Type func() { ... } (static member functions)
+            # EXCEPTION: Allow statics inside template functions
+            if in_function and brace_depth > 0 and not in_template_function:
+                # Fast first pass: skip regex if "static" not in line
+                if "static" in code_part and self._STATIC_VAR_PATTERN.search(code_part):
+                    # Skip if line contains function definition pattern (false positive)
+                    if not self._STATIC_FUNC_PATTERN.search(code_part):
+                        # Allow suppression
+                        if "// okay static in header" not in line:
+                            violations.append((line_number, stripped))
+
+        # Store violations if any found
+        if violations:
+            self.violations[file_content.path] = violations
+
+        return []  # MUST return empty list
+
+
+def main() -> None:
+    """Run static in headers checker standalone."""
+    from ci.util.check_files import run_checker_standalone
+    from ci.util.paths import PROJECT_ROOT
+
+    checker = StaticInHeaderChecker()
+    run_checker_standalone(
+        checker,
+        [str(PROJECT_ROOT / "src")],
+        "Found function-local static variables in headers",
+        extensions=[".h", ".hpp"],
+    )
+
+
+if __name__ == "__main__":
+    main()

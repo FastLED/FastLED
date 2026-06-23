@@ -50,7 +50,7 @@ class Blend2d : public Fx2d {
         Fx2dPtr fx;
         u8 blur_amount = 0;
         u8 blur_passes = 1;
-        Entry() FL_NO_EXCEPT = default;
+        Entry() FL_NOEXCEPT = default;
         Entry(Fx2dPtr fx, u8 blur_amount, u8 blur_passes)
             : fx(fx), blur_amount(blur_amount), blur_passes(blur_passes) {}
     };

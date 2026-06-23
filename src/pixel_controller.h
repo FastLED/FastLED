@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 /// @file pixel_controller.h
 /// Low level pixel data writing class
@@ -232,18 +232,18 @@ struct PixelController {
 //
 // THE PROBLEM:
 //   Integer scaling causes color shifts at low brightness. For example:
-//     CRGB(100, 60, 20) at 20% brightness â†’ RGB(19, 11, 3)
+//     CRGB(100, 60, 20) at 20% brightness → RGB(19, 11, 3)
 //   Each channel loses different fractional precision, distorting the color.
 //
 // THE SOLUTION:
 //   Add frame-varying noise BEFORE scaling, causing different rounding outcomes:
 //     Frame 1: scale8(100+0, 51) = 19
-//     Frame 2: scale8(100+3, 51) = 20  â† noise pushed over threshold
+//     Frame 2: scale8(100+3, 51) = 20  ← noise pushed over threshold
 //   Your eye averages these to perceive the correct fractional brightness.
 //
 // THE ALGORITHM:
 //   1. Frame counter R cycles 0-7, creating an 8-frame pattern
-//   2. Bit-reverse R to Q (0â†’0, 1â†’128, 2â†’64...) to distribute pattern temporally
+//   2. Bit-reverse R to Q (0→0, 1→128, 2→64...) to distribute pattern temporally
 //   3. Center pattern: Q += 16
 //   4. Scale per channel: e[i] = 256/brightness, d[i] = scale8(Q, e[i])
 //      Lower brightness needs BIGGER dither to compensate for larger % error
@@ -251,7 +251,7 @@ struct PixelController {
 //   6. Apply: pixel = scale8(qadd8(pixel, d[i]), brightness)
 //
 // VIRTUAL BITS:
-//   8-frame cycle at 400Hz = 50Hz complete cycle â†’ +3 "virtual" bits
+//   8-frame cycle at 400Hz = 50Hz complete cycle → +3 "virtual" bits
 //   Result: 8-bit hardware provides 11-bit perceived precision (0-2047 levels)
 //
 // DISABLE FOR:
@@ -317,10 +317,10 @@ struct PixelController {
         R &= (0x01 << ditherBits) - 1;
 
         // STEP 3: Bit-reverse R to create maximally-spaced pattern Q
-        // Why? Prevents visible ramping patterns. Turns 0,1,2,3,4,5,6,7 â†’ 0,128,64,192,32,160,96,224
+        // Why? Prevents visible ramping patterns. Turns 0,1,2,3,4,5,6,7 → 0,128,64,192,32,160,96,224
         fl::u8 Q = 0;
 
-        // Bit reversal magic: mirrors bit positions (bit 0 â†” bit 7, bit 1 â†” bit 6, etc.)
+        // Bit reversal magic: mirrors bit positions (bit 0 ↔ bit 7, bit 1 ↔ bit 6, etc.)
         {
             if(R & 0x01) { Q |= 0x80; }
             if(R & 0x02) { Q |= 0x40; }
@@ -346,7 +346,7 @@ struct PixelController {
                 fl::u8 s = mColorAdjustment.premixed.raw[i];  // Brightness scale factor
 
                 // Calculate max dither range: e = 256/brightness
-                // At 100% (255): eâ‰ˆ1 (tiny range), At 20% (51): eâ‰ˆ5 (large range)
+                // At 100% (255): e≈1 (tiny range), At 20% (51): e≈5 (large range)
                 e[i] = s ? (256/s) + 1 : 0;
 
                 // Scale Q by the dither range to get current offset
@@ -457,18 +457,18 @@ struct PixelController {
     /// @{
 
 
-    /// Complete pipeline: load â†’ dither â†’ scale (THE MAGIC HAPPENS HERE!)
+    /// Complete pipeline: load → dither → scale (THE MAGIC HAPPENS HERE!)
     /// Order is critical: pixel + dither FIRST, then scale by brightness
     template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadAndScale(PixelController & pc) {
         return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc)));
     }
 
-    /// Complete pipeline: load â†’ dither â†’ scale (parallel output version)
+    /// Complete pipeline: load → dither → scale (parallel output version)
     template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadAndScale(PixelController & pc, int lane) {
         return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane)));
     }
 
-    /// Complete pipeline: load â†’ dither â†’ scale (explicit dither/scale values)
+    /// Complete pipeline: load → dither → scale (explicit dither/scale values)
     template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadAndScale(PixelController & pc, int lane, fl::u8 d, fl::u8 scale) {
         return fl::scale8(pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane), d), scale);
     }
@@ -640,9 +640,9 @@ struct PixelController {
         // AVR: float colorimetric math is too expensive on the 8-bit core;
         // the strip will get RGB-only output with both white channels black.
         // Surface this with a FL_WARN_ONCE so the silent dropout is visible
-        // when debugging â€” a user configuring RGBWW on an AVR target almost
+        // when debugging — a user configuring RGBWW on an AVR target almost
         // certainly didn't expect their warm/cool W channels to be inert.
-        FL_WARN_F_ONCE("RGBWW colorimetric is not supported on AVR â€” the warm "
+        FL_WARN_ONCE("RGBWW colorimetric is not supported on AVR — the warm "
                      "and cool white channels will be black. Use an ESP32 / "
                      "Teensy / RP2040 target for full RGBWW support.");
         fl::u8 r_pre = loadAndScale0();

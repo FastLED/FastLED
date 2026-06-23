@@ -1,13 +1,13 @@
 // IWYU pragma: private
 
 #include "fl/system/sketch_macros.h"
-#include "fl/stl/json/types.h"
 
-#if SKETCH_HAS_LARGE_MEMORY && FL_JSON_FLOAT_ENABLED
+#if SKETCH_HAS_LARGE_MEMORY
 
 
 #include "platforms/shared/ui/json/json_console.h"
 #include "fl/log/log.h"
+#include "fl/stl/json.h"
 #include "fl/stl/json.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/stdint.h"
@@ -22,7 +22,7 @@ namespace fl {
 JsonConsole::JsonConsole(ReadAvailableCallback ReadAvailableCallback, 
                          ReadCallback readCallback, 
                          WriteCallback writeCallback)
- FL_NO_EXCEPT : mReadAvailableCallback(ReadAvailableCallback)
+ FL_NOEXCEPT : mReadAvailableCallback(ReadAvailableCallback)
     , mReadCallback(readCallback)
     , mWriteCallback(writeCallback) {
 }
@@ -46,21 +46,21 @@ JsonConsole::~JsonConsole() {
     // with other components. The manager will handle cleanup automatically.
 }
 
-void JsonConsole::init() FL_NO_EXCEPT {
+void JsonConsole::init() FL_NOEXCEPT {
     // Set up JsonUI handlers - we capture component data but don't send it anywhere
     mUpdateEngineState = setJsonUiHandlers([this](const char* jsonStr) {
         this->processJsonFromUI(jsonStr);
     });
     
     if (!mUpdateEngineState) {
-        FL_WARN_F("JsonConsole::init: Failed to set up JsonUI handlers");
+        FL_WARN("JsonConsole::init: Failed to set up JsonUI handlers");
         return;
     }
     
     writeOutput("JsonConsole initialized. Type 'help' for commands.");
 }
 
-void JsonConsole::update() FL_NO_EXCEPT {
+void JsonConsole::update() FL_NOEXCEPT {
     if (!mUpdateEngineState) {
         return; // Not initialized
     }
@@ -68,11 +68,11 @@ void JsonConsole::update() FL_NO_EXCEPT {
     readInputFromSerial();
 }
 
-bool JsonConsole::executeCommand(const fl::string& command) FL_NO_EXCEPT {
-    FL_WARN_F("JsonConsole::executeCommand called with: '%s'", command.c_str());
+bool JsonConsole::executeCommand(const fl::string& command) FL_NOEXCEPT {
+    FL_WARN("JsonConsole::executeCommand called with: '" << command.c_str() << "'");
     
     if (command.empty()) {
-        FL_WARN_F("JsonConsole::executeCommand: Command is empty");
+        FL_WARN("JsonConsole::executeCommand: Command is empty");
         return false;
     }
     
@@ -86,16 +86,16 @@ bool JsonConsole::executeCommand(const fl::string& command) FL_NO_EXCEPT {
         trimmed = trimmed.substr(0, trimmed.size()-1);
     }
     
-    FL_WARN_F("JsonConsole::executeCommand: Trimmed command: '%s'", trimmed.c_str());
+    FL_WARN("JsonConsole::executeCommand: Trimmed command: '" << trimmed.c_str() << "'");
     
     if (trimmed.empty()) {
-        FL_WARN_F("JsonConsole::executeCommand: Trimmed command is empty");
+        FL_WARN("JsonConsole::executeCommand: Trimmed command is empty");
         return false;
     }
     
     // Handle help command
     if (trimmed == "help") {
-        FL_WARN_F("JsonConsole::executeCommand: Executing help command");
+        FL_WARN("JsonConsole::executeCommand: Executing help command");
         writeOutput("Available commands:");
         writeOutput("  <component_name>: <value>  - Set component value by name");
         writeOutput("  <component_id>: <value>    - Set component value by ID");
@@ -106,13 +106,13 @@ bool JsonConsole::executeCommand(const fl::string& command) FL_NO_EXCEPT {
         return true;
     }
     
-    FL_WARN_F("JsonConsole::executeCommand: Calling parseCommand");
+    FL_WARN("JsonConsole::executeCommand: Calling parseCommand");
     parseCommand(trimmed);
-    FL_WARN_F("JsonConsole::executeCommand: parseCommand completed");
+    FL_WARN("JsonConsole::executeCommand: parseCommand completed");
     return true;
 }
 
-void JsonConsole::processJsonFromUI(const char* jsonStr) FL_NO_EXCEPT {
+void JsonConsole::processJsonFromUI(const char* jsonStr) FL_NOEXCEPT {
     if (!jsonStr) {
         return;
     }
@@ -121,7 +121,7 @@ void JsonConsole::processJsonFromUI(const char* jsonStr) FL_NO_EXCEPT {
     updateComponentMapping(jsonStr);
 }
 
-void JsonConsole::readInputFromSerial() FL_NO_EXCEPT {
+void JsonConsole::readInputFromSerial() FL_NOEXCEPT {
     if (!mReadAvailableCallback || !mReadCallback) {
         return;
     }
@@ -152,12 +152,12 @@ void JsonConsole::readInputFromSerial() FL_NO_EXCEPT {
     }
 }
 
-void JsonConsole::parseCommand(const fl::string& command) FL_NO_EXCEPT {
-    FL_WARN_F("JsonConsole::parseCommand: Parsing command '%s'", command.c_str());
+void JsonConsole::parseCommand(const fl::string& command) FL_NOEXCEPT {
+    FL_WARN("JsonConsole::parseCommand: Parsing command '" << command.c_str() << "'");
     
     // Look for pattern: "name: value"
     i16 colonPos = command.find(':');
-    FL_WARN_F("JsonConsole::parseCommand: Colon position: %s", colonPos);
+    FL_WARN("JsonConsole::parseCommand: Colon position: " << colonPos);
     
     if (colonPos == -1) {
         writeOutput("Error: Command format should be 'name: value'");
@@ -168,8 +168,8 @@ void JsonConsole::parseCommand(const fl::string& command) FL_NO_EXCEPT {
     fl::string name = command.substring(0, static_cast<fl::size>(colonPos - 1));
     fl::string valueStr = command.substring(static_cast<fl::size>(colonPos + 1), command.size());
     
-    FL_WARN_F("JsonConsole::parseCommand: Raw name: '%s'", name.c_str());
-    FL_WARN_F("JsonConsole::parseCommand: Raw valueStr: '%s'", valueStr.c_str());
+    FL_WARN("JsonConsole::parseCommand: Raw name: '" << name.c_str() << "'");
+    FL_WARN("JsonConsole::parseCommand: Raw valueStr: '" << valueStr.c_str() << "'");
     
     // Trim whitespace from name and value
     while (!name.empty() && name[name.size()-1] == ' ') {
@@ -179,8 +179,8 @@ void JsonConsole::parseCommand(const fl::string& command) FL_NO_EXCEPT {
         valueStr = valueStr.substring(1, valueStr.size());
     }
     
-    FL_WARN_F("JsonConsole::parseCommand: Trimmed name: '%s'", name.c_str());
-    FL_WARN_F("JsonConsole::parseCommand: Trimmed valueStr: '%s'", valueStr.c_str());
+    FL_WARN("JsonConsole::parseCommand: Trimmed name: '" << name.c_str() << "'");
+    FL_WARN("JsonConsole::parseCommand: Trimmed valueStr: '" << valueStr.c_str() << "'");
     
     if (name.empty() || valueStr.empty()) {
         writeOutput("Error: Both name and value are required");
@@ -213,11 +213,11 @@ void JsonConsole::parseCommand(const fl::string& command) FL_NO_EXCEPT {
     }
 }
 
-bool JsonConsole::setSliderValue(const fl::string& name, float value) FL_NO_EXCEPT {
-    FL_WARN_F("JsonConsole::setSliderValue: Looking for component '%s' with value %s", name.c_str(), value);
-    FL_WARN_F("JsonConsole: Component mapping size: %s", mComponentNameToId.size());
+bool JsonConsole::setSliderValue(const fl::string& name, float value) FL_NOEXCEPT {
+    FL_WARN("JsonConsole::setSliderValue: Looking for component '" << name.c_str() << "' with value " << value);
+    FL_WARN("JsonConsole: Component mapping size: " << mComponentNameToId.size());
     for (const auto& pair : mComponentNameToId) {
-        FL_WARN_F("JsonConsole: Available component: '%s' -> ID %s", pair.first.c_str(), pair.second);
+        FL_WARN("JsonConsole: Available component: '" << pair.first.c_str() << "' -> ID " << pair.second);
     }
     
     int componentId = -1;
@@ -230,7 +230,7 @@ bool JsonConsole::setSliderValue(const fl::string& name, float value) FL_NO_EXCE
     if (endptr != cstr && *endptr == '\0' && parsed >= 0 && parsed <= 2147483647L) {
         // Successfully parsed as a valid integer ID
         componentId = static_cast<int>(parsed);
-        FL_WARN_F("JsonConsole: Using numeric ID: %s", componentId);
+        FL_WARN("JsonConsole: Using numeric ID: " << componentId);
     } else {
         // Not a valid integer, try to find component ID by name
         auto it = mComponentNameToId.find(name);
@@ -245,12 +245,12 @@ bool JsonConsole::setSliderValue(const fl::string& name, float value) FL_NO_EXCE
         }
         
         if (!componentIdPtr) {
-            FL_WARN_F("JsonConsole: Component '%s' not found in mapping", name.c_str());
+            FL_WARN("JsonConsole: Component '" << name.c_str() << "' not found in mapping");
             return false; // Component not found
         }
         
         componentId = *componentIdPtr;
-        FL_WARN_F("JsonConsole: Found component ID: %s", componentId);
+        FL_WARN("JsonConsole: Found component ID: " << componentId);
     }
     
     // Create JSON to update the component using new json
@@ -265,19 +265,19 @@ bool JsonConsole::setSliderValue(const fl::string& name, float value) FL_NO_EXCE
     // Convert to string and send to driver
     fl::string jsonStr = doc.to_string();
     
-    FL_WARN_F("JsonConsole: Sending JSON to driver: %s", jsonStr.c_str());
+    FL_WARN("JsonConsole: Sending JSON to driver: " << jsonStr.c_str());
     mUpdateEngineState(jsonStr.c_str());
     
     // Force immediate processing of pending updates (for testing environments)
     // In normal operation, this happens during the driver loop
-    FL_WARN_F("JsonConsole: Calling processJsonUiPendingUpdates()");
+    FL_WARN("JsonConsole: Calling processJsonUiPendingUpdates()");
     processJsonUiPendingUpdates();
     
-    FL_WARN_F("JsonConsole: setSliderValue completed successfully");
+    FL_WARN("JsonConsole: setSliderValue completed successfully");
     return true;
 }
 
-void JsonConsole::updateComponentMapping(const char* jsonStr) FL_NO_EXCEPT {
+void JsonConsole::updateComponentMapping(const char* jsonStr) FL_NOEXCEPT {
     if (!jsonStr) {
         return;
     }
@@ -309,13 +309,13 @@ void JsonConsole::updateComponentMapping(const char* jsonStr) FL_NO_EXCEPT {
     }
 }
 
-void JsonConsole::writeOutput(const fl::string& message) FL_NO_EXCEPT {
+void JsonConsole::writeOutput(const fl::string& message) FL_NOEXCEPT {
     if (mWriteCallback) {
         mWriteCallback(message.c_str());
     }
 }
 
-void JsonConsole::dump(fl::sstream& out) FL_NO_EXCEPT {
+void JsonConsole::dump(fl::sstream& out) FL_NOEXCEPT {
     out << "=== JsonConsole State Dump ===\n";
     
     // Initialization status
@@ -349,4 +349,4 @@ void JsonConsole::dump(fl::sstream& out) FL_NO_EXCEPT {
 
 } // namespace fl
 
-#endif // SKETCH_HAS_LARGE_MEMORY && FL_JSON_FLOAT_ENABLED
+#endif // SKETCH_HAS_LARGE_MEMORY

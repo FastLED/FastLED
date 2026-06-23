@@ -20,19 +20,19 @@ private:
 
 public:
     JsonUiAudioInternal(const fl::string& name)
- FL_NO_EXCEPT : JsonUiInternal(name) {}
+ FL_NOEXCEPT : JsonUiInternal(name) {}
 
     JsonUiAudioInternal(const fl::string& name, const fl::url& url)
- FL_NO_EXCEPT : JsonUiInternal(name), mUrl(url) {}
+ FL_NOEXCEPT : JsonUiInternal(name), mUrl(url) {}
 
-    void toJson(fl::json& json) const FL_NO_EXCEPT override;
-    void updateInternal(const fl::json& json) FL_NO_EXCEPT override;
+    void toJson(fl::json& json) const FL_NOEXCEPT override;
+    void updateInternal(const fl::json& json) FL_NOEXCEPT override;
 
     // Accessors for audio data
-    fl::vector<audio::SampleImplPtr>& audioSamples() FL_NO_EXCEPT { return mAudioSampleImpls; }
-    const fl::vector<audio::SampleImplPtr>& audioSamples() const FL_NO_EXCEPT { return mAudioSampleImpls; }
+    fl::vector<audio::SampleImplPtr>& audioSamples() FL_NOEXCEPT { return mAudioSampleImpls; }
+    const fl::vector<audio::SampleImplPtr>& audioSamples() const FL_NOEXCEPT { return mAudioSampleImpls; }
 
-    const fl::url& url() const FL_NO_EXCEPT { return mUrl; }
+    const fl::url& url() const FL_NOEXCEPT { return mUrl; }
 
 private:
     fl::url mUrl;

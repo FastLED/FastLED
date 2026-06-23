@@ -20,7 +20,7 @@ namespace fl {
 // ============================================================================
 
 SpiHw16Stub::SpiHw16Stub(int bus_id, const char* name)
- FL_NO_EXCEPT : mBusId(bus_id)
+ FL_NOEXCEPT : mBusId(bus_id)
     , mName(name)
     , mInitialized(false)
     , mBusy(false)
@@ -30,7 +30,7 @@ SpiHw16Stub::SpiHw16Stub(int bus_id, const char* name)
     , mBufferAcquired(false) {
 }
 
-bool SpiHw16Stub::begin(const SpiHw16::Config& config) FL_NO_EXCEPT {
+bool SpiHw16Stub::begin(const SpiHw16::Config& config) FL_NOEXCEPT {
     if (mInitialized) {
         return true;  // Already initialized
     }
@@ -45,7 +45,7 @@ bool SpiHw16Stub::begin(const SpiHw16::Config& config) FL_NO_EXCEPT {
     return true;
 }
 
-void SpiHw16Stub::end() FL_NO_EXCEPT {
+void SpiHw16Stub::end() FL_NOEXCEPT {
     mInitialized = false;
     mBusy = false;
     mLastBuffer.clear();
@@ -55,7 +55,7 @@ void SpiHw16Stub::end() FL_NO_EXCEPT {
     mBufferAcquired = false;
 }
 
-DMABuffer SpiHw16Stub::acquireDMABuffer(size_t bytes_per_lane) FL_NO_EXCEPT {
+DMABuffer SpiHw16Stub::acquireDMABuffer(size_t bytes_per_lane) FL_NOEXCEPT {
     if (!mInitialized) {
         return DMABuffer(SPIError::NOT_INITIALIZED);
     }
@@ -82,7 +82,7 @@ DMABuffer SpiHw16Stub::acquireDMABuffer(size_t bytes_per_lane) FL_NO_EXCEPT {
     return mCurrentBuffer;
 }
 
-bool SpiHw16Stub::transmit(TransmitMode mode) FL_NO_EXCEPT {
+bool SpiHw16Stub::transmit(TransmitMode mode) FL_NOEXCEPT {
     (void)mode;  // Unused in stub
 
     if (!mInitialized || !mBufferAcquired) {
@@ -107,7 +107,7 @@ bool SpiHw16Stub::transmit(TransmitMode mode) FL_NO_EXCEPT {
     return true;
 }
 
-bool SpiHw16Stub::waitComplete(u32 timeout_ms) FL_NO_EXCEPT {
+bool SpiHw16Stub::waitComplete(u32 timeout_ms) FL_NOEXCEPT {
     (void)timeout_ms;  // Unused in mock
     mBusy = false;
 
@@ -117,45 +117,45 @@ bool SpiHw16Stub::waitComplete(u32 timeout_ms) FL_NO_EXCEPT {
     return true;  // Always succeeds instantly
 }
 
-bool SpiHw16Stub::isBusy() const FL_NO_EXCEPT {
+bool SpiHw16Stub::isBusy() const FL_NOEXCEPT {
     return mBusy;
 }
 
-bool SpiHw16Stub::isInitialized() const FL_NO_EXCEPT {
+bool SpiHw16Stub::isInitialized() const FL_NOEXCEPT {
     return mInitialized;
 }
 
-int SpiHw16Stub::getBusId() const FL_NO_EXCEPT {
+int SpiHw16Stub::getBusId() const FL_NOEXCEPT {
     return mBusId;
 }
 
-const char* SpiHw16Stub::getName() const FL_NO_EXCEPT {
+const char* SpiHw16Stub::getName() const FL_NOEXCEPT {
     return mName;
 }
 
-const fl::vector<u8>& SpiHw16Stub::getLastTransmission() const FL_NO_EXCEPT {
+const fl::vector<u8>& SpiHw16Stub::getLastTransmission() const FL_NOEXCEPT {
     return mLastBuffer;
 }
 
-u32 SpiHw16Stub::getTransmissionCount() const FL_NO_EXCEPT {
+u32 SpiHw16Stub::getTransmissionCount() const FL_NOEXCEPT {
     return mTransmitCount;
 }
 
-u32 SpiHw16Stub::getClockSpeed() const FL_NO_EXCEPT {
+u32 SpiHw16Stub::getClockSpeed() const FL_NOEXCEPT {
     return mClockSpeed;
 }
 
-bool SpiHw16Stub::isTransmissionActive() const FL_NO_EXCEPT {
+bool SpiHw16Stub::isTransmissionActive() const FL_NOEXCEPT {
     return mBusy;
 }
 
-void SpiHw16Stub::reset() FL_NO_EXCEPT {
+void SpiHw16Stub::reset() FL_NOEXCEPT {
     mLastBuffer.clear();
     mTransmitCount = 0;
     mBusy = false;
 }
 
-fl::vector<fl::vector<u8>> SpiHw16Stub::extractLanes(u8 num_lanes, size_t bytes_per_lane) const FL_NO_EXCEPT {
+fl::vector<fl::vector<u8>> SpiHw16Stub::extractLanes(u8 num_lanes, size_t bytes_per_lane) const FL_NOEXCEPT {
     fl::vector<fl::vector<u8>> lanes(num_lanes);
 
     // Pre-allocate per-lane buffers
@@ -203,12 +203,12 @@ fl::vector<fl::vector<u8>> SpiHw16Stub::extractLanes(u8 num_lanes, size_t bytes_
 
 namespace {
 // Singleton getters for mock controller instances (Meyer's Singleton pattern)
-fl::shared_ptr<SpiHw16Stub>& getController2_Spi16() FL_NO_EXCEPT {
+fl::shared_ptr<SpiHw16Stub>& getController2_Spi16() FL_NOEXCEPT {
     static fl::shared_ptr<SpiHw16Stub> instance = fl::make_shared<SpiHw16Stub>(2, "MockHexadeca2");
     return instance;
 }
 
-fl::shared_ptr<SpiHw16Stub>& getController3_Spi16() FL_NO_EXCEPT {
+fl::shared_ptr<SpiHw16Stub>& getController3_Spi16() FL_NOEXCEPT {
     static fl::shared_ptr<SpiHw16Stub> instance = fl::make_shared<SpiHw16Stub>(3, "MockHexadeca3");
     return instance;
 }
@@ -224,11 +224,11 @@ namespace platforms {
 ///
 /// Called lazily on first access to SpiHw16::getAll().
 /// Registers mock SpiHw16 controller instances for testing.
-void initSpiHw16Instances() FL_NO_EXCEPT {
-    FL_WARN_F("Registering SpiHw16 stub instances...");
+void initSpiHw16Instances() FL_NOEXCEPT {
+    FL_WARN("Registering SpiHw16 stub instances...");
     SpiHw16::registerInstance(getController2_Spi16());
     SpiHw16::registerInstance(getController3_Spi16());
-    FL_WARN_F("SpiHw16 stub instances registered!");
+    FL_WARN("SpiHw16 stub instances registered!");
 }
 
 }  // namespace platforms

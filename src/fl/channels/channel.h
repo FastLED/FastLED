@@ -58,7 +58,7 @@ public:
     static ChannelPtr create(const ChannelConfig& config);
 
     /// @brief Destructor
-    virtual ~Channel() FL_NO_EXCEPT;
+    virtual ~Channel() FL_NOEXCEPT;
 
     /// @brief Get the channel ID
     /// @return Channel ID (always increments, starts at 0)
@@ -185,7 +185,7 @@ public:
 private:
     /// @brief Friend declaration for make_shared to access private constructor
     template<typename T, typename... Args>
-    friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NO_EXCEPT;
+    friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NOEXCEPT;
 
 protected:
     // CPixelLEDController interface implementation - protected so subclass delegates
@@ -223,7 +223,7 @@ protected:
     /// @note Stored as `weak_ptr` to avoid holding the driver alive past the
     ///       caller's intent. The caller (typically the static singleton in a
     ///       BusTraits) owns the strong reference.
-    void setDriver(fl::shared_ptr<IChannelDriver> driver) FL_NO_EXCEPT {
+    void setDriver(fl::shared_ptr<IChannelDriver> driver) FL_NOEXCEPT {
         mDriver = driver;
         mDriverPreBound = true;
     }
@@ -243,10 +243,10 @@ private:
             EOrder rgbOrder, const ChannelOptions& options);
 
     // Non-copyable, non-movable
-    Channel(const Channel&) FL_NO_EXCEPT = delete;
-    Channel& operator=(const Channel&) FL_NO_EXCEPT = delete;
-    Channel(Channel&&) FL_NO_EXCEPT = delete;
-    Channel& operator=(Channel&&) FL_NO_EXCEPT = delete;
+    Channel(const Channel&) FL_NOEXCEPT = delete;
+    Channel& operator=(const Channel&) FL_NOEXCEPT = delete;
+    Channel(Channel&&) FL_NOEXCEPT = delete;
+    Channel& operator=(Channel&&) FL_NOEXCEPT = delete;
 
     static i32 nextId();
     static fl::string makeName(i32 id, const fl::optional<fl::string>& configName = fl::optional<fl::string>());

@@ -20,7 +20,7 @@ Mp3HelixDecoder::Mp3HelixDecoder()
     fl::memset(&mFrameInfo, 0, sizeof(mFrameInfo));
 }
 
-Mp3HelixDecoder::~Mp3HelixDecoder() FL_NO_EXCEPT {
+Mp3HelixDecoder::~Mp3HelixDecoder() FL_NOEXCEPT {
     reset();
 }
 
@@ -124,8 +124,8 @@ fl::vector<audio::Sample> Mp3HelixDecoder::decodeToAudioSamples(const fl::u8* da
 // Mp3StreamDecoderImpl - internal implementation of streaming MP3 decoder
 class Mp3StreamDecoderImpl {
   public:
-    Mp3StreamDecoderImpl() FL_NO_EXCEPT;
-    ~Mp3StreamDecoderImpl() FL_NO_EXCEPT;
+    Mp3StreamDecoderImpl() FL_NOEXCEPT;
+    ~Mp3StreamDecoderImpl() FL_NOEXCEPT;
 
     bool begin(fl::filebuf_ptr stream);
     void end();
@@ -162,7 +162,7 @@ Mp3StreamDecoderImpl::Mp3StreamDecoderImpl()
     mBuffer.reserve(BUFFER_SIZE);
 }
 
-Mp3StreamDecoderImpl::~Mp3StreamDecoderImpl() FL_NO_EXCEPT {
+Mp3StreamDecoderImpl::~Mp3StreamDecoderImpl() FL_NOEXCEPT {
     end();
 }
 
@@ -362,7 +362,7 @@ bool Mp3StreamDecoderImpl::decodeNextFrame(audio::Sample* out_sample) {
 // Mp3Decoder implementation
 Mp3Decoder::Mp3Decoder() : mImpl(fl::make_unique<third_party::Mp3StreamDecoderImpl>()) {}
 
-Mp3Decoder::~Mp3Decoder() FL_NO_EXCEPT = default;
+Mp3Decoder::~Mp3Decoder() FL_NOEXCEPT = default;
 
 bool Mp3Decoder::begin(fl::filebuf_ptr stream) {
     return mImpl->begin(stream);

@@ -1,4 +1,4 @@
-﻿// IWYU pragma: private
+// IWYU pragma: private
 
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h"
 
@@ -82,7 +82,7 @@ namespace {
  */
 inline u32 ticksToNs(u32 ticks, u32 ns_per_tick) {
     // Convert RMT ticks to nanoseconds
-    // Example: 16 ticks Ã— 25 ns/tick = 400ns
+    // Example: 16 ticks × 25 ns/tick = 400ns
     return ticks * ns_per_tick;
 }
 
@@ -112,11 +112,13 @@ inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     // Reset pulse should have level=0 (low) for the long duration
     // Check duration0 with level0=0, or duration1 with level1=0
     if (rmt_sym.level0 == 0 && duration0_ns >= reset_min_ns) {
-        FL_WARN_F("isResetPulse DETECTED: duration0=%sns (level0=0), reset_min=%sns (%sus)", duration0_ns, reset_min_ns, timing.reset_min_us);
+        FL_WARN("isResetPulse DETECTED: duration0=" << duration0_ns << "ns (level0=0), reset_min="
+               << reset_min_ns << "ns (" << timing.reset_min_us << "us)");
         return true;
     }
     if (rmt_sym.level1 == 0 && duration1_ns >= reset_min_ns) {
-        FL_WARN_F("isResetPulse DETECTED: duration1=%sns (level1=0), reset_min=%sns (%sus)", duration1_ns, reset_min_ns, timing.reset_min_us);
+        FL_WARN("isResetPulse DETECTED: duration1=" << duration1_ns << "ns (level1=0), reset_min="
+               << reset_min_ns << "ns (" << timing.reset_min_us << "us)");
         return true;
     }
 
@@ -161,14 +163,16 @@ inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     // Check duration1 (most common case - gap at end of bit sequence)
     if (rmt_sym.level1 == 0 && duration1_ns > timing.t0l_max_ns &&
         duration1_ns <= timing.gap_tolerance_ns) {
-        FL_WARN_F("isGapPulse DETECTED: duration1=%sns (level1=0), t0l_max=%sns, gap_tolerance=%sns", duration1_ns, timing.t0l_max_ns, timing.gap_tolerance_ns);
+        FL_WARN("isGapPulse DETECTED: duration1=" << duration1_ns << "ns (level1=0), t0l_max="
+               << timing.t0l_max_ns << "ns, gap_tolerance=" << timing.gap_tolerance_ns << "ns");
         return true;
     }
 
     // Check duration0 (less common - gap at start)
     if (rmt_sym.level0 == 0 && duration0_ns > timing.t0l_max_ns &&
         duration0_ns <= timing.gap_tolerance_ns) {
-        FL_WARN_F("isGapPulse DETECTED: duration0=%sns (level0=0), t0l_max=%sns, gap_tolerance=%sns", duration0_ns, timing.t0l_max_ns, timing.gap_tolerance_ns);
+        FL_WARN("isGapPulse DETECTED: duration0=" << duration0_ns << "ns (level0=0), t0l_max="
+               << timing.t0l_max_ns << "ns, gap_tolerance=" << timing.gap_tolerance_ns << "ns");
         return true;
     }
 
@@ -198,7 +202,8 @@ inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     // Check if levels match expected pattern (high=1, low=0)
     if (rmt_sym.level0 != 1 || rmt_sym.level1 != 0) {
         // Unexpected level pattern - possibly inverted signal or noise
-        FL_WARN_F("decodeBit REJECTED: Invalid level pattern (level0=%s, level1=%s) - expected level0=1, level1=0", static_cast<int>(rmt_sym.level0), static_cast<int>(rmt_sym.level1));
+        FL_WARN("decodeBit REJECTED: Invalid level pattern (level0=" << static_cast<int>(rmt_sym.level0)
+               << ", level1=" << static_cast<int>(rmt_sym.level1) << ") - expected level0=1, level1=0");
         return -1;
     }
 
@@ -223,9 +228,13 @@ inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     }
 
     // Timing doesn't match either pattern - log detailed rejection reason
-    FL_WARN_F("decodeBit REJECTED: Timing mismatch (high=%sns, low=%sns)", high_ns, low_ns);
-    FL_WARN_F("  Bit0 thresholds: t0h=[%s-%s]ns (match=%s), t0l=[%s-%s]ns (match=%s)", timing.t0h_min_ns, timing.t0h_max_ns, t0h_match, timing.t0l_min_ns, timing.t0l_max_ns, t0l_match);
-    FL_WARN_F("  Bit1 thresholds: t1h=[%s-%s]ns (match=%s), t1l=[%s-%s]ns (match=%s)", timing.t1h_min_ns, timing.t1h_max_ns, t1h_match, timing.t1l_min_ns, timing.t1l_max_ns, t1l_match);
+    FL_WARN("decodeBit REJECTED: Timing mismatch (high=" << high_ns << "ns, low=" << low_ns << "ns)");
+    FL_WARN("  Bit0 thresholds: t0h=[" << timing.t0h_min_ns << "-" << timing.t0h_max_ns
+           << "]ns (match=" << t0h_match << "), t0l=[" << timing.t0l_min_ns << "-" << timing.t0l_max_ns
+           << "]ns (match=" << t0l_match << ")");
+    FL_WARN("  Bit1 thresholds: t1h=[" << timing.t1h_min_ns << "-" << timing.t1h_max_ns
+           << "]ns (match=" << t1h_match << "), t1l=[" << timing.t1l_min_ns << "-" << timing.t1l_max_ns
+           << "]ns (match=" << t1l_match << ")");
 
     return -1; // Invalid
 }
@@ -245,19 +254,19 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
                  fl::span<const RmtSymbol> symbols, fl::span<u8> bytes_out,
                  bool start_low = true) {
     if (symbols.empty()) {
-        FL_WARN_F("decodeRmtSymbols: symbols span is empty");
+        FL_WARN("decodeRmtSymbols: symbols span is empty");
         return fl::result<u32, DecodeError>::failure(
             DecodeError::INVALID_ARGUMENT);
     }
 
     if (bytes_out.empty()) {
-        FL_WARN_F("decodeRmtSymbols: bytes_out span is empty");
+        FL_WARN("decodeRmtSymbols: bytes_out span is empty");
         return fl::result<u32, DecodeError>::failure(
             DecodeError::INVALID_ARGUMENT);
     }
 
     // Calculate nanoseconds per tick for efficient conversion
-    // Example: 40MHz = 40,000,000 Hz â†’ 1,000,000,000 / 40,000,000 = 25ns per
+    // Example: 40MHz = 40,000,000 Hz → 1,000,000,000 / 40,000,000 = 25ns per
     // tick
     u32 ns_per_tick = 1000000000UL / resolution_hz;
 
@@ -310,8 +319,8 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
     //
     // EVIDENCE: Hex dump shows pattern "ff 00 00 00" repeating (R=255, G=0,
     // B=0, SPURIOUS=0x00)
-    // - Expected: 24 symbols/LED Ã— 255 LEDs = 6120 symbols total
-    // - Actual: 32 symbols/LED Ã— 255 LEDs = 8160 symbols total (33% overhead)
+    // - Expected: 24 symbols/LED × 255 LEDs = 6120 symbols total
+    // - Actual: 32 symbols/LED × 255 LEDs = 8160 symbols total (33% overhead)
     //
     // ROOT CAUSE: Unknown - could be TX encoder adding padding, RX capture
     // artifact, or timing peculiarity of the test setup. The extra 8 symbols
@@ -337,7 +346,8 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
 
             // Flush partial byte if needed
             if (bit_index != 0) {
-                FL_WARN_F("decodeRmtSymbols: partial byte at reset (bit_index=%s), flushing", bit_index);
+                FL_WARN("decodeRmtSymbols: partial byte at reset (bit_index="
+                        << bit_index << "), flushing");
                 // Shift remaining bits to MSB position
                 current_byte <<= (8 - bit_index);
 
@@ -438,7 +448,8 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
 #endif
             } else {
                 // Buffer full, stop decoding
-                FL_WARN_F("decodeRmtSymbols: output buffer overflow at byte %s", bytes_decoded);
+                FL_WARN("decodeRmtSymbols: output buffer overflow at byte "
+                        << bytes_decoded);
                 buffer_overflow = true;
                 break;
             }
@@ -472,13 +483,15 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
 
     // Determine error type and return Result
     if (buffer_overflow) {
-        FL_WARN_F("decodeRmtSymbols: buffer overflow - output buffer too small");
+        FL_WARN("decodeRmtSymbols: buffer overflow - output buffer too small");
         return fl::result<u32, DecodeError>::failure(
             DecodeError::BUFFER_OVERFLOW);
     }
 
     if (error_count >= (symbols.size() / 10)) {
-        FL_WARN_F("decodeRmtSymbols: high error rate: %s/%s symbols (%s%)", error_count, symbols.size(), (100 * error_count / symbols.size()));
+        FL_WARN("decodeRmtSymbols: high error rate: "
+                << error_count << "/" << symbols.size() << " symbols ("
+                << (100 * error_count / symbols.size()) << "%)");
         return fl::result<u32, DecodeError>::failure(
             DecodeError::HIGH_ERROR_RATE);
     }
@@ -533,7 +546,7 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
  */
 class RmtRxChannelImpl : public RmtRxChannel {
   public:
-    RmtRxChannelImpl(int pin) FL_NO_EXCEPT
+    RmtRxChannelImpl(int pin) FL_NOEXCEPT
         : mChannel(nullptr), mPin(static_cast<gpio_num_t>(pin)),
           mResolutionHz(0), mBufferSize(0), mReceiveDone(false),
           mSymbolsReceived(0), mSignalRangeMinNs(100),
@@ -559,14 +572,15 @@ class RmtRxChannelImpl : public RmtRxChannel {
         auto &memMgr = RmtMemoryManager::instance();
         mMemoryChannelId = static_cast<u8>(128 + (mPin & 0x7F));
         constexpr u32 kMinRxSymbols = 64;  // Minimum RX buffer size
-        // Status-code variant (#2856 item 3.5) â€” call site only needs success/fail.
+        // Status-code variant (#2856 item 3.5) — call site only needs success/fail.
         size_t alloc_words = 0;
         if (memMgr.tryAllocateRx(mMemoryChannelId, kMinRxSymbols, false, alloc_words)) {
             mMemoryRegistered = true;
             FL_LOG_RX("RMT RX pre-registered with memory manager in constructor (channel_id="
                       << static_cast<int>(mMemoryChannelId) << ")");
         } else {
-            FL_WARN_F("RMT RX failed to pre-register with memory manager (channel_id=%s)", static_cast<int>(mMemoryChannelId));
+            FL_WARN("RMT RX failed to pre-register with memory manager (channel_id="
+                    << static_cast<int>(mMemoryChannelId) << ")");
         }
     }
 
@@ -605,14 +619,17 @@ class RmtRxChannelImpl : public RmtRxChannel {
         }
     }
 
-    bool begin(const RxConfig &config) FL_NO_EXCEPT override {
+    bool begin(const RxConfig &config) FL_NOEXCEPT override {
         // If the DMA setting changed on an already-created channel, we have to
-        // tear it down â€” ESP-IDF bakes `flags.with_dma` into the channel at
+        // tear it down — ESP-IDF bakes `flags.with_dma` into the channel at
         // rmt_new_rx_channel() time, so toggling on a later begin() is a no-op
         // unless we rebuild. Also release the shared DMA slot and any DRAM
         // capture buffer so first-time init below allocates cleanly.
         if (mChannel && config.use_dma != mUseDma) {
-            FL_WARN_F("[RMT RX] use_dma changed (%s -> %s) - rebuilding channel", (mUseDma ? "true" : "false"), (config.use_dma ? "true" : "false"));
+            FL_WARN("[RMT RX] use_dma changed ("
+                    << (mUseDma ? "true" : "false") << " -> "
+                    << (config.use_dma ? "true" : "false")
+                    << ") - rebuilding channel");
             rmt_disable(mChannel);
             rmt_del_channel(mChannel);
             mChannel = nullptr;
@@ -638,7 +655,8 @@ class RmtRxChannelImpl : public RmtRxChannel {
             // First-time initialization - extract hardware parameters from
             // config
             if (config.buffer_size == 0) {
-                FL_WARN_F("RX begin: Invalid buffer_size in config (buffer_size=0)");
+                FL_WARN(
+                    "RX begin: Invalid buffer_size in config (buffer_size=0)");
                 return false;
             }
 
@@ -676,7 +694,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             // Clear receive state (resets mSkipCounter to skip_signals_)
             clear();
 
-            // Enable channel (transition "init" â†’ "enabled")
+            // Enable channel (transition "init" → "enabled")
             if (!enable()) {
                 return false;
             }
@@ -716,9 +734,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
         //     num_dma_nodes = max(2, mem_block_symbols * 4 / 4095 + 1)
         //   and the per-rmt_receive() user-buffer cap is num_dma_nodes * 4092
         //   bytes (=1023 symbols/node). So to pass a 14000-symbol user buffer
-        //   (= 56 KB) we need â‰¥14 DMA nodes, which means mem_block_symbols â‰¥
+        //   (= 56 KB) we need ≥14 DMA nodes, which means mem_block_symbols ≥
         //   14336. Set 14336 to cover ~595 WS2812B LEDs in a single rmt_receive.
-        //   Memory cost: 14336 Ã— 4 = 56 KB internal-RAM DMA buffer â€” ESP32-S3
+        //   Memory cost: 14336 × 4 = 56 KB internal-RAM DMA buffer — ESP32-S3
         //   has ~320 KB so ~18%. See issue #2254.
         rx_config.mem_block_symbols = mUseDma ? 14336 : 64;
         // Interrupt priority level 3 (maximum supported by ESP-IDF RMT driver
@@ -735,11 +753,13 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // rmt_new_rx_channel() time; toggling later requires rebuilding.
         rx_config.flags.with_dma = mUseDma ? 1 : 0;
         if (mUseDma) {
-            FL_WARN_F("[RMT RX] DMA streaming mode requested on GPIO %s (mem_block_symbols=%s)", static_cast<int>(mPin), rx_config.mem_block_symbols);
+            FL_WARN("[RMT RX] DMA streaming mode requested on GPIO "
+                    << static_cast<int>(mPin)
+                    << " (mem_block_symbols=" << rx_config.mem_block_symbols << ")");
         }
         // Internal loopback configuration:
         // When io_loop_back=true, RX receives from TX output internally (same GPIO).
-        // This is REQUIRED for RMT TX â†’ RMT RX validation on ESP32-S3 because
+        // This is REQUIRED for RMT TX → RMT RX validation on ESP32-S3 because
         // ESP32-S3 has a hardware limitation where TX GPIO output stops when RX
         // is actively receiving on a different GPIO. With loopback enabled,
         // TX output is routed both to the GPIO AND internally to RX.
@@ -747,7 +767,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         rx_config.flags.io_loop_back = mIoLoopBack ? 1 : 0;
 #endif
         if (mIoLoopBack) {
-            FL_WARN_F("[RMT RX] Internal loopback enabled (io_loop_back=1) on GPIO %s", static_cast<int>(mPin));
+            FL_WARN("[RMT RX] Internal loopback enabled (io_loop_back=1) on GPIO " << static_cast<int>(mPin));
         }
 
         // Note: RX channel is already registered with RmtMemoryManager in constructor
@@ -755,7 +775,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // The registration happens early so that TX channels disable DMA when RX is active
         // (ESP32-S3 has shared DMA channel between TX and RX).
         if (!mMemoryRegistered) {
-            FL_WARN_F("RMT RX was not pre-registered in constructor - registering now");
+            FL_WARN("RMT RX was not pre-registered in constructor - registering now");
             auto &memMgr = RmtMemoryManager::instance();
             mMemoryChannelId = static_cast<u8>(128 + (mPin & 0x7F));
             // Pass use_dma=true when DMA mode is on so the memory manager
@@ -766,7 +786,8 @@ class RmtRxChannelImpl : public RmtRxChannel {
             size_t rx_alloc_words = 0;
             if (!memMgr.tryAllocateRx(mMemoryChannelId, rx_config.mem_block_symbols,
                                        mUseDma, rx_alloc_words)) {
-                FL_WARN_F("RMT RX memory allocation failed for channel %s", static_cast<int>(mMemoryChannelId));
+                FL_WARN("RMT RX memory allocation failed for channel "
+                        << static_cast<int>(mMemoryChannelId));
                 return false;
             }
             mMemoryRegistered = true;
@@ -779,7 +800,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         if (mUseDma) {
             auto &memMgr = RmtMemoryManager::instance();
             if (!memMgr.allocateDMA(mMemoryChannelId, false)) {
-                FL_WARN_F("[RMT RX] Shared DMA slot unavailable â€” falling back to non-DMA mode");
+                FL_WARN("[RMT RX] Shared DMA slot unavailable — falling back to non-DMA mode");
                 mUseDma = false;
                 rx_config.flags.with_dma = 0;
                 rx_config.mem_block_symbols = 64;
@@ -791,7 +812,8 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // Create RX channel
         esp_err_t err = rmt_new_rx_channel(&rx_config, &mChannel);
         if (err != ESP_OK) {
-            FL_WARN_F("Failed to create RX channel: %s (%s)", static_cast<int>(err), esp_err_to_name(err));
+            FL_WARN("Failed to create RX channel: " << static_cast<int>(err)
+                    << " (" << esp_err_to_name(err) << ")");
             // Unregister from memory manager on failure
             if (mMemoryRegistered) {
                 auto &memMgr = RmtMemoryManager::instance();
@@ -809,7 +831,8 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         err = rmt_rx_register_event_callbacks(mChannel, &callbacks, this);
         if (err != ESP_OK) {
-            FL_WARN_F("Failed to register RX callbacks: %s", static_cast<int>(err));
+            FL_WARN(
+                "Failed to register RX callbacks: " << static_cast<int>(err));
             rmt_del_channel(mChannel);
             mChannel = nullptr;
             return false;
@@ -821,7 +844,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // state The channel is created in "init" state by rmt_new_rx_channel()
         // We must call rmt_enable() before calling rmt_receive()
         if (!enable()) {
-            FL_WARN_F("Failed to enable RX channel");
+            FL_WARN("Failed to enable RX channel");
             rmt_del_channel(mChannel);
             mChannel = nullptr;
             return false;
@@ -832,7 +855,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // the ISR so no pre-capture drain is required (see rxDoneCallback).
         if (!mUseDma) {
             if (!handleSkipPhase()) {
-                FL_WARN_F("Failed to handle skip phase in begin()");
+                FL_WARN("Failed to handle skip phase in begin()");
                 rmt_disable(mChannel);
                 rmt_del_channel(mChannel);
                 mChannel = nullptr;
@@ -842,11 +865,11 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         // Allocate buffer and arm receiver for actual capture
         if (!allocateAndArm()) {
-            FL_WARN_F("Failed to arm receiver in begin()");
+            FL_WARN("Failed to arm receiver in begin()");
             rmt_disable(mChannel);
             rmt_del_channel(mChannel);
             mChannel = nullptr;
-            // Release the DMA slot we acquired earlier â€” otherwise the slot
+            // Release the DMA slot we acquired earlier — otherwise the slot
             // leaks and subsequent begin() retries report "Shared DMA slot
             // unavailable" until the RxDevice is destroyed.
             if (mDmaAllocated) {
@@ -866,11 +889,11 @@ class RmtRxChannelImpl : public RmtRxChannel {
         return true;
     }
 
-    bool finished() const FL_NO_EXCEPT override { return mReceiveDone; }
+    bool finished() const FL_NOEXCEPT override { return mReceiveDone; }
 
-    RxWaitResult wait(u32 timeout_ms) FL_NO_EXCEPT override {
+    RxWaitResult wait(u32 timeout_ms) FL_NOEXCEPT override {
         if (!mChannel) {
-            FL_WARN_F("wait(): channel not initialized");
+            FL_WARN("wait(): channel not initialized");
             return RxWaitResult::TIMEOUT; // Treat as timeout
         }
 
@@ -883,7 +906,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         if (mAccumulationBuffer.empty()) {
             // Allocate buffer and arm receiver
             if (!allocateAndArm()) {
-                FL_WARN_F("wait(): failed to allocate and arm");
+                FL_WARN("wait(): failed to allocate and arm");
                 return RxWaitResult::TIMEOUT; // Treat as timeout
             }
         } else {
@@ -906,8 +929,10 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
             // Check timeout
             if (elapsed_us >= timeout_us) {
-                FL_ERROR_F("RMT RX timeout after %sus, received %s symbols (expected %s)", elapsed_us, mSymbolsReceived, mBufferSize);
-                FL_ERROR_F("RMT RX: No data received from TX pin - check that PARLIO/SPI/RMT TX is transmitting");
+                FL_ERROR("RMT RX timeout after "
+                        << elapsed_us << "us, received " << mSymbolsReceived
+                        << " symbols (expected " << mBufferSize << ")");
+                FL_ERROR("RMT RX: No data received from TX pin - check that PARLIO/SPI/RMT TX is transmitting");
                 return RxWaitResult::TIMEOUT;
             }
 
@@ -922,14 +947,17 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // streams. mCallbackCount == 1 on a long-stream capture indicates
         // ESP-IDF ended the receive after one fill (likely due to idle
         // timeout from signal_range_max_ns). See issue #2254.
-        FL_WARN_F("[RMT RX] wait(): symbols=%s callbacks=%s use_dma=%s", mSymbolsReceived, mCallbackCount, (mUseDma ? "true" : "false"));
+        FL_WARN("[RMT RX] wait(): symbols=" << mSymbolsReceived
+                                          << " callbacks=" << mCallbackCount
+                                          << " use_dma="
+                                          << (mUseDma ? "true" : "false"));
         return RxWaitResult::SUCCESS;
     }
 
-    u32 getResolutionHz() const FL_NO_EXCEPT override { return mResolutionHz; }
+    u32 getResolutionHz() const FL_NOEXCEPT override { return mResolutionHz; }
 
     fl::result<u32, DecodeError> decode(const ChipsetTiming4Phase &timing,
-                                             fl::span<u8> out) FL_NO_EXCEPT override {
+                                             fl::span<u8> out) FL_NOEXCEPT override {
         // Get received symbols (spurious symbols already filtered by wait())
         fl::span<const RmtSymbol> symbols = getReceivedSymbols();
 
@@ -944,11 +972,11 @@ class RmtRxChannelImpl : public RmtRxChannel {
         return decodeRmtSymbols(timing, mResolutionHz, symbols, out, true);
     }
 
-    const char *name() const FL_NO_EXCEPT override { return "RMT"; }
+    const char *name() const FL_NOEXCEPT override { return "RMT"; }
 
-    int getPin() const FL_NO_EXCEPT override { return static_cast<int>(mPin); }
+    int getPin() const FL_NOEXCEPT override { return static_cast<int>(mPin); }
 
-    size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) FL_NO_EXCEPT override {
+    size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) FL_NOEXCEPT override {
         // Get received symbols (spurious symbols already filtered by wait())
         fl::span<const RmtSymbol> symbols = getReceivedSymbols();
 
@@ -1014,15 +1042,16 @@ class RmtRxChannelImpl : public RmtRxChannel {
         return write_index;
     }
 
-    bool injectEdges(fl::span<const EdgeTime> edges) FL_NO_EXCEPT override {
+    bool injectEdges(fl::span<const EdgeTime> edges) FL_NOEXCEPT override {
         if (edges.empty()) {
-            FL_WARN_F("injectEdges(): empty edges span");
+            FL_WARN("injectEdges(): empty edges span");
             return false;
         }
 
         // Check if edges count is even (must have pairs for RMT symbols)
         if (edges.size() % 2 != 0) {
-            FL_WARN_F("injectEdges(): edge count must be even (got %s)", edges.size());
+            FL_WARN("injectEdges(): edge count must be even (got "
+                    << edges.size() << ")");
             return false;
         }
 
@@ -1037,12 +1066,14 @@ class RmtRxChannelImpl : public RmtRxChannel {
                 mAccumulationBuffer.push_back(0);
             }
         } else if (mAccumulationBuffer.size() < symbol_count) {
-            FL_WARN_F("injectEdges(): accumulation buffer too small (need %s, have %s)", symbol_count, mAccumulationBuffer.size());
+            FL_WARN("injectEdges(): accumulation buffer too small (need "
+                    << symbol_count << ", have " << mAccumulationBuffer.size()
+                    << ")");
             return false;
         }
 
-        // Calculate nanoseconds per tick for conversion (ns â†’ ticks)
-        // Example: 40MHz = 40,000,000 Hz â†’ 1,000,000,000 / 40,000,000 = 25ns
+        // Calculate nanoseconds per tick for conversion (ns → ticks)
+        // Example: 40MHz = 40,000,000 Hz → 1,000,000,000 / 40,000,000 = 25ns
         // per tick
         u32 ns_per_tick = 1000000000UL / mResolutionHz;
 
@@ -1103,7 +1134,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
      * allocating the full buffer. This ensures we don't buffer unwanted
      * symbols. Only allocates memory temporarily during the skip phase.
      */
-    bool handleSkipPhase() FL_NO_EXCEPT {
+    bool handleSkipPhase() FL_NOEXCEPT {
         if (mSkipCounter == 0) {
             FL_LOG_RX("No symbols to skip, skip phase complete");
             return true;
@@ -1137,7 +1168,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             // Start receive with discard buffer (rmt_receive will enable the RX
             // hardware internally)
             if (!startReceive(discard_buffer.data(), chunk_size)) {
-                FL_WARN_F("handleSkipPhase(): failed to start receive");
+                FL_WARN("handleSkipPhase(): failed to start receive");
                 return false;
             }
 
@@ -1150,7 +1181,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             while (!mReceiveDone) {
                 i64 elapsed_us = esp_timer_get_time() - start_time_us;
                 if (elapsed_us >= timeout_us) {
-                    FL_WARN_F("handleSkipPhase(): timeout waiting for symbols");
+                    FL_WARN("handleSkipPhase(): timeout waiting for symbols");
                     return false;
                 }
                 taskYIELD();
@@ -1167,8 +1198,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
             if (mSkipCounter > 0) { // Only disable if more iterations needed
                 esp_err_t err = rmt_disable(mChannel);
                 if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-                    FL_WARN_F("handleSkipPhase(): failed to disable channel for "
-                            "next iteration: %s", static_cast<int>(err));
+                    FL_WARN("handleSkipPhase(): failed to disable channel for "
+                            "next iteration: "
+                            << static_cast<int>(err));
                     return false;
                 }
                 FL_LOG_RX("Skip phase: channel disabled for next iteration");
@@ -1194,8 +1226,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
                 FL_LOG_RX("Skip phase: channel already in init state "
                        "(skip_signals=0 case)");
             } else {
-                FL_WARN_F("handleSkipPhase(): failed to disable channel after "
-                        "skip phase: %s", static_cast<int>(err));
+                FL_WARN("handleSkipPhase(): failed to disable channel after "
+                        "skip phase: "
+                        << static_cast<int>(err));
                 return false;
             }
         }
@@ -1218,20 +1251,20 @@ class RmtRxChannelImpl : public RmtRxChannel {
      * - ISR callback copies from DMA buffer to accumulation buffer on each
      * partial RX callback
      */
-    bool allocateAndArm() FL_NO_EXCEPT {
+    bool allocateAndArm() FL_NOEXCEPT {
         // Per-receive buffer that ESP-IDF writes into. In non-DMA mode this is
         // sized for a single mem-block fill; in DMA mode ESP-IDF requires the
-        // user buffer to be â‰¤ mem_block_symbols (the DRAM ping-pong size),
+        // user buffer to be ≤ mem_block_symbols (the DRAM ping-pong size),
         // and the ISR streams from it into the accumulation buffer on every
         // partial-rx callback. The DMA variant MUST live in MALLOC_CAP_DMA |
-        // MALLOC_CAP_INTERNAL memory â€” a plain fl::vector can land in PSRAM on
+        // MALLOC_CAP_INTERNAL memory — a plain fl::vector can land in PSRAM on
         // ESP32-S3, which ESP-IDF rejects with "user buffer not in the internal
         // RAM". See issue #2254.
         constexpr size_t NONDMA_BUFFER_SIZE = 4096;
-        // DMA user buffer sized to fit within num_dma_nodes Ã— 4092 bytes. With
+        // DMA user buffer sized to fit within num_dma_nodes × 4092 bytes. With
         // mem_block_symbols=14336 we get 14 DMA nodes = 57288 bytes = 14322
         // symbols capacity. Pass 14000 symbols (= 56000 bytes) with margin.
-        // Covers 583 WS2812B LEDs in a single rmt_receive() â€” no need for
+        // Covers 583 WS2812B LEDs in a single rmt_receive() — no need for
         // ISR re-submission on typical long strips. Partial-rx ISR still fires
         // every ~1023-symbol DMA node fill, streaming into the accumulation
         // buffer via rxDoneCallback.
@@ -1249,7 +1282,8 @@ class RmtRxChannelImpl : public RmtRxChannel {
                 mDmaCapableBuffer = static_cast<RmtSymbol *>(
                     heap_caps_malloc(bytes, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL));
                 if (!mDmaCapableBuffer) {
-                    FL_WARN_F("allocateAndArm(): heap_caps_malloc(%s, DMA|INTERNAL) failed", bytes);
+                    FL_WARN("allocateAndArm(): heap_caps_malloc("
+                            << bytes << ", DMA|INTERNAL) failed");
                     return false;
                 }
                 mDmaCapableBufferSize = hw_buffer_size;
@@ -1284,7 +1318,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
         }
         size_t effective_size = mAccumulationBuffer.capacity();
         if (effective_size < mBufferSize) {
-            FL_WARN_F("allocateAndArm(): accumulation buffer reduced from %s to %s symbols (memory constrained)", mBufferSize, effective_size);
+            FL_WARN("allocateAndArm(): accumulation buffer reduced from "
+                    << mBufferSize << " to " << effective_size
+                    << " symbols (memory constrained)");
         }
         for (size_t i = mAccumulationBuffer.size(); i < effective_size; i++) {
             mAccumulationBuffer.push_back(0);
@@ -1301,7 +1337,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         RmtSymbol *hw_buffer = mUseDma ? mDmaCapableBuffer
                                         : mInternalBuffer.data();
         if (!startReceive(hw_buffer, hw_buffer_size)) {
-            FL_WARN_F("allocateAndArm(): failed to start receive");
+            FL_WARN("allocateAndArm(): failed to start receive");
             return false;
         }
 
@@ -1321,20 +1357,20 @@ class RmtRxChannelImpl : public RmtRxChannel {
      * state but must be disabled before calling rmt_receive() again.
      *
      * State transitions:
-     *   - rmt_new_rx_channel() â†’ "init" state
-     *   - rmt_enable() â†’ "enabled" state
-     *   - rmt_receive() â†’ requires "enabled" state
-     *   - After receive completes â†’ remains "enabled" but must disable before
+     *   - rmt_new_rx_channel() → "init" state
+     *   - rmt_enable() → "enabled" state
+     *   - rmt_receive() → requires "enabled" state
+     *   - After receive completes → remains "enabled" but must disable before
      * next receive
-     *   - rmt_disable() â†’ "init" state (ready for next enable/receive cycle)
+     *   - rmt_disable() → "init" state (ready for next enable/receive cycle)
      */
-    bool enable() FL_NO_EXCEPT {
+    bool enable() FL_NOEXCEPT {
         if (!mChannel) {
-            FL_WARN_F("enable(): RX channel not initialized");
+            FL_WARN("enable(): RX channel not initialized");
             return false;
         }
 
-        // Enable channel (transition "init" â†’ "enabled")
+        // Enable channel (transition "init" → "enabled")
         esp_err_t err = rmt_enable(mChannel);
 
         // ESP_OK: Successfully enabled
@@ -1342,7 +1378,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
             FL_LOG_RX("RX channel enabled");
             return true;
         } else {
-            FL_WARN_F("Failed to enable RX channel: %s (code: %s)", esp_err_to_name(err), static_cast<int>(err));
+            FL_WARN("Failed to enable RX channel: "
+                    << esp_err_to_name(err)
+                    << " (code: " << static_cast<int>(err) << ")");
             return false;
         }
     }
@@ -1356,7 +1394,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
      * The accumulation buffer contains the complete data stream assembled from
      * multiple partial RX callbacks.
      */
-    fl::span<const RmtSymbol> getReceivedSymbols() const FL_NO_EXCEPT {
+    fl::span<const RmtSymbol> getReceivedSymbols() const FL_NOEXCEPT {
         if (mAccumulationBuffer.empty()) {
             return fl::span<const RmtSymbol>();
         }
@@ -1367,7 +1405,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
     /**
      * @brief Clear receive state (internal method)
      */
-    void clear() FL_NO_EXCEPT {
+    void clear() FL_NOEXCEPT {
         mReceiveDone = false;
         mSymbolsReceived = 0;
         mAccumulationOffset = 0;
@@ -1383,17 +1421,17 @@ class RmtRxChannelImpl : public RmtRxChannel {
      * @return true if receive started, false on error
      *
      * IMPORTANT: This method is called with the DMA buffer, not the
-     * accumulation buffer. The ISR callback will copy from DMA buffer â†’
+     * accumulation buffer. The ISR callback will copy from DMA buffer →
      * accumulation buffer on each partial RX callback.
      */
-    bool startReceive(RmtSymbol *buffer, size_t buffer_size) FL_NO_EXCEPT {
+    bool startReceive(RmtSymbol *buffer, size_t buffer_size) FL_NOEXCEPT {
         if (!mChannel) {
-            FL_WARN_F("RX channel not initialized (call begin() first)");
+            FL_WARN("RX channel not initialized (call begin() first)");
             return false;
         }
 
         if (!buffer || buffer_size == 0) {
-            FL_WARN_F("Invalid buffer parameters");
+            FL_WARN("Invalid buffer parameters");
             return false;
         }
 
@@ -1407,7 +1445,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // Clamp signal_range_max_ns to hardware limit: each RMT symbol duration
         // field is 15 bits (max 32767 ticks). At the configured resolution,
         // max_ns = 32767 * (1e9 / resolution_hz).
-        // ESP32-C6 at 40MHz: 32767 * 25 = 818675 ns (~819Âµs)
+        // ESP32-C6 at 40MHz: 32767 * 25 = 818675 ns (~819µs)
         u32 max_signal_range_ns = mSignalRangeMaxNs;
         if (mResolutionHz > 0) {
             u64 tick_ns = 1000000000ULL / mResolutionHz;
@@ -1437,7 +1475,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             rmt_receive(mChannel, rmt_buffer,
                         buffer_size * sizeof(rmt_symbol_word_t), &rx_params);
         if (err != ESP_OK) {
-            FL_WARN_F("Failed to start RX receive: %s", static_cast<int>(err));
+            FL_WARN("Failed to start RX receive: " << static_cast<int>(err));
             return false;
         }
 
@@ -1468,7 +1506,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
      */
     static bool IRAM_ATTR rxDoneCallback(rmt_channel_handle_t channel,
                                          const rmt_rx_done_event_data_t *data,
-                                         void *user_data) FL_NO_EXCEPT {
+                                         void *user_data) FL_NOEXCEPT {
         RmtRxChannelImpl *self = static_cast<RmtRxChannelImpl *>(user_data);
         if (!self) {
             return false;
@@ -1486,10 +1524,10 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // receiver fires the ISR on every ping-pong fill, and we want to
         // filter skip chunks inline without terminating the receive op.
         //
-        //   - Chunk entirely inside skip window â†’ drop whole chunk, continue.
-        //   - Chunk straddles the skip boundary â†’ advance past the skipped
+        //   - Chunk entirely inside skip window → drop whole chunk, continue.
+        //   - Chunk straddles the skip boundary → advance past the skipped
         //     prefix and copy the remainder into the accumulation buffer.
-        //   - Chunk entirely past the skip window â†’ normal accumulation.
+        //   - Chunk entirely past the skip window → normal accumulation.
         //
         // In non-DMA mode the handleSkipPhase() wrapper still owns the drain
         // loop (it calls rmt_receive() in a loop, each fill sets is_last).
@@ -1593,13 +1631,13 @@ class RmtRxChannelImpl : public RmtRxChannel {
         mSkipCounter; ///< Runtime counter for skipping (decremented in ISR)
     bool mStartLow;   ///< Pin idle state: true=LOW (WS2812B), false=HIGH
                       ///< (inverted)
-    bool mIoLoopBack; ///< Enable internal RMT loopback (TXâ†’RX on same GPIO)
+    bool mIoLoopBack; ///< Enable internal RMT loopback (TX→RX on same GPIO)
     bool mUseDma;     ///< DMA streaming mode (ESP-IDF 5.3+ en_partial_rx)
     bool mDmaAllocated; ///< True if we hold the shared DMA slot
     RmtSymbol *mDmaCapableBuffer; ///< DRAM-resident ping-pong buffer for DMA
     size_t mDmaCapableBufferSize; ///< Capacity in symbols
     fl::vector<RmtSymbol>
-        mInternalBuffer; ///< DMA buffer for hardware RX (small, â‰¤4096 symbols)
+        mInternalBuffer; ///< DMA buffer for hardware RX (small, ≤4096 symbols)
     fl::vector<RmtSymbol>
         mAccumulationBuffer; ///< Accumulation buffer for full data stream
                              ///< (user-requested size)
@@ -1615,7 +1653,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 };
 
 // Factory method implementation
-fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NO_EXCEPT {
+fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NOEXCEPT {
     return fl::make_shared<RmtRxChannelImpl>(pin);
 }
 
@@ -1627,9 +1665,9 @@ fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NO_EXCEPT {
 // RX functionality requires RMT5 driver (ESP-IDF 5.0+)
 namespace fl {
 
-fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NO_EXCEPT {
+fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NOEXCEPT {
     (void)pin; // Suppress unused parameter warning
-    FL_WARN_F("RmtRxChannel::create() requires RMT5 driver (ESP-IDF 5.0+). "
+    FL_WARN("RmtRxChannel::create() requires RMT5 driver (ESP-IDF 5.0+). "
             "Returning nullptr.");
     return nullptr;
 }

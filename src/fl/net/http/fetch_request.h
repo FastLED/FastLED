@@ -39,7 +39,7 @@ public:
     FetchRequest(const fl::string& url, const FetchOptions& opts, fl::task::Promise<Response> promise);
 
     /// @brief Destructor - closes socket if still open
-    ~FetchRequest() FL_NO_EXCEPT;
+    ~FetchRequest() FL_NOEXCEPT;
 
     /// @brief Pump the state machine (called by fl::task every update interval)
     ///

@@ -16,7 +16,7 @@ NoiseFloorTracker::NoiseFloorTracker(const NoiseFloorTrackerConfig& config) {
     mStats.currentFloor = mCurrentFloor;  // Initialize stats to match internal state
 }
 
-NoiseFloorTracker::~NoiseFloorTracker() FL_NO_EXCEPT = default;
+NoiseFloorTracker::~NoiseFloorTracker() FL_NOEXCEPT = default;
 
 void NoiseFloorTracker::configure(const NoiseFloorTrackerConfig& config) {
     mConfig = config;

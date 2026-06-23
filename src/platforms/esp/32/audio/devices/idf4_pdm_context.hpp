@@ -26,7 +26,7 @@ struct PDMContext {
     bool valid;
 };
 
-PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NO_EXCEPT {
+PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NOEXCEPT {
     int pin_clk = config.mPinClk;
     int pin_din = config.mPinDin;
     u16 sample_rate = config.mSampleRate;
@@ -55,12 +55,12 @@ PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NO_EXCEPT {
 
     esp_err_t ret = i2s_driver_install(i2s_port, &i2s_config, 0, nullptr);
     if (ret != ESP_OK) {
-        FL_WARN_F("Failed to install PDM I2S driver: %s", ret);
+        FL_WARN("Failed to install PDM I2S driver: " << ret);
         return ctx;
     }
     ret = i2s_set_pin(i2s_port, &pin_config);
     if (ret != ESP_OK) {
-        FL_WARN_F("Failed to set PDM I2S pins: %s", ret);
+        FL_WARN("Failed to set PDM I2S pins: " << ret);
         i2s_driver_uninstall(i2s_port);
         return ctx;
     }
@@ -72,7 +72,7 @@ PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NO_EXCEPT {
 
 size_t pdm_read_raw_samples(const PDMContext &ctx,
                             audio_sample_t (&buffer)[I2S_AUDIO_BUFFER_LEN])
-    FL_NO_EXCEPT {
+    FL_NOEXCEPT {
     size_t bytes_read = 0;
 
     esp_err_t result =
@@ -86,7 +86,7 @@ size_t pdm_read_raw_samples(const PDMContext &ctx,
     return 0;
 }
 
-void pdm_audio_destroy(const PDMContext &ctx) FL_NO_EXCEPT {
+void pdm_audio_destroy(const PDMContext &ctx) FL_NOEXCEPT {
     if (ctx.valid) {
         i2s_driver_uninstall(ctx.i2s_port);
     }

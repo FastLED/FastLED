@@ -3,7 +3,7 @@
 
 namespace fl {
 
-int IdTracker::getOrCreateId(void* ptr) FL_NO_EXCEPT {
+int IdTracker::getOrCreateId(void* ptr) FL_NOEXCEPT {
     if (!ptr) {
         return -1;  // Invalid pointer gets invalid ID
     }
@@ -27,7 +27,7 @@ int IdTracker::getOrCreateId(void* ptr) FL_NO_EXCEPT {
     return newId;
 }
 
-bool IdTracker::getId(void* ptr, int* outId) FL_NO_EXCEPT {
+bool IdTracker::getId(void* ptr, int* outId) FL_NOEXCEPT {
     if (!ptr || !outId) {
         return false;
     }
@@ -45,7 +45,7 @@ bool IdTracker::getId(void* ptr, int* outId) FL_NO_EXCEPT {
     return found;
 }
 
-bool IdTracker::removeId(void* ptr) FL_NO_EXCEPT {
+bool IdTracker::removeId(void* ptr) FL_NOEXCEPT {
     if (!ptr) {
         return false;
     }
@@ -59,7 +59,7 @@ bool IdTracker::removeId(void* ptr) FL_NO_EXCEPT {
     return removed;
 }
 
-size_t IdTracker::size() FL_NO_EXCEPT {
+size_t IdTracker::size() FL_NOEXCEPT {
     // Lock for thread safety
     mMutex.lock();
 
@@ -69,7 +69,7 @@ size_t IdTracker::size() FL_NO_EXCEPT {
     return currentSize;
 }
 
-void IdTracker::clear() FL_NO_EXCEPT {
+void IdTracker::clear() FL_NOEXCEPT {
     // Lock for thread safety
     mMutex.lock();
 

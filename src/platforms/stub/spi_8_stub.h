@@ -19,28 +19,28 @@ namespace fl {
 /// Implements SpiHw8 interface with data capture for validation
 class SpiHw8Stub : public SpiHw8 {
 public:
-    explicit SpiHw8Stub(int bus_id = -1, const char* name = "MockOctalSPI") FL_NO_EXCEPT;
+    explicit SpiHw8Stub(int bus_id = -1, const char* name = "MockOctalSPI") FL_NOEXCEPT;
     ~SpiHw8Stub() override = default;
 
-    bool begin(const SpiHw8::Config& config) FL_NO_EXCEPT override;
-    void end() FL_NO_EXCEPT override;
-    DMABuffer acquireDMABuffer(size_t bytes_per_lane) FL_NO_EXCEPT override;
-    bool transmit(TransmitMode mode = TransmitMode::ASYNC) FL_NO_EXCEPT override;
-    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) FL_NO_EXCEPT override;
-    bool isBusy() const FL_NO_EXCEPT override;
-    bool isInitialized() const FL_NO_EXCEPT override;
-    int getBusId() const FL_NO_EXCEPT override;
-    const char* getName() const FL_NO_EXCEPT override;
+    bool begin(const SpiHw8::Config& config) FL_NOEXCEPT override;
+    void end() FL_NOEXCEPT override;
+    DMABuffer acquireDMABuffer(size_t bytes_per_lane) FL_NOEXCEPT override;
+    bool transmit(TransmitMode mode = TransmitMode::ASYNC) FL_NOEXCEPT override;
+    bool waitComplete(u32 timeout_ms = fl::numeric_limits<u32>::max()) FL_NOEXCEPT override;
+    bool isBusy() const FL_NOEXCEPT override;
+    bool isInitialized() const FL_NOEXCEPT override;
+    int getBusId() const FL_NOEXCEPT override;
+    const char* getName() const FL_NOEXCEPT override;
 
     // Test inspection methods
-    const fl::vector<u8>& getLastTransmission() const FL_NO_EXCEPT;
-    u32 getTransmissionCount() const FL_NO_EXCEPT;
-    u32 getClockSpeed() const FL_NO_EXCEPT;
-    bool isTransmissionActive() const FL_NO_EXCEPT;
-    void reset() FL_NO_EXCEPT;
+    const fl::vector<u8>& getLastTransmission() const FL_NOEXCEPT;
+    u32 getTransmissionCount() const FL_NOEXCEPT;
+    u32 getClockSpeed() const FL_NOEXCEPT;
+    bool isTransmissionActive() const FL_NOEXCEPT;
+    void reset() FL_NOEXCEPT;
 
     // De-interleave transmitted data to extract per-lane data (for testing)
-    fl::vector<fl::vector<u8>> extractLanes(u8 num_lanes, size_t bytes_per_lane) const FL_NO_EXCEPT;
+    fl::vector<fl::vector<u8>> extractLanes(u8 num_lanes, size_t bytes_per_lane) const FL_NOEXCEPT;
 
 private:
     int mBusId;
@@ -59,7 +59,7 @@ private:
 /// Cast SpiHw8* to SpiHw8Stub* for test inspection
 /// @param driver SpiHw8 pointer (must be from test environment)
 /// @returns SpiHw8Stub pointer, or nullptr if cast fails
-inline SpiHw8Stub* toStub(SpiHw8* driver) FL_NO_EXCEPT {
+inline SpiHw8Stub* toStub(SpiHw8* driver) FL_NOEXCEPT {
     return static_cast<SpiHw8Stub*>(driver);
 }
 

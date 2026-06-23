@@ -38,7 +38,7 @@ namespace fl {
 RmtController5LowLevel::RmtController5LowLevel(
     int pin,
     const ChipsetTiming& timing
-) FL_NO_EXCEPT
+) FL_NOEXCEPT
 {
     // Create ChipsetTimingConfig from ChipsetTiming
     ChipsetTimingConfig timingConfig(
@@ -62,10 +62,10 @@ RmtController5LowLevel::~RmtController5LowLevel() {
     // Engine holds reference until transmission completes
 }
 
-void RmtController5LowLevel::loadPixelData(PixelIterator& pixels) FL_NO_EXCEPT {
+void RmtController5LowLevel::loadPixelData(PixelIterator& pixels) FL_NOEXCEPT {
     // Safety check: don't modify buffer if driver is transmitting it
     if (mChannelData->isInUse()) {
-        FL_WARN_F("RMT5 Controller: Skipping update - buffer in use by driver");
+        FL_WARN("RMT5 Controller: Skipping update - buffer in use by driver");
         return;
     }
 
@@ -77,7 +77,7 @@ void RmtController5LowLevel::loadPixelData(PixelIterator& pixels) FL_NO_EXCEPT {
     pixels.writeWS2812(&data);
 }
 
-void RmtController5LowLevel::showPixels() FL_NO_EXCEPT {
+void RmtController5LowLevel::showPixels() FL_NOEXCEPT {
     // Get RMT driver if not already set
     if (!mDriver) {
         auto& manager = channelManager();
@@ -88,7 +88,7 @@ void RmtController5LowLevel::showPixels() FL_NO_EXCEPT {
     if (mDriver) {
         mDriver->enqueue(mChannelData);
     } else {
-        FL_WARN_F("RMT5 Controller: RMT driver not available for showPixels()");
+        FL_WARN("RMT5 Controller: RMT driver not available for showPixels()");
     }
 }
 

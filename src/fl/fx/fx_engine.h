@@ -42,7 +42,7 @@ class FxEngine {
     /**
      * @brief Destructor for FxEngine.
      */
-    ~FxEngine() FL_NO_EXCEPT;
+    ~FxEngine() FL_NOEXCEPT;
 
     /**
      * @brief Adds a new effect to the engine.

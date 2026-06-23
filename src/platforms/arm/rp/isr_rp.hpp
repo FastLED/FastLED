@@ -36,13 +36,13 @@
 namespace fl {
 
 /// Disable interrupts on ARM Cortex-M (RP2040/RP2350)
-inline void interruptsDisable() FL_NO_EXCEPT {
-    __asm__ __volatile__("cpsid i" ::: "memory") FL_NO_EXCEPT;
+inline void interruptsDisable() FL_NOEXCEPT {
+    __asm__ __volatile__("cpsid i" ::: "memory") FL_NOEXCEPT;
 }
 
 /// Enable interrupts on ARM Cortex-M (RP2040/RP2350)
-inline void interruptsEnable() FL_NO_EXCEPT {
-    __asm__ __volatile__("cpsie i" ::: "memory") FL_NO_EXCEPT;
+inline void interruptsEnable() FL_NOEXCEPT {
+    __asm__ __volatile__("cpsie i" ::: "memory") FL_NOEXCEPT;
 }
 
 } // namespace fl

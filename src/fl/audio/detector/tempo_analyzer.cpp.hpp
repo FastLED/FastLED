@@ -32,7 +32,7 @@ TempoAnalyzer::TempoAnalyzer()
     mConfidenceEnvelope.configure(cfg);
 }
 
-TempoAnalyzer::~TempoAnalyzer() FL_NO_EXCEPT = default;
+TempoAnalyzer::~TempoAnalyzer() FL_NOEXCEPT = default;
 
 void TempoAnalyzer::update(shared_ptr<Context> context) {
     mRetainedFFT = context->getFFT16();

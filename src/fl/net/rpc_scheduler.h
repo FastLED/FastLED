@@ -22,14 +22,14 @@ namespace net {
 template<typename Task = fl::function<void()>>
 class RpcScheduler {
 public:
-    RpcScheduler() FL_NO_EXCEPT = default;
-    ~RpcScheduler() FL_NO_EXCEPT = default;
+    RpcScheduler() FL_NOEXCEPT = default;
+    ~RpcScheduler() FL_NOEXCEPT = default;
 
     // Non-copyable but movable
-    RpcScheduler(const RpcScheduler&) FL_NO_EXCEPT = delete;
-    RpcScheduler& operator=(const RpcScheduler&) FL_NO_EXCEPT = delete;
-    RpcScheduler(RpcScheduler&&) FL_NO_EXCEPT = default;
-    RpcScheduler& operator=(RpcScheduler&&) FL_NO_EXCEPT = default;
+    RpcScheduler(const RpcScheduler&) FL_NOEXCEPT = delete;
+    RpcScheduler& operator=(const RpcScheduler&) FL_NOEXCEPT = delete;
+    RpcScheduler(RpcScheduler&&) FL_NOEXCEPT = default;
+    RpcScheduler& operator=(RpcScheduler&&) FL_NOEXCEPT = default;
 
     /**
      * @brief Schedule a task for execution at specified timestamp

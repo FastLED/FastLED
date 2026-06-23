@@ -53,7 +53,7 @@ public:
 
     /// @brief Destructor - releases hardware resources
     /// @note Waits for pending operations to complete
-    ~Device() FL_NO_EXCEPT;
+    ~Device() FL_NOEXCEPT;
 
     // ========== Initialization ==========
 
@@ -134,8 +134,8 @@ private:
     fl::unique_ptr<Impl> pImpl;
 
     // Non-copyable, non-movable (owns hardware resources)
-    Device(const Device&) FL_NO_EXCEPT = delete;
-    Device& operator=(const Device&) FL_NO_EXCEPT = delete;
+    Device(const Device&) FL_NOEXCEPT = delete;
+    Device& operator=(const Device&) FL_NOEXCEPT = delete;
 };
 
 } // namespace spi

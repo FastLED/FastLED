@@ -35,7 +35,7 @@ class P9813Controller : public CPixelLEDController<RGB_ORDER> {
 	}
 
 public:
-	P9813Controller() FL_NO_EXCEPT {}
+	P9813Controller() FL_NOEXCEPT {}
 
 	virtual void init() {
 		mSPI.init();

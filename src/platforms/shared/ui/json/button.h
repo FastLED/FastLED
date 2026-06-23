@@ -16,29 +16,29 @@ class JsonUiButtonInternal;
 
 class JsonButtonImpl {
   public:
-    JsonButtonImpl(const fl::string &name) FL_NO_EXCEPT;
+    JsonButtonImpl(const fl::string &name) FL_NOEXCEPT;
     ~JsonButtonImpl();
-    JsonButtonImpl &Group(const fl::string &name) FL_NO_EXCEPT;
+    JsonButtonImpl &Group(const fl::string &name) FL_NOEXCEPT;
 
-    const fl::string &name() const FL_NO_EXCEPT;
-    void toJson(fl::json &json) const FL_NO_EXCEPT;
-    bool isPressed() const FL_NO_EXCEPT;
-    bool clicked() const FL_NO_EXCEPT;
-    int clickedCount() const FL_NO_EXCEPT;
-    fl::string groupName() const FL_NO_EXCEPT;
+    const fl::string &name() const FL_NOEXCEPT;
+    void toJson(fl::json &json) const FL_NOEXCEPT;
+    bool isPressed() const FL_NOEXCEPT;
+    bool clicked() const FL_NOEXCEPT;
+    int clickedCount() const FL_NOEXCEPT;
+    fl::string groupName() const FL_NOEXCEPT;
     
     // Method to allow parent UIElement class to set the group
-    void setGroup(const fl::string &groupName) FL_NO_EXCEPT;
+    void setGroup(const fl::string &groupName) FL_NOEXCEPT;
 
-    void click() FL_NO_EXCEPT;
+    void click() FL_NOEXCEPT;
 
-    int id() const FL_NO_EXCEPT;
+    int id() const FL_NOEXCEPT;
 
   private:
     struct Updater : fl::EngineEvents::Listener {
-        void init(JsonButtonImpl *owner) FL_NO_EXCEPT;
+        void init(JsonButtonImpl *owner) FL_NOEXCEPT;
         ~Updater();
-        void onPlatformPreLoop2() FL_NO_EXCEPT override;
+        void onPlatformPreLoop2() FL_NOEXCEPT override;
         JsonButtonImpl *mOwner = nullptr;
     };
 

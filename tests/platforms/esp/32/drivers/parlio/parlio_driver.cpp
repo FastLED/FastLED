@@ -2359,11 +2359,9 @@ FL_TEST_CASE("Wave3 eligibility - WS2815 NOT eligible") {
     FL_CHECK(!fl::canUseWave3(timing));
 }
 
-FL_TEST_CASE("Wave3 eligibility - SM16824E eligible") {
-    // With the datasheet-aligned timing (300/600/300, see issue #3203),
-    // SM16824E shares the WS2811-800kHz Wave3-eligible profile.
+FL_TEST_CASE("Wave3 eligibility - SM16824E NOT eligible") {
     fl::ChipsetTiming timing = fl::to_runtime_timing<fl::TIMING_SM16824E>();
-    FL_CHECK(fl::canUseWave3(timing));
+    FL_CHECK(!fl::canUseWave3(timing));
 }
 
 FL_TEST_CASE("Wave3 eligibility - GW6205 800KHz eligible") {

@@ -42,7 +42,7 @@ extern "C" void runner_setup_crash_handler();
 // Function signature for the example entry point exported by example DLLs/SOs
 typedef int (*RunExampleFunc)(int argc, const char** argv);
 
-int main(int argc, char** argv) FL_NO_EXCEPT {
+int main(int argc, char** argv) FL_NOEXCEPT {
     // Setup crash handler BEFORE loading any DLLs
     // This ensures crash handling is active for the entire process lifetime
     runner_setup_crash_handler();
@@ -67,7 +67,7 @@ int main(int argc, char** argv) FL_NO_EXCEPT {
         }
 
         // Extract directory and filename
-        std::string full_path(exe_path) FL_NO_EXCEPT;
+        std::string full_path(exe_path) FL_NOEXCEPT;
         size_t last_slash = full_path.find_last_of("\\/");
         std::string exe_dir = (last_slash != std::string::npos) ? full_path.substr(0, last_slash) : ".";
         std::string exe_file = (last_slash != std::string::npos) ? full_path.substr(last_slash + 1) : full_path;
@@ -107,7 +107,7 @@ int main(int argc, char** argv) FL_NO_EXCEPT {
                 // Also try SetDllDirectoryA as fallback
                 size_t last_slash = fastled_dll_path.find_last_of("\\/");
                 if (last_slash != std::string::npos) {
-                    SetDllDirectoryA(fastled_dll_path.substr(0, last_slash).c_str()) FL_NO_EXCEPT;
+                    SetDllDirectoryA(fastled_dll_path.substr(0, last_slash).c_str()) FL_NOEXCEPT;
                 }
             }
         }
@@ -125,7 +125,7 @@ int main(int argc, char** argv) FL_NO_EXCEPT {
     RunExampleFunc run_example = (RunExampleFunc)GetProcAddress(dll, "run_example");
     if (!run_example) {
         std::cout << "Error: Failed to find run_example() in " << dll_path << std::endl;
-        FreeLibrary(dll) FL_NO_EXCEPT;
+        FreeLibrary(dll) FL_NOEXCEPT;
         return 1;
     }
 
@@ -157,7 +157,7 @@ int main(int argc, char** argv) FL_NO_EXCEPT {
     // resulting in "<unknown module>" in stack traces.
     // See: https://github.com/google/sanitizers/issues/899
 #if !defined(__SANITIZE_ADDRESS__)
-    FreeLibrary(dll) FL_NO_EXCEPT;
+    FreeLibrary(dll) FL_NOEXCEPT;
 #endif
 
     return example_result;

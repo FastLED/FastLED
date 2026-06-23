@@ -19,7 +19,7 @@ namespace fl {
 /// @param in input value
 /// @param pulsewidth width of the output pulse
 /// @returns square wave output
-LIB8STATIC u8 squarewave8(u8 in, u8 pulsewidth = 128) FL_NO_EXCEPT {
+LIB8STATIC u8 squarewave8(u8 in, u8 pulsewidth = 128) FL_NOEXCEPT {
     if (in < pulsewidth || (pulsewidth == 255)) {
         return 255;
     } else {

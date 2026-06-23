@@ -43,7 +43,7 @@ class HD108Controller : public CPixelLEDController<RGB_ORDER> {
 	SPI mSPI;
 
 public:
-	HD108Controller() FL_NO_EXCEPT {}
+	HD108Controller() FL_NOEXCEPT {}
 
 	void init() override { mSPI.init(); }
 

@@ -1,4 +1,4 @@
-# Known missing FL_NO_EXCEPT signatures for ci/tools/check_noexcept.py.
+# Known missing FL_NOEXCEPT signatures for ci/tools/check_noexcept.py.
 # Generated with:
 #   uv run python ci/tools/check_noexcept.py --scope all --update-baseline
 #

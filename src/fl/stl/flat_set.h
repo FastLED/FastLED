@@ -46,7 +46,7 @@ class flat_set {
 
   public:
     // Constructors
-    flat_set() FL_NO_EXCEPT = default;
+    flat_set() FL_NOEXCEPT = default;
 
     explicit flat_set(memory_resource* resource)
         : mData(resource) {}
@@ -57,13 +57,13 @@ class flat_set {
     flat_set(const Less& less, memory_resource* resource)
         : mData(resource), mLess(less) {}
 
-    flat_set(const flat_set& other) FL_NO_EXCEPT = default;
+    flat_set(const flat_set& other) FL_NOEXCEPT = default;
     flat_set& operator=(const flat_set& other) = default;
 
-    flat_set(flat_set&& other) FL_NO_EXCEPT
+    flat_set(flat_set&& other) FL_NOEXCEPT
         : mData(fl::move(other.mData)), mLess(fl::move(other.mLess)) {}
 
-    flat_set& operator=(flat_set&& other) FL_NO_EXCEPT {
+    flat_set& operator=(flat_set&& other) FL_NOEXCEPT {
         if (this != &other) {
             mData = fl::move(other.mData);
             mLess = fl::move(other.mLess);
@@ -299,7 +299,7 @@ class flat_set {
     }
 
     // Swap
-    void swap(flat_set& other) FL_NO_EXCEPT {
+    void swap(flat_set& other) FL_NOEXCEPT {
         mData.swap(other.mData);
         fl::swap(mLess, other.mLess);
     }
@@ -363,7 +363,7 @@ bool operator>=(const flat_set<Key, Less>& lhs,
 // Swap
 template <typename Key, typename Less>
 void swap(flat_set<Key, Less>& lhs,
-          flat_set<Key, Less>& rhs) FL_NO_EXCEPT {
+          flat_set<Key, Less>& rhs) FL_NOEXCEPT {
     lhs.swap(rhs);
 }
 

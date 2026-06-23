@@ -48,22 +48,22 @@ namespace detail {
 /// IMPORTANT: This class must not depend on any FL types (string, etc.)
 /// to avoid circular dependencies.
 struct AssertSink {
-    AssertSink& operator<<(const char*) FL_NO_EXCEPT { return *this; }
-    AssertSink& operator<<(char) FL_NO_EXCEPT { return *this; }
-    AssertSink& operator<<(bool) FL_NO_EXCEPT { return *this; }
-    AssertSink& operator<<(float) FL_NO_EXCEPT { return *this; }
-    AssertSink& operator<<(double) FL_NO_EXCEPT { return *this; }
-    AssertSink& operator<<(const void*) FL_NO_EXCEPT { return *this; }
+    AssertSink& operator<<(const char*) FL_NOEXCEPT { return *this; }
+    AssertSink& operator<<(char) FL_NOEXCEPT { return *this; }
+    AssertSink& operator<<(bool) FL_NOEXCEPT { return *this; }
+    AssertSink& operator<<(float) FL_NOEXCEPT { return *this; }
+    AssertSink& operator<<(double) FL_NOEXCEPT { return *this; }
+    AssertSink& operator<<(const void*) FL_NOEXCEPT { return *this; }
 
     // Generic integer type overload using SFINAE (mirrors fl::sstream pattern)
     template<typename T>
     typename fl::enable_if<fl::is_multi_byte_integer<T>::value, AssertSink&>::type
-    operator<<(T) FL_NO_EXCEPT { return *this; }
+    operator<<(T) FL_NOEXCEPT { return *this; }
 
     // Enum support
     template<typename T>
     typename fl::enable_if<fl::is_enum<T>::value, AssertSink&>::type
-    operator<<(T) FL_NO_EXCEPT { return *this; }
+    operator<<(T) FL_NOEXCEPT { return *this; }
 
     // Catch-all for any other type
     template<typename T>
@@ -71,7 +71,7 @@ struct AssertSink {
         !fl::is_multi_byte_integer<T>::value &&
         !fl::is_enum<T>::value,
         AssertSink&>::type
-    operator<<(const T&) FL_NO_EXCEPT { return *this; }
+    operator<<(const T&) FL_NOEXCEPT { return *this; }
 };
 
 } // namespace detail

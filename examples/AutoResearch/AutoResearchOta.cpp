@@ -5,15 +5,6 @@
 // Uses ESP-IDF native APIs for WiFi Soft AP.
 // Guarded with FL_IS_ESP32 - no-op stubs on other platforms.
 
-// Gate out under low-memory mode -- no OTA path on parts that don't have
-// WiFi / a network stack. Matches the conditional structure in
-// AutoResearch.ino itself.
-#include "fl/system/sketch_macros.h"
-#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
-#define FASTLED_AUTORESEARCH_LOW_MEMORY 1
-#endif
-#if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
-
 #include "AutoResearchOta.h"
 #include "fl/stl/json.h"
 #include "fl/log/log.h"
@@ -204,5 +195,3 @@ fl::json stopOta() {
 }
 
 #endif  // FL_IS_ESP32
-
-#endif  // !FASTLED_AUTORESEARCH_LOW_MEMORY

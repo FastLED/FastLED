@@ -17,7 +17,7 @@ class CSmartMatrixController : public CPixelLEDController<RGB_ORDER> {
 
 public:
     // initialize the LED controller
-    virtual void init() FL_NO_EXCEPT {
+    virtual void init() FL_NOEXCEPT {
         // Initialize 32x32 LED Matrix
         matrix.begin();
         matrix.setBrightness(255);
@@ -29,7 +29,7 @@ public:
         pSmartMatrix = &matrix;
     }
 
-    virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
+    virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NOEXCEPT {
         if(SMART_MATRIX_CAN_TRIPLE_BUFFER) {
             rgb24 *md = matrix.getRealBackBuffer();
         } else {

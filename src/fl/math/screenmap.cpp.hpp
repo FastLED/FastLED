@@ -28,7 +28,7 @@ namespace fl {
 
 // Default constructor and destructor - must be in .cpp for proper smart_ptr handling
 ScreenMap::ScreenMap() = default;
-ScreenMap::~ScreenMap() FL_NO_EXCEPT = default;
+ScreenMap::~ScreenMap() FL_NOEXCEPT = default;
 
 // Helper function to extract a vector of floats from a JSON array
 fl::vector<float> jsonArrayToFloatVector(const fl::json& jsonArray) {
@@ -53,7 +53,7 @@ fl::vector<float> jsonArrayToFloatVector(const fl::json& jsonArray) {
         if (!parseResult.has_error()) {
             result.push_back(parseResult.get_value());
         } else {
-            FL_WARN_F("jsonArrayToFloatVector: parse_result<float> has error: %s", parseResult.get_error().message);
+            FL_WARN("jsonArrayToFloatVector: parse_result<float> has error: " << parseResult.get_error().message);
         }
     }
     
@@ -113,7 +113,7 @@ ScreenMap ScreenMap::DefaultStrip(int numLeds, float cm_between_leds,
 // `z` is dropped (firmware-side ScreenMap is 2D today).
 static bool parseV2SegmentArray(const fl::json& segmentsArr,
                                 fl::flat_map<string, ScreenMap> *segmentMaps,
-                                string *err) FL_NO_EXCEPT {
+                                string *err) FL_NOEXCEPT {
     if (!segmentsArr.has_value() || !segmentsArr.is_array()) {
         *err = "v2 'segments' is not an array";
         return false;
@@ -190,7 +190,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     FL_UNUSED(jsonStrScreenMap);
     FL_UNUSED(segmentMaps);
     FL_UNUSED(err);
-    FL_WARN_F("ScreenMap::ParseJson called with FASTLED_NO_JSON");
+    FL_WARN("ScreenMap::ParseJson called with FASTLED_NO_JSON");
     if (err) {
         *err = "JSON is not supported in this build";
     }
@@ -206,13 +206,13 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     auto jsonDoc = fl::json::parse(jsonStrScreenMap);
     if (!jsonDoc.has_value()) {
         *err = "Failed to parse JSON";
-        FL_WARN_F("Failed to parse JSON");
+        FL_WARN("Failed to parse JSON");
         return false;
     }
 
     if (!jsonDoc.is_object()) {
         *err = "JSON root is not an object";
-        FL_WARN_F("JSON root is not an object");
+        FL_WARN("JSON root is not an object");
         return false;
     }
 
@@ -242,7 +242,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     // Check if "map" key exists and is an object
     if (!jsonDoc.contains("map")) {
         *err = "Missing 'map' key in JSON";
-        FL_WARN_F("Missing 'map' key in JSON");
+        FL_WARN("Missing 'map' key in JSON");
         return false;
     }
     
@@ -250,14 +250,14 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     auto mapObj = jsonDoc["map"];
     if (!mapObj.has_value() || !mapObj.is_object()) {
         *err = "Invalid 'map' object in JSON";
-        FL_WARN_F("Invalid 'map' object in JSON");
+        FL_WARN("Invalid 'map' object in JSON");
         return false;
     }
     
     auto jsonMapPtr = mapObj.as_object();
     if (!jsonMapPtr || jsonMapPtr->empty()) {
         *err = "Failed to parse map from JSON or map is empty";
-        FL_WARN_F("Failed to parse map from JSON or map is empty");
+        FL_WARN("Failed to parse map from JSON or map is empty");
         return false;
     }
 
@@ -370,11 +370,11 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
                        fl::json *doc) {
 
 #if FASTLED_NO_JSON
-    FL_WARN_F("ScreenMap::toJson called with FASTLED_NO_JSON");
+    FL_WARN("ScreenMap::toJson called with FASTLED_NO_JSON");
     return;
 #else
     if (!doc) {
-        FL_WARN_F("ScreenMap::toJson called with nullptr doc");
+        FL_WARN("ScreenMap::toJson called with nullptr doc");
         return;
     }
 
@@ -402,7 +402,7 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
     size_t idx = 0;
     for (const auto& kv : segmentMaps) {
         if (kv.second.getLength() == 0) {
-            FL_WARN_F("ScreenMap::toJson called with empty segment: %s", fl::string(kv.first));
+            FL_WARN("ScreenMap::toJson called with empty segment: " << fl::string(kv.first));
             continue;
         }
 
@@ -412,11 +412,11 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
 
         fl::json xArray = fl::json::array();
         for (u16 i = 0; i < segment.getLength(); i++) {
-            xArray.push_back(fl::json(segment[i].x));
+            xArray.push_back(fl::json(static_cast<double>(segment[i].x)));
         }
         fl::json yArray = fl::json::array();
         for (u16 i = 0; i < segment.getLength(); i++) {
-            yArray.push_back(fl::json(segment[i].y));
+            yArray.push_back(fl::json(static_cast<double>(segment[i].y)));
         }
 
         fl::json groupObj = fl::json::object();
@@ -429,18 +429,18 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
         segmentObj.set("group", fl::json(fl::string(name)));
         segmentObj.set("x", xArray);
         segmentObj.set("y", yArray);
-        segmentObj.set("diameter", fl::json(diameter));
+        segmentObj.set("diameter", fl::json(static_cast<double>(diameter)));
         segmentsArr.push_back(segmentObj);
 
         idx++;
     }
 
-    doc->set("version", fl::json(i64(2)));
+    doc->set("version", fl::json(static_cast<double>(2)));
     doc->set("groups", groupsObj);
     doc->set("segments", segmentsArr);
 
     fl::string debugStr = doc->to_string();
-    FL_WARN_F("ScreenMap::toJson generated JSON: %s", debugStr);
+    FL_WARN("ScreenMap::toJson generated JSON: " << debugStr);
 #endif
 }
 
@@ -575,7 +575,7 @@ vec2f &ScreenMap::operator[](u32 x) {
     return data[x];
 }
 
-ScreenMap &ScreenMap::operator=(const ScreenMap &other) FL_NO_EXCEPT {
+ScreenMap &ScreenMap::operator=(const ScreenMap &other) FL_NOEXCEPT {
     if (this != &other) {
         mDiameter = other.mDiameter;
         length = other.length;
@@ -585,7 +585,7 @@ ScreenMap &ScreenMap::operator=(const ScreenMap &other) FL_NO_EXCEPT {
     return *this;
 }
 
-ScreenMap &ScreenMap::operator=(ScreenMap &&other) FL_NO_EXCEPT {
+ScreenMap &ScreenMap::operator=(ScreenMap &&other) FL_NOEXCEPT {
     if (this != &other) {
         mDiameter = other.mDiameter;
         length = other.length;

@@ -33,16 +33,16 @@ namespace fl {
 /// @param numToFill the number of LEDs to fill in the array
 /// @param color the color to fill with
 void fill_solid(CRGB *targetArray, int numToFill,
-                const CRGB &color) FL_NO_EXCEPT;
+                const CRGB &color) FL_NOEXCEPT;
 
 /// @copydoc fill_solid()
-inline void fill_solid(fl::span<CRGB> leds, const CRGB &color) FL_NO_EXCEPT {
+inline void fill_solid(fl::span<CRGB> leds, const CRGB &color) FL_NOEXCEPT {
     fill_solid(leds.data(), static_cast<int>(leds.size()), color);
 }
 
 /// @copydoc fill_solid()
 void fill_solid(CHSV *targetArray, int numToFill,
-                const CHSV &color) FL_NO_EXCEPT;
+                const CHSV &color) FL_NOEXCEPT;
 
 /// Fill a range of LEDs with a rainbow of colors.
 /// The colors making up the rainbow are at full saturation and full
@@ -52,17 +52,17 @@ void fill_solid(CHSV *targetArray, int numToFill,
 /// @param initialhue the starting hue for the rainbow
 /// @param deltahue how many hue values to advance for each LED
 void fill_rainbow(CRGB *targetArray, int numToFill, fl::u8 initialhue,
-                  fl::u8 deltahue = 5) FL_NO_EXCEPT;
+                  fl::u8 deltahue = 5) FL_NOEXCEPT;
 
 /// @copydoc fill_rainbow()
 inline void fill_rainbow(fl::span<CRGB> leds, fl::u8 initialhue,
-                         fl::u8 deltahue = 5) FL_NO_EXCEPT {
+                         fl::u8 deltahue = 5) FL_NOEXCEPT {
     fill_rainbow(leds.data(), static_cast<int>(leds.size()), initialhue, deltahue);
 }
 
 /// @copydoc fill_rainbow()
 void fill_rainbow(CHSV *targetArray, int numToFill, fl::u8 initialhue,
-                  fl::u8 deltahue = 5) FL_NO_EXCEPT;
+                  fl::u8 deltahue = 5) FL_NOEXCEPT;
 
 /// Fill a range of LEDs with a rainbow of colors, so that the hues
 /// are continuous between the end of the strip and the beginning.
@@ -73,18 +73,18 @@ void fill_rainbow(CHSV *targetArray, int numToFill, fl::u8 initialhue,
 /// @param initialhue the starting hue for the rainbow
 /// @param reversed whether to progress through the rainbow hues backwards
 void fill_rainbow_circular(CRGB *targetArray, int numToFill,
-                           fl::u8 initialhue, bool reversed = false) FL_NO_EXCEPT;
+                           fl::u8 initialhue, bool reversed = false) FL_NOEXCEPT;
 
 /// @copydoc fill_rainbow_circular()
 inline void fill_rainbow_circular(fl::span<CRGB> leds, fl::u8 initialhue,
-                                  bool reversed = false) FL_NO_EXCEPT {
+                                  bool reversed = false) FL_NOEXCEPT {
     fill_rainbow_circular(leds.data(), static_cast<int>(leds.size()),
                           initialhue, reversed);
 }
 
 /// @copydoc fill_rainbow_circular()
 void fill_rainbow_circular(CHSV *targetArray, int numToFill,
-                           fl::u8 initialhue, bool reversed = false) FL_NO_EXCEPT;
+                           fl::u8 initialhue, bool reversed = false) FL_NOEXCEPT;
 
 /// Fill a range of LEDs with a smooth HSV gradient between two HSV colors.
 /// This function can write the gradient colors either:
@@ -104,7 +104,7 @@ void fill_rainbow_circular(CHSV *targetArray, int numToFill,
 template <typename T>
 void fill_gradient(T *targetArray, u16 startpos, CHSV startcolor,
                    u16 endpos, CHSV endcolor,
-                   TGradientDirectionCode directionCode = SHORTEST_HUES) FL_NO_EXCEPT {
+                   TGradientDirectionCode directionCode = SHORTEST_HUES) FL_NOEXCEPT {
     // if the points are in the wrong order, straighten them
     if (endpos < startpos) {
         u16 t = endpos;
@@ -215,7 +215,7 @@ void fill_gradient(T *targetArray, u16 startpos, CHSV startcolor,
 template <typename T>
 void fill_gradient(T *targetArray, u16 numLeds, const CHSV &c1,
                    const CHSV &c2,
-                   TGradientDirectionCode directionCode = SHORTEST_HUES) FL_NO_EXCEPT {
+                   TGradientDirectionCode directionCode = SHORTEST_HUES) FL_NOEXCEPT {
     u16 last = numLeds - 1;
     fill_gradient(targetArray, 0, c1, last, c2, directionCode);
 }
@@ -231,7 +231,7 @@ void fill_gradient(T *targetArray, u16 numLeds, const CHSV &c1,
 template <typename T>
 void fill_gradient(T *targetArray, u16 numLeds, const CHSV &c1,
                    const CHSV &c2, const CHSV &c3,
-                   TGradientDirectionCode directionCode = SHORTEST_HUES) FL_NO_EXCEPT {
+                   TGradientDirectionCode directionCode = SHORTEST_HUES) FL_NOEXCEPT {
     u16 half = (numLeds / 2);
     u16 last = numLeds - 1;
     fill_gradient(targetArray, 0, c1, half, c2, directionCode);
@@ -250,7 +250,7 @@ void fill_gradient(T *targetArray, u16 numLeds, const CHSV &c1,
 template <typename T>
 void fill_gradient(T *targetArray, u16 numLeds, const CHSV &c1,
                    const CHSV &c2, const CHSV &c3, const CHSV &c4,
-                   TGradientDirectionCode directionCode = SHORTEST_HUES) FL_NO_EXCEPT {
+                   TGradientDirectionCode directionCode = SHORTEST_HUES) FL_NOEXCEPT {
     u16 onethird = (numLeds / 3);
     u16 twothirds = ((numLeds * 2) / 3);
     u16 last = numLeds - 1;
@@ -272,7 +272,7 @@ void fill_gradient(T *targetArray, u16 numLeds, const CHSV &c1,
 /// @param endpos the ending position in the array
 /// @param endcolor the end color for the gradient
 void fill_gradient_RGB(CRGB *leds, u16 startpos, CRGB startcolor,
-                       u16 endpos, CRGB endcolor) FL_NO_EXCEPT;
+                       u16 endpos, CRGB endcolor) FL_NOEXCEPT;
 
 /// Fill a range of LEDs with a smooth RGB gradient between two RGB colors.
 /// @see fill_gradient_RGB()
@@ -281,7 +281,7 @@ void fill_gradient_RGB(CRGB *leds, u16 startpos, CRGB startcolor,
 /// @param c1 the starting color in the gradient
 /// @param c2 the end color for the gradient
 void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1,
-                       const CRGB &c2) FL_NO_EXCEPT;
+                       const CRGB &c2) FL_NOEXCEPT;
 
 /// Fill a range of LEDs with a smooth RGB gradient between three RGB colors.
 /// @see fill_gradient_RGB()
@@ -291,7 +291,7 @@ void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1,
 /// @param c2 the middle color for the gradient
 /// @param c3 the end color for the gradient
 void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1,
-                       const CRGB &c2, const CRGB &c3) FL_NO_EXCEPT;
+                       const CRGB &c2, const CRGB &c3) FL_NOEXCEPT;
 
 /// Fill a range of LEDs with a smooth RGB gradient between four RGB colors.
 /// @see fill_gradient_RGB()
@@ -302,24 +302,24 @@ void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1,
 /// @param c3 the second middle color for the gradient
 /// @param c4 the end color for the gradient
 void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1,
-                       const CRGB &c2, const CRGB &c3, const CRGB &c4) FL_NO_EXCEPT;
+                       const CRGB &c2, const CRGB &c3, const CRGB &c4) FL_NOEXCEPT;
 
 /// @copydoc fill_gradient_RGB()
 inline void fill_gradient_RGB(fl::span<CRGB> leds, const CRGB &c1,
-                               const CRGB &c2) FL_NO_EXCEPT {
+                               const CRGB &c2) FL_NOEXCEPT {
     fill_gradient_RGB(leds.data(), static_cast<u16>(leds.size()), c1, c2);
 }
 
 /// @copydoc fill_gradient_RGB()
 inline void fill_gradient_RGB(fl::span<CRGB> leds, const CRGB &c1,
-                               const CRGB &c2, const CRGB &c3) FL_NO_EXCEPT {
+                               const CRGB &c2, const CRGB &c3) FL_NOEXCEPT {
     fill_gradient_RGB(leds.data(), static_cast<u16>(leds.size()), c1, c2, c3);
 }
 
 /// @copydoc fill_gradient_RGB()
 inline void fill_gradient_RGB(fl::span<CRGB> leds, const CRGB &c1,
                                const CRGB &c2, const CRGB &c3,
-                               const CRGB &c4) FL_NO_EXCEPT {
+                               const CRGB &c4) FL_NOEXCEPT {
     fill_gradient_RGB(leds.data(), static_cast<u16>(leds.size()), c1, c2, c3,
                       c4);
 }

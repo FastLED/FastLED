@@ -69,9 +69,9 @@ struct MusicalBeatDetectorConfig {
 /// @endcode
 class MusicalBeat {
 public:
-    MusicalBeat() FL_NO_EXCEPT;
+    MusicalBeat() FL_NOEXCEPT;
     explicit MusicalBeat(const MusicalBeatDetectorConfig& config);
-    ~MusicalBeat() FL_NO_EXCEPT;
+    ~MusicalBeat() FL_NOEXCEPT;
 
     /// Configure the beat detector
     void configure(const MusicalBeatDetectorConfig& config);

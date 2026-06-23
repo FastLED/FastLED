@@ -374,9 +374,13 @@ def _start_zccache_session(build_dir: Path) -> None:
     if "ZCCACHE_LINK_DEPLOY_CMD" not in os.environ:
         os.environ["ZCCACHE_LINK_DEPLOY_CMD"] = "clang-tool-chain-libdeploy"
     os.environ.setdefault("ZCCACHE_STRICT_PATHS", "absolute")
-    # ZCCACHE_PROBE_BYPASS=1 setdefault removed as a probe per #3129 A9
-    # (the CLI-side probe-bypass fast-path was internalised in zccache
-    # 1.12.x). If configure-phase try-compile times regress, revert.
+    # Opt in to zccache's CLI-side probe-bypass fast-path for meson
+    # configure-phase try-compiles (zackees/zccache#625, #633, #636 — bench
+    # in #636 shows 7-10s saved per configure run). Not a disable: per-call
+    # routing, only sub-4 KiB single-source no-PCH no-@rsp invocations
+    # bypass; production TUs continue to use the cache. setdefault keeps any
+    # user override intact; older zccache without this env var ignores it.
+    os.environ.setdefault("ZCCACHE_PROBE_BYPASS", "1")
 
     zccache_bin = _find_zccache_binary()
     if not zccache_bin:

@@ -564,8 +564,8 @@ class UCS1912Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMIN
 
 /// SM16824E controller - references centralized timing from fl::TIMING_SM16824E
 /// @note NEW LED! Help us test it! Under development.
-/// Timing: T0H=.3µs, T0L=.9µs, T1H=.9µs, T1L=.3µs, TRST=200µs
-/// @see fl::TIMING_SM16824E in chipsets::led_timing.h (300, 600, 300 ns)
+/// Timing: T0H=.3μs, T0L=.9μs, T1H=.9μs, T1L=.3μs, TRST=200μs
+/// @see fl::TIMING_SM16824E in chipsets::led_timing.h (300, 900, 100 ns)
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
 class SM16824EController : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_SM16824E, RGB_ORDER> {};
 

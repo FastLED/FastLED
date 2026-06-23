@@ -125,49 +125,4 @@ FL_TEST_CASE("Test clear() method") {
     FL_REQUIRE(!f3);
 }
 
-// FastLED #3237 -- FL_FUNCTION_NO_HEAP_FALLBACK opt-out behavior verification.
-//
-// When the macro is NOT defined (the default; this build), over-SBO captures
-// route through the `HeapHolder<F>` + `shared_ptr<F>` heap path. This test
-// constructs a deliberately-large capture (above FASTLED_INLINE_LAMBDA_SIZE
-// = 64 B), confirms it works, and confirms copying the fl::function does the
-// right thing -- the captured F is shared via refcount instead of being
-// re-allocated. The runtime-observable invariant is that two copies of the
-// fl::function see the same captured state.
-FL_TEST_CASE("fl::function: over-SBO captures route through heap fallback by default") {
-    struct LargeCapture {
-        // Force > 64 B by padding with an explicit array. The padding does
-        // not need to be referenced by operator(); the size is what triggers
-        // the over-SBO `init_with_impl(false_type)` branch.
-        int payload;
-        char padding[96];
-        LargeCapture(int p) : payload(p) {
-            for (size_t i = 0; i < sizeof(padding); ++i) padding[i] = 0;
-        }
-    };
-
-    LargeCapture big(7);
-    // Capture `big` by value; sizeof(lambda) becomes >= sizeof(LargeCapture)
-    // > FASTLED_INLINE_LAMBDA_SIZE (64 B), so the heap fallback fires.
-    fl::function<int()> f = [big]() { return big.payload * 6; };
-    FL_REQUIRE(f);
-    FL_REQUIRE(f() == 42);
-
-    // Copy the fl::function -- the captured LargeCapture lives on the heap
-    // (per #3237 design), and the copy increments shared_ptr refcount rather
-    // than re-allocating. Both copies see the same captured payload.
-    fl::function<int()> f_copy = f;
-    FL_REQUIRE(f_copy);
-    FL_REQUIRE(f_copy() == 42);
-
-    // Rebind the original's stored callable and confirm the copy is
-    // unaffected (the heap-held F was shared by refcount, but assignment
-    // to `f` rebinds `f`'s invoker/manager pair, not the shared F's
-    // contents). This validates that the shared_ptr-based sharing has the
-    // expected fl::function semantics.
-    f = []() { return 99; };
-    FL_REQUIRE(f() == 99);
-    FL_REQUIRE(f_copy() == 42);  // still observes the original captured LargeCapture
-}
-
 } // FL_TEST_FILE

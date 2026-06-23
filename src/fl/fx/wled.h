@@ -254,7 +254,7 @@ public:
      * Example:
      *   fl::WLED wled;
      */
-    WLED() FL_NO_EXCEPT;
+    WLED() FL_NOEXCEPT;
 
     /**
      * @brief Construct WLED with custom I/O callbacks

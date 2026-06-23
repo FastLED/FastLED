@@ -8,7 +8,6 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/gfx/blur.h"
 #include "fl/gfx/gradient.h"
 #include "fl/stl/shared_ptr.h"  // For FASTLED_SHARED_PTR macros and shared_ptr
 #include "fl/math/wave/wave_simulation.h"
@@ -29,7 +28,7 @@ FASTLED_SHARED_PTR(WaveCrgbGradientMap);
 /// into CRGB color values for LED display.
 class WaveCrgbMap {
   public:
-    virtual ~WaveCrgbMap() FL_NO_EXCEPT = default;
+    virtual ~WaveCrgbMap() FL_NOEXCEPT = default;
 
     /// @brief Convert wave simulation values to LED colors
     /// @param xymap Coordinate mapping from 2D grid to 1D LED array
@@ -79,7 +78,7 @@ class WaveCrgbGradientMap : public WaveCrgbMap {
     WaveCrgbGradientMap(const CRGBPalette16 &palette) : mGradient(palette) {}
 
     /// @brief Default constructor with no initial gradient
-    WaveCrgbGradientMap() FL_NO_EXCEPT = default;
+    WaveCrgbGradientMap() FL_NOEXCEPT = default;
 
     /// @brief Map wave values to gradient-colored LEDs
     /// @param xymap Coordinate mapping from 2D grid to 1D LED array
@@ -101,7 +100,7 @@ class WaveCrgbGradientMap : public WaveCrgbMap {
 /// Defines all the settings that control wave behavior including
 /// simulation quality, physics parameters, and color mapping.
 struct WaveFxArgs {
-    WaveFxArgs() FL_NO_EXCEPT = default;
+    WaveFxArgs() FL_NOEXCEPT = default;
 
     /// @brief Construct with all parameters
     /// @param factor Supersampling quality (higher = smoother but slower)
@@ -114,8 +113,8 @@ struct WaveFxArgs {
                float speed, float dampening, WaveCrgbMapPtr crgbMap)
         : factor(factor), half_duplex(half_duplex), auto_updates(auto_updates),
           speed(speed), dampening(dampening), crgbMap(crgbMap) {}
-    WaveFxArgs(const WaveFxArgs &) FL_NO_EXCEPT = default;
-    WaveFxArgs &operator=(const WaveFxArgs &) FL_NO_EXCEPT = default;
+    WaveFxArgs(const WaveFxArgs &) FL_NOEXCEPT = default;
+    WaveFxArgs &operator=(const WaveFxArgs &) FL_NOEXCEPT = default;
 
     /// Supersampling quality (SUPER_SAMPLE_2X recommended for balance)
     SuperSample factor = SuperSample::SUPER_SAMPLE_2X;
@@ -131,16 +130,6 @@ struct WaveFxArgs {
     bool x_cyclical = false;
     /// Use change grid tracking for optimization (may reduce visual quality)
     bool use_change_grid = false;
-    /// Post-process Gaussian-style blur (#3122 A4 / #3112 research §A1).
-    /// Applied to the rendered CRGB output after `mapWaveToLEDs`. 0 = off.
-    /// Values 32-128 give a smoothing effect comparable to SUPER_SAMPLE_2X
-    /// at ~1.2x scalar cost vs 8-512x for true super-sampling. Recommended
-    /// as a cheaper alternative to SuperSample for ripple smoothing.
-    fl::u8 output_blur_amount = 0;
-    /// Number of blur passes (1 = single pass, 2+ = repeated smoothing).
-    /// Use 1 for typical smoothing; 2 only if you genuinely need a heavier
-    /// blur — visually subtle gain past 2 passes.
-    fl::u8 output_blur_passes = 1;
     /// Custom color mapper (nullptr uses default grayscale)
     WaveCrgbMapPtr crgbMap;
 };
@@ -195,25 +184,7 @@ class WaveFx : public Fx2d {
         setAutoUpdate(args.auto_updates);
         setXCylindrical(args.x_cyclical);
         setUseChangeGrid(args.use_change_grid);
-        setOutputBlur(args.output_blur_amount, args.output_blur_passes);
     }
-
-    /// @brief Configure the post-process output blur (#3122 A4)
-    /// @param amount Blur strength (0-255). 0 disables. 32-128 ≈ smoothing
-    ///               comparable to SUPER_SAMPLE_2X.
-    /// @param passes Number of repeated blur passes. 1 = single. >1 only
-    ///               for heavy smoothing.
-    ///
-    /// Applied to the rendered CRGB output buffer after `mapWaveToLEDs`.
-    /// ~1.2x scalar cost vs 8-512x for SuperSample with broadly
-    /// comparable visual quality on smooth fields. See #3112 research
-    /// doc §A1 for the rationale.
-    void setOutputBlur(fl::u8 amount, fl::u8 passes = 1) FL_NO_EXCEPT {
-        mOutputBlurAmount = amount;
-        mOutputBlurPasses = (passes < 1) ? 1 : passes;
-    }
-    fl::u8 getOutputBlurAmount() const FL_NO_EXCEPT { return mOutputBlurAmount; }
-    fl::u8 getOutputBlurPasses() const FL_NO_EXCEPT { return mOutputBlurPasses; }
 
     /// @brief Enable/disable cylindrical topology on x-axis
     /// @param on If true, waves wrap around from right edge to left edge
@@ -287,12 +258,12 @@ class WaveFx : public Fx2d {
     /// Calling this marks the choice as user-set, so subsequent
     /// setSuperSample() calls preserve it instead of re-applying the
     /// multiplier-based default.
-    void setStencil(LaplacianStencil s) FL_NO_EXCEPT {
+    void setStencil(LaplacianStencil s) FL_NOEXCEPT {
         mWaveSim.setStencil(s);
     }
 
     /// @brief Get the currently active Laplacian stencil
-    LaplacianStencil getStencil() const FL_NO_EXCEPT {
+    LaplacianStencil getStencil() const FL_NOEXCEPT {
         return mWaveSim.getStencil();
     }
 
@@ -374,17 +345,6 @@ class WaveFx : public Fx2d {
         }
         // Map the wave values to the LEDs.
         mCrgbMap->mapWaveToLEDs(mXyMap, mWaveSim, context.leds);
-        // #3122 A4 — post-process output blur as a cheaper alternative
-        // to SuperSample. Skipped entirely when amount == 0.
-        if (mOutputBlurAmount > 0) {
-            const fl::u32 w = mWaveSim.getWidth();
-            const fl::u32 h = mWaveSim.getHeight();
-            for (fl::u8 pass = 0; pass < mOutputBlurPasses; ++pass) {
-                fl::blur2d(context.leds, static_cast<fl::u8>(w),
-                           static_cast<fl::u8>(h), mOutputBlurAmount,
-                           mXyMap);
-            }
-        }
     }
 
     /// @brief Enable/disable automatic simulation updates
@@ -416,8 +376,6 @@ class WaveFx : public Fx2d {
     WaveSimulation2D mWaveSim;
     WaveCrgbMapPtr mCrgbMap;
     bool mAutoUpdates = true;
-    fl::u8 mOutputBlurAmount = 0;  // #3122 A4 — 0 disables
-    fl::u8 mOutputBlurPasses = 1;
 };
 
 } // namespace fl

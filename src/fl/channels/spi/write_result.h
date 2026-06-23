@@ -14,7 +14,7 @@ struct WriteResult {
     bool ok;                ///< True if write succeeded, false if error
     fl::string error;       ///< Error message (empty if ok == true)
 
-    WriteResult() FL_NO_EXCEPT : ok(true) {}
+    WriteResult() FL_NOEXCEPT : ok(true) {}
     explicit WriteResult(const char* err) : ok(false), error(err) {}
     explicit WriteResult(const fl::string& err) : ok(false), error(err) {}
 

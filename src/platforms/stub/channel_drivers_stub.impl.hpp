@@ -14,7 +14,7 @@
 namespace fl {
 namespace platforms {
 
-inline void enableAllChannelDrivers() FL_NO_EXCEPT {
+inline void enableAllChannelDrivers() FL_NOEXCEPT {
     fl::enableDrivers<fl::Bus::BIT_BANG, fl::Bus::STUB>();
 }
 

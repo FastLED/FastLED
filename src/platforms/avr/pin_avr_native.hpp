@@ -414,7 +414,7 @@ static u8 analog_reference = DEFAULT;
 // GPIO Functions - Native AVR Implementation
 // ============================================================================
 
-inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
+inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
     u8 port = digitalPinToPort(pin);
     if (port == NOT_A_PORT) return;
 
@@ -447,7 +447,7 @@ inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
     SREG = oldSREG;
 }
 
-inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
+inline void digitalWrite(int pin, PinValue val) FL_NOEXCEPT {
     u8 port = digitalPinToPort(pin);
     if (port == NOT_A_PORT) return;
 
@@ -469,7 +469,7 @@ inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
     SREG = oldSREG;
 }
 
-inline PinValue digitalRead(int pin) FL_NO_EXCEPT {
+inline PinValue digitalRead(int pin) FL_NOEXCEPT {
     u8 port = digitalPinToPort(pin);
     if (port == NOT_A_PORT) return PinValue::Low;
 
@@ -483,7 +483,7 @@ inline PinValue digitalRead(int pin) FL_NO_EXCEPT {
     return PinValue::Low;
 }
 
-inline u16 analogRead(int pin) FL_NO_EXCEPT {
+inline u16 analogRead(int pin) FL_NOEXCEPT {
 #if defined(ADCSRA) && defined(ADMUX)
     // Convert analog pin number to ADC channel
     u8 channel = analogPinToChannel(pin);
@@ -512,7 +512,7 @@ inline u16 analogRead(int pin) FL_NO_EXCEPT {
 #endif
 }
 
-inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
+inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
     // Simplified PWM implementation
     // Full implementation would require timer configuration per pin
     // For now, treat as digital output for edge cases
@@ -537,7 +537,7 @@ inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
     }
 }
 
-inline void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
+inline void setPwm16(int pin, u16 val) FL_NOEXCEPT {
     // AVR 16-bit PWM using Timer1 (pins 9, 10 on Uno)
     // Provides true 16-bit resolution at ~244 Hz (16 MHz / 65536)
 
@@ -598,7 +598,7 @@ inline void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
     platforms::analogWrite(pin, val >> 8);
 }
 
-inline void setAdcRange(AdcRange range) FL_NO_EXCEPT {
+inline void setAdcRange(AdcRange range) FL_NOEXCEPT {
     // Translate AdcRange to AVR analogReference constants
     // AdcRange: Default=0, Range0_1V1=1, Range0_1V5=2, Range0_2V2=3, Range0_3V3=4, Range0_5V=5, External=6
     // AVR constants: DEFAULT=1, INTERNAL=3, EXTERNAL=0

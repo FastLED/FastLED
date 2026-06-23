@@ -111,12 +111,10 @@ def main() -> int:
         if rel_norm == sub_path or rel_norm.startswith(sub_path + "/"):
             return 0
 
-    # Note: previously C++ files under examples/ were short-circuited here
-    # because IWYU checks aren't applicable. After PR #3293 the Rust lint
-    # path needs to run on save for examples-scope checkers
-    # (UsingNamespaceFlInExamplesChecker, ExampleSerialChecker, the
-    # examples-scope BannedHeadersChecker). The fingerprint cache keeps
-    # the per-save cost low, so the short-circuit was removed.
+    # Skip C++ files in examples directory (IWYU checks not applicable)
+    if Path(file_path).suffix.lower() in CPP_EXTENSIONS:
+        if rel_path.startswith("examples" + os.sep) or rel_path.startswith("examples/"):
+            return 0
 
     # Delegate to lint.py in single-file mode
     # Always use --strict for Python files (pyright on single file is fast)

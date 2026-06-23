@@ -77,7 +77,7 @@ public:
     );
 
     /// @brief Destructor
-    ~SpiChannelEngineAdapter() FL_NO_EXCEPT override;
+    ~SpiChannelEngineAdapter() FL_NOEXCEPT override;
 
     // IChannelDriver interface implementation
 
@@ -118,7 +118,7 @@ public:
 private:
     /// @brief Friend declaration for make_shared to access private constructor
     template<typename T, typename... Args>
-    friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NO_EXCEPT;
+    friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NOEXCEPT;
 
     /// @brief Private constructor - use create() factory method
     SpiChannelEngineAdapter(const char* name);
@@ -185,10 +185,10 @@ private:
     fl::vector<ChannelDataPtr> mTransmittingChannels;  ///< Channels currently transmitting
 
     // Non-copyable, non-movable
-    SpiChannelEngineAdapter(const SpiChannelEngineAdapter&) FL_NO_EXCEPT = delete;
-    SpiChannelEngineAdapter& operator=(const SpiChannelEngineAdapter&) FL_NO_EXCEPT = delete;
-    SpiChannelEngineAdapter(SpiChannelEngineAdapter&&) FL_NO_EXCEPT = delete;
-    SpiChannelEngineAdapter& operator=(SpiChannelEngineAdapter&&) FL_NO_EXCEPT = delete;
+    SpiChannelEngineAdapter(const SpiChannelEngineAdapter&) FL_NOEXCEPT = delete;
+    SpiChannelEngineAdapter& operator=(const SpiChannelEngineAdapter&) FL_NOEXCEPT = delete;
+    SpiChannelEngineAdapter(SpiChannelEngineAdapter&&) FL_NOEXCEPT = delete;
+    SpiChannelEngineAdapter& operator=(SpiChannelEngineAdapter&&) FL_NOEXCEPT = delete;
 };
 
 } // namespace fl

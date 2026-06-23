@@ -27,7 +27,7 @@ namespace platforms {
 /// multiple times (subsequent calls are no-ops).
 ///
 /// @note Implementation is in src/platforms/arm/rp/init_rp.cpp
-void init() FL_NO_EXCEPT;
+void init() FL_NOEXCEPT;
 
 } // namespace platforms
 } // namespace fl

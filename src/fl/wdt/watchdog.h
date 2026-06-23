@@ -32,7 +32,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/noexcept.h"
-#include "fl/stl/compiler_control.h"   // FL_NO_RETURN
+#include "fl/stl/compiler_control.h"   // FL_NORETURN
 #include "fl/stl/span.h"
 #include "fl/stl/function.h"
 #include "fl/stl/string_view.h"        // for resetCauseName() return type
@@ -58,7 +58,7 @@ enum class ResetCause : fl::u8 {
 /// context (ISR, panic handler, before setup() finishes). Backed by
 /// `fl::string_view` so the result has no destructor and can be passed by
 /// value freely.
-inline fl::string_view resetCauseName(ResetCause c) FL_NO_EXCEPT {
+inline fl::string_view resetCauseName(ResetCause c) FL_NOEXCEPT {
     switch (c) {
         case ResetCause::POWER_ON:     return fl::string_view("POWER_ON");
         case ResetCause::BROWNOUT:     return fl::string_view("BROWNOUT");
@@ -85,12 +85,12 @@ struct ResetInfo {
     fl::u32    rawRegister;    ///< Raw value of the platform's reset-cause register
 
     /// Cause name (zero-cost, static string_view).
-    fl::string_view causeName() const FL_NO_EXCEPT { return resetCauseName(cause); }
+    fl::string_view causeName() const FL_NOEXCEPT { return resetCauseName(cause); }
 
     /// Platform-specific subcause name (zero-cost, static string_view).
     /// Returns an empty view if `subcauseId == 0` or the platform doesn't
     /// define names. Per-platform impls extend this via a strong override.
-    fl::string_view subcauseName() const FL_NO_EXCEPT;
+    fl::string_view subcauseName() const FL_NOEXCEPT;
 
     /// Write a single-line human-readable description into the caller's
     /// buffer. Returns the number of bytes written (NOT including any
@@ -100,7 +100,7 @@ struct ResetInfo {
     ///   "<cause>"                          if subcauseId == 0
     ///   "<cause> (<sub>)"                  if subcauseId != 0 && !verbose
     ///   "<cause> (<sub>) raw=0x<hex>"      if verbose
-    fl::size describe(fl::span<char> out, bool verbose = false) const FL_NO_EXCEPT;
+    fl::size describe(fl::span<char> out, bool verbose = false) const FL_NOEXCEPT;
 };
 
 /// @brief ISR-safe C function pointer callback for `onTimeout()`.
@@ -129,55 +129,55 @@ public:
     // FastLED.h. See `agents/docs/cpp-standards.md` → "Header rules:
     // function-local statics with non-trivial constructors are forbidden in
     // `src/**/*.h`."
-    static Watchdog& instance() FL_NO_EXCEPT;
+    static Watchdog& instance() FL_NOEXCEPT;
 
     // ========== Tier 0 — universal ==========
 
-    void       begin(fl::u32 timeout_ms) FL_NO_EXCEPT;
-    void       feed() FL_NO_EXCEPT;
-    void       disable() FL_NO_EXCEPT;
+    void       begin(fl::u32 timeout_ms) FL_NOEXCEPT;
+    void       feed() FL_NOEXCEPT;
+    void       disable() FL_NOEXCEPT;
 
-    ResetCause lastResetCause() const FL_NO_EXCEPT;
-    bool       lastResetWasWatchdog() const FL_NO_EXCEPT;
+    ResetCause lastResetCause() const FL_NOEXCEPT;
+    bool       lastResetWasWatchdog() const FL_NOEXCEPT;
 
     /// @brief Detailed reset information including platform raw register +
     /// subcause id. Default implementation returns {lastResetCause(), 0, 0};
     /// platforms that capture the raw register override with a strong
     /// definition in their `.impl.hpp`.
-    ResetInfo lastResetInfo() const FL_NO_EXCEPT;
+    ResetInfo lastResetInfo() const FL_NOEXCEPT;
 
-    fl::u8     persistRead(fl::size idx) const FL_NO_EXCEPT;
-    void       persistWrite(fl::size idx, fl::u8 v) FL_NO_EXCEPT;
+    fl::u8     persistRead(fl::size idx) const FL_NOEXCEPT;
+    void       persistWrite(fl::size idx, fl::u8 v) FL_NOEXCEPT;
 
-    fl::u16    consecutiveCrashCount() const FL_NO_EXCEPT;
-    void       markCleanShutdown() FL_NO_EXCEPT;
-    bool       isInSafeMode() const FL_NO_EXCEPT;
-    fl::u16    safeModeThreshold() const FL_NO_EXCEPT;
-    void       setSafeModeThreshold(fl::u16 threshold) FL_NO_EXCEPT;
+    fl::u16    consecutiveCrashCount() const FL_NOEXCEPT;
+    void       markCleanShutdown() FL_NOEXCEPT;
+    bool       isInSafeMode() const FL_NOEXCEPT;
+    fl::u16    safeModeThreshold() const FL_NOEXCEPT;
+    void       setSafeModeThreshold(fl::u16 threshold) FL_NOEXCEPT;
 
-    FL_NO_RETURN void reboot() FL_NO_EXCEPT;
+    FL_NORETURN void reboot() FL_NOEXCEPT;
 
     // ========== Tier 1 — most platforms ==========
 
-    bool       onTimeout(WatchdogTimeoutCallback cb, void* user_data = nullptr) FL_NO_EXCEPT;
-    bool       onTimeout(fl::function<void()> cb) FL_NO_EXCEPT;
-    bool       setPauseOnDebug(bool pause) FL_NO_EXCEPT;
-    bool       writeCrashLog(fl::span<const fl::u8> payload) FL_NO_EXCEPT;
-    fl::size   readCrashLog(fl::span<fl::u8> out) const FL_NO_EXCEPT;
-    bool       rebootIntoBootloader() FL_NO_EXCEPT;
+    bool       onTimeout(WatchdogTimeoutCallback cb, void* user_data = nullptr) FL_NOEXCEPT;
+    bool       onTimeout(fl::function<void()> cb) FL_NOEXCEPT;
+    bool       setPauseOnDebug(bool pause) FL_NOEXCEPT;
+    bool       writeCrashLog(fl::span<const fl::u8> payload) FL_NOEXCEPT;
+    fl::size   readCrashLog(fl::span<fl::u8> out) const FL_NOEXCEPT;
+    bool       rebootIntoBootloader() FL_NOEXCEPT;
 
     // ========== Tier 2 — advanced platforms ==========
 
-    bool                setWindow(fl::u32 window_min_ms, fl::u32 window_max_ms) FL_NO_EXCEPT;
-    bool                hasCrashReport() const FL_NO_EXCEPT;
-    WatchdogCrashReport readCrashReport() const FL_NO_EXCEPT;
-    void                clearCrashReport() FL_NO_EXCEPT;
+    bool                setWindow(fl::u32 window_min_ms, fl::u32 window_max_ms) FL_NOEXCEPT;
+    bool                hasCrashReport() const FL_NOEXCEPT;
+    WatchdogCrashReport readCrashReport() const FL_NOEXCEPT;
+    void                clearCrashReport() FL_NOEXCEPT;
 
 private:
-    Watchdog() FL_NO_EXCEPT = default;
-    ~Watchdog() FL_NO_EXCEPT = default;
-    Watchdog(const Watchdog&) FL_NO_EXCEPT = delete;
-    Watchdog& operator=(const Watchdog&) FL_NO_EXCEPT = delete;
+    Watchdog() FL_NOEXCEPT = default;
+    ~Watchdog() FL_NOEXCEPT = default;
+    Watchdog(const Watchdog&) FL_NOEXCEPT = delete;
+    Watchdog& operator=(const Watchdog&) FL_NOEXCEPT = delete;
 
     fl::u16 mSafeModeThreshold = 2;
 };
@@ -205,23 +205,23 @@ private:
 class ScopedWatchdog {
 public:
     /// Default construct with the library default timeout (15 000 ms).
-    ScopedWatchdog() FL_NO_EXCEPT : ScopedWatchdog(15000u) {}
+    ScopedWatchdog() FL_NOEXCEPT : ScopedWatchdog(15000u) {}
 
     /// Construct with an explicit timeout. Same semantics as the default
     /// constructor — first-call init, feed on construction.
-    explicit ScopedWatchdog(fl::u32 timeout_ms) FL_NO_EXCEPT;
+    explicit ScopedWatchdog(fl::u32 timeout_ms) FL_NOEXCEPT;
 
     /// Feed the watchdog at end-of-scope so the next `loop()` iteration has
     /// a clean deadline window.
-    ~ScopedWatchdog() FL_NO_EXCEPT;
+    ~ScopedWatchdog() FL_NOEXCEPT;
 
     /// Observability: number of simultaneously-alive ScopedWatchdog instances.
     /// Used by tests + diagnostics. A value > 1 means a nested-guard
     /// programmer error was hit; the WDT is still being fed.
-    static int activeScopeCount() FL_NO_EXCEPT;
+    static int activeScopeCount() FL_NOEXCEPT;
 
-    ScopedWatchdog(const ScopedWatchdog&)            FL_NO_EXCEPT = delete;
-    ScopedWatchdog& operator=(const ScopedWatchdog&) FL_NO_EXCEPT = delete;
+    ScopedWatchdog(const ScopedWatchdog&)            FL_NOEXCEPT = delete;
+    ScopedWatchdog& operator=(const ScopedWatchdog&) FL_NOEXCEPT = delete;
 };
 
 } // namespace fl

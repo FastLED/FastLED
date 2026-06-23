@@ -49,42 +49,42 @@ struct hsv8 {
     /// Array access operator to index into the hsv8 object
     /// @param x the index to retrieve (0-2)
     /// @returns the hsv8::raw value for the given index
-    FASTLED_FORCE_INLINE fl::u8& operator[] (fl::u8 x) FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE fl::u8& operator[] (fl::u8 x) FL_NOEXCEPT
     {
         return raw[x];
     }
 
     /// @copydoc operator[]
-    FASTLED_FORCE_INLINE const fl::u8& operator[] (fl::u8 x) const FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE const fl::u8& operator[] (fl::u8 x) const FL_NOEXCEPT
     {
         return raw[x];
     }
 
     /// Default constructor
     /// @warning Default values are UNITIALIZED!
-    constexpr hsv8() FL_NO_EXCEPT : h(0), s(0), v(0) { }
+    constexpr hsv8() FL_NOEXCEPT : h(0), s(0), v(0) { }
 
     /// Allow construction from hue, saturation, and value
     /// @param ih input hue
     /// @param is input saturation
     /// @param iv input value
-    constexpr hsv8( fl::u8 ih, fl::u8 is, fl::u8 iv) FL_NO_EXCEPT
+    constexpr hsv8( fl::u8 ih, fl::u8 is, fl::u8 iv) FL_NOEXCEPT
         : h(ih), s(is), v(iv)
     {
     }
 
     /// Allow copy construction
-    constexpr hsv8(const hsv8& rhs) FL_NO_EXCEPT : h(rhs.h), s(rhs.s), v(rhs.v) { }
+    constexpr hsv8(const hsv8& rhs) FL_NOEXCEPT : h(rhs.h), s(rhs.s), v(rhs.v) { }
 
     /// Allow copy construction
-    hsv8& operator= (const hsv8& rhs) FL_NO_EXCEPT = default;
+    hsv8& operator= (const hsv8& rhs) FL_NOEXCEPT = default;
 
     /// Assign new HSV values
     /// @param ih input hue
     /// @param is input saturation
     /// @param iv input value
     /// @returns reference to the hsv8 object
-    FASTLED_FORCE_INLINE hsv8& setHSV(fl::u8 ih, fl::u8 is, fl::u8 iv) FL_NO_EXCEPT
+    FASTLED_FORCE_INLINE hsv8& setHSV(fl::u8 ih, fl::u8 is, fl::u8 iv) FL_NOEXCEPT
     {
         h = ih;
         s = is;

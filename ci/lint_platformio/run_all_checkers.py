@@ -26,16 +26,7 @@ from pathlib import Path
 from ci.lint_platformio.check_no_internal_platformio import (
     NoInternalPlatformIOChecker,
 )
-from ci.lint_platformio.check_root_platformio_lockdown import (
-    check as run_root_platformio_lockdown_lint,
-)
 from ci.util.check_files import FileContentChecker, MultiCheckerFileProcessor
-
-
-__all__ = [
-    "run_platformio_lint",
-    "run_root_platformio_lockdown_lint",
-]
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent

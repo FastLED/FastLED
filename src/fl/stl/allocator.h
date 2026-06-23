@@ -66,34 +66,34 @@ struct allocator_traits {
 // Interface class for malloc/free test hooks
 class MallocFreeHook {
 public:
-    virtual ~MallocFreeHook() FL_NO_EXCEPT = default;
-    virtual void onMalloc(void* ptr, fl::size size) FL_NO_EXCEPT = 0;
-    virtual void onFree(void* ptr) FL_NO_EXCEPT = 0;
+    virtual ~MallocFreeHook() FL_NOEXCEPT = default;
+    virtual void onMalloc(void* ptr, fl::size size) FL_NOEXCEPT = 0;
+    virtual void onFree(void* ptr) FL_NOEXCEPT = 0;
 };
 
 // Set test hooks for malloc and free operations
-void SetMallocFreeHook(MallocFreeHook* hook) FL_NO_EXCEPT;
+void SetMallocFreeHook(MallocFreeHook* hook) FL_NOEXCEPT;
 
 // Clear test hooks (set to nullptr)
-void ClearMallocFreeHook() FL_NO_EXCEPT;
+void ClearMallocFreeHook() FL_NOEXCEPT;
 #endif
 
-void SetPSRamAllocator(void *(*alloc)(fl::size), void (*free)(void *)) FL_NO_EXCEPT;
-void *PSRamAllocate(fl::size size, bool zero = true) FL_NO_EXCEPT;
-void PSRamDeallocate(void *ptr) FL_NO_EXCEPT;
+void SetPSRamAllocator(void *(*alloc)(fl::size), void (*free)(void *)) FL_NOEXCEPT;
+void *PSRamAllocate(fl::size size, bool zero = true) FL_NOEXCEPT;
+void PSRamDeallocate(void *ptr) FL_NOEXCEPT;
 
 // Deleter for memory allocated via fl::PSRamAllocator (uses fl::PSRamDeallocate)
 template <typename T> struct PSRamDeleter {
-    PSRamDeleter() FL_NO_EXCEPT = default;
-    void operator()(T *ptr) FL_NO_EXCEPT {
+    PSRamDeleter() FL_NOEXCEPT = default;
+    void operator()(T *ptr) FL_NOEXCEPT {
         if (ptr) {
             PSRamDeallocate(ptr);
         }
     }
 };
 
-void* Malloc(fl::size size) FL_NO_EXCEPT;
-void Free(void *ptr) FL_NO_EXCEPT;
+void* Malloc(fl::size size) FL_NOEXCEPT;
+void Free(void *ptr) FL_NOEXCEPT;
 
 // SlabAllocator registry for cross-DLL shared slab allocators.
 // On Windows DLLs, inline functions with static locals create per-DLL copies.
@@ -101,8 +101,8 @@ void Free(void *ptr) FL_NO_EXCEPT;
 // for a given (block_size, slab_size) pair, preventing cross-DLL slab
 // deallocation errors (freeing a pointer inside another DLL's slab).
 namespace detail {
-    void* slab_allocator_registry_get(fl::size block_size, fl::size slab_size) FL_NO_EXCEPT;
-    void  slab_allocator_registry_set(fl::size block_size, fl::size slab_size, void* allocator) FL_NO_EXCEPT;
+    void* slab_allocator_registry_get(fl::size block_size, fl::size slab_size) FL_NOEXCEPT;
+    void  slab_allocator_registry_set(fl::size block_size, fl::size slab_size, void* allocator) FL_NOEXCEPT;
 } // namespace detail
 
 #ifdef FL_IS_ESP32
@@ -116,12 +116,12 @@ void DMAFree(void* ptr);
 
 template <typename T> class PSRamAllocator {
   public:
-    static T *Alloc(fl::size n) FL_NO_EXCEPT {
+    static T *Alloc(fl::size n) FL_NOEXCEPT {
         void *ptr = PSRamAllocate(sizeof(T) * n, true);
         return fl::bit_cast_ptr<T>(ptr);
     }
 
-    static void Free(T *p) FL_NO_EXCEPT {
+    static void Free(T *p) FL_NOEXCEPT {
         if (p == nullptr) {
             return;
         }
@@ -148,19 +148,19 @@ template <typename T> class allocator {
     };
 
     // Default constructor
-    allocator() FL_NO_EXCEPT {}
+    allocator() FL_NOEXCEPT {}
 
     // Copy constructor
     template <typename U>
-    allocator(const allocator<U>&) FL_NO_EXCEPT {}
+    allocator(const allocator<U>&) FL_NOEXCEPT {}
 
     // Destructor
-    ~allocator() FL_NO_EXCEPT {}
+    ~allocator() FL_NOEXCEPT {}
 
     // Optional: allocate_at_least() for optimized resizing
     // Allows allocator to return more memory than requested to reduce reallocations
     // Returns allocation_result with actual allocated count (may be > requested)
-    allocation_result<pointer, size_type> allocate_at_least(fl::size n) FL_NO_EXCEPT {
+    allocation_result<pointer, size_type> allocate_at_least(fl::size n) FL_NOEXCEPT {
         if (n == 0) {
             return {nullptr, 0};
         }
@@ -172,14 +172,14 @@ template <typename T> class allocator {
     // Optional: reallocate() for in-place resizing
     // Automatically uses fl::realloc() for trivially copyable types
     // Returns nullptr on failure or if type is not trivially copyable
-    pointer reallocate(pointer ptr, fl::size old_count, fl::size new_count) FL_NO_EXCEPT {
+    pointer reallocate(pointer ptr, fl::size old_count, fl::size new_count) FL_NOEXCEPT {
         return reallocate_impl(ptr, old_count, new_count,
             fl::integral_constant<bool, fl::is_trivially_copyable<T>::value>{});
     }
 
 private:
     // SFINAE: Use fl::realloc() for trivially copyable types
-    pointer reallocate_impl(pointer ptr, fl::size old_count, fl::size new_count, fl::true_type) FL_NO_EXCEPT {
+    pointer reallocate_impl(pointer ptr, fl::size old_count, fl::size new_count, fl::true_type) FL_NOEXCEPT {
         if (new_count == 0) {
             if (ptr) {
                 deallocate(ptr, old_count);
@@ -204,7 +204,7 @@ private:
     }
 
     // SFINAE: Don't use realloc() for non-trivially-copyable types
-    pointer reallocate_impl(pointer ptr, fl::size old_count, fl::size new_count, fl::false_type) FL_NO_EXCEPT {
+    pointer reallocate_impl(pointer ptr, fl::size old_count, fl::size new_count, fl::false_type) FL_NOEXCEPT {
         FASTLED_UNUSED(ptr);
         FASTLED_UNUSED(old_count);
         FASTLED_UNUSED(new_count);
@@ -216,7 +216,7 @@ public:
     // Use this to allocate large blocks of memory for T.
     // This is useful for large arrays or objects that need to be allocated
     // in a single block.
-    T* allocate(fl::size n) FL_NO_EXCEPT {
+    T* allocate(fl::size n) FL_NOEXCEPT {
         if (n == 0) {
             return nullptr; // Handle zero allocation
         }
@@ -229,7 +229,7 @@ public:
         return static_cast<T*>(ptr);
     }
 
-    void deallocate(T* p, fl::size n) FL_NO_EXCEPT {
+    void deallocate(T* p, fl::size n) FL_NOEXCEPT {
         FASTLED_UNUSED(n);
         if (p == nullptr) {
             return; // Handle null pointer
@@ -239,14 +239,14 @@ public:
     
     // Construct an object at the specified address
         template <typename U, typename... Args>
-        void construct(U* p, Args&&... args) FL_NO_EXCEPT {
+        void construct(U* p, Args&&... args) FL_NOEXCEPT {
             if (p == nullptr) return;
             new(static_cast<void*>(p)) U(fl::forward<Args>(args)...);
         }
         
         // Destroy an object at the specified address
         template <typename U>
-        void destroy(U* p) FL_NO_EXCEPT {
+        void destroy(U* p) FL_NOEXCEPT {
             if (p == nullptr) return;
             p->~U();
         }
@@ -293,17 +293,17 @@ public:
     };
 
     // Default constructor
-    allocator_realloc() FL_NO_EXCEPT {}
+    allocator_realloc() FL_NOEXCEPT {}
 
     // Copy constructor
     template <typename U>
-    allocator_realloc(const allocator_realloc<U>&) FL_NO_EXCEPT {}
+    allocator_realloc(const allocator_realloc<U>&) FL_NOEXCEPT {}
 
     // Destructor
-    ~allocator_realloc() FL_NO_EXCEPT {}
+    ~allocator_realloc() FL_NOEXCEPT {}
 
     // Standard allocate() - allocates new memory
-    T* allocate(fl::size n) FL_NO_EXCEPT {
+    T* allocate(fl::size n) FL_NOEXCEPT {
         if (n == 0) {
             return nullptr;
         }
@@ -317,7 +317,7 @@ public:
     }
 
     // Standard deallocate()
-    void deallocate(T* p, fl::size n) FL_NO_EXCEPT {
+    void deallocate(T* p, fl::size n) FL_NOEXCEPT {
         FASTLED_UNUSED(n);
         if (p == nullptr) {
             return;
@@ -327,21 +327,21 @@ public:
 
     // Standard construct()
     template <typename U, typename... Args>
-    void construct(U* p, Args&&... args) FL_NO_EXCEPT {
+    void construct(U* p, Args&&... args) FL_NOEXCEPT {
         if (p == nullptr) return;
         new(static_cast<void*>(p)) U(fl::forward<Args>(args)...);
     }
 
     // Standard destroy()
     template <typename U>
-    void destroy(U* p) FL_NO_EXCEPT {
+    void destroy(U* p) FL_NOEXCEPT {
         if (p == nullptr) return;
         p->~U();
     }
 
     // OPTIMIZED: allocate_at_least() - can return more than requested
     // This gives the vector a hint to allocate extra space and reduce future reallocations
-    allocation_result<pointer, size_type> allocate_at_least(fl::size n) FL_NO_EXCEPT {
+    allocation_result<pointer, size_type> allocate_at_least(fl::size n) FL_NOEXCEPT {
         if (n == 0) {
             return {nullptr, 0};
         }
@@ -359,7 +359,7 @@ public:
     // OPTIMIZED: reallocate() - in-place resize using fl::realloc()
     // Returns the new pointer if successful, nullptr if not supported/failed
     // The caller (fl::vector) handles fallback to allocate-copy-deallocate
-    pointer reallocate(pointer ptr, fl::size old_count, fl::size new_count) FL_NO_EXCEPT {
+    pointer reallocate(pointer ptr, fl::size old_count, fl::size new_count) FL_NOEXCEPT {
         if (new_count == 0) {
             if (ptr) {
                 deallocate(ptr, old_count);
@@ -402,42 +402,42 @@ template <typename T> class allocator_psram {
         };
 
         // Default constructor
-        allocator_psram() FL_NO_EXCEPT {}
+        allocator_psram() FL_NOEXCEPT {}
 
         // Copy constructor
         template <typename U>
-        allocator_psram(const allocator_psram<U>&) FL_NO_EXCEPT {}
+        allocator_psram(const allocator_psram<U>&) FL_NOEXCEPT {}
 
         // Destructor
-        ~allocator_psram() FL_NO_EXCEPT {}
+        ~allocator_psram() FL_NOEXCEPT {}
 
         // Allocate memory for n objects of type T
-        T* allocate(fl::size n) FL_NO_EXCEPT {
+        T* allocate(fl::size n) FL_NOEXCEPT {
             return PSRamAllocator<T>::Alloc(n);
         }
 
         // Deallocate memory for n objects of type T
-        void deallocate(T* p, fl::size n) FL_NO_EXCEPT {
+        void deallocate(T* p, fl::size n) FL_NOEXCEPT {
             PSRamAllocator<T>::Free(p);
             FASTLED_UNUSED(n);
         }
 
         // Construct an object at the specified address
         template <typename U, typename... Args>
-        void construct(U* p, Args&&... args) FL_NO_EXCEPT {
+        void construct(U* p, Args&&... args) FL_NOEXCEPT {
             if (p == nullptr) return;
             new(static_cast<void*>(p)) U(fl::forward<Args>(args)...);
         }
 
         // Destroy an object at the specified address
         template <typename U>
-        void destroy(U* p) FL_NO_EXCEPT {
+        void destroy(U* p) FL_NOEXCEPT {
             if (p == nullptr) return;
             p->~U();
         }
 
         // Optional: allocate_at_least() with default implementation
-        allocation_result<pointer, size_type> allocate_at_least(fl::size n) FL_NO_EXCEPT {
+        allocation_result<pointer, size_type> allocate_at_least(fl::size n) FL_NOEXCEPT {
             if (n == 0) {
                 return {nullptr, 0};
             }
@@ -446,7 +446,7 @@ template <typename T> class allocator_psram {
         }
 
         // Optional: reallocate() - no-op for PSRAM
-        pointer reallocate(pointer ptr, fl::size old_count, fl::size new_count) FL_NO_EXCEPT {
+        pointer reallocate(pointer ptr, fl::size old_count, fl::size new_count) FL_NOEXCEPT {
             FASTLED_UNUSED(ptr);
             FASTLED_UNUSED(old_count);
             FASTLED_UNUSED(new_count);
@@ -471,9 +471,9 @@ private:
         fl::size allocated_count;
         fl::bitset_fixed<BLOCKS_PER_SLAB> allocated_blocks;  // Track which blocks are allocated
         
-        Slab() FL_NO_EXCEPT : next(nullptr), memory(nullptr), allocated_count(0) {}
+        Slab() FL_NOEXCEPT : next(nullptr), memory(nullptr), allocated_count(0) {}
         
-        ~Slab() FL_NO_EXCEPT {
+        ~Slab() FL_NOEXCEPT {
             if (memory) {
                 Free(memory);
             }
@@ -484,7 +484,7 @@ private:
     fl::size mTotalAllocated;
     fl::size mTotalDeallocated;
 
-    Slab* createSlab() FL_NO_EXCEPT {
+    Slab* createSlab() FL_NOEXCEPT {
         Slab* slab = static_cast<Slab*>(Malloc(sizeof(Slab)));
         if (!slab) {
             return nullptr;
@@ -510,7 +510,7 @@ private:
         return slab;
     }
 
-    void* allocateFromSlab(fl::size n = 1) FL_NO_EXCEPT {
+    void* allocateFromSlab(fl::size n = 1) FL_NOEXCEPT {
         // Try to find n contiguous free blocks in existing slabs
         for (Slab* slab = mSlabs; slab; slab = slab->next) {
             void* ptr = findContiguousBlocks(slab, n);
@@ -533,7 +533,7 @@ private:
         return nullptr;
     }
     
-    void* findContiguousBlocks(Slab* slab, fl::size n) FL_NO_EXCEPT {
+    void* findContiguousBlocks(Slab* slab, fl::size n) FL_NOEXCEPT {
         // Check if allocation is too large for this slab
         if (n > BLOCKS_PER_SLAB) {
             return nullptr;
@@ -556,7 +556,7 @@ private:
         return nullptr;
     }
 
-    void deallocateToSlab(void* ptr, fl::size n = 1) FL_NO_EXCEPT {
+    void deallocateToSlab(void* ptr, fl::size n = 1) FL_NOEXCEPT {
         if (!ptr) {
             return;
         }
@@ -586,26 +586,26 @@ private:
 
 public:
     // Constructor
-    SlabAllocator() FL_NO_EXCEPT : mSlabs(nullptr), mTotalAllocated(0), mTotalDeallocated(0) {}
+    SlabAllocator() FL_NOEXCEPT : mSlabs(nullptr), mTotalAllocated(0), mTotalDeallocated(0) {}
     
     // Destructor
-    ~SlabAllocator() FL_NO_EXCEPT {
+    ~SlabAllocator() FL_NOEXCEPT {
         cleanup();
     }
     
     // Non-copyable
-    SlabAllocator(const SlabAllocator&) FL_NO_EXCEPT = delete;
-    SlabAllocator& operator=(const SlabAllocator&) FL_NO_EXCEPT = delete;
+    SlabAllocator(const SlabAllocator&) FL_NOEXCEPT = delete;
+    SlabAllocator& operator=(const SlabAllocator&) FL_NOEXCEPT = delete;
     
     // Movable
-    SlabAllocator(SlabAllocator&& other) FL_NO_EXCEPT 
+    SlabAllocator(SlabAllocator&& other) FL_NOEXCEPT 
         : mSlabs(other.mSlabs), mTotalAllocated(other.mTotalAllocated), mTotalDeallocated(other.mTotalDeallocated) {
         other.mSlabs = nullptr;
         other.mTotalAllocated = 0;
         other.mTotalDeallocated = 0;
     }
     
-    SlabAllocator& operator=(SlabAllocator&& other) FL_NO_EXCEPT {
+    SlabAllocator& operator=(SlabAllocator&& other) FL_NOEXCEPT {
         if (this != &other) {
             cleanup();
             mSlabs = other.mSlabs;
@@ -618,7 +618,7 @@ public:
         return *this;
     }
 
-    T* allocate(fl::size n = 1) FL_NO_EXCEPT {
+    T* allocate(fl::size n = 1) FL_NOEXCEPT {
         if (n == 0) {
             return nullptr;
         }
@@ -638,7 +638,7 @@ public:
         return static_cast<T*>(ptr);
     }
 
-    void deallocate(T* ptr, fl::size n = 1) FL_NO_EXCEPT {
+    void deallocate(T* ptr, fl::size n = 1) FL_NOEXCEPT {
         if (!ptr) {
             return;
         }
@@ -664,12 +664,12 @@ public:
     }
 
     // Get allocation statistics
-    fl::size getTotalAllocated() const FL_NO_EXCEPT { return mTotalAllocated; }
-    fl::size getTotalDeallocated() const FL_NO_EXCEPT { return mTotalDeallocated; }
-    fl::size getActiveAllocations() const FL_NO_EXCEPT { return mTotalAllocated - mTotalDeallocated; }
+    fl::size getTotalAllocated() const FL_NOEXCEPT { return mTotalAllocated; }
+    fl::size getTotalDeallocated() const FL_NOEXCEPT { return mTotalDeallocated; }
+    fl::size getActiveAllocations() const FL_NOEXCEPT { return mTotalAllocated - mTotalDeallocated; }
     
     // Get number of slabs
-    fl::size getSlabCount() const FL_NO_EXCEPT {
+    fl::size getSlabCount() const FL_NOEXCEPT {
         fl::size count = 0;
         for (Slab* slab = mSlabs; slab; slab = slab->next) {
             ++count;
@@ -678,7 +678,7 @@ public:
     }
 
     // Cleanup all slabs
-    void cleanup() FL_NO_EXCEPT {
+    void cleanup() FL_NOEXCEPT {
         while (mSlabs) {
             Slab* next = mSlabs->next;
             mSlabs->~Slab();
@@ -714,33 +714,33 @@ public:
     };
 
     // Default constructor
-    allocator_slab() FL_NO_EXCEPT {}
+    allocator_slab() FL_NOEXCEPT {}
 
     // Copy constructor
-    allocator_slab(const allocator_slab& other) FL_NO_EXCEPT {
+    allocator_slab(const allocator_slab& other) FL_NOEXCEPT {
         FASTLED_UNUSED(other);
     }
 
     // Copy assignment
-    allocator_slab& operator=(const allocator_slab& other) FL_NO_EXCEPT {
+    allocator_slab& operator=(const allocator_slab& other) FL_NOEXCEPT {
         FASTLED_UNUSED(other);
         return *this;
     }
 
     // Template copy constructor
     template <typename U>
-    allocator_slab(const allocator_slab<U, SLAB_SIZE>& other) FL_NO_EXCEPT {
+    allocator_slab(const allocator_slab<U, SLAB_SIZE>& other) FL_NOEXCEPT {
         FASTLED_UNUSED(other);
     }
 
     // Destructor
-    ~allocator_slab() FL_NO_EXCEPT {}
+    ~allocator_slab() FL_NOEXCEPT {}
 
 private:
     // Get the shared process-wide allocator instance.
     // Uses a DLL-exported registry to ensure all DLLs in the process share
     // the same SlabAllocator for a given (block_size, slab_size) pair.
-    static SlabAllocator<T, SLAB_SIZE>& get_allocator() FL_NO_EXCEPT {
+    static SlabAllocator<T, SLAB_SIZE>& get_allocator() FL_NOEXCEPT {
         constexpr fl::size block_size = sizeof(T) > sizeof(void*) ? sizeof(T) : sizeof(void*);
         void* ptr = detail::slab_allocator_registry_get(block_size, SLAB_SIZE);
         if (ptr) {
@@ -754,14 +754,14 @@ private:
 
 public:
     // Allocate memory for n objects of type T
-    T* allocate(fl::size n) FL_NO_EXCEPT {
+    T* allocate(fl::size n) FL_NOEXCEPT {
         // Use a static allocator instance per type/size combination
         SlabAllocator<T, SLAB_SIZE>& allocator = get_allocator();
         return allocator.allocate(n);
     }
 
     // Deallocate memory for n objects of type T
-    void deallocate(T* p, fl::size n) FL_NO_EXCEPT {
+    void deallocate(T* p, fl::size n) FL_NOEXCEPT {
         // Use the same static allocator instance
         SlabAllocator<T, SLAB_SIZE>& allocator = get_allocator();
         allocator.deallocate(p, n);
@@ -769,32 +769,32 @@ public:
 
     // Construct an object at the specified address
     template <typename U, typename... Args>
-    void construct(U* p, Args&&... args) FL_NO_EXCEPT {
+    void construct(U* p, Args&&... args) FL_NOEXCEPT {
         if (p == nullptr) return;
         new(static_cast<void*>(p)) U(fl::forward<Args>(args)...);
     }
 
     // Destroy an object at the specified address
     template <typename U>
-    void destroy(U* p) FL_NO_EXCEPT {
+    void destroy(U* p) FL_NOEXCEPT {
         if (p == nullptr) return;
         p->~U();
     }
 
     // Cleanup method to clean up the static slab allocator
-    void cleanup() FL_NO_EXCEPT {
+    void cleanup() FL_NOEXCEPT {
         // Access the same static allocator instance and clean it up
         static SlabAllocator<T, SLAB_SIZE> allocator;
         allocator.cleanup();
     }
 
     // Equality comparison
-    bool operator==(const allocator_slab& other) const FL_NO_EXCEPT {
+    bool operator==(const allocator_slab& other) const FL_NOEXCEPT {
         FASTLED_UNUSED(other);
         return true; // All instances are equivalent
     }
 
-    bool operator!=(const allocator_slab& other) const FL_NO_EXCEPT {
+    bool operator!=(const allocator_slab& other) const FL_NOEXCEPT {
         return !(*this == other);
     }
 };
@@ -809,7 +809,7 @@ private:
     struct InlinedStorage {
         FL_ALIGN_AS(T) u8 data[N * sizeof(T)];
         
-        InlinedStorage() FL_NO_EXCEPT {
+        InlinedStorage() FL_NOEXCEPT {
             fl::memset(data, 0, sizeof(data));
         }
     };
@@ -837,10 +837,10 @@ public:
     };
 
     // Default constructor
-    allocator_inlined() FL_NO_EXCEPT = default;
+    allocator_inlined() FL_NOEXCEPT = default;
 
     // Copy constructor
-    allocator_inlined(const allocator_inlined& other) FL_NO_EXCEPT {
+    allocator_inlined(const allocator_inlined& other) FL_NOEXCEPT {
         // Copy inlined data
         mInlinedUsed = other.mInlinedUsed;
         for (fl::size i = 0; i < mInlinedUsed; ++i) {
@@ -857,7 +857,7 @@ public:
     }
 
     // Copy assignment
-    allocator_inlined& operator=(const allocator_inlined& other) FL_NO_EXCEPT {
+    allocator_inlined& operator=(const allocator_inlined& other) FL_NOEXCEPT {
         if (this != &other) {
             clear();
             
@@ -880,17 +880,17 @@ public:
 
     // Template copy constructor
     template <typename U>
-    allocator_inlined(const allocator_inlined<U, N, typename BaseAllocator::template rebind<U>::other>& other) FL_NO_EXCEPT {
+    allocator_inlined(const allocator_inlined<U, N, typename BaseAllocator::template rebind<U>::other>& other) FL_NOEXCEPT {
         FASTLED_UNUSED(other);
     }
 
     // Destructor
-    ~allocator_inlined() FL_NO_EXCEPT {
+    ~allocator_inlined() FL_NOEXCEPT {
         clear();
     }
 
     // Allocate memory for n objects of type T
-    T* allocate(fl::size n) FL_NO_EXCEPT {
+    T* allocate(fl::size n) FL_NOEXCEPT {
         if (n == 0) {
             return nullptr;
         }
@@ -928,7 +928,7 @@ public:
     }
 
     // Deallocate memory for n objects of type T
-    void deallocate(T* p, fl::size n) FL_NO_EXCEPT {
+    void deallocate(T* p, fl::size n) FL_NOEXCEPT {
         if (!p || n == 0) {
             return;
         }
@@ -956,20 +956,20 @@ public:
 
     // Construct an object at the specified address
     template <typename U, typename... Args>
-    void construct(U* p, Args&&... args) FL_NO_EXCEPT {
+    void construct(U* p, Args&&... args) FL_NOEXCEPT {
         if (p == nullptr) return;
         new(static_cast<void*>(p)) U(fl::forward<Args>(args)...);
     }
 
     // Destroy an object at the specified address
     template <typename U>
-    void destroy(U* p) FL_NO_EXCEPT {
+    void destroy(U* p) FL_NOEXCEPT {
         if (p == nullptr) return;
         p->~U();
     }
 
     // Clear all allocated memory
-    void clear() FL_NO_EXCEPT {
+    void clear() FL_NOEXCEPT {
         // Destroy inlined objects
         for (fl::size i = 0; i < mInlinedUsed; ++i) {
             get_inlined_ptr()[i].~T();
@@ -983,58 +983,58 @@ public:
     }
 
     // Get total allocated size
-    fl::size total_size() const FL_NO_EXCEPT {
+    fl::size total_size() const FL_NOEXCEPT {
         return mActiveAllocations;
     }
 
     // Get inlined capacity
-    fl::size inlined_capacity() const FL_NO_EXCEPT {
+    fl::size inlined_capacity() const FL_NOEXCEPT {
         return N;
     }
 
     // Check if using inlined storage
-    bool is_using_inlined() const FL_NO_EXCEPT {
+    bool is_using_inlined() const FL_NOEXCEPT {
         return mActiveAllocations == mInlinedUsed;
     }
 
 private:
-    T* get_inlined_ptr() FL_NO_EXCEPT {
+    T* get_inlined_ptr() FL_NOEXCEPT {
         return fl::bit_cast_ptr<T>(mInlinedStorage.data);
     }
 
-    const T* get_inlined_ptr() const FL_NO_EXCEPT {
+    const T* get_inlined_ptr() const FL_NOEXCEPT {
         return fl::bit_cast_ptr<const T>(mInlinedStorage.data);
     }
     
     // SFINAE helper to detect if base allocator has cleanup() method
     template<typename U>
-    static auto has_cleanup_impl(int) FL_NO_EXCEPT -> decltype(fl::declval<U>().cleanup(), fl::true_type{});
+    static auto has_cleanup_impl(int) FL_NOEXCEPT -> decltype(fl::declval<U>().cleanup(), fl::true_type{});
     
     template<typename U>
-    static fl::false_type has_cleanup_impl(...) FL_NO_EXCEPT;
+    static fl::false_type has_cleanup_impl(...) FL_NOEXCEPT;
     
     using has_cleanup = decltype(has_cleanup_impl<BaseAllocator>(0));
     
     // Call cleanup on base allocator if it has the method
-    void cleanup_base_allocator() FL_NO_EXCEPT {
+    void cleanup_base_allocator() FL_NOEXCEPT {
         cleanup_base_allocator_impl(has_cleanup{});
     }
     
-    void cleanup_base_allocator_impl(fl::true_type) FL_NO_EXCEPT {
+    void cleanup_base_allocator_impl(fl::true_type) FL_NOEXCEPT {
         mBaseAllocator.cleanup();
     }
     
-    void cleanup_base_allocator_impl(fl::false_type) FL_NO_EXCEPT {
+    void cleanup_base_allocator_impl(fl::false_type) FL_NOEXCEPT {
         // Base allocator doesn't have cleanup method, do nothing
     }
     
     // Equality comparison
-    bool operator==(const allocator_inlined& other) const FL_NO_EXCEPT {
+    bool operator==(const allocator_inlined& other) const FL_NOEXCEPT {
         FASTLED_UNUSED(other);
         return true; // All instances are equivalent for now
     }
 
-    bool operator!=(const allocator_inlined& other) const FL_NO_EXCEPT {
+    bool operator!=(const allocator_inlined& other) const FL_NOEXCEPT {
         return !(*this == other);
     }
 };

@@ -18,7 +18,7 @@ namespace platforms {
 ///
 /// This function does nothing and is used for platforms that don't require
 /// any special initialization during FastLED::init().
-inline void init() FL_NO_EXCEPT {
+inline void init() FL_NOEXCEPT {
     // No-op: Platforms using this stub don't need initialization
 }
 

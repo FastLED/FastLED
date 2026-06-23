@@ -147,8 +147,7 @@
 
 // Escape hatch for platform-specific pragmas.
 // Place FL_ALLOW_PLATFORM_PRAGMA on the line before a raw #pragma directive
-// to suppress the PlatformPragmaChecker lint (Rust crate
-// ci/lint_cpp_rs/src/checkers/style.rs). Use only when the FL_DISABLE_WARNING
+// to suppress the platform_pragma_checker lint. Use only when the FL_DISABLE_WARNING
 // macros above cannot express the needed pragma (e.g. non-diagnostic pragmas).
 // Prefer FL_DISABLE_WARNING_PUSH / FL_DISABLE_WARNING(name) / FL_DISABLE_WARNING_POP.
 #define FL_ALLOW_PLATFORM_PRAGMA /* platform-specific pragma — lint escape hatch */
@@ -333,9 +332,8 @@
 
 // Unconditional "do not inline this function" attribute, portable across
 // GCC/Clang/MSVC. Prefer this over a bare `__attribute__((noinline))` in
-// `src/` — a lint check in `ci/lint_cpp_rs/src/checkers/bare_legacy.rs`
-// (`BareNoInlineChecker`) enforces the use of the macro so the GCC-only
-// syntax doesn't sneak in.
+// `src/` — a lint check in `ci/lint_cpp/bare_noinline_checker.py` enforces
+// the use of the macro so the GCC-only syntax doesn't sneak in.
 //
 // Typical use: cold helpers extracted out of a hot path so the compiler
 // can't fold them back via inline expansion. Pair with the lint guard.
@@ -502,28 +500,28 @@ FL_DISABLE_WARNING_POP
 // Mark functions whose return value must be used (generates compiler warning if ignored)
 // Preferred over [[nodiscard]] for C++11/14 compatibility
 //
-// Usage: FL_NO_DISCARD bool try_lock();
+// Usage: FL_NODISCARD bool try_lock();
 //
 // By default, this generates a WARNING when the return value is ignored.
 // To promote to a compile ERROR, use compiler flags:
 //   GCC/Clang: -Werror=unused-result
 //   MSVC:      /we6031
 //
-// Note: These flags ONLY affect functions explicitly marked with FL_NO_DISCARD.
+// Note: These flags ONLY affect functions explicitly marked with FL_NODISCARD.
 // Regular functions without this attribute can still have their return values
 // ignored without warnings/errors.
 #if __cplusplus >= 201703L
   // C++17+: Use standard [[nodiscard]] attribute
-  #define FL_NO_DISCARD [[nodiscard]]
+  #define FL_NODISCARD [[nodiscard]]
 #elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
   // GCC/Clang: Use warn_unused_result attribute
-  #define FL_NO_DISCARD __attribute__((warn_unused_result))
+  #define FL_NODISCARD __attribute__((warn_unused_result))
 #elif defined(FL_IS_WIN_MSVC)
   // MSVC: Use SAL annotation
-  #define FL_NO_DISCARD _Check_return_
+  #define FL_NODISCARD _Check_return_
 #else
   // Unsupported compiler: no-op
-  #define FL_NO_DISCARD
+  #define FL_NODISCARD
 #endif
 
 // Suppress warnings for intentionally unused fall-through in switch statements
@@ -554,21 +552,21 @@ FL_DISABLE_WARNING_POP
 // Mark functions that never return (e.g., infinite loops, exit handlers)
 // Enables compiler optimizations and warnings for unreachable code.
 //
-// Usage: FL_NO_RETURN void abort_handler();
+// Usage: FL_NORETURN void abort_handler();
 //
 // This macro is portable across C++11/14/17 compilers.
 #if __cplusplus >= 201103L
   // C++11+: Use standard [[noreturn]] attribute
-  #define FL_NO_RETURN [[noreturn]]
+  #define FL_NORETURN [[noreturn]]
 #elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
   // GCC/Clang: Use noreturn attribute
-  #define FL_NO_RETURN __attribute__((noreturn))
+  #define FL_NORETURN __attribute__((noreturn))
 #elif defined(FL_IS_WIN_MSVC)
   // MSVC: Use __declspec(noreturn)
-  #define FL_NO_RETURN __declspec(noreturn)
+  #define FL_NORETURN __declspec(noreturn)
 #else
   // Unsupported compiler: no-op
-  #define FL_NO_RETURN
+  #define FL_NORETURN
 #endif
 
 // Mark symbols (functions, types, variables) as deprecated
@@ -803,7 +801,7 @@ FL_DISABLE_WARNING_POP
 #if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
 __attribute__((always_inline))
 static inline void *_fl_builtin_memcpy(void *dest, const void *src,
-                                       __SIZE_TYPE__ n) FL_NO_EXCEPT {
+                                       __SIZE_TYPE__ n) FL_NOEXCEPT {
     return __builtin_memcpy(dest, src, n);
 }
 #define FL_BUILTIN_MEMCPY(dest, src, n) _fl_builtin_memcpy(dest, src, n)
@@ -820,7 +818,7 @@ static inline void *_fl_builtin_memcpy(void *dest, const void *src,
 // CRGB and CRGB16 are in practice.
 #if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
 __attribute__((always_inline))
-static inline void *_fl_builtin_memset(void *dest, int val, __SIZE_TYPE__ n) FL_NO_EXCEPT {
+static inline void *_fl_builtin_memset(void *dest, int val, __SIZE_TYPE__ n) FL_NOEXCEPT {
     return __builtin_memset(dest, val, n);
 }
 #define FL_BUILTIN_MEMSET(dest, val, n) _fl_builtin_memset(dest, val, n)

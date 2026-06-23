@@ -33,7 +33,7 @@
 
 namespace fl {
 
-void enableAllDrivers() FL_NO_EXCEPT {
+void enableAllDrivers() FL_NOEXCEPT {
     platforms::enableAllChannelDrivers();
 }
 

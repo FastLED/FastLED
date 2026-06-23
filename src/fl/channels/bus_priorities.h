@@ -35,7 +35,7 @@ namespace fl {
 /// Higher = preferred. The function is `constexpr` so callers can use it in
 /// constant expressions if needed. Buses without a registered priority fall
 /// back to 0.
-constexpr int default_bus_priority(Bus b) FL_NO_EXCEPT {
+constexpr int default_bus_priority(Bus b) FL_NOEXCEPT {
     // FORCE-style overrides (FASTLED_ESP32_FORCE_*) are intentionally not
     // applied here -- the legacy initChannelDrivers() retains its own
     // priority-bumping logic for backward compatibility. This table is the

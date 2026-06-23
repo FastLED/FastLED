@@ -24,14 +24,14 @@ using JsonUiUpdateInput = fl::function<void(const char*)>;
  * @param updateJsHandler Function to call when UI needs to send updates to JavaScript
  * @return Function to call when you want to update the driver state with JSON data
  */
-JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) FL_NO_EXCEPT;
+JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) FL_NOEXCEPT;
 
 /**
  * Add a UI component to the global component registry.
  * 
  * @param component weak_ptr to the JsonUiInternal component to add
  */
-void addJsonUiComponent(fl::weak_ptr<JsonUiInternal> component) FL_NO_EXCEPT;
+void addJsonUiComponent(fl::weak_ptr<JsonUiInternal> component) FL_NOEXCEPT;
 
 
 /**
@@ -39,13 +39,13 @@ void addJsonUiComponent(fl::weak_ptr<JsonUiInternal> component) FL_NO_EXCEPT;
  * 
  * @param component weak_ptr to the JsonUiInternal component to remove
  */
-void removeJsonUiComponent(fl::weak_ptr<JsonUiInternal> component) FL_NO_EXCEPT;
+void removeJsonUiComponent(fl::weak_ptr<JsonUiInternal> component) FL_NOEXCEPT;
 
 /**
  * Force immediate processing of any pending UI updates (for testing).
  * In normal operation, updates are processed during the driver loop.
  */
-void processJsonUiPendingUpdates() FL_NO_EXCEPT;
+void processJsonUiPendingUpdates() FL_NOEXCEPT;
 
 
 } // namespace fl

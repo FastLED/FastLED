@@ -25,7 +25,7 @@ public:
         ) != 0;
     }
 
-    ~FontImpl() FL_NO_EXCEPT override = default;
+    ~FontImpl() FL_NOEXCEPT override = default;
 
     bool isValid() const { return mValid; }
 
@@ -195,7 +195,7 @@ FontRenderer::FontRenderer(FontPtr font, float pixelHeight)
     , mScale(font ? font->getScaleForPixelHeight(pixelHeight) : 0.0f) {
 }
 
-FontRenderer::~FontRenderer() FL_NO_EXCEPT = default;
+FontRenderer::~FontRenderer() FL_NOEXCEPT = default;
 
 FontRenderer::ScaledMetrics FontRenderer::getScaledMetrics() const {
     ScaledMetrics result = {};

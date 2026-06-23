@@ -31,7 +31,7 @@ class Impl {
     };
     // Default values for the Impl.
     Impl(const Args &args);
-    ~Impl() FL_NO_EXCEPT;
+    ~Impl() FL_NOEXCEPT;
 
     fl::size sampleSize() const;
     // Note that the sample sizes MUST match the samples size passed into the
@@ -42,10 +42,10 @@ class Impl {
     fl::string info() const;
 
     // Disable copy and move constructors and assignment operators
-    Impl(const Impl &) FL_NO_EXCEPT = delete;
-    Impl &operator=(const Impl &) FL_NO_EXCEPT = delete;
-    Impl(Impl &&) FL_NO_EXCEPT = delete;
-    Impl &operator=(Impl &&) FL_NO_EXCEPT = delete;
+    Impl(const Impl &) FL_NOEXCEPT = delete;
+    Impl &operator=(const Impl &) FL_NOEXCEPT = delete;
+    Impl(Impl &&) FL_NOEXCEPT = delete;
+    Impl &operator=(Impl &&) FL_NOEXCEPT = delete;
 
   private:
     fl::unique_ptr<Context> mContext;

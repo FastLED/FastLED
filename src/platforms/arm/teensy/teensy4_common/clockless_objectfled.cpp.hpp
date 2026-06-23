@@ -85,27 +85,27 @@ void ObjectFLEDGroupBase::addStrip(u8 pin, PixelIterator& pixel_iterator) {
     // Validate pin before adding
     auto validation = objectfled::validate_teensy4_pin(pin);
     if (!validation.valid) {
-        FL_WARN_F("================================================================================");
-        FL_WARN_F("FASTLED ERROR: Strip on pin %s is INVALID and has been disabled", (int)pin);
-        FL_WARN_F("%s", validation.error_message);
-        FL_WARN_F("================================================================================");
+        FL_WARN("================================================================================");
+        FL_WARN("FASTLED ERROR: Strip on pin " << (int)pin << " is INVALID and has been disabled");
+        FL_WARN(validation.error_message);
+        FL_WARN("================================================================================");
         return;
     }
 
     // Check for warnings (pin is valid but may have issues)
     if (validation.error_message != nullptr) {
-        FL_WARN_F("================================================================================");
-        FL_WARN_F("FASTLED WARNING: Strip on pin %s may have issues", (int)pin);
-        FL_WARN_F("%s", validation.error_message);
-        FL_WARN_F("================================================================================");
+        FL_WARN("================================================================================");
+        FL_WARN("FASTLED WARNING: Strip on pin " << (int)pin << " may have issues");
+        FL_WARN(validation.error_message);
+        FL_WARN("================================================================================");
     }
 
     // Check for duplicate pin in current draw list
     for (const auto& item : mRectDrawBuffer.mDrawList) {
         if (item.mPin == pin) {
-            FL_WARN_F("================================================================================");
-            FL_WARN_F("FASTLED ERROR: Pin %s is already in use - strip disabled", (int)pin);
-            FL_WARN_F("================================================================================");
+            FL_WARN("================================================================================");
+            FL_WARN("FASTLED ERROR: Pin " << (int)pin << " is already in use - strip disabled");
+            FL_WARN("================================================================================");
             return;
         }
     }
@@ -202,7 +202,7 @@ void ObjectFLEDGroupBase::rebuildObjectFLED() {
     int totalLeds = total_bytes / bytesPerLed;
 
     #ifdef FASTLED_DEBUG_OBJECTFLED
-    FL_WARN_F("ObjectFLEDGroupBase: totalLeds=%s bytesPerStrip=%s", totalLeds, bytes_per_strip);
+    FL_WARN("ObjectFLEDGroupBase: totalLeds=" << totalLeds << " bytesPerStrip=" << bytes_per_strip);
     #endif
 
     // Pass nullptr so ObjectFLED allocates frameBufferLocal internally

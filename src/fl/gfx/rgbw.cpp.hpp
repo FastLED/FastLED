@@ -196,11 +196,11 @@ struct RgbwColorimetricState {
 };
 } // namespace
 
-void set_rgbw_colorimetric_profile(const DiodeProfile* profile) FL_NO_EXCEPT {
+void set_rgbw_colorimetric_profile(const DiodeProfile* profile) FL_NOEXCEPT {
     fl::Singleton<RgbwColorimetricState>::instance().profile = profile;
 }
 
-const DiodeProfile* get_rgbw_colorimetric_profile() FL_NO_EXCEPT {
+const DiodeProfile* get_rgbw_colorimetric_profile() FL_NOEXCEPT {
     const DiodeProfile* p =
         fl::Singleton<RgbwColorimetricState>::instance().profile;
     return p != nullptr ? p : &kRgbwDefaultProfile;
@@ -237,10 +237,10 @@ constexpr NamedGamut kDciP3D60  = {{0.6800f, 0.3200f}, {0.2650f, 0.6900f},
 // whose input_xy_* fields were just mutated in place — without this hook the
 // pointer+CCT cache key stays equal and stale M_src/LUT data is reused
 // after a gamut switch on the currently active profile.
-namespace { void invalidate_colorimetric_caches_for(const DiodeProfile* profile) FL_NO_EXCEPT; }
+namespace { void invalidate_colorimetric_caches_for(const DiodeProfile* profile) FL_NOEXCEPT; }
 
 void set_input_gamut(DiodeProfile* profile, InputGamut g,
-                     const float white_xy[2]) FL_NO_EXCEPT {
+                     const float white_xy[2]) FL_NOEXCEPT {
     if (profile == nullptr) return;
     auto apply = [profile](const float r[2], const float gp[2],
                            const float b[2], const float w[2]) {
@@ -276,7 +276,7 @@ void set_input_gamut(DiodeProfile* profile, InputGamut g,
     // leave the profile's input_xy_* untouched — also nothing to invalidate.
 }
 
-void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NO_EXCEPT {
+void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NOEXCEPT {
     set_input_gamut(profile, g, nullptr);
 }
 
@@ -296,13 +296,13 @@ struct ColorimetricCacheHolder {
 // Resolve the CCT to use for the W vertex: if the dispatch passed a value in
 // the valid Krystek range AND it differs from the profile's nominal CCT,
 // shift W. Otherwise use the profile's xy_w as-is (cct_override = 0).
-inline int resolve_cct_override(const DiodeProfile* p, int requested_cct) FL_NO_EXCEPT {
+inline int resolve_cct_override(const DiodeProfile* p, int requested_cct) FL_NOEXCEPT {
     if (requested_cct < 1500 || requested_cct > 15000) return 0;
     if (requested_cct == p->nominal_cct) return 0;
     return requested_cct;
 }
 
-inline const colorimetric_detail::ProfileCache& get_cache(int cct) FL_NO_EXCEPT {
+inline const colorimetric_detail::ProfileCache& get_cache(int cct) FL_NOEXCEPT {
     ColorimetricCacheHolder& h =
         fl::Singleton<ColorimetricCacheHolder>::instance();
     const DiodeProfile* active = get_rgbw_colorimetric_profile();
@@ -333,13 +333,13 @@ struct LutStateHolder {
 };
 
 inline colorimetric_detail::LutInterp to_internal_interp(
-    RgbwLutInterp i) FL_NO_EXCEPT {
+    RgbwLutInterp i) FL_NOEXCEPT {
     return (i == RgbwLutInterp::Hermite)
         ? colorimetric_detail::LutInterp::Hermite
         : colorimetric_detail::LutInterp::Bilinear;
 }
 
-inline void rebuild_lut_if_stale(LutStateHolder& s, int cct) FL_NO_EXCEPT {
+inline void rebuild_lut_if_stale(LutStateHolder& s, int cct) FL_NOEXCEPT {
     if (!s.enabled || s.requested_grid_n <= 0) return;
     const DiodeProfile* active = get_rgbw_colorimetric_profile();
     const int override_cct = resolve_cct_override(active, cct);
@@ -361,7 +361,7 @@ inline void rebuild_lut_if_stale(LutStateHolder& s, int cct) FL_NO_EXCEPT {
 // current cache key. set_input_gamut() mutates input_xy_* in place without
 // touching the profile pointer or CCT, so the (pointer, cct) cache key
 // stays equal and would otherwise serve stale M_src / LUT data.
-void invalidate_colorimetric_caches_for(const DiodeProfile* profile) FL_NO_EXCEPT {
+void invalidate_colorimetric_caches_for(const DiodeProfile* profile) FL_NOEXCEPT {
     ColorimetricCacheHolder& ch =
         fl::Singleton<ColorimetricCacheHolder>::instance();
     if (ch.cached_for == profile) {
@@ -379,7 +379,7 @@ void invalidate_colorimetric_caches_for(const DiodeProfile* profile) FL_NO_EXCEP
 void rgb_2_rgbw_colorimetric(u16 w_color_temperature, u8 r,
                              u8 g, u8 b, u8 r_scale,
                              u8 g_scale, u8 b_scale, u8 *out_r,
-                             u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
+                             u8 *out_g, u8 *out_b, u8 *out_w) FL_NOEXCEPT {
     r = scale8(r, r_scale);
     g = scale8(g, g_scale);
     b = scale8(b, b_scale);
@@ -439,7 +439,7 @@ void rgb_2_rgbw_colorimetric(u16 w_color_temperature, u8 r,
 void rgb_2_rgbw_colorimetric_boosted(u16 w_color_temperature, u8 r,
                                      u8 g, u8 b, u8 r_scale,
                                      u8 g_scale, u8 b_scale, u8 *out_r,
-                                     u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
+                                     u8 *out_g, u8 *out_b, u8 *out_w) FL_NOEXCEPT {
     r = scale8(r, r_scale);
     g = scale8(g, g_scale);
     b = scale8(b, b_scale);
@@ -463,7 +463,7 @@ void rgb_2_rgbw_colorimetric_boosted(u16 w_color_temperature, u8 r,
 }
 
 bool enable_rgbw_colorimetric_lut(int grid_n,
-                                  RgbwLutInterp interp) FL_NO_EXCEPT {
+                                  RgbwLutInterp interp) FL_NOEXCEPT {
     if (grid_n < 4) grid_n = 4;
     if (grid_n > 256) grid_n = 256;
     LutStateHolder& s = fl::Singleton<LutStateHolder>::instance();
@@ -476,11 +476,11 @@ bool enable_rgbw_colorimetric_lut(int grid_n,
     return true;
 }
 
-bool enable_rgbw_colorimetric_lut(int grid_n) FL_NO_EXCEPT {
+bool enable_rgbw_colorimetric_lut(int grid_n) FL_NOEXCEPT {
     return enable_rgbw_colorimetric_lut(grid_n, RgbwLutInterp::Hermite);
 }
 
-void disable_rgbw_colorimetric_lut() FL_NO_EXCEPT {
+void disable_rgbw_colorimetric_lut() FL_NOEXCEPT {
     LutStateHolder& s = fl::Singleton<LutStateHolder>::instance();
     s.enabled = false;
     s.table.reset();  // unique_ptr destructor frees the cells storage
@@ -490,7 +490,7 @@ void disable_rgbw_colorimetric_lut() FL_NO_EXCEPT {
     s.built_cct = 0;
 }
 
-bool rgbw_colorimetric_lut_enabled() FL_NO_EXCEPT {
+bool rgbw_colorimetric_lut_enabled() FL_NOEXCEPT {
     return fl::Singleton<LutStateHolder>::instance().enabled;
 }
 
@@ -500,25 +500,25 @@ bool rgbw_colorimetric_lut_enabled() FL_NO_EXCEPT {
 // exist when FASTLED_RGBW_COLORIMETRIC=0, so set_input_gamut has nothing to
 // evict. Keeping the forward-declared symbol available means the dispatch
 // path above doesn't need its own #if gate.
-namespace { void invalidate_colorimetric_caches_for(const DiodeProfile*) FL_NO_EXCEPT {} }
+namespace { void invalidate_colorimetric_caches_for(const DiodeProfile*) FL_NOEXCEPT {} }
 
 // Stub APIs for the LUT/CCT/RGBCCT path — no-ops when colorimetric is off.
 bool enable_rgbw_colorimetric_lut(int /*grid_n*/,
-                                  RgbwLutInterp /*interp*/) FL_NO_EXCEPT {
+                                  RgbwLutInterp /*interp*/) FL_NOEXCEPT {
     return false;
 }
-bool enable_rgbw_colorimetric_lut(int /*grid_n*/) FL_NO_EXCEPT { return false; }
-void disable_rgbw_colorimetric_lut() FL_NO_EXCEPT {}
-bool rgbw_colorimetric_lut_enabled() FL_NO_EXCEPT { return false; }
+bool enable_rgbw_colorimetric_lut(int /*grid_n*/) FL_NOEXCEPT { return false; }
+void disable_rgbw_colorimetric_lut() FL_NOEXCEPT {}
+bool rgbw_colorimetric_lut_enabled() FL_NOEXCEPT { return false; }
 
 // Stub path: warn-once + fall back to rgb_2_rgbw_exact. Does not pull in the
 // simplex solver, profile cache, or float math machinery.
 void rgb_2_rgbw_colorimetric(u16 w_color_temperature, u8 r,
                              u8 g, u8 b, u8 r_scale,
                              u8 g_scale, u8 b_scale, u8 *out_r,
-                             u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
+                             u8 *out_g, u8 *out_b, u8 *out_w) FL_NOEXCEPT {
 #ifndef FASTLED_SUPPRESS_COLORIMETRIC_FALLBACK_WARNING
-    FL_WARN_F_ONCE("RGBW: kRGBWColorimetric requested but FASTLED_RGBW_COLORIMETRIC is not defined — falling back to kRGBWExactColors. Define FASTLED_RGBW_COLORIMETRIC=1 to enable the colorimetric path.");
+    FL_WARN_ONCE("RGBW: kRGBWColorimetric requested but FASTLED_RGBW_COLORIMETRIC is not defined — falling back to kRGBWExactColors. Define FASTLED_RGBW_COLORIMETRIC=1 to enable the colorimetric path.");
 #endif
     rgb_2_rgbw_exact(w_color_temperature, r, g, b, r_scale, g_scale, b_scale,
                      out_r, out_g, out_b, out_w);
@@ -527,9 +527,9 @@ void rgb_2_rgbw_colorimetric(u16 w_color_temperature, u8 r,
 void rgb_2_rgbw_colorimetric_boosted(u16 w_color_temperature, u8 r,
                                      u8 g, u8 b, u8 r_scale,
                                      u8 g_scale, u8 b_scale, u8 *out_r,
-                                     u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
+                                     u8 *out_g, u8 *out_b, u8 *out_w) FL_NOEXCEPT {
 #ifndef FASTLED_SUPPRESS_COLORIMETRIC_FALLBACK_WARNING
-    FL_WARN_F_ONCE("RGBW: kRGBWColorimetricBoosted requested but FASTLED_RGBW_COLORIMETRIC is not defined — falling back to kRGBWExactColors. Define FASTLED_RGBW_COLORIMETRIC=1 to enable the colorimetric path.");
+    FL_WARN_ONCE("RGBW: kRGBWColorimetricBoosted requested but FASTLED_RGBW_COLORIMETRIC is not defined — falling back to kRGBWExactColors. Define FASTLED_RGBW_COLORIMETRIC=1 to enable the colorimetric path.");
 #endif
     rgb_2_rgbw_exact(w_color_temperature, r, g, b, r_scale, g_scale, b_scale,
                      out_r, out_g, out_b, out_w);

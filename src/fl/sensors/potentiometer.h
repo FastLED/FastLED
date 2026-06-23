@@ -12,10 +12,10 @@ namespace fl {
 class PotentiometerLowLevel {
   public:
     PotentiometerLowLevel(int pin);
-    ~PotentiometerLowLevel() FL_NO_EXCEPT;
-    PotentiometerLowLevel(const PotentiometerLowLevel &other) FL_NO_EXCEPT = default;
-    PotentiometerLowLevel &operator=(const PotentiometerLowLevel &other) FL_NO_EXCEPT = delete;
-    PotentiometerLowLevel(PotentiometerLowLevel &&other) FL_NO_EXCEPT = delete;
+    ~PotentiometerLowLevel() FL_NOEXCEPT;
+    PotentiometerLowLevel(const PotentiometerLowLevel &other) FL_NOEXCEPT = default;
+    PotentiometerLowLevel &operator=(const PotentiometerLowLevel &other) FL_NOEXCEPT = delete;
+    PotentiometerLowLevel(PotentiometerLowLevel &&other) FL_NOEXCEPT = delete;
 
     // Read raw ADC value (0-1023 for 10-bit, 0-4095 for 12-bit ADC)
     u16 read();
@@ -138,7 +138,7 @@ class Potentiometer {
   protected:
     struct Listener : public EngineEvents::Listener {
         Listener(Potentiometer *owner);
-        ~Listener() FL_NO_EXCEPT;
+        ~Listener() FL_NOEXCEPT;
         void addToEngineEventsOnce();
 
         // Update on end frame (before next frame is drawn, matching Button behavior)

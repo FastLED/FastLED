@@ -27,25 +27,25 @@ static constexpr u32 kFlexIOMaxPeriodNs = 2500;
 // ============================================================================
 
 ChannelEngineFlexIO::ChannelEngineFlexIO()
- FL_NO_EXCEPT : mPeripheral(IFlexIOPeripheral::create()),
+ FL_NOEXCEPT : mPeripheral(IFlexIOPeripheral::create()),
       mHwInitialized(false), mCurrentPin(0xFF) {
-    FL_LOG_FLEXIO_F("ChannelEngineFlexIO: created");
+    FL_LOG_FLEXIO("ChannelEngineFlexIO: created");
 }
 
 ChannelEngineFlexIO::ChannelEngineFlexIO(fl::shared_ptr<IFlexIOPeripheral> peripheral)
- FL_NO_EXCEPT : mPeripheral(fl::move(peripheral)),
+ FL_NOEXCEPT : mPeripheral(fl::move(peripheral)),
       mHwInitialized(false), mCurrentPin(0xFF) {
-    FL_LOG_FLEXIO_F("ChannelEngineFlexIO: created (injected peripheral)");
+    FL_LOG_FLEXIO("ChannelEngineFlexIO: created (injected peripheral)");
 }
 
 ChannelEngineFlexIO::~ChannelEngineFlexIO() {
     if (mPeripheral) {
         mPeripheral->deinit();
     }
-    FL_LOG_FLEXIO_F("ChannelEngineFlexIO: destroyed");
+    FL_LOG_FLEXIO("ChannelEngineFlexIO: destroyed");
 }
 
-bool ChannelEngineFlexIO::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
+bool ChannelEngineFlexIO::canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT {
     if (!data || !data->isClockless()) {
         return false;
     }
@@ -64,14 +64,14 @@ bool ChannelEngineFlexIO::canHandle(const ChannelDataPtr& data) const FL_NO_EXCE
     return mPeripheral->canHandlePin(pin);
 }
 
-void ChannelEngineFlexIO::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
+void ChannelEngineFlexIO::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
     if (channelData) {
         channelData->setInUse(true);
         mEnqueuedChannels.push_back(fl::move(channelData));
     }
 }
 
-void ChannelEngineFlexIO::show() FL_NO_EXCEPT {
+void ChannelEngineFlexIO::show() FL_NOEXCEPT {
     if (!mPeripheral) {
         return;
     }
@@ -100,7 +100,7 @@ void ChannelEngineFlexIO::show() FL_NO_EXCEPT {
             mPeripheral->deinit();
 
             if (!mPeripheral->canHandlePin(pin)) {
-                FL_LOG_FLEXIO_F("ChannelEngineFlexIO: Pin %s not FlexIO2-capable", (int)pin);
+                FL_LOG_FLEXIO("ChannelEngineFlexIO: Pin " << (int)pin << " not FlexIO2-capable");
                 continue;
             }
 
@@ -110,7 +110,7 @@ void ChannelEngineFlexIO::show() FL_NO_EXCEPT {
             u32 period = timing.total_period_ns();
 
             if (!mPeripheral->init(pin, t0h, t1h, period, timing.reset_us)) {
-                FL_LOG_FLEXIO_F("ChannelEngineFlexIO: Failed to init FlexIO for pin %s", (int)pin);
+                FL_LOG_FLEXIO("ChannelEngineFlexIO: Failed to init FlexIO for pin " << (int)pin);
                 continue;
             }
 
@@ -137,7 +137,7 @@ void ChannelEngineFlexIO::show() FL_NO_EXCEPT {
     mTransmittingChannels.clear();
 }
 
-IChannelDriver::DriverState ChannelEngineFlexIO::poll() FL_NO_EXCEPT {
+IChannelDriver::DriverState ChannelEngineFlexIO::poll() FL_NOEXCEPT {
     if (!mTransmittingChannels.empty()) {
         if (mPeripheral && mPeripheral->isDone()) {
             // Transfer complete — clean up

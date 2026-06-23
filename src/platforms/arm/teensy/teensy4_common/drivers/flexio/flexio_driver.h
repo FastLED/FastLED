@@ -32,7 +32,7 @@ struct FlexIOPinInfo {
 /// @param teensy_pin Teensy digital pin number
 /// @param[out] info Filled with pin mapping if found
 /// @return true if pin has a FlexIO2 mapping, false otherwise
-bool flexio_lookup_pin(u8 teensy_pin, FlexIOPinInfo* info) FL_NO_EXCEPT;
+bool flexio_lookup_pin(u8 teensy_pin, FlexIOPinInfo* info) FL_NOEXCEPT;
 
 /// @brief Initialize FlexIO2 hardware for WS2812 waveform generation
 /// @param pin_info Pin mapping info (from flexio_lookup_pin)
@@ -42,22 +42,22 @@ bool flexio_lookup_pin(u8 teensy_pin, FlexIOPinInfo* info) FL_NO_EXCEPT;
 /// @param reset_us Reset/latch time in microseconds
 /// @return true on success, false on failure
 bool flexio_init(const FlexIOPinInfo& pin_info, u32 t0h_ns, u32 t1h_ns,
-                 u32 period_ns, u32 reset_us) FL_NO_EXCEPT;
+                 u32 period_ns, u32 reset_us) FL_NOEXCEPT;
 
 /// @brief Start DMA transfer of pixel data to FlexIO2
 /// @param pixel_data Pointer to encoded pixel bytes (must be 32-bit aligned)
 /// @param num_bytes Number of bytes to transmit
 /// @return true if DMA transfer started, false on error
-bool flexio_show(const u8* pixel_data, u32 num_bytes) FL_NO_EXCEPT;
+bool flexio_show(const u8* pixel_data, u32 num_bytes) FL_NOEXCEPT;
 
 /// @brief Check if FlexIO2 DMA transfer is complete
 /// @return true if transfer is done (or no transfer active), false if still running
-bool flexio_is_done() FL_NO_EXCEPT;
+bool flexio_is_done() FL_NOEXCEPT;
 
 /// @brief Block until FlexIO2 DMA transfer completes
-void flexio_wait() FL_NO_EXCEPT;
+void flexio_wait() FL_NOEXCEPT;
 
 /// @brief Shut down FlexIO2 and release resources
-void flexio_deinit() FL_NO_EXCEPT;
+void flexio_deinit() FL_NOEXCEPT;
 
 } // namespace fl

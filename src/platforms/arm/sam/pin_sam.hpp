@@ -52,10 +52,10 @@ using ::fl::AdcRange;
 namespace detail {
     // Pin mapping helper - converts Arduino pin number to (PIO controller, bit mask)
     // Returns nullptr for invalid pins
-    inline Pio* getPioController(int pin, u32& mask) FL_NO_EXCEPT;
+    inline Pio* getPioController(int pin, u32& mask) FL_NOEXCEPT;
 }
 
-inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
+inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
     u32 mask;
     Pio* pio = detail::getPioController(pin, mask);
     if (!pio) return;
@@ -85,7 +85,7 @@ inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
     }
 }
 
-inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
+inline void digitalWrite(int pin, PinValue val) FL_NOEXCEPT {
     u32 mask;
     Pio* pio = detail::getPioController(pin, mask);
     if (!pio) return;
@@ -97,7 +97,7 @@ inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
     }
 }
 
-inline PinValue digitalRead(int pin) FL_NO_EXCEPT {
+inline PinValue digitalRead(int pin) FL_NOEXCEPT {
     u32 mask;
     Pio* pio = detail::getPioController(pin, mask);
     if (!pio) return PinValue::Low;
@@ -106,7 +106,7 @@ inline PinValue digitalRead(int pin) FL_NO_EXCEPT {
     return (pio->PIO_PDSR & mask) ? PinValue::High : PinValue::Low;
 }
 
-inline u16 analogRead(int pin) FL_NO_EXCEPT {
+inline u16 analogRead(int pin) FL_NOEXCEPT {
     // ADC implementation requires complex peripheral configuration
     // For now, use stub - full implementation would require:
     // 1. Enable ADC peripheral clock via PMC
@@ -118,7 +118,7 @@ inline u16 analogRead(int pin) FL_NO_EXCEPT {
     return 0;
 }
 
-inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
+inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
     // PWM implementation requires complex peripheral configuration
     // For now, use stub - full implementation would require:
     // 1. Enable PWM peripheral clock via PMC
@@ -129,13 +129,13 @@ inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
     (void)val;
 }
 
-inline void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
+inline void setPwm16(int pin, u16 val) FL_NOEXCEPT {
     // 16-bit PWM would configure SAM3X8E PWM controller with CPRD=65535
     // For now, delegate to analogWrite stub
     analogWrite(pin, val);
 }
 
-inline void setAdcRange(AdcRange range) FL_NO_EXCEPT {
+inline void setAdcRange(AdcRange range) FL_NOEXCEPT {
     // Arduino Due doesn't support analogReference - analog reference is fixed at 3.3V
     // No-op for all range values
     (void)range;
@@ -149,7 +149,7 @@ namespace detail {
 
 // Pin mapping table: converts Arduino pin numbers to (PIO controller, bit position)
 // Based on Arduino Due pin mapping from fastpin_arm_sam.h
-inline Pio* getPioController(int pin, u32& mask) FL_NO_EXCEPT {
+inline Pio* getPioController(int pin, u32& mask) FL_NOEXCEPT {
     // Arduino Due pin mapping (from fastpin_arm_sam.h)
     // Format: pin -> (controller, bit)
     switch (pin) {

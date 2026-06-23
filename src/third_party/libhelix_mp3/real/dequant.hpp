@@ -75,7 +75,7 @@ namespace third_party {
  *              Equivalently, we can think of the dequantized coefficients as 
  *                Q(DQ_FRACBITS_OUT - 15) with no implicit bias. 
  **************************************************************************************/
-int Dequantize(MP3DecInfo *mp3DecInfo, int gr) FL_NO_EXCEPT
+int Dequantize(MP3DecInfo *mp3DecInfo, int gr) FL_NOEXCEPT
 {
 	int i, ch, nSamps;
 	int32_t mOut[2];

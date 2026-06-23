@@ -67,7 +67,7 @@ public:
     ///
     /// Mirrors the hardware constraint that there is only one RMT peripheral
     /// (though multiple channels can be created).
-    static Rmt5PeripheralESP& instance() FL_NO_EXCEPT;
+    static Rmt5PeripheralESP& instance() FL_NOEXCEPT;
 
     /// @brief Destructor - cleanup is handled by implementation
     ~Rmt5PeripheralESP() override;
@@ -81,24 +81,24 @@ public:
     //=========================================================================
 
     bool createTxChannel(const Rmt5ChannelConfig& config,
-                         void** out_handle) FL_NO_EXCEPT override = 0;
-    bool deleteChannel(void* channel_handle) FL_NO_EXCEPT override = 0;
-    bool enableChannel(void* channel_handle) FL_NO_EXCEPT override = 0;
-    bool disableChannel(void* channel_handle) FL_NO_EXCEPT override = 0;
+                         void** out_handle) FL_NOEXCEPT override = 0;
+    bool deleteChannel(void* channel_handle) FL_NOEXCEPT override = 0;
+    bool enableChannel(void* channel_handle) FL_NOEXCEPT override = 0;
+    bool disableChannel(void* channel_handle) FL_NOEXCEPT override = 0;
     bool transmit(void* channel_handle, void* encoder_handle,
-                  const u8* buffer, size_t buffer_size) FL_NO_EXCEPT override = 0;
-    bool waitAllDone(void* channel_handle, u32 timeout_ms) FL_NO_EXCEPT override = 0;
+                  const u8* buffer, size_t buffer_size) FL_NOEXCEPT override = 0;
+    bool waitAllDone(void* channel_handle, u32 timeout_ms) FL_NOEXCEPT override = 0;
     void* createEncoder(const ChipsetTiming& timing,
-                        u32 resolution_hz) FL_NO_EXCEPT override = 0;
-    void deleteEncoder(void* encoder_handle) FL_NO_EXCEPT override = 0;
-    bool resetEncoder(void* encoder_handle) FL_NO_EXCEPT override = 0;
+                        u32 resolution_hz) FL_NOEXCEPT override = 0;
+    void deleteEncoder(void* encoder_handle) FL_NOEXCEPT override = 0;
+    bool resetEncoder(void* encoder_handle) FL_NOEXCEPT override = 0;
     bool registerTxCallback(void* channel_handle,
                             Rmt5TxDoneCallback callback,
-                            void* user_ctx) FL_NO_EXCEPT override = 0;
-    void configureLogging() FL_NO_EXCEPT override = 0;
-    bool syncCache(void* buffer, size_t size) FL_NO_EXCEPT override = 0;
-    u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT override = 0;
-    void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override = 0;
+                            void* user_ctx) FL_NOEXCEPT override = 0;
+    void configureLogging() FL_NOEXCEPT override = 0;
+    bool syncCache(void* buffer, size_t size) FL_NOEXCEPT override = 0;
+    u8* allocateDmaBuffer(size_t size) FL_NOEXCEPT override = 0;
+    void freeDmaBuffer(u8* buffer) FL_NOEXCEPT override = 0;
 
 protected:
     /// @brief Protected constructor for singleton

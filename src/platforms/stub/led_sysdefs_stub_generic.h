@@ -64,14 +64,14 @@ typedef volatile fl::u32 RoReg;
 typedef volatile fl::u32 RwReg;
 
 extern "C" {
-    void pinMode(fl::u8 pin, fl::u8 mode) FL_NO_EXCEPT;
+    void pinMode(fl::u8 pin, fl::u8 mode) FL_NOEXCEPT;
 
-    fl::u32 millis(void) FL_NO_EXCEPT;
-    fl::u32 micros(void) FL_NO_EXCEPT;
+    fl::u32 millis(void) FL_NOEXCEPT;
+    fl::u32 micros(void) FL_NOEXCEPT;
 
     // delay() is provided by fl::delay() via "using fl::delay;" in FastLED.h
     // This gives sketches the async-pumping version automatically
-    void yield(void) FL_NO_EXCEPT;
+    void yield(void) FL_NOEXCEPT;
 }
 #endif // FASTLED_NO_ARDUINO_STUBS
 

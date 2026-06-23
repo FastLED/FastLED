@@ -35,11 +35,11 @@ BuildupDetector::BuildupDetector()
     }
 }
 
-BuildupDetector::~BuildupDetector() FL_NO_EXCEPT = default;
+BuildupDetector::~BuildupDetector() FL_NOEXCEPT = default;
 
 void BuildupDetector::update(shared_ptr<Context> context) {
     if (!context) {
-        FL_WARN_F("BuildupDetector::update: null context");
+        FL_WARN("BuildupDetector::update: null context");
         return;
     }
 
@@ -73,7 +73,7 @@ void BuildupDetector::update(shared_ptr<Context> context) {
             mCurrentBuildup.duration = 0;
             mCurrentBuildup.active = true;
 
-            FL_DBG_F("BuildupDetector: Buildup started (intensity=%s)", intensity);
+            FL_DBG("BuildupDetector: Buildup started (intensity=" << intensity << ")");
 
             mFireBuildupStart = true;
         }
@@ -89,7 +89,7 @@ void BuildupDetector::update(shared_ptr<Context> context) {
         // Check if we've reached peak (just before drop)
         if (!mPeakFired && shouldPeak()) {
             mPeakFired = true;
-            FL_DBG_F("BuildupDetector: Peak reached");
+            FL_DBG("BuildupDetector: Peak reached");
 
             mFireBuildupPeak = true;
         }
@@ -102,7 +102,7 @@ void BuildupDetector::update(shared_ptr<Context> context) {
 
         // Check if buildup should end
         if (shouldEndBuildup()) {
-            FL_DBG_F("BuildupDetector: Buildup ended (duration=%sms)", mCurrentBuildup.duration);
+            FL_DBG("BuildupDetector: Buildup ended (duration=" << mCurrentBuildup.duration << "ms)");
 
             mBuildupActive = false;
             mCurrentBuildup.active = false;

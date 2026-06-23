@@ -91,7 +91,7 @@ FetchRequest::FetchRequest(const fl::string& url, const FetchOptions& opts, fl::
     mPath = p.empty() ? fl::string("/") : fl::string(p.data(), p.size());
 }
 
-FetchRequest::~FetchRequest() FL_NO_EXCEPT {
+FetchRequest::~FetchRequest() FL_NOEXCEPT {
     close_socket();
 }
 
@@ -120,7 +120,7 @@ void FetchRequest::handle_dns_lookup() {
     // Pump async system before DNS to keep server responsive
     fl::task::run(1000);
 
-    FL_WARN_F("[FETCH] Resolving hostname: %s", mHostname);
+    FL_WARN("[FETCH] Resolving hostname: " << mHostname);
 
     // DNS lookup (blocking 10-100ms, but acceptable)
     // Note: localhost is typically instant due to OS caching
@@ -160,7 +160,7 @@ void FetchRequest::handle_dns_lookup() {
     fl::memcpy(&addr_ptr, mDnsResult->h_addr_list, sizeof(addr_ptr));
     fl::memcpy(&server_addr.sin_addr, addr_ptr, mDnsResult->h_length);
 
-    FL_WARN_F("[FETCH] Waiting for connection to %s:%s", mHostname, mPort);
+    FL_WARN("[FETCH] Waiting for connection to " << mHostname << ":" << mPort);
 
     connect(mSocketFd, (sockaddr*)&server_addr, sizeof(server_addr));
     // connect() returns immediately with EINPROGRESS/WSAEWOULDBLOCK (expected)
@@ -219,7 +219,7 @@ void FetchRequest::handle_sending() {
     if (sent > 0) {
         mBytesSent += sent;
         if (mBytesSent >= mRequestBuffer.size()) {
-            FL_WARN_F("[FETCH] Waiting for HTTP response...");
+            FL_WARN("[FETCH] Waiting for HTTP response...");
             mState = RECEIVING;
             mStateStartTime = fl::millis();
         }

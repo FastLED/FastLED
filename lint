@@ -1,9 +1,4 @@
 #!/bin/bash
 set -e
 cd "$(dirname "$0")"
-# --no-sync skips uv's per-invocation project-sync probe, which scales with
-# dep-graph size and was adding ~130s to every `bash lint` on this project
-# (zackees/soldr#805). Without sync, `uv run` falls back to the existing
-# .venv — fast. Manual `uv sync` is still required after `pyproject.toml`
-# / `uv.lock` changes.
-uv run --no-sync ci/lint.py "$@"
+uv run ci/lint.py "$@"

@@ -20,10 +20,10 @@ namespace fl {
 /// Pure timing — no encoder field. The byte-level encoder pipeline lives on
 /// `ClocklessChipset` as a peer field.
 struct ChipsetTimingConfig {
-    constexpr ChipsetTimingConfig() FL_NO_EXCEPT
+    constexpr ChipsetTimingConfig() FL_NOEXCEPT
         : t1_ns(0), t2_ns(0), t3_ns(0), reset_us(0), name("UNSET") {}
     constexpr ChipsetTimingConfig(u32 t1, u32 t2, u32 t3, u32 reset,
-                                  const char* name = "UNNAMED CHIPSET") FL_NO_EXCEPT
+                                  const char* name = "UNNAMED CHIPSET") FL_NOEXCEPT
         : t1_ns(t1), t2_ns(t2), t3_ns(t3), reset_us(reset), name(name) {}
 
     u32 t1_ns;           ///< T0H: High time for bit 0 (nanoseconds)
@@ -33,12 +33,12 @@ struct ChipsetTimingConfig {
     const char* name;    ///< Human-readable chipset name
 
     /// @brief Get total bit period (T1 + T2 + T3)
-    constexpr u32 total_period_ns() const FL_NO_EXCEPT {
+    constexpr u32 total_period_ns() const FL_NOEXCEPT {
         return t1_ns + t2_ns + t3_ns;
     }
 
     /// @brief Equality operator (all timing fields participate; name ignored)
-    constexpr bool operator==(const ChipsetTimingConfig& other) const FL_NO_EXCEPT {
+    constexpr bool operator==(const ChipsetTimingConfig& other) const FL_NOEXCEPT {
         return t1_ns == other.t1_ns &&
                t2_ns == other.t2_ns &&
                t3_ns == other.t3_ns &&
@@ -46,7 +46,7 @@ struct ChipsetTimingConfig {
     }
 
     /// @brief Inequality operator
-    constexpr bool operator!=(const ChipsetTimingConfig& other) const FL_NO_EXCEPT {
+    constexpr bool operator!=(const ChipsetTimingConfig& other) const FL_NOEXCEPT {
         return !(*this == other);
     }
 };
@@ -60,7 +60,7 @@ struct ChipsetTimingConfig {
 /// @tparam CHIPSET Chipset timing trait (e.g., TIMING_WS2812_800KHZ)
 /// @return Runtime timing configuration for the chipset
 template <typename CHIPSET>
-constexpr ChipsetTimingConfig makeTimingConfig() FL_NO_EXCEPT {
+constexpr ChipsetTimingConfig makeTimingConfig() FL_NOEXCEPT {
     return {
         CHIPSET::T1,      // t1_ns
         CHIPSET::T2,      // t2_ns

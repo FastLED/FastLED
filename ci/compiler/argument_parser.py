@@ -262,34 +262,30 @@ class CompilationArgumentParser:
             help="Override global PlatformIO cache directory path (for testing)",
         )
 
-        # Build backend selection. fbuild is the ONLY supported production
-        # backend (#3279 Phase 3). ``--backend platformio`` is a
-        # comparison-only escape hatch for diagnosing fbuild gaps; do NOT
-        # rely on it for shipped builds.
+        # Build backend selection. Default is fbuild (fast, incremental).
+        # --backend=platformio / --platformio / --pio forces `pio run` (slower,
+        # but exercises the PlatformIO-native build for size/compat comparison).
         parser.add_argument(
             "--backend",
             choices=[b.value for b in BuildBackend],
             default=BuildBackend.FBUILD.value,
-            help="Select build backend. 'fbuild' (default) is the ONLY "
-            "supported production backend. 'platformio' is a "
-            "COMPARISON-ONLY tool — use only to compare fbuild output "
-            "and find gaps. Production CI compiles every board via "
-            "fbuild; flags added to root platformio.ini are NOT consumed "
-            "by CI (see #3274 / #3279).",
+            help="Select build backend: 'fbuild' (default, fast) or 'platformio' "
+            "(runs `pio run` for a PlatformIO-native build). Use 'platformio' "
+            "to compare against fbuild output or reproduce PlatformIO-only "
+            "size/link behavior.",
         )
         parser.add_argument(
             "--platformio",
             "--pio",
             dest="platformio_backend",
             action="store_true",
-            help="Shortcut for --backend=platformio. COMPARISON-ONLY: "
-            "use only to compare fbuild output and find gaps.",
+            help="Shortcut for --backend=platformio (force PlatformIO `pio run`).",
         )
         parser.add_argument(
             "--fbuild",
             dest="fbuild_backend",
             action="store_true",
-            help="Shortcut for --backend=fbuild (default, production backend).",
+            help="Shortcut for --backend=fbuild (default).",
         )
 
         return parser

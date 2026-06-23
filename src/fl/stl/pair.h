@@ -22,32 +22,32 @@ template <typename T1, typename T2> struct pair {
     // Constructor from values
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING_NULL_DEREFERENCE
-    pair(const T1 &k, const T2 &v) FL_NO_EXCEPT : first(k), second(v) {}
+    pair(const T1 &k, const T2 &v) FL_NOEXCEPT : first(k), second(v) {}
     FL_DISABLE_WARNING_POP
     
     // Perfect forwarding constructor
     template <typename U1, typename U2>
-    pair(U1&& u1, U2&& u2) FL_NO_EXCEPT : first(fl::forward<U1>(u1)), second(fl::forward<U2>(u2)) {}
+    pair(U1&& u1, U2&& u2) FL_NOEXCEPT : first(fl::forward<U1>(u1)), second(fl::forward<U2>(u2)) {}
     
     // Copy constructor from different pair types
     template <typename U1, typename U2>
-    pair(const pair<U1, U2> &other) FL_NO_EXCEPT : first(other.first), second(other.second) {}
+    pair(const pair<U1, U2> &other) FL_NOEXCEPT : first(other.first), second(other.second) {}
     
     // Move constructor from different pair types
     template <typename U1, typename U2>
-    pair(pair<U1, U2> &&other) FL_NO_EXCEPT : first(fl::move(other.first)), second(fl::move(other.second)) {}
+    pair(pair<U1, U2> &&other) FL_NOEXCEPT : first(fl::move(other.first)), second(fl::move(other.second)) {}
     
     // Rule of 5: copy constructor, copy assignment, move constructor, move assignment, destructor
-    pair(const pair &other) FL_NO_EXCEPT = default;
+    pair(const pair &other) FL_NOEXCEPT = default;
     pair &operator=(const pair &other) = default;
-    pair(pair &&other) FL_NO_EXCEPT : first(fl::move(other.first)), second(fl::move(other.second)) {}
-    pair &operator=(pair &&other) FL_NO_EXCEPT = default;
+    pair(pair &&other) FL_NOEXCEPT : first(fl::move(other.first)), second(fl::move(other.second)) {}
+    pair &operator=(pair &&other) FL_NOEXCEPT = default;
     
     // Note: Template assignment operators removed to avoid issues with const members
     // The default copy and move assignment operators will handle same-type assignments
     
     // Swap member function
-    void swap(pair &other) FL_NO_EXCEPT {
+    void swap(pair &other) FL_NOEXCEPT {
         fl::swap(first, other.first);
         fl::swap(second, other.second);
     }
@@ -55,44 +55,44 @@ template <typename T1, typename T2> struct pair {
 
 // Comparison operators
 template <typename T1, typename T2, typename U1, typename U2>
-bool operator==(const pair<T1, T2> &lhs, const pair<U1, U2> &rhs) FL_NO_EXCEPT {
+bool operator==(const pair<T1, T2> &lhs, const pair<U1, U2> &rhs) FL_NOEXCEPT {
     return lhs.first == rhs.first && lhs.second == rhs.second;
 }
 
 template <typename T1, typename T2, typename U1, typename U2>
-bool operator!=(const pair<T1, T2> &lhs, const pair<U1, U2> &rhs) FL_NO_EXCEPT {
+bool operator!=(const pair<T1, T2> &lhs, const pair<U1, U2> &rhs) FL_NOEXCEPT {
     return !(lhs == rhs);
 }
 
 template <typename T1, typename T2, typename U1, typename U2>
-bool operator<(const pair<T1, T2> &lhs, const pair<U1, U2> &rhs) FL_NO_EXCEPT {
+bool operator<(const pair<T1, T2> &lhs, const pair<U1, U2> &rhs) FL_NOEXCEPT {
     return lhs.first < rhs.first || (!(rhs.first < lhs.first) && lhs.second < rhs.second);
 }
 
 template <typename T1, typename T2, typename U1, typename U2>
-bool operator<=(const pair<T1, T2> &lhs, const pair<U1, U2> &rhs) FL_NO_EXCEPT {
+bool operator<=(const pair<T1, T2> &lhs, const pair<U1, U2> &rhs) FL_NOEXCEPT {
     return !(rhs < lhs);
 }
 
 template <typename T1, typename T2, typename U1, typename U2>
-bool operator>(const pair<T1, T2> &lhs, const pair<U1, U2> &rhs) FL_NO_EXCEPT {
+bool operator>(const pair<T1, T2> &lhs, const pair<U1, U2> &rhs) FL_NOEXCEPT {
     return rhs < lhs;
 }
 
 template <typename T1, typename T2, typename U1, typename U2>
-bool operator>=(const pair<T1, T2> &lhs, const pair<U1, U2> &rhs) FL_NO_EXCEPT {
+bool operator>=(const pair<T1, T2> &lhs, const pair<U1, U2> &rhs) FL_NOEXCEPT {
     return !(lhs < rhs);
 }
 
 // Non-member swap function
 template <typename T1, typename T2>
-void swap(pair<T1, T2> &lhs, pair<T1, T2> &rhs) FL_NO_EXCEPT {
+void swap(pair<T1, T2> &lhs, pair<T1, T2> &rhs) FL_NOEXCEPT {
     lhs.swap(rhs);
 }
 
 // make_pair function
 template <typename T1, typename T2>
-pair<typename fl::decay<T1>::type, typename fl::decay<T2>::type> make_pair(T1&& t, T2&& u) FL_NO_EXCEPT {
+pair<typename fl::decay<T1>::type, typename fl::decay<T2>::type> make_pair(T1&& t, T2&& u) FL_NOEXCEPT {
     return pair<typename fl::decay<T1>::type, typename fl::decay<T2>::type>(fl::forward<T1>(t), fl::forward<T2>(u));
 }
 
@@ -112,7 +112,7 @@ struct pair_element<1, T1, T2> {
 
 // get function overloads for tuple-like access by index
 template <fl::size I, typename T1, typename T2>
-typename pair_element<I, T1, T2>::type& get(pair<T1, T2> &p) FL_NO_EXCEPT {
+typename pair_element<I, T1, T2>::type& get(pair<T1, T2> &p) FL_NOEXCEPT {
     FL_STATIC_ASSERT(I < 2, "Index out of bounds for pair");
     if (I == 0) {
         return p.first;
@@ -122,7 +122,7 @@ typename pair_element<I, T1, T2>::type& get(pair<T1, T2> &p) FL_NO_EXCEPT {
 }
 
 template <fl::size I, typename T1, typename T2>
-const typename pair_element<I, T1, T2>::type& get(const pair<T1, T2> &p) FL_NO_EXCEPT {
+const typename pair_element<I, T1, T2>::type& get(const pair<T1, T2> &p) FL_NOEXCEPT {
     FL_STATIC_ASSERT(I < 2, "Index out of bounds for pair");
     if (I == 0) {
         return p.first;
@@ -132,7 +132,7 @@ const typename pair_element<I, T1, T2>::type& get(const pair<T1, T2> &p) FL_NO_E
 }
 
 template <fl::size I, typename T1, typename T2>
-typename pair_element<I, T1, T2>::type&& get(pair<T1, T2> &&p) FL_NO_EXCEPT {
+typename pair_element<I, T1, T2>::type&& get(pair<T1, T2> &&p) FL_NOEXCEPT {
     FL_STATIC_ASSERT(I < 2, "Index out of bounds for pair");
     if (I == 0) {
         return fl::move(p.first);
@@ -143,7 +143,7 @@ typename pair_element<I, T1, T2>::type&& get(pair<T1, T2> &&p) FL_NO_EXCEPT {
 
 // get by type overloads (when T1 and T2 are different types)
 template <typename T, typename T1, typename T2>
-T& get(pair<T1, T2> &p) FL_NO_EXCEPT {
+T& get(pair<T1, T2> &p) FL_NOEXCEPT {
     FL_STATIC_ASSERT(fl::is_same<T, T1>::value || fl::is_same<T, T2>::value,
                   "Type T must be one of the pair's element types");
     FL_STATIC_ASSERT(!(fl::is_same<T, T1>::value && fl::is_same<T, T2>::value),
@@ -156,7 +156,7 @@ T& get(pair<T1, T2> &p) FL_NO_EXCEPT {
 }
 
 template <typename T, typename T1, typename T2>
-const T& get(const pair<T1, T2> &p) FL_NO_EXCEPT {
+const T& get(const pair<T1, T2> &p) FL_NOEXCEPT {
     FL_STATIC_ASSERT(fl::is_same<T, T1>::value || fl::is_same<T, T2>::value,
                   "Type T must be one of the pair's element types");
     FL_STATIC_ASSERT(!(fl::is_same<T, T1>::value && fl::is_same<T, T2>::value),
@@ -169,7 +169,7 @@ const T& get(const pair<T1, T2> &p) FL_NO_EXCEPT {
 }
 
 template <typename T, typename T1, typename T2>
-T&& get(pair<T1, T2> &&p) FL_NO_EXCEPT {
+T&& get(pair<T1, T2> &&p) FL_NOEXCEPT {
     FL_STATIC_ASSERT(fl::is_same<T, T1>::value || fl::is_same<T, T2>::value,
                   "Type T must be one of the pair's element types");
     FL_STATIC_ASSERT(!(fl::is_same<T, T1>::value && fl::is_same<T, T2>::value),

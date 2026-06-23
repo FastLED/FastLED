@@ -109,7 +109,7 @@ struct PthreadCoroCtx {
 /// initial-wait exit branch below. Mid-coroutine teardown is handled by
 /// contextSwitch() calling pthread_exit() — the thread terminates without
 /// returning here.
-inline void pthread_coro_thread_main(PthreadCoroCtx* self) FL_NO_EXCEPT {
+inline void pthread_coro_thread_main(PthreadCoroCtx* self) FL_NOEXCEPT {
     {
         fl::unique_lock<fl::mutex> lk(self->mutex);
         self->cv.wait(lk, [self] { return self->signaled; });
@@ -133,21 +133,21 @@ inline void pthread_coro_thread_main(PthreadCoroCtx* self) FL_NO_EXCEPT {
 
 class CoroutinePlatformPthread : public ICoroutinePlatform {
 public:
-    void* createContext(void (*entry_fn)(), size_t /*stack_size*/) FL_NO_EXCEPT override {
+    void* createContext(void (*entry_fn)(), size_t /*stack_size*/) FL_NOEXCEPT override {
         auto* ctx = new PthreadCoroCtx();  // ok bare allocation - platform context lifetime
         ctx->entry_fn = entry_fn;
         ctx->thread.reset(new fl::thread(pthread_coro_thread_main, ctx));  // ok bare allocation
         return ctx;
     }
 
-    void* createRunnerContext() FL_NO_EXCEPT override {
+    void* createRunnerContext() FL_NOEXCEPT override {
         // Runner is the calling thread (sketch thread). No OS thread to spawn —
         // we just need a parking spot for it.
         auto* ctx = new PthreadCoroCtx();  // ok bare allocation
         return ctx;
     }
 
-    void destroyContext(void* ctx_p) FL_NO_EXCEPT override {
+    void destroyContext(void* ctx_p) FL_NOEXCEPT override {
         auto* ctx = static_cast<PthreadCoroCtx*>(ctx_p);
         if (!ctx) return;
 
@@ -185,7 +185,7 @@ public:
         delete ctx;  // ok bare allocation - platform context lifetime
     }
 
-    void contextSwitch(void* from_ctx_p, void* to_ctx_p) FL_NO_EXCEPT override {
+    void contextSwitch(void* from_ctx_p, void* to_ctx_p) FL_NOEXCEPT override {
         auto* from = static_cast<PthreadCoroCtx*>(from_ctx_p);
         auto* to = static_cast<PthreadCoroCtx*>(to_ctx_p);
         if (!from || !to) return;
@@ -217,7 +217,7 @@ public:
         }
     }
 
-    fl::u32 micros() const FL_NO_EXCEPT override {
+    fl::u32 micros() const FL_NOEXCEPT override {
         // emscripten_get_now() returns milliseconds as double
         return static_cast<fl::u32>(emscripten_get_now() * 1000.0);
     }

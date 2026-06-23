@@ -63,7 +63,7 @@ class string;
 /// @param consumed  If non-null, receives the number of bytes consumed.
 ///                  Useful for caller-side bookkeeping (e.g. JSON tokenizer).
 /// @return          IEEE 754 single-precision bit pattern.
-u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed = nullptr) FL_NO_EXCEPT;
+u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed = nullptr) FL_NOEXCEPT;
 
 /// @brief Format IEEE 754 single-precision bits as decimal text.
 ///
@@ -78,6 +78,6 @@ u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed = null
 /// @param precision  Digits after the decimal point. Negative values
 ///                   collapse to `0` (integer form). Clamped to [0, 9].
 /// @return           Heap-allocated `fl::string` with the decimal text.
-fl::string ieee754_format_decimal(u32 bits, int precision = 6) FL_NO_EXCEPT;
+fl::string ieee754_format_decimal(u32 bits, int precision = 6) FL_NOEXCEPT;
 
 } // namespace fl

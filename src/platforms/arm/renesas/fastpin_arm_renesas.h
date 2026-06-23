@@ -46,7 +46,7 @@ public:
     #define digitalBspPinToBitMask(P)      (1 << (P & 0xFF))
 
     #if 0
-    inline static void setOutput() FL_NO_EXCEPT {
+    inline static void setOutput() FL_NOEXCEPT {
         if(_BIT<8) {
             _CRL::r() = (_CRL::r() & (0xF << (_BIT*4)) | (0x1 << (_BIT*4));
         } else {

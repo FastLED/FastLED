@@ -48,7 +48,7 @@ namespace platforms {
 // Digital Pin Functions
 // ============================================================================
 
-inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
+inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
     if (pin < 0 || pin >= GPIO_NUM_MAX) {
         return;  // Invalid pin
     }
@@ -85,7 +85,7 @@ inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
     gpio_config(&io_conf);
 }
 
-inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
+inline void digitalWrite(int pin, PinValue val) FL_NOEXCEPT {
     if (pin < 0 || pin >= GPIO_NUM_MAX) {
         return;  // Invalid pin
     }
@@ -93,7 +93,7 @@ inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
                    val == PinValue::High ? 1 : 0);
 }
 
-inline PinValue digitalRead(int pin) FL_NO_EXCEPT {
+inline PinValue digitalRead(int pin) FL_NOEXCEPT {
     if (pin < 0 || pin >= GPIO_NUM_MAX) {
         return PinValue::Low;  // Invalid pin
     }
@@ -111,7 +111,7 @@ namespace {
     // ADC handle for analog reads (lazy initialization)
     adc_oneshot_unit_handle_t adc1_handle = nullptr;
 
-    void initADC1() FL_NO_EXCEPT {
+    void initADC1() FL_NOEXCEPT {
         if (adc1_handle != nullptr) {
             return;  // Already initialized
         }
@@ -124,7 +124,7 @@ namespace {
     }
 }
 
-inline u16 analogRead(int pin) FL_NO_EXCEPT {
+inline u16 analogRead(int pin) FL_NOEXCEPT {
     // Map GPIO pin to ADC channel (ESP32-specific mapping)
     // This is a simplified mapping - real implementation would need
     // platform-specific channel detection
@@ -155,7 +155,7 @@ inline u16 analogRead(int pin) FL_NO_EXCEPT {
 namespace {
     bool adc1_initialized = false;
 
-    void initADC1() FL_NO_EXCEPT {
+    void initADC1() FL_NOEXCEPT {
         if (adc1_initialized) {
             return;
         }
@@ -164,7 +164,7 @@ namespace {
     }
 }
 
-inline u16 analogRead(int pin) FL_NO_EXCEPT {
+inline u16 analogRead(int pin) FL_NOEXCEPT {
     initADC1();
 
     // Note: This is a stub implementation. Real implementation would need
@@ -181,7 +181,7 @@ inline u16 analogRead(int pin) FL_NO_EXCEPT {
 
 #endif  // ESP_IDF_VERSION_5_OR_HIGHER
 
-inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
+inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
     // ESP-IDF does not provide a simple analogWrite API like Arduino
     // This would require LEDC (LED PWM Controller) setup
     // Stub implementation - no-op
@@ -189,7 +189,7 @@ inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
     (void)val;
 }
 
-inline void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
+inline void setPwm16(int pin, u16 val) FL_NOEXCEPT {
     // ESP-IDF native: Full LEDC 16-bit PWM would require:
     // 1. Channel allocation (16 channels available)
     // 2. ledc_timer_config for 16-bit resolution
@@ -200,7 +200,7 @@ inline void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
     (void)val;
 }
 
-inline void setAdcRange(AdcRange range) FL_NO_EXCEPT {
+inline void setAdcRange(AdcRange range) FL_NOEXCEPT {
     // ESP32 uses ADC attenuation instead of reference voltage
     // This would need to be implemented per-channel in analogRead
     // For now, this is a stub implementation - no-op
@@ -257,7 +257,7 @@ inline bool needsPwmIsrFallback(int /*pin*/, u32 frequency_hz) {
     return false;
 }
 
-inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NO_EXCEPT {
+inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NOEXCEPT {
     if (pin < 0 || pin >= GPIO_NUM_MAX) {
         return -1;  // Invalid pin
     }
@@ -357,7 +357,7 @@ inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NO_EXCEPT {
     return 0;
 }
 
-inline u32 getPwmFrequencyNative(int pin) FL_NO_EXCEPT {
+inline u32 getPwmFrequencyNative(int pin) FL_NOEXCEPT {
     for (int i = 0; i < FL_LEDC_MAX_CHANNELS; i++) {
         if (g_ledc_alloc[i].pin == pin) {
             return g_ledc_alloc[i].frequency_hz;

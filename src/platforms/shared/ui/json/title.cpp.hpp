@@ -14,12 +14,12 @@ class JsonUiTitleInternal : public JsonUiInternal {
     // Constructor: Initializes the base JsonUiInternal with name, and sets the
     // title text.
     JsonUiTitleInternal(const fl::string &name, const fl::string &text)
- FL_NO_EXCEPT : JsonUiInternal(name), mText(text) {}
+ FL_NOEXCEPT : JsonUiInternal(name), mText(text) {}
 
     // Override toJson to serialize the title's data directly.
     // This function will be called by JsonUiManager to get the component's
     // state.
-    void toJson(fl::json &json) const FL_NO_EXCEPT override {
+    void toJson(fl::json &json) const FL_NOEXCEPT override {
         json.set("name", name());
         json.set("type", "title");
         json.set("group",
@@ -30,18 +30,18 @@ class JsonUiTitleInternal : public JsonUiInternal {
 
     // Override updateInternal. Titles typically don't have update functionality
     // from the UI, so this can be a no-op.
-    void updateInternal(const fl::json &json) FL_NO_EXCEPT override {
+    void updateInternal(const fl::json &json) FL_NOEXCEPT override {
         // No update needed for title components
         FL_UNUSED(json);
     }
 
     // Accessors for the title text.
-    const fl::string &text() const FL_NO_EXCEPT { return mText; }
-    void setText(const fl::string &text) FL_NO_EXCEPT { mText = text; }
+    const fl::string &text() const FL_NOEXCEPT { return mText; }
+    void setText(const fl::string &text) FL_NOEXCEPT { mText = text; }
 };
 
 // Constructor implementation
-JsonTitleImpl::JsonTitleImpl(const fl::string &name, const fl::string &text) FL_NO_EXCEPT {
+JsonTitleImpl::JsonTitleImpl(const fl::string &name, const fl::string &text) FL_NOEXCEPT {
     // Create an instance of the new internal class
     mInternal = fl::make_shared<JsonUiTitleInternal>(name, text);
 
@@ -60,28 +60,28 @@ JsonTitleImpl::~JsonTitleImpl() {
     // }
 }
 
-JsonTitleImpl &JsonTitleImpl::Group(const fl::string &name) FL_NO_EXCEPT {
+JsonTitleImpl &JsonTitleImpl::Group(const fl::string &name) FL_NOEXCEPT {
     mInternal->setGroup(name);
     return *this;
 }
 
-const string &JsonTitleImpl::name() const FL_NO_EXCEPT { return mInternal->name(); }
+const string &JsonTitleImpl::name() const FL_NOEXCEPT { return mInternal->name(); }
 
-fl::string JsonTitleImpl::groupName() const FL_NO_EXCEPT {
+fl::string JsonTitleImpl::groupName() const FL_NOEXCEPT {
     return mInternal->groupName();
 }
 
 // Delegate text accessors to the internal object
-const fl::string &JsonTitleImpl::text() const FL_NO_EXCEPT { return mInternal->text(); }
+const fl::string &JsonTitleImpl::text() const FL_NOEXCEPT { return mInternal->text(); }
 
-void JsonTitleImpl::setText(const fl::string &text) FL_NO_EXCEPT {
+void JsonTitleImpl::setText(const fl::string &text) FL_NOEXCEPT {
     mInternal->setText(text);
 }
 
-void JsonTitleImpl::setGroup(const fl::string &groupName) FL_NO_EXCEPT {
+void JsonTitleImpl::setGroup(const fl::string &groupName) FL_NOEXCEPT {
     mInternal->setGroup(groupName);
 }
 
-int JsonTitleImpl::id() const FL_NO_EXCEPT { return mInternal->id(); }
+int JsonTitleImpl::id() const FL_NOEXCEPT { return mInternal->id(); }
 
 } // namespace fl

@@ -31,6 +31,6 @@ class GpioIsrRx;
  * - Fast assembly ISR for edge capture (<130 ns latency)
  * - Slow management ISR for filtering and timeout detection
  */
-fl::shared_ptr<GpioIsrRx> GpioIsrRxMcpwm_create(int pin) FL_NO_EXCEPT;
+fl::shared_ptr<GpioIsrRx> GpioIsrRxMcpwm_create(int pin) FL_NOEXCEPT;
 
 } // namespace fl

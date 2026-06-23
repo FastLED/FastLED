@@ -34,7 +34,7 @@ template <typename T> using ThreadLocal = ThreadLocalFake<T>;
 template <typename T> class ThreadLocalReal {
   public:
     // Default: each thread's object is default-constructed
-    ThreadLocalReal() FL_NO_EXCEPT : mDefaultValue(), mHasDefault(false) {
+    ThreadLocalReal() FL_NOEXCEPT : mDefaultValue(), mHasDefault(false) {
         initializeKey();
     }
 
@@ -45,7 +45,7 @@ template <typename T> class ThreadLocalReal {
     }
 
     // Destructor - cleanup pthread key
-    ~ThreadLocalReal() FL_NO_EXCEPT {
+    ~ThreadLocalReal() FL_NOEXCEPT {
         if (mKeyInitialized) {
             // Manually clean up storage for the current thread.
             // pthread_key_delete does NOT call the cleanup function - it only
@@ -60,12 +60,12 @@ template <typename T> class ThreadLocalReal {
     }
 
     // Copy constructor
-    ThreadLocalReal(const ThreadLocalReal& other) FL_NO_EXCEPT : mDefaultValue(other.mDefaultValue), mHasDefault(other.mHasDefault) {
+    ThreadLocalReal(const ThreadLocalReal& other) FL_NOEXCEPT : mDefaultValue(other.mDefaultValue), mHasDefault(other.mHasDefault) {
         initializeKey();
     }
 
     // Assignment operator
-    ThreadLocalReal& operator=(const ThreadLocalReal& other) FL_NO_EXCEPT {
+    ThreadLocalReal& operator=(const ThreadLocalReal& other) FL_NOEXCEPT {
         if (this != &other) {
             mDefaultValue = other.mDefaultValue;
             mHasDefault = other.mHasDefault;
@@ -108,7 +108,7 @@ template <typename T> class ThreadLocalReal {
     operator T &() { return access(); }
     operator const T &() const { return access(); }
 
-    ThreadLocalReal &operator=(const T &v) FL_NO_EXCEPT {
+    ThreadLocalReal &operator=(const T &v) FL_NOEXCEPT {
         set(v);
         return *this;
     }
@@ -189,26 +189,26 @@ template <typename T> class ThreadLocalReal {
 template <typename T> class ThreadLocalFake {
   public:
     // Default: each thread's object is default-constructed
-    ThreadLocalFake() FL_NO_EXCEPT : mValue() {}
+    ThreadLocalFake() FL_NOEXCEPT : mValue() {}
 
     // With default: each thread's object is copy-constructed from defaultVal
     template <typename U>
-    explicit ThreadLocalFake(const U &defaultVal) FL_NO_EXCEPT : mValue(defaultVal) {}
+    explicit ThreadLocalFake(const U &defaultVal) FL_NOEXCEPT : mValue(defaultVal) {}
 
     // Access the thread-local instance (not actually thread-local in fake version)
-    T &access() FL_NO_EXCEPT { return mValue; }
-    const T &access() const FL_NO_EXCEPT { return mValue; }
+    T &access() FL_NOEXCEPT { return mValue; }
+    const T &access() const FL_NOEXCEPT { return mValue; }
 
     // Set the value (globally shared in fake version)
-    void set(const T& value) FL_NO_EXCEPT {
+    void set(const T& value) FL_NOEXCEPT {
         mValue = value;
     }
 
     // Convenience operators for "ThreadLocal<T> = x;"
-    operator T &() FL_NO_EXCEPT { return access(); }
-    operator const T &() const FL_NO_EXCEPT { return access(); }
+    operator T &() FL_NOEXCEPT { return access(); }
+    operator const T &() const FL_NOEXCEPT { return access(); }
 
-    ThreadLocalFake &operator=(const T &v) FL_NO_EXCEPT {
+    ThreadLocalFake &operator=(const T &v) FL_NOEXCEPT {
         set(v);
         return *this;
     }

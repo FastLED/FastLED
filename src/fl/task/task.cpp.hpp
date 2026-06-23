@@ -43,12 +43,12 @@ public:
         : mImpl(platforms::createTaskCoroutine(fl::move(name), fl::move(function), stack_size, priority, core_id)) {
     }
 
-    ~Coroutine() FL_NO_EXCEPT = default;
+    ~Coroutine() FL_NOEXCEPT = default;
 
-    Coroutine(const Coroutine&) FL_NO_EXCEPT = delete;
-    Coroutine& operator=(const Coroutine&) FL_NO_EXCEPT = delete;
-    Coroutine(Coroutine&&) FL_NO_EXCEPT = delete;
-    Coroutine& operator=(Coroutine&&) FL_NO_EXCEPT = delete;
+    Coroutine(const Coroutine&) FL_NOEXCEPT = delete;
+    Coroutine& operator=(const Coroutine&) FL_NOEXCEPT = delete;
+    Coroutine(Coroutine&&) FL_NOEXCEPT = delete;
+    Coroutine& operator=(Coroutine&&) FL_NOEXCEPT = delete;
 
     void stop() {
         if (mImpl) {
@@ -80,7 +80,7 @@ namespace task {
 
 class ITaskImpl {
 public:
-    virtual ~ITaskImpl() FL_NO_EXCEPT = default;
+    virtual ~ITaskImpl() FL_NOEXCEPT = default;
     virtual void set_then(function<void()> on_then) = 0;
     virtual void set_catch(function<void(const Error&)> on_catch) = 0;
     virtual void set_canceled() = 0;

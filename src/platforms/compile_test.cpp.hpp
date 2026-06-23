@@ -43,7 +43,7 @@ namespace fl {
 
 // Test that sstream and sstream_noop can accept all fundamental integer types
 // This ensures SFINAE collision prevention works across all platforms
-FL_MAYBE_UNUSED static void test_strstream_integer_operators() FL_NO_EXCEPT {
+FL_MAYBE_UNUSED static void test_strstream_integer_operators() FL_NOEXCEPT {
     fl::sstream ss;
     fl::sstream_noop fss;
 
@@ -89,7 +89,7 @@ FL_MAYBE_UNUSED static void test_strstream_integer_operators() FL_NO_EXCEPT {
 // This file contains only compile-time tests.
 // The platform-specific test functions are called to trigger
 // any compile-time errors if the platform is not configured correctly.
-FL_MAYBE_UNUSED static void compile_tests() FL_NO_EXCEPT {
+FL_MAYBE_UNUSED static void compile_tests() FL_NOEXCEPT {
 
     FL_STATIC_ASSERT(fl::is_same<u32, u32>::value, "u32 must be the same type as u32");
     FL_STATIC_ASSERT(fl::is_same<u16, u16>::value, "u16 must be the same type as u16");

@@ -126,12 +126,12 @@ static const fl::u32 kSysconPluClkBit        = (1UL << 18);
 // access pattern (compare ARM_DEMCR / ARM_DWT_CTRL in clockless_arm_giga.h);
 // the FastLED reinterpret_cast linter explicitly allows C-style casts for
 // MMIO addresses.
-static inline volatile fl::u32* reg32(fl::u32 base, fl::u32 off) FL_NO_EXCEPT {
+static inline volatile fl::u32* reg32(fl::u32 base, fl::u32 off) FL_NOEXCEPT {
     return (volatile fl::u32*)(base + off);  // MMIO register address
 }
 
 // LUTn_TRUTH[n] write helper.
-static inline void writeLutTruth(fl::u8 lut, fl::u32 truth_table) FL_NO_EXCEPT {
+static inline void writeLutTruth(fl::u8 lut, fl::u32 truth_table) FL_NOEXCEPT {
     *reg32(kPluBase, kOffLutTruth0 + (fl::u32(lut) << 2)) = truth_table;
 }
 
@@ -139,19 +139,19 @@ static inline void writeLutTruth(fl::u8 lut, fl::u32 truth_table) FL_NO_EXCEPT {
 // sel: 0..5 -> primary input PLU_IN0..PLU_IN5
 //      6..N -> LUT[sel-6] output (UM11065 §12.6.1 mux encoding)
 static inline void writeLutInputMux(fl::u8 lut, fl::u8 input_idx,
-                                    fl::u8 sel) FL_NO_EXCEPT {
+                                    fl::u8 sel) FL_NOEXCEPT {
     // Stride is 5 u32 per LUT (one per input).
     fl::u32 off = kOffLutInpMux0 + (fl::u32(lut) * 5UL + input_idx) * 4UL;
     *reg32(kPluBase, off) = sel;
 }
 
 // OUTPUTm_MUX write helper. Selects which LUT drives PLU_OUTm.
-static inline void writeOutputMux(fl::u8 out_idx, fl::u8 lut_sel) FL_NO_EXCEPT {
+static inline void writeOutputMux(fl::u8 out_idx, fl::u8 lut_sel) FL_NOEXCEPT {
     *reg32(kPluBase, kOffOutputMux0 + (fl::u32(out_idx) << 2)) = lut_sel;
 }
 
 // Enable PLU peripheral clock (SYSCON->SYSAHBCLKCTRL0 bit 18).
-static inline void enablePluClock() FL_NO_EXCEPT {
+static inline void enablePluClock() FL_NOEXCEPT {
     volatile fl::u32* p = reg32(kSysconBase, kOffSysahbclkctrl0);
     *p = *p | kSysconPluClkBit;
 }
@@ -226,12 +226,12 @@ static const fl::u8 kMuxPluIn0 = 0;
 static const fl::u8 kMuxPluIn1 = 1;
 static const fl::u8 kMuxPluIn2 = 2;
 // sel = 6 + lut_id -> LUTn output
-static inline fl::u8 muxLutOutput(fl::u8 lut_id) FL_NO_EXCEPT {
+static inline fl::u8 muxLutOutput(fl::u8 lut_id) FL_NOEXCEPT {
     return fl::u8(6u + lut_id);
 }
 
 // One-shot PLU init. Idempotent: a second call rewrites the same registers.
-static void initPluGraph() FL_NO_EXCEPT {
+static void initPluGraph() FL_NOEXCEPT {
     // Step 1: enable peripheral clock BEFORE any register write
     // (ARM Cortex-M0+ silently drops writes to unpowered peripherals).
     enablePluClock();
@@ -303,9 +303,9 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     bool       mPluReady;
 
 public:
-    ClocklessController() FL_NO_EXCEPT : mPinMask(0), mPort(0), mPluReady(false) {}
+    ClocklessController() FL_NOEXCEPT : mPinMask(0), mPort(0), mPluReady(false) {}
 
-    virtual void init() FL_NO_EXCEPT {
+    virtual void init() FL_NOEXCEPT {
         // The CPU still owns the data pin - the PLU samples it via SWM, but
         // the pin itself is a normal GPIO that the CPU writes to.
         FastPin<DATA_PIN>::setOutput();
@@ -319,7 +319,7 @@ public:
 
     virtual fl::u16 getMaxRefreshRate() const { return 400; }
 
-    virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT {
+    virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NOEXCEPT {
         mWait.wait();
 
         // The PLU drives the wire shape; the CPU's only job is to clock data
@@ -354,7 +354,7 @@ private:
     // "ready-for-next-bit" PLU flag via OUTPUT3 and have the CPU spin on it
     // instead of relying on the slack envelope. That would let this loop
     // run lock-step against the PLU and eliminate any cadence drift.
-    void feedPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT {
+    void feedPixels(PixelController<RGB_ORDER>& pixels) FL_NOEXCEPT {
         const fl::u8 nLeds = static_cast<fl::u8>(pixels.size());
         if (nLeds == 0) return;
 
@@ -376,7 +376,7 @@ private:
     }
 
     // Push one byte MSB-first to the PLU data input.
-    inline void sendByte(fl::u8 b) FL_NO_EXCEPT {
+    inline void sendByte(fl::u8 b) FL_NOEXCEPT {
         // We unroll to 8 bit writes. Each write touches SET (for bit=1) or
         // CLR (for bit=0) of the data pin. The PLU is what actually drives
         // the WS2812 timing waveform - this loop just selects 0 vs 1 width.

@@ -56,7 +56,7 @@ class Particles1d : public Fx1d {
     /// @param fade_rate Fade amount per frame for trails (0-255, default: 2)
     Particles1d(u16 num_leds, u8 max_particles = 10, u8 fade_rate = 2);
 
-    ~Particles1d() FL_NO_EXCEPT;
+    ~Particles1d() FL_NOEXCEPT;
 
     /// @brief Update and render all particles with overdraw technique
     /// @param context Draw context containing current time and LED buffer
@@ -107,7 +107,7 @@ class Particles1d : public Fx1d {
         u32 lifetime;       ///< Lifespan in milliseconds
         bool active;        ///< Active flag (false = available for reuse)
 
-        Particle() FL_NO_EXCEPT;
+        Particle() FL_NOEXCEPT;
 
         /// @return Power level from 1.0 (birth) to 0.0 (death)
         float getPower(u32 now) const;

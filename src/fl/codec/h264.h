@@ -15,7 +15,7 @@ struct H264Info {
     fl::u8 numRefFrames = 0;
     bool isValid = false;
 
-    H264Info() FL_NO_EXCEPT = default;
+    H264Info() FL_NOEXCEPT = default;
     H264Info(fl::u16 w, fl::u16 h, fl::u8 prof, fl::u8 lvl)
         : width(w), height(h), profile(prof), level(lvl), isValid(true) {}
 };

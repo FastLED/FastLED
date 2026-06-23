@@ -40,7 +40,7 @@ namespace std {
         using const_iterator = const T*;
 
         // Default constructor
-        constexpr initializer_list() FL_NO_EXCEPT : mBegin(nullptr), mSize(0) {}
+        constexpr initializer_list() FL_NOEXCEPT : mBegin(nullptr), mSize(0) {}
 
         // Size and capacity
         constexpr unsigned int size() const { return mSize; }

@@ -43,12 +43,12 @@ namespace platforms {
 /// - SAMD51: platforms/arm/d51/spi_hw_manager_samd51.cpp.hpp
 /// - SAMD21: platforms/arm/d21/spi_hw_manager_samd21.cpp.hpp
 /// - nRF52: platforms/arm/nrf52/spi_hw_manager_nrf52.cpp.hpp
-void initSpiHardware() FL_NO_EXCEPT;
+void initSpiHardware() FL_NOEXCEPT;
 
 #else
 
 /// @brief No-op SPI hardware initialization for unsupported ARM platforms
-inline void initSpiHardware() FL_NO_EXCEPT {
+inline void initSpiHardware() FL_NOEXCEPT {
     // No-op for unsupported ARM platforms
 }
 

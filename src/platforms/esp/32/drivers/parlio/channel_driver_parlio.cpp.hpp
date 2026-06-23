@@ -39,7 +39,7 @@ namespace fl {
 
 namespace {
 
-inline bool isValidParlioOutputPin(int pin) FL_NO_EXCEPT {
+inline bool isValidParlioOutputPin(int pin) FL_NOEXCEPT {
     if (pin < 0 || pin >= 64) {
         return false;
     }
@@ -56,7 +56,7 @@ inline bool isValidParlioOutputPin(int pin) FL_NO_EXCEPT {
 // Constructors / Destructors - Implementation Class
 //=============================================================================
 
-ChannelDriverPARLIOImpl::ChannelDriverPARLIOImpl(size_t data_width) FL_NO_EXCEPT
+ChannelDriverPARLIOImpl::ChannelDriverPARLIOImpl(size_t data_width) FL_NOEXCEPT
     : mDriver(detail::ParlioEngine::getInstance()),
       mInitialized(false),
       mDataWidth(data_width),
@@ -66,7 +66,8 @@ ChannelDriverPARLIOImpl::ChannelDriverPARLIOImpl(size_t data_width) FL_NO_EXCEPT
     // Validate data width
     if (data_width != 1 && data_width != 2 && data_width != 4 &&
         data_width != 8 && data_width != 16) {
-        FL_WARN_F("PARLIO: Invalid data_width=%s (must be 1, 2, 4, 8, or 16)", data_width);
+        FL_WARN("PARLIO: Invalid data_width="
+                << data_width << " (must be 1, 2, 4, 8, or 16)");
         // Constructor will still complete, but initialization will fail
         return;
     }
@@ -79,7 +80,7 @@ ChannelDriverPARLIOImpl::~ChannelDriverPARLIOImpl() {
     u32 start = mDriver.peripheral()->millis();
     while (state.state != DriverState::READY && state.state != DriverState::ERROR) {
         if (mDriver.peripheral()->millis() - start >= 2000) {
-            FL_ERROR_F("PARLIO: Destructor timeout waiting for READY");
+            FL_ERROR("PARLIO: Destructor timeout waiting for READY");
             break;
         }
         mDriver.peripheral()->delayMicroseconds(100);
@@ -94,7 +95,7 @@ ChannelDriverPARLIOImpl::~ChannelDriverPARLIOImpl() {
     mCurrentGroupIndex = 0;
 }
 
-bool ChannelDriverPARLIOImpl::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
+bool ChannelDriverPARLIOImpl::canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT {
     if (!data) {
         return false;
     }
@@ -111,17 +112,17 @@ bool ChannelDriverPARLIOImpl::canHandle(const ChannelDataPtr& data) const FL_NO_
 // Public Interface - IChannelDriver Implementation
 //=============================================================================
 
-void ChannelDriverPARLIOImpl::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
+void ChannelDriverPARLIOImpl::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
     if (channelData) {
         mEnqueuedChannels.push_back(channelData);
     }
 }
 
-void ChannelDriverPARLIOImpl::setReversedPinOrder(bool reversed_pin_order) FL_NO_EXCEPT {
+void ChannelDriverPARLIOImpl::setReversedPinOrder(bool reversed_pin_order) FL_NOEXCEPT {
     mReversedPinOrder = reversed_pin_order;
 }
 
-void ChannelDriverPARLIOImpl::show() FL_NO_EXCEPT {
+void ChannelDriverPARLIOImpl::show() FL_NOEXCEPT {
     FL_SCOPED_TRACE;
     if (!mEnqueuedChannels.empty()) {
         // Wait for previous transmission to complete
@@ -168,7 +169,7 @@ void ChannelDriverPARLIOImpl::show() FL_NO_EXCEPT {
         // This allows faster transmissions to complete first, reducing latency
         // for shorter/faster strips while longer/slower strips are still being prepared
         fl::sort(mChipsetGroups.begin(), mChipsetGroups.end(),
-                 [](const ChipsetGroup& a, const ChipsetGroup& b) FL_NO_EXCEPT {
+                 [](const ChipsetGroup& a, const ChipsetGroup& b) FL_NOEXCEPT {
                      // Find max channel size in group a
                      size_t maxSizeA = 0;
                      for (const auto& channel : a.mChannels) {
@@ -199,7 +200,7 @@ void ChannelDriverPARLIOImpl::show() FL_NO_EXCEPT {
         for (auto& group : mChipsetGroups) {
             // sort each member of the group by their pin orders.
             bool reversed = mReversedPinOrder;
-            fl::sort(group.mChannels.begin(), group.mChannels.end(), [reversed](const ChannelDataPtr& a, const ChannelDataPtr& b) FL_NO_EXCEPT {
+            fl::sort(group.mChannels.begin(), group.mChannels.end(), [reversed](const ChannelDataPtr& a, const ChannelDataPtr& b) FL_NOEXCEPT {
                 if (reversed) {
                     return b->getPin() < a->getPin();
                 }
@@ -213,7 +214,7 @@ void ChannelDriverPARLIOImpl::show() FL_NO_EXCEPT {
                 }
             }
             if (!has_unique_pins) {
-                FL_LOG_PARLIO_F("PARLIO: Channels in group %s have non-unique pins", group.mTiming.name);
+                FL_LOG_PARLIO("PARLIO: Channels in group " << group.mTiming.name << " have non-unique pins");
             }
         }
 
@@ -229,7 +230,7 @@ void ChannelDriverPARLIOImpl::show() FL_NO_EXCEPT {
     }
 }
 
-IChannelDriver::DriverState ChannelDriverPARLIOImpl::poll() FL_NO_EXCEPT {
+IChannelDriver::DriverState ChannelDriverPARLIOImpl::poll() FL_NOEXCEPT {
     // If not initialized, we're ready (no hardware to poll)
     if (!mInitialized) {
         return DriverState::READY;
@@ -288,7 +289,7 @@ IChannelDriver::DriverState ChannelDriverPARLIOImpl::poll() FL_NO_EXCEPT {
     }
 }
 
-void ChannelDriverPARLIOImpl::setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT {
+void ChannelDriverPARLIOImpl::setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT {
     mDriver.setPollNeededCallback(callback);
 }
 
@@ -297,7 +298,7 @@ void ChannelDriverPARLIOImpl::setPollNeededCallback(PollNeededCallback callback)
 //=============================================================================
 
 void ChannelDriverPARLIOImpl::beginTransmission(
-    fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT {
+    fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT {
 
     // Validate channel data first (before initialization)
     if (channelData.size() == 0) {
@@ -307,14 +308,17 @@ void ChannelDriverPARLIOImpl::beginTransmission(
     // Validate channel count is within bounds
     size_t channel_count = channelData.size();
     if (channel_count > 16) {
-        FL_WARN_F("PARLIO: Too many channels (got %s, max 16)", channel_count);
+        FL_WARN("PARLIO: Too many channels (got " << channel_count
+                                                  << ", max 16)");
         return;
     }
 
     // Validate channel count matches data_width constraints
     size_t required_width = selectDataWidth(channel_count);
     if (required_width != mDataWidth) {
-        FL_WARN_F("PARLIO: Channel count %s requires data_width=%s but this instance is data_width=%s", channel_count, required_width, mDataWidth);
+        FL_WARN("PARLIO: Channel count "
+                << channel_count << " requires data_width=" << required_width
+                << " but this instance is data_width=" << mDataWidth);
         return;
     }
 
@@ -323,7 +327,9 @@ void ChannelDriverPARLIOImpl::beginTransmission(
     for (size_t i = 0; i < channel_count; i++) {
         int pin = channelData[i]->getPin();
         if (!isValidParlioOutputPin(pin)) {
-            FL_WARN_F("PARLIO: Invalid output GPIO %s for this ESP32 target; refusing to configure PARLIO", pin);
+            FL_WARN("PARLIO: Invalid output GPIO "
+                    << pin
+                    << " for this ESP32 target; refusing to configure PARLIO");
             return;
         }
         pins.push_back(pin);
@@ -343,7 +349,7 @@ void ChannelDriverPARLIOImpl::beginTransmission(
 
     for (size_t i = 0; i < channelData.size(); i++) {
         if (!channelData[i]) {
-            FL_WARN_F("PARLIO: Null channel data at index %s", i);
+            FL_WARN("PARLIO: Null channel data at index " << i);
             return;
         }
 
@@ -368,7 +374,10 @@ void ChannelDriverPARLIOImpl::beginTransmission(
 
     // Initialize HAL if needed
     if (!mDriver.initialize(mDataWidth, pins, timing, maxLeds)) {
-        FL_WARN_F("PARLIO: HAL initialization failed (data_width=%s, channels=%s, maxLeds=%s). Try reducing FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL or FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES", mDataWidth, channel_count, maxLeds);
+        FL_WARN("PARLIO: HAL initialization failed (data_width=" << mDataWidth
+                << ", channels=" << channel_count << ", maxLeds=" << maxLeds
+                << "). Try reducing FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL or "
+                << "FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES");
         return;
     }
 
@@ -386,13 +395,13 @@ void ChannelDriverPARLIOImpl::beginTransmission(
             totalBufferSize,        // ITERATION 9 FIX: Pass total buffer size, not per-lane size
             channelData.size(),
             maxChannelSize)) {
-        FL_WARN_F("PARLIO: Transmission failed");
+        FL_WARN("PARLIO: Transmission failed");
     }
 }
 
 void ChannelDriverPARLIOImpl::prepareScratchBuffer(
     fl::span<const ChannelDataPtr> channelData,
-    size_t maxChannelSize) FL_NO_EXCEPT {
+    size_t maxChannelSize) FL_NOEXCEPT {
 
     // Resize scratch buffer (per-lane layout)
     size_t totalSize = channelData.size() * maxChannelSize;
@@ -407,7 +416,7 @@ void ChannelDriverPARLIOImpl::prepareScratchBuffer(
 
         // Safety check: Skip empty channels (shouldn't happen in normal operation)
         if (srcData.size() == 0 || dataSize == 0) {
-            FL_WARN_F("PARLIO: Channel %s has empty data (size=%s), skipping transmission", i, srcData.size());
+            FL_WARN("PARLIO: Channel " << i << " has empty data (size=" << srcData.size() << "), skipping transmission");
             return;  // Abort transmission - channel not ready
         }
 
@@ -425,7 +434,7 @@ void ChannelDriverPARLIOImpl::prepareScratchBuffer(
 // Polymorphic Wrapper Class Implementation
 //=============================================================================
 
-ChannelDriverPARLIO::ChannelDriverPARLIO() FL_NO_EXCEPT
+ChannelDriverPARLIO::ChannelDriverPARLIO() FL_NOEXCEPT
     : mCurrentDataWidth(0),
       mPhase(TransmitPhase::IDLE),
       mPollNeededCallback(),
@@ -436,7 +445,7 @@ ChannelDriverPARLIO::~ChannelDriverPARLIO() {
     mCurrentDataWidth = 0;
 }
 
-bool ChannelDriverPARLIO::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
+bool ChannelDriverPARLIO::canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT {
     if (!data) {
         return false;
     }
@@ -444,13 +453,13 @@ bool ChannelDriverPARLIO::canHandle(const ChannelDataPtr& data) const FL_NO_EXCE
     return true;
 }
 
-void ChannelDriverPARLIO::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
+void ChannelDriverPARLIO::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
     if (channelData) {
         mTransmittingChannels.push_back(channelData);
     }
 }
 
-void ChannelDriverPARLIO::show() FL_NO_EXCEPT {
+void ChannelDriverPARLIO::show() FL_NOEXCEPT {
     FL_SCOPED_TRACE;
     if (mTransmittingChannels.empty()) return;
 
@@ -481,7 +490,7 @@ void ChannelDriverPARLIO::show() FL_NO_EXCEPT {
     }
 }
 
-IChannelDriver::DriverState ChannelDriverPARLIO::poll() FL_NO_EXCEPT {
+IChannelDriver::DriverState ChannelDriverPARLIO::poll() FL_NOEXCEPT {
     switch (mPhase) {
         case TransmitPhase::IDLE:
             return DriverState::READY;
@@ -555,7 +564,7 @@ IChannelDriver::DriverState ChannelDriverPARLIO::poll() FL_NO_EXCEPT {
     }
 }
 
-void ChannelDriverPARLIO::setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT {
+void ChannelDriverPARLIO::setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT {
     mPollNeededCallback = callback;
     detail::ParlioEngine::getInstance().setPollNeededCallback(mPollNeededCallback);
     if (mClocklessDriver) {
@@ -564,20 +573,21 @@ void ChannelDriverPARLIO::setPollNeededCallback(PollNeededCallback callback) FL_
 }
 
 void ChannelDriverPARLIO::beginClocklessTransmission(
-    fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT {
+    fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT {
     if (channelData.size() == 0) {
         return;
     }
 
     size_t channel_count = channelData.size();
     if (channel_count > 16) {
-        FL_WARN_F("PARLIO: Too many clockless channels (got %s, max 16)", channel_count);
+        FL_WARN("PARLIO: Too many clockless channels (got " << channel_count
+                                                            << ", max 16)");
         return;
     }
 
     size_t required_width = selectDataWidth(channel_count);
     if (required_width == 0) {
-        FL_WARN_F("PARLIO: Invalid clockless channel count %s", channel_count);
+        FL_WARN("PARLIO: Invalid clockless channel count " << channel_count);
         return;
     }
 
@@ -595,21 +605,21 @@ void ChannelDriverPARLIO::beginClocklessTransmission(
     mClocklessDriver->show();
 }
 
-void ChannelDriverPARLIO::beginSpiTransmission() FL_NO_EXCEPT {
+void ChannelDriverPARLIO::beginSpiTransmission() FL_NOEXCEPT {
     if (mPendingSpi.empty()) return;
 
     mCurrentSpiChannelIndex = 0;
     beginSingleSpiChannel(mPendingSpi[0]);
 }
 
-void ChannelDriverPARLIO::beginSingleSpiChannel(const ChannelDataPtr& channelData) FL_NO_EXCEPT {
+void ChannelDriverPARLIO::beginSingleSpiChannel(const ChannelDataPtr& channelData) FL_NOEXCEPT {
     if (!channelData || !channelData->isSpi()) return;
 
     // Extract SPI config from channel data
     const ChipsetVariant& chipset = channelData->getChipset();
     const SpiChipsetConfig* spiConfig = chipset.ptr<SpiChipsetConfig>();
     if (!spiConfig) {
-        FL_WARN_F("PARLIO_SPI: Channel is not SPI type");
+        FL_WARN("PARLIO_SPI: Channel is not SPI type");
         return;
     }
 
@@ -627,7 +637,7 @@ void ChannelDriverPARLIO::beginSingleSpiChannel(const ChannelDataPtr& channelDat
     // Initialize engine in SPI mode
     auto& driver = detail::ParlioEngine::getInstance();
     if (!driver.initializeSpi(pins, spiConfig->timing.clock_hz, dataSize)) {
-        FL_WARN_F("PARLIO_SPI: HAL initialization failed");
+        FL_WARN("PARLIO_SPI: HAL initialization failed");
         return;
     }
     mSpiInitialized = true;
@@ -638,11 +648,11 @@ void ChannelDriverPARLIO::beginSingleSpiChannel(const ChannelDataPtr& channelDat
 
     // Transmit (single lane, laneStride = dataSize)
     if (!driver.beginTransmission(mSpiScratchBuffer.data(), dataSize, 1, dataSize)) {
-        FL_WARN_F("PARLIO_SPI: Transmission failed");
+        FL_WARN("PARLIO_SPI: Transmission failed");
     }
 }
 
-ParlioDebugMetrics getParlioDebugMetrics() FL_NO_EXCEPT {
+ParlioDebugMetrics getParlioDebugMetrics() FL_NOEXCEPT {
     const detail::ParlioDebugMetrics engine_metrics =
         detail::ParlioEngine::getInstance().getDebugMetrics();
     ParlioDebugMetrics metrics = {};

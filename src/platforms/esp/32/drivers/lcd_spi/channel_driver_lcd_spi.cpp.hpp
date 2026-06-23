@@ -1,4 +1,4 @@
-﻿// IWYU pragma: private
+// IWYU pragma: private
 
 /// @file channel_driver_lcd_spi.cpp
 /// @brief LCD_CAM SPI channel driver implementation
@@ -50,7 +50,7 @@ namespace fl {
 //=============================================================================
 
 ChannelDriverLcdSpi::ChannelDriverLcdSpi(
-    fl::shared_ptr<detail::ILcdSpiPeripheral> peripheral) FL_NO_EXCEPT
+    fl::shared_ptr<detail::ILcdSpiPeripheral> peripheral) FL_NOEXCEPT
     : mPeripheral(fl::move(peripheral)), mInitialized(false),
       mEnqueuedChannels(), mTransmittingChannels(),
       mRingBuffers{nullptr, nullptr, nullptr}, mRingCapacity(0),
@@ -59,7 +59,7 @@ ChannelDriverLcdSpi::ChannelDriverLcdSpi(
 }
 
 ChannelDriverLcdSpi::~ChannelDriverLcdSpi() {
-    // Block until DMA completes â€” ring buffers are DMA sources,
+    // Block until DMA completes — ring buffers are DMA sources,
     // so freeing them while DMA is active would be a use-after-free.
     if (mBusy && mPeripheral) {
         bool done = mPeripheral->waitTransmitDone(2000);
@@ -69,7 +69,7 @@ ChannelDriverLcdSpi::~ChannelDriverLcdSpi() {
             // hardware or a mock with no auto-completion. Free anyway:
             // LeakSanitizer flags the alternative, and a 2 s stall already
             // indicates the DMA is lost.
-            FL_WARN_F("ChannelDriverLcdSpi: DMA wait timed out â€” "
+            FL_WARN("ChannelDriverLcdSpi: DMA wait timed out — "
                     "freeing ring buffers anyway");
         }
     }
@@ -80,7 +80,7 @@ ChannelDriverLcdSpi::~ChannelDriverLcdSpi() {
 // Ring Buffer Management
 //=============================================================================
 
-void ChannelDriverLcdSpi::freeRingBuffers() FL_NO_EXCEPT {
+void ChannelDriverLcdSpi::freeRingBuffers() FL_NOEXCEPT {
     for (size_t i = 0; i < kRingBufferCount; i++) {
         if (mPeripheral && mRingBuffers[i] != nullptr) {
             mPeripheral->freeBuffer(mRingBuffers[i]);
@@ -91,7 +91,7 @@ void ChannelDriverLcdSpi::freeRingBuffers() FL_NO_EXCEPT {
 }
 
 bool ChannelDriverLcdSpi::allocateRingBuffers(
-    size_t slotCapacityBytes) FL_NO_EXCEPT {
+    size_t slotCapacityBytes) FL_NOEXCEPT {
     if (mRingCapacity >= slotCapacityBytes && mRingBuffers[0] != nullptr) {
         return true; // already big enough
     }
@@ -101,7 +101,8 @@ bool ChannelDriverLcdSpi::allocateRingBuffers(
     for (size_t i = 0; i < kRingBufferCount; i++) {
         mRingBuffers[i] = mPeripheral->allocateBuffer(slotCapacityBytes);
         if (mRingBuffers[i] == nullptr) {
-            FL_WARN_F("ChannelDriverLcdSpi: ring buffer alloc failed slot %s", i);
+            FL_WARN("ChannelDriverLcdSpi: ring buffer alloc failed slot "
+                    << i);
             freeRingBuffers();
             return false;
         }
@@ -115,18 +116,18 @@ bool ChannelDriverLcdSpi::allocateRingBuffers(
 //=============================================================================
 
 bool ChannelDriverLcdSpi::canHandle(
-    const ChannelDataPtr &data) const FL_NO_EXCEPT {
+    const ChannelDataPtr &data) const FL_NOEXCEPT {
     if (!data) {
         return false;
     }
     return data->isSpi();
 }
 
-void ChannelDriverLcdSpi::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
+void ChannelDriverLcdSpi::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
     mEnqueuedChannels.push_back(fl::move(channelData));
 }
 
-void ChannelDriverLcdSpi::show() FL_NO_EXCEPT {
+void ChannelDriverLcdSpi::show() FL_NOEXCEPT {
     // Release channels from any completed previous transmission
     poll();
 
@@ -142,7 +143,7 @@ void ChannelDriverLcdSpi::show() FL_NO_EXCEPT {
         fl::task::run(250, fl::task::ExecFlags::SYSTEM);
     }
     if (mBusy) {
-        FL_WARN_F("ChannelDriverLcdSpi: DMA hung â€” forcing release");
+        FL_WARN("ChannelDriverLcdSpi: DMA hung — forcing release");
         mBusy = false;
         for (auto &channel : mTransmittingChannels) {
             channel->setInUse(false);
@@ -160,7 +161,7 @@ void ChannelDriverLcdSpi::show() FL_NO_EXCEPT {
     }
 }
 
-IChannelDriver::DriverState ChannelDriverLcdSpi::poll() FL_NO_EXCEPT {
+IChannelDriver::DriverState ChannelDriverLcdSpi::poll() FL_NOEXCEPT {
     if (mTransmittingChannels.empty()) {
         return DriverState::READY;
     }
@@ -183,12 +184,12 @@ IChannelDriver::DriverState ChannelDriverLcdSpi::poll() FL_NO_EXCEPT {
 }
 
 //=============================================================================
-// Transposition (byte â†’ 16-bit word, per-chunk)
+// Transposition (byte → 16-bit word, per-chunk)
 //=============================================================================
 
 void ChannelDriverLcdSpi::transposeToWords(
     fl::span<const ChannelDataPtr> channels, u16 *output,
-    size_t startByte, size_t byteCount) FL_NO_EXCEPT {
+    size_t startByte, size_t byteCount) FL_NOEXCEPT {
     // For each byte position in [startByte, startByte+byteCount),
     // create 8 u16 words (one per bit, MSB first).
     // Each bit N of the output word = corresponding bit of byte from lane N.
@@ -218,11 +219,11 @@ void ChannelDriverLcdSpi::transposeToWords(
 }
 
 //=============================================================================
-// ISR Callback â€” processes chunk completion
+// ISR Callback — processes chunk completion
 //=============================================================================
 
 bool ChannelDriverLcdSpi::isrChunkDone(void *panel_io, const void *edata,
-                                       void *user_ctx) FL_NO_EXCEPT {
+                                       void *user_ctx) FL_NOEXCEPT {
     (void)panel_io;
     (void)edata;
 
@@ -240,7 +241,7 @@ bool ChannelDriverLcdSpi::isrChunkDone(void *panel_io, const void *edata,
     size_t writeIdx = ctx.mRingWriteIdx;
     u16 *buf = self->mRingBuffers[writeIdx];
 
-    // Calculate bytes for this chunk (may pad beyond source data â€” that's OK,
+    // Calculate bytes for this chunk (may pad beyond source data — that's OK,
     // transposeToWords outputs zeros for out-of-range bytes)
     size_t bytesRemaining = ctx.mTotalBytes - ctx.mNextByteOffset;
     size_t chunkBytes = ctx.mChunkInputBytes;
@@ -252,7 +253,7 @@ bool ChannelDriverLcdSpi::isrChunkDone(void *panel_io, const void *edata,
     self->transposeToWords(self->mTransmittingChannels, buf,
                            ctx.mNextByteOffset, chunkBytes);
 
-    // Explicit read-modify-write â€” `mNextByteOffset` is volatile (ISR/main
+    // Explicit read-modify-write — `mNextByteOffset` is volatile (ISR/main
     // memory model, see channel_driver_lcd_spi.h:117-130). C++20 deprecates
     // compound assignment on volatile (-Wvolatile); C++23 makes it a hard
     // error. #2723
@@ -262,21 +263,21 @@ bool ChannelDriverLcdSpi::isrChunkDone(void *panel_io, const void *edata,
     // Submit this chunk for DMA
     size_t dmaBytes = chunkBytes * 8 * sizeof(u16);
     if (!self->mPeripheral->transmit(buf, dmaBytes)) {
-        // Transmit failed â€” abort stream
+        // Transmit failed — abort stream
         ctx.mStreamComplete = true;
         self->mBusy = false;
-        FL_WARN_F("ChannelDriverLcdSpi: ISR transmit failed");
+        FL_WARN("ChannelDriverLcdSpi: ISR transmit failed");
     }
 
     return false;
 }
 
 //=============================================================================
-// Begin Transmission â€” sets up chunked streaming
+// Begin Transmission — sets up chunked streaming
 //=============================================================================
 
 bool ChannelDriverLcdSpi::beginTransmission(
-    fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT {
+    fl::span<const ChannelDataPtr> channels) FL_NOEXCEPT {
     if (channels.empty() || !mPeripheral) {
         return false;
     }
@@ -304,7 +305,7 @@ bool ChannelDriverLcdSpi::beginTransmission(
         chunkInputBytes = maxSize;
     }
 
-    // Each source byte â†’ 8 u16 words â†’ 16 DMA bytes
+    // Each source byte → 8 u16 words → 16 DMA bytes
     size_t slotCapacityBytes = chunkInputBytes * 8 * sizeof(u16);
 
     // Only reinitialize the peripheral when hardware config changes
@@ -345,7 +346,7 @@ bool ChannelDriverLcdSpi::beginTransmission(
         }
 
         if (!mPeripheral->initialize(config)) {
-            FL_WARN_F("ChannelDriverLcdSpi: Failed to initialize peripheral");
+            FL_WARN("ChannelDriverLcdSpi: Failed to initialize peripheral");
             return false;
         }
 
@@ -361,7 +362,7 @@ bool ChannelDriverLcdSpi::beginTransmission(
     // Register the ISR callback for chunked streaming
     if (!mPeripheral->registerTransmitCallback(
             reinterpret_cast<void *>(&isrChunkDone), this)) { // ok reinterpret cast
-        FL_WARN_F("ChannelDriverLcdSpi: registerTransmitCallback failed");
+        FL_WARN("ChannelDriverLcdSpi: registerTransmitCallback failed");
         return false;
     }
 
@@ -387,7 +388,7 @@ bool ChannelDriverLcdSpi::beginTransmission(
     mIsrCtx.mNextByteOffset = firstChunkBytes;
     mIsrCtx.mRingWriteIdx = 1; // next write goes to slot 1
 
-    // Submit first chunk â€” ISR callback handles the rest
+    // Submit first chunk — ISR callback handles the rest
     mBusy = true;
     size_t firstDmaBytes = firstChunkBytes * 8 * sizeof(u16);
     if (!mPeripheral->transmit(mRingBuffers[0], firstDmaBytes)) {
@@ -395,7 +396,7 @@ bool ChannelDriverLcdSpi::beginTransmission(
         for (const auto &channel : channels) {
             channel->setInUse(false);
         }
-        FL_WARN_F("ChannelDriverLcdSpi: Initial transmit failed");
+        FL_WARN("ChannelDriverLcdSpi: Initial transmit failed");
         return false;
     }
 
@@ -406,48 +407,48 @@ bool ChannelDriverLcdSpi::beginTransmission(
 // Factory
 //=============================================================================
 
-fl::shared_ptr<IChannelDriver> createLcdSpiEngine() FL_NO_EXCEPT {
+fl::shared_ptr<IChannelDriver> createLcdSpiEngine() FL_NOEXCEPT {
 #if FL_LCD_SPI_HAS_ESP_PERIPHERAL
     class EspWrapper : public detail::ILcdSpiPeripheral {
       public:
-        bool initialize(const detail::LcdSpiConfig &c) FL_NO_EXCEPT override {
+        bool initialize(const detail::LcdSpiConfig &c) FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().initialize(c);
         }
-        void deinitialize() FL_NO_EXCEPT override {
+        void deinitialize() FL_NOEXCEPT override {
             detail::LcdSpiPeripheralEsp::instance().deinitialize();
         }
-        bool isInitialized() const FL_NO_EXCEPT override {
+        bool isInitialized() const FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().isInitialized();
         }
-        u16 *allocateBuffer(size_t s) FL_NO_EXCEPT override {
+        u16 *allocateBuffer(size_t s) FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().allocateBuffer(s);
         }
-        void freeBuffer(u16 *b) FL_NO_EXCEPT override {
+        void freeBuffer(u16 *b) FL_NOEXCEPT override {
             detail::LcdSpiPeripheralEsp::instance().freeBuffer(b);
         }
-        bool transmit(const u16 *b, size_t s) FL_NO_EXCEPT override {
+        bool transmit(const u16 *b, size_t s) FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().transmit(b, s);
         }
-        bool queueTransmit(const u16 *b, size_t s) FL_NO_EXCEPT override {
+        bool queueTransmit(const u16 *b, size_t s) FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().queueTransmit(b, s);
         }
-        bool waitTransmitDone(u32 t) FL_NO_EXCEPT override {
+        bool waitTransmitDone(u32 t) FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().waitTransmitDone(t);
         }
-        bool isBusy() const FL_NO_EXCEPT override {
+        bool isBusy() const FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().isBusy();
         }
-        bool registerTransmitCallback(void *cb, void *ctx) FL_NO_EXCEPT override {
+        bool registerTransmitCallback(void *cb, void *ctx) FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance()
                 .registerTransmitCallback(cb, ctx);
         }
-        const detail::LcdSpiConfig &getConfig() const FL_NO_EXCEPT override {
+        const detail::LcdSpiConfig &getConfig() const FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().getConfig();
         }
-        u64 getMicroseconds() FL_NO_EXCEPT override {
+        u64 getMicroseconds() FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().getMicroseconds();
         }
-        void delay(u32 ms) FL_NO_EXCEPT override {
+        void delay(u32 ms) FL_NOEXCEPT override {
             detail::LcdSpiPeripheralEsp::instance().delay(ms);
         }
     };

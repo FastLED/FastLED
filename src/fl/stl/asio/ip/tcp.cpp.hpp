@@ -154,14 +154,14 @@ int plat_getsockname(int fd, struct sockaddr *addr, socklen_t *addrlen) {
 
 socket::socket() : mFd(-1), mNonBlocking(false) {}
 
-socket::~socket() FL_NO_EXCEPT { close_fd(); }
+socket::~socket() FL_NOEXCEPT { close_fd(); }
 
 socket::socket(socket &&other) : mFd(other.mFd), mNonBlocking(other.mNonBlocking) {
     other.mFd = -1;
     other.mNonBlocking = false;
 }
 
-socket &socket::operator=(socket &&other) FL_NO_EXCEPT {
+socket &socket::operator=(socket &&other) FL_NOEXCEPT {
     if (this != &other) {
         close_fd();
         mFd = other.mFd;
@@ -355,7 +355,7 @@ void socket::close_fd() {
 
 acceptor::acceptor() : mFd(-1), mPort(0) {}
 
-acceptor::~acceptor() FL_NO_EXCEPT { close(); }
+acceptor::~acceptor() FL_NOEXCEPT { close(); }
 
 error_code acceptor::open(u16 port) {
     close();

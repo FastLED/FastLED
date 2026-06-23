@@ -52,7 +52,7 @@ struct ParallelDevice::Impl {
         , backend_width(0) {
     }
 
-    ~Impl() FL_NO_EXCEPT {
+    ~Impl() FL_NOEXCEPT {
         if (initialized && backend) {
             releaseBackend();
         }
@@ -139,13 +139,14 @@ ParallelDevice::ParallelDevice(const Config& config)
     // Validate configuration
     size_t num_pins = config.gpio_pins.size();
     if (num_pins == 0 || num_pins > 32) {
-        FL_WARN_F("ParallelDevice: Invalid number of GPIO pins (%s), must be 1-32", num_pins);
+        FL_WARN("ParallelDevice: Invalid number of GPIO pins (" << num_pins
+                << "), must be 1-32");
     }
 
-    FL_DBG_F("ParallelDevice: Created with %s GPIO pins", num_pins);
+    FL_DBG("ParallelDevice: Created with " << num_pins << " GPIO pins");
 }
 
-ParallelDevice::~ParallelDevice() FL_NO_EXCEPT {
+ParallelDevice::~ParallelDevice() FL_NOEXCEPT {
     if (pImpl && pImpl->initialized) {
         end();
     }
@@ -194,7 +195,7 @@ fl::optional<fl::task::Error> ParallelDevice::begin() {
 
     if (use_isr) {
         // ISR-based backend
-        FL_DBG_F("ParallelDevice: Initializing ISR mode (width=%s)", (int)backend_width);
+        FL_DBG("ParallelDevice: Initializing ISR mode (width=" << (int)backend_width << ")");
 
         // Note: These need to be heap-allocated for type-erasure
         // For now, return error indicating ISR mode not yet implemented
@@ -202,7 +203,7 @@ fl::optional<fl::task::Error> ParallelDevice::begin() {
 
     } else {
         // Bit-bang (blocking) backend
-        FL_DBG_F("ParallelDevice: Initializing bit-bang mode (width=%s)", (int)backend_width);
+        FL_DBG("ParallelDevice: Initializing bit-bang mode (width=" << (int)backend_width << ")");
 
         // Note: These need to be heap-allocated for type-erasure
         // For now, return error indicating bit-bang mode not yet implemented
@@ -224,7 +225,7 @@ void ParallelDevice::end() {
     // Release backend
     pImpl->releaseBackend();
 
-    FL_DBG_F("ParallelDevice: Shutdown complete");
+    FL_DBG("ParallelDevice: Shutdown complete");
 }
 
 bool ParallelDevice::isReady() const {
@@ -272,13 +273,13 @@ bool ParallelDevice::isBusy() const {
 
 void ParallelDevice::configureLUT(const u32* set_masks, const u32* clear_masks) {
     if (!set_masks || !clear_masks) {
-        FL_WARN_F("ParallelDevice: Invalid LUT pointers");
+        FL_WARN("ParallelDevice: Invalid LUT pointers");
         return;
     }
 
     // LUT configuration depends on backend type
     // For now, this is a no-op
-    FL_DBG_F("ParallelDevice: LUT configuration not yet implemented");
+    FL_DBG("ParallelDevice: LUT configuration not yet implemented");
 }
 
 const ParallelDevice::Config& ParallelDevice::getConfig() const {

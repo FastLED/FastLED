@@ -49,7 +49,7 @@ class Fx {
     u16 getNumLeds() const { return mNumLeds; }
 
   protected:
-    virtual ~Fx() FL_NO_EXCEPT {} // Protected destructor
+    virtual ~Fx() FL_NOEXCEPT {} // Protected destructor
     u16 mNumLeds;
 };
 

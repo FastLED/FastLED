@@ -20,7 +20,7 @@ namespace fl {
 // ============================================================================
 
 SpiHw4Stub::SpiHw4Stub(int bus_id, const char* name)
- FL_NO_EXCEPT : mBusId(bus_id)
+ FL_NOEXCEPT : mBusId(bus_id)
     , mName(name)
     , mInitialized(false)
     , mBusy(false)
@@ -30,7 +30,7 @@ SpiHw4Stub::SpiHw4Stub(int bus_id, const char* name)
     , mBufferAcquired(false) {
 }
 
-bool SpiHw4Stub::begin(const SpiHw4::Config& config) FL_NO_EXCEPT {
+bool SpiHw4Stub::begin(const SpiHw4::Config& config) FL_NOEXCEPT {
     if (mInitialized) {
         return true;  // Already initialized
     }
@@ -45,7 +45,7 @@ bool SpiHw4Stub::begin(const SpiHw4::Config& config) FL_NO_EXCEPT {
     return true;
 }
 
-void SpiHw4Stub::end() FL_NO_EXCEPT {
+void SpiHw4Stub::end() FL_NOEXCEPT {
     mInitialized = false;
     mBusy = false;
     mLastBuffer.clear();
@@ -55,7 +55,7 @@ void SpiHw4Stub::end() FL_NO_EXCEPT {
     mBufferAcquired = false;
 }
 
-DMABuffer SpiHw4Stub::acquireDMABuffer(size_t bytes_per_lane) FL_NO_EXCEPT {
+DMABuffer SpiHw4Stub::acquireDMABuffer(size_t bytes_per_lane) FL_NOEXCEPT {
     if (!mInitialized) {
         return DMABuffer(SPIError::NOT_INITIALIZED);
     }
@@ -82,7 +82,7 @@ DMABuffer SpiHw4Stub::acquireDMABuffer(size_t bytes_per_lane) FL_NO_EXCEPT {
     return mCurrentBuffer;
 }
 
-bool SpiHw4Stub::transmit(TransmitMode mode) FL_NO_EXCEPT {
+bool SpiHw4Stub::transmit(TransmitMode mode) FL_NOEXCEPT {
     (void)mode;  // Unused in stub
 
     if (!mInitialized || !mBufferAcquired) {
@@ -107,7 +107,7 @@ bool SpiHw4Stub::transmit(TransmitMode mode) FL_NO_EXCEPT {
     return true;
 }
 
-bool SpiHw4Stub::waitComplete(u32 timeout_ms) FL_NO_EXCEPT {
+bool SpiHw4Stub::waitComplete(u32 timeout_ms) FL_NOEXCEPT {
     (void)timeout_ms;  // Unused in mock
     mBusy = false;
 
@@ -117,45 +117,45 @@ bool SpiHw4Stub::waitComplete(u32 timeout_ms) FL_NO_EXCEPT {
     return true;  // Always succeeds instantly
 }
 
-bool SpiHw4Stub::isBusy() const FL_NO_EXCEPT {
+bool SpiHw4Stub::isBusy() const FL_NOEXCEPT {
     return mBusy;
 }
 
-bool SpiHw4Stub::isInitialized() const FL_NO_EXCEPT {
+bool SpiHw4Stub::isInitialized() const FL_NOEXCEPT {
     return mInitialized;
 }
 
-int SpiHw4Stub::getBusId() const FL_NO_EXCEPT {
+int SpiHw4Stub::getBusId() const FL_NOEXCEPT {
     return mBusId;
 }
 
-const char* SpiHw4Stub::getName() const FL_NO_EXCEPT {
+const char* SpiHw4Stub::getName() const FL_NOEXCEPT {
     return mName;
 }
 
-const fl::vector<u8>& SpiHw4Stub::getLastTransmission() const FL_NO_EXCEPT {
+const fl::vector<u8>& SpiHw4Stub::getLastTransmission() const FL_NOEXCEPT {
     return mLastBuffer;
 }
 
-u32 SpiHw4Stub::getTransmissionCount() const FL_NO_EXCEPT {
+u32 SpiHw4Stub::getTransmissionCount() const FL_NOEXCEPT {
     return mTransmitCount;
 }
 
-u32 SpiHw4Stub::getClockSpeed() const FL_NO_EXCEPT {
+u32 SpiHw4Stub::getClockSpeed() const FL_NOEXCEPT {
     return mClockSpeed;
 }
 
-bool SpiHw4Stub::isTransmissionActive() const FL_NO_EXCEPT {
+bool SpiHw4Stub::isTransmissionActive() const FL_NOEXCEPT {
     return mBusy;
 }
 
-void SpiHw4Stub::reset() FL_NO_EXCEPT {
+void SpiHw4Stub::reset() FL_NOEXCEPT {
     mLastBuffer.clear();
     mTransmitCount = 0;
     mBusy = false;
 }
 
-fl::vector<fl::vector<u8>> SpiHw4Stub::extractLanes(u8 num_lanes, size_t bytes_per_lane) const FL_NO_EXCEPT {
+fl::vector<fl::vector<u8>> SpiHw4Stub::extractLanes(u8 num_lanes, size_t bytes_per_lane) const FL_NOEXCEPT {
     fl::vector<fl::vector<u8>> lanes(num_lanes);
 
     // Pre-allocate per-lane buffers
@@ -194,12 +194,12 @@ fl::vector<fl::vector<u8>> SpiHw4Stub::extractLanes(u8 num_lanes, size_t bytes_p
 
 namespace {
 // Singleton getters for mock controller instances (Meyer's Singleton pattern)
-fl::shared_ptr<SpiHw4Stub>& getController2_Spi4() FL_NO_EXCEPT {
+fl::shared_ptr<SpiHw4Stub>& getController2_Spi4() FL_NOEXCEPT {
     static fl::shared_ptr<SpiHw4Stub> instance = fl::make_shared<SpiHw4Stub>(2, "MockQuad2");
     return instance;
 }
 
-fl::shared_ptr<SpiHw4Stub>& getController3_Spi4() FL_NO_EXCEPT {
+fl::shared_ptr<SpiHw4Stub>& getController3_Spi4() FL_NOEXCEPT {
     static fl::shared_ptr<SpiHw4Stub> instance = fl::make_shared<SpiHw4Stub>(3, "MockQuad3");
     return instance;
 }
@@ -215,11 +215,11 @@ namespace platforms {
 ///
 /// Called lazily on first access to SpiHw4::getAll().
 /// Registers mock SpiHw4 controller instances for testing.
-void initSpiHw4Instances() FL_NO_EXCEPT {
-    FL_WARN_F("Registering SpiHw4 stub instances...");
+void initSpiHw4Instances() FL_NOEXCEPT {
+    FL_WARN("Registering SpiHw4 stub instances...");
     SpiHw4::registerInstance(getController2_Spi4());
     SpiHw4::registerInstance(getController3_Spi4());
-    FL_WARN_F("SpiHw4 stub instances registered!");
+    FL_WARN("SpiHw4 stub instances registered!");
 }
 
 }  // namespace platforms

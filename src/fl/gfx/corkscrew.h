@@ -65,15 +65,15 @@ struct Gap {
     int num_leds = 0;   // Number of LEDs after which gap is activated, 0 = no gap
     float gap = 0.0f;   // Gap value from 0 to 1, represents percentage of width unit to add
     
-    Gap() FL_NO_EXCEPT = default;
+    Gap() FL_NOEXCEPT = default;
     Gap(float g) : num_leds(0), gap(g) {} // Backwards compatibility constructor
     Gap(int n, float g) : num_leds(n), gap(g) {} // New constructor with num_leds
     
     // Rule of 5 for POD data
-    Gap(const Gap &other) FL_NO_EXCEPT = default;
+    Gap(const Gap &other) FL_NOEXCEPT = default;
     Gap &operator=(const Gap &other) = default;
-    Gap(Gap &&other) FL_NO_EXCEPT = default;
-    Gap &operator=(Gap &&other) FL_NO_EXCEPT = default;
+    Gap(Gap &&other) FL_NOEXCEPT = default;
+    Gap &operator=(Gap &&other) FL_NOEXCEPT = default;
 };
 
 // Maps a Corkscrew defined by the input to a cylindrical mapping for rendering
@@ -145,8 +145,8 @@ class Corkscrew {
     // Constructor with external pixel buffer - these pixels will be drawn to directly
     Corkscrew(float totalTurns, fl::span<CRGB> dstPixels, bool invert = false, const Gap& gapParams = Gap());
     
-    Corkscrew(const Corkscrew &) FL_NO_EXCEPT = default;
-    Corkscrew(Corkscrew &&) FL_NO_EXCEPT = default;
+    Corkscrew(const Corkscrew &) FL_NOEXCEPT = default;
+    Corkscrew(Corkscrew &&) FL_NOEXCEPT = default;
 
     // Caching control
     void setCachingEnabled(bool enabled);

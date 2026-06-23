@@ -32,7 +32,7 @@ constexpr int PRIORITY_SPI_HW_2 = 6;   // Dual-SPI (only mode available on SAMD2
 static void addSpiHw2IfPossible() {
     // Note: SPIDualSAMD21 class is defined in spi_hw_2_samd21.cpp.hpp
     // which is included by _build.hpp before this file
-    FL_DBG_F("SAMD21: Registering SpiHw2 instances");
+    FL_DBG("SAMD21: Registering SpiHw2 instances");
 
     // SAMD21 typically has 2-3 SERCOM peripherals available for SPI
     static auto controller0 = fl::make_shared<SPIDualSAMD21>(0, "SPI0");
@@ -41,7 +41,7 @@ static void addSpiHw2IfPossible() {
     SpiHw2::registerInstance(controller0);
     SpiHw2::registerInstance(controller1);
 
-    FL_DBG_F("SAMD21: SpiHw2 instances registered");
+    FL_DBG("SAMD21: SpiHw2 instances registered");
 }
 
 }  // namespace detail
@@ -56,11 +56,11 @@ namespace platforms {
 /// Platform availability:
 /// - SAMD21: SpiHw2 only (dual-lane via SERCOM)
 void initSpiHardware() {
-    FL_DBG_F("SAMD21: Initializing SPI hardware");
+    FL_DBG("SAMD21: Initializing SPI hardware");
 
     detail::addSpiHw2IfPossible();  // Priority 6
 
-    FL_DBG_F("SAMD21: SPI hardware initialized");
+    FL_DBG("SAMD21: SPI hardware initialized");
 }
 
 }  // namespace platforms

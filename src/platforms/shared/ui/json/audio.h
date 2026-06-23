@@ -27,33 +27,33 @@ enum {
 
 class JsonAudioImpl {
   public:
-    JsonAudioImpl(const fl::string &name) FL_NO_EXCEPT;
-    JsonAudioImpl(const fl::string &name, const fl::url& url) FL_NO_EXCEPT;
-    JsonAudioImpl(const fl::string &name, const fl::audio::Config& config) FL_NO_EXCEPT;
+    JsonAudioImpl(const fl::string &name) FL_NOEXCEPT;
+    JsonAudioImpl(const fl::string &name, const fl::url& url) FL_NOEXCEPT;
+    JsonAudioImpl(const fl::string &name, const fl::audio::Config& config) FL_NOEXCEPT;
     ~JsonAudioImpl();
-    JsonAudioImpl &Group(const fl::string &name) FL_NO_EXCEPT;
+    JsonAudioImpl &Group(const fl::string &name) FL_NOEXCEPT;
 
-    const fl::string &name() const FL_NO_EXCEPT;
-    audio::Sample next() FL_NO_EXCEPT;
-    bool hasNext() FL_NO_EXCEPT;
-    fl::string groupName() const FL_NO_EXCEPT;
+    const fl::string &name() const FL_NOEXCEPT;
+    audio::Sample next() FL_NOEXCEPT;
+    bool hasNext() FL_NOEXCEPT;
+    fl::string groupName() const FL_NOEXCEPT;
     
     // Method to allow parent UIElement class to set the group
-    void setGroup(const fl::string &groupName) FL_NO_EXCEPT;
+    void setGroup(const fl::string &groupName) FL_NOEXCEPT;
 
     // Stub: no underlying audio input for JSON UI
-    fl::shared_ptr<audio::IInput> audioInput() FL_NO_EXCEPT { return nullptr; }
+    fl::shared_ptr<audio::IInput> audioInput() FL_NOEXCEPT { return nullptr; }
 
-    int id() const FL_NO_EXCEPT {
+    int id() const FL_NOEXCEPT {
       return mInternal->id();
     }
 
   private:
     fl::shared_ptr<JsonUiAudioInternal> mInternal;
     struct Updater : fl::EngineEvents::Listener {
-        void init(JsonAudioImpl *owner) FL_NO_EXCEPT;
+        void init(JsonAudioImpl *owner) FL_NOEXCEPT;
         ~Updater();
-        void onPlatformPreLoop2() FL_NO_EXCEPT override;
+        void onPlatformPreLoop2() FL_NOEXCEPT override;
         JsonAudioImpl *mOwner = nullptr;
     };
     Updater mUpdater;

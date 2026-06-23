@@ -22,7 +22,7 @@ SpectralEqualizer::SpectralEqualizer(const SpectralEqualizerConfig& config) {
     configure(config);
 }
 
-SpectralEqualizer::~SpectralEqualizer() FL_NO_EXCEPT = default;
+SpectralEqualizer::~SpectralEqualizer() FL_NOEXCEPT = default;
 
 void SpectralEqualizer::configure(const SpectralEqualizerConfig& config) {
     mConfig = config;
@@ -55,7 +55,9 @@ void SpectralEqualizer::calculateGains() {
                     mGains[i] = mConfig.customGains[i];
                 }
             } else {
-                FL_WARN_F("SpectralEqualizer: custom gains size mismatch (%s != %s), using flat gains", mConfig.customGains.size(), mConfig.numBands);
+                FL_WARN("SpectralEqualizer: custom gains size mismatch ("
+                        << mConfig.customGains.size() << " != " << mConfig.numBands
+                        << "), using flat gains");
                 calculateFlatGains();
             }
             break;
@@ -86,7 +88,8 @@ void SpectralEqualizer::calculateAWeightingGains() {
         curveSize = 32;
     } else {
         // Unsupported band count - use flat gains
-        FL_WARN_F("SpectralEqualizer: A-weighting not defined for %s bands, using flat gains", mConfig.numBands);
+        FL_WARN("SpectralEqualizer: A-weighting not defined for " << mConfig.numBands
+                << " bands, using flat gains");
         calculateFlatGains();
         return;
     }
@@ -99,7 +102,8 @@ void SpectralEqualizer::calculateAWeightingGains() {
 
 void SpectralEqualizer::setCustomGains(span<const float> gains) {
     if (gains.size() != mConfig.numBands) {
-        FL_WARN_F("SpectralEqualizer: custom gains size mismatch (%s != %s)", gains.size(), mConfig.numBands);
+        FL_WARN("SpectralEqualizer: custom gains size mismatch ("
+                << gains.size() << " != " << mConfig.numBands << ")");
         return;
     }
 
@@ -117,12 +121,14 @@ void SpectralEqualizer::setCustomGains(span<const float> gains) {
 
 void SpectralEqualizer::apply(span<const float> inputBins, span<float> outputBins) const {
     if (inputBins.size() != mConfig.numBands) {
-        FL_WARN_F("SpectralEqualizer: input size mismatch (%s != %s)", inputBins.size(), mConfig.numBands);
+        FL_WARN("SpectralEqualizer: input size mismatch ("
+                << inputBins.size() << " != " << mConfig.numBands << ")");
         return;
     }
 
     if (outputBins.size() < mConfig.numBands) {
-        FL_WARN_F("SpectralEqualizer: output buffer too small (%s < %s)", outputBins.size(), mConfig.numBands);
+        FL_WARN("SpectralEqualizer: output buffer too small ("
+                << outputBins.size() << " < " << mConfig.numBands << ")");
         return;
     }
 

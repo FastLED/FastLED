@@ -44,7 +44,7 @@ private:
         value_type value;
         fl::size unique_id;
 
-        ValueWithId() FL_NO_EXCEPT = default;
+        ValueWithId() FL_NOEXCEPT = default;
         ValueWithId(const value_type& v, fl::size id) : value(v), unique_id(id) {}
         ValueWithId(value_type&& v, fl::size id) : value(fl::move(v)), unique_id(id) {}
 
@@ -83,7 +83,7 @@ private:
         typename TreeType::iterator mTreeIt;
 
     public:
-        IteratorWrapper() FL_NO_EXCEPT = default;
+        IteratorWrapper() FL_NOEXCEPT = default;
         explicit IteratorWrapper(typename TreeType::iterator it) : mTreeIt(it) {}
 
         value_type& operator*() {
@@ -126,7 +126,7 @@ private:
         typename TreeType::const_iterator mTreeIt;
 
     public:
-        ConstIteratorWrapper() FL_NO_EXCEPT = default;
+        ConstIteratorWrapper() FL_NOEXCEPT = default;
         explicit ConstIteratorWrapper(typename TreeType::const_iterator it) : mTreeIt(it) {}
         // Allow implicit conversion from non-const iterator
         ConstIteratorWrapper(const IteratorWrapper& it) : mTreeIt(it.mTreeIt) {}
@@ -171,7 +171,7 @@ private:
         typename TreeType::reverse_iterator mTreeRIt;
 
     public:
-        ReverseIteratorWrapper() FL_NO_EXCEPT = default;
+        ReverseIteratorWrapper() FL_NOEXCEPT = default;
         explicit ReverseIteratorWrapper(typename TreeType::reverse_iterator it) : mTreeRIt(it) {}
 
         value_type& operator*() {
@@ -213,7 +213,7 @@ private:
         typename TreeType::const_reverse_iterator mTreeRIt;
 
     public:
-        ConstReverseIteratorWrapper() FL_NO_EXCEPT = default;
+        ConstReverseIteratorWrapper() FL_NOEXCEPT = default;
         explicit ConstReverseIteratorWrapper(typename TreeType::const_reverse_iterator it) : mTreeRIt(it) {}
         // Allow implicit conversion from non-const reverse iterator
         ConstReverseIteratorWrapper(const ReverseIteratorWrapper& it) : mTreeRIt(it.mTreeRIt) {}
@@ -272,11 +272,11 @@ public:
     MultiMapTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator())
         : mTree(PairCompareWithId(comp), alloc) {}
 
-    MultiMapTree(const MultiMapTree& other) FL_NO_EXCEPT = default;
-    MultiMapTree& operator=(const MultiMapTree& other) FL_NO_EXCEPT = default;
+    MultiMapTree(const MultiMapTree& other) FL_NOEXCEPT = default;
+    MultiMapTree& operator=(const MultiMapTree& other) FL_NOEXCEPT = default;
 
-    MultiMapTree(MultiMapTree&& other) FL_NO_EXCEPT = default;
-    MultiMapTree& operator=(MultiMapTree&& other) FL_NO_EXCEPT = default;
+    MultiMapTree(MultiMapTree&& other) FL_NOEXCEPT = default;
+    MultiMapTree& operator=(MultiMapTree&& other) FL_NOEXCEPT = default;
 
     // Initializer list constructor
     MultiMapTree(fl::initializer_list<value_type> init,
@@ -288,7 +288,7 @@ public:
         }
     }
 
-    ~MultiMapTree() FL_NO_EXCEPT = default;
+    ~MultiMapTree() FL_NOEXCEPT = default;
 
     // Iterators
     iterator begin() { return iterator(mTree.begin()); }

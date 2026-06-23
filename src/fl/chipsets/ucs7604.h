@@ -107,7 +107,7 @@ private:
     fl::vector_psram<u8> mByteBuffer;
 
 public:
-    UCS7604ControllerT() FL_NO_EXCEPT {}
+    UCS7604ControllerT() FL_NOEXCEPT {}
 
     virtual void init() override {
         mDelegate.init();

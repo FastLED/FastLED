@@ -218,11 +218,11 @@ struct plm_t {
 	void *audio_decode_callback_user_data;
 };
 
-int plm_init_decoders(plm_t *self) FL_NO_EXCEPT;
-void plm_handle_end(plm_t *self) FL_NO_EXCEPT;
-void plm_read_video_packet(plm_buffer_t *buffer, void *user) FL_NO_EXCEPT;
-void plm_read_audio_packet(plm_buffer_t *buffer, void *user) FL_NO_EXCEPT;
-void plm_read_packets(plm_t *self, int requested_type) FL_NO_EXCEPT;
+int plm_init_decoders(plm_t *self) FL_NOEXCEPT;
+void plm_handle_end(plm_t *self) FL_NOEXCEPT;
+void plm_read_video_packet(plm_buffer_t *buffer, void *user) FL_NOEXCEPT;
+void plm_read_audio_packet(plm_buffer_t *buffer, void *user) FL_NOEXCEPT;
+void plm_read_packets(plm_t *self, int requested_type) FL_NOEXCEPT;
 
 #ifndef PLM_NO_STDIO
 
@@ -241,12 +241,12 @@ plm_t *plm_create_with_file(FILE *fh, int close_when_done) {
 
 #endif // PLM_NO_STDIO
 
-plm_t *plm_create_with_memory(uint8_t *bytes, size_t length, int free_when_done) FL_NO_EXCEPT {
+plm_t *plm_create_with_memory(uint8_t *bytes, size_t length, int free_when_done) FL_NOEXCEPT {
 	plm_buffer_t *buffer = plm_buffer_create_with_memory(bytes, length, free_when_done);
 	return plm_create_with_buffer(buffer, TRUE);
 }
 
-plm_t *plm_create_with_buffer(plm_buffer_t *buffer, int destroy_when_done) FL_NO_EXCEPT {
+plm_t *plm_create_with_buffer(plm_buffer_t *buffer, int destroy_when_done) FL_NOEXCEPT {
 	plm_t *self = (plm_t *)PLM_MALLOC(sizeof(plm_t));
 	fl::memset(self, 0, sizeof(plm_t));
 
@@ -258,7 +258,7 @@ plm_t *plm_create_with_buffer(plm_buffer_t *buffer, int destroy_when_done) FL_NO
 	return self;
 }
 
-int plm_init_decoders(plm_t *self) FL_NO_EXCEPT {
+int plm_init_decoders(plm_t *self) FL_NOEXCEPT {
 	if (self->has_decoders) {
 		return TRUE;
 	}
@@ -293,7 +293,7 @@ int plm_init_decoders(plm_t *self) FL_NO_EXCEPT {
 	return TRUE;
 }
 
-void plm_destroy(plm_t *self) FL_NO_EXCEPT {
+void plm_destroy(plm_t *self) FL_NOEXCEPT {
 	if (self->video_decoder) {
 		plm_video_destroy(self->video_decoder);
 	}
@@ -305,11 +305,11 @@ void plm_destroy(plm_t *self) FL_NO_EXCEPT {
 	PLM_FREE(self);
 }
 
-int plm_get_audio_enabled(plm_t *self) FL_NO_EXCEPT {
+int plm_get_audio_enabled(plm_t *self) FL_NOEXCEPT {
 	return self->audio_enabled;
 }
 
-int plm_has_headers(plm_t *self) FL_NO_EXCEPT {
+int plm_has_headers(plm_t *self) FL_NOEXCEPT {
 	if (!plm_demux_has_headers(self->demux)) {
 		return FALSE;
 	}
@@ -328,7 +328,7 @@ int plm_has_headers(plm_t *self) FL_NO_EXCEPT {
 	return TRUE;
 }
 
-int plm_probe(plm_t *self, size_t probesize) FL_NO_EXCEPT {
+int plm_probe(plm_t *self, size_t probesize) FL_NOEXCEPT {
 	int found_streams = plm_demux_probe(self->demux, probesize);
 	if (!found_streams) {
 		return FALSE;
@@ -341,7 +341,7 @@ int plm_probe(plm_t *self, size_t probesize) FL_NO_EXCEPT {
 	return plm_init_decoders(self);
 }
 
-void plm_set_audio_enabled(plm_t *self, int enabled) FL_NO_EXCEPT {
+void plm_set_audio_enabled(plm_t *self, int enabled) FL_NOEXCEPT {
 	self->audio_enabled = enabled;
 
 	if (!enabled) {
@@ -354,7 +354,7 @@ void plm_set_audio_enabled(plm_t *self, int enabled) FL_NO_EXCEPT {
 		: 0;
 }
 
-void plm_set_audio_stream(plm_t *self, int stream_index) FL_NO_EXCEPT {
+void plm_set_audio_stream(plm_t *self, int stream_index) FL_NOEXCEPT {
 	if (stream_index < 0 || stream_index > 3) {
 		return;
 	}
@@ -364,11 +364,11 @@ void plm_set_audio_stream(plm_t *self, int stream_index) FL_NO_EXCEPT {
 	plm_set_audio_enabled(self, self->audio_enabled);
 }
 
-int plm_get_video_enabled(plm_t *self) FL_NO_EXCEPT {
+int plm_get_video_enabled(plm_t *self) FL_NOEXCEPT {
 	return self->video_enabled;
 }
 
-void plm_set_video_enabled(plm_t *self, int enabled) FL_NO_EXCEPT {
+void plm_set_video_enabled(plm_t *self, int enabled) FL_NOEXCEPT {
 	self->video_enabled = enabled;
 
 	if (!enabled) {
@@ -381,61 +381,61 @@ void plm_set_video_enabled(plm_t *self, int enabled) FL_NO_EXCEPT {
 		: 0;
 }
 
-int plm_get_num_video_streams(plm_t *self) FL_NO_EXCEPT {
+int plm_get_num_video_streams(plm_t *self) FL_NOEXCEPT {
 	return plm_demux_get_num_video_streams(self->demux);
 }
 
-int plm_get_width(plm_t *self) FL_NO_EXCEPT {
+int plm_get_width(plm_t *self) FL_NOEXCEPT {
 	return (plm_init_decoders(self) && self->video_decoder)
 		? plm_video_get_width(self->video_decoder)
 		: 0;
 }
 
-int plm_get_height(plm_t *self) FL_NO_EXCEPT {
+int plm_get_height(plm_t *self) FL_NOEXCEPT {
 	return (plm_init_decoders(self) && self->video_decoder)
 		? plm_video_get_height(self->video_decoder)
 		: 0;
 }
 
-double plm_get_framerate(plm_t *self) FL_NO_EXCEPT {
+double plm_get_framerate(plm_t *self) FL_NOEXCEPT {
 	return (plm_init_decoders(self) && self->video_decoder)
 		? plm_video_get_framerate(self->video_decoder)
 		: 0;
 }
 
-double plm_get_pixel_aspect_ratio(plm_t *self) FL_NO_EXCEPT {
+double plm_get_pixel_aspect_ratio(plm_t *self) FL_NOEXCEPT {
 	return (plm_init_decoders(self) && self->video_decoder)
 		? plm_video_get_pixel_aspect_ratio(self->video_decoder)
 		: 0;
 }
 
-int plm_get_num_audio_streams(plm_t *self) FL_NO_EXCEPT {
+int plm_get_num_audio_streams(plm_t *self) FL_NOEXCEPT {
 	return plm_demux_get_num_audio_streams(self->demux);
 }
 
-int plm_get_samplerate(plm_t *self) FL_NO_EXCEPT {
+int plm_get_samplerate(plm_t *self) FL_NOEXCEPT {
 	return (plm_init_decoders(self) && self->audio_decoder)
 		? plm_audio_get_samplerate(self->audio_decoder)
 		: 0;
 }
 
-double plm_get_audio_lead_time(plm_t *self) FL_NO_EXCEPT {
+double plm_get_audio_lead_time(plm_t *self) FL_NOEXCEPT {
 	return self->audio_lead_time;
 }
 
-void plm_set_audio_lead_time(plm_t *self, double lead_time) FL_NO_EXCEPT {
+void plm_set_audio_lead_time(plm_t *self, double lead_time) FL_NOEXCEPT {
 	self->audio_lead_time = lead_time;
 }
 
-double plm_get_time(plm_t *self) FL_NO_EXCEPT {
+double plm_get_time(plm_t *self) FL_NOEXCEPT {
 	return self->time;
 }
 
-double plm_get_duration(plm_t *self) FL_NO_EXCEPT {
+double plm_get_duration(plm_t *self) FL_NOEXCEPT {
 	return plm_demux_get_duration(self->demux, PLM_DEMUX_PACKET_VIDEO_1);
 }
 
-void plm_rewind(plm_t *self) FL_NO_EXCEPT {
+void plm_rewind(plm_t *self) FL_NOEXCEPT {
 	if (self->video_decoder) {
 		plm_video_rewind(self->video_decoder);
 	}
@@ -449,29 +449,29 @@ void plm_rewind(plm_t *self) FL_NO_EXCEPT {
 	self->has_ended = FALSE;
 }
 
-int plm_get_loop(plm_t *self) FL_NO_EXCEPT {
+int plm_get_loop(plm_t *self) FL_NOEXCEPT {
 	return self->loop;
 }
 
-void plm_set_loop(plm_t *self, int loop) FL_NO_EXCEPT {
+void plm_set_loop(plm_t *self, int loop) FL_NOEXCEPT {
 	self->loop = loop;
 }
 
-int plm_has_ended(plm_t *self) FL_NO_EXCEPT {
+int plm_has_ended(plm_t *self) FL_NOEXCEPT {
 	return self->has_ended;
 }
 
-void plm_set_video_decode_callback(plm_t *self, plm_video_decode_callback fp, void *user) FL_NO_EXCEPT {
+void plm_set_video_decode_callback(plm_t *self, plm_video_decode_callback fp, void *user) FL_NOEXCEPT {
 	self->video_decode_callback = fp;
 	self->video_decode_callback_user_data = user;
 }
 
-void plm_set_audio_decode_callback(plm_t *self, plm_audio_decode_callback fp, void *user) FL_NO_EXCEPT {
+void plm_set_audio_decode_callback(plm_t *self, plm_audio_decode_callback fp, void *user) FL_NOEXCEPT {
 	self->audio_decode_callback = fp;
 	self->audio_decode_callback_user_data = user;
 }
 
-void plm_decode(plm_t *self, double tick) FL_NO_EXCEPT {
+void plm_decode(plm_t *self, double tick) FL_NOEXCEPT {
 	if (!plm_init_decoders(self)) {
 		return;
 	}
@@ -530,7 +530,7 @@ void plm_decode(plm_t *self, double tick) FL_NO_EXCEPT {
 	self->time += tick;
 }
 
-plm_frame_t *plm_decode_video(plm_t *self) FL_NO_EXCEPT {
+plm_frame_t *plm_decode_video(plm_t *self) FL_NOEXCEPT {
 	if (!plm_init_decoders(self)) {
 		return NULL;
 	}
@@ -549,7 +549,7 @@ plm_frame_t *plm_decode_video(plm_t *self) FL_NO_EXCEPT {
 	return frame;
 }
 
-plm_samples_t *plm_decode_audio(plm_t *self) FL_NO_EXCEPT {
+plm_samples_t *plm_decode_audio(plm_t *self) FL_NOEXCEPT {
 	if (!plm_init_decoders(self)) {
 		return NULL;
 	}
@@ -568,7 +568,7 @@ plm_samples_t *plm_decode_audio(plm_t *self) FL_NO_EXCEPT {
 	return samples;
 }
 
-void plm_handle_end(plm_t *self) FL_NO_EXCEPT {
+void plm_handle_end(plm_t *self) FL_NOEXCEPT {
 	if (self->loop) {
 		plm_rewind(self);
 	}
@@ -577,19 +577,19 @@ void plm_handle_end(plm_t *self) FL_NO_EXCEPT {
 	}
 }
 
-void plm_read_video_packet(plm_buffer_t *buffer, void *user) FL_NO_EXCEPT {
+void plm_read_video_packet(plm_buffer_t *buffer, void *user) FL_NOEXCEPT {
 	PLM_UNUSED(buffer);
 	plm_t *self = (plm_t *)user;
 	plm_read_packets(self, self->video_packet_type);
 }
 
-void plm_read_audio_packet(plm_buffer_t *buffer, void *user) FL_NO_EXCEPT {
+void plm_read_audio_packet(plm_buffer_t *buffer, void *user) FL_NOEXCEPT {
 	PLM_UNUSED(buffer);
 	plm_t *self = (plm_t *)user;
 	plm_read_packets(self, self->audio_packet_type);
 }
 
-void plm_read_packets(plm_t *self, int requested_type) FL_NO_EXCEPT {
+void plm_read_packets(plm_t *self, int requested_type) FL_NOEXCEPT {
 	plm_packet_t *packet;
 	while ((packet = plm_demux_decode(self->demux))) {
 		if (packet->type == self->video_packet_type) {
@@ -614,7 +614,7 @@ void plm_read_packets(plm_t *self, int requested_type) FL_NO_EXCEPT {
 	}
 }
 
-plm_frame_t *plm_seek_frame(plm_t *self, double time, int seek_exact) FL_NO_EXCEPT {
+plm_frame_t *plm_seek_frame(plm_t *self, double time, int seek_exact) FL_NOEXCEPT {
 	if (!plm_init_decoders(self)) {
 		return NULL;
 	}
@@ -669,7 +669,7 @@ plm_frame_t *plm_seek_frame(plm_t *self, double time, int seek_exact) FL_NO_EXCE
 	return frame;
 }
 
-int plm_seek(plm_t *self, double time, int seek_exact) FL_NO_EXCEPT {
+int plm_seek(plm_t *self, double time, int seek_exact) FL_NOEXCEPT {
 	plm_frame_t *frame = plm_seek_frame(self, time, seek_exact);
 	
 	if (!frame) {
@@ -754,9 +754,9 @@ typedef struct {
 } plm_vlc_uint_t;
 
 
-void plm_buffer_seek(plm_buffer_t *self, size_t pos) FL_NO_EXCEPT;
-size_t plm_buffer_tell(plm_buffer_t *self) FL_NO_EXCEPT;
-void plm_buffer_discard_read_bytes(plm_buffer_t *self) FL_NO_EXCEPT;
+void plm_buffer_seek(plm_buffer_t *self, size_t pos) FL_NOEXCEPT;
+size_t plm_buffer_tell(plm_buffer_t *self) FL_NOEXCEPT;
+void plm_buffer_discard_read_bytes(plm_buffer_t *self) FL_NOEXCEPT;
 
 #ifndef PLM_NO_STDIO
 void plm_buffer_load_file_callback(plm_buffer_t *self, void *user);
@@ -764,16 +764,16 @@ void plm_buffer_seek_file_callback(plm_buffer_t *self, size_t offset, void *user
 size_t plm_buffer_tell_file_callback(plm_buffer_t *self, void *user);
 #endif
 
-int plm_buffer_has(plm_buffer_t *self, size_t count) FL_NO_EXCEPT;
-int plm_buffer_read(plm_buffer_t *self, int count) FL_NO_EXCEPT;
-void plm_buffer_align(plm_buffer_t *self) FL_NO_EXCEPT;
-void plm_buffer_skip(plm_buffer_t *self, size_t count) FL_NO_EXCEPT;
-int plm_buffer_skip_bytes(plm_buffer_t *self, uint8_t v) FL_NO_EXCEPT;
-int plm_buffer_next_start_code(plm_buffer_t *self) FL_NO_EXCEPT;
-int plm_buffer_find_start_code(plm_buffer_t *self, int code) FL_NO_EXCEPT;
-int plm_buffer_no_start_code(plm_buffer_t *self) FL_NO_EXCEPT;
-int16_t plm_buffer_read_vlc(plm_buffer_t *self, const plm_vlc_t *table) FL_NO_EXCEPT;
-uint16_t plm_buffer_read_vlc_uint(plm_buffer_t *self, const plm_vlc_uint_t *table) FL_NO_EXCEPT;
+int plm_buffer_has(plm_buffer_t *self, size_t count) FL_NOEXCEPT;
+int plm_buffer_read(plm_buffer_t *self, int count) FL_NOEXCEPT;
+void plm_buffer_align(plm_buffer_t *self) FL_NOEXCEPT;
+void plm_buffer_skip(plm_buffer_t *self, size_t count) FL_NOEXCEPT;
+int plm_buffer_skip_bytes(plm_buffer_t *self, uint8_t v) FL_NOEXCEPT;
+int plm_buffer_next_start_code(plm_buffer_t *self) FL_NOEXCEPT;
+int plm_buffer_find_start_code(plm_buffer_t *self, int code) FL_NOEXCEPT;
+int plm_buffer_no_start_code(plm_buffer_t *self) FL_NOEXCEPT;
+int16_t plm_buffer_read_vlc(plm_buffer_t *self, const plm_vlc_t *table) FL_NOEXCEPT;
+uint16_t plm_buffer_read_vlc_uint(plm_buffer_t *self, const plm_vlc_uint_t *table) FL_NOEXCEPT;
 
 #ifndef PLM_NO_STDIO
 
@@ -810,7 +810,7 @@ plm_buffer_t *plm_buffer_create_with_callbacks(
 	plm_buffer_tell_callback tell_callback,
 	size_t length,
 	void *user
-) FL_NO_EXCEPT {
+) FL_NOEXCEPT {
 	plm_buffer_t *self = plm_buffer_create_with_capacity(PLM_BUFFER_DEFAULT_SIZE);
 	self->mode = PLM_BUFFER_MODE_FILE;
 	self->total_size = length;
@@ -821,7 +821,7 @@ plm_buffer_t *plm_buffer_create_with_callbacks(
 	return self;
 }
 
-plm_buffer_t *plm_buffer_create_with_memory(uint8_t *bytes, size_t length, int free_when_done) FL_NO_EXCEPT {
+plm_buffer_t *plm_buffer_create_with_memory(uint8_t *bytes, size_t length, int free_when_done) FL_NOEXCEPT {
 	plm_buffer_t *self = (plm_buffer_t *)PLM_MALLOC(sizeof(plm_buffer_t));
 	fl::memset(self, 0, sizeof(plm_buffer_t));
 	self->capacity = length;
@@ -834,7 +834,7 @@ plm_buffer_t *plm_buffer_create_with_memory(uint8_t *bytes, size_t length, int f
 	return self;
 }
 
-plm_buffer_t *plm_buffer_create_with_capacity(size_t capacity) FL_NO_EXCEPT {
+plm_buffer_t *plm_buffer_create_with_capacity(size_t capacity) FL_NOEXCEPT {
 	plm_buffer_t *self = (plm_buffer_t *)PLM_MALLOC(sizeof(plm_buffer_t));
 	fl::memset(self, 0, sizeof(plm_buffer_t));
 	self->capacity = capacity;
@@ -845,14 +845,14 @@ plm_buffer_t *plm_buffer_create_with_capacity(size_t capacity) FL_NO_EXCEPT {
 	return self;
 }
 
-plm_buffer_t *plm_buffer_create_for_appending(size_t initial_capacity) FL_NO_EXCEPT {
+plm_buffer_t *plm_buffer_create_for_appending(size_t initial_capacity) FL_NOEXCEPT {
 	plm_buffer_t *self = plm_buffer_create_with_capacity(initial_capacity);
 	self->mode = PLM_BUFFER_MODE_APPEND;
 	self->discard_read_bytes = FALSE;
 	return self;
 }
 
-void plm_buffer_destroy(plm_buffer_t *self) FL_NO_EXCEPT {
+void plm_buffer_destroy(plm_buffer_t *self) FL_NOEXCEPT {
 #ifndef PLM_NO_STDIO
 	if (self->fh && self->close_when_done) {
 		fclose(self->fh);
@@ -864,17 +864,17 @@ void plm_buffer_destroy(plm_buffer_t *self) FL_NO_EXCEPT {
 	PLM_FREE(self);
 }
 
-size_t plm_buffer_get_size(plm_buffer_t *self) FL_NO_EXCEPT {
+size_t plm_buffer_get_size(plm_buffer_t *self) FL_NOEXCEPT {
 	return (self->mode == PLM_BUFFER_MODE_FILE)
 		? self->total_size
 		: self->length;
 }
 
-size_t plm_buffer_get_remaining(plm_buffer_t *self) FL_NO_EXCEPT {
+size_t plm_buffer_get_remaining(plm_buffer_t *self) FL_NOEXCEPT {
 	return self->length - (self->bit_index >> 3);
 }
 
-size_t plm_buffer_write(plm_buffer_t *self, uint8_t *bytes, size_t length) FL_NO_EXCEPT {
+size_t plm_buffer_write(plm_buffer_t *self, uint8_t *bytes, size_t length) FL_NOEXCEPT {
 	if (self->mode == PLM_BUFFER_MODE_FIXED_MEM) {
 		return 0;
 	}
@@ -907,20 +907,20 @@ size_t plm_buffer_write(plm_buffer_t *self, uint8_t *bytes, size_t length) FL_NO
 	return length;
 }
 
-void plm_buffer_signal_end(plm_buffer_t *self) FL_NO_EXCEPT {
+void plm_buffer_signal_end(plm_buffer_t *self) FL_NOEXCEPT {
 	self->total_size = self->length;
 }
 
-void plm_buffer_set_load_callback(plm_buffer_t *self, plm_buffer_load_callback fp, void *user) FL_NO_EXCEPT {
+void plm_buffer_set_load_callback(plm_buffer_t *self, plm_buffer_load_callback fp, void *user) FL_NOEXCEPT {
 	self->load_callback = fp;
 	self->load_callback_user_data = user;
 }
 
-void plm_buffer_rewind(plm_buffer_t *self) FL_NO_EXCEPT {
+void plm_buffer_rewind(plm_buffer_t *self) FL_NOEXCEPT {
 	plm_buffer_seek(self, 0);
 }
 
-void plm_buffer_seek(plm_buffer_t *self, size_t pos) FL_NO_EXCEPT {
+void plm_buffer_seek(plm_buffer_t *self, size_t pos) FL_NOEXCEPT {
 	self->has_ended = FALSE;
 
 	if (self->seek_callback) {
@@ -942,13 +942,13 @@ void plm_buffer_seek(plm_buffer_t *self, size_t pos) FL_NO_EXCEPT {
 	}
 }
 
-size_t plm_buffer_tell(plm_buffer_t *self) FL_NO_EXCEPT {
+size_t plm_buffer_tell(plm_buffer_t *self) FL_NOEXCEPT {
 	return self->tell_callback
 		? self->tell_callback(self, self->load_callback_user_data) + (self->bit_index >> 3) - self->length
 		: self->bit_index >> 3;
 }
 
-void plm_buffer_discard_read_bytes(plm_buffer_t *self) FL_NO_EXCEPT {
+void plm_buffer_discard_read_bytes(plm_buffer_t *self) FL_NOEXCEPT {
 	size_t byte_pos = self->bit_index >> 3;
 	if (byte_pos == self->length) {
 		self->bit_index = 0;
@@ -991,11 +991,11 @@ size_t plm_buffer_tell_file_callback(plm_buffer_t *self, void *user) {
 
 #endif // PLM_NO_STDIO
 
-int plm_buffer_has_ended(plm_buffer_t *self) FL_NO_EXCEPT {
+int plm_buffer_has_ended(plm_buffer_t *self) FL_NOEXCEPT {
 	return self->has_ended;
 }
 
-int plm_buffer_has(plm_buffer_t *self, size_t count) FL_NO_EXCEPT {
+int plm_buffer_has(plm_buffer_t *self, size_t count) FL_NOEXCEPT {
 	if (((self->length << 3) - self->bit_index) >= count) {
 		return TRUE;
 	}
@@ -1014,7 +1014,7 @@ int plm_buffer_has(plm_buffer_t *self, size_t count) FL_NO_EXCEPT {
 	return FALSE;
 }
 
-int plm_buffer_read(plm_buffer_t *self, int count) FL_NO_EXCEPT {
+int plm_buffer_read(plm_buffer_t *self, int count) FL_NOEXCEPT {
 	if (!plm_buffer_has(self, count)) {
 		return 0;
 	}
@@ -1037,17 +1037,17 @@ int plm_buffer_read(plm_buffer_t *self, int count) FL_NO_EXCEPT {
 	return value;
 }
 
-void plm_buffer_align(plm_buffer_t *self) FL_NO_EXCEPT {
+void plm_buffer_align(plm_buffer_t *self) FL_NOEXCEPT {
 	self->bit_index = ((self->bit_index + 7) >> 3) << 3; // Align to next byte
 }
 
-void plm_buffer_skip(plm_buffer_t *self, size_t count) FL_NO_EXCEPT {
+void plm_buffer_skip(plm_buffer_t *self, size_t count) FL_NOEXCEPT {
 	if (plm_buffer_has(self, count)) {
 		self->bit_index += count;
 	}
 }
 
-int plm_buffer_skip_bytes(plm_buffer_t *self, uint8_t v) FL_NO_EXCEPT {
+int plm_buffer_skip_bytes(plm_buffer_t *self, uint8_t v) FL_NOEXCEPT {
 	plm_buffer_align(self);
 	int skipped = 0;
 	while (plm_buffer_has(self, 8) && self->bytes[self->bit_index >> 3] == v) {
@@ -1057,7 +1057,7 @@ int plm_buffer_skip_bytes(plm_buffer_t *self, uint8_t v) FL_NO_EXCEPT {
 	return skipped;
 }
 
-int plm_buffer_next_start_code(plm_buffer_t *self) FL_NO_EXCEPT {
+int plm_buffer_next_start_code(plm_buffer_t *self) FL_NOEXCEPT {
 	plm_buffer_align(self);
 
 	while (plm_buffer_has(self, (5 << 3))) {
@@ -1075,7 +1075,7 @@ int plm_buffer_next_start_code(plm_buffer_t *self) FL_NO_EXCEPT {
 	return -1;
 }
 
-int plm_buffer_find_start_code(plm_buffer_t *self, int code) FL_NO_EXCEPT {
+int plm_buffer_find_start_code(plm_buffer_t *self, int code) FL_NOEXCEPT {
 	int current = 0;
 	while (TRUE) {
 		current = plm_buffer_next_start_code(self);
@@ -1086,7 +1086,7 @@ int plm_buffer_find_start_code(plm_buffer_t *self, int code) FL_NO_EXCEPT {
 	return -1;
 }
 
-int plm_buffer_has_start_code(plm_buffer_t *self, int code) FL_NO_EXCEPT {
+int plm_buffer_has_start_code(plm_buffer_t *self, int code) FL_NOEXCEPT {
 	size_t previous_bit_index = self->bit_index;
 	int previous_discard_read_bytes = self->discard_read_bytes;
 	
@@ -1098,7 +1098,7 @@ int plm_buffer_has_start_code(plm_buffer_t *self, int code) FL_NO_EXCEPT {
 	return current;
 }
 
-int plm_buffer_peek_non_zero(plm_buffer_t *self, int bit_count) FL_NO_EXCEPT {
+int plm_buffer_peek_non_zero(plm_buffer_t *self, int bit_count) FL_NOEXCEPT {
 	if (!plm_buffer_has(self, bit_count)) {
 		return FALSE;
 	}
@@ -1108,7 +1108,7 @@ int plm_buffer_peek_non_zero(plm_buffer_t *self, int bit_count) FL_NO_EXCEPT {
 	return val != 0;
 }
 
-int16_t plm_buffer_read_vlc(plm_buffer_t *self, const plm_vlc_t *table) FL_NO_EXCEPT {
+int16_t plm_buffer_read_vlc(plm_buffer_t *self, const plm_vlc_t *table) FL_NOEXCEPT {
 	plm_vlc_t state = {0, 0};
 	do {
 		state = table[state.index + plm_buffer_read(self, 1)];
@@ -1116,7 +1116,7 @@ int16_t plm_buffer_read_vlc(plm_buffer_t *self, const plm_vlc_t *table) FL_NO_EX
 	return state.value;
 }
 
-uint16_t plm_buffer_read_vlc_uint(plm_buffer_t *self, const plm_vlc_uint_t *table) FL_NO_EXCEPT {
+uint16_t plm_buffer_read_vlc_uint(plm_buffer_t *self, const plm_vlc_uint_t *table) FL_NOEXCEPT {
 	return (uint16_t)plm_buffer_read_vlc(self, (const plm_vlc_t *)table);
 }
 
@@ -1151,12 +1151,12 @@ struct plm_demux_t {
 };
 
 
-void plm_demux_buffer_seek(plm_demux_t *self, size_t pos) FL_NO_EXCEPT;
-double plm_demux_decode_time(plm_demux_t *self) FL_NO_EXCEPT;
-plm_packet_t *plm_demux_decode_packet(plm_demux_t *self, int type) FL_NO_EXCEPT;
-plm_packet_t *plm_demux_get_packet(plm_demux_t *self) FL_NO_EXCEPT;
+void plm_demux_buffer_seek(plm_demux_t *self, size_t pos) FL_NOEXCEPT;
+double plm_demux_decode_time(plm_demux_t *self) FL_NOEXCEPT;
+plm_packet_t *plm_demux_decode_packet(plm_demux_t *self, int type) FL_NOEXCEPT;
+plm_packet_t *plm_demux_get_packet(plm_demux_t *self) FL_NOEXCEPT;
 
-plm_demux_t *plm_demux_create(plm_buffer_t *buffer, int destroy_when_done) FL_NO_EXCEPT {
+plm_demux_t *plm_demux_create(plm_buffer_t *buffer, int destroy_when_done) FL_NOEXCEPT {
 	plm_demux_t *self = (plm_demux_t *)PLM_MALLOC(sizeof(plm_demux_t));
 	fl::memset(self, 0, sizeof(plm_demux_t));
 
@@ -1171,14 +1171,14 @@ plm_demux_t *plm_demux_create(plm_buffer_t *buffer, int destroy_when_done) FL_NO
 	return self;
 }
 
-void plm_demux_destroy(plm_demux_t *self) FL_NO_EXCEPT {
+void plm_demux_destroy(plm_demux_t *self) FL_NOEXCEPT {
 	if (self->destroy_buffer_when_done) {
 		plm_buffer_destroy(self->buffer);
 	}
 	PLM_FREE(self);
 }
 
-int plm_demux_has_headers(plm_demux_t *self) FL_NO_EXCEPT {
+int plm_demux_has_headers(plm_demux_t *self) FL_NOEXCEPT {
 	if (self->has_headers) {
 		return TRUE;
 	}
@@ -1238,7 +1238,7 @@ int plm_demux_has_headers(plm_demux_t *self) FL_NO_EXCEPT {
 	return TRUE;
 }
 
-int plm_demux_probe(plm_demux_t *self, size_t probesize) FL_NO_EXCEPT {
+int plm_demux_probe(plm_demux_t *self, size_t probesize) FL_NOEXCEPT {
 	int previous_pos = plm_buffer_tell(self->buffer);
 
 	int video_stream = FALSE;
@@ -1271,37 +1271,37 @@ int plm_demux_probe(plm_demux_t *self, size_t probesize) FL_NO_EXCEPT {
 	return (self->num_video_streams || self->num_audio_streams);
 }
 
-int plm_demux_get_num_video_streams(plm_demux_t *self) FL_NO_EXCEPT {
+int plm_demux_get_num_video_streams(plm_demux_t *self) FL_NOEXCEPT {
 	return plm_demux_has_headers(self)
 		? self->num_video_streams
 		: 0;
 }
 
-int plm_demux_get_num_audio_streams(plm_demux_t *self) FL_NO_EXCEPT {
+int plm_demux_get_num_audio_streams(plm_demux_t *self) FL_NOEXCEPT {
 	return plm_demux_has_headers(self)
 		? self->num_audio_streams
 		: 0;
 }
 
-void plm_demux_rewind(plm_demux_t *self) FL_NO_EXCEPT {
+void plm_demux_rewind(plm_demux_t *self) FL_NOEXCEPT {
 	plm_buffer_rewind(self->buffer);
 	self->current_packet.length = 0;
 	self->next_packet.length = 0;
 	self->start_code = -1;
 }
 
-int plm_demux_has_ended(plm_demux_t *self) FL_NO_EXCEPT {
+int plm_demux_has_ended(plm_demux_t *self) FL_NOEXCEPT {
 	return plm_buffer_has_ended(self->buffer);
 }
 
-void plm_demux_buffer_seek(plm_demux_t *self, size_t pos) FL_NO_EXCEPT {
+void plm_demux_buffer_seek(plm_demux_t *self, size_t pos) FL_NOEXCEPT {
 	plm_buffer_seek(self->buffer, pos);
 	self->current_packet.length = 0;
 	self->next_packet.length = 0;
 	self->start_code = -1;
 }
 
-double plm_demux_get_start_time(plm_demux_t *self, int type) FL_NO_EXCEPT {
+double plm_demux_get_start_time(plm_demux_t *self, int type) FL_NOEXCEPT {
 	if (self->start_time != PLM_PACKET_INVALID_TS) {
 		return self->start_time;
 	}
@@ -1326,7 +1326,7 @@ double plm_demux_get_start_time(plm_demux_t *self, int type) FL_NO_EXCEPT {
 	return self->start_time;
 }
 
-double plm_demux_get_duration(plm_demux_t *self, int type) FL_NO_EXCEPT {
+double plm_demux_get_duration(plm_demux_t *self, int type) FL_NOEXCEPT {
 	size_t file_size = plm_buffer_get_size(self->buffer);
 
 	if (
@@ -1371,7 +1371,7 @@ double plm_demux_get_duration(plm_demux_t *self, int type) FL_NO_EXCEPT {
 	return self->duration;
 }
 
-plm_packet_t *plm_demux_seek(plm_demux_t *self, double seek_time, int type, int force_intra) FL_NO_EXCEPT {
+plm_packet_t *plm_demux_seek(plm_demux_t *self, double seek_time, int type, int force_intra) FL_NOEXCEPT {
 	if (!plm_demux_has_headers(self)) {
 		return NULL;
 	}
@@ -1514,7 +1514,7 @@ plm_packet_t *plm_demux_seek(plm_demux_t *self, double seek_time, int type, int 
 	return NULL;
 }
 
-plm_packet_t *plm_demux_decode(plm_demux_t *self) FL_NO_EXCEPT {
+plm_packet_t *plm_demux_decode(plm_demux_t *self) FL_NOEXCEPT {
 	if (!plm_demux_has_headers(self)) {
 		return NULL;
 	}
@@ -1554,7 +1554,7 @@ plm_packet_t *plm_demux_decode(plm_demux_t *self) FL_NO_EXCEPT {
 	return NULL;
 }
 
-double plm_demux_decode_time(plm_demux_t *self) FL_NO_EXCEPT {
+double plm_demux_decode_time(plm_demux_t *self) FL_NOEXCEPT {
 	i64 clock = (i64)plm_buffer_read(self->buffer, 3) << 30;
 	plm_buffer_skip(self->buffer, 1);
 	clock |= (i64)plm_buffer_read(self->buffer, 15) << 15;
@@ -1564,7 +1564,7 @@ double plm_demux_decode_time(plm_demux_t *self) FL_NO_EXCEPT {
 	return (double)clock / 90000.0;
 }
 
-plm_packet_t *plm_demux_decode_packet(plm_demux_t *self, int type) FL_NO_EXCEPT {
+plm_packet_t *plm_demux_decode_packet(plm_demux_t *self, int type) FL_NOEXCEPT {
 	if (!plm_buffer_has(self->buffer, 16 << 3)) {
 		return NULL;
 	}
@@ -1605,7 +1605,7 @@ plm_packet_t *plm_demux_decode_packet(plm_demux_t *self, int type) FL_NO_EXCEPT 
 	return plm_demux_get_packet(self);
 }
 
-plm_packet_t *plm_demux_get_packet(plm_demux_t *self) FL_NO_EXCEPT {
+plm_packet_t *plm_demux_get_packet(plm_demux_t *self) FL_NOEXCEPT {
 	if (!plm_buffer_has(self->buffer, self->next_packet.length << 3)) {
 		return NULL;
 	}
@@ -2094,7 +2094,7 @@ struct plm_video_t {
 	int assume_no_b_frames;
 };
 
-static inline uint8_t plm_clamp(int n) FL_NO_EXCEPT {
+static inline uint8_t plm_clamp(int n) FL_NOEXCEPT {
 	if (n > 255) {
 		n = 255;
 	}
@@ -2104,21 +2104,21 @@ static inline uint8_t plm_clamp(int n) FL_NO_EXCEPT {
 	return n;
 }
 
-int plm_video_decode_sequence_header(plm_video_t *self) FL_NO_EXCEPT;
-void plm_video_init_frame(plm_video_t *self, plm_frame_t *frame, uint8_t *base) FL_NO_EXCEPT;
-void plm_video_decode_picture(plm_video_t *self) FL_NO_EXCEPT;
-void plm_video_decode_slice(plm_video_t *self, int slice) FL_NO_EXCEPT;
-void plm_video_decode_macroblock(plm_video_t *self) FL_NO_EXCEPT;
-void plm_video_decode_motion_vectors(plm_video_t *self) FL_NO_EXCEPT;
-int plm_video_decode_motion_vector(plm_video_t *self, int r_size, int motion) FL_NO_EXCEPT;
-void plm_video_predict_macroblock(plm_video_t *self) FL_NO_EXCEPT;
-void plm_video_copy_macroblock(plm_video_t *self, plm_frame_t *s, int motion_h, int motion_v) FL_NO_EXCEPT;
-void plm_video_interpolate_macroblock(plm_video_t *self, plm_frame_t *s, int motion_h, int motion_v) FL_NO_EXCEPT;
-void plm_video_process_macroblock(plm_video_t *self, uint8_t *s, uint8_t *d, int mh, int mb, int bs, int interp) FL_NO_EXCEPT;
-void plm_video_decode_block(plm_video_t *self, int block) FL_NO_EXCEPT;
-void plm_video_idct(int *block) FL_NO_EXCEPT;
+int plm_video_decode_sequence_header(plm_video_t *self) FL_NOEXCEPT;
+void plm_video_init_frame(plm_video_t *self, plm_frame_t *frame, uint8_t *base) FL_NOEXCEPT;
+void plm_video_decode_picture(plm_video_t *self) FL_NOEXCEPT;
+void plm_video_decode_slice(plm_video_t *self, int slice) FL_NOEXCEPT;
+void plm_video_decode_macroblock(plm_video_t *self) FL_NOEXCEPT;
+void plm_video_decode_motion_vectors(plm_video_t *self) FL_NOEXCEPT;
+int plm_video_decode_motion_vector(plm_video_t *self, int r_size, int motion) FL_NOEXCEPT;
+void plm_video_predict_macroblock(plm_video_t *self) FL_NOEXCEPT;
+void plm_video_copy_macroblock(plm_video_t *self, plm_frame_t *s, int motion_h, int motion_v) FL_NOEXCEPT;
+void plm_video_interpolate_macroblock(plm_video_t *self, plm_frame_t *s, int motion_h, int motion_v) FL_NOEXCEPT;
+void plm_video_process_macroblock(plm_video_t *self, uint8_t *s, uint8_t *d, int mh, int mb, int bs, int interp) FL_NOEXCEPT;
+void plm_video_decode_block(plm_video_t *self, int block) FL_NOEXCEPT;
+void plm_video_idct(int *block) FL_NOEXCEPT;
 
-plm_video_t * plm_video_create_with_buffer(plm_buffer_t *buffer, int destroy_when_done) FL_NO_EXCEPT {
+plm_video_t * plm_video_create_with_buffer(plm_buffer_t *buffer, int destroy_when_done) FL_NOEXCEPT {
 	plm_video_t *self = (plm_video_t *)PLM_MALLOC(sizeof(plm_video_t));
 	fl::memset(self, 0, sizeof(plm_video_t));
 	
@@ -2133,7 +2133,7 @@ plm_video_t * plm_video_create_with_buffer(plm_buffer_t *buffer, int destroy_whe
 	return self;
 }
 
-void plm_video_destroy(plm_video_t *self) FL_NO_EXCEPT {
+void plm_video_destroy(plm_video_t *self) FL_NOEXCEPT {
 	if (self->destroy_buffer_when_done) {
 		plm_buffer_destroy(self->buffer);
 	}
@@ -2145,44 +2145,44 @@ void plm_video_destroy(plm_video_t *self) FL_NO_EXCEPT {
 	PLM_FREE(self);
 }
 
-double plm_video_get_framerate(plm_video_t *self) FL_NO_EXCEPT {
+double plm_video_get_framerate(plm_video_t *self) FL_NOEXCEPT {
 	return plm_video_has_header(self)
 		? self->framerate
 		: 0;
 }
 
-double plm_video_get_pixel_aspect_ratio(plm_video_t *self) FL_NO_EXCEPT {
+double plm_video_get_pixel_aspect_ratio(plm_video_t *self) FL_NOEXCEPT {
 	return plm_video_has_header(self)
 		? self->pixel_aspect_ratio
 		: 0;
 }
 
-int plm_video_get_width(plm_video_t *self) FL_NO_EXCEPT {
+int plm_video_get_width(plm_video_t *self) FL_NOEXCEPT {
 	return plm_video_has_header(self)
 		? self->width
 		: 0;
 }
 
-int plm_video_get_height(plm_video_t *self) FL_NO_EXCEPT {
+int plm_video_get_height(plm_video_t *self) FL_NOEXCEPT {
 	return plm_video_has_header(self)
 		? self->height
 		: 0;
 }
 
-void plm_video_set_no_delay(plm_video_t *self, int no_delay) FL_NO_EXCEPT {
+void plm_video_set_no_delay(plm_video_t *self, int no_delay) FL_NOEXCEPT {
 	self->assume_no_b_frames = no_delay;
 }
 
-double plm_video_get_time(plm_video_t *self) FL_NO_EXCEPT {
+double plm_video_get_time(plm_video_t *self) FL_NOEXCEPT {
 	return self->time;
 }
 
-void plm_video_set_time(plm_video_t *self, double time) FL_NO_EXCEPT {
+void plm_video_set_time(plm_video_t *self, double time) FL_NOEXCEPT {
 	self->frames_decoded = self->framerate * time;
 	self->time = time;
 }
 
-void plm_video_rewind(plm_video_t *self) FL_NO_EXCEPT {
+void plm_video_rewind(plm_video_t *self) FL_NOEXCEPT {
 	plm_buffer_rewind(self->buffer);
 	self->time = 0;
 	self->frames_decoded = 0;
@@ -2190,11 +2190,11 @@ void plm_video_rewind(plm_video_t *self) FL_NO_EXCEPT {
 	self->start_code = -1;
 }
 
-int plm_video_has_ended(plm_video_t *self) FL_NO_EXCEPT {
+int plm_video_has_ended(plm_video_t *self) FL_NOEXCEPT {
 	return plm_buffer_has_ended(self->buffer);
 }
 
-plm_frame_t *plm_video_decode(plm_video_t *self) FL_NO_EXCEPT {
+plm_frame_t *plm_video_decode(plm_video_t *self) FL_NOEXCEPT {
 	if (!plm_video_has_header(self)) {
 		return NULL;
 	}
@@ -2260,7 +2260,7 @@ plm_frame_t *plm_video_decode(plm_video_t *self) FL_NO_EXCEPT {
 	return frame;
 }
 
-int plm_video_has_header(plm_video_t *self) FL_NO_EXCEPT {
+int plm_video_has_header(plm_video_t *self) FL_NOEXCEPT {
 	if (self->has_sequence_header) {
 		return TRUE;
 	}
@@ -2279,7 +2279,7 @@ int plm_video_has_header(plm_video_t *self) FL_NO_EXCEPT {
 	return TRUE;
 }
 
-int plm_video_decode_sequence_header(plm_video_t *self) FL_NO_EXCEPT {
+int plm_video_decode_sequence_header(plm_video_t *self) FL_NOEXCEPT {
 	int max_header_size = 64 + 2 * 64 * 8; // 64 bit header + 2x 64 byte matrix
 	if (!plm_buffer_has(self->buffer, max_header_size)) {
 		return FALSE;
@@ -2360,7 +2360,7 @@ int plm_video_decode_sequence_header(plm_video_t *self) FL_NO_EXCEPT {
 	return TRUE;
 }
 
-void plm_video_init_frame(plm_video_t *self, plm_frame_t *frame, uint8_t *base) FL_NO_EXCEPT {
+void plm_video_init_frame(plm_video_t *self, plm_frame_t *frame, uint8_t *base) FL_NOEXCEPT {
 	size_t luma_plane_size = self->luma_width * self->luma_height;
 	size_t chroma_plane_size = self->chroma_width * self->chroma_height;
 
@@ -2379,7 +2379,7 @@ void plm_video_init_frame(plm_video_t *self, plm_frame_t *frame, uint8_t *base) 
 	frame->cb.data = base + luma_plane_size + chroma_plane_size;
 }
 
-void plm_video_decode_picture(plm_video_t *self) FL_NO_EXCEPT {
+void plm_video_decode_picture(plm_video_t *self) FL_NOEXCEPT {
 	plm_buffer_skip(self->buffer, 10); // skip temporalReference
 	self->picture_type = plm_buffer_read(self->buffer, 3);
 	plm_buffer_skip(self->buffer, 16); // skip vbv_delay
@@ -2450,7 +2450,7 @@ void plm_video_decode_picture(plm_video_t *self) FL_NO_EXCEPT {
 	}
 }
 
-void plm_video_decode_slice(plm_video_t *self, int slice) FL_NO_EXCEPT {
+void plm_video_decode_slice(plm_video_t *self, int slice) FL_NOEXCEPT {
 	self->slice_begin = TRUE;
 	self->macroblock_address = (slice - 1) * self->mb_width - 1;
 
@@ -2476,7 +2476,7 @@ void plm_video_decode_slice(plm_video_t *self, int slice) FL_NO_EXCEPT {
 	);
 }
 
-void plm_video_decode_macroblock(plm_video_t *self) FL_NO_EXCEPT {
+void plm_video_decode_macroblock(plm_video_t *self) FL_NOEXCEPT {
 	// Decode increment
 	int increment = 0;
 	int t = plm_buffer_read_vlc(self->buffer, PLM_VIDEO_MACROBLOCK_ADDRESS_INCREMENT);
@@ -2576,7 +2576,7 @@ void plm_video_decode_macroblock(plm_video_t *self) FL_NO_EXCEPT {
 	}
 }
 
-void plm_video_decode_motion_vectors(plm_video_t *self) FL_NO_EXCEPT {
+void plm_video_decode_motion_vectors(plm_video_t *self) FL_NOEXCEPT {
 
 	// Forward
 	if (self->motion_forward.is_set) {
@@ -2597,7 +2597,7 @@ void plm_video_decode_motion_vectors(plm_video_t *self) FL_NO_EXCEPT {
 	}
 }
 
-int plm_video_decode_motion_vector(plm_video_t *self, int r_size, int motion) FL_NO_EXCEPT {
+int plm_video_decode_motion_vector(plm_video_t *self, int r_size, int motion) FL_NOEXCEPT {
 	int fscale = 1 << r_size;
 	int m_code = plm_buffer_read_vlc(self->buffer, PLM_VIDEO_MOTION);
 	int r = 0;
@@ -2625,7 +2625,7 @@ int plm_video_decode_motion_vector(plm_video_t *self, int r_size, int motion) FL
 	return motion;
 }
 
-void plm_video_predict_macroblock(plm_video_t *self) FL_NO_EXCEPT {
+void plm_video_predict_macroblock(plm_video_t *self) FL_NOEXCEPT {
 	int fw_h = self->motion_forward.h;
 	int fw_v = self->motion_forward.v;
 
@@ -2658,14 +2658,14 @@ void plm_video_predict_macroblock(plm_video_t *self) FL_NO_EXCEPT {
 	}
 }
 
-void plm_video_copy_macroblock(plm_video_t *self, plm_frame_t *s, int motion_h, int motion_v) FL_NO_EXCEPT {
+void plm_video_copy_macroblock(plm_video_t *self, plm_frame_t *s, int motion_h, int motion_v) FL_NOEXCEPT {
 	plm_frame_t *d = &self->frame_current;
 	plm_video_process_macroblock(self, s->y.data, d->y.data, motion_h, motion_v, 16, FALSE);
 	plm_video_process_macroblock(self, s->cr.data, d->cr.data, motion_h / 2, motion_v / 2, 8, FALSE);
 	plm_video_process_macroblock(self, s->cb.data, d->cb.data, motion_h / 2, motion_v / 2, 8, FALSE);
 }
 
-void plm_video_interpolate_macroblock(plm_video_t *self, plm_frame_t *s, int motion_h, int motion_v) FL_NO_EXCEPT {
+void plm_video_interpolate_macroblock(plm_video_t *self, plm_frame_t *s, int motion_h, int motion_v) FL_NOEXCEPT {
 	plm_frame_t *d = &self->frame_current;
 	plm_video_process_macroblock(self, s->y.data, d->y.data, motion_h, motion_v, 16, TRUE);
 	plm_video_process_macroblock(self, s->cr.data, d->cr.data, motion_h / 2, motion_v / 2, 8, TRUE);
@@ -2687,7 +2687,7 @@ void plm_video_interpolate_macroblock(plm_video_t *self, plm_frame_t *s, int mot
 void plm_video_process_macroblock(
 	plm_video_t *self, uint8_t *s, uint8_t *d,
 	int motion_h, int motion_v, int block_size, int interpolate
-) FL_NO_EXCEPT {
+) FL_NOEXCEPT {
 	int dw = self->mb_width * block_size;
 
 	int hp = motion_h >> 1;
@@ -2723,7 +2723,7 @@ void plm_video_process_macroblock(
 	#undef PLM_MB_CASE
 }
 
-void plm_video_decode_block(plm_video_t *self, int block) FL_NO_EXCEPT {
+void plm_video_decode_block(plm_video_t *self, int block) FL_NOEXCEPT {
 
 	int n = 0;
 	uint8_t *quant_matrix;
@@ -2877,7 +2877,7 @@ void plm_video_decode_block(plm_video_t *self, int block) FL_NO_EXCEPT {
 	}
 }
 
-void plm_video_idct(int *block) FL_NO_EXCEPT {
+void plm_video_idct(int *block) FL_NOEXCEPT {
 	int
 		b1, b3, b4, b6, b7, tmp1, tmp2, m0,
 		x0, x1, x2, x3, x4, y3, y4, y5, y6, y7;
@@ -3225,14 +3225,14 @@ struct plm_audio_t {
 	float U[32];
 };
 
-int plm_audio_find_frame_sync(plm_audio_t *self) FL_NO_EXCEPT;
-int plm_audio_decode_header(plm_audio_t *self) FL_NO_EXCEPT;
-void plm_audio_decode_frame(plm_audio_t *self) FL_NO_EXCEPT;
-const plm_quantizer_spec_t *plm_audio_read_allocation(plm_audio_t *self, int sb, int tab3) FL_NO_EXCEPT;
-void plm_audio_read_samples(plm_audio_t *self, int ch, int sb, int part) FL_NO_EXCEPT;
-void plm_audio_idct36(int s[32][3], int ss, float *d, int dp) FL_NO_EXCEPT;
+int plm_audio_find_frame_sync(plm_audio_t *self) FL_NOEXCEPT;
+int plm_audio_decode_header(plm_audio_t *self) FL_NOEXCEPT;
+void plm_audio_decode_frame(plm_audio_t *self) FL_NOEXCEPT;
+const plm_quantizer_spec_t *plm_audio_read_allocation(plm_audio_t *self, int sb, int tab3) FL_NOEXCEPT;
+void plm_audio_read_samples(plm_audio_t *self, int ch, int sb, int part) FL_NOEXCEPT;
+void plm_audio_idct36(int s[32][3], int ss, float *d, int dp) FL_NOEXCEPT;
 
-plm_audio_t *plm_audio_create_with_buffer(plm_buffer_t *buffer, int destroy_when_done) FL_NO_EXCEPT {
+plm_audio_t *plm_audio_create_with_buffer(plm_buffer_t *buffer, int destroy_when_done) FL_NOEXCEPT {
 	plm_audio_t *self = (plm_audio_t *)PLM_MALLOC(sizeof(plm_audio_t));
 	fl::memset(self, 0, sizeof(plm_audio_t));
 
@@ -3250,14 +3250,14 @@ plm_audio_t *plm_audio_create_with_buffer(plm_buffer_t *buffer, int destroy_when
 	return self;
 }
 
-void plm_audio_destroy(plm_audio_t *self) FL_NO_EXCEPT {
+void plm_audio_destroy(plm_audio_t *self) FL_NOEXCEPT {
 	if (self->destroy_buffer_when_done) {
 		plm_buffer_destroy(self->buffer);
 	}
 	PLM_FREE(self);
 }
 
-int plm_audio_has_header(plm_audio_t *self) FL_NO_EXCEPT {
+int plm_audio_has_header(plm_audio_t *self) FL_NOEXCEPT {
 	if (self->has_header) {
 		return TRUE;
 	}
@@ -3266,34 +3266,34 @@ int plm_audio_has_header(plm_audio_t *self) FL_NO_EXCEPT {
 	return self->has_header;
 }
 
-int plm_audio_get_samplerate(plm_audio_t *self) FL_NO_EXCEPT {
+int plm_audio_get_samplerate(plm_audio_t *self) FL_NOEXCEPT {
 	return plm_audio_has_header(self)
 		? PLM_AUDIO_SAMPLE_RATE[self->samplerate_index]
 		: 0;
 }
 
-double plm_audio_get_time(plm_audio_t *self) FL_NO_EXCEPT {
+double plm_audio_get_time(plm_audio_t *self) FL_NOEXCEPT {
 	return self->time;
 }
 
-void plm_audio_set_time(plm_audio_t *self, double time) FL_NO_EXCEPT {
+void plm_audio_set_time(plm_audio_t *self, double time) FL_NOEXCEPT {
 	self->samples_decoded = time * 
 		(double)PLM_AUDIO_SAMPLE_RATE[self->samplerate_index];
 	self->time = time;
 }
 
-void plm_audio_rewind(plm_audio_t *self) FL_NO_EXCEPT {
+void plm_audio_rewind(plm_audio_t *self) FL_NOEXCEPT {
 	plm_buffer_rewind(self->buffer);
 	self->time = 0;
 	self->samples_decoded = 0;
 	self->next_frame_data_size = 0;
 }
 
-int plm_audio_has_ended(plm_audio_t *self) FL_NO_EXCEPT {
+int plm_audio_has_ended(plm_audio_t *self) FL_NOEXCEPT {
 	return plm_buffer_has_ended(self->buffer);
 }
 
-plm_samples_t *plm_audio_decode(plm_audio_t *self) FL_NO_EXCEPT {
+plm_samples_t *plm_audio_decode(plm_audio_t *self) FL_NOEXCEPT {
 	// Do we have at least enough information to decode the frame header?
 	if (!self->next_frame_data_size) {
 		if (!plm_buffer_has(self->buffer, 48)) {
@@ -3321,7 +3321,7 @@ plm_samples_t *plm_audio_decode(plm_audio_t *self) FL_NO_EXCEPT {
 	return &self->samples;
 }
 
-int plm_audio_find_frame_sync(plm_audio_t *self) FL_NO_EXCEPT {
+int plm_audio_find_frame_sync(plm_audio_t *self) FL_NOEXCEPT {
 	size_t i;
 	for (i = self->buffer->bit_index >> 3; i < self->buffer->length-1; i++) {
 		if (
@@ -3336,7 +3336,7 @@ int plm_audio_find_frame_sync(plm_audio_t *self) FL_NO_EXCEPT {
 	return FALSE;
 }
 
-int plm_audio_decode_header(plm_audio_t *self) FL_NO_EXCEPT {
+int plm_audio_decode_header(plm_audio_t *self) FL_NOEXCEPT {
 	if (!plm_buffer_has(self->buffer, 48)) {
 		return 0;
 	}
@@ -3421,7 +3421,7 @@ int plm_audio_decode_header(plm_audio_t *self) FL_NO_EXCEPT {
 	return frame_size - (hasCRC ? 6 : 4);
 }
 
-void plm_audio_decode_frame(plm_audio_t *self) FL_NO_EXCEPT {
+void plm_audio_decode_frame(plm_audio_t *self) FL_NOEXCEPT {
 	// Prepare the quantizer table lookups
 	int tab3 = 0;
 	int sblimit = 0;
@@ -3579,13 +3579,13 @@ void plm_audio_decode_frame(plm_audio_t *self) FL_NO_EXCEPT {
 	plm_buffer_align(self->buffer);
 }
 
-const plm_quantizer_spec_t *plm_audio_read_allocation(plm_audio_t *self, int sb, int tab3) FL_NO_EXCEPT {
+const plm_quantizer_spec_t *plm_audio_read_allocation(plm_audio_t *self, int sb, int tab3) FL_NOEXCEPT {
 	int tab4 = PLM_AUDIO_QUANT_LUT_STEP_3[tab3][sb];
 	int qtab = PLM_AUDIO_QUANT_LUT_STEP_4[tab4 & 15][plm_buffer_read(self->buffer, tab4 >> 4)];
 	return qtab ? (&PLM_AUDIO_QUANT_TAB[qtab - 1]) : 0;
 }
 
-void plm_audio_read_samples(plm_audio_t *self, int ch, int sb, int part) FL_NO_EXCEPT {
+void plm_audio_read_samples(plm_audio_t *self, int ch, int sb, int part) FL_NOEXCEPT {
 	const plm_quantizer_spec_t *q = self->allocation[ch][sb];
 	int sf = self->scale_factor[ch][sb][part];
 	int *sample = self->sample[ch][sb];
@@ -3637,7 +3637,7 @@ void plm_audio_read_samples(plm_audio_t *self, int ch, int sb, int part) FL_NO_E
 	sample[2] = (val * (sf >> 12) + ((val * (sf & 4095) + 2048) >> 12)) >> 12;
 }
 
-void plm_audio_idct36(int s[32][3], int ss, float *d, int dp) FL_NO_EXCEPT {
+void plm_audio_idct36(int s[32][3], int ss, float *d, int dp) FL_NOEXCEPT {
 	float t01, t02, t03, t04, t05, t06, t07, t08, t09, t10, t11, t12,
 		t13, t14, t15, t16, t17, t18, t19, t20, t21, t22, t23, t24,
 		t25, t26, t27, t28, t29, t30, t31, t32, t33;

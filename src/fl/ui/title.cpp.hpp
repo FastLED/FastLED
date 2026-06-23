@@ -8,11 +8,11 @@ namespace fl {
 // const-char* UITitle ctor. Both arguments are const-ref and are copied into
 // the internal JsonUiTitleInternal, so we pass two short-lived fl::string
 // temporaries built from the same C-string source.
-UITitle::UITitle(const char *name) FL_NO_EXCEPT : mImpl(fl::string(name), fl::string(name)) {}
+UITitle::UITitle(const char *name) FL_NOEXCEPT : mImpl(fl::string(name), fl::string(name)) {}
 #else
-UITitle::UITitle(const char *name) FL_NO_EXCEPT : mImpl(name) {}
+UITitle::UITitle(const char *name) FL_NOEXCEPT : mImpl(name) {}
 #endif
 
-UITitle::~UITitle() FL_NO_EXCEPT {}
+UITitle::~UITitle() FL_NOEXCEPT {}
 
 } // namespace fl

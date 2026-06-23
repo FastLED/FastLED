@@ -42,7 +42,7 @@ public:
     /**
      * @brief Destructor
      */
-    ~FastLEDAdapter() FL_NO_EXCEPT override = default;
+    ~FastLEDAdapter() FL_NOEXCEPT override = default;
 
     // IFastLED interface implementation
 

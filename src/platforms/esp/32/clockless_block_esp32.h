@@ -36,14 +36,14 @@ extern u32 _frame_cnt;
 extern u32 _retry_cnt;
 #endif
 
-FASTLED_FORCE_INLINE void interrupt_unlock() FL_NO_EXCEPT {
+FASTLED_FORCE_INLINE void interrupt_unlock() FL_NOEXCEPT {
 	// ets_intr_unlock();
 	// TODO: imlement interrupt_unlock?
 	// These functions were mined out of the code below and
 	// made no-ops here. We probably want to implement them.
 }
 
-FASTLED_FORCE_INLINE void interrupt_lock() FL_NO_EXCEPT {
+FASTLED_FORCE_INLINE void interrupt_lock() FL_NOEXCEPT {
 	// ets_intr_lock();
 	// TODO: imlement interrupt_lock?
 }
@@ -77,7 +77,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 public:
     virtual int size() { return CLEDController::size() * LANES; }
 
-    virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) FL_NO_EXCEPT {
+    virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) FL_NOEXCEPT {
 	// mWait.wait();
 	/*u32 clocks = */
 	int cnt=FASTLED_INTERRUPT_RETRY_COUNT;
@@ -100,14 +100,14 @@ public:
 	// mWait.mark();
     }
 
-    template<int PIN> static void initPin() FL_NO_EXCEPT {
+    template<int PIN> static void initPin() FL_NOEXCEPT {
 	if(PIN >= REAL_FIRST_PIN && PIN <= LAST_PIN) {
 	    _ESPPIN<PIN, 1<<(PIN & 0xFF), true>::setOutput();
 	    // FastPin<PIN>::setOutput();
 	}
     }
 
-    virtual void init() FL_NO_EXCEPT {
+    virtual void init() FL_NOEXCEPT {
 	// Only supportd on pins 12-15
         // SZG: This probably won't work (check pins definitions in fastpin_esp32)
 	initPin<12>();
@@ -130,7 +130,7 @@ public:
 
 #define ESP_ADJUST 0 // (2*(F_CPU/24000000))
 #define ESP_ADJUST2 0
-    template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & last_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) FL_NO_EXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
+    template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & last_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) FL_NOEXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
 	Lines b2 = b;
 	transpose8x1_noinline(b.bytes,b2.bytes);
 	
@@ -168,7 +168,7 @@ public:
 
     // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
     // gcc will use register Y for the this pointer.
-    static u32 showRGBInternal(PixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels) FL_NO_EXCEPT {
+    static u32 showRGBInternal(PixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels) FL_NOEXCEPT {
 	
 	// Setup the pixel controller and load/scale the first byte
 	Lines b0;

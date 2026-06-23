@@ -63,6 +63,15 @@ def get_zccache_wrapper_path() -> str | None:
     return None
 
 
+def clear_zccache_stats() -> None:
+    """Clear zccache statistics (no-op).
+
+    zccache 1.0.3 does not support --zero-stats.
+    Stats are per-daemon-uptime and reset automatically on daemon restart.
+    """
+    pass
+
+
 def show_zccache_stats() -> None:
     """Display zccache statistics if zccache is available."""
     zccache_path = get_zccache_wrapper_path()

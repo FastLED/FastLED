@@ -52,7 +52,7 @@ extern "C" {
  * @note Timer starts in disabled state - call mcpwm_timer_start() to begin
  * @note Stores hardware register address in ctx->mcpwm_capture_reg_addr
  */
-int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) FL_NO_EXCEPT;
+int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) FL_NOEXCEPT;
 
 /**
  * @brief Start MCPWM capture timer
@@ -65,7 +65,7 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) FL_NO_EXCEPT;
  * @note Must call mcpwm_timer_init() first
  * @note Timer must be started before fast ISR can capture timestamps
  */
-int mcpwm_timer_start() FL_NO_EXCEPT;
+int mcpwm_timer_start() FL_NOEXCEPT;
 
 /**
  * @brief Stop MCPWM capture timer
@@ -78,7 +78,7 @@ int mcpwm_timer_start() FL_NO_EXCEPT;
  * @note Safe to call multiple times
  * @note Call before cleanup to ensure clean shutdown
  */
-int mcpwm_timer_stop() FL_NO_EXCEPT;
+int mcpwm_timer_stop() FL_NOEXCEPT;
 
 /**
  * @brief Clean up MCPWM resources
@@ -91,7 +91,7 @@ int mcpwm_timer_stop() FL_NO_EXCEPT;
  * @note Automatically stops timer if running
  * @note Safe to call multiple times (idempotent)
  */
-int mcpwm_timer_cleanup() FL_NO_EXCEPT;
+int mcpwm_timer_cleanup() FL_NOEXCEPT;
 
 /**
  * @brief Get current MCPWM timer value (for debugging)
@@ -105,7 +105,7 @@ int mcpwm_timer_cleanup() FL_NO_EXCEPT;
  * @note This function has overhead - use for debugging only
  * @note Fast ISR should read ctx->mcpwm_capture_reg_addr directly
  */
-uint32_t mcpwm_timer_get_value() FL_NO_EXCEPT;
+uint32_t mcpwm_timer_get_value() FL_NOEXCEPT;
 
 #ifdef __cplusplus
 }

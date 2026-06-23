@@ -20,19 +20,19 @@ namespace fl {
 // }
 
 
-JsonAudioImpl::JsonAudioImpl(const fl::string &name) FL_NO_EXCEPT {
+JsonAudioImpl::JsonAudioImpl(const fl::string &name) FL_NOEXCEPT {
     mInternal = fl::make_shared<JsonUiAudioInternal>(name);
     mUpdater.init(this);
     addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
-JsonAudioImpl::JsonAudioImpl(const fl::string &name, const fl::url& url) FL_NO_EXCEPT {
+JsonAudioImpl::JsonAudioImpl(const fl::string &name, const fl::url& url) FL_NOEXCEPT {
     mInternal = fl::make_shared<JsonUiAudioInternal>(name, url);
     mUpdater.init(this);
     addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
-JsonAudioImpl::JsonAudioImpl(const fl::string &name, const fl::audio::Config& config) FL_NO_EXCEPT {
+JsonAudioImpl::JsonAudioImpl(const fl::string &name, const fl::audio::Config& config) FL_NOEXCEPT {
     // JSON UI gets audio from browser, so config is ignored
     FL_UNUSED(config);
     mInternal = fl::make_shared<JsonUiAudioInternal>(name);
@@ -42,31 +42,31 @@ JsonAudioImpl::JsonAudioImpl(const fl::string &name, const fl::audio::Config& co
 
 JsonAudioImpl::~JsonAudioImpl() { removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal)); }
 
-JsonAudioImpl &JsonAudioImpl::Group(const fl::string &name) FL_NO_EXCEPT {
+JsonAudioImpl &JsonAudioImpl::Group(const fl::string &name) FL_NOEXCEPT {
     mInternal->setGroup(name);
     return *this;
 }
 
-const fl::string &JsonAudioImpl::name() const FL_NO_EXCEPT { return mInternal->name(); }
+const fl::string &JsonAudioImpl::name() const FL_NOEXCEPT { return mInternal->name(); }
 
-fl::string JsonAudioImpl::groupName() const FL_NO_EXCEPT {
+fl::string JsonAudioImpl::groupName() const FL_NOEXCEPT {
     return mInternal->groupName();
 }
 
-void JsonAudioImpl::setGroup(const fl::string &groupName) FL_NO_EXCEPT {
+void JsonAudioImpl::setGroup(const fl::string &groupName) FL_NOEXCEPT {
     mInternal->setGroup(groupName);
 }
 
-void JsonAudioImpl::Updater::init(JsonAudioImpl *owner) FL_NO_EXCEPT {
+void JsonAudioImpl::Updater::init(JsonAudioImpl *owner) FL_NOEXCEPT {
     mOwner = owner;
     fl::EngineEvents::addListener(this);
 }
 
 JsonAudioImpl::Updater::~Updater() { fl::EngineEvents::removeListener(this); }
 
-void JsonAudioImpl::Updater::onPlatformPreLoop2() FL_NO_EXCEPT {}
+void JsonAudioImpl::Updater::onPlatformPreLoop2() FL_NOEXCEPT {}
 
-audio::Sample JsonAudioImpl::next() FL_NO_EXCEPT {
+audio::Sample JsonAudioImpl::next() FL_NOEXCEPT {
     audio::SampleImplPtr out;
     if (mInternal->audioSamples().empty()) {
         // FL_WARN("No audio samples available");
@@ -80,6 +80,6 @@ audio::Sample JsonAudioImpl::next() FL_NO_EXCEPT {
     return audio::Sample(out);
 }
 
-bool JsonAudioImpl::hasNext() FL_NO_EXCEPT { return !mInternal->audioSamples().empty(); }
+bool JsonAudioImpl::hasNext() FL_NOEXCEPT { return !mInternal->audioSamples().empty(); }
 
 } // namespace fl

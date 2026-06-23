@@ -44,7 +44,7 @@ typedef void (*watchdog_callback_t)(void* user_data);
 /// @note Callback executes in ISR context - keep it simple and avoid logging functions
 void watchdog_setup(u32 timeout_ms = 5000,
                     watchdog_callback_t callback = nullptr,
-                    void* user_data = nullptr) FL_NO_EXCEPT;
+                    void* user_data = nullptr) FL_NOEXCEPT;
 
 /// @brief Tear down the ESP32 task watchdog.
 /// @return true if teardown succeeded (TWDT is now disabled and callbacks
@@ -53,6 +53,6 @@ void watchdog_setup(u32 timeout_ms = 5000,
 ///         deinitialized — in any of those cases the TWDT remains active).
 /// @note Wraps `esp_task_wdt_deinit()` and propagates its return.
 /// @note Used by `fl::Watchdog::disable()` to honor the Tier-0 disable contract.
-bool watchdog_disable() FL_NO_EXCEPT;
+bool watchdog_disable() FL_NOEXCEPT;
 
 } // namespace fl

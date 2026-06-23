@@ -17,7 +17,7 @@ public:
     explicit memorybuf(fl::u32 capacity)
         : mBuffer(capacity), mTotalWritten(0) {}
 
-    ~memorybuf() FL_NO_EXCEPT override = default;
+    ~memorybuf() FL_NOEXCEPT override = default;
 
     bool is_open() const override { return true; }
 

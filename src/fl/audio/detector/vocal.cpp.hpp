@@ -21,7 +21,7 @@ Vocal::Vocal()
     , mFormantRatio(0.0f)
 {}
 
-Vocal::~Vocal() FL_NO_EXCEPT = default;
+Vocal::~Vocal() FL_NOEXCEPT = default;
 
 void Vocal::update(shared_ptr<Context> context) {
     mSampleRate = context->getSampleRate();

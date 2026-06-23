@@ -13,7 +13,7 @@ class ScreenMap;
 class XMap;   // Forward declaration
 
 FASTLED_FORCE_INLINE u16 xy_serpentine(u16 x, u16 y,
-                                            u16 width, u16 height) FL_NO_EXCEPT {
+                                            u16 width, u16 height) FL_NOEXCEPT {
     (void)height;
     if (y & 1) // Even or odd row?
         // reverse every second line for a serpentine lled layout
@@ -23,7 +23,7 @@ FASTLED_FORCE_INLINE u16 xy_serpentine(u16 x, u16 y,
 }
 
 FASTLED_FORCE_INLINE u16 xy_line_by_line(u16 x, u16 y,
-                                              u16 width, u16 height) FL_NO_EXCEPT {
+                                              u16 width, u16 height) FL_NOEXCEPT {
     (void)height;
     return y * width + x;
 }
@@ -44,10 +44,10 @@ class XYMap {
 
     static XYMap constructWithUserFunction(u16 width, u16 height,
                                            XYFunction xyFunction,
-                                           u16 offset = 0) FL_NO_EXCEPT;
+                                           u16 offset = 0) FL_NOEXCEPT;
 
     static XYMap constructRectangularGrid(u16 width, u16 height,
-                                          u16 offset = 0) FL_NO_EXCEPT;
+                                          u16 offset = 0) FL_NOEXCEPT;
 
     // This isn't working right, but the user function works just fine. The discussion
     // is here:
@@ -55,74 +55,74 @@ class XYMap {
     // Remember that this is open source software so if you want to fix it, go for it.
     static XYMap constructWithLookUpTable(u16 width, u16 height,
                                           const u16 *lookUpTable,
-                                          u16 offset = 0) FL_NO_EXCEPT;
+                                          u16 offset = 0) FL_NOEXCEPT;
 
     static XYMap constructSerpentine(u16 width, u16 height,
-                                     u16 offset = 0) FL_NO_EXCEPT;
+                                     u16 offset = 0) FL_NOEXCEPT;
 
     /// @brief Create an XYMap from an XMap (treats 1D as 2D with height=1)
     /// @param xmap 1D addressing map
     /// @return XYMap with width=xmap.length and height=1
-    static XYMap fromXMap(const XMap& xmap) FL_NO_EXCEPT;
+    static XYMap fromXMap(const XMap& xmap) FL_NOEXCEPT;
 
-    static XYMap identity(u16 width, u16 height) FL_NO_EXCEPT {
+    static XYMap identity(u16 width, u16 height) FL_NOEXCEPT {
         return constructRectangularGrid(width, height);
     }
 
     // is_serpentine is true by default. You probably want this unless you are
     // using a different layout
     XYMap(u16 width, u16 height, bool is_serpentine = true,
-          u16 offset = 0) FL_NO_EXCEPT;
+          u16 offset = 0) FL_NOEXCEPT;
 
-    XYMap(const XYMap &other) FL_NO_EXCEPT = default;
-    XYMap &operator=(const XYMap &other) FL_NO_EXCEPT = default;
+    XYMap(const XYMap &other) FL_NOEXCEPT = default;
+    XYMap &operator=(const XYMap &other) FL_NOEXCEPT = default;
 
-    fl::ScreenMap toScreenMap() const FL_NO_EXCEPT;
+    fl::ScreenMap toScreenMap() const FL_NOEXCEPT;
 
-    void mapPixels(const CRGB *input, CRGB *output) const FL_NO_EXCEPT;
+    void mapPixels(const CRGB *input, CRGB *output) const FL_NOEXCEPT;
 
-    void convertToLookUpTable() FL_NO_EXCEPT;
+    void convertToLookUpTable() FL_NOEXCEPT;
 
-    void setRectangularGrid() FL_NO_EXCEPT;
+    void setRectangularGrid() FL_NOEXCEPT;
 
-    u16 operator()(u16 x, u16 y) const FL_NO_EXCEPT {
+    u16 operator()(u16 x, u16 y) const FL_NOEXCEPT {
         return mapToIndex(x, y);
     }
 
-    u16 mapToIndex(const u16 &x, const u16 &y) const FL_NO_EXCEPT;
+    u16 mapToIndex(const u16 &x, const u16 &y) const FL_NOEXCEPT;
 
     template <typename IntType,
               typename = fl::enable_if_t<!fl::is_integral<IntType>::value>>
-    u16 mapToIndex(IntType x, IntType y) const FL_NO_EXCEPT {
+    u16 mapToIndex(IntType x, IntType y) const FL_NOEXCEPT {
         x = fl::clamp<int>(x, 0, width - 1);
         y = fl::clamp<int>(y, 0, height - 1);
         return mapToIndex((u16)x, (u16)y);
     }
 
-    bool has(u16 x, u16 y) const FL_NO_EXCEPT {
+    bool has(u16 x, u16 y) const FL_NOEXCEPT {
         return (x < width) && (y < height);
     }
 
-    bool has(int x, int y) const FL_NO_EXCEPT {
+    bool has(int x, int y) const FL_NOEXCEPT {
         return (x >= 0) && (y >= 0) && has((u16)x, (u16)y);
     }
 
-    bool isSerpentine() const FL_NO_EXCEPT { return type == kSerpentine; }
-    bool isLineByLine() const FL_NO_EXCEPT { return type == kLineByLine; }
-    bool isFunction() const FL_NO_EXCEPT { return type == kFunction; }
-    bool isLUT() const FL_NO_EXCEPT { return type == kLookUpTable; }
-    bool isRectangularGrid() const FL_NO_EXCEPT { return type == kLineByLine; }
-    bool isSerpentineOrLineByLine() const FL_NO_EXCEPT {
+    bool isSerpentine() const FL_NOEXCEPT { return type == kSerpentine; }
+    bool isLineByLine() const FL_NOEXCEPT { return type == kLineByLine; }
+    bool isFunction() const FL_NOEXCEPT { return type == kFunction; }
+    bool isLUT() const FL_NOEXCEPT { return type == kLookUpTable; }
+    bool isRectangularGrid() const FL_NOEXCEPT { return type == kLineByLine; }
+    bool isSerpentineOrLineByLine() const FL_NOEXCEPT {
         return type == kSerpentine || type == kLineByLine;
     }
 
-    u16 getWidth() const FL_NO_EXCEPT;
-    u16 getHeight() const FL_NO_EXCEPT;
-    u16 getTotal() const FL_NO_EXCEPT;
-    XyMapType getType() const FL_NO_EXCEPT;
+    u16 getWidth() const FL_NOEXCEPT;
+    u16 getHeight() const FL_NOEXCEPT;
+    u16 getTotal() const FL_NOEXCEPT;
+    XyMapType getType() const FL_NOEXCEPT;
 
   private:
-    XYMap(u16 width, u16 height, XyMapType type) FL_NO_EXCEPT;
+    XYMap(u16 width, u16 height, XyMapType type) FL_NOEXCEPT;
 
     XyMapType type;
     u16 width;

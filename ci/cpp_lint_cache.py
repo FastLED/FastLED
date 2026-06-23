@@ -32,9 +32,6 @@ _DEFAULT_CPP_LINT_GLOBS = [
     "tests/**/*.cpp",
     "tests/**/*.hpp",
     "ci/lint_cpp/*.py",
-    "ci/lint_cpp_rs/Cargo.toml",
-    "ci/lint_cpp_rs/Cargo.lock",
-    "ci/lint_cpp_rs/src/**/*.rs",
 ]
 
 
@@ -52,17 +49,9 @@ def _get_cpp_lint_patterns() -> tuple[list[str], list[str]]:
         manifest = DependencyManifest()
         include = manifest.get_globs("cpp_lint")
         exclude = manifest.get_excludes("cpp_lint")
-        # Also monitor linter scripts (Python + Rust) — local edits to either
-        # checker implementation must invalidate the lint-success cache.
-        extra_includes = [
-            "ci/lint_cpp/*.py",
-            "ci/lint_cpp_rs/Cargo.toml",
-            "ci/lint_cpp_rs/Cargo.lock",
-            "ci/lint_cpp_rs/src/**/*.rs",
-        ]
-        for pattern in extra_includes:
-            if pattern not in include:
-                include.append(pattern)
+        # Also monitor linter scripts
+        if "ci/lint_cpp/*.py" not in include:
+            include.append("ci/lint_cpp/*.py")
         return include, exclude
     except (FileNotFoundError, KeyError):
         return list(_DEFAULT_CPP_LINT_GLOBS), []

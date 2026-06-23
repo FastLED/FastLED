@@ -15,7 +15,7 @@ namespace fl {
 class DigitalPinImpl {
   public:
     DigitalPinImpl(int pin) : mPin(pin) {}
-    ~DigitalPinImpl() FL_NO_EXCEPT = default;
+    ~DigitalPinImpl() FL_NOEXCEPT = default;
 
     void setPinMode(DigitalPin::Mode mode) {
         fl::PinMode pinMode;
@@ -54,10 +54,10 @@ class DigitalPinImpl {
 DigitalPin::DigitalPin(int pin) {
     mImpl = fl::make_shared<DigitalPinImpl>(pin);
 }
-DigitalPin::~DigitalPin() FL_NO_EXCEPT = default;
+DigitalPin::~DigitalPin() FL_NOEXCEPT = default;
 DigitalPin::DigitalPin(const DigitalPin &other) = default;
 
-DigitalPin& DigitalPin::operator=(const DigitalPin &other) FL_NO_EXCEPT = default;
+DigitalPin& DigitalPin::operator=(const DigitalPin &other) FL_NOEXCEPT = default;
 
 void DigitalPin::setPinMode(Mode mode) {
     mImpl->setPinMode(mode);

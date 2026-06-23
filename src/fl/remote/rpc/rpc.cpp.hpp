@@ -64,35 +64,17 @@ void Rpc::bindAsync(const char* name,
 // Rpc::handle() - Process JSON-RPC requests
 // =============================================================================
 
-// Compact error-message constants. Long error strings inflate the
-// per-call-site `fl::string` ctor + concat code on Cortex-M0+ /
-// no-FPU targets where every `.text` byte counts. Large-memory targets
-// keep the descriptive form; Low-memory targets use the short form.
-#if FL_PLATFORM_HAS_LARGE_MEMORY
-#  define FL_RPC_ERR_NO_METHOD       "Invalid Request: missing 'method'"
-#  define FL_RPC_ERR_METHOD_NOT_STR  "Invalid Request: 'method' must be a string"
-#  define FL_RPC_ERR_METHOD_NOT_FOUND_PREFIX "Method not found: "
-#  define FL_RPC_ERR_PARAMS_NOT_ARRAY "Invalid params: must be an array"
-#  define FL_RPC_ERR_INVALID_PARAMS_PREFIX  "Invalid params: "
-#else
-#  define FL_RPC_ERR_NO_METHOD       "method"
-#  define FL_RPC_ERR_METHOD_NOT_STR  "method"
-#  define FL_RPC_ERR_METHOD_NOT_FOUND_PREFIX "404: "
-#  define FL_RPC_ERR_PARAMS_NOT_ARRAY "params"
-#  define FL_RPC_ERR_INVALID_PARAMS_PREFIX  "params: "
-#endif
-
 json Rpc::handle(const json& request) {
     // Extract method name
     if (!request.contains("method")) {
-        FL_ERROR_F("RPC: Invalid Request - missing 'method' field");
-        return detail::makeJsonRpcError(-32600, FL_RPC_ERR_NO_METHOD, request["id"]);
+        FL_ERROR("RPC: Invalid Request - missing 'method' field");
+        return detail::makeJsonRpcError(-32600, "Invalid Request: missing 'method'", request["id"]);
     }
 
     auto methodOpt = request["method"].as_string();
     if (!methodOpt.has_value()) {
-        FL_ERROR_F("RPC: Invalid Request - 'method' must be a string");
-        return detail::makeJsonRpcError(-32600, FL_RPC_ERR_METHOD_NOT_STR, request["id"]);
+        FL_ERROR("RPC: Invalid Request - 'method' must be a string");
+        return detail::makeJsonRpcError(-32600, "Invalid Request: 'method' must be a string", request["id"]);
     }
     fl::string methodName = methodOpt.value();
 
@@ -117,20 +99,19 @@ json Rpc::handle(const json& request) {
     // Look up the method
     auto it = mRegistry.find(methodName);
     if (it == mRegistry.end()) {
-        FL_WARN_F("RPC: Method not found: %s", methodName.c_str());
-        return detail::makeJsonRpcError(-32601, fl::string(FL_RPC_ERR_METHOD_NOT_FOUND_PREFIX) + methodName, request["id"]);
+        FL_WARN("RPC: Method not found: " << methodName.c_str());
+        return detail::makeJsonRpcError(-32601, "Method not found: " + methodName, request["id"]);
     }
 
     // Extract params (default to empty array)
     json params = request.contains("params") ? request["params"] : json::parse("[]");
     if (!params.is_array()) {
-        FL_ERROR_F("RPC: Invalid params - must be an array for method: %s", methodName.c_str());
-        return detail::makeJsonRpcError(-32602, FL_RPC_ERR_PARAMS_NOT_ARRAY, request["id"]);
+        FL_ERROR("RPC: Invalid params - must be an array for method: " << methodName.c_str());
+        return detail::makeJsonRpcError(-32602, "Invalid params: must be an array", request["id"]);
     }
 
     // Check if this is an async function
     const detail::RpcEntry& entry = it->second;
-#if FL_PLATFORM_HAS_LARGE_MEMORY
     bool isAsync = (entry.mMode == RpcMode::ASYNC || entry.mMode == RpcMode::ASYNC_STREAM);
 
     // Check if this is a response-aware function (uses ResponseSend&)
@@ -147,13 +128,11 @@ json Rpc::handle(const json& request) {
         ack.set("result", ackResult);
 
         mResponseSink(ack);
-        FL_DBG_F("RPC: Sent ACK for async method: %s", methodName.c_str());
+        FL_DBG("RPC: Sent ACK for async method: " << methodName.c_str());
     }
-#endif
 
     fl::tuple<TypeConversionResult, json> resultTuple;
 
-#if FL_PLATFORM_HAS_LARGE_MEMORY
     // Handle response-aware methods (with ResponseSend& parameter)
     if (isResponseAware) {
         // Create ResponseSend instance
@@ -169,20 +148,14 @@ json Rpc::handle(const json& request) {
         // Regular invocation
         resultTuple = entry.mInvoker->invoke(params);
     }
-#else
-    // Low-memory targets only register regular (non-response-aware) sync RPCs;
-    // the bindAsync path is gated out (see #3224 Tier 1B). Drop the
-    // isResponseAware branch entirely to slim Rpc::handle.
-    resultTuple = entry.mInvoker->invoke(params);
-#endif
 
     TypeConversionResult convResult = fl::get<0>(resultTuple);
     json returnVal = fl::get<1>(resultTuple);
 
     // Check for conversion errors
     if (!convResult.ok()) {
-        FL_ERROR_F("RPC: Invalid params for method '%s': %s", methodName.c_str(), convResult.errorMessage().c_str());
-        return detail::makeJsonRpcError(-32602, fl::string(FL_RPC_ERR_INVALID_PARAMS_PREFIX) + convResult.errorMessage(), request["id"]);
+        FL_ERROR("RPC: Invalid params for method '" << methodName.c_str() << "': " << convResult.errorMessage().c_str());
+        return detail::makeJsonRpcError(-32602, "Invalid params: " + convResult.errorMessage(), request["id"]);
     }
 
     // Build success response
@@ -195,12 +168,7 @@ json Rpc::handle(const json& request) {
         response.set("id", request["id"]);
     }
 
-#if FL_PLATFORM_HAS_LARGE_MEMORY
-    // Include warnings if any. Low-memory targets emit warnings only as
-    // explicit error returns (e.g. our gated `float -> int not supported`
-    // path in #3224 Tier 1A) -- the warnings-array variant emplace + nested
-    // json::array() builder + push_back path was a measurable contributor
-    // to the LowMemory .text mass on its own.
+    // Include warnings if any
     if (convResult.hasWarning()) {
         json warnings = json::array();
         for (fl::size i = 0; i < convResult.warnings().size(); ++i) {
@@ -209,14 +177,10 @@ json Rpc::handle(const json& request) {
         response.set("warnings", warnings);
     }
 
-    // For async functions, mark response to signal "ACK already sent" so
-    // downstream queue machinery skips pushing a duplicate response.
-    // Renamed from `__async` in #3228 -- field is a public envelope-control
-    // marker, not a reserved-namespace identifier.
+    // For async functions, mark response to not queue it (ACK already sent)
     if (isAsync) {
-        response.set("ackOnly", true);
+        response.set("__async", true);  // Internal marker
     }
-#endif
 
     return response;
 }

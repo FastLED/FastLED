@@ -1,4 +1,4 @@
-﻿// ESP32 I/O implementation - Unified UART + USB-Serial JTAG backend
+// ESP32 I/O implementation - Unified UART + USB-Serial JTAG backend
 // Auto-detects USB-Serial JTAG on ESP32-S3/C3/C6/H2, falls back to UART otherwise
 // No Arduino dependencies - works standalone with ESP-IDF
 
@@ -8,7 +8,7 @@
 
 #include "platforms/esp/is_esp.h"
 
-#include "fl/log/log.h"  // FL_PRINT_F("%s", used by reportInitDiagnosticsIfNeeded)
+#include "fl/log/log.h"  // FL_PRINT (used by reportInitDiagnosticsIfNeeded)
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/singleton.h"
 #include "platforms/esp/32/drivers/uart_esp32.h"
@@ -29,7 +29,7 @@
 // Previously EspIO held BOTH UartEsp32 AND UsbSerialJtagEsp32 as direct
 // members and runtime-probed which one was buffered. The linker had to
 // keep both drivers (and the ESP-IDF JTAG driver they pull in) alive
-// because both were reachable from every print/read/write/flush path â€”
+// because both were reachable from every print/read/write/flush path —
 // ~2-3 KB of dead weight when only one backend is actually used. See
 // FastLED #2773 item 1.4.
 //
@@ -38,15 +38,15 @@
 // Arduino-ESP32's existing `ARDUINO_USB_CDC_ON_BOOT` convention:
 //
 //   * ARDUINO_USB_CDC_ON_BOOT=1 (Arduino routes Serial through USB
-//     Serial-JTAG)     â†’ EspIO uses UsbSerialJtagEsp32.
+//     Serial-JTAG)     → EspIO uses UsbSerialJtagEsp32.
 //   * otherwise (Arduino-default UART0 console, or non-Arduino ESP-IDF
-//     build)            â†’ EspIO uses UartEsp32.
+//     build)            → EspIO uses UartEsp32.
 //
 // Explicit overrides for the rare case where a user wants a different
 // backend than what their Arduino board config implies:
 //
-//   * `#define FASTLED_ESP_FORCE_UART_SERIAL`        â†’ forces UART.
-//   * `#define FASTLED_ESP_FORCE_USB_SERIAL_JTAG`    â†’ forces JTAG.
+//   * `#define FASTLED_ESP_FORCE_UART_SERIAL`        → forces UART.
+//   * `#define FASTLED_ESP_FORCE_USB_SERIAL_JTAG`    → forces JTAG.
 //
 // Both macros are honored only when JTAG hardware is available; on
 // chips without JTAG (`FL_ESP_HAS_USB_SERIAL_JTAG == 0`) the choice is
@@ -90,12 +90,12 @@ namespace platforms {
 class EspIO {
 public:
     // Get singleton instance
-    static EspIO& instance() FL_NO_EXCEPT {
+    static EspIO& instance() FL_NOEXCEPT {
         return fl::Singleton<EspIO>::instance();
     }
 
     // Initialize/reconfigure serial
-    void begin(u32 baudRate) FL_NO_EXCEPT {
+    void begin(u32 baudRate) FL_NOEXCEPT {
         // Both drivers are already initialized in constructor with default baud rate
         // USB-Serial JTAG doesn't support baud rate configuration (fixed USB speed)
         // UART reconfiguration after initialization is not currently supported
@@ -104,24 +104,24 @@ public:
     }
 
     // Print string to serial
-    void print(const char* str) FL_NO_EXCEPT {
+    void print(const char* str) FL_NOEXCEPT {
         reportInitDiagnosticsIfNeeded();
         mDriver.write(str);
     }
 
     // Print string with newline to serial
-    void println(const char* str) FL_NO_EXCEPT {
+    void println(const char* str) FL_NOEXCEPT {
         reportInitDiagnosticsIfNeeded();
         mDriver.writeln(str);
     }
 
     // Check input availability
-    int available() FL_NO_EXCEPT {
+    int available() FL_NOEXCEPT {
         return mDriver.available();
     }
 
     // Peek at next character without removing it
-    int peek() FL_NO_EXCEPT {
+    int peek() FL_NOEXCEPT {
         if (mHasPeek) {
             return mPeekByte;
         }
@@ -133,7 +133,7 @@ public:
     }
 
     // Read single character
-    int read() FL_NO_EXCEPT {
+    int read() FL_NOEXCEPT {
         if (mHasPeek) {
             mHasPeek = false;
             return mPeekByte;
@@ -142,40 +142,40 @@ public:
     }
 
     // Write raw bytes to serial (binary data)
-    size_t writeBytes(const u8* buffer, size_t size) FL_NO_EXCEPT {
+    size_t writeBytes(const u8* buffer, size_t size) FL_NOEXCEPT {
         return mDriver.write(buffer, size);
     }
 
     // Flush TX buffer and wait for transmission to complete
-    bool flush(u32 timeoutMs = 1000) FL_NO_EXCEPT {
+    bool flush(u32 timeoutMs = 1000) FL_NOEXCEPT {
         return mDriver.flush(timeoutMs);
     }
 
     // Check if serial is ready
-    bool isReady() const FL_NO_EXCEPT {
+    bool isReady() const FL_NOEXCEPT {
         return mDriver.isBuffered();
     }
 
     // Check if using buffered mode (for testing/diagnostics)
-    bool isBufferedMode() const FL_NO_EXCEPT {
+    bool isBufferedMode() const FL_NOEXCEPT {
         return mDriver.isBuffered();
     }
 
     // Compile-time: which backend is the active one in this build?
-    static constexpr bool isUsingUsbSerialJtag() FL_NO_EXCEPT {
+    static constexpr bool isUsingUsbSerialJtag() FL_NOEXCEPT {
         return FL_ESP_IO_USE_USB_SERIAL_JTAG;
     }
 
 #if FL_ESP_IO_USE_USB_SERIAL_JTAG
     // Get reference to USB-Serial JTAG driver (for advanced use).
     // Available only when this build was configured with the JTAG backend.
-    UsbSerialJtagEsp32& getUsbSerialJtag() FL_NO_EXCEPT {
+    UsbSerialJtagEsp32& getUsbSerialJtag() FL_NOEXCEPT {
         return mDriver;
     }
 #else
     // Get reference to underlying UART driver (for advanced use).
     // Available only when this build was configured with the UART backend.
-    UartEsp32& getUart() FL_NO_EXCEPT {
+    UartEsp32& getUart() FL_NOEXCEPT {
         return mDriver;
     }
 #endif
@@ -186,12 +186,12 @@ private:
     // code is dead and dropped by `--gc-sections`. See the comment block
     // at the top of this file (#2773 item 1.4).
     using ActiveDriver = UsbSerialJtagEsp32;
-    static UsbSerialJtagConfig defaultConfig() FL_NO_EXCEPT {
+    static UsbSerialJtagConfig defaultConfig() FL_NOEXCEPT {
         return UsbSerialJtagConfig::defaults();
     }
 #else
     using ActiveDriver = UartEsp32;
-    static UartConfig defaultConfig() FL_NO_EXCEPT {
+    static UartConfig defaultConfig() FL_NOEXCEPT {
         return UartConfig::reliable(UartPort::UART0);
     }
 #endif
@@ -210,7 +210,7 @@ private:
 
     // Emit a one-shot human-readable summary of the compile-time backend
     // choice on the first user-facing print/println.
-    void reportInitDiagnosticsIfNeeded() FL_NO_EXCEPT {
+    void reportInitDiagnosticsIfNeeded() FL_NOEXCEPT {
         if (mDiagnosticsReported) {
             return;
         }
@@ -227,9 +227,11 @@ private:
             case UsbSerialJtagEsp32::InitOutcome::kVerificationFailed:  outcome = "VerificationFailed"; break;
             case UsbSerialJtagEsp32::InitOutcome::kNotAvailable:        outcome = "NotAvailable"; break;
         }
-        FL_PRINT_F("EspIO: backend=%s usb_jtag_outcome=%s err=%s", backend, outcome, static_cast<int>(mDriver.initError()));
+        FL_PRINT("EspIO: backend=" << backend
+                 << " usb_jtag_outcome=" << outcome
+                 << " err=" << static_cast<int>(mDriver.initError()));
 #else
-        FL_PRINT_F("EspIO: backend=UART0 (compile-time choice; "
+        FL_PRINT("EspIO: backend=UART0 (compile-time choice; "
                  "#define FASTLED_ESP_FORCE_USB_SERIAL_JTAG to switch)");
 #endif
     }

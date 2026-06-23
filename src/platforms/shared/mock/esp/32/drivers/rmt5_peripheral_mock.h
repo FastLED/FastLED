@@ -96,7 +96,7 @@ public:
     ///
     /// This mirrors the hardware constraint that there is only one RMT peripheral.
     /// The instance is created on first access and persists for the program lifetime.
-    static Rmt5PeripheralMock& instance() FL_NO_EXCEPT;
+    static Rmt5PeripheralMock& instance() FL_NOEXCEPT;
 
     //=========================================================================
     // Lifecycle
@@ -109,24 +109,24 @@ public:
     //=========================================================================
 
     bool createTxChannel(const Rmt5ChannelConfig& config,
-                         void** out_handle) FL_NO_EXCEPT override = 0;
-    bool deleteChannel(void* channel_handle) FL_NO_EXCEPT override = 0;
-    bool enableChannel(void* channel_handle) FL_NO_EXCEPT override = 0;
-    bool disableChannel(void* channel_handle) FL_NO_EXCEPT override = 0;
+                         void** out_handle) FL_NOEXCEPT override = 0;
+    bool deleteChannel(void* channel_handle) FL_NOEXCEPT override = 0;
+    bool enableChannel(void* channel_handle) FL_NOEXCEPT override = 0;
+    bool disableChannel(void* channel_handle) FL_NOEXCEPT override = 0;
     bool transmit(void* channel_handle, void* encoder_handle,
-                  const u8* buffer, size_t buffer_size) FL_NO_EXCEPT override = 0;
-    bool waitAllDone(void* channel_handle, u32 timeout_ms) FL_NO_EXCEPT override = 0;
+                  const u8* buffer, size_t buffer_size) FL_NOEXCEPT override = 0;
+    bool waitAllDone(void* channel_handle, u32 timeout_ms) FL_NOEXCEPT override = 0;
     void* createEncoder(const ChipsetTiming& timing,
-                        u32 resolution_hz) FL_NO_EXCEPT override = 0;
-    void deleteEncoder(void* encoder_handle) FL_NO_EXCEPT override = 0;
-    bool resetEncoder(void* encoder_handle) FL_NO_EXCEPT override = 0;
+                        u32 resolution_hz) FL_NOEXCEPT override = 0;
+    void deleteEncoder(void* encoder_handle) FL_NOEXCEPT override = 0;
+    bool resetEncoder(void* encoder_handle) FL_NOEXCEPT override = 0;
     bool registerTxCallback(void* channel_handle,
                             Rmt5TxDoneCallback callback,
-                            void* user_ctx) FL_NO_EXCEPT override = 0;
-    void configureLogging() FL_NO_EXCEPT override = 0;
-    bool syncCache(void* buffer, size_t size) FL_NO_EXCEPT override = 0;
-    u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT override = 0;
-    void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override = 0;
+                            void* user_ctx) FL_NOEXCEPT override = 0;
+    void configureLogging() FL_NOEXCEPT override = 0;
+    bool syncCache(void* buffer, size_t size) FL_NOEXCEPT override = 0;
+    u8* allocateDmaBuffer(size_t size) FL_NOEXCEPT override = 0;
+    void freeDmaBuffer(u8* buffer) FL_NOEXCEPT override = 0;
 
     //=========================================================================
     // Mock-Specific API (for unit tests)
@@ -159,7 +159,7 @@ public:
     /// mock.simulateTransmitDone(channel);  // Trigger callback
     /// driver.poll();  // Process completion
     /// ```
-    virtual void simulateTransmitDone(void* channel_handle) FL_NO_EXCEPT = 0;
+    virtual void simulateTransmitDone(void* channel_handle) FL_NOEXCEPT = 0;
 
     /// @brief Inject transmission failure for negative testing
     /// @param should_fail true = fail next transmit(), false = succeed
@@ -170,7 +170,7 @@ public:
     /// bool result = driver.transmit(...);
     /// CHECK_FALSE(result);  // Should fail
     /// ```
-    virtual void setTransmitFailure(bool should_fail) FL_NO_EXCEPT = 0;
+    virtual void setTransmitFailure(bool should_fail) FL_NOEXCEPT = 0;
 
     //-------------------------------------------------------------------------
     // Waveform Capture (for validation)
@@ -181,34 +181,34 @@ public:
     ///
     /// Each record contains a copy of the transmitted pixel buffer, allowing
     /// tests to validate pixel data correctness.
-    virtual const fl::vector<TransmissionRecord>& getTransmissionHistory() const FL_NO_EXCEPT = 0;
+    virtual const fl::vector<TransmissionRecord>& getTransmissionHistory() const FL_NOEXCEPT = 0;
 
     /// @brief Clear transmission history (reset for next test)
-    virtual void clearTransmissionHistory() FL_NO_EXCEPT = 0;
+    virtual void clearTransmissionHistory() FL_NOEXCEPT = 0;
 
     /// @brief Get the most recent transmission data
     /// @return Span of the most recent pixel buffer (empty if no transmissions)
     ///
     /// Returns the captured data from the most recent transmit() call.
     /// Useful for quick validation without iterating through history.
-    virtual fl::span<const u8> getLastTransmissionData() const FL_NO_EXCEPT = 0;
+    virtual fl::span<const u8> getLastTransmissionData() const FL_NOEXCEPT = 0;
 
     //-------------------------------------------------------------------------
     // State Inspection
     //-------------------------------------------------------------------------
 
     /// @brief Get number of active channels
-    virtual size_t getChannelCount() const FL_NO_EXCEPT = 0;
+    virtual size_t getChannelCount() const FL_NOEXCEPT = 0;
 
     /// @brief Get number of active encoders
-    virtual size_t getEncoderCount() const FL_NO_EXCEPT = 0;
+    virtual size_t getEncoderCount() const FL_NOEXCEPT = 0;
 
     /// @brief Get total number of transmit() calls
-    virtual size_t getTransmissionCount() const FL_NO_EXCEPT = 0;
+    virtual size_t getTransmissionCount() const FL_NOEXCEPT = 0;
 
     /// @brief Check if a channel is enabled
     /// @param channel_handle Channel handle from createTxChannel()
-    virtual bool isChannelEnabled(void* channel_handle) const FL_NO_EXCEPT = 0;
+    virtual bool isChannelEnabled(void* channel_handle) const FL_NOEXCEPT = 0;
 
     /// @brief Reset mock to initial state (for testing)
     ///
@@ -217,7 +217,7 @@ public:
     /// - Clears transmission history
     /// - Resets error injection flags
     /// - Resets internal ID counters
-    virtual void reset() FL_NO_EXCEPT = 0;
+    virtual void reset() FL_NOEXCEPT = 0;
 };
 
 //=============================================================================
@@ -231,7 +231,7 @@ public:
 ///
 /// Simple byte-wise comparison of pixel data.
 inline bool verifyPixelData(const Rmt5PeripheralMock::TransmissionRecord& record,
-                             fl::span<const u8> expected) FL_NO_EXCEPT {
+                             fl::span<const u8> expected) FL_NOEXCEPT {
     if (record.buffer_copy.size() != expected.size()) {
         return false;
     }

@@ -26,9 +26,9 @@ namespace fl {
 
 // Forward declare singleton getters from spi_hw_1_esp32.cpp.hpp
 // These are defined in spi_hw_1_esp32.cpp.hpp, included via platforms/esp/32/drivers/spi/_build.hpp
-extern fl::shared_ptr<SpiHw1>& getController2() FL_NO_EXCEPT;
+extern fl::shared_ptr<SpiHw1>& getController2() FL_NOEXCEPT;
 #if SOC_SPI_PERIPH_NUM > 2
-extern fl::shared_ptr<SpiHw1>& getController3() FL_NO_EXCEPT;
+extern fl::shared_ptr<SpiHw1>& getController3() FL_NOEXCEPT;
 #endif
 
 namespace detail {
@@ -37,15 +37,15 @@ namespace detail {
 constexpr int PRIORITY_HW_1 = 5;    ///< Standard single-lane SPI
 
 /// @brief Add SpiHw1 (single-lane SPI) if supported
-static void addSpiHw1IfPossible() FL_NO_EXCEPT {
+static void addSpiHw1IfPossible() FL_NOEXCEPT {
 #ifdef FL_IS_ESP32
-    FL_DBG_F("ESP32: Registering SpiHw1 controllers");
+    FL_DBG("ESP32: Registering SpiHw1 controllers");
 
     // Register SPI2_HOST controller
     fl::shared_ptr<SpiHw1> ctrl2 = getController2();
     if (ctrl2) {
         SpiHw1::registerInstance(ctrl2);
-        FL_DBG_F("ESP32: Registered SpiHw1 controller (SPI2)");
+        FL_DBG("ESP32: Registered SpiHw1 controller (SPI2)");
     }
 
     // Register SPI3_HOST controller if available (ESP32, ESP32-S2, ESP32-S3)
@@ -53,11 +53,11 @@ static void addSpiHw1IfPossible() FL_NO_EXCEPT {
     fl::shared_ptr<SpiHw1> ctrl3 = getController3();
     if (ctrl3) {
         SpiHw1::registerInstance(ctrl3);
-        FL_DBG_F("ESP32: Registered SpiHw1 controller (SPI3)");
+        FL_DBG("ESP32: Registered SpiHw1 controller (SPI3)");
     }
 #endif
 
-    FL_DBG_F("ESP32: SpiHw1 registration complete");
+    FL_DBG("ESP32: SpiHw1 registration complete");
 #endif
 }
 
@@ -72,7 +72,7 @@ namespace platforms {
 ///
 /// Uses a static initialization flag to ensure initialization happens only once,
 /// even if called from multiple SpiHw* classes.
-void initSpiHardware() FL_NO_EXCEPT {
+void initSpiHardware() FL_NOEXCEPT {
     // C++11 guarantees thread-safe static initialization
     static bool sInitialized = false;
     if (sInitialized) {
@@ -80,13 +80,13 @@ void initSpiHardware() FL_NO_EXCEPT {
     }
     sInitialized = true;
 
-    FL_DBG_F("ESP32: Initializing SPI hardware");
+    FL_DBG("ESP32: Initializing SPI hardware");
 
     // Register SPI hardware
     // Note: SpiHw16 (I2S parallel) replaced by I2S_SPI/LCD_SPI channel drivers
     detail::addSpiHw1IfPossible();   // Priority 5 (single-lane SPI)
 
-    FL_DBG_F("ESP32: SPI hardware initialized");
+    FL_DBG("ESP32: SPI hardware initialized");
 }
 
 }  // namespace platforms

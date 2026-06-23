@@ -11,7 +11,7 @@ namespace platforms {
 // This uses no-op implementations to prevent "_write" linker issues
 // Users should initialize their own Serial ports if they need actual output
 
-inline void print(const char* str) FL_NO_EXCEPT {
+inline void print(const char* str) FL_NOEXCEPT {
     if (!str) return;
 
     // No-op implementation to avoid "_write" linker dependencies
@@ -20,7 +20,7 @@ inline void print(const char* str) FL_NO_EXCEPT {
     (void)str; // Suppress unused parameter warning
 }
 
-inline void println(const char* str) FL_NO_EXCEPT {
+inline void println(const char* str) FL_NOEXCEPT {
     if (!str) return;
 
     // No-op implementation to avoid "_write" linker dependencies
@@ -29,19 +29,19 @@ inline void println(const char* str) FL_NO_EXCEPT {
 }
 
 // Input functions - no-op implementations for Teensy
-inline int available() FL_NO_EXCEPT {
+inline int available() FL_NOEXCEPT {
     // No-op implementation to avoid Arduino dependencies
     // Teensy users should use Serial1.available() directly in their sketch for input
     return 0;
 }
 
-inline int read() FL_NO_EXCEPT {
+inline int read() FL_NOEXCEPT {
     // No-op implementation to avoid Arduino dependencies
     // Teensy users should use Serial1.read() directly in their sketch for input
     return -1;
 }
 
-inline int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
+inline int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
     (void)delimiter; (void)out; (void)outLen;
     return -1;  // Not supported
 }

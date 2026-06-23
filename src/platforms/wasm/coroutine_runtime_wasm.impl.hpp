@@ -39,7 +39,7 @@ namespace platforms {
 
 class CoroutineRuntimeWasm : public ICoroutineRuntime {
 public:
-    void pumpCoroutines(fl::u32 us) FL_NO_EXCEPT override {
+    void pumpCoroutines(fl::u32 us) FL_NOEXCEPT override {
         if (CoroutineContext::isInsideCoroutine()) {
             // Called from within a coroutine — yield back to runner
             CoroutineContext::suspend();
@@ -60,7 +60,7 @@ public:
     /// thread, but with -sPROXY_TO_PTHREAD both main() and every coroutine
     /// run on worker pthreads, so any caller that reaches this path is on
     /// a parkable thread.
-    void suspendMainthread(fl::u32 us) FL_NO_EXCEPT override {
+    void suspendMainthread(fl::u32 us) FL_NOEXCEPT override {
         // Inside a coroutine: hand the baton back to the runner so other
         // coroutines (and the main loop) keep progressing — same as default.
         if (CoroutineContext::isInsideCoroutine()) {
@@ -86,7 +86,7 @@ public:
     /// Called from async callbacks (currently js_fetch_success_callback /
     /// js_fetch_error_callback) after they have committed Promise state, so
     /// the awaiting pthread re-checks promptly.
-    void wakeWaiters() FL_NO_EXCEPT override {
+    void wakeWaiters() FL_NOEXCEPT override {
         mWakeupCounter.fetch_add(1);
         // emscripten_atomic_notify expects a 64-bit count; pass a sentinel
         // that wakes all parked threads.
@@ -108,7 +108,7 @@ private:
 
 namespace {
 struct WasmPlatformRegistrar {
-    WasmPlatformRegistrar() FL_NO_EXCEPT {
+    WasmPlatformRegistrar() FL_NOEXCEPT {
         ICoroutinePlatform::setInstance(
             &fl::Singleton<CoroutinePlatformPthread>::instance());
     }
@@ -116,7 +116,7 @@ struct WasmPlatformRegistrar {
 static WasmPlatformRegistrar sWasmPlatformRegistrar;
 }  // namespace
 
-ICoroutineRuntime& ICoroutineRuntime::instance() FL_NO_EXCEPT {
+ICoroutineRuntime& ICoroutineRuntime::instance() FL_NOEXCEPT {
     return fl::Singleton<CoroutineRuntimeWasm>::instance();
 }
 
@@ -129,14 +129,15 @@ public:
     static TaskCoroutinePtr create(fl::string name,
                                     TaskFunction function,
                                     size_t stack_size = 4096,
-                                    u8 priority = 5) FL_NO_EXCEPT {
+                                    u8 priority = 5) FL_NOEXCEPT {
         auto* ctx = CoroutineContext::create(fl::move(function), stack_size);
         if (!ctx) {
-            FL_WARN_F("TaskCoroutineWasm: Failed to create context for '%s'", name);
+            FL_WARN("TaskCoroutineWasm: Failed to create context for '"
+                    << name << "'");
             return nullptr;
         }
 
-        TaskCoroutinePtr task(new TaskCoroutineWasm()) FL_NO_EXCEPT;  // ok bare allocation
+        TaskCoroutinePtr task(new TaskCoroutineWasm()) FL_NOEXCEPT;  // ok bare allocation
         auto* impl = static_cast<TaskCoroutineWasm*>(task.get());
         impl->mName = fl::move(name);
         impl->mContext.reset(ctx);
@@ -149,13 +150,13 @@ public:
 
     ~TaskCoroutineWasm() override { stop(); }
 
-    void stop() FL_NO_EXCEPT override {
+    void stop() FL_NOEXCEPT override {
         if (!mContext) return;
         mContext->stop_and_complete();
         CoroutineRunner::instance().remove(mContext.get());
     }
 
-    bool isRunning() const FL_NO_EXCEPT override {
+    bool isRunning() const FL_NOEXCEPT override {
         if (!mContext) return false;
         return !mContext->is_completed();
     }
@@ -175,7 +176,7 @@ TaskCoroutinePtr createTaskCoroutine(fl::string name,
                                       ICoroutineTask::TaskFunction function,
                                       size_t stack_size,
                                       u8 priority,
-                                      int /*core_id*/) FL_NO_EXCEPT {
+                                      int /*core_id*/) FL_NOEXCEPT {
     return TaskCoroutineWasm::create(fl::move(name), fl::move(function),
                                      stack_size, priority);
 }
@@ -184,7 +185,7 @@ TaskCoroutinePtr createTaskCoroutine(fl::string name,
 // Static exitCurrent — suspend back to runner and mark completed
 //=============================================================================
 
-void ICoroutineTask::exitCurrent() FL_NO_EXCEPT {
+void ICoroutineTask::exitCurrent() FL_NOEXCEPT {
     CoroutineContext* ctx = CoroutineContext::runningCoroutine();
     if (ctx) {
         ctx->set_should_stop(true);

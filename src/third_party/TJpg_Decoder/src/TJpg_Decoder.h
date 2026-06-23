@@ -34,19 +34,19 @@ class TJpg_Decoder {
 
 public:
 
-  TJpg_Decoder() FL_NO_EXCEPT;
+  TJpg_Decoder() FL_NOEXCEPT;
   ~TJpg_Decoder();
 
-  static int jd_output(JDEC* jdec, void* bitmap, JRECT* jrect) FL_NO_EXCEPT;
-  static size_t jd_input(JDEC* jdec, uint8_t* buf, size_t len) FL_NO_EXCEPT;
+  static int jd_output(JDEC* jdec, void* bitmap, JRECT* jrect) FL_NOEXCEPT;
+  static size_t jd_input(JDEC* jdec, uint8_t* buf, size_t len) FL_NOEXCEPT;
 
-  void setJpgScale(uint8_t scale) FL_NO_EXCEPT;
-  void setCallback(SketchCallback sketchCallback) FL_NO_EXCEPT;
+  void setJpgScale(uint8_t scale) FL_NOEXCEPT;
+  void setCallback(SketchCallback sketchCallback) FL_NOEXCEPT;
 
-  JRESULT drawJpg(int32_t x, int32_t y, const uint8_t array[], size_t array_size) FL_NO_EXCEPT;
-  JRESULT getJpgSize(uint16_t *w, uint16_t *h, const uint8_t array[], size_t array_size) FL_NO_EXCEPT;
+  JRESULT drawJpg(int32_t x, int32_t y, const uint8_t array[], size_t array_size) FL_NOEXCEPT;
+  JRESULT getJpgSize(uint16_t *w, uint16_t *h, const uint8_t array[], size_t array_size) FL_NOEXCEPT;
 
-  void setSwapBytes(bool swap) FL_NO_EXCEPT;
+  void setSwapBytes(bool swap) FL_NOEXCEPT;
 
   bool _swap = false;
 

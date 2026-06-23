@@ -27,7 +27,7 @@ struct Pins8 {
 /// yields the pin indices to set HIGH or LOW — no per-bit branching.
 class DigitalMultiWrite8 {
   public:
-    DigitalMultiWrite8() FL_NO_EXCEPT = default;
+    DigitalMultiWrite8() FL_NOEXCEPT = default;
 
     /// Initialize from 8 pin numbers. -1 means "skip this bit position".
     void init(const Pins8& pins);
@@ -92,7 +92,7 @@ struct Pins16 {
 /// yields the pin indices to set HIGH or LOW — no per-bit branching.
 class DigitalMultiWrite16 {
   public:
-    DigitalMultiWrite16() FL_NO_EXCEPT = default;
+    DigitalMultiWrite16() FL_NOEXCEPT = default;
 
     /// Initialize from 16 pin numbers. -1 means "skip this bit position".
     void init(const Pins16& pins);

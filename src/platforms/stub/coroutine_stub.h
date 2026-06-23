@@ -47,33 +47,33 @@ namespace detail {
 /// The runner queue manages when each coroutine is allowed to run.
 class CoroutineContext {
 public:
-    static fl::shared_ptr<CoroutineContext> create() FL_NO_EXCEPT;
+    static fl::shared_ptr<CoroutineContext> create() FL_NOEXCEPT;
 
     virtual ~CoroutineContext() = default;
 
     /// @brief Wait until this coroutine is signaled to run
-    virtual void wait() FL_NO_EXCEPT = 0;
+    virtual void wait() FL_NOEXCEPT = 0;
 
     /// @brief Get this coroutine's wakeup semaphore
-    virtual fl::binary_semaphore& wakeup_semaphore() FL_NO_EXCEPT = 0;
+    virtual fl::binary_semaphore& wakeup_semaphore() FL_NOEXCEPT = 0;
 
     /// @brief Check if coroutine should stop
-    virtual bool should_stop() const FL_NO_EXCEPT = 0;
+    virtual bool should_stop() const FL_NOEXCEPT = 0;
 
     /// @brief Set should_stop flag
-    virtual void set_should_stop(bool value) FL_NO_EXCEPT = 0;
+    virtual void set_should_stop(bool value) FL_NOEXCEPT = 0;
 
     /// @brief Check if coroutine is completed
-    virtual bool is_completed() const FL_NO_EXCEPT = 0;
+    virtual bool is_completed() const FL_NOEXCEPT = 0;
 
     /// @brief Set completed flag
-    virtual void set_completed(bool value) FL_NO_EXCEPT = 0;
+    virtual void set_completed(bool value) FL_NOEXCEPT = 0;
 
     /// @brief Check if coroutine thread is ready (reached the wait point)
-    virtual bool is_thread_ready() const FL_NO_EXCEPT = 0;
+    virtual bool is_thread_ready() const FL_NOEXCEPT = 0;
 
     /// @brief Set thread ready flag (internal use by thread)
-    virtual void set_thread_ready(bool value) FL_NO_EXCEPT = 0;
+    virtual void set_thread_ready(bool value) FL_NOEXCEPT = 0;
 };
 
 //=============================================================================
@@ -89,26 +89,26 @@ public:
     virtual ~CoroutineRunner() = default;
 
     /// @brief Register a coroutine context in the queue
-    virtual void enqueue(fl::shared_ptr<CoroutineContext> ctx) FL_NO_EXCEPT = 0;
+    virtual void enqueue(fl::shared_ptr<CoroutineContext> ctx) FL_NOEXCEPT = 0;
 
     /// @brief Run coroutines for the specified duration
-    virtual void run(fl::u32 us) FL_NO_EXCEPT = 0;
+    virtual void run(fl::u32 us) FL_NOEXCEPT = 0;
 
     /// @brief Stop a specific coroutine context
-    virtual void stop(fl::shared_ptr<CoroutineContext> ctx) FL_NO_EXCEPT = 0;
+    virtual void stop(fl::shared_ptr<CoroutineContext> ctx) FL_NOEXCEPT = 0;
 
     /// @brief Remove a context from the queue (for cleanup)
-    virtual void remove(fl::shared_ptr<CoroutineContext> ctx) FL_NO_EXCEPT = 0;
+    virtual void remove(fl::shared_ptr<CoroutineContext> ctx) FL_NOEXCEPT = 0;
 
     /// @brief Stop all coroutines
-    virtual void stop_all() FL_NO_EXCEPT = 0;
+    virtual void stop_all() FL_NOEXCEPT = 0;
 
     /// @brief Get singleton instance
-    static CoroutineRunner& instance() FL_NO_EXCEPT;
+    static CoroutineRunner& instance() FL_NOEXCEPT;
 
     /// @brief Get the main thread semaphore for two-phase handoff
     /// Coroutine releases twice (started + done), main acquires twice.
-    virtual fl::counting_semaphore<2>& get_main_thread_semaphore() FL_NO_EXCEPT = 0;
+    virtual fl::counting_semaphore<2>& get_main_thread_semaphore() FL_NOEXCEPT = 0;
 };
 
 } // namespace detail
@@ -121,11 +121,11 @@ namespace platforms {
 
 class CoroutineRuntimeStub : public ICoroutineRuntime {
 public:
-    void pumpCoroutines(fl::u32 us) FL_NO_EXCEPT override {
+    void pumpCoroutines(fl::u32 us) FL_NOEXCEPT override {
         fl::detail::CoroutineRunner::instance().run(us);
     }
 
-    void suspendMainthread(fl::u32 us) FL_NO_EXCEPT override {
+    void suspendMainthread(fl::u32 us) FL_NOEXCEPT override {
         // Stub coroutines are std::threads — calling CoroutineRunner::run()
         // from a worker thread would deadlock on the two-phase semaphore handoff.
         // Instead, just sleep for the requested duration (safe from any thread).
@@ -153,12 +153,12 @@ public:
     static TaskCoroutinePtr create(fl::string name,
                                     TaskFunction function,
                                     size_t stack_size = 4096,
-                                    u8 priority = 5) FL_NO_EXCEPT;
+                                    u8 priority = 5) FL_NOEXCEPT;
 
     ~TaskCoroutineStub() override = default;
 
-    void stop() FL_NO_EXCEPT override = 0;
-    bool isRunning() const FL_NO_EXCEPT override = 0;
+    void stop() FL_NOEXCEPT override = 0;
+    bool isRunning() const FL_NOEXCEPT override = 0;
 };
 
 //=============================================================================
@@ -169,24 +169,24 @@ public:
 ///
 /// Joins all registered background threads and coroutine threads.
 /// Must be called before DLL unload to prevent access violations.
-void cleanup_coroutine_threads() FL_NO_EXCEPT;
+void cleanup_coroutine_threads() FL_NOEXCEPT;
 
 /// @brief Register a background thread for cleanup on exit
 ///
 /// Threads registered here will be joined by cleanup_background_threads()
 /// or cleanup_coroutine_threads().
-void register_background_thread(fl::thread&& t) FL_NO_EXCEPT;
+void register_background_thread(fl::thread&& t) FL_NOEXCEPT;
 
 /// @brief Join all registered background threads (not coroutine threads)
 ///
 /// Safe to call between tests — does NOT touch coroutine state.
-void cleanup_background_threads() FL_NO_EXCEPT;
+void cleanup_background_threads() FL_NOEXCEPT;
 
 /// @brief Check if shutdown has been requested (stub platform)
 ///
 /// Background threads should poll this and exit early when true.
 /// Backed by atomic flag in BackgroundThreadRegistry.
-bool is_shutdown_requested() FL_NO_EXCEPT;
+bool is_shutdown_requested() FL_NOEXCEPT;
 
 } // namespace platforms
 } // namespace fl

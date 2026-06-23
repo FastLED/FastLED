@@ -106,9 +106,9 @@ static constexpr AVRChipsetTimingLegacy AVR_TIMING_LPD1886_1250KHZ = {2, 3, 2, "
 /// FMUL-based: 350ns/125 = 2.8 ≈ 3×FMUL, 1010ns/125 = 8.08 ≈ 8×FMUL, 350ns/125 = 2.8 ≈ 3×FMUL
 static constexpr AVRChipsetTimingLegacy AVR_TIMING_PL9823 = {3, 8, 3, "PL9823"};
 
-/// SM16824E @ 800 kHz (datasheet identical to SM16703 / WS2811 family — see issue #3203)
-/// FMUL-based: 300ns/125 = 2.4 ≈ 3×FMUL, 600ns/125 = 4.8 ≈ 4×FMUL, 300ns/125 = 2.4 ≈ 3×FMUL
-static constexpr AVRChipsetTimingLegacy AVR_TIMING_SM16824E = {3, 4, 3, "SM16824E"};
+/// SM16824E high-speed variant
+/// FMUL-based: 300ns/125 = 2.4 ≈ 3×FMUL, 900ns/125 = 7.2 ≈ 9×FMUL, 100ns/125 = 0.8 ≈ 1×FMUL
+static constexpr AVRChipsetTimingLegacy AVR_TIMING_SM16824E = {3, 9, 1, "SM16824E"};
 
 // ============================================================================
 // Medium-Speed AVR Chipsets (400kHz - 600kHz equivalent)
@@ -157,7 +157,7 @@ static constexpr AVRChipsetTimingLegacy AVR_TIMING_UCS1912 = {2, 8, 3, "UCS1912"
 /// @brief Get total bit period in FMUL units
 /// @param timing AVR chipset timing structure
 /// @return Total bit period (T1 + T2 + T3) in FMUL units
-constexpr u32 get_avr_bit_period_fmul(const AVRChipsetTimingLegacy& timing) FL_NO_EXCEPT {
+constexpr u32 get_avr_bit_period_fmul(const AVRChipsetTimingLegacy& timing) FL_NOEXCEPT {
     return timing.T1 + timing.T2 + timing.T3;
 }
 
@@ -165,7 +165,7 @@ constexpr u32 get_avr_bit_period_fmul(const AVRChipsetTimingLegacy& timing) FL_N
 /// @param fmul_cycles FMUL multiplier value
 /// @param frequency_hz CPU frequency in Hz
 /// @return Approximate nanoseconds
-constexpr u32 avr_fmul_to_ns(u32 fmul_cycles, u32 frequency_hz) FL_NO_EXCEPT {
+constexpr u32 avr_fmul_to_ns(u32 fmul_cycles, u32 frequency_hz) FL_NOEXCEPT {
     // At frequency_hz, each cycle = 1000000000 / frequency_hz nanoseconds
     // fmul represents cycles at 8MHz = 125ns per cycle
     // So: ns = fmul_cycles * 125 / FMUL = fmul_cycles * (8000000 / frequency_hz) * 125 / (frequency_hz / 8000000)
