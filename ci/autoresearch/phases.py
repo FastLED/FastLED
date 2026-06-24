@@ -2574,6 +2574,11 @@ def _validate_test_rpc_response(
     expected_tx_pin, expected_rx_pin = _expected_test_pins(
         method, cmd, expected_tx_pin, expected_rx_pin
     )
+    if expected_tx_pin is not None or expected_rx_pin is not None:
+        capture_backend = data.get("captureBackend")
+        if not isinstance(capture_backend, str) or not capture_backend:
+            errors.append("missing string captureBackend")
+
     for field, expected in (
         ("requestedTxPin", expected_tx_pin),
         ("requestedRxPin", expected_rx_pin),
