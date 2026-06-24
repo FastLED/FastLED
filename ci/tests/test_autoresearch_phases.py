@@ -215,7 +215,6 @@ class TestParseArgsAndBuildCommands:
             "LCD_RGB",
             "OBJECT_FLED",
             "FLEX_IO",
-            "LPUART",
         }
 
     def test_all_drivers_teensy4_only_real_teensy_drivers(
@@ -229,11 +228,20 @@ class TestParseArgsAndBuildCommands:
         )
         result = _parse_args_and_build_commands(args)
         assert isinstance(result, RunContext)
-        assert result.drivers == ["OBJECT_FLED", "FLEX_IO", "LPUART"]
+        assert result.drivers == ["OBJECT_FLED", "FLEX_IO"]
         assert {cmd["method"] for cmd in result.json_rpc_commands} == {
             "runSingleTest"
         }
         assert not any("__skip_with_pass" in cmd for cmd in result.json_rpc_commands)
+
+    def test_lpuart_is_reserved_not_selectable(self, fake_project_dir: Path) -> None:
+        args = _make_args(
+            parlio=False,
+            lpuart=True,
+            project_dir=fake_project_dir,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
 
     def test_multiple_drivers(self, fake_project_dir: Path) -> None:
         args = _make_args(parlio=True, rmt=True, spi=True, project_dir=fake_project_dir)
