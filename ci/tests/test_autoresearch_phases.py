@@ -950,6 +950,32 @@ class TestRunTestsOrSpecialMode:
             rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
         assert rc == 0
 
+    def test_rpc_control_error_without_success_false_stops_run(self) -> None:
+        ctx = _make_ctx()
+        ctx.json_rpc_commands.insert(
+            0, {"method": "setPins", "params": [{"txPin": 8, "rxPin": 9}]}
+        )
+        qctx = QuietContext(quiet=False)
+
+        mock_client = AsyncMock()
+        set_pins_response = MagicMock()
+        set_pins_response.data = {
+            "error": "RxChannelCreationFailed",
+            "message": "Failed to create RX channel",
+        }
+        mock_client.send = AsyncMock(return_value=set_pins_response)
+        mock_client.connect = AsyncMock()
+        mock_client.close = AsyncMock()
+
+        with (
+            patch(f"{_PATCH_MOD}.RpcClient", return_value=mock_client),
+            patch(f"{_PATCH_MOD}.kill_port_users"),
+            patch("time.sleep"),
+        ):
+            rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
+        assert rc == 1
+        assert mock_client.send.await_count == 1
+
     def test_discovery_client_reuse(self) -> None:
         """Verify that discovery_client is reused instead of creating a new one."""
         mock_discovery = AsyncMock()
