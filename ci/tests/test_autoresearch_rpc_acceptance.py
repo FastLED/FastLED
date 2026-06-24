@@ -45,6 +45,8 @@ def _make_ctx(commands: list[dict[str, Any]]) -> RunContext:
         upload_port="COM5",
         use_fbuild=False,
         build_driver=None,
+        effective_tx_pin=1,
+        effective_rx_pin=0,
     )
 
 
@@ -98,6 +100,10 @@ def _valid_single_pass() -> dict[str, Any]:
         "duration_ms": 42,
         "passedTests": 1,
         "totalTests": 1,
+        "requestedTxPin": 1,
+        "requestedRxPin": 0,
+        "actualTxPin": 1,
+        "actualRxPin": 0,
     }
 
 
@@ -151,6 +157,27 @@ def test_run_single_response_driver_must_match_request() -> None:
     assert rc == 1
 
 
+def test_run_single_missing_actual_pin_fails() -> None:
+    response = _valid_single_pass()
+    del response["actualRxPin"]
+
+    rc = _run_rpc([_run_single_command()], [response])
+
+    assert rc == 1
+
+
+def test_run_single_pin_override_is_accepted_when_response_matches() -> None:
+    command = _run_single_command()
+    command["params"]["pinTx"] = 6
+    response = _valid_single_pass()
+    response["requestedTxPin"] = 6
+    response["actualTxPin"] = 6
+
+    rc = _run_rpc([command], [response])
+
+    assert rc == 0
+
+
 def _run_parallel_command() -> dict[str, Any]:
     return {
         "method": "runParallelTest",
@@ -173,6 +200,10 @@ def _valid_parallel_pass() -> dict[str, Any]:
         "duration_ms": 50,
         "totalTests": 1,
         "passedTests": 1,
+        "requestedTxPin": 1,
+        "requestedRxPin": 0,
+        "actualTxPin": 1,
+        "actualRxPin": 0,
         "drivers": [
             {"driver": "PARLIO", "pinTx": 1, "laneSizes": [100], "laneCount": 1},
             {"driver": "RMT", "pinTx": 2, "laneSizes": [100], "laneCount": 1},
