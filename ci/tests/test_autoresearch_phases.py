@@ -225,8 +225,13 @@ class TestParseArgsAndBuildCommands:
             parlio=False,
             environment_positional="teensy40",
             project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
         )
-        result = _parse_args_and_build_commands(args)
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
         assert isinstance(result, RunContext)
         assert result.drivers == ["OBJECT_FLED", "FLEX_IO"]
         assert {cmd["method"] for cmd in result.json_rpc_commands} == {
@@ -475,6 +480,31 @@ class TestParseArgsAndBuildCommands:
         assert isinstance(result, int)
         assert result == 1
 
+    def test_teensy_root_platformio_ini_rejected_up_front(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            environment_positional="teensy41",
+            object_fled=True,
+            parlio=False,
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=True,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
+
+    def test_teensy_specific_driver_rejects_root_platformio_without_env(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=True,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
+
     def test_timeout_parsing(self, fake_project_dir: Path) -> None:
         args = _make_args(timeout="2m", project_dir=fake_project_dir)
         result = _parse_args_and_build_commands(args)
@@ -540,6 +570,32 @@ class TestResolvePortAndEnvironment:
         assert rc is None
         assert ctx.upload_port == "COM9"
         auto_detect.assert_called_once_with(expected_environment="esp32c6")
+
+    def test_teensy_auto_detect_rejects_root_platformio_ini(self) -> None:
+        ctx = _make_ctx(upload_port=None, final_environment=None)
+        ctx.args = _make_args(
+            upload_port=None,
+            parlio=False,
+            all=True,
+            use_root_platformio_ini=True,
+        )
+        mock_port_result = MagicMock(ok=True, selected_port="COM8")
+        mock_chip_result = MagicMock(
+            ok=True, chip_type="Teensy 4.1", environment="teensy41"
+        )
+        with (
+            patch(
+                f"{_PATCH_MOD}.auto_detect_upload_port",
+                return_value=mock_port_result,
+            ),
+            patch(
+                f"{_PATCH_MOD}.detect_attached_chip",
+                return_value=mock_chip_result,
+            ),
+        ):
+            rc = asyncio.run(_resolve_port_and_environment(ctx))
+        assert rc == 1
+        assert ctx.final_environment == "teensy41"
 
     def test_cli_upload_port(self) -> None:
         ctx = _make_ctx(upload_port=None)
