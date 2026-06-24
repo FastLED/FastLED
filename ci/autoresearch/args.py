@@ -150,8 +150,8 @@ Driver Selection (JSON-RPC):
     --lcd-spi      Test only LCD_SPI driver (ESP32-S3 only, APA102/SK9822)
     --lcd-rgb      Test only LCD RGB driver (ESP32-P4 only)
     --object-fled  Test only ObjectFLED DMA driver (Teensy 4.x)
-    --lpuart       Test only LPUART driver (Teensy 4.x; eDMA-backed UART TX, pinned to pin 1 by default)
-    --all          Test all drivers
+    --lpuart       Reserved for future Teensy 4.x LPUART driver; currently unavailable
+    --all          Test all currently implemented drivers
 
 Strip Size Configuration:
   Configure LED strip sizes for autoresearch testing via JSON-RPC:
@@ -258,12 +258,12 @@ See Also:
         driver_group.add_argument(
             "--lpuart",
             action="store_true",
-            help="Test only LPUART clockless driver (Teensy 4.x only; eDMA-backed UART TX; pin pinned to 1=LPUART6_TX by default, override with --tx-pin in {1,8,14,17,20,24,29,35,47,48})",
+            help="Reserved for the future Teensy 4.x LPUART clockless driver; currently unavailable and not included in --all",
         )
         driver_group.add_argument(
             "--all",
             action="store_true",
-            help="Test all drivers (equivalent to --parlio --rmt --spi --uart --lcd --lcd-spi --lcd-rgb --object-fled --flex-io --lpuart)",
+            help="Test all currently implemented drivers (Teensy 4.x: --object-fled --flex-io)",
         )
         driver_group.add_argument(
             "--simd",
