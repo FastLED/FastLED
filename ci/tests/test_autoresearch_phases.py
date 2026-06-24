@@ -784,7 +784,10 @@ class TestRunSchemaAndPinSetup:
         assert rc is None
         assert ctx.effective_tx_pin == 3
         assert ctx.effective_rx_pin == 4
-        assert ctx.json_rpc_commands[0]["method"] == "setPins"
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 3, "rxPin": 4}],
+        }
 
     def test_default_pins(self) -> None:
         args = _make_args(skip_schema=True)
@@ -798,6 +801,10 @@ class TestRunSchemaAndPinSetup:
         assert rc is None
         assert ctx.effective_tx_pin == 1
         assert ctx.effective_rx_pin == 2
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 1, "rxPin": 2}],
+        }
 
     def test_teensy_default_pins_match_firmware(self) -> None:
         args = _make_args(skip_schema=True)
@@ -811,6 +818,10 @@ class TestRunSchemaAndPinSetup:
         assert rc is None
         assert ctx.effective_tx_pin == 1
         assert ctx.effective_rx_pin == 2
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 1, "rxPin": 2}],
+        }
 
     def test_esp32p4_default_pins_match_firmware(self) -> None:
         args = _make_args(skip_schema=True)
@@ -824,6 +835,10 @@ class TestRunSchemaAndPinSetup:
         assert rc is None
         assert ctx.effective_tx_pin == 5
         assert ctx.effective_rx_pin == 6
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 5, "rxPin": 6}],
+        }
 
     def test_teensy_cli_half_override_uses_firmware_default_complement(self) -> None:
         args = _make_args(tx_pin=22, skip_schema=True)
@@ -893,6 +908,10 @@ class TestRunSchemaAndPinSetup:
         assert ctx.effective_rx_pin == 6
         assert ctx.discovery_client is not None
         assert ctx.pins_discovered is True
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 5, "rxPin": 6}],
+        }
 
     def test_auto_discover_pins_failure_uses_platform_defaults(self) -> None:
         args = _make_args(auto_discover_pins=True, skip_schema=True)
@@ -917,6 +936,10 @@ class TestRunSchemaAndPinSetup:
         assert rc is None
         assert ctx.effective_tx_pin == 5
         assert ctx.effective_rx_pin == 6
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 5, "rxPin": 6}],
+        }
         mock_client.close.assert_awaited_once()
 
 

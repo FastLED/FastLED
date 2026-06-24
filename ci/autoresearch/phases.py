@@ -1502,11 +1502,6 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print(
             f"\n\U0001f4cc Using CLI-specified pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
         )
-        set_pins_cmd = {
-            "method": "setPins",
-            "params": [{"txPin": ctx.effective_tx_pin, "rxPin": ctx.effective_rx_pin}],
-        }
-        ctx.json_rpc_commands.insert(0, set_pins_cmd)
     elif args.auto_discover_pins:
         print("\n\U0001f50d Auto-discovery enabled - searching for connected pins...")
         pin_discovery = await run_pin_discovery(
@@ -1540,6 +1535,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print(
             f"\n\U0001f4cc Using default pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
         )
+
+    _ensure_leading_set_pins_command(ctx)
 
     # GPIO connectivity pre-test
     if final_environment in LPC_BRING_UP_ENVS:
@@ -2509,6 +2506,21 @@ def _actual_test_drivers(method: str, data: dict[str, Any]) -> list[str]:
         return actual
 
     return []
+
+
+def _set_pins_rpc_command(tx_pin: int, rx_pin: int) -> dict[str, Any]:
+    return {"method": "setPins", "params": [{"txPin": tx_pin, "rxPin": rx_pin}]}
+
+
+def _ensure_leading_set_pins_command(ctx: RunContext) -> None:
+    if ctx.effective_tx_pin is None or ctx.effective_rx_pin is None:
+        return
+
+    set_pins_cmd = _set_pins_rpc_command(ctx.effective_tx_pin, ctx.effective_rx_pin)
+    if ctx.json_rpc_commands and ctx.json_rpc_commands[0].get("method") == "setPins":
+        ctx.json_rpc_commands[0] = set_pins_cmd
+        return
+    ctx.json_rpc_commands.insert(0, set_pins_cmd)
 
 
 def _expected_test_pins(
