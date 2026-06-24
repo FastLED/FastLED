@@ -62,6 +62,17 @@ if TYPE_CHECKING:
 # hard wall; this is the additional headroom for any in-flight RPC to
 # unwind cleanly before we kill the process. Per session 2026-06-22 spec.
 WATCHDOG_GRACE_SECONDS = 20.0
+FLEX_IO_TEENSY_DEFAULT_TX_PIN = 6
+
+
+def _uses_teensy_flex_io_default_tx(
+    args: Args, final_environment: str, drivers: list[str]
+) -> bool:
+    return (
+        args.tx_pin is None
+        and final_environment in {"teensy40", "teensy41"}
+        and "FLEX_IO" in drivers
+    )
 
 
 def _autoresearch_watchdog_thread(
@@ -773,11 +784,6 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             f"({len(drivers_list)} drivers \u00d7 {lane_range['max'] - lane_range['min'] + 1} lane count(s) \u00d7 {len(strip_sizes)} strip size(s))"
         )
     else:
-        # FlexIO on Teensy 4.x only routes through pins {6-13, 32}; the global
-        # default TX pin (1) is not FlexIO2-capable so canHandle() rejects it
-        # and the manager silently falls back to ObjectFLED. Pin the FLEX_IO
-        # tests to a known FlexIO2 pin so the engine actually runs.
-        flex_io_tx_pin = 6
         for driver in drivers_list:
             for lane_count in range(lane_range["min"], lane_range["max"] + 1):
                 for strip_size in strip_sizes:
@@ -789,8 +795,6 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         "iterations": 1,
                         "timing": timing_name,
                     }
-                    if driver == "FLEX_IO" and args.tx_pin is None:
-                        test_config["pinTx"] = flex_io_tx_pin
                     if args.legacy:
                         test_config["useLegacyApi"] = True
                     # Multi-frame capture: back-to-back show()/capture cycles per pattern.
@@ -1455,6 +1459,11 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
 
     final_environment = (ctx.final_environment or "").lower()
     default_tx_pin, default_rx_pin = default_pins_for_environment(final_environment)
+    uses_flex_io_default_tx = _uses_teensy_flex_io_default_tx(
+        args, final_environment, ctx.drivers
+    )
+    if uses_flex_io_default_tx:
+        default_tx_pin = FLEX_IO_TEENSY_DEFAULT_TX_PIN
     use_pyserial = (not use_fbuild) or final_environment in LPC_BRING_UP_ENVS
     ctx.serial_iface = create_serial_interface(
         port=upload_port, use_pyserial=use_pyserial
@@ -1502,6 +1511,11 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print(
             f"\n\U0001f4cc Using CLI-specified pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
         )
+        if uses_flex_io_default_tx:
+            print(
+                "\U0001f4cc Teensy FLEX_IO defaulted omitted TX to "
+                f"{ctx.effective_tx_pin}."
+            )
     elif args.auto_discover_pins:
         print("\n\U0001f50d Auto-discovery enabled - searching for connected pins...")
         pin_discovery = await run_pin_discovery(
@@ -1523,8 +1537,12 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         else:
             ctx.effective_tx_pin = default_tx_pin
             ctx.effective_rx_pin = default_rx_pin
+            default_reason = "default pins"
+            if uses_flex_io_default_tx:
+                default_reason = "Teensy FLEX_IO default pins"
             print(
-                f"\U0001f4cc Using default pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
+                f"\U0001f4cc Using {default_reason}: "
+                f"TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
             )
             if ctx.discovery_client:
                 await ctx.discovery_client.close()
@@ -1532,8 +1550,12 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     else:
         ctx.effective_tx_pin = default_tx_pin
         ctx.effective_rx_pin = default_rx_pin
+        default_reason = "default pins"
+        if uses_flex_io_default_tx:
+            default_reason = "Teensy FLEX_IO default pins"
         print(
-            f"\n\U0001f4cc Using default pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
+            f"\n\U0001f4cc Using {default_reason}: "
+            f"TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
         )
 
     _ensure_leading_set_pins_command(ctx)

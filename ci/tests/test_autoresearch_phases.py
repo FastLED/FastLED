@@ -236,6 +236,29 @@ class TestParseArgsAndBuildCommands:
         assert result.drivers == ["OBJECT_FLED", "FLEX_IO"]
         assert {cmd["method"] for cmd in result.json_rpc_commands} == {"runSingleTest"}
         assert not any("__skip_with_pass" in cmd for cmd in result.json_rpc_commands)
+        assert all("pinTx" not in cmd["params"] for cmd in result.json_rpc_commands)
+
+    def test_flex_io_does_not_hide_tx_pin_override(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            flex_io=True,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["FLEX_IO"]
+        command = result.json_rpc_commands[0]
+        assert command["method"] == "runSingleTest"
+        assert command["params"]["driver"] == "FLEX_IO"
+        assert "pinTx" not in command["params"]
 
     def test_lpuart_is_reserved_not_selectable(self, fake_project_dir: Path) -> None:
         args = _make_args(
@@ -821,6 +844,57 @@ class TestRunSchemaAndPinSetup:
         assert ctx.json_rpc_commands[0] == {
             "method": "setPins",
             "params": [{"txPin": 1, "rxPin": 2}],
+        }
+
+    def test_teensy_flex_io_default_tx_pin_is_visible(self) -> None:
+        args = _make_args(parlio=False, flex_io=True, skip_schema=True)
+        ctx = _make_ctx(
+            args=args,
+            drivers=["FLEX_IO"],
+            final_environment="teensy41",
+        )
+        with patch(
+            f"{_PATCH_MOD}.run_gpio_pretest",
+            new_callable=AsyncMock,
+            return_value=True,
+        ) as pretest:
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.effective_tx_pin == 6
+        assert ctx.effective_rx_pin == 2
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 6, "rxPin": 2}],
+        }
+        pretest.assert_awaited_once_with(
+            "COM5", 6, 2, serial_interface=ctx.serial_iface
+        )
+
+    def test_teensy_flex_io_explicit_pin_override_wins(self) -> None:
+        args = _make_args(
+            parlio=False,
+            flex_io=True,
+            tx_pin=22,
+            rx_pin=8,
+            skip_schema=True,
+        )
+        ctx = _make_ctx(
+            args=args,
+            drivers=["FLEX_IO"],
+            final_environment="teensy41",
+        )
+        with patch(
+            f"{_PATCH_MOD}.run_gpio_pretest",
+            new_callable=AsyncMock,
+            return_value=True,
+        ):
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.effective_tx_pin == 22
+        assert ctx.effective_rx_pin == 8
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 22, "rxPin": 8}],
         }
 
     def test_esp32p4_default_pins_match_firmware(self) -> None:
