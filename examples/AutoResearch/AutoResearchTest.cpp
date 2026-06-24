@@ -813,9 +813,13 @@ void runMultiTest(const char* test_name,
 
             // Capture RX data
             size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing, config.driver_name);
+            result.capturedBytes = static_cast<int>(bytes_captured);
 
             if (bytes_captured == 0) {
                 FL_WARN("[Run " << run << "] Capture failed");
+                result.mismatches = static_cast<int>(num_leds);
+                result.mismatchedBytes = static_cast<int>(result.totalBytes);
+                result.captureFailed = true;
                 result.passed = false;
                 break;
             }

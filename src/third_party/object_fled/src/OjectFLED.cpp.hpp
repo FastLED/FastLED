@@ -710,7 +710,8 @@ void drawSquare(void* leds, uint16_t planeY, uint16_t planeX, int yCorner, int x
 ObjectFLED::~ObjectFLED() {
 	// Wait for prior xmission to end, don't need to wait for latch time before deleting buffer
 	while (micros() - update_begin_micros < numbytesLocal * 8 * TH_TL / 1000 + 5);
-	delete frameBufferLocal;
+	waitForDmaToFinish();
+	delete[] frameBufferLocal;
 }
 
 void ObjectFLED::waitForDmaToFinish() {

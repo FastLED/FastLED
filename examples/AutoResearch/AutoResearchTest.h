@@ -78,14 +78,16 @@ struct RunResult {
     int total_leds;                 ///< Total LEDs tested
     int mismatches;                 ///< Number of LED mismatches
     int totalBytes;                 ///< Total bytes compared (num_leds * 3)
+    int capturedBytes;              ///< Bytes decoded from the RX channel
     int mismatchedBytes;            ///< Number of individual bytes that differ
     int lsbOnlyErrors;              ///< Bytes where (expected ^ actual) == 0x01
     fl::vector<LEDError> errors;    ///< First few errors (up to 10)
+    bool captureFailed;             ///< True when RX produced no decodable bytes
     bool passed;                    ///< True if no errors
 
     RunResult() : run_number(0), total_leds(0), mismatches(0),
-                  totalBytes(0), mismatchedBytes(0), lsbOnlyErrors(0),
-                  passed(false) {}
+                  totalBytes(0), capturedBytes(0), mismatchedBytes(0),
+                  lsbOnlyErrors(0), captureFailed(false), passed(false) {}
 };
 
 /// @brief Multi-run test configuration

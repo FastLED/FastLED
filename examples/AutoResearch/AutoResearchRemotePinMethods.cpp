@@ -46,6 +46,7 @@
 
 #include "fl/codec/h264.h"
 #include "fl/codec/mp4_parser.h"
+#include "fl/stl/cstdio.h"
 #include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/frame.h"
 
@@ -72,6 +73,9 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
 
         bool enabled = args[0].as_bool().value();
         mState->debug_enabled = enabled;
+        fl::setLogLevel(static_cast<fl::u8>(
+            enabled ? fl::LogLevel::FL_LOG_LEVEL_DEBUG
+                    : fl::LogLevel::FL_LOG_LEVEL_NONE));
 
         response.set("success", true);
         response.set("debug_enabled", enabled);

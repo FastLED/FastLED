@@ -58,7 +58,9 @@
 // smaller than the half the Cortex-M7 data cache.
 //bitdata[B_P_D * 64]		buffer holds data (10KB) for 80 LED bytes: 4DW * 8b = 32DW/LEDB = 96DW/LED
 //framebuffer_index = B_P_D * 2 = pointer to next block for transfer (80 LEDB / bitdata buffer)
-#define BYTES_PER_DMA	20		//= number of pairs of LEDB (40=80B) bitmasks in bitdata.
+#ifndef BYTES_PER_DMA
+#define BYTES_PER_DMA	60		//= number of pairs of LEDB (120=240B) bitmasks in bitdata.
+#endif
 
 #define CORDER_RGB	0	//* WS2811, YF923
 #define CORDER_RBG	1

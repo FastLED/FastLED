@@ -38,6 +38,7 @@
 #include "fl/stl/json.h"
 #include "fl/task/task.h"
 #include "fl/task/executor.h"
+#include <Arduino.h>
 #include "fl/math/wave/wave_perf_bench.h"
 #include "fl/stl/atomic.h"
 #include "fl/task/promise.h"
@@ -68,9 +69,19 @@
 void printJsonRaw(const fl::json& json, const char* prefix) {
     // Serialize and print response
     fl::string formatted = fl::formatJsonResponse(json, prefix);
-    fl::println(formatted.c_str());
-    fl::flush();
+    Serial.println(formatted.c_str());  // ok serial - RPC response bypasses FastLED log gate
+    Serial.flush();                     // ok serial - ensure host sees RPC boundary promptly
 }
+
+namespace {
+
+void printRemoteResponseRaw(const fl::json& response) {
+    fl::string formatted = fl::formatJsonResponse(response, "REMOTE: ");
+    Serial.println(formatted.c_str());  // ok serial - RPC response bypasses FastLED log gate
+    Serial.flush();                     // ok serial - host waits for RPC response boundary
+}
+
+}  // namespace
 
 void printStreamRaw(const char* messageType, const fl::json& data) {
     // Build pure JSONL message: RESULT: {"type":"...", ...data}
@@ -87,7 +98,7 @@ void printStreamRaw(const char* messageType, const fl::json& data) {
 
     // Use fl:: serial transport for consistent formatting
     fl::string formatted = fl::formatJsonResponse(output, "RESULT: ");
-    fl::println(formatted.c_str());
+    Serial.println(formatted.c_str());  // ok serial - stream response bypasses FastLED log gate
 }
 
 // ============================================================================
@@ -273,7 +284,7 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
 AutoResearchRemoteControl::AutoResearchRemoteControl()
     : mRemote(fl::make_unique<fl::Remote>(
         fl::createSerialRequestSource(),
-        fl::createSerialResponseSink("REMOTE: ")
+        printRemoteResponseRaw
     )) {
     // mState will be set by registerFunctions()
 }
