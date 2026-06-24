@@ -18,9 +18,32 @@ if TYPE_CHECKING:
 # Constants
 # ============================================================
 
-# GPIO pin definitions (must match AutoResearch.ino)
-PIN_TX = 1  # TX pin used by FastLED drivers
-PIN_RX = 0  # RX pin used by RMT receiver (ESP32-C6 default; ESP32 uses 2)
+# Legacy fallback GPIO pin definitions. Platform-aware code should use
+# default_pins_for_environment() so host defaults stay synchronized with
+# examples/AutoResearch/AutoResearchPlatform.h.
+PIN_TX = 1
+PIN_RX = 0
+
+
+def _normalize_environment_name(environment: str | None) -> str:
+    return (environment or "").lower().replace("-", "").replace("_", "")
+
+
+def default_pins_for_environment(environment: str | None) -> tuple[int, int]:
+    """Return AutoResearch firmware default TX/RX pins for a board environment."""
+    env = _normalize_environment_name(environment)
+    if env in {"native", "stub", "host"} or "stub" in env:
+        return (1, 1)
+    if "esp32s3" in env:
+        return (1, 2)
+    if "esp32p4" in env:
+        return (5, 6)
+    if env in {"teensy40", "teensy41"}:
+        return (1, 2)
+    if any(chip in env for chip in ("esp32s2", "esp32c6", "esp32c3")):
+        return (1, 0)
+    return (PIN_TX, PIN_RX)
+
 
 # No legacy expect patterns — JSON-RPC test_complete is the authoritative
 # completion signal.

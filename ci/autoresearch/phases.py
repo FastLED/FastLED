@@ -24,10 +24,9 @@ from ci.autoresearch.context import (
     DEFAULT_EXPECT_PATTERNS,
     DEFAULT_FAIL_ON_PATTERN,
     EXIT_ON_ERROR_PATTERNS,
-    PIN_RX,
-    PIN_TX,
     QuietContext,
     RunContext,
+    default_pins_for_environment,
     display_pattern_details,
     display_tight_timing,
 )
@@ -1455,6 +1454,7 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     from ci.util.serial_interface import create_serial_interface
 
     final_environment = (ctx.final_environment or "").lower()
+    default_tx_pin, default_rx_pin = default_pins_for_environment(final_environment)
     use_pyserial = (not use_fbuild) or final_environment in LPC_BRING_UP_ENVS
     ctx.serial_iface = create_serial_interface(
         port=upload_port, use_pyserial=use_pyserial
@@ -1493,8 +1493,12 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     elif ctx.ble_mode:
         print("\n\U0001f4cc BLE mode: skipping pin discovery and GPIO pre-test")
     elif args.tx_pin is not None or args.rx_pin is not None:
-        ctx.effective_tx_pin = args.tx_pin if args.tx_pin is not None else PIN_TX
-        ctx.effective_rx_pin = args.rx_pin if args.rx_pin is not None else PIN_RX
+        ctx.effective_tx_pin = (
+            args.tx_pin if args.tx_pin is not None else default_tx_pin
+        )
+        ctx.effective_rx_pin = (
+            args.rx_pin if args.rx_pin is not None else default_rx_pin
+        )
         print(
             f"\n\U0001f4cc Using CLI-specified pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
         )
@@ -1522,8 +1526,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
                 f"\U0001f4cc Using discovered pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
             )
         else:
-            ctx.effective_tx_pin = PIN_TX
-            ctx.effective_rx_pin = PIN_RX
+            ctx.effective_tx_pin = default_tx_pin
+            ctx.effective_rx_pin = default_rx_pin
             print(
                 f"\U0001f4cc Using default pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
             )
@@ -1531,8 +1535,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
                 await ctx.discovery_client.close()
                 ctx.discovery_client = None
     else:
-        ctx.effective_tx_pin = PIN_TX
-        ctx.effective_rx_pin = PIN_RX
+        ctx.effective_tx_pin = default_tx_pin
+        ctx.effective_rx_pin = default_rx_pin
         print(
             f"\n\U0001f4cc Using default pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
         )
@@ -1558,8 +1562,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print("\n\u2705 Skipping GPIO pre-test (pins verified during discovery)")
     elif not await run_gpio_pretest(
         upload_port,
-        ctx.effective_tx_pin or PIN_TX,
-        ctx.effective_rx_pin or PIN_RX,
+        ctx.effective_tx_pin if ctx.effective_tx_pin is not None else default_tx_pin,
+        ctx.effective_rx_pin if ctx.effective_rx_pin is not None else default_rx_pin,
         serial_interface=serial_iface,
     ):
         print()
@@ -1573,8 +1577,12 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print("     JSON-RPC commands. Check serial output above for boot errors")
         print("     or crashes. Try power-cycling the device.")
         print()
-        tx = ctx.effective_tx_pin if ctx.effective_tx_pin is not None else PIN_TX
-        rx = ctx.effective_rx_pin if ctx.effective_rx_pin is not None else PIN_RX
+        tx = (
+            ctx.effective_tx_pin if ctx.effective_tx_pin is not None else default_tx_pin
+        )
+        rx = (
+            ctx.effective_rx_pin if ctx.effective_rx_pin is not None else default_rx_pin
+        )
         print("  2. WRONG PIN PAIR: The jumper wire may be connected to different")
         print(f"     pins than expected (tested TX={tx}, RX={rx}).")
         print("     Try: bash autoresearch --auto-discover-pins")
