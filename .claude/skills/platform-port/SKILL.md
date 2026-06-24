@@ -26,6 +26,11 @@ $ARGUMENTS
 - SPI hardware driver if platform supports it
 - RMT/I2S/PARLIO drivers for ESP32 variants
 - GPIO register access patterns for the target MCU
+- **Register-map authoring** — use the vendor CMSIS PAL header
+  (`LPC845.h`, `stm32f4xx.h`, `nrf52840.h`, `hardware/structs/*.h`,
+  etc.); do not hand-roll register shims. See
+  `agents/docs/register-maps.md` for the rule, the vendor-source
+  table, and the tier-1/2/3 integration pattern.
 
 ### Build System Integration
 - PlatformIO board definition

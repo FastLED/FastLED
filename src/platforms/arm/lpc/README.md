@@ -42,6 +42,21 @@ What the harness asserts:
 
 Once all four run green against an LPC845-BRK with the loopback jumper, [#2880](https://github.com/FastLED/FastLED/issues/2880) closes and the table above flips its LPC845 / LPC804 rows to "✅ hardware verified". No human-eyeball scope trace required.
 
+## Register-map authoring note (issue #2990)
+
+`clockless_arm_lpc_pwm_dma.h` defines tier-3 fallback shim structs
+(`FL_LPC_SCT_Shim`, `FL_LPC_DMA_Shim`, `FL_LPC_SYSCON_Shim`) for build
+configurations where NXP's `<LPC845.h>` is not on the include path.
+Those shims have shipped wrong offsets twice (#3349 fixed `SYSCON`
+`_resv0[16]→[32]` and `DMA_CHANNEL.CFG` bit composition). Any further
+edits to those structs — or to any new LPC register access — MUST follow
+`agents/docs/register-maps.md`: cite both the UM section and the
+vendor CMSIS member name on every line, gate the shim behind the
+vendor typedef's include guard, and spot-check three offsets against
+the real header before merging. The long-term plan is tier-2 vendoring
+of `LPC845.h` (BSD-3-Clause) into `src/platforms/arm/lpc/cmsis/` and
+deletion of the shims.
+
 ## Files (quick pass)
 
 - `fastled_arm_lpc.h` — Aggregator; selects between bit-bang / PLU / PWM+DMA per chip and opt-in macro.

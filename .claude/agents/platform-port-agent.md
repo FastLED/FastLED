@@ -77,12 +77,24 @@ Register in `src/platforms/int.h` dispatcher with appropriate `#elif` guard.
 
 The clockless driver is the minimum for LED output. It bit-bangs the GPIO pin.
 
+**BEFORE touching any peripheral register, read `agents/docs/register-maps.md`.**
+The rule: use the vendor CMSIS PAL header (`LPC845.h`, `stm32f4xx.h`,
+`nrf52840.h`, `hardware/structs/sio.h`, etc.) — do NOT hand-roll a parallel
+`struct FooShim { volatile u32 _resv0[16]; ... }` from the chip's user manual.
+Hand-rolled shims have already shipped wrong offsets to LPC845 twice
+(issue #2990, fix PR #3349). Vendor headers are generated from the silicon
+designer's SVD/IP-XACT and encode silicon-revision-specific layout quirks
+that human-readable user manuals miss.
+
 **Key implementation requirements**:
 1. **Nanosecond-precision timing** — use cycle counting or hardware timers
 2. **Interrupt disable during output** — LED protocols are timing-sensitive
-3. **GPIO direct register access** — `digitalWrite()` is too slow
+3. **GPIO direct register access** — `digitalWrite()` is too slow, but go
+   through the vendor's typedef'd peripheral pointers (`GPIOx->BSRR`,
+   `sio_hw->gpio_set`, `NRF_GPIO->OUTSET`) — never type out the struct
+   yourself.
 
-**GPIO access patterns by architecture**:
+**GPIO access patterns by architecture** (all use vendor CMSIS pointers):
 - ARM Cortex-M: `GPIOx->BSRR = pin_mask` (set), `GPIOx->BRR = pin_mask` (clear)
 - AVR: `PORTB |= pin_mask` / `PORTB &= ~pin_mask`
 - ESP32: `GPIO.out_w1ts = pin_mask` / `GPIO.out_w1tc = pin_mask`
@@ -141,6 +153,7 @@ If the platform has hardware SPI:
 
 - **Research before implementing** — get architecture details right
 - **Follow existing patterns** — look at similar platforms already ported
+- **Use vendor CMSIS register definitions, never hand-roll register-map shims** — read `agents/docs/register-maps.md` before authoring any `struct *Shim` or typing out register offsets from a user manual
 - **Use the correct naming convention** — `FL_IS_<PLATFORM>` for detection macros
 - **Never modify `fl/stl/int.h` or `fl/stdint.h`** — only platform-specific int files
 - **Stay in project root** — never `cd` to subdirectories
