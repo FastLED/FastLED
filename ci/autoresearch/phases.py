@@ -2471,6 +2471,13 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
         for i, cmd in enumerate(json_rpc_commands, 1):
             method = cmd.get("method", "unknown")
             params = cmd.get("params", [])
+            setup_method = method in {
+                "setPins",
+                "setTxPin",
+                "setRxPin",
+                "setLaneSizes",
+                "setSolidColor",
+            }
 
             print(f"\n[{i}/{len(json_rpc_commands)}] Calling {method}()...")
 
@@ -2504,7 +2511,18 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                 _leds = sum(test_data.get("laneSizes", [0]))
                 _dur = test_data.get("duration_ms", "?")
 
-                if test_data.get("success") and test_data.get("passed"):
+                if test_data.get("success") is False or "error" in test_data:
+                    stop_word_found = "ERROR"
+                    test_failed = True
+                    print(f"{Fore.RED}\u274c RPC command failed{Style.RESET_ALL}")
+                    if "error" in test_data:
+                        print(f"   Error: {test_data['error']}")
+                    if "message" in test_data:
+                        print(f"   Message: {test_data['message']}")
+                    if setup_method:
+                        break
+
+                elif test_data.get("success") and test_data.get("passed"):
                     stop_word_found = "OK"
                     print(f"{Fore.GREEN}\u2705 Test passed{Style.RESET_ALL}")
                     qctx.emit(
@@ -2571,13 +2589,6 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
 
                     if "patterns" in test_data:
                         display_pattern_details(test_data)
-
-                elif test_data.get("success") is False:
-                    stop_word_found = "ERROR"
-                    test_failed = True
-                    print(f"{Fore.RED}\u274c RPC command failed{Style.RESET_ALL}")
-                    if "error" in test_data:
-                        print(f"   Error: {test_data['error']}")
 
                 else:
                     stop_word_found = "OK"

@@ -240,6 +240,8 @@ def display_pattern_details(result: dict[str, Any]) -> None:
         total_bytes = pat.get("totalBytes", num_leds * 3)
         mismatched_bytes = pat.get("mismatchedBytes", 0)
         lsb_only = pat.get("lsbOnlyErrors", 0)
+        captured_bytes = pat.get("capturedBytes")
+        capture_failed = bool(pat.get("captureFailed", False))
 
         agg_total_bytes += total_bytes
         agg_mismatched_bytes += mismatched_bytes
@@ -249,6 +251,10 @@ def display_pattern_details(result: dict[str, Any]) -> None:
         lsb_pct = 100.0 * lsb_only / mismatched_bytes if mismatched_bytes > 0 else 0.0
 
         print(f"    Mismatched LEDs:  {mismatched_leds}/{num_leds}")
+        if captured_bytes is not None:
+            print(f"    Captured bytes:   {captured_bytes}/{total_bytes}")
+        if capture_failed:
+            print(f"    Capture status:   RX produced no decodable bytes")
         print(
             f"    Byte corruption:  {mismatched_bytes}/{total_bytes} bytes ({byte_pct:.1f}%)"
         )

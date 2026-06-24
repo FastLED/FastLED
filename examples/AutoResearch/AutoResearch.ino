@@ -278,7 +278,11 @@ constexpr int RX_BUFFER_SIZE = 3000 * 32 + 100;  // LEDs × 32:1 expansion + hea
 // This allows AutoResearchRemoteControl to recreate the RX channel when the pin changes
 fl::shared_ptr<fl::RxChannel> createRxDevice(int pin) {
     fl::RxChannelConfig config(pin, RX_BACKEND);
-    return FastLED.addRx(config);
+    fl::shared_ptr<fl::RxChannel> channel = FastLED.addRx(config);
+    if (!channel || channel->getPin() != pin) {
+        return fl::shared_ptr<fl::RxChannel>();
+    }
+    return channel;
 }
 
 // Global autoresearch state (shared between main loop and RPC handlers)
