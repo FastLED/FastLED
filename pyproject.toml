@@ -5,7 +5,17 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.2.27 (released 2026-06-12). 2.2.27 bumps the
+    # Pin to fbuild 2.3.3 (released 2026-06-23).
+    #
+    # Pin history:
+    #   2.3.3 -- latest PyPI release as of 2026-06-24; carries the
+    #            post-2.3.1 fbuild fixes needed by the current
+    #            AutoResearch/ObjectFLED validation pass.
+    #   2.3.1 -- latest PyPI release as of 2026-06-22; carries the
+    #            post-2.3.0 Teensy deploy/serial fixes needed while
+    #            validating AutoResearch/ObjectFLED on physical T4.x
+    #            hardware.
+    #   2.2.27 (released 2026-06-12). 2.2.27 bumps the
     # bundled `running-process` daemon broker to 4.2.0
     # (FastLED/fbuild#537) on top of the 2.2.26 ArmCompiler/zccache
     # unification (FastLED/fbuild#526) and LPC845-BRK board stubs
@@ -112,7 +122,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.3.0",
+    "fbuild==2.3.3",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
