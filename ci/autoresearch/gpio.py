@@ -145,6 +145,7 @@ async def run_gpio_pretest(
                 print(f"{Fore.RED}\u274c GPIO PRE-TEST FAILED{Style.RESET_ALL}")
                 print()
                 print(f"   {Fore.RED}Error: {msg}{Style.RESET_ALL}")
+                print(f"   Failure class: electrical_issue")
                 print()
                 # Provide specific diagnosis based on pin readings
                 if rx_low == 1 and rx_high == 1:
