@@ -659,6 +659,8 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
             pat.set("totalLeds", static_cast<int64_t>(rr.total_leds));
             pat.set("mismatchedLeds", static_cast<int64_t>(rr.mismatches));
             pat.set("capturedBytes", static_cast<int64_t>(rr.capturedBytes));
+            pat.set("captureWaitResult", static_cast<int64_t>(rr.captureWaitResult));
+            pat.set("rawEdgesAfterWait", static_cast<int64_t>(rr.rawEdgesAfterWait));
             pat.set("captureFailed", rr.captureFailed);
             pat.set("mismatchedBytes", static_cast<int64_t>(rr.mismatchedBytes));
             pat.set("lsbOnlyErrors", static_cast<int64_t>(rr.lsbOnlyErrors));

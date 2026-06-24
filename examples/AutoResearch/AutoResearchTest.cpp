@@ -330,7 +330,16 @@ static size_t decodeSpiEdges(fl::shared_ptr<fl::RxChannel> rx_channel,
 // - timing: Chipset timing configuration for RX decoder
 // - driver_name: Name of the TX driver being tested (e.g., "RMT", "PARLIO") - enables io_loop_back only for RMT
 // Returns number of bytes captured, or 0 on error
-size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel, fl::span<uint8_t> rx_buffer, const fl::ChipsetTimingConfig& timing, const char* driver_name) {
+size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
+               fl::span<uint8_t> rx_buffer,
+               const fl::ChipsetTimingConfig& timing,
+               const char* driver_name,
+               fl::RunResult* diagnostics) {
+    if (diagnostics) {
+        diagnostics->captureWaitResult = -1;
+        diagnostics->rawEdgesAfterWait = 0;
+    }
+
     if (!rx_channel) {
         FL_ERROR("RX channel is null");
         return 0;
@@ -428,6 +437,12 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel, fl::span<uint8_t> rx_bu
     const uint32_t rx_wait_ms = is_uart_driver ? 500 : 150;
     FL_WARN("[CAPTURE] Waiting for RX completion (" << rx_wait_ms << "ms timeout)...");
     auto wait_result = rx_channel->wait(rx_wait_ms);
+    if (diagnostics) {
+        diagnostics->captureWaitResult = static_cast<int>(wait_result);
+        fl::FixedVector<fl::EdgeTime, 256> edges;
+        edges.resize(256);
+        diagnostics->rawEdgesAfterWait = static_cast<int>(rx_channel->getRawEdgeTimes(edges, 0));
+    }
     FL_WARN("[CAPTURE] RX wait returned: " << static_cast<int>(wait_result));
 
     if (wait_result != fl::RxWaitResult::SUCCESS) {
@@ -812,7 +827,7 @@ void runMultiTest(const char* test_name,
             result.totalBytes = num_leds * 3;
 
             // Capture RX data
-            size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing, config.driver_name);
+            size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing, config.driver_name, &result);
             result.capturedBytes = static_cast<int>(bytes_captured);
 
             if (bytes_captured == 0) {
