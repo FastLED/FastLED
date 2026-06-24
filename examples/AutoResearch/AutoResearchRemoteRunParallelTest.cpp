@@ -347,10 +347,21 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
     FastLED.clear(ClearFlags::CHANNELS);
 
     uint32_t duration_ms = millis() - start_ms;
+    int total_tests = 1;
+    int passed_tests = show_success ? 1 : 0;
+    if (rx_validation_attempted) {
+        total_tests++;
+        if (rx_validation_passed) {
+            passed_tests++;
+        }
+    }
 
     // ========== RESPONSE ==========
     response.set("success", true);
     response.set("passed", show_success && rx_validation_passed);
+    response.set("totalTests", static_cast<int64_t>(total_tests));
+    response.set("passedTests", static_cast<int64_t>(passed_tests));
+    response.set("failedTests", static_cast<int64_t>(total_tests - passed_tests));
     response.set("duration_ms", static_cast<int64_t>(duration_ms));
     response.set("show_duration_us", static_cast<int64_t>(show_duration_us));
     response.set("iterations", static_cast<int64_t>(iterations));

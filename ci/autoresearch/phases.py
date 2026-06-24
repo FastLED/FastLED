@@ -2452,6 +2452,98 @@ async def _run_coroutine_tests(ctx: RunContext) -> int:
             await client.close()
 
 
+_TEST_RPC_METHODS = frozenset({"runSingleTest", "runParallelTest"})
+
+
+def _is_plain_int(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _expected_test_drivers(method: str, cmd: dict[str, Any]) -> list[str]:
+    params = cmd.get("params")
+    if not isinstance(params, dict):
+        return []
+
+    if method == "runSingleTest":
+        driver = params.get("driver")
+        return [driver] if isinstance(driver, str) and driver else []
+
+    if method == "runParallelTest":
+        drivers = params.get("drivers")
+        if not isinstance(drivers, list):
+            return []
+        expected: list[str] = []
+        for entry in drivers:
+            if isinstance(entry, dict):
+                driver = entry.get("driver")
+                if isinstance(driver, str) and driver:
+                    expected.append(driver)
+        return expected
+
+    return []
+
+
+def _actual_test_drivers(method: str, data: dict[str, Any]) -> list[str]:
+    if method == "runSingleTest":
+        driver = data.get("driver")
+        return [driver] if isinstance(driver, str) and driver else []
+
+    if method == "runParallelTest":
+        drivers = data.get("drivers")
+        if not isinstance(drivers, list):
+            return []
+        actual: list[str] = []
+        for entry in drivers:
+            if isinstance(entry, dict):
+                driver = entry.get("driver")
+                if isinstance(driver, str) and driver:
+                    actual.append(driver)
+        return actual
+
+    return []
+
+
+def _validate_test_rpc_response(
+    method: str, cmd: dict[str, Any], data: dict[str, Any]
+) -> list[str]:
+    """Return validation errors that prevent a test RPC from proving PASS."""
+    errors: list[str] = []
+
+    if not isinstance(data.get("success"), bool):
+        errors.append("missing boolean success")
+    if not isinstance(data.get("passed"), bool):
+        errors.append("missing boolean passed")
+
+    total_tests = data.get("totalTests")
+    passed_tests = data.get("passedTests")
+    if not _is_plain_int(total_tests):
+        errors.append("missing integer totalTests")
+    elif total_tests <= 0:
+        errors.append("totalTests must be > 0")
+
+    if not _is_plain_int(passed_tests):
+        errors.append("missing integer passedTests")
+    elif _is_plain_int(total_tests):
+        if passed_tests < 0:
+            errors.append("passedTests must be >= 0")
+        if passed_tests > total_tests:
+            errors.append("passedTests must be <= totalTests")
+        if data.get("passed") is True and passed_tests != total_tests:
+            errors.append("passed=true requires passedTests == totalTests")
+
+    expected_drivers = _expected_test_drivers(method, cmd)
+    actual_drivers = _actual_test_drivers(method, data)
+    if not actual_drivers:
+        field = "driver" if method == "runSingleTest" else "drivers"
+        errors.append(f"missing selected {field}")
+    else:
+        for driver in expected_drivers:
+            if driver not in actual_drivers:
+                errors.append(f"missing expected driver {driver}")
+
+    return errors
+
+
 async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
     """Execute main RPC test loop."""
     upload_port = ctx.upload_port
@@ -2505,6 +2597,7 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                 "setLaneSizes",
                 "setSolidColor",
             }
+            test_method = method in _TEST_RPC_METHODS
 
             print(f"\n[{i}/{len(json_rpc_commands)}] Calling {method}()...")
 
@@ -2531,6 +2624,10 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         f"{Fore.YELLOW}\u26a0\ufe0f  Unexpected response type: {type(test_data)}{Style.RESET_ALL}"
                     )
                     print(f"   Response: {test_data}")
+                    if test_method:
+                        test_failed = True
+                        stop_word_found = "ERROR"
+                        break
                     continue
 
                 _driver = test_data.get("driver", method)
@@ -2548,6 +2645,18 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         print(f"   Message: {test_data['message']}")
                     if setup_method:
                         break
+
+                elif test_method and (
+                    validation_errors := _validate_test_rpc_response(
+                        method, cmd, test_data
+                    )
+                ):
+                    stop_word_found = "ERROR"
+                    test_failed = True
+                    print(f"{Fore.RED}\u274c Malformed test response{Style.RESET_ALL}")
+                    for error in validation_errors:
+                        print(f"   - {error}")
+                    break
 
                 elif test_data.get("success") and test_data.get("passed"):
                     stop_word_found = "OK"
@@ -2618,10 +2727,11 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         display_pattern_details(test_data)
 
                 else:
-                    stop_word_found = "OK"
                     print(f"{Fore.GREEN}\u2713 Command completed{Style.RESET_ALL}")
                     if test_data:
                         print(f"   Response: {test_data}")
+                    if not setup_method:
+                        stop_word_found = "OK"
 
             except RpcCrashError as crash_err:
                 print(
