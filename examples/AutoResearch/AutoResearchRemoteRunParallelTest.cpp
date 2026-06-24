@@ -369,6 +369,10 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
     response.set("requestedRxPin", static_cast<int64_t>(mState->pin_rx));
     response.set("actualTxPin", static_cast<int64_t>(primary_tx_pin));
     response.set("actualRxPin", static_cast<int64_t>(mState->pin_rx));
+    fl::string capture_backend = mState->rx_channel
+                                     ? mState->rx_channel->getEngineName()
+                                     : fl::string("none");
+    response.set("captureBackend", capture_backend.c_str());
     response.set("duration_ms", static_cast<int64_t>(duration_ms));
     response.set("show_duration_us", static_cast<int64_t>(show_duration_us));
     response.set("iterations", static_cast<int64_t>(iterations));
