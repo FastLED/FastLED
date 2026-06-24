@@ -363,6 +363,21 @@ def _try_teensy_bootloader_upload(build_dir: Path, environment: str | None) -> b
 # ============================================================
 
 
+def _is_teensy_environment(environment: str | None) -> bool:
+    return environment is not None and environment.lower() in ("teensy40", "teensy41")
+
+
+def _reject_teensy_root_platformio_ini(environment: str | None) -> bool:
+    if not _is_teensy_environment(environment):
+        return False
+    print(
+        f"{Fore.RED}❌ Error: --use-root-platformio-ini is not allowed for "
+        f"Teensy AutoResearch acceptance. Use the synthesized fbuild project "
+        f"from ci/boards.py instead.{Style.RESET_ALL}"
+    )
+    return True
+
+
 def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     """Parse CLI args, validate modes, build JSON-RPC command list.
 
@@ -421,6 +436,15 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         "teensy40",
         "teensy41",
     )
+    is_teensy_specific_driver = args.object_fled or args.flex_io or args.lpuart
+
+    if args.use_root_platformio_ini and (is_teensy4 or is_teensy_specific_driver):
+        print(
+            f"{Fore.RED}❌ Error: --use-root-platformio-ini is not allowed for "
+            f"Teensy AutoResearch acceptance. Use the synthesized fbuild project "
+            f"from ci/boards.py instead.{Style.RESET_ALL}"
+        )
+        return 1
 
     if args.lpuart:
         print(
@@ -1123,6 +1147,11 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                 )
                 return 1
         print()
+
+    if args.use_root_platformio_ini and _reject_teensy_root_platformio_ini(
+        ctx.final_environment
+    ):
+        return 1
 
     # Deferred synthesis (#3281). When --use-root-platformio-ini is NOT set
     # and the board wasn't known at parse time, the build_dir is still pointing
