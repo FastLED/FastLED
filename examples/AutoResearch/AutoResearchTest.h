@@ -79,6 +79,8 @@ struct RunResult {
     int mismatches;                 ///< Number of LED mismatches
     int totalBytes;                 ///< Total bytes compared (num_leds * 3)
     int capturedBytes;              ///< Bytes decoded from the RX channel
+    int captureWaitResult;          ///< RxWaitResult value, or -1 before wait
+    int rawEdgesAfterWait;          ///< Raw edges visible after RX wait/decode
     int mismatchedBytes;            ///< Number of individual bytes that differ
     int lsbOnlyErrors;              ///< Bytes where (expected ^ actual) == 0x01
     fl::vector<LEDError> errors;    ///< First few errors (up to 10)
@@ -86,8 +88,9 @@ struct RunResult {
     bool passed;                    ///< True if no errors
 
     RunResult() : run_number(0), total_leds(0), mismatches(0),
-                  totalBytes(0), capturedBytes(0), mismatchedBytes(0),
-                  lsbOnlyErrors(0), captureFailed(false), passed(false) {}
+                  totalBytes(0), capturedBytes(0), captureWaitResult(-1),
+                  rawEdgesAfterWait(0), mismatchedBytes(0), lsbOnlyErrors(0),
+                  captureFailed(false), passed(false) {}
 };
 
 /// @brief Multi-run test configuration
@@ -114,7 +117,11 @@ struct MultiRunConfig {
 // - timing: Chipset timing configuration for RX decoder
 // - driver_name: Name of the TX driver being tested (e.g., "RMT", "PARLIO") - enables io_loop_back only for RMT
 // Returns number of bytes captured, or 0 on error
-size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel, fl::span<uint8_t> rx_buffer, const fl::ChipsetTimingConfig& timing, const char* driver_name);
+size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
+               fl::span<uint8_t> rx_buffer,
+               const fl::ChipsetTimingConfig& timing,
+               const char* driver_name,
+               fl::RunResult* diagnostics = nullptr);
 
 // Generic driver-agnostic autoresearch test runner (single run)
 // Tests all channels using the specified configuration
