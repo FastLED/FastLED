@@ -24,6 +24,7 @@
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/json.h"
+#include "fl/stl/cstdio.h"
 #include "fl/task/task.h"
 #include "fl/task/executor.h"
 #include "fl/math/wave/wave_perf_bench.h"
@@ -567,9 +568,11 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     bool tight_timing_passed = true;
 
     {
-        // Note: ScopedLogDisable removed to enable diagnostic output during test execution.
-        // This allows capture/decode debug messages (e.g., RX timing, edge dumps) to appear
-        // on serial, which is critical for diagnosing PARLIO failures at different LED counts.
+        // Keep timing-sensitive hardware validation quiet. On Teensy 4,
+        // Serial-backed FL_WARN output can block long enough to starve
+        // ObjectFLED's DMA refill path, which is exactly what #3343 is
+        // trying to prove or eliminate. JSON-RPC responses bypass this guard.
+        fl::ScopedLogDisable quiet_logs;
 
         if (use_legacy_api) {
             // Legacy API path: WS2812B<PIN> template instantiation
@@ -655,6 +658,8 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
             pat.set("runNumber", static_cast<int64_t>(rr.run_number));
             pat.set("totalLeds", static_cast<int64_t>(rr.total_leds));
             pat.set("mismatchedLeds", static_cast<int64_t>(rr.mismatches));
+            pat.set("capturedBytes", static_cast<int64_t>(rr.capturedBytes));
+            pat.set("captureFailed", rr.captureFailed);
             pat.set("mismatchedBytes", static_cast<int64_t>(rr.mismatchedBytes));
             pat.set("lsbOnlyErrors", static_cast<int64_t>(rr.lsbOnlyErrors));
 

@@ -11,7 +11,7 @@ namespace fl {
 
 // Forward declarations
 #ifndef BYTES_PER_DMA
-#define BYTES_PER_DMA 20
+#define BYTES_PER_DMA 60
 #endif
 
 /// Singleton manager for shared ObjectFLED DMA resources
