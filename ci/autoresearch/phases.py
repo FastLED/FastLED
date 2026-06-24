@@ -2545,7 +2545,11 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                     if "patterns" in test_data:
                         display_pattern_details(test_data)
 
-                elif test_data.get("success") and not test_data.get("passed"):
+                elif (
+                    test_data.get("success")
+                    and "passed" in test_data
+                    and not test_data.get("passed")
+                ):
                     stop_word_found = "ERROR"
                     test_failed = True
                     print(f"{Fore.RED}\u274c Test failed{Style.RESET_ALL}")

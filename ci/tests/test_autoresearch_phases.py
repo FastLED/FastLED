@@ -912,6 +912,44 @@ class TestRunTestsOrSpecialMode:
             rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
         assert rc == 1
 
+    def test_rpc_control_success_without_passed_field(self) -> None:
+        ctx = _make_ctx()
+        ctx.json_rpc_commands.insert(
+            0, {"method": "setPins", "params": [{"txPin": 8, "rxPin": 9}]}
+        )
+        qctx = QuietContext(quiet=False)
+
+        mock_client = AsyncMock()
+        set_pins_response = MagicMock()
+        set_pins_response.data = {
+            "success": True,
+            "txPin": 8,
+            "rxPin": 9,
+            "rxChannelRecreated": True,
+        }
+        driver_response = MagicMock()
+        driver_response.data = {
+            "success": True,
+            "passed": True,
+            "driver": "PARLIO",
+            "laneCount": 1,
+            "laneSizes": [100],
+            "duration_ms": 42,
+            "passedTests": 1,
+            "totalTests": 1,
+        }
+        mock_client.send = AsyncMock(side_effect=[set_pins_response, driver_response])
+        mock_client.connect = AsyncMock()
+        mock_client.close = AsyncMock()
+
+        with (
+            patch(f"{_PATCH_MOD}.RpcClient", return_value=mock_client),
+            patch(f"{_PATCH_MOD}.kill_port_users"),
+            patch("time.sleep"),
+        ):
+            rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
+        assert rc == 0
+
     def test_discovery_client_reuse(self) -> None:
         """Verify that discovery_client is reused instead of creating a new one."""
         mock_discovery = AsyncMock()
