@@ -2608,6 +2608,56 @@ def _validate_test_rpc_response(
     return errors
 
 
+def _classify_test_failure(data: dict[str, Any]) -> tuple[str, str]:
+    """Classify a failed test response using structured RPC evidence."""
+    patterns = data.get("patterns")
+    if isinstance(patterns, list) and patterns:
+        saw_pattern = False
+        saw_capture_bytes = False
+        saw_raw_edges = False
+        saw_mismatched_bytes = False
+        saw_capture_failure = False
+
+        for pattern in patterns:
+            if not isinstance(pattern, dict):
+                continue
+            saw_pattern = True
+            captured = pattern.get("capturedBytes")
+            raw_edges = pattern.get("rawEdgesAfterWait")
+            mismatched = pattern.get("mismatchedBytes")
+            if _is_plain_int(captured) and captured > 0:
+                saw_capture_bytes = True
+            if _is_plain_int(raw_edges) and raw_edges > 0:
+                saw_raw_edges = True
+            if _is_plain_int(mismatched) and mismatched > 0:
+                saw_mismatched_bytes = True
+            if pattern.get("captureFailed") is True:
+                saw_capture_failure = True
+
+        if saw_pattern:
+            if not saw_capture_bytes and not saw_raw_edges:
+                return (
+                    "zero_capture",
+                    "RX produced no raw edges or decodable bytes",
+                )
+            if saw_mismatched_bytes or saw_capture_failure:
+                return (
+                    "decode_mismatch",
+                    "RX captured signal/data but decoded output did not match",
+                )
+
+    evidence_bytes = data.get("captureEvidenceBytes")
+    evidence_edges = data.get("captureEvidenceRawEdges")
+    has_capture_bytes = _is_plain_int(evidence_bytes) and evidence_bytes > 0
+    has_capture_edges = _is_plain_int(evidence_edges) and evidence_edges > 0
+    if data.get("passed") is False:
+        if not has_capture_bytes and not has_capture_edges:
+            return ("zero_capture", "test failed with no positive capture evidence")
+        return ("decode_mismatch", "test failed despite positive capture evidence")
+
+    return ("test_failed", "test response reported failure")
+
+
 async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
     """Execute main RPC test loop."""
     upload_port = ctx.upload_port
@@ -2722,8 +2772,10 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                     stop_word_found = "ERROR"
                     test_failed = True
                     print(f"{Fore.RED}\u274c Malformed test response{Style.RESET_ALL}")
+                    print("   Failure class: malformed_response")
                     for error in validation_errors:
                         print(f"   - {error}")
+                    qctx.emit(f"FAILURE class=malformed_response method={method}")
                     break
 
                 elif test_data.get("success") and test_data.get("passed"):
@@ -2774,12 +2826,16 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                 ):
                     stop_word_found = "ERROR"
                     test_failed = True
+                    failure_class, failure_detail = _classify_test_failure(test_data)
                     print(f"{Fore.RED}\u274c Test failed{Style.RESET_ALL}")
+                    print(f"   Failure class: {failure_class}")
+                    print(f"   Detail: {failure_detail}")
                     _err_detail = ""
                     if "firstFailure" in test_data:
                         _err_detail = f" {test_data['firstFailure'].get('pattern', '')}"
                     qctx.emit(
-                        f"TEST {_driver} lanes={_lanes} leds={_leds} FAIL {_dur}ms{_err_detail}"
+                        f"TEST {_driver} lanes={_lanes} leds={_leds} FAIL {_dur}ms "
+                        f"class={failure_class}{_err_detail}"
                     )
 
                     if "firstFailure" in test_data:
@@ -2805,8 +2861,10 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                 print(
                     f"{Fore.RED}\u274c Device crashed during {method}(){Style.RESET_ALL}"
                 )
+                print("   Failure class: crash")
                 if not crash_err.decoded_lines:
                     print("   (no decoded stack trace available)")
+                qctx.emit(f"FAILURE class=crash method={method}")
                 test_failed = True
                 stop_word_found = "ERROR"
                 break
@@ -2814,6 +2872,8 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
             except RpcTimeoutError:
                 print(f"{Fore.RED}\u274c RPC timeout{Style.RESET_ALL}")
                 print(f"   No response within {120}s")
+                print("   Failure class: timeout")
+                qctx.emit(f"FAILURE class=timeout method={method}")
                 test_failed = True
                 stop_word_found = "ERROR"
                 break

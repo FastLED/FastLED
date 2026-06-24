@@ -9,7 +9,7 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from ci.autoresearch.context import QuietContext, RunContext
-from ci.autoresearch.phases import _run_tests_or_special_mode
+from ci.autoresearch.phases import _classify_test_failure, _run_tests_or_special_mode
 
 
 _PATCH_MOD = "ci.autoresearch.phases"
@@ -270,3 +270,45 @@ def test_run_parallel_pass_requires_capture_evidence() -> None:
     rc = _run_rpc([_run_parallel_command()], [response])
 
     assert rc == 1
+
+
+def test_failed_response_with_no_edges_is_zero_capture() -> None:
+    failure_class, detail = _classify_test_failure(
+        {
+            "passed": False,
+            "captureEvidenceBytes": 0,
+            "captureEvidenceRawEdges": 0,
+            "patterns": [
+                {
+                    "capturedBytes": 0,
+                    "rawEdgesAfterWait": 0,
+                    "mismatchedBytes": 300,
+                    "captureFailed": True,
+                }
+            ],
+        }
+    )
+
+    assert failure_class == "zero_capture"
+    assert "no raw edges" in detail
+
+
+def test_failed_response_with_edges_is_decode_mismatch() -> None:
+    failure_class, detail = _classify_test_failure(
+        {
+            "passed": False,
+            "captureEvidenceBytes": 32,
+            "captureEvidenceRawEdges": 128,
+            "patterns": [
+                {
+                    "capturedBytes": 32,
+                    "rawEdgesAfterWait": 128,
+                    "mismatchedBytes": 300,
+                    "captureFailed": False,
+                }
+            ],
+        }
+    )
+
+    assert failure_class == "decode_mismatch"
+    assert "did not match" in detail
