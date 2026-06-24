@@ -131,7 +131,7 @@ def run_cpp_lint() -> bool:
         # The legacy direct `cpp_lint.py` relative-includes call has been
         # retired — RelativeIncludeChecker now ships in the Rust crate.
         result = subprocess.run(
-            ["uv", "run", "python", "ci/lint.py", "--cpp"],
+            ["uv", "run", "--no-sync", "python", "ci/lint.py", "--cpp"],
             cwd=project_root,
             env=get_utf8_env(),
         )

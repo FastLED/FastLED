@@ -2578,6 +2578,18 @@ def _validate_test_rpc_response(
         capture_backend = data.get("captureBackend")
         if not isinstance(capture_backend, str) or not capture_backend:
             errors.append("missing string captureBackend")
+        if data.get("passed") is True:
+            capture_evidence_bytes = data.get("captureEvidenceBytes")
+            capture_evidence_raw_edges = data.get("captureEvidenceRawEdges")
+            has_capture_bytes = (
+                _is_plain_int(capture_evidence_bytes) and capture_evidence_bytes > 0
+            )
+            has_capture_edges = (
+                _is_plain_int(capture_evidence_raw_edges)
+                and capture_evidence_raw_edges > 0
+            )
+            if not has_capture_bytes and not has_capture_edges:
+                errors.append("passed test response requires nonzero capture evidence")
 
     for field, expected in (
         ("requestedTxPin", expected_tx_pin),

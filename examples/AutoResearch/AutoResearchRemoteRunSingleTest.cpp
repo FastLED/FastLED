@@ -624,12 +624,28 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     }
 
     uint32_t duration_ms = millis() - start_ms;
+    int capture_evidence_bytes = 0;
+    int capture_evidence_raw_edges = 0;
+    for (fl::size ri = 0; ri < run_results.size(); ri++) {
+        const auto& rr = run_results[ri];
+        if (rr.capturedBytes > 0) {
+            capture_evidence_bytes += rr.capturedBytes;
+        }
+        if (rr.rawEdgesAfterWait > capture_evidence_raw_edges) {
+            capture_evidence_raw_edges = rr.rawEdgesAfterWait;
+        }
+    }
 
     // ========== RESPONSE ==========
     response.set("success", true);
     response.set("passed", passed);
     response.set("totalTests", static_cast<int64_t>(total_tests));
     response.set("passedTests", static_cast<int64_t>(passed_tests));
+    response.set("captureEvidenceExpected", true);
+    response.set("captureEvidenceBytes",
+                 static_cast<int64_t>(capture_evidence_bytes));
+    response.set("captureEvidenceRawEdges",
+                 static_cast<int64_t>(capture_evidence_raw_edges));
     response.set("duration_ms", static_cast<int64_t>(duration_ms));
     response.set("show_duration_ms", static_cast<int64_t>(show_duration_ms));
     response.set("driver", driver_name.c_str());

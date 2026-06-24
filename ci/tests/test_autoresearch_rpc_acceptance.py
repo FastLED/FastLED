@@ -105,6 +105,9 @@ def _valid_single_pass() -> dict[str, Any]:
         "actualTxPin": 1,
         "actualRxPin": 0,
         "captureBackend": "FLEXPWM",
+        "captureEvidenceExpected": True,
+        "captureEvidenceBytes": 300,
+        "captureEvidenceRawEdges": 2400,
     }
 
 
@@ -176,6 +179,26 @@ def test_run_single_missing_capture_backend_fails() -> None:
     assert rc == 1
 
 
+def test_run_single_pass_requires_capture_evidence() -> None:
+    response = _valid_single_pass()
+    response["captureEvidenceBytes"] = 0
+    response["captureEvidenceRawEdges"] = 0
+
+    rc = _run_rpc([_run_single_command()], [response])
+
+    assert rc == 1
+
+
+def test_run_single_pass_requires_capture_evidence_fields() -> None:
+    response = _valid_single_pass()
+    del response["captureEvidenceBytes"]
+    del response["captureEvidenceRawEdges"]
+
+    rc = _run_rpc([_run_single_command()], [response])
+
+    assert rc == 1
+
+
 def test_run_single_pin_override_is_accepted_when_response_matches() -> None:
     command = _run_single_command()
     command["params"]["pinTx"] = 6
@@ -215,6 +238,9 @@ def _valid_parallel_pass() -> dict[str, Any]:
         "actualTxPin": 1,
         "actualRxPin": 0,
         "captureBackend": "FLEXPWM",
+        "captureEvidenceExpected": True,
+        "captureEvidenceBytes": 300,
+        "captureEvidenceRawEdges": 2400,
         "drivers": [
             {"driver": "PARLIO", "pinTx": 1, "laneSizes": [100], "laneCount": 1},
             {"driver": "RMT", "pinTx": 2, "laneSizes": [100], "laneCount": 1},
@@ -230,6 +256,16 @@ def test_run_parallel_valid_pass_is_accepted() -> None:
 def test_run_parallel_missing_test_counts_fails() -> None:
     response = _valid_parallel_pass()
     del response["totalTests"]
+
+    rc = _run_rpc([_run_parallel_command()], [response])
+
+    assert rc == 1
+
+
+def test_run_parallel_pass_requires_capture_evidence() -> None:
+    response = _valid_parallel_pass()
+    response["captureEvidenceBytes"] = 0
+    response["captureEvidenceRawEdges"] = 0
 
     rc = _run_rpc([_run_parallel_command()], [response])
 
