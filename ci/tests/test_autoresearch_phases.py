@@ -234,9 +234,7 @@ class TestParseArgsAndBuildCommands:
             result = _parse_args_and_build_commands(args)
         assert isinstance(result, RunContext)
         assert result.drivers == ["OBJECT_FLED", "FLEX_IO"]
-        assert {cmd["method"] for cmd in result.json_rpc_commands} == {
-            "runSingleTest"
-        }
+        assert {cmd["method"] for cmd in result.json_rpc_commands} == {"runSingleTest"}
         assert not any("__skip_with_pass" in cmd for cmd in result.json_rpc_commands)
 
     def test_lpuart_is_reserved_not_selectable(self, fake_project_dir: Path) -> None:
@@ -798,8 +796,51 @@ class TestRunSchemaAndPinSetup:
         ):
             rc = asyncio.run(_run_schema_and_pin_setup(ctx))
         assert rc is None
-        assert ctx.effective_tx_pin == 1  # PIN_TX default
-        assert ctx.effective_rx_pin == 0  # PIN_RX default
+        assert ctx.effective_tx_pin == 1
+        assert ctx.effective_rx_pin == 2
+
+    def test_teensy_default_pins_match_firmware(self) -> None:
+        args = _make_args(skip_schema=True)
+        ctx = _make_ctx(args=args, final_environment="teensy41")
+        with patch(
+            f"{_PATCH_MOD}.run_gpio_pretest",
+            new_callable=AsyncMock,
+            return_value=True,
+        ):
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.effective_tx_pin == 1
+        assert ctx.effective_rx_pin == 2
+
+    def test_esp32p4_default_pins_match_firmware(self) -> None:
+        args = _make_args(skip_schema=True)
+        ctx = _make_ctx(args=args, final_environment="esp32p4")
+        with patch(
+            f"{_PATCH_MOD}.run_gpio_pretest",
+            new_callable=AsyncMock,
+            return_value=True,
+        ):
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.effective_tx_pin == 5
+        assert ctx.effective_rx_pin == 6
+
+    def test_teensy_cli_half_override_uses_firmware_default_complement(self) -> None:
+        args = _make_args(tx_pin=22, skip_schema=True)
+        ctx = _make_ctx(args=args, final_environment="teensy41")
+        with patch(
+            f"{_PATCH_MOD}.run_gpio_pretest",
+            new_callable=AsyncMock,
+            return_value=True,
+        ):
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.effective_tx_pin == 22
+        assert ctx.effective_rx_pin == 2
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 22, "rxPin": 2}],
+        }
 
     def test_gpio_pretest_failure(self) -> None:
         args = _make_args(skip_schema=True)
@@ -852,6 +893,31 @@ class TestRunSchemaAndPinSetup:
         assert ctx.effective_rx_pin == 6
         assert ctx.discovery_client is not None
         assert ctx.pins_discovered is True
+
+    def test_auto_discover_pins_failure_uses_platform_defaults(self) -> None:
+        args = _make_args(auto_discover_pins=True, skip_schema=True)
+        ctx = _make_ctx(args=args, final_environment="esp32p4")
+        mock_client = AsyncMock()
+        mock_discovery = MagicMock(
+            success=False, tx_pin=None, rx_pin=None, client=mock_client
+        )
+        with (
+            patch(
+                f"{_PATCH_MOD}.run_pin_discovery",
+                new_callable=AsyncMock,
+                return_value=mock_discovery,
+            ),
+            patch(
+                f"{_PATCH_MOD}.run_gpio_pretest",
+                new_callable=AsyncMock,
+                return_value=True,
+            ),
+        ):
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.effective_tx_pin == 5
+        assert ctx.effective_rx_pin == 6
+        mock_client.close.assert_awaited_once()
 
 
 # ============================================================
