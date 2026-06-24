@@ -349,6 +349,9 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
     uint32_t duration_ms = millis() - start_ms;
     int total_tests = 1;
     int passed_tests = show_success ? 1 : 0;
+    const int primary_tx_pin = driver_entries.empty()
+                                   ? mState->pin_tx
+                                   : driver_entries[0].pin_tx;
     if (rx_validation_attempted) {
         total_tests++;
         if (rx_validation_passed) {
@@ -362,6 +365,10 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
     response.set("totalTests", static_cast<int64_t>(total_tests));
     response.set("passedTests", static_cast<int64_t>(passed_tests));
     response.set("failedTests", static_cast<int64_t>(total_tests - passed_tests));
+    response.set("requestedTxPin", static_cast<int64_t>(primary_tx_pin));
+    response.set("requestedRxPin", static_cast<int64_t>(mState->pin_rx));
+    response.set("actualTxPin", static_cast<int64_t>(primary_tx_pin));
+    response.set("actualRxPin", static_cast<int64_t>(mState->pin_rx));
     response.set("duration_ms", static_cast<int64_t>(duration_ms));
     response.set("show_duration_us", static_cast<int64_t>(show_duration_us));
     response.set("iterations", static_cast<int64_t>(iterations));

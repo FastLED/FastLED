@@ -2503,8 +2503,38 @@ def _actual_test_drivers(method: str, data: dict[str, Any]) -> list[str]:
     return []
 
 
+def _expected_test_pins(
+    method: str,
+    cmd: dict[str, Any],
+    default_tx_pin: int | None,
+    default_rx_pin: int | None,
+) -> tuple[int | None, int | None]:
+    params = cmd.get("params")
+    if not isinstance(params, dict):
+        return default_tx_pin, default_rx_pin
+
+    if method == "runParallelTest":
+        drivers = params.get("drivers")
+        if isinstance(drivers, list) and drivers and isinstance(drivers[0], dict):
+            tx_pin = drivers[0].get("pinTx")
+            if _is_plain_int(tx_pin):
+                return tx_pin, default_rx_pin
+        return default_tx_pin, default_rx_pin
+
+    tx_pin = params.get("pinTx")
+    rx_pin = params.get("pinRx")
+    return (
+        tx_pin if _is_plain_int(tx_pin) else default_tx_pin,
+        rx_pin if _is_plain_int(rx_pin) else default_rx_pin,
+    )
+
+
 def _validate_test_rpc_response(
-    method: str, cmd: dict[str, Any], data: dict[str, Any]
+    method: str,
+    cmd: dict[str, Any],
+    data: dict[str, Any],
+    expected_tx_pin: int | None,
+    expected_rx_pin: int | None,
 ) -> list[str]:
     """Return validation errors that prevent a test RPC from proving PASS."""
     errors: list[str] = []
@@ -2540,6 +2570,23 @@ def _validate_test_rpc_response(
         for driver in expected_drivers:
             if driver not in actual_drivers:
                 errors.append(f"missing expected driver {driver}")
+
+    expected_tx_pin, expected_rx_pin = _expected_test_pins(
+        method, cmd, expected_tx_pin, expected_rx_pin
+    )
+    for field, expected in (
+        ("requestedTxPin", expected_tx_pin),
+        ("requestedRxPin", expected_rx_pin),
+        ("actualTxPin", expected_tx_pin),
+        ("actualRxPin", expected_rx_pin),
+    ):
+        if expected is None:
+            continue
+        value = data.get(field)
+        if not _is_plain_int(value):
+            errors.append(f"missing integer {field}")
+        elif expected is not None and value != expected:
+            errors.append(f"{field}={value} does not match expected {expected}")
 
     return errors
 
@@ -2648,7 +2695,11 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
 
                 elif test_method and (
                     validation_errors := _validate_test_rpc_response(
-                        method, cmd, test_data
+                        method,
+                        cmd,
+                        test_data,
+                        ctx.effective_tx_pin,
+                        ctx.effective_rx_pin,
                     )
                 ):
                     stop_word_found = "ERROR"

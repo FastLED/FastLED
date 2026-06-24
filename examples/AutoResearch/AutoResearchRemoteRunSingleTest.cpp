@@ -633,6 +633,11 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     response.set("duration_ms", static_cast<int64_t>(duration_ms));
     response.set("show_duration_ms", static_cast<int64_t>(show_duration_ms));
     response.set("driver", driver_name.c_str());
+    response.set("requestedTxPin", static_cast<int64_t>(pin_tx));
+    response.set("requestedRxPin", static_cast<int64_t>(pin_rx));
+    response.set("actualTxPin", static_cast<int64_t>(pin_tx));
+    response.set("actualRxPin", static_cast<int64_t>(
+        rx_channel_to_use ? rx_channel_to_use->getPin() : pin_rx));
     response.set("laneCount", static_cast<int64_t>(lane_sizes.size()));
 
     fl::json sizes_response = fl::json::array();
