@@ -384,8 +384,7 @@ impl FileContentChecker for AutoResearchRuntimeOutputChecker {
             return false;
         }
         let normalized = normalize_path(file_path);
-        normalized.ends_with("examples/AutoResearch/AutoResearch.ino")
-            || normalized.contains("examples/AutoResearch/AutoResearchRemote")
+        normalized.contains("examples/AutoResearch/")
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
@@ -393,11 +392,29 @@ impl FileContentChecker for AutoResearchRuntimeOutputChecker {
             return Vec::new();
         }
 
+        let normalized_path = normalize_path(&file_content.path);
+        let always_enforced =
+            normalized_path.ends_with("examples/AutoResearch/AutoResearch.ino")
+                || normalized_path.contains("examples/AutoResearch/AutoResearchRemote");
         let mut violations = Vec::new();
         let mut in_multiline_comment = false;
+        let mut lint_active = always_enforced;
 
         for (index, line) in file_content.lines.iter().enumerate() {
             let stripped = line.trim();
+            let lower_line = line.to_ascii_lowercase();
+
+            if lower_line.contains("autoresearch-runtime-output-lint: begin") {
+                lint_active = true;
+                continue;
+            }
+            if lower_line.contains("autoresearch-runtime-output-lint: end") {
+                lint_active = always_enforced;
+                continue;
+            }
+            if !lint_active {
+                continue;
+            }
 
             if line.contains("/*") {
                 in_multiline_comment = true;
@@ -428,7 +445,7 @@ impl FileContentChecker for AutoResearchRuntimeOutputChecker {
             violations.push((
                 index + 1,
                 format!(
-                    "AutoResearch runtime output must use JSON-RPC result fields, not direct logging/serial output.\n      Line: {stripped}\n      If this is the RPC transport boundary itself, suppress with `// ok autoresearch rpc serial - <reason>`."
+                    "AutoResearch runtime output must use JSON-RPC result fields, not direct logging/serial output.\n      Line: {stripped}\n      Boot/RPC files are always checked; other AutoResearch files can protect critical test sections with `// autoresearch-runtime-output-lint: begin` and `// autoresearch-runtime-output-lint: end`.\n      If this is the RPC transport boundary itself, suppress with `// ok autoresearch rpc serial - <reason>`."
                 ),
             ));
         }
