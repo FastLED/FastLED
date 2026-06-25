@@ -116,6 +116,11 @@ private:
 
     ObjectFLEDTimingConfig mTiming;
     RectangularDrawBuffer mRectDrawBuffer;
+    struct PendingStrip {
+        u8 pin = 0;
+        fl::vector<u8> bytes;
+    };
+    fl::vector<PendingStrip> mPendingStrips;
     void* mObjectFLED;  // Opaque pointer to ObjectFLED
     bool mDrawn;
 };
