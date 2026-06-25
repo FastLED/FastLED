@@ -5,8 +5,10 @@
 /// ObjectFLED's show() starts DMA and returns while output/latch timing may
 /// still be active, so poll() owns the DRAINING -> READY transition.
 ///
-/// Data format: ChannelData contains raw RGB/RGBW bytes (from ws2812 encoder),
-/// which is exactly what ObjectFLED expects in its frameBufferLocal.
+/// Data format: ChannelData contains raw RGB/RGBW bytes (from the WS2812
+/// encoder) plus explicit ChannelPixelFormat metadata. The engine uses that
+/// metadata for ObjectFLED's raw frameBufferLocal layout; it does not infer
+/// RGBW from byte counts.
 
 #pragma once
 

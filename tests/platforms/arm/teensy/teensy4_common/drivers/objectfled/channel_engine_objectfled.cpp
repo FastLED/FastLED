@@ -57,7 +57,8 @@ ChannelDataPtr createRGBWChannelData(int pin, size_t num_leds,
             encoded[i] = rgbw_data[i];
         }
     }
-    return ChannelData::create(pin, t, fl::move(encoded));
+    return ChannelData::create(
+        pin, t, fl::move(encoded), ChannelPixelFormat::RGBW);
 }
 
 } // anonymous namespace
@@ -310,6 +311,30 @@ FL_TEST_CASE("ObjectFLED engine - detects RGBW data") {
     FL_CHECK(record->isRgbw == true);
 }
 
+FL_TEST_CASE("ObjectFLED engine - explicit RGB metadata wins over 12-byte size") {
+    auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
+    ChannelEngineObjectFLED engine(mock);
+
+    uint8_t rgb[] = {
+        0x10, 0x11, 0x12,
+        0x20, 0x21, 0x22,
+        0x30, 0x31, 0x32,
+        0x40, 0x41, 0x42,
+    };
+    auto ch = createRGBChannelData(2, 4, rgb);
+
+    engine.enqueue(ch);
+    engine.show();
+
+    auto* record = mock->getLastCreateRecord();
+    auto* inst = mock->getLastInstance();
+    FL_REQUIRE(record != nullptr);
+    FL_REQUIRE(inst != nullptr);
+    FL_CHECK(record->isRgbw == false);
+    FL_CHECK(record->totalLeds == 4);
+    FL_CHECK(inst->getFrameBufferSize() == 12);
+}
+
 FL_TEST_CASE("ObjectFLED rectangular sizing rounds RGBW small counts") {
     struct Case {
         u16 leds;
@@ -345,15 +370,18 @@ FL_TEST_CASE("ObjectFLED rectangular sizing rounds RGBW small counts") {
     }
 }
 
-FL_TEST_CASE("ObjectFLED engine - RGBW small counts allocate padding") {
+FL_TEST_CASE("ObjectFLED engine - RGBW raw channel counts use exact byte layout") {
     struct Case {
         size_t leds;
         u32 expectedFrameBytes;
     };
     const Case cases[] = {
-        {1, 12},
-        {2, 12},
-        {4, 20},
+        {1, 4},
+        {2, 8},
+        {3, 12},
+        {4, 16},
+        {6, 24},
+        {9, 36},
     };
 
     for (const auto& c : cases) {
@@ -369,8 +397,38 @@ FL_TEST_CASE("ObjectFLED engine - RGBW small counts allocate padding") {
         FL_REQUIRE(inst != nullptr);
         FL_REQUIRE(record != nullptr);
         FL_CHECK(record->isRgbw == true);
+        FL_CHECK(record->totalLeds == static_cast<int>(c.leds));
         FL_CHECK(inst->getFrameBufferSize() == c.expectedFrameBytes);
     }
+}
+
+FL_TEST_CASE("ObjectFLED engine - RGBW raw channel preserves nonzero white") {
+    auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
+    ChannelEngineObjectFLED engine(mock);
+
+    uint8_t rgbw[] = {
+        0x01, 0x02, 0x03, 0xA5,
+        0x04, 0x05, 0x06, 0xB6,
+        0x07, 0x08, 0x09, 0xC7,
+    };
+    auto ch = createRGBWChannelData(22, 3, rgbw);
+
+    engine.enqueue(ch);
+    engine.show();
+
+    auto* record = mock->getLastCreateRecord();
+    auto* inst = mock->getLastInstance();
+    FL_REQUIRE(record != nullptr);
+    FL_REQUIRE(inst != nullptr);
+    FL_CHECK(record->isRgbw == true);
+    FL_CHECK(record->totalLeds == 3);
+    FL_CHECK(inst->getFrameBufferSize() == 12);
+
+    const auto& frameData = inst->getRawBuffer();
+    FL_REQUIRE(frameData.size() == 12);
+    FL_CHECK(frameData[3] == 0xA5);
+    FL_CHECK(frameData[7] == 0xB6);
+    FL_CHECK(frameData[11] == 0xC7);
 }
 
 //=============================================================================

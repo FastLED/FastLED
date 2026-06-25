@@ -11,17 +11,21 @@ namespace fl {
 
 ChannelDataPtr ChannelData::create(
     const ChipsetVariant& chipset,
-    fl::vector_psram<u8>&& encodedData
+    fl::vector_psram<u8>&& encodedData,
+    ChannelPixelFormat pixelFormat
 ) FL_NO_EXCEPT {
-    return fl::make_shared<ChannelData>(chipset, fl::move(encodedData));
+    return fl::make_shared<ChannelData>(
+            chipset, fl::move(encodedData), pixelFormat);
 }
 
 ChannelDataPtr ChannelData::create(
     int pin,
     const ChipsetTimingConfig& timing,
-    fl::vector_psram<u8>&& encodedData
+    fl::vector_psram<u8>&& encodedData,
+    ChannelPixelFormat pixelFormat
 ) FL_NO_EXCEPT {
-    return fl::make_shared<ChannelData>(pin, timing, fl::move(encodedData));
+    return fl::make_shared<ChannelData>(
+            pin, timing, fl::move(encodedData), pixelFormat);
 }
 
 int ChannelData::getPin() const FL_NO_EXCEPT {
@@ -44,18 +48,22 @@ const ChipsetTimingConfig& ChannelData::getTiming() const FL_NO_EXCEPT {
 
 ChannelData::ChannelData(
     const ChipsetVariant& chipset,
-    fl::vector_psram<u8>&& encodedData
+    fl::vector_psram<u8>&& encodedData,
+    ChannelPixelFormat pixelFormat
 ) FL_NO_EXCEPT
     : mChipset(chipset)
+    , mPixelFormat(pixelFormat)
     , mEncodedData(fl::move(encodedData))
 {}
 
 ChannelData::ChannelData(
     int pin,
     const ChipsetTimingConfig& timing,
-    fl::vector_psram<u8>&& encodedData
+    fl::vector_psram<u8>&& encodedData,
+    ChannelPixelFormat pixelFormat
 ) FL_NO_EXCEPT
     : mChipset(ClocklessChipset(pin, timing))
+    , mPixelFormat(pixelFormat)
     , mEncodedData(fl::move(encodedData))
 {}
 
