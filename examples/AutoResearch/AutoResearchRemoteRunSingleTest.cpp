@@ -878,6 +878,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
 
         if (is_object_fled_driver) {
             fl::objectFledDiagnosticsReset();
+            fl::objectFledDiagnosticsSetRxPin(pin_rx);
         }
 
         if (use_legacy_api) {

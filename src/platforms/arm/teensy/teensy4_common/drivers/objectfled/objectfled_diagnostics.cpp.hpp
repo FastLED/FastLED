@@ -122,6 +122,14 @@ struct SnapshotEvent {
     u32 xbarCtrl1 = 0;
     DmaSnapshot dma;
     BusyStateSnapshot busy;
+    // RX-pin probe: snapshot the configured RX pin's pad status across the
+    // run so afterShowReturn (captured while DMA is still actively driving
+    // TX) can prove whether the RX pad sees any transition.
+    bool rxPinValid = false;
+    u8 rxPin = 0;
+    u8 rxBit = 0;
+    u32 rxFastPsr = 0;
+    u32 rxStandardPsr = 0;
 };
 
 SnapshotEvent s_events[kMaxEvents];
@@ -130,6 +138,8 @@ u32 s_overflowCount = 0;
 u8 s_lastPins[kMaxPins];
 u8 s_lastPinCount = 0;
 BusyStateSnapshot s_busyState;
+bool s_rxPinValid = false;
+u8 s_rxPin = 0;
 
 u32 ptrToU32(const volatile void* ptr) FL_NO_EXCEPT {
     return static_cast<u32>(fl::ptr_to_int(const_cast<void*>(ptr)));
@@ -397,6 +407,15 @@ void appendEvent(fl::sstream& out, const SnapshotEvent& event) FL_NO_EXCEPT {
         out << " pin[" << static_cast<int>(i) << "].";
         appendPin(out, event.pins[i]);
     }
+    if (event.rxPinValid) {
+        const u32 mask = 1u << event.rxBit;
+        out << " rx.pin=" << static_cast<int>(event.rxPin)
+            << " rx.bit=" << static_cast<int>(event.rxBit)
+            << " rx.fastPsr=" << event.rxFastPsr
+            << " rx.standardPsr=" << event.rxStandardPsr
+            << " rx.fastHigh=" << ((event.rxFastPsr & mask) ? 1 : 0)
+            << " rx.standardHigh=" << ((event.rxStandardPsr & mask) ? 1 : 0);
+    }
     out << '\n';
 }
 
@@ -425,6 +444,8 @@ void objectFledDiagnosticsReset() FL_NO_EXCEPT {
     s_overflowCount = 0;
     s_lastPinCount = 0;
     s_busyState = BusyStateSnapshot();
+    s_rxPinValid = false;
+    s_rxPin = 0;
 }
 
 void objectFledDiagnosticsSetBusyState(bool dma_active,
@@ -432,6 +453,20 @@ void objectFledDiagnosticsSetBusyState(bool dma_active,
     s_busyState.dmaActive = dma_active;
     s_busyState.latchActive = latch_active;
     s_busyState.ready = !dma_active && !latch_active;
+}
+
+void objectFledDiagnosticsSetRxPin(int rx_pin) FL_NO_EXCEPT {
+#if defined(NUM_DIGITAL_PINS)
+    if (rx_pin < 0 || rx_pin >= NUM_DIGITAL_PINS) {
+        s_rxPinValid = false;
+        return;
+    }
+    s_rxPinValid = true;
+    s_rxPin = static_cast<u8>(rx_pin);
+#else
+    (void)rx_pin;
+    s_rxPinValid = false;
+#endif
 }
 
 void objectFledDiagnosticsRecord(const char* stage, const u8* pins,
@@ -479,6 +514,23 @@ void objectFledDiagnosticsRecord(const char* stage, const u8* pins,
     event.xbarCtrl0 = XBARA1_CTRL0;
     event.xbarCtrl1 = XBARA1_CTRL1;
     event.dma = captureDma();
+
+#if defined(NUM_DIGITAL_PINS)
+    if (s_rxPinValid && s_rxPin < NUM_DIGITAL_PINS) {
+        event.rxPinValid = true;
+        event.rxPin = s_rxPin;
+        event.rxBit = digitalPinToBit(s_rxPin);
+        volatile u32* fastOut = portOutputRegister(s_rxPin);
+        volatile u32* fastPsr =
+            reinterpret_cast<volatile u32*>( // ok reinterpret cast - Teensy GPIO PSR offset
+                ptrToU32(fastOut) + 0x08u);
+        volatile u32* standardPsr =
+            reinterpret_cast<volatile u32*>( // ok reinterpret cast - Teensy GPIO alias address map
+                ptrToU32(fastOut) - 0x01E48000u + 0x08u);
+        event.rxFastPsr = *fastPsr;
+        event.rxStandardPsr = *standardPsr;
+    }
+#endif
 }
 
 fl::json objectFledDiagnosticsToJson() FL_NO_EXCEPT {
