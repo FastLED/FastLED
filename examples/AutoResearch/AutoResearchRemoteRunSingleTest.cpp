@@ -102,6 +102,144 @@ bool contaminateTxMuxWithPwm(int pin) {
 #endif
 }
 
+// Diagnostic probe (Teensy 4.x): manually drive TX via the standard GPIO1-4
+// alias and read RX with digitalRead, so we can tell whether the
+// IOMUXC_GPR_GPR26..29 fast->standard remap that ObjectFLED relies on
+// actually reaches the pad on the connected board. Saves and restores all
+// touched IOMUXC/GPIO state; never modifies FlexPWM or DMA.
+fl::json probeStandardGpioPad(int tx_pin, int rx_pin) {
+    fl::json probe = fl::json::object();
+    probe.set("supported", false);
+    probe.set("txPin", static_cast<int64_t>(tx_pin));
+    probe.set("rxPin", static_cast<int64_t>(rx_pin));
+#if !defined(FL_IS_TEENSY_4X)
+    probe.set("message", "Teensy 4.x only");
+    return probe;
+#else
+    probe.set("supported", true);
+    if (tx_pin < 0 || tx_pin >= NUM_DIGITAL_PINS ||
+        rx_pin < 0 || rx_pin >= NUM_DIGITAL_PINS) {
+        probe.set("success", false);
+        probe.set("error", "InvalidPin");
+        return probe;
+    }
+
+    volatile uint32_t* fast_output = portOutputRegister(tx_pin);
+    volatile uint32_t* standard_output = reinterpret_cast<volatile uint32_t*>( // ok reinterpret cast - Teensy GPIO alias address map
+        reinterpret_cast<uintptr_t>(fast_output) - 0x01E48000u);
+    volatile uint32_t* fast_mode = portModeRegister(tx_pin);
+    volatile uint32_t* standard_mode = reinterpret_cast<volatile uint32_t*>( // ok reinterpret cast - Teensy GPIO alias address map
+        reinterpret_cast<uintptr_t>(fast_mode) - 0x01E48000u);
+    volatile uint32_t* tx_mux = portConfigRegister(tx_pin);
+    volatile uint32_t* tx_pad = portControlRegister(tx_pin);
+    volatile uint32_t* rx_mux = portConfigRegister(rx_pin);
+    volatile uint32_t* rx_pad = portControlRegister(rx_pin);
+
+    const uint32_t gpio6_base =
+        static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&GPIO6_DR));
+    const uint32_t output_addr =
+        static_cast<uint32_t>(reinterpret_cast<uintptr_t>(fast_output));
+    const uint8_t offset =
+        static_cast<uint8_t>((output_addr - gpio6_base) >> 14);
+    const uint8_t bit = digitalPinToBit(tx_pin);
+    const uint32_t mask = 1u << bit;
+    probe.set("txBit", static_cast<int64_t>(bit));
+    probe.set("txMask", static_cast<int64_t>(mask));
+    probe.set("txOffset", static_cast<int64_t>(offset));
+    if (offset > 3) {
+        probe.set("success", false);
+        probe.set("error", "UnsupportedGpioBank");
+        return probe;
+    }
+
+    volatile uint32_t* gpr = &IOMUXC_GPR_GPR26 + offset;
+    // Save state we are about to clobber.
+    const uint32_t saved_gpr = *gpr;
+    const uint32_t saved_tx_mux = *tx_mux;
+    const uint32_t saved_tx_pad = *tx_pad;
+    const uint32_t saved_rx_mux = *rx_mux;
+    const uint32_t saved_rx_pad = *rx_pad;
+    const uint32_t saved_fast_mode = *fast_mode;
+    const uint32_t saved_standard_mode = *standard_mode;
+    const uint32_t saved_fast_out = *fast_output;
+    const uint32_t saved_standard_out = *standard_output;
+
+    // Make sure standard GPIO1-4 banks are clocked. Teensy startup usually
+    // leaves them on, but assert it explicitly so this probe is independent
+    // of boot order.
+    CCM_CCGR1 |= CCM_CCGR1_GPIO1(CCM_CCGR_ON);
+    CCM_CCGR0 |= CCM_CCGR0_GPIO2(CCM_CCGR_ON);
+    CCM_CCGR2 |= CCM_CCGR2_GPIO3(CCM_CCGR_ON);
+    CCM_CCGR3 |= CCM_CCGR3_GPIO4(CCM_CCGR_ON);
+
+    // RX pin: simple input, no pull, so we can sample what the pad sees.
+    *rx_mux = 5 | 0x10;
+    *rx_pad = (5u << 3) | (3u << 6);  // DSE=5, SPEED=3, no pull/keeper
+    pinMode(rx_pin, INPUT);
+
+    // TX pin: ALT5 (GPIO) + SION, mapped to standard bank.
+    *tx_mux = 5 | 0x10;
+    *tx_pad = (3u << 3) | (3u << 6);  // DSE=3 (matches ObjectFLED), SPEED=3
+    *gpr &= ~mask;                       // route pad to standard alias
+    *standard_mode |= mask;              // output mode in standard bank
+    // DR_CLEAR = +0x88, DR_SET = +0x84
+    *reinterpret_cast<volatile uint32_t*>( // ok reinterpret cast - Teensy GPIO alias address map
+        reinterpret_cast<uintptr_t>(standard_output) + 0x88u) = mask;
+    delayMicroseconds(50);
+    const int rx_initial = digitalReadFast(rx_pin);
+
+    int rx_high_count = 0;
+    int rx_low_count = 0;
+    for (int i = 0; i < 5; ++i) {
+        *reinterpret_cast<volatile uint32_t*>( // ok reinterpret cast - Teensy GPIO alias address map
+            reinterpret_cast<uintptr_t>(standard_output) + 0x84u) = mask;
+        delayMicroseconds(40);
+        if (digitalReadFast(rx_pin) == HIGH) {
+            ++rx_high_count;
+        }
+        *reinterpret_cast<volatile uint32_t*>( // ok reinterpret cast - Teensy GPIO alias address map
+            reinterpret_cast<uintptr_t>(standard_output) + 0x88u) = mask;
+        delayMicroseconds(40);
+        if (digitalReadFast(rx_pin) == LOW) {
+            ++rx_low_count;
+        }
+    }
+
+    probe.set("standardGpioRxInitial",
+              rx_initial == HIGH ? "HIGH" : "LOW");
+    probe.set("standardGpioRxHighCount", static_cast<int64_t>(rx_high_count));
+    probe.set("standardGpioRxLowCount", static_cast<int64_t>(rx_low_count));
+    probe.set("standardGpioConnected",
+              (rx_high_count == 5) && (rx_low_count == 5));
+
+    // Restore TX/RX pad state.
+    if ((saved_fast_out & mask) != 0) {
+        *reinterpret_cast<volatile uint32_t*>( // ok reinterpret cast - Teensy GPIO alias address map
+            reinterpret_cast<uintptr_t>(fast_output) + 0x84u) = mask;
+    } else {
+        *reinterpret_cast<volatile uint32_t*>( // ok reinterpret cast - Teensy GPIO alias address map
+            reinterpret_cast<uintptr_t>(fast_output) + 0x88u) = mask;
+    }
+    if ((saved_standard_out & mask) != 0) {
+        *reinterpret_cast<volatile uint32_t*>( // ok reinterpret cast - Teensy GPIO alias address map
+            reinterpret_cast<uintptr_t>(standard_output) + 0x84u) = mask;
+    } else {
+        *reinterpret_cast<volatile uint32_t*>( // ok reinterpret cast - Teensy GPIO alias address map
+            reinterpret_cast<uintptr_t>(standard_output) + 0x88u) = mask;
+    }
+    *fast_mode = saved_fast_mode;
+    *standard_mode = saved_standard_mode;
+    *gpr = saved_gpr;
+    *tx_pad = saved_tx_pad;
+    *tx_mux = saved_tx_mux;
+    *rx_pad = saved_rx_pad;
+    *rx_mux = saved_rx_mux;
+
+    probe.set("success", true);
+    return probe;
+#endif
+}
+
 fl::json measureTightTiming(const fl::string& driver_name,
                             const fl::ChipsetTimingConfig& timing,
                             const fl::vector<fl::ChannelConfig>& tx_configs,
@@ -557,6 +695,11 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
 
     uint32_t start_ms = millis();
 
+    fl::json standard_gpio_pad_probe;
+    if (is_object_fled_driver) {
+        standard_gpio_pad_probe = probeStandardGpioPad(pin_tx, pin_rx);
+    }
+
     if (contaminate_tx_mux) {
         if (!is_object_fled_driver) {
             response.set("success", false);
@@ -817,6 +960,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         response.set("flexPwmRxDiagnostics",
                      fl::FlexPwmRxChannel::diagnosticsToJson(pin_rx));
 #endif
+        response.set("standardGpioPadProbe", standard_gpio_pad_probe);
     }
 
     // Free run_results before building response to reclaim heap
