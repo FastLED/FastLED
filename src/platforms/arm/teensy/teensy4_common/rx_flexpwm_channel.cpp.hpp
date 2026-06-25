@@ -114,9 +114,12 @@ static const FlexPwmPinInfo kPinMap[] = {
      &IOMUXC_FLEXPWM2_PWMA2_SELECT_INPUT, 1},
 
     // Pin 8: FlexPWM1_SM3_A (GPIO_B1_00, ALT6)
+    // SELECT_INPUT=4 routes from GPIO_B1_00 (pin 8). The previous value 0
+    // selected GPIO_SD_B1_00, an unrelated pad, so FlexPWM never saw the
+    // pin 8 signal -- #3359 zero_capture root cause for canonical TX22->RX8.
     {8, &IMXRT_FLEXPWM1, 3, false, DMAMUX_SOURCE_FLEXPWM1_READ3,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_B1_00, 6,
-     &IOMUXC_FLEXPWM1_PWMA3_SELECT_INPUT, 0},
+     &IOMUXC_FLEXPWM1_PWMA3_SELECT_INPUT, 4},
 
     // Pin 22: FlexPWM4_SM0_A (GPIO_AD_B1_08, ALT1)
     {22, &IMXRT_FLEXPWM4, 0, false, DMAMUX_SOURCE_FLEXPWM4_READ0,
@@ -498,6 +501,19 @@ void FlexPwmRxChannelImpl::configureDma() {
     }
 
     mDma.begin();
+
+    // Quiesce the channel before rewriting the TCD. configureDma() runs
+    // once per test pattern (i.e. per capture()) and the previous pattern
+    // may have left ERQ set, a pending interrupt latched, or an in-flight
+    // hardware request mid-minor-loop. Modifying the TCD while a transfer
+    // is active is undefined behavior on i.MX RT eDMA and was the trigger
+    // for the runSingleTest hang/DACCVIOL we hit in #3400 once
+    // SELECT_INPUT started routing real edges into the submodule.
+    mDma.disable();
+    mDma.clearComplete();
+    mDma.clearInterrupt();
+    mDma.clearError();
+
     mDma.TCD->SADDR = const_cast<u16 *>(capture_reg);
     mDma.TCD->SOFF = 4;
     mDma.TCD->ATTR = DMA_TCD_ATTR_SSIZE(1) | DMA_TCD_ATTR_DSIZE(1);
