@@ -212,6 +212,43 @@ fl::json probeStandardGpioPad(int tx_pin, int rx_pin) {
     probe.set("standardGpioConnected",
               (rx_high_count == 5) && (rx_low_count == 5));
 
+    // Tight-loop fast toggle: write HIGH, read RX, write LOW, read RX, with
+    // no delay between write and read. Measures whether the standard GPIO
+    // alias propagates to the pad and back to digitalReadFast within a
+    // CPU-bus-cycle window comparable to ObjectFLED's DMA write rate.
+    int fast_high_count = 0;
+    int fast_low_count = 0;
+    int fast_high_zero_delay = 0;
+    int fast_low_zero_delay = 0;
+    constexpr int kFastIters = 50;
+    for (int i = 0; i < kFastIters; ++i) {
+        *reinterpret_cast<volatile uint32_t*>( // ok reinterpret cast - Teensy GPIO alias address map
+            reinterpret_cast<uintptr_t>(standard_output) + 0x84u) = mask;
+        if (digitalReadFast(rx_pin) == HIGH) {
+            ++fast_high_zero_delay;
+        }
+        delayNanoseconds(200);
+        if (digitalReadFast(rx_pin) == HIGH) {
+            ++fast_high_count;
+        }
+        *reinterpret_cast<volatile uint32_t*>( // ok reinterpret cast - Teensy GPIO alias address map
+            reinterpret_cast<uintptr_t>(standard_output) + 0x88u) = mask;
+        if (digitalReadFast(rx_pin) == LOW) {
+            ++fast_low_zero_delay;
+        }
+        delayNanoseconds(200);
+        if (digitalReadFast(rx_pin) == LOW) {
+            ++fast_low_count;
+        }
+    }
+    probe.set("fastToggleHighSettled", static_cast<int64_t>(fast_high_count));
+    probe.set("fastToggleLowSettled", static_cast<int64_t>(fast_low_count));
+    probe.set("fastToggleHighZeroDelay",
+              static_cast<int64_t>(fast_high_zero_delay));
+    probe.set("fastToggleLowZeroDelay",
+              static_cast<int64_t>(fast_low_zero_delay));
+    probe.set("fastToggleIterations", static_cast<int64_t>(kFastIters));
+
     // Restore TX/RX pad state.
     if ((saved_fast_out & mask) != 0) {
         *reinterpret_cast<volatile uint32_t*>( // ok reinterpret cast - Teensy GPIO alias address map
