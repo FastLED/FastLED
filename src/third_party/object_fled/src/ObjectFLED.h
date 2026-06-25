@@ -153,6 +153,7 @@ private:
 public:
 
 	void show(void);
+	void showRawFrameBuffer(void);
 	void waitForDmaToFinish();
 
 	int busy(void);
@@ -174,6 +175,7 @@ private:
 	static void isr(void);
 
 	void genFrameBuffer(uint32_t);
+	void showInternal(bool regenerateFrameBuffer);
 
 	uint32_t update_begin_micros = 0;
 	uint8_t brightness = 255;
