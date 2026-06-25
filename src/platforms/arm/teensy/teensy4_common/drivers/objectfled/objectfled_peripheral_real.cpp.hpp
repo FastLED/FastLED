@@ -50,20 +50,29 @@ public:
     }
 
     void show() override {
+        updateBusyState();
         objectFledDiagnosticsRecord("beforeShow", mPins, mPinCount);
         mObjectFLED->show();
+        updateBusyState();
         objectFledDiagnosticsRecord("afterShowReturn", mPins, mPinCount);
     }
 
     bool isBusy() override {
-        if (mObjectFLED == nullptr) {
-            return false;
-        }
-        return mObjectFLED->busy() != 0 ||
-               ObjectFLEDDmaManager::getInstance().isBusy();
+        return updateBusyState();
     }
 
 private:
+    bool updateBusyState() {
+        if (mObjectFLED == nullptr) {
+            objectFledDiagnosticsSetBusyState(false, false);
+            return false;
+        }
+        const bool latchBusy = mObjectFLED->busy() != 0;
+        const bool dmaBusy = ObjectFLEDDmaManager::getInstance().isBusy();
+        objectFledDiagnosticsSetBusyState(dmaBusy, latchBusy);
+        return latchBusy || dmaBusy;
+    }
+
     static constexpr u32 kMaxCapturedPins = 16;
     ObjectFLED* mObjectFLED;
     u32 mTotalBytes;

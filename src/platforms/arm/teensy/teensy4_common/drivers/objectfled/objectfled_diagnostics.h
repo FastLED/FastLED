@@ -13,6 +13,8 @@ namespace fl {
 #if defined(FL_IS_TEENSY_4X) && defined(FASTLED_OBJECTFLED_DIAGNOSTICS) && FASTLED_OBJECTFLED_DIAGNOSTICS
 
 void objectFledDiagnosticsReset() FL_NO_EXCEPT;
+void objectFledDiagnosticsSetBusyState(bool dma_active,
+                                       bool latch_active) FL_NO_EXCEPT;
 void objectFledDiagnosticsRecord(const char* stage, const u8* pins = nullptr,
                                  u32 pin_count = 0) FL_NO_EXCEPT;
 fl::json objectFledDiagnosticsToJson() FL_NO_EXCEPT;
@@ -20,6 +22,8 @@ fl::json objectFledDiagnosticsToJson() FL_NO_EXCEPT;
 #else
 
 inline void objectFledDiagnosticsReset() FL_NO_EXCEPT {}
+
+inline void objectFledDiagnosticsSetBusyState(bool, bool) FL_NO_EXCEPT {}
 
 inline void objectFledDiagnosticsRecord(const char*, const u8* = nullptr,
                                         u32 = 0) FL_NO_EXCEPT {}

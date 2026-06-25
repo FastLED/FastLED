@@ -87,7 +87,7 @@ mod tests {
             "examples/AutoResearch/AutoResearchRemotePinMethods.cpp",
             Path::new(".")
         ));
-        assert!(!checker.should_process_file(
+        assert!(checker.should_process_file(
             "examples/AutoResearch/AutoResearchTest.cpp",
             Path::new(".")
         ));
@@ -97,6 +97,33 @@ mod tests {
                 "FL_WARN(\"diagnostic-only path\");\n",
             ))
             .is_empty());
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_marker_scope_flags_test_time_sections() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearchTest.cpp",
+            "FL_WARN(\"legacy diagnostic outside guarded section\");\n\
+// autoresearch-runtime-output-lint: begin\n\
+FL_WARN(\"test-time chatter\");\n\
+Serial.println(\"test-time chatter\");\n\
+fl::serial_println(\"test-time chatter\");\n\
+// autoresearch-runtime-output-lint: end\n\
+FL_WARN(\"legacy diagnostic outside guarded section\");\n",
+        ));
+        assert_eq!(result.len(), 3);
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_marker_scope_restores_always_checked_files() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearchRemoteRunSingleTest.cpp",
+            "// autoresearch-runtime-output-lint: end\n\
+FL_WARN(\"still checked because remote files are always guarded\");\n",
+        ));
+        assert_eq!(result.len(), 1);
     }
 
     #[test]

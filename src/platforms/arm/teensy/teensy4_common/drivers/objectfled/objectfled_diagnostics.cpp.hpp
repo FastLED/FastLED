@@ -97,6 +97,12 @@ struct DmaSnapshot {
     DmaChannelSnapshot dma2next;
 };
 
+struct BusyStateSnapshot {
+    bool dmaActive = false;
+    bool latchActive = false;
+    bool ready = true;
+};
+
 struct SnapshotEvent {
     const char* stage = "";
     u32 millisValue = 0;
@@ -111,6 +117,7 @@ struct SnapshotEvent {
     u32 xbarCtrl0 = 0;
     u32 xbarCtrl1 = 0;
     DmaSnapshot dma;
+    BusyStateSnapshot busy;
 };
 
 SnapshotEvent s_events[kMaxEvents];
@@ -118,6 +125,7 @@ u8 s_eventCount = 0;
 u32 s_overflowCount = 0;
 u8 s_lastPins[kMaxPins];
 u8 s_lastPinCount = 0;
+BusyStateSnapshot s_busyState;
 
 u32 ptrToU32(const volatile void* ptr) FL_NO_EXCEPT {
     return static_cast<u32>(fl::ptr_to_int(const_cast<void*>(ptr)));
@@ -344,6 +352,9 @@ void appendEvent(fl::sstream& out, const SnapshotEvent& event) FL_NO_EXCEPT {
     out << "stage=" << event.stage
         << " ms=" << event.millisValue
         << " us=" << event.microsValue
+        << " busy.dmaActive=" << (event.busy.dmaActive ? 1 : 0)
+        << " busy.latchActive=" << (event.busy.latchActive ? 1 : 0)
+        << " busy.ready=" << (event.busy.ready ? 1 : 0)
         << " gpr26=" << event.gpr[0]
         << " gpr27=" << event.gpr[1]
         << " gpr28=" << event.gpr[2]
@@ -407,6 +418,14 @@ void objectFledDiagnosticsReset() FL_NO_EXCEPT {
     s_eventCount = 0;
     s_overflowCount = 0;
     s_lastPinCount = 0;
+    s_busyState = BusyStateSnapshot();
+}
+
+void objectFledDiagnosticsSetBusyState(bool dma_active,
+                                       bool latch_active) FL_NO_EXCEPT {
+    s_busyState.dmaActive = dma_active;
+    s_busyState.latchActive = latch_active;
+    s_busyState.ready = !dma_active && !latch_active;
 }
 
 void objectFledDiagnosticsRecord(const char* stage, const u8* pins,
@@ -434,6 +453,7 @@ void objectFledDiagnosticsRecord(const char* stage, const u8* pins,
     event.stage = stage != nullptr ? stage : "";
     event.millisValue = millis();
     event.microsValue = micros();
+    event.busy = s_busyState;
     event.pinCount = static_cast<u8>(pin_count < kMaxPins ? pin_count : kMaxPins);
     for (u8 i = 0; i < event.pinCount; ++i) {
         event.pins[i] = capturePin(pins[i]);
@@ -458,7 +478,7 @@ fl::json objectFledDiagnosticsToJson() FL_NO_EXCEPT {
     out.set("enabled", true);
     setU32(out, "eventCount", s_eventCount);
     setU32(out, "overflowCount", s_overflowCount);
-    out.set("format", "objectfled-register-snapshot-v1");
+    out.set("format", "objectfled-register-snapshot-v2");
     out.set("note",
             "snapshot is newline-delimited key=value register state");
     fl::sstream snapshot;
