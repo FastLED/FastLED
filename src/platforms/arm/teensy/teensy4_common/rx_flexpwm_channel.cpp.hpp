@@ -361,6 +361,7 @@ class FlexPwmRxChannelImpl : public FlexPwmRxChannel {
     volatile bool mReceiveDone = false;
     bool mConfigured = false;
     bool mStartLow = true;
+    u16 mArmedCiter = 0;
 
     // Decoded edge cache (built from mCaptureBuffer or injected)
     fl::vector<EdgeTime> mEdges;
@@ -528,6 +529,7 @@ void FlexPwmRxChannelImpl::configureDma() {
     mDma.TCD->DLASTSGA = 0;
     mDma.TCD->BITER = mCaptureBuffer.size() / 2;
     mDma.TCD->CSR = DMA_TCD_CSR_DREQ;
+    mArmedCiter = mDma.TCD->CITER;
     mDma.triggerAtHardwareEvent(mPinInfo->dma_source);
     mDma.interruptAtCompletion();
     mDma.attachInterrupt(dmaIsr);
@@ -567,8 +569,13 @@ bool FlexPwmRxChannelImpl::finished() const {
 
 RxWaitResult FlexPwmRxChannelImpl::wait(u32 timeout_ms) {
     u32 start = millis();
-    const u16 initial_citer = mDma.TCD->CITER;
-    u16 last_citer = initial_citer;
+    // Compare progress against the CITER captured at arm time, not at wait
+    // entry. capture() calls FastLED.wait() before rx_channel->wait(), so by
+    // the time we enter here the TX may already have completed and the DMA
+    // may have already drained one frame -- a wait-entry sample would equal
+    // the current value and falsely classify a successful capture as TIMEOUT.
+    const u16 armed_citer = mArmedCiter;
+    u16 last_citer = mDma.TCD->CITER;
     u32 last_change_time = micros();
     bool exited_on_timeout = false;
 
@@ -606,12 +613,13 @@ RxWaitResult FlexPwmRxChannelImpl::wait(u32 timeout_ms) {
     }
 
     // Honesty: distinguish "actually got data" from "timeout with nothing".
-    //   - mReceiveDone     -> full buffer, definitely SUCCESS
-    //   - CITER moved      -> partial buffer, SUCCESS (caller decodes what
-    //                          arrived; inactivity-detection path lands here)
-    //   - CITER unchanged  -> nothing arrived; do not pretend it did
+    //   - mReceiveDone              -> full buffer, definitely SUCCESS
+    //   - CITER moved since arm     -> partial buffer, SUCCESS (caller decodes
+    //                                   what arrived; inactivity-detection
+    //                                   path lands here)
+    //   - CITER unchanged since arm -> nothing arrived; do not pretend it did
     const u16 current_citer = mDma.TCD->CITER;
-    const bool dma_progressed = mReceiveDone || (current_citer != initial_citer);
+    const bool dma_progressed = mReceiveDone || (current_citer != armed_citer);
     if (!dma_progressed) {
         return RxWaitResult::TIMEOUT;
     }

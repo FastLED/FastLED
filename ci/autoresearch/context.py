@@ -276,6 +276,28 @@ def display_pattern_details(result: dict[str, Any]) -> None:
         print(f"    Mismatched LEDs:  {mismatched_leds}/{num_leds}")
         if captured_bytes is not None:
             print(f"    Captured bytes:   {captured_bytes}/{total_bytes}")
+        capture_wait = pat.get("captureWaitResult")
+        raw_edges = pat.get("rawEdgesAfterWait")
+        if capture_wait is not None or raw_edges is not None:
+            print(f"    RX wait/raw:      {capture_wait}/{raw_edges}")
+        decode_ok = pat.get("decodeOk")
+        decode_error = pat.get("decodeError")
+        decode_bytes = pat.get("decodeBytes")
+        decode_capacity = pat.get("decodeOutputCapacity")
+        if (
+            decode_ok is not None
+            or decode_error is not None
+            or decode_bytes is not None
+            or decode_capacity is not None
+        ):
+            print(
+                "    Decode status:    "
+                f"ok={decode_ok} error={decode_error} "
+                f"bytes={decode_bytes}/{decode_capacity}"
+            )
+        raw_sample = pat.get("rawEdgeSample")
+        if raw_sample:
+            print(f"    Raw sample:       {raw_sample}")
         if capture_failed:
             print(f"    Capture status:   RX produced no decodable bytes")
         print(
