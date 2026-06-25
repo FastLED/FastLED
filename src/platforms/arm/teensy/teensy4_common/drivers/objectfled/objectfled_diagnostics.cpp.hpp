@@ -116,6 +116,8 @@ struct SnapshotEvent {
     u32 tmrEnbl = 0;
     u32 xbarSel15 = 0;
     u32 xbarSel47 = 0;
+    u32 xbarSel0 = 0;
+    u32 xbarSel1 = 0;
     u32 xbarCtrl0 = 0;
     u32 xbarCtrl1 = 0;
     DmaSnapshot dma;
@@ -362,6 +364,8 @@ void appendEvent(fl::sstream& out, const SnapshotEvent& event) FL_NO_EXCEPT {
         << " gpr28=" << event.gpr[2]
         << " gpr29=" << event.gpr[3]
         << " tmr4.enbl=" << event.tmrEnbl
+        << " xbar.sel0=" << event.xbarSel0
+        << " xbar.sel1=" << event.xbarSel1
         << " xbar.sel15=" << event.xbarSel15
         << " xbar.sel47=" << event.xbarSel47
         << " xbar.ctrl0=" << event.xbarCtrl0
@@ -470,6 +474,8 @@ void objectFledDiagnosticsRecord(const char* stage, const u8* pins,
     event.tmr[2] = captureTimerChannel(2);
     event.xbarSel15 = XBARA1_SEL15;
     event.xbarSel47 = XBARA1_SEL47;
+    event.xbarSel0 = XBARA1_SEL0;
+    event.xbarSel1 = XBARA1_SEL1;
     event.xbarCtrl0 = XBARA1_CTRL0;
     event.xbarCtrl1 = XBARA1_CTRL1;
     event.dma = captureDma();
