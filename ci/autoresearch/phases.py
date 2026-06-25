@@ -2534,6 +2534,66 @@ def _set_pins_rpc_command(tx_pin: int, rx_pin: int) -> dict[str, Any]:
     return {"method": "setPins", "params": [{"txPin": tx_pin, "rxPin": rx_pin}]}
 
 
+def _expected_setup_pins(
+    method: str, cmd: dict[str, Any]
+) -> tuple[int | None, int | None]:
+    params = cmd.get("params")
+    if method == "setPins":
+        if (
+            isinstance(params, list)
+            and len(params) == 1
+            and isinstance(params[0], dict)
+        ):
+            tx_pin = params[0].get("txPin")
+            rx_pin = params[0].get("rxPin")
+            return (
+                tx_pin if _is_plain_int(tx_pin) else None,
+                rx_pin if _is_plain_int(rx_pin) else None,
+            )
+        if isinstance(params, list) and len(params) == 2:
+            tx_pin, rx_pin = params
+            return (
+                tx_pin if _is_plain_int(tx_pin) else None,
+                rx_pin if _is_plain_int(rx_pin) else None,
+            )
+        return None, None
+
+    if not isinstance(params, list) or len(params) != 1:
+        return None, None
+
+    pin = params[0]
+    if not _is_plain_int(pin):
+        return None, None
+
+    if method == "setTxPin":
+        return pin, None
+    if method == "setRxPin":
+        return None, pin
+    return None, None
+
+
+def _validate_setup_rpc_response(
+    method: str, cmd: dict[str, Any], data: dict[str, Any]
+) -> list[str]:
+    """Return validation errors for setup RPCs that must not drift silently."""
+    errors: list[str] = []
+    expected_tx_pin, expected_rx_pin = _expected_setup_pins(method, cmd)
+
+    for field, expected in (
+        ("txPin", expected_tx_pin),
+        ("rxPin", expected_rx_pin),
+    ):
+        if expected is None:
+            continue
+        value = data.get(field)
+        if not _is_plain_int(value):
+            errors.append(f"missing integer {field}")
+        elif value != expected:
+            errors.append(f"{field}={value} does not match expected {expected}")
+
+    return errors
+
+
 def _ensure_leading_set_pins_command(ctx: RunContext) -> None:
     if ctx.effective_tx_pin is None or ctx.effective_rx_pin is None:
         return
@@ -2801,6 +2861,22 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         print(f"   Message: {test_data['message']}")
                     if setup_method:
                         break
+
+                elif setup_method and (
+                    validation_errors := _validate_setup_rpc_response(
+                        method,
+                        cmd,
+                        test_data,
+                    )
+                ):
+                    stop_word_found = "ERROR"
+                    test_failed = True
+                    print(f"{Fore.RED}\u274c Setup response mismatch{Style.RESET_ALL}")
+                    print("   Failure class: pin_state_mismatch")
+                    for error in validation_errors:
+                        print(f"   - {error}")
+                    qctx.emit(f"FAILURE class=pin_state_mismatch method={method}")
+                    break
 
                 elif test_method and (
                     validation_errors := _validate_test_rpc_response(

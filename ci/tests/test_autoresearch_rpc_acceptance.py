@@ -15,7 +15,11 @@ from ci.autoresearch.phases import _classify_test_failure, _run_tests_or_special
 _PATCH_MOD = "ci.autoresearch.phases"
 
 
-def _make_ctx(commands: list[dict[str, Any]]) -> RunContext:
+def _make_ctx(
+    commands: list[dict[str, Any]],
+    effective_tx_pin: int = 1,
+    effective_rx_pin: int = 0,
+) -> RunContext:
     return RunContext(
         args=SimpleNamespace(
             pin_toggle_rx=False,
@@ -45,8 +49,8 @@ def _make_ctx(commands: list[dict[str, Any]]) -> RunContext:
         upload_port="COM5",
         use_fbuild=False,
         build_driver=None,
-        effective_tx_pin=1,
-        effective_rx_pin=0,
+        effective_tx_pin=effective_tx_pin,
+        effective_rx_pin=effective_rx_pin,
     )
 
 
@@ -56,8 +60,17 @@ def _response(data: Any) -> MagicMock:
     return response
 
 
-def _run_rpc(commands: list[dict[str, Any]], responses: list[Any]) -> int:
-    ctx = _make_ctx(commands)
+def _run_rpc(
+    commands: list[dict[str, Any]],
+    responses: list[Any],
+    effective_tx_pin: int = 1,
+    effective_rx_pin: int = 0,
+) -> int:
+    ctx = _make_ctx(
+        commands,
+        effective_tx_pin=effective_tx_pin,
+        effective_rx_pin=effective_rx_pin,
+    )
     qctx = QuietContext(quiet=False)
 
     mock_client = AsyncMock()
@@ -150,6 +163,40 @@ def test_non_dict_test_response_fails_after_setup_ok() -> None:
     )
 
     assert rc == 1
+
+
+def test_set_pins_response_must_match_request() -> None:
+    response = _valid_single_pass()
+    response["requestedTxPin"] = 22
+    response["requestedRxPin"] = 8
+    response["actualTxPin"] = 22
+    response["actualRxPin"] = 8
+
+    rc = _run_rpc(
+        [_set_pins_command(), _run_single_command()],
+        [{"success": True, "txPin": 22, "rxPin": 9}, response],
+        effective_tx_pin=22,
+        effective_rx_pin=8,
+    )
+
+    assert rc == 1
+
+
+def test_set_pins_and_test_response_agree_with_effective_pins() -> None:
+    response = _valid_single_pass()
+    response["requestedTxPin"] = 22
+    response["requestedRxPin"] = 8
+    response["actualTxPin"] = 22
+    response["actualRxPin"] = 8
+
+    rc = _run_rpc(
+        [_set_pins_command(), _run_single_command()],
+        [{"success": True, "txPin": 22, "rxPin": 8}, response],
+        effective_tx_pin=22,
+        effective_rx_pin=8,
+    )
+
+    assert rc == 0
 
 
 def test_run_single_response_driver_must_match_request() -> None:
