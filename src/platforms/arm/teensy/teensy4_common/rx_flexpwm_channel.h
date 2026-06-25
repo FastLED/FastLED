@@ -10,6 +10,7 @@
 #if defined(FL_IS_TEENSY_4X)
 
 #include "fl/channels/rx.h"
+#include "fl/stl/json.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/noexcept.h"
 
@@ -49,6 +50,8 @@ class FlexPwmRxChannel : public RxDevice {
     FlexPwmRxChannel() = default;
     ~FlexPwmRxChannel() override = default;
 };
+
+fl::json flexPwmRxDiagnosticsToJson(int pin) FL_NO_EXCEPT;
 
 } // namespace fl
 

@@ -105,10 +105,35 @@ static volatile uint32_t *standard_gpio_addr(volatile uint32_t *fastgpio) {
 	return (volatile uint32_t *)((uint32_t)fastgpio - 0x01E48000);
 }
 
+static volatile uint32_t *gpio_dr_clear_addr(volatile uint32_t *gpioDr) {
+	return (volatile uint32_t *)((uint32_t)gpioDr + 0x88);
+}
+
 static void force_pin_to_gpio_mux(uint8_t pin) {
 	// Teensy 4.x GPIO pads use MUX_MODE=5. Keep SION set so diagnostics can
 	// observe the pad input path while DMA drives the standard GPIO alias.
 	*portConfigRegister(pin) = 5 | 0x10;
+}
+
+static void enable_standard_gpio_clocks() {
+	// Teensy startup defaults to fast GPIO6-9. ObjectFLED remaps selected pins
+	// back to DMA-visible GPIO1-4, whose clocks are otherwise not guaranteed on.
+	CCM_CCGR1 |= CCM_CCGR1_GPIO1(CCM_CCGR_ON);
+	CCM_CCGR0 |= CCM_CCGR0_GPIO2(CCM_CCGR_ON);
+	CCM_CCGR2 |= CCM_CCGR2_GPIO3(CCM_CCGR_ON);
+	CCM_CCGR3 |= CCM_CCGR3_GPIO4(CCM_CCGR_ON);
+}
+
+static void configure_pin_output_aliases(uint8_t pin, uint32_t mask) {
+	volatile uint32_t *fastOutput = portOutputRegister(pin);
+	volatile uint32_t *standardOutput = standard_gpio_addr(fastOutput);
+	volatile uint32_t *fastMode = portModeRegister(pin);
+	volatile uint32_t *standardMode = standard_gpio_addr(fastMode);
+
+	*gpio_dr_clear_addr(fastOutput) = mask;
+	*gpio_dr_clear_addr(standardOutput) = mask;
+	*fastMode |= mask;
+	*standardMode |= mask;
 }
 
 static void configure_objectfled_xbar_dma_edges() {
@@ -184,6 +209,7 @@ void ObjectFLED::beginInternal(uint16_t period, uint16_t t0h, uint16_t t1h, uint
 void ObjectFLED::begin(void) {
 	auto& dma = ObjectFLEDDmaManager::getInstance();
 	initialized = false;
+	enable_standard_gpio_clocks();
 
 	// Set each pin's bitmask bit, store offset & bit# for pin
 	uint32_t tempBitmask[4] = {0};
@@ -232,7 +258,7 @@ void ObjectFLED::begin(void) {
 			((OUTPUT_PAD_DSE & 0x7) << 3);	//DSE = 0b011 for LED overclock
 		//clear pin bit in IOMUX_GPR26 to map GPIO6-9 to GPIO1-4 for DMA
 		*(&IOMUXC_GPR_GPR26 + offset) &= ~mask;
-		*standard_gpio_addr(portModeRegister(pin)) |= mask;		//GDIR? bit flag set output mode
+		configure_pin_output_aliases(pin, mask);
 	}
 
 	// Check if any valid pins were configured
