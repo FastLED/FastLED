@@ -74,6 +74,7 @@ class Args:
     # Legacy API testing
     legacy: bool
     legacy_mixed_timings: bool
+    legacy_rgbw_small_counts: bool
 
     # Chipset selection
     chipset: str
@@ -583,6 +584,14 @@ See Also:
                 "Requires multi-lane historical TX pins 0-8."
             ),
         )
+        parser.add_argument(
+            "--legacy-rgbw-small-counts",
+            action="store_true",
+            help=(
+                "With --legacy, run RGBW 1, 2, 3, and 4 LED cases to cover "
+                "small-count ObjectFLED RGBW overflow regressions."
+            ),
+        )
 
         # Chipset selection
         parser.add_argument(
@@ -705,6 +714,7 @@ See Also:
             color_pattern=parsed.color_pattern,
             legacy=parsed.legacy,
             legacy_mixed_timings=parsed.legacy_mixed_timings,
+            legacy_rgbw_small_counts=parsed.legacy_rgbw_small_counts,
             chipset=parsed.chipset,
             net_server=parsed.net_server,
             net_client=parsed.net_client,

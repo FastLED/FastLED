@@ -5,9 +5,11 @@
 
 #include "platforms/shared/mock/arm/teensy4/drivers/objectfled/objectfled_peripheral_mock.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/channel_engine_objectfled.h"
+#include "platforms/arm/teensy/teensy4_common/clockless_objectfled.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
+#include "fl/gfx/rectangular_draw_buffer.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -306,6 +308,69 @@ FL_TEST_CASE("ObjectFLED engine - detects RGBW data") {
     auto* record = mock->getLastCreateRecord();
     FL_REQUIRE(record != nullptr);
     FL_CHECK(record->isRgbw == true);
+}
+
+FL_TEST_CASE("ObjectFLED rectangular sizing rounds RGBW small counts") {
+    struct Case {
+        u16 leds;
+        u32 rectangularBytes;
+        u32 frameBytes;
+        u32 totalLeds;
+    };
+    const Case cases[] = {
+        {1, 9, 12, 3},
+        {2, 9, 12, 3},
+        {3, 15, 16, 4},
+        {4, 18, 20, 5},
+    };
+
+    for (const auto& c : cases) {
+        RectangularDrawBuffer drawBuf;
+        drawBuf.queue(DrawItem(22, c.leds, true));
+        drawBuf.onQueuingDone();
+
+        u32 numStrips = 0;
+        u32 bytesPerStrip = 0;
+        u32 totalBytes = 0;
+        drawBuf.getBlockInfo(&numStrips, &bytesPerStrip, &totalBytes);
+
+        FL_CHECK(numStrips == 1);
+        FL_CHECK(bytesPerStrip == c.rectangularBytes);
+        FL_CHECK(totalBytes == c.rectangularBytes);
+        FL_CHECK(objectFledFrameBytesForRectangularBlock(
+                     numStrips, bytesPerStrip, true) == c.frameBytes);
+        FL_CHECK(objectFledTotalLedsForRectangularBlock(
+                     numStrips, bytesPerStrip, true) == c.totalLeds);
+        FL_CHECK(c.frameBytes >= totalBytes);
+    }
+}
+
+FL_TEST_CASE("ObjectFLED engine - RGBW small counts allocate padding") {
+    struct Case {
+        size_t leds;
+        u32 expectedFrameBytes;
+    };
+    const Case cases[] = {
+        {1, 12},
+        {2, 12},
+        {4, 20},
+    };
+
+    for (const auto& c : cases) {
+        auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
+        ChannelEngineObjectFLED engine(mock);
+        auto ch = createRGBWChannelData(22, c.leds);
+
+        engine.enqueue(ch);
+        engine.show();
+
+        auto* inst = mock->getLastInstance();
+        auto* record = mock->getLastCreateRecord();
+        FL_REQUIRE(inst != nullptr);
+        FL_REQUIRE(record != nullptr);
+        FL_CHECK(record->isRgbw == true);
+        FL_CHECK(inst->getFrameBufferSize() == c.expectedFrameBytes);
+    }
 }
 
 //=============================================================================
