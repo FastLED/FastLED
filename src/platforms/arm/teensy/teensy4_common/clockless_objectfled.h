@@ -32,6 +32,7 @@
 #include "fl/stl/singleton.h"
 #include "fl/stl/map.h"
 #include "fl/stl/noexcept.h"
+#include "fl/system/engine_events.h"
 
 #ifndef FASTLED_OBJECTFLED_LATCH_DELAY
 #define FASTLED_OBJECTFLED_LATCH_DELAY 300  // WS2812-5VB
@@ -47,8 +48,11 @@ template <typename TIMING> class ObjectFLEDGroup;
 // ============================================================================
 
 /// Track all active chipset groups across all chipset types
-class ObjectFLEDRegistry {
+class ObjectFLEDRegistry : public EngineEvents::Listener {
 public:
+    ObjectFLEDRegistry() FL_NO_EXCEPT;
+    ~ObjectFLEDRegistry() FL_NO_EXCEPT override;
+
     static ObjectFLEDRegistry& getInstance() FL_NO_EXCEPT {
         return fl::Singleton<ObjectFLEDRegistry>::instance();
     }
@@ -61,6 +65,8 @@ public:
 
     // Flush all groups except the specified one
     void flushAllExcept(void* exceptPtr) FL_NO_EXCEPT;
+
+    void onEndFrame() FL_NO_EXCEPT override;
 
 private:
     struct GroupEntry {
@@ -125,22 +131,30 @@ public:
 
     ObjectFLEDGroup()
         : mBase(ObjectFLEDTimingConfig{TIMING::T1, TIMING::T2, TIMING::T3, TIMING::RESET}) {
-        // Auto-register with global registry on construction
-        ObjectFLEDRegistry::getInstance().registerGroup(
-            this,
-            [](void* ptr) {
-                static_cast<ObjectFLEDGroup*>(ptr)->flush();
-            }
-        );
+        registerWithRegistry();
     }
 
-    void onQueuingStart() { mBase.onQueuingStart(); }
+    void onQueuingStart() {
+        registerWithRegistry();
+        mBase.onQueuingStart();
+    }
     void addStrip(u8 pin, PixelIterator& pixel_iterator) FL_NO_EXCEPT {
         mBase.addStrip(pin, pixel_iterator);
     }
     void flush() { mBase.flush(); }
 
 private:
+    static void flushRegisteredGroup(void* ptr) FL_NO_EXCEPT {
+        static_cast<ObjectFLEDGroup*>(ptr)->flush();
+    }
+
+    void registerWithRegistry() FL_NO_EXCEPT {
+        ObjectFLEDRegistry::getInstance().registerGroup(
+            this,
+            &ObjectFLEDGroup<TIMING>::flushRegisteredGroup
+        );
+    }
+
     ObjectFLEDGroupBase mBase;  // Delegate all work to concrete base
 };
 
