@@ -14,7 +14,7 @@ import sys
 import threading
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeGuard
 
 from colorama import Fore, Style
 
@@ -2483,7 +2483,7 @@ async def _run_coroutine_tests(ctx: RunContext) -> int:
 _TEST_RPC_METHODS = frozenset({"runSingleTest", "runParallelTest"})
 
 
-def _is_plain_int(value: Any) -> bool:
+def _is_plain_int(value: Any) -> TypeGuard[int]:
     return isinstance(value, int) and not isinstance(value, bool)
 
 
