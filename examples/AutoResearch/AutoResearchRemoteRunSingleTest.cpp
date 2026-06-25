@@ -87,6 +87,18 @@ class ScopedFastLedBrightness {
     uint8_t mSavedBrightness;
 };
 
+bool contaminateTxMuxWithPwm(int pin) {
+#if defined(FL_IS_TEENSY_4X)
+    analogWriteFrequency(pin, 1000.0f);
+    analogWrite(pin, 128);
+    delay(2);
+    return true;
+#else
+    (void)pin;
+    return false;
+#endif
+}
+
 fl::json measureTightTiming(const fl::string& driver_name,
                             const fl::ChipsetTimingConfig& timing,
                             const fl::vector<fl::ChannelConfig>& tx_configs,
@@ -277,6 +289,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         return response;
     }
     fl::string driver_name = config["driver"].as_string().value();
+    const bool is_object_fled_driver = (driver_name == "OBJECT_FLED");
 
     // Validate driver exists
     bool driver_found = false;
@@ -414,7 +427,14 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         use_legacy_api = config["useLegacyApi"].as_bool().value();
     }
 
-    // 9. Extract tightTiming (optional, default: false)
+    // 9. Extract contaminateTxMux (optional, default: false)
+    bool contaminate_tx_mux = false;
+    if (config.contains("contaminateTxMux") &&
+        config["contaminateTxMux"].is_bool()) {
+        contaminate_tx_mux = config["contaminateTxMux"].as_bool().value();
+    }
+
+    // 10. Extract tightTiming (optional, default: false)
     bool measure_tight_timing = false;
     if (config.contains("tightTiming") && config["tightTiming"].is_bool()) {
         measure_tight_timing = config["tightTiming"].as_bool().value();
@@ -466,6 +486,21 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
 
     uint32_t start_ms = millis();
 
+    if (contaminate_tx_mux) {
+        if (!is_object_fled_driver) {
+            response.set("success", false);
+            response.set("error", "MuxContaminationDriverUnsupported");
+            response.set("message", "contaminateTxMux is only supported for OBJECT_FLED");
+            return response;
+        }
+        if (!contaminateTxMuxWithPwm(pin_tx)) {
+            response.set("success", false);
+            response.set("error", "MuxContaminationUnsupported");
+            response.set("message", "contaminateTxMux requires Teensy 4.x analogWriteFrequency support");
+            return response;
+        }
+    }
+
     // Set driver as exclusive (by-name path: driver_name comes from RPC)
     if (!autoResearchSetExclusiveDriverByName(driver_name.c_str())) {
         response.set("success", false);
@@ -501,7 +536,6 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
 
     // SPI chipset drivers use APA102 protocol with data+clock pins.
     // Clockless drivers use WS2812B timing on a single data pin
-    bool is_object_fled_driver = (driver_name == "OBJECT_FLED");
     bool is_spi_chipset_driver = (driver_name == "LCD_SPI" ||
                                   driver_name == "I2S_SPI" ||
                                   driver_name == "SPI_UNIFIED");
@@ -676,6 +710,10 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     response.set("pattern", pattern.c_str());
     response.set("useLegacyApi", use_legacy_api);
     response.set("frameCount", static_cast<int64_t>(frame_count));
+    response.set("contaminateTxMux", contaminate_tx_mux);
+    if (contaminate_tx_mux) {
+        response.set("contaminateTxMuxPin", static_cast<int64_t>(pin_tx));
+    }
     if (measure_tight_timing) {
         response.set("tightTiming", tight_timing_response);
     }

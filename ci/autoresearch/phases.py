@@ -767,6 +767,8 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         frame_count = 1
                     if frame_count > 1:
                         test_config["frameCount"] = frame_count
+                    if args.contaminate_tx_mux:
+                        test_config["contaminateTxMux"] = True
                     if args.tight_timing:
                         if (
                             args.tight_timing_iterations < 1
