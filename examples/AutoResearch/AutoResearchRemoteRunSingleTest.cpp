@@ -1015,6 +1015,14 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
             pat.set("capturedBytes", static_cast<int64_t>(rr.capturedBytes));
             pat.set("captureWaitResult", static_cast<int64_t>(rr.captureWaitResult));
             pat.set("rawEdgesAfterWait", static_cast<int64_t>(rr.rawEdgesAfterWait));
+            pat.set("decodeOk", static_cast<int64_t>(rr.decodeOk));
+            pat.set("decodeError", static_cast<int64_t>(rr.decodeError));
+            pat.set("decodeBytes", static_cast<int64_t>(rr.decodeBytes));
+            pat.set("decodeOutputCapacity",
+                    static_cast<int64_t>(rr.decodeOutputCapacity));
+            if (!rr.rawEdgeSample.empty()) {
+                pat.set("rawEdgeSample", rr.rawEdgeSample.c_str());
+            }
             pat.set("captureFailed", rr.captureFailed);
             pat.set("mismatchedBytes", static_cast<int64_t>(rr.mismatchedBytes));
             pat.set("lsbOnlyErrors", static_cast<int64_t>(rr.lsbOnlyErrors));
