@@ -83,6 +83,7 @@ def _make_args(**overrides) -> Args:
         color_pattern=None,
         legacy=False,
         legacy_mixed_timings=False,
+        legacy_rgbw_small_counts=False,
         chipset="ws2812",
         net_server=False,
         net_client=False,
@@ -356,6 +357,45 @@ class TestParseArgsAndBuildCommands:
         assert params["useLegacyApi"] is True
         assert params["legacyChipsets"] == ["WS2812B", "SK6812"]
 
+    def test_object_fled_legacy_rgbw_small_counts_commands(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=True,
+            legacy_rgbw_small_counts=True,
+            tx_pin=22,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["OBJECT_FLED"]
+
+        run_commands = [
+            cmd for cmd in result.json_rpc_commands if cmd["method"] == "runSingleTest"
+        ]
+        assert len(run_commands) == 4
+        assert [cmd["params"]["laneSizes"] for cmd in run_commands] == [
+            [1],
+            [2],
+            [3],
+            [4],
+        ]
+        for cmd in run_commands:
+            params = cmd["params"]
+            assert params["driver"] == "OBJECT_FLED"
+            assert params["useLegacyApi"] is True
+            assert params["legacyRgbw"] is True
+            assert "legacyChipsets" not in params
+
     def test_legacy_mixed_timings_requires_legacy(self, fake_project_dir: Path) -> None:
         args = _make_args(
             object_fled=True,
@@ -384,6 +424,59 @@ class TestParseArgsAndBuildCommands:
             lanes="1",
             strip_sizes="3",
             tx_pin=0,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
+
+    def test_legacy_rgbw_small_counts_requires_legacy(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=False,
+            legacy_rgbw_small_counts=True,
+            tx_pin=22,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
+
+    def test_legacy_rgbw_small_counts_requires_single_lane(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=True,
+            legacy_rgbw_small_counts=True,
+            lanes="2",
+            tx_pin=0,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
+
+    def test_legacy_rgbw_small_counts_rejects_strip_size_override(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=True,
+            legacy_rgbw_small_counts=True,
+            strip_sizes="3",
+            tx_pin=22,
             rx_pin=8,
             environment_positional="teensy41",
             project_dir=fake_project_dir,

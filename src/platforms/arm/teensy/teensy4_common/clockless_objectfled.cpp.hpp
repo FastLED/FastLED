@@ -198,11 +198,27 @@ void ObjectFLEDGroupBase::flush() {
 
     // Copy pixel data from RectangularDrawBuffer into ObjectFLED's frameBufferLocal
     auto* objectfled = static_cast<fl::ObjectFLED*>(mObjectFLED);
+    bool hasRgbw = false;
+    for (const auto& item : mRectDrawBuffer.mDrawList) {
+        if (item.mIsRgbw) {
+            hasRgbw = true;
+            break;
+        }
+    }
+    u32 numStrips = 0;
+    u32 bytesPerStrip = 0;
     u32 totalBytes = mRectDrawBuffer.getTotalBytes();
-    if (totalBytes > 0) {
+    mRectDrawBuffer.getBlockInfo(&numStrips, &bytesPerStrip, &totalBytes);
+    const u32 frameBytes =
+            objectFledFrameBytesForRectangularBlock(numStrips, bytesPerStrip, hasRgbw);
+    if (frameBytes > 0) {
+        fl::memset(objectfled->frameBufferLocal, 0, frameBytes);
+    }
+    const u32 copyBytes = totalBytes < frameBytes ? totalBytes : frameBytes;
+    if (copyBytes > 0) {
         fl::memcpy(objectfled->frameBufferLocal,
                     mRectDrawBuffer.mAllLedsBufferUint8.get(),
-                    totalBytes);
+                    copyBytes);
     }
 
     // Transmit the already packed RectangularDrawBuffer bytes.
@@ -228,12 +244,13 @@ void ObjectFLEDGroupBase::rebuildObjectFLED() {
     u32 total_bytes = 0;
     mRectDrawBuffer.getBlockInfo(&num_strips, &bytes_per_strip, &total_bytes);
 
-    // Total LEDs = total_bytes / bytes_per_led
-    int bytesPerLed = hasRgbw ? 4 : 3;
-    int totalLeds = total_bytes / bytesPerLed;
+    const u32 frame_bytes =
+            objectFledFrameBytesForRectangularBlock(num_strips, bytes_per_strip, hasRgbw);
+    int totalLeds = static_cast<int>(
+            objectFledTotalLedsForRectangularBlock(num_strips, bytes_per_strip, hasRgbw));
 
     #ifdef FASTLED_DEBUG_OBJECTFLED
-    FL_WARN_F("ObjectFLEDGroupBase: totalLeds=%s bytesPerStrip=%s", totalLeds, bytes_per_strip);
+    FL_WARN_F("ObjectFLEDGroupBase: totalLeds=%s bytesPerStrip=%s frameBytes=%s", totalLeds, bytes_per_strip, frame_bytes);
     #endif
 
     // Pass nullptr so ObjectFLED allocates frameBufferLocal internally
@@ -252,7 +269,7 @@ void ObjectFLEDGroupBase::rebuildObjectFLED() {
     mObjectFLED = objectfled;
 
     // Clear frameBufferLocal to zeros (for padding)
-    fl::memset(objectfled->frameBufferLocal, 0, total_bytes);
+    fl::memset(objectfled->frameBufferLocal, 0, frame_bytes);
 }
 
 } // namespace fl

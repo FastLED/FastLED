@@ -69,16 +69,16 @@
 void printJsonRaw(const fl::json& json, const char* prefix) {
     // Serialize and print response
     fl::string formatted = fl::formatJsonResponse(json, prefix);
-    Serial.println(formatted.c_str());  // ok autoresearch rpc serial - RPC response boundary
-    Serial.flush();                     // ok autoresearch rpc serial - host waits for RPC boundary
+    Serial.println(formatted.c_str());  // ok serial - ok autoresearch rpc serial - RPC response boundary
+    Serial.flush();                     // ok serial - ok autoresearch rpc serial - host waits for RPC boundary
 }
 
 namespace {
 
 void printRemoteResponseRaw(const fl::json& response) {
     fl::string formatted = fl::formatJsonResponse(response, "REMOTE: ");
-    Serial.println(formatted.c_str());  // ok autoresearch rpc serial - RPC response boundary
-    Serial.flush();                     // ok autoresearch rpc serial - host waits for RPC boundary
+    Serial.println(formatted.c_str());  // ok serial - ok autoresearch rpc serial - RPC response boundary
+    Serial.flush();                     // ok serial - ok autoresearch rpc serial - host waits for RPC boundary
 }
 
 }  // namespace
@@ -98,7 +98,7 @@ void printStreamRaw(const char* messageType, const fl::json& data) {
 
     // Use fl:: serial transport for consistent formatting
     fl::string formatted = fl::formatJsonResponse(output, "RESULT: ");
-    Serial.println(formatted.c_str());  // ok autoresearch rpc serial - stream response boundary
+    Serial.println(formatted.c_str());  // ok serial - ok autoresearch rpc serial - stream response boundary
 }
 
 // ============================================================================

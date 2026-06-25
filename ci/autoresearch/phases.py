@@ -573,6 +573,17 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 "\u274c Error: --legacy-mixed-timings requires --legacy with at least 2 lanes"
             )
             return 1
+        if args.legacy_rgbw_small_counts:
+            if requested_min_lanes != 1 or requested_max_lanes != 1:
+                print(
+                    "\u274c Error: --legacy-rgbw-small-counts requires exactly 1 lane"
+                )
+                return 1
+            if args.strip_sizes is not None:
+                print(
+                    "\u274c Error: --legacy-rgbw-small-counts supplies strip sizes 1,2,3,4; do not combine with --strip-sizes"
+                )
+                return 1
         if requested_max_lanes > 1:
             if args.tx_pin is None:
                 print(
@@ -594,8 +605,17 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             print(
                 "\u2139\ufe0f  Legacy mixed timing mode: alternating WS2812B/SK6812 template chipsets across lanes"
             )
-    elif args.legacy_mixed_timings:
-        print("\u274c Error: --legacy-mixed-timings requires --legacy")
+        if args.legacy_rgbw_small_counts:
+            print(
+                "\u2139\ufe0f  Legacy RGBW small-count mode: running RGBW strip sizes 1, 2, 3, and 4"
+            )
+    elif args.legacy_mixed_timings or args.legacy_rgbw_small_counts:
+        flag = (
+            "--legacy-mixed-timings"
+            if args.legacy_mixed_timings
+            else "--legacy-rgbw-small-counts"
+        )
+        print(f"\u274c Error: {flag} requires --legacy")
         return 1
 
     if min_lanes is not None and max_lanes is not None:
@@ -709,6 +729,9 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 )
                 return 1
 
+    if args.legacy_rgbw_small_counts:
+        config["stripSizes"] = [1, 2, 3, 4]
+
     rpc_commands_list: list[dict[str, Any]] = []
 
     if per_lane_counts is not None:
@@ -777,6 +800,8 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                     }
                     if args.legacy:
                         test_config["useLegacyApi"] = True
+                        if args.legacy_rgbw_small_counts:
+                            test_config["legacyRgbw"] = True
                         if args.legacy_mixed_timings:
                             test_config["legacyChipsets"] = [
                                 "WS2812B" if i % 2 == 0 else "SK6812"

@@ -73,7 +73,7 @@ private:
         void* groupPtr;
         void (*flushFunc)(void*);
 
-        bool operator==(const GroupEntry& other) const {
+        bool operator==(const GroupEntry& other) const FL_NO_EXCEPT {
             return groupPtr == other.groupPtr;
         }
     };
@@ -94,6 +94,32 @@ struct ObjectFLEDTimingConfig {
     u32 T3;     // Total bit period (ns)
     u32 RESET;  // Reset/latch time (ns)
 };
+
+inline u32 objectFledBytesPerLed(bool isRgbw) FL_NO_EXCEPT {
+    return isRgbw ? 4u : 3u;
+}
+
+inline u32 objectFledLedsPerStripForRectangularBytes(
+        u32 bytesPerStrip, bool isRgbw) FL_NO_EXCEPT {
+    const u32 bytesPerLed = objectFledBytesPerLed(isRgbw);
+    if (bytesPerStrip == 0) {
+        return 0;
+    }
+    return (bytesPerStrip + bytesPerLed - 1u) / bytesPerLed;
+}
+
+inline u32 objectFledTotalLedsForRectangularBlock(
+        u32 numStrips, u32 bytesPerStrip, bool isRgbw) FL_NO_EXCEPT {
+    return numStrips *
+           objectFledLedsPerStripForRectangularBytes(bytesPerStrip, isRgbw);
+}
+
+inline u32 objectFledFrameBytesForRectangularBlock(
+        u32 numStrips, u32 bytesPerStrip, bool isRgbw) FL_NO_EXCEPT {
+    return objectFledTotalLedsForRectangularBlock(
+               numStrips, bytesPerStrip, isRgbw) *
+           objectFledBytesPerLed(isRgbw);
+}
 
 /// Concrete (non-template) group that manages ObjectFLED for a specific timing
 /// This does all the real work - templates just delegate to this
@@ -134,19 +160,19 @@ public:
         return fl::Singleton<ObjectFLEDGroup<TIMING>>::instance();
     }
 
-    ObjectFLEDGroup()
+    ObjectFLEDGroup() FL_NO_EXCEPT
         : mBase(ObjectFLEDTimingConfig{TIMING::T1, TIMING::T2, TIMING::T3, TIMING::RESET}) {
         registerWithRegistry();
     }
 
-    void onQueuingStart() {
+    void onQueuingStart() FL_NO_EXCEPT {
         registerWithRegistry();
         mBase.onQueuingStart();
     }
     void addStrip(u8 pin, PixelIterator& pixel_iterator) FL_NO_EXCEPT {
         mBase.addStrip(pin, pixel_iterator);
     }
-    void flush() { mBase.flush(); }
+    void flush() FL_NO_EXCEPT { mBase.flush(); }
 
 private:
     static void flushRegisteredGroup(void* ptr) FL_NO_EXCEPT {
@@ -177,7 +203,7 @@ class ClocklessController_ObjectFLED_Proxy
   public:
     ClocklessController_ObjectFLED_Proxy() FL_NO_EXCEPT;
 
-    void init() override {}
+    void init() FL_NO_EXCEPT override {}
 
     virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT override {
         // Calculate based on timing: if total period > 2000ns, it's 400kHz, else 800kHz
@@ -186,7 +212,7 @@ class ClocklessController_ObjectFLED_Proxy
     }
 
   protected:
-    virtual void *beginShowLeds(int nleds) override;
+    virtual void *beginShowLeds(int nleds) FL_NO_EXCEPT override;
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override;
     virtual void endShowLeds(void *data) FL_NO_EXCEPT override;
 };
@@ -196,13 +222,13 @@ class ClocklessController_ObjectFLED_Proxy
 // ============================================================================
 
 template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
-ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::ClocklessController_ObjectFLED_Proxy()
+ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::ClocklessController_ObjectFLED_Proxy() FL_NO_EXCEPT
     : Base() {
     // Latch delay is automatically determined from TIMING::RESET
 }
 
 template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
-void *ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::beginShowLeds(int nleds) {
+void *ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::beginShowLeds(int nleds) FL_NO_EXCEPT {
     void *data = Base::beginShowLeds(nleds);
 
     // Auto-grab the singleton for THIS chipset type
@@ -219,7 +245,7 @@ void *ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::beginSh
 
 template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
 void ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::showPixels(
-    PixelController<RGB_ORDER> &pixels) {
+    PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT {
     // Auto-grab the singleton for THIS chipset type
     ObjectFLEDGroup<TIMING>& group = ObjectFLEDGroup<TIMING>::getInstance();
 
@@ -229,7 +255,7 @@ void ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::showPixe
 }
 
 template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
-void ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::endShowLeds(void *data) {
+void ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::endShowLeds(void *data) FL_NO_EXCEPT {
     Base::endShowLeds(data);
 
     // DON'T flush here - let chipset change detection or frame end handle it

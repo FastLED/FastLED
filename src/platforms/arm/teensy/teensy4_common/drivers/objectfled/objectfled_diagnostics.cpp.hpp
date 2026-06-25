@@ -9,10 +9,12 @@
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/sstream.h"
+// IWYU pragma: begin_keep
 #include "third_party/object_fled/src/ObjectFLEDDmaManager.h"
 
 #include <Arduino.h>
-#include "DMAChannel.h"
+#include "DMAChannel.h"  // ok include path - Teensy core header
+// IWYU pragma: end_keep
 
 namespace fl {
 namespace {
@@ -135,8 +137,8 @@ void setU32(fl::json& out, const char* key, u32 value) FL_NO_EXCEPT {
     out.set(key, static_cast<i64>(value));
 }
 
-volatile uint32_t* standardGpioAddr(volatile uint32_t* fastgpio) FL_NO_EXCEPT {
-    return reinterpret_cast<volatile uint32_t*>( // ok reinterpret cast - Teensy GPIO alias address map
+volatile u32* standardGpioAddr(volatile u32* fastgpio) FL_NO_EXCEPT {
+    return reinterpret_cast<volatile u32*>( // ok reinterpret cast - Teensy GPIO alias address map
         ptrToU32(fastgpio) - 0x01E48000u);
 }
 
@@ -150,11 +152,11 @@ PinRegisterSnapshot capturePin(u8 pin) FL_NO_EXCEPT {
     out.bit = digitalPinToBit(pin);
     out.mask = 1u << out.bit;
 
-    volatile uint32_t* outputReg = portOutputRegister(pin);
-    volatile uint32_t* modeReg = portModeRegister(pin);
-    volatile uint32_t* inputReg = portInputRegister(pin);
-    volatile uint32_t* muxReg = portConfigRegister(pin);
-    volatile uint32_t* padReg = portControlRegister(pin);
+    volatile u32* outputReg = portOutputRegister(pin);
+    volatile u32* modeReg = portModeRegister(pin);
+    volatile u32* inputReg = portInputRegister(pin);
+    volatile u32* muxReg = portConfigRegister(pin);
+    volatile u32* padReg = portControlRegister(pin);
 
     out.outputRegister = ptrToU32(outputReg);
     out.outputValue = *outputReg;
@@ -173,12 +175,12 @@ PinRegisterSnapshot capturePin(u8 pin) FL_NO_EXCEPT {
     if (offset <= 3) {
         out.fastGpio = static_cast<u8>(6 + offset);
         out.standardGpio = static_cast<u8>(1 + offset);
-        volatile uint32_t* gprReg = &IOMUXC_GPR_GPR26 + offset;
+        volatile u32* gprReg = &IOMUXC_GPR_GPR26 + offset;
         out.gpr = *gprReg;
         out.gprMask = out.mask;
         out.mappedToStandard = ((*gprReg & out.mask) == 0);
 
-        volatile uint32_t* standardModeReg = standardGpioAddr(modeReg);
+        volatile u32* standardModeReg = standardGpioAddr(modeReg);
         out.modeRegister = ptrToU32(standardModeReg);
         out.modeValue = *standardModeReg;
     }
@@ -242,7 +244,7 @@ TcdSnapshot captureTcd(const DMABaseClass::TCD_t* tcd) FL_NO_EXCEPT {
 }
 
 u32 captureDmamuxChcfg(u8 channel) FL_NO_EXCEPT {
-    volatile uint32_t* dmamux = &DMAMUX_CHCFG0 + channel;
+    volatile u32* dmamux = &DMAMUX_CHCFG0 + channel;
     return *dmamux;
 }
 

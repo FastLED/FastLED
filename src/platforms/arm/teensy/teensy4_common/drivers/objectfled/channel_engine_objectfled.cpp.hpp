@@ -5,6 +5,7 @@
 
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/channel_engine_objectfled.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/iobjectfled_peripheral.h"
+#include "platforms/arm/teensy/teensy4_common/clockless_objectfled.h"
 
 #include "fl/log/log.h"
 #include "fl/log/log.h"
@@ -209,8 +210,9 @@ bool ChannelEngineObjectFLED::startTimingGroup(TimingGroup& group) FL_NO_EXCEPT 
         u32 total_bytes = 0;
         drawBuf.getBlockInfo(&num_strips, &bytes_per_strip, &total_bytes);
 
-        int bytesPerLed = hasRgbw ? 4 : 3;
-        int totalLeds = total_bytes / bytesPerLed;
+        int totalLeds = static_cast<int>(
+            objectFledTotalLedsForRectangularBlock(
+                num_strips, bytes_per_strip, hasRgbw));
 
         group.instance = mPeripheral->createInstance(
             totalLeds, hasRgbw, pinList.size(), pinList.data(),

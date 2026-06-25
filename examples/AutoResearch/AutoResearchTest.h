@@ -22,6 +22,7 @@ struct AutoResearchConfig {
     int base_strip_size;                         ///< Base strip size (10 or 300 LEDs)
     fl::RxDeviceType rx_type;                    ///< RX device type (RMT or ISR)
     fl::span<const LegacyClocklessChipset> legacy_chipsets;  ///< Optional per-lane legacy templates
+    bool legacy_rgbw;                            ///< Enable RGBW on legacy controllers
 
     AutoResearchConfig(const fl::ChipsetTimingConfig& t,
                      const char* tn,
@@ -32,7 +33,8 @@ struct AutoResearchConfig {
                      int bss,
                      fl::RxDeviceType rt,
                      fl::ClocklessEncoder enc = fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812,
-                     fl::span<const LegacyClocklessChipset> legacy = fl::span<const LegacyClocklessChipset>())
+                     fl::span<const LegacyClocklessChipset> legacy = fl::span<const LegacyClocklessChipset>(),
+                     bool legacy_rgbw_enabled = false)
         : timing(t)
         , encoder(enc)
         , timing_name(tn)
@@ -42,7 +44,8 @@ struct AutoResearchConfig {
         , rx_buffer(rb)
         , base_strip_size(bss)
         , rx_type(rt)
-        , legacy_chipsets(legacy) {}
+        , legacy_chipsets(legacy)
+        , legacy_rgbw(legacy_rgbw_enabled) {}
 };
 
 /// @brief Test context for detailed error reporting

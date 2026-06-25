@@ -427,6 +427,23 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         use_legacy_api = config["useLegacyApi"].as_bool().value();
     }
 
+    bool legacy_rgbw = false;
+    if (config.contains("legacyRgbw")) {
+        if (!use_legacy_api) {
+            response.set("success", false);
+            response.set("error", "LegacyRgbwRequiresLegacyApi");
+            response.set("message", "legacyRgbw requires useLegacyApi=true");
+            return response;
+        }
+        if (!config["legacyRgbw"].is_bool()) {
+            response.set("success", false);
+            response.set("error", "InvalidLegacyRgbw");
+            response.set("message", "legacyRgbw must be a boolean");
+            return response;
+        }
+        legacy_rgbw = config["legacyRgbw"].as_bool().value();
+    }
+
     fl::vector<LegacyClocklessChipset> legacy_chipsets;
     if (config.contains("legacyChipsets") && !use_legacy_api) {
         response.set("success", false);
@@ -656,7 +673,8 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         lane_sizes[0],  // base_strip_size (used for logging)
         fl::RxDeviceType::RMT,  // Default RX device type
         timing_config.encoder,
-        fl::span<const LegacyClocklessChipset>(legacy_chipsets)
+        fl::span<const LegacyClocklessChipset>(legacy_chipsets),
+        legacy_rgbw
     );
 
     // Run test with debug output suppressed
@@ -773,6 +791,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     response.set("pattern", pattern.c_str());
     response.set("useLegacyApi", use_legacy_api);
     if (use_legacy_api) {
+        response.set("legacyRgbw", legacy_rgbw);
         fl::json legacy_chipsets_response = fl::json::array();
         for (LegacyClocklessChipset chipset : legacy_chipsets) {
             legacy_chipsets_response.push_back(

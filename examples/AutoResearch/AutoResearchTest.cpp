@@ -1227,8 +1227,8 @@ void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
             chipset = config.legacy_chipsets[i];
         }
 
-        auto proxy =
-            fl::make_unique<LegacyClocklessProxy>(pin, leds, numLeds, chipset);
+        auto proxy = fl::make_unique<LegacyClocklessProxy>(
+            pin, leds, numLeds, chipset, config.legacy_rgbw);
         if (!proxy->valid()) {
             FL_ERROR("Legacy proxy invalid for lane " << i << " (pin " << pin
                      << ", chipset " << legacyClocklessChipsetName(chipset)

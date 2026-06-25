@@ -54,20 +54,25 @@ class LegacyClocklessProxy {
     fl::unique_ptr<CLEDController> mController;
 
     template<typename Controller>
-    fl::unique_ptr<CLEDController> createTyped(CRGB* leds, int numLeds) {
+    fl::unique_ptr<CLEDController> createTyped(CRGB* leds, int numLeds,
+                                               bool rgbw) {
         auto c = fl::make_unique<Controller>();
         FastLED.addLeds(c.get(), leds, numLeds);
+        if (rgbw) {
+            c->setRgbw(RgbwDefault());
+        }
         return c;
     }
 
     template<int PIN>
     fl::unique_ptr<CLEDController> create(CRGB* leds, int numLeds,
-                                          LegacyClocklessChipset chipset) {
+                                          LegacyClocklessChipset chipset,
+                                          bool rgbw) {
         switch (chipset) {
             case LegacyClocklessChipset::WS2812B:
-                return createTyped<WS2812B<PIN, RGB>>(leds, numLeds);
+                return createTyped<WS2812B<PIN, RGB>>(leds, numLeds, rgbw);
             case LegacyClocklessChipset::SK6812:
-                return createTyped<SK6812<PIN, RGB>>(leds, numLeds);
+                return createTyped<SK6812<PIN, RGB>>(leds, numLeds, rgbw);
         }
         return nullptr;
     }
@@ -75,18 +80,19 @@ class LegacyClocklessProxy {
 public:
     LegacyClocklessProxy(
         int pin, CRGB* leds, int numLeds,
-        LegacyClocklessChipset chipset = LegacyClocklessChipset::WS2812B) {
+        LegacyClocklessChipset chipset = LegacyClocklessChipset::WS2812B,
+        bool rgbw = false) {
         switch (pin) {
-            case 0: mController = create<0>(leds, numLeds, chipset); break;
-            case 1: mController = create<1>(leds, numLeds, chipset); break;
-            case 2: mController = create<2>(leds, numLeds, chipset); break;
-            case 3: mController = create<3>(leds, numLeds, chipset); break;
-            case 4: mController = create<4>(leds, numLeds, chipset); break;
-            case 5: mController = create<5>(leds, numLeds, chipset); break;
-            case 6: mController = create<6>(leds, numLeds, chipset); break;
-            case 7: mController = create<7>(leds, numLeds, chipset); break;
-            case 8: mController = create<8>(leds, numLeds, chipset); break;
-            case 22: mController = create<22>(leds, numLeds, chipset); break;
+            case 0: mController = create<0>(leds, numLeds, chipset, rgbw); break;
+            case 1: mController = create<1>(leds, numLeds, chipset, rgbw); break;
+            case 2: mController = create<2>(leds, numLeds, chipset, rgbw); break;
+            case 3: mController = create<3>(leds, numLeds, chipset, rgbw); break;
+            case 4: mController = create<4>(leds, numLeds, chipset, rgbw); break;
+            case 5: mController = create<5>(leds, numLeds, chipset, rgbw); break;
+            case 6: mController = create<6>(leds, numLeds, chipset, rgbw); break;
+            case 7: mController = create<7>(leds, numLeds, chipset, rgbw); break;
+            case 8: mController = create<8>(leds, numLeds, chipset, rgbw); break;
+            case 22: mController = create<22>(leds, numLeds, chipset, rgbw); break;
             default: break;  // mController stays nullptr
         }
     }
