@@ -99,6 +99,12 @@ namespace fl {
 //Usage: ObjectFLED myCube ( Num_LEDs, *drawBuffer, LED_type, numPins, *pinList, serpentineNumber )
 class ObjectFLED {
 public:
+	// Teensy 4.x hardware ownership:
+	// ObjectFLED owns QTimer4 channels 0-2, XBAR1 DMA request outputs 30/31/94,
+	// the corresponding DMAMUX requests, its allocated DMA channels, and the
+	// selected pins' standard GPIO aliases while an instance is active. It does
+	// not restore prior owners for those resources; conflicting peripherals must
+	// be treated as unsupported while ObjectFLED is in use.
 	// Usage: ObjectFLED myCube ( Num_LEDs, *drawBuffer, LED_type, numPins, *pinList, serpentineNumber )
 	// Example:
     // byte pinList[NUM_CHANNELS] = {1, 8, 14, 17, 24, 29, 20, 0, 15, 16, 18, 19, 21, 22, 23, 25};
@@ -202,6 +208,7 @@ private:
 	uint32_t numbytesLocal;
 	uint8_t pin_bitnumLocal[NUM_DIGITAL_PINS];
 	uint8_t pin_offsetLocal[NUM_DIGITAL_PINS];
+	bool initialized = false;
 };	// class ObjectFLED
 
 
