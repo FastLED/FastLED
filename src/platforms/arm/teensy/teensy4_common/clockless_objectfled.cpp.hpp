@@ -29,6 +29,14 @@ namespace fl {
 // ObjectFLEDRegistry Implementation (non-template)
 // ============================================================================
 
+ObjectFLEDRegistry::ObjectFLEDRegistry() FL_NO_EXCEPT {
+    EngineEvents::addListener(this);
+}
+
+ObjectFLEDRegistry::~ObjectFLEDRegistry() FL_NO_EXCEPT {
+    EngineEvents::removeListener(this);
+}
+
 void ObjectFLEDRegistry::registerGroup(void* groupPtr, void (*flushFunc)(void*)) {
     GroupEntry entry{groupPtr, flushFunc};
     if (!contains(entry)) {
@@ -37,10 +45,11 @@ void ObjectFLEDRegistry::registerGroup(void* groupPtr, void (*flushFunc)(void*))
 }
 
 void ObjectFLEDRegistry::flushAll() {
-    for (auto& entry : mGroups) {
+    fl::vector<GroupEntry> groups = mGroups;
+    mGroups.clear();
+    for (auto& entry : groups) {
         entry.flushFunc(entry.groupPtr);
     }
-    mGroups.clear();
 }
 
 void ObjectFLEDRegistry::flushAllExcept(void* exceptPtr) {
@@ -60,6 +69,10 @@ bool ObjectFLEDRegistry::contains(const GroupEntry& entry) {
         if (e == entry) return true;
     }
     return false;
+}
+
+void ObjectFLEDRegistry::onEndFrame() FL_NO_EXCEPT {
+    flushAll();
 }
 
 // ============================================================================
