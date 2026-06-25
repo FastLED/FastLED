@@ -2,8 +2,8 @@
 /// @brief ObjectFLED DMA-based channel engine for Teensy 4.x
 ///
 /// Implements IChannelDriver wrapping ObjectFLED's 3:1 DMA bit transposition.
-/// ObjectFLED's show() is synchronous (blocks until DMA completes), so the
-/// state machine is simply: READY -> BUSY -> READY (no DRAINING).
+/// ObjectFLED's show() starts DMA and returns while output/latch timing may
+/// still be active, so poll() owns the DRAINING -> READY transition.
 ///
 /// Data format: ChannelData contains raw RGB/RGBW bytes (from ws2812 encoder),
 /// which is exactly what ObjectFLED expects in its frameBufferLocal.
@@ -38,7 +38,7 @@ class IObjectFLEDPeripheral;
 /// period 1000-2500ns (standard WS2812/SK6812 range). Rejects WS2816 and
 /// other HD chipsets that use different encoding.
 ///
-/// State machine: READY -> BUSY -> READY (synchronous DMA)
+/// State machine: READY -> BUSY -> DRAINING -> READY
 class ChannelEngineObjectFLED : public IChannelDriver {
 public:
     /// @brief Construct with platform-default peripheral
@@ -56,11 +56,11 @@ public:
     /// @brief Enqueue channel data for transmission
     void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
 
-    /// @brief Trigger transmission of enqueued data (synchronous DMA)
+    /// @brief Trigger transmission of enqueued data
     void show() FL_NO_EXCEPT override;
 
     /// @brief Query engine state
-    /// @return READY (ObjectFLED show() is synchronous, always completes before returning)
+    /// @return DRAINING while ObjectFLED DMA/latch timing is active
     DriverState poll() FL_NO_EXCEPT override;
 
     /// @brief Get engine name
@@ -86,6 +86,12 @@ private:
 
     /// @brief Persistent timing groups (cached across frames)
     fl::vector<fl::unique_ptr<TimingGroup>> mTimingGroups;
+
+    size_t mCurrentGroupIndex = 0;
+
+    bool startNextTimingGroup() FL_NO_EXCEPT;
+    bool startTimingGroup(TimingGroup& group) FL_NO_EXCEPT;
+    void finishTransmission() FL_NO_EXCEPT;
 };
 
 } // namespace fl
