@@ -71,6 +71,34 @@ mod tests {
     }
 
     #[test]
+    fn autoresearch_runtime_output_marker_scope_can_protect_driver_cpp_hpp() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let path = "src/platforms/arm/teensy/teensy4_common/example.cpp.hpp";
+        assert!(checker.should_process_file(path, Path::new(".")));
+        let result = checker.check_file_content(&file(
+            path,
+            "// autoresearch-runtime-output-lint: begin\n\
+FL_WARN(\"driver chatter\");\n\
+FL_PRINT(\"driver chatter\");\n\
+Serial.printX(\"driver chatter\");\n\
+fl::serialPrintln(\"driver chatter\");\n\
+fl::serial_write(bytes, len);\n\
+// autoresearch-runtime-output-lint: end\n",
+        ));
+        assert_eq!(result.len(), 5);
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_ignores_unmarked_non_autoresearch_files() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "src/platforms/arm/teensy/teensy4_common/example.cpp.hpp",
+            "FL_WARN(\"allowed outside an explicit protected span\");\n",
+        ));
+        assert!(result.is_empty());
+    }
+
+    #[test]
     fn autoresearch_runtime_output_allows_rpc_serial_boundary_only() {
         let checker = AutoResearchRuntimeOutputChecker;
         let result = checker.check_file_content(&file(

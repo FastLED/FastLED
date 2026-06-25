@@ -171,6 +171,7 @@ void ObjectFLEDGroupBase::addStrip(u8 pin, PixelIterator& pixel_iterator) {
     mPendingStrips.push_back(pending);
 }
 
+// autoresearch-runtime-output-lint: begin
 void ObjectFLEDGroupBase::flush() {
     if (mDrawn || mRectDrawBuffer.mDrawList.size() == 0) {
         return;  // Already drawn or no data
@@ -249,10 +250,6 @@ void ObjectFLEDGroupBase::rebuildObjectFLED() {
     int totalLeds = static_cast<int>(
             objectFledTotalLedsForRectangularBlock(num_strips, bytes_per_strip, hasRgbw));
 
-    #ifdef FASTLED_DEBUG_OBJECTFLED
-    FL_WARN_F("ObjectFLEDGroupBase: totalLeds=%s bytesPerStrip=%s frameBytes=%s", totalLeds, bytes_per_strip, frame_bytes);
-    #endif
-
     // Pass nullptr so ObjectFLED allocates frameBufferLocal internally
     auto* objectfled = new fl::ObjectFLED(  // ok bare allocation
         totalLeds,
@@ -271,6 +268,7 @@ void ObjectFLEDGroupBase::rebuildObjectFLED() {
     // Clear frameBufferLocal to zeros (for padding)
     fl::memset(objectfled->frameBufferLocal, 0, frame_bytes);
 }
+// autoresearch-runtime-output-lint: end
 
 } // namespace fl
 

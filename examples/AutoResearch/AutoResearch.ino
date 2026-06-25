@@ -106,8 +106,9 @@ void loop()  { autoResearchLowMemoryLoop(); }
 //    - DO NOT change "ERROR" to "FAIL", "WARNING", "FAILURE", or any other
 //      keyword to avoid test detection
 //    - DO NOT add FL_ERROR, FL_PRINT, FL_WARN, Serial.print*, fl::Serial.print*,
-//      fl::print*, fl::write_bytes, or fl::serial_print* runtime output in this
-//      sketch or lint-marked runtime sections. Use JSON-RPC / RESULT JSONL.
+//      fl::print*, fl::write_bytes, or fl::serial print/write/flush runtime
+//      output in this sketch or any `autoresearch-runtime-output-lint` section.
+//      fl::serial_begin/ready setup helpers are allowed. Use JSON-RPC / RESULT JSONL.
 //    - The "ERROR" keyword is INTENTIONAL and part of the autoresearch contract
 //
 // ✅ VALID MODIFICATIONS (only if explicitly requested):

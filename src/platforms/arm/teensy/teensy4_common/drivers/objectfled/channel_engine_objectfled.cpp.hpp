@@ -137,6 +137,7 @@ bool ChannelEngineObjectFLED::startNextTimingGroup() FL_NO_EXCEPT {
     return false;
 }
 
+// autoresearch-runtime-output-lint: begin
 bool ChannelEngineObjectFLED::startTimingGroup(TimingGroup& group) FL_NO_EXCEPT {
     RectangularDrawBuffer& drawBuf = group.drawBuffer;
     drawBuf.onQueuingStart();
@@ -240,6 +241,7 @@ bool ChannelEngineObjectFLED::startTimingGroup(TimingGroup& group) FL_NO_EXCEPT 
     group.instance->show();
     return true;
 }
+// autoresearch-runtime-output-lint: end
 
 IChannelDriver::DriverState ChannelEngineObjectFLED::poll() FL_NO_EXCEPT {
     if (mTransmittingChannels.empty()) {
