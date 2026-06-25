@@ -432,6 +432,28 @@ def display_objectfled_diagnostics(result: dict[str, Any]) -> None:
             if key in flex_diag:
                 print(f"    {key}: {flex_diag[key]}")
 
+    pad_probe = result.get("standardGpioPadProbe")
+    if isinstance(pad_probe, dict):
+        print()
+        print("  Standard GPIO pad probe (TX manual drive via standard alias)")
+        for key in (
+            "supported",
+            "txPin",
+            "rxPin",
+            "txBit",
+            "txMask",
+            "txOffset",
+            "success",
+            "error",
+            "standardGpioRxInitial",
+            "standardGpioRxHighCount",
+            "standardGpioRxLowCount",
+            "standardGpioConnected",
+            "message",
+        ):
+            if key in pad_probe:
+                print(f"    {key}: {pad_probe[key]}")
+
 
 def print_run_summary(ctx: RunContext) -> None:
     """Print the compact configuration header."""
