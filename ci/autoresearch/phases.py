@@ -27,6 +27,7 @@ from ci.autoresearch.context import (
     QuietContext,
     RunContext,
     default_pins_for_environment,
+    display_objectfled_diagnostics,
     display_pattern_details,
     display_tight_timing,
 )
@@ -2867,6 +2868,7 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         print(f"   Duration: {duration_str}")
 
                     display_tight_timing(test_data)
+                    display_objectfled_diagnostics(test_data)
 
                     if "drivers" in test_data and isinstance(
                         test_data["drivers"], list
@@ -2911,6 +2913,7 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         print(f"   Actual: {failure.get('actual', 'unknown')}")
 
                     display_tight_timing(test_data)
+                    display_objectfled_diagnostics(test_data)
 
                     if "patterns" in test_data:
                         display_pattern_details(test_data)
