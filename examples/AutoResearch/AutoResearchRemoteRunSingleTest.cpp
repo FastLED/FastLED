@@ -37,6 +37,7 @@
 #include "AutoResearchParlioEncode.h"
 #include "AutoResearchTimingDrift.h"
 #include "AutoResearchParlioStream.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_diagnostics.h"
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
 #include <Arduino.h>
@@ -500,6 +501,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
 
     // SPI chipset drivers use APA102 protocol with data+clock pins.
     // Clockless drivers use WS2812B timing on a single data pin
+    bool is_object_fled_driver = (driver_name == "OBJECT_FLED");
     bool is_spi_chipset_driver = (driver_name == "LCD_SPI" ||
                                   driver_name == "I2S_SPI" ||
                                   driver_name == "SPI_UNIFIED");
@@ -575,6 +577,10 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         // ObjectFLED's DMA refill path, which is exactly what #3343 is
         // trying to prove or eliminate. JSON-RPC responses bypass this guard.
         fl::ScopedLogDisable quiet_logs;
+
+        if (is_object_fled_driver) {
+            fl::objectFledDiagnosticsReset();
+        }
 
         if (use_legacy_api) {
             // Legacy API path: WS2812B<PIN> template instantiation
@@ -672,6 +678,10 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     response.set("frameCount", static_cast<int64_t>(frame_count));
     if (measure_tight_timing) {
         response.set("tightTiming", tight_timing_response);
+    }
+    if (is_object_fled_driver) {
+        response.set("objectFledDiagnostics",
+                     fl::objectFledDiagnosticsToJson());
     }
 
     // Free run_results before building response to reclaim heap

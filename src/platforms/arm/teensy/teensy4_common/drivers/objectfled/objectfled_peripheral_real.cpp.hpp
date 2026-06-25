@@ -8,6 +8,7 @@
 #if defined(FL_IS_TEENSY_4X)
 
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/iobjectfled_peripheral.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_diagnostics.h"
 
 #include "fl/stl/cstring.h"
 // IWYU pragma: begin_keep
@@ -23,11 +24,20 @@ namespace fl {
 
 class ObjectFLEDInstanceReal : public IObjectFLEDInstance {
 public:
-    ObjectFLEDInstanceReal(ObjectFLED* ofled, u32 totalBytes)
-        : mObjectFLED(ofled), mTotalBytes(totalBytes) {}
+    ObjectFLEDInstanceReal(ObjectFLED* ofled, u32 totalBytes, const u8* pins,
+                           u32 pinCount)
+        : mObjectFLED(ofled), mTotalBytes(totalBytes),
+          mPinCount(pinCount < kMaxCapturedPins ? pinCount : kMaxCapturedPins) {
+        if (pins != nullptr && mPinCount > 0) {
+            fl::memcpy(mPins, pins, mPinCount);
+        }
+    }
 
     ~ObjectFLEDInstanceReal() override {
+        objectFledDiagnosticsRecord("beforeDestroy", mPins, mPinCount);
         delete mObjectFLED;  // ok bare allocation
+        mObjectFLED = nullptr;
+        objectFledDiagnosticsRecord("afterDestroy", mPins, mPinCount);
     }
 
     u8* getFrameBuffer() override {
@@ -39,12 +49,17 @@ public:
     }
 
     void show() override {
+        objectFledDiagnosticsRecord("beforeShow", mPins, mPinCount);
         mObjectFLED->show();
+        objectFledDiagnosticsRecord("afterShowReturn", mPins, mPinCount);
     }
 
 private:
+    static constexpr u32 kMaxCapturedPins = 16;
     ObjectFLED* mObjectFLED;
     u32 mTotalBytes;
+    u8 mPins[kMaxCapturedPins] = {};
+    u32 mPinCount = 0;
 };
 
 // ============================================================================
@@ -74,12 +89,14 @@ public:
             0  // No serpentine
         );
 
+        objectFledDiagnosticsRecord("beforeBegin", pinList, numPins);
         ofled->begin(
             static_cast<u16>(t1_ns),
             static_cast<u16>(t2_ns),
             static_cast<u16>(t3_ns),
             static_cast<u16>(reset_us)
         );
+        objectFledDiagnosticsRecord("afterBegin", pinList, numPins);
 
         // CRITICAL: Set drawBuffer to frameBufferLocal so genFrameBuffer()
         // (called inside show()) doesn't dereference nullptr. We write
@@ -94,7 +111,8 @@ public:
         // Clear frame buffer for padding
         fl::memset(ofled->frameBufferLocal, 0, totalBytes);
 
-        return fl::make_unique<ObjectFLEDInstanceReal>(ofled, totalBytes);
+        return fl::make_unique<ObjectFLEDInstanceReal>(
+            ofled, totalBytes, pinList, numPins);
     }
 };
 

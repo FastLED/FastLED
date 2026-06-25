@@ -72,6 +72,7 @@ def synthesise_autoresearch_project(
         "AutoResearch",
         paths,
         build_dir=build_dir,
+        additional_defines=["FASTLED_OBJECTFLED_DIAGNOSTICS=1"],
         use_fbuild=True,
     )
     if not init_result.success:

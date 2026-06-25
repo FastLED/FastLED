@@ -347,6 +347,29 @@ def display_tight_timing(result: dict[str, Any]) -> None:
     )
 
 
+def display_objectfled_diagnostics(result: dict[str, Any]) -> None:
+    """Display ObjectFLED register snapshots attached to runSingleTest."""
+    diagnostics = result.get("objectFledDiagnostics")
+    if not isinstance(diagnostics, dict):
+        return
+    if diagnostics.get("enabled") is not True:
+        return
+
+    event_count = diagnostics.get("eventCount", "?")
+    overflow_count = diagnostics.get("overflowCount", "?")
+    fmt = diagnostics.get("format", "unknown")
+    snapshot = diagnostics.get("snapshot")
+
+    print()
+    print("  ObjectFLED diagnostics")
+    print(f"    format: {fmt}")
+    print(f"    events: {event_count}, overflow: {overflow_count}")
+    if isinstance(snapshot, str) and snapshot:
+        print("    snapshot:")
+        for line in snapshot.splitlines():
+            print(f"      {line}")
+
+
 def print_run_summary(ctx: RunContext) -> None:
     """Print the compact configuration header."""
     print("\u2500" * 60)

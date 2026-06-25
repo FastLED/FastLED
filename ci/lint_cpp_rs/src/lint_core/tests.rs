@@ -55,9 +55,9 @@ mod tests {
         let checker = AutoResearchRuntimeOutputChecker;
         let result = checker.check_file_content(&file(
             "examples/AutoResearch/AutoResearch.ino",
-            "FL_WARN(\"boot chatter\");\nFL_WARN_F_ONCE(\"boot chatter\");\nFL_PRINT_EVERY(1000, \"tick\");\nFL_ERROR(\"boot failure\");\nSerial.println(\"not rpc\");\nSerial.printf(\"not rpc\");\nfl::println(\"nope\");\nfl::serial_println(\"nope\");\nfl::serial_printf(\"nope\");\n",
+            "FL_WARN(\"boot chatter\");\nFL_WARN_F_ONCE(\"boot chatter\");\nFL_WARN_LIT(\"boot chatter\");\nFL_PRINT_EVERY(1000, \"tick\");\nFL_PRINT_F(\"tick\");\nFL_ERROR(\"boot failure\");\nSerial.println(\"not rpc\");\nSerial.printf(\"not rpc\");\nSerial.printHex(\"not rpc\");\nfl::println(\"nope\");\nfl::serial_print(\"nope\");\nfl::serial_println(\"nope\");\nfl::serial_printf(\"nope\");\nfl::serialPrintln(\"nope\");\n",
         ));
-        assert_eq!(result.len(), 9);
+        assert_eq!(result.len(), 14);
     }
 
     #[test]

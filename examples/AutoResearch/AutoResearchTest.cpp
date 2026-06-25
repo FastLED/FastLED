@@ -14,6 +14,7 @@
 
 #include "AutoResearchTest.h"
 #include "LegacyClocklessProxy.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_diagnostics.h"
 #include <FastLED.h>
 #include "fl/stl/sstream.h"
 #include "fl/chipsets/encoders/ucs7604.h"
@@ -355,6 +356,7 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     // Buffer size: 1 LED byte = 8 bits = 8 RMT symbols
     // UART with TX inversion produces standard WS2812 waveform, same symbol count
     bool is_uart_driver = (fl::strcmp(driver_name, "UART") == 0);
+    bool is_object_fled_driver = (fl::strcmp(driver_name, "OBJECT_FLED") == 0);
     rx_config.edge_capacity = rx_buffer.size() * 8;
 
     // Internal loopback configuration: Enable ONLY for RMT TX -> RMT RX scenarios
@@ -422,8 +424,14 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         FastLED.show();
         FL_WARN("[CAPTURE] FastLED.show() returned, calling wait...");
         if (!FastLED.wait(TX_WAIT_TIMEOUT_MS)) {
+            if (is_object_fled_driver) {
+                fl::objectFledDiagnosticsRecord("afterFastLedWaitTimeout");
+            }
             FL_WARN("[CAPTURE] FastLED.wait() timed out");
             return 0;
+        }
+        if (is_object_fled_driver) {
+            fl::objectFledDiagnosticsRecord("afterFastLedWait");
         }
         FL_WARN("[CAPTURE] FastLED.wait() done");
     }
@@ -1175,6 +1183,9 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
     // CRITICAL: Clear FastLED's global channel registry to prevent accumulation
     // If we only destroy local shared_ptrs, FastLED still holds references
     FastLED.clear(ClearFlags::CHANNELS);
+    if (fl::strcmp(config.driver_name, "OBJECT_FLED") == 0) {
+        fl::objectFledDiagnosticsRecord("afterFastLedClear");
+    }
     // Channel destruction is synchronous - no delay needed
 }
 
