@@ -253,6 +253,7 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "banned_macros",
         "banned_namespace",
         "builtin_memcpy",
+        "autoresearch_runtime_output",
         "fl_no_underscore",
         "legacy_log_macro",
         "cpp_hpp_includes",
@@ -329,6 +330,7 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "BannedMacrosChecker",
         "BannedNamespaceChecker",
         "BuiltinMemcpyChecker",
+        "AutoResearchRuntimeOutputChecker",
         "FlNoUnderscoreChecker",
         "LegacyLogMacroChecker",
         "CppHppIncludesChecker",
@@ -462,6 +464,10 @@ pub fn create_checkers(
         ("banned_macros", Box::new(BannedMacrosChecker)),
         ("banned_namespace", Box::new(BannedNamespaceChecker)),
         ("builtin_memcpy", Box::new(BuiltinMemcpyChecker)),
+        (
+            "autoresearch_runtime_output",
+            Box::new(AutoResearchRuntimeOutputChecker),
+        ),
         ("fl_no_underscore", Box::new(FlNoUnderscoreChecker)),
         ("legacy_log_macro", Box::new(LegacyLogMacroChecker)),
         ("cpp_hpp_includes", Box::new(CppHppIncludesChecker)),
@@ -984,4 +990,3 @@ fn strip_string_literals(code: &str) -> String {
 
     result
 }
-

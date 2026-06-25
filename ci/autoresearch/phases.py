@@ -316,58 +316,6 @@ async def _run_native_autoresearch(args: Args, build_mode: str = "quick") -> int
     return 0 if result.success else 1
 
 
-def _try_teensy_bootloader_upload(build_dir: Path, environment: str | None) -> bool:
-    """Try to detect Teensy in HalfKay bootloader mode and upload firmware."""
-    if not environment:
-        return False
-
-    loader_paths = [
-        Path.home()
-        / ".platformio"
-        / "packages"
-        / "tool-teensy"
-        / "teensy_loader_cli.exe",
-        Path.home() / ".platformio" / "packages" / "tool-teensy" / "teensy_loader_cli",
-    ]
-    loader = None
-    for p in loader_paths:
-        if p.exists():
-            loader = p
-            break
-    if not loader:
-        return False
-
-    hex_path = build_dir / ".pio" / "build" / environment / "firmware.hex"
-    if not hex_path.exists():
-        return False
-
-    mcu_map = {
-        "teensy41": "TEENSY41",
-        "teensy40": "TEENSY40",
-        "teensylc": "TEENSYLC",
-        "teensy36": "TEENSY36",
-        "teensy35": "TEENSY35",
-        "teensy31": "TEENSY31",
-    }
-    mcu = mcu_map.get(environment.lower())
-    if not mcu:
-        return False
-
-    try:
-        result = subprocess.run(
-            [str(loader), f"--mcu={mcu}", "-v", str(hex_path)],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        if result.returncode == 0 and "Programming" in result.stdout:
-            return True
-    except (subprocess.TimeoutExpired, OSError):
-        pass
-
-    return False
-
-
 # ============================================================
 # Phase A: Parse args and build commands
 # ============================================================
@@ -1025,7 +973,14 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
             if is_teensy:
                 print(f"\n{Fore.YELLOW}{'=' * 60}")
                 print(f"  Teensy not detected on USB.")
-                print(f"  Press the PROGRAM button on the Teensy to enter bootloader.")
+                print(
+                    "  AutoResearch will not pre-upload stale .pio firmware "
+                    "during port detection."
+                )
+                print(
+                    "  Power-cycle or reconnect the Teensy so the USB serial "
+                    "port appears, then let fbuild own the deploy."
+                )
                 print(f"{'=' * 60}{Style.RESET_ALL}\n")
             print(
                 f"\u23f3 No USB serial port found yet. Waiting up to {max_wait_s}s for device..."
@@ -1043,26 +998,6 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                         f"\u2705 USB serial port detected after {elapsed:.1f}s: {result.selected_port}"
                     )
                     break
-                if is_teensy:
-                    teensy_result = _try_teensy_bootloader_upload(
-                        ctx.build_dir, ctx.final_environment
-                    )
-                    if teensy_result:
-                        print(
-                            "\u2705 Firmware uploaded via Teensy bootloader, waiting for serial port..."
-                        )
-                        serial_deadline = time.monotonic() + 15
-                        while time.monotonic() < serial_deadline:
-                            time.sleep(1.0)
-                            result = auto_detect_upload_port(
-                                expected_environment=expected_environment
-                            )
-                            if result.ok:
-                                print(
-                                    f"\u2705 Teensy serial port detected: {result.selected_port}"
-                                )
-                                break
-                        break
                 now = time.monotonic()
                 if now - last_msg_at >= 5.0:
                     remaining = deadline - now
@@ -1089,7 +1024,9 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
             )
             if is_teensy:
                 print(
-                    f"{Fore.YELLOW}Teensy hint: Hold the PROGRAM button while plugging in USB to force bootloader mode.{Style.RESET_ALL}"
+                    f"{Fore.YELLOW}Teensy hint: keep the board in USB serial mode "
+                    f"for AutoResearch acceptance; fbuild must perform the first "
+                    f"firmware deploy for this run.{Style.RESET_ALL}"
                 )
             print(
                 f"{Fore.RED}Note: Bluetooth serial ports (BTHENUM) are not supported.{Style.RESET_ALL}\n"
