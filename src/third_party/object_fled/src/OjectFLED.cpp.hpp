@@ -105,6 +105,12 @@ static volatile uint32_t *standard_gpio_addr(volatile uint32_t *fastgpio) {
 	return (volatile uint32_t *)((uint32_t)fastgpio - 0x01E48000);
 }
 
+static void force_pin_to_gpio_mux(uint8_t pin) {
+	// Teensy 4.x GPIO pads use MUX_MODE=5. Keep SION set so diagnostics can
+	// observe the pad input path while DMA drives the standard GPIO alias.
+	*portConfigRegister(pin) = 5 | 0x10;
+}
+
 
 void ObjectFLED::begin(uint16_t latchDelay) {
 	LATCH_DELAY = latchDelay;
@@ -179,6 +185,7 @@ void ObjectFLED::begin(void) {
 		pin_offsetLocal[i] = offset;	//local copy for context switch
 		uint32_t mask = 1 << bit;	//mask32 = bit set @position in GPIO DR
 		tempBitmask[offset] |= mask;	//bitmask32[0..3] = collective pin bit masks for each GPIO DR
+		force_pin_to_gpio_mux(pin);	// reclaim pin after PWM/Serial/FlexIO mux use
 		//bit7:6 SPEED; bit 5:3 DSE; bit0 SRE  (default SPEED = 0b10; def. DSE = 0b110)
 		*portControlRegister(pin) &= ~0xF9;		//clear SPEED, DSE, SRE
 		*portControlRegister(pin) |= ((OUTPUT_PAD_SPEED & 0x3) << 6) | \

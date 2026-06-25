@@ -50,6 +50,7 @@ class Args:
     tx_pin: int | None
     rx_pin: int | None
     auto_discover_pins: bool
+    contaminate_tx_mux: bool
 
     # Build system selection
     use_fbuild: bool
@@ -487,6 +488,14 @@ See Also:
             action="store_true",
             help="Disable auto-discovery of connected pins",
         )
+        pin_group.add_argument(
+            "--contaminate-tx-mux",
+            action="store_true",
+            help=(
+                "Before runSingleTest, remux the selected TX pin through "
+                "analogWrite() so ObjectFLED must reclaim GPIO mux mode."
+            ),
+        )
 
         # Build system selection
         parser.add_argument(
@@ -674,6 +683,7 @@ See Also:
             rx_pin=parsed.rx_pin,
             auto_discover_pins=parsed.auto_discover_pins
             and not parsed.no_auto_discover_pins,
+            contaminate_tx_mux=parsed.contaminate_tx_mux,
             use_fbuild=parsed.use_fbuild,
             no_fbuild=parsed.no_fbuild,
             clean=parsed.clean,
