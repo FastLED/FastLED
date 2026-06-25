@@ -827,6 +827,51 @@ fl::json FlexPwmRxChannel::diagnosticsToJson(int requested_pin) FL_NO_EXCEPT {
     out.set("captureBufferSize", static_cast<i64>(active->mCaptureBuffer.size()));
     out.set("signalRangeMaxNs", static_cast<i64>(active->mSignalRangeMaxNs));
 
+    // Pin pad / GPIO state for the RX pin itself. Lets us tell if the pad
+    // inherited some pull/keeper/ODE/HYS setting from boot that would block
+    // FlexPWM input capture even when GPIO-mode digitalRead works.
+#if defined(NUM_DIGITAL_PINS)
+    if (active->mPin >= 0 && active->mPin < NUM_DIGITAL_PINS) {
+        volatile u32 *padReg = portControlRegister(active->mPin);
+        volatile u32 *fastOut = portOutputRegister(active->mPin);
+        volatile u32 *fastMode = portModeRegister(active->mPin);
+        volatile u32 *fastInput =
+            reinterpret_cast<volatile u32 *>( // ok reinterpret cast - Teensy fast GPIO PSR offset
+                fl::ptr_to_int(const_cast<u32 *>(fastOut)) + 0x08u);
+        volatile u32 *standardOut = reinterpret_cast<volatile u32 *>( // ok reinterpret cast - Teensy GPIO alias address map
+            fl::ptr_to_int(const_cast<u32 *>(fastOut)) - 0x01E48000u);
+        volatile u32 *standardMode = reinterpret_cast<volatile u32 *>( // ok reinterpret cast - Teensy GPIO alias address map
+            fl::ptr_to_int(const_cast<u32 *>(fastMode)) - 0x01E48000u);
+        volatile u32 *standardInput =
+            reinterpret_cast<volatile u32 *>( // ok reinterpret cast - Teensy fast GPIO PSR offset
+                fl::ptr_to_int(const_cast<u32 *>(standardOut)) + 0x08u);
+        flexPwmDiagSetPtr(out, "rxPadRegister", padReg);
+        flexPwmDiagSetU32(out, "rxPadValue", *padReg);
+        const u8 bit = digitalPinToBit(active->mPin);
+        out.set("rxBit", static_cast<i64>(bit));
+        out.set("rxMask", static_cast<i64>(1u << bit));
+        flexPwmDiagSetU32(out, "rxFastModeValue", *fastMode);
+        flexPwmDiagSetU32(out, "rxFastInputValue", *fastInput);
+        flexPwmDiagSetU32(out, "rxStandardModeValue", *standardMode);
+        flexPwmDiagSetU32(out, "rxStandardInputValue", *standardInput);
+        const u32 gpio6_base =
+            static_cast<u32>(fl::ptr_to_int(&GPIO6_DR));
+        const u32 output_addr =
+            static_cast<u32>(fl::ptr_to_int(const_cast<u32 *>(fastOut)));
+        if (output_addr >= gpio6_base) {
+            const u8 offset = static_cast<u8>((output_addr - gpio6_base) >> 14);
+            out.set("rxFastGpioBank", static_cast<i64>(6 + offset));
+            out.set("rxStandardGpioBank", static_cast<i64>(1 + offset));
+            if (offset <= 3) {
+                volatile u32 *gprReg = &IOMUXC_GPR_GPR26 + offset;
+                flexPwmDiagSetU32(out, "rxGprValue", *gprReg);
+                out.set("rxMappedToStandard",
+                        ((*gprReg) & (1u << bit)) == 0);
+            }
+        }
+    }
+#endif
+
     const FlexPwmPinInfo *active_info = active->mPinInfo;
     out.set("activeSubmodule", static_cast<i64>(active_info->submodule));
     out.set("activeChannelB", active_info->channel_b);
