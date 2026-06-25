@@ -380,11 +380,7 @@ impl FileContentChecker for AutoResearchRuntimeOutputChecker {
     }
 
     fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
-        if !ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino"]) {
-            return false;
-        }
-        let normalized = normalize_path(file_path);
-        normalized.contains("examples/AutoResearch/")
+        ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino", ".cpp.hpp"])
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
@@ -393,6 +389,14 @@ impl FileContentChecker for AutoResearchRuntimeOutputChecker {
         }
 
         let normalized_path = normalize_path(&file_content.path);
+        let is_autoresearch_file = normalized_path.contains("examples/AutoResearch/");
+        let has_marker = file_content
+            .content
+            .to_ascii_lowercase()
+            .contains("autoresearch-runtime-output-lint:");
+        if !is_autoresearch_file && !has_marker {
+            return Vec::new();
+        }
         let always_enforced =
             normalized_path.ends_with("examples/AutoResearch/AutoResearch.ino")
                 || normalized_path.contains("examples/AutoResearch/AutoResearchRemote");
