@@ -467,15 +467,20 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         tight_timing_max_overhead_us = static_cast<uint32_t>(max_overhead);
     }
 
-    // Legacy API: all pins must be in range 0-8 (compile-time template range)
-    // Multi-lane uses consecutive pins starting at pin_tx
+    // Legacy API: pins 0-8 are the historical compile-time template range.
+    // Pin 22 is included for the current Teensy ObjectFLED loopback wiring.
+    // Multi-lane uses consecutive pins starting at pin_tx.
     if (use_legacy_api) {
         int max_pin = pin_tx + (int)lane_sizes.size() - 1;
-        if (pin_tx < 0 || max_pin > 8) {
+        const bool historical_pin_range = pin_tx >= 0 && max_pin <= 8;
+        const bool current_loopback_pin =
+                lane_sizes.size() == 1 && pin_tx == 22;
+        if (!historical_pin_range && !current_loopback_pin) {
             response.set("success", false);
             response.set("error", "LegacyApiPinRange");
             fl::sstream msg;
-            msg << "Legacy template API requires all pins in range 0-8, got pins "
+            msg << "Legacy template API supports pins 0-8, plus single-lane "
+                << "pin 22 for current ObjectFLED loopback, got pins "
                 << pin_tx << "-" << max_pin;
             response.set("message", msg.str().c_str());
             return response;

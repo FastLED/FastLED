@@ -1222,7 +1222,8 @@ void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
 
         auto proxy = fl::make_unique<LegacyClocklessProxy>(pin, leds, numLeds);
         if (!proxy->valid()) {
-            FL_ERROR("Legacy proxy invalid for lane " << i << " (pin " << pin << " out of range 0-8)");
+            FL_ERROR("Legacy proxy invalid for lane " << i << " (pin " << pin
+                     << " not in supported set 0-8 or 22)");
             return;  // vector destructor cleans up already-created proxies
         }
         proxies.push_back(fl::move(proxy));

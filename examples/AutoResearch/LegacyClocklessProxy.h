@@ -1,7 +1,7 @@
 // LegacyClocklessProxy.h - Runtime-to-template pin dispatch for legacy addLeds API
 //
-// Maps a runtime pin number (0-8) to compile-time WS2812B<PIN, RGB> template
-// instantiations via a switch statement. This allows autoresearch testing of the
+// Maps a runtime pin number to compile-time WS2812B<PIN, RGB> template
+// instantiations via a switch statement. This allows AutoResearch testing of the
 // legacy template API path: WS2812B<PIN> -> WS2812Controller800Khz ->
 // ClocklessControllerImpl -> ClocklessIdf5 -> Channel
 
@@ -15,9 +15,10 @@
 /// The legacy FastLED API requires compile-time template pin parameters:
 ///   FastLED.addLeds<WS2812B, PIN>(leds, numLeds)
 ///
-/// This proxy uses a switch statement to dispatch runtime pin values (0-8) to
-/// the corresponding template instantiation, enabling autoresearch testing of the
-/// full legacy code path.
+/// This proxy uses a switch statement to dispatch supported AutoResearch legacy
+/// pin values to the corresponding template instantiation, enabling testing of
+/// the full legacy code path. Pins 0-8 are historical coverage pins; pin 22 is
+/// the current Teensy ObjectFLED loopback TX pin.
 ///
 /// Destructor deletes the controller, which on ESP32 (SKETCH_HAS_LARGE_MEMORY)
 /// automatically calls removeFromDrawList() via ~CLEDController().
@@ -43,6 +44,7 @@ public:
             case 6: mController = create<6>(leds, numLeds); break;
             case 7: mController = create<7>(leds, numLeds); break;
             case 8: mController = create<8>(leds, numLeds); break;
+            case 22: mController = create<22>(leds, numLeds); break;
             default: break;  // mController stays nullptr
         }
     }
