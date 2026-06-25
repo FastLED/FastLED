@@ -288,6 +288,56 @@ class TestParseArgsAndBuildCommands:
         assert params["laneSizes"] == [1]
         assert params["useLegacyApi"] is True
 
+    def test_object_fled_legacy_same_timing_multistrip_command(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=True,
+            lanes="2",
+            strip_sizes="3",
+            tx_pin=0,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["OBJECT_FLED"]
+
+        run_commands = [
+            cmd for cmd in result.json_rpc_commands if cmd["method"] == "runSingleTest"
+        ]
+        assert len(run_commands) == 1
+        params = run_commands[0]["params"]
+        assert params["driver"] == "OBJECT_FLED"
+        assert params["laneSizes"] == [3, 3]
+        assert params["useLegacyApi"] is True
+
+    def test_object_fled_legacy_current_pin_rejects_multistrip(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=True,
+            lanes="2",
+            strip_sizes="3",
+            tx_pin=22,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
+
     def test_spi_driver_name_remains_spi_on_esp32(self, fake_project_dir: Path) -> None:
         args = _make_args(parlio=False, spi=True, project_dir=fake_project_dir)
         result = _parse_args_and_build_commands(args)

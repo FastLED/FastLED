@@ -566,15 +566,24 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 return 1
 
     if args.legacy:
-        if max_lanes is not None and max_lanes > 1:
-            print(
-                "\u274c Error: --legacy only supports single-lane. Remove --lanes or use --lanes 1"
-            )
-            return 1
-        min_lanes = 1
-        max_lanes = 1
+        requested_min_lanes = min_lanes if min_lanes is not None else 1
+        requested_max_lanes = max_lanes if max_lanes is not None else 1
+        if requested_max_lanes > 1:
+            if args.tx_pin is None:
+                print(
+                    "\u274c Error: --legacy multi-lane requires explicit --tx-pin in the historical 0-8 template range"
+                )
+                return 1
+            max_pin = args.tx_pin + requested_max_lanes - 1
+            if args.tx_pin < 0 or max_pin > 8:
+                print(
+                    "\u274c Error: --legacy multi-lane supports consecutive TX pins 0-8 only; pin 22 is single-lane for the current ObjectFLED loopback"
+                )
+                return 1
+        min_lanes = requested_min_lanes
+        max_lanes = requested_max_lanes
         print(
-            "\u2139\ufe0f  Legacy API mode: using WS2812B<PIN> template path (single-lane, supported TX pins 0-8 and 22)"
+            "\u2139\ufe0f  Legacy API mode: using WS2812B<PIN> template path (supported TX pins 0-8; pin 22 single-lane current loopback)"
         )
 
     if min_lanes is not None and max_lanes is not None:
