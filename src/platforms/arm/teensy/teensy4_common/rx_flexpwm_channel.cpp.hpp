@@ -46,6 +46,7 @@
 #include "fl/log/log.h"
 #include "fl/stl/result.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/bit_cast.h"
 
 // IWYU pragma: begin_keep
 #include <Arduino.h>
@@ -342,6 +343,8 @@ class FlexPwmRxChannelImpl : public FlexPwmRxChannel {
 
     static void dmaIsr();
     static FlexPwmRxChannelImpl *sActiveInstance;
+
+    friend fl::json FlexPwmRxChannel::diagnosticsToJson(int requested_pin) FL_NO_EXCEPT;
 
     int mPin = -1;
     const FlexPwmPinInfo *mPinInfo = nullptr;
@@ -768,6 +771,116 @@ fl::shared_ptr<FlexPwmRxChannel> FlexPwmRxChannel::create(int pin) {
         return fl::shared_ptr<FlexPwmRxChannel>();
     }
     return fl::make_shared<FlexPwmRxChannelImpl>(pin);
+}
+
+// ---------------------------------------------------------------------------
+// Diagnostics
+// ---------------------------------------------------------------------------
+
+static u32 flexPwmDiagPtrToU32(const volatile void *ptr) FL_NO_EXCEPT {
+    return static_cast<u32>(fl::ptr_to_int(const_cast<void *>(ptr)));
+}
+
+static void flexPwmDiagSetU32(fl::json &obj, const char *key, u32 value) FL_NO_EXCEPT {
+    obj.set(key, static_cast<i64>(value));
+}
+
+static void flexPwmDiagSetPtr(fl::json &obj, const char *key,
+                              const volatile void *ptr) FL_NO_EXCEPT {
+    flexPwmDiagSetU32(obj, key, flexPwmDiagPtrToU32(ptr));
+}
+
+fl::json FlexPwmRxChannel::diagnosticsToJson(int requested_pin) FL_NO_EXCEPT {
+    fl::json out = fl::json::object();
+    out.set("format", "flexpwm-rx-diag-v1");
+    out.set("requestedPin", static_cast<i64>(requested_pin));
+
+    const FlexPwmPinInfo *info = lookupPin(requested_pin);
+    out.set("requestedPinSupported", info != nullptr);
+    if (info) {
+        out.set("requestedDmaSource", static_cast<i64>(info->dma_source));
+        out.set("requestedSubmodule", static_cast<i64>(info->submodule));
+        out.set("requestedChannelB", info->channel_b);
+        flexPwmDiagSetPtr(out, "requestedMuxRegister", info->mux_register);
+        flexPwmDiagSetU32(out, "requestedMuxValue", info->mux_value);
+        if (info->select_register) {
+            out.set("hasSelectRegister", true);
+            flexPwmDiagSetPtr(out, "requestedSelectRegister", info->select_register);
+            flexPwmDiagSetU32(out, "requestedSelectValue", info->select_value);
+        } else {
+            out.set("hasSelectRegister", false);
+        }
+    }
+
+    FlexPwmRxChannelImpl *active = FlexPwmRxChannelImpl::sActiveInstance;
+    out.set("activeInstance", active != nullptr);
+    if (!active || !active->mPinInfo) {
+        return out;
+    }
+
+    out.set("activePin", static_cast<i64>(active->mPin));
+    out.set("activePinMatches", active->mPin == requested_pin);
+    out.set("configured", active->mConfigured);
+    out.set("receiveDone", static_cast<bool>(active->mReceiveDone));
+    out.set("edgesValid", active->mEdgesValid);
+    out.set("edgeCount", static_cast<i64>(active->mEdges.size()));
+    out.set("captureBufferSize", static_cast<i64>(active->mCaptureBuffer.size()));
+    out.set("signalRangeMaxNs", static_cast<i64>(active->mSignalRangeMaxNs));
+
+    const FlexPwmPinInfo *active_info = active->mPinInfo;
+    out.set("activeSubmodule", static_cast<i64>(active_info->submodule));
+    out.set("activeChannelB", active_info->channel_b);
+    out.set("activeDmaSource", static_cast<i64>(active_info->dma_source));
+    flexPwmDiagSetU32(out, "activeMuxValueLive", *(active_info->mux_register));
+    flexPwmDiagSetU32(out, "activeMuxValueExpected", active_info->mux_value | 0x10);
+    if (active_info->select_register) {
+        flexPwmDiagSetU32(out, "activeSelectValueLive", *(active_info->select_register));
+        flexPwmDiagSetU32(out, "activeSelectValueExpected", active_info->select_value);
+    }
+
+    const u8 sm = active_info->submodule;
+    IMXRT_FLEXPWM_t *pwm = active_info->pwm;
+    flexPwmDiagSetPtr(out, "pwm", pwm);
+    flexPwmDiagSetU32(out, "mctrl", pwm->MCTRL);
+    flexPwmDiagSetU32(out, "ctrl", pwm->SM[sm].CTRL);
+    flexPwmDiagSetU32(out, "ctrl2", pwm->SM[sm].CTRL2);
+    flexPwmDiagSetU32(out, "dmaen", pwm->SM[sm].DMAEN);
+    flexPwmDiagSetU32(out, "captctrla", pwm->SM[sm].CAPTCTRLA);
+    flexPwmDiagSetU32(out, "captctrlb", pwm->SM[sm].CAPTCTRLB);
+    flexPwmDiagSetU32(out, "captcompa", pwm->SM[sm].CAPTCOMPA);
+    flexPwmDiagSetU32(out, "captcompb", pwm->SM[sm].CAPTCOMPB);
+    flexPwmDiagSetU32(out, "cval2", pwm->SM[sm].CVAL2);
+    flexPwmDiagSetU32(out, "cval3", pwm->SM[sm].CVAL3);
+    flexPwmDiagSetU32(out, "cval4", pwm->SM[sm].CVAL4);
+    flexPwmDiagSetU32(out, "cval5", pwm->SM[sm].CVAL5);
+
+    out.set("dmaChannel", static_cast<i64>(active->mDma.channel));
+    flexPwmDiagSetU32(out, "dmaErq", DMA_ERQ);
+    flexPwmDiagSetU32(out, "dmaHrs", DMA_HRS);
+    flexPwmDiagSetU32(out, "dmaInt", DMA_INT);
+    flexPwmDiagSetU32(out, "dmaErr", DMA_ERR);
+    flexPwmDiagSetU32(out, "dmaEs", DMA_ES);
+    flexPwmDiagSetU32(out, "dmamuxChcfg", *(&DMAMUX_CHCFG0 + active->mDma.channel));
+
+    if (active->mDma.TCD) {
+        out.set("hasTcd", true);
+        flexPwmDiagSetPtr(out, "tcdAddress", active->mDma.TCD);
+        flexPwmDiagSetPtr(out, "saddr", active->mDma.TCD->SADDR);
+        flexPwmDiagSetU32(out, "soff", static_cast<u32>(active->mDma.TCD->SOFF));
+        flexPwmDiagSetU32(out, "attr", active->mDma.TCD->ATTR);
+        flexPwmDiagSetU32(out, "nbytes", active->mDma.TCD->NBYTES);
+        flexPwmDiagSetU32(out, "slast", static_cast<u32>(active->mDma.TCD->SLAST));
+        flexPwmDiagSetPtr(out, "daddr", active->mDma.TCD->DADDR);
+        flexPwmDiagSetU32(out, "doff", static_cast<u32>(active->mDma.TCD->DOFF));
+        flexPwmDiagSetU32(out, "citer", active->mDma.TCD->CITER);
+        flexPwmDiagSetU32(out, "dlastsga", static_cast<u32>(active->mDma.TCD->DLASTSGA));
+        flexPwmDiagSetU32(out, "csr", active->mDma.TCD->CSR);
+        flexPwmDiagSetU32(out, "biter", active->mDma.TCD->BITER);
+    } else {
+        out.set("hasTcd", false);
+    }
+
+    return out;
 }
 
 } // namespace fl

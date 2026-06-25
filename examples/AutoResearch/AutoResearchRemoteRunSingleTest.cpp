@@ -38,6 +38,9 @@
 #include "AutoResearchTimingDrift.h"
 #include "AutoResearchParlioStream.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_diagnostics.h"
+#if defined(FL_IS_TEENSY_4X)
+#include "platforms/arm/teensy/teensy4_common/rx_flexpwm_channel.h"
+#endif
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
 #include <Arduino.h>
@@ -810,6 +813,10 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     if (is_object_fled_driver) {
         response.set("objectFledDiagnostics",
                      fl::objectFledDiagnosticsToJson());
+#if defined(FL_IS_TEENSY_4X)
+        response.set("flexPwmRxDiagnostics",
+                     fl::FlexPwmRxChannel::diagnosticsToJson(pin_rx));
+#endif
     }
 
     // Free run_results before building response to reclaim heap

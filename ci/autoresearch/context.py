@@ -369,6 +369,69 @@ def display_objectfled_diagnostics(result: dict[str, Any]) -> None:
         for line in snapshot.splitlines():
             print(f"      {line}")
 
+    flex_diag = result.get("flexPwmRxDiagnostics")
+    if isinstance(flex_diag, dict):
+        print()
+        print("  FlexPWM RX diagnostics")
+        keys = (
+            "format",
+            "requestedPin",
+            "requestedPinSupported",
+            "requestedDmaSource",
+            "requestedSubmodule",
+            "requestedChannelB",
+            "hasSelectRegister",
+            "activeInstance",
+            "activePin",
+            "activePinMatches",
+            "configured",
+            "receiveDone",
+            "edgesValid",
+            "edgeCount",
+            "captureBufferSize",
+            "activeSubmodule",
+            "activeChannelB",
+            "activeDmaSource",
+            "activeMuxValueLive",
+            "activeMuxValueExpected",
+            "activeSelectValueLive",
+            "activeSelectValueExpected",
+            "mctrl",
+            "ctrl",
+            "ctrl2",
+            "dmaen",
+            "captctrla",
+            "captctrlb",
+            "captcompa",
+            "captcompb",
+            "cval2",
+            "cval3",
+            "cval4",
+            "cval5",
+            "dmaChannel",
+            "dmaErq",
+            "dmaHrs",
+            "dmaInt",
+            "dmaErr",
+            "dmaEs",
+            "dmamuxChcfg",
+            "hasTcd",
+            "saddr",
+            "soff",
+            "attr",
+            "nbytes",
+            "slast",
+            "daddr",
+            "doff",
+            "citer",
+            "dlastsga",
+            "csr",
+            "biter",
+        )
+        for key in keys:
+            if key in flex_diag:
+                print(f"    {key}: {flex_diag[key]}")
+
 
 def print_run_summary(ctx: RunContext) -> None:
     """Print the compact configuration header."""
