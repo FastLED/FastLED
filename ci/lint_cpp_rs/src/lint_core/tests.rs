@@ -51,6 +51,55 @@ mod tests {
     }
 
     #[test]
+    fn autoresearch_runtime_output_flags_direct_logging_and_serial_prints() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearch.ino",
+            "FL_WARN(\"boot chatter\");\nFL_ERROR(\"boot failure\");\nSerial.println(\"not rpc\");\nfl::println(\"nope\");\n",
+        ));
+        assert_eq!(result.len(), 4);
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_allows_rpc_serial_boundary_only() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearchRemote.cpp",
+            "Serial.println(formatted.c_str());  // ok autoresearch rpc serial - RPC response boundary\n",
+        ));
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_scope_is_limited() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        assert!(checker.should_process_file(
+            "examples/AutoResearch/AutoResearchRemotePinMethods.cpp",
+            Path::new(".")
+        ));
+        assert!(!checker.should_process_file(
+            "examples/AutoResearch/AutoResearchTest.cpp",
+            Path::new(".")
+        ));
+        assert!(checker
+            .check_file_content(&file(
+                "examples/AutoResearch/AutoResearchTest.cpp",
+                "FL_WARN(\"diagnostic-only path\");\n",
+            ))
+            .is_empty());
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_ignores_strings_and_comments() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearch.ino",
+            "// FL_WARN(\"comment\")\nconst char* s = \"Serial.println\";\n",
+        ));
+        assert!(result.is_empty());
+    }
+
+    #[test]
     fn bare_allocation_rejects_malloc_but_not_fl_malloc() {
         let checker = BareAllocationChecker;
         assert_eq!(
