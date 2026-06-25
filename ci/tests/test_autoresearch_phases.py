@@ -656,6 +656,56 @@ class TestResolvePortAndEnvironment:
             rc = asyncio.run(_resolve_port_and_environment(ctx))
         assert rc == 1
 
+    def test_teensy_port_detection_never_uploads_stale_pio_hex(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        stale_hex = tmp_path / ".pio" / "build" / "teensy41" / "firmware.hex"
+        stale_hex.parent.mkdir(parents=True)
+        stale_hex.write_text("", encoding="utf-8")
+
+        ctx = _make_ctx(
+            upload_port=None,
+            final_environment="teensy41",
+            build_dir=tmp_path,
+        )
+        ctx.args = _make_args(
+            upload_port=None,
+            environment="teensy41",
+            object_fled=True,
+            parlio=False,
+            use_root_platformio_ini=False,
+            project_dir=tmp_path,
+        )
+        mock_result = MagicMock(
+            ok=False,
+            selected_port=None,
+            error_message="No USB",
+            all_ports=[],
+        )
+        call_count = [0]
+        original_monotonic = __import__("time").monotonic
+
+        def fake_monotonic() -> float:
+            call_count[0] += 1
+            if call_count[0] <= 2:
+                return original_monotonic()
+            return original_monotonic() + 999
+
+        with (
+            patch(f"{_PATCH_MOD}.auto_detect_upload_port", return_value=mock_result),
+            patch(f"{_PATCH_MOD}.time") as mock_time,
+            patch(f"{_PATCH_MOD}.subprocess.run") as mock_subprocess_run,
+        ):
+            mock_time.monotonic = fake_monotonic
+            mock_time.sleep = MagicMock()
+            rc = asyncio.run(_resolve_port_and_environment(ctx))
+
+        output = capsys.readouterr().out
+        assert rc == 1
+        mock_subprocess_run.assert_not_called()
+        assert "AutoResearch will not pre-upload stale .pio firmware" in output
+        assert "Firmware uploaded via Teensy bootloader" not in output
+
 
 class TestAutoDetectUploadPort:
     """Test USB port detection edge cases used by autoresearch."""
