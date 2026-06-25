@@ -10,6 +10,7 @@
 #if defined(FL_IS_TEENSY_4X)
 
 #include "fl/channels/rx.h"
+#include "fl/stl/json.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/noexcept.h"
 
@@ -43,6 +44,10 @@ class FlexPwmRxChannel : public RxDevice {
     const char *name() const override;
     int getPin() const FL_NO_EXCEPT override;
     bool injectEdges(fl::span<const EdgeTime> edges) FL_NO_EXCEPT override;
+
+    /// Capture FlexPWM/DMA/IOMUX register snapshot for the active receiver.
+    /// Diagnostics only — does not modify hardware state.
+    static fl::json diagnosticsToJson(int requested_pin) FL_NO_EXCEPT;
 
   protected:
     friend class fl::shared_ptr<FlexPwmRxChannel>;
