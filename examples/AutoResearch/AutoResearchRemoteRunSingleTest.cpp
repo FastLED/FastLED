@@ -38,7 +38,6 @@
 #include "AutoResearchTimingDrift.h"
 #include "AutoResearchParlioStream.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_diagnostics.h"
-#include "platforms/arm/teensy/teensy4_common/rx_flexpwm_channel.h"
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
 #include <Arduino.h>
@@ -97,256 +96,6 @@ bool contaminateTxMuxWithPwm(int pin) {
 #else
     (void)pin;
     return false;
-#endif
-}
-
-#if defined(FL_IS_TEENSY_4X)
-volatile uint32_t* standardGpioAddrForFast(volatile uint32_t* fast_gpio) {
-    return reinterpret_cast<volatile uint32_t*>(
-        reinterpret_cast<uintptr_t>(fast_gpio) - 0x01E48000u);
-}
-
-volatile uint32_t* gpioDrSetAddr(volatile uint32_t* gpio_dr) {
-    return reinterpret_cast<volatile uint32_t*>(
-        reinterpret_cast<uintptr_t>(gpio_dr) + 0x84u);
-}
-
-volatile uint32_t* gpioDrClearAddr(volatile uint32_t* gpio_dr) {
-    return reinterpret_cast<volatile uint32_t*>(
-        reinterpret_cast<uintptr_t>(gpio_dr) + 0x88u);
-}
-#endif
-
-fl::json probeObjectFledStandardGpioConnection(int tx_pin, int rx_pin) {
-    fl::json probe = fl::json::object();
-    probe.set("requested", true);
-    probe.set("txPin", static_cast<int64_t>(tx_pin));
-    probe.set("rxPin", static_cast<int64_t>(rx_pin));
-#if !defined(FL_IS_TEENSY_4X)
-    probe.set("supported", false);
-    probe.set("message", "Teensy 4.x only");
-    return probe;
-#else
-    probe.set("supported", true);
-    if (tx_pin < 0 || tx_pin >= NUM_DIGITAL_PINS ||
-        rx_pin < 0 || rx_pin >= NUM_DIGITAL_PINS) {
-        probe.set("success", false);
-        probe.set("error", "InvalidPin");
-        return probe;
-    }
-
-    volatile uint32_t* fast_output = portOutputRegister(tx_pin);
-    volatile uint32_t* fast_mode = portModeRegister(tx_pin);
-    volatile uint32_t* standard_output = standardGpioAddrForFast(fast_output);
-    volatile uint32_t* standard_mode = standardGpioAddrForFast(fast_mode);
-    volatile uint32_t* mux = portConfigRegister(tx_pin);
-    volatile uint32_t* pad = portControlRegister(tx_pin);
-
-    const uint32_t gpio6_base = reinterpret_cast<uintptr_t>(&GPIO6_DR);
-    const uint32_t output_addr = reinterpret_cast<uintptr_t>(fast_output);
-    const uint8_t offset = static_cast<uint8_t>((output_addr - gpio6_base) >> 14);
-    const uint8_t bit = digitalPinToBit(tx_pin);
-    const uint32_t mask = 1u << bit;
-
-    probe.set("bit", static_cast<int64_t>(bit));
-    probe.set("mask", static_cast<int64_t>(mask));
-    probe.set("offset", static_cast<int64_t>(offset));
-    if (offset > 3) {
-        probe.set("success", false);
-        probe.set("error", "UnsupportedGpioBank");
-        return probe;
-    }
-
-    volatile uint32_t* gpr = &IOMUXC_GPR_GPR26 + offset;
-    const uint32_t saved_gpr = *gpr;
-    const uint32_t saved_mux = *mux;
-    const uint32_t saved_pad = *pad;
-    const uint32_t saved_fast_mode = *fast_mode;
-    const uint32_t saved_standard_mode = *standard_mode;
-    const uint32_t saved_fast_out = *fast_output;
-    const uint32_t saved_standard_out = *standard_output;
-
-    CCM_CCGR1 |= CCM_CCGR1_GPIO1(CCM_CCGR_ON);
-    CCM_CCGR0 |= CCM_CCGR0_GPIO2(CCM_CCGR_ON);
-    CCM_CCGR2 |= CCM_CCGR2_GPIO3(CCM_CCGR_ON);
-    CCM_CCGR3 |= CCM_CCGR3_GPIO4(CCM_CCGR_ON);
-
-    pinMode(rx_pin, INPUT_PULLUP);
-    *mux = 5 | 0x10;
-    *gpr &= ~mask;
-    *fast_mode |= mask;
-    *standard_mode |= mask;
-
-    *gpioDrClearAddr(fast_output) = mask;
-    *gpioDrClearAddr(standard_output) = mask;
-    delay(5);
-    const int rx_when_low = digitalRead(rx_pin);
-    const uint32_t std_out_low = *standard_output;
-    const uint32_t fast_out_low = *fast_output;
-
-    *gpioDrSetAddr(standard_output) = mask;
-    delay(5);
-    const int rx_when_high = digitalRead(rx_pin);
-    const uint32_t std_out_high = *standard_output;
-    const uint32_t fast_out_high = *fast_output;
-
-    *gpioDrClearAddr(standard_output) = mask;
-    delay(1);
-
-    if ((saved_fast_out & mask) != 0) {
-        *gpioDrSetAddr(fast_output) = mask;
-    } else {
-        *gpioDrClearAddr(fast_output) = mask;
-    }
-    if ((saved_standard_out & mask) != 0) {
-        *gpioDrSetAddr(standard_output) = mask;
-    } else {
-        *gpioDrClearAddr(standard_output) = mask;
-    }
-    *fast_mode = saved_fast_mode;
-    *standard_mode = saved_standard_mode;
-    *pad = saved_pad;
-    *mux = saved_mux;
-    *gpr = saved_gpr;
-    pinMode(tx_pin, INPUT);
-    pinMode(rx_pin, INPUT);
-
-    const bool connected = (rx_when_low == LOW) && (rx_when_high == HIGH);
-    probe.set("success", true);
-    probe.set("connected", connected);
-    probe.set("rxWhenStandardLow", rx_when_low == LOW ? "LOW" : "HIGH");
-    probe.set("rxWhenStandardHigh", rx_when_high == HIGH ? "HIGH" : "LOW");
-    probe.set("standardOutLow", static_cast<int64_t>(std_out_low));
-    probe.set("standardOutHigh", static_cast<int64_t>(std_out_high));
-    probe.set("fastOutLow", static_cast<int64_t>(fast_out_low));
-    probe.set("fastOutHigh", static_cast<int64_t>(fast_out_high));
-    return probe;
-#endif
-}
-
-fl::json probeObjectFledRxCapture(int tx_pin, int rx_pin,
-                                  fl::shared_ptr<fl::RxChannel> rx_channel) {
-    fl::json probe = fl::json::object();
-    probe.set("requested", true);
-    probe.set("txPin", static_cast<int64_t>(tx_pin));
-    probe.set("rxPin", static_cast<int64_t>(rx_pin));
-#if !defined(FL_IS_TEENSY_4X)
-    (void)rx_channel;
-    probe.set("supported", false);
-    probe.set("message", "Teensy 4.x only");
-    return probe;
-#else
-    probe.set("supported", true);
-    if (!rx_channel) {
-        probe.set("success", false);
-        probe.set("error", "NoRxChannel");
-        return probe;
-    }
-    probe.set("engine", rx_channel->getEngineName().c_str());
-    if (tx_pin < 0 || tx_pin >= NUM_DIGITAL_PINS ||
-        rx_pin < 0 || rx_pin >= NUM_DIGITAL_PINS) {
-        probe.set("success", false);
-        probe.set("error", "InvalidPin");
-        return probe;
-    }
-
-    fl::RxChannelConfig rx_config(rx_pin);
-    rx_config.hz = 40000000;
-    rx_config.edge_capacity = 64;
-    rx_config.start_low = true;
-    if (!rx_channel->begin(rx_config)) {
-        probe.set("success", false);
-        probe.set("error", "RxBeginFailed");
-        return probe;
-    }
-    probe.set("diagnosticsAfterBegin",
-              fl::flexPwmRxDiagnosticsToJson(rx_pin));
-
-    volatile uint32_t* fast_output = portOutputRegister(tx_pin);
-    volatile uint32_t* fast_mode = portModeRegister(tx_pin);
-    volatile uint32_t* standard_output = standardGpioAddrForFast(fast_output);
-    volatile uint32_t* standard_mode = standardGpioAddrForFast(fast_mode);
-    volatile uint32_t* mux = portConfigRegister(tx_pin);
-    volatile uint32_t* pad = portControlRegister(tx_pin);
-
-    const uint32_t gpio6_base = reinterpret_cast<uintptr_t>(&GPIO6_DR);
-    const uint32_t output_addr = reinterpret_cast<uintptr_t>(fast_output);
-    const uint8_t offset = static_cast<uint8_t>((output_addr - gpio6_base) >> 14);
-    const uint8_t bit = digitalPinToBit(tx_pin);
-    const uint32_t mask = 1u << bit;
-    probe.set("bit", static_cast<int64_t>(bit));
-    probe.set("offset", static_cast<int64_t>(offset));
-    if (offset > 3) {
-        probe.set("success", false);
-        probe.set("error", "UnsupportedGpioBank");
-        return probe;
-    }
-
-    volatile uint32_t* gpr = &IOMUXC_GPR_GPR26 + offset;
-    const uint32_t saved_gpr = *gpr;
-    const uint32_t saved_mux = *mux;
-    const uint32_t saved_pad = *pad;
-    const uint32_t saved_fast_mode = *fast_mode;
-    const uint32_t saved_standard_mode = *standard_mode;
-    const uint32_t saved_fast_out = *fast_output;
-    const uint32_t saved_standard_out = *standard_output;
-
-    CCM_CCGR1 |= CCM_CCGR1_GPIO1(CCM_CCGR_ON);
-    CCM_CCGR0 |= CCM_CCGR0_GPIO2(CCM_CCGR_ON);
-    CCM_CCGR2 |= CCM_CCGR2_GPIO3(CCM_CCGR_ON);
-    CCM_CCGR3 |= CCM_CCGR3_GPIO4(CCM_CCGR_ON);
-
-    *mux = 5 | 0x10;
-    *gpr &= ~mask;
-    *fast_mode |= mask;
-    *standard_mode |= mask;
-    *gpioDrClearAddr(fast_output) = mask;
-    *gpioDrClearAddr(standard_output) = mask;
-    delayMicroseconds(100);
-    probe.set("diagnosticsBeforePulses",
-              fl::flexPwmRxDiagnosticsToJson(rx_pin));
-
-    for (int i = 0; i < 4; ++i) {
-        *gpioDrSetAddr(standard_output) = mask;
-        delayMicroseconds(40);
-        *gpioDrClearAddr(standard_output) = mask;
-        delayMicroseconds(40);
-    }
-
-    probe.set("diagnosticsAfterPulses",
-              fl::flexPwmRxDiagnosticsToJson(rx_pin));
-    const fl::RxWaitResult wait_result = rx_channel->wait(50);
-    probe.set("waitResult", static_cast<int64_t>(wait_result));
-    probe.set("diagnosticsAfterWait",
-              fl::flexPwmRxDiagnosticsToJson(rx_pin));
-    fl::vector<fl::EdgeTime> edges;
-    edges.assign(32, fl::EdgeTime());
-    const size_t edge_count =
-        rx_channel->getRawEdgeTimes(fl::span<fl::EdgeTime>(edges), 0);
-    probe.set("diagnosticsAfterRead",
-              fl::flexPwmRxDiagnosticsToJson(rx_pin));
-
-    if ((saved_fast_out & mask) != 0) {
-        *gpioDrSetAddr(fast_output) = mask;
-    } else {
-        *gpioDrClearAddr(fast_output) = mask;
-    }
-    if ((saved_standard_out & mask) != 0) {
-        *gpioDrSetAddr(standard_output) = mask;
-    } else {
-        *gpioDrClearAddr(standard_output) = mask;
-    }
-    *fast_mode = saved_fast_mode;
-    *standard_mode = saved_standard_mode;
-    *pad = saved_pad;
-    *mux = saved_mux;
-    *gpr = saved_gpr;
-    pinMode(tx_pin, INPUT);
-
-    probe.set("success", true);
-    probe.set("rawEdges", static_cast<int64_t>(edge_count));
-    probe.set("captured", edge_count > 0);
-    return probe;
 #endif
 }
 
@@ -804,14 +553,6 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     // ========== EXECUTION ==========
 
     uint32_t start_ms = millis();
-    fl::json object_fled_standard_gpio_probe;
-    fl::json object_fled_rx_capture_probe = fl::json::object();
-    fl::json object_fled_diagnostics;
-    if (is_object_fled_driver) {
-        object_fled_rx_capture_probe.set("requested", false);
-        object_fled_standard_gpio_probe =
-            probeObjectFledStandardGpioConnection(pin_tx, pin_rx);
-    }
 
     if (contaminate_tx_mux) {
         if (!is_object_fled_driver) {
@@ -977,12 +718,6 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         passed = (total_tests > 0) && (passed_tests == total_tests);
     }
 
-    if (is_object_fled_driver && !passed) {
-        object_fled_diagnostics = fl::objectFledDiagnosticsToJson();
-        object_fled_rx_capture_probe =
-            probeObjectFledRxCapture(pin_tx, pin_rx, rx_channel_to_use);
-    }
-
     if (measure_tight_timing) {
         if (use_legacy_api) {
             tight_timing_passed = false;
@@ -1073,13 +808,8 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         response.set("tightTiming", tight_timing_response);
     }
     if (is_object_fled_driver) {
-        response.set("objectFledStandardGpioProbe",
-                     object_fled_standard_gpio_probe);
-        response.set("objectFledRxCaptureProbe",
-                     object_fled_rx_capture_probe);
-        if (!passed) {
-            response.set("objectFledDiagnostics", object_fled_diagnostics);
-        }
+        response.set("objectFledDiagnostics",
+                     fl::objectFledDiagnosticsToJson());
     }
 
     // Free run_results before building response to reclaim heap
@@ -1096,13 +826,6 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
             pat.set("capturedBytes", static_cast<int64_t>(rr.capturedBytes));
             pat.set("captureWaitResult", static_cast<int64_t>(rr.captureWaitResult));
             pat.set("rawEdgesAfterWait", static_cast<int64_t>(rr.rawEdgesAfterWait));
-            pat.set("decodeOk", static_cast<int64_t>(rr.decodeOk));
-            pat.set("decodeError", static_cast<int64_t>(rr.decodeError));
-            pat.set("decodeBytes", static_cast<int64_t>(rr.decodeBytes));
-            pat.set("decodeOutputCapacity", static_cast<int64_t>(rr.decodeOutputCapacity));
-            if (!rr.rawEdgeSample.empty()) {
-                pat.set("rawEdgeSample", rr.rawEdgeSample.c_str());
-            }
             pat.set("captureFailed", rr.captureFailed);
             pat.set("mismatchedBytes", static_cast<int64_t>(rr.mismatchedBytes));
             pat.set("lsbOnlyErrors", static_cast<int64_t>(rr.lsbOnlyErrors));

@@ -46,7 +46,6 @@
 #include "fl/log/log.h"
 #include "fl/stl/result.h"
 #include "fl/stl/cstring.h"
-#include "fl/stl/bit_cast.h"
 
 // IWYU pragma: begin_keep
 #include <Arduino.h>
@@ -116,17 +115,17 @@ static const FlexPwmPinInfo kPinMap[] = {
     // Pin 8: FlexPWM1_SM3_A (GPIO_B1_00, ALT6)
     {8, &IMXRT_FLEXPWM1, 3, false, DMAMUX_SOURCE_FLEXPWM1_READ3,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_B1_00, 6,
-     &IOMUXC_FLEXPWM1_PWMA3_SELECT_INPUT, 4},
+     &IOMUXC_FLEXPWM1_PWMA3_SELECT_INPUT, 0},
 
     // Pin 22: FlexPWM4_SM0_A (GPIO_AD_B1_08, ALT1)
     {22, &IMXRT_FLEXPWM4, 0, false, DMAMUX_SOURCE_FLEXPWM4_READ0,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B1_08, 1,
-     &IOMUXC_FLEXPWM4_PWMA0_SELECT_INPUT, 1},
+     &IOMUXC_FLEXPWM4_PWMA0_SELECT_INPUT, 0},
 
     // Pin 23: FlexPWM4_SM1_A (GPIO_AD_B1_09, ALT1)
     {23, &IMXRT_FLEXPWM4, 1, false, DMAMUX_SOURCE_FLEXPWM4_READ1,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B1_09, 1,
-     &IOMUXC_FLEXPWM4_PWMA1_SELECT_INPUT, 1},
+     &IOMUXC_FLEXPWM4_PWMA1_SELECT_INPUT, 0},
 
     // Pin 29: FlexPWM3_SM1_B (GPIO_EMC_31, ALT1)
     {29, &IMXRT_FLEXPWM3, 1, true, DMAMUX_SOURCE_FLEXPWM3_READ1,
@@ -139,7 +138,7 @@ static const FlexPwmPinInfo kPinMap[] = {
     // Pin 36: FlexPWM2_SM3_A (GPIO_B1_02, ALT6)
     {36, &IMXRT_FLEXPWM2, 3, false, DMAMUX_SOURCE_FLEXPWM2_READ3,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_B1_02, 6,
-     &IOMUXC_FLEXPWM2_PWMA3_SELECT_INPUT, 4},
+     &IOMUXC_FLEXPWM2_PWMA3_SELECT_INPUT, 1},
 
     // Pin 49: FlexPWM1_SM2_A (GPIO_EMC_23, ALT1) [bottom pads]
     {49, &IMXRT_FLEXPWM1, 2, false, DMAMUX_SOURCE_FLEXPWM1_READ2,
@@ -219,20 +218,6 @@ static inline int decodeBitFromHigh(u32 high_ns,
 static inline bool isResetPulse(u32 low_ns,
                                 const ChipsetTiming4Phase &timing) {
     return low_ns >= (static_cast<u32>(timing.reset_min_us) * 1000u);
-}
-
-static u32 flexPwmRxPtrToU32(const volatile void *ptr) FL_NO_EXCEPT {
-    return static_cast<u32>(fl::ptr_to_int(const_cast<void *>(ptr)));
-}
-
-static void flexPwmRxSetU32(fl::json &obj, const char *key,
-                            u32 value) FL_NO_EXCEPT {
-    obj.set(key, static_cast<i64>(value));
-}
-
-static void flexPwmRxSetPtr(fl::json &obj, const char *key,
-                            const volatile void *ptr) FL_NO_EXCEPT {
-    flexPwmRxSetU32(obj, key, flexPwmRxPtrToU32(ptr));
 }
 
 /// Check if a pulse is a gap to tolerate (longer than normal but shorter
@@ -351,12 +336,9 @@ class FlexPwmRxChannelImpl : public FlexPwmRxChannel {
     bool injectEdges(fl::span<const EdgeTime> edges) override;
 
   private:
-    friend fl::json flexPwmRxDiagnosticsToJson(int pin) FL_NO_EXCEPT;
-
     void configureFlexPwm();
     void configureDma();
     void buildEdgeTimesFromCaptures();
-    fl::json diagnosticsToJson() const FL_NO_EXCEPT;
 
     static void dmaIsr();
     static FlexPwmRxChannelImpl *sActiveInstance;
@@ -373,7 +355,6 @@ class FlexPwmRxChannelImpl : public FlexPwmRxChannel {
     volatile bool mReceiveDone = false;
     bool mConfigured = false;
     bool mStartLow = true;
-    u16 mArmedCiter = 0;
 
     // Decoded edge cache (built from mCaptureBuffer or injected)
     fl::vector<EdgeTime> mEdges;
@@ -527,7 +508,6 @@ void FlexPwmRxChannelImpl::configureDma() {
     mDma.TCD->CITER = mCaptureBuffer.size() / 2;
     mDma.TCD->DLASTSGA = 0;
     mDma.TCD->BITER = mCaptureBuffer.size() / 2;
-    mArmedCiter = mDma.TCD->CITER;
     mDma.TCD->CSR = DMA_TCD_CSR_DREQ;
     mDma.triggerAtHardwareEvent(mPinInfo->dma_source);
     mDma.interruptAtCompletion();
@@ -568,8 +548,8 @@ bool FlexPwmRxChannelImpl::finished() const {
 
 RxWaitResult FlexPwmRxChannelImpl::wait(u32 timeout_ms) {
     u32 start = millis();
-    const u16 armed_citer = mArmedCiter;
-    u16 last_citer = mDma.TCD->CITER;
+    const u16 initial_citer = mDma.TCD->CITER;
+    u16 last_citer = initial_citer;
     u32 last_change_time = micros();
     bool exited_on_timeout = false;
 
@@ -577,9 +557,10 @@ RxWaitResult FlexPwmRxChannelImpl::wait(u32 timeout_ms) {
         u32 now_ms = millis();
         if ((now_ms - start) >= timeout_ms) {
             // Hit caller's timeout. Don't claim SUCCESS unless DMA actually
-            // moved since begin() armed it. AutoResearch calls wait() after
-            // FastLED.wait(), so comparing only against wait-entry CITER
-            // falsely reports TIMEOUT for already-captured frames.
+            // moved -- if CITER is still at its initial value we got zero
+            // edges and must report TIMEOUT honestly so capture() can bail
+            // and runMultiTest() can emit a real failure instead of decoding
+            // a stale/empty buffer.
             exited_on_timeout = true;
             break;
         }
@@ -606,12 +587,12 @@ RxWaitResult FlexPwmRxChannelImpl::wait(u32 timeout_ms) {
     }
 
     // Honesty: distinguish "actually got data" from "timeout with nothing".
-    //   - mReceiveDone              -> full buffer, definitely SUCCESS
-    //   - CITER moved since begin() -> partial buffer, SUCCESS (caller decodes
-    //                                  what arrived)
-    //   - CITER unchanged           -> nothing arrived; do not pretend it did
+    //   - mReceiveDone     -> full buffer, definitely SUCCESS
+    //   - CITER moved      -> partial buffer, SUCCESS (caller decodes what
+    //                          arrived; inactivity-detection path lands here)
+    //   - CITER unchanged  -> nothing arrived; do not pretend it did
     const u16 current_citer = mDma.TCD->CITER;
-    const bool dma_progressed = mReceiveDone || (current_citer != armed_citer);
+    const bool dma_progressed = mReceiveDone || (current_citer != initial_citer);
     if (!dma_progressed) {
         return RxWaitResult::TIMEOUT;
     }
@@ -774,109 +755,6 @@ bool FlexPwmRxChannelImpl::injectEdges(fl::span<const EdgeTime> edges) {
     mEdgesValid = true;
     mReceiveDone = true;
     return true;
-}
-
-fl::json FlexPwmRxChannelImpl::diagnosticsToJson() const FL_NO_EXCEPT {
-    fl::json out = fl::json::object();
-    out.set("active", true);
-    out.set("pin", static_cast<i64>(mPin));
-    out.set("configured", mConfigured);
-    out.set("receiveDone", static_cast<bool>(mReceiveDone));
-    out.set("edgesValid", mEdgesValid);
-    out.set("edgeCount", static_cast<i64>(mEdges.size()));
-    out.set("captureBufferSize", static_cast<i64>(mCaptureBuffer.size()));
-    out.set("signalRangeMaxNs", static_cast<i64>(mSignalRangeMaxNs));
-
-    if (!mPinInfo) {
-        out.set("pinSupported", false);
-        return out;
-    }
-
-    out.set("pinSupported", true);
-    out.set("submodule", static_cast<i64>(mPinInfo->submodule));
-    out.set("channelB", mPinInfo->channel_b);
-    out.set("dmaSource", static_cast<i64>(mPinInfo->dma_source));
-    flexPwmRxSetPtr(out, "muxRegister", mPinInfo->mux_register);
-    flexPwmRxSetU32(out, "muxRegisterValue", *(mPinInfo->mux_register));
-    flexPwmRxSetU32(out, "muxExpectedValue", mPinInfo->mux_value | 0x10);
-    if (mPinInfo->select_register) {
-        out.set("hasSelectRegister", true);
-        flexPwmRxSetPtr(out, "selectRegister", mPinInfo->select_register);
-        flexPwmRxSetU32(out, "selectRegisterValue", *(mPinInfo->select_register));
-        flexPwmRxSetU32(out, "selectExpectedValue", mPinInfo->select_value);
-    } else {
-        out.set("hasSelectRegister", false);
-    }
-
-    const u8 sm = mPinInfo->submodule;
-    IMXRT_FLEXPWM_t *pwm = mPinInfo->pwm;
-    flexPwmRxSetPtr(out, "pwm", pwm);
-    flexPwmRxSetU32(out, "mctrl", pwm->MCTRL);
-    flexPwmRxSetU32(out, "ctrl", pwm->SM[sm].CTRL);
-    flexPwmRxSetU32(out, "ctrl2", pwm->SM[sm].CTRL2);
-    flexPwmRxSetU32(out, "dmaen", pwm->SM[sm].DMAEN);
-    flexPwmRxSetU32(out, "captctrla", pwm->SM[sm].CAPTCTRLA);
-    flexPwmRxSetU32(out, "captctrlb", pwm->SM[sm].CAPTCTRLB);
-    flexPwmRxSetU32(out, "captcompa", pwm->SM[sm].CAPTCOMPA);
-    flexPwmRxSetU32(out, "captcompb", pwm->SM[sm].CAPTCOMPB);
-    flexPwmRxSetU32(out, "cval2", pwm->SM[sm].CVAL2);
-    flexPwmRxSetU32(out, "cval3", pwm->SM[sm].CVAL3);
-    flexPwmRxSetU32(out, "cval4", pwm->SM[sm].CVAL4);
-    flexPwmRxSetU32(out, "cval5", pwm->SM[sm].CVAL5);
-
-    out.set("dmaChannel", static_cast<i64>(mDma.channel));
-    flexPwmRxSetU32(out, "armedCiter", mArmedCiter);
-    flexPwmRxSetU32(out, "dmaErq", DMA_ERQ);
-    flexPwmRxSetU32(out, "dmaHrs", DMA_HRS);
-    flexPwmRxSetU32(out, "dmaInt", DMA_INT);
-    flexPwmRxSetU32(out, "dmaErr", DMA_ERR);
-    flexPwmRxSetU32(out, "dmaEs", DMA_ES);
-    flexPwmRxSetU32(out, "dmamuxChcfg", *(&DMAMUX_CHCFG0 + mDma.channel));
-    if (mDma.TCD) {
-        out.set("hasTcd", true);
-        flexPwmRxSetPtr(out, "tcdAddress", mDma.TCD);
-        flexPwmRxSetPtr(out, "saddr", mDma.TCD->SADDR);
-        out.set("soff", static_cast<i64>(mDma.TCD->SOFF));
-        flexPwmRxSetU32(out, "attr", mDma.TCD->ATTR);
-        flexPwmRxSetU32(out, "nbytes", mDma.TCD->NBYTES);
-        out.set("slast", static_cast<i64>(mDma.TCD->SLAST));
-        flexPwmRxSetPtr(out, "daddr", mDma.TCD->DADDR);
-        out.set("doff", static_cast<i64>(mDma.TCD->DOFF));
-        flexPwmRxSetU32(out, "citer", mDma.TCD->CITER);
-        out.set("dlastsga", static_cast<i64>(mDma.TCD->DLASTSGA));
-        flexPwmRxSetU32(out, "csr", mDma.TCD->CSR);
-        flexPwmRxSetU32(out, "biter", mDma.TCD->BITER);
-    } else {
-        out.set("hasTcd", false);
-    }
-
-    return out;
-}
-
-fl::json flexPwmRxDiagnosticsToJson(int pin) FL_NO_EXCEPT {
-    fl::json out = fl::json::object();
-    out.set("supported", true);
-    out.set("requestedPin", static_cast<i64>(pin));
-
-    const FlexPwmPinInfo *info = lookupPin(pin);
-    out.set("pinSupported", info != nullptr);
-    if (info) {
-        out.set("requestedDmaSource", static_cast<i64>(info->dma_source));
-        out.set("requestedSubmodule", static_cast<i64>(info->submodule));
-        out.set("requestedChannelB", info->channel_b);
-    }
-
-    FlexPwmRxChannelImpl *active = FlexPwmRxChannelImpl::sActiveInstance;
-    if (!active) {
-        out.set("active", false);
-        return out;
-    }
-
-    out = active->diagnosticsToJson();
-    out.set("supported", true);
-    out.set("requestedPin", static_cast<i64>(pin));
-    out.set("requestedPinMatchesActive", active->mPin == pin);
-    return out;
 }
 
 // ---------------------------------------------------------------------------

@@ -339,10 +339,6 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     if (diagnostics) {
         diagnostics->captureWaitResult = -1;
         diagnostics->rawEdgesAfterWait = 0;
-        diagnostics->decodeOk = -1;
-        diagnostics->decodeError = -1;
-        diagnostics->decodeBytes = 0;
-        diagnostics->decodeOutputCapacity = static_cast<int>(rx_buffer.size());
     }
 
     if (!rx_channel) {
@@ -454,17 +450,6 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         fl::FixedVector<fl::EdgeTime, 256> edges;
         edges.resize(256);
         diagnostics->rawEdgesAfterWait = static_cast<int>(rx_channel->getRawEdgeTimes(edges, 0));
-        fl::FixedVector<fl::EdgeTime, 32> sample_edges;
-        sample_edges.resize(32);
-        const size_t sample_count = rx_channel->getRawEdgeTimes(sample_edges, 0);
-        fl::sstream sample;
-        for (size_t i = 0; i < sample_count; ++i) {
-            if (i > 0) {
-                sample << ' ';
-            }
-            sample << (sample_edges[i].high ? 'H' : 'L') << sample_edges[i].ns;
-        }
-        diagnostics->rawEdgeSample = sample.str();
     }
     FL_WARN("[CAPTURE] RX wait returned: " << static_cast<int>(wait_result));
 
@@ -511,13 +496,6 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
                 << " T1L=" << uart_timing.T3);
 
         auto decode_result = rx_channel->decode(rx_timing, rx_buffer);
-        if (diagnostics) {
-            diagnostics->decodeOk = decode_result.ok() ? 1 : 0;
-            diagnostics->decodeError =
-                decode_result.ok() ? -1 : static_cast<int>(decode_result.error());
-            diagnostics->decodeBytes =
-                decode_result.ok() ? static_cast<int>(decode_result.value()) : 0;
-        }
         if (!decode_result.ok()) {
             FL_WARN("[CAPTURE] UART decode failed (error: " << static_cast<int>(decode_result.error()) << ")");
             // Was EdgeRange(0, 256) -- 257 FL_WARN lines per decode failure
@@ -653,13 +631,6 @@ dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
 
     FL_WARN("[CAPTURE] Decoding...");
     auto decode_result = rx_channel->decode(rx_timing, rx_buffer);
-    if (diagnostics) {
-        diagnostics->decodeOk = decode_result.ok() ? 1 : 0;
-        diagnostics->decodeError =
-            decode_result.ok() ? -1 : static_cast<int>(decode_result.error());
-        diagnostics->decodeBytes =
-            decode_result.ok() ? static_cast<int>(decode_result.value()) : 0;
-    }
 
     if (!decode_result.ok()) {
         // Use FL_WARN instead of FL_ERROR to avoid triggering bash autoresearch exit

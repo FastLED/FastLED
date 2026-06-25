@@ -27,7 +27,7 @@ class ObjectFLEDDmaManager {
 
     void acquire(void* owner);
     void release(void* owner);
-    bool waitForCompletion(uint32_t timeout_us = 250000);
+    void waitForCompletion();
     bool isBusy();
     void* getCurrentOwner() const { return mCurrentOwner; }
 

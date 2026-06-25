@@ -11,18 +11,6 @@ namespace fl {
 DMAMEM uint32_t ObjectFLEDDmaManager::bitdata[BYTES_PER_DMA * 64] __attribute__((used, aligned(32)));
 DMAMEM uint32_t ObjectFLEDDmaManager::bitmask[4] __attribute__((used, aligned(32)));
 
-namespace {
-
-void markDmaStopped(DMAChannel& channel) {
-    channel.disable();
-    channel.clearInterrupt();
-    if (channel.TCD != nullptr) {
-        channel.TCD->CSR = DMA_TCD_CSR_DREQ | DMA_TCD_CSR_DONE;
-    }
-}
-
-} // namespace
-
 void ObjectFLEDDmaManager::acquire(void* owner) {
     // Wait for any current transmission to complete
     waitForCompletion();
@@ -42,20 +30,11 @@ void ObjectFLEDDmaManager::release(void* owner) {
     mCurrentOwner = nullptr;
 }
 
-bool ObjectFLEDDmaManager::waitForCompletion(uint32_t timeout_us) {
-    const uint32_t start = micros();
-
+void ObjectFLEDDmaManager::waitForCompletion() {
+    // Spin-wait for DMA completion with periodic delays
     while (!dma3.complete()) {
-        if (timeout_us > 0 && static_cast<uint32_t>(micros() - start) >= timeout_us) {
-            markDmaStopped(dma1);
-            markDmaStopped(dma2);
-            markDmaStopped(dma3);
-            return false;
-        }
         delayMicroseconds(10);
     }
-
-    return true;
 }
 
 bool ObjectFLEDDmaManager::isBusy() {
