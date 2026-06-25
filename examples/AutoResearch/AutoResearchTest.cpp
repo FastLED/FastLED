@@ -1213,17 +1213,26 @@ void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
     ss << "========================================";
     FL_WARN(ss.str());
 
-    // Create one legacy proxy per lane (each maps runtime pin to WS2812B<PIN> template)
+    // Create one legacy proxy per lane. By default every lane uses WS2812B,
+    // but AutoResearch can supply per-lane chipsets to exercise multiple
+    // ObjectFLED timing groups in a single FastLED.show().
     fl::vector<fl::unique_ptr<LegacyClocklessProxy>> proxies;
     for (size_t i = 0; i < config.tx_configs.size(); i++) {
         int pin = config.tx_configs[i].getDataPin();
         CRGB* leds = config.tx_configs[i].mLeds.data();
         int numLeds = static_cast<int>(config.tx_configs[i].mLeds.size());
+        LegacyClocklessChipset chipset = LegacyClocklessChipset::WS2812B;
+        if (!config.legacy_chipsets.empty() &&
+            i < config.legacy_chipsets.size()) {
+            chipset = config.legacy_chipsets[i];
+        }
 
-        auto proxy = fl::make_unique<LegacyClocklessProxy>(pin, leds, numLeds);
+        auto proxy =
+            fl::make_unique<LegacyClocklessProxy>(pin, leds, numLeds, chipset);
         if (!proxy->valid()) {
             FL_ERROR("Legacy proxy invalid for lane " << i << " (pin " << pin
-                     << " not in supported set 0-8 or 22)");
+                     << ", chipset " << legacyClocklessChipsetName(chipset)
+                     << " not in supported set)");
             return;  // vector destructor cleans up already-created proxies
         }
         proxies.push_back(fl::move(proxy));

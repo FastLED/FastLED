@@ -568,6 +568,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     if args.legacy:
         requested_min_lanes = min_lanes if min_lanes is not None else 1
         requested_max_lanes = max_lanes if max_lanes is not None else 1
+        if args.legacy_mixed_timings and requested_max_lanes < 2:
+            print(
+                "\u274c Error: --legacy-mixed-timings requires --legacy with at least 2 lanes"
+            )
+            return 1
         if requested_max_lanes > 1:
             if args.tx_pin is None:
                 print(
@@ -585,6 +590,13 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         print(
             "\u2139\ufe0f  Legacy API mode: using WS2812B<PIN> template path (supported TX pins 0-8; pin 22 single-lane current loopback)"
         )
+        if args.legacy_mixed_timings:
+            print(
+                "\u2139\ufe0f  Legacy mixed timing mode: alternating WS2812B/SK6812 template chipsets across lanes"
+            )
+    elif args.legacy_mixed_timings:
+        print("\u274c Error: --legacy-mixed-timings requires --legacy")
+        return 1
 
     if min_lanes is not None and max_lanes is not None:
         if min_lanes < 1 or max_lanes < 1 or min_lanes > max_lanes:
@@ -765,6 +777,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                     }
                     if args.legacy:
                         test_config["useLegacyApi"] = True
+                        if args.legacy_mixed_timings:
+                            test_config["legacyChipsets"] = [
+                                "WS2812B" if i % 2 == 0 else "SK6812"
+                                for i in range(lane_count)
+                            ]
                     # Multi-frame capture: back-to-back show()/capture cycles per pattern.
                     # Defaults: SPI -> 2 (catches #2254/#2288 second-frame degradation),
                     # others -> 1. User can override with --frames N.

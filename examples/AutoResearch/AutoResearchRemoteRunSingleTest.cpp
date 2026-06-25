@@ -427,6 +427,52 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         use_legacy_api = config["useLegacyApi"].as_bool().value();
     }
 
+    fl::vector<LegacyClocklessChipset> legacy_chipsets;
+    if (config.contains("legacyChipsets") && !use_legacy_api) {
+        response.set("success", false);
+        response.set("error", "LegacyChipsetsRequireLegacyApi");
+        response.set("message", "legacyChipsets requires useLegacyApi=true");
+        return response;
+    }
+    if (use_legacy_api) {
+        for (fl::size i = 0; i < lane_sizes.size(); i++) {
+            legacy_chipsets.push_back(LegacyClocklessChipset::WS2812B);
+        }
+        if (config.contains("legacyChipsets")) {
+            if (!config["legacyChipsets"].is_array()) {
+                response.set("success", false);
+                response.set("error", "InvalidLegacyChipsets");
+                response.set("message", "legacyChipsets must be an array");
+                return response;
+            }
+            fl::json legacy_chipsets_json = config["legacyChipsets"];
+            if (legacy_chipsets_json.size() != lane_sizes.size()) {
+                response.set("success", false);
+                response.set("error", "InvalidLegacyChipsetCount");
+                response.set("message", "legacyChipsets length must match laneSizes");
+                return response;
+            }
+            for (fl::size i = 0; i < legacy_chipsets_json.size(); i++) {
+                if (!legacy_chipsets_json[i].is_string()) {
+                    response.set("success", false);
+                    response.set("error", "InvalidLegacyChipsetType");
+                    response.set("message", "legacyChipsets entries must be strings");
+                    return response;
+                }
+                fl::string chipset_name =
+                    legacy_chipsets_json[i].as_string().value();
+                LegacyClocklessChipset chipset;
+                if (!legacyClocklessChipsetFromName(chipset_name, &chipset)) {
+                    response.set("success", false);
+                    response.set("error", "UnsupportedLegacyChipset");
+                    response.set("message", "supported legacyChipsets: WS2812B, SK6812");
+                    return response;
+                }
+                legacy_chipsets[i] = chipset;
+            }
+        }
+    }
+
     // 9. Extract contaminateTxMux (optional, default: false)
     bool contaminate_tx_mux = false;
     if (config.contains("contaminateTxMux") &&
@@ -517,15 +563,26 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     }
 
     // Get timing configuration
-    // Legacy API: WS2812B<PIN> template uses TIMING_WS2812_800KHZ (T1=250, T2=625, T3=375)
+    // Legacy API: default WS2812B<PIN> template uses TIMING_WS2812_800KHZ.
+    // If mixed legacy chipsets are requested, lane 0 timing is used for RX
+    // decode because AutoResearch captures only lane 0.
     // Channel API: Uses timing_name from RPC (default: WS2812B-V5)
     // RX decode timing MUST match actual TX timing for correct capture
     fl::ChipsetTimingConfig resolved_timing;
     fl::ClocklessEncoder resolved_encoder = fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812;
     if (use_legacy_api) {
-        resolved_timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
-        resolved_encoder = fl::encoder_for<fl::TIMING_WS2812_800KHZ>();
-        timing_name = "WS2812-800KHZ";
+        LegacyClocklessChipset first_chipset = LegacyClocklessChipset::WS2812B;
+        if (!legacy_chipsets.empty()) {
+            first_chipset = legacy_chipsets[0];
+        }
+        if (first_chipset == LegacyClocklessChipset::SK6812) {
+            resolved_timing = fl::makeTimingConfig<fl::TIMING_SK6812>();
+            resolved_encoder = fl::encoder_for<fl::TIMING_SK6812>();
+        } else {
+            resolved_timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+            resolved_encoder = fl::encoder_for<fl::TIMING_WS2812_800KHZ>();
+        }
+        timing_name = legacyClocklessChipsetName(first_chipset);
     } else if (timing_name == "UCS7604-800KHZ") {
         resolved_timing = fl::makeTimingConfig<fl::TIMING_UCS7604_800KHZ>();
         resolved_encoder = fl::encoder_for<fl::TIMING_UCS7604_800KHZ>();
@@ -598,7 +655,8 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         mState->rx_buffer,
         lane_sizes[0],  // base_strip_size (used for logging)
         fl::RxDeviceType::RMT,  // Default RX device type
-        timing_config.encoder
+        timing_config.encoder,
+        fl::span<const LegacyClocklessChipset>(legacy_chipsets)
     );
 
     // Run test with debug output suppressed
@@ -714,6 +772,14 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     response.set("laneSizes", sizes_response);
     response.set("pattern", pattern.c_str());
     response.set("useLegacyApi", use_legacy_api);
+    if (use_legacy_api) {
+        fl::json legacy_chipsets_response = fl::json::array();
+        for (LegacyClocklessChipset chipset : legacy_chipsets) {
+            legacy_chipsets_response.push_back(
+                legacyClocklessChipsetName(chipset));
+        }
+        response.set("legacyChipsets", legacy_chipsets_response);
+    }
     response.set("frameCount", static_cast<int64_t>(frame_count));
     response.set("contaminateTxMux", contaminate_tx_mux);
     if (contaminate_tx_mux) {
