@@ -250,7 +250,7 @@
   #define FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING        \
       _Pragma("GCC push_options")                   \
       _FL_TIMING_OPT_PRAGMA                         \
-      _Pragma("GCC optimize(\"-fno-lto\")")         \
+    /*_Pragma("GCC optimize(\"-fno-lto\")") is invalid in this context*/\
       _Pragma("GCC optimize(\"-fno-schedule-insns\")")  \
       _Pragma("GCC optimize(\"-fno-schedule-insns2\")") \
       _Pragma("GCC optimize(\"-fno-reorder-blocks\")")  \

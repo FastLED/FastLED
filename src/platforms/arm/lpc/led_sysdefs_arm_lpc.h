@@ -23,6 +23,23 @@
 #define FL_IS_ARM_M3
 #endif
 
+// Pull in the CMSIS Peripheral Access Layer (device header) when it is on the
+// include path. It supplies the IRQ intrinsics, SysTick definitions, and the
+// peripheral register maps (MRT/SYSCON, used by the cycle counter). When present
+// we define FASTLED_HAS_CMSIS and suppress the hand-rolled fallbacks below (and
+// in arm/common/m0clockless_c.h) so they don't clash with CMSIS's own
+// declarations -- CMSIS provides __enable_irq/__disable_irq/__get_PRIMASK as
+// functions, which the #ifndef guards cannot detect.
+#if defined(__has_include)
+#  if defined(FL_IS_ARM_LPC_845) && __has_include("LPC845.h")
+#    include "LPC845.h"
+#    define FASTLED_HAS_CMSIS 1
+#  elif defined(FL_IS_ARM_LPC_804) && __has_include("LPC804.h")
+#    include "LPC804.h"
+#    define FASTLED_HAS_CMSIS 1
+#  endif
+#endif
+
 // The "modern" LPC GPIO controller (LPC8xx / LPC11Uxx / LPC15xx) exposes
 // SET[port] and CLR[port] at byte offsets 0x2200 / 0x2280 from the controller
 // base — far beyond the 5-bit imm5*4 encoding the M0/M0+ STR-immediate-offset
@@ -66,8 +83,16 @@
 #define VARIANT_MCK F_CPU
 #endif
 
+// Default to MODE 1 (interrupts disabled during output) on LPC. The only working
+// LPC clockless driver today is the shared C++ bit-banger (arm/common/
+// m0clockless_c.h). Its MODE 2 path (FASTLED_ALLOW_INTERRUPTS=1) re-enables
+// interrupts between pixels and -- when entered with interrupts already disabled,
+// as ClocklessController::showPixels() does via cli() -- leaves them enabled for
+// the rest of the frame, so the SysTick millis ISR fires mid-bit and stretches
+// and jitters pulses. Interrupts-off gives clean WS2812 timing. Override to 1 if
+// you need interrupts serviced mid-frame and can tolerate the timing impact.
 #ifndef FASTLED_ALLOW_INTERRUPTS
-#define FASTLED_ALLOW_INTERRUPTS 1
+#define FASTLED_ALLOW_INTERRUPTS 0
 #endif
 
 #ifndef FASTLED_USE_PROGMEM
@@ -93,11 +118,14 @@ typedef fl::u8           boolean;
 #define NO_PROGMEM
 #define NEED_CXX_BITS
 
-// CMSIS device headers provide these intrinsics when they are on the include
-// path. ArduinoCore-LPC8xx's PlatformIO binding exposes only the active variant
-// directory, so board aliases such as lpc845brk may not make LPC845.h directly
-// includable. Keep the IRQ primitives local so FastLED does not depend on that
-// package-specific include layout.
+// When CMSIS is present (FASTLED_HAS_CMSIS) it provides the IRQ intrinsics and
+// SysTick CTRL masks; defining them here too would clash (CMSIS declares the IRQ
+// helpers as functions, and -Werror rejects redefining the masks). Only supply
+// these fallbacks for builds without a reachable CMSIS device header -- e.g.
+// ArduinoCore-LPC8xx's PlatformIO binding, which exposes only the active variant
+// directory so board aliases like lpc845brk may not make LPC845.h includable.
+#if !defined(FASTLED_HAS_CMSIS)
+
 #ifndef __disable_irq
 #define __disable_irq() __asm volatile("cpsid i" ::: "memory")
 #endif
@@ -105,6 +133,30 @@ typedef fl::u8           boolean;
 #ifndef __enable_irq
 #define __enable_irq() __asm volatile("cpsie i" ::: "memory")
 #endif
+
+#ifndef __get_PRIMASK
+#define __get_PRIMASK()                                                        \
+    (__extension__({                                                           \
+        unsigned int __pm;                                                     \
+        __asm volatile("MRS %0, primask" : "=r"(__pm)::"memory");              \
+        __pm;                                                                  \
+    }))
+#endif
+
+// SysTick CTRL bit masks are architectural Cortex-M constants. CMSIS device
+// headers (core_cm0plus.h) provide them; supply fallbacks for builds where no
+// CMSIS device header is reachable from the platform translation units.
+#ifndef SysTick_CTRL_ENABLE_Msk
+#define SysTick_CTRL_ENABLE_Msk (1UL << 0)
+#endif
+#ifndef SysTick_CTRL_TICKINT_Msk
+#define SysTick_CTRL_TICKINT_Msk (1UL << 1)
+#endif
+#ifndef SysTick_CTRL_CLKSOURCE_Msk
+#define SysTick_CTRL_CLKSOURCE_Msk (1UL << 2)
+#endif
+
+#endif  // !FASTLED_HAS_CMSIS
 
 #define cli() __disable_irq()
 #define sei() __enable_irq()

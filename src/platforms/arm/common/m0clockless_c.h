@@ -12,16 +12,18 @@
  * instead of inline assembly.
  *
  * KEY FEATURES:
- * - Uses hardware cycle counters (DWT on M3/M4/M7, SysTick on M0/M0+)
  * - Compile-time conversion of nanosecond timings to CPU cycles
+ * - Cycle-exact delays via compile-time NOP counting (no runtime cycle counter)
  * - Timing-specific optimizations for cycle-accurate LED protocol
- * - Cycle-accurate delays using get_cycle_count() and delay_cycles()
  * - Easier to understand, maintain, and port than assembly
  *
  * TIMING APPROACH:
  * - T1/T2/T3 converted from nanoseconds to cycles at compile-time
- * - delay_cycles() uses hardware counter for accurate busy-wait
- * - Should achieve comparable timing to assembly on faster CPUs
+ * - Bit delays emitted as compile-time NOP runs (fl_delay_cycles_ct<N>()), which
+ *   are cycle-exact and need no timer. M0/M0+ has no DWT cycle counter, and
+ *   SysTick is typically owned by the millis() tick (a periodic down-counter, not
+ *   a free-running one), so a runtime counter cannot time sub-microsecond WS2812
+ *   phases reliably -- this matches what the assembly driver does.
  *
  * See m0clockless_asm.h for detailed protocol documentation and timing analysis.
  ******************************************************************************/
@@ -42,6 +44,10 @@
 // where CMSIS is on the include path (LPC8xx, SAMD, nRF, STM32) the local
 // definitions below are skipped. On Arduino-AVR where `__enable_irq` is a
 // preprocessor macro from `WString.h`, the macro guard also wins.
+// Skip entirely when a CMSIS device header is on the include path (it declares
+// these as functions, which the #ifndef guards below cannot detect, so defining
+// them here would clash). LPC builds set FASTLED_HAS_CMSIS in led_sysdefs.
+#if !defined(FASTLED_HAS_CMSIS)
 #ifndef __get_PRIMASK
 static inline fl::u32 __get_PRIMASK(void) FL_NO_EXCEPT {
     fl::u32 primask;
@@ -59,6 +65,7 @@ static inline void __disable_irq(void) FL_NO_EXCEPT {
     __asm volatile ("cpsid i" ::: "memory");
 }
 #endif
+#endif  // !FASTLED_HAS_CMSIS
 
 FL_EXTERN_C_BEGIN
 
@@ -131,19 +138,15 @@ struct M0ClocklessData {
 #endif
 
 /******************************************************************************
- * CYCLE COUNTER CONFIGURATION
- *
- * On M0/M0+, we use SysTick as a cycle counter (M3/M4/M7 have DWT).
- * This can be disabled if SysTick is needed for other purposes.
- ******************************************************************************/
-
-// Allow disabling SysTick-based cycle counting if needed
-#ifndef FL_USE_SYSTICK_FOR_CYCLECOUNT
-  #define FL_USE_SYSTICK_FOR_CYCLECOUNT 1
-#endif
-
-/******************************************************************************
  * HELPER FUNCTIONS - C++ equivalents of assembly macros
+ *
+ * TIMING: Bit delays use a compile-time, NOP-counted delay (see FlNopDelay /
+ * fl_delay_cycles_ct below), NOT a runtime cycle counter. M0/M0+ has no DWT
+ * CYCCNT, and reusing SysTick as a counter does not work (it is owned by the
+ * millis() tick: a periodic down-counter, not a free-running one). A peripheral
+ * counter read also costs more cycles than a sub-microsecond WS2812 bit phase,
+ * so it cannot time these delays accurately. Compile-time NOP counting is
+ * cycle-exact and needs no timer -- the same approach the assembly driver uses.
  *
  * OPTIMIZATION: Use timing-specific optimization settings that disable
  * instruction scheduling and other transformations that affect cycle accuracy.
@@ -153,85 +156,61 @@ struct M0ClocklessData {
 FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING
 
 /**
- * get_cycle_count - Read current CPU cycle count
+ * Compile-time, NOP-counted cycle delay used by the WS2812 bit timing.
  *
- * @return Current cycle count (32-bit, wraps around)
- */
-FL_FORCE_INLINE fl::u32 get_cycle_count() FL_NO_EXCEPT {
-#if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__) || \
-    defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
-    // M3/M4/M7/M23/M33: Use DWT CYCCNT (Data Watchpoint and Trace cycle counter)
-    // Note: DWT may need to be enabled first (usually done by Arduino core)
-    // ARMv8-M (M23/M33) also has DWT with compatible register layout
-    #define DWT_CYCCNT  (*(volatile fl::u32 *)0xE0001004)
-    return DWT_CYCCNT;
-#elif defined(__ARM_ARCH_6M__)
-    // M0/M0+: No DWT, use SysTick (down-counter, invert for up-count)
-    #if FL_USE_SYSTICK_FOR_CYCLECOUNT
-        // Check if SysTick is enabled (CTRL bit 0)
-        if ((SysTick->CTRL & 0x1) == 0) {
-            return 0;  // SysTick not enabled - cannot use as counter
-        }
-        return 0xFFFFFF - SysTick->VAL;
-    #else
-        return 0;  // SysTick use disabled - no counter available
-    #endif
-#else
-    // Fallback
-    return 0;
-#endif
-}
-
-/**
- * delay_cycles - Busy-wait delay for exact cycle count using hardware counter
+ * Self-contained on purpose: it does NOT use fl::delaycycles<>(), whose small-N
+ * specializations live in another translation unit (fl/delay.cpp.hpp). When they
+ * aren't visible, the generic fl::delaycycles<> recurses forever on N==1
+ * (HALF=0, REMAINDER=1 -> re-instantiates <1>), exploding template instantiation
+ * (it will OOM the compiler). This local version terminates at FlNopDelay<0>.
  *
- * @param cycles Number of CPU cycles to delay
+ * Each "nop" is one cycle on Cortex-M0+. Always-inlined, so it unrolls to exactly
+ * N nops at the call site with no call overhead.
  */
-FL_FORCE_INLINE void delay_cycles(fl::u32 cycles) FL_NO_EXCEPT {
-    if (cycles == 0) return;
-
-    fl::u32 start = get_cycle_count();
-    fl::u32 target = start + cycles;
-
-    // Busy-wait until target time (handles 32-bit wraparound)
-    if (target >= start) {
-        // No wraparound: wait until counter >= target
-        while (get_cycle_count() < target) {
-            __asm__ volatile("nop") FL_NO_EXCEPT;
-        }
-    } else {
-        // Wraparound: wait for counter to wrap, then reach target
-        while (get_cycle_count() >= start) {
-            __asm__ volatile("nop") FL_NO_EXCEPT;
-        }
-        while (get_cycle_count() < target) {
-            __asm__ volatile("nop") FL_NO_EXCEPT;
-        }
+template <int N> struct FlNopDelay {
+    static FL_FORCE_INLINE void run() FL_NO_EXCEPT {
+        __asm__ volatile("nop");
+        // Recurse toward 0, never below it. The clamp makes FlNopDelay<N>
+        // terminate at FlNopDelay<0> for ANY int N -- including negatives. GCC
+        // never instantiates a negative N (fl_delay_cycles_ct clamps first and
+        // GCC constant-folds it), but the cpptools/EDG IntelliSense engine can
+        // instantiate the primary template speculatively; without this clamp a
+        // negative N recurses N-1, N-2, ... forever and OOMs the analyzer.
+        FlNopDelay<(N > 1 ? N - 1 : 0)>::run();
     }
+};
+template <> struct FlNopDelay<0> {
+    static FL_FORCE_INLINE void run() FL_NO_EXCEPT {}
+};
+
+// Delay exactly N cycles at compile time; N <= 0 delays nothing, so callers may
+// pass (T_CYCLES - overhead) without guarding against underflow on fast clocks.
+template <int N> FL_FORCE_INLINE void fl_delay_cycles_ct() FL_NO_EXCEPT {
+    FlNopDelay<(N > 0 ? N : 0)>::run();
 }
 
 /**
  * gpio_set_high - Set GPIO pin HIGH
  * Equivalent to: qset2 with HI_OFFSET
  *
- * NOTE: Macro with FL_DSB() to ensure write completes before timing delays.
- * Critical for accurate WS2812 protocol timing.
+ * The store goes through a `volatile` port pointer, so the compiler can neither
+ * elide nor reorder it, and the surrounding FL_COMPILER_BARRIER() pins its
+ * position. No FL_DSB(): a full data-sync barrier after every GPIO write costs
+ * several cycles we cannot spare on a 24 MHz M0+ (~30 cycles per WS2812 bit),
+ * and the single-core AHB store posts without it.
  */
 #define gpio_set_high(port, bitmask, hi_offset) do { \
     (port)[(hi_offset) / 4] = (bitmask); \
-    FL_DSB(); \
 } while(0)
 
 /**
  * gpio_set_low - Set GPIO pin LOW
  * Equivalent to: qset2 with LO_OFFSET
  *
- * NOTE: Macro with FL_DSB() to ensure write completes before timing delays.
- * Critical for accurate WS2812 protocol timing.
+ * See gpio_set_high for the no-FL_DSB() rationale.
  */
 #define gpio_set_low(port, bitmask, lo_offset) do { \
     (port)[(lo_offset) / 4] = (bitmask); \
-    FL_DSB(); \
 } while(0)
 
 /**
@@ -252,8 +231,7 @@ FL_FORCE_INLINE fl::u8 gpio_conditional_low(fl::u8 byte, volatile fl::u32* port,
     // If bit 7 was 0 (bit 8 of temp is 0), set pin LOW
     FL_COMPILER_BARRIER();
     if ((temp & 0x100) == 0) {
-        port[lo_offset / 4] = bitmask;  // Write directly to avoid double barrier
-        FL_DSB();
+        port[lo_offset / 4] = bitmask;  // volatile store; no FL_DSB (see gpio_set_high)
     }
     FL_COMPILER_BARRIER();
     // Otherwise (bit 7 was 1), do nothing - pin stays HIGH
@@ -396,7 +374,6 @@ int showLedData(volatile fl::u32* port, fl::u32 bitmask,
     // Local variables
     fl::u32 counter = num_leds;
     fl::u8 b0 = 0, b1 = 0, b2 = 0;  // Bytes for current pixel (positioned for output)
-    fl::u8 bn0 = 0, bn1 = 0, bn2 = 0;  // Next bytes being processed
 
 #if (FASTLED_SCALE8_FIXED == 1)
     ++pData->s[0];
@@ -420,26 +397,35 @@ int showLedData(volatile fl::u32* port, fl::u32 bitmask,
     // Helper macro: Output one bit of a byte
     // This is the core WS2812 protocol implementation
     //
-    // Overhead accounting (approximate cycles consumed by operations):
-    // - gpio_set_high: ~2 cycles (store instruction)
-    // - gpio_conditional_low: ~4-5 cycles (shift, branch, optional store)
-    // - gpio_set_low: ~2 cycles (store instruction)
+    // Timing uses fl::delaycycles<N>() -- a compile-time NOP-counted delay (T1/T2/
+    // T3_CYCLES are constexpr) -- NOT the get_cycle_count()/delay_cycles() busy-
+    // wait. On M0/M0+ that busy-wait reads a peripheral counter (SysTick/MRT) per
+    // iteration; the MMIO read costs more cycles than a WS2812 bit phase (~6/15/9
+    // cycles at 24 MHz), so it always overshoots and stretches every bit. NOP
+    // delays have zero read overhead and are cycle-exact. fl::delaycycles<N>() is
+    // a no-op for N <= 0, so the overhead subtraction below is allowed to go
+    // non-positive on very fast clocks without a guard.
+    //
+    // Overhead subtracted = cycles consumed by the GPIO ops inside each phase:
+    // - gpio_set_high: ~2 cycles (store)        -> subtracted from T1
+    // - gpio_conditional_low: ~4 cycles + work  -> subtracted from T2
+    // - gpio_set_low: ~2 cycles (store)         -> subtracted from T3
+    // These are starting estimates; verify the waveform on a scope and adjust.
     /////////////////////////////////////////////////////////////////////////////
     #define OUTPUT_BIT(byte, work_cycles, work_code) do { \
         FL_COMPILER_BARRIER(); \
         gpio_set_high(port, bitmask, HI_OFFSET); \
         FL_COMPILER_BARRIER(); \
-        if (T1_CYCLES > 2) { delay_cycles(T1_CYCLES - 2); } \
+        fl_delay_cycles_ct<(int)T1_CYCLES - 2>(); \
         FL_COMPILER_BARRIER(); \
         byte = gpio_conditional_low(byte, port, bitmask, LO_OFFSET); \
         FL_COMPILER_BARRIER(); \
         work_code; \
-        constexpr fl::u32 t2_overhead = 4 + work_cycles; \
-        if (T2_CYCLES > t2_overhead) { delay_cycles(T2_CYCLES - t2_overhead); } \
+        fl_delay_cycles_ct<(int)T2_CYCLES - 4 - (int)(work_cycles)>(); \
         FL_COMPILER_BARRIER(); \
         gpio_set_low(port, bitmask, LO_OFFSET); \
         FL_COMPILER_BARRIER(); \
-        if (T3_CYCLES > 2) { delay_cycles(T3_CYCLES - 2); } \
+        fl_delay_cycles_ct<(int)T3_CYCLES - 2>(); \
         FL_COMPILER_BARRIER(); \
     } while(0)
 
@@ -514,12 +500,19 @@ int showLedData(volatile fl::u32* port, fl::u32 bitmask,
             PROCESS_BYTE(0, b0);
         });
 
+        // Open a brief window for pending interrupts between pixels, then
+        // restore the caller's interrupt state. PRIMASK == 1 means interrupts
+        // were disabled on entry (e.g. showPixels() called cli()), so they must
+        // be re-disabled here; PRIMASK == 0 means they were enabled, so leave
+        // them enabled. (Previously this tested `prim == 0`, which was inverted:
+        // entered with interrupts disabled, it left them enabled for the rest of
+        // the frame, so ISRs fired mid-bit and corrupted the WS2812 timing.)
         // Check interrupt timing using SysTick
         fl::u32 ticksBeforeInterrupts = SysTick->VAL;
         fl::u32 prim = __get_PRIMASK();
         __enable_irq();
         --counter;
-        if (prim == 0) __disable_irq();
+        if (prim != 0) __disable_irq();
 
         // Calculate elapsed time and check if it exceeds 45μs
         const fl::u32 kTicksPerMs = VARIANT_MCK / 1000;
@@ -586,10 +579,9 @@ FL_END_OPTIMIZE_FOR_EXACT_TIMING
  * IMPLEMENTATION NOTES:
  *
  * TIMING:
- * - Uses hardware cycle counters (DWT_CYCCNT on M3/M4/M7, SysTick on M0/M0+)
  * - Compile-time conversion: nanoseconds → CPU cycles
- * - Runtime delay: delay_cycles() busy-waits using get_cycle_count()
- * - Handles 32-bit wraparound correctly
+ * - Bit delays emitted as compile-time NOP runs (fl_delay_cycles_ct<N>()):
+ *   cycle-exact, no runtime cycle counter, no timer dependency
  *
  * OPTIMIZATION:
  * - Timing-specific optimizations via FL_BEGIN/END_OPTIMIZE_FOR_EXACT_TIMING
