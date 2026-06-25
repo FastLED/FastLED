@@ -114,9 +114,12 @@ static const FlexPwmPinInfo kPinMap[] = {
      &IOMUXC_FLEXPWM2_PWMA2_SELECT_INPUT, 1},
 
     // Pin 8: FlexPWM1_SM3_A (GPIO_B1_00, ALT6)
+    // SELECT_INPUT=4 routes from GPIO_B1_00 (pin 8). The previous value 0
+    // selected GPIO_SD_B1_00, an unrelated pad, so FlexPWM never saw the
+    // pin 8 signal -- #3359 zero_capture root cause for canonical TX22->RX8.
     {8, &IMXRT_FLEXPWM1, 3, false, DMAMUX_SOURCE_FLEXPWM1_READ3,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_B1_00, 6,
-     &IOMUXC_FLEXPWM1_PWMA3_SELECT_INPUT, 0},
+     &IOMUXC_FLEXPWM1_PWMA3_SELECT_INPUT, 4},
 
     // Pin 22: FlexPWM4_SM0_A (GPIO_AD_B1_08, ALT1)
     {22, &IMXRT_FLEXPWM4, 0, false, DMAMUX_SOURCE_FLEXPWM4_READ0,
@@ -513,8 +516,14 @@ void FlexPwmRxChannelImpl::configureDma() {
     mDma.TCD->BITER = mCaptureBuffer.size() / 2;
     mDma.TCD->CSR = DMA_TCD_CSR_DREQ;
     mDma.triggerAtHardwareEvent(mPinInfo->dma_source);
-    mDma.interruptAtCompletion();
-    mDma.attachInterrupt(dmaIsr);
+    // NOTE: dmaIsr is intentionally NOT attached. On Teensy 4.x, once
+    // SELECT_INPUT is corrected so FlexPWM actually captures the WS2812
+    // signal, registering a major-loop completion interrupt for the
+    // RX DMA channel caused runSingleTest to hang (>120 s RPC timeout
+    // with no firmware response). The wait() loop below already covers
+    // termination via the CITER-inactivity branch (mSignalRangeMaxNs),
+    // so the ISR is a convenience the driver does not need. Root cause
+    // of the ISR-induced hang is tracked separately in #3359 follow-up.
     mDma.enable();
 }
 
