@@ -735,8 +735,6 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     rpc_commands_list: list[dict[str, Any]] = []
 
     if per_lane_counts is not None:
-        set_lane_sizes_cmd = {"method": "setLaneSizes", "params": [per_lane_counts]}
-        rpc_commands_list.append(set_lane_sizes_cmd)
         print(
             f"\u2139\ufe0f  Setting per-lane LED counts: {', '.join(str(c) for c in per_lane_counts)} ({len(per_lane_counts)} lanes)"
         )
@@ -761,84 +759,87 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     drivers_list = config["drivers"]
     lane_range = config.get("laneRange", {"min": 1, "max": 1})
     strip_sizes = config.get("stripSizes", [100])
+    if per_lane_counts is not None:
+        lane_size_sets = [per_lane_counts]
+    else:
+        lane_size_sets = [
+            [strip_size] * lane_count
+            for lane_count in range(lane_range["min"], lane_range["max"] + 1)
+            for strip_size in strip_sizes
+        ]
 
     if parallel_mode:
-        for lane_count in range(lane_range["min"], lane_range["max"] + 1):
-            for strip_size in strip_sizes:
-                lane_sizes = [strip_size] * lane_count
-                driver_entries: list[dict[str, Any]] = []
-                for driver in drivers_list:
-                    driver_entry: dict[str, Any] = {
-                        "driver": driver,
-                        "laneSizes": lane_sizes,
-                    }
-                    driver_entries.append(driver_entry)
-                parallel_config: dict[str, Any] = {
-                    "drivers": driver_entries,
+        for lane_sizes in lane_size_sets:
+            driver_entries: list[dict[str, Any]] = []
+            for driver in drivers_list:
+                driver_entry: dict[str, Any] = {
+                    "driver": driver,
+                    "laneSizes": lane_sizes,
+                }
+                driver_entries.append(driver_entry)
+            parallel_config: dict[str, Any] = {
+                "drivers": driver_entries,
+                "pattern": "MSB_LSB_A",
+                "iterations": 1,
+                "timing": timing_name,
+            }
+            rpc_command = {"method": "runParallelTest", "params": parallel_config}
+            rpc_commands_list.append(rpc_command)
+
+        print(
+            f"\u2139\ufe0f  Generated {len(rpc_commands_list)} parallel test(s) "
+            f"({len(drivers_list)} drivers \u00d7 {len(lane_size_sets)} lane-size set(s))"
+        )
+    else:
+        for driver in drivers_list:
+            for lane_sizes in lane_size_sets:
+                lane_count = len(lane_sizes)
+                test_config: dict[str, Any] = {
+                    "driver": driver,
+                    "laneSizes": lane_sizes,
                     "pattern": "MSB_LSB_A",
                     "iterations": 1,
                     "timing": timing_name,
                 }
-                rpc_command = {"method": "runParallelTest", "params": parallel_config}
+                if args.legacy:
+                    test_config["useLegacyApi"] = True
+                    if args.legacy_rgbw_small_counts:
+                        test_config["legacyRgbw"] = True
+                    if args.legacy_mixed_timings:
+                        test_config["legacyChipsets"] = [
+                            "WS2812B" if i % 2 == 0 else "SK6812"
+                            for i in range(lane_count)
+                        ]
+                # Multi-frame capture: back-to-back show()/capture cycles per pattern.
+                # Defaults: SPI -> 2 (catches #2254/#2288 second-frame degradation),
+                # others -> 1. User can override with --frames N.
+                if args.frames is not None:
+                    frame_count = args.frames
+                elif driver == "SPI":
+                    frame_count = 2
+                else:
+                    frame_count = 1
+                if frame_count > 1:
+                    test_config["frameCount"] = frame_count
+                if args.contaminate_tx_mux:
+                    test_config["contaminateTxMux"] = True
+                if args.tight_timing:
+                    if (
+                        args.tight_timing_iterations < 1
+                        or args.tight_timing_iterations > 64
+                    ):
+                        print("Error: --tight-timing-iterations must be in [1, 64]")
+                        return 1
+                    if args.tight_timing_max_overhead_us < 1:
+                        print("Error: --tight-timing-max-overhead-us must be >= 1")
+                        return 1
+                    test_config["tightTiming"] = True
+                    test_config["tightTimingIterations"] = args.tight_timing_iterations
+                    test_config["tightTimingMaxOverheadUs"] = (
+                        args.tight_timing_max_overhead_us
+                    )
+                rpc_command = {"method": "runSingleTest", "params": test_config}
                 rpc_commands_list.append(rpc_command)
-
-        print(
-            f"\u2139\ufe0f  Generated {len(rpc_commands_list)} parallel test(s) "
-            f"({len(drivers_list)} drivers \u00d7 {lane_range['max'] - lane_range['min'] + 1} lane count(s) \u00d7 {len(strip_sizes)} strip size(s))"
-        )
-    else:
-        for driver in drivers_list:
-            for lane_count in range(lane_range["min"], lane_range["max"] + 1):
-                for strip_size in strip_sizes:
-                    lane_sizes = [strip_size] * lane_count
-                    test_config: dict[str, Any] = {
-                        "driver": driver,
-                        "laneSizes": lane_sizes,
-                        "pattern": "MSB_LSB_A",
-                        "iterations": 1,
-                        "timing": timing_name,
-                    }
-                    if args.legacy:
-                        test_config["useLegacyApi"] = True
-                        if args.legacy_rgbw_small_counts:
-                            test_config["legacyRgbw"] = True
-                        if args.legacy_mixed_timings:
-                            test_config["legacyChipsets"] = [
-                                "WS2812B" if i % 2 == 0 else "SK6812"
-                                for i in range(lane_count)
-                            ]
-                    # Multi-frame capture: back-to-back show()/capture cycles per pattern.
-                    # Defaults: SPI -> 2 (catches #2254/#2288 second-frame degradation),
-                    # others -> 1. User can override with --frames N.
-                    if args.frames is not None:
-                        frame_count = args.frames
-                    elif driver == "SPI":
-                        frame_count = 2
-                    else:
-                        frame_count = 1
-                    if frame_count > 1:
-                        test_config["frameCount"] = frame_count
-                    if args.contaminate_tx_mux:
-                        test_config["contaminateTxMux"] = True
-                    if args.tight_timing:
-                        if (
-                            args.tight_timing_iterations < 1
-                            or args.tight_timing_iterations > 64
-                        ):
-                            print("Error: --tight-timing-iterations must be in [1, 64]")
-                            return 1
-                        if args.tight_timing_max_overhead_us < 1:
-                            print("Error: --tight-timing-max-overhead-us must be >= 1")
-                            return 1
-                        test_config["tightTiming"] = True
-                        test_config["tightTimingIterations"] = (
-                            args.tight_timing_iterations
-                        )
-                        test_config["tightTimingMaxOverheadUs"] = (
-                            args.tight_timing_max_overhead_us
-                        )
-                    rpc_command = {"method": "runSingleTest", "params": test_config}
-                    rpc_commands_list.append(rpc_command)
 
     json_rpc_cmd_str = json.dumps(rpc_commands_list)
 

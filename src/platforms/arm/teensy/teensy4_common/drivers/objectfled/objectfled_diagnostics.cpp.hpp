@@ -41,6 +41,14 @@ struct PinRegisterSnapshot {
     u32 modeValue = 0;
     u32 inputRegister = 0;
     u32 inputValue = 0;
+    u32 fastModeRegister = 0;
+    u32 fastModeValue = 0;
+    u32 standardOutputRegister = 0;
+    u32 standardOutputValue = 0;
+    u32 standardModeRegister = 0;
+    u32 standardModeValue = 0;
+    u32 standardInputRegister = 0;
+    u32 standardInputValue = 0;
 };
 
 struct TimerChannelSnapshot {
@@ -112,6 +120,7 @@ struct SnapshotEvent {
     u8 pinCount = 0;
     PinRegisterSnapshot pins[kMaxPins];
     u32 gpr[4] = {0, 0, 0, 0};
+    u32 ccgr[4] = {0, 0, 0, 0};
     TimerChannelSnapshot tmr[3];
     u32 tmrEnbl = 0;
     u32 xbarSel15 = 0;
@@ -164,6 +173,8 @@ PinRegisterSnapshot capturePin(u8 pin) FL_NO_EXCEPT {
     out.modeValue = *modeReg;
     out.inputRegister = ptrToU32(inputReg);
     out.inputValue = *inputReg;
+    out.fastModeRegister = ptrToU32(modeReg);
+    out.fastModeValue = *modeReg;
     out.muxRegister = ptrToU32(muxReg);
     out.mux = *muxReg;
     out.padRegister = ptrToU32(padReg);
@@ -180,7 +191,15 @@ PinRegisterSnapshot capturePin(u8 pin) FL_NO_EXCEPT {
         out.gprMask = out.mask;
         out.mappedToStandard = ((*gprReg & out.mask) == 0);
 
+        volatile u32* standardOutputReg = standardGpioAddr(outputReg);
         volatile u32* standardModeReg = standardGpioAddr(modeReg);
+        volatile u32* standardInputReg = standardGpioAddr(inputReg);
+        out.standardOutputRegister = ptrToU32(standardOutputReg);
+        out.standardOutputValue = *standardOutputReg;
+        out.standardModeRegister = ptrToU32(standardModeReg);
+        out.standardModeValue = *standardModeReg;
+        out.standardInputRegister = ptrToU32(standardInputReg);
+        out.standardInputValue = *standardInputReg;
         out.modeRegister = ptrToU32(standardModeReg);
         out.modeValue = *standardModeReg;
     }
@@ -347,7 +366,15 @@ void appendPin(fl::sstream& out, const PinRegisterSnapshot& pin) FL_NO_EXCEPT {
         << " modeReg=" << pin.modeRegister
         << " mode=" << pin.modeValue
         << " inReg=" << pin.inputRegister
-        << " in=" << pin.inputValue;
+        << " in=" << pin.inputValue
+        << " fastModeReg=" << pin.fastModeRegister
+        << " fastMode=" << pin.fastModeValue
+        << " stdOutReg=" << pin.standardOutputRegister
+        << " stdOut=" << pin.standardOutputValue
+        << " stdModeReg=" << pin.standardModeRegister
+        << " stdMode=" << pin.standardModeValue
+        << " stdInReg=" << pin.standardInputRegister
+        << " stdIn=" << pin.standardInputValue;
 }
 
 void appendEvent(fl::sstream& out, const SnapshotEvent& event) FL_NO_EXCEPT {
@@ -361,6 +388,10 @@ void appendEvent(fl::sstream& out, const SnapshotEvent& event) FL_NO_EXCEPT {
         << " gpr27=" << event.gpr[1]
         << " gpr28=" << event.gpr[2]
         << " gpr29=" << event.gpr[3]
+        << " ccgr0=" << event.ccgr[0]
+        << " ccgr1=" << event.ccgr[1]
+        << " ccgr2=" << event.ccgr[2]
+        << " ccgr3=" << event.ccgr[3]
         << " tmr4.enbl=" << event.tmrEnbl
         << " xbar.sel15=" << event.xbarSel15
         << " xbar.sel47=" << event.xbarSel47
@@ -464,6 +495,10 @@ void objectFledDiagnosticsRecord(const char* stage, const u8* pins,
     event.gpr[1] = IOMUXC_GPR_GPR27;
     event.gpr[2] = IOMUXC_GPR_GPR28;
     event.gpr[3] = IOMUXC_GPR_GPR29;
+    event.ccgr[0] = CCM_CCGR0;
+    event.ccgr[1] = CCM_CCGR1;
+    event.ccgr[2] = CCM_CCGR2;
+    event.ccgr[3] = CCM_CCGR3;
     event.tmrEnbl = TMR4_ENBL;
     event.tmr[0] = captureTimerChannel(0);
     event.tmr[1] = captureTimerChannel(1);

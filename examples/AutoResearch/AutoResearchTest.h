@@ -88,6 +88,11 @@ struct RunResult {
     int capturedBytes;              ///< Bytes decoded from the RX channel
     int captureWaitResult;          ///< RxWaitResult value, or -1 before wait
     int rawEdgesAfterWait;          ///< Raw edges visible after RX wait/decode
+    int decodeOk;                   ///< 1 if RX decode returned success, 0 on error, -1 before decode
+    int decodeError;                ///< DecodeError value, or -1 when decode succeeded/not run
+    int decodeBytes;                ///< Bytes reported directly by decode()
+    int decodeOutputCapacity;       ///< Output span size passed to decode()
+    fl::string rawEdgeSample;       ///< Compact first-edge sample for failures
     int mismatchedBytes;            ///< Number of individual bytes that differ
     int lsbOnlyErrors;              ///< Bytes where (expected ^ actual) == 0x01
     fl::vector<LEDError> errors;    ///< First few errors (up to 10)
@@ -96,7 +101,8 @@ struct RunResult {
 
     RunResult() : run_number(0), total_leds(0), mismatches(0),
                   totalBytes(0), capturedBytes(0), captureWaitResult(-1),
-                  rawEdgesAfterWait(0), mismatchedBytes(0), lsbOnlyErrors(0),
+                  rawEdgesAfterWait(0), decodeOk(-1), decodeError(-1),
+                  decodeBytes(0), decodeOutputCapacity(0), mismatchedBytes(0), lsbOnlyErrors(0),
                   captureFailed(false), passed(false) {}
 };
 

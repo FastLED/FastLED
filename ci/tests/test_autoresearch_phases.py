@@ -646,9 +646,9 @@ class TestParseArgsAndBuildCommands:
         args = _make_args(lane_counts="100,200,300", project_dir=fake_project_dir)
         result = _parse_args_and_build_commands(args)
         assert isinstance(result, RunContext)
-        # setLaneSizes + runSingleTest = 2 commands
-        assert len(result.json_rpc_commands) == 2
-        assert result.json_rpc_commands[0]["method"] == "setLaneSizes"
+        assert len(result.json_rpc_commands) == 1
+        assert result.json_rpc_commands[0]["method"] == "runSingleTest"
+        assert result.json_rpc_commands[0]["params"]["laneSizes"] == [100, 200, 300]
 
     def test_lane_counts_accepts_16_lanes(self, fake_project_dir: Path) -> None:
         args = _make_args(
@@ -657,8 +657,8 @@ class TestParseArgsAndBuildCommands:
         )
         result = _parse_args_and_build_commands(args)
         assert isinstance(result, RunContext)
-        assert result.json_rpc_commands[0]["method"] == "setLaneSizes"
-        assert result.json_rpc_commands[0]["params"] == [[100] * 16]
+        assert result.json_rpc_commands[0]["method"] == "runSingleTest"
+        assert result.json_rpc_commands[0]["params"]["laneSizes"] == [100] * 16
 
     def test_lane_counts_rejects_17_lanes(self, fake_project_dir: Path) -> None:
         args = _make_args(

@@ -264,6 +264,12 @@ def display_pattern_details(result: dict[str, Any]) -> None:
         mismatched_bytes = pat.get("mismatchedBytes", 0)
         lsb_only = pat.get("lsbOnlyErrors", 0)
         captured_bytes = pat.get("capturedBytes")
+        capture_wait = pat.get("captureWaitResult")
+        raw_edges = pat.get("rawEdgesAfterWait")
+        decode_ok = pat.get("decodeOk")
+        decode_error = pat.get("decodeError")
+        decode_bytes = pat.get("decodeBytes")
+        decode_capacity = pat.get("decodeOutputCapacity")
         capture_failed = bool(pat.get("captureFailed", False))
 
         agg_total_bytes += total_bytes
@@ -276,6 +282,21 @@ def display_pattern_details(result: dict[str, Any]) -> None:
         print(f"    Mismatched LEDs:  {mismatched_leds}/{num_leds}")
         if captured_bytes is not None:
             print(f"    Captured bytes:   {captured_bytes}/{total_bytes}")
+        if capture_wait is not None or raw_edges is not None:
+            print(f"    RX wait/raw:      {capture_wait}/{raw_edges}")
+        if (
+            decode_ok is not None
+            or decode_error is not None
+            or decode_bytes is not None
+            or decode_capacity is not None
+        ):
+            print(
+                "    Decode status:    "
+                f"ok={decode_ok} error={decode_error} bytes={decode_bytes}/{decode_capacity}"
+            )
+        raw_sample = pat.get("rawEdgeSample")
+        if raw_sample:
+            print(f"    Raw sample:       {raw_sample}")
         if capture_failed:
             print(f"    Capture status:   RX produced no decodable bytes")
         print(
@@ -364,6 +385,53 @@ def display_objectfled_diagnostics(result: dict[str, Any]) -> None:
     print("  ObjectFLED diagnostics")
     print(f"    format: {fmt}")
     print(f"    events: {event_count}, overflow: {overflow_count}")
+    probe = result.get("objectFledStandardGpioProbe")
+    if isinstance(probe, dict):
+        connected = probe.get("connected", "?")
+        low = probe.get("rxWhenStandardLow", "?")
+        high = probe.get("rxWhenStandardHigh", "?")
+        offset = probe.get("offset", "?")
+        bit = probe.get("bit", "?")
+        print(
+            "    standard GPIO probe: "
+            f"connected={connected} rxLow={low} rxHigh={high} "
+            f"offset={offset} bit={bit}"
+        )
+    rx_probe = result.get("objectFledRxCaptureProbe")
+    if isinstance(rx_probe, dict):
+        captured = rx_probe.get("captured", "?")
+        raw_edges = rx_probe.get("rawEdges", "?")
+        engine = rx_probe.get("engine", "?")
+        wait_result = rx_probe.get("waitResult", "?")
+        print(
+            "    RX capture probe: "
+            f"engine={engine} waitResult={wait_result} "
+            f"captured={captured} rawEdges={raw_edges}"
+        )
+        rx_diag = rx_probe.get("diagnosticsAfterWait")
+        if isinstance(rx_diag, dict):
+            mux = rx_diag.get("muxRegisterValue", "?")
+            mux_expected = rx_diag.get("muxExpectedValue", "?")
+            select = rx_diag.get("selectRegisterValue", "?")
+            select_expected = rx_diag.get("selectExpectedValue", "?")
+            dma_source = rx_diag.get("dmaSource", "?")
+            dmamux = rx_diag.get("dmamuxChcfg", "?")
+            citer = rx_diag.get("citer", "?")
+            biter = rx_diag.get("biter", "?")
+            csr = rx_diag.get("csr", "?")
+            dma_erq = rx_diag.get("dmaErq", "?")
+            cval2 = rx_diag.get("cval2", "?")
+            cval3 = rx_diag.get("cval3", "?")
+            cval4 = rx_diag.get("cval4", "?")
+            cval5 = rx_diag.get("cval5", "?")
+            print(
+                "      FlexPWM after wait: "
+                f"pin={rx_diag.get('pin', '?')} "
+                f"mux={mux}/{mux_expected} select={select}/{select_expected} "
+                f"source={dma_source} dmamux={dmamux} "
+                f"citer={citer} biter={biter} csr={csr} erq={dma_erq} "
+                f"cval={cval2},{cval3},{cval4},{cval5}"
+            )
     if isinstance(snapshot, str) and snapshot:
         print("    snapshot:")
         for line in snapshot.splitlines():
