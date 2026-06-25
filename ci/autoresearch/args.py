@@ -73,6 +73,7 @@ class Args:
 
     # Legacy API testing
     legacy: bool
+    legacy_mixed_timings: bool
 
     # Chipset selection
     chipset: str
@@ -573,6 +574,15 @@ See Also:
             action="store_true",
             help="Test using legacy template addLeds API (WS2812B<PIN>) instead of Channel API. Supports consecutive TX pins 0-8; pin 22 is single-lane for the current ObjectFLED loopback.",
         )
+        parser.add_argument(
+            "--legacy-mixed-timings",
+            action="store_true",
+            help=(
+                "With --legacy, alternate WS2812B/SK6812 template chipsets "
+                "across lanes to exercise multiple ObjectFLED timing groups. "
+                "Requires multi-lane historical TX pins 0-8."
+            ),
+        )
 
         # Chipset selection
         parser.add_argument(
@@ -694,6 +704,7 @@ See Also:
             lane_counts=parsed.lane_counts,
             color_pattern=parsed.color_pattern,
             legacy=parsed.legacy,
+            legacy_mixed_timings=parsed.legacy_mixed_timings,
             chipset=parsed.chipset,
             net_server=parsed.net_server,
             net_client=parsed.net_client,

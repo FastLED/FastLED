@@ -4,6 +4,7 @@
 #pragma once
 
 #include <FastLED.h>
+#include "LegacyClocklessProxy.h"
 #include "fl/channels/validation.h"
 
 namespace fl {
@@ -20,6 +21,7 @@ struct AutoResearchConfig {
     fl::span<uint8_t> rx_buffer;                 ///< Buffer to store received bytes
     int base_strip_size;                         ///< Base strip size (10 or 300 LEDs)
     fl::RxDeviceType rx_type;                    ///< RX device type (RMT or ISR)
+    fl::span<const LegacyClocklessChipset> legacy_chipsets;  ///< Optional per-lane legacy templates
 
     AutoResearchConfig(const fl::ChipsetTimingConfig& t,
                      const char* tn,
@@ -29,7 +31,8 @@ struct AutoResearchConfig {
                      fl::span<uint8_t> rb,
                      int bss,
                      fl::RxDeviceType rt,
-                     fl::ClocklessEncoder enc = fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812)
+                     fl::ClocklessEncoder enc = fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812,
+                     fl::span<const LegacyClocklessChipset> legacy = fl::span<const LegacyClocklessChipset>())
         : timing(t)
         , encoder(enc)
         , timing_name(tn)
@@ -38,7 +41,8 @@ struct AutoResearchConfig {
         , rx_channel(rc)
         , rx_buffer(rb)
         , base_strip_size(bss)
-        , rx_type(rt) {}
+        , rx_type(rt)
+        , legacy_chipsets(legacy) {}
 };
 
 /// @brief Test context for detailed error reporting
