@@ -187,8 +187,8 @@ void ObjectFLEDGroupBase::flush() {
                     totalBytes);
     }
 
-    // TRANSMIT to hardware!
-    objectfled->show();
+    // Transmit the already packed RectangularDrawBuffer bytes.
+    objectfled->showRawFrameBuffer();
 }
 
 void ObjectFLEDGroupBase::rebuildObjectFLED() {

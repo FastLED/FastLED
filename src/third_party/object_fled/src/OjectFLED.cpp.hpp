@@ -481,6 +481,14 @@ void ObjectFLED::genFrameBuffer(uint32_t serp) {
 // 4 word32s for each bit in (led data)/pin = 16 * 8 = 96 bitdata bytes for each LED byte: 288 bytes / LED
 // launches DMA with IRQ activation to reload bitdata from frameBuffer
 void ObjectFLED::show(void) {
+	showInternal(true);
+}
+
+void ObjectFLED::showRawFrameBuffer(void) {
+	showInternal(false);
+}
+
+void ObjectFLED::showInternal(bool regenerateFrameBuffer) {
 	auto& dma = ObjectFLEDDmaManager::getInstance();
 
 	// Acquire DMA (blocks if another instance transmitting)
@@ -509,7 +517,9 @@ void ObjectFLED::show(void) {
 		dma.dma3.TCD->BITER_ELINKNO = dma.numbytes * 8;
 	} //done restoring context
 
-	genFrameBuffer(serpNumber);
+	if (regenerateFrameBuffer) {
+		genFrameBuffer(serpNumber);
+	}
 
 	// disable timers
 	uint16_t enable = TMR4_ENBL;
@@ -577,7 +587,7 @@ void ObjectFLED::show(void) {
 
 	// Release DMA (transmission continues asynchronously)
 	dma.release(this);
-}	// show()
+}	// showInternal()
 
 
 //INPUT: dma2, dma2next, bitdata, framebuffer_inedex, numpins, numbytes, pin_offset[], pin_bitnum[]

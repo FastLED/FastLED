@@ -52,7 +52,7 @@ public:
     void show() override {
         updateBusyState();
         objectFledDiagnosticsRecord("beforeShow", mPins, mPinCount);
-        mObjectFLED->show();
+        mObjectFLED->showRawFrameBuffer();
         updateBusyState();
         objectFledDiagnosticsRecord("afterShowReturn", mPins, mPinCount);
     }
@@ -115,13 +115,6 @@ public:
             static_cast<u16>(reset_us)
         );
         objectFledDiagnosticsRecord("afterBegin", pinList, numPins);
-
-        // CRITICAL: Set drawBuffer to frameBufferLocal so genFrameBuffer()
-        // (called inside show()) doesn't dereference nullptr. We write
-        // pixel data directly into frameBufferLocal, so genFrameBuffer's
-        // copy from drawBuffer→frameBufferLocal becomes a self-copy (no-op
-        // at default brightness=255).
-        ofled->drawBuffer = ofled->frameBufferLocal;
 
         int bytesPerLed = isRgbw ? 4 : 3;
         u32 totalBytes = static_cast<u32>(totalLeds * bytesPerLed);
