@@ -73,10 +73,11 @@ void ChannelEngineObjectFLED::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
 }
 
 void ChannelEngineObjectFLED::show() FL_NO_EXCEPT {
-    // Wait for any previous transmission (per DMA Wait Pattern)
-    while (poll() != DriverState::READY) {
-        // ObjectFLED show() is synchronous, so this should be instant
+    if (mEnqueuedChannels.empty()) {
+        return;
     }
+
+    waitForReady();
 
     // Move enqueued -> transmitting
     mTransmittingChannels.swap(mEnqueuedChannels);
@@ -114,116 +115,157 @@ void ChannelEngineObjectFLED::show() FL_NO_EXCEPT {
         found->channels.push_back(ch);
     }
 
-    // ================================================================
-    // Transmit each timing group that has channels this frame
-    // ================================================================
-    for (auto& group : mTimingGroups) {
-        if (group->channels.empty()) {
-            continue;  // No channels this frame for this timing group
+    mCurrentGroupIndex = 0;
+    if (!startNextTimingGroup()) {
+        finishTransmission();
+    }
+}
+
+bool ChannelEngineObjectFLED::startNextTimingGroup() FL_NO_EXCEPT {
+    while (mCurrentGroupIndex < mTimingGroups.size()) {
+        TimingGroup& group = *mTimingGroups[mCurrentGroupIndex];
+        if (group.channels.empty()) {
+            ++mCurrentGroupIndex;
+            continue;
+        }
+        if (startTimingGroup(group)) {
+            return true;
+        }
+        ++mCurrentGroupIndex;
+    }
+    return false;
+}
+
+bool ChannelEngineObjectFLED::startTimingGroup(TimingGroup& group) FL_NO_EXCEPT {
+    RectangularDrawBuffer& drawBuf = group.drawBuffer;
+    drawBuf.onQueuingStart();
+
+    // Queue all channels in this group
+    for (auto& ch : group.channels) {
+        const u8 pin = static_cast<u8>(ch->getPin());
+
+        // Validate pin
+        auto validation = mPeripheral->validatePin(pin);
+        if (!validation.valid) {
+            FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: Pin %s invalid: %s", (int)pin, validation.error_message);
+            continue;
         }
 
-        RectangularDrawBuffer& drawBuf = group->drawBuffer;
-        drawBuf.onQueuingStart();
+        // Determine bytes per LED from data size and pin count
+        const auto& data = ch->getData();
+        const size_t dataSize = data.size();
 
-        // Queue all channels in this group
-        for (auto& ch : group->channels) {
-            const u8 pin = static_cast<u8>(ch->getPin());
+        // Determine if RGBW: data size must be divisible by 4 but not 3,
+        // or divisible by both but 4 gives an integer LED count matching 3's
+        // Simple heuristic: if dataSize % 4 == 0 and dataSize % 3 != 0 -> RGBW
+        // Otherwise RGB
+        bool isRgbw = (dataSize % 4 == 0) && (dataSize % 3 != 0);
+        int bytesPerLed = isRgbw ? 4 : 3;
+        u16 numLeds = static_cast<u16>(dataSize / bytesPerLed);
 
-            // Validate pin
-            auto validation = mPeripheral->validatePin(pin);
-            if (!validation.valid) {
-                FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: Pin %s invalid: %s", (int)pin, validation.error_message);
-                continue;
-            }
+        drawBuf.queue(DrawItem(pin, numLeds, isRgbw));
+    }
+    drawBuf.onQueuingDone();
 
-            // Determine bytes per LED from data size and pin count
-            const auto& data = ch->getData();
-            const size_t dataSize = data.size();
-
-            // Determine if RGBW: data size must be divisible by 4 but not 3,
-            // or divisible by both but 4 gives an integer LED count matching 3's
-            // Simple heuristic: if dataSize % 4 == 0 and dataSize % 3 != 0 -> RGBW
-            // Otherwise RGB
-            bool isRgbw = (dataSize % 4 == 0) && (dataSize % 3 != 0);
-            int bytesPerLed = isRgbw ? 4 : 3;
-            u16 numLeds = static_cast<u16>(dataSize / bytesPerLed);
-
-            drawBuf.queue(DrawItem(pin, numLeds, isRgbw));
-        }
-        drawBuf.onQueuingDone();
-
-        // Copy raw RGB bytes from ChannelData into the draw buffer
-        for (auto& ch : group->channels) {
-            const u8 pin = static_cast<u8>(ch->getPin());
-            auto validation = mPeripheral->validatePin(pin);
-            if (!validation.valid) {
-                continue;
-            }
-
-            fl::span<u8> stripBytes = drawBuf.getLedsBufferBytesForPin(pin, true);
-            const auto& srcData = ch->getData();
-            const size_t copySize = (srcData.size() < stripBytes.size())
-                                      ? srcData.size()
-                                      : stripBytes.size();
-            if (copySize > 0) {
-                fl::memcpy(stripBytes.data(), srcData.data(), copySize);
-            }
+    // Copy raw RGB bytes from ChannelData into the draw buffer
+    for (auto& ch : group.channels) {
+        const u8 pin = static_cast<u8>(ch->getPin());
+        auto validation = mPeripheral->validatePin(pin);
+        if (!validation.valid) {
+            continue;
         }
 
-        // Build/rebuild ObjectFLED instance only when draw list changes
-        bool drawListChanged = drawBuf.mDrawListChangedThisFrame;
-        if (drawListChanged || !group->instance) {
-            group->instance.reset();
-
-            // Build pin list
-            fl::FixedVector<u8, 50> pinList;
-            bool hasRgbw = false;
-            for (const auto& item : drawBuf.mDrawList) {
-                pinList.push_back(item.mPin);
-                if (item.mIsRgbw) {
-                    hasRgbw = true;
-                }
-            }
-
-            if (pinList.empty()) {
-                continue;  // All pins invalid, skip this group
-            }
-
-            u32 num_strips = 0;
-            u32 bytes_per_strip = 0;
-            u32 total_bytes = 0;
-            drawBuf.getBlockInfo(&num_strips, &bytes_per_strip, &total_bytes);
-
-            int bytesPerLed = hasRgbw ? 4 : 3;
-            int totalLeds = total_bytes / bytesPerLed;
-
-            group->instance = mPeripheral->createInstance(
-                totalLeds, hasRgbw, pinList.size(), pinList.data(),
-                group->timing.t1_ns, group->timing.t2_ns,
-                group->timing.t3_ns, group->timing.reset_us
-            );
+        fl::span<u8> stripBytes = drawBuf.getLedsBufferBytesForPin(pin, true);
+        const auto& srcData = ch->getData();
+        const size_t copySize = (srcData.size() < stripBytes.size())
+                                  ? srcData.size()
+                                  : stripBytes.size();
+        if (copySize > 0) {
+            fl::memcpy(stripBytes.data(), srcData.data(), copySize);
         }
-
-        if (!group->instance) {
-            continue;  // createInstance failed
-        }
-
-        // Copy draw buffer into instance's frame buffer
-        u32 totalBytes = drawBuf.getTotalBytes();
-        u32 frameBufferSize = group->instance->getFrameBufferSize();
-        u32 copyBytes = totalBytes < frameBufferSize ? totalBytes : frameBufferSize;
-        if (copyBytes > 0) {
-            fl::memcpy(
-                group->instance->getFrameBuffer(),
-                drawBuf.mAllLedsBufferUint8.get(),
-                copyBytes
-            );
-        }
-
-        // Transmit! (synchronous - blocks until DMA completes)
-        group->instance->show();
     }
 
+    // Build/rebuild ObjectFLED instance only when draw list changes
+    bool drawListChanged = drawBuf.mDrawListChangedThisFrame;
+    if (drawListChanged || !group.instance) {
+        group.instance.reset();
+
+        // Build pin list
+        fl::FixedVector<u8, 50> pinList;
+        bool hasRgbw = false;
+        for (const auto& item : drawBuf.mDrawList) {
+            pinList.push_back(item.mPin);
+            if (item.mIsRgbw) {
+                hasRgbw = true;
+            }
+        }
+
+        if (pinList.empty()) {
+            return false;  // All pins invalid, skip this group
+        }
+
+        u32 num_strips = 0;
+        u32 bytes_per_strip = 0;
+        u32 total_bytes = 0;
+        drawBuf.getBlockInfo(&num_strips, &bytes_per_strip, &total_bytes);
+
+        int bytesPerLed = hasRgbw ? 4 : 3;
+        int totalLeds = total_bytes / bytesPerLed;
+
+        group.instance = mPeripheral->createInstance(
+            totalLeds, hasRgbw, pinList.size(), pinList.data(),
+            group.timing.t1_ns, group.timing.t2_ns,
+            group.timing.t3_ns, group.timing.reset_us
+        );
+    }
+
+    if (!group.instance) {
+        return false;  // createInstance failed
+    }
+
+    // Copy draw buffer into instance's frame buffer
+    u32 totalBytes = drawBuf.getTotalBytes();
+    u32 frameBufferSize = group.instance->getFrameBufferSize();
+    u32 copyBytes = totalBytes < frameBufferSize ? totalBytes : frameBufferSize;
+    if (copyBytes > 0) {
+        fl::memcpy(
+            group.instance->getFrameBuffer(),
+            drawBuf.mAllLedsBufferUint8.get(),
+            copyBytes
+        );
+    }
+
+    group.instance->show();
+    return true;
+}
+
+IChannelDriver::DriverState ChannelEngineObjectFLED::poll() FL_NO_EXCEPT {
+    if (mTransmittingChannels.empty()) {
+        return DriverState::READY;
+    }
+
+    while (mCurrentGroupIndex < mTimingGroups.size()) {
+        TimingGroup& group = *mTimingGroups[mCurrentGroupIndex];
+        if (group.channels.empty() || !group.instance) {
+            ++mCurrentGroupIndex;
+            continue;
+        }
+
+        if (group.instance->isBusy()) {
+            return DriverState::DRAINING;
+        }
+
+        ++mCurrentGroupIndex;
+        if (startNextTimingGroup()) {
+            return DriverState::BUSY;
+        }
+    }
+
+    finishTransmission();
+    return DriverState::READY;
+}
+
+void ChannelEngineObjectFLED::finishTransmission() FL_NO_EXCEPT {
     // Remove stale timing groups that had no channels this frame
     // (channels were destroyed, e.g., FastLED.clear(ClearFlags::CHANNELS))
     for (size_t i = mTimingGroups.size(); i > 0; --i) {
@@ -237,11 +279,7 @@ void ChannelEngineObjectFLED::show() FL_NO_EXCEPT {
         ch->setInUse(false);
     }
     mTransmittingChannels.clear();
-}
-
-IChannelDriver::DriverState ChannelEngineObjectFLED::poll() FL_NO_EXCEPT {
-    // ObjectFLED show() is synchronous - always READY after show() returns
-    return DriverState::READY;
+    mCurrentGroupIndex = 0;
 }
 
 } // namespace fl

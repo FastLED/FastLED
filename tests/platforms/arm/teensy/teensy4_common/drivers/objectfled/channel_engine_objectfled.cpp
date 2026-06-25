@@ -193,8 +193,67 @@ FL_TEST_CASE("ObjectFLED engine - different timing = 2 instances") {
     engine.enqueue(ch1);
     engine.enqueue(ch2);
     engine.show();
+    while (engine.poll() != DriverState::READY) {
+    }
 
     FL_CHECK(mock->getCreateCount() == 2);
+}
+
+FL_TEST_CASE("ObjectFLED engine - poll drains active DMA/latch state") {
+    auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
+    mock->setBusyAfterShow(true);
+    ChannelEngineObjectFLED engine(mock);
+
+    uint8_t red[] = {0xFF, 0x00, 0x00};
+    auto ch = createRGBChannelData(2, 1, red);
+
+    engine.enqueue(ch);
+    engine.show();
+
+    auto* inst = mock->getLastInstance();
+    FL_REQUIRE(inst != nullptr);
+    FL_CHECK(ch->isInUse() == true);
+    FL_CHECK(engine.poll() == DriverState::DRAINING);
+
+    inst->complete();
+    FL_CHECK(engine.poll() == DriverState::READY);
+    FL_CHECK(ch->isInUse() == false);
+}
+
+FL_TEST_CASE("ObjectFLED engine - timing groups sequence after busy completion") {
+    auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
+    mock->setBusyAfterShow(true);
+    ChannelEngineObjectFLED engine(mock);
+
+    ChipsetTimingConfig ws2812 = createWS2812Timing();
+    ChipsetTimingConfig sk6812 = createSK6812Timing();
+    auto ch1 = createRGBChannelData(2, 1, nullptr, &ws2812);
+    auto ch2 = createRGBChannelData(3, 1, nullptr, &sk6812);
+
+    engine.enqueue(ch1);
+    engine.enqueue(ch2);
+    engine.show();
+
+    FL_CHECK(mock->getCreateCount() == 1);
+    FL_CHECK(ch1->isInUse() == true);
+    FL_CHECK(ch2->isInUse() == true);
+    FL_CHECK(engine.poll() == DriverState::DRAINING);
+
+    auto* first = mock->getInstance(0);
+    FL_REQUIRE(first != nullptr);
+    first->complete();
+
+    FL_CHECK(engine.poll() == DriverState::BUSY);
+    FL_CHECK(mock->getCreateCount() == 2);
+    FL_CHECK(engine.poll() == DriverState::DRAINING);
+
+    auto* second = mock->getInstance(1);
+    FL_REQUIRE(second != nullptr);
+    second->complete();
+
+    FL_CHECK(engine.poll() == DriverState::READY);
+    FL_CHECK(ch1->isInUse() == false);
+    FL_CHECK(ch2->isInUse() == false);
 }
 
 FL_TEST_CASE("ObjectFLED engine - empty enqueue does nothing") {

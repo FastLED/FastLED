@@ -13,6 +13,7 @@
 #include "fl/stl/cstring.h"
 // IWYU pragma: begin_keep
 #include "third_party/object_fled/src/ObjectFLED.h"
+#include "third_party/object_fled/src/ObjectFLEDDmaManager.h"
 #include "third_party/object_fled/src/ObjectFLEDPinValidation.h"
 // IWYU pragma: end_keep
 
@@ -52,6 +53,14 @@ public:
         objectFledDiagnosticsRecord("beforeShow", mPins, mPinCount);
         mObjectFLED->show();
         objectFledDiagnosticsRecord("afterShowReturn", mPins, mPinCount);
+    }
+
+    bool isBusy() override {
+        if (mObjectFLED == nullptr) {
+            return false;
+        }
+        return mObjectFLED->busy() != 0 ||
+               ObjectFLEDDmaManager::getInstance().isBusy();
     }
 
 private:
