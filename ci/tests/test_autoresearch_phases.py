@@ -259,6 +259,35 @@ class TestParseArgsAndBuildCommands:
         assert result.json_rpc_commands[0]["method"] == "runSingleTest"
         assert result.json_rpc_commands[0]["params"]["contaminateTxMux"] is True
 
+    def test_object_fled_legacy_one_strip_command(self, fake_project_dir: Path) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=True,
+            strip_sizes="1",
+            tx_pin=22,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["OBJECT_FLED"]
+
+        run_commands = [
+            cmd for cmd in result.json_rpc_commands if cmd["method"] == "runSingleTest"
+        ]
+        assert len(run_commands) == 1
+        params = run_commands[0]["params"]
+        assert params["driver"] == "OBJECT_FLED"
+        assert params["laneSizes"] == [1]
+        assert params["useLegacyApi"] is True
+
     def test_spi_driver_name_remains_spi_on_esp32(self, fake_project_dir: Path) -> None:
         args = _make_args(parlio=False, spi=True, project_dir=fake_project_dir)
         result = _parse_args_and_build_commands(args)

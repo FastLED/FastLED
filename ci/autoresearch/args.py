@@ -571,7 +571,7 @@ See Also:
         parser.add_argument(
             "--legacy",
             action="store_true",
-            help="Test using legacy template addLeds API (WS2812B<PIN>) instead of Channel API. Single-lane only, pin must be 0-8.",
+            help="Test using legacy template addLeds API (WS2812B<PIN>) instead of Channel API. Single-lane only; supported TX pins are 0-8 and 22.",
         )
 
         # Chipset selection

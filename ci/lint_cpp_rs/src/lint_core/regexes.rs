@@ -465,7 +465,7 @@ fn regex_autoresearch_forbidden_runtime_output() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| {
         Regex::new(
-            r"\b(?:FL_(?:PRINT|WARN|ERROR)(?:_[A-Z0-9]+)*|Serial\.(?:print\w*|write|flush)|fl::(?:print|println|printf|write|flush|serial_(?:print\w*|println|printf|write|flush)|serial(?:Print\w*|Write|Flush)))\s*\(",
+            r"\b(?:FL_(?:PRINT|WARN|ERROR)(?:_[A-Z0-9]+)*|Serial\.(?:print\w*|write|flush)|fl::(?:Serial\.(?:print\w*|write|flush)|print|println|printf|write|flush|serial_(?:print\w*|println|printf|write|flush)|serial(?:Print\w*|Write|Flush)))\s*\(",
         )
         .unwrap()
     })

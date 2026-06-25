@@ -568,13 +568,13 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     if args.legacy:
         if max_lanes is not None and max_lanes > 1:
             print(
-                "\u274c Error: --legacy only supports single-lane (pin 0-8). Remove --lanes or use --lanes 1"
+                "\u274c Error: --legacy only supports single-lane. Remove --lanes or use --lanes 1"
             )
             return 1
         min_lanes = 1
         max_lanes = 1
         print(
-            "\u2139\ufe0f  Legacy API mode: using WS2812B<PIN> template path (single-lane, pin 0-8)"
+            "\u2139\ufe0f  Legacy API mode: using WS2812B<PIN> template path (single-lane, supported TX pins 0-8 and 22)"
         )
 
     if min_lanes is not None and max_lanes is not None:
