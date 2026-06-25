@@ -404,7 +404,7 @@ void setup() {
         errorData.set("error", "RxChannelCreationFailed");
         errorData.set("message", "Failed to create RX channel during setup");
         errorData.set("pinRx", static_cast<int64_t>(PIN_RX));
-        errorData.set("rxBackend", fl::toString(RX_BACKEND).c_str());
+        errorData.set("rxBackend", fl::toString(RX_BACKEND));
         printStreamRaw("setupError", errorData);
         return;
     }
@@ -475,7 +475,7 @@ void setup() {
     readyData.set("pinTx", static_cast<int64_t>(PIN_TX));
     readyData.set("pinRx", static_cast<int64_t>(PIN_RX));
     readyData.set("chip", autoresearch::chipName());
-    readyData.set("rxBackend", fl::toString(RX_BACKEND).c_str());
+    readyData.set("rxBackend", fl::toString(RX_BACKEND));
     readyData.set("loopbackMode", loop_back_mode);
     readyData.set("rxBufferSize", static_cast<int64_t>(RX_BUFFER_SIZE));
     printStreamRaw("ready", readyData);

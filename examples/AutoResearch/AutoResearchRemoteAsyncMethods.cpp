@@ -480,10 +480,8 @@ void AutoResearchRemoteControl::bindAsyncMethods(fl::Remote& remote) {
                 }
                 if (success) {
                     passed++;
-                    FL_PRINT("[COROUTINE] PASS: " << test_names[i]);
                 } else {
                     failed++;
-                    FL_PRINT("[COROUTINE] FAIL: " << test_names[i]);
                 }
                 results.set(test_names[i], test_result);
             } else {
@@ -492,7 +490,6 @@ void AutoResearchRemoteControl::bindAsyncMethods(fl::Remote& remote) {
                 err.set("success", false);
                 err.set("error", "Method not found");
                 results.set(test_names[i], err);
-                FL_PRINT("[COROUTINE] FAIL: " << test_names[i] << " (not found)");
             }
         }
 

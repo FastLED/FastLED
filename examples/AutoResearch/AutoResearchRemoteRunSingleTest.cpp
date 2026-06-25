@@ -498,9 +498,11 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     fl::vector<fl::unique_ptr<fl::vector<CRGB>>> led_arrays;
     fl::vector<fl::ChannelConfig> tx_configs;
 
-    // SPI chipset drivers (LCD_SPI, I2S_SPI) use APA102 protocol with data+clock pins
+    // SPI chipset drivers use APA102 protocol with data+clock pins.
     // Clockless drivers use WS2812B timing on a single data pin
-    bool is_spi_chipset_driver = (driver_name == "LCD_SPI" || driver_name == "I2S_SPI");
+    bool is_spi_chipset_driver = (driver_name == "LCD_SPI" ||
+                                  driver_name == "I2S_SPI" ||
+                                  driver_name == "SPI_UNIFIED");
 
     for (fl::size i = 0; i < lane_sizes.size(); i++) {
         auto leds = fl::make_unique<fl::vector<CRGB>>(lane_sizes[i]);

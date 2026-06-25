@@ -82,11 +82,12 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
     // begins in the next iteration of the loop.
     remote.bind("deliberateHang", [this](const fl::json& args) -> fl::json {
         (void)args;
-        FL_WARN("[deliberateHang] watchdog test: spinning forever in 200 ms");
         mState->deliberate_hang_requested = true;
         fl::json response = fl::json::object();
         response.set("success", true);
         response.set("message", "device will hang after RPC returns; watchdog should reset within configured timeout");
+        response.set("hangDelayMs", static_cast<int64_t>(200));
+        response.set("watchdogExpected", true);
         return response;
     });
 

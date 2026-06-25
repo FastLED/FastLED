@@ -526,13 +526,14 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
             volatile uint32_t *shftbuf  = (volatile uint32_t *)(kFLEXIO1_BASE_DIAG + 0x200);
             volatile uint32_t *shftbufbis = (volatile uint32_t *)(kFLEXIO1_BASE_DIAG + 0x280);
             volatile uint32_t *shftbufbys = (volatile uint32_t *)(kFLEXIO1_BASE_DIAG + 0x300);
-            FL_WARN("[ping diag] post-toggle FLEXIO1: PIN=0x"
-                    << fl::hex << *pin
-                    << " SHIFTSTAT=0x" << *shftstat
-                    << " TIMSTAT=0x" << *timstat << fl::dec);
-            FL_WARN("[ping diag] SHIFTBUF[0]=0x" << fl::hex << *shftbuf
-                    << " SHIFTBUFBIS[0]=0x" << *shftbufbis
-                    << " SHIFTBUFBYS[0]=0x" << *shftbufbys << fl::dec);
+            fl::json flexio_diag = fl::json::object();
+            flexio_diag.set("pin", static_cast<int64_t>(*pin));
+            flexio_diag.set("shiftstat", static_cast<int64_t>(*shftstat));
+            flexio_diag.set("timstat", static_cast<int64_t>(*timstat));
+            flexio_diag.set("shiftbuf0", static_cast<int64_t>(*shftbuf));
+            flexio_diag.set("shiftbufbis0", static_cast<int64_t>(*shftbufbis));
+            flexio_diag.set("shiftbufbys0", static_cast<int64_t>(*shftbufbys));
+            response.set("flexio1", flexio_diag);
         }
 
         // 3. Wait briefly for FlexIO RX to flush any pending DMA. The DMA

@@ -65,6 +65,19 @@ WATCHDOG_GRACE_SECONDS = 20.0
 FLEX_IO_TEENSY_DEFAULT_TX_PIN = 6
 
 
+def _is_teensy4_environment(final_environment: str | None) -> bool:
+    return final_environment is not None and final_environment.lower() in (
+        "teensy40",
+        "teensy41",
+    )
+
+
+def _driver_name_for_environment(driver: str, final_environment: str | None) -> str:
+    if driver == "SPI" and _is_teensy4_environment(final_environment):
+        return "SPI_UNIFIED"
+    return driver
+
+
 def _uses_teensy_flex_io_default_tx(
     args: Args, final_environment: str, drivers: list[str]
 ) -> bool:
@@ -390,10 +403,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             )
             sys.exit(2)
 
-    is_teensy4 = final_environment is not None and final_environment.lower() in (
-        "teensy40",
-        "teensy41",
-    )
+    is_teensy4 = _is_teensy4_environment(final_environment)
     is_teensy_specific_driver = args.object_fled or args.flex_io or args.lpuart
 
     if args.use_root_platformio_ini and (is_teensy4 or is_teensy_specific_driver):
@@ -434,7 +444,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         if args.rmt:
             drivers.append("RMT")
         if args.spi:
-            drivers.append("SPI")
+            drivers.append(_driver_name_for_environment("SPI", final_environment))
         if args.uart:
             drivers.append("UART")
         if args.lcd:
