@@ -55,9 +55,19 @@ mod tests {
         let checker = AutoResearchRuntimeOutputChecker;
         let result = checker.check_file_content(&file(
             "examples/AutoResearch/AutoResearch.ino",
-            "FL_WARN(\"boot chatter\");\nFL_ERROR(\"boot failure\");\nSerial.println(\"not rpc\");\nfl::println(\"nope\");\n",
+            "FL_WARN(\"boot chatter\");\nFL_WARN_F_ONCE(\"boot chatter\");\nFL_PRINT_EVERY(1000, \"tick\");\nFL_ERROR(\"boot failure\");\nSerial.println(\"not rpc\");\nSerial.printf(\"not rpc\");\nfl::println(\"nope\");\nfl::serial_println(\"nope\");\nfl::serial_printf(\"nope\");\n",
         ));
-        assert_eq!(result.len(), 4);
+        assert_eq!(result.len(), 9);
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_allows_serial_setup_helpers() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearch.ino",
+            "fl::serial_begin(115200);\nwhile (!fl::serial_ready()) {}\n",
+        ));
+        assert!(result.is_empty());
     }
 
     #[test]

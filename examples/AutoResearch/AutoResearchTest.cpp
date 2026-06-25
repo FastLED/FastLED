@@ -501,12 +501,13 @@ dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
         return decode_result.value();
     }
 
-    // SPI chipset drivers (LCD_SPI, I2S_SPI): decode raw SPI bit stream
-    // These drivers use LCD_CAM I80 bus or I2S to output APA102 data.
+    // SPI chipset drivers: decode raw SPI bit stream.
+    // These drivers use platform hardware SPI/I80/I2S to output APA102 data.
     // RMT RX captures edges on the data pin; clock pin is ignored.
     bool is_lcd_spi_driver = (fl::strcmp(driver_name, "LCD_SPI") == 0);
     bool is_i2s_spi_driver = (fl::strcmp(driver_name, "I2S_SPI") == 0);
-    if (is_lcd_spi_driver || is_i2s_spi_driver) {
+    bool is_spi_unified_driver = (fl::strcmp(driver_name, "SPI_UNIFIED") == 0);
+    if (is_lcd_spi_driver || is_i2s_spi_driver || is_spi_unified_driver) {
         // SPI clock used for validation: 2.4MHz (matches ValidationRemote.cpp)
         const uint32_t spi_clock_hz = 2400000;
         FL_WARN("[CAPTURE] SPI chipset decode: clock=" << spi_clock_hz << " Hz");

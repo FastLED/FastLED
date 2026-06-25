@@ -238,6 +238,32 @@ class TestParseArgsAndBuildCommands:
         assert not any("__skip_with_pass" in cmd for cmd in result.json_rpc_commands)
         assert all("pinTx" not in cmd["params"] for cmd in result.json_rpc_commands)
 
+    def test_spi_driver_name_remains_spi_on_esp32(self, fake_project_dir: Path) -> None:
+        args = _make_args(parlio=False, spi=True, project_dir=fake_project_dir)
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["SPI"]
+        assert result.json_rpc_commands[0]["params"]["driver"] == "SPI"
+
+    def test_spi_driver_name_maps_to_spi_unified_on_teensy4(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            spi=True,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["SPI_UNIFIED"]
+        assert result.json_rpc_commands[0]["params"]["driver"] == "SPI_UNIFIED"
+
     def test_flex_io_does_not_hide_tx_pin_override(
         self, fake_project_dir: Path
     ) -> None:

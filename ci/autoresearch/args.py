@@ -144,7 +144,7 @@ Driver Selection (JSON-RPC):
   MANDATORY: You MUST specify at least one driver flag:
     --parlio       Test only PARLIO driver
     --rmt          Test only RMT driver
-    --spi          Test only SPI driver
+    --spi          Test only SPI driver (Teensy 4.x resolves to SPI_UNIFIED)
     --uart         Test only UART driver
     --lcd          Test only LCD_CLOCKLESS driver (ESP32-S3 only, replaces misnamed I2S)
     --lcd-spi      Test only LCD_SPI driver (ESP32-S3 only, APA102/SK9822)
@@ -223,7 +223,7 @@ See Also:
         driver_group.add_argument(
             "--spi",
             action="store_true",
-            help="Test only SPI driver",
+            help="Test only SPI driver (Teensy 4.x resolves to SPI_UNIFIED)",
         )
         driver_group.add_argument(
             "--uart",
