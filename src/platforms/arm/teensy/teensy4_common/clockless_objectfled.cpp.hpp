@@ -90,7 +90,10 @@ ObjectFLEDGroupBase::~ObjectFLEDGroupBase() {
 }
 
 void ObjectFLEDGroupBase::onQueuingStart() {
-    mRectDrawBuffer.onQueuingStart();
+    const bool started = mRectDrawBuffer.onQueuingStart();
+    if (started) {
+        mPendingStrips.clear();
+    }
     mDrawn = false;
 }
 
@@ -128,11 +131,11 @@ void ObjectFLEDGroupBase::addStrip(u8 pin, PixelIterator& pixel_iterator) {
     const bool isRgbw = pixel_iterator.get_rgbw().active();
     mRectDrawBuffer.queue(DrawItem(pin, numLeds, isRgbw));
 
-    // Finalize buffer layout so we can write pixels
-    mRectDrawBuffer.onQueuingDone();
+    PendingStrip pending;
+    pending.pin = pin;
+    pending.bytes.resize(numLeds * (isRgbw ? 4 : 3));
 
-    // Write pixels into RectangularDrawBuffer
-    fl::span<u8> strip_bytes = mRectDrawBuffer.getLedsBufferBytesForPin(pin, true);
+    fl::span<u8> strip_bytes(pending.bytes.data(), pending.bytes.size());
     const Rgbw rgbw = pixel_iterator.get_rgbw();
 
     if (rgbw.active()) {
@@ -164,6 +167,8 @@ void ObjectFLEDGroupBase::addStrip(u8 pin, PixelIterator& pixel_iterator) {
             pixel_iterator.stepDithering();
         }
     }
+
+    mPendingStrips.push_back(pending);
 }
 
 void ObjectFLEDGroupBase::flush() {
@@ -172,6 +177,19 @@ void ObjectFLEDGroupBase::flush() {
     }
 
     mDrawn = true;
+
+    mRectDrawBuffer.onQueuingDone();
+    for (const auto& pending : mPendingStrips) {
+        fl::span<u8> strip_bytes =
+                mRectDrawBuffer.getLedsBufferBytesForPin(pending.pin, true);
+        const size_t copy_size = pending.bytes.size() < strip_bytes.size()
+                ? pending.bytes.size()
+                : strip_bytes.size();
+        if (copy_size > 0) {
+            fl::memcpy(strip_bytes.data(), pending.bytes.data(), copy_size);
+        }
+    }
+    mPendingStrips.clear();
 
     bool drawListChanged = mRectDrawBuffer.mDrawListChangedThisFrame;
     if (drawListChanged || !mObjectFLED) {
