@@ -449,6 +449,11 @@ def display_objectfled_diagnostics(result: dict[str, Any]) -> None:
             "standardGpioRxHighCount",
             "standardGpioRxLowCount",
             "standardGpioConnected",
+            "fastToggleIterations",
+            "fastToggleHighSettled",
+            "fastToggleLowSettled",
+            "fastToggleHighZeroDelay",
+            "fastToggleLowZeroDelay",
             "message",
         ):
             if key in pad_probe:
