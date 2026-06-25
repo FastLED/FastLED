@@ -17,6 +17,22 @@ namespace fl {
 class ChannelData;
 FASTLED_SHARED_PTR(ChannelData);
 
+/// @brief Pixel byte layout carried by encoded channel data.
+///
+/// ChannelData stores bytes that are already encoded for a driver. Consumers
+/// that need a bytes-per-pixel stride must use this metadata rather than
+/// guessing from total byte count.
+enum class ChannelPixelFormat : u8 {
+    Unknown = 0,
+    RGB = 3,
+    RGBW = 4,
+    RGBWW = 5,
+};
+
+inline u8 channelPixelFormatBytesPerPixel(ChannelPixelFormat format) FL_NO_EXCEPT {
+    return static_cast<u8>(format);
+}
+
 /// @brief Padding generator function type
 ///
 /// Called by writeWithPadding() to write source data with padding to destination buffer.
@@ -43,7 +59,8 @@ public:
     /// @param encodedData Encoded byte stream ready for transmission (defaults to empty)
     static ChannelDataPtr create(
         const ChipsetVariant& chipset,
-        fl::vector_psram<u8>&& encodedData = fl::vector_psram<u8>()
+        fl::vector_psram<u8>&& encodedData = fl::vector_psram<u8>(),
+        ChannelPixelFormat pixelFormat = ChannelPixelFormat::RGB
     ) FL_NO_EXCEPT;
 
     /// @brief Create channel transmission data (backwards compatibility)
@@ -54,7 +71,8 @@ public:
     static ChannelDataPtr create(
         int pin,
         const ChipsetTimingConfig& timing,
-        fl::vector_psram<u8>&& encodedData = fl::vector_psram<u8>()
+        fl::vector_psram<u8>&& encodedData = fl::vector_psram<u8>(),
+        ChannelPixelFormat pixelFormat = ChannelPixelFormat::RGB
     ) FL_NO_EXCEPT;
 
     /// @brief Get the GPIO pin number
@@ -78,6 +96,19 @@ public:
 
     /// @brief Get the encoded transmission data (mutable)
     fl::vector_psram<u8>& getData() FL_NO_EXCEPT { return mEncodedData; }
+
+    /// @brief Get explicit pixel byte layout for encoded data
+    ChannelPixelFormat getPixelFormat() const FL_NO_EXCEPT { return mPixelFormat; }
+
+    /// @brief Set explicit pixel byte layout for encoded data
+    void setPixelFormat(ChannelPixelFormat pixelFormat) FL_NO_EXCEPT {
+        mPixelFormat = pixelFormat;
+    }
+
+    /// @brief Get encoded bytes per pixel/element, or 0 if unknown
+    u8 getBytesPerPixel() const FL_NO_EXCEPT {
+        return channelPixelFormatBytesPerPixel(mPixelFormat);
+    }
 
     /// @brief Get the data size in bytes
     size_t getSize() const FL_NO_EXCEPT { return mEncodedData.size(); }
@@ -128,7 +159,8 @@ private:
     /// @brief Private constructor - variant-based (modern API)
     ChannelData(
         const ChipsetVariant& chipset,
-        fl::vector_psram<u8>&& encodedData
+        fl::vector_psram<u8>&& encodedData,
+        ChannelPixelFormat pixelFormat
     ) FL_NO_EXCEPT;
 
     /// @brief Private constructor - legacy API (backwards compatibility)
@@ -136,7 +168,8 @@ private:
     ChannelData(
         int pin,
         const ChipsetTimingConfig& timing,
-        fl::vector_psram<u8>&& encodedData
+        fl::vector_psram<u8>&& encodedData,
+        ChannelPixelFormat pixelFormat
     ) FL_NO_EXCEPT;
 
     // Non-copyable (move-only via shared_ptr)
@@ -144,6 +177,7 @@ private:
     ChannelData& operator=(const ChannelData&) FL_NO_EXCEPT = delete;
 
     ChipsetVariant mChipset;                ///< Chipset configuration (clockless or SPI)
+    ChannelPixelFormat mPixelFormat;        ///< Explicit byte layout for encoded data
     PaddingGenerator mPaddingGenerator;     ///< Optional padding generator for block-size alignment
     fl::vector_psram<u8> mEncodedData; ///< Encoded transmission bytes (PSRAM)
     volatile bool mInUse = false;           ///< Engine is transmitting this data (prevents creator updates)

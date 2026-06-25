@@ -501,6 +501,13 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // Encode pixels based on chipset type
     auto& data = mChannelData->getData();
     data.clear();
+    if (mSettings.isRgbww()) {
+        mChannelData->setPixelFormat(ChannelPixelFormat::RGBWW);
+    } else if (mSettings.isRgbw()) {
+        mChannelData->setPixelFormat(ChannelPixelFormat::RGBW);
+    } else {
+        mChannelData->setPixelFormat(ChannelPixelFormat::RGB);
+    }
 
     if (mChipset.is<ClocklessChipset>()) {
         // Clockless chipsets: dispatch based on encoder type
