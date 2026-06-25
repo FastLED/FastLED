@@ -55,9 +55,9 @@ mod tests {
         let checker = AutoResearchRuntimeOutputChecker;
         let result = checker.check_file_content(&file(
             "examples/AutoResearch/AutoResearch.ino",
-            "FL_WARN(\"boot chatter\");\nFL_WARN_F_ONCE(\"boot chatter\");\nFL_WARN_LIT(\"boot chatter\");\nFL_PRINT_EVERY(1000, \"tick\");\nFL_PRINT_F(\"tick\");\nFL_ERROR(\"boot failure\");\nSerial.println(\"not rpc\");\nSerial.printf(\"not rpc\");\nSerial.printHex(\"not rpc\");\nfl::println(\"nope\");\nfl::Serial.println(\"nope\");\nfl::serial_print(\"nope\");\nfl::serial_println(\"nope\");\nfl::serial_printf(\"nope\");\nfl::serialPrintln(\"nope\");\n",
+            "FL_WARN(\"boot chatter\");\nFL_WARN_F_ONCE(\"boot chatter\");\nFL_WARN_LIT(\"boot chatter\");\nFL_PRINT_EVERY(1000, \"tick\");\nFL_PRINT_F(\"tick\");\nFL_PRINTLN(\"tick\");\nFL_ERROR(\"boot failure\");\nSerial.println(\"not rpc\");\nSerial.printf(\"not rpc\");\nSerial.printHex(\"not rpc\");\nfl::println(\"nope\");\nfl::write_bytes(bytes, len);\nfl::Serial.println(\"nope\");\nfl::Serial.printHex(\"nope\");\nfl::serial_print(\"nope\");\nfl::serial_println(\"nope\");\nfl::serial_printf(\"nope\");\nfl::serial_write(bytes, len);\nfl::serialPrintln(\"nope\");\nfl::serialWrite(bytes, len);\n",
         ));
-        assert_eq!(result.len(), 15);
+        assert_eq!(result.len(), 20);
     }
 
     #[test]
