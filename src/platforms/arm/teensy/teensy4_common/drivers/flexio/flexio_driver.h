@@ -60,4 +60,37 @@ void flexio_wait() FL_NO_EXCEPT;
 /// @brief Shut down FlexIO2 and release resources
 void flexio_deinit() FL_NO_EXCEPT;
 
+/// @brief FlexIO2 hardware state snapshot for bring-up diagnostics.
+/// Filled by flexio_read_diagnostics() with the live register values so
+/// the autoresearch RPC can report whether the peripheral is actually
+/// running, what its shifter/timer/DMA state is, and what the TCD looks
+/// like after the last flexio_show().
+struct FlexIODiagnostics {
+    u32 ctrl;
+    u32 shiftstat;
+    u32 shifterr;
+    u32 timstat;
+    u32 shiftsden;
+    u32 shiftctl0;
+    u32 shiftcfg0;
+    u32 timctl0;
+    u32 timcfg0;
+    u32 timcmp0;
+    u32 ccm_ccgr3;
+    u32 ccm_cscmr2;
+    u32 ccm_cs1cdr;
+    u32 muxRegValue;
+    u32 padRegValue;
+    u32 tcd_saddr;
+    u32 tcd_daddr;
+    u32 tcd_citer;
+    u32 tcd_biter;
+    u32 tcd_csr;
+    bool initialized;
+    bool dmaComplete;
+};
+
+/// @brief Snapshot the FlexIO2 register state for the most recent pin.
+void flexio_read_diagnostics(FlexIODiagnostics* out) FL_NO_EXCEPT;
+
 } // namespace fl

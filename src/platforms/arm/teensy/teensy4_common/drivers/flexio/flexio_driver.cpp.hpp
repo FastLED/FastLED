@@ -50,17 +50,26 @@ struct FlexIOPinEntry {
 // IOMUXC base address
 static constexpr u32 kIOMUXC_BASE = 0x401F8000;
 
-// FlexIO2 pin mapping entries
+// FlexIO2 pin mapping entries. Offsets are byte offsets from IOMUXC
+// base 0x401F8000 and are cross-checked against Teensyduino imxrt.h
+// macros (IOMUXC_SW_MUX_CTL_PAD_GPIO_B*_** / IOMUXC_SW_PAD_CTL_PAD_*).
+// The previous table was off by exactly +0x10 on every entry, so the
+// per-pin mux register write went to a different pad and the requested
+// TX pin was never actually switched to ALT4 (FlexIO2). The pin stayed
+// in its boot/GPIO default alt mode and the FlexIO shifter, while
+// running internally, drove an unrouted internal signal. This was the
+// real root cause of zero_capture across rounds 1-6 -- not register
+// values, not clock, not DMA, not sequencing.
 static const FlexIOPinEntry kFlexIOPins[] = {
-    {10, 0,  0x014C, 0x033C},  // GPIO_B0_00
-    {12, 1,  0x0150, 0x0340},  // GPIO_B0_01
-    {11, 2,  0x0154, 0x0344},  // GPIO_B0_02
-    {13, 3,  0x0158, 0x0348},  // GPIO_B0_03
-    { 6, 10, 0x0174, 0x0364},  // GPIO_B0_10
-    { 9, 11, 0x0178, 0x0368},  // GPIO_B0_11
-    {32, 12, 0x017C, 0x036C},  // GPIO_B0_12
-    { 8, 16, 0x018C, 0x037C},  // GPIO_B1_00
-    { 7, 17, 0x0190, 0x0380},  // GPIO_B1_01
+    {10, 0,  0x013C, 0x032C},  // GPIO_B0_00
+    {12, 1,  0x0140, 0x0330},  // GPIO_B0_01
+    {11, 2,  0x0144, 0x0334},  // GPIO_B0_02
+    {13, 3,  0x0148, 0x0338},  // GPIO_B0_03
+    { 6, 10, 0x0164, 0x0354},  // GPIO_B0_10
+    { 9, 11, 0x0168, 0x0358},  // GPIO_B0_11
+    {32, 12, 0x016C, 0x035C},  // GPIO_B0_12
+    { 8, 16, 0x017C, 0x036C},  // GPIO_B1_00
+    { 7, 17, 0x0180, 0x0370},  // GPIO_B1_01
 };
 static constexpr int kNumFlexIOPins = sizeof(kFlexIOPins) / sizeof(kFlexIOPins[0]);
 
@@ -222,22 +231,55 @@ static void flexio_configure_hw(u8 flexio_pin, u32 baud_div) {
 
     FLEXIO2_SHIFTCFG[0] = 0;           // 1-bit serial, no start/stop bits
 
-    // Timer 0: shift clock for shifter 0. Dual 8-bit baud generates
-    // `bit_count + 1 = 32` shift edges per timer enable, with each edge
-    // separated by `(baud_div + 1) * 2` FlexIO clock cycles. Triggered
-    // by shifter status flag (asserts when shifter is empty in TX mode);
-    // disabled when compare reaches 0 (i.e. all 32 bits shifted out).
-    const u32 bit_count = 32u - 1u;
+    // Timer 0: shift clock for shifter 0. Cross-referenced against the
+    // working Teensyduino FlexSerial driver (UART TX uses the same
+    // 1-bit-shifter + dual-8bit-baud-timer topology) -- four real bugs
+    // present prior to this revision:
+    //   1. TIMCMP bit-count field: per RM 47.4.18, "the number of bits in
+    //      each word equals (CMP[15:8]+1)/2", so 32 bits => CMP[15:8]=63
+    //      not 31. The previous value emitted only 16 of the 32
+    //      pre-encoded FlexIO bits per word, so even the bits we did emit
+    //      were the wrong pattern.
+    //   2. TRGPOL (bit 23) missing -- trigger needs to be active-low so it
+    //      asserts when SSF is LOW (= shifter just loaded with data) and
+    //      deasserts when SSF is HIGH (= shifter consumed all bits). With
+    //      TRGPOL=0 the polarity was inverted: timer wanted to run while
+    //      shifter was empty.
+    //   3. TIMENA=6 (rising-edge enable) replaced with TIMENA=2 (level:
+    //      enable while trigger high). FlexSerial uses level; our use
+    //      case is the same.
+    //   4. (See flexio_show below) FASTACC bit must NOT be set on CTRL --
+    //      FASTACC requires FlexIO clock >= 2x bus, but here FlexIO is
+    //      120 MHz and bus is 600 MHz; FASTACC=1 makes register reads
+    //      and writes unreliable.
+    //
+    // With these four fixes the loop works: shifter empties -> SSF high
+    // -> trigger low -> timer disables (and DMA request fires on SSF
+    // high) -> DMA writes next word to SHIFTBUF -> SSF low -> trigger
+    // high -> TIMENA=2 re-enables timer -> 32 shifts -> repeat.
+    const u32 bit_count = (32u * 2u) - 1u;  // = 63 for 32 bits per word
 
     FLEXIO2_TIMCTL[0] =
         (1u << 0) |                    // TIMOD = Dual 8-bit baud
         (1u << 22) |                   // TRGSRC = internal
+        (1u << 23) |                   // TRGPOL = active low
         (1u << 24);                    // TRGSEL = 4*0+1 = shifter 0 status
 
     FLEXIO2_TIMCFG[0] =
-        (6u << 8) |                    // TIMENA = trigger rising edge
-        (2u << 12) |                   // TIMDIS = on compare
-        (1u << 24);                    // TIMOUT = logic 0 on enable
+        (2u << 8) |                    // TIMENA = enable while trigger high
+        (2u << 12);                    // TIMDIS = on compare
+                                       // TIMOUT = 0 (logic HIGH on enable):
+                                       // With TIMPOL=0 (shifter shifts on
+                                       // RISING edge), TIMOUT=1 starts the
+                                       // timer output LOW and the first
+                                       // rising edge happens at baud/2 ->
+                                       // the FIRST shift fires after only
+                                       // half a baud period, eating bit 0's
+                                       // pin time. TIMOUT=0 keeps the timer
+                                       // output HIGH on enable so the first
+                                       // edge to shift on is a full baud
+                                       // later. Empirically this is what
+                                       // restores the leading-bit alignment.
 
     FLEXIO2_TIMCMP[0] = (bit_count << 8) | (baud_div & 0xFFu);
 
@@ -270,17 +312,28 @@ static bool flexio_dma_init() {
 // ============================================================================
 
 // Encode a single WS2812 byte into 32 FlexIO bits.
-// MSB of the input byte becomes the first bit shifted out.
-// Each WS2812 bit is expanded to a 4-bit pulse pattern:
-//   0-bit -> 0b1000 = pin HIGH for 1 FlexIO clock, LOW for 3
-//   1-bit -> 0b1110 = pin HIGH for 3 FlexIO clocks, LOW for 1
-// The shifter outputs MSB-first, so we lay down the WS2812 MSB's
-// 4-bit encoding in the high nibble of the resulting u32.
+//
+// The FlexIO shifter in TX mode is LSB-first: bit 0 of the internal
+// shifter is driven to the pin first, then bits 1, 2, ..., 31. WS2812
+// protocol is MSB-first (each byte's bit 7 sent first).
+//
+// To match those two, the FIRST WS2812 bit of the byte (= bit 7 of `b`)
+// must occupy the LOW nibble of the u32, and its 4-bit pulse encoding
+// must be ordered so that LSB-first emission produces the right wire
+// pattern (HIGH FIRST, then trailing LOW):
+//   '1' bit on the wire = HIGH for 3 ticks then LOW for 1 = stream
+//     (1,1,1,0); LSB-first storage = nibble 0b0111 = 0x7
+//   '0' bit on the wire = HIGH for 1 tick then LOW for 3 = stream
+//     (1,0,0,0); LSB-first storage = nibble 0b0001 = 0x1
+//
+// The DMA target is SHIFTBUF (no swap) because the encoder already
+// produces the LSB-first-friendly layout. SHIFTBUFBIS would over-correct
+// and re-invert.
 static inline u32 flexio_encode_ws2812_byte(u8 b) {
     u32 result = 0;
     for (int i = 7; i >= 0; --i) {
-        result <<= 4;
-        result |= (b & (1u << i)) ? 0xEu : 0x8u;
+        const u32 nib = (b & (1u << i)) ? 0x7u : 0x1u;
+        result |= nib << ((7 - i) * 4);
     }
     return result;
 }
@@ -374,19 +427,23 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     sDmaChannel->TCD->BITER_ELINKNO = num_words;
     sDmaChannel->TCD->DLASTSGA = 0;
     sDmaChannel->TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ;
+    sDmaChannel->TCD->DADDR = &FLEXIO2_SHIFTBUF[0];
 
     sDmaComplete = false;
-    // Enable FlexIO BEFORE DMA so the shifter is live when the first DMA
-    // request fires (per #3412 fix; writing SHIFTBUF while FLEXEN=0
-    // raises IMPRECISERR).
-    FLEXIO2_CTRL = (1u << 0) | (1u << 2);
+    // CTRL = FLEXEN only. FASTACC (bit 2) was set previously, but per RM
+    // 47.4.2 "Fast access requires the FlexIO clock to be at least twice
+    // the bus interface clock frequency". On Teensy 4.x the bus runs at
+    // 600 MHz while FlexIO is 120 MHz (PLL3/4), so FASTACC=1 corrupts
+    // register reads/writes. Working Teensyduino FlexSerial uses
+    // FLEXEN alone -- match that.
+    FLEXIO2_CTRL = (1u << 0);
 
-    // #3410 Round 5: Prime the shifter with the first word directly so the
-    // FIRST shifter status flag transition happens. SSF in TX mode toggles
-    // when SHIFTBUF transfers to internal shifter; without the prime,
-    // SHIFTSDEN's DMA request might never assert and Timer 0 never sees
-    // the rising edge that enables shifting.
-    FLEXIO2_SHIFTBUF[0] = sPixelBuffer[0];
+    // Do NOT prime SHIFTBUF: with the correct trigger polarity
+    // (TRGPOL=1) and TIMENA=2 (level), the first DMA request fires
+    // automatically on the initial SSF=HIGH (shifter empty) state right
+    // after FlexIO enable. Priming would write SHIFTBUF first, leaving
+    // CITER mis-matched with actual words queued (an off-by-one
+    // over-shift). The hardware self-starts cleanly.
 
     sDmaChannel->enable();
 
@@ -410,6 +467,50 @@ void flexio_wait() {
         if ((u32)(millis() - start) >= timeout_ms) {
             return;
         }
+    }
+}
+
+void flexio_read_diagnostics(FlexIODiagnostics* out) {
+    if (!out) return;
+    out->ctrl = FLEXIO2_CTRL;
+    out->shiftstat = FLEXIO2_SHIFTSTAT;
+    out->shifterr = FLEXIO2_SHIFTERR;
+    out->timstat = FLEXIO2_TIMSTAT;
+    out->shiftsden = FLEXIO2_SHIFTSDEN;
+    out->shiftctl0 = FLEXIO2_SHIFTCTL[0];
+    out->shiftcfg0 = FLEXIO2_SHIFTCFG[0];
+    out->timctl0 = FLEXIO2_TIMCTL[0];
+    out->timcfg0 = FLEXIO2_TIMCFG[0];
+    out->timcmp0 = FLEXIO2_TIMCMP[0];
+    out->ccm_ccgr3 = CCM_CCGR3;
+    out->ccm_cscmr2 = CCM_CSCMR2;
+    out->ccm_cs1cdr = CCM_CS1CDR;
+    FlexIOPinInfo info{};
+    out->muxRegValue = 0;
+    out->padRegValue = 0;
+    if (sInitialized) {
+        for (int i = 0; i < kNumFlexIOPins; i++) {
+            if (kFlexIOPins[i].flexio_pin == sFlexIOPin) {
+                out->muxRegValue = *(volatile u32*)(kIOMUXC_BASE + kFlexIOPins[i].mux_reg_offset);
+                out->padRegValue = *(volatile u32*)(kIOMUXC_BASE + kFlexIOPins[i].pad_reg_offset);
+                break;
+            }
+        }
+    }
+    out->initialized = sInitialized;
+    out->dmaComplete = sDmaComplete;
+    if (sDmaChannel && sDmaChannel->TCD) {
+        out->tcd_saddr = (u32)sDmaChannel->TCD->SADDR;
+        out->tcd_daddr = (u32)sDmaChannel->TCD->DADDR;
+        out->tcd_citer = sDmaChannel->TCD->CITER_ELINKNO;
+        out->tcd_biter = sDmaChannel->TCD->BITER_ELINKNO;
+        out->tcd_csr = sDmaChannel->TCD->CSR;
+    } else {
+        out->tcd_saddr = 0;
+        out->tcd_daddr = 0;
+        out->tcd_citer = 0;
+        out->tcd_biter = 0;
+        out->tcd_csr = 0;
     }
 }
 

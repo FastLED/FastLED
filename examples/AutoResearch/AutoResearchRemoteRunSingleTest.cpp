@@ -40,6 +40,7 @@
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_diagnostics.h"
 #if defined(FL_IS_TEENSY_4X)
 #include "platforms/arm/teensy/teensy4_common/rx_flexpwm_channel.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/flexio/flexio_driver.h"
 #endif
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
@@ -1003,6 +1004,39 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     // can see what the receiver sees during FlexIO TX too.
     response.set("flexPwmRxDiagnostics",
                  fl::FlexPwmRxChannel::diagnosticsToJson(pin_rx));
+    {
+        // #3410 Round 7: snapshot FlexIO2 register state so we can tell
+        // whether the peripheral is actually running, what the
+        // shifter/timer/DMA state is after show(), and whether CTRL,
+        // SHIFTSDEN, TCD etc match what flexio_show() programmed. Without
+        // this we are guessing in the dark about why zero_capture happens.
+        fl::FlexIODiagnostics fd{};
+        fl::flexio_read_diagnostics(&fd);
+        fl::json fj = fl::json::object();
+        fj.set("ctrl", static_cast<int64_t>(fd.ctrl));
+        fj.set("shiftstat", static_cast<int64_t>(fd.shiftstat));
+        fj.set("shifterr", static_cast<int64_t>(fd.shifterr));
+        fj.set("timstat", static_cast<int64_t>(fd.timstat));
+        fj.set("shiftsden", static_cast<int64_t>(fd.shiftsden));
+        fj.set("shiftctl0", static_cast<int64_t>(fd.shiftctl0));
+        fj.set("shiftcfg0", static_cast<int64_t>(fd.shiftcfg0));
+        fj.set("timctl0", static_cast<int64_t>(fd.timctl0));
+        fj.set("timcfg0", static_cast<int64_t>(fd.timcfg0));
+        fj.set("timcmp0", static_cast<int64_t>(fd.timcmp0));
+        fj.set("ccmCcgr3", static_cast<int64_t>(fd.ccm_ccgr3));
+        fj.set("ccmCscmr2", static_cast<int64_t>(fd.ccm_cscmr2));
+        fj.set("ccmCs1cdr", static_cast<int64_t>(fd.ccm_cs1cdr));
+        fj.set("muxRegValue", static_cast<int64_t>(fd.muxRegValue));
+        fj.set("padRegValue", static_cast<int64_t>(fd.padRegValue));
+        fj.set("tcdSaddr", static_cast<int64_t>(fd.tcd_saddr));
+        fj.set("tcdDaddr", static_cast<int64_t>(fd.tcd_daddr));
+        fj.set("tcdCiter", static_cast<int64_t>(fd.tcd_citer));
+        fj.set("tcdBiter", static_cast<int64_t>(fd.tcd_biter));
+        fj.set("tcdCsr", static_cast<int64_t>(fd.tcd_csr));
+        fj.set("initialized", fd.initialized);
+        fj.set("dmaComplete", fd.dmaComplete);
+        response.set("flexIoDiagnostics", fj);
+    }
 #endif
 
     // Free run_results before building response to reclaim heap
