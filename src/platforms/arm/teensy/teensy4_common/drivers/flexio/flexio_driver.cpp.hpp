@@ -445,6 +445,14 @@ static inline u32 flexio_encode_ws2812_byte(u8 b) {
 //   0-bit: 1 HIGH + 3 LOW   = ~317 ns HIGH, ~950 ns LOW (within T0H/T0L spec)
 //   1-bit: 3 HIGH + 1 LOW   = ~950 ns HIGH, ~317 ns LOW (within T1H/T1L spec)
 // Total period per WS2812 bit ~= 1267 ns.
+//
+// #3416 FX-MED-6 / FX-LOW-7: the 1267 ns total is at the upper edge of
+// the WS2812B reset-detection window. Per WS2812B datasheet rev 2017,
+// reset detection requires >=50 us LOW; nominal bit period is 1250 ns
+// +/- 600 ns. 1267 ns is safely within spec, but some WS2812B clones
+// (notably some early SK6812-RGB-W batches) have tighter trailing-low
+// detectors that may misinterpret. Scope verification across vendors
+// is recommended before changing baud_div.
 static constexpr u32 kFlexIOBaudDiv = 18;
 
 bool flexio_init(const FlexIOPinInfo& pin_info, u32 t0h_ns, u32 t1h_ns,

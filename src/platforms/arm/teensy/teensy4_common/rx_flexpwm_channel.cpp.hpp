@@ -273,7 +273,10 @@ decodeEdges(const ChipsetTiming4Phase &timing,
 
     u32 byte_index = 0;
     u8 current_byte = 0;
-    u8 bit_count = 0;
+    // #3416 RX-MED-7: widen bit_count from u8 to u32 so accidental
+    // comparison against size_t or unsigned arithmetic doesn't promote
+    // into a surprise. The actual range is 0..8 either way.
+    u32 bit_count = 0;
     u32 error_count = 0;
     u32 total_bits = 0;
     u32 resync_count = 0;
@@ -631,19 +634,11 @@ void FlexPwmRxChannelImpl::dmaIsr() {
 // ---------------------------------------------------------------------------
 
 bool FlexPwmRxChannelImpl::finished() const {
-    if (mReceiveDone) {
-        return true;
-    }
-
-    // Inactivity-based frame detection: check if DMA has stalled
-    // (no new edges for longer than mSignalRangeMaxNs).
-    // We approximate this by checking the DMA destination address progress.
-    // If the DMA pointer hasn't moved in two consecutive checks separated
-    // by at least signal_range_max_ns, we declare the frame complete.
-    //
-    // For simplicity, we check the DMA DADDR (destination address) which
-    // gives us the current write position.
-    return false;
+    // #3416 RX-LOW-5: only the ISR-confirmed completion flag is checked
+    // here. The inactivity-based detection (sampling DADDR progress) is
+    // implemented inside wait() instead, where we hold the polling
+    // state. This function is therefore a thin ISR-flag accessor.
+    return mReceiveDone;
 }
 
 RxWaitResult FlexPwmRxChannelImpl::wait(u32 timeout_ms) {
@@ -873,6 +868,11 @@ size_t FlexPwmRxChannelImpl::getRawEdgeTimes(fl::span<EdgeTime> out,
 // injectEdges()
 // ---------------------------------------------------------------------------
 
+// #3416 RX-LOW-6: this is a TEST-ONLY entry point. It bypasses the
+// DMA capture path and pre-loads the decoder with synthetic edges.
+// `mReceiveDone = true` short-circuits subsequent wait() calls; the
+// fixture must call begin() again before a real capture or it will
+// immediately return SUCCESS without arming DMA.
 bool FlexPwmRxChannelImpl::injectEdges(fl::span<const EdgeTime> edges) {
     mEdges.clear();
     mEdges.reserve(edges.size());
