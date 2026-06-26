@@ -352,6 +352,12 @@ void ObjectFLED::begin(void) {
 	dma.dma3.TCD->CITER_ELINKNO = numbytesLocal * 8;
 	dma.dma3.TCD->DLASTSGA = -65536;
 	dma.dma3.TCD->BITER_ELINKNO = numbytesLocal * 8;
+	// Note: DMA_TCD_CSR_DONE pre-set is INTENTIONAL -- it lets
+	// waitForCompletion() short-circuit on the very first acquire()
+	// after begin() (before any transfer has actually run). Audit
+	// #3416 OF-CRIT-1 suggested removing this; verified empirically
+	// that doing so hangs the first show() indefinitely (the spin
+	// loop never sees DONE=1 because the channel hasn't started yet).
 	dma.dma3.TCD->CSR = DMA_TCD_CSR_DREQ | DMA_TCD_CSR_DONE;
 	dma.dma3.triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_2);
 	initialized = true;

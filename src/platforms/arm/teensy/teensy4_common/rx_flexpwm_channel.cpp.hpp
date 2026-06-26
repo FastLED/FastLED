@@ -490,6 +490,10 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
         // EDGA0 = 2 captures rising edges to CVAL2.
         // EDGA1 = 1 captures falling edges to CVAL3.
         // DMA fires on CA1DE after both registers for the bit are valid.
+        // #3416 RX-HIGH-1: CFAWM>=1 was attempted but regressed (the
+        // FIFO buffers per-edge-type, not per-pair, so CFAWM=1 waits
+        // for TWO rising edges before firing DMA -- wrong for our
+        // dual-circuit dual-edge capture design). Kept at 0.
         pwm->SM[sm].CAPTCTRLA = FLEXPWM_SMCAPTCTRLA_EDGA0(2) |
                                  FLEXPWM_SMCAPTCTRLA_EDGA1(1) |
                                  FLEXPWM_SMCAPTCTRLA_CFAWM(0) |
