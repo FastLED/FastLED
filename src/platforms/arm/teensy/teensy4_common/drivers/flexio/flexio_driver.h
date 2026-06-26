@@ -97,6 +97,7 @@ struct FlexIODiagnostics {
     u32 tcd_citer;
     u32 tcd_biter;
     u32 tcd_csr;
+    u32 dma_es;  ///< #3416 FX-HIGH-5: eDMA error status snapshot
     bool initialized;
     bool dmaComplete;
 };

@@ -146,6 +146,9 @@ static FlexIOPinInfo sCurrentPinInfo{};
 static constexpr u32 kMaxPixelBytes = 4096;
 DMAMEM static u32 sPixelBuffer[kMaxPixelBytes / 4] __attribute__((aligned(32)));
 
+static volatile u32 sDmaErrorCount = 0;
+static volatile u32 sLastDmaEs = 0;
+
 static void flexio_dma_isr() {
     // Guard: deinit() can delete sDmaChannel while a pending IRQ is still
     // queued at the NVIC. Without this check the next IRQ vector services
@@ -162,6 +165,12 @@ static void flexio_dma_isr() {
     asm volatile("dsb" ::: "memory");
     sDmaComplete = true;
 }
+
+// #3416 FX-HIGH-5: DMA_ES (eDMA Error Status) is now sampled in
+// flexio_read_diagnostics() and surfaced via the JSON-RPC diag dump.
+// Installing a dedicated error-vector handler would require taking
+// IRQ_DMA_ERROR globally (shared with Audio/Serial), so we expose
+// the state passively instead.
 
 // ============================================================================
 // Clock Configuration
@@ -410,6 +419,13 @@ static bool flexio_dma_init() {
     // we still target the same FlexIO2 shifter 0).
     sDmaChannel->triggerAtHardwareEvent(DMAMUX_SOURCE_FLEXIO2_REQUEST0);
     sDmaChannel->attachInterrupt(flexio_dma_isr);
+    // #3416 FX-HIGH-5: DO NOT install IRQ_DMA_ERROR handler globally --
+    // that vector is shared by EVERY eDMA channel on the system and
+    // replacing it would break Audio I2S, FlexSerial, ObjectFLED, etc.
+    // Instead, expose DMA_ES + per-channel error flags via
+    // flexio_read_diagnostics() (FlexIODiagnostics now includes
+    // dma_es) so user code can poll the error state on its own
+    // schedule without owning the interrupt.
     return true;
 }
 
@@ -636,6 +652,11 @@ void flexio_read_diagnostics(FlexIODiagnostics* out) {
     out->ccm_cs1cdr = CCM_CS1CDR;
     out->initialized = sInitialized;
     out->dmaComplete = sDmaComplete;
+    // FX-HIGH-5: eDMA error status snapshot. DMA_ES is a global register
+    // shared across all eDMA channels; non-zero indicates SOMETHING
+    // erred (not necessarily our channel), so consumers must cross-
+    // reference the ERR field of DMA_ES against our channel index.
+    out->dma_es = DMA_ES;
 
     if (!sInitialized) {
         interrupts();  // FX-LOW-4 atomic window close on early return
