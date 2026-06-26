@@ -347,7 +347,23 @@ decodeEdges(const ChipsetTiming4Phase &timing,
 class FlexPwmRxChannelImpl : public FlexPwmRxChannel {
   public:
     explicit FlexPwmRxChannelImpl(int pin) : mPin(pin) {}
-    ~FlexPwmRxChannelImpl() override = default;
+    ~FlexPwmRxChannelImpl() override {
+        // #3416 RX-LOW-7: tear down on destruction so subsequent
+        // peripheral users on the same pin don't inherit our PAD_CTL
+        // (HYS/PKE/PUE) or ALT-mode + SION setting. Disable DMA first
+        // so a pending IRQ doesn't fire on a freed object.
+        if (mConfigured) {
+            mDma.disable();
+            mDma.detachInterrupt();
+        }
+        if (mPinInfo && mPinInfo->mux_register) {
+            // Restore to ALT5 (GPIO) without SION, default PAD_CTL.
+            *(mPinInfo->mux_register) = 5;
+            volatile u32 *pad_register = (volatile u32 *)(
+                (uintptr_t)mPinInfo->mux_register + 0x1F0u);
+            *pad_register = 0;
+        }
+    }
 
     bool begin(const RxConfig &config) override;
     bool finished() const override;

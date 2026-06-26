@@ -3,11 +3,18 @@
 #ifndef CHANNEL_ENGINE_OBJECTFLED_CPP_HPP_
 #define CHANNEL_ENGINE_OBJECTFLED_CPP_HPP_
 
+// #3416 OF-LOW-6: ChannelEngineObjectFLED serialises multi-timing-group
+// frames with an implicit ~LATCH_DELAY (300 us) idle between groups.
+// poll() services one group at a time; if poll() isn't called quickly
+// enough between groups, the second group waits indefinitely (singleton
+// DMA manager's acquire() blocks). This is by design but worth noting
+// for users who yield to other code in their show() loop.
+
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/channel_engine_objectfled.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/iobjectfled_peripheral.h"
 #include "platforms/arm/teensy/teensy4_common/clockless_objectfled.h"
 
-#include "fl/log/log.h"
+// #3416 FX-LOW-3 mirror: duplicate include removed.
 #include "fl/log/log.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
