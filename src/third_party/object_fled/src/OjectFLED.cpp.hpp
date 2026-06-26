@@ -85,9 +85,21 @@ ObjectFLED::ObjectFLED(uint16_t numLEDs, void *drawBuf, uint8_t config, uint8_t 
 	serpNumber = serpentine;
 	drawBuffer = drawBuf;
 	params = config;
-	if (numPins > NUM_DIGITAL_PINS) numPins = NUM_DIGITAL_PINS;
+	if (numPins > NUM_DIGITAL_PINS) {
+		// #3416 OF-LOW-2: warn on silent truncation so users debugging
+		// "why is my multi-strip setup short on pins" see the cause.
+		Serial.printf("ObjectFLED: numPins=%u exceeds NUM_DIGITAL_PINS=%u; truncating\r\n",
+		              numPins, NUM_DIGITAL_PINS);
+		numPins = NUM_DIGITAL_PINS;
+	}
 	numpinsLocal = numPins;
 	stripLen = numLEDs / numpinsLocal;
+	// #3416 OF-LOW-8: warn if numLEDs doesn't divide evenly across pins
+	// -- tail LEDs are silently dropped from the per-strip stride.
+	if (numpinsLocal > 0 && numLEDs % numpinsLocal != 0) {
+		Serial.printf("ObjectFLED: numLEDs=%u not divisible by numpins=%u; last %u LED(s) ignored\r\n",
+		              numLEDs, numpinsLocal, (unsigned)(numLEDs % numpinsLocal));
+	}
 	memcpy(pinlist, pinList, numpinsLocal);
 	if ((params & 0x3F) < 6) {
 		frameBufferLocal = new uint8_t[numLEDs * 3];

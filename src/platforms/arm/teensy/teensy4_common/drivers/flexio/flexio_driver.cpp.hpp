@@ -571,6 +571,13 @@ void flexio_wait() {
 void flexio_read_diagnostics(FlexIODiagnostics* out) {
     if (!out) return;
 
+    // #3416 FX-LOW-4: snapshot atomically so the ISR can't run mid-read
+    // and produce an inconsistent (e.g. dmaComplete=false but
+    // tcd_citer=0) view. Interrupts are off only for the brief register
+    // reads themselves; this is a diagnostic-only path so the latency
+    // cost is acceptable.
+    noInterrupts();
+
     // Always zero-fill first. The CCM clock-gate / divider registers and
     // the driver's own bookkeeping fields are always safe to read, so
     // populate them unconditionally. The FLEXIO2_* peripheral block is
@@ -588,6 +595,7 @@ void flexio_read_diagnostics(FlexIODiagnostics* out) {
     out->dmaComplete = sDmaComplete;
 
     if (!sInitialized) {
+        interrupts();  // FX-LOW-4 atomic window close on early return
         return;
     }
 
@@ -616,6 +624,7 @@ void flexio_read_diagnostics(FlexIODiagnostics* out) {
         out->tcd_csr = sDmaChannel->TCD->CSR;
     }
     // TCD fields already zero from the FlexIODiagnostics{} value init above.
+    interrupts();  // close the FX-LOW-4 atomic-snapshot window
 }
 
 void flexio_deinit() {

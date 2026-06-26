@@ -189,6 +189,15 @@ static const FlexPwmPinInfo *lookupPin(int pin) {
 // ---------------------------------------------------------------------------
 
 /// Convert 16-bit tick delta to nanoseconds using the bus clock frequency.
+///
+/// #3416 RX-LOW-3: 16-bit deltas wrap at (65536 / F_BUS_ACTUAL) seconds.
+/// At F_BUS_ACTUAL = 150 MHz this is ~437 us. The longest legal WS2812
+/// pulse we care about is the reset LOW (>= 50 us). Some older WS2811
+/// strands have ~280 us reset minimums. F_BUS_ACTUAL is not a constexpr
+/// on Teensyduino so a true static_assert isn't possible; the safety
+/// invariant is: F_BUS_ACTUAL must stay >= ~210 MHz for the 16-bit
+/// timestamp window to contain a 300 us pulse. Default Teensy 4.x bus
+/// is 150 MHz which leaves ~437 us headroom.
 static inline u32 tickDeltaNs(u16 t0, u16 t1) {
     u16 delta = static_cast<u16>(t1 - t0); // handles wraparound
     return static_cast<u32>(
@@ -437,6 +446,11 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
     // Configure pin mux to route the pin to FlexPWM input.
     // Set SION (bit 4) to force input path through IOMUXC — required
     // for peripheral input capture when the pad is muxed to an alt function.
+    // #3416 RX-MED-2: this is `=` not `|=` -- the assignment wipes any
+    // other IOMUXC bits the boot ROM or Teensy core set (e.g. ODE).
+    // For our pure-input use that is intentional: we want a known
+    // alt-mode + SION starting point, and the SW_PAD_CTL write below
+    // sets the only pad attributes we care about (HYS, PKE, PUE).
     *(mPinInfo->mux_register) = mPinInfo->mux_value | 0x10; // SION bit
     if (mPinInfo->select_register) {
         *(mPinInfo->select_register) = mPinInfo->select_value;
