@@ -120,7 +120,16 @@ static volatile uint32_t *standard_gpio_addr(volatile uint32_t *fastgpio) {
 static void force_pin_to_gpio_mux(uint8_t pin) {
 	// Teensy 4.x GPIO pads use MUX_MODE=5. Keep SION set so diagnostics can
 	// observe the pad input path while DMA drives the standard GPIO alias.
-	*portConfigRegister(pin) = 5 | 0x10;
+	// #3416 OF-LOW-5: SION=1 enables the pad input keeper even on a
+	// pure-output pin and can leak ~1-2 mA per pin plus capacitively
+	// couple noise back into the input keeper on long traces. Gate
+	// behind a define so production users can drop the keeper if not
+	// using the loopback RX path for diagnostics.
+#ifdef FASTLED_OBJECTFLED_PROBE_INPUT
+	*portConfigRegister(pin) = 5 | 0x10;  // ALT5 (GPIO) + SION
+#else
+	*portConfigRegister(pin) = 5;          // ALT5 (GPIO) only
+#endif
 }
 
 static void configure_objectfled_xbar_dma_edges() {
@@ -276,6 +285,11 @@ void ObjectFLED::begin(void) {
 	// and T0H=225 ns, 225e-9 * 150e6 = 33.75 ticks -> truncated to 33 (=220 ns,
 	// 5 ns short of spec). +0.5f rounds to 34 (=226.67 ns, well inside the
 	// WS2812B-V5 215-235 ns window). #3406 audit Agent 3.
+	// #3416 OF-MED-2: comp1load[] is computed from F_BUS_ACTUAL at
+	// begin() time. If a user changes the bus clock at runtime (e.g.
+	// via set_arm_clock(816000000) which raises IPG -> 198 MHz), these
+	// values become stale and the WS2812 timing slips outside spec.
+	// If you need runtime clock changes, call begin() again first.
 	comp1load[0] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0f * (float)TH_TL + 0.5f);
 	comp1load[1] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0f * (float)T0H + 0.5f);
 	comp1load[2] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0f * (float)T1H + 0.5f);
@@ -365,6 +379,12 @@ void ObjectFLED::begin(void) {
 	dma.dma2next.TCD->CSR = 0;
 
 	dma.dma2 = dma.dma2next; // copies TCD
+	// #3416 OF-LOW-3: dma2 uses default eDMA channel priority. During a
+	// 100-LED frame (~1.5 ms) the ObjectFLED DMA channels can starve
+	// equal-or-lower-priority channels held by other subsystems
+	// (Audio I2S typically at ch3). If the user reports audio underruns
+	// during LED updates, raise the offending subsystem's priority via
+	// DCHPRIn or migrate this DMA to a higher channel number.
 	dma.dma2.triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_1);
 	// #3416 OF-CRIT-2: detach any prior interrupt before re-attaching so
 	// a re-init after pin change doesn't leave an attachInterrupt() routed
