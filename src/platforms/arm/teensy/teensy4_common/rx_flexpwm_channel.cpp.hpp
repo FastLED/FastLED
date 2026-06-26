@@ -738,7 +738,15 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
         // visible in raw_sample as `H214753` huge HIGH gaps.
         captures_written = mCaptureBuffer.size();
     } else if (biter >= citer) {
-        captures_written = static_cast<size_t>(biter - citer) * 2u;
+        // #3416 RX-MED-5: include the in-flight minor-loop. CITER
+        // decrements only on minor-loop COMPLETION; if we sample CITER
+        // mid-minor-loop (TX halted, CVAL2 already read but CVAL3 not
+        // yet captured & committed), the difference under-counts by 2.
+        // Adding +2 over-reports by up to 2 captures in the steady
+        // state, but the downstream decoder gracefully handles trailing
+        // zero or stale captures via the buildEdgeTimes phantom-pair
+        // skip + invalid-edge check.
+        captures_written = static_cast<size_t>(biter - citer + 1u) * 2u;
     }
     if (captures_written > mCaptureBuffer.size()) {
         captures_written = mCaptureBuffer.size();
