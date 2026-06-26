@@ -258,10 +258,15 @@ void ObjectFLED::begin(void) {
 
 	arm_dcache_flush_delete(bitmaskLocal, sizeof(bitmaskLocal));			//can't DMA from cached memory
 
-	// Set up 3 timers to create waveform timing events
-	comp1load[0] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0 * (float)TH_TL);
-	comp1load[1] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0 * (float)T0H);
-	comp1load[2] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0 * (float)T1H);
+	// Set up 3 timers to create waveform timing events.
+	// Add 0.5f to the float result before casting so the integer conversion
+	// rounds to nearest tick rather than truncating downward. At F_BUS=150 MHz
+	// and T0H=225 ns, 225e-9 * 150e6 = 33.75 ticks -> truncated to 33 (=220 ns,
+	// 5 ns short of spec). +0.5f rounds to 34 (=226.67 ns, well inside the
+	// WS2812B-V5 215-235 ns window). #3406 audit Agent 3.
+	comp1load[0] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0f * (float)TH_TL + 0.5f);
+	comp1load[1] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0f * (float)T0H + 0.5f);
+	comp1load[2] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0f * (float)T1H + 0.5f);
 	TMR4_ENBL &= ~7;
 	TMR4_SCTRL0 = TMR_SCTRL_OEN | TMR_SCTRL_FORCE | TMR_SCTRL_MSTR;
 	TMR4_CSCTRL0 = TMR_CSCTRL_CL1(1) | TMR_CSCTRL_TCF1EN;
