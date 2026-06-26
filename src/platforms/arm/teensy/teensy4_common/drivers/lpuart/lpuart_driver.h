@@ -41,6 +41,12 @@ struct LpuartPinInfo {
     u8 mux_alt;             ///< IOMUXC ALT value (always 2 for LPUART TX on RT1062)
     volatile u32* mux_reg;  ///< IOMUXC SW_MUX_CTL register
     volatile u32* pad_reg;  ///< IOMUXC SW_PAD_CTL register
+    /// IOMUXC LPUARTn_TX_SELECT_INPUT daisy register. Null if not used
+    /// (LPUART1 has fixed pad routing). Writing the matching value
+    /// connects this pad to the LPUART internal TX output -- the
+    /// #3402-class fix that resolved silent zero-output on FlexPWM RX.
+    volatile u32* select_input_reg;
+    u32 select_input_value;
 };
 
 /// @brief Resolve a Teensy pin into LPUART pin info.

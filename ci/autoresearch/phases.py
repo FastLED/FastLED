@@ -415,13 +415,6 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         )
         return 1
 
-    if args.lpuart:
-        print(
-            f"{Fore.RED}\u274c Error: --lpuart is reserved but not currently implemented. "
-            f"LPUART is not part of the active AutoResearch driver matrix; see #3157.{Style.RESET_ALL}"
-        )
-        return 1
-
     if args.all and is_teensy4:
         drivers = [
             "OBJECT_FLED",

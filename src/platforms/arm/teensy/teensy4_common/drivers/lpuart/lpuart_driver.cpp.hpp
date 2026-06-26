@@ -43,21 +43,44 @@ struct LpuartPinEntry {
     u8 lpuart_index;
     u32 mux_reg_offset;
     u32 pad_reg_offset;
+    // #3402-class IOMUXC DAISY: each LPUART TX peripheral's input
+    // selector points at a specific pad. `select_input_offset` is the
+    // byte offset within the IOMUXC_b region (base 0x401F8400) of the
+    // LPUARTn_TX_SELECT_INPUT register, and `select_input_value` is
+    // what to write into it to pick THIS pad. Set both to 0 if the
+    // LPUART has no SELECT_INPUT (LPUART1's TX is fixed-routed).
+    u32 select_input_offset;
+    u32 select_input_value;
 };
 
 // Renamed kIomuxcBase / sLp* to avoid unity-build symbol collisions with
 // the FlexIO driver which also lives in `namespace fl` at file scope.
 static constexpr u32 kLpuartIomuxcBase = 0x401F8000u;
 
+// Per-LPUART TX_SELECT_INPUT register offsets (within IOMUXC_b at
+// IOMUXC_BASE + 0x400). LPUART1 TX has no select-input register
+// (fixed pad routing on Teensy 4.x); set offset=0 and the driver skips
+// the write.
+static constexpr u32 kSelectInputLpuart2Tx = 0x130;
+static constexpr u32 kSelectInputLpuart3Tx = 0x13C;
+static constexpr u32 kSelectInputLpuart4Tx = 0x144;
+static constexpr u32 kSelectInputLpuart5Tx = 0x14C;
+static constexpr u32 kSelectInputLpuart6Tx = 0x154;
+static constexpr u32 kSelectInputLpuart7Tx = 0x15C;
+static constexpr u32 kSelectInputLpuart8Tx = 0x164;
+
+// Per-pin select_input_value taken from Teensyduino HardwareSerial*.cpp
+// where each Serial port's `hardware_t` records `{pin, mux_val,
+// select_input_register, select_input_value}` (the 4-tuple, last field).
 static constexpr LpuartPinEntry kLpuartPins[] = {
-    // pin, LPUARTn, mux_offset, pad_offset
-    { 1,  6, 0x0CC, 0x2BC},  // GPIO_AD_B0_12 (Serial1 TX)
-    { 8,  4, 0x17C, 0x36C},  // GPIO_B1_00    (Serial2 TX on T4.0)
-    {14,  2, 0x0F0, 0x2E0},  // GPIO_AD_B1_02 (Serial3 TX)
-    {17,  3, 0x0EC, 0x2DC},  // GPIO_AD_B1_07 (Serial4 TX on T4.0)
-    {20,  8, 0x100, 0x2F0},  // GPIO_AD_B1_10 (Serial5 TX)
-    {24,  1, 0x0B0, 0x2A0},  // GPIO_AD_B0_12 mirror? -> Serial6 TX
-    {29,  7, 0x048, 0x238},  // GPIO_EMC_31   (Serial7 TX)
+    // pin, LPUARTn, mux_offset, pad_offset, sel_input_offset, sel_input_value
+    { 1,  6, 0x0CC, 0x2BC, kSelectInputLpuart6Tx, 1},  // GPIO_AD_B0_12 (Serial1)
+    { 8,  4, 0x17C, 0x36C, kSelectInputLpuart4Tx, 2},  // GPIO_B1_00    (Serial2 T4.0)
+    {14,  2, 0x0F0, 0x2E0, kSelectInputLpuart2Tx, 1},  // GPIO_AD_B1_02 (Serial3)
+    {17,  3, 0x0EC, 0x2DC, kSelectInputLpuart3Tx, 1},  // GPIO_AD_B1_07 (Serial4 T4.0)
+    {20,  8, 0x100, 0x2F0, kSelectInputLpuart8Tx, 2},  // GPIO_AD_B1_10 (Serial5)
+    {24,  1, 0x0B0, 0x2A0, 0,                     0},  // Serial6 LPUART1 (no SELECT_INPUT)
+    {29,  7, 0x048, 0x238, kSelectInputLpuart7Tx, 1},  // GPIO_EMC_31   (Serial7)
 };
 static constexpr int kNumLpuartPins =
     sizeof(kLpuartPins) / sizeof(kLpuartPins[0]);
@@ -70,6 +93,16 @@ bool lpuart_lookup_pin(u8 teensy_pin, LpuartPinInfo* info) {
             info->mux_alt = 2;
             info->mux_reg = (volatile u32*)(kLpuartIomuxcBase + kLpuartPins[i].mux_reg_offset);
             info->pad_reg = (volatile u32*)(kLpuartIomuxcBase + kLpuartPins[i].pad_reg_offset);
+            // IOMUXC_b lives at IOMUXC_BASE + 0x400. select_input_offset
+            // is the byte offset within IOMUXC_b.
+            if (kLpuartPins[i].select_input_offset) {
+                info->select_input_reg = (volatile u32*)(
+                    kLpuartIomuxcBase + 0x400u + kLpuartPins[i].select_input_offset);
+                info->select_input_value = kLpuartPins[i].select_input_value;
+            } else {
+                info->select_input_reg = nullptr;
+                info->select_input_value = 0;
+            }
             return true;
         }
     }
@@ -146,12 +179,18 @@ static void lpuart_pin_init(const LpuartPinInfo& pin_info) {
     // FlexPWM input capture; for LPUART TX it shouldn't matter, but
     // mirror the FlexIO pattern for safety.
     *(pin_info.mux_reg) = pin_info.mux_alt | 0x10u;
-    // Drive strength + speed + keeper + hysteresis. Mirror RX_FLEXPWM
-    // PAD_CTL choice -- the actual drive needs to be strong (DSE=6) for
-    // 4 Mbps edges.
+    // Drive strength + speed + keeper. Mirror RX_FLEXPWM PAD_CTL --
+    // the actual drive needs to be strong (DSE=6) for 4 Mbps edges.
     *(pin_info.pad_reg) = (6u << 3) |       // DSE = R0/6 (~30 ohm)
                           (2u << 6) |       // SPEED = 150 MHz
-                          (1u << 12);       // PKE (keeper) -- HYS not needed on TX
+                          (1u << 12);       // PKE (keeper)
+    // IOMUXC SELECT_INPUT daisy: connect this pad to the LPUART
+    // internal TX output. The #3402-class fix. Without this write
+    // the LPUART runs but its TX output is routed to a different
+    // (possibly unrouted) pad.
+    if (pin_info.select_input_reg) {
+        *(pin_info.select_input_reg) = pin_info.select_input_value;
+    }
 }
 
 // Configure clock and LPUART registers for 4 Mbps, TXINV=1, 8N1.
@@ -211,15 +250,24 @@ static bool lpuart_dma_init() {
 // ============================================================================
 
 bool lpuart_init(const LpuartPinInfo& pin_info, u32 reset_us) {
-    (void)reset_us;  // inter-frame gap is handled by Arduino loop overhead
+    (void)reset_us;
     if (sLpInitialized) lpuart_deinit();
 
     sLpPinInfo = pin_info;
 
+    Serial.printf("LPUART: init pin=%u idx=%u\r\n", pin_info.teensy_pin, pin_info.lpuart_index);
     lpuart_configure(pin_info.lpuart_index);
+    Serial.printf("LPUART: configured\r\n");
     lpuart_pin_init(pin_info);
+    Serial.printf("LPUART: pin muxed mux=0x%lx pad=0x%lx\r\n",
+                  (unsigned long)*(pin_info.mux_reg),
+                  (unsigned long)*(pin_info.pad_reg));
 
-    if (!lpuart_dma_init()) return false;
+    if (!lpuart_dma_init()) {
+        Serial.printf("LPUART: DMA init failed\r\n");
+        return false;
+    }
+    Serial.printf("LPUART: DMA channel ready\r\n");
 
     sLpInitialized = true;
     sLpDmaComplete = true;
@@ -262,12 +310,37 @@ bool lpuart_show_encoded(const u8* encoded, u32 num_uart_bytes) {
     if (!sLpInitialized || !sLpDmaChannel || !encoded || num_uart_bytes == 0) {
         return false;
     }
-    lpuart_wait();
-    // Cast to non-const for arm_dcache_flush_delete (it doesn't modify
-    // logically; the function signature is non-const for the address
-    // parameter).
-    arm_dcache_flush_delete(const_cast<u8*>(encoded), num_uart_bytes);
-    return lpuart_arm_dma(encoded, num_uart_bytes);
+    // DIAGNOSTIC: bypass DMA, do polled writes. If LPUART is configured
+    // correctly we'll see the bytes on the wire and the RX side will
+    // decode SOMETHING. If LPUART is dead, the polled writes will block
+    // on a never-asserted TDRE -- but we have a per-byte deadline.
+    IMXRT_LPUART_t* lp = lpuart_base(sLpPinInfo.lpuart_index);
+    if (!lp) return false;
+    Serial.printf("LPUART: polled tx n=%lu BAUD=0x%lx CTRL=0x%lx STAT=0x%lx\r\n",
+                  (unsigned long)num_uart_bytes,
+                  (unsigned long)lp->BAUD, (unsigned long)lp->CTRL,
+                  (unsigned long)lp->STAT);
+    const u32 start = micros();
+    for (u32 i = 0; i < num_uart_bytes; ++i) {
+        // Wait for TDRE (bit 23 of STAT) with bounded deadline.
+        const u32 byte_start = micros();
+        while ((lp->STAT & (1u << 23)) == 0) {
+            if ((u32)(micros() - byte_start) > 1000u) {
+                Serial.printf("LPUART: TDRE never asserted at byte %lu STAT=0x%lx\r\n",
+                              (unsigned long)i, (unsigned long)lp->STAT);
+                sLpDmaComplete = true;
+                return false;
+            }
+        }
+        lp->DATA = encoded[i];
+    }
+    // Wait for transmit complete.
+    while ((lp->STAT & (1u << 22)) == 0) {
+        if ((u32)(micros() - start) > 500000u) break;  // 500 ms
+    }
+    Serial.printf("LPUART: polled tx done %luus\r\n", (unsigned long)(micros() - start));
+    sLpDmaComplete = true;
+    return true;
 }
 
 bool lpuart_show(const u8* pixel_data, u32 num_pixel_bytes) {

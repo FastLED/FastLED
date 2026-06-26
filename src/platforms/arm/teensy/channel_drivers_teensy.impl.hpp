@@ -25,6 +25,7 @@ inline void enableAllChannelDrivers() FL_NO_EXCEPT {
 #if defined(FL_IS_TEENSY_4X)
         , fl::Bus::FLEX_IO
         , fl::Bus::OBJECT_FLED
+        , fl::Bus::LPUART
 #endif
     >();
 }
