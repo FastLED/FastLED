@@ -36,6 +36,20 @@ inline void delaycycles() FL_NO_EXCEPT;
 // These provide the minimum base cases to stop the recursive template from infinitely recursing.
 // All specializations (positive and non-positive cycles) are provided in fl/delay.cpp and linked at compile time.
 // Use #ifndef guard to allow delay.cpp to override these with its definitions
+//
+// CRITICAL: the positive base cases <1> and <2> below are what make the
+// binary-split recursion terminate. The split is delaycycles<N>() ->
+// delaycycles<N/2>() + delaycycles<N - N/2>(). For every N >= 2 both children
+// are strictly smaller than N, so the recursion descends. But at N == 1 the
+// split degenerates to <0> + <1> (HALF=0, REMAINDER=1) and re-instantiates <1>
+// FOREVER. The positive specializations that would stop this live in another
+// translation unit (fl/system/delay.cpp.hpp), so any TU that includes only
+// these headers -- e.g. a clockless/SPI driver calling delaycycles<N>() -- has
+// no <1> base, recurses without bound, and OOMs the compiler (and the
+// cpptools/EDG IntelliSense engine, which instantiates the primary template
+// speculatively). Defining <1> (and <2>) here gives the split a floor in EVERY
+// TU. Guarded by FL_DELAY_CPP_SPECIALIZATIONS so delay.cpp.hpp still provides
+// its own out-of-line copies (it #defines that before including this header).
 #ifndef FL_DELAY_CPP_SPECIALIZATIONS
 template<> FASTLED_FORCE_INLINE void delaycycles<-10>() FL_NO_EXCEPT {}
 template<> FASTLED_FORCE_INLINE void delaycycles<-9>() FL_NO_EXCEPT {}
@@ -48,13 +62,16 @@ template<> FASTLED_FORCE_INLINE void delaycycles<-3>() FL_NO_EXCEPT {}
 template<> FASTLED_FORCE_INLINE void delaycycles<-2>() FL_NO_EXCEPT {}
 template<> FASTLED_FORCE_INLINE void delaycycles<-1>() FL_NO_EXCEPT {}
 template<> FASTLED_FORCE_INLINE void delaycycles<0>() FL_NO_EXCEPT {}
+template<> FASTLED_FORCE_INLINE void delaycycles<1>() FL_NO_EXCEPT { FL_NOP; }
+template<> FASTLED_FORCE_INLINE void delaycycles<2>() FL_NO_EXCEPT { FL_NOP2; }
 #endif
 
 /// Delay for N clock cycles (generic NOP-based implementation)
 /// Uses binary splitting to minimize template instantiation depth
 /// Recursively splits the delay into two halves:
 /// delaycycles<N>() → delaycycles<N/2>() + delaycycles<N - N/2>()
-/// Base cases (0-50) are specialized in fl/delay.cpp for efficiency
+/// Terminates at the <0>/<1>/<2> base cases above (present in every TU); larger
+/// cases (3-50) also have out-of-line specializations in fl/system/delay.cpp.hpp.
 template<fl::cycle_t CYCLES>
 FASTLED_FORCE_INLINE void delaycycles() FL_NO_EXCEPT {
   constexpr fl::cycle_t HALF = CYCLES / 2;
