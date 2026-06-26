@@ -255,6 +255,12 @@ static void flexio_pin_park_low(const FlexIOPinInfo& pin_info) {
     // ALT5 == GPIO5 mode on all Teensy 4.x B0/B1 pads we map.
     // Use Arduino's ::pinMode/::digitalWriteFast (the fl:: overloads
     // are not interchangeable with the Arduino enum constants).
+    // #3416 FX-MED-5: confirmed working on pin 8 (GPIO_B1_00 ->
+    // GPIO7_IO16 fast alias) via bench loopback. Other supported
+    // FlexIO2 pins (pins 6, 7, 9-13, 32) all live on B0_xx / B1_xx
+    // pads that use the same GPIO7 fast-alias path on Teensy 4.x,
+    // so this should work uniformly. Scope verification on each
+    // unique pad bank is still recommended before declaring portable.
     *(pin_info.mux_reg) = 5;
     ::pinMode(pin_info.teensy_pin, OUTPUT);
     ::digitalWriteFast(pin_info.teensy_pin, LOW);
