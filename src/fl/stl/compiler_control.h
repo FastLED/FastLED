@@ -247,10 +247,14 @@
     #define _FL_TIMING_OPT_PRAGMA _Pragma("GCC optimize(\"O2\")")
   #endif
 
+  // `-fno-lto` is deliberately omitted: GCC rejects it as an `optimize`
+  // attribute/pragma argument (-Wattributes, -Wpragmas). LTO is a whole-program
+  // decision resolved by the link-time plugin, not by per-function codegen, so
+  // the optimize attribute cannot express it. Targets that need cycle-exact
+  // codegen under LTO must disable it at the build-flags level (FastLED #3417).
   #define FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING        \
       _Pragma("GCC push_options")                   \
       _FL_TIMING_OPT_PRAGMA                         \
-      _Pragma("GCC optimize(\"-fno-lto\")")         \
       _Pragma("GCC optimize(\"-fno-schedule-insns\")")  \
       _Pragma("GCC optimize(\"-fno-schedule-insns2\")") \
       _Pragma("GCC optimize(\"-fno-reorder-blocks\")")  \
