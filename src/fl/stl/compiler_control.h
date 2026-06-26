@@ -362,14 +362,14 @@
 // `noinline` keeps it a real out-of-line function (so it actually lands in the
 // section rather than being inlined back into a flash caller). `long_call`
 // forces an indirect call so the flash->RAM branch (flash @ 0x0, SRAM @
-// 0x10000000 — far beyond Thumb `bl` ±16 MB range) does not depend on the
+// 0x10000000 - far beyond Thumb `bl` +/-16 MB range) does not depend on the
 // linker inserting a veneer.
 //
-// OPT-IN ONLY: gated on FASTLED_M0_RAMFUNC because it requires a linker script
+// OPT-IN ONLY: gated on FL_ARM_M0_RAMFUNC because it requires a linker script
 // with `.ramfunc` wired into the startup copy table (e.g. the LPC845 MCUXSDK
 // script, or the Arduino LPC core with `*(.ramfunc*)` added to `.data`). NOT
 // assumed for arbitrary linkers. Expands to nothing unless the flag is set.
-#if defined(FASTLED_M0_RAMFUNC) && (defined(FL_IS_GCC) || defined(FL_IS_CLANG))
+#if defined(FL_ARM_M0_RAMFUNC) && (defined(FL_IS_GCC) || defined(FL_IS_CLANG))
   #define FL_RAMFUNC __attribute__((section(".ramfunc"), noinline, long_call))
 #else
   #define FL_RAMFUNC

@@ -187,7 +187,7 @@ template <int N> FL_FORCE_INLINE void fl_nop_run() FL_NO_EXCEPT {
 }
 
 /**
- * Loop-based variant of the bit-timing delay. Opt in with FASTLED_M0_DELAY_LOOP.
+ * Loop-based variant of the bit-timing delay. Opt in with FL_ARM_M0_DELAY_LOOP.
  *
  * WHY: the .rept variant above unrolls to exactly N `nop`s, which is cycle-exact
  * but bulky -- on the 16 KB-SRAM LPC845, with showLedData running from RAM
@@ -231,7 +231,7 @@ template <int N> FL_FORCE_INLINE void fl_nop_loop() FL_NO_EXCEPT {
 
 // Select the bit-timing delay strategy: unrolled nops (default, cycle-exact) or
 // a counted loop (smaller code, for RAM-constrained RAMFUNC builds).
-#if defined(FASTLED_M0_DELAY_LOOP)
+#if defined(FL_ARM_M0_DELAY_LOOP)
   #define fl_delay_cycles_ct fl_nop_loop
 #else
   #define fl_delay_cycles_ct fl_nop_run
