@@ -168,6 +168,31 @@ static void flexio_clock_init() {
 // Pin Muxing
 // ============================================================================
 
+// IOMUXC pad drive strength for the FlexIO TX pin (DSE field, bits 3-5).
+// Larger DSE -> stronger driver -> faster edges; smaller DSE -> softer
+// edges that behave like a built-in series-termination resistor.
+//
+// Empirical sweep (Teensy 4.1 pin 8 -> pin 22 loopback, jumper wire,
+// 100 LEDs x 4 patterns, with park-pin-LOW fix in place):
+//   DSE=1 (~150 ohm)  -> 0.9% byte corruption
+//   DSE=3 (~50 ohm)   -> 0.8% byte corruption (default)
+//   DSE=6 (~25 ohm)   -> 0.9% byte corruption
+// All three converge to the same RX-side noise floor; varying drive
+// strength did NOT improve things. The residual errors are receiver-
+// side capture dropout (raw_sample shows ~200 us mid-frame HIGH gaps)
+// rather than edge ringing. Define is exposed for hardware-specific
+// tuning on different boards / wire lengths.
+//   Values: 0 = output disabled, 1..7 = R0/N drive
+#ifndef FL_FLEXIO_TX_DSE
+#define FL_FLEXIO_TX_DSE 3
+#endif
+
+// IOMUXC pad SPEED field (bits 6-7). 0 = 50 MHz, 1 = 100 MHz, 2 = 150 MHz,
+// 3 = 200 MHz. Lower SPEED also softens the slew rate slightly.
+#ifndef FL_FLEXIO_TX_SPEED
+#define FL_FLEXIO_TX_SPEED 0
+#endif
+
 static void flexio_pin_init(const FlexIOPinInfo& pin_info) {
     // #3410 Round 5: mux value MUST include the SION bit (0x10) per
     // Teensyduino FlexIO_t4 library reference (flex2_hardware uses 0x14
@@ -178,7 +203,9 @@ static void flexio_pin_init(const FlexIOPinInfo& pin_info) {
     // settings were correct; this single missing bit kept the pad in a
     // gated state.
     *(pin_info.mux_reg) = 4 | 0x10;  // ALT4 + SION
-    *(pin_info.pad_reg) = (3 << 3) | (0 << 6);
+    *(pin_info.pad_reg) =
+        ((FL_FLEXIO_TX_DSE & 0x7u) << 3) |
+        ((FL_FLEXIO_TX_SPEED & 0x3u) << 6);
 }
 
 // #3410 Round 7 follow-up: between flexio_show() calls the FlexIO
