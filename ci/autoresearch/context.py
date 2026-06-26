@@ -468,6 +468,61 @@ def display_objectfled_diagnostics(result: dict[str, Any]) -> None:
             if key in flex_diag:
                 print(f"    {key}: {flex_diag[key]}")
 
+    flexio_diag = result.get("flexIoDiagnostics")
+    if isinstance(flexio_diag, dict):
+        print()
+        print("  FlexIO2 register diagnostics")
+        hex_keys = {
+            "ctrl",
+            "shiftstat",
+            "shifterr",
+            "timstat",
+            "shiftsden",
+            "shiftctl0",
+            "shiftcfg0",
+            "timctl0",
+            "timcfg0",
+            "timcmp0",
+            "ccmCcgr3",
+            "ccmCscmr2",
+            "ccmCs1cdr",
+            "muxRegValue",
+            "padRegValue",
+            "tcdSaddr",
+            "tcdDaddr",
+            "tcdCsr",
+        }
+        for key in (
+            "initialized",
+            "dmaComplete",
+            "ctrl",
+            "shiftstat",
+            "shifterr",
+            "timstat",
+            "shiftsden",
+            "shiftctl0",
+            "shiftcfg0",
+            "timctl0",
+            "timcfg0",
+            "timcmp0",
+            "ccmCcgr3",
+            "ccmCscmr2",
+            "ccmCs1cdr",
+            "muxRegValue",
+            "padRegValue",
+            "tcdSaddr",
+            "tcdDaddr",
+            "tcdCiter",
+            "tcdBiter",
+            "tcdCsr",
+        ):
+            if key in flexio_diag:
+                val = flexio_diag[key]
+                if key in hex_keys and isinstance(val, int):
+                    print(f"    {key}: 0x{val & 0xFFFFFFFF:08X}")
+                else:
+                    print(f"    {key}: {val}")
+
     pad_probe = result.get("standardGpioPadProbe")
     if isinstance(pad_probe, dict):
         print()
