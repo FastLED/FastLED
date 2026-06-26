@@ -12,6 +12,7 @@
 #include "fl/stl/cstring.h"
 
 // IWYU pragma: begin_keep
+#include <Arduino.h>
 #include <imxrt.h>
 #include <DMAChannel.h>
 // IWYU pragma: end_keep
@@ -111,7 +112,13 @@ static constexpr u32 kMaxPixelBytes = 4096;
 DMAMEM static u32 sPixelBuffer[kMaxPixelBytes / 4] __attribute__((aligned(32)));
 
 static void flexio_dma_isr() {
-    sDmaChannel->clearInterrupt();
+    // Guard: deinit() can delete sDmaChannel while a pending IRQ is still
+    // queued at the NVIC. Without this check the next IRQ vector services
+    // a deleted channel and dereferences a freed pointer (IMPRECISERR
+    // data bus fault observed during FlexIO bring-up, #3410).
+    if (sDmaChannel != nullptr) {
+        sDmaChannel->clearInterrupt();
+    }
     sDmaComplete = true;
 }
 
@@ -150,9 +157,20 @@ static void flexio_pin_init(const FlexIOPinInfo& pin_info) {
 
 static void flexio_configure_hw(u8 flexio_pin, u32 t0h_clocks, u32 t1h_clocks,
                                  u32 period_clocks, u32 latch_clocks) {
-    // Software reset
+    // Software reset. Bounded wait — if FLEXIO2 doesn't respond within
+    // a few microseconds, the peripheral isn't actually clocked (CCM
+    // misconfig, clock gate stuck, etc.) and looping forever just turns
+    // a setup-time failure into an RPC timeout. Give up after a short
+    // timeout so the failure is observable.
     FLEXIO2_CTRL = (1 << 1);
-    while (FLEXIO2_CTRL & (1 << 1)) {}
+    {
+        const u32 swrst_start = micros();
+        while (FLEXIO2_CTRL & (1 << 1)) {
+            if ((u32)(micros() - swrst_start) >= 1000) {
+                break;  // 1 ms is >>> the few hundred ns SWRST should take
+            }
+        }
+    }
     FLEXIO2_CTRL = 0;
 
     // Shifter 0: Transmit mode, 1-bit serial, output on flexio_pin
@@ -305,6 +323,17 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
 
     flexio_wait();
 
+    // Quiesce: hard-disable DMA + clear flags before reprogramming the TCD.
+    // flexio_wait can now return early via its 50 ms timeout; if it does,
+    // DMA is still live. Modifying the TCD mid-transfer is undefined
+    // behaviour on i.MX RT eDMA (IMPRECISERR data bus fault observed on
+    // first FlexIO bring-up attempt, #3410).
+    sDmaChannel->disable();
+    sDmaChannel->clearComplete();
+    sDmaChannel->clearInterrupt();
+    sDmaChannel->clearError();
+    sDmaComplete = true;
+
     if (num_bytes > kMaxPixelBytes) {
         num_bytes = kMaxPixelBytes;
     }
@@ -344,20 +373,42 @@ bool flexio_is_done() {
 }
 
 void flexio_wait() {
-    while (!sDmaComplete) {}
+    // Bounded wait so a stuck FlexIO/DMA can't take down the whole RPC test
+    // session. WS2812 frame for 100 LEDs at 800 kHz takes ~3 ms. 50 ms is
+    // plenty of headroom for any reasonable strip length while staying
+    // well below the autoresearch 120 s RPC deadline. If the timeout
+    // elapses, leave sDmaComplete=false so callers can detect the failure
+    // via flexio_is_done() and the driver state remains observable.
+    const u32 start = millis();
+    const u32 timeout_ms = 50;
+    while (!sDmaComplete) {
+        if ((u32)(millis() - start) >= timeout_ms) {
+            return;
+        }
+    }
 }
 
 void flexio_deinit() {
     if (!sInitialized) return;
     flexio_wait();
+    // Shut down FlexIO BEFORE touching DMA so no more shifter-empty DMA
+    // requests can fire while we're tearing the channel down.
     FLEXIO2_CTRL = 0;
     FLEXIO2_SHIFTSDEN = 0;
     if (sDmaChannel) {
+        // Order: disable ERQ -> detach interrupt -> clear pending NVIC IRQ
+        // -> then mark pointer null -> only THEN delete. Without the
+        // detach + IRQ-clear, a pending interrupt vector dereferences a
+        // deleted channel (#3410 IMPRECISERR fault).
         sDmaChannel->disable();
-        delete sDmaChannel;  // ok bare allocation
+        sDmaChannel->detachInterrupt();
+        sDmaChannel->clearInterrupt();
+        DMAChannel* to_delete = sDmaChannel;
         sDmaChannel = nullptr;
+        delete to_delete;  // ok bare allocation
     }
     sInitialized = false;
+    sDmaComplete = true;
 }
 
 // ============================================================================
