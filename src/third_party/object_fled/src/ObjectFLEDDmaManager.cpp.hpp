@@ -11,31 +11,36 @@ namespace fl {
 DMAMEM uint32_t ObjectFLEDDmaManager::bitdata[BYTES_PER_DMA * 64] __attribute__((used, aligned(32)));
 DMAMEM uint32_t ObjectFLEDDmaManager::bitmask[4] __attribute__((used, aligned(32)));
 
+// #3416 OF-HIGH-1 / CodeRabbit-flagged: save/restore PRIMASK rather than
+// unconditionally re-enabling interrupts, so we don't clobber the
+// caller's IRQ-disabled state if we're invoked from inside another
+// critical section. Inline asm avoids needing the CMSIS header.
+static inline uint32_t fl_save_primask_disable() {
+    uint32_t pm;
+    __asm volatile ("mrs %0, primask\n\tcpsid i" : "=r"(pm) :: "memory");
+    return pm;
+}
+static inline void fl_restore_primask(uint32_t pm) {
+    __asm volatile ("msr primask, %0" :: "r"(pm) : "memory");
+}
+
 void ObjectFLEDDmaManager::acquire(void* owner) {
     // Wait for any current transmission to complete
     waitForCompletion();
 
-    // #3416 OF-HIGH-1: protect mCurrentOwner against ISR/cross-instance
-    // races. ObjectFLED is documented as singleton-coordinated but
-    // nothing physically prevents a USB-CDC or SysTick ISR from calling
-    // show() on a different instance while we're mid-acquire. Without
-    // the noInterrupts() guard, two acquire() calls could both believe
-    // they own the channel and scramble the in-flight TCD.
-    noInterrupts();
+    const uint32_t pm = fl_save_primask_disable();
     mCurrentOwner = owner;
-    interrupts();
+    fl_restore_primask(pm);
 }
 
 void ObjectFLEDDmaManager::release(void* owner) {
-    noInterrupts();
-    // Validate ownership while interrupts are disabled so we can't see
-    // a half-set/half-cleared mCurrentOwner from a racing release.
+    const uint32_t pm = fl_save_primask_disable();
     if (mCurrentOwner != owner) {
-        interrupts();
+        fl_restore_primask(pm);
         return;
     }
     mCurrentOwner = nullptr;
-    interrupts();
+    fl_restore_primask(pm);
 }
 
 void ObjectFLEDDmaManager::waitForCompletion() {

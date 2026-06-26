@@ -92,6 +92,15 @@ ObjectFLED::ObjectFLED(uint16_t numLEDs, void *drawBuf, uint8_t config, uint8_t 
 		              numPins, NUM_DIGITAL_PINS);
 		numPins = NUM_DIGITAL_PINS;
 	}
+	// CodeRabbit-flagged on PR #3419: guard against numPins=0 which
+	// would otherwise divide by zero in stripLen = numLEDs / numpinsLocal.
+	if (numPins == 0) {
+		Serial.printf("ObjectFLED: numPins=0 is invalid; abandoning init\r\n");
+		numpinsLocal = 0;
+		stripLen = 0;
+		initialized = false;
+		return;
+	}
 	numpinsLocal = numPins;
 	stripLen = numLEDs / numpinsLocal;
 	// #3416 OF-LOW-8: warn if numLEDs doesn't divide evenly across pins

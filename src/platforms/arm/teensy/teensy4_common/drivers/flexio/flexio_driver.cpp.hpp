@@ -545,7 +545,7 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
         // #3416 FX-MED-2: warn loudly so the user sees that their strip
         // is being silently truncated rather than discovering tail LEDs
         // are dark. kMaxInputBytes = 1024 bytes = 341 RGB LEDs.
-        FL_LOG_FLEXIO_F("FlexIO: strip truncated -- requested %s bytes exceeds buffer cap %s (~341 RGB LEDs max). Tail LEDs will not update.",
+        FL_LOG_FLEXIO_F("FlexIO: strip truncated -- requested %d bytes exceeds buffer cap %d (~341 RGB LEDs max). Tail LEDs will not update.",
                         (int)num_bytes, (int)kMaxInputBytes);
         num_bytes = kMaxInputBytes;
     }
