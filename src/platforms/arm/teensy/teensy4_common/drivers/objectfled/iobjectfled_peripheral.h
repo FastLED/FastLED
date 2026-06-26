@@ -27,7 +27,8 @@ struct ObjectFLEDPinResult {
 /// @brief Abstract handle for a single ObjectFLED timing-group instance
 ///
 /// Owns a frame buffer that the channel engine writes pixel data into.
-/// show() triggers synchronous DMA transmission.
+/// show() starts DMA transmission; isBusy() remains true while DMA or latch
+/// reset timing is still active.
 class IObjectFLEDInstance {
 public:
     virtual ~IObjectFLEDInstance() = default;
@@ -38,8 +39,11 @@ public:
     /// @brief Get size of the frame buffer in bytes
     virtual u32 getFrameBufferSize() const FL_NO_EXCEPT = 0;
 
-    /// @brief Trigger synchronous DMA transmission
+    /// @brief Trigger DMA transmission
     virtual void show() FL_NO_EXCEPT = 0;
+
+    /// @brief Return true while DMA output or latch/reset timing is active
+    virtual bool isBusy() FL_NO_EXCEPT = 0;
 
 protected:
     IObjectFLEDInstance() = default;

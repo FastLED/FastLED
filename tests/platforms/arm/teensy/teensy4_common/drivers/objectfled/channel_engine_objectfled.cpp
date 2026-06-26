@@ -5,9 +5,11 @@
 
 #include "platforms/shared/mock/arm/teensy4/drivers/objectfled/objectfled_peripheral_mock.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/channel_engine_objectfled.h"
+#include "platforms/arm/teensy/teensy4_common/clockless_objectfled.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
+#include "fl/gfx/rectangular_draw_buffer.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -55,7 +57,8 @@ ChannelDataPtr createRGBWChannelData(int pin, size_t num_leds,
             encoded[i] = rgbw_data[i];
         }
     }
-    return ChannelData::create(pin, t, fl::move(encoded));
+    return ChannelData::create(
+        pin, t, fl::move(encoded), ChannelPixelFormat::RGBW);
 }
 
 } // anonymous namespace
@@ -193,8 +196,67 @@ FL_TEST_CASE("ObjectFLED engine - different timing = 2 instances") {
     engine.enqueue(ch1);
     engine.enqueue(ch2);
     engine.show();
+    while (engine.poll() != DriverState::READY) {
+    }
 
     FL_CHECK(mock->getCreateCount() == 2);
+}
+
+FL_TEST_CASE("ObjectFLED engine - poll drains active DMA/latch state") {
+    auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
+    mock->setBusyAfterShow(true);
+    ChannelEngineObjectFLED engine(mock);
+
+    uint8_t red[] = {0xFF, 0x00, 0x00};
+    auto ch = createRGBChannelData(2, 1, red);
+
+    engine.enqueue(ch);
+    engine.show();
+
+    auto* inst = mock->getLastInstance();
+    FL_REQUIRE(inst != nullptr);
+    FL_CHECK(ch->isInUse() == true);
+    FL_CHECK(engine.poll() == DriverState::DRAINING);
+
+    inst->complete();
+    FL_CHECK(engine.poll() == DriverState::READY);
+    FL_CHECK(ch->isInUse() == false);
+}
+
+FL_TEST_CASE("ObjectFLED engine - timing groups sequence after busy completion") {
+    auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
+    mock->setBusyAfterShow(true);
+    ChannelEngineObjectFLED engine(mock);
+
+    ChipsetTimingConfig ws2812 = createWS2812Timing();
+    ChipsetTimingConfig sk6812 = createSK6812Timing();
+    auto ch1 = createRGBChannelData(2, 1, nullptr, &ws2812);
+    auto ch2 = createRGBChannelData(3, 1, nullptr, &sk6812);
+
+    engine.enqueue(ch1);
+    engine.enqueue(ch2);
+    engine.show();
+
+    FL_CHECK(mock->getCreateCount() == 1);
+    FL_CHECK(ch1->isInUse() == true);
+    FL_CHECK(ch2->isInUse() == true);
+    FL_CHECK(engine.poll() == DriverState::DRAINING);
+
+    auto* first = mock->getInstance(0);
+    FL_REQUIRE(first != nullptr);
+    first->complete();
+
+    FL_CHECK(engine.poll() == DriverState::BUSY);
+    FL_CHECK(mock->getCreateCount() == 2);
+    FL_CHECK(engine.poll() == DriverState::DRAINING);
+
+    auto* second = mock->getInstance(1);
+    FL_REQUIRE(second != nullptr);
+    second->complete();
+
+    FL_CHECK(engine.poll() == DriverState::READY);
+    FL_CHECK(ch1->isInUse() == false);
+    FL_CHECK(ch2->isInUse() == false);
 }
 
 FL_TEST_CASE("ObjectFLED engine - empty enqueue does nothing") {
@@ -247,6 +309,126 @@ FL_TEST_CASE("ObjectFLED engine - detects RGBW data") {
     auto* record = mock->getLastCreateRecord();
     FL_REQUIRE(record != nullptr);
     FL_CHECK(record->isRgbw == true);
+}
+
+FL_TEST_CASE("ObjectFLED engine - explicit RGB metadata wins over 12-byte size") {
+    auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
+    ChannelEngineObjectFLED engine(mock);
+
+    uint8_t rgb[] = {
+        0x10, 0x11, 0x12,
+        0x20, 0x21, 0x22,
+        0x30, 0x31, 0x32,
+        0x40, 0x41, 0x42,
+    };
+    auto ch = createRGBChannelData(2, 4, rgb);
+
+    engine.enqueue(ch);
+    engine.show();
+
+    auto* record = mock->getLastCreateRecord();
+    auto* inst = mock->getLastInstance();
+    FL_REQUIRE(record != nullptr);
+    FL_REQUIRE(inst != nullptr);
+    FL_CHECK(record->isRgbw == false);
+    FL_CHECK(record->totalLeds == 4);
+    FL_CHECK(inst->getFrameBufferSize() == 12);
+}
+
+FL_TEST_CASE("ObjectFLED rectangular sizing rounds RGBW small counts") {
+    struct Case {
+        u16 leds;
+        u32 rectangularBytes;
+        u32 frameBytes;
+        u32 totalLeds;
+    };
+    const Case cases[] = {
+        {1, 9, 12, 3},
+        {2, 9, 12, 3},
+        {3, 15, 16, 4},
+        {4, 18, 20, 5},
+    };
+
+    for (const auto& c : cases) {
+        RectangularDrawBuffer drawBuf;
+        drawBuf.queue(DrawItem(22, c.leds, true));
+        drawBuf.onQueuingDone();
+
+        u32 numStrips = 0;
+        u32 bytesPerStrip = 0;
+        u32 totalBytes = 0;
+        drawBuf.getBlockInfo(&numStrips, &bytesPerStrip, &totalBytes);
+
+        FL_CHECK(numStrips == 1);
+        FL_CHECK(bytesPerStrip == c.rectangularBytes);
+        FL_CHECK(totalBytes == c.rectangularBytes);
+        FL_CHECK(objectFledFrameBytesForRectangularBlock(
+                     numStrips, bytesPerStrip, true) == c.frameBytes);
+        FL_CHECK(objectFledTotalLedsForRectangularBlock(
+                     numStrips, bytesPerStrip, true) == c.totalLeds);
+        FL_CHECK(c.frameBytes >= totalBytes);
+    }
+}
+
+FL_TEST_CASE("ObjectFLED engine - RGBW raw channel counts use exact byte layout") {
+    struct Case {
+        size_t leds;
+        u32 expectedFrameBytes;
+    };
+    const Case cases[] = {
+        {1, 4},
+        {2, 8},
+        {3, 12},
+        {4, 16},
+        {6, 24},
+        {9, 36},
+    };
+
+    for (const auto& c : cases) {
+        auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
+        ChannelEngineObjectFLED engine(mock);
+        auto ch = createRGBWChannelData(22, c.leds);
+
+        engine.enqueue(ch);
+        engine.show();
+
+        auto* inst = mock->getLastInstance();
+        auto* record = mock->getLastCreateRecord();
+        FL_REQUIRE(inst != nullptr);
+        FL_REQUIRE(record != nullptr);
+        FL_CHECK(record->isRgbw == true);
+        FL_CHECK(record->totalLeds == static_cast<int>(c.leds));
+        FL_CHECK(inst->getFrameBufferSize() == c.expectedFrameBytes);
+    }
+}
+
+FL_TEST_CASE("ObjectFLED engine - RGBW raw channel preserves nonzero white") {
+    auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
+    ChannelEngineObjectFLED engine(mock);
+
+    uint8_t rgbw[] = {
+        0x01, 0x02, 0x03, 0xA5,
+        0x04, 0x05, 0x06, 0xB6,
+        0x07, 0x08, 0x09, 0xC7,
+    };
+    auto ch = createRGBWChannelData(22, 3, rgbw);
+
+    engine.enqueue(ch);
+    engine.show();
+
+    auto* record = mock->getLastCreateRecord();
+    auto* inst = mock->getLastInstance();
+    FL_REQUIRE(record != nullptr);
+    FL_REQUIRE(inst != nullptr);
+    FL_CHECK(record->isRgbw == true);
+    FL_CHECK(record->totalLeds == 3);
+    FL_CHECK(inst->getFrameBufferSize() == 12);
+
+    const auto& frameData = inst->getRawBuffer();
+    FL_REQUIRE(frameData.size() == 12);
+    FL_CHECK(frameData[3] == 0xA5);
+    FL_CHECK(frameData[7] == 0xB6);
+    FL_CHECK(frameData[11] == 0xC7);
 }
 
 //=============================================================================

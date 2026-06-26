@@ -31,6 +31,7 @@ test_abs_include_args = [
 # chain with "module file has a different size or modification time than expected".
 # Instead, test_pch.h directly #includes FastLED.h, making this PCH self-contained.
 cpp_compiler = meson.get_compiler('cpp')
+test_pch_input_abs = path_norm_root + '/tests/test_pch.h'
 test_pch = custom_target('test_pch',
   input: 'test_pch.h',
   output: 'test_pch.h.pch',      # Only PCH is an output; .d file is depfile only
@@ -41,7 +42,7 @@ test_pch = custom_target('test_pch',
     cpp_compiler.cmd_array(),
     '-c',                          # Suppress linker step (MinGW driver adds link job without -c)
     '-x', 'c++-header',           # Treat input as C++ header
-    '@INPUT@',                     # test_pch.h
+    test_pch_input_abs,            # Canonical absolute forward-slash spelling
     '-o', '@OUTPUT@',              # test_pch.h.pch
     '-MD', '-MF', '@DEPFILE@',     # Generate dependency file (will be fixed by wrapper)
     unit_test_compile_args,        # Same flags as all tests
@@ -177,7 +178,12 @@ shared_test_cpp_args = test_abs_include_args + unit_test_compile_args + [
 ]
 
 test_shared_objs_lib = static_library('test_shared_objs',
-  ['doctest_main.cpp', 'shared/fl_unittest.cpp', 'misc' / 'coroutine_impl.cpp', test_pch],
+  [
+    path_norm_root + '/tests/doctest_main.cpp',
+    path_norm_root + '/tests/shared/fl_unittest.cpp',
+    path_norm_root + '/tests/misc/coroutine_impl.cpp',
+    test_pch,
+  ],
   cpp_args: shared_test_cpp_args,
   pic: true,
   implicit_include_directories: false,
@@ -192,8 +198,9 @@ foreach test_name : test_names
 
   # Test sources: only the unique test file + PCH dependency
   # doctest_main.cpp and fl_unittest.cpp are pre-compiled in shared_test_objects
+  test_source_abs = path_norm_root + '/tests/' + test_file
   test_sources = [
-    test_file,
+    test_source_abs,
     test_pch,
   ]
   test_cpp_args = shared_test_cpp_args

@@ -50,6 +50,7 @@ class Args:
     tx_pin: int | None
     rx_pin: int | None
     auto_discover_pins: bool
+    contaminate_tx_mux: bool
 
     # Build system selection
     use_fbuild: bool
@@ -72,6 +73,8 @@ class Args:
 
     # Legacy API testing
     legacy: bool
+    legacy_mixed_timings: bool
+    legacy_rgbw_small_counts: bool
 
     # Chipset selection
     chipset: str
@@ -144,7 +147,7 @@ Driver Selection (JSON-RPC):
   MANDATORY: You MUST specify at least one driver flag:
     --parlio       Test only PARLIO driver
     --rmt          Test only RMT driver
-    --spi          Test only SPI driver
+    --spi          Test only SPI driver (Teensy 4.x resolves to SPI_UNIFIED)
     --uart         Test only UART driver
     --lcd          Test only LCD_CLOCKLESS driver (ESP32-S3 only, replaces misnamed I2S)
     --lcd-spi      Test only LCD_SPI driver (ESP32-S3 only, APA102/SK9822)
@@ -223,7 +226,7 @@ See Also:
         driver_group.add_argument(
             "--spi",
             action="store_true",
-            help="Test only SPI driver",
+            help="Test only SPI driver (Teensy 4.x resolves to SPI_UNIFIED)",
         )
         driver_group.add_argument(
             "--uart",
@@ -487,6 +490,14 @@ See Also:
             action="store_true",
             help="Disable auto-discovery of connected pins",
         )
+        pin_group.add_argument(
+            "--contaminate-tx-mux",
+            action="store_true",
+            help=(
+                "Before runSingleTest, remux the selected TX pin through "
+                "analogWrite() so ObjectFLED must reclaim GPIO mux mode."
+            ),
+        )
 
         # Build system selection
         parser.add_argument(
@@ -562,7 +573,24 @@ See Also:
         parser.add_argument(
             "--legacy",
             action="store_true",
-            help="Test using legacy template addLeds API (WS2812B<PIN>) instead of Channel API. Single-lane only, pin must be 0-8.",
+            help="Test using legacy template addLeds API (WS2812B<PIN>) instead of Channel API. Supports consecutive TX pins 0-8; pin 22 is single-lane for the current ObjectFLED loopback.",
+        )
+        parser.add_argument(
+            "--legacy-mixed-timings",
+            action="store_true",
+            help=(
+                "With --legacy, alternate WS2812B/SK6812 template chipsets "
+                "across lanes to exercise multiple ObjectFLED timing groups. "
+                "Requires multi-lane historical TX pins 0-8."
+            ),
+        )
+        parser.add_argument(
+            "--legacy-rgbw-small-counts",
+            action="store_true",
+            help=(
+                "With --legacy, run RGBW 1, 2, 3, and 4 LED cases to cover "
+                "small-count ObjectFLED RGBW overflow regressions."
+            ),
         )
 
         # Chipset selection
@@ -674,6 +702,7 @@ See Also:
             rx_pin=parsed.rx_pin,
             auto_discover_pins=parsed.auto_discover_pins
             and not parsed.no_auto_discover_pins,
+            contaminate_tx_mux=parsed.contaminate_tx_mux,
             use_fbuild=parsed.use_fbuild,
             no_fbuild=parsed.no_fbuild,
             clean=parsed.clean,
@@ -684,6 +713,8 @@ See Also:
             lane_counts=parsed.lane_counts,
             color_pattern=parsed.color_pattern,
             legacy=parsed.legacy,
+            legacy_mixed_timings=parsed.legacy_mixed_timings,
+            legacy_rgbw_small_counts=parsed.legacy_rgbw_small_counts,
             chipset=parsed.chipset,
             net_server=parsed.net_server,
             net_client=parsed.net_client,

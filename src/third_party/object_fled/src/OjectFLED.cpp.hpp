@@ -105,6 +105,51 @@ static volatile uint32_t *standard_gpio_addr(volatile uint32_t *fastgpio) {
 	return (volatile uint32_t *)((uint32_t)fastgpio - 0x01E48000);
 }
 
+static void force_pin_to_gpio_mux(uint8_t pin) {
+	// Teensy 4.x GPIO pads use MUX_MODE=5. Keep SION set so diagnostics can
+	// observe the pad input path while DMA drives the standard GPIO alias.
+	*portConfigRegister(pin) = 5 | 0x10;
+}
+
+static void configure_objectfled_xbar_dma_edges() {
+	// XBAR CTRL registers hold two request-control slots each. STS bits are
+	// write-one-to-clear, so keep non-owned STS bits at zero while preserving
+	// their edge/interrupt/DMA enable settings.
+	constexpr uint16_t ctrl0ConfigMask =
+		XBARA_CTRL_EDGE0(3) | XBARA_CTRL_DEN0 |
+		XBARA_CTRL_EDGE1(3) | XBARA_CTRL_DEN1;
+	constexpr uint16_t ctrl1ConfigMask =
+		XBARA_CTRL_EDGE0(3) | XBARA_CTRL_DEN0;
+
+	uint16_t ctrl0 = XBARA1_CTRL0;
+	ctrl0 &= ~(ctrl0ConfigMask | XBARA_CTRL_STS0 | XBARA_CTRL_STS1);
+	ctrl0 |= XBARA_CTRL_STS1 | XBARA_CTRL_EDGE1(3) | XBARA_CTRL_DEN1 |
+			 XBARA_CTRL_STS0 | XBARA_CTRL_EDGE0(3) | XBARA_CTRL_DEN0;
+	XBARA1_CTRL0 = ctrl0;
+
+	uint16_t ctrl1 = XBARA1_CTRL1;
+	ctrl1 &= ~(ctrl1ConfigMask | XBARA_CTRL_STS0 | XBARA_CTRL_STS1);
+	ctrl1 |= XBARA_CTRL_STS0 | XBARA_CTRL_EDGE0(3) | XBARA_CTRL_DEN0;
+	XBARA1_CTRL1 = ctrl1;
+}
+
+static void clear_objectfled_xbar_dma_status() {
+	uint16_t ctrl0 = XBARA1_CTRL0;
+	ctrl0 &= ~(XBARA_CTRL_STS0 | XBARA_CTRL_STS1);
+	XBARA1_CTRL0 = ctrl0 | XBARA_CTRL_STS1 | XBARA_CTRL_STS0;
+
+	uint16_t ctrl1 = XBARA1_CTRL1;
+	ctrl1 &= ~(XBARA_CTRL_STS0 | XBARA_CTRL_STS1);
+	XBARA1_CTRL1 = ctrl1 | XBARA_CTRL_STS0;
+}
+
+static bool objectfled_has_dma_tcds(const ObjectFLEDDmaManager& dma) {
+	return dma.dma1.TCD != nullptr &&
+		   dma.dma2.TCD != nullptr &&
+		   dma.dma3.TCD != nullptr &&
+		   dma.dma2next.TCD != nullptr;
+}
+
 
 void ObjectFLED::begin(uint16_t latchDelay) {
 	LATCH_DELAY = latchDelay;
@@ -138,6 +183,7 @@ void ObjectFLED::beginInternal(uint16_t period, uint16_t t0h, uint16_t t1h, uint
 // init timers, xbar to DMA, DMA bitdata -> GPIOR; clears frameBuffer (total LEDs * 3 bytes)
 void ObjectFLED::begin(void) {
 	auto& dma = ObjectFLEDDmaManager::getInstance();
+	initialized = false;
 
 	// Set each pin's bitmask bit, store offset & bit# for pin
 	uint32_t tempBitmask[4] = {0};
@@ -179,6 +225,7 @@ void ObjectFLED::begin(void) {
 		pin_offsetLocal[i] = offset;	//local copy for context switch
 		uint32_t mask = 1 << bit;	//mask32 = bit set @position in GPIO DR
 		tempBitmask[offset] |= mask;	//bitmask32[0..3] = collective pin bit masks for each GPIO DR
+		force_pin_to_gpio_mux(pin);	// reclaim pin after PWM/Serial/FlexIO mux use
 		//bit7:6 SPEED; bit 5:3 DSE; bit0 SRE  (default SPEED = 0b10; def. DSE = 0b110)
 		*portControlRegister(pin) &= ~0xF9;		//clear SPEED, DSE, SRE
 		*portControlRegister(pin) |= ((OUTPUT_PAD_SPEED & 0x3) << 6) | \
@@ -195,6 +242,7 @@ void ObjectFLED::begin(void) {
 		FL_WARN_F("All %s pins failed validation.", (int)numpinsLocal);
 		FL_WARN_F("ObjectFLED driver is disabled - no LEDs will be updated.");
 		FL_WARN_F("================================================================================");
+		numpinsLocal = 0;
 		return;
 	}
 
@@ -240,12 +288,18 @@ void ObjectFLED::begin(void) {
 	xbar_connect(XBARA1_IN_QTIMER4_TIMER0, XBARA1_OUT_DMA_CH_MUX_REQ30);	
 	xbar_connect(XBARA1_IN_QTIMER4_TIMER1, XBARA1_OUT_DMA_CH_MUX_REQ31);
 	xbar_connect(XBARA1_IN_QTIMER4_TIMER2, XBARA1_OUT_DMA_CH_MUX_REQ94);
-	XBARA1_CTRL0 = XBARA_CTRL_STS1 | XBARA_CTRL_EDGE1(3) | XBARA_CTRL_DEN1 |
-					XBARA_CTRL_STS0 | XBARA_CTRL_EDGE0(3) | XBARA_CTRL_DEN0;
-	XBARA1_CTRL1 = XBARA_CTRL_STS0 | XBARA_CTRL_EDGE0(3) | XBARA_CTRL_DEN0;
 
 	// configure DMA channels
 	dma.dma1.begin();
+	dma.dma2.begin();
+	dma.dma3.begin();
+	if (!objectfled_has_dma_tcds(dma)) {
+		numpinsLocal = 0;
+		return;
+	}
+
+	configure_objectfled_xbar_dma_edges();
+
 	dma.dma1.TCD->SADDR = dma.bitmask;					// source 4*32b GPIO pin mask
 	dma.dma1.TCD->SOFF = 8;								// bytes offset added to SADDR after each transfer
 	// SMOD(4) low bits of SADDR to update with adds of SOFF
@@ -277,12 +331,10 @@ void ObjectFLED::begin(void) {
 	dma.dma2next.TCD->BITER_ELINKNO = BYTES_PER_DMA * 8;
 	dma.dma2next.TCD->CSR = 0;
 
-	dma.dma2.begin();
 	dma.dma2 = dma.dma2next; // copies TCD
 	dma.dma2.triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_1);
 	dma.dma2.attachInterrupt(isr);
 
-	dma.dma3.begin();
 	dma.dma3.TCD->SADDR = dma.bitmask;
 	dma.dma3.TCD->SOFF = 8;
 	dma.dma3.TCD->ATTR = DMA_TCD_ATTR_SSIZE(3) | DMA_TCD_ATTR_SMOD(4) | DMA_TCD_ATTR_DSIZE(2);
@@ -297,6 +349,7 @@ void ObjectFLED::begin(void) {
 	dma.dma3.TCD->BITER_ELINKNO = numbytesLocal * 8;
 	dma.dma3.TCD->CSR = DMA_TCD_CSR_DREQ | DMA_TCD_CSR_DONE;
 	dma.dma3.triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_2);
+	initialized = true;
 }	// begin()
 
 
@@ -474,6 +527,18 @@ void ObjectFLED::genFrameBuffer(uint32_t serp) {
 // 4 word32s for each bit in (led data)/pin = 16 * 8 = 96 bitdata bytes for each LED byte: 288 bytes / LED
 // launches DMA with IRQ activation to reload bitdata from frameBuffer
 void ObjectFLED::show(void) {
+	showInternal(true);
+}
+
+void ObjectFLED::showRawFrameBuffer(void) {
+	showInternal(false);
+}
+
+void ObjectFLED::showInternal(bool regenerateFrameBuffer) {
+	if (!initialized || numpinsLocal == 0 || frameBufferLocal == nullptr) {
+		return;
+	}
+
 	auto& dma = ObjectFLEDDmaManager::getInstance();
 
 	// Acquire DMA (blocks if another instance transmitting)
@@ -502,7 +567,9 @@ void ObjectFLED::show(void) {
 		dma.dma3.TCD->BITER_ELINKNO = dma.numbytes * 8;
 	} //done restoring context
 
-	genFrameBuffer(serpNumber);
+	if (regenerateFrameBuffer) {
+		genFrameBuffer(serpNumber);
+	}
 
 	// disable timers
 	uint16_t enable = TMR4_ENBL;
@@ -514,8 +581,7 @@ void ObjectFLED::show(void) {
 	TMR4_SCTRL2 = TMR_SCTRL_OEN | TMR_SCTRL_FORCE;
 
 	// clear any prior pending DMA requests
-	XBARA1_CTRL0 |= XBARA_CTRL_STS1 | XBARA_CTRL_STS0;
-	XBARA1_CTRL1 |= XBARA_CTRL_STS0;
+	clear_objectfled_xbar_dma_status();
 
 	// fill the DMA transmit buffer
 	memset(dma.bitdata, 0, sizeof(dma.bitdata));	//BYTES_PER_DMA * 64 words32
@@ -570,7 +636,7 @@ void ObjectFLED::show(void) {
 
 	// Release DMA (transmission continues asynchronously)
 	dma.release(this);
-}	// show()
+}	// showInternal()
 
 
 //INPUT: dma2, dma2next, bitdata, framebuffer_inedex, numpins, numbytes, pin_offset[], pin_bitnum[]
@@ -621,6 +687,9 @@ void ObjectFLED::isr(void)
 
 int ObjectFLED::busy(void)
 {
+	if (!initialized) {
+		return 0;
+	}
 	auto& dma = ObjectFLEDDmaManager::getInstance();
 	if (micros() - update_begin_micros < dma.numbytes * TH_TL / 1000 * 8 + LATCH_DELAY) {
 		return 1;
@@ -709,8 +778,10 @@ void drawSquare(void* leds, uint16_t planeY, uint16_t planeX, int yCorner, int x
 
 ObjectFLED::~ObjectFLED() {
 	// Wait for prior xmission to end, don't need to wait for latch time before deleting buffer
-	while (micros() - update_begin_micros < numbytesLocal * 8 * TH_TL / 1000 + 5);
-	waitForDmaToFinish();
+	if (initialized) {
+		while (micros() - update_begin_micros < numbytesLocal * 8 * TH_TL / 1000 + 5);
+		waitForDmaToFinish();
+	}
 	delete[] frameBufferLocal;
 }
 

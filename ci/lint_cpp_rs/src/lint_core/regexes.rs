@@ -461,6 +461,16 @@ fn regex_serial_method() -> &'static Regex {
     VALUE.get_or_init(|| Regex::new(r"\bSerial\.(\w+)\s*\(").unwrap())
 }
 
+fn regex_autoresearch_forbidden_runtime_output() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        Regex::new(
+            r"\b(?:FL_(?:PRINT|WARN|ERROR)[A-Z0-9_]*|Serial\.(?:print\w*|write|flush)|fl::(?:Serial\.(?:print\w*|write|flush)|print|println|printf|write(?:_bytes)?|flush|serial_(?:print\w*|write\w*|flush\w*)|serial(?:Print\w*|Write\w*|Flush\w*)))\s*\(",
+        )
+        .unwrap()
+    })
+}
+
 fn regex_iram_function() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| {
@@ -659,4 +669,3 @@ fn regex_legacy_log_macro() -> &'static Regex {
         Regex::new(&format!(r"\b({})\s*\(", MACROS.join("|"))).unwrap()
     })
 }
-

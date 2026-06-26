@@ -14,6 +14,7 @@
 
 #include "AutoResearchTest.h"
 #include "LegacyClocklessProxy.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_diagnostics.h"
 #include <FastLED.h>
 #include "fl/stl/sstream.h"
 #include "fl/chipsets/encoders/ucs7604.h"
@@ -330,7 +331,16 @@ static size_t decodeSpiEdges(fl::shared_ptr<fl::RxChannel> rx_channel,
 // - timing: Chipset timing configuration for RX decoder
 // - driver_name: Name of the TX driver being tested (e.g., "RMT", "PARLIO") - enables io_loop_back only for RMT
 // Returns number of bytes captured, or 0 on error
-size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel, fl::span<uint8_t> rx_buffer, const fl::ChipsetTimingConfig& timing, const char* driver_name) {
+size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
+               fl::span<uint8_t> rx_buffer,
+               const fl::ChipsetTimingConfig& timing,
+               const char* driver_name,
+               fl::RunResult* diagnostics) {
+    if (diagnostics) {
+        diagnostics->captureWaitResult = -1;
+        diagnostics->rawEdgesAfterWait = 0;
+    }
+
     if (!rx_channel) {
         FL_ERROR("RX channel is null");
         return 0;
@@ -346,6 +356,7 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel, fl::span<uint8_t> rx_bu
     // Buffer size: 1 LED byte = 8 bits = 8 RMT symbols
     // UART with TX inversion produces standard WS2812 waveform, same symbol count
     bool is_uart_driver = (fl::strcmp(driver_name, "UART") == 0);
+    bool is_object_fled_driver = (fl::strcmp(driver_name, "OBJECT_FLED") == 0);
     rx_config.edge_capacity = rx_buffer.size() * 8;
 
     // Internal loopback configuration: Enable ONLY for RMT TX -> RMT RX scenarios
@@ -413,8 +424,14 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel, fl::span<uint8_t> rx_bu
         FastLED.show();
         FL_WARN("[CAPTURE] FastLED.show() returned, calling wait...");
         if (!FastLED.wait(TX_WAIT_TIMEOUT_MS)) {
+            if (is_object_fled_driver) {
+                fl::objectFledDiagnosticsRecord("afterFastLedWaitTimeout");
+            }
             FL_WARN("[CAPTURE] FastLED.wait() timed out");
             return 0;
+        }
+        if (is_object_fled_driver) {
+            fl::objectFledDiagnosticsRecord("afterFastLedWait");
         }
         FL_WARN("[CAPTURE] FastLED.wait() done");
     }
@@ -428,6 +445,24 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel, fl::span<uint8_t> rx_bu
     const uint32_t rx_wait_ms = is_uart_driver ? 500 : 150;
     FL_WARN("[CAPTURE] Waiting for RX completion (" << rx_wait_ms << "ms timeout)...");
     auto wait_result = rx_channel->wait(rx_wait_ms);
+    if (diagnostics) {
+        diagnostics->captureWaitResult = static_cast<int>(wait_result);
+        fl::FixedVector<fl::EdgeTime, 256> edges;
+        edges.resize(256);
+        diagnostics->rawEdgesAfterWait = static_cast<int>(rx_channel->getRawEdgeTimes(edges, 0));
+        diagnostics->decodeOutputCapacity = static_cast<int>(rx_buffer.size());
+        fl::FixedVector<fl::EdgeTime, 32> sample_edges;
+        sample_edges.resize(32);
+        const size_t sample_count = rx_channel->getRawEdgeTimes(sample_edges, 0);
+        fl::sstream sample;
+        for (size_t i = 0; i < sample_count; ++i) {
+            if (i > 0) {
+                sample << ' ';
+            }
+            sample << (sample_edges[i].high ? 'H' : 'L') << sample_edges[i].ns;
+        }
+        diagnostics->rawEdgeSample = sample.str();
+    }
     FL_WARN("[CAPTURE] RX wait returned: " << static_cast<int>(wait_result));
 
     if (wait_result != fl::RxWaitResult::SUCCESS) {
@@ -486,12 +521,13 @@ dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
         return decode_result.value();
     }
 
-    // SPI chipset drivers (LCD_SPI, I2S_SPI): decode raw SPI bit stream
-    // These drivers use LCD_CAM I80 bus or I2S to output APA102 data.
+    // SPI chipset drivers: decode raw SPI bit stream.
+    // These drivers use platform hardware SPI/I80/I2S to output APA102 data.
     // RMT RX captures edges on the data pin; clock pin is ignored.
     bool is_lcd_spi_driver = (fl::strcmp(driver_name, "LCD_SPI") == 0);
     bool is_i2s_spi_driver = (fl::strcmp(driver_name, "I2S_SPI") == 0);
-    if (is_lcd_spi_driver || is_i2s_spi_driver) {
+    bool is_spi_unified_driver = (fl::strcmp(driver_name, "SPI_UNIFIED") == 0);
+    if (is_lcd_spi_driver || is_i2s_spi_driver || is_spi_unified_driver) {
         // SPI clock used for validation: 2.4MHz (matches ValidationRemote.cpp)
         const uint32_t spi_clock_hz = 2400000;
         FL_WARN("[CAPTURE] SPI chipset decode: clock=" << spi_clock_hz << " Hz");
@@ -607,6 +643,13 @@ dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
 
     FL_WARN("[CAPTURE] Decoding...");
     auto decode_result = rx_channel->decode(rx_timing, rx_buffer);
+    if (diagnostics) {
+        diagnostics->decodeOk = decode_result.ok() ? 1 : 0;
+        diagnostics->decodeError =
+            decode_result.ok() ? -1 : static_cast<int>(decode_result.error());
+        diagnostics->decodeBytes =
+            decode_result.ok() ? static_cast<int>(decode_result.value()) : 0;
+    }
 
     if (!decode_result.ok()) {
         // Use FL_WARN instead of FL_ERROR to avoid triggering bash autoresearch exit
@@ -812,7 +855,7 @@ void runMultiTest(const char* test_name,
             result.totalBytes = num_leds * 3;
 
             // Capture RX data
-            size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing, config.driver_name);
+            size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing, config.driver_name, &result);
             result.capturedBytes = static_cast<int>(bytes_captured);
 
             if (bytes_captured == 0) {
@@ -1159,6 +1202,9 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
     // CRITICAL: Clear FastLED's global channel registry to prevent accumulation
     // If we only destroy local shared_ptrs, FastLED still holds references
     FastLED.clear(ClearFlags::CHANNELS);
+    if (fl::strcmp(config.driver_name, "OBJECT_FLED") == 0) {
+        fl::objectFledDiagnosticsRecord("afterFastLedClear");
+    }
     // Channel destruction is synchronous - no delay needed
 }
 
@@ -1186,16 +1232,26 @@ void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
     ss << "========================================";
     FL_WARN(ss.str());
 
-    // Create one legacy proxy per lane (each maps runtime pin to WS2812B<PIN> template)
+    // Create one legacy proxy per lane. By default every lane uses WS2812B,
+    // but AutoResearch can supply per-lane chipsets to exercise multiple
+    // ObjectFLED timing groups in a single FastLED.show().
     fl::vector<fl::unique_ptr<LegacyClocklessProxy>> proxies;
     for (size_t i = 0; i < config.tx_configs.size(); i++) {
         int pin = config.tx_configs[i].getDataPin();
         CRGB* leds = config.tx_configs[i].mLeds.data();
         int numLeds = static_cast<int>(config.tx_configs[i].mLeds.size());
+        LegacyClocklessChipset chipset = LegacyClocklessChipset::WS2812B;
+        if (!config.legacy_chipsets.empty() &&
+            i < config.legacy_chipsets.size()) {
+            chipset = config.legacy_chipsets[i];
+        }
 
-        auto proxy = fl::make_unique<LegacyClocklessProxy>(pin, leds, numLeds);
+        auto proxy = fl::make_unique<LegacyClocklessProxy>(
+            pin, leds, numLeds, chipset, config.legacy_rgbw);
         if (!proxy->valid()) {
-            FL_ERROR("Legacy proxy invalid for lane " << i << " (pin " << pin << " out of range 0-8)");
+            FL_ERROR("Legacy proxy invalid for lane " << i << " (pin " << pin
+                     << ", chipset " << legacyClocklessChipsetName(chipset)
+                     << " not in supported set)");
             return;  // vector destructor cleans up already-created proxies
         }
         proxies.push_back(fl::move(proxy));

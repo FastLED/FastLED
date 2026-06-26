@@ -372,6 +372,92 @@ impl FileContentChecker for ExampleSerialChecker {
     }
 }
 
+struct AutoResearchRuntimeOutputChecker;
+
+impl FileContentChecker for AutoResearchRuntimeOutputChecker {
+    fn name(&self) -> &'static str {
+        "AutoResearchRuntimeOutputChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino", ".cpp.hpp"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if !self.should_process_file(&file_content.path, Path::new(".")) {
+            return Vec::new();
+        }
+
+        let normalized_path = normalize_path(&file_content.path);
+        let is_autoresearch_file = normalized_path.contains("examples/AutoResearch/");
+        let has_marker = file_content
+            .content
+            .to_ascii_lowercase()
+            .contains("autoresearch-runtime-output-lint:");
+        if !is_autoresearch_file && !has_marker {
+            return Vec::new();
+        }
+        let always_enforced =
+            normalized_path.ends_with("examples/AutoResearch/AutoResearch.ino")
+                || normalized_path.contains("examples/AutoResearch/AutoResearchRemote");
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+        let mut lint_active = always_enforced;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            let lower_line = line.to_ascii_lowercase();
+
+            if lower_line.contains("autoresearch-runtime-output-lint: begin") {
+                lint_active = true;
+                continue;
+            }
+            if lower_line.contains("autoresearch-runtime-output-lint: end") {
+                lint_active = always_enforced;
+                continue;
+            }
+            if !lint_active {
+                continue;
+            }
+
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let (code_part, comment_part) = line
+                .split_once("//")
+                .map_or((line.as_str(), ""), |(code, comment)| (code, comment));
+            let code_without_strings =
+                regex_string_literal().replace_all(code_part, "\"\"").to_string();
+            if !regex_autoresearch_forbidden_runtime_output().is_match(&code_without_strings) {
+                continue;
+            }
+            if comment_part
+                .to_ascii_lowercase()
+                .contains("ok autoresearch rpc serial")
+            {
+                continue;
+            }
+
+            violations.push((
+                index + 1,
+                format!(
+                    "AutoResearch runtime output must use JSON-RPC result fields, not direct logging/serial output.\n      Line: {stripped}\n      Boot/RPC files are always checked; other AutoResearch files can protect critical test sections with `// autoresearch-runtime-output-lint: begin` and `// autoresearch-runtime-output-lint: end`.\n      If this is the RPC transport boundary itself, suppress with `// ok autoresearch rpc serial - <reason>`."
+                ),
+            ));
+        }
+
+        violations
+    }
+}
+
 struct IncludeAfterNamespaceChecker;
 
 impl FileContentChecker for IncludeAfterNamespaceChecker {
@@ -547,4 +633,3 @@ impl FileContentChecker for UsingNamespaceChecker {
         violations
     }
 }
-

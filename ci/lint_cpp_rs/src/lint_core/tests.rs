@@ -51,6 +51,120 @@ mod tests {
     }
 
     #[test]
+    fn autoresearch_runtime_output_flags_direct_logging_and_serial_prints() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearch.ino",
+            "FL_WARN(\"boot chatter\");\nFL_WARN_F_ONCE(\"boot chatter\");\nFL_WARN_LIT(\"boot chatter\");\nFL_PRINT_EVERY(1000, \"tick\");\nFL_PRINT_F(\"tick\");\nFL_PRINTLN(\"tick\");\nFL_ERROR(\"boot failure\");\nSerial.println(\"not rpc\");\nSerial.printf(\"not rpc\");\nSerial.printHex(\"not rpc\");\nfl::println(\"nope\");\nfl::write_bytes(bytes, len);\nfl::Serial.println(\"nope\");\nfl::Serial.printHex(\"nope\");\nfl::serial_print(\"nope\");\nfl::serial_println(\"nope\");\nfl::serial_printf(\"nope\");\nfl::serial_write(bytes, len);\nfl::serialPrintln(\"nope\");\nfl::serialWrite(bytes, len);\n",
+        ));
+        assert_eq!(result.len(), 20);
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_allows_serial_setup_helpers() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearch.ino",
+            "fl::serial_begin(115200);\nwhile (!fl::serial_ready()) {}\n",
+        ));
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_marker_scope_can_protect_driver_cpp_hpp() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let path = "src/platforms/arm/teensy/teensy4_common/example.cpp.hpp";
+        assert!(checker.should_process_file(path, Path::new(".")));
+        let result = checker.check_file_content(&file(
+            path,
+            "// autoresearch-runtime-output-lint: begin\n\
+FL_WARN(\"driver chatter\");\n\
+FL_PRINT(\"driver chatter\");\n\
+Serial.printX(\"driver chatter\");\n\
+fl::serialPrintln(\"driver chatter\");\n\
+fl::serial_write(bytes, len);\n\
+// autoresearch-runtime-output-lint: end\n",
+        ));
+        assert_eq!(result.len(), 5);
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_ignores_unmarked_non_autoresearch_files() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "src/platforms/arm/teensy/teensy4_common/example.cpp.hpp",
+            "FL_WARN(\"allowed outside an explicit protected span\");\n",
+        ));
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_allows_rpc_serial_boundary_only() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearchRemote.cpp",
+            "Serial.println(formatted.c_str());  // ok autoresearch rpc serial - RPC response boundary\n",
+        ));
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_scope_is_limited() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        assert!(checker.should_process_file(
+            "examples/AutoResearch/AutoResearchRemotePinMethods.cpp",
+            Path::new(".")
+        ));
+        assert!(checker.should_process_file(
+            "examples/AutoResearch/AutoResearchTest.cpp",
+            Path::new(".")
+        ));
+        assert!(checker
+            .check_file_content(&file(
+                "examples/AutoResearch/AutoResearchTest.cpp",
+                "FL_WARN(\"diagnostic-only path\");\n",
+            ))
+            .is_empty());
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_marker_scope_flags_test_time_sections() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearchTest.cpp",
+            "FL_WARN(\"legacy diagnostic outside guarded section\");\n\
+// autoresearch-runtime-output-lint: begin\n\
+FL_WARN(\"test-time chatter\");\n\
+Serial.println(\"test-time chatter\");\n\
+fl::serial_println(\"test-time chatter\");\n\
+// autoresearch-runtime-output-lint: end\n\
+FL_WARN(\"legacy diagnostic outside guarded section\");\n",
+        ));
+        assert_eq!(result.len(), 3);
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_marker_scope_restores_always_checked_files() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearchRemoteRunSingleTest.cpp",
+            "// autoresearch-runtime-output-lint: end\n\
+FL_WARN(\"still checked because remote files are always guarded\");\n",
+        ));
+        assert_eq!(result.len(), 1);
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_ignores_strings_and_comments() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearch.ino",
+            "// FL_WARN(\"comment\")\nconst char* s = \"Serial.println\";\n",
+        ));
+        assert!(result.is_empty());
+    }
+
+    #[test]
     fn bare_allocation_rejects_malloc_but_not_fl_malloc() {
         let checker = BareAllocationChecker;
         assert_eq!(

@@ -194,7 +194,8 @@ public:
         for (size_t i = 0; i < encodedData.size(); i++) {
             encodedData[i] = static_cast<uint8_t>(i);
         }
-        return fl::make_shared<ChannelData>(pin, timing, fl::move(encodedData));
+        return fl::make_shared<ChannelData>(
+                pin, timing, fl::move(encodedData), ChannelPixelFormat::RGB);
     }
 
     bool pollUntilReady(uint32_t timeout_ms = 1000) {
@@ -1068,7 +1069,8 @@ FL_TEST_CASE("ChannelEngineUART - Edge cases") {
     FL_SUBCASE("Empty channel (0 LEDs)") {
         ChipsetTimingConfig timing(WS2812_T0H, WS2812_T0L, WS2812_T1H, WS2812_T1L);
         fl::vector_psram<uint8_t> emptyData;
-        auto data = fl::make_shared<ChannelData>(17, timing, fl::move(emptyData));
+        auto data = fl::make_shared<ChannelData>(
+                17, timing, fl::move(emptyData), ChannelPixelFormat::RGB);
         fixture.mDriver.enqueue(data);
         fixture.mDriver.show();
         FL_CHECK(fixture.mDriver.poll() == IChannelDriver::DriverState::READY);
@@ -1135,7 +1137,8 @@ FL_TEST_CASE("ChannelEngineUART - canHandle validates timing") {
         // TM1829-1600k: T1=100, T2=300, T3=200, period=600ns → 8.3 Mbps
         ChipsetTimingConfig timing(100, 300, 200, 500);
         fl::vector_psram<uint8_t> data(30);
-        auto ch = fl::make_shared<ChannelData>(17, timing, fl::move(data));
+        auto ch = fl::make_shared<ChannelData>(
+                17, timing, fl::move(data), ChannelPixelFormat::RGB);
         FL_CHECK_FALSE(fixture.mDriver.canHandle(ch));
     }
 }

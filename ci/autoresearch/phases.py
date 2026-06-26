@@ -14,7 +14,7 @@ import sys
 import threading
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeGuard
 
 from colorama import Fore, Style
 
@@ -24,10 +24,10 @@ from ci.autoresearch.context import (
     DEFAULT_EXPECT_PATTERNS,
     DEFAULT_FAIL_ON_PATTERN,
     EXIT_ON_ERROR_PATTERNS,
-    PIN_RX,
-    PIN_TX,
     QuietContext,
     RunContext,
+    default_pins_for_environment,
+    display_objectfled_diagnostics,
     display_pattern_details,
     display_tight_timing,
 )
@@ -63,6 +63,30 @@ if TYPE_CHECKING:
 # hard wall; this is the additional headroom for any in-flight RPC to
 # unwind cleanly before we kill the process. Per session 2026-06-22 spec.
 WATCHDOG_GRACE_SECONDS = 20.0
+FLEX_IO_TEENSY_DEFAULT_TX_PIN = 6
+
+
+def _is_teensy4_environment(final_environment: str | None) -> bool:
+    return final_environment is not None and final_environment.lower() in (
+        "teensy40",
+        "teensy41",
+    )
+
+
+def _driver_name_for_environment(driver: str, final_environment: str | None) -> str:
+    if driver == "SPI" and _is_teensy4_environment(final_environment):
+        return "SPI_UNIFIED"
+    return driver
+
+
+def _uses_teensy_flex_io_default_tx(
+    args: Args, final_environment: str, drivers: list[str]
+) -> bool:
+    return (
+        args.tx_pin is None
+        and final_environment in {"teensy40", "teensy41"}
+        and "FLEX_IO" in drivers
+    )
 
 
 def _autoresearch_watchdog_thread(
@@ -306,61 +330,24 @@ async def _run_native_autoresearch(args: Args, build_mode: str = "quick") -> int
     return 0 if result.success else 1
 
 
-def _try_teensy_bootloader_upload(build_dir: Path, environment: str | None) -> bool:
-    """Try to detect Teensy in HalfKay bootloader mode and upload firmware."""
-    if not environment:
-        return False
-
-    loader_paths = [
-        Path.home()
-        / ".platformio"
-        / "packages"
-        / "tool-teensy"
-        / "teensy_loader_cli.exe",
-        Path.home() / ".platformio" / "packages" / "tool-teensy" / "teensy_loader_cli",
-    ]
-    loader = None
-    for p in loader_paths:
-        if p.exists():
-            loader = p
-            break
-    if not loader:
-        return False
-
-    hex_path = build_dir / ".pio" / "build" / environment / "firmware.hex"
-    if not hex_path.exists():
-        return False
-
-    mcu_map = {
-        "teensy41": "TEENSY41",
-        "teensy40": "TEENSY40",
-        "teensylc": "TEENSYLC",
-        "teensy36": "TEENSY36",
-        "teensy35": "TEENSY35",
-        "teensy31": "TEENSY31",
-    }
-    mcu = mcu_map.get(environment.lower())
-    if not mcu:
-        return False
-
-    try:
-        result = subprocess.run(
-            [str(loader), f"--mcu={mcu}", "-v", str(hex_path)],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        if result.returncode == 0 and "Programming" in result.stdout:
-            return True
-    except (subprocess.TimeoutExpired, OSError):
-        pass
-
-    return False
-
-
 # ============================================================
 # Phase A: Parse args and build commands
 # ============================================================
+
+
+def _is_teensy_environment(environment: str | None) -> bool:
+    return environment is not None and environment.lower() in ("teensy40", "teensy41")
+
+
+def _reject_teensy_root_platformio_ini(environment: str | None) -> bool:
+    if not _is_teensy_environment(environment):
+        return False
+    print(
+        f"{Fore.RED}❌ Error: --use-root-platformio-ini is not allowed for "
+        f"Teensy AutoResearch acceptance. Use the synthesized fbuild project "
+        f"from ci/boards.py instead.{Style.RESET_ALL}"
+    )
+    return True
 
 
 def _parse_args_and_build_commands(args: Args) -> RunContext | int:
@@ -417,10 +404,16 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             )
             sys.exit(2)
 
-    is_teensy4 = final_environment is not None and final_environment.lower() in (
-        "teensy40",
-        "teensy41",
-    )
+    is_teensy4 = _is_teensy4_environment(final_environment)
+    is_teensy_specific_driver = args.object_fled or args.flex_io or args.lpuart
+
+    if args.use_root_platformio_ini and (is_teensy4 or is_teensy_specific_driver):
+        print(
+            f"{Fore.RED}❌ Error: --use-root-platformio-ini is not allowed for "
+            f"Teensy AutoResearch acceptance. Use the synthesized fbuild project "
+            f"from ci/boards.py instead.{Style.RESET_ALL}"
+        )
+        return 1
 
     if args.lpuart:
         print(
@@ -452,7 +445,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         if args.rmt:
             drivers.append("RMT")
         if args.spi:
-            drivers.append("SPI")
+            drivers.append(_driver_name_for_environment("SPI", final_environment))
         if args.uart:
             drivers.append("UART")
         if args.lcd:
@@ -573,16 +566,57 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 return 1
 
     if args.legacy:
-        if max_lanes is not None and max_lanes > 1:
+        requested_min_lanes = min_lanes if min_lanes is not None else 1
+        requested_max_lanes = max_lanes if max_lanes is not None else 1
+        if args.legacy_mixed_timings and requested_max_lanes < 2:
             print(
-                "\u274c Error: --legacy only supports single-lane (pin 0-8). Remove --lanes or use --lanes 1"
+                "\u274c Error: --legacy-mixed-timings requires --legacy with at least 2 lanes"
             )
             return 1
-        min_lanes = 1
-        max_lanes = 1
+        if args.legacy_rgbw_small_counts:
+            if requested_min_lanes != 1 or requested_max_lanes != 1:
+                print(
+                    "\u274c Error: --legacy-rgbw-small-counts requires exactly 1 lane"
+                )
+                return 1
+            if args.strip_sizes is not None:
+                print(
+                    "\u274c Error: --legacy-rgbw-small-counts supplies strip sizes 1,2,3,4; do not combine with --strip-sizes"
+                )
+                return 1
+        if requested_max_lanes > 1:
+            if args.tx_pin is None:
+                print(
+                    "\u274c Error: --legacy multi-lane requires explicit --tx-pin in the historical 0-8 template range"
+                )
+                return 1
+            max_pin = args.tx_pin + requested_max_lanes - 1
+            if args.tx_pin < 0 or max_pin > 8:
+                print(
+                    "\u274c Error: --legacy multi-lane supports consecutive TX pins 0-8 only; pin 22 is single-lane for the current ObjectFLED loopback"
+                )
+                return 1
+        min_lanes = requested_min_lanes
+        max_lanes = requested_max_lanes
         print(
-            "\u2139\ufe0f  Legacy API mode: using WS2812B<PIN> template path (single-lane, pin 0-8)"
+            "\u2139\ufe0f  Legacy API mode: using WS2812B<PIN> template path (supported TX pins 0-8; pin 22 single-lane current loopback)"
         )
+        if args.legacy_mixed_timings:
+            print(
+                "\u2139\ufe0f  Legacy mixed timing mode: alternating WS2812B/SK6812 template chipsets across lanes"
+            )
+        if args.legacy_rgbw_small_counts:
+            print(
+                "\u2139\ufe0f  Legacy RGBW small-count mode: running RGBW strip sizes 1, 2, 3, and 4"
+            )
+    elif args.legacy_mixed_timings or args.legacy_rgbw_small_counts:
+        flag = (
+            "--legacy-mixed-timings"
+            if args.legacy_mixed_timings
+            else "--legacy-rgbw-small-counts"
+        )
+        print(f"\u274c Error: {flag} requires --legacy")
+        return 1
 
     if min_lanes is not None and max_lanes is not None:
         if min_lanes < 1 or max_lanes < 1 or min_lanes > max_lanes:
@@ -695,6 +729,9 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 )
                 return 1
 
+    if args.legacy_rgbw_small_counts:
+        config["stripSizes"] = [1, 2, 3, 4]
+
     rpc_commands_list: list[dict[str, Any]] = []
 
     if per_lane_counts is not None:
@@ -750,11 +787,6 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             f"({len(drivers_list)} drivers \u00d7 {lane_range['max'] - lane_range['min'] + 1} lane count(s) \u00d7 {len(strip_sizes)} strip size(s))"
         )
     else:
-        # FlexIO on Teensy 4.x only routes through pins {6-13, 32}; the global
-        # default TX pin (1) is not FlexIO2-capable so canHandle() rejects it
-        # and the manager silently falls back to ObjectFLED. Pin the FLEX_IO
-        # tests to a known FlexIO2 pin so the engine actually runs.
-        flex_io_tx_pin = 6
         for driver in drivers_list:
             for lane_count in range(lane_range["min"], lane_range["max"] + 1):
                 for strip_size in strip_sizes:
@@ -766,10 +798,15 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         "iterations": 1,
                         "timing": timing_name,
                     }
-                    if driver == "FLEX_IO" and args.tx_pin is None:
-                        test_config["pinTx"] = flex_io_tx_pin
                     if args.legacy:
                         test_config["useLegacyApi"] = True
+                        if args.legacy_rgbw_small_counts:
+                            test_config["legacyRgbw"] = True
+                        if args.legacy_mixed_timings:
+                            test_config["legacyChipsets"] = [
+                                "WS2812B" if i % 2 == 0 else "SK6812"
+                                for i in range(lane_count)
+                            ]
                     # Multi-frame capture: back-to-back show()/capture cycles per pattern.
                     # Defaults: SPI -> 2 (catches #2254/#2288 second-frame degradation),
                     # others -> 1. User can override with --frames N.
@@ -781,6 +818,8 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         frame_count = 1
                     if frame_count > 1:
                         test_config["frameCount"] = frame_count
+                    if args.contaminate_tx_mux:
+                        test_config["contaminateTxMux"] = True
                     if args.tight_timing:
                         if (
                             args.tight_timing_iterations < 1
@@ -998,7 +1037,14 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
             if is_teensy:
                 print(f"\n{Fore.YELLOW}{'=' * 60}")
                 print(f"  Teensy not detected on USB.")
-                print(f"  Press the PROGRAM button on the Teensy to enter bootloader.")
+                print(
+                    "  AutoResearch will not pre-upload stale .pio firmware "
+                    "during port detection."
+                )
+                print(
+                    "  Power-cycle or reconnect the Teensy so the USB serial "
+                    "port appears, then let fbuild own the deploy."
+                )
                 print(f"{'=' * 60}{Style.RESET_ALL}\n")
             print(
                 f"\u23f3 No USB serial port found yet. Waiting up to {max_wait_s}s for device..."
@@ -1016,26 +1062,6 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                         f"\u2705 USB serial port detected after {elapsed:.1f}s: {result.selected_port}"
                     )
                     break
-                if is_teensy:
-                    teensy_result = _try_teensy_bootloader_upload(
-                        ctx.build_dir, ctx.final_environment
-                    )
-                    if teensy_result:
-                        print(
-                            "\u2705 Firmware uploaded via Teensy bootloader, waiting for serial port..."
-                        )
-                        serial_deadline = time.monotonic() + 15
-                        while time.monotonic() < serial_deadline:
-                            time.sleep(1.0)
-                            result = auto_detect_upload_port(
-                                expected_environment=expected_environment
-                            )
-                            if result.ok:
-                                print(
-                                    f"\u2705 Teensy serial port detected: {result.selected_port}"
-                                )
-                                break
-                        break
                 now = time.monotonic()
                 if now - last_msg_at >= 5.0:
                     remaining = deadline - now
@@ -1062,7 +1088,9 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
             )
             if is_teensy:
                 print(
-                    f"{Fore.YELLOW}Teensy hint: Hold the PROGRAM button while plugging in USB to force bootloader mode.{Style.RESET_ALL}"
+                    f"{Fore.YELLOW}Teensy hint: keep the board in USB serial mode "
+                    f"for AutoResearch acceptance; fbuild must perform the first "
+                    f"firmware deploy for this run.{Style.RESET_ALL}"
                 )
             print(
                 f"{Fore.RED}Note: Bluetooth serial ports (BTHENUM) are not supported.{Style.RESET_ALL}\n"
@@ -1123,6 +1151,11 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                 )
                 return 1
         print()
+
+    if args.use_root_platformio_ini and _reject_teensy_root_platformio_ini(
+        ctx.final_environment
+    ):
+        return 1
 
     # Deferred synthesis (#3281). When --use-root-platformio-ini is NOT set
     # and the board wasn't known at parse time, the build_dir is still pointing
@@ -1426,6 +1459,12 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     from ci.util.serial_interface import create_serial_interface
 
     final_environment = (ctx.final_environment or "").lower()
+    default_tx_pin, default_rx_pin = default_pins_for_environment(final_environment)
+    uses_flex_io_default_tx = _uses_teensy_flex_io_default_tx(
+        args, final_environment, ctx.drivers
+    )
+    if uses_flex_io_default_tx:
+        default_tx_pin = FLEX_IO_TEENSY_DEFAULT_TX_PIN
     use_pyserial = (not use_fbuild) or final_environment in LPC_BRING_UP_ENVS
     ctx.serial_iface = create_serial_interface(
         port=upload_port, use_pyserial=use_pyserial
@@ -1464,16 +1503,20 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     elif ctx.ble_mode:
         print("\n\U0001f4cc BLE mode: skipping pin discovery and GPIO pre-test")
     elif args.tx_pin is not None or args.rx_pin is not None:
-        ctx.effective_tx_pin = args.tx_pin if args.tx_pin is not None else PIN_TX
-        ctx.effective_rx_pin = args.rx_pin if args.rx_pin is not None else PIN_RX
+        ctx.effective_tx_pin = (
+            args.tx_pin if args.tx_pin is not None else default_tx_pin
+        )
+        ctx.effective_rx_pin = (
+            args.rx_pin if args.rx_pin is not None else default_rx_pin
+        )
         print(
             f"\n\U0001f4cc Using CLI-specified pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
         )
-        set_pins_cmd = {
-            "method": "setPins",
-            "params": [{"txPin": ctx.effective_tx_pin, "rxPin": ctx.effective_rx_pin}],
-        }
-        ctx.json_rpc_commands.insert(0, set_pins_cmd)
+        if uses_flex_io_default_tx:
+            print(
+                "\U0001f4cc Teensy FLEX_IO defaulted omitted TX to "
+                f"{ctx.effective_tx_pin}."
+            )
     elif args.auto_discover_pins:
         print("\n\U0001f50d Auto-discovery enabled - searching for connected pins...")
         pin_discovery = await run_pin_discovery(
@@ -1493,20 +1536,30 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
                 f"\U0001f4cc Using discovered pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
             )
         else:
-            ctx.effective_tx_pin = PIN_TX
-            ctx.effective_rx_pin = PIN_RX
+            ctx.effective_tx_pin = default_tx_pin
+            ctx.effective_rx_pin = default_rx_pin
+            default_reason = "default pins"
+            if uses_flex_io_default_tx:
+                default_reason = "Teensy FLEX_IO default pins"
             print(
-                f"\U0001f4cc Using default pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
+                f"\U0001f4cc Using {default_reason}: "
+                f"TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
             )
             if ctx.discovery_client:
                 await ctx.discovery_client.close()
                 ctx.discovery_client = None
     else:
-        ctx.effective_tx_pin = PIN_TX
-        ctx.effective_rx_pin = PIN_RX
+        ctx.effective_tx_pin = default_tx_pin
+        ctx.effective_rx_pin = default_rx_pin
+        default_reason = "default pins"
+        if uses_flex_io_default_tx:
+            default_reason = "Teensy FLEX_IO default pins"
         print(
-            f"\n\U0001f4cc Using default pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
+            f"\n\U0001f4cc Using {default_reason}: "
+            f"TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
         )
+
+    _ensure_leading_set_pins_command(ctx)
 
     # GPIO connectivity pre-test
     if final_environment in LPC_BRING_UP_ENVS:
@@ -1529,8 +1582,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print("\n\u2705 Skipping GPIO pre-test (pins verified during discovery)")
     elif not await run_gpio_pretest(
         upload_port,
-        ctx.effective_tx_pin or PIN_TX,
-        ctx.effective_rx_pin or PIN_RX,
+        ctx.effective_tx_pin if ctx.effective_tx_pin is not None else default_tx_pin,
+        ctx.effective_rx_pin if ctx.effective_rx_pin is not None else default_rx_pin,
         serial_interface=serial_iface,
     ):
         print()
@@ -1544,8 +1597,12 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print("     JSON-RPC commands. Check serial output above for boot errors")
         print("     or crashes. Try power-cycling the device.")
         print()
-        tx = ctx.effective_tx_pin if ctx.effective_tx_pin is not None else PIN_TX
-        rx = ctx.effective_rx_pin if ctx.effective_rx_pin is not None else PIN_RX
+        tx = (
+            ctx.effective_tx_pin if ctx.effective_tx_pin is not None else default_tx_pin
+        )
+        rx = (
+            ctx.effective_rx_pin if ctx.effective_rx_pin is not None else default_rx_pin
+        )
         print("  2. WRONG PIN PAIR: The jumper wire may be connected to different")
         print(f"     pins than expected (tested TX={tx}, RX={rx}).")
         print("     Try: bash autoresearch --auto-discover-pins")
@@ -2423,6 +2480,287 @@ async def _run_coroutine_tests(ctx: RunContext) -> int:
             await client.close()
 
 
+_TEST_RPC_METHODS = frozenset({"runSingleTest", "runParallelTest"})
+
+
+def _is_plain_int(value: Any) -> TypeGuard[int]:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _expected_test_drivers(method: str, cmd: dict[str, Any]) -> list[str]:
+    params = cmd.get("params")
+    if not isinstance(params, dict):
+        return []
+
+    if method == "runSingleTest":
+        driver = params.get("driver")
+        return [driver] if isinstance(driver, str) and driver else []
+
+    if method == "runParallelTest":
+        drivers = params.get("drivers")
+        if not isinstance(drivers, list):
+            return []
+        expected: list[str] = []
+        for entry in drivers:
+            if isinstance(entry, dict):
+                driver = entry.get("driver")
+                if isinstance(driver, str) and driver:
+                    expected.append(driver)
+        return expected
+
+    return []
+
+
+def _actual_test_drivers(method: str, data: dict[str, Any]) -> list[str]:
+    if method == "runSingleTest":
+        driver = data.get("driver")
+        return [driver] if isinstance(driver, str) and driver else []
+
+    if method == "runParallelTest":
+        drivers = data.get("drivers")
+        if not isinstance(drivers, list):
+            return []
+        actual: list[str] = []
+        for entry in drivers:
+            if isinstance(entry, dict):
+                driver = entry.get("driver")
+                if isinstance(driver, str) and driver:
+                    actual.append(driver)
+        return actual
+
+    return []
+
+
+def _set_pins_rpc_command(tx_pin: int, rx_pin: int) -> dict[str, Any]:
+    return {"method": "setPins", "params": [{"txPin": tx_pin, "rxPin": rx_pin}]}
+
+
+def _expected_setup_pins(
+    method: str, cmd: dict[str, Any]
+) -> tuple[int | None, int | None]:
+    params = cmd.get("params")
+    if method == "setPins":
+        if (
+            isinstance(params, list)
+            and len(params) == 1
+            and isinstance(params[0], dict)
+        ):
+            tx_pin = params[0].get("txPin")
+            rx_pin = params[0].get("rxPin")
+            return (
+                tx_pin if _is_plain_int(tx_pin) else None,
+                rx_pin if _is_plain_int(rx_pin) else None,
+            )
+        if isinstance(params, list) and len(params) == 2:
+            tx_pin, rx_pin = params
+            return (
+                tx_pin if _is_plain_int(tx_pin) else None,
+                rx_pin if _is_plain_int(rx_pin) else None,
+            )
+        return None, None
+
+    if not isinstance(params, list) or len(params) != 1:
+        return None, None
+
+    pin = params[0]
+    if not _is_plain_int(pin):
+        return None, None
+
+    if method == "setTxPin":
+        return pin, None
+    if method == "setRxPin":
+        return None, pin
+    return None, None
+
+
+def _validate_setup_rpc_response(
+    method: str, cmd: dict[str, Any], data: dict[str, Any]
+) -> list[str]:
+    """Return validation errors for setup RPCs that must not drift silently."""
+    errors: list[str] = []
+    expected_tx_pin, expected_rx_pin = _expected_setup_pins(method, cmd)
+
+    for field, expected in (
+        ("txPin", expected_tx_pin),
+        ("rxPin", expected_rx_pin),
+    ):
+        if expected is None:
+            continue
+        value = data.get(field)
+        if not _is_plain_int(value):
+            errors.append(f"missing integer {field}")
+        elif value != expected:
+            errors.append(f"{field}={value} does not match expected {expected}")
+
+    return errors
+
+
+def _ensure_leading_set_pins_command(ctx: RunContext) -> None:
+    if ctx.effective_tx_pin is None or ctx.effective_rx_pin is None:
+        return
+
+    set_pins_cmd = _set_pins_rpc_command(ctx.effective_tx_pin, ctx.effective_rx_pin)
+    if ctx.json_rpc_commands and ctx.json_rpc_commands[0].get("method") == "setPins":
+        ctx.json_rpc_commands[0] = set_pins_cmd
+        return
+    ctx.json_rpc_commands.insert(0, set_pins_cmd)
+
+
+def _expected_test_pins(
+    method: str,
+    cmd: dict[str, Any],
+    default_tx_pin: int | None,
+    default_rx_pin: int | None,
+) -> tuple[int | None, int | None]:
+    params = cmd.get("params")
+    if not isinstance(params, dict):
+        return default_tx_pin, default_rx_pin
+
+    if method == "runParallelTest":
+        drivers = params.get("drivers")
+        if isinstance(drivers, list) and drivers and isinstance(drivers[0], dict):
+            tx_pin = drivers[0].get("pinTx")
+            if _is_plain_int(tx_pin):
+                return tx_pin, default_rx_pin
+        return default_tx_pin, default_rx_pin
+
+    tx_pin = params.get("pinTx")
+    rx_pin = params.get("pinRx")
+    return (
+        tx_pin if _is_plain_int(tx_pin) else default_tx_pin,
+        rx_pin if _is_plain_int(rx_pin) else default_rx_pin,
+    )
+
+
+def _validate_test_rpc_response(
+    method: str,
+    cmd: dict[str, Any],
+    data: dict[str, Any],
+    expected_tx_pin: int | None,
+    expected_rx_pin: int | None,
+) -> list[str]:
+    """Return validation errors that prevent a test RPC from proving PASS."""
+    errors: list[str] = []
+
+    if not isinstance(data.get("success"), bool):
+        errors.append("missing boolean success")
+    if not isinstance(data.get("passed"), bool):
+        errors.append("missing boolean passed")
+
+    total_tests = data.get("totalTests")
+    passed_tests = data.get("passedTests")
+    if not _is_plain_int(total_tests):
+        errors.append("missing integer totalTests")
+    elif total_tests <= 0:
+        errors.append("totalTests must be > 0")
+
+    if not _is_plain_int(passed_tests):
+        errors.append("missing integer passedTests")
+    elif _is_plain_int(total_tests):
+        if passed_tests < 0:
+            errors.append("passedTests must be >= 0")
+        if passed_tests > total_tests:
+            errors.append("passedTests must be <= totalTests")
+        if data.get("passed") is True and passed_tests != total_tests:
+            errors.append("passed=true requires passedTests == totalTests")
+
+    expected_drivers = _expected_test_drivers(method, cmd)
+    actual_drivers = _actual_test_drivers(method, data)
+    if not actual_drivers:
+        field = "driver" if method == "runSingleTest" else "drivers"
+        errors.append(f"missing selected {field}")
+    else:
+        for driver in expected_drivers:
+            if driver not in actual_drivers:
+                errors.append(f"missing expected driver {driver}")
+
+    expected_tx_pin, expected_rx_pin = _expected_test_pins(
+        method, cmd, expected_tx_pin, expected_rx_pin
+    )
+    if expected_tx_pin is not None or expected_rx_pin is not None:
+        capture_backend = data.get("captureBackend")
+        if not isinstance(capture_backend, str) or not capture_backend:
+            errors.append("missing string captureBackend")
+        if data.get("passed") is True:
+            capture_evidence_bytes = data.get("captureEvidenceBytes")
+            capture_evidence_raw_edges = data.get("captureEvidenceRawEdges")
+            has_capture_bytes = (
+                _is_plain_int(capture_evidence_bytes) and capture_evidence_bytes > 0
+            )
+            has_capture_edges = (
+                _is_plain_int(capture_evidence_raw_edges)
+                and capture_evidence_raw_edges > 0
+            )
+            if not has_capture_bytes and not has_capture_edges:
+                errors.append("passed test response requires nonzero capture evidence")
+
+    for field, expected in (
+        ("requestedTxPin", expected_tx_pin),
+        ("requestedRxPin", expected_rx_pin),
+        ("actualTxPin", expected_tx_pin),
+        ("actualRxPin", expected_rx_pin),
+    ):
+        if expected is None:
+            continue
+        value = data.get(field)
+        if not _is_plain_int(value):
+            errors.append(f"missing integer {field}")
+        elif expected is not None and value != expected:
+            errors.append(f"{field}={value} does not match expected {expected}")
+
+    return errors
+
+
+def _classify_test_failure(data: dict[str, Any]) -> tuple[str, str]:
+    """Classify a failed test response using structured RPC evidence."""
+    patterns = data.get("patterns")
+    if isinstance(patterns, list) and patterns:
+        saw_pattern = False
+        saw_capture_bytes = False
+        saw_raw_edges = False
+        saw_mismatched_bytes = False
+        saw_capture_failure = False
+
+        for pattern in patterns:
+            if not isinstance(pattern, dict):
+                continue
+            saw_pattern = True
+            captured = pattern.get("capturedBytes")
+            raw_edges = pattern.get("rawEdgesAfterWait")
+            mismatched = pattern.get("mismatchedBytes")
+            if _is_plain_int(captured) and captured > 0:
+                saw_capture_bytes = True
+            if _is_plain_int(raw_edges) and raw_edges > 0:
+                saw_raw_edges = True
+            if _is_plain_int(mismatched) and mismatched > 0:
+                saw_mismatched_bytes = True
+            if pattern.get("captureFailed") is True:
+                saw_capture_failure = True
+
+        if saw_pattern:
+            if not saw_capture_bytes and not saw_raw_edges:
+                return (
+                    "zero_capture",
+                    "RX produced no raw edges or decodable bytes",
+                )
+            if saw_mismatched_bytes or saw_capture_failure:
+                return (
+                    "decode_mismatch",
+                    "RX captured signal/data but decoded output did not match",
+                )
+
+    evidence_bytes = data.get("captureEvidenceBytes")
+    evidence_edges = data.get("captureEvidenceRawEdges")
+    has_capture_bytes = _is_plain_int(evidence_bytes) and evidence_bytes > 0
+    has_capture_edges = _is_plain_int(evidence_edges) and evidence_edges > 0
+    if data.get("passed") is False:
+        if not has_capture_bytes and not has_capture_edges:
+            return ("zero_capture", "test failed with no positive capture evidence")
+        return ("decode_mismatch", "test failed despite positive capture evidence")
+
+    return ("test_failed", "test response reported failure")
+
+
 async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
     """Execute main RPC test loop."""
     upload_port = ctx.upload_port
@@ -2476,6 +2814,7 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                 "setLaneSizes",
                 "setSolidColor",
             }
+            test_method = method in _TEST_RPC_METHODS
 
             print(f"\n[{i}/{len(json_rpc_commands)}] Calling {method}()...")
 
@@ -2502,6 +2841,10 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         f"{Fore.YELLOW}\u26a0\ufe0f  Unexpected response type: {type(test_data)}{Style.RESET_ALL}"
                     )
                     print(f"   Response: {test_data}")
+                    if test_method:
+                        test_failed = True
+                        stop_word_found = "ERROR"
+                        break
                     continue
 
                 _driver = test_data.get("driver", method)
@@ -2519,6 +2862,40 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         print(f"   Message: {test_data['message']}")
                     if setup_method:
                         break
+
+                elif setup_method and (
+                    validation_errors := _validate_setup_rpc_response(
+                        method,
+                        cmd,
+                        test_data,
+                    )
+                ):
+                    stop_word_found = "ERROR"
+                    test_failed = True
+                    print(f"{Fore.RED}\u274c Setup response mismatch{Style.RESET_ALL}")
+                    print("   Failure class: pin_state_mismatch")
+                    for error in validation_errors:
+                        print(f"   - {error}")
+                    qctx.emit(f"FAILURE class=pin_state_mismatch method={method}")
+                    break
+
+                elif test_method and (
+                    validation_errors := _validate_test_rpc_response(
+                        method,
+                        cmd,
+                        test_data,
+                        ctx.effective_tx_pin,
+                        ctx.effective_rx_pin,
+                    )
+                ):
+                    stop_word_found = "ERROR"
+                    test_failed = True
+                    print(f"{Fore.RED}\u274c Malformed test response{Style.RESET_ALL}")
+                    print("   Failure class: malformed_response")
+                    for error in validation_errors:
+                        print(f"   - {error}")
+                    qctx.emit(f"FAILURE class=malformed_response method={method}")
+                    break
 
                 elif test_data.get("success") and test_data.get("passed"):
                     stop_word_found = "OK"
@@ -2544,6 +2921,7 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         print(f"   Duration: {duration_str}")
 
                     display_tight_timing(test_data)
+                    display_objectfled_diagnostics(test_data)
 
                     if "drivers" in test_data and isinstance(
                         test_data["drivers"], list
@@ -2568,12 +2946,16 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                 ):
                     stop_word_found = "ERROR"
                     test_failed = True
+                    failure_class, failure_detail = _classify_test_failure(test_data)
                     print(f"{Fore.RED}\u274c Test failed{Style.RESET_ALL}")
+                    print(f"   Failure class: {failure_class}")
+                    print(f"   Detail: {failure_detail}")
                     _err_detail = ""
                     if "firstFailure" in test_data:
                         _err_detail = f" {test_data['firstFailure'].get('pattern', '')}"
                     qctx.emit(
-                        f"TEST {_driver} lanes={_lanes} leds={_leds} FAIL {_dur}ms{_err_detail}"
+                        f"TEST {_driver} lanes={_lanes} leds={_leds} FAIL {_dur}ms "
+                        f"class={failure_class}{_err_detail}"
                     )
 
                     if "firstFailure" in test_data:
@@ -2584,22 +2966,26 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         print(f"   Actual: {failure.get('actual', 'unknown')}")
 
                     display_tight_timing(test_data)
+                    display_objectfled_diagnostics(test_data)
 
                     if "patterns" in test_data:
                         display_pattern_details(test_data)
 
                 else:
-                    stop_word_found = "OK"
                     print(f"{Fore.GREEN}\u2713 Command completed{Style.RESET_ALL}")
                     if test_data:
                         print(f"   Response: {test_data}")
+                    if not setup_method:
+                        stop_word_found = "OK"
 
             except RpcCrashError as crash_err:
                 print(
                     f"{Fore.RED}\u274c Device crashed during {method}(){Style.RESET_ALL}"
                 )
+                print("   Failure class: crash")
                 if not crash_err.decoded_lines:
                     print("   (no decoded stack trace available)")
+                qctx.emit(f"FAILURE class=crash method={method}")
                 test_failed = True
                 stop_word_found = "ERROR"
                 break
@@ -2607,6 +2993,8 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
             except RpcTimeoutError:
                 print(f"{Fore.RED}\u274c RPC timeout{Style.RESET_ALL}")
                 print(f"   No response within {120}s")
+                print("   Failure class: timeout")
+                qctx.emit(f"FAILURE class=timeout method={method}")
                 test_failed = True
                 stop_word_found = "ERROR"
                 break

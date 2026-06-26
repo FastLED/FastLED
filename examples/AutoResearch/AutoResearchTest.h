@@ -4,6 +4,7 @@
 #pragma once
 
 #include <FastLED.h>
+#include "LegacyClocklessProxy.h"
 #include "fl/channels/validation.h"
 
 namespace fl {
@@ -20,6 +21,8 @@ struct AutoResearchConfig {
     fl::span<uint8_t> rx_buffer;                 ///< Buffer to store received bytes
     int base_strip_size;                         ///< Base strip size (10 or 300 LEDs)
     fl::RxDeviceType rx_type;                    ///< RX device type (RMT or ISR)
+    fl::span<const LegacyClocklessChipset> legacy_chipsets;  ///< Optional per-lane legacy templates
+    bool legacy_rgbw;                            ///< Enable RGBW on legacy controllers
 
     AutoResearchConfig(const fl::ChipsetTimingConfig& t,
                      const char* tn,
@@ -29,7 +32,9 @@ struct AutoResearchConfig {
                      fl::span<uint8_t> rb,
                      int bss,
                      fl::RxDeviceType rt,
-                     fl::ClocklessEncoder enc = fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812)
+                     fl::ClocklessEncoder enc = fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812,
+                     fl::span<const LegacyClocklessChipset> legacy = fl::span<const LegacyClocklessChipset>(),
+                     bool legacy_rgbw_enabled = false)
         : timing(t)
         , encoder(enc)
         , timing_name(tn)
@@ -38,7 +43,9 @@ struct AutoResearchConfig {
         , rx_channel(rc)
         , rx_buffer(rb)
         , base_strip_size(bss)
-        , rx_type(rt) {}
+        , rx_type(rt)
+        , legacy_chipsets(legacy)
+        , legacy_rgbw(legacy_rgbw_enabled) {}
 };
 
 /// @brief Test context for detailed error reporting
@@ -79,6 +86,13 @@ struct RunResult {
     int mismatches;                 ///< Number of LED mismatches
     int totalBytes;                 ///< Total bytes compared (num_leds * 3)
     int capturedBytes;              ///< Bytes decoded from the RX channel
+    int captureWaitResult;          ///< RxWaitResult value, or -1 before wait
+    int rawEdgesAfterWait;          ///< Raw edges visible after RX wait/decode
+    int decodeOk;                   ///< 1 if RX decode returned success, 0 on error, -1 before decode
+    int decodeError;                ///< DecodeError value, or -1 when decode succeeded/not run
+    int decodeBytes;                ///< Bytes reported directly by decode()
+    int decodeOutputCapacity;       ///< Output span size passed to decode()
+    fl::string rawEdgeSample;       ///< Compact first-edge sample for failures
     int mismatchedBytes;            ///< Number of individual bytes that differ
     int lsbOnlyErrors;              ///< Bytes where (expected ^ actual) == 0x01
     fl::vector<LEDError> errors;    ///< First few errors (up to 10)
@@ -86,7 +100,9 @@ struct RunResult {
     bool passed;                    ///< True if no errors
 
     RunResult() : run_number(0), total_leds(0), mismatches(0),
-                  totalBytes(0), capturedBytes(0), mismatchedBytes(0),
+                  totalBytes(0), capturedBytes(0), captureWaitResult(-1),
+                  rawEdgesAfterWait(0), decodeOk(-1), decodeError(-1),
+                  decodeBytes(0), decodeOutputCapacity(0), mismatchedBytes(0),
                   lsbOnlyErrors(0), captureFailed(false), passed(false) {}
 };
 
@@ -114,7 +130,11 @@ struct MultiRunConfig {
 // - timing: Chipset timing configuration for RX decoder
 // - driver_name: Name of the TX driver being tested (e.g., "RMT", "PARLIO") - enables io_loop_back only for RMT
 // Returns number of bytes captured, or 0 on error
-size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel, fl::span<uint8_t> rx_buffer, const fl::ChipsetTimingConfig& timing, const char* driver_name);
+size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
+               fl::span<uint8_t> rx_buffer,
+               const fl::ChipsetTimingConfig& timing,
+               const char* driver_name,
+               fl::RunResult* diagnostics = nullptr);
 
 // Generic driver-agnostic autoresearch test runner (single run)
 // Tests all channels using the specified configuration
