@@ -302,14 +302,30 @@ void ObjectFLED::begin(void) {
 
 	// route the timer outputs through XBAR to edge trigger DMA request: only 4 mappings avail.
 	CCM_CCGR2 |= CCM_CCGR2_XBAR1(CCM_CCGR_ON);
-	xbar_connect(XBARA1_IN_QTIMER4_TIMER0, XBARA1_OUT_DMA_CH_MUX_REQ30);	
+	// #3416 OF-LOW-4: xbar_connect() (in Teensyduino's pwm.c) only writes
+	// the XBAR SEL[] register; it does NOT touch CTRL. So calling it
+	// after configure_objectfled_xbar_dma_edges() (which configures
+	// CTRL bits below) is safe. Future contributors: if you ever
+	// change xbar_connect to also clear CTRL, this sequence breaks.
+	xbar_connect(XBARA1_IN_QTIMER4_TIMER0, XBARA1_OUT_DMA_CH_MUX_REQ30);
 	xbar_connect(XBARA1_IN_QTIMER4_TIMER1, XBARA1_OUT_DMA_CH_MUX_REQ31);
 	xbar_connect(XBARA1_IN_QTIMER4_TIMER2, XBARA1_OUT_DMA_CH_MUX_REQ94);
 
 	// configure DMA channels
+	// #3416 OF-LOW-7: dma{1,2,3}.begin() returns void; if channel
+	// allocation fails (all 32 eDMA channels taken) we'd silently
+	// proceed and the show() path would write to TCD->* on a null
+	// or stale TCD pointer. The `initialized` flag at the end of
+	// this function gates show(); add explicit null checks below.
 	dma.dma1.begin();
 	dma.dma2.begin();
 	dma.dma3.begin();
+	if (!dma.dma1.TCD || !dma.dma2.TCD || !dma.dma3.TCD) {
+		// All channels needed for ObjectFLED; abandon init.
+		initialized = false;
+		numpinsLocal = 0;
+		return;
+	}
 	if (!objectfled_has_dma_tcds(dma)) {
 		numpinsLocal = 0;
 		return;
