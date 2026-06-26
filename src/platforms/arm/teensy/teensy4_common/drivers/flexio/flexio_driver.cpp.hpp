@@ -83,7 +83,15 @@ bool flexio_lookup_pin(u8 teensy_pin, FlexIOPinInfo* info) {
 
 static constexpr u32 kFLEXIO2_BASE = 0x401B0000;
 
-static volatile u32& FLEXIO2_CTRL     = *(volatile u32*)(kFLEXIO2_BASE + 0x000);
+// #3410 Round-2 audit: CTRL is at offset 0x008, NOT 0x000.
+// Offset 0x000 is VERID (read-only Version ID per i.MX RT1062 FlexIO RM).
+// The previous +0x000 address was writing to a read-only register, so
+// FLEXEN / FASTACC / SWRST never actually got set, and subsequent FlexIO
+// register writes (which require the module to be clocked AND enabled)
+// triggered IMPRECISERR. addr2line on the crash addresses pointed at
+// flexio_init's call to flexio_configure_hw -- consistent with FLEXIO2_CTRL
+// writes silently failing.
+static volatile u32& FLEXIO2_CTRL     = *(volatile u32*)(kFLEXIO2_BASE + 0x008);
 static volatile u32& FLEXIO2_SHIFTSTAT = *(volatile u32*)(kFLEXIO2_BASE + 0x010);
 static volatile u32& FLEXIO2_SHIFTERR  = *(volatile u32*)(kFLEXIO2_BASE + 0x014);
 static volatile u32& FLEXIO2_TIMSTAT   = *(volatile u32*)(kFLEXIO2_BASE + 0x018);
@@ -127,19 +135,23 @@ static void flexio_dma_isr() {
 // ============================================================================
 
 static void flexio_clock_init() {
+    // #3410 Round-2 audit: Match Teensyduino FlexIO_t4::setClockSettings()
+    // exactly: gate OFF -> set CSCMR2 (source) -> set CS1CDR (dividers)
+    // -> gate ON. The previous order (CS1CDR before CSCMR2) put dividers
+    // on a not-yet-routed clock source and the FlexIO module never
+    // started clocking -- causing register writes in flexio_configure_hw
+    // to IMPRECISERR (decoded via addr2line to FlexIOPeripheralReal::init).
+    CCM_CCGR3 &= ~CCM_CCGR3_FLEXIO2(CCM_CCGR_ON);
+
+    CCM_CSCMR2 = (CCM_CSCMR2 & ~CCM_CSCMR2_FLEXIO2_CLK_SEL(3)) |
+                 CCM_CSCMR2_FLEXIO2_CLK_SEL(3);
+
+    CCM_CS1CDR = (CCM_CS1CDR & ~(CCM_CS1CDR_FLEXIO2_CLK_PRED(7) |
+                                   CCM_CS1CDR_FLEXIO2_CLK_PODF(7))) |
+                 CCM_CS1CDR_FLEXIO2_CLK_PRED(1) |
+                 CCM_CS1CDR_FLEXIO2_CLK_PODF(1);
+
     CCM_CCGR3 |= CCM_CCGR3_FLEXIO2(CCM_CCGR_ON);
-
-    u32 cs1cdr = CCM_CS1CDR;
-    cs1cdr &= ~(CCM_CS1CDR_FLEXIO2_CLK_PODF(7) |
-                CCM_CS1CDR_FLEXIO2_CLK_PRED(7));
-    cs1cdr |= CCM_CS1CDR_FLEXIO2_CLK_PRED(1) |
-              CCM_CS1CDR_FLEXIO2_CLK_PODF(1);
-    CCM_CS1CDR = cs1cdr;
-
-    u32 cscmr2 = CCM_CSCMR2;
-    cscmr2 &= ~CCM_CSCMR2_FLEXIO2_CLK_SEL(3);
-    cscmr2 |= CCM_CSCMR2_FLEXIO2_CLK_SEL(3);
-    CCM_CSCMR2 = cscmr2;
 }
 
 // ============================================================================
@@ -362,8 +374,13 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     sDmaChannel->TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ;
 
     sDmaComplete = false;
-    sDmaChannel->enable();
+    // #3410 Round-2 audit: Enable FlexIO module BEFORE the DMA channel.
+    // With the previous order (DMA enable first), the DMA could fire on the
+    // very next FLEXIO2_REQUEST0 trigger and write to FLEXIO2_SHIFTBUFBIS
+    // while FLEXIO2_CTRL.FLEXEN was still 0 -- writing to a disabled
+    // shifter register raises IMPRECISERR on i.MX RT1062.
     FLEXIO2_CTRL = (1 << 0) | (1 << 2);
+    sDmaChannel->enable();
 
     return true;
 }
