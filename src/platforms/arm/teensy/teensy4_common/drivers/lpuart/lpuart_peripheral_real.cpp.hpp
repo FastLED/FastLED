@@ -15,18 +15,20 @@
 
 namespace fl {
 
+// LPUARTInstanceReal: owns a buffer sized for the ENCODED (wave8) UART
+// byte stream. The engine pre-encodes raw WS2812 bytes -> 4 UART bytes
+// each into getTxBuffer(); show() DMAs the encoded buffer to LPUARTn_DATA.
 class LPUARTInstanceReal : public ILPUARTInstance {
 public:
     LPUARTInstanceReal(u8 tx_pin, u32 total_leds, bool is_rgbw,
                        u32 t1_ns, u32 t2_ns, u32 t3_ns, u32 reset_us) FL_NO_EXCEPT
         : mTxPin(tx_pin),
-          mBytesPerLed(is_rgbw ? 4u : 3u),
-          mTotalBytes(total_leds * (is_rgbw ? 4u : 3u)),
-          mUartBytes(mTotalBytes * 4u),
+          mEncodedBytes(total_leds * (is_rgbw ? 4u : 3u) * 4u),
           mResetUs(reset_us),
-          mInitialized(false) {
+          mInitialized(false),
+          mTxBuffer(nullptr) {
         (void)t1_ns; (void)t2_ns; (void)t3_ns;
-        mTxBuffer = new u8[mTotalBytes]();  // raw WS2812 bytes the engine fills
+        mTxBuffer = new u8[mEncodedBytes]();
         LpuartPinInfo info{};
         if (lpuart_lookup_pin(tx_pin, &info)) {
             mInitialized = lpuart_init(info, mResetUs);
@@ -39,19 +41,21 @@ public:
     }
 
     u8* getTxBuffer() FL_NO_EXCEPT override { return mTxBuffer; }
-    u32 getTxBufferSize() const FL_NO_EXCEPT override { return mTotalBytes; }
+    u32 getTxBufferSize() const FL_NO_EXCEPT override { return mEncodedBytes; }
 
     void show() FL_NO_EXCEPT override {
         if (!mInitialized) return;
-        lpuart_show(mTxBuffer, mTotalBytes);
+        // The encoded buffer is already wave8-encoded by the engine.
+        // Stream it directly to LPUARTn_DATA via DMA. lpuart_show()
+        // expects RAW bytes and does its own encoding -- we bypass
+        // that by writing through a "passthrough" entry point below.
+        lpuart_show_encoded(mTxBuffer, mEncodedBytes);
         lpuart_wait();
     }
 
 private:
     u8 mTxPin;
-    u32 mBytesPerLed;
-    u32 mTotalBytes;
-    u32 mUartBytes;
+    u32 mEncodedBytes;
     u32 mResetUs;
     bool mInitialized;
     u8* mTxBuffer;

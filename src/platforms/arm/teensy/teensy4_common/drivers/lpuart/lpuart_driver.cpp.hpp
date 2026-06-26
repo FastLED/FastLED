@@ -226,6 +226,50 @@ bool lpuart_init(const LpuartPinInfo& pin_info, u32 reset_us) {
     return true;
 }
 
+// Shared internal entry point: arms the eDMA TCD to stream `uart_count`
+// bytes from `src` to LPUARTn_DATA. Caller has already flushed any
+// dirty cache lines covering `src`.
+static bool lpuart_arm_dma(const u8* src, u32 uart_count) {
+    IMXRT_LPUART_t* lp = lpuart_base(sLpPinInfo.lpuart_index);
+    if (!lp) return false;
+
+    sLpDmaChannel->disable();
+    sLpDmaChannel->clearComplete();
+    sLpDmaChannel->clearInterrupt();
+    sLpDmaChannel->clearError();
+    sLpDmaComplete = false;
+
+    sLpDmaChannel->TCD->SADDR = src;
+    sLpDmaChannel->TCD->SOFF = 1;
+    sLpDmaChannel->TCD->ATTR = DMA_TCD_ATTR_SSIZE(0) | DMA_TCD_ATTR_DSIZE(0);
+    sLpDmaChannel->TCD->NBYTES_MLNO = 1;
+    sLpDmaChannel->TCD->SLAST = -(i32)uart_count;
+    sLpDmaChannel->TCD->DADDR = &(lp->DATA);
+    sLpDmaChannel->TCD->DOFF = 0;
+    sLpDmaChannel->TCD->CITER_ELINKNO = uart_count;
+    sLpDmaChannel->TCD->BITER_ELINKNO = uart_count;
+    sLpDmaChannel->TCD->DLASTSGA = 0;
+    sLpDmaChannel->TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ;
+
+    sLpDmaChannel->triggerAtHardwareEvent(lpuart_dmamux_tx_source(sLpPinInfo.lpuart_index));
+    sLpDmaChannel->attachInterrupt(lpuart_dma_isr);
+
+    sLpDmaChannel->enable();
+    return true;
+}
+
+bool lpuart_show_encoded(const u8* encoded, u32 num_uart_bytes) {
+    if (!sLpInitialized || !sLpDmaChannel || !encoded || num_uart_bytes == 0) {
+        return false;
+    }
+    lpuart_wait();
+    // Cast to non-const for arm_dcache_flush_delete (it doesn't modify
+    // logically; the function signature is non-const for the address
+    // parameter).
+    arm_dcache_flush_delete(const_cast<u8*>(encoded), num_uart_bytes);
+    return lpuart_arm_dma(encoded, num_uart_bytes);
+}
+
 bool lpuart_show(const u8* pixel_data, u32 num_pixel_bytes) {
     if (!sLpInitialized || !sLpDmaChannel || !pixel_data || num_pixel_bytes == 0) {
         return false;
@@ -246,33 +290,7 @@ bool lpuart_show(const u8* pixel_data, u32 num_pixel_bytes) {
     const u32 uart_count = num_pixel_bytes * 4u;
     arm_dcache_flush_delete(sLpUartBuffer, uart_count);
 
-    IMXRT_LPUART_t* lp = lpuart_base(sLpPinInfo.lpuart_index);
-    if (!lp) return false;
-
-    sLpDmaChannel->disable();
-    sLpDmaChannel->clearComplete();
-    sLpDmaChannel->clearInterrupt();
-    sLpDmaChannel->clearError();
-    sLpDmaComplete = false;
-
-    // Source = encoded buffer, dest = LPUARTn_DATA.
-    sLpDmaChannel->TCD->SADDR = sLpUartBuffer;
-    sLpDmaChannel->TCD->SOFF = 1;
-    sLpDmaChannel->TCD->ATTR = DMA_TCD_ATTR_SSIZE(0) | DMA_TCD_ATTR_DSIZE(0);
-    sLpDmaChannel->TCD->NBYTES_MLNO = 1;
-    sLpDmaChannel->TCD->SLAST = -(i32)uart_count;
-    sLpDmaChannel->TCD->DADDR = &(lp->DATA);
-    sLpDmaChannel->TCD->DOFF = 0;
-    sLpDmaChannel->TCD->CITER_ELINKNO = uart_count;
-    sLpDmaChannel->TCD->BITER_ELINKNO = uart_count;
-    sLpDmaChannel->TCD->DLASTSGA = 0;
-    sLpDmaChannel->TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ;
-
-    sLpDmaChannel->triggerAtHardwareEvent(lpuart_dmamux_tx_source(sLpPinInfo.lpuart_index));
-    sLpDmaChannel->attachInterrupt(lpuart_dma_isr);
-
-    sLpDmaChannel->enable();
-    return true;
+    return lpuart_arm_dma(sLpUartBuffer, uart_count);
 }
 
 bool lpuart_is_done() { return sLpDmaComplete; }

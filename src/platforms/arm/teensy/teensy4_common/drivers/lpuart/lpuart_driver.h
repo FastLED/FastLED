@@ -61,6 +61,13 @@ bool lpuart_init(const LpuartPinInfo& pin_info, u32 reset_us) FL_NO_EXCEPT;
 /// @return true if DMA was queued.
 bool lpuart_show(const u8* pixel_data, u32 num_pixel_bytes) FL_NO_EXCEPT;
 
+/// @brief Stream a PRE-ENCODED wave8 buffer to the LPUART. Bypasses the
+///        internal encoder for callers (like ChannelEngineLPUART) that
+///        do their own encoding into an externally-owned buffer.
+/// @param encoded UART bytes already in wave8 form (4 per WS2812 byte).
+/// @param num_uart_bytes Length in bytes.
+bool lpuart_show_encoded(const u8* encoded, u32 num_uart_bytes) FL_NO_EXCEPT;
+
 /// @brief Non-blocking completion check.
 bool lpuart_is_done() FL_NO_EXCEPT;
 
