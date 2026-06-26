@@ -12,7 +12,6 @@
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/iflexio_peripheral.h"
 
 #include "fl/log/log.h"
-#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 
 #if defined(FL_IS_TEENSY_4X)
@@ -112,8 +111,11 @@ void ChannelEngineFlexIO::show() FL_NO_EXCEPT {
         return;
     }
 
-    // FlexIO supports one strip at a time (4 timers + 1 shifter per strip).
-    // Transmit each channel sequentially.
+    // #3416 FX-LOW-6: current driver serialises strips through one
+    // shifter + one timer. FlexIO2 hardware supports up to 8 parallel
+    // shifters (RM 47.3 Features); a future PR could parallelise
+    // multi-strip frames to bring perf from N*t_strip to t_strip.
+    // For now strips are transmitted sequentially.
     for (auto& ch : mTransmittingChannels) {
         const u8 pin = static_cast<u8>(ch->getPin());
         const ChipsetTimingConfig& timing = ch->getTiming();

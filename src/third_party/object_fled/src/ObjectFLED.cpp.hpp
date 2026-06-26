@@ -85,9 +85,30 @@ ObjectFLED::ObjectFLED(uint16_t numLEDs, void *drawBuf, uint8_t config, uint8_t 
 	serpNumber = serpentine;
 	drawBuffer = drawBuf;
 	params = config;
-	if (numPins > NUM_DIGITAL_PINS) numPins = NUM_DIGITAL_PINS;
+	if (numPins > NUM_DIGITAL_PINS) {
+		// #3416 OF-LOW-2: warn on silent truncation so users debugging
+		// "why is my multi-strip setup short on pins" see the cause.
+		Serial.printf("ObjectFLED: numPins=%u exceeds NUM_DIGITAL_PINS=%u; truncating\r\n",
+		              numPins, NUM_DIGITAL_PINS);
+		numPins = NUM_DIGITAL_PINS;
+	}
+	// CodeRabbit-flagged on PR #3419: guard against numPins=0 which
+	// would otherwise divide by zero in stripLen = numLEDs / numpinsLocal.
+	if (numPins == 0) {
+		Serial.printf("ObjectFLED: numPins=0 is invalid; abandoning init\r\n");
+		numpinsLocal = 0;
+		stripLen = 0;
+		initialized = false;
+		return;
+	}
 	numpinsLocal = numPins;
 	stripLen = numLEDs / numpinsLocal;
+	// #3416 OF-LOW-8: warn if numLEDs doesn't divide evenly across pins
+	// -- tail LEDs are silently dropped from the per-strip stride.
+	if (numpinsLocal > 0 && numLEDs % numpinsLocal != 0) {
+		Serial.printf("ObjectFLED: numLEDs=%u not divisible by numpins=%u; last %u LED(s) ignored\r\n",
+		              numLEDs, numpinsLocal, (unsigned)(numLEDs % numpinsLocal));
+	}
 	memcpy(pinlist, pinList, numpinsLocal);
 	if ((params & 0x3F) < 6) {
 		frameBufferLocal = new uint8_t[numLEDs * 3];
@@ -108,7 +129,16 @@ static volatile uint32_t *standard_gpio_addr(volatile uint32_t *fastgpio) {
 static void force_pin_to_gpio_mux(uint8_t pin) {
 	// Teensy 4.x GPIO pads use MUX_MODE=5. Keep SION set so diagnostics can
 	// observe the pad input path while DMA drives the standard GPIO alias.
-	*portConfigRegister(pin) = 5 | 0x10;
+	// #3416 OF-LOW-5: SION=1 enables the pad input keeper even on a
+	// pure-output pin and can leak ~1-2 mA per pin plus capacitively
+	// couple noise back into the input keeper on long traces. Gate
+	// behind a define so production users can drop the keeper if not
+	// using the loopback RX path for diagnostics.
+#ifdef FASTLED_OBJECTFLED_PROBE_INPUT
+	*portConfigRegister(pin) = 5 | 0x10;  // ALT5 (GPIO) + SION
+#else
+	*portConfigRegister(pin) = 5;          // ALT5 (GPIO) only
+#endif
 }
 
 static void configure_objectfled_xbar_dma_edges() {
@@ -264,6 +294,11 @@ void ObjectFLED::begin(void) {
 	// and T0H=225 ns, 225e-9 * 150e6 = 33.75 ticks -> truncated to 33 (=220 ns,
 	// 5 ns short of spec). +0.5f rounds to 34 (=226.67 ns, well inside the
 	// WS2812B-V5 215-235 ns window). #3406 audit Agent 3.
+	// #3416 OF-MED-2: comp1load[] is computed from F_BUS_ACTUAL at
+	// begin() time. If a user changes the bus clock at runtime (e.g.
+	// via set_arm_clock(816000000) which raises IPG -> 198 MHz), these
+	// values become stale and the WS2812 timing slips outside spec.
+	// If you need runtime clock changes, call begin() again first.
 	comp1load[0] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0f * (float)TH_TL + 0.5f);
 	comp1load[1] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0f * (float)T0H + 0.5f);
 	comp1load[2] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0f * (float)T1H + 0.5f);
@@ -290,14 +325,30 @@ void ObjectFLED::begin(void) {
 
 	// route the timer outputs through XBAR to edge trigger DMA request: only 4 mappings avail.
 	CCM_CCGR2 |= CCM_CCGR2_XBAR1(CCM_CCGR_ON);
-	xbar_connect(XBARA1_IN_QTIMER4_TIMER0, XBARA1_OUT_DMA_CH_MUX_REQ30);	
+	// #3416 OF-LOW-4: xbar_connect() (in Teensyduino's pwm.c) only writes
+	// the XBAR SEL[] register; it does NOT touch CTRL. So calling it
+	// after configure_objectfled_xbar_dma_edges() (which configures
+	// CTRL bits below) is safe. Future contributors: if you ever
+	// change xbar_connect to also clear CTRL, this sequence breaks.
+	xbar_connect(XBARA1_IN_QTIMER4_TIMER0, XBARA1_OUT_DMA_CH_MUX_REQ30);
 	xbar_connect(XBARA1_IN_QTIMER4_TIMER1, XBARA1_OUT_DMA_CH_MUX_REQ31);
 	xbar_connect(XBARA1_IN_QTIMER4_TIMER2, XBARA1_OUT_DMA_CH_MUX_REQ94);
 
 	// configure DMA channels
+	// #3416 OF-LOW-7: dma{1,2,3}.begin() returns void; if channel
+	// allocation fails (all 32 eDMA channels taken) we'd silently
+	// proceed and the show() path would write to TCD->* on a null
+	// or stale TCD pointer. The `initialized` flag at the end of
+	// this function gates show(); add explicit null checks below.
 	dma.dma1.begin();
 	dma.dma2.begin();
 	dma.dma3.begin();
+	if (!dma.dma1.TCD || !dma.dma2.TCD || !dma.dma3.TCD) {
+		// All channels needed for ObjectFLED; abandon init.
+		initialized = false;
+		numpinsLocal = 0;
+		return;
+	}
 	if (!objectfled_has_dma_tcds(dma)) {
 		numpinsLocal = 0;
 		return;
@@ -337,7 +388,17 @@ void ObjectFLED::begin(void) {
 	dma.dma2next.TCD->CSR = 0;
 
 	dma.dma2 = dma.dma2next; // copies TCD
+	// #3416 OF-LOW-3: dma2 uses default eDMA channel priority. During a
+	// 100-LED frame (~1.5 ms) the ObjectFLED DMA channels can starve
+	// equal-or-lower-priority channels held by other subsystems
+	// (Audio I2S typically at ch3). If the user reports audio underruns
+	// during LED updates, raise the offending subsystem's priority via
+	// DCHPRIn or migrate this DMA to a higher channel number.
 	dma.dma2.triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_1);
+	// #3416 OF-CRIT-2: detach any prior interrupt before re-attaching so
+	// a re-init after pin change doesn't leave an attachInterrupt() routed
+	// to the OLD vector slot from the previous channel allocation.
+	dma.dma2.detachInterrupt();
 	dma.dma2.attachInterrupt(isr);
 
 	dma.dma3.TCD->SADDR = dma.bitmask;
@@ -352,6 +413,12 @@ void ObjectFLED::begin(void) {
 	dma.dma3.TCD->CITER_ELINKNO = numbytesLocal * 8;
 	dma.dma3.TCD->DLASTSGA = -65536;
 	dma.dma3.TCD->BITER_ELINKNO = numbytesLocal * 8;
+	// Note: DMA_TCD_CSR_DONE pre-set is INTENTIONAL -- it lets
+	// waitForCompletion() short-circuit on the very first acquire()
+	// after begin() (before any transfer has actually run). Audit
+	// #3416 OF-CRIT-1 suggested removing this; verified empirically
+	// that doing so hangs the first show() indefinitely (the spin
+	// loop never sees DONE=1 because the channel hasn't started yet).
 	dma.dma3.TCD->CSR = DMA_TCD_CSR_DREQ | DMA_TCD_CSR_DONE;
 	dma.dma3.triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_2);
 	initialized = true;
@@ -611,7 +678,11 @@ void ObjectFLED::showInternal(bool regenerateFrameBuffer) {
 		dma.dma2.TCD->SADDR = dma.bitdata;
 		dma.dma2.TCD->DADDR = &GPIO1_DR_CLEAR;
 		dma.dma2.TCD->CITER_ELINKNO = BYTES_PER_DMA * 8;
-		dma.dma2.TCD->CSR = 0;
+		// #3416 OF-HIGH-2: drop the dual-write CSR=0;CSR=ESG|INTMAJOR
+		// pattern. The intermediate CSR=0 cleared DREQ which can re-arm
+		// the channel mid-window if ERQ is set, leaving a brief gap
+		// where the channel is armed without ESG. Just write the final
+		// value directly.
 		dma.dma2.TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_ESG;
 		dma.dma2next.TCD->SADDR = dma.bitdata + BYTES_PER_DMA*32;
 		dma.dma2next.TCD->CITER_ELINKNO = BYTES_PER_DMA * 8;
@@ -622,10 +693,19 @@ void ObjectFLED::showInternal(bool regenerateFrameBuffer) {
 		}
 		dma_first = true;
     }
+	// #3416 OF-MED-4: barriers so all memcpy + TCD writes commit before
+	// the eDMA channels are armed. Without these the compiler is free
+	// to reorder the memcpy of dma.pin_bitnum / pin_offset / bitmask
+	// past the dma*.enable() calls, and the ISR (or DMA engine itself)
+	// could observe stale shared-state values. Strongly-ordered peripheral
+	// region writes drain on DSB; DMB ensures the memcpy stores are
+	// visible to the eDMA engine via the AXIM port before ERQ goes hot.
+	asm volatile("dmb" ::: "memory");
 	dma.dma3.clearComplete();
 	dma.dma1.enable();
 	dma.dma2.enable();
 	dma.dma3.enable();
+	asm volatile("dsb" ::: "memory");
 
 	// initialize timers
 	TMR4_CNTR0 = 0;
@@ -653,9 +733,14 @@ void ObjectFLED::isr(void)
 
 	// first ack the interrupt
 	dma.dma2.clearInterrupt();
+	asm volatile("dsb" ::: "memory");  // #3416 OF mirror of FX-HIGH-6
 
-	// fill (up to) half the transmit buffer with new fillbits(frameBuffer data)
-	//digitalWriteFast(12, HIGH);
+	// Determine remaining payload first so we can short-circuit the
+	// expensive memset+fillbits+dcache_flush when there's nothing left
+	// to send (#3416 OF-HIGH-4).
+	uint32_t index_check = dma.framebuffer_index;
+	uint32_t remain_check = dma.numbytes - index_check;
+
 	uint32_t *dest;
 	if (dma_first) {
 		dma_first = false;
@@ -664,6 +749,23 @@ void ObjectFLED::isr(void)
 		dma_first = true;
 		dest = dma.bitdata + BYTES_PER_DMA*32;
 	}
+
+	if (remain_check == 0) {
+		// #3416 OF-HIGH-4: nothing more to send. The next-iteration
+		// CSR is already set to DREQ from the previous ISR or
+		// showInternal, so no further DMA fires. Skipping ~10us of
+		// memset + fillbits + cache flush trims ISR length and the
+		// next show() does a full memset(dma.bitdata) anyway.
+		dma.dma2next.TCD->CSR = DMA_TCD_CSR_DREQ;
+		return;
+	}
+
+	// #3416 OF-MED-5: memset zeroes the half-buffer we're about to fill.
+	// fillbits() below does *dest |= mask (read-modify-write); the OR
+	// only works correctly when the destination starts at 0. The full-
+	// buffer memset in showInternal at frame start initialises only the
+	// half DMA reads first; this per-ISR memset initialises the OTHER
+	// half before each refill so the |= invariant holds.
 	memset(dest, 0, sizeof(dma.bitdata)/2);
 	uint32_t index = dma.framebuffer_index;
 	uint32_t count = dma.numbytes - dma.framebuffer_index;

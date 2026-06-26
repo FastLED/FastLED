@@ -68,9 +68,15 @@
 // reported in #3406 (statistical analysis shows errors cluster at the
 // 20-LED chunk boundaries that BYTES_PER_DMA=60 produces). 120 doubles
 // the inter-ISR margin with the same memset overhead, +15 KB DMAMEM cost.
-#ifndef BYTES_PER_DMA
-#define BYTES_PER_DMA	120		//= number of pairs of LEDB (120=240B) bitmasks in bitdata.
-#endif
+// BYTES_PER_DMA is defined in ObjectFLEDDmaManager.h to keep a single
+// source of truth (CodeRabbit-flagged on PR #3419 -- previously this
+// header also had a #ifndef guard with default 120, while
+// ObjectFLEDDmaManager.h had 150, creating an include-order-dependent
+// ODR hazard between the bitdata[] array size and any consumer that
+// arithmetic-references BYTES_PER_DMA). The definition itself now
+// lives in ObjectFLEDDmaManager.h next to the static_assert and the
+// bitdata array declaration that depends on it.
+#include "ObjectFLEDDmaManager.h"
 
 #define CORDER_RGB	0	//* WS2811, YF923
 #define CORDER_RBG	1
@@ -216,7 +222,12 @@ private:
 	// Force 32-byte alignment so arm_dcache_flush_delete in begin() operates
 	// on a whole cache line. Without alignment the 16-byte flush is unsafe
 	// per Cortex-M7 cache maintenance semantics (#3406).
-	alignas(32) uint32_t bitmaskLocal[4];
+	// #3416 OF-MED-1: bitmaskLocal is 16 bytes (alignas 32 = its own line
+	// start) but the adjacent numpinsLocal/numbytesLocal share the second
+	// half of the same 32-byte cache line. Padding to a full 32 bytes
+	// guarantees the flush_delete invalidates only data this driver owns
+	// and never an adjacent instance's fields.
+	alignas(32) uint32_t bitmaskLocal[8];  // 4 valid words + 4 pad
 	uint8_t numpinsLocal;
 	uint32_t numbytesLocal;
 	uint8_t pin_bitnumLocal[NUM_DIGITAL_PINS];

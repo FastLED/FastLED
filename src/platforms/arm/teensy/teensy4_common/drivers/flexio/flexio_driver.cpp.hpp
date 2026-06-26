@@ -8,7 +8,6 @@
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/iflexio_peripheral.h"
 
 #include "fl/log/log.h"
-#include "fl/log/log.h"
 #include "fl/stl/cstring.h"
 
 // IWYU pragma: begin_keep
@@ -60,7 +59,7 @@ static constexpr u32 kIOMUXC_BASE = 0x401F8000;
 // running internally, drove an unrouted internal signal. This was the
 // real root cause of zero_capture across rounds 1-6 -- not register
 // values, not clock, not DMA, not sequencing.
-static const FlexIOPinEntry kFlexIOPins[] = {
+static constexpr FlexIOPinEntry kFlexIOPins[] = {
     {10, 0,  0x013C, 0x032C},  // GPIO_B0_00
     {12, 1,  0x0140, 0x0330},  // GPIO_B0_01
     {11, 2,  0x0144, 0x0334},  // GPIO_B0_02
@@ -85,6 +84,24 @@ bool flexio_lookup_pin(u8 teensy_pin, FlexIOPinInfo* info) {
     }
     return false;
 }
+
+// #3416 FX-CRIT-1: enforce at compile time that this driver targets
+// only FlexIO2 (the kFLEXIO2_BASE / FLEXIO2_* register pointers are
+// hard-coded). FlexIO2 on i.MX RT1062 has 8 shifters (indices 0-7);
+// any pin table entry above flexio_pin=17 is suspicious because the
+// physical pad routing on Teensy 4.x maxes at FLEXIO2_FLEXIO17.
+// Anything above that suggests a copy-paste from a FlexIO3 reference
+// where pin indices go higher -- which would silently write to the
+// FlexIO2 register block for a pad electrically routed to FlexIO3.
+static constexpr bool flexio_pin_table_is_flexio2_only() {
+    for (int i = 0; i < kNumFlexIOPins; i++) {
+        if (kFlexIOPins[i].flexio_pin > 17) return false;
+    }
+    return true;
+}
+static_assert(flexio_pin_table_is_flexio2_only(),
+              "kFlexIOPins entries must target FlexIO2 pads only "
+              "(flexio_pin <= 17). See #3416 FX-CRIT-1.");
 
 // ============================================================================
 // FlexIO2 Register Access Helpers
@@ -129,6 +146,9 @@ static FlexIOPinInfo sCurrentPinInfo{};
 static constexpr u32 kMaxPixelBytes = 4096;
 DMAMEM static u32 sPixelBuffer[kMaxPixelBytes / 4] __attribute__((aligned(32)));
 
+static volatile u32 sDmaErrorCount = 0;
+static volatile u32 sLastDmaEs = 0;
+
 static void flexio_dma_isr() {
     // Guard: deinit() can delete sDmaChannel while a pending IRQ is still
     // queued at the NVIC. Without this check the next IRQ vector services
@@ -137,8 +157,20 @@ static void flexio_dma_isr() {
     if (sDmaChannel != nullptr) {
         sDmaChannel->clearInterrupt();
     }
+    // #3416 FX-HIGH-6: ensure the clearInterrupt() write to DMA_CINT
+    // reaches the eDMA before we return. On Cortex-M7 a posted store can
+    // still be in the write buffer when the ISR returns, allowing the
+    // NVIC to immediately re-fire the same vector before the interrupt
+    // status actually clears. Matches Teensyduino FlexSerial.cpp:512.
+    asm volatile("dsb" ::: "memory");
     sDmaComplete = true;
 }
+
+// #3416 FX-HIGH-5: DMA_ES (eDMA Error Status) is now sampled in
+// flexio_read_diagnostics() and surfaced via the JSON-RPC diag dump.
+// Installing a dedicated error-vector handler would require taking
+// IRQ_DMA_ERROR globally (shared with Audio/Serial), so we expose
+// the state passively instead.
 
 // ============================================================================
 // Clock Configuration
@@ -160,6 +192,14 @@ static void flexio_clock_init() {
                                    CCM_CS1CDR_FLEXIO2_CLK_PODF(7))) |
                  CCM_CS1CDR_FLEXIO2_CLK_PRED(1) |
                  CCM_CS1CDR_FLEXIO2_CLK_PODF(1);
+
+    // #3416 FX-MED-3: barrier so CCM_CS1CDR write commits before we
+    // enable the clock gate. Without this, the CCM may still be
+    // propagating the new divider when the gate is opened, letting the
+    // FlexIO module see one or two ticks of the previous (or
+    // undefined) clock divider before settling.
+    asm volatile("dsb" ::: "memory");
+    (void)CCM_CS1CDR;
 
     CCM_CCGR3 |= CCM_CCGR3_FLEXIO2(CCM_CCGR_ON);
 }
@@ -224,6 +264,12 @@ static void flexio_pin_park_low(const FlexIOPinInfo& pin_info) {
     // ALT5 == GPIO5 mode on all Teensy 4.x B0/B1 pads we map.
     // Use Arduino's ::pinMode/::digitalWriteFast (the fl:: overloads
     // are not interchangeable with the Arduino enum constants).
+    // #3416 FX-MED-5: confirmed working on pin 8 (GPIO_B1_00 ->
+    // GPIO7_IO16 fast alias) via bench loopback. Other supported
+    // FlexIO2 pins (pins 6, 7, 9-13, 32) all live on B0_xx / B1_xx
+    // pads that use the same GPIO7 fast-alias path on Teensy 4.x,
+    // so this should work uniformly. Scope verification on each
+    // unique pad bank is still recommended before declaring portable.
     *(pin_info.mux_reg) = 5;
     ::pinMode(pin_info.teensy_pin, OUTPUT);
     ::digitalWriteFast(pin_info.teensy_pin, LOW);
@@ -275,11 +321,17 @@ static void flexio_configure_hw(u8 flexio_pin, u32 baud_div) {
     FLEXIO2_CTRL = 0;
 
     // Shifter 0: Transmit mode, output bit drives flexio_pin directly.
+    // #3416 FX-HIGH-2: mask PINSEL to 5 bits (PINSEL field per imxrt.h
+    // FLEXIO_SHIFTCTL_PINSEL(n) = ((n) & 0x1F) << 8). Any FlexIO pin
+    // index above 31 (a future copy-paste from a FlexIO3 table, which
+    // does have higher pin indices) would otherwise silently overflow
+    // into PINPOL (bit 7) and the high bit of the pin number would be
+    // lost. Today this is a no-op since our table maxes at pin 17.
     FLEXIO2_SHIFTCTL[0] =
-        (2u << 0) |                    // SMOD = Transmit
-        ((u32)flexio_pin << 8) |       // PINSEL = output pin
-        (3u << 16) |                   // PINCFG = output enabled
-        (0u << 24);                    // TIMSEL = Timer 0
+        (2u << 0) |                              // SMOD = Transmit
+        ((u32)(flexio_pin & 0x1F) << 8) |        // PINSEL = output pin
+        (3u << 16) |                             // PINCFG = output enabled
+        (0u << 24);                              // TIMSEL = Timer 0
 
     FLEXIO2_SHIFTCFG[0] = 0;           // 1-bit serial, no start/stop bits
 
@@ -354,8 +406,26 @@ static bool flexio_dma_init() {
         FL_LOG_FLEXIO_F("FlexIO: Failed to allocate DMA channel");
         return false;
     }
+    // #3416 FX-HIGH-3: DMAMUX source 1 (REQUEST0) is shared between
+    // Shifter 0 SSF and Shifter 1 SSF on the i.MX RT1062. We use only
+    // Shifter 0, but if a future change adds a second shifter for
+    // parallel-LED support, the DMA would fire on both shifters'
+    // empty events and either over-feed or stall the second one.
+    // Document the assumption so it's visible.
+    // #3416 FX-LOW-5: DMAMUX is wired here once. ChannelEngineFlexIO's
+    // pin/timing reinit path re-enters flexio_init() which calls
+    // flexio_dma_init() again -- the early-return at the top means
+    // the DMAMUX routing is unchanged across reinits (correct, since
+    // we still target the same FlexIO2 shifter 0).
     sDmaChannel->triggerAtHardwareEvent(DMAMUX_SOURCE_FLEXIO2_REQUEST0);
     sDmaChannel->attachInterrupt(flexio_dma_isr);
+    // #3416 FX-HIGH-5: DO NOT install IRQ_DMA_ERROR handler globally --
+    // that vector is shared by EVERY eDMA channel on the system and
+    // replacing it would break Audio I2S, FlexSerial, ObjectFLED, etc.
+    // Instead, expose DMA_ES + per-channel error flags via
+    // flexio_read_diagnostics() (FlexIODiagnostics now includes
+    // dma_es) so user code can poll the error state on its own
+    // schedule without owning the interrupt.
     return true;
 }
 
@@ -397,10 +467,27 @@ static inline u32 flexio_encode_ws2812_byte(u8 b) {
 //   0-bit: 1 HIGH + 3 LOW   = ~317 ns HIGH, ~950 ns LOW (within T0H/T0L spec)
 //   1-bit: 3 HIGH + 1 LOW   = ~950 ns HIGH, ~317 ns LOW (within T1H/T1L spec)
 // Total period per WS2812 bit ~= 1267 ns.
+//
+// #3416 FX-MED-6 / FX-LOW-7: the 1267 ns total is at the upper edge of
+// the WS2812B reset-detection window. Per WS2812B datasheet rev 2017,
+// reset detection requires >=50 us LOW; nominal bit period is 1250 ns
+// +/- 600 ns. 1267 ns is safely within spec, but some WS2812B clones
+// (notably some early SK6812-RGB-W batches) have tighter trailing-low
+// detectors that may misinterpret. Scope verification across vendors
+// is recommended before changing baud_div.
 static constexpr u32 kFlexIOBaudDiv = 18;
 
 bool flexio_init(const FlexIOPinInfo& pin_info, u32 t0h_ns, u32 t1h_ns,
                  u32 period_ns, u32 reset_us) {
+    // #3416 FX-MED-1: t0h_ns/t1h_ns/period_ns are currently IGNORED.
+    // The encoder hard-codes WS2812B nominal timing via kFlexIOBaudDiv
+    // and the 0x1/0x7 nibble layout. Honouring the params requires
+    // (a) computing baud_div from period_ns, (b) selecting between
+    // 4-bit-per-WS-bit and 5-bit-per-WS-bit encoding for chipsets with
+    // tighter timing ratios. Defer until a non-WS2812B chipset is
+    // explicitly added to the supported list (ChannelEngineFlexIO's
+    // canHandle() filter currently lets SK6812/WS2811/APA106 pass at
+    // the period range, so they silently get WS2812B waveforms).
     (void)t0h_ns;
     (void)t1h_ns;
     (void)period_ns;
@@ -444,11 +531,22 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     sDmaChannel->clearInterrupt();
     sDmaChannel->clearError();
     sDmaComplete = true;
+    // #3416 FX-CRIT-3: ensure DMA disable + flag clears commit to the
+    // eDMA engine before we touch FlexIO registers below. Without the
+    // barrier, an in-flight minor-loop write to SHIFTBUF could overlap
+    // the FLEXIO2_CTRL &= ~1 disable, leaving the shifter in an
+    // ambiguous state right when park_low switches the mux to ALT5.
+    asm volatile("dsb" ::: "memory");
 
     // Each WS2812 byte expands to 4 FlexIO bytes (32 FlexIO bits, 4 per
     // WS2812 bit). Cap to buffer.
     const u32 kMaxInputBytes = kMaxPixelBytes / 4u;
     if (num_bytes > kMaxInputBytes) {
+        // #3416 FX-MED-2: warn loudly so the user sees that their strip
+        // is being silently truncated rather than discovering tail LEDs
+        // are dark. kMaxInputBytes = 1024 bytes = 341 RGB LEDs.
+        FL_LOG_FLEXIO_F("FlexIO: strip truncated -- requested %d bytes exceeds buffer cap %d (~341 RGB LEDs max). Tail LEDs will not update.",
+                        (int)num_bytes, (int)kMaxInputBytes);
         num_bytes = kMaxInputBytes;
     }
 
@@ -464,7 +562,15 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     FLEXIO2_SHIFTSTAT = 0xFFu;
     FLEXIO2_SHIFTERR = 0xFFu;
     FLEXIO2_TIMSTAT = 0xFFu;
-    FLEXIO2_SHIFTSDEN = (1u << 0);
+    // #3416 FX-CRIT-2 / FX-HIGH-4: SHIFTSDEN write deferred to AFTER
+    // TCD is fully programmed and DMA channel is enabled. The previous
+    // ordering (SHIFTSDEN here -> TCD writes -> FLEXEN -> enable())
+    // theoretically allowed a half-programmed TCD to service a pending
+    // DMA request if the channel was still ERQ-armed from a previous
+    // frame. Even though sDmaChannel->disable() above clears ERQ, on a
+    // re-init path (different pin/timing) a stale armed flag could
+    // sneak through. Move SHIFTSDEN to after enable() to close the
+    // window unambiguously.
 
     // Park the pin LOW via GPIO before re-asserting the FlexIO mux. This
     // forces a clean LOW idle the receiver can decode the first '1' bit
@@ -488,7 +594,8 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     sDmaChannel->TCD->BITER_ELINKNO = num_words;
     sDmaChannel->TCD->DLASTSGA = 0;
     sDmaChannel->TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ;
-    sDmaChannel->TCD->DADDR = &FLEXIO2_SHIFTBUF[0];
+    // #3416 FX-LOW-1: duplicate DADDR write removed (was set above
+    // already). Editing artifact from the bring-up rounds.
 
     sDmaComplete = false;
     // CTRL = FLEXEN only. FASTACC (bit 2) was set previously, but per RM
@@ -507,6 +614,10 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     // over-shift). The hardware self-starts cleanly.
 
     sDmaChannel->enable();
+    // #3416 FX-CRIT-2: enable shifter-empty -> DMA request now that
+    // both the TCD and the channel are fully armed. The first DMA
+    // request fires on the next FLEXEN-induced SSF=HIGH transition.
+    FLEXIO2_SHIFTSDEN = (1u << 0);
 
     return true;
 }
@@ -519,13 +630,25 @@ void flexio_wait() {
     // Bounded wait so a stuck FlexIO/DMA can't take down the whole RPC test
     // session. WS2812 frame for 100 LEDs at 800 kHz takes ~3 ms. 50 ms is
     // plenty of headroom for any reasonable strip length while staying
-    // well below the autoresearch 120 s RPC deadline. If the timeout
-    // elapses, leave sDmaComplete=false so callers can detect the failure
-    // via flexio_is_done() and the driver state remains observable.
+    // well below the autoresearch 120 s RPC deadline.
     const u32 start = millis();
     const u32 timeout_ms = 50;
     while (!sDmaComplete) {
         if ((u32)(millis() - start) >= timeout_ms) {
+            // #3416 FX-MED-4: on timeout, force-recover instead of
+            // leaving sDmaComplete=false. The previous code returned with
+            // the flag still false, so the very next flexio_show() would
+            // call flexio_wait() again, time out a second time, and the
+            // stuck channel was never disposed. Force-disable + mark
+            // complete so the next show() can reprogram a fresh TCD.
+            if (sDmaChannel) {
+                sDmaChannel->disable();
+                sDmaChannel->clearComplete();
+                sDmaChannel->clearError();
+            }
+            sDmaComplete = true;
+            FL_LOG_FLEXIO_F("FlexIO: flexio_wait() timed out after %s ms -- recovering",
+                            (int)timeout_ms);
             return;
         }
     }
@@ -533,6 +656,13 @@ void flexio_wait() {
 
 void flexio_read_diagnostics(FlexIODiagnostics* out) {
     if (!out) return;
+
+    // #3416 FX-LOW-4: snapshot atomically so the ISR can't run mid-read
+    // and produce an inconsistent (e.g. dmaComplete=false but
+    // tcd_citer=0) view. Interrupts are off only for the brief register
+    // reads themselves; this is a diagnostic-only path so the latency
+    // cost is acceptable.
+    noInterrupts();
 
     // Always zero-fill first. The CCM clock-gate / divider registers and
     // the driver's own bookkeeping fields are always safe to read, so
@@ -549,8 +679,14 @@ void flexio_read_diagnostics(FlexIODiagnostics* out) {
     out->ccm_cs1cdr = CCM_CS1CDR;
     out->initialized = sInitialized;
     out->dmaComplete = sDmaComplete;
+    // FX-HIGH-5: eDMA error status snapshot. DMA_ES is a global register
+    // shared across all eDMA channels; non-zero indicates SOMETHING
+    // erred (not necessarily our channel), so consumers must cross-
+    // reference the ERR field of DMA_ES against our channel index.
+    out->dma_es = DMA_ES;
 
     if (!sInitialized) {
+        interrupts();  // FX-LOW-4 atomic window close on early return
         return;
     }
 
@@ -579,6 +715,7 @@ void flexio_read_diagnostics(FlexIODiagnostics* out) {
         out->tcd_csr = sDmaChannel->TCD->CSR;
     }
     // TCD fields already zero from the FlexIODiagnostics{} value init above.
+    interrupts();  // close the FX-LOW-4 atomic-snapshot window
 }
 
 void flexio_deinit() {

@@ -3,4 +3,4 @@
 /// Includes all implementation files in alphabetical order
 
 #include "third_party/object_fled/src/ObjectFLEDDmaManager.cpp.hpp"
-#include "third_party/object_fled/src/OjectFLED.cpp.hpp"
+#include "third_party/object_fled/src/ObjectFLED.cpp.hpp"

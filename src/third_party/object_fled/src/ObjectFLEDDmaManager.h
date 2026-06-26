@@ -27,6 +27,15 @@ namespace fl {
 #define BYTES_PER_DMA 150
 #endif
 
+// #3416 OF-HIGH-3: at BYTES_PER_DMA < 90 the ISR refill margin
+// (~10 us memset+fillbits+dcache_flush) approaches the major-loop
+// duration (BYTES_PER_DMA * 10 us / 8 bits-per-byte = X us), reintroducing
+// the race that Round 2 of #3406 fixed. Compile-time guard so a
+// user override below the safe threshold fails loudly.
+static_assert(BYTES_PER_DMA >= 90,
+              "BYTES_PER_DMA must be >= 90 to keep the ISR refill margin "
+              "ahead of the DMA major-loop tick. See #3406 round-2 race.");
+
 /// Singleton manager for shared ObjectFLED DMA resources
 ///
 /// Coordinates exclusive access to Teensy 4.x TMR4/DMA hardware across

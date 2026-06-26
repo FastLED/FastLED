@@ -1,15 +1,26 @@
 /// @file flexio_driver.h
 /// @brief Low-level FlexIO2 WS2812 driver for IMXRT1062 (Teensy 4.x)
 ///
-/// Uses the 4-timer + 1-shifter architecture from RESEARCH.md §8:
-/// - Shifter 0: Transmit mode, feeds pixel data via DMA
-/// - Timer 0: Shift clock (baud mode), driven by shifter status flag
-/// - Timer 1: Low-bit PWM (always fires, short HIGH pulse for '0' bit)
-/// - Timer 2: High-bit PWM (fires only when data=1, extends HIGH for '1' bit)
-/// - Timer 3: Latch timer (>50µs LOW reset signal)
+/// Uses a 1-shifter + 1-timer architecture (post-#3415 Round-5 rewrite):
+/// - Shifter 0: Transmit mode, LSB-first, PINCFG=3 drives the output pin
+///   directly from shifter[0]. DMA writes pre-encoded 32-bit words
+///   (4 FlexIO bits per WS2812 bit) into SHIFTBUF on each shifter-empty
+///   event.
+/// - Timer 0: Dual 8-bit baud mode. Lower byte = baud divider
+///   (kFlexIOBaudDiv=18 -> 317 ns per FlexIO shift). Upper byte = bit
+///   count (63 -> 32 bits per shifter word). Triggered by shifter
+///   status flag (TRGSEL=1, TRGPOL=1 active-low) so the timer runs
+///   while the shifter has data and stops when it empties.
 ///
-/// Timer 1 and Timer 2 outputs are OR'd on the same output pin by FlexIO hardware.
-/// DMA refills SHIFTBUFBIS (bit-swapped buffer) from pixel data in RAM.
+/// The earlier 4-timer + Timer-output-OR design described in
+/// RESEARCH.md §8 was abandoned in #3415 because the timer-conditional
+/// gating it required isn't actually expressible in FlexIO's TRGSEL
+/// encoding.
+///
+/// Important: the `t0h_ns`, `t1h_ns`, and `period_ns` parameters of
+/// flexio_init() are currently IGNORED; the driver hard-codes
+/// WS2812B nominal timing via the baud divider and the 4-bit
+/// `0xE`/`0x1` nibble encoder. See #3416 FX-MED-1.
 
 #pragma once
 
@@ -86,6 +97,7 @@ struct FlexIODiagnostics {
     u32 tcd_citer;
     u32 tcd_biter;
     u32 tcd_csr;
+    u32 dma_es;  ///< #3416 FX-HIGH-5: eDMA error status snapshot
     bool initialized;
     bool dmaComplete;
 };
