@@ -59,7 +59,7 @@ static constexpr u32 kIOMUXC_BASE = 0x401F8000;
 // running internally, drove an unrouted internal signal. This was the
 // real root cause of zero_capture across rounds 1-6 -- not register
 // values, not clock, not DMA, not sequencing.
-static const FlexIOPinEntry kFlexIOPins[] = {
+static constexpr FlexIOPinEntry kFlexIOPins[] = {
     {10, 0,  0x013C, 0x032C},  // GPIO_B0_00
     {12, 1,  0x0140, 0x0330},  // GPIO_B0_01
     {11, 2,  0x0144, 0x0334},  // GPIO_B0_02
@@ -84,6 +84,24 @@ bool flexio_lookup_pin(u8 teensy_pin, FlexIOPinInfo* info) {
     }
     return false;
 }
+
+// #3416 FX-CRIT-1: enforce at compile time that this driver targets
+// only FlexIO2 (the kFLEXIO2_BASE / FLEXIO2_* register pointers are
+// hard-coded). FlexIO2 on i.MX RT1062 has 8 shifters (indices 0-7);
+// any pin table entry above flexio_pin=17 is suspicious because the
+// physical pad routing on Teensy 4.x maxes at FLEXIO2_FLEXIO17.
+// Anything above that suggests a copy-paste from a FlexIO3 reference
+// where pin indices go higher -- which would silently write to the
+// FlexIO2 register block for a pad electrically routed to FlexIO3.
+static constexpr bool flexio_pin_table_is_flexio2_only() {
+    for (int i = 0; i < kNumFlexIOPins; i++) {
+        if (kFlexIOPins[i].flexio_pin > 17) return false;
+    }
+    return true;
+}
+static_assert(flexio_pin_table_is_flexio2_only(),
+              "kFlexIOPins entries must target FlexIO2 pads only "
+              "(flexio_pin <= 17). See #3416 FX-CRIT-1.");
 
 // ============================================================================
 // FlexIO2 Register Access Helpers
@@ -373,6 +391,17 @@ static bool flexio_dma_init() {
         FL_LOG_FLEXIO_F("FlexIO: Failed to allocate DMA channel");
         return false;
     }
+    // #3416 FX-HIGH-3: DMAMUX source 1 (REQUEST0) is shared between
+    // Shifter 0 SSF and Shifter 1 SSF on the i.MX RT1062. We use only
+    // Shifter 0, but if a future change adds a second shifter for
+    // parallel-LED support, the DMA would fire on both shifters'
+    // empty events and either over-feed or stall the second one.
+    // Document the assumption so it's visible.
+    // #3416 FX-LOW-5: DMAMUX is wired here once. ChannelEngineFlexIO's
+    // pin/timing reinit path re-enters flexio_init() which calls
+    // flexio_dma_init() again -- the early-return at the top means
+    // the DMAMUX routing is unchanged across reinits (correct, since
+    // we still target the same FlexIO2 shifter 0).
     sDmaChannel->triggerAtHardwareEvent(DMAMUX_SOURCE_FLEXIO2_REQUEST0);
     sDmaChannel->attachInterrupt(flexio_dma_isr);
     return true;

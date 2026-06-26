@@ -15,19 +15,27 @@ void ObjectFLEDDmaManager::acquire(void* owner) {
     // Wait for any current transmission to complete
     waitForCompletion();
 
-    // Set ownership
+    // #3416 OF-HIGH-1: protect mCurrentOwner against ISR/cross-instance
+    // races. ObjectFLED is documented as singleton-coordinated but
+    // nothing physically prevents a USB-CDC or SysTick ISR from calling
+    // show() on a different instance while we're mid-acquire. Without
+    // the noInterrupts() guard, two acquire() calls could both believe
+    // they own the channel and scramble the in-flight TCD.
+    noInterrupts();
     mCurrentOwner = owner;
+    interrupts();
 }
 
 void ObjectFLEDDmaManager::release(void* owner) {
-    // Validate ownership
+    noInterrupts();
+    // Validate ownership while interrupts are disabled so we can't see
+    // a half-set/half-cleared mCurrentOwner from a racing release.
     if (mCurrentOwner != owner) {
-        // Ownership mismatch - ignore for now
+        interrupts();
         return;
     }
-
-    // Release ownership
     mCurrentOwner = nullptr;
+    interrupts();
 }
 
 void ObjectFLEDDmaManager::waitForCompletion() {
