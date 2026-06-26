@@ -12,7 +12,6 @@
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/iflexio_peripheral.h"
 
 #include "fl/log/log.h"
-#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 
 #if defined(FL_IS_TEENSY_4X)

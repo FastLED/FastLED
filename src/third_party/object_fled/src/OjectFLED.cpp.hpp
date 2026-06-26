@@ -338,6 +338,10 @@ void ObjectFLED::begin(void) {
 
 	dma.dma2 = dma.dma2next; // copies TCD
 	dma.dma2.triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_1);
+	// #3416 OF-CRIT-2: detach any prior interrupt before re-attaching so
+	// a re-init after pin change doesn't leave an attachInterrupt() routed
+	// to the OLD vector slot from the previous channel allocation.
+	dma.dma2.detachInterrupt();
 	dma.dma2.attachInterrupt(isr);
 
 	dma.dma3.TCD->SADDR = dma.bitmask;
@@ -617,7 +621,11 @@ void ObjectFLED::showInternal(bool regenerateFrameBuffer) {
 		dma.dma2.TCD->SADDR = dma.bitdata;
 		dma.dma2.TCD->DADDR = &GPIO1_DR_CLEAR;
 		dma.dma2.TCD->CITER_ELINKNO = BYTES_PER_DMA * 8;
-		dma.dma2.TCD->CSR = 0;
+		// #3416 OF-HIGH-2: drop the dual-write CSR=0;CSR=ESG|INTMAJOR
+		// pattern. The intermediate CSR=0 cleared DREQ which can re-arm
+		// the channel mid-window if ERQ is set, leaving a brief gap
+		// where the channel is armed without ESG. Just write the final
+		// value directly.
 		dma.dma2.TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_ESG;
 		dma.dma2next.TCD->SADDR = dma.bitdata + BYTES_PER_DMA*32;
 		dma.dma2next.TCD->CITER_ELINKNO = BYTES_PER_DMA * 8;
@@ -628,10 +636,19 @@ void ObjectFLED::showInternal(bool regenerateFrameBuffer) {
 		}
 		dma_first = true;
     }
+	// #3416 OF-MED-4: barriers so all memcpy + TCD writes commit before
+	// the eDMA channels are armed. Without these the compiler is free
+	// to reorder the memcpy of dma.pin_bitnum / pin_offset / bitmask
+	// past the dma*.enable() calls, and the ISR (or DMA engine itself)
+	// could observe stale shared-state values. Strongly-ordered peripheral
+	// region writes drain on DSB; DMB ensures the memcpy stores are
+	// visible to the eDMA engine via the AXIM port before ERQ goes hot.
+	asm volatile("dmb" ::: "memory");
 	dma.dma3.clearComplete();
 	dma.dma1.enable();
 	dma.dma2.enable();
 	dma.dma3.enable();
+	asm volatile("dsb" ::: "memory");
 
 	// initialize timers
 	TMR4_CNTR0 = 0;

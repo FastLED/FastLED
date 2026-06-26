@@ -8,7 +8,6 @@
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/iflexio_peripheral.h"
 
 #include "fl/log/log.h"
-#include "fl/log/log.h"
 #include "fl/stl/cstring.h"
 
 // IWYU pragma: begin_keep
@@ -137,6 +136,12 @@ static void flexio_dma_isr() {
     if (sDmaChannel != nullptr) {
         sDmaChannel->clearInterrupt();
     }
+    // #3416 FX-HIGH-6: ensure the clearInterrupt() write to DMA_CINT
+    // reaches the eDMA before we return. On Cortex-M7 a posted store can
+    // still be in the write buffer when the ISR returns, allowing the
+    // NVIC to immediately re-fire the same vector before the interrupt
+    // status actually clears. Matches Teensyduino FlexSerial.cpp:512.
+    asm volatile("dsb" ::: "memory");
     sDmaComplete = true;
 }
 
@@ -160,6 +165,14 @@ static void flexio_clock_init() {
                                    CCM_CS1CDR_FLEXIO2_CLK_PODF(7))) |
                  CCM_CS1CDR_FLEXIO2_CLK_PRED(1) |
                  CCM_CS1CDR_FLEXIO2_CLK_PODF(1);
+
+    // #3416 FX-MED-3: barrier so CCM_CS1CDR write commits before we
+    // enable the clock gate. Without this, the CCM may still be
+    // propagating the new divider when the gate is opened, letting the
+    // FlexIO module see one or two ticks of the previous (or
+    // undefined) clock divider before settling.
+    asm volatile("dsb" ::: "memory");
+    (void)CCM_CS1CDR;
 
     CCM_CCGR3 |= CCM_CCGR3_FLEXIO2(CCM_CCGR_ON);
 }
@@ -275,11 +288,17 @@ static void flexio_configure_hw(u8 flexio_pin, u32 baud_div) {
     FLEXIO2_CTRL = 0;
 
     // Shifter 0: Transmit mode, output bit drives flexio_pin directly.
+    // #3416 FX-HIGH-2: mask PINSEL to 5 bits (PINSEL field per imxrt.h
+    // FLEXIO_SHIFTCTL_PINSEL(n) = ((n) & 0x1F) << 8). Any FlexIO pin
+    // index above 31 (a future copy-paste from a FlexIO3 table, which
+    // does have higher pin indices) would otherwise silently overflow
+    // into PINPOL (bit 7) and the high bit of the pin number would be
+    // lost. Today this is a no-op since our table maxes at pin 17.
     FLEXIO2_SHIFTCTL[0] =
-        (2u << 0) |                    // SMOD = Transmit
-        ((u32)flexio_pin << 8) |       // PINSEL = output pin
-        (3u << 16) |                   // PINCFG = output enabled
-        (0u << 24);                    // TIMSEL = Timer 0
+        (2u << 0) |                              // SMOD = Transmit
+        ((u32)(flexio_pin & 0x1F) << 8) |        // PINSEL = output pin
+        (3u << 16) |                             // PINCFG = output enabled
+        (0u << 24);                              // TIMSEL = Timer 0
 
     FLEXIO2_SHIFTCFG[0] = 0;           // 1-bit serial, no start/stop bits
 
@@ -449,6 +468,11 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     // WS2812 bit). Cap to buffer.
     const u32 kMaxInputBytes = kMaxPixelBytes / 4u;
     if (num_bytes > kMaxInputBytes) {
+        // #3416 FX-MED-2: warn loudly so the user sees that their strip
+        // is being silently truncated rather than discovering tail LEDs
+        // are dark. kMaxInputBytes = 1024 bytes = 341 RGB LEDs.
+        FL_LOG_FLEXIO_F("FlexIO: strip truncated -- requested %s bytes exceeds buffer cap %s (~341 RGB LEDs max). Tail LEDs will not update.",
+                        (int)num_bytes, (int)kMaxInputBytes);
         num_bytes = kMaxInputBytes;
     }
 
@@ -488,7 +512,8 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     sDmaChannel->TCD->BITER_ELINKNO = num_words;
     sDmaChannel->TCD->DLASTSGA = 0;
     sDmaChannel->TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ;
-    sDmaChannel->TCD->DADDR = &FLEXIO2_SHIFTBUF[0];
+    // #3416 FX-LOW-1: duplicate DADDR write removed (was set above
+    // already). Editing artifact from the bring-up rounds.
 
     sDmaComplete = false;
     // CTRL = FLEXEN only. FASTACC (bit 2) was set previously, but per RM
@@ -519,13 +544,25 @@ void flexio_wait() {
     // Bounded wait so a stuck FlexIO/DMA can't take down the whole RPC test
     // session. WS2812 frame for 100 LEDs at 800 kHz takes ~3 ms. 50 ms is
     // plenty of headroom for any reasonable strip length while staying
-    // well below the autoresearch 120 s RPC deadline. If the timeout
-    // elapses, leave sDmaComplete=false so callers can detect the failure
-    // via flexio_is_done() and the driver state remains observable.
+    // well below the autoresearch 120 s RPC deadline.
     const u32 start = millis();
     const u32 timeout_ms = 50;
     while (!sDmaComplete) {
         if ((u32)(millis() - start) >= timeout_ms) {
+            // #3416 FX-MED-4: on timeout, force-recover instead of
+            // leaving sDmaComplete=false. The previous code returned with
+            // the flag still false, so the very next flexio_show() would
+            // call flexio_wait() again, time out a second time, and the
+            // stuck channel was never disposed. Force-disable + mark
+            // complete so the next show() can reprogram a fresh TCD.
+            if (sDmaChannel) {
+                sDmaChannel->disable();
+                sDmaChannel->clearComplete();
+                sDmaChannel->clearError();
+            }
+            sDmaComplete = true;
+            FL_LOG_FLEXIO_F("FlexIO: flexio_wait() timed out after %s ms -- recovering",
+                            (int)timeout_ms);
             return;
         }
     }

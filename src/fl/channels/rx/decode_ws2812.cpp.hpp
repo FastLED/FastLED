@@ -50,6 +50,16 @@ decodeWs2812Edges(const ChipsetTiming4Phase& timing,
             if (low_ns >= static_cast<u32>(timing.reset_min_us) * 1000u) {
                 break;  // WS2812 reset pulse -> end of frame
             }
+            // #3416 RX-HIGH-5: also break on a long HIGH between frames.
+            // The FlexIO RX path observed sustained HIGH-state between
+            // frames (#3066, FlexIO TX shifter latch retention) where
+            // the line stayed high for many milliseconds. Without this
+            // branch a single stray falling edge after the long HIGH
+            // would misclassify a phantom bit cell of arbitrary
+            // duration as a real WS2812 bit.
+            if (high_ns >= static_cast<u32>(timing.reset_min_us) * 1000u) {
+                break;
+            }
             if (timing.gap_tolerance_ns > 0 && low_ns <= timing.gap_tolerance_ns) {
                 if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns) {
                     is_bit1 = true;
