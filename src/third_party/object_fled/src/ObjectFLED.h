@@ -58,8 +58,18 @@
 // smaller than the half the Cortex-M7 data cache.
 //bitdata[B_P_D * 64]		buffer holds data (10KB) for 80 LED bytes: 4DW * 8b = 32DW/LEDB = 96DW/LED
 //framebuffer_index = B_P_D * 2 = pointer to next block for transfer (80 LEDB / bitdata buffer)
+// Doubled from 60 to 120 to lengthen the eDMA major loop on dma2 (the
+// chunked half-buffer used for ESG-chained refill). With BYTES_PER_DMA=60
+// the ISR had only ~1.25 us between dma2's ESG reload and the next TMR4
+// trigger, but the ISR's memset + fillbits + dcache_flush takes ~10 us
+// on Cortex-M7 @ 600 MHz -- so dma2next was reading a partially-refilled
+// chunk on the first ~10 us of each new chunk. That race is the most
+// plausible mechanism behind the residual mid-byte 0->1 phantom bit flips
+// reported in #3406 (statistical analysis shows errors cluster at the
+// 20-LED chunk boundaries that BYTES_PER_DMA=60 produces). 120 doubles
+// the inter-ISR margin with the same memset overhead, +15 KB DMAMEM cost.
 #ifndef BYTES_PER_DMA
-#define BYTES_PER_DMA	60		//= number of pairs of LEDB (120=240B) bitmasks in bitdata.
+#define BYTES_PER_DMA	120		//= number of pairs of LEDB (120=240B) bitmasks in bitdata.
 #endif
 
 #define CORDER_RGB	0	//* WS2811, YF923
