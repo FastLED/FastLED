@@ -349,6 +349,32 @@
   #define FL_NO_INLINE
 #endif
 
+// Place a function in RAM instead of flash, so it executes with zero flash
+// wait states. On parts whose flash cannot be fetched at full core speed
+// (e.g. LPC845 @ 30 MHz, no flash accelerator), the cycle-counted WS2812 bit
+// timing in the M0 clockless driver only holds when the code runs from SRAM.
+//
+// Mechanism: the function is emitted into the `.ramfunc` section. The device
+// linker script gives that section a flash load address but a RAM run address,
+// and the SDK startup copies it to SRAM alongside `.data` before main(). No
+// runtime memcpy is required.
+//
+// `noinline` keeps it a real out-of-line function (so it actually lands in the
+// section rather than being inlined back into a flash caller). `long_call`
+// forces an indirect call so the flash->RAM branch (flash @ 0x0, SRAM @
+// 0x10000000 - far beyond Thumb `bl` +/-16 MB range) does not depend on the
+// linker inserting a veneer.
+//
+// OPT-IN ONLY: gated on FL_ARM_M0_RAMFUNC because it requires a linker script
+// with `.ramfunc` wired into the startup copy table (e.g. the LPC845 MCUXSDK
+// script, or the Arduino LPC core with `*(.ramfunc*)` added to `.data`). NOT
+// assumed for arbitrary linkers. Expands to nothing unless the flag is set.
+#if defined(FL_ARM_M0_RAMFUNC) && (defined(FL_IS_GCC) || defined(FL_IS_CLANG))
+  #define FL_RAMFUNC __attribute__((section(".ramfunc"), noinline, long_call))
+#else
+  #define FL_RAMFUNC
+#endif
+
 // Mark functions to run during C++ static initialization (before main())
 // Used for auto-registration of platform-specific implementations
 #if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
