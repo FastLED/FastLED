@@ -122,14 +122,20 @@ static const FlexPwmPinInfo kPinMap[] = {
      &IOMUXC_FLEXPWM1_PWMA3_SELECT_INPUT, 4},
 
     // Pin 22: FlexPWM4_SM0_A (GPIO_AD_B1_08, ALT1)
+    // SELECT_INPUT=1 routes from GPIO_AD_B1_08 per the i.MX RT1062
+    // IOMUXC_FLEXPWM4_PWMA0_SELECT_INPUT daisy table. Previous value 0
+    // selected a different pad and would have silently failed FlexPWM RX
+    // capture on pin 22 (same class of bug as #3402's pin 8 fix).
     {22, &IMXRT_FLEXPWM4, 0, false, DMAMUX_SOURCE_FLEXPWM4_READ0,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B1_08, 1,
-     &IOMUXC_FLEXPWM4_PWMA0_SELECT_INPUT, 0},
+     &IOMUXC_FLEXPWM4_PWMA0_SELECT_INPUT, 1},
 
     // Pin 23: FlexPWM4_SM1_A (GPIO_AD_B1_09, ALT1)
+    // SELECT_INPUT=1 routes from GPIO_AD_B1_09 per the i.MX RT1062
+    // IOMUXC_FLEXPWM4_PWMA1_SELECT_INPUT daisy table.
     {23, &IMXRT_FLEXPWM4, 1, false, DMAMUX_SOURCE_FLEXPWM4_READ1,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B1_09, 1,
-     &IOMUXC_FLEXPWM4_PWMA1_SELECT_INPUT, 0},
+     &IOMUXC_FLEXPWM4_PWMA1_SELECT_INPUT, 1},
 
     // Pin 29: FlexPWM3_SM1_B (GPIO_EMC_31, ALT1)
     {29, &IMXRT_FLEXPWM3, 1, true, DMAMUX_SOURCE_FLEXPWM3_READ1,
@@ -140,9 +146,12 @@ static const FlexPwmPinInfo kPinMap[] = {
     // Teensy 4.1 only pins
 
     // Pin 36: FlexPWM2_SM3_A (GPIO_B1_02, ALT6)
+    // SELECT_INPUT=4 routes from GPIO_B1_02 per the i.MX RT1062
+    // IOMUXC_FLEXPWM2_PWMA3_SELECT_INPUT daisy table. Mirrors the same
+    // GPIO_B1_xx / FlexPWM*_PWMA3 / ALT6 pattern as pin 8.
     {36, &IMXRT_FLEXPWM2, 3, false, DMAMUX_SOURCE_FLEXPWM2_READ3,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_B1_02, 6,
-     &IOMUXC_FLEXPWM2_PWMA3_SELECT_INPUT, 1},
+     &IOMUXC_FLEXPWM2_PWMA3_SELECT_INPUT, 4},
 
     // Pin 49: FlexPWM1_SM2_A (GPIO_EMC_23, ALT1) [bottom pads]
     {49, &IMXRT_FLEXPWM1, 2, false, DMAMUX_SOURCE_FLEXPWM1_READ2,
