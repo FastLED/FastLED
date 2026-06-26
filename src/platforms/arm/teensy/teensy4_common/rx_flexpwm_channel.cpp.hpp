@@ -198,10 +198,26 @@ static const FlexPwmPinInfo *lookupPin(int pin) {
 /// invariant is: F_BUS_ACTUAL must stay >= ~210 MHz for the 16-bit
 /// timestamp window to contain a 300 us pulse. Default Teensy 4.x bus
 /// is 150 MHz which leaves ~437 us headroom.
+///
+/// #3416 RX-LOW-4: replace the per-edge 64-bit divide with a Q16.16
+/// fixed-point multiply. At F_BUS_ACTUAL=150 MHz the conversion
+/// factor is 1e9/F_BUS_ACTUAL = 6.666... ns/tick. Pre-scaled to Q16.16
+/// once at first call, then a 1-cycle UMULL replaces the ~30-cycle
+/// 64-bit divide. Saves ~150k cycles per 100-LED frame (~250us at
+/// 600 MHz CPU). Initial computation happens on first call instead
+/// of constexpr because F_BUS_ACTUAL is a runtime variable on Teensy.
 static inline u32 tickDeltaNs(u16 t0, u16 t1) {
-    u16 delta = static_cast<u16>(t1 - t0); // handles wraparound
+    static u32 ns_per_tick_q16 = 0;
+    if (ns_per_tick_q16 == 0) {
+        // ns_per_tick_q16 = (1e9 / F_BUS_ACTUAL) << 16
+        // = 1e9 << 16 / F_BUS_ACTUAL, but 1e9 << 16 overflows u32;
+        // use u64 intermediate then truncate.
+        ns_per_tick_q16 = static_cast<u32>(
+            (static_cast<u64>(1000000000ULL) << 16) / F_BUS_ACTUAL);
+    }
+    u16 delta = static_cast<u16>(t1 - t0);  // handles wraparound
     return static_cast<u32>(
-        (static_cast<u64>(delta) * 1000000000ULL) / F_BUS_ACTUAL);
+        (static_cast<u64>(delta) * ns_per_tick_q16) >> 16);
 }
 
 /// Decode a single bit from high/low nanosecond durations.

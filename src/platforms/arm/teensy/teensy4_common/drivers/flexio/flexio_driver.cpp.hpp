@@ -531,6 +531,12 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     sDmaChannel->clearInterrupt();
     sDmaChannel->clearError();
     sDmaComplete = true;
+    // #3416 FX-CRIT-3: ensure DMA disable + flag clears commit to the
+    // eDMA engine before we touch FlexIO registers below. Without the
+    // barrier, an in-flight minor-loop write to SHIFTBUF could overlap
+    // the FLEXIO2_CTRL &= ~1 disable, leaving the shifter in an
+    // ambiguous state right when park_low switches the mux to ALT5.
+    asm volatile("dsb" ::: "memory");
 
     // Each WS2812 byte expands to 4 FlexIO bytes (32 FlexIO bits, 4 per
     // WS2812 bit). Cap to buffer.
