@@ -370,26 +370,29 @@ def display_tight_timing(result: dict[str, Any]) -> None:
 
 
 def display_objectfled_diagnostics(result: dict[str, Any]) -> None:
-    """Display ObjectFLED register snapshots attached to runSingleTest."""
+    """Display ObjectFLED register snapshots attached to runSingleTest.
+
+    Also dumps the FlexPWM RX diagnostics + standardGpioPadProbe if
+    present, regardless of whether ObjectFLED was the test driver -- the
+    FlexPWM RX block is useful for ANY Teensy driver that uses a
+    FlexPWM-capable pin as the receiver (e.g. FlexIO TX -> pin 22 RX
+    during #3410 bring-up).
+    """
     diagnostics = result.get("objectFledDiagnostics")
-    if not isinstance(diagnostics, dict):
-        return
-    if diagnostics.get("enabled") is not True:
-        return
+    if isinstance(diagnostics, dict) and diagnostics.get("enabled") is True:
+        event_count = diagnostics.get("eventCount", "?")
+        overflow_count = diagnostics.get("overflowCount", "?")
+        fmt = diagnostics.get("format", "unknown")
+        snapshot = diagnostics.get("snapshot")
 
-    event_count = diagnostics.get("eventCount", "?")
-    overflow_count = diagnostics.get("overflowCount", "?")
-    fmt = diagnostics.get("format", "unknown")
-    snapshot = diagnostics.get("snapshot")
-
-    print()
-    print("  ObjectFLED diagnostics")
-    print(f"    format: {fmt}")
-    print(f"    events: {event_count}, overflow: {overflow_count}")
-    if isinstance(snapshot, str) and snapshot:
-        print("    snapshot:")
-        for line in snapshot.splitlines():
-            print(f"      {line}")
+        print()
+        print("  ObjectFLED diagnostics")
+        print(f"    format: {fmt}")
+        print(f"    events: {event_count}, overflow: {overflow_count}")
+        if isinstance(snapshot, str) and snapshot:
+            print("    snapshot:")
+            for line in snapshot.splitlines():
+                print(f"      {line}")
 
     flex_diag = result.get("flexPwmRxDiagnostics")
     if isinstance(flex_diag, dict):
