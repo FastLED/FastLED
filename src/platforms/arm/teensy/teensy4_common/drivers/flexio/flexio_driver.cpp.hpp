@@ -533,6 +533,27 @@ void flexio_wait() {
 
 void flexio_read_diagnostics(FlexIODiagnostics* out) {
     if (!out) return;
+
+    // Always zero-fill first. The CCM clock-gate / divider registers and
+    // the driver's own bookkeeping fields are always safe to read, so
+    // populate them unconditionally. The FLEXIO2_* peripheral block is
+    // ONLY safe to read once the CCM clock gate is on and FLEXEN has
+    // been set at least once by flexio_init() -- accessing it any
+    // earlier hits the same IMPRECISERR class fault we chased during
+    // bring-up (#3411, #3412). Bail out of the FlexIO-side reads when
+    // !sInitialized so the autoresearch RPC path stays safe on every
+    // Teensy 4.x test, including those that never bring FlexIO up.
+    *out = FlexIODiagnostics{};
+    out->ccm_ccgr3 = CCM_CCGR3;
+    out->ccm_cscmr2 = CCM_CSCMR2;
+    out->ccm_cs1cdr = CCM_CS1CDR;
+    out->initialized = sInitialized;
+    out->dmaComplete = sDmaComplete;
+
+    if (!sInitialized) {
+        return;
+    }
+
     out->ctrl = FLEXIO2_CTRL;
     out->shiftstat = FLEXIO2_SHIFTSTAT;
     out->shifterr = FLEXIO2_SHIFTERR;
@@ -543,36 +564,21 @@ void flexio_read_diagnostics(FlexIODiagnostics* out) {
     out->timctl0 = FLEXIO2_TIMCTL[0];
     out->timcfg0 = FLEXIO2_TIMCFG[0];
     out->timcmp0 = FLEXIO2_TIMCMP[0];
-    out->ccm_ccgr3 = CCM_CCGR3;
-    out->ccm_cscmr2 = CCM_CSCMR2;
-    out->ccm_cs1cdr = CCM_CS1CDR;
-    FlexIOPinInfo info{};
-    out->muxRegValue = 0;
-    out->padRegValue = 0;
-    if (sInitialized) {
-        for (int i = 0; i < kNumFlexIOPins; i++) {
-            if (kFlexIOPins[i].flexio_pin == sFlexIOPin) {
-                out->muxRegValue = *(volatile u32*)(kIOMUXC_BASE + kFlexIOPins[i].mux_reg_offset);
-                out->padRegValue = *(volatile u32*)(kIOMUXC_BASE + kFlexIOPins[i].pad_reg_offset);
-                break;
-            }
+    for (int i = 0; i < kNumFlexIOPins; i++) {
+        if (kFlexIOPins[i].flexio_pin == sFlexIOPin) {
+            out->muxRegValue = *(volatile u32*)(kIOMUXC_BASE + kFlexIOPins[i].mux_reg_offset);
+            out->padRegValue = *(volatile u32*)(kIOMUXC_BASE + kFlexIOPins[i].pad_reg_offset);
+            break;
         }
     }
-    out->initialized = sInitialized;
-    out->dmaComplete = sDmaComplete;
     if (sDmaChannel && sDmaChannel->TCD) {
         out->tcd_saddr = (u32)sDmaChannel->TCD->SADDR;
         out->tcd_daddr = (u32)sDmaChannel->TCD->DADDR;
         out->tcd_citer = sDmaChannel->TCD->CITER_ELINKNO;
         out->tcd_biter = sDmaChannel->TCD->BITER_ELINKNO;
         out->tcd_csr = sDmaChannel->TCD->CSR;
-    } else {
-        out->tcd_saddr = 0;
-        out->tcd_daddr = 0;
-        out->tcd_citer = 0;
-        out->tcd_biter = 0;
-        out->tcd_csr = 0;
     }
+    // TCD fields already zero from the FlexIODiagnostics{} value init above.
 }
 
 void flexio_deinit() {
