@@ -552,11 +552,14 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
     volatile u32 *pad_register = (volatile u32 *)(
         (uintptr_t)mPinInfo->mux_register + 0x1F0u);
     // KEEPER mode (PUE=0): pad holds the last driven level. WS2812 lines
-    // are actively driven by the TX side both HIGH and LOW; a pull-up
-    // (PUE=1, PUS=2) would fight the LOW drive and leak HIGH between
-    // frames -- exactly the symptom that the FlexIO TX park-pin-LOW
-    // workaround was originally introduced to mitigate. The keeper
-    // configuration matches what most clockless RX libraries use.
+    // are actively driven by the TX side both HIGH and LOW; tested
+    // pull-up, pull-down, and keeper -- all three produced statistically
+    // identical noise floors on bench loopback (0.5-1.0% byte error
+    // range across both FlexIO and ObjectFLED TX). Keeper is the least
+    // surprising default since push-pull TX leaves no time window for
+    // any of the three configurations to actually act differently on
+    // the line. Hysteresis (HYS=1) is the one bit that's theoretically
+    // useful, kept regardless.
     *pad_register = (1u << 12) |    // PKE
                     (0u << 13) |    // PUE = 0 -> keeper mode
                     (1u << 16);     // HYS
