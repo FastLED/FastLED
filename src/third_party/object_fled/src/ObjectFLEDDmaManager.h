@@ -20,7 +20,11 @@ namespace fl {
 // the ISR has plenty of margin to refill before the next chunk starts.
 // Memory cost: bitdata grows from 15 KB to 30 KB in DMAMEM (OCRAM2).
 #ifndef BYTES_PER_DMA
-#define BYTES_PER_DMA 120
+// EXPERIMENT: 150 makes our 100-LED test fit in a single major loop
+// (numbytes=300 <= BYTES_PER_DMA*2=300) so the ESG/ISR refill path is
+// completely bypassed. If the residual #3406 byte corruption disappears
+// with this setting, the bug IS in the refill chain.
+#define BYTES_PER_DMA 150
 #endif
 
 /// Singleton manager for shared ObjectFLED DMA resources
