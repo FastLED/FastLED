@@ -470,7 +470,13 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
                                  FLEXPWM_SMCAPTCTRLA_EDGA1(1) |
                                  FLEXPWM_SMCAPTCTRLA_CFAWM(0) |
                                  FLEXPWM_SMCAPTCTRLA_ARMA;
-        pwm->SM[sm].CAPTCOMPA = 0;
+        // CAPTCOMPA bits 0:1 (CFA, CAE) are write-1-to-clear capture-occurred
+        // flags per i.MX RT1062 RM eFlexPWM chapter. Writing 0 does NOT clear
+        // them, so a stale flag from a previous capture session causes the
+        // dual-circuit capture to produce a mismatched CVAL2/CVAL3 pair on
+        // the first read (old falling + fresh rising) -- root cause of the
+        // residual 0->1 random bit flips per #3406.
+        pwm->SM[sm].CAPTCOMPA = 0x3;
 
         // CAPTDE selects channel A capture DMA for the submodule read source.
         pwm->SM[sm].DMAEN = FLEXPWM_SMDMAEN_CAPTDE(1) | FLEXPWM_SMDMAEN_CA1DE;
@@ -481,7 +487,9 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
         pwm->SM[sm].CAPTCTRLB = FLEXPWM_SMCAPTCTRLB_EDGB0(2) |
                                  FLEXPWM_SMCAPTCTRLB_EDGB1(1) |
                                  FLEXPWM_SMCAPTCTRLB_ARMB;
-        pwm->SM[sm].CAPTCOMPB = 0;
+        // CAPTCOMPB bits 0:1 (CFB, CBE) are write-1-to-clear -- same as
+        // CAPTCOMPA above.
+        pwm->SM[sm].CAPTCOMPB = 0x3;
 
         // CAPTDE selects channel B capture DMA for the submodule read source.
         pwm->SM[sm].DMAEN = FLEXPWM_SMDMAEN_CAPTDE(2) | FLEXPWM_SMDMAEN_CB1DE;
@@ -675,9 +683,22 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
     // DMA writes bypass the CPU cache, so we must invalidate to see
     // the data DMA actually wrote. Without this, the CPU reads stale
     // cache lines and gets all-zero capture values.
+    //
+    // Cortex-M7 L1 cache lines are 32 bytes. arm_dcache_delete is only
+    // safe when both the start address and the size are 32-byte-aligned;
+    // a partial-line invalidate can leave 1-31 stale bytes adjacent to
+    // the invalidated region. Stale bytes with set bits leaking into a
+    // freshly-DMA'd buffer matches the residual 0->1 random byte-flip
+    // pattern from #3406 / #3359.
     if (captures_written > 0) {
-        arm_dcache_delete(mCaptureBuffer.data(),
-                          captures_written * sizeof(u16));
+        const fl::uptr kCacheLine = 32u;
+        const fl::uptr raw_addr = fl::ptr_to_int(mCaptureBuffer.data());
+        const fl::uptr end_addr = raw_addr + captures_written * sizeof(u16);
+        const fl::uptr aligned_start = raw_addr & ~(kCacheLine - 1u);
+        const fl::uptr aligned_end =
+            (end_addr + kCacheLine - 1u) & ~(kCacheLine - 1u);
+        arm_dcache_delete(fl::int_to_ptr<void>(aligned_start),
+                          aligned_end - aligned_start);
     }
 
     if (captures_written < 2) {
