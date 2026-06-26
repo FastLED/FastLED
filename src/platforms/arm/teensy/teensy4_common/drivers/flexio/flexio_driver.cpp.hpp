@@ -556,7 +556,15 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     FLEXIO2_SHIFTSTAT = 0xFFu;
     FLEXIO2_SHIFTERR = 0xFFu;
     FLEXIO2_TIMSTAT = 0xFFu;
-    FLEXIO2_SHIFTSDEN = (1u << 0);
+    // #3416 FX-CRIT-2 / FX-HIGH-4: SHIFTSDEN write deferred to AFTER
+    // TCD is fully programmed and DMA channel is enabled. The previous
+    // ordering (SHIFTSDEN here -> TCD writes -> FLEXEN -> enable())
+    // theoretically allowed a half-programmed TCD to service a pending
+    // DMA request if the channel was still ERQ-armed from a previous
+    // frame. Even though sDmaChannel->disable() above clears ERQ, on a
+    // re-init path (different pin/timing) a stale armed flag could
+    // sneak through. Move SHIFTSDEN to after enable() to close the
+    // window unambiguously.
 
     // Park the pin LOW via GPIO before re-asserting the FlexIO mux. This
     // forces a clean LOW idle the receiver can decode the first '1' bit
@@ -600,6 +608,10 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     // over-shift). The hardware self-starts cleanly.
 
     sDmaChannel->enable();
+    // #3416 FX-CRIT-2: enable shifter-empty -> DMA request now that
+    // both the TCD and the channel are fully armed. The first DMA
+    // request fires on the next FLEXEN-induced SSF=HIGH transition.
+    FLEXIO2_SHIFTSDEN = (1u << 0);
 
     return true;
 }
