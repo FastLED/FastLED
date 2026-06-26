@@ -550,6 +550,26 @@ void FlexPwmRxChannelImpl::configureDma() {
     mDma.triggerAtHardwareEvent(mPinInfo->dma_source);
     mDma.interruptAtCompletion();
     mDma.attachInterrupt(dmaIsr);
+
+    // Settle delay: the IOMUXC pad-mux switch in configureFlexPwm() can latch
+    // a spurious edge into CVAL2/CVAL3 BEFORE the real TX starts. Re-arm the
+    // capture circuit just before enabling DMA so the spike is consumed by
+    // the capture FIFO without DMA picking it up as the first capture pair.
+    // Without this, ~1 in 7 frames sees a whole-frame 1-bit shift signature
+    // ((0xF0,0x0F,0xAA) decoded as (0xE0,0x1F,0x55)) -- #3406 Round-4 Run 7.
+    delayMicroseconds(50);
+    if (!mPinInfo->channel_b) {
+        mPinInfo->pwm->SM[mPinInfo->submodule].CAPTCTRLA &=
+            ~static_cast<u16>(FLEXPWM_SMCAPTCTRLA_ARMA);
+        mPinInfo->pwm->SM[mPinInfo->submodule].CAPTCTRLA |=
+            FLEXPWM_SMCAPTCTRLA_ARMA;
+    } else {
+        mPinInfo->pwm->SM[mPinInfo->submodule].CAPTCTRLB &=
+            ~static_cast<u16>(FLEXPWM_SMCAPTCTRLB_ARMB);
+        mPinInfo->pwm->SM[mPinInfo->submodule].CAPTCTRLB |=
+            FLEXPWM_SMCAPTCTRLB_ARMB;
+    }
+
     mDma.enable();
 }
 
