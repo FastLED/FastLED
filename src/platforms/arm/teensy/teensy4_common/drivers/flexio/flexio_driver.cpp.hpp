@@ -479,6 +479,15 @@ static constexpr u32 kFlexIOBaudDiv = 18;
 
 bool flexio_init(const FlexIOPinInfo& pin_info, u32 t0h_ns, u32 t1h_ns,
                  u32 period_ns, u32 reset_us) {
+    // #3416 FX-MED-1: t0h_ns/t1h_ns/period_ns are currently IGNORED.
+    // The encoder hard-codes WS2812B nominal timing via kFlexIOBaudDiv
+    // and the 0x1/0x7 nibble layout. Honouring the params requires
+    // (a) computing baud_div from period_ns, (b) selecting between
+    // 4-bit-per-WS-bit and 5-bit-per-WS-bit encoding for chipsets with
+    // tighter timing ratios. Defer until a non-WS2812B chipset is
+    // explicitly added to the supported list (ChannelEngineFlexIO's
+    // canHandle() filter currently lets SK6812/WS2811/APA106 pass at
+    // the period range, so they silently get WS2812B waveforms).
     (void)t0h_ns;
     (void)t1h_ns;
     (void)period_ns;

@@ -406,6 +406,13 @@ bool FlexPwmRxChannelImpl::begin(const RxConfig &config) {
     }
 
     mBufferSize = config.buffer_size;
+    // #3416 RX-MED-6: signal_range_max_ns / 1000 is used as the idle
+    // threshold in wait() to declare frame-end via inactivity. Default
+    // 100us is fine for WS2812 (50us reset minimum) but tighter LED
+    // chipsets with shorter inter-byte gaps (e.g. TM1814/APA106 with
+    // ~80us reset) need this lowered via RxConfig. Already exposed
+    // through the public config struct -- documented here for the
+    // implementation reader.
     mSignalRangeMaxNs = config.signal_range_max_ns;
     mStartLow = config.start_low;
     mReceiveDone = false;
@@ -605,6 +612,13 @@ void FlexPwmRxChannelImpl::configureDma() {
     mDma.TCD->DLASTSGA = 0;
     mDma.TCD->BITER = mCaptureBuffer.size() / 2;
     mDma.TCD->CSR = DMA_TCD_CSR_DREQ;
+    // #3416 RX-MED-1: mArmedCiter is sampled here (BEFORE the 50us
+    // settle + ARMA bounce and BEFORE mDma.enable()). The wait() loop
+    // uses this as a baseline to detect "DMA never moved" failures.
+    // Sampling here matches BITER at this point (CITER hasn't been
+    // decremented yet); a later sample (after enable + settle) would
+    // false-positive a successful capture as TIMEOUT if the TX side
+    // had already begun by the time we entered wait().
     mArmedCiter = mDma.TCD->CITER;
     mDma.triggerAtHardwareEvent(mPinInfo->dma_source);
     mDma.interruptAtCompletion();
