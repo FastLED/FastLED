@@ -203,7 +203,10 @@ private:
 	uint16_t LATCH_DELAY = 300;		//uS time to hold output low for LED latch.
 
 	//for show context switch
-	uint32_t bitmaskLocal[4];
+	// Force 32-byte alignment so arm_dcache_flush_delete in begin() operates
+	// on a whole cache line. Without alignment the 16-byte flush is unsafe
+	// per Cortex-M7 cache maintenance semantics (#3406).
+	alignas(32) uint32_t bitmaskLocal[4];
 	uint8_t numpinsLocal;
 	uint32_t numbytesLocal;
 	uint8_t pin_bitnumLocal[NUM_DIGITAL_PINS];
