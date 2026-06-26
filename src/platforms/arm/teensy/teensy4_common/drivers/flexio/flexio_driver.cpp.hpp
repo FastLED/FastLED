@@ -219,7 +219,12 @@ static void flexio_configure_hw(u8 flexio_pin, u32 t0h_clocks, u32 t1h_clocks,
         ((u32)flexio_pin << 8) |      // PINSEL = output pin
         (3 << 16) |                   // PINCFG = output
         (1 << 22) |                   // TRGSRC = internal
-        (0 << 24);                    // TRGSEL = Timer 0 output
+        // #3410 Round-3 audit: TRGSEL = 4*M + pattern. For "Timer 0
+        // output" pattern is 3, M is 0 -> TRGSEL = 3 (NOT 0). Value 0
+        // selected "pin 0 input" -- so Timer 1 was waiting on an
+        // external pin instead of Timer 0's shift-clock output and
+        // the PWM never fired.
+        (3 << 24);                    // TRGSEL = Timer 0 output
 
     FLEXIO2_TIMCFG[1] =
         (6 << 8) |                    // TIMENA = trigger rising
@@ -252,7 +257,9 @@ static void flexio_configure_hw(u8 flexio_pin, u32 t0h_clocks, u32 t1h_clocks,
         ((u32)flexio_pin << 8) |      // PINSEL = output pin
         (3 << 16) |                   // PINCFG = output
         (1 << 22) |                   // TRGSRC = internal
-        (0 << 24);                    // TRGSEL = Timer 0
+        // #3410 Round-3 audit: same TRGSEL encoding error as Timer 1.
+        // "Timer 0 output" = pattern 3 + M=0 = TRGSEL value 3.
+        (3 << 24);                    // TRGSEL = Timer 0 output
 
     FLEXIO2_TIMCFG[3] =
         (6 << 8) |                    // TIMENA = trigger rising

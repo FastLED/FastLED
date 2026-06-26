@@ -994,12 +994,16 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     if (is_object_fled_driver) {
         response.set("objectFledDiagnostics",
                      fl::objectFledDiagnosticsToJson());
-#if defined(FL_IS_TEENSY_4X)
-        response.set("flexPwmRxDiagnostics",
-                     fl::FlexPwmRxChannel::diagnosticsToJson(pin_rx));
-#endif
         response.set("standardGpioPadProbe", standard_gpio_pad_probe);
     }
+#if defined(FL_IS_TEENSY_4X)
+    // FlexPWM RX diagnostics are useful for ANY Teensy driver that uses
+    // pin 22 (or another FlexPWM-capable pin) as RX -- not just ObjectFLED.
+    // #3410 round-3 FlexIO bring-up: emit on every Teensy 4.x test so we
+    // can see what the receiver sees during FlexIO TX too.
+    response.set("flexPwmRxDiagnostics",
+                 fl::FlexPwmRxChannel::diagnosticsToJson(pin_rx));
+#endif
 
     // Free run_results before building response to reclaim heap
     // Only serialize pattern details when tests FAIL (saves heap on passing tests)
