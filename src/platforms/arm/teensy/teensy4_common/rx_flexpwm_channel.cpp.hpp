@@ -415,6 +415,12 @@ bool FlexPwmRxChannelImpl::begin(const RxConfig &config) {
     // Allocate capture buffer: 2 captures per bit (rising + falling).
     // Cap to 8192 captures to avoid exhausting Teensy RAM (~16KB buffer).
     // For 100 LEDs × 24 bits = 2400 bits, we need ~4800 captures.
+    // #3416 RX-LOW-2: mBufferSize is named in EDGE PAIRS but
+    // RxConfig::buffer_size is documented as EDGES. Doubling here means
+    // the user-facing limit is actually half of what they think. A
+    // request like buffer_size=10000 silently caps to 4096 edge-pairs
+    // = 4096 bits = ~170 LEDs. For ~600+ LED strips this is dramatically
+    // undersized and the DMA wraps mid-frame.
     size_t cap_count = mBufferSize * 2;
     if (cap_count > 8192) {
         cap_count = 8192;
@@ -562,6 +568,14 @@ void FlexPwmRxChannelImpl::configureDma() {
     } else {
         capture_reg = &(mPinInfo->pwm->SM[mPinInfo->submodule].CVAL4);
     }
+
+    // #3416 RX-MED-4: this DMA reads from the FlexPWM CVAL registers in
+    // peripheral MMIO space. Teensyduino maps that region as Device-
+    // nGnRnE (per the MPU table in core/teensy4/startup.c), which means
+    // the DMA sees the live register value without any cache-coherence
+    // dance. If a future Teensy core update accidentally remaps FlexPWM
+    // as Normal-Cacheable, this DMA would read stale CVAL values and
+    // silently corrupt every frame.
 
     mDma.begin();
 

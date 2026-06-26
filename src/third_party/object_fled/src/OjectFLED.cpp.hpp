@@ -735,6 +735,12 @@ void ObjectFLED::isr(void)
 		dma_first = true;
 		dest = dma.bitdata + BYTES_PER_DMA*32;
 	}
+	// #3416 OF-MED-5: memset zeroes the half-buffer we're about to fill.
+	// fillbits() below does *dest |= mask (read-modify-write); the OR
+	// only works correctly when the destination starts at 0. The full-
+	// buffer memset in showInternal at frame start initialises only the
+	// half DMA reads first; this per-ISR memset initialises the OTHER
+	// half before each refill so the |= invariant holds.
 	memset(dest, 0, sizeof(dma.bitdata)/2);
 	uint32_t index = dma.framebuffer_index;
 	uint32_t count = dma.numbytes - dma.framebuffer_index;
