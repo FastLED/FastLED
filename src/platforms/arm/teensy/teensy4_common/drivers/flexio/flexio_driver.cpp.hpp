@@ -124,6 +124,7 @@ static volatile bool sDmaComplete = true;
 static bool sInitialized = false;
 static u8 sFlexIOPin = 0;
 static u32 sLatchCycles = 0;
+static FlexIOPinInfo sCurrentPinInfo{};
 
 static constexpr u32 kMaxPixelBytes = 4096;
 DMAMEM static u32 sPixelBuffer[kMaxPixelBytes / 4] __attribute__((aligned(32)));
@@ -178,6 +179,30 @@ static void flexio_pin_init(const FlexIOPinInfo& pin_info) {
     // gated state.
     *(pin_info.mux_reg) = 4 | 0x10;  // ALT4 + SION
     *(pin_info.pad_reg) = (3 << 3) | (0 << 6);
+}
+
+// #3410 Round 7 follow-up: between flexio_show() calls the FlexIO
+// peripheral leaves the line in an undefined state (the receiver
+// observed an extended HIGH between frames). The decoder then treats
+// that long HIGH as an invalid first edge-pair and silently advances
+// past it, eating the FIRST WS2812 bit of the next frame. The visible
+// symptom is byte_1 = 0xFE for expected 0xFF, byte_n's bits all shifted
+// left by 1, etc.
+//
+// Fix: BEFORE re-enabling FLEXEN for a new frame, briefly switch the pad
+// to ALT5 (GPIO5) output and drive it LOW for >=60 us so the receiver
+// captures a clean LOW idle. Then restore ALT4 | SION immediately
+// before the shifter loads its first word.
+static void flexio_pin_park_low(const FlexIOPinInfo& pin_info) {
+    // ALT5 == GPIO5 mode on all Teensy 4.x B0/B1 pads we map.
+    // Use Arduino's ::pinMode/::digitalWriteFast (the fl:: overloads
+    // are not interchangeable with the Arduino enum constants).
+    *(pin_info.mux_reg) = 5;
+    ::pinMode(pin_info.teensy_pin, OUTPUT);
+    ::digitalWriteFast(pin_info.teensy_pin, LOW);
+    delayMicroseconds(60);
+    // Restore the FlexIO mux on the way back to flexio_show().
+    *(pin_info.mux_reg) = 4 | 0x10;
 }
 
 // ============================================================================
@@ -363,6 +388,7 @@ bool flexio_init(const FlexIOPinInfo& pin_info, u32 t0h_ns, u32 t1h_ns,
 
     sFlexIOPin = pin_info.flexio_pin;
     sLatchCycles = reset_us;
+    sCurrentPinInfo = pin_info;
 
     flexio_configure_hw(pin_info.flexio_pin, kFlexIOBaudDiv);
 
@@ -412,6 +438,14 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     FLEXIO2_SHIFTERR = 0xFFu;
     FLEXIO2_TIMSTAT = 0xFFu;
     FLEXIO2_SHIFTSDEN = (1u << 0);
+
+    // Park the pin LOW via GPIO before re-asserting the FlexIO mux. This
+    // forces a clean LOW idle the receiver can decode the first '1' bit
+    // against; without it the previous-frame pin state leaks into the
+    // first edge-pair capture and the WS2812 decoder eats the leading
+    // data bit (off-by-one across the whole frame, observed pre-Round 7
+    // residual fix).
+    flexio_pin_park_low(sCurrentPinInfo);
 
     sDmaChannel->TCD->SADDR = sPixelBuffer;
     sDmaChannel->TCD->SOFF = 4;
