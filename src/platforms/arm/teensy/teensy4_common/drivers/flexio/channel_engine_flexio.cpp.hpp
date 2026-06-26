@@ -15,6 +15,12 @@
 #include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 
+#if defined(FL_IS_TEENSY_4X)
+// IWYU pragma: begin_keep
+#include <Arduino.h>
+// IWYU pragma: end_keep
+#endif
+
 namespace fl {
 
 // Timing period bounds for canHandle() filtering.
@@ -76,10 +82,27 @@ void ChannelEngineFlexIO::show() FL_NO_EXCEPT {
         return;
     }
 
-    // Wait for any previous transmission (per DMA Wait Pattern)
+    // Wait for any previous transmission (per DMA Wait Pattern). Bounded
+    // wait so a stuck FlexIO from a previous show cannot hang subsequent
+    // shows -- if poll never becomes READY, force-drop the previous channel
+    // set and proceed. 100 ms is plenty for any reasonable WS2812 frame.
+#if defined(FL_IS_TEENSY_4X)
+    const u32 spin_start = millis();
+    while (poll() != DriverState::READY) {
+        if ((u32)(millis() - spin_start) >= 100) {
+            // Previous transmission stuck -- force-clear so we can proceed.
+            for (auto& ch : mTransmittingChannels) {
+                ch->setInUse(false);
+            }
+            mTransmittingChannels.clear();
+            break;
+        }
+    }
+#else
     while (poll() != DriverState::READY) {
         // Spin until FlexIO DMA completes
     }
+#endif
 
     // Move enqueued → transmitting
     mTransmittingChannels.swap(mEnqueuedChannels);
