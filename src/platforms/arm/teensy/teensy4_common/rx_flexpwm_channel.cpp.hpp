@@ -442,6 +442,25 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
         *(mPinInfo->select_register) = mPinInfo->select_value;
     }
 
+    // #3416 RX-HIGH-3 / RX-LOW-8: configure SW_PAD_CTL with hysteresis +
+    // keeper/pull-up so a marginal edge on a long jumper trace doesn't
+    // ring across the receiver's Vih/Vil thresholds and produce a
+    // spurious "double-H" capture (one of the residual ~0.8% noise-
+    // floor symptoms in #3410). The PAD_CTL register lives at a fixed
+    // +0x1F0 offset from MUX_CTL for every IOMUXC pad on the i.MX RT1062
+    // (verified across GPIO_EMC_*, GPIO_AD_B1_*, GPIO_B0_*, GPIO_B1_*
+    // via Teensyduino imxrt.h offsets). Values copied from the working
+    // FlexIO1 RX pad init (`rx_flexio_channel.cpp.hpp:391-395`):
+    //   bit 12 PKE = 1, bit 13 PUE = 1: pull mode (not keeper)
+    //   bits 14-15 PUS = 2: 100K pull-up
+    //   bit 16 HYS = 1: hysteresis enable — the actual noise-floor lever
+    volatile u32 *pad_register = (volatile u32 *)(
+        (uintptr_t)mPinInfo->mux_register + 0x1F0u);
+    *pad_register = (1u << 12) |    // PKE
+                    (1u << 13) |    // PUE
+                    (2u << 14) |    // PUS = 100K pull-up
+                    (1u << 16);     // HYS
+
     // Disable the submodule while configuring
     pwm->MCTRL &= ~(FLEXPWM_MCTRL_RUN(1 << sm));
 
@@ -689,8 +708,16 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
     bool dma_done = mReceiveDone || (mDma.TCD->CSR & DMA_TCD_CSR_DONE);
     size_t captures_written = 0;
 
-    if (dma_done && (biter == citer)) {
-        // DMA completed a full major loop — entire buffer is valid
+    if (dma_done) {
+        // #3416 RX-CRIT-2: when DMA completion ISR fires, the entire
+        // buffer is filled regardless of whether CITER has reloaded from
+        // BITER. The previous "dma_done && (biter == citer)" branch
+        // narrowly handled the post-reload case; the dma_done +
+        // biter != citer case (DREQ halt at major-loop end where the
+        // hardware briefly leaves CITER==0) fell through to the
+        // `biter >= citer` residual-count branch and reported
+        // captures_written=0, producing the silent mid-frame dropout
+        // visible in raw_sample as `H214753` huge HIGH gaps.
         captures_written = mCaptureBuffer.size();
     } else if (biter >= citer) {
         captures_written = static_cast<size_t>(biter - citer) * 2u;
