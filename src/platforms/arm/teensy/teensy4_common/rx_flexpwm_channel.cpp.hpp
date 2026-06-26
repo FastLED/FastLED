@@ -280,11 +280,39 @@ static inline bool isGapPulse(u32 low_ns,
 /// Polarity-aware decoder: uses the HIGH/LOW labels from the gap-aware
 /// edge builder. Edges come in HIGH/LOW pairs representing one bit each.
 /// If polarity is wrong (noise), skip and resync on the next HIGH edge.
+///
+/// #3416 adaptive midpoint: a single pre-pass over the HIGH durations
+/// finds the bimodal split point (min + max) / 2 rather than relying on
+/// the static `(t0h_max + t1h_min) / 2` midpoint derived from the
+/// chipset timing spec. Many TX implementations (notably FlexIO at
+/// kFlexIOBaudDiv=18) emit '1' bits at ~950 ns HIGH vs the spec
+/// nominal of 580 ns; receiver jitter can push a marginal '0' bit
+/// above the static 402 ns threshold and a marginal '1' bit below it.
+/// The observed-distribution midpoint (~635 ns for FlexIO) better
+/// separates the two clusters under jitter.
 static fl::result<u32, DecodeError>
 decodeEdges(const ChipsetTiming4Phase &timing,
             fl::span<const EdgeTime> edges, fl::span<u8> bytes_out) {
     if (edges.size() == 0 || bytes_out.size() == 0) {
         return fl::result<u32, DecodeError>::success(0);
+    }
+
+    // Pre-scan to compute observed-distribution midpoint.
+    u32 high_min = 0xFFFFFFFFu;
+    u32 high_max = 0u;
+    u32 high_samples = 0;
+    for (size_t k = 0; k + 1 < edges.size(); k += 2) {
+        if (!edges[k].high) continue;  // polarity error, skip
+        u32 h = edges[k].ns;
+        if (h < 100u || h > 1500u) continue;  // outlier (idle/glitch)
+        if (h < high_min) high_min = h;
+        if (h > high_max) high_max = h;
+        ++high_samples;
+    }
+    u32 adaptive_midpoint = (timing.t0h_max_ns + timing.t1h_min_ns) / 2u;
+    if (high_samples >= 16 && high_max > high_min + 200u) {
+        // Enough samples to trust the observed distribution.
+        adaptive_midpoint = (high_min + high_max) / 2u;
     }
 
     u32 byte_index = 0;
@@ -311,10 +339,15 @@ decodeEdges(const ChipsetTiming4Phase &timing,
         int bit = -1;
         if (i + 1 < edges.size() && !edges[i + 1].high) {
             u32 low_ns = edges[i + 1].ns;
-            bit = decodeBit(high_ns, low_ns, timing);
+            (void)low_ns;
+            // Use the adaptive midpoint computed from this frame's
+            // observed distribution -- more robust against TX-side
+            // baud divider deviation than the static timing-spec
+            // midpoint.
+            bit = (high_ns >= adaptive_midpoint) ? 1 : 0;
             i += 2;
         } else {
-            bit = decodeBitFromHigh(high_ns, timing);
+            bit = (high_ns >= adaptive_midpoint) ? 1 : 0;
             i += 1;
         }
         ++total_bits;
