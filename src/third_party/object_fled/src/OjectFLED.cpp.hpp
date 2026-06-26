@@ -724,9 +724,14 @@ void ObjectFLED::isr(void)
 
 	// first ack the interrupt
 	dma.dma2.clearInterrupt();
+	asm volatile("dsb" ::: "memory");  // #3416 OF mirror of FX-HIGH-6
 
-	// fill (up to) half the transmit buffer with new fillbits(frameBuffer data)
-	//digitalWriteFast(12, HIGH);
+	// Determine remaining payload first so we can short-circuit the
+	// expensive memset+fillbits+dcache_flush when there's nothing left
+	// to send (#3416 OF-HIGH-4).
+	uint32_t index_check = dma.framebuffer_index;
+	uint32_t remain_check = dma.numbytes - index_check;
+
 	uint32_t *dest;
 	if (dma_first) {
 		dma_first = false;
@@ -735,6 +740,17 @@ void ObjectFLED::isr(void)
 		dma_first = true;
 		dest = dma.bitdata + BYTES_PER_DMA*32;
 	}
+
+	if (remain_check == 0) {
+		// #3416 OF-HIGH-4: nothing more to send. The next-iteration
+		// CSR is already set to DREQ from the previous ISR or
+		// showInternal, so no further DMA fires. Skipping ~10us of
+		// memset + fillbits + cache flush trims ISR length and the
+		// next show() does a full memset(dma.bitdata) anyway.
+		dma.dma2next.TCD->CSR = DMA_TCD_CSR_DREQ;
+		return;
+	}
+
 	// #3416 OF-MED-5: memset zeroes the half-buffer we're about to fill.
 	// fillbits() below does *dest |= mask (read-modify-write); the OR
 	// only works correctly when the destination starts at 0. The full-

@@ -39,10 +39,18 @@ void ObjectFLEDDmaManager::release(void* owner) {
 }
 
 void ObjectFLEDDmaManager::waitForCompletion() {
-    // Spin-wait for DMA completion with periodic delays
+    // Spin-wait for DMA completion with periodic delays.
     while (!dma3.complete()) {
         delayMicroseconds(10);
     }
+    // #3416 OF-MED-6: dma3.complete() reflects DMA major-loop done but
+    // does NOT include the WS2812 reset latch period. If the caller is
+    // about to destroy the LED buffer or hand the line off to another
+    // peripheral, returning here can corrupt the final frame's tail
+    // bits. The destructor wait path adds its own latch margin (see
+    // ObjectFLED::~ObjectFLED) but defensive callers should also gate
+    // on busy()==0 which factors in LATCH_DELAY. Documented here so
+    // the next reader doesn't mistake "DMA done" for "frame done".
 }
 
 bool ObjectFLEDDmaManager::isBusy() {

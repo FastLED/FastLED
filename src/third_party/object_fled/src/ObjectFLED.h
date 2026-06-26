@@ -216,7 +216,12 @@ private:
 	// Force 32-byte alignment so arm_dcache_flush_delete in begin() operates
 	// on a whole cache line. Without alignment the 16-byte flush is unsafe
 	// per Cortex-M7 cache maintenance semantics (#3406).
-	alignas(32) uint32_t bitmaskLocal[4];
+	// #3416 OF-MED-1: bitmaskLocal is 16 bytes (alignas 32 = its own line
+	// start) but the adjacent numpinsLocal/numbytesLocal share the second
+	// half of the same 32-byte cache line. Padding to a full 32 bytes
+	// guarantees the flush_delete invalidates only data this driver owns
+	// and never an adjacent instance's fields.
+	alignas(32) uint32_t bitmaskLocal[8];  // 4 valid words + 4 pad
 	uint8_t numpinsLocal;
 	uint32_t numbytesLocal;
 	uint8_t pin_bitnumLocal[NUM_DIGITAL_PINS];
