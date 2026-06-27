@@ -33,11 +33,10 @@ from dataclasses import dataclass
 from typing import Any
 
 
-try:
-    import serial  # type: ignore[import-not-found]
-except ImportError:
-    print("[objectfled-spi-smoke] pyserial not installed; run `uv sync`")
-    sys.exit(1)
+# NOTE: pyserial import is deferred to main() so `test_*.py` discovery by
+# pytest (or similar collectors) doesn't fail with sys.exit(1) at module
+# load when pyserial isn't installed in the discovery environment.
+# (CodeRabbit review on PR #3432.)
 
 
 @dataclass(frozen=True)
@@ -63,7 +62,7 @@ CASES = [
 
 
 def send_rpc(
-    s: "serial.Serial",
+    s: Any,
     method: str,
     args: dict[str, Any] | None = None,
     request_id: int = 1,
@@ -126,6 +125,12 @@ def evaluate(case: SmokeCase, result: dict[str, Any]) -> tuple[bool, str]:
 
 
 def main() -> int:
+    try:
+        import serial  # type: ignore[import-not-found]
+    except ImportError:
+        print("[objectfled-spi-smoke] pyserial not installed; run `uv sync`")
+        return 1
+
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--port", default="COM20", help="Serial port (default COM20)")
     parser.add_argument("--baud", type=int, default=115200)

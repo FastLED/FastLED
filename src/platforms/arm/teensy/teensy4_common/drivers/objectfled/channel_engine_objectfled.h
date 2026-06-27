@@ -86,15 +86,14 @@ public:
     /// @brief Get capabilities (unified clockless + SPI per #3428)
     ///
     /// Returns `(clockless=true, spi=true)` because the FlexPWM + eDMA +
-    /// GPIO bank peripheral can serve both modes. SPI runtime support is
-    /// currently gated by `objectfled_spi_lookup_pins()` which returns
-    /// `false` until the hardware impl lands -- so SPI channels are
-    /// rejected by `canHandle()` today but the architectural slot is in
-    /// place. See `src/fl/channels/README.md` -> "Rule: Parallel-IO
-    /// peripherals -- one engine for both clockless and SPI modes".
-    Capabilities getCapabilities() const FL_NO_EXCEPT override {
-        return Capabilities(true, true);
-    }
+    /// GPIO bank peripheral can serve both modes. SPI runtime serving is
+    /// gated by `FL_OBJECTFLED_SPI_HARDWARE_ENABLE` and the runtime
+    /// `objectfled_spi_lookup_pins()` -- the architectural slot is
+    /// permanent. See `src/fl/channels/README.md` -> "Rule: Parallel-IO
+    /// peripherals -- one engine for both clockless and SPI modes". Body
+    /// lives in `channel_engine_objectfled.cpp.hpp` per the `src/**/*.h`
+    /// header-discipline rule.
+    Capabilities getCapabilities() const FL_NO_EXCEPT override;
 
 private:
     /// @brief Peripheral abstraction (real hardware or mock)

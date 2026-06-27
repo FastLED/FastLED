@@ -88,6 +88,11 @@ ChannelEngineObjectFLED::~ChannelEngineObjectFLED() {
     FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: destroyed");
 }
 
+// Moved out of the header per `src/**/*.h` header-discipline (CodeRabbit #3432).
+IChannelDriver::Capabilities ChannelEngineObjectFLED::getCapabilities() const FL_NO_EXCEPT {
+    return Capabilities(true, true);
+}
+
 bool ChannelEngineObjectFLED::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
     if (!data) {
         return false;
@@ -116,7 +121,14 @@ bool ChannelEngineObjectFLED::canHandle(const ChannelDataPtr& data) const FL_NO_
         // place via getCapabilities()+BusSupports so flipping the flag is
         // a one-line enable once bring-up is verified.
         const auto* spi = data->getChipset().ptr<SpiChipsetConfig>();
-        if (!spi || spi->dataPin < 0 || spi->clockPin < 0) {
+        if (!spi) {
+            return false;
+        }
+        // Validate pin range BEFORE narrowing to u8 -- without these guards
+        // dataPin=270 would wrap to pin 14 in static_cast<u8>() and silently
+        // route to wrong hardware. Per coderabbitai review on PR #3432.
+        if (spi->dataPin < 0 || spi->dataPin > 255 ||
+            spi->clockPin < 0 || spi->clockPin > 255) {
             return false;
         }
         ObjectFLEDSPIPinInfo info;

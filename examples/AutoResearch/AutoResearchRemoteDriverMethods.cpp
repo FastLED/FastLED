@@ -696,10 +696,27 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         response.set("clock_hz", static_cast<int64_t>(clock_hz));
         response.set("num_bytes", num_bytes);
 
+        // Validate input ranges BEFORE narrowing to u8/u32. mosi_pin=270
+        // wraps to pin 14 in static_cast<u8>(); negative clock_hz wraps to
+        // a large u32 that the SPI driver clamps to 25 MHz -- both produce
+        // silently-wrong hardware behavior. Per coderabbitai review on #3432.
         if (num_bytes <= 0 || num_bytes > 64) {
             response.set("success", false);
             response.set("error", "InvalidArgs");
             response.set("message", "num_bytes must be in [1, 64].");
+            return response;
+        }
+        if (mosi_pin < 0 || mosi_pin > 255 ||
+            sclk_pin < 0 || sclk_pin > 255) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "mosi_pin / sclk_pin must be in [0, 255].");
+            return response;
+        }
+        if (clock_hz <= 0) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "clock_hz must be > 0.");
             return response;
         }
 
