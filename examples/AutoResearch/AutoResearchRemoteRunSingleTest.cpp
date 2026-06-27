@@ -875,6 +875,12 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         // Serial-backed FL_WARN output can block long enough to starve
         // ObjectFLED's DMA refill path, which is exactly what #3343 is
         // trying to prove or eliminate. JSON-RPC responses bypass this guard.
+        //
+        // LPUART note: empirically tried both directions (logs disabled vs
+        // logs enabled during LPUART tests). Logs ENABLED yielded ~0/3
+        // success (USB-CDC backed up during the 4-pattern loop, RPC
+        // response never reaches host). Logs DISABLED yielded ~1/3 to
+        // ~1/5 success. ScopedLogDisable stays in scope for LPUART too.
         fl::ScopedLogDisable quiet_logs;
 
         if (is_object_fled_driver) {
@@ -998,13 +1004,16 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         response.set("standardGpioPadProbe", standard_gpio_pad_probe);
     }
 #if defined(FL_IS_TEENSY_4X)
-    // FlexPWM RX diagnostics are useful for ANY Teensy driver that uses
-    // pin 22 (or another FlexPWM-capable pin) as RX -- not just ObjectFLED.
-    // #3410 round-3 FlexIO bring-up: emit on every Teensy 4.x test so we
-    // can see what the receiver sees during FlexIO TX too.
-    response.set("flexPwmRxDiagnostics",
-                 fl::FlexPwmRxChannel::diagnosticsToJson(pin_rx));
-    {
+    // FlexPWM RX diagnostics are useful for any TX driver routed through
+    // pin 22's FlexPWM RX capture path. Skip emit for LPUART tests where
+    // these diagnostics add JSON-RPC spam without surfacing anything
+    // LPUART-specific (LPUART status lives in lpuart_read_diagnostics).
+    const bool emit_flex_diagnostics = (driver_name != "LPUART");
+    if (emit_flex_diagnostics) {
+        response.set("flexPwmRxDiagnostics",
+                     fl::FlexPwmRxChannel::diagnosticsToJson(pin_rx));
+    }
+    if (emit_flex_diagnostics) {
         // #3410 Round 7: snapshot FlexIO2 register state so we can tell
         // whether the peripheral is actually running, what the
         // shifter/timer/DMA state is after show(), and whether CTRL,

@@ -261,7 +261,7 @@ See Also:
         driver_group.add_argument(
             "--lpuart",
             action="store_true",
-            help="Reserved for the future Teensy 4.x LPUART clockless driver; currently unavailable and not included in --all",
+            help="Test only LPUART clockless driver (Teensy 4.x only; pin to LPUARTn mapping is board-dependent -- see kLpuartPins[] in lpuart_driver.cpp.hpp)",
         )
         driver_group.add_argument(
             "--all",

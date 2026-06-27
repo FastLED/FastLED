@@ -50,6 +50,7 @@ constexpr int default_bus_priority(Bus b) FL_NO_EXCEPT {
         b == Bus::I2S           ? 1  :
         b == Bus::FLEX_IO       ? 1  :
         b == Bus::OBJECT_FLED   ? 1  :
+        b == Bus::LPUART        ? 1  :
         b == Bus::SPI           ? 0  :
         b == Bus::BIT_BANG      ? 0  :
         b == Bus::STUB          ? 0  :

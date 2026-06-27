@@ -53,22 +53,29 @@ struct LPUARTPinResult {
 /// @brief Compile-time list of Teensy 4.0 / 4.1 LPUART TX-capable pins.
 ///
 /// Sourced from the iMXRT1062 reference manual's IOMUXC pad-mux table:
-///   pin 1  → LPUART6_TX (default after `Serial2.begin()`)
-///   pin 8  → LPUART3_TX
-///   pin 14 → LPUART2_TX
-///   pin 17 → LPUART4_TX
-///   pin 20 → LPUART8_TX
-///   pin 24 → LPUART5_TX
-///   pin 29 → LPUART7_TX
-///   pin 35 → LPUART1_TX  (Teensy 4.1 only — physically present on T4.1)
-///   pin 47 → LPUART3_TX_ALT (Teensy 4.1 only — exposed on the bottom SD pad row)
-///   pin 48 → LPUART8_TX_ALT (Teensy 4.1 only)
+///   pin 1  → LPUART6_TX (Serial1 default — also Teensyduino's default)
+///   pin 8  → LPUART4_TX (Serial2 default on T4.0)
+///   pin 14 → LPUART2_TX (Serial3 default)
+///   pin 17 → LPUART3_TX (Serial4 default on T4.0)
+///   pin 20 → LPUART8_TX (Serial5 default)
+///   pin 24 → LPUART1_TX (Serial6 default — fixed-route, no SELECT_INPUT daisy)
+///   pin 29 → LPUART7_TX (Serial7 default)
+///   pin 35 → LPUART5_TX (T4.1 only — ALT 1, not 2)
+///   pin 47 → LPUART8_TX_ALT (T4.1 only — second SD-pad-row LPUART8)
+///   pin 53 → LPUART6_TX_ALT (T4.1 only — Serial1 alt on bottom EMC pad row)
+///
+/// Note: the original `{1,8,14,17,20,24,29,35,47,48}` list (#3023
+/// Phase 1) listed pin 48 as a TX pin. Re-audit against
+/// Teensyduino HardwareSerial8.cpp showed pin 48 is the T4.1
+/// LPUART5_RX_ALT, not a TX pin -- the correct T4.1 third alt-TX is
+/// pin 53 (LPUART6_TX_ALT). Driver and contract were corrected
+/// together in PR #3421.
 ///
 /// Mirrors workstream A Phase 1 of issue #3023. Validating against this
 /// array is the basis of `LPUARTPeripheralReal::validatePin`; the mock
 /// accepts the same set by default but lets tests override via
 /// `setInvalidPin()` to exercise error paths.
-constexpr u8 kLPUARTTxPins[] = {1, 8, 14, 17, 20, 24, 29, 35, 47, 48};
+constexpr u8 kLPUARTTxPins[] = {1, 8, 14, 17, 20, 24, 29, 35, 47, 53};
 
 /// @brief Number of LPUART-TX capable pins exposed on Teensy 4.x.
 constexpr u32 kLPUARTTxPinCount = sizeof(kLPUARTTxPins) / sizeof(kLPUARTTxPins[0]);

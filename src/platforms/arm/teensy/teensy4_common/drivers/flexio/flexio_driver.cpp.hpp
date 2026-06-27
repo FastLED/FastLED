@@ -9,6 +9,7 @@
 
 #include "fl/log/log.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/static_assert.h"
 
 // IWYU pragma: begin_keep
 #include <Arduino.h>
@@ -99,9 +100,9 @@ static constexpr bool flexio_pin_table_is_flexio2_only() {
     }
     return true;
 }
-static_assert(flexio_pin_table_is_flexio2_only(),
-              "kFlexIOPins entries must target FlexIO2 pads only "
-              "(flexio_pin <= 17). See #3416 FX-CRIT-1.");
+FL_STATIC_ASSERT(flexio_pin_table_is_flexio2_only(),
+                 "kFlexIOPins entries must target FlexIO2 pads only "
+                 "(flexio_pin <= 17). See #3416 FX-CRIT-1.");
 
 // ============================================================================
 // FlexIO2 Register Access Helpers
