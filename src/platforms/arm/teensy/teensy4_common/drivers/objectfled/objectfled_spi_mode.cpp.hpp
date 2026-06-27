@@ -218,10 +218,13 @@ static void objectfled_spi_program_flexpwm(u32 req_hz) FL_NO_EXCEPT {
     FLEXPWM2_SM0VAL4 = 0;
     FLEXPWM2_SM0VAL5 = (u16)(period / 2u);
 
-    // VAL1 compare -> DMA request. SMDMAEN bit 4 = VALDE per RM 30.4.3.7.
-    // TODO(#3428): replace literal with FLEXPWM_SMDMAEN_VALDE once we
-    // confirm the core version macro spelling.
-    FLEXPWM2_SM0DMAEN = (1u << 4);
+    // VAL1 compare -> DMA request. VALDE = bit 9 of SMDMAEN per
+    // imxrt.h:5079 (an earlier draft used 1<<4 which is CA0DE = capture
+    // DMA, so the DMA request never fired -- silent "init/show
+    // completes, wait_ms=50 timeout" failure mode). Confirmed against
+    // Teensyduino's Audio/output_pwm.cpp:310 which uses VALDE for
+    // PWM-update-driven DMA.
+    FLEXPWM2_SM0DMAEN = FLEXPWM_SMDMAEN_VALDE;
 
     FLEXPWM2_SM0STS = 0xFFFFu;
     FLEXPWM2_MCTRL  &= ~FLEXPWM_MCTRL_CLDOK(1);
