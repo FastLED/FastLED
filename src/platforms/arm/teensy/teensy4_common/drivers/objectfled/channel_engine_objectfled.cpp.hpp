@@ -12,6 +12,7 @@
 
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/channel_engine_objectfled.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/iobjectfled_peripheral.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_spi_mode.h"
 #include "platforms/arm/teensy/teensy4_common/clockless_objectfled.h"
 
 // #3416 FX-LOW-3 mirror: duplicate include removed.
@@ -86,14 +87,38 @@ ChannelEngineObjectFLED::~ChannelEngineObjectFLED() {
 }
 
 bool ChannelEngineObjectFLED::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
-    if (!data || !data->isClockless()) {
+    if (!data) {
         return false;
     }
-    if (!objectFledSupportsPixelFormat(data->getPixelFormat())) {
-        return false;
+
+    if (data->isClockless()) {
+        if (!objectFledSupportsPixelFormat(data->getPixelFormat())) {
+            return false;
+        }
+        const u32 period = data->getTiming().total_period_ns();
+        return period >= kMinPeriodNs && period <= kMaxPeriodNs;
     }
-    const u32 period = data->getTiming().total_period_ns();
-    return period >= kMinPeriodNs && period <= kMaxPeriodNs;
+
+#if defined(FL_IS_TEENSY_4X)
+    if (data->isSpi()) {
+        // #3428: SPI-mode dispatch on the SAME peripheral (unified engine).
+        // The (MOSI, SCLK) pin pair must both live on the DMA-able GPIO
+        // bank used by ObjectFLED (so one DMA write to GPIOx_DR can flip
+        // both bits together). The pin-pair table is stubbed today
+        // (always returns false); the real lookup lands with the SPI
+        // hardware impl in a follow-up PR, at which point this branch
+        // starts claiming SPI channels.
+        const auto* spi = data->getChipset().ptr<SpiChipsetConfig>();
+        if (!spi || spi->dataPin < 0 || spi->clockPin < 0) {
+            return false;
+        }
+        ObjectFLEDSPIPinInfo info;
+        return objectfled_spi_lookup_pins(static_cast<u8>(spi->dataPin),
+                                          static_cast<u8>(spi->clockPin), &info);
+    }
+#endif
+
+    return false;
 }
 
 void ChannelEngineObjectFLED::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {

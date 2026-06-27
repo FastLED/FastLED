@@ -1,7 +1,15 @@
 /// @file channel_engine_objectfled.h
 /// @brief ObjectFLED DMA-based channel engine for Teensy 4.x
+///        (unified clockless + SPI per #3428)
 ///
-/// Implements IChannelDriver wrapping ObjectFLED's 3:1 DMA bit transposition.
+/// Implements IChannelDriver wrapping ObjectFLED's 3:1 DMA bit transposition
+/// for clockless WS2812 output AND a DMA-bit-banged SPI mode for APA102 /
+/// SK9822-class chipsets. One engine, one Bus enum slot (`Bus::OBJECT_FLED`),
+/// one peripheral (FlexPWM + eDMA + GPIO bank) -- the mode switch happens
+/// inside `show()` based on `ChannelData::isSpi()` vs `isClockless()`. See
+/// `src/fl/channels/README.md` -> "Rule: Parallel-IO peripherals -- one
+/// engine for both clockless and SPI modes".
+///
 /// ObjectFLED's show() starts DMA and returns while output/latch timing may
 /// still be active, so poll() owns the DRAINING -> READY transition.
 ///
@@ -52,7 +60,11 @@ public:
     ~ChannelEngineObjectFLED() override;
 
     /// @brief Check if this engine can handle the given channel data
-    /// @return true for clockless chipsets with total period 1000-2500ns
+    /// @return true for:
+    ///   - Clockless chipsets with total period 1000-2500ns (RGB/RGBW)
+    ///   - SPI chipsets whose (MOSI, SCLK) pair lives on the same DMA-able
+    ///     GPIO bank (#3428; hardware impl pending so canHandle currently
+    ///     returns false for SPI)
     bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
 
     /// @brief Enqueue channel data for transmission
@@ -71,9 +83,17 @@ public:
         return fl::string::from_literal("OBJECT_FLED");
     }
 
-    /// @brief Get capabilities (clockless only)
+    /// @brief Get capabilities (unified clockless + SPI per #3428)
+    ///
+    /// Returns `(clockless=true, spi=true)` because the FlexPWM + eDMA +
+    /// GPIO bank peripheral can serve both modes. SPI runtime support is
+    /// currently gated by `objectfled_spi_lookup_pins()` which returns
+    /// `false` until the hardware impl lands -- so SPI channels are
+    /// rejected by `canHandle()` today but the architectural slot is in
+    /// place. See `src/fl/channels/README.md` -> "Rule: Parallel-IO
+    /// peripherals -- one engine for both clockless and SPI modes".
     Capabilities getCapabilities() const FL_NO_EXCEPT override {
-        return Capabilities(true, false);
+        return Capabilities(true, true);
     }
 
 private:
