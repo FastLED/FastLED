@@ -20,8 +20,6 @@
 
 namespace fl {
 
-// Timing period bounds for canHandle(). Same range as FlexIO -- the
-// 4 Mbps encoding only fits standard WS2812B/SK6812 timings.
 static constexpr u32 kLpuartMinPeriodNs = 1000;
 static constexpr u32 kLpuartMaxPeriodNs = 2500;
 
@@ -51,32 +49,37 @@ void ChannelEngineLPUART::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     }
 }
 
-namespace {
-
-// Per-engine cache of the currently-bound LPUART instance. Re-created
-// when the pin or strip length changes.
-struct CachedInstance {
-    fl::unique_ptr<ILPUARTInstance> instance;
-    u8 pin = 0xFF;
-    u32 raw_bytes = 0;
-    bool is_rgbw = false;
-};
-
-}  // anonymous namespace
+// Member-owned instance and current-binding state (#3023 / LPUART
+// goal): mirrors ChannelEngineFlexIO's mHwInitialized + mCurrentPin
+// + mCurrentTiming triple. Replaces the previous function-local
+// static CachedInstance which made cross-pattern teardown awkward.
+//
+// `mInstance` is the live ILPUARTInstance bound to the current pin /
+// strip-length. It is reset to nullptr when:
+//   - the pin changes, or
+//   - the strip length (raw_bytes) changes, or
+//   - the engine is reconstructed.
+// `mCurrentRawBytes` caches the raw-byte length so we can detect a
+// size change without re-calling createInstance().
 
 void ChannelEngineLPUART::show() FL_NO_EXCEPT {
     if (!mPeripheral) return;
 
-    // Wait for any previous transmission.
+    // Wait for any previous transmission. Bounded spin so a stuck
+    // peripheral can't hang subsequent shows -- if poll never becomes
+    // READY, force-clear and proceed (mirrors ChannelEngineFlexIO).
+    const u32 spin_start = millis();
     while (poll() != DriverState::READY) {
-        // Spin -- LPUART show() in our real impl is already synchronous.
+        if ((u32)(millis() - spin_start) >= 100) {
+            for (auto& ch : mTransmittingChannels) ch->setInUse(false);
+            mTransmittingChannels.clear();
+            break;
+        }
     }
 
     mTransmittingChannels.swap(mEnqueuedChannels);
     mEnqueuedChannels.clear();
     if (mTransmittingChannels.empty()) return;
-
-    static CachedInstance s_cached;
 
     for (auto& ch : mTransmittingChannels) {
         const u8 pin = static_cast<u8>(ch->getPin());
@@ -86,50 +89,56 @@ void ChannelEngineLPUART::show() FL_NO_EXCEPT {
 
         const u32 raw_bytes = static_cast<u32>(data.size());
 
-        // Reinit if pin / strip size changed.
-        if (!s_cached.instance || s_cached.pin != pin || s_cached.raw_bytes != raw_bytes) {
-            s_cached.instance.reset();
-            s_cached.pin = pin;
-            s_cached.raw_bytes = raw_bytes;
-            const bool is_rgbw = (raw_bytes % 4 == 0) && false;  // RGB only for now
-            (void)is_rgbw;
-            const u32 total_leds = raw_bytes / 3u;
-            s_cached.instance = mPeripheral->createInstance(
+        // Reinit if pin / strip size / timing changed.
+        if (!mHwInitialized || pin != mCurrentPin
+                || timing != mCurrentTiming
+                || raw_bytes != mCurrentRawBytes) {
+            mInstance.reset();
+            const u32 total_leds = (raw_bytes + 2u) / 3u;  // ceil for RGB
+            mInstance = mPeripheral->createInstance(
                 pin, total_leds, /*is_rgbw=*/false,
                 timing.t1_ns, timing.t2_ns, timing.t3_ns, timing.reset_us);
-            if (!s_cached.instance) {
+            if (!mInstance) {
                 FL_LOG_FLEXIO_F("ChannelEngineLPUART: createInstance failed on pin %d", (int)pin);
                 continue;
             }
             mCurrentPin = pin;
             mCurrentTiming = timing;
+            mCurrentRawBytes = raw_bytes;
             mHwInitialized = true;
         }
 
-        // Per ILPUARTInstance contract (see ilpuart_peripheral.h):
-        // the engine pre-encodes raw WS2812 bytes -> 4 wave8 UART
-        // bytes each and writes them into instance->getTxBuffer().
-        // instance->show() then DMAs the encoded bytes to LPUARTn_DATA.
-        u8* dst = s_cached.instance->getTxBuffer();
-        const u32 dst_size = s_cached.instance->getTxBufferSize();
+        // Pre-encode raw WS2812 bytes -> 4 wave8 UART bytes each into
+        // the instance's TX buffer (per ILPUARTInstance contract).
+        u8* dst = mInstance->getTxBuffer();
+        const u32 dst_size = mInstance->getTxBufferSize();
         const u32 encoded_bytes = raw_bytes * 4u;
-        const u32 copy_n = (encoded_bytes < dst_size) ? encoded_bytes : dst_size;
-        const u32 max_raw_safe = copy_n / 4u;
+        const u32 max_raw_safe = (encoded_bytes < dst_size ? encoded_bytes : dst_size) / 4u;
         for (u32 i = 0; i < max_raw_safe; ++i) {
             lpuart_encode_byte(data.data()[i], &dst[i * 4u]);
         }
 
-        s_cached.instance->show();  // blocking inside the real driver
+        mInstance->show();  // blocking inside the real driver
     }
 
     for (auto& ch : mTransmittingChannels) ch->setInUse(false);
     mTransmittingChannels.clear();
+    // Yield to the USB-CDC stack so RPC responses can flush. Empirically
+    // the autoresearch RPC pipeline stalls if the firmware never yields
+    // between LPUART shows -- the test framework's pattern handoff,
+    // RX wait, and result reporting all need the USB serial to drain.
+    yield();
 }
 
 IChannelDriver::DriverState ChannelEngineLPUART::poll() FL_NO_EXCEPT {
-    if (mTransmittingChannels.empty()) return DriverState::READY;
-    // The real show() blocks, so we should never observe a non-ready
-    // state here -- but defensively report BUSY.
+    if (!mTransmittingChannels.empty()) {
+        // show() is fully blocking inside the real LPUART driver
+        // (DMA major-loop ISR + LPUART STAT.TC wait), so by the time
+        // any external poll() runs, the transmission is complete.
+        // Clear and report READY.
+        for (auto& ch : mTransmittingChannels) ch->setInUse(false);
+        mTransmittingChannels.clear();
+    }
     return DriverState::READY;
 }
 

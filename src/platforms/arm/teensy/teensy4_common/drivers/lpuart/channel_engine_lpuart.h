@@ -14,6 +14,7 @@
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/unique_ptr.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -44,8 +45,10 @@ private:
     fl::shared_ptr<ILPUARTPeripheral> mPeripheral;
     fl::vector<ChannelDataPtr> mEnqueuedChannels;
     fl::vector<ChannelDataPtr> mTransmittingChannels;
+    fl::unique_ptr<ILPUARTInstance> mInstance;
     bool mHwInitialized;
     u8 mCurrentPin;
+    u32 mCurrentRawBytes = 0;
     ChipsetTimingConfig mCurrentTiming;
 };
 
