@@ -246,16 +246,40 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
     //   - GPIO6_DR direct-write while clockless mode's GPR26 remap is
     //     in a partially-configured state from a prior test boot.
     //
-    // Bench-debug status update (#3428): the dma3.complete() spin in
-    // ObjectFLEDDmaManager::acquire() that previously hard-faulted the
-    // firmware on first-time use is now bypassed (see show()). With the
-    // gate enabled, init+show complete cleanly on Teensy 4.1. However
-    // the DMA major-loop completion is still not signaled within the
-    // 50 ms timeout, indicating the FlexPWM2 -> DMA trigger is not
-    // wired correctly yet (needs scope-on-wire to verify SCLK toggle).
+    // Bench-debug status update (#3428): two real bugs have been
+    // root-caused and fixed this session via on-device Serial.flush()
+    // checkpoint bisect on Teensy 4.1:
+    //
+    //   (1) `ObjectFLEDDmaManager::acquire()` spun on `dma3.complete()`
+    //       which never returns true if clockless mode has never run
+    //       (third-party first-use bug -> firmware hard fault). Fixed
+    //       by bypassing the manager from SPI mode (see show()).
+    //
+    //   (2) `FLEXPWM2_SM0DMAEN = (1u << 4)` was setting `CA0DE`
+    //       (Capture-A0 DMA Enable) not `VALDE` (which is bit 9).
+    //       Fixed by using the named macro `FLEXPWM_SMDMAEN_VALDE`.
+    //
+    // With both fixes in place, init+show+wait+deinit completes cleanly
+    // (no crash). BUT the DMA major-loop completion still doesn't
+    // signal within the 50 ms timeout. Architectural finding: VALDE is
+    // designed for "VAL register reload" DMA -- it's the right trigger
+    // when DMA writes to FlexPWM's VAL FIFO (the Audio library pattern,
+    // see Teensy `Audio/output_pwm.cpp:310`). It is NOT the right
+    // trigger for our use case of "fire DMA on each PWM tick so we can
+    // write to an arbitrary GPIO".
+    //
+    // The architecturally-correct path forward is to use a different
+    // timing source whose compare event has a generic DMA request:
+    //   * QTimer1/2/3 with DMAMUX_SOURCE_QTIMER{1,2,3}_WRITE0_CMPLD1
+    //     (QTimer4 is taken by ObjectFLED clockless mode).
+    //   * Or XBAR routing of a FlexPWM compare event to a DMA line.
+    //
     // Keep the gate OFF by default so users don't get phantom non-
-    // transmitting SPI behavior; flip FL_OBJECTFLED_SPI_HARDWARE_ENABLE
-    // to bench-debug.
+    // transmitting SPI behavior. The next debug session needs to
+    // either (a) re-design the DMA trigger via QTimer1/2/3, or
+    // (b) verify via scope that the VALDE-based design actually does
+    // fire DMA in some configuration we haven't tried (unlikely given
+    // the RM definition of VALDE).
 #ifndef FL_OBJECTFLED_SPI_HARDWARE_ENABLE
     (void)pin_info;
     (void)clock_hz;
