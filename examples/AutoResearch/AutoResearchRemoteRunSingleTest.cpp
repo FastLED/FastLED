@@ -1004,11 +1004,14 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         response.set("standardGpioPadProbe", standard_gpio_pad_probe);
     }
 #if defined(FL_IS_TEENSY_4X)
-    // FlexPWM RX diagnostics are useful for any TX driver routed through
-    // pin 22's FlexPWM RX capture path. Skip emit for LPUART tests where
-    // these diagnostics add JSON-RPC spam without surfacing anything
-    // LPUART-specific (LPUART status lives in lpuart_read_diagnostics).
-    const bool emit_flex_diagnostics = (driver_name != "LPUART");
+    // FlexPWM RX diagnostics: useful for ANY clockless TX routed through
+    // pin 22. Skip for LPUART (LPUART has its own status path) AND for
+    // FLEX_IO (PR #3421 framework-hang investigation found that the
+    // ~20 fj.set() calls for flexIoDiagnostics below push the heap into
+    // a state where downstream destructors hang -- emit only for
+    // OBJECT_FLED where the diagnostics were originally added for
+    // #3343 / #3410 bring-up).
+    const bool emit_flex_diagnostics = (driver_name == "OBJECT_FLED");
     if (emit_flex_diagnostics) {
         response.set("flexPwmRxDiagnostics",
                      fl::FlexPwmRxChannel::diagnosticsToJson(pin_rx));

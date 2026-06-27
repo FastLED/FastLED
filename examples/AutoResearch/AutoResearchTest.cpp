@@ -16,7 +16,28 @@
 #include "LegacyClocklessProxy.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_diagnostics.h"
 #include <FastLED.h>
+#include "fl/stl/cstdio.h"
 #include "fl/stl/sstream.h"
+
+// PR #3421 framework-hang fix:
+// FL_WARN expansion ALWAYS constructs `fl::sstream() << X` regardless
+// of log level -- `fl::ScopedLogDisable` only suppresses OUTPUT inside
+// `log_emit`. Under autoresearch's RPC ASYNC handler (which wraps the
+// test in ScopedLogDisable), the cumulative `fl::sstream`/`fl::string`
+// heap alloc/free cycles across this file's many FL_WARN sites leave
+// the Teensy 4 heap in a state where a later function-exit destructor
+// of a heap-backed fl::string hangs indefinitely (~80% of runs on
+// LPUART, FlexIO, and ObjectFLED autoresearch tests).
+//
+// AR_FL_WARN gates the FL_WARN expansion at log level so the sstream
+// is never constructed when output is suppressed. Used for every
+// FL_WARN in this file. Marker-narrowed investigation confirmed the
+// fix moves LPUART from ~1/5 success to 5/5 -- see session research.
+#define AR_FL_WARN(...) do { \
+    if (fl::getLogLevel() >= static_cast<fl::u8>(fl::LogLevel::FL_LOG_LEVEL_WARN)) { \
+        FL_WARN(__VA_ARGS__); \
+    } \
+} while (0)
 #include "fl/chipsets/encoders/ucs7604.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/chipsets/led_timing.h"
@@ -41,7 +62,7 @@ void dumpRawEdgeTiming(fl::shared_ptr<fl::RxChannel> rx_channel,
                        const fl::ChipsetTimingConfig& timing,
                        fl::EdgeRange range) {
     if (!rx_channel) {
-        FL_WARN("[RAW EDGE TIMING] ERROR: RX channel is null");
+        AR_FL_WARN("[RAW EDGE TIMING] ERROR: RX channel is null");
         return;
     }
 
@@ -54,7 +75,7 @@ void dumpRawEdgeTiming(fl::shared_ptr<fl::RxChannel> rx_channel,
     size_t edge_count = rx_channel->getRawEdgeTimes(edges, range.offset);
 
     if (edge_count == 0) {
-        FL_WARN("[RAW EDGE TIMING] WARNING: No edge data captured at offset " << range.offset);
+        AR_FL_WARN("[RAW EDGE TIMING] WARNING: No edge data captured at offset " << range.offset);
         return;
     }
 
@@ -73,7 +94,7 @@ void dumpRawEdgeTiming(fl::shared_ptr<fl::RxChannel> rx_channel,
         for (size_t i = 0; i < edge_count; i++) {
             edge_dump << " " << (edges[i].high ? "H" : "L") << edges[i].ns;
         }
-        FL_WARN(edge_dump.str());
+        AR_FL_WARN(edge_dump.str());
     }
 
     // Pattern analysis (only if showing edges from start)
@@ -110,10 +131,10 @@ void dumpRawEdgeTiming(fl::shared_ptr<fl::RxChannel> rx_channel,
         ss << "  Long HIGH  (~" << expected_bit1_high << "ns, Bit 1): " << (has_long_high ? "FOUND ✓" : "MISSING ✗") << "\n";
         ss << "  Short LOW  (~" << expected_bit1_low << "ns, Bit 1): " << (has_short_low ? "FOUND ✓" : "MISSING ✗") << "\n";
         ss << "  Long LOW   (~" << expected_bit0_low << "ns, Bit 0): " << (has_long_low ? "FOUND ✓" : "MISSING ✗");
-        FL_WARN(ss.str());
+        AR_FL_WARN(ss.str());
 
         if (has_short_high && has_long_high && has_short_low && has_long_low) {
-            FL_WARN("\n[RAW EDGE TIMING] ✓ Encoder appears to be working correctly (varied timing patterns)");
+            AR_FL_WARN("\n[RAW EDGE TIMING] ✓ Encoder appears to be working correctly (varied timing patterns)");
         } else if (!has_short_high && !has_long_high) {
             ss.clear();
             ss << "[RAW EDGE TIMING] ✗ ENCODER BROKEN: No valid HIGH pulses detected!\n";
@@ -124,12 +145,12 @@ void dumpRawEdgeTiming(fl::shared_ptr<fl::RxChannel> rx_channel,
             FL_ERROR(ss.str());
         } else if (!has_short_low && !has_long_low) {
             // Use FL_WARN to avoid triggering bash autoresearch early exit
-            FL_WARN("[RAW EDGE TIMING] ✗ ENCODER BROKEN: No valid LOW pulses detected!");
+            AR_FL_WARN("[RAW EDGE TIMING] ✗ ENCODER BROKEN: No valid LOW pulses detected!");
         } else {
-            FL_WARN("[RAW EDGE TIMING] ⚠ Partial pattern match - encoder may have issues");
+            AR_FL_WARN("[RAW EDGE TIMING] ⚠ Partial pattern match - encoder may have issues");
         }
     }
-    FL_WARN("");
+    AR_FL_WARN("");
 }
 
 /// @brief Check if an encoder selector identifies a UCS7604 variant
@@ -192,13 +213,13 @@ static size_t decodeSpiEdges(fl::shared_ptr<fl::RxChannel> rx_channel,
                              fl::span<uint8_t> rx_buffer,
                              uint32_t clock_hz) {
     if (!rx_channel || clock_hz == 0) {
-        FL_WARN("[SPI DECODE] Invalid parameters");
+        AR_FL_WARN("[SPI DECODE] Invalid parameters");
         return 0;
     }
 
     const uint32_t bit_period_ns = static_cast<uint32_t>(1000000000ULL / clock_hz);
     const uint32_t half_bit_ns = bit_period_ns / 2;
-    FL_WARN("[SPI DECODE] clock=" << clock_hz << " Hz, bit_period=" << bit_period_ns << " ns");
+    AR_FL_WARN("[SPI DECODE] clock=" << clock_hz << " Hz, bit_period=" << bit_period_ns << " ns");
 
     // Read raw edges (up to 4096 to handle large strips)
     constexpr size_t MAX_EDGES = 4096;
@@ -207,10 +228,10 @@ static size_t decodeSpiEdges(fl::shared_ptr<fl::RxChannel> rx_channel,
     size_t edge_count = rx_channel->getRawEdgeTimes(edge_span, 0);
 
     if (edge_count == 0) {
-        FL_WARN("[SPI DECODE] No edges captured");
+        AR_FL_WARN("[SPI DECODE] No edges captured");
         return 0;
     }
-    FL_WARN("[SPI DECODE] Captured " << edge_count << " edges");
+    AR_FL_WARN("[SPI DECODE] Captured " << edge_count << " edges");
 
     // Reconstruct bit stream from edges
     // Each edge has a level (high/low) and duration in ns.
@@ -228,10 +249,10 @@ static size_t decodeSpiEdges(fl::shared_ptr<fl::RxChannel> rx_channel,
         }
     }
 
-    FL_WARN("[SPI DECODE] Reconstructed " << bits.size() << " bits");
+    AR_FL_WARN("[SPI DECODE] Reconstructed " << bits.size() << " bits");
 
     if (bits.size() < 32) {
-        FL_WARN("[SPI DECODE] Too few bits for APA102 frame");
+        AR_FL_WARN("[SPI DECODE] Too few bits for APA102 frame");
         return 0;
     }
 
@@ -249,7 +270,7 @@ static size_t decodeSpiEdges(fl::shared_ptr<fl::RxChannel> rx_channel,
         raw_bytes[i] = byte_val;
     }
 
-    FL_WARN("[SPI DECODE] Decoded " << total_bytes << " raw bytes");
+    AR_FL_WARN("[SPI DECODE] Decoded " << total_bytes << " raw bytes");
 
     // Log first few bytes for debugging
     {
@@ -263,7 +284,7 @@ static size_t decodeSpiEdges(fl::shared_ptr<fl::RxChannel> rx_channel,
             dbg << (char)(hi < 10 ? '0' + hi : 'A' + hi - 10);
             dbg << (char)(lo < 10 ? '0' + lo : 'A' + lo - 10);
         }
-        FL_WARN(dbg.str());
+        AR_FL_WARN(dbg.str());
     }
 
     // Find APA102 start frame (4 bytes of 0x00)
@@ -276,11 +297,11 @@ static size_t decodeSpiEdges(fl::shared_ptr<fl::RxChannel> rx_channel,
     if (total_bytes >= 4 && raw_bytes[0] == 0x00 && raw_bytes[1] == 0x00 &&
         raw_bytes[2] == 0x00 && raw_bytes[3] == 0x00) {
         data_start = 4; // Skip start frame
-        FL_WARN("[SPI DECODE] Found start frame at offset 0");
+        AR_FL_WARN("[SPI DECODE] Found start frame at offset 0");
     } else {
         // No start frame captured (RMT started at first edge = first HIGH bit)
         // First byte should be 0xE0|brightness or 0xFF
-        FL_WARN("[SPI DECODE] No start frame (first edge = first LED data)");
+        AR_FL_WARN("[SPI DECODE] No start frame (first edge = first LED data)");
     }
 
     // Extract LED RGB data from APA102 frames
@@ -298,7 +319,7 @@ static size_t decodeSpiEdges(fl::shared_ptr<fl::RxChannel> rx_channel,
 
         // Check for valid LED frame header (top 3 bits must be 111)
         if ((header & 0xE0) != 0xE0) {
-            FL_WARN("[SPI DECODE] End of LED data at byte " << pos
+            AR_FL_WARN("[SPI DECODE] End of LED data at byte " << pos
                     << " (header=0x" << ((header >> 4) < 10 ? '0' + (header >> 4) : 'A' + (header >> 4) - 10)
                     << ((header & 0xF) < 10 ? '0' + (header & 0xF) : 'A' + (header & 0xF) - 10) << ")");
             break;
@@ -314,14 +335,14 @@ static size_t decodeSpiEdges(fl::shared_ptr<fl::RxChannel> rx_channel,
             rx_buffer[led_bytes_written + 2] = c2;
             led_bytes_written += 3;
         } else {
-            FL_WARN("[SPI DECODE] rx_buffer full at LED " << (led_bytes_written / 3));
+            AR_FL_WARN("[SPI DECODE] rx_buffer full at LED " << (led_bytes_written / 3));
             break;
         }
         pos += 4;
     }
 
     size_t num_leds = led_bytes_written / 3;
-    FL_WARN("[SPI DECODE] Extracted " << num_leds << " LEDs (" << led_bytes_written << " RGB bytes)");
+    AR_FL_WARN("[SPI DECODE] Extracted " << num_leds << " LEDs (" << led_bytes_written << " RGB bytes)");
     return led_bytes_written;
 }
 
@@ -375,14 +396,14 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     // See issue #2254.
     rx_config.use_dma = !is_rmt_driver;
     if (is_rmt_driver) {
-        FL_WARN("[CAPTURE] RMT TX -> RMT RX: Internal loopback enabled (io_loop_back=true)");
+        AR_FL_WARN("[CAPTURE] RMT TX -> RMT RX: Internal loopback enabled (io_loop_back=true)");
     } else {
         // The RX peripheral is platform-dependent (RMT on ESP32, FlexPWM on
         // Teensy 4, LPC_SCT on LPC845, …). Don't claim "RMT RX" on platforms
         // that have no RMT — that label burned an hour of Teensy-4 debug
         // (FastLED#3059). Just say "external RX" so the label stays correct
         // regardless of backend.
-        FL_WARN("[CAPTURE] " << driver_name << " TX -> external RX: External GPIO wire (io_loop_back=false, use_dma=true)");
+        AR_FL_WARN("[CAPTURE] " << driver_name << " TX -> external RX: External GPIO wire (io_loop_back=false, use_dma=true)");
     }
 
     // Driver-aware capture strategy:
@@ -396,7 +417,7 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     if (is_rmt_driver) {
         // RMT: Two-TX approach for ESP32-S3 compatibility
         // First TX without RX armed (diagnostics), then arm RX, then second TX
-        FL_WARN("[CAPTURE] RMT: Two-TX approach (ESP32-S3 workaround)");
+        AR_FL_WARN("[CAPTURE] RMT: Two-TX approach (ESP32-S3 workaround)");
         FastLED.show();
         if (!FastLED.wait(TX_WAIT_TIMEOUT_MS)) {
             FL_ERROR("[CAPTURE] TX wait timeout (pre-arm) - driver may be stalled");
@@ -417,24 +438,24 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     } else {
         // Non-RMT (PARLIO, SPI, etc.): Single-TX approach
         if (!rx_channel->begin(rx_config)) {
-            FL_WARN("[CAPTURE] RX begin() failed for pin " << rx_channel->getPin());
+            AR_FL_WARN("[CAPTURE] RX begin() failed for pin " << rx_channel->getPin());
             return 0;
         }
-        FL_WARN("[CAPTURE] RX armed, calling FastLED.show()...");
+        AR_FL_WARN("[CAPTURE] RX armed, calling FastLED.show()...");
 
         FastLED.show();
-        FL_WARN("[CAPTURE] FastLED.show() returned, calling wait...");
+        AR_FL_WARN("[CAPTURE] FastLED.show() returned, calling wait...");
         if (!FastLED.wait(TX_WAIT_TIMEOUT_MS)) {
             if (is_object_fled_driver) {
                 fl::objectFledDiagnosticsRecord("afterFastLedWaitTimeout");
             }
-            FL_WARN("[CAPTURE] FastLED.wait() timed out");
+            AR_FL_WARN("[CAPTURE] FastLED.wait() timed out");
             return 0;
         }
         if (is_object_fled_driver) {
             fl::objectFledDiagnosticsRecord("afterFastLedWait");
         }
-        FL_WARN("[CAPTURE] FastLED.wait() done");
+        AR_FL_WARN("[CAPTURE] FastLED.wait() done");
     }
 
 
@@ -444,7 +465,7 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     // WS2812B: ~30μs per LED → 3000 LEDs = 90ms, use 150ms
     // UART with inverted TX produces same waveform timing as WS2812
     const uint32_t rx_wait_ms = is_uart_driver ? 500 : 150;
-    FL_WARN("[CAPTURE] Waiting for RX completion (" << rx_wait_ms << "ms timeout)...");
+    AR_FL_WARN("[CAPTURE] Waiting for RX completion (" << rx_wait_ms << "ms timeout)...");
     auto wait_result = rx_channel->wait(rx_wait_ms);
     if (diagnostics) {
         diagnostics->captureWaitResult = static_cast<int>(wait_result);
@@ -464,22 +485,22 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         }
         diagnostics->rawEdgeSample = sample.str();
     }
-    FL_WARN("[CAPTURE] RX wait returned: " << static_cast<int>(wait_result));
+    AR_FL_WARN("[CAPTURE] RX wait returned: " << static_cast<int>(wait_result));
 
     if (wait_result != fl::RxWaitResult::SUCCESS) {
-        FL_WARN("RX wait failed (timeout or no data received)");
+        AR_FL_WARN("RX wait failed (timeout or no data received)");
         fl::sstream ss;
         ss << "\n⚠️  TROUBLESHOOTING:\n";
         ss << "   1. Connect physical jumper wire from TX GPIO to RX GPIO " << rx_channel->getPin() << "\n";
         ss << "   2. Check that both TX and RX pins are correctly configured\n";
         ss << "   3. Verify the GPIO connection is working (GPIO baseline test should pass)\n";
         ss << "   4. For RMT TX → RMT RX: Ensure io_loop_back=true in RxConfig";
-        FL_WARN(ss.str());
+        AR_FL_WARN(ss.str());
         if (!is_uart_driver) {
             return 0;
         }
         // UART: still attempt decode with captured edges (timeout may be expected)
-        FL_WARN("[CAPTURE] UART: attempting decode with captured edges despite timeout");
+        AR_FL_WARN("[CAPTURE] UART: attempting decode with captured edges despite timeout");
     }
 
     // UART with TX inversion at 4 Mbps produces a standard WS2812-compatible
@@ -489,7 +510,7 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     //   T1H=750ns, T1L=500ns  (LED bit "1")
     // Use the standard WS2812 decoder with UART-specific timing thresholds.
     if (is_uart_driver) {
-        FL_WARN("[CAPTURE] UART (inverted TX): using standard WS2812 decoder with UART timing...");
+        AR_FL_WARN("[CAPTURE] UART (inverted TX): using standard WS2812 decoder with UART timing...");
         // UART timing at 4 Mbps: T0H=250ns, T1H-T0H=500ns, T0L=1000ns
         fl::ChipsetTiming uart_timing{
             250,   // T1 = T0H (1 UART bit = 250ns)
@@ -503,14 +524,14 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         auto rx_timing = fl::make4PhaseTiming(uart_timing, 250);
         rx_timing.gap_tolerance_ns = 100000; // 100µs for UART inter-frame gaps
 
-        FL_WARN("[CAPTURE] UART RX timing: T0H=" << uart_timing.T1
+        AR_FL_WARN("[CAPTURE] UART RX timing: T0H=" << uart_timing.T1
                 << " T1H=" << (uart_timing.T1 + uart_timing.T2)
                 << " T0L=" << (uart_timing.T2 + uart_timing.T3)
                 << " T1L=" << uart_timing.T3);
 
         auto decode_result = rx_channel->decode(rx_timing, rx_buffer);
         if (!decode_result.ok()) {
-            FL_WARN("[CAPTURE] UART decode failed (error: " << static_cast<int>(decode_result.error()) << ")");
+            AR_FL_WARN("[CAPTURE] UART decode failed (error: " << static_cast<int>(decode_result.error()) << ")");
             // Was EdgeRange(0, 256) -- 257 FL_WARN lines per decode failure
 // drowned the Teensy 4 UART TX FIFO and stalled autoresearch
 // between patterns (fbuild#755). 32 edges is enough to see whether
@@ -518,7 +539,7 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
 dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
             return 0;
         }
-        FL_WARN("[CAPTURE] UART decoded " << decode_result.value() << " LED bytes");
+        AR_FL_WARN("[CAPTURE] UART decoded " << decode_result.value() << " LED bytes");
         return decode_result.value();
     }
 
@@ -531,10 +552,10 @@ dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
     if (is_lcd_spi_driver || is_i2s_spi_driver || is_spi_unified_driver) {
         // SPI clock used for validation: 2.4MHz (matches ValidationRemote.cpp)
         const uint32_t spi_clock_hz = 2400000;
-        FL_WARN("[CAPTURE] SPI chipset decode: clock=" << spi_clock_hz << " Hz");
+        AR_FL_WARN("[CAPTURE] SPI chipset decode: clock=" << spi_clock_hz << " Hz");
         size_t decoded = decodeSpiEdges(rx_channel, rx_buffer, spi_clock_hz);
         if (decoded == 0) {
-            FL_WARN("[CAPTURE] SPI decode failed");
+            AR_FL_WARN("[CAPTURE] SPI decode failed");
             // Was EdgeRange(0, 256) -- 257 FL_WARN lines per decode failure
 // drowned the Teensy 4 UART TX FIFO and stalled autoresearch
 // between patterns (fbuild#755). 32 edges is enough to see whether
@@ -600,7 +621,7 @@ dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
             timing.reset_us,
             wave8_name
         };
-        FL_WARN("[RX TIMING] " << wave8_name << ": pulses_bit0=" << pulses_bit0
+        AR_FL_WARN("[RX TIMING] " << wave8_name << ": pulses_bit0=" << pulses_bit0
                 << " pulses_bit1=" << pulses_bit1
                 << " tick_ns=" << tick_ns
                 << " -> T1=" << tx_timing.T1 << " T2=" << tx_timing.T2
@@ -623,7 +644,7 @@ dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
             timing.reset_us,
             "LCD_CLOCKLESS_wave3"
         };
-        FL_WARN("[RX TIMING] LCD_CLOCKLESS_wave3: ticks_bit0=" << ticks_bit0
+        AR_FL_WARN("[RX TIMING] LCD_CLOCKLESS_wave3: ticks_bit0=" << ticks_bit0
                 << " ticks_bit1=" << ticks_bit1
                 << " tick_ns=" << tick_ns
                 << " -> T1=" << tx_timing.T1 << " T2=" << tx_timing.T2
@@ -642,7 +663,7 @@ dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
     // Increased to 100µs to accommodate SPI driver timing variations
     rx_timing.gap_tolerance_ns = 100000; // 100µs (was 30µs)
 
-    FL_WARN("[CAPTURE] Decoding...");
+    AR_FL_WARN("[CAPTURE] Decoding...");
     auto decode_result = rx_channel->decode(rx_timing, rx_buffer);
     if (diagnostics) {
         diagnostics->decodeOk = decode_result.ok() ? 1 : 0;
@@ -655,7 +676,7 @@ dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
     if (!decode_result.ok()) {
         // Use FL_WARN instead of FL_ERROR to avoid triggering bash autoresearch exit
         // This can happen during warmup/setup and is not fatal
-        FL_WARN("Decode failed (error code: " << static_cast<int>(decode_result.error()) << ")");
+        AR_FL_WARN("Decode failed (error code: " << static_cast<int>(decode_result.error()) << ")");
         // Print raw edge timing on decode failure to diagnose the issue
         // Was EdgeRange(0, 256) -- 257 FL_WARN lines per decode failure
 // drowned the Teensy 4 UART TX FIFO and stalled autoresearch
@@ -665,7 +686,7 @@ dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
         return 0;
     }
 
-    FL_WARN("[CAPTURE] Decoded " << decode_result.value() << " bytes");
+    AR_FL_WARN("[CAPTURE] Decoded " << decode_result.value() << " bytes");
     return decode_result.value();
 }
 
@@ -679,7 +700,7 @@ void runTest(const char* test_name,
     size_t channels_to_test = config.tx_configs.size() > 1 ? 1 : config.tx_configs.size();
 
     if (config.tx_configs.size() > 1) {
-        FL_WARN("\n[MULTI-LANE] Testing " << config.tx_configs.size() << " lanes, testing Lane 0 only (hardware limitation)");
+        AR_FL_WARN("\n[MULTI-LANE] Testing " << config.tx_configs.size() << " lanes, testing Lane 0 only (hardware limitation)");
     }
 
     // Test enabled configs (Lane 0 only for multi-lane)
@@ -702,7 +723,7 @@ void runTest(const char* test_name,
             config.tx_configs[config_idx].getDataPin()
         };
 
-        FL_WARN("\n=== " << test_name << " [Lane " << config_idx << "/" << config.tx_configs.size()
+        AR_FL_WARN("\n=== " << test_name << " [Lane " << config_idx << "/" << config.tx_configs.size()
                 << ", Pin " << config.tx_configs[config_idx].getDataPin()
                 << ", LEDs " << config.tx_configs[config_idx].mLeds.size() << "] ===");
 
@@ -734,7 +755,7 @@ void runTest(const char* test_name,
                 config.tx_configs[config_idx].mLeds, config.encoder);
             size_t expected_len = expected_encoded.size();
 
-            FL_WARN("UCS7604 encoded comparison: expected " << expected_len << " bytes, captured " << bytes_captured);
+            AR_FL_WARN("UCS7604 encoded comparison: expected " << expected_len << " bytes, captured " << bytes_captured);
 
             size_t compare_len = (bytes_captured < expected_len) ? bytes_captured : expected_len;
             for (size_t i = 0; i < compare_len; i++) {
@@ -747,9 +768,9 @@ void runTest(const char* test_name,
                 mismatches += static_cast<int>(expected_len - bytes_captured);
             }
 
-            FL_WARN("Bytes Captured: " << bytes_captured << " (expected: " << expected_len << ")");
+            AR_FL_WARN("Bytes Captured: " << bytes_captured << " (expected: " << expected_len << ")");
             int total_bytes = static_cast<int>(expected_len);
-            FL_WARN("Accuracy: " << (100.0 * (total_bytes - mismatches) / total_bytes) << "% ("
+            AR_FL_WARN("Accuracy: " << (100.0 * (total_bytes - mismatches) / total_bytes) << "% ("
                     << (total_bytes - mismatches) << "/" << total_bytes << " bytes match)");
         } else {
             // WS2812: Compare raw RGB per-LED
@@ -760,7 +781,7 @@ void runTest(const char* test_name,
             const size_t rx_buffer_offset = front_padding_bytes;
 
             if (bytes_captured > bytes_expected + front_padding_bytes) {
-                FL_WARN("Info: Captured " << bytes_captured << " bytes ("
+                AR_FL_WARN("Info: Captured " << bytes_captured << " bytes ("
                         << front_padding_bytes << " front pad + "
                         << bytes_expected << " LED data + "
                         << (bytes_captured - bytes_expected - front_padding_bytes) << " back pad/RESET)");
@@ -796,13 +817,13 @@ void runTest(const char* test_name,
                 }
             }
 
-            FL_WARN("Bytes Captured: " << bytes_captured << " (expected: " << bytes_expected << ")");
-            FL_WARN("Accuracy: " << (100.0 * (num_leds - mismatches) / num_leds) << "% ("
+            AR_FL_WARN("Bytes Captured: " << bytes_captured << " (expected: " << bytes_expected << ")");
+            AR_FL_WARN("Accuracy: " << (100.0 * (num_leds - mismatches) / num_leds) << "% ("
                     << (num_leds - mismatches) << "/" << num_leds << " LEDs match)");
         }
 
         if (mismatches == 0) {
-            FL_WARN("Result: PASS ✓");
+            AR_FL_WARN("Result: PASS ✓");
             passed++;
         } else {
             FL_ERROR("[" << ctx.driver_name << "/" << ctx.timing_name << "/" << ctx.pattern_name
@@ -821,13 +842,30 @@ void runMultiTest(const char* test_name,
                   int& total, int& passed,
                   fl::vector<fl::RunResult>* out_results) {
 
+    // PR #3421 framework-hang fix:
+    // FL_WARN expansion ALWAYS constructs `fl::sstream() << X` regardless
+    // of log level -- `ScopedLogDisable` only suppresses the OUTPUT inside
+    // `log_emit`. Under autoresearch's RPC ASYNC handler (which wraps the
+    // test in `ScopedLogDisable`), the cumulative `fl::sstream`/`fl::string`
+    // heap alloc/free cycles in runMultiTest's banner + per-run + summary
+    // FL_WARNs were leaving the Teensy 4 heap in a state where the
+    // function-exit destructor of the heap-backed `fl::string` hangs
+    // indefinitely (reproduced ~80% of runs on LPUART, FlexIO, and
+    // ObjectFLED autoresearch tests). Skipping the sstream construction
+    // when log level is below WARN avoids the heap thrash entirely.
+    // See: marker-narrowed investigation in PR #3421 / session research.
+    const bool kLogsEnabled = fl::getLogLevel() >=
+        static_cast<fl::u8>(fl::LogLevel::FL_LOG_LEVEL_WARN);
+
     fl::sstream ss;
-    ss << "\n╔════════════════════════════════════════════════════════════════╗\n";
-    ss << "║ MULTI-RUN TEST: " << test_name << "\n";
-    ss << "║ Runs: " << multi_config.num_runs << " | Print Mode: "
-       << (multi_config.print_all_runs ? "All" : "Errors ONLY") << "\n";
-    ss << "╚════════════════════════════════════════════════════════════════╝";
-    FL_WARN(ss.str());
+    if (kLogsEnabled) {
+        ss << "\n╔════════════════════════════════════════════════════════════════╗\n";
+        ss << "║ MULTI-RUN TEST: " << test_name << "\n";
+        ss << "║ Runs: " << multi_config.num_runs << " | Print Mode: "
+           << (multi_config.print_all_runs ? "All" : "Errors ONLY") << "\n";
+        ss << "╚════════════════════════════════════════════════════════════════╝";
+        AR_FL_WARN(ss.str());
+    }
 
     fl::vector<fl::RunResult> run_results;
 
@@ -835,14 +873,14 @@ void runMultiTest(const char* test_name,
     size_t channels_to_test = config.tx_configs.size() > 1 ? 1 : config.tx_configs.size();
 
     if (config.tx_configs.size() > 1) {
-        FL_WARN("[MULTI-LANE] Testing " << config.tx_configs.size() << " lanes, testing Lane 0 only");
+        AR_FL_WARN("[MULTI-LANE] Testing " << config.tx_configs.size() << " lanes, testing Lane 0 only");
     }
 
     // Execute multiple runs
     for (int run = 1; run <= multi_config.num_runs; run++) {
         // Print progress to keep output flowing (prevents auto-exit timeout)
         if (run % 3 == 1 || multi_config.num_runs <= 5) {
-            FL_WARN("[Run " << run << "/" << multi_config.num_runs << "] Testing...");
+            AR_FL_WARN("[Run " << run << "/" << multi_config.num_runs << "] Testing...");
         }
 
         fl::RunResult result;
@@ -860,7 +898,7 @@ void runMultiTest(const char* test_name,
             result.capturedBytes = static_cast<int>(bytes_captured);
 
             if (bytes_captured == 0) {
-                FL_WARN("[Run " << run << "] Capture failed");
+                AR_FL_WARN("[Run " << run << "] Capture failed");
                 result.mismatches = static_cast<int>(num_leds);
                 result.mismatchedBytes = static_cast<int>(result.totalBytes);
                 result.captureFailed = true;
@@ -885,7 +923,7 @@ void runMultiTest(const char* test_name,
                     if (i > 0) hex_dump << " ";
                     hex_dump << fl::hex << static_cast<int>(config.rx_buffer[i]) << fl::dec;
                 }
-                FL_WARN("[RUN " << run << "] Driver=" << config.driver_name
+                AR_FL_WARN("[RUN " << run << "] Driver=" << config.driver_name
                         << " bytes_captured=" << bytes_captured
                         << " first" << static_cast<int>(dump_count) << "=" << hex_dump.str());
             }
@@ -908,7 +946,7 @@ void runMultiTest(const char* test_name,
 
                         // Print corruption context for first mismatch only
                         if (mismatches == 1) {
-                            FL_WARN("\n[CORRUPTION @ byte " << static_cast<int>(i) << ", Run " << run
+                            AR_FL_WARN("\n[CORRUPTION @ byte " << static_cast<int>(i) << ", Run " << run
                                     << "] expected=0x" << fl::hex << static_cast<int>(expected_encoded[i])
                                     << " actual=0x" << static_cast<int>(config.rx_buffer[i]) << fl::dec);
                         }
@@ -971,7 +1009,7 @@ void runMultiTest(const char* test_name,
                     if (led_mismatch) {
                         // Print corruption context for first mismatch only
                         if (mismatches == 0) {
-                            FL_WARN("\n[CORRUPTION @ LED " << static_cast<int>(i) << ", Run " << run << "]");
+                            AR_FL_WARN("\n[CORRUPTION @ LED " << static_cast<int>(i) << ", Run " << run << "]");
 
                             // Calculate edge index and print timing around corruption point
                             size_t corruption_edge_index = i * 48;
@@ -1002,7 +1040,7 @@ void runMultiTest(const char* test_name,
                     size_t unchecked = num_leds - verified_leds;
                     mismatches += static_cast<int>(unchecked);
                     result.mismatchedBytes += static_cast<int>(unchecked * 3);
-                    FL_WARN("[TRUNCATED CAPTURE] Only verified " << verified_leds
+                    AR_FL_WARN("[TRUNCATED CAPTURE] Only verified " << verified_leds
                             << "/" << num_leds << " LEDs (" << bytes_captured
                             << " bytes captured, needed " << (num_leds * 3)
                             << "). Marking " << unchecked
@@ -1016,19 +1054,20 @@ void runMultiTest(const char* test_name,
 
         run_results.push_back(result);
 
-        // Print run result if configured
-        if (multi_config.print_all_runs || !result.passed) {
-            FL_WARN("[Run " << run << "/" << multi_config.num_runs << "] "
+        // Print run result if configured (sstream construction skipped
+        // when logs disabled -- see kLogsEnabled note at function top).
+        if (kLogsEnabled && (multi_config.print_all_runs || !result.passed)) {
+            AR_FL_WARN("[Run " << run << "/" << multi_config.num_runs << "] "
                     << (result.passed ? "PASS" : "FAIL")
                     << " | Errors: " << result.mismatches << "/" << result.total_leds
                     << " (" << (100.0 * (result.total_leds - result.mismatches) / result.total_leds) << "%)");
 
             // Print error details if enabled
             if (!result.passed && multi_config.print_per_led_errors && !result.errors.empty()) {
-                FL_WARN("  First " << result.errors.size() << " error(s):");
+                AR_FL_WARN("  First " << result.errors.size() << " error(s):");
                 for (size_t i = 0; i < result.errors.size(); i++) {
                     const auto& err = result.errors[i];
-                    FL_WARN("    LED[" << err.led_index << "]: expected RGB("
+                    AR_FL_WARN("    LED[" << err.led_index << "]: expected RGB("
                             << static_cast<int>(err.expected_r) << ","
                             << static_cast<int>(err.expected_g) << ","
                             << static_cast<int>(err.expected_b) << ") got RGB("
@@ -1048,33 +1087,37 @@ void runMultiTest(const char* test_name,
         else total_failed++;
     }
 
-    ss.clear();
-    ss << "\n╔════════════════════════════════════════════════════════════════╗\n";
-    ss << "║ MULTI-RUN SUMMARY\n";
-    ss << "╚════════════════════════════════════════════════════════════════╝\n";
-    ss << "Total Runs:   " << multi_config.num_runs << "\n";
-    ss << "Passed:       " << total_passed << " (" << (100.0 * total_passed / multi_config.num_runs) << "%)\n";
-    ss << "Failed:       " << total_failed << " (" << (100.0 * total_failed / multi_config.num_runs) << "%)";
-    FL_WARN(ss.str());
-
-    if (total_failed > 0) {
+    // Summary FL_WARN -- gated on log level (see kLogsEnabled note above)
+    // to prevent heap thrash under autoresearch ScopedLogDisable.
+    if (kLogsEnabled) {
         ss.clear();
-        ss << "\nFailed Run Numbers:\n";
-        for (const auto& r : run_results) {
-            if (!r.passed) {
-                ss << "  Run #" << r.run_number << " - " << r.mismatches << " errors\n";
-                if (!r.errors.empty()) {
-                    ss << "    First error at LED[" << r.errors[0].led_index << "]: "
-                       << "expected RGB(" << static_cast<int>(r.errors[0].expected_r) << ","
-                       << static_cast<int>(r.errors[0].expected_g) << ","
-                       << static_cast<int>(r.errors[0].expected_b) << ") got RGB("
-                       << static_cast<int>(r.errors[0].actual_r) << ","
-                       << static_cast<int>(r.errors[0].actual_g) << ","
-                       << static_cast<int>(r.errors[0].actual_b) << ")\n";
+        ss << "\n╔════════════════════════════════════════════════════════════════╗\n";
+        ss << "║ MULTI-RUN SUMMARY\n";
+        ss << "╚════════════════════════════════════════════════════════════════╝\n";
+        ss << "Total Runs:   " << multi_config.num_runs << "\n";
+        ss << "Passed:       " << total_passed << " (" << (100.0 * total_passed / multi_config.num_runs) << "%)\n";
+        ss << "Failed:       " << total_failed << " (" << (100.0 * total_failed / multi_config.num_runs) << "%)";
+        AR_FL_WARN(ss.str());
+
+        if (total_failed > 0) {
+            ss.clear();
+            ss << "\nFailed Run Numbers:\n";
+            for (const auto& r : run_results) {
+                if (!r.passed) {
+                    ss << "  Run #" << r.run_number << " - " << r.mismatches << " errors\n";
+                    if (!r.errors.empty()) {
+                        ss << "    First error at LED[" << r.errors[0].led_index << "]: "
+                           << "expected RGB(" << static_cast<int>(r.errors[0].expected_r) << ","
+                           << static_cast<int>(r.errors[0].expected_g) << ","
+                           << static_cast<int>(r.errors[0].expected_b) << ") got RGB("
+                           << static_cast<int>(r.errors[0].actual_r) << ","
+                           << static_cast<int>(r.errors[0].actual_g) << ","
+                           << static_cast<int>(r.errors[0].actual_b) << ")\n";
+                    }
                 }
             }
+            AR_FL_WARN(ss.str());
         }
-        FL_WARN(ss.str());
     }
 
     // Copy results to caller if requested
@@ -1088,9 +1131,13 @@ void runMultiTest(const char* test_name,
     total++;
     if (total_failed == 0) {
         passed++;
-        FL_WARN("\n[OVERALL] PASS ✓ - All " << multi_config.num_runs << " runs succeeded");
+        if (kLogsEnabled) {
+            AR_FL_WARN("\n[OVERALL] PASS ✓ - All " << multi_config.num_runs << " runs succeeded");
+        }
     } else {
-        FL_WARN("\n[OVERALL] FAIL ✗ - " << total_failed << "/" << multi_config.num_runs << " runs failed");
+        if (kLogsEnabled) {
+            AR_FL_WARN("\n[OVERALL] FAIL ✗ - " << total_failed << "/" << multi_config.num_runs << " runs failed");
+        }
     }
 }
 
@@ -1117,7 +1164,7 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
     }
     ss << "  Channels: " << config.tx_configs.size() << "\n";
     ss << "========================================";
-    FL_WARN(ss.str());
+    AR_FL_WARN(ss.str());
 
     // Create ALL channels from tx_configs (multi-channel support)
     fl::vector<fl::shared_ptr<fl::Channel>> channels;
@@ -1231,7 +1278,7 @@ void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
            << " LEDs=" << config.tx_configs[i].mLeds.size() << "\n";
     }
     ss << "========================================";
-    FL_WARN(ss.str());
+    AR_FL_WARN(ss.str());
 
     // Create one legacy proxy per lane. By default every lane uses WS2812B,
     // but AutoResearch can supply per-lane chipsets to exercise multiple
