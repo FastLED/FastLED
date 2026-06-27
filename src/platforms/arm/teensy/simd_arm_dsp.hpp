@@ -121,6 +121,74 @@ FASTLED_FORCE_INLINE FL_IRAM u32 fl_dsp_uadd16(u32 a, u32 b) FL_NO_EXCEPT {
     return r;
 }
 
+// Zero-extend bytes 0 and 2 of `a` to halfwords. Result lanes: (0:a[2], 0:a[0]).
+FASTLED_FORCE_INLINE FL_IRAM u32 fl_dsp_uxtb16(u32 a) FL_NO_EXCEPT {
+    u32 r;
+    __asm__ volatile ("uxtb16 %0, %1" : "=r"(r) : "r"(a));
+    return r;
+}
+
+// Zero-extend bytes 1 and 3 of `a` (via ROR #8) to halfwords.
+// Result lanes: (0:a[3], 0:a[1]).
+FASTLED_FORCE_INLINE FL_IRAM u32 fl_dsp_uxtb16_ror8(u32 a) FL_NO_EXCEPT {
+    u32 r;
+    __asm__ volatile ("uxtb16 %0, %1, ror #8" : "=r"(r) : "r"(a));
+    return r;
+}
+
+// Pack halfwords: Rd[15:0] = Rn[15:0]; Rd[31:16] = Rm[15:0] (Rm shifted left 16).
+FASTLED_FORCE_INLINE FL_IRAM u32 fl_dsp_pkhbt_lsl16(u32 lo, u32 hi) FL_NO_EXCEPT {
+    u32 r;
+    __asm__ volatile ("pkhbt %0, %1, %2, lsl #16" : "=r"(r) : "r"(lo), "r"(hi));
+    return r;
+}
+
+// Pack halfwords: Rd[31:16] = Rn[31:16]; Rd[15:0] = (Rm >> 16)[15:0].
+FASTLED_FORCE_INLINE FL_IRAM u32 fl_dsp_pkhtb_asr16(u32 hi, u32 lo) FL_NO_EXCEPT {
+    u32 r;
+    __asm__ volatile ("pkhtb %0, %1, %2, asr #16" : "=r"(r) : "r"(hi), "r"(lo));
+    return r;
+}
+
+// USAT16 #8: saturate each 16-bit halfword to unsigned [0, 255].
+// Replaces the per-lane `(value > 255 ? 255 : value)` conditional and
+// the compiler can't always vectorise that conditional cleanly.
+FASTLED_FORCE_INLINE FL_IRAM u32 fl_dsp_usat16_8(u32 a) FL_NO_EXCEPT {
+    u32 r;
+    __asm__ volatile ("usat16 %0, #8, %1" : "=r"(r) : "r"(a));
+    return r;
+}
+
+// USUB8 + SEL combo: select per-byte minimum. USUB8 modulo-subtracts and
+// sets APSR.GE[lane] = (a[lane] >= b[lane]) for unsigned bytes. SEL then
+// picks the smaller byte per lane. Use "memory" clobber on USUB8 so the
+// compiler does NOT lift it across the SEL (the GE flags are the actual
+// data-dependency carrier; without telling the compiler so, it could
+// reorder and the SEL would see stale flags).
+FASTLED_FORCE_INLINE FL_IRAM u32 fl_dsp_min_u8x4(u32 a, u32 b) FL_NO_EXCEPT {
+    u32 dummy, r;
+    __asm__ volatile (
+        "usub8 %0, %2, %3\n\t"
+        "sel   %1, %3, %2"
+        : "=&r"(dummy), "=r"(r)
+        : "r"(a), "r"(b)
+        : "cc"
+    );
+    return r;
+}
+
+FASTLED_FORCE_INLINE FL_IRAM u32 fl_dsp_max_u8x4(u32 a, u32 b) FL_NO_EXCEPT {
+    u32 dummy, r;
+    __asm__ volatile (
+        "usub8 %0, %2, %3\n\t"
+        "sel   %1, %2, %3"
+        : "=&r"(dummy), "=r"(r)
+        : "r"(a), "r"(b)
+        : "cc"
+    );
+    return r;
+}
+
 //==============================================================================
 // Load/Store Operations (NOT atomic — no thread-safety / memory-order semantics)
 //==============================================================================
@@ -260,31 +328,47 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, 
     return result;
 }
 
+/// Rounding 16-lane unsigned average via UHADD8 NOT-trick: per byte,
+/// `(a + b + 1) >> 1` = `~UHADD8(~a, ~b)` (De Morgan + halving). Two
+/// XOR-immediate + UHADD8 + XOR-immediate per word, vs the 16-iteration
+/// scalar loop with widening cast and right-shift this replaces.
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 avg_round_u8_16(simd_u8x16 a, simd_u8x16 b) FL_NO_EXCEPT {
-    // UHADD8 floors; a "rounding" variant would need UHADD8 + UQADD8(1) pair.
-    // Deferred until we wire the full lib8tion DSP-ext path.
-    simd_u8x16 result;
-    for (int i = 0; i < 16; ++i) {
-        result.data[i] = static_cast<u8>((static_cast<u16>(a.data[i]) + static_cast<u16>(b.data[i]) + 1) >> 1);
-    }
-    return result;
+    simd_u8x16 r;
+    const u32* pa = reinterpret_cast<const u32*>(a.data);  // ok reinterpret cast
+    const u32* pb = reinterpret_cast<const u32*>(b.data);  // ok reinterpret cast
+    u32* pr = reinterpret_cast<u32*>(r.data);              // ok reinterpret cast
+    pr[0] = ~fl_dsp_uhadd8(~pa[0], ~pb[0]);
+    pr[1] = ~fl_dsp_uhadd8(~pa[1], ~pb[1]);
+    pr[2] = ~fl_dsp_uhadd8(~pa[2], ~pb[2]);
+    pr[3] = ~fl_dsp_uhadd8(~pa[3], ~pb[3]);
+    return r;
 }
 
+/// Per-byte unsigned minimum via USUB8+SEL. 2 DSP ops per 4 bytes
+/// (8 ops total) vs 16 scalar conditional moves.
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 min_u8_16(simd_u8x16 a, simd_u8x16 b) FL_NO_EXCEPT {
-    // TODO(#2628): USUB8 + SEL using the GE flags is the canonical DSP-ext pattern.
-    simd_u8x16 result;
-    for (int i = 0; i < 16; ++i) {
-        result.data[i] = (a.data[i] < b.data[i]) ? a.data[i] : b.data[i];
-    }
-    return result;
+    simd_u8x16 r;
+    const u32* pa = reinterpret_cast<const u32*>(a.data);  // ok reinterpret cast
+    const u32* pb = reinterpret_cast<const u32*>(b.data);  // ok reinterpret cast
+    u32* pr = reinterpret_cast<u32*>(r.data);              // ok reinterpret cast
+    pr[0] = fl_dsp_min_u8x4(pa[0], pb[0]);
+    pr[1] = fl_dsp_min_u8x4(pa[1], pb[1]);
+    pr[2] = fl_dsp_min_u8x4(pa[2], pb[2]);
+    pr[3] = fl_dsp_min_u8x4(pa[3], pb[3]);
+    return r;
 }
 
+/// Per-byte unsigned maximum via USUB8+SEL.
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 max_u8_16(simd_u8x16 a, simd_u8x16 b) FL_NO_EXCEPT {
-    simd_u8x16 result;
-    for (int i = 0; i < 16; ++i) {
-        result.data[i] = (a.data[i] > b.data[i]) ? a.data[i] : b.data[i];
-    }
-    return result;
+    simd_u8x16 r;
+    const u32* pa = reinterpret_cast<const u32*>(a.data);  // ok reinterpret cast
+    const u32* pb = reinterpret_cast<const u32*>(b.data);  // ok reinterpret cast
+    u32* pr = reinterpret_cast<u32*>(r.data);              // ok reinterpret cast
+    pr[0] = fl_dsp_max_u8x4(pa[0], pb[0]);
+    pr[1] = fl_dsp_max_u8x4(pa[1], pb[1]);
+    pr[2] = fl_dsp_max_u8x4(pa[2], pb[2]);
+    pr[3] = fl_dsp_max_u8x4(pa[3], pb[3]);
+    return r;
 }
 
 //==============================================================================
@@ -348,27 +432,89 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 andnot_u8_16(simd_u8x16 a, simd_u8x16 b)
 // u16x8 Operations
 //==============================================================================
 
+/// Widen low 8 bytes of u8x16 to 8 halfwords via UXTB16 + PKHBT/PKHTB.
+/// Per pair of output u32 words (4 halfwords): 1 UXTB16 + 1 UXTB16(ror8) +
+/// 1 PKHBT + 1 PKHTB = 4 DSP ops, vs the scalar version's 8 LDRB+STRH pairs.
 FASTLED_FORCE_INLINE FL_IRAM simd_u16x8 widen_lo_u8_to_u16(simd_u8x16 vec) FL_NO_EXCEPT {
-    // TODO(#2628 follow-up): UXTB16 x2 packs (b0,b1)->(0,b0,0,b1) etc.
-    simd_u16x8 result;
-    for (int i = 0; i < 8; ++i) result.data[i] = vec.data[i];
-    return result;
+    simd_u16x8 r;
+    const u32* pv = reinterpret_cast<const u32*>(vec.data);  // ok reinterpret cast
+    u32* pr = reinterpret_cast<u32*>(r.data);                // ok reinterpret cast
+
+    // Input word 0: bytes [b0, b1, b2, b3] -> output halfwords [b0, b1, b2, b3]
+    u32 in0 = pv[0];
+    u32 lo0 = fl_dsp_uxtb16(in0);          // (0:b2, 0:b0) in u32 register
+    u32 hi0 = fl_dsp_uxtb16_ror8(in0);     // (0:b3, 0:b1)
+    pr[0] = fl_dsp_pkhbt_lsl16(lo0, hi0);  // halfword pair (0:b1, 0:b0)
+    pr[1] = fl_dsp_pkhtb_asr16(hi0, lo0);  // halfword pair (0:b3, 0:b2)
+
+    // Input word 1: bytes [b4, b5, b6, b7]
+    u32 in1 = pv[1];
+    u32 lo1 = fl_dsp_uxtb16(in1);
+    u32 hi1 = fl_dsp_uxtb16_ror8(in1);
+    pr[2] = fl_dsp_pkhbt_lsl16(lo1, hi1);
+    pr[3] = fl_dsp_pkhtb_asr16(hi1, lo1);
+
+    return r;
 }
 
+/// Widen high 8 bytes of u8x16 to 8 halfwords. Same shape as widen_lo_u8_to_u16
+/// but consumes the upper half of the input (input words 2 and 3).
 FASTLED_FORCE_INLINE FL_IRAM simd_u16x8 widen_hi_u8_to_u16(simd_u8x16 vec) FL_NO_EXCEPT {
-    simd_u16x8 result;
-    for (int i = 0; i < 8; ++i) result.data[i] = vec.data[i + 8];
-    return result;
+    simd_u16x8 r;
+    const u32* pv = reinterpret_cast<const u32*>(vec.data);  // ok reinterpret cast
+    u32* pr = reinterpret_cast<u32*>(r.data);                // ok reinterpret cast
+
+    u32 in0 = pv[2];
+    u32 lo0 = fl_dsp_uxtb16(in0);
+    u32 hi0 = fl_dsp_uxtb16_ror8(in0);
+    pr[0] = fl_dsp_pkhbt_lsl16(lo0, hi0);
+    pr[1] = fl_dsp_pkhtb_asr16(hi0, lo0);
+
+    u32 in1 = pv[3];
+    u32 lo1 = fl_dsp_uxtb16(in1);
+    u32 hi1 = fl_dsp_uxtb16_ror8(in1);
+    pr[2] = fl_dsp_pkhbt_lsl16(lo1, hi1);
+    pr[3] = fl_dsp_pkhtb_asr16(hi1, lo1);
+
+    return r;
 }
 
+/// Narrow 16 halfwords to 16 bytes with unsigned-saturate-to-255.
+/// USAT16 #8 clamps each halfword to [0, 255] in one DSP op; we then
+/// repack 4 halfword-LSBs into 1 byte-packed u32 per output word.
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 narrow_u16_to_u8(simd_u16x8 lo, simd_u16x8 hi) FL_NO_EXCEPT {
-    // TODO(#2628 follow-up): USAT16 + PKHBT to pack saturated halfwords back to bytes.
-    simd_u8x16 result;
-    for (int i = 0; i < 8; ++i)
-        result.data[i] = lo.data[i] > 255 ? 255 : static_cast<u8>(lo.data[i]);
-    for (int i = 0; i < 8; ++i)
-        result.data[i + 8] = hi.data[i] > 255 ? 255 : static_cast<u8>(hi.data[i]);
-    return result;
+    simd_u8x16 r;
+    const u32* plo = reinterpret_cast<const u32*>(lo.data);  // ok reinterpret cast
+    const u32* phi = reinterpret_cast<const u32*>(hi.data);  // ok reinterpret cast
+    u32* pr = reinterpret_cast<u32*>(r.data);                // ok reinterpret cast
+
+    // Each USAT16 saturates 2 halfwords -> 2 bytes (in low byte of each
+    // halfword). 2 sat-words feed 4 output bytes, packed via mask+shift.
+    {
+        u32 s0 = fl_dsp_usat16_8(plo[0]);  // (0:b1, 0:b0)
+        u32 s1 = fl_dsp_usat16_8(plo[1]);  // (0:b3, 0:b2)
+        pr[0] = (s0 & 0xFF) | ((s0 >> 8) & 0xFF00)
+              | ((s1 & 0xFF) << 16) | ((s1 & 0xFF0000) << 8);
+    }
+    {
+        u32 s2 = fl_dsp_usat16_8(plo[2]);
+        u32 s3 = fl_dsp_usat16_8(plo[3]);
+        pr[1] = (s2 & 0xFF) | ((s2 >> 8) & 0xFF00)
+              | ((s3 & 0xFF) << 16) | ((s3 & 0xFF0000) << 8);
+    }
+    {
+        u32 s4 = fl_dsp_usat16_8(phi[0]);
+        u32 s5 = fl_dsp_usat16_8(phi[1]);
+        pr[2] = (s4 & 0xFF) | ((s4 >> 8) & 0xFF00)
+              | ((s5 & 0xFF) << 16) | ((s5 & 0xFF0000) << 8);
+    }
+    {
+        u32 s6 = fl_dsp_usat16_8(phi[2]);
+        u32 s7 = fl_dsp_usat16_8(phi[3]);
+        pr[3] = (s6 & 0xFF) | ((s6 >> 8) & 0xFF00)
+              | ((s7 & 0xFF) << 16) | ((s7 & 0xFF0000) << 8);
+    }
+    return r;
 }
 
 /// 8-lane u16 add via UADD16 x4 (each instruction handles 2 lanes).
