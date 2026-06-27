@@ -66,6 +66,10 @@
 #include <DMAChannel.h>
 // IWYU pragma: end_keep
 
+// xbar_connect() is declared inside Teensyduino's pwm.c without a public
+// header. Forward-declare here so we can call it from this TU.
+extern "C" void xbar_connect(unsigned int input, unsigned int output);
+
 namespace fl {
 
 // ============================================================================
@@ -193,42 +197,53 @@ bool objectfled_spi_lookup_pins(u8 mosi_pin, u8 sclk_pin,
 // (which is 2 * SCLK = one request per DMA word).
 // TODO(#3428): verify against RM 30 -- exact register sequence below
 // uses LDOK + CLDOK pattern from Teensyduino's pwm.c analogWrite path.
-static void objectfled_spi_program_flexpwm(u32 req_hz) FL_NO_EXCEPT {
-    FLEXPWM2_OUTEN  &= ~(FLEXPWM_OUTEN_PWMA_EN(1) |
-                         FLEXPWM_OUTEN_PWMB_EN(1) |
-                         FLEXPWM_OUTEN_PWMX_EN(1));
-    FLEXPWM2_MCTRL  |= FLEXPWM_MCTRL_CLDOK(1);
-    FLEXPWM2_SM0CTRL2 = FLEXPWM_SMCTRL2_INDEP
-                      | FLEXPWM_SMCTRL2_INIT_SEL(0)
-                      | FLEXPWM_SMCTRL2_CLK_SEL(0);
-    FLEXPWM2_SM0CTRL  = FLEXPWM_SMCTRL_FULL
-                      | FLEXPWM_SMCTRL_PRSC(0);
+// Program QTimer3 channel 0 to generate periodic compare events at
+// `req_hz`, routed through XBAR1 to DMA_CH_MUX_REQ95 (DMAMUX_SOURCE_XBAR1_3).
+// Mirrors the clockless ObjectFLED QTimer4 setup at OjectFLED.cpp.hpp:305-335
+// but on QTimer3 (QTimer4 is taken) and routes to the only unclaimed XBAR
+// DMA slot (req95; clockless uses 30/31/94).
+static void objectfled_spi_program_qtimer(u32 req_hz) FL_NO_EXCEPT {
+    // Disable channel 0 so we can re-program safely.
+    TMR3_ENBL &= ~1u;
 
+    // Status/control: output enable, FORCE clears OFLAG, MSTR drives output.
+    TMR3_SCTRL0 = TMR_SCTRL_OEN | TMR_SCTRL_FORCE | TMR_SCTRL_MSTR;
+    // Compare/status: CL1=1 (capture-load from CMPLD1), TCF1EN enables the
+    // compare-1 flag that drives the XBAR input edge.
+    TMR3_CSCTRL0 = TMR_CSCTRL_CL1(1) | TMR_CSCTRL_TCF1EN;
+    TMR3_CNTR0 = 0;
+    TMR3_LOAD0 = 0;
+
+    // Compare period: F_BUS_ACTUAL counts per second / req_hz.
     u32 ipg_hz = (u32)F_BUS_ACTUAL;
     if (ipg_hz == 0) ipg_hz = 150000000u;
     u32 period = ipg_hz / req_hz;
-    if (period < 4u)     period = 4u;
+    if (period < 4u)      period = 4u;
     if (period > 0xFFFFu) period = 0xFFFFu;
+    TMR3_COMP10 = (u16)period;
+    TMR3_CMPLD10 = (u16)period;
 
-    FLEXPWM2_SM0INIT = 0;
-    FLEXPWM2_SM0VAL0 = 0;
-    FLEXPWM2_SM0VAL1 = (u16)(period - 1u);
-    FLEXPWM2_SM0VAL2 = 0;
-    FLEXPWM2_SM0VAL3 = (u16)(period / 2u);
-    FLEXPWM2_SM0VAL4 = 0;
-    FLEXPWM2_SM0VAL5 = (u16)(period / 2u);
+    // CTRL: CM(1)=count rising IP clock, PCS(8)=prescaler IP clock /1,
+    // LENGTH=count until COMP1 then reload from LOAD, OUTMODE(3)=toggle
+    // output on COMP1 (gives a 50% duty toggle the XBAR sees as edges).
+    TMR3_CTRL0 = TMR_CTRL_CM(1) | TMR_CTRL_PCS(8) |
+                 TMR_CTRL_LENGTH | TMR_CTRL_OUTMODE(3);
 
-    // VAL1 compare -> DMA request. VALDE = bit 9 of SMDMAEN per
-    // imxrt.h:5079 (an earlier draft used 1<<4 which is CA0DE = capture
-    // DMA, so the DMA request never fired -- silent "init/show
-    // completes, wait_ms=50 timeout" failure mode). Confirmed against
-    // Teensyduino's Audio/output_pwm.cpp:310 which uses VALDE for
-    // PWM-update-driven DMA.
-    FLEXPWM2_SM0DMAEN = FLEXPWM_SMDMAEN_VALDE;
+    // Route QTIMER3_TIMER0 -> DMA_CH_MUX_REQ95 via XBAR1.
+    CCM_CCGR2 |= CCM_CCGR2_XBAR1(CCM_CCGR_ON);
+    xbar_connect(XBARA1_IN_QTIMER3_TIMER0, XBARA1_OUT_DMA_CH_MUX_REQ95);
 
-    FLEXPWM2_SM0STS = 0xFFFFu;
-    FLEXPWM2_MCTRL  &= ~FLEXPWM_MCTRL_CLDOK(1);
-    FLEXPWM2_MCTRL  |=  FLEXPWM_MCTRL_LDOK(1);
+    // Configure XBARA1_CTRL1 slot 1 (DMA output 3 = req95) for edge-detect
+    // DMA enable. We OR-in our bits without disturbing slot 0 (which the
+    // clockless mode may have configured for req94). See clockless setup
+    // at OjectFLED.cpp.hpp:166-173 for the inverse pattern.
+    {
+        u16 ctrl1 = XBARA1_CTRL1;
+        // Clear our slot's STS bit before re-asserting (W1C semantics).
+        ctrl1 &= ~XBARA_CTRL_STS1;
+        ctrl1 |= XBARA_CTRL_STS1 | XBARA_CTRL_EDGE1(3) | XBARA_CTRL_DEN1;
+        XBARA1_CTRL1 = ctrl1;
+    }
 }
 
 // ============================================================================
@@ -268,28 +283,34 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
     // trigger for our use case of "fire DMA on each PWM tick so we can
     // write to an arbitrary GPIO".
     //
-    // The architecturally-correct path forward is to use a QTimer
-    // compare event routed through XBAR to a DMA request line, mirroring
-    // the working clockless setup at OjectFLED.cpp.hpp:305-335:
-    //   1. Configure QTimer1 (or 2 or 3 -- QTimer4 is taken by clockless)
-    //      channel 0 in periodic count-and-compare mode with COMP1 set
-    //      to (F_BUS_ACTUAL / (2 * sclk_hz)).
-    //   2. Enable timer-compare-flag-1 interrupt enable (TMR_CSCTRL_TCF1EN).
-    //   3. Route via XBAR: xbar_connect(XBARA1_IN_QTIMER1_TIMER0,
-    //      XBARA1_OUT_DMA_CH_MUX_REQ95) -- 30/31/94 are taken by
-    //      clockless mode (see OjectFLED.cpp.hpp:333-335); 95 is free.
-    //   4. triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_3) on our SPI
-    //      DMA channel (XBAR1_3 corresponds to DMA_CH_MUX_REQ95).
-    //   5. Drop the FlexPWM2_SM0 programming entirely -- it was the
-    //      wrong primitive for "fire DMA on each tick".
+    // The QTimer3 + XBAR + DMA_CH_MUX_REQ95 path IS implemented below
+    // (replacing the original FlexPWM2/VALDE attempt). It mirrors the
+    // working clockless QTimer4 setup at OjectFLED.cpp.hpp:305-335 but
+    // on QTimer3 channel 0 (QTimer4 is taken) and routes to req95 (the
+    // only XBAR-DMA slot not used by clockless mode's 30/31/94).
     //
-    // Bare DMAMUX_SOURCE_QTIMER1_WRITE0_CMPLD1 (= 52) is NOT a viable
-    // alternative -- that source fires on CPU/DMA *writes* to the
-    // CMPLD1 register, not on periodic compare events.
+    // Bench-debug status after the QTimer3 rewrite (Teensy 4.1, COM20):
+    //   * Init + show + wait + deinit no longer crashes. ✓
+    //   * wait_ms = 55 ms = bounded DMA-timeout(50) + drain-wait(5).
+    //     The DMA still isn't actually completing.
     //
-    // Keep the gate OFF by default so users don't get phantom non-
-    // transmitting SPI behavior. The next debug session implements the
-    // QTimer1+XBAR path above and scope-verifies on bench.
+    // So neither of the two attempted DMA-trigger designs (VALDE via
+    // FlexPWM2, then XBAR via QTimer3) actually fires the DMA on this
+    // hardware. The remaining suspects, all requiring scope-on-bench
+    // to diagnose:
+    //   (a) QTimer3 channel 0 isn't actually counting (verify by
+    //       reading TMR3_CNTR0 after enable -- should advance).
+    //   (b) XBARA1_IN_QTIMER3_TIMER0 isn't actually toggling its
+    //       output (verify by scoping the timer-output pin, or by
+    //       reading XBARA1 STS bits which latch on edge).
+    //   (c) DMA channel ERQ isn't set despite enable() -- verify by
+    //       reading DMA_ERQ register after enable.
+    //   (d) DMAMUX is enabled but channel# != XBARA1_OUT_DMA_CH_MUX_REQ95
+    //       value (verify DMAMUX_CHCFG[ch] register).
+    //
+    // Keep the gate OFF by default. Next bench session adds DMA-state
+    // dump to the smoke test response so the host can see which of the
+    // four suspects is the root cause.
 #ifndef FL_OBJECTFLED_SPI_HARDWARE_ENABLE
     (void)pin_info;
     (void)clock_hz;
@@ -343,7 +364,7 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
     GPIO6_GDIR |= (pin_info.mosi_mask | pin_info.sclk_mask);
     GPIO6_DR   &= ~(pin_info.mosi_mask | pin_info.sclk_mask);
 
-    objectfled_spi_program_flexpwm(2u * clock_hz);
+    objectfled_spi_program_qtimer(2u * clock_hz);
 
     if (sSpiDmaChannel == nullptr) {
         sSpiDmaChannel = new DMAChannel();  // ok bare allocation -- one-shot, balanced in deinit
@@ -357,7 +378,9 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
             sSpiDmaChannel = nullptr;
             return false;
         }
-        sSpiDmaChannel->triggerAtHardwareEvent(DMAMUX_SOURCE_FLEXPWM2_WRITE0);
+        // XBAR1_3 -> DMA_CH_MUX_REQ95, driven by QTIMER3_TIMER0 compare event
+        // (configured in objectfled_spi_program_qtimer). DMAMUX_SOURCE_XBAR1_3 = 95.
+        sSpiDmaChannel->triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_3);
         sSpiDmaChannel->attachInterrupt(objectfled_spi_dma_isr);
     }
 
@@ -466,8 +489,10 @@ bool objectfled_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT {
     sSpiDmaComplete = false;
     sSpiDmaChannel->enable();
 
-    FLEXPWM2_SM0STS = 0xFFFFu;
-    FLEXPWM2_MCTRL |= FLEXPWM_MCTRL_RUN(1);
+    // Start QTimer3 channel 0 -- its periodic compare events drive the
+    // DMA via XBAR routing set up in init().
+    TMR3_CNTR0 = 0;
+    TMR3_ENBL |= 1u;
     asm volatile("dsb" ::: "memory");
 
     return true;
@@ -491,7 +516,7 @@ void objectfled_spi_wait() FL_NO_EXCEPT {
                 sSpiDmaChannel->clearComplete();
                 sSpiDmaChannel->clearError();
             }
-            FLEXPWM2_MCTRL &= ~FLEXPWM_MCTRL_RUN(1);
+            TMR3_ENBL &= ~1u;  // stop QTimer3 channel 0
             sSpiDmaComplete = true;
             FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: wait timed out after %s ms -- recovering",
                                 (int)timeout_ms);
@@ -499,18 +524,17 @@ void objectfled_spi_wait() FL_NO_EXCEPT {
         }
     }
 
-    // TODO(#3428): verify the compare-flag bit on scope.
+    // Brief drain wait so the last DMA word has time to land on the wire.
+    // 5 ms covers ~5000 single-byte transfers at the slowest 1 MHz config.
     const u32 drain_start = millis();
     const u32 drain_timeout_ms = 5;
-    while ((FLEXPWM2_SM0STS & FLEXPWM_SMSTS_CMPF(0x02)) == 0) {
-        if ((u32)(millis() - drain_start) >= drain_timeout_ms) {
-            FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: shifter drain timeout after %s ms",
-                                (int)drain_timeout_ms);
-            break;
-        }
+    while ((u32)(millis() - drain_start) < drain_timeout_ms) {
+        // Just bounded-spin; we have no timer-status proxy that maps
+        // cleanly to "shifter drained" in the QTimer-driven path.
     }
-    FLEXPWM2_SM0STS = 0xFFFFu;
-    FLEXPWM2_MCTRL &= ~FLEXPWM_MCTRL_RUN(1);
+
+    // Stop QTimer3 channel 0 between transfers.
+    TMR3_ENBL &= ~1u;
 
     GPIO6_DR = (GPIO6_DR & ~(sSpiCurrentPins.mosi_mask | sSpiCurrentPins.sclk_mask));
 
@@ -528,11 +552,14 @@ void objectfled_spi_deinit() FL_NO_EXCEPT {
 
     objectfled_spi_wait();
 
-    FLEXPWM2_MCTRL    &= ~FLEXPWM_MCTRL_RUN(1);
-    FLEXPWM2_SM0DMAEN  = 0;
-    FLEXPWM2_SM0CTRL   = 0;
-    FLEXPWM2_SM0CTRL2  = 0;
-    FLEXPWM2_SM0STS    = 0xFFFFu;
+    // Stop + clear QTimer3 channel 0.
+    TMR3_ENBL    &= ~1u;
+    TMR3_CSCTRL0  = 0;
+    TMR3_CTRL0    = 0;
+    TMR3_SCTRL0   = 0;
+    // NOTE: XBAR routing is left as configured -- another driver may share
+    // CTRL1 slot 0 (req94) and we don't want to clobber its bits. The
+    // routing is harmless when our DMA channel is disabled.
 
     if (sSpiDmaChannel) {
         sSpiDmaChannel->disable();
