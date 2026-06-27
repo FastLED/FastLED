@@ -261,7 +261,7 @@ See Also:
         driver_group.add_argument(
             "--lpuart",
             action="store_true",
-            help="Test only LPUART clockless driver (Teensy 4.x only; pin 8 -> LPUART4)",
+            help="Test only LPUART clockless driver (Teensy 4.x only; pin to LPUARTn mapping is board-dependent -- see kLpuartPins[] in lpuart_driver.cpp.hpp)",
         )
         driver_group.add_argument(
             "--all",

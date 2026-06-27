@@ -6,6 +6,7 @@
 #include "platforms/arm/teensy/is_teensy.h"
 
 #include "platforms/arm/teensy/teensy4_common/drivers/lpuart/channel_engine_lpuart.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/lpuart/bus_traits.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/lpuart/ilpuart_peripheral.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/lpuart/lpuart_encoder.h"
 
@@ -32,6 +33,14 @@ ChannelEngineLPUART::ChannelEngineLPUART(fl::shared_ptr<ILPUARTPeripheral> perip
       mHwInitialized(false), mCurrentPin(0xFF) {}
 
 ChannelEngineLPUART::~ChannelEngineLPUART() {}
+
+fl::string ChannelEngineLPUART::getName() const FL_NO_EXCEPT {
+    return fl::string::from_literal("LPUART");
+}
+
+IChannelDriver::Capabilities ChannelEngineLPUART::getCapabilities() const FL_NO_EXCEPT {
+    return Capabilities(true, false);
+}
 
 bool ChannelEngineLPUART::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
     if (!data || !data->isClockless()) return false;
@@ -93,15 +102,24 @@ void ChannelEngineLPUART::show() FL_NO_EXCEPT {
         if (!mHwInitialized || pin != mCurrentPin
                 || timing != mCurrentTiming
                 || raw_bytes != mCurrentRawBytes) {
+            // CodeRabbit-flagged: clear hardware-binding state BEFORE
+            // attempting createInstance(). If create fails we leave
+            // mHwInitialized=false so the next channel forces a fresh
+            // reinit instead of inheriting the half-torn-down state.
             mInstance.reset();
+            mHwInitialized = false;
+            mCurrentPin = 0xFF;
+            mCurrentRawBytes = 0;
+
             const u32 total_leds = (raw_bytes + 2u) / 3u;  // ceil for RGB
-            mInstance = mPeripheral->createInstance(
+            auto candidate = mPeripheral->createInstance(
                 pin, total_leds, /*is_rgbw=*/false,
                 timing.t1_ns, timing.t2_ns, timing.t3_ns, timing.reset_us);
-            if (!mInstance) {
+            if (!candidate) {
                 FL_LOG_FLEXIO_F("ChannelEngineLPUART: createInstance failed on pin %d", (int)pin);
                 continue;
             }
+            mInstance = fl::move(candidate);
             mCurrentPin = pin;
             mCurrentTiming = timing;
             mCurrentRawBytes = raw_bytes;
@@ -136,6 +154,16 @@ IChannelDriver::DriverState ChannelEngineLPUART::poll() FL_NO_EXCEPT {
     }
     return DriverState::READY;
 }
+
+// CodeRabbit: move BusTraits<Bus::LPUART>::instancePtr() out of the
+// header. Static storage lives here in the TU.
+#if defined(FL_IS_TEENSY_4X)
+fl::shared_ptr<ChannelEngineLPUART> BusTraits<Bus::LPUART>::instancePtr() FL_NO_EXCEPT {
+    static fl::shared_ptr<ChannelEngineLPUART> gHolder =
+        fl::make_shared<ChannelEngineLPUART>();
+    return gHolder;
+}
+#endif
 
 } // namespace fl
 

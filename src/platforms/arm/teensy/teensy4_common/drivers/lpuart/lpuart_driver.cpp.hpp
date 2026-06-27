@@ -165,6 +165,12 @@ static DMAChannel* sLpDmaChannel = nullptr;
 static volatile bool sLpDmaComplete = true;
 static bool sLpInitialized = false;
 static LpuartPinInfo sLpPinInfo{};
+// CodeRabbit-flagged: honour the public reset_us contract. We record
+// the requested reset/latch micros at init time and the millis() at
+// which the last frame finished; lpuart_show_encoded waits for the
+// reset window to elapse before starting the next frame.
+static u32 sLpResetUs = 280;
+static volatile u32 sLpLastFrameEndUs = 0;
 
 // Max strip size: 1024 raw bytes -> 4096 UART bytes. Larger strips would
 // need a heap allocation; defer to FX-MED-2-style truncation warning.
@@ -267,10 +273,11 @@ static bool lpuart_dma_init() {
 // ============================================================================
 
 bool lpuart_init(const LpuartPinInfo& pin_info, u32 reset_us) {
-    (void)reset_us;
     if (sLpInitialized) lpuart_deinit();
 
     sLpPinInfo = pin_info;
+    sLpResetUs = (reset_us > 0) ? reset_us : 280u;
+    sLpLastFrameEndUs = 0;
 
     lpuart_configure(pin_info.lpuart_index);
     lpuart_pin_init(pin_info);
@@ -315,6 +322,16 @@ bool lpuart_show_encoded(const u8* encoded, u32 num_uart_bytes) {
     if (!sLpInitialized || !sLpDmaChannel || !encoded || num_uart_bytes == 0) {
         return false;
     }
+    // CodeRabbit-flagged: honour reset_us. Hold the previous-frame's
+    // latch window before arming the next TX so back-to-back show()
+    // calls can't start a new WS2812 frame before the strip has
+    // latched the previous one.
+    if (sLpLastFrameEndUs != 0) {
+        const u32 elapsed = (u32)(micros() - sLpLastFrameEndUs);
+        if (elapsed < sLpResetUs) {
+            delayMicroseconds(sLpResetUs - elapsed);
+        }
+    }
     lpuart_wait();
     arm_dcache_flush_delete(const_cast<u8*>(encoded), num_uart_bytes);
     bool ok = lpuart_arm_dma(encoded, num_uart_bytes);
@@ -330,6 +347,7 @@ bool lpuart_show_encoded(const u8* encoded, u32 num_uart_bytes) {
             if ((u32)(micros() - tc_start) > 1000u) break;
         }
     }
+    sLpLastFrameEndUs = micros();
     return true;
 }
 

@@ -21,16 +21,14 @@
 
 namespace fl {
 
+// CodeRabbit-flagged: function-local static with non-trivial ctor is
+// disallowed in `src/**/*.h`. instancePtr() is defined in
+// channel_engine_lpuart.cpp.hpp so the static storage lives in a TU,
+// not in this header.
 template<> struct BusTraits<Bus::LPUART> {
     using Driver = ChannelEngineLPUART;
-
-    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
-        static fl::shared_ptr<Driver> gHolder = fl::make_shared<Driver>();
-        return gHolder;
-    }
-
+    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT;
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
-
     static void registerWithManager() FL_NO_EXCEPT {
         ChannelManager::instance().addDriver(default_bus_priority(Bus::LPUART), instancePtr());
     }

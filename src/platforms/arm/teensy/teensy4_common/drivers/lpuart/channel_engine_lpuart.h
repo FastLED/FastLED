@@ -34,12 +34,8 @@ public:
     void show() FL_NO_EXCEPT override;
     DriverState poll() FL_NO_EXCEPT override;
 
-    fl::string getName() const FL_NO_EXCEPT override {
-        return fl::string::from_literal("LPUART");
-    }
-    Capabilities getCapabilities() const FL_NO_EXCEPT override {
-        return Capabilities(true, false);
-    }
+    fl::string getName() const FL_NO_EXCEPT override;
+    Capabilities getCapabilities() const FL_NO_EXCEPT override;
 
 private:
     fl::shared_ptr<ILPUARTPeripheral> mPeripheral;
