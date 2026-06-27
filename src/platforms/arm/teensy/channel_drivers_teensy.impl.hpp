@@ -28,10 +28,12 @@ inline void enableAllChannelDrivers() FL_NO_EXCEPT {
         // Bus::UART is the cross-platform clockless-via-UART name --
         // sketches that want portability use Bus::UART, and on
         // Teensy 4.x it routes to ChannelEngineLPUART. Bus::LPUART
-        // is registered as an alias for the same engine instance so
-        // code that names the hardware directly still works.
+        // is *not* re-registered here: its BusTraits returns the same
+        // singleton as Bus::UART, so registering it would trigger the
+        // ChannelManager replace-driver path (waitForReady + replace)
+        // every boot. Sketches that name `Bus::LPUART` directly still
+        // resolve to the same engine instance via the trait alias.
         , fl::Bus::UART
-        , fl::Bus::LPUART
 #endif
     >();
 }

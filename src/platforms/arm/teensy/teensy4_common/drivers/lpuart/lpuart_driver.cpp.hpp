@@ -261,7 +261,7 @@ static void lpuart_dma_isr() {
 
 static bool lpuart_dma_init() {
     if (sLpDmaChannel) return true;
-    sLpDmaChannel = new DMAChannel();
+    sLpDmaChannel = new DMAChannel();  // ok bare allocation - Teensyduino DMAChannel has no fl smart-pointer factory
     if (!sLpDmaChannel) return false;
     sLpDmaChannel->triggerAtHardwareEvent(lpuart_dmamux_tx_source(sLpPinInfo.lpuart_index));
     sLpDmaChannel->attachInterrupt(lpuart_dma_isr);
@@ -410,7 +410,7 @@ void lpuart_deinit() {
         sLpDmaChannel->clearInterrupt();
         DMAChannel* to_delete = sLpDmaChannel;
         sLpDmaChannel = nullptr;
-        delete to_delete;
+        delete to_delete;  // ok bare allocation - paired with bare 'new' above
     }
     sLpInitialized = false;
     sLpDmaComplete = true;

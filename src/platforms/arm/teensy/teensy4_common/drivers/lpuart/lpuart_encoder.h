@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file lpuart_encoder.h
 /// @brief Wave8 encoder for WS2812 via LPUART (TXINV semantics).
 ///
@@ -31,12 +33,13 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
 /// @brief Look up the UART byte for one WS2812 bit pair.
 /// @param pair Two-bit field (WS0 in bit 1, WS1 in bit 0).
-inline u8 lpuart_pair_to_byte(u8 pair) {
+inline u8 lpuart_pair_to_byte(u8 pair) FL_NO_EXCEPT {
     static constexpr u8 kTable[4] = { 0xEF, 0x8F, 0xEC, 0x8C };
     return kTable[pair & 0x3];
 }
@@ -51,7 +54,7 @@ inline u8 lpuart_pair_to_byte(u8 pair) {
 /// Call sites that index into a larger DMA buffer construct the span
 /// with `fl::span<u8, 4>{&buf[i*4], 4}` -- see `lpuart_driver.cpp.hpp`
 /// and `channel_engine_lpuart.cpp.hpp` for the standard usage.
-inline void lpuart_encode_byte(u8 b, fl::span<u8, 4> out4) {
+inline void lpuart_encode_byte(u8 b, fl::span<u8, 4> out4) FL_NO_EXCEPT {
     out4[0] = lpuart_pair_to_byte((b >> 6) & 0x3);  // bits 7,6
     out4[1] = lpuart_pair_to_byte((b >> 4) & 0x3);  // bits 5,4
     out4[2] = lpuart_pair_to_byte((b >> 2) & 0x3);  // bits 3,2
