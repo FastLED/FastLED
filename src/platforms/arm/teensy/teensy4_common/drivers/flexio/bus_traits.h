@@ -38,6 +38,15 @@ template<> struct BusTraits<Bus::FLEX_IO> {
 
 template<> struct BusSupports<Bus::FLEX_IO, ClocklessChipset> : fl::true_type {};
 
+// #3428: unified clockless + SPI engine -- the same FlexIO2 peripheral
+// (and the same `ChannelEngineFlexIO` class) serves both modes. See
+// `src/fl/channels/README.md` -> "Rule: Parallel-IO peripherals -- one
+// engine for both clockless and SPI modes". Runtime support for SPI is
+// gated by `flexio_spi_lookup_pins()` which is stubbed today; this
+// compile-time slot lets users write
+// `FastLED.add<Bus::FLEX_IO, SpiChipsetConfig>(cfg)` and have it type-check.
+template<> struct BusSupports<Bus::FLEX_IO, SpiChipsetConfig> : fl::true_type {};
+
 }  // namespace fl
 
 #endif  // FL_IS_TEENSY_4X
