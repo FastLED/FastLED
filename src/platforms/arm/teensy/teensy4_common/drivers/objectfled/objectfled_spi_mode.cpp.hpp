@@ -243,10 +243,16 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
     //   - GPIO6_DR direct-write while clockless mode's GPR26 remap is
     //     in a partially-configured state from a prior test boot.
     //
-    // Until the hardware is debugged on-bench, gate the init behind a
-    // compile-time flag so the architectural scaffolding (Capabilities,
-    // BusSupports, canHandle SPI branch, engine routing) can still ship
-    // and merge. Define FL_OBJECTFLED_SPI_HARDWARE_ENABLE to re-enable.
+    // Bench-debug status update (#3428): the dma3.complete() spin in
+    // ObjectFLEDDmaManager::acquire() that previously hard-faulted the
+    // firmware on first-time use is now bypassed (see show()). With the
+    // gate enabled, init+show complete cleanly on Teensy 4.1. However
+    // the DMA major-loop completion is still not signaled within the
+    // 50 ms timeout, indicating the FlexPWM2 -> DMA trigger is not
+    // wired correctly yet (needs scope-on-wire to verify SCLK toggle).
+    // Keep the gate OFF by default so users don't get phantom non-
+    // transmitting SPI behavior; flip FL_OBJECTFLED_SPI_HARDWARE_ENABLE
+    // to bench-debug.
 #ifndef FL_OBJECTFLED_SPI_HARDWARE_ENABLE
     (void)pin_info;
     (void)clock_hz;
@@ -276,7 +282,6 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
                         (int)pin_info.mosi_pin, (int)pin_info.mosi_bit,
                         (int)pin_info.sclk_pin, (int)pin_info.sclk_bit,
                         (int)clock_hz);
-
     // CCM gate for FlexPWM2. The macro is at bits 18-19 of CCGR4 (NOT
     // bits 22-23 as an earlier draft had it -- writing to the wrong bits
     // left FlexPWM2 ungated, and the first SM0CTRL2 write bus-faulted
@@ -364,8 +369,24 @@ bool objectfled_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT {
         num_bytes = kSpiMaxInputBytes;
     }
 
-    auto& mgr = ObjectFLEDDmaManager::getInstance();
-    mgr.acquire(static_cast<void*>(&sSpiBitPattern));
+    // NOTE(#3428): we intentionally do NOT call
+    // `ObjectFLEDDmaManager::acquire()` here. That method's
+    // `waitForCompletion()` spins on `dma3.complete()`, which returns
+    // false forever when the clockless mode has never run and so dma3's
+    // major-loop INT flag has never been set. Calling it from SPI mode
+    // before any clockless show() either hangs or crashes (verified on
+    // Teensy 4.1: the spin path crashes the firmware).
+    //
+    // For the simple "user alternates clockless and SPI shows" case
+    // there is no actual race -- each show() completes before the next
+    // is initiated. The race only matters if the user issues SPI and
+    // clockless concurrently from different contexts, which FastLED's
+    // single-threaded engine doesn't do today.
+    //
+    // TODO(#3428): proper coordination needs a fix at the manager level
+    // (e.g., initialize dma3's INT flag in the constructor so
+    // first-time `complete()` returns true) or a separate per-bank
+    // coordination primitive that doesn't rely on dma3.
 
     objectfled_spi_wait();
 
@@ -456,8 +477,9 @@ void objectfled_spi_wait() FL_NO_EXCEPT {
 
     GPIO6_DR = (GPIO6_DR & ~(sSpiCurrentPins.mosi_mask | sSpiCurrentPins.sclk_mask));
 
-    ObjectFLEDDmaManager::getInstance().release(
-        static_cast<void*>(&sSpiBitPattern));
+    // NOTE(#3428): paired with the show() acquire-skip above. The manager
+    // was never acquired (see comment in objectfled_spi_show), so no
+    // release is needed.
 }
 
 // ============================================================================
