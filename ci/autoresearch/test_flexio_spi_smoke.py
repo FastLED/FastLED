@@ -123,7 +123,10 @@ def evaluate(case: SmokeCase, result: dict[str, Any]) -> tuple[bool, str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    # __doc__ may be None if Python runs with -OO (docstrings stripped).
+    doc = __doc__ or ""
+    description = doc.splitlines()[0] if doc else ""
+    parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--port", default="COM20", help="Serial port (default COM20)")
     parser.add_argument("--baud", type=int, default=115200)
     args = parser.parse_args()
