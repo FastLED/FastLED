@@ -206,12 +206,24 @@ static void lpuart_configure(u8 lpuart_index) {
     IMXRT_LPUART_t* lp = lpuart_base(lpuart_index);
     if (!lp) return;
 
+    // Force LPUART clock source = PLL3_80M (80 MHz), divider = 1.
+    // Empirical bring-up (hardware run on Teensy 4.0) showed the
+    // post-Teensyduino-boot LPUART clock running at 24 MHz, producing
+    // ~1.2 Mbps with our OSR=4/SBR=4 BAUD config instead of the
+    // intended 4 Mbps. Explicitly select PLL3_80M and divide-by-1
+    // here so the baud math is stable regardless of what other
+    // peripherals did to CSCDR1.
+    CCM_CSCDR1 = (CCM_CSCDR1 & ~(CCM_CSCDR1_UART_CLK_SEL |
+                                  CCM_CSCDR1_UART_CLK_PODF(0x3F)));
+    // After clearing: SEL=0 (PLL3_80M) and PODF=0 (divide by 1).
+
     lpuart_clock_gate_on(lpuart_index);
 
     // Disable TX/RX while reconfiguring.
     lp->CTRL = 0;
 
-    // BAUD: OSR=4, SBR=4, TDMAE (TX DMA enable) at bit 23.
+    // BAUD: OSR=4 (5x oversample), SBR=4, TDMAE (TX DMA enable) at bit 23.
+    // 80 MHz / (5 * 4) = 4 Mbps -> 250 ns per UART bit.
     lp->BAUD = LPUART_BAUD_OSR(4) | LPUART_BAUD_SBR(4) | LPUART_BAUD_TDMAE;
 
     // Clear status flags (W1C).
@@ -242,6 +254,8 @@ static bool lpuart_dma_init() {
     if (sLpDmaChannel) return true;
     sLpDmaChannel = new DMAChannel();
     if (!sLpDmaChannel) return false;
+    sLpDmaChannel->triggerAtHardwareEvent(lpuart_dmamux_tx_source(sLpPinInfo.lpuart_index));
+    sLpDmaChannel->attachInterrupt(lpuart_dma_isr);
     return true;
 }
 
@@ -255,19 +269,10 @@ bool lpuart_init(const LpuartPinInfo& pin_info, u32 reset_us) {
 
     sLpPinInfo = pin_info;
 
-    Serial.printf("LPUART: init pin=%u idx=%u\r\n", pin_info.teensy_pin, pin_info.lpuart_index);
     lpuart_configure(pin_info.lpuart_index);
-    Serial.printf("LPUART: configured\r\n");
     lpuart_pin_init(pin_info);
-    Serial.printf("LPUART: pin muxed mux=0x%lx pad=0x%lx\r\n",
-                  (unsigned long)*(pin_info.mux_reg),
-                  (unsigned long)*(pin_info.pad_reg));
 
-    if (!lpuart_dma_init()) {
-        Serial.printf("LPUART: DMA init failed\r\n");
-        return false;
-    }
-    Serial.printf("LPUART: DMA channel ready\r\n");
+    if (!lpuart_dma_init()) return false;
 
     sLpInitialized = true;
     sLpDmaComplete = true;
@@ -299,9 +304,6 @@ static bool lpuart_arm_dma(const u8* src, u32 uart_count) {
     sLpDmaChannel->TCD->DLASTSGA = 0;
     sLpDmaChannel->TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ;
 
-    sLpDmaChannel->triggerAtHardwareEvent(lpuart_dmamux_tx_source(sLpPinInfo.lpuart_index));
-    sLpDmaChannel->attachInterrupt(lpuart_dma_isr);
-
     sLpDmaChannel->enable();
     return true;
 }
@@ -310,36 +312,21 @@ bool lpuart_show_encoded(const u8* encoded, u32 num_uart_bytes) {
     if (!sLpInitialized || !sLpDmaChannel || !encoded || num_uart_bytes == 0) {
         return false;
     }
-    // DIAGNOSTIC: bypass DMA, do polled writes. If LPUART is configured
-    // correctly we'll see the bytes on the wire and the RX side will
-    // decode SOMETHING. If LPUART is dead, the polled writes will block
-    // on a never-asserted TDRE -- but we have a per-byte deadline.
+    lpuart_wait();
+    arm_dcache_flush_delete(const_cast<u8*>(encoded), num_uart_bytes);
+    bool ok = lpuart_arm_dma(encoded, num_uart_bytes);
+    if (!ok) return false;
+    // Block until DMA major-loop ISR fires, then wait for LPUART TC
+    // (transmit complete) so the final byte fully drains through the
+    // FIFO + shift register before we let the caller return.
+    lpuart_wait();
     IMXRT_LPUART_t* lp = lpuart_base(sLpPinInfo.lpuart_index);
-    if (!lp) return false;
-    Serial.printf("LPUART: polled tx n=%lu BAUD=0x%lx CTRL=0x%lx STAT=0x%lx\r\n",
-                  (unsigned long)num_uart_bytes,
-                  (unsigned long)lp->BAUD, (unsigned long)lp->CTRL,
-                  (unsigned long)lp->STAT);
-    const u32 start = micros();
-    for (u32 i = 0; i < num_uart_bytes; ++i) {
-        // Wait for TDRE (bit 23 of STAT) with bounded deadline.
-        const u32 byte_start = micros();
-        while ((lp->STAT & (1u << 23)) == 0) {
-            if ((u32)(micros() - byte_start) > 1000u) {
-                Serial.printf("LPUART: TDRE never asserted at byte %lu STAT=0x%lx\r\n",
-                              (unsigned long)i, (unsigned long)lp->STAT);
-                sLpDmaComplete = true;
-                return false;
-            }
+    if (lp) {
+        const u32 tc_start = micros();
+        while ((lp->STAT & (1u << 22)) == 0) {  // TC = bit 22
+            if ((u32)(micros() - tc_start) > 1000u) break;
         }
-        lp->DATA = encoded[i];
     }
-    // Wait for transmit complete.
-    while ((lp->STAT & (1u << 22)) == 0) {
-        if ((u32)(micros() - start) > 500000u) break;  // 500 ms
-    }
-    Serial.printf("LPUART: polled tx done %luus\r\n", (unsigned long)(micros() - start));
-    sLpDmaComplete = true;
     return true;
 }
 
