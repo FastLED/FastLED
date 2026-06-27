@@ -132,13 +132,20 @@ bool flush(u32 timeoutMs) FL_NO_EXCEPT {
     // indefinitely without a host (arduino-esp32 issue #7554). Returning
     // true is correct semantics: there is no drained-to-host invariant
     // we can establish without a host. See FastLED issue #2668.
-    if (!Serial) return true;
+    // Ride out Teensy 4 DTR debounce so a flush right after host re-open
+    // doesn't return early (same race as fl::print/fl::println above).
+    if (!waitForSerialReady_DtrSettle()) return true;
     Serial.flush();
     return true;
 }
 
+// Detect whether the host has the USB-CDC port open. Honours the
+// Teensy 4 DTR debounce window so callers don't see a spurious "host
+// absent" reading during the first ~15ms after a DTR transition.
+// Note: this matches `Serial`'s eventual-consistency semantics --
+// callers that want a raw, no-wait check can `(bool)Serial` directly.
 bool serial_ready() FL_NO_EXCEPT {
-    return (bool)Serial;
+    return waitForSerialReady_DtrSettle();
 }
 
 // Binary write function
