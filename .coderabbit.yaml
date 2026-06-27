@@ -6,6 +6,48 @@ reviews:
   # Per-path natural-language review instructions.
   # See https://docs.coderabbit.ai/getting-started/configure-coderabbit
   path_instructions:
+    - path: "src/fl/channels/bus.h"
+      instructions: |
+        Bus enum additions and parallel-IO peripheral driver rule. Flag any
+        PR that adds a new `Bus::X_SPI` enum value (e.g. `Bus::FLEX_IO_SPI`,
+        `Bus::OBJECT_FLED_SPI`, `Bus::PARLIO_SPI`, `Bus::LCD_CAM_SPI`) for
+        a peripheral that already has a clockless `Bus::X` entry. The
+        FastLED rule is: parallel-IO peripherals MUST put their SPI mode
+        and clockless mode in the SAME ChannelEngine, returning
+        `Capabilities(true, true)` and routing per-channel in show()
+        based on `data->isSpi()` vs `data->isClockless()`. Forking the
+        Bus enum is the wrong shape — the peripheral is the dispatch
+        boundary, not the mode. Established 2026-06-27 from #3428.
+        Exception: genuinely separate peripherals (e.g. LPSPI vs I2S_SPI
+        on ESP32) are different silicon and CORRECTLY get separate Bus
+        entries. The exception covers different-peripheral-same-protocol,
+        not different-mode-same-peripheral.
+        Reference: `src/fl/channels/README.md` → "Rule: Parallel-IO
+        peripherals — one engine for both clockless and SPI modes" and
+        `agents/docs/cpp-standards.md` → "Parallel-IO Driver: Unified
+        Clockless + SPI Engine".
+    - path: "src/platforms/**/drivers/**/channel_engine_*.{h,cpp.hpp}"
+      instructions: |
+        Channel engine implementation review. For any engine that wraps a
+        parallel-IO peripheral (FlexIO, ObjectFLED, ESP32 PARLIO, LCD_CAM,
+        I2S, etc.), verify:
+        - `getCapabilities()` returns `Capabilities(true, true)` if the
+          peripheral can natively do both clockless WS281x AND clocked SPI
+          chipsets. Returning `Capabilities(true, false)` for a peripheral
+          that CAN do SPI is a missed opportunity that future maintainers
+          will revisit — flag it.
+        - `canHandle()` accepts both `data->isClockless()` and `data->isSpi()`
+          for capable peripherals, gated by the per-mode pin / timing
+          routability check.
+        - `show()` routes per-channel between clockless and SPI paths.
+          Mode changes between consecutive channels reconfigure the
+          peripheral (shifter / timer / DMA TCD) — do NOT silently drop
+          channels of the unsupported mode.
+        - Do NOT create a separate `ChannelEngineXxxSPI` class that
+          wraps the same peripheral as `ChannelEngineXxx`. One engine
+          per peripheral; mode chosen at show-time.
+        Reference: `src/fl/channels/README.md` → "Rule: Parallel-IO
+        peripherals — one engine for both clockless and SPI modes".
     - path: "src/platforms/*.impl.cpp.hpp"
       instructions: |
         FastLED platform dispatch file. Verify:
