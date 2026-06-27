@@ -123,10 +123,6 @@ void ChannelEngineLPUART::show() FL_NO_EXCEPT {
 
     for (auto& ch : mTransmittingChannels) ch->setInUse(false);
     mTransmittingChannels.clear();
-    // Yield to the USB-CDC stack so RPC responses can flush. Empirically
-    // the autoresearch RPC pipeline stalls if the firmware never yields
-    // between LPUART shows -- the test framework's pattern handoff,
-    // RX wait, and result reporting all need the USB serial to drain.
     yield();
 }
 
@@ -134,8 +130,7 @@ IChannelDriver::DriverState ChannelEngineLPUART::poll() FL_NO_EXCEPT {
     if (!mTransmittingChannels.empty()) {
         // show() is fully blocking inside the real LPUART driver
         // (DMA major-loop ISR + LPUART STAT.TC wait), so by the time
-        // any external poll() runs, the transmission is complete.
-        // Clear and report READY.
+        // any external poll() runs, transmission is complete.
         for (auto& ch : mTransmittingChannels) ch->setInUse(false);
         mTransmittingChannels.clear();
     }

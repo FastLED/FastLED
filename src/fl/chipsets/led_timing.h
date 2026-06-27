@@ -164,10 +164,7 @@ struct TIMING_WS2812B_MINI_V3 {
         T1 = FASTLED_WS2812B_V5_T1,
         T2 = FASTLED_WS2812B_V5_T2,
         T3 = FASTLED_WS2812B_V5_T3,
-        // WS2812B-V5 reset/latch time per datasheet: 150 us minimum.
-        // (Earlier value 280 us was a conservative carry-over from older
-        // WS2812 variants; the V5 spec is tighter.)
-        RESET = 150
+        RESET = 280   // WS2812B-V5 reset/latch time per datasheet
     };
 };
 

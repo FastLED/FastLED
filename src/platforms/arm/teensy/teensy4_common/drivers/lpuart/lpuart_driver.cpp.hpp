@@ -69,18 +69,21 @@ static constexpr u32 kSelectInputLpuart6Tx = 0x154;
 static constexpr u32 kSelectInputLpuart7Tx = 0x15C;
 static constexpr u32 kSelectInputLpuart8Tx = 0x164;
 
-// Per-pin select_input_value taken from Teensyduino HardwareSerial*.cpp
-// where each Serial port's `hardware_t` records `{pin, mux_val,
-// select_input_register, select_input_value}` (the 4-tuple, last field).
+// Per-pin entries audited against Teensyduino HardwareSerial*.cpp
+// (`UARTn_Hardware` struct's `{pin, mux_val, select_input_register,
+// select_input_value}` 4-tuple) and the IOMUXC_SW_MUX_CTL_PAD_GPIO_*
+// offsets in imxrt.h. Each pad's PAD_CTL register lives at +0x1F0
+// from its MUX_CTL register (universal IOMUXC layout).
 static constexpr LpuartPinEntry kLpuartPins[] = {
-    // pin, LPUARTn, mux_offset, pad_offset, sel_input_offset, sel_input_value
-    { 1,  6, 0x0CC, 0x2BC, kSelectInputLpuart6Tx, 1},  // GPIO_AD_B0_12 (Serial1)
+    // pin, LPUARTn, mux_offset (PAD_GPIO_*), pad_offset (mux+0x1F0),
+    //                                       sel_input_offset, sel_input_value
+    { 1,  6, 0x0EC, 0x2DC, kSelectInputLpuart6Tx, 1},  // GPIO_AD_B0_12 (Serial1)
     { 8,  4, 0x17C, 0x36C, kSelectInputLpuart4Tx, 2},  // GPIO_B1_00    (Serial2 T4.0)
-    {14,  2, 0x0F0, 0x2E0, kSelectInputLpuart2Tx, 1},  // GPIO_AD_B1_02 (Serial3)
-    {17,  3, 0x0EC, 0x2DC, kSelectInputLpuart3Tx, 1},  // GPIO_AD_B1_07 (Serial4 T4.0)
-    {20,  8, 0x100, 0x2F0, kSelectInputLpuart8Tx, 2},  // GPIO_AD_B1_10 (Serial5)
-    {24,  1, 0x0B0, 0x2A0, 0,                     0},  // Serial6 LPUART1 (no SELECT_INPUT)
-    {29,  7, 0x048, 0x238, kSelectInputLpuart7Tx, 1},  // GPIO_EMC_31   (Serial7)
+    {14,  2, 0x104, 0x2F4, kSelectInputLpuart2Tx, 1},  // GPIO_AD_B1_02 (Serial3)
+    {17,  3, 0x114, 0x304, kSelectInputLpuart3Tx, 0},  // GPIO_AD_B1_06 (Serial4 T4.0)
+    {20,  8, 0x124, 0x314, kSelectInputLpuart8Tx, 1},  // GPIO_AD_B1_10 (Serial5)
+    {24,  1, 0x0F0, 0x2E0, 0,                     0},  // GPIO_AD_B0_13 (Serial6) LPUART1 fixed-route
+    {29,  7, 0x090, 0x280, kSelectInputLpuart7Tx, 1},  // GPIO_EMC_31   (Serial7)
 };
 static constexpr int kNumLpuartPins =
     sizeof(kLpuartPins) / sizeof(kLpuartPins[0]);
