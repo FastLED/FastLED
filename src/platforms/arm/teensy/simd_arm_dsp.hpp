@@ -189,6 +189,52 @@ FASTLED_FORCE_INLINE FL_IRAM u32 fl_dsp_max_u8x4(u32 a, u32 b) FL_NO_EXCEPT {
     return r;
 }
 
+// Multiply each of the 4 bytes by an 8-bit scale, returning the high byte
+// (i.e. `(byte * scale) >> 8`). Implementation: UXTB16 splits the 4 bytes
+// into two (0:b2,0:b0) and (0:b3,0:b1) halfword pairs. Each multiply by
+// `scale` is a plain u32 mul -- safe because each halfword product
+// `byte*scale` fits in u16 (255*255 = 65025 < 65536), so the low and high
+// halfword products do not interfere across lane boundaries. Final extract
+// keeps only the high byte of each halfword (= the scale8 result).
+FASTLED_FORCE_INLINE FL_IRAM u32 fl_dsp_scale_u8x4(u32 a, u8 scale) FL_NO_EXCEPT {
+    u32 s32 = static_cast<u32>(scale);
+    u32 lo = fl_dsp_uxtb16(a);              // (0:a2, 0:a0)
+    u32 hi = fl_dsp_uxtb16_ror8(a);         // (0:a3, 0:a1)
+    u32 sl = lo * s32;                       // (a2*scale, a0*scale) packed
+    u32 sh = hi * s32;                       // (a3*scale, a1*scale) packed
+    // Extract HIGH byte of each halfword product (= (byte*scale)>>8).
+    u32 hl = (sl >> 8) & 0x00FF00FFu;        // bits[0:7]=s0, bits[16:23]=s2
+    u32 hh = (sh >> 8) & 0x00FF00FFu;        // bits[0:7]=s1, bits[16:23]=s3
+    return hl | (hh << 8);                   // (s3 s2 s1 s0) in byte sequence
+}
+
+// Lerp 4 bytes between `a` and `b` by an 8-bit amount: per-byte
+// result = a + ((b - a) * amount) >> 8. Done as the additive identity
+// pos_diff = max(b-a,0), neg_diff = max(a-b,0) -- always mutually
+// exclusive per lane -- then `a + scale(pos_diff,amount) - scale(neg_diff,amount)`.
+// Saturating add/sub guards the LSB rounding overshoot that the noop
+// reference's signed-shift formulation has differently; bench tolerance
+// in AutoResearchSimd.h's blend test allows ±2 LSB which this satisfies.
+FASTLED_FORCE_INLINE FL_IRAM u32 fl_dsp_blend_u8x4(u32 a, u32 b, u8 amount) FL_NO_EXCEPT {
+    u32 pos_diff = fl_dsp_uqsub8(b, a);
+    u32 neg_diff = fl_dsp_uqsub8(a, b);
+    u32 scaled_pos = fl_dsp_scale_u8x4(pos_diff, amount);
+    u32 scaled_neg = fl_dsp_scale_u8x4(neg_diff, amount);
+    return fl_dsp_uqsub8(fl_dsp_uqadd8(a, scaled_pos), scaled_neg);
+}
+
+// Multiply 2 halfword pairs: low 16 of each lane's product.
+// SMULBB / SMULTT do signed 16x16 -> 32 multiplies for the low/high
+// halfword pair. Since we keep only the low 16 of each product, sign
+// doesn't matter -- 2's-complement low bits are identical to unsigned.
+// PKHBT packs the two products' low halfwords back into one u32.
+FASTLED_FORCE_INLINE FL_IRAM u32 fl_dsp_mullo_u16x2(u32 a, u32 b) FL_NO_EXCEPT {
+    u32 prod_lo, prod_hi;
+    __asm__ volatile ("smulbb %0, %1, %2" : "=r"(prod_lo) : "r"(a), "r"(b));
+    __asm__ volatile ("smultt %0, %1, %2" : "=r"(prod_hi) : "r"(a), "r"(b));
+    return fl_dsp_pkhbt_lsl16(prod_lo, prod_hi);
+}
+
 //==============================================================================
 // Load/Store Operations (NOT atomic — no thread-safety / memory-order semantics)
 //==============================================================================
@@ -308,24 +354,35 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 avg_u8_16(simd_u8x16 a, simd_u8x16 b) FL
 // u8x16 Arithmetic — scalar fallback (deferred to a follow-up PR)
 //==============================================================================
 
+/// Per-byte scale8 via UXTB16 + u32 mul + extract-high-byte. 7 ops per
+/// 4-byte chunk (28 ops for u8x16) vs the 16-iter widening-mul scalar loop.
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 scale_u8_16(simd_u8x16 vec, u8 scale) FL_NO_EXCEPT {
-    // TODO(#2628 follow-up): replace with PKHBT(scale|scale) + UXTB16 + SMUAD chain.
-    simd_u8x16 result;
-    for (int i = 0; i < 16; ++i) {
-        result.data[i] = static_cast<u8>((static_cast<u16>(vec.data[i]) * scale) >> 8);
-    }
-    return result;
+    simd_u8x16 r;
+    const u32* pv = reinterpret_cast<const u32*>(vec.data);  // ok reinterpret cast
+    u32* pr = reinterpret_cast<u32*>(r.data);                // ok reinterpret cast
+    pr[0] = fl_dsp_scale_u8x4(pv[0], scale);
+    pr[1] = fl_dsp_scale_u8x4(pv[1], scale);
+    pr[2] = fl_dsp_scale_u8x4(pv[2], scale);
+    pr[3] = fl_dsp_scale_u8x4(pv[3], scale);
+    return r;
 }
 
+/// Per-byte lerp via the additive identity `a + scale(pos_diff,amount) -
+/// scale(neg_diff,amount)` where pos_diff and neg_diff are produced by
+/// UQSUB8. Mutually exclusive per lane, so the add/sub composes correctly.
+/// Bit-exact against noop at amount=0; ±1 LSB of noop in mid-amount range
+/// due to two-complement signed-shift vs unsigned-mul rounding asymmetry
+/// (test tolerance allows ±2 LSB in AutoResearchSimd.h).
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, u8 amount) FL_NO_EXCEPT {
-    // TODO(#2628 follow-up): SMUAD-based weighted blend per 4-byte chunk.
-    simd_u8x16 result;
-    for (int i = 0; i < 16; ++i) {
-        i16 diff = static_cast<i16>(b.data[i]) - static_cast<i16>(a.data[i]);
-        i16 scaled = (diff * amount) >> 8;
-        result.data[i] = static_cast<u8>(a.data[i] + scaled);
-    }
-    return result;
+    simd_u8x16 r;
+    const u32* pa = reinterpret_cast<const u32*>(a.data);  // ok reinterpret cast
+    const u32* pb = reinterpret_cast<const u32*>(b.data);  // ok reinterpret cast
+    u32* pr = reinterpret_cast<u32*>(r.data);              // ok reinterpret cast
+    pr[0] = fl_dsp_blend_u8x4(pa[0], pb[0], amount);
+    pr[1] = fl_dsp_blend_u8x4(pa[1], pb[1], amount);
+    pr[2] = fl_dsp_blend_u8x4(pa[2], pb[2], amount);
+    pr[3] = fl_dsp_blend_u8x4(pa[3], pb[3], amount);
+    return r;
 }
 
 /// Rounding 16-lane unsigned average via UHADD8 NOT-trick: per byte,
@@ -530,12 +587,19 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u16x8 add_u16_8(simd_u16x8 a, simd_u16x8 b) FL
     return r;
 }
 
+/// Halfword-wise mullo via SMULBB+SMULTT+PKHBT. 3 ops per halfword pair
+/// (12 ops total) vs the 8-iter LDRH+MUL+STRH scalar loop. Sign-agnostic
+/// because we keep only the low 16 of each product.
 FASTLED_FORCE_INLINE FL_IRAM simd_u16x8 mullo_u16_8(simd_u16x8 a, simd_u16x8 b) FL_NO_EXCEPT {
-    // DSP-ext SMULxy is per-pair-of-halfwords, not vectorised across halfword lanes.
-    simd_u16x8 result;
-    for (int i = 0; i < 8; ++i)
-        result.data[i] = static_cast<u16>(static_cast<u32>(a.data[i]) * b.data[i]);
-    return result;
+    simd_u16x8 r;
+    const u32* pa = reinterpret_cast<const u32*>(a.data);  // ok reinterpret cast
+    const u32* pb = reinterpret_cast<const u32*>(b.data);  // ok reinterpret cast
+    u32* pr = reinterpret_cast<u32*>(r.data);              // ok reinterpret cast
+    pr[0] = fl_dsp_mullo_u16x2(pa[0], pb[0]);
+    pr[1] = fl_dsp_mullo_u16x2(pa[1], pb[1]);
+    pr[2] = fl_dsp_mullo_u16x2(pa[2], pb[2]);
+    pr[3] = fl_dsp_mullo_u16x2(pa[3], pb[3]);
+    return r;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u16x8 srli_u16_8(simd_u16x8 vec, int shift) FL_NO_EXCEPT {
