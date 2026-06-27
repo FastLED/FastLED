@@ -41,6 +41,10 @@ namespace fl {
 struct LpuartPinEntry {
     u8 teensy_pin;
     u8 lpuart_index;
+    u8 mux_alt;             ///< IOMUXC ALT value to select LPUART TX
+                            ///  on this pad. Almost always 2; the
+                            ///  T4.1 LPUART5 TX (pin 35) is the lone
+                            ///  exception at ALT 1.
     u32 mux_reg_offset;
     u32 pad_reg_offset;
     // #3402-class IOMUXC DAISY: each LPUART TX peripheral's input
@@ -75,15 +79,27 @@ static constexpr u32 kSelectInputLpuart8Tx = 0x164;
 // offsets in imxrt.h. Each pad's PAD_CTL register lives at +0x1F0
 // from its MUX_CTL register (universal IOMUXC layout).
 static constexpr LpuartPinEntry kLpuartPins[] = {
-    // pin, LPUARTn, mux_offset (PAD_GPIO_*), pad_offset (mux+0x1F0),
-    //                                       sel_input_offset, sel_input_value
-    { 1,  6, 0x0EC, 0x2DC, kSelectInputLpuart6Tx, 1},  // GPIO_AD_B0_12 (Serial1)
-    { 8,  4, 0x17C, 0x36C, kSelectInputLpuart4Tx, 2},  // GPIO_B1_00    (Serial2 T4.0)
-    {14,  2, 0x104, 0x2F4, kSelectInputLpuart2Tx, 1},  // GPIO_AD_B1_02 (Serial3)
-    {17,  3, 0x114, 0x304, kSelectInputLpuart3Tx, 0},  // GPIO_AD_B1_06 (Serial4 T4.0)
-    {20,  8, 0x124, 0x314, kSelectInputLpuart8Tx, 1},  // GPIO_AD_B1_10 (Serial5)
-    {24,  1, 0x0F0, 0x2E0, 0,                     0},  // GPIO_AD_B0_13 (Serial6) LPUART1 fixed-route
-    {29,  7, 0x090, 0x280, kSelectInputLpuart7Tx, 1},  // GPIO_EMC_31   (Serial7)
+    // pin, LPUARTn, alt, mux_offset (PAD_GPIO_*), pad_offset (mux+0x1F0),
+    //                                            sel_input_offset, sel_input_value
+    //
+    // T4.0 / T4.1 shared entries (top header rows). Verified against
+    // Teensyduino HardwareSerial[1-7].cpp UARTn_Hardware structs.
+    { 1,  6, 2, 0x0EC, 0x2DC, kSelectInputLpuart6Tx, 1},  // GPIO_AD_B0_12 (Serial1)
+    { 8,  4, 2, 0x17C, 0x36C, kSelectInputLpuart4Tx, 2},  // GPIO_B1_00    (Serial2)
+    {14,  2, 2, 0x104, 0x2F4, kSelectInputLpuart2Tx, 1},  // GPIO_AD_B1_02 (Serial3)
+    {17,  3, 2, 0x114, 0x304, kSelectInputLpuart3Tx, 0},  // GPIO_AD_B1_06 (Serial4)
+    {20,  8, 2, 0x124, 0x314, kSelectInputLpuart8Tx, 1},  // GPIO_AD_B1_10 (Serial5)
+    {24,  1, 2, 0x0F0, 0x2E0, 0,                     0},  // GPIO_AD_B0_13 (Serial6) LPUART1 fixed-route
+    {29,  7, 2, 0x090, 0x280, kSelectInputLpuart7Tx, 1},  // GPIO_EMC_31   (Serial7)
+#if defined(ARDUINO_TEENSY41)
+    // T4.1-only entries (bottom SD pad row + B1 pad row). Verified
+    // against Teensyduino HardwareSerial[5,8].cpp T4.1 alt tuples
+    // (the second per-port `{pin, mux_val, sel_input_reg, val}`
+    // tuple). Pin 53 is also LPUART6 ALT2; LPUART8 ALT2 is pin 47.
+    {35,  5, 1, 0x1AC, 0x39C, kSelectInputLpuart5Tx, 1},  // GPIO_B1_12    (Serial8 T4.1)
+    {47,  8, 2, 0x1CC, 0x3BC, kSelectInputLpuart8Tx, 0},  // GPIO_SD_B0_04 (Serial5 alt T4.1)
+    {53,  6, 2, 0x078, 0x268, kSelectInputLpuart6Tx, 0},  // GPIO_EMC_25   (Serial1 alt T4.1)
+#endif
 };
 static constexpr int kNumLpuartPins =
     sizeof(kLpuartPins) / sizeof(kLpuartPins[0]);
@@ -93,7 +109,7 @@ bool lpuart_lookup_pin(u8 teensy_pin, LpuartPinInfo* info) {
         if (kLpuartPins[i].teensy_pin == teensy_pin) {
             info->teensy_pin = teensy_pin;
             info->lpuart_index = kLpuartPins[i].lpuart_index;
-            info->mux_alt = 2;
+            info->mux_alt = kLpuartPins[i].mux_alt;
             info->mux_reg = (volatile u32*)(kLpuartIomuxcBase + kLpuartPins[i].mux_reg_offset);
             info->pad_reg = (volatile u32*)(kLpuartIomuxcBase + kLpuartPins[i].pad_reg_offset);
             // IOMUXC_b lives at IOMUXC_BASE + 0x400. select_input_offset
