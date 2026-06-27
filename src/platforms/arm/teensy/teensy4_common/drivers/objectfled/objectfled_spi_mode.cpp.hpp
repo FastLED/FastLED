@@ -268,18 +268,28 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
     // trigger for our use case of "fire DMA on each PWM tick so we can
     // write to an arbitrary GPIO".
     //
-    // The architecturally-correct path forward is to use a different
-    // timing source whose compare event has a generic DMA request:
-    //   * QTimer1/2/3 with DMAMUX_SOURCE_QTIMER{1,2,3}_WRITE0_CMPLD1
-    //     (QTimer4 is taken by ObjectFLED clockless mode).
-    //   * Or XBAR routing of a FlexPWM compare event to a DMA line.
+    // The architecturally-correct path forward is to use a QTimer
+    // compare event routed through XBAR to a DMA request line, mirroring
+    // the working clockless setup at OjectFLED.cpp.hpp:305-335:
+    //   1. Configure QTimer1 (or 2 or 3 -- QTimer4 is taken by clockless)
+    //      channel 0 in periodic count-and-compare mode with COMP1 set
+    //      to (F_BUS_ACTUAL / (2 * sclk_hz)).
+    //   2. Enable timer-compare-flag-1 interrupt enable (TMR_CSCTRL_TCF1EN).
+    //   3. Route via XBAR: xbar_connect(XBARA1_IN_QTIMER1_TIMER0,
+    //      XBARA1_OUT_DMA_CH_MUX_REQ95) -- 30/31/94 are taken by
+    //      clockless mode (see OjectFLED.cpp.hpp:333-335); 95 is free.
+    //   4. triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_3) on our SPI
+    //      DMA channel (XBAR1_3 corresponds to DMA_CH_MUX_REQ95).
+    //   5. Drop the FlexPWM2_SM0 programming entirely -- it was the
+    //      wrong primitive for "fire DMA on each tick".
+    //
+    // Bare DMAMUX_SOURCE_QTIMER1_WRITE0_CMPLD1 (= 52) is NOT a viable
+    // alternative -- that source fires on CPU/DMA *writes* to the
+    // CMPLD1 register, not on periodic compare events.
     //
     // Keep the gate OFF by default so users don't get phantom non-
-    // transmitting SPI behavior. The next debug session needs to
-    // either (a) re-design the DMA trigger via QTimer1/2/3, or
-    // (b) verify via scope that the VALDE-based design actually does
-    // fire DMA in some configuration we haven't tried (unlikely given
-    // the RM definition of VALDE).
+    // transmitting SPI behavior. The next debug session implements the
+    // QTimer1+XBAR path above and scope-verifies on bench.
 #ifndef FL_OBJECTFLED_SPI_HARDWARE_ENABLE
     (void)pin_info;
     (void)clock_hz;
