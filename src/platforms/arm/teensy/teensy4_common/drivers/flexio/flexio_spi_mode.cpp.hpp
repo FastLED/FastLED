@@ -235,8 +235,14 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
     // fall). SCLK frequency = flexio_clk / (2 * (div + 1)).
     // Solve: div = (flexio_clk / (2 * sclk)) - 1.
     // Field is 8 bits so clamp to [0, 255].
+    //
+    // Ceiling division (not floor) so actual SCLK never EXCEEDS the
+    // requested/clamped rate -- with floor, a 25 MHz request becomes
+    // div=1 and emits 120/(2*2)=30 MHz, breaking the 25 MHz upper clamp.
+    // Per coderabbitai review on PR #3431.
     // ------------------------------------------------------------------
-    u32 div_calc = (kFlexIO2BaseClockHz / (2u * clock_hz));
+    const u32 div_denom = 2u * clock_hz;
+    u32 div_calc = (kFlexIO2BaseClockHz + div_denom - 1u) / div_denom;
     if (div_calc == 0) div_calc = 1;
     u32 baud_div_field = div_calc - 1u;
     if (baud_div_field > 0xFFu) {

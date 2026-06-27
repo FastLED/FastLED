@@ -51,6 +51,11 @@ ChannelEngineFlexIO::~ChannelEngineFlexIO() {
     FL_LOG_FLEXIO_F("ChannelEngineFlexIO: destroyed");
 }
 
+// Moved out of the header per `src/**/*.h` header-discipline (CodeRabbit #3431).
+IChannelDriver::Capabilities ChannelEngineFlexIO::getCapabilities() const FL_NO_EXCEPT {
+    return Capabilities(true, true);
+}
+
 bool ChannelEngineFlexIO::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
     if (!data) {
         return false;
@@ -161,6 +166,13 @@ void ChannelEngineFlexIO::show() FL_NO_EXCEPT {
                 }
 #endif
                 mPeripheral->deinit();
+                // Reset cached state immediately after deinit so any later
+                // `continue` (e.g. pin invalid, init failure) doesn't leave
+                // mHwInitialized/mCurrentMode advertising a torn-down config.
+                // Per coderabbitai review on PR #3431.
+                mHwInitialized = false;
+                mCurrentMode = Mode::Uninitialized;
+                mCurrentPin = 0xFF;
 
                 if (!mPeripheral->canHandlePin(pin)) {
                     FL_LOG_FLEXIO_F("ChannelEngineFlexIO: Pin %s not FlexIO2-capable", (int)pin);
@@ -220,6 +232,15 @@ void ChannelEngineFlexIO::show() FL_NO_EXCEPT {
                     mPeripheral->deinit();
                 }
                 flexio_spi_deinit();
+                // Reset cached state immediately after deinit so any later
+                // `continue` (e.g. pin lookup fails, init fails) doesn't
+                // leave mHwInitialized/mCurrentMode advertising a torn-down
+                // config. Per coderabbitai review on PR #3431.
+                mHwInitialized = false;
+                mCurrentMode = Mode::Uninitialized;
+                mCurrentSpiMosi = 0xFF;
+                mCurrentSpiSclk = 0xFF;
+                mCurrentSpiClockHz = 0;
 
                 FlexIOSPIPinInfo info;
                 if (!flexio_spi_lookup_pins(mosi, sclk, &info)) {
