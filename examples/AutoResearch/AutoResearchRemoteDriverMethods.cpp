@@ -44,6 +44,11 @@
 #include "fl/channels/config.h"
 #include <Arduino.h>
 
+// #3428: ObjectFLED DMA-bit-banged SPI mode bring-up smoke test
+// (`objectfledSpiSelfTest` RPC). Header is Teensy 4.x-gated but the
+// `#include` is safe on any platform.
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_spi_mode.h"
+
 #include "fl/net/ble.h"
 
 #include "fl/codec/h264.h"
@@ -632,6 +637,136 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         }
         response.set("iter_ms", iter_ms_arr);
         return response;
+    });
+
+    // Register "objectfledSpiSelfTest" — #3428 bring-up smoke test for the
+    // ObjectFLED DMA-bit-banged SPI master mode. Exercises the full
+    // lookup → init → show → wait → deinit path on a user-specified
+    // (MOSI, SCLK) pin pair (both must be on GPIO6) with a known byte
+    // pattern, reports back per-stage success + echoed args.
+    //
+    // Args (positional, all optional):
+    //   { "mosi_pin":  int = 14,   // GPIO6 bit 18 on T4.1
+    //     "sclk_pin":  int = 15,   // GPIO6 bit 19 on T4.1
+    //     "clock_hz":  int = 1000000,
+    //     "num_bytes": int = 4 }
+    //
+    // Returns:
+    //   { success, mosi_pin, sclk_pin, clock_hz, num_bytes,
+    //     lookup_ok, init_ok, show_ok, wait_ms,
+    //     mosi_bit, sclk_bit }
+    //
+    // Teensy 4.x-only.
+    remote.bind("objectfledSpiSelfTest", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+#if !defined(FL_IS_TEENSY_4X)
+        (void)args;
+        response.set("success", false);
+        response.set("error", "PlatformNotSupported");
+        response.set("message",
+                     "objectfledSpiSelfTest is Teensy 4.x-only (FlexPWM2 + eDMA + GPIO6).");
+        return response;
+#else
+        // Parse args. The RPC framework strips the outer params array
+        // and passes params[0] directly as `args`, so `args` is an OBJECT
+        // here (NOT an array -- some existing bindings have the wrong
+        // is_array() check; pre-existing bug, fix tracked separately).
+        int mosi_pin = 14;        // GPIO6 bit 18 on T4.1 (and T4.0)
+        int sclk_pin = 15;        // GPIO6 bit 19
+        int clock_hz = 1000000;   // 1 MHz -- safe for bring-up
+        int num_bytes = 4;
+        if (args.is_object()) {
+            const fl::json& cfg = args;
+            if (cfg.contains("mosi_pin") && cfg["mosi_pin"].is_int()) {
+                mosi_pin = static_cast<int>(cfg["mosi_pin"].as_int().value());
+            }
+            if (cfg.contains("sclk_pin") && cfg["sclk_pin"].is_int()) {
+                sclk_pin = static_cast<int>(cfg["sclk_pin"].as_int().value());
+            }
+            if (cfg.contains("clock_hz") && cfg["clock_hz"].is_int()) {
+                clock_hz = static_cast<int>(cfg["clock_hz"].as_int().value());
+            }
+            if (cfg.contains("num_bytes") && cfg["num_bytes"].is_int()) {
+                num_bytes = static_cast<int>(cfg["num_bytes"].as_int().value());
+            }
+        }
+
+        response.set("mosi_pin", mosi_pin);
+        response.set("sclk_pin", sclk_pin);
+        response.set("clock_hz", static_cast<int64_t>(clock_hz));
+        response.set("num_bytes", num_bytes);
+
+        if (num_bytes <= 0 || num_bytes > 64) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "num_bytes must be in [1, 64].");
+            return response;
+        }
+
+        // 1. Pin-pair lookup.
+        fl::ObjectFLEDSPIPinInfo pin_info{};
+        bool lookup_ok = fl::objectfled_spi_lookup_pins(
+            static_cast<fl::u8>(mosi_pin),
+            static_cast<fl::u8>(sclk_pin),
+            &pin_info);
+        response.set("lookup_ok", lookup_ok);
+        if (!lookup_ok) {
+            response.set("success", false);
+            response.set("error", "PinNotRoutable");
+            response.set("message",
+                         "(MOSI, SCLK) pair is not on GPIO6 or otherwise invalid; "
+                         "both pins must be GPIO6-resident (T4.x: 0, 1, 14-27, "
+                         "T4.1 adds 38-41).");
+            return response;
+        }
+        response.set("mosi_bit", static_cast<int64_t>(pin_info.mosi_bit));
+        response.set("sclk_bit", static_cast<int64_t>(pin_info.sclk_bit));
+
+        // 2. Init.
+        bool init_ok = fl::objectfled_spi_init(pin_info,
+                                                static_cast<fl::u32>(clock_hz));
+        response.set("init_ok", init_ok);
+        if (!init_ok) {
+            response.set("success", false);
+            response.set("error", "InitFailed");
+            response.set("message", "objectfled_spi_init returned false.");
+            return response;
+        }
+
+        // 3. Send a known pattern.
+        fl::u8 buffer[64] = {0};
+        for (int i = 0; i < num_bytes; ++i) {
+            switch (i % 4) {
+                case 0: buffer[i] = 0xA5; break;
+                case 1: buffer[i] = 0x5A; break;
+                case 2: buffer[i] = 0xFF; break;
+                case 3: buffer[i] = 0x00; break;
+            }
+        }
+
+        const fl::u32 show_start_ms = millis();
+        bool show_ok = fl::objectfled_spi_show(buffer,
+                                                static_cast<fl::u32>(num_bytes));
+        response.set("show_ok", show_ok);
+        if (!show_ok) {
+            fl::objectfled_spi_deinit();
+            response.set("success", false);
+            response.set("error", "ShowFailed");
+            response.set("message", "objectfled_spi_show returned false.");
+            return response;
+        }
+
+        // 4. Wait for completion.
+        fl::objectfled_spi_wait();
+        const fl::u32 wait_ms = millis() - show_start_ms;
+        response.set("wait_ms", static_cast<int64_t>(wait_ms));
+
+        // 5. Tear down.
+        fl::objectfled_spi_deinit();
+
+        response.set("success", true);
+        return response;
+#endif
     });
 }
 

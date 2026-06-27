@@ -10,6 +10,8 @@
 // DMA manager's acquire() blocks). This is by design but worth noting
 // for users who yield to other code in their show() loop.
 
+#include "platforms/arm/teensy/is_teensy.h"
+
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/channel_engine_objectfled.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/iobjectfled_peripheral.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_spi_mode.h"
@@ -99,15 +101,20 @@ bool ChannelEngineObjectFLED::canHandle(const ChannelDataPtr& data) const FL_NO_
         return period >= kMinPeriodNs && period <= kMaxPeriodNs;
     }
 
-#if defined(FL_IS_TEENSY_4X)
+#if defined(FL_IS_TEENSY_4X) && defined(FL_OBJECTFLED_SPI_HARDWARE_ENABLE)
     if (data->isSpi()) {
         // #3428: SPI-mode dispatch on the SAME peripheral (unified engine).
-        // The (MOSI, SCLK) pin pair must both live on the DMA-able GPIO
-        // bank used by ObjectFLED (so one DMA write to GPIOx_DR can flip
-        // both bits together). The pin-pair table is stubbed today
-        // (always returns false); the real lookup lands with the SPI
-        // hardware impl in a follow-up PR, at which point this branch
-        // starts claiming SPI channels.
+        // The (MOSI, SCLK) pin pair must both be GPIO6-resident (so one
+        // DMA write to GPIO6_DR can flip both bits together).
+        //
+        // This branch is gated by FL_OBJECTFLED_SPI_HARDWARE_ENABLE -- the
+        // ObjectFLED-SPI hardware bring-up is incomplete (the FlexPWM2
+        // register sequence hard-faults on first show; needs scope debug).
+        // Until then, canHandle returns false for SPI and channels fall
+        // through to the next bus (e.g. FlexIO-SPI from PR #3431, or a
+        // user-explicit LPSPI selection). The architectural slot is in
+        // place via getCapabilities()+BusSupports so flipping the flag is
+        // a one-line enable once bring-up is verified.
         const auto* spi = data->getChipset().ptr<SpiChipsetConfig>();
         if (!spi || spi->dataPin < 0 || spi->clockPin < 0) {
             return false;
