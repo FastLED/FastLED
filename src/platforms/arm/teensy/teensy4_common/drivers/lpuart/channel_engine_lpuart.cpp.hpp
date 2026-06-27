@@ -133,7 +133,7 @@ void ChannelEngineLPUART::show() FL_NO_EXCEPT {
         const u32 encoded_bytes = raw_bytes * 4u;
         const u32 max_raw_safe = (encoded_bytes < dst_size ? encoded_bytes : dst_size) / 4u;
         for (u32 i = 0; i < max_raw_safe; ++i) {
-            lpuart_encode_byte(data.data()[i], &dst[i * 4u]);
+            lpuart_encode_byte(data.data()[i], fl::span<u8, 4>{&dst[i * 4u], 4});
         }
 
         mInstance->show();  // blocking inside the real driver
@@ -155,10 +155,11 @@ IChannelDriver::DriverState ChannelEngineLPUART::poll() FL_NO_EXCEPT {
     return DriverState::READY;
 }
 
-// CodeRabbit: move BusTraits<Bus::LPUART>::instancePtr() out of the
-// header. Static storage lives here in the TU.
+// CodeRabbit: move BusTraits<Bus::UART>::instancePtr() out of the
+// header. Static storage lives here in the TU. Bus::LPUART resolves
+// to the same singleton via the trait alias in bus_traits.h.
 #if defined(FL_IS_TEENSY_4X)
-fl::shared_ptr<ChannelEngineLPUART> BusTraits<Bus::LPUART>::instancePtr() FL_NO_EXCEPT {
+fl::shared_ptr<ChannelEngineLPUART> BusTraits<Bus::UART>::instancePtr() FL_NO_EXCEPT {
     static fl::shared_ptr<ChannelEngineLPUART> gHolder =
         fl::make_shared<ChannelEngineLPUART>();
     return gHolder;

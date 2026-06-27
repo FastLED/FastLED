@@ -25,6 +25,12 @@ inline void enableAllChannelDrivers() FL_NO_EXCEPT {
 #if defined(FL_IS_TEENSY_4X)
         , fl::Bus::FLEX_IO
         , fl::Bus::OBJECT_FLED
+        // Bus::UART is the cross-platform clockless-via-UART name --
+        // sketches that want portability use Bus::UART, and on
+        // Teensy 4.x it routes to ChannelEngineLPUART. Bus::LPUART
+        // is registered as an alias for the same engine instance so
+        // code that names the hardware directly still works.
+        , fl::Bus::UART
         , fl::Bus::LPUART
 #endif
     >();

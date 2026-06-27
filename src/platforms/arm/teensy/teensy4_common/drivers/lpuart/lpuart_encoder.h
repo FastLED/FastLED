@@ -30,6 +30,7 @@
 #pragma once
 
 #include "fl/stl/stdint.h"
+#include "fl/stl/span.h"
 
 namespace fl {
 
@@ -40,8 +41,17 @@ inline u8 lpuart_pair_to_byte(u8 pair) {
     return kTable[pair & 0x3];
 }
 
-/// @brief Encode one raw WS2812 byte into 4 UART bytes (MSB-first).
-inline void lpuart_encode_byte(u8 b, u8* out4) {
+/// @brief Encode one raw WS2812 byte into a 4-byte UART output (MSB-first).
+///
+/// Per user feedback: enforce the 4-byte-output contract at the type
+/// level via `fl::span<u8, 4>` (fixed-extent span). A raw `u8*` would
+/// have silently accepted shorter buffers and caused out-of-bounds
+/// writes; the static-extent span is checked at construction.
+///
+/// Call sites that index into a larger DMA buffer construct the span
+/// with `fl::span<u8, 4>{&buf[i*4], 4}` -- see `lpuart_driver.cpp.hpp`
+/// and `channel_engine_lpuart.cpp.hpp` for the standard usage.
+inline void lpuart_encode_byte(u8 b, fl::span<u8, 4> out4) {
     out4[0] = lpuart_pair_to_byte((b >> 6) & 0x3);  // bits 7,6
     out4[1] = lpuart_pair_to_byte((b >> 4) & 0x3);  // bits 5,4
     out4[2] = lpuart_pair_to_byte((b >> 2) & 0x3);  // bits 3,2

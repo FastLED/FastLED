@@ -358,15 +358,19 @@ bool lpuart_show(const u8* pixel_data, u32 num_pixel_bytes) {
 
     lpuart_wait();
 
+    // CodeRabbit-flagged: reject oversize transfers instead of
+    // silently truncating. A partial frame with the caller believing
+    // the update succeeded would leave the tail LEDs stale and
+    // misreport success.
     if (num_pixel_bytes > kMaxRawBytes) {
-        FL_LOG_FLEXIO_F("LPUART: strip truncated -- requested %d bytes exceeds buffer cap %d (~341 RGB LEDs max). Tail LEDs will not update.",
+        FL_LOG_FLEXIO_F("LPUART: strip too large -- requested %d bytes exceeds buffer cap %d (~341 RGB LEDs max). Rejecting frame.",
                         (int)num_pixel_bytes, (int)kMaxRawBytes);
-        num_pixel_bytes = kMaxRawBytes;
+        return false;
     }
 
     // Encode raw WS2812 bytes -> 4 UART bytes each.
     for (u32 i = 0; i < num_pixel_bytes; ++i) {
-        lpuart_encode_byte(pixel_data[i], &sLpUartBuffer[i * 4u]);
+        lpuart_encode_byte(pixel_data[i], fl::span<u8, 4>{&sLpUartBuffer[i * 4u], 4});
     }
     const u32 uart_count = num_pixel_bytes * 4u;
     arm_dcache_flush_delete(sLpUartBuffer, uart_count);
