@@ -131,7 +131,9 @@ def main() -> int:
         print("[objectfled-spi-smoke] pyserial not installed; run `uv sync`")
         return 1
 
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    doc = __doc__ or ""
+    description = doc.splitlines()[0] if doc else ""
+    parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--port", default="COM20", help="Serial port (default COM20)")
     parser.add_argument("--baud", type=int, default=115200)
     args = parser.parse_args()
