@@ -33,6 +33,8 @@ Loopback setup:
 1. `fbuild build lpc845 --examples AutoResearch` flashes the consolidated `examples/AutoResearch/AutoResearch.ino` (its low-memory mode auto-engages on LPC8xx via `FL_PLATFORM_HAS_LARGE_MEMORY == 0`).
 2. Jumper TX pin → RX pin externally on the LPC845-BRK header (default: `P0_10` → `P0_11`).
 
+> **Pin discovery is on by default.** `bash autoresearch <board>` auto-sweeps the GPIO matrix for wired loopback pairs before running any driver test — no `--tx-pin`/`--rx-pin` flags required for the canonical fixture. Pass `--no-auto-discover-pins` to opt out (e.g. for known-bad wiring debug or CI determinism). Explicit `--tx-pin <N>`/`--rx-pin <N>` overrides keep working. See [#3296](https://github.com/FastLED/FastLED/issues/3296).
+
 What the harness asserts:
 
 - **`bash autoresearch lpc845brk --bring-up`** — `echo` RPC round-trips; FL_WARN literal reaches the host; proves Serial + JSON-RPC + log pipeline intact.
