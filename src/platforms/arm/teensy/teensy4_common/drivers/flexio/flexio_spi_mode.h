@@ -34,9 +34,11 @@ bool flexio_spi_lookup_pins(u8 mosi_pin, u8 sclk_pin, FlexIOSPIPinInfo* info) FL
 
 /// Initialize FlexIO2 in SPI master mode: shifter 0 = MOSI transmit,
 /// timer 0 = SCLK baud generator. Mode 0 (CPOL=0, CPHA=0), MSB-first,
-/// 8-bit byte beats. `clock_hz` is clamped to [100 kHz, 30 MHz] for
+/// 8-bit byte beats. `clock_hz` is clamped to [100 kHz, 25 MHz] for
 /// testing reliability per #3428 (FlexIO peripheral can do up to 45 MHz
-/// per lane but APA102 spec caps at 25-30 MHz).
+/// per lane but APA102 spec is 30 MHz max and we keep margin for cable
+/// + chipset variance). Below ~234 kHz the implementation clamps the
+/// baud divider to its 8-bit max and logs a warning instead of failing.
 bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info, u32 clock_hz) FL_NO_EXCEPT;
 
 /// Begin a DMA-driven transmit of `num_bytes` from `buffer`. Returns false
