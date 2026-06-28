@@ -158,168 +158,11 @@
 #include "fl/stl/cstring.h"
 #include "eorder.h"
 
-// Forward declarations for the CMSIS LPC845 peripheral struct types. When
-// the user's build pulls in <LPC845.h> via led_sysdefs_arm_lpc.h, the real
-// CMSIS definitions take precedence (their inclusion guard is the typedef
-// name, e.g. LPC_SCT_TYPE). The duplicates below exist only so that this
-// file still parses in build environments that have FASTLED_LPC_PWM_DMA set
-// but cannot locate <LPC845.h> on the include path (e.g. IDE introspection).
-// They are *not* full struct definitions; the driver only touches members
-// declared on the real CMSIS types, so on a real LPC845 build only the
-// member access paths exercised below need to exist in the CMSIS header.
-
-#if !defined(LPC_SCT_BASE)
-#define LPC_SCT_BASE  0x50004000UL
-#endif
-#if !defined(LPC_DMA_BASE)
-#define LPC_DMA_BASE  0x50008000UL
-#endif
-#if !defined(LPC_SYSCON_BASE)
-#define LPC_SYSCON_BASE 0x40048000UL
-#endif
-
-namespace fl {
-
-#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
-
-// Default base DMA channel; users can override at build time to avoid
-// collisions with other peripherals (USART/SPI/I2C also have DMA triggers
-// on LPC845 - UM11029 17.3.3 hardware trigger table).
-#ifndef FASTLED_LPC_PWM_DMA_BASECH
-#define FASTLED_LPC_PWM_DMA_BASECH 0
-#endif
-
-// Streaming chunk size in WS2812 bits per re-arm. Each chunk is
-// 3 * BUFFER_BITS * 4 bytes of working RAM (default 64 bits = 768 bytes).
-// Must be a multiple of 8 (one byte = 8 bits, encoder fills byte-at-a-time).
-#ifndef FASTLED_LPC_PWM_DMA_CHUNK_BITS
-#define FASTLED_LPC_PWM_DMA_CHUNK_BITS 64
-#endif
-
-// SCT match indices and counter reload event.
-// TODO(2842): verify SCT EVx assignment is unused by user code at build
-// time. UM11029 §16.6.21 (EVx_CTRL) controls which match triggers which
-// event; we use EV0/EV1/EV2 here.
-#define FASTLED_LPC_PWM_DMA_SCT_MATCH_RISE   0
-#define FASTLED_LPC_PWM_DMA_SCT_MATCH_T0FALL 1
-#define FASTLED_LPC_PWM_DMA_SCT_MATCH_T1FALL 2
-#define FASTLED_LPC_PWM_DMA_SCT_MATCH_END    3
-
-// Forward-declared peripheral struct shim. Only present when the real CMSIS
-// header has NOT defined LPC_SCT (its include guard). This lets the file
-// compile in environments where CMSIS isn't on the include path; users with
-// a real LPC845 toolchain include <LPC845.h> via led_sysdefs_arm_lpc.h and
-// the genuine struct wins.
-#if !defined(LPC_SCT) && !defined(LPC_SCT_TYPE_)
-// Arduino.h on the LPC8xx core defines INPUT / OUTPUT as preprocessor
-// macros for digitalRead/Write. The SCT register block uses identifiers
-// with the same names (INPUT at offset 0x048, OUTPUT at 0x054 per
-// UM11029 sec. 16.6); macro expansion would corrupt the struct fields.
-// Push the Arduino macros aside for the struct definition only;
-// downstream user code that calls pinMode(pin, OUTPUT) still works
-// because the macros get redefined at the bottom of this block.
-#pragma push_macro("INPUT")
-#pragma push_macro("OUTPUT")
-#undef INPUT
-#undef OUTPUT
-struct FL_LPC_SCT_Shim {
-    volatile u32 CONFIG;        // 0x000  config
-    volatile u32 CTRL;          // 0x004  control
-    volatile u32 LIMIT_L;       // 0x008
-    volatile u32 LIMIT_H;       // 0x00C
-    volatile u32 HALT_L;        // 0x010
-    volatile u32 HALT_H;        // 0x014
-    volatile u32 STOP_L;        // 0x018
-    volatile u32 STOP_H;        // 0x01C
-    volatile u32 START_L;       // 0x020
-    volatile u32 START_H;       // 0x024
-    volatile u32 _resv0[10];
-    volatile u32 COUNT_U;       // 0x040
-    volatile u32 STATE;         // 0x044
-    volatile u32 INPUT;         // 0x048
-    volatile u32 REGMODE_L;     // 0x04C
-    volatile u32 REGMODE_H;     // 0x050
-    volatile u32 OUTPUT;        // 0x054
-    volatile u32 OUTPUTDIRCTRL; // 0x058
-    volatile u32 RES;           // 0x05C
-    volatile u32 DMAREQ0;       // 0x060
-    volatile u32 DMAREQ1;       // 0x064
-    volatile u32 _resv1[35];
-    volatile u32 EVEN;          // 0x0F0  event enable
-    volatile u32 EVFLAG;        // 0x0F4
-    volatile u32 CONEN;         // 0x0F8
-    volatile u32 CONFLAG;       // 0x0FC
-    union {
-        volatile u32 U;
-        struct { volatile u16 L, H; };
-    } MATCH[8];                 // 0x100
-    volatile u32 _resv2[56];
-    union {
-        volatile u32 U;
-        struct { volatile u16 L, H; };
-    } MATCHREL[8];              // 0x200
-    volatile u32 _resv3[56];
-    struct {
-        volatile u32 STATE;     // 0x300, 0x308, ...
-        volatile u32 CTRL;      // 0x304, 0x30C, ...
-    } EV[8];
-};
-#pragma pop_macro("OUTPUT")
-#pragma pop_macro("INPUT")
-#define LPC_SCT ((FL_LPC_SCT_Shim*)LPC_SCT_BASE)
-#endif  // !LPC_SCT
-
-#if !defined(LPC_DMA) && !defined(LPC_DMA_TYPE_)
-struct FL_LPC_DMA_ChannelShim {
-    volatile u32 CFG;
-    volatile u32 CTLSTAT;
-    volatile u32 XFERCFG;
-    volatile u32 _resv;
-};
-struct FL_LPC_DMA_Shim {
-    volatile u32 CTRL;
-    volatile u32 INTSTAT;
-    volatile u32 SRAMBASE;
-    volatile u32 _resv0[5];
-    volatile u32 ENABLESET0;
-    volatile u32 _resv1;
-    volatile u32 ENABLECLR0;
-    volatile u32 _resv2;
-    volatile u32 ACTIVE0;
-    volatile u32 _resv3;
-    volatile u32 BUSY0;
-    volatile u32 _resv4;
-    volatile u32 ERRINT0;
-    volatile u32 _resv5;
-    volatile u32 INTENSET0;
-    volatile u32 _resv6;
-    volatile u32 INTENCLR0;
-    volatile u32 _resv7;
-    volatile u32 INTA0;
-    volatile u32 _resv8;
-    volatile u32 INTB0;
-    volatile u32 _resv9;
-    volatile u32 SETVALID0;
-    volatile u32 _resv10;
-    volatile u32 SETTRIG0;
-    volatile u32 _resv11;
-    volatile u32 ABORT0;
-    volatile u32 _resv12[225];
-    FL_LPC_DMA_ChannelShim CHANNEL[25];
-};
-#define LPC_DMA ((FL_LPC_DMA_Shim*)LPC_DMA_BASE)
-#endif  // !LPC_DMA
-
-#if !defined(LPC_SYSCON) && !defined(LPC_SYSCON_TYPE_)
-struct FL_LPC_SYSCON_Shim {
-    volatile u32 _resv0[16];
-    volatile u32 SYSAHBCLKCTRL0; // 0x040 (SCT bit 8, DMA bit 29)
-    volatile u32 SYSAHBCLKCTRL1; // 0x044
-    // TODO(2842): verify exact SYSAHBCLKCTRL0 bit positions against UM11029
-    // §4.6.13 (LPC845 has different layout vs LPC8N04).
-};
-#define LPC_SYSCON ((FL_LPC_SYSCON_Shim*)LPC_SYSCON_BASE)
-#endif
+// Peripheral access uses the canonical NXP CMSIS PAL types (SCT_Type,
+// DMA_Type, SYSCON_Type) and pointer macros (SCT0, DMA0, SYSCON). These
+// are brought in by led_sysdefs_arm_lpc.h which includes <LPC845.h>
+// from the toolchain (zackees/ArduinoCore-LPC8xx variants/lpc845/, after
+// PR #34 ships the full upstream NXP header). FastLED #3437.
 
 // SCT match counts derived from TIMING (nanoseconds) and F_CPU.
 // Formula: ticks = (ns * F_CPU + 5e8) / 1e9  (round-to-nearest).
@@ -376,7 +219,7 @@ public:
         // TODO(2842): verify SYSCON->SYSAHBCLKCTRL0 bit assignments against
         // UM11029 §4.6.13. SCT = bit 8 (per LPC8xx historical layout);
         // DMA = bit 29 (per LPC845 SDK clock_config.h).
-        LPC_SYSCON->SYSAHBCLKCTRL0 |= (1UL << 8) | (1UL << 29);
+        SYSCON->SYSAHBCLKCTRL0 |= (1UL << 8) | (1UL << 29);
 
         configureSct();
         configureDma();
@@ -515,64 +358,73 @@ private:
     void configureSct() FL_NO_EXCEPT {
         // CONFIG: UNIFY (bit 0) - one 32-bit counter; CLKMODE = SYS clock.
         // TODO(2842): verify CONFIG layout vs UM11029 §16.6.1.
-        LPC_SCT->CONFIG = 0x00000001UL;  // UNIFY
-        LPC_SCT->CTRL   = 0x00000004UL;  // HALT_L = 1 (paused while configuring)
+        SCT0->CONFIG = 0x00000001UL;  // UNIFY
+        SCT0->CTRL   = 0x00000004UL;  // HALT_L = 1 (paused while configuring)
 
-        LPC_SCT->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_RISE].U   = kT0Rise;
-        LPC_SCT->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_T0FALL].U = kT0Fall;
-        LPC_SCT->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_T1FALL].U = kT1Fall;
-        LPC_SCT->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_END].U    = kBitEnd;
-        LPC_SCT->MATCHREL[FASTLED_LPC_PWM_DMA_SCT_MATCH_RISE].U   = kT0Rise;
-        LPC_SCT->MATCHREL[FASTLED_LPC_PWM_DMA_SCT_MATCH_T0FALL].U = kT0Fall;
-        LPC_SCT->MATCHREL[FASTLED_LPC_PWM_DMA_SCT_MATCH_T1FALL].U = kT1Fall;
-        LPC_SCT->MATCHREL[FASTLED_LPC_PWM_DMA_SCT_MATCH_END].U    = kBitEnd;
+        SCT0->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_RISE]   = kT0Rise;
+        SCT0->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_T0FALL] = kT0Fall;
+        SCT0->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_T1FALL] = kT1Fall;
+        SCT0->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_END]    = kBitEnd;
+        SCT0->MATCHREL[FASTLED_LPC_PWM_DMA_SCT_MATCH_RISE]   = kT0Rise;
+        SCT0->MATCHREL[FASTLED_LPC_PWM_DMA_SCT_MATCH_T0FALL] = kT0Fall;
+        SCT0->MATCHREL[FASTLED_LPC_PWM_DMA_SCT_MATCH_T1FALL] = kT1Fall;
+        SCT0->MATCHREL[FASTLED_LPC_PWM_DMA_SCT_MATCH_END]    = kBitEnd;
 
         // Event 0/1/2/3: each tied to a MATCH register and active in state 0.
         // EVx_CTRL bits 0..3 = MATCHSEL, bit 12 = COMBMODE (MATCH only).
         // TODO(2842): verify EVx_CTRL bit layout vs UM11029 §16.6.21.
         for (u32 ev = 0; ev < 4; ++ev) {
-            LPC_SCT->EV[ev].STATE = 0x00000001UL;  // active in STATE 0
-            LPC_SCT->EV[ev].CTRL  = (ev & 0xF) |   // MATCHSEL = ev
+            SCT0->EV[ev].STATE = 0x00000001UL;  // active in STATE 0
+            SCT0->EV[ev].CTRL  = (ev & 0xF) |   // MATCHSEL = ev
                                     (0x1UL << 12);  // COMBMODE = MATCH
         }
 
         // Limit on event 3 (T_END) -> counter reloads.
-        LPC_SCT->LIMIT_L = (1UL << 3);
+        SCT0->LIMIT = (1UL << 3);
 
         // Route SCT events to DMA. UM11029 §17.3.3 DMA hardware trigger
         // matrix - SCT_DMA0/1 are SCT-driven trigger lines.
         // TODO(2842): verify SCT->DMAREQ0/1 vs UM11029 §16.6.18.
-        LPC_SCT->DMAREQ0 = (1UL << 0) | (1UL << 1) | (1UL << 2);
+        SCT0->DMAREQ0 = (1UL << 0) | (1UL << 1) | (1UL << 2);
 
         // Enable EV0..EV3.
-        LPC_SCT->EVEN = 0xFUL;
+        SCT0->EVEN = 0xFUL;
     }
 
     // Configure 3 DMA channels writing to GPIO SET[0]/CLR[0].
     // UM11029 §17.4 channel descriptor, §17.5 XFERCFG.
     void configureDma() FL_NO_EXCEPT {
         // Enable DMA.
-        LPC_DMA->CTRL = 1UL;
+        DMA0->CTRL = 1UL;
         // SRAMBASE points at the channel descriptor table - must be 256-byte
         // aligned. TODO(2842): allocate aligned descriptor block (static
         // alignas(256) array) and wire SRAMBASE here. v1 punts to the SDK
         // clock_config.h conventional address.
-        // LPC_DMA->SRAMBASE = (uint32_t)sDmaDescriptors;
+        // DMA0->SRAMBASE = (uint32_t)sDmaDescriptors;
 
         const u32 base = FASTLED_LPC_PWM_DMA_BASECH;
         for (u32 i = 0; i < 3; ++i) {
-            // CFG: HWTRIGEN=1, TRIGTYPE=edge, TRIGBURST=0, BURSTPOWER=0,
-            // CHPRIORITY=0. The trigger source is selected by the DMA-INMUX
-            // peripheral; UM11029 §17.6.1.
-            // TODO(2842): verify CFG bit positions vs UM11029 §17.6.2.
-            LPC_DMA->CHANNEL[base + i].CFG = (1UL << 0);  // HWTRIGEN
+            // Configuration register for DMA channel; UM11029 §17.6.1.
+            //     bit 0    PERIPHREQEN = 1 (Peripheral Request Enable for this channel.)
+            //     bit 1    HWTRIGEN = 1 (Hardware Triggering Enable for this channel.)
+            //     bit 4    TRIGPOL = 0 (Trigger Polarity: 0 = active high, 1 = active low.)
+            //     bit 5    TRIGTYPE = 0 (Trigger Type: 0 = edge, 1 = level.)
+            //     bit 6    TRIGBURST = 0 (Trigger Burst: 0 = single transfer, 1 = burst transfer.)
+            //     bit 8-11  BURSTPOWER = 0 (Burst Power: 0 = 1 transfer, 1 = 2 transfers, ..., 15 = 16 transfers)
+            //     bit 16-18 CHPRIORITY = 0 (Channel Priority: 0 = lowest, 15 = highest.)
+            // @phatpaul caught the missing PERIPHREQEN in FastLED #3349.
+            DMA0->CHANNEL[base + i].CFG =
+                (1UL << 0) |  // PERIPHREQEN = 1
+                (1UL << 1) |  // HWTRIGEN = 1
+                (0UL << 4) |  // TRIGPOL = 0
+                (0UL << 5);  // TRIGTYPE = 0
 
             // INMUX entry maps SCT match event -> channel i.
             // TODO(2842): set up DMA_ITRIG_INMUX[i] = SCT_DMA0_inmux_source.
         }
         // ENABLESET marks the channels as live; descriptors are armed by
         // SETVALID/SETTRIG at chunk start (startDmaChunk()).
-        LPC_DMA->ENABLESET0 |= (7UL << base);  // 3 contiguous channels
+        DMA0->COMMON[0].ENABLESET |= (7UL << base);  // 3 contiguous channels
     }
 
     // Arm one chunk: program each channel's source address to point at the
@@ -600,28 +452,28 @@ private:
             (0UL << 14);   // DSTINC = no
         const u32 count_field = ((chunk_bits - 1UL) & 0x3FFUL) << 16;
         for (u32 i = 0; i < 3; ++i) {
-            LPC_DMA->CHANNEL[base + i].XFERCFG = xfercfg_base | count_field;
+            DMA0->CHANNEL[base + i].XFERCFG = xfercfg_base | count_field;
         }
 
         // SETVALID flips the descriptor's VALIDPENDING -> VALID, arming the
         // channel for the next hardware trigger from the SCT.
-        LPC_DMA->SETVALID0 = (7UL << base);
+        DMA0->COMMON[0].SETVALID = (7UL << base);
 
         // Release the SCT HALT so the timer starts producing match events.
-        LPC_SCT->CTRL &= ~0x00000004UL;
+        SCT0->CTRL &= ~0x00000004UL;
     }
 
     void waitDmaChunk() FL_NO_EXCEPT {
         const u32 mask = (7UL << FASTLED_LPC_PWM_DMA_BASECH);
         // Spin until all three channels report ACTIVE=0 (transfer done).
-        while ((LPC_DMA->ACTIVE0 & mask) != 0) {
+        while ((DMA0->COMMON[0].ACTIVE & mask) != 0) {
             // CPU-free transmission goal: user-level code may run on the
             // outer task; this driver simply blocks at the FastLED.show()
             // boundary. TODO(2842): replace busy-wait with WFI + DMA done
             // IRQ once IRQ handler is wired.
         }
         // Halt SCT in preparation for the next chunk.
-        LPC_SCT->CTRL |= 0x00000004UL;
+        SCT0->CTRL |= 0x00000004UL;
     }
 };
 

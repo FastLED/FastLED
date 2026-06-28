@@ -47,29 +47,17 @@ namespace fl {
 /// CodeRabbit suggestion to split into `.impl.hpp` (PR #2872 review,
 /// tracked at #2875) does not apply for template-heavy headers.
 
+// Use the vendor CMSIS PAL SPI_Type from <LPC845.h> / <LPC804.h> (brought
+// in via led_sysdefs_arm_lpc.h). SPI0/SPI1 pointer macros and SPI0_BASE/
+// SPI1_BASE come from the vendor header. FL_LPC_SPI0_BASE / FL_LPC_SPI1_BASE
+// kept as aliases for backward compat with users that pass the base address
+// as the pSPIX template parameter.
 #ifndef FL_LPC_SPI0_BASE
-#define FL_LPC_SPI0_BASE 0x40058000UL
+#define FL_LPC_SPI0_BASE SPI0_BASE
 #endif
 #ifndef FL_LPC_SPI1_BASE
-#define FL_LPC_SPI1_BASE 0x4005C000UL
+#define FL_LPC_SPI1_BASE SPI1_BASE
 #endif
-
-/// Minimal LPC8xx SPI controller view used by the FastLED SPI driver.
-/// Mirrors the relevant subset of MCUXpresso CMSIS LPC_SPI_Type; when the
-/// device header is on the include path the real type is what links.
-typedef struct {
-    volatile u32 CFG;          // 0x000 SPI configuration
-    volatile u32 DLY;          // 0x004 Delay between frames
-    volatile u32 STAT;         // 0x008 Status (R/W1C on some bits)
-    volatile u32 INTENSET;     // 0x00C Interrupt enable set
-    volatile u32 INTENCLR;     // 0x010 Interrupt enable clear
-    volatile u32 RXDAT;        // 0x014 Receive data
-    volatile u32 TXDATCTL;     // 0x018 Transmit data with control
-    volatile u32 TXDAT;        // 0x01C Transmit data only
-    volatile u32 TXCTL;        // 0x020 Transmit control only
-    volatile u32 DIV;          // 0x024 Clock divider (12-bit)
-    volatile u32 INTSTAT;      // 0x028 Interrupt status
-} FL_LPC_SPI_Type;
 
 // SPI register bit definitions (UM11029)
 #define FL_LPC_SPI_CFG_ENABLE         (1u << 0)
@@ -115,12 +103,12 @@ template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER,
 class ARMHardwareSPIOutput {
     Selectable *mPSelect;
 
-    static inline FL_LPC_SPI_Type* spi_block() __attribute__((always_inline)) {
+    static inline SPI_Type* spi_block() __attribute__((always_inline)) {
         // C-style cast is the canonical embedded-register access pattern
         // (cf. clockless_arm_lpc_plu.h::reg32); the FastLED
         // reinterpret_cast linter explicitly allows C-style casts for MMIO
         // base addresses, where reinterpret_cast is otherwise flagged.
-        return (FL_LPC_SPI_Type*)(pSPIX);  // MMIO base address
+        return (SPI_Type*)(pSPIX);  // MMIO base address
     }
 
 public:
@@ -138,7 +126,7 @@ public:
         FastPin<_DATA_PIN>::setOutput();
         FastPin<_CLOCK_PIN>::setOutput();
 
-        FL_LPC_SPI_Type *spi = spi_block();
+        SPI_Type *spi = spi_block();
 
         // Disable before reconfig
         spi->CFG = 0;
@@ -181,7 +169,7 @@ public:
     template <u8 BIT>
     inline static void writeBit(u8 b) FL_NO_EXCEPT {
         wait();
-        FL_LPC_SPI_Type *spi = spi_block();
+        SPI_Type *spi = spi_block();
         // OR in RXIGNORE so this transmit doesn't clock data into RXDAT;
         // the driver never drains RXDAT, so otherwise repeated writeBit()
         // calls would accumulate RXOV. Matches writeByte() below.
@@ -193,7 +181,7 @@ public:
     /// fill; this primitive only writes the TX data register.
     static void writeByte(u8 b) __attribute__((always_inline)) {
         wait();
-        FL_LPC_SPI_Type *spi = spi_block();
+        SPI_Type *spi = spi_block();
         // TXDATCTL with LEN=7 (8-bit transfer) and RX ignored.
         spi->TXDATCTL = static_cast<u32>(b) | FL_LPC_SPI_TXCTL_LEN_8BIT |
                         FL_LPC_SPI_TXCTL_RXIGNORE;
