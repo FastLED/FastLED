@@ -15,6 +15,12 @@ enum class LegacyClocklessChipset : uint8_t {
     SK6812,
 };
 
+#if defined(FL_IS_TEENSY_4X)
+#define AUTORESEARCH_LEGACY_SUPPORTS_PIN_22 1
+#else
+#define AUTORESEARCH_LEGACY_SUPPORTS_PIN_22 0
+#endif
+
 inline const char* legacyClocklessChipsetName(LegacyClocklessChipset chipset) {
     switch (chipset) {
         case LegacyClocklessChipset::WS2812B:
@@ -45,8 +51,10 @@ inline bool legacyClocklessChipsetFromName(const fl::string& name,
 ///
 /// This proxy uses a switch statement to dispatch supported AutoResearch legacy
 /// pin and chipset values to the corresponding template instantiation, enabling
-/// testing of the full legacy code path. Pins 0-8 are historical coverage pins;
-/// pin 22 is the current Teensy ObjectFLED loopback TX pin.
+/// testing of the full legacy code path. Pins 0-8 are historical coverage pins.
+/// On Teensy 4.x, pin 22 is also included for the current ObjectFLED loopback
+/// wiring. Other platforms may mark pin 22 invalid at compile time, so avoid
+/// instantiating that template there.
 ///
 /// Destructor deletes the controller, which on ESP32 (SKETCH_HAS_LARGE_MEMORY)
 /// automatically calls removeFromDrawList() via ~CLEDController().
@@ -92,7 +100,9 @@ public:
             case 6: mController = create<6>(leds, numLeds, chipset, rgbw); break;
             case 7: mController = create<7>(leds, numLeds, chipset, rgbw); break;
             case 8: mController = create<8>(leds, numLeds, chipset, rgbw); break;
+#if AUTORESEARCH_LEGACY_SUPPORTS_PIN_22
             case 22: mController = create<22>(leds, numLeds, chipset, rgbw); break;
+#endif
             default: break;  // mController stays nullptr
         }
     }

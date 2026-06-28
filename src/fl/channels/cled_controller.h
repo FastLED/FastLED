@@ -84,6 +84,7 @@ public:
         if (!arg.active()) {
             mSettings.mWhiteCfg.reset();
         } else {
+            prepare_rgbw_colorimetric(arg);
             mSettings.mWhiteCfg = arg;
         }
         return *this;  // builder pattern.

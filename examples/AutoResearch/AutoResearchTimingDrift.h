@@ -63,7 +63,7 @@ struct MillisDelay {
 };
 
 struct DriftResult {
-    bool valid_pin;                    // false if pin outside LegacyClocklessProxy range (0-8)
+    bool valid_pin;                    // false if pin outside LegacyClocklessProxy range
     int pin;
     int num_leds;
     int iterations;                    // completed sequence count

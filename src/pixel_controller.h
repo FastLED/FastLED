@@ -588,8 +588,9 @@ struct PixelController {
     // NOTE: loadAndScale_WS2816_HD() has been moved to src/fl/chipsets/encoders/ws2816.h
     // Use fl::loadAndScale_WS2816_HD<RGB_ORDER>(pixels, ...) instead
 
-    FASTLED_FORCE_INLINE void loadAndScaleRGBW(Rgbw rgbw, fl::u8 *b0_out, fl::u8 *b1_out,
-                                               fl::u8 *b2_out, fl::u8 *b3_out) {
+    FASTLED_FORCE_INLINE void loadAndScaleRGBW(
+        const Rgbw& rgbw, fl::u8 *b0_out, fl::u8 *b1_out,
+        fl::u8 *b2_out, fl::u8 *b3_out) {
 #ifdef FL_IS_AVR
         // Don't do RGBW conversion for AVR, just set the W pixel to black.
         fl::u8 out[4] = {
@@ -612,8 +613,7 @@ struct PixelController {
         // Get the naive RGB data order in r,g,b order.
         CRGB rgb(mData[0], mData[1], mData[2]);
         fl::u8 w = 0;
-        fl::rgb_2_rgbw(rgbw.rgbw_mode,
-                   rgbw.white_color_temp,
+        fl::rgb_2_rgbw(rgbw,
                    rgb.r, rgb.g, rgb.b,  // Input colors
                    mColorAdjustment.premixed.r, mColorAdjustment.premixed.g, mColorAdjustment.premixed.b,  // How these colors are scaled for color balance.
                    &rgb.r, &rgb.g, &rgb.b, &w);

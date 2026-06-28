@@ -42,7 +42,7 @@ class PixelIterator;
 // vtable. The PixelControllerVtable is cheaper than doing fl::function<>.
 template<typename PixelControllerT>
 struct PixelControllerVtable {
-  static void loadAndScaleRGBW(void* pixel_controller, Rgbw rgbw, u8* b0_out, u8* b1_out, u8* b2_out, u8* b3_out) FL_NO_EXCEPT {
+  static void loadAndScaleRGBW(void* pixel_controller, const Rgbw& rgbw, u8* b0_out, u8* b1_out, u8* b2_out, u8* b3_out) FL_NO_EXCEPT {
     PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
     pc->loadAndScaleRGBW(rgbw, b0_out, b1_out, b2_out, b3_out);
   }
@@ -98,7 +98,7 @@ struct PixelControllerVtable {
   #endif
 };
 
-typedef void (*loadAndScaleRGBWFunction)(void* pixel_controller, Rgbw rgbw, u8* b0_out, u8* b1_out, u8* b2_out, u8* b3_out);
+typedef void (*loadAndScaleRGBWFunction)(void* pixel_controller, const Rgbw& rgbw, u8* b0_out, u8* b1_out, u8* b2_out, u8* b3_out);
 typedef void (*loadAndScaleRGBWWFunction)(void* pixel_controller, Rgbww rgbww, u8* b0_out, u8* b1_out, u8* b2_out, u8* b3_out, u8* b4_out);
 typedef void (*loadAndScaleRGBFunction)(void* pixel_controller, u8* r_out, u8* g_out, u8* b_out);
 // NOTE: loadAndScale_APA102_HDFunction removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
@@ -121,7 +121,7 @@ typedef void (*getHdScaleFunction)(void* pixel_controller, u8* c0, u8* c1, u8* c
 class PixelIterator {
   public:
     template<typename PixelControllerT>
-    PixelIterator(PixelControllerT* pc, Rgbw rgbw,
+    PixelIterator(PixelControllerT* pc, const Rgbw& rgbw,
                   Rgbww rgbww = RgbwwInvalid::value()) FL_NO_EXCEPT
          : mPixelController(pc), mRgbw(rgbw), mRgbww(rgbww) {
       // Manually build up a vtable.
@@ -181,7 +181,7 @@ class PixelIterator {
     void advanceData() FL_NO_EXCEPT { mAdvanceData(mPixelController); }
     int size() FL_NO_EXCEPT { return mSize(mPixelController); }
 
-    void set_rgbw(Rgbw rgbw) FL_NO_EXCEPT { mRgbw = rgbw; }
+    void set_rgbw(const Rgbw& rgbw) FL_NO_EXCEPT { mRgbw = rgbw; }
     Rgbw get_rgbw() const FL_NO_EXCEPT { return mRgbw; }
 
     void set_rgbww(Rgbww rgbww) FL_NO_EXCEPT { mRgbww = rgbww; }

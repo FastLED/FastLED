@@ -243,7 +243,8 @@ using fl::degrees;
 #include "fl/system/engine_events.h"
 
 #include "fl/gfx/leds.h"
-#include "fl/gfx/rgbw.h"  // DiodeProfile + InputGamut (wrapped on CFastLED below)
+#include "fl/gfx/rgbw.h"  // RGBW mode config (wrapped on CFastLED below)
+#include "fl/color/rgbw.h"  // colorimetric profile facade
 
 // clockless.h removed - BulkClockless API has been superseded by Channel API
 
@@ -1494,32 +1495,6 @@ public:
 		return get_power_scaling_exponent();
 	}
 
-	/// @name RGBW Input Gamut Configuration
-	/// God-instance wrappers around `fl::set_input_gamut` (#2710). See
-	/// `agents/docs/cpp-standards.md` → "Public Settings Pattern" for the
-	/// rule that global setters live here, not as bare `fl::` free functions.
-	/// @{
-
-	/// Reconfigure `profile`'s input gamut to one of the named source
-	/// chromaticity sets (Native / Rec709 / Rec2020 / DCI-P3 D65 / D60).
-	/// Mutates `profile` in place; no-op if `profile == nullptr`.
-	/// @code
-	/// FastLED.setInputGamut(&my_profile, fl::InputGamut::Rec709);
-	/// @endcode
-	inline void setInputGamut(fl::DiodeProfile* profile, fl::InputGamut g) FL_NO_EXCEPT {
-		fl::set_input_gamut(profile, g);
-	}
-
-	/// Same as above with an explicit input white-point override. Pass
-	/// `nullptr` for `white_xy` to fall back to the gamut's standard
-	/// reference white (equivalent to the 2-argument overload).
-	inline void setInputGamut(fl::DiodeProfile* profile, fl::InputGamut g,
-	                          const float white_xy[2]) FL_NO_EXCEPT {
-		fl::set_input_gamut(profile, g, white_xy);
-	}
-
-	/// @} RGBW Input Gamut Configuration
-
 private:
 	// Forward shims for the tiered-wait spin budget (#2818). Full impl
 	// lives in src/fl/channels/detail/wait_spin_budget.{h,cpp.hpp}.
@@ -1615,20 +1590,28 @@ public:
 
 	/// @} Power Model Configuration
 
-	/// @name RGBW Colorimetric Configuration
-	/// God-instance wrappers around `fl::set_rgbw_colorimetric_profile` /
-	/// `fl::get_rgbw_colorimetric_profile`. See
+	/// @name RGBW Colorimetric Fallback Configuration
+	/// Legacy process-wide fallback wrappers around
+	/// `fl::set_rgbw_colorimetric_profile` /
+	/// `fl::get_rgbw_colorimetric_profile`. Prefer passing a profile on the
+	/// per-controller `fl::Rgbw` setting for new sketches. See
 	/// `agents/docs/cpp-standards.md` → "Public Settings Pattern" for the
 	/// rule that global setters live here, not as bare `fl::` free functions.
 	/// @{
 
-	/// Install a user-supplied RGBW diode chromaticity profile for the
-	/// colorimetric modes. The pointer is stored — caller must keep the
-	/// `DiodeProfile` alive for as long as a colorimetric mode is active.
+	/// Install a legacy fallback RGBW diode chromaticity profile for scalar
+	/// colorimetric calls. The pointer is stored; caller must keep the
+	/// `DiodeProfile` alive for as long as a colorimetric mode may use it.
 	/// No-op when `FASTLED_RGBW_COLORIMETRIC` is undefined.
 	/// @param profile pointer to a caller-owned `fl::DiodeProfile`, or `nullptr` to revert to `kRgbwDefaultProfile`.
 	/// @code
-	/// FastLED.setRgbwColorimetricProfile(&my_profile);
+	/// fl::shared_ptr<const fl::color::DiodeProfile> profile =
+	///     fl::color::make_diode_profile(fl::color::kRgbwDefaultProfile);
+	/// FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS)
+	///     .setRgbw(fl::Rgbw(fl::kRGBWDefaultColorTemp,
+	///                       fl::RGBW_MODE::kRGBWColorimetric,
+	///                       fl::EOrderW::W3,
+	///                       profile));
 	/// @endcode
 	inline void setRgbwColorimetricProfile(const fl::DiodeProfile* profile) FL_NO_EXCEPT {
 		fl::set_rgbw_colorimetric_profile(profile);

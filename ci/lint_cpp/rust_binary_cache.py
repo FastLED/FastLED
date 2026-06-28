@@ -206,11 +206,14 @@ def _run_build(verbose: bool = True) -> None:
 
     Uses the cargo ``dev`` profile (no ``--release``). The lint binary
     is disk-I/O bound; release-mode codegen does not measurably speed up
-    runtime but costs ~10x cold-build wall time vs dev. See module docstring.
+    runtime but costs ~10x cold-build wall time vs dev. The wrapper-level
+    ``--no-cache`` avoids soldr/zccache protocol drift on hosted runners; the
+    built binary is already cached separately by this module and CI.
     """
     soldr = _resolve_soldr()
     cmd = [
         soldr,
+        "--no-cache",
         "cargo",
         "build",
         "--manifest-path",

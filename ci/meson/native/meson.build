@@ -38,6 +38,7 @@ base_defines = shared_defines + [
   '-DENABLE_CRASH_HANDLER',
   '-DFASTLED_HAS_NETWORKING',    # Enable networking APIs (HTTP server, fetch client, sockets)
   '-DFASTLED_DEBUG_STACK_TRACE',  # Enable stack tracing (must be in base for PCH compatibility)
+  '-DFASTLED_RGBW_COLORIMETRIC=1', # Exercise the real RGBW/RGBWW colorimetric path in native tests.
 ]
 
 # Group 2: Warning and error flags (code quality enforcement)

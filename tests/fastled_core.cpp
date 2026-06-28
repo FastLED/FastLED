@@ -898,7 +898,12 @@ FL_TEST_CASE("Channel::applyConfig updates reconfigurable fields") {
     opts2.mCorrection = Typical8mmPixel;
     opts2.mTemperature = CRGB(200, 180, 160);
     opts2.mDitherMode = DISABLE_DITHER;
-    opts2.mWhiteCfg = fl::Rgbw(fl::kRGBWDefaultColorTemp, fl::RGBW_MODE::kRGBWExactColors);
+    static fl::shared_ptr<const fl::DiodeProfile> rgbwProfile =
+        fl::make_diode_profile(fl::kRgbwDefaultProfile);
+    opts2.mWhiteCfg = fl::Rgbw(fl::kRGBWDefaultColorTemp,
+                               fl::RGBW_MODE::kRGBWExactColors,
+                               fl::EOrderW::WDefault,
+                               rgbwProfile);
 
     fl::ChannelConfig config2(99, timing, fl::span<CRGB>(leds2, 16), BGR, opts2);
 
@@ -913,6 +918,7 @@ FL_TEST_CASE("Channel::applyConfig updates reconfigurable fields") {
     FL_CHECK(channel->getTemperature() == CRGB(200, 180, 160));
     FL_CHECK(channel->getDither() == DISABLE_DITHER);
     FL_CHECK(channel->getRgbw().active());
+    FL_CHECK(channel->getRgbw().profile == rgbwProfile);
 
     // Verify structural members are unchanged
     FL_CHECK(channel->id() == originalId);

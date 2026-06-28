@@ -2,6 +2,10 @@
 
 #include <FastLED.h>
 
+// Add this build flag for the real colorimetric solver:
+//   -DFASTLED_RGBW_COLORIMETRIC=1
+// Without it, kRGBWColorimetric compiles and falls back to kRGBWExactColors.
+
 // How many leds in your strip?
 #define NUM_LEDS 10
 
@@ -21,7 +25,16 @@ CRGB leds[NUM_LEDS];
 
 void setup() {
     Serial.begin(115200);
-    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+    fl::shared_ptr<const fl::color::DiodeProfile> rgbwProfile =
+        fl::color::make_diode_profile(fl::color::kRgbwDefaultProfile);
+
+    fl::Rgbw rgbw(
+        fl::kRGBWDefaultColorTemp,
+        fl::RGBW_MODE::kRGBWColorimetric,
+        fl::EOrderW::W3,
+        rgbwProfile);
+
+    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS).setRgbw(rgbw);
     FastLED.setBrightness(128);  // Set global brightness to 50%
     delay(2000);  // If something ever goes wrong this delay will allow upload.
 }
