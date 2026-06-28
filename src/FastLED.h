@@ -1818,6 +1818,8 @@ using fl::UINumberField;
 using fl::UISlider;
 using fl::UIDropdown;
 using fl::UIGroup;
+using fl::UIAudioReactive;
+using fl::UIAudio;
 using fl::XYMap;
 using fl::round;  // Template version avoids conflicts with ::round
 // Only expose fl::delay as global delay() on non-hardware platforms (stub/WASM).
