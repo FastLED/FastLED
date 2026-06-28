@@ -93,11 +93,21 @@ typedef fl::u8           boolean;
 #define NO_PROGMEM
 #define NEED_CXX_BITS
 
-// CMSIS device headers provide these intrinsics when they are on the include
-// path. ArduinoCore-LPC8xx's PlatformIO binding exposes only the active variant
-// directory, so board aliases such as lpc845brk may not make LPC845.h directly
-// includable. Keep the IRQ primitives local so FastLED does not depend on that
-// package-specific include layout.
+// Vendor CMSIS PAL header is on the include path via ArduinoCore-LPC8xx's
+// variants/<chip>/ directory (zackees/ArduinoCore-LPC8xx#34 ships the full
+// NXP CMSIS PAL; FastLED #3437 step 3 consumes it here). The peripheral
+// typedefs (SCT_Type, DMA_Type, SYSCON_Type, SPI_Type, etc.) and pointer
+// macros (SCT0, DMA0, SYSCON, SPI0, SPI1) come from these headers; the
+// FastLED LPC drivers use them directly instead of hand-rolled shims.
+#if defined(FL_IS_ARM_LPC_845)
+#include <LPC845.h>
+#elif defined(FL_IS_ARM_LPC_804)
+#include <LPC804.h>
+#endif
+
+// CMSIS-Core intrinsics — kept local as a fallback in case the toolchain
+// CMSIS-Core package is not on the include path. The vendor LPC845.h /
+// LPC804.h includes "core_cm0plus.h" which normally defines these.
 #ifndef __disable_irq
 #define __disable_irq() __asm volatile("cpsid i" ::: "memory")
 #endif
