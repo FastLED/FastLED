@@ -69,20 +69,6 @@ jobs:
           restore-keys: |
             rust-lint-${{ runner.os }}-
 
-      - name: Reset zccache daemon
-        # The hosted runner can have a zccache daemon from a different
-        # protocol version by the time soldr builds fastled-lint. Stop it
-        # before lint so soldr starts a matching daemon on every platform.
-        # zccache is installed into the project venv by ./install, so use uv
-        # instead of relying on PATH.
-        run: |
-          if command -v uv >/dev/null 2>&1; then
-            uv run --no-sync zccache stop || true
-          elif command -v zccache >/dev/null 2>&1; then
-            zccache stop || true
-          fi
-        shell: bash
-
       - name: C++ lint (Rust path)
         # Exercises the Rust C++ linter (`fastled-lint`) end-to-end via the
         # default `bash lint --cpp` path on every PR. The binary is rebuilt
