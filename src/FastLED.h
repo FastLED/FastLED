@@ -1615,20 +1615,28 @@ public:
 
 	/// @} Power Model Configuration
 
-	/// @name RGBW Colorimetric Configuration
-	/// God-instance wrappers around `fl::set_rgbw_colorimetric_profile` /
-	/// `fl::get_rgbw_colorimetric_profile`. See
+	/// @name RGBW Colorimetric Fallback Configuration
+	/// Legacy process-wide fallback wrappers around
+	/// `fl::set_rgbw_colorimetric_profile` /
+	/// `fl::get_rgbw_colorimetric_profile`. Prefer passing a profile on the
+	/// per-controller `fl::Rgbw` setting for new sketches. See
 	/// `agents/docs/cpp-standards.md` → "Public Settings Pattern" for the
 	/// rule that global setters live here, not as bare `fl::` free functions.
 	/// @{
 
-	/// Install a user-supplied RGBW diode chromaticity profile for the
-	/// colorimetric modes. The pointer is stored — caller must keep the
-	/// `DiodeProfile` alive for as long as a colorimetric mode is active.
+	/// Install a legacy fallback RGBW diode chromaticity profile for scalar
+	/// colorimetric calls. The pointer is stored; caller must keep the
+	/// `DiodeProfile` alive for as long as a colorimetric mode may use it.
 	/// No-op when `FASTLED_RGBW_COLORIMETRIC` is undefined.
 	/// @param profile pointer to a caller-owned `fl::DiodeProfile`, or `nullptr` to revert to `kRgbwDefaultProfile`.
 	/// @code
-	/// FastLED.setRgbwColorimetricProfile(&my_profile);
+	/// fl::DiodeProfilePtrConst profile =
+	///     fl::make_diode_profile(fl::kRgbwDefaultProfile, fl::InputGamut::Rec709);
+	/// FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS)
+	///     .setRgbw(fl::Rgbw(fl::kRGBWDefaultColorTemp,
+	///                       fl::RGBW_MODE::kRGBWColorimetric,
+	///                       fl::EOrderW::W3,
+	///                       profile));
 	/// @endcode
 	inline void setRgbwColorimetricProfile(const fl::DiodeProfile* profile) FL_NO_EXCEPT {
 		fl::set_rgbw_colorimetric_profile(profile);

@@ -28,7 +28,8 @@ namespace fl {
 ///
 ///   - `fl::Empty` (default) — plain 3-channel RGB output, no white extraction.
 ///     Replaces the legacy `Rgbw{rgbw_mode=kRGBWInvalid}` sentinel.
-///   - `Rgbw` — 4-channel RGBW output. Mode + CCT inside the Rgbw value.
+///   - `Rgbw` — 4-channel RGBW output. Mode + CCT + optional shared
+///     colorimetric profile handle inside the Rgbw value.
 ///   - `Rgbww` — 5-channel RGB + warm-W + cool-W output. Mode + two CCTs +
 ///     optional profile pointer inside the Rgbww value.
 ///

@@ -198,6 +198,9 @@ struct RgbwColorimetricState {
 
 void set_rgbw_colorimetric_profile(const DiodeProfile* profile) FL_NO_EXCEPT {
     fl::Singleton<RgbwColorimetricState>::instance().profile = profile;
+    prepare_rgbw_colorimetric(Rgbw(kRGBWDefaultColorTemp,
+                                   RGBW_MODE::kRGBWColorimetric,
+                                   EOrderW::WDefault));
 }
 
 const DiodeProfile* get_rgbw_colorimetric_profile() FL_NO_EXCEPT {
@@ -280,6 +283,25 @@ void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NO_EXCEPT {
     set_input_gamut(profile, g, nullptr);
 }
 
+DiodeProfilePtrConst make_diode_profile(
+    const DiodeProfile& profile) FL_NO_EXCEPT {
+    return fl::static_pointer_cast<const DiodeProfile>(
+        fl::make_shared<DiodeProfile>(profile));
+}
+
+DiodeProfilePtrConst make_diode_profile(
+    const DiodeProfile& profile, InputGamut g) FL_NO_EXCEPT {
+    return make_diode_profile(profile, g, nullptr);
+}
+
+DiodeProfilePtrConst make_diode_profile(
+    const DiodeProfile& profile, InputGamut g,
+    const float white_xy[2]) FL_NO_EXCEPT {
+    DiodeProfile copy = profile;
+    set_input_gamut(&copy, g, white_xy);
+    return make_diode_profile(copy);
+}
+
 #if FASTLED_RGBW_COLORIMETRIC
 
 namespace {
@@ -302,10 +324,21 @@ inline int resolve_cct_override(const DiodeProfile* p, int requested_cct) FL_NO_
     return requested_cct;
 }
 
-inline const colorimetric_detail::ProfileCache& get_cache(int cct) FL_NO_EXCEPT {
+inline const DiodeProfile* resolve_rgbw_profile(
+    const DiodeProfile* profile) FL_NO_EXCEPT {
+    return profile != nullptr ? profile : get_rgbw_colorimetric_profile();
+}
+
+inline const DiodeProfile* resolve_rgbw_profile(
+    const DiodeProfilePtrConst& profile) FL_NO_EXCEPT {
+    return resolve_rgbw_profile(profile.get());
+}
+
+inline const colorimetric_detail::ProfileCache& get_cache(
+    const DiodeProfile* profile, int cct) FL_NO_EXCEPT {
     ColorimetricCacheHolder& h =
         fl::Singleton<ColorimetricCacheHolder>::instance();
-    const DiodeProfile* active = get_rgbw_colorimetric_profile();
+    const DiodeProfile* active = resolve_rgbw_profile(profile);
     const int override_cct = resolve_cct_override(active, cct);
     if (h.cached_for != active || h.cached_cct != override_cct) {
         colorimetric_detail::build_profile_cache(active, override_cct, &h.cache);
@@ -313,6 +346,15 @@ inline const colorimetric_detail::ProfileCache& get_cache(int cct) FL_NO_EXCEPT 
         h.cached_cct = override_cct;
     }
     return h.cache;
+}
+
+inline const colorimetric_detail::ProfileCache& get_cache(
+    const DiodeProfilePtrConst& profile, int cct) FL_NO_EXCEPT {
+    return get_cache(resolve_rgbw_profile(profile), cct);
+}
+
+inline const colorimetric_detail::ProfileCache& get_cache(int cct) FL_NO_EXCEPT {
+    return get_cache(static_cast<const DiodeProfile*>(nullptr), cct);
 }
 
 // ===== LUT state (issue #2545 Phase 2) ==================================
@@ -339,9 +381,10 @@ inline colorimetric_detail::LutInterp to_internal_interp(
         : colorimetric_detail::LutInterp::Bilinear;
 }
 
-inline void rebuild_lut_if_stale(LutStateHolder& s, int cct) FL_NO_EXCEPT {
+inline void rebuild_lut_if_stale(LutStateHolder& s, const DiodeProfile* profile,
+                                 int cct) FL_NO_EXCEPT {
     if (!s.enabled || s.requested_grid_n <= 0) return;
-    const DiodeProfile* active = get_rgbw_colorimetric_profile();
+    const DiodeProfile* active = resolve_rgbw_profile(profile);
     const int override_cct = resolve_cct_override(active, cct);
     const colorimetric_detail::LutInterp interp =
         to_internal_interp(s.requested_interp);
@@ -351,10 +394,20 @@ inline void rebuild_lut_if_stale(LutStateHolder& s, int cct) FL_NO_EXCEPT {
         return;  // up-to-date
     }
     s.table = fl::make_unique<colorimetric_detail::LutTable>(
-        colorimetric_detail::build_lut(get_cache(cct), s.requested_grid_n,
+        colorimetric_detail::build_lut(get_cache(active, cct), s.requested_grid_n,
                                        interp));
     s.built_for = active;
     s.built_cct = override_cct;
+}
+
+inline void rebuild_lut_if_stale(LutStateHolder& s,
+                                 const DiodeProfilePtrConst& profile,
+                                 int cct) FL_NO_EXCEPT {
+    rebuild_lut_if_stale(s, resolve_rgbw_profile(profile), cct);
+}
+
+inline void rebuild_lut_if_stale(LutStateHolder& s, int cct) FL_NO_EXCEPT {
+    rebuild_lut_if_stale(s, DiodeProfilePtrConst(), cct);
 }
 
 // Drop both the ProfileCache and the LUT cache when `profile` matches the
@@ -376,10 +429,30 @@ void invalidate_colorimetric_caches_for(const DiodeProfile* profile) FL_NO_EXCEP
 }
 } // namespace
 
+void prepare_rgbw_colorimetric(const Rgbw& cfg) FL_NO_EXCEPT {
+    if (cfg.rgbw_mode != RGBW_MODE::kRGBWColorimetric
+        && cfg.rgbw_mode != RGBW_MODE::kRGBWColorimetricBoosted) {
+        return;
+    }
+    (void)get_cache(cfg.profile, cfg.white_color_temp);
+    LutStateHolder& lut_state = fl::Singleton<LutStateHolder>::instance();
+    rebuild_lut_if_stale(lut_state, cfg.profile, cfg.white_color_temp);
+}
+
 void rgb_2_rgbw_colorimetric(u16 w_color_temperature, u8 r,
                              u8 g, u8 b, u8 r_scale,
                              u8 g_scale, u8 b_scale, u8 *out_r,
                              u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
+    Rgbw cfg(w_color_temperature, RGBW_MODE::kRGBWColorimetric);
+    rgb_2_rgbw_colorimetric(cfg, r, g, b, r_scale, g_scale, b_scale,
+                            out_r, out_g, out_b, out_w);
+}
+
+void rgb_2_rgbw_colorimetric(const Rgbw& cfg, u8 r,
+                             u8 g, u8 b, u8 r_scale,
+                             u8 g_scale, u8 b_scale, u8 *out_r,
+                             u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
+    const int w_color_temperature = cfg.white_color_temp;
     r = scale8(r, r_scale);
     g = scale8(g, g_scale);
     b = scale8(b, b_scale);
@@ -390,14 +463,33 @@ void rgb_2_rgbw_colorimetric(u16 w_color_temperature, u8 r,
     const float s_r = r * (1.0f / 255.0f);
     const float s_g = g * (1.0f / 255.0f);
     const float s_b = b * (1.0f / 255.0f);
-    const colorimetric_detail::ProfileCache& cache = get_cache(w_color_temperature);
+    const colorimetric_detail::ProfileCache& cache =
+        get_cache(cfg.profile, w_color_temperature);
     float rgbw[4];
 
     // LUT fast path — gc-sections drops the branch + singleton + lookup_lut
     // for sketches that never call enable_rgbw_colorimetric_lut().
     LutStateHolder& lut_state = fl::Singleton<LutStateHolder>::instance();
     if (lut_state.enabled) {
-        rebuild_lut_if_stale(lut_state, w_color_temperature);
+        // The xy/Y LUT has no source active-channel mask, so it cannot enforce
+        // native single-axis or dual-edge topology on its own. Keep those rows
+        // on the analytical guard path and reserve LUT lookup for interiors.
+        if (colorimetric_detail::is_native_input_gamut(*cache.profile)
+            && colorimetric_detail::count_active_channels(s_r, s_g, s_b) < 3) {
+            const bool ok = colorimetric_detail::solve_strict_subgamut(
+                cache, s_r, s_g, s_b, rgbw);
+            if (!ok) {
+                rgb_2_rgbw_exact(w_color_temperature, r, g, b, 255, 255, 255,
+                                 out_r, out_g, out_b, out_w);
+                return;
+            }
+            *out_r = colorimetric_detail::quantize_u8(rgbw[0]);
+            *out_g = colorimetric_detail::quantize_u8(rgbw[1]);
+            *out_b = colorimetric_detail::quantize_u8(rgbw[2]);
+            *out_w = colorimetric_detail::quantize_u8(rgbw[3]);
+            return;
+        }
+        rebuild_lut_if_stale(lut_state, cfg.profile, w_color_temperature);
         float X_t[3];
         if (cache.has_source_space) {
             // #2705: use source-space matrix so the LUT lookup targets the
@@ -440,6 +532,15 @@ void rgb_2_rgbw_colorimetric_boosted(u16 w_color_temperature, u8 r,
                                      u8 g, u8 b, u8 r_scale,
                                      u8 g_scale, u8 b_scale, u8 *out_r,
                                      u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
+    Rgbw cfg(w_color_temperature, RGBW_MODE::kRGBWColorimetricBoosted);
+    rgb_2_rgbw_colorimetric_boosted(cfg, r, g, b, r_scale, g_scale, b_scale,
+                                    out_r, out_g, out_b, out_w);
+}
+
+void rgb_2_rgbw_colorimetric_boosted(const Rgbw& cfg, u8 r,
+                                     u8 g, u8 b, u8 r_scale,
+                                     u8 g_scale, u8 b_scale, u8 *out_r,
+                                     u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
     r = scale8(r, r_scale);
     g = scale8(g, g_scale);
     b = scale8(b, b_scale);
@@ -452,7 +553,7 @@ void rgb_2_rgbw_colorimetric_boosted(u16 w_color_temperature, u8 r,
     const float s_b = b * (1.0f / 255.0f);
     float rgbw[4];
     colorimetric_detail::solve_wx_overdrive(
-        get_cache(w_color_temperature),
+        get_cache(cfg.profile, cfg.white_color_temp),
         s_r, s_g, s_b,
         colorimetric_detail::kDefaultOverdriveRatio,
         rgbw);
@@ -503,6 +604,8 @@ bool rgbw_colorimetric_lut_enabled() FL_NO_EXCEPT {
 namespace { void invalidate_colorimetric_caches_for(const DiodeProfile*) FL_NO_EXCEPT {} }
 
 // Stub APIs for the LUT/CCT/RGBCCT path — no-ops when colorimetric is off.
+void prepare_rgbw_colorimetric(const Rgbw& /*cfg*/) FL_NO_EXCEPT {}
+
 bool enable_rgbw_colorimetric_lut(int /*grid_n*/,
                                   RgbwLutInterp /*interp*/) FL_NO_EXCEPT {
     return false;
@@ -533,6 +636,23 @@ void rgb_2_rgbw_colorimetric_boosted(u16 w_color_temperature, u8 r,
 #endif
     rgb_2_rgbw_exact(w_color_temperature, r, g, b, r_scale, g_scale, b_scale,
                      out_r, out_g, out_b, out_w);
+}
+
+void rgb_2_rgbw_colorimetric(const Rgbw& cfg, u8 r,
+                             u8 g, u8 b, u8 r_scale,
+                             u8 g_scale, u8 b_scale, u8 *out_r,
+                             u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
+    rgb_2_rgbw_colorimetric(cfg.white_color_temp, r, g, b, r_scale, g_scale,
+                            b_scale, out_r, out_g, out_b, out_w);
+}
+
+void rgb_2_rgbw_colorimetric_boosted(const Rgbw& cfg, u8 r,
+                                     u8 g, u8 b, u8 r_scale,
+                                     u8 g_scale, u8 b_scale, u8 *out_r,
+                                     u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
+    rgb_2_rgbw_colorimetric_boosted(cfg.white_color_temp, r, g, b, r_scale,
+                                    g_scale, b_scale, out_r, out_g, out_b,
+                                    out_w);
 }
 
 #endif  // FASTLED_RGBW_COLORIMETRIC
