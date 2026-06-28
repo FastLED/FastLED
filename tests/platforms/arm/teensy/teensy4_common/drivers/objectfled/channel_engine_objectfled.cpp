@@ -460,12 +460,17 @@ FL_TEST_CASE("ObjectFLED engine - name is OBJECT_FLED") {
     FL_CHECK(engine.getName() == "OBJECT_FLED");
 }
 
-FL_TEST_CASE("ObjectFLED engine - capabilities are clockless only") {
+FL_TEST_CASE("ObjectFLED engine - capabilities are unified clockless + SPI (#3428)") {
     auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
     ChannelEngineObjectFLED engine(mock);
     auto caps = engine.getCapabilities();
+    // Per the unified parallel-IO driver rule: one ChannelEngine, both modes.
+    // SPI runtime serving is gated by `objectfled_spi_lookup_pins()` (stubbed
+    // until the DMA-bit-banged SPI hardware impl lands), but the capability
+    // slot is permanent. See src/fl/channels/README.md -> "Rule: Parallel-IO
+    // peripherals -- one engine for both clockless and SPI modes".
     FL_CHECK(caps.supportsClockless == true);
-    FL_CHECK(caps.supportsSpi == false);
+    FL_CHECK(caps.supportsSpi == true);
 }
 
 #endif // FASTLED_STUB_IMPL

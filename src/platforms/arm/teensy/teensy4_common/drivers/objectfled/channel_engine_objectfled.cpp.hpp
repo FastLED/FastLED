@@ -10,8 +10,11 @@
 // DMA manager's acquire() blocks). This is by design but worth noting
 // for users who yield to other code in their show() loop.
 
+#include "platforms/arm/teensy/is_teensy.h"
+
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/channel_engine_objectfled.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/iobjectfled_peripheral.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_spi_mode.h"
 #include "platforms/arm/teensy/teensy4_common/clockless_objectfled.h"
 
 // #3416 FX-LOW-3 mirror: duplicate include removed.
@@ -85,15 +88,48 @@ ChannelEngineObjectFLED::~ChannelEngineObjectFLED() {
     FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: destroyed");
 }
 
+// Moved out of the header per `src/**/*.h` header-discipline (CodeRabbit #3432).
+IChannelDriver::Capabilities ChannelEngineObjectFLED::getCapabilities() const FL_NO_EXCEPT {
+    return Capabilities(true, true);
+}
+
 bool ChannelEngineObjectFLED::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
-    if (!data || !data->isClockless()) {
+    if (!data) {
         return false;
     }
-    if (!objectFledSupportsPixelFormat(data->getPixelFormat())) {
-        return false;
+
+    if (data->isClockless()) {
+        if (!objectFledSupportsPixelFormat(data->getPixelFormat())) {
+            return false;
+        }
+        const u32 period = data->getTiming().total_period_ns();
+        return period >= kMinPeriodNs && period <= kMaxPeriodNs;
     }
-    const u32 period = data->getTiming().total_period_ns();
-    return period >= kMinPeriodNs && period <= kMaxPeriodNs;
+
+#if defined(FL_IS_TEENSY_4X) && !defined(FL_OBJECTFLED_SPI_HARDWARE_DISABLE)
+    if (data->isSpi()) {
+        // #3428: SPI-mode dispatch on the SAME peripheral (unified engine).
+        // The (MOSI, SCLK) pin pair must both be GPIO6-resident; init
+        // remaps them to GPIO1 alias (via IOMUXC_GPR_GPR26) for eDMA
+        // reach. Enabled by default; opt out with -DFL_OBJECTFLED_SPI_HARDWARE_DISABLE.
+        const auto* spi = data->getChipset().ptr<SpiChipsetConfig>();
+        if (!spi) {
+            return false;
+        }
+        // Validate pin range BEFORE narrowing to u8 -- without these guards
+        // dataPin=270 would wrap to pin 14 in static_cast<u8>() and silently
+        // route to wrong hardware. Per coderabbitai review on PR #3432.
+        if (spi->dataPin < 0 || spi->dataPin > 255 ||
+            spi->clockPin < 0 || spi->clockPin > 255) {
+            return false;
+        }
+        ObjectFLEDSPIPinInfo info;
+        return objectfled_spi_lookup_pins(static_cast<u8>(spi->dataPin),
+                                          static_cast<u8>(spi->clockPin), &info);
+    }
+#endif
+
+    return false;
 }
 
 void ChannelEngineObjectFLED::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {

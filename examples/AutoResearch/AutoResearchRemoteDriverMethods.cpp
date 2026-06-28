@@ -42,12 +42,17 @@
 #include "AutoResearchTimingDrift.h"  // timingDriftTest RPC (#2994 repro)
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
+#include "fl/stl/span.h"
 #include <Arduino.h>
 
 // #3428: FlexIO2 SPI mode bring-up smoke test (`flexioSpiSelfTest` RPC).
 // The header is Teensy 4.x-gated, but #include is safe on any platform
 // because all declarations sit inside `#if defined(FL_IS_TEENSY_4X)`.
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/flexio_spi_mode.h"
+
+// #3428: ObjectFLED DMA-bit-banged SPI mode bring-up smoke test
+// (`objectfledSpiSelfTest` RPC). Same Teensy 4.x-gating pattern.
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_spi_mode.h"
 
 #include "fl/net/ble.h"
 
@@ -794,6 +799,167 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
 
         // 5. Tear down.
         fl::flexio_spi_deinit();
+
+        response.set("success", true);
+        return response;
+#endif
+    });
+
+    // Register "objectfledSpiSelfTest" — #3428 bring-up smoke test for the
+    // ObjectFLED DMA-bit-banged SPI master mode. Exercises the full
+    // lookup → init → show → wait → deinit path on a user-specified
+    // (MOSI, SCLK) pin pair (both must be on GPIO6) with a known byte
+    // pattern, reports back per-stage success + echoed args.
+    //
+    // Args (positional, all optional):
+    //   { "mosi_pin":  int = 14,   // GPIO6 bit 18 on T4.1
+    //     "sclk_pin":  int = 15,   // GPIO6 bit 19 on T4.1
+    //     "clock_hz":  int = 1000000,
+    //     "num_bytes": int = 4 }
+    //
+    // Returns:
+    //   { success, mosi_pin, sclk_pin, clock_hz, num_bytes,
+    //     lookup_ok, init_ok, show_ok, wait_ms,
+    //     mosi_bit, sclk_bit, dma_* (10), tmr3_* (5), xbar1_ctrl1 }
+    //
+    // Teensy 4.x-only.
+    remote.bind("objectfledSpiSelfTest", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+#if !defined(FL_IS_TEENSY_4X)
+        (void)args;
+        response.set("success", false);
+        response.set("error", "PlatformNotSupported");
+        response.set("message",
+                     "objectfledSpiSelfTest is Teensy 4.x-only (FlexPWM2 + eDMA + GPIO6).");
+        return response;
+#else
+        // Parse args. The RPC framework strips the outer params array
+        // and passes params[0] directly as `args`, so `args` is an OBJECT
+        // here (NOT an array).
+        int mosi_pin = 14;        // GPIO6 bit 18 on T4.1 (and T4.0)
+        int sclk_pin = 15;        // GPIO6 bit 19
+        int clock_hz = 1000000;   // 1 MHz -- safe for bring-up
+        int num_bytes = 4;
+        if (args.is_object()) {
+            const fl::json& cfg = args;
+            if (cfg.contains("mosi_pin") && cfg["mosi_pin"].is_int()) {
+                mosi_pin = static_cast<int>(cfg["mosi_pin"].as_int().value());
+            }
+            if (cfg.contains("sclk_pin") && cfg["sclk_pin"].is_int()) {
+                sclk_pin = static_cast<int>(cfg["sclk_pin"].as_int().value());
+            }
+            if (cfg.contains("clock_hz") && cfg["clock_hz"].is_int()) {
+                clock_hz = static_cast<int>(cfg["clock_hz"].as_int().value());
+            }
+            if (cfg.contains("num_bytes") && cfg["num_bytes"].is_int()) {
+                num_bytes = static_cast<int>(cfg["num_bytes"].as_int().value());
+            }
+        }
+
+        response.set("mosi_pin", mosi_pin);
+        response.set("sclk_pin", sclk_pin);
+        response.set("clock_hz", static_cast<int64_t>(clock_hz));
+        response.set("num_bytes", num_bytes);
+
+        // Validate input ranges BEFORE narrowing to u8/u32.
+        if (num_bytes <= 0 || num_bytes > 64) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "num_bytes must be in [1, 64].");
+            return response;
+        }
+        if (mosi_pin < 0 || mosi_pin > 255 ||
+            sclk_pin < 0 || sclk_pin > 255) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "mosi_pin / sclk_pin must be in [0, 255].");
+            return response;
+        }
+        if (clock_hz <= 0) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "clock_hz must be > 0.");
+            return response;
+        }
+
+        // 1. Pin-pair lookup.
+        fl::ObjectFLEDSPIPinInfo pin_info{};
+        bool lookup_ok = fl::objectfled_spi_lookup_pins(
+            static_cast<fl::u8>(mosi_pin),
+            static_cast<fl::u8>(sclk_pin),
+            &pin_info);
+        response.set("lookup_ok", lookup_ok);
+        if (!lookup_ok) {
+            response.set("success", false);
+            response.set("error", "PinNotRoutable");
+            response.set("message",
+                         "(MOSI, SCLK) pair is not on GPIO6 or otherwise invalid; "
+                         "both pins must be GPIO6-resident (T4.x: 0, 1, 14-27, "
+                         "T4.1 adds 38-41).");
+            return response;
+        }
+        response.set("mosi_bit", static_cast<int64_t>(pin_info.mosi_bit));
+        response.set("sclk_bit", static_cast<int64_t>(pin_info.sclk_bit));
+
+        // 2. Init.
+        bool init_ok = fl::objectfled_spi_init(pin_info,
+                                                static_cast<fl::u32>(clock_hz));
+        response.set("init_ok", init_ok);
+        if (!init_ok) {
+            response.set("success", false);
+            response.set("error", "InitFailed");
+            response.set("message", "objectfled_spi_init returned false.");
+            return response;
+        }
+
+        // 3. Send a known pattern.
+        fl::u8 buffer[64] = {0};
+        for (int i = 0; i < num_bytes; ++i) {
+            switch (i % 4) {
+                case 0: buffer[i] = 0xA5; break;
+                case 1: buffer[i] = 0x5A; break;
+                case 2: buffer[i] = 0xFF; break;
+                case 3: buffer[i] = 0x00; break;
+            }
+        }
+
+        const fl::u32 show_start_ms = millis();
+        bool show_ok = fl::objectfled_spi_show(
+            fl::span<const fl::u8>(buffer,
+                                   static_cast<fl::size>(num_bytes)));
+        response.set("show_ok", show_ok);
+        if (!show_ok) {
+            fl::objectfled_spi_deinit();
+            response.set("success", false);
+            response.set("error", "ShowFailed");
+            response.set("message", "objectfled_spi_show returned false.");
+            return response;
+        }
+
+        // 4. Wait for completion.
+        fl::objectfled_spi_wait();
+        const fl::u32 wait_ms = millis() - show_start_ms;
+        response.set("wait_ms", static_cast<int64_t>(wait_ms));
+
+        // 5. Snapshot DMA + QTimer3 + XBAR1 register state.
+        fl::ObjectFLEDSPIDiagnostics diag{};
+        fl::objectfled_spi_read_diagnostics(&diag);
+        response.set("dma_channel", static_cast<int64_t>(diag.dma_channel));
+        response.set("dma_erq",     static_cast<int64_t>(diag.dma_erq));
+        response.set("dma_int",     static_cast<int64_t>(diag.dma_int));
+        response.set("dma_err",     static_cast<int64_t>(diag.dma_err));
+        response.set("dma_es",      static_cast<int64_t>(diag.dma_es));
+        response.set("dma_citer",   static_cast<int64_t>(diag.dma_citer));
+        response.set("dma_biter",   static_cast<int64_t>(diag.dma_biter));
+        response.set("tmr3_cntr0",   static_cast<int64_t>(diag.tmr3_cntr0));
+        response.set("tmr3_csctrl0", static_cast<int64_t>(diag.tmr3_csctrl0));
+        response.set("tmr3_sctrl0",  static_cast<int64_t>(diag.tmr3_sctrl0));
+        response.set("tmr3_ctrl0",   static_cast<int64_t>(diag.tmr3_ctrl0));
+        response.set("tmr3_enbl",    static_cast<int64_t>(diag.tmr3_enbl));
+        response.set("xbar1_ctrl1",  static_cast<int64_t>(diag.xbar1_ctrl1));
+
+        // 6. Tear down.
+        fl::objectfled_spi_deinit();
 
         response.set("success", true);
         return response;
