@@ -120,6 +120,17 @@ typedef fl::u8           boolean;
 #pragma pop_macro("OUTPUT")
 #pragma pop_macro("INPUT")
 
+// V7 of FastLED #3437: hard-require the vendor PAL. If the toolchain
+// failed to put <LPC845.h> / <LPC804.h> on the include path, fail at
+// preprocessing time rather than silently fall back on hand-rolled
+// shims (the failure mode that motivated #3437).
+#if defined(FL_IS_ARM_LPC_845) && !defined(SCT0_BASE)
+#error "FL_IS_ARM_LPC_845 set but vendor <LPC845.h> did not put SCT0_BASE on the include path. Ensure the build is using zackees/ArduinoCore-LPC8xx at SHA 50d76e0d or newer (post zackees/ArduinoCore-LPC8xx#34, which ships the full NXP CMSIS PAL in variants/lpc845/)."
+#endif
+#if defined(FL_IS_ARM_LPC_804) && !defined(PLU_BASE)
+#error "FL_IS_ARM_LPC_804 set but vendor <LPC804.h> did not put PLU_BASE on the include path. Ensure the build is using zackees/ArduinoCore-LPC8xx at SHA 50d76e0d or newer (post zackees/ArduinoCore-LPC8xx#34, which ships the full NXP CMSIS PAL in variants/lpc804/)."
+#endif
+
 // CMSIS-Core intrinsics — kept local as a fallback in case the toolchain
 // CMSIS-Core package is not on the include path. The vendor LPC845.h /
 // LPC804.h includes "core_cm0plus.h" which normally defines these.

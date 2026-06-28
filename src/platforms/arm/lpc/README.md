@@ -100,11 +100,11 @@ re-typed from the user manual, prone to silent offset bugs.
 
 | # | Symbol | Location | Peripheral | Replace with |
 |---|--------|----------|------------|--------------|
-| 1 | `FL_LPC_SCT_Shim` + `#define LPC_SCT` | `clockless_arm_lpc_pwm_dma.h:225,269` | LPC845 SCT (UM11029 §16) | `LPC_SCT_Type` from `LPC845.h` |
-| 2 | `FL_LPC_DMA_Shim` + `FL_LPC_DMA_ChannelShim` + `#define LPC_DMA` | `clockless_arm_lpc_pwm_dma.h:273,279,310` | LPC845 DMA (UM11029 §17) | `LPC_DMA_Type` from `LPC845.h` |
-| 3 | `FL_LPC_SYSCON_Shim` + `#define LPC_SYSCON` | `clockless_arm_lpc_pwm_dma.h:314,321` | LPC845 SYSCON (UM11029 §4.6) | `LPC_SYSCON_Type` from `LPC845.h` |
-| 4 | `FL_LPC_SPI_Type` (no `LPC_SPI*` define — driver casts pSPIX itself) | `spi_arm_lpc.h:60-72` | LPC8xx SPI0/SPI1 (UM11029 §"SPI") | `LPC_SPI_Type` from `LPC845.h` / `LPC804.h` |
-| 5 | `FL_LPC11_LEGACY_GPIO_Type` + `#define LPC_GPIO0..3` | `fastpin_arm_lpc11_legacy.h:57-82` | LPC11xx legacy GPIO @ 0x50000000 (UM10398 §9) | `LPC_GPIO_Type` from `LPC11xx.h` / `LPC1100.h` |
+| ✅ 1 | `FL_LPC_SCT_Shim` + `#define LPC_SCT` | `clockless_arm_lpc_pwm_dma.h:225,269` | LPC845 SCT (UM11029 §16) | `LPC_SCT_Type` from `LPC845.h` |
+| ✅ 2 | `FL_LPC_DMA_Shim` + `FL_LPC_DMA_ChannelShim` + `#define LPC_DMA` | `clockless_arm_lpc_pwm_dma.h:273,279,310` | LPC845 DMA (UM11029 §17) | `LPC_DMA_Type` from `LPC845.h` |
+| ✅ 3 | `FL_LPC_SYSCON_Shim` + `#define LPC_SYSCON` | `clockless_arm_lpc_pwm_dma.h:314,321` | LPC845 SYSCON (UM11029 §4.6) | `LPC_SYSCON_Type` from `LPC845.h` |
+| ✅ 4 | `FL_LPC_SPI_Type` (no `LPC_SPI*` define — driver casts pSPIX itself) | `spi_arm_lpc.h:60-72` | LPC8xx SPI0/SPI1 (UM11029 §"SPI") | `LPC_SPI_Type` from `LPC845.h` / `LPC804.h` |
+| ⏳ 5 | `FL_LPC11_LEGACY_GPIO_Type` + `#define LPC_GPIO0..3` | `fastpin_arm_lpc11_legacy.h:57-82` | LPC11xx legacy GPIO @ 0x50000000 (UM10398 §9) | `LPC_GPIO_Type` from `LPC11xx.h` / `LPC1100.h` |
 
 #### B. Raw `base + offset` MMIO with embedded register-map knowledge
 
@@ -115,16 +115,28 @@ generate.
 
 | # | Location | Peripheral(s) | Replace with |
 |---|----------|---------------|--------------|
-| 6 | `FL_LPC_GPIO_*_OFFSET` constants + `lpc_gpio_*()` fallback helpers, `fastpin_arm_lpc.h:55-86` | Modern LPC GPIO @ 0xA0000000 (LPC8xx / LPC11Uxx / LPC15xx) | File already prefers vendor `LPC_GPIO` when on the include path — once CMSIS is required, delete the `#else` fallback path |
-| 7 | `kPluBase`, `kSysconBase`, `kOff*` offsets + `reg32(base, off)` helper, `clockless_arm_lpc_plu.h:82-180` | LPC804 PLU (UM11065 §12) + SYSCON | `LPC_PLU_Type`, `LPC_SYSCON_Type` from `LPC804.h` |
-| 8 | `kSctBase`, `kDmaBase`, `kSwmBase`, `kSysconBase`, dozens of `kOff*` constants + `reg(base, off)` helper, `rx_sct_capture.cpp.hpp:80-220` | LPC845 SCT + DMA + SWM + SYSCON | `LPC_SCT_Type`, `LPC_DMA_Type`, `LPC_SWM_Type`, `LPC_SYSCON_Type` from `LPC845.h` |
+| ⏳ 6 | `FL_LPC_GPIO_*_OFFSET` constants + `lpc_gpio_*()` fallback helpers, `fastpin_arm_lpc.h:55-86` | Modern LPC GPIO @ 0xA0000000 (LPC8xx / LPC11Uxx / LPC15xx) | File already prefers vendor `LPC_GPIO` when on the include path — once CMSIS is required, delete the `#else` fallback path |
+| ✅ 7 | `kPluBase`, `kSysconBase`, `kOff*` offsets + `reg32(base, off)` helper, `clockless_arm_lpc_plu.h:82-180` | LPC804 PLU (UM11065 §12) + SYSCON | `LPC_PLU_Type`, `LPC_SYSCON_Type` from `LPC804.h` |
+| ⏳ 8 | `kSctBase`, `kDmaBase`, `kSwmBase`, `kSysconBase`, dozens of `kOff*` constants + `reg(base, off)` helper, `rx_sct_capture.cpp.hpp:80-220` | LPC845 SCT + DMA + SWM + SYSCON | `LPC_SCT_Type`, `LPC_DMA_Type`, `LPC_SWM_Type`, `LPC_SYSCON_Type` from `LPC845.h` |
 
-**Total: 8 hand-rolled register-access sites across 6 files** —
-`clockless_arm_lpc_pwm_dma.h`, `spi_arm_lpc.h`,
-`fastpin_arm_lpc11_legacy.h`, `fastpin_arm_lpc.h`,
-`clockless_arm_lpc_plu.h`, `rx_sct_capture.cpp.hpp`.
+**Status: 5/8 sites migrated** in PR #3438 (sites 1, 2, 3, 4, 7).
+Deferred:
 
-Closing this list = deleting all eight, replacing every access site
+- ⏳ **Site 5** — LPC11xx-legacy GPIO. No CI workflow exists for
+  LPC1110/1112/1114/1115 yet (compile-only family). Migration deferred
+  until that family enters CI; pattern will be the same once a vendor
+  CMSIS header for LPC11xx is on the include path.
+- ⏳ **Site 6** — `fastpin_arm_lpc.h` already prefers vendor `LPC_GPIO`
+  / `GPIO` when it is on the include path (which it now always is for
+  LPC845/LPC804). The `#else` raw-offset fallback is retained for
+  LPC11Uxx / LPC15xx until those families get full vendor CMSIS
+  vendoring. No functional gap on LPC845/LPC804 today.
+- ⏳ **Site 8** — `rx_sct_capture.cpp.hpp` (~48 register accesses).
+  Opt-in driver (FASTLED_LPC_RX_SCT_DMA). Not exercised by default
+  CI builds. Migration is mechanically straightforward (same pattern
+  as sites 1-3) but large; tracked as a follow-up PR.
+
+Closing the remaining 3 = deleting them, replacing every access site
 with the vendor typedef'd pointer, and bumping
 `agents/docs/register-maps.md` to retire LPC8xx as its
 worked anti-example.

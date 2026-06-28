@@ -146,28 +146,43 @@ When reviewing a PR that adds or modifies peripheral register access:
 - [ ] If the change touches an existing shim, does the diff include the
       vendor-header offset for any added/changed member?
 
-## Worked anti-example: LPC845
+## Resolved anti-example: LPC845 (FastLED #3437)
 
-`src/platforms/arm/lpc/clockless_arm_lpc_pwm_dma.h` lines 225–322 define
+`src/platforms/arm/lpc/clockless_arm_lpc_pwm_dma.h` previously defined
 three shim structs (`FL_LPC_SCT_Shim`, `FL_LPC_DMA_Shim`,
-`FL_LPC_SYSCON_Shim`). They follow rule (2) above — the include guard is
-the vendor typedef name, so a real `<LPC845.h>` wins — but they were
-written from the user manual without cross-checking the vendor header,
-and the offsets were wrong twice:
+`FL_LPC_SYSCON_Shim`) written from UM11029 without cross-checking the
+vendor header. Three offset bugs slipped in:
 
-- **First miss** — `FL_LPC_SYSCON_Shim` had `_resv0[16]` (placing
+- **Miss 1** — `FL_LPC_SYSCON_Shim` had `_resv0[16]` (placing
   `SYSAHBCLKCTRL0` at offset `0x040`). The real LPC845 layout puts it at
-  `0x080`. Caught and fixed in #3349.
-- **Second miss** — `DMA_CHANNEL.CFG` was written with only the
+  `0x080`. Caught and fixed by @phatpaul in #3349.
+- **Miss 2** — `DMA_CHANNEL.CFG` was written with only the
   `HWTRIGEN` bit; the channel actually needs `PERIPHREQEN | HWTRIGEN`
   plus explicit `TRIGPOL=0`, `TRIGTYPE=0`. Also fixed in #3349.
+- **Miss 3** — `FL_LPC_SCT_Shim` split `LIMIT`/`HALT`/`STOP`/`START`
+  into `_L`/`_H` 32-bit register pairs (8 bytes each). The vendor SCT
+  has them as single 32-bit registers (4 bytes, with optional inner
+  16-bit access unions). Net effect: every shim member from `COUNT_U`
+  onward was laid out 16 bytes too high. Uncovered during #3437 cross-
+  verification; latent because the PWM+DMA driver did not dereference
+  those members.
 
-The right fix going forward is tier 2: vendor a copy of NXP's `LPC845.h`
-(BSD-3-Clause) into `src/platforms/arm/lpc/cmsis/LPC845.h`, include it
-unconditionally from `led_sysdefs_arm_lpc.h`, and delete the shims. This
-work is tracked as an open follow-up; until it lands, the tier-3 shim
-remains the source of truth for non-Arduino build paths and any further
-edits must follow the rules in this document.
+**Resolution (FastLED #3437, landed in PR #3438):** the three repos in
+the LPC build chain now flow vendor PAL through to FastLED:
+
+1. `zackees/ArduinoCore-LPC8xx#34` ships the full NXP CMSIS PAL in
+   `variants/lpc845/LPC845.h` and `variants/lpc804/LPC804.h` (rev. 1.2,
+   BSD-3-Clause, ~10K/7K lines respectively).
+2. `zackees/platform-nxplpc-arduino#9` (v0.2.0) pins
+   `framework-arduino-lpc8xx` to that SHA in `platform.json`.
+3. FastLED `ci/boards.py` + `platformio.ini` bumped to the v0.2.0
+   platform SHA; `led_sysdefs_arm_lpc.h` `#include <LPC845.h>` /
+   `<LPC804.h>` directly; the SCT / DMA / SYSCON / SPI / PLU shims
+   were deleted and every call site migrated to vendor typedefs
+   (`SCT0->`, `DMA0->`, `SYSCON->`, `SPI0/1`, `PLU->`).
+
+The tier-1 path (toolchain provides the canonical NXP CMSIS PAL) is
+now operational across all five FastLED LPC8xx CI workflows.
 
 ## Cross-references
 
