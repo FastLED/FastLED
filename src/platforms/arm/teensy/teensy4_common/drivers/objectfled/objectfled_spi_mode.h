@@ -22,6 +22,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/span.h"
 
 namespace fl {
 
@@ -51,10 +52,11 @@ bool objectfled_spi_lookup_pins(u8 mosi_pin, u8 sclk_pin,
 bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
                          u32 clock_hz) FL_NO_EXCEPT;
 
-/// Begin a DMA-driven SPI transmit of `num_bytes` (max 64) from `buffer`,
+/// Begin a DMA-driven SPI transmit of `buffer` (max 64 bytes),
 /// MSB-first, Mode 0. Returns false if not initialized or arguments
-/// invalid. Caller should `objectfled_spi_wait()` before re-arming.
-bool objectfled_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT;
+/// invalid (empty span, oversized, etc.). Caller should
+/// `objectfled_spi_wait()` before re-arming.
+bool objectfled_spi_show(fl::span<const u8> buffer) FL_NO_EXCEPT;
 
 /// Block until the in-flight DMA completes (50 ms bounded timeout +
 /// 5 ms shifter drain). Force-recovers on timeout.

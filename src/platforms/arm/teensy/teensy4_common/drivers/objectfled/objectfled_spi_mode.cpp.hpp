@@ -87,13 +87,13 @@ namespace fl {
 #define FL_OBJECTFLED_SPI_MAX_BYTES 64
 #endif
 
-static constexpr u32 kSpiMaxInputBytes  = (u32)FL_OBJECTFLED_SPI_MAX_BYTES;
-static constexpr u32 kSpiWordsPerByte   = 16u;
-static constexpr u32 kSpiMaxOutputWords = kSpiMaxInputBytes * kSpiWordsPerByte;
+static constexpr u32 kOfSpiMaxInputBytes  = (u32)FL_OBJECTFLED_SPI_MAX_BYTES;
+static constexpr u32 kOfSpiWordsPerByte   = 16u;
+static constexpr u32 kOfSpiMaxOutputWords = kOfSpiMaxInputBytes * kOfSpiWordsPerByte;
 
 // Clock-rate clamp window (matches flexio_spi_mode.cpp.hpp).
-static constexpr u32 kSpiClockMinHz =   100000u;
-static constexpr u32 kSpiClockMaxHz = 25000000u;
+static constexpr u32 kOfSpiClockMinHz =   100000u;
+static constexpr u32 kOfSpiClockMaxHz = 25000000u;
 
 // IOMUXC pad tuning -- mirror the clockless mode's OUTPUT_PAD_SPEED=0,
 // DSE=3. TODO(#3428): if SPI loopback at 25 MHz shows undershoot, bump
@@ -109,23 +109,23 @@ static constexpr u32 kSpiClockMaxHz = 25000000u;
 // Module state (file-static, ISR-shared)
 // ============================================================================
 
-static DMAChannel* sSpiDmaChannel = nullptr;
-static volatile bool sSpiDmaComplete = true;
-static bool sSpiInitialized = false;
-static ObjectFLEDSPIPinInfo sSpiCurrentPins{};
+static DMAChannel* sOfSpiDmaChannel = nullptr;
+static volatile bool sOfSpiDmaComplete = true;
+static bool sOfSpiInitialized = false;
+static ObjectFLEDSPIPinInfo sOfSpiCurrentPins{};
 
 // Pre-encoded DMA bit-pattern buffer. DMAMEM = OCRAM2 (uncached on T4),
 // matches dma.bitdata in ObjectFLEDDmaManager. 32-byte aligned so the
 // SADDR satisfies eDMA 32-bit beat alignment.
-static DMAMEM u32 sSpiBitPattern[kSpiMaxOutputWords] __attribute__((used, aligned(32)));
+static DMAMEM u32 sOfSpiBitPattern[kOfSpiMaxOutputWords] __attribute__((used, aligned(32)));
 
 // Saved IOMUXC pad-mux values so deinit() can restore pad ALT5 (GPIO).
-static u32 sSpiSavedMosiMux = 0;
-static u32 sSpiSavedSclkMux = 0;
+static u32 sOfSpiSavedMosiMux = 0;
+static u32 sOfSpiSavedSclkMux = 0;
 
 // Diagnostics snapshot captured in wait() BEFORE recovery clears state.
 // Read by `objectfled_spi_read_diagnostics()` after wait() returns.
-static ObjectFLEDSPIDiagnostics sSpiLastDiag{};
+static ObjectFLEDSPIDiagnostics sOfSpiLastDiag{};
 
 // ============================================================================
 // GPIO6 pin-bank validation
@@ -145,12 +145,12 @@ static bool pin_is_gpio6(u8 pin) FL_NO_EXCEPT {
 // DMA ISR
 // ============================================================================
 
-static void objectfled_spi_dma_isr() {
-    if (sSpiDmaChannel != nullptr) {
-        sSpiDmaChannel->clearInterrupt();
+static void of_spi_dma_isr() {
+    if (sOfSpiDmaChannel != nullptr) {
+        sOfSpiDmaChannel->clearInterrupt();
     }
     asm volatile("dsb" ::: "memory");
-    sSpiDmaComplete = true;
+    sOfSpiDmaComplete = true;
 }
 
 // ============================================================================
@@ -206,7 +206,7 @@ bool objectfled_spi_lookup_pins(u8 mosi_pin, u8 sclk_pin,
 // Mirrors the clockless ObjectFLED QTimer4 setup at OjectFLED.cpp.hpp:305-335
 // but on QTimer3 (QTimer4 is taken) and routes to the only unclaimed XBAR
 // DMA slot (req95; clockless uses 30/31/94).
-static void objectfled_spi_program_qtimer(u32 req_hz) FL_NO_EXCEPT {
+static void of_spi_program_qtimer(u32 req_hz) FL_NO_EXCEPT {
     // Disable channel 0 so we can re-program safely.
     TMR3_ENBL &= ~1u;
 
@@ -340,23 +340,23 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
                         "channels fall through to next bus (see #3428).");
     return false;
 #else
-    sSpiLastDiag = ObjectFLEDSPIDiagnostics{};  // reset captured snapshot
+    sOfSpiLastDiag = ObjectFLEDSPIDiagnostics{};  // reset captured snapshot
     if (clock_hz == 0) {
         FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: init refused -- clock_hz == 0");
         return false;
     }
-    if (sSpiInitialized) {
+    if (sOfSpiInitialized) {
         objectfled_spi_deinit();
     }
 
-    if (clock_hz < kSpiClockMinHz) {
+    if (clock_hz < kOfSpiClockMinHz) {
         FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: clock %s Hz below floor; clamp to %s",
-                            (int)clock_hz, (int)kSpiClockMinHz);
-        clock_hz = kSpiClockMinHz;
-    } else if (clock_hz > kSpiClockMaxHz) {
+                            (int)clock_hz, (int)kOfSpiClockMinHz);
+        clock_hz = kOfSpiClockMinHz;
+    } else if (clock_hz > kOfSpiClockMaxHz) {
         FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: clock %s Hz above ceiling; clamp to %s",
-                            (int)clock_hz, (int)kSpiClockMaxHz);
-        clock_hz = kSpiClockMaxHz;
+                            (int)clock_hz, (int)kOfSpiClockMaxHz);
+        clock_hz = kOfSpiClockMaxHz;
     }
 
     FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: init MOSI=%s(bit %s) SCLK=%s(bit %s) @ %s Hz",
@@ -371,8 +371,8 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
 
     // Snapshot pre-init mux ALT values so deinit() can restore them. Per
     // coderabbitai review on #3432.
-    sSpiSavedMosiMux = *(pin_info.mosi_mux_reg);
-    sSpiSavedSclkMux = *(pin_info.sclk_mux_reg);
+    sOfSpiSavedMosiMux = *(pin_info.mosi_mux_reg);
+    sOfSpiSavedSclkMux = *(pin_info.sclk_mux_reg);
 
     *(pin_info.mosi_mux_reg) = 5u;
     *(pin_info.mosi_pad_reg) =
@@ -399,29 +399,29 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
     GPIO1_GDIR |= (pin_info.mosi_mask | pin_info.sclk_mask);
     GPIO1_DR   &= ~(pin_info.mosi_mask | pin_info.sclk_mask);
 
-    objectfled_spi_program_qtimer(2u * clock_hz);
+    of_spi_program_qtimer(2u * clock_hz);
 
-    if (sSpiDmaChannel == nullptr) {
-        sSpiDmaChannel = new DMAChannel();  // ok bare allocation -- one-shot, balanced in deinit
-        if (sSpiDmaChannel == nullptr) {
+    if (sOfSpiDmaChannel == nullptr) {
+        sOfSpiDmaChannel = new DMAChannel();  // ok bare allocation -- one-shot, balanced in deinit
+        if (sOfSpiDmaChannel == nullptr) {
             FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: failed to allocate DMA channel");
             return false;
         }
-        if (sSpiDmaChannel->TCD == nullptr) {
+        if (sOfSpiDmaChannel->TCD == nullptr) {
             FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: DMA channel has null TCD");
-            delete sSpiDmaChannel;  // ok bare allocation
-            sSpiDmaChannel = nullptr;
+            delete sOfSpiDmaChannel;  // ok bare allocation
+            sOfSpiDmaChannel = nullptr;
             return false;
         }
         // XBAR1_3 -> DMA_CH_MUX_REQ95, driven by QTIMER3_TIMER0 compare event
-        // (configured in objectfled_spi_program_qtimer). DMAMUX_SOURCE_XBAR1_3 = 95.
-        sSpiDmaChannel->triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_3);
-        sSpiDmaChannel->attachInterrupt(objectfled_spi_dma_isr);
+        // (configured in of_spi_program_qtimer). DMAMUX_SOURCE_XBAR1_3 = 95.
+        sOfSpiDmaChannel->triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_3);
+        sOfSpiDmaChannel->attachInterrupt(of_spi_dma_isr);
     }
 
-    sSpiCurrentPins = pin_info;
-    sSpiInitialized = true;
-    sSpiDmaComplete = true;
+    sOfSpiCurrentPins = pin_info;
+    sOfSpiInitialized = true;
+    sOfSpiDmaComplete = true;
     return true;
 #endif  // FL_OBJECTFLED_SPI_HARDWARE_DISABLE
 }
@@ -454,18 +454,20 @@ static inline void encode_byte(u32* dst, u8 b,
 // objectfled_spi_show
 // ============================================================================
 
-bool objectfled_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT {
-    if (!sSpiInitialized || !sSpiDmaChannel || !buffer || num_bytes == 0) {
+bool objectfled_spi_show(fl::span<const u8> buffer) FL_NO_EXCEPT {
+    const u8* const data = buffer.data();
+    const u32 num_bytes = static_cast<u32>(buffer.size());
+    if (!sOfSpiInitialized || !sOfSpiDmaChannel || !data || num_bytes == 0) {
         return false;
     }
-    if (num_bytes > kSpiMaxInputBytes) {
+    if (num_bytes > kOfSpiMaxInputBytes) {
         // Per coderabbitai review on #3432: reject oversized frames rather
         // than silently truncating. Silent truncation would emit a partial
         // APA102/SK9822 frame with no caller visibility, corrupting the
         // strip output. The header documents that invalid arguments return
         // false; honor that contract.
         FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: num_bytes=%s exceeds max %s; rejecting",
-                            (int)num_bytes, (int)kSpiMaxInputBytes);
+                            (int)num_bytes, (int)kOfSpiMaxInputBytes);
         return false;
     }
 
@@ -490,47 +492,47 @@ bool objectfled_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT {
 
     objectfled_spi_wait();
 
-    sSpiDmaChannel->disable();
-    sSpiDmaChannel->clearComplete();
-    sSpiDmaChannel->clearInterrupt();
-    sSpiDmaChannel->clearError();
-    sSpiDmaComplete = true;
+    sOfSpiDmaChannel->disable();
+    sOfSpiDmaChannel->clearComplete();
+    sOfSpiDmaChannel->clearInterrupt();
+    sOfSpiDmaChannel->clearError();
+    sOfSpiDmaComplete = true;
 
     // Snapshot "other" bits from the GPIO1 alias (init remapped GPIO6
     // pads -> GPIO1 so eDMA can reach them).
-    const u32 other = GPIO1_DR & ~(sSpiCurrentPins.mosi_mask |
-                                   sSpiCurrentPins.sclk_mask);
+    const u32 other = GPIO1_DR & ~(sOfSpiCurrentPins.mosi_mask |
+                                   sOfSpiCurrentPins.sclk_mask);
 
-    u32* dst = sSpiBitPattern;
+    u32* dst = sOfSpiBitPattern;
     for (u32 i = 0; i < num_bytes; ++i) {
-        encode_byte(dst, buffer[i], other,
-                    sSpiCurrentPins.mosi_mask,
-                    sSpiCurrentPins.sclk_mask);
-        dst += kSpiWordsPerByte;
+        encode_byte(dst, data[i], other,
+                    sOfSpiCurrentPins.mosi_mask,
+                    sOfSpiCurrentPins.sclk_mask);
+        dst += kOfSpiWordsPerByte;
     }
-    const u32 num_words = num_bytes * kSpiWordsPerByte;
+    const u32 num_words = num_bytes * kOfSpiWordsPerByte;
 
-    if ((uintptr_t)sSpiBitPattern >= 0x20200000u) {
-        arm_dcache_flush((void*)sSpiBitPattern, num_words * sizeof(u32));
+    if ((uintptr_t)sOfSpiBitPattern >= 0x20200000u) {
+        arm_dcache_flush((void*)sOfSpiBitPattern, num_words * sizeof(u32));
     }
     asm volatile("dsb" ::: "memory");
 
-    sSpiDmaChannel->TCD->SADDR        = sSpiBitPattern;
-    sSpiDmaChannel->TCD->SOFF         = 4;
-    sSpiDmaChannel->TCD->ATTR         = DMA_TCD_ATTR_SSIZE(2)
+    sOfSpiDmaChannel->TCD->SADDR        = sOfSpiBitPattern;
+    sOfSpiDmaChannel->TCD->SOFF         = 4;
+    sOfSpiDmaChannel->TCD->ATTR         = DMA_TCD_ATTR_SSIZE(2)
                                       | DMA_TCD_ATTR_DSIZE(2);
-    sSpiDmaChannel->TCD->NBYTES_MLNO  = 4;
-    sSpiDmaChannel->TCD->SLAST        = -(i32)(num_words * 4u);
+    sOfSpiDmaChannel->TCD->NBYTES_MLNO  = 4;
+    sOfSpiDmaChannel->TCD->SLAST        = -(i32)(num_words * 4u);
     // DADDR = GPIO1_DR (eDMA-reachable alias; init remapped via GPR26).
-    sSpiDmaChannel->TCD->DADDR        = &GPIO1_DR;
-    sSpiDmaChannel->TCD->DOFF         = 0;
-    sSpiDmaChannel->TCD->CITER_ELINKNO = num_words;
-    sSpiDmaChannel->TCD->BITER_ELINKNO = num_words;
-    sSpiDmaChannel->TCD->DLASTSGA     = 0;
-    sSpiDmaChannel->TCD->CSR          = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ;
+    sOfSpiDmaChannel->TCD->DADDR        = &GPIO1_DR;
+    sOfSpiDmaChannel->TCD->DOFF         = 0;
+    sOfSpiDmaChannel->TCD->CITER_ELINKNO = num_words;
+    sOfSpiDmaChannel->TCD->BITER_ELINKNO = num_words;
+    sOfSpiDmaChannel->TCD->DLASTSGA     = 0;
+    sOfSpiDmaChannel->TCD->CSR          = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ;
 
-    sSpiDmaComplete = false;
-    sSpiDmaChannel->enable();
+    sOfSpiDmaComplete = false;
+    sOfSpiDmaChannel->enable();
 
     // Start QTimer3 channel 0 -- its periodic compare events drive the
     // DMA via XBAR routing set up in init().
@@ -546,44 +548,44 @@ bool objectfled_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT {
 // ============================================================================
 
 void objectfled_spi_wait() FL_NO_EXCEPT {
-    if (sSpiDmaComplete) {
+    if (sOfSpiDmaComplete) {
         return;
     }
 
     const u32 start = millis();
     const u32 timeout_ms = 50;
-    while (!sSpiDmaComplete) {
+    while (!sOfSpiDmaComplete) {
         if ((u32)(millis() - start) >= timeout_ms) {
             // Snapshot register state BEFORE recovery clears it.
-            sSpiLastDiag = ObjectFLEDSPIDiagnostics{};
-            sSpiLastDiag.initialized = sSpiInitialized;
-            sSpiLastDiag.dma_complete = sSpiDmaComplete;
-            if (sSpiDmaChannel) {
-                sSpiLastDiag.dma_channel = sSpiDmaChannel->channel;
-                sSpiLastDiag.dma_erq = DMA_ERQ;
-                sSpiLastDiag.dma_int = DMA_INT;
-                sSpiLastDiag.dma_err = DMA_ERR;
-                sSpiLastDiag.dma_es  = DMA_ES;
-                if (sSpiDmaChannel->TCD) {
-                    sSpiLastDiag.dma_citer    = sSpiDmaChannel->TCD->CITER_ELINKNO;
-                    sSpiLastDiag.dma_biter    = sSpiDmaChannel->TCD->BITER_ELINKNO;
-                    sSpiLastDiag.dma_dlastsga = (u32)sSpiDmaChannel->TCD->DLASTSGA;
+            sOfSpiLastDiag = ObjectFLEDSPIDiagnostics{};
+            sOfSpiLastDiag.initialized = sOfSpiInitialized;
+            sOfSpiLastDiag.dma_complete = sOfSpiDmaComplete;
+            if (sOfSpiDmaChannel) {
+                sOfSpiLastDiag.dma_channel = sOfSpiDmaChannel->channel;
+                sOfSpiLastDiag.dma_erq = DMA_ERQ;
+                sOfSpiLastDiag.dma_int = DMA_INT;
+                sOfSpiLastDiag.dma_err = DMA_ERR;
+                sOfSpiLastDiag.dma_es  = DMA_ES;
+                if (sOfSpiDmaChannel->TCD) {
+                    sOfSpiLastDiag.dma_citer    = sOfSpiDmaChannel->TCD->CITER_ELINKNO;
+                    sOfSpiLastDiag.dma_biter    = sOfSpiDmaChannel->TCD->BITER_ELINKNO;
+                    sOfSpiLastDiag.dma_dlastsga = (u32)sOfSpiDmaChannel->TCD->DLASTSGA;
                 }
             }
-            sSpiLastDiag.tmr3_cntr0   = TMR3_CNTR0;
-            sSpiLastDiag.tmr3_csctrl0 = TMR3_CSCTRL0;
-            sSpiLastDiag.tmr3_sctrl0  = TMR3_SCTRL0;
-            sSpiLastDiag.tmr3_ctrl0   = TMR3_CTRL0;
-            sSpiLastDiag.tmr3_enbl    = TMR3_ENBL;
-            sSpiLastDiag.xbar1_ctrl1  = XBARA1_CTRL1;
+            sOfSpiLastDiag.tmr3_cntr0   = TMR3_CNTR0;
+            sOfSpiLastDiag.tmr3_csctrl0 = TMR3_CSCTRL0;
+            sOfSpiLastDiag.tmr3_sctrl0  = TMR3_SCTRL0;
+            sOfSpiLastDiag.tmr3_ctrl0   = TMR3_CTRL0;
+            sOfSpiLastDiag.tmr3_enbl    = TMR3_ENBL;
+            sOfSpiLastDiag.xbar1_ctrl1  = XBARA1_CTRL1;
 
-            if (sSpiDmaChannel) {
-                sSpiDmaChannel->disable();
-                sSpiDmaChannel->clearComplete();
-                sSpiDmaChannel->clearError();
+            if (sOfSpiDmaChannel) {
+                sOfSpiDmaChannel->disable();
+                sOfSpiDmaChannel->clearComplete();
+                sOfSpiDmaChannel->clearError();
             }
             TMR3_ENBL &= ~1u;  // stop QTimer3 channel 0
-            sSpiDmaComplete = true;
+            sOfSpiDmaComplete = true;
             FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: wait timed out after %s ms -- recovering",
                                 (int)timeout_ms);
             break;
@@ -603,7 +605,7 @@ void objectfled_spi_wait() FL_NO_EXCEPT {
     TMR3_ENBL &= ~1u;
 
     // Park SCLK + MOSI low on the GPIO1 alias (init remapped GPIO6 -> GPIO1).
-    GPIO1_DR = (GPIO1_DR & ~(sSpiCurrentPins.mosi_mask | sSpiCurrentPins.sclk_mask));
+    GPIO1_DR = (GPIO1_DR & ~(sOfSpiCurrentPins.mosi_mask | sOfSpiCurrentPins.sclk_mask));
 
     // NOTE(#3428): paired with the show() acquire-skip above. The manager
     // was never acquired (see comment in objectfled_spi_show), so no
@@ -615,7 +617,7 @@ void objectfled_spi_wait() FL_NO_EXCEPT {
 // ============================================================================
 
 void objectfled_spi_deinit() FL_NO_EXCEPT {
-    if (!sSpiInitialized) return;
+    if (!sOfSpiInitialized) return;
 
     objectfled_spi_wait();
 
@@ -628,12 +630,12 @@ void objectfled_spi_deinit() FL_NO_EXCEPT {
     // CTRL1 slot 0 (req94) and we don't want to clobber its bits. The
     // routing is harmless when our DMA channel is disabled.
 
-    if (sSpiDmaChannel) {
-        sSpiDmaChannel->disable();
-        sSpiDmaChannel->detachInterrupt();
-        sSpiDmaChannel->clearInterrupt();
-        DMAChannel* to_delete = sSpiDmaChannel;
-        sSpiDmaChannel = nullptr;
+    if (sOfSpiDmaChannel) {
+        sOfSpiDmaChannel->disable();
+        sOfSpiDmaChannel->detachInterrupt();
+        sOfSpiDmaChannel->clearInterrupt();
+        DMAChannel* to_delete = sOfSpiDmaChannel;
+        sOfSpiDmaChannel = nullptr;
         delete to_delete;  // ok bare allocation
     }
 
@@ -641,25 +643,25 @@ void objectfled_spi_deinit() FL_NO_EXCEPT {
     // captured in objectfled_spi_init() rather than forcing ALT5. If the
     // user previously had the pin on (e.g.) ALT3 for FlexCAN, forcing ALT5
     // would leave them with a silently-changed pin mux post-deinit.
-    if (sSpiCurrentPins.mosi_mux_reg) {
-        GPIO1_DR   &= ~sSpiCurrentPins.mosi_mask;
-        GPIO1_GDIR &= ~sSpiCurrentPins.mosi_mask;
-        *(sSpiCurrentPins.mosi_mux_reg) = sSpiSavedMosiMux;
+    if (sOfSpiCurrentPins.mosi_mux_reg) {
+        GPIO1_DR   &= ~sOfSpiCurrentPins.mosi_mask;
+        GPIO1_GDIR &= ~sOfSpiCurrentPins.mosi_mask;
+        *(sOfSpiCurrentPins.mosi_mux_reg) = sOfSpiSavedMosiMux;
     }
-    if (sSpiCurrentPins.sclk_mux_reg) {
-        GPIO1_DR   &= ~sSpiCurrentPins.sclk_mask;
-        GPIO1_GDIR &= ~sSpiCurrentPins.sclk_mask;
-        *(sSpiCurrentPins.sclk_mux_reg) = sSpiSavedSclkMux;
+    if (sOfSpiCurrentPins.sclk_mux_reg) {
+        GPIO1_DR   &= ~sOfSpiCurrentPins.sclk_mask;
+        GPIO1_GDIR &= ~sOfSpiCurrentPins.sclk_mask;
+        *(sOfSpiCurrentPins.sclk_mux_reg) = sOfSpiSavedSclkMux;
     }
     // NOTE: we deliberately do NOT restore IOMUXC_GPR_GPR26 -- leaving
     // the pads aliased to GPIO1 is harmless when not driven, and avoids
     // a race with any other driver that may have remapped the same bits.
 
-    sSpiInitialized   = false;
-    sSpiDmaComplete   = true;
-    sSpiCurrentPins   = ObjectFLEDSPIPinInfo{};
-    sSpiSavedMosiMux  = 0;
-    sSpiSavedSclkMux  = 0;
+    sOfSpiInitialized   = false;
+    sOfSpiDmaComplete   = true;
+    sOfSpiCurrentPins   = ObjectFLEDSPIPinInfo{};
+    sOfSpiSavedMosiMux  = 0;
+    sOfSpiSavedSclkMux  = 0;
 }
 
 // ============================================================================
@@ -672,27 +674,27 @@ void objectfled_spi_read_diagnostics(ObjectFLEDSPIDiagnostics* out) FL_NO_EXCEPT
     // If wait() captured a snapshot during its timeout-recovery path,
     // prefer that (pre-cleanup register state is much more diagnostic
     // than post-cleanup).
-    if (sSpiLastDiag.tmr3_enbl != 0 || sSpiLastDiag.dma_erq != 0 ||
-        sSpiLastDiag.dma_int != 0  || sSpiLastDiag.dma_err != 0) {
-        *out = sSpiLastDiag;
+    if (sOfSpiLastDiag.tmr3_enbl != 0 || sOfSpiLastDiag.dma_erq != 0 ||
+        sOfSpiLastDiag.dma_int != 0  || sOfSpiLastDiag.dma_err != 0) {
+        *out = sOfSpiLastDiag;
         return;
     }
 
     *out = ObjectFLEDSPIDiagnostics{};
-    out->initialized = sSpiInitialized;
-    out->dma_complete = sSpiDmaComplete;
+    out->initialized = sOfSpiInitialized;
+    out->dma_complete = sOfSpiDmaComplete;
 
-    if (sSpiDmaChannel) {
-        out->dma_channel = sSpiDmaChannel->channel;
+    if (sOfSpiDmaChannel) {
+        out->dma_channel = sOfSpiDmaChannel->channel;
         // Per-channel bit in ERQ/INT/ERR is (1 << channel).
         out->dma_erq = DMA_ERQ;
         out->dma_int = DMA_INT;
         out->dma_err = DMA_ERR;
         out->dma_es  = DMA_ES;
-        if (sSpiDmaChannel->TCD) {
-            out->dma_citer    = sSpiDmaChannel->TCD->CITER_ELINKNO;
-            out->dma_biter    = sSpiDmaChannel->TCD->BITER_ELINKNO;
-            out->dma_dlastsga = (u32)sSpiDmaChannel->TCD->DLASTSGA;
+        if (sOfSpiDmaChannel->TCD) {
+            out->dma_citer    = sOfSpiDmaChannel->TCD->CITER_ELINKNO;
+            out->dma_biter    = sOfSpiDmaChannel->TCD->BITER_ELINKNO;
+            out->dma_dlastsga = (u32)sOfSpiDmaChannel->TCD->DLASTSGA;
         }
     }
 

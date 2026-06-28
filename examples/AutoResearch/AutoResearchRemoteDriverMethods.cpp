@@ -42,6 +42,7 @@
 #include "AutoResearchTimingDrift.h"  // timingDriftTest RPC (#2994 repro)
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
+#include "fl/stl/span.h"
 #include <Arduino.h>
 
 // #3428: FlexIO2 SPI mode bring-up smoke test (`flexioSpiSelfTest` RPC).
@@ -923,8 +924,9 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         }
 
         const fl::u32 show_start_ms = millis();
-        bool show_ok = fl::objectfled_spi_show(buffer,
-                                                static_cast<fl::u32>(num_bytes));
+        bool show_ok = fl::objectfled_spi_show(
+            fl::span<const fl::u8>(buffer,
+                                   static_cast<fl::size>(num_bytes)));
         response.set("show_ok", show_ok);
         if (!show_ok) {
             fl::objectfled_spi_deinit();
