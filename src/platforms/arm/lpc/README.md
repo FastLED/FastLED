@@ -58,14 +58,17 @@ vendor typedef's include guard, and spot-check three offsets against
 the real header before merging.
 
 **Vendor CMSIS PAL header is now in-tree** at
-[`src/platforms/arm/lpc/cmsis/LPC845.h`](cmsis/) (V1 step of [#3437](https://github.com/FastLED/FastLED/issues/3437),
-NXP `mcux-sdk` rev. 1.2 @ SHA `8a289764` — BSD-3-Clause). Subsequent PRs
+[`src/platforms/arm/lpc/third_party/cmsis/LPC845.h`](third_party/cmsis/) (V1 step of [#3437](https://github.com/FastLED/FastLED/issues/3437),
+NXP `mcux-sdk` rev. 1.2 @ SHA `8a289764` — BSD-3-Clause). Lives under
+a `third_party/` path component so the FastLED C++ linter automatically
+exempts it from house-style rules (`stdint.h`, plain enums, namespace
+`fl`, etc.) that don't apply to vendored upstream code. Subsequent PRs
 will wire it into `led_sysdefs_arm_lpc.h`, migrate call sites to the
 vendor typedefs (`SCT_Type`, `DMA_Type`, `SYSCON_Type`, etc.), and
-delete the shims. See `cmsis/README.md` for the verified offsets
-including the cross-check of @phatpaul's #3349 fix (`SYSAHBCLKCTRL0`
-at `0x80`) and additional shim layout bugs uncovered during
-verification.
+delete the shims. See `third_party/cmsis/README.md` for the verified
+offsets including the cross-check of @phatpaul's #3349 fix
+(`SYSAHBCLKCTRL0` at `0x80`) and additional shim layout bugs uncovered
+during verification.
 
 ### Hand-rolled register-map remediation list (PR #3349 follow-up)
 
@@ -82,8 +85,9 @@ what needs to move to vendor headers before that PR can finish.
 include unconditionally from `led_sysdefs_arm_lpc.h`, then delete every
 row below.
 
-**Status:** ✅ V1 done — `cmsis/LPC845.h` + `cmsis/system_LPC845.h`
-vendored (rev. 1.2, SHA `8a289764`). Still pending: V2-V4 (vendor
+**Status:** ✅ V1 done — `third_party/cmsis/LPC845.h` +
+`third_party/cmsis/system_LPC845.h` vendored (rev. 1.2, SHA
+`8a289764`). Still pending: V2-V4 (vendor
 `LPC804.h`, `LPC11xx.h`, modern-LPC-GPIO header), V5 (wire into
 `led_sysdefs_arm_lpc.h`), V6 (delete the shims in each row below and
 migrate call sites), V7 (`#error` guard).

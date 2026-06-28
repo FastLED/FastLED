@@ -11,6 +11,17 @@ the V1 step of the [#3437](https://github.com/FastLED/FastLED/issues/3437)
 remediation plan. It exists because hand-typed offsets in
 `clockless_arm_lpc_pwm_dma.h` shipped wrong twice ([#3349](https://github.com/FastLED/FastLED/pull/3349)).
 
+## Why under `third_party/`?
+
+The FastLED C++ linter (`bash lint --cpp`) exempts any path containing
+`/third_party/` from house-style rules (`fl::u32` instead of `uint32_t`,
+`namespace fl {`, `enum class`, `IWYU pragma: private`, etc.). Vendored
+upstream code is byte-identical with its source and must not be edited
+to satisfy those rules, so it lives under `third_party/` to inherit
+that exemption automatically. The convention applies to every vendored
+header on every platform — `src/third_party/stb/`,
+`src/third_party/libhelix_mp3/`, `src/third_party/object_fled/`, etc.
+
 ## Files
 
 | File | Purpose |
