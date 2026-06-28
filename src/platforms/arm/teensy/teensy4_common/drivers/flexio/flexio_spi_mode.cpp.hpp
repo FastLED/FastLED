@@ -61,6 +61,14 @@
 
 namespace fl {
 
+// Private namespace for this TU's internal state + helpers. Avoids name
+// collisions with the sibling `objectfled_spi_mode.cpp.hpp` TU in the
+// unity build (`fl/build/platforms+.cpp`): both would otherwise define
+// identically-named `sSpiCurrentPins` / `sSpiDmaChannel` / etc. at fl::
+// namespace scope -- a redefinition. Per user directive 2026-06-27
+// "when in doubt use private namespaces" (#3428).
+namespace detail::flexio_spi_internal {
+
 // ============================================================================
 // FlexIO2 Register Access Helpers (duplicated from flexio_driver.cpp.hpp;
 // the two TUs are intentionally independent so either mode can compile alone)
@@ -123,12 +131,21 @@ static void flexio_spi_dma_isr() {
     sSpiDmaComplete = true;
 }
 
+}  // namespace detail::flexio_spi_internal
+
+// ===========================================================================
+// Public API: defined in `namespace fl` directly (header signatures match).
+// Each function `using namespace detail::flexio_spi_internal` to access the
+// private state without changing call-site spelling.
+// ===========================================================================
+
 // ============================================================================
 // flexio_spi_lookup_pins
 // ============================================================================
 
 bool flexio_spi_lookup_pins(u8 mosi_pin, u8 sclk_pin,
                             FlexIOSPIPinInfo* info) FL_NO_EXCEPT {
+    using namespace detail::flexio_spi_internal;
     if (!info) return false;
     if (mosi_pin == sclk_pin) return false;  // aliasing not allowed
 
@@ -167,6 +184,7 @@ bool flexio_spi_lookup_pins(u8 mosi_pin, u8 sclk_pin,
 
 bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
                      u32 clock_hz) FL_NO_EXCEPT {
+    using namespace detail::flexio_spi_internal;
     if (clock_hz == 0) {
         FL_LOG_FLEXIO_F("FlexIO_SPI: init refused -- clock_hz == 0");
         return false;
@@ -370,6 +388,7 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
 // ============================================================================
 
 bool flexio_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT {
+    using namespace detail::flexio_spi_internal;
     if (!sSpiInitialized || !sSpiDmaChannel || !buffer || num_bytes == 0) {
         return false;
     }
@@ -450,6 +469,7 @@ bool flexio_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT {
 // ============================================================================
 
 void flexio_spi_wait() FL_NO_EXCEPT {
+    using namespace detail::flexio_spi_internal;
     if (sSpiDmaComplete) return;
 
     // Bounded 50 ms wait for the DMA major-loop completion.
@@ -497,6 +517,7 @@ void flexio_spi_wait() FL_NO_EXCEPT {
 // ============================================================================
 
 void flexio_spi_deinit() FL_NO_EXCEPT {
+    using namespace detail::flexio_spi_internal;
     if (!sSpiInitialized) return;
 
     flexio_spi_wait();
