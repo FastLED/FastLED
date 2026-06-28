@@ -55,9 +55,74 @@ edits to those structs — or to any new LPC register access — MUST follow
 `agents/docs/register-maps.md`: cite both the UM section and the
 vendor CMSIS member name on every line, gate the shim behind the
 vendor typedef's include guard, and spot-check three offsets against
-the real header before merging. The long-term plan is tier-2 vendoring
-of `LPC845.h` (BSD-3-Clause) into `src/platforms/arm/lpc/cmsis/` and
-deletion of the shims.
+the real header before merging.
+
+**Vendor CMSIS PAL header is now in-tree** at
+[`src/platforms/arm/lpc/cmsis/LPC845.h`](cmsis/) (V1 step of [#3437](https://github.com/FastLED/FastLED/issues/3437),
+NXP `mcux-sdk` rev. 1.2 @ SHA `8a289764` — BSD-3-Clause). Subsequent PRs
+will wire it into `led_sysdefs_arm_lpc.h`, migrate call sites to the
+vendor typedefs (`SCT_Type`, `DMA_Type`, `SYSCON_Type`, etc.), and
+delete the shims. See `cmsis/README.md` for the verified offsets
+including the cross-check of @phatpaul's #3349 fix (`SYSAHBCLKCTRL0`
+at `0x80`) and additional shim layout bugs uncovered during
+verification.
+
+### Hand-rolled register-map remediation list (PR #3349 follow-up)
+
+> **Tracking issue:** [#3437](https://github.com/FastLED/FastLED/issues/3437) — meta for replacing every site below with vendor CMSIS PAL headers.
+
+@phatpaul (PR [#3349](https://github.com/FastLED/FastLED/pull/3349#issuecomment-4811566535)):
+*"I want to remove all the hand-rolled register maps and require the
+use of the vendor provided CMSIS PAL files to build."* Full audit of
+what needs to move to vendor headers before that PR can finish.
+
+**Tier-2 vendoring milestone** — drop NXP CMSIS PAL headers into
+`src/platforms/arm/lpc/cmsis/` (BSD-3-Clause; upstream
+[mcux-sdk](https://github.com/nxp-mcuxpresso/mcux-sdk)),
+include unconditionally from `led_sysdefs_arm_lpc.h`, then delete every
+row below.
+
+**Status:** ✅ V1 done — `cmsis/LPC845.h` + `cmsis/system_LPC845.h`
+vendored (rev. 1.2, SHA `8a289764`). Still pending: V2-V4 (vendor
+`LPC804.h`, `LPC11xx.h`, modern-LPC-GPIO header), V5 (wire into
+`led_sysdefs_arm_lpc.h`), V6 (delete the shims in each row below and
+migrate call sites), V7 (`#error` guard).
+
+#### A. Hand-rolled struct shims (CMSIS-style typedef + `LPC_*` pointer)
+
+These are the dangerous pattern called out in `agents/docs/register-maps.md` —
+re-typed from the user manual, prone to silent offset bugs.
+
+| # | Symbol | Location | Peripheral | Replace with |
+|---|--------|----------|------------|--------------|
+| 1 | `FL_LPC_SCT_Shim` + `#define LPC_SCT` | `clockless_arm_lpc_pwm_dma.h:225,269` | LPC845 SCT (UM11029 §16) | `LPC_SCT_Type` from `LPC845.h` |
+| 2 | `FL_LPC_DMA_Shim` + `FL_LPC_DMA_ChannelShim` + `#define LPC_DMA` | `clockless_arm_lpc_pwm_dma.h:273,279,310` | LPC845 DMA (UM11029 §17) | `LPC_DMA_Type` from `LPC845.h` |
+| 3 | `FL_LPC_SYSCON_Shim` + `#define LPC_SYSCON` | `clockless_arm_lpc_pwm_dma.h:314,321` | LPC845 SYSCON (UM11029 §4.6) | `LPC_SYSCON_Type` from `LPC845.h` |
+| 4 | `FL_LPC_SPI_Type` (no `LPC_SPI*` define — driver casts pSPIX itself) | `spi_arm_lpc.h:60-72` | LPC8xx SPI0/SPI1 (UM11029 §"SPI") | `LPC_SPI_Type` from `LPC845.h` / `LPC804.h` |
+| 5 | `FL_LPC11_LEGACY_GPIO_Type` + `#define LPC_GPIO0..3` | `fastpin_arm_lpc11_legacy.h:57-82` | LPC11xx legacy GPIO @ 0x50000000 (UM10398 §9) | `LPC_GPIO_Type` from `LPC11xx.h` / `LPC1100.h` |
+
+#### B. Raw `base + offset` MMIO with embedded register-map knowledge
+
+Not literal structs, but the same problem in flatter form: numeric base
+addresses + hand-typed offset constants + `reg(base, off)` helpers. Every
+offset is a hand-typed source of truth that a vendor header would
+generate.
+
+| # | Location | Peripheral(s) | Replace with |
+|---|----------|---------------|--------------|
+| 6 | `FL_LPC_GPIO_*_OFFSET` constants + `lpc_gpio_*()` fallback helpers, `fastpin_arm_lpc.h:55-86` | Modern LPC GPIO @ 0xA0000000 (LPC8xx / LPC11Uxx / LPC15xx) | File already prefers vendor `LPC_GPIO` when on the include path — once CMSIS is required, delete the `#else` fallback path |
+| 7 | `kPluBase`, `kSysconBase`, `kOff*` offsets + `reg32(base, off)` helper, `clockless_arm_lpc_plu.h:82-180` | LPC804 PLU (UM11065 §12) + SYSCON | `LPC_PLU_Type`, `LPC_SYSCON_Type` from `LPC804.h` |
+| 8 | `kSctBase`, `kDmaBase`, `kSwmBase`, `kSysconBase`, dozens of `kOff*` constants + `reg(base, off)` helper, `rx_sct_capture.cpp.hpp:80-220` | LPC845 SCT + DMA + SWM + SYSCON | `LPC_SCT_Type`, `LPC_DMA_Type`, `LPC_SWM_Type`, `LPC_SYSCON_Type` from `LPC845.h` |
+
+**Total: 8 hand-rolled register-access sites across 6 files** —
+`clockless_arm_lpc_pwm_dma.h`, `spi_arm_lpc.h`,
+`fastpin_arm_lpc11_legacy.h`, `fastpin_arm_lpc.h`,
+`clockless_arm_lpc_plu.h`, `rx_sct_capture.cpp.hpp`.
+
+Closing this list = deleting all eight, replacing every access site
+with the vendor typedef'd pointer, and bumping
+`agents/docs/register-maps.md` to retire LPC8xx as its
+worked anti-example.
 
 ## Files (quick pass)
 
