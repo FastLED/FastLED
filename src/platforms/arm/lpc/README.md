@@ -57,18 +57,17 @@ vendor CMSIS member name on every line, gate the shim behind the
 vendor typedef's include guard, and spot-check three offsets against
 the real header before merging.
 
-**Vendor CMSIS PAL header is now in-tree** at
-[`src/platforms/arm/lpc/third_party/cmsis/LPC845.h`](third_party/cmsis/) (V1 step of [#3437](https://github.com/FastLED/FastLED/issues/3437),
-NXP `mcux-sdk` rev. 1.2 @ SHA `8a289764` — BSD-3-Clause). Lives under
-a `third_party/` path component so the FastLED C++ linter automatically
-exempts it from house-style rules (`stdint.h`, plain enums, namespace
-`fl`, etc.) that don't apply to vendored upstream code. Subsequent PRs
-will wire it into `led_sysdefs_arm_lpc.h`, migrate call sites to the
-vendor typedefs (`SCT_Type`, `DMA_Type`, `SYSCON_Type`, etc.), and
-delete the shims. See `third_party/cmsis/README.md` for the verified
-offsets including the cross-check of @phatpaul's #3349 fix
-(`SYSAHBCLKCTRL0` at `0x80`) and additional shim layout bugs uncovered
-during verification.
+The proper long-term fix is for the **`zackees/ArduinoCore-LPC8xx`
+platform package to ship NXP's full `LPC845.h` CMSIS PAL** (typedefs
+for `SCT_Type`, `DMA_Type`, `SYSCON_Type`, etc.) in
+`variants/lpc845/LPC845.h`. The version currently shipped is a 54-line
+stub containing only IRQ enums + CMSIS-Core configuration constants —
+no peripheral typedefs — which is why the FastLED shims exist in the
+first place. Once the upstream package provides the full vendor
+header, FastLED's `led_sysdefs_arm_lpc.h` can `#include <LPC845.h>`
+directly (tier 1 per `agents/docs/register-maps.md`) and all eight
+shim/raw-offset sites listed below can be migrated to vendor typedefs
+without FastLED vendoring anything.
 
 ### Hand-rolled register-map remediation list (PR #3349 follow-up)
 
@@ -79,18 +78,20 @@ during verification.
 use of the vendor provided CMSIS PAL files to build."* Full audit of
 what needs to move to vendor headers before that PR can finish.
 
-**Tier-2 vendoring milestone** — drop NXP CMSIS PAL headers into
-`src/platforms/arm/lpc/cmsis/` (BSD-3-Clause; upstream
-[mcux-sdk](https://github.com/nxp-mcuxpresso/mcux-sdk)),
-include unconditionally from `led_sysdefs_arm_lpc.h`, then delete every
-row below.
+**Tier-1 path (preferred per `agents/docs/register-maps.md`):** wait
+for `zackees/ArduinoCore-LPC8xx` to ship NXP's full `LPC845.h` (and
+`LPC804.h`, `LPC11xx.h`) under `variants/<chip>/`. Then FastLED
+includes the vendor header directly from `led_sysdefs_arm_lpc.h` and
+deletes every shim/raw-offset row below. **No vendoring inside
+FastLED.**
 
-**Status:** ✅ V1 done — `third_party/cmsis/LPC845.h` +
-`third_party/cmsis/system_LPC845.h` vendored (rev. 1.2, SHA
-`8a289764`). Still pending: V2-V4 (vendor
-`LPC804.h`, `LPC11xx.h`, modern-LPC-GPIO header), V5 (wire into
-`led_sysdefs_arm_lpc.h`), V6 (delete the shims in each row below and
-migrate call sites), V7 (`#error` guard).
+**Tier-2 fallback (FastLED-side vendoring):** only if the upstream
+package declines to ship the full header — copy NXP's
+[mcux-sdk](https://github.com/nxp-mcuxpresso/mcux-sdk) `devices/<chip>/<chip>.h`
+into `src/platforms/arm/lpc/third_party/cmsis/` (BSD-3-Clause; the
+`third_party/` path component is required so the FastLED linter
+exempts it from house-style rules), include from
+`led_sysdefs_arm_lpc.h`, then delete every row below.
 
 #### A. Hand-rolled struct shims (CMSIS-style typedef + `LPC_*` pointer)
 

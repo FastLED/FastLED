@@ -271,12 +271,6 @@ impl FileContentChecker for BannedHeadersChecker {
         if is_excluded_file(&normalized) {
             return false;
         }
-        // Vendored upstream code under any `/third_party/` directory is
-        // byte-identical with its source and must not be edited to satisfy
-        // FastLED's house style. Skip regardless of scope.
-        if normalized.contains("/third_party/") {
-            return false;
-        }
         self.scope_matches(&normalized, project_root)
     }
 

@@ -86,11 +86,7 @@ vendor's typedef'd peripheral pointers (`LPC_SCT->CONFIG`, `GPIOA->BSRR`,
 If the toolchain's include path is unreliable (e.g. the Arduino core only
 exposes the active variant directory, like the NXP `ArduinoCore-LPC8xx`
 PlatformIO binding does), copy the vendor header into
-`src/platforms/<arch>/<vendor>/third_party/cmsis/<chip>.h`. The
-`/third_party/` path component is required — the FastLED C++ linter
-exempts any path containing `/third_party/` from house-style rules
-(`fl::u32` instead of `uint32_t`, `namespace fl {`, `enum class`, etc.)
-that don't apply to vendored upstream code. License headers stay intact;
+`src/platforms/<arch>/<vendor>/cmsis/<chip>.h`. License headers stay intact;
 add a one-line `README.md` next to it citing the upstream URL and the
 commit SHA the copy is from. Update the platform's `led_sysdefs_*.h` to
 include the local copy.
@@ -167,14 +163,11 @@ and the offsets were wrong twice:
   plus explicit `TRIGPOL=0`, `TRIGTYPE=0`. Also fixed in #3349.
 
 The right fix going forward is tier 2: vendor a copy of NXP's `LPC845.h`
-(BSD-3-Clause) into `src/platforms/arm/lpc/third_party/cmsis/LPC845.h`,
-include it unconditionally from `led_sysdefs_arm_lpc.h`, and delete the
-shims. V1 of this work landed in PR #3438 (the vendored header is now
-in-tree); the call-site migration + shim deletion is tracked under
-[#3437](https://github.com/FastLED/FastLED/issues/3437). Until that
-lands, the tier-3 shim remains the source of truth for non-Arduino
-build paths and any further edits must follow the rules in this
-document.
+(BSD-3-Clause) into `src/platforms/arm/lpc/cmsis/LPC845.h`, include it
+unconditionally from `led_sysdefs_arm_lpc.h`, and delete the shims. This
+work is tracked as an open follow-up; until it lands, the tier-3 shim
+remains the source of truth for non-Arduino build paths and any further
+edits must follow the rules in this document.
 
 ## Cross-references
 

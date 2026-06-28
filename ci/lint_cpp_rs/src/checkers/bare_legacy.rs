@@ -381,13 +381,6 @@ impl FileContentChecker for IwyuPragmaPrivateChecker {
             return false;
         }
 
-        // Vendored upstream code under any `/third_party/` directory is
-        // byte-identical with its source and uses vendor-native include
-        // pragmas. Skip.
-        if normalized.contains("/third_party/") {
-            return false;
-        }
-
         // Skip root-level files directly under src/platforms/. Python's
         // `file.parent != platforms_dir` check is equivalent to "the path
         // under src/platforms/ has at least one more `/` separator".

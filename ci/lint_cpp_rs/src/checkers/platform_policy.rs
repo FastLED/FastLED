@@ -102,12 +102,6 @@ impl FileContentChecker for PlatformsFlNamespaceChecker {
         if normalized.contains("/examples/") || normalized.contains("/tests/") {
             return false;
         }
-        // Vendored upstream code under any `/third_party/` directory is
-        // byte-identical with its source and uses vendor-native namespacing
-        // (e.g. no `namespace fl`). Skip.
-        if normalized.contains("/third_party/") {
-            return false;
-        }
         if ends_with_any(&normalized, &["_build.hpp", "_build.cpp", "_build.cpp.hpp"]) {
             return false;
         }
