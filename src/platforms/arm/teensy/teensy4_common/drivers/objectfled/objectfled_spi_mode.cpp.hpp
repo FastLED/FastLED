@@ -362,10 +362,10 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
     // the Teensy on bring-up. Verified against imxrt.h:1573.
     CCM_CCGR4 |= CCM_CCGR4_PWM2(CCM_CCGR_ON);
 
+    // Snapshot pre-init mux ALT values so deinit() can restore them. Per
+    // coderabbitai review on #3432.
     sSpiSavedMosiMux = *(pin_info.mosi_mux_reg);
     sSpiSavedSclkMux = *(pin_info.sclk_mux_reg);
-    (void)sSpiSavedMosiMux;
-    (void)sSpiSavedSclkMux;
 
     *(pin_info.mosi_mux_reg) = 5u;
     *(pin_info.mosi_pad_reg) =
@@ -452,9 +452,14 @@ bool objectfled_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT {
         return false;
     }
     if (num_bytes > kSpiMaxInputBytes) {
-        FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: num_bytes=%s exceeds max %s; truncating",
+        // Per coderabbitai review on #3432: reject oversized frames rather
+        // than silently truncating. Silent truncation would emit a partial
+        // APA102/SK9822 frame with no caller visibility, corrupting the
+        // strip output. The header documents that invalid arguments return
+        // false; honor that contract.
+        FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: num_bytes=%s exceeds max %s; rejecting",
                             (int)num_bytes, (int)kSpiMaxInputBytes);
-        num_bytes = kSpiMaxInputBytes;
+        return false;
     }
 
     // NOTE(#3428): we intentionally do NOT call
@@ -625,15 +630,19 @@ void objectfled_spi_deinit() FL_NO_EXCEPT {
         delete to_delete;  // ok bare allocation
     }
 
+    // Per coderabbitai review on #3432: restore the saved mux ALT values
+    // captured in objectfled_spi_init() rather than forcing ALT5. If the
+    // user previously had the pin on (e.g.) ALT3 for FlexCAN, forcing ALT5
+    // would leave them with a silently-changed pin mux post-deinit.
     if (sSpiCurrentPins.mosi_mux_reg) {
         GPIO1_DR   &= ~sSpiCurrentPins.mosi_mask;
         GPIO1_GDIR &= ~sSpiCurrentPins.mosi_mask;
-        *(sSpiCurrentPins.mosi_mux_reg) = 5u;
+        *(sSpiCurrentPins.mosi_mux_reg) = sSpiSavedMosiMux;
     }
     if (sSpiCurrentPins.sclk_mux_reg) {
         GPIO1_DR   &= ~sSpiCurrentPins.sclk_mask;
         GPIO1_GDIR &= ~sSpiCurrentPins.sclk_mask;
-        *(sSpiCurrentPins.sclk_mux_reg) = 5u;
+        *(sSpiCurrentPins.sclk_mux_reg) = sSpiSavedSclkMux;
     }
     // NOTE: we deliberately do NOT restore IOMUXC_GPR_GPR26 -- leaving
     // the pads aliased to GPIO1 is harmless when not driven, and avoids
