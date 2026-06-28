@@ -710,20 +710,27 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     }
 
     // Legacy API: pins 0-8 are the historical compile-time template range.
-    // Pin 22 is included for the current Teensy ObjectFLED loopback wiring.
+    // On Teensy 4.x, pin 22 is also included for current ObjectFLED loopback
+    // wiring. Other targets may mark GPIO22 invalid at compile time.
     // Multi-lane uses consecutive pins starting at pin_tx.
     if (use_legacy_api) {
         int max_pin = pin_tx + (int)lane_sizes.size() - 1;
         const bool historical_pin_range = pin_tx >= 0 && max_pin <= 8;
+#if AUTORESEARCH_LEGACY_SUPPORTS_PIN_22
         const bool current_loopback_pin =
                 lane_sizes.size() == 1 && pin_tx == 22;
+#else
+        const bool current_loopback_pin = false;
+#endif
         if (!historical_pin_range && !current_loopback_pin) {
             response.set("success", false);
             response.set("error", "LegacyApiPinRange");
             fl::sstream msg;
-            msg << "Legacy template API supports pins 0-8, plus single-lane "
-                << "pin 22 for current ObjectFLED loopback, got pins "
-                << pin_tx << "-" << max_pin;
+            msg << "Legacy template API supports pins 0-8";
+#if AUTORESEARCH_LEGACY_SUPPORTS_PIN_22
+            msg << ", plus single-lane pin 22 for current ObjectFLED loopback";
+#endif
+            msg << ", got pins " << pin_tx << "-" << max_pin;
             response.set("message", msg.str().c_str());
             return response;
         }

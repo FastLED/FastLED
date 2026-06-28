@@ -1495,34 +1495,6 @@ public:
 		return get_power_scaling_exponent();
 	}
 
-	/// @name RGBW Input Gamut Configuration
-	/// Legacy god-instance wrappers around `fl::set_input_gamut` (#2710) for
-	/// mutable profile structs. New sketches should normally create an owned
-	/// profile with `fl::color::make_diode_profile(...)` and pass that profile
-	/// into `fl::Rgbw`.
-	/// @{
-
-	/// Reconfigure `profile`'s input gamut to one of the named source
-	/// chromaticity sets (Native / Rec709 / Rec2020 / DCI-P3 D65 / D60).
-	/// Mutates `profile` in place; no-op if `profile == nullptr`.
-	/// @code
-	/// fl::color::DiodeProfile my_profile = fl::color::kRgbwDefaultProfile;
-	/// FastLED.setInputGamut(&my_profile, fl::color::InputGamut::Rec709);
-	/// @endcode
-	inline void setInputGamut(fl::DiodeProfile* profile, fl::InputGamut g) FL_NO_EXCEPT {
-		fl::set_input_gamut(profile, g);
-	}
-
-	/// Same as above with an explicit input white-point override. Pass
-	/// `nullptr` for `white_xy` to fall back to the gamut's standard
-	/// reference white (equivalent to the 2-argument overload).
-	inline void setInputGamut(fl::DiodeProfile* profile, fl::InputGamut g,
-	                          const float white_xy[2]) FL_NO_EXCEPT {
-		fl::set_input_gamut(profile, g, white_xy);
-	}
-
-	/// @} RGBW Input Gamut Configuration
-
 private:
 	// Forward shims for the tiered-wait spin budget (#2818). Full impl
 	// lives in src/fl/channels/detail/wait_spin_budget.{h,cpp.hpp}.
