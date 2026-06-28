@@ -16,14 +16,14 @@ namespace fl {
 
 namespace {
     /// Static registry of all registered instances
-    fl::vector<fl::shared_ptr<SpiHw16>>& getRegistrySpiHw16() FL_NOEXCEPT {
+    fl::vector<fl::shared_ptr<SpiHw16>>& getRegistrySpiHw16() FL_NO_EXCEPT {
         static fl::vector<fl::shared_ptr<SpiHw16>> registry;
         return registry;
     }
 }
 
 /// Get all available 16-lane hardware SPI devices on this platform
-const fl::vector<fl::shared_ptr<SpiHw16>>& SpiHw16::getAll() FL_NOEXCEPT {
+const fl::vector<fl::shared_ptr<SpiHw16>>& SpiHw16::getAll() FL_NO_EXCEPT {
     // Lazy initialization of platform-specific SPI instances
     // C++11 guarantees thread-safe static initialization
     static bool sInitialized = false;
@@ -35,14 +35,14 @@ const fl::vector<fl::shared_ptr<SpiHw16>>& SpiHw16::getAll() FL_NOEXCEPT {
 }
 
 /// Register a platform-specific instance
-void SpiHw16::registerInstance(fl::shared_ptr<SpiHw16> instance) FL_NOEXCEPT {
+void SpiHw16::registerInstance(fl::shared_ptr<SpiHw16> instance) FL_NO_EXCEPT {
     if (instance) {
         getRegistrySpiHw16().push_back(instance);
     }
 }
 
 /// Remove a registered instance
-bool SpiHw16::removeInstance(const fl::shared_ptr<SpiHw16>& instance) FL_NOEXCEPT {
+bool SpiHw16::removeInstance(const fl::shared_ptr<SpiHw16>& instance) FL_NO_EXCEPT {
     auto& registry = getRegistrySpiHw16();
     for (size_t i = 0; i < registry.size(); ++i) {
         if (registry[i] == instance) {
@@ -54,7 +54,7 @@ bool SpiHw16::removeInstance(const fl::shared_ptr<SpiHw16>& instance) FL_NOEXCEP
 }
 
 /// Clear all registered instances (primarily for testing)
-void SpiHw16::clearInstances() FL_NOEXCEPT {
+void SpiHw16::clearInstances() FL_NO_EXCEPT {
     getRegistrySpiHw16().clear();
 }
 

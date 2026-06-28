@@ -29,7 +29,7 @@ public:
     typedef u32 port_t;
 
     #if 0
-    inline static void setOutput() FL_NOEXCEPT {
+    inline static void setOutput() FL_NO_EXCEPT {
         if(_BIT<8) {
             _CRL::r() = (_CRL::r() & (0xF << (_BIT*4)) | (0x1 << (_BIT*4));
         } else {

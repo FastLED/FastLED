@@ -12,12 +12,12 @@ const fl::size basic_string::npos;
 
 // ======= PUBLIC CONSTRUCTORS (span delegate) =======
 
-basic_string::basic_string(fl::span<char, static_cast<fl::size>(-1)> storage) FL_NOEXCEPT
+basic_string::basic_string(fl::span<char, static_cast<fl::size>(-1)> storage) FL_NO_EXCEPT
     : basic_string(storage.data(), storage.size()) {}
 
 // ======= DESTRUCTOR =======
 
-basic_string::~basic_string() FL_NOEXCEPT {}
+basic_string::~basic_string() FL_NO_EXCEPT {}
 
 // ======= string_view CONSTRUCTOR FROM basic_string =======
 // Defined here (in the same TU as basic_string itself) so
@@ -25,7 +25,7 @@ basic_string::~basic_string() FL_NOEXCEPT {}
 // and declares this ctor without needing basic_string's complete
 // type.
 
-string_view::string_view(const basic_string& str) FL_NOEXCEPT
+string_view::string_view(const basic_string& str) FL_NO_EXCEPT
     : mData(str.c_str()), mSize(str.size()) {}
 
 // ======= ACCESSORS =======
@@ -489,7 +489,7 @@ basic_string& basic_string::assign(fl::size count, char c) {
     return *this;
 }
 
-basic_string& basic_string::assign(basic_string&& str) FL_NOEXCEPT {
+basic_string& basic_string::assign(basic_string&& str) FL_NO_EXCEPT {
     moveAssign(fl::move(str));
     return *this;
 }
@@ -1225,7 +1225,7 @@ int basic_string::compare(fl::size pos1, fl::size count1, const char* s, fl::siz
 
 // ======= PROTECTED: MOVE / SWAP / FACTORY HELPERS =======
 
-void basic_string::moveFrom(basic_string&& other) FL_NOEXCEPT {
+void basic_string::moveFrom(basic_string&& other) FL_NO_EXCEPT {
     if (other.isInline()) {
         mLength = other.mLength;
         fl::memcpy(inlineBufferPtr(), other.inlineBufferPtr(), other.mLength + 1);
@@ -1239,7 +1239,7 @@ void basic_string::moveFrom(basic_string&& other) FL_NOEXCEPT {
     other.inlineBufferPtr()[0] = '\0';
 }
 
-void basic_string::moveAssign(basic_string&& other) FL_NOEXCEPT {
+void basic_string::moveAssign(basic_string&& other) FL_NO_EXCEPT {
     if (this == &other) return;
     if (other.isInline()) {
         mLength = other.mLength;

@@ -38,6 +38,7 @@
 #include "fl/stl/json.h"
 #include "fl/task/task.h"
 #include "fl/task/executor.h"
+#include <Arduino.h>
 #include "fl/math/wave/wave_perf_bench.h"
 #include "fl/stl/atomic.h"
 #include "fl/task/promise.h"
@@ -68,9 +69,19 @@
 void printJsonRaw(const fl::json& json, const char* prefix) {
     // Serialize and print response
     fl::string formatted = fl::formatJsonResponse(json, prefix);
-    fl::println(formatted.c_str());
-    fl::flush();
+    Serial.println(formatted.c_str());  // ok serial - ok autoresearch rpc serial - RPC response boundary
+    Serial.flush();                     // ok serial - ok autoresearch rpc serial - host waits for RPC boundary
 }
+
+namespace {
+
+void printRemoteResponseRaw(const fl::json& response) {
+    fl::string formatted = fl::formatJsonResponse(response, "REMOTE: ");
+    Serial.println(formatted.c_str());  // ok serial - ok autoresearch rpc serial - RPC response boundary
+    Serial.flush();                     // ok serial - ok autoresearch rpc serial - host waits for RPC boundary
+}
+
+}  // namespace
 
 void printStreamRaw(const char* messageType, const fl::json& data) {
     // Build pure JSONL message: RESULT: {"type":"...", ...data}
@@ -87,7 +98,7 @@ void printStreamRaw(const char* messageType, const fl::json& data) {
 
     // Use fl:: serial transport for consistent formatting
     fl::string formatted = fl::formatJsonResponse(output, "RESULT: ");
-    fl::println(formatted.c_str());
+    Serial.println(formatted.c_str());  // ok serial - ok autoresearch rpc serial - stream response boundary
 }
 
 // ============================================================================
@@ -243,11 +254,11 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
                 mState->rx_channel.reset();
                 mState->rx_channel = mState->rx_factory(found_rx);
                 if (!mState->rx_channel) {
-                    FL_ERROR("[PIN PROBE] Failed to recreate RX channel on GPIO " << found_rx);
                     // Restore old values
                     mState->pin_tx = old_tx;
                     mState->pin_rx = old_rx;
                     response.set("error", "RxChannelCreationFailed");
+                    response.set("message", "Failed to recreate RX channel on discovered pin");
                     response.set("autoApplied", false);
                     return response;
                 }
@@ -273,7 +284,7 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
 AutoResearchRemoteControl::AutoResearchRemoteControl()
     : mRemote(fl::make_unique<fl::Remote>(
         fl::createSerialRequestSource(),
-        fl::createSerialResponseSink("REMOTE: ")
+        printRemoteResponseRaw
     )) {
     // mState will be set by registerFunctions()
 }
@@ -319,7 +330,6 @@ void AutoResearchRemoteControl::tick(uint32_t current_millis) {
         mBleState = nullptr;
         mState->ble_server_active = false;
         getBleState().ble_server_active = false;
-        FL_WARN("[BLE] Deferred teardown complete");
     }
 }
 
@@ -387,7 +397,6 @@ fl::json AutoResearchRemoteControl::startBleRemote() {
     response.set("service_uuid", FL_BLE_SERVICE_UUID);
     response.set("rx_uuid", FL_BLE_CHAR_RX_UUID);
     response.set("tx_uuid", FL_BLE_CHAR_TX_UUID);
-    FL_WARN("[BLE] Remote created and advertising");
     return response;
 }
 

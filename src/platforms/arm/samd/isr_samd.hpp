@@ -100,7 +100,7 @@ static samd_isr_handle_data* eic_handles[MAX_EIC_CHANNELS] = {};
 // =============================================================================
 
 // Get timer instance pointer from index
-static Tc* get_timer_instance(u8 index) FL_NOEXCEPT {
+static Tc* get_timer_instance(u8 index) FL_NO_EXCEPT {
     switch (index) {
 #ifdef TC0
         case 0: return TC0;
@@ -131,7 +131,7 @@ static Tc* get_timer_instance(u8 index) FL_NOEXCEPT {
 }
 
 // Get timer IRQ from index
-static IRQn_Type get_timer_irq(u8 index) FL_NOEXCEPT {
+static IRQn_Type get_timer_irq(u8 index) FL_NO_EXCEPT {
     switch (index) {
 #ifdef TC0_IRQn
         case 0: return TC0_IRQn;
@@ -162,7 +162,7 @@ static IRQn_Type get_timer_irq(u8 index) FL_NOEXCEPT {
 }
 
 // Allocate a free timer
-static bool allocate_timer(u8& timer_idx) FL_NOEXCEPT {
+static bool allocate_timer(u8& timer_idx) FL_NO_EXCEPT {
     // Critical section: prevent interrupt from modifying allocation state
     __disable_irq();
 
@@ -181,7 +181,7 @@ static bool allocate_timer(u8& timer_idx) FL_NOEXCEPT {
 }
 
 // Free a timer
-static void free_timer(u8 timer_idx) FL_NOEXCEPT {
+static void free_timer(u8 timer_idx) FL_NO_EXCEPT {
     if (timer_idx <= MAX_TIMER_INDEX) {
         // Critical section: prevent interrupt from accessing freed resources
         __disable_irq();
@@ -192,7 +192,7 @@ static void free_timer(u8 timer_idx) FL_NOEXCEPT {
 }
 
 // Allocate a free EIC channel
-static bool allocate_eic_channel(u8& channel) FL_NOEXCEPT {
+static bool allocate_eic_channel(u8& channel) FL_NO_EXCEPT {
     // Critical section: prevent interrupt from modifying allocation state
     __disable_irq();
 
@@ -211,7 +211,7 @@ static bool allocate_eic_channel(u8& channel) FL_NOEXCEPT {
 }
 
 // Free an EIC channel
-static void free_eic_channel(u8 channel) FL_NOEXCEPT {
+static void free_eic_channel(u8 channel) FL_NO_EXCEPT {
     if (channel < MAX_EIC_CHANNELS) {
         // Critical section: prevent interrupt from accessing freed resources
         __disable_irq();
@@ -225,7 +225,7 @@ static void free_eic_channel(u8 channel) FL_NOEXCEPT {
 // For SAMD21 (M0+): 4 priority levels (0-3), lower number = higher priority
 // For SAMD51 (M4): 8 priority levels (0-7), lower number = higher priority
 // ISR priority 1 (low) -> NVIC 3, ISR priority 7 (max) -> NVIC 0
-static u8 map_priority_to_nvic(u8 isr_priority) FL_NOEXCEPT {
+static u8 map_priority_to_nvic(u8 isr_priority) FL_NO_EXCEPT {
     // Clamp to valid range
     if (isr_priority < 1) isr_priority = 1;
 
@@ -247,7 +247,7 @@ static u8 map_priority_to_nvic(u8 isr_priority) FL_NOEXCEPT {
 }
 
 // Check if timer is syncing (required for SAMD register writes)
-static bool tc_is_syncing(Tc* tc) FL_NOEXCEPT {
+static bool tc_is_syncing(Tc* tc) FL_NO_EXCEPT {
 #if defined(FL_IS_SAMD21)
     return tc->COUNT16.STATUS.reg & TC_STATUS_SYNCBUSY;
 #elif defined(FL_IS_SAMD51)
@@ -258,14 +258,14 @@ static bool tc_is_syncing(Tc* tc) FL_NOEXCEPT {
 }
 
 // Wait for timer sync
-static void tc_wait_sync(Tc* tc) FL_NOEXCEPT {
+static void tc_wait_sync(Tc* tc) FL_NO_EXCEPT {
     while (tc_is_syncing(tc)) {
         // Wait for sync
     }
 }
 
 // Reset timer
-static void tc_reset(Tc* tc) FL_NOEXCEPT {
+static void tc_reset(Tc* tc) FL_NO_EXCEPT {
     tc->COUNT16.CTRLA.reg = TC_CTRLA_SWRST;
     tc_wait_sync(tc);
     while (tc->COUNT16.CTRLA.bit.SWRST) {
@@ -278,7 +278,7 @@ static void tc_reset(Tc* tc) FL_NOEXCEPT {
 // =============================================================================
 
 // Common timer interrupt handler
-static void timer_interrupt_handler(u8 timer_idx) FL_NOEXCEPT {
+static void timer_interrupt_handler(u8 timer_idx) FL_NO_EXCEPT {
     Tc* timer = get_timer_instance(timer_idx);
     if (!timer) return;
 
@@ -297,55 +297,55 @@ static void timer_interrupt_handler(u8 timer_idx) FL_NOEXCEPT {
 // Timer ISR wrappers for each possible TC instance
 extern "C" {
 #ifdef TC0_IRQn
-    void TC0_Handler(void) FL_NOEXCEPT {
+    void TC0_Handler(void) FL_NO_EXCEPT {
         timer_interrupt_handler(0);
     }
 #endif
 
 #ifdef TC1_IRQn
-    void TC1_Handler(void) FL_NOEXCEPT {
+    void TC1_Handler(void) FL_NO_EXCEPT {
         timer_interrupt_handler(1);
     }
 #endif
 
 #ifdef TC2_IRQn
-    void TC2_Handler(void) FL_NOEXCEPT {
+    void TC2_Handler(void) FL_NO_EXCEPT {
         timer_interrupt_handler(2);
     }
 #endif
 
 #ifdef TC3_IRQn
-    void TC3_Handler(void) FL_NOEXCEPT {
+    void TC3_Handler(void) FL_NO_EXCEPT {
         timer_interrupt_handler(3);
     }
 #endif
 
 #ifdef TC4_IRQn
-    void TC4_Handler(void) FL_NOEXCEPT {
+    void TC4_Handler(void) FL_NO_EXCEPT {
         timer_interrupt_handler(4);
     }
 #endif
 
 #ifdef TC5_IRQn
-    void TC5_Handler(void) FL_NOEXCEPT {
+    void TC5_Handler(void) FL_NO_EXCEPT {
         timer_interrupt_handler(5);
     }
 #endif
 
 #ifdef TC6_IRQn
-    void TC6_Handler(void) FL_NOEXCEPT {
+    void TC6_Handler(void) FL_NO_EXCEPT {
         timer_interrupt_handler(6);
     }
 #endif
 
 #ifdef TC7_IRQn
-    void TC7_Handler(void) FL_NOEXCEPT {
+    void TC7_Handler(void) FL_NO_EXCEPT {
         timer_interrupt_handler(7);
     }
 #endif
 
     // EIC (External Interrupt Controller) handler
-    void EIC_Handler(void) FL_NOEXCEPT {
+    void EIC_Handler(void) FL_NO_EXCEPT {
         for (u8 ch = 0; ch < MAX_EIC_CHANNELS; ch++) {
             u32 flag = 1UL << ch;
 
@@ -366,7 +366,7 @@ extern "C" {
 // SAMD ISR Implementation (fl::isr::platform namespace)
 // =============================================================================
 
-int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
+int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
     if (!config.handler) {
         FL_WARN_F("attachTimerHandler: handler is null");
         return -1;  // Invalid parameter
@@ -522,7 +522,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     return 0;  // Success
 }
 
-int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
+int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
     if (!config.handler) {
         FL_WARN_F("attachExternalHandler: handler is null");
         return -1;  // Invalid parameter
@@ -634,10 +634,10 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
 
     // Configure NVIC
     u8 nvic_priority = map_priority_to_nvic(config.priority);
-    NVIC_DisableIRQ(EIC_IRQn) FL_NOEXCEPT;
-    NVIC_ClearPendingIRQ(EIC_IRQn) FL_NOEXCEPT;
-    NVIC_SetPriority(EIC_IRQn, nvic_priority) FL_NOEXCEPT;
-    NVIC_EnableIRQ(EIC_IRQn) FL_NOEXCEPT;
+    NVIC_DisableIRQ(EIC_IRQn) FL_NO_EXCEPT;
+    NVIC_ClearPendingIRQ(EIC_IRQn) FL_NO_EXCEPT;
+    NVIC_SetPriority(EIC_IRQn, nvic_priority) FL_NO_EXCEPT;
+    NVIC_EnableIRQ(EIC_IRQn) FL_NO_EXCEPT;
 
     FL_DBG_F("EIC interrupt attached on pin %s EIC channel %s", static_cast<int>(pin), static_cast<int>(eic_ch));
 
@@ -655,7 +655,7 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     return 0;  // Success
 }
 
-int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
+int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != SAMD_PLATFORM_ID) {
         FL_WARN_F("detachHandler: invalid handle");
         return -1;  // Invalid handle
@@ -694,7 +694,7 @@ int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
     return 0;  // Success
 }
 
-int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
+int enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != SAMD_PLATFORM_ID) {
         FL_WARN_F("enableHandler: invalid handle");
         return -1;  // Invalid handle
@@ -721,7 +721,7 @@ int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     return 0;  // Success
 }
 
-int disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
+int disable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != SAMD_PLATFORM_ID) {
         FL_WARN_F("disableHandler: invalid handle");
         return -1;  // Invalid handle
@@ -748,7 +748,7 @@ int disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     return 0;  // Success
 }
 
-bool is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
+bool is_handler_enabled(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != SAMD_PLATFORM_ID) {
         return false;
     }
@@ -761,7 +761,7 @@ bool is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
     return handle_data->is_enabled;
 }
 
-const char* get_error_string(int error_code) FL_NOEXCEPT {
+const char* get_error_string(int error_code) FL_NO_EXCEPT {
     switch (error_code) {
         case 0: return "Success";
         case -1: return "Invalid parameter";
@@ -773,7 +773,7 @@ const char* get_error_string(int error_code) FL_NOEXCEPT {
     }
 }
 
-const char* get_platform_name() FL_NOEXCEPT {
+const char* get_platform_name() FL_NO_EXCEPT {
 #if defined(FL_IS_SAMD51)
     return "SAMD51";
 #elif defined(FL_IS_SAMD21)
@@ -783,7 +783,7 @@ const char* get_platform_name() FL_NOEXCEPT {
 #endif
 }
 
-u32 get_max_timer_frequency() FL_NOEXCEPT {
+u32 get_max_timer_frequency() FL_NO_EXCEPT {
 #if defined(FL_IS_SAMD51)
     return 120000000;  // 120 MHz (SAMD51 max clock)
 #elif defined(FL_IS_SAMD21)
@@ -793,11 +793,11 @@ u32 get_max_timer_frequency() FL_NOEXCEPT {
 #endif
 }
 
-u32 get_min_timer_frequency() FL_NOEXCEPT {
+u32 get_min_timer_frequency() FL_NO_EXCEPT {
     return 1;  // 1 Hz (practical minimum)
 }
 
-u8 get_max_priority() FL_NOEXCEPT {
+u8 get_max_priority() FL_NO_EXCEPT {
 #if defined(FL_IS_SAMD51)
     return 7;  // SAMD51 has 8 levels (0-7)
 #elif defined(FL_IS_SAMD21)
@@ -807,7 +807,7 @@ u8 get_max_priority() FL_NOEXCEPT {
 #endif
 }
 
-bool requires_assembly_handler(u8 priority) FL_NOEXCEPT {
+bool requires_assembly_handler(u8 priority) FL_NO_EXCEPT {
     // ARM Cortex-M0+ and Cortex-M4F: All priority levels support C handlers
     (void)priority;
     return false;
@@ -821,13 +821,13 @@ bool requires_assembly_handler(u8 priority) FL_NOEXCEPT {
 // =============================================================================
 
 /// Disable interrupts on ARM Cortex-M (SAMD)
-inline void interruptsDisable() FL_NOEXCEPT {
-    __asm__ __volatile__("cpsid i" ::: "memory") FL_NOEXCEPT;
+inline void interruptsDisable() FL_NO_EXCEPT {
+    __asm__ __volatile__("cpsid i" ::: "memory") FL_NO_EXCEPT;
 }
 
 /// Enable interrupts on ARM Cortex-M (SAMD)
-inline void interruptsEnable() FL_NOEXCEPT {
-    __asm__ __volatile__("cpsie i" ::: "memory") FL_NOEXCEPT;
+inline void interruptsEnable() FL_NO_EXCEPT {
+    __asm__ __volatile__("cpsie i" ::: "memory") FL_NO_EXCEPT;
 }
 
 } // namespace fl

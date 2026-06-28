@@ -22,7 +22,7 @@ namespace fl {
 // ESP32-specific audio input creation function
 fl::shared_ptr<audio::IInput>
 esp32_create_audio_input(const audio::Config &config,
-                         fl::string *error_message) FL_NOEXCEPT {
+                         fl::string *error_message) FL_NO_EXCEPT {
     if (config.is<audio::ConfigI2S>()) {
 #if FASTLED_ESP32_I2S_SUPPORTED
         FL_WARN_F("Creating I2S standard mode audio source");

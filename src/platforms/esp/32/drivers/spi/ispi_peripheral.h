@@ -36,7 +36,7 @@ struct SpiBusConfig {
 
     /// @brief Default constructor (single-lane mode)
     SpiBusConfig()
- FL_NOEXCEPT : miso_pin(-1)
+ FL_NO_EXCEPT : miso_pin(-1)
         , mosi_pin(-1)
         , sclk_pin(-1)
         , data2_pin(-1)
@@ -50,7 +50,7 @@ struct SpiBusConfig {
     /// @param sclk SCLK pin (clock output)
     /// @param max_sz Max transfer size (0 = default)
     SpiBusConfig(int mosi, int sclk, int max_sz = 0)
- FL_NOEXCEPT : miso_pin(-1)
+ FL_NO_EXCEPT : miso_pin(-1)
         , mosi_pin(mosi)
         , sclk_pin(sclk)
         , data2_pin(-1)
@@ -65,7 +65,7 @@ struct SpiBusConfig {
     /// @param sclk SCLK pin
     /// @param max_sz Max transfer size
     SpiBusConfig(int data0, int data1, int sclk, int max_sz)
- FL_NOEXCEPT : miso_pin(data1)  // Data1 uses MISO line
+ FL_NO_EXCEPT : miso_pin(data1)  // Data1 uses MISO line
         , mosi_pin(data0)  // Data0 uses MOSI line
         , sclk_pin(sclk)
         , data2_pin(-1)
@@ -82,7 +82,7 @@ struct SpiBusConfig {
     /// @param sclk SCLK pin
     /// @param max_sz Max transfer size
     SpiBusConfig(int data0, int data1, int data2, int data3, int sclk, int max_sz)
- FL_NOEXCEPT : miso_pin(data1)
+ FL_NO_EXCEPT : miso_pin(data1)
         , mosi_pin(data0)
         , sclk_pin(sclk)
         , data2_pin(data2)
@@ -105,7 +105,7 @@ struct SpiDeviceConfig {
 
     /// @brief Default constructor
     SpiDeviceConfig()
- FL_NOEXCEPT : mode(0)
+ FL_NO_EXCEPT : mode(0)
         , clock_speed_hz(0)
         , queue_size(0)
         , flags(0)
@@ -117,7 +117,7 @@ struct SpiDeviceConfig {
     /// @param queue_depth Transaction queue size
     /// @param spi_mode SPI mode (0-3)
     SpiDeviceConfig(int clock_hz, int queue_depth, u8 spi_mode = 0)
- FL_NOEXCEPT : mode(spi_mode)
+ FL_NO_EXCEPT : mode(spi_mode)
         , clock_speed_hz(clock_hz)
         , queue_size(queue_depth)
         , flags(0)
@@ -137,7 +137,7 @@ struct SpiTransaction {
 
     /// @brief Default constructor
     SpiTransaction()
- FL_NOEXCEPT : tx_buffer(nullptr)
+ FL_NO_EXCEPT : tx_buffer(nullptr)
         , length_bits(0)
         , flags(0)
         , user(nullptr)
@@ -147,7 +147,7 @@ struct SpiTransaction {
     /// @param buffer Transmit buffer pointer
     /// @param size_bytes Buffer size in bytes
     SpiTransaction(const u8* buffer, size_t size_bytes)
- FL_NOEXCEPT : tx_buffer(buffer)
+ FL_NO_EXCEPT : tx_buffer(buffer)
         , length_bits(size_bytes * 8)
         , flags(0)
         , user(nullptr)
@@ -158,7 +158,7 @@ struct SpiTransaction {
     /// @param size_bytes Buffer size in bytes
     /// @param user_ctx User context pointer
     SpiTransaction(const u8* buffer, size_t size_bytes, void* user_ctx)
- FL_NOEXCEPT : tx_buffer(buffer)
+ FL_NO_EXCEPT : tx_buffer(buffer)
         , length_bits(size_bytes * 8)
         , flags(0)
         , user(user_ctx)
@@ -204,7 +204,7 @@ public:
     /// - Allocates DMA channel
     /// - Configures GPIO pins
     /// - Must be called before addDevice()
-    virtual bool initializeBus(const SpiBusConfig& config) FL_NOEXCEPT = 0;
+    virtual bool initializeBus(const SpiBusConfig& config) FL_NO_EXCEPT = 0;
 
     /// @brief Add a device to the initialized bus
     /// @param config Device configuration (clock speed, mode, queue size)
@@ -217,7 +217,7 @@ public:
     /// - Allocates transaction queue
     /// - Returns a device handle (stored internally)
     /// - Must be called after initializeBus()
-    virtual bool addDevice(const SpiDeviceConfig& config) FL_NOEXCEPT = 0;
+    virtual bool addDevice(const SpiDeviceConfig& config) FL_NO_EXCEPT = 0;
 
     /// @brief Remove device from bus
     /// @return true on success, false on error
@@ -225,7 +225,7 @@ public:
     /// Maps to ESP-IDF: spi_bus_remove_device()
     ///
     /// Must be called before freeBus().
-    virtual bool removeDevice() FL_NOEXCEPT = 0;
+    virtual bool removeDevice() FL_NO_EXCEPT = 0;
 
     /// @brief Free SPI bus resources
     /// @return true on success, false on error
@@ -233,11 +233,11 @@ public:
     /// Maps to ESP-IDF: spi_bus_free()
     ///
     /// Must be called after removeDevice().
-    virtual bool freeBus() FL_NOEXCEPT = 0;
+    virtual bool freeBus() FL_NO_EXCEPT = 0;
 
     /// @brief Check if bus is initialized
     /// @return true if initialized, false otherwise
-    virtual bool isInitialized() const FL_NOEXCEPT = 0;
+    virtual bool isInitialized() const FL_NO_EXCEPT = 0;
 
     //=========================================================================
     // Transaction API
@@ -257,7 +257,7 @@ public:
     ///
     /// The buffer MUST remain valid until pollTransaction() returns
     /// or the post-transaction callback fires.
-    virtual bool queueTransaction(const SpiTransaction& trans) FL_NOEXCEPT = 0;
+    virtual bool queueTransaction(const SpiTransaction& trans) FL_NO_EXCEPT = 0;
 
     /// @brief Poll for transaction completion
     /// @param timeout_ms Timeout in milliseconds (0 = non-blocking poll)
@@ -271,7 +271,7 @@ public:
     ///
     /// Returns true if transaction completes successfully.
     /// Returns false on timeout or hardware error.
-    virtual bool pollTransaction(u32 timeout_ms) FL_NOEXCEPT = 0;
+    virtual bool pollTransaction(u32 timeout_ms) FL_NO_EXCEPT = 0;
 
     /// @brief Register post-transaction callback
     /// @param callback Function pointer (cast to void*)
@@ -296,7 +296,7 @@ public:
     /// - CAN access shared state with mutexes
     /// - SHOULD minimize execution time
     /// - AVOID blocking operations (delay, long loops)
-    virtual bool registerCallback(void* callback, void* user_ctx) FL_NOEXCEPT = 0;
+    virtual bool registerCallback(void* callback, void* user_ctx) FL_NO_EXCEPT = 0;
 
     //=========================================================================
     // DMA Memory Management
@@ -315,7 +315,7 @@ public:
     ///
     /// Size is automatically rounded up to 4-byte multiple to meet
     /// ESP32 DMA alignment requirements.
-    virtual u8* allocateDma(size_t size) FL_NOEXCEPT = 0;
+    virtual u8* allocateDma(size_t size) FL_NO_EXCEPT = 0;
 
     /// @brief Free DMA buffer allocated via allocateDma()
     /// @param buffer Buffer pointer (must be from allocateDma())
@@ -323,7 +323,7 @@ public:
     /// Maps to ESP-IDF: heap_caps_free()
     ///
     /// Safe to call with nullptr (no-op).
-    virtual void freeDma(u8* buffer) FL_NOEXCEPT = 0;
+    virtual void freeDma(u8* buffer) FL_NO_EXCEPT = 0;
 
     //=========================================================================
     // Platform Utilities
@@ -335,7 +335,7 @@ public:
     /// Maps to platform-specific delay:
     /// - ESP32/FreeRTOS: vTaskDelay(pdMS_TO_TICKS(ms))
     /// - Host/Mock: std::this_thread::sleep_for() or usleep()
-    virtual void delay(u32 ms) FL_NOEXCEPT = 0;
+    virtual void delay(u32 ms) FL_NO_EXCEPT = 0;
 
     /// @brief Get current timestamp in microseconds
     /// @return Current timestamp in microseconds (monotonic clock)
@@ -343,7 +343,7 @@ public:
     /// Maps to:
     /// - ESP32: esp_timer_get_time()
     /// - Mock: std::chrono::high_resolution_clock or simulated time
-    virtual u64 getMicroseconds() FL_NOEXCEPT = 0;
+    virtual u64 getMicroseconds() FL_NO_EXCEPT = 0;
 };
 
 } // namespace detail

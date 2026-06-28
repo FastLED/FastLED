@@ -29,7 +29,7 @@ namespace detail {
 /// Call this function from your setup() to enable verbose logging.
 /// This was previously called automatically via FL_INIT, but now requires
 /// manual invocation for explicit control over debug initialization.
-inline void fastled_debug_init() FL_NOEXCEPT {
+inline void fastled_debug_init() FL_NO_EXCEPT {
     // Set all ESP-IDF components to VERBOSE logging
     esp_log_level_set("*", ESP_LOG_VERBOSE);
 

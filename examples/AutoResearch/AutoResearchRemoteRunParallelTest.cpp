@@ -299,6 +299,7 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
     // Only the first driver (PARLIO) is typically connected to the RX pin
     bool rx_validation_passed = true;
     bool rx_validation_attempted = false;
+    fl::vector<fl::RunResult> run_results;
 
     if (mState->rx_channel && driver_entries.size() > 0) {
         const auto& primary_driver = driver_entries[0];
@@ -337,7 +338,7 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
             uint32_t val_show_duration_ms = 0;
 
             autoResearchChipsetTiming(autoresearch_config, total_tests, passed_tests,
-                                  val_show_duration_ms, nullptr);
+                                      val_show_duration_ms, &run_results);
 
             rx_validation_passed = (total_tests > 0) && (passed_tests == total_tests);
         }
@@ -347,10 +348,48 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
     FastLED.clear(ClearFlags::CHANNELS);
 
     uint32_t duration_ms = millis() - start_ms;
+    int total_tests = 1;
+    int passed_tests = show_success ? 1 : 0;
+    const int primary_tx_pin = driver_entries.empty()
+                                   ? mState->pin_tx
+                                   : driver_entries[0].pin_tx;
+    int capture_evidence_bytes = 0;
+    int capture_evidence_raw_edges = 0;
+    for (fl::size ri = 0; ri < run_results.size(); ri++) {
+        const auto& rr = run_results[ri];
+        if (rr.capturedBytes > 0) {
+            capture_evidence_bytes += rr.capturedBytes;
+        }
+        if (rr.rawEdgesAfterWait > capture_evidence_raw_edges) {
+            capture_evidence_raw_edges = rr.rawEdgesAfterWait;
+        }
+    }
+    if (rx_validation_attempted) {
+        total_tests++;
+        if (rx_validation_passed) {
+            passed_tests++;
+        }
+    }
 
     // ========== RESPONSE ==========
     response.set("success", true);
     response.set("passed", show_success && rx_validation_passed);
+    response.set("totalTests", static_cast<int64_t>(total_tests));
+    response.set("passedTests", static_cast<int64_t>(passed_tests));
+    response.set("failedTests", static_cast<int64_t>(total_tests - passed_tests));
+    response.set("requestedTxPin", static_cast<int64_t>(primary_tx_pin));
+    response.set("requestedRxPin", static_cast<int64_t>(mState->pin_rx));
+    response.set("actualTxPin", static_cast<int64_t>(primary_tx_pin));
+    response.set("actualRxPin", static_cast<int64_t>(mState->pin_rx));
+    fl::string capture_backend = mState->rx_channel
+                                     ? mState->rx_channel->getEngineName()
+                                     : fl::string("none");
+    response.set("captureBackend", capture_backend.c_str());
+    response.set("captureEvidenceExpected", rx_validation_attempted);
+    response.set("captureEvidenceBytes",
+                 static_cast<int64_t>(capture_evidence_bytes));
+    response.set("captureEvidenceRawEdges",
+                 static_cast<int64_t>(capture_evidence_raw_edges));
     response.set("duration_ms", static_cast<int64_t>(duration_ms));
     response.set("show_duration_us", static_cast<int64_t>(show_duration_us));
     response.set("iterations", static_cast<int64_t>(iterations));

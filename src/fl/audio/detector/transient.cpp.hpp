@@ -22,7 +22,7 @@ Transient::Transient()
     mPreviousHighFreq.resize(16, 0.0f);
 }
 
-Transient::~Transient() FL_NOEXCEPT = default;
+Transient::~Transient() FL_NO_EXCEPT = default;
 
 void Transient::update(shared_ptr<Context> context) {
     mRetainedFFT = context->getFFT16();

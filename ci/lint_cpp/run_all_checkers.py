@@ -13,97 +13,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
-from ci.lint_cpp.arduino_macro_usage_checker import ArduinoMacroUsageChecker
-from ci.lint_cpp.asm_js_location_checker import AsmJsLocationChecker
-from ci.lint_cpp.attribute_checker import AttributeChecker
-from ci.lint_cpp.banned_define_checker import BannedDefineChecker
-from ci.lint_cpp.banned_headers_checker import (
-    BANNED_HEADERS_COMMON,
-    BANNED_HEADERS_CORE,
-    BANNED_HEADERS_PLATFORMS,
-    BannedHeadersChecker,
-)
-from ci.lint_cpp.banned_macros_checker import BannedMacrosChecker
-from ci.lint_cpp.banned_namespace_checker import BannedNamespaceChecker
-from ci.lint_cpp.bare_allocation_checker import BareAllocationChecker
-from ci.lint_cpp.bare_libm_checker import BareLibmChecker
-from ci.lint_cpp.bare_noinline_checker import BareNoInlineChecker
-from ci.lint_cpp.bare_snprintf_checker import BareSnprintfChecker
-from ci.lint_cpp.bare_using_checker import BareUsingChecker
-from ci.lint_cpp.builtin_memcpy_checker import BuiltinMemcpyChecker
-
-# Import all checker classes
-from ci.lint_cpp.check_namespace_includes import NamespaceIncludesChecker
-from ci.lint_cpp.check_platform_includes import PlatformTrampolineChecker
-from ci.lint_cpp.check_platforms_fl_namespace import PlatformsFlNamespaceChecker
-from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
-from ci.lint_cpp.cpp_hpp_header_pair_checker import CppHppHeaderPairChecker
-from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
-from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
-from ci.lint_cpp.ctype_global_checker import CtypeGlobalChecker
-from ci.lint_cpp.enum_class_checker import EnumClassChecker
-from ci.lint_cpp.esp_rom_printf_checker import EspRomPrintfChecker
-from ci.lint_cpp.example_serial_checker import ExampleSerialChecker
-from ci.lint_cpp.fastled_header_usage_checker import FastLEDHeaderUsageChecker
-from ci.lint_cpp.fl_is_defined_checker import FlIsDefinedChecker
-from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
-from ci.lint_cpp.impl_hpp_includes_checker import ImplHppIncludesChecker
-from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
-from ci.lint_cpp.include_paths_checker import IncludePathsChecker
-from ci.lint_cpp.is_header_include_checker import IsHeaderIncludeChecker
-from ci.lint_cpp.iwyu_pragma_block_checker import IwyuPragmaBlockChecker
-from ci.lint_cpp.legacy_log_macro_checker import LegacyLogMacroChecker
-from ci.lint_cpp.logging_in_iram_checker import LoggingInIramChecker
-from ci.lint_cpp.member_style_checker import MemberStyleChecker
-from ci.lint_cpp.namespace_platforms_checker import NamespacePlatformsChecker
-from ci.lint_cpp.native_platform_defines_checker import NativePlatformDefinesChecker
-from ci.lint_cpp.no_namespace_fl_declaration import NamespaceFlDeclarationChecker
-from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
-from ci.lint_cpp.noexcept_special_members_checker import NoexceptSpecialMembersChecker
-from ci.lint_cpp.numeric_limit_macros_checker import NumericLimitMacroChecker
-from ci.lint_cpp.pch_file_checker import check as check_pch_files
-from ci.lint_cpp.platform_includes_checker import PlatformIncludesChecker
-from ci.lint_cpp.platform_pragma_checker import PlatformPragmaChecker
-from ci.lint_cpp.pragma_once_checker import PragmaOnceChecker
-from ci.lint_cpp.public_settings_pattern_checker import PublicSettingsPatternChecker
-from ci.lint_cpp.raw_noexcept_checker import RawNoexceptChecker
-from ci.lint_cpp.raw_pragma_checker import RawPragmaChecker
-from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
-from ci.lint_cpp.relative_include_checker import RelativeIncludeChecker
 from ci.lint_cpp.rust_bridge import (
     merge_checker_results,
-    remove_rust_supported_checkers,
-    run_rust_ab_check,
     run_rust_linter,
 )
-from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
-from ci.lint_cpp.simd_intrinsics_checker import SimdIntrinsicsChecker
-from ci.lint_cpp.singleton_in_headers_checker import SingletonInHeadersChecker
-from ci.lint_cpp.sleep_for_checker import SleepForChecker
-from ci.lint_cpp.span_from_pointer_checker import SpanFromPointerChecker
-from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
-from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
-from ci.lint_cpp.stdint_type_checker import (
-    StdintTypeChecker,
-)
-from ci.lint_cpp.subdir_namespace_checker import SubdirNamespaceChecker
-from ci.lint_cpp.test_aggregation_checker import TestAggregationChecker
-from ci.lint_cpp.test_aggregation_checker import check as check_test_aggregation
-from ci.lint_cpp.test_aggregation_checker import (
-    check_single_file as check_test_aggregation_single_file,
-)
-from ci.lint_cpp.test_include_paths_checker import TestIncludePathsChecker
-from ci.lint_cpp.test_path_structure_checker import TestPathStructureChecker
-from ci.lint_cpp.test_unity_build import check as check_unity_build
-from ci.lint_cpp.test_unity_build import (
-    check_single_file as check_unity_build_single_file,
-)
-from ci.lint_cpp.thread_local_keyword_checker import ThreadLocalKeywordChecker
-from ci.lint_cpp.unit_test_checker import UnitTestChecker
-from ci.lint_cpp.using_namespace_fl_in_examples_checker import (
-    UsingNamespaceFlInExamplesChecker,
-)
-from ci.lint_cpp.weak_attribute_checker import WeakAttributeChecker
 from ci.util.check_files import (
     CheckerResults,
     FileContentChecker,
@@ -176,168 +89,57 @@ def create_checkers(
         all_headers: Optional frozenset of all header file paths in the project
                     (used for cross-file validation in some checkers)
     """
+    # NOTE: The bulk of the legacy Python checker fleet was retired in favor
+    # of the Rust C++ linter (see ``ci/lint_cpp/rust_bridge.py`` and
+    # ``ci/lint_cpp_rs/``). Only the small set of Python-only checkers that
+    # have no Rust port yet remain instantiated here. The ``all_headers``
+    # argument is kept for API compatibility — it is no longer consumed by
+    # any Python-side checker.
+    del all_headers  # currently unused; kept for API compatibility
+
     checkers_by_scope: dict[str, list[FileContentChecker]] = {}
 
-    # Global checkers (run on all src/, examples/, tests/ files)
-    checkers_by_scope["global"] = [
-        CppIncludeChecker(),
-        CppHppIncludesChecker(),
-        ImplHppIncludesChecker(),
-        IncludeAfterNamespaceChecker(),
-        MemberStyleChecker(),
-        NumericLimitMacroChecker(),
-        StaticInHeaderChecker(),
-        LoggingInIramChecker(),
-        LegacyLogMacroChecker(),
-        PlatformIncludesChecker(),
-        PlatformTrampolineChecker(),  # Enforce trampoline architecture in src/fl/** and root src/
-        WeakAttributeChecker(),
-        AttributeChecker(),  # Checks all C++ standard attributes (replaces MaybeUnusedChecker)
-        AsmJsLocationChecker(),  # Checks EM_JS / EM_ASYNC_JS / EM_ASM live only in *.js.cpp.hpp
-        BannedMacrosChecker(),  # Checks for banned preprocessor macros like __has_include
-        BuiltinMemcpyChecker(),  # Checks for raw __builtin_memcpy — use FL_BUILTIN_MEMCPY
-        EspRomPrintfChecker(),  # Checks for raw esp_rom_printf — use FastLED logging
-        FlIsDefinedChecker(),
-        BannedNamespaceChecker(),  # Checks for banned namespace patterns like fl::fl
-        SingletonInHeadersChecker(),  # Checks for Singleton<T> in headers (must use SingletonShared<T>)
-        SpanFromPointerChecker(),  # Checks for span<T>(container.data(), container.size()) → span<T>(container)
-        BareAllocationChecker(),  # Checks for bare new/delete/malloc/free — use fl::unique_ptr/fl::shared_ptr
-        BareSnprintfChecker(),  # Bans bare C ::snprintf/::printf/::sprintf in src/ — use fl::snprintf (#2773 item 1.5)
-        BareLibmChecker(),  # Bans bare C libm calls (::sqrtf, ::atan2, ::powf, ::ldexpf, ...) — use fl::sqrt/fl::atan2/... (#3002, #3012)
-        BareNoInlineChecker(),  # Bans bare __attribute__((noinline)) in src/ — use FL_NO_INLINE (#2773 item 2.1 follow-up)
-        SleepForChecker(),  # Checks for sleep_for() — bypasses async runner, use fl::yield/fl::async_run
-        ThreadLocalKeywordChecker(),  # Checks for thread_local keyword — use fl::SingletonThreadLocal<T>::instance()
-        BannedDefineChecker(),  # Checks for wrong #if patterns (e.g., #if ESP32 → #ifdef ESP32)
-        PlatformPragmaChecker(),  # Checks for raw #pragma GCC/clang/warning — use FL_DISABLE_WARNING macros
-        RawPragmaChecker(),  # Checks for raw _Pragma() — use FL_DISABLE_WARNING macros
-        RawNoexceptChecker(),  # Checks for raw noexcept keyword — use FL_NOEXCEPT macro
-        # Note: Private libc++ headers checking is now integrated into BannedHeadersChecker
-        # Note: _build.hpp hierarchy checking is now integrated into test_unity_build.py
-    ]
+    # Global checkers — all retired to Rust (#3297). The list is kept as an
+    # empty placeholder so the dispatch loop and the empty-list shortcut
+    # in run_checkers() still work; a future port can land its first new
+    # Python-only checker here without re-introducing the scope key.
+    checkers_by_scope["global"] = []
 
-    # Src-only checkers
-    checkers_by_scope["src"] = [
-        ArduinoMacroUsageChecker(),  # Checks for banned Arduino macros (INPUT, OUTPUT, DEFAULT)
-        UsingNamespaceFlChecker(),
-        StdNamespaceChecker(),
-        NamespaceIncludesChecker(),
-        ReinterpretCastChecker(),
-        RelativeIncludeChecker(),
-        FastLEDHeaderUsageChecker(),
-        StdintTypeChecker(),  # Covers all src/ (excludes third_party/ internally)
-        CtypeGlobalChecker(),  # Checks for global-scope ctype functions (use fl:: variants)
-        SimdIntrinsicsChecker(),  # Checks for direct platform SIMD intrinsics — use fl::simd
-        PragmaOnceChecker(),  # Checks headers have #pragma once, .cpp files don't
-    ]
+    # Src-only checkers — all retired to Rust.
+    checkers_by_scope["src"] = []
 
-    # Platforms-specific checkers
-    checkers_by_scope["platforms"] = [
-        PlatformsFlNamespaceChecker(),
-        NamespacePlatformsChecker(),
-        IsHeaderIncludeChecker(),
-        IwyuPragmaBlockChecker(all_headers=all_headers),
-        EnumClassChecker(),  # Checks for plain enum — use enum class for type safety
-    ]
+    # Platforms-specific checkers — all retired to Rust.
+    checkers_by_scope["platforms"] = []
 
-    # Native platform defines checker — runs on ALL src/ files (including third_party/)
-    # (the checker internally filters to src/ and excludes dispatch headers,
-    # is_*.h detection headers, etc.)
-    checkers_by_scope["native_platform_defines"] = [
-        NativePlatformDefinesChecker(),
-    ]
+    # Native platform defines checker — retired to Rust.
+    checkers_by_scope["native_platform_defines"] = []
 
-    # Include paths checker (for fl/ and platforms/ directories)
-    # Ensures include paths use "fl/", "platforms/", etc. prefixes
-    checkers_by_scope["fl_platforms_include_paths"] = [
-        IncludePathsChecker(),
-    ]
+    # Include paths checker (fl/ and platforms/) — retired to Rust.
+    checkers_by_scope["fl_platforms_include_paths"] = []
 
-    # Src root-only checkers
-    checkers_by_scope["src_root"] = [
-        NamespaceFlDeclarationChecker(),
-    ]
+    # Src root-only checkers — retired to Rust.
+    checkers_by_scope["src_root"] = []
 
-    # Examples-only checkers
-    checkers_by_scope["examples"] = [
-        SerialPrintfChecker(),
-        ExampleSerialChecker(),
-        UsingNamespaceFlInExamplesChecker(),
-    ]
+    # Examples-only checkers — retired to Rust.
+    checkers_by_scope["examples"] = []
 
-    # fl/ directory checkers with STRICT enforcement
-    checkers_by_scope["fl"] = [
-        BannedHeadersChecker(banned_headers_list=BANNED_HEADERS_CORE, strict_mode=True),
-        CppHppHeaderPairChecker(),  # Checks that *.cpp.hpp files have corresponding *.h headers
-        IwyuPragmaBlockChecker(all_headers=all_headers),
-        BareUsingChecker(),  # Checks for bare using declarations in headers (unity build safety)
-        SubdirNamespaceChecker(
-            "net"
-        ),  # Checks fl/net/ headers use proper fl::net:: namespaces
-        SubdirNamespaceChecker(
-            "video"
-        ),  # Checks fl/video/ headers use proper fl::video:: namespaces
-        SubdirNamespaceChecker(
-            "task"
-        ),  # Checks fl/task/ headers use proper fl::task:: namespaces
-        # NOTE: fl/math/ is NOT checked — types there intentionally live in fl::
-        # namespace for backward compatibility. Using inline namespace math
-        # causes cascading ambiguity with fl::detail, fl::simd, etc.
-        EnumClassChecker(),  # Checks for plain enum — use enum class for type safety
-        NoexceptSpecialMembersChecker(),  # Checks special member functions have FL_NOEXCEPT
-        PublicSettingsPatternChecker(),  # Checks fl::set_*/enable_*/disable_*/use_* free functions have CFastLED wrappers
-    ]
+    # fl/ directory — retired to Rust (#3297). Empty placeholder kept so the
+    # dispatch loop's empty-list shortcut works without scope-key churn.
+    checkers_by_scope["fl"] = []
 
-    # lib8tion/ directory checkers with STRICT enforcement
-    checkers_by_scope["lib8tion"] = [
-        BannedHeadersChecker(banned_headers_list=BANNED_HEADERS_CORE, strict_mode=True),
-    ]
+    # lib8tion/, fx_sensors_platforms_shared, platforms_banned, examples_banned,
+    # third_party — all banned-header variants retired to Rust.
+    checkers_by_scope["lib8tion"] = []
+    checkers_by_scope["fx_sensors_platforms_shared"] = []
+    checkers_by_scope["platforms_banned"] = []
+    checkers_by_scope["examples_banned"] = []
+    checkers_by_scope["third_party"] = []
 
-    # fx/, sensors/, platforms/shared/ checkers
-    checkers_by_scope["fx_sensors_platforms_shared"] = [
-        BannedHeadersChecker(
-            banned_headers_list=BANNED_HEADERS_CORE, strict_mode=False
-        ),
-    ]
+    # fl/ header-only checker — retired to Rust.
+    checkers_by_scope["fl_headers"] = []
 
-    # platforms/ directory checkers
-    checkers_by_scope["platforms_banned"] = [
-        BannedHeadersChecker(
-            banned_headers_list=BANNED_HEADERS_PLATFORMS, strict_mode=False
-        ),
-    ]
-
-    # examples/ directory checkers
-    checkers_by_scope["examples_banned"] = [
-        BannedHeadersChecker(
-            banned_headers_list=BANNED_HEADERS_COMMON, strict_mode=False
-        ),
-    ]
-
-    # third_party/ directory checkers
-    checkers_by_scope["third_party"] = [
-        BannedHeadersChecker(
-            banned_headers_list=BANNED_HEADERS_COMMON, strict_mode=True
-        ),
-    ]
-
-    # Specialized checker for src/fl/ header files only
-    checkers_by_scope["fl_headers"] = [
-        UsingNamespaceChecker(),
-    ]
-
-    # Tests-only checkers - FL compatibility now enforced
-    checkers_by_scope["tests"] = [
-        HeadersExistChecker(),
-        BannedHeadersChecker(
-            banned_headers_list=BANNED_HEADERS_CORE, strict_mode=False
-        ),
-        StdNamespaceChecker(),
-        TestPathStructureChecker(),
-        UnitTestChecker(),
-        CtypeGlobalChecker(),  # Checks for bare C ctype/cstring functions (use fl:: variants)
-        TestAggregationChecker(),  # Checks that .hpp files in excluded test dirs have parent aggregators
-        TestIncludePathsChecker(),  # Checks for bare/relative includes in tests (use full paths)
-    ]
+    # Tests-only checkers — all retired to Rust.
+    checkers_by_scope["tests"] = []
 
     return checkers_by_scope
 
@@ -542,28 +344,22 @@ def format_and_print_results(
         return 0
 
 
-def run_unity_build_check() -> tuple[int, list[str]]:
-    """Run unity build structure check (formerly standalone test_unity_build.py).
+def _ast_tool_unavailable(message: str) -> bool:
+    """Return True iff *message* signals that the clang-query AST tool is
+    absent from the runtime (vs. an actual lint violation).
 
-    Returns:
-        (violation_count, violation_messages)
+    Captures both the "tool not found at resolve time" path inside
+    ``_find_clang_query`` and the "uv resolved but couldn't spawn the
+    inner binary" path that surfaces on CI runners without the full
+    clang-tool-chain wheel installed.
     """
-    result = check_unity_build()
-    return (len(result.violations), result.violations)
-
-
-def run_test_aggregation_check() -> tuple[int, list[str]]:
-    """Run test aggregation structure check.
-
-    Returns:
-        (violation_count, violation_messages)
-    """
-    success, violations = check_test_aggregation()
-    return (len(violations), violations)
+    lower = message.lower()
+    tool_named = "clang-query" in lower or "clang-tool-chain-query" in lower
+    return tool_named and ("not found" in lower or "failed to spawn" in lower)
 
 
 def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
-    """Run the clang-query FL_NOEXCEPT ratchet used by default C++ lint."""
+    """Run the clang-query FL_NO_EXCEPT ratchet used by default C++ lint."""
     from ci.tools.check_noexcept import (
         DEFAULT_BASELINE,
         NoexceptCheckError,
@@ -571,8 +367,6 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
         find_missing_noexcept,
         load_baseline,
     )
-
-    results = CheckerResults()
 
     scope = "all"
     rel_file: str | None = None
@@ -587,25 +381,176 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
             scope = "third_party"
         else:
             # Outside owned src scopes — nothing to check for this file.
+            return CheckerResults()
+
+    def _run() -> CheckerResults:
+        results = CheckerResults()
+        try:
+            hits = find_missing_noexcept(scope)
+        except NoexceptCheckError as exc:
+            # If the underlying clang-query tool simply isn't on PATH (common on
+            # CI runners without a full LLVM toolchain install), skip the AST
+            # ratchet with a stderr warning rather than turning it into a hard
+            # lint failure. The ratchet is one of the Tier-4 entries explicitly
+            # out-of-scope per #3288 and is best effort outside dev boxes.
+            # The two flavors we see in the wild:
+            #   - "clang-query not found. Install LLVM or the clang-tool-chain ..."
+            #     (raised by _find_clang_query returning empty)
+            #   - "error: Failed to spawn: `clang-tool-chain-query` Caused by ..."
+            #     (raised by uv when it can resolve uv itself but not the inner
+            #     clang-tool-chain entry-point)
+            message = str(exc)
+            if _ast_tool_unavailable(message):
+                print(
+                    f"⚠️  Skipping FL_NO_EXCEPT AST ratchet — {message}", file=sys.stderr
+                )
+                return results
+            results.add_violation("ci/tools/check_noexcept.py", 0, message)
             return results
 
-    try:
-        hits = find_missing_noexcept(scope)
-    except NoexceptCheckError as exc:
-        results.add_violation("ci/tools/check_noexcept.py", 0, str(exc))
+        if rel_file is not None:
+            hits = [hit for hit in hits if hit.path == rel_file]
+
+        new_hits, _stale = diff_against_baseline(hits, load_baseline(DEFAULT_BASELINE))
+        for hit in new_hits:
+            abs_path = str(PROJECT_ROOT / hit.path)
+            results.add_violation(
+                abs_path, hit.line, f"Missing FL_NO_EXCEPT: {hit.line_text}"
+            )
         return results
 
-    if rel_file is not None:
-        hits = [hit for hit in hits if hit.path == rel_file]
+    # Single-file mode bypasses the cache - the fingerprint is built over
+    # the whole scope and would cost more to compute than the per-file
+    # check itself saves.
+    if file_path is not None:
+        return _run()
 
-    new_hits, _stale = diff_against_baseline(hits, load_baseline(DEFAULT_BASELINE))
-    for hit in new_hits:
-        abs_path = str(PROJECT_ROOT / hit.path)
-        results.add_violation(
-            abs_path, hit.line, f"Missing FL_NOEXCEPT: {hit.line_text}"
+    from ci.lint_cpp.ast_cache import cached_ast_check
+
+    return cached_ast_check(
+        name="noexcept_ast",
+        scope=scope,
+        tool_sources=[PROJECT_ROOT / "ci" / "tools" / "check_noexcept.py"],
+        baseline_path=PROJECT_ROOT / DEFAULT_BASELINE if DEFAULT_BASELINE else None,
+        runner=_run,
+    )
+
+
+def run_combined_ast_check() -> tuple[CheckerResults, CheckerResults]:
+    """Run noexcept + array-param matchers in ONE clang-query session per TU.
+
+    Returns (noexcept_results, array_param_results) so the orchestrator can
+    bucket them under their separate checker names.
+
+    The combined dispatch halves the peak clang-query process count
+    (~50 -> ~25 for the "all" scope) by sharing the parsed AST between
+    the two matchers per TU. Each result is still individually cached
+    via cached_ast_check so a warm run skips clang-query entirely.
+
+    Single-file mode is NOT handled here - the caller falls back to the
+    per-check run_*_ast_check functions when a file_path is supplied.
+    """
+    from ci.lint_cpp.ast_cache import cached_ast_check
+    from ci.tools.check_array_params import (
+        DEFAULT_BASELINE as ARRAY_BASELINE,
+    )
+    from ci.tools.check_array_params import (
+        ArrayParamCheckError,
+        _diagnostic_for_hit,
+    )
+    from ci.tools.check_array_params import (
+        diff_against_baseline as array_diff,
+    )
+    from ci.tools.check_array_params import (
+        load_baseline as load_array_baseline,
+    )
+    from ci.tools.check_ast_combined import find_combined_hits
+    from ci.tools.check_noexcept import (
+        DEFAULT_BASELINE as NOEXCEPT_BASELINE,
+    )
+    from ci.tools.check_noexcept import (
+        NoexceptCheckError,
+    )
+    from ci.tools.check_noexcept import (
+        diff_against_baseline as noexcept_diff,
+    )
+    from ci.tools.check_noexcept import (
+        load_baseline as load_noexcept_baseline,
+    )
+
+    def _shape() -> tuple[CheckerResults, CheckerResults]:
+        noexcept_results = CheckerResults()
+        array_param_results = CheckerResults()
+        try:
+            noexcept_hits, array_param_hits = find_combined_hits("all")
+        except (NoexceptCheckError, ArrayParamCheckError) as exc:
+            message = str(exc)
+            if _ast_tool_unavailable(message):
+                print(
+                    f"⚠️  Skipping combined AST ratchet — {message}",
+                    file=sys.stderr,
+                )
+                return noexcept_results, array_param_results
+            noexcept_results.add_violation("ci/tools/check_ast_combined.py", 0, message)
+            return noexcept_results, array_param_results
+
+        new_noexcept, _stale_n = noexcept_diff(
+            noexcept_hits, load_noexcept_baseline(NOEXCEPT_BASELINE)
         )
+        for hit in new_noexcept:
+            abs_path = str(PROJECT_ROOT / hit.path)
+            noexcept_results.add_violation(
+                abs_path, hit.line, f"Missing FL_NO_EXCEPT: {hit.line_text}"
+            )
 
-    return results
+        new_array, _stale_a = array_diff(
+            array_param_hits, load_array_baseline(ARRAY_BASELINE)
+        )
+        for hit in new_array:
+            abs_path = str(PROJECT_ROOT / hit.path)
+            array_param_results.add_violation(
+                abs_path, hit.line, _diagnostic_for_hit(hit)
+            )
+        return noexcept_results, array_param_results
+
+    # Cache wrapper. Fingerprint over the same inputs both checks share
+    # (src/fl + platforms + third_party + both tool sources + both
+    # baselines). cached_ast_check stores ONE CheckerResults at a time,
+    # so we wrap each direction separately around the same _shape()
+    # call - first hit populates both caches, subsequent hits replay
+    # without re-running clang-query.
+    cache: dict[str, tuple[CheckerResults, CheckerResults]] = {}
+
+    def _runner_noexcept() -> CheckerResults:
+        if "value" not in cache:
+            cache["value"] = _shape()
+        return cache["value"][0]
+
+    def _runner_array_param() -> CheckerResults:
+        if "value" not in cache:
+            cache["value"] = _shape()
+        return cache["value"][1]
+
+    tool_sources = [
+        PROJECT_ROOT / "ci" / "tools" / "check_noexcept.py",
+        PROJECT_ROOT / "ci" / "tools" / "check_array_params.py",
+        PROJECT_ROOT / "ci" / "tools" / "check_ast_combined.py",
+    ]
+    noexcept_cached = cached_ast_check(
+        name="noexcept_ast",
+        scope="all",
+        tool_sources=tool_sources,
+        baseline_path=PROJECT_ROOT / NOEXCEPT_BASELINE if NOEXCEPT_BASELINE else None,
+        runner=_runner_noexcept,
+    )
+    array_param_cached = cached_ast_check(
+        name="array_param_ast",
+        scope="all",
+        tool_sources=tool_sources,
+        baseline_path=PROJECT_ROOT / ARRAY_BASELINE if ARRAY_BASELINE else None,
+        runner=_runner_array_param,
+    )
+    return noexcept_cached, array_param_cached
 
 
 def run_array_param_ast_check(file_path: str | None = None) -> CheckerResults:
@@ -619,8 +564,6 @@ def run_array_param_ast_check(file_path: str | None = None) -> CheckerResults:
         load_baseline,
     )
 
-    results = CheckerResults()
-
     scope = "all"
     rel_file: str | None = None
     if file_path is not None:
@@ -633,23 +576,46 @@ def run_array_param_ast_check(file_path: str | None = None) -> CheckerResults:
         elif rel_file.startswith("src/third_party/"):
             scope = "third_party"
         else:
+            return CheckerResults()
+
+    def _run() -> CheckerResults:
+        results = CheckerResults()
+        try:
+            hits = find_decayed_array_params(scope)
+        except ArrayParamCheckError as exc:
+            # Same fallback as run_noexcept_ast_check above — skip when the
+            # underlying tool is missing rather than failing the whole lint.
+            message = str(exc)
+            if _ast_tool_unavailable(message):
+                print(
+                    f"⚠️  Skipping decayed-array-param AST ratchet — {message}",
+                    file=sys.stderr,
+                )
+                return results
+            results.add_violation("ci/tools/check_array_params.py", 0, message)
             return results
 
-    try:
-        hits = find_decayed_array_params(scope)
-    except ArrayParamCheckError as exc:
-        results.add_violation("ci/tools/check_array_params.py", 0, str(exc))
+        if rel_file is not None:
+            hits = [hit for hit in hits if hit.path == rel_file]
+
+        new_hits, _stale = diff_against_baseline(hits, load_baseline(DEFAULT_BASELINE))
+        for hit in new_hits:
+            abs_path = str(PROJECT_ROOT / hit.path)
+            results.add_violation(abs_path, hit.line, _diagnostic_for_hit(hit))
         return results
 
-    if rel_file is not None:
-        hits = [hit for hit in hits if hit.path == rel_file]
+    if file_path is not None:
+        return _run()
 
-    new_hits, _stale = diff_against_baseline(hits, load_baseline(DEFAULT_BASELINE))
-    for hit in new_hits:
-        abs_path = str(PROJECT_ROOT / hit.path)
-        results.add_violation(abs_path, hit.line, _diagnostic_for_hit(hit))
+    from ci.lint_cpp.ast_cache import cached_ast_check
 
-    return results
+    return cached_ast_check(
+        name="array_param_ast",
+        scope=scope,
+        tool_sources=[PROJECT_ROOT / "ci" / "tools" / "check_array_params.py"],
+        baseline_path=PROJECT_ROOT / DEFAULT_BASELINE if DEFAULT_BASELINE else None,
+        runner=_run,
+    )
 
 
 @dataclass(frozen=True)
@@ -825,26 +791,6 @@ def _determine_file_scopes(file_path: str) -> set[str]:
     return scopes
 
 
-def _collect_all_headers(files_by_dir: dict[str, list[str]]) -> frozenset[str]:
-    """Collect all header files from the project for cross-file validation.
-
-    Args:
-        files_by_dir: Dictionary of files organized by directory
-
-    Returns:
-        Immutable frozenset of all header file paths
-    """
-    all_headers: set[str] = set()
-
-    # Collect all header files from all directories
-    for file_list in files_by_dir.values():
-        for file_path in file_list:
-            if file_path.endswith((".h", ".hpp", ".hh", ".hxx")):
-                all_headers.add(file_path)
-
-    return frozenset(all_headers)
-
-
 def run_checkers_on_single_file(
     file_path: str, checkers_by_scope: dict[str, list[FileContentChecker]]
 ) -> dict[str, CheckerResults]:
@@ -897,12 +843,15 @@ def main() -> int:
     )
     parser.add_argument(
         "--rust",
-        action="store_true",
-        help="Use the Rust linter for the checker subset it currently supports",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Use the Rust linter for the checker subset it currently supports "
+            "(default: on). Pass --no-rust to fall back to the Python-only path."
+        ),
     )
     args = parser.parse_args()
-    rust_ab = os.environ.get("FL_LINT_AB") == "1"
-    use_rust_fast_path = args.rust and not rust_ab
+    use_rust_fast_path = args.rust
 
     if args.file:
         # Single file mode
@@ -915,41 +864,29 @@ def main() -> int:
         print(f"File: {file_path}")
         print()
 
-        # Collect all headers for cross-file validation (even in single-file mode)
+        # Collect files by directory so the file/scope dispatch below knows
+        # which checkers to apply. Cross-file header collection used to feed
+        # into create_checkers() but is no longer needed — every checker
+        # that consumed it has been retired to the Rust binary.
         files_by_dir = collect_all_files_by_directory()
-        all_headers = _collect_all_headers(files_by_dir)
 
         # Create all checker instances
-        checkers_by_scope = create_checkers(all_headers=all_headers)
+        checkers_by_scope = create_checkers()
         rust_results: dict[str, CheckerResults] = {}
         if use_rust_fast_path:
             rust_results = run_rust_linter([str(file_path)])
-            remove_rust_supported_checkers(checkers_by_scope)
 
         # Run all applicable checkers on the single file
         results = run_checkers_on_single_file(str(file_path), checkers_by_scope)
         merge_checker_results(results, rust_results)
 
-        # Run targeted unity build check for .cpp.hpp files and build files in src/fl/build/
-        is_build_file = "/fl/build/" in str(file_path).replace("\\", "/")
-        if file_path.name.endswith(".cpp.hpp") or is_build_file:
-            unity_result = check_unity_build_single_file(file_path)
-            if not unity_result.success:
-                unity_checker_results = CheckerResults()
-                for violation in unity_result.violations:
-                    unity_checker_results.add_violation(
-                        "unity_build_structure", 0, violation
-                    )
-                results["UnityBuildChecker"] = unity_checker_results
+        # Per-file UnityBuildChecker now lives in the Rust crate
+        # (ci/lint_cpp_rs/src/checkers/unity_build.rs); its violations
+        # arrive via the merge_checker_results step above.
 
-        # Run targeted test aggregation check for test .cpp/.hpp files
-        if "/tests/" in str(file_path).replace("\\", "/"):
-            agg_success, agg_violations = check_test_aggregation_single_file(file_path)
-            if not agg_success:
-                agg_results = CheckerResults()
-                for violation in agg_violations:
-                    agg_results.add_violation("test_aggregation", 0, violation)
-                results["TestAggregationChecker"] = agg_results
+        # Per-file TestAggregationChecker now lives in the Rust crate
+        # (ci/lint_cpp_rs/src/checkers/test_structure.rs); its violations
+        # arrive via the merge_checker_results step above.
 
         noexcept_results = run_noexcept_ast_check(str(file_path))
         if noexcept_results.has_violations():
@@ -960,8 +897,6 @@ def main() -> int:
             results["ArrayParamAstChecker"] = array_param_results
 
         # Format and print results
-        if rust_ab and not run_rust_ab_check(results, [str(file_path)]):
-            return 1
         exit_code = format_and_print_results(results)
 
         return exit_code
@@ -974,56 +909,59 @@ def main() -> int:
         # Collect all files by directory
         files_by_dir = collect_all_files_by_directory()
 
-        # Extract all headers for cross-file validation
-        all_headers = _collect_all_headers(files_by_dir)
+        # Create all checker instances. The previous all_headers
+        # cross-file collection has been retired with its consumers.
+        checkers_by_scope = create_checkers()
 
-        # Create all checker instances
-        checkers_by_scope = create_checkers(all_headers=all_headers)
-        rust_results: dict[str, CheckerResults] = {}
-        if use_rust_fast_path:
-            rust_results = run_rust_linter(None)
-            remove_rust_supported_checkers(checkers_by_scope)
+        # Fan out the three independent heavy stages in parallel:
+        #   - the Rust fastled-lint pass        (~5s, all-cores rayon-parallel)
+        #   - the clang-query FL_NO_EXCEPT pass (~17s, single clang-query subprocess)
+        #   - the clang-query decayed-array pass(~10s, single clang-query subprocess)
+        # Wall time collapses from ~32s sequential to ~17s (clang-query bound).
+        # The Python per-file run_checkers() pass is run on the foreground thread
+        # since most of its scopes are currently empty buckets - kept separate so
+        # any future heavy Python checker re-enables fast.
+        from concurrent.futures import ThreadPoolExecutor
 
-        # Run all checkers in a single pass per scope
-        results = run_checkers(files_by_dir, checkers_by_scope)
-        merge_checker_results(results, rust_results)
+        # Default to host CPU count. ThreadPoolExecutor caps at the
+        # submitted future count, so a 2-stage fan-out (rust binary +
+        # combined AST) naturally serializes nothing on small boxes
+        # either. The constant is set high so we don't have to re-touch
+        # this when more parallel stages get added.
+        #
+        # AST consolidation: noexcept + array-param matchers now run
+        # against the SAME parsed AST per TU via run_combined_ast_check
+        # (one clang-query session per TU instead of two). Halves the
+        # peak clang-query process count from ~50 to ~25 on the "all"
+        # scope, which matters on machines with fewer cores than TUs.
+        with ThreadPoolExecutor(max_workers=os.cpu_count() or 3) as pool:
+            rust_future = (
+                pool.submit(run_rust_linter, None) if use_rust_fast_path else None
+            )
+            ast_future = pool.submit(run_combined_ast_check)
 
-        # Run unity build structure check (formerly standalone subprocess)
-        unity_violation_count, unity_violations = run_unity_build_check()
-        if unity_violation_count > 0:
-            unity_results = CheckerResults()
-            for violation in unity_violations:
-                unity_results.add_violation("unity_build_structure", 0, violation)
-            results["UnityBuildChecker"] = unity_results
+            # Run the Python per-file pass on the foreground thread; the
+            # background subprocess-bound futures make progress in parallel.
+            results = run_checkers(files_by_dir, checkers_by_scope)
 
-        # Run test aggregation structure check
-        agg_count, agg_violations = run_test_aggregation_check()
-        if agg_count > 0:
-            agg_results = CheckerResults()
-            for violation in agg_violations:
-                agg_results.add_violation("test_aggregation", 0, violation)
-            results["TestAggregationChecker"] = agg_results
+            rust_results: dict[str, CheckerResults] = (
+                rust_future.result() if rust_future is not None else {}
+            )
+            merge_checker_results(results, rust_results)
 
-        # Run .pch file check (precompiled headers should not be in the repo)
-        pch_success, pch_violations = check_pch_files()
-        if not pch_success:
-            pch_results = CheckerResults()
-            for violation in pch_violations:
-                pch_results.add_violation("pch_files", 0, violation)
-            results["PchFileChecker"] = pch_results
+            # UnityBuildChecker (whole-project structural pass),
+            # TestAggregationChecker (whole-project structural pass), and
+            # PchFileChecker now ship in the Rust binary's run_structural_passes()
+            # — see ci/lint_cpp_rs/src/checkers/structural_passes.rs. Violations
+            # arrive via `merge_checker_results` above.
 
-        # Run AST-backed FL_NOEXCEPT enforcement from normal C++ lint.
-        noexcept_results = run_noexcept_ast_check()
-        if noexcept_results.has_violations():
-            results["NoexceptAstChecker"] = noexcept_results
-
-        array_param_results = run_array_param_ast_check()
-        if array_param_results.has_violations():
-            results["ArrayParamAstChecker"] = array_param_results
+            noexcept_results, array_param_results = ast_future.result()
+            if noexcept_results.has_violations():
+                results["NoexceptAstChecker"] = noexcept_results
+            if array_param_results.has_violations():
+                results["ArrayParamAstChecker"] = array_param_results
 
         # Format and print results
-        if rust_ab and not run_rust_ab_check(results, None):
-            return 1
         exit_code = format_and_print_results(results)
 
         return exit_code

@@ -131,7 +131,7 @@ constexpr int PRIORITY_LCD_CLOCKLESS = 2; ///< LCD_CAM clockless driver (ESP32-S
 #endif
 
 /// @brief Add HW SPI drivers if supported by platform (UNIFIED VERSION)
-static void addSpiHardwareIfPossible(ChannelManager& manager) FL_NOEXCEPT {
+static void addSpiHardwareIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
     FL_DBG_F("ESP32: Registering unified HW SPI channel driver");
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers;
@@ -192,7 +192,7 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 // twice. Phase 4 documented this caveat; Phase 5a (this commit) fixes it.
 
 /// @brief Add PARLIO driver if supported by platform
-static void addParlioIfPossible(ChannelManager& manager) FL_NOEXCEPT {
+static void addParlioIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_PARLIO
     manager.addDriver(PRIORITY_PARLIO, BusTraits<Bus::PARLIO>::instancePtr());
     FL_DBG_F("ESP32: Added PARLIO driver (priority %s)", PRIORITY_PARLIO);
@@ -202,7 +202,7 @@ static void addParlioIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 }
 
 /// @brief Add LCD RGB driver if supported by platform
-static void addLcdRgbIfPossible(ChannelManager& manager) FL_NOEXCEPT {
+static void addLcdRgbIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_LCD_RGB
     auto driver = BusTraits<Bus::LCD_RGB>::instancePtr();
     if (driver) {
@@ -217,7 +217,7 @@ static void addLcdRgbIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 }
 
 /// @brief Add SPI driver if supported by platform
-static void addSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
+static void addSpiIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
     manager.addDriver(PRIORITY_SPI, BusTraits<Bus::SPI>::instancePtr());
     FL_DBG_F("ESP32: Added SPI driver (priority %s)", PRIORITY_SPI);
@@ -227,7 +227,7 @@ static void addSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 }
 
 /// @brief Add UART driver if supported by platform
-static void addUartIfPossible(ChannelManager& manager) FL_NOEXCEPT {
+static void addUartIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_UART
     // UART driver uses wave8 encoding adapted for UART framing.
     // Available on all ESP32 variants (C3, S3, C6, H2, P4) with ESP-IDF 4.0+.
@@ -241,7 +241,7 @@ static void addUartIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 }
 
 /// @brief Add RMT driver if supported by platform
-static void addRmtIfPossible(ChannelManager& manager) FL_NOEXCEPT {
+static void addRmtIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_RMT
     // BusTraits<Bus::RMT> resolves to ChannelEngineRMT (RMT5) or
     // ChannelEngineRMT4 depending on the build path; the right header is
@@ -261,7 +261,7 @@ static void addRmtIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 }
 
 /// @brief Add I2S_SPI driver if supported by platform (ESP32dev true SPI)
-static void addI2sSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
+static void addI2sSpiIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_I2S
     auto driver = BusTraits<Bus::I2S_SPI>::instancePtr();
     if (driver) {
@@ -276,7 +276,7 @@ static void addI2sSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 }
 
 /// @brief Add LCD_SPI driver if supported by platform (ESP32-S3 true SPI)
-static void addLcdSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
+static void addLcdSpiIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_LCD_SPI
     auto driver = BusTraits<Bus::LCD_SPI>::instancePtr();
     if (driver) {
@@ -291,7 +291,7 @@ static void addLcdSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 }
 
 /// @brief Add LCD_CAM clockless driver if supported (ESP32-S3, replaces misnamed I2S)
-static void addLcdClocklessIfPossible(ChannelManager& manager) FL_NOEXCEPT {
+static void addLcdClocklessIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_LCD_SPI
     auto driver = BusTraits<Bus::LCD_CLOCKLESS>::instancePtr();
     if (driver) {
@@ -306,7 +306,7 @@ static void addLcdClocklessIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 }
 
 /// @brief Add I2S LCD_CAM driver if supported by platform
-static void addI2sIfPossible(ChannelManager& manager) FL_NOEXCEPT {
+static void addI2sIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_I2S_LCD_CAM
     // I2S LCD_CAM driver uses LCD_CAM peripheral via I80 bus (ESP32-S3 only).
     // Experimental driver - uses transpose encoding for parallel LED output.
@@ -333,7 +333,7 @@ namespace platforms {
 /// Phase 5b pre-bind via `BusTraits<DefaultBus<Chipset>>::instancePtr()`)
 /// links into the binary. Users who need additional drivers at runtime call
 /// `fl::enableDrivers<fl::Bus::X, ...>()` or `FastLED.enableAllDrivers()`.
-void initChannelDrivers() FL_NOEXCEPT {
+void initChannelDrivers() FL_NO_EXCEPT {
     // Intentionally empty. See `fl::enableDrivers<>()` / `enableAllDrivers()`
     // for the opt-in registration path.
 }

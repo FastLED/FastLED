@@ -44,7 +44,7 @@ class fixed_point_base {
 
     // ---- Construction ------------------------------------------------------
 
-    constexpr fixed_point_base() FL_NOEXCEPT = default;
+    constexpr fixed_point_base() FL_NO_EXCEPT = default;
 
     explicit constexpr fixed_point_base(float f)
         : mValue(static_cast<raw_type>(f * (static_cast<raw_type>(1) << FRAC_BITS))) {}

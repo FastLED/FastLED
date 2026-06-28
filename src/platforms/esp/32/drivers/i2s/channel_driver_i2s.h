@@ -113,7 +113,7 @@ public:
     ///
     /// Stores a shared pointer to the peripheral to maintain proper lifetime.
     /// The peripheral will remain valid for the lifetime of this driver.
-    explicit ChannelEngineI2S(fl::shared_ptr<detail::II2sLcdCamPeripheral> peripheral) FL_NOEXCEPT;
+    explicit ChannelEngineI2S(fl::shared_ptr<detail::II2sLcdCamPeripheral> peripheral) FL_NO_EXCEPT;
 
     /// @brief Destructor - waits for transmission completion
     ~ChannelEngineI2S() override;
@@ -121,19 +121,19 @@ public:
     /// @brief Check if driver can handle channel data (clockless only)
     /// @param data Channel data to check
     /// @return true if clockless channel (rejects SPI), false otherwise
-    bool canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT override;
+    bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
 
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit
     ///
     /// Adds channel to internal queue. Transmission happens when show() is called.
-    void enqueue(ChannelDataPtr channelData) FL_NOEXCEPT override;
+    void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
 
     /// @brief Trigger transmission of enqueued data
     ///
     /// Groups channels by timing configuration and begins transmission of
     /// first group. Subsequent groups transmit sequentially via poll().
-    void show() FL_NOEXCEPT override;
+    void show() FL_NO_EXCEPT override;
 
     /// @brief Query driver state and perform maintenance
     /// @return Current driver state (READY, BUSY, DRAINING, or ERROR)
@@ -142,17 +142,17 @@ public:
     /// - Check transmission completion status
     /// - Trigger sequential chipset group transmissions
     /// - Clean up completed transmissions
-    DriverState poll() FL_NOEXCEPT override;
+    DriverState poll() FL_NO_EXCEPT override;
 
-    void setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT override;
+    void setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT override;
 
     /// @brief Get the driver name for affinity binding
     /// @return "I2S"
-    fl::string getName() const FL_NOEXCEPT override { return fl::string::from_literal("I2S"); }
+    fl::string getName() const FL_NO_EXCEPT override { return fl::string::from_literal("I2S"); }
 
     /// @brief Get driver capabilities (CLOCKLESS protocols only)
     /// @return Capabilities with supportsClockless=true, supportsSpi=false
-    Capabilities getCapabilities() const FL_NOEXCEPT override {
+    Capabilities getCapabilities() const FL_NO_EXCEPT override {
         return Capabilities(true, false);  // Clockless only
     }
 
@@ -167,7 +167,7 @@ private:
     /// 3. Prepares scratch buffer with LED data
     /// 4. Encodes LED data to I2S waveforms (transpose encoding)
     /// 5. Submits encoded data to I2S LCD_CAM peripheral
-    bool beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT;
+    bool beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT;
 
     /// @brief Prepare scratch buffer with per-lane data layout
     /// @param channelData Span of channel data to copy
@@ -175,22 +175,22 @@ private:
     ///
     /// Copies LED RGB data from all channels into per-lane scratch buffer.
     void prepareScratchBuffer(fl::span<const ChannelDataPtr> channelData,
-                              size_t maxChannelSize) FL_NOEXCEPT;
+                              size_t maxChannelSize) FL_NO_EXCEPT;
 
     /// @brief Encode frame data into DMA buffer using transpose encoding
     ///
     /// Encodes LED RGB data from scratch buffer using the transpose algorithm
     /// from Yves driver (transpose16x1_noinline2 pattern).
-    void encodeFrame() FL_NOEXCEPT;
+    void encodeFrame() FL_NO_EXCEPT;
 
     /// @brief Transpose 16x1 byte array for parallel output
     /// @param A Input byte array (16 bytes, one per lane)
     /// @param B Output word array (8 uint16_t words for bit-parallel output)
-    static void transpose16x1(const u8* A, u16* B) FL_NOEXCEPT;
+    static void transpose16x1(const u8* A, u16* B) FL_NO_EXCEPT;
 
     static bool FL_IRAM isrTransmitDone(void* panel_io,
                                         const void* edata,
-                                        void* user_ctx) FL_NOEXCEPT;
+                                        void* user_ctx) FL_NO_EXCEPT;
 
 private:
     /// @brief Group of channels sharing the same chipset timing
@@ -199,7 +199,7 @@ private:
         fl::vector<ChannelDataPtr> mChannels; ///< Channels in this group
 
         /// @brief Construct with timing config
-        explicit ChipsetGroup(const ChipsetTimingConfig& timing) FL_NOEXCEPT
+        explicit ChipsetGroup(const ChipsetTimingConfig& timing) FL_NO_EXCEPT
             : mTiming(timing), mChannels() {}
     };
 
@@ -253,6 +253,6 @@ private:
 ///
 /// Creates ChannelEngineI2S with I2sLcdCamPeripheralEsp (real hardware).
 /// Only available on ESP32-S3 with LCD_CAM support.
-fl::shared_ptr<IChannelDriver> createI2sEngine() FL_NOEXCEPT;
+fl::shared_ptr<IChannelDriver> createI2sEngine() FL_NO_EXCEPT;
 
 } // namespace fl

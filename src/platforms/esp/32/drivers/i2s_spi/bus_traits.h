@@ -34,14 +34,14 @@ namespace fl {
 template<> struct BusTraits<Bus::I2S_SPI> {
     using Driver = IChannelDriver;
 
-    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
         static fl::shared_ptr<Driver> gHolder = createI2sSpiEngine();
         return gHolder;
     }
 
-    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
+    static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
-    static void registerWithManager() FL_NOEXCEPT {
+    static void registerWithManager() FL_NO_EXCEPT {
         ChannelManager::instance().addDriver(default_bus_priority(Bus::I2S_SPI), instancePtr());
     }
 };

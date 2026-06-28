@@ -13,6 +13,11 @@ impl FileContentChecker for WeakAttributeChecker {
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        // Whole-file early exit: the regex only matches if both
+        // "__attribute__" and "weak" appear; most files have neither.
+        if !file_content.content.contains("weak") {
+            return Vec::new();
+        }
         let mut violations = Vec::new();
         let mut in_multiline_comment = false;
 
@@ -69,6 +74,13 @@ impl FileContentChecker for BannedDefineChecker {
             ),
         ];
 
+        // Whole-file early exit: every needle starts with "#if " and
+        // most files have no `#if` at all (or only `#ifdef`/`#ifndef`).
+        // The per-line walk would burn nontrivial time on these.
+        if !file_content.content.contains("#if ") {
+            return Vec::new();
+        }
+
         let mut violations = Vec::new();
         let mut in_multiline_comment = false;
 
@@ -94,6 +106,44 @@ impl FileContentChecker for BannedDefineChecker {
         }
 
         violations
+    }
+}
+
+struct EmAsmClangFormatChecker;
+
+impl FileContentChecker for EmAsmClangFormatChecker {
+    fn name(&self) -> &'static str {
+        "EmAsmClangFormatChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        // Ported from ci/tests/test_wasm_clang_format.py: walks src/platforms/wasm/
+        // and checks files whose names end in ".h" or ".cpp".
+        if !ends_with_any(file_path, &[".h", ".cpp"]) {
+            return false;
+        }
+        let normalized = normalize_path(file_path);
+        is_under_project_subpath(&normalized, project_root, "src/platforms/wasm")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        // The original pytest fails when a file contains "EM_ASM_" anywhere AND
+        // does NOT contain "clang-format off" anywhere. We surface a single
+        // violation at line 1 to mirror the Python failure message exactly.
+        if !file_content.content.contains("EM_ASM_") {
+            return Vec::new();
+        }
+        if file_content.content.contains("clang-format off") {
+            return Vec::new();
+        }
+        vec![(
+            1,
+            format!(
+                "Missing clang-format off in {} (file uses EM_ASM_ macros; \
+add `// clang-format off` somewhere in the file)",
+                file_content.path
+            ),
+        )]
     }
 }
 

@@ -119,7 +119,11 @@ impl FileContentChecker for CtypeGlobalChecker {
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
-        if !ctype_functions().any(|func| file_content.content.contains(func)) {
+        // Whole-file pre-flight gate. The combined static regex matches in
+        // a single pass over the content instead of 28 separate `contains`
+        // scans (one per ctype/cstring function name) - the old code paid
+        // O(28 * content_len) per file just to decide "no work to do".
+        if !ctype_any_function_regex().is_match(&file_content.content) {
             return Vec::new();
         }
 
@@ -167,7 +171,10 @@ impl FileContentChecker for CtypeGlobalChecker {
             if line.contains("// ok ctype") || line.contains("// okay ctype") {
                 continue;
             }
-            if !ctype_functions().any(|func| code_part.contains(func)) {
+            // Same single-regex gate at the per-line level - skip the
+            // 28-substring-scan loop unless the line plausibly mentions
+            // one of the watched functions.
+            if !ctype_any_function_regex().is_match(code_part) {
                 continue;
             }
 

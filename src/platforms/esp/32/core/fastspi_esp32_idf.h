@@ -87,11 +87,11 @@ public:
         }
     }
 
-    void setSelect(Selectable* pSelect) FL_NOEXCEPT {
+    void setSelect(Selectable* pSelect) FL_NO_EXCEPT {
         mPSelect = pSelect;
     }
 
-    void init() FL_NOEXCEPT {
+    void init() FL_NO_EXCEPT {
         if (mInitialized) {
             return;
         }
@@ -136,21 +136,21 @@ public:
     static void wait() {}
     static void waitFully() {}
 
-    void writeByteNoWait(u8 b) FL_NOEXCEPT __attribute__((always_inline)) {
+    void writeByteNoWait(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
         writeByte(b);
     }
 
-    void writeBytePostWait(u8 b) FL_NOEXCEPT __attribute__((always_inline)) {
+    void writeBytePostWait(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
         writeByte(b);
         wait();
     }
 
-    void writeWord(u16 w) FL_NOEXCEPT __attribute__((always_inline)) {
+    void writeWord(u16 w) FL_NO_EXCEPT __attribute__((always_inline)) {
         writeByte(static_cast<u8>(w >> 8));
         writeByte(static_cast<u8>(w & 0xFF));
     }
 
-    void writeByte(u8 b) FL_NOEXCEPT {
+    void writeByte(u8 b) FL_NO_EXCEPT {
         if (!mInitialized || !mSPIHandle) {
             return;
         }
@@ -163,7 +163,7 @@ public:
         spi_device_polling_transmit(mSPIHandle, &t);
     }
 
-    void writePixelsBulk(const CRGB* pixels, size_t n) FL_NOEXCEPT {
+    void writePixelsBulk(const CRGB* pixels, size_t n) FL_NO_EXCEPT {
         if (!mInitialized || !mSPIHandle || n == 0) {
             return;
         }
@@ -178,7 +178,7 @@ public:
         spi_device_polling_transmit(mSPIHandle, &t);
     }
 
-    void select() FL_NOEXCEPT {
+    void select() FL_NO_EXCEPT {
         if (!mInitialized) {
             return;
         }
@@ -192,7 +192,7 @@ public:
         }
     }
 
-    void release() FL_NOEXCEPT {
+    void release() FL_NO_EXCEPT {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -206,25 +206,25 @@ public:
         mInTransaction = false;
     }
 
-    void endTransaction() FL_NOEXCEPT {
+    void endTransaction() FL_NO_EXCEPT {
         waitFully();
         release();
     }
 
-    void writeBytesValue(u8 value, int len) FL_NOEXCEPT {
+    void writeBytesValue(u8 value, int len) FL_NO_EXCEPT {
         select();
         writeBytesValueRaw(value, len);
         release();
     }
 
-    void writeBytesValueRaw(u8 value, int len) FL_NOEXCEPT {
+    void writeBytesValueRaw(u8 value, int len) FL_NO_EXCEPT {
         while (len--) {
             writeByte(value);
         }
     }
 
     template <class D>
-    void writeBytes(FASTLED_REGISTER u8* data, int len) FL_NOEXCEPT {
+    void writeBytes(FASTLED_REGISTER u8* data, int len) FL_NO_EXCEPT {
         select();
         u8* end = data + len;
         while (data != end) {
@@ -234,14 +234,14 @@ public:
         release();
     }
 
-    void writeBytes(FASTLED_REGISTER u8* data, int len) FL_NOEXCEPT {
+    void writeBytes(FASTLED_REGISTER u8* data, int len) FL_NO_EXCEPT {
         writeBytes<DATA_NOP>(data, len);
     }
 
     static void finalizeTransmission() {}
 
     template <u8 BIT>
-    inline void writeBit(u8 b) FL_NOEXCEPT {
+    inline void writeBit(u8 b) FL_NO_EXCEPT {
         // Test bit BIT in value b, send 0xFF if set, 0x00 if clear
         writeByte((b & (1 << BIT)) ? 0xFF : 0x00);
     }
@@ -266,7 +266,7 @@ public:
                 D::adjust(pixels.loadAndScale0()),
                 D::adjust(pixels.loadAndScale1()),
                 D::adjust(pixels.loadAndScale2())
-            ) FL_NOEXCEPT;
+            ) FL_NO_EXCEPT;
             data_block[data_block_index++] = rgb;
             pixels.advanceData();
             pixels.stepDithering();

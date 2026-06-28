@@ -33,6 +33,8 @@ Loopback setup:
 1. `fbuild build lpc845 --examples AutoResearch` flashes the consolidated `examples/AutoResearch/AutoResearch.ino` (its low-memory mode auto-engages on LPC8xx via `FL_PLATFORM_HAS_LARGE_MEMORY == 0`).
 2. Jumper TX pin → RX pin externally on the LPC845-BRK header (default: `P0_10` → `P0_11`).
 
+> **Pin discovery is on by default.** `bash autoresearch <board>` auto-sweeps the GPIO matrix for wired loopback pairs before running any driver test — no `--tx-pin`/`--rx-pin` flags required for the canonical fixture. Pass `--no-auto-discover-pins` to opt out (e.g. for known-bad wiring debug or CI determinism). Explicit `--tx-pin <N>`/`--rx-pin <N>` overrides keep working. See [#3296](https://github.com/FastLED/FastLED/issues/3296).
+
 What the harness asserts:
 
 - **`bash autoresearch lpc845brk --bring-up`** — `echo` RPC round-trips; FL_WARN literal reaches the host; proves Serial + JSON-RPC + log pipeline intact.
@@ -41,6 +43,21 @@ What the harness asserts:
 - **Link-symbol check** — `arm-none-eabi-nm -C firmware.elf | grep -E '(aeabi_d|aeabi_f|f2iz|d2iz|__l2f|__floatdisf)'` stays empty after [#3038](https://github.com/FastLED/FastLED/pull/3038). The harness can fold this into its reporting path so the no-soft-FP invariant is asserted on every run.
 
 Once all four run green against an LPC845-BRK with the loopback jumper, [#2880](https://github.com/FastLED/FastLED/issues/2880) closes and the table above flips its LPC845 / LPC804 rows to "✅ hardware verified". No human-eyeball scope trace required.
+
+## Register-map authoring note (issue #2990)
+
+`clockless_arm_lpc_pwm_dma.h` defines tier-3 fallback shim structs
+(`FL_LPC_SCT_Shim`, `FL_LPC_DMA_Shim`, `FL_LPC_SYSCON_Shim`) for build
+configurations where NXP's `<LPC845.h>` is not on the include path.
+Those shims have shipped wrong offsets twice (#3349 fixed `SYSCON`
+`_resv0[16]→[32]` and `DMA_CHANNEL.CFG` bit composition). Any further
+edits to those structs — or to any new LPC register access — MUST follow
+`agents/docs/register-maps.md`: cite both the UM section and the
+vendor CMSIS member name on every line, gate the shim behind the
+vendor typedef's include guard, and spot-check three offsets against
+the real header before merging. The long-term plan is tier-2 vendoring
+of `LPC845.h` (BSD-3-Clause) into `src/platforms/arm/lpc/cmsis/` and
+deletion of the shims.
 
 ## Files (quick pass)
 

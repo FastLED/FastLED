@@ -17,15 +17,15 @@ namespace lpc_time {
 static volatile u32 g_millis = 0;
 static bool g_systick_started = false;
 
-static u32 ticks_per_ms() FL_NOEXCEPT {
+static u32 ticks_per_ms() FL_NO_EXCEPT {
     return F_CPU / 1000UL;
 }
 
-static u32 ticks_per_us() FL_NOEXCEPT {
+static u32 ticks_per_us() FL_NO_EXCEPT {
     return F_CPU / 1000000UL;
 }
 
-static void init_systick() FL_NOEXCEPT {
+static void init_systick() FL_NO_EXCEPT {
     if (g_systick_started) {
         return;
     }
@@ -43,7 +43,7 @@ static void init_systick() FL_NOEXCEPT {
     g_systick_started = true;
 }
 
-static u32 current_ms_fraction_us() FL_NOEXCEPT {
+static u32 current_ms_fraction_us() FL_NO_EXCEPT {
     const u32 per_us = ticks_per_us();
     if (!g_systick_started || per_us == 0) {
         return 0;
@@ -67,24 +67,24 @@ extern "C" void SysTick_Handler(void) {
 namespace fl {
 namespace platforms {
 
-void delay(u32 ms) FL_NOEXCEPT {
+void delay(u32 ms) FL_NO_EXCEPT {
     const u32 start = millis();
     while ((millis() - start) < ms) {
     }
 }
 
-void delayMicroseconds(u32 us) FL_NOEXCEPT {
+void delayMicroseconds(u32 us) FL_NO_EXCEPT {
     const u32 start = micros();
     while ((micros() - start) < us) {
     }
 }
 
-u32 millis() FL_NOEXCEPT {
+u32 millis() FL_NO_EXCEPT {
     lpc_time::init_systick();
     return lpc_time::g_millis;
 }
 
-u32 micros() FL_NOEXCEPT {
+u32 micros() FL_NO_EXCEPT {
     lpc_time::init_systick();
 
     u32 before;

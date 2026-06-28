@@ -119,36 +119,24 @@ def run_cpp_lint() -> bool:
     print("=" * 60)
     print("LINTING C++ CODE")
     print("=" * 60)
-    print("Running C++ linters (unified runner - matches 'bash lint')")
+    print("Running C++ linters (unified runner - matches 'bash lint --cpp')")
     print()
 
     project_root = Path(__file__).parent.parent
 
     try:
-        # Phase 1: Run unified C++ checker (all content-based linters in one pass)
-        # This is the same as 'bash lint' line 200
-        print("🔍 Running unified C++ checker (all content-based linters in one pass)")
+        # Delegate to the same C++ lint entrypoint as `bash lint --cpp` so
+        # the Rust `fastled-lint` binary is used by default (FastLED #3288)
+        # and we stay on whatever flag defaults `ci/lint.py` ships next.
+        # The legacy direct `cpp_lint.py` relative-includes call has been
+        # retired — RelativeIncludeChecker now ships in the Rust crate.
         result = subprocess.run(
-            ["uv", "run", "python", "ci/lint_cpp/run_all_checkers.py"],
+            ["uv", "run", "--no-sync", "python", "ci/lint.py", "--cpp"],
             cwd=project_root,
             env=get_utf8_env(),
         )
         if result.returncode != 0:
-            print("❌ Unified C++ linter failed")
-            return False
-
-        print()
-
-        # Phase 3: Run relative includes check for src/ only
-        # This is the same as 'bash lint' line 219
-        print("🔗 Running relative includes check (cpp_lint.py for src/ only)")
-        result = subprocess.run(
-            ["uv", "run", "python", "cpp_lint.py", "src/"],
-            cwd=project_root,
-            env=get_utf8_env(),
-        )
-        if result.returncode != 0:
-            print("❌ cpp_lint.py failed: Found relative includes in src/")
+            print("❌ C++ linter failed")
             return False
 
         print()

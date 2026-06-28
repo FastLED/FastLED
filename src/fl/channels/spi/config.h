@@ -42,7 +42,7 @@ enum class SpiParallelMode : u8 {
 
 /// @brief Configuration for SPI device (supports 1-8 lanes)
 struct SpiConfig {
-    SpiConfig() FL_NOEXCEPT = default;
+    SpiConfig() FL_NO_EXCEPT = default;
 
     /// @brief Construct single-lane SPI config
     SpiConfig(int clk, int data, u32 speed_hz = 0xffffffff, spi_output_mode_t output_mode = spi_output_mode_t::SPI_AUTO, u8 spi_mode = 0)

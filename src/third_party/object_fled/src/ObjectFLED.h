@@ -58,7 +58,25 @@
 // smaller than the half the Cortex-M7 data cache.
 //bitdata[B_P_D * 64]		buffer holds data (10KB) for 80 LED bytes: 4DW * 8b = 32DW/LEDB = 96DW/LED
 //framebuffer_index = B_P_D * 2 = pointer to next block for transfer (80 LEDB / bitdata buffer)
-#define BYTES_PER_DMA	20		//= number of pairs of LEDB (40=80B) bitmasks in bitdata.
+// Doubled from 60 to 120 to lengthen the eDMA major loop on dma2 (the
+// chunked half-buffer used for ESG-chained refill). With BYTES_PER_DMA=60
+// the ISR had only ~1.25 us between dma2's ESG reload and the next TMR4
+// trigger, but the ISR's memset + fillbits + dcache_flush takes ~10 us
+// on Cortex-M7 @ 600 MHz -- so dma2next was reading a partially-refilled
+// chunk on the first ~10 us of each new chunk. That race is the most
+// plausible mechanism behind the residual mid-byte 0->1 phantom bit flips
+// reported in #3406 (statistical analysis shows errors cluster at the
+// 20-LED chunk boundaries that BYTES_PER_DMA=60 produces). 120 doubles
+// the inter-ISR margin with the same memset overhead, +15 KB DMAMEM cost.
+// BYTES_PER_DMA is defined in ObjectFLEDDmaManager.h to keep a single
+// source of truth (CodeRabbit-flagged on PR #3419 -- previously this
+// header also had a #ifndef guard with default 120, while
+// ObjectFLEDDmaManager.h had 150, creating an include-order-dependent
+// ODR hazard between the bitdata[] array size and any consumer that
+// arithmetic-references BYTES_PER_DMA). The definition itself now
+// lives in ObjectFLEDDmaManager.h next to the static_assert and the
+// bitdata array declaration that depends on it.
+#include "ObjectFLEDDmaManager.h"
 
 #define CORDER_RGB	0	//* WS2811, YF923
 #define CORDER_RBG	1
@@ -97,6 +115,12 @@ namespace fl {
 //Usage: ObjectFLED myCube ( Num_LEDs, *drawBuffer, LED_type, numPins, *pinList, serpentineNumber )
 class ObjectFLED {
 public:
+	// Teensy 4.x hardware ownership:
+	// ObjectFLED owns QTimer4 channels 0-2, XBAR1 DMA request outputs 30/31/94,
+	// the corresponding DMAMUX requests, its allocated DMA channels, and the
+	// selected pins' standard GPIO aliases while an instance is active. It does
+	// not restore prior owners for those resources; conflicting peripherals must
+	// be treated as unsupported while ObjectFLED is in use.
 	// Usage: ObjectFLED myCube ( Num_LEDs, *drawBuffer, LED_type, numPins, *pinList, serpentineNumber )
 	// Example:
     // byte pinList[NUM_CHANNELS] = {1, 8, 14, 17, 24, 29, 20, 0, 15, 16, 18, 19, 21, 22, 23, 25};
@@ -151,6 +175,7 @@ private:
 public:
 
 	void show(void);
+	void showRawFrameBuffer(void);
 	void waitForDmaToFinish();
 
 	int busy(void);
@@ -172,6 +197,7 @@ private:
 	static void isr(void);
 
 	void genFrameBuffer(uint32_t);
+	void showInternal(bool regenerateFrameBuffer);
 
 	uint32_t update_begin_micros = 0;
 	uint8_t brightness = 255;
@@ -193,11 +219,20 @@ private:
 	uint16_t LATCH_DELAY = 300;		//uS time to hold output low for LED latch.
 
 	//for show context switch
-	uint32_t bitmaskLocal[4];
+	// Force 32-byte alignment so arm_dcache_flush_delete in begin() operates
+	// on a whole cache line. Without alignment the 16-byte flush is unsafe
+	// per Cortex-M7 cache maintenance semantics (#3406).
+	// #3416 OF-MED-1: bitmaskLocal is 16 bytes (alignas 32 = its own line
+	// start) but the adjacent numpinsLocal/numbytesLocal share the second
+	// half of the same 32-byte cache line. Padding to a full 32 bytes
+	// guarantees the flush_delete invalidates only data this driver owns
+	// and never an adjacent instance's fields.
+	alignas(32) uint32_t bitmaskLocal[8];  // 4 valid words + 4 pad
 	uint8_t numpinsLocal;
 	uint32_t numbytesLocal;
 	uint8_t pin_bitnumLocal[NUM_DIGITAL_PINS];
 	uint8_t pin_offsetLocal[NUM_DIGITAL_PINS];
+	bool initialized = false;
 };	// class ObjectFLED
 
 

@@ -57,6 +57,35 @@ bash autoresearch --all --skip-lint --timeout 180
 ### Build Backend
 `bash autoresearch` uses fbuild for all board compiles. Do not use board-specific PlatformIO fallback paths for compatibility issues; file board build compatibility problems at https://github.com/FastLED/fbuild/issues.
 
+### Synthesised `platformio.ini` (no root dependency)
+
+Since #3281, `bash autoresearch` synthesises its own `.build/pio/<board>/platformio.ini` from `ci/boards.py` before launching fbuild — the same pattern `bash compile` already uses. **Root `./platformio.ini` is NOT consulted in the default path.** The staged tree under `.build/pio/<board>/` contains:
+
+- `platformio.ini` — generated from `Board.to_platformio_ini()` for the resolved board.
+- `src/sketch/` — populated by copying `examples/AutoResearch/`.
+
+Board selection happens in this order:
+1. Positional environment (`bash autoresearch esp32c6 ...`) — synthesised immediately at parse time.
+2. `--env <name>` — same as positional.
+3. `--lcd` / `--lcd-spi` / `--lcd-rgb` — implies `esp32s3` / `esp32p4`; synthesised immediately.
+4. Auto-detect from attached USB device — synthesis deferred until after `detect_attached_chip()`.
+
+**Legacy escape hatch (deprecated):** `--use-root-platformio-ini` re-enables the old behavior of reading root `./platformio.ini` instead of synthesising. It is not allowed for Teensy AutoResearch acceptance or any ObjectFLED/FlexIO bring-up run. Use only for non-Teensy diagnostic comparisons when you have local edits to root `./platformio.ini` that the synthesised file misses — in which case the correct fix is to move those edits into `ci/boards.py`.
+
+```bash
+# Default (synthesised):
+bash autoresearch esp32c6 --parlio
+
+# Legacy (consumes root ./platformio.ini, deprecated):
+bash autoresearch esp32c6 --parlio --use-root-platformio-ini
+```
+
+For Teensy 4.x validation, always use the synthesised fbuild path:
+
+```bash
+bash autoresearch teensy41 --object-fled --tx-pin 8 --rx-pin 9 --timeout 120
+```
+
 ### Strip Size Configuration
 Configure LED strip sizes for autoresearch testing via JSON-RPC:
 ```bash
@@ -334,13 +363,7 @@ fl::RxChannelConfig cfg(rx_pin, fl::RxBackend::FLEXIO);
 auto rx = fl::RxChannel::create(cfg);
 ```
 
-```python
-# Python — call the dedicated RPCs from any harness with pyserial open
-send_rpc(s, "flexioRxBenchmark",
-         {"frequency_hz": 100000, "duration_ms": 100, "tx_pin": 3, "rx_pin": 4})
-send_rpc(s, "flexioObjectFledTest",
-         {"test_case": 4, "tx_pin": 3, "rx_pin": 4, "capture_ms": 50})
-```
+Raw pyserial RPC scripts are diagnostics only. They are not acceptance criteria for Teensy ObjectFLED/FlexIO bring-up, and they must not be open while `bash autoresearch` owns the port.
 
 ### Pin support
 
@@ -366,8 +389,8 @@ Adding a pin: append a row mapping its Teensy digital number to its FLEXIO1 inpu
 
 ### Verification
 
-- **`flexioRxBenchmark`** — RPC that drives a square wave via `analogWriteFrequency` and reports per-period mean / σ / min / max nanoseconds. Phase 2 acceptance: σ < 1 µs at 1 kHz, < 500 ns at 10 kHz, < 100 ns at 100 kHz; mean within ±1 % of expected period. See `ci/autoresearch/test_flexio_rx_squarewave.py`.
-- **`flexioObjectFledTest`** — RPC that drives a WS2812 pattern via `Bus::OBJECT_FLED` and decodes the captured edge stream against `TIMING_WS2812B_V5`. Five fixed patterns: red single LED, RGB chain, all zeros, all ones, 100-LED alternating R/G/B. Acceptance: byte-for-byte match against the transmitted CRGB array. See `ci/autoresearch/test_flexio_rx_objectfled.py`.
+- **`flexioRxBenchmark`** — diagnostic RPC that drives a square wave via `analogWriteFrequency` and reports per-period mean / sigma / min / max nanoseconds. The raw script is useful for investigation only; acceptance must be routed through canonical `bash autoresearch`.
+- **`flexioObjectFledTest`** — diagnostic RPC that drives a WS2812 pattern via `Bus::OBJECT_FLED` and decodes the captured edge stream against `TIMING_WS2812B_V5`. The raw `ci/autoresearch/test_flexio_rx_objectfled.py` script is not an acceptance path; use it only when deliberately debugging outside a canonical run, and close it before `bash autoresearch`.
 
 `RxBackend::PLATFORM_DEFAULT` switching from FlexPWM to FlexIO on Teensy 4 is intentionally **deferred** to a follow-up PR — keeps the bench-validation surface small and the existing FlexPWM-based AutoResearch flows untouched until both backends are equally exercised.
 

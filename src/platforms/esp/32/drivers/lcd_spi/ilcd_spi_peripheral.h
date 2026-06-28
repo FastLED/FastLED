@@ -44,7 +44,7 @@ struct LcdSpiConfig {
     bool use_psram;                        ///< Allocate buffers in PSRAM
     LcdSpiOwnerDriver owner;               ///< Which driver is initializing (issue #2270)
 
-    LcdSpiConfig() FL_NOEXCEPT
+    LcdSpiConfig() FL_NO_EXCEPT
         : data_gpios(),
           clock_gpio(-1),
           dc_gpio(-1),
@@ -60,7 +60,7 @@ struct LcdSpiConfig {
     }
 
     LcdSpiConfig(int lanes, int clk_gpio, u32 clk_hz,
-                 size_t max_bytes) FL_NOEXCEPT
+                 size_t max_bytes) FL_NO_EXCEPT
         : data_gpios(),
           clock_gpio(clk_gpio),
           dc_gpio(-1),
@@ -86,35 +86,35 @@ class ILcdSpiPeripheral {
     virtual ~ILcdSpiPeripheral() = default;
 
     // Lifecycle
-    virtual bool initialize(const LcdSpiConfig &config) FL_NOEXCEPT = 0;
-    virtual void deinitialize() FL_NOEXCEPT = 0;
-    virtual bool isInitialized() const FL_NOEXCEPT = 0;
+    virtual bool initialize(const LcdSpiConfig &config) FL_NO_EXCEPT = 0;
+    virtual void deinitialize() FL_NO_EXCEPT = 0;
+    virtual bool isInitialized() const FL_NO_EXCEPT = 0;
 
     // Buffer management (DMA-capable, 16-bit aligned)
-    virtual u16 *allocateBuffer(size_t size_bytes) FL_NOEXCEPT = 0;
-    virtual void freeBuffer(u16 *buffer) FL_NOEXCEPT = 0;
+    virtual u16 *allocateBuffer(size_t size_bytes) FL_NO_EXCEPT = 0;
+    virtual void freeBuffer(u16 *buffer) FL_NO_EXCEPT = 0;
 
     // Transmission
     virtual bool transmit(const u16 *buffer,
-                          size_t size_bytes) FL_NOEXCEPT = 0;
+                          size_t size_bytes) FL_NO_EXCEPT = 0;
     virtual bool queueTransmit(const u16 *buffer,
-                               size_t size_bytes) FL_NOEXCEPT {
+                               size_t size_bytes) FL_NO_EXCEPT {
         return transmit(buffer, size_bytes);
     }
-    virtual bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT = 0;
-    virtual bool isBusy() const FL_NOEXCEPT = 0;
+    virtual bool waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT = 0;
+    virtual bool isBusy() const FL_NO_EXCEPT = 0;
 
     // Callback — WARNING: callback is invoked from ISR context and
     // MUST be placed in IRAM (IRAM_ATTR) on ESP32 platforms.
     virtual bool registerTransmitCallback(void *callback,
-                                          void *user_ctx) FL_NOEXCEPT = 0;
+                                          void *user_ctx) FL_NO_EXCEPT = 0;
 
     // State
-    virtual const LcdSpiConfig &getConfig() const FL_NOEXCEPT = 0;
+    virtual const LcdSpiConfig &getConfig() const FL_NO_EXCEPT = 0;
 
     // Platform utilities
-    virtual u64 getMicroseconds() FL_NOEXCEPT = 0;
-    virtual void delay(u32 ms) FL_NOEXCEPT = 0;
+    virtual u64 getMicroseconds() FL_NO_EXCEPT = 0;
+    virtual void delay(u32 ms) FL_NO_EXCEPT = 0;
 };
 
 } // namespace detail

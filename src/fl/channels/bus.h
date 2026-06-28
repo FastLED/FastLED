@@ -139,8 +139,18 @@ template<> struct DefaultBus<SpiChipsetConfig> {
 template<> struct DefaultBus<ClocklessChipset> {
     static constexpr Bus value = Bus::OBJECT_FLED;
 };
-// SpiChipsetConfig default for Teensy 4.x is intentionally unspecified -- users
-// pick explicitly between Bus::BIT_BANG and any future hardware-SPI bus.
+
+// SPI chipsets (APA102/SK9822/HD108): default to FlexIO2 SPI master per
+// user directive in #3428 ("single strip should not default LPSPI because
+// that can be allocated already for peripherals where the parallel io
+// drivers are more likely to be free and can be purposed for spi usage").
+// FlexIO-SPI (this PR) is hardware-verified on Teensy 4.1; its pin pool
+// (6, 7, 8, 9, 10, 11, 12, 13, 32) is dedicated to FlexIO2 and rarely
+// collides with user GPIO use. It is a true hardware SPI master engine
+// (shifter + timer), not DMA-bit-banged.
+template<> struct DefaultBus<SpiChipsetConfig> {
+    static constexpr Bus value = Bus::FLEX_IO;
+};
 
 #endif
 
@@ -164,7 +174,7 @@ template<> struct DefaultBus<ClocklessChipset> {
 ///
 /// **Lifetime.** Every returned pointer is to a string literal, so it has
 /// static storage duration — safe to feed to `fl::string::from_literal()`.
-inline const char* busName(Bus b) FL_NOEXCEPT {
+inline const char* busName(Bus b) FL_NO_EXCEPT {
     switch (b) {
         case Bus::AUTO:          return "AUTO";
         case Bus::RMT:           return "RMT";

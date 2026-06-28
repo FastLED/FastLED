@@ -19,7 +19,7 @@ namespace platforms {
 /// POSIX platforms are host-based testing environments that don't require
 /// platform-specific initialization. This function is a no-op and exists
 /// for API consistency.
-inline void init() FL_NOEXCEPT {
+inline void init() FL_NO_EXCEPT {
     // No-op: POSIX platforms don't need special initialization
 }
 

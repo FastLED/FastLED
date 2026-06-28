@@ -65,21 +65,21 @@ public:
     ~Transaction();
 
     // Move semantics
-    Transaction(Transaction&& other) FL_NOEXCEPT;
-    Transaction& operator=(Transaction&& other) FL_NOEXCEPT;
+    Transaction(Transaction&& other) FL_NO_EXCEPT;
+    Transaction& operator=(Transaction&& other) FL_NO_EXCEPT;
 
 private:
     friend class Device;
 
     // Private constructor for Device to create transactions
-    Transaction() FL_NOEXCEPT;
+    Transaction() FL_NO_EXCEPT;
 
     struct Impl;
     fl::unique_ptr<Impl> pImpl;
 
     // Non-copyable
-    Transaction(const Transaction&) FL_NOEXCEPT = delete;
-    Transaction& operator=(const Transaction&) FL_NOEXCEPT = delete;
+    Transaction(const Transaction&) FL_NO_EXCEPT = delete;
+    Transaction& operator=(const Transaction&) FL_NO_EXCEPT = delete;
 };
 
 } // namespace spi

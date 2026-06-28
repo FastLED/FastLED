@@ -18,9 +18,32 @@ if TYPE_CHECKING:
 # Constants
 # ============================================================
 
-# GPIO pin definitions (must match AutoResearch.ino)
-PIN_TX = 1  # TX pin used by FastLED drivers
-PIN_RX = 0  # RX pin used by RMT receiver (ESP32-C6 default; ESP32 uses 2)
+# Legacy fallback GPIO pin definitions. Platform-aware code should use
+# default_pins_for_environment() so host defaults stay synchronized with
+# examples/AutoResearch/AutoResearchPlatform.h.
+PIN_TX = 1
+PIN_RX = 0
+
+
+def _normalize_environment_name(environment: str | None) -> str:
+    return (environment or "").lower().replace("-", "").replace("_", "")
+
+
+def default_pins_for_environment(environment: str | None) -> tuple[int, int]:
+    """Return AutoResearch firmware default TX/RX pins for a board environment."""
+    env = _normalize_environment_name(environment)
+    if env in {"native", "stub", "host"} or "stub" in env:
+        return (1, 1)
+    if "esp32s3" in env:
+        return (1, 2)
+    if "esp32p4" in env:
+        return (5, 6)
+    if env in {"teensy40", "teensy41"}:
+        return (1, 2)
+    if any(chip in env for chip in ("esp32s2", "esp32c6", "esp32c3")):
+        return (1, 0)
+    return (PIN_TX, PIN_RX)
+
 
 # No legacy expect patterns — JSON-RPC test_complete is the authoritative
 # completion signal.
@@ -152,6 +175,40 @@ class RunContext:
     discovery_client: Any = None
     pins_discovered: bool = False
 
+    # `--timeout N` is a TOTAL post-flash budget, not a per-call timeout.
+    # `deadline_epoch` is set to `time.monotonic() + timeout_seconds`
+    # immediately after deploy returns and the board has entered its
+    # pre-connect state. Every downstream RPC call computes its own
+    # per-call budget as `remaining_seconds()` so the user-supplied
+    # `--timeout` is honored as a hard wall. A wrapper-level watchdog
+    # task (`_watchdog_task`) fires at `deadline_epoch + 20s` to force
+    # an error + serial-port release if normal teardown wedges.
+    deadline_epoch: float | None = None
+    _watchdog_task: Any = None  # asyncio.Task[None] set by start_watchdog()
+
+    def start_timeout_epoch(self) -> None:
+        """Stamp the post-flash deadline. Call exactly once, after deploy."""
+        import time as _time
+
+        self.deadline_epoch = _time.monotonic() + self.timeout_seconds
+
+    def remaining_seconds(self, *, minimum: float = 0.0) -> float:
+        """Time left until the user-supplied --timeout expires.
+
+        Returns 0.0 if the deadline has already passed (so an RPC call
+        will fail fast rather than block). `minimum` clamps the returned
+        value upward for callers that need a non-zero budget to do
+        anything useful at all (e.g. a 0.5 s floor for ping).
+        """
+        import time as _time
+
+        if self.deadline_epoch is None:
+            # Not in a deadline-tracked phase (e.g. compile-only).
+            # Fall back to the full timeout so legacy callers still work.
+            return max(minimum, float(self.timeout_seconds))
+        remaining = self.deadline_epoch - _time.monotonic()
+        return max(minimum, remaining)
+
 
 # ============================================================
 # Display Helpers
@@ -206,6 +263,8 @@ def display_pattern_details(result: dict[str, Any]) -> None:
         total_bytes = pat.get("totalBytes", num_leds * 3)
         mismatched_bytes = pat.get("mismatchedBytes", 0)
         lsb_only = pat.get("lsbOnlyErrors", 0)
+        captured_bytes = pat.get("capturedBytes")
+        capture_failed = bool(pat.get("captureFailed", False))
 
         agg_total_bytes += total_bytes
         agg_mismatched_bytes += mismatched_bytes
@@ -215,6 +274,32 @@ def display_pattern_details(result: dict[str, Any]) -> None:
         lsb_pct = 100.0 * lsb_only / mismatched_bytes if mismatched_bytes > 0 else 0.0
 
         print(f"    Mismatched LEDs:  {mismatched_leds}/{num_leds}")
+        if captured_bytes is not None:
+            print(f"    Captured bytes:   {captured_bytes}/{total_bytes}")
+        capture_wait = pat.get("captureWaitResult")
+        raw_edges = pat.get("rawEdgesAfterWait")
+        if capture_wait is not None or raw_edges is not None:
+            print(f"    RX wait/raw:      {capture_wait}/{raw_edges}")
+        decode_ok = pat.get("decodeOk")
+        decode_error = pat.get("decodeError")
+        decode_bytes = pat.get("decodeBytes")
+        decode_capacity = pat.get("decodeOutputCapacity")
+        if (
+            decode_ok is not None
+            or decode_error is not None
+            or decode_bytes is not None
+            or decode_capacity is not None
+        ):
+            print(
+                "    Decode status:    "
+                f"ok={decode_ok} error={decode_error} "
+                f"bytes={decode_bytes}/{decode_capacity}"
+            )
+        raw_sample = pat.get("rawEdgeSample")
+        if raw_sample:
+            print(f"    Raw sample:       {raw_sample}")
+        if capture_failed:
+            print(f"    Capture status:   RX produced no decodable bytes")
         print(
             f"    Byte corruption:  {mismatched_bytes}/{total_bytes} bytes ({byte_pct:.1f}%)"
         )
@@ -282,6 +367,188 @@ def display_tight_timing(result: dict[str, Any]) -> None:
         f"   Tight timing: {status} max overhead {max_overhead}us "
         f"(limit {max_allowed}us, wire {expected}us, avg total {avg_total}us)"
     )
+
+
+def display_objectfled_diagnostics(result: dict[str, Any]) -> None:
+    """Display ObjectFLED register snapshots attached to runSingleTest.
+
+    Also dumps the FlexPWM RX diagnostics + standardGpioPadProbe if
+    present, regardless of whether ObjectFLED was the test driver -- the
+    FlexPWM RX block is useful for ANY Teensy driver that uses a
+    FlexPWM-capable pin as the receiver (e.g. FlexIO TX -> pin 22 RX
+    during #3410 bring-up).
+    """
+    diagnostics = result.get("objectFledDiagnostics")
+    if isinstance(diagnostics, dict) and diagnostics.get("enabled") is True:
+        event_count = diagnostics.get("eventCount", "?")
+        overflow_count = diagnostics.get("overflowCount", "?")
+        fmt = diagnostics.get("format", "unknown")
+        snapshot = diagnostics.get("snapshot")
+
+        print()
+        print("  ObjectFLED diagnostics")
+        print(f"    format: {fmt}")
+        print(f"    events: {event_count}, overflow: {overflow_count}")
+        if isinstance(snapshot, str) and snapshot:
+            print("    snapshot:")
+            for line in snapshot.splitlines():
+                print(f"      {line}")
+
+    flex_diag = result.get("flexPwmRxDiagnostics")
+    if isinstance(flex_diag, dict):
+        print()
+        print("  FlexPWM RX diagnostics")
+        keys = (
+            "format",
+            "requestedPin",
+            "requestedPinSupported",
+            "requestedDmaSource",
+            "requestedSubmodule",
+            "requestedChannelB",
+            "hasSelectRegister",
+            "activeInstance",
+            "activePin",
+            "activePinMatches",
+            "configured",
+            "receiveDone",
+            "edgesValid",
+            "edgeCount",
+            "captureBufferSize",
+            "activeSubmodule",
+            "activeChannelB",
+            "activeDmaSource",
+            "activeMuxValueLive",
+            "activeMuxValueExpected",
+            "activeSelectValueLive",
+            "activeSelectValueExpected",
+            "mctrl",
+            "ctrl",
+            "ctrl2",
+            "dmaen",
+            "captctrla",
+            "captctrlb",
+            "captcompa",
+            "captcompb",
+            "cval2",
+            "cval3",
+            "cval4",
+            "cval5",
+            "dmaChannel",
+            "dmaErq",
+            "dmaHrs",
+            "dmaInt",
+            "dmaErr",
+            "dmaEs",
+            "dmamuxChcfg",
+            "rxBit",
+            "rxMask",
+            "rxPadValue",
+            "rxFastModeValue",
+            "rxFastInputValue",
+            "rxStandardModeValue",
+            "rxStandardInputValue",
+            "rxFastGpioBank",
+            "rxStandardGpioBank",
+            "rxGprValue",
+            "rxMappedToStandard",
+            "hasTcd",
+            "saddr",
+            "soff",
+            "attr",
+            "nbytes",
+            "slast",
+            "daddr",
+            "doff",
+            "citer",
+            "dlastsga",
+            "csr",
+            "biter",
+        )
+        for key in keys:
+            if key in flex_diag:
+                print(f"    {key}: {flex_diag[key]}")
+
+    flexio_diag = result.get("flexIoDiagnostics")
+    if isinstance(flexio_diag, dict):
+        print()
+        print("  FlexIO2 register diagnostics")
+        hex_keys = {
+            "ctrl",
+            "shiftstat",
+            "shifterr",
+            "timstat",
+            "shiftsden",
+            "shiftctl0",
+            "shiftcfg0",
+            "timctl0",
+            "timcfg0",
+            "timcmp0",
+            "ccmCcgr3",
+            "ccmCscmr2",
+            "ccmCs1cdr",
+            "muxRegValue",
+            "padRegValue",
+            "tcdSaddr",
+            "tcdDaddr",
+            "tcdCsr",
+        }
+        for key in (
+            "initialized",
+            "dmaComplete",
+            "ctrl",
+            "shiftstat",
+            "shifterr",
+            "timstat",
+            "shiftsden",
+            "shiftctl0",
+            "shiftcfg0",
+            "timctl0",
+            "timcfg0",
+            "timcmp0",
+            "ccmCcgr3",
+            "ccmCscmr2",
+            "ccmCs1cdr",
+            "muxRegValue",
+            "padRegValue",
+            "tcdSaddr",
+            "tcdDaddr",
+            "tcdCiter",
+            "tcdBiter",
+            "tcdCsr",
+        ):
+            if key in flexio_diag:
+                val = flexio_diag[key]
+                if key in hex_keys and isinstance(val, int):
+                    print(f"    {key}: 0x{val & 0xFFFFFFFF:08X}")
+                else:
+                    print(f"    {key}: {val}")
+
+    pad_probe = result.get("standardGpioPadProbe")
+    if isinstance(pad_probe, dict):
+        print()
+        print("  Standard GPIO pad probe (TX manual drive via standard alias)")
+        for key in (
+            "supported",
+            "txPin",
+            "rxPin",
+            "txBit",
+            "txMask",
+            "txOffset",
+            "success",
+            "error",
+            "standardGpioRxInitial",
+            "standardGpioRxHighCount",
+            "standardGpioRxLowCount",
+            "standardGpioConnected",
+            "fastToggleIterations",
+            "fastToggleHighSettled",
+            "fastToggleLowSettled",
+            "fastToggleHighZeroDelay",
+            "fastToggleLowZeroDelay",
+            "message",
+        ):
+            if key in pad_probe:
+                print(f"    {key}: {pad_probe[key]}")
 
 
 def print_run_summary(ctx: RunContext) -> None:

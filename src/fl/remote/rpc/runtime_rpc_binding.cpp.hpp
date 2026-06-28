@@ -24,10 +24,10 @@ struct RuntimeRpcSlotCleanup {
     fl::size constructed;
 
     RuntimeRpcSlotCleanup(const RpcTypeOps* const* types,
-                          fl::vector<unsigned char*>& s) FL_NOEXCEPT
+                          fl::vector<unsigned char*>& s) FL_NO_EXCEPT
         : arg_types(types), slots(s), constructed(0) {}
 
-    ~RuntimeRpcSlotCleanup() FL_NOEXCEPT {
+    ~RuntimeRpcSlotCleanup() FL_NO_EXCEPT {
         for (fl::size i = 0; i < slots.size(); ++i) {
             if (!slots[i]) continue;
             if (i < constructed) arg_types[i]->destroy(slots[i]);
@@ -38,7 +38,7 @@ struct RuntimeRpcSlotCleanup {
 
 } // namespace
 
-fl::tuple<TypeConversionResult, json> RuntimeRpcBinding::invoke(const json& jsonArgs) FL_NOEXCEPT {
+fl::tuple<TypeConversionResult, json> RuntimeRpcBinding::invoke(const json& jsonArgs) FL_NO_EXCEPT {
     TypeConversionResult result;
 
     if (!jsonArgs.is_array()) {

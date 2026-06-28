@@ -37,27 +37,27 @@ public:
   static constexpr u32 GPIO_BIT_CLEAR_REG = PIN < 32 ? GPIO_OUT_W1TC_REG : GPIO_OUT1_W1TC_REG;
   #endif
 
-  inline static void setOutput() FL_NOEXCEPT {
+  inline static void setOutput() FL_NO_EXCEPT {
       FL_STATIC_ASSERT(validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
       pinMode(PIN, PinMode::Output);
   }
   inline static void setInput() { pinMode(PIN, PinMode::Input); }
 
-  inline static void hi() FL_NOEXCEPT __attribute__ ((always_inline)) {
+  inline static void hi() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       *sport() = MASK;
   }
 
-  inline static void lo() FL_NOEXCEPT __attribute__ ((always_inline)) {
+  inline static void lo() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       *cport() = MASK;
   }
 
-  inline static void set(FASTLED_REGISTER port_t val) FL_NOEXCEPT __attribute__ ((always_inline)) {
+  inline static void set(FASTLED_REGISTER port_t val) FL_NO_EXCEPT __attribute__ ((always_inline)) {
       *port() = val;
   }
 
   inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-  inline static void toggle() FL_NOEXCEPT __attribute__ ((always_inline)) {
+  inline static void toggle() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       *port() ^= MASK;
   }
 
@@ -65,29 +65,29 @@ public:
   inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
   inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
 
-  inline static port_t hival() FL_NOEXCEPT __attribute__ ((always_inline)) {
+  inline static port_t hival() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       return (*port()) | MASK;
   }
 
-  inline static port_t loval() FL_NOEXCEPT __attribute__ ((always_inline)) {
+  inline static port_t loval() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       return (*port()) & ~MASK;
   }
 
-  inline static port_ptr_t port() FL_NOEXCEPT __attribute__ ((always_inline)) {
+  inline static port_ptr_t port() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       return (port_ptr_t)GPIO_REG;
   }
 
-  inline static port_ptr_t sport() FL_NOEXCEPT __attribute__ ((always_inline)) {
+  inline static port_ptr_t sport() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       return (port_ptr_t)GPIO_BIT_SET_REG;
   }
 
-  inline static port_ptr_t cport() FL_NOEXCEPT __attribute__ ((always_inline)) {
+  inline static port_ptr_t cport() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       return (port_ptr_t)GPIO_BIT_CLEAR_REG;
   }
 
   inline static port_t mask() __attribute__ ((always_inline)) { return MASK; }
 
-  inline static bool isset() FL_NOEXCEPT __attribute__ ((always_inline)) {
+  inline static bool isset() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       return (*port()) & MASK;
   }
 };

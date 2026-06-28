@@ -30,13 +30,13 @@ using enable_if_integer_t =
 
 // Not constexpr: calling from a constexpr context triggers a compile error.
 // This is the C++11 "constexpr assert" pattern.
-inline void integer_out_of_range_for_fixed_point_type() FL_NOEXCEPT {}
+inline void integer_out_of_range_for_fixed_point_type() FL_NO_EXCEPT {}
 
 // Range check: is n in [0, MAX_U]?  Works for both signed and unsigned IntT.
 // For signed IntT, explicitly rejects negative values via i32 comparison.
 // For unsigned IntT, the negativity check is always true (optimized away).
 template <typename IntT>
-constexpr bool in_unsigned_range(IntT n, u32 max_u) FL_NOEXCEPT {
+constexpr bool in_unsigned_range(IntT n, u32 max_u) FL_NO_EXCEPT {
     return static_cast<i32>(fl::is_signed<IntT>::value ? (n >= IntT(0)) : 1) &&
            static_cast<u32>(n) <= max_u;
 }
@@ -57,14 +57,14 @@ struct int_to_fixed<IntBits, FracBits, true> {
     static constexpr u32 MAX_U = (static_cast<u32>(1) << IntBits) - 1;
 
     template <typename IntT>
-    static constexpr i16 from_signed(IntT n) FL_NOEXCEPT {
+    static constexpr i16 from_signed(IntT n) FL_NO_EXCEPT {
         return (static_cast<i32>(n) >= MIN_S && static_cast<i32>(n) <= MAX_S)
             ? static_cast<i16>(static_cast<i32>(n) * SCALE)
             : (integer_out_of_range_for_fixed_point_type(), i16(0));
     }
 
     template <typename IntT>
-    static constexpr u16 from_unsigned(IntT n) FL_NOEXCEPT {
+    static constexpr u16 from_unsigned(IntT n) FL_NO_EXCEPT {
         return in_unsigned_range(n, MAX_U)
             ? static_cast<u16>(static_cast<u32>(n) * SCALE)
             : (integer_out_of_range_for_fixed_point_type(), u16(0));
@@ -81,14 +81,14 @@ struct int_to_fixed<IntBits, FracBits, false> {
     static constexpr u32 MAX_U = (static_cast<u32>(1) << IntBits) - 1;
 
     template <typename IntT>
-    static constexpr i32 from_signed(IntT n) FL_NOEXCEPT {
+    static constexpr i32 from_signed(IntT n) FL_NO_EXCEPT {
         return (static_cast<i32>(n) >= MIN_S && static_cast<i32>(n) <= MAX_S)
             ? static_cast<i32>(static_cast<u32>(n) * USCALE)
             : (integer_out_of_range_for_fixed_point_type(), i32(0));
     }
 
     template <typename IntT>
-    static constexpr u32 from_unsigned(IntT n) FL_NOEXCEPT {
+    static constexpr u32 from_unsigned(IntT n) FL_NO_EXCEPT {
         return in_unsigned_range(n, MAX_U)
             ? static_cast<u32>(n) * USCALE
             : (integer_out_of_range_for_fixed_point_type(), u32(0));

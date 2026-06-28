@@ -8,10 +8,12 @@
 #if defined(FL_IS_TEENSY_4X)
 
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/iobjectfled_peripheral.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_diagnostics.h"
 
 #include "fl/stl/cstring.h"
 // IWYU pragma: begin_keep
 #include "third_party/object_fled/src/ObjectFLED.h"
+#include "third_party/object_fled/src/ObjectFLEDDmaManager.h"
 #include "third_party/object_fled/src/ObjectFLEDPinValidation.h"
 // IWYU pragma: end_keep
 
@@ -23,11 +25,20 @@ namespace fl {
 
 class ObjectFLEDInstanceReal : public IObjectFLEDInstance {
 public:
-    ObjectFLEDInstanceReal(ObjectFLED* ofled, u32 totalBytes)
-        : mObjectFLED(ofled), mTotalBytes(totalBytes) {}
+    ObjectFLEDInstanceReal(ObjectFLED* ofled, u32 totalBytes, const u8* pins,
+                           u32 pinCount)
+        : mObjectFLED(ofled), mTotalBytes(totalBytes),
+          mPinCount(pinCount < kMaxCapturedPins ? pinCount : kMaxCapturedPins) {
+        if (pins != nullptr && mPinCount > 0) {
+            fl::memcpy(mPins, pins, mPinCount);
+        }
+    }
 
     ~ObjectFLEDInstanceReal() override {
+        objectFledDiagnosticsRecord("beforeDestroy", mPins, mPinCount);
         delete mObjectFLED;  // ok bare allocation
+        mObjectFLED = nullptr;
+        objectFledDiagnosticsRecord("afterDestroy", mPins, mPinCount);
     }
 
     u8* getFrameBuffer() override {
@@ -39,12 +50,34 @@ public:
     }
 
     void show() override {
-        mObjectFLED->show();
+        updateBusyState();
+        objectFledDiagnosticsRecord("beforeShow", mPins, mPinCount);
+        mObjectFLED->showRawFrameBuffer();
+        updateBusyState();
+        objectFledDiagnosticsRecord("afterShowReturn", mPins, mPinCount);
+    }
+
+    bool isBusy() override {
+        return updateBusyState();
     }
 
 private:
+    bool updateBusyState() {
+        if (mObjectFLED == nullptr) {
+            objectFledDiagnosticsSetBusyState(false, false);
+            return false;
+        }
+        const bool latchBusy = mObjectFLED->busy() != 0;
+        const bool dmaBusy = ObjectFLEDDmaManager::getInstance().isBusy();
+        objectFledDiagnosticsSetBusyState(dmaBusy, latchBusy);
+        return latchBusy || dmaBusy;
+    }
+
+    static constexpr u32 kMaxCapturedPins = 16;
     ObjectFLED* mObjectFLED;
     u32 mTotalBytes;
+    u8 mPins[kMaxCapturedPins] = {};
+    u32 mPinCount = 0;
 };
 
 // ============================================================================
@@ -74,19 +107,14 @@ public:
             0  // No serpentine
         );
 
+        objectFledDiagnosticsRecord("beforeBegin", pinList, numPins);
         ofled->begin(
             static_cast<u16>(t1_ns),
             static_cast<u16>(t2_ns),
             static_cast<u16>(t3_ns),
             static_cast<u16>(reset_us)
         );
-
-        // CRITICAL: Set drawBuffer to frameBufferLocal so genFrameBuffer()
-        // (called inside show()) doesn't dereference nullptr. We write
-        // pixel data directly into frameBufferLocal, so genFrameBuffer's
-        // copy from drawBuffer→frameBufferLocal becomes a self-copy (no-op
-        // at default brightness=255).
-        ofled->drawBuffer = ofled->frameBufferLocal;
+        objectFledDiagnosticsRecord("afterBegin", pinList, numPins);
 
         int bytesPerLed = isRgbw ? 4 : 3;
         u32 totalBytes = static_cast<u32>(totalLeds * bytesPerLed);
@@ -94,7 +122,8 @@ public:
         // Clear frame buffer for padding
         fl::memset(ofled->frameBufferLocal, 0, totalBytes);
 
-        return fl::make_unique<ObjectFLEDInstanceReal>(ofled, totalBytes);
+        return fl::make_unique<ObjectFLEDInstanceReal>(
+            ofled, totalBytes, pinList, numPins);
     }
 };
 

@@ -13,8 +13,8 @@ enum MicType { // ok plain enum
 
 class SoundUtil {
 public:
-    static float rms(const i16 *samples, size_t num_samples) FL_NOEXCEPT;
-    static float rms_to_dB(MicType type, float rms_loudness) FL_NOEXCEPT;
+    static float rms(const i16 *samples, size_t num_samples) FL_NO_EXCEPT;
+    static float rms_to_dB(MicType type, float rms_loudness) FL_NO_EXCEPT;
 };
 
 }  // namespace fl

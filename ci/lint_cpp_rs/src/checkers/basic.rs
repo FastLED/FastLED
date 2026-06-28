@@ -98,6 +98,14 @@ impl FileContentChecker for BannedMacrosChecker {
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        // Whole-file early exit. Most files have neither sequence; the
+        // per-line walk would otherwise touch every line of every file
+        // just to bail out at the inner `code_no_strings.contains` check.
+        if !file_content.content.contains("__has_include")
+            && !file_content.content.contains("static_assert")
+        {
+            return Vec::new();
+        }
         let mut violations = Vec::new();
         let mut in_multiline_comment = false;
 
@@ -180,6 +188,20 @@ impl FileContentChecker for BareAllocationChecker {
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        // Whole-file early exit: a file without any allocation keyword
+        // anywhere has nothing for this checker to flag. The per-line
+        // bail-out at the bottom of the loop body fires for these too
+        // but only after walking every line, allocating substrings, and
+        // running the comment-state machine.
+        if !file_content.content.contains("new")
+            && !file_content.content.contains("delete")
+            && !file_content.content.contains("malloc")
+            && !file_content.content.contains("calloc")
+            && !file_content.content.contains("realloc")
+            && !file_content.content.contains("free")
+        {
+            return Vec::new();
+        }
         let mut violations = Vec::new();
         let mut in_multiline_comment = false;
 
@@ -392,6 +414,12 @@ impl FileContentChecker for IncludePathsChecker {
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        // Whole-file early exit: every violation this checker can report
+        // is gated on the line containing `#include`. Files without any
+        // #include at all (rare but possible) skip the per-line walk.
+        if !file_content.content.contains("#include") {
+            return Vec::new();
+        }
         let mut violations = Vec::new();
         let mut in_multiline_comment = false;
 

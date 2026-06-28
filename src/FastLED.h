@@ -1405,7 +1405,7 @@ public:
 	///            `bus_traits.h` visible at the call site (which provides
 	///            the `BusTraits<B>` specialization).
 	template<fl::Bus B>
-	void setExclusiveDriver() FL_NOEXCEPT {
+	void setExclusiveDriver() FL_NO_EXCEPT {
 		fl::channelManager().setExclusiveDriver<B>();
 	}
 
@@ -1506,7 +1506,7 @@ public:
 	/// @code
 	/// FastLED.setInputGamut(&my_profile, fl::InputGamut::Rec709);
 	/// @endcode
-	inline void setInputGamut(fl::DiodeProfile* profile, fl::InputGamut g) FL_NOEXCEPT {
+	inline void setInputGamut(fl::DiodeProfile* profile, fl::InputGamut g) FL_NO_EXCEPT {
 		fl::set_input_gamut(profile, g);
 	}
 
@@ -1514,7 +1514,7 @@ public:
 	/// `nullptr` for `white_xy` to fall back to the gamut's standard
 	/// reference white (equivalent to the 2-argument overload).
 	inline void setInputGamut(fl::DiodeProfile* profile, fl::InputGamut g,
-	                          const float white_xy[2]) FL_NOEXCEPT {
+	                          const float white_xy[2]) FL_NO_EXCEPT {
 		fl::set_input_gamut(profile, g, white_xy);
 	}
 
@@ -1525,8 +1525,8 @@ private:
 	// lives in src/fl/channels/detail/wait_spin_budget.{h,cpp.hpp}.
 	// Declared here so we don't drag the channel-detail include graph
 	// into FastLED.h.
-	static void _setWaitSpinBudgetUs(fl::u32 budget_us) FL_NOEXCEPT;
-	static fl::u32 _getWaitSpinBudgetUs() FL_NOEXCEPT;
+	static void _setWaitSpinBudgetUs(fl::u32 budget_us) FL_NO_EXCEPT;
+	static fl::u32 _getWaitSpinBudgetUs() FL_NO_EXCEPT;
 public:
 
 	/// Override the channel-manager tiered-wait spin budget (microseconds).
@@ -1542,12 +1542,12 @@ public:
 	/// Higher values catch larger DMA tails inside the spin without paying
 	/// the FreeRTOS >=1 ms tick floor, at the cost of busy-spinning the
 	/// LED-pinned core. See #2815 for design rationale.
-	inline void setWaitSpinBudgetUs(fl::u32 budget_us) FL_NOEXCEPT {
+	inline void setWaitSpinBudgetUs(fl::u32 budget_us) FL_NO_EXCEPT {
 		_setWaitSpinBudgetUs(budget_us);
 	}
 
 	/// Get the current tiered-wait spin budget (microseconds).
-	inline fl::u32 getWaitSpinBudgetUs() const FL_NOEXCEPT {
+	inline fl::u32 getWaitSpinBudgetUs() const FL_NO_EXCEPT {
 		return _getWaitSpinBudgetUs();
 	}
 
@@ -1630,12 +1630,12 @@ public:
 	/// @code
 	/// FastLED.setRgbwColorimetricProfile(&my_profile);
 	/// @endcode
-	inline void setRgbwColorimetricProfile(const fl::DiodeProfile* profile) FL_NOEXCEPT {
+	inline void setRgbwColorimetricProfile(const fl::DiodeProfile* profile) FL_NO_EXCEPT {
 		fl::set_rgbw_colorimetric_profile(profile);
 	}
 
 	/// Currently active RGBW colorimetric profile (defaults to `&fl::kRgbwDefaultProfile`).
-	inline const fl::DiodeProfile* getRgbwColorimetricProfile() const FL_NOEXCEPT {
+	inline const fl::DiodeProfile* getRgbwColorimetricProfile() const FL_NO_EXCEPT {
 		return fl::get_rgbw_colorimetric_profile();
 	}
 

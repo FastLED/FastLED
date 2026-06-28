@@ -112,7 +112,7 @@ constexpr u8 NUM_PRESCALERS = sizeof(PRESCALERS) / sizeof(PRESCALERS[0]);
  * Formula: OCR1A = (F_CPU / (prescaler * frequency)) - 1
  * Returns true on success, false if frequency is out of range.
  */
-static bool calculate_timer_config(u32 target_freq_hz, u8& prescaler_idx, u16& ocr_value) FL_NOEXCEPT {
+static bool calculate_timer_config(u32 target_freq_hz, u8& prescaler_idx, u16& ocr_value) FL_NO_EXCEPT {
     // Try each prescaler, starting with smallest for best precision
     for (u8 i = 0; i < NUM_PRESCALERS; i++) {
         u32 prescaler = PRESCALERS[i].value;
@@ -134,7 +134,7 @@ static bool calculate_timer_config(u32 target_freq_hz, u8& prescaler_idx, u16& o
  * Calculate actual frequency achieved with given prescaler and OCR value.
  * Formula: freq = F_CPU / (prescaler * (OCR1A + 1))
  */
-static u32 calculate_actual_frequency(u8 prescaler_idx, u16 ocr_value) FL_NOEXCEPT {
+static u32 calculate_actual_frequency(u8 prescaler_idx, u16 ocr_value) FL_NO_EXCEPT {
     u32 prescaler = PRESCALERS[prescaler_idx].value;
     return F_CPU / (prescaler * (static_cast<u32>(ocr_value) + 1));
 }
@@ -157,7 +157,7 @@ ISR(TIMER1_COMPA_vect) {
 // AVR ATmega ISR Implementation (fl::isr::platform namespace)
 // =============================================================================
 
-int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
+int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
     if (!config.handler) {
         FL_WARN_F("AVR ISR: handler is null");
         return -1;  // Invalid parameter
@@ -250,7 +250,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     return 0;  // Success
 }
 
-int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
+int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
     // External interrupts not yet implemented
     // AVR supports external interrupts via INT0/INT1 and Pin Change Interrupts
     // Implementation would use Arduino's attachInterrupt() or direct register manipulation
@@ -261,7 +261,7 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     return -100;  // Not implemented
 }
 
-int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
+int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != AVR_PLATFORM_ID) {
         FL_WARN_F("AVR ISR: invalid handle");
         return -1;  // Invalid handle
@@ -298,7 +298,7 @@ int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
     return 0;  // Success
 }
 
-int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
+int enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != AVR_PLATFORM_ID) {
         FL_WARN_F("AVR ISR: invalid handle");
         return -1;  // Invalid handle
@@ -333,7 +333,7 @@ int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     return 0;  // Success
 }
 
-int disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
+int disable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != AVR_PLATFORM_ID) {
         FL_WARN_F("AVR ISR: invalid handle");
         return -1;  // Invalid handle
@@ -364,7 +364,7 @@ int disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     return 0;  // Success
 }
 
-bool is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
+bool is_handler_enabled(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != AVR_PLATFORM_ID) {
         return false;
     }
@@ -377,7 +377,7 @@ bool is_handler_enabled(const isr_handle_t& handle) FL_NOEXCEPT {
     return handle_data->mIsEnabled;
 }
 
-const char* get_error_string(int error_code) FL_NOEXCEPT {
+const char* get_error_string(int error_code) FL_NO_EXCEPT {
     switch (error_code) {
         case 0: return "Success";
         case -1: return "Invalid parameter or handle";
@@ -389,7 +389,7 @@ const char* get_error_string(int error_code) FL_NOEXCEPT {
     }
 }
 
-const char* get_platform_name() FL_NOEXCEPT {
+const char* get_platform_name() FL_NO_EXCEPT {
 #if defined(FL_IS_AVR_ATMEGA_328P)
     return "AVR ATmega328P family (Uno/Nano)";
 #elif defined(FL_IS_AVR_ATMEGA_2560)
@@ -401,28 +401,28 @@ const char* get_platform_name() FL_NOEXCEPT {
 #endif
 }
 
-u32 get_max_timer_frequency() FL_NOEXCEPT {
+u32 get_max_timer_frequency() FL_NO_EXCEPT {
     // Maximum frequency with prescaler=1 and OCR1A=1
     // freq = F_CPU / (1 * (1 + 1)) = F_CPU / 2
     // For 16MHz: 8MHz theoretical, but ~250kHz is more practical
     return F_CPU / 64;  // Conservative estimate (250kHz @ 16MHz)
 }
 
-u32 get_min_timer_frequency() FL_NOEXCEPT {
+u32 get_min_timer_frequency() FL_NO_EXCEPT {
     // Minimum frequency with prescaler=1024 and OCR1A=65535
     // freq = F_CPU / (1024 * (65535 + 1))
     // For 16MHz: ~0.238 Hz
     return 1;  // 1 Hz minimum (well within capability)
 }
 
-u8 get_max_priority() FL_NOEXCEPT {
+u8 get_max_priority() FL_NO_EXCEPT {
     // AVR has no hardware interrupt priority levels
     // All interrupts are equal priority (can't nest by default)
     // Return 0 to indicate no priority support
     return 0;
 }
 
-bool requires_assembly_handler(u8 priority) FL_NOEXCEPT {
+bool requires_assembly_handler(u8 priority) FL_NO_EXCEPT {
     (void)priority;
     // AVR interrupts use ISR() macro - no assembly required
     return false;

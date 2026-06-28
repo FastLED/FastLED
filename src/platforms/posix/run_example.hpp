@@ -28,7 +28,7 @@
 #include "timeout_watchdog.h"  // ok include path - tests/timeout_watchdog.h needed by runner
 #include "fl/stl/noexcept.h"
 
-int main(int argc, char** argv) FL_NOEXCEPT {
+int main(int argc, char** argv) FL_NO_EXCEPT {
     // Setup crash handler BEFORE loading any shared libraries
     runner_setup_crash_handler();
 

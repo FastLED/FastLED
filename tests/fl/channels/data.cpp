@@ -75,6 +75,20 @@ void ucs7604PaddingGenerator(fl::span<const uint8_t> src, fl::span<uint8_t> dst)
 
 } // anonymous namespace
 
+FL_TEST_CASE("ChannelData carries explicit pixel format metadata") {
+    auto timing = ChipsetTimingConfig(800, 450, 450, 50, "WS2812");
+    fl::vector_psram<uint8_t> encoded(12);
+    auto channelData = ChannelData::create(
+        5, timing, fl::move(encoded), ChannelPixelFormat::RGBW);
+
+    FL_CHECK(channelData->getPixelFormat() == ChannelPixelFormat::RGBW);
+    FL_CHECK(channelData->getBytesPerPixel() == 4);
+
+    channelData->setPixelFormat(ChannelPixelFormat::RGB);
+    FL_CHECK(channelData->getPixelFormat() == ChannelPixelFormat::RGB);
+    FL_CHECK(channelData->getBytesPerPixel() == 3);
+}
+
 FL_TEST_CASE("writeWithPadding - no padding generator, exact size") {
     auto timing = ChipsetTimingConfig(800, 450, 450, 50, "WS2812");
     auto channelData = ChannelData::create(5, timing);

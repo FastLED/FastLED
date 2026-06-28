@@ -32,7 +32,11 @@ pub trait FileContentChecker: Sync {
 }
 
 pub struct MultiCheckerFileProcessor {
-    file_cache: HashMap<PathBuf, FileContent>,
+    // Arc-wrapped so the clone-from-cache phase is a refcount bump
+    // (per-file ~tens of nanos) instead of a deep clone of the content
+    // String + Vec<String> lines (which dominated ~140ms wall time
+    // before this change, ~50us per file).
+    file_cache: HashMap<PathBuf, std::sync::Arc<FileContent>>,
 }
 
 impl MultiCheckerFileProcessor {
@@ -48,9 +52,27 @@ impl MultiCheckerFileProcessor {
         checkers: &[Box<dyn FileContentChecker>],
         project_root: &Path,
     ) -> Result<Vec<LintViolation>, DynError> {
+        self.process_files_with_checkers_profiled(file_paths, checkers, project_root, false)
+    }
+
+    pub fn process_files_with_checkers_profiled(
+        &mut self,
+        file_paths: &[PathBuf],
+        checkers: &[Box<dyn FileContentChecker>],
+        project_root: &Path,
+        profile: bool,
+    ) -> Result<Vec<LintViolation>, DynError> {
+        let t_unique = std::time::Instant::now();
         let mut unique_paths = BTreeSet::new();
         for path in file_paths {
             unique_paths.insert(path.clone());
+        }
+        if profile {
+            eprintln!(
+                "[PROFILE]   unique_paths build: {:?} ({} unique)",
+                t_unique.elapsed(),
+                unique_paths.len()
+            );
         }
 
         let pending_paths: Vec<PathBuf> = unique_paths
@@ -59,6 +81,7 @@ impl MultiCheckerFileProcessor {
             .cloned()
             .collect();
 
+        let t_read = std::time::Instant::now();
         let loaded_files: Vec<(PathBuf, Result<FileContent, DynError>)> = pending_paths
             .par_iter()
             .map(|path| (path.clone(), FileContent::read(path)))
@@ -67,7 +90,7 @@ impl MultiCheckerFileProcessor {
         for (path, loaded) in loaded_files {
             match loaded {
                 Ok(content) => {
-                    self.file_cache.insert(path, content);
+                    self.file_cache.insert(path, std::sync::Arc::new(content));
                 }
                 Err(error) => {
                     eprintln!(
@@ -77,34 +100,133 @@ impl MultiCheckerFileProcessor {
                 }
             }
         }
+        if profile {
+            eprintln!(
+                "[PROFILE]   file read+parse (par): {:?} ({} files)",
+                t_read.elapsed(),
+                pending_paths.len()
+            );
+        }
 
-        let files: Vec<FileContent> = unique_paths
+        let t_collect = std::time::Instant::now();
+        // Arc::clone is a refcount bump; the heavy String + Vec<String>
+        // payload is shared, not duplicated.
+        let files: Vec<std::sync::Arc<FileContent>> = unique_paths
             .iter()
-            .filter_map(|path| self.file_cache.get(path).cloned())
+            .filter_map(|path| self.file_cache.get(path).map(std::sync::Arc::clone))
             .collect();
+        if profile {
+            eprintln!(
+                "[PROFILE]   clone-from-cache: {:?} ({} files)",
+                t_collect.elapsed(),
+                files.len()
+            );
+        }
 
-        let mut violations: Vec<LintViolation> = files
-            .par_iter()
-            .flat_map_iter(|file_content| {
-                let mut file_violations = Vec::new();
-                for checker in checkers {
-                    if !checker.should_process_file(&file_content.path, project_root) {
-                        continue;
+        let t_dispatch = std::time::Instant::now();
+        // Per-checker timing aggregates (only allocated when profiling is on).
+        // Returned alongside the per-file violations via flat_map_iter so we
+        // can roll them up after the parallel pass without an atomic-counter
+        // dance per checker. Each per-file work item produces a Vec<u128>
+        // (nanos of check_file_content time per checker) and a Vec<bool>
+        // (whether check_file_content ran for that checker on this file).
+        let mut violations: Vec<LintViolation>;
+        if profile {
+            let per_file: Vec<(Vec<LintViolation>, Vec<u128>, Vec<bool>)> = files
+                .par_iter()
+                .map(|file_content| {
+                    let mut file_violations = Vec::new();
+                    let mut checker_ns = vec![0u128; checkers.len()];
+                    let mut checker_ran = vec![false; checkers.len()];
+                    for (idx, checker) in checkers.iter().enumerate() {
+                        if !checker.should_process_file(&file_content.path, project_root) {
+                            continue;
+                        }
+                        checker_ran[idx] = true;
+                        let t = std::time::Instant::now();
+                        let results = checker.check_file_content(file_content);
+                        checker_ns[idx] = t.elapsed().as_nanos();
+                        for (line, message) in results {
+                            file_violations.push(LintViolation {
+                                checker: checker.name().to_string(),
+                                path: file_content.path.clone(),
+                                line,
+                                message,
+                            });
+                        }
                     }
-                    for (line, message) in checker.check_file_content(file_content) {
-                        file_violations.push(LintViolation {
-                            checker: checker.name().to_string(),
-                            path: file_content.path.clone(),
-                            line,
-                            message,
-                        });
+                    (file_violations, checker_ns, checker_ran)
+                })
+                .collect();
+
+            let mut totals_ns = vec![0u128; checkers.len()];
+            let mut ran_counts = vec![0usize; checkers.len()];
+            violations = Vec::new();
+            for (v, ns, ran) in per_file {
+                violations.extend(v);
+                for (i, n) in ns.iter().enumerate() {
+                    totals_ns[i] += n;
+                }
+                for (i, r) in ran.iter().enumerate() {
+                    if *r {
+                        ran_counts[i] += 1;
                     }
                 }
-                file_violations
-            })
-            .collect();
+            }
+            eprintln!(
+                "[PROFILE]   checker dispatch (par): {:?} ({} files x {} checkers)",
+                t_dispatch.elapsed(),
+                files.len(),
+                checkers.len()
+            );
+            // Per-checker top spenders. Sort by total nanos desc; print top 20.
+            let mut idx_by_ns: Vec<usize> = (0..checkers.len()).collect();
+            idx_by_ns.sort_by(|a, b| totals_ns[*b].cmp(&totals_ns[*a]));
+            eprintln!("[PROFILE]   per-checker top 20 by total time:");
+            for &idx in idx_by_ns.iter().take(20) {
+                if totals_ns[idx] == 0 {
+                    break;
+                }
+                let ms = totals_ns[idx] as f64 / 1_000_000.0;
+                eprintln!(
+                    "[PROFILE]     {:>8.1}ms  {:>5} files  {}",
+                    ms,
+                    ran_counts[idx],
+                    checkers[idx].name()
+                );
+            }
+        } else {
+            violations = files
+                .par_iter()
+                .flat_map_iter(|file_content| {
+                    let mut file_violations = Vec::new();
+                    for checker in checkers {
+                        if !checker.should_process_file(&file_content.path, project_root) {
+                            continue;
+                        }
+                        for (line, message) in checker.check_file_content(file_content) {
+                            file_violations.push(LintViolation {
+                                checker: checker.name().to_string(),
+                                path: file_content.path.clone(),
+                                line,
+                                message,
+                            });
+                        }
+                    }
+                    file_violations
+                })
+                .collect();
+        }
 
+        let t_sort = std::time::Instant::now();
         violations.sort();
+        if profile {
+            eprintln!(
+                "[PROFILE]   sort violations: {:?} ({} violations)",
+                t_sort.elapsed(),
+                violations.len()
+            );
+        }
         Ok(violations)
     }
 }
@@ -121,16 +243,24 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "asm_js_location",
         "attribute",
         "bare_allocation",
+        "bare_digit_separator",
+        "bare_libm",
+        "bare_noinline",
+        "bare_snprintf",
         "bare_using",
         "banned_headers",
         "banned_define",
         "banned_macros",
         "banned_namespace",
         "builtin_memcpy",
+        "autoresearch_runtime_output",
+        "fl_no_underscore",
+        "legacy_log_macro",
         "cpp_hpp_includes",
         "cpp_hpp_header_pair",
         "cpp_include",
         "ctype_global",
+        "em_asm_clang_format",
         "enum_class",
         "esp_rom_printf",
         "fastled_header_usage",
@@ -142,6 +272,7 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "logging_in_iram",
         "is_header_include",
         "iwyu_pragma_block",
+        "iwyu_pragma_private",
         "member_style",
         "namespace_fl_declaration",
         "namespace_includes",
@@ -152,8 +283,11 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "platform_includes",
         "platforms_fl_namespace",
         "pragma_once",
+        "pch_file",
         "platform_pragma",
         "platform_trampoline",
+        "public_settings_pattern",
+        "unity_build",
         "raw_noexcept",
         "raw_pragma",
         "reinterpret_cast",
@@ -186,16 +320,24 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "AsmJsLocationChecker",
         "AttributeChecker",
         "BareAllocationChecker",
+        "BareDigitSeparatorChecker",
+        "BareLibmChecker",
+        "BareNoInlineChecker",
+        "BareSnprintfChecker",
         "BareUsingChecker",
         "BannedDefineChecker",
         "BannedHeadersChecker",
         "BannedMacrosChecker",
         "BannedNamespaceChecker",
         "BuiltinMemcpyChecker",
+        "AutoResearchRuntimeOutputChecker",
+        "FlNoUnderscoreChecker",
+        "LegacyLogMacroChecker",
         "CppHppIncludesChecker",
         "CppHppHeaderPairChecker",
         "CppIncludeChecker",
         "CtypeGlobalChecker",
+        "EmAsmClangFormatChecker",
         "EnumClassChecker",
         "EspRomPrintfChecker",
         "ExampleSerialChecker",
@@ -207,6 +349,7 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "ImplHppIncludesChecker",
         "IsHeaderIncludeChecker",
         "IwyuPragmaBlockChecker",
+        "IwyuPragmaPrivateChecker",
         "LoggingInIramChecker",
         "MemberStyleChecker",
         "NamespaceFlDeclarationChecker",
@@ -218,8 +361,11 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "PlatformIncludesChecker",
         "PlatformsFlNamespaceChecker",
         "PragmaOnceChecker",
+        "PchFileChecker",
         "PlatformPragmaChecker",
         "PlatformTrampolineChecker",
+        "PublicSettingsPatternChecker",
+        "UnityBuildChecker",
         "RawNoexceptChecker",
         "RawPragmaChecker",
         "ReinterpretCastChecker",
@@ -253,6 +399,10 @@ pub fn create_checkers(
         ("asm_js_location", Box::new(AsmJsLocationChecker)),
         ("attribute", Box::new(AttributeChecker)),
         ("bare_allocation", Box::new(BareAllocationChecker)),
+        ("bare_digit_separator", Box::new(BareDigitSeparatorChecker)),
+        ("bare_libm", Box::new(BareLibmChecker)),
+        ("bare_noinline", Box::new(BareNoInlineChecker)),
+        ("bare_snprintf", Box::new(BareSnprintfChecker)),
         ("bare_using", Box::new(BareUsingChecker)),
         (
             "banned_headers",
@@ -314,10 +464,17 @@ pub fn create_checkers(
         ("banned_macros", Box::new(BannedMacrosChecker)),
         ("banned_namespace", Box::new(BannedNamespaceChecker)),
         ("builtin_memcpy", Box::new(BuiltinMemcpyChecker)),
+        (
+            "autoresearch_runtime_output",
+            Box::new(AutoResearchRuntimeOutputChecker),
+        ),
+        ("fl_no_underscore", Box::new(FlNoUnderscoreChecker)),
+        ("legacy_log_macro", Box::new(LegacyLogMacroChecker)),
         ("cpp_hpp_includes", Box::new(CppHppIncludesChecker)),
         ("cpp_hpp_header_pair", Box::new(CppHppHeaderPairChecker)),
         ("cpp_include", Box::new(CppIncludeChecker)),
         ("ctype_global", Box::new(CtypeGlobalChecker)),
+        ("em_asm_clang_format", Box::new(EmAsmClangFormatChecker)),
         ("enum_class", Box::new(EnumClassChecker)),
         ("esp_rom_printf", Box::new(EspRomPrintfChecker)),
         ("example_serial", Box::new(ExampleSerialChecker)),
@@ -332,6 +489,7 @@ pub fn create_checkers(
         ("impl_hpp_includes", Box::new(ImplHppIncludesChecker)),
         ("is_header_include", Box::new(IsHeaderIncludeChecker)),
         ("iwyu_pragma_block", Box::new(IwyuPragmaBlockChecker)),
+        ("iwyu_pragma_private", Box::new(IwyuPragmaPrivateChecker)),
         ("logging_in_iram", Box::new(LoggingInIramChecker)),
         ("member_style", Box::new(MemberStyleChecker)),
         (
@@ -357,6 +515,8 @@ pub fn create_checkers(
         ("pragma_once", Box::new(PragmaOnceChecker)),
         ("platform_pragma", Box::new(PlatformPragmaChecker)),
         ("platform_trampoline", Box::new(PlatformTrampolineChecker)),
+        ("public_settings_pattern", Box::new(PublicSettingsPatternChecker)),
+        ("unity_build", Box::new(UnityBuildChecker)),
         ("raw_noexcept", Box::new(RawNoexceptChecker)),
         ("raw_pragma", Box::new(RawPragmaChecker)),
         ("reinterpret_cast", Box::new(ReinterpretCastChecker)),
@@ -414,6 +574,12 @@ pub fn run_cli<I>(args: I) -> Result<u8, DynError>
 where
     I: IntoIterator<Item = String>,
 {
+    let t_total = std::time::Instant::now();
+    let profile = matches!(
+        std::env::var("FASTLED_LINT_PROFILE").as_deref(),
+        Ok("1") | Ok("true") | Ok("yes") | Ok("on")
+    );
+
     let config = CliConfig::parse(args)?;
 
     if config.show_help {
@@ -428,11 +594,59 @@ where
     }
 
     let selected = config.selected_checkers.as_ref();
+
+    let t = std::time::Instant::now();
     let checkers = create_checkers(selected)?;
+    if profile {
+        eprintln!(
+            "[PROFILE] create_checkers: {:?} ({} checkers)",
+            t.elapsed(),
+            checkers.len()
+        );
+    }
+
+    let t = std::time::Instant::now();
     let files = collect_input_files(&config.project_root, &config.paths)?;
+    if profile {
+        eprintln!(
+            "[PROFILE] collect_input_files: {:?} ({} files)",
+            t.elapsed(),
+            files.len()
+        );
+    }
+
     let mut processor = MultiCheckerFileProcessor::new();
-    let violations =
-        processor.process_files_with_checkers(&files, &checkers, &config.project_root)?;
+    let mut violations = processor.process_files_with_checkers_profiled(
+        &files,
+        &checkers,
+        &config.project_root,
+        profile,
+    )?;
+
+    // Structural passes only fire in whole-project mode (no explicit paths) —
+    // single-file mode shouldn't see cross-file walks, mirroring the Python
+    // orchestrator's behaviour.
+    if config.paths.is_empty() {
+        let t = std::time::Instant::now();
+        let mut structural = run_structural_passes(&config.project_root);
+        if profile {
+            eprintln!(
+                "[PROFILE] run_structural_passes: {:?} ({} violations)",
+                t.elapsed(),
+                structural.len()
+            );
+        }
+        if let Some(selected) = selected {
+            structural.retain(|violation| selected.contains(violation.checker.as_str())
+                || selected_contains_structural_alias(selected, &violation.checker));
+        }
+        violations.extend(structural);
+        violations.sort();
+    }
+
+    if profile {
+        eprintln!("[PROFILE] TOTAL run_cli: {:?}", t_total.elapsed());
+    }
 
     match config.output_format {
         OutputFormat::Json => {
@@ -442,6 +656,16 @@ where
     }
 
     Ok(if violations.is_empty() { 0 } else { 1 })
+}
+
+fn selected_contains_structural_alias(selected: &HashSet<String>, checker_name: &str) -> bool {
+    // Structural passes are referenced by their snake_case alias in the
+    // --checker selector (e.g. `pch_file`) just like per-file checkers; both
+    // the alias and the class name should activate them.
+    match checker_name {
+        "PchFileChecker" => selected.contains("pch_file"),
+        _ => false,
+    }
 }
 
 #[derive(Debug)]
@@ -766,4 +990,3 @@ fn strip_string_literals(code: &str) -> String {
 
     result
 }
-

@@ -52,7 +52,7 @@ bool VideoImpl::needsFrame(fl::u32 now) const {
     return out;
 }
 
-VideoImpl::~VideoImpl() FL_NOEXCEPT { end(); }
+VideoImpl::~VideoImpl() FL_NO_EXCEPT { end(); }
 
 void VideoImpl::begin(filebuf_ptr h) {
     end();
@@ -355,12 +355,12 @@ bool VideoImpl::rewind() {
     return true;
 }
 
-bool VideoImpl::hasEmbeddedScreenMap() const FL_NOEXCEPT {
+bool VideoImpl::hasEmbeddedScreenMap() const FL_NO_EXCEPT {
     if (!mStream) return false;
     return mStream->hasEmbeddedScreenMap();
 }
 
-const fl::string &VideoImpl::embeddedScreenMapJson() const FL_NOEXCEPT {
+const fl::string &VideoImpl::embeddedScreenMapJson() const FL_NO_EXCEPT {
     static const fl::string kEmpty;
     if (!mStream) return kEmpty;
     return mStream->embeddedScreenMapJson();

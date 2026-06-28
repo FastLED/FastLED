@@ -101,7 +101,7 @@ public:
      * rx->begin(config);
      * @endcode
      */
-    static fl::shared_ptr<GpioIsrRx> create(int pin) FL_NOEXCEPT;
+    static fl::shared_ptr<GpioIsrRx> create(int pin) FL_NO_EXCEPT;
 
     /**
      * @brief Virtual destructor

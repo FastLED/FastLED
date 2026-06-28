@@ -63,19 +63,19 @@ public:
     /// Factory method
     /// @param pin GPIO pin number for receiving signals
     /// @return Shared pointer to LpcSctRxChannel
-    static fl::shared_ptr<LpcSctRxChannel> create(int pin) FL_NOEXCEPT;
+    static fl::shared_ptr<LpcSctRxChannel> create(int pin) FL_NO_EXCEPT;
 
     // RxDevice interface
-    bool begin(const RxConfig& config) FL_NOEXCEPT override;
-    bool finished() const FL_NOEXCEPT override;
-    RxWaitResult wait(u32 timeout_ms) FL_NOEXCEPT override;
+    bool begin(const RxConfig& config) FL_NO_EXCEPT override;
+    bool finished() const FL_NO_EXCEPT override;
+    RxWaitResult wait(u32 timeout_ms) FL_NO_EXCEPT override;
     fl::result<u32, DecodeError> decode(const ChipsetTiming4Phase& timing,
-                                        fl::span<u8> out) FL_NOEXCEPT override;
+                                        fl::span<u8> out) FL_NO_EXCEPT override;
     size_t getRawEdgeTimes(fl::span<EdgeTime> out,
-                           size_t offset = 0) FL_NOEXCEPT override;
-    const char* name() const FL_NOEXCEPT override;
-    int getPin() const FL_NOEXCEPT override;
-    bool injectEdges(fl::span<const EdgeTime> edges) FL_NOEXCEPT override;
+                           size_t offset = 0) FL_NO_EXCEPT override;
+    const char* name() const FL_NO_EXCEPT override;
+    int getPin() const FL_NO_EXCEPT override;
+    bool injectEdges(fl::span<const EdgeTime> edges) FL_NO_EXCEPT override;
 
     /// @brief Drain pending SCT capture events into the edge buffer.
     /// @return Number of new EdgeTime entries pushed.
@@ -87,15 +87,15 @@ public:
     /// upgrade (Phase 2 of #3021) the DMA fills the ring autonomously
     /// and this method becomes a no-op fast-path. On non-LPC builds /
     /// builds without `FASTLED_LPC_RX_SCT` it is a no-op stub.
-    fl::size pollOnce() FL_NOEXCEPT;
+    fl::size pollOnce() FL_NO_EXCEPT;
 
-    ~LpcSctRxChannel() FL_NOEXCEPT override;
+    ~LpcSctRxChannel() FL_NO_EXCEPT override;
 
 private:
     template<typename T, typename... Args>
-    friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NOEXCEPT;
+    friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NO_EXCEPT;
 
-    explicit LpcSctRxChannel(int pin) FL_NOEXCEPT;
+    explicit LpcSctRxChannel(int pin) FL_NO_EXCEPT;
 
     int                   mPin;
     bool                  mFinished;

@@ -11,20 +11,24 @@ namespace fl {
 
 ChannelDataPtr ChannelData::create(
     const ChipsetVariant& chipset,
-    fl::vector_psram<u8>&& encodedData
-) FL_NOEXCEPT {
-    return fl::make_shared<ChannelData>(chipset, fl::move(encodedData));
+    fl::vector_psram<u8>&& encodedData,
+    ChannelPixelFormat pixelFormat
+) FL_NO_EXCEPT {
+    return fl::make_shared<ChannelData>(
+            chipset, fl::move(encodedData), pixelFormat);
 }
 
 ChannelDataPtr ChannelData::create(
     int pin,
     const ChipsetTimingConfig& timing,
-    fl::vector_psram<u8>&& encodedData
-) FL_NOEXCEPT {
-    return fl::make_shared<ChannelData>(pin, timing, fl::move(encodedData));
+    fl::vector_psram<u8>&& encodedData,
+    ChannelPixelFormat pixelFormat
+) FL_NO_EXCEPT {
+    return fl::make_shared<ChannelData>(
+            pin, timing, fl::move(encodedData), pixelFormat);
 }
 
-int ChannelData::getPin() const FL_NOEXCEPT {
+int ChannelData::getPin() const FL_NO_EXCEPT {
     if (const ClocklessChipset* cs = mChipset.ptr<ClocklessChipset>()) {
         return cs->pin;
     }
@@ -34,7 +38,7 @@ int ChannelData::getPin() const FL_NOEXCEPT {
     return -1;
 }
 
-const ChipsetTimingConfig& ChannelData::getTiming() const FL_NOEXCEPT {
+const ChipsetTimingConfig& ChannelData::getTiming() const FL_NO_EXCEPT {
     if (const ClocklessChipset* cs = mChipset.ptr<ClocklessChipset>()) {
         return cs->timing;
     }
@@ -44,22 +48,26 @@ const ChipsetTimingConfig& ChannelData::getTiming() const FL_NOEXCEPT {
 
 ChannelData::ChannelData(
     const ChipsetVariant& chipset,
-    fl::vector_psram<u8>&& encodedData
-) FL_NOEXCEPT
+    fl::vector_psram<u8>&& encodedData,
+    ChannelPixelFormat pixelFormat
+) FL_NO_EXCEPT
     : mChipset(chipset)
+    , mPixelFormat(pixelFormat)
     , mEncodedData(fl::move(encodedData))
 {}
 
 ChannelData::ChannelData(
     int pin,
     const ChipsetTimingConfig& timing,
-    fl::vector_psram<u8>&& encodedData
-) FL_NOEXCEPT
+    fl::vector_psram<u8>&& encodedData,
+    ChannelPixelFormat pixelFormat
+) FL_NO_EXCEPT
     : mChipset(ClocklessChipset(pin, timing))
+    , mPixelFormat(pixelFormat)
     , mEncodedData(fl::move(encodedData))
 {}
 
-void ChannelData::writeWithPadding(fl::span<u8> dst) FL_NOEXCEPT {
+void ChannelData::writeWithPadding(fl::span<u8> dst) FL_NO_EXCEPT {
     size_t targetSize = dst.size();
     size_t currentSize = mEncodedData.size();
 
@@ -85,6 +93,6 @@ void ChannelData::writeWithPadding(fl::span<u8> dst) FL_NOEXCEPT {
     }
 }
 
-ChannelData::~ChannelData() FL_NOEXCEPT = default;
+ChannelData::~ChannelData() FL_NO_EXCEPT = default;
 
 }  // namespace fl

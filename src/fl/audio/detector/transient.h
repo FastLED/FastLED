@@ -20,8 +20,8 @@ namespace detector {
  */
 class Transient : public Detector {
 public:
-    Transient() FL_NOEXCEPT;
-    ~Transient() FL_NOEXCEPT override;
+    Transient() FL_NO_EXCEPT;
+    ~Transient() FL_NO_EXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

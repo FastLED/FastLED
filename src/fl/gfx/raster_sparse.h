@@ -29,14 +29,14 @@ class Leds;
 // only store the values that are set.
 class XYRasterU8Sparse {
   public:
-    XYRasterU8Sparse() FL_NOEXCEPT = default;
+    XYRasterU8Sparse() FL_NO_EXCEPT = default;
     XYRasterU8Sparse(int width, int height) {
         setBounds(rect<u16>(0, 0, width, height));
     }
-    XYRasterU8Sparse(const XYRasterU8Sparse &) FL_NOEXCEPT = default;
-    XYRasterU8Sparse &operator=(XYRasterU8Sparse &&) FL_NOEXCEPT = default;
-    XYRasterU8Sparse(XYRasterU8Sparse &&) FL_NOEXCEPT = default;
-    XYRasterU8Sparse &operator=(const XYRasterU8Sparse &) FL_NOEXCEPT = default;
+    XYRasterU8Sparse(const XYRasterU8Sparse &) FL_NO_EXCEPT = default;
+    XYRasterU8Sparse &operator=(XYRasterU8Sparse &&) FL_NO_EXCEPT = default;
+    XYRasterU8Sparse(XYRasterU8Sparse &&) FL_NO_EXCEPT = default;
+    XYRasterU8Sparse &operator=(const XYRasterU8Sparse &) FL_NO_EXCEPT = default;
 
     XYRasterU8Sparse &reset() {
         mSparseGrid.clear();
@@ -227,14 +227,14 @@ namespace fl {
 // only store the values that are set.
 class XYRasterSparse_RGB8 {
   public:
-    XYRasterSparse_RGB8() FL_NOEXCEPT = default;
+    XYRasterSparse_RGB8() FL_NO_EXCEPT = default;
     XYRasterSparse_RGB8(u16 width, u16 height) {
         setBounds(rect<u16>(0, 0, width, height));
     }
-    XYRasterSparse_RGB8(const XYRasterSparse_RGB8 &) FL_NOEXCEPT = default;
-    XYRasterSparse_RGB8 &operator=(XYRasterSparse_RGB8 &&) FL_NOEXCEPT = default;
-    XYRasterSparse_RGB8(XYRasterSparse_RGB8 &&) FL_NOEXCEPT = default;
-    XYRasterSparse_RGB8 &operator=(XYRasterSparse_RGB8 &) FL_NOEXCEPT = default;
+    XYRasterSparse_RGB8(const XYRasterSparse_RGB8 &) FL_NO_EXCEPT = default;
+    XYRasterSparse_RGB8 &operator=(XYRasterSparse_RGB8 &&) FL_NO_EXCEPT = default;
+    XYRasterSparse_RGB8(XYRasterSparse_RGB8 &&) FL_NO_EXCEPT = default;
+    XYRasterSparse_RGB8 &operator=(XYRasterSparse_RGB8 &) FL_NO_EXCEPT = default;
 
     XYRasterSparse_RGB8 &reset() {
         mSparseGrid.clear();

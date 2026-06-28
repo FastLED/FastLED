@@ -57,7 +57,7 @@ struct StubWatchdogPersist {
     fl::u8  safe_mode_threshold;
     fl::u8  user[FL_WATCHDOG_PERSIST_BYTES];
 
-    void reset_if_unmagic() FL_NOEXCEPT {
+    void reset_if_unmagic() FL_NO_EXCEPT {
         if (magic != kMagic) {
             magic = kMagic;
             crash_count.store(0);
@@ -67,7 +67,7 @@ struct StubWatchdogPersist {
     }
 };
 
-inline StubWatchdogPersist& stubWatchdogPersist() FL_NOEXCEPT {
+inline StubWatchdogPersist& stubWatchdogPersist() FL_NO_EXCEPT {
     static StubWatchdogPersist s{};  // okay static in header — single-TU `.impl.hpp`
     s.reset_if_unmagic();
     return s;
@@ -96,7 +96,7 @@ struct StubWatchdogState {
     fl::atomic<bool>                       software_reboot;
     fl::thread                             worker;
 
-    StubWatchdogState() FL_NOEXCEPT
+    StubWatchdogState() FL_NO_EXCEPT
         : enabled(false), stop(false), timeout_ms(0),
           cb(nullptr), cb_user(nullptr),
           reset_was_watchdog(false), fired(false), software_reboot(false) {}
@@ -107,7 +107,7 @@ struct StubWatchdogState {
     }
 };
 
-inline StubWatchdogState& stubWatchdogState() FL_NOEXCEPT {
+inline StubWatchdogState& stubWatchdogState() FL_NO_EXCEPT {
     static StubWatchdogState s{};  // okay static in header — single-TU `.impl.hpp`
     return s;
 }
@@ -118,7 +118,7 @@ inline StubWatchdogState& stubWatchdogState() FL_NOEXCEPT {
 // `crash_count` is incremented via a saturating CAS loop so concurrent
 // markCleanShutdown() resets are not lost and the counter never rolls over
 // from 0xFFFF back to 0.
-inline void stubWatchdogReset() FL_NOEXCEPT {
+inline void stubWatchdogReset() FL_NO_EXCEPT {
     auto& p = stubWatchdogPersist();
     p.magic = StubWatchdogPersist::kMagic;
     fl::u16 current = p.crash_count.load();
@@ -137,7 +137,7 @@ inline void stubWatchdogReset() FL_NOEXCEPT {
 // Explicit `Watchdog::reboot()` path: mark the reset as SOFTWARE without
 // bumping crash_count or setting the watchdog-induced flag. Real-hardware
 // platforms similarly distinguish ESP_RST_SW from ESP_RST_TASK_WDT.
-inline void stubWatchdogSoftwareReboot() FL_NOEXCEPT {
+inline void stubWatchdogSoftwareReboot() FL_NO_EXCEPT {
     auto& p = stubWatchdogPersist();
     p.magic = StubWatchdogPersist::kMagic;
 
@@ -145,7 +145,7 @@ inline void stubWatchdogSoftwareReboot() FL_NOEXCEPT {
     s.software_reboot.store(true);
 }
 
-inline void stubWatchdogTimerLoop() FL_NOEXCEPT {
+inline void stubWatchdogTimerLoop() FL_NO_EXCEPT {
     auto& s = stubWatchdogState();
     while (!s.stop.load()) {
         // Host-only watchdog timer thread; not part of async-scheduler pumping.
@@ -176,7 +176,7 @@ inline void stubWatchdogTimerLoop() FL_NOEXCEPT {
     }
 }
 
-inline void stubWatchdogEnsureWorker() FL_NOEXCEPT {
+inline void stubWatchdogEnsureWorker() FL_NO_EXCEPT {
     auto& s = stubWatchdogState();
     fl::lock_guard<fl::mutex> g(s.mu);
     if (!s.worker.joinable()) {
@@ -191,12 +191,12 @@ inline void stubWatchdogEnsureWorker() FL_NOEXCEPT {
 // the noop) so the function-local static lives in exactly one TU per program.
 // Avoids the Teensy 3.x `__cxa_guard` ABI conflict that a header-side
 // definition would impose on every TU including FastLED.h.
-Watchdog& Watchdog::instance() FL_NOEXCEPT {
+Watchdog& Watchdog::instance() FL_NO_EXCEPT {
     static Watchdog sInstance;
     return sInstance;
 }
 
-void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
+void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
     if (timeout_ms == 0) timeout_ms = 1;
     if (timeout_ms > FL_WATCHDOG_MAX_TIMEOUT_MS) timeout_ms = FL_WATCHDOG_MAX_TIMEOUT_MS;
     platforms::stubWatchdogEnsureWorker();
@@ -207,19 +207,19 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     s.enabled.store(true);
 }
 
-void Watchdog::feed() FL_NOEXCEPT {
+void Watchdog::feed() FL_NO_EXCEPT {
     auto& s = platforms::stubWatchdogState();
     if (!s.enabled.load()) return;
     fl::lock_guard<fl::mutex> g(s.mu);
     s.deadline = fl::chrono::steady_clock::now() + fl::chrono::milliseconds(s.timeout_ms.load());
 }
 
-void Watchdog::disable() FL_NOEXCEPT {
+void Watchdog::disable() FL_NO_EXCEPT {
     auto& s = platforms::stubWatchdogState();
     s.enabled.store(false);
 }
 
-ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
+ResetCause Watchdog::lastResetCause() const FL_NO_EXCEPT {
     auto& s = platforms::stubWatchdogState();
     // Watchdog-induced reset takes precedence over a software reboot, but
     // never get conflated: a clean `reboot()` reports SOFTWARE, a timeout
@@ -229,48 +229,48 @@ ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
     return ResetCause::POWER_ON;
 }
 
-bool Watchdog::lastResetWasWatchdog() const FL_NOEXCEPT {
+bool Watchdog::lastResetWasWatchdog() const FL_NO_EXCEPT {
     return platforms::stubWatchdogState().reset_was_watchdog.load();
 }
 
-fl::u8 Watchdog::persistRead(fl::size idx) const FL_NOEXCEPT {
+fl::u8 Watchdog::persistRead(fl::size idx) const FL_NO_EXCEPT {
     if (idx >= FL_WATCHDOG_PERSIST_BYTES) return 0;
     return platforms::stubWatchdogPersist().user[idx];
 }
 
-void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NOEXCEPT {
+void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NO_EXCEPT {
     if (idx >= FL_WATCHDOG_PERSIST_BYTES) return;
     platforms::stubWatchdogPersist().user[idx] = v;
 }
 
-fl::u16 Watchdog::consecutiveCrashCount() const FL_NOEXCEPT {
+fl::u16 Watchdog::consecutiveCrashCount() const FL_NO_EXCEPT {
     return platforms::stubWatchdogPersist().crash_count.load();
 }
 
-void Watchdog::markCleanShutdown() FL_NOEXCEPT {
+void Watchdog::markCleanShutdown() FL_NO_EXCEPT {
     platforms::stubWatchdogPersist().crash_count.store(0);
 }
 
-bool Watchdog::isInSafeMode() const FL_NOEXCEPT {
+bool Watchdog::isInSafeMode() const FL_NO_EXCEPT {
     return platforms::stubWatchdogPersist().crash_count.load() >= mSafeModeThreshold;
 }
 
-fl::u16 Watchdog::safeModeThreshold() const FL_NOEXCEPT {
+fl::u16 Watchdog::safeModeThreshold() const FL_NO_EXCEPT {
     return mSafeModeThreshold;
 }
 
-void Watchdog::setSafeModeThreshold(fl::u16 t) FL_NOEXCEPT {
+void Watchdog::setSafeModeThreshold(fl::u16 t) FL_NO_EXCEPT {
     mSafeModeThreshold = t;
 }
 
-FL_NORETURN void Watchdog::reboot() FL_NOEXCEPT {
+FL_NO_RETURN void Watchdog::reboot() FL_NO_EXCEPT {
     // Intentional software reboot — does NOT bump crash_count and does NOT
     // mark the reset as watchdog-induced.
     platforms::stubWatchdogSoftwareReboot();
     while (true) {}
 }
 
-bool Watchdog::onTimeout(WatchdogTimeoutCallback cb, void* user_data) FL_NOEXCEPT {
+bool Watchdog::onTimeout(WatchdogTimeoutCallback cb, void* user_data) FL_NO_EXCEPT {
     auto& s = platforms::stubWatchdogState();
     fl::lock_guard<fl::mutex> g(s.mu);
     s.cb = cb;
@@ -278,35 +278,35 @@ bool Watchdog::onTimeout(WatchdogTimeoutCallback cb, void* user_data) FL_NOEXCEP
     return true;
 }
 
-bool Watchdog::onTimeout(fl::function<void()> cb) FL_NOEXCEPT {
+bool Watchdog::onTimeout(fl::function<void()> cb) FL_NO_EXCEPT {
     auto& s = platforms::stubWatchdogState();
     fl::lock_guard<fl::mutex> g(s.mu);
     s.cb_fn = cb;
     return true;
 }
 
-bool Watchdog::setPauseOnDebug(bool /*pause*/) FL_NOEXCEPT { return true; }
-bool Watchdog::writeCrashLog(fl::span<const fl::u8> /*payload*/) FL_NOEXCEPT { return false; }
-fl::size Watchdog::readCrashLog(fl::span<fl::u8> /*out*/) const FL_NOEXCEPT { return 0; }
-bool Watchdog::rebootIntoBootloader() FL_NOEXCEPT { return false; }
+bool Watchdog::setPauseOnDebug(bool /*pause*/) FL_NO_EXCEPT { return true; }
+bool Watchdog::writeCrashLog(fl::span<const fl::u8> /*payload*/) FL_NO_EXCEPT { return false; }
+fl::size Watchdog::readCrashLog(fl::span<fl::u8> /*out*/) const FL_NO_EXCEPT { return 0; }
+bool Watchdog::rebootIntoBootloader() FL_NO_EXCEPT { return false; }
 
-bool Watchdog::setWindow(fl::u32 /*min*/, fl::u32 /*max*/) FL_NOEXCEPT {
+bool Watchdog::setWindow(fl::u32 /*min*/, fl::u32 /*max*/) FL_NO_EXCEPT {
     // Stub does NOT model windowed feeds (no min/max enforcement in feed() or
     // the timer loop). Returning false matches FL_WATCHDOG_HAS_WINDOW_MODE
     // not being defined and keeps user code that checks the return value
     // honest.
     return false;
 }
-bool Watchdog::hasCrashReport() const FL_NOEXCEPT {
+bool Watchdog::hasCrashReport() const FL_NO_EXCEPT {
     return platforms::stubWatchdogState().reset_was_watchdog.load();
 }
-WatchdogCrashReport Watchdog::readCrashReport() const FL_NOEXCEPT {
+WatchdogCrashReport Watchdog::readCrashReport() const FL_NO_EXCEPT {
     WatchdogCrashReport r{};
     r.valid = platforms::stubWatchdogState().reset_was_watchdog.load();
     r.fault_type = r.valid ? "WatchdogTimeout (stub)" : "";
     return r;
 }
-void Watchdog::clearCrashReport() FL_NOEXCEPT {
+void Watchdog::clearCrashReport() FL_NO_EXCEPT {
     // Clear ONLY the watchdog-crash state — `software_reboot` is independent
     // bookkeeping and must not be silently reset, otherwise lastResetCause()
     // would flip back to POWER_ON after a clean reboot+clear sequence.

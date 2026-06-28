@@ -23,7 +23,7 @@ Device::Device(const Config& config)
     FL_LOG_SPI_F("SPI Device: Created with clock=%s data_pins.size()=%s", config.clock_pin, config.data_pins.size());
 }
 
-Device::~Device() FL_NOEXCEPT {
+Device::~Device() FL_NO_EXCEPT {
     FL_LOG_SPI_F("SPI Device: Destructor called");
     if (pImpl && pImpl->initialized) {
         FL_LOG_SPI_F("SPI Device: Calling end() from destructor");
@@ -385,18 +385,18 @@ const Config& Device::getConfig() const {
 
 Transaction::Transaction() : pImpl(nullptr) {}
 
-Transaction::Transaction(Transaction&& other) FL_NOEXCEPT
+Transaction::Transaction(Transaction&& other) FL_NO_EXCEPT
     : pImpl(fl::move(other.pImpl)) {
 }
 
-Transaction& Transaction::operator=(Transaction&& other) FL_NOEXCEPT {
+Transaction& Transaction::operator=(Transaction&& other) FL_NO_EXCEPT {
     if (this != &other) {
         pImpl = fl::move(other.pImpl);
     }
     return *this;
 }
 
-Transaction::~Transaction() FL_NOEXCEPT {
+Transaction::~Transaction() FL_NO_EXCEPT {
     if (pImpl) {
         // Auto-wait for completion if not already done
         if (!pImpl->completed) {

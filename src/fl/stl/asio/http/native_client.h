@@ -22,11 +22,11 @@ public:
     NativeHttpClient(const asio::ip::tcp::endpoint& ep, const ConnectionConfig& config = ConnectionConfig());
     // Legacy constructor (backward compatible)
     NativeHttpClient(const string& host, u16 port, const ConnectionConfig& config = ConnectionConfig());
-    ~NativeHttpClient() FL_NOEXCEPT;
+    ~NativeHttpClient() FL_NO_EXCEPT;
 
     // Disable copy (socket ownership)
-    NativeHttpClient(const NativeHttpClient&) FL_NOEXCEPT = delete;
-    NativeHttpClient& operator=(const NativeHttpClient&) FL_NOEXCEPT = delete;
+    NativeHttpClient(const NativeHttpClient&) FL_NO_EXCEPT = delete;
+    NativeHttpClient& operator=(const NativeHttpClient&) FL_NO_EXCEPT = delete;
 
     // Connection management
     bool connect();           // Initiate connection

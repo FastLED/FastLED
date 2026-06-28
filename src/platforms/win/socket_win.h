@@ -124,53 +124,53 @@ using in_port_t = unsigned short;    // Same as USHORT
 // Helper Functions for Windows Socket Normalization
 //=============================================================================
 
-bool initialize_winsock() FL_NOEXCEPT;
-void cleanup_winsock() FL_NOEXCEPT;
-int translate_windows_error(int wsa_error) FL_NOEXCEPT;
+bool initialize_winsock() FL_NO_EXCEPT;
+void cleanup_winsock() FL_NO_EXCEPT;
+int translate_windows_error(int wsa_error) FL_NO_EXCEPT;
 
 //=============================================================================
 // Normalized POSIX-Style Socket API Functions
 //=============================================================================
 
 // Core Socket Operations
-int socket(int domain, int type, int protocol) FL_NOEXCEPT;
-int socketpair(int domain, int type, int protocol, int sv[2]) FL_NOEXCEPT;
+int socket(int domain, int type, int protocol) FL_NO_EXCEPT;
+int socketpair(int domain, int type, int protocol, int sv[2]) FL_NO_EXCEPT;
 
 // Addressing
-int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) FL_NOEXCEPT;
-int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen) FL_NOEXCEPT;
-int listen(int sockfd, int backlog) FL_NOEXCEPT;
-int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) FL_NOEXCEPT;
+int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) FL_NO_EXCEPT;
+int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen) FL_NO_EXCEPT;
+int listen(int sockfd, int backlog) FL_NO_EXCEPT;
+int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) FL_NO_EXCEPT;
 
 // Data Transfer
-ssize_t send(int sockfd, const void *buf, size_t len, int flags) FL_NOEXCEPT;
-ssize_t recv(int sockfd, void *buf, size_t len, int flags) FL_NOEXCEPT;
+ssize_t send(int sockfd, const void *buf, size_t len, int flags) FL_NO_EXCEPT;
+ssize_t recv(int sockfd, void *buf, size_t len, int flags) FL_NO_EXCEPT;
 ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
-               const struct sockaddr *dest_addr, socklen_t addrlen) FL_NOEXCEPT;
+               const struct sockaddr *dest_addr, socklen_t addrlen) FL_NO_EXCEPT;
 ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
-                 struct sockaddr *src_addr, socklen_t *addrlen) FL_NOEXCEPT;
+                 struct sockaddr *src_addr, socklen_t *addrlen) FL_NO_EXCEPT;
 
 // Connection Teardown
-int shutdown(int sockfd, int how) FL_NOEXCEPT;
-int close(int fd) FL_NOEXCEPT;
+int shutdown(int sockfd, int how) FL_NO_EXCEPT;
+int close(int fd) FL_NO_EXCEPT;
 
 // Socket Options
-int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen) FL_NOEXCEPT;
-int getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen) FL_NOEXCEPT;
+int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen) FL_NO_EXCEPT;
+int getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen) FL_NO_EXCEPT;
 
 // Address Information
-int getpeername(int sockfd, struct sockaddr *addr, socklen_t *addrlen) FL_NOEXCEPT;
-int getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen) FL_NOEXCEPT;
+int getpeername(int sockfd, struct sockaddr *addr, socklen_t *addrlen) FL_NO_EXCEPT;
+int getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen) FL_NO_EXCEPT;
 
 // Address Resolution
-int inet_pton(int af, const char *src, void *dst) FL_NOEXCEPT;
-const char* inet_ntop(int af, const void *src, char *dst, socklen_t size) FL_NOEXCEPT;
+int inet_pton(int af, const char *src, void *dst) FL_NO_EXCEPT;
+const char* inet_ntop(int af, const void *src, char *dst, socklen_t size) FL_NO_EXCEPT;
 
 // fcntl emulation for non-blocking sockets
-int fcntl(int fd, int cmd, ...) FL_NOEXCEPT;
+int fcntl(int fd, int cmd, ...) FL_NO_EXCEPT;
 
 // Error handling
-int get_errno() FL_NOEXCEPT;
+int get_errno() FL_NO_EXCEPT;
 
 // WASM CONSTRAINTS: The following functions are blocking calls and are 
 // DISALLOWED and NOT AVAILABLE on WASM due to proxying limitations:

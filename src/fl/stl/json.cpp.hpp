@@ -53,7 +53,7 @@ namespace fl {
 // We treat NaN / inf as "beyond precision" so the caller's safe-fallback path
 // is taken -- matches the previous `canBeRepresentedAsFloat(double)` semantics
 // before this code was bit-twiddled (FastLED #3022 phase 2).
-static inline bool float_bits_magnitude_exceeds_2_24(u32 bits) FL_NOEXCEPT {
+static inline bool float_bits_magnitude_exceeds_2_24(u32 bits) FL_NO_EXCEPT {
     const u32 biased_exp = (bits >> 23) & 0xFFu;
     const u32 mantissa = bits & 0x7FFFFFu;
     return biased_exp == 0xFFu || biased_exp > 151u ||
@@ -114,7 +114,7 @@ enum class ParseState : u8 { KEEP_GOING = 0, ERROR = 1 };
 class JsonVisitor {
 public:
     virtual ParseState on_token(JsonToken token, const fl::span<const char>& value) = 0;
-    virtual ~JsonVisitor() FL_NOEXCEPT = default;
+    virtual ~JsonVisitor() FL_NO_EXCEPT = default;
 };
 
 // Character-by-character tokenizer
@@ -527,7 +527,7 @@ private:
     int mDepth;
 
 public:
-    JsonValidator() FL_NOEXCEPT : mExpectKey(false), mExpectValue(false), mExpectColon(false), mDepth(0) {}
+    JsonValidator() FL_NO_EXCEPT : mExpectKey(false), mExpectValue(false), mExpectColon(false), mDepth(0) {}
 
     ParseState on_token(JsonToken token, const fl::span<const char>& value) override {
         (void)value;  // Suppress unused parameter warning
@@ -926,7 +926,7 @@ private:
     }
 
 public:
-    JsonBuilder() FL_NOEXCEPT : mRoot(), mDepth(0) {}
+    JsonBuilder() FL_NO_EXCEPT : mRoot(), mDepth(0) {}
 
     ParseState on_token(JsonToken token, const fl::span<const char>& value) override {
         // Recursion depth check
@@ -1313,10 +1313,17 @@ fl::string json::to_string_native() const {
     SerializerVisitor visitor{json_chars};
     visitor.serialize_value(mValue.get());
 
-    // Convert deque to fl::string efficiently
+    // Convert deque to fl::string. With FastLED #3270 the deque is chunked,
+    // so its storage is no longer contiguous -- treating `&json_chars[0]`
+    // as a buffer would walk off the first chunk. Reserve + per-element
+    // append is correct for the chunked layout (and was correct for the
+    // pre-#3270 layout too whenever a wraparound occurred).
     fl::string result;
     if (!json_chars.empty()) {
-        result.assign(&json_chars[0], json_chars.size());
+        result.reserve(json_chars.size());
+        for (fl::size i = 0; i < json_chars.size(); ++i) {
+            result.push_back(json_chars[i]);
+        }
     }
 
     return result;

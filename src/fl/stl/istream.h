@@ -14,7 +14,7 @@
 #include "fl/stl/noexcept.h"
 
 namespace fl {
-    int available() FL_NOEXCEPT;
+    int available() FL_NO_EXCEPT;
 }
 
 namespace fl {
@@ -37,7 +37,7 @@ private:
     bool readToken(string& token);
     
 public:
-    istream_real() FL_NOEXCEPT = default;
+    istream_real() FL_NO_EXCEPT = default;
     
     // Check if stream is in good state
     bool good() const { return !mFailed; }
@@ -91,7 +91,7 @@ private:
 #endif
     
 public:
-    istream() FL_NOEXCEPT = default;
+    istream() FL_NO_EXCEPT = default;
     
     // Check if stream is in good state
     bool good() const { 

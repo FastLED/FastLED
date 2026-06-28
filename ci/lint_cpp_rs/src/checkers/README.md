@@ -5,8 +5,10 @@ The Rust C++ linter keeps a single crate-level dispatch path in `lib.rs` through
 with all applicable checkers. The implementation is split into small source
 files so edits and reviews no longer happen inside one 7k-line file.
 
-Python checker prior art lives in `ci/lint_cpp/*_checker.py`. The Rust checker
-chunks are grouped by related policy area:
+As of FastLED #3288 the Rust crate is the default lint path; the 60 ported
+Python checkers under `ci/lint_cpp/*_checker.py` have been retired (see git
+history for prior art). New checkers go here. The Rust checker chunks are
+grouped by related policy area:
 
 - `basic.rs`: serial printf, namespace use in examples, banned macros,
   allocation, static-in-header, include paths, and builtin memcpy checks.

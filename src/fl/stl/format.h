@@ -300,7 +300,7 @@ public:
     enum class Type { None, Int, UInt, Long, ULong, LongLong, ULongLong,
                       Double, Char, CString, String, Pointer };
 
-    FormatArg() FL_NOEXCEPT : mType(Type::None) {}
+    FormatArg() FL_NO_EXCEPT : mType(Type::None) {}
     FormatArg(int v) : mType(Type::Int) { mData.i = v; }
     FormatArg(unsigned int v) : mType(Type::UInt) { mData.u = v; }
     FormatArg(long v) : mType(Type::Long) { mData.l = v; }

@@ -18,23 +18,23 @@ class JsonUiHelpInternal;
 
 class JsonHelpImpl {
   public:
-    JsonHelpImpl(const fl::string &markdownContent) FL_NOEXCEPT;
+    JsonHelpImpl(const fl::string &markdownContent) FL_NO_EXCEPT;
     ~JsonHelpImpl();
-    JsonHelpImpl &Group(const fl::string &name) FL_NOEXCEPT;
+    JsonHelpImpl &Group(const fl::string &name) FL_NO_EXCEPT;
 
-    const fl::string &markdownContent() const FL_NOEXCEPT;
+    const fl::string &markdownContent() const FL_NO_EXCEPT;
 
-    const fl::string &name() const FL_NOEXCEPT;
-    void toJson(fl::json &json) const FL_NOEXCEPT;
-    fl::string groupName() const FL_NOEXCEPT;
+    const fl::string &name() const FL_NO_EXCEPT;
+    void toJson(fl::json &json) const FL_NO_EXCEPT;
+    fl::string groupName() const FL_NO_EXCEPT;
     
     // Method to allow parent UIElement class to set the group
-    void setGroup(const fl::string &groupName) FL_NOEXCEPT;
+    void setGroup(const fl::string &groupName) FL_NO_EXCEPT;
 
-    int id() const FL_NOEXCEPT;
+    int id() const FL_NO_EXCEPT;
 
-    bool operator==(const fl::string& other) const FL_NOEXCEPT { return groupName() == other; }
-    bool operator!=(const fl::string& other) const FL_NOEXCEPT { return groupName() != other; }
+    bool operator==(const fl::string& other) const FL_NO_EXCEPT { return groupName() == other; }
+    bool operator!=(const fl::string& other) const FL_NO_EXCEPT { return groupName() != other; }
 
 
   private:

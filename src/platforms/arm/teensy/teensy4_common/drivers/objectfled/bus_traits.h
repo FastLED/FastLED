@@ -24,19 +24,28 @@ namespace fl {
 template<> struct BusTraits<Bus::OBJECT_FLED> {
     using Driver = ChannelEngineObjectFLED;
 
-    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
         static fl::shared_ptr<Driver> gHolder = fl::make_shared<Driver>();
         return gHolder;
     }
 
-    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
+    static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
-    static void registerWithManager() FL_NOEXCEPT {
+    static void registerWithManager() FL_NO_EXCEPT {
         ChannelManager::instance().addDriver(default_bus_priority(Bus::OBJECT_FLED), instancePtr());
     }
 };
 
 template<> struct BusSupports<Bus::OBJECT_FLED, ClocklessChipset> : fl::true_type {};
+
+// #3428: unified clockless + SPI engine -- the same FlexPWM + eDMA + GPIO
+// bank peripheral (and the same `ChannelEngineObjectFLED` class) serves
+// both modes. See `src/fl/channels/README.md` -> "Rule: Parallel-IO
+// peripherals -- one engine for both clockless and SPI modes". Runtime
+// support for SPI is gated by `objectfled_spi_lookup_pins()` which is
+// stubbed today; this compile-time slot lets users write
+// `FastLED.add<Bus::OBJECT_FLED, SpiChipsetConfig>(cfg)` and have it type-check.
+template<> struct BusSupports<Bus::OBJECT_FLED, SpiChipsetConfig> : fl::true_type {};
 
 }  // namespace fl
 

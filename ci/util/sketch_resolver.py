@@ -104,13 +104,14 @@ def parse_timeout(timeout_str: str) -> int:
     """Parse timeout string with optional suffix into seconds.
 
     Supported formats:
-        - Plain number: "120" → 120 seconds
-        - Milliseconds: "5000ms" → 5 seconds
-        - Seconds: "120s" → 120 seconds
-        - Minutes: "2m" → 120 seconds
+        - Plain number: "120" -> 120 seconds
+        - Milliseconds: "5000ms" -> 5 seconds
+        - Seconds: "120s" -> 120 seconds
+        - Minutes: "2m" -> 120 seconds
+        - Hours: "1h" -> 3600 seconds (FastLED #3309)
 
     Args:
-        timeout_str: Timeout string (e.g., "120", "2m", "5000ms")
+        timeout_str: Timeout string (e.g., "120", "2m", "1h", "5000ms")
 
     Returns:
         Timeout in seconds (integer)
@@ -123,11 +124,11 @@ def parse_timeout(timeout_str: str) -> int:
     timeout_str = timeout_str.strip()
 
     # Match number with optional suffix
-    match = re.match(r"^(\d+(?:\.\d+)?)\s*(ms|s|m)?$", timeout_str, re.IGNORECASE)
+    match = re.match(r"^(\d+(?:\.\d+)?)\s*(ms|s|m|h)?$", timeout_str, re.IGNORECASE)
     if not match:
         raise ValueError(
             f"Invalid timeout format: '{timeout_str}'. "
-            f"Expected formats: '120', '120s', '2m', '5000ms'"
+            f"Expected formats: '120', '120s', '2m', '1h', '5000ms'"
         )
 
     value_str, suffix = match.groups()
@@ -146,6 +147,9 @@ def parse_timeout(timeout_str: str) -> int:
     elif suffix.lower() == "m":
         # Minutes to seconds
         seconds = value * 60
+    elif suffix.lower() == "h":
+        # Hours to seconds (FastLED #3309)
+        seconds = value * 3600
     else:
         # Should never reach here due to regex
         raise ValueError(f"Unknown suffix: {suffix}")

@@ -54,7 +54,7 @@ namespace platforms {
 // Pin Mode Control
 // ============================================================================
 
-inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
+inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
 #if defined(HAL_GPIO_MODULE_ENABLED) && defined(FL_STM32_HAS_HAL)
     // Use native helper functions instead of Arduino-specific digitalPinToPinName()
     GPIO_TypeDef* port = fl::stm32::getGPIOPort(pin);
@@ -129,7 +129,7 @@ inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
             return;
     }
 
-    HAL_GPIO_Init(port, &GPIO_InitStruct) FL_NOEXCEPT;
+    HAL_GPIO_Init(port, &GPIO_InitStruct) FL_NO_EXCEPT;
 #else
     (void)pin;
     (void)mode;
@@ -141,7 +141,7 @@ inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
 // Digital I/O
 // ============================================================================
 
-inline void digitalWrite(int pin, PinValue val) FL_NOEXCEPT {
+inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
 #if defined(HAL_GPIO_MODULE_ENABLED) && defined(FL_STM32_HAS_HAL)
     // Use native helper functions instead of Arduino-specific digitalPinToPinName()
     GPIO_TypeDef* port = fl::stm32::getGPIOPort(pin);
@@ -153,14 +153,14 @@ inline void digitalWrite(int pin, PinValue val) FL_NOEXCEPT {
 
     // Write pin state using HAL
     // Translate fl::PinValue to GPIO_PinState
-    HAL_GPIO_WritePin(port, pin_mask, (val == PinValue::High) ? GPIO_PIN_SET : GPIO_PIN_RESET) FL_NOEXCEPT;
+    HAL_GPIO_WritePin(port, pin_mask, (val == PinValue::High) ? GPIO_PIN_SET : GPIO_PIN_RESET) FL_NO_EXCEPT;
 #else
     (void)pin;
     (void)val;
 #endif
 }
 
-inline PinValue digitalRead(int pin) FL_NOEXCEPT {
+inline PinValue digitalRead(int pin) FL_NO_EXCEPT {
 #if defined(HAL_GPIO_MODULE_ENABLED) && defined(FL_STM32_HAS_HAL)
     // Use native helper functions instead of Arduino-specific digitalPinToPinName()
     GPIO_TypeDef* port = fl::stm32::getGPIOPort(pin);
@@ -182,7 +182,7 @@ inline PinValue digitalRead(int pin) FL_NOEXCEPT {
 // Analog I/O
 // ============================================================================
 
-inline u16 analogRead(int pin) FL_NOEXCEPT {
+inline u16 analogRead(int pin) FL_NO_EXCEPT {
     // NOTE: analogRead requires STM32duino pinmap functions for ADC channel mapping
     // This is because there's no direct way to map Arduino pin numbers to ADC channels
     // without the pinmap tables provided by STM32duino core.
@@ -275,22 +275,22 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
 
     if (HAL_ADC_ConfigChannel(&AdcHandle, &AdcChannelConf) != HAL_OK) {
         FL_WARN_F("STM32: ADC channel configuration failed");
-        HAL_ADC_DeInit(&AdcHandle) FL_NOEXCEPT;
+        HAL_ADC_DeInit(&AdcHandle) FL_NO_EXCEPT;
         return 0;
     }
 
     // Start ADC conversion
     if (HAL_ADC_Start(&AdcHandle) != HAL_OK) {
         FL_WARN_F("STM32: ADC start failed");
-        HAL_ADC_DeInit(&AdcHandle) FL_NOEXCEPT;
+        HAL_ADC_DeInit(&AdcHandle) FL_NO_EXCEPT;
         return 0;
     }
 
     // Poll for conversion complete (10ms timeout)
     if (HAL_ADC_PollForConversion(&AdcHandle, 10) != HAL_OK) {
         FL_WARN_F("STM32: ADC conversion timeout");
-        HAL_ADC_Stop(&AdcHandle) FL_NOEXCEPT;
-        HAL_ADC_DeInit(&AdcHandle) FL_NOEXCEPT;
+        HAL_ADC_Stop(&AdcHandle) FL_NO_EXCEPT;
+        HAL_ADC_DeInit(&AdcHandle) FL_NO_EXCEPT;
         return 0;
     }
 
@@ -301,8 +301,8 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
     }
 
     // Stop and deinitialize ADC
-    HAL_ADC_Stop(&AdcHandle) FL_NOEXCEPT;
-    HAL_ADC_DeInit(&AdcHandle) FL_NOEXCEPT;
+    HAL_ADC_Stop(&AdcHandle) FL_NO_EXCEPT;
+    HAL_ADC_DeInit(&AdcHandle) FL_NO_EXCEPT;
 
     // Scale 12-bit value to 10-bit Arduino-compatible value (0-1023)
     return static_cast<u16>(value >> 2);  // 4096 -> 1024 range
@@ -314,7 +314,7 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
 #endif  // #if 0 - disabled code
 }
 
-inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
+inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
     // NOTE: analogWrite requires STM32duino pinmap functions for Timer channel mapping
     // This is because there's no direct way to map Arduino pin numbers to Timer channels
     // without the pinmap tables provided by STM32duino core.
@@ -393,7 +393,7 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
     GPIO_InitStruct.Alternate = STM_PIN_AFNUM(function);
 #endif
 
-    HAL_GPIO_Init(port, &GPIO_InitStruct) FL_NOEXCEPT;
+    HAL_GPIO_Init(port, &GPIO_InitStruct) FL_NO_EXCEPT;
 
     // Enable timer clock
     fl::stm32::enableTimerClock(timer_instance);
@@ -489,14 +489,14 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
 #endif  // #if 0 - disabled code
 }
 
-inline void setPwm16(int pin, u16 val) FL_NOEXCEPT {
+inline void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
     // STM32 16-bit PWM implementation would configure Timer PWM with period=65535
     // For simplified implementation, scale 16-bit value to 8-bit and use analogWrite
     // Full 16-bit implementation would require HAL timer reconfiguration
     analogWrite(pin, val >> 8);
 }
 
-inline void setAdcRange(AdcRange range) FL_NOEXCEPT {
+inline void setAdcRange(AdcRange range) FL_NO_EXCEPT {
     // STM32 ADC reference voltage configuration
     // On STM32, the ADC reference voltage is typically hardware-configured:
     // - VDDA (analog supply voltage) is the default reference

@@ -1,4 +1,5 @@
 ﻿#include "fl/system/file_system.h"
+#include "fl/fled/fled.h"
 #include "fl/stl/has_include.h"
 #include "fl/log/log.h"
 #include "fl/stl/vector.h"
@@ -34,8 +35,8 @@ namespace fl {
 
 class NullFileHandle : public filebuf {
   public:
-    NullFileHandle() FL_NOEXCEPT = default;
-    ~NullFileHandle() FL_NOEXCEPT override {}
+    NullFileHandle() FL_NO_EXCEPT = default;
+    ~NullFileHandle() FL_NO_EXCEPT override {}
 
     bool is_open() const override { return false; }
     fl::size_t size() const override { return 0; }
@@ -67,11 +68,11 @@ class NullFileHandle : public filebuf {
 
 class NullFileSystem : public FsImpl {
   public:
-    NullFileSystem() FL_NOEXCEPT {
+    NullFileSystem() FL_NO_EXCEPT {
         FL_WARN_F("NullFileSystem instantiated as a placeholder, please "
                      "implement a file system for your platform.");
     }
-    ~NullFileSystem() FL_NOEXCEPT override {}
+    ~NullFileSystem() FL_NO_EXCEPT override {}
 
     bool begin() override { return true; }
     void end() override {}
@@ -99,6 +100,10 @@ bool FileSystem::begin(FsImplPtr platform_filesystem) {
     }
     mFs->begin();
     return true;
+}
+
+Fled FileSystem::loadFled(const char *path) FL_NO_EXCEPT {
+    return Fled::load(*this, path);
 }
 
 FileSystem::FileSystem() : mFs() {}
@@ -163,6 +168,12 @@ bool FileSystem::readScreenMap(const char *path, const char *name,
 }
 
 fl::ifstream FileSystem::openRead(const char *path) {
+    if (!mFs) {
+        // Defensive: default-constructed FileSystem or one whose begin*()
+        // call failed has a null backend. Returning a closed ifstream
+        // lets downstream code branch on is_open() rather than crash.
+        return fl::ifstream();
+    }
     return fl::ifstream(mFs->openRead(path));
 }
 Video FileSystem::openVideo(const char *path, fl::size pixelsPerFrame, float fps,

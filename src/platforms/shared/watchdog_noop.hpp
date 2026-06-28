@@ -38,55 +38,55 @@ namespace fl {
 // `.impl.hpp`) so the function-local static lives in exactly one TU per
 // program — keeps Teensy 3.x clear of the `__cxa_guard` ABI conflict.
 
-Watchdog& Watchdog::instance() FL_NOEXCEPT {
+Watchdog& Watchdog::instance() FL_NO_EXCEPT {
     static Watchdog sInstance;
     return sInstance;
 }
 
 // ---- Tier 0 ----
 
-void       Watchdog::begin(fl::u32 /*timeout_ms*/) FL_NOEXCEPT {}
-void       Watchdog::feed() FL_NOEXCEPT {}
-void       Watchdog::disable() FL_NOEXCEPT {}
+void       Watchdog::begin(fl::u32 /*timeout_ms*/) FL_NO_EXCEPT {}
+void       Watchdog::feed() FL_NO_EXCEPT {}
+void       Watchdog::disable() FL_NO_EXCEPT {}
 
-ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT { return ResetCause::UNKNOWN; }
-bool       Watchdog::lastResetWasWatchdog() const FL_NOEXCEPT { return false; }
+ResetCause Watchdog::lastResetCause() const FL_NO_EXCEPT { return ResetCause::UNKNOWN; }
+bool       Watchdog::lastResetWasWatchdog() const FL_NO_EXCEPT { return false; }
 
-fl::u8     Watchdog::persistRead(fl::size /*idx*/) const FL_NOEXCEPT { return 0; }
-void       Watchdog::persistWrite(fl::size /*idx*/, fl::u8 /*v*/) FL_NOEXCEPT {}
+fl::u8     Watchdog::persistRead(fl::size /*idx*/) const FL_NO_EXCEPT { return 0; }
+void       Watchdog::persistWrite(fl::size /*idx*/, fl::u8 /*v*/) FL_NO_EXCEPT {}
 
-fl::u16    Watchdog::consecutiveCrashCount() const FL_NOEXCEPT { return 0; }
-void       Watchdog::markCleanShutdown() FL_NOEXCEPT {}
-bool       Watchdog::isInSafeMode() const FL_NOEXCEPT { return false; }
-fl::u16    Watchdog::safeModeThreshold() const FL_NOEXCEPT { return mSafeModeThreshold; }
-void       Watchdog::setSafeModeThreshold(fl::u16 t) FL_NOEXCEPT { mSafeModeThreshold = t; }
+fl::u16    Watchdog::consecutiveCrashCount() const FL_NO_EXCEPT { return 0; }
+void       Watchdog::markCleanShutdown() FL_NO_EXCEPT {}
+bool       Watchdog::isInSafeMode() const FL_NO_EXCEPT { return false; }
+fl::u16    Watchdog::safeModeThreshold() const FL_NO_EXCEPT { return mSafeModeThreshold; }
+void       Watchdog::setSafeModeThreshold(fl::u16 t) FL_NO_EXCEPT { mSafeModeThreshold = t; }
 
-// reboot() is FL_NORETURN — even on noop, we must spin forever so the
+// reboot() is FL_NO_RETURN — even on noop, we must spin forever so the
 // signature contract holds. Using a loop instead of abort() so we don't
 // require <cstdlib> from a header used on bare-metal AVR.
-FL_NORETURN void Watchdog::reboot() FL_NOEXCEPT {
+FL_NO_RETURN void Watchdog::reboot() FL_NO_EXCEPT {
     while (true) {}
 }
 
 // ---- Tier 1 ----
 
-bool       Watchdog::onTimeout(WatchdogTimeoutCallback /*cb*/, void* /*ud*/) FL_NOEXCEPT { return false; }
-bool       Watchdog::onTimeout(fl::function<void()> /*cb*/) FL_NOEXCEPT { return false; }
-bool       Watchdog::setPauseOnDebug(bool /*pause*/) FL_NOEXCEPT { return false; }
-bool       Watchdog::writeCrashLog(fl::span<const fl::u8> /*payload*/) FL_NOEXCEPT { return false; }
-fl::size   Watchdog::readCrashLog(fl::span<fl::u8> /*out*/) const FL_NOEXCEPT { return 0; }
-bool       Watchdog::rebootIntoBootloader() FL_NOEXCEPT { return false; }
+bool       Watchdog::onTimeout(WatchdogTimeoutCallback /*cb*/, void* /*ud*/) FL_NO_EXCEPT { return false; }
+bool       Watchdog::onTimeout(fl::function<void()> /*cb*/) FL_NO_EXCEPT { return false; }
+bool       Watchdog::setPauseOnDebug(bool /*pause*/) FL_NO_EXCEPT { return false; }
+bool       Watchdog::writeCrashLog(fl::span<const fl::u8> /*payload*/) FL_NO_EXCEPT { return false; }
+fl::size   Watchdog::readCrashLog(fl::span<fl::u8> /*out*/) const FL_NO_EXCEPT { return 0; }
+bool       Watchdog::rebootIntoBootloader() FL_NO_EXCEPT { return false; }
 
 // ---- Tier 2 ----
 
-bool                Watchdog::setWindow(fl::u32, fl::u32) FL_NOEXCEPT { return false; }
-bool                Watchdog::hasCrashReport() const FL_NOEXCEPT { return false; }
-WatchdogCrashReport Watchdog::readCrashReport() const FL_NOEXCEPT {
+bool                Watchdog::setWindow(fl::u32, fl::u32) FL_NO_EXCEPT { return false; }
+bool                Watchdog::hasCrashReport() const FL_NO_EXCEPT { return false; }
+WatchdogCrashReport Watchdog::readCrashReport() const FL_NO_EXCEPT {
     WatchdogCrashReport r{};
     r.valid = false;
     r.fault_type = "";
     return r;
 }
-void                Watchdog::clearCrashReport() FL_NOEXCEPT {}
+void                Watchdog::clearCrashReport() FL_NO_EXCEPT {}
 
 } // namespace fl

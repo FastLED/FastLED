@@ -69,10 +69,10 @@ int& tls_reintrancy_count() {
 
 struct MemoryGuard {
     int& reintrancy_count;
-    MemoryGuard() FL_NOEXCEPT : reintrancy_count(tls_reintrancy_count()) {
+    MemoryGuard() FL_NO_EXCEPT : reintrancy_count(tls_reintrancy_count()) {
         reintrancy_count++;
     }
-    ~MemoryGuard() FL_NOEXCEPT {
+    ~MemoryGuard() FL_NO_EXCEPT {
         reintrancy_count--;
     }
     bool enabled() const {

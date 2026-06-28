@@ -336,9 +336,51 @@ fn strip_line_comment_code(line: &str) -> String {
     line.to_string()
 }
 
+// Pre-compiled state for classify_noexcept_line: the single combined
+// alternation regex over all class names + a vector of the same names
+// so we can look up which name matched without re-running per-name regexes.
+//
+// Built ONCE per file in check_file_content; without this every non-blank
+// line was paying O(class_names) calls to `Regex::new` which is
+// milliseconds per call (zackees/fastled #2871 follow-up).
+pub struct ClassNameRegex {
+    pub names: Vec<String>,
+    pub combined: Option<Regex>,
+}
+
+impl ClassNameRegex {
+    pub fn build(class_names: &HashSet<String>) -> Self {
+        let names: Vec<String> = class_names.iter().cloned().collect();
+        let combined = if names.is_empty() {
+            None
+        } else {
+            let alternation: Vec<String> =
+                names.iter().map(|n| regex::escape(n)).collect();
+            let pattern = format!(r"\b({})\s*\(", alternation.join("|"));
+            match Regex::new(&pattern) {
+                Ok(re) => Some(re),
+                Err(err) => {
+                    // Loud failure: silently dropping this regex would skip
+                    // copy/move/default-ctor detection for every file with no
+                    // signal to the user. Stderr warning surfaces the bug.
+                    eprintln!(
+                        "warning: ClassNameRegex::build failed to compile pattern for {} class names ({}): {}; \
+                         constructor noexcept checks will be skipped",
+                        names.len(),
+                        names.iter().take(3).cloned().collect::<Vec<_>>().join(", "),
+                        err
+                    );
+                    None
+                }
+            }
+        };
+        Self { names, combined }
+    }
+}
+
 fn classify_noexcept_line(
     line: &str,
-    class_names: &HashSet<String>,
+    class_names: &ClassNameRegex,
 ) -> Option<(&'static str, usize)> {
     let code = strip_line_comment_code(line);
     let stripped = code.trim();
@@ -364,38 +406,37 @@ fn classify_noexcept_line(
         return Some(("assignment operator", paren));
     }
 
-    for name in class_names {
-        let pattern = format!(r"\b{}\s*\(", regex::escape(name));
-        let Ok(regex) = Regex::new(&pattern) else {
+    let combined = class_names.combined.as_ref()?;
+    for matched in combined.captures_iter(&code) {
+        let outer = matched.get(0)?;
+        let name_match = matched.get(1)?;
+        let name = name_match.as_str();
+        let prefix = code[..outer.start()].trim();
+        if !NOEXCEPT_CTOR_QUALS.contains(&prefix) {
             continue;
-        };
-        for matched in regex.find_iter(&code) {
-            let prefix = code[..matched.start()].trim();
-            if !NOEXCEPT_CTOR_QUALS.contains(&prefix) {
-                continue;
-            }
-            let paren = matched.end() - 1;
-            let rest = code[paren + 1..].trim_start();
-            let copy_prefix = format!("const {name}");
-            if rest.starts_with(&copy_prefix) {
-                let after = rest[copy_prefix.len()..].trim_start();
-                if after.starts_with('&') {
-                    return Some(("copy constructor", paren));
-                }
-            }
-            if rest.starts_with(name) {
-                let after = rest[name.len()..].trim_start();
-                if after.starts_with("&&") {
-                    return Some(("move constructor", paren));
-                }
-            }
-            if rest.starts_with(')')
-                || rest.starts_with("void") && rest[4..].trim_start().starts_with(')')
-            {
-                return Some(("default constructor", paren));
+        }
+        let paren = outer.end() - 1;
+        let rest = code[paren + 1..].trim_start();
+        let copy_prefix = format!("const {name}");
+        if rest.starts_with(&copy_prefix) {
+            let after = rest[copy_prefix.len()..].trim_start();
+            if after.starts_with('&') {
+                return Some(("copy constructor", paren));
             }
         }
+        if rest.starts_with(name) {
+            let after = rest[name.len()..].trim_start();
+            if after.starts_with("&&") {
+                return Some(("move constructor", paren));
+            }
+        }
+        if rest.starts_with(')')
+            || rest.starts_with("void") && rest[4..].trim_start().starts_with(')')
+        {
+            return Some(("default constructor", paren));
+        }
     }
+    let _ = &class_names.names; // names retained for future per-match dispatch
     None
 }
 

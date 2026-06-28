@@ -40,7 +40,7 @@ Vibe::Vibe() {
     }
 }
 
-Vibe::~Vibe() FL_NOEXCEPT = default;
+Vibe::~Vibe() FL_NO_EXCEPT = default;
 
 void Vibe::update(shared_ptr<Context> context) {
     if (!context) {

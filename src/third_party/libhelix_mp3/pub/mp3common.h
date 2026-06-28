@@ -106,16 +106,16 @@ typedef struct _SFBandTable {
 } SFBandTable;
 
 /* decoder functions which must be implemented for each platform */
-MP3DecInfo *AllocateBuffers(void) FL_NOEXCEPT;
-void FreeBuffers(MP3DecInfo *mp3DecInfo) FL_NOEXCEPT;
-int CheckPadBit(MP3DecInfo *mp3DecInfo) FL_NOEXCEPT;
-int UnpackFrameHeader(MP3DecInfo *mp3DecInfo, const unsigned char *buf) FL_NOEXCEPT;
-int UnpackSideInfo(MP3DecInfo *mp3DecInfo, const unsigned char *buf) FL_NOEXCEPT;
-int DecodeHuffman(MP3DecInfo *mp3DecInfo, const unsigned char *buf, int *bitOffset, int huffBlockBits, int gr, int ch) FL_NOEXCEPT;
-int Dequantize(MP3DecInfo *mp3DecInfo, int gr) FL_NOEXCEPT;
-int IMDCT(MP3DecInfo *mp3DecInfo, int gr, int ch) FL_NOEXCEPT;
-int UnpackScaleFactors(MP3DecInfo *mp3DecInfo, const unsigned char *buf, int *bitOffset, int bitsAvail, int gr, int ch) FL_NOEXCEPT;
-int Subband(MP3DecInfo *mp3DecInfo, short *pcmBuf) FL_NOEXCEPT;
+MP3DecInfo *AllocateBuffers(void) FL_NO_EXCEPT;
+void FreeBuffers(MP3DecInfo *mp3DecInfo) FL_NO_EXCEPT;
+int CheckPadBit(MP3DecInfo *mp3DecInfo) FL_NO_EXCEPT;
+int UnpackFrameHeader(MP3DecInfo *mp3DecInfo, const unsigned char *buf) FL_NO_EXCEPT;
+int UnpackSideInfo(MP3DecInfo *mp3DecInfo, const unsigned char *buf) FL_NO_EXCEPT;
+int DecodeHuffman(MP3DecInfo *mp3DecInfo, const unsigned char *buf, int *bitOffset, int huffBlockBits, int gr, int ch) FL_NO_EXCEPT;
+int Dequantize(MP3DecInfo *mp3DecInfo, int gr) FL_NO_EXCEPT;
+int IMDCT(MP3DecInfo *mp3DecInfo, int gr, int ch) FL_NO_EXCEPT;
+int UnpackScaleFactors(MP3DecInfo *mp3DecInfo, const unsigned char *buf, int *bitOffset, int bitsAvail, int gr, int ch) FL_NO_EXCEPT;
+int Subband(MP3DecInfo *mp3DecInfo, short *pcmBuf) FL_NO_EXCEPT;
 
 /* mp3tabs.c - global ROM tables */
 extern const int32_t samplerateTab[3][3];

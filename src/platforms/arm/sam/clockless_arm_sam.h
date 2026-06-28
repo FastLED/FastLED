@@ -42,7 +42,7 @@ class ClocklessSAMHardware : public CPixelLEDController<RGB_ORDER> {
 	CMinWait<WAIT_TIME> mWait;
 
 public:
-	virtual void init() FL_NOEXCEPT {
+	virtual void init() FL_NO_EXCEPT {
 		FastPinBB<DATA_PIN>::setOutput();
 		mPinMask = FastPinBB<DATA_PIN>::mask();
 		mPort = FastPinBB<DATA_PIN>::port();
@@ -51,7 +51,7 @@ public:
 	virtual u16 getMaxRefreshRate() const { return 400; }
 
 protected:
-    virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NOEXCEPT {
+    virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
         mWait.wait();
         if(!showRGBInternal(pixels)) {
             sei(); delayMicroseconds(WAIT_TIME); cli();
@@ -60,7 +60,7 @@ protected:
         mWait.mark();
     }
 
-	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER u8 & b) FL_NOEXCEPT {
+	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER u8 & b) FL_NO_EXCEPT {
 		// Make sure we don't slot into a wrapping spot, this will delay up to 12.5µs for WS2812
 		// bool bShift=0;
 		// while(VAL < (TOTAL*10)) { bShift=true; }
@@ -88,13 +88,13 @@ protected:
 #define FORCE_REFERENCE(var)  asm volatile( "" : : "r" (var) )
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static u32 showRGBInternal(PixelController<RGB_ORDER> pixels) FL_NOEXCEPT {
+	static u32 showRGBInternal(PixelController<RGB_ORDER> pixels) FL_NO_EXCEPT {
 		// Setup and start the clock
-		TC_Configure(DUE_TIMER,DUE_TIMER_CHANNEL,TC_CMR_TCCLKS_TIMER_CLOCK1) FL_NOEXCEPT;
+		TC_Configure(DUE_TIMER,DUE_TIMER_CHANNEL,TC_CMR_TCCLKS_TIMER_CLOCK1) FL_NO_EXCEPT;
 		pmc_enable_periph_clk(DUE_TIMER_ID);
-		TC_Start(DUE_TIMER,DUE_TIMER_CHANNEL) FL_NOEXCEPT;
+		TC_Start(DUE_TIMER,DUE_TIMER_CHANNEL) FL_NO_EXCEPT;
 
-		FASTLED_REGISTER data_ptr_t port asm("r7") FL_NOEXCEPT = FastPinBB<DATA_PIN>::port(); FORCE_REFERENCE(port);
+		FASTLED_REGISTER data_ptr_t port asm("r7") FL_NO_EXCEPT = FastPinBB<DATA_PIN>::port(); FORCE_REFERENCE(port);
 		*port = 0;
 
 		// Setup the pixel controller and load/scale the first byte
@@ -128,7 +128,7 @@ protected:
 			#endif
 		};
 
-		TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL) FL_NOEXCEPT;
+		TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL) FL_NO_EXCEPT;
 		return DUE_TIMER_VAL;
 	}
 };

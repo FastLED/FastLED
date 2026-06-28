@@ -34,7 +34,7 @@ class string;
 /// fl::string hex_neg = fl::to_hex(-16, false);          // "-10"
 /// @endcode
 template<typename T>
-fl::string to_hex(T value, bool uppercase = false, bool pad_to_width = false) FL_NOEXCEPT;
+fl::string to_hex(T value, bool uppercase = false, bool pad_to_width = false) FL_NO_EXCEPT;
 
 namespace detail {
 
@@ -53,36 +53,36 @@ enum class HexIntWidth : u8 {
 /// @param uppercase If true, use uppercase hex digits (A-F), otherwise lowercase (a-f)
 /// @param pad_to_width If true, pad with leading zeros to full type width
 /// @return Hexadecimal string representation
-fl::string hex(u64 value, HexIntWidth width, bool is_negative, bool uppercase, bool pad_to_width) FL_NOEXCEPT;
+fl::string hex(u64 value, HexIntWidth width, bool is_negative, bool uppercase, bool pad_to_width) FL_NO_EXCEPT;
 
 /// @brief Compile-time integer width determination (default - triggers error)
 template<size_t Size>
-constexpr HexIntWidth get_hex_int_width() FL_NOEXCEPT {
+constexpr HexIntWidth get_hex_int_width() FL_NO_EXCEPT {
     FL_STATIC_ASSERT(Size == 0, "Unsupported type size for hex conversion");
     return HexIntWidth::Width8; // Unreachable, but needed for compilation
 }
 
 /// @brief Specialization for 1-byte types (int8_t, uint8_t, char, etc.)
 template<>
-constexpr HexIntWidth get_hex_int_width<1>() FL_NOEXCEPT {
+constexpr HexIntWidth get_hex_int_width<1>() FL_NO_EXCEPT {
     return HexIntWidth::Width8;
 }
 
 /// @brief Specialization for 2-byte types (int16_t, uint16_t, short, etc.)
 template<>
-constexpr HexIntWidth get_hex_int_width<2>() FL_NOEXCEPT {
+constexpr HexIntWidth get_hex_int_width<2>() FL_NO_EXCEPT {
     return HexIntWidth::Width16;
 }
 
 /// @brief Specialization for 4-byte types (int32_t, uint32_t, int, etc.)
 template<>
-constexpr HexIntWidth get_hex_int_width<4>() FL_NOEXCEPT {
+constexpr HexIntWidth get_hex_int_width<4>() FL_NO_EXCEPT {
     return HexIntWidth::Width32;
 }
 
 /// @brief Specialization for 8-byte types (i64, u64, long long, etc.)
 template<>
-constexpr HexIntWidth get_hex_int_width<8>() FL_NOEXCEPT {
+constexpr HexIntWidth get_hex_int_width<8>() FL_NO_EXCEPT {
     return HexIntWidth::Width64;
 }
 
@@ -96,51 +96,51 @@ constexpr HexIntWidth get_hex_int_width<8>() FL_NOEXCEPT {
 /// @param buffer Output buffer (must be at least 34 bytes for base 2, 12 for base 10, 12 for base 16)
 /// @param radix Number base (2-36, typically 10 for decimal, 16 for hex, 8 for octal)
 /// @return Number of characters written (excluding null terminator)
-int itoa(i32 value, char *buffer, int radix) FL_NOEXCEPT;
+int itoa(i32 value, char *buffer, int radix) FL_NO_EXCEPT;
 
 /// @brief Convert signed 64-bit integer to string buffer in given radix
 /// @param value The signed 64-bit integer value to convert
 /// @param buffer Output buffer (must be at least 66 bytes for base 2 with sign, 21 for base 10)
 /// @param radix Number base (2-36, typically 10 for decimal, 16 for hex, 8 for octal)
 /// @return Number of characters written (excluding null terminator)
-int itoa64(i64 value, char *buffer, int radix) FL_NOEXCEPT;
+int itoa64(i64 value, char *buffer, int radix) FL_NO_EXCEPT;
 
 /// @brief Convert unsigned 32-bit integer to string buffer in given radix
 /// @param value The unsigned integer value to convert
 /// @param buffer Output buffer (must be at least 33 bytes for base 2, 11 for base 10, 9 for base 16)
 /// @param radix Number base (2-36, typically 10 for decimal, 16 for hex, 8 for octal)
 /// @return Number of characters written (excluding null terminator)
-int utoa32(u32 value, char *buffer, int radix) FL_NOEXCEPT;
+int utoa32(u32 value, char *buffer, int radix) FL_NO_EXCEPT;
 
 /// @brief Convert unsigned 64-bit integer to string buffer in given radix
 /// @param value The unsigned 64-bit integer value to convert
 /// @param buffer Output buffer (must be at least 65 bytes for base 2, 21 for base 10, 17 for base 16)
 /// @param radix Number base (2-36, typically 10 for decimal, 16 for hex, 8 for octal)
 /// @return Number of characters written (excluding null terminator)
-int utoa64(u64 value, char *buffer, int radix) FL_NOEXCEPT;
+int utoa64(u64 value, char *buffer, int radix) FL_NO_EXCEPT;
 
 /// @brief Convert floating point number to string buffer
 /// @param value The float value to convert
 /// @param buffer Output buffer (must be at least 64 bytes)
 /// @param precision Number of decimal places (default: 2)
-void ftoa(float value, char *buffer, int precision = 2) FL_NOEXCEPT;
+void ftoa(float value, char *buffer, int precision = 2) FL_NO_EXCEPT;
 
 /// @brief Parse a floating point number from a character buffer
 /// @param str The character buffer to parse
 /// @param len The length of the buffer
 /// @return The parsed float value (0.0f if parsing fails)
-float parseFloat(const char *str, fl::size len) FL_NOEXCEPT;
+float parseFloat(const char *str, fl::size len) FL_NO_EXCEPT;
 
 /// @brief Parse an integer from a character buffer
 /// @param str The character buffer to parse
 /// @param len The length of the buffer
 /// @return The parsed integer value (0 if parsing fails)
-int parseInt(const char *str, fl::size len) FL_NOEXCEPT;
+int parseInt(const char *str, fl::size len) FL_NO_EXCEPT;
 
 /// @brief Parse an integer from a null-terminated string
 /// @param str The null-terminated string to parse
 /// @return The parsed integer value (0 if parsing fails)
-int parseInt(const char *str) FL_NOEXCEPT;
+int parseInt(const char *str) FL_NO_EXCEPT;
 
 } // namespace fl
 

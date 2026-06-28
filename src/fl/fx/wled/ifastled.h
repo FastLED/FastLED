@@ -23,7 +23,7 @@ namespace fl {
  */
 class IFastLED {
 public:
-    virtual ~IFastLED() FL_NOEXCEPT = default;
+    virtual ~IFastLED() FL_NO_EXCEPT = default;
 
     // LED array access
 

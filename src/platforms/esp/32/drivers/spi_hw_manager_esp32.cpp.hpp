@@ -26,9 +26,9 @@ namespace fl {
 
 // Forward declare singleton getters from spi_hw_1_esp32.cpp.hpp
 // These are defined in spi_hw_1_esp32.cpp.hpp, included via platforms/esp/32/drivers/spi/_build.hpp
-extern fl::shared_ptr<SpiHw1>& getController2() FL_NOEXCEPT;
+extern fl::shared_ptr<SpiHw1>& getController2() FL_NO_EXCEPT;
 #if SOC_SPI_PERIPH_NUM > 2
-extern fl::shared_ptr<SpiHw1>& getController3() FL_NOEXCEPT;
+extern fl::shared_ptr<SpiHw1>& getController3() FL_NO_EXCEPT;
 #endif
 
 namespace detail {
@@ -37,7 +37,7 @@ namespace detail {
 constexpr int PRIORITY_HW_1 = 5;    ///< Standard single-lane SPI
 
 /// @brief Add SpiHw1 (single-lane SPI) if supported
-static void addSpiHw1IfPossible() FL_NOEXCEPT {
+static void addSpiHw1IfPossible() FL_NO_EXCEPT {
 #ifdef FL_IS_ESP32
     FL_DBG_F("ESP32: Registering SpiHw1 controllers");
 
@@ -72,7 +72,7 @@ namespace platforms {
 ///
 /// Uses a static initialization flag to ensure initialization happens only once,
 /// even if called from multiple SpiHw* classes.
-void initSpiHardware() FL_NOEXCEPT {
+void initSpiHardware() FL_NO_EXCEPT {
     // C++11 guarantees thread-safe static initialization
     static bool sInitialized = false;
     if (sInitialized) {

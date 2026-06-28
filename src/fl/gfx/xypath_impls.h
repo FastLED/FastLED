@@ -55,7 +55,7 @@ class XYPathParams {
 // Base class for the actual path generator.
 class XYPathGenerator {
   public:
-    virtual ~XYPathGenerator() FL_NOEXCEPT = default; // Add virtual destructor for proper cleanup
+    virtual ~XYPathGenerator() FL_NO_EXCEPT = default; // Add virtual destructor for proper cleanup
     virtual const string name() const = 0;
     virtual vec2f compute(float alpha) = 0;
     // No writes when returning false.
@@ -99,7 +99,7 @@ class GielisCurveParams : public XYPathParams {
 
 class CatmullRomParams : public XYPathParams {
   public:
-    CatmullRomParams() FL_NOEXCEPT {}
+    CatmullRomParams() FL_NO_EXCEPT {}
 
     // Add a point to the path
     void addPoint(vec2f p) { points.push_back(p); }
@@ -151,14 +151,14 @@ class LinePath : public XYPathGenerator {
 
 class CirclePath : public XYPathGenerator {
   public:
-    CirclePath() FL_NOEXCEPT;
+    CirclePath() FL_NO_EXCEPT;
     vec2f compute(float alpha) override;
     const string name() const override;
 };
 
 class HeartPath : public XYPathGenerator {
   public:
-    HeartPath() FL_NOEXCEPT;
+    HeartPath() FL_NO_EXCEPT;
     vec2f compute(float alpha) override;
     const string name() const override;
 };

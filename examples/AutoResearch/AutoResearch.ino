@@ -99,14 +99,16 @@ void loop()  { autoResearchLowMemoryLoop(); }
 // ============================================================================
 // AGENT INSTRUCTIONS
 // ============================================================================
-// This sketch is an autoresearch test that uses the "ERROR" keyword in FL_ERROR
-// statements to signal test failures. The `bash debug` command monitors for
-// the "ERROR" keyword and fails the test when detected (exit code 1).
+// AutoResearch runtime output must stay machine-readable. Use JSON-RPC
+// responses and RESULT JSONL events for test state, failures, and diagnostics.
 //
 // 🚫 DO NOT "CHEAT" THE TEST:
 //    - DO NOT change "ERROR" to "FAIL", "WARNING", "FAILURE", or any other
 //      keyword to avoid test detection
-//    - DO NOT modify FL_ERROR statements unless explicitly requested by the user
+//    - DO NOT add FL_ERROR, FL_PRINT, FL_WARN, Serial.print*, fl::Serial.print*,
+//      fl::print*, fl::write_bytes, or fl::serial print/write/flush runtime
+//      output in this sketch or any `autoresearch-runtime-output-lint` section.
+//      fl::serial_begin/ready setup helpers are allowed. Use JSON-RPC / RESULT JSONL.
 //    - The "ERROR" keyword is INTENTIONAL and part of the autoresearch contract
 //
 // ✅ VALID MODIFICATIONS (only if explicitly requested):
@@ -138,7 +140,7 @@ void loop()  { autoResearchLowMemoryLoop(); }
 //       print(result)
 //   "
 //
-// Text output (FL_PRINT, FL_WARN) is for human diagnostics ONLY.
+// Direct text output is not allowed in runtime paths while tests are running.
 // Machine coordination uses ONLY JSON-RPC commands and JSONL events.
 // ============================================================================
 
@@ -278,7 +280,11 @@ constexpr int RX_BUFFER_SIZE = 3000 * 32 + 100;  // LEDs × 32:1 expansion + hea
 // This allows AutoResearchRemoteControl to recreate the RX channel when the pin changes
 fl::shared_ptr<fl::RxChannel> createRxDevice(int pin) {
     fl::RxChannelConfig config(pin, RX_BACKEND);
-    return FastLED.addRx(config);
+    fl::shared_ptr<fl::RxChannel> channel = FastLED.addRx(config);
+    if (!channel || channel->getPin() != pin) {
+        return fl::shared_ptr<fl::RxChannel>();
+    }
+    return channel;
 }
 
 // Global autoresearch state (shared between main loop and RPC handlers)
@@ -315,69 +321,16 @@ using RemoteControlSingleton = fl::Singleton<AutoResearchRemoteControl>;
 uint32_t frame_counter = 0;
 
 
-#if defined(FL_IS_TEENSY_4X) && defined(__IMXRT1062__)
-// =============================================================================
-// CRITICAL: WDOG3 (RTWDOG) startup-early-hook recovery (FastLED#2731)
-// =============================================================================
-// The iMXRT1062 RTWDOG (WDOG3) is enabled by default at chip reset with
-// TOVAL = 0x400 LPO ticks ≈ 32 ms. The Teensy 4 core does NOT disable it in
-// startup.c — most sketches happen to be fast enough or stay in WAIT mode
-// where WDOG3 stops counting, so it never bites in practice.
-//
-// But if a previous run armed WDOG3 with a short timeout, or if any
-// peripheral init takes longer than 32 ms, the chip enters a reset loop
-// where the new sketch can't even complete USB enumeration. Symptom: red
-// LED double-blink + "Unknown USB Device (Device Descriptor Request Failed)".
-//
-// `startup_early_hook` is a weak symbol in Teensyduino's startup.c that runs
-// very early in ResetHandler2(), before main() and before ITCM is even
-// initialized. Overriding it here disables WDOG3 BEFORE any other code can
-// observe a reset. Must be in FLASHMEM (ITCM not ready yet).
-extern "C" FLASHMEM void startup_early_hook(void) {
-    // Enable the WDOG3 clock gate (CCM_CCGR5 bits 4-5) so the WDOG3
-    // peripheral registers are addressable. Per imxrt.h comment:
-    // "WDOG3 requires CCM_CCGR5_WDOG3".
-    CCM_CCGR5 |= CCM_CCGR5_WDOG3(3);
-    // Ensure the CCM store is visible to the peripheral bus before
-    // touching WDOG3.
-    __asm__ volatile ("dsb" ::: "memory");
-    __asm__ volatile ("isb" ::: "memory");
-
-    // Unlock RTWDOG with the 32-bit key (works because CS.CMD32EN=1 at reset).
-    WDOG3_CNT = 0xD928C520u;
-
-    // Wait for the unlock window to open. Bounded spin — if for any reason
-    // the unlock never lands, we'd rather continue and let the WDOG bite
-    // than hang here forever.
-    {
-        volatile uint32_t spin = 0;
-        while (!(WDOG3_CS & WDOG_CS_ULK)) {
-            if (++spin > 200000u) break;
-        }
-    }
-
-    // Disable: clear EN, keep CMD32EN+UPDATE+CLK(LPO) so future arms work.
-    // Set TOVAL to max so even if the disable doesn't take, we have ~524 sec
-    // before any reset can occur.
-    WDOG3_TOVAL = 0xFFFFu;
-    WDOG3_WIN = 0;
-    WDOG3_CS = WDOG_CS_CMD32EN | WDOG_CS_UPDATE | WDOG_CS_CLK(1);  // EN=0
-
-    // Wait for reconfigure complete (bounded).
-    {
-        volatile uint32_t spin = 0;
-        while (!(WDOG3_CS & WDOG_CS_RCS)) {
-            if (++spin > 200000u) break;
-        }
-    }
-}
-#endif
+// Teensy 4 WDOG3 startup recovery lives in AutoResearchStartupHook.cpp.
+// Keeping the extern "C" hook out of this .ino avoids Arduino prototype
+// generation with C++ linkage during fbuild deploy.
 
 void setup() {
     // Initialize serial buffers with platform-specific configuration
     // Must be called BEFORE Serial.begin()
     init_serial_buffers();
     fl::serial_begin(115200);
+    fl::setLogLevel(static_cast<fl::u8>(fl::LogLevel::FL_LOG_LEVEL_NONE));
 #if defined(ARDUINO_USB_CDC_ON_BOOT) && ARDUINO_USB_CDC_ON_BOOT
     // Make HWCDC writes drop instead of block when no host is reading.
     // Without this, Serial.print() on ESP32-C3/C6/H2 can stall up to ~2s
@@ -389,8 +342,6 @@ void setup() {
 #endif
     uint32_t serial_wait_start = millis();
     while (!fl::serial_ready() && (millis() - serial_wait_start) < AUTORESEARCH_SERIAL_WAIT_MS);  // Wait for serial monitor (early exits when connected)
-
-    FL_WARN("[SETUP] AutoResearch sketch starting - serial output active");
 
     // Note: the unified watchdog is armed lazily by FL_WATCHDOG_AUTO() at the
     // top of loop() — no explicit setup() call needed. The macro prints the
@@ -432,7 +383,6 @@ void setup() {
     ss << "  Loopback Mode: " << loop_back_mode << "\n";
     ss << "  Color Order: RGB\n";
     ss << "  RX Buffer Size: " << RX_BUFFER_SIZE << " bytes";
-    FL_PRINT(ss.str());
 
     // SIMD validation suite, Wave8 expansion micro-bench, and full PARLIO
     // encode bench are RPC-driven — invoke via the `testSimd`,
@@ -448,23 +398,22 @@ void setup() {
     ss << "\n[RX SETUP] Creating RX channel for LED autoresearch\n";
     ss << "[RX CREATE] Creating RX channel on PIN " << PIN_RX
        << " (" << (40000000 / 1000000) << "MHz, " << RX_BUFFER_SIZE << " symbols)";
-    FL_PRINT(ss.str());
 
     g_autoresearch_state->rx_channel = createRxDevice(PIN_RX);
 
     if (!g_autoresearch_state->rx_channel) {
-        ss.clear();
-        ss << "[RX SETUP]: Failed to create RX channel\n";
-        ss << "[RX SETUP]: Check that RMT peripheral is available and not in use";
-        FL_ERROR(ss.str());
-        FL_ERROR("Sanity check failed - RX channel creation failed");
+        fl::json errorData = fl::json::object();
+        errorData.set("error", "RxChannelCreationFailed");
+        errorData.set("message", "Failed to create RX channel during setup");
+        errorData.set("pinRx", static_cast<int64_t>(PIN_RX));
+        errorData.set("rxBackend", fl::toString(RX_BACKEND));
+        printStreamRaw("setupError", errorData);
         return;
     }
 
     ss.clear();
     ss << "[RX CREATE] ✓ RX channel created successfully (will be initialized with config in begin())\n";
     ss << "[RX SETUP] ✓ RX channel ready for LED autoresearch";
-    FL_PRINT(ss.str());
 
     // PARLIO streaming validation (#2548) is now RPC-driven via the
     // `parlioStreamValidate` handler registered in AutoResearchRemote.cpp.
@@ -478,19 +427,15 @@ void setup() {
 
     ss.clear();
     ss << "\n[REMOTE RPC] Registering JSON RPC functions for dynamic control";
-    FL_PRINT(ss.str());
 
     // Initialize RemoteControl singleton and register all RPC functions
     RemoteControlSingleton::instance().registerFunctions(g_autoresearch_state);
 
-    FL_PRINT("[REMOTE RPC] ✓ RPC system initialized (testGpioConnection available)");
 
     // ========================================================================
     // Async Task Setup - JSON-RPC Processing
     // ========================================================================
-    FL_PRINT("[ASYNC] Setting up JSON-RPC async task (10ms interval)");
     autoresearch::setupRpcAsyncTask(RemoteControlSingleton::instance(), 10);
-    FL_PRINT("[ASYNC] ✓ JSON-RPC task registered with scheduler");
 
     // Stub: register self-running autoresearch client (no-op on ESP32)
     autoresearch::maybeRegisterStubAutorun(RemoteControlSingleton::instance(),
@@ -501,11 +446,9 @@ void setup() {
     // ========================================================================
     ss.clear();
     ss << "\n[GPIO BASELINE TEST] Testing GPIO " << PIN_TX << " → GPIO " << PIN_RX << " connectivity";
-    FL_PRINT(ss.str());
 
     // GPIO baseline test moved to loop() - wait for RPC start signal before testing
     // This allows JSON-RPC commands (testGpioConnection, findConnectedPins) to run first
-    FL_WARN("[GPIO BASELINE TEST] Deferred to loop() - waiting for RPC start signal");
 
     // Post-#2428 the channel driver registry no longer auto-populates. This
     // example needs every available driver enrolled with ChannelManager so the
@@ -522,7 +465,6 @@ void setup() {
            << " (priority: " << g_autoresearch_state->drivers_available[i].priority
            << ", enabled: " << (g_autoresearch_state->drivers_available[i].enabled ? "yes" : "no") << ")\n";
     }
-    FL_PRINT(ss.str());
 
     // Validate that expected drivers are available for this platform
     autoResearchExpectedEngines();
@@ -534,10 +476,12 @@ void setup() {
     readyData.set("drivers", static_cast<int64_t>(g_autoresearch_state->drivers_available.size()));
     readyData.set("pinTx", static_cast<int64_t>(PIN_TX));
     readyData.set("pinRx", static_cast<int64_t>(PIN_RX));
+    readyData.set("chip", autoresearch::chipName());
+    readyData.set("rxBackend", fl::toString(RX_BACKEND));
+    readyData.set("loopbackMode", loop_back_mode);
+    readyData.set("rxBufferSize", static_cast<int64_t>(RX_BUFFER_SIZE));
     printStreamRaw("ready", readyData);
 
-    // Human-readable diagnostics (not machine-parsed)
-    FL_PRINT("\n[SETUP COMPLETE] AutoResearch ready - awaiting JSON-RPC commands");
     delay(2000);
 }
 
@@ -578,7 +522,6 @@ void loop() {
     // and is reflashable.
     // ========================================================================
     if (g_autoresearch_state->deliberate_hang_requested) {
-        FL_WARN("[deliberateHang] entering forced-hang loop NOW");
         delay(200);  // give Serial TX FIFO time to flush
         // noInterrupts() is an Arduino-only macro; guard it so the host stub
         // build (which compiles this .ino for the unit-test framework) doesn't
@@ -604,23 +547,17 @@ void loop() {
         if (millis() > 500) {
             g_autoresearch_state->gpio_baseline_test_done = true;
 
-            FL_PRINT("\n[GPIO BASELINE TEST] Testing GPIO " << PIN_TX << " → GPIO " << PIN_RX << " connectivity");
-
             // Test RX channel with manual GPIO toggle to confirm hardware path works
             // This isolates GPIO/hardware issues from PARLIO driver issues
             // Buffer size = 100 symbols, hz = 40MHz (same as LED autoresearch)
-            if (!testRxChannel(g_autoresearch_state->rx_channel, PIN_TX, PIN_RX, 40000000, 100)) {
-                FL_WARN("[GPIO BASELINE TEST] FAILED - RX did not capture manual GPIO toggles");
-                FL_WARN("[GPIO BASELINE TEST] Possible causes:");
-                FL_WARN("  1. GPIO " << PIN_TX << " and GPIO " << PIN_RX << " are not physically connected");
-                FL_WARN("  2. RX channel initialization failed");
-                FL_WARN("  3. GPIO conflict with other peripherals (USB Serial JTAG on C6 uses certain GPIOs)");
-                FL_WARN("[GPIO BASELINE TEST] Continuing - JSON-RPC pin discovery/testing available");
-            } else {
-                FL_WARN("\n[GPIO BASELINE TEST] ✓ PASSED - GPIO path confirmed working");
-                FL_WARN("[GPIO BASELINE TEST] ✓ RX successfully captured manual GPIO toggles");
-                FL_WARN("[GPIO BASELINE TEST] ✓ Hardware connectivity verified (GPIO " << PIN_TX << " → GPIO " << PIN_RX << ")");
-            }
+            const bool gpio_ok = testRxChannel(g_autoresearch_state->rx_channel, PIN_TX, PIN_RX, 40000000, 100);
+            fl::json gpioData = fl::json::object();
+            gpioData.set("success", gpio_ok);
+            gpioData.set("pinTx", static_cast<int64_t>(PIN_TX));
+            gpioData.set("pinRx", static_cast<int64_t>(PIN_RX));
+            gpioData.set("hz", static_cast<int64_t>(40000000));
+            gpioData.set("symbols", static_cast<int64_t>(100));
+            printStreamRaw("gpioBaseline", gpioData);
         }
     }
 

@@ -11,36 +11,36 @@
 #include "fl/stl/noexcept.h"
 namespace fl {
 
-const fl::string &JsonUiInternal::name() const FL_NOEXCEPT { return mName; }
+const fl::string &JsonUiInternal::name() const FL_NO_EXCEPT { return mName; }
 
-int JsonUiInternal::id() const FL_NOEXCEPT { return mId; }
+int JsonUiInternal::id() const FL_NO_EXCEPT { return mId; }
 
-void JsonUiInternal::setGroup(const fl::string &groupName) FL_NOEXCEPT {
+void JsonUiInternal::setGroup(const fl::string &groupName) FL_NO_EXCEPT {
     fl::unique_lock<fl::mutex> lock(mMutex);
     mGroup = groupName;
 }
 
-fl::string JsonUiInternal::groupName() const FL_NOEXCEPT {
+fl::string JsonUiInternal::groupName() const FL_NO_EXCEPT {
     fl::unique_lock<fl::mutex> lock(mMutex);
     return mGroup;
 }
 
-bool JsonUiInternal::hasChanged() const FL_NOEXCEPT {
+bool JsonUiInternal::hasChanged() const FL_NO_EXCEPT {
     fl::unique_lock<fl::mutex> lock(mMutex);
     return mHasChanged;
 }
 
-void JsonUiInternal::markChanged() FL_NOEXCEPT {
+void JsonUiInternal::markChanged() FL_NO_EXCEPT {
     fl::unique_lock<fl::mutex> lock(mMutex);
     mHasChanged = true;
 }
 
-void JsonUiInternal::clearChanged() FL_NOEXCEPT {
+void JsonUiInternal::clearChanged() FL_NO_EXCEPT {
     fl::unique_lock<fl::mutex> lock(mMutex);
     mHasChanged = false;
 }
 
-int JsonUiInternal::nextId() FL_NOEXCEPT {
+int JsonUiInternal::nextId() FL_NO_EXCEPT {
     static fl::atomic<u32> sNextId(0);
     return sNextId.fetch_add(1);
 }

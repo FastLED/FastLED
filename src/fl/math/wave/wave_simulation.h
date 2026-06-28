@@ -56,7 +56,7 @@ class WaveSimulation1D {
     // Only applies to getu8().
     void setEasingMode(U8EasingFunction mode) { mU8Mode = mode; }
 
-    ~WaveSimulation1D() FL_NOEXCEPT = default;
+    ~WaveSimulation1D() FL_NO_EXCEPT = default;
 
     // Delegate methods to the internal simulation.
     void setSpeed(float speed);
@@ -128,7 +128,7 @@ class WaveSimulation2D {
     void init(u32 width, u32 height, SuperSample factor, float speed,
               int dampening);
 
-    ~WaveSimulation2D() FL_NOEXCEPT = default;
+    ~WaveSimulation2D() FL_NO_EXCEPT = default;
 
     // Delegated simulation methods.
     void setSpeed(float speed);
@@ -166,11 +166,11 @@ class WaveSimulation2D {
     // (no setStencil() ever called) is auto-selection: NinePointIsotropic
     // at SuperSample >= 2X, FivePoint at 1X. See WaveSimulation2D_Real::
     // setStencil() for the stencil semantics.
-    void setStencil(LaplacianStencil s) FL_NOEXCEPT {
+    void setStencil(LaplacianStencil s) FL_NO_EXCEPT {
         mSim->setStencil(s);
         mUserSetStencil = true;
     }
-    LaplacianStencil getStencil() const FL_NOEXCEPT { return mSim->getStencil(); }
+    LaplacianStencil getStencil() const FL_NO_EXCEPT { return mSim->getStencil(); }
 
     void setXCylindrical(bool on) { mSim->setXCylindrical(on); }
 

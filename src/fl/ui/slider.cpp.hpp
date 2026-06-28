@@ -7,12 +7,12 @@ FL_DISABLE_WARNING(float-equal)
 
 namespace fl {
 
-UISlider::UISlider(const char *name, float value, float min, float max, float step) FL_NOEXCEPT
+UISlider::UISlider(const char *name, float value, float min, float max, float step) FL_NO_EXCEPT
     : mImpl(name, value, min, max, step), mListener(this) {
     mListener.addToEngineEventsOnce();
 }
 
-void UISlider::setValue(float value) FL_NOEXCEPT {
+void UISlider::setValue(float value) FL_NO_EXCEPT {
     float oldValue = mImpl.value();
     mImpl.setValue(value);
     // Read back post-clamp value; only fire callbacks if the observable value
@@ -27,7 +27,7 @@ void UISlider::setValue(float value) FL_NOEXCEPT {
     }
 }
 
-void UISlider::Listener::onBeginFrame() FL_NOEXCEPT {
+void UISlider::Listener::onBeginFrame() FL_NO_EXCEPT {
     UISlider &owner = *mOwner;
     if (!owner.mLastFrameValueValid) {
         owner.mLastFrameValue = owner.value();

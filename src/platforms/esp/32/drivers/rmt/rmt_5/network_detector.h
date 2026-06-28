@@ -61,7 +61,7 @@ class NetworkDetector {
     /// @return false if WiFi not initialized or failed to query
     ///
     /// **Platform Support:** ESP32, S2, S3, C3, C6, H2 (not C2)
-    static bool isWiFiActive() FL_NOEXCEPT;
+    static bool isWiFiActive() FL_NO_EXCEPT;
 
     /// @brief Check if WiFi is connected to an access point
     ///
@@ -74,7 +74,7 @@ class NetworkDetector {
     ///
     /// **Use Case:** More precise detection than isWiFiActive() - only
     /// triggers adaptive behavior when WiFi is actively transmitting.
-    static bool isWiFiConnected() FL_NOEXCEPT;
+    static bool isWiFiConnected() FL_NO_EXCEPT;
 
     //=========================================================================
     // Ethernet Detection
@@ -90,7 +90,7 @@ class NetworkDetector {
     /// @return false if no Ethernet interface found
     ///
     /// **Platform Support:** ESP32 (with external PHY like LAN8720), ESP32-C6
-    static bool isEthernetActive() FL_NOEXCEPT;
+    static bool isEthernetActive() FL_NO_EXCEPT;
 
     /// @brief Check if Ethernet has a valid IP address
     ///
@@ -102,7 +102,7 @@ class NetworkDetector {
     ///
     /// **Use Case:** More precise than isEthernetActive() - confirms actual
     /// network connectivity, not just link status.
-    static bool isEthernetConnected() FL_NOEXCEPT;
+    static bool isEthernetConnected() FL_NO_EXCEPT;
 
     //=========================================================================
     // Bluetooth Detection
@@ -122,7 +122,7 @@ class NetworkDetector {
     /// **Note:** This detects both Classic Bluetooth and BLE (they share
     /// the same controller). If you need to distinguish between them, use
     /// additional ESP-IDF APIs.
-    static bool isBluetoothActive() FL_NOEXCEPT;
+    static bool isBluetoothActive() FL_NO_EXCEPT;
 
     //=========================================================================
     // Convenience Methods (Shorthand)
@@ -139,7 +139,7 @@ class NetworkDetector {
     /// @code
     /// isWiFiActive() || isEthernetActive() || isBluetoothActive()
     /// @endcode
-    static bool isAnyNetworkActive() FL_NOEXCEPT;
+    static bool isAnyNetworkActive() FL_NO_EXCEPT;
 
     /// @brief Check if any network type is connected
     ///
@@ -155,7 +155,7 @@ class NetworkDetector {
     ///
     /// **Note:** Bluetooth is not included because it doesn't have a
     /// "connected" state in the same sense (no IP address).
-    static bool isAnyNetworkConnected() FL_NOEXCEPT;
+    static bool isAnyNetworkConnected() FL_NO_EXCEPT;
 
   private:
     // No instances - static API only

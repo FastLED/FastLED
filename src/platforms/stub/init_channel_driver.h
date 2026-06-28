@@ -23,7 +23,7 @@ namespace platforms {
 /// Post-#2428 the stub platform does not auto-register any driver with
 /// `ChannelManager`. Tests that need the stub driver call
 /// `fl::enableDrivers<Bus::STUB>()` or `FastLED.enableAllDrivers()` directly.
-inline void initChannelDrivers() FL_NOEXCEPT {
+inline void initChannelDrivers() FL_NO_EXCEPT {
     // No auto-registration. See `fl::enableDrivers<Bus::STUB>()` for opt-in.
 }
 

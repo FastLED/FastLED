@@ -7,14 +7,14 @@ FL_DISABLE_WARNING(float-equal)
 
 namespace fl {
 
-UINumberField::UINumberField(const char *name, double value, double min, double max) FL_NOEXCEPT
+UINumberField::UINumberField(const char *name, double value, double min, double max) FL_NO_EXCEPT
     : mImpl(name, value, min, max), mListener(this), mLastFrameValue(0), mLastFrameValueValid(false) {
     mListener.addToEngineEventsOnce();
 }
 
-UINumberField::~UINumberField() FL_NOEXCEPT {}
+UINumberField::~UINumberField() FL_NO_EXCEPT {}
 
-void UINumberField::Listener::onBeginFrame() FL_NOEXCEPT {
+void UINumberField::Listener::onBeginFrame() FL_NO_EXCEPT {
     UINumberField &owner = *mOwner;
     if (!owner.mLastFrameValueValid) {
         owner.mLastFrameValue = owner.value();

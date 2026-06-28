@@ -14,3 +14,21 @@ regex = "1.11"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 walkdir = "2.5"
+
+# Dev profile = the production build for this lint tool. Cargo defaults
+# (opt-level=0, incremental=true) plus line-tables-only debuginfo so
+# panic stack traces still resolve to file:line - enough for diagnosing
+# crashes, none of the full-DWARF compile-time tax.
+#
+# Why dev not release: the lint binary is disk-I/O bound (it reads and
+# parses source files). Release-mode codegen does not measurably speed
+# up runtime but costs ~10x cold-build wall time.
+[profile.dev]
+debug = "line-tables-only"
+
+# Build third-party crates at opt-level=1. Empirically faster on a cold
+# build than the default opt-0-for-all: heavy generics in `regex` /
+# `rayon` instantiate slowly at opt-0, and the opt-1 cost is paid once
+# (cargo caches dep artifacts across crate-source edits).
+[profile.dev.package."*"]
+opt-level = 1

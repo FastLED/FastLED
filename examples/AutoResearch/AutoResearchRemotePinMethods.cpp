@@ -46,6 +46,7 @@
 
 #include "fl/codec/h264.h"
 #include "fl/codec/mp4_parser.h"
+#include "fl/stl/cstdio.h"
 #include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/frame.h"
 
@@ -72,6 +73,9 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
 
         bool enabled = args[0].as_bool().value();
         mState->debug_enabled = enabled;
+        fl::setLogLevel(static_cast<fl::u8>(
+            enabled ? fl::LogLevel::FL_LOG_LEVEL_DEBUG
+                    : fl::LogLevel::FL_LOG_LEVEL_NONE));
 
         response.set("success", true);
         response.set("debug_enabled", enabled);
@@ -196,8 +200,6 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
         int old_pin = mState->pin_tx;
         mState->pin_tx = new_pin;
 
-        FL_PRINT("[RPC] setTxPin(" << new_pin << ") - TX pin changed from " << old_pin << " to " << new_pin);
-
         response.set("success", true);
         response.set("txPin", static_cast<int64_t>(new_pin));
         response.set("previousTxPin", static_cast<int64_t>(old_pin));
@@ -231,8 +233,6 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
             mState->pin_rx = new_pin;
 
             // Recreate RX channel with new pin
-            FL_PRINT("[RPC] setRxPin(" << new_pin << ") - Recreating RX channel...");
-
             // Destroy old RX channel
             mState->rx_channel.reset();
 
@@ -240,12 +240,11 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
             mState->rx_channel = mState->rx_factory(new_pin);
 
             if (mState->rx_channel) {
-                FL_PRINT("[RPC] setRxPin - RX channel recreated on GPIO " << new_pin);
                 rx_recreated = true;
             } else {
-                FL_ERROR("[RPC] setRxPin - Failed to create RX channel on GPIO " << new_pin);
                 response.set("error", "RxChannelCreationFailed");
                 response.set("message", "Failed to create RX channel on new pin");
+                response.set("pinRx", static_cast<int64_t>(new_pin));
                 // Restore old pin value
                 mState->pin_rx = old_pin;
                 return response;
@@ -314,8 +313,6 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
         if (rx_pin_changed) {
             mState->pin_rx = new_rx_pin;
 
-            FL_PRINT("[RPC] setPins - Recreating RX channel on GPIO " << new_rx_pin << "...");
-
             // Destroy old RX channel
             mState->rx_channel.reset();
 
@@ -323,23 +320,19 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
             mState->rx_channel = mState->rx_factory(new_rx_pin);
 
             if (mState->rx_channel) {
-                FL_PRINT("[RPC] setPins - RX channel recreated successfully");
                 rx_recreated = true;
             } else {
-                FL_ERROR("[RPC] setPins - Failed to create RX channel on GPIO " << new_rx_pin);
                 // Rollback both pins
                 mState->pin_tx = old_tx_pin;
                 mState->pin_rx = old_rx_pin;
                 response.set("error", "RxChannelCreationFailed");
                 response.set("message", "Failed to create RX channel - pins restored to previous values");
+                response.set("pinRx", static_cast<int64_t>(new_rx_pin));
                 return response;
             }
         } else {
             mState->pin_rx = new_rx_pin;
         }
-
-        FL_PRINT("[RPC] setPins - TX: " << old_tx_pin << " → " << new_tx_pin
-                << ", RX: " << old_rx_pin << " → " << new_rx_pin);
 
         response.set("success", true);
         response.set("txPin", static_cast<int64_t>(new_tx_pin));

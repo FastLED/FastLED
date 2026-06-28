@@ -24,19 +24,31 @@ namespace fl {
 template<> struct BusTraits<Bus::FLEX_IO> {
     using Driver = ChannelEngineFlexIO;
 
-    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
         static fl::shared_ptr<Driver> gHolder = fl::make_shared<Driver>();
         return gHolder;
     }
 
-    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
+    static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
-    static void registerWithManager() FL_NOEXCEPT {
+    static void registerWithManager() FL_NO_EXCEPT {
         ChannelManager::instance().addDriver(default_bus_priority(Bus::FLEX_IO), instancePtr());
     }
 };
 
 template<> struct BusSupports<Bus::FLEX_IO, ClocklessChipset> : fl::true_type {};
+
+// #3428: unified clockless + SPI engine -- the same FlexIO2 peripheral
+// (and the same `ChannelEngineFlexIO` class) serves both modes. See
+// `src/fl/channels/README.md` -> "Rule: Parallel-IO peripherals -- one
+// engine for both clockless and SPI modes". Runtime support for SPI is
+// gated by `flexio_spi_lookup_pins()`, which currently routes the
+// APA102 default (MOSI=11/SCLK=13) and the Teensy 4.1 FlexIO2 SPI pin
+// pairs covered by the flexioSpiSelfTest smoke test (3/3 pass at 1/6/
+// 12 MHz on real hardware -- see PR #3431). This compile-time slot lets
+// users write `FastLED.add<Bus::FLEX_IO, SpiChipsetConfig>(cfg)` and
+// have it both type-check AND run.
+template<> struct BusSupports<Bus::FLEX_IO, SpiChipsetConfig> : fl::true_type {};
 
 }  // namespace fl
 

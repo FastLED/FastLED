@@ -19,8 +19,8 @@ namespace fl {
 struct RGBWWPixel {
     u8 r, g, b, ww, wc;
 
-    RGBWWPixel() FL_NOEXCEPT : r(0), g(0), b(0), ww(0), wc(0) {}
-    RGBWWPixel(u8 _r, u8 _g, u8 _b, u8 _ww, u8 _wc) FL_NOEXCEPT
+    RGBWWPixel() FL_NO_EXCEPT : r(0), g(0), b(0), ww(0), wc(0) {}
+    RGBWWPixel(u8 _r, u8 _g, u8 _b, u8 _ww, u8 _wc) FL_NO_EXCEPT
         : r(_r), g(_g), b(_b), ww(_ww), wc(_wc) {}
 };
 

@@ -212,8 +212,15 @@ For a subsystem (e.g., `Watchdog`, `Audio`, `Codec`) that has multi-tier platfor
 - **Alternative Solution (header files)**: Move static initialization to corresponding `.cpp` file
   - Example: See `src/platforms/shared/spi_hw_1.{h,cpp}` for the correct pattern
 - **Exception**: Statics inside template functions are allowed (each template instantiation gets its own static, avoiding conflicts)
-- **Linter**: Enforced by `ci/lint_cpp/test_no_static_in_headers.py` for critical directories (`src/platforms/shared/`, `src/fl/`, `src/fx/`)
+- **Linter**: Enforced by `StaticInHeaderChecker` in the Rust crate (`ci/lint_cpp_rs/src/checkers/style.rs`) for critical directories (`src/platforms/shared/`, `src/fl/`, `src/fx/`)
 - **Suppression**: Add `// okay static in header` comment if absolutely necessary (use sparingly)
+
+## Parallel-IO Driver: Unified Clockless + SPI Engine (REQUIRED)
+- **Rule:** Any parallel-IO peripheral driver (FlexIO, ObjectFLED, ESP32 PARLIO, LCD_CAM, I2S, etc.) MUST put its SPI mode and its clockless mode in the SAME `ChannelEngine` — do NOT fork into separate `ChannelEngineXxx` + `ChannelEngineXxxSPI` classes, separate `Bus::X` + `Bus::X_SPI` enum values, or separate `BusTraits<>` specializations.
+- **How:** The unified engine's `getCapabilities()` returns `Capabilities(true, true)`. Both `BusSupports<Bus::X, ClocklessChipset>` and `BusSupports<Bus::X, SpiChipsetConfig>` specialize to `fl::true_type`. `canHandle()` accepts both `data->isClockless()` and `data->isSpi()` channels (gated by pin / timing routability for each mode). `show()` routes per-channel — if the prior channel ran clockless and the current channel is SPI, reconfigure the peripheral (shifter / timer / DMA TCD) before transmitting.
+- **Why:** The peripheral itself can only run in one mode at a time, so the mode switch always happens AT show-time anyway. Forking duplicates Bus enum entries, priority-table rows, registration calls, `_build.cpp.hpp` includes, and `BusTraits<>` specializations for zero behavioral benefit. The peripheral is the dispatch boundary, not the mode.
+- **Exception:** genuinely separate peripherals (e.g. ESP32 LPSPI vs I2S_SPI are different silicon blocks with completely different register surfaces) get separate drivers. The "parallel-IO" qualifier excludes the different-peripheral-same-protocol case.
+- **History:** Established 2026-06-27 during #3428 FlexIO-SPI/ObjectFLED-SPI implementation. Initial design forked into `Bus::FLEX_IO_SPI` / `Bus::OBJECT_FLED_SPI`; user reverted because forking made the maintenance surface 4× larger with no benefit. See `src/fl/channels/README.md` → "Rule: Parallel-IO peripherals — one engine for both clockless and SPI modes" for the full pattern + reference code.
 
 ## Channel Engine DMA Wait Pattern
 - **`onBeginFrame()` / `show()` must wait for `poll() == READY` before starting a new frame** — use a simple `while (poll() != READY)` loop
@@ -259,12 +266,12 @@ class CFastLED {
 2. ✅ **The wrapper is a `inline` one-liner that delegates** — no logic, no validation, no error handling. The free function holds all behavior.
 3. ✅ **Per-object configuration (e.g. one strip's diode profile, one controller's correction) MAY live on the per-object API.** This rule targets *library-wide / process-wide / default-profile* state.
 4. ✅ **Documentation, examples, and PR descriptions reference the god-instance form.** The free function is an implementation detail.
-5. ⚠️ **Strict for new code; transitional allowlist for legacy names only.** Every *new* public global setter under `fl::` must ship with a `CFastLED` wrapper. A small transitional allowlist (`GRANDFATHERED_NAMES` in `ci/lint_cpp/public_settings_pattern_checker.py`) exempts pre-existing bare setters (e.g. `fl::set_input_gamut` #2710, `fl::enable_rgbw_colorimetric_lut`, `fl::set_rgbww_colorimetric_profile`) until their wrappers land. Entries are removed as each name is wrapped — the goal is an empty allowlist. New additions do NOT get grandfathered.
+5. ⚠️ **Strict for new code; transitional allowlist for legacy names only.** Every *new* public global setter under `fl::` must ship with a `CFastLED` wrapper. A small transitional allowlist (`PUBLIC_SETTINGS_GRANDFATHERED` in `ci/lint_cpp_rs/src/checkers/public_settings.rs`) exempts pre-existing bare setters (e.g. `fl::set_input_gamut` #2710, `fl::enable_rgbw_colorimetric_lut`, `fl::set_rgbww_colorimetric_profile`) until their wrappers land. Entries are removed as each name is wrapped — the goal is an empty allowlist. New additions do NOT get grandfathered.
 
 **Check Process**:
 1. For every new public function in `src/fl/**/*.h` whose name matches `^set_|^enable_|^disable_|^use_` and that mutates a static / global / namespace-scope variable, grep `src/FastLED.h` for a `CFastLED` method that delegates to it.
 2. If none exists: violation — add the wrapper in the same PR.
-3. Enforced by `ci/lint_cpp/public_settings_pattern_checker.py`. The checker carries a shrinking `GRANDFATHERED_NAMES` allowlist for legacy bare setters; remove a name from the list once its `CFastLED` wrapper is merged.
+3. Enforced by `PublicSettingsPatternChecker` in `ci/lint_cpp_rs/src/checkers/public_settings.rs`. The checker carries a shrinking `PUBLIC_SETTINGS_GRANDFATHERED` allowlist for legacy bare setters; remove a name from the list once its `CFastLED` wrapper is merged.
 
 **Where the rule does NOT apply**:
 - Helpers, constructors, factory functions — these are not setters of global state.
@@ -280,21 +287,21 @@ class CFastLED {
    - ❌ Bad:
      ```cpp
      namespace { const RgbcctProfile* sActive = nullptr; }
-     void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NOEXCEPT {
+     void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NO_EXCEPT {
          sActive = p;  // caller's lifetime, BOOM if they pass a stack temporary
      }
      ```
    - ✅ Good (value semantics, preferred):
      ```cpp
      namespace { RgbcctProfile sActive = kRgbwwDefaultProfile; }
-     void set_rgbww_colorimetric_profile(const RgbcctProfile& p) FL_NOEXCEPT {
+     void set_rgbww_colorimetric_profile(const RgbcctProfile& p) FL_NO_EXCEPT {
          sActive = p;  // copy, lifetime owned by library
      }
      ```
    - ✅ Good (nullable-reset exception — `const T*` allowed when null means "reset"):
      ```cpp
      namespace { RgbcctProfile sActive = kRgbwwDefaultProfile; }
-     void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NOEXCEPT {
+     void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NO_EXCEPT {
          sActive = (p != nullptr) ? *p : kRgbwwDefaultProfile;  // copy on non-null, reset on null
      }
      ```
@@ -316,14 +323,14 @@ class CFastLED {
 1. ❌ **NEVER mutate a profile field in place without bumping a version counter** when a cache exists keyed on the profile pointer.
    - ❌ Bad:
      ```cpp
-     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NOEXCEPT {
+     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NO_EXCEPT {
          apply_gamut(p, g);  // rewrites p->input_xy_*
          // …no version bump; ProfileCache keyed on (p, cct) still returns stale M_src
      }
      ```
    - ✅ Good:
      ```cpp
-     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NOEXCEPT {
+     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NO_EXCEPT {
          apply_gamut(p, g);
          ++p->mCacheVersion;  // forces any derived-value cache to rebuild
      }

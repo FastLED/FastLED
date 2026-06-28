@@ -59,7 +59,7 @@ enum {
 // `cap` slots or found an empty / matching slot.
 FL_NO_INLINE
 fl::size unordered_map_probe_idx(fl::size h, fl::size i,
-                                 fl::size mask, fl::size cap) FL_NOEXCEPT;
+                                 fl::size mask, fl::size cap) FL_NO_EXCEPT;
 
 } // namespace detail
 } // namespace fl

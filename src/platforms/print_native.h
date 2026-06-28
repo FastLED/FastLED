@@ -13,7 +13,7 @@
 
 namespace fl {
 
-inline void print_native(const char* str) FL_NOEXCEPT {
+inline void print_native(const char* str) FL_NO_EXCEPT {
     if (!str) return;
     
     // Native/Testing: Use direct system calls to stderr
@@ -31,7 +31,7 @@ inline void print_native(const char* str) FL_NOEXCEPT {
 #endif
 }
 
-inline void println_native(const char* str) FL_NOEXCEPT {
+inline void println_native(const char* str) FL_NO_EXCEPT {
     if (!str) return;
     print_native(str);
     print_native("\n");

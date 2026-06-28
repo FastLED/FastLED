@@ -24,12 +24,12 @@ class ClocklessPARLIO : public Channel
 {
     FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
-    static ChipsetVariant makeChipset() FL_NOEXCEPT {
+    static ChipsetVariant makeChipset() FL_NO_EXCEPT {
         return ClocklessChipset(DATA_PIN, makeTimingConfig<TIMING>());
     }
 
 public:
-    ClocklessPARLIO() FL_NOEXCEPT
+    ClocklessPARLIO() FL_NO_EXCEPT
         : Channel(makeChipset(), RGB_ORDER, RegistrationMode::DeferRegister)
     {
         BusTraits<Bus::PARLIO>::registerWithManager();
@@ -37,8 +37,8 @@ public:
         addToList();
     }
 
-    void init() FL_NOEXCEPT override { }
-    u16 getMaxRefreshRate() const FL_NOEXCEPT override { return 800; }
+    void init() FL_NO_EXCEPT override { }
+    u16 getMaxRefreshRate() const FL_NO_EXCEPT override { return 800; }
 };
 
 }  // namespace fl

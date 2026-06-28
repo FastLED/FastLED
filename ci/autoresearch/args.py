@@ -50,6 +50,7 @@ class Args:
     tx_pin: int | None
     rx_pin: int | None
     auto_discover_pins: bool
+    contaminate_tx_mux: bool
 
     # Build system selection
     use_fbuild: bool
@@ -72,6 +73,8 @@ class Args:
 
     # Legacy API testing
     legacy: bool
+    legacy_mixed_timings: bool
+    legacy_rgbw_small_counts: bool
 
     # Chipset selection
     chipset: str
@@ -109,6 +112,12 @@ class Args:
     tight_timing_iterations: int
     tight_timing_max_overhead_us: int
 
+    # Legacy escape hatch (#3281): consume root ./platformio.ini instead of
+    # synthesising .build/pio/<board>/platformio.ini from ci/boards.py.
+    # Emits a deprecation warning when set. Slated for removal one release
+    # cycle after #3281 lands.
+    use_root_platformio_ini: bool
+
     @staticmethod
     def parse_args(argv: list[str] | None = None) -> "Args":
         """Parse command-line arguments and return Args dataclass instance."""
@@ -122,7 +131,7 @@ Examples:
   %(prog)s --rmt --spi                 # Test RMT and SPI drivers
   %(prog)s --all                       # Test all drivers
   %(prog)s --parlio --skip-lint        # Skip linting for faster iteration
-  %(prog)s --rmt --timeout 120         # Custom timeout (default: 60s)
+  %(prog)s --rmt --timeout 2m          # Custom timeout (default: 30s; supports s/m/h/ms)
   %(prog)s --lcd --lanes 2 --strip-sizes 100,300  # Test LCD_CLOCKLESS with 2 lanes, strips of 100 and 300 LEDs
   %(prog)s --lcd-spi --strip-sizes 100,500   # Test LCD_SPI (APA102) on ESP32-S3
   %(prog)s --parlio --lanes 1-4        # Test PARLIO with 1-4 lanes
@@ -138,14 +147,14 @@ Driver Selection (JSON-RPC):
   MANDATORY: You MUST specify at least one driver flag:
     --parlio       Test only PARLIO driver
     --rmt          Test only RMT driver
-    --spi          Test only SPI driver
+    --spi          Test only SPI driver (Teensy 4.x resolves to SPI_UNIFIED)
     --uart         Test only UART driver
     --lcd          Test only LCD_CLOCKLESS driver (ESP32-S3 only, replaces misnamed I2S)
     --lcd-spi      Test only LCD_SPI driver (ESP32-S3 only, APA102/SK9822)
     --lcd-rgb      Test only LCD RGB driver (ESP32-P4 only)
     --object-fled  Test only ObjectFLED DMA driver (Teensy 4.x)
-    --lpuart       Test only LPUART driver (Teensy 4.x; eDMA-backed UART TX, pinned to pin 1 by default)
-    --all          Test all drivers
+    --lpuart       Reserved for future Teensy 4.x LPUART driver; currently unavailable
+    --all          Test all currently implemented drivers
 
 Strip Size Configuration:
   Configure LED strip sizes for autoresearch testing via JSON-RPC:
@@ -217,7 +226,7 @@ See Also:
         driver_group.add_argument(
             "--spi",
             action="store_true",
-            help="Test only SPI driver",
+            help="Test only SPI driver (Teensy 4.x resolves to SPI_UNIFIED)",
         )
         driver_group.add_argument(
             "--uart",
@@ -252,12 +261,12 @@ See Also:
         driver_group.add_argument(
             "--lpuart",
             action="store_true",
-            help="Test only LPUART clockless driver (Teensy 4.x only; eDMA-backed UART TX; pin pinned to 1=LPUART6_TX by default, override with --tx-pin in {1,8,14,17,20,24,29,35,47,48})",
+            help="Test only LPUART clockless driver (Teensy 4.x only; pin to LPUARTn mapping is board-dependent -- see kLpuartPins[] in lpuart_driver.cpp.hpp)",
         )
         driver_group.add_argument(
             "--all",
             action="store_true",
-            help="Test all drivers (equivalent to --parlio --rmt --spi --uart --lcd --lcd-spi --lcd-rgb --object-fled --flex-io --lpuart)",
+            help="Test all currently implemented drivers (Teensy 4.x: --object-fled --flex-io)",
         )
         driver_group.add_argument(
             "--simd",
@@ -399,8 +408,23 @@ See Also:
             "--timeout",
             "-t",
             type=str,
-            default="60",
-            help="Timeout for monitor phase. Supports: plain number (seconds), '120s', '2m', '5000ms' (default: 60)",
+            default=None,
+            help=(
+                "Timeout for monitor phase. Supports: plain number (seconds), "
+                "'30s', '2m', '1h', '5000ms'. "
+                "Default: 30s with a yellow advisory banner (FastLED #3309). "
+                "Pass --no-timeout to disable."
+            ),
+        )
+        parser.add_argument(
+            "--no-timeout",
+            action="store_true",
+            help=(
+                "Disable the monitor-phase timeout entirely. Use for debugger "
+                "sessions or interactive bring-up where the device may legitimately "
+                "stay quiet for a long time. Suppresses the default-timeout banner. "
+                "FastLED #3309."
+            ),
         )
         parser.add_argument(
             "--project-dir",
@@ -465,6 +489,14 @@ See Also:
             "--no-auto-discover-pins",
             action="store_true",
             help="Disable auto-discovery of connected pins",
+        )
+        pin_group.add_argument(
+            "--contaminate-tx-mux",
+            action="store_true",
+            help=(
+                "Before runSingleTest, remux the selected TX pin through "
+                "analogWrite() so ObjectFLED must reclaim GPIO mux mode."
+            ),
         )
 
         # Build system selection
@@ -541,7 +573,24 @@ See Also:
         parser.add_argument(
             "--legacy",
             action="store_true",
-            help="Test using legacy template addLeds API (WS2812B<PIN>) instead of Channel API. Single-lane only, pin must be 0-8.",
+            help="Test using legacy template addLeds API (WS2812B<PIN>) instead of Channel API. Supports consecutive TX pins 0-8; pin 22 is single-lane for the current ObjectFLED loopback.",
+        )
+        parser.add_argument(
+            "--legacy-mixed-timings",
+            action="store_true",
+            help=(
+                "With --legacy, alternate WS2812B/SK6812 template chipsets "
+                "across lanes to exercise multiple ObjectFLED timing groups. "
+                "Requires multi-lane historical TX pins 0-8."
+            ),
+        )
+        parser.add_argument(
+            "--legacy-rgbw-small-counts",
+            action="store_true",
+            help=(
+                "With --legacy, run RGBW 1, 2, 3, and 4 LED cases to cover "
+                "small-count ObjectFLED RGBW overflow regressions."
+            ),
         )
 
         # Chipset selection
@@ -588,6 +637,21 @@ See Also:
             help="Maximum allowed max(show()+wait()-wire_time) overhead for --tight-timing (default: 2000us).",
         )
 
+        # Legacy root platformio.ini escape hatch (#3281). Default flow
+        # synthesises .build/pio/<board>/platformio.ini from ci/boards.py,
+        # matching `bash compile`. This flag re-enables the legacy
+        # consume-root-./platformio.ini behavior for one release cycle.
+        parser.add_argument(
+            "--use-root-platformio-ini",
+            action="store_true",
+            help=(
+                "[DEPRECATED, #3281] Use root ./platformio.ini instead of "
+                "synthesising .build/pio/<board>/platformio.ini from "
+                "ci/boards.py. Legacy escape hatch; will be removed in a "
+                "future release."
+            ),
+        )
+
         parsed = parser.parse_args(argv)
 
         if parsed.use_fbuild or parsed.no_fbuild:
@@ -595,6 +659,14 @@ See Also:
             print(
                 f"warning: {flag} is deprecated and has no effect; "
                 "fbuild is always used for board builds.",
+                file=sys.stderr,
+            )
+
+        if parsed.use_root_platformio_ini:
+            # Deprecation telemetry, per issue #3281.
+            print(
+                "DEPRECATION: --use-root-platformio-ini will be removed in a "
+                "future release. See #3281.",
                 file=sys.stderr,
             )
 
@@ -630,6 +702,7 @@ See Also:
             rx_pin=parsed.rx_pin,
             auto_discover_pins=parsed.auto_discover_pins
             and not parsed.no_auto_discover_pins,
+            contaminate_tx_mux=parsed.contaminate_tx_mux,
             use_fbuild=parsed.use_fbuild,
             no_fbuild=parsed.no_fbuild,
             clean=parsed.clean,
@@ -640,6 +713,8 @@ See Also:
             lane_counts=parsed.lane_counts,
             color_pattern=parsed.color_pattern,
             legacy=parsed.legacy,
+            legacy_mixed_timings=parsed.legacy_mixed_timings,
+            legacy_rgbw_small_counts=parsed.legacy_rgbw_small_counts,
             chipset=parsed.chipset,
             net_server=parsed.net_server,
             net_client=parsed.net_client,
@@ -654,4 +729,5 @@ See Also:
             tight_timing=parsed.tight_timing,
             tight_timing_iterations=parsed.tight_timing_iterations,
             tight_timing_max_overhead_us=parsed.tight_timing_max_overhead_us,
+            use_root_platformio_ini=parsed.use_root_platformio_ini,
         )

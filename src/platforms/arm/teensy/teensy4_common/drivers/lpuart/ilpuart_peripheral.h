@@ -53,22 +53,29 @@ struct LPUARTPinResult {
 /// @brief Compile-time list of Teensy 4.0 / 4.1 LPUART TX-capable pins.
 ///
 /// Sourced from the iMXRT1062 reference manual's IOMUXC pad-mux table:
-///   pin 1  → LPUART6_TX (default after `Serial2.begin()`)
-///   pin 8  → LPUART3_TX
-///   pin 14 → LPUART2_TX
-///   pin 17 → LPUART4_TX
-///   pin 20 → LPUART8_TX
-///   pin 24 → LPUART5_TX
-///   pin 29 → LPUART7_TX
-///   pin 35 → LPUART1_TX  (Teensy 4.1 only — physically present on T4.1)
-///   pin 47 → LPUART3_TX_ALT (Teensy 4.1 only — exposed on the bottom SD pad row)
-///   pin 48 → LPUART8_TX_ALT (Teensy 4.1 only)
+///   pin 1  → LPUART6_TX (Serial1 default — also Teensyduino's default)
+///   pin 8  → LPUART4_TX (Serial2 default on T4.0)
+///   pin 14 → LPUART2_TX (Serial3 default)
+///   pin 17 → LPUART3_TX (Serial4 default on T4.0)
+///   pin 20 → LPUART8_TX (Serial5 default)
+///   pin 24 → LPUART1_TX (Serial6 default — fixed-route, no SELECT_INPUT daisy)
+///   pin 29 → LPUART7_TX (Serial7 default)
+///   pin 35 → LPUART5_TX (T4.1 only — ALT 1, not 2)
+///   pin 47 → LPUART8_TX_ALT (T4.1 only — second SD-pad-row LPUART8)
+///   pin 53 → LPUART6_TX_ALT (T4.1 only — Serial1 alt on bottom EMC pad row)
+///
+/// Note: the original `{1,8,14,17,20,24,29,35,47,48}` list (#3023
+/// Phase 1) listed pin 48 as a TX pin. Re-audit against
+/// Teensyduino HardwareSerial8.cpp showed pin 48 is the T4.1
+/// LPUART5_RX_ALT, not a TX pin -- the correct T4.1 third alt-TX is
+/// pin 53 (LPUART6_TX_ALT). Driver and contract were corrected
+/// together in PR #3421.
 ///
 /// Mirrors workstream A Phase 1 of issue #3023. Validating against this
 /// array is the basis of `LPUARTPeripheralReal::validatePin`; the mock
 /// accepts the same set by default but lets tests override via
 /// `setInvalidPin()` to exercise error paths.
-constexpr u8 kLPUARTTxPins[] = {1, 8, 14, 17, 20, 24, 29, 35, 47, 48};
+constexpr u8 kLPUARTTxPins[] = {1, 8, 14, 17, 20, 24, 29, 35, 47, 53};
 
 /// @brief Number of LPUART-TX capable pins exposed on Teensy 4.x.
 constexpr u32 kLPUARTTxPinCount = sizeof(kLPUARTTxPins) / sizeof(kLPUARTTxPins[0]);
@@ -88,13 +95,13 @@ public:
     virtual ~ILPUARTInstance() = default;
 
     /// @brief Get a writable pointer to the TX buffer (wave8-encoded UART bytes).
-    virtual u8* getTxBuffer() FL_NOEXCEPT = 0;
+    virtual u8* getTxBuffer() FL_NO_EXCEPT = 0;
 
     /// @brief Get the TX buffer size in bytes.
-    virtual u32 getTxBufferSize() const FL_NOEXCEPT = 0;
+    virtual u32 getTxBufferSize() const FL_NO_EXCEPT = 0;
 
     /// @brief Trigger a synchronous eDMA transmission. Blocks until done.
-    virtual void show() FL_NOEXCEPT = 0;
+    virtual void show() FL_NO_EXCEPT = 0;
 
 protected:
     ILPUARTInstance() = default;
@@ -121,7 +128,7 @@ public:
     /// @brief Validate whether a pin can carry LPUART TX on the target board.
     /// @param pin Teensy digital pin number.
     /// @return Validation result with error message if invalid.
-    virtual LPUARTPinResult validatePin(u8 pin) const FL_NOEXCEPT = 0;
+    virtual LPUARTPinResult validatePin(u8 pin) const FL_NO_EXCEPT = 0;
 
     /// @brief Create an LPUART TX instance bound to a single pin.
     /// @param tx_pin Digital pin number (must be in `kLPUARTTxPins`).
@@ -134,11 +141,11 @@ public:
     /// @return Instance handle, or `nullptr` on failure.
     virtual fl::unique_ptr<ILPUARTInstance> createInstance(
         u8 tx_pin, u32 total_leds, bool is_rgbw,
-        u32 t1_ns, u32 t2_ns, u32 t3_ns, u32 reset_us) FL_NOEXCEPT = 0;
+        u32 t1_ns, u32 t2_ns, u32 t3_ns, u32 reset_us) FL_NO_EXCEPT = 0;
 
     /// @brief Get the platform-specific peripheral instance. Implemented in
     ///        the real driver TU (Teensy 4.x) and the host stub TU (tests).
-    static fl::shared_ptr<ILPUARTPeripheral> create() FL_NOEXCEPT;
+    static fl::shared_ptr<ILPUARTPeripheral> create() FL_NO_EXCEPT;
 
 protected:
     ILPUARTPeripheral() = default;

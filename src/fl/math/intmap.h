@@ -45,67 +45,67 @@ namespace fl {
 // Deprecated legacy unsigned functions that delegate to the new int_scale<FROM, TO>() template
 /// @deprecated Use int_scale<uint8_t, uint16_t>() instead
 
-inline u16 map8_to_16(u8 x) FL_NOEXCEPT {
+inline u16 map8_to_16(u8 x) FL_NO_EXCEPT {
     return fl::int_scale<u8, u16>(x);
 }
 
 /// @deprecated Use int_scale<uint8_t, uint32_t>() instead
 
-inline u32 map8_to_32(u8 x) FL_NOEXCEPT {
+inline u32 map8_to_32(u8 x) FL_NO_EXCEPT {
     return fl::int_scale<u8, u32>(x);
 }
 
 /// @deprecated Use int_scale<uint16_t, uint32_t>() instead
 
-inline u32 map16_to_32(u16 x) FL_NOEXCEPT {
+inline u32 map16_to_32(u16 x) FL_NO_EXCEPT {
     return fl::int_scale<u16, u32>(x);
 }
 
 /// @deprecated Use int_scale<uint16_t, uint8_t>() instead
 
-inline u8 map16_to_8(u16 x) FL_NOEXCEPT {
+inline u8 map16_to_8(u16 x) FL_NO_EXCEPT {
     return fl::int_scale<u16, u8>(x);
 }
 
 /// @deprecated Use int_scale<uint32_t, uint16_t>() instead
 
-inline u16 map32_to_16(u32 x) FL_NOEXCEPT {
+inline u16 map32_to_16(u32 x) FL_NO_EXCEPT {
     return fl::int_scale<u32, u16>(x);
 }
 
 /// @deprecated Use int_scale<uint32_t, uint8_t>() instead
-inline u8 map32_to_8(u32 x) FL_NOEXCEPT {
+inline u8 map32_to_8(u32 x) FL_NO_EXCEPT {
     return fl::int_scale<u32, u8>(x);
 }
 
 // New signed functions that delegate to int_scale
 /// Use int_scale<int8_t, int16_t>() instead
-inline i16 smap8_to_16(i8 x) FL_NOEXCEPT {
+inline i16 smap8_to_16(i8 x) FL_NO_EXCEPT {
     return fl::int_scale<i8, i16>(x);
 }
 
 /// Use int_scale<int8_t, int32_t>() instead
-inline i32 smap8_to_32(i8 x) FL_NOEXCEPT {
+inline i32 smap8_to_32(i8 x) FL_NO_EXCEPT {
     return fl::int_scale<i8, i32>(x);
 }
 
 /// Use int_scale<int16_t, int32_t>() instead
-inline i32 smap16_to_32(i16 x) FL_NOEXCEPT {
+inline i32 smap16_to_32(i16 x) FL_NO_EXCEPT {
     return fl::int_scale<i16, i32>(x);
 }
 
 /// Use int_scale<int16_t, int8_t>() instead
-inline i8 smap16_to_8(i16 x) FL_NOEXCEPT {
+inline i8 smap16_to_8(i16 x) FL_NO_EXCEPT {
     return fl::int_scale<i16, i8>(x);
 }
 
 /// Use int_scale<int32_t, int16_t>() instead
-inline i16 smap32_to_16(i32 x) FL_NOEXCEPT {
+inline i16 smap32_to_16(i32 x) FL_NO_EXCEPT {
     return fl::int_scale<i32, i16>(x);
 }
 
 /// Use int_scale<int32_t, int8_t>() instead
-inline i8 smap32_to_8(i32 x) FL_NOEXCEPT {
+inline i8 smap32_to_8(i32 x) FL_NO_EXCEPT {
     return fl::int_scale<i32, i8>(x);
 }
 

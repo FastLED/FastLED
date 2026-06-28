@@ -10,20 +10,20 @@ namespace fl {
 // Used when string exceeds inline buffer size
 class StringHolder {
   public:
-    StringHolder(const char *str) FL_NOEXCEPT;
-    StringHolder(size length) FL_NOEXCEPT;
-    StringHolder(const char *str, size length) FL_NOEXCEPT;
-    StringHolder(const StringHolder &other) FL_NOEXCEPT = delete;
-    StringHolder &operator=(const StringHolder &other) FL_NOEXCEPT = delete;
-    ~StringHolder() FL_NOEXCEPT;
+    StringHolder(const char *str) FL_NO_EXCEPT;
+    StringHolder(size length) FL_NO_EXCEPT;
+    StringHolder(const char *str, size length) FL_NO_EXCEPT;
+    StringHolder(const StringHolder &other) FL_NO_EXCEPT = delete;
+    StringHolder &operator=(const StringHolder &other) FL_NO_EXCEPT = delete;
+    ~StringHolder() FL_NO_EXCEPT;
 
-    void grow(size newLength) FL_NOEXCEPT;
-    bool hasCapacity(size newLength) const FL_NOEXCEPT { return newLength + 1 <= mCapacity; }
-    const char *data() const FL_NOEXCEPT { return mData; }
-    char *data() FL_NOEXCEPT { return mData; }
-    size length() const FL_NOEXCEPT { return mLength; }
-    size capacity() const FL_NOEXCEPT { return mCapacity; }
-    bool copy(const char *str, size len) FL_NOEXCEPT {
+    void grow(size newLength) FL_NO_EXCEPT;
+    bool hasCapacity(size newLength) const FL_NO_EXCEPT { return newLength + 1 <= mCapacity; }
+    const char *data() const FL_NO_EXCEPT { return mData; }
+    char *data() FL_NO_EXCEPT { return mData; }
+    size length() const FL_NO_EXCEPT { return mLength; }
+    size capacity() const FL_NO_EXCEPT { return mCapacity; }
+    bool copy(const char *str, size len) FL_NO_EXCEPT {
         if ((len + 1) > mCapacity) {
             return false;
         }

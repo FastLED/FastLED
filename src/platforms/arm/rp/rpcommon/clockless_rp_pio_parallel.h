@@ -137,7 +137,7 @@ public:
 
     /// @brief Check if the controller was successfully initialized
     /// @return true if initialization successful
-    bool isInitialized() const FL_NOEXCEPT {
+    bool isInitialized() const FL_NO_EXCEPT {
         return (mPio != nullptr && mDmaChan != -1 && mTransposeBuffer != nullptr);
     }
 
@@ -150,7 +150,7 @@ public:
     /// @param leds Pointer to CRGB array
     /// @param num_leds Number of LEDs
     /// @return true if successful
-    bool addStrip(u8 lane, CRGB* leds, u16 num_leds) FL_NOEXCEPT {
+    bool addStrip(u8 lane, CRGB* leds, u16 num_leds) FL_NO_EXCEPT {
         if (lane >= NUM_LANES || leds == nullptr) {
             return false;
         }
@@ -164,7 +164,7 @@ public:
     }
 
     /// @brief Initialize PIO, DMA, and buffers
-    virtual void init() FL_NOEXCEPT override {
+    virtual void init() FL_NO_EXCEPT override {
         if (mMaxLeds == 0) {
             return;
         }
@@ -207,7 +207,7 @@ public:
 
     /// @brief Output LED data to all strips
     /// @param pixels FastLED PixelController
-    virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NOEXCEPT override {
+    virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT override {
         if (mPio == nullptr || mTransposeBuffer == nullptr) {
             return;
         }
@@ -225,13 +225,13 @@ public:
 
     /// @brief Get maximum refresh rate
     /// @return Maximum FPS
-    virtual u16 getMaxRefreshRate() const FL_NOEXCEPT {
+    virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT {
         return 400;
     }
 
 private:
     /// @brief Prepare bit-transposed data from LED buffers
-    void prepareTransposedData() FL_NOEXCEPT {
+    void prepareTransposedData() FL_NO_EXCEPT {
         // Allocate temporary buffer for padded RGB data
         u32 padded_size = mMaxLeds * 3 * NUM_LANES;
         u8* padded_rgb = fl::bit_cast<u8*>(fl::malloc(padded_size));
@@ -284,7 +284,7 @@ private:
     }
 
     /// @brief Clean up resources
-    void cleanup() FL_NOEXCEPT {
+    void cleanup() FL_NO_EXCEPT {
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
         if (mDmaChan != -1) {
             dma_channel_unclaim(mDmaChan);

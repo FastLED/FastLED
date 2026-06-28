@@ -30,16 +30,16 @@ template<> struct BusTraits<Bus::PARLIO> {
 
     /// @brief Lazily-constructed shared pointer to the singleton driver.
     /// Naming this anywhere in the program is what links the driver TU.
-    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
         static fl::shared_ptr<Driver> gHolder = fl::make_shared<Driver>();
         return gHolder;
     }
 
-    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
+    static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
     /// @brief Register this driver with `ChannelManager` for runtime selection.
     /// Used by `FastLED.enableDrivers<Bus::PARLIO, ...>()` opt-in API.
-    static void registerWithManager() FL_NOEXCEPT {
+    static void registerWithManager() FL_NO_EXCEPT {
         ChannelManager::instance().addDriver(default_bus_priority(Bus::PARLIO), instancePtr());
     }
 };

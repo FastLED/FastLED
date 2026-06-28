@@ -93,7 +93,8 @@ struct M0ClocklessData {
 };
 
 
-template<int HI_OFFSET, int LO_OFFSET, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME>int
+template<int HI_OFFSET, int LO_OFFSET, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME>
+FL_RAMFUNC int
 showLedData(volatile fl::u32 *_port, fl::u32 _bitmask, const fl::u8 *_leds, fl::u32 num_leds, struct M0ClocklessData *pData) {
   /////////////////////////////////////////////////////////////////////////////
   // TIMING CALCULATION

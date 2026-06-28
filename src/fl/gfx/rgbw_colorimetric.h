@@ -101,9 +101,9 @@ constexpr int kLutStrideHermite = colorimetric_response::kLutStrideHermite;
 // authority is about RGB topology.  Different target whites affect the source
 // matrix and full-3-channel routing, not whether a pure/edge native input is
 // allowed to introduce W.
-inline bool is_native_input_gamut(const DiodeProfile& p) FL_NOEXCEPT {
+inline bool is_native_input_gamut(const DiodeProfile& p) FL_NO_EXCEPT {
     constexpr float kPrimaryEps = 1e-6f;
-    auto close = [](const float a[2], const float b[2]) FL_NOEXCEPT {
+    auto close = [](const float a[2], const float b[2]) FL_NO_EXCEPT {
         const float dx = a[0] - b[0];
         const float dy = a[1] - b[1];
         return (dx * dx + dy * dy) < kPrimaryEps;
@@ -119,7 +119,7 @@ inline bool is_native_input_gamut(const DiodeProfile& p) FL_NOEXCEPT {
 //   n == 1 : exact single-axis identity
 //   n == 2 : fixed-topology two-emitter solve
 //   n == 3 : normal strict / LP / overdrive interior solve
-inline int count_active_channels(float s_r, float s_g, float s_b) FL_NOEXCEPT {
+inline int count_active_channels(float s_r, float s_g, float s_b) FL_NO_EXCEPT {
     // 1 / 65535 — matches the 16-bit verifier precision used in the
     // reference math model; anything below this is below noise floor.
     constexpr float kTopoEps = 1.0f / 65535.0f;
@@ -188,7 +188,7 @@ struct RgbcctProfile {
 // Convenience: derive eta from a target CCT relative to the warm/cool
 // reference CCTs. Linear interpolation in CCT space, clamped to [0, 1].
 inline float rgbcct_eta_for_cct(int target_cct, int warm_cct,
-                                int cool_cct) FL_NOEXCEPT {
+                                int cool_cct) FL_NO_EXCEPT {
     if (cool_cct == warm_cct) return 0.5f;
     const float t = (static_cast<float>(target_cct) - warm_cct)
                   / (static_cast<float>(cool_cct) - warm_cct);
@@ -204,11 +204,11 @@ inline float rgbcct_eta_for_cct(int target_cct, int warm_cct,
 // vertex chromaticity is replaced with cct_to_xy(cct_override). Pass
 // cct_override = 0 to use the profile's xy_w unchanged.
 void build_profile_cache(const DiodeProfile* p, int cct_override,
-                         ProfileCache* cache) FL_NOEXCEPT;
+                         ProfileCache* cache) FL_NO_EXCEPT;
 
 // Convenience overload: no CCT override.
 inline void build_profile_cache(const DiodeProfile* p,
-                                ProfileCache* cache) FL_NOEXCEPT {
+                                ProfileCache* cache) FL_NO_EXCEPT {
     build_profile_cache(p, 0, cache);
 }
 
@@ -227,7 +227,7 @@ inline void build_profile_cache(const DiodeProfile* p,
 // caller should fall back to a simpler path.
 bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
                            float s_g, float s_b,
-                           float out_rgbw[4]) FL_NOEXCEPT;
+                           float out_rgbw[4]) FL_NO_EXCEPT;
 
 // Per-chromaticity variant: starts from explicit (xy, Y) instead of input RGB.
 // Used by the LUT builder where xy/Y have already been chosen by the table
@@ -236,7 +236,7 @@ bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
 // xy sample.
 bool solve_strict_subgamut_xy(const ProfileCache& cache,
                               const float xy_t[2], float Y_t,
-                              float out_rgbw[4]) FL_NOEXCEPT;
+                              float out_rgbw[4]) FL_NO_EXCEPT;
 
 // Reference wx_lp_legacy solver.
 //
@@ -254,7 +254,7 @@ bool solve_strict_subgamut_xy(const ProfileCache& cache,
 // locked to RG/RB/GB but are solved from measured/source XYZ instead of raw
 // passthrough. This is intentionally separate from boosted overdrive below.
 bool solve_wx_lp_legacy(const ProfileCache& cache, float s_r, float s_g,
-                        float s_b, float out_rgbw[4]) FL_NOEXCEPT;
+                        float s_b, float out_rgbw[4]) FL_NO_EXCEPT;
 
 // White-overdrive / boosted solver (#2706). Uses a separate visual policy
 // that pushes W past the non-overdriven residual boundary by
@@ -263,7 +263,7 @@ bool solve_wx_lp_legacy(const ProfileCache& cache, float s_r, float s_g,
 // legacy reference is the bounded chromaticity-preserving solver above.
 void solve_wx_overdrive(const ProfileCache& cache, float s_r, float s_g,
                         float s_b, float overdrive_ratio,
-                        float out_rgbw[4]) FL_NOEXCEPT;
+                        float out_rgbw[4]) FL_NO_EXCEPT;
 
 // Default overdrive ratio for `kRGBWColorimetricBoosted`. 0.5 = halfway
 // between the strict vertex and full W; produces visibly brighter output
@@ -276,21 +276,21 @@ constexpr float kDefaultOverdriveRatio = 0.5f;
 // error than bilinear at the same grid size — enabling small tables (N=8..16)
 // suitable for memory-constrained targets.
 LutTable build_lut(const ProfileCache& cache, int grid_n,
-                   LutInterp interp) FL_NOEXCEPT;
+                   LutInterp interp) FL_NO_EXCEPT;
 
-inline LutTable build_lut(const ProfileCache& cache, int grid_n) FL_NOEXCEPT {
+inline LutTable build_lut(const ProfileCache& cache, int grid_n) FL_NO_EXCEPT {
     return build_lut(cache, grid_n, LutInterp::Hermite);
 }
 
 // Bilinear lookup + Y multiply + normalize.
 void lookup_lut(const LutTable& lut, const float xy_t[2], float Y_t,
-                float out_rgbw[4]) FL_NOEXCEPT;
+                float out_rgbw[4]) FL_NO_EXCEPT;
 
 // RGBCCT layered solver: solve target against each W diode separately, then
 // line-blend the resulting RGBW tuples by an eta in [0, 1].
 // Output layout: out[0..2] = RGB, out[3] = warm-W, out[4] = cool-W.
 void solve_rgbcct(const RgbcctProfile& profile, float s_r, float s_g,
-                  float s_b, float eta, float out[5]) FL_NOEXCEPT;
+                  float s_b, float eta, float out[5]) FL_NO_EXCEPT;
 
 } // namespace colorimetric_detail
 } // namespace fl

@@ -82,7 +82,7 @@ class APA102Controller : public CPixelLEDController<RGB_ORDER> {
 	}
 
 public:
-	APA102Controller() FL_NOEXCEPT {}
+	APA102Controller() FL_NO_EXCEPT {}
 
 	virtual void init() override {
 		mSPI.init();
@@ -292,8 +292,8 @@ class APA102ControllerHD : public APA102Controller<
 	fl::u32(0x00000000),
 	fl::u32(0x00000000)> {
 public:
-  APA102ControllerHD() FL_NOEXCEPT = default;
-  APA102ControllerHD(const APA102ControllerHD&) FL_NOEXCEPT = delete;
+  APA102ControllerHD() FL_NO_EXCEPT = default;
+  APA102ControllerHD(const APA102ControllerHD&) FL_NO_EXCEPT = delete;
 };
 
 /// SK9822 controller class. It's exactly the same as the APA102Controller protocol but with a different END_FRAME and default SPI_SPEED.

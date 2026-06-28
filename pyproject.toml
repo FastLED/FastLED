@@ -5,7 +5,17 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.2.27 (released 2026-06-12). 2.2.27 bumps the
+    # Pin to fbuild 2.3.3 (released 2026-06-23).
+    #
+    # Pin history:
+    #   2.3.3 -- latest PyPI release as of 2026-06-24; carries the
+    #            post-2.3.1 fbuild fixes needed by the current
+    #            AutoResearch/ObjectFLED validation pass.
+    #   2.3.1 -- latest PyPI release as of 2026-06-22; carries the
+    #            post-2.3.0 Teensy deploy/serial fixes needed while
+    #            validating AutoResearch/ObjectFLED on physical T4.x
+    #            hardware.
+    #   2.2.27 (released 2026-06-12). 2.2.27 bumps the
     # bundled `running-process` daemon broker to 4.2.0
     # (FastLED/fbuild#537) on top of the 2.2.26 ArmCompiler/zccache
     # unification (FastLED/fbuild#526) and LPC845-BRK board stubs
@@ -89,6 +99,19 @@ dependencies = [
     #   2.2.16 — completed ESP32-C2 framework skeleton installs
     #            and patched the missing touch_sensor_legacy_types.h
     #            no-touch compatibility header (FastLED/fbuild#378).
+    # 2.3.0 (released 2026-06-22) -- daemon-side serial-WebSocket bridge
+    # refactor (FastLED/fbuild#750, closes FastLED/fbuild#749). The pre-fix
+    # bridge sent ONE WebSocket frame per serial line; on bursty TX
+    # (~80 FL_WARN lines per pattern * 4 patterns = ~320 lines) the
+    # broadcast channel filled and silently dropped lines via
+    # RecvError::Lagged. Downstream FastLED autoresearch saw only the
+    # first pattern then 720s of silence -- the symptom that motivated
+    # FastLED #3219. The fix splits handle_serial_ws into concurrent
+    # reader / writer / inbound tasks: reader drains the broadcast into
+    # an mpsc as fast as the runtime allows, writer drains the mpsc and
+    # coalesces adjacent Data messages into a single WS frame on every
+    # flush. Validated on Teensy 4.0: a 5-LED 4-pattern OBJECT_FLED
+    # autoresearch test completes in 42s wall (was 20+ min timeout).
     # 2.2.28 (released 2026-06-15) -- LPC port delegates SystemInit +
     # linker scripts to zackees/ArduinoCore-LPC8xx upstream; fbuild no
     # longer ships shadow copies of those NXP-managed assets. Also rolls
@@ -99,7 +122,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.2.28",
+    "fbuild==2.3.3",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
@@ -190,6 +213,12 @@ dependencies = [
     "colorama>=0.4.6",
     "ty>=0.0.15",
     "bleak>=0.22.3",
+    # soldr drives the Rust C++ linter's cold-build rebuild path (zccache +
+    # shared target tree). Pinned floor matches the version FastLED currently
+    # tests against; the binary-cache layer in ci/lint_cpp/rust_binary_cache.py
+    # only invokes soldr when the crate sources change, so the per-call cost
+    # of having soldr installed but unused is zero. See FastLED #3288.
+    "soldr>=0.7.55",
 ]
 
 [build-system]

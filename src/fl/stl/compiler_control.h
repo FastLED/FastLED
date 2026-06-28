@@ -147,7 +147,8 @@
 
 // Escape hatch for platform-specific pragmas.
 // Place FL_ALLOW_PLATFORM_PRAGMA on the line before a raw #pragma directive
-// to suppress the platform_pragma_checker lint. Use only when the FL_DISABLE_WARNING
+// to suppress the PlatformPragmaChecker lint (Rust crate
+// ci/lint_cpp_rs/src/checkers/style.rs). Use only when the FL_DISABLE_WARNING
 // macros above cannot express the needed pragma (e.g. non-diagnostic pragmas).
 // Prefer FL_DISABLE_WARNING_PUSH / FL_DISABLE_WARNING(name) / FL_DISABLE_WARNING_POP.
 #define FL_ALLOW_PLATFORM_PRAGMA /* platform-specific pragma — lint escape hatch */
@@ -246,10 +247,14 @@
     #define _FL_TIMING_OPT_PRAGMA _Pragma("GCC optimize(\"O2\")")
   #endif
 
+  // `-fno-lto` is deliberately omitted: GCC rejects it as an `optimize`
+  // attribute/pragma argument (-Wattributes, -Wpragmas). LTO is a whole-program
+  // decision resolved by the link-time plugin, not by per-function codegen, so
+  // the optimize attribute cannot express it. Targets that need cycle-exact
+  // codegen under LTO must disable it at the build-flags level (FastLED #3417).
   #define FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING        \
       _Pragma("GCC push_options")                   \
       _FL_TIMING_OPT_PRAGMA                         \
-      _Pragma("GCC optimize(\"-fno-lto\")")         \
       _Pragma("GCC optimize(\"-fno-schedule-insns\")")  \
       _Pragma("GCC optimize(\"-fno-schedule-insns2\")") \
       _Pragma("GCC optimize(\"-fno-reorder-blocks\")")  \
@@ -332,8 +337,9 @@
 
 // Unconditional "do not inline this function" attribute, portable across
 // GCC/Clang/MSVC. Prefer this over a bare `__attribute__((noinline))` in
-// `src/` — a lint check in `ci/lint_cpp/bare_noinline_checker.py` enforces
-// the use of the macro so the GCC-only syntax doesn't sneak in.
+// `src/` — a lint check in `ci/lint_cpp_rs/src/checkers/bare_legacy.rs`
+// (`BareNoInlineChecker`) enforces the use of the macro so the GCC-only
+// syntax doesn't sneak in.
 //
 // Typical use: cold helpers extracted out of a hot path so the compiler
 // can't fold them back via inline expansion. Pair with the lint guard.
@@ -345,6 +351,32 @@
   #define FL_NO_INLINE __declspec(noinline)
 #else
   #define FL_NO_INLINE
+#endif
+
+// Place a function in RAM instead of flash, so it executes with zero flash
+// wait states. On parts whose flash cannot be fetched at full core speed
+// (e.g. LPC845 @ 30 MHz, no flash accelerator), the cycle-counted WS2812 bit
+// timing in the M0 clockless driver only holds when the code runs from SRAM.
+//
+// Mechanism: the function is emitted into the `.ramfunc` section. The device
+// linker script gives that section a flash load address but a RAM run address,
+// and the SDK startup copies it to SRAM alongside `.data` before main(). No
+// runtime memcpy is required.
+//
+// `noinline` keeps it a real out-of-line function (so it actually lands in the
+// section rather than being inlined back into a flash caller). `long_call`
+// forces an indirect call so the flash->RAM branch (flash @ 0x0, SRAM @
+// 0x10000000 - far beyond Thumb `bl` +/-16 MB range) does not depend on the
+// linker inserting a veneer.
+//
+// OPT-IN ONLY: gated on FL_ARM_M0_RAMFUNC because it requires a linker script
+// with `.ramfunc` wired into the startup copy table (e.g. the LPC845 MCUXSDK
+// script, or the Arduino LPC core with `*(.ramfunc*)` added to `.data`). NOT
+// assumed for arbitrary linkers. Expands to nothing unless the flag is set.
+#if defined(FL_ARM_M0_RAMFUNC) && (defined(FL_IS_GCC) || defined(FL_IS_CLANG))
+  #define FL_RAMFUNC __attribute__((section(".ramfunc"), noinline, long_call))
+#else
+  #define FL_RAMFUNC
 #endif
 
 // Mark functions to run during C++ static initialization (before main())
@@ -500,28 +532,28 @@ FL_DISABLE_WARNING_POP
 // Mark functions whose return value must be used (generates compiler warning if ignored)
 // Preferred over [[nodiscard]] for C++11/14 compatibility
 //
-// Usage: FL_NODISCARD bool try_lock();
+// Usage: FL_NO_DISCARD bool try_lock();
 //
 // By default, this generates a WARNING when the return value is ignored.
 // To promote to a compile ERROR, use compiler flags:
 //   GCC/Clang: -Werror=unused-result
 //   MSVC:      /we6031
 //
-// Note: These flags ONLY affect functions explicitly marked with FL_NODISCARD.
+// Note: These flags ONLY affect functions explicitly marked with FL_NO_DISCARD.
 // Regular functions without this attribute can still have their return values
 // ignored without warnings/errors.
 #if __cplusplus >= 201703L
   // C++17+: Use standard [[nodiscard]] attribute
-  #define FL_NODISCARD [[nodiscard]]
+  #define FL_NO_DISCARD [[nodiscard]]
 #elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
   // GCC/Clang: Use warn_unused_result attribute
-  #define FL_NODISCARD __attribute__((warn_unused_result))
+  #define FL_NO_DISCARD __attribute__((warn_unused_result))
 #elif defined(FL_IS_WIN_MSVC)
   // MSVC: Use SAL annotation
-  #define FL_NODISCARD _Check_return_
+  #define FL_NO_DISCARD _Check_return_
 #else
   // Unsupported compiler: no-op
-  #define FL_NODISCARD
+  #define FL_NO_DISCARD
 #endif
 
 // Suppress warnings for intentionally unused fall-through in switch statements
@@ -552,21 +584,21 @@ FL_DISABLE_WARNING_POP
 // Mark functions that never return (e.g., infinite loops, exit handlers)
 // Enables compiler optimizations and warnings for unreachable code.
 //
-// Usage: FL_NORETURN void abort_handler();
+// Usage: FL_NO_RETURN void abort_handler();
 //
 // This macro is portable across C++11/14/17 compilers.
 #if __cplusplus >= 201103L
   // C++11+: Use standard [[noreturn]] attribute
-  #define FL_NORETURN [[noreturn]]
+  #define FL_NO_RETURN [[noreturn]]
 #elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
   // GCC/Clang: Use noreturn attribute
-  #define FL_NORETURN __attribute__((noreturn))
+  #define FL_NO_RETURN __attribute__((noreturn))
 #elif defined(FL_IS_WIN_MSVC)
   // MSVC: Use __declspec(noreturn)
-  #define FL_NORETURN __declspec(noreturn)
+  #define FL_NO_RETURN __declspec(noreturn)
 #else
   // Unsupported compiler: no-op
-  #define FL_NORETURN
+  #define FL_NO_RETURN
 #endif
 
 // Mark symbols (functions, types, variables) as deprecated
@@ -801,7 +833,7 @@ FL_DISABLE_WARNING_POP
 #if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
 __attribute__((always_inline))
 static inline void *_fl_builtin_memcpy(void *dest, const void *src,
-                                       __SIZE_TYPE__ n) FL_NOEXCEPT {
+                                       __SIZE_TYPE__ n) FL_NO_EXCEPT {
     return __builtin_memcpy(dest, src, n);
 }
 #define FL_BUILTIN_MEMCPY(dest, src, n) _fl_builtin_memcpy(dest, src, n)
@@ -818,7 +850,7 @@ static inline void *_fl_builtin_memcpy(void *dest, const void *src,
 // CRGB and CRGB16 are in practice.
 #if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
 __attribute__((always_inline))
-static inline void *_fl_builtin_memset(void *dest, int val, __SIZE_TYPE__ n) FL_NOEXCEPT {
+static inline void *_fl_builtin_memset(void *dest, int val, __SIZE_TYPE__ n) FL_NO_EXCEPT {
     return __builtin_memset(dest, val, n);
 }
 #define FL_BUILTIN_MEMSET(dest, val, n) _fl_builtin_memset(dest, val, n)

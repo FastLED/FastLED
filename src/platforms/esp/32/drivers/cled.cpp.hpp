@@ -27,7 +27,7 @@
 namespace fl {
 namespace esp32 {
 
-CLED::CLED() FL_NOEXCEPT
+CLED::CLED() FL_NO_EXCEPT
     : mMaxDuty(0)
     , mInitialized(false) {
 }
@@ -36,7 +36,7 @@ CLED::~CLED() {
     end();
 }
 
-bool CLED::begin(const CLEDConfig& config) FL_NOEXCEPT {
+bool CLED::begin(const CLEDConfig& config) FL_NO_EXCEPT {
     // Clean up any previous initialization
     if (mInitialized) {
         end();
@@ -90,7 +90,7 @@ bool CLED::begin(const CLEDConfig& config) FL_NOEXCEPT {
     return true;
 }
 
-void CLED::end() FL_NOEXCEPT {
+void CLED::end() FL_NO_EXCEPT {
     if (!mInitialized) {
         return;
     }
@@ -100,7 +100,7 @@ void CLED::end() FL_NOEXCEPT {
     mInitialized = false;
 }
 
-void CLED::write16(u16 value) FL_NOEXCEPT {
+void CLED::write16(u16 value) FL_NO_EXCEPT {
     // Accept 16-bit input (0-65535), scale to configured resolution
     // Users apply gamma correction upstream
     u32 duty = mapToDutyCycle(value);
@@ -133,15 +133,15 @@ void CLED::write16(u16 value) FL_NOEXCEPT {
 #endif
 }
 
-u32 CLED::getMaxDuty() const FL_NOEXCEPT {
+u32 CLED::getMaxDuty() const FL_NO_EXCEPT {
     return mMaxDuty;
 }
 
-u8 CLED::getResolutionBits() const FL_NOEXCEPT {
+u8 CLED::getResolutionBits() const FL_NO_EXCEPT {
     return mConfig.resolution_bits;
 }
 
-u32 CLED::mapToDutyCycle(u16 val16) const FL_NOEXCEPT {
+u32 CLED::mapToDutyCycle(u16 val16) const FL_NO_EXCEPT {
     // Map 16-bit input (0-65535) to current resolution
     // Formula: (val16 * maxDuty + 32767) / 65535 (with rounding)
     // Use 32-bit math to avoid overflow

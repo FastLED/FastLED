@@ -47,7 +47,7 @@ private:
     void* mHandle;  // SemaphoreHandle_t (opaque pointer to avoid including FreeRTOS headers)
 
 public:
-    MutexSTM32() FL_NOEXCEPT;
+    MutexSTM32() FL_NO_EXCEPT;
     ~MutexSTM32();
 
     // Non-copyable and non-movable
@@ -56,9 +56,9 @@ public:
     MutexSTM32(MutexSTM32&&) = delete;
     MutexSTM32& operator=(MutexSTM32&&) = delete;
 
-    void lock() FL_NOEXCEPT;
-    void unlock() FL_NOEXCEPT;
-    bool try_lock() FL_NOEXCEPT;
+    void lock() FL_NO_EXCEPT;
+    void unlock() FL_NO_EXCEPT;
+    bool try_lock() FL_NO_EXCEPT;
 };
 
 // STM32 FreeRTOS recursive mutex wrapper
@@ -67,7 +67,7 @@ private:
     void* mHandle;  // SemaphoreHandle_t (opaque pointer to avoid including FreeRTOS headers)
 
 public:
-    RecursiveMutexSTM32() FL_NOEXCEPT;
+    RecursiveMutexSTM32() FL_NO_EXCEPT;
     ~RecursiveMutexSTM32();
 
     // Non-copyable and non-movable
@@ -76,9 +76,9 @@ public:
     RecursiveMutexSTM32(RecursiveMutexSTM32&&) = delete;
     RecursiveMutexSTM32& operator=(RecursiveMutexSTM32&&) = delete;
 
-    void lock() FL_NOEXCEPT;
-    void unlock() FL_NOEXCEPT;
-    bool try_lock() FL_NOEXCEPT;
+    void lock() FL_NO_EXCEPT;
+    void unlock() FL_NO_EXCEPT;
+    bool try_lock() FL_NO_EXCEPT;
 };
 
 // Define FASTLED_MULTITHREADED for STM32 with FreeRTOS

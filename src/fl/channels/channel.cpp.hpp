@@ -33,7 +33,7 @@ namespace {
 /// CLEDController. The variant alternative chooses RGB-only / RGBW / RGBWW
 /// without forcing every call site to duplicate the dispatch.
 inline void applyWhiteCfg(CLEDController& ctrl,
-                          const ChannelOptions& options) FL_NOEXCEPT {
+                          const ChannelOptions& options) FL_NO_EXCEPT {
     if (auto* p = options.mWhiteCfg.ptr<Rgbww>()) {
         ctrl.setRgbww(*p);
     } else if (auto* p = options.mWhiteCfg.ptr<Rgbw>()) {
@@ -128,7 +128,7 @@ class ReorderingPixelIteratorAny {
 FL_NO_INLINE
 static void emitDisabledDriverError(const fl::string& channelName,
                                     const fl::string& driverName,
-                                    const fl::string& exclusive) FL_NOEXCEPT {
+                                    const fl::string& exclusive) FL_NO_EXCEPT {
     if (!exclusive.empty()) {
         FL_ERROR_F("Channel '%s': bound driver '%s' is currently DISABLED by exclusive-driver selection '%s'. Frame will be silently dropped. Resolve with: FastLED.enableDrivers<fl::Bus::%s>() or FastLED.enableAllDrivers().", channelName, driverName, exclusive, driverName);
     } else {
@@ -270,7 +270,7 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     mChannelData = ChannelData::create(mChipset);
 }
 
-Channel::~Channel() FL_NOEXCEPT {
+Channel::~Channel() FL_NO_EXCEPT {
     auto& events = ChannelEvents::instance();
     events.onChannelBeginDestroy(*this);
 }
@@ -373,7 +373,7 @@ void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator,
 ///        bus-key-miss diagnostic chain. Hoisted out of `showPixels` so the
 ///        hot legacy `addLeds<>` path stays compact â€” see #2773 item 2.1.
 ///
-/// Marked `noinline` (via `FL_NOINLINE`) so the compiler doesn't fold the
+/// Marked `noinline` (via `FL_NO_INLINE`) so the compiler doesn't fold the
 /// cold body back into `showPixels`. The whole helper is reachable only
 /// when `mDriverPreBound == false`, which on stock Blink is never true â€”
 /// LTO can use that across the call site to keep the cold body off the
@@ -501,6 +501,13 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // Encode pixels based on chipset type
     auto& data = mChannelData->getData();
     data.clear();
+    if (mSettings.isRgbww()) {
+        mChannelData->setPixelFormat(ChannelPixelFormat::RGBWW);
+    } else if (mSettings.isRgbw()) {
+        mChannelData->setPixelFormat(ChannelPixelFormat::RGBW);
+    } else {
+        mChannelData->setPixelFormat(ChannelPixelFormat::RGB);
+    }
 
     if (mChipset.is<ClocklessChipset>()) {
         // Clockless chipsets: dispatch based on encoder type
@@ -662,7 +669,7 @@ void Channel::init() {
 namespace {
 class StubChannelEngine : public IChannelDriver {
 public:
-    virtual ~StubChannelEngine() FL_NOEXCEPT = default;
+    virtual ~StubChannelEngine() FL_NO_EXCEPT = default;
 
     virtual bool canHandle(const ChannelDataPtr& data) const override {
         (void)data;

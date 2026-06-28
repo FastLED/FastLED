@@ -162,6 +162,12 @@ impl FileContentChecker for SimdIntrinsicsChecker {
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        // Whole-file early exit. Most files have ZERO of the 27 SIMD
+        // patterns; the per-line walk was doing 27 substring searches
+        // per non-comment line for nothing.
+        if !simd_any_pattern_regex().is_match(&file_content.content) {
+            return Vec::new();
+        }
         let mut violations = Vec::new();
         let mut in_multiline_comment = false;
 
@@ -192,6 +198,21 @@ impl FileContentChecker for SimdIntrinsicsChecker {
 
         violations
     }
+}
+
+// Combined regex over every SIMD_PATTERN literal. Built once via
+// OnceLock; used as the file-level pre-flight gate so files with no
+// SIMD content at all skip the 27-substring per-line walk entirely.
+fn simd_any_pattern_regex() -> &'static regex::Regex {
+    static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+    RE.get_or_init(|| {
+        let alt: Vec<String> = SIMD_PATTERNS
+            .iter()
+            .map(|(p, _)| regex::escape(p))
+            .collect();
+        let pattern = alt.join("|");
+        regex::Regex::new(&pattern).expect("simd pattern regex must compile")
+    })
 }
 
 struct CppHppHeaderPairChecker;
@@ -334,6 +355,11 @@ impl FileContentChecker for IwyuPragmaBlockChecker {
     }
 
     fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        // Matches the EFFECTIVE Python scope, which was `fl/` + `platforms/`
+        // via dispatch (checkers_by_scope["fl"] + ["platforms"]), not the
+        // wider `should_process_file` that the Python class declared. The
+        // dispatch layer pruned files outside fl/ and platforms/ before they
+        // ever reached the Python checker.
         let normalized = normalize_path(file_path);
         if !is_under_project_subpath(&normalized, project_root, "src/fl")
             && !is_under_project_subpath(&normalized, project_root, "src/platforms")

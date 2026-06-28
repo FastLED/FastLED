@@ -42,7 +42,7 @@ Frame::Frame(const Frame& other)
     }
 }
 
-Frame::~Frame() FL_NOEXCEPT {
+Frame::~Frame() FL_NO_EXCEPT {
     // Vector will handle memory cleanup automatically
 }
 

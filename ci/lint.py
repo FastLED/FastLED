@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 from ci.lint.args_parser import LintArgs, parse_lint_args
+from ci.lint.check_size_thresholds import run as run_size_thresholds_check
 from ci.lint.duration_tracker import DurationTracker
 from ci.lint.orchestrator import LintOrchestrator
 from ci.lint.stage_impls import (
@@ -28,7 +29,13 @@ from ci.lint.stage_impls import (
 )
 from ci.lint.stages import LintStage
 from ci.lint_meson.run_all_checkers import run_meson_lint
-from ci.lint_platformio.run_all_checkers import run_platformio_lint
+from ci.lint_platformio.check_root_platformio_lockdown import (
+    _warn_only_from_env as _root_pio_warn_only_from_env,
+)
+from ci.lint_platformio.run_all_checkers import (
+    run_platformio_lint,
+    run_root_platformio_lockdown_lint,
+)
 from ci.util.global_interrupt_handler import install_signal_handler, wait_for_cleanup
 
 
@@ -146,7 +153,8 @@ def print_ai_hints() -> None:
     print("  - Use 'bash lint --js' for JavaScript linting only")
     print("  - Use 'bash lint --cpp' for C++ linting only")
     print(
-        "  - Use 'bash lint --cpp --rust' to use Rust-backed C++ checkers where available"
+        "  - C++ linting uses the Rust-backed `fastled-lint` binary by default; "
+        "pass --no-rust to fall back to the legacy Python-only path"
     )
     print("  - Use 'bash lint --full' to include IWYU (Include-What-You-Use) analysis")
     print("  - Use 'bash lint --iwyu' to run IWYU analysis only")
@@ -156,7 +164,7 @@ def print_ai_hints() -> None:
     print("  - Use --strict to also run pyright (strict type checking)")
     print(
         "  - C++ linting includes: clang-format, custom checkers, and default AST ratchets"
-        " for FL_NOEXCEPT and decayed array parameters"
+        " for FL_NO_EXCEPT and decayed array parameters"
     )
     print("  - IWYU runs with --full, --iwyu, or --strict flags")
     print("  - clang-tidy runs with --tidy flag")
@@ -255,6 +263,33 @@ def create_stages(args: LintArgs) -> list[LintStage]:
                 display_name="PLATFORMIO-INTERNAL-USAGE LINT",
                 run_fn=lambda: run_platformio_lint(),
                 timeout=30.0,
+            )
+        )
+        # Root ./platformio.ini lockdown: every diff line needs an adjacent
+        # `; justification:` + `; added-in:` comment. See #3274 and the
+        # matching CodeRabbit rule. No-op on master and when the file is
+        # unchanged against origin/master.
+        stages.append(
+            LintStage(
+                name="root_platformio_ini_lockdown",
+                display_name="ROOT-PLATFORMIO.INI LOCKDOWN",
+                run_fn=lambda: run_root_platformio_lockdown_lint(
+                    warn_only=_root_pio_warn_only_from_env()
+                ),
+                timeout=10.0,
+            )
+        )
+        # check_*_size.yml threshold lockdown: every max_size{,_apa102} value
+        # in .github/workflows/check_*_size.yml must match the frozen list
+        # in ci/lint/check_size_thresholds.py. Prevents agents from silently
+        # raising the ceiling to make CI green. ALWAYS error mode — no
+        # warn-only escape hatch.
+        stages.append(
+            LintStage(
+                name="size_thresholds_locked",
+                display_name="SIZE-CHECK YML THRESHOLDS LOCKED",
+                run_fn=run_size_thresholds_check,
+                timeout=10.0,
             )
         )
 

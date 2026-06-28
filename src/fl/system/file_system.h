@@ -40,6 +40,7 @@ const char* getTestFileSystemRoot();
 namespace fl {
 
 class ScreenMap;
+class Fled;
 FASTLED_SHARED_PTR(FileSystem);
 class Video;
 template <typename Key, typename Value, fl::size N> class unsorted_map_fixed;
@@ -50,8 +51,15 @@ class json;
 
 class FileSystem {
   public:
-    FileSystem() FL_NOEXCEPT;
-    bool beginSd(int cs_pin); // Signal to begin using the filesystem resource.
+    FileSystem() FL_NO_EXCEPT;
+
+    // Convenience factory: construct + beginSd in one call. Returns a
+    // default-constructed FileSystem if the SD card could not be opened
+    // (the typical begin() failure case). Sugar for code that wants to
+    // chain straight into loadFled / openVideo / openRead.
+    static FileSystem sd(int cs_pin) FL_NO_EXCEPT;
+
+    bool beginSd(int cs_pin) FL_NO_EXCEPT; // Signal to begin using the filesystem resource.
     bool begin(FsImplPtr platform_filesystem); // Signal to begin using the
                                                // filesystem resource.
     void end(); // Signal to end use of the file system.
@@ -78,6 +86,11 @@ class FileSystem {
     fl::Mp3DecoderPtr openMp3(const char *path,
                               fl::string *error_message = nullptr);
 
+    // One-line sugar for fl::Fled::load(*this, path). Returns a null
+    // Fled if the file could not be opened or is malformed - the Fled
+    // class itself owns all the failure-mode bookkeeping.
+    fl::Fled loadFled(const char *path) FL_NO_EXCEPT;
+
   private:
     FsImplPtr mFs; // System dependent filesystem.
 };
@@ -86,11 +99,11 @@ class FileSystem {
 class FsImpl {
   public:
     struct Visitor {
-        virtual ~Visitor() FL_NOEXCEPT {}
+        virtual ~Visitor() FL_NO_EXCEPT {}
         virtual void accept(const char *path) = 0;
     };
-    FsImpl() FL_NOEXCEPT = default;
-    virtual ~FsImpl() FL_NOEXCEPT {} // Use default pins for spi.
+    FsImpl() FL_NO_EXCEPT = default;
+    virtual ~FsImpl() FL_NO_EXCEPT {} // Use default pins for spi.
     virtual bool begin() = 0;
     //  End use of card
     virtual void end() = 0;

@@ -23,7 +23,7 @@ namespace fl {
 // will be wired through a follow-up issue (#2755 tracks the design); for
 // now the empty default works for every backend and describe() handles
 // the subcauseId==0 case by skipping the parenthesized name.
-fl::string_view ResetInfo::subcauseName() const FL_NOEXCEPT {
+fl::string_view ResetInfo::subcauseName() const FL_NO_EXCEPT {
     return fl::string_view();
 }
 
@@ -32,7 +32,7 @@ namespace platforms {
 // Write `value` as a lowercase hex string into `out`, prefixed with "0x".
 // Returns bytes written (always <= 10, since u32 max is 0xFFFFFFFF = 8 hex
 // digits + 2 prefix chars). Does not write a NUL. Truncates if out is small.
-inline fl::size writeHex(fl::span<char> out, fl::u32 value) FL_NOEXCEPT {
+inline fl::size writeHex(fl::span<char> out, fl::u32 value) FL_NO_EXCEPT {
     char tmp[10];
     tmp[0] = '0';
     tmp[1] = 'x';
@@ -46,26 +46,26 @@ inline fl::size writeHex(fl::span<char> out, fl::u32 value) FL_NOEXCEPT {
 }
 
 // Copy a string_view into out[]. Returns bytes copied, truncated to out.size().
-inline fl::size writeView(fl::span<char> out, fl::string_view sv) FL_NOEXCEPT {
+inline fl::size writeView(fl::span<char> out, fl::string_view sv) FL_NO_EXCEPT {
     fl::size n = (out.size() < sv.size()) ? out.size() : sv.size();
     for (fl::size i = 0; i < n; ++i) out[i] = sv[i];
     return n;
 }
 
-inline fl::size writeChar(fl::span<char> out, char c) FL_NOEXCEPT {
+inline fl::size writeChar(fl::span<char> out, char c) FL_NO_EXCEPT {
     if (out.size() == 0) return 0;
     out[0] = c;
     return 1;
 }
 
-inline fl::size writeNulIfRoom(fl::span<char> out, fl::size written) FL_NOEXCEPT {
+inline fl::size writeNulIfRoom(fl::span<char> out, fl::size written) FL_NO_EXCEPT {
     if (written < out.size()) out[written] = '\0';
     return written;
 }
 
 } // namespace platforms
 
-fl::size ResetInfo::describe(fl::span<char> out, bool verbose) const FL_NOEXCEPT {
+fl::size ResetInfo::describe(fl::span<char> out, bool verbose) const FL_NO_EXCEPT {
     fl::size n = 0;
     // <cause>
     n += platforms::writeView(out.subspan(n), causeName());
@@ -92,7 +92,7 @@ fl::size ResetInfo::describe(fl::span<char> out, bool verbose) const FL_NOEXCEPT
 // Default: lift the normalized cause into a ResetInfo, leaving
 // subcauseId/rawRegister at 0. Per-platform richer extraction will be wired
 // through a follow-up to issue #2755 (every backend uses this default for now).
-ResetInfo Watchdog::lastResetInfo() const FL_NOEXCEPT {
+ResetInfo Watchdog::lastResetInfo() const FL_NO_EXCEPT {
     ResetInfo info{};
     info.cause = lastResetCause();
     info.subcauseId = 0;
@@ -109,8 +109,8 @@ namespace platforms {
 // Forward-declared in this TU to avoid pulling in fl::print/println headers
 // from a public header. The dispatcher TU includes the necessary print
 // header before this file.
-void scopedWatchdogPrintLine(fl::string_view sv) FL_NOEXCEPT;
-void scopedWatchdogPause3s() FL_NOEXCEPT;
+void scopedWatchdogPrintLine(fl::string_view sv) FL_NO_EXCEPT;
+void scopedWatchdogPause3s() FL_NO_EXCEPT;
 
 // Counts simultaneously-alive ScopedWatchdog instances. >1 is almost always
 // a programmer error: nested guards mean the lazy-init's timeout argument
@@ -118,7 +118,7 @@ void scopedWatchdogPause3s() FL_NOEXCEPT;
 // the two scopes become ambiguous. Singleton-style accessor (function-local
 // static) so the counter has well-defined lifetime even if a guard is
 // constructed before main().
-inline int& scopedWatchdogActiveCount() FL_NOEXCEPT {
+inline int& scopedWatchdogActiveCount() FL_NO_EXCEPT {
     static int count = 0;
     return count;
 }
@@ -126,7 +126,7 @@ inline int& scopedWatchdogActiveCount() FL_NOEXCEPT {
 // First-init helper, used by ScopedWatchdog's constructor. Runs only once
 // per process. Single-threaded loop() is the canonical caller — no atomics
 // are needed for the guard byte on supported MCUs.
-inline void scopedWatchdogFirstInit(fl::u32 timeout_ms) FL_NOEXCEPT {
+inline void scopedWatchdogFirstInit(fl::u32 timeout_ms) FL_NO_EXCEPT {
     Watchdog& wdt = Watchdog::instance();
     wdt.begin(timeout_ms);
 
@@ -151,7 +151,7 @@ inline void scopedWatchdogFirstInit(fl::u32 timeout_ms) FL_NOEXCEPT {
 
 } // namespace platforms
 
-ScopedWatchdog::ScopedWatchdog(fl::u32 timeout_ms) FL_NOEXCEPT {
+ScopedWatchdog::ScopedWatchdog(fl::u32 timeout_ms) FL_NO_EXCEPT {
     static bool sInitialized = false;
     if (!sInitialized) {
         sInitialized = true;
@@ -177,13 +177,13 @@ ScopedWatchdog::ScopedWatchdog(fl::u32 timeout_ms) FL_NOEXCEPT {
     Watchdog::instance().feed();
 }
 
-ScopedWatchdog::~ScopedWatchdog() FL_NOEXCEPT {
+ScopedWatchdog::~ScopedWatchdog() FL_NO_EXCEPT {
     int& count = platforms::scopedWatchdogActiveCount();
     if (count > 0) --count;
     Watchdog::instance().feed();
 }
 
-int ScopedWatchdog::activeScopeCount() FL_NOEXCEPT {
+int ScopedWatchdog::activeScopeCount() FL_NO_EXCEPT {
     return platforms::scopedWatchdogActiveCount();
 }
 

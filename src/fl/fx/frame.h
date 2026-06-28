@@ -33,12 +33,12 @@ class Frame {
     Frame(fl::u8* pixels, fl::u16 width, fl::u16 height, PixelFormat format, fl::u32 timestamp = 0);
 
     // Copy constructor
-    Frame(const Frame& other) FL_NOEXCEPT;
+    Frame(const Frame& other) FL_NO_EXCEPT;
 
     // Delete copy assignment operator (can't assign due to const member)
-    Frame& operator=(const Frame& other) FL_NOEXCEPT = delete;
+    Frame& operator=(const Frame& other) FL_NO_EXCEPT = delete;
 
-    ~Frame() FL_NOEXCEPT;
+    ~Frame() FL_NO_EXCEPT;
     fl::span<CRGB> rgb() { return fl::span<CRGB>(mRgb.data(), mPixelsCount); }
     fl::span<const CRGB> rgb() const { return fl::span<const CRGB>(mRgb.data(), mPixelsCount); }
     size_t size() const { return mPixelsCount; }

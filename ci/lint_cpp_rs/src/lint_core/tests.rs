@@ -51,6 +51,120 @@ mod tests {
     }
 
     #[test]
+    fn autoresearch_runtime_output_flags_direct_logging_and_serial_prints() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearch.ino",
+            "FL_WARN(\"boot chatter\");\nFL_WARN_F_ONCE(\"boot chatter\");\nFL_WARN_LIT(\"boot chatter\");\nFL_PRINT_EVERY(1000, \"tick\");\nFL_PRINT_F(\"tick\");\nFL_PRINTLN(\"tick\");\nFL_ERROR(\"boot failure\");\nSerial.println(\"not rpc\");\nSerial.printf(\"not rpc\");\nSerial.printHex(\"not rpc\");\nfl::println(\"nope\");\nfl::write_bytes(bytes, len);\nfl::Serial.println(\"nope\");\nfl::Serial.printHex(\"nope\");\nfl::serial_print(\"nope\");\nfl::serial_println(\"nope\");\nfl::serial_printf(\"nope\");\nfl::serial_write(bytes, len);\nfl::serialPrintln(\"nope\");\nfl::serialWrite(bytes, len);\n",
+        ));
+        assert_eq!(result.len(), 20);
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_allows_serial_setup_helpers() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearch.ino",
+            "fl::serial_begin(115200);\nwhile (!fl::serial_ready()) {}\n",
+        ));
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_marker_scope_can_protect_driver_cpp_hpp() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let path = "src/platforms/arm/teensy/teensy4_common/example.cpp.hpp";
+        assert!(checker.should_process_file(path, Path::new(".")));
+        let result = checker.check_file_content(&file(
+            path,
+            "// autoresearch-runtime-output-lint: begin\n\
+FL_WARN(\"driver chatter\");\n\
+FL_PRINT(\"driver chatter\");\n\
+Serial.printX(\"driver chatter\");\n\
+fl::serialPrintln(\"driver chatter\");\n\
+fl::serial_write(bytes, len);\n\
+// autoresearch-runtime-output-lint: end\n",
+        ));
+        assert_eq!(result.len(), 5);
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_ignores_unmarked_non_autoresearch_files() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "src/platforms/arm/teensy/teensy4_common/example.cpp.hpp",
+            "FL_WARN(\"allowed outside an explicit protected span\");\n",
+        ));
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_allows_rpc_serial_boundary_only() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearchRemote.cpp",
+            "Serial.println(formatted.c_str());  // ok autoresearch rpc serial - RPC response boundary\n",
+        ));
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_scope_is_limited() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        assert!(checker.should_process_file(
+            "examples/AutoResearch/AutoResearchRemotePinMethods.cpp",
+            Path::new(".")
+        ));
+        assert!(checker.should_process_file(
+            "examples/AutoResearch/AutoResearchTest.cpp",
+            Path::new(".")
+        ));
+        assert!(checker
+            .check_file_content(&file(
+                "examples/AutoResearch/AutoResearchTest.cpp",
+                "FL_WARN(\"diagnostic-only path\");\n",
+            ))
+            .is_empty());
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_marker_scope_flags_test_time_sections() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearchTest.cpp",
+            "FL_WARN(\"legacy diagnostic outside guarded section\");\n\
+// autoresearch-runtime-output-lint: begin\n\
+FL_WARN(\"test-time chatter\");\n\
+Serial.println(\"test-time chatter\");\n\
+fl::serial_println(\"test-time chatter\");\n\
+// autoresearch-runtime-output-lint: end\n\
+FL_WARN(\"legacy diagnostic outside guarded section\");\n",
+        ));
+        assert_eq!(result.len(), 3);
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_marker_scope_restores_always_checked_files() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearchRemoteRunSingleTest.cpp",
+            "// autoresearch-runtime-output-lint: end\n\
+FL_WARN(\"still checked because remote files are always guarded\");\n",
+        ));
+        assert_eq!(result.len(), 1);
+    }
+
+    #[test]
+    fn autoresearch_runtime_output_ignores_strings_and_comments() {
+        let checker = AutoResearchRuntimeOutputChecker;
+        let result = checker.check_file_content(&file(
+            "examples/AutoResearch/AutoResearch.ino",
+            "// FL_WARN(\"comment\")\nconst char* s = \"Serial.println\";\n",
+        ));
+        assert!(result.is_empty());
+    }
+
+    #[test]
     fn bare_allocation_rejects_malloc_but_not_fl_malloc() {
         let checker = BareAllocationChecker;
         assert_eq!(
@@ -109,6 +223,130 @@ mod tests {
         let checkers = create_checkers(Some(&selected)).unwrap();
         let names: Vec<&str> = checkers.iter().map(|checker| checker.name()).collect();
         assert_eq!(names, vec!["BareAllocationChecker"]);
+    }
+
+    #[test]
+    fn em_asm_without_clang_format_off_in_wasm_triggers_violation() {
+        let checker = EmAsmClangFormatChecker;
+        let project_root = std::env::current_dir().unwrap();
+        let project_root = project_root
+            .ancestors()
+            .find(|candidate| candidate.join("src").join("platforms").join("wasm").exists())
+            .map(|path| path.to_path_buf())
+            .unwrap_or(project_root);
+        let path = project_root
+            .join("src")
+            .join("platforms")
+            .join("wasm")
+            .join("synthetic_em_asm_test.cpp");
+        let path_str = normalize_path(&path.to_string_lossy());
+        let content = "#include <emscripten.h>\nvoid foo() {\n    EM_ASM_({ console.log($0); }, 42);\n}\n";
+
+        assert!(checker.should_process_file(&path_str, &project_root));
+        let violations = checker.check_file_content(&file(&path_str, content));
+        assert_eq!(violations.len(), 1);
+        assert_eq!(violations[0].0, 1);
+        assert!(violations[0].1.contains("Missing clang-format off"));
+    }
+
+    #[test]
+    fn em_asm_with_clang_format_off_in_wasm_passes() {
+        let checker = EmAsmClangFormatChecker;
+        let project_root = std::env::current_dir().unwrap();
+        let project_root = project_root
+            .ancestors()
+            .find(|candidate| candidate.join("src").join("platforms").join("wasm").exists())
+            .map(|path| path.to_path_buf())
+            .unwrap_or(project_root);
+        let path = project_root
+            .join("src")
+            .join("platforms")
+            .join("wasm")
+            .join("synthetic_em_asm_test.cpp");
+        let path_str = normalize_path(&path.to_string_lossy());
+        let content = "// clang-format off\n#include <emscripten.h>\nvoid foo() {\n    EM_ASM_({ console.log($0); }, 42);\n}\n";
+
+        assert!(checker.should_process_file(&path_str, &project_root));
+        let violations = checker.check_file_content(&file(&path_str, content));
+        assert!(violations.is_empty());
+    }
+
+    #[test]
+    fn em_asm_outside_wasm_scope_is_ignored() {
+        let checker = EmAsmClangFormatChecker;
+        let project_root = std::env::current_dir().unwrap();
+        let project_root = project_root
+            .ancestors()
+            .find(|candidate| candidate.join("src").join("fl").exists())
+            .map(|path| path.to_path_buf())
+            .unwrap_or(project_root);
+        let path = project_root
+            .join("src")
+            .join("fl")
+            .join("synthetic_em_asm_test.cpp");
+        let path_str = normalize_path(&path.to_string_lossy());
+        let content = "void foo() {\n    EM_ASM_({ console.log($0); }, 42);\n}\n";
+
+        // Out of scope: should_process_file must reject src/fl/* paths even
+        // though the file contains EM_ASM_ without a clang-format-off marker.
+        assert!(!checker.should_process_file(&path_str, &project_root));
+        // Defensive: even if a caller invoked check_file_content directly, the
+        // checker would still report the violation — guard scoping is enforced
+        // by should_process_file alone, which is the contract we just verified.
+        assert_eq!(
+            checker
+                .check_file_content(&file(&path_str, content))
+                .len(),
+            1
+        );
+    }
+
+    #[test]
+    fn bare_digit_separator_flags_cpp14_literal() {
+        let checker = BareDigitSeparatorChecker;
+        let project_root = std::env::current_dir().unwrap();
+        let path_str = normalize_path("src/fl/synthetic.cpp");
+        let content = "u32 x = 999'999'999ULL;\n";
+        let violations = checker.check_file_content(&file(&path_str, content));
+        assert_eq!(violations.len(), 1);
+        assert_eq!(violations[0].0, 1);
+        assert!(violations[0].1.contains("digit separator"));
+        let _ = project_root; // touch to keep the binding live
+    }
+
+    #[test]
+    fn bare_digit_separator_skips_comments() {
+        let checker = BareDigitSeparatorChecker;
+        let path_str = normalize_path("src/fl/synthetic.cpp");
+        // Single-line `//` comment + doxygen `///<` comment + block comment all
+        // mention `999'999'999` as documentation — none should fire.
+        let content = "// Using: (ns * hz + 999'999'999) / 1'000'000'000\n\
+                       u32 y = 0; ///< base 80'000'000 Hz\n\
+                       /* documenting 9'9 */ u32 z = 1;\n";
+        let violations = checker.check_file_content(&file(&path_str, content));
+        assert!(violations.is_empty(), "comments must not trigger: {violations:?}");
+    }
+
+    #[test]
+    fn bare_digit_separator_skips_string_literals_and_suppression() {
+        let checker = BareDigitSeparatorChecker;
+        let path_str = normalize_path("src/fl/synthetic.cpp");
+        // 1) `"don't 9'9"` is inside a string literal — must not fire.
+        // 2) Trailing `// ok digit-separator` opts a line out explicitly.
+        let content = "const char* s = \"don't 9'9\";\n\
+                       u32 q = 1'234ULL; // ok digit-separator\n";
+        let violations = checker.check_file_content(&file(&path_str, content));
+        assert!(violations.is_empty(), "string + suppression must pass: {violations:?}");
+    }
+
+    #[test]
+    fn bare_digit_separator_scope_excludes_third_party() {
+        let checker = BareDigitSeparatorChecker;
+        let project_root = std::env::current_dir().unwrap();
+        let third_party_path = normalize_path("src/third_party/foo/bar.cpp");
+        assert!(!checker.should_process_file(&third_party_path, &project_root));
+        let in_scope = normalize_path("src/fl/example.cpp");
+        assert!(checker.should_process_file(&in_scope, &project_root));
     }
 
     #[test]

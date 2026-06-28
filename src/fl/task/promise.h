@@ -39,11 +39,11 @@ namespace task {
 struct Error {
     fl::string message;
 
-    Error() FL_NOEXCEPT = default;
-    Error(const fl::string& msg) FL_NOEXCEPT : message(msg) {}
-    Error(const char* msg) FL_NOEXCEPT : message(msg) {}
-    Error(fl::string&& msg) FL_NOEXCEPT : message(fl::move(msg)) {}
-    bool is_empty() const FL_NOEXCEPT { return message.empty(); }
+    Error() FL_NO_EXCEPT = default;
+    Error(const fl::string& msg) FL_NO_EXCEPT : message(msg) {}
+    Error(const char* msg) FL_NO_EXCEPT : message(msg) {}
+    Error(fl::string&& msg) FL_NO_EXCEPT : message(fl::move(msg)) {}
+    bool is_empty() const FL_NO_EXCEPT { return message.empty(); }
 };
 
 // Forward declaration for implementation
@@ -58,61 +58,61 @@ template<typename T>
 class Promise {
 public:
     /// Create a pending Promise
-    static Promise<T> create() FL_NOEXCEPT {
+    static Promise<T> create() FL_NO_EXCEPT {
         auto impl = fl::make_shared<detail::PromiseImpl<T>>();
         return Promise<T>(impl);
     }
 
     /// Create a resolved Promise with value
-    static Promise<T> resolve(const T& value) FL_NOEXCEPT {  // okay static in header
+    static Promise<T> resolve(const T& value) FL_NO_EXCEPT {  // okay static in header
         auto p = create();
         p.complete_with_value(value);
         return p;
     }
 
     /// Create a resolved Promise with value (move version)
-    static Promise<T> resolve(T&& value) FL_NOEXCEPT {  // okay static in header
+    static Promise<T> resolve(T&& value) FL_NO_EXCEPT {  // okay static in header
         auto p = create();
         p.complete_with_value(fl::move(value));
         return p;
     }
 
     /// Create a rejected Promise with error
-    static Promise<T> reject(const Error& error) FL_NOEXCEPT {  // okay static in header
+    static Promise<T> reject(const Error& error) FL_NO_EXCEPT {  // okay static in header
         auto p = create();
         p.complete_with_error(error);
         return p;
     }
 
     /// Create a rejected Promise with error message
-    static Promise<T> reject(const fl::string& error_message) FL_NOEXCEPT {  // okay static in header
+    static Promise<T> reject(const fl::string& error_message) FL_NO_EXCEPT {  // okay static in header
         return reject(Error(error_message));
     }
 
     /// Default constructor - creates invalid Promise
-    Promise() FL_NOEXCEPT : mImpl(nullptr) {}
+    Promise() FL_NO_EXCEPT : mImpl(nullptr) {}
 
     /// Copy constructor (promises are now copyable via shared implementation)
     Promise(const Promise& other) = default;
 
     /// Move constructor
-    Promise(Promise&& other) FL_NOEXCEPT = default;
+    Promise(Promise&& other) FL_NO_EXCEPT = default;
 
     /// Copy assignment operator
     Promise& operator=(const Promise& other) = default;
 
     /// Move assignment operator
-    Promise& operator=(Promise&& other) FL_NOEXCEPT = default;
+    Promise& operator=(Promise&& other) FL_NO_EXCEPT = default;
 
     /// Check if Promise is valid
-    bool valid() const FL_NOEXCEPT {
+    bool valid() const FL_NO_EXCEPT {
         return mImpl != nullptr;
     }
 
     /// Register success callback - returns reference for chaining
     /// @param callback Function to call when Promise resolves successfully
     /// @returns Reference to this Promise for chaining
-    Promise& then(fl::function<void(const T&)> callback) FL_NOEXCEPT {
+    Promise& then(fl::function<void(const T&)> callback) FL_NO_EXCEPT {
         if (!valid()) return *this;
 
         mImpl->set_then_callback(fl::move(callback));
@@ -122,7 +122,7 @@ public:
     /// Register error callback - returns reference for chaining
     /// @param callback Function to call when Promise rejects with error
     /// @returns Reference to this Promise for chaining
-    Promise& catch_(fl::function<void(const Error&)> callback) FL_NOEXCEPT {
+    Promise& catch_(fl::function<void(const Error&)> callback) FL_NO_EXCEPT {
         if (!valid()) return *this;
 
         mImpl->set_catch_callback(fl::move(callback));
@@ -131,31 +131,31 @@ public:
 
     /// Update Promise state in main loop - should be called periodically
     /// This processes pending callbacks when the Promise completes
-    void update() FL_NOEXCEPT {
+    void update() FL_NO_EXCEPT {
         if (!valid()) return;
         mImpl->update();
     }
 
     /// Check if Promise is completed (resolved or rejected)
-    bool is_completed() const FL_NOEXCEPT {
+    bool is_completed() const FL_NO_EXCEPT {
         if (!valid()) return false;
         return mImpl->is_completed();
     }
 
     /// Check if Promise is resolved (completed successfully)
-    bool is_resolved() const FL_NOEXCEPT {
+    bool is_resolved() const FL_NO_EXCEPT {
         if (!valid()) return false;
         return mImpl->is_resolved();
     }
 
     /// Check if Promise is rejected (completed with error)
-    bool is_rejected() const FL_NOEXCEPT {
+    bool is_rejected() const FL_NO_EXCEPT {
         if (!valid()) return false;
         return mImpl->is_rejected();
     }
 
     /// Get the result value (only valid if is_resolved() returns true)
-    const T& value() const FL_NOEXCEPT {
+    const T& value() const FL_NO_EXCEPT {
         if (!valid()) {
             static const T default_value{};
             return default_value;
@@ -164,7 +164,7 @@ public:
     }
 
     /// Get the error (only valid if is_rejected() returns true)
-    const Error& error() const FL_NOEXCEPT {
+    const Error& error() const FL_NO_EXCEPT {
         if (!valid()) {
             static const Error default_error;
             return default_error;
@@ -173,37 +173,37 @@ public:
     }
 
     /// Clear Promise to invalid state
-    void clear() FL_NOEXCEPT {
+    void clear() FL_NO_EXCEPT {
         mImpl.reset();
     }
 
     // ========== PRODUCER INTERFACE (INTERNAL USE) ==========
 
     /// Complete the Promise with a result (used by networking library)
-    bool complete_with_value(const T& value) FL_NOEXCEPT {
+    bool complete_with_value(const T& value) FL_NO_EXCEPT {
         if (!valid()) return false;
         return mImpl->resolve(value);
     }
 
-    bool complete_with_value(T&& value) FL_NOEXCEPT {
+    bool complete_with_value(T&& value) FL_NO_EXCEPT {
         if (!valid()) return false;
         return mImpl->resolve(fl::move(value));
     }
 
     /// Complete the Promise with an error (used by networking library)
-    bool complete_with_error(const Error& error) FL_NOEXCEPT {
+    bool complete_with_error(const Error& error) FL_NO_EXCEPT {
         if (!valid()) return false;
         return mImpl->reject(error);
     }
 
-    bool complete_with_error(const fl::string& error_message) FL_NOEXCEPT {
+    bool complete_with_error(const fl::string& error_message) FL_NO_EXCEPT {
         if (!valid()) return false;
         return mImpl->reject(Error(error_message));
     }
 
 private:
     /// Constructor from shared implementation (used internally)
-    explicit Promise(fl::shared_ptr<detail::PromiseImpl<T>> impl) FL_NOEXCEPT : mImpl(impl) {}
+    explicit Promise(fl::shared_ptr<detail::PromiseImpl<T>> impl) FL_NO_EXCEPT : mImpl(impl) {}
 
     /// Shared pointer to implementation - this allows copying and sharing Promise state
     fl::shared_ptr<detail::PromiseImpl<T>> mImpl;
@@ -211,19 +211,19 @@ private:
 
 /// Convenience function to create a resolved Promise
 template<typename T>
-Promise<T> make_resolved_promise(T value) FL_NOEXCEPT {
+Promise<T> make_resolved_promise(T value) FL_NO_EXCEPT {
     return Promise<T>::resolve(fl::move(value));
 }
 
 /// Convenience function to create a rejected Promise
 template<typename T>
-Promise<T> make_rejected_promise(const fl::string& error_message) FL_NOEXCEPT {
+Promise<T> make_rejected_promise(const fl::string& error_message) FL_NO_EXCEPT {
     return Promise<T>::reject(Error(error_message));
 }
 
 /// Convenience function to create a rejected Promise (const char* overload)
 template<typename T>
-Promise<T> make_rejected_promise(const char* error_message) FL_NOEXCEPT {
+Promise<T> make_rejected_promise(const char* error_message) FL_NO_EXCEPT {
     return Promise<T>::reject(Error(error_message));
 }
 
@@ -244,10 +244,10 @@ enum class PromiseState_t {
 template<typename T>
 class PromiseImpl {
 public:
-    PromiseImpl() FL_NOEXCEPT : mState(static_cast<int>(PromiseState_t::PENDING)), mCallbacksProcessed(false) {}
+    PromiseImpl() FL_NO_EXCEPT : mState(static_cast<int>(PromiseState_t::PENDING)), mCallbacksProcessed(false) {}
 
     /// Set success callback
-    void set_then_callback(fl::function<void(const T&)> callback) FL_NOEXCEPT {
+    void set_then_callback(fl::function<void(const T&)> callback) FL_NO_EXCEPT {
         mThenCallback = fl::move(callback);
         // If already resolved, process callback immediately
         if (state() == PromiseState_t::RESOLVED && !mCallbacksProcessed) {
@@ -256,7 +256,7 @@ public:
     }
 
     /// Set error callback
-    void set_catch_callback(fl::function<void(const Error&)> callback) FL_NOEXCEPT {
+    void set_catch_callback(fl::function<void(const Error&)> callback) FL_NO_EXCEPT {
         mCatchCallback = fl::move(callback);
         // If already rejected, process callback immediately
         if (state() == PromiseState_t::REJECTED && !mCallbacksProcessed) {
@@ -265,7 +265,7 @@ public:
     }
 
     /// Update Promise state - processes callbacks if needed
-    void update() FL_NOEXCEPT {
+    void update() FL_NO_EXCEPT {
         // Process callbacks if we're completed and haven't processed them yet
         if (is_completed() && !mCallbacksProcessed) {
             process_callbacks();
@@ -273,7 +273,7 @@ public:
     }
 
     /// Resolve Promise with value
-    bool resolve(const T& value) FL_NOEXCEPT {
+    bool resolve(const T& value) FL_NO_EXCEPT {
         if (state() != PromiseState_t::PENDING) return false;
 
         // Write value BEFORE setting state — the atomic store provides
@@ -290,7 +290,7 @@ public:
         return true;
     }
 
-    bool resolve(T&& value) FL_NOEXCEPT {
+    bool resolve(T&& value) FL_NO_EXCEPT {
         if (state() != PromiseState_t::PENDING) return false;
 
         mValue = fl::move(value);
@@ -304,7 +304,7 @@ public:
     }
 
     /// Reject Promise with error
-    bool reject(const Error& error) FL_NOEXCEPT {
+    bool reject(const Error& error) FL_NO_EXCEPT {
         if (state() != PromiseState_t::PENDING) return false;
 
         mError = error;
@@ -318,27 +318,27 @@ public:
     }
 
     /// Check if Promise is completed
-    bool is_completed() const FL_NOEXCEPT {
+    bool is_completed() const FL_NO_EXCEPT {
         return state() != PromiseState_t::PENDING;
     }
 
     /// Check if Promise is resolved
-    bool is_resolved() const FL_NOEXCEPT {
+    bool is_resolved() const FL_NO_EXCEPT {
         return state() == PromiseState_t::RESOLVED;
     }
 
     /// Check if Promise is rejected
-    bool is_rejected() const FL_NOEXCEPT {
+    bool is_rejected() const FL_NO_EXCEPT {
         return state() == PromiseState_t::REJECTED;
     }
 
     /// Get value (only valid if resolved)
-    const T& value() const FL_NOEXCEPT {
+    const T& value() const FL_NO_EXCEPT {
         return mValue;
     }
 
     /// Get error (only valid if rejected)
-    const Error& error() const FL_NOEXCEPT {
+    const Error& error() const FL_NO_EXCEPT {
         return mError;
     }
 
@@ -353,17 +353,17 @@ private:
     bool mCallbacksProcessed;
 
     /// Read the state atomically
-    PromiseState_t state() const FL_NOEXCEPT {
+    PromiseState_t state() const FL_NO_EXCEPT {
         return static_cast<PromiseState_t>(mState.load());
     }
 
     /// Write the state atomically
-    void set_state(PromiseState_t s) FL_NOEXCEPT {
+    void set_state(PromiseState_t s) FL_NO_EXCEPT {
         mState.store(static_cast<int>(s));
     }
 
     /// Process pending callbacks
-    void process_callbacks() FL_NOEXCEPT {
+    void process_callbacks() FL_NO_EXCEPT {
         if (mCallbacksProcessed) return;
 
         PromiseState_t s = state();

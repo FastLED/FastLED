@@ -49,7 +49,7 @@ public:
         if( P == 27 || P == 7 || P == 30) break;                \
     }
 
-    virtual void init() FL_NOEXCEPT {
+    virtual void init() FL_NO_EXCEPT {
         // pre-initialize
         fl::memset(m_bitOffsets,0,16);
         mNActualLanes = 0;
@@ -110,7 +110,7 @@ public:
 
     virtual u16 getMaxRefreshRate() const { return 400; }
 
-    virtual void showPixels(PixelController<RGB_ORDER, LANES, __FL_T4_MASK> & pixels) FL_NOEXCEPT {
+    virtual void showPixels(PixelController<RGB_ORDER, LANES, __FL_T4_MASK> & pixels) FL_NO_EXCEPT {
         mWait.wait();
     #if FASTLED_ALLOW_INTERRUPTS == 0
         u32 clocks = showRGBInternal(pixels);
@@ -131,7 +131,7 @@ public:
   } _outlines;
 
 
-  template<int BITS,int PX> __attribute__ ((always_inline)) inline void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER _outlines & b, PixelController<RGB_ORDER, LANES, __FL_T4_MASK> &pixels) FL_NOEXCEPT {
+  template<int BITS,int PX> __attribute__ ((always_inline)) inline void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER _outlines & b, PixelController<RGB_ORDER, LANES, __FL_T4_MASK> &pixels) FL_NO_EXCEPT {
         _outlines b2;
         transpose8x1(b.bg[3], b2.bg[3]);
         transpose8x1(b.bg[2], b2.bg[2]);
@@ -170,7 +170,7 @@ public:
         }
     }
 
-    u32 showRGBInternal(PixelController<RGB_ORDER,LANES, __FL_T4_MASK> &allpixels) FL_NOEXCEPT {
+    u32 showRGBInternal(PixelController<RGB_ORDER,LANES, __FL_T4_MASK> &allpixels) FL_NO_EXCEPT {
         allpixels.preStepFirstByteDithering();
         _outlines b0;
         u32 start = ARM_DWT_CYCCNT;

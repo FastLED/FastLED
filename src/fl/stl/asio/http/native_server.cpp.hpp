@@ -25,7 +25,7 @@ NativeHttpServer::NativeHttpServer(u16 port, const ConnectionConfig& config)
 {
 }
 
-NativeHttpServer::~NativeHttpServer() FL_NOEXCEPT {
+NativeHttpServer::~NativeHttpServer() FL_NO_EXCEPT {
     stop();
 }
 

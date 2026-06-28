@@ -33,20 +33,20 @@ namespace fl {
 
 class LPUARTInstanceMock : public ILPUARTInstance {
 public:
-    explicit LPUARTInstanceMock(u32 buffer_bytes) FL_NOEXCEPT
+    explicit LPUARTInstanceMock(u32 buffer_bytes) FL_NO_EXCEPT
         : mBuffer(buffer_bytes, 0), mShowCount(0) {}
 
     ~LPUARTInstanceMock() override = default;
 
-    u8* getTxBuffer() FL_NOEXCEPT override {
+    u8* getTxBuffer() FL_NO_EXCEPT override {
         return mBuffer.data();
     }
 
-    u32 getTxBufferSize() const FL_NOEXCEPT override {
+    u32 getTxBufferSize() const FL_NO_EXCEPT override {
         return static_cast<u32>(mBuffer.size());
     }
 
-    void show() FL_NOEXCEPT override {
+    void show() FL_NO_EXCEPT override {
         ++mShowCount;
     }
 
@@ -55,10 +55,10 @@ public:
     // ------------------------------------------------------------------
 
     /// @brief Number of `show()` calls.
-    u32 getShowCount() const FL_NOEXCEPT { return mShowCount; }
+    u32 getShowCount() const FL_NO_EXCEPT { return mShowCount; }
 
     /// @brief Raw TX buffer contents (written by the engine before `show()`).
-    const fl::vector<u8>& getRawBuffer() const FL_NOEXCEPT { return mBuffer; }
+    const fl::vector<u8>& getRawBuffer() const FL_NO_EXCEPT { return mBuffer; }
 
 private:
     fl::vector<u8> mBuffer;
@@ -84,14 +84,14 @@ public:
         u32 reset_us;
     };
 
-    LPUARTPeripheralMock() FL_NOEXCEPT : mLastInstance(nullptr), mForceCreateFailure(false) {}
+    LPUARTPeripheralMock() FL_NO_EXCEPT : mLastInstance(nullptr), mForceCreateFailure(false) {}
     ~LPUARTPeripheralMock() override = default;
 
     // ------------------------------------------------------------------
     // ILPUARTPeripheral interface
     // ------------------------------------------------------------------
 
-    LPUARTPinResult validatePin(u8 pin) const FL_NOEXCEPT override {
+    LPUARTPinResult validatePin(u8 pin) const FL_NO_EXCEPT override {
         for (const auto& invalid : mInvalidPins) {
             if (invalid.pin == pin) {
                 return {false, invalid.message};
@@ -108,7 +108,7 @@ public:
 
     fl::unique_ptr<ILPUARTInstance> createInstance(
             u8 tx_pin, u32 total_leds, bool is_rgbw,
-            u32 t1_ns, u32 t2_ns, u32 t3_ns, u32 reset_us) FL_NOEXCEPT override {
+            u32 t1_ns, u32 t2_ns, u32 t3_ns, u32 reset_us) FL_NO_EXCEPT override {
         CreateRecord record;
         record.tx_pin = tx_pin;
         record.total_leds = total_leds;
@@ -143,33 +143,33 @@ public:
 
     /// @brief Mark a pin as invalid (overrides default `kLPUARTTxPins[]`
     ///        acceptance — useful for negative-path tests).
-    void setInvalidPin(u8 pin, const char* message = "Pin invalid (mock)") FL_NOEXCEPT {
+    void setInvalidPin(u8 pin, const char* message = "Pin invalid (mock)") FL_NO_EXCEPT {
         mInvalidPins.push_back({pin, message});
     }
 
     /// @brief Clear all invalid-pin overrides.
-    void clearInvalidPins() FL_NOEXCEPT { mInvalidPins.clear(); }
+    void clearInvalidPins() FL_NO_EXCEPT { mInvalidPins.clear(); }
 
     /// @brief Force `createInstance()` to return `nullptr`.
-    void setCreateFailure(bool fail) FL_NOEXCEPT { mForceCreateFailure = fail; }
+    void setCreateFailure(bool fail) FL_NO_EXCEPT { mForceCreateFailure = fail; }
 
     /// @brief Total number of `createInstance()` calls.
-    size_t getCreateCount() const FL_NOEXCEPT { return mCreateRecords.size(); }
+    size_t getCreateCount() const FL_NO_EXCEPT { return mCreateRecords.size(); }
 
     /// @brief All `createInstance()` call records, in chronological order.
-    const fl::vector<CreateRecord>& getCreateRecords() const FL_NOEXCEPT { return mCreateRecords; }
+    const fl::vector<CreateRecord>& getCreateRecords() const FL_NO_EXCEPT { return mCreateRecords; }
 
     /// @brief Most recent `createInstance()` record, or `nullptr` if none.
-    const CreateRecord* getLastCreateRecord() const FL_NOEXCEPT {
+    const CreateRecord* getLastCreateRecord() const FL_NO_EXCEPT {
         if (mCreateRecords.empty()) return nullptr;
         return &mCreateRecords[mCreateRecords.size() - 1];
     }
 
     /// @brief Most recent created instance (raw pointer, not owned).
-    LPUARTInstanceMock* getLastInstance() const FL_NOEXCEPT { return mLastInstance; }
+    LPUARTInstanceMock* getLastInstance() const FL_NO_EXCEPT { return mLastInstance; }
 
     /// @brief Reset all mock state.
-    void reset() FL_NOEXCEPT {
+    void reset() FL_NO_EXCEPT {
         mInvalidPins.clear();
         mCreateRecords.clear();
         mLastInstance = nullptr;

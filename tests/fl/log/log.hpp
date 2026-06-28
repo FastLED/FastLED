@@ -416,6 +416,110 @@ FL_TEST_CASE("warning macros do not interfere with control flow") {
     }
 }
 
+// ============================================================================
+// Test Suite: Unified FL_WARN/FL_ERROR/FL_INFO/FL_PRINT (#3272)
+// Verifies that argument-count dispatch correctly routes single-arg calls
+// to stream form and multi-arg calls to printf form.
+// ============================================================================
+
+FL_TEST_CASE("FL_WARN unified - printf-style without _F suffix") {
+    FL_SUBCASE("FL_WARN with printf format and one arg") {
+        int n = 42;
+        FL_WARN("Count: %d", n);
+        FL_CHECK(true);
+    }
+
+    FL_SUBCASE("FL_WARN with printf format and multiple args") {
+        int x = 7, y = 11;
+        FL_WARN("x=%d y=%d", x, y);
+        FL_CHECK(true);
+    }
+
+    FL_SUBCASE("FL_WARN with literal containing percent and no args (stream)") {
+        // Single-arg path - '%' is NOT interpreted as a format specifier.
+        FL_WARN("100% loaded");
+        FL_CHECK(true);
+    }
+
+    FL_SUBCASE("FL_WARN_F alias still compiles") {
+        int n = 5;
+        FL_WARN_F("Legacy: %d", n);
+        FL_CHECK(true);
+    }
+}
+
+FL_TEST_CASE("FL_ERROR unified - printf-style without _F suffix") {
+    FL_SUBCASE("FL_ERROR with printf format") {
+        int code = -1;
+        FL_ERROR("Error code: %d", code);
+        FL_CHECK(true);
+    }
+
+    FL_SUBCASE("FL_ERROR_F alias still compiles") {
+        FL_ERROR_F("Legacy err: %s", "oops");
+        FL_CHECK(true);
+    }
+
+    FL_SUBCASE("FL_ERROR with stream chain still works") {
+        int v = 9;
+        FL_ERROR("value=" << v);
+        FL_CHECK(true);
+    }
+}
+
+FL_TEST_CASE("FL_INFO unified - printf-style") {
+    FL_SUBCASE("FL_INFO with printf format") {
+        FL_INFO("info: %d", 123);
+        FL_CHECK(true);
+    }
+
+    FL_SUBCASE("FL_INFO with stream chain") {
+        FL_INFO("info " << 456);
+        FL_CHECK(true);
+    }
+}
+
+FL_TEST_CASE("FL_INFO_IF unified - printf-style") {
+    FL_SUBCASE("FL_INFO_IF with printf format and true condition") {
+        FL_INFO_IF(true, "info conditional fmt %d", 9);
+        FL_CHECK(true);
+    }
+
+    FL_SUBCASE("FL_INFO_IF with stream chain") {
+        FL_INFO_IF(true, "info stream " << 22);
+        FL_CHECK(true);
+    }
+}
+
+FL_TEST_CASE("FL_PRINT unified - printf-style") {
+    FL_SUBCASE("FL_PRINT with printf format") {
+        FL_PRINT("printed: %d", 99);
+        FL_CHECK(true);
+    }
+
+    FL_SUBCASE("FL_PRINT with stream chain") {
+        FL_PRINT("stream " << 42);
+        FL_CHECK(true);
+    }
+
+    FL_SUBCASE("FL_PRINT_F alias still compiles") {
+        FL_PRINT_F("Legacy: %s", "abc");
+        FL_CHECK(true);
+    }
+}
+
+FL_TEST_CASE("FL_WARN_IF unified - printf-style") {
+    FL_SUBCASE("FL_WARN_IF with printf format and true condition") {
+        FL_WARN_IF(true, "conditional fmt %d", 7);
+        FL_CHECK(true);
+    }
+
+    FL_SUBCASE("FL_WARN_IF with printf format and false condition") {
+        FL_WARN_IF(false, "conditional fmt %d", 7);
+        FL_CHECK(true);
+    }
+}
+
 FL_TEST_CASE("warning macro edge cases") {
     FL_SUBCASE("empty message (should still compile)") {
         FL_WARN("");

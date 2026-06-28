@@ -65,7 +65,7 @@ SpiChannelEngineAdapter::SpiChannelEngineAdapter(const char* name)
     // Controllers added via create() factory method
 }
 
-SpiChannelEngineAdapter::~SpiChannelEngineAdapter() FL_NOEXCEPT {
+SpiChannelEngineAdapter::~SpiChannelEngineAdapter() FL_NO_EXCEPT {
     FL_DBG_F("SpiChannelEngineAdapter: Destructor for '%s'", mName);
 
     // Clear any enqueued channels that were never transmitted

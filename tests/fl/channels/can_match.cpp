@@ -19,7 +19,7 @@ using namespace fl;
 namespace {
 
 // RMT5-style: clockless any-pin, generous timing.
-DriverCapabilities makeRmtCaps() FL_NOEXCEPT {
+DriverCapabilities makeRmtCaps() FL_NO_EXCEPT {
     DriverCapabilities c;
     c.name = fl::string_view("RMT5");
     c.priority = 7;
@@ -35,7 +35,7 @@ DriverCapabilities makeRmtCaps() FL_NOEXCEPT {
     return c;
 }
 
-PinGroup makeRmtClocklessGroup(fl::u16 instance_id = 0, fl::u8 cap = 1) FL_NOEXCEPT {
+PinGroup makeRmtClocklessGroup(fl::u16 instance_id = 0, fl::u8 cap = 1) FL_NO_EXCEPT {
     PinGroup g;
     g.instance_id = instance_id;
     g.protocol = Protocol::Clockless;
@@ -46,7 +46,7 @@ PinGroup makeRmtClocklessGroup(fl::u16 instance_id = 0, fl::u8 cap = 1) FL_NOEXC
     return g;
 }
 
-DriverCapabilities makeSpiCaps() FL_NOEXCEPT {
+DriverCapabilities makeSpiCaps() FL_NO_EXCEPT {
     DriverCapabilities c;
     c.name = fl::string_view("SPI");
     c.priority = 5;
@@ -58,7 +58,7 @@ DriverCapabilities makeSpiCaps() FL_NOEXCEPT {
     return c;
 }
 
-PinGroup makeFixedSpiGroup() FL_NOEXCEPT {
+PinGroup makeFixedSpiGroup() FL_NO_EXCEPT {
     static fl::i16 kData[] = {11};
     static fl::i16 kClock[] = {12};
     PinGroup g;
@@ -71,7 +71,7 @@ PinGroup makeFixedSpiGroup() FL_NOEXCEPT {
     return g;
 }
 
-PinGroup makeSharedClockSpiGroup() FL_NOEXCEPT {
+PinGroup makeSharedClockSpiGroup() FL_NO_EXCEPT {
     static fl::i16 kData[] = {9, 10, 11, 12};
     static fl::i16 kClock[] = {16};
     PinGroup g;
@@ -84,7 +84,7 @@ PinGroup makeSharedClockSpiGroup() FL_NOEXCEPT {
     return g;
 }
 
-ChipsetClocklessTiming makeWs2812Timing() FL_NOEXCEPT {
+ChipsetClocklessTiming makeWs2812Timing() FL_NO_EXCEPT {
     return ChipsetClocklessTiming{
         NanosRange{200u, 500u},
         NanosRange{700u, 1000u},
@@ -93,7 +93,7 @@ ChipsetClocklessTiming makeWs2812Timing() FL_NOEXCEPT {
     };
 }
 
-ChannelRequest makeBulkClocklessRequest(fl::i16 start, fl::u32 count, fl::i16 stride = 1) FL_NOEXCEPT {
+ChannelRequest makeBulkClocklessRequest(fl::i16 start, fl::u32 count, fl::i16 stride = 1) FL_NO_EXCEPT {
     ChannelRequest r;
     r.protocol = Protocol::Clockless;
     r.clock_pin = -1;

@@ -25,7 +25,7 @@ MoodAnalyzer::MoodAnalyzer()
     mArousalHistory.reserve(mAveragingFrames);
 }
 
-MoodAnalyzer::~MoodAnalyzer() FL_NOEXCEPT = default;
+MoodAnalyzer::~MoodAnalyzer() FL_NO_EXCEPT = default;
 
 void MoodAnalyzer::update(shared_ptr<Context> context) {
     mRetainedFFT = context->getFFT(32);  // Higher resolution for mood analysis

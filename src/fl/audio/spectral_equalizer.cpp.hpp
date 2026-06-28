@@ -22,7 +22,7 @@ SpectralEqualizer::SpectralEqualizer(const SpectralEqualizerConfig& config) {
     configure(config);
 }
 
-SpectralEqualizer::~SpectralEqualizer() FL_NOEXCEPT = default;
+SpectralEqualizer::~SpectralEqualizer() FL_NO_EXCEPT = default;
 
 void SpectralEqualizer::configure(const SpectralEqualizerConfig& config) {
     mConfig = config;

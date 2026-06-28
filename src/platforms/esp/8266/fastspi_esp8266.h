@@ -56,7 +56,7 @@ public:
 	ESP8266SPIOutput(Selectable *pSelect) { mPSelect = pSelect; }
 	void setSelect(Selectable *pSelect) { mPSelect = pSelect; }
 
-	void init() FL_NOEXCEPT {
+	void init() FL_NO_EXCEPT {
 		// set the pins to output and make sure the select is released (which apparently means hi?  This is a bit
 		// confusing to me)
 		SPI.begin();
@@ -76,7 +76,7 @@ public:
 	static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
 	// naive writeByte implelentation, simply calls writeBit on the 8 bits in the byte.
-	static void writeByte(u8 b) FL_NOEXCEPT {
+	static void writeByte(u8 b) FL_NO_EXCEPT {
 		SPI.transfer(b);
 	}
 
@@ -84,30 +84,30 @@ public:
 
 	// select the SPI output (TODO: research whether this really means hi or lo.  Alt TODO: move select responsibility out of the SPI classes
 	// entirely, make it up to the caller to remember to lock/select the line?)
-	void select() FL_NOEXCEPT {
+	void select() FL_NO_EXCEPT {
 		SPI.beginTransaction(SPISettings(3200000, MSBFIRST, SPI_MODE0));
 		if(mPSelect != nullptr) { mPSelect->select(); } 
 	} 
 
 	// release the SPI line
-	void release() FL_NOEXCEPT {
+	void release() FL_NO_EXCEPT {
 		if(mPSelect != nullptr) { mPSelect->release(); }
 		SPI.endTransaction();
 	}
 
-	void endTransaction() FL_NOEXCEPT {
+	void endTransaction() FL_NO_EXCEPT {
 		waitFully();
 		release();
 	}
 
 	// Write out len bytes of the given value out over SPI.  Useful for quickly flushing, say, a line of 0's down the line.
-	void writeBytesValue(u8 value, int len) FL_NOEXCEPT {
+	void writeBytesValue(u8 value, int len) FL_NO_EXCEPT {
 		select();
 		writeBytesValueRaw(value, len);
 		release();
 	}
 
-	static void writeBytesValueRaw(u8 value, int len) FL_NOEXCEPT {
+	static void writeBytesValueRaw(u8 value, int len) FL_NO_EXCEPT {
 		while(len--) {
 			SPI.transfer(value); 
 		}
@@ -115,7 +115,7 @@ public:
 
 	// write a block of len uint8_ts out.  Need to type this better so that explicit casts into the call aren't required.
 	// note that this template version takes a class parameter for a per-byte modifier to the data.
-	template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) FL_NOEXCEPT {
+	template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) FL_NO_EXCEPT {
 		select();
 		u8 *end = data + len;
 		while(data != end) {
@@ -129,7 +129,7 @@ public:
 	void writeBytes(FASTLED_REGISTER u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
-	template <u8 BIT> inline void writeBit(u8 b) FL_NOEXCEPT {
+	template <u8 BIT> inline void writeBit(u8 b) FL_NO_EXCEPT {
 		SPI.transfer(b);
 	}
 
@@ -141,7 +141,7 @@ public:
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning of each grouping, as well as a class specifying a per
 	// byte of data modification to be made.  (See DATA_NOP above)
-	template <u8 FLAGS, class D, EOrder RGB_ORDER>  FL_NO_INLINE void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NOEXCEPT {
+	template <u8 FLAGS, class D, EOrder RGB_ORDER>  FL_NO_INLINE void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NO_EXCEPT {
 		select();
 		int len = pixels.mLen;
 		while(pixels.has(1)) {

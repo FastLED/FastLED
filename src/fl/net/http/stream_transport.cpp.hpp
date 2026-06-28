@@ -55,7 +55,7 @@ HttpStreamTransport::HttpStreamTransport(const fl::string& host, u16 port, u32 h
     , mWasConnected(false) {
 }
 
-HttpStreamTransport::~HttpStreamTransport() FL_NOEXCEPT {
+HttpStreamTransport::~HttpStreamTransport() FL_NO_EXCEPT {
     // Note: Cannot call pure virtual disconnect() here
     // Subclasses must clean up in their own destructors
 }

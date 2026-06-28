@@ -37,7 +37,7 @@ Percussion::Percussion()
     , mLastTomTime(0)
 {}
 
-Percussion::~Percussion() FL_NOEXCEPT = default;
+Percussion::~Percussion() FL_NO_EXCEPT = default;
 
 void Percussion::update(shared_ptr<Context> context) {
     mRetainedFFT = context->getFFT16(fft::Mode::CQ_NAIVE);

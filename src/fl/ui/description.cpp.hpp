@@ -3,7 +3,7 @@
 
 namespace fl {
 
-UIDescription::UIDescription(const char *name) FL_NOEXCEPT : mImpl(name) {}
-UIDescription::~UIDescription() FL_NOEXCEPT {}
+UIDescription::UIDescription(const char *name) FL_NO_EXCEPT : mImpl(name) {}
+UIDescription::~UIDescription() FL_NO_EXCEPT {}
 
 } // namespace fl

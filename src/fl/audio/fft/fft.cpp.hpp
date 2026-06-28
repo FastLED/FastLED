@@ -172,7 +172,7 @@ FloatVectorPool& Bins::pool() {
 Bins::Bins(fl::size n)
     : mBands(n) {}
 
-Bins::~Bins() FL_NOEXCEPT {
+Bins::~Bins() FL_NO_EXCEPT {
     auto& p = pool();
     p.releaseIfNotEmpty(fl::move(mBinsRaw));
     p.releaseIfNotEmpty(fl::move(mBinsLinear));
@@ -186,7 +186,7 @@ Bins::~Bins() FL_NOEXCEPT {
 
 // Hash specialization must be in fl:: namespace where Hash is defined
 template <> struct Hash<audio::fft::Args> {
-    fl::u32 operator()(const audio::fft::Args &key) const FL_NOEXCEPT {
+    fl::u32 operator()(const audio::fft::Args &key) const FL_NO_EXCEPT {
         // Hash fields individually to avoid padding-byte issues
         fl::u32 h = 0;
         h ^= MurmurHash3_x86_32(&key.samples, sizeof(key.samples));

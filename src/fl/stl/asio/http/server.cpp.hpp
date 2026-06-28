@@ -259,7 +259,7 @@ Server::Server() {
     EngineEvents::addListener(this);
 }
 
-Server::~Server() FL_NOEXCEPT {
+Server::~Server() FL_NO_EXCEPT {
     // Unregister from engine events
     EngineEvents::removeListener(this);
     stop();
@@ -829,7 +829,7 @@ Server::Server() {
     EngineEvents::addListener(this);
 }
 
-Server::~Server() FL_NOEXCEPT {
+Server::~Server() FL_NO_EXCEPT {
     EngineEvents::removeListener(this);
     stop();
 }
@@ -968,7 +968,7 @@ Response Response::internal_error(const string&) { return Response(); }
 string Response::to_string() const { return ""; }
 
 Server::Server() {}
-Server::~Server() FL_NOEXCEPT = default;
+Server::~Server() FL_NO_EXCEPT = default;
 void Server::onExit() {}
 bool Server::start(int) { return false; }
 void Server::stop() {}

@@ -61,39 +61,39 @@ public:
     /// @brief Construct and push function name onto stack
     /// @param function Function name (must be string literal or have static lifetime)
     /// @param line Line number (from __LINE__)
-    explicit ScopedTrace(const char* function, int line) FL_NOEXCEPT;
+    explicit ScopedTrace(const char* function, int line) FL_NO_EXCEPT;
 
     /// @brief Destructor - automatically pops from stack
-    ~ScopedTrace() FL_NOEXCEPT;
+    ~ScopedTrace() FL_NO_EXCEPT;
 
     // Non-copyable, non-movable
-    ScopedTrace(const ScopedTrace&) FL_NOEXCEPT = delete;
-    ScopedTrace& operator=(const ScopedTrace&) FL_NOEXCEPT = delete;
-    ScopedTrace(ScopedTrace&&) FL_NOEXCEPT = delete;
-    ScopedTrace& operator=(ScopedTrace&&) FL_NOEXCEPT = delete;
+    ScopedTrace(const ScopedTrace&) FL_NO_EXCEPT = delete;
+    ScopedTrace& operator=(const ScopedTrace&) FL_NO_EXCEPT = delete;
+    ScopedTrace(ScopedTrace&&) FL_NO_EXCEPT = delete;
+    ScopedTrace& operator=(ScopedTrace&&) FL_NO_EXCEPT = delete;
 
     /// @brief Push a function name onto the call stack
     /// @param function Function name (must be string literal or have static lifetime)
     /// @param line Line number (from __LINE__)
-    static void push(const char* function, int line) FL_NOEXCEPT;
+    static void push(const char* function, int line) FL_NO_EXCEPT;
 
     /// @brief Pop the most recent function from the call stack
-    static void pop() FL_NOEXCEPT;
+    static void pop() FL_NO_EXCEPT;
 
     /// @brief Get the current stack depth
     /// @return Number of valid entries in the stack (may exceed storage capacity)
-    static fl::size depth() FL_NOEXCEPT;
+    static fl::size depth() FL_NO_EXCEPT;
 
     /// @brief Dump the current call stack to a string
     /// @return String representation of the stack trace
-    static fl::string dump() FL_NOEXCEPT;
+    static fl::string dump() FL_NO_EXCEPT;
 
     /// @brief Dump the current call stack to an inlined vector of TracePoints
     /// @param out Pointer to vector to receive the stack trace entries
-    static void dump(fl::vector<TracePoint>* out) FL_NOEXCEPT;
+    static void dump(fl::vector<TracePoint>* out) FL_NO_EXCEPT;
 
     /// @brief Clear the entire call stack (primarily for testing)
-    static void clear() FL_NOEXCEPT;
+    static void clear() FL_NO_EXCEPT;
 };
 
 } // namespace fl

@@ -7,12 +7,14 @@
 | Task | Read |
 |------|------|
 | Writing/editing C++ code | `agents/docs/cpp-standards.md` |
+| Defining a register map / accessing MCU peripherals | `agents/docs/register-maps.md` (use vendor CMSIS PAL — do not hand-roll shims) |
 | Creating an API wrapper type | `agents/docs/cpp-standards.md` → "API Object Pattern" |
 | Adding a global setting / configuration knob | `agents/docs/cpp-standards.md` → "Public Settings Pattern" (new setters go on `CFastLED`, not as bare `fl::set_*` free functions) |
 | Writing/editing Python code | `agents/docs/python-standards.md` |
 | Editing meson.build files | `agents/docs/build-system.md` |
 | Running tests, Docker, WASM, QEMU | `agents/docs/testing-commands.md` |
 | Test-Driven Development (TDD) | Use `/tdd` or `/tdd-implement` skills |
+| Editing `.fled` container docs or `src/fl/fled/` | `agents/docs/fled-format.md` |
 | Hardware autoresearch / `bash autoresearch` | `agents/docs/hardware-autoresearch.md` |
 | Debugging a C++ crash | `agents/docs/debugging.md` |
 | Investigating binary size / flash bloat | `agents/docs/binary-size-analysis.md` |
@@ -20,7 +22,7 @@
 | Detailed command reference | `agents/docs/commands-reference.md` |
 | Workflow and task management | `agents/docs/workflow.md` |
 
-**By directory:** `src/`/`tests/` → `agents/docs/cpp-standards.md` | `ci/` → `agents/docs/python-standards.md`, `agents/ci.md` | `tests/` → `agents/tests.md` | `examples/` → `agents/examples.md` | `meson.build` → `agents/docs/build-system.md`
+**By directory:** `src/`/`tests/` → `agents/docs/cpp-standards.md` | `src/fl/fled/` → `agents/docs/fled-format.md` | `ci/` → `agents/docs/python-standards.md`, `agents/ci.md` | `tests/` → `agents/tests.md` | `examples/` → `agents/examples.md` | `meson.build` → `agents/docs/build-system.md`
 
 ## Key Commands
 

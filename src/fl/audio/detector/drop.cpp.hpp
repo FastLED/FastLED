@@ -25,7 +25,7 @@ DropDetector::DropDetector()
     mLastDrop.timestamp = 0;  // Initialize to allow immediate first drop
 }
 
-DropDetector::~DropDetector() FL_NOEXCEPT = default;
+DropDetector::~DropDetector() FL_NO_EXCEPT = default;
 
 void DropDetector::update(shared_ptr<Context> context) {
     if (!context) {

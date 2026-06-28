@@ -28,7 +28,7 @@ namespace fl {
 
 // Default constructor and destructor - must be in .cpp for proper smart_ptr handling
 ScreenMap::ScreenMap() = default;
-ScreenMap::~ScreenMap() FL_NOEXCEPT = default;
+ScreenMap::~ScreenMap() FL_NO_EXCEPT = default;
 
 // Helper function to extract a vector of floats from a JSON array
 fl::vector<float> jsonArrayToFloatVector(const fl::json& jsonArray) {
@@ -113,7 +113,7 @@ ScreenMap ScreenMap::DefaultStrip(int numLeds, float cm_between_leds,
 // `z` is dropped (firmware-side ScreenMap is 2D today).
 static bool parseV2SegmentArray(const fl::json& segmentsArr,
                                 fl::flat_map<string, ScreenMap> *segmentMaps,
-                                string *err) FL_NOEXCEPT {
+                                string *err) FL_NO_EXCEPT {
     if (!segmentsArr.has_value() || !segmentsArr.is_array()) {
         *err = "v2 'segments' is not an array";
         return false;
@@ -575,7 +575,7 @@ vec2f &ScreenMap::operator[](u32 x) {
     return data[x];
 }
 
-ScreenMap &ScreenMap::operator=(const ScreenMap &other) FL_NOEXCEPT {
+ScreenMap &ScreenMap::operator=(const ScreenMap &other) FL_NO_EXCEPT {
     if (this != &other) {
         mDiameter = other.mDiameter;
         length = other.length;
@@ -585,7 +585,7 @@ ScreenMap &ScreenMap::operator=(const ScreenMap &other) FL_NOEXCEPT {
     return *this;
 }
 
-ScreenMap &ScreenMap::operator=(ScreenMap &&other) FL_NOEXCEPT {
+ScreenMap &ScreenMap::operator=(ScreenMap &&other) FL_NO_EXCEPT {
     if (this != &other) {
         mDiameter = other.mDiameter;
         length = other.length;

@@ -33,7 +33,7 @@ namespace detail {
         fl::size mMessagesPerTick;         // Max messages to flush per timer tick
         bool mEnabled;                     // Whether background flushing is enabled
 
-        BackgroundFlushState() FL_NOEXCEPT
+        BackgroundFlushState() FL_NO_EXCEPT
             : mNeedsFlush(false)
             , mTimerHandle()  // Default constructor
             , mMessagesPerTick(5)

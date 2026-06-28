@@ -71,6 +71,7 @@ def _make_args(**overrides) -> Args:
         tx_pin=None,
         rx_pin=None,
         auto_discover_pins=False,
+        contaminate_tx_mux=False,
         use_fbuild=False,
         no_fbuild=True,
         clean=False,
@@ -81,6 +82,8 @@ def _make_args(**overrides) -> Args:
         lane_counts=None,
         color_pattern=None,
         legacy=False,
+        legacy_mixed_timings=False,
+        legacy_rgbw_small_counts=False,
         chipset="ws2812",
         net_server=False,
         net_client=False,
@@ -95,6 +98,11 @@ def _make_args(**overrides) -> Args:
         tight_timing_max_overhead_us=2000,
         pin_toggle_rx=False,
         ws2812_loopback=False,
+        # Default existing-test behavior: use the legacy root-platformio.ini
+        # path so the ``fake_project_dir`` fixture's hand-written ini is the
+        # one read. Tests that exercise the new synthesised-ini path (#3281)
+        # override this explicitly.
+        use_root_platformio_ini=True,
     )
     defaults.update(overrides)
     return Args(**defaults)
@@ -210,7 +218,6 @@ class TestParseArgsAndBuildCommands:
             "LCD_RGB",
             "OBJECT_FLED",
             "FLEX_IO",
-            "LPUART",
         }
 
     def test_all_drivers_teensy4_only_real_teensy_drivers(
@@ -221,15 +228,337 @@ class TestParseArgsAndBuildCommands:
             parlio=False,
             environment_positional="teensy40",
             project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["OBJECT_FLED", "FLEX_IO"]
+        assert {cmd["method"] for cmd in result.json_rpc_commands} == {"runSingleTest"}
+        assert not any("__skip_with_pass" in cmd for cmd in result.json_rpc_commands)
+        assert all("pinTx" not in cmd["params"] for cmd in result.json_rpc_commands)
+
+    def test_contaminate_tx_mux_sets_run_single_test_field(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            contaminate_tx_mux=True,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.json_rpc_commands[0]["method"] == "runSingleTest"
+        assert result.json_rpc_commands[0]["params"]["contaminateTxMux"] is True
+
+    def test_object_fled_legacy_one_strip_command(self, fake_project_dir: Path) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=True,
+            strip_sizes="1",
+            tx_pin=22,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["OBJECT_FLED"]
+
+        run_commands = [
+            cmd for cmd in result.json_rpc_commands if cmd["method"] == "runSingleTest"
+        ]
+        assert len(run_commands) == 1
+        params = run_commands[0]["params"]
+        assert params["driver"] == "OBJECT_FLED"
+        assert params["laneSizes"] == [1]
+        assert params["useLegacyApi"] is True
+
+    def test_object_fled_legacy_same_timing_multistrip_command(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=True,
+            lanes="2",
+            strip_sizes="3",
+            tx_pin=0,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["OBJECT_FLED"]
+
+        run_commands = [
+            cmd for cmd in result.json_rpc_commands if cmd["method"] == "runSingleTest"
+        ]
+        assert len(run_commands) == 1
+        params = run_commands[0]["params"]
+        assert params["driver"] == "OBJECT_FLED"
+        assert params["laneSizes"] == [3, 3]
+        assert params["useLegacyApi"] is True
+        assert "legacyChipsets" not in params
+
+    def test_object_fled_legacy_mixed_timing_multistrip_command(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=True,
+            legacy_mixed_timings=True,
+            lanes="2",
+            strip_sizes="3",
+            tx_pin=0,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["OBJECT_FLED"]
+
+        run_commands = [
+            cmd for cmd in result.json_rpc_commands if cmd["method"] == "runSingleTest"
+        ]
+        assert len(run_commands) == 1
+        params = run_commands[0]["params"]
+        assert params["driver"] == "OBJECT_FLED"
+        assert params["laneSizes"] == [3, 3]
+        assert params["useLegacyApi"] is True
+        assert params["legacyChipsets"] == ["WS2812B", "SK6812"]
+
+    def test_object_fled_legacy_rgbw_small_counts_commands(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=True,
+            legacy_rgbw_small_counts=True,
+            tx_pin=22,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["OBJECT_FLED"]
+
+        run_commands = [
+            cmd for cmd in result.json_rpc_commands if cmd["method"] == "runSingleTest"
+        ]
+        assert len(run_commands) == 4
+        assert [cmd["params"]["laneSizes"] for cmd in run_commands] == [
+            [1],
+            [2],
+            [3],
+            [4],
+        ]
+        for cmd in run_commands:
+            params = cmd["params"]
+            assert params["driver"] == "OBJECT_FLED"
+            assert params["useLegacyApi"] is True
+            assert params["legacyRgbw"] is True
+            assert "legacyChipsets" not in params
+
+    def test_legacy_mixed_timings_requires_legacy(self, fake_project_dir: Path) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=False,
+            legacy_mixed_timings=True,
+            lanes="2",
+            strip_sizes="3",
+            tx_pin=0,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
         )
         result = _parse_args_and_build_commands(args)
-        assert isinstance(result, RunContext)
-        assert result.drivers == ["OBJECT_FLED", "FLEX_IO", "LPUART"]
-        assert {cmd["method"] for cmd in result.json_rpc_commands} == {
-            "runSingleTest"
-        }
-        assert not any("__skip_with_pass" in cmd for cmd in result.json_rpc_commands)
+        assert result == 1
 
+    def test_legacy_mixed_timings_requires_multiple_lanes(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=True,
+            legacy_mixed_timings=True,
+            lanes="1",
+            strip_sizes="3",
+            tx_pin=0,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
+
+    def test_legacy_rgbw_small_counts_requires_legacy(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=False,
+            legacy_rgbw_small_counts=True,
+            tx_pin=22,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
+
+    def test_legacy_rgbw_small_counts_requires_single_lane(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=True,
+            legacy_rgbw_small_counts=True,
+            lanes="2",
+            tx_pin=0,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
+
+    def test_legacy_rgbw_small_counts_rejects_strip_size_override(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=True,
+            legacy_rgbw_small_counts=True,
+            strip_sizes="3",
+            tx_pin=22,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
+
+    def test_object_fled_legacy_current_pin_rejects_multistrip(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            legacy=True,
+            lanes="2",
+            strip_sizes="3",
+            tx_pin=22,
+            rx_pin=8,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
+
+    def test_spi_driver_name_remains_spi_on_esp32(self, fake_project_dir: Path) -> None:
+        args = _make_args(parlio=False, spi=True, project_dir=fake_project_dir)
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["SPI"]
+        assert result.json_rpc_commands[0]["params"]["driver"] == "SPI"
+
+    def test_spi_driver_name_maps_to_spi_unified_on_teensy4(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            spi=True,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["SPI_UNIFIED"]
+        assert result.json_rpc_commands[0]["params"]["driver"] == "SPI_UNIFIED"
+
+    def test_flex_io_does_not_hide_tx_pin_override(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            flex_io=True,
+            environment_positional="teensy41",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["FLEX_IO"]
+        command = result.json_rpc_commands[0]
+        assert command["method"] == "runSingleTest"
+        assert command["params"]["driver"] == "FLEX_IO"
+        assert "pinTx" not in command["params"]
+
+    def test_lpuart_is_reserved_not_selectable(self, fake_project_dir: Path) -> None:
+        args = _make_args(
+            parlio=False,
+            lpuart=True,
+            project_dir=fake_project_dir,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
     def test_multiple_drivers(self, fake_project_dir: Path) -> None:
         args = _make_args(parlio=True, rmt=True, spi=True, project_dir=fake_project_dir)
         result = _parse_args_and_build_commands(args)
@@ -385,6 +714,108 @@ class TestParseArgsAndBuildCommands:
         assert result.final_environment == "esp32s3"
         assert "LCD_CLOCKLESS" in result.drivers
 
+    # ============================================================
+    # #3281: synthesised .build/pio/<board>/platformio.ini path
+    # ============================================================
+
+    def test_synthesised_path_calls_staging_when_board_known(
+        self, tmp_path: Path
+    ) -> None:
+        """When the board is known up-front and the legacy flag is OFF,
+        ``_parse_args_and_build_commands`` should synthesise the staged
+        ``.build/pio/<board>/`` project and use it as ``build_dir`` — NO
+        root ``./platformio.ini`` is required."""
+        # Note: NO platformio.ini in tmp_path on purpose. The synthesis path
+        # must NOT require one to exist.
+        (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
+
+        fake_build_dir = tmp_path / ".build" / "pio" / "esp32s3"
+        fake_build_dir.mkdir(parents=True)
+
+        args = _make_args(
+            environment_positional="esp32s3",
+            project_dir=tmp_path,
+            use_root_platformio_ini=False,
+        )
+
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_build_dir,
+        ) as mock_synth:
+            result = _parse_args_and_build_commands(args)
+
+        assert isinstance(result, RunContext), result
+        mock_synth.assert_called_once_with(
+            "esp32s3", project_root=tmp_path.resolve(), verbose=False
+        )
+        assert result.build_dir == fake_build_dir
+
+    def test_synthesised_path_defers_when_board_unknown(self, tmp_path: Path) -> None:
+        """When the board is NOT known up-front (no positional, no --env,
+        no --lcd*) and the legacy flag is OFF, parse-time synthesis must NOT
+        happen — synthesis is deferred to ``_resolve_port_and_environment``
+        after chip auto-detect."""
+        # No platformio.ini in tmp_path — synthesised path must tolerate that.
+        (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
+
+        args = _make_args(
+            environment_positional=None,
+            project_dir=tmp_path,
+            use_root_platformio_ini=False,
+        )
+
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project"
+        ) as mock_synth:
+            result = _parse_args_and_build_commands(args)
+
+        assert isinstance(result, RunContext), result
+        mock_synth.assert_not_called()
+        # build_dir falls back to project_root so the sketch resolver still
+        # finds examples/AutoResearch/.
+        assert result.build_dir == tmp_path.resolve()
+        assert result.final_environment is None
+
+    def test_legacy_flag_still_requires_root_platformio_ini(
+        self, tmp_path: Path
+    ) -> None:
+        """With ``--use-root-platformio-ini`` set, the legacy
+        ``platformio.ini`` existence check still fires and a missing file is
+        an error — proving the escape hatch keeps the old behavior."""
+        # No platformio.ini in tmp_path.
+        args = _make_args(
+            project_dir=tmp_path,
+            use_root_platformio_ini=True,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, int)
+        assert result == 1
+
+    def test_teensy_root_platformio_ini_rejected_up_front(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            environment_positional="teensy41",
+            object_fled=True,
+            parlio=False,
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=True,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
+
+    def test_teensy_specific_driver_rejects_root_platformio_without_env(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            object_fled=True,
+            parlio=False,
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=True,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert result == 1
+
     def test_timeout_parsing(self, fake_project_dir: Path) -> None:
         args = _make_args(timeout="2m", project_dir=fake_project_dir)
         result = _parse_args_and_build_commands(args)
@@ -451,6 +882,32 @@ class TestResolvePortAndEnvironment:
         assert ctx.upload_port == "COM9"
         auto_detect.assert_called_once_with(expected_environment="esp32c6")
 
+    def test_teensy_auto_detect_rejects_root_platformio_ini(self) -> None:
+        ctx = _make_ctx(upload_port=None, final_environment=None)
+        ctx.args = _make_args(
+            upload_port=None,
+            parlio=False,
+            all=True,
+            use_root_platformio_ini=True,
+        )
+        mock_port_result = MagicMock(ok=True, selected_port="COM8")
+        mock_chip_result = MagicMock(
+            ok=True, chip_type="Teensy 4.1", environment="teensy41"
+        )
+        with (
+            patch(
+                f"{_PATCH_MOD}.auto_detect_upload_port",
+                return_value=mock_port_result,
+            ),
+            patch(
+                f"{_PATCH_MOD}.detect_attached_chip",
+                return_value=mock_chip_result,
+            ),
+        ):
+            rc = asyncio.run(_resolve_port_and_environment(ctx))
+        assert rc == 1
+        assert ctx.final_environment == "teensy41"
+
     def test_cli_upload_port(self) -> None:
         ctx = _make_ctx(upload_port=None)
         ctx.args = _make_args(upload_port="/dev/ttyUSB0")
@@ -488,6 +945,56 @@ class TestResolvePortAndEnvironment:
             mock_time.sleep = MagicMock()
             rc = asyncio.run(_resolve_port_and_environment(ctx))
         assert rc == 1
+
+    def test_teensy_port_detection_never_uploads_stale_pio_hex(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        stale_hex = tmp_path / ".pio" / "build" / "teensy41" / "firmware.hex"
+        stale_hex.parent.mkdir(parents=True)
+        stale_hex.write_text("", encoding="utf-8")
+
+        ctx = _make_ctx(
+            upload_port=None,
+            final_environment="teensy41",
+            build_dir=tmp_path,
+        )
+        ctx.args = _make_args(
+            upload_port=None,
+            environment="teensy41",
+            object_fled=True,
+            parlio=False,
+            use_root_platformio_ini=False,
+            project_dir=tmp_path,
+        )
+        mock_result = MagicMock(
+            ok=False,
+            selected_port=None,
+            error_message="No USB",
+            all_ports=[],
+        )
+        call_count = [0]
+        original_monotonic = __import__("time").monotonic
+
+        def fake_monotonic() -> float:
+            call_count[0] += 1
+            if call_count[0] <= 2:
+                return original_monotonic()
+            return original_monotonic() + 999
+
+        with (
+            patch(f"{_PATCH_MOD}.auto_detect_upload_port", return_value=mock_result),
+            patch(f"{_PATCH_MOD}.time") as mock_time,
+            patch(f"{_PATCH_MOD}.subprocess.run") as mock_subprocess_run,
+        ):
+            mock_time.monotonic = fake_monotonic
+            mock_time.sleep = MagicMock()
+            rc = asyncio.run(_resolve_port_and_environment(ctx))
+
+        output = capsys.readouterr().out
+        assert rc == 1
+        mock_subprocess_run.assert_not_called()
+        assert "AutoResearch will not pre-upload stale .pio firmware" in output
+        assert "Firmware uploaded via Teensy bootloader" not in output
 
 
 class TestAutoDetectUploadPort:
@@ -640,7 +1147,10 @@ class TestRunSchemaAndPinSetup:
         assert rc is None
         assert ctx.effective_tx_pin == 3
         assert ctx.effective_rx_pin == 4
-        assert ctx.json_rpc_commands[0]["method"] == "setPins"
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 3, "rxPin": 4}],
+        }
 
     def test_default_pins(self) -> None:
         args = _make_args(skip_schema=True)
@@ -652,8 +1162,114 @@ class TestRunSchemaAndPinSetup:
         ):
             rc = asyncio.run(_run_schema_and_pin_setup(ctx))
         assert rc is None
-        assert ctx.effective_tx_pin == 1  # PIN_TX default
-        assert ctx.effective_rx_pin == 0  # PIN_RX default
+        assert ctx.effective_tx_pin == 1
+        assert ctx.effective_rx_pin == 2
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 1, "rxPin": 2}],
+        }
+
+    def test_teensy_default_pins_match_firmware(self) -> None:
+        args = _make_args(skip_schema=True)
+        ctx = _make_ctx(args=args, final_environment="teensy41")
+        with patch(
+            f"{_PATCH_MOD}.run_gpio_pretest",
+            new_callable=AsyncMock,
+            return_value=True,
+        ):
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.effective_tx_pin == 1
+        assert ctx.effective_rx_pin == 2
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 1, "rxPin": 2}],
+        }
+
+    def test_teensy_flex_io_default_tx_pin_is_visible(self) -> None:
+        args = _make_args(parlio=False, flex_io=True, skip_schema=True)
+        ctx = _make_ctx(
+            args=args,
+            drivers=["FLEX_IO"],
+            final_environment="teensy41",
+        )
+        with patch(
+            f"{_PATCH_MOD}.run_gpio_pretest",
+            new_callable=AsyncMock,
+            return_value=True,
+        ) as pretest:
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.effective_tx_pin == 6
+        assert ctx.effective_rx_pin == 2
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 6, "rxPin": 2}],
+        }
+        pretest.assert_awaited_once_with(
+            "COM5", 6, 2, serial_interface=ctx.serial_iface
+        )
+
+    def test_teensy_flex_io_explicit_pin_override_wins(self) -> None:
+        args = _make_args(
+            parlio=False,
+            flex_io=True,
+            tx_pin=22,
+            rx_pin=8,
+            skip_schema=True,
+        )
+        ctx = _make_ctx(
+            args=args,
+            drivers=["FLEX_IO"],
+            final_environment="teensy41",
+        )
+        with patch(
+            f"{_PATCH_MOD}.run_gpio_pretest",
+            new_callable=AsyncMock,
+            return_value=True,
+        ):
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.effective_tx_pin == 22
+        assert ctx.effective_rx_pin == 8
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 22, "rxPin": 8}],
+        }
+
+    def test_esp32p4_default_pins_match_firmware(self) -> None:
+        args = _make_args(skip_schema=True)
+        ctx = _make_ctx(args=args, final_environment="esp32p4")
+        with patch(
+            f"{_PATCH_MOD}.run_gpio_pretest",
+            new_callable=AsyncMock,
+            return_value=True,
+        ):
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.effective_tx_pin == 5
+        assert ctx.effective_rx_pin == 6
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 5, "rxPin": 6}],
+        }
+
+    def test_teensy_cli_half_override_uses_firmware_default_complement(self) -> None:
+        args = _make_args(tx_pin=22, skip_schema=True)
+        ctx = _make_ctx(args=args, final_environment="teensy41")
+        with patch(
+            f"{_PATCH_MOD}.run_gpio_pretest",
+            new_callable=AsyncMock,
+            return_value=True,
+        ):
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.effective_tx_pin == 22
+        assert ctx.effective_rx_pin == 2
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 22, "rxPin": 2}],
+        }
 
     def test_gpio_pretest_failure(self) -> None:
         args = _make_args(skip_schema=True)
@@ -706,6 +1322,39 @@ class TestRunSchemaAndPinSetup:
         assert ctx.effective_rx_pin == 6
         assert ctx.discovery_client is not None
         assert ctx.pins_discovered is True
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 5, "rxPin": 6}],
+        }
+
+    def test_auto_discover_pins_failure_uses_platform_defaults(self) -> None:
+        args = _make_args(auto_discover_pins=True, skip_schema=True)
+        ctx = _make_ctx(args=args, final_environment="esp32p4")
+        mock_client = AsyncMock()
+        mock_discovery = MagicMock(
+            success=False, tx_pin=None, rx_pin=None, client=mock_client
+        )
+        with (
+            patch(
+                f"{_PATCH_MOD}.run_pin_discovery",
+                new_callable=AsyncMock,
+                return_value=mock_discovery,
+            ),
+            patch(
+                f"{_PATCH_MOD}.run_gpio_pretest",
+                new_callable=AsyncMock,
+                return_value=True,
+            ),
+        ):
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.effective_tx_pin == 5
+        assert ctx.effective_rx_pin == 6
+        assert ctx.json_rpc_commands[0] == {
+            "method": "setPins",
+            "params": [{"txPin": 5, "rxPin": 6}],
+        }
+        mock_client.close.assert_awaited_once()
 
 
 # ============================================================
@@ -829,6 +1478,70 @@ class TestRunTestsOrSpecialMode:
         ):
             rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
         assert rc == 1
+
+    def test_rpc_control_success_without_passed_field(self) -> None:
+        ctx = _make_ctx()
+        ctx.json_rpc_commands.insert(
+            0, {"method": "setPins", "params": [{"txPin": 8, "rxPin": 9}]}
+        )
+        qctx = QuietContext(quiet=False)
+
+        mock_client = AsyncMock()
+        set_pins_response = MagicMock()
+        set_pins_response.data = {
+            "success": True,
+            "txPin": 8,
+            "rxPin": 9,
+            "rxChannelRecreated": True,
+        }
+        driver_response = MagicMock()
+        driver_response.data = {
+            "success": True,
+            "passed": True,
+            "driver": "PARLIO",
+            "laneCount": 1,
+            "laneSizes": [100],
+            "duration_ms": 42,
+            "passedTests": 1,
+            "totalTests": 1,
+        }
+        mock_client.send = AsyncMock(side_effect=[set_pins_response, driver_response])
+        mock_client.connect = AsyncMock()
+        mock_client.close = AsyncMock()
+
+        with (
+            patch(f"{_PATCH_MOD}.RpcClient", return_value=mock_client),
+            patch(f"{_PATCH_MOD}.kill_port_users"),
+            patch("time.sleep"),
+        ):
+            rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
+        assert rc == 0
+
+    def test_rpc_control_error_without_success_false_stops_run(self) -> None:
+        ctx = _make_ctx()
+        ctx.json_rpc_commands.insert(
+            0, {"method": "setPins", "params": [{"txPin": 8, "rxPin": 9}]}
+        )
+        qctx = QuietContext(quiet=False)
+
+        mock_client = AsyncMock()
+        set_pins_response = MagicMock()
+        set_pins_response.data = {
+            "error": "RxChannelCreationFailed",
+            "message": "Failed to create RX channel",
+        }
+        mock_client.send = AsyncMock(return_value=set_pins_response)
+        mock_client.connect = AsyncMock()
+        mock_client.close = AsyncMock()
+
+        with (
+            patch(f"{_PATCH_MOD}.RpcClient", return_value=mock_client),
+            patch(f"{_PATCH_MOD}.kill_port_users"),
+            patch("time.sleep"),
+        ):
+            rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
+        assert rc == 1
+        assert mock_client.send.await_count == 1
 
     def test_discovery_client_reuse(self) -> None:
         """Verify that discovery_client is reused instead of creating a new one."""

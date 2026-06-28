@@ -12,13 +12,13 @@ struct Drop {
     u32 timestamp = 0;        // When the drop occurred
 
     // Default constructor
-    Drop() FL_NOEXCEPT = default;
+    Drop() FL_NO_EXCEPT = default;
 };
 
 class DropDetector {
 public:
-    DropDetector() FL_NOEXCEPT;
-    ~DropDetector() FL_NOEXCEPT;
+    DropDetector() FL_NO_EXCEPT;
+    ~DropDetector() FL_NO_EXCEPT;
 
     void update(shared_ptr<Context> context);
     void reset();

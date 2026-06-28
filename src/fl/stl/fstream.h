@@ -66,20 +66,20 @@ private:
     }
 
 public:
-    ifstream() FL_NOEXCEPT : mLastRead(0), mGood(false), mEof(false), mFail(true) {}
+    ifstream() FL_NO_EXCEPT : mLastRead(0), mGood(false), mEof(false), mFail(true) {}
 
     explicit ifstream(const char* path, ios::openmode mode = ios::in);
 
     explicit ifstream(filebuf_ptr handle);
 
-    ~ifstream() FL_NOEXCEPT;
+    ~ifstream() FL_NO_EXCEPT;
 
     // Non-copyable
-    ifstream(const ifstream&) FL_NOEXCEPT = delete;
+    ifstream(const ifstream&) FL_NO_EXCEPT = delete;
     ifstream& operator=(const ifstream&) = delete;
 
     // Moveable
-    ifstream(ifstream&& other) FL_NOEXCEPT
+    ifstream(ifstream&& other) FL_NO_EXCEPT
         : mHandle(other.mHandle), mLastRead(other.mLastRead),
           mGood(other.mGood), mEof(other.mEof), mFail(other.mFail) {
         other.mHandle.reset();
@@ -89,7 +89,7 @@ public:
         other.mFail = true;
     }
 
-    ifstream& operator=(ifstream&& other) FL_NOEXCEPT {
+    ifstream& operator=(ifstream&& other) FL_NO_EXCEPT {
         if (this != &other) {
             close();
             mHandle = other.mHandle;
@@ -225,20 +225,20 @@ private:
     }
 
 public:
-    ofstream() FL_NOEXCEPT : mGood(false), mEof(false), mFail(true), mLocalError(0) {}
+    ofstream() FL_NO_EXCEPT : mGood(false), mEof(false), mFail(true), mLocalError(0) {}
 
     explicit ofstream(const char* path, ios::openmode mode = ios::out);
 
     explicit ofstream(filebuf_ptr handle);
 
-    ~ofstream() FL_NOEXCEPT;
+    ~ofstream() FL_NO_EXCEPT;
 
     // Non-copyable
-    ofstream(const ofstream&) FL_NOEXCEPT = delete;
+    ofstream(const ofstream&) FL_NO_EXCEPT = delete;
     ofstream& operator=(const ofstream&) = delete;
 
     // Moveable
-    ofstream(ofstream&& other) FL_NOEXCEPT
+    ofstream(ofstream&& other) FL_NO_EXCEPT
         : mHandle(other.mHandle), mGood(other.mGood), mEof(other.mEof),
           mFail(other.mFail), mLocalError(other.mLocalError) {
         other.mHandle.reset();
@@ -248,7 +248,7 @@ public:
         other.mLocalError = 0;
     }
 
-    ofstream& operator=(ofstream&& other) FL_NOEXCEPT {
+    ofstream& operator=(ofstream&& other) FL_NO_EXCEPT {
         if (this != &other) {
             close();
             mHandle = other.mHandle;
@@ -318,20 +318,20 @@ private:
     }
 
 public:
-    fstream() FL_NOEXCEPT : mLastRead(0), mGood(false), mEof(false), mFail(true), mLocalError(0) {}
+    fstream() FL_NO_EXCEPT : mLastRead(0), mGood(false), mEof(false), mFail(true), mLocalError(0) {}
 
     explicit fstream(const char* path, ios::openmode mode = ios::in | ios::out);
 
     explicit fstream(filebuf_ptr handle);
 
-    ~fstream() FL_NOEXCEPT;
+    ~fstream() FL_NO_EXCEPT;
 
     // Non-copyable
-    fstream(const fstream&) FL_NOEXCEPT = delete;
+    fstream(const fstream&) FL_NO_EXCEPT = delete;
     fstream& operator=(const fstream&) = delete;
 
     // Moveable
-    fstream(fstream&& other) FL_NOEXCEPT
+    fstream(fstream&& other) FL_NO_EXCEPT
         : mHandle(other.mHandle), mLastRead(other.mLastRead),
           mGood(other.mGood), mEof(other.mEof), mFail(other.mFail),
           mLocalError(other.mLocalError) {
@@ -343,7 +343,7 @@ public:
         other.mLocalError = 0;
     }
 
-    fstream& operator=(fstream&& other) FL_NOEXCEPT {
+    fstream& operator=(fstream&& other) FL_NO_EXCEPT {
         if (this != &other) {
             close();
             mHandle = other.mHandle;

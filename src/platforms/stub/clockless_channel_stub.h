@@ -47,7 +47,7 @@ private:
 
 public:
     ClocklessController()
- FL_NOEXCEPT {
+ FL_NO_EXCEPT {
         // Create channel data with pin and timing configuration
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
         mChannelData = ChannelData::create(DATA_PIN, timing);
@@ -60,10 +60,10 @@ public:
         mDriver = BusTraits<Bus::STUB>::instancePtr();
     }
 
-    virtual void init() FL_NOEXCEPT override { }
+    virtual void init() FL_NO_EXCEPT override { }
 
 protected:
-    virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NOEXCEPT override
+    virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT override
     {
         // Phase 5b of #2428: use the pre-bound driver directly. Legacy
         // `addLeds<>`-style controllers name `BusTraits<Bus::STUB>::instancePtr()`

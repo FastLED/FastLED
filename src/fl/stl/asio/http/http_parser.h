@@ -40,8 +40,8 @@ using HttpResponsePtrConst = fl::shared_ptr<const HttpResponse>;
 // HttpRequestParser: Parse HTTP/1.1 requests
 class HttpRequestParser {
 public:
-    HttpRequestParser() FL_NOEXCEPT;
-    ~HttpRequestParser() FL_NOEXCEPT;
+    HttpRequestParser() FL_NO_EXCEPT;
+    ~HttpRequestParser() FL_NO_EXCEPT;
 
     // Feed raw bytes received from a socket into the parser (incremental/streaming)
     void feed(fl::span<const u8> data);
@@ -103,8 +103,8 @@ private:
 // HttpResponseParser: Parse HTTP/1.1 responses
 class HttpResponseParser {
 public:
-    HttpResponseParser() FL_NOEXCEPT;
-    ~HttpResponseParser() FL_NOEXCEPT;
+    HttpResponseParser() FL_NO_EXCEPT;
+    ~HttpResponseParser() FL_NO_EXCEPT;
 
     // Feed raw bytes received from a socket into the parser (incremental/streaming)
     void feed(fl::span<const u8> data);

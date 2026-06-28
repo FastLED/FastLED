@@ -12,7 +12,7 @@ namespace detail {
 FL_NO_INLINE
 fl::size flat_map_lower_bound_idx(const void* data, fl::size n,
                                   const void* key,
-                                  const flat_map_ops& ops) FL_NOEXCEPT {
+                                  const flat_map_ops& ops) FL_NO_EXCEPT {
     const char* base = static_cast<const char*>(data);
     fl::size first_idx = 0;
     fl::size count = n;
@@ -34,7 +34,7 @@ fl::size flat_map_lower_bound_idx(const void* data, fl::size n,
 FL_NO_INLINE
 fl::size flat_map_upper_bound_idx(const void* data, fl::size n,
                                   const void* key,
-                                  const flat_map_ops& ops) FL_NOEXCEPT {
+                                  const flat_map_ops& ops) FL_NO_EXCEPT {
     const char* base = static_cast<const char*>(data);
     fl::size first_idx = 0;
     fl::size count = n;

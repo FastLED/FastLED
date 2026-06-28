@@ -58,9 +58,9 @@ public:
     /**
      * @brief Construct with standalone Beat
      */
-    Backbeat() FL_NOEXCEPT;
+    Backbeat() FL_NO_EXCEPT;
 
-    ~Backbeat() FL_NOEXCEPT override;
+    ~Backbeat() FL_NO_EXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

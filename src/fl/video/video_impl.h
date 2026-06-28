@@ -36,7 +36,7 @@ class VideoImpl {
     // audio triggers.
     VideoImpl(size_t pixelsPerFrame, float fpsVideo,
               size_t frameHistoryCount = 0);
-    ~VideoImpl() FL_NOEXCEPT;
+    ~VideoImpl() FL_NO_EXCEPT;
     // Api
     void begin(fl::filebuf_ptr h);
     void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
@@ -56,8 +56,8 @@ class VideoImpl {
 
     // FLED v1 container accessors. Forwards to the underlying PixelStream;
     // empty / false for legacy headerless `.rgb` files.
-    bool hasEmbeddedScreenMap() const FL_NOEXCEPT;
-    const fl::string &embeddedScreenMapJson() const FL_NOEXCEPT;
+    bool hasEmbeddedScreenMap() const FL_NO_EXCEPT;
+    const fl::string &embeddedScreenMapJson() const FL_NO_EXCEPT;
 
   private:
     bool updateBufferIfNecessary(fl::u32 prev, fl::u32 now);

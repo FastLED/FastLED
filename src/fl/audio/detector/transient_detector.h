@@ -9,8 +9,8 @@ namespace detector {
 
 class Transient {
 public:
-    Transient() FL_NOEXCEPT;
-    ~Transient() FL_NOEXCEPT;
+    Transient() FL_NO_EXCEPT;
+    ~Transient() FL_NO_EXCEPT;
 
     void update(shared_ptr<Context> context);
     void reset();

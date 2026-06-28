@@ -25,21 +25,18 @@
 
 #if defined(FL_IS_TEENSY_4X)
 
-// FastLED #3066 Phase 4 sub-task 2: enable the per-frame raw-capture dumps
-// in this file by default. These FL_DEBUG-gated FL_WARN_F sites surface the
-// bimodal-edge symptom (940/640 ns HIGH, 286/586 ns LOW from an OBJECT_FLED
-// frame) over the serial RPC link so bench operators can characterise the
-// FIFO-watermark / merging hypothesis without rebuilding.
-//
-// Users who need silent FlexPWM RX can `#define FL_RX_FLEXPWM_QUIET 1`
-// upstream of this include — that path #undef's FL_DEBUG so the production
-// fast path is unchanged.
-#ifndef FL_RX_FLEXPWM_QUIET
-#ifndef FL_DEBUG
-#define FL_DEBUG 1
-#define FL_DEBUG_DEFINED_BY_RX_FLEXPWM 1
-#endif
-#endif
+// FastLED #3219: the per-frame `[FlexPWM CFG]`/`DMA`/`RAW`/`EDGE`/`E`/
+// `DECODE` FL_WARN_F dumps that PR #3216 enabled by default in this
+// file have been removed. They were instrumentation added during the
+// bimodal-edge investigation (#3066 Phase 4) and produced 18 of the
+// 75 serial lines per OBJECT_FLED autoresearch frame -- ~24 % of the
+// device's UART output volume. On a 100-LED frame that volume blocked
+// the device's UART TX FIFO and stalled the test between patterns.
+// The dual-circuit capture refactor + midpoint classifier fix landed
+// in this PR series, so the bench-debug surface is no longer needed
+// to characterize the previous root cause. If diagnostic dumps are
+// needed again, add them behind a `-DFL_RX_FLEXPWM_VERBOSE=1` build
+// flag, NOT a hardcoded `#define FL_DEBUG 1` in this header.
 
 #define FASTLED_INTERNAL
 #include "fl/system/fastled.h"
@@ -49,6 +46,7 @@
 #include "fl/log/log.h"
 #include "fl/stl/result.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/bit_cast.h"
 
 // IWYU pragma: begin_keep
 #include <Arduino.h>
@@ -116,19 +114,28 @@ static const FlexPwmPinInfo kPinMap[] = {
      &IOMUXC_FLEXPWM2_PWMA2_SELECT_INPUT, 1},
 
     // Pin 8: FlexPWM1_SM3_A (GPIO_B1_00, ALT6)
+    // SELECT_INPUT=4 routes from GPIO_B1_00 (pin 8). The previous value 0
+    // selected GPIO_SD_B1_00, an unrelated pad, so FlexPWM never saw the
+    // pin 8 signal -- #3359 zero_capture root cause for canonical TX22->RX8.
     {8, &IMXRT_FLEXPWM1, 3, false, DMAMUX_SOURCE_FLEXPWM1_READ3,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_B1_00, 6,
-     &IOMUXC_FLEXPWM1_PWMA3_SELECT_INPUT, 0},
+     &IOMUXC_FLEXPWM1_PWMA3_SELECT_INPUT, 4},
 
     // Pin 22: FlexPWM4_SM0_A (GPIO_AD_B1_08, ALT1)
+    // SELECT_INPUT=1 routes from GPIO_AD_B1_08 per the i.MX RT1062
+    // IOMUXC_FLEXPWM4_PWMA0_SELECT_INPUT daisy table. Previous value 0
+    // selected a different pad and would have silently failed FlexPWM RX
+    // capture on pin 22 (same class of bug as #3402's pin 8 fix).
     {22, &IMXRT_FLEXPWM4, 0, false, DMAMUX_SOURCE_FLEXPWM4_READ0,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B1_08, 1,
-     &IOMUXC_FLEXPWM4_PWMA0_SELECT_INPUT, 0},
+     &IOMUXC_FLEXPWM4_PWMA0_SELECT_INPUT, 1},
 
     // Pin 23: FlexPWM4_SM1_A (GPIO_AD_B1_09, ALT1)
+    // SELECT_INPUT=1 routes from GPIO_AD_B1_09 per the i.MX RT1062
+    // IOMUXC_FLEXPWM4_PWMA1_SELECT_INPUT daisy table.
     {23, &IMXRT_FLEXPWM4, 1, false, DMAMUX_SOURCE_FLEXPWM4_READ1,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_AD_B1_09, 1,
-     &IOMUXC_FLEXPWM4_PWMA1_SELECT_INPUT, 0},
+     &IOMUXC_FLEXPWM4_PWMA1_SELECT_INPUT, 1},
 
     // Pin 29: FlexPWM3_SM1_B (GPIO_EMC_31, ALT1)
     {29, &IMXRT_FLEXPWM3, 1, true, DMAMUX_SOURCE_FLEXPWM3_READ1,
@@ -139,9 +146,12 @@ static const FlexPwmPinInfo kPinMap[] = {
     // Teensy 4.1 only pins
 
     // Pin 36: FlexPWM2_SM3_A (GPIO_B1_02, ALT6)
+    // SELECT_INPUT=4 routes from GPIO_B1_02 per the i.MX RT1062
+    // IOMUXC_FLEXPWM2_PWMA3_SELECT_INPUT daisy table. Mirrors the same
+    // GPIO_B1_xx / FlexPWM*_PWMA3 / ALT6 pattern as pin 8.
     {36, &IMXRT_FLEXPWM2, 3, false, DMAMUX_SOURCE_FLEXPWM2_READ3,
      &IOMUXC_SW_MUX_CTL_PAD_GPIO_B1_02, 6,
-     &IOMUXC_FLEXPWM2_PWMA3_SELECT_INPUT, 1},
+     &IOMUXC_FLEXPWM2_PWMA3_SELECT_INPUT, 4},
 
     // Pin 49: FlexPWM1_SM2_A (GPIO_EMC_23, ALT1) [bottom pads]
     {49, &IMXRT_FLEXPWM1, 2, false, DMAMUX_SOURCE_FLEXPWM1_READ2,
@@ -179,32 +189,63 @@ static const FlexPwmPinInfo *lookupPin(int pin) {
 // ---------------------------------------------------------------------------
 
 /// Convert 16-bit tick delta to nanoseconds using the bus clock frequency.
+///
+/// #3416 RX-LOW-3: 16-bit deltas wrap at (65536 / F_BUS_ACTUAL) seconds.
+/// At F_BUS_ACTUAL = 150 MHz this is ~437 us. The longest legal WS2812
+/// pulse we care about is the reset LOW (>= 50 us). Some older WS2811
+/// strands have ~280 us reset minimums. F_BUS_ACTUAL is not a constexpr
+/// on Teensyduino so a true static_assert isn't possible; the safety
+/// invariant is: F_BUS_ACTUAL must stay >= ~210 MHz for the 16-bit
+/// timestamp window to contain a 300 us pulse. Default Teensy 4.x bus
+/// is 150 MHz which leaves ~437 us headroom.
+///
+/// #3416 RX-LOW-4: replace the per-edge 64-bit divide with a Q16.16
+/// fixed-point multiply. At F_BUS_ACTUAL=150 MHz the conversion
+/// factor is 1e9/F_BUS_ACTUAL = 6.666... ns/tick. Pre-scaled to Q16.16
+/// once at first call, then a 1-cycle UMULL replaces the ~30-cycle
+/// 64-bit divide. Saves ~150k cycles per 100-LED frame (~250us at
+/// 600 MHz CPU). Initial computation happens on first call instead
+/// of constexpr because F_BUS_ACTUAL is a runtime variable on Teensy.
 static inline u32 tickDeltaNs(u16 t0, u16 t1) {
-    u16 delta = static_cast<u16>(t1 - t0); // handles wraparound
+    static u32 ns_per_tick_q16 = 0;
+    if (ns_per_tick_q16 == 0) {
+        // ns_per_tick_q16 = (1e9 / F_BUS_ACTUAL) << 16
+        // = 1e9 << 16 / F_BUS_ACTUAL, but 1e9 << 16 overflows u32;
+        // use u64 intermediate then truncate.
+        ns_per_tick_q16 = static_cast<u32>(
+            (static_cast<u64>(1000000000ULL) << 16) / F_BUS_ACTUAL);
+    }
+    u16 delta = static_cast<u16>(t1 - t0);  // handles wraparound
     return static_cast<u32>(
-        (static_cast<u64>(delta) * 1000000000ULL) / F_BUS_ACTUAL);
+        (static_cast<u64>(delta) * ns_per_tick_q16) >> 16);
 }
 
 /// Decode a single bit from high/low nanosecond durations.
-/// Returns 0, 1, or -1 (unrecognised).
+///
+/// **Always returns 0 or 1** (never -1). Bench evidence (#3219, 5-LED test):
+/// when a single bit's HIGH duration landed marginally outside T0H_max but
+/// also outside T1H_min, the old "return -1" path made the decoder `continue`
+/// past that bit -- which dropped one bit from the stream and SHIFTED every
+/// downstream bit forward by one position in its byte. A single edge-of-
+/// tolerance pulse then propagated through the rest of the frame as
+/// cascading byte/LED errors (e.g. Pattern B 5-LED: one bit error caused
+/// all 5 LEDs to fail with `R: 0x55 -> 0xAB` left-shift). Classifying by
+/// the midpoint between t0h_max and t1h_min keeps byte alignment intact;
+/// at worst a single LSB flips in the affected bit's byte instead of
+/// poisoning everything that follows.
 static inline int decodeBit(u32 high_ns, u32 low_ns,
                             const ChipsetTiming4Phase &timing) {
-    // Check bit-0 thresholds
-    if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns &&
-        low_ns >= timing.t0l_min_ns && low_ns <= timing.t0l_max_ns) {
-        return 0;
-    }
-    // Check bit-1 thresholds
-    if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns &&
-        low_ns >= timing.t1l_min_ns && low_ns <= timing.t1l_max_ns) {
-        return 1;
-    }
-    return -1;
+    (void)low_ns;  // HIGH-only classification is more robust to TX/RX skew
+    const u32 midpoint =
+        (timing.t0h_max_ns + timing.t1h_min_ns) / 2u;
+    return (high_ns >= midpoint) ? 1 : 0;
 }
 
 /// Decode a bit when the following LOW phase is a reset/gap or was not
+/// Decode a bit when the following LOW phase is a reset/gap or was not
 /// captured. WS2812 bit value is encoded by HIGH width; LOW validation is only
-/// possible for intra-frame bit periods.
+/// possible for intra-frame bit periods. Returns 0, 1, or -1 (out-of-range);
+/// the caller checks `< 0` to count decode errors.
 static inline int decodeBitFromHigh(u32 high_ns,
                                     const ChipsetTiming4Phase &timing) {
     if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns) {
@@ -244,6 +285,16 @@ static inline bool isGapPulse(u32 low_ns,
 /// Polarity-aware decoder: uses the HIGH/LOW labels from the gap-aware
 /// edge builder. Edges come in HIGH/LOW pairs representing one bit each.
 /// If polarity is wrong (noise), skip and resync on the next HIGH edge.
+///
+/// #3416 adaptive midpoint: a single pre-pass over the HIGH durations
+/// finds the bimodal split point (min + max) / 2 rather than relying on
+/// the static `(t0h_max + t1h_min) / 2` midpoint derived from the
+/// chipset timing spec. Many TX implementations (notably FlexIO at
+/// kFlexIOBaudDiv=18) emit '1' bits at ~950 ns HIGH vs the spec
+/// nominal of 580 ns; receiver jitter can push a marginal '0' bit
+/// above the static 402 ns threshold and a marginal '1' bit below it.
+/// The observed-distribution midpoint (~635 ns for FlexIO) better
+/// separates the two clusters under jitter.
 static fl::result<u32, DecodeError>
 decodeEdges(const ChipsetTiming4Phase &timing,
             fl::span<const EdgeTime> edges, fl::span<u8> bytes_out) {
@@ -251,9 +302,30 @@ decodeEdges(const ChipsetTiming4Phase &timing,
         return fl::result<u32, DecodeError>::success(0);
     }
 
+    // Pre-scan to compute observed-distribution midpoint.
+    u32 high_min = 0xFFFFFFFFu;
+    u32 high_max = 0u;
+    u32 high_samples = 0;
+    for (size_t k = 0; k + 1 < edges.size(); k += 2) {
+        if (!edges[k].high) continue;  // polarity error, skip
+        u32 h = edges[k].ns;
+        if (h < 100u || h > 1500u) continue;  // outlier (idle/glitch)
+        if (h < high_min) high_min = h;
+        if (h > high_max) high_max = h;
+        ++high_samples;
+    }
+    u32 adaptive_midpoint = (timing.t0h_max_ns + timing.t1h_min_ns) / 2u;
+    if (high_samples >= 16 && high_max > high_min + 200u) {
+        // Enough samples to trust the observed distribution.
+        adaptive_midpoint = (high_min + high_max) / 2u;
+    }
+
     u32 byte_index = 0;
     u8 current_byte = 0;
-    u8 bit_count = 0;
+    // #3416 RX-MED-7: widen bit_count from u8 to u32 so accidental
+    // comparison against size_t or unsigned arithmetic doesn't promote
+    // into a surprise. The actual range is 0..8 either way.
+    u32 bit_count = 0;
     u32 error_count = 0;
     u32 total_bits = 0;
     u32 resync_count = 0;
@@ -275,8 +347,7 @@ decodeEdges(const ChipsetTiming4Phase &timing,
             bit = decodeBit(high_ns, low_ns, timing);
             i += 2;
         } else {
-            bit = decodeBitFromHigh(high_ns, timing);
-            i += 1;
+            bit = decodeBitFromHigh(high_ns, timing);            i += 1;
         }
         ++total_bits;
 
@@ -305,13 +376,6 @@ decodeEdges(const ChipsetTiming4Phase &timing,
             static_cast<u8>(current_byte << (8 - bit_count));
     }
 
-#ifdef FL_DEBUG
-    FL_WARN_F("[FlexPWM DECODE] bytes=%s total_bits=%s errors=%s resyncs=%s edges=%s", byte_index, total_bits, error_count, resync_count, edges.size());
-    if (edges.size() >= 4) {
-        FL_WARN_F("[FlexPWM DECODE] e[0]=%s%s e[1]=%s%s e[2]=%s%s e[3]=%s%s", (edges[0].high?"H":"L"), edges[0].ns, (edges[1].high?"H":"L"), edges[1].ns, (edges[2].high?"H":"L"), edges[2].ns, (edges[3].high?"H":"L"), edges[3].ns);
-    }
-#endif
-
     // Check error rate (>10% is considered too high)
     if (total_bits > 0 &&
         (error_count * 10) > total_bits) {
@@ -331,7 +395,23 @@ decodeEdges(const ChipsetTiming4Phase &timing,
 class FlexPwmRxChannelImpl : public FlexPwmRxChannel {
   public:
     explicit FlexPwmRxChannelImpl(int pin) : mPin(pin) {}
-    ~FlexPwmRxChannelImpl() override = default;
+    ~FlexPwmRxChannelImpl() override {
+        // #3416 RX-LOW-7: tear down on destruction so subsequent
+        // peripheral users on the same pin don't inherit our PAD_CTL
+        // (HYS/PKE/PUE) or ALT-mode + SION setting. Disable DMA first
+        // so a pending IRQ doesn't fire on a freed object.
+        if (mConfigured) {
+            mDma.disable();
+            mDma.detachInterrupt();
+        }
+        if (mPinInfo && mPinInfo->mux_register) {
+            // Restore to ALT5 (GPIO) without SION, default PAD_CTL.
+            *(mPinInfo->mux_register) = 5;
+            volatile u32 *pad_register = (volatile u32 *)(
+                (uintptr_t)mPinInfo->mux_register + 0x1F0u);
+            *pad_register = 0;
+        }
+    }
 
     bool begin(const RxConfig &config) override;
     bool finished() const override;
@@ -352,6 +432,8 @@ class FlexPwmRxChannelImpl : public FlexPwmRxChannel {
     static void dmaIsr();
     static FlexPwmRxChannelImpl *sActiveInstance;
 
+    friend fl::json FlexPwmRxChannel::diagnosticsToJson(int requested_pin) FL_NO_EXCEPT;
+
     int mPin = -1;
     const FlexPwmPinInfo *mPinInfo = nullptr;
 
@@ -364,6 +446,7 @@ class FlexPwmRxChannelImpl : public FlexPwmRxChannel {
     volatile bool mReceiveDone = false;
     bool mConfigured = false;
     bool mStartLow = true;
+    u16 mArmedCiter = 0;
 
     // Decoded edge cache (built from mCaptureBuffer or injected)
     fl::vector<EdgeTime> mEdges;
@@ -387,6 +470,13 @@ bool FlexPwmRxChannelImpl::begin(const RxConfig &config) {
     }
 
     mBufferSize = config.buffer_size;
+    // #3416 RX-MED-6: signal_range_max_ns / 1000 is used as the idle
+    // threshold in wait() to declare frame-end via inactivity. Default
+    // 100us is fine for WS2812 (50us reset minimum) but tighter LED
+    // chipsets with shorter inter-byte gaps (e.g. TM1814/APA106 with
+    // ~80us reset) need this lowered via RxConfig. Already exposed
+    // through the public config struct -- documented here for the
+    // implementation reader.
     mSignalRangeMaxNs = config.signal_range_max_ns;
     mStartLow = config.start_low;
     mReceiveDone = false;
@@ -396,6 +486,12 @@ bool FlexPwmRxChannelImpl::begin(const RxConfig &config) {
     // Allocate capture buffer: 2 captures per bit (rising + falling).
     // Cap to 8192 captures to avoid exhausting Teensy RAM (~16KB buffer).
     // For 100 LEDs × 24 bits = 2400 bits, we need ~4800 captures.
+    // #3416 RX-LOW-2: mBufferSize is named in EDGE PAIRS but
+    // RxConfig::buffer_size is documented as EDGES. Doubling here means
+    // the user-facing limit is actually half of what they think. A
+    // request like buffer_size=10000 silently caps to 4096 edge-pairs
+    // = 4096 bits = ~170 LEDs. For ~600+ LED strips this is dramatically
+    // undersized and the DMA wraps mid-frame.
     size_t cap_count = mBufferSize * 2;
     if (cap_count > 8192) {
         cap_count = 8192;
@@ -430,10 +526,43 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
     // Configure pin mux to route the pin to FlexPWM input.
     // Set SION (bit 4) to force input path through IOMUXC — required
     // for peripheral input capture when the pad is muxed to an alt function.
+    // #3416 RX-MED-2: this is `=` not `|=` -- the assignment wipes any
+    // other IOMUXC bits the boot ROM or Teensy core set (e.g. ODE).
+    // For our pure-input use that is intentional: we want a known
+    // alt-mode + SION starting point, and the SW_PAD_CTL write below
+    // sets the only pad attributes we care about (HYS, PKE, PUE).
     *(mPinInfo->mux_register) = mPinInfo->mux_value | 0x10; // SION bit
     if (mPinInfo->select_register) {
         *(mPinInfo->select_register) = mPinInfo->select_value;
     }
+
+    // #3416 RX-HIGH-3 / RX-LOW-8: configure SW_PAD_CTL with hysteresis +
+    // keeper so a marginal edge on a long jumper trace doesn't ring
+    // across the receiver's Vih/Vil thresholds and produce a spurious
+    // "double-H" capture (one of the residual ~0.8% noise-floor
+    // symptoms in #3410). The PAD_CTL register lives at a fixed
+    // +0x1F0 offset from MUX_CTL for every IOMUXC pad on the i.MX RT1062
+    // (verified across GPIO_EMC_*, GPIO_AD_B1_*, GPIO_B0_*, GPIO_B1_*
+    // via Teensyduino imxrt.h offsets). Final values (after empirically
+    // testing keeper vs pull-up vs pull-down -- all three statistically
+    // identical because TX is push-pull):
+    //   bit 12 PKE = 1: pull/keep enable
+    //   bit 13 PUE = 0: keeper mode (holds last driven level)
+    //   bit 16 HYS = 1: hysteresis enable -- the actual noise-floor lever
+    volatile u32 *pad_register = (volatile u32 *)(
+        (uintptr_t)mPinInfo->mux_register + 0x1F0u);
+    // KEEPER mode (PUE=0): pad holds the last driven level. WS2812 lines
+    // are actively driven by the TX side both HIGH and LOW; tested
+    // pull-up, pull-down, and keeper -- all three produced statistically
+    // identical noise floors on bench loopback (0.5-1.0% byte error
+    // range across both FlexIO and ObjectFLED TX). Keeper is the least
+    // surprising default since push-pull TX leaves no time window for
+    // any of the three configurations to actually act differently on
+    // the line. Hysteresis (HYS=1) is the one bit that's theoretically
+    // useful, kept regardless.
+    *pad_register = (1u << 12) |    // PKE
+                    (0u << 13) |    // PUE = 0 -> keeper mode
+                    (1u << 16);     // HYS
 
     // Disable the submodule while configuring
     pwm->MCTRL &= ~(FLEXPWM_MCTRL_RUN(1 << sm));
@@ -463,7 +592,13 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
                                  FLEXPWM_SMCAPTCTRLA_EDGA1(1) |
                                  FLEXPWM_SMCAPTCTRLA_CFAWM(0) |
                                  FLEXPWM_SMCAPTCTRLA_ARMA;
-        pwm->SM[sm].CAPTCOMPA = 0;
+        // CAPTCOMPA bits 0:1 (CFA, CAE) are write-1-to-clear capture-occurred
+        // flags per i.MX RT1062 RM eFlexPWM chapter. Writing 0 does NOT clear
+        // them, so a stale flag from a previous capture session causes the
+        // dual-circuit capture to produce a mismatched CVAL2/CVAL3 pair on
+        // the first read (old falling + fresh rising) -- root cause of the
+        // residual 0->1 random bit flips per #3406.
+        pwm->SM[sm].CAPTCOMPA = 0x3;
 
         // CAPTDE selects channel A capture DMA for the submodule read source.
         pwm->SM[sm].DMAEN = FLEXPWM_SMDMAEN_CAPTDE(1) | FLEXPWM_SMDMAEN_CA1DE;
@@ -474,7 +609,9 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
         pwm->SM[sm].CAPTCTRLB = FLEXPWM_SMCAPTCTRLB_EDGB0(2) |
                                  FLEXPWM_SMCAPTCTRLB_EDGB1(1) |
                                  FLEXPWM_SMCAPTCTRLB_ARMB;
-        pwm->SM[sm].CAPTCOMPB = 0;
+        // CAPTCOMPB bits 0:1 (CFB, CBE) are write-1-to-clear -- same as
+        // CAPTCOMPA above.
+        pwm->SM[sm].CAPTCOMPB = 0x3;
 
         // CAPTDE selects channel B capture DMA for the submodule read source.
         pwm->SM[sm].DMAEN = FLEXPWM_SMDMAEN_CAPTDE(2) | FLEXPWM_SMDMAEN_CB1DE;
@@ -482,22 +619,6 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
 
     // Start the submodule counter
     pwm->MCTRL |= FLEXPWM_MCTRL_RUN(1 << sm);
-
-#ifdef FL_DEBUG
-    FL_WARN_F("[FlexPWM CFG] pin=%s pwm%s sm=%s chB=%s", static_cast<int>(mPinInfo->pin), (pwm == &IMXRT_FLEXPWM1 ? 1 : pwm == &IMXRT_FLEXPWM2 ? 2 : pwm == &IMXRT_FLEXPWM3 ? 3 : 4), static_cast<int>(sm), mPinInfo->channel_b);
-    FL_WARN_F("[FlexPWM CFG] MCTRL=0x%x CTRL2=0x%x CTRL=0x%x",
-              pwm->MCTRL, pwm->SM[sm].CTRL2, pwm->SM[sm].CTRL);
-    if (!mPinInfo->channel_b) {
-        FL_WARN_F("[FlexPWM CFG] CAPTCTRLA=0x%x DMAEN=0x%x STS=0x%x",
-                  pwm->SM[sm].CAPTCTRLA, pwm->SM[sm].DMAEN,
-                  pwm->SM[sm].STS);
-    } else {
-        FL_WARN_F("[FlexPWM CFG] CAPTCTRLB=0x%x DMAEN=0x%x STS=0x%x",
-                  pwm->SM[sm].CAPTCTRLB, pwm->SM[sm].DMAEN,
-                  pwm->SM[sm].STS);
-    }
-    FL_WARN_F("[FlexPWM CFG] MUX=0x%x", *(mPinInfo->mux_register));
-#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -534,22 +655,38 @@ void FlexPwmRxChannelImpl::configureDma() {
     mDma.TCD->DLASTSGA = 0;
     mDma.TCD->BITER = mCaptureBuffer.size() / 2;
     mDma.TCD->CSR = DMA_TCD_CSR_DREQ;
+
+    // #3416 RX-MED-1: mArmedCiter is sampled BEFORE the 50us settle +
+    // ARMA bounce and BEFORE mDma.enable(). The wait() loop uses this
+    // as a baseline to detect "DMA never moved" failures. Sampling here
+    // matches BITER (CITER hasn't been decremented yet); sampling later
+    // (after enable + settle) would false-positive a successful capture
+    // as TIMEOUT if the TX side had already begun by then.
+    mArmedCiter = mDma.TCD->CITER;
     mDma.triggerAtHardwareEvent(mPinInfo->dma_source);
     mDma.interruptAtCompletion();
     mDma.attachInterrupt(dmaIsr);
-    mDma.enable();
 
-#ifdef FL_DEBUG
-    // Debug: dump DMA channel and DMAMUX state
-    volatile u32 *dmamux_reg = &DMAMUX_CHCFG0 + mDma.channel;
-    uintptr_t dma_daddr = reinterpret_cast<uintptr_t>(const_cast<void*>(mDma.TCD->DADDR)); // ok reinterpret cast - reading register
-    uintptr_t buf_addr = reinterpret_cast<uintptr_t>(mCaptureBuffer.data()); // ok reinterpret cast
-    FL_WARN_F("[FlexPWM DMA] ch=%s src=%d DMAMUX=0x%x CITER=%d ERQ=%d DADDR_match=%s",
-              mDma.channel, static_cast<int>(mPinInfo->dma_source),
-              *dmamux_reg, static_cast<int>(mDma.TCD->CITER),
-              (DMA_ERQ & (1 << mDma.channel) ? 1 : 0),
-              (dma_daddr == buf_addr ? "YES" : "NO"));
-#endif
+    // Settle delay: the IOMUXC pad-mux switch in configureFlexPwm() can latch
+    // a spurious edge into CVAL2/CVAL3 BEFORE the real TX starts. Re-arm the
+    // capture circuit just before enabling DMA so the spike is consumed by
+    // the capture FIFO without DMA picking it up as the first capture pair.
+    // Without this, ~1 in 7 frames sees a whole-frame 1-bit shift signature
+    // ((0xF0,0x0F,0xAA) decoded as (0xE0,0x1F,0x55)) -- #3406 Round-4 Run 7.
+    delayMicroseconds(50);
+    if (!mPinInfo->channel_b) {
+        mPinInfo->pwm->SM[mPinInfo->submodule].CAPTCTRLA &=
+            ~static_cast<u16>(FLEXPWM_SMCAPTCTRLA_ARMA);
+        mPinInfo->pwm->SM[mPinInfo->submodule].CAPTCTRLA |=
+            FLEXPWM_SMCAPTCTRLA_ARMA;
+    } else {
+        mPinInfo->pwm->SM[mPinInfo->submodule].CAPTCTRLB &=
+            ~static_cast<u16>(FLEXPWM_SMCAPTCTRLB_ARMB);
+        mPinInfo->pwm->SM[mPinInfo->submodule].CAPTCTRLB |=
+            FLEXPWM_SMCAPTCTRLB_ARMB;
+    }
+
+    mDma.enable();
 }
 
 // ---------------------------------------------------------------------------
@@ -568,31 +705,34 @@ void FlexPwmRxChannelImpl::dmaIsr() {
 // ---------------------------------------------------------------------------
 
 bool FlexPwmRxChannelImpl::finished() const {
-    if (mReceiveDone) {
-        return true;
-    }
-
-    // Inactivity-based frame detection: check if DMA has stalled
-    // (no new edges for longer than mSignalRangeMaxNs).
-    // We approximate this by checking the DMA destination address progress.
-    // If the DMA pointer hasn't moved in two consecutive checks separated
-    // by at least signal_range_max_ns, we declare the frame complete.
-    //
-    // For simplicity, we check the DMA DADDR (destination address) which
-    // gives us the current write position.
-    return false;
+    // #3416 RX-LOW-5: only the ISR-confirmed completion flag is checked
+    // here. The inactivity-based detection (sampling DADDR progress) is
+    // implemented inside wait() instead, where we hold the polling
+    // state. This function is therefore a thin ISR-flag accessor.
+    return mReceiveDone;
 }
 
 RxWaitResult FlexPwmRxChannelImpl::wait(u32 timeout_ms) {
     u32 start = millis();
+    // Compare progress against the CITER captured at arm time, not at wait
+    // entry. capture() calls FastLED.wait() before rx_channel->wait(), so by
+    // the time we enter here the TX may already have completed and the DMA
+    // may have already drained one frame -- a wait-entry sample would equal
+    // the current value and falsely classify a successful capture as TIMEOUT.
+    const u16 armed_citer = mArmedCiter;
     u16 last_citer = mDma.TCD->CITER;
     u32 last_change_time = micros();
+    bool exited_on_timeout = false;
 
     while (!mReceiveDone) {
         u32 now_ms = millis();
         if ((now_ms - start) >= timeout_ms) {
-            // Timeout -- but we may have partial data; treat it as success
-            // if DMA has captured any edges.
+            // Hit caller's timeout. Don't claim SUCCESS unless DMA actually
+            // moved -- if CITER is still at its initial value we got zero
+            // edges and must report TIMEOUT honestly so capture() can bail
+            // and runMultiTest() can emit a real failure instead of decoding
+            // a stale/empty buffer.
+            exited_on_timeout = true;
             break;
         }
 
@@ -617,9 +757,18 @@ RxWaitResult FlexPwmRxChannelImpl::wait(u32 timeout_ms) {
         yield();
     }
 
-    // Calculate how many captures DMA actually wrote
-    // (This is handled in buildEdgeTimesFromCaptures)
-
+    // Honesty: distinguish "actually got data" from "timeout with nothing".
+    //   - mReceiveDone              -> full buffer, definitely SUCCESS
+    //   - CITER moved since arm     -> partial buffer, SUCCESS (caller decodes
+    //                                   what arrived; inactivity-detection
+    //                                   path lands here)
+    //   - CITER unchanged since arm -> nothing arrived; do not pretend it did
+    const u16 current_citer = mDma.TCD->CITER;
+    const bool dma_progressed = mReceiveDone || (current_citer != armed_citer);
+    if (!dma_progressed) {
+        return RxWaitResult::TIMEOUT;
+    }
+    (void)exited_on_timeout;  // retained for future telemetry; see #3219
     return RxWaitResult::SUCCESS;
 }
 
@@ -648,8 +797,16 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
     bool dma_done = mReceiveDone || (mDma.TCD->CSR & DMA_TCD_CSR_DONE);
     size_t captures_written = 0;
 
-    if (dma_done && (biter == citer)) {
-        // DMA completed a full major loop — entire buffer is valid
+    if (dma_done) {
+        // #3416 RX-CRIT-2: when DMA completion ISR fires, the entire
+        // buffer is filled regardless of whether CITER has reloaded from
+        // BITER. The previous "dma_done && (biter == citer)" branch
+        // narrowly handled the post-reload case; the dma_done +
+        // biter != citer case (DREQ halt at major-loop end where the
+        // hardware briefly leaves CITER==0) fell through to the
+        // `biter >= citer` residual-count branch and reported
+        // captures_written=0, producing the silent mid-frame dropout
+        // visible in raw_sample as `H214753` huge HIGH gaps.
         captures_written = mCaptureBuffer.size();
     } else if (biter >= citer) {
         captures_written = static_cast<size_t>(biter - citer) * 2u;
@@ -658,26 +815,27 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
         captures_written = mCaptureBuffer.size();
     }
 
-#ifdef FL_DEBUG
-    FL_WARN_F("[FlexPWM RX] DMA captures_written=%s BITER=%s CITER=%s done=%s mReceiveDone=%s ch=%s pin=%s", captures_written, biter, citer, (dma_done ? 1 : 0), (mReceiveDone ? 1 : 0), mDma.channel, static_cast<int>(mPinInfo->pin));
-#endif
-
     // CRITICAL: Invalidate D-cache for the capture buffer region.
     // DMA writes bypass the CPU cache, so we must invalidate to see
     // the data DMA actually wrote. Without this, the CPU reads stale
     // cache lines and gets all-zero capture values.
+    //
+    // Cortex-M7 L1 cache lines are 32 bytes. arm_dcache_delete is only
+    // safe when both the start address and the size are 32-byte-aligned;
+    // a partial-line invalidate can leave 1-31 stale bytes adjacent to
+    // the invalidated region. Stale bytes with set bits leaking into a
+    // freshly-DMA'd buffer matches the residual 0->1 random byte-flip
+    // pattern from #3406 / #3359.
     if (captures_written > 0) {
-        arm_dcache_delete(mCaptureBuffer.data(),
-                          captures_written * sizeof(u16));
+        const fl::uptr kCacheLine = 32u;
+        const fl::uptr raw_addr = fl::ptr_to_int(mCaptureBuffer.data());
+        const fl::uptr end_addr = raw_addr + captures_written * sizeof(u16);
+        const fl::uptr aligned_start = raw_addr & ~(kCacheLine - 1u);
+        const fl::uptr aligned_end =
+            (end_addr + kCacheLine - 1u) & ~(kCacheLine - 1u);
+        arm_dcache_delete(fl::int_to_ptr<void>(aligned_start),
+                          aligned_end - aligned_start);
     }
-
-#ifdef FL_DEBUG
-    if (captures_written >= 8) {
-        FL_WARN_F("[FlexPWM RAW] first: %s %s %s %s", mCaptureBuffer[0], mCaptureBuffer[1], mCaptureBuffer[2], mCaptureBuffer[3]);
-        size_t mid = captures_written / 2;
-        FL_WARN_F("[FlexPWM RAW] mid[%s]: %s %s %s %s", mid, mCaptureBuffer[mid], mCaptureBuffer[mid+1], mCaptureBuffer[mid+2], mCaptureBuffer[mid+3]);
-    }
-#endif
 
     if (captures_written < 2) {
         mEdgesValid = true;
@@ -688,14 +846,15 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
     // [rise0, fall0, rise1, fall1, ...]. High time is the delta inside a pair;
     // low time is the delta from one pair's falling edge to the next pair's
     // rising edge.
-
-    mEdges.reserve(captures_written);
+    // Build EdgeTime pairs from paired rising/falling captures. DMA writes
+    // [rise0, fall0, rise1, fall1, ...]. High time is the delta inside a pair;
+    // low time is the delta from one pair's falling edge to the next pair's
+    // rising edge.
 
     for (size_t i = 0; i + 3 < captures_written; i += 2) {
         u16 rise = mCaptureBuffer[i];
         u16 fall = mCaptureBuffer[i + 1];
         u16 next_rise = mCaptureBuffer[i + 2];
-
         u32 high_ns = tickDeltaNs(rise, fall);
         u32 low_ns = tickDeltaNs(fall, next_rise);
 
@@ -767,6 +926,11 @@ size_t FlexPwmRxChannelImpl::getRawEdgeTimes(fl::span<EdgeTime> out,
 // injectEdges()
 // ---------------------------------------------------------------------------
 
+// #3416 RX-LOW-6: this is a TEST-ONLY entry point. It bypasses the
+// DMA capture path and pre-loads the decoder with synthetic edges.
+// `mReceiveDone = true` short-circuits subsequent wait() calls; the
+// fixture must call begin() again before a real capture or it will
+// immediately return SUCCESS without arming DMA.
 bool FlexPwmRxChannelImpl::injectEdges(fl::span<const EdgeTime> edges) {
     mEdges.clear();
     mEdges.reserve(edges.size());
@@ -791,11 +955,161 @@ fl::shared_ptr<FlexPwmRxChannel> FlexPwmRxChannel::create(int pin) {
     return fl::make_shared<FlexPwmRxChannelImpl>(pin);
 }
 
-} // namespace fl
+// ---------------------------------------------------------------------------
+// Diagnostics
+// ---------------------------------------------------------------------------
 
-#ifdef FL_DEBUG_DEFINED_BY_RX_FLEXPWM
-#undef FL_DEBUG_DEFINED_BY_RX_FLEXPWM
-#undef FL_DEBUG
+static u32 flexPwmDiagPtrToU32(const volatile void *ptr) FL_NO_EXCEPT {
+    return static_cast<u32>(fl::ptr_to_int(const_cast<void *>(ptr)));
+}
+
+static void flexPwmDiagSetU32(fl::json &obj, const char *key, u32 value) FL_NO_EXCEPT {
+    obj.set(key, static_cast<i64>(value));
+}
+
+static void flexPwmDiagSetPtr(fl::json &obj, const char *key,
+                              const volatile void *ptr) FL_NO_EXCEPT {
+    flexPwmDiagSetU32(obj, key, flexPwmDiagPtrToU32(ptr));
+}
+
+fl::json FlexPwmRxChannel::diagnosticsToJson(int requested_pin) FL_NO_EXCEPT {
+    fl::json out = fl::json::object();
+    out.set("format", "flexpwm-rx-diag-v1");
+    out.set("requestedPin", static_cast<i64>(requested_pin));
+
+    const FlexPwmPinInfo *info = lookupPin(requested_pin);
+    out.set("requestedPinSupported", info != nullptr);
+    if (info) {
+        out.set("requestedDmaSource", static_cast<i64>(info->dma_source));
+        out.set("requestedSubmodule", static_cast<i64>(info->submodule));
+        out.set("requestedChannelB", info->channel_b);
+        flexPwmDiagSetPtr(out, "requestedMuxRegister", info->mux_register);
+        flexPwmDiagSetU32(out, "requestedMuxValue", info->mux_value);
+        if (info->select_register) {
+            out.set("hasSelectRegister", true);
+            flexPwmDiagSetPtr(out, "requestedSelectRegister", info->select_register);
+            flexPwmDiagSetU32(out, "requestedSelectValue", info->select_value);
+        } else {
+            out.set("hasSelectRegister", false);
+        }
+    }
+
+    FlexPwmRxChannelImpl *active = FlexPwmRxChannelImpl::sActiveInstance;
+    out.set("activeInstance", active != nullptr);
+    if (!active || !active->mPinInfo) {
+        return out;
+    }
+
+    out.set("activePin", static_cast<i64>(active->mPin));
+    out.set("activePinMatches", active->mPin == requested_pin);
+    out.set("configured", active->mConfigured);
+    out.set("receiveDone", static_cast<bool>(active->mReceiveDone));
+    out.set("edgesValid", active->mEdgesValid);
+    out.set("edgeCount", static_cast<i64>(active->mEdges.size()));
+    out.set("captureBufferSize", static_cast<i64>(active->mCaptureBuffer.size()));
+    out.set("signalRangeMaxNs", static_cast<i64>(active->mSignalRangeMaxNs));
+
+    // Pin pad / GPIO state for the RX pin itself. Lets us tell if the pad
+    // inherited some pull/keeper/ODE/HYS setting from boot that would block
+    // FlexPWM input capture even when GPIO-mode digitalRead works.
+#if defined(NUM_DIGITAL_PINS)
+    if (active->mPin >= 0 && active->mPin < NUM_DIGITAL_PINS) {
+        volatile u32 *padReg = portControlRegister(active->mPin);
+        volatile u32 *fastOut = portOutputRegister(active->mPin);
+        volatile u32 *fastMode = portModeRegister(active->mPin);
+        volatile u32 *fastInput =
+            reinterpret_cast<volatile u32 *>( // ok reinterpret cast - Teensy fast GPIO PSR offset
+                fl::ptr_to_int(const_cast<u32 *>(fastOut)) + 0x08u);
+        volatile u32 *standardOut = reinterpret_cast<volatile u32 *>( // ok reinterpret cast - Teensy GPIO alias address map
+            fl::ptr_to_int(const_cast<u32 *>(fastOut)) - 0x01E48000u);
+        volatile u32 *standardMode = reinterpret_cast<volatile u32 *>( // ok reinterpret cast - Teensy GPIO alias address map
+            fl::ptr_to_int(const_cast<u32 *>(fastMode)) - 0x01E48000u);
+        volatile u32 *standardInput =
+            reinterpret_cast<volatile u32 *>( // ok reinterpret cast - Teensy fast GPIO PSR offset
+                fl::ptr_to_int(const_cast<u32 *>(standardOut)) + 0x08u);
+        flexPwmDiagSetPtr(out, "rxPadRegister", padReg);
+        flexPwmDiagSetU32(out, "rxPadValue", *padReg);
+        const u8 bit = digitalPinToBit(active->mPin);
+        out.set("rxBit", static_cast<i64>(bit));
+        out.set("rxMask", static_cast<i64>(1u << bit));
+        flexPwmDiagSetU32(out, "rxFastModeValue", *fastMode);
+        flexPwmDiagSetU32(out, "rxFastInputValue", *fastInput);
+        flexPwmDiagSetU32(out, "rxStandardModeValue", *standardMode);
+        flexPwmDiagSetU32(out, "rxStandardInputValue", *standardInput);
+        const u32 gpio6_base =
+            static_cast<u32>(fl::ptr_to_int(&GPIO6_DR));
+        const u32 output_addr =
+            static_cast<u32>(fl::ptr_to_int(const_cast<u32 *>(fastOut)));
+        if (output_addr >= gpio6_base) {
+            const u8 offset = static_cast<u8>((output_addr - gpio6_base) >> 14);
+            out.set("rxFastGpioBank", static_cast<i64>(6 + offset));
+            out.set("rxStandardGpioBank", static_cast<i64>(1 + offset));
+            if (offset <= 3) {
+                volatile u32 *gprReg = &IOMUXC_GPR_GPR26 + offset;
+                flexPwmDiagSetU32(out, "rxGprValue", *gprReg);
+                out.set("rxMappedToStandard",
+                        ((*gprReg) & (1u << bit)) == 0);
+            }
+        }
+    }
 #endif
+
+    const FlexPwmPinInfo *active_info = active->mPinInfo;
+    out.set("activeSubmodule", static_cast<i64>(active_info->submodule));
+    out.set("activeChannelB", active_info->channel_b);
+    out.set("activeDmaSource", static_cast<i64>(active_info->dma_source));
+    flexPwmDiagSetU32(out, "activeMuxValueLive", *(active_info->mux_register));
+    flexPwmDiagSetU32(out, "activeMuxValueExpected", active_info->mux_value | 0x10);
+    if (active_info->select_register) {
+        flexPwmDiagSetU32(out, "activeSelectValueLive", *(active_info->select_register));
+        flexPwmDiagSetU32(out, "activeSelectValueExpected", active_info->select_value);
+    }
+
+    const u8 sm = active_info->submodule;
+    IMXRT_FLEXPWM_t *pwm = active_info->pwm;
+    flexPwmDiagSetPtr(out, "pwm", pwm);
+    flexPwmDiagSetU32(out, "mctrl", pwm->MCTRL);
+    flexPwmDiagSetU32(out, "ctrl", pwm->SM[sm].CTRL);
+    flexPwmDiagSetU32(out, "ctrl2", pwm->SM[sm].CTRL2);
+    flexPwmDiagSetU32(out, "dmaen", pwm->SM[sm].DMAEN);
+    flexPwmDiagSetU32(out, "captctrla", pwm->SM[sm].CAPTCTRLA);
+    flexPwmDiagSetU32(out, "captctrlb", pwm->SM[sm].CAPTCTRLB);
+    flexPwmDiagSetU32(out, "captcompa", pwm->SM[sm].CAPTCOMPA);
+    flexPwmDiagSetU32(out, "captcompb", pwm->SM[sm].CAPTCOMPB);
+    flexPwmDiagSetU32(out, "cval2", pwm->SM[sm].CVAL2);
+    flexPwmDiagSetU32(out, "cval3", pwm->SM[sm].CVAL3);
+    flexPwmDiagSetU32(out, "cval4", pwm->SM[sm].CVAL4);
+    flexPwmDiagSetU32(out, "cval5", pwm->SM[sm].CVAL5);
+
+    out.set("dmaChannel", static_cast<i64>(active->mDma.channel));
+    flexPwmDiagSetU32(out, "dmaErq", DMA_ERQ);
+    flexPwmDiagSetU32(out, "dmaHrs", DMA_HRS);
+    flexPwmDiagSetU32(out, "dmaInt", DMA_INT);
+    flexPwmDiagSetU32(out, "dmaErr", DMA_ERR);
+    flexPwmDiagSetU32(out, "dmaEs", DMA_ES);
+    flexPwmDiagSetU32(out, "dmamuxChcfg", *(&DMAMUX_CHCFG0 + active->mDma.channel));
+
+    if (active->mDma.TCD) {
+        out.set("hasTcd", true);
+        flexPwmDiagSetPtr(out, "tcdAddress", active->mDma.TCD);
+        flexPwmDiagSetPtr(out, "saddr", active->mDma.TCD->SADDR);
+        flexPwmDiagSetU32(out, "soff", static_cast<u32>(active->mDma.TCD->SOFF));
+        flexPwmDiagSetU32(out, "attr", active->mDma.TCD->ATTR);
+        flexPwmDiagSetU32(out, "nbytes", active->mDma.TCD->NBYTES);
+        flexPwmDiagSetU32(out, "slast", static_cast<u32>(active->mDma.TCD->SLAST));
+        flexPwmDiagSetPtr(out, "daddr", active->mDma.TCD->DADDR);
+        flexPwmDiagSetU32(out, "doff", static_cast<u32>(active->mDma.TCD->DOFF));
+        flexPwmDiagSetU32(out, "citer", active->mDma.TCD->CITER);
+        flexPwmDiagSetU32(out, "dlastsga", static_cast<u32>(active->mDma.TCD->DLASTSGA));
+        flexPwmDiagSetU32(out, "csr", active->mDma.TCD->CSR);
+        flexPwmDiagSetU32(out, "biter", active->mDma.TCD->BITER);
+    } else {
+        out.set("hasTcd", false);
+    }
+
+    return out;
+}
+
+} // namespace fl
 
 #endif // FL_IS_TEENSY_4X

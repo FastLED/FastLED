@@ -52,7 +52,7 @@ private:
 
 public:
     /// @brief Construct a condition variable
-    ConditionVariableESP32() FL_NOEXCEPT;
+    ConditionVariableESP32() FL_NO_EXCEPT;
 
     ~ConditionVariableESP32();
 
@@ -63,16 +63,16 @@ public:
     ConditionVariableESP32& operator=(ConditionVariableESP32&&) = delete;
 
     /// @brief Notify one waiting thread
-    void notify_one() FL_NOEXCEPT;
+    void notify_one() FL_NO_EXCEPT;
 
     /// @brief Notify all waiting threads
-    void notify_all() FL_NOEXCEPT;
+    void notify_all() FL_NO_EXCEPT;
 
     /// @brief Wait on the condition variable
     /// @tparam Mutex The mutex type (must be compatible with fl::platforms::mutex)
     /// @param lock The unique_lock that must be locked by the current thread
     template<typename Mutex>
-    void wait(unique_lock<Mutex>& lock) FL_NOEXCEPT;
+    void wait(unique_lock<Mutex>& lock) FL_NO_EXCEPT;
 
     /// @brief Wait on the condition variable with a predicate
     /// @tparam Mutex The mutex type
@@ -80,7 +80,7 @@ public:
     /// @param lock The unique_lock that must be locked by the current thread
     /// @param pred Predicate that returns false if waiting should continue
     template<typename Mutex, typename Predicate>
-    void wait(unique_lock<Mutex>& lock, Predicate pred) FL_NOEXCEPT;
+    void wait(unique_lock<Mutex>& lock, Predicate pred) FL_NO_EXCEPT;
 
     /// @brief Wait with a timeout
     /// @tparam Mutex The mutex type
@@ -91,7 +91,7 @@ public:
     /// @return cv_status::timeout if the timeout expired, cv_status::no_timeout otherwise
     template<typename Mutex, typename Rep, typename Period>
     cv_status wait_for(unique_lock<Mutex>& lock,
-                       const std::chrono::duration<Rep, Period>& rel_time) FL_NOEXCEPT;  // okay std namespace
+                       const std::chrono::duration<Rep, Period>& rel_time) FL_NO_EXCEPT;  // okay std namespace
 
     /// @brief Wait with a timeout and predicate
     /// @tparam Mutex The mutex type
@@ -105,7 +105,7 @@ public:
     template<typename Mutex, typename Rep, typename Period, typename Predicate>
     bool wait_for(unique_lock<Mutex>& lock,
                   const std::chrono::duration<Rep, Period>& rel_time,  // okay std namespace
-                  Predicate pred) FL_NOEXCEPT;
+                  Predicate pred) FL_NO_EXCEPT;
 
     /// @brief Wait until an absolute time point
     /// @tparam Mutex The mutex type
@@ -116,7 +116,7 @@ public:
     /// @return cv_status::timeout if the timeout expired, cv_status::no_timeout otherwise
     template<typename Mutex, typename Clock, typename Duration>
     cv_status wait_until(unique_lock<Mutex>& lock,
-                         const std::chrono::time_point<Clock, Duration>& abs_time) FL_NOEXCEPT;  // okay std namespace
+                         const std::chrono::time_point<Clock, Duration>& abs_time) FL_NO_EXCEPT;  // okay std namespace
 
     /// @brief Wait until an absolute time point with predicate
     /// @tparam Mutex The mutex type
@@ -130,7 +130,7 @@ public:
     template<typename Mutex, typename Clock, typename Duration, typename Predicate>
     bool wait_until(unique_lock<Mutex>& lock,
                     const std::chrono::time_point<Clock, Duration>& abs_time,  // okay std namespace
-                    Predicate pred) FL_NOEXCEPT;
+                    Predicate pred) FL_NO_EXCEPT;
 };
 
 // Define FASTLED_MULTITHREADED for ESP32 (has FreeRTOS)

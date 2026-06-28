@@ -32,7 +32,7 @@ namespace fl {
 // Constructor / Destructor
 //=============================================================================
 
-ChannelEngineLcdRgb::ChannelEngineLcdRgb(fl::shared_ptr<detail::ILcdRgbPeripheral> peripheral) FL_NOEXCEPT
+ChannelEngineLcdRgb::ChannelEngineLcdRgb(fl::shared_ptr<detail::ILcdRgbPeripheral> peripheral) FL_NO_EXCEPT
     : mPeripheral(fl::move(peripheral)),
       mInitialized(false),
       mConfig(),
@@ -78,7 +78,7 @@ ChannelEngineLcdRgb::~ChannelEngineLcdRgb() {
 // IChannelDriver Interface
 //=============================================================================
 
-bool ChannelEngineLcdRgb::canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT {
+bool ChannelEngineLcdRgb::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
     if (!data) {
         return false;
     }
@@ -87,11 +87,11 @@ bool ChannelEngineLcdRgb::canHandle(const ChannelDataPtr& data) const FL_NOEXCEP
 }
 
 
-void ChannelEngineLcdRgb::enqueue(ChannelDataPtr channelData) FL_NOEXCEPT {
+void ChannelEngineLcdRgb::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     mEnqueuedChannels.push_back(fl::move(channelData));
 }
 
-void ChannelEngineLcdRgb::show() FL_NOEXCEPT {
+void ChannelEngineLcdRgb::show() FL_NO_EXCEPT {
     if (mEnqueuedChannels.empty()) {
         return;
     }
@@ -135,7 +135,7 @@ void ChannelEngineLcdRgb::show() FL_NOEXCEPT {
     }
 }
 
-IChannelDriver::DriverState ChannelEngineLcdRgb::poll() FL_NOEXCEPT {
+IChannelDriver::DriverState ChannelEngineLcdRgb::poll() FL_NO_EXCEPT {
     if (mTransmittingChannels.empty()) {
         return DriverState::READY;
     }
@@ -175,7 +175,7 @@ IChannelDriver::DriverState ChannelEngineLcdRgb::poll() FL_NOEXCEPT {
 // Transmission Implementation
 //=============================================================================
 
-bool ChannelEngineLcdRgb::beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT {
+bool ChannelEngineLcdRgb::beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT {
     if (channelData.empty() || !mPeripheral) {
         return false;
     }
@@ -309,7 +309,7 @@ bool ChannelEngineLcdRgb::beginTransmission(fl::span<const ChannelDataPtr> chann
 }
 
 void ChannelEngineLcdRgb::prepareScratchBuffer(fl::span<const ChannelDataPtr> channelData,
-                                                size_t maxChannelSize) FL_NOEXCEPT {
+                                                size_t maxChannelSize) FL_NO_EXCEPT {
     // Resize scratch buffer to hold all channel data
     size_t totalSize = channelData.size() * maxChannelSize;
     mScratchBuffer.resize(totalSize);
@@ -329,7 +329,7 @@ void ChannelEngineLcdRgb::prepareScratchBuffer(fl::span<const ChannelDataPtr> ch
     }
 }
 
-void ChannelEngineLcdRgb::encodeFrame() FL_NOEXCEPT {
+void ChannelEngineLcdRgb::encodeFrame() FL_NO_EXCEPT {
     int backBuffer = 1 - mFrontBuffer;
     u16* output = mBuffers[backBuffer];
 
@@ -393,38 +393,38 @@ void ChannelEngineLcdRgb::encodeFrame() FL_NOEXCEPT {
 /// the singleton manages its own lifetime.
 class LcdRgbPeripheralSingletonWrapper : public detail::ILcdRgbPeripheral {
 public:
-    LcdRgbPeripheralSingletonWrapper(detail::ILcdRgbPeripheral& impl) FL_NOEXCEPT : mImpl(impl) {}
+    LcdRgbPeripheralSingletonWrapper(detail::ILcdRgbPeripheral& impl) FL_NO_EXCEPT : mImpl(impl) {}
 
-    bool initialize(const detail::LcdRgbPeripheralConfig& config) FL_NOEXCEPT override {
+    bool initialize(const detail::LcdRgbPeripheralConfig& config) FL_NO_EXCEPT override {
         return mImpl.initialize(config);
     }
-    void deinitialize() FL_NOEXCEPT override { mImpl.deinitialize(); }
-    bool isInitialized() const FL_NOEXCEPT override { return mImpl.isInitialized(); }
-    u16* allocateFrameBuffer(size_t size_bytes) FL_NOEXCEPT override {
+    void deinitialize() FL_NO_EXCEPT override { mImpl.deinitialize(); }
+    bool isInitialized() const FL_NO_EXCEPT override { return mImpl.isInitialized(); }
+    u16* allocateFrameBuffer(size_t size_bytes) FL_NO_EXCEPT override {
         return mImpl.allocateFrameBuffer(size_bytes);
     }
-    void freeFrameBuffer(u16* buffer) FL_NOEXCEPT override { mImpl.freeFrameBuffer(buffer); }
-    bool drawFrame(const u16* buffer, size_t size_bytes) FL_NOEXCEPT override {
+    void freeFrameBuffer(u16* buffer) FL_NO_EXCEPT override { mImpl.freeFrameBuffer(buffer); }
+    bool drawFrame(const u16* buffer, size_t size_bytes) FL_NO_EXCEPT override {
         return mImpl.drawFrame(buffer, size_bytes);
     }
-    bool waitFrameDone(u32 timeout_ms) FL_NOEXCEPT override {
+    bool waitFrameDone(u32 timeout_ms) FL_NO_EXCEPT override {
         return mImpl.waitFrameDone(timeout_ms);
     }
-    bool isBusy() const FL_NOEXCEPT override { return mImpl.isBusy(); }
-    bool registerDrawCallback(void* callback, void* user_ctx) FL_NOEXCEPT override {
+    bool isBusy() const FL_NO_EXCEPT override { return mImpl.isBusy(); }
+    bool registerDrawCallback(void* callback, void* user_ctx) FL_NO_EXCEPT override {
         return mImpl.registerDrawCallback(callback, user_ctx);
     }
-    const detail::LcdRgbPeripheralConfig& getConfig() const FL_NOEXCEPT override {
+    const detail::LcdRgbPeripheralConfig& getConfig() const FL_NO_EXCEPT override {
         return mImpl.getConfig();
     }
-    u64 getMicroseconds() FL_NOEXCEPT override { return mImpl.getMicroseconds(); }
-    void delay(u32 ms) FL_NOEXCEPT override { mImpl.delay(ms); }
+    u64 getMicroseconds() FL_NO_EXCEPT override { return mImpl.getMicroseconds(); }
+    void delay(u32 ms) FL_NO_EXCEPT override { mImpl.delay(ms); }
 
 private:
     detail::ILcdRgbPeripheral& mImpl;
 };
 
-fl::shared_ptr<IChannelDriver> createLcdRgbEngine() FL_NOEXCEPT {
+fl::shared_ptr<IChannelDriver> createLcdRgbEngine() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP_32P4) && FL_HAS_INCLUDE("esp_lcd_panel_rgb.h")
     // Wrap singleton in shared_ptr (singleton manages its own lifetime)
     auto wrapper = fl::make_shared<LcdRgbPeripheralSingletonWrapper>(

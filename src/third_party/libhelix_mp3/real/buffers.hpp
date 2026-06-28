@@ -69,7 +69,7 @@ namespace third_party {
  *
  * Notes:       slow, platform-independent equivalent to memset(buf, 0, nBytes)
  **************************************************************************************/
-static void ClearBuffer(void *buf, int nBytes) FL_NOEXCEPT
+static void ClearBuffer(void *buf, int nBytes) FL_NO_EXCEPT
 {
 	int i;
 	unsigned char *cbuf = (unsigned char *)buf;
@@ -96,7 +96,7 @@ static void ClearBuffer(void *buf, int nBytes) FL_NOEXCEPT
  * Notes:       if one or more mallocs fail, function frees any buffers already
  *                allocated before returning
  **************************************************************************************/
-MP3DecInfo *AllocateBuffers(void) FL_NOEXCEPT
+MP3DecInfo *AllocateBuffers(void) FL_NO_EXCEPT
 {
 	MP3DecInfo *mp3DecInfo;
 	FrameHeader *fh;
@@ -160,7 +160,7 @@ MP3DecInfo *AllocateBuffers(void) FL_NOEXCEPT
  *
  * Notes:       safe to call even if some buffers were not allocated (uses SAFE_FREE)
  **************************************************************************************/
-void FreeBuffers(MP3DecInfo *mp3DecInfo) FL_NOEXCEPT
+void FreeBuffers(MP3DecInfo *mp3DecInfo) FL_NO_EXCEPT
 {
 	if (!mp3DecInfo)
 		return;

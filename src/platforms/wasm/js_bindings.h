@@ -52,7 +52,7 @@ class ActiveStripData;
  * Note: This function calls async JavaScript callbacks that may return Promises.
  * Frame processing will await JavaScript Promise returns when Asyncify is enabled.
  */
-void jsOnFrame(ActiveStripData &active_strips) FL_NOEXCEPT;
+void jsOnFrame(ActiveStripData &active_strips) FL_NO_EXCEPT;
 
 /**
  * Async-aware strip addition notification
@@ -64,7 +64,7 @@ void jsOnFrame(ActiveStripData &active_strips) FL_NOEXCEPT;
  * Note: This function calls async JavaScript callbacks that may return Promises.
  * Strip addition will await JavaScript Promise returns when Asyncify is enabled.
  */
-void jsOnStripAdded(uintptr_t strip, u32 num_leds) FL_NOEXCEPT;
+void jsOnStripAdded(uintptr_t strip, u32 num_leds) FL_NO_EXCEPT;
 
 /**
  * Async-aware UI update function
@@ -75,6 +75,6 @@ void jsOnStripAdded(uintptr_t strip, u32 num_leds) FL_NOEXCEPT;
  * Note: This function calls async JavaScript callbacks that may return Promises.
  * UI updates will await JavaScript Promise returns when Asyncify is enabled.
  */
-void updateJs(const char *jsonStr) FL_NOEXCEPT;
+void updateJs(const char *jsonStr) FL_NO_EXCEPT;
 
 } // namespace fl

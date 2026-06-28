@@ -97,7 +97,7 @@ template <typename T> Gradient::Gradient(T *palette) { set(palette); }
 
 Gradient::Gradient(const Gradient &other) : mVariant(other.mVariant) {}
 
-Gradient::Gradient(Gradient &&other) FL_NOEXCEPT
+Gradient::Gradient(Gradient &&other) FL_NO_EXCEPT
     : mVariant(move(other.mVariant)) {}
 
 void Gradient::set(const CRGBPalette32 *palette) { mVariant = palette; }
@@ -108,7 +108,7 @@ void Gradient::set(const CRGBPalette16 *palette) { mVariant = palette; }
 
 void Gradient::set(const GradientFunction &func) { mVariant = func; }
 
-Gradient &Gradient::operator=(const Gradient &other) FL_NOEXCEPT {
+Gradient &Gradient::operator=(const Gradient &other) FL_NO_EXCEPT {
     if (this != &other) {
         mVariant = other.mVariant;
     }

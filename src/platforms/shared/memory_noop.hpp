@@ -11,19 +11,19 @@ namespace platforms {
 
 /// @brief Get free heap memory (no-op implementation)
 /// @return Always returns 0 (heap tracking not available)
-inline size_t getFreeHeap() FL_NOEXCEPT {
+inline size_t getFreeHeap() FL_NO_EXCEPT {
     return 0;
 }
 
 /// @brief Get total heap size (no-op implementation)
 /// @return Always returns 0 (heap size not available)
-inline size_t getHeapSize() FL_NOEXCEPT {
+inline size_t getHeapSize() FL_NO_EXCEPT {
     return 0;
 }
 
 /// @brief Get minimum free heap (no-op implementation)
 /// @return Always returns 0 (heap tracking not available)
-inline size_t getMinFreeHeap() FL_NOEXCEPT {
+inline size_t getMinFreeHeap() FL_NO_EXCEPT {
     return 0;
 }
 

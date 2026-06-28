@@ -11,9 +11,10 @@ import json
 import os
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeGuard
 
 from colorama import Fore, Style
 
@@ -23,16 +24,17 @@ from ci.autoresearch.context import (
     DEFAULT_EXPECT_PATTERNS,
     DEFAULT_FAIL_ON_PATTERN,
     EXIT_ON_ERROR_PATTERNS,
-    PIN_RX,
-    PIN_TX,
     QuietContext,
     RunContext,
+    default_pins_for_environment,
+    display_objectfled_diagnostics,
     display_pattern_details,
     display_tight_timing,
 )
 from ci.autoresearch.gpio import run_gpio_pretest, run_pin_discovery
 from ci.debug_attached import run_cpp_lint
 from ci.rpc_client import RpcClient, RpcCrashError, RpcTimeoutError
+from ci.util.blocker_alert import blocker_alert
 from ci.util.crash_trace_decoder import CrashTraceDecoder
 from ci.util.global_interrupt_handler import (
     handle_keyboard_interrupt,
@@ -55,6 +57,202 @@ if TYPE_CHECKING:
 # ============================================================
 # Helpers
 # ============================================================
+
+# Grace period added on top of the user's --timeout before the wrapper-level
+# watchdog force-terminates. The deadline_epoch in RunContext is the user's
+# hard wall; this is the additional headroom for any in-flight RPC to
+# unwind cleanly before we kill the process. Per session 2026-06-22 spec.
+WATCHDOG_GRACE_SECONDS = 20.0
+FLEX_IO_TEENSY_DEFAULT_TX_PIN = 6
+
+
+def _is_teensy4_environment(final_environment: str | None) -> bool:
+    return final_environment is not None and final_environment.lower() in (
+        "teensy40",
+        "teensy41",
+    )
+
+
+def _driver_name_for_environment(driver: str, final_environment: str | None) -> str:
+    if driver == "SPI" and _is_teensy4_environment(final_environment):
+        return "SPI_UNIFIED"
+    return driver
+
+
+def _uses_teensy_flex_io_default_tx(
+    args: Args, final_environment: str, drivers: list[str]
+) -> bool:
+    return (
+        args.tx_pin is None
+        and final_environment in {"teensy40", "teensy41"}
+        and "FLEX_IO" in drivers
+    )
+
+
+def _autoresearch_watchdog_thread(
+    ctx: "RunContext", cancel_event: "threading.Event"
+) -> None:
+    """Force-terminate the process if --timeout + grace expires.
+
+    Runs on a daemon `threading.Thread` -- deliberately NOT on the
+    asyncio event loop, because the failure modes we're guarding
+    against (wedged DMA, hung serial monitor, blocking call that never
+    yields control to the loop) can starve the loop's coroutines. A
+    real OS thread keeps ticking even when the loop is dead.
+
+    Steps:
+      1. Sleeps until `deadline_epoch + WATCHDOG_GRACE_SECONDS`,
+         in 1 s steps so a cancelled run can still bail quickly.
+      2. Emits a red `blocker_alert` banner with the trigger reason.
+      3. Best-effort closes the serial port from a side-thread with a
+         bounded join so the close itself can't hang us.
+      4. `os._exit(2)` -- bypasses any stuck asyncio cleanup. Clean
+         exit would be preferable, but the whole point of this
+         watchdog is to escape cases where clean exit doesn't happen.
+    """
+    assert ctx.deadline_epoch is not None, "watchdog started without deadline_epoch set"
+
+    # Re-read `ctx.deadline_epoch` every iteration so that
+    # `extend_autoresearch_watchdog_deadline()` can grant additional
+    # runway to long-running cleanup paths (e.g. an `await client.close()`
+    # that legitimately needs a few seconds) WITHOUT disarming the
+    # safety net. If close() itself wedges, the watchdog still fires
+    # after the new (extended) deadline.
+    while True:
+        now = time.monotonic()
+        fire_at = ctx.deadline_epoch + WATCHDOG_GRACE_SECONDS
+        if now >= fire_at:
+            break
+        if cancel_event.wait(min(fire_at - now, 1.0)):
+            return  # normal shutdown: caller signaled cancel
+
+    total = ctx.timeout_seconds + WATCHDOG_GRACE_SECONDS
+    blocker_alert(
+        f"AUTORESEARCH WATCHDOG: --timeout ({ctx.timeout_seconds:.0f}s) + "
+        f"{WATCHDOG_GRACE_SECONDS:.0f}s grace exceeded -- force-terminating.",
+        details=[
+            f"total wall-clock budget: {total:.0f}s",
+            "the per-RPC deadline path did not unwind in time",
+            "best-effort closing serial port before exit",
+            f"upload_port={ctx.upload_port!r}",
+        ],
+    )
+
+    # Forensic stack dump across every live Python thread (top 4 frames
+    # each) so we can post-mortem WHERE the wedge happened. Walks
+    # `sys._current_frames()` directly rather than using
+    # `faulthandler.dump_traceback()` so we control the depth and have
+    # the per-thread name in the header. Output goes to stderr right
+    # next to the red banner; piped logs keep the dump in order.
+    sys.stderr.write("\n--- WATCHDOG STACK DUMP (top 4 frames per thread) ---\n")
+    threads_by_id = {t.ident: t for t in threading.enumerate()}
+    for tid, frame in sys._current_frames().items():
+        thread_obj = threads_by_id.get(tid)
+        name = thread_obj.name if thread_obj is not None else "?"
+        daemon_marker = (
+            " [daemon]" if thread_obj is not None and thread_obj.daemon else ""
+        )
+        sys.stderr.write(f"\nThread {name!r} (tid={tid}){daemon_marker}:\n")
+        try:
+            import traceback as _traceback
+
+            stack_frames = _traceback.extract_stack(frame, limit=4)
+            for entry in _traceback.format_list(stack_frames):
+                sys.stderr.write(entry)
+        except KeyboardInterrupt as ki:  # noqa: BLE001
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as dump_exc:  # never let the dump itself kill us
+            sys.stderr.write(f"  <stack dump failed: {dump_exc}>\n")
+    sys.stderr.write("--- END WATCHDOG STACK DUMP ---\n\n")
+
+    # Best-effort serial close -- run in yet another thread so a wedged
+    # close() can't keep us from exiting. 2 s join cap, then we exit.
+    serial_iface = ctx.serial_iface
+
+    def _close_target() -> None:
+        if serial_iface is None:
+            return
+        # The async adapter wraps a sync fbuild SerialMonitor; reach for
+        # the sync underlying object first since we're off the loop.
+        # We swallow ALL exceptions here -- we're about to os._exit and
+        # the caller cannot interrupt us via Ctrl-C anyway (watchdog
+        # thread does not own the main-thread interrupt handler).
+        try:
+            mon = getattr(serial_iface, "_monitor", None)
+            if mon is not None and hasattr(mon, "__exit__"):
+                mon.__exit__(None, None, None)
+                return
+        except KeyboardInterrupt as ki:  # noqa: BLE001
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception:
+            pass
+        try:
+            close = getattr(serial_iface, "close", None)
+            if callable(close):
+                close()  # may return a coroutine; we ignore it
+        except KeyboardInterrupt as ki:  # noqa: BLE001
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception:
+            pass
+
+    closer = threading.Thread(
+        target=_close_target,
+        name="autoresearch-watchdog-closer",
+        daemon=True,
+    )
+    closer.start()
+    closer.join(timeout=2.0)
+
+    sys.stderr.flush()
+    os._exit(2)
+
+
+def start_autoresearch_watchdog(ctx: "RunContext") -> None:
+    """Spawn the watchdog daemon thread. Call once per run, after deploy.
+
+    Uses a real OS thread (not an asyncio task) so a wedged event loop
+    can't disable the safety net. The cancel signal is a
+    `threading.Event` stored on `ctx._watchdog_task`. Clean-exit paths
+    do NOT disarm the watchdog -- if cleanup itself wedges we still
+    want the force-kill. They call
+    `extend_autoresearch_watchdog_deadline(ctx, N)` to grant the
+    cleanup phase additional runway without disarming the bomb.
+    """
+    if ctx._watchdog_task is not None:
+        return  # already running
+    cancel_event = threading.Event()
+    ctx._watchdog_task = cancel_event
+    thread = threading.Thread(
+        target=_autoresearch_watchdog_thread,
+        args=(ctx, cancel_event),
+        name="autoresearch-watchdog",
+        daemon=True,
+    )
+    thread.start()
+
+
+def extend_autoresearch_watchdog_deadline(
+    ctx: "RunContext", extra_seconds: float
+) -> None:
+    """Push the watchdog deadline forward by `extra_seconds`.
+
+    Use this around long-running cleanup work that legitimately needs
+    more time than the user's `--timeout` allows (e.g. an `await
+    client.close()` that may take a couple seconds). The watchdog
+    stays armed; if the cleanup itself wedges past the new deadline
+    plus `WATCHDOG_GRACE_SECONDS`, it still force-terminates.
+
+    This is preferred over a `stop_autoresearch_watchdog` because
+    disabling the bomb during cleanup risks an indefinite hang if
+    cleanup itself is the wedge.
+    """
+    if ctx.deadline_epoch is None:
+        return
+    ctx.deadline_epoch += extra_seconds
+
 
 MAX_AUTORESEARCH_LANES = 16
 LPC_BRING_UP_ENVS = {
@@ -132,61 +330,24 @@ async def _run_native_autoresearch(args: Args, build_mode: str = "quick") -> int
     return 0 if result.success else 1
 
 
-def _try_teensy_bootloader_upload(build_dir: Path, environment: str | None) -> bool:
-    """Try to detect Teensy in HalfKay bootloader mode and upload firmware."""
-    if not environment:
-        return False
-
-    loader_paths = [
-        Path.home()
-        / ".platformio"
-        / "packages"
-        / "tool-teensy"
-        / "teensy_loader_cli.exe",
-        Path.home() / ".platformio" / "packages" / "tool-teensy" / "teensy_loader_cli",
-    ]
-    loader = None
-    for p in loader_paths:
-        if p.exists():
-            loader = p
-            break
-    if not loader:
-        return False
-
-    hex_path = build_dir / ".pio" / "build" / environment / "firmware.hex"
-    if not hex_path.exists():
-        return False
-
-    mcu_map = {
-        "teensy41": "TEENSY41",
-        "teensy40": "TEENSY40",
-        "teensylc": "TEENSYLC",
-        "teensy36": "TEENSY36",
-        "teensy35": "TEENSY35",
-        "teensy31": "TEENSY31",
-    }
-    mcu = mcu_map.get(environment.lower())
-    if not mcu:
-        return False
-
-    try:
-        result = subprocess.run(
-            [str(loader), f"--mcu={mcu}", "-v", str(hex_path)],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        if result.returncode == 0 and "Programming" in result.stdout:
-            return True
-    except (subprocess.TimeoutExpired, OSError):
-        pass
-
-    return False
-
-
 # ============================================================
 # Phase A: Parse args and build commands
 # ============================================================
+
+
+def _is_teensy_environment(environment: str | None) -> bool:
+    return environment is not None and environment.lower() in ("teensy40", "teensy41")
+
+
+def _reject_teensy_root_platformio_ini(environment: str | None) -> bool:
+    if not _is_teensy_environment(environment):
+        return False
+    print(
+        f"{Fore.RED}❌ Error: --use-root-platformio-ini is not allowed for "
+        f"Teensy AutoResearch acceptance. Use the synthesized fbuild project "
+        f"from ci/boards.py instead.{Style.RESET_ALL}"
+    )
+    return True
 
 
 def _parse_args_and_build_commands(args: Args) -> RunContext | int:
@@ -243,16 +404,21 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             )
             sys.exit(2)
 
-    is_teensy4 = final_environment is not None and final_environment.lower() in (
-        "teensy40",
-        "teensy41",
-    )
+    is_teensy4 = _is_teensy4_environment(final_environment)
+    is_teensy_specific_driver = args.object_fled or args.flex_io or args.lpuart
+
+    if args.use_root_platformio_ini and (is_teensy4 or is_teensy_specific_driver):
+        print(
+            f"{Fore.RED}❌ Error: --use-root-platformio-ini is not allowed for "
+            f"Teensy AutoResearch acceptance. Use the synthesized fbuild project "
+            f"from ci/boards.py instead.{Style.RESET_ALL}"
+        )
+        return 1
 
     if args.all and is_teensy4:
         drivers = [
             "OBJECT_FLED",
             "FLEX_IO",
-            "LPUART",
         ]
     elif args.all:
         drivers = [
@@ -265,7 +431,6 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             "LCD_RGB",
             "OBJECT_FLED",
             "FLEX_IO",
-            "LPUART",
         ]
     else:
         if args.parlio:
@@ -273,7 +438,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         if args.rmt:
             drivers.append("RMT")
         if args.spi:
-            drivers.append("SPI")
+            drivers.append(_driver_name_for_environment("SPI", final_environment))
         if args.uart:
             drivers.append("UART")
         if args.lcd:
@@ -394,16 +559,57 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 return 1
 
     if args.legacy:
-        if max_lanes is not None and max_lanes > 1:
+        requested_min_lanes = min_lanes if min_lanes is not None else 1
+        requested_max_lanes = max_lanes if max_lanes is not None else 1
+        if args.legacy_mixed_timings and requested_max_lanes < 2:
             print(
-                "\u274c Error: --legacy only supports single-lane (pin 0-8). Remove --lanes or use --lanes 1"
+                "\u274c Error: --legacy-mixed-timings requires --legacy with at least 2 lanes"
             )
             return 1
-        min_lanes = 1
-        max_lanes = 1
+        if args.legacy_rgbw_small_counts:
+            if requested_min_lanes != 1 or requested_max_lanes != 1:
+                print(
+                    "\u274c Error: --legacy-rgbw-small-counts requires exactly 1 lane"
+                )
+                return 1
+            if args.strip_sizes is not None:
+                print(
+                    "\u274c Error: --legacy-rgbw-small-counts supplies strip sizes 1,2,3,4; do not combine with --strip-sizes"
+                )
+                return 1
+        if requested_max_lanes > 1:
+            if args.tx_pin is None:
+                print(
+                    "\u274c Error: --legacy multi-lane requires explicit --tx-pin in the historical 0-8 template range"
+                )
+                return 1
+            max_pin = args.tx_pin + requested_max_lanes - 1
+            if args.tx_pin < 0 or max_pin > 8:
+                print(
+                    "\u274c Error: --legacy multi-lane supports consecutive TX pins 0-8 only; pin 22 is single-lane for the current ObjectFLED loopback"
+                )
+                return 1
+        min_lanes = requested_min_lanes
+        max_lanes = requested_max_lanes
         print(
-            "\u2139\ufe0f  Legacy API mode: using WS2812B<PIN> template path (single-lane, pin 0-8)"
+            "\u2139\ufe0f  Legacy API mode: using WS2812B<PIN> template path (supported TX pins 0-8; pin 22 single-lane current loopback)"
         )
+        if args.legacy_mixed_timings:
+            print(
+                "\u2139\ufe0f  Legacy mixed timing mode: alternating WS2812B/SK6812 template chipsets across lanes"
+            )
+        if args.legacy_rgbw_small_counts:
+            print(
+                "\u2139\ufe0f  Legacy RGBW small-count mode: running RGBW strip sizes 1, 2, 3, and 4"
+            )
+    elif args.legacy_mixed_timings or args.legacy_rgbw_small_counts:
+        flag = (
+            "--legacy-mixed-timings"
+            if args.legacy_mixed_timings
+            else "--legacy-rgbw-small-counts"
+        )
+        print(f"\u274c Error: {flag} requires --legacy")
+        return 1
 
     if min_lanes is not None and max_lanes is not None:
         if min_lanes < 1 or max_lanes < 1 or min_lanes > max_lanes:
@@ -516,6 +722,9 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 )
                 return 1
 
+    if args.legacy_rgbw_small_counts:
+        config["stripSizes"] = [1, 2, 3, 4]
+
     rpc_commands_list: list[dict[str, Any]] = []
 
     if per_lane_counts is not None:
@@ -571,16 +780,6 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             f"({len(drivers_list)} drivers \u00d7 {lane_range['max'] - lane_range['min'] + 1} lane count(s) \u00d7 {len(strip_sizes)} strip size(s))"
         )
     else:
-        # FlexIO on Teensy 4.x only routes through pins {6-13, 32}; the global
-        # default TX pin (1) is not FlexIO2-capable so canHandle() rejects it
-        # and the manager silently falls back to ObjectFLED. Pin the FLEX_IO
-        # tests to a known FlexIO2 pin so the engine actually runs.
-        flex_io_tx_pin = 6
-        # LPUART on Teensy 4.x routes through {1, 8, 14, 17, 20, 24, 29, 35,
-        # 47, 48}. Pin LPUART tests to pin 1 (LPUART6_TX, Teensy 4's default
-        # Serial2 TX) so the engine accepts the request when --tx-pin is not
-        # supplied. Mirrors the FLEX_IO override above.
-        lpuart_tx_pin = 1
         for driver in drivers_list:
             for lane_count in range(lane_range["min"], lane_range["max"] + 1):
                 for strip_size in strip_sizes:
@@ -592,12 +791,15 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         "iterations": 1,
                         "timing": timing_name,
                     }
-                    if driver == "FLEX_IO" and args.tx_pin is None:
-                        test_config["pinTx"] = flex_io_tx_pin
-                    if driver == "LPUART" and args.tx_pin is None:
-                        test_config["pinTx"] = lpuart_tx_pin
                     if args.legacy:
                         test_config["useLegacyApi"] = True
+                        if args.legacy_rgbw_small_counts:
+                            test_config["legacyRgbw"] = True
+                        if args.legacy_mixed_timings:
+                            test_config["legacyChipsets"] = [
+                                "WS2812B" if i % 2 == 0 else "SK6812"
+                                for i in range(lane_count)
+                            ]
                     # Multi-frame capture: back-to-back show()/capture cycles per pattern.
                     # Defaults: SPI -> 2 (catches #2254/#2288 second-frame degradation),
                     # others -> 1. User can override with --frames N.
@@ -609,6 +811,8 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         frame_count = 1
                     if frame_count > 1:
                         test_config["frameCount"] = frame_count
+                    if args.contaminate_tx_mux:
+                        test_config["contaminateTxMux"] = True
                     if args.tight_timing:
                         if (
                             args.tight_timing_iterations < 1
@@ -655,19 +859,91 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         if args.fail_keywords:
             fail_keywords.extend(args.fail_keywords)
 
-    # Parse timeout
-    try:
-        timeout_seconds = parse_timeout(args.timeout)
-    except ValueError as e:
-        print(f"\u274c Error: {e}")
-        return 1
+    # Parse timeout (FastLED #3309: 30s default with advisory banner;
+    # --no-timeout to disable; supports 30s / 10m / 1h / 5000ms notation).
+    AUTORESEARCH_DEFAULT_TIMEOUT_S = 30
+    no_timeout = bool(getattr(args, "no_timeout", False))
+    quiet = bool(getattr(args, "quiet", False))
+    if no_timeout:
+        # Effectively unbounded: a year-of-seconds is "no timeout" for any
+        # practical bring-up session and stays well within int range.
+        timeout_seconds = 365 * 24 * 3600
+    elif args.timeout is None:
+        timeout_seconds = AUTORESEARCH_DEFAULT_TIMEOUT_S
+        if not quiet:
+            # Yellow advisory banner so the user sees the default is in effect
+            # and knows how to override. Suppressed under --quiet. Fore/Style
+            # are imported at module level above.
+            print(
+                f"{Fore.YELLOW}"
+                f"[default {AUTORESEARCH_DEFAULT_TIMEOUT_S}s timeout in effect "
+                f"-- pass --timeout <duration> (e.g. 30s / 2m / 1h) or "
+                f"--no-timeout to override]"
+                f"{Style.RESET_ALL}"
+            )
+    else:
+        try:
+            timeout_seconds = parse_timeout(args.timeout)
+        except ValueError as e:
+            print(f"\u274c Error: {e}")
+            return 1
 
-    # Validate project directory
-    build_dir = args.project_dir.resolve()
-    if not (build_dir / "platformio.ini").exists():
-        print(f"\u274c Error: platformio.ini not found in {build_dir}")
-        print("   Make sure you're running this from a PlatformIO project directory")
-        return 1
+    # Resolve project root (always the user's invocation cwd) and build_dir.
+    #
+    # Two code paths (#3281):
+    #
+    # 1. Default (``args.use_root_platformio_ini == False``): synthesise
+    #    ``.build/pio/<board>/platformio.ini`` from ``ci/boards.py`` if the
+    #    board is already known at parse time; otherwise defer synthesis to
+    #    :func:`_resolve_port_and_environment` after chip auto-detect.
+    # 2. Legacy (``args.use_root_platformio_ini == True``): read root
+    #    ``./platformio.ini``. The flag is deprecated and emits a warning at
+    #    parse time (see ci/autoresearch/args.py).
+    #
+    # In the deferred-synthesis case we keep ``build_dir`` pointing at the
+    # invocation cwd so the sketch source can still be located under
+    # ``examples/AutoResearch/``. Synthesis happens later, and ``ctx.build_dir``
+    # is rewritten before fbuild is invoked.
+    project_root = args.project_dir.resolve()
+
+    if args.use_root_platformio_ini:
+        build_dir = project_root
+        if not (build_dir / "platformio.ini").exists():
+            print(f"\u274c Error: platformio.ini not found in {build_dir}")
+            print(
+                "   Make sure you're running this from a PlatformIO project directory"
+            )
+            return 1
+    elif final_environment:
+        # Board known up-front \u2014 synthesise now so downstream callers (chip
+        # auto-detect log lines, default_envs probes) see the staged file.
+        from ci.autoresearch.staging import synthesise_autoresearch_project
+
+        try:
+            build_dir = synthesise_autoresearch_project(
+                final_environment,
+                project_root=project_root,
+                verbose=args.verbose,
+            )
+        except KeyboardInterrupt as ki:
+            # Let user-initiated interrupts propagate via the project's
+            # canonical handler; never swallow them under the broad
+            # Exception handler below (CodeRabbit feedback, PR #3290).
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as e:
+            print(
+                f"\u274c Error: failed to synthesise platformio.ini for "
+                f"board '{final_environment}': {e}"
+            )
+            return 1
+    else:
+        # Board not yet known \u2014 defer synthesis to _resolve_port_and_environment
+        # once chip auto-detect resolves the environment. Use project_root as
+        # the build_dir so the sketch-resolver fallback below picks up
+        # examples/AutoResearch/. The build_dir is rewritten before fbuild is
+        # invoked.
+        build_dir = project_root
 
     # Sketch selection.
     #
@@ -678,17 +954,29 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     # standalone examples/AutoResearchLpc/ harness was retired by FastLED #3030
     # once the soft-FP cascade from #3022 phase 2 freed up the LPC845 flash
     # budget.
+    #
+    # For the synthesised path the staged tree lives under ``build_dir/src/sketch/``
+    # (populated by ``_init_platformio_build`` \u2192 ``copy_example_source``);
+    # for the legacy and deferred-synthesis paths the in-tree
+    # ``examples/AutoResearch/`` source applies.
     sketch_path = build_dir / "examples" / "AutoResearch"
     if not sketch_path.exists():
         staged_sketch_path = build_dir / "src" / "sketch"
         if staged_sketch_path.exists():
             sketch_path = staged_sketch_path
         else:
-            print(
-                "\u274c Error: AutoResearch sketch not found at "
-                f"{sketch_path} or {staged_sketch_path}"
-            )
-            return 1
+            # Fall back to <project_root>/examples/AutoResearch/ when we're in
+            # the synthesised path and the staged sketch isn't laid down yet
+            # (shouldn't happen, but keeps the error message useful).
+            repo_sketch_path = project_root / "examples" / "AutoResearch"
+            if repo_sketch_path.exists():
+                sketch_path = repo_sketch_path
+            else:
+                print(
+                    "\u274c Error: AutoResearch sketch not found at "
+                    f"{sketch_path} or {staged_sketch_path} or {repo_sketch_path}"
+                )
+                return 1
 
     os.environ["PLATFORMIO_SRC_DIR"] = str(sketch_path)
 
@@ -742,7 +1030,14 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
             if is_teensy:
                 print(f"\n{Fore.YELLOW}{'=' * 60}")
                 print(f"  Teensy not detected on USB.")
-                print(f"  Press the PROGRAM button on the Teensy to enter bootloader.")
+                print(
+                    "  AutoResearch will not pre-upload stale .pio firmware "
+                    "during port detection."
+                )
+                print(
+                    "  Power-cycle or reconnect the Teensy so the USB serial "
+                    "port appears, then let fbuild own the deploy."
+                )
                 print(f"{'=' * 60}{Style.RESET_ALL}\n")
             print(
                 f"\u23f3 No USB serial port found yet. Waiting up to {max_wait_s}s for device..."
@@ -760,26 +1055,6 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                         f"\u2705 USB serial port detected after {elapsed:.1f}s: {result.selected_port}"
                     )
                     break
-                if is_teensy:
-                    teensy_result = _try_teensy_bootloader_upload(
-                        ctx.build_dir, ctx.final_environment
-                    )
-                    if teensy_result:
-                        print(
-                            "\u2705 Firmware uploaded via Teensy bootloader, waiting for serial port..."
-                        )
-                        serial_deadline = time.monotonic() + 15
-                        while time.monotonic() < serial_deadline:
-                            time.sleep(1.0)
-                            result = auto_detect_upload_port(
-                                expected_environment=expected_environment
-                            )
-                            if result.ok:
-                                print(
-                                    f"\u2705 Teensy serial port detected: {result.selected_port}"
-                                )
-                                break
-                        break
                 now = time.monotonic()
                 if now - last_msg_at >= 5.0:
                     remaining = deadline - now
@@ -806,7 +1081,9 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
             )
             if is_teensy:
                 print(
-                    f"{Fore.YELLOW}Teensy hint: Hold the PROGRAM button while plugging in USB to force bootloader mode.{Style.RESET_ALL}"
+                    f"{Fore.YELLOW}Teensy hint: keep the board in USB serial mode "
+                    f"for AutoResearch acceptance; fbuild must perform the first "
+                    f"firmware deploy for this run.{Style.RESET_ALL}"
                 )
             print(
                 f"{Fore.RED}Note: Bluetooth serial ports (BTHENUM) are not supported.{Style.RESET_ALL}\n"
@@ -833,26 +1110,92 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                 f"\u2705 Detected {chip_result.chip_type} \u2192 using environment '{ctx.final_environment}'"
             )
         if not ctx.final_environment:
-            from ci.util.pio_package_daemon import get_default_environment
+            # Fall back to <build_dir>/platformio.ini's `default_envs` value.
+            # In the legacy (--use-root-platformio-ini) path this reads root
+            # ./platformio.ini; in the synthesised path (#3281) this reads
+            # nothing if the board isn't already known (deferred synthesis
+            # hasn't run yet). That fallback is fine \u2014 we just don't have a
+            # platformio.ini to consult yet, so we bail with a clear error.
+            if args.use_root_platformio_ini:
+                from ci.util.pio_package_daemon import get_default_environment
 
-            default_env = get_default_environment(str(ctx.build_dir))
-            if default_env:
-                ctx.final_environment = default_env
-                error_msg = "Chip detection failed"
-                print(
-                    f"\u26a0\ufe0f  {error_msg}, "
-                    f"using platformio.ini default: '{ctx.final_environment}'"
-                )
+                default_env = get_default_environment(str(ctx.build_dir))
+                if default_env:
+                    ctx.final_environment = default_env
+                    error_msg = "Chip detection failed"
+                    print(
+                        f"\u26a0\ufe0f  {error_msg}, "
+                        f"using platformio.ini default: '{ctx.final_environment}'"
+                    )
+                else:
+                    print(
+                        "\u26a0\ufe0f  Chip detection failed and no default_envs in platformio.ini"
+                    )
             else:
+                # Synthesised path with no env known and chip detect failed:
+                # there is no platformio.ini to fall back to and nothing
+                # downstream can recover. Fail fast with a clear error
+                # (CodeRabbit feedback, PR #3290) so callers don't silently
+                # proceed with an unset final_environment.
                 print(
-                    "\u26a0\ufe0f  Chip detection failed and no default_envs in platformio.ini"
+                    "\u274c Chip detection failed and no environment given. "
+                    "Pass a positional environment (e.g. `bash autoresearch esp32c6 ...`) "
+                    "or attach a recognisable device."
                 )
+                return 1
         print()
 
-    # Platform mismatch warning
-    from ci.util.pio_package_daemon import get_default_environment
+    if args.use_root_platformio_ini and _reject_teensy_root_platformio_ini(
+        ctx.final_environment
+    ):
+        return 1
 
-    default_env = get_default_environment(str(ctx.build_dir))
+    # Deferred synthesis (#3281). When --use-root-platformio-ini is NOT set
+    # and the board wasn't known at parse time, the build_dir is still pointing
+    # at the project root. Now that chip auto-detect has resolved the
+    # environment we can synthesise .build/pio/<board>/platformio.ini and
+    # redirect build_dir so fbuild reads the synthesised file instead of root.
+    if (
+        not args.use_root_platformio_ini
+        and ctx.final_environment
+        and ctx.build_dir == args.project_dir.resolve()
+    ):
+        from ci.autoresearch.staging import synthesise_autoresearch_project
+
+        try:
+            ctx.build_dir = synthesise_autoresearch_project(
+                ctx.final_environment,
+                project_root=args.project_dir.resolve(),
+                verbose=args.verbose,
+            )
+            # The staged sketch lives under <build_dir>/src/sketch \u2014 point
+            # PLATFORMIO_SRC_DIR at it so fbuild and any downstream sketch
+            # resolver pick up the freshly-copied source.
+            staged_sketch = ctx.build_dir / "src" / "sketch"
+            if staged_sketch.exists():
+                os.environ["PLATFORMIO_SRC_DIR"] = str(staged_sketch)
+        except KeyboardInterrupt as ki:
+            # Let user-initiated interrupts propagate via the project's
+            # canonical handler; never swallow them under the broad
+            # Exception handler below (CodeRabbit feedback, PR #3290).
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as e:
+            print(
+                f"\u274c Error: failed to synthesise platformio.ini for "
+                f"board '{ctx.final_environment}': {e}"
+            )
+            return 1
+
+    # Platform mismatch warning (legacy path only \u2014 synthesised platformio.ini
+    # is generated from ci/boards.py, so `default_envs` always matches the
+    # detected board by construction and the warning would be noise).
+    if args.use_root_platformio_ini:
+        from ci.util.pio_package_daemon import get_default_environment
+
+        default_env = get_default_environment(str(ctx.build_dir))
+    else:
+        default_env = None
     if detected_environment and default_env and detected_environment != default_env:
         print(f"{Fore.YELLOW}{'=' * 60}")
         print(f"{Fore.YELLOW}\u26a0\ufe0f  PLATFORM MISMATCH WARNING")
@@ -1007,6 +1350,24 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
                 f"\u26a0\ufe0f  Port {upload_port} not available after 3s, proceeding anyway..."
             )
 
+    # POST-FLASH, PRE-CONNECT EPOCH. From here on, every downstream RPC
+    # call computes its per-call timeout via `ctx.remaining_seconds()`
+    # so that the user-supplied `--timeout N` is a HARD WALL on the
+    # post-flash budget rather than a per-call value that could be
+    # silently inflated by hardcoded callsites (the previous bug --
+    # `--timeout 60` then 120 s hardcoded at the runSingleTest call
+    # site stretched real wall-clock to 15+ min). The watchdog kicks
+    # in `WATCHDOG_GRACE_SECONDS` after that hard wall to force-kill
+    # if normal teardown wedges. See goal session 2026-06-22.
+    ctx.start_timeout_epoch()
+    start_autoresearch_watchdog(ctx)
+    if ctx.deadline_epoch is not None:
+        print(
+            f"\u23f1  Post-flash deadline armed: "
+            f"--timeout={ctx.timeout_seconds:.0f}s "
+            f"(+ {WATCHDOG_GRACE_SECONDS:.0f}s watchdog grace)"
+        )
+
     return None
 
 
@@ -1091,6 +1452,12 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     from ci.util.serial_interface import create_serial_interface
 
     final_environment = (ctx.final_environment or "").lower()
+    default_tx_pin, default_rx_pin = default_pins_for_environment(final_environment)
+    uses_flex_io_default_tx = _uses_teensy_flex_io_default_tx(
+        args, final_environment, ctx.drivers
+    )
+    if uses_flex_io_default_tx:
+        default_tx_pin = FLEX_IO_TEENSY_DEFAULT_TX_PIN
     use_pyserial = (not use_fbuild) or final_environment in LPC_BRING_UP_ENVS
     ctx.serial_iface = create_serial_interface(
         port=upload_port, use_pyserial=use_pyserial
@@ -1129,16 +1496,20 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     elif ctx.ble_mode:
         print("\n\U0001f4cc BLE mode: skipping pin discovery and GPIO pre-test")
     elif args.tx_pin is not None or args.rx_pin is not None:
-        ctx.effective_tx_pin = args.tx_pin if args.tx_pin is not None else PIN_TX
-        ctx.effective_rx_pin = args.rx_pin if args.rx_pin is not None else PIN_RX
+        ctx.effective_tx_pin = (
+            args.tx_pin if args.tx_pin is not None else default_tx_pin
+        )
+        ctx.effective_rx_pin = (
+            args.rx_pin if args.rx_pin is not None else default_rx_pin
+        )
         print(
             f"\n\U0001f4cc Using CLI-specified pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
         )
-        set_pins_cmd = {
-            "method": "setPins",
-            "params": [{"txPin": ctx.effective_tx_pin, "rxPin": ctx.effective_rx_pin}],
-        }
-        ctx.json_rpc_commands.insert(0, set_pins_cmd)
+        if uses_flex_io_default_tx:
+            print(
+                "\U0001f4cc Teensy FLEX_IO defaulted omitted TX to "
+                f"{ctx.effective_tx_pin}."
+            )
     elif args.auto_discover_pins:
         print("\n\U0001f50d Auto-discovery enabled - searching for connected pins...")
         pin_discovery = await run_pin_discovery(
@@ -1158,20 +1529,30 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
                 f"\U0001f4cc Using discovered pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
             )
         else:
-            ctx.effective_tx_pin = PIN_TX
-            ctx.effective_rx_pin = PIN_RX
+            ctx.effective_tx_pin = default_tx_pin
+            ctx.effective_rx_pin = default_rx_pin
+            default_reason = "default pins"
+            if uses_flex_io_default_tx:
+                default_reason = "Teensy FLEX_IO default pins"
             print(
-                f"\U0001f4cc Using default pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
+                f"\U0001f4cc Using {default_reason}: "
+                f"TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
             )
             if ctx.discovery_client:
                 await ctx.discovery_client.close()
                 ctx.discovery_client = None
     else:
-        ctx.effective_tx_pin = PIN_TX
-        ctx.effective_rx_pin = PIN_RX
+        ctx.effective_tx_pin = default_tx_pin
+        ctx.effective_rx_pin = default_rx_pin
+        default_reason = "default pins"
+        if uses_flex_io_default_tx:
+            default_reason = "Teensy FLEX_IO default pins"
         print(
-            f"\n\U0001f4cc Using default pins: TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
+            f"\n\U0001f4cc Using {default_reason}: "
+            f"TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
         )
+
+    _ensure_leading_set_pins_command(ctx)
 
     # GPIO connectivity pre-test
     if final_environment in LPC_BRING_UP_ENVS:
@@ -1194,8 +1575,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print("\n\u2705 Skipping GPIO pre-test (pins verified during discovery)")
     elif not await run_gpio_pretest(
         upload_port,
-        ctx.effective_tx_pin or PIN_TX,
-        ctx.effective_rx_pin or PIN_RX,
+        ctx.effective_tx_pin if ctx.effective_tx_pin is not None else default_tx_pin,
+        ctx.effective_rx_pin if ctx.effective_rx_pin is not None else default_rx_pin,
         serial_interface=serial_iface,
     ):
         print()
@@ -1209,8 +1590,12 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print("     JSON-RPC commands. Check serial output above for boot errors")
         print("     or crashes. Try power-cycling the device.")
         print()
-        tx = ctx.effective_tx_pin if ctx.effective_tx_pin is not None else PIN_TX
-        rx = ctx.effective_rx_pin if ctx.effective_rx_pin is not None else PIN_RX
+        tx = (
+            ctx.effective_tx_pin if ctx.effective_tx_pin is not None else default_tx_pin
+        )
+        rx = (
+            ctx.effective_rx_pin if ctx.effective_rx_pin is not None else default_rx_pin
+        )
         print("  2. WRONG PIN PAIR: The jumper wire may be connected to different")
         print(f"     pins than expected (tested TX={tx}, RX={rx}).")
         print("     Try: bash autoresearch --auto-discover-pins")
@@ -1820,8 +2205,17 @@ async def _run_bring_up_tests(ctx: RunContext) -> int:
     try:
         print("   Opening serial port...", end="", flush=True)
         ser = _serial.Serial(upload_port, 115200, timeout=2)
-        ser.dtr = False  # type: ignore[assignment]
-        ser.rts = False  # type: ignore[assignment]
+        # Assert DTR/RTS = True (universal "host ready" idle state).
+        # ESP32 native USB CDC tolerates this (it's the post-reset idle state);
+        # LPC845-BRK *requires* DTR=True because the LPC11U35 USB-VCOM bridge
+        # uses DTR as a flow gate. Previously hardcoded to False here, which
+        # silently dropped every byte the LPC845 transmitted and produced the
+        # bring-up "zero bytes" false alarm under FastLED #3300 / #3325.
+        # See ci/util/pyserial_monitor.py for the same fix on the monitor path,
+        # and ci/util/serial_probe.py for the agent-facing helper that mirrors
+        # this default.
+        ser.dtr = True  # type: ignore[assignment]
+        ser.rts = True  # type: ignore[assignment]
         await asyncio.sleep(0.5)
         ser.reset_input_buffer()
         await asyncio.sleep(2.0)  # let boot banner drain
@@ -2079,6 +2473,287 @@ async def _run_coroutine_tests(ctx: RunContext) -> int:
             await client.close()
 
 
+_TEST_RPC_METHODS = frozenset({"runSingleTest", "runParallelTest"})
+
+
+def _is_plain_int(value: Any) -> TypeGuard[int]:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _expected_test_drivers(method: str, cmd: dict[str, Any]) -> list[str]:
+    params = cmd.get("params")
+    if not isinstance(params, dict):
+        return []
+
+    if method == "runSingleTest":
+        driver = params.get("driver")
+        return [driver] if isinstance(driver, str) and driver else []
+
+    if method == "runParallelTest":
+        drivers = params.get("drivers")
+        if not isinstance(drivers, list):
+            return []
+        expected: list[str] = []
+        for entry in drivers:
+            if isinstance(entry, dict):
+                driver = entry.get("driver")
+                if isinstance(driver, str) and driver:
+                    expected.append(driver)
+        return expected
+
+    return []
+
+
+def _actual_test_drivers(method: str, data: dict[str, Any]) -> list[str]:
+    if method == "runSingleTest":
+        driver = data.get("driver")
+        return [driver] if isinstance(driver, str) and driver else []
+
+    if method == "runParallelTest":
+        drivers = data.get("drivers")
+        if not isinstance(drivers, list):
+            return []
+        actual: list[str] = []
+        for entry in drivers:
+            if isinstance(entry, dict):
+                driver = entry.get("driver")
+                if isinstance(driver, str) and driver:
+                    actual.append(driver)
+        return actual
+
+    return []
+
+
+def _set_pins_rpc_command(tx_pin: int, rx_pin: int) -> dict[str, Any]:
+    return {"method": "setPins", "params": [{"txPin": tx_pin, "rxPin": rx_pin}]}
+
+
+def _expected_setup_pins(
+    method: str, cmd: dict[str, Any]
+) -> tuple[int | None, int | None]:
+    params = cmd.get("params")
+    if method == "setPins":
+        if (
+            isinstance(params, list)
+            and len(params) == 1
+            and isinstance(params[0], dict)
+        ):
+            tx_pin = params[0].get("txPin")
+            rx_pin = params[0].get("rxPin")
+            return (
+                tx_pin if _is_plain_int(tx_pin) else None,
+                rx_pin if _is_plain_int(rx_pin) else None,
+            )
+        if isinstance(params, list) and len(params) == 2:
+            tx_pin, rx_pin = params
+            return (
+                tx_pin if _is_plain_int(tx_pin) else None,
+                rx_pin if _is_plain_int(rx_pin) else None,
+            )
+        return None, None
+
+    if not isinstance(params, list) or len(params) != 1:
+        return None, None
+
+    pin = params[0]
+    if not _is_plain_int(pin):
+        return None, None
+
+    if method == "setTxPin":
+        return pin, None
+    if method == "setRxPin":
+        return None, pin
+    return None, None
+
+
+def _validate_setup_rpc_response(
+    method: str, cmd: dict[str, Any], data: dict[str, Any]
+) -> list[str]:
+    """Return validation errors for setup RPCs that must not drift silently."""
+    errors: list[str] = []
+    expected_tx_pin, expected_rx_pin = _expected_setup_pins(method, cmd)
+
+    for field, expected in (
+        ("txPin", expected_tx_pin),
+        ("rxPin", expected_rx_pin),
+    ):
+        if expected is None:
+            continue
+        value = data.get(field)
+        if not _is_plain_int(value):
+            errors.append(f"missing integer {field}")
+        elif value != expected:
+            errors.append(f"{field}={value} does not match expected {expected}")
+
+    return errors
+
+
+def _ensure_leading_set_pins_command(ctx: RunContext) -> None:
+    if ctx.effective_tx_pin is None or ctx.effective_rx_pin is None:
+        return
+
+    set_pins_cmd = _set_pins_rpc_command(ctx.effective_tx_pin, ctx.effective_rx_pin)
+    if ctx.json_rpc_commands and ctx.json_rpc_commands[0].get("method") == "setPins":
+        ctx.json_rpc_commands[0] = set_pins_cmd
+        return
+    ctx.json_rpc_commands.insert(0, set_pins_cmd)
+
+
+def _expected_test_pins(
+    method: str,
+    cmd: dict[str, Any],
+    default_tx_pin: int | None,
+    default_rx_pin: int | None,
+) -> tuple[int | None, int | None]:
+    params = cmd.get("params")
+    if not isinstance(params, dict):
+        return default_tx_pin, default_rx_pin
+
+    if method == "runParallelTest":
+        drivers = params.get("drivers")
+        if isinstance(drivers, list) and drivers and isinstance(drivers[0], dict):
+            tx_pin = drivers[0].get("pinTx")
+            if _is_plain_int(tx_pin):
+                return tx_pin, default_rx_pin
+        return default_tx_pin, default_rx_pin
+
+    tx_pin = params.get("pinTx")
+    rx_pin = params.get("pinRx")
+    return (
+        tx_pin if _is_plain_int(tx_pin) else default_tx_pin,
+        rx_pin if _is_plain_int(rx_pin) else default_rx_pin,
+    )
+
+
+def _validate_test_rpc_response(
+    method: str,
+    cmd: dict[str, Any],
+    data: dict[str, Any],
+    expected_tx_pin: int | None,
+    expected_rx_pin: int | None,
+) -> list[str]:
+    """Return validation errors that prevent a test RPC from proving PASS."""
+    errors: list[str] = []
+
+    if not isinstance(data.get("success"), bool):
+        errors.append("missing boolean success")
+    if not isinstance(data.get("passed"), bool):
+        errors.append("missing boolean passed")
+
+    total_tests = data.get("totalTests")
+    passed_tests = data.get("passedTests")
+    if not _is_plain_int(total_tests):
+        errors.append("missing integer totalTests")
+    elif total_tests <= 0:
+        errors.append("totalTests must be > 0")
+
+    if not _is_plain_int(passed_tests):
+        errors.append("missing integer passedTests")
+    elif _is_plain_int(total_tests):
+        if passed_tests < 0:
+            errors.append("passedTests must be >= 0")
+        if passed_tests > total_tests:
+            errors.append("passedTests must be <= totalTests")
+        if data.get("passed") is True and passed_tests != total_tests:
+            errors.append("passed=true requires passedTests == totalTests")
+
+    expected_drivers = _expected_test_drivers(method, cmd)
+    actual_drivers = _actual_test_drivers(method, data)
+    if not actual_drivers:
+        field = "driver" if method == "runSingleTest" else "drivers"
+        errors.append(f"missing selected {field}")
+    else:
+        for driver in expected_drivers:
+            if driver not in actual_drivers:
+                errors.append(f"missing expected driver {driver}")
+
+    expected_tx_pin, expected_rx_pin = _expected_test_pins(
+        method, cmd, expected_tx_pin, expected_rx_pin
+    )
+    if expected_tx_pin is not None or expected_rx_pin is not None:
+        capture_backend = data.get("captureBackend")
+        if not isinstance(capture_backend, str) or not capture_backend:
+            errors.append("missing string captureBackend")
+        if data.get("passed") is True:
+            capture_evidence_bytes = data.get("captureEvidenceBytes")
+            capture_evidence_raw_edges = data.get("captureEvidenceRawEdges")
+            has_capture_bytes = (
+                _is_plain_int(capture_evidence_bytes) and capture_evidence_bytes > 0
+            )
+            has_capture_edges = (
+                _is_plain_int(capture_evidence_raw_edges)
+                and capture_evidence_raw_edges > 0
+            )
+            if not has_capture_bytes and not has_capture_edges:
+                errors.append("passed test response requires nonzero capture evidence")
+
+    for field, expected in (
+        ("requestedTxPin", expected_tx_pin),
+        ("requestedRxPin", expected_rx_pin),
+        ("actualTxPin", expected_tx_pin),
+        ("actualRxPin", expected_rx_pin),
+    ):
+        if expected is None:
+            continue
+        value = data.get(field)
+        if not _is_plain_int(value):
+            errors.append(f"missing integer {field}")
+        elif expected is not None and value != expected:
+            errors.append(f"{field}={value} does not match expected {expected}")
+
+    return errors
+
+
+def _classify_test_failure(data: dict[str, Any]) -> tuple[str, str]:
+    """Classify a failed test response using structured RPC evidence."""
+    patterns = data.get("patterns")
+    if isinstance(patterns, list) and patterns:
+        saw_pattern = False
+        saw_capture_bytes = False
+        saw_raw_edges = False
+        saw_mismatched_bytes = False
+        saw_capture_failure = False
+
+        for pattern in patterns:
+            if not isinstance(pattern, dict):
+                continue
+            saw_pattern = True
+            captured = pattern.get("capturedBytes")
+            raw_edges = pattern.get("rawEdgesAfterWait")
+            mismatched = pattern.get("mismatchedBytes")
+            if _is_plain_int(captured) and captured > 0:
+                saw_capture_bytes = True
+            if _is_plain_int(raw_edges) and raw_edges > 0:
+                saw_raw_edges = True
+            if _is_plain_int(mismatched) and mismatched > 0:
+                saw_mismatched_bytes = True
+            if pattern.get("captureFailed") is True:
+                saw_capture_failure = True
+
+        if saw_pattern:
+            if not saw_capture_bytes and not saw_raw_edges:
+                return (
+                    "zero_capture",
+                    "RX produced no raw edges or decodable bytes",
+                )
+            if saw_mismatched_bytes or saw_capture_failure:
+                return (
+                    "decode_mismatch",
+                    "RX captured signal/data but decoded output did not match",
+                )
+
+    evidence_bytes = data.get("captureEvidenceBytes")
+    evidence_edges = data.get("captureEvidenceRawEdges")
+    has_capture_bytes = _is_plain_int(evidence_bytes) and evidence_bytes > 0
+    has_capture_edges = _is_plain_int(evidence_edges) and evidence_edges > 0
+    if data.get("passed") is False:
+        if not has_capture_bytes and not has_capture_edges:
+            return ("zero_capture", "test failed with no positive capture evidence")
+        return ("decode_mismatch", "test failed despite positive capture evidence")
+
+    return ("test_failed", "test response reported failure")
+
+
 async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
     """Execute main RPC test loop."""
     upload_port = ctx.upload_port
@@ -2125,14 +2800,31 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
         for i, cmd in enumerate(json_rpc_commands, 1):
             method = cmd.get("method", "unknown")
             params = cmd.get("params", [])
+            setup_method = method in {
+                "setPins",
+                "setTxPin",
+                "setRxPin",
+                "setLaneSizes",
+                "setSolidColor",
+            }
+            test_method = method in _TEST_RPC_METHODS
 
             print(f"\n[{i}/{len(json_rpc_commands)}] Calling {method}()...")
 
             try:
+                # Per-RPC budget = TIME REMAINING UNTIL ctx.deadline_epoch.
+                # `--timeout N` is a TOTAL wall-clock budget from the post-
+                # flash epoch (not a per-call value), so each call shrinks
+                # the remaining window. Previously this site hardcoded
+                # 120.0 (ignoring --timeout entirely) and PR #3219 first
+                # changed it to `ctx.timeout_seconds` (still per-call, not
+                # decrementing) -- both let runs blow well past the user's
+                # stated budget. The watchdog thread enforces a hard
+                # ceiling at `deadline_epoch + WATCHDOG_GRACE_SECONDS`.
                 response = await client.send(
                     method,
                     args=params if params else [],
-                    timeout=120.0,
+                    timeout=ctx.remaining_seconds(minimum=1.0),
                 )
 
                 test_data = response.data
@@ -2142,6 +2834,10 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         f"{Fore.YELLOW}\u26a0\ufe0f  Unexpected response type: {type(test_data)}{Style.RESET_ALL}"
                     )
                     print(f"   Response: {test_data}")
+                    if test_method:
+                        test_failed = True
+                        stop_word_found = "ERROR"
+                        break
                     continue
 
                 _driver = test_data.get("driver", method)
@@ -2149,7 +2845,52 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                 _leds = sum(test_data.get("laneSizes", [0]))
                 _dur = test_data.get("duration_ms", "?")
 
-                if test_data.get("success") and test_data.get("passed"):
+                if test_data.get("success") is False or "error" in test_data:
+                    stop_word_found = "ERROR"
+                    test_failed = True
+                    print(f"{Fore.RED}\u274c RPC command failed{Style.RESET_ALL}")
+                    if "error" in test_data:
+                        print(f"   Error: {test_data['error']}")
+                    if "message" in test_data:
+                        print(f"   Message: {test_data['message']}")
+                    if setup_method:
+                        break
+
+                elif setup_method and (
+                    validation_errors := _validate_setup_rpc_response(
+                        method,
+                        cmd,
+                        test_data,
+                    )
+                ):
+                    stop_word_found = "ERROR"
+                    test_failed = True
+                    print(f"{Fore.RED}\u274c Setup response mismatch{Style.RESET_ALL}")
+                    print("   Failure class: pin_state_mismatch")
+                    for error in validation_errors:
+                        print(f"   - {error}")
+                    qctx.emit(f"FAILURE class=pin_state_mismatch method={method}")
+                    break
+
+                elif test_method and (
+                    validation_errors := _validate_test_rpc_response(
+                        method,
+                        cmd,
+                        test_data,
+                        ctx.effective_tx_pin,
+                        ctx.effective_rx_pin,
+                    )
+                ):
+                    stop_word_found = "ERROR"
+                    test_failed = True
+                    print(f"{Fore.RED}\u274c Malformed test response{Style.RESET_ALL}")
+                    print("   Failure class: malformed_response")
+                    for error in validation_errors:
+                        print(f"   - {error}")
+                    qctx.emit(f"FAILURE class=malformed_response method={method}")
+                    break
+
+                elif test_data.get("success") and test_data.get("passed"):
                     stop_word_found = "OK"
                     print(f"{Fore.GREEN}\u2705 Test passed{Style.RESET_ALL}")
                     qctx.emit(
@@ -2173,6 +2914,7 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         print(f"   Duration: {duration_str}")
 
                     display_tight_timing(test_data)
+                    display_objectfled_diagnostics(test_data)
 
                     if "drivers" in test_data and isinstance(
                         test_data["drivers"], list
@@ -2190,15 +2932,23 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                     if "patterns" in test_data:
                         display_pattern_details(test_data)
 
-                elif test_data.get("success") and not test_data.get("passed"):
+                elif (
+                    test_data.get("success")
+                    and "passed" in test_data
+                    and not test_data.get("passed")
+                ):
                     stop_word_found = "ERROR"
                     test_failed = True
+                    failure_class, failure_detail = _classify_test_failure(test_data)
                     print(f"{Fore.RED}\u274c Test failed{Style.RESET_ALL}")
+                    print(f"   Failure class: {failure_class}")
+                    print(f"   Detail: {failure_detail}")
                     _err_detail = ""
                     if "firstFailure" in test_data:
                         _err_detail = f" {test_data['firstFailure'].get('pattern', '')}"
                     qctx.emit(
-                        f"TEST {_driver} lanes={_lanes} leds={_leds} FAIL {_dur}ms{_err_detail}"
+                        f"TEST {_driver} lanes={_lanes} leds={_leds} FAIL {_dur}ms "
+                        f"class={failure_class}{_err_detail}"
                     )
 
                     if "firstFailure" in test_data:
@@ -2209,29 +2959,26 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         print(f"   Actual: {failure.get('actual', 'unknown')}")
 
                     display_tight_timing(test_data)
+                    display_objectfled_diagnostics(test_data)
 
                     if "patterns" in test_data:
                         display_pattern_details(test_data)
 
-                elif test_data.get("success") is False:
-                    stop_word_found = "ERROR"
-                    test_failed = True
-                    print(f"{Fore.RED}\u274c RPC command failed{Style.RESET_ALL}")
-                    if "error" in test_data:
-                        print(f"   Error: {test_data['error']}")
-
                 else:
-                    stop_word_found = "OK"
                     print(f"{Fore.GREEN}\u2713 Command completed{Style.RESET_ALL}")
                     if test_data:
                         print(f"   Response: {test_data}")
+                    if not setup_method:
+                        stop_word_found = "OK"
 
             except RpcCrashError as crash_err:
                 print(
                     f"{Fore.RED}\u274c Device crashed during {method}(){Style.RESET_ALL}"
                 )
+                print("   Failure class: crash")
                 if not crash_err.decoded_lines:
                     print("   (no decoded stack trace available)")
+                qctx.emit(f"FAILURE class=crash method={method}")
                 test_failed = True
                 stop_word_found = "ERROR"
                 break
@@ -2239,6 +2986,8 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
             except RpcTimeoutError:
                 print(f"{Fore.RED}\u274c RPC timeout{Style.RESET_ALL}")
                 print(f"   No response within {120}s")
+                print("   Failure class: timeout")
+                qctx.emit(f"FAILURE class=timeout method={method}")
                 test_failed = True
                 stop_word_found = "ERROR"
                 break
@@ -2261,6 +3010,13 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
         print(f"\n{Fore.RED}\u274c RPC client error: {e}{Style.RESET_ALL}")
         return 1
     finally:
+        # Grant the cleanup phase 10s of additional runway BUT keep the
+        # watchdog armed. If `await client.close()` itself wedges (which
+        # is the exact failure mode that motivated the watchdog), the
+        # force-kill still fires after deadline_epoch+10+grace. Per
+        # user spec 2026-06-22: never disarm the bomb, just give it
+        # more fuse when we're entering a known-slow phase.
+        extend_autoresearch_watchdog_deadline(ctx, 10.0)
         if client is not None:
             await client.close()
             print(f"\n\u2705 RPC connection closed")

@@ -45,14 +45,14 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     // just leave this as the default. For streaming byte streams you may want
     // to increase this number to allow momentary re-wind. If you'd like to use
     // a Video as a buffer for an fx effect then please see VideoFxWrapper.
-    Video() FL_NOEXCEPT;
+    Video() FL_NO_EXCEPT;
     Video(size_t pixelsPerFrame, float fps = 30.0f,
           size_t frameHistoryCount =
               DefaultFrameHistoryCount()); // Please use FileSytem to construct
                                            // a Video.
-    ~Video() FL_NOEXCEPT;
-    Video(const Video &) FL_NOEXCEPT;
-    Video &operator=(const Video &) FL_NOEXCEPT;
+    ~Video() FL_NO_EXCEPT;
+    Video(const Video &) FL_NO_EXCEPT;
+    Video &operator=(const Video &) FL_NO_EXCEPT;
 
     // Fx Api
     void draw(DrawContext context) override;
@@ -75,8 +75,8 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     // opened a FLED-formatted file (12-byte "FLED" magic header). Legacy
     // headerless `.rgb` files return false / empty string.
     // Spec: https://github.com/zackees/ledmapper/blob/main/docs/fled-format.md
-    bool hasEmbeddedScreenMap() const FL_NOEXCEPT;
-    const fl::string &embeddedScreenMapJson() const FL_NOEXCEPT;
+    bool hasEmbeddedScreenMap() const FL_NO_EXCEPT;
+    const fl::string &embeddedScreenMapJson() const FL_NO_EXCEPT;
     void pause(fl::u32 now) override;
     void resume(fl::u32 now) override;
     void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
@@ -100,7 +100,7 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
 class VideoFxWrapper : public Fx1d {
   public:
     VideoFxWrapper(FxPtr fx);
-    ~VideoFxWrapper() FL_NOEXCEPT override;
+    ~VideoFxWrapper() FL_NO_EXCEPT override;
     void draw(DrawContext context) override;
     string fxName() const override;
     void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
