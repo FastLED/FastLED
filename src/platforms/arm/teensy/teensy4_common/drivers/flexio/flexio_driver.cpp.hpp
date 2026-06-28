@@ -5,6 +5,7 @@
 #if defined(FL_IS_TEENSY_4X)
 
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/flexio_driver.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/flexio/flexio_internal.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/iflexio_peripheral.h"
 
 #include "fl/log/log.h"
@@ -40,12 +41,10 @@ namespace fl {
 // From RESEARCH.md §11
 // ============================================================================
 
-struct FlexIOPinEntry {
-    u8 teensy_pin;
-    u8 flexio_pin;
-    u32 mux_reg_offset;  // Offset from IOMUXC base for SW_MUX_CTL
-    u32 pad_reg_offset;  // Offset from IOMUXC base for SW_PAD_CTL
-};
+// `FlexIOPinEntry` is now declared in flexio_internal.h so the SPI-mode
+// TU (#3428) can share the same struct without forking the type. Keeping
+// the same field layout / order; the cross-TU lookup helper
+// `flexio_lookup_pin_entry()` is exported at the end of this file.
 
 // IOMUXC base address
 static constexpr u32 kIOMUXC_BASE = 0x401F8000;
@@ -496,7 +495,7 @@ bool flexio_init(const FlexIOPinInfo& pin_info, u32 t0h_ns, u32 t1h_ns,
         flexio_deinit();
     }
 
-    FL_LOG_FLEXIO_F("FlexIO: init pin %s (FlexIO2:%s)", (int)pin_info.teensy_pin, (int)pin_info.flexio_pin);
+    FL_LOG_FLEXIO_F("FlexIO: init pin %d (FlexIO2:%d)", (int)pin_info.teensy_pin, (int)pin_info.flexio_pin);
 
     flexio_clock_init();
     flexio_pin_init(pin_info);
@@ -648,8 +647,8 @@ void flexio_wait() {
                 sDmaChannel->clearError();
             }
             sDmaComplete = true;
-            FL_LOG_FLEXIO_F("FlexIO: flexio_wait() timed out after %s ms -- recovering",
-                            (int)timeout_ms);
+            FL_LOG_FLEXIO_F("FlexIO: flexio_wait() timed out after %u ms -- recovering",
+                            (unsigned)timeout_ms);
             return;
         }
     }
@@ -785,6 +784,28 @@ public:
 // Factory: create real peripheral on Teensy hardware
 fl::shared_ptr<IFlexIOPeripheral> IFlexIOPeripheral::create() {
     return fl::make_shared<FlexIOPeripheralReal>();
+}
+
+// ============================================================================
+// Cross-TU helpers exposed for flexio_spi_mode.cpp.hpp via
+// flexio_internal.h. The clockless mode owns the canonical pin table
+// and CCM clock-gate sequence; the SPI mode imports them via these
+// thin shims so we don't fork the lists. See #3428.
+// ============================================================================
+
+bool flexio_lookup_pin_entry(u8 teensy_pin, FlexIOPinEntry* out) FL_NO_EXCEPT {
+    if (!out) return false;
+    for (int i = 0; i < kNumFlexIOPins; i++) {
+        if (kFlexIOPins[i].teensy_pin == teensy_pin) {
+            *out = kFlexIOPins[i];
+            return true;
+        }
+    }
+    return false;
+}
+
+void flexio_ensure_clock() FL_NO_EXCEPT {
+    flexio_clock_init();
 }
 
 } // namespace fl

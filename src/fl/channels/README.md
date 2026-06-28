@@ -701,6 +701,48 @@ void loop() {
 
 Third-party developers can create custom channel drivers to support new hardware peripherals or transmission protocols. This section covers the requirements and best practices.
 
+### **Rule: Parallel-IO peripherals — one engine for both clockless and SPI modes**
+
+> **Any parallel-IO peripheral driver (FlexIO, ObjectFLED, ESP32 PARLIO, LCD_CAM, I2S, etc.) must put its SPI mode and its clockless mode in the SAME `ChannelEngine`, unless the hardware truly cannot share the dispatch path.**
+
+Forking into two separate engines (e.g. `ChannelEngineFlexIO` and `ChannelEngineFlexIOSPI`) creates Bus enum proliferation, priority-table juggling, two registrations, two `BusTraits<>` specializations, and two engines competing for the same silicon block. The peripheral itself can only run in one mode at a time, so internal mode-switch logic in `show()` is the architecturally correct shape.
+
+**How to apply:**
+
+```cpp
+class ChannelEngineMyPeripheral : public fl::IChannelDriver {
+    // Both modes -> one engine returns BOTH caps.
+    Capabilities getCapabilities() const FL_NO_EXCEPT override {
+        return Capabilities(/*clockless=*/true, /*spi=*/true);
+    }
+
+    bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override {
+        if (!data) return false;
+        if (data->isClockless()) return pin_routes_for_clockless(data->getPin());
+        if (data->isSpi()) {
+            const auto* spi = data->getChipset().ptr<SpiChipsetConfig>();
+            return spi && pins_route_for_spi(spi->dataPin, spi->clockPin);
+        }
+        return false;
+    }
+
+    void show() FL_NO_EXCEPT override {
+        for (auto& ch : mTransmittingChannels) {
+            if (ch->isClockless()) { run_clockless_mode(ch); }
+            else if (ch->isSpi())  { run_spi_mode(ch); }
+            // Mode switch between channels => reconfigure peripheral
+            // (shifter/timer config, DMA TCD, etc.) before transmitting.
+        }
+    }
+};
+```
+
+`BusTraits<Bus::X>` registers ONCE. `BusSupports<Bus::X, ClocklessChipset>` AND `BusSupports<Bus::X, SpiChipsetConfig>` both specialize to `fl::true_type`. Sketches selecting `Bus::X` with either chipset type get the right mode automatically.
+
+**Exception (rule does NOT apply):** genuinely separate peripherals — e.g. ESP32 LPSPI vs I2S_SPI are different silicon blocks with completely different register layouts and DMA paths. Two drivers is correct there. The "parallel-IO" qualifier in the rule excludes this case — the rule covers shared-peripheral-different-mode, not different-peripheral-same-protocol.
+
+**Why:** Established 2026-06-27 during the #3428 FlexIO-SPI / ObjectFLED-SPI implementation. The initial design forked into `Bus::FLEX_IO_SPI` + `Bus::OBJECT_FLED_SPI` separate enum slots; the user reverted to the unified pattern because forking made the Bus enum + priority table + registration scaffolding 4× the maintenance burden for zero behavioral benefit. The CodeRabbit ruleset (`.coderabbit.yaml`) flags Bus enum additions that look like a parallel-IO peripheral mode fork.
+
 ### Overview
 
 A channel driver bridges the gap between high-level `Channel` objects and low-level hardware. Channels pass their encoded data to drivers via an **ephemeral enqueue** - drivers manage transmission, not channel registration.

@@ -38,6 +38,26 @@ Exemplars to cite when explaining the pattern:
 - Dispatcher: `src/platforms/coroutine.impl.cpp.hpp`
 - No-op fallback: `src/platforms/shared/memory_noop.hpp`, `src/platforms/shared/pin_noop.hpp`, `src/platforms/shared/simd_noop.hpp`
 
+## Channel Driver Architectural Checks (Parallel-IO peripherals)
+
+When reviewing additions to `src/fl/channels/bus.h` (Bus enum) or `src/platforms/**/drivers/**/channel_engine_*.{h,cpp.hpp}`, enforce the **unified clockless+SPI engine rule** for parallel-IO peripherals:
+
+1. **One ChannelEngine per peripheral, not per mode.** If a peripheral can natively do both clockless WS281x and clocked SPI chipsets (FlexIO2, ObjectFLED's DMA-to-GPIO bank, ESP32 PARLIO, LCD_CAM, I2S, etc.), the engine MUST handle both modes in the same class. Flag any PR that introduces `ChannelEngineXxxSPI` as a sibling to `ChannelEngineXxx` for the same peripheral.
+2. **One Bus enum entry per peripheral.** Flag any new `Bus::X_SPI` enum value (`Bus::FLEX_IO_SPI`, `Bus::OBJECT_FLED_SPI`, `Bus::PARLIO_SPI`, `Bus::LCD_CAM_SPI`, etc.) for a peripheral that already has a clockless `Bus::X` entry.
+3. **`getCapabilities()` returns `Capabilities(true, true)`** for unified engines — both clockless AND SPI.
+4. **`BusSupports<Bus::X, ClocklessChipset>` AND `BusSupports<Bus::X, SpiChipsetConfig>` both specialize to `fl::true_type`** for unified engines.
+5. **`canHandle()` accepts both chipset types** (clockless and SPI), gated by per-mode pin / timing routability checks.
+6. **`show()` routes per-channel** based on `data->isClockless()` vs `data->isSpi()`. Mode changes between consecutive channels reconfigure the peripheral (shifter / timer / DMA TCD) before transmitting — never silently drop a channel of the "wrong" mode.
+
+**Exception (rule does NOT apply):** genuinely separate peripherals — e.g. ESP32 LPSPI vs I2S_SPI are different silicon blocks with completely different register surfaces, separate DMA, separate clock trees. Two drivers is correct there. The "parallel-IO" qualifier restricts the rule to **shared peripheral, different mode**.
+
+**History:** Established 2026-06-27 during the #3428 FlexIO-SPI / ObjectFLED-SPI implementation. The initial draft forked into `Bus::FLEX_IO_SPI` + `Bus::OBJECT_FLED_SPI` enum slots and separate `ChannelEngineFlexIOSPI` / `ChannelEngineObjectFLEDSPI` engines; user reverted to the unified pattern because forking made the maintenance surface 4× larger with no behavioral benefit. The peripheral is the dispatch boundary, not the mode.
+
+**Reference exemplars:**
+- Channel-driver pattern doc: `src/fl/channels/README.md` → "Rule: Parallel-IO peripherals — one engine for both clockless and SPI modes"
+- Coding standard: `agents/docs/cpp-standards.md` → "Parallel-IO Driver: Unified Clockless + SPI Engine"
+- CodeRabbit enforcement: `.coderabbit.yaml` → path_instructions for `src/fl/channels/bus.h` and `src/platforms/**/drivers/**/channel_engine_*.{h,cpp.hpp}`
+
 ## FastLED Architecture Layers
 
 The codebase follows a layered architecture. Dependencies flow **downward only**.

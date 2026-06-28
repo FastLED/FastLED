@@ -1,11 +1,16 @@
 /// @file channel_engine_flexio.h
-/// @brief FlexIO2-based channel engine for Teensy 4.x
+/// @brief FlexIO2-based channel engine for Teensy 4.x (unified clockless + SPI)
 ///
-/// Implements IChannelDriver using FlexIO2 hardware for WS2812 waveform generation.
-/// Uses 4-timer + 1-shifter architecture with DMA for asynchronous transmission.
+/// Implements IChannelDriver using FlexIO2 hardware for BOTH WS2812 clockless
+/// waveform generation AND APA102/SK9822-class SPI transmission. One engine,
+/// one Bus enum slot (`Bus::FLEX_IO`), one peripheral -- the mode switch
+/// happens inside `show()` based on `ChannelData::isSpi()` vs `isClockless()`.
+/// See `src/fl/channels/README.md` -> "Rule: Parallel-IO peripherals -- one
+/// engine for both clockless and SPI modes" and #3428.
 ///
 /// Unlike ObjectFLED (which uses QTimer + XBAR + eDMA + GPIO), this driver uses
-/// FlexIO2's built-in waveform generation with timer OR'ing on the output pin.
+/// FlexIO2's built-in shifter/timer hardware: 1-shifter + 1-timer for clockless
+/// WS2812, and 1-shifter + 1-timer in SPI master mode for APA102/SK9822.
 ///
 /// State machine: READY → BUSY → READY (asynchronous DMA)
 /// - show() starts DMA and returns immediately
@@ -14,6 +19,8 @@
 #pragma once
 
 // IWYU pragma: private
+
+#include "platforms/arm/teensy/is_teensy.h"
 
 #include "fl/channels/driver.h"
 #include "fl/channels/data.h"
@@ -49,7 +56,10 @@ public:
     ~ChannelEngineFlexIO() override;
 
     /// @brief Check if this engine can handle the given channel data
-    /// @return true for clockless chipsets on FlexIO2-capable pins with period 1000-2500ns
+    /// @return true for:
+    ///   - Clockless chipsets on FlexIO2-capable pins with period 1000-2500ns
+    ///   - SPI chipsets whose (MOSI, SCLK) pin pair is FlexIO2-routable (#3428;
+    ///     hardware impl pending so canHandle currently returns false for SPI)
     bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
 
     /// @brief Enqueue channel data for transmission
@@ -68,10 +78,16 @@ public:
         return fl::string::from_literal("FLEX_IO");
     }
 
-    /// @brief Get capabilities (clockless only)
-    Capabilities getCapabilities() const FL_NO_EXCEPT override {
-        return Capabilities(true, false);
-    }
+    /// @brief Get capabilities (unified clockless + SPI per #3428)
+    ///
+    /// Returns `(clockless=true, spi=true)` because FlexIO2 can serve both
+    /// modes from the same peripheral. SPI runtime serving is gated at
+    /// runtime by `flexio_spi_lookup_pins()` -- the architectural slot is
+    /// permanent. See `src/fl/channels/README.md` -> "Rule: Parallel-IO
+    /// peripherals -- one engine for both clockless and SPI modes". Body
+    /// lives in `channel_engine_flexio.cpp.hpp` per the `src/**/*.h`
+    /// header-discipline rule.
+    Capabilities getCapabilities() const FL_NO_EXCEPT override;
 
 private:
     /// @brief Peripheral abstraction (real hardware or mock)
@@ -83,14 +99,42 @@ private:
     /// @brief Channels currently transmitting
     fl::vector<ChannelDataPtr> mTransmittingChannels;
 
+    /// @brief Which FlexIO2 mode the peripheral is currently programmed for.
+    /// Used by `show()` to decide whether the peripheral needs to be torn
+    /// down and reinitialized when the next channel uses a different mode.
+    enum class Mode : u8 {
+        Uninitialized = 0,
+        Clockless,
+#if defined(FL_IS_TEENSY_4X)
+        Spi,
+#endif
+    };
+
+    /// @brief Current peripheral mode (Uninitialized at boot)
+    Mode mCurrentMode = Mode::Uninitialized;
+
     /// @brief Whether FlexIO hardware has been initialized for current pin/timing
     bool mHwInitialized;
 
-    /// @brief Currently configured pin (0xFF = none)
+    /// @brief Currently configured clockless pin (0xFF = none)
     u8 mCurrentPin;
 
-    /// @brief Currently configured timing
+    /// @brief Currently configured clockless timing
     ChipsetTimingConfig mCurrentTiming;
+
+#if defined(FL_IS_TEENSY_4X)
+    /// @brief Currently configured SPI MOSI pin (0xFF = none).
+    /// Only present on Teensy 4.x (FlexIO2 SPI mode is platform-gated; the
+    /// SPI hardware helpers in `flexio_spi_mode.h` are compiled out
+    /// elsewhere, and `show()` never references these fields off-Teensy).
+    u8 mCurrentSpiMosi = 0xFF;
+
+    /// @brief Currently configured SPI SCLK pin (0xFF = none)
+    u8 mCurrentSpiSclk = 0xFF;
+
+    /// @brief Currently configured SPI clock rate (Hz; 0 = none)
+    u32 mCurrentSpiClockHz = 0;
+#endif  // FL_IS_TEENSY_4X
 };
 
 } // namespace fl

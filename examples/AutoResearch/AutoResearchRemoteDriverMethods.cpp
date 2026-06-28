@@ -44,9 +44,13 @@
 #include "fl/channels/config.h"
 #include <Arduino.h>
 
+// #3428: FlexIO2 SPI mode bring-up smoke test (`flexioSpiSelfTest` RPC).
+// The header is Teensy 4.x-gated, but #include is safe on any platform
+// because all declarations sit inside `#if defined(FL_IS_TEENSY_4X)`.
+#include "platforms/arm/teensy/teensy4_common/drivers/flexio/flexio_spi_mode.h"
+
 // #3428: ObjectFLED DMA-bit-banged SPI mode bring-up smoke test
-// (`objectfledSpiSelfTest` RPC). Header is Teensy 4.x-gated but the
-// `#include` is safe on any platform.
+// (`objectfledSpiSelfTest` RPC). Same Teensy 4.x-gating pattern.
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_spi_mode.h"
 
 #include "fl/net/ble.h"
@@ -639,6 +643,167 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         return response;
     });
 
+    // Register "flexioSpiSelfTest" — #3428 bring-up smoke test for the
+    // FlexIO2 SPI master mode. Exercises the full
+    // lookup → init → show → wait → deinit path on a user-specified
+    // (MOSI, SCLK) pin pair with a known byte pattern, then reports back
+    // success/failure of each stage plus the resolved FlexIO2 pin indices
+    // so a host-side test can diagnose routing and bring-up failures.
+    //
+    // This test does NOT need a logic analyzer or a connected APA102
+    // strip — it confirms the driver runs without crashing the firmware,
+    // pins route, init programs the shifter/timer, and DMA completes
+    // within the bounded timeout. Full byte-level verification needs a
+    // scope (see TODO markers in flexio_spi_mode.cpp.hpp).
+    //
+    // Args (positional, all optional):
+    //   { "mosi_pin":  int = 10,   // FlexIO2 pin 0  (default APA102 MOSI)
+    //     "sclk_pin":  int = 12,   // FlexIO2 pin 1  (default APA102 SCLK)
+    //     "clock_hz":  int = 1000000,  // 1 MHz default for safety
+    //     "num_bytes": int = 4 }       // sent bytes 0xA5 0x5A 0xFF 0x00
+    //
+    // Returns:
+    //   { success, mosi_pin, sclk_pin, clock_hz, num_bytes,
+    //     lookup_ok, init_ok, show_ok, wait_ms,
+    //     mosi_flexio_pin, sclk_flexio_pin }
+    //
+    // Teensy 4.x-only.
+    remote.bind("flexioSpiSelfTest", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+#if !defined(FL_IS_TEENSY_4X)
+        (void)args;
+        response.set("success", false);
+        response.set("error", "PlatformNotSupported");
+        response.set("message",
+                     "flexioSpiSelfTest is Teensy 4.x-only (FlexIO2 SPI master mode).");
+        return response;
+#else
+        // Parse args with defaults that work out-of-the-box on Teensy 4.x.
+        // Note: the RPC framework signature `fl::json(const fl::json&)` makes
+        // the framework strip the outer params array and pass `params[0]`
+        // directly as `args`. So `args` is an OBJECT here, not an array --
+        // some existing bindings in this file have the wrong `args.is_array()`
+        // check (pre-existing bug, fix tracked separately) and silently use
+        // their defaults always.
+        int mosi_pin = 10;       // FlexIO2 pin 0 (teensy pin 10)
+        int sclk_pin = 12;       // FlexIO2 pin 1 (teensy pin 12)
+        int clock_hz = 1000000;  // 1 MHz -- safe for bring-up
+        int num_bytes = 4;
+        if (args.is_object()) {
+            const fl::json& cfg = args;
+            if (cfg.contains("mosi_pin") && cfg["mosi_pin"].is_int()) {
+                mosi_pin = static_cast<int>(cfg["mosi_pin"].as_int().value());
+            }
+            if (cfg.contains("sclk_pin") && cfg["sclk_pin"].is_int()) {
+                sclk_pin = static_cast<int>(cfg["sclk_pin"].as_int().value());
+            }
+            if (cfg.contains("clock_hz") && cfg["clock_hz"].is_int()) {
+                clock_hz = static_cast<int>(cfg["clock_hz"].as_int().value());
+            }
+            if (cfg.contains("num_bytes") && cfg["num_bytes"].is_int()) {
+                num_bytes = static_cast<int>(cfg["num_bytes"].as_int().value());
+            }
+        }
+
+        response.set("mosi_pin", mosi_pin);
+        response.set("sclk_pin", sclk_pin);
+        response.set("clock_hz", static_cast<int64_t>(clock_hz));
+        response.set("num_bytes", num_bytes);
+
+        // Validate input ranges BEFORE narrowing to u8/u32. Without these
+        // guards, mosi_pin=270 wraps to pin 14 in static_cast<u8>(), and
+        // a negative clock_hz wraps to a huge u32 that the SPI driver
+        // would then clamp to the 25 MHz ceiling -- both silently produce
+        // wrong-hardware behavior. Per coderabbitai review on PR #3431.
+        if (num_bytes <= 0 || num_bytes > 64) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "num_bytes must be in [1, 64].");
+            return response;
+        }
+        if (mosi_pin < 0 || mosi_pin > 255 ||
+            sclk_pin < 0 || sclk_pin > 255) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "mosi_pin / sclk_pin must be in [0, 255].");
+            return response;
+        }
+        if (clock_hz <= 0) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "clock_hz must be > 0.");
+            return response;
+        }
+
+        // 1. Pin-pair lookup.
+        fl::FlexIOSPIPinInfo pin_info{};
+        bool lookup_ok = fl::flexio_spi_lookup_pins(
+            static_cast<fl::u8>(mosi_pin),
+            static_cast<fl::u8>(sclk_pin),
+            &pin_info);
+        response.set("lookup_ok", lookup_ok);
+        if (!lookup_ok) {
+            response.set("success", false);
+            response.set("error", "PinNotRoutable");
+            response.set("message",
+                         "(MOSI, SCLK) pair is not FlexIO2-routable; both pins "
+                         "must be in {6, 7, 8, 9, 10, 11, 12, 13, 32}.");
+            return response;
+        }
+        response.set("mosi_flexio_pin",
+                     static_cast<int64_t>(pin_info.mosi_flexio_pin));
+        response.set("sclk_flexio_pin",
+                     static_cast<int64_t>(pin_info.sclk_flexio_pin));
+
+        // 2. Init.
+        bool init_ok = fl::flexio_spi_init(pin_info,
+                                            static_cast<fl::u32>(clock_hz));
+        response.set("init_ok", init_ok);
+        if (!init_ok) {
+            response.set("success", false);
+            response.set("error", "InitFailed");
+            response.set("message", "flexio_spi_init returned false.");
+            return response;
+        }
+
+        // 3. Send a known pattern. 0xA5 = 1010 0101 — easy to read on a
+        // scope to verify MSB-first ordering (high bit shifts out first).
+        // Fill the rest with alternating 0xFF / 0x00 so the wire toggles.
+        fl::u8 buffer[64] = {0};
+        for (int i = 0; i < num_bytes; ++i) {
+            switch (i % 4) {
+                case 0: buffer[i] = 0xA5; break;
+                case 1: buffer[i] = 0x5A; break;
+                case 2: buffer[i] = 0xFF; break;
+                case 3: buffer[i] = 0x00; break;
+            }
+        }
+
+        const fl::u32 show_start_ms = millis();
+        bool show_ok = fl::flexio_spi_show(buffer,
+                                            static_cast<fl::u32>(num_bytes));
+        response.set("show_ok", show_ok);
+        if (!show_ok) {
+            fl::flexio_spi_deinit();
+            response.set("success", false);
+            response.set("error", "ShowFailed");
+            response.set("message", "flexio_spi_show returned false.");
+            return response;
+        }
+
+        // 4. Wait for completion.
+        fl::flexio_spi_wait();
+        const fl::u32 wait_ms = millis() - show_start_ms;
+        response.set("wait_ms", static_cast<int64_t>(wait_ms));
+
+        // 5. Tear down.
+        fl::flexio_spi_deinit();
+
+        response.set("success", true);
+        return response;
+#endif
+    });
+
     // Register "objectfledSpiSelfTest" — #3428 bring-up smoke test for the
     // ObjectFLED DMA-bit-banged SPI master mode. Exercises the full
     // lookup → init → show → wait → deinit path on a user-specified
@@ -654,7 +819,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     // Returns:
     //   { success, mosi_pin, sclk_pin, clock_hz, num_bytes,
     //     lookup_ok, init_ok, show_ok, wait_ms,
-    //     mosi_bit, sclk_bit }
+    //     mosi_bit, sclk_bit, dma_* (10), tmr3_* (5), xbar1_ctrl1 }
     //
     // Teensy 4.x-only.
     remote.bind("objectfledSpiSelfTest", [this](const fl::json& args) -> fl::json {
@@ -669,8 +834,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
 #else
         // Parse args. The RPC framework strips the outer params array
         // and passes params[0] directly as `args`, so `args` is an OBJECT
-        // here (NOT an array -- some existing bindings have the wrong
-        // is_array() check; pre-existing bug, fix tracked separately).
+        // here (NOT an array).
         int mosi_pin = 14;        // GPIO6 bit 18 on T4.1 (and T4.0)
         int sclk_pin = 15;        // GPIO6 bit 19
         int clock_hz = 1000000;   // 1 MHz -- safe for bring-up
@@ -696,10 +860,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         response.set("clock_hz", static_cast<int64_t>(clock_hz));
         response.set("num_bytes", num_bytes);
 
-        // Validate input ranges BEFORE narrowing to u8/u32. mosi_pin=270
-        // wraps to pin 14 in static_cast<u8>(); negative clock_hz wraps to
-        // a large u32 that the SPI driver clamps to 25 MHz -- both produce
-        // silently-wrong hardware behavior. Per coderabbitai review on #3432.
+        // Validate input ranges BEFORE narrowing to u8/u32.
         if (num_bytes <= 0 || num_bytes > 64) {
             response.set("success", false);
             response.set("error", "InvalidArgs");
@@ -778,8 +939,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         const fl::u32 wait_ms = millis() - show_start_ms;
         response.set("wait_ms", static_cast<int64_t>(wait_ms));
 
-        // 5. Snapshot DMA + QTimer3 + XBAR1 register state -- lets the
-        // host smoke test identify why DMA didn't complete without scope.
+        // 5. Snapshot DMA + QTimer3 + XBAR1 register state.
         fl::ObjectFLEDSPIDiagnostics diag{};
         fl::objectfled_spi_read_diagnostics(&diag);
         response.set("dma_channel", static_cast<int64_t>(diag.dma_channel));
