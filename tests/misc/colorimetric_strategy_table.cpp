@@ -7096,7 +7096,8 @@ inline ErrorStats evaluate_public_dispatch_fixture_parity(
         return stats;
     }
 
-    DiodeProfilePtrConst profile_ptr = make_diode_profile(profile);
+    fl::shared_ptr<const fl::DiodeProfile> profile_ptr =
+        make_diode_profile(profile);
     Rgbw cfg(kRGBWDefaultColorTemp, mode, EOrderW::WDefault, profile_ptr);
     prepare_rgbw_colorimetric(cfg);
     disable_rgbw_colorimetric_lut();
@@ -7143,7 +7144,8 @@ inline ErrorStats evaluate_public_dispatch_cube_parity(
         return stats;
     }
 
-    DiodeProfilePtrConst profile_ptr = make_diode_profile(profile);
+    fl::shared_ptr<const fl::DiodeProfile> profile_ptr =
+        make_diode_profile(profile);
     Rgbw cfg(kRGBWDefaultColorTemp, mode, EOrderW::WDefault, profile_ptr);
     prepare_rgbw_colorimetric(cfg);
     disable_rgbw_colorimetric_lut();

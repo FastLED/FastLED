@@ -898,7 +898,7 @@ FL_TEST_CASE("Channel::applyConfig updates reconfigurable fields") {
     opts2.mCorrection = Typical8mmPixel;
     opts2.mTemperature = CRGB(200, 180, 160);
     opts2.mDitherMode = DISABLE_DITHER;
-    static fl::DiodeProfilePtrConst rgbwProfile =
+    static fl::shared_ptr<const fl::DiodeProfile> rgbwProfile =
         fl::make_diode_profile(fl::kRgbwDefaultProfile);
     opts2.mWhiteCfg = fl::Rgbw(fl::kRGBWDefaultColorTemp,
                                fl::RGBW_MODE::kRGBWExactColors,

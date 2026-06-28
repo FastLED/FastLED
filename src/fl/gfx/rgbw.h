@@ -45,8 +45,9 @@ enum class RGBW_MODE {
 // primary-matrix construction from these four chromaticities.
 //
 // Users wanting standard color-space input semantics (Rec709 / sRGB,
-// Rec2020, DCI-P3 D65/D60) should opt in explicitly via
-// `fl::set_input_gamut(profile, fl::InputGamut::Rec709)` etc.
+// Rec2020, DCI-P3 D65/D60) should opt in explicitly when creating the
+// owned profile, for example
+// `fl::color::make_diode_profile(profile, fl::color::InputGamut::Rec709)`.
 //
 // If input_xy_w[1] is left at 0.0f (the default for value-initialized
 // profiles `DiodeProfile{}`), solvers fall back to the legacy
@@ -69,8 +70,6 @@ struct DiodeProfile {
     float input_xy_b[2];  // source B primary chromaticity (default: native LED B)
     float input_xy_w[2];  // source white chromaticity (default D65)
 };
-
-using DiodeProfilePtrConst = fl::shared_ptr<const DiodeProfile>;
 
 // Named source color spaces for opting into standard input-gamut semantics
 // (#2710). The default `kRgbwDefaultProfile` ships as `Native`; pick a
@@ -106,11 +105,11 @@ void set_input_gamut(DiodeProfile* profile, InputGamut g,
 // Create an owned immutable profile. The gamut overload copies `profile`,
 // applies the named input gamut to that copy, and returns it as const shared
 // state suitable for storing on Rgbw.
-DiodeProfilePtrConst make_diode_profile(
+fl::shared_ptr<const DiodeProfile> make_diode_profile(
     const DiodeProfile& profile) FL_NO_EXCEPT;
-DiodeProfilePtrConst make_diode_profile(
+fl::shared_ptr<const DiodeProfile> make_diode_profile(
     const DiodeProfile& profile, InputGamut g) FL_NO_EXCEPT;
-DiodeProfilePtrConst make_diode_profile(
+fl::shared_ptr<const DiodeProfile> make_diode_profile(
     const DiodeProfile& profile, InputGamut g,
     const float white_xy[2]) FL_NO_EXCEPT;
 
@@ -188,7 +187,8 @@ struct Rgbw {
     explicit Rgbw(u16 white_color_temp = fl::kRGBWDefaultColorTemp,
                   fl::RGBW_MODE rgbw_mode = fl::RGBW_MODE::kRGBWExactColors,
                   fl::EOrderW _w_placement = EOrderW::WDefault,
-                  DiodeProfilePtrConst _profile = DiodeProfilePtrConst())
+                  fl::shared_ptr<const DiodeProfile> _profile =
+                      fl::shared_ptr<const DiodeProfile>())
  FL_NO_EXCEPT : white_color_temp(white_color_temp), w_placement(_w_placement),
           rgbw_mode(rgbw_mode), profile(_profile) {}
     explicit Rgbw(u16 white_color_temp,
@@ -206,7 +206,7 @@ struct Rgbw {
     /// nullptr means "use the legacy process-wide fallback", which itself
     /// defaults to kRgbwDefaultProfile. Shared ownership keeps a custom
     /// profile alive for the lifetime of any controller using this Rgbw.
-    DiodeProfilePtrConst profile;
+    fl::shared_ptr<const DiodeProfile> profile;
     FASTLED_FORCE_INLINE bool active() const FL_NO_EXCEPT {
         return rgbw_mode != RGBW_MODE::kRGBWInvalid;
     }

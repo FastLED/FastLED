@@ -15,8 +15,8 @@ CRGB leds[NUM_LEDS];
 void setup() {
     Serial.begin(115200);
 
-    fl::DiodeProfilePtrConst profile =
-        fl::make_diode_profile(fl::kRgbwDefaultProfile, fl::InputGamut::Rec709);
+    fl::shared_ptr<const fl::color::DiodeProfile> profile =
+        fl::color::make_diode_profile(fl::color::kRgbwDefaultProfile);
 
     fl::Rgbw rgbw(
         fl::kRGBWDefaultColorTemp,

@@ -32,8 +32,9 @@ namespace fl {
 // and RGB=(255,255,255) lands on D65. This is what most FastLED users
 // expect — full use of their hardware's chromatic range. Users who want
 // named-gamut input semantics (Rec709 / sRGB, Rec2020, DCI-P3 D65/D60)
-// should explicitly call `set_input_gamut()` after copying / constructing
-// their profile. See #2705 for the source-space transform itself.
+// should construct an owned profile with
+// `fl::color::make_diode_profile(profile, fl::color::InputGamut::Rec709)`.
+// See #2705 for the source-space transform itself.
 const DiodeProfile kRgbwDefaultProfile = {
     /* xy_r        */ { 0.700606f, 0.299300f },
     /* xy_g        */ { 0.097940f, 0.831593f },
@@ -283,18 +284,18 @@ void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NO_EXCEPT {
     set_input_gamut(profile, g, nullptr);
 }
 
-DiodeProfilePtrConst make_diode_profile(
+fl::shared_ptr<const DiodeProfile> make_diode_profile(
     const DiodeProfile& profile) FL_NO_EXCEPT {
     return fl::static_pointer_cast<const DiodeProfile>(
         fl::make_shared<DiodeProfile>(profile));
 }
 
-DiodeProfilePtrConst make_diode_profile(
+fl::shared_ptr<const DiodeProfile> make_diode_profile(
     const DiodeProfile& profile, InputGamut g) FL_NO_EXCEPT {
     return make_diode_profile(profile, g, nullptr);
 }
 
-DiodeProfilePtrConst make_diode_profile(
+fl::shared_ptr<const DiodeProfile> make_diode_profile(
     const DiodeProfile& profile, InputGamut g,
     const float white_xy[2]) FL_NO_EXCEPT {
     DiodeProfile copy = profile;
@@ -330,7 +331,7 @@ inline const DiodeProfile* resolve_rgbw_profile(
 }
 
 inline const DiodeProfile* resolve_rgbw_profile(
-    const DiodeProfilePtrConst& profile) FL_NO_EXCEPT {
+    const fl::shared_ptr<const DiodeProfile>& profile) FL_NO_EXCEPT {
     return resolve_rgbw_profile(profile.get());
 }
 
@@ -349,7 +350,7 @@ inline const colorimetric_detail::ProfileCache& get_cache(
 }
 
 inline const colorimetric_detail::ProfileCache& get_cache(
-    const DiodeProfilePtrConst& profile, int cct) FL_NO_EXCEPT {
+    const fl::shared_ptr<const DiodeProfile>& profile, int cct) FL_NO_EXCEPT {
     return get_cache(resolve_rgbw_profile(profile), cct);
 }
 
@@ -401,13 +402,13 @@ inline void rebuild_lut_if_stale(LutStateHolder& s, const DiodeProfile* profile,
 }
 
 inline void rebuild_lut_if_stale(LutStateHolder& s,
-                                 const DiodeProfilePtrConst& profile,
+                                 const fl::shared_ptr<const DiodeProfile>& profile,
                                  int cct) FL_NO_EXCEPT {
     rebuild_lut_if_stale(s, resolve_rgbw_profile(profile), cct);
 }
 
 inline void rebuild_lut_if_stale(LutStateHolder& s, int cct) FL_NO_EXCEPT {
-    rebuild_lut_if_stale(s, DiodeProfilePtrConst(), cct);
+    rebuild_lut_if_stale(s, static_cast<const DiodeProfile*>(nullptr), cct);
 }
 
 // Drop both the ProfileCache and the LUT cache when `profile` matches the

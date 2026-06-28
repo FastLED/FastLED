@@ -215,7 +215,7 @@ FL_TEST_CASE("default profile is reachable via get/set API") {
 
 
 FL_TEST_CASE("Rgbw colorimetric config carries shared profile and input gamut") {
-    DiodeProfilePtrConst profile =
+    fl::shared_ptr<const fl::DiodeProfile> profile =
         make_diode_profile(kRgbwDefaultProfile, InputGamut::Rec709);
     Rgbw cfg(kRGBWDefaultColorTemp,
              RGBW_MODE::kRGBWColorimetric,

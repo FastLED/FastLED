@@ -243,7 +243,8 @@ using fl::degrees;
 #include "fl/system/engine_events.h"
 
 #include "fl/gfx/leds.h"
-#include "fl/gfx/rgbw.h"  // DiodeProfile + InputGamut (wrapped on CFastLED below)
+#include "fl/gfx/rgbw.h"  // RGBW mode config (wrapped on CFastLED below)
+#include "fl/color/rgbw.h"  // colorimetric profile facade
 
 // clockless.h removed - BulkClockless API has been superseded by Channel API
 
@@ -1495,16 +1496,18 @@ public:
 	}
 
 	/// @name RGBW Input Gamut Configuration
-	/// God-instance wrappers around `fl::set_input_gamut` (#2710). See
-	/// `agents/docs/cpp-standards.md` → "Public Settings Pattern" for the
-	/// rule that global setters live here, not as bare `fl::` free functions.
+	/// Legacy god-instance wrappers around `fl::set_input_gamut` (#2710) for
+	/// mutable profile structs. New sketches should normally create an owned
+	/// profile with `fl::color::make_diode_profile(...)` and pass that profile
+	/// into `fl::Rgbw`.
 	/// @{
 
 	/// Reconfigure `profile`'s input gamut to one of the named source
 	/// chromaticity sets (Native / Rec709 / Rec2020 / DCI-P3 D65 / D60).
 	/// Mutates `profile` in place; no-op if `profile == nullptr`.
 	/// @code
-	/// FastLED.setInputGamut(&my_profile, fl::InputGamut::Rec709);
+	/// fl::color::DiodeProfile my_profile = fl::color::kRgbwDefaultProfile;
+	/// FastLED.setInputGamut(&my_profile, fl::color::InputGamut::Rec709);
 	/// @endcode
 	inline void setInputGamut(fl::DiodeProfile* profile, fl::InputGamut g) FL_NO_EXCEPT {
 		fl::set_input_gamut(profile, g);
@@ -1630,8 +1633,8 @@ public:
 	/// No-op when `FASTLED_RGBW_COLORIMETRIC` is undefined.
 	/// @param profile pointer to a caller-owned `fl::DiodeProfile`, or `nullptr` to revert to `kRgbwDefaultProfile`.
 	/// @code
-	/// fl::DiodeProfilePtrConst profile =
-	///     fl::make_diode_profile(fl::kRgbwDefaultProfile, fl::InputGamut::Rec709);
+	/// fl::shared_ptr<const fl::color::DiodeProfile> profile =
+	///     fl::color::make_diode_profile(fl::color::kRgbwDefaultProfile);
 	/// FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS)
 	///     .setRgbw(fl::Rgbw(fl::kRGBWDefaultColorTemp,
 	///                       fl::RGBW_MODE::kRGBWColorimetric,
