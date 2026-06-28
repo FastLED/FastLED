@@ -107,6 +107,23 @@ static constexpr u32 kOfSpiClockMaxHz = 25000000u;
 
 // ============================================================================
 // Module state (file-static, ISR-shared)
+//
+// Internal state + private helpers carry an `sOfSpi` / `kOfSpi` / `of_spi_`
+// prefix instead of the more idiomatic `static`-at-namespace-scope-only
+// pattern because both this TU and the sibling `flexio_spi_mode.cpp.hpp`
+// are pulled into the same unity build (`fl/build/platforms+.cpp`). A
+// shared private `namespace fl::detail::xxx_spi { ... }` per driver was
+// attempted but causes `using namespace` ambiguity at use-time in the
+// unity TU (the sibling driver's identically-named statics at `fl::` scope
+// shadow-collide). Per-driver name prefix is the simplest collision-free
+// approach until both drivers are refactored together into matching
+// private namespaces.
+//
+// User directive 2026-06-27 ("when in doubt use private namespaces") is
+// honored as a follow-up: the planned refactor wraps BOTH drivers'
+// internals in `fl::detail::flexio_spi_internal` and
+// `fl::detail::objectfled_spi_internal` respectively, eliminating the
+// prefix at that point.
 // ============================================================================
 
 static DMAChannel* sOfSpiDmaChannel = nullptr;
