@@ -174,13 +174,18 @@ FL_TEST_CASE("FlexIO engine - name is FLEX_IO") {
     FL_CHECK(engine.getName() == "FLEX_IO");
 }
 
-FL_TEST_CASE("FlexIO engine - capabilities are clockless only") {
+FL_TEST_CASE("FlexIO engine - capabilities are unified clockless + SPI (#3428)") {
     auto mock = fl::make_shared<FlexIOPeripheralMock>();
     ChannelEngineFlexIO engine(mock);
 
     auto caps = engine.getCapabilities();
+    // Per the unified parallel-IO driver rule: one ChannelEngine, both modes.
+    // SPI runtime serving is gated by `flexio_spi_lookup_pins()` (stubbed
+    // until the FlexIO2 SPI hardware impl lands), but the capability slot
+    // is permanent. See src/fl/channels/README.md -> "Rule: Parallel-IO
+    // peripherals -- one engine for both clockless and SPI modes".
     FL_CHECK(caps.supportsClockless == true);
-    FL_CHECK(caps.supportsSpi == false);
+    FL_CHECK(caps.supportsSpi == true);
 }
 
 //=============================================================================
