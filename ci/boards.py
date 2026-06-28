@@ -1133,7 +1133,7 @@ RPI_PICO2 = Board(
 # NXP LPC8xx family. PlatformIO has no native Arduino-capable nxplpc
 # platform, so use the zackees fork that layers ArduinoCore-LPC8xx on top of
 # platformio/platform-nxplpc.
-_NXPLPC_PLATFORM = "https://github.com/zackees/platform-nxplpc-arduino.git#2ee527ae80de98e9105329a7260edb003289dfda"
+_NXPLPC_PLATFORM = "https://github.com/zackees/platform-nxplpc-arduino.git#12265f765aebd3893465d6d7ad76be66d89ba015"
 
 LPC845BRK = Board(
     board_name="lpc845brk",
