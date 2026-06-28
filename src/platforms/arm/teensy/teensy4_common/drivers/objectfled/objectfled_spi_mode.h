@@ -64,6 +64,33 @@ void objectfled_spi_wait() FL_NO_EXCEPT;
 /// ObjectFLEDDmaManager slot so clockless mode can take over.
 void objectfled_spi_deinit() FL_NO_EXCEPT;
 
+/// @brief Diagnostic snapshot of the DMA + QTimer3 + XBAR1 register state
+/// after the most recent `objectfled_spi_show()` + `objectfled_spi_wait()`.
+/// Used by `objectfledSpiSelfTest` RPC to surface why DMA didn't complete
+/// (without scope-on-wire). Populated by `objectfled_spi_read_diagnostics`.
+struct ObjectFLEDSPIDiagnostics {
+    u32 dma_erq;          ///< eDMA ERQ register (channel-N bit shows if our channel is enabled)
+    u32 dma_int;          ///< eDMA INT register (channel-N bit shows major-loop done)
+    u32 dma_err;          ///< eDMA ERR register (channel-N bit shows error)
+    u32 dma_es;           ///< eDMA ES (error status detail)
+    u32 dma_channel;      ///< Our DMA channel index (0..31)
+    u32 dma_citer;        ///< TCD.CITER -- counts down each minor loop; 0 = transfer done
+    u32 dma_biter;        ///< TCD.BITER -- the initial value CITER was loaded from
+    u32 dma_dlastsga;     ///< TCD.DLASTSGA -- destination last-address-after-major-loop
+    u16 tmr3_cntr0;       ///< QTimer3 ch0 counter (should advance after enable)
+    u16 tmr3_csctrl0;     ///< QTimer3 ch0 compare-status-and-control (TCF1 = compare-1 fired)
+    u16 tmr3_sctrl0;      ///< QTimer3 ch0 status (TCF = timer-compare-flag)
+    u16 tmr3_ctrl0;       ///< QTimer3 ch0 control (CM=count mode; should be nonzero when running)
+    u16 tmr3_enbl;        ///< QTimer3 enable register (bit 0 = ch0 enabled)
+    u16 xbar1_ctrl1;      ///< XBARA1 CTRL1 (slot 1 = our edge-detect for req95)
+    bool dma_complete;    ///< sSpiDmaComplete flag (set by ISR)
+    bool initialized;     ///< sSpiInitialized
+};
+
+/// @brief Read current DMA/QTimer3/XBAR1 register state into `out`.
+/// Safe to call any time; no side effects on hardware state.
+void objectfled_spi_read_diagnostics(ObjectFLEDSPIDiagnostics* out) FL_NO_EXCEPT;
+
 }  // namespace fl
 
 #endif  // FL_IS_TEENSY_4X

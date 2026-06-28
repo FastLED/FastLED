@@ -778,7 +778,25 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         const fl::u32 wait_ms = millis() - show_start_ms;
         response.set("wait_ms", static_cast<int64_t>(wait_ms));
 
-        // 5. Tear down.
+        // 5. Snapshot DMA + QTimer3 + XBAR1 register state -- lets the
+        // host smoke test identify why DMA didn't complete without scope.
+        fl::ObjectFLEDSPIDiagnostics diag{};
+        fl::objectfled_spi_read_diagnostics(&diag);
+        response.set("dma_channel", static_cast<int64_t>(diag.dma_channel));
+        response.set("dma_erq",     static_cast<int64_t>(diag.dma_erq));
+        response.set("dma_int",     static_cast<int64_t>(diag.dma_int));
+        response.set("dma_err",     static_cast<int64_t>(diag.dma_err));
+        response.set("dma_es",      static_cast<int64_t>(diag.dma_es));
+        response.set("dma_citer",   static_cast<int64_t>(diag.dma_citer));
+        response.set("dma_biter",   static_cast<int64_t>(diag.dma_biter));
+        response.set("tmr3_cntr0",   static_cast<int64_t>(diag.tmr3_cntr0));
+        response.set("tmr3_csctrl0", static_cast<int64_t>(diag.tmr3_csctrl0));
+        response.set("tmr3_sctrl0",  static_cast<int64_t>(diag.tmr3_sctrl0));
+        response.set("tmr3_ctrl0",   static_cast<int64_t>(diag.tmr3_ctrl0));
+        response.set("tmr3_enbl",    static_cast<int64_t>(diag.tmr3_enbl));
+        response.set("xbar1_ctrl1",  static_cast<int64_t>(diag.xbar1_ctrl1));
+
+        // 6. Tear down.
         fl::objectfled_spi_deinit();
 
         response.set("success", true);

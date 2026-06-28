@@ -123,6 +123,10 @@ static DMAMEM u32 sSpiBitPattern[kSpiMaxOutputWords] __attribute__((used, aligne
 static u32 sSpiSavedMosiMux = 0;
 static u32 sSpiSavedSclkMux = 0;
 
+// Diagnostics snapshot captured in wait() BEFORE recovery clears state.
+// Read by `objectfled_spi_read_diagnostics()` after wait() returns.
+static ObjectFLEDSPIDiagnostics sSpiLastDiag{};
+
 // ============================================================================
 // GPIO6 pin-bank validation
 // ============================================================================
@@ -283,41 +287,53 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
     // trigger for our use case of "fire DMA on each PWM tick so we can
     // write to an arbitrary GPIO".
     //
-    // The QTimer3 + XBAR + DMA_CH_MUX_REQ95 path IS implemented below
-    // (replacing the original FlexPWM2/VALDE attempt). It mirrors the
-    // working clockless QTimer4 setup at OjectFLED.cpp.hpp:305-335 but
-    // on QTimer3 channel 0 (QTimer4 is taken) and routes to req95 (the
-    // only XBAR-DMA slot not used by clockless mode's 30/31/94).
+    // Bench-debug history (#3428): three iterations to reach a working
+    // DMA-transmit path on Teensy 4.1.
     //
-    // Bench-debug status after the QTimer3 rewrite (Teensy 4.1, COM20):
-    //   * Init + show + wait + deinit no longer crashes. ✓
-    //   * wait_ms = 55 ms = bounded DMA-timeout(50) + drain-wait(5).
-    //     The DMA still isn't actually completing.
+    // Iteration 1 -- FlexPWM2 + VALDE:
+    //   Wrong DMA-trigger primitive. VALDE fires when a PWM VAL register
+    //   is reloaded (the use case in Teensy Audio's `output_pwm.cpp`),
+    //   not on a generic "PWM cycle tick". Our DMA writes to GPIO6_DR
+    //   never triggered.
     //
-    // So neither of the two attempted DMA-trigger designs (VALDE via
-    // FlexPWM2, then XBAR via QTimer3) actually fires the DMA on this
-    // hardware. The remaining suspects, all requiring scope-on-bench
-    // to diagnose:
-    //   (a) QTimer3 channel 0 isn't actually counting (verify by
-    //       reading TMR3_CNTR0 after enable -- should advance).
-    //   (b) XBARA1_IN_QTIMER3_TIMER0 isn't actually toggling its
-    //       output (verify by scoping the timer-output pin, or by
-    //       reading XBARA1 STS bits which latch on edge).
-    //   (c) DMA channel ERQ isn't set despite enable() -- verify by
-    //       reading DMA_ERQ register after enable.
-    //   (d) DMAMUX is enabled but channel# != XBARA1_OUT_DMA_CH_MUX_REQ95
-    //       value (verify DMAMUX_CHCFG[ch] register).
+    // Iteration 2 -- QTimer3 + XBAR1 + DMA_CH_MUX_REQ95:
+    //   Architecturally correct (mirrors clockless QTimer4 setup at
+    //   OjectFLED.cpp.hpp:305-335), but DMA still failed with
+    //   DMA_ES = 0x80000401 (DBE = destination bus error). Root cause:
+    //   GPIO6-9 are "fast GPIO" on the Cortex-M7 private TCM bus,
+    //   inaccessible from eDMA. Direct writes to &GPIO6_DR bus-fault.
     //
-    // Keep the gate OFF by default. Next bench session adds DMA-state
-    // dump to the smoke test response so the host can see which of the
-    // four suspects is the root cause.
+    // Iteration 3 -- QTimer3 + XBAR1 + GPIO1 remap (CURRENT, WORKING):
+    //   Clear the matching IOMUXC_GPR_GPR26 bits to remap the pads from
+    //   GPIO6 (fast/M7-only) to GPIO1 (system-bus = eDMA-reachable), then
+    //   write DMA to &GPIO1_DR. Bit positions stay the same. Mirrors
+    //   clockless mode (OjectFLED.cpp.hpp:264). Hardware-verified on
+    //   Teensy 4.1 (COM20): wait_ms drops from 55 (bounded timeout) to
+    //   5 (just the drain wait) for all three test configurations
+    //   (1/6/12 MHz, 4/16/64 bytes). DMA_ERR=0, DMA_ES=0, DMA_INT
+    //   cleared by ISR. The full lookup -> init -> show -> wait ->
+    //   deinit chain transmits successfully end-to-end.
+    //
+    // What's still NOT verified:
+    //   - Byte-level MOSI bit pattern (need scope to confirm 0xA5
+    //     streams as 1010 0101 MSB-first).
+    //   - APA102/SK9822 strip lighting up.
+    //
+    // Safety gate FL_OBJECTFLED_SPI_HARDWARE_ENABLE stays OFF by
+    // default until the scope verification completes -- the design is
+    // proven correct at the API level, but byte-level wire verification
+    // is still pending.
 #ifndef FL_OBJECTFLED_SPI_HARDWARE_ENABLE
     (void)pin_info;
     (void)clock_hz;
-    FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: hardware bring-up incomplete; "
-                        "init disabled until #3428 scope debug completes");
+    FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: gate disabled (set "
+                        "FL_OBJECTFLED_SPI_HARDWARE_ENABLE to enable). "
+                        "DMA transmit IS hardware-verified on Teensy 4.1 "
+                        "but byte-level scope verification of MOSI bit "
+                        "pattern is still pending -- see #3428.");
     return false;
 #else
+    sSpiLastDiag = ObjectFLEDSPIDiagnostics{};  // reset captured snapshot
     if (clock_hz == 0) {
         FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: init refused -- clock_hz == 0");
         return false;
@@ -361,8 +377,20 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
         ((FL_OBJECTFLED_SPI_SPEED & 0x3u) << 6) |
         ((FL_OBJECTFLED_SPI_DSE   & 0x7u) << 3);
 
-    GPIO6_GDIR |= (pin_info.mosi_mask | pin_info.sclk_mask);
-    GPIO6_DR   &= ~(pin_info.mosi_mask | pin_info.sclk_mask);
+    // CRITICAL (#3428 bench debug): eDMA cannot write to GPIO6_DR
+    // directly -- GPIO6-9 are "fast GPIO" on the Cortex-M7 private TCM
+    // bus, inaccessible from eDMA. Confirmed via DMA_ES = 0x80000401
+    // (DBE = Destination Bus Error, channel 4) on our first transmit
+    // attempt. The fix mirrors clockless mode (OjectFLED.cpp.hpp:264):
+    // clear the matching IOMUXC_GPR_GPR26 bits to remap the pads from
+    // GPIO6 (fast/M7-only) to GPIO1 (slow/system-bus = eDMA-reachable).
+    // Bit positions in GPIO1_DR match the original GPIO6_DR positions.
+    IOMUXC_GPR_GPR26 &= ~(pin_info.mosi_mask | pin_info.sclk_mask);
+
+    // Now set GDIR / drive low on the GPIO1 alias (the bits are the
+    // same; the alias is the eDMA-reachable mirror).
+    GPIO1_GDIR |= (pin_info.mosi_mask | pin_info.sclk_mask);
+    GPIO1_DR   &= ~(pin_info.mosi_mask | pin_info.sclk_mask);
 
     objectfled_spi_program_qtimer(2u * clock_hz);
 
@@ -456,7 +484,9 @@ bool objectfled_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT {
     sSpiDmaChannel->clearError();
     sSpiDmaComplete = true;
 
-    const u32 other = GPIO6_DR & ~(sSpiCurrentPins.mosi_mask |
+    // Snapshot "other" bits from the GPIO1 alias (init remapped GPIO6
+    // pads -> GPIO1 so eDMA can reach them).
+    const u32 other = GPIO1_DR & ~(sSpiCurrentPins.mosi_mask |
                                    sSpiCurrentPins.sclk_mask);
 
     u32* dst = sSpiBitPattern;
@@ -479,7 +509,8 @@ bool objectfled_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT {
                                       | DMA_TCD_ATTR_DSIZE(2);
     sSpiDmaChannel->TCD->NBYTES_MLNO  = 4;
     sSpiDmaChannel->TCD->SLAST        = -(i32)(num_words * 4u);
-    sSpiDmaChannel->TCD->DADDR        = &GPIO6_DR;
+    // DADDR = GPIO1_DR (eDMA-reachable alias; init remapped via GPR26).
+    sSpiDmaChannel->TCD->DADDR        = &GPIO1_DR;
     sSpiDmaChannel->TCD->DOFF         = 0;
     sSpiDmaChannel->TCD->CITER_ELINKNO = num_words;
     sSpiDmaChannel->TCD->BITER_ELINKNO = num_words;
@@ -511,6 +542,29 @@ void objectfled_spi_wait() FL_NO_EXCEPT {
     const u32 timeout_ms = 50;
     while (!sSpiDmaComplete) {
         if ((u32)(millis() - start) >= timeout_ms) {
+            // Snapshot register state BEFORE recovery clears it.
+            sSpiLastDiag = ObjectFLEDSPIDiagnostics{};
+            sSpiLastDiag.initialized = sSpiInitialized;
+            sSpiLastDiag.dma_complete = sSpiDmaComplete;
+            if (sSpiDmaChannel) {
+                sSpiLastDiag.dma_channel = sSpiDmaChannel->channel;
+                sSpiLastDiag.dma_erq = DMA_ERQ;
+                sSpiLastDiag.dma_int = DMA_INT;
+                sSpiLastDiag.dma_err = DMA_ERR;
+                sSpiLastDiag.dma_es  = DMA_ES;
+                if (sSpiDmaChannel->TCD) {
+                    sSpiLastDiag.dma_citer    = sSpiDmaChannel->TCD->CITER_ELINKNO;
+                    sSpiLastDiag.dma_biter    = sSpiDmaChannel->TCD->BITER_ELINKNO;
+                    sSpiLastDiag.dma_dlastsga = (u32)sSpiDmaChannel->TCD->DLASTSGA;
+                }
+            }
+            sSpiLastDiag.tmr3_cntr0   = TMR3_CNTR0;
+            sSpiLastDiag.tmr3_csctrl0 = TMR3_CSCTRL0;
+            sSpiLastDiag.tmr3_sctrl0  = TMR3_SCTRL0;
+            sSpiLastDiag.tmr3_ctrl0   = TMR3_CTRL0;
+            sSpiLastDiag.tmr3_enbl    = TMR3_ENBL;
+            sSpiLastDiag.xbar1_ctrl1  = XBARA1_CTRL1;
+
             if (sSpiDmaChannel) {
                 sSpiDmaChannel->disable();
                 sSpiDmaChannel->clearComplete();
@@ -536,7 +590,8 @@ void objectfled_spi_wait() FL_NO_EXCEPT {
     // Stop QTimer3 channel 0 between transfers.
     TMR3_ENBL &= ~1u;
 
-    GPIO6_DR = (GPIO6_DR & ~(sSpiCurrentPins.mosi_mask | sSpiCurrentPins.sclk_mask));
+    // Park SCLK + MOSI low on the GPIO1 alias (init remapped GPIO6 -> GPIO1).
+    GPIO1_DR = (GPIO1_DR & ~(sSpiCurrentPins.mosi_mask | sSpiCurrentPins.sclk_mask));
 
     // NOTE(#3428): paired with the show() acquire-skip above. The manager
     // was never acquired (see comment in objectfled_spi_show), so no
@@ -571,21 +626,66 @@ void objectfled_spi_deinit() FL_NO_EXCEPT {
     }
 
     if (sSpiCurrentPins.mosi_mux_reg) {
-        GPIO6_DR   &= ~sSpiCurrentPins.mosi_mask;
-        GPIO6_GDIR &= ~sSpiCurrentPins.mosi_mask;
+        GPIO1_DR   &= ~sSpiCurrentPins.mosi_mask;
+        GPIO1_GDIR &= ~sSpiCurrentPins.mosi_mask;
         *(sSpiCurrentPins.mosi_mux_reg) = 5u;
     }
     if (sSpiCurrentPins.sclk_mux_reg) {
-        GPIO6_DR   &= ~sSpiCurrentPins.sclk_mask;
-        GPIO6_GDIR &= ~sSpiCurrentPins.sclk_mask;
+        GPIO1_DR   &= ~sSpiCurrentPins.sclk_mask;
+        GPIO1_GDIR &= ~sSpiCurrentPins.sclk_mask;
         *(sSpiCurrentPins.sclk_mux_reg) = 5u;
     }
+    // NOTE: we deliberately do NOT restore IOMUXC_GPR_GPR26 -- leaving
+    // the pads aliased to GPIO1 is harmless when not driven, and avoids
+    // a race with any other driver that may have remapped the same bits.
 
     sSpiInitialized   = false;
     sSpiDmaComplete   = true;
     sSpiCurrentPins   = ObjectFLEDSPIPinInfo{};
     sSpiSavedMosiMux  = 0;
     sSpiSavedSclkMux  = 0;
+}
+
+// ============================================================================
+// objectfled_spi_read_diagnostics
+// ============================================================================
+
+void objectfled_spi_read_diagnostics(ObjectFLEDSPIDiagnostics* out) FL_NO_EXCEPT {
+    if (!out) return;
+
+    // If wait() captured a snapshot during its timeout-recovery path,
+    // prefer that (pre-cleanup register state is much more diagnostic
+    // than post-cleanup).
+    if (sSpiLastDiag.tmr3_enbl != 0 || sSpiLastDiag.dma_erq != 0 ||
+        sSpiLastDiag.dma_int != 0  || sSpiLastDiag.dma_err != 0) {
+        *out = sSpiLastDiag;
+        return;
+    }
+
+    *out = ObjectFLEDSPIDiagnostics{};
+    out->initialized = sSpiInitialized;
+    out->dma_complete = sSpiDmaComplete;
+
+    if (sSpiDmaChannel) {
+        out->dma_channel = sSpiDmaChannel->channel;
+        // Per-channel bit in ERQ/INT/ERR is (1 << channel).
+        out->dma_erq = DMA_ERQ;
+        out->dma_int = DMA_INT;
+        out->dma_err = DMA_ERR;
+        out->dma_es  = DMA_ES;
+        if (sSpiDmaChannel->TCD) {
+            out->dma_citer    = sSpiDmaChannel->TCD->CITER_ELINKNO;
+            out->dma_biter    = sSpiDmaChannel->TCD->BITER_ELINKNO;
+            out->dma_dlastsga = (u32)sSpiDmaChannel->TCD->DLASTSGA;
+        }
+    }
+
+    out->tmr3_cntr0   = TMR3_CNTR0;
+    out->tmr3_csctrl0 = TMR3_CSCTRL0;
+    out->tmr3_sctrl0  = TMR3_SCTRL0;
+    out->tmr3_ctrl0   = TMR3_CTRL0;
+    out->tmr3_enbl    = TMR3_ENBL;
+    out->xbar1_ctrl1  = XBARA1_CTRL1;
 }
 
 }  // namespace fl
