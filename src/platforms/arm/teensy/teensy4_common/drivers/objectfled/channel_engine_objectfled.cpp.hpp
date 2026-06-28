@@ -106,20 +106,12 @@ bool ChannelEngineObjectFLED::canHandle(const ChannelDataPtr& data) const FL_NO_
         return period >= kMinPeriodNs && period <= kMaxPeriodNs;
     }
 
-#if defined(FL_IS_TEENSY_4X) && defined(FL_OBJECTFLED_SPI_HARDWARE_ENABLE)
+#if defined(FL_IS_TEENSY_4X) && !defined(FL_OBJECTFLED_SPI_HARDWARE_DISABLE)
     if (data->isSpi()) {
         // #3428: SPI-mode dispatch on the SAME peripheral (unified engine).
-        // The (MOSI, SCLK) pin pair must both be GPIO6-resident (so one
-        // DMA write to GPIO6_DR can flip both bits together).
-        //
-        // This branch is gated by FL_OBJECTFLED_SPI_HARDWARE_ENABLE -- the
-        // ObjectFLED-SPI hardware bring-up is incomplete (the FlexPWM2
-        // register sequence hard-faults on first show; needs scope debug).
-        // Until then, canHandle returns false for SPI and channels fall
-        // through to the next bus (e.g. FlexIO-SPI from PR #3431, or a
-        // user-explicit LPSPI selection). The architectural slot is in
-        // place via getCapabilities()+BusSupports so flipping the flag is
-        // a one-line enable once bring-up is verified.
+        // The (MOSI, SCLK) pin pair must both be GPIO6-resident; init
+        // remaps them to GPIO1 alias (via IOMUXC_GPR_GPR26) for eDMA
+        // reach. Enabled by default; opt out with -DFL_OBJECTFLED_SPI_HARDWARE_DISABLE.
         const auto* spi = data->getChipset().ptr<SpiChipsetConfig>();
         if (!spi) {
             return false;

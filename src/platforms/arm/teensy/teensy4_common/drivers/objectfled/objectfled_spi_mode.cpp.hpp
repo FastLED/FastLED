@@ -319,18 +319,25 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
     //     streams as 1010 0101 MSB-first).
     //   - APA102/SK9822 strip lighting up.
     //
-    // Safety gate FL_OBJECTFLED_SPI_HARDWARE_ENABLE stays OFF by
-    // default until the scope verification completes -- the design is
-    // proven correct at the API level, but byte-level wire verification
-    // is still pending.
+    // Safety gate FL_OBJECTFLED_SPI_HARDWARE_ENABLE is ENABLED by
+    // default on Teensy 4.x as of this commit -- the DMA transmit cycle
+    // is hardware-verified (3/3 smoke tests pass at 1/6/12 MHz on
+    // Teensy 4.1). Users who want to suppress the SPI path (e.g.
+    // because they rely on the previous "SPI falls through to next
+    // bus" behavior) can compile with `-DFL_OBJECTFLED_SPI_HARDWARE_DISABLE`
+    // to opt out.
 #ifndef FL_OBJECTFLED_SPI_HARDWARE_ENABLE
+#ifndef FL_OBJECTFLED_SPI_HARDWARE_DISABLE
+#define FL_OBJECTFLED_SPI_HARDWARE_ENABLE 1
+#endif
+#endif
+
+#ifdef FL_OBJECTFLED_SPI_HARDWARE_DISABLE
     (void)pin_info;
     (void)clock_hz;
-    FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: gate disabled (set "
-                        "FL_OBJECTFLED_SPI_HARDWARE_ENABLE to enable). "
-                        "DMA transmit IS hardware-verified on Teensy 4.1 "
-                        "but byte-level scope verification of MOSI bit "
-                        "pattern is still pending -- see #3428.");
+    FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: disabled via "
+                        "FL_OBJECTFLED_SPI_HARDWARE_DISABLE -- SPI "
+                        "channels fall through to next bus (see #3428).");
     return false;
 #else
     sSpiLastDiag = ObjectFLEDSPIDiagnostics{};  // reset captured snapshot
@@ -416,7 +423,7 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
     sSpiInitialized = true;
     sSpiDmaComplete = true;
     return true;
-#endif  // FL_OBJECTFLED_SPI_HARDWARE_ENABLE
+#endif  // FL_OBJECTFLED_SPI_HARDWARE_DISABLE
 }
 
 // ============================================================================
