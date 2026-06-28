@@ -643,9 +643,8 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     // FlexIO2 SPI master mode. Exercises the full
     // lookup → init → show → wait → deinit path on a user-specified
     // (MOSI, SCLK) pin pair with a known byte pattern, then reports back
-    // success/failure of each stage plus a snapshot of the FlexIO2
-    // peripheral registers so a host-side test can compare against the
-    // expected RM-defined values.
+    // success/failure of each stage plus the resolved FlexIO2 pin indices
+    // so a host-side test can diagnose routing and bring-up failures.
     //
     // This test does NOT need a logic analyzer or a connected APA102
     // strip — it confirms the driver runs without crashing the firmware,

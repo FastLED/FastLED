@@ -177,19 +177,19 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
 
     // Clock-rate clamp.
     if (clock_hz < kSpiClockMinHz) {
-        FL_LOG_FLEXIO_F("FlexIO_SPI: clock %s Hz below floor; clamping to %s Hz",
-                        (int)clock_hz, (int)kSpiClockMinHz);
+        FL_LOG_FLEXIO_F("FlexIO_SPI: clock %u Hz below floor; clamping to %u Hz",
+                        (unsigned)clock_hz, (unsigned)kSpiClockMinHz);
         clock_hz = kSpiClockMinHz;
     } else if (clock_hz > kSpiClockMaxHz) {
-        FL_LOG_FLEXIO_F("FlexIO_SPI: clock %s Hz above ceiling; clamping to %s Hz",
-                        (int)clock_hz, (int)kSpiClockMaxHz);
+        FL_LOG_FLEXIO_F("FlexIO_SPI: clock %u Hz above ceiling; clamping to %u Hz",
+                        (unsigned)clock_hz, (unsigned)kSpiClockMaxHz);
         clock_hz = kSpiClockMaxHz;
     }
 
-    FL_LOG_FLEXIO_F("FlexIO_SPI: init MOSI=%s(flex %s) SCLK=%s(flex %s) @ %s Hz",
+    FL_LOG_FLEXIO_F("FlexIO_SPI: init MOSI=%d(flex %d) SCLK=%d(flex %d) @ %u Hz",
                     (int)pin_info.mosi_pin, (int)pin_info.mosi_flexio_pin,
                     (int)pin_info.sclk_pin, (int)pin_info.sclk_flexio_pin,
-                    (int)clock_hz);
+                    (unsigned)clock_hz);
 
     // Bring the CCM gate up if the clockless mode hasn't already done so.
     // flexio_ensure_clock() is idempotent and matches the exact pred/podf
@@ -217,8 +217,8 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
     // ------------------------------------------------------------------
     sSpiSavedMosiMux = *(pin_info.mosi_mux_reg);
     sSpiSavedSclkMux = *(pin_info.sclk_mux_reg);
-    (void)sSpiSavedMosiMux;  // reserved for future restore-on-deinit
-    (void)sSpiSavedSclkMux;
+    // Used by the DMA-alloc-failure cleanup below to restore pin muxes;
+    // a future patch may also restore them in flexio_spi_deinit().
 
     *(pin_info.mosi_mux_reg) = 4u | 0x10u;  // ALT4 + SION
     *(pin_info.mosi_pad_reg) =
@@ -252,8 +252,8 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
         // instead of failing.
         // TODO(#3428): expose a CCM tweak path if a real <234 kHz target
         // shows up.
-        FL_LOG_FLEXIO_F("FlexIO_SPI: baud div overflow (%s); clamping to 255 -> effective ~234 kHz",
-                        (int)baud_div_field);
+        FL_LOG_FLEXIO_F("FlexIO_SPI: baud div overflow (%u); clamping to 255 -> effective ~234 kHz",
+                        (unsigned)baud_div_field);
         baud_div_field = 0xFFu;
     }
 
@@ -339,6 +339,13 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
         sSpiDmaChannel = new DMAChannel();  // ok bare allocation -- one-shot
         if (sSpiDmaChannel == nullptr) {
             FL_LOG_FLEXIO_F("FlexIO_SPI: failed to allocate DMA channel");
+            // Restore pin muxes -- without this, MOSI/SCLK stay stolen by
+            // the failed init (we already switched them to ALT4|SION above)
+            // and any subsequent re-init at different pins would dangle.
+            // Per coderabbitai review on PR #3431.
+            SPI_FLEXIO2_CTRL = 0;
+            *(pin_info.mosi_mux_reg) = sSpiSavedMosiMux;
+            *(pin_info.sclk_mux_reg) = sSpiSavedSclkMux;
             return false;
         }
         sSpiDmaChannel->triggerAtHardwareEvent(DMAMUX_SOURCE_FLEXIO2_REQUEST0);
@@ -462,8 +469,8 @@ void flexio_spi_wait() FL_NO_EXCEPT {
             }
             SPI_FLEXIO2_SHIFTSDEN = 0;
             sSpiDmaComplete = true;
-            FL_LOG_FLEXIO_F("FlexIO_SPI: wait timed out after %s ms -- recovering",
-                            (int)timeout_ms);
+            FL_LOG_FLEXIO_F("FlexIO_SPI: wait timed out after %u ms -- recovering",
+                            (unsigned)timeout_ms);
             return;
         }
     }
@@ -477,8 +484,8 @@ void flexio_spi_wait() FL_NO_EXCEPT {
     const u32 drain_timeout_ms = 5;
     while (!(SPI_FLEXIO2_TIMSTAT & 0x1u)) {
         if ((u32)(millis() - drain_start) >= drain_timeout_ms) {
-            FL_LOG_FLEXIO_F("FlexIO_SPI: shifter drain timeout after %s ms",
-                            (int)drain_timeout_ms);
+            FL_LOG_FLEXIO_F("FlexIO_SPI: shifter drain timeout after %u ms",
+                            (unsigned)drain_timeout_ms);
             break;
         }
     }

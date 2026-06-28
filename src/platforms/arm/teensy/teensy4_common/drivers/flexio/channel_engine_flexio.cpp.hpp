@@ -175,7 +175,7 @@ void ChannelEngineFlexIO::show() FL_NO_EXCEPT {
                 mCurrentPin = 0xFF;
 
                 if (!mPeripheral->canHandlePin(pin)) {
-                    FL_LOG_FLEXIO_F("ChannelEngineFlexIO: Pin %s not FlexIO2-capable", (int)pin);
+                    FL_LOG_FLEXIO_F("ChannelEngineFlexIO: Pin %d not FlexIO2-capable", (int)pin);
                     continue;
                 }
 
@@ -185,7 +185,7 @@ void ChannelEngineFlexIO::show() FL_NO_EXCEPT {
                 u32 period = timing.total_period_ns();
 
                 if (!mPeripheral->init(pin, t0h, t1h, period, timing.reset_us)) {
-                    FL_LOG_FLEXIO_F("ChannelEngineFlexIO: Failed to init FlexIO for pin %s", (int)pin);
+                    FL_LOG_FLEXIO_F("ChannelEngineFlexIO: Failed to init FlexIO for pin %d", (int)pin);
                     continue;
                 }
 
@@ -244,13 +244,13 @@ void ChannelEngineFlexIO::show() FL_NO_EXCEPT {
 
                 FlexIOSPIPinInfo info;
                 if (!flexio_spi_lookup_pins(mosi, sclk, &info)) {
-                    FL_LOG_FLEXIO_F("ChannelEngineFlexIO: SPI pin pair (%s,%s) not FlexIO2-routable",
+                    FL_LOG_FLEXIO_F("ChannelEngineFlexIO: SPI pin pair (%d,%d) not FlexIO2-routable",
                                     (int)mosi, (int)sclk);
                     continue;
                 }
                 if (!flexio_spi_init(info, clock_hz)) {
-                    FL_LOG_FLEXIO_F("ChannelEngineFlexIO: flexio_spi_init failed (mosi=%s, sclk=%s, hz=%s)",
-                                    (int)mosi, (int)sclk, (int)clock_hz);
+                    FL_LOG_FLEXIO_F("ChannelEngineFlexIO: flexio_spi_init failed (mosi=%d, sclk=%d, hz=%u)",
+                                    (int)mosi, (int)sclk, (unsigned)clock_hz);
                     continue;
                 }
 
@@ -263,8 +263,13 @@ void ChannelEngineFlexIO::show() FL_NO_EXCEPT {
 
             const auto& payload = ch->getData();
             if (!payload.empty()) {
-                flexio_spi_show(payload.data(), static_cast<u32>(payload.size()));
-                flexio_spi_wait();
+                // Guard the start call -- if flexio_spi_show() refuses (e.g.
+                // !sSpiInitialized, missing DMA channel, null buffer), do NOT
+                // wait or advance as if DMA had been armed. Per coderabbitai
+                // review on PR #3431.
+                if (flexio_spi_show(payload.data(), static_cast<u32>(payload.size()))) {
+                    flexio_spi_wait();
+                }
             }
             continue;
         }

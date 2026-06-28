@@ -108,7 +108,13 @@ def evaluate(case: SmokeCase, result: dict[str, Any]) -> tuple[bool, str]:
     if not result.get("show_ok"):
         return False, "FAILED — flexio_spi_show returned false"
 
-    wait_ms = int(result.get("wait_ms", 0))
+    # Treat missing/malformed wait_ms as a hard failure -- a defaulted 0
+    # would otherwise mask a firmware that forgot to populate the field.
+    # Per coderabbitai review on PR #3431.
+    wait_value = result.get("wait_ms")
+    if not isinstance(wait_value, int) or isinstance(wait_value, bool):
+        return False, "FAILED — wait_ms missing or not an integer"
+    wait_ms = wait_value
     if wait_ms > 100:
         return False, f"FAILED — wait_ms={wait_ms} exceeded 100 ms ceiling"
 

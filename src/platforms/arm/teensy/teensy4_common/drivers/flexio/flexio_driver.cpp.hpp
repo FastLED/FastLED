@@ -495,7 +495,7 @@ bool flexio_init(const FlexIOPinInfo& pin_info, u32 t0h_ns, u32 t1h_ns,
         flexio_deinit();
     }
 
-    FL_LOG_FLEXIO_F("FlexIO: init pin %s (FlexIO2:%s)", (int)pin_info.teensy_pin, (int)pin_info.flexio_pin);
+    FL_LOG_FLEXIO_F("FlexIO: init pin %d (FlexIO2:%d)", (int)pin_info.teensy_pin, (int)pin_info.flexio_pin);
 
     flexio_clock_init();
     flexio_pin_init(pin_info);
@@ -647,8 +647,8 @@ void flexio_wait() {
                 sDmaChannel->clearError();
             }
             sDmaComplete = true;
-            FL_LOG_FLEXIO_F("FlexIO: flexio_wait() timed out after %s ms -- recovering",
-                            (int)timeout_ms);
+            FL_LOG_FLEXIO_F("FlexIO: flexio_wait() timed out after %u ms -- recovering",
+                            (unsigned)timeout_ms);
             return;
         }
     }
