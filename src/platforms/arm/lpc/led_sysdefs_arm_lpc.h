@@ -99,6 +99,17 @@ typedef fl::u8           boolean;
 // typedefs (SCT_Type, DMA_Type, SYSCON_Type, SPI_Type, etc.) and pointer
 // macros (SCT0, DMA0, SYSCON, SPI0, SPI1) come from these headers; the
 // FastLED LPC drivers use them directly instead of hand-rolled shims.
+// Arduino.h on the LPC8xx core defines INPUT / OUTPUT (and a few other
+// names) as preprocessor macros for digitalRead / digitalWrite. The vendor
+// SCT_Type / GPIO_Type structs in <LPC845.h> have members named INPUT /
+// OUTPUT (UM11029 §16.6.7 / §16.6.10). Push the Arduino macros aside for
+// the duration of the vendor-header include so the struct definitions don't
+// get clobbered; pop them after so user code using pinMode(pin, OUTPUT)
+// still works.
+#pragma push_macro("INPUT")
+#pragma push_macro("OUTPUT")
+#undef INPUT
+#undef OUTPUT
 // IWYU pragma: begin_keep
 #if defined(FL_IS_ARM_LPC_845)
 #include <LPC845.h>
@@ -106,6 +117,8 @@ typedef fl::u8           boolean;
 #include <LPC804.h>
 #endif
 // IWYU pragma: end_keep
+#pragma pop_macro("OUTPUT")
+#pragma pop_macro("INPUT")
 
 // CMSIS-Core intrinsics — kept local as a fallback in case the toolchain
 // CMSIS-Core package is not on the include path. The vendor LPC845.h /
