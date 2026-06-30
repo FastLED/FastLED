@@ -1,18 +1,17 @@
-// IWYU pragma: private
+#pragma once
 
-#ifndef CHANNEL_ENGINE_LPC_SCT_DMA_CPP_HPP_
-#define CHANNEL_ENGINE_LPC_SCT_DMA_CPP_HPP_
+// IWYU pragma: private
 
 #include "platforms/arm/lpc/is_lpc.h"
 #include "platforms/is_platform.h"
 
 // Same gate as the header — engine compiles on LPC845 (real target) AND on
-// host/stub builds for test exercise. The scaffold's show()/poll() do not
-// touch any peripheral registers; the real SCT/DMA work is deferred per
-// TODO(3459).
+// host/stub builds for test exercise. The peripheral access lives in the
+// runtime helper (`lpc_sct_dma_runtime.cpp.hpp`) which is also host-safe.
 #if defined(FL_IS_ARM_LPC_845) || defined(FL_IS_STUB) || defined(FASTLED_STUB_IMPL)
 
 #include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h"
+#include "platforms/arm/lpc/drivers/sct_dma/lpc_sct_dma_runtime.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -24,10 +23,11 @@ namespace fl {
 // channel_engine_objectfled.cpp.hpp (1000-2500 ns total bit period). Anything
 // outside is either an HD chipset (WS2816 etc.) that needs separate encoding,
 // or a non-clockless chipset.
-// =============================================================================
+//
 // Prefixed to avoid clash with the matching constants in
 // `channel_engine_objectfled.cpp.hpp` — both files end up in the same
 // unity-build translation unit on host.
+// =============================================================================
 static constexpr u32 kLpcSctMinPeriodNs = 1000;
 static constexpr u32 kLpcSctMaxPeriodNs = 2500;
 
@@ -54,53 +54,60 @@ void ChannelEngineLpcSctDma::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
 }
 
 void ChannelEngineLpcSctDma::show() FL_NO_EXCEPT {
-    // TODO(3459): lift the chunk-encode + 3-channel DMA stream kick from
-    // `clockless_arm_lpc_pwm_dma.h::showRGBInternal()`. The legacy template
-    // engine works compile-time off `TIMING::T1/T2/T3`; the channels-API
-    // engine here needs to take those values from
-    // `ChannelDataPtr::getTiming()` and program SCT->MATCH at runtime.
-    //
-    // The structural moves required:
-    //   1. Lift `LpcSctTicks<NS>::value` from a constexpr template to a
-    //      runtime helper `lpc_sct_ticks(u32 ns)`.
-    //   2. Lift `configureSct()` / `configureDma()` / `startDmaChunk()` /
-    //      `waitDmaChunk()` from the templated `ClocklessController` into
-    //      a non-template helper struct owned by this engine.
-    //   3. Iterate `mEnqueuedChannels`, dispatching each through the
-    //      lifted helper. v1 single-strip just takes the first entry;
-    //      multi-strip parallel output is #2879.
-    //
-    // For the scaffold, transition into BUSY so the state machine looks
-    // alive but do not actually program SCT/DMA. `poll()` will immediately
-    // flip back to READY. This is the same scaffold convention as
-    // `rx_sct_capture.h::begin()` (#3015) and the SPI DMA driver from
-    // #3454 — channels-API surface in, peripheral wiring in a follow-up.
+    // Empty queue → nothing to do, state stays READY.
     if (mEnqueuedChannels.empty()) {
         return;
     }
 
+    // Hand the queue to the transmitting slot so poll() can clear it
+    // when the DMA completes.
     mTransmittingChannels = mEnqueuedChannels;
     mEnqueuedChannels.clear();
     mTransmissionActive = true;
+
+    // Single-strip v1: take the first entry. Multi-strip (#2879 Stage 4.4)
+    // is a separate engine evolution; the parallel SCT topology needs the
+    // shared timebase + per-bit OR'd masks discussed in the
+    // clockless_arm_lpc_pwm_dma.h header's MULTI-CHAIN SUPPORT block.
+    const ChannelDataPtr& ch = mTransmittingChannels[0];
+    if (!ch) {
+        return;
+    }
+    const ChipsetTimingConfig& t = ch->getTiming();
+    const int pin = ch->getPin();
+    if (pin < 0 || pin > 31) {
+        // LPC845 GPIO port 0 holds PIO0_0..PIO0_31. Out-of-range pins
+        // would index a bit outside the port mask — refuse silently
+        // rather than corrupting other channels. (The legacy template
+        // path enforces this via FastPin<DATA_PIN> at compile time.)
+        return;
+    }
+    const fl::vector_psram<u8>& bytes = ch->getData();
+    if (bytes.empty()) {
+        return;
+    }
+
+    // Configure the runtime SCT/DMA helper for this channel's pin +
+    // timing, then run the chunk-stream transmit loop. On host this is a
+    // no-op so the engine's state machine still settles in poll().
+    mTransmitter.configureForChannel(
+        static_cast<u8>(pin),
+        t.t1_ns, t.t2_ns, t.t3_ns);
+    mTransmitter.transmit(bytes.data(), static_cast<u32>(bytes.size()),
+                          ch->getPixelFormat() == ChannelPixelFormat::RGBW);
 }
 
 IChannelDriver::DriverState ChannelEngineLpcSctDma::poll() FL_NO_EXCEPT {
     if (!mTransmissionActive) {
         return DriverState::READY;
     }
-
-    // TODO(3459): probe the real DMA0 channel ACTIVE flag for the three
-    // SCT-tied channels, matching the existing busy-wait in
-    // `clockless_arm_lpc_pwm_dma.h::waitDmaChunk()`:
-    //
-    //   const u32 mask = (7UL << FASTLED_LPC_PWM_DMA_BASECH);
-    //   return (DMA0->COMMON[0].ACTIVE & mask) != 0
-    //              ? DriverState::DRAINING
-    //              : DriverState::READY;
-    //
-    // For the v1 scaffold the show() body is a no-op, so flip to READY
-    // immediately. Real DMA-driven implementation will follow the
-    // BUSY → DRAINING → READY shape per `IChannelDriver`'s contract.
+    // Probe the helper's DMA done flag. On LPC845 this reads
+    // DMA0->COMMON[0].ACTIVE; on host it returns true immediately so
+    // the state machine settles to READY on the next poll — matching the
+    // contract verified by `tests/fl/channels/lpc_sct_dma_engine.cpp`.
+    if (!mTransmitter.isDone()) {
+        return DriverState::DRAINING;
+    }
     mTransmissionActive = false;
     mTransmittingChannels.clear();
     return DriverState::READY;
@@ -109,5 +116,3 @@ IChannelDriver::DriverState ChannelEngineLpcSctDma::poll() FL_NO_EXCEPT {
 }  // namespace fl
 
 #endif  // FL_IS_ARM_LPC_845 || FL_IS_STUB || FASTLED_STUB_IMPL
-
-#endif  // CHANNEL_ENGINE_LPC_SCT_DMA_CPP_HPP_

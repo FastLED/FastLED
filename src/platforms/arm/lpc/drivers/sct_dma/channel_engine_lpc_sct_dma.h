@@ -48,6 +48,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/string.h"
 #include "fl/stl/noexcept.h"
+#include "platforms/arm/lpc/drivers/sct_dma/lpc_sct_dma_runtime.h"
 
 namespace fl {
 
@@ -79,13 +80,12 @@ public:
 
     /// @brief Encode enqueued channels and kick the SCT-driven DMA stream.
     ///
-    /// **TODO(3459):** v1 ships the channels-API state-machine wiring
-    /// only — the actual SCT match-register programming and 3-channel
-    /// DMA chunk-stream lift from `clockless_arm_lpc_pwm_dma.h` lands in
-    /// the bench-validation follow-up. Today `show()` transitions
-    /// `READY → BUSY` and `poll()` immediately transitions back to
-    /// `READY`, so calls do not transmit but also do not stall the
-    /// manager.
+    /// On LPC845 with `-DFASTLED_LPC_PWM_DMA=1`, picks the first enqueued
+    /// channel, sets up the `LpcSctDmaTransmitter` for its pin + timing,
+    /// and runs the chunk-stream encode/transmit loop. Single-strip only
+    /// in v1 — multi-strip parallel output is the #2879 Stage 4.4
+    /// follow-up. On host/stub builds the transmitter is a no-op so the
+    /// state-machine flow remains valid for the host tests.
     void show() FL_NO_EXCEPT override;
 
     /// @brief Query engine state; returns BUSY/DRAINING while the SCT-driven
@@ -111,9 +111,16 @@ private:
     ///        observes DMA-done).
     fl::vector<ChannelDataPtr> mTransmittingChannels;
 
-    /// @brief Cached transmission-active bit. v1 toggles it manually in
-    ///        show()/poll() until the real DMA-channel-active probe is
-    ///        wired up in the implementation follow-up.
+    /// @brief Runtime SCT+DMA transmitter — owns the per-instance
+    ///        encoding buffer + does the actual peripheral programming
+    ///        on LPC845. Host-build methods are no-ops.
+    ///
+    /// Per-instance ownership of the encoding buffer closes one of the
+    /// `TODO(2842)` markers from `clockless_arm_lpc_pwm_dma.h` (the
+    /// shared-static `sChannelBuf`).
+    LpcSctDmaTransmitter mTransmitter;
+
+    /// @brief Transmission-in-flight flag toggled by show()/poll().
     bool mTransmissionActive = false;
 };
 
