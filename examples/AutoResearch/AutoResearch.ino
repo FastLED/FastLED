@@ -534,11 +534,28 @@ void loop() {
     }
     // autoresearch-runtime-output-lint: end
 
+    // autoresearch-runtime-output-lint: begin
+    // FastLED #3452 diagnostic: bracket the task-run pump so we can tell
+    // whether it returns. If we see "before iter=N" but no "after iter=N",
+    // one of the tasks is blocking forever.
+    if (s_loopIter <= 3) {
+        Serial.print("[#3452:raw] before for(100) iter=");  // ok autoresearch rpc serial - issue #3452 diagnostic
+        Serial.println(s_loopIter);                          // ok autoresearch rpc serial - issue #3452 diagnostic
+    }
+    // autoresearch-runtime-output-lint: end
+
     // Aggressively pump async tasks (including JSON-RPC task)
     // This ensures RPC commands are processed frequently even without delay() calls
     for (int i = 0; i < 100; i++) {
         fl::task::run();
     }
+
+    // autoresearch-runtime-output-lint: begin
+    if (s_loopIter <= 3) {
+        Serial.print("[#3452:raw] after for(100) iter=");  // ok autoresearch rpc serial - issue #3452 diagnostic
+        Serial.println(s_loopIter);                         // ok autoresearch rpc serial - issue #3452 diagnostic
+    }
+    // autoresearch-runtime-output-lint: end
 
     // ========================================================================
     // Watchdog autoresearch trigger (FastLED#2731) — when the host RPC sends
