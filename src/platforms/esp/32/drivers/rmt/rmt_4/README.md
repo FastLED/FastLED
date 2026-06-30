@@ -11,6 +11,10 @@ This directory contains the **ChannelManager-based RMT4 driver** for ESP32 platf
 - ✅ **Direct hardware memory access** - High-performance pixel transmission
 - ✅ **Polling-based architecture** - Compatible with ChannelManager pattern
 - ✅ **Identical timing characteristics** - Drop-in replacement for legacy RMT4
+- ✅ **`IRMT4Peripheral` lifecycle wrapper** (#3458) - ESP-IDF API surface is
+   isolated behind a virtual interface mirroring `IUartPeripheral` /
+   `IRMT5Peripheral`. The ISR hot path stays inline IRAM and is **not**
+   virtualised (see `irmt4_peripheral.h` for the interface scope).
 
 ---
 
