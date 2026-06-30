@@ -18,6 +18,12 @@ on:
       - 'platformio.ini'
       - 'library.json'
       - 'library.properties'
+  # Manual trigger so the cross-platform matrix can be exercised on a
+  # feature branch before merge. The matrix is otherwise post-merge only
+  # — useful for big refactors (e.g. #3444 bus enum migration) where the
+  # contributor wants per-board signal before the breaking-swap lands on
+  # master.
+  workflow_dispatch:
 
 jobs:
   build_uno:
