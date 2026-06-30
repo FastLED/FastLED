@@ -5,9 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.3.13 (released 2026-06-29).
+    # Pin to fbuild 2.3.14 (released 2026-06-30).
     #
     # Pin history:
+    #   2.3.14 -- carries the async/subprocess timeout fixes and daemon
+    #             serial-WebSocket hardening needed after the fbuild async
+    #             migration (FastLED/fbuild#828/#832/#833/#842/#843).
     #   2.3.13 -- carries the serial monitor reset/preemption fixes needed
     #             for AutoResearch to keep using fbuild serial after a
     #             daemon reset path closes the active monitor session
@@ -126,7 +129,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.3.13",
+    "fbuild==2.3.14",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
