@@ -191,7 +191,10 @@ def auto_detect_upload_port(expected_environment: str | None) -> ComportResult:
         probe_notes: list[str] = []
         saw_positive_detection = False
         for port in usb_ports:
-            chip_result = detect_attached_chip(port.device, timeout=3.0)
+            # FastLED #3446: drop the explicit 3.0 s override so the call
+            # picks up `detect_attached_chip`'s richer 15 s default and the
+            # reset-strategy fallback chain (default → usb → no-reset).
+            chip_result = detect_attached_chip(port.device)
             if chip_result.ok:
                 saw_positive_detection = True
                 detected_env = chip_result.environment or "unknown"
@@ -465,18 +468,15 @@ class ChipDetectionResult:
     error_message: str | None = None
 
 
-def detect_attached_chip(port: str, timeout: float = 10.0) -> ChipDetectionResult:
-    """Detect ESP chip type using esptool.
+def _probe_chip_with_reset_mode(
+    port: str, reset_mode: str, timeout: float
+) -> tuple[str | None, str | None]:
+    """Run esptool chip-id with a specific --before reset strategy.
 
-    Uses esptool with auto chip detection to identify the connected ESP device.
-    This allows automatic selection of the correct PlatformIO environment.
-
-    Args:
-        port: Serial port name (e.g., "COM13", "/dev/ttyUSB0")
-        timeout: Maximum time to wait for esptool in seconds
-
-    Returns:
-        ChipDetectionResult with chip type, suggested environment, or error details
+    Returns ``(chip_type, error)``. Exactly one of the two is non-None on
+    a clean call. The caller is responsible for combining results across
+    multiple strategies and surfacing the final error if every strategy
+    fails.
     """
     try:
         result = subprocess.run(
@@ -490,63 +490,132 @@ def detect_attached_chip(port: str, timeout: float = 10.0) -> ChipDetectionResul
                 "auto",
                 "-p",
                 port,
+                "--before",
+                reset_mode,
                 "chip-id",
             ],
             capture_output=True,
             text=True,
             timeout=timeout,
         )
-
-        # Parse output for "Detecting chip type... ESP32-S3" line
-        chip_type = None
-        for line in result.stdout.split("\n"):
-            if "Detecting chip type..." in line:
-                # Extract chip type after "..."
-                chip_type = line.split("...")[-1].strip()
-                break
-
-        if not chip_type:
-            # Also check for "Chip is ESP32-S3" pattern in case output format varies
-            for line in result.stdout.split("\n"):
-                if line.strip().startswith("Chip is "):
-                    chip_type = line.strip().replace("Chip is ", "").strip()
-                    break
-
-        if not chip_type:
-            return ChipDetectionResult(
-                ok=False,
-                chip_type=None,
-                environment=None,
-                error_message="Could not parse chip type from esptool output",
-            )
-
-        # Map chip type to environment
-        environment = chip_to_environment(chip_type)
-
-        return ChipDetectionResult(
-            ok=True,
-            chip_type=chip_type,
-            environment=environment,
-            error_message=None,
-        )
-
     except subprocess.TimeoutExpired:
-        return ChipDetectionResult(
-            ok=False,
-            chip_type=None,
-            environment=None,
-            error_message=f"esptool timed out after {timeout}s - device may not be in bootloader mode",
+        return (
+            None,
+            f"esptool --before {reset_mode} timed out after {timeout:.1f}s",
         )
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
+        return None, f"esptool --before {reset_mode} crashed: {e}"
+
+    # Parse output for "Detecting chip type... ESP32-S3" line
+    chip_type: str | None = None
+    for line in result.stdout.split("\n"):
+        if "Detecting chip type..." in line:
+            chip_type = line.split("...")[-1].strip()
+            break
+
+    if not chip_type:
+        # Also check for "Chip is ESP32-S3" pattern in case output format varies
+        for line in result.stdout.split("\n"):
+            if line.strip().startswith("Chip is "):
+                chip_type = line.strip().replace("Chip is ", "").strip()
+                break
+
+    if chip_type:
+        return chip_type, None
+
+    stderr_tail = (result.stderr or "").strip().splitlines()
+    tail_line = stderr_tail[-1] if stderr_tail else ""
+    return (
+        None,
+        f"esptool --before {reset_mode} produced no chip-id; last stderr: {tail_line!r}",
+    )
+
+
+def detect_attached_chip(port: str, timeout: float = 7.0) -> ChipDetectionResult:
+    """Detect ESP chip type using esptool.
+
+    Uses esptool with auto chip detection to identify the connected ESP device.
+    This allows automatic selection of the correct PlatformIO environment.
+
+    FastLED #3446: previously hardcoded at 3.0 s with one reset strategy.
+    That budget undershoots the CP210x worst-case auto-reset path (slow
+    USB driver init + ~4 s of esptool SYNC retries + bootloader
+    handshake), so devkits with even a slightly sluggish reset circuit
+    failed to be recognised on the first try.
+
+    Detection budget per port:
+
+    1. **Primary**: ``--before default-reset`` (the classic DTR/RTS
+       auto-reset). Bounded by ``timeout``. Catches all healthy boards
+       on the first pass.
+    2. **Fallback chain**, ONLY triggered when the primary attempt
+       actually *timed out* (i.e. esptool was still in the
+       reset/sync loop, not "no device on this port" — those fail fast):
+       - ``--before usb-reset`` — native USB-CDC chips
+         (S2/S3/C2/C3/H2/C6) whose reset path is over USB, not DTR/RTS.
+       - ``--before no-reset`` — boards where the user (or a
+         previous flash) already left the device in the bootloader.
+
+       Each fallback gets the same ``timeout``. Skipped on "no chip-id
+       produced" so empty ports don't drag the total probe out — keeps
+       a 5-port-all-empty sweep under ~10 s.
+
+    Args:
+        port: Serial port name (e.g., "COM13", "/dev/ttyUSB0")
+        timeout: Per-strategy wall-clock budget. Default 7 s — covers
+            the CP210x worst case while keeping a multi-port sweep
+            with no devices well under 30 s total.
+
+    Returns:
+        ChipDetectionResult with chip type, suggested environment, or
+        an aggregated error describing what each reset strategy saw.
+    """
+    primary_mode = "default-reset"
+    chip_type, primary_err = _probe_chip_with_reset_mode(port, primary_mode, timeout)
+    if chip_type:
+        return ChipDetectionResult(
+            ok=True,
+            chip_type=chip_type,
+            environment=chip_to_environment(chip_type),
+            error_message=None,
+        )
+
+    # Only escalate to the fallback chain if the primary attempt was
+    # cut off by `timeout` — that's the signature of a struggling reset
+    # circuit. A primary that returned "no chip-id produced" means the
+    # port is dead or the device isn't an ESP, so additional strategies
+    # are a waste.
+    if primary_err and "timed out" not in primary_err:
         return ChipDetectionResult(
             ok=False,
             chip_type=None,
             environment=None,
-            error_message=f"Failed to detect chip: {e}",
+            error_message=primary_err,
         )
+
+    attempts: list[str] = [primary_err or f"esptool --before {primary_mode}: timed out"]
+    for mode in ("usb-reset", "no-reset"):
+        chip_type, err = _probe_chip_with_reset_mode(port, mode, timeout)
+        if chip_type:
+            return ChipDetectionResult(
+                ok=True,
+                chip_type=chip_type,
+                environment=chip_to_environment(chip_type),
+                error_message=None,
+            )
+        attempts.append(err or f"esptool --before {mode}: unknown failure")
+
+    return ChipDetectionResult(
+        ok=False,
+        chip_type=None,
+        environment=None,
+        error_message=(
+            "esptool reset-strategy fallback chain exhausted: " + "; ".join(attempts)
+        ),
+    )
 
 
 def chip_to_environment(chip_type: str) -> str | None:

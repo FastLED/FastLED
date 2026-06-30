@@ -21,6 +21,22 @@ enum class LegacyClocklessChipset : uint8_t {
 #define AUTORESEARCH_LEGACY_SUPPORTS_PIN_22 0
 #endif
 
+// GPIO8 on the classic ESP32 (esp32dev / WROOM modules) is reserved
+// for SPI flash (D2/HD) and FastLED's `_ESPPIN<8>::validpin()` reflects
+// that with a compile-time false. Trying to instantiate any clockless
+// driver bound to pin 8 fails the FastLED static_assert. Other ESP32
+// variants (S2/S3/C-series) repurpose GPIO8 and accept it as a valid
+// output pin, and every non-ESP family treats pin 8 as a normal digital.
+#if defined(FL_IS_ESP_32) && !defined(FL_IS_ESP_32S2) && \
+    !defined(FL_IS_ESP_32S3) && !defined(FL_IS_ESP_32C2) && \
+    !defined(FL_IS_ESP_32C3) && !defined(FL_IS_ESP_32C5) && \
+    !defined(FL_IS_ESP_32C6) && !defined(FL_IS_ESP_32H2) && \
+    !defined(FL_IS_ESP_32P4)
+#define AUTORESEARCH_LEGACY_SUPPORTS_PIN_8 0
+#else
+#define AUTORESEARCH_LEGACY_SUPPORTS_PIN_8 1
+#endif
+
 inline const char* legacyClocklessChipsetName(LegacyClocklessChipset chipset) {
     switch (chipset) {
         case LegacyClocklessChipset::WS2812B:
@@ -99,7 +115,9 @@ public:
             case 5: mController = create<5>(leds, numLeds, chipset, rgbw); break;
             case 6: mController = create<6>(leds, numLeds, chipset, rgbw); break;
             case 7: mController = create<7>(leds, numLeds, chipset, rgbw); break;
+#if AUTORESEARCH_LEGACY_SUPPORTS_PIN_8
             case 8: mController = create<8>(leds, numLeds, chipset, rgbw); break;
+#endif
 #if AUTORESEARCH_LEGACY_SUPPORTS_PIN_22
             case 22: mController = create<22>(leds, numLeds, chipset, rgbw); break;
 #endif
