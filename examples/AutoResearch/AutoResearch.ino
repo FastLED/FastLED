@@ -506,56 +506,11 @@ void loop() {
     // feeds on construction (now) and again on destruction (end of scope).
     FL_WATCHDOG_AUTO(AUTORESEARCH_WATCHDOG_TIMEOUT_MS);
 
-    // autoresearch-runtime-output-lint: begin
-    // FastLED #3452 diagnostic: PROOF-OF-LIFE heartbeat. Prints
-    // unconditionally on the first iteration and then once per second
-    // with the live `fl::available()` count. Goes through BOTH the
-    // fl::println path AND a raw Serial.print so we can tell whether
-    // the FastLED IO singleton is wedged or the underlying UART is.
-    // Non-destructive — never consumes a byte. Remove once root-caused.
-    static uint32_t s_loopIter = 0;
-    static uint32_t s_lastHeartbeat = 0;
-    s_loopIter++;
-    uint32_t now_ms = millis();
-    bool emit_now = (s_loopIter == 1) || (now_ms - s_lastHeartbeat >= 1000);
-    if (emit_now) {
-        s_lastHeartbeat = now_ms;
-        // Path A: through fl::println (uses FastLED's UART driver)
-        fl::sstream dbg;
-        dbg << "[#3452] loop_alive iter=" << s_loopIter
-            << " ms=" << now_ms
-            << " avail=" << fl::available();
-        fl::println(dbg.str().c_str());  // ok autoresearch rpc serial - issue #3452 diagnostic, removed after root-cause
-        // Path B: through raw Arduino Serial.print (bypasses fl::print)
-        Serial.print("[#3452:raw] iter=");  // ok autoresearch rpc serial - issue #3452 diagnostic
-        Serial.print(s_loopIter);  // ok autoresearch rpc serial - issue #3452 diagnostic
-        Serial.print(" avail=");  // ok autoresearch rpc serial - issue #3452 diagnostic
-        Serial.println(Serial.available());  // ok autoresearch rpc serial - issue #3452 diagnostic
-    }
-    // autoresearch-runtime-output-lint: end
-
-    // autoresearch-runtime-output-lint: begin
-    // FastLED #3452 diagnostic: bracket the task-run pump so we can tell
-    // whether it returns. If we see "before iter=N" but no "after iter=N",
-    // one of the tasks is blocking forever.
-    if (s_loopIter <= 3) {
-        Serial.print("[#3452:raw] before for(100) iter=");  // ok autoresearch rpc serial - issue #3452 diagnostic
-        Serial.println(s_loopIter);                          // ok autoresearch rpc serial - issue #3452 diagnostic
-    }
-    // autoresearch-runtime-output-lint: end
-
     // Aggressively pump async tasks (including JSON-RPC task)
     // This ensures RPC commands are processed frequently even without delay() calls
     for (int i = 0; i < 100; i++) {
         fl::task::run();
     }
-
-    // autoresearch-runtime-output-lint: begin
-    if (s_loopIter <= 3) {
-        Serial.print("[#3452:raw] after for(100) iter=");  // ok autoresearch rpc serial - issue #3452 diagnostic
-        Serial.println(s_loopIter);                         // ok autoresearch rpc serial - issue #3452 diagnostic
-    }
-    // autoresearch-runtime-output-lint: end
 
     // ========================================================================
     // Watchdog autoresearch trigger (FastLED#2731) — when the host RPC sends
@@ -587,7 +542,7 @@ void loop() {
 
     // Run GPIO baseline test once after device is ready (allows JSON-RPC to be operational first)
     // This test is informational only - we continue regardless of pass/fail
-    if (!g_autoresearch_state->gpio_baseline_test_done) {
+    if (!g_autoresearch_state->gpio_baseline_test_done && g_autoresearch_state->rx_channel) {
         // Wait 500ms after boot to ensure JSON-RPC is fully operational
         if (millis() > 500) {
             g_autoresearch_state->gpio_baseline_test_done = true;
