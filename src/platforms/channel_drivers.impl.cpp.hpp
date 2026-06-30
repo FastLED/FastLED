@@ -25,6 +25,8 @@
 #include "platforms/esp/32/channel_drivers_esp32.impl.hpp"
 #elif defined(FL_IS_TEENSY_4X)
 #include "platforms/arm/teensy/channel_drivers_teensy.impl.hpp"
+#elif defined(FL_IS_ARM_LPC)
+#include "platforms/arm/lpc/channel_drivers_lpc.impl.hpp"
 #elif defined(FL_IS_STUB) || defined(FL_IS_WASM)
 #include "platforms/stub/channel_drivers_stub.impl.hpp"
 #else
