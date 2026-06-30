@@ -57,4 +57,11 @@
 // LPC15xx variants have different SPI controllers and are not yet wired.
 #include "platforms/arm/lpc/spi_arm_lpc.h"
 
+// Optional LPC845 SPI + DMA0 async driver (#3453 Phase 1). Opt-in via
+// FASTLED_LPC_SPI_DMA=1; consumes one DMA0 channel (default 4 = SPI0_TX
+// per UM11029 Table 80) and a SRAM encode buffer. The header self-gates
+// with `#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_SPI_DMA)`,
+// so default LPC845 builds keep the polled driver from spi_arm_lpc.h.
+#include "platforms/arm/lpc/spi_arm_lpc_dma.h"
+
 #endif
