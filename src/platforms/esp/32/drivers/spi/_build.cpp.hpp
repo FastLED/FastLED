@@ -5,8 +5,8 @@
 ///
 /// `Bus::SPI` is the *clockless-over-SPI* driver (WS2812 etc. over the SPI
 /// peripheral, using wave8 encoding). It is never a platform default
-/// (true-SPI chipsets like APA102 / SK9822 / HD108 go through `Bus::I2S_SPI`
-/// on ESP32dev or `Bus::LCD_SPI` on ESP32-S3 instead).
+/// (true-SPI chipsets like APA102 / SK9822 / HD108 go through `Bus::FLEX_IO`
+/// slot 0 on ESP32dev/S3 when those parallel-SPI engines are selected).
 ///
 /// Post-#2428 the driver impl is always compiled here so that
 /// `fl::enableDrivers<fl::Bus::SPI>()` / `FastLED.enableAllDrivers()` /

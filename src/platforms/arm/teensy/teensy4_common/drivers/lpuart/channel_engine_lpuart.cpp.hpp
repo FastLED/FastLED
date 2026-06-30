@@ -156,8 +156,7 @@ IChannelDriver::DriverState ChannelEngineLPUART::poll() FL_NO_EXCEPT {
 }
 
 // CodeRabbit: move BusTraits<Bus::UART>::instancePtr() out of the
-// header. Static storage lives here in the TU. Bus::LPUART resolves
-// to the same singleton via the trait alias in bus_traits.h.
+// header. Static storage lives here in the TU.
 #if defined(FL_IS_TEENSY_4X)
 fl::shared_ptr<ChannelEngineLPUART> BusTraits<Bus::UART>::instancePtr() FL_NO_EXCEPT {
     static fl::shared_ptr<ChannelEngineLPUART> gHolder =

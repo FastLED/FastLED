@@ -187,14 +187,14 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 // Each addXxxIfPossible delegates to BusTraits<Bus::X>::instancePtr() so the
 // legacy auto-init path and the new fl::enableDrivers<>() opt-in API share the
 // SAME singleton driver instance. Without this unification, calling
-// enableDrivers<Bus::PARLIO>() after the legacy auto-init created a *second*
+// enableDriver<Bus::FLEX_IO, 0>() after the legacy auto-init created a *second*
 // PARLIO driver instance, which then tried to claim the PARLIO peripheral
 // twice. Phase 4 documented this caveat; Phase 5a (this commit) fixes it.
 
 /// @brief Add PARLIO driver if supported by platform
 static void addParlioIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_PARLIO
-    manager.addDriver(PRIORITY_PARLIO, BusTraits<Bus::PARLIO>::instancePtr());
+    manager.addDriver(PRIORITY_PARLIO, BusTraits<Bus::FLEX_IO, 0>::instancePtr());
     FL_DBG_F("ESP32: Added PARLIO driver (priority %s)", PRIORITY_PARLIO);
 #else
     (void)manager;  // Suppress unused parameter warning
@@ -204,7 +204,7 @@ static void addParlioIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 /// @brief Add LCD RGB driver if supported by platform
 static void addLcdRgbIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_LCD_RGB
-    auto driver = BusTraits<Bus::LCD_RGB>::instancePtr();
+    auto driver = BusTraits<Bus::FLEX_IO, 1>::instancePtr();
     if (driver) {
         manager.addDriver(PRIORITY_LCD_RGB, driver);
         FL_DBG_F("ESP32: Added LCD_RGB driver (priority %s)", PRIORITY_LCD_RGB);
@@ -263,7 +263,7 @@ static void addRmtIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 /// @brief Add I2S_SPI driver if supported by platform (ESP32dev true SPI)
 static void addI2sSpiIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_I2S
-    auto driver = BusTraits<Bus::I2S_SPI>::instancePtr();
+    auto driver = BusTraits<Bus::FLEX_IO, 0>::instancePtr();
     if (driver) {
         manager.addDriver(PRIORITY_I2S_SPI, driver);
         FL_DBG_F("ESP32: Added I2S_SPI driver (priority %s)", PRIORITY_I2S_SPI);
@@ -278,7 +278,8 @@ static void addI2sSpiIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 /// @brief Add LCD_SPI driver if supported by platform (ESP32-S3 true SPI)
 static void addLcdSpiIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_LCD_SPI
-    auto driver = BusTraits<Bus::LCD_SPI>::instancePtr();
+    BusTraits<Bus::FLEX_IO, 0>::registerWithManager();
+    auto driver = manager.findDriverByName(fl::string::from_literal("LCD_SPI"));
     if (driver) {
         manager.addDriver(PRIORITY_LCD_SPI, driver);
         FL_DBG_F("ESP32-S3: Added LCD_SPI driver (priority %s)", PRIORITY_LCD_SPI);
@@ -293,7 +294,8 @@ static void addLcdSpiIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 /// @brief Add LCD_CAM clockless driver if supported (ESP32-S3, replaces misnamed I2S)
 static void addLcdClocklessIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_LCD_SPI
-    auto driver = BusTraits<Bus::LCD_CLOCKLESS>::instancePtr();
+    BusTraits<Bus::FLEX_IO, 0>::registerWithManager();
+    auto driver = manager.findDriverByName(fl::string::from_literal("LCD_CLOCKLESS"));
     if (driver) {
         manager.addDriver(PRIORITY_LCD_CLOCKLESS, driver);
         FL_DBG_F("ESP32-S3: Added LCD_CLOCKLESS driver (priority %s)", PRIORITY_LCD_CLOCKLESS);
@@ -310,7 +312,8 @@ static void addI2sIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_I2S_LCD_CAM
     // I2S LCD_CAM driver uses LCD_CAM peripheral via I80 bus (ESP32-S3 only).
     // Experimental driver - uses transpose encoding for parallel LED output.
-    auto driver = BusTraits<Bus::I2S>::instancePtr();
+    BusTraits<Bus::FLEX_IO, 0>::registerWithManager();
+    auto driver = manager.findDriverByName(fl::string::from_literal("LCD_CLOCKLESS"));
     if (driver) {
         manager.addDriver(PRIORITY_I2S, driver);
         FL_DBG_F("ESP32-S3: Added I2S LCD_CAM driver (priority %s)", PRIORITY_I2S);

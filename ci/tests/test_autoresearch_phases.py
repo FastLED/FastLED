@@ -559,6 +559,7 @@ class TestParseArgsAndBuildCommands:
         )
         result = _parse_args_and_build_commands(args)
         assert result == 1
+
     def test_multiple_drivers(self, fake_project_dir: Path) -> None:
         args = _make_args(parlio=True, rmt=True, spi=True, project_dir=fake_project_dir)
         result = _parse_args_and_build_commands(args)

@@ -197,7 +197,7 @@ protected:
     /// @param rgbOrder RGB channel ordering
     /// @param mode Registration mode (AutoRegister or DeferRegister)
     /// @note Does not set LED data or channel options - caller must do that
-    Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode);
+    Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode) FL_NO_EXCEPT;
 
 private:
     /// @brief Cold slow-path helper for `showPixels()` when the driver was
@@ -235,12 +235,12 @@ private:
     /// @param rgbOrder RGB channel ordering
     /// @param options Channel options (correction, temperature, dither, rgbw, affinity)
     Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
-            EOrder rgbOrder, const ChannelOptions& options);
+            EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT;
 
     /// @brief Backwards-compatible constructor (deprecated)
     /// @deprecated Use variant-based constructor instead
     Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-            EOrder rgbOrder, const ChannelOptions& options);
+            EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT;
 
     // Non-copyable, non-movable
     Channel(const Channel&) FL_NO_EXCEPT = delete;
@@ -262,6 +262,7 @@ private:
     Bus mBus = Bus::AUTO;            // Typed driver selection (#2459). `Bus::AUTO` falls through
                                      // to `ChannelManager` priority dispatch; any other value
                                      // pins this channel to `busName(mBus)`.
+    fl::u8 mBusWhich = 0;            // Instance selector for portable buses.
     bool mBusWarned = false;         // One-shot guard for the #2455 FL_ERROR. Flipped on the
                                      // first showPixels() that observes a `mBus` miss (the
                                      // named driver wasn't registered with ChannelManager).

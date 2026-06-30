@@ -49,6 +49,7 @@ struct ChannelOptions {
     /// Rgbww = 5-channel. Default-constructed = Empty.
     fl::variant<fl::Empty, Rgbw, Rgbww> mWhiteCfg;
     Bus mBus = Bus::AUTO;              // Typed driver selection
+    fl::u8 mBusWhich = 0;              // Instance selector for portable buses
     fl::optional<float> mGamma;        // Gamma correction (nullopt = use default 2.8)
 
     /// @return The active Rgbw if mWhiteCfg holds one, else RgbwInvalid::value().

@@ -239,8 +239,8 @@ void ChannelManager::setDriverEnabled(const char* name, bool enabled) {
     }
 }
 
-bool ChannelManager::setExclusiveDriver(Bus bus) {
-    return setExclusiveDriverByName(busName(bus));
+bool ChannelManager::setExclusiveDriver(Bus bus, fl::u8 which) FL_NO_EXCEPT {
+    return setExclusiveDriverByName(busDriverName(bus, which));
 }
 
 bool ChannelManager::setExclusiveDriverByName(const char* name) {

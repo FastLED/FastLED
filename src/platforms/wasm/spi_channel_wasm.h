@@ -80,10 +80,10 @@ protected:
 
     static fl::shared_ptr<IChannelDriver> getWasmSpiEngine() FL_NO_EXCEPT {
         // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
-        // the `BusTraits<Bus::STUB>` singleton. WASM uses the stub driver
+        // the `BusTraits<Bus::BIT_BANG>` singleton. WASM uses the fallback
         // for both clockless and SPI chipsets (no real hardware in the
         // browser). Naming the singleton here ODR-links the stub driver TU.
-        return BusTraits<Bus::STUB>::instancePtr();
+        return BusTraits<Bus::BIT_BANG>::instancePtr();
     }
 };
 

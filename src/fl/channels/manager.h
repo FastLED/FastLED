@@ -115,7 +115,7 @@ public:
     ///       resolution. Legacy clockless controllers that already pre-bound
     ///       to the platform default via Phase 5b will continue to use that
     ///       pre-bind -- this template does not rewrite existing controllers.
-    template<fl::Bus B>
+    template<fl::Bus B, fl::u8 Which = 0>
     void setExclusiveDriver() FL_NO_EXCEPT;
 
     /// @brief Enable only one driver exclusively, by `fl::Bus` enum (runtime form).
@@ -125,7 +125,7 @@ public:
     ///       built-in drivers. Delegates to `setExclusiveDriverByName(busName(bus))`.
     /// @note Does NOT ODR-use `BusTraits<bus>::instancePtr()` — for compile-time
     ///       TU-linking, use the `setExclusiveDriver<fl::Bus B>()` template overload.
-    bool setExclusiveDriver(Bus bus) FL_NO_EXCEPT;
+    bool setExclusiveDriver(Bus bus, fl::u8 which = 0) FL_NO_EXCEPT;
 
     /// @brief Enable only one driver exclusively (disables all others) — by-name escape hatch
     /// @param name Driver name to enable exclusively (case-sensitive, e.g., "MOCK_SPI")
@@ -318,12 +318,12 @@ ChannelManager& channelManager() FL_NO_EXCEPT;
 // caller's TU, which links the driver translation unit. The caller must have
 // the per-driver `bus_traits.h` (which provides `BusTraits<B>::instancePtr`)
 // visible at the call site.
-template<fl::Bus B>
+template<fl::Bus B, fl::u8 Which>
 inline void ChannelManager::setExclusiveDriver() FL_NO_EXCEPT {
     // Priority above any platform default — see `bus_priorities.h` for the
     // default-priority constants (highest there is ~10 for native LCD/I2S SPI).
     constexpr int kExclusivePriority = 10000;
-    addDriver(kExclusivePriority, fl::BusTraits<B>::instancePtr());
+    addDriver(kExclusivePriority, fl::BusTraits<B, Which>::instancePtr());
 }
 
 } // namespace fl

@@ -343,8 +343,8 @@ FL_TEST_CASE("XMap reverse addressing with APA102 encodes pixels in reverse orde
 }
 
 // ============ Bus-template API tests (#2428 / #2167) ============
-// Verify Channel::create<Bus::STUB>(cfg) and FastLED.add<Bus::STUB>(cfg)
-// on the host build (FL_IS_STUB).  Tests run against the real STUB driver —
+// Verify Channel::create<Bus::BIT_BANG>(cfg) and FastLED.add<Bus::BIT_BANG>(cfg)
+// on the host build (FL_IS_STUB).  Tests run against the real BIT_BANG driver —
 // no mocks needed.
 
 namespace {
@@ -371,7 +371,7 @@ ChannelConfig makeBusTestConfig(fl::span<CRGB> leds) {
 // to `busName(mBus)`. `Bus::AUTO` (the default) falls through to the
 // string-affinity escape hatch / priority dispatch.
 
-FL_TEST_CASE("cfg.options.mBus = Bus::STUB binds the STUB driver on host") {
+FL_TEST_CASE("cfg.options.mBus = Bus::BIT_BANG binds the BIT_BANG driver on host") {
     auto& mgr = freshBusTestManager();
     FL_REQUIRE(mgr.getDriverCount() == 0);
 
@@ -380,18 +380,18 @@ FL_TEST_CASE("cfg.options.mBus = Bus::STUB binds the STUB driver on host") {
 
     CRGB leds[8] = {};
     ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
-    cfg.options.mBus = Bus::STUB;
+    cfg.options.mBus = Bus::BIT_BANG;
 
     auto channel = Channel::create(cfg);
     FL_REQUIRE(channel != nullptr);
     channel->addToDrawList();
     channel->showLeds(0);
 
-    FL_CHECK_EQ(channel->getEngineName(), fl::string::from_literal("STUB"));
+    FL_CHECK_EQ(channel->getEngineName(), fl::string::from_literal("BIT_BANG"));
 
-    auto stubDriver = mgr.getDriverByName(fl::string::from_literal("STUB"));
-    FL_REQUIRE(stubDriver != nullptr);
-    FL_CHECK_EQ(stubDriver.get(), &BusTraits<Bus::STUB>::instance());
+    auto bitbangDriver = mgr.getDriverByName(fl::string::from_literal("BIT_BANG"));
+    FL_REQUIRE(bitbangDriver != nullptr);
+    FL_CHECK_EQ(bitbangDriver.get(), &BusTraits<Bus::BIT_BANG>::instance());
 
     channel->removeFromDrawList();
 }

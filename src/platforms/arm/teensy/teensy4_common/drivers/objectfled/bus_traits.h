@@ -3,7 +3,7 @@
 // IWYU pragma: private
 
 /// @file bus_traits.h
-/// @brief BusTraits<Bus::OBJECT_FLED> specialization for Teensy 4.x ObjectFLED.
+/// @brief BusTraits<Bus::FLEX_IO, 0> specialization for Teensy 4.x ObjectFLED.
 
 #include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"
@@ -21,7 +21,7 @@
 
 namespace fl {
 
-template<> struct BusTraits<Bus::OBJECT_FLED> {
+template<> struct BusTraits<Bus::FLEX_IO, 0> {
     using Driver = ChannelEngineObjectFLED;
 
     static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
@@ -32,11 +32,11 @@ template<> struct BusTraits<Bus::OBJECT_FLED> {
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
     static void registerWithManager() FL_NO_EXCEPT {
-        ChannelManager::instance().addDriver(default_bus_priority(Bus::OBJECT_FLED), instancePtr());
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::FLEX_IO, 0), instancePtr());
     }
 };
 
-template<> struct BusSupports<Bus::OBJECT_FLED, ClocklessChipset> : fl::true_type {};
+template<> struct BusSupports<Bus::FLEX_IO, ClocklessChipset, 0> : fl::true_type {};
 
 // #3428: unified clockless + SPI engine -- the same FlexPWM + eDMA + GPIO
 // bank peripheral (and the same `ChannelEngineObjectFLED` class) serves
@@ -44,8 +44,8 @@ template<> struct BusSupports<Bus::OBJECT_FLED, ClocklessChipset> : fl::true_typ
 // peripherals -- one engine for both clockless and SPI modes". Runtime
 // support for SPI is gated by `objectfled_spi_lookup_pins()` which is
 // stubbed today; this compile-time slot lets users write
-// `FastLED.add<Bus::OBJECT_FLED, SpiChipsetConfig>(cfg)` and have it type-check.
-template<> struct BusSupports<Bus::OBJECT_FLED, SpiChipsetConfig> : fl::true_type {};
+// `FastLED.add<Bus::FLEX_IO, SpiChipsetConfig>(cfg)` with Which=0 and have it type-check.
+template<> struct BusSupports<Bus::FLEX_IO, SpiChipsetConfig, 0> : fl::true_type {};
 
 }  // namespace fl
 

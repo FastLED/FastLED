@@ -40,6 +40,7 @@
 #include "AutoResearchTimingDrift.h"
 #include "AutoResearchParlioStream.h"
 #include "fl/chipsets/spi.h"
+#include "fl/channels/bus_info.json.h"
 #include "fl/channels/config.h"
 #include <Arduino.h>
 
@@ -49,6 +50,42 @@
 #include "fl/codec/mp4_parser.h"
 #include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/frame.h"
+
+namespace {
+
+fl::json autoResearchDeviceJson(const fl::string& name) {
+    if (name == "RMT") return fl::deviceJson<fl::Bus::RMT>();
+    if (name == "SPI" || name == "SPI_UNIFIED") return fl::deviceJson<fl::Bus::SPI>();
+    if (name == "UART" || name == "LPUART") return fl::deviceJson<fl::Bus::UART>();
+    if (name == "BIT_BANG" || name == "STUB") return fl::deviceJson<fl::Bus::BIT_BANG>();
+
+    if (name == "FLEX_IO" || name == "LCD_RGB") {
+        return fl::deviceJson<fl::Bus::FLEX_IO, 1>();
+    }
+    if (name == "OBJECT_FLED" || name == "PARLIO" || name == "LCD_SPI" ||
+        name == "LCD_CLOCKLESS" || name == "I2S" || name == "I2S_SPI") {
+        return fl::deviceJson<fl::Bus::FLEX_IO, 0>();
+    }
+
+    fl::json info = fl::json::object();
+    info.set("bus", static_cast<int64_t>(0));
+    info.set("bus_name", name.c_str());
+    info.set("vendor_name", name.c_str());
+    info.set("device_name", name.c_str());
+    info.set("which", static_cast<int64_t>(0));
+    info.set("is_noop", false);
+    info.set("notes", "registered runtime driver");
+    fl::json runtime = fl::json::object();
+    runtime.set("available", true);
+    runtime.set("initialized", false);
+    runtime.set("ready", true);
+    runtime.set("busy", false);
+    runtime.set("error", "");
+    info.set("runtime", runtime);
+    return info;
+}
+
+}  // namespace
 
 
 void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
@@ -99,6 +136,13 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
             driver.set("name", mState->drivers_available[i].name.c_str());
             driver.set("priority", static_cast<int64_t>(mState->drivers_available[i].priority));
             driver.set("enabled", mState->drivers_available[i].enabled);
+            fl::json device = autoResearchDeviceJson(mState->drivers_available[i].name);
+            driver.set("bus_name", device["bus_name"]);
+            driver.set("vendor_name", device["vendor_name"]);
+            driver.set("device_name", device["device_name"]);
+            driver.set("which", device["which"]);
+            driver.set("is_noop", device["is_noop"]);
+            driver.set("runtime", device["runtime"]);
             drivers.push_back(driver);
         }
         return drivers;

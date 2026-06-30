@@ -258,10 +258,17 @@ foreach example_name : example_paths.keys()
         example_specific_cpp_args += [
             '-DEXAMPLE_PLATFORM_FILTER="' + example_filter_str + '"'
         ]
-        # Check if this filter indicates the example should NOT run on stub/native
-        # If it contains "platform is X" where X is not "native", mark as stub-incompatible
-        # This is a defense-in-depth guard - normally these are filtered at configure time
-        if example_filter_str.contains('platform is') and not example_filter_str.contains('platform is native')
+        # Check if this normalized filter indicates the example should NOT run
+        # on stub/native. This is a defense-in-depth guard - normally these are
+        # filtered at configure time via SKIP metadata.
+        if (
+            (
+                example_filter_str.contains('require:platform=') or
+                example_filter_str.contains('require:board=') or
+                example_filter_str.contains('require:target=') or
+                example_filter_str.contains('platform is')
+            ) and not example_filter_str.contains('native')
+        )
             example_specific_cpp_args += ['-DEXAMPLE_STUB_INCOMPATIBLE=1']
         endif
     endif

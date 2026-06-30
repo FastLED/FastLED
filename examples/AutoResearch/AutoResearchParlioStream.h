@@ -142,7 +142,8 @@ inline ValidateResult validateParlioStreaming(int base_tx_pin,
         fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
 
     fl::ChannelOptions parlio_opts;
-    parlio_opts.mBus = fl::Bus::PARLIO;
+    parlio_opts.mBus = fl::Bus::FLEX_IO;
+    parlio_opts.mBusWhich = 0;
 
     FastLED.clear(ClearFlags::CHANNELS);
 

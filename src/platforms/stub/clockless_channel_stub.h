@@ -53,11 +53,11 @@ public:
         mChannelData = ChannelData::create(DATA_PIN, timing);
         // Phase 5b of #2428: pre-bind to the stub driver singleton so
         // showPixels() bypasses ChannelManager entirely. Naming
-        // BusTraits<Bus::STUB>::instancePtr() here is the ODR-use that
-        // lets the linker keep ONLY the stub driver TU -- post-#2428
+        // BusTraits<Bus::BIT_BANG>::instancePtr() here is the ODR-use that
+        // lets the linker keep ONLY the portable fallback driver TU -- post-#2428
         // drivers do not auto-register, so this pre-bind is what links
         // the stub singleton.
-        mDriver = BusTraits<Bus::STUB>::instancePtr();
+        mDriver = BusTraits<Bus::BIT_BANG>::instancePtr();
     }
 
     virtual void init() FL_NO_EXCEPT override { }
@@ -66,7 +66,7 @@ protected:
     virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT override
     {
         // Phase 5b of #2428: use the pre-bound driver directly. Legacy
-        // `addLeds<>`-style controllers name `BusTraits<Bus::STUB>::instancePtr()`
+        // `addLeds<>`-style controllers name `BusTraits<Bus::BIT_BANG>::instancePtr()`
         // in their constructor so this is the platform-default stub driver.
         // For runtime overrides, sketches use `FastLED.add(cfg)` (Channel API)
         // with `cfg.options.mBus` -- the manager-driven Channel path stays.

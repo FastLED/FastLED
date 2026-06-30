@@ -32,8 +32,8 @@ public:
     ClocklessPARLIO() FL_NO_EXCEPT
         : Channel(makeChipset(), RGB_ORDER, RegistrationMode::DeferRegister)
     {
-        BusTraits<Bus::PARLIO>::registerWithManager();
-        setDriver(BusTraits<Bus::PARLIO>::instancePtr());
+        BusTraits<Bus::FLEX_IO, 0>::registerWithManager();
+        setDriver(BusTraits<Bus::FLEX_IO, 0>::instancePtr());
         addToList();
     }
 

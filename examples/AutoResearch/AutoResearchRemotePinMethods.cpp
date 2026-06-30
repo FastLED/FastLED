@@ -603,7 +603,7 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
         flexioObjectFledTest_fn.set("phase", "Phase 4: Utility");
         flexioObjectFledTest_fn.set("args", "[{test_case=0..4, tx_pin=3, rx_pin=4, capture_ms=50}] (all optional)");
         flexioObjectFledTest_fn.set("returns", "{success, test_case, tx_pin, rx_pin, num_leds, expected_bytes, decoded_bytes, matched, mismatched, edges_captured}");
-        flexioObjectFledTest_fn.set("description", "End-to-end ObjectFLED TX -> FlexIO RX loopback verification (Teensy 4.x only, FastLED#2764 Phase 3). Drives WS2812 patterns through Bus::OBJECT_FLED, captures via RxBackend::FLEXIO, decodes the bit stream, and reports byte-level match counts. Five fixed test patterns: 0=red, 1=RGB triple, 2=all zeros, 3=all ones, 4=100-LED alternating.");
+        flexioObjectFledTest_fn.set("description", "End-to-end ObjectFLED TX -> FlexIO RX loopback verification (Teensy 4.x only, FastLED#2764 Phase 3). Drives WS2812 patterns through Bus::FLEX_IO slot 0, captures via RxBackend::FLEXIO, decodes the bit stream, and reports byte-level match counts. Five fixed test patterns: 0=red, 1=RGB triple, 2=all zeros, 3=all ones, 4=100-LED alternating.");
         functions.push_back(flexioObjectFledTest_fn);
 
         fl::json response = fl::json::object();

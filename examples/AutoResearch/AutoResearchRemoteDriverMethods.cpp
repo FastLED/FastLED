@@ -221,7 +221,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     // Register "flexioObjectFledTest" — end-to-end ObjectFLED TX → FlexIO RX
     // loopback verification (Phase 3 of FastLED#2764).
     //
-    // Drives a small WS2812 pattern through `Bus::OBJECT_FLED` on `tx_pin`,
+    // Drives a small WS2812 pattern through `Bus::FLEX_IO` slot 0 on `tx_pin`,
     // captures the wire signal back through the new `RxBackend::FLEXIO` on
     // `rx_pin`, decodes the bit stream against WS2812B-V5 timing, and reports
     // how many bytes matched the transmitted pattern.
@@ -348,7 +348,8 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
 
         // 4. Configure ObjectFLED TX via FastLED.add().
         fl::ChannelOptions opts;
-        opts.mBus = fl::Bus::OBJECT_FLED;
+        opts.mBus = fl::Bus::FLEX_IO;
+        opts.mBusWhich = 0;
         auto resolved_timing  = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
         auto resolved_encoder = fl::encoder_for<fl::TIMING_WS2812B_V5>();
         fl::NamedTimingConfig timing_cfg(resolved_timing, "WS2812B-V5",

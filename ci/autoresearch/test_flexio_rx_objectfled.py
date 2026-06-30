@@ -1,6 +1,6 @@
 """Phase 3 of FastLED#2764 — ObjectFLED TX -> FlexIO RX loopback verification.
 
-Drives five fixed WS2812 patterns through the `Bus::OBJECT_FLED` clockless TX
+Drives five fixed WS2812 patterns through the `Bus::FLEX_IO` slot 0 clockless TX
 driver, captures the wire signal through the new `RxBackend::FLEXIO` RX
 backend, decodes the bit stream against `TIMING_WS2812B_V5`, and asserts
 byte-for-byte equality with the transmitted pattern.

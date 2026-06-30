@@ -13,6 +13,7 @@
 
 #if defined(FL_IS_TEENSY_4X)
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/bus_traits.h"      // ok platform headers // IWYU pragma: keep
+#include "platforms/arm/teensy/teensy4_common/drivers/lpuart/bus_traits.h"      // ok platform headers // IWYU pragma: keep
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/bus_traits.h"  // ok platform headers // IWYU pragma: keep
 #endif
 
@@ -24,18 +25,12 @@ inline void enableAllChannelDrivers() FL_NO_EXCEPT {
         fl::Bus::BIT_BANG
 #if defined(FL_IS_TEENSY_4X)
         , fl::Bus::FLEX_IO
-        , fl::Bus::OBJECT_FLED
-        // Bus::UART is the cross-platform clockless-via-UART name --
-        // sketches that want portability use Bus::UART, and on
-        // Teensy 4.x it routes to ChannelEngineLPUART. Bus::LPUART
-        // is *not* re-registered here: its BusTraits returns the same
-        // singleton as Bus::UART, so registering it would trigger the
-        // ChannelManager replace-driver path (waitForReady + replace)
-        // every boot. Sketches that name `Bus::LPUART` directly still
-        // resolve to the same engine instance via the trait alias.
         , fl::Bus::UART
 #endif
     >();
+#if defined(FL_IS_TEENSY_4X)
+    fl::enableDriver<fl::Bus::FLEX_IO, 1>();
+#endif
 }
 
 }  // namespace platforms
