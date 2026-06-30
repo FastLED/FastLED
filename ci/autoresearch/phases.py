@@ -31,7 +31,11 @@ from ci.autoresearch.context import (
     display_pattern_details,
     display_tight_timing,
 )
-from ci.autoresearch.gpio import run_gpio_pretest, run_pin_discovery
+from ci.autoresearch.gpio import (
+    run_gpio_pretest,
+    run_pin_discovery,
+    run_pin_discovery_segmented,
+)
 from ci.debug_attached import run_cpp_lint
 from ci.rpc_client import RpcClient, RpcCrashError, RpcTimeoutError
 from ci.util.blocker_alert import blocker_alert
@@ -1512,7 +1516,12 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
             )
     elif args.auto_discover_pins:
         print("\n\U0001f50d Auto-discovery enabled - searching for connected pins...")
-        pin_discovery = await run_pin_discovery(
+        # FastLED #3446: walk the full classic-ESP32 GPIO range via
+        # overlapping 8-pin windows so shorts on any ADC2 / IO_MUX-only
+        # pin (e.g. the user-reported (33, 34) pair) are reachable. The
+        # segmented helper isolates segment-level hangs so an unsafe
+        # window only takes out itself, not the whole sweep.
+        pin_discovery = await run_pin_discovery_segmented(
             upload_port, serial_interface=serial_iface
         )
         ctx.discovery_client = pin_discovery.client
