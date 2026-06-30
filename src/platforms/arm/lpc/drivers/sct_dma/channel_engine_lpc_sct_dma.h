@@ -33,8 +33,15 @@
 // IWYU pragma: private
 
 #include "platforms/arm/lpc/is_lpc.h"
+#include "platforms/is_platform.h"
 
-#if defined(FL_IS_ARM_LPC_845)
+// Engine compiles on LPC845 (the target) AND on host/stub builds so the
+// channels-API contract — canHandle filtering, state machine, capabilities,
+// name — can be exercised by `tests/fl/channels/lpc_sct_dma_engine.cpp`
+// without requiring silicon. Same gate convention as `ChannelEngineObjectFLED`
+// which compiles under `FASTLED_STUB_IMPL` for its tests in
+// `tests/platforms/arm/teensy/teensy4_common/drivers/objectfled/`.
+#if defined(FL_IS_ARM_LPC_845) || defined(FL_IS_STUB) || defined(FASTLED_STUB_IMPL)
 
 #include "fl/channels/driver.h"
 #include "fl/channels/data.h"
@@ -112,4 +119,4 @@ private:
 
 }  // namespace fl
 
-#endif  // FL_IS_ARM_LPC_845
+#endif  // FL_IS_ARM_LPC_845 || FL_IS_STUB || FASTLED_STUB_IMPL

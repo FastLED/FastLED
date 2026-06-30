@@ -4,8 +4,13 @@
 #define CHANNEL_ENGINE_LPC_SCT_DMA_CPP_HPP_
 
 #include "platforms/arm/lpc/is_lpc.h"
+#include "platforms/is_platform.h"
 
-#if defined(FL_IS_ARM_LPC_845)
+// Same gate as the header — engine compiles on LPC845 (real target) AND on
+// host/stub builds for test exercise. The scaffold's show()/poll() do not
+// touch any peripheral registers; the real SCT/DMA work is deferred per
+// TODO(3459).
+#if defined(FL_IS_ARM_LPC_845) || defined(FL_IS_STUB) || defined(FASTLED_STUB_IMPL)
 
 #include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h"
 #include "fl/stl/noexcept.h"
@@ -20,8 +25,11 @@ namespace fl {
 // outside is either an HD chipset (WS2816 etc.) that needs separate encoding,
 // or a non-clockless chipset.
 // =============================================================================
-static constexpr u32 kMinPeriodNs = 1000;
-static constexpr u32 kMaxPeriodNs = 2500;
+// Prefixed to avoid clash with the matching constants in
+// `channel_engine_objectfled.cpp.hpp` — both files end up in the same
+// unity-build translation unit on host.
+static constexpr u32 kLpcSctMinPeriodNs = 1000;
+static constexpr u32 kLpcSctMaxPeriodNs = 2500;
 
 ChannelEngineLpcSctDma::ChannelEngineLpcSctDma() FL_NO_EXCEPT = default;
 ChannelEngineLpcSctDma::~ChannelEngineLpcSctDma() = default;
@@ -35,7 +43,7 @@ bool ChannelEngineLpcSctDma::canHandle(
         return false;
     }
     const u32 period = data->getTiming().total_period_ns();
-    return period >= kMinPeriodNs && period <= kMaxPeriodNs;
+    return period >= kLpcSctMinPeriodNs && period <= kLpcSctMaxPeriodNs;
 }
 
 void ChannelEngineLpcSctDma::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
@@ -100,6 +108,6 @@ IChannelDriver::DriverState ChannelEngineLpcSctDma::poll() FL_NO_EXCEPT {
 
 }  // namespace fl
 
-#endif  // FL_IS_ARM_LPC_845
+#endif  // FL_IS_ARM_LPC_845 || FL_IS_STUB || FASTLED_STUB_IMPL
 
 #endif  // CHANNEL_ENGINE_LPC_SCT_DMA_CPP_HPP_
