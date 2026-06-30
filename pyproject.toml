@@ -5,9 +5,16 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.3.14 (released 2026-06-30).
+    # Pin to fbuild 2.3.15 (released 2026-06-30).
     #
     # Pin history:
+    #   2.3.15 -- carries the Windows compile env fix (TMP/TEMP propagation)
+    #             AND the path-separator fix that surfaced immediately after
+    #             (forward-slash paths so cc1's spec-file pass doesn't eat
+    #             backslashes). Together these are what makes
+    #             `bash compile esp32dev` actually work on Windows for the
+    #             AutoResearch hardware-validation pass
+    #             (FastLED/fbuild#875/#885, FastLED/fbuild#890).
     #   2.3.14 -- carries the async/subprocess timeout fixes and daemon
     #             serial-WebSocket hardening needed after the fbuild async
     #             migration (FastLED/fbuild#828/#832/#833/#842/#843).
