@@ -136,7 +136,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.3.14",
+    "fbuild==2.3.15",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
