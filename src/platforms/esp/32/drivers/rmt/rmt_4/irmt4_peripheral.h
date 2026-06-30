@@ -55,16 +55,12 @@
 
 // IWYU pragma: private
 
+// This interface is platform-agnostic (no ESP32 guard) so it can be
+// included from host-side mock builds. Mirrors `IRMT5Peripheral`
+// — the concrete real-hardware impl (`Rmt4PeripheralESP`) keeps the
+// platform guard; this header does not.
+
 #include "fl/stl/compiler_control.h"
-#include "platforms/is_platform.h"
-
-#if defined(FL_IS_ESP32)
-#include "platforms/esp/32/feature_flags/enabled.h"
-#endif
-
-#if defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_RMT &&                           \
-    !FASTLED_ESP32_RMT5_ONLY_PLATFORM && !FASTLED_RMT5
-
 #include "fl/stl/cstddef.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/stdint.h"
@@ -201,5 +197,3 @@ class IRMT4Peripheral {
 
 } // namespace detail
 } // namespace fl
-
-#endif // FL_IS_ESP32 && FASTLED_ESP32_HAS_RMT && !RMT5-only && !FASTLED_RMT5
