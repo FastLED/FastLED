@@ -542,7 +542,7 @@ void loop() {
 
     // Run GPIO baseline test once after device is ready (allows JSON-RPC to be operational first)
     // This test is informational only - we continue regardless of pass/fail
-    if (!g_autoresearch_state->gpio_baseline_test_done) {
+    if (!g_autoresearch_state->gpio_baseline_test_done && g_autoresearch_state->rx_channel) {
         // Wait 500ms after boot to ensure JSON-RPC is fully operational
         if (millis() > 500) {
             g_autoresearch_state->gpio_baseline_test_done = true;
