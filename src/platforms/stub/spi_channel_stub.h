@@ -85,10 +85,10 @@ protected:
 
     static fl::shared_ptr<IChannelDriver> getStubSpiEngine() FL_NO_EXCEPT {
         // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
-        // the `BusTraits<Bus::STUB>` singleton. Stub builds route every
+        // the `BusTraits<Bus::BIT_BANG>` singleton. Stub builds route every
         // clockless/SPI chipset through the same no-op driver. Naming the
         // singleton here ODR-links the stub driver TU.
-        return BusTraits<Bus::STUB>::instancePtr();
+        return BusTraits<Bus::BIT_BANG>::instancePtr();
     }
 };
 

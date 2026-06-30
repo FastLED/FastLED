@@ -1293,7 +1293,7 @@ FL_TEST_CASE("Wave8 byte LUT == nibble LUT for all 256 bytes across real chipset
 FL_TEST_CASE("Wave8 bit cell starts HIGH and ends LOW for every real chipset") {
     // The wave8 wire shape — every bit cell starts HIGH (T1 phase) and ends
     // LOW (T3 phase) — is the framing constraint that lets an inverted UART
-    // (#3023 workstream A: `Bus::LPUART`) carry wave8 traffic byte-by-byte.
+    // (#3023 workstream A: `Bus::UART`) carry wave8 traffic byte-by-byte.
     // Pinning the invariant here means a future timing-table edit can't
     // quietly invalidate the assumption the LPUART canHandle() rests on.
     const RealTimingEntry entries[] = {

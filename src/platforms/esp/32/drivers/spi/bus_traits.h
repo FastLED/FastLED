@@ -7,8 +7,8 @@
 ///
 /// Despite the bus name, this driver implements clockless protocols (WS2812,
 /// SK6812, etc.) using SPI hardware as a precise bit-pulse generator. It does
-/// NOT drive true SPI chipsets like APA102 (those go through Bus::I2S_SPI on
-/// ESP32-dev or Bus::LCD_SPI on ESP32-S3).
+/// NOT drive true SPI chipsets like APA102 (those go through the platform's
+/// selected true-SPI path, often `Bus::FLEX_IO` slot 0 on ESP32-dev/S3).
 
 #include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"

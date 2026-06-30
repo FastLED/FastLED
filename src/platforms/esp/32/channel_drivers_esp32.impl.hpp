@@ -32,29 +32,19 @@ inline void enableAllChannelDrivers() FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_RMT
         , fl::Bus::RMT
 #endif
-#if FASTLED_ESP32_HAS_PARLIO
-        , fl::Bus::PARLIO
-#endif
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
         , fl::Bus::SPI
 #endif
-#if FASTLED_ESP32_HAS_I2S_LCD_CAM
-        , fl::Bus::I2S
-#endif
-#if FASTLED_ESP32_HAS_I2S
-        , fl::Bus::I2S_SPI
-#endif
-#if FASTLED_ESP32_HAS_LCD_RGB
-        , fl::Bus::LCD_RGB
-#endif
-#if FASTLED_ESP32_HAS_LCD_SPI
-        , fl::Bus::LCD_SPI
-        , fl::Bus::LCD_CLOCKLESS
+#if FASTLED_ESP32_HAS_PARLIO || FASTLED_ESP32_HAS_I2S || FASTLED_ESP32_HAS_LCD_SPI
+        , fl::Bus::FLEX_IO
 #endif
 #if FASTLED_ESP32_HAS_UART
         , fl::Bus::UART
 #endif
     >();
+#if FASTLED_ESP32_HAS_LCD_RGB
+    fl::enableDriver<fl::Bus::FLEX_IO, 1>();
+#endif
 }
 
 }  // namespace platforms

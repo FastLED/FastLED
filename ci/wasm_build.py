@@ -828,10 +828,12 @@ def create_wrapper(example_name: str, sketch_cache_dir: Path) -> Path:
         raise FileNotFoundError(f"Example not found: {ino_file}")
 
     # Discover additional .cpp files in the example directory tree (sorted for determinism)
+    excluded_dirs = {".build", ".fbuild", ".pio", ".vscode", "build", "fastled_js"}
     extra_cpps = sorted(
         f
         for f in example_dir.rglob("*.cpp")
-        if f.name != f"{example_name}.ino" and ".build" not in f.parts
+        if not f.name.endswith(".ino.cpp")
+        and all(part not in excluded_dirs for part in f.parts)
     )
 
     wrapper_path = sketch_cache_dir / f"{example_name}_wrapper.cpp"

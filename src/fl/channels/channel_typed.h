@@ -60,7 +60,7 @@ struct resolve_bus<Bus::AUTO, Chipset> {
 /// This matches the API requested in issue #2428 without forcing every existing
 /// `Channel` consumer (subclasses like `ClocklessIdf5`, `ChannelEvents`
 /// callbacks, `ChannelManager`) to be retemplated.
-template<Bus B, typename Chipset>
+template<Bus B, typename Chipset, fl::u8 Which = 0>
 class TypedChannel {
 public:
     /// The bus actually used after resolving `Bus::AUTO`.
@@ -72,7 +72,7 @@ public:
     // FL_STATIC_ASSERT) describes the contract: route ClocklessChipset to a
     // clockless bus (RMT/PARLIO/I2S/...) and SpiChipsetConfig to an SPI bus.
     FL_STATIC_ASSERT(
-        BusSupports<kBus, Chipset>::value,
+        BusSupports<kBus, Chipset, Which>::value,
         "TypedChannel: Bus does not support this Chipset family");
 
     /// @brief Construct a runtime `Channel` from a typed configuration.
@@ -84,8 +84,10 @@ public:
         // Naming `BusTraits<kBus>::instance` here is the ODR-use that links
         // the driver translation unit even in the static-only `--gc-sections`
         // mode (issue #2428 Phase 5 binary-size fix).
-        (void)&BusTraits<kBus>::instance;
+        (void)&BusTraits<kBus, Which>::instance;
         ChannelConfig erased = cfg.toErased();
+        erased.options.mBus = kBus;
+        erased.options.mBusWhich = Which;
         return Channel::create(erased);
     }
 
@@ -96,8 +98,11 @@ public:
     /// match `Chipset` -- there's no compile-time guarantee at this overload,
     /// so the static_assert above is the only contract.
     static ChannelPtr create(const ChannelConfig& cfg) FL_NO_EXCEPT {
-        (void)&BusTraits<kBus>::instance;
-        return Channel::create(cfg);
+        (void)&BusTraits<kBus, Which>::instance;
+        ChannelConfig erased = cfg;
+        erased.options.mBus = kBus;
+        erased.options.mBusWhich = Which;
+        return Channel::create(erased);
     }
 
 private:

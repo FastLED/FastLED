@@ -225,19 +225,19 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
             {
                 const fl::string& n = de.name;
                 if      (n == "RMT")           opts.mBus = fl::Bus::RMT;
-                else if (n == "PARLIO")        opts.mBus = fl::Bus::PARLIO;
+                else if (n == "PARLIO")        opts.mBus = fl::Bus::FLEX_IO;
                 else if (n == "SPI")           opts.mBus = fl::Bus::SPI;
-                else if (n == "I2S")           opts.mBus = fl::Bus::I2S;
-                else if (n == "I2S_SPI")       opts.mBus = fl::Bus::I2S_SPI;
-                else if (n == "LCD_RGB")       opts.mBus = fl::Bus::LCD_RGB;
-                else if (n == "LCD_SPI")       opts.mBus = fl::Bus::LCD_SPI;
-                else if (n == "LCD_CLOCKLESS") opts.mBus = fl::Bus::LCD_CLOCKLESS;
+                else if (n == "I2S")           opts.mBus = fl::Bus::FLEX_IO;
+                else if (n == "I2S_SPI")       opts.mBus = fl::Bus::FLEX_IO;
+                else if (n == "LCD_RGB")       { opts.mBus = fl::Bus::FLEX_IO; opts.mBusWhich = 1; }
+                else if (n == "LCD_SPI")       opts.mBus = fl::Bus::FLEX_IO;
+                else if (n == "LCD_CLOCKLESS") opts.mBus = fl::Bus::FLEX_IO;
                 else if (n == "UART")          opts.mBus = fl::Bus::UART;
-                else if (n == "FLEX_IO")       opts.mBus = fl::Bus::FLEX_IO;
-                else if (n == "OBJECT_FLED")   opts.mBus = fl::Bus::OBJECT_FLED;
-                else if (n == "LPUART")        opts.mBus = fl::Bus::LPUART;
+                else if (n == "FLEX_IO")       { opts.mBus = fl::Bus::FLEX_IO; opts.mBusWhich = 1; }
+                else if (n == "OBJECT_FLED")   opts.mBus = fl::Bus::FLEX_IO;
+                else if (n == "LPUART")        opts.mBus = fl::Bus::UART;
                 else if (n == "BIT_BANG")      opts.mBus = fl::Bus::BIT_BANG;
-                else if (n == "STUB")          opts.mBus = fl::Bus::STUB;
+                else if (n == "STUB")          opts.mBus = fl::Bus::BIT_BANG;
                 // else: leave Bus::AUTO; priority dispatch will pick.
             }
 

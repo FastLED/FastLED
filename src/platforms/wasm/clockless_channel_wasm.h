@@ -97,10 +97,10 @@ protected:
 
     static fl::shared_ptr<IChannelDriver> getWasmEngine() FL_NO_EXCEPT {
         // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
-        // the `BusTraits<Bus::STUB>` singleton -- the stub driver is the
-        // platform default for both stub and WASM builds. Naming the
+        // the `BusTraits<Bus::BIT_BANG>` singleton -- the portable fallback
+        // is the platform default for both stub and WASM builds. Naming the
         // singleton here ODR-links the stub driver TU.
-        return BusTraits<Bus::STUB>::instancePtr();
+        return BusTraits<Bus::BIT_BANG>::instancePtr();
     }
 };
 

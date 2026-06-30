@@ -4,7 +4,7 @@
 ///
 /// Implements IChannelDriver wrapping ObjectFLED's 3:1 DMA bit transposition
 /// for clockless WS2812 output AND a DMA-bit-banged SPI mode for APA102 /
-/// SK9822-class chipsets. One engine, one Bus enum slot (`Bus::OBJECT_FLED`),
+/// SK9822-class chipsets. One engine, one portable Bus slot (`Bus::FLEX_IO`, which 0),
 /// one peripheral (FlexPWM + eDMA + GPIO bank) -- the mode switch happens
 /// inside `show()` based on `ChannelData::isSpi()` vs `isClockless()`. See
 /// `src/fl/channels/README.md` -> "Rule: Parallel-IO peripherals -- one
@@ -78,7 +78,7 @@ public:
     DriverState poll() FL_NO_EXCEPT override;
 
     /// @brief Get engine name
-    /// @return "OBJECT_FLED" — matches the `fl::Bus::OBJECT_FLED` enumerator spelling.
+    /// @return "OBJECT_FLED" as the concrete Teensy vendor driver name.
     fl::string getName() const FL_NO_EXCEPT override {
         return fl::string::from_literal("OBJECT_FLED");
     }

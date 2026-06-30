@@ -12,5 +12,5 @@
 // header for rationale.
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_spi_mode.cpp.hpp"
 
-// BusTraits<Bus::OBJECT_FLED> specialization + BusSupports for both chipset families.
+// BusTraits<Bus::FLEX_IO, 0> specialization + BusSupports for both chipset families.
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/bus_traits.h"

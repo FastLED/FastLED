@@ -3,6 +3,7 @@
 /// Includes all implementation files in alphabetical order
 
 // begin current directory includes
+#include "fl/channels/bus_info_impl.cpp.hpp"
 #include "fl/channels/can_match.cpp.hpp"
 #include "fl/channels/capabilities.cpp.hpp"
 #include "fl/channels/channel.cpp.hpp"

@@ -194,12 +194,13 @@ const ChipsetTimingConfig& Channel::getTiming() const {
     return sEmpty;
 }
 
-Channel::Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode)
+Channel::Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode) FL_NO_EXCEPT
     : CPixelLEDController<RGB>(mode)
     , mChipset(chipset)
     , mRgbOrder(rgbOrder)
     , mDriver()
     , mBus(Bus::AUTO)
+    , mBusWhich(0)
     , mId(nextId())
     , mName(makeName(mId)) {
     // NOTE: Do NOT call fl::pinMode() here â€” see comment in the
@@ -208,12 +209,13 @@ Channel::Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMod
 }
 
 Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
-                 EOrder rgbOrder, const ChannelOptions& options)
+                 EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
     : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until FastLED.add()
     , mChipset(chipset)
     , mRgbOrder(rgbOrder)
     , mDriver()  // Empty weak_ptr - late binding on first showPixels()
     , mBus(options.mBus)  // Bus selection (#2459)
+    , mBusWhich(options.mBusWhich)
     , mId(nextId())
     , mName(makeName(mId)) {
     // NOTE: Do NOT call fl::pinMode() here. The pin may already be
@@ -242,12 +244,13 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
 
 // Backwards-compatible constructor (deprecated)
 Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-                 EOrder rgbOrder, const ChannelOptions& options)
+                 EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
     : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until FastLED.add()
     , mChipset(ClocklessChipset(pin, timing))  // Convert to variant
     , mRgbOrder(rgbOrder)
     , mDriver()  // Empty weak_ptr - late binding on first showPixels()
     , mBus(options.mBus)  // Bus selection (#2459)
+    , mBusWhich(options.mBusWhich)
     , mId(nextId())
     , mName(makeName(mId)) {
     // NOTE: Do NOT call fl::pinMode() here â€” see comment in the
@@ -284,6 +287,8 @@ void Channel::applyConfig(const ChannelConfig& config) {
     // Sync mSettings from incoming options so the mWhiteCfg variant survives
     // to showPixels(). Setters below are idempotent overlays on the same data.
     mSettings = config.options;
+    mBus = config.options.mBus;
+    mBusWhich = config.options.mBusWhich;
     setCorrection(config.options.mCorrection);
     setTemperature(config.options.mTemperature);
     setDither(config.options.mDitherMode);
@@ -390,7 +395,7 @@ fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() {
     // Build busKey only when we actually need it (mBus != AUTO).
     fl::string busKey;
     if (mBus != Bus::AUTO) {
-        busKey = fl::string::from_literal(busName(mBus));
+        busKey = fl::string::from_literal(busDriverName(mBus, mBusWhich, isSpi()));
     }
 
     fl::shared_ptr<IChannelDriver> driver =

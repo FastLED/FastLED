@@ -14,10 +14,19 @@ Usage:
     python discover_examples_all.py <examples_dir>
 """
 
+import fnmatch
 import os
 import re
 import sys
+from dataclasses import dataclass
 from pathlib import Path
+
+
+@dataclass(slots=True)
+class FilterDiscovery:
+    metadata: str | None
+    should_skip: bool
+    reason: str
 
 
 def should_skip_for_stub(filter_str: str) -> tuple[bool, str]:
@@ -77,6 +86,103 @@ def should_skip_for_stub(filter_str: str) -> tuple[bool, str]:
     return True, f"Platform-specific (@filter:{filter_str})"
 
 
+def _split_filter_values(values: str) -> list[str]:
+    return [v.strip() for v in re.split(r"[|,]", values) if v.strip()]
+
+
+def _filter_value_matches(board_value: str, filter_values: list[str]) -> bool:
+    board_value_lower = board_value.lower()
+    for filter_value in filter_values:
+        filter_value_lower = filter_value.lower()
+        if filter_value_lower.startswith("-d"):
+            filter_value_lower = filter_value_lower[2:]
+        if "*" in filter_value_lower:
+            if fnmatch.fnmatch(board_value_lower, filter_value_lower):
+                return True
+        elif board_value_lower == filter_value_lower:
+            return True
+    return False
+
+
+def _should_skip_yaml_filter(
+    require: dict[str, list[str]], exclude: dict[str, list[str]]
+) -> tuple[bool, str]:
+    # Host/stub examples run with native platform semantics. Memory filters do
+    # not exclude host builds; host has enough memory for Meson compilation.
+    host_values = {
+        "platform": "native",
+        "board": "stub",
+        "target": "native",
+    }
+
+    for key, values in exclude.items():
+        host_value = host_values.get(key)
+        if host_value and _filter_value_matches(host_value, values):
+            return True, f"excluded by {key}={host_value}"
+
+    for key, values in require.items():
+        if key == "memory":
+            continue
+        host_value = host_values.get(key)
+        if host_value and not _filter_value_matches(host_value, values):
+            return True, f"doesn't match required {key}={','.join(values)}"
+
+    return False, ""
+
+
+def _filter_metadata(
+    require: dict[str, list[str]], exclude: dict[str, list[str]]
+) -> str | None:
+    parts: list[str] = []
+    for section_name, constraints in (
+        ("require", require),
+        ("exclude", exclude),
+    ):
+        for key, values in sorted(constraints.items()):
+            parts.append(f"{section_name}:{key}={','.join(values)}")
+    return ";".join(parts) if parts else None
+
+
+def parse_yaml_filter(content: str) -> FilterDiscovery:
+    """Parse YAML-style @filter blocks for host/stub discovery."""
+    match = re.search(
+        r"//\s*@filter\s*:?\s*\n(.*?)//\s*@end-filter", content, re.DOTALL
+    )
+    if not match:
+        return FilterDiscovery(None, False, "")
+
+    require: dict[str, list[str]] = {}
+    exclude: dict[str, list[str]] = {}
+    current_section: str | None = None
+
+    for line in match.group(1).split("\n"):
+        stripped = line.lstrip("/").strip()
+        if not stripped:
+            continue
+        if stripped.startswith("require:"):
+            current_section = "require"
+            continue
+        if stripped.startswith("exclude:"):
+            current_section = "exclude"
+            continue
+        if not stripped.startswith("- ") or not current_section:
+            continue
+
+        rest = stripped[2:].strip()
+        if ":" not in rest:
+            continue
+        key, values = rest.split(":", 1)
+        key = key.strip().lower()
+        if key not in ("platform", "target", "memory", "board"):
+            continue
+        target = require if current_section == "require" else exclude
+        target.setdefault(key, []).extend(_split_filter_values(values))
+
+    metadata = _filter_metadata(require, exclude)
+    should_skip, reason = _should_skip_yaml_filter(require, exclude)
+    return FilterDiscovery(metadata, should_skip, reason)
+
+
 def has_define_before_fastled_include(content: str) -> tuple[bool, str]:
     """Check if any #define appears before the first #include of FastLED.h.
 
@@ -115,6 +221,7 @@ def discover_examples_all(examples_dir: Path) -> None:
 
     # Find all .ino files
     ino_files = list(examples_dir.rglob("*.ino"))
+    filters_disabled = os.environ.get("FASTLED_IGNORE_EXAMPLE_FILTERS") == "1"
 
     for ino_file in sorted(ino_files):
         # Example name is the filename without extension
@@ -170,10 +277,9 @@ def discover_examples_all(examples_dir: Path) -> None:
         try:
             content = ino_file.read_text(encoding="utf-8")
 
-            # Check for @filter annotation
-            # @filter:<platform_list> or @filter-out:<platform> indicates platform-specific
+            # Check for @filter annotation. Support both one-line and
+            # YAML-style blocks so host builds skip platform-specific sketches.
             if "@filter:" in content or "@filter-out:" in content:
-                # Parse the filter line to extract platforms
                 for line in content.split("\n"):
                     line = line.strip()
                     if line.startswith("// @filter:"):
@@ -181,18 +287,22 @@ def discover_examples_all(examples_dir: Path) -> None:
                         should_skip, reason = should_skip_for_stub(filter_str)
                         if should_skip:
                             print(f"SKIP|{example_name}|{reason}")
-                        # Always output FILTER line so runtime guard can detect
-                        # platform-specific examples even with stale build cache
                         print(f"FILTER|{example_name}|{filter_str}")
                         break
                     elif line.startswith("// @filter-out:"):
                         platforms = line.split("// @filter-out:")[1].strip()
-                        if "STUB" in platforms.upper():
+                        if "STUB" in platforms.upper() and not filters_disabled:
                             print(
                                 f"SKIP|{example_name}|Filtered out for STUB (@filter-out:{platforms})"
                             )
                         print(f"FILTER|{example_name}|filter-out:{platforms}")
                         break
+            elif "@filter" in content and "@end-filter" in content:
+                filter_result = parse_yaml_filter(content)
+                if filter_result.metadata:
+                    if filter_result.should_skip and not filters_disabled:
+                        print(f"SKIP|{example_name}|{filter_result.reason}")
+                    print(f"FILTER|{example_name}|{filter_result.metadata}")
 
             # Check for #define before #include FastLED (PCH-incompatible)
             has_define, define_line = has_define_before_fastled_include(content)

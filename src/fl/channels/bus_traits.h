@@ -25,9 +25,10 @@ namespace fl {
 ///
 /// Specializations live next to each driver under
 /// `src/platforms/.../<driver>/bus_traits.h`. Naming an unsupported bus value
-/// (e.g. `BusTraits<Bus::PARLIO>::instance()` on a platform without PARLIO)
+/// (e.g. `BusTraits<Bus::FLEX_IO, 0>::instance()` on a platform without
+/// a matching parallel-I/O driver)
 /// produces an "implicit instantiation of undefined template" diagnostic.
-template<fl::Bus B> struct BusTraits;
+template<fl::Bus B, fl::u8 Which = 0> struct BusTraits;
 
 /// @brief Capability check: does bus `B` accept chipset family `Chipset`?
 ///
@@ -35,14 +36,14 @@ template<fl::Bus B> struct BusTraits;
 /// specializations for the chipset families it supports, e.g.
 ///
 /// @code
-/// template<> struct BusSupports<Bus::PARLIO, ClocklessChipset> : fl::true_type {};
+/// template<> struct BusSupports<Bus::FLEX_IO, ClocklessChipset, 0> : fl::true_type {};
 /// template<> struct BusSupports<Bus::SPI,    SpiChipsetConfig>  : fl::true_type {};
 /// @endcode
 ///
 /// `Channel<B, Chipset>` and `add<B>()` use this in a `static_assert` to reject
 /// nonsense combinations (e.g. driving an SPI chipset over a clockless-only bus)
 /// at compile time rather than at runtime.
-template<fl::Bus B, typename Chipset>
+template<fl::Bus B, typename Chipset, fl::u8 Which = 0>
 struct BusSupports : fl::false_type {};
 
 namespace detail {
@@ -50,9 +51,9 @@ namespace detail {
 /// @brief Helper used by `enableDrivers<Bus...>()` to expand the parameter pack.
 /// Each call ODR-uses `BusTraits<B>::registerWithManager()`, which lazily
 /// constructs the driver singleton AND registers it with `ChannelManager`.
-template<Bus B>
+template<Bus B, fl::u8 Which = 0>
 inline int bus_register_one() FL_NO_EXCEPT {
-    BusTraits<B>::registerWithManager();
+    BusTraits<B, Which>::registerWithManager();
     return 0;
 }
 
@@ -74,13 +75,18 @@ inline int bus_register_one() FL_NO_EXCEPT {
 /// @code
 ///   #include "platforms/esp/32/drivers/rmt/rmt_5/bus_traits.h"
 ///   #include "platforms/esp/32/drivers/parlio/bus_traits.h"
-///   fl::enableDrivers<fl::Bus::RMT, fl::Bus::PARLIO>();
+///   fl::enableDriver<fl::Bus::FLEX_IO, 0>();  // PARLIO/LCD_CAM/etc. slot
 /// @endcode
 template<Bus... Buses>
 inline void enableDrivers() FL_NO_EXCEPT {
     // C++11-compatible pack expansion via array initializer trick.
     using expand = int[];
     (void)expand{0, detail::bus_register_one<Buses>()...};
+}
+
+template<Bus B, fl::u8 Which = 0>
+inline void enableDriver() FL_NO_EXCEPT {
+    detail::bus_register_one<B, Which>();
 }
 
 /// @brief Compile-time linker keep-alive hook for a single `fl::Bus`.
@@ -93,7 +99,7 @@ inline void enableDrivers() FL_NO_EXCEPT {
 /// explicit Bus param remain byte-for-byte identical to pre-#2460 code.
 namespace detail {
 
-template<fl::Bus B>
+template<fl::Bus B, fl::u8 Which = 0>
 struct BusKeepAliveImpl {
     static inline void odr_use() FL_NO_EXCEPT {
         // ODR-use the singleton accessor's address — sufficient to keep
@@ -102,20 +108,20 @@ struct BusKeepAliveImpl {
         // singleton and we want `Bus::X`-tagged `addLeds<>` to behave as
         // a pure compile-time annotation (no runtime side effect beyond
         // the linker keep-alive itself).
-        (void)&BusTraits<B>::instance;
+        (void)&BusTraits<B, Which>::instance;
     }
 };
 
-template<>
-struct BusKeepAliveImpl<fl::Bus::AUTO> {
+template<fl::u8 Which>
+struct BusKeepAliveImpl<fl::Bus::AUTO, Which> {
     static inline void odr_use() FL_NO_EXCEPT {}  // AUTO: no pinning, no ODR-use.
 };
 
 }  // namespace detail
 
-template<fl::Bus B>
+template<fl::Bus B, fl::u8 Which = 0>
 inline void busKeepAlive() FL_NO_EXCEPT {
-    detail::BusKeepAliveImpl<B>::odr_use();
+    detail::BusKeepAliveImpl<B, Which>::odr_use();
 }
 
 }  // namespace fl

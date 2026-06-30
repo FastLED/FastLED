@@ -5,7 +5,7 @@
 ///
 /// PARLIO is the platform-default clockless driver on ESP32-P4 / C6 / H2 / C5.
 /// On those variants the legacy clockless controller pre-binds to
-/// `BusTraits<Bus::PARLIO>::instancePtr()` which links this TU. On other
+/// `BusTraits<Bus::FLEX_IO, 0>::instancePtr()` which links this TU. On other
 /// platforms (including host unit tests) the driver impl is also compiled --
 /// the impl files self-gate on the appropriate hardware / mock macros, and
 /// `--gc-sections` strips the unused driver TU when nothing ODR-uses the
@@ -18,5 +18,5 @@
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_esp.cpp.hpp"
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.cpp.hpp"
 
-// BusTraits<Bus::PARLIO> specialization.
+// BusTraits<Bus::FLEX_IO, 0> specialization.
 #include "platforms/esp/32/drivers/parlio/bus_traits.h"

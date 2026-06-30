@@ -3,7 +3,7 @@
 // IWYU pragma: private
 
 /// @file bus_traits.h
-/// @brief BusTraits<Bus::FLEX_IO> specialization for Teensy 4.x FlexIO2 driver.
+/// @brief BusTraits<Bus::FLEX_IO, 1> specialization for Teensy 4.x FlexIO2 driver.
 
 #include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"
@@ -21,7 +21,7 @@
 
 namespace fl {
 
-template<> struct BusTraits<Bus::FLEX_IO> {
+template<> struct BusTraits<Bus::FLEX_IO, 1> {
     using Driver = ChannelEngineFlexIO;
 
     static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
@@ -32,11 +32,11 @@ template<> struct BusTraits<Bus::FLEX_IO> {
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
     static void registerWithManager() FL_NO_EXCEPT {
-        ChannelManager::instance().addDriver(default_bus_priority(Bus::FLEX_IO), instancePtr());
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::FLEX_IO, 1), instancePtr());
     }
 };
 
-template<> struct BusSupports<Bus::FLEX_IO, ClocklessChipset> : fl::true_type {};
+template<> struct BusSupports<Bus::FLEX_IO, ClocklessChipset, 1> : fl::true_type {};
 
 // #3428: unified clockless + SPI engine -- the same FlexIO2 peripheral
 // (and the same `ChannelEngineFlexIO` class) serves both modes. See
@@ -48,7 +48,7 @@ template<> struct BusSupports<Bus::FLEX_IO, ClocklessChipset> : fl::true_type {}
 // 12 MHz on real hardware -- see PR #3431). This compile-time slot lets
 // users write `FastLED.add<Bus::FLEX_IO, SpiChipsetConfig>(cfg)` and
 // have it both type-check AND run.
-template<> struct BusSupports<Bus::FLEX_IO, SpiChipsetConfig> : fl::true_type {};
+template<> struct BusSupports<Bus::FLEX_IO, SpiChipsetConfig, 1> : fl::true_type {};
 
 }  // namespace fl
 

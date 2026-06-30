@@ -3,7 +3,7 @@
 // IWYU pragma: private
 
 /// @file bus_traits.h
-/// @brief BusTraits<Bus::LCD_RGB> specialization for ESP32-P4 RGB LCD driver.
+/// @brief BusTraits<Bus::FLEX_IO, 1> specialization for ESP32-P4 RGB LCD driver.
 
 #include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"
@@ -28,7 +28,7 @@ namespace fl {
 
 // createLcdRgbEngine() is declared in channel_driver_lcd_rgb.h (included above).
 
-template<> struct BusTraits<Bus::LCD_RGB> {
+template<> struct BusTraits<Bus::FLEX_IO, 1> {
     using Driver = IChannelDriver;
 
     static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
@@ -39,11 +39,11 @@ template<> struct BusTraits<Bus::LCD_RGB> {
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
     static void registerWithManager() FL_NO_EXCEPT {
-        ChannelManager::instance().addDriver(default_bus_priority(Bus::LCD_RGB), instancePtr());
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::FLEX_IO, 1), instancePtr());
     }
 };
 
-template<> struct BusSupports<Bus::LCD_RGB, ClocklessChipset> : fl::true_type {};
+template<> struct BusSupports<Bus::FLEX_IO, ClocklessChipset, 1> : fl::true_type {};
 
 }  // namespace fl
 

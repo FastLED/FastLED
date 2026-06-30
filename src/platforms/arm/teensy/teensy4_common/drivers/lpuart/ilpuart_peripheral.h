@@ -2,8 +2,8 @@
 /// @brief Abstract interface for Teensy 4.x iMXRT1062 LPUART peripheral
 ///        (issue #3023 workstream A).
 ///
-/// `Bus::LPUART` is the third orthogonal Teensy 4.x clockless peripheral
-/// (alongside `Bus::FLEX_IO` and `Bus::OBJECT_FLED`). The driver uses the
+/// `Bus::UART` is the Teensy 4.x LPUART clockless peripheral slot
+/// (alongside the `Bus::FLEX_IO` slots). The driver uses the
 /// LPUART hardware in inverted-TX mode with eDMA backing so a single byte
 /// frame on the wire decomposes into 8 freely-programmable pulses sandwiched
 /// between a HIGH leading idle and a LOW trailing transition — the exact

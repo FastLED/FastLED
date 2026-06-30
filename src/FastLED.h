@@ -164,6 +164,7 @@
 #include "fl/channels/manager.h"
 #include "fl/channels/config.h"  // for ChannelConfig, MultiChannelConfig
 #include "fl/channels/bus.h"          // for fl::Bus, fl::DefaultBus (Phase 3b, #2428)
+#include "fl/channels/bus_info.h"     // for fl::deviceInfo (portable bus introspection)
 #include "fl/channels/bus_traits.h"   // for fl::BusTraits, fl::BusSupports (Phase 3b, #2428)
 #include "fl/channels/channel_typed.h"  // for fl::TypedChannel<B, Chipset> (Phase 3b, #2428)
 #include "fl/channels/rx/channel.h"
@@ -1405,9 +1406,9 @@ public:
 	/// @tparam B  Bus identifier. The caller must have the per-driver
 	///            `bus_traits.h` visible at the call site (which provides
 	///            the `BusTraits<B>` specialization).
-	template<fl::Bus B>
+	template<fl::Bus B, fl::u8 Which = 0>
 	void setExclusiveDriver() FL_NO_EXCEPT {
-		fl::channelManager().setExclusiveDriver<B>();
+		fl::channelManager().setExclusiveDriver<B, Which>();
 	}
 
 	/// Enable only one driver exclusively, runtime form (disables all others)
@@ -1421,7 +1422,7 @@ public:
 	///       custom third-party drivers, RPC-resolved names), use
 	///       `fl::ChannelManager::instance().setExclusiveDriverByName(name)`
 	///       directly.
-	bool setExclusiveDriver(fl::Bus bus);
+	bool setExclusiveDriver(fl::Bus bus, fl::u8 which = 0);
 
 	/// Check if a driver is enabled by name
 	/// @param name Driver name to query (case-sensitive)

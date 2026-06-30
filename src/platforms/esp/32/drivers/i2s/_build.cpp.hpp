@@ -5,8 +5,8 @@
 ///
 /// I2S (LCD_CAM clockless on ESP32-S3) is never a platform default. Post-#2428
 /// the driver impl is always compiled here so that
-/// `fl::enableDrivers<fl::Bus::I2S>()` / `FastLED.enableAllDrivers()` /
-/// `FastLED.setExclusiveDriver<fl::Bus::I2S>()` have the symbols they need to
+/// `fl::enableDriver<fl::Bus::FLEX_IO, 0>()` / `FastLED.enableAllDrivers()` /
+/// `FastLED.setExclusiveDriver<fl::Bus::FLEX_IO, 0>()` have the symbols they need to
 /// link. Default builds don't ODR-use any symbol from this driver, so
 /// `--gc-sections` strips the whole TU.
 
@@ -19,5 +19,5 @@
 
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s.cpp.hpp"
 
-// BusTraits<Bus::I2S> specialization.
+// Legacy concrete I2S driver implementation.
 #include "platforms/esp/32/drivers/i2s/bus_traits.h"

@@ -3,7 +3,7 @@
 // IWYU pragma: private
 
 /// @file bus_traits.h
-/// @brief BusTraits<Bus::PARLIO> specialization for ESP32-P4/C6/H2/C5.
+/// @brief BusTraits<Bus::FLEX_IO, 0> specialization for ESP32 PARLIO.
 
 #include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"
@@ -25,7 +25,7 @@
 
 namespace fl {
 
-template<> struct BusTraits<Bus::PARLIO> {
+template<> struct BusTraits<Bus::FLEX_IO, 0> {
     using Driver = ChannelDriverPARLIO;
 
     /// @brief Lazily-constructed shared pointer to the singleton driver.
@@ -38,13 +38,13 @@ template<> struct BusTraits<Bus::PARLIO> {
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
     /// @brief Register this driver with `ChannelManager` for runtime selection.
-    /// Used by `FastLED.enableDrivers<Bus::PARLIO, ...>()` opt-in API.
     static void registerWithManager() FL_NO_EXCEPT {
-        ChannelManager::instance().addDriver(default_bus_priority(Bus::PARLIO), instancePtr());
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::FLEX_IO, 0), instancePtr());
     }
 };
 
-template<> struct BusSupports<Bus::PARLIO, ClocklessChipset> : fl::true_type {};
+template<> struct BusSupports<Bus::FLEX_IO, ClocklessChipset, 0> : fl::true_type {};
+template<> struct BusSupports<Bus::FLEX_IO, SpiChipsetConfig, 0> : fl::true_type {};
 
 }  // namespace fl
 
