@@ -79,6 +79,27 @@ template<> struct DefaultBus<SpiChipsetConfig> {
     static constexpr Bus value = Bus::FLEX_IO;
 };
 
+#elif defined(FL_IS_ARM_LPC)
+
+// LPC8xx / LPC11Uxx / LPC15xx have no parallel-IO clockless peripheral.
+// Clockless output goes through the shared M0 cycle-counted C++ driver
+// (FASTLED_M0_USE_C_IMPLEMENTATION in led_sysdefs_arm_lpc.h), which is
+// what Bus::BIT_BANG names — the same engine that LPC's
+// ClocklessController template uses today.
+template<> struct DefaultBus<ClocklessChipset> {
+    static constexpr Bus value = Bus::BIT_BANG;
+};
+
+// LPC845 / LPC804 have a hardware SPI driver (spi_arm_lpc.h, UM11029).
+// LPC11xx / LPC15xx do not yet ship one (#2845 Stage 4) — they fall
+// through to the unspecialized DefaultBus, which is intentional: a
+// link error there is the right signal that no SPI driver is wired.
+#if defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804)
+template<> struct DefaultBus<SpiChipsetConfig> {
+    static constexpr Bus value = Bus::SPI;
+};
+#endif
+
 #endif
 
 template<Bus B> struct BusInstanceCount {
