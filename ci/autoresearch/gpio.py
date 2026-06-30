@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
 from colorama import Fore, Style
 
@@ -228,10 +228,14 @@ async def run_pin_discovery(
     timeout: float = 15.0,
     serial_interface: SerialInterface | None = None,
 ) -> PinDiscoveryResult:
-    """Auto-discover connected pin pairs by probing adjacent GPIO pins.
+    """Auto-discover connected pin pairs by probing adjacent GPIO pins
+    in a single window.
 
-    Calls the findConnectedPins RPC to search for a jumper wire connection
-    between adjacent pin pairs.
+    Calls the `findConnectedPins` RPC with the given range. Defaults to
+    the conservative 0-8 window — for full-chip sweeps that find shorts
+    on higher GPIOs use :func:`run_pin_discovery_segmented`, which
+    iterates 8-pin overlapping windows so a hang in one segment doesn't
+    take out the rest of the scan.
 
     Returns:
         PinDiscoveryResult with success, tx_pin, rx_pin, and client (kept open for reuse)
@@ -327,6 +331,28 @@ async def run_pin_discovery(
             retries=3,
         )
 
+        # FastLED #3446: render the skippedPins payload (if any) so the
+        # human-facing log says exactly which pins the firmware refused
+        # to probe \u2014 turning a silent "no jumper" into "GPIO 6-11 were
+        # flash pads, 20 USB-JTAG, 34-39 input-only".
+        skipped = response.get("skippedPins") or []
+        if skipped:
+            unique_pins: dict[int, str] = {}
+            for entry in skipped:
+                if isinstance(entry, dict):
+                    pin_val = entry.get("pin")
+                    reason = entry.get("reason", "unknown")
+                    if isinstance(pin_val, int) and pin_val not in unique_pins:
+                        unique_pins[pin_val] = str(reason)
+            if unique_pins:
+                summary = ", ".join(
+                    f"GPIO {p} ({reason})" for p, reason in sorted(unique_pins.items())
+                )
+                print(
+                    f"   {Fore.CYAN}Skipped per FastLED pin-validity map: "
+                    f"{summary}{Style.RESET_ALL}"
+                )
+
         if response.get("found", False):
             tx_pin = response.get("txPin")
             rx_pin = response.get("rxPin")
@@ -388,3 +414,138 @@ async def run_pin_discovery(
         if client:
             await client.close()
         return PinDiscoveryResult(success=False, tx_pin=None, rx_pin=None, client=None)
+
+
+# ============================================================
+# Segmented Pin Discovery (FastLED #3446 \u2014 full-chip sweep)
+# ============================================================
+#
+# The single-window `run_pin_discovery` defaults to GPIO 0-8 because
+# that's the historically-safe window \u2014 driving anything higher on
+# classic-ESP32 can hit boot strapping pins (12, 15), the SPI flash
+# pads (6-11), or the USB JTAG pads (20) and either reset the chip or
+# corrupt the live flash. But the user-reported (33, 34) short \u2014 and
+# more generally any short on ADC2 / IO_MUX-only pins \u2014 is completely
+# invisible to a 0-8 sweep.
+#
+# Segmented discovery splits the full 0-39 range into overlapping
+# 8-pin windows and probes them one at a time. Each segment gets its
+# own RPC round-trip, so:
+#
+#   * a hang or watchdog reset in segment N is isolated \u2014 the host
+#     re-establishes RPC, logs which segment knocked the chip over,
+#     and moves on to N+1 instead of giving up on the whole sweep;
+#   * the human-visible scan log says exactly which segment found the
+#     pair (or which segment hung), turning "I don't know why it
+#     failed" into "GPIO 32-40 caused a reset, try a clean power
+#     cycle and re-run from segment 5".
+#
+# Overlap on the segment-boundary pin (e.g. both 0-8 and 8-16 include
+# pin 8) means the (n-1, n) and (n, n+1) pairs straddling the boundary
+# are still tested.
+
+# Default segment plan for classic-ESP32: five overlapping 8-pin
+# windows covering 0..40. Each pair `(start, end)` matches
+# `findConnectedPins` semantics \u2014 `start` inclusive, `end` exclusive
+# upper bound on the *pin* (so the loop tests pairs (start, start+1)
+# through (end-1, end)).
+DEFAULT_PIN_DISCOVERY_SEGMENTS: tuple[tuple[int, int], ...] = (
+    (0, 8),
+    (8, 16),
+    (16, 24),
+    (24, 32),
+    (32, 40),
+)
+
+
+async def run_pin_discovery_segmented(
+    port: str,
+    segments: Iterable[tuple[int, int]] = DEFAULT_PIN_DISCOVERY_SEGMENTS,
+    per_segment_timeout: float = 15.0,
+    serial_interface: SerialInterface | None = None,
+) -> PinDiscoveryResult:
+    """Sweep adjacent-pair pin discovery across multiple GPIO segments.
+
+    Iterates ``segments`` in order, issuing one ``findConnectedPins``
+    RPC per (start, end) window. The first segment that returns
+    ``found=true`` wins. If a segment hangs the firmware (no response
+    within ``per_segment_timeout``), the host logs which window
+    misbehaved, attempts a DTR reset + reconnect, and continues with
+    the next segment \u2014 so an ADC2 / strap-pin hazard in one window
+    doesn't abort the whole sweep.
+
+    Args:
+        port: Serial port (e.g. ``"COM11"``).
+        segments: Iterable of ``(start_pin, end_pin)`` windows.
+            Defaults to :data:`DEFAULT_PIN_DISCOVERY_SEGMENTS` which
+            covers the full classic-ESP32 GPIO range in five
+            overlapping 8-pin windows.
+        per_segment_timeout: Wall-clock budget per segment. The single
+            window scan typically completes in <2 s, so 15 s leaves
+            generous headroom for reset + handshake.
+        serial_interface: Optional shared serial interface for reuse.
+
+    Returns:
+        PinDiscoveryResult \u2014 ``success=True`` with the discovered
+        ``tx_pin/rx_pin`` and an open ``client`` on the first hit;
+        ``success=False`` with ``client=None`` if every segment came
+        back empty (or hung).
+    """
+    print()
+    print("=" * 60)
+    print("PIN DISCOVERY \u2014 SEGMENTED SWEEP (FastLED #3446)")
+    print("=" * 60)
+    segments_list = list(segments)
+    print(f"Probing {len(segments_list)} overlapping GPIO window(s):")
+    for s in segments_list:
+        print(f"  \u2022 GPIO {s[0]}-{s[1]}")
+    print()
+
+    crashed_segments: list[tuple[int, int]] = []
+    for idx, (start_pin, end_pin) in enumerate(segments_list, start=1):
+        print(
+            f"{Fore.CYAN}\u2500\u2500 Segment {idx}/{len(segments_list)}: "
+            f"GPIO {start_pin}-{end_pin} \u2500\u2500{Style.RESET_ALL}"
+        )
+        result = await run_pin_discovery(
+            port=port,
+            start_pin=start_pin,
+            end_pin=end_pin,
+            timeout=per_segment_timeout,
+            serial_interface=serial_interface,
+        )
+        if result.success:
+            print()
+            print(
+                f"{Fore.GREEN}\u2705 SEGMENTED PIN DISCOVERY: HIT in "
+                f"GPIO {start_pin}-{end_pin}{Style.RESET_ALL}"
+            )
+            if crashed_segments:
+                print(
+                    f"   (segments that hung mid-sweep: "
+                    f"{', '.join(f'{a}-{b}' for a, b in crashed_segments)})"
+                )
+            return result
+
+        # Empty result is fine \u2014 try next segment. We only treat a
+        # missing client as a true hang signal, since
+        # `run_pin_discovery` closes the client when the RPC times out
+        # or the serial layer raises.
+        if result.client is None:
+            crashed_segments.append((start_pin, end_pin))
+            print(
+                f"{Fore.YELLOW}\u26a0\ufe0f  Segment GPIO {start_pin}-{end_pin} "
+                f"did not respond \u2014 skipping and continuing.{Style.RESET_ALL}"
+            )
+
+    print()
+    print(
+        f"{Fore.YELLOW}\u26a0\ufe0f  PIN DISCOVERY: no connection in any of the "
+        f"{len(segments_list)} segment(s){Style.RESET_ALL}"
+    )
+    if crashed_segments:
+        print(
+            f"   crashed segments: {', '.join(f'{a}-{b}' for a, b in crashed_segments)}"
+        )
+    print()
+    return PinDiscoveryResult(success=False, tx_pin=None, rx_pin=None, client=None)

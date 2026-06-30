@@ -42,6 +42,16 @@
 #include "fl/math/wave/wave_perf_bench.h"
 #include "fl/stl/atomic.h"
 #include "fl/task/promise.h"
+
+// FastLED #3446: findConnectedPins consults FastLED's per-chip pin
+// validity table so the host scan sees the same forbidden-pin set the
+// rest of FastLED enforces (SPI flash pads, USB-JTAG, GPIO34-39
+// input-only, …). Pulling the platform's `fastpin_*.h` directly is the
+// cheapest way to reach `_FL_VALID_PIN_MASK` / `FASTLED_UNUSABLE_PIN_MASK`
+// at runtime.
+#if defined(FL_IS_ESP32)
+#include "platforms/esp/32/core/fastpin_esp32.h"  // for _FL_VALID_PIN_MASK et al.  // ok platform headers
+#endif
 #include "fl/math/simd.h"
 #include "AutoResearchSimd.h"
 #include "AutoResearchAnimartrixBench.h"  // animartrixPerlinBench RPC (#2628 follow-up)
@@ -135,8 +145,17 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
     fl::json response = fl::json::object();
 
     // Parse optional arguments: [{startPin: int, endPin: int, autoApply: bool}]
+    //
+    // FastLED #3446: default range stays at the historically-safe 0-8
+    // window so an unparameterised call cannot accidentally drive a
+    // boot/strap/USB pin into reset. Callers that need to sweep higher
+    // pins (e.g. the user-reported (33, 34) short) should issue
+    // multiple `findConnectedPins` calls with overlapping 8-pin windows
+    // (0-8, 8-16, 16-24, ...) from the host side. The Python wrapper
+    // `run_pin_discovery_segmented` in `ci/autoresearch/gpio.py` does
+    // exactly that.
     int start_pin = 0;
-    int end_pin = 8;  // Default range: GPIO 0-8 (safe range, avoids USB/flash/strapping pins)
+    int end_pin = 8;
     bool auto_apply = true;  // If true, automatically apply found pins
 
     if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
@@ -158,6 +177,67 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
         response.set("message", "Pin range must be 0-48 with startPin < endPin");
         return response;
     }
+
+    // FastLED #3446: defer to FastLED's existing per-chip pin map
+    // (`FASTLED_UNUSABLE_PIN_MASK` + `SOC_GPIO_VALID_*_MASK`) rather
+    // than hard-coding pin numbers here. The mask already covers
+    // SPI-flash pads, USB-JTAG pads, chip-strap pins, and packaging-
+    // reserved gaps for every supported ESP32 variant, and is the
+    // single source of truth `_ESPPIN<P>::validpin()` uses too. Any
+    // pin not in `_FL_VALID_PIN_MASK` is unsafe to drive; any pin in
+    // `SOC_GPIO_VALID_GPIO_MASK` but NOT `SOC_GPIO_VALID_OUTPUT_GPIO_MASK`
+    // is input-only (drivable in the forward direction only).
+    //
+    // We surface skipped pins in the response so the host log says
+    // exactly which pins were forbidden and why — turning silent
+    // "no jumper found" into actionable "pins 6-11 are flash, 20 is
+    // USB-JTAG, 34-39 are input-only".
+    //
+    // The fallthrough for non-ESP32 hosts is "allow everything" —
+    // platform-specific gating lives on those platforms' own
+    // `findConnectedPins` paths.
+    auto isFastLedValidOutputPin = [](int p) -> bool {
+#if defined(FL_IS_ESP32)
+        if (p < 0 || p >= 64) return false;
+        return (_FL_VALID_PIN_MASK & (1ULL << p)) != 0;
+#else
+        (void)p;
+        return true;
+#endif
+    };
+
+    auto isFastLedInputOnlyPin = [](int p) -> bool {
+#if defined(FL_IS_ESP32)
+        if (p < 0 || p >= 64) return false;
+        constexpr u64 inputOnlyMask =
+            u64(SOC_GPIO_VALID_GPIO_MASK) & ~u64(SOC_GPIO_VALID_OUTPUT_GPIO_MASK);
+        return (inputOnlyMask & (1ULL << p)) != 0;
+#else
+        (void)p;
+        return false;
+#endif
+    };
+
+    auto isFastLedReservedPin = [&](int p) -> bool {
+        // Reserved means "in FASTLED_UNUSABLE_PIN_MASK", i.e. flash /
+        // USB-JTAG / strap pins. Distinct from input-only (those are
+        // probe-as-RX-only, not "skip entirely").
+#if defined(FL_IS_ESP32)
+        if (p < 0 || p >= 64) return false;
+        return (FASTLED_UNUSABLE_PIN_MASK & (1ULL << p)) != 0;
+#else
+        (void)p;
+        return false;
+#endif
+    };
+
+    fl::json skipped_pins = fl::json::array();
+    auto recordSkip = [&](int p, const char* reason) {
+        fl::json entry = fl::json::object();
+        entry.set("pin", static_cast<int64_t>(p));
+        entry.set("reason", reason);
+        skipped_pins.push_back(entry);
+    };
 
     FL_DBG("[PIN PROBE] Searching for connected pin pairs in range " << start_pin << "-" << end_pin);
 
@@ -191,26 +271,53 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
         int tx_candidate = pin;
         int rx_candidate = pin + 1;
 
-        // No pin skip logic needed - default range (0-8) is safe for all platforms
-        // Higher pins (USB, flash, strapping) are excluded by the reduced default range
+        // FastLED #3446: hands off the platform's reserved pads
+        // (SPI flash 6-11, USB-JTAG 20, …) — driving them locks the
+        // chip up or corrupts the live flash transaction. The
+        // FASTLED_UNUSABLE_PIN_MASK is per-chip authoritative.
+        if (isFastLedReservedPin(tx_candidate)) {
+            recordSkip(tx_candidate, "reserved-by-FastLED");
+            continue;
+        }
+        if (isFastLedReservedPin(rx_candidate)) {
+            recordSkip(rx_candidate, "reserved-by-FastLED");
+            continue;
+        }
 
         fl::json pair = fl::json::object();
         pair.set("tx", static_cast<int64_t>(tx_candidate));
         pair.set("rx", static_cast<int64_t>(rx_candidate));
 
-        // Test TX→RX direction
-        bool connected_forward = testPinPair(tx_candidate, rx_candidate);
-        if (connected_forward) {
-            pair.set("connected", true);
-            pair.set("direction", "forward");
-            tested_pairs.push_back(pair);
-            found_tx = tx_candidate;
-            found_rx = rx_candidate;
-            FL_DBG("[PIN PROBE] Found connected pair: TX=" << found_tx << " -> RX=" << found_rx);
-            break;
+        // Test TX→RX direction. Skip when the TX side can't actually
+        // drive output (e.g. input-only GPIO34-39 on classic ESP32).
+        if (!isFastLedValidOutputPin(tx_candidate)) {
+            recordSkip(tx_candidate, "input-only");
+        } else {
+            bool connected_forward = testPinPair(tx_candidate, rx_candidate);
+            if (connected_forward) {
+                pair.set("connected", true);
+                pair.set("direction", "forward");
+                tested_pairs.push_back(pair);
+                found_tx = tx_candidate;
+                found_rx = rx_candidate;
+                FL_DBG("[PIN PROBE] Found connected pair: TX=" << found_tx << " -> RX=" << found_rx);
+                break;
+            }
         }
 
-        // Test RX→TX direction (reversed)
+        // Test RX→TX direction (reversed). Same drive-capability gate:
+        // if the would-be-driver is input-only, skip — `pinMode(p, OUTPUT)`
+        // is silently ignored and the test produces a false negative.
+        if (isFastLedInputOnlyPin(rx_candidate)) {
+            recordSkip(rx_candidate, "input-only");
+            tested_pairs.push_back(pair);
+            continue;
+        }
+        if (!isFastLedValidOutputPin(rx_candidate)) {
+            recordSkip(rx_candidate, "not-output-capable");
+            tested_pairs.push_back(pair);
+            continue;
+        }
         bool connected_reverse = testPinPair(rx_candidate, tx_candidate);
         if (connected_reverse) {
             pair.set("connected", true);
@@ -233,6 +340,13 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
     search_range.push_back(static_cast<int64_t>(start_pin));
     search_range.push_back(static_cast<int64_t>(end_pin));
     response.set("searchRange", search_range);
+
+    // FastLED #3446: surface every pin we declined to drive (and why)
+    // so the host log can render "Skipped GPIO 6/7/8/9/10/11 (SPI flash),
+    // 20 (USB-JTAG), 34-39 (input-only)". A small list — at most the
+    // bad-pin count for the platform — so this doesn't bloat the
+    // response heap budget the way `tested_pairs` did.
+    response.set("skippedPins", skipped_pins);
 
     if (found_tx >= 0 && found_rx >= 0) {
         response.set("success", true);
