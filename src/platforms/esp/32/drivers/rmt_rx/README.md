@@ -6,6 +6,15 @@ This driver provides RMT (Remote Control) receive functionality for ESP32 platfo
 
 **Primary Use Case**: Hardware-in-the-loop validation of SPI/RMT TX LED output
 
+## IDF 4 vs IDF 5 split
+
+The directory is split to match the TX-side `drivers/rmt/rmt_4` vs `drivers/rmt/rmt_5` pattern (issue #3465):
+
+- `rmt_rx_5/rmt_rx_channel_5.cpp.hpp` — IDF 5.x impl (S3 / C3 / C6 / H2 / P4). Uses `driver/rmt_rx.h`, encoder callbacks, optional DMA, and the RmtMemoryManager for TX/RX coordination.
+- `rmt_rx_4/rmt_rx_channel_4.cpp.hpp` — IDF 4.x impl (classic ESP32 / S2). Uses the legacy `driver/rmt.h` plus the IDF-managed FreeRTOS ring buffer (`rmt_get_ringbuf_handle` + `xRingbufferReceive`). No DMA, no custom ISR — RX has no latency pressure so the ring buffer suffices.
+
+The two impls are mutually exclusive at compile time via the same `FASTLED_RMT5` gate the TX drivers use, so exactly one definition of `RmtRxChannel::create(int)` links per build.
+
 ## Architecture
 
 ```

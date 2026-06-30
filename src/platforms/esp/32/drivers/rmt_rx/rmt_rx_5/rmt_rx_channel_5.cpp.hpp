@@ -1621,20 +1621,7 @@ fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NO_EXCEPT {
 
 } // namespace fl
 
-#else // !FASTLED_RMT5
-
-// RMT4 platforms (ESP32 with ESP-IDF < 5.0) - provide stub implementation
-// RX functionality requires RMT5 driver (ESP-IDF 5.0+)
-namespace fl {
-
-fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NO_EXCEPT {
-    (void)pin; // Suppress unused parameter warning
-    FL_WARN_F("RmtRxChannel::create() requires RMT5 driver (ESP-IDF 5.0+). "
-            "Returning nullptr.");
-    return nullptr;
-}
-
-} // namespace fl
-
 #endif // FASTLED_RMT5
+       // The IDF 4.x implementation lives in
+       // ../rmt_rx_4/rmt_rx_channel_4.cpp.hpp (issue #3465).
 #endif // FL_IS_ESP32
