@@ -14,7 +14,7 @@
 // IWYU pragma: begin_keep
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h" // ok platform headers
 #include "platforms/esp/32/drivers/gpio_isr_rx/gpio_isr_rx.h" // ok platform headers
-#include "platforms/esp/32/feature_flags/enabled.h" // FASTLED_ESP32_HAS_RMT / FASTLED_RMT5 gates
+#include "platforms/esp/32/feature_flags/enabled.h" // ok platform headers
 #endif
 // IWYU pragma: end_keep
 
