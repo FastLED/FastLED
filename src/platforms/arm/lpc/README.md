@@ -18,8 +18,8 @@ The LPC family currently covers two ARM cores:
 
 | Platform | Chip | CPU | Default Clock | Drivers Shipped | Status |
 |----------|------|-----|---------------|-----------------|--------|
-| **LPC845** | LPC845M301 | Cortex-M0+ @ 30 MHz | 30 MHz | Bit-bang (default) + optional SCT/PWM+DMA (#2850) | ✅ Compiles + AutoResearch RPC bring-up sketch ([#3041](https://github.com/FastLED/FastLED/pull/3041)); AutoResearch loopback verification pending [#2880](https://github.com/FastLED/FastLED/issues/2880) |
-| **LPC804** | LPC804M101 | Cortex-M0+ @ 15 MHz | 15 MHz | Bit-bang (default) + optional PLU (#2848) | ✅ Compiles + AutoResearch RPC bring-up sketch ([#3041](https://github.com/FastLED/FastLED/pull/3041)); AutoResearch loopback verification pending [#2880](https://github.com/FastLED/FastLED/issues/2880) |
+| **LPC845** | LPC845M301 | Cortex-M0+ @ 24 MHz | 24 MHz (FRO direct path) | Bit-bang (default) + optional SCT/PWM+DMA legacy template ([#2850](https://github.com/FastLED/FastLED/pull/2850)) + optional SCT/DMA channels-API engine ([#3460](https://github.com/FastLED/FastLED/pull/3460), TX→RX byte-match [#3472](https://github.com/FastLED/FastLED/pull/3472)) + optional SPI DMA async ([#3454](https://github.com/FastLED/FastLED/pull/3454)) | ✅ Compiles + AutoResearch RPC bring-up sketch ([#3041](https://github.com/FastLED/FastLED/pull/3041)) + host-side TX→RX byte-match through `engine.show()` ([#3472](https://github.com/FastLED/FastLED/pull/3472)); on-silicon loopback pending [#2880](https://github.com/FastLED/FastLED/issues/2880) |
+| **LPC804** | LPC804M101 | Cortex-M0+ @ 15 MHz | 15 MHz (FRO direct path) | Bit-bang (default) + optional PLU ([#2848](https://github.com/FastLED/FastLED/pull/2848)) + optional SPI DMA async ([#3500](https://github.com/FastLED/FastLED/pull/3500) widened gate, requires fbuild ≥ 2.3.16 for the LPC804 CMSIS DMA0 typedef) | ✅ Compiles + AutoResearch RPC bring-up sketch ([#3041](https://github.com/FastLED/FastLED/pull/3041)); AutoResearch loopback verification pending [#2880](https://github.com/FastLED/FastLED/issues/2880) |
 | **LPC11Uxx** | LPC11U24, LPC11U35 | Cortex-M0 | 12 MHz (IRC) | Shared LPC8xx fastpin + M0 C++ clockless (#2872) | ✅ Compiles; hardware bring-up pending |
 | **LPC11xx legacy** | LPC1110, LPC1112, LPC1114, LPC1115 | Cortex-M0 | — | Dedicated `fastpin_arm_lpc11_legacy.h` ([#2878](https://github.com/FastLED/FastLED/pull/2878)) + shared M0 C++ clockless | ✅ Compiles; hardware bring-up pending |
 | **LPC15xx** | LPC1517…LPC1549 | Cortex-M3 | 12 MHz (IRC) | Shared LPC8xx fastpin + M3-compatible C++ clockless (#2872) | ✅ Compiles; hardware bring-up pending |
@@ -149,6 +149,11 @@ worked anti-example.
 - `clockless_arm_lpc_plu.h` — LPC804-only Programmable Logic Unit (PLU) clockless driver. Hardware pulse-shaping via 26-LUT reconfigurable fabric; CPU only writes serial data per bit. See UM11065 §12.
 - `clockless_arm_lpc_pwm_dma.h` — LPC845-only SCT + DMA-to-GPIO clockless driver. CPU-free WS2812 output via three DMA channels (T0_RISE / T_MID / T_END). See UM11029 §16-17.
 - `spi_arm_lpc.h` — LPC845 / LPC804 hardware SPI driver for **APA102 / SK9822 / WS2801** clocked strips. Targets the LPC8xx SPI peripheral (UM11029 §"SPI") in master / MSB-first / mode-0 / 8-bit configuration. SPI0 default; users route to SPI1 via the `pSPIX` template arg. Pin routing through the LPC Switch Matrix is the user's responsibility (matching the bit-bang clockless driver's "FastPin sees raw GPIO" convention). Closes #2845 Stage 4 item 3.
+- `spi_arm_lpc_dma.h` — LPC845 / LPC804 hardware SPI + single-channel DMA async driver ([#3454](https://github.com/FastLED/FastLED/pull/3454); LPC804 gate widened in [#3500](https://github.com/FastLED/FastLED/pull/3500)). Same MSB-first / mode-0 / 8-bit SPI framing as the polled `spi_arm_lpc.h`, but the TX byte stream is fed by one DMA0 channel (default: channel 0 for SPI0, override to 4 for SPI1). Opt-in via `FASTLED_LPC_SPI_DMA`; falls back to the polled driver otherwise.
+- `drivers/sct_dma/channel_engine_lpc_sct_dma.{h,cpp.hpp}` — Channels-API `IChannelDriver` for the LPC845 SCT + 3-DMA-channel clockless engine ([#3460](https://github.com/FastLED/FastLED/pull/3460)). Wraps the same SCT/DMA machinery as `clockless_arm_lpc_pwm_dma.h` but plugs into the portable `ChannelManager` dispatch, with async `pollAndAdvance()` chunk progression (no busy-wait in `show()`). Host-side TX→RX byte-match test through `engine.show()` verified in [#3472](https://github.com/FastLED/FastLED/pull/3472).
+- `drivers/sct_dma/lpc_sct_dma_runtime.{h,cpp.hpp}` — Runtime SCT+DMA helper (chunked encode → 3 DMA channels → GPIO SET/CLR), shared by the channels-API engine.
+- `drivers/sct_dma/bus_traits.h` — `BusTraits<Bus::BIT_BANG>` specialization routing LPC845 bit-bang bus to the SCT/DMA channels engine when `FASTLED_LPC_PWM_DMA` is set; kept behind `!FL_IS_ARM_LPC_845` in the shared bit-bang traits to avoid duplicate specialization.
+- `rx_sct_capture.{h,cpp.hpp}` — LPC845 SCT input-capture RX device used by the AutoResearch loopback harness; drives byte-match assertions for the bit-bang, PWM+DMA, and channels-API TX paths.
 - `led_sysdefs_arm_lpc.h` — System defines (sets `FL_IS_ARM_M0_PLUS`, `F_CPU`, forces `FASTLED_M0_USE_C_IMPLEMENTATION`, includes `<LPC845.h>` / `<LPC804.h>` CMSIS device headers).
 - `fastpin_arm_lpc.h` — see above.
 - `is_lpc.h` — Detection macros (`FL_IS_ARM_LPC_845`, `FL_IS_ARM_LPC_804`, `FL_IS_ARM_LPC_11`, `FL_IS_ARM_LPC_15`, `FL_IS_ARM_LPC`).
@@ -162,6 +167,9 @@ Build-time opt-ins (default off). Define before including `FastLED.h` or via bui
 - **`FASTLED_LPC_PWM_DMA`** — LPC845 only. Activates the SCT + DMA-to-GPIO clockless driver in place of the bit-banged default. Claims 3 DMA channels and the SCT for the lifetime of the FastLED controller.
 - **`FASTLED_LPC_PWM_DMA_BASECH`** — LPC845 + `FASTLED_LPC_PWM_DMA`. Base index of the 3 contiguous DMA channels (default `0`, i.e. channels 0/1/2).
 - **`FASTLED_LPC_PWM_DMA_CHUNK_BITS`** — LPC845 + `FASTLED_LPC_PWM_DMA`. SRAM-budgeted streaming chunk size in bits (default `64`); a 144-LED encode fits in 16 KB SRAM with the default.
+- **`FASTLED_LPC_SPI_DMA`** — LPC845 / LPC804. Activates the DMA-async SPI driver (`spi_arm_lpc_dma.h`) in place of the polled `spi_arm_lpc.h` for APA102 / SK9822 / WS2801. On LPC804 requires fbuild ≥ 2.3.16 for the vendor `<LPC804.h>` DMA0 typedef (adds a compile-time `#error` diagnostic pointing at [framework-arduino-lpc8xx #35](https://github.com/FastLED/framework-arduino-lpc8xx/pull/35) + [fbuild #916](https://github.com/FastLED/fbuild/pull/916)).
+- **`FASTLED_LPC_SPI_DMA_CHANNEL`** — LPC845 / LPC804 + `FASTLED_LPC_SPI_DMA`. DMA0 channel index feeding SPI TX. Defaults: `0` (SPI0), `4` (SPI1 on LPC845 — override via `-DFASTLED_LPC_SPI_DMA_CHANNEL=6`).
+- **`FASTLED_LPC_SPI_DMA_MAX_BYTES`** — LPC845 / LPC804 + `FASTLED_LPC_SPI_DMA`. Static DMA descriptor pool size (default `2048`).
 - **`FASTLED_M0_USE_C_IMPLEMENTATION`** — Already set unconditionally by `led_sysdefs_arm_lpc.h`. The LPC8xx GPIO controller exposes SET[port] and CLR[port] at byte offsets `0x2200 / 0x2280` from the controller base, beyond the 5-bit imm5*4 encoding the M0/M0+ STR-immediate-offset instruction supports. The shared inline-assembly clockless driver assumes both offsets fit a single str-with-immediate; LPC routes through the portable C++ implementation, which performs an indexed store instead.
 - **`FASTLED_ALLOW_INTERRUPTS`** — Default `1`.
 - **`FASTLED_USE_PROGMEM`** — Default `0`.
@@ -227,6 +235,13 @@ Closing the meta does not stall any open work — every still-open item is now i
 - [#2866](https://github.com/FastLED/FastLED/pull/2866) — Scope LPC8xx driver code to LPC8xx-only
 - [#2872](https://github.com/FastLED/FastLED/pull/2872) — Stage 4 wiring: LPC11Uxx + LPC15xx + APA102 SPI
 - [#2876](https://github.com/FastLED/FastLED/pull/2876) — CodeRabbit follow-up fixes on #2872
+- [#3438](https://github.com/FastLED/FastLED/pull/3438) — Register-map remediation: 5/8 sites migrated from hand-rolled shims to vendor CMSIS PAL (`LPC845.h` / `LPC804.h`)
+- [#3454](https://github.com/FastLED/FastLED/pull/3454) — LPC845 SPI + single-channel DMA async driver (`spi_arm_lpc_dma.h`)
+- [#3460](https://github.com/FastLED/FastLED/pull/3460) — LPC845 SCT+DMA channels-API engine (`drivers/sct_dma/channel_engine_lpc_sct_dma.*`)
+- [#3472](https://github.com/FastLED/FastLED/pull/3472) — Host-side TX→RX byte-match through `engine.show()` for the SCT/DMA channels engine (closes [#3468](https://github.com/FastLED/FastLED/issues/3468))
+- [#3500](https://github.com/FastLED/FastLED/pull/3500) — Widen `spi_arm_lpc_dma.h` gate to include LPC804 with an actionable `#error` when the vendor DMA0 typedef is missing (closes [#3499](https://github.com/FastLED/FastLED/issues/3499))
+- [framework-arduino-lpc8xx #35](https://github.com/FastLED/framework-arduino-lpc8xx/pull/35) — Add the DMA0 register block to `variants/lpc804/LPC804.h` (byte-identical to LPC845's block, only `CHANNEL[4]` instead of `CHANNEL[25]`); prerequisite for `FASTLED_LPC_SPI_DMA` on LPC804
+- [fbuild #916](https://github.com/FastLED/fbuild/pull/916) — Bump ArduinoCore-LPC8xx pin so LPC804 DMA0 is on the fbuild include path
 - [fbuild#419](https://github.com/FastLED/fbuild/pull/419) / [fbuild#420](https://github.com/FastLED/fbuild/pull/420) — Stage 1: bare-metal target + real SystemInit
 
 ### Open follow-ups (carved out of #2845)
@@ -234,7 +249,10 @@ Closing the meta does not stall any open work — every still-open item is now i
 - [#2878](https://github.com/FastLED/FastLED/issues/2878) — Stage 4.1 legacy: LPC1110/1112/1114/1115 clockless (0x50000000 GPIO fastpin)
 - [#2879](https://github.com/FastLED/FastLED/issues/2879) — Stage 4.4: LPC845 multi-strip parallel output (blocked on Stage 2c hardware)
 - [#2880](https://github.com/FastLED/FastLED/issues/2880) — Stages 3.5 + 3.6: LPC845 hardware bring-up + AutoResearch UART
+- [#3437](https://github.com/FastLED/FastLED/issues/3437) — Register-map remediation meta: remaining 3/8 sites (LPC11xx-legacy GPIO, LPC11Uxx/LPC15xx GPIO fallback, `rx_sct_capture.cpp.hpp`)
+- [#3501](https://github.com/FastLED/FastLED/issues/3501) — LPC11Uxx / LPC15xx SPI driver support (polled `spi_arm_lpc.h` gate widening candidate)
 - [fbuild #456](https://github.com/FastLED/fbuild/issues/456) — Meta: Stage 3 fbuild-side items (3.1, 3.2, 3.3, 3.4, 3.7, 3.8)
+- [fbuild #565](https://github.com/FastLED/fbuild/issues/565) — CMSIS-DAP deploy support (Windows composite-device replug bug blocks LPC-Link2 auto-flash)
 
 ### NXP user manuals
 
