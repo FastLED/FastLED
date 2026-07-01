@@ -18,25 +18,21 @@
 ///   - State machine: READY → enqueue → READY → show → BUSY →
 ///     poll* → READY (peripheral completion callback flips the flag).
 ///
-/// ## Staging
+/// ## Layering
 ///
-/// Stage 1 (this file's initial impl): pre-computation strategy.
 /// `show()` linearly copies every enqueued channel's encoded pixel
 /// bytes into a single DMA-capable scratch buffer, then calls
-/// `peripheral->transmit()` once. The buffer stays valid until the
-/// completion callback fires. This keeps the engine's state machine
-/// simple, exercises the full peripheral surface (allocateBuffer /
-/// transmit / registerTransmitCallback / freeBuffer), and is fully
-/// testable against the mock. It does NOT yet run the parallel
-/// bit-transpose or the wave8 slot encoding.
+/// `peripheral->transmit()` once. The scratch buffer stays valid
+/// until the peripheral's completion callback fires.
 ///
-/// Stage 2 (follow-up PR against the same file): the encoder step
-/// runs the actual per-lane bit-transpose + wave8 slot expansion so
-/// the emitted waveform drives real WS2812 timing.
-///
-/// The peripheral interface + engine state machine are stable across
-/// stages — Stage 2 replaces the body of `packScratchBuffer()`
-/// without touching the surface.
+/// Wave8 pulse-major encoding lives inside the peripheral's
+/// `transmit()` implementation, NOT in this engine's
+/// `packScratchBuffer()`. Rationale: the encoded byte stream is a
+/// hardware-specific DMA layout (16 lanes × 8 pulses per byte at the
+/// wave8 pixel clock), so the encoding step belongs next to the DMA
+/// register writes. The engine hands over raw channel bytes; the
+/// peripheral chooses whether to run the encoder (`_esp` impl) or
+/// capture the raw bytes for test observation (`_mock` impl).
 
 #pragma once
 
@@ -116,9 +112,10 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
     bool ensureScratchBuffer(size_t required) FL_NO_EXCEPT;
 
     /// @brief Copy encoded pixel bytes from every enqueued channel
-    ///        into the scratch buffer. Stage 1: linear concatenation.
-    ///        Stage 2: parallel bit-transpose + wave8 slot expansion.
-    ///        Returns the total byte count written.
+    ///        into the scratch buffer as a linear concatenation.
+    ///        Wave8 pulse-major encoding is the peripheral's
+    ///        responsibility (see the class docstring's Layering
+    ///        section). Returns the total byte count written.
     size_t packScratchBuffer() FL_NO_EXCEPT;
 
     /// @brief Free the current scratch buffer (if any). Called when
