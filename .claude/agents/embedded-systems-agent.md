@@ -53,6 +53,16 @@ Provide expert guidance on firmware engineering topics: DMA configuration, inter
 
 ### 1. DMA (Direct Memory Access)
 
+> **Before writing any DMA driver code for a specific chip, read
+> `agents/docs/peripheral-existence.md` FIRST.** Verify the DMA
+> controller actually exists on the target silicon — grep the vendor
+> CMSIS header for the `<Peripheral>_Type` typedef, `<PERIPH>_BASE`
+> macro, and `FSL_FEATURE_SOC_<PERIPH>_COUNT` feature flag. **If the
+> peripheral is absent from vendor CMSIS, HALT.** Do not fabricate the
+> missing typedef — that anti-pattern shipped a phantom `DMA_Type` on
+> LPC804 (four-repo revert cascade). Applies equally to FlexIO,
+> LCD_CAM, PARLIO, I2S, RMT and every other async peripheral.
+
 **ESP32 DMA best practices**:
 - Buffers: `MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA` — 4-byte aligned, internal SRAM
 - Double-buffered pipeline: DMA sends buffer A while CPU fills buffer B

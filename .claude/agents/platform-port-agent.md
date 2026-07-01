@@ -77,14 +77,31 @@ Register in `src/platforms/int.h` dispatcher with appropriate `#elif` guard.
 
 The clockless driver is the minimum for LED output. It bit-bangs the GPIO pin.
 
-**BEFORE touching any peripheral register, read `agents/docs/register-maps.md`.**
-The rule: use the vendor CMSIS PAL header (`LPC845.h`, `stm32f4xx.h`,
-`nrf52840.h`, `hardware/structs/sio.h`, etc.) — do NOT hand-roll a parallel
-`struct FooShim { volatile u32 _resv0[16]; ... }` from the chip's user manual.
-Hand-rolled shims have already shipped wrong offsets to LPC845 twice
-(issue #2990, fix PR #3349). Vendor headers are generated from the silicon
-designer's SVD/IP-XACT and encode silicon-revision-specific layout quirks
-that human-readable user manuals miss.
+**BEFORE touching any peripheral register, read TWO docs in order:**
+
+1. **`agents/docs/peripheral-existence.md`** — verify the peripheral you
+   plan to touch actually EXISTS on this specific chip. Grep the vendor
+   CMSIS header for the `<Peripheral>_Type` typedef and `<PERIPH>_BASE`
+   macro. Grep the chip's `_features.h` for `FSL_FEATURE_SOC_<PERIPH>_COUNT`.
+   Check the vendor SDK's `devices/<CHIP>/drivers/` directory for driver
+   files. **If any of those four signals say "absent," HALT and report
+   the finding on the driving issue.** Do not fabricate the missing
+   typedef in the vendor header repo — that's the pattern that shipped
+   a phantom `DMA_Type` on LPC804 (see the doc's Historical anti-example).
+2. **`agents/docs/register-maps.md`** — once you've confirmed the
+   peripheral exists, use the vendor CMSIS PAL header (`LPC845.h`,
+   `stm32f4xx.h`, `nrf52840.h`, `hardware/structs/sio.h`, etc.) — do NOT
+   hand-roll a parallel `struct FooShim { volatile u32 _resv0[16]; ... }`
+   from the chip's user manual. Hand-rolled shims have already shipped
+   wrong offsets to LPC845 twice (issue #2990, fix PR #3349). Vendor
+   headers are generated from the silicon designer's SVD/IP-XACT and
+   encode silicon-revision-specific layout quirks that human-readable
+   user manuals miss.
+
+**This applies to any async / DMA-backed / non-blocking peripheral, not
+just DMA:** FlexIO, FlexSPI, LCD_CAM, PARLIO, I2S, RMT, CAN, USB, etc.
+Any peripheral a vendor may de-populate per SKU needs the existence
+check first.
 
 **Key implementation requirements**:
 1. **Nanosecond-precision timing** — use cycle counting or hardware timers
@@ -153,6 +170,7 @@ If the platform has hardware SPI:
 
 - **Research before implementing** — get architecture details right
 - **Follow existing patterns** — look at similar platforms already ported
+- **Verify the peripheral EXISTS on the target chip before writing any driver code that names it** — read `agents/docs/peripheral-existence.md`. Halt on phantom peripherals; do not fabricate missing vendor CMSIS typedefs. Applies to DMA and every other async peripheral (FlexIO, LCD_CAM, PARLIO, I2S, RMT, ...).
 - **Use vendor CMSIS register definitions, never hand-roll register-map shims** — read `agents/docs/register-maps.md` before authoring any `struct *Shim` or typing out register offsets from a user manual
 - **Use the correct naming convention** — `FL_IS_<PLATFORM>` for detection macros
 - **Never modify `fl/stl/int.h` or `fl/stdint.h`** — only platform-specific int files

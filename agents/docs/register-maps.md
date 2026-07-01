@@ -1,5 +1,14 @@
 # Register Maps & Vendor CMSIS Headers
 
+> **Before you author register access, read
+> [`peripheral-existence.md`](peripheral-existence.md) too.** This doc
+> tells you *how* to write register access; peripheral-existence.md tells
+> you *whether the peripheral you're accessing exists on the target
+> silicon at all*. If the vendor CMSIS header omits the peripheral,
+> **halt** — do not fabricate the missing typedef. That anti-pattern
+> shipped a phantom `DMA_Type` on LPC804 (see `peripheral-existence.md`
+> → "Historical anti-example" for the four-repo revert cascade).
+
 **Rule for ALL agents (human and AI):** when a MCU has an official vendor
 peripheral-access-layer (CMSIS PAL) header — `LPC845.h`, `stm32f4xx.h`,
 `MK20DX256.h`, `nrf52840.h`, `samd21.h`, `hardware/structs/*.h`, etc. — that
@@ -186,6 +195,8 @@ now operational across all five FastLED LPC8xx CI workflows.
 
 ## Cross-references
 
+- `agents/docs/peripheral-existence.md` — verify the peripheral EXISTS
+  before authoring any register access. Halt-on-phantom guardrail.
 - `agents/docs/cpp-standards.md` — general C++ rules.
 - `.claude/agents/platform-port-agent.md` — porting walkthrough that links
   here before any peripheral struct is authored.

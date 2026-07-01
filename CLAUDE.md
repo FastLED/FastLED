@@ -8,6 +8,7 @@
 |------|------|
 | Writing/editing C++ code | `agents/docs/cpp-standards.md` |
 | Defining a register map / accessing MCU peripherals | `agents/docs/register-maps.md` (use vendor CMSIS PAL — do not hand-roll shims) |
+| **Building any async / DMA / FlexIO / LCD_CAM / PARLIO / I2S / RMT driver for a chip** | **`agents/docs/peripheral-existence.md` FIRST — verify the peripheral EXISTS in vendor CMSIS + datasheet before writing driver code. Halt on phantom.** |
 | Creating an API wrapper type | `agents/docs/cpp-standards.md` → "API Object Pattern" |
 | Adding a global setting / configuration knob | `agents/docs/cpp-standards.md` → "Public Settings Pattern" (new setters go on `CFastLED`, not as bare `fl::set_*` free functions) |
 | Writing/editing Python code | `agents/docs/python-standards.md` |
