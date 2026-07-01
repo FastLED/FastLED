@@ -1680,7 +1680,24 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
                     "exclusive: both target the SCT peripheral."
                 )
                 return 1
+            if getattr(ctx.args, "dma_spi", False):
+                print(
+                    "--pwm-dma-cl and --dma-spi are mutually exclusive: "
+                    "both claim DMA0 channels and the LowMemory flash "
+                    "budget doesn't fit both."
+                )
+                return 1
             return await _run_lpc_pwm_dma_cl_tests(ctx)
+        # FastLED #3456: --dma-spi runs the SPI+DMA async driver bench.
+        # Phase 1 of the #3453 bring-up.
+        if getattr(ctx.args, "dma_spi", False):
+            if final_environment not in LPC_WS2812_ENVS:
+                print(
+                    "--dma-spi is only supported on LPC845 boards "
+                    "(lpc845brk, lpc845, lpcxpresso845max)."
+                )
+                return 1
+            return await _run_lpc_dma_spi_tests(ctx)
         return await _run_bring_up_tests(ctx)
 
     # GPIO-only mode
@@ -2468,6 +2485,58 @@ async def _run_lpc_pwm_dma_cl_tests(ctx: RunContext) -> int:
         str(tx_pin),
         "--rx-pin",
         str(rx_pin),
+    ]
+    result = subprocess.run(cmd)
+    return 0 if result.returncode == 0 else 1
+
+
+async def _run_lpc_dma_spi_tests(ctx: RunContext) -> int:
+    """Run the FastLED #3456 SPI+DMA async driver bench.
+
+    Sibling of `_run_lpc_pwm_dma_cl_tests`, but exercises the LPC845
+    `ARMHardwareSPIOutputDMA<>` driver from `spi_arm_lpc_dma.h`.
+    Phase 1 of the #3453 bench bring-up series. LPC845 low-memory
+    builds bind the `dmaSpiTransferOnce` / `dmaSpiTransferOverlap` /
+    `dmaSpiMeasureSck` handlers automatically when `FASTLED_LPC_SPI_DMA`
+    is set at compile time — this phase driver expects that flag to
+    already be present in `build_flags`.
+
+    Compile-time build flag: `-DFASTLED_LPC_SPI_DMA=1` (optionally
+    combined with `-DFASTLED_LPC_SPI_DMA_CHANNEL=4` for SPI1). See
+    `examples/AutoResearch/AutoResearchSpiDma.h`.
+    """
+    final_environment = (ctx.final_environment or "").lower()
+    if final_environment not in LPC_WS2812_ENVS:
+        print(
+            "--dma-spi is only supported on LPC845 boards "
+            "(lpc845brk, lpc845, lpcxpresso845max)."
+        )
+        return 1
+
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+
+    print()
+    print("=" * 60)
+    print("LPC SPI+DMA async driver bench — #3456 (Phase 1 of #3453)")
+    print(
+        "   Driver: ARMHardwareSPIOutputDMA<> (src/platforms/arm/lpc/spi_arm_lpc_dma.h)"
+    )
+    print("   Build flag: -DFASTLED_LPC_SPI_DMA=1 (see")
+    print("   examples/AutoResearch/AutoResearchSpiDma.h)")
+    print("   Optional: -DFASTLED_LPC_SPI_DMA_CHANNEL=4 (SPI1 default)")
+    print("   Wiring: no jumper required for transferOnce/Overlap timing;")
+    print("   SCK measurement is wall-clock derived, not SCT-captured.")
+    print("=" * 60)
+    print()
+
+    cmd = [
+        "uv",
+        "run",
+        "python",
+        "ci/autoresearch/test_lpc_dma_spi.py",
+        "--port",
+        upload_port,
     ]
     result = subprocess.run(cmd)
     return 0 if result.returncode == 0 else 1
