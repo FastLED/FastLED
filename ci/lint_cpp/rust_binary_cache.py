@@ -220,6 +220,46 @@ def _resolve_soldr() -> str:
     return soldr
 
 
+def _stream_build_cmd(cmd: list[str], label: str, verbose: bool) -> tuple[int, int]:
+    """Run ``cmd`` under Popen, prefix-stream its stdout, return (rc, line_count).
+
+    ``line_count`` is the number of non-empty output lines observed. Callers use
+    it to detect the "silent no-op" case where a wrapper binary exits 0 without
+    ever calling cargo (see the soldr-shim fallback path below).
+    """
+    if verbose:
+        print(
+            f"    cwd: {PROJECT_ROOT}",
+            file=sys.stderr,
+            flush=True,
+        )
+        print(
+            f"    cmd: {' '.join(cmd)}",
+            file=sys.stderr,
+            flush=True,
+        )
+    proc = subprocess.Popen(
+        cmd,
+        cwd=str(PROJECT_ROOT),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,  # line-buffered
+    )
+    assert proc.stdout is not None
+    prefix = f"    [{label}] "
+    line_count = 0
+    for line in proc.stdout:
+        stripped = line.rstrip()
+        if stripped:
+            line_count += 1
+        # Preserve the raw line (cargo emits progress bars via \r; strip
+        # trailing whitespace only, don't collapse internal spacing).
+        print(f"{prefix}{stripped}", file=sys.stderr, flush=True)
+    returncode = proc.wait()
+    return returncode, line_count
+
+
 def _run_build(verbose: bool = True) -> None:
     """Invoke ``soldr cargo build`` for the fastled-lint binary.
 
@@ -240,18 +280,26 @@ def _run_build(verbose: bool = True) -> None:
     runners, logging wrappers, CI harnesses), cargo's diagnostics
     disappear. The explicit stream + prefix makes every cargo line
     identifiable and visible even under those layers.
+
+    Broken-shim fallback
+    --------------------
+    soldr 0.7.87 (current PyPI head) ships as a ~118 KB Windows shim that,
+    on cold runners, exits 0 without invoking cargo or producing any
+    stdout — see the empty ``[cargo]`` prefix stream in FastLED CI unit
+    tests on windows-latest. When we detect that signature (rc == 0 AND
+    zero output lines AND binary not produced), fall back to invoking
+    ``cargo build`` directly. This loses soldr's cache assist but keeps
+    lint functional; the outer binary-cache layer still avoids re-building
+    on unchanged crate sources.
     """
-    soldr = _resolve_soldr()
-    cmd = [
-        soldr,
-        "--no-cache",
-        "cargo",
+    cargo_args = [
         "build",
         "--manifest-path",
         str(RUST_MANIFEST),
         "--bin",
         RUST_BINARY_NAME,
     ]
+
     if verbose:
         print(
             f"🔨 Building Rust C++ linter ({RUST_BINARY_NAME}) — this runs once "
@@ -259,34 +307,23 @@ def _run_build(verbose: bool = True) -> None:
             file=sys.stderr,
             flush=True,
         )
-        print(
-            f"    cwd: {PROJECT_ROOT}",
-            file=sys.stderr,
-            flush=True,
-        )
-        print(
-            f"    cmd: {' '.join(cmd)}",
-            file=sys.stderr,
-            flush=True,
-        )
 
-    # Popen + explicit stream. stderr merged into stdout so line ordering
-    # matches what a user would see running the command interactively.
-    proc = subprocess.Popen(
-        cmd,
-        cwd=str(PROJECT_ROOT),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        bufsize=1,  # line-buffered
-    )
-    assert proc.stdout is not None
-    prefix = "    [cargo] "
-    for line in proc.stdout:
-        # Preserve the raw line (cargo emits progress bars via \r; strip
-        # trailing whitespace only, don't collapse internal spacing).
-        print(f"{prefix}{line.rstrip()}", file=sys.stderr, flush=True)
-    returncode = proc.wait()
+    soldr = _resolve_soldr()
+    soldr_cmd = [soldr, "--no-cache", "cargo", *cargo_args]
+    returncode, line_count = _stream_build_cmd(soldr_cmd, "cargo", verbose)
+
+    if returncode == 0 and line_count == 0 and not _binary_path().exists():
+        # soldr shim exited 0 without invoking cargo. Fall back to bare
+        # cargo so lint keeps working while soldr's Windows-shim regression
+        # is being worked upstream.
+        print(
+            "    ⚠  soldr shim exited 0 with no cargo output and no binary "
+            "produced — falling back to bare `cargo build`.",
+            file=sys.stderr,
+            flush=True,
+        )
+        cargo_cmd = ["cargo", *cargo_args]
+        returncode, _ = _stream_build_cmd(cargo_cmd, "cargo", verbose)
 
     if returncode != 0:
         raise RuntimeError(
