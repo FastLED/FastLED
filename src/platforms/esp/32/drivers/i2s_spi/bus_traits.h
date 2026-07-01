@@ -3,10 +3,25 @@
 // IWYU pragma: private
 
 /// @file bus_traits.h
-/// @brief BusTraits<Bus::FLEX_IO, 0> for ESP32-dev native I2S parallel SPI.
+/// @brief BusTraits<Bus::FLEX_IO, 0> for classic-ESP32 I2S1 unified engine.
 ///
-/// Drives true SPI chipsets (APA102, SK9822, HD108) via the original ESP32's
-/// I2S parallel mode. ESP32-S3 uses the same portable `Bus::FLEX_IO` slot.
+/// **FastLED#3526 Phase 2d — slot swap.** Previously this specialization
+/// returned `createI2sSpiEngine()` (the standalone I2S-SPI driver).
+/// Now returns `createI2sEsp32DevEngine()` — the modern unified engine
+/// that handles BOTH clockless and SPI batches on the same I2S1
+/// peripheral, per the parallel-IO unified-engine rule in
+/// `agents/docs/cpp-standards.md`.
+///
+/// SPI users are unaffected in behavior — the modern engine delegates
+/// SPI batches to the tested `ChannelDriverI2sSpi` internally
+/// (`channel_engine_i2s_esp32dev.cpp.hpp`, `has_spi` branch). Only the
+/// dispatch entry point changes.
+///
+/// This file is scheduled for deletion at Phase 2e along with the rest
+/// of `drivers/i2s_spi/` — the modern-engine specialization moves to
+/// `drivers/i2s/bus_traits.h` at that point. Keeping it here in the
+/// meantime avoids churning the `_build.cpp.hpp` and channel-manager
+/// wiring on the same PR that flips the binding.
 
 #include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"
@@ -25,17 +40,17 @@
 #include "fl/channels/manager.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/type_traits.h"
-#include "platforms/esp/32/drivers/i2s_spi/channel_driver_i2s_spi.h"
+#include "platforms/esp/32/drivers/i2s/channel_engine_i2s_esp32dev.h"
 
 namespace fl {
 
-// createI2sSpiEngine() is declared in channel_driver_i2s_spi.h (included above).
+// createI2sEsp32DevEngine() is declared in channel_engine_i2s_esp32dev.h.
 
 template<> struct BusTraits<Bus::FLEX_IO, 0> {
     using Driver = IChannelDriver;
 
     static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
-        static fl::shared_ptr<Driver> gHolder = createI2sSpiEngine();
+        static fl::shared_ptr<Driver> gHolder = createI2sEsp32DevEngine();
         return gHolder;
     }
 
@@ -46,6 +61,9 @@ template<> struct BusTraits<Bus::FLEX_IO, 0> {
     }
 };
 
+// The unified engine handles both clockless AND SPI on the same slot —
+// per the parallel-IO code-review rule (agents/docs/cpp-standards.md
+// -> "Parallel-IO Driver: Unified Clockless + SPI Engine").
 template<> struct BusSupports<Bus::FLEX_IO, SpiChipsetConfig, 0> : fl::true_type {};
 
 }  // namespace fl
