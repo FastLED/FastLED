@@ -17,23 +17,19 @@
 #include "platforms/esp/32/drivers/i2s/i2s_esp32dev.cpp.hpp"
 #include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_esp.cpp.hpp"
 #include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_mock.cpp.hpp"
+// FastLED#3512 Phase 5: `i2s_peripheral_esp32dev_esp.cpp.hpp` is
+// re-included here. Prior comments claimed the file's `driver/gpio.h`
+// include triggered an `ADC: CONFLICT!` boot loop when linked
+// alongside the restored classic Yves driver — that turned out to be
+// specifically about `driver/i2s.h` from the earlier Stage 2 (#3476)
+// impl, not `driver/gpio.h`. The current Stage 4 impl doesn't include
+// `driver/i2s.h` at all (only very-low-level headers per the file's
+// own doc comment), so the conflict rationale no longer applies. The
+// stub `transmit()` currently does no DMA (see FastLED#3512 Phase 2
+// for that work), so re-including adds a small TU that gc-sections
+// elides completely when nothing calls into `I2sPeripheralEsp32DevEsp`.
+#include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_esp.cpp.hpp"
 #include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_mock.cpp.hpp"
-// Stage 5 (#3474): the proven register+DMA+ISR machinery from the
-// classic-ESP32 I2S driver is restored above under
-// `i2s_esp32dev.{h,cpp.hpp}` + `clockless_i2s_esp32.{h,cpp.hpp}` —
-// these are the ~700 LoC that generate real WS2812 parallel-out
-// waveforms on I2S1. Users on classic ESP32 can hit that path via
-// the legacy `addLeds<WS2812, PIN, GRB>()` template. The modern
-// `ChannelEngineI2sEsp32Dev` + mock (still shipped above) exposes
-// the same peripheral behind a mock-testable IChannelDriver
-// interface for future code that wants the modern channel-manager
-// path. `i2s_peripheral_esp32dev_esp.cpp.hpp` (Stage 4 real-hw impl)
-// is intentionally NOT included here — its `driver/gpio.h` include
-// collides with the restored code at link time as an
-// `ADC: CONFLICT!` boot loop. A future PR that reworks the modern
-// peripheral to share I2S1/periph_module state (rather than
-// duplicating it) can drop the modern impl into the unity build
-// cleanly.
 
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s.cpp.hpp"
 

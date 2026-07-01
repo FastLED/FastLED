@@ -1,6 +1,13 @@
 // IWYU pragma: private
 
-// UNITY_BUILD_EXCLUDE(Stage-4 real-hardware impl — intentionally NOT included in the i2s unity build because its `driver/gpio.h` include collides at link time with the restored classic `i2s_esp32dev.cpp.hpp` machinery as an `ADC: CONFLICT!` boot loop. See `_build.cpp.hpp` header comment for the design rationale; kept in-tree for a future PR that reworks the modern peripheral to share I2S1/periph_module state with the classic impl.)
+// FastLED#3512 Phase 5: this file is now part of the i2s unity build.
+// The earlier UNITY_BUILD_EXCLUDE marker cited a `driver/gpio.h` collision
+// against the restored classic Yves driver; on re-investigation the
+// actual `ADC: CONFLICT!` issue was `driver/i2s.h` in the Stage 2
+// (#3476) impl. This Stage 4 file drops `driver/i2s.h` entirely (see
+// the docblock below) so the conflict no longer applies. The stub
+// `transmit()` currently does no DMA — Phase 2 replaces it with real
+// register + DMA + ISR machinery reused from the classic driver.
 
 /// @file i2s_peripheral_esp32dev_esp.cpp.hpp
 /// @brief Real-hardware `II2sPeripheralEsp32Dev` impl — Stage 4 rewrite
