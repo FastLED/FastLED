@@ -7,6 +7,17 @@
 #include "platforms/arm/lpc/is_lpc.h"
 #include "fastled_delay.h"
 
+// FASTLED_LPC_PWM_DMA_CHUNK_BITS was moved into the channels-API runtime
+// helper (`drivers/sct_dma/lpc_sct_dma_runtime.h`) as part of PR #3460's
+// engine refactor. The legacy template path (this file) is scheduled for
+// retirement in the #3517 meta issue (Phase A.3), but until then it still
+// needs the macro to compile. Fall back to the runtime helper's default
+// (64) if neither the runtime header has been included nor a user-supplied
+// override is on the command line.
+#ifndef FASTLED_LPC_PWM_DMA_CHUNK_BITS
+#define FASTLED_LPC_PWM_DMA_CHUNK_BITS 64u
+#endif
+
 // =============================================================================
 // LPC845 PWM+DMA-to-GPIO clockless driver (Stage 2c of #2836, issue #2842)
 // =============================================================================
