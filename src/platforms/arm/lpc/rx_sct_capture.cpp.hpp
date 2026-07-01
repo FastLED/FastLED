@@ -37,6 +37,7 @@
 
 #include "fl/channels/rx/decode_ws2812.h"
 #include "fl/log/log.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
 
@@ -112,11 +113,11 @@ constexpr fl::u32 kDmaBase      = 0x50008000u;
 // time without needing `reinterpret_cast` (which isn't a constant
 // expression). Any future vendor-header bump that moves a base
 // address surfaces here as a build error, not a silent misbehavior.
-static_assert(kSysconBase   == SYSCON_BASE,   "kSysconBase mismatch vs vendor SYSCON_BASE");
-static_assert(kSwmBase      == SWM0_BASE,     "kSwmBase mismatch vs vendor SWM0_BASE");
-static_assert(kInputMuxBase == INPUTMUX_BASE, "kInputMuxBase mismatch vs vendor INPUTMUX_BASE");
-static_assert(kSctBase      == SCT0_BASE,     "kSctBase mismatch vs vendor SCT0_BASE");
-static_assert(kDmaBase      == DMA0_BASE,     "kDmaBase mismatch vs vendor DMA0_BASE");
+FL_STATIC_ASSERT(kSysconBase   == SYSCON_BASE,   "kSysconBase mismatch vs vendor SYSCON_BASE");
+FL_STATIC_ASSERT(kSwmBase      == SWM0_BASE,     "kSwmBase mismatch vs vendor SWM0_BASE");
+FL_STATIC_ASSERT(kInputMuxBase == INPUTMUX_BASE, "kInputMuxBase mismatch vs vendor INPUTMUX_BASE");
+FL_STATIC_ASSERT(kSctBase      == SCT0_BASE,     "kSctBase mismatch vs vendor SCT0_BASE");
+FL_STATIC_ASSERT(kDmaBase      == DMA0_BASE,     "kDmaBase mismatch vs vendor DMA0_BASE");
 #endif
 
 constexpr fl::u32 kOffSYSAHBCLKCTRL0 = 0x080u;
