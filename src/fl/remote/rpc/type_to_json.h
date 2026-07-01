@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/json.h"
+#include "fl/stl/noexcept.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "fl/remote/rpc/base64.h"
@@ -34,7 +35,7 @@ struct TypeToJson<fl::string> {
 // AutoResearch RPCs from #3517).
 template <>
 struct TypeToJson<fl::u32> {
-    static json convert(const fl::u32& value) {
+    static json convert(const fl::u32& value) FL_NO_EXCEPT {
         return json(static_cast<fl::i64>(value));
     }
 };
@@ -43,7 +44,7 @@ struct TypeToJson<fl::u32> {
 // GCC 15 despite implicit promotion — safer to be explicit.
 template <>
 struct TypeToJson<fl::u16> {
-    static json convert(const fl::u16& value) {
+    static json convert(const fl::u16& value) FL_NO_EXCEPT {
         return json(static_cast<fl::i64>(value));
     }
 };
