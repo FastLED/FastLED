@@ -1025,7 +1025,10 @@ class TestAutoDetectUploadPort:
 
         assert result.ok is True
         assert result.selected_port == "COM9"
-        detect_chip.assert_called_once_with("COM9", timeout=3.0)
+        # FastLED #3446: the 3.0s explicit timeout override was removed so
+        # the call picks up `detect_attached_chip`'s richer default. Test
+        # now just asserts the call happened with the port name.
+        detect_chip.assert_called_once_with("COM9")
 
     def test_expected_environment_positive_mismatch_fails(self) -> None:
         port = ListPortInfo("COM9")
@@ -1054,6 +1057,67 @@ class TestAutoDetectUploadPort:
         assert "No USB serial port matched expected environment" in (
             result.error_message or ""
         )
+
+    def test_lpc845brk_lpcxpresso_vcom_fingerprint_matches(self) -> None:
+        """LPC845-BRK with LPCXpresso VCOM firmware (16C0:0483) is accepted."""
+        port = ListPortInfo("COM12")
+        port.description = "USB Serial Device"
+        port.hwid = "USB VID:PID=16C0:0483"
+        port.vid = 0x16C0
+        port.pid = 0x0483
+
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[port],
+        ):
+            result = auto_detect_upload_port("lpc845brk")
+
+        assert result.ok is True
+        assert result.selected_port == "COM12"
+
+    def test_lpc845brk_lpc_link2_cmsis_dap_fingerprint_matches(self) -> None:
+        """LPC845-BRK with LPC-Link2 CMSIS-DAP firmware (1FC9:0132) is accepted.
+
+        FastLED #3468 follow-up: newer LPC845-BRK boards ship with NXP's own
+        LPC-Link2 CMSIS-DAP firmware pre-flashed on the debug probe. The
+        probe still exposes the LPC845's USART0 as a VCOM alongside the
+        CMSIS-DAP HID interface — VID:PID 1FC9:0132 belongs to NXP rather
+        than the community "V-USB" pool. Both firmwares are valid for
+        AutoResearch.
+        """
+        port = ListPortInfo("COM10")
+        port.description = "USB Serial Device"
+        port.hwid = "USB VID:PID=1FC9:0132"
+        port.vid = 0x1FC9
+        port.pid = 0x0132
+
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[port],
+        ):
+            result = auto_detect_upload_port("lpc845brk")
+
+        assert result.ok is True
+        assert result.selected_port == "COM10"
+
+    def test_lpc845brk_neither_fingerprint_matches_reports_both(self) -> None:
+        """Error message lists BOTH accepted VID:PIDs when neither is found."""
+        port = ListPortInfo("COM7")
+        port.description = "USB Serial Device"
+        port.hwid = "USB VID:PID=303A:1001"
+        port.vid = 0x303A
+        port.pid = 0x1001
+
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[port],
+        ):
+            result = auto_detect_upload_port("lpc845brk")
+
+        assert result.ok is False
+        assert result.selected_port is None
+        assert "16C0:0483" in (result.error_message or "")
+        assert "1FC9:0132" in (result.error_message or "")
 
 
 # ============================================================
