@@ -24,8 +24,8 @@
 #ifdef FL_LCD_CLOCKLESS_COMPILE
 
 #include "platforms/esp/32/drivers/lcd_spi/channel_driver_lcd_clockless.h"
-#include "fl/channels/detail/wave3.hpp"
-#include "fl/channels/detail/wave8.hpp"
+#include "fl/channels/detail/wave3.h"
+#include "fl/channels/detail/wave8.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/log/log.h"
 #include "fl/task/executor.h"

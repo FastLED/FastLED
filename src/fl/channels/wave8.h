@@ -77,7 +77,7 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing);
 /// wave8_convert_byte_to_wave8byte() produces. Not for ISR use.
 Wave8ByteExpansionLut buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble);
 
-// Forward declaration for inline function (implementation in detail/wave8.hpp)
+// Forward declaration; implementation is out-of-line in detail/wave8.cpp.hpp
 void wave8(u8 lane,
            const Wave8BitExpansionLut &lut,
            u8 (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]);

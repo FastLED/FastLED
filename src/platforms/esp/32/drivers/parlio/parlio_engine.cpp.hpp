@@ -20,8 +20,8 @@
 #include "platforms/memory_barrier.h"  // For FL_MEMORY_BARRIER
 
 #include "platforms/esp/32/drivers/parlio/parlio_engine.h"
-#include "fl/channels/detail/wave3.hpp"
-#include "fl/channels/detail/wave8.hpp"
+#include "fl/channels/detail/wave3.h"
+#include "fl/channels/detail/wave8.h"
 #include "platforms/esp/32/drivers/parlio/parlio_isr_context.h"
 #include "platforms/esp/32/drivers/parlio/parlio_buffer_calc.h"
 #include "platforms/esp/32/drivers/parlio/parlio_debug.h"

@@ -4,7 +4,7 @@
 /// 16-lane), across edge + random inputs.
 
 #include "fl/channels/wave3.h"
-#include "fl/channels/detail/wave3.hpp"
+#include "fl/channels/detail/wave3.h"
 #include "fl/stl/cstring.h"
 #include "test.h"
 

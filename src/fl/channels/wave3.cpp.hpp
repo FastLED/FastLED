@@ -9,7 +9,7 @@
 /// - Untranspose functions (for testing)
 
 #include "fl/channels/wave3.h"
-#include "fl/channels/detail/wave3.hpp"
+#include "fl/channels/detail/wave3.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/isr/memcpy.h"
 

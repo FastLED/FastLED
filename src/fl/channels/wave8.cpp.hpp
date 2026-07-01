@@ -5,10 +5,11 @@
 /// - Non-ISR LUT builder (buildWave8ExpansionLUT)
 /// - Public transposition functions (wave8Transpose_2, wave8Transpose_4)
 ///
-/// Note: Inline helper functions are in detail/wave8.hpp
+/// Note: helper functions are declared in detail/wave8.h and defined
+/// out-of-line in detail/wave8.cpp.hpp (compiled once via the unity build).
 
 #include "fl/channels/wave8.h"
-#include "fl/channels/detail/wave8.hpp"
+#include "fl/channels/detail/wave8.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/isr/memcpy.h"
 
