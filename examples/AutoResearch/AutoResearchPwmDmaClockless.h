@@ -55,7 +55,7 @@
 #include "fl/stl/noexcept.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/vector.h"
-#include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h"
+#include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h" // ok platform headers — AutoResearch driver-specific test needs the concrete engine type
 
 namespace autoresearch {
 namespace pwm_dma_cl {

@@ -165,7 +165,7 @@ class RmtMemoryManager4 {
     /// @brief Release an allocation. Silent on miss — callers use
     ///        this in a "free-before-reallocate" idiom where the
     ///        first-time-configure path always misses.
-    bool free(int channel_id, bool is_tx) FL_NO_EXCEPT {
+    bool free(int channel_id, bool is_tx) FL_NO_EXCEPT { // ok bare allocation — member function, not C free()
         for (size_t i = 0; i < mAllocations.size(); ++i) {
             if (mAllocations[i].channel_id == channel_id &&
                 mAllocations[i].is_tx == is_tx) {
