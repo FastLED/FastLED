@@ -116,32 +116,10 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
         return;
     }
 
-    // Lazy peripheral init on first show(). Config values are the
-    // Stage 1 defaults — the Stage 2 encoder will pick these from
-    // the per-channel timing.
-    if (!mPeripheralInitialized) {
-        I2sEsp32DevPeripheralConfig cfg(
-            /*port=*/1,
-            /*clk=*/2400000, // 2.4 MHz — typical wave8 slot rate
-            /*width=*/static_cast<u8>(mEnqueuedChannels.size()));
-        if (!mPeripheral->initialize(cfg)) {
-            FL_WARN_F("ChannelEngineI2sEsp32Dev: peripheral initialize failed");
-            for (auto &data : mEnqueuedChannels) {
-                if (data) {
-                    data->setInUse(false);
-                }
-            }
-            mEnqueuedChannels.clear();
-            mState = DriverState::ERROR;
-            return;
-        }
-        mPeripheralInitialized = true;
-    }
-
-    // If a prior transmit is still in flight, wait synchronously for
-    // it so we don't stomp its scratch buffer. Callers who care about
-    // throughput can pump `poll()` first.
-    if (mPeripheral->isBusy()) {
+    // If a prior clockless transmit is still in flight, wait for it
+    // before we potentially reconfigure the peripheral. Callers who care
+    // about throughput can pump `poll()` first.
+    if (mPeripheralInitialized && mPeripheral->isBusy()) {
         (void)mPeripheral->waitTransmitDone(/*timeout_ms=*/500);
     }
 
@@ -229,7 +207,27 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
         return;
 #endif
     }
-    // Clockless batch — take the existing wave8-encoding path below.
+    // Clockless batch — lazy-initialize the peripheral now (postponed
+    // from the show() prologue so a SPI-only batch doesn't waste
+    // an I2S1 claim that the SPI delegate would immediately race with).
+    if (!mPeripheralInitialized) {
+        I2sEsp32DevPeripheralConfig cfg(
+            /*port=*/1,
+            /*clk=*/2400000, // 2.4 MHz — typical wave8 slot rate
+            /*width=*/static_cast<u8>(mInFlightChannels.size()));
+        if (!mPeripheral->initialize(cfg)) {
+            FL_WARN_F("ChannelEngineI2sEsp32Dev: peripheral initialize failed");
+            for (auto &data : mInFlightChannels) {
+                if (data) {
+                    data->setInUse(false);
+                }
+            }
+            mInFlightChannels.clear();
+            mState = DriverState::ERROR;
+            return;
+        }
+        mPeripheralInitialized = true;
+    }
 
     // Pack every channel's encoded bytes into the scratch buffer.
     size_t required = 0;
