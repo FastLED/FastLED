@@ -47,8 +47,17 @@ FL_EXTERN_C_BEGIN
 // IDF 6.x+ — periph_module_* was removed. Route through the LL API that
 // replaces it. `hal/i2s_ll.h` is a private HAL header but the public
 // surface for direct-register users on IDF 6 is precisely this file.
+//
+// Both `i2s_ll_enable_bus_clock` and `i2s_ll_reset_register` are wrapped
+// in `PERIPH_RCC_ATOMIC() { ... }` critical sections per the IDF 6
+// convention. The macro-form of both functions in `hal/i2s_ll.h`
+// requires `__DECLARE_RCC_ATOMIC_ENV` to be declared in scope, which
+// `PERIPH_RCC_ATOMIC()` from `esp_private/periph_ctrl.h` provides.
+// (Verified against espressif/esp-idf@master/components/esp_driver_i2s/
+// i2s_platform.c which uses the same pattern.)
 // IWYU pragma: begin_keep
 #include "hal/i2s_ll.h"
+#include "esp_private/periph_ctrl.h"  // PERIPH_RCC_ATOMIC() critical section
 #include "soc/soc_caps.h"
 // IWYU pragma: end_keep
 #endif
@@ -85,9 +94,15 @@ inline bool fl_i2s_periph_enable(int port) FL_NO_EXCEPT {
 #else
     // IDF 6.x — LL API replaces the removed periph_module surface.
     // Enable the bus clock and reset the peripheral register block.
-    // Bench validation on real IDF 6 silicon is FastLED#3509 Phase 7.
-    i2s_ll_enable_bus_clock(port, true);
-    i2s_ll_reset_register(port);
+    // Both calls must live inside `PERIPH_RCC_ATOMIC()` because the
+    // macro-form of the functions in `hal/i2s_ll.h` requires the
+    // `__DECLARE_RCC_ATOMIC_ENV` variable that macro provides.
+    // Same pattern as IDF 6's own components/esp_driver_i2s/
+    // i2s_platform.c.
+    PERIPH_RCC_ATOMIC() {
+        i2s_ll_enable_bus_clock(port, true);
+        i2s_ll_reset_register(port);
+    }
     return true;
 #endif
 }
@@ -110,7 +125,9 @@ inline bool fl_i2s_periph_disable(int port) FL_NO_EXCEPT {
     }
     return true;
 #else
-    i2s_ll_enable_bus_clock(port, false);
+    PERIPH_RCC_ATOMIC() {
+        i2s_ll_enable_bus_clock(port, false);
+    }
     return true;
 #endif
 }
