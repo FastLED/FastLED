@@ -13,8 +13,14 @@
 #include "fl/stl/noexcept.h"
 #include "platforms/arm/is_arm.h"
 
-extern "C" {
+// __dso_handle must have C++ linkage: the compiler implicitly declares it that
+// way when it emits __cxa_atexit() for C++ static locals with destructors
+// (e.g. bus_traits.h's gHolder). Declaring it extern "C" here conflicts with
+// that implicit declaration. The emitted symbol is `__dso_handle` either way
+// (global-scope objects aren't name-mangled), so this is linker-safe.
 FL_LINK_WEAK void* __dso_handle;
+
+extern "C" {
 FL_LINK_WEAK char end;
 FL_LINK_WEAK char _end;
 }

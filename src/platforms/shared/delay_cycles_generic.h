@@ -74,8 +74,8 @@ template<> FASTLED_FORCE_INLINE void delaycycles<2>() FL_NO_EXCEPT { FL_NOP2; }
 /// cases (3-50) also have out-of-line specializations in fl/system/delay.cpp.hpp.
 template<fl::cycle_t CYCLES>
 FASTLED_FORCE_INLINE void delaycycles() FL_NO_EXCEPT {
-  constexpr fl::cycle_t HALF = CYCLES / 2;
-  constexpr fl::cycle_t REMAINDER = CYCLES - HALF;
+  constexpr fl::cycle_t HALF = (CYCLES > 0) ? (CYCLES / 2) : (0);
+  constexpr fl::cycle_t REMAINDER = (CYCLES > 0) ? (CYCLES - HALF) : (0);
   delaycycles<HALF>();
   delaycycles<REMAINDER>();
 }

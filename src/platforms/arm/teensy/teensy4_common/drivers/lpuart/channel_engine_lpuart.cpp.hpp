@@ -1,9 +1,7 @@
 // IWYU pragma: private
 
-#ifndef CHANNEL_ENGINE_LPUART_CPP_HPP_
-#define CHANNEL_ENGINE_LPUART_CPP_HPP_
-
 #include "platforms/arm/teensy/is_teensy.h"
+#if defined(FL_IS_TEENSY_4X)
 
 #include "platforms/arm/teensy/teensy4_common/drivers/lpuart/channel_engine_lpuart.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/lpuart/bus_traits.h"
@@ -13,11 +11,11 @@
 #include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 
-#if defined(FL_IS_TEENSY_4X)
+
 // IWYU pragma: begin_keep
 #include <Arduino.h>
 // IWYU pragma: end_keep
-#endif
+
 
 namespace fl {
 
@@ -167,4 +165,4 @@ fl::shared_ptr<ChannelEngineLPUART> BusTraits<Bus::UART>::instancePtr() FL_NO_EX
 
 } // namespace fl
 
-#endif  // CHANNEL_ENGINE_LPUART_CPP_HPP_
+#endif // FL_IS_TEENSY_4X
