@@ -217,6 +217,35 @@ class II2sPeripheralEsp32Dev {
     virtual bool registerTransmitCallback(I2sEsp32DevTxDoneCallback cb,
                                           void *user_ctx) FL_NO_EXCEPT = 0;
 
+    //=========================================================================
+    // Lane -> GPIO routing (Phase 2b step C)
+    //=========================================================================
+
+    /// @brief Route one parallel-out data lane to a specific GPIO pin.
+    ///
+    /// Wires I2S1 (or I2S0)'s `DATA_OUT{lane}` signal to the SoC GPIO
+    /// matrix so the parallel encoder's `lane` bit reaches the given
+    /// `gpio_pin` on the physical pinout. Called by the engine after
+    /// `initialize()` for each active channel, before the first
+    /// `transmit()`. The peripheral is responsible for putting the
+    /// pin into output mode.
+    ///
+    /// Real hardware implementation uses `gpio_matrix_out()` +
+    /// `gpio_set_direction()`. Mock records the (lane, pin) pair for
+    /// test verification and returns true.
+    ///
+    /// @param lane      Parallel-out lane index in `[0, 15]` for
+    ///                  classic ESP32 I2S1 (16 parallel lanes).
+    /// @param gpio_pin  Target GPIO pin (0-39 on classic ESP32).
+    ///                  Negative values clear the routing.
+    /// @return true on success; false if `lane` is out of range, the
+    ///         peripheral is uninitialised, or the pin routing failed.
+    virtual bool routeLanePin(u8 lane, i32 gpio_pin) FL_NO_EXCEPT {
+        (void)lane;
+        (void)gpio_pin;
+        return false;
+    }
+
     /// @brief Register the streaming buffer-refill ISR callback.
     ///
     /// Fired from the DMA-EOF ISR every buffer drain. The whole point

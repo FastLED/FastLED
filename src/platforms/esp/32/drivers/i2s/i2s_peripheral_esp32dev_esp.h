@@ -86,6 +86,8 @@ class I2sPeripheralEsp32DevEsp : public II2sPeripheralEsp32Dev {
     bool registerTransmitCallback(I2sEsp32DevTxDoneCallback cb,
                                   void *user_ctx) FL_NO_EXCEPT override;
 
+    bool routeLanePin(u8 lane, i32 gpio_pin) FL_NO_EXCEPT override;
+
     const I2sEsp32DevPeripheralConfig &getConfig() const FL_NO_EXCEPT override;
 
     // FastLED#3526 Phase 2b step B — ISR-context completion. Called from

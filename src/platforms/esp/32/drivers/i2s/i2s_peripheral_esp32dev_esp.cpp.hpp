@@ -74,9 +74,11 @@ FL_EXTERN_C_BEGIN
 #include "esp_err.h"
 #include "esp_heap_caps.h"
 #include "esp_intr_alloc.h"
+#include "esp_rom_gpio.h"  // esp_rom_gpio_connect_out_signal (replaces gpio_matrix_out)
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "rom/lldesc.h"
+#include "soc/gpio_sig_map.h"  // I2S1O_DATA_OUT0_IDX ..
 #include "soc/i2s_reg.h"
 #include "soc/i2s_struct.h"
 #include "soc/soc.h"
@@ -449,6 +451,60 @@ bool I2sPeripheralEsp32DevEsp::registerTransmitCallback(
     I2sEsp32DevTxDoneCallback cb, void *user_ctx) FL_NO_EXCEPT {
     mCallback = cb;
     mCallbackUserCtx = user_ctx;
+    return true;
+}
+
+//=============================================================================
+// Lane -> GPIO routing (Phase 2b step C)
+//=============================================================================
+
+bool I2sPeripheralEsp32DevEsp::routeLanePin(u8 lane, i32 gpio_pin) FL_NO_EXCEPT {
+    if (!mInitialized) {
+        return false;
+    }
+    if (lane >= 16) {
+        return false;
+    }
+    const int i2s_device = static_cast<int>(mConfig.mI2sPort);
+
+    // Compute the SoC signal index for this lane. Classic ESP32 I2S1 has
+    // 24 parallel-out data signals (I2S1O_DATA_OUT0_IDX ..); the modern
+    // engine uses lanes 0..15. I2S0 has an analogous block starting at
+    // I2S0O_DATA_OUT0_IDX. The signal indices are contiguous — one add
+    // per lane covers the whole range.
+    const int base_signal = (i2s_device == 0)
+        ? static_cast<int>(I2S0O_DATA_OUT0_IDX)
+        : static_cast<int>(I2S1O_DATA_OUT0_IDX);
+
+    if (gpio_pin < 0) {
+        // Negative pin = clear routing. Nothing hardware-specific to do
+        // for clearing on classic ESP32 — the caller re-routes to the
+        // desired pin at next transmit.
+        return true;
+    }
+
+    // Put the pin into output mode. `gpio_set_direction` accepts a
+    // `gpio_num_t` enum; the raw int cast is safe for the classic
+    // ESP32's 0..39 pin range.
+    esp_err_t err = gpio_set_direction(static_cast<gpio_num_t>(gpio_pin),
+                                        GPIO_MODE_OUTPUT);
+    if (err != ESP_OK) {
+        FL_WARN_F("I2sPeripheralEsp32DevEsp: gpio_set_direction failed pin=%s err=%s",
+                  static_cast<int>(gpio_pin), static_cast<int>(err));
+        return false;
+    }
+
+    // Route the DATA_OUT{lane} signal through the GPIO matrix to the
+    // target pin. `esp_rom_gpio_connect_out_signal` is the IDF v5-safe
+    // API (replaces the legacy `gpio_matrix_out`).
+    //
+    // Args: gpio_num, signal_idx, out_inv, oen_inv. We honor the
+    // per-strip invert mask from the peripheral config so chipsets
+    // that want polarity inversion get it "for free" via the matrix.
+    const bool invert = (mConfig.mInvertMask & (1u << lane)) != 0;
+    esp_rom_gpio_connect_out_signal(static_cast<u32>(gpio_pin),
+                                     static_cast<u32>(base_signal + lane),
+                                     invert, false);
     return true;
 }
 

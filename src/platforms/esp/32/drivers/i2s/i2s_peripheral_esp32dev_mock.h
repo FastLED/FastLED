@@ -84,8 +84,19 @@ class I2sPeripheralEsp32DevMock : public II2sPeripheralEsp32Dev {
     bool registerBufferRefillCallback(I2sEsp32DevBufferRefillCallback cb,
                                       void *user_ctx) FL_NO_EXCEPT override = 0;
 
+    bool routeLanePin(u8 lane, i32 gpio_pin) FL_NO_EXCEPT override = 0;
+
     const I2sEsp32DevPeripheralConfig &
     getConfig() const FL_NO_EXCEPT override = 0;
+
+    /// @brief Number of `routeLanePin` calls since the most recent
+    ///        `reset()`. Test-only introspection.
+    virtual u32 laneRouteInvocationCount() const FL_NO_EXCEPT = 0;
+
+    /// @brief GPIO pin most recently routed for `lane`. Returns -1 if
+    ///        no routing has been recorded for that lane since the
+    ///        most recent `reset()`. Test-only introspection.
+    virtual i32 lastRoutedPinForLane(u8 lane) const FL_NO_EXCEPT = 0;
 
     //=========================================================================
     // Mock-only simulation API (no threads)

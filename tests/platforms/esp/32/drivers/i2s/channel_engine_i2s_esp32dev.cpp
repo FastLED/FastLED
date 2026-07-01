@@ -80,6 +80,10 @@ fl::shared_ptr<II2sPeripheralEsp32Dev> createMockPeripheral() {
             return I2sPeripheralEsp32DevMock::instance()
                 .registerTransmitCallback(cb, user_ctx);
         }
+        bool routeLanePin(u8 lane, i32 gpio_pin) FL_NO_EXCEPT override {
+            return I2sPeripheralEsp32DevMock::instance().routeLanePin(lane,
+                                                                     gpio_pin);
+        }
         const I2sEsp32DevPeripheralConfig &
         getConfig() const FL_NO_EXCEPT override {
             return I2sPeripheralEsp32DevMock::instance().getConfig();
@@ -610,6 +614,47 @@ FL_TEST_CASE("I2sPeripheralEsp32DevMock - refill + tx-done coexist") {
     mock.simulateTransmitDone();
     FL_CHECK(tx_done_calls == 1u);
     FL_CHECK(mock.bufferRefillInvocationCount() == 2u);
+}
+
+// FastLED#3526 Phase 2b step C — lane -> GPIO pin routing.
+FL_TEST_CASE("Modern I2S peripheral: routeLanePin records mock mapping") {
+    auto& mock = I2sPeripheralEsp32DevMock::instance();
+    mock.reset();
+
+    // Uninitialised peripheral rejects the route.
+    FL_CHECK_FALSE(mock.routeLanePin(0, 4));
+
+    I2sEsp32DevPeripheralConfig cfg(/*port=*/1, /*clk=*/2400000, /*width=*/4);
+    FL_REQUIRE(mock.initialize(cfg));
+
+    // Route a handful of lanes to arbitrary pins.
+    FL_REQUIRE(mock.routeLanePin(0, 4));
+    FL_REQUIRE(mock.routeLanePin(1, 5));
+    FL_REQUIRE(mock.routeLanePin(2, 18));
+    FL_REQUIRE(mock.routeLanePin(3, 19));
+
+    FL_CHECK_EQ(mock.laneRouteInvocationCount(), 4u);
+    FL_CHECK_EQ(mock.lastRoutedPinForLane(0), 4);
+    FL_CHECK_EQ(mock.lastRoutedPinForLane(1), 5);
+    FL_CHECK_EQ(mock.lastRoutedPinForLane(2), 18);
+    FL_CHECK_EQ(mock.lastRoutedPinForLane(3), 19);
+    // Unrouted lane returns -1.
+    FL_CHECK_EQ(mock.lastRoutedPinForLane(4), -1);
+
+    // Rejected: out-of-range lane.
+    FL_CHECK_FALSE(mock.routeLanePin(16, 4));
+    FL_CHECK_FALSE(mock.routeLanePin(17, 4));
+
+    // Re-routing the same lane replaces the previous pin.
+    FL_REQUIRE(mock.routeLanePin(0, 21));
+    FL_CHECK_EQ(mock.lastRoutedPinForLane(0), 21);
+    FL_CHECK_EQ(mock.laneRouteInvocationCount(), 5u);
+
+    // Reset clears everything.
+    mock.reset();
+    FL_CHECK_EQ(mock.laneRouteInvocationCount(), 0u);
+    FL_CHECK_EQ(mock.lastRoutedPinForLane(0), -1);
+    FL_CHECK_EQ(mock.lastRoutedPinForLane(3), -1);
 }
 
 #endif // FASTLED_STUB_IMPL
