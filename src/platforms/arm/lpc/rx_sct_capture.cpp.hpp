@@ -94,11 +94,30 @@ namespace fl {
 
 namespace {
 
+// Base addresses. Cross-checked against the vendor CMSIS PAL (NXP
+// mcux-sdk `devices/LPC845/LPC845.h`): `SCT0_BASE = 0x50004000u`,
+// `DMA0_BASE = 0x50008000u`, `SYSCON_BASE = 0x40048000u`,
+// `SWM0_BASE = 0x4000C000u`, `INPUTMUX_BASE = 0x4002C000u`. The
+// `static_assert`s below enforce that identity at compile time so any
+// future vendor-header bump that moves a base address surfaces here
+// as a build error, not a silent misbehavior.
 constexpr fl::u32 kSysconBase   = 0x40048000u;
 constexpr fl::u32 kSwmBase      = 0x4000C000u;
 constexpr fl::u32 kInputMuxBase = 0x4002C000u;
 constexpr fl::u32 kSctBase      = 0x50004000u;
 constexpr fl::u32 kDmaBase      = 0x50008000u;
+#if defined(FL_IS_ARM_LPC_845)
+// Vendor-defined `<PERIPH>_BASE` macros (from `<LPC845.h>`) are
+// preprocessor constants, so we can `static_assert` identity at compile
+// time without needing `reinterpret_cast` (which isn't a constant
+// expression). Any future vendor-header bump that moves a base
+// address surfaces here as a build error, not a silent misbehavior.
+static_assert(kSysconBase   == SYSCON_BASE,   "kSysconBase mismatch vs vendor SYSCON_BASE");
+static_assert(kSwmBase      == SWM0_BASE,     "kSwmBase mismatch vs vendor SWM0_BASE");
+static_assert(kInputMuxBase == INPUTMUX_BASE, "kInputMuxBase mismatch vs vendor INPUTMUX_BASE");
+static_assert(kSctBase      == SCT0_BASE,     "kSctBase mismatch vs vendor SCT0_BASE");
+static_assert(kDmaBase      == DMA0_BASE,     "kDmaBase mismatch vs vendor DMA0_BASE");
+#endif
 
 constexpr fl::u32 kOffSYSAHBCLKCTRL0 = 0x080u;
 constexpr fl::u32 kOffPRESETCTRL0    = 0x088u;
