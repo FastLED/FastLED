@@ -462,7 +462,14 @@ bool I2sPeripheralEsp32DevEsp::routeLanePin(u8 lane, i32 gpio_pin) FL_NO_EXCEPT 
     if (!mInitialized) {
         return false;
     }
-    if (lane >= 16) {
+    // Classic ESP32 I2S{0,1} each expose 24 parallel data output signals
+    // (`I2S{n}O_DATA_OUT0_IDX` .. `I2S{n}O_DATA_OUT23_IDX` — verified in
+    // `soc/gpio_sig_map.h`). Reject lanes past 24. The wave8 encoder is
+    // currently 16-lane wide; lanes 16..23 will only carry data once a
+    // `wave8Transpose_24` (or a padded-32) kernel lands, but the
+    // peripheral surface accepts the full hardware range so the encoder
+    // upgrade is a drop-in on the encoder side alone.
+    if (lane >= 24) {
         return false;
     }
     const int i2s_device = static_cast<int>(mConfig.mI2sPort);

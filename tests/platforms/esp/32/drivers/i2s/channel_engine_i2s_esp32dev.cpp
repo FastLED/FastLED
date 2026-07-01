@@ -638,17 +638,31 @@ FL_TEST_CASE("Modern I2S peripheral: routeLanePin records mock mapping") {
     FL_CHECK_EQ(mock.lastRoutedPinForLane(1), 5);
     FL_CHECK_EQ(mock.lastRoutedPinForLane(2), 18);
     FL_CHECK_EQ(mock.lastRoutedPinForLane(3), 19);
-    // Unrouted lane returns -1.
+    // Unrouted lanes return -1 across the full 24-lane range.
     FL_CHECK_EQ(mock.lastRoutedPinForLane(4), -1);
+    FL_CHECK_EQ(mock.lastRoutedPinForLane(15), -1);
+    FL_CHECK_EQ(mock.lastRoutedPinForLane(23), -1);
 
-    // Rejected: out-of-range lane.
-    FL_CHECK_FALSE(mock.routeLanePin(16, 4));
-    FL_CHECK_FALSE(mock.routeLanePin(17, 4));
+    // Lanes 16..23 are valid on classic ESP32 I2S (I2S{n}O_DATA_OUT16
+    // through DATA_OUT23 exist on the hardware — see soc/gpio_sig_map.h).
+    // The current wave8 encoder is 16-wide so lanes 16..23 carry no
+    // useful data yet, but the routing surface accepts the full range.
+    FL_REQUIRE(mock.routeLanePin(16, 22));
+    FL_REQUIRE(mock.routeLanePin(23, 27));
+    FL_CHECK_EQ(mock.lastRoutedPinForLane(16), 22);
+    FL_CHECK_EQ(mock.lastRoutedPinForLane(23), 27);
+
+    // Rejected: out-of-range lane (24 or higher).
+    FL_CHECK_FALSE(mock.routeLanePin(24, 4));
+    FL_CHECK_FALSE(mock.routeLanePin(25, 4));
+
+    // 6 successful routes so far (4 initial + 2 upper-range).
+    FL_CHECK_EQ(mock.laneRouteInvocationCount(), 6u);
 
     // Re-routing the same lane replaces the previous pin.
     FL_REQUIRE(mock.routeLanePin(0, 21));
     FL_CHECK_EQ(mock.lastRoutedPinForLane(0), 21);
-    FL_CHECK_EQ(mock.laneRouteInvocationCount(), 5u);
+    FL_CHECK_EQ(mock.laneRouteInvocationCount(), 7u);
 
     // Reset clears everything.
     mock.reset();

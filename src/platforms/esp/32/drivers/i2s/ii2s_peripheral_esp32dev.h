@@ -234,8 +234,15 @@ class II2sPeripheralEsp32Dev {
     /// `gpio_set_direction()`. Mock records the (lane, pin) pair for
     /// test verification and returns true.
     ///
-    /// @param lane      Parallel-out lane index in `[0, 15]` for
-    ///                  classic ESP32 I2S1 (16 parallel lanes).
+    /// @param lane      Parallel-out lane index in `[0, 23]`. Classic
+    ///                  ESP32 I2S{0,1} each expose 24 parallel data
+    ///                  output signals (`I2S{n}O_DATA_OUT0_IDX` ..
+    ///                  `I2S{n}O_DATA_OUT23_IDX`). The current wave8
+    ///                  encoder is 16-lane wide; lanes 16..23 are
+    ///                  reserved for a future `wave8Transpose_24` (or
+    ///                  padded-32) encoder — the peripheral surface
+    ///                  accepts the full hardware range now so the
+    ///                  encoder upgrade doesn't have to churn this API.
     /// @param gpio_pin  Target GPIO pin (0-39 on classic ESP32).
     ///                  Negative values clear the routing.
     /// @return true on success; false if `lane` is out of range, the
