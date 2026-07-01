@@ -4,6 +4,9 @@
 /docs/doxygen-awesome-css
 components/
 
+# Cross-repo agent workspace (clud-extern-repos convention)
+.extern-repos/
+
 # Build outputs
 .build/
 .cached/
