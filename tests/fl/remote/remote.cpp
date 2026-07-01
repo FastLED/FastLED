@@ -1713,4 +1713,53 @@ FL_TEST_CASE("Remote: Async RPC - Sync vs Async behavior difference") {
         FL_REQUIRE(ackResult["acknowledged"].as_bool().value() == true);
     }
 }
+
+// =============================================================================
+// FastLED #3300 / #3325 — AutoResearch echo bind regression reproducer
+// =============================================================================
+//
+// Mirrors AutoResearchLowMemory.h:158 — `remote.bind("echo", [](int v) -> int
+// { return v; })` — and the exact JSON-RPC wire request the LPC845-BRK and
+// ESP32-C6 both see ("RESULT: Method not found: echo"). If this test fails
+// on host we have a fast reproducer for the binding regression; if it
+// passes, the bug is in the device-side serial source / parse / wiring,
+// not in bind/dispatch.
+
+FL_TEST_CASE("Remote: AutoResearch echo via parsed wire JSON (issue #3300)") {
+    TestIO io;
+    fl::Remote remote(
+        [&io]() { return io.pullRequest(); },
+        [&io](const fl::json& r) { io.pushResponse(r); }
+    );
+
+    // Exact AutoResearch binding (AutoResearchLowMemory.h:158).
+    remote.bind("echo", [](int v) -> int { return v; });
+
+    // Exact wire bytes the device receives.
+    const char* wireRequest =
+        "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"echo\",\"params\":[4242]}";
+
+    fl::optional<fl::json> parsed = fl::json::parse(wireRequest);
+    FL_REQUIRE(parsed.has_value());
+    FL_REQUIRE(parsed->contains("method"));
+    FL_REQUIRE(parsed->operator[]("method").as_string().value() == "echo");
+
+    io.requests.push_back(*parsed);
+
+    // Drive the full pipeline (pull -> mRequestHandler -> processRpc ->
+    // mRpc.handle -> response sink -> push).
+    remote.update(0);
+
+    FL_REQUIRE(io.responses.size() == 1);
+    const fl::json& resp = io.responses[0];
+
+    // The bug surfaces here: on master the device emits
+    //   {"id":1,"error":{"code":-32601,"message":"Method not found: echo"}}
+    // even though we just bound "echo" three lines above. If this assertion
+    // fires on host we've reproduced the regression with a 50 ms cycle.
+    FL_REQUIRE(!resp.contains("error"));
+    FL_REQUIRE(resp.contains("result"));
+    FL_REQUIRE(resp["result"].as_int().value() == 4242);
+}
+
 } // FL_TEST_FILE
