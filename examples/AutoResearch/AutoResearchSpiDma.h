@@ -85,7 +85,7 @@ namespace dma_spi {
 #define FASTLED_LPC_SPI_DMA_HARNESS_DIVIDER 6
 #endif
 
-using HarnessDriver = ARMHardwareSPIOutputDMA<
+using HarnessDriver = fl::ARMHardwareSPIOutputDMA<
     static_cast<fl::u8>(FASTLED_LPC_SPI_DMA_HARNESS_DATA_PIN),
     static_cast<fl::u8>(FASTLED_LPC_SPI_DMA_HARNESS_CLOCK_PIN),
     static_cast<fl::u32>(FASTLED_LPC_SPI_DMA_HARNESS_DIVIDER)>;
