@@ -1134,7 +1134,15 @@ RPI_PICO2 = Board(
 # platform, so use the FastLED fork (transferred from zackees/ in 2026-06-28) that
 # layers framework-arduino-lpc8xx on top of
 # platformio/platform-nxplpc.
-_NXPLPC_PLATFORM = "https://github.com/FastLED/platform-nxp-lpc8xx.git#12265f765aebd3893465d6d7ad76be66d89ba015"
+#
+# The `nxplpc@` prefix is a compatibility workaround for fbuild 2.3.15
+# whose platform matcher only substring-matches `nxplpc` (no separator)
+# and rejects the hyphenated `nxp-lpc` in the raw GitHub URL. The
+# matcher fix landed as FastLED/fbuild#900 but was cut AFTER 2.3.15 was
+# released (fbuild 2.3.15 released 20:09 UTC, matcher merge 21:47 UTC).
+# Once fbuild 2.3.16 ships with #900 the `nxplpc@` prefix becomes
+# redundant but stays valid PlatformIO syntax (name @ source URI).
+_NXPLPC_PLATFORM = "nxplpc@https://github.com/FastLED/platform-nxp-lpc8xx.git#12265f765aebd3893465d6d7ad76be66d89ba015"
 
 LPC845BRK = Board(
     board_name="lpc845brk",

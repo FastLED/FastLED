@@ -120,6 +120,19 @@ typedef fl::u8           boolean;
 #pragma pop_macro("OUTPUT")
 #pragma pop_macro("INPUT")
 
+// Signal to shared ARM headers that this build has the CMSIS PAL
+// (`__get_PRIMASK`, `__enable_irq`, `__disable_irq`, `SysTick`,
+// etc.) on the include path via the vendor `<LPC845.h>` / `<LPC804.h>`
+// includes above (which pull in `core_cm0plus.h`). Without this,
+// `src/platforms/arm/common/m0clockless_c.h` re-defines the CMSIS
+// intrinsics locally and the vendor + FastLED versions collide with a
+// `redefinition of fl::u32 __get_PRIMASK()` error at compile time —
+// exactly what `m0clockless_c.h:51` guards against with
+// `#if !defined(FASTLED_HAS_CMSIS)`.
+#ifndef FASTLED_HAS_CMSIS
+#define FASTLED_HAS_CMSIS 1
+#endif
+
 // V7 of FastLED #3437: hard-require the vendor PAL. If the toolchain
 // failed to put <LPC845.h> / <LPC804.h> on the include path, fail at
 // preprocessing time rather than silently fall back on hand-rolled
