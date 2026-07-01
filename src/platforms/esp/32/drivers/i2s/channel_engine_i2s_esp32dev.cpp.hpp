@@ -143,6 +143,50 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
     mInFlightChannels = fl::move(mEnqueuedChannels);
     mEnqueuedChannels.clear();
 
+    // FastLED#3526 Phase 2c — per-channel mode dispatch. The parallel-IO
+    // unified-engine rule (agents/docs/cpp-standards.md) says the peripheral
+    // is the dispatch boundary, not the mode. Since I2S1 can only run one
+    // mode at a time (clockless bit-shift vs SPI clocked), we check whether
+    // the in-flight batch is homogeneous. Mixed batches (some clockless,
+    // some SPI) or SPI batches are rejected until Phase 2c-SPI machinery
+    // ships — for now the SPI transmit path is a documented stub. Clockless
+    // batches take the existing wave8-encoding path.
+    bool has_clockless = false;
+    bool has_spi = false;
+    for (const auto &data : mInFlightChannels) {
+        if (!data) continue;
+        if (data->isClockless()) has_clockless = true;
+        if (data->isSpi()) has_spi = true;
+    }
+    if (has_spi && has_clockless) {
+        FL_WARN_F("ChannelEngineI2sEsp32Dev: mixed clockless+SPI batches not supported yet — FastLED#3526 Phase 2c stub");
+        for (auto &data : mInFlightChannels) {
+            if (data) {
+                data->setInUse(false);
+            }
+        }
+        mInFlightChannels.clear();
+        mState = DriverState::ERROR;
+        return;
+    }
+    if (has_spi) {
+        // Phase 2c-SPI: peripheral needs to be reconfigured for SPI mode
+        // (clock rate + FIFO width + DMA slot) and encoding switches from
+        // wave8 pulse-major to raw byte stream. The peripheral surface for
+        // SPI mode is still bench-blocked; refuse cleanly rather than
+        // silently sending garbage.
+        FL_WARN_F("ChannelEngineI2sEsp32Dev: SPI mode not yet wired — FastLED#3526 Phase 2c pending bench validation");
+        for (auto &data : mInFlightChannels) {
+            if (data) {
+                data->setInUse(false);
+            }
+        }
+        mInFlightChannels.clear();
+        mState = DriverState::ERROR;
+        return;
+    }
+    // Clockless batch — take the existing wave8-encoding path below.
+
     // Pack every channel's encoded bytes into the scratch buffer.
     size_t required = 0;
     for (const auto &data : mInFlightChannels) {
