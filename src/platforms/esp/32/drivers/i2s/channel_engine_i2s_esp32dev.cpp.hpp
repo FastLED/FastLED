@@ -378,12 +378,13 @@ bool ChannelEngineI2sEsp32Dev::ensureScratchBuffer(size_t required)
 }
 
 size_t ChannelEngineI2sEsp32Dev::packScratchBuffer() FL_NO_EXCEPT {
-    // Stage 1: linear byte concatenation. Sufficient to exercise the
-    // full peripheral + state-machine surface against the mock.
-    //
-    // Stage 2 replaces this with the parallel bit-transpose + wave8
-    // slot expansion so the emitted waveform drives real WS2812
-    // timing. The peripheral surface is unchanged across stages.
+    // Linear byte concatenation. Wave8 encoding happens inside the
+    // peripheral's `transmit()` implementation on real hardware — the
+    // engine hands over raw bytes; the peripheral is responsible for
+    // encoding them into I2S1's DMA-ready pulse-major layout. This
+    // keeps the mock peripheral's capture semantics simple (it sees
+    // exactly the bytes each channel produced) and lets host tests
+    // remain byte-value-sensitive without depending on wave8 details.
     size_t offset = 0;
     for (const auto &data : mInFlightChannels) {
         if (!data) {
