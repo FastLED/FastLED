@@ -21,7 +21,9 @@
 #include "fl/stl/move.h" // fl::move
 #include "fl/stl/noexcept.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/channel_driver_rmt4.h"
+#include "platforms/esp/32/drivers/rmt/rmt_4/network_state_tracker_4.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_peripheral_esp.h"
+#include "platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4.h"
 
 namespace fl {
 
@@ -96,6 +98,11 @@ ChannelEngineRMT4Impl::~ChannelEngineRMT4Impl() {
                                              false);
                 mPeripheral->uninstallDriver(static_cast<int>(state.channel));
             }
+            // Give the pool word count back to the manager (#3469). A
+            // miss here is silent — the manager already logs on the
+            // free() path.
+            RmtMemoryManager4::instance().free(static_cast<int>(state.channel),
+                                               /*is_tx=*/true);
             state.inUse = false;
         }
     }
@@ -371,11 +378,44 @@ bool ChannelEngineRMT4Impl::configureChannel(
     state->maxCyclesPerFill = state->cyclesPerFill + state->cyclesPerFill / 2;
     state->lastFill = 0;
 
+    // Register the TX allocation with the RMT4 memory manager (#3469).
+    // The manager tracks the global pool (512 words on classic ESP32,
+    // 256 on S2), refuses overallocation, and — once
+    // NetworkStateTracker4 is wired to a real detector — will return
+    // 3 mem blocks instead of 2 during WiFi bursts. Today's stub
+    // always returns 2, so behaviour is bit-for-bit identical to the
+    // pre-#3469 driver until the follow-up flips the network detector
+    // on.
+    //
+    // Free any prior allocation for this channel first, so Strategy 2
+    // (reconfigure an idle channel for a new pin/timing) doesn't hit
+    // the duplicate-alloc check. Silent-miss on the first-time-configure
+    // path is expected.
+    (void)RmtMemoryManager4::instance().free(static_cast<int>(state->channel),
+                                             /*is_tx=*/true);
+
+    const bool network_active = NetworkStateTracker4::instance().isActive();
+    size_t alloc_words = 0;
+    if (!RmtMemoryManager4::instance().tryAllocateTx(
+            static_cast<int>(state->channel), network_active, alloc_words)) {
+        // Pool exhausted — refuse. The caller (acquireChannel) will
+        // treat this the same as a hardware-channel-count miss and
+        // defer this strip to the pending queue.
+        FL_WARN_F("configureChannel: memory manager refused TX allocation "
+                  "on channel %s",
+                  state->channel);
+        return false;
+    }
+
     // Apply the channel configuration via the peripheral.
+    const u8 mem_blocks =
+        RmtMemoryManager4::instance().calculateMemoryBlocks(network_active);
     detail::Rmt4ChannelConfig cfg(static_cast<int>(state->channel),
                                   static_cast<int>(pin), DIVIDER_RMT4,
-                                  FASTLED_RMT_MEM_BLOCKS, PULSES_PER_FILL_RMT4);
+                                  mem_blocks, PULSES_PER_FILL_RMT4);
     if (!mPeripheral->configureChannel(cfg)) {
+        RmtMemoryManager4::instance().free(static_cast<int>(state->channel),
+                                           /*is_tx=*/true);
         return false;
     }
 
