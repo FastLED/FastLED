@@ -101,11 +101,15 @@ IChannelDriver::DriverState ChannelEngineLpcSctDma::poll() FL_NO_EXCEPT {
     if (!mTransmissionActive) {
         return DriverState::READY;
     }
-    // Probe the helper's DMA done flag. On LPC845 this reads
-    // DMA0->COMMON[0].ACTIVE; on host it returns true immediately so
-    // the state machine settles to READY on the next poll — matching the
-    // contract verified by `tests/fl/channels/lpc_sct_dma_engine.cpp`.
-    if (!mTransmitter.isDone()) {
+    // Drive chunk progression via the runtime transmitter. On LPC845
+    // this probes `DMA0->COMMON[0].ACTIVE` for the three SCT-tied
+    // channels — when they drop, if bytes remain the next chunk gets
+    // encoded and kicked in this same call. #3459 acceptance
+    // criterion 3: no busy-wait in show(); the state machine
+    // transitions READY→BUSY→DRAINING→READY are all driven from
+    // here. On host the transmit was synchronous so pollAndAdvance()
+    // immediately returns true.
+    if (!mTransmitter.pollAndAdvance()) {
         return DriverState::DRAINING;
     }
     mTransmissionActive = false;
