@@ -19,6 +19,7 @@
 #include "platforms/esp/32/drivers/i2s/channel_engine_i2s_esp32dev.h"
 #include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_mock.h"
 
+#include "fl/channels/config.h"  // for SpiChipsetConfig / SpiEncoder
 #include "fl/channels/data.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/cstddef.h"
@@ -104,6 +105,25 @@ ChannelDataPtr makeChannelData(int pin, size_t byte_count,
     }
 
     return ChannelData::create(pin, timing, fl::move(encoded));
+}
+
+/// @brief Build a `ChannelData` marked as SPI chipset (APA102-style)
+///        so the engine's Phase 2c dispatch treats it as SPI. Used by
+///        the Phase 2c dispatch tests below to confirm the SPI branch
+///        rejects cleanly rather than silently sending garbage.
+ChannelDataPtr makeSpiChannelData(int dataPin, int clockPin,
+                                  size_t byte_count,
+                                  u8 fill_byte = 0x00) {
+    SpiEncoder timing{SpiChipset::APA102, /*clockHz=*/6000000};
+    SpiChipsetConfig spi_cfg(dataPin, clockPin, timing);
+    ChipsetVariant chipset(spi_cfg);
+
+    fl::vector_psram<u8> encoded;
+    encoded.resize(byte_count);
+    for (size_t i = 0; i < byte_count; ++i) {
+        encoded[i] = fill_byte;
+    }
+    return ChannelData::create(chipset, fl::move(encoded));
 }
 
 } // anonymous namespace
@@ -495,6 +515,63 @@ FL_TEST_CASE("I2sPeripheralEsp32DevMock - refill callback respects failure knob"
     FL_REQUIRE_FALSE(mock.registerBufferRefillCallback(&refillCb, &state));
     mock.simulateBufferRefill(0);
     FL_CHECK(state.total_calls == 0);
+}
+
+// =============================================================================
+// FastLED#3526 Phase 2c — mode dispatch scaffolding
+// =============================================================================
+//
+// The engine's `show()` dispatches on the batch's clockless-vs-SPI
+// composition. Mixed batches and pure-SPI batches route to a stub
+// error path until the SPI transmit machinery lands (bench-blocked).
+// Clockless batches take the existing wave8-encoding path.
+
+FL_TEST_CASE("I2sEsp32Dev - pure clockless batch still succeeds") {
+    resetMockState();
+    ChannelEngineI2sEsp32Dev engine(createMockPeripheral());
+    auto &mock = I2sPeripheralEsp32DevMock::instance();
+
+    engine.enqueue(makeChannelData(0, 6, 0xAA));
+    engine.enqueue(makeChannelData(1, 6, 0xBB));
+    engine.show();
+
+    // Clockless batch is fully accepted — reaches BUSY, not ERROR.
+    FL_REQUIRE(engine.currentState() == IChannelDriver::DriverState::BUSY);
+    FL_CHECK(mock.getTransmitCount() == 1u);
+}
+
+FL_TEST_CASE("I2sEsp32Dev - pure SPI batch rejected as Phase 2c stub") {
+    resetMockState();
+    ChannelEngineI2sEsp32Dev engine(createMockPeripheral());
+    auto &mock = I2sPeripheralEsp32DevMock::instance();
+
+    auto spi_data = makeSpiChannelData(/*dataPin=*/23, /*clockPin=*/18, 6, 0xCC);
+    engine.enqueue(spi_data);
+    engine.show();
+
+    // SPI path is stubbed — engine drops to ERROR without touching the
+    // peripheral, and releases the channel's in-use mark.
+    FL_REQUIRE(engine.currentState() == IChannelDriver::DriverState::ERROR);
+    FL_CHECK(mock.getTransmitCount() == 0u);
+    FL_CHECK_FALSE(spi_data->isInUse());
+}
+
+FL_TEST_CASE("I2sEsp32Dev - mixed clockless+SPI batch rejected as Phase 2c stub") {
+    resetMockState();
+    ChannelEngineI2sEsp32Dev engine(createMockPeripheral());
+    auto &mock = I2sPeripheralEsp32DevMock::instance();
+
+    auto clockless_data = makeChannelData(0, 6, 0xAA);
+    auto spi_data = makeSpiChannelData(23, 18, 6, 0xCC);
+    engine.enqueue(clockless_data);
+    engine.enqueue(spi_data);
+    engine.show();
+
+    // Mixed batch — same stub outcome as pure SPI.
+    FL_REQUIRE(engine.currentState() == IChannelDriver::DriverState::ERROR);
+    FL_CHECK(mock.getTransmitCount() == 0u);
+    FL_CHECK_FALSE(clockless_data->isInUse());
+    FL_CHECK_FALSE(spi_data->isInUse());
 }
 
 FL_TEST_CASE("I2sPeripheralEsp32DevMock - refill + tx-done coexist") {
