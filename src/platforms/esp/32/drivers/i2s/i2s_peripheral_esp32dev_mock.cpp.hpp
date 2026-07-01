@@ -12,6 +12,7 @@
 #include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_mock.h"
 
 #include "fl/log/log.h"
+#include "fl/stl/array.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/malloc.h"
@@ -159,6 +160,33 @@ class I2sPeripheralEsp32DevMockImpl : public I2sPeripheralEsp32DevMock {
         return true;
     }
 
+    // FastLED#3526 Phase 2b step C — record the (lane, pin) mapping so
+    // engine tests can assert on the routing without doing any hardware
+    // work. Returns false if lane is out of range or the peripheral is
+    // uninitialised — matches the real impl's contract.
+    bool routeLanePin(u8 lane, i32 gpio_pin) FL_NO_EXCEPT override {
+        if (!mInitialized) {
+            return false;
+        }
+        if (lane >= kMaxI2sLanes) {
+            return false;
+        }
+        mLaneRoutedPin[lane] = gpio_pin;
+        ++mLaneRouteInvocations;
+        return true;
+    }
+
+    u32 laneRouteInvocationCount() const FL_NO_EXCEPT override {
+        return mLaneRouteInvocations;
+    }
+
+    i32 lastRoutedPinForLane(u8 lane) const FL_NO_EXCEPT override {
+        if (lane >= kMaxI2sLanes) {
+            return -1;
+        }
+        return mLaneRoutedPin[lane];
+    }
+
     const I2sEsp32DevPeripheralConfig &getConfig() const FL_NO_EXCEPT override {
         return mConfig;
     }
@@ -270,6 +298,10 @@ class I2sPeripheralEsp32DevMockImpl : public I2sPeripheralEsp32DevMock {
         mRefillCallbackInvocations = 0;
         mLastRefillBufferIndex = -1;
         mLastRefillDone = false;
+        for (auto& p : mLaneRoutedPin) {
+            p = -1;
+        }
+        mLaneRouteInvocations = 0;
         mFailInitialize = false;
         mFailAllocateBuffer = false;
         mFailTransmit = false;
@@ -297,6 +329,13 @@ class I2sPeripheralEsp32DevMockImpl : public I2sPeripheralEsp32DevMock {
     u32 mRefillCallbackInvocations = 0;
     int mLastRefillBufferIndex = -1;
     bool mLastRefillDone = false;
+
+    // FastLED#3526 Phase 2b step C — lane routing state (24 lanes to
+    // match the classic ESP32 I2S{n}O_DATA_OUT{0..23}_IDX signal range).
+    fl::array<i32, kMaxI2sLanes> mLaneRoutedPin = {{-1, -1, -1, -1, -1, -1, -1, -1,
+                                                    -1, -1, -1, -1, -1, -1, -1, -1,
+                                                    -1, -1, -1, -1, -1, -1, -1, -1}};
+    u32 mLaneRouteInvocations = 0;
 
     bool mFailInitialize;
     bool mFailAllocateBuffer;

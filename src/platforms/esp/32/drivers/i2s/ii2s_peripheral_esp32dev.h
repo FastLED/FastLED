@@ -67,6 +67,16 @@ namespace fl {
 // Configuration Structures
 //=============================================================================
 
+/// @brief Maximum parallel-out lane count on classic ESP32 I2S{0,1}.
+///
+/// Both peripherals expose 24 DATA_OUT signals (`I2S{n}O_DATA_OUT0_IDX`
+/// through `DATA_OUT23_IDX` per `soc/gpio_sig_map.h`). The wave8 encoder
+/// is currently 16-wide; lanes 16..23 are reserved for a future
+/// `wave8Transpose_24` / padded-32 encoder. The peripheral surface
+/// accepts the full hardware range so the encoder upgrade doesn't have
+/// to churn the peripheral API.
+constexpr u8 kMaxI2sLanes = 24;
+
 /// @brief Classic-ESP32 I2S peripheral configuration.
 ///
 /// Captures the shape of the parallel-out I2S setup FastLED needs to
@@ -216,6 +226,42 @@ class II2sPeripheralEsp32Dev {
     ///         support callbacks in the current state.
     virtual bool registerTransmitCallback(I2sEsp32DevTxDoneCallback cb,
                                           void *user_ctx) FL_NO_EXCEPT = 0;
+
+    //=========================================================================
+    // Lane -> GPIO routing (Phase 2b step C)
+    //=========================================================================
+
+    /// @brief Route one parallel-out data lane to a specific GPIO pin.
+    ///
+    /// Wires I2S1 (or I2S0)'s `DATA_OUT{lane}` signal to the SoC GPIO
+    /// matrix so the parallel encoder's `lane` bit reaches the given
+    /// `gpio_pin` on the physical pinout. Called by the engine after
+    /// `initialize()` for each active channel, before the first
+    /// `transmit()`. The peripheral is responsible for putting the
+    /// pin into output mode.
+    ///
+    /// Real hardware implementation uses `gpio_matrix_out()` +
+    /// `gpio_set_direction()`. Mock records the (lane, pin) pair for
+    /// test verification and returns true.
+    ///
+    /// @param lane      Parallel-out lane index in `[0, 23]`. Classic
+    ///                  ESP32 I2S{0,1} each expose 24 parallel data
+    ///                  output signals (`I2S{n}O_DATA_OUT0_IDX` ..
+    ///                  `I2S{n}O_DATA_OUT23_IDX`). The current wave8
+    ///                  encoder is 16-lane wide; lanes 16..23 are
+    ///                  reserved for a future `wave8Transpose_24` (or
+    ///                  padded-32) encoder — the peripheral surface
+    ///                  accepts the full hardware range now so the
+    ///                  encoder upgrade doesn't have to churn this API.
+    /// @param gpio_pin  Target GPIO pin (0-39 on classic ESP32).
+    ///                  Negative values clear the routing.
+    /// @return true on success; false if `lane` is out of range, the
+    ///         peripheral is uninitialised, or the pin routing failed.
+    virtual bool routeLanePin(u8 lane, i32 gpio_pin) FL_NO_EXCEPT {
+        (void)lane;
+        (void)gpio_pin;
+        return false;
+    }
 
     /// @brief Register the streaming buffer-refill ISR callback.
     ///
