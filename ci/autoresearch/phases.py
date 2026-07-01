@@ -266,6 +266,10 @@ LPC_BRING_UP_ENVS = {
     "lpcxpresso804",
 }
 LPC_WS2812_ENVS = {"lpc845brk", "lpc845", "lpcxpresso845max"}
+# SPI+DMA harness (#3456) covers both LPC845 and LPC804 — the driver
+# `spi_arm_lpc_dma.h` was widened to LPC804 in #3500 once fbuild >=
+# 2.3.16 ships the vendor DMA0 typedef from framework-arduino-lpc8xx#35.
+LPC_DMA_SPI_ENVS = LPC_WS2812_ENVS | {"lpcxpresso804"}
 LPC_IEEE754_BUILD_ENVS = {
     "lpc845brk": "lpc845brk_ieee754",
 }
@@ -1689,12 +1693,13 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
                 return 1
             return await _run_lpc_pwm_dma_cl_tests(ctx)
         # FastLED #3456: --dma-spi runs the SPI+DMA async driver bench.
-        # Phase 1 of the #3453 bring-up.
+        # Phase 1 of the #3453 bring-up. Covers both LPC845 and LPC804
+        # (driver was widened to LPC804 in #3500).
         if getattr(ctx.args, "dma_spi", False):
-            if final_environment not in LPC_WS2812_ENVS:
+            if final_environment not in LPC_DMA_SPI_ENVS:
                 print(
-                    "--dma-spi is only supported on LPC845 boards "
-                    "(lpc845brk, lpc845, lpcxpresso845max)."
+                    "--dma-spi is only supported on LPC845/LPC804 boards "
+                    "(lpc845brk, lpc845, lpcxpresso845max, lpcxpresso804)."
                 )
                 return 1
             return await _run_lpc_dma_spi_tests(ctx)
@@ -2506,19 +2511,25 @@ async def _run_lpc_dma_spi_tests(ctx: RunContext) -> int:
     `examples/AutoResearch/AutoResearchSpiDma.h`.
     """
     final_environment = (ctx.final_environment or "").lower()
-    if final_environment not in LPC_WS2812_ENVS:
+    if final_environment not in LPC_DMA_SPI_ENVS:
         print(
-            "--dma-spi is only supported on LPC845 boards "
-            "(lpc845brk, lpc845, lpcxpresso845max)."
+            "--dma-spi is only supported on LPC845/LPC804 boards "
+            "(lpc845brk, lpc845, lpcxpresso845max, lpcxpresso804)."
         )
         return 1
 
     upload_port = ctx.upload_port
     assert upload_port is not None
 
+    # LPC845 F_CPU = 24 MHz; LPC804 F_CPU = 15 MHz — the Python runner
+    # needs the correct core clock to center the SCK measurement band.
+    is_lpc804 = final_environment == "lpcxpresso804"
+    core_hz = 15_000_000 if is_lpc804 else 24_000_000
+
     print()
     print("=" * 60)
     print("LPC SPI+DMA async driver bench — #3456 (Phase 1 of #3453)")
+    print(f"   Target: {final_environment} (core_hz={core_hz})")
     print(
         "   Driver: ARMHardwareSPIOutputDMA<> (src/platforms/arm/lpc/spi_arm_lpc_dma.h)"
     )
@@ -2537,6 +2548,8 @@ async def _run_lpc_dma_spi_tests(ctx: RunContext) -> int:
         "ci/autoresearch/test_lpc_dma_spi.py",
         "--port",
         upload_port,
+        "--core-hz",
+        str(core_hz),
     ]
     result = subprocess.run(cmd)
     return 0 if result.returncode == 0 else 1
