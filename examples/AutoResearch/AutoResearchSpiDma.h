@@ -1,12 +1,17 @@
-// AutoResearchSpiDma.h — LPC845 SPI + DMA async driver AutoResearch
+// AutoResearchSpiDma.h — LPC8xx SPI + DMA async driver AutoResearch
 // validation harness (FastLED #3456, Phase 1 of #3453 bench bring-up).
 //
-// Device-side RPC handlers that exercise the LPC845 SPI-with-DMA0
+// Device-side RPC handlers that exercise the LPC8xx SPI-with-DMA0
 // async driver (`ARMHardwareSPIOutputDMA<>` from
-// `platforms/arm/lpc/spi_arm_lpc_dma.h`, PR #3454) on real silicon.
+// `platforms/arm/lpc/spi_arm_lpc_dma.h`, PR #3454 for LPC845 + #3500
+// gate-widening for LPC804) on real silicon.
 //
-// Gated on `FL_IS_ARM_LPC_845 && FASTLED_LPC_SPI_DMA`. The whole file
-// compiles out on any other build target.
+// Gated on `(FL_IS_ARM_LPC_845 || FL_IS_ARM_LPC_804) && FASTLED_LPC_SPI_DMA`.
+// LPC845 F_CPU = 24 MHz → default harness divider 6 gives ~4 MHz SCK.
+// LPC804 F_CPU = 15 MHz → default harness divider 6 gives ~2.5 MHz SCK
+// (pass `--core-hz 15000000` to the Python runner so the SCK measurement
+// band is centered correctly). The whole file compiles out on any other
+// build target.
 //
 // **Sibling of `AutoResearchPwmDmaClockless.h`** (#3468) — same
 // architectural shape, different peripheral. The two must not be
@@ -50,7 +55,8 @@
 
 #include <FastLED.h>
 
-#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_SPI_DMA)
+#if (defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804)) && \
+    defined(FASTLED_LPC_SPI_DMA)
 
 #include "fl/remote/remote.h"
 #include "fl/stl/noexcept.h"
@@ -224,4 +230,4 @@ inline void bind(fl::Remote& remote) FL_NO_EXCEPT {
 }  // namespace dma_spi
 }  // namespace autoresearch
 
-#endif  // FL_IS_ARM_LPC_845 && FASTLED_LPC_SPI_DMA
+#endif  // (FL_IS_ARM_LPC_845 || FL_IS_ARM_LPC_804) && FASTLED_LPC_SPI_DMA

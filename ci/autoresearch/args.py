@@ -403,13 +403,15 @@ See Also:
         lpc_group.add_argument(
             "--dma-spi",
             action="store_true",
-            help="LPC845-only: SPI+DMA async driver bench (FastLED #3456, "
-            "Phase 1 of #3453). Drives `ARMHardwareSPIOutputDMA<>` and "
-            "reports (a) single-shot transfer timing, (b) beacon-toggle "
-            "count during overlap to affirmatively prove CPU is free "
-            "during DMA, (c) SCK rate measurement via wall clock. "
-            "Mutually exclusive with --pwm-dma-cl (both claim DMA0 "
-            "channels and the LowMemory flash budget doesn't fit both).",
+            help="LPC845/LPC804 SPI+DMA async driver bench (FastLED "
+            "#3456, Phase 1 of #3453). Drives `ARMHardwareSPIOutputDMA<>` "
+            "and reports (a) single-shot transfer timing, (b) beacon-"
+            "toggle count during overlap to affirmatively prove CPU is "
+            "free during DMA, (c) SCK rate measurement via wall clock. "
+            "On LPC845 mutually exclusive with --pwm-dma-cl (both claim "
+            "DMA0 channels and the LowMemory flash budget doesn't fit "
+            "both). LPC804 requires fbuild >= 2.3.16 for the vendor DMA0 "
+            "typedef (framework-arduino-lpc8xx#35 + fbuild#916).",
         )
 
         # Standard options
