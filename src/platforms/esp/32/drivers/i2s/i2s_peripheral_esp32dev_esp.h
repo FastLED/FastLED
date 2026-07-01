@@ -48,6 +48,13 @@
 #include "fl/stl/noexcept.h"
 #include "platforms/esp/32/drivers/i2s/ii2s_peripheral_esp32dev.h"
 
+// Forward declare `intr_handle_t` and `lldesc_t` to avoid pulling ESP-IDF
+// headers into this public-ish surface — the impl file has the full
+// definitions in an extern "C" block.
+struct intr_handle_data_t;
+typedef struct intr_handle_data_t* intr_handle_t;
+struct lldesc_s;
+
 namespace fl {
 
 /// @brief Real-hardware I2S peripheral for classic ESP32 (IDF 4.x).
@@ -81,12 +88,28 @@ class I2sPeripheralEsp32DevEsp : public II2sPeripheralEsp32Dev {
 
     const I2sEsp32DevPeripheralConfig &getConfig() const FL_NO_EXCEPT override;
 
+    // FastLED#3526 Phase 2b step B — ISR-context completion. Called from
+    // the file-scope trampoline in `.cpp.hpp` when the DMA-done ISR
+    // fires. Flips `mBusy` and dispatches the user callback (which
+    // routes to the channel-engine trampoline). Not for direct user
+    // invocation.
+    void finishTransmitFromIsr() FL_NO_EXCEPT;
+
   private:
     I2sEsp32DevPeripheralConfig mConfig;
     bool mInitialized;
     volatile bool mBusy;
     I2sEsp32DevTxDoneCallback mCallback;
     void *mCallbackUserCtx;
+
+    // FastLED#3526 Phase 2b step B — real DMA machinery.
+    // `mDescriptor` is a single `lldesc_t` (from `rom/lldesc.h`) allocated in
+    // DMA-capable RAM. `mIsrHandle` is the `esp_intr_alloc()` handle for the
+    // I2S1 DMA-done interrupt. On streaming transmits (>1 descriptor's worth
+    // of data) the descriptor gets rewritten each ISR fire; single-shot fits
+    // in one descriptor.
+    struct lldesc_s *mDescriptor;
+    intr_handle_t mIsrHandle;
 };
 
 } // namespace fl
