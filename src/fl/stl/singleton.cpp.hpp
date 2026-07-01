@@ -10,7 +10,9 @@ namespace {
         void* value;
     };
     static constexpr int REGISTRY_MAX = 128;
+    // FL_LINT_ALLOW_GLOBAL(singleton registry backing — cannot itself live inside a Singleton<T>, which would be self-referential)
     static RegistryEntry registry[REGISTRY_MAX];
+    // FL_LINT_ALLOW_GLOBAL(singleton registry backing — see above)
     static int registry_count = 0;
 } // anonymous namespace
 

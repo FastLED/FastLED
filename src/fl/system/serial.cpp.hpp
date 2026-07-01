@@ -365,6 +365,7 @@ float SerialPort::parseFloat() {
 
 // Note: FL_MAYBE_UNUSED on extern declaration (in header) is enough
 // Don't use it on definition or linker won't export the symbol
+// FL_LINT_ALLOW_GLOBAL(public API surface — `fl::fl_serial` is the FastLED-side serial-port global, referenced by name from user code and from the platform serial glue. Same source-compat rationale as `fl::cout` / `fl::cin`.)
 SerialPort fl_serial;
 
 } // namespace fl

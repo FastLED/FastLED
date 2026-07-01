@@ -3,10 +3,11 @@
 
 namespace fl {
 
-// Global cout instance for immediate output
+// Global cout instance for immediate output.
+// FL_LINT_ALLOW_GLOBAL(public API surface — `fl::cout << x;` is called by name, cannot become `cout()` without a source-breaking API change. Migration deferred; see FastLED#3481 discussion of streams.)
 ostream cout;
 
-// endl manipulator instance
+// FL_LINT_ALLOW_GLOBAL(stream manipulator tag `endl` — public API surface, empty struct, matches `hex`/`dec`/`oct` in ios.cpp.hpp)
 const endl_t endl;
 
 // Numeric output operators with formatting support

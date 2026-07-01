@@ -241,40 +241,48 @@ namespace detail {
 
 // Process-wide SlabAllocator registry.
 // Ensures all DLLs share the same SlabAllocator for a given (block_size, slab_size).
-// Simple fixed-size array since the number of unique allocator types is small.
+// State lives inside a Singleton so `--gc-sections` can drop the 64-entry table
+// (~1.5 KB `.bss`) when no slab allocator is ever created (FastLED#3481).
 namespace {
     struct SlabRegistryEntry {
         fl::size block_size;
         fl::size slab_size;
         void* allocator;
     };
-    static constexpr int SLAB_REGISTRY_MAX = 64;
-    static SlabRegistryEntry slab_registry[SLAB_REGISTRY_MAX];
-    static int slab_registry_count = 0;
+    struct SlabRegistryState {
+        static constexpr int MAX = 64;
+        SlabRegistryEntry entries[MAX]{};
+        int count = 0;
+    };
+    inline SlabRegistryState& slab_registry_state() FL_NO_EXCEPT {
+        return fl::Singleton<SlabRegistryState>::instance();
+    }
 } // anonymous namespace
 
 void* slab_allocator_registry_get(fl::size block_size, fl::size slab_size) {
-    for (int i = 0; i < slab_registry_count; i++) {
-        if (slab_registry[i].block_size == block_size &&
-            slab_registry[i].slab_size == slab_size) {
-            return slab_registry[i].allocator;
+    auto& s = slab_registry_state();
+    for (int i = 0; i < s.count; i++) {
+        if (s.entries[i].block_size == block_size &&
+            s.entries[i].slab_size == slab_size) {
+            return s.entries[i].allocator;
         }
     }
     return nullptr;
 }
 
 void slab_allocator_registry_set(fl::size block_size, fl::size slab_size, void* allocator) {
+    auto& s = slab_registry_state();
     // Check if already registered (update)
-    for (int i = 0; i < slab_registry_count; i++) {
-        if (slab_registry[i].block_size == block_size &&
-            slab_registry[i].slab_size == slab_size) {
-            slab_registry[i].allocator = allocator;
+    for (int i = 0; i < s.count; i++) {
+        if (s.entries[i].block_size == block_size &&
+            s.entries[i].slab_size == slab_size) {
+            s.entries[i].allocator = allocator;
             return;
         }
     }
     // Add new entry
-    if (slab_registry_count < SLAB_REGISTRY_MAX) {
-        slab_registry[slab_registry_count++] = {block_size, slab_size, allocator};
+    if (s.count < SlabRegistryState::MAX) {
+        s.entries[s.count++] = {block_size, slab_size, allocator};
     }
 }
 

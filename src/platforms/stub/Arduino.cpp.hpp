@@ -136,9 +136,13 @@ fl::u8 SerialEmulation::peek() FL_NO_EXCEPT {
 }
 
 // Serial instances
+// FL_LINT_ALLOW_GLOBAL(stub Arduino Serial* — emulates the Arduino API globals for host-only test builds; no on-device bloat, cannot wrap in Singleton because user sketches call `Serial.begin()` etc. by name)
 SerialEmulation Serial;
+// FL_LINT_ALLOW_GLOBAL(stub Arduino Serial1 — see Serial above)
 SerialEmulation Serial1;
+// FL_LINT_ALLOW_GLOBAL(stub Arduino Serial2 — see Serial above)
 SerialEmulation Serial2;
+// FL_LINT_ALLOW_GLOBAL(stub Arduino Serial3 — see Serial above)
 SerialEmulation Serial3;
 
 #endif

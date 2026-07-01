@@ -280,6 +280,7 @@ struct VsyncCallbackData {
 };
 
 // Static storage for callback data (singleton peripheral, so one instance suffices)
+// FL_LINT_ALLOW_GLOBAL(Tier 2c: LCD_CAM VSYNC ISR callback state — pending migration to Singleton<T> per FastLED#3491, needs cached-pointer-in-IRAM pattern for ISR safety)
 static VsyncCallbackData s_vsync_cb_data;
 
 // VSYNC ISR callback - must be in IRAM for ESP-IDF

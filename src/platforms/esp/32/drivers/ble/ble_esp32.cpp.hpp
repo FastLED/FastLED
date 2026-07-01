@@ -1,6 +1,7 @@
 // platforms/esp/32/drivers/ble/ble_esp32.cpp.hpp
 // BLE GATT transport layer — ESP32 NimBLE C API implementation (IDF 5+)
 // Included via platforms/esp/32/drivers/ble/_build.cpp.hpp (unity build). Do NOT compile separately.
+// FL_LINT_ALLOW_GLOBAL_FILE(BLE mutable GATT service/characteristic table copies (fl_gatt_svr_svcs_mut / fl_gatt_chr_defs_mut) are patched once at BLE startup and handed to NimBLE by pointer. Migrating to `fl::Singleton<BleGattState>` is straightforward but deferred to a driver-focused PR so this linter-landing PR stays minimal — tracked under FastLED#3481.)
 
 #pragma once
 

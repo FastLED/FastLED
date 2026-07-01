@@ -1,5 +1,6 @@
 // IWYU pragma: private
 
+// FL_LINT_ALLOW_GLOBAL_FILE(Tier 1d: ObjectFLED diagnostic snapshot state (s_events / s_lastPins / s_busyState + counters) is used from 40+ sites in this TU. Mechanical migration to `fl::Singleton<DiagState>` is tracked in FastLED#3487 — kept as-is here to keep the linter-landing PR focused.)
 #include "platforms/arm/teensy/is_teensy.h"
 
 #if defined(FL_IS_TEENSY_4X) && defined(FASTLED_OBJECTFLED_DIAGNOSTICS) && FASTLED_OBJECTFLED_DIAGNOSTICS

@@ -1,6 +1,6 @@
 ﻿// IWYU pragma: private
 
-
+// FL_LINT_ALLOW_GLOBAL_FILE(Tier 2a: Yves Bazin I2S driver — file-scope statics are the motivating case for the SingletonElisionChecker itself. Migration to `fl::Singleton<I2SDriverState>` with cached-IRAM-pointer pattern for ISR safety is tracked in FastLED#3489. Kept as-is for now to avoid destabilizing a working driver in the same PR that lands the linter.)
 
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32

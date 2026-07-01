@@ -122,7 +122,8 @@ namespace {
 }
 
 FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
-// Global cin instance (stub that conditionally delegates)
+// Global cin instance (stub that conditionally delegates).
+// FL_LINT_ALLOW_GLOBAL(public API surface — `fl::cin >> x;` is called by name, same source-compat constraint as `cout` in ostream.cpp.hpp. Real storage IS lazy: `cin` is a small stub, `istream_real` lives inside `cin_real()`'s function-local static below and DOES elide when unused.)
 istream cin;
 
 // Function to get singleton instance of istream_real (for better linker elimination)
