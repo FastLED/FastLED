@@ -43,22 +43,47 @@ CHIP_TO_ENVIRONMENT: dict[str, str] = {
 # ESP32 variants that lack WiFi hardware
 NO_WIFI_ENVIRONMENTS: set[str] = {"esp32h2", "esp32p4"}
 
-# PlatformIO environments → expected USB VID:PID for the data-bearing VCOM
-# port. This bypasses the description-string heuristic for boards whose USB
-# descriptors are too generic to disambiguate (e.g. "USB Serial Device" on
-# Windows for both the LPC845-BRK VCOM and any other Microsoft CDC device).
+# PlatformIO environments → expected USB VID:PID(s) for the data-bearing
+# VCOM port. This bypasses the description-string heuristic for boards
+# whose USB descriptors are too generic to disambiguate (e.g. "USB Serial
+# Device" on Windows for both the LPC845-BRK VCOM and any other Microsoft
+# CDC device).
+#
+# Each entry is a **tuple of accepted VID:PID pairs** — the first port
+# whose (vid, pid) matches any pair is selected. Some boards ship one of
+# several debug-probe firmwares that expose different VID:PIDs; listing
+# them all here lets the same PlatformIO env work regardless of which
+# firmware is on the on-board probe (see the LPC845-BRK note below).
+#
 # Add new entries here when porting to a new board. See FastLED #3300 for
-# the LPC845-BRK case that motivated this map. ci/util/serial_probe.py has
-# a richer fingerprint table; this map only carries the entries autoresearch
-# needs for default-port selection.
+# the LPC845-BRK case that motivated this map. ci/util/serial_probe.py
+# has a richer fingerprint table; this map only carries the entries
+# autoresearch needs for default-port selection.
+ENVIRONMENT_TO_VCOM_VID_PIDS: dict[str, tuple[tuple[int, int], ...]] = {
+    # LPC8xx family: the on-board debug probe can be either
+    #   * LPC11U35 running the LPCXpresso VCOM firmware — 16C0:0483
+    #     (the community "V-USB" VID:PID; shared with PJRC Teensy).
+    #   * LPC-Link2 CMSIS-DAP firmware — 1FC9:0132
+    #     (NXP's own VID:PID; the debug probe presents a single COM
+    #     port that carries the LPC845's USART0 as a virtual serial
+    #     bridge alongside the CMSIS-DAP HID interface).
+    # Newer LPC845-BRK / LPCXpresso boards ship with the LPC-Link2
+    # CMSIS-DAP firmware pre-flashed; either variant is acceptable for
+    # AutoResearch as long as the VCOM stream reaches the host.
+    "lpc845brk": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
+    "lpc845": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
+    "lpc804": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
+    "lpcxpresso845max": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
+    "lpcxpresso804": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
+}
+
+# Backwards-compatibility shim — the old single-VID:PID map is derived
+# from the first entry of the new plural form so any external caller
+# that still reads `ENVIRONMENT_TO_VCOM_VID_PID` gets the primary
+# (LPCXpresso VCOM) fingerprint. Deprecated; update callers to consume
+# the plural form and drop this once no in-repo callers remain.
 ENVIRONMENT_TO_VCOM_VID_PID: dict[str, tuple[int, int]] = {
-    # LPC8xx family: LPC11U35-on-board USB-VCOM bridge for USART0.
-    # Same VID:PID across all four LPC8xx canary boards.
-    "lpc845brk": (0x16C0, 0x0483),
-    "lpc845": (0x16C0, 0x0483),
-    "lpc804": (0x16C0, 0x0483),
-    "lpcxpresso845max": (0x16C0, 0x0483),
-    "lpcxpresso804": (0x16C0, 0x0483),
+    env: pids[0] for env, pids in ENVIRONMENT_TO_VCOM_VID_PIDS.items()
 }
 
 
@@ -151,14 +176,19 @@ def auto_detect_upload_port(expected_environment: str | None) -> ComportResult:
 
     # VID:PID-based detection takes precedence over chip-probe and description
     # heuristics. For boards whose VCOM bridges have well-known IDs (LPC845-BRK
-    # via LPC11U35, see FastLED #3300), this is the only reliable signal on
-    # Windows where multiple boards report a generic "USB Serial Device" name.
-    expected_vid_pid = (
-        ENVIRONMENT_TO_VCOM_VID_PID.get(expected_env) if expected_env else None
+    # via LPC11U35 or LPC-Link2 CMSIS-DAP, see FastLED #3300), this is the only
+    # reliable signal on Windows where multiple boards report a generic "USB
+    # Serial Device" name. An environment may map to more than one accepted
+    # VID:PID (e.g. LPC845-BRK boards ship with either LPCXpresso VCOM
+    # firmware 16C0:0483 or LPC-Link2 CMSIS-DAP firmware 1FC9:0132 on the
+    # debug probe) — the first port matching ANY of the entry's pairs wins.
+    expected_vid_pids = (
+        ENVIRONMENT_TO_VCOM_VID_PIDS.get(expected_env) if expected_env else None
     )
-    if expected_vid_pid is not None:
+    if expected_vid_pids:
+        accepted = set(expected_vid_pids)
         for port in usb_ports:
-            if (port.vid, port.pid) == expected_vid_pid:
+            if (port.vid, port.pid) in accepted:
                 return ComportResult(
                     ok=True,
                     selected_port=port.device,
@@ -168,13 +198,15 @@ def auto_detect_upload_port(expected_environment: str | None) -> ComportResult:
         # Fingerprint expected but no port matched. Don't fall through to the
         # ESP probe — the wrong port will fail later with PermissionError or
         # silent timeout. Report explicitly so the user can plug the board in.
-        vid, pid = expected_vid_pid
+        formatted_expected = " or ".join(
+            f"{vid:04X}:{pid:04X}" for vid, pid in expected_vid_pids
+        )
         return ComportResult(
             ok=False,
             selected_port=None,
             error_message=(
                 f"No USB serial port matched expected VCOM fingerprint for "
-                f"'{expected_environment}' (VID:PID {vid:04X}:{pid:04X}). "
+                f"'{expected_environment}' (VID:PID {formatted_expected}). "
                 f"Detected USB ports: "
                 + ", ".join(
                     f"{p.device}={p.vid:04X}:{p.pid:04X}"
