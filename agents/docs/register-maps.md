@@ -7,6 +7,15 @@ header is the **source of truth** for peripheral register layouts. Do not
 hand-roll a parallel `struct FooShim { volatile u32 _resv0[16]; ... }` from
 the chip's user manual when the vendor already publishes the typedef.
 
+**Before you begin:** if you are about to write code that names a
+`<Peripheral>_Type` typedef, a `<Peripheral>_BASE` address, or a peripheral
+pointer for a specific chip, first verify the peripheral actually exists on
+that silicon. See **`agents/docs/peripheral-existence.md`** for the
+peripheral-existence guardrail (rule, verification recipe, and the LPC804
+phantom-`DMA_Type` anti-example). Do not proceed with register-map work on
+a peripheral that is not present in the vendor CMSIS header AND the chip
+datasheet chapter for that specific variant.
+
 This document exists because two register-offset bugs slipped into
 `src/platforms/arm/lpc/clockless_arm_lpc_pwm_dma.h` (issue #2990, fix PR
 #3349). Both were hand-rolled shim entries whose offsets disagreed with NXP's
@@ -186,6 +195,10 @@ now operational across all five FastLED LPC8xx CI workflows.
 
 ## Cross-references
 
+- `agents/docs/peripheral-existence.md` — **read this first** when starting
+  any DMA / async / parallel-IO driver: verify the peripheral EXISTS on the
+  target chip before writing any register-map code. Canonical anti-example
+  is the LPC804 phantom-`DMA_Type` cascade (`framework-arduino-lpc8xx#35`).
 - `agents/docs/cpp-standards.md` — general C++ rules.
 - `.claude/agents/platform-port-agent.md` — porting walkthrough that links
   here before any peripheral struct is authored.

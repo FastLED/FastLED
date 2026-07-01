@@ -26,6 +26,12 @@ $ARGUMENTS
 - SPI hardware driver if platform supports it
 - RMT/I2S/PARLIO drivers for ESP32 variants
 - GPIO register access patterns for the target MCU
+- **Peripheral existence check FIRST** — before naming any
+  `<Peripheral>_Type` typedef or `<Peripheral>_BASE` address, verify the
+  peripheral EXISTS on the target chip against BOTH the vendor CMSIS PAL
+  header for that specific variant AND the chip's datasheet chapter. See
+  `agents/docs/peripheral-existence.md` for the halt-on-phantom rule and
+  the LPC804 anti-example (`framework-arduino-lpc8xx#35`).
 - **Register-map authoring** — use the vendor CMSIS PAL header
   (`LPC845.h`, `stm32f4xx.h`, `nrf52840.h`, `hardware/structs/*.h`,
   etc.); do not hand-roll register shims. See

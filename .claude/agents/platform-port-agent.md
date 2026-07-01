@@ -1,6 +1,6 @@
 ---
 name: platform-port-agent
-description: Guides porting FastLED to new MCU platforms with platform detection, int types, drivers, and build integration
+description: Guides porting FastLED to new MCU platforms with platform detection, int types, drivers, and build integration. BEFORE writing any peripheral driver code, verifies the peripheral EXISTS on the target silicon against the vendor CMSIS PAL header AND the chip datasheet — see agents/docs/peripheral-existence.md for the halt-on-phantom rule.
 tools: Read, Edit, Grep, Glob, Bash, TodoWrite, WebFetch, WebSearch
 model: opus
 ---
@@ -86,6 +86,15 @@ Hand-rolled shims have already shipped wrong offsets to LPC845 twice
 designer's SVD/IP-XACT and encode silicon-revision-specific layout quirks
 that human-readable user manuals miss.
 
+**BEFORE that**, read `agents/docs/peripheral-existence.md`. Verify the
+peripheral you are about to program EXISTS on the target silicon against
+BOTH the vendor CMSIS PAL header for that specific chip variant AND the
+chip's datasheet peripheral chapter. If either is absent, halt and report
+on the driving issue — do NOT fabricate a missing `<Peripheral>_Type` in
+the vendor header repo to make the build pass. The canonical anti-example
+is the LPC804 phantom-`DMA_Type` cascade
+(`FastLED/framework-arduino-lpc8xx#35` and the follow-on PRs).
+
 **Key implementation requirements**:
 1. **Nanosecond-precision timing** — use cycle counting or hardware timers
 2. **Interrupt disable during output** — LED protocols are timing-sensitive
@@ -153,6 +162,7 @@ If the platform has hardware SPI:
 
 - **Research before implementing** — get architecture details right
 - **Follow existing patterns** — look at similar platforms already ported
+- **Verify peripheral existence before programming it** — read `agents/docs/peripheral-existence.md` before writing any DMA / RMT / FlexIO / PARLIO / LCD_CAM / I2S / async driver code. Halt on phantom: if the peripheral is absent from the vendor CMSIS PAL header for the exact chip variant, do NOT fabricate the typedef to make the build compile.
 - **Use vendor CMSIS register definitions, never hand-roll register-map shims** — read `agents/docs/register-maps.md` before authoring any `struct *Shim` or typing out register offsets from a user manual
 - **Use the correct naming convention** — `FL_IS_<PLATFORM>` for detection macros
 - **Never modify `fl/stl/int.h` or `fl/stdint.h`** — only platform-specific int files
