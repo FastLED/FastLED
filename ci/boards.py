@@ -1144,15 +1144,26 @@ RPI_PICO2 = Board(
 # redundant but stays valid PlatformIO syntax (name @ source URI).
 _NXPLPC_PLATFORM = "nxplpc@https://github.com/FastLED/platform-nxp-lpc8xx.git#12265f765aebd3893465d6d7ad76be66d89ba015"
 
-LPC845BRK = Board(
-    board_name="lpc845brk",
+# Preferred name for the LPC845 canary board target (FastLED #3220).
+# `LPC845` is the canonical entry — `bash compile lpc845 …` and
+# `bash autoresearch lpc845 …` are the documented spellings in
+# `agents/docs/hardware-autoresearch.md`. `LPC845BRK` below is retained
+# as a deprecated alias so pre-#3220 scripts and CI matrices keep
+# working; it slates for removal one release / CI cycle after this
+# lands (see #3220 acceptance).
+LPC845 = Board(
+    board_name="lpc845",
     platform=_NXPLPC_PLATFORM,
     platform_needs_install=True,
     framework="arduino",
 )
 
-LPC845 = Board(
-    board_name="lpc845",
+# Deprecated alias — prefer `LPC845` above. Same platform + framework;
+# named for the LPC845-BRK breakout board specifically. Kept working
+# so `bash compile lpc845brk …` still resolves during the transition.
+# FastLED #3220 tracks removal.
+LPC845BRK = Board(
+    board_name="lpc845brk",
     platform=_NXPLPC_PLATFORM,
     platform_needs_install=True,
     framework="arduino",
