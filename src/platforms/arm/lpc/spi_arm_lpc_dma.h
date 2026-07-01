@@ -434,14 +434,14 @@ private:
         if (count == 0u) return;
 
         const u32 ch = FASTLED_LPC_SPI_DMA_CHANNEL;
-        const u32 src_end = reinterpret_cast<u32>(&sEncodeBuf[count - 1u]);
-        const u32 dst_end = reinterpret_cast<u32>(&spi_block()->TXDAT);
+        const u32 src_end = reinterpret_cast<u32>(&sEncodeBuf[count - 1u]); // ok reinterpret cast - LPC DMA descriptor requires raw address
+        const u32 dst_end = reinterpret_cast<u32>(&spi_block()->TXDAT); // ok reinterpret cast - LPC DMA descriptor requires raw address
 
         // Descriptor write. UM11029 §17.4.3: the descriptor table is at
         // SRAMBASE; channel N's descriptor occupies bytes [16*N, 16*N+15].
         const u32 srambase = DMA0->SRAMBASE;
         if (srambase != 0u) {
-            volatile u32 *descr = reinterpret_cast<volatile u32*>(srambase + 16u * ch);
+            volatile u32 *descr = reinterpret_cast<volatile u32*>(srambase + 16u * ch); // ok reinterpret cast - SRAMBASE + channel offset = raw descriptor table address
             // descr[0] is the XFERCFG-shadow word; the live XFERCFG is
             // the per-channel register. UM11029 wires both ways.
             descr[1] = src_end;  // SRCEND

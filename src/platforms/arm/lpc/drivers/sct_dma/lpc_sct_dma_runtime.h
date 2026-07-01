@@ -134,7 +134,7 @@ public:
     /// Returns an empty span on LPC845 silicon (the capture member
     /// stays empty on the real target — see `transmit()` body).
     fl::span<const u8> getCapturedTxBytes() const FL_NO_EXCEPT {
-        return fl::span<const u8>(mTxCapture.data(), mTxCapture.size());
+        return fl::span<const u8>(mTxCapture);
     }
 
     /// @brief Drop the capture buffer. Call before a fresh `transmit()`

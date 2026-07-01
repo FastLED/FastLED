@@ -243,6 +243,20 @@ fn unity_build_check_single_file(file_path: &str) -> Vec<String> {
         return Vec::new();
     };
     if !content.contains(&rel_path) {
+        // File-level opt-out: `UNITY_BUILD_EXCLUDE(<reason>)` in the
+        // first 15 lines of the .cpp.hpp declares that this file is
+        // intentionally NOT part of the unity build (e.g. Stage-4 impl
+        // whose symbol set collides with a restored classic driver —
+        // see `platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_esp.cpp.hpp`).
+        if let Ok(file_content) = std::fs::read_to_string(&file_path_buf) {
+            if file_content
+                .lines()
+                .take(15)
+                .any(|l| l.contains("UNITY_BUILD_EXCLUDE"))
+            {
+                return Vec::new();
+            }
+        }
         let build_hpp_norm = normalize_path(&path_to_string(&build_hpp));
         let rel_build = project_relative_path(&build_hpp_norm).unwrap_or(build_hpp_norm);
         return vec![format!("{rel_build}: missing {rel_path}")];
@@ -344,6 +358,22 @@ fn check_cpp_hpp_files(
                 .unwrap_or("");
             if name == UNITY_BUILD_HPP {
                 continue;
+            }
+            // File-level opt-out: if the .cpp.hpp declares
+            // `UNITY_BUILD_EXCLUDE(<reason>)` in its first 15 lines,
+            // skip the "missing include" check. Used for files that
+            // intentionally must NOT participate in the unity build
+            // (e.g. Stage-4 impls whose symbol set collides with a
+            // restored classic driver — see
+            // `platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_esp.cpp.hpp`).
+            if let Ok(file_content) = std::fs::read_to_string(cpp_hpp) {
+                if file_content
+                    .lines()
+                    .take(15)
+                    .any(|l| l.contains("UNITY_BUILD_EXCLUDE"))
+                {
+                    continue;
+                }
             }
             let Some(rel_path) = pathdiff_normalized(&path_to_string(cpp_hpp), src_dir) else {
                 continue;
@@ -536,6 +566,15 @@ fn check_alphabetical_order(
         let Ok(content) = std::fs::read_to_string(build_hpp) else {
             continue;
         };
+        // File-level opt-out for intentionally non-alphabetical include
+        // order: `UNITY_BUILD_ORDER(<reason>)` in the file suppresses
+        // the alphabetical check. Used when a compile-order dependency
+        // between two cpp.hpp files (e.g. runtime-before-engine when the
+        // engine instantiates a runtime class as a member) forces a
+        // non-sorted order.
+        if content.contains("UNITY_BUILD_ORDER") {
+            continue;
+        }
         let rel_file = rel_from_project(build_hpp, project_root);
 
         let mut same_level: Vec<(String, usize)> = Vec::new();

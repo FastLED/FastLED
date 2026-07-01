@@ -10,6 +10,7 @@
 /// `src/platforms/channel_drivers.impl.cpp.hpp` for the dispatch contract
 /// and `src/fl/channels/all_drivers.h` for the public API.
 
+#include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
 
 #if defined(FL_IS_ARM_LPC_845)

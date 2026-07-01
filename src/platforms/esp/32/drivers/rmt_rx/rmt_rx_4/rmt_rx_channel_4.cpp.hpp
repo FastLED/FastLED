@@ -602,7 +602,7 @@ fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NO_EXCEPT {
         FL_WARN_F("[RMT4 RX] create() refused: pin %s is negative", pin);
         return nullptr;
     }
-    return fl::shared_ptr<RmtRxChannel>(new RmtRxChannelImpl(pin));
+    return fl::shared_ptr<RmtRxChannel>(new RmtRxChannelImpl(pin)); // ok bare allocation — RmtRxChannelImpl is private, cannot construct externally via make_shared without exposing type
 }
 
 } // namespace fl

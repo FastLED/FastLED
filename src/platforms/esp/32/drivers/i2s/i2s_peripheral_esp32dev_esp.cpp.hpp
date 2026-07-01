@@ -1,5 +1,7 @@
 // IWYU pragma: private
 
+// UNITY_BUILD_EXCLUDE(Stage-4 real-hardware impl — intentionally NOT included in the i2s unity build because its `driver/gpio.h` include collides at link time with the restored classic `i2s_esp32dev.cpp.hpp` machinery as an `ADC: CONFLICT!` boot loop. See `_build.cpp.hpp` header comment for the design rationale; kept in-tree for a future PR that reworks the modern peripheral to share I2S1/periph_module state with the classic impl.)
+
 /// @file i2s_peripheral_esp32dev_esp.cpp.hpp
 /// @brief Real-hardware `II2sPeripheralEsp32Dev` impl — Stage 4 rewrite
 ///        avoids IDF's `driver/i2s.h` to escape the `driver_ng` vs
