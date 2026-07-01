@@ -34,39 +34,7 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
 #include "platforms/arm/is_arm.h"  // FL_IS_ARM_M0_PLUS (loop-delay period selection)
-
-// CMSIS interrupt-control intrinsics used by `showLedData`. These live as
-// `__STATIC_INLINE` functions in `cmsis_gcc.h` per Cortex-M CMSIS bundle.
-// gcc 15.2+ `-Wtemplate-body` errors on the function-template instantiation
-// when `__get_PRIMASK` is an undeclared name at template-body parse time,
-// so provide static-inline fallbacks here that match the canonical CMSIS
-// semantics (inline asm against the PRIMASK SCS register). Guarded with
-// `#ifndef` so a transitively-included `cmsis_gcc.h` wins -- on platforms
-// where CMSIS is on the include path (LPC8xx, SAMD, nRF, STM32) the local
-// definitions below are skipped. On Arduino-AVR where `__enable_irq` is a
-// preprocessor macro from `WString.h`, the macro guard also wins.
-// Skip entirely when a CMSIS device header is on the include path (it declares
-// these as functions, which the #ifndef guards below cannot detect, so defining
-// them here would clash). LPC builds set FASTLED_HAS_CMSIS in led_sysdefs.
-#if !defined(FASTLED_HAS_CMSIS)
-#ifndef __get_PRIMASK
-static inline fl::u32 __get_PRIMASK(void) FL_NO_EXCEPT {
-    fl::u32 primask;
-    __asm volatile ("MRS %0, primask" : "=r" (primask) :: "memory");
-    return primask;
-}
-#endif
-#ifndef __enable_irq
-static inline void __enable_irq(void) FL_NO_EXCEPT {
-    __asm volatile ("cpsie i" ::: "memory");
-}
-#endif
-#ifndef __disable_irq
-static inline void __disable_irq(void) FL_NO_EXCEPT {
-    __asm volatile ("cpsid i" ::: "memory");
-}
-#endif
-#endif  // !FASTLED_HAS_CMSIS
+#include "fl/math/scale8.h"
 
 FL_EXTERN_C_BEGIN
 
