@@ -63,7 +63,16 @@ jobs:
       - name: Set up fbuild (install + cache)
         uses: FastLED/fbuild/.github/actions/setup@main
         with:
-          cache-key-extra: ${{ steps.fbuild_board.outputs.name }}-${{ hashFiles('platformio.ini', 'library.json', 'pyproject.toml', 'uv.lock') }}
+          # `ci/boards.py` holds the pinned platform SHAs (e.g. `_NXPLPC_PLATFORM`
+          # for LPC804/845). When one of those pins changes the framework
+          # tarball fbuild is expected to download changes too, and the
+          # per-board cache from the previous SHA holds a stale
+          # tarball + expected sha256 — fbuild then reports
+          # `sha256 mismatch for ...` on cache restore even though the pin
+          # is now correct. Hash `ci/boards.py` here so pin bumps bust the
+          # per-board cache. See FastLED/FastLED#3543 for the LPC-transfer
+          # incident that surfaced this gap.
+          cache-key-extra: ${{ steps.fbuild_board.outputs.name }}-${{ hashFiles('platformio.ini', 'library.json', 'pyproject.toml', 'uv.lock', 'ci/boards.py') }}
           # Binary install cache is intentionally board-independent — every
           # job in this repo's board matrix shares the same fbuild binary,
           # so key the install cache solely on the fbuild pin in pyproject.
