@@ -1,58 +1,38 @@
 // IWYU pragma: private
 
-// FastLED#3512 Phase 5: this file is now part of the i2s unity build.
-// The earlier UNITY_BUILD_EXCLUDE marker cited a `driver/gpio.h` collision
-// against the restored classic Yves driver; on re-investigation the
-// actual `ADC: CONFLICT!` issue was `driver/i2s.h` in the Stage 2
-// (#3476) impl. This Stage 4 file drops `driver/i2s.h` entirely (see
-// the docblock below) so the conflict no longer applies. The stub
-// `transmit()` currently does no DMA — Phase 2 replaces it with real
-// register + DMA + ISR machinery reused from the classic driver.
-
 /// @file i2s_peripheral_esp32dev_esp.cpp.hpp
-/// @brief Real-hardware `II2sPeripheralEsp32Dev` impl — Stage 4 rewrite
-///        avoids IDF's `driver/i2s.h` to escape the `driver_ng` vs
-///        legacy-ADC conflict (#3474).
+/// @brief Real-hardware `II2sPeripheralEsp32Dev` impl for the modern
+///        classic-ESP32 I2S1 parallel-out clockless engine.
 ///
-/// ## Why not `driver/i2s.h`
+/// ## Attribution
 ///
-/// Stage 2 (#3476) used the legacy `driver/i2s.h`. Wiring that TU
-/// into the classic-ESP32 unity build tripped a hard `ADC:
-/// CONFLICT! driver_ng is not allowed to be used with the legacy
-/// driver` panic at IDF init time — the include drags in the
-/// `driver_ng` framework, and something in the link (arduino-esp32
-/// 3.3.7 core, or FastLED's `pin_esp32_native_impl.hpp` on the same
-/// codepath) had already registered the legacy ADC driver.
+/// **Original I2S1 parallel-out clockless proof-of-concept: Yves Bazin**
+/// (`ClocklessI2S<>` and the `i2s_esp32dev` register-level driver, first
+/// merged as the FastLED#Yves I2S driver in 2018-2019). Yves proved
+/// that classic-ESP32 I2S1 in parallel/LCD mode could drive multiple
+/// WS2812-family strips in lock-step through a DMA + ISR pipeline —
+/// years before ESP-IDF grew official parallel-IO peripherals like
+/// PARLIO or LCD_CAM. Every register write in this impl's
+/// `initialize()`, every DMA descriptor field in `transmit()`, and the
+/// clock-divider math for the 8 MHz wave8 pixel rate all trace their
+/// lineage to Yves's original driver. The Yves files
+/// (`clockless_i2s_esp32.{h,cpp.hpp}`, `i2s_esp32dev.{h,cpp.hpp}`) were
+/// deleted at FastLED#3526 Phase 2e once this modern engine reached
+/// parity, but Yves's work is the foundation everything here stands on.
 ///
-/// Stage 4 dodges the ecosystem conflict by dropping the
-/// `driver/i2s.h` include entirely. Only very-low-level headers
-/// remain:
+/// ## Architecture
 ///
-///   - `esp_heap_caps.h` — DMA-capable buffer alloc.
-///   - `driver/gpio.h` — GPIO enable (no ADC interaction).
+/// Unlike Yves's driver (which encoded bit patterns per chipset via
+/// `i2s_define_bit_patterns`), this modern impl is a **general wave8/
+/// wave3 clockless driver** in the same shape as PARLIO — fixed 8 MHz
+/// pixel clock, per-channel `ChipsetTimingConfig` translated to a wave8
+/// byte-LUT at show time. See `channel_engine_i2s_esp32dev.h` for the
+/// engine-level design and `wave8_encoder_i2s1.h` for the encoder.
 ///
-/// These are the same low-level headers that AutoResearch and every
-/// other classic-ESP32 driver in the tree use without triggering the
-/// conflict. The peripheral wraps this narrow surface so the engine
-/// can drive it exactly the way the mock does.
-///
-/// ## Scope of the Stage 4 v1 impl
-///
-/// Sufficient to satisfy "peripheral wired end-to-end" and pass the
-/// engine tests on hardware:
-///
-/// - `initialize()` accepts the config, stashes it, sets the
-///   initialized flag.
-/// - `allocateBuffer()` / `freeBuffer()` back onto DMA-capable heap.
-/// - `transmit()` accepts the byte buffer and fires the registered
-///   callback synchronously (mock-equivalent semantics — the engine
-///   walks through BUSY → poll → READY the same way).
-/// - `isBusy()` / `waitTransmitDone()` reflect the ready state.
-///
-/// The full DMA descriptor chain, ISR install, register-level
-/// clock/pin setup on `I2S1`, and the real WS2812 waveform emit are
-/// Stage 5. The peripheral surface is stable across that upgrade —
-/// only this file's bodies change.
+/// Very-low-level ESP-IDF headers only (`esp_heap_caps.h`,
+/// `driver/gpio.h`, `soc/i2s_struct.h`, `esp_intr_alloc.h`, etc.) — no
+/// `driver/i2s.h` because that drags in `driver_ng` and clashes with
+/// FastLED's legacy-ADC pin-init path (#3474).
 
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
@@ -89,25 +69,61 @@ namespace fl {
 
 namespace {
 
-// FastLED#3526 Phase 2b — modern peripheral owns I2S1 for the duration of
-// its `initialize()`/`deinitialize()` window. This static-storage flag is
-// the ownership handshake between concurrent construction attempts (e.g.,
-// test doubles + a real peripheral in the same TU). Yves classic driver
-// tracks its own separate flag (`gInitializedI2sInitialized`) — during the
-// #3526 rollout only one path is bound at any time (Yves via
-// `-DFASTLED_ESP32_I2S=1` opt-in, modern via `Bus::FLEX_IO, 0` after Phase
-// 2d), so there is no cross-driver race here. Yves is deleted at Phase 2e
-// and this flag becomes the sole record.
-bool g_i2s1_hardware_claimed_by_modern = false;
+// I2S APB clock — used to derive the clock-divider N/A/B for the
+// requested `mPixelClockHz`. Classic ESP32 I2S1 runs off the 80 MHz
+// APB reference; the divider formula is
+// `f_out = I2S_BASE_CLK / (N + B/A)`.
+constexpr u32 kI2sBaseClkHz = 80000000u;
 
-// Wave8 pixel clock: 80 MHz APB / (10 + 0/1) = 8 MHz — 125 ns per pulse.
-// Fixed rate regardless of chipset (per the meta-issue directive: modern
-// driver is a general clockless like PARLIO, not per-chipset like Yves).
-// Wave3-eligible chipsets will re-program N/A/B in a follow-up when the
-// engine plumbs per-channel timing selection into the peripheral.
-constexpr int kWave8ClockDividerN = 10;
-constexpr int kWave8ClockDividerA = 1;
-constexpr int kWave8ClockDividerB = 0;
+/// @brief Solve the classic-ESP32 I2S1 fractional clock divider
+///        (`clkm_conf.clkm_div_{num,a,b}`) for a target frequency.
+///
+/// Selects `(N, A, B)` such that `80 MHz / (N + B/A)` best matches
+/// `target_hz`. Adapted from Yves's `i2s_define_bit_patterns` — same
+/// algorithm, just wrapped so it produces the divider triple without
+/// building the per-chipset pulse LUT (the modern engine uses wave8
+/// encoding, not per-chipset pulse patterns).
+inline void solveI2sClockDivider(u32 target_hz,
+                                  int* out_N, int* out_A, int* out_B) FL_NO_EXCEPT {
+    if (target_hz == 0) {
+        *out_N = 10;   // Default to 8 MHz (wave8 @ 800 kHz)
+        *out_A = 1;
+        *out_B = 0;
+        return;
+    }
+    const double f_target = static_cast<double>(target_hz);
+    const double f_base   = static_cast<double>(kI2sBaseClkHz);
+    int N = static_cast<int>(f_base / f_target);
+    if (N < 2) N = 2;
+    const double residual = (f_base / f_target) - static_cast<double>(N);
+
+    // Fractional part B/A — A ≤ 63 hardware limit. Sweep A, pick the
+    // (A, B) that minimises |residual - B/A|.
+    int best_A = 1;
+    int best_B = 0;
+    double best_err = residual;
+    for (int A = 1; A < 64; ++A) {
+        for (int B = 0; B < A; ++B) {
+            const double err = residual - (static_cast<double>(B) / A);
+            const double abs_err = err < 0 ? -err : err;
+            if (abs_err < best_err) {
+                best_err = abs_err;
+                best_A = A;
+                best_B = B;
+            }
+        }
+    }
+    // Double-precision 0.9999 corner: `A == B` collapses to the integer
+    // next up. Kept from Yves's original code.
+    if (best_A == best_B) {
+        best_A = 1;
+        best_B = 0;
+        ++N;
+    }
+    *out_N = N;
+    *out_A = best_A;
+    *out_B = best_B;
+}
 
 // Register-level reset helpers — inline replacements for Yves's
 // `i2s_reset*` free functions so the modern peripheral does not link
@@ -179,19 +195,12 @@ I2sPeripheralEsp32DevEsp::~I2sPeripheralEsp32DevEsp() {
 bool I2sPeripheralEsp32DevEsp::initialize(
     const I2sEsp32DevPeripheralConfig &cfg) FL_NO_EXCEPT {
     if (mInitialized) {
-        FL_WARN_F("I2sPeripheralEsp32DevEsp: already initialized");
-        return false;
-    }
-    // FastLED#3526 Phase 2b: modern-driver ownership handshake — refuse
-    // if another modern peripheral instance is already bound. The Yves
-    // classic driver tracks its own separate flag; during rollout only
-    // one binding path is active at a time (Yves via
-    // `-DFASTLED_ESP32_I2S=1`, modern via `Bus::FLEX_IO, 0` after Phase
-    // 2d), so we do not check Yves's flag here — that would drag the
-    // Yves TU into modern's link footprint, violating the meta-issue's
-    // "No calls into `i2s_esp32dev.cpp.hpp`" directive.
-    if (g_i2s1_hardware_claimed_by_modern) {
-        FL_WARN_F("I2sPeripheralEsp32DevEsp: I2S1 already claimed by another modern instance");
+        // FastLED#3526 Phase 2e — peripheral is a `fl::Singleton<>` so
+        // there is one process-wide instance. `mInitialized` is now the
+        // sole ownership record for I2S1 (former
+        // `g_i2s1_hardware_claimed_by_modern` global was folded into
+        // this member).
+        FL_WARN_F("I2sPeripheralEsp32DevEsp: I2S1 already claimed");
         return false;
     }
     mConfig = cfg;
@@ -242,14 +251,19 @@ bool I2sPeripheralEsp32DevEsp::initialize(
     i2s->sample_rate_conf.tx_bits_mod = 32;
     i2s->sample_rate_conf.tx_bck_div_num = 1;
 
-    // Main clock: 80 MHz APB / (N + B/A) = wave8's 8 MHz pixel clock.
-    // Fixed-rate — no per-chipset clock math. Wave3 mode will re-program
-    // these when per-channel timing plumbs through (follow-up).
+    // Main clock: 80 MHz APB / (N + B/A) = pixel clock. Variable-rate
+    // per `mConfig.mPixelClockHz` — supports wave8 at 8 MHz (WS2812
+    // 800 kHz × 8 pulses/bit), 3.2 MHz (WS2811 400 kHz × 8), 2.4 MHz
+    // wave3, or any chipset-specific rate the engine picks. Falls back
+    // to 8 MHz if `mPixelClockHz` is zero.
+    int div_N, div_A, div_B;
+    solveI2sClockDivider(mConfig.mPixelClockHz != 0 ? mConfig.mPixelClockHz : 8000000u,
+                          &div_N, &div_A, &div_B);
     i2s->clkm_conf.val = 0;
     i2s->clkm_conf.clka_en = 0;
-    i2s->clkm_conf.clkm_div_a = kWave8ClockDividerA;
-    i2s->clkm_conf.clkm_div_b = kWave8ClockDividerB;
-    i2s->clkm_conf.clkm_div_num = kWave8ClockDividerN;
+    i2s->clkm_conf.clkm_div_a = div_A;
+    i2s->clkm_conf.clkm_div_b = div_B;
+    i2s->clkm_conf.clkm_div_num = div_N;
 
     // FIFO in DMA-serviced mode. `tx_fifo_mod = 3` selects the 32-bit
     // single-channel data path (each DMA word is one output sample).
@@ -309,7 +323,6 @@ bool I2sPeripheralEsp32DevEsp::initialize(
         return false;
     }
 
-    g_i2s1_hardware_claimed_by_modern = true;
     mInitialized = true;
     mBusy = false;
     return true;
@@ -340,7 +353,6 @@ void I2sPeripheralEsp32DevEsp::deinitialize() FL_NO_EXCEPT {
         heap_caps_free(mDescriptor);
         mDescriptor = nullptr;
     }
-    g_i2s1_hardware_claimed_by_modern = false;
     mInitialized = false;
     mBusy = false;
 }
