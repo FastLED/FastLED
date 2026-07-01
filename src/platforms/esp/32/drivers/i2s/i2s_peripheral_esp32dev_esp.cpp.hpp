@@ -63,9 +63,11 @@
 #if FASTLED_ESP32_HAS_I2S
 
 #include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_esp.h"
+#include "platforms/esp/32/drivers/i2s/i2s_esp32dev.h"  // FastLED#3526 Phase 2b — real hardware init/start/wait
 
 #include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
+#include "fl/chipsets/led_timing.h"
 
 FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
@@ -106,14 +108,28 @@ bool I2sPeripheralEsp32DevEsp::initialize(
         FL_WARN_F("I2sPeripheralEsp32DevEsp: already initialized");
         return false;
     }
+    // FastLED#3526 Phase 2b: hardware-ownership check — the classic
+    // Yves `ClocklessI2S<>` template on `-DFASTLED_ESP32_I2S=1` uses
+    // the same I2S1 peripheral via file-scope globals; both cannot own
+    // the hardware simultaneously. First-in-wins.
+    if (i2s_is_initialized()) {
+        FL_WARN_F("I2sPeripheralEsp32DevEsp: I2S1 already claimed by classic ClocklessI2S — refusing to bind");
+        return false;
+    }
     mConfig = cfg;
 
-    // Stage 4 v1: accept the config, don't touch I2S registers yet.
-    // Register-level bring-up on `I2S1` moves into Stage 5 alongside
-    // the DMA descriptor chain + ISR install. Skipping it here means
-    // this TU can be linked into the classic-ESP32 unity build
-    // without pulling in `driver/i2s.h` / `driver_ng` — the ecosystem
-    // conflict that blocked Stage 2 stays clear.
+    // FastLED#3526 Phase 2b — real hardware init. Uses the tested Yves
+    // C-style utilities from `i2s_esp32dev.h` to configure the I2S1
+    // peripheral registers + DMA descriptor allocation + ISR install.
+    // Once Phase 2e deletes the Yves driver, these utility functions
+    // become inline in this file. Chipset timing defaults to canonical
+    // WS2812B until the modern engine adds a `configureTiming()`
+    // method that plumbs per-channel `ChipsetTimingConfig` through.
+    const ChipsetTiming default_timing =
+        to_runtime_timing<TIMING_WS2812_800KHZ>();
+    i2s_define_bit_patterns(default_timing);
+    i2s_init(static_cast<int>(mConfig.mI2sPort));
+
     mInitialized = true;
     mBusy = false;
     return true;
