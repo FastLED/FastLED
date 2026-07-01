@@ -1,0 +1,48 @@
+name: esp32dev_idf6
+
+# Compile-smoke of the classic-ESP32 I2S clockless driver against ESP-IDF v6.0+
+# via pioarduino's prep_IDF6 branch (arduino-esp32 master with IDF v6.0.1+).
+#
+# This job exercises the `i2s_ll_enable_bus_clock` + `PERIPH_RCC_ATOMIC()` path
+# in `src/platforms/esp/32/drivers/i2s/i2s_periph_compat.h` (landed in #3511 /
+# #3514). Board defaults to `-DFASTLED_ESP32_I2S=1` so the Yves driver actually
+# compiles, not just the stubs.
+#
+# Part of FastLED#3516 meta / #3515 Phase A.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - '!src/platforms/arm/**'
+      - '!src/platforms/wasm/**'
+      - '!src/platforms/avr/**'
+      - 'src/platforms/esp/**'
+      - 'examples/**'
+      - 'ci/**'
+      - '.github/workflows/build_esp32dev_idf6.yml'
+      - '.github/workflows/build_template.yml'
+      - 'CMakeLists.txt'
+      - 'platformio.ini'
+      - 'library.json'
+      - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  pull_request:
+    paths:
+      - 'src/platforms/esp/32/drivers/i2s/**'
+      - 'src/platforms/esp/clockless.h'
+      - '.github/workflows/build_esp32dev_idf6.yml'
+      - 'ci/boards.py'
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: esp32dev_idf6 --examples Blink,SpecialDrivers/ESP/DriverTest

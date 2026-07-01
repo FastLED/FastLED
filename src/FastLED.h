@@ -44,12 +44,12 @@
 #    endif
 #  endif
 #endif
-// ESP32 I2S Driver compatibility warning
+// ESP32 I2S Driver deprecation notice — `FASTLED_ESP32_I2S` was removed
+// per FastLED#3516. If a user defines it we warn them to migrate to the
+// runtime selection API (`FastLED.enableDriver<fl::Bus::FLEX_IO, 0>()`)
+// instead of the compile-time flag.
 #if defined(FASTLED_ESP32_I2S) && !defined(FASTLED_INTERNAL)
-#include "platforms/esp/esp_version.h"  // ok platform headers
-#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR >= 5
-#warning "ESP32 I2S Driver: ESP-IDF 5.x detected. This driver may not work reliably with ESP-IDF 5.x+. Consider using RMT driver instead or staying on ESP-IDF 4.x. See ESP32_I2S_ISSUES.md for details. Report issues at: https://github.com/FastLED/FastLED/issues"
-#endif
+#warning "FASTLED_ESP32_I2S is deprecated (FastLED#3516). The I2S driver is now always compiled on classic ESP32 (gc-sections elides it when unused) and selected at runtime via `FastLED.enableDriver<fl::Bus::FLEX_IO, 0>()`. Remove the `-DFASTLED_ESP32_I2S` define — the flag is a no-op."
 #endif
 
 // ESP32 RMT Driver conflict prevention
