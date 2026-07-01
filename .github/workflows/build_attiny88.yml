@@ -24,4 +24,9 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: attiny88 all
+      # RGBWColorimetric hits the SK6812 clockless_blocking timing floor
+      # (T3 >= 3 cycles ~= 375ns at 8 MHz, SK6812 T3 = 300ns) — the
+      # FL_STATIC_ASSERT in src/platforms/avr/attiny/clockless_blocking.h
+      # fires at compile time. Exclude the one example, keep the other 31
+      # in the sweep.
+      args: attiny88 all --exclude-examples RGBWColorimetric
