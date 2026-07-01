@@ -157,6 +157,14 @@
 #include "fl/stl/noexcept.h"
 #include "fl/stl/cstring.h"
 #include "eorder.h"
+#include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h"
+#include "platforms/arm/lpc/drivers/sct_dma/lpc_sct_dma_runtime.h"
+
+namespace fl {
+
+#ifndef FL_CLOCKLESS_CONTROLLER_DEFINED
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
+#endif
 
 // Peripheral access uses the canonical NXP CMSIS PAL types (SCT_Type,
 // DMA_Type, SYSCON_Type) and pointer macros (SCT0, DMA0, SYSCON). These

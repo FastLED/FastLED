@@ -11,29 +11,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
 
-// ------------------------------------------------------------------
-// SCT match-register slot defaults. The legacy template driver
-// (`clockless_arm_lpc_pwm_dma.h`) references these as project-supplied
-// `-D` flags without providing fallbacks. The runtime form provides
-// defaults that match the documented layout in the header comment block
-// (MATCH0 = RISE, MATCH1 = T0_FALL, MATCH2 = T1_FALL, MATCH3 = END) so
-// downstream callers don't have to define them.
-// ------------------------------------------------------------------
-#ifndef FASTLED_LPC_PWM_DMA_BASECH
-#define FASTLED_LPC_PWM_DMA_BASECH 0u
-#endif
-#ifndef FASTLED_LPC_PWM_DMA_SCT_MATCH_RISE
-#define FASTLED_LPC_PWM_DMA_SCT_MATCH_RISE 0u
-#endif
-#ifndef FASTLED_LPC_PWM_DMA_SCT_MATCH_T0FALL
-#define FASTLED_LPC_PWM_DMA_SCT_MATCH_T0FALL 1u
-#endif
-#ifndef FASTLED_LPC_PWM_DMA_SCT_MATCH_T1FALL
-#define FASTLED_LPC_PWM_DMA_SCT_MATCH_T1FALL 2u
-#endif
-#ifndef FASTLED_LPC_PWM_DMA_SCT_MATCH_END
-#define FASTLED_LPC_PWM_DMA_SCT_MATCH_END 3u
-#endif
+
 
 namespace fl {
 
