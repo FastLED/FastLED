@@ -25,6 +25,29 @@ struct TypeToJson<fl::string> {
     }
 };
 
+// Explicit unsigned-int specialization. Without this, `json(u32_value)` in
+// the primary template above is ambiguous between `json(int)` and
+// `json(i64)` for a `u32` argument — GCC 15 reports:
+//     error: call of overloaded 'json(const long unsigned int&)' is ambiguous
+// Route u32 → i64 explicitly so the RPC framework can carry unsigned 32-bit
+// return values / arg types (e.g. `fl::u32 rgb` in the LPC PWM+DMA
+// AutoResearch RPCs from #3517).
+template <>
+struct TypeToJson<fl::u32> {
+    static json convert(const fl::u32& value) {
+        return json(static_cast<fl::i64>(value));
+    }
+};
+
+// Sibling specialization for u16 which would hit the same ambiguity on
+// GCC 15 despite implicit promotion — safer to be explicit.
+template <>
+struct TypeToJson<fl::u16> {
+    static json convert(const fl::u16& value) {
+        return json(static_cast<fl::i64>(value));
+    }
+};
+
 // json identity conversion - pass json through unchanged
 template <>
 struct TypeToJson<fl::json> {
