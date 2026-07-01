@@ -153,4 +153,17 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
     bool mPeripheralInitialized;
 };
 
+/// @brief Factory that builds a `ChannelEngineI2sEsp32Dev` wrapping a
+///        real hardware peripheral, returned as a `shared_ptr<IChannelDriver>`
+///        suitable for registration with the channel manager.
+///
+/// FastLED#3526 Phase 2d — used by the `BusTraits<Bus::FLEX_IO, 1>`
+/// specialization on classic ESP32 to expose the modern engine at
+/// slot 1 (slot 0 stays with the I2S-SPI driver during rollout).
+///
+/// On non-classic-ESP32 targets or builds without `FASTLED_ESP32_HAS_I2S`,
+/// returns nullptr so the channel-manager registration path skips
+/// cleanly.
+fl::shared_ptr<IChannelDriver> createI2sEsp32DevEngine() FL_NO_EXCEPT;
+
 } // namespace fl

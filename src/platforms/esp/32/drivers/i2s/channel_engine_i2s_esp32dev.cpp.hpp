@@ -10,6 +10,12 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/move.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/shared_ptr.h"  // for fl::make_shared
+#include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32)
+#include "platforms/esp/32/feature_flags/enabled.h"
+#include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_esp.h"
+#endif
 
 namespace fl {
 
@@ -336,6 +342,19 @@ void ChannelEngineI2sEsp32Dev::onTransmitDone() FL_NO_EXCEPT {
     // pump picks up the flag and does the cleanup work outside ISR
     // context.
     mTransmitCompleted = true;
+}
+
+//=============================================================================
+// Factory — FastLED#3526 Phase 2d
+//=============================================================================
+
+fl::shared_ptr<IChannelDriver> createI2sEsp32DevEngine() FL_NO_EXCEPT {
+#if defined(FL_IS_ESP_32DEV) && FASTLED_ESP32_HAS_I2S
+    auto peripheral = fl::make_shared<I2sPeripheralEsp32DevEsp>();
+    return fl::make_shared<ChannelEngineI2sEsp32Dev>(peripheral);
+#else
+    return nullptr;
+#endif
 }
 
 } // namespace fl

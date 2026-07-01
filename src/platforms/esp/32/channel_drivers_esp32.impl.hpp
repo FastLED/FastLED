@@ -45,6 +45,17 @@ inline void enableAllChannelDrivers() FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_LCD_RGB
     fl::enableDriver<fl::Bus::FLEX_IO, 1>();
 #endif
+    // FastLED#3526 — the modern classic-ESP32 I2S parallel-out engine
+    // (`ChannelEngineI2sEsp32Dev`) wraps the SAME I2S1 peripheral as
+    // the current `I2S_SPI` driver at `Bus::FLEX_IO, 0`. Per the
+    // parallel-IO unified-engine rule (agents/docs/cpp-standards.md
+    // -> "the peripheral is the dispatch boundary, not the mode"),
+    // both cannot bind at the same slot. Phase 2d proper replaces the
+    // I2S_SPI binding at slot 0 with the unified clockless+SPI modern
+    // engine — but that requires Phase 2c-SPI's real transmit path to
+    // land first so SPI users aren't broken. Until then, slot 0 stays
+    // with I2S_SPI and the modern engine is a library-linked
+    // implementation ready for the swap.
 }
 
 }  // namespace platforms
