@@ -15,21 +15,14 @@
 
 #include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_esp.cpp.hpp"
 #include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_mock.cpp.hpp"
+#include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_esp.cpp.hpp"
 #include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_mock.cpp.hpp"
-// The real-hardware peripheral (`i2s_peripheral_esp32dev_esp.cpp.hpp`)
-// header and impl exist in the tree but are NOT included in the
-// classic-ESP32 unity build yet. Its `#include "driver/i2s.h"` pulls
-// in IDF's `driver_ng` framework, which conflicts at IDF init time
-// with the legacy `driver/adc.h` path pulled in by
-// `platforms/esp/32/pin_esp32_native_impl.hpp` — the resulting
-// runtime abort is `ADC: CONFLICT! driver_ng is not allowed to be
-// used with the legacy driver`. Wiring the real-hw impl requires
-// migrating that ADC path to `esp_adc/adc_oneshot.h` first (or
-// dropping the ADC include when only pinMode() is reached). Yves
-// Bazin's third-party driver (`i2s_esp32dev.{h,cpp.hpp}` +
-// `clockless_i2s_esp32.{h,cpp.hpp}`) is *deleted* in this PR —
-// that removes 800+ LoC of legacy register access and clears the
-// path forward.
+// Stage 4 (#3474) rewrote the real-hw peripheral impl above to drop
+// its `driver/i2s.h` include; the ecosystem `driver_ng` vs legacy-
+// ADC panic that blocked Stage 2 doesn't fire in this shape, so the
+// TU is now linked into the classic-ESP32 unity build. Register-
+// level bring-up + DMA descriptor chain + ISR install move into
+// Stage 5.
 
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s.cpp.hpp"
 
