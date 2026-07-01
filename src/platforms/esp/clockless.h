@@ -29,8 +29,10 @@ namespace fl {
 // Define platform-default ClocklessController alias for ESP32
 // Multiple driver types are available (ClocklessIdf4/ClocklessIdf5, ClocklessSPI, ClocklessI2S)
 // This alias selects the preferred default for backward compatibility
-#if defined(FASTLED_ESP32_I2S) && !ESP_IDF_VERSION_6_OR_HIGHER
-  // I2S driver requested explicitly (not available on ESP-IDF 6.0+)
+#if defined(FASTLED_ESP32_I2S)
+  // I2S driver requested explicitly. On ESP-IDF 4.x/5.x uses the classic
+  // periph_module path; on IDF 6.x+ routes through the LL-API compat shim
+  // (`i2s_periph_compat.h`). See FastLED#3509.
   template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
   using ClocklessController = ClocklessI2S<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
   #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
