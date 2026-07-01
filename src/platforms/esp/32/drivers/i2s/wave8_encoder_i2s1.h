@@ -44,6 +44,7 @@
 
 // IWYU pragma: private
 
+#include "fl/channels/wave3.h"
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/int.h"
@@ -100,6 +101,45 @@ bool encodeChannelWave8_i2s1(fl::span<const fl::u8> input,
                              fl::size_t bytes_per_lane,
                              fl::size_t num_lanes,
                              const Wave8ByteExpansionLut &lut,
+                             fl::span<fl::u8> output) FL_NO_EXCEPT;
+
+// ============================================================================
+// Wave3 sibling (FastLED#3526 Phase 2a follow-up)
+// ============================================================================
+//
+// Wave3 is a 3-pulse-per-bit expansion (vs wave8's 8-pulse-per-bit). It saves
+// 2.67x memory for chipsets whose timing is expressible as 1-tick and 2-tick
+// slots (e.g. WS2812 with T1=250 T2=625 T3=375 rounds to 1/2/N ticks per 3).
+// Callers check eligibility via `fl::canUseWave3(timing)` and use the wave3
+// path when true, falling back to wave8 otherwise. Pixel clock rate is per-
+// chipset via `fl::wave3ClockFrequencyHz(timing)` instead of the fixed 8 MHz
+// wave8 rate.
+
+/// @brief Byte-count per input byte-position in the wave3 encoder output.
+///
+/// Each byte position expands to 16 lane positions × 1 `Wave3Byte`
+/// (3 bytes) = 48 output bytes. 8/3 = 2.67x smaller than wave8's 128.
+constexpr fl::size_t kWave3I2s1BytesPerBytePosition = 16 * sizeof(Wave3Byte);
+
+/// @brief Encoded output size for a full wave3 frame.
+constexpr fl::size_t wave3I2s1EncodedFrameSize(fl::size_t bytes_per_lane) FL_NO_EXCEPT {
+    return bytes_per_lane * kWave3I2s1BytesPerBytePosition;
+}
+
+/// @brief Encode one frame across `num_lanes` LED strips into a wave3
+///        pulse-major byte stream ready for I2S1 DMA output.
+///
+/// Same input layout as `encodeChannelWave8_i2s1`. Wave3 eligibility is
+/// the caller's responsibility — pass an LUT built via
+/// `buildWave3ExpansionLUT(timing)` for a `canUseWave3(timing) == true`
+/// chipset. Undefined output for wave3-ineligible timings.
+///
+/// @return true on success. false if inputs are out of range OR the
+///         output span is too small.
+bool encodeChannelWave3_i2s1(fl::span<const fl::u8> input,
+                             fl::size_t bytes_per_lane,
+                             fl::size_t num_lanes,
+                             const Wave3BitExpansionLut &lut,
                              fl::span<fl::u8> output) FL_NO_EXCEPT;
 
 } // namespace fl

@@ -195,6 +195,74 @@ FL_TEST_CASE("encodeChannelWave8_i2s1 — inactive-lane bytes ignored") {
     }
 }
 
+// ============================================================================
+// Wave3 sibling tests (FastLED#3526 Phase 2a follow-up)
+// ============================================================================
+
+FL_TEST_CASE("encodeChannelWave3_i2s1 — WS2812 is wave3-eligible and encodes byte-exact") {
+    // WS2812 canonical timing: T1=250, T2=625, T3=375 → period 1250 ns.
+    // canUseWave3 must accept this so wave3 encoding is available.
+    ChipsetTiming timing = to_runtime_timing<TIMING_WS2812_800KHZ>();
+    FL_REQUIRE(canUseWave3(timing));
+
+    Wave3BitExpansionLut lut = buildWave3ExpansionLUT(timing);
+
+    // 1 lane, 3 bytes/lane. Total input frame is 16*3 = 48 bytes.
+    // Encoded output is bytes_per_lane * (16 * sizeof(Wave3Byte))
+    //                 = 3 * 48 = 144 bytes.
+    fl::vector<fl::u8> input(16 * 3, 0);
+    input[0] = 0x33;
+    input[1] = 0xCC;
+    input[2] = 0x55;
+    fl::vector<fl::u8> encoded(wave3I2s1EncodedFrameSize(3), 0xAB);
+
+    bool ok = encodeChannelWave3_i2s1(fl::span<const fl::u8>(input),
+                                       /*bytes_per_lane=*/3,
+                                       /*num_lanes=*/1, lut,
+                                       fl::span<fl::u8>(encoded));
+    FL_REQUIRE(ok);
+
+    // Reference: run the shared wave3Transpose_16 kernel directly on the
+    // per-byte-position lane arrays and compare byte-exact. Same anti-drift
+    // pattern as the wave8 test above.
+    constexpr size_t kBlockSize = 16 * sizeof(Wave3Byte);
+    fl::u8 ref[3 * kBlockSize] = {0};
+    for (size_t byte_pos = 0; byte_pos < 3; ++byte_pos) {
+        fl::u8 lanes[16] = {0};
+        lanes[0] = input[byte_pos];
+        wave3Transpose_16(
+            reinterpret_cast<const fl::u8(&)[16]>(lanes), lut,
+            *reinterpret_cast<fl::u8(*)[kBlockSize]>(ref + byte_pos * kBlockSize));
+    }
+
+    for (size_t i = 0; i < sizeof(ref); ++i) {
+        FL_REQUIRE_EQ(encoded[i], ref[i]);
+    }
+}
+
+FL_TEST_CASE("encodeChannelWave3_i2s1 — rejects out-of-range inputs") {
+    ChipsetTiming timing = to_runtime_timing<TIMING_WS2812_800KHZ>();
+    Wave3BitExpansionLut lut = buildWave3ExpansionLUT(timing);
+
+    fl::vector<fl::u8> input(16 * 3, 0);
+    fl::vector<fl::u8> output(wave3I2s1EncodedFrameSize(3), 0);
+
+    // Zero lanes rejected.
+    FL_REQUIRE(!encodeChannelWave3_i2s1(fl::span<const fl::u8>(input), 3, 0, lut,
+                                         fl::span<fl::u8>(output)));
+    // 17 lanes rejected.
+    FL_REQUIRE(!encodeChannelWave3_i2s1(fl::span<const fl::u8>(input), 3, 17, lut,
+                                         fl::span<fl::u8>(output)));
+    // Undersized input rejected.
+    fl::vector<fl::u8> short_input(47, 0);
+    FL_REQUIRE(!encodeChannelWave3_i2s1(fl::span<const fl::u8>(short_input), 3, 1,
+                                         lut, fl::span<fl::u8>(output)));
+    // Undersized output rejected.
+    fl::vector<fl::u8> short_output(wave3I2s1EncodedFrameSize(3) - 1, 0);
+    FL_REQUIRE(!encodeChannelWave3_i2s1(fl::span<const fl::u8>(input), 3, 1, lut,
+                                         fl::span<fl::u8>(short_output)));
+}
+
 }  // FL_TEST_FILE
 
 #endif  // FASTLED_STUB_IMPL
