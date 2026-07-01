@@ -58,7 +58,7 @@ u32 wave3ClockFrequencyHz(const ChipsetTiming& timing);
 /// @return Populated Wave3BitExpansionLut lookup table (32 bytes)
 Wave3BitExpansionLut buildWave3ExpansionLUT(const ChipsetTiming& timing);
 
-// Forward declaration for inline function (implementation in detail/wave3.hpp)
+// Forward declaration; implementation is out-of-line in detail/wave3.cpp.hpp
 void wave3(u8 lane,
            const Wave3BitExpansionLut& lut,
            u8 (&FL_RESTRICT_PARAM output)[sizeof(Wave3Byte)]);

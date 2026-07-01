@@ -13,7 +13,7 @@
 #include "test.h"
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s1.h"
 #include "fl/channels/wave8.h"
-#include "fl/channels/detail/wave8.hpp"
+#include "fl/channels/detail/wave8.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/vector.h"
 

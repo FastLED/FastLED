@@ -22,7 +22,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/task/executor.h"
 #include "fl/channels/wave8.h"
-#include "fl/channels/detail/wave8.hpp"
+#include "fl/channels/detail/wave8.h"
 #include "fl/stl/noexcept.h"
 
 // Include ESP implementation only on real hardware

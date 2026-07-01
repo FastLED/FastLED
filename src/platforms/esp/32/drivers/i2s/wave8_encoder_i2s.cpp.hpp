@@ -5,7 +5,7 @@
 
 #include "fl/stl/compiler_control.h"
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s.h"
-#include "fl/channels/detail/wave8.hpp"
+#include "fl/channels/detail/wave8.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/noexcept.h"
 #include "fl/log/log.h"
