@@ -73,10 +73,13 @@ FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
 #include "esp_err.h"
 #include "esp_heap_caps.h"
+#include "esp_intr_alloc.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "rom/lldesc.h"
 #include "soc/i2s_reg.h"
 #include "soc/i2s_struct.h"
+#include "soc/soc.h"
 // IWYU pragma: end_keep
 FL_EXTERN_C_END
 
@@ -135,6 +138,14 @@ inline void reset_i2s_fifo(i2s_dev_t* i2s) FL_NO_EXCEPT {
     i2s->conf.tx_fifo_reset = 0;
 }
 
+// FastLED#3526 Phase 2b step B — DMA-done ISR handler.
+//
+// Runs in ISR context. `arg` is the peripheral instance. On `out_eof`
+// (end-of-frame — DMA finished draining the descriptor), clear the
+// interrupt, mark the peripheral not-busy, and fire the registered
+// completion callback (which routes to the channel-engine trampoline).
+FL_IRAM void i2s_dma_isr_trampoline(void* arg) FL_NO_EXCEPT;
+
 }  // anonymous namespace
 
 //=============================================================================
@@ -146,7 +157,9 @@ I2sPeripheralEsp32DevEsp::I2sPeripheralEsp32DevEsp() FL_NO_EXCEPT
       mInitialized(false),
       mBusy(false),
       mCallback(nullptr),
-      mCallbackUserCtx(nullptr) {}
+      mCallbackUserCtx(nullptr),
+      mDescriptor(nullptr),
+      mIsrHandle(nullptr) {}
 
 I2sPeripheralEsp32DevEsp::~I2sPeripheralEsp32DevEsp() {
     if (mInitialized) {
@@ -255,6 +268,42 @@ bool I2sPeripheralEsp32DevEsp::initialize(
 
     i2s->timing.val = 0;
 
+    // FastLED#3526 Phase 2b step B — allocate one DMA-capable descriptor
+    // for single-shot transmit. Streaming (multi-descriptor ring) is a
+    // follow-up when the engine can produce buffers larger than one
+    // descriptor's 4 KB reach.
+    mDescriptor = static_cast<lldesc_t*>(heap_caps_malloc(sizeof(lldesc_t), MALLOC_CAP_DMA));
+    if (!mDescriptor) {
+        FL_WARN_F("I2sPeripheralEsp32DevEsp: descriptor alloc failed");
+        return false;
+    }
+    mDescriptor->owner = 1;
+    mDescriptor->sosf = 1;
+    mDescriptor->eof = 1;
+    mDescriptor->offset = 0;
+    mDescriptor->empty = 0;
+    mDescriptor->buf = nullptr;
+    mDescriptor->size = 0;
+    mDescriptor->length = 0;
+    mDescriptor->qe.stqe_next = nullptr;
+
+    // Enable OUT_EOF interrupt bit so the DMA-done ISR fires at the end
+    // of each descriptor. `int_ena.out_eof = 1` on the peripheral, then
+    // install our ISR handler via `esp_intr_alloc`.
+    i2s->int_ena.val = 0;
+    i2s->int_ena.out_eof = 1;
+
+    const int interrupt_source =
+        (i2s_device == 0) ? ETS_I2S0_INTR_SOURCE : ETS_I2S1_INTR_SOURCE;
+    esp_err_t err = esp_intr_alloc(interrupt_source, ESP_INTR_FLAG_IRAM,
+                                   &i2s_dma_isr_trampoline, this, &mIsrHandle);
+    if (err != ESP_OK) {
+        FL_WARN_F("I2sPeripheralEsp32DevEsp: esp_intr_alloc failed err=%s", static_cast<int>(err));
+        heap_caps_free(mDescriptor);
+        mDescriptor = nullptr;
+        return false;
+    }
+
     g_i2s1_hardware_claimed_by_modern = true;
     mInitialized = true;
     mBusy = false;
@@ -265,18 +314,26 @@ void I2sPeripheralEsp32DevEsp::deinitialize() FL_NO_EXCEPT {
     if (!mInitialized) {
         return;
     }
-    // FastLED#3526 Phase 2b — stop the peripheral inline (no calls into
-    // Yves). Clears `tx_start` and resets the block so the DMA doesn't
-    // drift into the next caller's buffer. When Phase 2b step B lands
-    // ISR install + DMA descriptor allocation, this same path will
-    // also `esp_intr_disable()` the ISR handle before the register
-    // reset.
+    const int i2s_device = static_cast<int>(mConfig.mI2sPort);
+    i2s_dev_t* const i2s = (i2s_device == 0) ? &I2S0 : &I2S1;
+
+    // Stop the peripheral first so DMA doesn't drift into the next
+    // caller's buffer while we tear down. Then disable + free the ISR
+    // handle. Then free the descriptor.
     if (mBusy) {
-        const int i2s_device = static_cast<int>(mConfig.mI2sPort);
-        i2s_dev_t* const i2s = (i2s_device == 0) ? &I2S0 : &I2S1;
         reset_i2s_registers(i2s);
         i2s->conf.rx_start = 0;
         i2s->conf.tx_start = 0;
+    }
+    i2s->int_ena.val = 0;
+    if (mIsrHandle) {
+        (void)esp_intr_disable(mIsrHandle);
+        (void)esp_intr_free(mIsrHandle);
+        mIsrHandle = nullptr;
+    }
+    if (mDescriptor) {
+        heap_caps_free(mDescriptor);
+        mDescriptor = nullptr;
     }
     g_i2s1_hardware_claimed_by_modern = false;
     mInitialized = false;
@@ -321,26 +378,65 @@ bool I2sPeripheralEsp32DevEsp::transmit(const u8 *buffer,
         FL_WARN_F("I2sPeripheralEsp32DevEsp: transmit while busy");
         return false;
     }
-
-    // Stage 4 v1: accept the buffer and fire the completion callback
-    // synchronously — the engine's state machine advances BUSY →
-    // poll() → READY exactly as it would with the real ISR path, and
-    // the same code path the mock's `simulateTransmitDone()` drives.
-    // Stage 5 replaces this fake-async arm with a real DMA descriptor
-    // kick + ISR-context callback.
-    (void)buffer;
-    (void)size_bytes;
-
-    mBusy = false;
-    if (mCallback != nullptr) {
-        (*mCallback)(mCallbackUserCtx);
+    // Descriptor field `length`/`size` are 12-bit — the DMA can carry
+    // 4093 bytes max per descriptor. Anything larger needs a chain, which
+    // is a Phase 2b step B follow-up (streaming refill from the ISR).
+    if (size_bytes > 4092) {
+        FL_WARN_F("I2sPeripheralEsp32DevEsp: buffer too large for single descriptor (%s > 4092)", static_cast<int>(size_bytes));
+        return false;
     }
+
+    const int i2s_device = static_cast<int>(mConfig.mI2sPort);
+    i2s_dev_t* const i2s = (i2s_device == 0) ? &I2S0 : &I2S1;
+
+    // Point the descriptor at the caller's DMA-capable buffer. Ownership
+    // stays with the DMA engine until it finishes (owner=1). `sosf`+`eof`
+    // = single-shot, one-descriptor frame. `qe.stqe_next = nullptr` ends
+    // the chain (no streaming refill in this step).
+    mDescriptor->buf = const_cast<u8*>(buffer);
+    mDescriptor->size = size_bytes;
+    mDescriptor->length = size_bytes;
+    mDescriptor->owner = 1;
+    mDescriptor->sosf = 1;
+    mDescriptor->eof = 1;
+    mDescriptor->offset = 0;
+    mDescriptor->empty = 0;
+    mDescriptor->qe.stqe_next = nullptr;
+
+    // Reset the peripheral so no stale DMA state carries over from a
+    // prior kick, then arm the output link with our descriptor address
+    // and start the DMA. The ISR will fire when the descriptor drains.
+    reset_i2s_registers(i2s);
+    i2s->lc_conf.val = I2S_OUT_DATA_BURST_EN | I2S_OUTDSCR_BURST_EN;
+    i2s->int_clr.val = i2s->int_raw.val;
+    i2s->out_link.addr = reinterpret_cast<u32>(mDescriptor); // ok reinterpret cast - DMA hardware register expects the physical address of the lldesc as a u32
+    i2s->out_link.start = 1;
+
+    esp_err_t err = esp_intr_enable(mIsrHandle);
+    if (err != ESP_OK) {
+        FL_WARN_F("I2sPeripheralEsp32DevEsp: esp_intr_enable failed err=%s", static_cast<int>(err));
+        return false;
+    }
+
+    mBusy = true;
+    i2s->conf.tx_start = 1;
     return true;
 }
 
 bool I2sPeripheralEsp32DevEsp::waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT {
-    (void)timeout_ms;
-    return !mBusy;
+    // Simple spin-wait for the ISR to clear `mBusy`. Callers typically
+    // pass ~500 ms and only reach this path when they're about to
+    // enqueue a next frame — nothing more elaborate needed until the
+    // engine grows a genuine concurrent enqueue path.
+    const TickType_t start = xTaskGetTickCount();
+    const TickType_t deadline = start + pdMS_TO_TICKS(timeout_ms);
+    while (mBusy) {
+        if (xTaskGetTickCount() >= deadline) {
+            return false;
+        }
+        vTaskDelay(1);
+    }
+    return true;
 }
 
 bool I2sPeripheralEsp32DevEsp::isBusy() const FL_NO_EXCEPT { return mBusy; }
@@ -363,6 +459,46 @@ bool I2sPeripheralEsp32DevEsp::registerTransmitCallback(
 const I2sEsp32DevPeripheralConfig &
 I2sPeripheralEsp32DevEsp::getConfig() const FL_NO_EXCEPT {
     return mConfig;
+}
+
+//=============================================================================
+// ISR trampoline
+//=============================================================================
+
+namespace {
+
+FL_IRAM void i2s_dma_isr_trampoline(void* arg) FL_NO_EXCEPT {
+    auto* self = static_cast<I2sPeripheralEsp32DevEsp*>(arg);
+    if (!self) {
+        return;
+    }
+    const int i2s_device = static_cast<int>(self->getConfig().mI2sPort);
+    i2s_dev_t* const i2s = (i2s_device == 0) ? &I2S0 : &I2S1;
+
+    // Only respond to OUT_EOF. Other flags (out_dscr_err, etc.) are not
+    // enabled in `int_ena` so shouldn't fire, but guard defensively.
+    if (i2s->int_st.out_eof) {
+        i2s->int_clr.val = i2s->int_raw.val;
+        i2s->conf.tx_start = 0;
+
+        // Fire user callback via the peripheral's registered slot.
+        // Callback is registered via `registerTransmitCallback` before
+        // any transmit is issued; the engine's trampoline lives in
+        // channel_engine_i2s_esp32dev and just flips `mTransmitCompleted`.
+        self->finishTransmitFromIsr();
+    }
+}
+
+}  // anonymous namespace
+
+// FastLED#3526 Phase 2b step B — ISR-context completion. Declared with a
+// public linker name so the trampoline (in the anonymous namespace) can
+// call it. Marked FL_IRAM so it stays resident during flash reads.
+FL_IRAM void I2sPeripheralEsp32DevEsp::finishTransmitFromIsr() FL_NO_EXCEPT {
+    mBusy = false;
+    if (mCallback != nullptr) {
+        (*mCallback)(mCallbackUserCtx);
+    }
 }
 
 } // namespace fl
