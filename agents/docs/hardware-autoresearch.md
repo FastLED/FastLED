@@ -58,6 +58,16 @@ bash autoresearch --all --skip-lint --timeout 180
 ### Build Backend
 `bash autoresearch` uses fbuild for all board compiles. Do not use board-specific PlatformIO fallback paths for compatibility issues; file board build compatibility problems at https://github.com/FastLED/fbuild/issues.
 
+### 🚨 Deploy Backend: fbuild ONLY
+
+`bash autoresearch` MUST NOT invoke flash tools directly. The build → deploy → run sequence is:
+
+1. `fbuild build --environment <env>` — fbuild produces `firmware.bin`.
+2. `fbuild deploy --environment <env>` — fbuild flashes the board.
+3. autoresearch opens the VCOM and runs the RPC bench.
+
+Steps 1 and 2 are both fbuild's responsibility. autoresearch is a bench-orchestration tool; it is not a flasher. If fbuild lacks a deployer for your target (e.g. nxplpc as of 2026-07-01), file the gap at https://github.com/FastLED/fbuild/issues and let autoresearch fail loudly — do **not** add a `pyocd`/`lpc21isp`/`esptool`/etc. call from autoresearch as a "temporary" fallback. The wedge story on 2026-07-01 (LPC-Link2 CMSIS-DAP v1 firmware hanging pyocd's Windows HID for 8 minutes) is exactly the class of bug that happens when deployment is scattered instead of centralised. Full rule: `agents/docs/build-system.md` → "Deployment (flash / upload) is fbuild's job — ALWAYS". Tracking issue for the nxplpc gap: FastLED/fbuild#921.
+
 ### Synthesised `platformio.ini` (no root dependency)
 
 Since #3281, `bash autoresearch` synthesises its own `.build/pio/<board>/platformio.ini` from `ci/boards.py` before launching fbuild — the same pattern `bash compile` already uses. **Root `./platformio.ini` is NOT consulted in the default path.** The staged tree under `.build/pio/<board>/` contains:

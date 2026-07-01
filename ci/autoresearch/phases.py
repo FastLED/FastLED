@@ -1268,10 +1268,12 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
     print(f"\U0001f4e6 Using {build_driver.name}")
 
     if final_environment_norm in LPC_BRING_UP_ENVS:
-        # fbuild's nxplpc orchestrator does not yet ship a deployer
-        # (`daemon/.../deploy.rs` only dispatches avr/teensy). Bring-up boards
-        # run `fbuild build` followed by a pyocd-based flash + sw-reset here.
-        if not _build_and_flash_nxplpc(
+        # Deployment is fbuild's responsibility — autoresearch never invokes
+        # flash tools (pyocd/lpc21isp/etc.) directly. If the nxplpc deploy
+        # backend is missing upstream, this fails loudly with a pointer to
+        # the fbuild tracking issue rather than bringing a probe wedge here.
+        # See agents/docs/build-system.md and FastLED/fbuild#921.
+        if not _build_and_deploy_nxplpc(
             build_dir,
             environment=build_environment
             or final_environment_norm
@@ -1279,7 +1281,7 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
             upload_port=upload_port,
             verbose=args.verbose,
         ):
-            qctx.emit("BUILD+FLASH FAIL (nxplpc)")
+            qctx.emit("BUILD+DEPLOY FAIL (nxplpc)")
             qctx.emit_log_path()
             return 1
     elif not build_driver.deploy(
@@ -2124,27 +2126,22 @@ async def _run_simd_tests(ctx: RunContext) -> int:
             await client.close()
 
 
-def _build_and_flash_nxplpc(
+def _build_and_deploy_nxplpc(
     build_dir: Path,
     *,
     environment: str | None,
     upload_port: str | None,
     verbose: bool,
 ) -> bool:
-    """Build via `fbuild build`, then flash + sw-reset via pyocd.
+    """Build + deploy the LPC8xx bring-up firmware exclusively via fbuild.
 
-    fbuild's nxplpc orchestrator does not yet implement a deployer
-    (daemon/handlers/operations/deploy.rs only wires avr/teensy). Until that
-    lands as an upstream fbuild PR, we run the build phase via fbuild and the
-    flash/reset phase via pyocd here. The pyocd path is identical to the
-    manual bring-up workflow used during initial LPC845 hardware validation.
+    autoresearch DOES NOT invoke flash tools (pyocd/lpc21isp/etc.) directly.
+    Deployment is fbuild's job — see agents/docs/build-system.md and the
+    tracking issue FastLED/fbuild#921. If fbuild's nxplpc deployer is not
+    yet available, this function fails loudly with a pointer to that issue.
+    DO NOT re-introduce a pyocd/lpc21isp fallback here; fix it in fbuild.
     """
-    import shutil
-
     env = dict(os.environ)
-    # The pinned ArduinoCore-LPC8xx commit only stripped the GitHub-archive
-    # wrapping dir in fbuild >= 2.2.27. The bundled venv fbuild was bumped to
-    # match; assume the user's PATH-resolved binary is current.
 
     print("\n📦 Building firmware via fbuild...")
     build_cmd = [
@@ -2174,51 +2171,33 @@ def _build_and_flash_nxplpc(
         print(f"{Fore.RED}❌ firmware.bin not found at {firmware_bin}{Style.RESET_ALL}")
         return False
 
-    pyocd = shutil.which("pyocd")
-    if pyocd is None:
-        # Fall back to uv-run pyocd (installed on demand). The bring-up
-        # workflow already used this pattern.
-        pyocd_cmd_prefix = ["uv", "run", "--with", "pyocd", "pyocd"]
-    else:
-        pyocd_cmd_prefix = [pyocd]
-
-    print("\n📡 Flashing firmware via pyocd...")
-    target = "lpc845" if "lpc845" in (environment or "") else "lpc804"
-    load_cmd = pyocd_cmd_prefix + [
-        "load",
-        "--target",
-        target,
-        "--no-reset",
-        str(firmware_bin),
+    print("\n📡 Deploying firmware via fbuild...")
+    deploy_cmd = [
+        "fbuild",
+        "deploy",
+        "--environment",
+        environment or "lpc845brk",
     ]
-    result = subprocess.run(load_cmd, env=env)
+    if upload_port:
+        deploy_cmd += ["--upload-port", upload_port]
+    if verbose:
+        deploy_cmd.append("--verbose")
+    result = subprocess.run(deploy_cmd, env=env, cwd=str(build_dir))
     if result.returncode != 0:
         print(
-            f"{Fore.RED}❌ pyocd load failed (exit {result.returncode}){Style.RESET_ALL}"
+            f"{Fore.RED}❌ fbuild deploy failed (exit {result.returncode}){Style.RESET_ALL}"
+        )
+        print(
+            f"{Fore.YELLOW}   Deployment is fbuild's responsibility. "
+            f"Do not add a pyocd/lpc21isp fallback here.{Style.RESET_ALL}"
+        )
+        print(
+            f"{Fore.YELLOW}   nxplpc deployer tracked at: "
+            f"https://github.com/FastLED/fbuild/issues/921{Style.RESET_ALL}"
         )
         return False
 
-    print("\n🔄 Resetting target via pyocd (sw reset, VCOM-safe)...")
-    reset_cmd = pyocd_cmd_prefix + [
-        "commander",
-        "--target",
-        target,
-        "-O",
-        "reset_type=sw",
-        "-c",
-        "reset",
-        "-c",
-        "go",
-        "-c",
-        "quit",
-    ]
-    result = subprocess.run(reset_cmd, env=env)
-    if result.returncode != 0:
-        print(
-            f"{Fore.YELLOW}⚠️  pyocd reset returned {result.returncode}; continuing{Style.RESET_ALL}"
-        )
-
-    print(f"{Fore.GREEN}✓ Build + flash + reset complete{Style.RESET_ALL}\n")
+    print(f"{Fore.GREEN}✓ Build + deploy complete{Style.RESET_ALL}\n")
     return True
 
 
