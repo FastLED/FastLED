@@ -59,6 +59,7 @@
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
 #include "fl/stl/type_traits.h"
+#include "platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4.h"
 #include "platforms/esp/esp_version.h"
 
 FL_EXTERN_C_BEGIN
@@ -259,11 +260,33 @@ class RmtRxChannelImpl : public RmtRxChannel {
           mResolutionHz(0),
           mBufferSize(0),
           mInternalBuffer(),
-          mRingbufHandle(nullptr) {
+          mRingbufHandle(nullptr),
+          mMemoryChannelId(128 + (pin & 0x7F)),
+          mMemoryRegistered(false) {
         FL_LOG_RX("RmtRxChannelImpl(pin=" << pin << ") constructed");
+
+        // Pre-register a minimum RX allocation with the RMT4 memory
+        // manager (#3469). Same channel-id offset convention as the
+        // RMT5 sibling (128 + (pin & 0x7F)) so TX (which uses raw
+        // channel numbers 0..7) never collides with an RX record.
+        // Failure is non-fatal — the RX device still constructs; the
+        // caller can retry allocation at begin() time.
+        constexpr size_t kMinRxSymbols = 64;
+        size_t reserved = 0;
+        if (RmtMemoryManager4::instance().tryAllocateRx(
+                mMemoryChannelId, kMinRxSymbols, reserved)) {
+            mMemoryRegistered = true;
+        }
     }
 
-    ~RmtRxChannelImpl() override { teardown(); }
+    ~RmtRxChannelImpl() override {
+        teardown();
+        if (mMemoryRegistered) {
+            (void)RmtMemoryManager4::instance().free(mMemoryChannelId,
+                                                     /*is_tx=*/false);
+            mMemoryRegistered = false;
+        }
+    }
 
     bool begin(const RxConfig &config) FL_NO_EXCEPT override {
         // Re-arm path: if already installed, just clear our buffer and
@@ -564,6 +587,10 @@ class RmtRxChannelImpl : public RmtRxChannel {
     size_t mBufferSize;
     fl::vector<RmtSymbol> mInternalBuffer;
     RingbufHandle_t mRingbufHandle;
+    // RMT4 memory-manager coordination (#3469). RX uses an offset ID so
+    // it doesn't collide with TX's raw 0..N-1 channel numbering.
+    int mMemoryChannelId;
+    bool mMemoryRegistered;
 };
 
 //=============================================================================
