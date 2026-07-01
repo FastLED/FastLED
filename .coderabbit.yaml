@@ -26,6 +26,40 @@ reviews:
         peripherals — one engine for both clockless and SPI modes" and
         `agents/docs/cpp-standards.md` → "Parallel-IO Driver: Unified
         Clockless + SPI Engine".
+    - path: "src/platforms/**/drivers/**/*peripheral*mock*.{h,cpp.hpp}"
+      instructions: |
+        Peripheral-mock singleton rule. FastLED peripheral mocks
+        (`Rmt4PeripheralMock`, `Rmt5PeripheralMock`, `UartPeripheralMock`,
+        `I2sLcdCamPeripheralMock`, `I2sPeripheralEsp32DevMock`,
+        `SpiPeripheralMock`, `FlexIOPeripheralMock`, etc.) MUST expose a
+        `static XxxMock& instance() FL_NO_EXCEPT` accessor backed by
+        `fl::Singleton<XxxMockImpl>`. This is the shape every peer mock
+        in the tree uses; a `createShared()` / `make_shared` factory
+        pattern is NOT acceptable because it fragments state across the
+        process and breaks the mental model shared with the S3 LCD_CAM,
+        RMT, UART, SPI, and FlexIO mock consumers.
+
+        When an engine ctor takes `fl::shared_ptr<IXxxPeripheral>` (e.g.
+        the standard `ChannelEngineXxx(fl::shared_ptr<IXxxPeripheral>)`),
+        tests wire the mock into the engine via a thin `MockWrapper`
+        forwarder class defined in the test TU that forwards every
+        interface method to `XxxMock::instance().foo(...)`. The
+        `MockWrapper` is passed to the engine via
+        `fl::make_shared<MockWrapper>()`. See the S3 sibling at
+        `tests/platforms/esp/32/drivers/i2s/channel_driver_i2s.cpp:43-87`
+        for the canonical `createMockPeripheral()` helper.
+
+        Flag any PR that:
+        - Adds a peripheral mock without an `instance()` singleton.
+        - Adds a peripheral mock with `createShared()`, `create()`, or any
+          other per-test-instance factory (state contamination bug
+          waiting to happen — the singleton + `reset()` between tests is
+          the mandatory pattern).
+        - Wires the mock into an engine test by any means other than the
+          `MockWrapper` forwarder + `fl::make_shared<MockWrapper>()`
+          pattern.
+        Reference: the S3 LCD_CAM test pattern (see above), or any of
+        the RMT/UART peripheral-mock consumers.
     - path: "src/platforms/**/drivers/**/channel_engine_*.{h,cpp.hpp}"
       instructions: |
         Channel engine implementation review. For any engine that wraps a
