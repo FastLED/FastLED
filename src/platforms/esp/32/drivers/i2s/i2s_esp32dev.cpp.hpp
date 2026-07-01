@@ -10,8 +10,10 @@
 #include "platforms/esp/32/feature_flags/enabled.h"
 #include "fl/log/log.h"  // For FL_WARN_ONCE in IDF6 stub
 
-// I2S parallel mode driver is disabled when FASTLED_ESP32_HAS_I2S=0 or on
-// ESP-IDF 6.0+ (PERIPH_I2S1_MODULE removed, needs LL API port).
+// I2S parallel mode driver is disabled when FASTLED_ESP32_HAS_I2S=0.
+// On ESP-IDF 6.0+ the driver routes through `i2s_periph_compat.h`'s LL-API
+// path (`i2s_ll_enable_bus_clock` / `i2s_ll_reset_register`) — bench
+// validation on real IDF 6 silicon is tracked in FastLED#3509 Phase 7.
 // Users can disable with -D FASTLED_ESP32_HAS_I2S=0
 #if FASTLED_ESP32_HAS_I2S
 
@@ -21,6 +23,7 @@
 #if !ESP_IDF_VERSION_4_OR_HIGHER || defined(FL_IS_ESP_32DEV)
 
 #include "platforms/esp/32/drivers/i2s/i2s_esp32dev.h"
+#include "platforms/esp/32/drivers/i2s/i2s_periph_compat.h"  // fl_i2s_periph_enable (IDF 6+ safe)
 
 // IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
@@ -368,15 +371,19 @@ void i2s_init(int i2s_device) FL_NO_EXCEPT {
     int interruptSource;
     if (i2s_device == 0) {
         i2s = &I2S0;
-        periph_module_enable(PERIPH_I2S0_MODULE);
         interruptSource = ETS_I2S0_INTR_SOURCE;
         i2s_base_pin_index = I2S0O_DATA_OUT0_IDX;
     } else {
         i2s = &I2S1;
-        periph_module_enable(PERIPH_I2S1_MODULE);
         interruptSource = ETS_I2S1_INTR_SOURCE;
         i2s_base_pin_index = I2S1O_DATA_OUT0_IDX;
     }
+    // Power-gate + reset the peripheral. Routes through the IDF-version
+    // compat shim: `periph_module_enable(PERIPH_I2S{n}_MODULE)` on IDF
+    // 4.x/5.x, `i2s_ll_enable_bus_clock` + `i2s_ll_reset_register` on
+    // IDF 6.x+ when `FASTLED_ESP32_I2S_IDF6_EXPERIMENTAL` is defined.
+    // See FastLED#3509.
+    fl::fl_i2s_periph_enable(i2s_device);
 
     // -- Reset everything
     i2s_reset();
