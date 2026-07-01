@@ -46,6 +46,7 @@ extern "C" void js_fetch_async(unsigned int request_id, const char* url);
 
 namespace fl {
 
+// FL_LINT_ALLOW_GLOBAL(WASM-only public global `fl::wasm_fetch` used from JS bindings — WASM target has no gc-sections elision benefit and this is a stable user-facing name)
 WasmFetch wasm_fetch;
 
 #ifdef FL_IS_WASM

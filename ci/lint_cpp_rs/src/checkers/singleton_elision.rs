@@ -30,22 +30,41 @@ impl FileContentChecker for SingletonElisionChecker {
         "SingletonElisionChecker"
     }
 
-    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
-        // TU sources under `src/`. Exclude headers (they're either included
-        // multiple times — different concern, "static in header" checker
-        // catches that — or they're `.hpp` files with template defs which
-        // don't emit unless instantiated).
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        // TU sources under the project's `src/` directory ONLY. Anchor to
+        // project root so scratch paths like `tests/fbuild_qemu_smoke/src/`
+        // are NOT mistakenly caught (they contain `/src/` as a substring
+        // but are user-sketch scaffolding, not FastLED library sources).
         //
-        // Explicitly exclude `src/third_party/` (upstream code we don't
-        // rewrite) and `src/fl/stl/singleton.h` itself (it IS the
-        // implementation of the pattern we're pushing everyone toward —
-        // its own storage is inside `instance()`).
-        is_under_dir(file_path, "src")
-            && !is_under_dir(file_path, "src/third_party")
-            && ends_with_any(file_path, &[".cpp.hpp", ".cpp", ".cc", ".cxx"])
+        // Excludes:
+        // - `src/third_party/` — upstream code we don't rewrite
+        // - `src/fl/stl/singleton.h` itself — it IS the implementation of
+        //   the pattern we're pushing everyone toward
+        if !ends_with_any(file_path, &[".cpp.hpp", ".cpp", ".cc", ".cxx"]) {
+            return false;
+        }
+        if !is_under_project_subpath(file_path, project_root, "src") {
+            return false;
+        }
+        if is_under_project_subpath(file_path, project_root, "src/third_party") {
+            return false;
+        }
+        true
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        // File-level opt-out: if any of the first 15 lines contains
+        // `FL_LINT_ALLOW_GLOBAL_FILE(<reason>)`, skip the entire file.
+        // Used for Tier 2 driver files pending migration to Singleton<T>
+        // via their own sub-issues (see FastLED#3481) — annotating 10+
+        // sites individually is noise; a single file-header marker
+        // captures the intent cleanly.
+        for line in file_content.lines.iter().take(15) {
+            if line.contains("FL_LINT_ALLOW_GLOBAL_FILE") {
+                return Vec::new();
+            }
+        }
+
         let mut violations = Vec::new();
 
         // Brace-depth tracker. Depth 0 = file scope. Inside `namespace X {`
@@ -59,9 +78,33 @@ impl FileContentChecker for SingletonElisionChecker {
         let mut in_multiline_comment = false;
         let mut in_extern_c_block: Vec<i32> = Vec::new(); // depths inside `extern "C" {`
 
+        // Track whether the previous non-blank line contained a
+        // FL_LINT_ALLOW_GLOBAL / FL_KEEP / [[gnu::used]] marker. This lets
+        // authors put the annotation on the line ABOVE the declaration
+        // (preferred style — keeps the declaration clean):
+        //
+        //     // FL_LINT_ALLOW_GLOBAL(reason)
+        //     MyType global_thing;
+        //
+        // as well as inline on the declaration line itself.
+        let mut prev_line_had_marker = false;
+
         for (index, line) in file_content.lines.iter().enumerate() {
             let raw = line;
             let trimmed = raw.trim();
+
+            // Snapshot the previous line's carry-over marker BEFORE we
+            // update it for the next iteration. The current line uses
+            // `effective_marker` below; the flag we set for next iteration
+            // carries only when THIS line is comment-only (so the marker
+            // "belongs" to the following declaration).
+            let carry_marker = prev_line_had_marker;
+            let this_line_marker = raw.contains("[[gnu::used]]")
+                || raw.contains("__attribute__((used))")
+                || raw.contains("FL_KEEP")
+                || raw.contains("FL_LINT_ALLOW_GLOBAL");
+            let this_is_comment_only = trimmed.starts_with("//") || trimmed.starts_with("/*");
+            prev_line_had_marker = this_line_marker && this_is_comment_only;
 
             // Strip multi-line comments (handle nested cases with a flag).
             let mut work = raw.to_string();
@@ -219,11 +262,10 @@ impl FileContentChecker for SingletonElisionChecker {
             //   ISR cache pointer, singleton-registry backing, host-only
             //   entry point). The `<reason>` argument is mandatory — the
             //   reviewer must see justification for each escape.
-            if code.contains("[[gnu::used]]")
-                || code.contains("__attribute__((used))")
-                || code.contains("FL_KEEP")
-                || code.contains("FL_LINT_ALLOW_GLOBAL")
-            {
+            //
+            // Opt-out honored either inline on the declaration line or on
+            // the immediately preceding comment line.
+            if this_line_marker || carry_marker {
                 continue;
             }
 
@@ -307,8 +349,9 @@ impl FileContentChecker for SingletonElisionChecker {
                      `fl::Singleton<T>::instance().field`. If the storage \
                      genuinely cannot move (linker-invisible reference, \
                      ISR-only IRAM placement, singleton-registry backing), \
-                     annotate with `[[gnu::used]]` / `FL_KEEP` or add to \
-                     the allowlist.",
+                     annotate with `[[gnu::used]]` / `FL_KEEP` or a \
+                     preceding `// FL_LINT_ALLOW_GLOBAL(<reason>)` \
+                     comment line.",
                     name = name,
                     ty = if type_pretty.is_empty() {
                         "?"

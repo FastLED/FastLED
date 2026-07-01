@@ -229,6 +229,7 @@ void CFastLED::clear(ClearFlags flags) {
 // and endShowLeds(): store the pointers in an array and iterate through that.
 //
 // static uninitialized gControllersData produces the smallest binary on attiny85.
+// FL_LINT_ALLOW_GLOBAL(intentional ATtiny85 code-size optimization — moving to Singleton<T> reverses the size win documented above)
 static void* gControllersData[MAX_CLED_CONTROLLERS];
 
 FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {

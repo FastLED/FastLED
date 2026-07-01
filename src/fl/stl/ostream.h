@@ -88,10 +88,16 @@ private:
     int mBase = 10;  // Default to decimal
 };
 
-// Global cout instance for immediate output
+// Global cout instance for immediate output.
+// `cout` is a public API global — users write `fl::cout << x;` by name.
+// Migration to `Singleton<ostream>::instance()` would break source
+// compat (`cout()` at call sites). Kept as a global; allowlist marker
+// on the definition site in ostream.cpp.hpp.
 extern ostream cout;
 
-// Line ending manipulator
+// Line ending manipulator — empty marker struct, public API surface
+// (`cout << endl`), same source-compat constraint as the other
+// manipulators. Definition in ostream.cpp.hpp is allowlisted.
 struct endl_t {};
 extern const endl_t endl;
 

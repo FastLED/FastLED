@@ -43,6 +43,7 @@ private:
     bool mEndFrameHappened = false;
 };
 
+// FL_LINT_ALLOW_GLOBAL(WASM entry-point listener — only compiled for WASM target where every symbol is used, no elision benefit possible)
 static EndFrameListener gEndFrameListener;
 
 void fastled_setup_once() {
