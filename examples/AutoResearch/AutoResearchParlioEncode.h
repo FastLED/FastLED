@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "fl/channels/detail/wave8.hpp"
+#include "fl/channels/detail/wave8.h"
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/log/log.h"  // FL_WARN

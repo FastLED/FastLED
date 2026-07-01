@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "fl/channels/detail/wave8.hpp"
+#include "fl/channels/detail/wave8.h"
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/bit_cast.h"

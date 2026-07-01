@@ -63,11 +63,10 @@
 #if FASTLED_ESP32_HAS_I2S
 
 #include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_esp.h"
-#include "platforms/esp/32/drivers/i2s/i2s_esp32dev.h"  // FastLED#3526 Phase 2b — real hardware init/start/wait
+#include "platforms/esp/32/drivers/i2s/i2s_periph_compat.h"  // fl_i2s_periph_enable — IDF-version-safe power gate
 
 #include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
-#include "fl/chipsets/led_timing.h"
 
 FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
@@ -76,10 +75,67 @@ FL_EXTERN_C_BEGIN
 #include "esp_heap_caps.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "soc/i2s_reg.h"
+#include "soc/i2s_struct.h"
 // IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 namespace fl {
+
+namespace {
+
+// FastLED#3526 Phase 2b — modern peripheral owns I2S1 for the duration of
+// its `initialize()`/`deinitialize()` window. This static-storage flag is
+// the ownership handshake between concurrent construction attempts (e.g.,
+// test doubles + a real peripheral in the same TU). Yves classic driver
+// tracks its own separate flag (`gInitializedI2sInitialized`) — during the
+// #3526 rollout only one path is bound at any time (Yves via
+// `-DFASTLED_ESP32_I2S=1` opt-in, modern via `Bus::FLEX_IO, 0` after Phase
+// 2d), so there is no cross-driver race here. Yves is deleted at Phase 2e
+// and this flag becomes the sole record.
+bool g_i2s1_hardware_claimed_by_modern = false;
+
+// Wave8 pixel clock: 80 MHz APB / (10 + 0/1) = 8 MHz — 125 ns per pulse.
+// Fixed rate regardless of chipset (per the meta-issue directive: modern
+// driver is a general clockless like PARLIO, not per-chipset like Yves).
+// Wave3-eligible chipsets will re-program N/A/B in a follow-up when the
+// engine plumbs per-channel timing selection into the peripheral.
+constexpr int kWave8ClockDividerN = 10;
+constexpr int kWave8ClockDividerA = 1;
+constexpr int kWave8ClockDividerB = 0;
+
+// Register-level reset helpers — inline replacements for Yves's
+// `i2s_reset*` free functions so the modern peripheral does not link
+// against `i2s_esp32dev.cpp.hpp`. Bit-identical to Yves's implementations
+// (same reset-flag mask, same set-then-clear sequence). See Yves source
+// for register-map derivation.
+inline void reset_i2s_registers(i2s_dev_t* i2s) FL_NO_EXCEPT {
+    const u32 lc_conf_reset_flags =
+        I2S_IN_RST_M | I2S_OUT_RST_M | I2S_AHBM_RST_M | I2S_AHBM_FIFO_RST_M;
+    i2s->lc_conf.val |= lc_conf_reset_flags;
+    i2s->lc_conf.val &= ~lc_conf_reset_flags;
+
+    const u32 conf_reset_flags = I2S_RX_RESET_M | I2S_RX_FIFO_RESET_M |
+                                  I2S_TX_RESET_M | I2S_TX_FIFO_RESET_M;
+    i2s->conf.val |= conf_reset_flags;
+    i2s->conf.val &= ~conf_reset_flags;
+}
+
+inline void reset_i2s_dma(i2s_dev_t* i2s) FL_NO_EXCEPT {
+    i2s->lc_conf.in_rst = 1;
+    i2s->lc_conf.in_rst = 0;
+    i2s->lc_conf.out_rst = 1;
+    i2s->lc_conf.out_rst = 0;
+}
+
+inline void reset_i2s_fifo(i2s_dev_t* i2s) FL_NO_EXCEPT {
+    i2s->conf.rx_fifo_reset = 1;
+    i2s->conf.rx_fifo_reset = 0;
+    i2s->conf.tx_fifo_reset = 1;
+    i2s->conf.tx_fifo_reset = 0;
+}
+
+}  // anonymous namespace
 
 //=============================================================================
 // Ctor / dtor
@@ -108,28 +164,98 @@ bool I2sPeripheralEsp32DevEsp::initialize(
         FL_WARN_F("I2sPeripheralEsp32DevEsp: already initialized");
         return false;
     }
-    // FastLED#3526 Phase 2b: hardware-ownership check — the classic
-    // Yves `ClocklessI2S<>` template on `-DFASTLED_ESP32_I2S=1` uses
-    // the same I2S1 peripheral via file-scope globals; both cannot own
-    // the hardware simultaneously. First-in-wins.
-    if (i2s_is_initialized()) {
-        FL_WARN_F("I2sPeripheralEsp32DevEsp: I2S1 already claimed by classic ClocklessI2S — refusing to bind");
+    // FastLED#3526 Phase 2b: modern-driver ownership handshake — refuse
+    // if another modern peripheral instance is already bound. The Yves
+    // classic driver tracks its own separate flag; during rollout only
+    // one binding path is active at a time (Yves via
+    // `-DFASTLED_ESP32_I2S=1`, modern via `Bus::FLEX_IO, 0` after Phase
+    // 2d), so we do not check Yves's flag here — that would drag the
+    // Yves TU into modern's link footprint, violating the meta-issue's
+    // "No calls into `i2s_esp32dev.cpp.hpp`" directive.
+    if (g_i2s1_hardware_claimed_by_modern) {
+        FL_WARN_F("I2sPeripheralEsp32DevEsp: I2S1 already claimed by another modern instance");
         return false;
     }
     mConfig = cfg;
+    const int i2s_device = static_cast<int>(mConfig.mI2sPort);
 
-    // FastLED#3526 Phase 2b — real hardware init. Uses the tested Yves
-    // C-style utilities from `i2s_esp32dev.h` to configure the I2S1
-    // peripheral registers + DMA descriptor allocation + ISR install.
-    // Once Phase 2e deletes the Yves driver, these utility functions
-    // become inline in this file. Chipset timing defaults to canonical
-    // WS2812B until the modern engine adds a `configureTiming()`
-    // method that plumbs per-channel `ChipsetTimingConfig` through.
-    const ChipsetTiming default_timing =
-        to_runtime_timing<TIMING_WS2812_800KHZ>();
-    i2s_define_bit_patterns(default_timing);
-    i2s_init(static_cast<int>(mConfig.mI2sPort));
+    // Power-gate + reset the peripheral via the IDF-version-safe wrapper
+    // (routes to `periph_module_enable(PERIPH_I2S{n}_MODULE)` on IDF
+    // 4.x/5.x, `i2s_ll_enable_bus_clock` + `i2s_ll_reset_register` on
+    // IDF 6.x+). Not a Yves helper — lives in `i2s_periph_compat.h`.
+    fl::fl_i2s_periph_enable(i2s_device);
 
+    // Select I2S0 vs I2S1 SoC register block. The modern engine uses
+    // I2S1 by default (mConfig.mI2sPort == 1); support I2S0 for tests
+    // that construct the peripheral against port 0.
+    i2s_dev_t* const i2s = (i2s_device == 0) ? &I2S0 : &I2S1;
+
+    // Reset everything before configuring. Order matters: peripheral
+    // reset first (clears any prior state), then DMA and FIFO subsystem
+    // reset. Bit-identical to Yves's `i2s_init` prelude.
+    reset_i2s_registers(i2s);
+    reset_i2s_dma(i2s);
+    reset_i2s_fifo(i2s);
+
+    // Main configuration — parallel-out mode with LSB-first byte order
+    // in each 32-bit sample. `tx_right_first = 1` puts channel-right
+    // data first, matching how wave8 encoded bytes are laid out in the
+    // DMA buffer. Same bit-map Yves proved works for classic ESP32 I2S
+    // parallel output.
+    i2s->conf.tx_msb_right = 1;
+    i2s->conf.tx_mono = 0;
+    i2s->conf.tx_short_sync = 0;
+    i2s->conf.tx_msb_shift = 0;
+    i2s->conf.tx_right_first = 1;
+    i2s->conf.tx_slave_mod = 0;
+
+    // Enable LCD/parallel mode. `lcd_tx_wrx2_en = 0` selects 16- or
+    // 32-bit parallel output width (vs the 8-bit-with-2x-write mode).
+    i2s->conf2.val = 0;
+    i2s->conf2.lcd_en = 1;
+    i2s->conf2.lcd_tx_wrx2_en = 0;
+    i2s->conf2.lcd_tx_sdx2_en = 0;
+
+    // Sample-rate configuration. `tx_bits_mod = 32` puts the peripheral
+    // in 32-bit-parallel mode (16 lanes × 2 bytes packed per word).
+    // `tx_bck_div_num = 1` is the divider on the sample clock feeding
+    // the bit clock — kept at 1 for wave8's 8 MHz rate.
+    i2s->sample_rate_conf.val = 0;
+    i2s->sample_rate_conf.tx_bits_mod = 32;
+    i2s->sample_rate_conf.tx_bck_div_num = 1;
+
+    // Main clock: 80 MHz APB / (N + B/A) = wave8's 8 MHz pixel clock.
+    // Fixed-rate — no per-chipset clock math. Wave3 mode will re-program
+    // these when per-channel timing plumbs through (follow-up).
+    i2s->clkm_conf.val = 0;
+    i2s->clkm_conf.clka_en = 0;
+    i2s->clkm_conf.clkm_div_a = kWave8ClockDividerA;
+    i2s->clkm_conf.clkm_div_b = kWave8ClockDividerB;
+    i2s->clkm_conf.clkm_div_num = kWave8ClockDividerN;
+
+    // FIFO in DMA-serviced mode. `tx_fifo_mod = 3` selects the 32-bit
+    // single-channel data path (each DMA word is one output sample).
+    // `dscr_en = 1` routes the FIFO through the DMA descriptor chain.
+    i2s->fifo_conf.val = 0;
+    i2s->fifo_conf.tx_fifo_mod_force_en = 1;
+    i2s->fifo_conf.tx_fifo_mod = 3;
+    i2s->fifo_conf.tx_data_num = 32;
+    i2s->fifo_conf.dscr_en = 1;
+
+    // Bypass the on-chip PCM formatting logic (we're delivering
+    // already-encoded pulse bytes; no PCM sample-rate conversion).
+    i2s->conf1.val = 0;
+    i2s->conf1.tx_stop_en = 0;
+    i2s->conf1.tx_pcm_bypass = 1;
+
+    // Mono channel mode routing everything to the right channel path
+    // (paired with `tx_msb_right = 1` above).
+    i2s->conf_chan.val = 0;
+    i2s->conf_chan.tx_chan_mod = 1;
+
+    i2s->timing.val = 0;
+
+    g_i2s1_hardware_claimed_by_modern = true;
     mInitialized = true;
     mBusy = false;
     return true;
@@ -139,19 +265,20 @@ void I2sPeripheralEsp32DevEsp::deinitialize() FL_NO_EXCEPT {
     if (!mInitialized) {
         return;
     }
-    // FastLED#3526 Phase 2b — deinit stops the I2S1 peripheral if a
-    // transmit was in flight so the DMA doesn't drift into the next
-    // caller's buffer. The classic Yves driver's `i2s_stop()` clears
-    // `tx_start` on the peripheral. Note: this deinit is not yet a
-    // full teardown — the ISR handle + DMA descriptor allocations
-    // from `i2s_init()` are still held onto so a re-init doesn't
-    // leak. That matches Yves's behavior (its `gInitializedI2sInitialized`
-    // flag is one-shot for the process). Full teardown lands with the
-    // singleton migration (#3489) since the resources are truly
-    // process-lifetime.
+    // FastLED#3526 Phase 2b — stop the peripheral inline (no calls into
+    // Yves). Clears `tx_start` and resets the block so the DMA doesn't
+    // drift into the next caller's buffer. When Phase 2b step B lands
+    // ISR install + DMA descriptor allocation, this same path will
+    // also `esp_intr_disable()` the ISR handle before the register
+    // reset.
     if (mBusy) {
-        i2s_stop();
+        const int i2s_device = static_cast<int>(mConfig.mI2sPort);
+        i2s_dev_t* const i2s = (i2s_device == 0) ? &I2S0 : &I2S1;
+        reset_i2s_registers(i2s);
+        i2s->conf.rx_start = 0;
+        i2s->conf.tx_start = 0;
     }
+    g_i2s1_hardware_claimed_by_modern = false;
     mInitialized = false;
     mBusy = false;
 }
