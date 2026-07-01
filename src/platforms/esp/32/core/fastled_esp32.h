@@ -14,6 +14,7 @@
 #include "platforms/esp/32/core/fastspi_esp32.h"
 // IWYU pragma: end_keep
 
+
 // Include ALL available clockless drivers for ESP32
 // Each driver defines its own type (ClocklessRMT, ClocklessSPI, ClocklessI2S)
 // The platform-default ClocklessController alias is defined in chipsets.h
@@ -30,14 +31,22 @@
 #include "platforms/esp/32/drivers/spi/idf5_clockless_spi_esp32.h"
 #endif
 
-// FASTLED_ESP32_I2S opt-in legacy include removed in Stage 3 of #3474.
-// Yves Bazin's `clockless_i2s_esp32.h` + `i2s_esp32dev.{h,cpp.hpp}` are
-// deleted. The ground-up `ChannelEngineI2sEsp32Dev` +
-// `I2sPeripheralEsp32DevEsp` pair under `drivers/i2s/` replaces the legacy
-// path; access it via `FastLED.enableDriver<fl::Bus::FLEX_IO, 0>()` /
-// `FastLED.enableAllDrivers()` on classic ESP32.
+#ifdef FASTLED_ESP32_I2S
+#include "platforms/esp/esp_version.h"
+#if ESP_IDF_VERSION_6_OR_HIGHER
+// I2S parallel driver is not yet ported to ESP-IDF 6.0+.
+// PERIPH_I2S1_MODULE was removed; the driver needs LL API migration.
+// Falling through to RMT/SPI/blocking driver instead.
+#else
+#ifndef FASTLED_INTERNAL
+#include "platforms/esp/32/drivers/i2s/clockless_i2s_esp32.h"
+#endif
+#endif // ESP_IDF_VERSION_6_OR_HIGHER
+#endif // FASTLED_ESP32_I2S
 
 // Bulk controller implementations have been replaced by the Channel API
 // See src/fl/channels/README.md for multi-strip support
+
+
 
 #endif // _FASTLED_ESP32_H

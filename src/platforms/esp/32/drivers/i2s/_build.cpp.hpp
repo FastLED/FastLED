@@ -12,17 +12,28 @@
 
 #include "platforms/esp/32/drivers/i2s/channel_driver_i2s.cpp.hpp"
 #include "platforms/esp/32/drivers/i2s/channel_engine_i2s_esp32dev.cpp.hpp"
+#include "platforms/esp/32/drivers/i2s/clockless_i2s_esp32.cpp.hpp"
 
+#include "platforms/esp/32/drivers/i2s/i2s_esp32dev.cpp.hpp"
 #include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_esp.cpp.hpp"
 #include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_mock.cpp.hpp"
-#include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_esp.cpp.hpp"
 #include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_mock.cpp.hpp"
-// Stage 4 (#3474) rewrote the real-hw peripheral impl above to drop
-// its `driver/i2s.h` include; the ecosystem `driver_ng` vs legacy-
-// ADC panic that blocked Stage 2 doesn't fire in this shape, so the
-// TU is now linked into the classic-ESP32 unity build. Register-
-// level bring-up + DMA descriptor chain + ISR install move into
-// Stage 5.
+// Stage 5 (#3474): the proven register+DMA+ISR machinery from the
+// classic-ESP32 I2S driver is restored above under
+// `i2s_esp32dev.{h,cpp.hpp}` + `clockless_i2s_esp32.{h,cpp.hpp}` —
+// these are the ~700 LoC that generate real WS2812 parallel-out
+// waveforms on I2S1. Users on classic ESP32 can hit that path via
+// the legacy `addLeds<WS2812, PIN, GRB>()` template. The modern
+// `ChannelEngineI2sEsp32Dev` + mock (still shipped above) exposes
+// the same peripheral behind a mock-testable IChannelDriver
+// interface for future code that wants the modern channel-manager
+// path. `i2s_peripheral_esp32dev_esp.cpp.hpp` (Stage 4 real-hw impl)
+// is intentionally NOT included here — its `driver/gpio.h` include
+// collides with the restored code at link time as an
+// `ADC: CONFLICT!` boot loop. A future PR that reworks the modern
+// peripheral to share I2S1/periph_module state (rather than
+// duplicating it) can drop the modern impl into the unity build
+// cleanly.
 
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s.cpp.hpp"
 

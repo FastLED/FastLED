@@ -1,0 +1,126 @@
+#pragma once
+
+// IWYU pragma: private
+#include "fl/stl/compiler_control.h"
+#include "fl/stl/stdint.h"
+#include "fl/chipsets/led_timing.h"
+#include "fl/stl/noexcept.h"
+#include "fl/log/log.h"
+
+// FastLED headers - must be outside extern C (contain C++ code/macros)
+#include "platforms/esp/esp_version.h"
+#include "platforms/esp/32/core/esp_log_control.h"  // Control ESP logging before including esp_log.h
+
+// Wrap only ESP-IDF C headers in extern C
+FL_EXTERN_C_BEGIN
+
+// IWYU pragma: begin_keep
+#include "driver/gpio.h"
+// IWYU pragma: end_keep
+#include "esp_heap_caps.h"
+// IWYU pragma: begin_keep
+#include "soc/gpio_sig_map.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
+#include "soc/i2s_reg.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
+#include "soc/i2s_struct.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
+#include "soc/io_mux_reg.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
+#include "soc/soc.h"
+
+// IWYU pragma: end_keep
+#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR >= 5
+// IWYU pragma: begin_keep
+#include "esp_private/periph_ctrl.h"
+// IWYU pragma: end_keep
+#else
+// IWYU pragma: begin_keep
+#include "driver/periph_ctrl.h"
+// IWYU pragma: end_keep
+#endif
+
+#include "esp_system.h" // Load ESP_IDF_VERSION_MAJOR if exists
+// IWYU pragma: begin_keep
+#include "rom/lldesc.h"
+// ESP_IDF_VERSION_MAJOR is defined in ESP-IDF v3.3 or later
+// IWYU pragma: end_keep
+#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR > 3
+#include "esp_intr_alloc.h"
+#else
+#include "esp_intr.h"
+#endif
+#include "esp_log.h"
+
+FL_EXTERN_C_END
+
+// Arduino C++ header - must be outside extern C
+// IWYU pragma: begin_keep
+#include <esp32-hal.h>
+// IWYU pragma: end_keep
+
+#ifndef F_CPU_MHZ
+#define F_CPU_MHZ (F_CPU / 1000000L)
+#endif
+
+// TODO: this is in like 2 places. Consolidate.
+// override default NUM_DMA_BUFFERS if FASTLED_ESP32_I2S_NUM_DMA_BUFFERS
+// is defined and has a valid value
+#if FASTLED_ESP32_I2S_NUM_DMA_BUFFERS > 2
+#if FASTLED_ESP32_I2S_NUM_DMA_BUFFERS > 16
+#error invalid value for FASTLED_ESP32_I2S_NUM_DMA_BUFFERS
+#endif
+#define NUM_DMA_BUFFERS FASTLED_ESP32_I2S_NUM_DMA_BUFFERS
+// for counting DMA buffers currently in use
+#else
+#define NUM_DMA_BUFFERS 2
+#endif
+
+
+#define NUM_COLOR_CHANNELS 3
+namespace fl {
+struct I2SDMABuffer {
+    lldesc_t descriptor;
+    u8 *buffer;
+};
+extern int gCntBuffer;
+extern int gCurBuffer;
+extern bool gDoneFilling;
+extern u8 gPixelRow[NUM_COLOR_CHANNELS][32];
+extern u8 gPixelBits[NUM_COLOR_CHANNELS][8][4];
+extern I2SDMABuffer *dmaBuffers[NUM_DMA_BUFFERS];
+
+// typedef for a void function pointer
+typedef void (*void_func_t)(void);
+void i2s_set_fill_buffer_callback(void_func_t callback) FL_NO_EXCEPT;
+
+int pgcd(int smallest, int precision, int a, int b, int c) FL_NO_EXCEPT;
+
+/** Compute pules/bit patterns
+ *
+ *  This is Yves Bazin's mad code for computing the pulse pattern
+ *  and clock timing given the target signal given by ChipsetTiming.
+ *  In general, T1, T2, and T3 parameters are interpreted as follows:
+ *
+ *  a "1" bit is encoded by setting the pin HIGH to T1+T2 ns, then LOW for T3 ns
+ *  a "0" bit is encoded by setting the pin HIGH to T1 ns, then LOW for T2+T3 ns
+ *
+ */
+void i2s_define_bit_patterns(const ChipsetTiming& TIMING) FL_NO_EXCEPT;
+bool i2s_is_initialized() FL_NO_EXCEPT;
+void i2s_init(int i2s_device) FL_NO_EXCEPT;
+void i2s_clear_dma_buffer(u32 *buf) FL_NO_EXCEPT;  // warning, this function assumes length.
+void i2s_start() FL_NO_EXCEPT;
+void i2s_reset() FL_NO_EXCEPT;
+void i2s_reset_dma() FL_NO_EXCEPT;
+void i2s_reset_fifo() FL_NO_EXCEPT;
+void i2s_stop() FL_NO_EXCEPT;
+void i2s_begin() FL_NO_EXCEPT;
+void i2s_wait() FL_NO_EXCEPT;
+void i2s_setup_pin(int pin, int offset) FL_NO_EXCEPT;
+void i2s_transpose_and_encode(int channel, u32 has_data_mask, volatile u32 *buf) FL_NO_EXCEPT;
+}  // namespace fl
