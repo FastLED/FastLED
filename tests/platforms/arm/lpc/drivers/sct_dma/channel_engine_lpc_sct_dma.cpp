@@ -376,4 +376,79 @@ FL_TEST_CASE("#3468: capture buffer is cleared between transmits") {
     }
 }
 
+// =============================================================================
+// #3459 acceptance criterion 3: no busy-wait in show().
+//
+// The engine's state machine transitions READY → BUSY → DRAINING → READY
+// must all be driven from poll() calls, not from inside show(). show()
+// kicks the transmission and returns; poll() advances chunk boundaries
+// on LPC845 and settles to READY when the full frame has drained.
+//
+// On host there is no DMA to wait on, so transmit() completes
+// synchronously and the first poll() after show() returns READY.
+// The tests below pin the observable contract on host: pollAndAdvance()
+// is idempotent when the transmitter is idle, and the poll()-driven
+// state machine can process multiple back-to-back frames without a
+// busy-wait inside show().
+// =============================================================================
+
+FL_TEST_CASE("#3459 item 3: pollAndAdvance() returns true when idle") {
+    ChannelEngineLpcSctDma engine;
+    // No transmission has been kicked; transmitter is idle.
+    FL_CHECK(engine.transmitter().pollAndAdvance() == true);
+    // Calling again does not change state.
+    FL_CHECK(engine.transmitter().pollAndAdvance() == true);
+}
+
+FL_TEST_CASE("#3459 item 3: show() does not busy-wait; multiple frames drain via poll()") {
+    // Drive three frames back-to-back through the engine's show()/poll()
+    // cycle. On host each transmit() completes synchronously so poll()
+    // returns READY immediately, but the test still exercises the loop
+    // caller would use on silicon: show() → poll() until READY → next
+    // show(). If show() had a hidden busy-wait this loop would still
+    // pass (blocking is invisible from outside), but if the state
+    // machine mis-tracked mTransmissionActive across frames the second
+    // or third show()+poll() would leak state and fail.
+    const u8 kFrame0[] = {0x11, 0x22, 0x33};
+    const u8 kFrame1[] = {0x44, 0x55, 0x66, 0x77, 0x88, 0x99};
+    const u8 kFrame2[] = {0xAA, 0xBB, 0xCC};
+
+    ChannelEngineLpcSctDma engine;
+
+    // Frame 0
+    auto ch0 = makeClocklessChannelData(/*pin=*/11, /*num_leds=*/1, kFrame0);
+    engine.enqueue(ch0);
+    engine.show();
+    // poll() must drive the state to READY. It should complete
+    // within a bounded number of calls (host: 1; silicon: chunk count).
+    for (int i = 0; i < 100; ++i) {
+        if (engine.poll() == DriverState::READY) break;
+    }
+    FL_CHECK(engine.poll() == DriverState::READY);
+    FL_REQUIRE(engine.transmitter().getCapturedTxBytes().size() == sizeof(kFrame0));
+
+    // Frame 1
+    auto ch1 = makeClocklessChannelData(/*pin=*/11, /*num_leds=*/2, kFrame1);
+    engine.enqueue(ch1);
+    engine.show();
+    for (int i = 0; i < 100; ++i) {
+        if (engine.poll() == DriverState::READY) break;
+    }
+    FL_CHECK(engine.poll() == DriverState::READY);
+    FL_REQUIRE(engine.transmitter().getCapturedTxBytes().size() == sizeof(kFrame1));
+
+    // Frame 2
+    auto ch2 = makeClocklessChannelData(/*pin=*/11, /*num_leds=*/1, kFrame2);
+    engine.enqueue(ch2);
+    engine.show();
+    for (int i = 0; i < 100; ++i) {
+        if (engine.poll() == DriverState::READY) break;
+    }
+    FL_CHECK(engine.poll() == DriverState::READY);
+    FL_REQUIRE(engine.transmitter().getCapturedTxBytes().size() == sizeof(kFrame2));
+    for (fl::size i = 0; i < sizeof(kFrame2); ++i) {
+        FL_CHECK(engine.transmitter().getCapturedTxBytes()[i] == kFrame2[i]);
+    }
+}
+
 }  // FL_TEST_FILE

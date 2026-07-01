@@ -170,15 +170,19 @@ void encodeChunkFromBytes(const u8* bytes, u32 bytes_avail,
 
 }  // namespace
 
-void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_NO_EXCEPT {
-    if (bytes == nullptr || len == 0u) {
-        return;
-    }
-    (void)is_rgbw;  // bytes are already chipset-encoded by ChannelData; the
-                    // is_rgbw flag is reserved for future per-pixel padding
-                    // logic (RGBW-XTRA0). For now the byte stream is consumed
-                    // verbatim.
+namespace {
 
+// Encode + arm the next chunk (up to `chunk_bits` bits from
+// `bytes + byte_offset`) into the transmitter's per-instance buffer,
+// then release SCT HALT so the SCT match events start streaming DMA.
+// Returns the number of BITS actually kicked (== chunk_bits for
+// non-final chunks; possibly less for the last).
+void kickNextChunk(u32* channel_buf,
+                    const u8* bytes,
+                    u32 total_len,
+                    u32 byte_offset,
+                    u32 pin_mask,
+                    u32& chunk_bits_out) FL_NO_EXCEPT {
     constexpr u32 chunk_words = FASTLED_LPC_PWM_DMA_CHUNK_BITS;
     constexpr u32 xfercfg_base =
         (1UL << 0) |                            // CFGVALID
@@ -187,44 +191,103 @@ void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_N
         (0UL << 14);                            // DSTINC = no
     const u32 base = FASTLED_LPC_PWM_DMA_BASECH;
 
-    u32* rise_stream   = &mChannelBuf[0];
-    u32* t0fall_stream = &mChannelBuf[chunk_words];
-    u32* t1fall_stream = &mChannelBuf[2u * chunk_words];
+    const u32 bytes_remaining = total_len - byte_offset;
+    const u32 bits_remaining = bytes_remaining * 8u;
+    const u32 chunk_bits = bits_remaining > chunk_words ? chunk_words : bits_remaining;
 
-    u32 byte_offset = 0;
-    while (byte_offset < len) {
-        const u32 bytes_remaining = len - byte_offset;
-        const u32 bits_remaining = bytes_remaining * 8u;
-        const u32 chunk_bits = bits_remaining > chunk_words ? chunk_words : bits_remaining;
+    u32* rise_stream   = &channel_buf[0];
+    u32* t0fall_stream = &channel_buf[chunk_words];
+    u32* t1fall_stream = &channel_buf[2u * chunk_words];
 
-        encodeChunkFromBytes(bytes + byte_offset, bytes_remaining,
-                              chunk_bits, mPinMask,
-                              rise_stream, t0fall_stream, t1fall_stream);
+    encodeChunkFromBytes(bytes + byte_offset, bytes_remaining,
+                          chunk_bits, pin_mask,
+                          rise_stream, t0fall_stream, t1fall_stream);
 
-        // Arm the 3 DMA channels for this chunk.
-        const u32 count_field = ((chunk_bits - 1u) & 0x3FFu) << 16;
-        for (u32 i = 0; i < 3; ++i) {
-            DMA0->CHANNEL[base + i].XFERCFG = xfercfg_base | count_field;
-        }
-        DMA0->COMMON[0].SETVALID = (7UL << base);
-
-        // Release HALT — SCT runs, match events fire, DMA channels stream.
-        SCT0->CTRL &= ~0x00000004UL;
-
-        // Block until the 3 channels complete this chunk. TODO(2842):
-        // wire SCT MATCH_END → NVIC IRQn so this becomes a WFI rather
-        // than a busy-wait — same TODO the legacy template carries.
-        const u32 mask = (7UL << base);
-        while ((DMA0->COMMON[0].ACTIVE & mask) != 0u) {
-            // busy
-        }
-        SCT0->CTRL |= 0x00000004UL;     // halt for next chunk
-
-        byte_offset += chunk_bits / 8u;
+    // Arm the 3 DMA channels for this chunk.
+    const u32 count_field = ((chunk_bits - 1u) & 0x3FFu) << 16;
+    for (u32 i = 0; i < 3; ++i) {
+        DMA0->CHANNEL[base + i].XFERCFG = xfercfg_base | count_field;
     }
+    DMA0->COMMON[0].SETVALID = (7UL << base);
+
+    // Release HALT — SCT runs, match events fire, DMA channels stream
+    // asynchronously. Control returns to the caller; poll() advances
+    // when this chunk completes.
+    SCT0->CTRL &= ~0x00000004UL;
+
+    chunk_bits_out = chunk_bits;
+}
+
+}  // namespace
+
+void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_NO_EXCEPT {
+    (void)is_rgbw;  // bytes are already chipset-encoded by ChannelData; the
+                    // is_rgbw flag is reserved for future per-pixel padding
+                    // logic (RGBW-XTRA0). For now the byte stream is consumed
+                    // verbatim.
+
+    if (bytes == nullptr || len == 0u) {
+        mCurrentBytes = nullptr;
+        mCurrentLen = 0;
+        mBytesSent = 0;
+        mTransmitInProgress = false;
+        return;
+    }
+
+    // Latch the buffer + progression state and kick the first chunk.
+    // The caller drives progression from here via pollAndAdvance().
+    mCurrentBytes = bytes;
+    mCurrentLen = len;
+    mBytesSent = 0;
+    mTransmitInProgress = true;
+
+    u32 chunk_bits = 0;
+    kickNextChunk(mChannelBuf, mCurrentBytes, mCurrentLen, mBytesSent,
+                   mPinMask, chunk_bits);
+    mBytesSent += chunk_bits / 8u;
+}
+
+bool LpcSctDmaTransmitter::pollAndAdvance() FL_NO_EXCEPT {
+    if (!mTransmitInProgress) {
+        return true;
+    }
+
+    // Is the current chunk still streaming? Any of the 3 SCT-tied DMA
+    // channels reporting ACTIVE means we're mid-chunk.
+    const u32 mask = (7UL << FASTLED_LPC_PWM_DMA_BASECH);
+    if ((DMA0->COMMON[0].ACTIVE & mask) != 0u) {
+        return false;   // still DRAINING
+    }
+
+    // Chunk done — halt SCT before we advance so it doesn't consume
+    // stale match events between chunks.
+    SCT0->CTRL |= 0x00000004UL;
+
+    if (mBytesSent >= mCurrentLen) {
+        // Full frame transmitted; idle.
+        mTransmitInProgress = false;
+        mCurrentBytes = nullptr;
+        mCurrentLen = 0;
+        return true;
+    }
+
+    // Encode + kick the next chunk. Poll() will observe DRAINING again
+    // until that chunk drains.
+    u32 chunk_bits = 0;
+    kickNextChunk(mChannelBuf, mCurrentBytes, mCurrentLen, mBytesSent,
+                   mPinMask, chunk_bits);
+    mBytesSent += chunk_bits / 8u;
+    return false;
 }
 
 bool LpcSctDmaTransmitter::isDone() const FL_NO_EXCEPT {
+    // Legacy done probe: idle if no transmission in flight AND no DMA
+    // channel is currently active. Callers that use the older isDone()
+    // interface won't auto-advance chunks; poll() with pollAndAdvance()
+    // is the preferred surface.
+    if (mTransmitInProgress) {
+        return false;
+    }
     const u32 mask = (7UL << FASTLED_LPC_PWM_DMA_BASECH);
     return (DMA0->COMMON[0].ACTIVE & mask) == 0u;
 }
@@ -255,12 +318,16 @@ void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_N
     // No SCT/DMA peripheral on host. Instead, capture the byte stream
     // so the caller can round-trip it through the LPC RX device's
     // decoder (#3468 TX→RX readback contract). The channels-API
-    // engine's poll() still flips back to READY on the next call.
+    // engine's poll() flips back to READY on the next call.
     //
     // Overwrite semantics: each transmit() replaces the prior capture.
     // Callers that need to accumulate across frames should copy the
     // span out between calls.
     mTxCapture.clear();
+    mCurrentBytes = nullptr;
+    mCurrentLen = 0;
+    mBytesSent = 0;
+    mTransmitInProgress = false;  // host completes synchronously
     if (bytes == nullptr || len == 0u) {
         return;
     }
@@ -268,6 +335,10 @@ void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_N
     for (u32 i = 0; i < len; ++i) {
         mTxCapture.push_back(bytes[i]);
     }
+}
+
+bool LpcSctDmaTransmitter::pollAndAdvance() FL_NO_EXCEPT {
+    return true;  // host completes transmit() synchronously.
 }
 
 bool LpcSctDmaTransmitter::isDone() const FL_NO_EXCEPT {

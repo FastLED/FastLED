@@ -102,20 +102,51 @@ public:
     /// @param t3_ns  Third phase length, nanoseconds (e.g. 450).
     void configureForChannel(u8 pin, u32 t1_ns, u32 t2_ns, u32 t3_ns) FL_NO_EXCEPT;
 
-    /// @brief Encode and transmit a raw byte stream as a chunked SCT+DMA
-    ///        stream. Blocks at chunk boundaries until each chunk's DMA
-    ///        completes (matches the legacy template's per-chunk
-    ///        synchronous wait — TODO(2842): wire the SCT MATCH_END
-    ///        interrupt for true async).
+    /// @brief Start a chunked SCT+DMA transmission of a raw byte stream.
+    ///
+    /// **Async semantics (LPC845):** encodes and kicks the first chunk,
+    /// then returns immediately. The caller drives chunk progression by
+    /// calling `pollAndAdvance()` until it returns true. Closes #3459
+    /// acceptance criterion 3 — no busy-wait in `show()`; the state
+    /// machine transitions `READY → BUSY → DRAINING → READY` are entirely
+    /// driven from the engine's `poll()` cycle.
+    ///
+    /// **Sync semantics (host / stub):** there's no DMA to wait on, so
+    /// the entire byte stream is copied into `mTxCapture` and
+    /// transmission is complete on return. `pollAndAdvance()` immediately
+    /// returns true.
+    ///
     /// @param bytes  Raw RGB / RGBW bytes (already chipset-encoded —
     ///               `ChannelData` stores them that way).
     /// @param len    Byte count.
     /// @param is_rgbw  When true, the byte stream is 4 bytes per LED.
     void transmit(const u8* bytes, u32 len, bool is_rgbw) FL_NO_EXCEPT;
 
-    /// @brief True once the most recent chunk's DMA channels have all
-    ///        cleared their `ACTIVE` flag. Used by `poll()` to advance
-    ///        the engine's state machine to `READY`.
+    /// @brief Advance the chunk-stream state machine by one step.
+    ///
+    /// Call from the engine's `poll()`. Semantics:
+    ///
+    ///   - Returns `true` when transmission is fully complete (all chunks
+    ///     have finished). The engine can then transition to `READY`.
+    ///   - Returns `false` while a chunk's DMA is still active OR another
+    ///     chunk has just been kicked. The engine stays in `DRAINING`.
+    ///
+    /// On LPC845 this probes `DMA0->COMMON[0].ACTIVE` for the three
+    /// SCT-tied channels. When they drop, if bytes remain the next chunk
+    /// is encoded and kicked in this same call; if bytes are exhausted
+    /// the transmission is marked idle.
+    ///
+    /// On host the transmit was fully synchronous, so this always
+    /// returns true.
+    bool pollAndAdvance() FL_NO_EXCEPT;
+
+    /// @brief Legacy done-flag probe. Prefer `pollAndAdvance()`.
+    ///
+    /// Returns true when no transmission is in flight. Kept for
+    /// backwards compatibility with callers that don't want to drive
+    /// chunk progression themselves — those callers pay the cost that
+    /// their poll() loop can't advance chunks (multi-chunk frames stall
+    /// after chunk 1).
     bool isDone() const FL_NO_EXCEPT;
 
     /// @brief Return the byte stream captured by the most recent
@@ -161,6 +192,15 @@ private:
     u32 mBitEnd = 0;
 
     bool mInitialized = false;
+
+    // Chunk-progression state for async transmission (LPC845). On host
+    // these members exist too but transmit() completes synchronously so
+    // they remain in the "idle" state (mTransmitInProgress == false)
+    // immediately after transmit() returns.
+    const u8* mCurrentBytes = nullptr;
+    u32 mCurrentLen = 0;
+    u32 mBytesSent = 0;
+    bool mTransmitInProgress = false;
 
     // Host-only TX byte capture. Populated by `transmit()` on host/stub
     // builds so tests can round-trip the byte stream through the LPC RX
