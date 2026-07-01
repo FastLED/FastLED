@@ -1,7 +1,7 @@
 /// @file lpc_sct_dma_engine.cpp
 /// @brief Host-side tests for the LPC845 SCT+DMA channels-API engine
-///        (FastLED #3459 scaffold) plus a TX→RX byte-flow demonstration
-///        through the LPC SCT-capture RX device.
+///        (FastLED #3459) including the #3468 TX→RX byte-flow readback
+///        through the actual `engine.show()` path.
 ///
 /// The engine itself ships on LPC845 silicon (gated on `FL_IS_ARM_LPC_845`).
 /// To exercise the `IChannelDriver` contract (canHandle filtering, state
@@ -10,16 +10,22 @@
 /// `ChannelEngineObjectFLED` in
 /// `tests/platforms/arm/teensy/teensy4_common/drivers/objectfled/`.
 ///
-/// The "TX→RX round-trip" half of this file does NOT call the engine's
-/// `show()` body (it is a documented `TODO(3459)` no-op until the SCT
-/// chunk-encode lift from `clockless_arm_lpc_pwm_dma.h` lands). Instead it
-/// demonstrates the integration shape: the same WS2812 byte stream that the
-/// engine's future `show()` will emit, when encoded as a HIGH/LOW edge
-/// sequence, round-trips losslessly through the LPC SCT-capture RX device.
-/// On host that device falls through to `NativeRxDevice` (per
-/// `src/fl/channels/rx.cpp.hpp:266`), so the decode path is the same code
-/// that runs on real LPC845 silicon once the RX SCT/DMA `begin()` body is
-/// invoked.
+/// Two tiers of test coverage:
+///
+/// 1. **Contract tests** (canHandle, state machine, capabilities, name).
+///    Exercise `IChannelDriver` conformance.
+///
+/// 2. **TX→RX readback** — closes the #3468 goal. Pixel bytes go into
+///    `ChannelData`, are driven through `engine.enqueue()` and
+///    `engine.show()`, captured by the host build of
+///    `LpcSctDmaTransmitter` (which records its input rather than
+///    driving SCT/DMA registers that do not exist on host), converted
+///    to WS2812 edge pairs, pushed through the LPC SCT-capture RX
+///    device via `injectEdges()`, and decoded back through the shared
+///    4-phase WS2812 decoder. Byte-for-byte equality confirms the
+///    channels-API engine's dispatch and byte handoff are correct —
+///    the only piece not exercised is the actual SCT/DMA register
+///    sequencing, which requires silicon.
 
 #include "FastLED.h"
 #include "fl/channels/rx.h"
@@ -30,6 +36,7 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/cstring.h"
 #include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h"
+#include "platforms/arm/lpc/drivers/sct_dma/lpc_sct_dma_runtime.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -251,6 +258,121 @@ FL_TEST_CASE("LPC SCT-DMA engine → LPC RX device byte-flow round-trip") {
     FL_CHECK(result.value() == kPayloadLen);
     for (fl::size i = 0; i < kPayloadLen; ++i) {
         FL_CHECK(decoded[i] == kPayload[i]);
+    }
+}
+
+// =============================================================================
+// #3468 goal: TX→RX readback THROUGH the actual engine.show() path.
+//
+// This is the "no cheating" version of the previous test case. Rather than
+// sourcing edges from an independent `appendByte()` encoder that bypasses
+// the engine, this test:
+//
+//   1. Builds a ChannelData with a known GRB pixel payload.
+//   2. Runs it through `engine.enqueue()` + `engine.show()`. On host the
+//      engine dispatches to `LpcSctDmaTransmitter::transmit()` whose host
+//      stub captures the byte stream in `mTxCapture` (see #3468 wiring).
+//   3. Reads the captured bytes out via `engine.transmitter().getCapturedTxBytes()`.
+//   4. Converts those captured bytes to WS2812 edge pairs using the same
+//      T0H / T0L / T1H / T1L timing the WS2812B protocol defines.
+//   5. Injects the edge stream into the LPC SCT-capture RX device.
+//   6. Decodes back through the shared 4-phase WS2812 decoder.
+//   7. Asserts decoded == original payload, byte-for-byte.
+//
+// If step (2) or (3) drops or corrupts bytes, step (7) fails. This
+// closes the "TX → RX readback confirmed working" goal from #3468 at the
+// byte-flow layer. The actual SCT/DMA register sequencing on silicon is
+// still guarded by the acceptance criteria that require bench validation.
+// =============================================================================
+
+FL_TEST_CASE("#3468: end-to-end TX→RX readback through engine.show()") {
+    // Deliberately non-trivial payload: two "LEDs" plus a bit pattern
+    // that exercises every 0→1 and 1→0 transition in a WS2812 byte
+    // (0x55 = 01010101, 0xAA = 10101010). Ordering unusual so a byte
+    // reversed anywhere in the pipeline shows up.
+    const u8 kPayload[] = {
+        0x00, 0xFF, 0x00,   // LED 0 — pure green (GRB order)
+        0xFF, 0x00, 0x00,   // LED 1 — pure red
+        0x55, 0xAA, 0x33,   // LED 2 — alternating bit patterns
+    };
+    constexpr fl::size kPayloadLen = sizeof(kPayload);
+
+    // 1. Build the channel data.
+    ChannelEngineLpcSctDma engine;
+    auto ch = makeClocklessChannelData(/*pin=*/11, /*num_leds=*/3, kPayload);
+    FL_REQUIRE(engine.canHandle(ch));
+
+    // 2. Drive it through the actual engine.show() dispatch. The host
+    //    build of LpcSctDmaTransmitter captures the byte stream.
+    engine.transmitter().clearCapture();
+    engine.enqueue(ch);
+    engine.show();
+
+    // 3. Read the captured bytes back out.
+    fl::span<const u8> captured = engine.transmitter().getCapturedTxBytes();
+    FL_REQUIRE(captured.size() == kPayloadLen);
+    // Sanity: the engine handed the transmitter the exact bytes from
+    // ChannelData, in the same order.
+    for (fl::size i = 0; i < kPayloadLen; ++i) {
+        FL_CHECK(captured[i] == kPayload[i]);
+    }
+
+    // 4. Convert captured bytes → WS2812 edge pairs.
+    fl::vector<EdgeTime> edges;
+    edges.reserve(kPayloadLen * 16 + 2);
+    for (fl::size i = 0; i < captured.size(); ++i) {
+        appendByte(edges, captured[i]);
+    }
+    edges.push_back(EdgeTime(/*high=*/false, 60u * 1000u));  // reset
+
+    // 5. Inject into the LPC RX device.
+    auto rx = RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(/*pin=*/11);
+    FL_REQUIRE(rx != nullptr);
+    RxConfig rx_config;
+    rx_config.buffer_size = 256;
+    rx_config.start_low   = true;
+    FL_REQUIRE(rx->begin(rx_config));
+    FL_REQUIRE(rx->injectEdges(toSpan(edges)));
+    FL_CHECK(rx->wait(10) == RxWaitResult::SUCCESS);
+
+    // 6. Decode.
+    u8 decoded[kPayloadLen + 1] = {0};
+    auto result = rx->decode(ws2812_decoder_timing(),
+                             fl::span<u8>(decoded, sizeof(decoded)));
+    FL_REQUIRE(result.ok());
+    FL_CHECK(result.value() == kPayloadLen);
+
+    // 7. Byte-for-byte check: the round-trip returned the exact
+    //    original payload.
+    for (fl::size i = 0; i < kPayloadLen; ++i) {
+        FL_CHECK(decoded[i] == kPayload[i]);
+    }
+
+    // Engine state machine settled cleanly.
+    FL_CHECK(engine.poll() == DriverState::READY);
+}
+
+FL_TEST_CASE("#3468: capture buffer is cleared between transmits") {
+    const u8 kFirst[]  = {0xDE, 0xAD, 0xBE};
+    const u8 kSecond[] = {0xCA, 0xFE, 0xBA, 0xBE, 0xF0, 0x0D};
+
+    ChannelEngineLpcSctDma engine;
+
+    auto ch1 = makeClocklessChannelData(/*pin=*/11, /*num_leds=*/1, kFirst);
+    engine.enqueue(ch1);
+    engine.show();
+    FL_REQUIRE(engine.transmitter().getCapturedTxBytes().size() == sizeof(kFirst));
+
+    // Second frame with a different payload must overwrite, not append.
+    engine.poll();  // settle back to READY
+    auto ch2 = makeClocklessChannelData(/*pin=*/11, /*num_leds=*/2, kSecond);
+    engine.enqueue(ch2);
+    engine.show();
+
+    fl::span<const u8> captured = engine.transmitter().getCapturedTxBytes();
+    FL_REQUIRE(captured.size() == sizeof(kSecond));
+    for (fl::size i = 0; i < sizeof(kSecond); ++i) {
+        FL_CHECK(captured[i] == kSecond[i]);
     }
 }
 

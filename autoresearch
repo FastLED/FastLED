@@ -37,6 +37,8 @@ Driver Selection (optional - omit for GPIO-only mode):
   --lcd-spi           Test LCD_SPI driver (ESP32-S3 only)
   --lcd-rgb           Test LCD RGB driver (ESP32-P4 only)
   --object-fled       Test ObjectFLED DMA driver (Teensy 4.x only)
+  --pwm-dma-cl        LPC845-only: channels-API SCT+DMA clockless
+                      self-loopback (FastLED #3468). Jumper P0_10↔P0_11.
   --all               Test all drivers
   --simd              Test SIMD operations only (no LED drivers needed)
   --coroutine         Test coroutine/task creation, stop, await (no LED drivers needed)

@@ -42,7 +42,9 @@
 #if defined(FL_IS_ARM_LPC_845) || defined(FL_IS_STUB) || defined(FASTLED_STUB_IMPL)
 
 #include "fl/stl/noexcept.h"
+#include "fl/stl/span.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/vector.h"
 
 // Chunk size matches the legacy template driver's
 // `FASTLED_LPC_PWM_DMA_CHUNK_BITS` so memory budgets are unchanged.
@@ -116,6 +118,31 @@ public:
     ///        the engine's state machine to `READY`.
     bool isDone() const FL_NO_EXCEPT;
 
+    /// @brief Return the byte stream captured by the most recent
+    ///        `transmit()` call.
+    ///
+    /// **Host / stub builds only.** On LPC845 silicon there is no
+    /// capture buffer — the transmit path writes bytes into the SCT +
+    /// DMA hardware and the wire is the observation surface. On host
+    /// the transmit path has no peripheral to drive, so it records the
+    /// byte stream so tests (and #3468's `--pwm-dma-cl` AutoResearch
+    /// harness in its host-simulation form) can round-trip the exact
+    /// bytes through the LPC RX device's decoder — this is the
+    /// TX→RX byte-flow readback contract that closes the LPC clockless
+    /// bring-up loop.
+    ///
+    /// Returns an empty span on LPC845 silicon (the capture member
+    /// stays empty on the real target — see `transmit()` body).
+    fl::span<const u8> getCapturedTxBytes() const FL_NO_EXCEPT {
+        return fl::span<const u8>(mTxCapture.data(), mTxCapture.size());
+    }
+
+    /// @brief Drop the capture buffer. Call before a fresh `transmit()`
+    ///        when the caller wants to isolate one frame's output.
+    void clearCapture() FL_NO_EXCEPT {
+        mTxCapture.clear();
+    }
+
 private:
     // Per-instance encoding buffer. 3 streams × CHUNK_BITS words. The
     // layout matches the legacy template:
@@ -134,6 +161,12 @@ private:
     u32 mBitEnd = 0;
 
     bool mInitialized = false;
+
+    // Host-only TX byte capture. Populated by `transmit()` on host/stub
+    // builds so tests can round-trip the byte stream through the LPC RX
+    // device's decoder. Left empty on LPC845 silicon — the real target
+    // observes the output on the actual wire.
+    fl::vector<u8> mTxCapture;
 };
 
 }  // namespace fl

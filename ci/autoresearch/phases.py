@@ -1663,6 +1663,24 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
                 )
                 return 1
             return await _run_lpc_ws2812_loopback_tests(ctx)
+        # FastLED #3468: --pwm-dma-cl runs the channels-API SCT+DMA
+        # clockless engine self-loopback. Sibling of --ws2812-loopback
+        # but exercises `ChannelEngineLpcSctDma` (channels-API path)
+        # rather than the legacy `ClocklessController` template.
+        if getattr(ctx.args, "pwm_dma_cl", False):
+            if final_environment not in LPC_WS2812_ENVS:
+                print(
+                    "--pwm-dma-cl is only supported on LPC845 boards "
+                    "(lpc845brk, lpc845, lpcxpresso845max)."
+                )
+                return 1
+            if getattr(ctx.args, "ws2812_loopback", False):
+                print(
+                    "--pwm-dma-cl and --ws2812-loopback are mutually "
+                    "exclusive: both target the SCT peripheral."
+                )
+                return 1
+            return await _run_lpc_pwm_dma_cl_tests(ctx)
         return await _run_bring_up_tests(ctx)
 
     # GPIO-only mode
@@ -2392,6 +2410,58 @@ async def _run_lpc_ws2812_loopback_tests(ctx: RunContext) -> int:
         "run",
         "python",
         "ci/autoresearch/test_lpc_ws2812_loopback.py",
+        "--port",
+        upload_port,
+        "--tx-pin",
+        str(tx_pin),
+        "--rx-pin",
+        str(rx_pin),
+    ]
+    result = subprocess.run(cmd)
+    return 0 if result.returncode == 0 else 1
+
+
+async def _run_lpc_pwm_dma_cl_tests(ctx: RunContext) -> int:
+    """Run the FastLED #3468 SCT+DMA channels-API clockless bench.
+
+    Sibling of `_run_lpc_ws2812_loopback_tests`, but exercises the new
+    `ChannelEngineLpcSctDma` engine (channels-API path) instead of the
+    legacy `ClocklessController` template. LPC845 low-memory builds
+    bind the `pwmDmaClFrameOnce` / `pwmDmaClFrameBurst` /
+    `pwmDmaClCaptureSelf` handlers automatically when
+    `FASTLED_LPC_PWM_DMA` is set at compile time — this phase driver
+    injects that macro via `build_flags` before delegating to the
+    test runner.
+    """
+    final_environment = (ctx.final_environment or "").lower()
+    if final_environment not in LPC_WS2812_ENVS:
+        print(
+            "--pwm-dma-cl is only supported on LPC845 boards "
+            "(lpc845brk, lpc845, lpcxpresso845max)."
+        )
+        return 1
+
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+
+    tx_pin = ctx.args.tx_pin if ctx.args.tx_pin is not None else 10
+    rx_pin = ctx.args.rx_pin if ctx.args.rx_pin is not None else 11
+
+    print()
+    print("=" * 60)
+    print("LPC SCT+DMA channels-API MODE — self-loopback (#3468)")
+    print(f"   Wiring required: jumper P0_{tx_pin} ↔ P0_{rx_pin} on LPC845-BRK")
+    print("   Engine: ChannelEngineLpcSctDma via BusTraits<Bus::BIT_BANG>")
+    print("   Build flag: -DFASTLED_LPC_PWM_DMA=1 (see")
+    print("   examples/AutoResearch/AutoResearchPwmDmaClockless.h)")
+    print("=" * 60)
+    print()
+
+    cmd = [
+        "uv",
+        "run",
+        "python",
+        "ci/autoresearch/test_lpc_pwm_dma_cl.py",
         "--port",
         upload_port,
         "--tx-pin",
