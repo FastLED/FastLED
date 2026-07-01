@@ -16,6 +16,7 @@ import multiprocessing
 import os
 import socket
 import socketserver
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -55,7 +56,10 @@ def parse_args():
 def install_playwright_browsers():
     console.print("[dim]Installing Playwright browsers...[/dim]")
     try:
-        os.system(f"{sys.executable} -m playwright install chromium")
+        subprocess.run(
+            [sys.executable, "-m", "playwright", "install", "chromium"],
+            check=False,
+        )
         console.print("[dim]Playwright browsers ready.[/dim]")
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)

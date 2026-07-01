@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
-import os
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -23,7 +23,10 @@ SCREENSHOTS_DIR.mkdir(exist_ok=True)
 def install_playwright_browsers():
     print("Installing Playwright browsers...")
     try:
-        os.system(f"{sys.executable} -m playwright install chromium")
+        subprocess.run(
+            [sys.executable, "-m", "playwright", "install", "chromium"],
+            check=False,
+        )
         print("Playwright browsers installed successfully.")
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
