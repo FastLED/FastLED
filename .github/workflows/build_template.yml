@@ -79,6 +79,31 @@ jobs:
           # The action ignores this input on older revisions (no-op).
           install-cache-key-extra: ${{ hashFiles('pyproject.toml') }}
 
+      # Purge stale platform tarballs whose sha256 no longer matches what
+      # the current pin resolves to. The fbuild-cache restore-keys fall
+      # back to os+arch+fbuild-hash prefix (see FastLED/fbuild's
+      # setup/action.yml), so an LPC board can inherit the framework
+      # tarball an unrelated board cached weeks ago against a pre-repo-
+      # transfer URL. Result: fbuild sees the on-disk file, computes its
+      # sha256, and compares against the OLD expected sha256 stored in
+      # cache metadata — mismatch, hard fail before pio/compile can even
+      # run. Deleting only the platform-tarball subtree is targeted:
+      # unrelated caches (toolchain, cook artifacts, per-board build
+      # artifacts) are untouched. Deleted entries are lazily re-populated
+      # by the very next fbuild call. Non-LPC boards never had this
+      # subtree and skip the delete transparently. See
+      # FastLED/FastLED#3543 + #3547 for the LPC-transfer incident and
+      # cache-key gap that motivated this.
+      - name: Purge stale platform tarballs from restored fbuild cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          purge_root="${RUNNER_TEMP}/fbuild-cache/platforms/FastLED-framework-arduino-lpc8xx"
+          if [ -d "$purge_root" ]; then
+            echo "purging stale $purge_root"
+            rm -rf "$purge_root"
+          fi
+
       - name: Install Platform
         if: inputs.platform != ''
         run: |
