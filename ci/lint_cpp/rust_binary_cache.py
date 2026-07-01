@@ -23,9 +23,23 @@ import platform
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 from ci.util.paths import PROJECT_ROOT
+
+
+@dataclass(frozen=True)
+class _BuildStreamResult:
+    """Return type for :func:`_stream_build_cmd`.
+
+    ``line_count`` = non-empty stdout lines observed. The soldr-shim fallback
+    path in :func:`_run_build` treats ``returncode == 0`` combined with
+    ``line_count == 0`` as evidence that the wrapper no-oped.
+    """
+
+    returncode: int
+    line_count: int
 
 
 RUST_CRATE_DIR = PROJECT_ROOT / "ci" / "lint_cpp_rs"
@@ -220,12 +234,11 @@ def _resolve_soldr() -> str:
     return soldr
 
 
-def _stream_build_cmd(cmd: list[str], label: str, verbose: bool) -> tuple[int, int]:
-    """Run ``cmd`` under Popen, prefix-stream its stdout, return (rc, line_count).
+def _stream_build_cmd(cmd: list[str], label: str, verbose: bool) -> _BuildStreamResult:
+    """Run ``cmd`` under Popen, prefix-stream its stdout, return the result.
 
-    ``line_count`` is the number of non-empty output lines observed. Callers use
-    it to detect the "silent no-op" case where a wrapper binary exits 0 without
-    ever calling cargo (see the soldr-shim fallback path below).
+    See :class:`_BuildStreamResult` for the returned fields and the reason
+    ``line_count`` is exposed (soldr-shim fallback detection).
     """
     if verbose:
         print(
@@ -234,7 +247,7 @@ def _stream_build_cmd(cmd: list[str], label: str, verbose: bool) -> tuple[int, i
             flush=True,
         )
         print(
-            f"    cmd: {' '.join(cmd)}",
+            f"    cmd: {subprocess.list2cmdline(cmd)}",
             file=sys.stderr,
             flush=True,
         )
@@ -257,7 +270,7 @@ def _stream_build_cmd(cmd: list[str], label: str, verbose: bool) -> tuple[int, i
         # trailing whitespace only, don't collapse internal spacing).
         print(f"{prefix}{stripped}", file=sys.stderr, flush=True)
     returncode = proc.wait()
-    return returncode, line_count
+    return _BuildStreamResult(returncode=returncode, line_count=line_count)
 
 
 def _run_build(verbose: bool = True) -> None:
@@ -310,9 +323,13 @@ def _run_build(verbose: bool = True) -> None:
 
     soldr = _resolve_soldr()
     soldr_cmd = [soldr, "--no-cache", "cargo", *cargo_args]
-    returncode, line_count = _stream_build_cmd(soldr_cmd, "cargo", verbose)
+    result = _stream_build_cmd(soldr_cmd, "cargo", verbose)
 
-    if returncode == 0 and line_count == 0 and not _binary_path().exists():
+    if (
+        result.returncode == 0
+        and result.line_count == 0
+        and not _binary_path().exists()
+    ):
         # soldr shim exited 0 without invoking cargo. Fall back to bare
         # cargo so lint keeps working while soldr's Windows-shim regression
         # is being worked upstream.
@@ -323,11 +340,11 @@ def _run_build(verbose: bool = True) -> None:
             flush=True,
         )
         cargo_cmd = ["cargo", *cargo_args]
-        returncode, _ = _stream_build_cmd(cargo_cmd, "cargo", verbose)
+        result = _stream_build_cmd(cargo_cmd, "cargo", verbose)
 
-    if returncode != 0:
+    if result.returncode != 0:
         raise RuntimeError(
-            f"Rust C++ linter build failed (exit {returncode}); see "
+            f"Rust C++ linter build failed (exit {result.returncode}); see "
             f"[cargo] lines above for the underlying error."
         )
 
