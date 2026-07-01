@@ -251,6 +251,18 @@ const fl::RxBackend RX_BACKEND = fl::RxBackend::PLATFORM_DEFAULT;
 // hang becomes a watchdog reboot instead of a permanently owned/dead port.
 static constexpr uint32_t AUTORESEARCH_WATCHDOG_TIMEOUT_MS = 5000;
 
+// setup() runs before FL_WATCHDOG_AUTO() at the top of loop() can arm the
+// timer, so we arm the WDT explicitly at the very top of setup() with a
+// longer window that covers normal setup work (serial handshake up to
+// 2 s, RPC handler registration ~65 binds, PSRAM RX-buffer allocation,
+// FastLED singleton init, driver enumeration). Without this, a hang in
+// setup() — e.g., a null-deref inside an RPC bind lambda or a stalled
+// singleton static-init — wedges the COM port until the user power-
+// cycles the board. 20 s is generous enough for cold boot yet still
+// short enough that host-side autoresearch RPC timeouts (default 30 s)
+// surface the reboot cleanly.
+static constexpr uint32_t AUTORESEARCH_SETUP_WATCHDOG_TIMEOUT_MS = 20000;
+
 // ============================================================================
 // Platform-Specific Pin Defaults
 // ============================================================================
@@ -326,6 +338,13 @@ uint32_t frame_counter = 0;
 // generation with C++ linkage during fbuild deploy.
 
 void setup() {
+    // Arm the WDT before doing any real work so a hang here (RPC bind
+    // null-deref, stalled static-init, wedged Serial handshake) auto-
+    // reboots the chip instead of leaving the COM port owned by a
+    // dead sketch. FL_WATCHDOG_AUTO() at loop() re-arms with the
+    // shorter loop-scoped timeout once setup() has finished.
+    fl::Watchdog::instance().begin(AUTORESEARCH_SETUP_WATCHDOG_TIMEOUT_MS);
+
     // Initialize serial buffers with platform-specific configuration
     // Must be called BEFORE Serial.begin()
     init_serial_buffers();
@@ -341,15 +360,26 @@ void setup() {
     Serial.setTxTimeoutMs(0);  // ok serial - platform-specific TX timeout, no fl:: equivalent
 #endif
     uint32_t serial_wait_start = millis();
-    while (!fl::serial_ready() && (millis() - serial_wait_start) < AUTORESEARCH_SERIAL_WAIT_MS);  // Wait for serial monitor (early exits when connected)
+    while (!fl::serial_ready() && (millis() - serial_wait_start) < AUTORESEARCH_SERIAL_WAIT_MS) {
+        // Feed the WDT while waiting for the serial monitor — on
+        // classic ESP32 (non-USB-CDC) this loop can run for up to
+        // AUTORESEARCH_SERIAL_WAIT_MS (120 s), far longer than the
+        // setup WDT window. Without feeding here, the WDT trips and
+        // the device reboots before the host ever attaches, leaving
+        // the port silent.
+        FastLED.watchdog().feed();
+    }
 
-    // Note: the unified watchdog is armed lazily by FL_WATCHDOG_AUTO() at the
-    // top of loop() — no explicit setup() call needed. The macro prints the
-    // prior-boot reset info via ResetInfo::describe() and pauses 3 s on crash
-    // before the new timer arms. Per-platform boot diagnostics (Teensy 4
-    // SRC_SRSR bit decode + bundled CrashReport, ESP32 panic backtrace, etc.)
-    // are emitted by the platform watchdog impl from Watchdog::begin() — see
-    // src/fl/wdt/watchdog.h and src/platforms/*/watchdog_*.impl.hpp.
+    // Watchdog was armed at the very top of setup() above with the longer
+    // AUTORESEARCH_SETUP_WATCHDOG_TIMEOUT_MS window so a hang here (RPC bind,
+    // singleton init, wedged serial) auto-reboots the chip. FL_WATCHDOG_AUTO()
+    // at the top of loop() re-arms with the shorter loop-scoped timeout and
+    // prints the prior-boot reset info via ResetInfo::describe(), pausing 3 s
+    // on crash before the new timer arms. Per-platform boot diagnostics
+    // (Teensy 4 SRC_SRSR bit decode + bundled CrashReport, ESP32 panic
+    // backtrace, etc.) are emitted by the platform watchdog impl from
+    // Watchdog::begin() — see src/fl/wdt/watchdog.h and
+    // src/platforms/*/watchdog_*.impl.hpp.
 
     // Initialize RX buffer dynamically (uses PSRAM if available, falls back to heap)
     g_rx_buffer_storage.resize(RX_BUFFER_SIZE);
