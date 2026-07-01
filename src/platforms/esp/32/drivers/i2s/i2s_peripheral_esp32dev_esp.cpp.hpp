@@ -139,7 +139,19 @@ void I2sPeripheralEsp32DevEsp::deinitialize() FL_NO_EXCEPT {
     if (!mInitialized) {
         return;
     }
-    // No hardware state to release — Stage 5 wires that in.
+    // FastLED#3526 Phase 2b — deinit stops the I2S1 peripheral if a
+    // transmit was in flight so the DMA doesn't drift into the next
+    // caller's buffer. The classic Yves driver's `i2s_stop()` clears
+    // `tx_start` on the peripheral. Note: this deinit is not yet a
+    // full teardown — the ISR handle + DMA descriptor allocations
+    // from `i2s_init()` are still held onto so a re-init doesn't
+    // leak. That matches Yves's behavior (its `gInitializedI2sInitialized`
+    // flag is one-shot for the process). Full teardown lands with the
+    // singleton migration (#3489) since the resources are truly
+    // process-lifetime.
+    if (mBusy) {
+        i2s_stop();
+    }
     mInitialized = false;
     mBusy = false;
 }
