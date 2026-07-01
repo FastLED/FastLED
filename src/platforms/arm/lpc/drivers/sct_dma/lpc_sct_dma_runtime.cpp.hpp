@@ -52,12 +52,11 @@ void LpcSctDmaTransmitter::init() FL_NO_EXCEPT {
     }
 
     // ----- Power up SCT + DMA in SYSAHBCLKCTRL0 -----
-    // Inherits the legacy template's bit assignments verbatim:
-    //   bit  8 = SCT clock
-    //   bit 29 = DMA clock
-    // TODO(2842): verify SYSCON->SYSAHBCLKCTRL0 bit assignments against
-    // UM11029 §4.6.13.
-    SYSCON->SYSAHBCLKCTRL0 |= (1UL << 8) | (1UL << 29);
+    // UM11029 §4.6.13 Table 41. Verified against NXP mcux-sdk:
+    //   SYSCON_SYSAHBCLKCTRL0_SCT_MASK = 0x100U    (SHIFT = 8U)
+    //   SYSCON_SYSAHBCLKCTRL0_DMA_MASK = 0x20000000U (SHIFT = 29U)
+    SYSCON->SYSAHBCLKCTRL0 |=
+        SYSCON_SYSAHBCLKCTRL0_SCT_MASK | SYSCON_SYSAHBCLKCTRL0_DMA_MASK;
 
     // ----- SCT skeleton -----
     // CONFIG: UNIFY (bit 0) — one 32-bit counter; CLKMODE = SYS clock.

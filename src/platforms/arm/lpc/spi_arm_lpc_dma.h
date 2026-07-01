@@ -183,11 +183,11 @@ public:
         spi->TXCTL = FL_LPC_SPI_TXCTL_LEN_8BIT | FL_LPC_SPI_TXCTL_RXIGNORE;
 
         // ----- DMA0 power-up + channel configuration ---------------------
-        // SYSAHBCLKCTRL0 bit 29 = DMA. Already shared with the PWM-DMA
-        // clockless driver if both are gated on; the OR-set is idempotent.
-        // TODO(3453): verify SYSCON->SYSAHBCLKCTRL0 bit 29 against
-        // UM11029 §4.6.13.
-        SYSCON->SYSAHBCLKCTRL0 |= (1UL << 29);
+        // DMA clock enable, UM11029 §4.6.13 Table 41 bit 29.
+        // Cross-checked against NXP mcux-sdk `SYSCON_SYSAHBCLKCTRL0_DMA_MASK`
+        // = 0x20000000U (SHIFT = 29U). Shared with the PWM+DMA clockless
+        // driver if both are gated on; the OR-set is idempotent.
+        SYSCON->SYSAHBCLKCTRL0 |= SYSCON_SYSAHBCLKCTRL0_DMA_MASK;
 
         // Enable the controller (master enable, not yet channel-enabled).
         DMA0->CTRL = 1UL;
