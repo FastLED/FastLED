@@ -13,7 +13,14 @@
 
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s1.h"
 
-#include "fl/channels/detail/wave8.hpp"  // wave8Transpose_16_bf1 + _pipe4
+// Public wave3.h / wave8.h declarations only (transitively via
+// wave8_encoder_i2s1.h) — do NOT include `fl/channels/detail/*.hpp`
+// here. Those force-inline headers would emit their transpose kernels
+// in every translation unit that includes this .cpp.hpp (unity build
+// pulls in this file across multiple TUs), doubling the code
+// footprint. The public declarations resolve at link time to the
+// single out-of-line definitions in `fl/channels/wave3.cpp.hpp` /
+// `wave8.cpp.hpp`.
 
 namespace fl {
 
@@ -88,6 +95,46 @@ bool encodeChannelWave8_i2s1(fl::span<const fl::u8> input,
             out_idx += kBlockSize;
             byte_offset += 1;
         }
+    }
+
+    return true;
+}
+
+bool encodeChannelWave3_i2s1(fl::span<const fl::u8> input,
+                             fl::size_t bytes_per_lane,
+                             fl::size_t num_lanes,
+                             const Wave3BitExpansionLut &lut,
+                             fl::span<fl::u8> output) FL_NO_EXCEPT {
+    if (num_lanes == 0 || num_lanes > 16) {
+        return false;
+    }
+    if (bytes_per_lane == 0) {
+        return false;
+    }
+    if (input.size() < 16 * bytes_per_lane) {
+        return false;
+    }
+    const fl::size_t required_output = wave3I2s1EncodedFrameSize(bytes_per_lane);
+    if (output.size() < required_output) {
+        return false;
+    }
+
+    constexpr fl::size_t kBlockSize = 16 * sizeof(Wave3Byte);
+
+    fl::u8 *out_ptr = output.data();
+    fl::size_t out_idx = 0;
+
+    for (fl::size_t byte_offset = 0; byte_offset < bytes_per_lane; ++byte_offset) {
+        fl::u8 lanes[16];
+        for (fl::size_t lane = 0; lane < 16; lane++) {
+            lanes[lane] = (lane < num_lanes)
+                ? input[lane * bytes_per_lane + byte_offset]
+                : 0;
+        }
+        wave3Transpose_16(
+            reinterpret_cast<const fl::u8(&)[16]>(lanes), lut, // ok reinterpret cast - array reference type conversion
+            *reinterpret_cast<fl::u8(*)[kBlockSize]>(out_ptr + out_idx)); // ok reinterpret cast - direct write to DMA buffer (wave3 transpose output)
+        out_idx += kBlockSize;
     }
 
     return true;
