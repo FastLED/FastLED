@@ -59,6 +59,7 @@
 #include "AutoResearchParlioEncode.h" // parlioEncodeBenchmark RPC (#2526 follow-up)
 #include "AutoResearchTimingDrift.h"  // timingDriftTest RPC (#2994 repro)
 #include "AutoResearchParlioStream.h" // parlioStreamValidate RPC (#2548 follow-up)
+#include "AutoResearchFlexIo.h"       // flexIoDeviceInfo RPC (#3515 Phase B)
 #include "fl/system/heap.h"
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"

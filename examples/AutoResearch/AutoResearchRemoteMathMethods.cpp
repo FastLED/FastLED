@@ -39,6 +39,7 @@
 #include "AutoResearchParlioEncode.h"
 #include "AutoResearchTimingDrift.h"
 #include "AutoResearchParlioStream.h"
+#include "AutoResearchFlexIo.h"
 #include "AutoResearchIeee754.h"
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
@@ -422,6 +423,36 @@ void AutoResearchRemoteControl::bindMathMethods(fl::Remote& remote) {
                 static_cast<fl::u64>(r.perpos_pp_us) * kFrameBytePositions / r.iters));
         }
         response.set("sink", static_cast<int64_t>(r.sink));
+        return response;
+    });
+
+    // Register "flexIoDeviceInfo" — introspect which concrete driver
+    // is bound to the `Bus::FLEX_IO` slot at runtime and return a
+    // device-info JSON structure the host can inspect. Peripheral-
+    // agnostic per the "Runtime driver selection is Bus::FLEX_IO"
+    // agent-doc rule (FastLED#3515 Phase B). Optional args:
+    // `{ "instance": 0 | 1 }` — currently only affects the
+    // `instance` echo in the response since the manager's public
+    // API doesn't yet expose per-(bus,instance) lookup. When
+    // IChannelDriver grows getBus/getInstance() methods, this handler
+    // will resolve to the specific driver on that slot.
+    remote.bind("flexIoDeviceInfo", [](const fl::json& args) -> fl::json {
+        fl::u8 instance = 0;
+        fl::json config;
+        if (args.is_object()) {
+            config = args;
+        } else if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            config = args[0];
+        }
+        if (!config.is_null() && config.contains("instance") &&
+            config["instance"].is_int()) {
+            int64_t iv = config["instance"].as_int().value();
+            if (iv >= 0 && iv <= 255) {
+                instance = static_cast<fl::u8>(iv);
+            }
+        }
+        fl::json response = autoresearch::flex_io::buildDeviceInfo(instance);
+        response.set("success", true);
         return response;
     });
 }
