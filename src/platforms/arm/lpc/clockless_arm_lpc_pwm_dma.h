@@ -14,12 +14,39 @@
 // OVERVIEW
 // --------
 // CPU-free WS2812 output using the LPC845 State Configurable Timer (SCT) +
-// DMA to GPIO SET/CLR registers. The SCT generates three match events at the
-// WS2812 timing positions (T0_RISE, T_MID, T_END); each match event triggers
-// a DMA channel that writes a single 32-bit GPIO bitmask to LPC_GPIO->SET[0]
-// or LPC_GPIO->CLR[0]. Three pre-encoded DMA streams (rising, mid, falling)
-// shift one word per WS2812 bit, so the only CPU work is the encode-pass that
-// runs ahead of the DMA stream.
+// DMA to the GPIO masked-port register (MPIN). The SCT generates three match
+// events at the WS2812 timing positions (T0_RISE, T0_FALL, T1_FALL); all three
+// events pulse SCT DMA-request-0, driving a SINGLE DMA channel that writes one
+// 32-bit pin-level word to GPIO->MPIN[0] per event. The GPIO MASK register is
+// programmed so only the data pin is affected, so each word is simply "pin
+// high" (mask) or "pin low" (0). The pre-encoded stream carries three words
+// per WS2812 bit, so the only CPU work is the encode-pass that runs ahead of
+// the DMA stream.
+//
+// Why one channel + MPIN rather than three SET/CLR channels: the SCT exposes
+// only two DMA request lines (DMAREQ0/DMAREQ1), which cannot give three
+// edges three independent triggers. Combining all three edges onto DMAREQ0
+// and writing pin levels to the masked MPIN register collapses the whole bit
+// waveform onto one channel. See #2845 design notes below.
+//
+// ┌─────────────────────────────────────────────────────────────────────────┐
+// │ HARDWARE FINDING (2026-07, on-device LPC845): the DMA controller CANNOT   │
+// │ master-write the GPIO port at 0xA0000000. A DMA transfer targeting        │
+// │ GPIO->MPIN[0] (0xA0002180) raises DMA0->COMMON[0].ERRINT; the identical   │
+// │ transfer to a RAM address completes cleanly. Confirmed by the             │
+// │ FASTLED_LPC_PWM_DMA_DEBUG_RAM_DST diagnostic in startDmaChunk(). The DMA   │
+// │ reaches SRAM (0x1000_0000) and the APB/AHB peripherals (0x4000/0x5000)    │
+// │ but not the 0xA000_0000 GPIO slave - matching the SDK, whose DMA examples │
+// │ only ever target 0x4000_0000 peripherals, never GPIO.                     │
+// │                                                                            │
+// │ CONSEQUENCE: this DMA-to-GPIO design (and the parallel/multi-lane goal    │
+// │ that motivated it) does NOT work on LPC845 as written. A working CPU-free │
+// │ path must keep all DMA traffic in SRAM/peripheral space - e.g. DMA the    │
+// │ SCT MATCH-compare values (0x5000_4000) and let the SCT drive an SCTOUT    │
+// │ pin directly, or use the SPI-DMA driver (spi_arm_lpc_dma.h) for a single  │
+// │ lane. The multi-output-via-GPIO-bitmask idea needs a chip whose DMA can   │
+// │ reach GPIO. See TODO(2842)/#2845.                                          │
+// └─────────────────────────────────────────────────────────────────────────┘
 //
 // This driver is novel in FastLED. The closest existing analogues are:
 //   * src/platforms/arm/rp/rpcommon/clockless_rp_pio.h - RP2040 PIO + DMA
@@ -37,23 +64,24 @@
 //
 // RESOURCES CONSUMED
 // ------------------
-//   * DMA channels: 3 contiguous channels, base = FASTLED_LPC_PWM_DMA_BASECH
-//     (default 0). Channel N+0 fires on T0_RISE (LED -> HIGH for every bit),
-//     channel N+1 fires on T_MID (drop to LOW for '0' bits only), channel
-//     N+2 fires on T_END (drop to LOW for '1' bits, no-op for '0' bits).
-//   * SCT match events: MATCH0/MATCH1/MATCH2 (16-bit unified counter mode).
+//   * DMA channel: 1 channel, index = FASTLED_LPC_PWM_DMA_BASECH (default 0),
+//     hardware-triggered from SCT DMA-request-0 via DMA_ITRIG_INMUX. It fires
+//     on all three edge events, writing 3 pin-level words per bit to MPIN[0].
+//   * SCT match events: MATCH0/MATCH1/MATCH2 (16-bit unified counter mode),
+//     all OR'd onto SCT DMAREQ0.
 //   * SCT itself: claimed for the lifetime of the driver. User code may not
 //     repurpose the SCT while a FastLED LPC845-PWM-DMA controller exists.
 //   * GPIO port 0: pin direction set to output. The data pin can be any
-//     PIO0_x on the package - DMA writes a full bitmask to SET[0]/CLR[0]
-//     so pin selection is purely a per-bit mask choice. (See pin-constraint
-//     note below.)
+//     PIO0_x on the package. GPIO->MASK[0] is set to ~pinmask so the DMA's
+//     full-word MPIN[0] writes affect only the data pin; MASK gates the MPIN
+//     register ONLY, so SET/CLR/PIN access by other code is unaffected. (See
+//     pin-constraint note below.)
 //
 // PIN CONSTRAINTS
 // ---------------
 // Any GPIO0 pin is acceptable. The SCT is *not* routed to the data pin via
-// hardware (no SCTOUT mux); the DMA writes the mask of the configured pin to
-// SET[0]/CLR[0] at SCT match time. Stage 4 (#2845) will explore using the
+// hardware (no SCTOUT mux); the DMA writes the pin-level word to the masked
+// MPIN[0] register at SCT match time. Stage 4 (#2845) will explore using the
 // SCTOUT0..6 mux for multi-chain parallel output. PIO1 (LPC845 64-pin package
 // only) is not supported in v1.
 //
@@ -82,30 +110,28 @@
 //
 // DMA DESCRIPTOR FORMAT (UM11029 17.4 DMA controller / channel descriptors)
 // -------------------------------------------------------------------------
-// Each DMA channel uses a single linear source buffer (width = 32-bit words,
-// one word per WS2812 bit) writing to a fixed destination (LPC_GPIO->SET[0]
-// or CLR[0]). The descriptor stream is laid out per-channel:
+// The single DMA channel uses one linear source buffer (width = 32-bit words)
+// writing to a fixed destination (LPC_GPIO->MPIN[0]). The stream carries three
+// words per WS2812 bit, in SCT-event (temporal) order:
 //
-//   ch+0 (RISE):  N words of constant kPinSetMask  -> SET[0]
-//   ch+1 (T0_FALL): N words; '0'-bits = kPinClrMask, '1'-bits = 0 -> CLR[0]
-//   ch+2 (T1_FALL): N words; '1'-bits = kPinClrMask, '0'-bits = 0 -> CLR[0]
+//   [3*i + 0] (T0_RISE):  pin-high (mask)             -> MPIN[0]
+//   [3*i + 1] (T0_FALL):  '1'-bit -> mask, '0' -> 0   -> MPIN[0]
+//   [3*i + 2] (T1_FALL):  pin-low (0)                 -> MPIN[0]
 //
-// Writing 0 to CLR[0] is a documented no-op (UM11029 12.4.2.6), so the
-// "skip this bit" entries cost only a DMA word in RAM. For a 144-LED strip
-// this is 3 * (144*24) = 10368 32-bit words = 41 KB which exceeds the
+// With GPIO->MASK[0] = ~pinmask, each MPIN write touches only the data pin,
+// so the words are just "high" / "low" levels. For a 144-LED strip the full
+// buffer would be 3 * (144*24) = 10368 32-bit words = 41 KB, exceeding the
 // LPC845's 16 KB SRAM. We therefore stream-encode in BUFFER_BITS chunks
-// (default 64 bits = 768 bytes total) and re-arm DMA in the SCT match-3
-// (counter-reload) ISR. See encodePixelsForDma() below.
+// (default 64 bits = 768 bytes total) and re-arm DMA between chunks. See
+// showRGBInternal() below.
 //
-// TODO(2842): replace the 3-channel design with a 1-channel + chained SCT
-// match->memcpy if the M0+ ISR cost (~50 cycles per chunk) proves too high.
-// Two valid alternative encodings are:
-//   (a) Single channel writing alternating SET/CLR with SCT match toggling
-//       the DMA source pointer between two banks (complex, lower RAM).
-//   (b) Two channels (rising = constant SET, falling = data-dependent CLR
-//       chosen per bit) using SCT events at T0_FALL and T1_FALL conditional
-//       on the next bit's value (requires SCT INVAL evaluation - novel).
-// Stage 4 #2845 design review will pick one.
+// This is option (a) from the original #2845 design menu, chosen because the
+// SCT exposes only two DMA request lines (DMAREQ0/DMAREQ1) and thus cannot
+// give three edges three independent triggers. Collapsing all three edges
+// onto DMAREQ0 + one masked-MPIN channel sidesteps that limit entirely. The
+// discarded alternatives were: 3 SET/CLR channels (needs 3 request lines -
+// impossible), and 2 channels (RISE on DMAREQ0 + combined FALL on DMAREQ1
+// writing 2 words/bit to CLR) - viable but uses a second channel and line.
 //
 // MULTI-CHAIN SUPPORT (FastLED #2879 — Stage 4.4 from #2845)
 // -------------------
@@ -121,23 +147,21 @@
 //      to 1 to preserve the v1 ABI; users opt in via
 //      `addLeds<WS2812, PIN, GRB, /*LANE_COUNT=*/4>(leds, n)` or similar.
 //
-//   2. DMA channel sharing. The current v1 layout claims 3 contiguous
-//      channels per controller instance (T0_RISE / T_MID / T_END). For
-//      multi-strip, the SAME 3 channels are reused — only the SET/CLR
-//      bitmask written by each transfer changes. That means each match
-//      event's DMA descriptor table needs LANE_COUNT entries chained
-//      via DMA_DESCRIPTOR_NEXTDESC; the SCT match timebase stays single
-//      and drives all lanes synchronously.
+//   2. DMA channel sharing. The v1 layout uses a single channel driven by
+//      SCT DMAREQ0 (all three edge events). For multi-strip the SAME channel
+//      and MPIN[0] destination are reused — only the pin-level word written
+//      per event changes (a wider mask covering all lane pins). The SCT
+//      match timebase stays single and drives all lanes synchronously; the
+//      per-bit stream still carries 3 words, now with multi-pin masks.
 //
-//   3. Encode pass. Single-strip's encoder emits one 32-bit word per
-//      WS2812 bit (the GPIO mask for the active pin). Multi-strip emits
-//      LANE_COUNT words per WS2812 bit — bit i of word j across all lanes
-//      OR'd into one mask. The encode-time cost is O(LANE_COUNT * leds);
-//      DMA time is unchanged (still one bit per match event, just with a
-//      wider bitmask).
+//   3. Encode pass. Single-strip's encoder emits three level words per
+//      WS2812 bit for one pin. Multi-strip OR's the active-lane masks into
+//      each of those three words. The encode-time cost is O(LANE_COUNT *
+//      leds); DMA time is unchanged (still 3 words per bit). Note MASK[0]
+//      must then clear all lane-pin bits, not just one.
 //
 //   4. Pin constraints. All lane pins must live on GPIO port 0 (same
-//      constraint as v1 — DMA writes to LPC_GPIO->SET[0]/CLR[0]).
+//      constraint as v1 — DMA writes to LPC_GPIO->MPIN[0]).
 //
 //   5. Test harness. The on-device verifier lands in
 //      `examples/AutoResearch/AutoResearch.ino` low-memory mode (post
@@ -154,6 +178,7 @@
 #if defined(FL_IS_ARM_LPC) && defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_PWM_DMA)
 
 #include "fl/chipsets/timing_traits.h"
+#include "fl/stl/align.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/cstring.h"
 #include "eorder.h"
@@ -188,6 +213,21 @@ inline constexpr u32 LpcPwmDmaChunkWords() FL_NO_EXCEPT {
     return FASTLED_LPC_PWM_DMA_CHUNK_BITS;
 }
 
+// LPC845 DMA channel descriptor (UM11029 §17.4.3). Raw 16-byte hardware
+// layout - we deliberately do NOT depend on the vendor fsl_dma.h; this is
+// the same struct the SDK's dma_descriptor_t describes, hand-declared so the
+// PWM+DMA driver stays SDK-free. The controller locates channel N's
+// descriptor at SRAMBASE + 16*N, so a table of these is indexed by absolute
+// channel number. For a one-shot (non-reloading) transfer the hardware still
+// reads srcEndAddr/dstEndAddr from the head descriptor to compute addresses;
+// xfercfg/linkToNextDesc are only consumed when RELOAD is set.
+struct LpcDmaDescriptor {
+    volatile u32 xfercfg;         // reloaded transfer config (RELOAD only)
+    const void*  srcEndAddr;      // last source address of the transfer
+    void*        dstEndAddr;      // last destination address of the transfer
+    void*        linkToNextDesc;  // next descriptor in chain, 0 = none
+};
+
 // =============================================================================
 // ClocklessController - PWM+DMA implementation
 // =============================================================================
@@ -205,17 +245,48 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     static constexpr u32 kT1Fall  = LpcSctTicks<TIMING::T1 + TIMING::T2>::value;
     static constexpr u32 kBitEnd  = LpcSctTicks<TIMING::T1 + TIMING::T2 + TIMING::T3>::value;
 
+    // Named values for CMSIS register *fields* that the PAL provides a
+    // shift/mask macro for but no symbolic value (the PAL macros take a raw
+    // number). Keeps the register writes below free of magic literals.
+    static constexpr u32 kSctStateDefault  = 0u;  // SCT powers up in state 0
+    static constexpr u32 kSctCombModeMatch = 1u;  // EV_CTRL COMBMODE: match only
+    static constexpr u32 kDmaWidth32Bit    = 2u;  // XFERCFG WIDTH: 32-bit word
+    static constexpr u32 kDmaIncOneUnit    = 1u;  // XFERCFG SRC/DSTINC: +1 unit
+    static constexpr u32 kDmaIncNone       = 0u;  // XFERCFG SRC/DSTINC: no incr
+    static constexpr u32 kDmaTrigPolRising = 1u;  // CFG TRIGPOL: active-high /
+                                                  // rising edge (the SCT DMA
+                                                  // request line pulses HIGH)
+    static constexpr u32 kDmaTrigEdge      = 0u;  // CFG TRIGTYPE: edge-sensitive
+    // DMA hardware-trigger source index for the SCT's DMA-request-0 line
+    // (UM11029 §11 DMA trigger matrix; equals the SDK's kINPUTMUX_SctDma0ToDma
+    // low field). Selected via INPUTMUX->DMA_ITRIG_INMUX[ch].
+    static constexpr u32 kInmuxSrcSctDma0  = 2u;
+
     data_t     mPinMask;
     data_ptr_t mPort;
     CMinWait<WAIT_TIME> mWait;
 
-    // Per-instance working buffer for the 3-stream encoding. Static so a
-    // single 768-byte allocation is shared across controller instances
-    // (mutually exclusive use - the SCT is a single global resource).
-    // TODO(2842): if multiple controllers ever coexist this buffer needs
-    // to move into a per-instance allocation. Today only one PWM+DMA
-    // controller may be live at once - see header comment.
+    // Single-channel MPIN encoding: one DMA channel triggered by the three
+    // SCT match events (RISE, T0_FALL, T1_FALL) writes three 32-bit words per
+    // WS2812 bit to GPIO->MPIN[0], in temporal order. The buffer is therefore
+    // laid out interleaved as 3 words per bit:
+    //   sChannelBuf[3*i + 0] = level at T0_RISE  (always pin-high)
+    //   sChannelBuf[3*i + 1] = level at T0_FALL  ('1' stays high, '0' -> low)
+    //   sChannelBuf[3*i + 2] = level at T1_FALL  (always pin-low)
+    // Static so a single 768-byte allocation is shared across controller
+    // instances (mutually exclusive use - the SCT is a single global
+    // resource). TODO(2842): move to per-instance if multiple controllers
+    // ever coexist. Today only one PWM+DMA controller may be live at once.
     static u32 sChannelBuf[3 * FASTLED_LPC_PWM_DMA_CHUNK_BITS];
+
+    // DMA channel descriptor table pointed at by DMA0->SRAMBASE. The hardware
+    // fetches channel N's descriptor at SRAMBASE + 16*N, so the table is
+    // indexed by absolute channel number and must span the channel we drive
+    // (BASECH). SRAMBASE ignores its low 9 bits (UM11029 §17.6.2), so the
+    // block must be 512-byte aligned - NOT 256. Static/shared for the same
+    // reason as sChannelBuf: one PWM+DMA controller is live at a time.
+    FL_ALIGNAS(512) static LpcDmaDescriptor
+        sDmaDescriptors[FASTLED_LPC_PWM_DMA_BASECH + 1];
 
 public:
     virtual void init() FL_NO_EXCEPT {
@@ -223,11 +294,23 @@ public:
         mPinMask = FastPin<DATA_PIN>::mask();
         mPort    = FastPin<DATA_PIN>::port();
 
-        // Power up SCT and DMA in SYSAHBCLKCTRL0.
-        // TODO(2842): verify SYSCON->SYSAHBCLKCTRL0 bit assignments against
-        // UM11029 §4.6.13. SCT = bit 8 (per LPC8xx historical layout);
-        // DMA = bit 29 (per LPC845 SDK clock_config.h).
-        SYSCON->SYSAHBCLKCTRL0 |= (1UL << 8) | (1UL << 29);
+        // Masked-port write protection (UM11029 §12.4.2 / PERI_GPIO MASKP).
+        // A MASK bit of 1 means "this pin is NOT affected by MPIN writes", so
+        // we mask every pin EXCEPT the data pin. The DMA then streams full
+        // 32-bit words to MPIN[0] and only the data pin ever changes - all
+        // other GPIO0 users (SET/CLR/PIN) are unaffected since MASK gates
+        // only the MPIN register. Nothing else in the codebase uses MPIN[0],
+        // so leaving MASK set for the controller's lifetime is safe.
+        GPIO->MASK[0] = ~static_cast<u32>(mPinMask);
+
+        // Power up SCT, DMA and GPIO0 in SYSAHBCLKCTRL0 (UM11029 §4.6.13).
+        // The SCT and DMA clocks also feed the INPUTMUX on LPC845 (it has no
+        // dedicated clock gate - it borrows SCT+DMA; see fsl_inputmux.c
+        // INPUTMUX_Init), so configureDma() can write DMA_ITRIG_INMUX without
+        // any further enable. GPIO0 must be clocked for the MASK/MPIN writes.
+        SYSCON->SYSAHBCLKCTRL0 |= SYSCON_SYSAHBCLKCTRL0_SCT(1) |
+                                  SYSCON_SYSAHBCLKCTRL0_DMA(1) |
+                                  SYSCON_SYSAHBCLKCTRL0_GPIO0(1);
 
         configureSct();
         configureDma();
@@ -286,28 +369,22 @@ public:
     }
 
 private:
-    // Encode one chunk of WS2812 bits into the three DMA channel buffers.
-    // Layout: sChannelBuf[0 .. CHUNK_BITS)             = RISE stream
-    //         sChannelBuf[CHUNK_BITS .. 2*CHUNK_BITS)  = T0_FALL stream
-    //         sChannelBuf[2*CHUNK_BITS .. 3*CHUNK_BITS) = T1_FALL stream
+    // Encode one chunk of WS2812 bits into the interleaved MPIN stream.
+    // Three words per bit in temporal (SCT event) order:
+    //   sChannelBuf[3*i + 0] = T0_RISE  level = pin-high (mask)
+    //   sChannelBuf[3*i + 1] = T0_FALL  level = '1' ? high : low
+    //   sChannelBuf[3*i + 2] = T1_FALL  level = pin-low (0)
+    // Each word is written verbatim to GPIO->MPIN[0]; MASK (set in init())
+    // ensures only the data pin is affected, so "high" = mask, "low" = 0.
     void encodeChunk(PixelController<RGB_ORDER>& pixels,
                      u32 chunk_bits, bool first_byte) FL_NO_EXCEPT {
-        const u32 hi_mask = mPinMask;
-        const u32 lo_mask = mPinMask;
-        u32* rise_stream   = &sChannelBuf[0];
-        u32* t0fall_stream = &sChannelBuf[LpcPwmDmaChunkWords()];
-        u32* t1fall_stream = &sChannelBuf[2 * LpcPwmDmaChunkWords()];
-
-        // Every bit raises the pin at T0_RISE.
-        for (u32 i = 0; i < chunk_bits; ++i) {
-            rise_stream[i] = hi_mask;
-        }
+        const u32 mask = mPinMask;
+        u32* stream = &sChannelBuf[0];
 
         if (first_byte) {
             pixels.preStepFirstByteDithering();
         }
 
-        // Walk pixel bytes filling t0fall / t1fall streams.
         u32 bit_idx = 0;
         while (bit_idx < chunk_bits && pixels.has(1)) {
             pixels.stepDithering();
@@ -316,25 +393,23 @@ private:
             u8 b2 = pixels.loadAndScale2();
 
             // RGB-only path; RGBW left as a TODO for v1.
-            encodeByte(b0, t0fall_stream, t1fall_stream, bit_idx, chunk_bits,
-                       lo_mask);
+            encodeByte(b0, stream, bit_idx, chunk_bits, mask);
             bit_idx += 8 + XTRA0;
             if (bit_idx >= chunk_bits) break;
-            encodeByte(b1, t0fall_stream, t1fall_stream, bit_idx, chunk_bits,
-                       lo_mask);
+            encodeByte(b1, stream, bit_idx, chunk_bits, mask);
             bit_idx += 8 + XTRA0;
             if (bit_idx >= chunk_bits) break;
-            encodeByte(b2, t0fall_stream, t1fall_stream, bit_idx, chunk_bits,
-                       lo_mask);
+            encodeByte(b2, stream, bit_idx, chunk_bits, mask);
             bit_idx += 8 + XTRA0;
 
             pixels.advanceData();
         }
 
-        // Pad tail of chunk with zeros (no-op CLR writes).
+        // Pad tail of chunk: hold the pin low across all three events.
         for (; bit_idx < chunk_bits; ++bit_idx) {
-            t0fall_stream[bit_idx] = 0;
-            t1fall_stream[bit_idx] = 0;
+            stream[3 * bit_idx + 0] = 0u;
+            stream[3 * bit_idx + 1] = 0u;
+            stream[3 * bit_idx + 2] = 0u;
         }
 
         // TODO(2842): RGBW support - the FlexIO driver uses
@@ -343,20 +418,19 @@ private:
     }
 
     static inline void encodeByte(u8 byte_value,
-                                  u32* t0fall_stream,
-                                  u32* t1fall_stream,
+                                  u32* stream,
                                   u32 bit_idx,
                                   u32 chunk_bits,
-                                  u32 lo_mask) FL_NO_EXCEPT {
-        // MSB first (WS2812 standard).
+                                  u32 mask) FL_NO_EXCEPT {
+        // MSB first (WS2812 standard). Three interleaved words per bit.
         for (u8 i = 0; i < 8; ++i) {
             const u32 dst = bit_idx + i;
             if (dst >= chunk_bits) return;
             const bool bit = (byte_value & (0x80u >> i)) != 0;
-            // '0' bit: drop at T0_FALL (short HIGH).
-            // '1' bit: drop at T1_FALL (long HIGH).
-            t0fall_stream[dst] = bit ? 0u : lo_mask;
-            t1fall_stream[dst] = bit ? lo_mask : 0u;
+            u32* w = &stream[3 * dst];
+            w[0] = mask;              // T0_RISE: pin goes high
+            w[1] = bit ? mask : 0u;   // T0_FALL: '1' stays high, '0' drops low
+            w[2] = 0u;                // T1_FALL: pin low (end of bit)
         }
     }
 
@@ -364,11 +438,17 @@ private:
     // MATCH2=T1_FALL, MATCH3=BIT_END -> reload + DMAREQ pulse.
     // UM11029 §16.6.1 CONFIG, §16.6.6 MATCH, §16.6.21 EVx_CTRL.
     void configureSct() FL_NO_EXCEPT {
-        // CONFIG: UNIFY (bit 0) - one 32-bit counter; CLKMODE = SYS clock.
-        // TODO(2842): verify CONFIG layout vs UM11029 §16.6.1.
-        SCT0->CONFIG = 0x00000001UL;  // UNIFY
-        SCT0->CTRL   = 0x00000004UL;  // HALT_L = 1 (paused while configuring)
+        // One 32-bit unified up-counter (UNIFY), clocked from the bus clock
+        // (CLKMODE=0). Keep it halted and cleared while we program it.
+        SCT0->CTRL   = SCT_CTRL_HALT_L(1) | SCT_CTRL_CLRCTR_L(1);
+        SCT0->CONFIG = SCT_CONFIG_UNIFY(1);
+        // Force the state machine to state 0. Every event below is enabled
+        // only in state 0 (STATEMSK bit 0); if the SCT powered up in another
+        // state the matches would never fire - no DMA requests, no LIMIT
+        // reset, and the counter would free-run instead of looping to kBitEnd.
+        SCT0->STATE = SCT_STATE_STATE_L(kSctStateDefault);
 
+        // Compare values (and their reload shadows) for the four edge counts.
         SCT0->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_RISE]   = kT0Rise;
         SCT0->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_T0FALL] = kT0Fall;
         SCT0->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_T1FALL] = kT1Fall;
@@ -378,102 +458,132 @@ private:
         SCT0->MATCHREL[FASTLED_LPC_PWM_DMA_SCT_MATCH_T1FALL] = kT1Fall;
         SCT0->MATCHREL[FASTLED_LPC_PWM_DMA_SCT_MATCH_END]    = kBitEnd;
 
-        // Event 0/1/2/3: each tied to a MATCH register and active in state 0.
-        // EVx_CTRL bits 0..3 = MATCHSEL, bit 12 = COMBMODE (MATCH only).
-        // TODO(2842): verify EVx_CTRL bit layout vs UM11029 §16.6.21.
+        // Each event fires purely on its own match register, active in the
+        // SCT's power-up state (state 0). UM11029 §16.6.21 EVx_CTRL.
         for (u32 ev = 0; ev < 4; ++ev) {
-            SCT0->EV[ev].STATE = 0x00000001UL;  // active in STATE 0
-            SCT0->EV[ev].CTRL  = (ev & 0xF) |   // MATCHSEL = ev
-                                    (0x1UL << 12);  // COMBMODE = MATCH
+            SCT0->EV[ev].STATE = SCT_EV_STATE_STATEMSKn(1u << kSctStateDefault);
+            SCT0->EV[ev].CTRL  = SCT_EV_CTRL_MATCHSEL(ev) |
+                                 SCT_EV_CTRL_COMBMODE(kSctCombModeMatch);
         }
 
-        // Limit on event 3 (T_END) -> counter reloads.
-        SCT0->LIMIT = (1UL << 3);
+        // The MATCH_END event limits (auto-resets) the counter, so the bit
+        // clock free-runs: 0 -> kBitEnd -> 0 -> ... UM11029 §16.6.11 LIMIT.
+        SCT0->LIMIT =
+            SCT_LIMIT_LIMMSK_L(1u << FASTLED_LPC_PWM_DMA_SCT_MATCH_END);
 
-        // Route SCT events to DMA. UM11029 §17.3.3 DMA hardware trigger
-        // matrix - SCT_DMA0/1 are SCT-driven trigger lines.
-        // TODO(2842): verify SCT->DMAREQ0/1 vs UM11029 §16.6.18.
-        SCT0->DMAREQ0 = (1UL << 0) | (1UL << 1) | (1UL << 2);
+        // The three edge events (RISE, T0_FALL, T1_FALL) each drive SCT DMA
+        // request 0 - one pulse per event, i.e. 3 MPIN transfers per WS2812
+        // bit. MATCH_END is deliberately excluded (it only reloads the
+        // counter). The SCT has only two DMA request lines, which is why all
+        // three edges share DMAREQ0. UM11029 §16.6.18.
+        SCT0->DMAREQ0 =
+            SCT_DMAREQ0_DEV_0((1u << FASTLED_LPC_PWM_DMA_SCT_MATCH_RISE) |
+                              (1u << FASTLED_LPC_PWM_DMA_SCT_MATCH_T0FALL) |
+                              (1u << FASTLED_LPC_PWM_DMA_SCT_MATCH_T1FALL));
 
-        // Enable EV0..EV3.
-        SCT0->EVEN = 0xFUL;
+        // No SCT CPU interrupts: the driver consumes events via DMA only.
+        // Leaving EVEN clear avoids a lockup in a default SCT_IRQ handler if
+        // that NVIC line is ever enabled elsewhere. UM11029 §16.6.16 EVEN.
+        SCT0->EVEN = 0u;
+        // Clear any stale event flags so the first run starts clean (W1C).
+        SCT0->EVFLAG = SCT_EVFLAG_FLAG(0xFFu);
     }
 
-    // Configure 3 DMA channels writing to GPIO SET[0]/CLR[0].
+    // Configure the single DMA channel writing to GPIO->MPIN[0].
     // UM11029 §17.4 channel descriptor, §17.5 XFERCFG.
     void configureDma() FL_NO_EXCEPT {
-        // Enable DMA.
-        DMA0->CTRL = 1UL;
-        // SRAMBASE points at the channel descriptor table - must be 256-byte
-        // aligned. TODO(2842): allocate aligned descriptor block (static
-        // alignas(256) array) and wire SRAMBASE here. v1 punts to the SDK
-        // clock_config.h conventional address.
-        // DMA0->SRAMBASE = (uint32_t)sDmaDescriptors;
+        DMA0->CTRL = DMA_CTRL_ENABLE(1);
+        // SRAMBASE points at the channel descriptor table. Bits 8:0 are
+        // reserved (UM11029 §17.6.2), so the block is 512-byte aligned - see
+        // the FL_ALIGNAS(512) sDmaDescriptors declaration. The cast is safe:
+        // the array is over-aligned relative to the register's requirement.
+        DMA0->SRAMBASE = reinterpret_cast<u32>(sDmaDescriptors);  // ok reinterpret cast - LPC DMA SRAMBASE requires raw descriptor-table address
 
-        const u32 base = FASTLED_LPC_PWM_DMA_BASECH;
-        for (u32 i = 0; i < 3; ++i) {
-            // Configuration register for DMA channel; UM11029 §17.6.1.
-            //     bit 0    PERIPHREQEN = 1 (Peripheral Request Enable for this channel.)
-            //     bit 1    HWTRIGEN = 1 (Hardware Triggering Enable for this channel.)
-            //     bit 4    TRIGPOL = 0 (Trigger Polarity: 0 = active high, 1 = active low.)
-            //     bit 5    TRIGTYPE = 0 (Trigger Type: 0 = edge, 1 = level.)
-            //     bit 6    TRIGBURST = 0 (Trigger Burst: 0 = single transfer, 1 = burst transfer.)
-            //     bit 8-11  BURSTPOWER = 0 (Burst Power: 0 = 1 transfer, 1 = 2 transfers, ..., 15 = 16 transfers)
-            //     bit 16-18 CHPRIORITY = 0 (Channel Priority: 0 = lowest, 15 = highest.)
-            // @phatpaul caught the missing PERIPHREQEN in FastLED #3349.
-            DMA0->CHANNEL[base + i].CFG =
-                (1UL << 0) |  // PERIPHREQEN = 1
-                (1UL << 1) |  // HWTRIGEN = 1
-                (0UL << 4) |  // TRIGPOL = 0
-                (0UL << 5);  // TRIGTYPE = 0
+        const u32 ch = FASTLED_LPC_PWM_DMA_BASECH;
 
-            // INMUX entry maps SCT match event -> channel i.
-            // TODO(2842): set up DMA_ITRIG_INMUX[i] = SCT_DMA0_inmux_source.
-        }
-        // ENABLESET marks the channels as live; descriptors are armed by
-        // SETVALID/SETTRIG at chunk start (startDmaChunk()).
-        DMA0->COMMON[0].ENABLESET |= (7UL << base);  // 3 contiguous channels
+        // Route SCT DMA-request-0 to this channel's hardware-trigger input.
+        INPUTMUX->DMA_ITRIG_INMUX[ch] =
+            INPUTMUX_DMA_ITRIG_INMUX_INP(kInmuxSrcSctDma0);
+
+        // Hardware-triggered, rising-edge, one transfer per trigger (UM11029
+        // §17.6.1). TRIGPOL MUST be active-high: the SCT DMA-request line
+        // pulses HIGH on each event, so TRIGPOL=0 (active-low) would never
+        // recognize the trigger and the channel would stall forever.
+        // PERIPHREQEN is left 0 on purpose: the channel's fixed peripheral
+        // request line (a USART/SPI DMA request for low channel indices, e.g.
+        // the debug-console UART on channel 0) must NOT also fire this
+        // channel - only the SCT trigger should.
+        DMA0->CHANNEL[ch].CFG =
+            DMA_CHANNEL_CFG_HWTRIGEN(1)  |
+            DMA_CHANNEL_CFG_TRIGPOL(kDmaTrigPolRising)  |
+            DMA_CHANNEL_CFG_TRIGTYPE(kDmaTrigEdge)      |
+            DMA_CHANNEL_CFG_TRIGBURST(0);   // single transfer per trigger
+
+        // ENABLESET is write-1-to-set; the descriptor is armed by SETVALID at
+        // chunk start (startDmaChunk()).
+        DMA0->COMMON[0].ENABLESET = DMA_COMMON_ENABLESET_ENA(1u << ch);
     }
 
-    // Arm one chunk: program each channel's source address to point at the
-    // appropriate stream slice in sChannelBuf, set XFERCFG with the chunk's
-    // word-count, then trigger.
+    // Arm one chunk: point the channel's descriptor at the interleaved
+    // stream, set XFERCFG with the chunk's word-count, then release the SCT.
     void startDmaChunk(u32 chunk_bits) FL_NO_EXCEPT {
-        const u32 base = FASTLED_LPC_PWM_DMA_BASECH;
-        // TODO(2842): wire the per-channel descriptor block. The DMA on
-        // LPC845 fetches the source-end / dest-end pointers from a 16-byte
-        // descriptor in SRAM (SRAMBASE + 16*ch). XFERCFG.XFERCOUNT = N-1.
+        const u32 ch    = FASTLED_LPC_PWM_DMA_BASECH;
+        const u32 words = 3u * chunk_bits;  // 3 MPIN writes per WS2812 bit
 
-        // Configure XFERCFG for each channel (UM11029 §17.5):
-        //   bit  0    CFGVALID
-        //   bit  1    RELOAD
-        //   bit  2    SWTRIG (don't set - we use HW trigger)
-        //   bit  4    SETINTA
-        //   bit  8-9  WIDTH  = 10b (32-bit)
-        //   bit 12-13 SRCINC = 01b (+1 word)
-        //   bit 14-15 DSTINC = 00b (no-inc, write same SET/CLR reg)
-        //   bit 16-25 XFERCOUNT = chunk-1
-        const u32 xfercfg_base =
-            (1UL << 0) |   // CFGVALID
-            (2UL << 8) |   // WIDTH = 32-bit
-            (1UL << 12) |  // SRCINC = +1 word
-            (0UL << 14);   // DSTINC = no
-        const u32 count_field = ((chunk_bits - 1UL) & 0x3FFUL) << 16;
-        for (u32 i = 0; i < 3; ++i) {
-            DMA0->CHANNEL[base + i].XFERCFG = xfercfg_base | count_field;
-        }
+        // Populate the channel head descriptor (UM11029 §17.4.3). The DMA
+        // reconstructs the running address from the *end* address: with
+        // SRCINC=+1 word the last source word is &stream[words-1]; with
+        // DSTINC=0 the destination end address is simply the MPIN register.
+        // No RELOAD is used, so xfercfg/link stay zero - the live transfer
+        // config is written to CHANNEL[ch].XFERCFG below.
+        LpcDmaDescriptor& d = sDmaDescriptors[ch];
+        d.srcEndAddr     = &sChannelBuf[words - 1u];
+#if defined(FASTLED_LPC_PWM_DMA_DEBUG_RAM_DST)
+        // DIAGNOSTIC (TODO(2842)): redirect the DMA destination to RAM
+        // (sChannelBuf[0]) instead of GPIO->MPIN[0]. DSTINC=0, so every word
+        // lands in that one location - contents are irrelevant, we only watch
+        // DMA0->COMMON[0].ERRINT. If ERRINT stops asserting with this defined,
+        // the LPC845 DMA cannot master-access the GPIO at 0xA0000000 and the
+        // driver's DMA-to-GPIO premise must change. If ERRINT still asserts,
+        // the fault is elsewhere (descriptor/source).
+        d.dstEndAddr     = reinterpret_cast<void*>(reinterpret_cast<u32>(&sChannelBuf[0]));  // ok reinterpret cast - diagnostic RAM destination
+#else
+        d.dstEndAddr     = reinterpret_cast<void*>(reinterpret_cast<u32>(&GPIO->MPIN[0]));  // ok reinterpret cast - LPC DMA descriptor requires raw destination address
+#endif
+        d.xfercfg        = 0u;
+        d.linkToNextDesc = nullptr;
+
+        // Configure XFERCFG (UM11029 §17.5): valid config, 32-bit words,
+        // source auto-increments through the stream, destination fixed on the
+        // MPIN register, and XFERCOUNT = words-1 (the field is N-1 encoded).
+        // RELOAD/SWTRIG/SETINT stay clear - single HW-triggered pass, polled.
+        const u32 xfercfg =
+            DMA_CHANNEL_XFERCFG_CFGVALID(1) |
+            DMA_CHANNEL_XFERCFG_WIDTH(kDmaWidth32Bit) |
+            DMA_CHANNEL_XFERCFG_SRCINC(kDmaIncOneUnit) |
+            DMA_CHANNEL_XFERCFG_DSTINC(kDmaIncNone) |
+            DMA_CHANNEL_XFERCFG_XFERCOUNT(words - 1u);
+        DMA0->CHANNEL[ch].XFERCFG = xfercfg;
 
         // SETVALID flips the descriptor's VALIDPENDING -> VALID, arming the
         // channel for the next hardware trigger from the SCT.
-        DMA0->COMMON[0].SETVALID = (7UL << base);
+        DMA0->COMMON[0].SETVALID = DMA_COMMON_SETVALID_SV(1u << ch);
 
-        // Release the SCT HALT so the timer starts producing match events.
-        SCT0->CTRL &= ~0x00000004UL;
+        // Zero the counter AND release HALT in one write (CLRCTR_L is
+        // self-clearing; every other CTRL field is 0 = up-count, no
+        // prescale). Starting each chunk at COUNT=0 guarantees the counter is
+        // always below the MATCH_END limit, so the reset match is reached
+        // from below every time. Without this, waitDmaChunk() halts the
+        // counter at an arbitrary point; if it was ever frozen at/after the
+        // limit value, releasing HALT would let it free-run to 2^32 (the
+        // "counts all the way up" hang) instead of looping at kBitEnd.
+        SCT0->CTRL = SCT_CTRL_CLRCTR_L(1);
     }
 
     void waitDmaChunk() FL_NO_EXCEPT {
-        const u32 mask = (7UL << FASTLED_LPC_PWM_DMA_BASECH);
-        // Spin until all three channels report ACTIVE=0 (transfer done).
+        const u32 mask =
+            DMA_COMMON_ACTIVE_ACT(1u << FASTLED_LPC_PWM_DMA_BASECH);
+        // Spin until the channel reports ACTIVE=0 (transfer done).
         while ((DMA0->COMMON[0].ACTIVE & mask) != 0) {
             // CPU-free transmission goal: user-level code may run on the
             // outer task; this driver simply blocks at the FastLED.show()
@@ -481,7 +591,7 @@ private:
             // IRQ once IRQ handler is wired.
         }
         // Halt SCT in preparation for the next chunk.
-        SCT0->CTRL |= 0x00000004UL;
+        SCT0->CTRL |= SCT_CTRLL_HALT_L_MASK;
     }
 };
 
@@ -492,6 +602,12 @@ private:
 template <u8 P, typename T, EOrder R, int X, bool F, int W>
 u32 ClocklessController<P, T, R, X, F, W>::sChannelBuf
     [3 * FASTLED_LPC_PWM_DMA_CHUNK_BITS];
+
+// DMA descriptor table definition (see sChannelBuf note above). FL_ALIGNAS is
+// repeated here so the emitted symbol carries the 512-byte alignment.
+template <u8 P, typename T, EOrder R, int X, bool F, int W>
+FL_ALIGNAS(512) LpcDmaDescriptor ClocklessController<P, T, R, X, F, W>::sDmaDescriptors
+    [FASTLED_LPC_PWM_DMA_BASECH + 1];
 
 }  // namespace fl
 
