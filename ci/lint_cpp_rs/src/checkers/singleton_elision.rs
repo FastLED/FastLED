@@ -207,9 +207,22 @@ impl FileContentChecker for SingletonElisionChecker {
             }
 
             // Opt-outs on the declaration line itself.
+            //
+            // - `[[gnu::used]]` / `__attribute__((used))`: compile-time
+            //   directive telling the linker to keep the symbol regardless
+            //   of use. Author has thought about this.
+            // - `FL_KEEP_ALIVE` / `FL_KEEP`: FastLED's export macro; same
+            //   semantics as above.
+            // - `FL_LINT_ALLOW_GLOBAL(<reason>)`: linter-only comment marker
+            //   with no compile-time effect. Use this when the storage
+            //   genuinely cannot move to `Singleton<T>` (public API surface,
+            //   ISR cache pointer, singleton-registry backing, host-only
+            //   entry point). The `<reason>` argument is mandatory — the
+            //   reviewer must see justification for each escape.
             if code.contains("[[gnu::used]]")
                 || code.contains("__attribute__((used))")
                 || code.contains("FL_KEEP")
+                || code.contains("FL_LINT_ALLOW_GLOBAL")
             {
                 continue;
             }
@@ -251,6 +264,15 @@ impl FileContentChecker for SingletonElisionChecker {
                 .find(|c: char| end_marker.contains(&c))
                 .unwrap_or(code.len());
             let head = &code[..end_pos];
+
+            // Class-static-member out-of-class definitions like
+            // `constexpr bool numeric_limits<char>::is_signed = true;` or
+            // `const float SpectralEqualizer::A_WEIGHTING_16BAND[16] = ...;`
+            // — the `::` in the name path is the giveaway. C++11 requires
+            // these; they don't emit storage unless ODR-used. Skip.
+            if head.contains("::") {
+                continue;
+            }
             let name = head
                 .rsplit(|c: char| !c.is_ascii_alphanumeric() && c != '_')
                 .next()
