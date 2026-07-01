@@ -81,6 +81,9 @@ class I2sPeripheralEsp32DevMock : public II2sPeripheralEsp32Dev {
     bool registerTransmitCallback(I2sEsp32DevTxDoneCallback cb,
                                   void *user_ctx) FL_NO_EXCEPT override = 0;
 
+    bool registerBufferRefillCallback(I2sEsp32DevBufferRefillCallback cb,
+                                      void *user_ctx) FL_NO_EXCEPT override = 0;
+
     const I2sEsp32DevPeripheralConfig &
     getConfig() const FL_NO_EXCEPT override = 0;
 
@@ -96,6 +99,25 @@ class I2sPeripheralEsp32DevMock : public II2sPeripheralEsp32Dev {
     /// @brief Number of times the stored callback has been invoked
     ///        since the most recent `reset()`.
     virtual u32 callbackInvocationCount() const FL_NO_EXCEPT = 0;
+
+    /// @brief Synchronously invoke the stored streaming refill
+    ///        callback with `buffer_index`. Tests call this once per
+    ///        simulated DMA-EOF interrupt to exercise the refill
+    ///        cadence. Records the callback's returned `done` flag —
+    ///        inspect via `lastRefillDone()`. Test-only.
+    virtual void simulateBufferRefill(int buffer_index) FL_NO_EXCEPT = 0;
+
+    /// @brief Number of times the buffer-refill callback has fired
+    ///        since the most recent `reset()`.
+    virtual u32 bufferRefillInvocationCount() const FL_NO_EXCEPT = 0;
+
+    /// @brief The `buffer_index` argument passed to the most recent
+    ///        refill callback firing. -1 if none.
+    virtual int lastRefillBufferIndex() const FL_NO_EXCEPT = 0;
+
+    /// @brief The `done` flag returned by the most recent refill
+    ///        callback firing. false if none.
+    virtual bool lastRefillDone() const FL_NO_EXCEPT = 0;
 
     //=========================================================================
     // Error-injection knobs
