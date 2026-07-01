@@ -32,6 +32,7 @@
 #include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_mock.cpp.hpp"
 
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s.cpp.hpp"
+#include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s1.cpp.hpp"  // FastLED#3526 Phase 2a — general clockless encoder for I2S1
 
 // Legacy concrete I2S driver implementation.
 #include "platforms/esp/32/drivers/i2s/bus_traits.h"
