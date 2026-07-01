@@ -23,9 +23,23 @@ import platform
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 from ci.util.paths import PROJECT_ROOT
+
+
+@dataclass(frozen=True)
+class _BuildStreamResult:
+    """Return type for :func:`_stream_build_cmd`.
+
+    ``line_count`` = non-empty stdout lines observed. The soldr-shim fallback
+    path in :func:`_run_build` treats ``returncode == 0`` combined with
+    ``line_count == 0`` as evidence that the wrapper no-oped.
+    """
+
+    returncode: int
+    line_count: int
 
 
 RUST_CRATE_DIR = PROJECT_ROOT / "ci" / "lint_cpp_rs"
@@ -220,6 +234,45 @@ def _resolve_soldr() -> str:
     return soldr
 
 
+def _stream_build_cmd(cmd: list[str], label: str, verbose: bool) -> _BuildStreamResult:
+    """Run ``cmd`` under Popen, prefix-stream its stdout, return the result.
+
+    See :class:`_BuildStreamResult` for the returned fields and the reason
+    ``line_count`` is exposed (soldr-shim fallback detection).
+    """
+    if verbose:
+        print(
+            f"    cwd: {PROJECT_ROOT}",
+            file=sys.stderr,
+            flush=True,
+        )
+        print(
+            f"    cmd: {subprocess.list2cmdline(cmd)}",
+            file=sys.stderr,
+            flush=True,
+        )
+    proc = subprocess.Popen(
+        cmd,
+        cwd=str(PROJECT_ROOT),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,  # line-buffered
+    )
+    assert proc.stdout is not None
+    prefix = f"    [{label}] "
+    line_count = 0
+    for line in proc.stdout:
+        stripped = line.rstrip()
+        if stripped:
+            line_count += 1
+        # Preserve the raw line (cargo emits progress bars via \r; strip
+        # trailing whitespace only, don't collapse internal spacing).
+        print(f"{prefix}{stripped}", file=sys.stderr, flush=True)
+    returncode = proc.wait()
+    return _BuildStreamResult(returncode=returncode, line_count=line_count)
+
+
 def _run_build(verbose: bool = True) -> None:
     """Invoke ``soldr cargo build`` for the fastled-lint binary.
 
@@ -240,18 +293,26 @@ def _run_build(verbose: bool = True) -> None:
     runners, logging wrappers, CI harnesses), cargo's diagnostics
     disappear. The explicit stream + prefix makes every cargo line
     identifiable and visible even under those layers.
+
+    Broken-shim fallback
+    --------------------
+    soldr 0.7.87 (current PyPI head) ships as a ~118 KB Windows shim that,
+    on cold runners, exits 0 without invoking cargo or producing any
+    stdout — see the empty ``[cargo]`` prefix stream in FastLED CI unit
+    tests on windows-latest. When we detect that signature (rc == 0 AND
+    zero output lines AND binary not produced), fall back to invoking
+    ``cargo build`` directly. This loses soldr's cache assist but keeps
+    lint functional; the outer binary-cache layer still avoids re-building
+    on unchanged crate sources.
     """
-    soldr = _resolve_soldr()
-    cmd = [
-        soldr,
-        "--no-cache",
-        "cargo",
+    cargo_args = [
         "build",
         "--manifest-path",
         str(RUST_MANIFEST),
         "--bin",
         RUST_BINARY_NAME,
     ]
+
     if verbose:
         print(
             f"🔨 Building Rust C++ linter ({RUST_BINARY_NAME}) — this runs once "
@@ -259,38 +320,31 @@ def _run_build(verbose: bool = True) -> None:
             file=sys.stderr,
             flush=True,
         )
+
+    soldr = _resolve_soldr()
+    soldr_cmd = [soldr, "--no-cache", "cargo", *cargo_args]
+    result = _stream_build_cmd(soldr_cmd, "cargo", verbose)
+
+    if (
+        result.returncode == 0
+        and result.line_count == 0
+        and not _binary_path().exists()
+    ):
+        # soldr shim exited 0 without invoking cargo. Fall back to bare
+        # cargo so lint keeps working while soldr's Windows-shim regression
+        # is being worked upstream.
         print(
-            f"    cwd: {PROJECT_ROOT}",
+            "    ⚠  soldr shim exited 0 with no cargo output and no binary "
+            "produced — falling back to bare `cargo build`.",
             file=sys.stderr,
             flush=True,
         )
-        print(
-            f"    cmd: {' '.join(cmd)}",
-            file=sys.stderr,
-            flush=True,
-        )
+        cargo_cmd = ["cargo", *cargo_args]
+        result = _stream_build_cmd(cargo_cmd, "cargo", verbose)
 
-    # Popen + explicit stream. stderr merged into stdout so line ordering
-    # matches what a user would see running the command interactively.
-    proc = subprocess.Popen(
-        cmd,
-        cwd=str(PROJECT_ROOT),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        bufsize=1,  # line-buffered
-    )
-    assert proc.stdout is not None
-    prefix = "    [cargo] "
-    for line in proc.stdout:
-        # Preserve the raw line (cargo emits progress bars via \r; strip
-        # trailing whitespace only, don't collapse internal spacing).
-        print(f"{prefix}{line.rstrip()}", file=sys.stderr, flush=True)
-    returncode = proc.wait()
-
-    if returncode != 0:
+    if result.returncode != 0:
         raise RuntimeError(
-            f"Rust C++ linter build failed (exit {returncode}); see "
+            f"Rust C++ linter build failed (exit {result.returncode}); see "
             f"[cargo] lines above for the underlying error."
         )
 
