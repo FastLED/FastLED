@@ -24,10 +24,16 @@
 // these are the ~700 LoC that generate real WS2812 parallel-out
 // waveforms on I2S1. Users on classic ESP32 can hit that path via
 // the legacy `addLeds<WS2812, PIN, GRB>()` template. The modern
-// `ChannelEngineI2sEsp32Dev` + `I2sPeripheralEsp32DevEsp` pair
-// (still shipped above) exposes the same peripheral behind a
-// mock-testable IChannelDriver interface for future code that
-// wants the modern channel-manager path.
+// `ChannelEngineI2sEsp32Dev` + mock (still shipped above) exposes
+// the same peripheral behind a mock-testable IChannelDriver
+// interface for future code that wants the modern channel-manager
+// path. `i2s_peripheral_esp32dev_esp.cpp.hpp` (Stage 4 real-hw impl)
+// is intentionally NOT included here — its `driver/gpio.h` include
+// collides with the restored code at link time as an
+// `ADC: CONFLICT!` boot loop. A future PR that reworks the modern
+// peripheral to share I2S1/periph_module state (rather than
+// duplicating it) can drop the modern impl into the unity build
+// cleanly.
 
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s.cpp.hpp"
 
