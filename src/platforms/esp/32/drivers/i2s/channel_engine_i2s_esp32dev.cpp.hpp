@@ -289,11 +289,14 @@ IChannelDriver::DriverState ChannelEngineI2sEsp32Dev::poll() FL_NO_EXCEPT {
     // FastLED#3526 Phase 2c — when the SPI delegate is active, drive
     // completion off its state machine. The delegate owns the SPI
     // transmit lifecycle; we surface its state (BUSY / DRAINING /
-    // READY / ERROR) up to our own callers.
+    // READY / ERROR) up to our own callers. Switch statement enforces
+    // full enum coverage — if a new DriverState value gets added, the
+    // compiler flags the missing arm.
     if (mSpiDelegate && (mState == DriverState::BUSY ||
                          mState == DriverState::DRAINING)) {
-        DriverState delegate_state = mSpiDelegate->poll();
-        if (delegate_state == DriverState::READY) {
+        const DriverState delegate_state = mSpiDelegate->poll();
+        switch (delegate_state.state) {
+        case DriverState::READY:
             // Release channels the delegate already released — the
             // delegate does its own setInUse(false), but be defensive.
             for (auto &data : mInFlightChannels) {
@@ -304,12 +307,14 @@ IChannelDriver::DriverState ChannelEngineI2sEsp32Dev::poll() FL_NO_EXCEPT {
             mInFlightChannels.clear();
             mTransmitCompleted = false;
             mState = DriverState::READY;
-        } else if (delegate_state == DriverState::DRAINING) {
+            break;
+        case DriverState::DRAINING:
             // Transmit kicked off, DMA still running. Surface DRAINING
             // to our callers so `onEndFrame()` can return without
             // blocking (per the channel-manager DMA wait pattern).
             mState = DriverState::DRAINING;
-        } else if (delegate_state == DriverState::ERROR) {
+            break;
+        case DriverState::ERROR:
             // Delegate hit an error — release channels + surface ERROR.
             for (auto &data : mInFlightChannels) {
                 if (data) {
@@ -319,8 +324,11 @@ IChannelDriver::DriverState ChannelEngineI2sEsp32Dev::poll() FL_NO_EXCEPT {
             mInFlightChannels.clear();
             mTransmitCompleted = false;
             mState = DriverState::ERROR;
+            break;
+        case DriverState::BUSY:
+            // Stay in current state; keep polling.
+            break;
         }
-        // BUSY / other → stay in current state.
         return mState;
     }
     if (!mPeripheral) {
