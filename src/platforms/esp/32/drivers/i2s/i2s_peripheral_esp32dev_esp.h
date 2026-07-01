@@ -45,6 +45,7 @@
 // already captures the intersection.
 #if FASTLED_ESP32_HAS_I2S
 
+#include "fl/stl/array.h"
 #include "fl/stl/noexcept.h"
 #include "platforms/esp/32/drivers/i2s/ii2s_peripheral_esp32dev.h"
 
@@ -97,6 +98,13 @@ class I2sPeripheralEsp32DevEsp : public II2sPeripheralEsp32Dev {
     // invocation.
     void finishTransmitFromIsr() FL_NO_EXCEPT;
 
+    // FastLED#3526 Phase 2b step B — IRAM-safe accessor used only by
+    // the DMA-done ISR trampoline. Reads the u8 port field directly, no
+    // through-getConfig indirection (getConfig returns a reference and
+    // may not be inlined under -Og debug builds, which is unsafe in
+    // ISR context).
+    u8 i2sPortForIsr() const FL_NO_EXCEPT { return mConfig.mI2sPort; }
+
   private:
     I2sEsp32DevPeripheralConfig mConfig;
     bool mInitialized;
@@ -112,6 +120,12 @@ class I2sPeripheralEsp32DevEsp : public II2sPeripheralEsp32Dev {
     // in one descriptor.
     struct lldesc_s *mDescriptor;
     intr_handle_t mIsrHandle;
+
+    // FastLED#3526 Phase 2b step C — per-lane GPIO routing record so
+    // `routeLanePin(lane, -1)` can actually detach the previously-routed
+    // pin (route SIG_GPIO_OUT_IDX in its place). Initialised to all -1
+    // by the ctor.
+    fl::array<i32, kMaxI2sLanes> mLaneRoutedPin;
 };
 
 } // namespace fl

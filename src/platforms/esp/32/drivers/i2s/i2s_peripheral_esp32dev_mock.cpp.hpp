@@ -168,7 +168,7 @@ class I2sPeripheralEsp32DevMockImpl : public I2sPeripheralEsp32DevMock {
         if (!mInitialized) {
             return false;
         }
-        if (lane >= 24) {
+        if (lane >= kMaxI2sLanes) {
             return false;
         }
         mLaneRoutedPin[lane] = gpio_pin;
@@ -181,7 +181,7 @@ class I2sPeripheralEsp32DevMockImpl : public I2sPeripheralEsp32DevMock {
     }
 
     i32 lastRoutedPinForLane(u8 lane) const FL_NO_EXCEPT override {
-        if (lane >= 24) {
+        if (lane >= kMaxI2sLanes) {
             return -1;
         }
         return mLaneRoutedPin[lane];
@@ -332,9 +332,9 @@ class I2sPeripheralEsp32DevMockImpl : public I2sPeripheralEsp32DevMock {
 
     // FastLED#3526 Phase 2b step C — lane routing state (24 lanes to
     // match the classic ESP32 I2S{n}O_DATA_OUT{0..23}_IDX signal range).
-    fl::array<i32, 24> mLaneRoutedPin = {{-1, -1, -1, -1, -1, -1, -1, -1,
-                                          -1, -1, -1, -1, -1, -1, -1, -1,
-                                          -1, -1, -1, -1, -1, -1, -1, -1}};
+    fl::array<i32, kMaxI2sLanes> mLaneRoutedPin = {{-1, -1, -1, -1, -1, -1, -1, -1,
+                                                    -1, -1, -1, -1, -1, -1, -1, -1,
+                                                    -1, -1, -1, -1, -1, -1, -1, -1}};
     u32 mLaneRouteInvocations = 0;
 
     bool mFailInitialize;

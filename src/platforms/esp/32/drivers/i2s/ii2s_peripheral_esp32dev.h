@@ -67,6 +67,16 @@ namespace fl {
 // Configuration Structures
 //=============================================================================
 
+/// @brief Maximum parallel-out lane count on classic ESP32 I2S{0,1}.
+///
+/// Both peripherals expose 24 DATA_OUT signals (`I2S{n}O_DATA_OUT0_IDX`
+/// through `DATA_OUT23_IDX` per `soc/gpio_sig_map.h`). The wave8 encoder
+/// is currently 16-wide; lanes 16..23 are reserved for a future
+/// `wave8Transpose_24` / padded-32 encoder. The peripheral surface
+/// accepts the full hardware range so the encoder upgrade doesn't have
+/// to churn the peripheral API.
+constexpr u8 kMaxI2sLanes = 24;
+
 /// @brief Classic-ESP32 I2S peripheral configuration.
 ///
 /// Captures the shape of the parallel-out I2S setup FastLED needs to

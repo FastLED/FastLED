@@ -161,7 +161,10 @@ I2sPeripheralEsp32DevEsp::I2sPeripheralEsp32DevEsp() FL_NO_EXCEPT
       mCallback(nullptr),
       mCallbackUserCtx(nullptr),
       mDescriptor(nullptr),
-      mIsrHandle(nullptr) {}
+      mIsrHandle(nullptr),
+      mLaneRoutedPin{{-1, -1, -1, -1, -1, -1, -1, -1,
+                      -1, -1, -1, -1, -1, -1, -1, -1,
+                      -1, -1, -1, -1, -1, -1, -1, -1}} {}
 
 I2sPeripheralEsp32DevEsp::~I2sPeripheralEsp32DevEsp() {
     if (mInitialized) {
@@ -381,8 +384,10 @@ bool I2sPeripheralEsp32DevEsp::transmit(const u8 *buffer,
         return false;
     }
     // Descriptor field `length`/`size` are 12-bit — the DMA can carry
-    // 4093 bytes max per descriptor. Anything larger needs a chain, which
-    // is a Phase 2b step B follow-up (streaming refill from the ISR).
+    // 4092 bytes max per descriptor (12-bit field caps at 4095, but 4092
+    // is the practical alignment-safe ceiling used across ESP32 DMA
+    // drivers). Anything larger needs a chain — streaming refill from
+    // the ISR is a Phase 2b step D follow-up.
     if (size_bytes > 4092) {
         FL_WARN_F("I2sPeripheralEsp32DevEsp: buffer too large for single descriptor (%s > 4092)", static_cast<int>(size_bytes));
         return false;
@@ -426,14 +431,15 @@ bool I2sPeripheralEsp32DevEsp::transmit(const u8 *buffer,
 }
 
 bool I2sPeripheralEsp32DevEsp::waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT {
-    // Simple spin-wait for the ISR to clear `mBusy`. Callers typically
-    // pass ~500 ms and only reach this path when they're about to
-    // enqueue a next frame — nothing more elaborate needed until the
-    // engine grows a genuine concurrent enqueue path.
+    // Spin-wait for the ISR to clear `mBusy`. Elapsed-time computation
+    // uses the FreeRTOS-standard wraparound-safe pattern
+    // `(TickType_t)(now - start)` so a 32-bit tick-counter wrap doesn't
+    // trip a spurious immediate timeout or an unbounded wait after ~49
+    // days of uptime.
     const TickType_t start = xTaskGetTickCount();
-    const TickType_t deadline = start + pdMS_TO_TICKS(timeout_ms);
+    const TickType_t timeout_ticks = pdMS_TO_TICKS(timeout_ms);
     while (mBusy) {
-        if (xTaskGetTickCount() >= deadline) {
+        if (static_cast<TickType_t>(xTaskGetTickCount() - start) >= timeout_ticks) {
             return false;
         }
         vTaskDelay(1);
@@ -462,33 +468,37 @@ bool I2sPeripheralEsp32DevEsp::routeLanePin(u8 lane, i32 gpio_pin) FL_NO_EXCEPT 
     if (!mInitialized) {
         return false;
     }
-    // Classic ESP32 I2S{0,1} each expose 24 parallel data output signals
-    // (`I2S{n}O_DATA_OUT0_IDX` .. `I2S{n}O_DATA_OUT23_IDX` — verified in
-    // `soc/gpio_sig_map.h`). Reject lanes past 24. The wave8 encoder is
-    // currently 16-lane wide; lanes 16..23 will only carry data once a
-    // `wave8Transpose_24` (or a padded-32) kernel lands, but the
-    // peripheral surface accepts the full hardware range so the encoder
-    // upgrade is a drop-in on the encoder side alone.
-    if (lane >= 24) {
+    if (lane >= kMaxI2sLanes) {
         return false;
     }
     const int i2s_device = static_cast<int>(mConfig.mI2sPort);
 
-    // Compute the SoC signal index for this lane. Classic ESP32 I2S1 has
-    // 24 parallel-out data signals (I2S1O_DATA_OUT0_IDX ..); the modern
-    // engine uses lanes 0..15. I2S0 has an analogous block starting at
-    // I2S0O_DATA_OUT0_IDX. The signal indices are contiguous — one add
-    // per lane covers the whole range.
+    // Compute the SoC signal index for this lane. Signal indices are
+    // contiguous within each I2S block (I2S{n}O_DATA_OUT0_IDX ..
+    // I2S{n}O_DATA_OUT23_IDX) — one add per lane covers the range.
     const int base_signal = (i2s_device == 0)
         ? static_cast<int>(I2S0O_DATA_OUT0_IDX)
         : static_cast<int>(I2S1O_DATA_OUT0_IDX);
 
     if (gpio_pin < 0) {
-        // Negative pin = clear routing. Nothing hardware-specific to do
-        // for clearing on classic ESP32 — the caller re-routes to the
-        // desired pin at next transmit.
+        // Negative pin = clear routing. Detach the previously-routed pin
+        // (if any) by routing SIG_GPIO_OUT_IDX in its place, so the pin
+        // stops driving I2S data and returns to plain-GPIO control.
+        const i32 prev = mLaneRoutedPin[lane];
+        if (prev >= 0) {
+            esp_rom_gpio_connect_out_signal(static_cast<u32>(prev),
+                                             SIG_GPIO_OUT_IDX,
+                                             false, false);
+            mLaneRoutedPin[lane] = -1;
+        }
         return true;
     }
+
+    // Select the pad's GPIO function first — pins that boot into an
+    // alternate function (e.g. SD_CMD on GPIO11 in some board configs)
+    // must be switched to plain GPIO before the matrix routing takes
+    // effect. `esp_rom_gpio_pad_select_gpio` is the IDF v5-safe API.
+    esp_rom_gpio_pad_select_gpio(static_cast<u8>(gpio_pin));
 
     // Put the pin into output mode. `gpio_set_direction` accepts a
     // `gpio_num_t` enum; the raw int cast is safe for the classic
@@ -502,16 +512,14 @@ bool I2sPeripheralEsp32DevEsp::routeLanePin(u8 lane, i32 gpio_pin) FL_NO_EXCEPT 
     }
 
     // Route the DATA_OUT{lane} signal through the GPIO matrix to the
-    // target pin. `esp_rom_gpio_connect_out_signal` is the IDF v5-safe
-    // API (replaces the legacy `gpio_matrix_out`).
-    //
-    // Args: gpio_num, signal_idx, out_inv, oen_inv. We honor the
-    // per-strip invert mask from the peripheral config so chipsets
+    // target pin. Args: gpio_num, signal_idx, out_inv, oen_inv. We honor
+    // the per-strip invert mask from the peripheral config so chipsets
     // that want polarity inversion get it "for free" via the matrix.
     const bool invert = (mConfig.mInvertMask & (1u << lane)) != 0;
     esp_rom_gpio_connect_out_signal(static_cast<u32>(gpio_pin),
                                      static_cast<u32>(base_signal + lane),
                                      invert, false);
+    mLaneRoutedPin[lane] = gpio_pin;
     return true;
 }
 
@@ -535,7 +543,10 @@ FL_IRAM void i2s_dma_isr_trampoline(void* arg) FL_NO_EXCEPT {
     if (!self) {
         return;
     }
-    const int i2s_device = static_cast<int>(self->getConfig().mI2sPort);
+    // Read port via the IRAM-safe accessor — do NOT go through
+    // `getConfig()` which may not be inlined into IRAM under -Og debug
+    // builds. `i2sPortForIsr()` reads the u8 member field directly.
+    const int i2s_device = static_cast<int>(self->i2sPortForIsr());
     i2s_dev_t* const i2s = (i2s_device == 0) ? &I2S0 : &I2S1;
 
     // Only respond to OUT_EOF. Other flags (out_dscr_err, etc.) are not
