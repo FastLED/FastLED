@@ -10,7 +10,8 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/move.h"
 #include "fl/stl/noexcept.h"
-#include "fl/stl/shared_ptr.h"  // for fl::make_shared
+#include "fl/stl/shared_ptr.h"  // for fl::make_shared, fl::no_op_deleter
+#include "fl/stl/singleton.h"
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32)
 #include "platforms/esp/32/feature_flags/enabled.h"
@@ -432,7 +433,14 @@ void ChannelEngineI2sEsp32Dev::onTransmitDone() FL_NO_EXCEPT {
 
 fl::shared_ptr<IChannelDriver> createI2sEsp32DevEngine() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP_32DEV) && FASTLED_ESP32_HAS_I2S
-    auto peripheral = fl::make_shared<I2sPeripheralEsp32DevEsp>();
+    // FastLED#3526 Phase 2e — the peripheral is now a `fl::Singleton<>`
+    // (process-lifetime, never destroyed) so the ownership record is
+    // simply the singleton's `mInitialized`. Wrap the singleton
+    // reference in a `shared_ptr` via `make_shared_no_tracking` — no
+    // control block, no delete, zero-overhead non-owning handle.
+    auto& singleton = fl::Singleton<I2sPeripheralEsp32DevEsp>::instance();
+    fl::shared_ptr<II2sPeripheralEsp32Dev> peripheral =
+        fl::make_shared_no_tracking<II2sPeripheralEsp32Dev>(singleton);
     return fl::make_shared<ChannelEngineI2sEsp32Dev>(peripheral);
 #else
     return nullptr;

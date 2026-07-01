@@ -12,9 +12,10 @@
 
 #include "platforms/esp/32/drivers/i2s/channel_driver_i2s.cpp.hpp"
 #include "platforms/esp/32/drivers/i2s/channel_engine_i2s_esp32dev.cpp.hpp"
-#include "platforms/esp/32/drivers/i2s/clockless_i2s_esp32.cpp.hpp"
 
-#include "platforms/esp/32/drivers/i2s/i2s_esp32dev.cpp.hpp"
+// FastLED#3526 Phase 2e — Yves `clockless_i2s_esp32.{h,cpp.hpp}` and
+// `i2s_esp32dev.{h,cpp.hpp}` DELETED. Modern I2S engine is now the
+// only path via `Bus::FLEX_IO, 0`.
 #include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_esp.cpp.hpp"
 #include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_mock.cpp.hpp"
 // FastLED#3512 Phase 5: `i2s_peripheral_esp32dev_esp.cpp.hpp` is

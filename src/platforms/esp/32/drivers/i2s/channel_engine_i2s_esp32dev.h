@@ -2,10 +2,20 @@
 /// @brief `IChannelDriver` for classic-ESP32 I2S parallel-out LEDs
 ///        (#3471).
 ///
-/// Ground-up rewrite of the classic-ESP32 I2S LED path. Deprecates and
-/// eventually removes the third-party Yves Bazin driver
-/// (`i2s_esp32dev.h` / `clockless_i2s_esp32.h`). Follows the same
-/// shape as the S3 sibling `ChannelEngineI2S`
+/// **Attribution: Yves Bazin** authored the original I2S1 parallel-out
+/// clockless driver for classic ESP32 (`ClocklessI2S<>` +
+/// `i2s_esp32dev`) — first shipped by FastLED circa 2018-2019 and the
+/// proof-of-concept that classic ESP32 I2S1 in LCD/parallel mode could
+/// drive multiple WS2812-family strips in lock-step. This engine
+/// replaces that architecture with a general wave8/wave3 clockless
+/// driver following the PARLIO pattern (fixed 8 MHz pixel clock,
+/// per-channel `ChipsetTimingConfig` translated to a wave8 byte-LUT),
+/// but every low-level register write and DMA-descriptor field in
+/// the peripheral impl (`i2s_peripheral_esp32dev_esp.cpp.hpp`) traces
+/// its lineage to Yves's original driver. The Yves files were deleted
+/// at FastLED#3526 Phase 2e once the modern path reached parity.
+///
+/// Follows the same shape as the S3 sibling `ChannelEngineI2S`
 /// (`channel_driver_i2s.h`):
 ///
 ///   - Constructor injects an `II2sPeripheralEsp32Dev` — real hardware

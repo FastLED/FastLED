@@ -31,18 +31,12 @@
 #include "platforms/esp/32/drivers/spi/idf5_clockless_spi_esp32.h"
 #endif
 
-// Classic-ESP32 I2S parallel-out clockless driver.
-// The `FASTLED_ESP32_I2S` compile-time selector was removed per
-// FastLED#3516 — the driver header is now included whenever the platform
-// supports it (via `FASTLED_ESP32_HAS_I2S` feature flag), so
-// `--gc-sections` can elide it when unused. Users select the driver at
-// runtime via `FastLED.enableDriver<fl::Bus::FLEX_IO, 0>()` (or the
-// modern `FastLED.add<Channel::create<>>()` surface). Legacy
-// `addLeds<>` continues to route to the RMT / PARLIO / SPI default.
-// IDF 6+ path routes through `i2s_periph_compat.h`'s LL API shim.
-#if FASTLED_ESP32_HAS_I2S && !defined(FASTLED_INTERNAL)
-#include "platforms/esp/32/drivers/i2s/clockless_i2s_esp32.h"
-#endif
+// The former Yves I2S parallel-out clockless driver
+// (`clockless_i2s_esp32.h` + `i2s_esp32dev.{h,cpp.hpp}`) was deleted at
+// FastLED#3526 Phase 2e. The modern I2S engine lives on
+// `Bus::FLEX_IO, 0` via the channel manager; users select it at runtime
+// via `FastLED.enableDriver<fl::Bus::FLEX_IO, 0>()` or
+// `FastLED.setExclusiveDriver<fl::Bus::FLEX_IO, 0>()`.
 
 // Bulk controller implementations have been replaced by the Channel API
 // See src/fl/channels/README.md for multi-strip support
