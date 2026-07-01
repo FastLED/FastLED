@@ -121,11 +121,30 @@ def _binary_candidate_paths() -> list[Path]:
 
 
 def _binary_path() -> Path:
-    """Return the path to an existing binary, or the default if none exists."""
+    """Return the path to an existing binary, or the default if none exists.
+
+    Searches the fixed candidate list first (fast + deterministic ordering).
+    If none of those exist but the binary was actually built somewhere else
+    under ``target/`` (e.g. a soldr / cargo config we did not predict, a
+    manually-set ``CARGO_TARGET_DIR``, or a non-standard triple that our
+    ``_guess_host_triple`` heuristic missed), fall back to a recursive
+    ``target/**/<name>`` walk so the "successful build but missing binary"
+    RuntimeError only fires when the binary genuinely was not produced.
+    """
     candidates = _binary_candidate_paths()
     for candidate in candidates:
         if candidate.exists():
             return candidate
+    # Safety-net walk. Only reached on the "successful build, unknown output
+    # location" path; cost is bounded by target/ size and only paid on the
+    # slow path.
+    suffix = ".exe" if os.name == "nt" else ""
+    name = f"{RUST_BINARY_NAME}{suffix}"
+    target_root = RUST_CRATE_DIR / "target"
+    if target_root.is_dir():
+        for hit in target_root.rglob(name):
+            if hit.is_file():
+                return hit
     return candidates[0]
 
 
@@ -209,6 +228,18 @@ def _run_build(verbose: bool = True) -> None:
     runtime but costs ~10x cold-build wall time vs dev. The wrapper-level
     ``--no-cache`` avoids soldr/zccache protocol drift on hosted runners; the
     built binary is already cached separately by this module and CI.
+
+    Streaming implementation
+    ------------------------
+    Uses ``subprocess.Popen`` with ``stdout=PIPE``/``stderr=STDOUT`` and a
+    line-by-line reader loop so cargo output reaches ``sys.stderr`` as it
+    is produced. This matters when the build is invoked from inside a
+    ``concurrent.futures.ThreadPoolExecutor`` (as ``run_all_checkers.py``
+    does): earlier code used ``subprocess.run`` with inherited handles,
+    but when the parent's stdout/stderr are indirectly captured (test
+    runners, logging wrappers, CI harnesses), cargo's diagnostics
+    disappear. The explicit stream + prefix makes every cargo line
+    identifiable and visible even under those layers.
     """
     soldr = _resolve_soldr()
     cmd = [
@@ -226,16 +257,41 @@ def _run_build(verbose: bool = True) -> None:
             f"🔨 Building Rust C++ linter ({RUST_BINARY_NAME}) — this runs once "
             "until the crate sources change.",
             file=sys.stderr,
+            flush=True,
         )
-    result = subprocess.run(
+        print(
+            f"    cwd: {PROJECT_ROOT}",
+            file=sys.stderr,
+            flush=True,
+        )
+        print(
+            f"    cmd: {' '.join(cmd)}",
+            file=sys.stderr,
+            flush=True,
+        )
+
+    # Popen + explicit stream. stderr merged into stdout so line ordering
+    # matches what a user would see running the command interactively.
+    proc = subprocess.Popen(
         cmd,
         cwd=str(PROJECT_ROOT),
-        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,  # line-buffered
     )
-    if result.returncode != 0:
+    assert proc.stdout is not None
+    prefix = "    [cargo] "
+    for line in proc.stdout:
+        # Preserve the raw line (cargo emits progress bars via \r; strip
+        # trailing whitespace only, don't collapse internal spacing).
+        print(f"{prefix}{line.rstrip()}", file=sys.stderr, flush=True)
+    returncode = proc.wait()
+
+    if returncode != 0:
         raise RuntimeError(
-            f"Rust C++ linter build failed (exit {result.returncode}); see "
-            "soldr/cargo output above."
+            f"Rust C++ linter build failed (exit {returncode}); see "
+            f"[cargo] lines above for the underlying error."
         )
 
 
@@ -259,9 +315,20 @@ def ensure_rust_lint_binary(verbose: bool = True) -> Path:
         _store_fingerprint(_compute_fingerprint())
 
     if not binary.exists():
+        target_root = RUST_CRATE_DIR / "target"
+        actually_present = []
+        if target_root.is_dir():
+            suffix = ".exe" if os.name == "nt" else ""
+            name = f"{RUST_BINARY_NAME}{suffix}"
+            actually_present = sorted(
+                str(p) for p in target_root.rglob(name) if p.is_file()
+            )
         raise RuntimeError(
-            f"Rust C++ linter binary missing after successful build (looked in: "
-            f"{[str(p) for p in _binary_candidate_paths()]})"
+            "Rust C++ linter binary missing after successful build.\n"
+            f"    fastled-lint crate: {RUST_CRATE_DIR}\n"
+            f"    checked candidates: {[str(p) for p in _binary_candidate_paths()]}\n"
+            f"    target/ walk found: {actually_present or '(none — cargo did not produce the binary)'}\n"
+            "    See [cargo] lines above for what cargo actually reported."
         )
     return binary
 

@@ -145,7 +145,7 @@ def insert_tool_aliases(meta_json: dict[str, dict[str, Any]]) -> None:
 def remove_readonly(func: Callable[..., Any], path: str, _: Any) -> None:
     "Clear the readonly bit and reattempt the removal"
     if os.name == "nt":
-        os.system(f"attrib -r {path}")
+        subprocess.run(["attrib", "-r", path], check=False)
     else:
         try:
             os.chmod(path, 0o777)

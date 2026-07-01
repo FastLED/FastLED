@@ -1,19 +1,17 @@
-import os
+import subprocess
 from pathlib import Path
 
 
 def map_dump(map_file: Path) -> None:
-    # os.system("uv run fpvgcc ci/tests/uno/firmware.map --lmap root")
-
-    cmds = [
-        f"uv run fpvgcc {map_file} --sar",
-        f"uv run fpvgcc {map_file} --lmap root",
-        f"uv run fpvgcc {map_file} --uf",
-        f"uv run fpvgcc {map_file} --uregions",
-        # --usections
-        f"uv run fpvgcc {map_file} --usections",
-        f"uv run fpvgcc {map_file} --la",
+    map_arg = str(map_file)
+    cmds: list[list[str]] = [
+        ["uv", "run", "fpvgcc", map_arg, "--sar"],
+        ["uv", "run", "fpvgcc", map_arg, "--lmap", "root"],
+        ["uv", "run", "fpvgcc", map_arg, "--uf"],
+        ["uv", "run", "fpvgcc", map_arg, "--uregions"],
+        ["uv", "run", "fpvgcc", map_arg, "--usections"],
+        ["uv", "run", "fpvgcc", map_arg, "--la"],
     ]
     for cmd in cmds:
-        print("\nRunning command: ", cmd)
-        os.system(cmd)
+        print("\nRunning command:", " ".join(cmd))
+        subprocess.run(cmd, check=False)
