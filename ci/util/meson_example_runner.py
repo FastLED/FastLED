@@ -433,6 +433,25 @@ def run_meson_examples(
             num_tests_failed=0,
         )
 
+    # Wire up ASan/LSan runtime discovery when the caller asked for debug
+    # sanitizers. On Windows this appends the clang-tool-chain MinGW sysroot
+    # bin/ (which owns libclang_rt.asan_dynamic-x86_64.dll) to PATH; without
+    # it every example .exe fails to start with 0xC0000135 STATUS_DLL_NOT_FOUND
+    # — the failure mode that had `example tests windows` red on master
+    # since 2026-06-23. Mirrors the same call ci/meson/runner.py makes for
+    # the unit-test runner; the example runner had grown its own --debug
+    # path without the equivalent env prep.
+    if build_mode == "debug":
+        from clang_tool_chain import (  # noqa: PLC0415 - lazy import: ~60ms
+            prepare_sanitizer_environment,
+        )
+
+        sanitizer_env = prepare_sanitizer_environment(
+            base_env=os.environ.copy(),
+            compiler_flags=["-fsanitize=address"],
+        )
+        os.environ.update(sanitizer_env)
+
     # Construct mode-specific build directory
     # This enables caching per mode when source unchanged but flags differ
     # Example: .build/meson -> .build/meson-debug
