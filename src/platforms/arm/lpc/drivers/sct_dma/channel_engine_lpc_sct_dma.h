@@ -103,6 +103,16 @@ public:
         return Capabilities(/*clockless=*/true, /*spi=*/false);
     }
 
+    /// @brief Access the underlying SCT+DMA transmitter.
+    ///
+    /// Test-facing accessor added for the #3468 TX→RX readback
+    /// contract: on host the transmitter records the byte stream the
+    /// engine handed it, so `tests/fl/channels/lpc_sct_dma_engine.cpp`
+    /// can round-trip the exact bytes through the LPC RX device's
+    /// decoder without bypassing the engine's `show()` path.
+    LpcSctDmaTransmitter& transmitter() FL_NO_EXCEPT { return mTransmitter; }
+    const LpcSctDmaTransmitter& transmitter() const FL_NO_EXCEPT { return mTransmitter; }
+
 private:
     /// @brief Pending channels (set by enqueue, consumed by show).
     fl::vector<ChannelDataPtr> mEnqueuedChannels;

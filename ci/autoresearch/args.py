@@ -102,6 +102,10 @@ class Args:
     # LPC845 SCT-RX bench (#3021 Phase 2) — WS2812 byte-match loopback.
     ws2812_loopback: bool
 
+    # LPC845 channels-API SCT+DMA clockless engine self-loopback (#3468).
+    # Drives `ChannelEngineLpcSctDma` and captures via `LpcSctRxChannel`.
+    pwm_dma_cl: bool
+
     # Multi-frame capture — number of back-to-back show()/capture cycles per pattern.
     # None = driver-default (SPI → 2, others → 1). Explicit value overrides.
     # See issues #2254 and #2288 (ESP32-S3 SPI second-frame degradation).
@@ -379,6 +383,17 @@ See Also:
             "FastLED.show() (bit-bang TX) → SCT input-capture RX "
             "(FastLED #3021 Phase 2). The LPC845 low-memory sketch binds "
             "the RPC automatically.",
+        )
+        lpc_group.add_argument(
+            "--pwm-dma-cl",
+            action="store_true",
+            help="LPC845-only: channels-API SCT+DMA clockless engine self-"
+            "loopback (FastLED #3468). Drives `ChannelEngineLpcSctDma` "
+            "through `BusTraits<Bus::BIT_BANG>::instance()` and captures "
+            "the wire via `LpcSctRxChannel` on --rx-pin for a byte-match "
+            "readback. Requires a jumper from --tx-pin (data) to --rx-pin. "
+            "Mutually exclusive with --ws2812-loopback (both target the "
+            "same SCT peripheral).",
         )
 
         # Standard options
@@ -725,6 +740,7 @@ See Also:
             decode=parsed.decode,
             pin_toggle_rx=parsed.pin_toggle_rx,
             ws2812_loopback=parsed.ws2812_loopback,
+            pwm_dma_cl=parsed.pwm_dma_cl,
             frames=parsed.frames,
             tight_timing=parsed.tight_timing,
             tight_timing_iterations=parsed.tight_timing_iterations,

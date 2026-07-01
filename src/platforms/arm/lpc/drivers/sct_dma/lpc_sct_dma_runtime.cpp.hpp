@@ -251,9 +251,23 @@ void LpcSctDmaTransmitter::configureForChannel(
 }
 
 void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_NO_EXCEPT {
-    (void)bytes; (void)len; (void)is_rgbw;
-    // No peripheral on host. The channels-API engine's poll() flips
-    // back to READY on the next call — same shape the scaffold had.
+    (void)is_rgbw;
+    // No SCT/DMA peripheral on host. Instead, capture the byte stream
+    // so the caller can round-trip it through the LPC RX device's
+    // decoder (#3468 TX→RX readback contract). The channels-API
+    // engine's poll() still flips back to READY on the next call.
+    //
+    // Overwrite semantics: each transmit() replaces the prior capture.
+    // Callers that need to accumulate across frames should copy the
+    // span out between calls.
+    mTxCapture.clear();
+    if (bytes == nullptr || len == 0u) {
+        return;
+    }
+    mTxCapture.reserve(len);
+    for (u32 i = 0; i < len; ++i) {
+        mTxCapture.push_back(bytes[i]);
+    }
 }
 
 bool LpcSctDmaTransmitter::isDone() const FL_NO_EXCEPT {
