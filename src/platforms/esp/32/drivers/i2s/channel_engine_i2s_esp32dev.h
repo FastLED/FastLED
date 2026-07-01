@@ -151,6 +151,15 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
     bool mTransmitCompleted;
 
     bool mPeripheralInitialized;
+
+    // FastLED#3526 Phase 2c — SPI-mode delegate. When `show()` sees a
+    // batch of SPI channels it forwards to the existing tested
+    // `ChannelDriverI2sSpi` (which owns its own peripheral instance
+    // via the `I2sSpiPeripheralEsp` singleton). Both drivers wrap the
+    // same I2S1 hardware; only one is active at a time. Lazy-init on
+    // first SPI batch so builds that never use SPI don't link the
+    // delegate.
+    fl::shared_ptr<IChannelDriver> mSpiDelegate;
 };
 
 /// @brief Factory that builds a `ChannelEngineI2sEsp32Dev` wrapping a

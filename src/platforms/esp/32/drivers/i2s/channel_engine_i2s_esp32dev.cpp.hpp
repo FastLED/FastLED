@@ -15,6 +15,13 @@
 #if defined(FL_IS_ESP32)
 #include "platforms/esp/32/feature_flags/enabled.h"
 #include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_esp.h"
+#if FASTLED_ESP32_HAS_I2S
+// FastLED#3526 Phase 2c — SPI batches delegate to the tested I2S-SPI
+// driver (which owns its own peripheral instance via the
+// `I2sSpiPeripheralEsp` singleton). Both wrap I2S1 hardware, only one
+// binds at a time — same-peripheral-one-slot per the parallel-IO rule.
+#include "platforms/esp/32/drivers/i2s_spi/channel_driver_i2s_spi.h"
+#endif
 #endif
 
 namespace fl {
@@ -176,12 +183,42 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
         return;
     }
     if (has_spi) {
-        // Phase 2c-SPI: peripheral needs to be reconfigured for SPI mode
-        // (clock rate + FIFO width + DMA slot) and encoding switches from
-        // wave8 pulse-major to raw byte stream. The peripheral surface for
-        // SPI mode is still bench-blocked; refuse cleanly rather than
-        // silently sending garbage.
-        FL_WARN_F("ChannelEngineI2sEsp32Dev: SPI mode not yet wired — FastLED#3526 Phase 2c pending bench validation");
+        // FastLED#3526 Phase 2c — pure-SPI batch delegates to the
+        // tested `ChannelDriverI2sSpi` (`createI2sSpiEngine()`
+        // factory). Lazy-init so builds that never route SPI channels
+        // through the modern engine don't pay for the delegate. Same
+        // peripheral (I2S1) — only one owner at a time, arbitration
+        // via the peripheral singleton's `initialize()` first-in-wins.
+#if defined(FL_IS_ESP_32DEV) && FASTLED_ESP32_HAS_I2S
+        if (!mSpiDelegate) {
+            mSpiDelegate = fl::createI2sSpiEngine();
+        }
+        if (!mSpiDelegate) {
+            FL_WARN_F("ChannelEngineI2sEsp32Dev: SPI delegate unavailable");
+            for (auto &data : mInFlightChannels) {
+                if (data) {
+                    data->setInUse(false);
+                }
+            }
+            mInFlightChannels.clear();
+            mState = DriverState::ERROR;
+            return;
+        }
+        // Forward every in-flight SPI channel to the delegate. The
+        // delegate does its own lane-interleave + peripheral
+        // transmit; the modern engine tracks state through its own
+        // BUSY→READY dispatch, driven by `poll()` polling the
+        // delegate's state.
+        for (const auto &data : mInFlightChannels) {
+            if (data) {
+                mSpiDelegate->enqueue(data);
+            }
+        }
+        mSpiDelegate->show();
+        mState = DriverState::BUSY;
+        return;
+#else
+        FL_WARN_F("ChannelEngineI2sEsp32Dev: SPI mode unavailable on this target");
         for (auto &data : mInFlightChannels) {
             if (data) {
                 data->setInUse(false);
@@ -190,6 +227,7 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
         mInFlightChannels.clear();
         mState = DriverState::ERROR;
         return;
+#endif
     }
     // Clockless batch — take the existing wave8-encoding path below.
 
@@ -248,6 +286,43 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
 }
 
 IChannelDriver::DriverState ChannelEngineI2sEsp32Dev::poll() FL_NO_EXCEPT {
+    // FastLED#3526 Phase 2c — when the SPI delegate is active, drive
+    // completion off its state machine. The delegate owns the SPI
+    // transmit lifecycle; we surface its state (BUSY / DRAINING /
+    // READY / ERROR) up to our own callers.
+    if (mSpiDelegate && (mState == DriverState::BUSY ||
+                         mState == DriverState::DRAINING)) {
+        DriverState delegate_state = mSpiDelegate->poll();
+        if (delegate_state == DriverState::READY) {
+            // Release channels the delegate already released — the
+            // delegate does its own setInUse(false), but be defensive.
+            for (auto &data : mInFlightChannels) {
+                if (data) {
+                    data->setInUse(false);
+                }
+            }
+            mInFlightChannels.clear();
+            mTransmitCompleted = false;
+            mState = DriverState::READY;
+        } else if (delegate_state == DriverState::DRAINING) {
+            // Transmit kicked off, DMA still running. Surface DRAINING
+            // to our callers so `onEndFrame()` can return without
+            // blocking (per the channel-manager DMA wait pattern).
+            mState = DriverState::DRAINING;
+        } else if (delegate_state == DriverState::ERROR) {
+            // Delegate hit an error — release channels + surface ERROR.
+            for (auto &data : mInFlightChannels) {
+                if (data) {
+                    data->setInUse(false);
+                }
+            }
+            mInFlightChannels.clear();
+            mTransmitCompleted = false;
+            mState = DriverState::ERROR;
+        }
+        // BUSY / other → stay in current state.
+        return mState;
+    }
     if (!mPeripheral) {
         return DriverState::READY;
     }

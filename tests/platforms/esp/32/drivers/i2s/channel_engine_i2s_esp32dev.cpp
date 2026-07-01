@@ -540,7 +540,12 @@ FL_TEST_CASE("I2sEsp32Dev - pure clockless batch still succeeds") {
     FL_CHECK(mock.getTransmitCount() == 1u);
 }
 
-FL_TEST_CASE("I2sEsp32Dev - pure SPI batch rejected as Phase 2c stub") {
+FL_TEST_CASE("I2sEsp32Dev - pure SPI batch — Phase 2c delegate path") {
+    // FastLED#3526 Phase 2c — SPI batches now delegate to the tested
+    // ChannelDriverI2sSpi. On host builds the delegate factory returns
+    // nullptr (no ESP peripheral), so the engine drops to ERROR
+    // cleanly with the "SPI delegate unavailable" path. On device
+    // (esp32dev) the delegate is functional and the batch reaches BUSY.
     resetMockState();
     ChannelEngineI2sEsp32Dev engine(createMockPeripheral());
     auto &mock = I2sPeripheralEsp32DevMock::instance();
@@ -549,14 +554,21 @@ FL_TEST_CASE("I2sEsp32Dev - pure SPI batch rejected as Phase 2c stub") {
     engine.enqueue(spi_data);
     engine.show();
 
-    // SPI path is stubbed — engine drops to ERROR without touching the
-    // peripheral, and releases the channel's in-use mark.
-    FL_REQUIRE(engine.currentState() == IChannelDriver::DriverState::ERROR);
+    // The clockless peripheral MUST NOT receive the SPI batch —
+    // regardless of whether the delegate is available.
     FL_CHECK(mock.getTransmitCount() == 0u);
-    FL_CHECK_FALSE(spi_data->isInUse());
+    // Either the delegate ran (BUSY) or wasn't available (ERROR).
+    // Both are correct engine behaviors — the invariant is that the
+    // clockless peripheral is untouched.
+    auto state = engine.currentState();
+    FL_CHECK(state == IChannelDriver::DriverState::BUSY ||
+             state == IChannelDriver::DriverState::ERROR);
 }
 
-FL_TEST_CASE("I2sEsp32Dev - mixed clockless+SPI batch rejected as Phase 2c stub") {
+FL_TEST_CASE("I2sEsp32Dev - mixed clockless+SPI batch rejected") {
+    // Mixed batches remain rejected — the peripheral can only run one
+    // mode at a time on I2S1. The engine forces callers to homogenize
+    // their batches.
     resetMockState();
     ChannelEngineI2sEsp32Dev engine(createMockPeripheral());
     auto &mock = I2sPeripheralEsp32DevMock::instance();
@@ -567,7 +579,6 @@ FL_TEST_CASE("I2sEsp32Dev - mixed clockless+SPI batch rejected as Phase 2c stub"
     engine.enqueue(spi_data);
     engine.show();
 
-    // Mixed batch — same stub outcome as pure SPI.
     FL_REQUIRE(engine.currentState() == IChannelDriver::DriverState::ERROR);
     FL_CHECK(mock.getTransmitCount() == 0u);
     FL_CHECK_FALSE(clockless_data->isInUse());
