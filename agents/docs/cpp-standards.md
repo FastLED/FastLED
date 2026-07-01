@@ -229,6 +229,39 @@ For a subsystem (e.g., `Watchdog`, `Audio`, `Codec`) that has multi-tier platfor
 - **Exception:** genuinely separate peripherals (e.g. ESP32 LPSPI vs I2S_SPI are different silicon blocks with completely different register surfaces) get separate drivers. The "parallel-IO" qualifier excludes the different-peripheral-same-protocol case.
 - **History:** Established 2026-06-27 during #3428 FlexIO-SPI/ObjectFLED-SPI implementation. Initial design forked into separate FLEX_IO_SPI / OBJECT_FLED_SPI bus slots; user reverted because forking made the maintenance surface 4× larger with no benefit. See `src/fl/channels/README.md` → "Rule: Parallel-IO peripherals — one engine for both clockless and SPI modes" for the full pattern + reference code.
 
+## Runtime driver selection is `Bus::FLEX_IO` — legacy chipset templates are not (REQUIRED)
+- **Rule:** When adding an AutoResearch harness, on-device test, or any test-driver code that exercises a parallel-IO peripheral (FlexIO, ObjectFLED, ESP32 PARLIO, LCD_CAM, I2S1 parallel-out, etc.), **reach for the `Bus::FLEX_IO` runtime-selection surface**, never the legacy chipset template class directly.
+- **Old (wrong) way — reaching for the class template:**
+  ```cpp
+  // Rebuilds a whole custom pipeline around one specific driver's
+  // template and blocks driver unification. NEVER do this in a
+  // test harness or validation sketch.
+  ClocklessI2S<PIN, WS2812_TIMING, GRB> controller;   // ← wrong
+  FastLED.addLeds(&controller, leds, N);
+  ```
+- **New (right) way — runtime binding through `Bus::FLEX_IO`:**
+  ```cpp
+  // Bind whatever peripheral BusTraits<Bus::FLEX_IO, 0> resolves to
+  // on this silicon (classic ESP32 → I2S1; ESP32-P4/C6/H2/C5 →
+  // PARLIO; Teensy 4.x → FlexIO or ObjectFLED; ESP32-S3 → LCD_CAM).
+  FastLED.setExclusiveDriver<fl::Bus::FLEX_IO, 0>();
+  FastLED.addLeds<WS2812, PIN, GRB>(leds, N);
+  ```
+- **Subtype information (which concrete peripheral is actually bound, which port/instance number, which mode) goes into a device-info JSON structure returned by the RPC handler.** The handler is peripheral-agnostic; the runtime driver reports what it is. Example shape:
+  ```json
+  {
+    "bus": "FLEX_IO",
+    "instance": 0,
+    "peripheral": "I2S1_PARALLEL",
+    "port": 1,
+    "silicon": "ESP32-D0WD-V3",
+    "mode": "clockless"
+  }
+  ```
+- **Caveat — mind the `Bus::FLEX_IO, 0` binding on classic ESP32 today:** as of 2026-07-01, the `Bus::FLEX_IO, 0` slot on classic ESP32 routes to the **I2S-SPI** driver (`src/platforms/esp/32/drivers/i2s_spi/`), NOT the Yves parallel-out clockless driver (`src/platforms/esp/32/drivers/i2s/clockless_i2s_esp32.h`). The unified clockless-plus-SPI engine that would make the parallel-out clockless reachable via `Bus::FLEX_IO, 0` is tracked in [FastLED#3512 Phase 4](https://github.com/FastLED/FastLED/issues/3512). Until Phase 4 lands, an AutoResearch harness or test harness that wants to validate the Yves clockless parallel-out driver cannot reach it through the modern channel API — that harness is genuinely blocked on Phase 4. Do NOT invent a workaround by reaching for `ClocklessI2S<>` directly; write the harness once Phase 4 makes it reachable via `Bus::FLEX_IO, 0`.
+- **Rationale:** the whole point of the parallel-IO unified-engine rule (previous section) is that the `Bus::FLEX_IO` slot dispatches per-silicon to the right peripheral in the right mode, and users select drivers at runtime rather than compile-time. If a test harness reaches for one specific chipset template, that harness only works for one specific driver — and every future driver has to grow its own harness. One `Bus::FLEX_IO` harness works across every parallel-IO driver on every silicon, with subtype info flowing through the device-info JSON.
+- **History:** Established 2026-07-01 during [FastLED#3515 Phase B](https://github.com/FastLED/FastLED/issues/3515) drafting. Agent initially reached for `ClocklessI2S<>` directly to write an I2S-specific harness; user rejected because the modern channel-manager surface makes I2S "just a `Bus::FLEX_IO` implementation," and subtype info belongs in a device-info JSON, not baked into the harness. See [FastLED#3516](https://github.com/FastLED/FastLED/issues/3516) meta and the surrounding refactor phases.
+
 ## Channel Engine DMA Wait Pattern
 - **`onBeginFrame()` / `show()` must wait for `poll() == READY` before starting a new frame** — use a simple `while (poll() != READY)` loop
 - **Yield in wait loops with `fl::task::run()`** — never busy-spin without yielding. Use `fl::task::run(250, fl::task::ExecFlags::SYSTEM)` inside wait loops to yield to the OS scheduler (FreeRTOS `vTaskDelay(0)` on ESP32, `std::this_thread::yield()` on host). This prevents watchdog timeouts and starvation of WiFi/BT/system tasks. Include `fl/task/executor.h`.

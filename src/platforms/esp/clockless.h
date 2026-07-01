@@ -30,19 +30,24 @@ namespace fl {
 // Multiple driver types are available (ClocklessIdf4/ClocklessIdf5, ClocklessSPI, ClocklessI2S)
 // This alias selects the preferred default for backward compatibility.
 //
-// I2S parallel-out is NO LONGER selected via compile-time flag — the
-// `FASTLED_ESP32_I2S` selector was removed per FastLED#3516. The driver
-// still compiles in via `FASTLED_ESP32_HAS_I2S` (auto-enabled on classic
-// ESP32) so `--gc-sections` elides it when unused; users who want I2S
-// bind it at runtime via
-//   `FastLED.enableDriver<fl::Bus::FLEX_IO, 0>()`
-// or the modern channel API
-//   `FastLED.add<Channel::create<fl::Bus::FLEX_IO, 0>()>`.
-//
-// Legacy `addLeds<WS2812, PIN, GRB>()` continues to get the RMT / PARLIO
-// / SPI default below — the unchanged behavior for callers who don't
-// explicitly select a driver.
-#if FASTLED_ESP32_HAS_PARLIO && \
+// The `FASTLED_ESP32_I2S` compile-time selector is kept for now because the
+// Yves parallel-out clockless driver is NOT yet reachable via
+// `Bus::FLEX_IO, 0` on classic ESP32 (that slot currently routes to the
+// I2S-SPI driver). Once FastLED#3512 Phase 4 wires the Yves clockless
+// through the modern channel-manager, this selector can be removed and
+// users migrate to `FastLED.setExclusiveDriver<fl::Bus::FLEX_IO, 0>()`.
+// See `agents/docs/cpp-standards.md` -> "Runtime driver selection is
+// `Bus::FLEX_IO` — legacy chipset templates are not (REQUIRED)" for the
+// full rationale and the future removal path.
+#if defined(FASTLED_ESP32_I2S) && !ESP_IDF_VERSION_6_OR_HIGHER
+  // I2S driver requested explicitly. On ESP-IDF 4.x/5.x uses the classic
+  // periph_module path; on IDF 6.x+ the compat shim in
+  // `i2s_periph_compat.h` handles the LL-API branch.
+  template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
+  using ClocklessController = ClocklessI2S<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+  #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
+
+#elif FASTLED_ESP32_HAS_PARLIO && \
       (defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32C6) || \
        defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5))
   // PARLIO is the clockless default on ESP32-P4/C6/H2/C5.

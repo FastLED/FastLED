@@ -44,12 +44,19 @@
 #    endif
 #  endif
 #endif
-// ESP32 I2S Driver deprecation notice — `FASTLED_ESP32_I2S` was removed
-// per FastLED#3516. If a user defines it we warn them to migrate to the
-// runtime selection API (`FastLED.enableDriver<fl::Bus::FLEX_IO, 0>()`)
-// instead of the compile-time flag.
+// ESP32 I2S Driver: `FASTLED_ESP32_I2S` is temporarily still honored as an
+// opt-in for the Yves parallel-out clockless driver, pending FastLED#3512
+// Phase 4 which will wire the Yves driver through `Bus::FLEX_IO, 0` in the
+// modern channel manager. Once Phase 4 lands, this flag is removed and
+// users select the driver at runtime via
+// `FastLED.setExclusiveDriver<fl::Bus::FLEX_IO, 0>()`.
+// The old ESP-IDF 5.x compatibility warning below fires so users know the
+// driver is on a deprecation path (FastLED#3516 tracks the migration).
 #if defined(FASTLED_ESP32_I2S) && !defined(FASTLED_INTERNAL)
-#warning "FASTLED_ESP32_I2S is deprecated (FastLED#3516). The I2S driver is now always compiled on classic ESP32 (gc-sections elides it when unused) and selected at runtime via `FastLED.enableDriver<fl::Bus::FLEX_IO, 0>()`. Remove the `-DFASTLED_ESP32_I2S` define — the flag is a no-op."
+#include "platforms/esp/esp_version.h"  // ok platform headers
+#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR >= 5
+#warning "ESP32 I2S Driver: ESP-IDF 5.x+ detected. The Yves parallel-out clockless driver works via `-DFASTLED_ESP32_I2S=1` but is on a deprecation path (FastLED#3516). Once FastLED#3512 Phase 4 wires the driver through `Bus::FLEX_IO, 0`, migrate to `FastLED.setExclusiveDriver<fl::Bus::FLEX_IO, 0>()` and drop the flag."
+#endif
 #endif
 
 // ESP32 RMT Driver conflict prevention
