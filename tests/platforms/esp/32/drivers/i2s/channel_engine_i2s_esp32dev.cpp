@@ -421,4 +421,107 @@ FL_TEST_CASE(
     FL_CHECK(mock.callbackInvocationCount() == 4u);
 }
 
+// =============================================================================
+// FastLED#3526 Phase 2b prep — streaming buffer-refill callback surface
+// =============================================================================
+
+namespace {
+
+struct RefillState {
+    int total_calls = 0;
+    int stop_after = 3;
+    int last_buffer_index = -1;
+};
+
+void refillCb(int buffer_index, bool *done, void *user_ctx) FL_NO_EXCEPT {
+    auto *state = static_cast<RefillState *>(user_ctx);
+    state->total_calls++;
+    state->last_buffer_index = buffer_index;
+    if (state->total_calls >= state->stop_after) {
+        *done = true;
+    }
+}
+
+} // namespace
+
+FL_TEST_CASE("I2sPeripheralEsp32DevMock - refill callback fires and reports done") {
+    resetMockState();
+    auto &mock = I2sPeripheralEsp32DevMock::instance();
+
+    RefillState state;
+    state.stop_after = 4;
+    FL_REQUIRE(mock.registerBufferRefillCallback(&refillCb, &state));
+
+    for (int i = 0; i < 4; ++i) {
+        mock.simulateBufferRefill(i % 3);
+    }
+    FL_CHECK(state.total_calls == 4);
+    FL_CHECK(mock.bufferRefillInvocationCount() == 4u);
+    FL_CHECK(mock.lastRefillBufferIndex() == 0);
+    FL_CHECK(mock.lastRefillDone());
+}
+
+FL_TEST_CASE("I2sPeripheralEsp32DevMock - refill callback nullptr is no-op") {
+    resetMockState();
+    auto &mock = I2sPeripheralEsp32DevMock::instance();
+
+    // No registration — simulate is a no-op.
+    mock.simulateBufferRefill(0);
+    FL_CHECK(mock.bufferRefillInvocationCount() == 0u);
+    FL_CHECK(mock.lastRefillBufferIndex() == -1);
+}
+
+FL_TEST_CASE("I2sPeripheralEsp32DevMock - refill callback clear on nullptr register") {
+    resetMockState();
+    auto &mock = I2sPeripheralEsp32DevMock::instance();
+
+    RefillState state;
+    FL_REQUIRE(mock.registerBufferRefillCallback(&refillCb, &state));
+    mock.simulateBufferRefill(0);
+    FL_CHECK(state.total_calls == 1);
+
+    FL_REQUIRE(mock.registerBufferRefillCallback(nullptr, nullptr));
+    mock.simulateBufferRefill(1);
+    // State unchanged.
+    FL_CHECK(state.total_calls == 1);
+}
+
+FL_TEST_CASE("I2sPeripheralEsp32DevMock - refill callback respects failure knob") {
+    resetMockState();
+    auto &mock = I2sPeripheralEsp32DevMock::instance();
+
+    mock.setRegisterCallbackFailure(true);
+    RefillState state;
+    FL_REQUIRE_FALSE(mock.registerBufferRefillCallback(&refillCb, &state));
+    mock.simulateBufferRefill(0);
+    FL_CHECK(state.total_calls == 0);
+}
+
+FL_TEST_CASE("I2sPeripheralEsp32DevMock - refill + tx-done coexist") {
+    resetMockState();
+    auto &mock = I2sPeripheralEsp32DevMock::instance();
+
+    static u32 tx_done_calls = 0;
+    tx_done_calls = 0;
+    auto tx_done = +[](void *) FL_NO_EXCEPT { tx_done_calls++; };
+    FL_REQUIRE(mock.registerTransmitCallback(tx_done, nullptr));
+
+    RefillState state;
+    FL_REQUIRE(mock.registerBufferRefillCallback(&refillCb, &state));
+
+    I2sEsp32DevPeripheralConfig cfg(1, 2400000, 1);
+    FL_REQUIRE(mock.initialize(cfg));
+    u8 dummy[4] = {0};
+    FL_REQUIRE(mock.transmit(dummy, sizeof(dummy)));
+
+    mock.simulateBufferRefill(0);
+    mock.simulateBufferRefill(1);
+    FL_CHECK(state.total_calls == 2);
+    FL_CHECK(tx_done_calls == 0u);
+
+    mock.simulateTransmitDone();
+    FL_CHECK(tx_done_calls == 1u);
+    FL_CHECK(mock.bufferRefillInvocationCount() == 2u);
+}
+
 #endif // FASTLED_STUB_IMPL

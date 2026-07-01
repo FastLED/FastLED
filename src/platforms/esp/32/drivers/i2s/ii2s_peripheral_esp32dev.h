@@ -119,6 +119,32 @@ struct I2sEsp32DevPeripheralConfig {
 /// allocate, or block.
 using I2sEsp32DevTxDoneCallback = void (*)(void *user_ctx);
 
+/// @brief Streaming buffer-refill ISR callback signature.
+///
+/// Fired from the DMA-EOF ISR every time a buffer drains — the
+/// caller's opportunity to refill the just-emptied buffer with the
+/// next row of encoded LED data before DMA circles back to it.
+/// This is the mechanism that makes I2S1 parallel-out capable of
+/// sustaining 24-strip streaming: the CPU refills one buffer while
+/// the DMA drives the next.
+///
+/// - `buffer_index` — which DMA buffer just drained (0..NUM_DMA_BUFFERS-1).
+///   Callers use this to pick the right buffer in the ring.
+/// - `user_ctx` — the pointer passed to `registerBufferRefillCallback()`.
+///
+/// Callback runs in ISR context, must be IRAM-safe, must not log,
+/// allocate, or block. The refill must complete before the current
+/// buffer starts draining (so the write hits before DMA reads it) —
+/// the caller is responsible for keeping refill latency inside the
+/// per-buffer time budget.
+///
+/// Callback should set `*done = true` when there are no more rows
+/// to fill — the ISR then stops firing refill callbacks and waits
+/// for the ring to drain before firing the transmit-done callback.
+using I2sEsp32DevBufferRefillCallback = void (*)(int buffer_index,
+                                                 bool *done,
+                                                 void *user_ctx);
+
 //=============================================================================
 // Virtual Peripheral Interface
 //=============================================================================
@@ -190,6 +216,30 @@ class II2sPeripheralEsp32Dev {
     ///         support callbacks in the current state.
     virtual bool registerTransmitCallback(I2sEsp32DevTxDoneCallback cb,
                                           void *user_ctx) FL_NO_EXCEPT = 0;
+
+    /// @brief Register the streaming buffer-refill ISR callback.
+    ///
+    /// Fired from the DMA-EOF ISR every buffer drain. The whole point
+    /// of the parallel-IO peripheral over RMT is streaming refill —
+    /// the CPU encodes the next row of pixels while DMA drives the
+    /// current one. `cb=nullptr` clears the hook. Default
+    /// implementation returns false — concrete impls that don't
+    /// support streaming refill (e.g. the pre-Phase-2b stub) can leave
+    /// it alone.
+    ///
+    /// FastLED#3526 Phase 2b wires this into
+    /// `I2sPeripheralEsp32DevEsp` for the real ISR path; the mock's
+    /// `simulateBufferRefill()` fires the callback synchronously so
+    /// host tests can exercise the callback cadence without an ISR.
+    ///
+    /// @return true on success, false if the impl doesn't support
+    ///         streaming refill.
+    virtual bool registerBufferRefillCallback(I2sEsp32DevBufferRefillCallback cb,
+                                              void *user_ctx) FL_NO_EXCEPT {
+        (void)cb;
+        (void)user_ctx;
+        return false;
+    }
 
     //=========================================================================
     // Introspection

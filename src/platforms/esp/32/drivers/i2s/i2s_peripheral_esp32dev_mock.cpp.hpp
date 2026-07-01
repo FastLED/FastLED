@@ -146,6 +146,19 @@ class I2sPeripheralEsp32DevMockImpl : public I2sPeripheralEsp32DevMock {
         return true;
     }
 
+    // FastLED#3526 Phase 2b prep — the mock now stores + fires
+    // streaming refill callbacks so the modern engine can be
+    // exercised end-to-end on host, before the real ISR path lands.
+    bool registerBufferRefillCallback(I2sEsp32DevBufferRefillCallback cb,
+                                      void *user_ctx) FL_NO_EXCEPT override {
+        if (mFailRegisterCallback) {
+            return false;
+        }
+        mRefillCallback = cb;
+        mRefillCallbackUserCtx = user_ctx;
+        return true;
+    }
+
     const I2sEsp32DevPeripheralConfig &getConfig() const FL_NO_EXCEPT override {
         return mConfig;
     }
@@ -165,6 +178,34 @@ class I2sPeripheralEsp32DevMockImpl : public I2sPeripheralEsp32DevMock {
 
     u32 callbackInvocationCount() const FL_NO_EXCEPT override {
         return mCallbackInvocations;
+    }
+
+    // FastLED#3526 Phase 2b prep — synchronously fire the registered
+    // buffer-refill callback with the given buffer_index. Records the
+    // caller-supplied `done` return so tests can assert stop-condition
+    // behavior. Callable multiple times per transmit to exercise the
+    // streaming cadence.
+    void simulateBufferRefill(int buffer_index) FL_NO_EXCEPT override {
+        if (mRefillCallback == nullptr) {
+            return;
+        }
+        bool done = false;
+        ++mRefillCallbackInvocations;
+        mLastRefillBufferIndex = buffer_index;
+        (*mRefillCallback)(buffer_index, &done, mRefillCallbackUserCtx);
+        mLastRefillDone = done;
+    }
+
+    u32 bufferRefillInvocationCount() const FL_NO_EXCEPT override {
+        return mRefillCallbackInvocations;
+    }
+
+    int lastRefillBufferIndex() const FL_NO_EXCEPT override {
+        return mLastRefillBufferIndex;
+    }
+
+    bool lastRefillDone() const FL_NO_EXCEPT override {
+        return mLastRefillDone;
     }
 
     //=== Error injection =====================================================
@@ -224,6 +265,11 @@ class I2sPeripheralEsp32DevMockImpl : public I2sPeripheralEsp32DevMock {
         mCallbackUserCtx = nullptr;
         mAllocateCount = 0;
         mCallbackInvocations = 0;
+        mRefillCallback = nullptr;
+        mRefillCallbackUserCtx = nullptr;
+        mRefillCallbackInvocations = 0;
+        mLastRefillBufferIndex = -1;
+        mLastRefillDone = false;
         mFailInitialize = false;
         mFailAllocateBuffer = false;
         mFailTransmit = false;
@@ -244,6 +290,13 @@ class I2sPeripheralEsp32DevMockImpl : public I2sPeripheralEsp32DevMock {
     fl::vector<u8 *> mAllocations;
     size_t mAllocateCount;
     u32 mCallbackInvocations;
+
+    // FastLED#3526 Phase 2b prep — streaming refill callback state.
+    I2sEsp32DevBufferRefillCallback mRefillCallback = nullptr;
+    void *mRefillCallbackUserCtx = nullptr;
+    u32 mRefillCallbackInvocations = 0;
+    int mLastRefillBufferIndex = -1;
+    bool mLastRefillDone = false;
 
     bool mFailInitialize;
     bool mFailAllocateBuffer;
