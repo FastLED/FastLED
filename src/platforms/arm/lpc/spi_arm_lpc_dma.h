@@ -11,7 +11,7 @@
 #include "platforms/arm/lpc/spi_arm_lpc.h"
 
 // =============================================================================
-// LPC845 SPI + DMA0 driver — async hardware-accelerated APA102/SK9822/WS2801
+// LPC8xx SPI + DMA0 driver — async hardware-accelerated APA102/SK9822/WS2801
 // =============================================================================
 //
 // Phase 1 of FastLED #3453. Drop-in peer of `ARMHardwareSPIOutput` from
@@ -19,6 +19,14 @@
 // blocks at the FastLED.show() boundary; this DMA driver hands the entire
 // pixel frame to a DMA0 channel tied to the SPI block's TX request line, so
 // the CPU is free in WFI during transmission.
+//
+// **Supported chips:** LPC845 and LPC804. Both share the same LPC8xx SPI
+// peripheral block (UM11029 §15 for LPC84x, UM11065 §11 for LPC80x — same
+// TXDATCTL / TXDAT / TXCTL register semantics). The two chips differ on
+// the DMA side: LPC845 has 25 channels with SPI0_TX at conventional
+// channel 4, LPC804 has only 4 channels total with SPI0_TX at
+// conventional channel 0. The driver picks the right default per-chip
+// via the `FASTLED_LPC_SPI_DMA_CHANNEL` macro (overridable).
 //
 // **Status:** untested on silicon. Phase 1 of #3453 ships the register-level
 // wiring per UM11029 §15 (SPI) and §17 (DMA) but has not been bench-validated
@@ -29,23 +37,33 @@
 //
 // BUILD-TIME OPT-IN
 // -----------------
-// Activated only when *both* are defined:
-//   * FL_IS_ARM_LPC_845    (auto-detected from CMSIS device macros)
-//   * FASTLED_LPC_SPI_DMA  (user-supplied, default off)
+// Activated when both are defined:
+//   * `FL_IS_ARM_LPC_845` OR `FL_IS_ARM_LPC_804`  (auto-detected from
+//                                                   CMSIS device macros)
+//   * `FASTLED_LPC_SPI_DMA`  (user-supplied, default off)
 //
-// When FASTLED_LPC_SPI_DMA is not set, `fastled_arm_lpc.h` continues to
-// route SPI through the polled driver in `spi_arm_lpc.h`. LPC804 has a
-// 4-channel DMA controller that needs channel-allocation review before
-// enabling — tracked under #2845 Stage 4 / #3453 Phase 1 follow-up.
+// When `FASTLED_LPC_SPI_DMA` is not set, `fastled_arm_lpc.h` continues
+// to route SPI through the polled driver in `spi_arm_lpc.h`. Default
+// LPC845 / LPC804 builds are unaffected.
+//
+// LPC804 support requires the vendor CMSIS PAL from
+// `FastLED/framework-arduino-lpc8xx` at commit `1179200a30` or newer
+// (adds `DMA_Type` + `DMA0` peripheral declarations for LPC804 —
+// FastLED/framework-arduino-lpc8xx#35 / FastLED/fbuild#916). That is
+// picked up transparently once the fbuild release containing #916
+// lands and `pyproject.toml` bumps the fbuild pin.
 //
 // RESOURCES CONSUMED
 // ------------------
-//   * One DMA0 channel — default `FASTLED_LPC_SPI_DMA_CHANNEL = 4`, which is
-//     the LPC845 conventional channel for SPI0_TX (UM11029 Table 80). For
-//     SPI1_TX the conventional channel is 6. Channel allocation has to be
-//     coordinated with the PWM+DMA clockless driver (3 channels starting at
-//     `FASTLED_LPC_PWM_DMA_BASECH`, default 0). With the defaults the
-//     allocations don't collide: channels 0,1,2 (clockless) vs 4 (SPI).
+//   * One DMA0 channel — `FASTLED_LPC_SPI_DMA_CHANNEL`. Default:
+//       - LPC845: channel 4 (SPI0_TX per UM11029 Table 80). SPI1_TX is
+//         channel 6; users targeting SPI1 override with
+//         `-DFASTLED_LPC_SPI_DMA_CHANNEL=6`.
+//       - LPC804: channel 0 (SPI0_TX per UM11065 §12.4 DMA trigger
+//         source table). LPC804 has only 4 DMA channels total and one
+//         SPI (SPI0), so channel allocation is tight but does not
+//         collide with any FastLED-side driver today (the PWM+DMA
+//         clockless driver is LPC845-only).
 //   * The SPI0 or SPI1 peripheral block (chosen via `pSPIX` template arg).
 //   * A SRAM-resident encoding buffer sized to the largest pixel frame. The
 //     DMA can only stream halfword writes to TXDAT, so each pixel byte
@@ -69,7 +87,18 @@
 //     conventions in this repo (SYSAHBCLKCTRL0 power-up bit layout, the
 //     PERIPHREQEN+HWTRIGEN CFG pattern, the SETVALID arming step).
 
-#if defined(FL_IS_ARM_LPC) && defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_SPI_DMA)
+#if defined(FL_IS_ARM_LPC) && \
+    (defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804)) && \
+    defined(FASTLED_LPC_SPI_DMA)
+
+// Clear diagnostic for the LPC804 opt-in when the toolchain is still on
+// the pre-#35 vendor CMSIS PAL. Without `DMA0` the `DMA0->CHANNEL[…]`
+// accesses below would fail with a cascade of "undeclared" errors that
+// don't hint at the actual problem. This #error steers the user at the
+// fbuild release that includes FastLED/framework-arduino-lpc8xx#35.
+#if defined(FL_IS_ARM_LPC_804) && !defined(DMA0)
+#error "FASTLED_LPC_SPI_DMA=1 was set on an LPC804 build, but <LPC804.h> does not declare DMA0. Requires the vendor CMSIS PAL from FastLED/framework-arduino-lpc8xx#35 (SHA 1179200a30 or newer). fbuild#916 bumps the pin — use a fbuild release that includes it (>= 2.3.16 depending on the release cut)."
+#endif
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -78,11 +107,27 @@ namespace fl {
 
 // ----- Tuning macros -------------------------------------------------------
 
-// DMA channel used for SPI TX. UM11029 Table 80 maps SPI0_TX to channel 4
-// and SPI1_TX to channel 6. Users targeting SPI1 should override this:
-//     -DFASTLED_LPC_SPI_DMA_CHANNEL=6
+// DMA channel used for SPI TX. Defaults are chip-specific:
+//
+//   LPC845 (UM11029 Table 80):
+//     SPI0_TX = channel 4
+//     SPI1_TX = channel 6
+//     Users targeting SPI1 override with `-DFASTLED_LPC_SPI_DMA_CHANNEL=6`.
+//
+//   LPC804 (UM11065 §12.4 DMA trigger source table):
+//     SPI0_TX = channel 0
+//     No SPI1 on LPC804.
+//
+// The channel-count difference reflects the underlying DMA hardware:
+// LPC845's DMA0 has 25 channels; LPC804's DMA0 has only 4 (channels
+// 0..3). Explicit overrides must satisfy the chip's channel limit or
+// the DMA controller silently rejects the descriptor arm.
 #ifndef FASTLED_LPC_SPI_DMA_CHANNEL
+#if defined(FL_IS_ARM_LPC_804)
+#define FASTLED_LPC_SPI_DMA_CHANNEL 0
+#else
 #define FASTLED_LPC_SPI_DMA_CHANNEL 4
+#endif
 #endif
 
 // Upper bound on encoded-buffer size in u16 elements. APA102 frames =
@@ -95,7 +140,9 @@ namespace fl {
 
 // ----- Driver --------------------------------------------------------------
 
-/// @brief LPC845 SPI + DMA0 async output for FastLED clocked strips.
+/// @brief LPC8xx (LPC845 / LPC804) SPI + DMA0 async output for FastLED
+///        clocked strips. LPC804 support gated on the vendor CMSIS PAL
+///        from FastLED/framework-arduino-lpc8xx#35 (SHA `1179200a30`+).
 ///
 /// Same template surface as `ARMHardwareSPIOutput<>` (the polled peer);
 /// users can swap in this template under a build flag without changing
