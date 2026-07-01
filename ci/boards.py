@@ -1163,7 +1163,7 @@ RPI_PICO2 = Board(
 # released (fbuild 2.3.15 released 20:09 UTC, matcher merge 21:47 UTC).
 # Once fbuild 2.3.16 ships with #900 the `nxplpc@` prefix becomes
 # redundant but stays valid PlatformIO syntax (name @ source URI).
-_NXPLPC_PLATFORM = "nxplpc@https://github.com/FastLED/platform-nxp-lpc8xx.git#12265f765aebd3893465d6d7ad76be66d89ba015"
+_NXPLPC_PLATFORM = "nxplpc@https://github.com/FastLED/platform-nxp-lpc8xx.git#4b6d395cbbfb9faf97a53af3733ad802dc160f1d"
 
 # Preferred name for the LPC845 canary board target (FastLED #3220).
 # `LPC845` is the canonical entry — `bash compile lpc845 …` and
