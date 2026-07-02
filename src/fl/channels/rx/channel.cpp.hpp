@@ -35,6 +35,8 @@ static fl::shared_ptr<RxDevice> createBackendDevice(const RxChannelConfig& confi
         return RxDevice::create<RxDeviceType::FLEXIO>(config.pin);
     case RxBackend::LPC_SCT_CAPTURE:
         return RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(config.pin);
+    case RxBackend::I2S_RX:
+        return RxDevice::create<RxDeviceType::I2S_RX>(config.pin);
     }
     return RxDevice::create<RxDeviceType::PLATFORM_DEFAULT>(config.pin);
 }
@@ -78,6 +80,10 @@ RxChannel::~RxChannel() FL_NO_EXCEPT = default;
 
 int RxChannel::getPin() const FL_NO_EXCEPT {
     return mDevice ? mDevice->getPin() : mConfig.pin;
+}
+
+RxBackend RxChannel::backend() const FL_NO_EXCEPT {
+    return mConfig.backend;
 }
 
 fl::string RxChannel::getEngineName() const FL_NO_EXCEPT {

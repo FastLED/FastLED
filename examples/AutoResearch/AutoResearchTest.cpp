@@ -397,6 +397,12 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     // for the shared ESP32-S3 DMA slot. RMT loopback stays non-DMA.
     // See issue #2254.
     rx_config.use_dma = !is_rmt_driver;
+    // Preserve the channel's explicitly-selected capture backend —
+    // RxChannel::begin() recreates the device when the backend field
+    // differs, and this config is built fresh (default =
+    // PLATFORM_DEFAULT), which silently reverted rxBackend overrides
+    // like I2S_RX back to RMT (FastLED#3576 Phase 3).
+    rx_config.backend = rx_channel->backend();
     if (is_rmt_driver) {
         AR_FL_WARN("[CAPTURE] RMT TX -> RMT RX: Internal loopback enabled (io_loop_back=true)");
     } else {

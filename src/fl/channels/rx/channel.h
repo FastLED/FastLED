@@ -24,6 +24,14 @@ public:
     int getPin() const FL_NO_EXCEPT;
     fl::string getEngineName() const FL_NO_EXCEPT;
 
+    /// @brief The capture backend this channel was created with.
+    /// Callers re-arming the channel via begin() should carry this
+    /// value into the new config — begin() recreates the device when
+    /// the backend differs, so a default-constructed config would
+    /// silently swap an explicitly-selected backend back to
+    /// PLATFORM_DEFAULT (FastLED#3576 Phase 3).
+    RxBackend backend() const FL_NO_EXCEPT;
+
     bool begin(const RxChannelConfig& config) FL_NO_EXCEPT;
     void setConfig(const RxChannelConfig& config) FL_NO_EXCEPT;
     bool finished() const FL_NO_EXCEPT;

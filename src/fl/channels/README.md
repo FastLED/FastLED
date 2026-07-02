@@ -375,6 +375,22 @@ void setup() {
 
 ## Advanced Features
 
+### RX Capture Backends
+
+`FastLED.addRx(RxChannelConfig(pin, backend))` creates a receive channel for
+capturing/validating LED waveforms. Backends (`fl::RxBackend`):
+
+| Backend | Platforms | Notes |
+|---------|-----------|-------|
+| `PLATFORM_DEFAULT` | all | Maps to the best available backend (RMT on ESP32) |
+| `RMT` | ESP32 family | Symbol-accurate; on **classic ESP32** the RMT receiver has no ping-pong/DMA, so a capture is one-shot into channel RAM — ~256 symbols ≈ 10 WS2812 LEDs max |
+| `I2S_RX` | classic ESP32 | 1-bit oversampler: I2S0 master-RX samples the pin at 16 MHz (62.5 ns) into a circular DMA ring; capture length is RAM-bound (~165 WS2812 LEDs), 16× the RMT ceiling. Contends for I2S0 with the second clockless bank / clocked-SPI driver via the port-claim registry — `begin()` fails cleanly when I2S0 is busy |
+| `ISR` | ESP32 family | GPIO-interrupt edge timestamping (lower precision) |
+
+The backend chosen at channel creation is sticky: re-arming via
+`RxChannel::begin()` preserves it (carry `channel->backend()` into the new
+config when building one from scratch).
+
 ### Channel Lifecycle Events
 
 Register callbacks for channel lifecycle events:
