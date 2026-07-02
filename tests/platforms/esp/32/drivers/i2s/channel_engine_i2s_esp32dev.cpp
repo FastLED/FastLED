@@ -21,9 +21,11 @@
 
 #include "fl/channels/config.h"  // for SpiChipsetConfig / SpiEncoder
 #include "fl/channels/data.h"
+#include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/memory.h"
+#include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s1.h"
 #include "test.h"
 
 using namespace fl;
@@ -217,14 +219,17 @@ FL_TEST_CASE("I2sEsp32Dev - show() moves state to BUSY, transmit fires") {
     FL_CHECK(mock.isBusy());
 }
 
-FL_TEST_CASE("I2sEsp32Dev - transmit records the packed byte payload") {
+FL_TEST_CASE("I2sEsp32Dev - transmit emits wave8-encoded payload") {
     resetMockState();
     ChannelEngineI2sEsp32Dev engine(createMockPeripheral());
     auto &mock = I2sPeripheralEsp32DevMock::instance();
 
-    // Two strips, each with a distinct fill byte. Stage-1 packing is
-    // linear concatenation — the mock's history captures the exact
-    // bytes the peripheral saw.
+    // Two strips, 3 bytes each. Wave8 pulse-major encoding produces
+    // `bytes_per_lane * 128` output bytes (3 * 128 = 384). Verify:
+    // - Size matches wave8I2s1EncodedFrameSize()
+    // - Output is non-zero (packing actually ran the encoder)
+    // - Output matches a direct encodeChannelWave8_i2s1() call on the
+    //   same lane-strided input (byte-exact anti-drift check)
     engine.enqueue(makeChannelData(0, 3, 0xAA));
     engine.enqueue(makeChannelData(1, 3, 0xBB));
     engine.show();
@@ -232,14 +237,30 @@ FL_TEST_CASE("I2sEsp32Dev - transmit records the packed byte payload") {
     const auto &hist = mock.getTransmitHistory();
     FL_REQUIRE(hist.size() == 1u);
     const auto &rec = hist[0];
-    FL_CHECK(rec.size_bytes == 6u);
-    FL_REQUIRE(rec.buffer_copy.size() == 6u);
-    FL_CHECK(rec.buffer_copy[0] == 0xAA);
-    FL_CHECK(rec.buffer_copy[1] == 0xAA);
-    FL_CHECK(rec.buffer_copy[2] == 0xAA);
-    FL_CHECK(rec.buffer_copy[3] == 0xBB);
-    FL_CHECK(rec.buffer_copy[4] == 0xBB);
-    FL_CHECK(rec.buffer_copy[5] == 0xBB);
+
+    constexpr size_t kExpectedSize = 3u * 128u;  // wave8: 128 output bytes per input byte-position
+    FL_CHECK(rec.size_bytes == kExpectedSize);
+    FL_REQUIRE(rec.buffer_copy.size() == kExpectedSize);
+
+    // Verify byte-exact via a direct kernel-call reference: build the
+    // same lane-strided input this test's channels produce and encode.
+    fl::vector<fl::u8> ref_input(16 * 3, 0);
+    for (size_t i = 0; i < 3; ++i) {
+        ref_input[0 * 3 + i] = 0xAA;   // lane 0
+        ref_input[1 * 3 + i] = 0xBB;   // lane 1
+    }
+    ChipsetTiming timing = to_runtime_timing<TIMING_WS2812_800KHZ>();
+    Wave8BitExpansionLut bit_lut = buildWave8ExpansionLUT(timing);
+    Wave8ByteExpansionLut byte_lut = buildWave8ByteExpansionLUT(bit_lut);
+    fl::vector<fl::u8> ref_output(kExpectedSize, 0);
+    bool ok = encodeChannelWave8_i2s1(
+        fl::span<const fl::u8>(ref_input),
+        /*bytes_per_lane=*/3, /*num_lanes=*/2, byte_lut,
+        fl::span<fl::u8>(ref_output));
+    FL_REQUIRE(ok);
+    for (size_t i = 0; i < kExpectedSize; ++i) {
+        FL_REQUIRE_EQ(rec.buffer_copy[i], ref_output[i]);
+    }
 }
 
 FL_TEST_CASE("I2sEsp32Dev - simulate completion drives BUSY -> READY on poll") {
@@ -419,10 +440,11 @@ FL_TEST_CASE("I2sEsp32Dev - enqueue during BUSY doesn't mutate in-flight set") {
     FL_REQUIRE(engine.currentState() == IChannelDriver::DriverState::BUSY);
 
     // Enqueue a second strip while the first is transmitting. It
-    // goes into the *next* frame — not the current one.
+    // goes into the *next* frame — not the current one. Wave8 output
+    // for 3 bytes-per-lane is `3 * 128 = 384` bytes.
     engine.enqueue(data2);
     FL_CHECK(mock.getTransmitCount() == 1u);
-    FL_CHECK(mock.getTransmitHistory()[0].size_bytes == 3u);
+    FL_CHECK(mock.getTransmitHistory()[0].size_bytes == 3u * 128u);
 }
 
 FL_TEST_CASE(
