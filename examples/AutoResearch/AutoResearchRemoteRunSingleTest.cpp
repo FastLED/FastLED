@@ -794,6 +794,11 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     } else if (timing_name == "UCS7604-800KHZ") {
         resolved_timing = fl::makeTimingConfig<fl::TIMING_UCS7604_800KHZ>();
         resolved_encoder = fl::encoder_for<fl::TIMING_UCS7604_800KHZ>();
+    } else if (timing_name == "SK6812") {
+        // SK6812 exercises the UART wave8-frame geometry (its T0H/T1H
+        // are exact multiples of period/4 — FastLED#3572 follow-up).
+        resolved_timing = fl::makeTimingConfig<fl::TIMING_SK6812>();
+        resolved_encoder = fl::encoder_for<fl::TIMING_SK6812>();
     } else {
         resolved_timing = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
         resolved_encoder = fl::encoder_for<fl::TIMING_WS2812B_V5>();

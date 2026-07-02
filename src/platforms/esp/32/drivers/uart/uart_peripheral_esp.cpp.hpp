@@ -91,7 +91,19 @@ bool UartPeripheralEsp::initialize(const UartPeripheralConfig& config) FL_NO_EXC
     // Configure UART parameters
     uart_config_t uart_config = {};
     uart_config.baud_rate = static_cast<int>(config.mBaudRate);
-    uart_config.data_bits = UART_DATA_8_BITS;
+    // Word length per the selected wave geometry: 8 data bits for
+    // wave10 (5 pulses/LED-bit), 6 for wave8-frame (4 pulses/LED-bit).
+    switch (config.mDataBits) {
+    case 5: uart_config.data_bits = UART_DATA_5_BITS; break;
+    case 6: uart_config.data_bits = UART_DATA_6_BITS; break;
+    case 7: uart_config.data_bits = UART_DATA_7_BITS; break;
+    case 8: uart_config.data_bits = UART_DATA_8_BITS; break;
+    default:
+        FL_WARN_F("UartPeripheralEsp: Invalid data bits (%s), defaulting to 8",
+                  static_cast<int>(config.mDataBits));
+        uart_config.data_bits = UART_DATA_8_BITS;
+        break;
+    }
     uart_config.parity = UART_PARITY_DISABLE;
 
     // Map stop bits (1 or 2)

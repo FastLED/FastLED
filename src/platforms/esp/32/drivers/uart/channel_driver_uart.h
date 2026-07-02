@@ -90,6 +90,7 @@ private:
     fl::shared_ptr<IUartPeripheral> mPeripheral;
     bool mInitialized;
     u32 mCurrentBaudRate; ///< Currently configured baud rate
+    u8 mCurrentDataBits;  ///< Currently configured UART word length (wave geometry)
 
     fl::vector<u8> mScratchBuffer;
     fl::vector<u8> mEncodedBuffer;

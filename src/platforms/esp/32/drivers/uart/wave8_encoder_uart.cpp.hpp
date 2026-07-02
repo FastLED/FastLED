@@ -61,33 +61,36 @@ u8 computePulseCount(u32 timing_ns, u32 pulse_width_ns) FL_NO_EXCEPT {
 /// @param pulses_a HIGH pulse count for LED bit A [1, 4]
 /// @param pulses_b HIGH pulse count for LED bit B [1, 4]
 /// @return UART data byte value
-u8 buildUartByte(u8 pulses_a, u8 pulses_b) FL_NO_EXCEPT {
-    // Build the desired 10-bit wire pattern (with TX inversion)
-    // Wire positions: [0=START] [1=~D0] ... [8=~D7] [9=STOP]
+u8 buildUartByte(u8 pulses_a, u8 pulses_b, u8 pulses_per_bit = 5) FL_NO_EXCEPT {
+    // Build the desired 2P-bit wire pattern (with TX inversion), where
+    // P = pulses_per_bit. Wire positions:
+    //   [0=START] [1=~D0] ... [2P-2=~D(2P-3)] [2P-1=STOP]
     //
-    // LED bit A (pos 0-4): pulses_a HIGH bits, then LOW
-    // LED bit B (pos 5-9): pulses_b HIGH bits, then LOW (STOP=L)
+    // LED bit A (pos 0..P-1): pulses_a HIGH bits, then LOW
+    // LED bit B (pos P..2P-1): pulses_b HIGH bits, then LOW (STOP=L)
 
-    int wire[10];
+    const int P = static_cast<int>(pulses_per_bit);
+    int wire[10]; // max frame = 10 (P=5)
 
     // LED bit A: pulses_a HIGH bits starting from position 0
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < P; i++) {
         wire[i] = (i < static_cast<int>(pulses_a)) ? 1 : 0;
     }
 
-    // LED bit B: pulses_b HIGH bits starting from position 5
-    for (int i = 0; i < 5; i++) {
-        wire[5 + i] = (i < static_cast<int>(pulses_b)) ? 1 : 0;
+    // LED bit B: pulses_b HIGH bits starting from position P
+    for (int i = 0; i < P; i++) {
+        wire[P + i] = (i < static_cast<int>(pulses_b)) ? 1 : 0;
     }
 
     // Convert wire pattern back to UART data byte
     // Wire[0] = START (inverted) = always H → no control needed
-    // Wire[1..8] = ~D0..~D7 (inverted data, LSB first)
-    // Wire[9] = STOP (inverted) = always L → no control needed
+    // Wire[1..2P-2] = ~D0..~D(2P-3) (inverted data, LSB first)
+    // Wire[2P-1] = STOP (inverted) = always L → no control needed
     //
     // So: wire[1+i] = ~D_i → D_i = ~wire[1+i] = wire[1+i] ? 0 : 1
     u8 byte_val = 0;
-    for (int i = 0; i < 8; i++) {
+    const int data_bits = 2 * P - 2;
+    for (int i = 0; i < data_bits; i++) {
         int data_bit = wire[1 + i] ? 0 : 1; // Invert: wire HIGH → data 0
         byte_val |= static_cast<u8>(data_bit << i); // LSB first
     }
@@ -95,113 +98,131 @@ u8 buildUartByte(u8 pulses_a, u8 pulses_b) FL_NO_EXCEPT {
     return byte_val;
 }
 
+/// @brief Fit result for one UART wave geometry (P pulses per LED bit)
+struct UartWaveFit {
+    bool ok;
+    u8 pulses_0;
+    u8 pulses_1;
+    u32 total_err_ns; ///< |T0H err| + |T1H err| vs nominal, post-bump
+};
+
+/// @brief Evaluate whether P pulses/LED-bit can represent the timing.
+///
+/// Shared by buildWave10Lut() and canRepresentTiming() so the LUT that
+/// gets built is always judged by the same rules that admitted it.
+UartWaveFit fitUartWave(const ChipsetTimingConfig& timing,
+                        u8 pulses_per_bit) FL_NO_EXCEPT {
+    UartWaveFit fit = {};
+    const u32 period_ns = timing.total_period_ns();
+    if (period_ns == 0) return fit;
+
+    // Baud = one UART bit per pulse = P / period. Must fit the ESP32
+    // UART ceiling.
+    const u64 baud =
+        static_cast<u64>(pulses_per_bit) * 1000000000ULL / period_ns;
+    if (baud == 0 || baud > kMaxUartBaudRate) return fit;
+
+    const u32 pulse_width_ns = period_ns / pulses_per_bit;
+    if (pulse_width_ns == 0) return fit;
+
+    const u32 t0h_ns = timing.t1_ns;
+    const u32 t1h_ns = timing.t1_ns + timing.t2_ns;
+    const u8 max_pulses = static_cast<u8>(pulses_per_bit - 1);
+
+    u8 pulses_0 = computePulseCount(t0h_ns, pulse_width_ns);
+    u8 pulses_1 = computePulseCount(t1h_ns, pulse_width_ns);
+    if (pulses_0 < 1 || pulses_0 > max_pulses) return fit;
+    if (pulses_1 < 1 || pulses_1 > max_pulses) return fit;
+    if (pulses_0 == pulses_1) return fit;
+
+    // FastLED#3569/#3572 — enforce a minimum ABSOLUTE wire separation
+    // between the 0 and 1 symbols, widening T1H upward (a longer HIGH
+    // still reads as 1). Best-fit rounding alone can land them one
+    // pulse apart, and at high baud one pulse is too little: WS2812B-V5
+    // at P=5 rounds to 245 vs 490 ns — inside real WS281x parts'
+    // sampling-threshold band (~550-625 ns); it flapped the WROOM bench
+    // decoder. Slow chipsets (WS2811-400: 500+ ns pulses) already
+    // exceed the floor with single-pulse separation.
+    constexpr u32 kMinSymbolSeparationNs = 400;
+    const u8 pulses_1_raw = pulses_1;
+    while (pulses_1 < max_pulses &&
+           static_cast<u32>(pulses_1 - pulses_0) * pulse_width_ns <
+               kMinSymbolSeparationNs) {
+        ++pulses_1;
+    }
+
+    // Quantized timing must be within half a pulse of nominal — the
+    // natural error bound for best-fit rounding. When the separation
+    // bump deliberately widened T1H, allow exactly the pulses it added
+    // on top of that bound.
+    const u32 tolerance_ns = pulse_width_ns / 2;
+    const u32 actual_t0h = static_cast<u32>(pulses_0) * pulse_width_ns;
+    const u32 actual_t1h = static_cast<u32>(pulses_1) * pulse_width_ns;
+    const u32 t1h_tolerance_ns =
+        tolerance_ns +
+        static_cast<u32>(pulses_1 - pulses_1_raw) * pulse_width_ns;
+    const u32 err_t0h = absDiff(actual_t0h, t0h_ns);
+    const u32 err_t1h = absDiff(actual_t1h, t1h_ns);
+    if (err_t0h > tolerance_ns) return fit;
+    if (err_t1h > t1h_tolerance_ns) return fit;
+
+    fit.ok = true;
+    fit.pulses_0 = pulses_0;
+    fit.pulses_1 = pulses_1;
+    fit.total_err_ns = err_t0h + err_t1h;
+    return fit;
+}
+
 } // anonymous namespace
 
 Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
     Wave10Lut result = {};
 
-    const u32 period_ns = timing.total_period_ns();
-    if (period_ns == 0) return result;
+    // Evaluate both frame geometries (FastLED#3572 follow-up):
+    //   P=5 — wave10: 8 data bits, baud = 5/period (the classic shape)
+    //   P=4 — wave8-frame: 6 data bits, baud = 4/period (lower baud →
+    //         reaches faster chipsets under the 5 Mbps cap; different
+    //         quantization grid — e.g. SK6812 is exact at period/4)
+    // Pick the feasible geometry with the smaller total quantization
+    // error. P=5 wins ties and near-ties (50 ns hysteresis) so the
+    // long-proven wave10 shapes stay stable for existing chipsets.
+    const UartWaveFit fit5 = fitUartWave(timing, 5);
+    const UartWaveFit fit4 = fitUartWave(timing, 4);
 
-    // Pulse width: each LED bit gets 5 pulses within its half-frame
-    const u32 pulse_width_ns = period_ns / 5;
-    if (pulse_width_ns == 0) return result;
-
-    // T0H and T1H in nanoseconds
-    const u32 t0h_ns = timing.t1_ns;           // T0H = T1
-    const u32 t1h_ns = timing.t1_ns + timing.t2_ns; // T1H = T1 + T2
-
-    // Compute pulse counts
-    u8 pulses_0 = computePulseCount(t0h_ns, pulse_width_ns);
-    u8 pulses_1 = computePulseCount(t1h_ns, pulse_width_ns);
-
-    // Clamp to valid range [1, 4]
-    if (pulses_0 < 1) pulses_0 = 1;
-    if (pulses_0 > 4) pulses_0 = 4;
-    if (pulses_1 < 1) pulses_1 = 1;
-    if (pulses_1 > 4) pulses_1 = 4;
-
-    // FastLED#3569 follow-up (UART bench): enforce a minimum ABSOLUTE
-    // wire separation between the 0 and 1 symbols, widening T1H upward.
-    // Best-fit rounding alone can land them one pulse apart, and at
-    // high baud one pulse is too little: WS2812B-V5 (T0H=225, T1H=580,
-    // pulse=245 ns) rounds to (1, 2) = 245 vs 490 ns, inside real LEDs'
-    // 0/1 ambiguity band (the WS281x sampling threshold sits near
-    // 550-625 ns) — it flapped the RX decoder's 500 ns threshold on the
-    // WROOM bench. A longer HIGH still reads as 1, so rounding T1H up
-    // is safe: (1, 2) → (1, 3) = 245 vs 735 ns, matching the proven
-    // legacy WS2812 LUT shape. Slow chipsets (WS2811-400: 500 ns
-    // pulses) already have ≥ 500 ns of single-pulse separation and are
-    // left untouched.
-    constexpr u32 kMinSymbolSeparationNs = 400;
-    while (pulses_1 < 4 &&
-           static_cast<u32>(pulses_1 - pulses_0) * pulse_width_ns <
-               kMinSymbolSeparationNs) {
-        ++pulses_1;
+    u8 P = 0;
+    UartWaveFit fit = {};
+    constexpr u32 kHysteresisNs = 50;
+    if (fit5.ok && fit4.ok) {
+        if (fit4.total_err_ns + kHysteresisNs < fit5.total_err_ns) {
+            P = 4;
+            fit = fit4;
+        } else {
+            P = 5;
+            fit = fit5;
+        }
+    } else if (fit5.ok) {
+        P = 5;
+        fit = fit5;
+    } else if (fit4.ok) {
+        P = 4;
+        fit = fit4;
+    } else {
+        return result; // infeasible — pulses_per_bit stays 0
     }
 
-    // Build LUT entries for all 4 two-bit combinations
-    result.lut[0] = buildUartByte(pulses_0, pulses_0); // "00"
-    result.lut[1] = buildUartByte(pulses_0, pulses_1); // "01"
-    result.lut[2] = buildUartByte(pulses_1, pulses_0); // "10"
-    result.lut[3] = buildUartByte(pulses_1, pulses_1); // "11"
+    result.pulses_per_bit = P;
+    result.lut[0] = buildUartByte(fit.pulses_0, fit.pulses_0, P); // "00"
+    result.lut[1] = buildUartByte(fit.pulses_0, fit.pulses_1, P); // "01"
+    result.lut[2] = buildUartByte(fit.pulses_1, fit.pulses_0, P); // "10"
+    result.lut[3] = buildUartByte(fit.pulses_1, fit.pulses_1, P); // "11"
 
     return result;
 }
 
 bool canRepresentTiming(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
-    const u32 period_ns = timing.total_period_ns();
-    if (period_ns == 0) return false;
-
-    // Check 1: Baud rate must be within ESP32 UART limits
-    const u32 baud_rate = Wave10Lut::computeBaudRate(timing);
-    if (baud_rate == 0 || baud_rate > kMaxUartBaudRate) return false;
-
-    // Pulse width for 5-pulse-per-bit model
-    const u32 pulse_width_ns = period_ns / 5;
-    if (pulse_width_ns == 0) return false;
-
-    // T0H and T1H timing
-    const u32 t0h_ns = timing.t1_ns;
-    const u32 t1h_ns = timing.t1_ns + timing.t2_ns;
-
-    // Compute pulse counts
-    u8 pulses_0 = computePulseCount(t0h_ns, pulse_width_ns);
-    u8 pulses_1 = computePulseCount(t1h_ns, pulse_width_ns);
-
-    // Check 2 & 3: Pulse counts must be in valid range [1, 4]
-    if (pulses_0 < 1 || pulses_0 > 4) return false;
-    if (pulses_1 < 1 || pulses_1 > 4) return false;
-
-    // Check 4: Pulse counts must be distinguishable
-    if (pulses_0 == pulses_1) return false;
-
-    // Mirror buildWave10Lut's minimum-separation bump so feasibility is
-    // judged against the counts that will actually be transmitted.
-    constexpr u32 kMinSymbolSeparationNs = 400;
-    const u8 pulses_1_raw = pulses_1;
-    while (pulses_1 < 4 &&
-           static_cast<u32>(pulses_1 - pulses_0) * pulse_width_ns <
-               kMinSymbolSeparationNs) {
-        ++pulses_1;
-    }
-
-    // Check 5 & 6: Quantized timing must be within half a pulse width of
-    // nominal — the natural error bound for best-fit rounding. When the
-    // separation bump deliberately widened T1H (longer HIGH still reads
-    // as 1), allow the extra pulse it added on top of that bound; the
-    // shortened T1L tail this costs is harmless as long as one LOW pulse
-    // remains, which the [1, 4] range guarantees.
-    const u32 tolerance_ns = pulse_width_ns / 2;
-    const u32 actual_t0h = static_cast<u32>(pulses_0) * pulse_width_ns;
-    const u32 actual_t1h = static_cast<u32>(pulses_1) * pulse_width_ns;
-    const u32 t1h_tolerance_ns =
-        tolerance_ns + static_cast<u32>(pulses_1 - pulses_1_raw) * pulse_width_ns;
-
-    if (absDiff(actual_t0h, t0h_ns) > tolerance_ns) return false;
-    if (absDiff(actual_t1h, t1h_ns) > t1h_tolerance_ns) return false;
-
-    return true;
+    // Feasible if EITHER frame geometry fits — same helper as
+    // buildWave10Lut(), so admission and construction can't drift.
+    return fitUartWave(timing, 5).ok || fitUartWave(timing, 4).ok;
 }
 
 FL_IRAM FL_OPTIMIZE_FUNCTION
