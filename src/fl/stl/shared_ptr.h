@@ -413,6 +413,13 @@ private:
 template<typename T, typename... Args>
 shared_ptr<T> make_shared(Args&&... args) FL_NO_EXCEPT {
     auto* control = new detail::InlinedControlBlock<T>();
+    if (control == nullptr) {
+        // OOM (embedded new returns null with -fno-exceptions): degrade
+        // to an empty shared_ptr instead of placement-constructing at a
+        // garbage offset from null (FastLED#3588 — crashed classic
+        // ESP32 when WiFi + HTTP server pushed free heap under 20 KB).
+        return shared_ptr<T>();
+    }
     T* obj = control->get_object();
     new(obj) T(fl::forward<Args>(args)...);  // Placement new
     control->object_constructed = true;
@@ -422,7 +429,14 @@ shared_ptr<T> make_shared(Args&&... args) FL_NO_EXCEPT {
 template<typename T, typename Deleter, typename... Args>
 shared_ptr<T> make_shared_with_deleter(Deleter d, Args&&... args) FL_NO_EXCEPT {
     T* obj = new T(fl::forward<Args>(args)...);
+    if (obj == nullptr) {
+        return shared_ptr<T>(); // OOM — see make_shared
+    }
     auto* control = new detail::ControlBlock<T, Deleter>(obj, d);
+    if (control == nullptr) {
+        d(obj);
+        return shared_ptr<T>(); // OOM — see make_shared
+    }
     //new(control->get_object()) T(fl::forward<Args>(args)...);
     //control->object_constructed = true;
     return shared_ptr<T>(obj, control, detail::make_shared_tag{});
@@ -440,7 +454,14 @@ shared_ptr<T> make_shared_no_tracking(T& obj) FL_NO_EXCEPT {
 template<typename T>
 shared_ptr<T> make_shared_array(size_t n) FL_NO_EXCEPT {
     T* arr = new T[n]();  // Zero-initialize the array
+    if (arr == nullptr) {
+        return shared_ptr<T>(); // OOM — see make_shared
+    }
     auto* control = new detail::ControlBlock<T, detail::array_delete<T>>(arr, detail::array_delete<T>{});
+    if (control == nullptr) {
+        delete[] arr;
+        return shared_ptr<T>(); // OOM — see make_shared
+    }
     return shared_ptr<T>(arr, control, detail::make_shared_tag{});
 }
 

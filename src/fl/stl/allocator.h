@@ -7,6 +7,7 @@
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/bitset.h"
+#include "fl/stl/detail/slab_mutex.h"
 #include "fl/stl/malloc.h"
 #include "fl/stl/align.h"
 #include "fl/stl/noexcept.h"
@@ -481,6 +482,9 @@ private:
     };
 
     Slab* mSlabs;
+    // Guards the slab list + block bitsets (FastLED#3588). A no-op on
+    // single-threaded platforms.
+    mutable fl::detail::slab_mutex mMutex;
     fl::size mTotalAllocated;
     fl::size mTotalDeallocated;
 
@@ -622,7 +626,15 @@ public:
         if (n == 0) {
             return nullptr;
         }
-        
+
+        // Thread safety (FastLED#3588): slab-backed containers
+        // (fl::map/set via allocator_slab) share a static per-type
+        // SlabAllocator across FreeRTOS tasks — e.g. the esp_http_server
+        // task building Response headers while the main loop mutates its
+        // own maps. Unsynchronized free-list/bitset updates corrupted
+        // the slab and crashed classic ESP32 under WiFi traffic.
+        fl::detail::slab_lock_guard guard(mMutex);
+
         // Try to allocate from slab first
         void* ptr = allocateFromSlab(n);
         if (ptr) {
@@ -642,7 +654,8 @@ public:
         if (!ptr) {
             return;
         }
-        
+        fl::detail::slab_lock_guard guard(mMutex); // see allocate()
+
         // Try to deallocate from slab first
         bool found_in_slab = false;
         for (Slab* slab = mSlabs; slab; slab = slab->next) {
@@ -679,6 +692,7 @@ public:
 
     // Cleanup all slabs
     void cleanup() FL_NO_EXCEPT {
+        fl::detail::slab_lock_guard guard(mMutex); // see allocate()
         while (mSlabs) {
             Slab* next = mSlabs->next;
             mSlabs->~Slab();

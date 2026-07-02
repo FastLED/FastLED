@@ -17,6 +17,7 @@
 #if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
 
 #include "AutoResearchNet.h"
+#include "FastLED.h"
 #include "fl/stl/json.h"
 #include "fl/log/log.h"
 
@@ -158,21 +159,29 @@ static bool startHttpServer() {
         return fl::asio::http::Response::ok("pong");
     });
 
+    // NOTE (FastLED#3588): these handlers execute ON the esp_http_server
+    // task, concurrently with the main loop. Building fl::json here
+    // reproducibly corrupted main-task json objects on classic ESP32
+    // (bisect: string-only handlers are stable, fl::json handlers crash
+    // the main task within one request). Until fl::json is audited for
+    // cross-task use, handlers format responses with fl::snprintf.
     s_http_server->get("/status", [](const fl::asio::http::Request&) {
-        fl::json json = fl::json::object();
-        json.set("uptime_ms", static_cast<int64_t>(millis()));
-        json.set("free_heap", static_cast<int64_t>(ESP.getFreeHeap()));
+        char body[128];
 #if defined(FL_IS_ESP_32S3)
-        json.set("chip", "esp32s3");
+        const char* chip = "esp32s3";
 #elif defined(FL_IS_ESP_32C6)
-        json.set("chip", "esp32c6");
+        const char* chip = "esp32c6";
 #elif defined(FL_IS_ESP_32C3)
-        json.set("chip", "esp32c3");
+        const char* chip = "esp32c3";
 #else
-        json.set("chip", "esp32");
+        const char* chip = "esp32";
 #endif
-        fl::asio::http::Response resp;
-        resp.json(json);
+        fl::snprintf(body, sizeof(body),
+                     "{\"uptime_ms\":%u,\"free_heap\":%u,\"chip\":\"%s\"}",
+                     static_cast<unsigned>(millis()),
+                     static_cast<unsigned>(ESP.getFreeHeap()), chip);
+        fl::asio::http::Response resp = fl::asio::http::Response::ok(body);
+        resp.header("Content-Type", "application/json");
         return resp;
     });
 
@@ -184,11 +193,10 @@ static bool startHttpServer() {
     });
 
     s_http_server->get("/leds", [](const fl::asio::http::Request&) {
-        fl::json json = fl::json::object();
-        json.set("num_leds", static_cast<int64_t>(10));
-        json.set("brightness", static_cast<int64_t>(64));
-        fl::asio::http::Response resp;
-        resp.json(json);
+        // Static body — see the fl::json cross-task note above (#3588).
+        fl::asio::http::Response resp =
+            fl::asio::http::Response::ok("{\"num_leds\":10,\"brightness\":64}");
+        resp.header("Content-Type", "application/json");
         return resp;
     });
 
@@ -234,7 +242,11 @@ static fl::json runHttpGetTest(const char* url, const char* test_name) {
 
     esp_http_client_config_t config = {};
     config.url = url;
-    config.timeout_ms = 5000;
+    // Must stay below the task-WDT window: esp_http_client_perform()
+    // blocks the loop task, and on single-core chips (ESP32-C6) a 5 s
+    // block starved the idle task -> WDT panic_abort mid-test
+    // (FastLED#3576 Phase 7 dual-device bench).
+    config.timeout_ms = 2000;
 
     esp_http_client_handle_t client = esp_http_client_init(&config);
     if (!client) {
@@ -335,6 +347,8 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
         }
         results.push_back(r);
     }
+
+    FastLED.watchdog().feed();  // between blocking HTTP tests (single-core WDT)
 
     // Test 2: GET /data
     {
