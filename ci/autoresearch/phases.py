@@ -2182,7 +2182,7 @@ def _build_and_deploy_nxplpc(
         environment or "lpc845brk",
     ]
     if upload_port:
-        deploy_cmd += ["--upload-port", upload_port]
+        deploy_cmd += ["--port", upload_port]
     if verbose:
         deploy_cmd.append("--verbose")
     result = subprocess.run(deploy_cmd, env=env, cwd=str(build_dir))
