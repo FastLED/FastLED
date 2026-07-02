@@ -23,6 +23,7 @@
 #include "Common.h"
 #include "AutoResearchTest.h"
 #include "AutoResearchHelpers.h"
+#include "AutoResearchEdgeProbe.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/unique_ptr.h"
 #include "platforms/is_platform.h"
@@ -30,6 +31,11 @@
 #include "platforms/esp/32/feature_flags/enabled.h"
 #if FASTLED_ESP32_HAS_PARLIO
 #include "platforms/esp/32/drivers/parlio/parlio_engine.h"
+FL_EXTERN_C_BEGIN
+// IWYU pragma: begin_keep
+#include "driver/parlio_tx.h"  // ok platform headers - parlioRawTest RPC
+// IWYU pragma: end_keep
+FL_EXTERN_C_END
 #endif
 FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
@@ -244,6 +250,140 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
     // investigation). Params: [{addr: <u32>, count?: 1-16}]. The caller
     // is expected to pass valid peripheral/SRAM addresses; an unmapped
     // address faults exactly as it would from any other code.
+    // "parlioRawTest" — minimal IDF parlio TX (FastLED#3586): 1-bit
+    // unit @ requested clock on a pin, transmit an alternating pattern.
+    // Bypasses the FastLED engine completely to split engine bugs from
+    // IDF-driver/silicon behavior.
+#if defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_PARLIO
+    remote.bind("parlioRawTest", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+        int pin = 1;
+        int hz = 8000000;
+        int width = 1;
+        int pattern = 0xAA;
+        int qnb = 0;
+        int mts = 1024;
+        int burst = 0;
+        int depth = 4;
+        int chunks = 1;
+        if (args.is_object()) {
+            if (args.contains("pin") && args["pin"].is_int()) pin = (int)args["pin"].as_int().value();
+            if (args.contains("hz") && args["hz"].is_int()) hz = (int)args["hz"].as_int().value();
+            if (args.contains("width") && args["width"].is_int()) width = (int)args["width"].as_int().value();
+            if (args.contains("pattern") && args["pattern"].is_int()) pattern = (int)args["pattern"].as_int().value();
+            if (args.contains("qnb") && args["qnb"].is_int()) qnb = (int)args["qnb"].as_int().value();
+            if (args.contains("mts") && args["mts"].is_int()) mts = (int)args["mts"].as_int().value();
+            if (args.contains("burst") && args["burst"].is_int()) burst = (int)args["burst"].as_int().value();
+            if (args.contains("depth") && args["depth"].is_int()) depth = (int)args["depth"].as_int().value();
+            if (args.contains("chunks") && args["chunks"].is_int()) chunks = (int)args["chunks"].as_int().value();
+        }
+        parlio_tx_unit_config_t cfg = {};
+        cfg.clk_src = PARLIO_CLK_SRC_DEFAULT;
+        cfg.data_width = (size_t)width;
+        cfg.clk_in_gpio_num = (gpio_num_t)-1;
+        cfg.clk_out_gpio_num = (gpio_num_t)-1;
+        cfg.valid_gpio_num = (gpio_num_t)-1;
+        cfg.trans_queue_depth = (size_t)depth;
+        cfg.max_transfer_size = (size_t)mts;
+        cfg.output_clk_freq_hz = (uint32_t)hz;
+        cfg.sample_edge = PARLIO_SAMPLE_EDGE_POS;
+        cfg.bit_pack_order = PARLIO_BIT_PACK_ORDER_MSB;
+        if (burst > 0) cfg.dma_burst_size = (size_t)burst;
+        for (int i = 0; i < 16; ++i) cfg.data_gpio_nums[i] = (gpio_num_t)-1;
+        cfg.data_gpio_nums[0] = (gpio_num_t)pin;
+        parlio_tx_unit_handle_t unit = nullptr;
+        esp_err_t err = parlio_new_tx_unit(&cfg, &unit);
+        if (err != ESP_OK) {
+            response.set("success", false);
+            response.set("error", esp_err_to_name(err));
+            return response;
+        }
+        err = parlio_tx_unit_enable(unit);
+        static uint8_t buf[512];
+        for (int i = 0; i < 512; ++i) buf[i] = (uint8_t)pattern;
+        parlio_transmit_config_t tcfg = {};
+        tcfg.idle_value = 0;
+        tcfg.flags.queue_nonblocking = qnb ? 1 : 0;
+        if (burst > 0) {
+            // dma_burst_size is a unit-config field; already applied below via cfg2 hack? No —
+            // it must be set before creation; handled via the 'burst' arg at cfg time.
+        }
+        esp_err_t terr = ESP_OK;
+        const size_t chunk_bytes = 512 / (chunks > 0 ? chunks : 1);
+        // Repeat for ~3 s so the edge-probe task (which re-arms 150 ms
+        // after the RPC) always overlaps live transmissions.
+        for (int rep = 0; rep < 300 && terr == ESP_OK; ++rep) {
+            for (int c = 0; c < chunks && terr == ESP_OK; ++c) {
+                terr = parlio_tx_unit_transmit(unit, buf + c * chunk_bytes, chunk_bytes * 8, &tcfg);
+            }
+            if (terr == ESP_OK) {
+                (void)parlio_tx_unit_wait_all_done(unit, 100);
+            }
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+        esp_err_t werr = parlio_tx_unit_wait_all_done(unit, 1000);
+        parlio_tx_unit_disable(unit);
+        parlio_del_tx_unit(unit);
+        response.set("success", true);
+        response.set("enableErr", esp_err_to_name(err));
+        response.set("txErr", esp_err_to_name(terr));
+        response.set("waitErr", esp_err_to_name(werr));
+        return response;
+    });
+#endif
+
+    // "edgeProbe" / "edgeProbeRead" — ISR-based edge recorder
+    // (FastLED#3586 bring-up): arms a GPIO any-edge interrupt that
+    // timestamps up to 200 edges with the cycle counter. Arm it, run a
+    // test, then read back exact pulse widths — a 6-ns logic probe for
+    // "transmits but capture sees nothing" investigations.
+#if defined(FL_IS_ESP32)
+    remote.bind("edgeProbe", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+        int pin = 0;
+        if (args.is_object() && args.contains("pin") && args["pin"].is_int()) {
+            pin = static_cast<int>(args["pin"].as_int().value());
+        }
+        edgeProbeArm(pin);
+        response.set("success", true);
+        response.set("pin", static_cast<int64_t>(pin));
+        response.set("selfTestEdges", static_cast<int64_t>(edgeProbeSelfTestEdges()));
+        return response;
+    });
+
+    remote.bind("edgeProbeRead", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+        response.set("success", true);
+        fl::u32 count = 0;
+        const fl::u32 *stamps = edgeProbeStamps(count);
+        response.set("edges", static_cast<int64_t>(count));
+        response.set("probeState", static_cast<int64_t>(edgeProbeState()));
+        {
+            const fl::u32 *rl = edgeProbeRmtLive();
+            fl::json live = fl::json::array();
+            for (int k = 0; k < 6; ++k) live.push_back(static_cast<int64_t>(rl[k]));
+            response.set("rmtLive", live);
+        }
+        fl::json runs = fl::json::array();
+        // Convert consecutive timestamps to durations in ns. Entry i
+        // encodes (level << 31) | cycle_stamp.
+        for (fl::u32 i = 1; i < count && i < 200; ++i) {
+            const fl::u32 prev = stamps[i - 1];
+            const fl::u32 cur = stamps[i];
+            const fl::u32 d_cycles = (cur & 0x7FFFFFFFu) - (prev & 0x7FFFFFFFu);
+            const fl::u32 level = prev >> 31;
+            // cycles -> ns via configured CPU MHz
+            const fl::u64 ns = (static_cast<fl::u64>(d_cycles) * 1000u) / edgeProbeCpuMhz();
+            fl::json e = fl::json::object();
+            e.set("level", static_cast<int64_t>(level));
+            e.set("ns", static_cast<int64_t>(ns));
+            runs.push_back(e);
+        }
+        response.set("runs", runs);
+        return response;
+    });
+#endif
+
     // "heapCheck" — heap integrity + stats (FastLED#3588 corruption
     // bisect). heap_caps_check_integrity_all walks every block; with
     // poisoning configured in the IDF libs it also validates canaries.

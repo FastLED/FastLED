@@ -2618,7 +2618,7 @@ FL_TEST_CASE("Wave3 integration - WS2812B_V5 falls back to wave8") {
     // Verify clock frequency is wave8 clock (8 MHz)
     auto& mock7 = ParlioPeripheralMock::instance();
     const auto& config7 = mock7.getConfig();
-    FL_CHECK_EQ(config7.clock_freq_hz, (u32)8000000);
+    FL_CHECK_EQ(config7.clock_freq_hz, (u32)6530612);  // wave8 clock derived from WS2812B_V5 timing: 8e9 / 1225 ns (FastLED#3586)
 }
 
 FL_TEST_CASE("Wave3 integration - transmit produces correct output size") {
@@ -2679,7 +2679,7 @@ FL_TEST_CASE("Wave3 corner case - mode switch wave3 to wave8") {
     FL_REQUIRE(init_ok);
 
     u32 wave8_clock = mock9.getConfig().clock_freq_hz;
-    FL_CHECK_EQ(wave8_clock, (u32)8000000);  // Should be wave8 clock
+    FL_CHECK_EQ(wave8_clock, (u32)6530612);  // wave8 clock derived from WS2812B_V5 timing: 8e9 / 1225 ns (FastLED#3586)  // Should be wave8 clock
 
     // Verify transmission works in wave8 mode
     uint8_t scratch[15] = {0xFF, 0xAA, 0x55, 0xF0, 0x0F,
@@ -2701,7 +2701,7 @@ FL_TEST_CASE("Wave3 corner case - mode switch wave8 to wave3") {
     FL_REQUIRE(init_ok);
 
     auto& mock10 = ParlioPeripheralMock::instance();
-    FL_CHECK_EQ(mock10.getConfig().clock_freq_hz, (u32)8000000);
+    FL_CHECK_EQ(mock10.getConfig().clock_freq_hz, (u32)6530612);  // wave8 clock derived from WS2812B_V5 timing: 8e9 / 1225 ns (FastLED#3586)
 
     // Second: reinit with WS2812 (wave3) — different timing forces reinit
     ChipsetTimingConfig timing_ws2812 = getWS2812Timing();
@@ -2786,7 +2786,7 @@ FL_TEST_CASE("Wave3 corner case - mock reset between modes") {
     ChipsetTimingConfig timing_v5(225, 355, 645, 280, "WS2812B_V5");
     init_ok = driver.initialize(1, pins, timing_v5, 10);
     FL_REQUIRE(init_ok);
-    FL_CHECK_EQ(mock11.getConfig().clock_freq_hz, (u32)8000000);
+    FL_CHECK_EQ(mock11.getConfig().clock_freq_hz, (u32)6530612);  // wave8 clock derived from WS2812B_V5 timing: 8e9 / 1225 ns (FastLED#3586)
 
     // Verify transmission works after reset+reinit
     uint8_t scratch[15] = {0xFF, 0xAA, 0x55, 0xF0, 0x0F,
