@@ -34,6 +34,7 @@ def synthesise_autoresearch_project(
     board_name: str,
     project_root: Path | None,
     verbose: bool,
+    extra_defines: list[str] | None = None,
 ) -> Path:
     """Stage ``.build/pio/<board>/`` and write a synthesised ``platformio.ini``.
 
@@ -42,6 +43,10 @@ def synthesise_autoresearch_project(
             Must resolve via ``ci.boards.create_board``.
         project_root: FastLED project root. ``None`` => resolve automatically.
         verbose: Forwarded to ``_init_platformio_build`` for diagnostic prints.
+        extra_defines: Additional ``NAME=VALUE`` compile defines merged into
+            the synthesised ``build_flags``. Used by driver-specific bench
+            modes (e.g. ``--dma-spi`` adds ``FASTLED_LPC_SPI_DMA=1`` so the
+            AutoResearchSpiDma handlers compile in — FastLED #3456).
 
     Returns:
         Absolute path to the staged build directory, ready to be handed to
@@ -66,13 +71,17 @@ def synthesise_autoresearch_project(
     # `get_root_platformio_build_flags` function entirely. The previous
     # monkeypatch bridge that lived here is obsolete — autoresearch's
     # fbuild path no longer reads root platformio.ini regardless.
+    defines = ["FASTLED_OBJECTFLED_DIAGNOSTICS=1"]
+    if extra_defines:
+        defines.extend(extra_defines)
+
     init_result = _init_platformio_build(
         board,
         verbose,
         "AutoResearch",
         paths,
         build_dir=build_dir,
-        additional_defines=["FASTLED_OBJECTFLED_DIAGNOSTICS=1"],
+        additional_defines=defines,
         use_fbuild=True,
     )
     if not init_result.success:

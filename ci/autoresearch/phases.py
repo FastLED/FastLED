@@ -896,6 +896,25 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             print(f"\u274c Error: {e}")
             return 1
 
+    # Driver-specific compile defines for the synthesised build. The LPC
+    # bench harnesses compile out unless their gate macro is set
+    # (examples/AutoResearch/AutoResearchSpiDma.h and sibling) — without
+    # this the bench RPCs are unbound and every call reports "no reply"
+    # against perfectly healthy firmware. The two flags are mutually
+    # exclusive host-side (both claim DMA0 channels + flash budget).
+    lpc_bench_defines: list[str] = []
+    if getattr(args, "dma_spi", False):
+        lpc_bench_defines.append("FASTLED_LPC_SPI_DMA=1")
+        # Cap the SPI+DMA buffers for the 16 KB-RAM bench build. At the
+        # driver default (2048) the u16 encode buffer (4 KB) + the u8
+        # harness buffer (2 KB) push static RAM to 94% and the first RPC
+        # HardFaults at PC=0 when heap/stack collide (observed on
+        # LPC845-BRK silicon 2026-07-02). The bench's largest case is
+        # 512 bytes, so 512 loses no coverage and frees 4.5 KB.
+        lpc_bench_defines.append("FASTLED_LPC_SPI_DMA_MAX_BYTES=512")
+    if getattr(args, "pwm_dma_cl", False):
+        lpc_bench_defines.append("FASTLED_LPC_PWM_DMA=1")
+
     # Resolve project root (always the user's invocation cwd) and build_dir.
     #
     # Two code paths (#3281):
@@ -932,6 +951,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 final_environment,
                 project_root=project_root,
                 verbose=args.verbose,
+                extra_defines=lpc_bench_defines,
             )
         except KeyboardInterrupt as ki:
             # Let user-initiated interrupts propagate via the project's
@@ -1170,11 +1190,22 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
     ):
         from ci.autoresearch.staging import synthesise_autoresearch_project
 
+        # Same driver-gate defines as the parse-time synthesis path — the
+        # LPC bench harnesses compile out without their gate macro.
+        deferred_defines: list[str] = []
+        if getattr(args, "dma_spi", False):
+            deferred_defines.append("FASTLED_LPC_SPI_DMA=1")
+            # Same 16 KB-RAM cap rationale as the parse-time path above.
+            deferred_defines.append("FASTLED_LPC_SPI_DMA_MAX_BYTES=512")
+        if getattr(args, "pwm_dma_cl", False):
+            deferred_defines.append("FASTLED_LPC_PWM_DMA=1")
+
         try:
             ctx.build_dir = synthesise_autoresearch_project(
                 ctx.final_environment,
                 project_root=args.project_dir.resolve(),
                 verbose=args.verbose,
+                extra_defines=deferred_defines,
             )
             # The staged sketch lives under <build_dir>/src/sketch \u2014 point
             # PLATFORMIO_SRC_DIR at it so fbuild and any downstream sketch
