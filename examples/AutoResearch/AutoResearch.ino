@@ -392,6 +392,16 @@ void setup() {
         // the port silent.
         FastLED.watchdog().feed();
     }
+#if defined(ARDUINO_USB_CDC_ON_BOOT) && ARDUINO_USB_CDC_ON_BOOT
+    if (fl::serial_ready()) {
+        // A host is attached and draining: allow writes to block up to
+        // 100 ms instead of dropping. With tx timeout 0, every RPC
+        // response longer than the 64-byte USB-Serial-JTAG FIFO was
+        // truncated mid-line on the C6 bench (host parse failures).
+        // Headless boots keep the drop-fast behavior above.
+        Serial.setTxTimeoutMs(100);  // ok serial - platform-specific TX timeout, no fl:: equivalent
+    }
+#endif
 
     // Watchdog was armed at the very top of setup() above with the longer
     // AUTORESEARCH_SETUP_WATCHDOG_TIMEOUT_MS window so a hang here (RPC bind,
