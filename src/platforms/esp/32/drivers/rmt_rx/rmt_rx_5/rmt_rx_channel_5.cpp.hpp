@@ -636,6 +636,24 @@ class RmtRxChannelImpl : public RmtRxChannel {
     }
 
     bool begin(const RxConfig &config) FL_NO_EXCEPT override {
+        if (beginImpl(config)) {
+            return true;
+        }
+        // FastLED#3591 — on ESP32-S3 the DMA-mode arm path can fail
+        // (bench: every non-RMT driver's capture returned begin=false
+        // with use_dma=true while the same capture succeeds without
+        // DMA). DMA only extends the capture window; a shorter window
+        // beats no capture, so retry once in non-DMA mode.
+        if (config.use_dma) {
+            FL_WARN_F("[RMT RX] begin() failed in DMA mode — retrying without DMA");
+            RxConfig retry = config;
+            retry.use_dma = false;
+            return beginImpl(retry);
+        }
+        return false;
+    }
+
+    bool beginImpl(const RxConfig &config) FL_NO_EXCEPT {
         // FastLED#3569 — clamp the DMA request BEFORE the rebuild
         // comparison below. Chips without RMT DMA (classic ESP32, C3,
         // C6, …) hard-fail rmt_new_rx_channel() when with_dma is
