@@ -25,6 +25,13 @@
 #include "AutoResearchHelpers.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/unique_ptr.h"
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
+#include "platforms/esp/32/feature_flags/enabled.h"
+#if FASTLED_ESP32_HAS_PARLIO
+#include "platforms/esp/32/drivers/parlio/parlio_engine.h"
+#endif
+#endif
 #include "fl/stl/optional.h"
 #include "fl/stl/json.h"
 #include "fl/task/task.h"
@@ -201,6 +208,28 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
         response.set("serial_safe", false);
         return response;
     });
+
+    // "parlioMetrics" — PARLIO engine ISR/DMA counters (C6 bring-up,
+    // FastLED#3576 Phase 7). Reads the engine's debug metrics AFTER a
+    // test to see whether the TX ISRs ever fired.
+#if defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_PARLIO
+    remote.bind("parlioMetrics", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+        const auto m = fl::detail::ParlioEngine::getInstance().getDebugMetrics();
+        response.set("success", true);
+        response.set("isrCount", static_cast<int64_t>(m.mIsrCount));
+        response.set("txDoneCount", static_cast<int64_t>(m.mTxDoneCount));
+        response.set("chunksQueued", static_cast<int64_t>(m.mChunksQueued));
+        response.set("chunksCompleted", static_cast<int64_t>(m.mChunksCompleted));
+        response.set("bytesTotal", static_cast<int64_t>(m.mBytesTotal));
+        response.set("bytesTransmitted", static_cast<int64_t>(m.mBytesTransmitted));
+        response.set("underruns", static_cast<int64_t>(m.mUnderrunCount));
+        response.set("errorCode", static_cast<int64_t>(m.mErrorCode));
+        response.set("hardwareIdle", m.mHardwareIdle);
+        response.set("transmissionActive", m.mTransmissionActive);
+        return response;
+    });
+#endif
 
     // FastLED#3569 bench diagnostic — read up to 16 u32 words of
     // memory-mapped register space without resetting the chip (esptool
