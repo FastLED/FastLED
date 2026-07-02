@@ -278,6 +278,7 @@ Engines are tried in priority order (highest first) until one accepts the channe
 | **I2S** | 1 | ESP32-S3 | LCD_CAM via legacy I80 bus (experimental) |
 | **SPI** | 0 | ESP32, S2, S3 | DMA-based, deprioritized due to reliability |
 | **UART** | -1 | All ESP32 variants | Wave10/wave4 frame-geometry encoding, per-chipset selection |
+| **UART2** (second lane) | -2 | ESP32-dev (original) | Second concurrent UART lane on the UART2 block (`Bus::UART` instance 1); UART0 stays reserved for the console |
 
 **Classic-ESP32 32-lane operation (FastLED#3576 Phase 1):** the I2S engines are capacity-aware — the primary bank accepts at most 16 clockless channels per frame, so the 17th+ channel overflows to the `I2S0` second bank, then to RMT. Each I2S block is a shared resource between its clockless bank and the clocked-SPI driver: ownership is arbitrated at `initialize()` time by the port-claim registry (`platforms/esp/32/drivers/i2s/i2s_port_claim.h`) — whichever mode claims a block first per session keeps it, and the other driver's channels fall through the priority list cleanly.
 

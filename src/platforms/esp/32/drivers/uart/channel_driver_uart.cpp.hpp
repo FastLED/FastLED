@@ -25,11 +25,13 @@ namespace fl {
 // Constructor / Destructor
 //=============================================================================
 
-ChannelEngineUART::ChannelEngineUART(fl::shared_ptr<IUartPeripheral> peripheral) FL_NO_EXCEPT
+ChannelEngineUART::ChannelEngineUART(fl::shared_ptr<IUartPeripheral> peripheral,
+                                     int uart_num) FL_NO_EXCEPT
     : mPeripheral(fl::move(peripheral)),
       mInitialized(false),
       mCurrentBaudRate(0),
       mCurrentDataBits(0),
+      mUartNum(uart_num),
       mCurrentGroupIndex(0) {
     if (!mPeripheral) {
         FL_WARN_F("UART: Null peripheral pointer in constructor");
@@ -288,7 +290,7 @@ void ChannelEngineUART::beginTransmission(
             4096,               // mTxBufferSize (4 KB for DMA)
             256,                // mRxBufferSize (minimum required by ESP-IDF)
             1,                  // mStopBits (N1)
-            1,                  // mUartNum (UART1)
+            mUartNum,           // which UART block (1 or 2 — FastLED#3576 Phase 2)
             required_data_bits  // mDataBits (8 = wave10, 6 = wave8-frame)
         );
 

@@ -8,6 +8,7 @@
 #include "fl/channels/bus.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/stl/compiler_control.h"
+#include "platforms/is_platform.h"  // FL_IS_ESP_32DEV (UART2 second-lane guard)
 #include "platforms/esp/32/feature_flags/enabled.h"
 #include "platforms/shared/bitbang/bus_traits.h"  // ok platform headers // IWYU pragma: keep
 
@@ -53,6 +54,12 @@ inline void enableAllChannelDrivers() FL_NO_EXCEPT {
     // clocked-SPI driver — the port-claim registry arbitrates at
     // initialize() time.
     fl::enableDriver<fl::Bus::FLEX_IO, 1>();
+#endif
+#if FASTLED_ESP32_HAS_UART && defined(FL_IS_ESP_32DEV)
+    // FastLED#3576 Phase 2 — second UART lane on UART2 ("UART2",
+    // Bus::UART instance 1). Classic ESP32 only for now (three UARTs:
+    // UART0 = console, UART1 = primary lane, UART2 = this).
+    fl::enableDriver<fl::Bus::UART, 1>();
 #endif
     // FastLED#3526 — the modern classic-ESP32 I2S parallel-out engine
     // (`ChannelEngineI2sEsp32Dev`) wraps the SAME I2S1 peripheral as

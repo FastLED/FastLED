@@ -33,8 +33,10 @@ bool i2sPortClaim(int port, const char *owner) FL_NO_EXCEPT {
         g_i2s_port_owner[port] = owner;
         return true;
     }
-    FL_WARN_F("i2sPortClaim: I2S%s already owned by %s (requested by %s)",
-              port, g_i2s_port_owner[port], owner);
+    // Surprising-but-by-design behavior (mode contention on I2S0) —
+    // warn once per call site, not once per frame.
+    FL_WARN_F_ONCE("i2sPortClaim: I2S%s already owned by %s (requested by %s)",
+                   port, g_i2s_port_owner[port], owner);
     return false;
 }
 

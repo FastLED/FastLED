@@ -48,7 +48,11 @@ namespace fl {
 /// LED data transmission. Uses wave10 encoding with dynamic LUT generation.
 class ChannelEngineUART : public IChannelDriver {
 public:
-    explicit ChannelEngineUART(fl::shared_ptr<IUartPeripheral> peripheral) FL_NO_EXCEPT;
+    /// @param uart_num Which UART block this engine drives (FastLED#3576
+    ///        Phase 2): 1 = primary lane ("UART"), 2 = second lane
+    ///        ("UART2"). UART0 is the console and is never used.
+    explicit ChannelEngineUART(fl::shared_ptr<IUartPeripheral> peripheral,
+                               int uart_num = 1) FL_NO_EXCEPT;
     ~ChannelEngineUART() override;
 
     bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
@@ -57,7 +61,12 @@ public:
     void show() FL_NO_EXCEPT override;
     DriverState poll() FL_NO_EXCEPT override;
 
-    fl::string getName() const FL_NO_EXCEPT override { return fl::string::from_literal("UART"); }
+    fl::string getName() const FL_NO_EXCEPT override {
+        // Distinct names per lane so affinity binding and the
+        // AutoResearch exclusive-driver selector can target each block.
+        return (mUartNum == 2) ? fl::string::from_literal("UART2")
+                               : fl::string::from_literal("UART");
+    }
 
     Capabilities getCapabilities() const FL_NO_EXCEPT override {
         return Capabilities(true, false);  // Clockless only
@@ -91,6 +100,7 @@ private:
     bool mInitialized;
     u32 mCurrentBaudRate; ///< Currently configured baud rate
     u8 mCurrentDataBits;  ///< Currently configured UART word length (wave geometry)
+    int mUartNum;         ///< Which UART block this engine drives (FastLED#3576 Phase 2)
 
     fl::vector<u8> mScratchBuffer;
     fl::vector<u8> mEncodedBuffer;
