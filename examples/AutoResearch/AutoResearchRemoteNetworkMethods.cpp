@@ -24,6 +24,8 @@
 #include "Common.h"
 #include "AutoResearchTest.h"
 #include "AutoResearchHelpers.h"
+#include "fl/net/network_detector.h"
+#include "fl/net/wifi.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/optional.h"
@@ -240,6 +242,90 @@ void AutoResearchRemoteControl::bindNetworkMethods(fl::Remote& remote) {
         mState->net_server_active = false;
         mState->net_client_active = false;
         return stopNet();
+    });
+
+    // ========================================================================
+    // WiFi Connection + Network Activity RPC Functions (FastLED#3576 Phase 6)
+    // ========================================================================
+
+    // "wifiConnect" {ssid, password} — async STA join via fl::net::wifi.
+    remote.bind("wifiConnect", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+        fl::string ssid, pass;
+        if (args.contains("ssid") && args["ssid"].is_string()) {
+            ssid = args["ssid"].as_string().value();
+        }
+        if (args.contains("password") && args["password"].is_string()) {
+            pass = args["password"].as_string().value();
+        }
+        if (ssid.empty()) {
+            response.set("success", false);
+            response.set("error", "MissingSsid");
+            return response;
+        }
+        const bool ok = fl::net::wifi::connectSta(ssid.c_str(), pass.c_str());
+        response.set("success", ok);
+        response.set("status", fl::net::wifi::toString(fl::net::wifi::status()));
+        return response;
+    });
+
+    // "wifiAp" {ssid, password, channel} — SoftAP via fl::net::wifi.
+    remote.bind("wifiAp", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+        fl::string ssid, pass;
+        int channel = 1;
+        if (args.contains("ssid") && args["ssid"].is_string()) {
+            ssid = args["ssid"].as_string().value();
+        }
+        if (args.contains("password") && args["password"].is_string()) {
+            pass = args["password"].as_string().value();
+        }
+        if (args.contains("channel") && args["channel"].is_int()) {
+            channel = static_cast<int>(args["channel"].as_int().value());
+        }
+        if (ssid.empty()) {
+            response.set("success", false);
+            response.set("error", "MissingSsid");
+            return response;
+        }
+        const bool ok = fl::net::wifi::startAp(ssid.c_str(), pass.c_str(),
+                                               static_cast<fl::u8>(channel));
+        response.set("success", ok);
+        response.set("apIp", fl::net::wifi::apIpAddress().c_str());
+        return response;
+    });
+
+    // "wifiStatus" — poll the async join.
+    remote.bind("wifiStatus", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+        response.set("success", true);
+        response.set("status", fl::net::wifi::toString(fl::net::wifi::status()));
+        response.set("connected", fl::net::wifi::isConnected());
+        response.set("ip", fl::net::wifi::ipAddress().c_str());
+        response.set("apIp", fl::net::wifi::apIpAddress().c_str());
+        return response;
+    });
+
+    // "wifiStop" — tear down STA + AP.
+    remote.bind("wifiStop", [](const fl::json& args) -> fl::json {
+        fl::net::wifi::stop();
+        fl::json response = fl::json::object();
+        response.set("success", true);
+        return response;
+    });
+
+    // "netActivity" — runtime network-activity snapshot (the detector
+    // the LED drivers consult for deep-yield decisions).
+    remote.bind("netActivity", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+        response.set("success", true);
+        response.set("wifiActive", fl::NetworkDetector::isWiFiActive());
+        response.set("wifiConnected", fl::NetworkDetector::isWiFiConnected());
+        response.set("bluetoothActive", fl::NetworkDetector::isBluetoothActive());
+        response.set("anyNetworkActive", fl::NetworkDetector::isAnyNetworkActive());
+        response.set("anyNetworkConnected", fl::NetworkDetector::isAnyNetworkConnected());
+        response.set("wifiStatus", fl::net::wifi::toString(fl::net::wifi::status()));
+        return response;
     });
 
     // ========================================================================
