@@ -12,6 +12,9 @@
 #include "fl/stl/noexcept.h"
 #include "fl/stl/shared_ptr.h"  // for fl::make_shared, fl::no_op_deleter
 #include "fl/stl/singleton.h"
+#include "fl/channels/wave8.h"
+#include "fl/chipsets/led_timing.h"
+#include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s1.h"
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32)
 #include "platforms/esp/32/feature_flags/enabled.h"
@@ -212,9 +215,11 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
     // from the show() prologue so a SPI-only batch doesn't waste
     // an I2S1 claim that the SPI delegate would immediately race with).
     if (!mPeripheralInitialized) {
+        // Wave8 pixel clock = 8 MHz (WS2812 800 kHz × 8 pulses/bit).
+        // Peripheral picks its own N/A/B divider via `solveI2sClockDivider`.
         I2sEsp32DevPeripheralConfig cfg(
             /*port=*/1,
-            /*clk=*/2400000, // 2.4 MHz — typical wave8 slot rate
+            /*clk=*/8000000u,
             /*width=*/static_cast<u8>(mInFlightChannels.size()));
         if (!mPeripheral->initialize(cfg)) {
             FL_WARN_F("ChannelEngineI2sEsp32Dev: peripheral initialize failed");
@@ -230,13 +235,40 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
         mPeripheralInitialized = true;
     }
 
-    // Pack every channel's encoded bytes into the scratch buffer.
-    size_t required = 0;
-    for (const auto &data : mInFlightChannels) {
-        if (data) {
-            required += data->getData().size();
+    // Route each active channel's GPIO pin to its I2S1 DATA_OUT lane so
+    // the wave8-encoded bytes actually leave the SoC on the right wire.
+    // Called every show() (idempotent from the peripheral's POV) so pin
+    // reassignment mid-run works. Follows the mock's contract: -1 pin
+    // is a no-op / detach.
+    {
+        u8 lane_idx = 0;
+        for (const auto &data : mInFlightChannels) {
+            if (!data) continue;
+            if (lane_idx >= 16) break;
+            const int pin = data->getPin();
+            (void)mPeripheral->routeLanePin(lane_idx, static_cast<i32>(pin));
+            ++lane_idx;
         }
     }
+
+    // Size the scratch buffer for wave8 output: max per-lane byte count
+    // across all in-flight channels × 16 lanes × 8 pulses = 128 output
+    // bytes per input byte-position. `wave8I2s1EncodedFrameSize()` gives
+    // us `bytes_per_lane * 128`.
+    size_t bytes_per_lane = 0;
+    for (const auto &data : mInFlightChannels) {
+        if (data) {
+            const size_t sz = data->getData().size();
+            if (sz > bytes_per_lane) bytes_per_lane = sz;
+        }
+    }
+    // Buffer sized for wave8 output PLUS the 16-lane input scratch that
+    // `packScratchBuffer()` uses as its transpose input. Input goes
+    // AFTER the output region since the encoder writes the whole output
+    // in place and the callers only read the output prefix.
+    const size_t output_size = wave8I2s1EncodedFrameSize(bytes_per_lane);
+    const size_t input_size = 16 * bytes_per_lane;
+    const size_t required = output_size + input_size;
     if (required == 0) {
         for (auto &data : mInFlightChannels) {
             if (data) {
@@ -377,26 +409,82 @@ bool ChannelEngineI2sEsp32Dev::ensureScratchBuffer(size_t required)
 }
 
 size_t ChannelEngineI2sEsp32Dev::packScratchBuffer() FL_NO_EXCEPT {
-    // Linear byte concatenation. Wave8 encoding happens inside the
-    // peripheral's `transmit()` implementation on real hardware — the
-    // engine hands over raw bytes; the peripheral is responsible for
-    // encoding them into I2S1's DMA-ready pulse-major layout. This
-    // keeps the mock peripheral's capture semantics simple (it sees
-    // exactly the bytes each channel produced) and lets host tests
-    // remain byte-value-sensitive without depending on wave8 details.
-    size_t offset = 0;
+    // FastLED#3526 Phase 2b/D wire-up: wave8 pulse-major encoding runs
+    // HERE (engine-side, matching PARLIO's pattern) so the scratch
+    // buffer content is the exact DMA byte stream the peripheral emits
+    // on the wire.
+    //
+    // Layout: for each byte-position (0..bytes_per_lane), gather one
+    // byte from each active lane into a 16-slot row (zero-padded for
+    // inactive lanes), transpose to 16 lanes × 8 pulses × 1 byte =
+    // 128 output bytes. Callers ensured `mScratchSize >=
+    // bytes_per_lane * 128` via the wave8I2s1EncodedFrameSize()
+    // pre-alloc in show().
+    //
+    // Chipset timing: for now assumes WS2812B 800kHz across all
+    // channels. Per-channel timing plumbing (build LUT from
+    // ChannelData::getTiming()) is a follow-up.
+
+    // Find max bytes across active lanes and count active lanes.
+    size_t bytes_per_lane = 0;
+    size_t num_lanes = 0;
     for (const auto &data : mInFlightChannels) {
-        if (!data) {
-            continue;
-        }
-        const auto &src = data->getData();
-        if (src.empty() || (offset + src.size()) > mScratchSize) {
-            continue;
-        }
-        fl::memcpy(mScratchBuffer + offset, src.data(), src.size());
-        offset += src.size();
+        if (!data) continue;
+        const size_t sz = data->getData().size();
+        if (sz > bytes_per_lane) bytes_per_lane = sz;
+        ++num_lanes;
     }
-    return offset;
+    if (bytes_per_lane == 0 || num_lanes == 0) return 0;
+    if (num_lanes > 16) num_lanes = 16;  // wave8 kernel is 16-wide
+
+    // Build lane-strided input: lane 0's bytes contiguous, then lane 1,
+    // etc. Total input is 16 * bytes_per_lane; unused-lane slots are
+    // zero-padded so the 16-wide transpose kernel doesn't read
+    // uninitialised memory.
+    const size_t input_size = 16 * bytes_per_lane;
+    const size_t output_size = wave8I2s1EncodedFrameSize(bytes_per_lane);
+
+    // Reuse the scratch buffer for input + output. Put input at the
+    // end (last input_size bytes) and encode into the start
+    // (first output_size bytes). The 4×-per-byte pipe4 encoder consumes
+    // input positions monotonically before writing later output rows,
+    // so an in-place scheme is safe as long as output_size >= input_size,
+    // which is always true (output_size = input_size * 8).
+    if (mScratchSize < output_size + input_size) {
+        // Fallback: bail cleanly. `show()` should have pre-sized to
+        // `output_size` at minimum; this belt-and-suspenders check is
+        // defense against a stale scratch buffer surviving a show()
+        // that used a much smaller frame.
+        return 0;
+    }
+    fl::u8* const input = mScratchBuffer + output_size;
+    fl::u8* const output = mScratchBuffer;
+
+    // Zero the input region first (covers inactive lanes).
+    fl::memset(input, 0, input_size);
+    size_t lane_idx = 0;
+    for (const auto &data : mInFlightChannels) {
+        if (!data) continue;
+        if (lane_idx >= 16) break;
+        const auto &src = data->getData();
+        const size_t copy_len = src.size() > bytes_per_lane ? bytes_per_lane : src.size();
+        fl::memcpy(input + lane_idx * bytes_per_lane, src.data(), copy_len);
+        ++lane_idx;
+    }
+
+    // Build the wave8 LUT for the target chipset timing. Default to
+    // WS2812B 800kHz until per-channel timing lookup is wired.
+    const ChipsetTiming timing = to_runtime_timing<TIMING_WS2812_800KHZ>();
+    const Wave8BitExpansionLut bit_lut = buildWave8ExpansionLUT(timing);
+    const Wave8ByteExpansionLut byte_lut = buildWave8ByteExpansionLUT(bit_lut);
+
+    if (!encodeChannelWave8_i2s1(
+            fl::span<const fl::u8>(input, input_size),
+            bytes_per_lane, num_lanes, byte_lut,
+            fl::span<fl::u8>(output, output_size))) {
+        return 0;
+    }
+    return output_size;
 }
 
 void ChannelEngineI2sEsp32Dev::freeScratchBuffer() FL_NO_EXCEPT {
