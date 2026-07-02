@@ -1269,10 +1269,11 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
 
     if final_environment_norm in LPC_BRING_UP_ENVS:
         # Deployment is fbuild's responsibility — autoresearch never invokes
-        # flash tools (pyocd/lpc21isp/etc.) directly. If the nxplpc deploy
-        # backend is missing upstream, this fails loudly with a pointer to
-        # the fbuild tracking issue rather than bringing a probe wedge here.
-        # See agents/docs/build-system.md and FastLED/fbuild#921.
+        # flash tools (pyocd/lpc21isp/etc.) directly. The nxplpc deploy
+        # backend (LpcDeployer, lpc21isp UART ISP path) landed in
+        # FastLED/fbuild#595; if the pinned fbuild predates it, this fails
+        # loudly with a clear pointer rather than bringing a probe wedge
+        # here. See agents/docs/build-system.md.
         if not _build_and_deploy_nxplpc(
             build_dir,
             environment=build_environment
@@ -2136,10 +2137,12 @@ def _build_and_deploy_nxplpc(
     """Build + deploy the LPC8xx bring-up firmware exclusively via fbuild.
 
     autoresearch DOES NOT invoke flash tools (pyocd/lpc21isp/etc.) directly.
-    Deployment is fbuild's job — see agents/docs/build-system.md and the
-    tracking issue FastLED/fbuild#921. If fbuild's nxplpc deployer is not
-    yet available, this function fails loudly with a pointer to that issue.
-    DO NOT re-introduce a pyocd/lpc21isp fallback here; fix it in fbuild.
+    Deployment is fbuild's job — see agents/docs/build-system.md. The nxplpc
+    deployer (LpcDeployer, lpc21isp UART ISP path) shipped in
+    FastLED/fbuild#595 and was refined in FastLED/fbuild#923 / #928.
+    If a pinned fbuild predates that, this function fails loudly with a
+    pointer to the fbuild issues tracker. DO NOT re-introduce a
+    pyocd/lpc21isp fallback here; fix it in fbuild.
     """
     env = dict(os.environ)
 
@@ -2192,8 +2195,12 @@ def _build_and_deploy_nxplpc(
             f"Do not add a pyocd/lpc21isp fallback here.{Style.RESET_ALL}"
         )
         print(
-            f"{Fore.YELLOW}   nxplpc deployer tracked at: "
-            f"https://github.com/FastLED/fbuild/issues/921{Style.RESET_ALL}"
+            f"{Fore.YELLOW}   nxplpc deployer landed in fbuild#595 "
+            f"(refined in #923, #928). If your pinned fbuild predates "
+            f"those, bump it. Report new gaps at{Style.RESET_ALL}"
+        )
+        print(
+            f"{Fore.YELLOW}   https://github.com/FastLED/fbuild/issues{Style.RESET_ALL}"
         )
         return False
 
