@@ -848,7 +848,34 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     // Create temporary RX channel if pinRx differs from default
     fl::shared_ptr<fl::RxChannel> rx_channel_to_use = mState->rx_channel;
 
-    if (pin_rx != mState->pin_rx && mState->rx_factory) {
+    // Optional rxBackend override (FastLED#3576 Phase 3) — lets the
+    // host select a specific capture backend per test, e.g. "I2S_RX"
+    // (classic-ESP32 oversampler, no 10-LED ceiling) vs "RMT".
+    fl::RxBackend rx_backend_override = fl::RxBackend::PLATFORM_DEFAULT;
+    bool have_backend_override = false;
+    if (config.contains("rxBackend") && config["rxBackend"].is_string()) {
+        fl::string rb = config["rxBackend"].as_string().value();
+        if (rb == "RMT") { rx_backend_override = fl::RxBackend::RMT; have_backend_override = true; }
+        else if (rb == "ISR") { rx_backend_override = fl::RxBackend::ISR; have_backend_override = true; }
+        else if (rb == "I2S_RX") { rx_backend_override = fl::RxBackend::I2S_RX; have_backend_override = true; }
+        else if (rb != "PLATFORM_DEFAULT") {
+            response.set("success", false);
+            response.set("error", "UnknownRxBackend");
+            response.set("message", "rxBackend must be PLATFORM_DEFAULT, RMT, ISR or I2S_RX");
+            return response;
+        }
+    }
+
+    if (have_backend_override) {
+        fl::RxChannelConfig rx_cfg(pin_rx, rx_backend_override);
+        rx_channel_to_use = FastLED.addRx(rx_cfg);
+        if (!rx_channel_to_use) {
+            response.set("success", false);
+            response.set("error", "RxChannelCreationFailed");
+            response.set("message", "Failed to create RX channel for requested rxBackend");
+            return response;
+        }
+    } else if (pin_rx != mState->pin_rx && mState->rx_factory) {
         rx_channel_to_use = mState->rx_factory(pin_rx);
         if (!rx_channel_to_use) {
             response.set("success", false);

@@ -12,6 +12,7 @@
 
 #ifdef FL_IS_ESP32
 // IWYU pragma: begin_keep
+#include "platforms/esp/32/drivers/i2s_rx/i2s_rx_sampler.h"  // ok platform headers
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h" // ok platform headers
 #include "platforms/esp/32/drivers/gpio_isr_rx/gpio_isr_rx.h" // ok platform headers
 #include "platforms/esp/32/feature_flags/enabled.h" // ok platform headers
@@ -142,6 +143,19 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXIO>(int pin) FL_NO_E
 }
 
 // LPC_SCT_CAPTURE not available on ESP32 (LPC8xx peripheral). See FastLED#3015.
+// FastLED#3576 Phase 3 — I2S-RX oversampling backend (classic ESP32).
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::I2S_RX>(int pin) FL_NO_EXCEPT {
+#if FASTLED_ESP32_HAS_I2S
+    auto device = createI2sRxSampler(pin);
+    if (device) {
+        return device;
+    }
+#endif
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("I2S_RX not supported on this chip");
+}
+
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(int pin) FL_NO_EXCEPT {
     (void)pin;
@@ -194,6 +208,12 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) FL_NO_EXCE
 
 // LPC_SCT_CAPTURE not available on Teensy (LPC8xx peripheral). See FastLED#3015.
 template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::I2S_RX>(int pin) FL_NO_EXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("I2S_RX not supported on this platform");
+}
+
+template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(int pin) FL_NO_EXCEPT {
     (void)pin;
     return fl::make_shared<DummyRxDevice>("LPC_SCT_CAPTURE RX not supported on Teensy");
@@ -209,6 +229,12 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PLATFORM_DEFAULT>(int pi
 #elif defined(FL_IS_ARM_LPC)
 
 // LPC8xx SCT input-capture + DMA receiver. See FastLED#3015.
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::I2S_RX>(int pin) FL_NO_EXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("I2S_RX not supported on this platform");
+}
+
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(int pin) FL_NO_EXCEPT {
     auto device = LpcSctRxChannel::create(pin);
@@ -284,6 +310,12 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXIO>(int pin) FL_NO_E
 // fallback so host-stub tests can exercise `RxBackend::LPC_SCT_CAPTURE`
 // against the synthetic capture buffer.
 template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::I2S_RX>(int pin) FL_NO_EXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("I2S_RX not supported on this platform");
+}
+
+template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(int pin) FL_NO_EXCEPT {
     return NativeRxDevice::create(pin);
 }
@@ -325,6 +357,12 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXIO>(int pin) FL_NO_E
 }
 
 // LPC_SCT_CAPTURE device specialization (dummy for unsupported platforms)
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::I2S_RX>(int pin) FL_NO_EXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("I2S_RX not supported on this platform");
+}
+
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(int pin) FL_NO_EXCEPT {
     (void)pin;  // Suppress unused parameter warning

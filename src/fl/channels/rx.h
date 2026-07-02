@@ -166,7 +166,8 @@ enum class RxDeviceType : u8 {
     RMT = 2,              ///< RMT-based receiver (ESP32)
     FLEXPWM = 3,          ///< FlexPWM input-capture receiver (Teensy 4.x)
     FLEXIO = 4,           ///< FlexIO shifter-based receiver (Teensy 4.x, FLEXIO1; see FastLED#2764)
-    LPC_SCT_CAPTURE = 5   ///< SCT input-capture + DMA receiver (LPC8xx). Skeleton + decoder land in #3015; bench-verified register-level capture is a follow-up.
+    LPC_SCT_CAPTURE = 5,  ///< SCT input-capture + DMA receiver (LPC8xx). Skeleton + decoder land in #3015; bench-verified register-level capture is a follow-up.
+    I2S_RX = 6            ///< I2S 1-bit oversampling receiver (classic ESP32 — breaks the RMT one-shot 10-LED capture ceiling, FastLED#3576 Phase 3)
 };
 
 /**
@@ -182,6 +183,7 @@ inline const char* toString(RxDeviceType type) FL_NO_EXCEPT {
     case RxDeviceType::FLEXPWM: return "FLEXPWM";
     case RxDeviceType::FLEXIO:  return "FLEXIO";
     case RxDeviceType::LPC_SCT_CAPTURE: return "LPC_SCT_CAPTURE";
+    case RxDeviceType::I2S_RX: return "I2S_RX";
     }
     return "UNKNOWN";
 }
@@ -435,6 +437,7 @@ private:
 // channel.cpp.hpp), which would otherwise collide with the explicit
 // specializations when both live in the same translation unit.
 template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PLATFORM_DEFAULT>(int pin) FL_NO_EXCEPT;
+template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::I2S_RX>(int pin) FL_NO_EXCEPT;
 template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>(int pin) FL_NO_EXCEPT;
 template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) FL_NO_EXCEPT;
 template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXPWM>(int pin) FL_NO_EXCEPT;
