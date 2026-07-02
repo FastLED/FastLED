@@ -361,7 +361,7 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
         {
             const fl::u32 *rl = edgeProbeRmtLive();
             fl::json live = fl::json::array();
-            for (int k = 0; k < 6; ++k) live.push_back(static_cast<int64_t>(rl[k]));
+            for (int k = 0; k < 8; ++k) live.push_back(static_cast<int64_t>(rl[k]));
             response.set("rmtLive", live);
         }
         fl::json runs = fl::json::array();

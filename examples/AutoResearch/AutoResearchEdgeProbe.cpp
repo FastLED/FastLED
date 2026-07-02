@@ -26,7 +26,7 @@ volatile fl::u32 g_stamps[kMaxStamps];
 volatile fl::u32 g_count = 0;
 volatile fl::u32 g_selftest_edges = 0;
 volatile fl::u32 g_probe_state = 0; // 1=task started 2=triggered 3=sample done
-volatile fl::u32 g_rmt_live[6] = {0};
+volatile fl::u32 g_rmt_live[8] = {0};
 int g_pin = -1;
 
 // Cycle counter. NOTE: plain `rdcycle` is an ILLEGAL INSTRUCTION on
@@ -125,7 +125,9 @@ void edgeProbeArm(int pin) {
             g_rmt_live[0] = *reinterpret_cast<volatile fl::u32 *>(0x60006038); // ok reinterpret cast - RMT_INT_RAW
             g_rmt_live[1] = *reinterpret_cast<volatile fl::u32 *>(0x60006030); // ok reinterpret cast - CH2STATUS
             g_rmt_live[2] = *reinterpret_cast<volatile fl::u32 *>(0x60006034); // ok reinterpret cast - CH3STATUS
-            g_rmt_live[3] = *reinterpret_cast<volatile fl::u32 *>(0x60006024); // ok reinterpret cast - CH2 RX_CONF1
+            g_rmt_live[3] = *reinterpret_cast<volatile fl::u32 *>(0x6000601C); // ok reinterpret cast - CH2CONF1 (real RX ch)
+            g_rmt_live[6] = *reinterpret_cast<volatile fl::u32 *>(0x60091000 + 0x154 + 71 * 4); // ok reinterpret cast - FUNC71_IN_SEL (RMT_SIG_IN0)
+            g_rmt_live[7] = *reinterpret_cast<volatile fl::u32 *>(0x60091000 + 0x154 + 72 * 4); // ok reinterpret cast - FUNC72_IN_SEL (RMT_SIG_IN1)
 #endif
             fl::u32 idx = 0;
             fl::u32 prev = *in_reg & mask;
