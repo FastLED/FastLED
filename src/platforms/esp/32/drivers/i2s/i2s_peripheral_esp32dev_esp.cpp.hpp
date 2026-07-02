@@ -54,6 +54,7 @@ FL_EXTERN_C_BEGIN
 #include "esp_err.h"
 #include "esp_heap_caps.h"
 #include "esp_intr_alloc.h"
+#include "esp_log.h"       // ESP_LOGI/E (bypasses fl::setLogLevel — for #3568 bench debug)
 #include "esp_rom_gpio.h"  // esp_rom_gpio_connect_out_signal (replaces gpio_matrix_out)
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -64,6 +65,8 @@ FL_EXTERN_C_BEGIN
 #include "soc/soc.h"
 // IWYU pragma: end_keep
 FL_EXTERN_C_END
+
+static const char* TAG_I2S_MODERN = "i2s_modern";
 
 namespace fl {
 
@@ -176,7 +179,8 @@ I2sPeripheralEsp32DevEsp::I2sPeripheralEsp32DevEsp() FL_NO_EXCEPT
       mBusy(false),
       mCallback(nullptr),
       mCallbackUserCtx(nullptr),
-      mDescriptor(nullptr),
+      mDescriptors(nullptr),
+      mDescriptorCapacity(0),
       mIsrHandle(nullptr),
       mLaneRoutedPin{{-1, -1, -1, -1, -1, -1, -1, -1,
                       -1, -1, -1, -1, -1, -1, -1, -1,
@@ -224,11 +228,7 @@ bool I2sPeripheralEsp32DevEsp::initialize(
     reset_i2s_dma(i2s);
     reset_i2s_fifo(i2s);
 
-    // Main configuration — parallel-out mode with LSB-first byte order
-    // in each 32-bit sample. `tx_right_first = 1` puts channel-right
-    // data first, matching how wave8 encoded bytes are laid out in the
-    // DMA buffer. Same bit-map Yves proved works for classic ESP32 I2S
-    // parallel output.
+    // Main configuration — Yves baseline (known-boot-clean).
     i2s->conf.tx_msb_right = 1;
     i2s->conf.tx_mono = 0;
     i2s->conf.tx_short_sync = 0;
@@ -243,28 +243,8 @@ bool I2sPeripheralEsp32DevEsp::initialize(
     i2s->conf2.lcd_tx_wrx2_en = 0;
     i2s->conf2.lcd_tx_sdx2_en = 0;
 
-    // Sample-rate configuration.
-    // `tx_bits_mod` = parallel output width per DMA sample.
-    //
-    // ## Known-open bench debug
-    //
-    // Wave8 output for 16-lane parallel is 2 bytes per pulse position
-    // (`wave8Transpose_16_bf1` writes `col_lo | col_hi` = 16 lanes
-    // across 2 bytes). That suggests `tx_bits_mod = 16`. Bench-tested
-    // that value on ESP32-WROOM: no wire edges captured
-    // (`captureFailed: true, rawEdgesAfterWait: 0`).
-    //
-    // Kept at `tx_bits_mod = 32` (Yves's known-working baseline value)
-    // to match his register-config trail. Yves's encoder packed 24-lane
-    // patterns into u32 words (`gOneBit[] = 0xFFFFFF00`). Wave8's
-    // byte-major layout doesn't fit that scheme, but keeping this at
-    // 32 leaves the register config identical to what Yves proved boots
-    // cleanly — the debug delta is exclusively the encoder-output-layout
-    // mismatch, not a chain of unrelated register changes.
-    //
-    // Follow-up (needs scope): confirm on the wire whether either
-    // `tx_bits_mod = 16` or `= 8` produces edges from wave8-encoded
-    // bytes, then wire the corresponding value here.
+    // Sample-rate configuration — Yves baseline (32-bit) restored
+    // after `= 16` triggered spurious DMA interrupts flooding the ISR.
     i2s->sample_rate_conf.val = 0;
     i2s->sample_rate_conf.tx_bits_mod = 32;
     i2s->sample_rate_conf.tx_bck_div_num = 1;
@@ -283,9 +263,8 @@ bool I2sPeripheralEsp32DevEsp::initialize(
     i2s->clkm_conf.clkm_div_b = div_B;
     i2s->clkm_conf.clkm_div_num = div_N;
 
-    // FIFO in DMA-serviced mode. `tx_fifo_mod = 3` selects the 32-bit
-    // single-channel data path (each DMA word is one output sample).
-    // `dscr_en = 1` routes the FIFO through the DMA descriptor chain.
+    // FIFO in DMA-serviced mode — Yves baseline (32-bit single-channel)
+    // restored after `= 1` triggered spurious DMA interrupts.
     i2s->fifo_conf.val = 0;
     i2s->fifo_conf.tx_fifo_mod_force_en = 1;
     i2s->fifo_conf.tx_fifo_mod = 3;
@@ -305,39 +284,26 @@ bool I2sPeripheralEsp32DevEsp::initialize(
 
     i2s->timing.val = 0;
 
-    // FastLED#3526 Phase 2b step B — allocate one DMA-capable descriptor
-    // for single-shot transmit. Streaming (multi-descriptor ring) is a
-    // follow-up when the engine can produce buffers larger than one
-    // descriptor's 4 KB reach.
-    mDescriptor = static_cast<lldesc_t*>(heap_caps_malloc(sizeof(lldesc_t), MALLOC_CAP_DMA));
-    if (!mDescriptor) {
-        FL_WARN_F("I2sPeripheralEsp32DevEsp: descriptor alloc failed");
-        return false;
-    }
-    mDescriptor->owner = 1;
-    mDescriptor->sosf = 1;
-    mDescriptor->eof = 1;
-    mDescriptor->offset = 0;
-    mDescriptor->empty = 0;
-    mDescriptor->buf = nullptr;
-    mDescriptor->size = 0;
-    mDescriptor->length = 0;
-    mDescriptor->qe.stqe_next = nullptr;
-
-    // Enable OUT_EOF interrupt bit so the DMA-done ISR fires at the end
-    // of each descriptor. `int_ena.out_eof = 1` on the peripheral, then
-    // install our ISR handler via `esp_intr_alloc`.
+    // FastLED#3569 interrupt hygiene — keep ALL I2S interrupt sources
+    // masked and any stale raw flags cleared BEFORE `esp_intr_alloc`
+    // (which enables the CPU interrupt immediately). `transmit()` arms
+    // `out_eof` after the descriptor chain is set up; nothing should be
+    // able to fire between here and the first kick.
     i2s->int_ena.val = 0;
-    i2s->int_ena.out_eof = 1;
+    i2s->int_clr.val = i2s->int_raw.val;
 
     const int interrupt_source =
         (i2s_device == 0) ? ETS_I2S0_INTR_SOURCE : ETS_I2S1_INTR_SOURCE;
-    esp_err_t err = esp_intr_alloc(interrupt_source, ESP_INTR_FLAG_IRAM,
+    // FastLED#3568 BUG #4 fix — flags = 0 matches Yves. IRAM-safe ISR
+    // requires all called code to be in IRAM; our trampoline calls
+    // finishTransmitFromIsr which dispatches through a function pointer
+    // that may target flash-resident code, so `ESP_INTR_FLAG_IRAM` was
+    // over-committing safety we don't uphold. Yves's driver runs in
+    // normal-cache-required mode.
+    esp_err_t err = esp_intr_alloc(interrupt_source, 0,
                                    &i2s_dma_isr_trampoline, this, &mIsrHandle);
     if (err != ESP_OK) {
         FL_WARN_F("I2sPeripheralEsp32DevEsp: esp_intr_alloc failed err=%s", static_cast<int>(err));
-        heap_caps_free(mDescriptor);
-        mDescriptor = nullptr;
         return false;
     }
 
@@ -367,9 +333,10 @@ void I2sPeripheralEsp32DevEsp::deinitialize() FL_NO_EXCEPT {
         (void)esp_intr_free(mIsrHandle);
         mIsrHandle = nullptr;
     }
-    if (mDescriptor) {
-        heap_caps_free(mDescriptor);
-        mDescriptor = nullptr;
+    if (mDescriptors) {
+        heap_caps_free(mDescriptors);
+        mDescriptors = nullptr;
+        mDescriptorCapacity = 0;
     }
     mInitialized = false;
     mBusy = false;
@@ -413,47 +380,73 @@ bool I2sPeripheralEsp32DevEsp::transmit(const u8 *buffer,
         FL_WARN_F("I2sPeripheralEsp32DevEsp: transmit while busy");
         return false;
     }
-    // Descriptor field `length`/`size` are 12-bit — the DMA can carry
-    // 4092 bytes max per descriptor (12-bit field caps at 4095, but 4092
-    // is the practical alignment-safe ceiling used across ESP32 DMA
-    // drivers). Anything larger needs a chain — streaming refill from
-    // the ISR is a Phase 2b step D follow-up.
-    if (size_bytes > 4092) {
-        FL_WARN_F("I2sPeripheralEsp32DevEsp: buffer too large for single descriptor (%s > 4092)", static_cast<int>(size_bytes));
-        return false;
-    }
 
     const int i2s_device = static_cast<int>(mConfig.mI2sPort);
     i2s_dev_t* const i2s = (i2s_device == 0) ? &I2S0 : &I2S1;
 
-    // Point the descriptor at the caller's DMA-capable buffer. Ownership
-    // stays with the DMA engine until it finishes (owner=1). `sosf`+`eof`
-    // = single-shot, one-descriptor frame. `qe.stqe_next = nullptr` ends
-    // the chain (no streaming refill in this step).
-    mDescriptor->buf = const_cast<u8*>(buffer);
-    mDescriptor->size = size_bytes;
-    mDescriptor->length = size_bytes;
-    mDescriptor->owner = 1;
-    mDescriptor->sosf = 1;
-    mDescriptor->eof = 1;
-    mDescriptor->offset = 0;
-    mDescriptor->empty = 0;
-    mDescriptor->qe.stqe_next = nullptr;
+    // FastLED#3569 — build a linear descriptor chain over the caller's
+    // DMA-capable buffer. Each lldesc reaches at most 4092 bytes
+    // (12-bit length field); a 32-bit-sample wave8 frame is
+    // `bytes_per_lane * 256` bytes, so real frames need several links.
+    // Chunk at 4088 (largest 4-byte multiple ≤ 4092) so every link
+    // starts on a 32-bit sample boundary. `eof = 1` only on the LAST
+    // link so `out_eof` fires exactly once per frame; the chain ends
+    // with `stqe_next = nullptr` so the DMA fetch stops after the
+    // final link drains.
+    constexpr size_t kChunk = 4088;
+    const size_t desc_count = (size_bytes + kChunk - 1) / kChunk;
+    if (desc_count > mDescriptorCapacity) {
+        lldesc_t* grown = static_cast<lldesc_t*>(
+            heap_caps_malloc(desc_count * sizeof(lldesc_t), MALLOC_CAP_DMA));
+        if (!grown) {
+            FL_WARN_F("I2sPeripheralEsp32DevEsp: descriptor chain alloc failed (%s links)",
+                      static_cast<int>(desc_count));
+            return false;
+        }
+        if (mDescriptors) {
+            heap_caps_free(mDescriptors);
+        }
+        mDescriptors = grown;
+        mDescriptorCapacity = desc_count;
+    }
+    size_t remaining = size_bytes;
+    const u8* chunk_ptr = buffer;
+    for (size_t i = 0; i < desc_count; ++i) {
+        lldesc_t& d = mDescriptors[i];
+        const size_t chunk_len = remaining > kChunk ? kChunk : remaining;
+        d.buf = const_cast<u8*>(chunk_ptr);
+        d.size = chunk_len;
+        d.length = chunk_len;
+        d.owner = 1;
+        d.sosf = (i == 0) ? 1 : 0;
+        d.eof = (i == desc_count - 1) ? 1 : 0;
+        d.offset = 0;
+        d.empty = 0;
+        d.qe.stqe_next = (i == desc_count - 1) ? nullptr : &mDescriptors[i + 1];
+        chunk_ptr += chunk_len;
+        remaining -= chunk_len;
+    }
 
-    // Reset the peripheral so no stale DMA state carries over from a
-    // prior kick, then arm the output link with our descriptor address
-    // and start the DMA. The ISR will fire when the descriptor drains.
+    // Register kick order matches Yves's proven `i2s_start()` exactly:
+    //   reset → BURST → out_link.addr → out_link.start → int_clr →
+    //   int_ena.out_dscr_err → esp_intr_enable → int_ena.out_eof →
+    //   conf.tx_start
+    // Yves clears int flags AFTER arming out_link so dscr_err bits
+    // raised by out_link.start descriptor validation aren't missed.
     reset_i2s_registers(i2s);
     i2s->lc_conf.val = I2S_OUT_DATA_BURST_EN | I2S_OUTDSCR_BURST_EN;
-    i2s->int_clr.val = i2s->int_raw.val;
-    i2s->out_link.addr = reinterpret_cast<u32>(mDescriptor); // ok reinterpret cast - DMA hardware register expects the physical address of the lldesc as a u32
+    i2s->out_link.addr = reinterpret_cast<u32>(&mDescriptors[0]); // ok reinterpret cast - DMA hardware register expects the physical address of the lldesc as a u32
     i2s->out_link.start = 1;
+    i2s->int_clr.val = i2s->int_raw.val;
+    i2s->int_ena.out_dscr_err = 1;
 
     esp_err_t err = esp_intr_enable(mIsrHandle);
     if (err != ESP_OK) {
         FL_WARN_F("I2sPeripheralEsp32DevEsp: esp_intr_enable failed err=%s", static_cast<int>(err));
         return false;
     }
+    i2s->int_ena.val = 0;
+    i2s->int_ena.out_eof = 1;
 
     mBusy = true;
     i2s->conf.tx_start = 1;
@@ -579,16 +572,19 @@ FL_IRAM void i2s_dma_isr_trampoline(void* arg) FL_NO_EXCEPT {
     const int i2s_device = static_cast<int>(self->i2sPortForIsr());
     i2s_dev_t* const i2s = (i2s_device == 0) ? &I2S0 : &I2S1;
 
-    // Only respond to OUT_EOF. Other flags (out_dscr_err, etc.) are not
-    // enabled in `int_ena` so shouldn't fire, but guard defensively.
-    if (i2s->int_st.out_eof) {
-        i2s->int_clr.val = i2s->int_raw.val;
-        i2s->conf.tx_start = 0;
+    // FastLED#3568 — disable ALL I2S1 interrupts BEFORE anything else
+    // to prevent ISR flooding if the DMA state (null stqe_next + wrong
+    // FIFO mode combo) is firing dscr_err or out_eof repeatedly. The
+    // next `transmit()` re-arms `int_ena.out_eof = 1` and
+    // `int_ena.out_dscr_err = 1` after setting up the new descriptor.
+    const u32 int_state = i2s->int_st.val;
+    i2s->int_ena.val = 0;
+    i2s->int_clr.val = int_state;
 
-        // Fire user callback via the peripheral's registered slot.
-        // Callback is registered via `registerTransmitCallback` before
-        // any transmit is issued; the engine's trampoline lives in
-        // channel_engine_i2s_esp32dev and just flips `mTransmitCompleted`.
+    // Only fire the completion callback on real end-of-frame. Ignore
+    // errors (dscr_err) for now — engine will notice via
+    // `waitTransmitDone` timeout.
+    if (int_state & I2S_OUT_EOF_INT_ST_M) {
         self->finishTransmitFromIsr();
     }
 }

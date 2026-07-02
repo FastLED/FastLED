@@ -74,6 +74,22 @@ FL_STATIC_ASSERT(fl::is_trivially_copyable<rmt_symbol_word_t>::value,
 
 namespace {
 
+// Non-DMA RX channel size in RMT symbols (= hardware memory words).
+//
+// FastLED#3569 — classic ESP32 has no RX ping-pong, so `rmt_receive`
+// rejects `en_partial_rx` and a receive is strictly one-shot into the
+// channel's on-chip RAM: whatever doesn't fit is lost. One 64-word
+// block captures only ~2.6 WS2812B LEDs. Claim 4 of the chip's 8
+// blocks (256 symbols ≈ 10 LEDs) so bench loopback tests can verify a
+// realistic frame; the remaining 4 blocks cover RMT TX. Ping-pong
+// chips (S3/C3/C6/...) keep the single 64-word block — partial-rx
+// refills it continuously, so more blocks buy nothing.
+#if defined(CONFIG_IDF_TARGET_ESP32)
+constexpr u32 kNonDmaRxSymbols = 256;
+#else
+constexpr u32 kNonDmaRxSymbols = 64;
+#endif
+
 /**
  * @brief Convert RMT ticks to nanoseconds
  * @param ticks Tick count from RMT symbol
@@ -558,10 +574,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // The actual allocation size may be adjusted in begin() if needed.
         auto &memMgr = RmtMemoryManager::instance();
         mMemoryChannelId = static_cast<u8>(128 + (mPin & 0x7F));
-        constexpr u32 kMinRxSymbols = 64;  // Minimum RX buffer size
         // Status-code variant (#2856 item 3.5) â€” call site only needs success/fail.
         size_t alloc_words = 0;
-        if (memMgr.tryAllocateRx(mMemoryChannelId, kMinRxSymbols, false, alloc_words)) {
+        if (memMgr.tryAllocateRx(mMemoryChannelId, kNonDmaRxSymbols, false, alloc_words)) {
             mMemoryRegistered = true;
             FL_LOG_RX("RMT RX pre-registered with memory manager in constructor (channel_id="
                       << static_cast<int>(mMemoryChannelId) << ")");
@@ -658,6 +673,17 @@ class RmtRxChannelImpl : public RmtRxChannel {
         mStartLow = config.start_low;
         mIoLoopBack = config.io_loop_back;
         mUseDma = config.use_dma;
+#if !SOC_RMT_SUPPORT_DMA
+        // FastLED#3569 — chips without RMT DMA (classic ESP32, C3, C6, …)
+        // hard-fail rmt_new_rx_channel() when with_dma is requested, which
+        // killed RX begin() for every non-RMT TX capture (AutoResearchTest
+        // asks for use_dma on those paths). Fall back to non-DMA instead
+        // of failing the whole capture.
+        if (mUseDma) {
+            FL_WARN_F("[RMT RX] DMA requested but unsupported on this chip — using non-DMA mode");
+            mUseDma = false;
+        }
+#endif
 
         FL_LOG_RX("RX begin: signal_range_min="
                << mSignalRangeMinNs
@@ -720,7 +746,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         //   14336. Set 14336 to cover ~595 WS2812B LEDs in a single rmt_receive.
         //   Memory cost: 14336 Ã— 4 = 56 KB internal-RAM DMA buffer â€” ESP32-S3
         //   has ~320 KB so ~18%. See issue #2254.
-        rx_config.mem_block_symbols = mUseDma ? 14336 : 64;
+        rx_config.mem_block_symbols = mUseDma ? 14336 : kNonDmaRxSymbols;
         // Interrupt priority level 3 (maximum supported by ESP-IDF RMT driver
         // API) Note: Both RISC-V and Xtensa platforms are limited to level 3 by
         // driver validation RISC-V hardware supports 1-7, but ESP-IDF
@@ -782,7 +808,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
                 FL_WARN_F("[RMT RX] Shared DMA slot unavailable â€” falling back to non-DMA mode");
                 mUseDma = false;
                 rx_config.flags.with_dma = 0;
-                rx_config.mem_block_symbols = 64;
+                rx_config.mem_block_symbols = kNonDmaRxSymbols;
             } else {
                 mDmaAllocated = true;
             }
@@ -1422,10 +1448,17 @@ class RmtRxChannelImpl : public RmtRxChannel {
         rmt_receive_config_t rx_params = {};
         rx_params.signal_range_min_ns = mSignalRangeMinNs;
         rx_params.signal_range_max_ns = max_signal_range_ns;
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
-        rx_params.flags.en_partial_rx =
-            true; // Enable partial reception for long data streams (>~250
-                  // symbols, ESP-IDF 5.3+)
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0) && SOC_RMT_SUPPORT_RX_PINGPONG
+        // Enable partial reception for long data streams (>~250 symbols,
+        // ESP-IDF 5.3+). Requires RX ping-pong hardware — classic ESP32
+        // lacks it (no SOC_RMT_SUPPORT_RX_PINGPONG in its soc_caps.h) and
+        // IDF's rmt_receive() hard-rejects the flag there with
+        // "E (rmt) rmt_receive(368): partial receive not supported",
+        // which silently killed EVERY capture on esp32dev benches
+        // (FastLED#3569 — masqueraded as "TX driver produces no wire
+        // edges"). Without the flag, a classic-ESP32 receive is one-shot
+        // and caps at the channel's mem-block capacity.
+        rx_params.flags.en_partial_rx = true;
 #endif
 
         // Cast RmtSymbol* to rmt_symbol_word_t* (safe due to static_assert

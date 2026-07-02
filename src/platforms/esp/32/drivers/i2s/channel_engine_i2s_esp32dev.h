@@ -55,6 +55,7 @@
 
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
+#include "fl/channels/wave8.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/shared_ptr.h"
@@ -167,6 +168,17 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
     // first SPI batch so builds that never use SPI don't link the
     // delegate.
     fl::shared_ptr<IChannelDriver> mSpiDelegate;
+
+    // FastLED#3568 stack-overflow fix — wave8 byte LUT is 2 KB
+    // (`Wave8Byte lut[256]` × 8 bytes), too big for the `show()` task
+    // stack. Cached here as an instance member and rebuilt whenever
+    // `mCachedTimingKey` changes (typically once, since default is
+    // fixed WS2812B 800 kHz until per-channel timing dispatch lands).
+    // Bit LUT (64 B) rebuilt alongside as an intermediate.
+    Wave8BitExpansionLut mWave8BitLut;
+    Wave8ByteExpansionLut mWave8ByteLut;
+    u32 mCachedTimingKey;   // 0 = uninitialised; hash of T1/T2/T3
+    bool mWave8LutValid;
 };
 
 /// @brief Factory that builds a `ChannelEngineI2sEsp32Dev` wrapping a

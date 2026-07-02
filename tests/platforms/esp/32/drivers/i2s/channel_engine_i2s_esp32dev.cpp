@@ -219,17 +219,21 @@ FL_TEST_CASE("I2sEsp32Dev - show() moves state to BUSY, transmit fires") {
     FL_CHECK(mock.isBusy());
 }
 
-FL_TEST_CASE("I2sEsp32Dev - transmit emits wave8-encoded payload") {
+FL_TEST_CASE("I2sEsp32Dev - transmit emits wave8-encoded 32-bit samples") {
     resetMockState();
     ChannelEngineI2sEsp32Dev engine(createMockPeripheral());
     auto &mock = I2sPeripheralEsp32DevMock::instance();
 
     // Two strips, 3 bytes each. Wave8 pulse-major encoding produces
-    // `bytes_per_lane * 128` output bytes (3 * 128 = 384). Verify:
-    // - Size matches wave8I2s1EncodedFrameSize()
-    // - Output is non-zero (packing actually ran the encoder)
-    // - Output matches a direct encodeChannelWave8_i2s1() call on the
-    //   same lane-strided input (byte-exact anti-drift check)
+    // `bytes_per_lane * 128` raw pulse bytes; the FastLED#3569 32-bit
+    // sample expansion doubles that (`3 * 256 = 768`) — one u32 sample
+    // per pulse period with the 16 lanes at bits 8..23 (I2S1
+    // tx_bits_mod=32 LCD mode presents sample bit n+8 on DATA_OUT(n)).
+    // Verify:
+    // - Size matches wave8I2s1Encoded32FrameSize()
+    // - Output matches encodeChannelWave8_i2s1() +
+    //   wave8I2s1ExpandTo32Samples() on the same lane-strided input
+    //   (byte-exact anti-drift check)
     engine.enqueue(makeChannelData(0, 3, 0xAA));
     engine.enqueue(makeChannelData(1, 3, 0xBB));
     engine.show();
@@ -238,7 +242,8 @@ FL_TEST_CASE("I2sEsp32Dev - transmit emits wave8-encoded payload") {
     FL_REQUIRE(hist.size() == 1u);
     const auto &rec = hist[0];
 
-    constexpr size_t kExpectedSize = 3u * 128u;  // wave8: 128 output bytes per input byte-position
+    constexpr size_t kWave8Size = 3u * 128u;      // raw wave8: 128 bytes per input byte-position
+    constexpr size_t kExpectedSize = 3u * 256u;   // 32-bit samples: 4 bytes per pulse
     FL_CHECK(rec.size_bytes == kExpectedSize);
     FL_REQUIRE(rec.buffer_copy.size() == kExpectedSize);
 
@@ -252,15 +257,36 @@ FL_TEST_CASE("I2sEsp32Dev - transmit emits wave8-encoded payload") {
     ChipsetTiming timing = to_runtime_timing<TIMING_WS2812_800KHZ>();
     Wave8BitExpansionLut bit_lut = buildWave8ExpansionLUT(timing);
     Wave8ByteExpansionLut byte_lut = buildWave8ByteExpansionLUT(bit_lut);
-    fl::vector<fl::u8> ref_output(kExpectedSize, 0);
+    fl::vector<fl::u8> ref_wave8(kWave8Size, 0);
     bool ok = encodeChannelWave8_i2s1(
         fl::span<const fl::u8>(ref_input),
         /*bytes_per_lane=*/3, /*num_lanes=*/2, byte_lut,
-        fl::span<fl::u8>(ref_output));
+        fl::span<fl::u8>(ref_wave8));
+    FL_REQUIRE(ok);
+    fl::vector<fl::u8> ref_output(kExpectedSize, 0);
+    ok = wave8I2s1ExpandTo32Samples(fl::span<const fl::u8>(ref_wave8),
+                                    fl::span<fl::u8>(ref_output));
     FL_REQUIRE(ok);
     for (size_t i = 0; i < kExpectedSize; ++i) {
         FL_REQUIRE_EQ(rec.buffer_copy[i], ref_output[i]);
     }
+
+    // Spot-check the sample layout: lanes 0-7 = sample bits 8-15
+    // (byte 1), lanes 8-15 = sample bits 16-23 (byte 2). Bytes 0 and 3
+    // (sample bits 0-7 / 24-31 — never presented on DATA_OUT) must
+    // stay zero. Note: zero-padded lanes still carry the wave8 "0-bit"
+    // waveform (all lanes go high during the T1 phase), so bytes 1-2
+    // are nonzero even for inactive lanes — they're simply never
+    // routed to a GPIO.
+    bool saw_lane0_high = false;
+    for (size_t p = 0; p < kExpectedSize / 4; ++p) {
+        FL_REQUIRE_EQ(rec.buffer_copy[4 * p + 0], 0u);  // sample bits 0-7 unused
+        FL_REQUIRE_EQ(rec.buffer_copy[4 * p + 3], 0u);  // sample bits 24-31 unused
+        if (rec.buffer_copy[4 * p + 1] & 0x01u) {
+            saw_lane0_high = true;  // lane 0 data present at sample bit 8
+        }
+    }
+    FL_CHECK(saw_lane0_high);
 }
 
 FL_TEST_CASE("I2sEsp32Dev - simulate completion drives BUSY -> READY on poll") {
@@ -440,11 +466,11 @@ FL_TEST_CASE("I2sEsp32Dev - enqueue during BUSY doesn't mutate in-flight set") {
     FL_REQUIRE(engine.currentState() == IChannelDriver::DriverState::BUSY);
 
     // Enqueue a second strip while the first is transmitting. It
-    // goes into the *next* frame — not the current one. Wave8 output
-    // for 3 bytes-per-lane is `3 * 128 = 384` bytes.
+    // goes into the *next* frame — not the current one. 32-bit-sample
+    // output for 3 bytes-per-lane is `3 * 256 = 768` bytes.
     engine.enqueue(data2);
     FL_CHECK(mock.getTransmitCount() == 1u);
-    FL_CHECK(mock.getTransmitHistory()[0].size_bytes == 3u * 128u);
+    FL_CHECK(mock.getTransmitHistory()[0].size_bytes == 3u * 256u);
 }
 
 FL_TEST_CASE(
