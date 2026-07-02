@@ -49,14 +49,23 @@ void ARDUINO_ISR_ATTR edgeIsr() {
 
 } // namespace
 
-void edgeProbeArm(int pin) {
-    if (g_pin >= 0) {
+void edgeProbeArm(int pin) { edgeProbeArmMode(pin, false); }
+
+void edgeProbeArmMode(int pin, bool passive) {
+    if (g_pin >= 0 && !passive) {
         detachInterrupt(digitalPinToInterrupt(g_pin));
     }
     g_count = 0;
     g_pin = pin;
-    pinMode(pin, INPUT);
-    attachInterrupt(digitalPinToInterrupt(pin), edgeIsr, CHANGE);
+    if (!passive) {
+        // Active mode reconfigures the pad; passive mode leaves the pad
+        // completely untouched (for probing pins owned by a receiver).
+        pinMode(pin, INPUT);
+        attachInterrupt(digitalPinToInterrupt(pin), edgeIsr, CHANGE);
+    }
+    if (passive) {
+        g_selftest_edges = 0;
+    } else {
     // Self-test: flip the pad's pull resistors to generate edges the
     // ISR must record. Proves the interrupt path end-to-end without
     // touching the output driver (jumpered TX pins stay unharmed).
@@ -68,6 +77,7 @@ void edgeProbeArm(int pin) {
     }
     g_selftest_edges = g_count;
     g_count = 0; // restart clean for the real capture
+    }
 
     // TX drivers reconfigure the probed pad when the test starts,
     // clearing the input-enable and the interrupt binding. Spawn a
@@ -178,6 +188,7 @@ fl::u32 edgeProbeCpuMhz() {
 #else // !FL_IS_ESP32
 
 void edgeProbeArm(int) {}
+void edgeProbeArmMode(int, bool) {}
 const fl::u32 *edgeProbeStamps(fl::u32 &count) {
     count = 0;
     return nullptr;

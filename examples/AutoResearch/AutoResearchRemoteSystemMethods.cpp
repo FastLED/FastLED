@@ -341,10 +341,14 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
     remote.bind("edgeProbe", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
         int pin = 0;
+        bool passive = false;
         if (args.is_object() && args.contains("pin") && args["pin"].is_int()) {
             pin = static_cast<int>(args["pin"].as_int().value());
         }
-        edgeProbeArm(pin);
+        if (args.is_object() && args.contains("passive") && args["passive"].is_bool()) {
+            passive = args["passive"].as_bool().value();
+        }
+        edgeProbeArmMode(pin, passive);
         response.set("success", true);
         response.set("pin", static_cast<int64_t>(pin));
         response.set("selfTestEdges", static_cast<int64_t>(edgeProbeSelfTestEdges()));
