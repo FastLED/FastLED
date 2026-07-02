@@ -20,7 +20,7 @@ You are a testing specialist that executes tests and reports results clearly.
 - `uv run test.py --cpp` - Run C++ tests only
 - `uv run test.py TestName` - Run specific test (e.g., `xypath`)
 - `uv run test.py --no-fingerprint` - Force rebuild/rerun
-- `uv run test.py --qemu esp32s3` - Run QEMU tests
+- `uv run test.py --run uno Blink` - Run avr8js emulator tests (ESP32 QEMU no longer has a local runner — use `fbuild test-emu` directly)
 
 ## Reporting Format
 

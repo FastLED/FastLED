@@ -94,19 +94,12 @@ class TestArgs:
     no_parallel: bool = False  # Force sequential test execution
     debug: bool = False  # Enable debug mode for unit tests and examples
     build_mode: Optional[str] = None  # Override build mode (quick, debug, release)
-    qemu: Optional[list[str]] = (
-        None  # Run examples in QEMU emulation (deprecated - use --run)
-    )
     run: Optional[list[str]] = (
-        None  # Run examples in emulation (QEMU for ESP32, avr8js for AVR)
+        None  # Run examples in emulation (avr8js for AVR — ESP32 QEMU local runner retired)
     )
     no_fingerprint: bool = False  # Disable fingerprint caching
-    build: bool = False  # Build Docker images if missing (use with --run)
     force: bool = False  # Force rerun of all tests, ignore fingerprint cache
     no_unity: bool = False  # Not in use any more, maybe revived later
-    docker: bool = (
-        False  # Run tests inside Docker container (implies --debug unless overridden)
-    )
     default_mode: bool = False  # True when no specific test flags were provided
     list_tests: bool = False  # List available tests without running them
     raw_test_query: Optional[str] = None  # Original test query before disambiguation
@@ -132,8 +125,6 @@ class TestCategories:
     py_only: bool
     integration_only: bool
     wasm_only: bool
-    qemu_esp32s3: bool
-    qemu_esp32s3_only: bool
 
     def __post_init__(self):
         # Type validation
@@ -148,8 +139,6 @@ class TestCategories:
             "py_only",
             "integration_only",
             "wasm_only",
-            "qemu_esp32s3",
-            "qemu_esp32s3_only",
         ]:
             value = getattr(self, field_name)
             if not isinstance(value, bool):
@@ -213,7 +202,6 @@ def process_test_flags(args: TestArgs) -> TestArgs:
         args.examples is not None,
         args.py,
         args.full,
-        args.qemu is not None,
     ]
     specific_count = sum(bool(flag) for flag in specific_flags)
 
@@ -246,7 +234,6 @@ def determine_test_categories(args: TestArgs) -> TestCategories:
     py_enabled = args.py
     # Integration tests only run when --full is used alone (not with --examples)
     integration_enabled = args.full and args.examples is None
-    qemu_esp32s3_enabled = args.qemu is not None
 
     # WASM compilation runs in default mode (when no specific test flags were provided)
     # When user explicitly specifies test categories (--cpp, --unit, --examples, --py), WASM is disabled
@@ -258,43 +245,31 @@ def determine_test_categories(args: TestArgs) -> TestCategories:
         py=py_enabled,
         integration=integration_enabled,
         wasm=wasm_enabled,
-        qemu_esp32s3=qemu_esp32s3_enabled,
         unit_only=unit_enabled
         and not examples_enabled
         and not py_enabled
         and not integration_enabled
-        and not wasm_enabled
-        and not qemu_esp32s3_enabled,
+        and not wasm_enabled,
         examples_only=examples_enabled
         and not unit_enabled
         and not py_enabled
         and not integration_enabled
-        and not wasm_enabled
-        and not qemu_esp32s3_enabled,
+        and not wasm_enabled,
         py_only=py_enabled
         and not unit_enabled
         and not examples_enabled
         and not integration_enabled
-        and not wasm_enabled
-        and not qemu_esp32s3_enabled,
+        and not wasm_enabled,
         integration_only=integration_enabled
         and not unit_enabled
         and not examples_enabled
         and not py_enabled
-        and not wasm_enabled
-        and not qemu_esp32s3_enabled,
+        and not wasm_enabled,
         wasm_only=wasm_enabled
         and not unit_enabled
         and not examples_enabled
         and not py_enabled
-        and not integration_enabled
-        and not qemu_esp32s3_enabled,
-        qemu_esp32s3_only=qemu_esp32s3_enabled
-        and not unit_enabled
-        and not examples_enabled
-        and not py_enabled
-        and not integration_enabled
-        and not wasm_enabled,
+        and not integration_enabled,
     )
 
 

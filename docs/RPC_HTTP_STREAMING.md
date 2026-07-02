@@ -941,7 +941,7 @@ transport->setOnConnect([&remote]() {  // Captures by reference, no circular ref
 **Debug**: Use AddressSanitizer (ASAN) to detect leaks:
 
 ```bash
-bash test --docker --cpp loopback  # Runs with ASAN enabled
+bash test --debug --cpp loopback  # Runs with ASAN enabled (native — Docker path retired)
 ```
 
 ---

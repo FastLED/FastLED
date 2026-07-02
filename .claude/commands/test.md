@@ -1,6 +1,6 @@
 ---
 description: Run test suite
-argument-hint: [test-name] [--cpp] [--no-fingerprint] [--qemu platform]
+argument-hint: [test-name] [--cpp] [--no-fingerprint] [--run platform]
 ---
 
 Run tests using `uv run test.py` with optional arguments.

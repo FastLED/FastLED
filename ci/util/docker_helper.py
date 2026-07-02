@@ -2,16 +2,17 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
-"""Generic Docker daemon helpers used by callers that need a running Docker
-engine (e.g. `bash test --docker`, `bash profile --docker`, the qemu/avr8js
-emulator runners).
+"""Generic Docker daemon helpers.
 
-The compile-Docker bits that used to live here (`get_docker_image_name`,
-`is_docker_image_available`, `should_use_docker_for_board`) were removed in
-#2812 along with the rest of the `niteris/fastled-compiler-*` image family
-and `bash compile --docker`. What remains is platform-agnostic daemon-start
-logic — install detection, Docker Desktop start (Windows / macOS / Linux),
-and WSL2-backend diagnostics on Windows.
+The compile-Docker bits (`get_docker_image_name`, `is_docker_image_available`,
+`should_use_docker_for_board`) were removed in #2812 with the
+`niteris/fastled-compiler-*` image family. The per-platform simulator images and
+the host `docker/unit-tests` image (`bash test --docker`, `bash profile --docker`,
+the qemu runner) were retired in the follow-up sweep. The remaining consumer is
+the AVR8JS emulator runner, which still needs a working Docker daemon. What
+survives here is platform-agnostic daemon-start logic — install detection,
+Docker Desktop start (Windows / macOS / Linux), WSL2-backend diagnostics on
+Windows.
 """
 
 import os

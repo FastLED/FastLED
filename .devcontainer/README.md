@@ -39,8 +39,9 @@ uv run test.py
 # Run C++ tests only
 uv run test.py --cpp
 
-# Run QEMU emulation tests
-uv run test.py --qemu esp32s3
+# Run QEMU emulation via fbuild (Docker QEMU path retired — fbuild drives the Espressif QEMU binary directly)
+uv run ci/ci-compile.py esp32s3 --examples Blink --merged-bin --defines FASTLED_ESP32_IS_QEMU
+uv run fbuild test-emu --emulator qemu --environment esp32s3 --timeout 120 .build/pio/esp32s3
 
 # Compile for specific platforms
 uv run ci/ci-compile.py uno --examples Blink

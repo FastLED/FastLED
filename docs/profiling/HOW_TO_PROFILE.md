@@ -428,54 +428,13 @@ uv run test.py myfeature --cpp
 
 ---
 
-## Docker-Based Profiling
+## Docker-Based Profiling (retired)
 
-Docker provides a consistent Linux environment with sanitizers (ASAN/LSAN) for catching memory bugs.
-
-### Quick Docker Profile
-
-```bash
-# Run profiler in Docker (implies --debug with sanitizers)
-bash test --docker tests/fx/profile_myfeature
-
-# Fast mode (no sanitizers)
-bash test --docker tests/fx/profile_myfeature --quick
-
-# Release mode (optimized)
-bash test --docker tests/fx/profile_myfeature --build-mode release
-```
-
-### Docker Compilation
-
-Compile your profiler for Docker environment:
-
-```bash
-# Compile in Docker
-bash compile --docker tests/fx/profile_myfeature.cpp
-
-# Then run manually
-docker run -it --rm -v $(pwd):/workspace fastled-test \
-    /workspace/.build/meson-docker-debug/tests/profile_myfeature
-```
-
-### When to Use Docker
-
-**Use Docker when:**
-- ✅ Reproducing CI failures that only occur in Linux
-- ✅ Testing with AddressSanitizer (ASAN) / LeakSanitizer (LSAN)
-- ✅ Verifying cross-platform compatibility
-
-**Avoid Docker when:**
-- ❌ Iterating quickly on performance (3-5 minutes per test)
-- ❌ Running 20+ benchmark iterations (use local build)
-- ❌ Debugging Windows-specific code
-
-### Docker Performance Notes
-
-- **First run**: Downloads Docker image + Python packages (~5 minutes)
-- **Subsequent runs**: Uses cached volumes (~30-60 seconds per test)
-- **Sanitizers**: Add 2-3x slowdown but catch memory bugs
-- **Use `--quick` flag**: Skip sanitizers for faster iteration
+`bash test --docker` and `bash compile --docker` were retired along with the
+host `fastled-unit-tests` image. To reproduce a Linux-specific profile on
+Windows, use WSL2 — the native `bash test` and `bash profile` commands work
+inside it identically. ASAN/LSAN sanitizers are still available via
+`bash test --debug` on any host that ships them.
 
 ---
 

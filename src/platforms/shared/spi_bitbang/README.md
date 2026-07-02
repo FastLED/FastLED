@@ -424,19 +424,23 @@ For detailed hardware octal-SPI information, see:
 
 ### QEMU RISC-V Testing
 
-To test examples in QEMU:
+To test examples in QEMU, drive fbuild directly (the previous Docker-wrapped `bash test --qemu` path was retired along with the rest of the platform-Docker infrastructure — fbuild auto-downloads the Espressif QEMU binary):
 
 ```bash
-# Install QEMU for ESP32 (one-time setup)
-uv run ci/install-qemu.py
-
-# Run example in QEMU
-uv run test.py --qemu esp32c3 Esp32C3_SingleSPI_ISR
-uv run test.py --qemu esp32c3 Esp32C3_DualSPI_ISR
-uv run test.py --qemu esp32c3 Esp32C3_QuadSPI_ISR
+# Stage + emulate an example on esp32c3
+uv run ci/ci-compile.py esp32c3 \
+    --examples Esp32C3_SingleSPI_ISR \
+    --merged-bin \
+    --defines FASTLED_ESP32_IS_QEMU \
+    --verbose
+uv run fbuild test-emu \
+    --emulator qemu \
+    --environment esp32c3 \
+    --timeout 120 \
+    .build/pio/esp32c3
 ```
 
-Examples produce serial output that can be regex-matched for pass/fail validation.
+Examples produce serial output that can be regex-matched for pass/fail validation via `fbuild test-emu`'s `--halt-on-success` / `--halt-on-error` flags.
 
 ## 📚 Additional Documentation
 

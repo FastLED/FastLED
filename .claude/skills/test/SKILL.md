@@ -1,7 +1,7 @@
 ---
 name: test
 description: Run test suite and report results. Use when running unit tests, integration tests, or verifying code changes pass all tests.
-argument-hint: [test-name] [--cpp] [--clean] [--qemu platform]
+argument-hint: [test-name] [--cpp] [--clean] [--run platform]
 context: fork
 agent: test-agent
 ---

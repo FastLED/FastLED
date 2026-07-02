@@ -409,7 +409,7 @@ Increase to 3-4× memory blocks for even more buffering headroom.
 
 1. ✅ Change `rmt5_worker.cpp:204` from `LEVEL3` to `LEVEL4`
 2. ✅ Enable `CONFIG_RMT_ISR_IRAM_SAFE=y` in build
-3. ✅ Test with QEMU: `uv run test.py --qemu esp32s3`
+3. ✅ Test with QEMU: `uv run ci/ci-compile.py esp32s3 --examples <sketch> --merged-bin --defines FASTLED_ESP32_IS_QEMU && uv run fbuild test-emu --emulator qemu --environment esp32s3 --timeout 120 .build/pio/esp32s3`
 
 ### Phase 2 (Short-term - Validate)
 

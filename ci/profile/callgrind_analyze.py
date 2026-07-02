@@ -25,14 +25,9 @@ class CallgrindAnalyzer:
         if platform.system() == "Windows":
             print("⚠️  ERROR: Callgrind (valgrind) is not available on Windows.")
             print()
-            print("🐳 SOLUTION: Use Docker for callgrind profiling:")
-            print("   bash profile <target> --docker --callgrind")
-            print()
-            print("   Example: bash profile sincos32_comparison --docker --callgrind")
-            print()
-            print(
-                "💡 AI AGENTS: Always use --docker flag when requesting callgrind on Windows"
-            )
+            print("Run callgrind on a Linux host or inside WSL2 — the Docker")
+            print("profile path (`bash profile --docker`) was retired along with")
+            print("the rest of the host-Docker infrastructure.")
             return False
 
         cmd = [

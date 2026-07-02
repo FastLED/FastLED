@@ -457,8 +457,8 @@ def argv_ultra_early_exit(start_time: float) -> None:
       Saves ~0.5s per cached run.
 
     Correctness: Bails out if any of these flags are present (they change semantics):
-      --clean, --force, --no-fingerprint, --debug, --build-mode, --docker, --run,
-      --qemu, --examples, --py, --full, --check, -h/--help, --list-tests
+      --clean, --force, --no-fingerprint, --debug, --build-mode, --run,
+      --examples, --py, --full, --check, -h/--help, --list-tests
 
     Args:
         start_time: Time when test.py started (used for elapsed time reporting).
@@ -683,9 +683,7 @@ def argv_ultra_early_exit(start_time: float) -> None:
             "--no-fingerprint",
             "--debug",
             "--build-mode",
-            "--docker",
             "--run",
-            "--qemu",
             "--examples",
             "--py",
             "--full",

@@ -214,18 +214,24 @@ This section outlines comprehensive test criteria for validating RMT interrupt s
 ### Test Infrastructure Requirements
 
 #### QEMU Setup Commands
+
+The Docker-based QEMU path (`ci/install-qemu.py`, `test.py --qemu`) was retired along with the rest of the platform-Docker infrastructure. fbuild's `test-emu --emulator qemu` auto-downloads the Espressif QEMU binary and runs the sketch directly — no image pull, no container. Invocation mirrors `.github/workflows/qemu_docker_template.yml`:
+
 ```bash
-# Install QEMU for ESP32 emulation
-uv run ci/install-qemu.py
+# Stage sketch
+uv run ci/ci-compile.py esp32s3 \
+    --examples <sketch> --merged-bin \
+    --defines FASTLED_ESP32_IS_QEMU --verbose
 
-# Run QEMU tests with ESP32-S3 (Xtensa)
-uv run test.py --qemu esp32s3
+# Emulate on ESP32-S3 (Xtensa)
+uv run fbuild test-emu --emulator qemu \
+    --environment esp32s3 --timeout 120 \
+    .build/pio/esp32s3
 
-# Run QEMU tests with ESP32-C3 (RISC-V)
-uv run test.py --qemu esp32c3
-
-# Skip QEMU installation if already present
-FASTLED_QEMU_SKIP_INSTALL=true uv run test.py --qemu esp32s3
+# Emulate on ESP32-C3 (RISC-V) — same shape, swap env
+uv run fbuild test-emu --emulator qemu \
+    --environment esp32c3 --timeout 120 \
+    .build/pio/esp32c3
 ```
 
 #### Platform Coverage Matrix

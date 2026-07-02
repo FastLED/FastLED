@@ -1,10 +1,5 @@
 
 {
-    "qemu": {
-        "esp32dev": "qemu",
-        "esp32c3": "qemu",
-        "esp32s3": "qemu"
-    },
     "avr8js": {
         "uno": "avr8js",
         "attiny85": "avr8js",

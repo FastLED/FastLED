@@ -94,39 +94,13 @@ bash test --clean                            # Clean rebuild, preserves fingerpr
 
 **LAST RESORT ONLY**: Only use `--no-fingerprint` if you have concrete evidence that fingerprint caching itself is broken (not just a stale build). This should be extremely rare. See `agents/docs/build-system.md` for details.
 
-## Docker Testing (Linux Environment)
-Run tests inside a Docker container for consistent Linux environment with ASAN/LSAN sanitizers:
+## Docker Testing (retired)
 
-```bash
-# Run all C++ tests in Docker (implies --debug with sanitizers)
-bash test --docker
-
-# Run specific unit test in Docker
-bash test --docker tests/fl/async
-
-# Run with quick mode (no sanitizers, faster)
-bash test --docker --quick
-
-# Run with release mode (optimized)
-bash test --docker --build-mode release
-
-# Run only unit tests
-bash test --docker --unit
-
-# Run only examples
-bash test --docker --examples
-```
-
-**Notes:**
-- `--docker` implies `--debug` mode (ASAN/LSAN sanitizers enabled) unless `--quick` or `--build-mode` is specified
-- Warning shown: `--docker implies --debug mode (sanitizers enabled). Use --quick or --build-mode release for faster builds.`
-- First run downloads Docker image and Python packages (cached for subsequent runs)
-- Uses named volumes for `.venv` and `.build` to persist between runs
-
-**AI AGENTS: Avoid `bash test --docker` unless necessary** - Docker testing is slow (3-5 minutes per test). Use `uv run test.py` for quick local testing. Only use Docker when:
-- You need Linux-specific sanitizers (ASAN/LSAN) that aren't working locally
-- Reproducing CI failures that only occur in the Linux environment
-- Testing cross-platform compatibility issues
+`bash test --docker` was retired along with the host `docker/unit-tests` image
+in the same sweep as the platform-Docker retirement. C++ tests run natively via
+Meson — sanitizers (ASAN/LSAN/UBSAN) are available on any host that ships them
+(`bash test --debug` opts in). To reproduce a Linux-specific CI failure on
+Windows, use WSL2 rather than Docker.
 
 ## fbuild (Default for Board Builds)
 The project uses `fbuild` as the build system for all board compiles. New board targets must take the fbuild path by default; do not add board allowlists or PlatformIO fallbacks for board compatibility issues. Fix those in fbuild instead.
@@ -263,6 +237,23 @@ npx --prefix ci/docker_utils/avr8js tsx ci/docker_utils/avr8js/main.ts \
 - `ci/docker_utils/avr8js/package.json` — Node dependencies (avr8js, tsx)
 
 ## QEMU Commands
-- `uv run ci/install-qemu.py` - Install QEMU for ESP32 emulation (standalone)
-- `uv run test.py --qemu esp32s3` - Run QEMU tests (installs QEMU automatically)
-- `FASTLED_QEMU_SKIP_INSTALL=true uv run test.py --qemu esp32s3` - Skip QEMU installation step
+
+The Docker-based QEMU pipeline (`ci/install-qemu.py`, `bash test --qemu ...`) was retired along with the rest of the platform-Docker infrastructure. Local QEMU runs go through fbuild directly — the exact invocation matches what CI runs in `.github/workflows/qemu_docker_template.yml`:
+
+```bash
+# 1. Stage the sketch (produces .build/pio/<env>/ with firmware + partitions).
+uv run ci/ci-compile.py esp32s3 \
+    --examples Blink \
+    --merged-bin \
+    --defines FASTLED_ESP32_IS_QEMU \
+    --verbose
+
+# 2. Emulate with fbuild (auto-downloads the Espressif QEMU binary).
+uv run fbuild test-emu \
+    --emulator qemu \
+    --environment esp32s3 \
+    --timeout 120 \
+    --halt-on-success "setup starting" \
+    --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:" \
+    .build/pio/esp32s3
+```
