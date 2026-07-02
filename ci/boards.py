@@ -849,6 +849,19 @@ ESP32DEV_IDF6 = Board(
     platform_needs_install=True,
 )
 
+# Heap-poisoning debug variant (FastLED#3588): same pioarduino platform
+# as esp32dev but with custom_sdkconfig, which makes pioarduino rebuild
+# the IDF libs from source with comprehensive heap poisoning + end-of-
+# stack watchpoints. The poisoning integrity check names the corrupter
+# on first touch — the tool the #3588 investigation needs.
+ESP32DEV_HEAPDBG = Board(
+    board_name="esp32dev_heapdbg",
+    real_board_name="esp32dev",
+    platform=ESP32_IDF_5_3_PIOARDUINO,
+    platform_needs_install=True,
+    customsdk="CONFIG_HEAP_POISONING_COMPREHENSIVE=y",
+)
+
 STM32H747XI_GIGA = Board(
     board_name="stm32h747xi",
     platform="ststm32",
