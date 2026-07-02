@@ -12,6 +12,10 @@
 /// Arm the probe on a pin (re-arming resets the buffer).
 void edgeProbeArm(int pin);
 
+/// Passive variant: no pinMode/attachInterrupt/pull toggles — only the
+/// triggered tight-loop sampler task. Safe on pads owned by a receiver.
+void edgeProbeArmMode(int pin, bool passive);
+
 /// Timestamp buffer: entry = (level_before_edge << 31) | cycle_count.
 /// Returns the buffer; count receives the number of valid entries.
 const fl::u32 *edgeProbeStamps(fl::u32 &count);

@@ -563,6 +563,10 @@ volatile fl::u32 g_rmtrx_wait_dbg[4] = {0, 0, 0, 0};
 volatile fl::u32 g_rmtrx_max_symbols = 0;
 // FL_LINT_ALLOW_GLOBAL(bench probe read via peekMem at a fixed symbol address)
 volatile fl::u32 g_rmtrx_first_symbols[4] = {0};
+// FL_LINT_ALLOW_GLOBAL(bench probe read via peekMem at a fixed symbol address)
+volatile fl::u32 g_rmtrx_cb_raw_symbols = 0;
+// FL_LINT_ALLOW_GLOBAL(bench probe read via peekMem at a fixed symbol address)
+volatile fl::u32 g_rmtrx_cb_first_raw = 0;
 
 class RmtRxChannelImpl : public RmtRxChannel {
   public:
@@ -1629,6 +1633,11 @@ class RmtRxChannelImpl : public RmtRxChannel {
         self->mCallbackCount =
             self->mCallbackCount + 1; // Debug: Track callback invocations
         size_t received_count = data->num_symbols;
+        g_rmtrx_cb_raw_symbols = static_cast<fl::u32>(received_count);
+        if (received_count > 0) {
+            g_rmtrx_cb_first_raw =
+                *reinterpret_cast<const fl::u32 *>(data->received_symbols); // ok reinterpret cast - bench telemetry
+        }
         const rmt_symbol_word_t *src = data->received_symbols;
         size_t src_offset = 0; // symbols consumed by in-stream skip
 
