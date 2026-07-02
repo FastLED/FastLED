@@ -22,4 +22,5 @@
 #include "platforms/esp/32/core/_build.cpp.hpp"
 #include "platforms/esp/32/drivers/_build.cpp.hpp"
 #include "platforms/esp/32/interrupts/_build.cpp.hpp"
+#include "platforms/esp/32/net/_build.cpp.hpp"
 #include "platforms/esp/32/ota/_build.cpp.hpp"
