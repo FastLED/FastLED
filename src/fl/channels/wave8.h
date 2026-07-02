@@ -77,6 +77,14 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing);
 /// wave8_convert_byte_to_wave8byte() produces. Not for ISR use.
 Wave8ByteExpansionLut buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble);
 
+/// @brief Out-param overload: fill an existing 2 KB LUT in place.
+///
+/// Prefer this on embedded targets — the by-value overload materialises a
+/// 2 KB temporary on the caller's stack (FastLED#3569 stack-canary panic on
+/// classic ESP32's 8 KB loop task).
+void buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble,
+                                Wave8ByteExpansionLut &out) FL_NO_EXCEPT;
+
 // Forward declaration; implementation is out-of-line in detail/wave8.cpp.hpp
 void wave8(u8 lane,
            const Wave8BitExpansionLut &lut,

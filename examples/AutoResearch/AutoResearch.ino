@@ -219,6 +219,22 @@ void loop()  { autoResearchLowMemoryLoop(); }
 #include "AutoResearchParlioStream.h" // #2548 PARLIO streaming validation (RPC-driven)
 
 // ============================================================================
+// Loop-task stack (FastLED#3569)
+// ============================================================================
+// The RPC-dispatch → runSingleTest → autoResearchChipsetTiming →
+// capture → FastLED.show() chain is bench-measured at ~8.0 KB deep on
+// classic ESP32 — the default 8 KB loopTask stack trips the canary the
+// moment an interrupt frame lands at peak depth. 16 KB fixes that, but
+// ONLY together with the classic-ESP32 RX_BUFFER_SIZE tier defined
+// further down in this file (search RX_BUFFER_SIZE): with the 96 KB
+// capture tier the extra 8 KB of stack exhausted the heap outright
+// (`fl::aligned_alloc` returned null inside fl::json::set →
+// StoreProhibited at 0x400d2ece). Keep the two changes paired.
+#if defined(FL_IS_ESP_32DEV) && defined(SET_LOOP_TASK_STACK_SIZE)
+SET_LOOP_TASK_STACK_SIZE(16 * 1024);
+#endif
+
+// ============================================================================
 // Hardware Watchdog (crash recovery)
 // ============================================================================
 // Use the unified cross-platform fl::Watchdog API via the FL_WATCHDOG_AUTO()
@@ -284,6 +300,13 @@ constexpr int DEFAULT_PIN_RX = autoresearch::defaultRxPin();
 // Maximum: 3000 LEDs (hardcoded for ESP32/S3 with PSRAM support)
 #if defined(FL_IS_TEENSY_4X) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5)
 constexpr int RX_BUFFER_SIZE = 100 * 32 + 100;  // Memory-constrained: 100 LEDs max for autoresearch
+#elif defined(FL_IS_ESP_32DEV)
+// FastLED#3569 — classic ESP32-WROOM (~320 KB DRAM, no PSRAM) ran out
+// of heap during runSingleTest with the 96 KB tier: `fl::aligned_alloc`
+// returned null inside fl::json::set (StoreProhibited @ 0x400d2ece).
+// 1000 LEDs × 32 symbols covers every bench scenario and frees 64 KB
+// for the 16 KB loop stack + result-JSON building.
+constexpr int RX_BUFFER_SIZE = 1000 * 32 + 100;
 #else
 constexpr int RX_BUFFER_SIZE = 3000 * 32 + 100;  // LEDs × 32:1 expansion + headroom
 #endif

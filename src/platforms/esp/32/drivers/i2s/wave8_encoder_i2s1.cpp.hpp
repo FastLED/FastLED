@@ -13,6 +13,8 @@
 
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s1.h"
 
+#include "fl/stl/bit_cast.h"  // fl::ptr_to_int — alignment check in wave8I2s1ExpandTo32Samples
+
 // Public wave3.h / wave8.h declarations only (transitively via
 // wave8_encoder_i2s1.h) — do NOT include `fl/channels/detail/*.hpp`
 // here. Those force-inline headers would emit their transpose kernels
@@ -97,6 +99,33 @@ bool encodeChannelWave8_i2s1(fl::span<const fl::u8> input,
         }
     }
 
+    return true;
+}
+
+bool wave8I2s1ExpandTo32Samples(fl::span<const fl::u8> pulses,
+                                fl::span<fl::u8> output) FL_NO_EXCEPT {
+    const fl::size_t pulse_bytes = pulses.size();
+    if (pulse_bytes == 0 || (pulse_bytes & 1u) != 0) {
+        return false;
+    }
+    if (output.size() < pulse_bytes * 2) {
+        return false;
+    }
+    // The DMA/FIFO consumes the buffer as little-endian u32 words —
+    // require 4-byte output alignment so the u32 stores below are legal.
+    if ((fl::ptr_to_int(output.data()) & 3u) != 0) {
+        return false;
+    }
+    const fl::u8 *src = pulses.data();
+    fl::u32 *dst = reinterpret_cast<fl::u32 *>(output.data()); // ok reinterpret cast - 4-byte-aligned DMA buffer written as u32 samples
+    const fl::size_t pulse_count = pulse_bytes / 2;
+    for (fl::size_t p = 0; p < pulse_count; ++p) {
+        const fl::u32 lo = src[2 * p + 0];  // lanes 0-7
+        const fl::u32 hi = src[2 * p + 1];  // lanes 8-15
+        // Sample bit (n + 8) drives DATA_OUT(n) in tx_bits_mod=32 LCD
+        // mode (see header) — place the 16 lanes at bits 8..23.
+        dst[p] = (lo << 8) | (hi << 16);
+    }
     return true;
 }
 

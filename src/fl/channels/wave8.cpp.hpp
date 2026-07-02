@@ -311,8 +311,8 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
 // Byte-indexed expansion LUT (#2526). Entry b = high-nibble expansion in
 // symbols[0..3] + low-nibble expansion in symbols[4..7], matching
 // wave8_convert_byte_to_wave8byte() exactly (so the byte path is bit-identical).
-Wave8ByteExpansionLut buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble) {
-    Wave8ByteExpansionLut out;
+void buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble,
+                                Wave8ByteExpansionLut &out) FL_NO_EXCEPT {
     for (int b = 0; b < 256; ++b) {
         const Wave8Bit *hi = nibble.lut[(b >> 4) & 0xF];
         const Wave8Bit *lo = nibble.lut[b & 0xF];
@@ -321,6 +321,11 @@ Wave8ByteExpansionLut buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nib
             out.lut[b].symbols[i + 4] = lo[i];
         }
     }
+}
+
+Wave8ByteExpansionLut buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble) {
+    Wave8ByteExpansionLut out;
+    buildWave8ByteExpansionLUT(nibble, out);
     return out;
 }
 

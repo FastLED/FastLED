@@ -104,6 +104,49 @@ bool encodeChannelWave8_i2s1(fl::span<const fl::u8> input,
                              fl::span<fl::u8> output) FL_NO_EXCEPT;
 
 // ============================================================================
+// 32-bit sample expansion (FastLED#3569 root-cause fix)
+// ============================================================================
+//
+// Classic-ESP32 I2S1 in Yves's proven register config (LCD mode,
+// `tx_bits_mod = 32`, `tx_fifo_mod = 3`) clocks ONE 32-bit sample per
+// pixel-clock period, and presents sample bit `n + 8` on `DATA_OUT(n)`
+// (bits 0..7 of every sample never reach any DATA_OUT line). Evidence:
+// Yves's driver put controller `i`'s data at word bit `i + 8`
+// (`has_data_mask |= 1 << (i + 8)`) while routing that controller's pin
+// to `I2S1O_DATA_OUT0_IDX + i` — and produced correct waveforms for
+// years. The raw wave8 stream (2 bytes per pulse) therefore CANNOT be
+// DMA'd directly: lane 0 would land at sample bit 0 (invisible) and two
+// pulse periods would be packed into each sample (halving the pulse
+// rate). This expansion pass rewrites each 2-byte pulse into one 4-byte
+// sample with the 16 lanes at bits 8..23, so lane `n` comes out on
+// `DATA_OUT(n)` at the correct 1-sample-per-pulse rate.
+
+/// @brief Bytes per input byte-position after 32-bit sample expansion.
+///
+/// 8 bits × 8 pulses/bit = 64 pulse periods per byte-position, one
+/// 32-bit sample each = 256 bytes.
+constexpr fl::size_t kWave8I2s1BytesPerBytePosition32 =
+    2 * kWave8I2s1BytesPerBytePosition;
+
+/// @brief DMA buffer size for a full frame of 32-bit I2S1 samples.
+constexpr fl::size_t wave8I2s1Encoded32FrameSize(fl::size_t bytes_per_lane) FL_NO_EXCEPT {
+    return bytes_per_lane * kWave8I2s1BytesPerBytePosition32;
+}
+
+/// @brief Expand raw wave8 pulse pairs into I2S1 32-bit DMA samples.
+///
+/// @param pulses  Raw `encodeChannelWave8_i2s1` output: 2 bytes per
+///                pulse period (`[p]`: lanes 0-7, `[p+1]`: lanes 8-15).
+///                Size must be even.
+/// @param output  DMA-ready sample buffer, 4-byte aligned, at least
+///                `pulses.size() * 2` bytes. Each sample is
+///                `lanes0_7 << 8 | lanes8_15 << 16` (bits 8..23 map to
+///                DATA_OUT0..15). Must NOT alias `pulses`.
+/// @return true on success; false on size/alignment violations.
+bool wave8I2s1ExpandTo32Samples(fl::span<const fl::u8> pulses,
+                                fl::span<fl::u8> output) FL_NO_EXCEPT;
+
+// ============================================================================
 // Wave3 sibling (FastLED#3526 Phase 2a follow-up)
 // ============================================================================
 //

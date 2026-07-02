@@ -107,6 +107,12 @@ class I2sPeripheralEsp32DevMockImpl : public I2sPeripheralEsp32DevMock {
         if (!mInitialized) {
             return false;
         }
+        // Match the hardware impl's contract: a null buffer or zero-size
+        // transmit is refused, not recorded — keeps host tests exercising
+        // the same engine state machine the device sees (FastLED#3569).
+        if (buffer == nullptr || size_bytes == 0) {
+            return false;
+        }
         if (mBusy) {
             FL_WARN_F(
                 "I2sPeripheralEsp32DevMock: transmit() while already busy");

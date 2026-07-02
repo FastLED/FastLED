@@ -113,12 +113,16 @@ class I2sPeripheralEsp32DevEsp : public II2sPeripheralEsp32Dev {
     void *mCallbackUserCtx;
 
     // FastLED#3526 Phase 2b step B — real DMA machinery.
-    // `mDescriptor` is a single `lldesc_t` (from `rom/lldesc.h`) allocated in
-    // DMA-capable RAM. `mIsrHandle` is the `esp_intr_alloc()` handle for the
-    // I2S1 DMA-done interrupt. On streaming transmits (>1 descriptor's worth
-    // of data) the descriptor gets rewritten each ISR fire; single-shot fits
-    // in one descriptor.
-    struct lldesc_s *mDescriptor;
+    // `mDescriptors` is an array of `lldesc_t` (from `rom/lldesc.h`)
+    // allocated in DMA-capable RAM and re-grown by `transmit()` when a
+    // frame needs more than `mDescriptorCapacity` links (each lldesc
+    // reaches at most 4092 bytes, so one descriptor can't carry a full
+    // 32-bit-sample frame — FastLED#3569). The links form a linear
+    // chain ending in `stqe_next = nullptr` with `eof = 1` only on the
+    // last link, so `out_eof` fires exactly once per frame. `mIsrHandle`
+    // is the `esp_intr_alloc()` handle for the I2S1 DMA-done interrupt.
+    struct lldesc_s *mDescriptors;
+    size_t mDescriptorCapacity;
     intr_handle_t mIsrHandle;
 
     // FastLED#3526 Phase 2b step C — per-lane GPIO routing record so
