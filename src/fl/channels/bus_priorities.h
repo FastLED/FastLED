@@ -53,7 +53,7 @@ constexpr int default_bus_priority(Bus b, fl::u8 which) FL_NO_EXCEPT {
         b == Bus::QUAD_SPI  ? 1  :
         b == Bus::OCTAL_SPI ? 1  :
         b == Bus::BIT_BANG  ? 0  :
-        b == Bus::UART      ? -1 :
+        b == Bus::UART      ? (which == 0 ? -1 : -2) :
         0;
 }
 

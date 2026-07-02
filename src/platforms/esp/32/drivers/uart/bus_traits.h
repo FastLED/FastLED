@@ -28,12 +28,15 @@ namespace fl {
 
 namespace detail {
 /// @brief UART singleton: peripheral + driver lifetimes paired.
+/// One holder per UART block (FastLED#3576 Phase 2): uart_num 1 =
+/// primary lane ("UART"), uart_num 2 = second lane ("UART2"). UART0 is
+/// the console and is never used.
 struct UartBusHolder {
     fl::shared_ptr<UartPeripheralEsp> peripheral;
     fl::shared_ptr<ChannelEngineUART> driver;
-    UartBusHolder() FL_NO_EXCEPT
+    explicit UartBusHolder(int uart_num) FL_NO_EXCEPT
         : peripheral(fl::make_shared<UartPeripheralEsp>()),
-          driver(fl::make_shared<ChannelEngineUART>(peripheral)) {}
+          driver(fl::make_shared<ChannelEngineUART>(peripheral, uart_num)) {}
 };
 }  // namespace detail
 
@@ -41,7 +44,7 @@ template<> struct BusTraits<Bus::UART> {
     using Driver = ChannelEngineUART;
 
     static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
-        static detail::UartBusHolder gHolder;
+        static detail::UartBusHolder gHolder(/*uart_num=*/1);
         return gHolder.driver;
     }
 
@@ -49,6 +52,24 @@ template<> struct BusTraits<Bus::UART> {
 
     static void registerWithManager() FL_NO_EXCEPT {
         ChannelManager::instance().addDriver(default_bus_priority(Bus::UART, 0), instancePtr());
+    }
+};
+
+// FastLED#3576 Phase 2 — second UART lane on UART2 ("UART2",
+// `Bus::UART` instance 1). Classic ESP32 has three UARTs: UART0 is the
+// console (off-limits), UART1 is the primary lane, UART2 is this one.
+template<> struct BusTraits<Bus::UART, 1> {
+    using Driver = ChannelEngineUART;
+
+    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
+        static detail::UartBusHolder gHolder(/*uart_num=*/2);
+        return gHolder.driver;
+    }
+
+    static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
+
+    static void registerWithManager() FL_NO_EXCEPT {
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::UART, 1), instancePtr());
     }
 };
 
