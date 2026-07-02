@@ -1633,11 +1633,16 @@ class RmtRxChannelImpl : public RmtRxChannel {
         self->mCallbackCount =
             self->mCallbackCount + 1; // Debug: Track callback invocations
         size_t received_count = data->num_symbols;
+#if defined(__riscv)
+        // Bench telemetry (FastLED#3586). RISC-V only: on Xtensa the
+        // global-address literals in this IRAM ISR trip "l32r: literal
+        // placed after use" at link time.
         g_rmtrx_cb_raw_symbols = static_cast<fl::u32>(received_count);
         if (received_count > 0) {
             g_rmtrx_cb_first_raw =
                 *reinterpret_cast<const fl::u32 *>(data->received_symbols); // ok reinterpret cast - bench telemetry
         }
+#endif
         const rmt_symbol_word_t *src = data->received_symbols;
         size_t src_offset = 0; // symbols consumed by in-stream skip
 

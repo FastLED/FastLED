@@ -633,9 +633,77 @@ namespace fl {
 namespace asio {
 namespace http {
 
-// Minimal definition for unique_ptr<ServerAsyncRunner> destruction
-// (ESP32 uses esp_http_server tasks, not runner)
-class Server::ServerAsyncRunner {};
+// ========== Main-task request marshaling (FastLED#3588) ==========
+//
+// Route handlers used to execute ON the esp_http_server task,
+// concurrently with the main loop's fl:: object churn - reproducibly
+// corrupting main-task heap objects on classic ESP32 under load.
+// Requests are now marshaled: the httpd task extracts plain-C request
+// data, queues it, and blocks on a semaphore; the main task (via the
+// task::Executor pump) runs the fl:: handler and hands back a
+// heap-allocated Response. No fl:: object is ever constructed or
+// mutated off the main task.
+
+namespace {
+
+struct EspPendingRequest {
+    Server* server;
+    fl::size route_index;
+    char method[8];
+    char uri[160];
+    char* body;         // fl::malloc'd raw body (may be null)
+    fl::size body_len;
+    Response* response; // filled by the main task
+    SemaphoreHandle_t done;
+};
+
+QueueHandle_t s_esp_request_queue = nullptr;
+
+} // anonymous namespace
+
+/// Runner pumped from the main task: executes queued route handlers.
+class Server::ServerAsyncRunner : public task::Runner {
+public:
+    explicit ServerAsyncRunner(Server* server) : mServer(server) {}
+
+    void update() override {
+        if (!s_esp_request_queue) {
+            return;
+        }
+        EspPendingRequest* item = nullptr;
+        while (xQueueReceive(s_esp_request_queue, &item, 0) == pdTRUE) {
+            if (!item) {
+                continue;
+            }
+            Request fl_req;
+            fl_req.mMethod = item->method;
+            fl_req.mPath = item->uri;
+            fl_req.mHttpVersion = "HTTP/1.1";
+            if (item->body && item->body_len > 0) {
+                fl_req.mBody = string(item->body, item->body_len);
+            }
+            Response* resp = new Response(); // ok bare allocation - handed to the httpd task, deleted there after send
+            if (item->server && item->route_index < item->server->mRoutes.size()) {
+                *resp = item->server->mRoutes[item->route_index].handler(fl_req);
+            } else {
+                *resp = Response::not_found();
+            }
+            item->response = resp;
+            xSemaphoreGive(item->done);
+        }
+    }
+
+    bool has_active_tasks() const override {
+        return mServer && mServer->is_running();
+    }
+
+    size_t active_task_count() const override {
+        return (mServer && mServer->is_running()) ? 1 : 0;
+    }
+
+private:
+    Server* mServer;
+};
 
 // ========== ESP32 Helpers ==========
 
@@ -665,35 +733,34 @@ esp_err_t esp_route_handler(httpd_req_t* req);
 // Signature uses void* to avoid ESP-IDF types in header; cast to httpd_req_t* here.
 // This is called from the ESP-IDF HTTP server task.
 int Server::handle_esp_request(void* raw_req) {
+    // Runs on the esp_http_server task. NO fl:: objects here - only
+    // plain C extraction; the fl:: handler executes on the main task
+    // (see ServerAsyncRunner::update, FastLED#3588).
     auto* req = static_cast<httpd_req_t*>(raw_req);
     auto* ctx = static_cast<EspRouteContext*>(req->user_ctx);
-    if (!ctx || !ctx->server) {
+    if (!ctx || !ctx->server || !s_esp_request_queue) {
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "No context");
         return ESP_FAIL;
     }
 
-    // Build fl::asio::http::Request from httpd_req_t
-    Request fl_req;
-    fl_req.mPath = req->uri;
+    EspPendingRequest item = {};
+    item.server = ctx->server;
+    item.route_index = ctx->route_index;
     switch (req->method) {
-        case HTTP_GET:    fl_req.mMethod = "GET"; break;
-        case HTTP_POST:   fl_req.mMethod = "POST"; break;
-        case HTTP_PUT:    fl_req.mMethod = "PUT"; break;
-        case HTTP_DELETE: fl_req.mMethod = "DELETE"; break;
-        default:          fl_req.mMethod = "GET"; break;
+        case HTTP_POST:   fl::strncpy(item.method, "POST", sizeof(item.method) - 1); break;
+        case HTTP_PUT:    fl::strncpy(item.method, "PUT", sizeof(item.method) - 1); break;
+        case HTTP_DELETE: fl::strncpy(item.method, "DELETE", sizeof(item.method) - 1); break;
+        default:          fl::strncpy(item.method, "GET", sizeof(item.method) - 1); break;
     }
-    fl_req.mHttpVersion = "HTTP/1.1";
-
-    // Strip query string from path
-    size_t q = fl_req.mPath.find('?');
-    if (q != string::npos) {
-        fl_req.mPath = fl_req.mPath.substr(0, q);
+    fl::strncpy(item.uri, req->uri, sizeof(item.uri) - 1);
+    // Strip query string from the path
+    for (char* c = item.uri; *c; ++c) {
+        if (*c == '?') { *c = '\0'; break; }
     }
 
-    // Read POST body if present
     if (req->content_len > 0 && req->content_len <= 8192) {
-        int total_len = req->content_len;
-        char* buf = static_cast<char*>(fl::malloc(total_len + 1));
+        int total_len = static_cast<int>(req->content_len);
+        char* buf = static_cast<char*>(fl::malloc(static_cast<fl::size>(total_len) + 1));
         if (buf) {
             int received = 0;
             while (received < total_len) {
@@ -704,31 +771,46 @@ int Server::handle_esp_request(void* raw_req) {
                 received += ret;
             }
             buf[received] = '\0';
-            fl_req.mBody = string(buf, received);
-            fl::free(buf);
+            item.body = buf;
+            item.body_len = static_cast<fl::size>(received);
         }
     }
 
-    // Call the RouteHandler
-    if (ctx->route_index >= ctx->server->mRoutes.size()) {
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Invalid route");
+    item.done = xSemaphoreCreateBinary();
+    if (!item.done) {
+        if (item.body) fl::free(item.body);
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "No memory");
         return ESP_FAIL;
     }
 
-    Response resp = ctx->server->mRoutes[ctx->route_index].handler(fl_req);
-
-    // Send response using Response::to_string() which serializes to HTTP format
-    // Use esp_http_server APIs to send the response parts
-    char status_str[32];
-    fl::snprintf(status_str, sizeof(status_str), "%d", resp.mStatusCode);
-    httpd_resp_set_status(req, status_str);
-
-    for (auto it = resp.mHeaders.begin(); it != resp.mHeaders.end(); ++it) {
-        httpd_resp_set_hdr(req, it->first.c_str(), it->second.c_str());
+    EspPendingRequest* item_ptr = &item;
+    esp_err_t result = ESP_OK;
+    if (xQueueSend(s_esp_request_queue, &item_ptr, pdMS_TO_TICKS(100)) != pdTRUE) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Server busy");
+        result = ESP_FAIL;
+    } else if (xSemaphoreTake(item.done, pdMS_TO_TICKS(5000)) != pdTRUE) {
+        // Main loop didn't service the request (e.g. blocked in a long
+        // operation) - tell the client to retry rather than corrupting
+        // state by running the fl:: handler on this task.
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Main loop busy");
+        result = ESP_FAIL;
+    } else if (item.response) {
+        Response* resp = item.response;
+        char status_str[32];
+        fl::snprintf(status_str, sizeof(status_str), "%d", resp->mStatusCode);
+        httpd_resp_set_status(req, status_str);
+        for (auto it = resp->mHeaders.begin(); it != resp->mHeaders.end(); ++it) {
+            httpd_resp_set_hdr(req, it->first.c_str(), it->second.c_str());
+        }
+        httpd_resp_send(req, resp->mBody.c_str(), resp->mBody.size());
+        delete resp; // ok bare allocation - constructed on the main task, settled via semaphore
     }
 
-    httpd_resp_send(req, resp.mBody.c_str(), resp.mBody.size());
-    return ESP_OK;
+    if (item.body) {
+        fl::free(item.body);
+    }
+    vSemaphoreDelete(item.done);
+    return result;
 }
 
 namespace {
@@ -844,6 +926,14 @@ bool Server::start(int port) {
         return false;
     }
 
+    if (!s_esp_request_queue) {
+        s_esp_request_queue = xQueueCreate(4, sizeof(EspPendingRequest*));
+    }
+    if (!mAsyncRunner) {
+        mAsyncRunner = fl::make_unique<ServerAsyncRunner>(this);
+        task::Executor::instance().register_runner(mAsyncRunner.get());
+    }
+
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.server_port = static_cast<u16>(port);
     // Route handlers execute ON the httpd task and run full fl::json /
@@ -890,9 +980,16 @@ bool Server::start(int port) {
 void Server::stop() {
     if (!mRunning) return;
 
+    // Stop the httpd first so no request can be queued mid-teardown,
+    // then drain and unregister the main-task runner (FastLED#3588).
     if (s_esp_httpd) {
         httpd_stop(s_esp_httpd);
         s_esp_httpd = nullptr;
+    }
+    if (mAsyncRunner) {
+        mAsyncRunner->update(); // serve any request already queued
+        task::Executor::instance().unregister_runner(mAsyncRunner.get());
+        mAsyncRunner.reset();
     }
 
     // Clean up route contexts (unique_ptr auto-deletes on clear)

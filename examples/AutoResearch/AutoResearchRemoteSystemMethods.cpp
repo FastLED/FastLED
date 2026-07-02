@@ -401,6 +401,23 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
         response.set("minFree", static_cast<int64_t>(heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT)));
         response.set("largest", static_cast<int64_t>(heap_caps_get_largest_free_block(MALLOC_CAP_8BIT)));
         response.set("loopStackHighWater", static_cast<int64_t>(uxTaskGetStackHighWaterMark(nullptr)));
+#if configUSE_TRACE_FACILITY
+        {
+            // Per-task stack headroom (words): a near-zero value means
+            // that task is about to overflow into adjacent heap
+            // (FastLED#3588 candidate mechanism).
+            TaskStatus_t statuses[16];
+            const UBaseType_t n = uxTaskGetSystemState(statuses, 16, nullptr);
+            fl::json tasks = fl::json::array();
+            for (UBaseType_t i = 0; i < n; ++i) {
+                fl::json t = fl::json::object();
+                t.set("name", statuses[i].pcTaskName);
+                t.set("hw", static_cast<int64_t>(statuses[i].usStackHighWaterMark));
+                tasks.push_back(t);
+            }
+            response.set("tasks", tasks);
+        }
+#endif
         return response;
     });
 #endif
