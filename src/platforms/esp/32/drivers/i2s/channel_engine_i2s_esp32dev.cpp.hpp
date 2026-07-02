@@ -220,11 +220,27 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
     // from the show() prologue so a SPI-only batch doesn't waste
     // an I2S1 claim that the SPI delegate would immediately race with).
     if (!mPeripheralInitialized) {
-        // Wave8 pixel clock = 8 MHz (WS2812 800 kHz × 8 pulses/bit).
-        // Peripheral picks its own N/A/B divider via `solveI2sClockDivider`.
+        // Wave8 pixel clock derived from the chipset timing: 8 pulses
+        // per bit → clk = 8 / bit_period. For WS2812 (1.25 µs period)
+        // that's 6.4 MHz; other chipsets get their own rate. (An
+        // earlier hardcoded 8 MHz produced a 1.0 µs bit period —
+        // bench-measured H750/L250 — 25% faster than spec;
+        // FastLED#3569.) All lanes share one clock — lane 0's timing
+        // wins; heterogeneous-timing batches are a follow-up.
+        u32 bit_period_ns = 0;
+        for (const auto &data : mInFlightChannels) {
+            if (data) {
+                bit_period_ns = data->getTiming().total_period_ns();
+                break;
+            }
+        }
+        const u32 pixel_clk_hz =
+            (bit_period_ns != 0)
+                ? static_cast<u32>(8000000000ULL / bit_period_ns)
+                : 6400000u;  // WS2812-equivalent fallback
         I2sEsp32DevPeripheralConfig cfg(
             /*port=*/1,
-            /*clk=*/8000000u,
+            /*clk=*/pixel_clk_hz,
             /*width=*/static_cast<u8>(mInFlightChannels.size()));
         if (!mPeripheral->initialize(cfg)) {
             FL_WARN_F("ChannelEngineI2sEsp32Dev: peripheral initialize failed");
@@ -470,15 +486,28 @@ size_t ChannelEngineI2sEsp32Dev::packScratchBuffer() FL_NO_EXCEPT {
         ++lane_idx;
     }
 
-    // Build the wave8 LUT for the target chipset timing, cached on the
-    // engine instance and filled IN PLACE via the out-param
-    // `buildWave8ByteExpansionLUT` overload — the by-value overload
-    // materialises a 2 KB temporary on the loop-task stack, which is
-    // what tripped the FastLED#3569 stack-canary panic inside the
-    // already-deep RPC → show() call chain. Rebuild when the timing
-    // changes (exact T1/T2/T3 comparison). Default chipset is fixed
-    // WS2812B 800 kHz until per-channel timing dispatch lands.
-    const ChipsetTiming timing = to_runtime_timing<TIMING_WS2812_800KHZ>();
+    // Build the wave8 LUT for the batch's chipset timing (lane 0's
+    // timing wins — all lanes share one waveform; heterogeneous-timing
+    // batches are a follow-up). Cached on the engine instance and
+    // filled IN PLACE via the out-param `buildWave8ByteExpansionLUT`
+    // overload — the by-value overload materialises a 2 KB temporary
+    // on the loop-task stack, which is what tripped the FastLED#3569
+    // stack-canary panic inside the already-deep RPC → show() call
+    // chain. Rebuild when the timing changes (exact T1/T2/T3
+    // comparison).
+    ChipsetTiming timing = to_runtime_timing<TIMING_WS2812_800KHZ>();
+    for (const auto &data : mInFlightChannels) {
+        if (!data) continue;
+        const ChipsetTimingConfig &cfg = data->getTiming();
+        if (cfg.total_period_ns() != 0) {
+            timing.T1 = cfg.t1_ns;
+            timing.T2 = cfg.t2_ns;
+            timing.T3 = cfg.t3_ns;
+            timing.RESET = cfg.reset_us;
+            timing.name = cfg.name;
+        }
+        break;
+    }
     if (!mWave8LutValid || mCachedT1 != timing.T1 || mCachedT2 != timing.T2 ||
         mCachedT3 != timing.T3) {
         const Wave8BitExpansionLut bit_lut = buildWave8ExpansionLUT(timing);  // 64 bytes — stack-safe

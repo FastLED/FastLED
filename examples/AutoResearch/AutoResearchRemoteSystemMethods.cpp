@@ -201,6 +201,45 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
         response.set("serial_safe", false);
         return response;
     });
+
+    // FastLED#3569 bench diagnostic — read up to 16 u32 words of
+    // memory-mapped register space without resetting the chip (esptool
+    // pokes force a reset, wiping the very peripheral state under
+    // investigation). Params: [{addr: <u32>, count?: 1-16}]. The caller
+    // is expected to pass valid peripheral/SRAM addresses; an unmapped
+    // address faults exactly as it would from any other code.
+    remote.bind("peekMem", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+        if (!args.is_object() || !args.contains("addr") ||
+            !args["addr"].is_int()) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "Expected {addr: u32, count?: 1-16}");
+            return response;
+        }
+        const uint32_t addr =
+            static_cast<uint32_t>(args["addr"].as_int().value());
+        int count = 1;
+        if (args.contains("count") && args["count"].is_int()) {
+            count = static_cast<int>(args["count"].as_int().value());
+        }
+        if (count < 1 || count > 16 || (addr & 3u) != 0) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "count must be 1-16, addr 4-byte aligned");
+            return response;
+        }
+        fl::json values = fl::json::array();
+        const volatile uint32_t* p =
+            reinterpret_cast<const volatile uint32_t*>(addr);  // ok reinterpret cast - caller-supplied MMIO/SRAM address, bench diagnostic
+        for (int i = 0; i < count; ++i) {
+            values.push_back(static_cast<int64_t>(p[i]));
+        }
+        response.set("success", true);
+        response.set("addr", static_cast<int64_t>(addr));
+        response.set("values", values);
+        return response;
+    });
 }
 
 #endif // !(FASTLED_AUTORESEARCH_LOW_MEMORY)

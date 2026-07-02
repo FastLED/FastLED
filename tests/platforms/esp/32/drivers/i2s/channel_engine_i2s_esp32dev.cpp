@@ -227,9 +227,9 @@ FL_TEST_CASE("I2sEsp32Dev - transmit emits wave8-encoded 32-bit samples") {
     // Two strips, 3 bytes each. Wave8 pulse-major encoding produces
     // `bytes_per_lane * 128` raw pulse bytes; the FastLED#3569 32-bit
     // sample expansion doubles that (`3 * 256 = 768`) — one u32 sample
-    // per pulse period with the 16 lanes at bits 8..23 (I2S1
-    // tx_bits_mod=32 LCD mode presents sample bit n+8 on DATA_OUT(n)).
-    // Verify:
+    // per pulse period with the 16 lanes at memory bits 16..31
+    // (bench-derived: I2S1 in tx_bits_mod=32 mono LCD mode emits only
+    // the high half-word; DATA_OUT(n) = memory bit 16+n). Verify:
     // - Size matches wave8I2s1Encoded32FrameSize()
     // - Output matches encodeChannelWave8_i2s1() +
     //   wave8I2s1ExpandTo32Samples() on the same lane-strided input
@@ -254,7 +254,13 @@ FL_TEST_CASE("I2sEsp32Dev - transmit emits wave8-encoded 32-bit samples") {
         ref_input[0 * 3 + i] = 0xAA;   // lane 0
         ref_input[1 * 3 + i] = 0xBB;   // lane 1
     }
+    // The engine derives the LUT from the CHANNEL's timing (see
+    // makeChannelData: 350/300/550) — build the reference from the same
+    // values, not a chipset constant.
     ChipsetTiming timing = to_runtime_timing<TIMING_WS2812_800KHZ>();
+    timing.T1 = 350;
+    timing.T2 = 300;
+    timing.T3 = 550;
     Wave8BitExpansionLut bit_lut = buildWave8ExpansionLUT(timing);
     Wave8ByteExpansionLut byte_lut = buildWave8ByteExpansionLUT(bit_lut);
     fl::vector<fl::u8> ref_wave8(kWave8Size, 0);
@@ -271,19 +277,18 @@ FL_TEST_CASE("I2sEsp32Dev - transmit emits wave8-encoded 32-bit samples") {
         FL_REQUIRE_EQ(rec.buffer_copy[i], ref_output[i]);
     }
 
-    // Spot-check the sample layout: lanes 0-7 = sample bits 8-15
-    // (byte 1), lanes 8-15 = sample bits 16-23 (byte 2). Bytes 0 and 3
-    // (sample bits 0-7 / 24-31 — never presented on DATA_OUT) must
-    // stay zero. Note: zero-padded lanes still carry the wave8 "0-bit"
-    // waveform (all lanes go high during the T1 phase), so bytes 1-2
-    // are nonzero even for inactive lanes — they're simply never
-    // routed to a GPIO.
+    // Spot-check the sample layout: lanes 0-7 = memory bits 16-23
+    // (byte 2), lanes 8-15 = memory bits 24-31 (byte 3). Bytes 0-1
+    // (the discarded low half-word) must stay zero. Note: zero-padded
+    // lanes still carry the wave8 "0-bit" waveform (all lanes go high
+    // during the T1 phase), so bytes 2-3 are nonzero even for inactive
+    // lanes — they're simply never routed to a GPIO.
     bool saw_lane0_high = false;
     for (size_t p = 0; p < kExpectedSize / 4; ++p) {
-        FL_REQUIRE_EQ(rec.buffer_copy[4 * p + 0], 0u);  // sample bits 0-7 unused
-        FL_REQUIRE_EQ(rec.buffer_copy[4 * p + 3], 0u);  // sample bits 24-31 unused
-        if (rec.buffer_copy[4 * p + 1] & 0x01u) {
-            saw_lane0_high = true;  // lane 0 data present at sample bit 8
+        FL_REQUIRE_EQ(rec.buffer_copy[4 * p + 0], 0u);  // low half-word unused
+        FL_REQUIRE_EQ(rec.buffer_copy[4 * p + 1], 0u);  // low half-word unused
+        if (rec.buffer_copy[4 * p + 2] & 0x01u) {
+            saw_lane0_high = true;  // lane 0 data present at memory bit 16
         }
     }
     FL_CHECK(saw_lane0_high);

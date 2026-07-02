@@ -66,8 +66,10 @@ void dumpRawEdgeTiming(fl::shared_ptr<fl::RxChannel> rx_channel,
         return;
     }
 
-    // Allocate edge buffer sized to requested count (max 256 to avoid stack overflow)
-    fl::FixedVector<fl::EdgeTime, 256> edges;
+    // Heap-allocated edge buffer (was a 2 KB FixedVector on the stack —
+    // the capture path already runs the loopTask close to its limit,
+    // FastLED#3569).
+    fl::vector<fl::EdgeTime> edges;
     size_t buffer_size = range.count < 256 ? range.count : 256;
     edges.resize(buffer_size);  // Default initializes to EdgeTime()
 
@@ -469,11 +471,13 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     auto wait_result = rx_channel->wait(rx_wait_ms);
     if (diagnostics) {
         diagnostics->captureWaitResult = static_cast<int>(wait_result);
-        fl::FixedVector<fl::EdgeTime, 256> edges;
+        // Heap-allocated (was 2 KB + 256 B FixedVectors on the loopTask
+        // stack at its deepest point — FastLED#3569).
+        fl::vector<fl::EdgeTime> edges;
         edges.resize(256);
         diagnostics->rawEdgesAfterWait = static_cast<int>(rx_channel->getRawEdgeTimes(edges, 0));
         diagnostics->decodeOutputCapacity = static_cast<int>(rx_buffer.size());
-        fl::FixedVector<fl::EdgeTime, 32> sample_edges;
+        fl::vector<fl::EdgeTime> sample_edges;
         sample_edges.resize(32);
         const size_t sample_count = rx_channel->getRawEdgeTimes(sample_edges, 0);
         fl::sstream sample;

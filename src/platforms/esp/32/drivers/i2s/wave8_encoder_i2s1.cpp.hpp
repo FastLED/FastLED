@@ -122,9 +122,15 @@ bool wave8I2s1ExpandTo32Samples(fl::span<const fl::u8> pulses,
     for (fl::size_t p = 0; p < pulse_count; ++p) {
         const fl::u32 lo = src[2 * p + 0];  // lanes 0-7
         const fl::u32 hi = src[2 * p + 1];  // lanes 8-15
-        // Sample bit (n + 8) drives DATA_OUT(n) in tx_bits_mod=32 LCD
-        // mode (see header) — place the 16 lanes at bits 8..23.
-        dst[p] = (lo << 8) | (hi << 16);
+        // Lane n → memory bit (16 + n). Bench-derived (FastLED#3569):
+        // with tx_bits_mod=32 / tx_fifo_mod=3 / tx_chan_mod=1 (mono) /
+        // tx_right_first=1, classic-ESP32 I2S1 emits ONE 16-bit parallel
+        // sample per 32-bit memory word, sourced from the HIGH half-word
+        // — the low 16 bits are discarded. Verified by bisection: lanes
+        // at bits 8..23 → no signal on DATA_OUT0; bits 0..15 → none;
+        // all-32-broadcast → clean lane-0 waveform. So DATA_OUT(n) =
+        // memory bit (16 + n).
+        dst[p] = (lo << 16) | (hi << 24);
     }
     return true;
 }

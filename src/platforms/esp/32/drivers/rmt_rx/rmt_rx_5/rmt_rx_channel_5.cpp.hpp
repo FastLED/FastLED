@@ -704,6 +704,22 @@ class RmtRxChannelImpl : public RmtRxChannel {
         mStartLow = config.start_low;
         mIoLoopBack = config.io_loop_back;
         mUseDma = use_dma_req;
+#if !SOC_RMT_SUPPORT_RX_PINGPONG
+        // FastLED#3569 — on chips without RX ping-pong a non-DMA receive is
+        // strictly one-shot: symbols beyond the channel's hardware block can
+        // NEVER arrive. mBufferSize drives the accumulation-buffer sizing in
+        // allocateAndArm(), which grabs up to 25% of free heap — callers like
+        // AutoResearch pass edge_capacity = rx_buffer_bytes * 8 (≈256k
+        // symbols ≈ 1 MB), which strangled the WROOM heap on every capture
+        // arm and cascaded into null-alloc StoreProhibited crashes while the
+        // extra capacity bought nothing. Clamp to the hardware capacity.
+        if (!mUseDma && mBufferSize > kNonDmaRxSymbols) {
+            FL_LOG_RX("RX begin: clamping buffer_size " << mBufferSize
+                      << " -> " << kNonDmaRxSymbols
+                      << " (one-shot hw capacity, no RX ping-pong)");
+            mBufferSize = kNonDmaRxSymbols;
+        }
+#endif
 
         FL_LOG_RX("RX begin: signal_range_min="
                << mSignalRangeMinNs
@@ -1301,7 +1317,14 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // MALLOC_CAP_INTERNAL memory â€” a plain fl::vector can land in PSRAM on
         // ESP32-S3, which ESP-IDF rejects with "user buffer not in the internal
         // RAM". See issue #2254.
+#if SOC_RMT_SUPPORT_RX_PINGPONG
         constexpr size_t NONDMA_BUFFER_SIZE = 4096;
+#else
+        // One-shot chips (no RX ping-pong): a receive can never deliver
+        // more than the channel's hardware block, so a 4096-symbol
+        // (16 KB) bounce buffer is pure heap waste (FastLED#3569).
+        constexpr size_t NONDMA_BUFFER_SIZE = kNonDmaRxSymbols;
+#endif
         // DMA user buffer sized to fit within num_dma_nodes Ã— 4092 bytes. With
         // mem_block_symbols=14336 we get 14 DMA nodes = 57288 bytes = 14322
         // symbols capacity. Pass 14000 symbols (= 56000 bytes) with margin.
