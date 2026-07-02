@@ -152,6 +152,41 @@ FL_TEST_CASE("I2sEsp32Dev - engine name is I2S") {
     FL_CHECK(engine.getName() == fl::string::from_literal("I2S"));
 }
 
+FL_TEST_CASE("I2sEsp32Dev - second bank (port 0) is named I2S0 and plumbs the port") {
+    resetMockState();
+    ChannelEngineI2sEsp32Dev engine(createMockPeripheral(), /*i2s_port=*/0);
+    auto &mock = I2sPeripheralEsp32DevMock::instance();
+    FL_CHECK(engine.getName() == fl::string::from_literal("I2S0"));
+
+    // First clockless show lazily initializes the peripheral — the
+    // config must carry port 0 (FastLED#3576 Phase 1).
+    engine.enqueue(makeChannelData(0, 3, 0x11));
+    engine.show();
+    FL_CHECK_EQ(static_cast<int>(mock.getConfig().mI2sPort), 0);
+}
+
+FL_TEST_CASE("I2sEsp32Dev - canHandle enforces the 16-lane clockless capacity") {
+    resetMockState();
+    ChannelEngineI2sEsp32Dev engine(createMockPeripheral());
+
+    fl::vector<ChannelDataPtr> held;
+    for (int i = 0; i < 16; ++i) {
+        auto data = makeChannelData(/*pin=*/i, /*bytes=*/3, 0x10);
+        FL_CHECK(engine.canHandle(data));
+        engine.enqueue(data);
+        held.push_back(data);
+    }
+    // 17th distinct clockless channel overflows to the next-priority
+    // driver (the I2S0 second bank / RMT) — refused here.
+    auto overflow = makeChannelData(/*pin=*/16, /*bytes=*/3, 0x10);
+    FL_CHECK_FALSE(engine.canHandle(overflow));
+    // Channels already enqueued this frame stay accepted.
+    FL_CHECK(engine.canHandle(held[3]));
+    // SPI batches are not lane-capped (they delegate).
+    auto spi = makeSpiChannelData(/*dataPin=*/17, /*clockPin=*/18, /*bytes=*/4);
+    FL_CHECK(engine.canHandle(spi));
+}
+
 FL_TEST_CASE(
     "I2sEsp32Dev - reports Capabilities(true,true) per parallel-IO rule") {
     resetMockState();

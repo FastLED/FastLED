@@ -119,6 +119,10 @@ constexpr int PRIORITY_I2S_SPI = PRIORITY_FORCE; ///< FORCED highest by FASTLED_
 #else
 constexpr int PRIORITY_I2S_SPI = 10; ///< Native I2S parallel SPI driver (ESP32dev, true SPI chipsets)
 #endif
+// FastLED#3576 Phase 1 -- second clockless bank on I2S0 ("I2S0",
+// FLEX_IO instance 1). One below the primary I2S1 engine so channels
+// fill bank 1's 16 lanes first, then overflow here (then RMT).
+constexpr int PRIORITY_I2S_BANK2 = 9;
 #if defined(FASTLED_ESP32_FORCE_LCD_SPI)
 constexpr int PRIORITY_LCD_SPI = PRIORITY_FORCE; ///< FORCED highest by FASTLED_ESP32_FORCE_LCD_SPI
 #else
@@ -269,6 +273,18 @@ static void addI2sSpiIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
         FL_DBG_F("ESP32: Added I2S_SPI driver (priority %s)", PRIORITY_I2S_SPI);
     } else {
         FL_DBG_F("ESP32: I2S_SPI driver creation deferred (no ESP peripheral yet)");
+    }
+    // FastLED#3576 Phase 1 -- second clockless bank on I2S0 (FLEX_IO
+    // instance 1, name "I2S0"). Registered one priority below the
+    // primary so the manager fills I2S1's 16 lanes first and overflows
+    // the 17th+ clockless channel here. Hardware contention with the
+    // clocked-SPI use of I2S0 is arbitrated at initialize() time by the
+    // port-claim registry -- whichever mode wins, the loser's channels
+    // fall through to RMT.
+    auto bank2 = BusTraits<Bus::FLEX_IO, 1>::instancePtr();
+    if (bank2) {
+        manager.addDriver(PRIORITY_I2S_BANK2, bank2);
+        FL_DBG_F("ESP32: Added I2S0 second-bank driver (priority %s)", PRIORITY_I2S_BANK2);
     }
 #else
     (void)manager;

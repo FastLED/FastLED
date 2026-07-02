@@ -45,6 +45,15 @@ inline void enableAllChannelDrivers() FL_NO_EXCEPT {
 #if FASTLED_ESP32_HAS_LCD_RGB
     fl::enableDriver<fl::Bus::FLEX_IO, 1>();
 #endif
+#if FASTLED_ESP32_HAS_I2S
+    // FastLED#3576 Phase 1 — second clockless bank on I2S0 ("I2S0",
+    // FLEX_IO instance 1). Priority one below the primary I2S1 bank so
+    // clockless channels fill 16 lanes there first, then overflow here
+    // (32 lanes total), then RMT. I2S0 hardware is contended with the
+    // clocked-SPI driver — the port-claim registry arbitrates at
+    // initialize() time.
+    fl::enableDriver<fl::Bus::FLEX_IO, 1>();
+#endif
     // FastLED#3526 — the modern classic-ESP32 I2S parallel-out engine
     // (`ChannelEngineI2sEsp32Dev`) wraps the SAME I2S1 peripheral as
     // the current `I2S_SPI` driver at `Bus::FLEX_IO, 0`. Per the

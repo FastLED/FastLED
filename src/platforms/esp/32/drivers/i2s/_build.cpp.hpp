@@ -31,6 +31,7 @@
 // elides completely when nothing calls into `I2sPeripheralEsp32DevEsp`.
 #include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_esp.cpp.hpp"
 #include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_mock.cpp.hpp"
+#include "platforms/esp/32/drivers/i2s/i2s_port_claim.cpp.hpp"  // FastLED#3576 Phase 1 — cross-driver I2S0/I2S1 ownership
 
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s.cpp.hpp"
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s1.cpp.hpp"  // FastLED#3526 Phase 2a — general clockless encoder for I2S1

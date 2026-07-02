@@ -44,6 +44,7 @@
 
 #include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_esp.h"
 #include "platforms/esp/32/drivers/i2s/i2s_periph_compat.h"  // fl_i2s_periph_enable — IDF-version-safe power gate
+#include "platforms/esp/32/drivers/i2s/i2s_port_claim.h"     // cross-driver I2S port ownership (FastLED#3576)
 
 #include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
@@ -74,6 +75,10 @@ namespace {
 // APB reference; the divider formula is
 // `f_out = I2S_BASE_CLK / (N + B/A)`.
 constexpr u32 kI2sBaseClkHz = 80000000u;
+
+// Owner tag for the cross-driver port-claim registry. Stable literal —
+// claim identity is the pointer.
+constexpr const char *kI2sClocklessOwner = "I2S_CLOCKLESS";
 
 /// @brief Solve the classic-ESP32 I2S1 fractional clock divider
 ///        (`clkm_conf.clkm_div_{num,a,b}`) for a target frequency.
@@ -196,16 +201,20 @@ I2sPeripheralEsp32DevEsp::~I2sPeripheralEsp32DevEsp() {
 bool I2sPeripheralEsp32DevEsp::initialize(
     const I2sEsp32DevPeripheralConfig &cfg) FL_NO_EXCEPT {
     if (mInitialized) {
-        // FastLED#3526 Phase 2e — peripheral is a `fl::Singleton<>` so
-        // there is one process-wide instance. `mInitialized` is now the
-        // sole ownership record for I2S1 (former
-        // `g_i2s1_hardware_claimed_by_modern` global was folded into
-        // this member).
-        FL_WARN_F("I2sPeripheralEsp32DevEsp: I2S1 already claimed");
+        FL_WARN_F("I2sPeripheralEsp32DevEsp: already initialized");
         return false;
     }
     mConfig = cfg;
     const int i2s_device = static_cast<int>(mConfig.mI2sPort);
+
+    // FastLED#3576 Phase 1 — cross-driver ownership: I2S0 is contended
+    // between the second clockless bank and the clocked-SPI driver
+    // (`I2sSpiPeripheralEsp`). First claim wins; released in
+    // deinitialize(). The per-instance `mInitialized` flag alone can't
+    // see the other driver class.
+    if (!i2sPortClaim(i2s_device, kI2sClocklessOwner)) {
+        return false;
+    }
 
     // Power-gate + reset the peripheral via the IDF-version-safe wrapper
     // (routes to `periph_module_enable(PERIPH_I2S{n}_MODULE)` on IDF
@@ -321,6 +330,7 @@ bool I2sPeripheralEsp32DevEsp::initialize(
                                    &i2s_dma_isr_trampoline, this, &mIsrHandle);
     if (err != ESP_OK) {
         FL_WARN_F("I2sPeripheralEsp32DevEsp: esp_intr_alloc failed err=%s", static_cast<int>(err));
+        i2sPortRelease(i2s_device, kI2sClocklessOwner);
         return false;
     }
 
@@ -355,6 +365,7 @@ void I2sPeripheralEsp32DevEsp::deinitialize() FL_NO_EXCEPT {
         mDescriptors = nullptr;
         mDescriptorCapacity = 0;
     }
+    i2sPortRelease(i2s_device, kI2sClocklessOwner);
     mInitialized = false;
     mBusy = false;
 }
@@ -527,8 +538,13 @@ bool I2sPeripheralEsp32DevEsp::routeLanePin(u8 lane, i32 gpio_pin) FL_NO_EXCEPT 
     // Compute the SoC signal index for this lane. Signal indices are
     // contiguous within each I2S block (I2S{n}O_DATA_OUT0_IDX ..
     // I2S{n}O_DATA_OUT23_IDX) — one add per lane covers the range.
+    //
+    // I2S0 quirk (FastLED#3576 Phase 1 bench): in the same 32-bit mono
+    // LCD config, I2S0 presents the emitted half-word on DATA_OUT8..23
+    // (one byte higher than I2S1's DATA_OUT0..15) — lane n therefore
+    // routes signal OUT(8+n) on port 0 and OUT(n) on port 1.
     const int base_signal = (i2s_device == 0)
-        ? static_cast<int>(I2S0O_DATA_OUT0_IDX)
+        ? static_cast<int>(I2S0O_DATA_OUT0_IDX) + 8
         : static_cast<int>(I2S1O_DATA_OUT0_IDX);
 
     if (gpio_pin < 0) {

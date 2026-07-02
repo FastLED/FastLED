@@ -118,6 +118,13 @@ template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 
 template<> struct BusInstanceCount<Bus::FLEX_IO> { static constexpr fl::u8 value = 2; };
 template<> struct BusInstanceCount<Bus::SPI> { static constexpr fl::u8 value = 1; };
 template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 2; };
+#elif defined(FL_IS_ESP_32DEV)
+// Classic ESP32 (FastLED#3576 Phase 1): FLEX_IO instance 0 = I2S1
+// primary clockless bank, instance 1 = I2S0 second bank ("I2S0",
+// contended with the clocked-SPI driver via the port-claim registry).
+template<> struct BusInstanceCount<Bus::FLEX_IO> { static constexpr fl::u8 value = 2; };
+template<> struct BusInstanceCount<Bus::SPI> { static constexpr fl::u8 value = 2; };
+template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 2; };
 #endif
 
 inline const char* busName(Bus b, fl::u8 which = 0) FL_NO_EXCEPT {

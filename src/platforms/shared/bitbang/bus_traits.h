@@ -40,7 +40,7 @@ template<> struct BusTraits<Bus::BIT_BANG> {
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
     static void registerWithManager() FL_NO_EXCEPT {
-        ChannelManager::instance().addDriver(default_bus_priority(Bus::BIT_BANG), instancePtr());
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::BIT_BANG, 0), instancePtr());
     }
 };
 

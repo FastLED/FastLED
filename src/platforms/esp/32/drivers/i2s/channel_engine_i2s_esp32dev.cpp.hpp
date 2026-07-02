@@ -35,7 +35,8 @@ namespace fl {
 //=============================================================================
 
 ChannelEngineI2sEsp32Dev::ChannelEngineI2sEsp32Dev(
-    fl::shared_ptr<II2sPeripheralEsp32Dev> peripheral) FL_NO_EXCEPT
+    fl::shared_ptr<II2sPeripheralEsp32Dev> peripheral,
+    u8 i2s_port) FL_NO_EXCEPT
     : mPeripheral(fl::move(peripheral)),
       mEnqueuedChannels(),
       mInFlightChannels(),
@@ -48,7 +49,8 @@ ChannelEngineI2sEsp32Dev::ChannelEngineI2sEsp32Dev(
       mCachedT1(0),
       mCachedT2(0),
       mCachedT3(0),
-      mWave8LutValid(false) {
+      mWave8LutValid(false),
+      mI2sPort(i2s_port) {
     if (!mPeripheral) {
         FL_WARN_F("ChannelEngineI2sEsp32Dev: null peripheral injected — inert");
         return;
@@ -99,9 +101,27 @@ ChannelEngineI2sEsp32Dev::~ChannelEngineI2sEsp32Dev() {
 bool ChannelEngineI2sEsp32Dev::canHandle(const ChannelDataPtr &data) const
     FL_NO_EXCEPT {
     // Per the parallel-IO rule, this engine handles both clockless
-    // and SPI on the classic-ESP32 I2S peripheral. Reject only null
-    // data.
-    return static_cast<bool>(data);
+    // and SPI on the classic-ESP32 I2S peripheral.
+    if (!data) {
+        return false;
+    }
+    if (data->isSpi()) {
+        return true; // SPI batches delegate — no lane cap here
+    }
+    // FastLED#3576 Phase 1 — 16-lane clockless capacity. Channels bind
+    // to drivers lazily inside their first show, AFTER earlier channels
+    // enqueued this frame, so refusing the 17th here overflows it to
+    // the next-priority driver (the second I2S bank, then RMT). A
+    // channel already enqueued this frame stays accepted.
+    if (mEnqueuedChannels.size() < 16) {
+        return true;
+    }
+    for (const auto &d : mEnqueuedChannels) {
+        if (d == data) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void ChannelEngineI2sEsp32Dev::enqueue(ChannelDataPtr data) FL_NO_EXCEPT {
@@ -239,7 +259,7 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
                 ? static_cast<u32>(8000000000ULL / bit_period_ns)
                 : 6400000u;  // WS2812-equivalent fallback
         I2sEsp32DevPeripheralConfig cfg(
-            /*port=*/1,
+            /*port=*/mI2sPort,
             /*clk=*/pixel_clk_hz,
             /*width=*/static_cast<u8>(mInFlightChannels.size()));
         if (!mPeripheral->initialize(cfg)) {
@@ -565,17 +585,29 @@ void ChannelEngineI2sEsp32Dev::onTransmitDone() FL_NO_EXCEPT {
 //=============================================================================
 
 fl::shared_ptr<IChannelDriver> createI2sEsp32DevEngine() FL_NO_EXCEPT {
+    return createI2sEsp32DevEngine(/*port=*/1);
+}
+
+fl::shared_ptr<IChannelDriver> createI2sEsp32DevEngine(u8 port) FL_NO_EXCEPT {
 #if defined(FL_IS_ESP_32DEV) && FASTLED_ESP32_HAS_I2S
-    // FastLED#3526 Phase 2e — the peripheral is now a `fl::Singleton<>`
-    // (process-lifetime, never destroyed) so the ownership record is
-    // simply the singleton's `mInitialized`. Wrap the singleton
-    // reference in a `shared_ptr` via `make_shared_no_tracking` — no
-    // control block, no delete, zero-overhead non-owning handle.
-    auto& singleton = fl::Singleton<I2sPeripheralEsp32DevEsp>::instance();
+    // FastLED#3576 Phase 1 — one peripheral singleton PER I2S BLOCK
+    // (`fl::Singleton<T, N>` tag = port). Process-lifetime, never
+    // destroyed; cross-driver hardware arbitration (vs the clocked-SPI
+    // driver on I2S0) happens in `initialize()` via the port-claim
+    // registry. Wrap in a `shared_ptr` via `make_shared_no_tracking` —
+    // no control block, no delete, zero-overhead non-owning handle.
+    if (port > 1) {
+        return nullptr;
+    }
     fl::shared_ptr<II2sPeripheralEsp32Dev> peripheral =
-        fl::make_shared_no_tracking<II2sPeripheralEsp32Dev>(singleton);
-    return fl::make_shared<ChannelEngineI2sEsp32Dev>(peripheral);
+        (port == 0)
+            ? fl::make_shared_no_tracking<II2sPeripheralEsp32Dev>(
+                  fl::Singleton<I2sPeripheralEsp32DevEsp, 0>::instance())
+            : fl::make_shared_no_tracking<II2sPeripheralEsp32Dev>(
+                  fl::Singleton<I2sPeripheralEsp32DevEsp, 1>::instance());
+    return fl::make_shared<ChannelEngineI2sEsp32Dev>(peripheral, port);
 #else
+    (void)port;
     return nullptr;
 #endif
 }

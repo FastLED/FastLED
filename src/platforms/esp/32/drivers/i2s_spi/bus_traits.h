@@ -66,6 +66,30 @@ template<> struct BusTraits<Bus::FLEX_IO, 0> {
 // -> "Parallel-IO Driver: Unified Clockless + SPI Engine").
 template<> struct BusSupports<Bus::FLEX_IO, SpiChipsetConfig, 0> : fl::true_type {};
 
+// FastLED#3576 Phase 1 — second clockless bank on I2S0 ("I2S0",
+// `Bus::FLEX_IO` instance 1). Classic ESP32 has two identical I2S
+// blocks; instance 0 wraps I2S1 (primary), instance 1 wraps I2S0.
+// I2S0 is contended with the clocked-SPI driver — the port-claim
+// registry (`i2s_port_claim.h`) arbitrates at initialize() time, so
+// whichever mode touches I2S0 first per session wins and the other
+// fails cleanly.
+template<> struct BusTraits<Bus::FLEX_IO, 1> {
+    using Driver = IChannelDriver;
+
+    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
+        static fl::shared_ptr<Driver> gHolder = createI2sEsp32DevEngine(/*port=*/0);
+        return gHolder;
+    }
+
+    static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
+
+    static void registerWithManager() FL_NO_EXCEPT {
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::FLEX_IO, 1), instancePtr());
+    }
+};
+
+template<> struct BusSupports<Bus::FLEX_IO, SpiChipsetConfig, 1> : fl::true_type {};
+
 }  // namespace fl
 
 #endif  // FL_IS_ESP32 && FASTLED_ESP32_HAS_I2S
