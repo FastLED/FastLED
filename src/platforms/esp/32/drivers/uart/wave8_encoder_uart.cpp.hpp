@@ -121,6 +121,25 @@ Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
     if (pulses_1 < 1) pulses_1 = 1;
     if (pulses_1 > 4) pulses_1 = 4;
 
+    // FastLED#3569 follow-up (UART bench): enforce a minimum ABSOLUTE
+    // wire separation between the 0 and 1 symbols, widening T1H upward.
+    // Best-fit rounding alone can land them one pulse apart, and at
+    // high baud one pulse is too little: WS2812B-V5 (T0H=225, T1H=580,
+    // pulse=245 ns) rounds to (1, 2) = 245 vs 490 ns, inside real LEDs'
+    // 0/1 ambiguity band (the WS281x sampling threshold sits near
+    // 550-625 ns) — it flapped the RX decoder's 500 ns threshold on the
+    // WROOM bench. A longer HIGH still reads as 1, so rounding T1H up
+    // is safe: (1, 2) → (1, 3) = 245 vs 735 ns, matching the proven
+    // legacy WS2812 LUT shape. Slow chipsets (WS2811-400: 500 ns
+    // pulses) already have ≥ 500 ns of single-pulse separation and are
+    // left untouched.
+    constexpr u32 kMinSymbolSeparationNs = 400;
+    while (pulses_1 < 4 &&
+           static_cast<u32>(pulses_1 - pulses_0) * pulse_width_ns <
+               kMinSymbolSeparationNs) {
+        ++pulses_1;
+    }
+
     // Build LUT entries for all 4 two-bit combinations
     result.lut[0] = buildUartByte(pulses_0, pulses_0); // "00"
     result.lut[1] = buildUartByte(pulses_0, pulses_1); // "01"
@@ -157,15 +176,30 @@ bool canRepresentTiming(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
     // Check 4: Pulse counts must be distinguishable
     if (pulses_0 == pulses_1) return false;
 
-    // Check 5 & 6: Quantized timing must be within half a pulse width of nominal.
-    // This is the natural quantization error bound for best-fit rounding.
-    // For chipsets with wider pulses (lower baud), tolerance scales accordingly.
+    // Mirror buildWave10Lut's minimum-separation bump so feasibility is
+    // judged against the counts that will actually be transmitted.
+    constexpr u32 kMinSymbolSeparationNs = 400;
+    const u8 pulses_1_raw = pulses_1;
+    while (pulses_1 < 4 &&
+           static_cast<u32>(pulses_1 - pulses_0) * pulse_width_ns <
+               kMinSymbolSeparationNs) {
+        ++pulses_1;
+    }
+
+    // Check 5 & 6: Quantized timing must be within half a pulse width of
+    // nominal — the natural error bound for best-fit rounding. When the
+    // separation bump deliberately widened T1H (longer HIGH still reads
+    // as 1), allow the extra pulse it added on top of that bound; the
+    // shortened T1L tail this costs is harmless as long as one LOW pulse
+    // remains, which the [1, 4] range guarantees.
     const u32 tolerance_ns = pulse_width_ns / 2;
     const u32 actual_t0h = static_cast<u32>(pulses_0) * pulse_width_ns;
     const u32 actual_t1h = static_cast<u32>(pulses_1) * pulse_width_ns;
+    const u32 t1h_tolerance_ns =
+        tolerance_ns + static_cast<u32>(pulses_1 - pulses_1_raw) * pulse_width_ns;
 
     if (absDiff(actual_t0h, t0h_ns) > tolerance_ns) return false;
-    if (absDiff(actual_t1h, t1h_ns) > tolerance_ns) return false;
+    if (absDiff(actual_t1h, t1h_ns) > t1h_tolerance_ns) return false;
 
     return true;
 }
