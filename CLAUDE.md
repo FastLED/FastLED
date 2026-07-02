@@ -87,6 +87,12 @@ See `agents/docs/build-system.md` for full command execution rules and forbidden
 - **Override**: `FL_AGENT_ALLOW_ALL_CMDS=1` prefix bypasses forbidden command checks
 - See `agents/docs/build-system.md` for full rules
 
+### Deployment (flash / upload) is fbuild's job — ALWAYS
+- **Never invoke flash tools directly from FastLED code.** No `pyocd`, `lpc21isp`, `esptool`, `avrdude`, `bossac`, `stm32flash`, `openocd load`, `dfu-util`, `teensy_loader_cli`, `JLinkExe`, or equivalents anywhere under `ci/`, `tests/`, `examples/`, or `src/`.
+- **The only permitted deploy entrypoint is `fbuild deploy`.** `bash autoresearch` runs `fbuild build` + `fbuild deploy` and then opens the VCOM — it does not flash.
+- If fbuild is missing a deploy backend for your target: **file the gap at https://github.com/FastLED/fbuild/issues and let the caller fail loudly.** Do not add a "temporary" direct flash call — those become permanent and skip the hardening (timeout guards, probe preflight, ISP fallback, VCOM unwedge) the fbuild path enforces.
+- Full rule and rationale: `agents/docs/build-system.md` → "Deployment (flash / upload) is fbuild's job — ALWAYS". History: LPC-Link2 CMSIS-DAP v1.0.7 firmware hung pyocd's Windows HID for 8 minutes per invocation on 2026-07-01 — a fbuild-owned platform-integration problem that was leaking into every FastLED script. The nxplpc deployer (lpc21isp UART ISP path) shipped in FastLED/fbuild#595 (refined in #923, #928); autoresearch now delegates to it via `fbuild deploy`.
+
 ### Code Standards
 - **C++**: See `agents/docs/cpp-standards.md` (span convention, DMA patterns, naming, macros)
 - **C++ public settings**: New global setters MUST go on `CFastLED` (`FastLED.setX()`), not as bare `fl::set_*` free functions — see `agents/docs/cpp-standards.md` → "Public Settings Pattern"

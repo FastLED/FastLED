@@ -45,8 +45,10 @@ namespace fl {
 
 // ============================================================================
 // LPC845 SCT register access — see embedded comment block below for the
-// UM11029 source for every offset and bit position. Layout cross-checked
-// against the hardware-validated SYSCON offsets in `watchdog_lpc.impl.hpp`.
+// UM11029 source for every offset and bit position. Base addresses are
+// static_assert'ed against the vendor CMSIS PAL below; `watchdog_lpc.impl.hpp`
+// migrated to vendor `WWDT_Type`/`SYSCON_Type` structs outright after its
+// hand-rolled map shipped with MOD/TC swapped (silicon-diagnosed 2026-07-02).
 // ============================================================================
 //
 // Memory map (UM11029 §3 Memory Map):

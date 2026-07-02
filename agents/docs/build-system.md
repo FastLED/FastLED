@@ -12,6 +12,19 @@
 
 All board compiles use `fbuild`. Do not add board allowlists or PlatformIO fallback paths when a board does not compile; file board build compatibility problems at https://github.com/FastLED/fbuild/issues and fix them in fbuild.
 
+### 🚨 Deployment (flash / upload) is fbuild's job — ALWAYS
+
+**FastLED code MUST NOT invoke flash tools directly.** No `pyocd`, `lpc21isp`, `esptool`, `avrdude`, `bossac`, `stm32flash`, `openocd load`, `dfu-util`, `teensy_loader_cli`, `JLinkExe`, or equivalents anywhere under `ci/`, `tests/`, `examples/`, or `src/`. The only permitted deployment entrypoint from FastLED code is `fbuild deploy`.
+
+**Why this rule exists:** on 2026-07-01 the LPC-Link2 CMSIS-DAP v1.0.7 firmware wedged pyocd's Windows HID backend for 8 minutes per attempt in `bash autoresearch lpc845`, silenced the shared VCOM, and blocked a whole afternoon of silicon validation. The wedge is a fbuild-owned platform-integration problem (timeout guards, probe preflight, UART ISP fallback, VCOM unwedge) that belongs in one place with proper hardening — not scattered across every FastLED script that wants to flash a board. See `ci/autoresearch/phases.py::_build_and_deploy_nxplpc` for the current shape (build + deploy, both delegated to fbuild). The nxplpc deployer (lpc21isp UART ISP path, sidesteps CMSIS-DAP HID entirely) shipped in FastLED/fbuild#595 (refined in #923 path resolver + #928 Windows COM prefix / `-bin` handling).
+
+**What to do if fbuild is missing a deploy backend for your target:**
+1. File a fbuild issue with the acceptance criteria you need.
+2. Have `bash autoresearch` (or the caller) fail loudly with a pointer to that issue.
+3. **Do NOT** re-add a direct pyocd/lpc21isp/etc. call as a "temporary" fallback. The fallbacks become permanent, they don't get the hardening the fbuild path gets, and the next agent hits the same wedge again.
+
+**What to do if you find a direct flash-tool call in FastLED code:** rip it out and route through `fbuild deploy`. Reference this section in the commit message.
+
 **`--backend platformio` is a comparison-only tool (#3279).** `bash compile <board> --backend platformio` (and the `--platformio` / `--pio` shortcuts) drives the legacy `PioCompiler` `pio run` backend. Use ONLY to compare fbuild output and find gaps in fbuild's flag / output reproduction. Production CI always uses fbuild — any binary you ship goes through fbuild. Programmatic callers are blocked unless they explicitly opt in via `FASTLED_BACKEND_PLATFORMIO_EXPLICIT=1`; the `--backend platformio` CLI flag is the supported path that sets this automatically. The PIO backend is retained as a diagnostic; do not build new functionality on top of it.
 
 ### Root `./platformio.ini` is a frozen surface (#3274)

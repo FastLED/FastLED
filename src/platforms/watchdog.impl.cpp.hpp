@@ -64,7 +64,12 @@
     #include "platforms/arm/mgm240/watchdog_mgm240.impl.hpp"
 #elif defined(FL_IS_AVR) && FL_HAS_INCLUDE(<avr/wdt.h>)
     #include "platforms/avr/watchdog_avr.impl.hpp"
-#elif defined(FL_IS_ARM_LPC)
+#elif defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804)
+    // Only the chips whose vendor CMSIS PAL ships in ArduinoCore-LPC8xx
+    // (<LPC845.h> / <LPC804.h>). LPC11xx / LPC15xx have different SYSCON
+    // layouts and no in-tree PAL — they take the no-op fallback below
+    // (the previous hand-rolled impl poked LPC84x register addresses on
+    // them, which was silently wrong).
     #include "platforms/arm/lpc/watchdog_lpc.impl.hpp"
 #else
     // Fallback: no real or emulated WDT available — all methods are no-ops.
