@@ -2525,7 +2525,7 @@ async def _run_lpc_dma_spi_tests(ctx: RunContext) -> int:
     already be present in `build_flags`.
 
     Compile-time build flag: `-DFASTLED_LPC_SPI_DMA=1` (optionally
-    combined with `-DFASTLED_LPC_SPI_DMA_CHANNEL=4` for SPI1). See
+    combined with `-DFASTLED_LPC_SPI_DMA_CHANNEL=13` for SPI1). See
     `examples/AutoResearch/AutoResearchSpiDma.h`.
     """
     final_environment = (ctx.final_environment or "").lower()
@@ -2553,7 +2553,7 @@ async def _run_lpc_dma_spi_tests(ctx: RunContext) -> int:
     )
     print("   Build flag: -DFASTLED_LPC_SPI_DMA=1 (see")
     print("   examples/AutoResearch/AutoResearchSpiDma.h)")
-    print("   Optional: -DFASTLED_LPC_SPI_DMA_CHANNEL=6 (SPI1 default)")
+    print("   Optional: -DFASTLED_LPC_SPI_DMA_CHANNEL=13 (SPI1; SPI0=11 default)")
     print("   Wiring: no jumper required for transferOnce/Overlap timing;")
     print("   SCK measurement is wall-clock derived, not SCT-captured.")
     print("=" * 60)

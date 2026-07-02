@@ -65,9 +65,10 @@ namespace autoresearch {
 namespace dma_spi {
 
 // Default pin assignment matches the LPC845-BRK SPI0 typical routing.
-// FastPin::setOutput() runs against these, but the actual MOSI/SCK
-// carrier is routed by SWM independently — fbuild's SystemInit
-// configures SPI0 to sensible defaults.
+// Since #3580 the driver's init() owns the full peripheral plumbing —
+// SPI clock enable, FCLKSEL function-clock select, reset release, and
+// SWM routing of SCK/MOSI to these pins. No startup-code cooperation
+// is required.
 //
 // If the user needs to move pins, override at compile time via
 // `-DFASTLED_LPC_SPI_DMA_HARNESS_DATA_PIN=<N>` /
@@ -134,8 +135,23 @@ inline fl::string transferOnceHandler(int byte_count, int byte_pattern) FL_NO_EX
     // Poll for done() without WFI so the elapsed measurement matches
     // the CPU-busy-wait cost path. (Callers wanting the WFI sleep path
     // use `waitDma()` — that's not what we're measuring here.)
+    //
+    // Bounded spin (#3580 diagnosis): a healthy 512-byte stream at 4 MHz
+    // SCK completes in ~1 ms; 2M iterations ≈ 1 s at 24 MHz. On timeout,
+    // return a register snapshot instead of wedging into the watchdog:
+    //   "0,dma_active,chan_xfercfg,chan_ctlstat,spi_stat,dma_errint"
+    fl::u32 spins = 0;
     while (!HarnessDriver::done()) {
-        // spin
+        if (++spins > 2000000u) {
+            fl::sstream d;
+            d << 0 << ','
+              << DMA0->COMMON[0].ACTIVE << ','
+              << DMA0->CHANNEL[FASTLED_LPC_SPI_DMA_CHANNEL].XFERCFG << ','
+              << DMA0->CHANNEL[FASTLED_LPC_SPI_DMA_CHANNEL].CTLSTAT << ','
+              << SPI0->STAT << ','
+              << DMA0->COMMON[0].ERRINT;
+            return d.str();
+        }
     }
     const fl::u32 t_end = micros();
 
