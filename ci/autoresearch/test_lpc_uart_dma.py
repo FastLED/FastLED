@@ -206,14 +206,14 @@ def main() -> int:
 
     try:
         s = serial.Serial(args.port, args.baud, timeout=0.25)
-    except Exception as e:
+    except serial.SerialException as e:
         print(f"FAIL — cannot open {args.port}: {e}")
         return 1
 
     time.sleep(0.5)
     try:
         s.reset_input_buffer()
-    except Exception:
+    except serial.SerialException:
         pass
 
     ok = True

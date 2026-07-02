@@ -912,6 +912,10 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         # LPC845-BRK silicon 2026-07-02). The bench's largest case is
         # 512 bytes, so 512 loses no coverage and frees 4.5 KB.
         lpc_bench_defines.append("FASTLED_LPC_SPI_DMA_MAX_BYTES=512")
+        # ISR-refilled streaming (kickDmaStreamAsync ping-pong refill).
+        # Requires the ACLPC core with named weak IRQ vector slots
+        # (framework-arduino-lpc8xx#38, pinned via fbuild ≥ 2.4.0).
+        lpc_bench_defines.append("FASTLED_LPC_DMA_ISR=1")
     if getattr(args, "dma_uart", False):
         # Async UART bench (#3453 follow-up). FASTLED_LPC_DMA_ISR turns on
         # the shared DMA0 IRQ hub for ISR chunk chaining — requires the
@@ -1204,6 +1208,7 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
             deferred_defines.append("FASTLED_LPC_SPI_DMA=1")
             # Same 16 KB-RAM cap rationale as the parse-time path above.
             deferred_defines.append("FASTLED_LPC_SPI_DMA_MAX_BYTES=512")
+            deferred_defines.append("FASTLED_LPC_DMA_ISR=1")
         if getattr(args, "dma_uart", False):
             deferred_defines.append("FASTLED_LPC_UART_DMA=1")
             deferred_defines.append("FASTLED_LPC_DMA_ISR=1")

@@ -98,6 +98,9 @@ def _make_args(**overrides) -> Args:
         tight_timing_max_overhead_us=2000,
         pin_toggle_rx=False,
         ws2812_loopback=False,
+        pwm_dma_cl=False,
+        dma_spi=False,
+        dma_uart=False,
         # Default existing-test behavior: use the legacy root-platformio.ini
         # path so the ``fake_project_dir`` fixture's hand-written ini is the
         # one read. Tests that exercise the new synthesised-ini path (#3281)

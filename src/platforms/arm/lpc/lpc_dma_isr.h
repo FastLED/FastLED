@@ -67,7 +67,14 @@ inline void registerDmaChannelIsr(fl::u32 channel, DmaChannelIsr fn,
 #if FASTLED_LPC_DMA_ISR
     dmaIsrTable()[channel] = DmaIsrSlot{fn, ctx};
     if (fn != nullptr) {
+        // Clear any STALE completion before opening the gate: a prior
+        // synchronous transfer on this channel (XFERCFG.SETINTA) leaves
+        // INTA pending, and enabling INTENSET would fire the callback
+        // immediately — before the caller finishes initializing its
+        // stream state (observed on LPC845 silicon 2026-07-02).
+        DMA0->COMMON[0].INTA = (1UL << channel);  // W1C
         DMA0->COMMON[0].INTENSET = (1UL << channel);
+        NVIC_ClearPendingIRQ(DMA0_IRQn);
         NVIC_EnableIRQ(DMA0_IRQn);
     } else {
         DMA0->COMMON[0].INTENCLR = (1UL << channel);
@@ -81,27 +88,9 @@ inline void registerDmaChannelIsr(fl::u32 channel, DmaChannelIsr fn,
 }  // namespace lpc
 }  // namespace fl
 
-#if FASTLED_LPC_DMA_ISR
-// Strong override of the ACLPC startup's weak DMA0_IRQHandler
-// (framework-arduino-lpc8xx#38). Dispatches INTA completion flags to the
-// registered per-channel callbacks. INTA bits are W1C; clear BEFORE the
-// callback so a callback that immediately re-arms and completes cannot
-// lose its next edge.
-extern "C" void DMA0_IRQHandler(void) {
-    const fl::u32 pending =
-        DMA0->COMMON[0].INTA & DMA0->COMMON[0].INTENSET;
-    DMA0->COMMON[0].INTA = pending;  // W1C
-    fl::u32 bits = pending;
-    while (bits != 0u) {
-        // Cortex-M0+ has no CLZ; walk set bits from LSB.
-        const fl::u32 ch = static_cast<fl::u32>(__builtin_ctz(bits));
-        bits &= bits - 1u;
-        const fl::lpc::DmaIsrSlot slot = fl::lpc::dmaIsrTable()[ch];
-        if (slot.fn != nullptr) {
-            slot.fn(slot.ctx);
-        }
-    }
-}
-#endif  // FASTLED_LPC_DMA_ISR
+// The strong `DMA0_IRQHandler` override lives in lpc_dma_isr.cpp.hpp
+// (single-TU unity-build slot) — a non-inline extern "C" definition in
+// this header would be emitted once per including TU and fail the link
+// with "multiple definition" (observed 2026-07-02).
 
 #endif  // FL_IS_ARM_LPC_845

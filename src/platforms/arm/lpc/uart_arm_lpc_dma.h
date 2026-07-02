@@ -186,6 +186,10 @@ public:
 
     static void onDmaChunkDone(void*) FL_NO_EXCEPT {
         if (!armNextChunk()) {
+            // Quiesce the channel IRQ at stream end — same hygiene as the
+            // SPI sibling, where a residual completion firing after the
+            // stream HardFaulted the RPC reply path (silicon, 2026-07-02).
+            DMA0->COMMON[0].INTENCLR = (1UL << kDmaChannel);
             sStream.running = false;
         }
     }

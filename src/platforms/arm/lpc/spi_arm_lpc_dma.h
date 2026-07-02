@@ -11,6 +11,9 @@
 #include "platforms/arm/lpc/lpc_dma_descriptor_table.h"
 #include "platforms/arm/lpc/lpc_dma_isr.h"
 #include "platforms/arm/lpc/spi_arm_lpc.h"
+#ifdef FASTLED_LPC_SPI_DMA_ISR_TRACE
+#include "fl/log/log.h"  // FL_WARN_LIT for the opt-in ISR trace breadcrumbs
+#endif
 
 // =============================================================================
 // LPC845 SPI + DMA0 driver — async hardware-accelerated APA102/SK9822/WS2801
@@ -240,14 +243,15 @@ public:
         // via STAT.ENDTRANSFER once the DMA drains — see waitFully().
         spi->TXCTL = FL_LPC_SPI_TXCTL_LEN_8BIT | FL_LPC_SPI_TXCTL_RXIGNORE;
 
-        // Gate the TX DMA request line open. Silicon finding (#3580,
-        // register snapshot 2026-07-02): with the channel armed
-        // (CFGVALID=1), PERIPHREQEN=1 and SPI STAT.TXRDY=1, XFERCOUNT
-        // never advanced — the SPI's TXRDY only reaches the DMA request
-        // input when INTENSET.TXRDYEN is set (the interrupt-enable and
-        // DMA-request paths share the gate on this IP). The NVIC-side
-        // SPI IRQ stays disabled, so no ISR fires from this.
-        spi->INTENSET = SPI_INTENSET_TXRDYEN_MASK;
+        // NOTE: deliberately NO SPI0->INTENSET bits. TXRDYEN was tried
+        // while chasing the "zero transfers" wedge and turned out to be
+        // wrong twice over: (a) the actual fix was XFERCFG.SWTRIG (the
+        // request line paces fine without any INTENSET involvement), and
+        // (b) a pending-but-NVIC-disabled TXRDY interrupt line becomes a
+        // live grenade the moment ANY code enables SPI0_IRQn — on the
+        // FASTLED_LPC_DMA_ISR build it fired into the weak default
+        // handler and the stream test HardFaulted at PC=0 in exception
+        // #16 (silicon, 2026-07-02).
 
         // ----- DMA0 power-up + channel configuration ---------------------
         // DMA clock enable, UM11029 §4.6.13 Table 41 bit 29.
@@ -472,15 +476,36 @@ public:
     /// DMA completion callback (IRQ context) — registered with the
     /// lpc_dma_isr.h hub by kickDmaStreamAsync().
     static void onDmaChunkDone(void*) FL_NO_EXCEPT {
+#ifdef FASTLED_LPC_SPI_DMA_ISR_TRACE
+        FL_WARN_LIT("spiIsr: enter");
+#endif
         const u32 other = sStream.active_half ^ 1u;
         if (sStream.half_ready[other]) {
             armHalf(other);                       // ~2 µs gap on the wire
+#ifdef FASTLED_LPC_SPI_DMA_ISR_TRACE
+            FL_WARN_LIT("spiIsr: armed other");
+#endif
             const u32 freed = other ^ 1u;
             if (sStream.remaining > 0u) {
                 encodeHalf(freed);                // refill inside the window
+#ifdef FASTLED_LPC_SPI_DMA_ISR_TRACE
+                FL_WARN_LIT("spiIsr: refilled");
+#endif
             }
         } else {
+            // Last chunk drained. Quiesce this channel's interrupt before
+            // reporting completion: leaving INTENSET on after the stream
+            // let a residual completion fire into post-stream state and
+            // HardFault the subsequent RPC reply path (silicon-bisected
+            // 2026-07-02 — deterministic PC in the stack region, gone
+            // with the quiesce). The next kickDmaStreamAsync() re-enables
+            // via registerDmaChannelIsr().
+            DMA0->COMMON[0].INTENCLR =
+                (1UL << FASTLED_LPC_SPI_DMA_CHANNEL);
             sStream.running = false;              // last chunk drained
+#ifdef FASTLED_LPC_SPI_DMA_ISR_TRACE
+            FL_WARN_LIT("spiIsr: final");
+#endif
         }
     }
 
