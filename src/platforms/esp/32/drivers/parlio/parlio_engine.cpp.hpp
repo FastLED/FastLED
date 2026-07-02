@@ -1498,7 +1498,17 @@ bool ParlioEngine::initialize(size_t dataWidth,
         mWave3Lut = buildWave3ExpansionLUT(chipsetTiming);
         FL_LOG_PARLIO_F("PARLIO_INIT: Wave3 mode selected (clock=%s Hz)", mClockFreqHz);
     } else {
-        mClockFreqHz = FL_ESP_PARLIO_CLOCK_FREQ_HZ;
+        // FastLED#3586: derive the wave8 clock from the CHIPSET timing —
+        // 8 samples per bit → clock = 8 / bit_period. The old hardcoded
+        // 8 MHz (FL_ESP_PARLIO_CLOCK_FREQ_HZ) transmitted WS2812 with a
+        // 1.0 µs bit period instead of 1.25 µs (bench-measured 25% fast
+        // on ESP32-C6: T1H 643 ns / T1L 356 ns on the wire).
+        const u32 bit_period_ns = static_cast<u32>(mTimingT1Ns) +
+                                  static_cast<u32>(mTimingT2Ns) +
+                                  static_cast<u32>(mTimingT3Ns);
+        mClockFreqHz = (bit_period_ns > 0)
+                           ? static_cast<u32>(8000000000ULL / bit_period_ns)
+                           : FL_ESP_PARLIO_CLOCK_FREQ_HZ;
         FL_LOG_PARLIO_F("PARLIO_INIT: Wave8 mode selected (clock=%s Hz)", mClockFreqHz);
     }
     // Always build wave8 LUT (needed as fallback and for SPI mode)
