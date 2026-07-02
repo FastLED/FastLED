@@ -243,10 +243,28 @@ bool I2sPeripheralEsp32DevEsp::initialize(
     i2s->conf2.lcd_tx_wrx2_en = 0;
     i2s->conf2.lcd_tx_sdx2_en = 0;
 
-    // Sample-rate configuration. `tx_bits_mod = 32` puts the peripheral
-    // in 32-bit-parallel mode (16 lanes × 2 bytes packed per word).
-    // `tx_bck_div_num = 1` is the divider on the sample clock feeding
-    // the bit clock — kept at 1 for wave8's 8 MHz rate.
+    // Sample-rate configuration.
+    // `tx_bits_mod` = parallel output width per DMA sample.
+    //
+    // ## Known-open bench debug
+    //
+    // Wave8 output for 16-lane parallel is 2 bytes per pulse position
+    // (`wave8Transpose_16_bf1` writes `col_lo | col_hi` = 16 lanes
+    // across 2 bytes). That suggests `tx_bits_mod = 16`. Bench-tested
+    // that value on ESP32-WROOM: no wire edges captured
+    // (`captureFailed: true, rawEdgesAfterWait: 0`).
+    //
+    // Kept at `tx_bits_mod = 32` (Yves's known-working baseline value)
+    // to match his register-config trail. Yves's encoder packed 24-lane
+    // patterns into u32 words (`gOneBit[] = 0xFFFFFF00`). Wave8's
+    // byte-major layout doesn't fit that scheme, but keeping this at
+    // 32 leaves the register config identical to what Yves proved boots
+    // cleanly — the debug delta is exclusively the encoder-output-layout
+    // mismatch, not a chain of unrelated register changes.
+    //
+    // Follow-up (needs scope): confirm on the wire whether either
+    // `tx_bits_mod = 16` or `= 8` produces edges from wave8-encoded
+    // bytes, then wire the corresponding value here.
     i2s->sample_rate_conf.val = 0;
     i2s->sample_rate_conf.tx_bits_mod = 32;
     i2s->sample_rate_conf.tx_bck_div_num = 1;
