@@ -9,6 +9,7 @@
 #include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
 #include "platforms/arm/lpc/lpc_dma_descriptor_table.h"
+#include "platforms/arm/lpc/lpc_dma_isr.h"
 #include "platforms/arm/lpc/spi_arm_lpc.h"
 
 // =============================================================================
@@ -406,6 +407,118 @@ public:
         }
     }
 
+    // ----- ISR-refilled streaming (frames larger than the encode buffer) --
+    //
+    // Ping-pong halves of the static encode buffer: while one half streams
+    // over DMA, the DMA0 completion ISR (lpc_dma_isr.h hub,
+    // FASTLED_LPC_DMA_ISR=1 builds only) arms the pre-encoded other half
+    // (~2 µs gap) and then encodes the next chunk into the just-freed one.
+    // The main thread returns from kickDmaStreamAsync() immediately after
+    // the initial prefill and is free until the whole frame drains — the
+    // encode work migrates into IRQ context (~3k cycles per 256-byte chunk
+    // inside each ~700 µs chunk window at 4 MHz wire SCK).
+    //
+    // Requires ArduinoCore-LPC8xx ≥ framework-arduino-lpc8xx#38 (named
+    // weak IRQ vector slots) — on older cores the hub's DMA0_IRQHandler
+    // never fires; kickDmaStreamAsync() then behaves exactly like the
+    // clamped single-shot kickDmaStream (it refuses lengths beyond one
+    // half and returns false so callers can fall back).
+    //
+    // The caller's `src` buffer must stay alive and unmodified until
+    // streamDone() reports true.
+
+    struct StreamState {
+        const u8* volatile src = nullptr;   ///< next unencoded source byte
+        volatile u32 remaining = 0;         ///< source bytes not yet encoded
+        volatile u32 half_len[2] = {0, 0};  ///< encoded halfwords per half
+        volatile bool half_ready[2] = {false, false};
+        volatile u32 active_half = 0;       ///< half currently on the wire
+        volatile bool running = false;
+    };
+
+    static StreamState sStream;
+
+    static constexpr u32 kHalfCap = FASTLED_LPC_SPI_DMA_MAX_BYTES / 2u;
+
+    /// Encode up to kHalfCap source bytes into buffer half `h`; advances
+    /// the stream cursor. IRQ- and thread-context safe (single consumer).
+    static void encodeHalf(u32 h) FL_NO_EXCEPT {
+        const u32 n = sStream.remaining < kHalfCap
+                          ? static_cast<u32>(sStream.remaining)
+                          : kHalfCap;
+        u16* dst = &sEncodeBuf[h * kHalfCap];
+        const u8* s = sStream.src;
+        for (u32 i = 0; i < n; ++i) {
+            dst[i] = static_cast<u16>(s[i]);
+        }
+        sStream.src = s + n;
+        sStream.remaining = sStream.remaining - n;
+        sStream.half_len[h] = n;
+        sStream.half_ready[h] = (n != 0u);
+    }
+
+    /// Arm buffer half `h` on the DMA channel and make it the active half.
+    static void armHalf(u32 h) FL_NO_EXCEPT {
+        sStream.half_ready[h] = false;
+        sStream.active_half = h;
+        if (configureChannelDescriptorAt(sStream.half_len[h],
+                                         &sEncodeBuf[h * kHalfCap])) {
+            DMA0->COMMON[0].SETVALID = (1UL << FASTLED_LPC_SPI_DMA_CHANNEL);
+        } else {
+            sStream.running = false;  // mis-sequenced init — fail visible
+        }
+    }
+
+    /// DMA completion callback (IRQ context) — registered with the
+    /// lpc_dma_isr.h hub by kickDmaStreamAsync().
+    static void onDmaChunkDone(void*) FL_NO_EXCEPT {
+        const u32 other = sStream.active_half ^ 1u;
+        if (sStream.half_ready[other]) {
+            armHalf(other);                       // ~2 µs gap on the wire
+            const u32 freed = other ^ 1u;
+            if (sStream.remaining > 0u) {
+                encodeHalf(freed);                // refill inside the window
+            }
+        } else {
+            sStream.running = false;              // last chunk drained
+        }
+    }
+
+    /// Stream `len` bytes from `src` without blocking the main thread.
+    /// Returns false (and streams nothing) when the ISR hub is compiled
+    /// out — callers fall back to the chunked-blocking writeBytes path.
+    static bool kickDmaStreamAsync(const u8* src, u32 len) FL_NO_EXCEPT {
+#if !FASTLED_LPC_DMA_ISR
+        (void)src;
+        (void)len;
+        return false;
+#else
+        if (len == 0u) return true;
+        waitDma();
+        while (sStream.running) {
+            __asm volatile("wfi" ::: "memory");
+        }
+        fl::lpc::registerDmaChannelIsr(FASTLED_LPC_SPI_DMA_CHANNEL,
+                                       &onDmaChunkDone, nullptr);
+        sStream.src = src;
+        sStream.remaining = len;
+        sStream.half_ready[0] = false;
+        sStream.half_ready[1] = false;
+        sStream.running = true;
+        encodeHalf(0);
+        if (sStream.remaining > 0u) {
+            encodeHalf(1);                        // prefill the other half
+        }
+        armHalf(0);
+        return true;
+#endif
+    }
+
+    /// True once an async stream (and the underlying DMA) fully drained.
+    static bool streamDone() FL_NO_EXCEPT {
+        return !sStream.running && done();
+    }
+
     // ----- Bulk synchronous API (poll-mode-compatible wrappers) ----------
 
     static void writeBytesValueRaw(u8 value, int len) FL_NO_EXCEPT {
@@ -545,10 +658,17 @@ private:
     // Returns true if the descriptor was written and XFERCFG armed;
     // callers must NOT set SETVALID when this returns false.
     static bool configureChannelDescriptor(u32 count) FL_NO_EXCEPT {
+        return configureChannelDescriptorAt(count, &sEncodeBuf[0]);
+    }
+
+    // Same, from an arbitrary base inside the encode buffer (the async
+    // streaming path arms alternating ping-pong halves).
+    static bool configureChannelDescriptorAt(u32 count,
+                                             const u16* src_base) FL_NO_EXCEPT {
         if (count == 0u) return false;
 
         const u32 ch = FASTLED_LPC_SPI_DMA_CHANNEL;
-        const u32 src_end = reinterpret_cast<u32>(&sEncodeBuf[count - 1u]); // ok reinterpret cast - LPC DMA descriptor requires raw address
+        const u32 src_end = reinterpret_cast<u32>(&src_base[count - 1u]); // ok reinterpret cast - LPC DMA descriptor requires raw address
         const u32 dst_end = reinterpret_cast<u32>(&spi_block()->TXDAT); // ok reinterpret cast - LPC DMA descriptor requires raw address
 
         // Descriptor write. UM11029 §17.4.3: the descriptor table is at
@@ -602,6 +722,11 @@ private:
 // PWM-DMA clockless driver's static-buffer pattern.
 template <u8 D, u8 C, u32 DIV, u32 P>
 u16 ARMHardwareSPIOutputDMA<D, C, DIV, P>::sEncodeBuf[FASTLED_LPC_SPI_DMA_MAX_BYTES];
+
+// Async-stream state (ISR-refilled ping-pong bookkeeping).
+template <u8 D, u8 C, u32 DIV, u32 P>
+typename ARMHardwareSPIOutputDMA<D, C, DIV, P>::StreamState
+    ARMHardwareSPIOutputDMA<D, C, DIV, P>::sStream;
 
 }  // namespace fl
 

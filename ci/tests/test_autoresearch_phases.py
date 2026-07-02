@@ -1180,7 +1180,9 @@ class TestRunBuildDeploy:
             ieee754_test_mode=True,
         )
         qctx = QuietContext(quiet=False)
-        with patch(f"{_PATCH_MOD}._build_and_flash_nxplpc", return_value=True) as flash:
+        with patch(
+            f"{_PATCH_MOD}._build_and_deploy_nxplpc", return_value=True
+        ) as flash:
             rc = asyncio.run(_run_build_deploy(ctx, qctx))
         assert rc is None
         assert _build_environment_for_mode(ctx) == "lpc845brk_ieee754"

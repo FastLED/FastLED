@@ -51,7 +51,7 @@
 /// (a wedge that somehow skips the NMI still hard-resets ~8 ms later
 /// with an authentic WDT cause); (2) `consecutiveCrashCount()` does not
 /// increment for warning-hook resets. Opt out of the hook entirely with
-/// `-DFL_LPC_WDT_NMI_BACKTRACE=0` (frees NMISRC for app use and restores
+/// `-DFL_LPC_WATCHDOG_NMI_BACKTRACE=0` (frees NMISRC for app use and restores
 /// authentic WDT reset attribution).
 ///
 /// **Lock semantics:** the WWDT can be locked via MOD.LOCK (bit 5). Once
@@ -80,8 +80,8 @@ FL_IS_ARM_LPC_804 (LPC11xx/LPC15xx take the no-op backend)."
 #endif
 // IWYU pragma: end_keep
 
-#ifndef FL_LPC_WDT_NMI_BACKTRACE
-#define FL_LPC_WDT_NMI_BACKTRACE 1
+#ifndef FL_LPC_WATCHDOG_NMI_BACKTRACE
+#define FL_LPC_WATCHDOG_NMI_BACKTRACE 1
 #endif
 
 #define FL_WATCHDOG_HAS_HARDWARE
@@ -172,12 +172,16 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
     // TC is in WWDT ticks; we are at ~125 kHz after the internal /4. Round
     // up so we never timeout EARLY (timeout_ms is the maximum allowed
     // silence between feeds, undershooting it would crash live code).
-    fl::u32 ticks = (timeout_ms * kTickHz + 999u) / 1000u;
-    if (ticks < 0x100u)      ticks = 0x100u;       // hardware minimum
-    if (ticks > 0x00FFFFFFu) ticks = 0x00FFFFFFu;  // 24-bit ceiling
-    WWDT->TC = ticks;
+    // 64-bit intermediate: timeout_ms * kTickHz overflows u32 above
+    // ~34.3 s, and the cap is 60 s — a wrapped product would program a
+    // much SHORTER window than requested (CodeRabbit finding, PR #3550).
+    fl::u64 ticks64 =
+        (static_cast<fl::u64>(timeout_ms) * kTickHz + 999u) / 1000u;
+    if (ticks64 < 0x100u)      ticks64 = 0x100u;       // hardware minimum
+    if (ticks64 > 0x00FFFFFFu) ticks64 = 0x00FFFFFFu;  // 24-bit ceiling
+    WWDT->TC = static_cast<fl::u32>(ticks64);
 
-#if FL_LPC_WDT_NMI_BACKTRACE
+#if FL_LPC_WATCHDOG_NMI_BACKTRACE
     // Warning threshold: fire the WDT interrupt when the counter reaches
     // the 10-bit maximum (1023 ticks ≈ 8 ms at 125 kHz) so the NMI hook
     // below gets a window to print the wedged PC before the hard reset.
@@ -196,7 +200,7 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
     // Feed once to commit the new TC value and start counting.
     platforms::lpcWwdtFeed();
 
-#if FL_LPC_WDT_NMI_BACKTRACE
+#if FL_LPC_WATCHDOG_NMI_BACKTRACE
     // Route the WDT interrupt line to NMI. The chip-level IRQ slots in
     // the ACLPC vector table are all Default_Handler (no per-IRQ weak
     // aliases), but the core's NMI_Handler — a strong alias of its

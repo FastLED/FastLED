@@ -912,6 +912,13 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         # LPC845-BRK silicon 2026-07-02). The bench's largest case is
         # 512 bytes, so 512 loses no coverage and frees 4.5 KB.
         lpc_bench_defines.append("FASTLED_LPC_SPI_DMA_MAX_BYTES=512")
+    if getattr(args, "dma_uart", False):
+        # Async UART bench (#3453 follow-up). FASTLED_LPC_DMA_ISR turns on
+        # the shared DMA0 IRQ hub for ISR chunk chaining — requires the
+        # ACLPC core with named weak IRQ vector slots
+        # (framework-arduino-lpc8xx#38).
+        lpc_bench_defines.append("FASTLED_LPC_UART_DMA=1")
+        lpc_bench_defines.append("FASTLED_LPC_DMA_ISR=1")
     if getattr(args, "pwm_dma_cl", False):
         lpc_bench_defines.append("FASTLED_LPC_PWM_DMA=1")
 
@@ -1197,6 +1204,9 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
             deferred_defines.append("FASTLED_LPC_SPI_DMA=1")
             # Same 16 KB-RAM cap rationale as the parse-time path above.
             deferred_defines.append("FASTLED_LPC_SPI_DMA_MAX_BYTES=512")
+        if getattr(args, "dma_uart", False):
+            deferred_defines.append("FASTLED_LPC_UART_DMA=1")
+            deferred_defines.append("FASTLED_LPC_DMA_ISR=1")
         if getattr(args, "pwm_dma_cl", False):
             deferred_defines.append("FASTLED_LPC_PWM_DMA=1")
 
@@ -1738,6 +1748,23 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
                 )
                 return 1
             return await _run_lpc_dma_spi_tests(ctx)
+        # #3453 follow-up: --dma-uart runs the async UART TX bench.
+        if getattr(ctx.args, "dma_uart", False):
+            if final_environment not in LPC_DMA_SPI_ENVS:
+                print(
+                    "--dma-uart is only supported on LPC845 boards "
+                    "(lpc845brk, lpc845, lpcxpresso845max)."
+                )
+                return 1
+            if getattr(ctx.args, "dma_spi", False) or getattr(
+                ctx.args, "pwm_dma_cl", False
+            ):
+                print(
+                    "--dma-uart is mutually exclusive with --dma-spi / "
+                    "--pwm-dma-cl (LowMemory flash budget fits one bench)."
+                )
+                return 1
+            return await _run_lpc_uart_dma_tests(ctx)
         return await _run_bring_up_tests(ctx)
 
     # GPIO-only mode
@@ -2568,6 +2595,58 @@ async def _run_lpc_dma_spi_tests(ctx: RunContext) -> int:
         upload_port,
         "--core-hz",
         str(core_hz),
+    ]
+    result = subprocess.run(cmd)
+    return 0 if result.returncode == 0 else 1
+
+
+async def _run_lpc_uart_dma_tests(ctx: RunContext) -> int:
+    """Run the #3453 follow-up async UART TX bench.
+
+    Exercises `ARMHardwareUARTOutputDMA<>` (USART1 TX + DMA0 channel 3,
+    ISR chunk chaining via the lpc_dma_isr.h hub) on real silicon while
+    USART0 keeps serving the RPC console. LPC845 low-memory builds bind
+    the `uartDmaStreamOnce` / `uartDmaStreamOverlap` handlers when
+    `FASTLED_LPC_UART_DMA` is set at compile time (injected by the
+    `--dma-uart` flag together with `FASTLED_LPC_DMA_ISR=1`).
+
+    Requires the ACLPC core with named weak IRQ vector slots
+    (framework-arduino-lpc8xx#38) — on older cores the ISR chain stalls
+    after the first 1024-byte descriptor and the bench reports a
+    register-snapshot timeout instead of wedging.
+    """
+    final_environment = (ctx.final_environment or "").lower()
+    if final_environment not in LPC_DMA_SPI_ENVS:
+        print(
+            "--dma-uart is only supported on LPC845 boards "
+            "(lpc845brk, lpc845, lpcxpresso845max)."
+        )
+        return 1
+
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+
+    baud = 1_000_000  # matches FASTLED_LPC_UART_DMA_HARNESS_BAUD default
+
+    print()
+    print("=" * 60)
+    print("LPC845 async UART TX bench — #3453 follow-up (ISR chunk chain)")
+    print(f"   Target: {final_environment} (USART1 @ {baud} baud, DMA0 ch3)")
+    print("   Driver: ARMHardwareUARTOutputDMA<>")
+    print("   Build flags: -DFASTLED_LPC_UART_DMA=1 -DFASTLED_LPC_DMA_ISR=1")
+    print("   Console: USART0 stays live throughout (that's the point).")
+    print("=" * 60)
+    print()
+
+    cmd = [
+        "uv",
+        "run",
+        "python",
+        "ci/autoresearch/test_lpc_uart_dma.py",
+        "--port",
+        upload_port,
+        "--baud-wire",
+        str(baud),
     ]
     result = subprocess.run(cmd)
     return 0 if result.returncode == 0 else 1

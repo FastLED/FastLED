@@ -226,11 +226,62 @@ inline fl::string measureSckHandler(int divider_hint) FL_NO_EXCEPT {
 
 // Bind the three handlers on the passed-in `Remote`. Call from
 // AutoResearchLowMemory.h under `#if defined(FASTLED_LPC_SPI_DMA)`.
+#if FASTLED_LPC_DMA_ISR
+// ISR-refilled streaming proof (#3453 follow-up). Streams a frame larger
+// than the whole encode buffer (multi-chunk, ping-pong ISR refill) while
+// beacon-toggling on the main thread. CSV: "success,total_us,toggle_count".
+// A stalled refill chain times out into a register-snapshot CSV.
+#ifndef FASTLED_LPC_SPI_DMA_STREAM_BYTES
+#define FASTLED_LPC_SPI_DMA_STREAM_BYTES 1024
+#endif
+inline fl::string streamOverlapHandler(int byte_count, int byte_pattern) FL_NO_EXCEPT {
+    static fl::u8 stream_src[FASTLED_LPC_SPI_DMA_STREAM_BYTES] = {0};
+    int len = byte_count;
+    if (len <= 0) return fl::string("0,0,0");
+    if (len > FASTLED_LPC_SPI_DMA_STREAM_BYTES)
+        len = FASTLED_LPC_SPI_DMA_STREAM_BYTES;
+    const fl::u8 pat = static_cast<fl::u8>(byte_pattern & 0xFF);
+    for (int i = 0; i < len; ++i) stream_src[i] = pat;
+
+    HarnessDriver& drv = harnessDriver();
+    drv.waitFully();
+
+    const fl::u32 t_start = micros();
+    if (!HarnessDriver::kickDmaStreamAsync(stream_src,
+                                           static_cast<fl::u32>(len))) {
+        return fl::string("0,kick_refused,0");
+    }
+    volatile fl::u32 toggle_count = 0;
+    fl::u32 spins = 0;
+    while (!HarnessDriver::streamDone()) {
+        ++toggle_count;
+        if (++spins > 4000000u) {
+            fl::sstream d;
+            d << 0 << ',' << DMA0->COMMON[0].ACTIVE << ','
+              << DMA0->CHANNEL[FASTLED_LPC_SPI_DMA_CHANNEL].CTLSTAT << ','
+              << SPI0->STAT;
+            return d.str();
+        }
+    }
+    const fl::u32 total_us = micros() - t_start;
+
+    fl::sstream s;
+    s << 1 << ',' << total_us << ',' << toggle_count;
+    return s.str();
+}
+#endif  // FASTLED_LPC_DMA_ISR
+
 inline void bind(fl::Remote& remote) FL_NO_EXCEPT {
     remote.bind("dmaSpiTransferOnce",
         [](int byte_count, int byte_pattern) -> fl::string {
             return transferOnceHandler(byte_count, byte_pattern);
         });
+#if FASTLED_LPC_DMA_ISR
+    remote.bind("dmaSpiStreamOverlap",
+        [](int byte_count, int byte_pattern) -> fl::string {
+            return streamOverlapHandler(byte_count, byte_pattern);
+        });
+#endif
     remote.bind("dmaSpiTransferOverlap",
         [](int byte_count, int byte_pattern) -> fl::string {
             return transferOverlapHandler(byte_count, byte_pattern);
