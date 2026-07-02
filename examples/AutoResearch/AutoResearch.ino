@@ -230,7 +230,11 @@ void loop()  { autoResearchLowMemoryLoop(); }
 // capture tier the extra 8 KB of stack exhausted the heap outright
 // (`fl::aligned_alloc` returned null inside fl::json::set →
 // StoreProhibited at 0x400d2ece). Keep the two changes paired.
-#if defined(FL_IS_ESP_32DEV) && defined(SET_LOOP_TASK_STACK_SIZE)
+// FastLED#3576 Phase 9: extended from classic-only to all ESP32
+// variants — ESP32-P4 hit the same ~8 KB-deep chain and died with a
+// "Stack protection fault" in loopTask (stack dump full of wave8 LUT
+// data) on its default 8 KB stack during SPI/UART/PARLIO tests.
+#if defined(FL_IS_ESP32) && defined(SET_LOOP_TASK_STACK_SIZE)
 SET_LOOP_TASK_STACK_SIZE(16 * 1024);
 #endif
 
