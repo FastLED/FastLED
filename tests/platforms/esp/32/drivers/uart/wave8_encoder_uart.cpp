@@ -212,6 +212,37 @@ FL_TEST_CASE("Wave10 - buildWave10Lut for WS2812") {
     }
 }
 
+FL_TEST_CASE("Wave10 - buildWave10Lut for WS2812B-V5 enforces symbol separation") {
+    // WS2812B-V5: T1=225, T2=355, T3=645, period=1225 — the AutoResearch
+    // bench default. pulse_width = 1225/5 = 245ns.
+    // T0H = 225 → 1 pulse (245ns). T1H = 580 → best-fit rounds to 2
+    // (490ns), only 245ns above the 0-symbol — under the 400ns minimum
+    // wire separation (real LEDs' 0/1 sampling threshold sits near
+    // 550-625ns; the bench RX decoder's 500ns threshold flapped —
+    // FastLED#3569 WROOM bench). The separation rule must widen it to
+    // 3 pulses (735ns).
+    ChipsetTimingConfig timing(225, 355, 645, 280);
+    FL_REQUIRE(canRepresentTiming(timing));
+    Wave10Lut lut = buildWave10Lut(timing);
+
+    FL_SUBCASE("1-symbol gets >=2 pulses of separation") {
+        auto p00 = measureHalfFrames(lut.lut[0]);
+        FL_CHECK_EQ(p00.high_count_a, 1);
+        FL_CHECK_EQ(p00.high_count_b, 1);
+
+        auto p11 = measureHalfFrames(lut.lut[3]);
+        FL_CHECK_EQ(p11.high_count_a, 3);
+        FL_CHECK_EQ(p11.high_count_b, 3);
+    }
+
+    FL_SUBCASE("LUT matches the proven legacy WS2812 shape") {
+        FL_CHECK_EQ(lut.lut[0], 0xEF);  // "00"
+        FL_CHECK_EQ(lut.lut[1], 0x8F);  // "01"
+        FL_CHECK_EQ(lut.lut[2], 0xEC);  // "10"
+        FL_CHECK_EQ(lut.lut[3], 0x8C);  // "11"
+    }
+}
+
 FL_TEST_CASE("Wave10 - buildWave10Lut for SK6812") {
     // SK6812: T1=300, T2=600, T3=300, period=1200
     ChipsetTimingConfig timing(300, 600, 300, 80);
