@@ -14,6 +14,7 @@
 // IWYU pragma: begin_keep
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h" // ok platform headers
 #include "platforms/esp/32/drivers/gpio_isr_rx/gpio_isr_rx.h" // ok platform headers
+#include "platforms/esp/32/feature_flags/enabled.h" // ok platform headers
 #endif
 // IWYU pragma: end_keep
 
@@ -90,14 +91,30 @@ namespace fl {
 
 #ifdef FL_IS_ESP32
 
-// RMT device specialization for ESP32
+// RMT device specialization for ESP32.
+//
+// The `RmtRxChannel::create` impl only exists on chips that actually have RMT
+// silicon: the IDF 4.x impl in `rmt_rx_4/` gates on
+// `FASTLED_ESP32_HAS_RMT && !FASTLED_ESP32_RMT5_ONLY_PLATFORM && !FASTLED_RMT5`
+// and the IDF 5.x impl in `rmt_rx_5/` gates on `FASTLED_RMT5`. On ESP32-C2
+// the SoC has no RMT peripheral (`SOC_RMT_SUPPORTED == 0`, so
+// `FASTLED_ESP32_HAS_RMT == 0`), and the workflow forces
+// `FASTLED_RMT5 = 0` for that chip — so both impls skip and the specialisation
+// link-fails with `undefined reference to fl::RmtRxChannel::create(int)`.
+// Mirror the exact gates the impls use here so the specialisation collapses
+// to a DummyRxDevice on RMT-less chips.
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>(int pin) FL_NO_EXCEPT {
+#if (FASTLED_ESP32_HAS_RMT && !FASTLED_ESP32_RMT5_ONLY_PLATFORM && !FASTLED_RMT5) || FASTLED_RMT5
     auto device = RmtRxChannel::create(pin);
     if (!device) {
         return fl::make_shared<DummyRxDevice>("RMT RX channel creation failed");
     }
     return device;
+#else
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("RMT RX not supported on this ESP32 SoC");
+#endif
 }
 
 // ISR device specialization for ESP32
