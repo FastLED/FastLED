@@ -225,9 +225,10 @@ void loop()  { autoResearchLowMemoryLoop(); }
 // capture → FastLED.show() chain is bench-measured at ~8.0 KB deep on
 // classic ESP32 — the default 8 KB loopTask stack trips the canary the
 // moment an interrupt frame lands at peak depth. 16 KB fixes that, but
-// ONLY together with the RX_BUFFER_SIZE reduction above: with the
-// 96 KB capture tier the extra 8 KB of stack exhausted the heap
-// outright (`fl::aligned_alloc` returned null inside fl::json::set →
+// ONLY together with the classic-ESP32 RX_BUFFER_SIZE tier defined
+// further down in this file (search RX_BUFFER_SIZE): with the 96 KB
+// capture tier the extra 8 KB of stack exhausted the heap outright
+// (`fl::aligned_alloc` returned null inside fl::json::set →
 // StoreProhibited at 0x400d2ece). Keep the two changes paired.
 #if defined(FL_IS_ESP_32DEV) && defined(SET_LOOP_TASK_STACK_SIZE)
 SET_LOOP_TASK_STACK_SIZE(16 * 1024);

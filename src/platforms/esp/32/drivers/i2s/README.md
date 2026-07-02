@@ -70,7 +70,7 @@ Falls back to 8 MHz if `mPixelClockHz` is zero. Divider solver is `solveI2sClock
 
 The whole point of using I2S parallel mode over RMT is streaming — the DMA fires an EOF interrupt as each buffer drains, the ISR refills that buffer with the next row's encoded bits, and the DMA engine continues onto the next buffer in the ring.
 
-**Current state (Phase 2b step B, PR #3557):** single-descriptor DMA. Cap: 4092 bytes per transmit ≈ 10 LEDs/strip at wave8 encoding.
+**Current state (FastLED#3569):** linear multi-descriptor chain built per transmit (4088-byte links, `eof` only on the last, null-terminated) — no per-transmit size cap beyond available DMA RAM, but the whole frame is still encoded up front (~400 bytes of DMA-capable scratch per input byte-position, practical ceiling ≈ 100–130 LEDs/strip on classic ESP32).
 
 **Follow-up (Phase 2b step D, tracked in #3515):** multi-descriptor ring with ISR-driven refill. Yves's original code has the reference pattern (`NUM_DMA_BUFFERS`, `qe.stqe_next` circular chain, `gCallback` inside the ISR) preserved in git history at PR #3557's parent commit.
 

@@ -44,9 +44,10 @@ ChannelEngineI2sEsp32Dev::ChannelEngineI2sEsp32Dev(
       mState(DriverState::READY),
       mTransmitCompleted(false),
       mPeripheralInitialized(false),
-      mWave8BitLut(),
       mWave8ByteLut(),
-      mCachedTimingKey(0),
+      mCachedT1(0),
+      mCachedT2(0),
+      mCachedT3(0),
       mWave8LutValid(false) {
     if (!mPeripheral) {
         FL_WARN_F("ChannelEngineI2sEsp32Dev: null peripheral injected — inert");
@@ -470,27 +471,21 @@ size_t ChannelEngineI2sEsp32Dev::packScratchBuffer() FL_NO_EXCEPT {
     }
 
     // Build the wave8 LUT for the target chipset timing, cached on the
-    // engine instance. Filled IN PLACE via the per-byte `wave8()`
-    // helper — assigning `buildWave8ByteExpansionLUT()`'s by-value
-    // return materialises a 2 KB temporary on the loop-task stack,
-    // which is what tripped the FastLED#3569 stack-canary panic inside
-    // the already-deep RPC → show() call chain. Invalidate + rebuild
-    // when the timing changes — `mCachedTimingKey` is a hash of
-    // T1/T2/T3 in ns. Default chipset is fixed WS2812B 800 kHz until
-    // per-channel timing dispatch lands.
+    // engine instance and filled IN PLACE via the out-param
+    // `buildWave8ByteExpansionLUT` overload — the by-value overload
+    // materialises a 2 KB temporary on the loop-task stack, which is
+    // what tripped the FastLED#3569 stack-canary panic inside the
+    // already-deep RPC → show() call chain. Rebuild when the timing
+    // changes (exact T1/T2/T3 comparison). Default chipset is fixed
+    // WS2812B 800 kHz until per-channel timing dispatch lands.
     const ChipsetTiming timing = to_runtime_timing<TIMING_WS2812_800KHZ>();
-    const u32 timing_key =
-        (static_cast<u32>(timing.T1) * 73856093u) ^
-        (static_cast<u32>(timing.T2) * 19349663u) ^
-        (static_cast<u32>(timing.T3) * 83492791u);
-    if (!mWave8LutValid || mCachedTimingKey != timing_key) {
-        mWave8BitLut = buildWave8ExpansionLUT(timing);  // 64 bytes — stack-safe
-        for (unsigned b = 0; b < 256; ++b) {
-            u8 expanded[sizeof(Wave8Byte)];
-            wave8(static_cast<u8>(b), mWave8BitLut, expanded);
-            fl::memcpy(&mWave8ByteLut.lut[b], expanded, sizeof(Wave8Byte));
-        }
-        mCachedTimingKey = timing_key;
+    if (!mWave8LutValid || mCachedT1 != timing.T1 || mCachedT2 != timing.T2 ||
+        mCachedT3 != timing.T3) {
+        const Wave8BitExpansionLut bit_lut = buildWave8ExpansionLUT(timing);  // 64 bytes — stack-safe
+        buildWave8ByteExpansionLUT(bit_lut, mWave8ByteLut);
+        mCachedT1 = timing.T1;
+        mCachedT2 = timing.T2;
+        mCachedT3 = timing.T3;
         mWave8LutValid = true;
     }
 

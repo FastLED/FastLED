@@ -54,7 +54,6 @@ FL_EXTERN_C_BEGIN
 #include "esp_err.h"
 #include "esp_heap_caps.h"
 #include "esp_intr_alloc.h"
-#include "esp_log.h"       // ESP_LOGI/E (bypasses fl::setLogLevel — for #3568 bench debug)
 #include "esp_rom_gpio.h"  // esp_rom_gpio_connect_out_signal (replaces gpio_matrix_out)
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -65,8 +64,6 @@ FL_EXTERN_C_BEGIN
 #include "soc/soc.h"
 // IWYU pragma: end_keep
 FL_EXTERN_C_END
-
-static const char* TAG_I2S_MODERN = "i2s_modern";
 
 namespace fl {
 
@@ -273,8 +270,20 @@ bool I2sPeripheralEsp32DevEsp::initialize(
 
     // Bypass the on-chip PCM formatting logic (we're delivering
     // already-encoded pulse bytes; no PCM sample-rate conversion).
+    //
+    // `tx_stop_en = 1` (deviation from Yves's 0): auto-stop the TX unit
+    // when the FIFO drains. Yves streamed a circular descriptor ring
+    // that fed zeros forever, so his TX never underran; our one-shot
+    // chain ends, and with tx_stop_en=0 the TX unit keeps clocking
+    // stale FIFO contents onto every routed DATA_OUT pin after the
+    // frame — spurious pulses during the WS28xx latch window. The last
+    // real sample of a wave8 frame ends low, so the auto-stopped line
+    // idles low as required. (Stopping via `tx_start = 0` in the EOF
+    // ISR instead would truncate the wire tail: OUT_EOF fires when the
+    // DMA drains the descriptor into the FIFO, up to 64 samples before
+    // they reach the pins.)
     i2s->conf1.val = 0;
-    i2s->conf1.tx_stop_en = 0;
+    i2s->conf1.tx_stop_en = 1;
     i2s->conf1.tx_pcm_bypass = 1;
 
     // Mono channel mode routing everything to the right channel path
@@ -427,26 +436,37 @@ bool I2sPeripheralEsp32DevEsp::transmit(const u8 *buffer,
         remaining -= chunk_len;
     }
 
-    // Register kick order matches Yves's proven `i2s_start()` exactly:
-    //   reset → BURST → out_link.addr → out_link.start → int_clr →
-    //   int_ena.out_dscr_err → esp_intr_enable → int_ena.out_eof →
-    //   conf.tx_start
-    // Yves clears int flags AFTER arming out_link so dscr_err bits
-    // raised by out_link.start descriptor validation aren't missed.
+    // Register kick order (deliberate deviation from Yves's i2s_start):
+    //   reset → BURST → int_clr → int_ena(eof|dscr_err) →
+    //   esp_intr_enable → out_link.addr/start → conf.tx_start
+    //
+    // Two ordering bugs in the previous (Yves-shaped) sequence:
+    //  1. `int_clr` ran AFTER `out_link.start` — a frame small enough to
+    //     drain entirely into the 64-word TX FIFO raised OUT_EOF in that
+    //     window and the clear wiped it, so the ISR never fired and the
+    //     frame hung until waitTransmitDone() timed out.
+    //  2. `int_ena.val = 0` ran after `int_ena.out_dscr_err = 1`,
+    //     silently disarming the descriptor-error interrupt every frame.
+    // Arming interrupts before out_link.start is safe: the reset +
+    // int_clr just above guarantee no stale raw flags can fire early.
+    // It also means a failed esp_intr_enable() returns before ANY DMA
+    // state is armed (the old order left the out-link fetching from the
+    // scratch buffer on that error path).
     reset_i2s_registers(i2s);
     i2s->lc_conf.val = I2S_OUT_DATA_BURST_EN | I2S_OUTDSCR_BURST_EN;
-    i2s->out_link.addr = reinterpret_cast<u32>(&mDescriptors[0]); // ok reinterpret cast - DMA hardware register expects the physical address of the lldesc as a u32
-    i2s->out_link.start = 1;
     i2s->int_clr.val = i2s->int_raw.val;
+    i2s->int_ena.val = 0;
+    i2s->int_ena.out_eof = 1;
     i2s->int_ena.out_dscr_err = 1;
 
     esp_err_t err = esp_intr_enable(mIsrHandle);
     if (err != ESP_OK) {
         FL_WARN_F("I2sPeripheralEsp32DevEsp: esp_intr_enable failed err=%s", static_cast<int>(err));
+        i2s->int_ena.val = 0;
         return false;
     }
-    i2s->int_ena.val = 0;
-    i2s->int_ena.out_eof = 1;
+    i2s->out_link.addr = reinterpret_cast<u32>(&mDescriptors[0]); // ok reinterpret cast - DMA hardware register expects the physical address of the lldesc as a u32
+    i2s->out_link.start = 1;
 
     mBusy = true;
     i2s->conf.tx_start = 1;

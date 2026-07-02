@@ -169,15 +169,17 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
     // delegate.
     fl::shared_ptr<IChannelDriver> mSpiDelegate;
 
-    // FastLED#3568 stack-overflow fix — wave8 byte LUT is 2 KB
+    // FastLED#3569 stack-overflow fix — wave8 byte LUT is 2 KB
     // (`Wave8Byte lut[256]` × 8 bytes), too big for the `show()` task
-    // stack. Cached here as an instance member and rebuilt whenever
-    // `mCachedTimingKey` changes (typically once, since default is
-    // fixed WS2812B 800 kHz until per-channel timing dispatch lands).
-    // Bit LUT (64 B) rebuilt alongside as an intermediate.
-    Wave8BitExpansionLut mWave8BitLut;
+    // stack. Cached here as an instance member (filled in place via the
+    // out-param `buildWave8ByteExpansionLUT` overload) and rebuilt
+    // whenever the cached T1/T2/T3 timing changes (typically once,
+    // since default is fixed WS2812B 800 kHz until per-channel timing
+    // dispatch lands).
     Wave8ByteExpansionLut mWave8ByteLut;
-    u32 mCachedTimingKey;   // 0 = uninitialised; hash of T1/T2/T3
+    u32 mCachedT1;
+    u32 mCachedT2;
+    u32 mCachedT3;
     bool mWave8LutValid;
 };
 

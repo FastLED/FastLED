@@ -43,6 +43,13 @@ FL_EXTERN_C_BEGIN
 #include "esp_attr.h"
 #include "esp_err.h"
 #include "esp_heap_caps.h" // For esp_get_free_heap_size()
+// IWYU pragma: begin_keep
+#include "soc/soc_caps.h"  // SOC_RMT_SUPPORT_RX_PINGPONG / SOC_RMT_SUPPORT_DMA — must be
+                           // directly included: if it were only transitively reachable and
+                           // ever dropped, the #if gates below would silently evaluate the
+                           // undefined macros as 0 and force non-DMA/no-partial-rx on chips
+                           // that support them (FastLED#3569).
+// IWYU pragma: end_keep
 #include "esp_log.h"   // For esp_log_timestamp()
 #include "esp_timer.h" // For esp_timer_get_time()
 // IWYU pragma: begin_keep
@@ -574,9 +581,17 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // The actual allocation size may be adjusted in begin() if needed.
         auto &memMgr = RmtMemoryManager::instance();
         mMemoryChannelId = static_cast<u8>(128 + (mPin & 0x7F));
+        // Pre-register with the MINIMUM claim (one 64-word block) — this
+        // only marks RX as active for TX-side decisions. Claiming more
+        // here would tax every sketch that constructs an RX channel
+        // (on classic ESP32's 512-word global pool it would halve what
+        // TX strips can allocate); begin() upgrades the claim to
+        // kNonDmaRxSymbols when the capture actually starts, with a
+        // graceful fallback if TX got there first (FastLED#3569).
+        constexpr u32 kMinRxSymbols = 64;
         // Status-code variant (#2856 item 3.5) â€” call site only needs success/fail.
         size_t alloc_words = 0;
-        if (memMgr.tryAllocateRx(mMemoryChannelId, kNonDmaRxSymbols, false, alloc_words)) {
+        if (memMgr.tryAllocateRx(mMemoryChannelId, kMinRxSymbols, false, alloc_words)) {
             mMemoryRegistered = true;
             FL_LOG_RX("RMT RX pre-registered with memory manager in constructor (channel_id="
                       << static_cast<int>(mMemoryChannelId) << ")");
@@ -621,13 +636,29 @@ class RmtRxChannelImpl : public RmtRxChannel {
     }
 
     bool begin(const RxConfig &config) FL_NO_EXCEPT override {
+        // FastLED#3569 — clamp the DMA request BEFORE the rebuild
+        // comparison below. Chips without RMT DMA (classic ESP32, C3,
+        // C6, …) hard-fail rmt_new_rx_channel() when with_dma is
+        // requested, so the request degrades to non-DMA. Clamping here
+        // (not after the comparison) matters: callers like
+        // AutoResearchTest keep passing use_dma=true every capture, and
+        // comparing the raw request against the already-clamped mUseDma
+        // would tear down and rebuild the channel on every begin().
+        bool use_dma_req = config.use_dma;
+#if !SOC_RMT_SUPPORT_DMA
+        if (use_dma_req) {
+            FL_WARN_F("[RMT RX] DMA requested but unsupported on this chip — using non-DMA mode");
+            use_dma_req = false;
+        }
+#endif
+
         // If the DMA setting changed on an already-created channel, we have to
         // tear it down â€” ESP-IDF bakes `flags.with_dma` into the channel at
         // rmt_new_rx_channel() time, so toggling on a later begin() is a no-op
         // unless we rebuild. Also release the shared DMA slot and any DRAM
         // capture buffer so first-time init below allocates cleanly.
-        if (mChannel && config.use_dma != mUseDma) {
-            FL_WARN_F("[RMT RX] use_dma changed (%s -> %s) - rebuilding channel", (mUseDma ? "true" : "false"), (config.use_dma ? "true" : "false"));
+        if (mChannel && use_dma_req != mUseDma) {
+            FL_WARN_F("[RMT RX] use_dma changed (%s -> %s) - rebuilding channel", (mUseDma ? "true" : "false"), (use_dma_req ? "true" : "false"));
             rmt_disable(mChannel);
             rmt_del_channel(mChannel);
             mChannel = nullptr;
@@ -672,18 +703,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         mSkipCounter = config.skip_signals;
         mStartLow = config.start_low;
         mIoLoopBack = config.io_loop_back;
-        mUseDma = config.use_dma;
-#if !SOC_RMT_SUPPORT_DMA
-        // FastLED#3569 — chips without RMT DMA (classic ESP32, C3, C6, …)
-        // hard-fail rmt_new_rx_channel() when with_dma is requested, which
-        // killed RX begin() for every non-RMT TX capture (AutoResearchTest
-        // asks for use_dma on those paths). Fall back to non-DMA instead
-        // of failing the whole capture.
-        if (mUseDma) {
-            FL_WARN_F("[RMT RX] DMA requested but unsupported on this chip — using non-DMA mode");
-            mUseDma = false;
-        }
-#endif
+        mUseDma = use_dma_req;
 
         FL_LOG_RX("RX begin: signal_range_min="
                << mSignalRangeMinNs
@@ -790,12 +810,40 @@ class RmtRxChannelImpl : public RmtRxChannel {
             // exceed ESP32-S3's 192-word dedicated RX pool and fail.
             // Status-code variant (#2856 item 3.5).
             size_t rx_alloc_words = 0;
-            if (!memMgr.tryAllocateRx(mMemoryChannelId, rx_config.mem_block_symbols,
+            if (!memMgr.tryAllocateRx(mMemoryChannelId,
+                                       mUseDma ? rx_config.mem_block_symbols : 64,
                                        mUseDma, rx_alloc_words)) {
                 FL_WARN_F("RMT RX memory allocation failed for channel %s", static_cast<int>(mMemoryChannelId));
                 return false;
             }
             mMemoryRegistered = true;
+        }
+
+        // FastLED#3569 — upgrade the minimum (64-word) pre-registration to
+        // the capture-sized claim now that a capture is actually starting.
+        // On chips without RX ping-pong (classic ESP32) a receive is
+        // one-shot into the channel's on-chip RAM, so extra blocks mean
+        // deeper capture (256 symbols ≈ 10 WS2812B LEDs). If TX channels
+        // already hold the extra blocks, fall back to the single-block
+        // 64-symbol window instead of failing the capture outright.
+        if (!mUseDma && kNonDmaRxSymbols > 64 && mMemoryRegistered) {
+            auto &memMgr = RmtMemoryManager::instance();
+            memMgr.free(mMemoryChannelId, false);
+            size_t rx_alloc_words = 0;
+            if (memMgr.tryAllocateRx(mMemoryChannelId, kNonDmaRxSymbols, false,
+                                      rx_alloc_words)) {
+                // Upgraded — rx_config.mem_block_symbols already asks for
+                // kNonDmaRxSymbols.
+            } else if (memMgr.tryAllocateRx(mMemoryChannelId, 64, false,
+                                             rx_alloc_words)) {
+                FL_WARN_F("[RMT RX] %s-symbol claim unavailable — falling back to 64-symbol capture window",
+                          static_cast<int>(kNonDmaRxSymbols));
+                rx_config.mem_block_symbols = 64;
+            } else {
+                FL_WARN_F("RMT RX memory allocation failed for channel %s", static_cast<int>(mMemoryChannelId));
+                mMemoryRegistered = false;
+                return false;
+            }
         }
 
         // ESP32-S3 has a single shared DMA slot between RMT TX and RX. Acquire
