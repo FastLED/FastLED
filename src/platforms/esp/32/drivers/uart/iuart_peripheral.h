@@ -70,6 +70,7 @@ struct UartPeripheralConfig {
     u32 mRxBufferSize;      ///< RX ring buffer size (typically 0 for LED control)
     u8 mStopBits;           ///< Stop bits: 1 or 2 (UART_STOP_BITS_1=1, UART_STOP_BITS_2=2)
     int mUartNum;                ///< UART peripheral number (0, 1, or 2)
+    u8 mDataBits;           ///< Data bits per frame: 5-8 (wave10 uses 8, wave8-frame uses 6)
 
     /// @brief Default constructor (for mock testing)
     UartPeripheralConfig() FL_NO_EXCEPT
@@ -79,7 +80,8 @@ struct UartPeripheralConfig {
           mTxBufferSize(0),
           mRxBufferSize(0),
           mStopBits(1),
-          mUartNum(0) {}
+          mUartNum(0),
+          mDataBits(8) {}
 
     /// @brief Constructor with all parameters
     UartPeripheralConfig(u32 baud_rate,
@@ -88,14 +90,16 @@ struct UartPeripheralConfig {
                          u32 tx_buffer_size,
                          u32 rx_buffer_size,
                          u8 stop_bits,
-                         int uart_num) FL_NO_EXCEPT
+                         int uart_num,
+                         u8 data_bits = 8) FL_NO_EXCEPT
         : mBaudRate(baud_rate),
           mTxPin(tx_pin),
           mRxPin(rx_pin),
           mTxBufferSize(tx_buffer_size),
           mRxBufferSize(rx_buffer_size),
           mStopBits(stop_bits),
-          mUartNum(uart_num) {}
+          mUartNum(uart_num),
+          mDataBits(data_bits) {}
 };
 
 //=============================================================================

@@ -57,6 +57,27 @@ HalfFramePulses measureHalfFrames(uint8_t byte_val) {
     return result;
 }
 
+/// P=4 variant: frame = [START][D0..D5][STOP] = 8 wire bits, two 4-pulse
+/// LED bit slots (wave8-frame geometry).
+HalfFramePulses measureHalfFramesP4(uint8_t byte_val) {
+    int raw[8];
+    raw[0] = 0; // start bit
+    for (int i = 0; i < 6; i++) {
+        raw[1 + i] = (byte_val >> i) & 1;
+    }
+    raw[7] = 1; // stop bit
+
+    int bits[8];
+    for (int i = 0; i < 8; i++) {
+        bits[i] = raw[i] ? 0 : 1; // TX inversion
+    }
+
+    HalfFramePulses result = {0, 0};
+    for (int i = 0; i < 4 && bits[i] == 1; i++) result.high_count_a++;
+    for (int i = 4; i < 8 && bits[i] == 1; i++) result.high_count_b++;
+    return result;
+}
+
 } // anonymous namespace
 
 //=============================================================================
@@ -177,6 +198,12 @@ FL_TEST_CASE("Wave10 - buildWave10Lut for WS2812") {
     ChipsetTimingConfig timing(250, 625, 375, 280);
     Wave10Lut lut = buildWave10Lut(timing);
 
+    FL_SUBCASE("wave10 geometry selected (P=5, 8 data bits)") {
+        FL_CHECK_EQ(lut.pulses_per_bit, 5);
+        FL_CHECK_EQ(lut.dataBits(), 8);
+        FL_CHECK_EQ(lut.baudRate(timing), 4000000u);
+    }
+
     FL_SUBCASE("LUT matches hardcoded WS2812 values") {
         FL_CHECK_EQ(lut.lut[0], 0xEF);  // "00"
         FL_CHECK_EQ(lut.lut[1], 0x8F);  // "01"
@@ -225,6 +252,10 @@ FL_TEST_CASE("Wave10 - buildWave10Lut for WS2812B-V5 enforces symbol separation"
     FL_REQUIRE(canRepresentTiming(timing));
     Wave10Lut lut = buildWave10Lut(timing);
 
+    FL_SUBCASE("stays on wave10 geometry (P=4 error is worse after its own bump)") {
+        FL_CHECK_EQ(lut.pulses_per_bit, 5);
+    }
+
     FL_SUBCASE("1-symbol gets >=2 pulses of separation") {
         auto p00 = measureHalfFrames(lut.lut[0]);
         FL_CHECK_EQ(p00.high_count_a, 1);
@@ -243,20 +274,31 @@ FL_TEST_CASE("Wave10 - buildWave10Lut for WS2812B-V5 enforces symbol separation"
     }
 }
 
-FL_TEST_CASE("Wave10 - buildWave10Lut for SK6812") {
+FL_TEST_CASE("Wave10 - buildWave10Lut for SK6812 selects wave4 geometry") {
     // SK6812: T1=300, T2=600, T3=300, period=1200
+    // P=5 grid (240ns pulses): T0H 300→1 (err 60), T1H 900→4 (err 60);
+    // total error 120ns. P=4 grid (300ns pulses): T0H 300→1 EXACT,
+    // T1H 900→3 EXACT; total error 0. The geometry selector picks P=4
+    // (6 data bits @ 3.33 Mbps) — SK6812's timing is an exact multiple
+    // of period/4.
     ChipsetTimingConfig timing(300, 600, 300, 80);
     Wave10Lut lut = buildWave10Lut(timing);
 
-    FL_SUBCASE("Pulse counts are correct") {
-        // pulse_width = 1200/5 = 240ns
-        // T0H = 300ns → 300/240 = 1.25 → best-fit: floor=1 (err=60) vs ceil=2 (err=180) → 1
-        // T1H = 900ns → 900/240 = 3.75 → best-fit: floor=3 (err=180) vs ceil=4 (err=60) → 4
-        auto p00 = measureHalfFrames(lut.lut[0]);
-        FL_CHECK_EQ(p00.high_count_a, 1);
+    FL_SUBCASE("wave4 geometry selected") {
+        FL_CHECK_EQ(lut.pulses_per_bit, 4);
+        FL_CHECK_EQ(lut.dataBits(), 6);
+        // baud = 4 / 1200ns = 3.333 MHz
+        FL_CHECK_EQ(lut.baudRate(timing), 3333333u);
+    }
 
-        auto p11 = measureHalfFrames(lut.lut[3]);
-        FL_CHECK_EQ(p11.high_count_a, 4);
+    FL_SUBCASE("Pulse counts are correct (exact fit)") {
+        auto p00 = measureHalfFramesP4(lut.lut[0]);
+        FL_CHECK_EQ(p00.high_count_a, 1);
+        FL_CHECK_EQ(p00.high_count_b, 1);
+
+        auto p11 = measureHalfFramesP4(lut.lut[3]);
+        FL_CHECK_EQ(p11.high_count_a, 3);
+        FL_CHECK_EQ(p11.high_count_b, 3);
     }
 
     FL_SUBCASE("All 4 LUT entries are distinct") {
@@ -268,9 +310,10 @@ FL_TEST_CASE("Wave10 - buildWave10Lut for SK6812") {
         FL_CHECK_NE(lut.lut[2], lut.lut[3]);
     }
 
-    FL_SUBCASE("Baud rate is correct") {
+    FL_SUBCASE("Legacy static baud formula still reports the P=5 rate") {
         u32 baud = Wave10Lut::computeBaudRate(timing);
-        // 5e9 / 1200 = 4166666
+        // 5e9 / 1200 = 4166666 (fixed-wave10 formula — the selected
+        // geometry's actual rate comes from lut.baudRate(), tested above)
         FL_CHECK_EQ(baud, 4166666u);
     }
 }
@@ -379,16 +422,22 @@ FL_TEST_CASE("Wave10 - canRepresentTiming accepts valid chipsets") {
         ChipsetTimingConfig timing(350, 660, 350, 0);
         FL_CHECK(canRepresentTiming(timing));
     }
+
+    FL_SUBCASE("LPD1886-1250kHz (wave10 infeasible at 6.25 Mbps; wave4 fits at 5.0 Mbps)") {
+        // period 800ns: P=4 grid = 200ns pulses — T0H 200→1 exact,
+        // T1H 600→3 exact, separation 400ns exactly at the floor.
+        // New coverage unlocked by the wave8-frame geometry.
+        ChipsetTimingConfig timing(200, 400, 200, 0);
+        FL_CHECK(canRepresentTiming(timing));
+        Wave10Lut lut = buildWave10Lut(timing);
+        FL_CHECK_EQ(lut.pulses_per_bit, 4);
+        FL_CHECK_EQ(lut.baudRate(timing), 5000000u);
+    }
 }
 
 FL_TEST_CASE("Wave10 - canRepresentTiming rejects infeasible chipsets") {
     FL_SUBCASE("TM1829-1600kHz (baud too high: 8.3 Mbps)") {
         ChipsetTimingConfig timing(100, 300, 200, 500);
-        FL_CHECK_FALSE(canRepresentTiming(timing));
-    }
-
-    FL_SUBCASE("LPD1886-1250kHz (baud too high: 6.25 Mbps)") {
-        ChipsetTimingConfig timing(200, 400, 200, 0);
         FL_CHECK_FALSE(canRepresentTiming(timing));
     }
 

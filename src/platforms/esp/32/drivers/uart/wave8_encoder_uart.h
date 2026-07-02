@@ -51,25 +51,49 @@ namespace fl {
 /// @brief Maximum UART baud rate supported by ESP32 variants
 constexpr u32 kMaxUartBaudRate = 5000000;
 
-/// @brief Wave10 lookup table for UART LED encoding
+/// @brief Wave lookup table for UART LED encoding (waveN family)
 ///
 /// Maps 2 LED bits to 1 UART data byte, computed from chipset timing.
-/// The 10-bit UART frame (with TX inversion) provides 5 pulses per LED bit.
+/// The UART frame (with TX inversion) is treated as two P-pulse LED bit
+/// slots, where P = `pulses_per_bit`:
 ///
-/// Valid HIGH pulse count per LED bit: [1, 4]
-/// - Bit A: START=H provides 1 guaranteed HIGH; D3 must be LOW for H→L transition
-/// - Bit B: D4 must be HIGH for leading edge; STOP=L provides trailing LOW
+/// - **P = 5 (wave10, 8 data bits + start/stop = 10-bit frame)** — the
+///   classic geometry: baud = 5/period.
+/// - **P = 4 (wave8-frame, 6 data bits + start/stop = 8-bit frame)** —
+///   20% lower baud (4/period): reaches faster chipsets under the
+///   ESP32's 5 Mbps cap and provides an alternative quantization grid
+///   (e.g. SK6812's T0H/T1H are exact multiples of period/4).
+///
+/// `buildWave10Lut()` evaluates both geometries and picks the feasible
+/// one with the smaller quantization error (preferring P=5 on ties).
+///
+/// Valid HIGH pulse count per LED bit: [1, P-1]
+/// - Bit A: START=H provides 1 guaranteed HIGH; the slot's final pulse
+///   must be LOW for the H→L transition
+/// - Bit B: first data pulse must be HIGH for the leading edge; STOP=L
+///   provides the trailing LOW
 struct Wave10Lut {
-    u8 lut[4]; ///< 2-bit input → UART data byte
+    u8 lut[4];         ///< 2-bit input → UART data byte
+    u8 pulses_per_bit; ///< Frame geometry: 5 (wave10) or 4 (wave8-frame); 0 = infeasible
 
-    /// @brief Compute the baud rate required for this timing
-    /// @param timing Chipset timing configuration
-    /// @return Baud rate in bits per second
+    /// @brief UART word length for this geometry (2P - 2 data bits)
+    u8 dataBits() const FL_NO_EXCEPT {
+        return static_cast<u8>(2 * pulses_per_bit - 2);
+    }
+
+    /// @brief Baud rate this LUT's geometry requires for the timing
+    /// (baud = P / bit_period; one UART bit per pulse).
+    u32 baudRate(const ChipsetTimingConfig& timing) const FL_NO_EXCEPT {
+        const u32 period_ns = timing.total_period_ns();
+        if (period_ns == 0 || pulses_per_bit == 0) return 0;
+        return static_cast<u32>(
+            static_cast<u64>(pulses_per_bit) * 1000000000ULL / period_ns);
+    }
+
+    /// @brief Legacy fixed-wave10 baud computation (P = 5)
+    /// @deprecated Prefer the instance `baudRate()` which respects the
+    /// selected geometry.
     static u32 computeBaudRate(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
-        // 10 UART bits encode 2 LED bits
-        // baud = 10 / (2 * bit_period) * 1e9
-        // = 10e9 / (2 * period_ns)
-        // = 5e9 / period_ns
         const u32 period_ns = timing.total_period_ns();
         if (period_ns == 0) return 0;
         return static_cast<u32>(5000000000ULL / period_ns);

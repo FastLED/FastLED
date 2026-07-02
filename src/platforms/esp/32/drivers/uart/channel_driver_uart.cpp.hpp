@@ -29,6 +29,7 @@ ChannelEngineUART::ChannelEngineUART(fl::shared_ptr<IUartPeripheral> peripheral)
     : mPeripheral(fl::move(peripheral)),
       mInitialized(false),
       mCurrentBaudRate(0),
+      mCurrentDataBits(0),
       mCurrentGroupIndex(0) {
     if (!mPeripheral) {
         FL_WARN_F("UART: Null peripheral pointer in constructor");
@@ -220,7 +221,7 @@ const Wave10Lut& ChannelEngineUART::getOrBuildLut(const ChipsetTimingConfig& tim
     LutCacheEntry newEntry;
     newEntry.mTiming = timing;
     newEntry.mLut = buildWave10Lut(timing);
-    newEntry.mBaudRate = Wave10Lut::computeBaudRate(timing);
+    newEntry.mBaudRate = newEntry.mLut.baudRate(timing);
     mLutCache.push_back(newEntry);
     return mLutCache.back().mLut;
 }
@@ -256,13 +257,23 @@ void ChannelEngineUART::beginTransmission(
         return;
     }
 
-    // Compute required baud rate from timing
-    u32 required_baud = Wave10Lut::computeBaudRate(timing);
+    // Get or build the wave LUT for this timing FIRST — the selected
+    // frame geometry (wave10 = 8 data bits @ 5 pulses/bit, wave8-frame
+    // = 6 data bits @ 4 pulses/bit) determines both the baud rate and
+    // the UART word length.
+    const Wave10Lut& lut = getOrBuildLut(timing);
+    if (lut.pulses_per_bit == 0) {
+        FL_WARN_F("UART: timing not representable by any wave geometry");
+        return;
+    }
+    const u32 required_baud = lut.baudRate(timing);
+    const u8 required_data_bits = lut.dataBits();
 
     // Initialize or reinitialize UART peripheral if needed
-    if (!mInitialized || mCurrentBaudRate != required_baud) {
+    if (!mInitialized || mCurrentBaudRate != required_baud ||
+        mCurrentDataBits != required_data_bits) {
         if (mInitialized) {
-            // Reinitialize with new baud rate
+            // Reinitialize with new baud rate / word length
             FL_DBG_F("UART: Reinitializing peripheral (baud change: %s -> %s)", mCurrentBaudRate, required_baud);
             mPeripheral->deinitialize();
             mInitialized = false;
@@ -271,13 +282,14 @@ void ChannelEngineUART::beginTransmission(
         FL_DBG_F("UART: Initializing peripheral with baud=%s, pin=%s", required_baud, pin);
 
         UartPeripheralConfig config(
-            required_baud,     // mBaudRate (derived from timing)
-            pin,               // mTxPin
-            -1,                // mRxPin (not used)
-            4096,              // mTxBufferSize (4 KB for DMA)
-            256,               // mRxBufferSize (minimum required by ESP-IDF)
-            1,                 // mStopBits (8N1)
-            1                  // mUartNum (UART1)
+            required_baud,      // mBaudRate (derived from timing + geometry)
+            pin,                // mTxPin
+            -1,                 // mRxPin (not used)
+            4096,               // mTxBufferSize (4 KB for DMA)
+            256,                // mRxBufferSize (minimum required by ESP-IDF)
+            1,                  // mStopBits (N1)
+            1,                  // mUartNum (UART1)
+            required_data_bits  // mDataBits (8 = wave10, 6 = wave8-frame)
         );
 
         if (!mPeripheral->initialize(config)) {
@@ -288,10 +300,8 @@ void ChannelEngineUART::beginTransmission(
         FL_DBG_F("UART: Peripheral initialized successfully");
         mInitialized = true;
         mCurrentBaudRate = required_baud;
+        mCurrentDataBits = required_data_bits;
     }
-
-    // Get or build the Wave10 LUT for this timing
-    const Wave10Lut& lut = getOrBuildLut(timing);
 
     // Prepare scratch buffer (copy LED RGB data)
     prepareScratchBuffer(channelData, dataSize);
