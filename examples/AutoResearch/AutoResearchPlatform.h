@@ -31,7 +31,13 @@ constexpr int defaultTxPin() {
 #elif defined(FL_IS_TEENSY_4X)
     return 1;  // Teensy 4.x: any GPIO works for TX
 #elif defined(FL_IS_ESP_32DEV)
-    return 18;  // ESP32 (classic): avoid GPIO0/1/3 (boot strap + UART0). See #3452.
+    // ESP32 (classic): GPIO 33 → GPIO 34 jumper. GPIO34 is input-only
+    // (no output driver, no boot-strap role) which makes it an ideal RX
+    // pin, and 33/34 avoid GPIO0/1/3 (boot strap + UART0, see #3452).
+    // The WROOM COM11 bench harness is physically wired 33 → 34
+    // (verified electrically in FastLED#3569 — the previously-documented
+    // 18 → 19 pair was never connected there).
+    return 33;
 #else
     return 1;  // Other variants
 #endif
@@ -57,7 +63,7 @@ constexpr int defaultRxPin() {
 #elif defined(FL_IS_TEENSY_4X)
     return 2;  // Teensy 4.x: FlexPWM-capable pin, jumper wire from pin 1
 #elif defined(FL_IS_ESP_32DEV)
-    return 19;  // ESP32 (classic): partner pin to GPIO 18 above. See #3452.
+    return 34;  // ESP32 (classic): input-only pad, jumper wire from GPIO 33.
 #else
     return 0;  // Other variants
 #endif

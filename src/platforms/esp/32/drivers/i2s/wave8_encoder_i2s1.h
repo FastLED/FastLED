@@ -108,18 +108,22 @@ bool encodeChannelWave8_i2s1(fl::span<const fl::u8> input,
 // ============================================================================
 //
 // Classic-ESP32 I2S1 in Yves's proven register config (LCD mode,
-// `tx_bits_mod = 32`, `tx_fifo_mod = 3`) clocks ONE 32-bit sample per
-// pixel-clock period, and presents sample bit `n + 8` on `DATA_OUT(n)`
-// (bits 0..7 of every sample never reach any DATA_OUT line). Evidence:
-// Yves's driver put controller `i`'s data at word bit `i + 8`
-// (`has_data_mask |= 1 << (i + 8)`) while routing that controller's pin
-// to `I2S1O_DATA_OUT0_IDX + i` — and produced correct waveforms for
-// years. The raw wave8 stream (2 bytes per pulse) therefore CANNOT be
-// DMA'd directly: lane 0 would land at sample bit 0 (invisible) and two
-// pulse periods would be packed into each sample (halving the pulse
+// `tx_bits_mod = 32`, `tx_fifo_mod = 3`, `tx_chan_mod = 1` mono,
+// `tx_right_first = 1`) consumes one 32-bit memory word per pixel-clock
+// period but emits only its HIGH half-word as a 16-bit parallel sample:
+// `DATA_OUT(n)` presents memory bit `16 + n`; the low 16 bits are
+// discarded by the mono channel path. Bench-derived on ESP32-WROOM
+// (FastLED#3569) by bisection with a working RMT-RX loopback: lanes
+// placed at bits 8..23 → no signal on DATA_OUT0; bits 0..15 → none;
+// all-32-bit broadcast → clean lane-0 waveform ⇒ the tap is in bits
+// 24..31 for lanes 8..15 and 16..23 for lanes 0..7.
+//
+// The raw wave8 stream (2 bytes per pulse) therefore CANNOT be DMA'd
+// directly: lane 0 would land in the discarded low half-word, and two
+// pulse periods would be packed into each word (halving the pulse
 // rate). This expansion pass rewrites each 2-byte pulse into one 4-byte
-// sample with the 16 lanes at bits 8..23, so lane `n` comes out on
-// `DATA_OUT(n)` at the correct 1-sample-per-pulse rate.
+// sample with the 16 lanes at memory bits 16..31, so lane `n` comes out
+// on `DATA_OUT(n)` at the correct 1-sample-per-pulse rate.
 
 /// @brief Bytes per input byte-position after 32-bit sample expansion.
 ///
@@ -140,8 +144,9 @@ constexpr fl::size_t wave8I2s1Encoded32FrameSize(fl::size_t bytes_per_lane) FL_N
 ///                Size must be even.
 /// @param output  DMA-ready sample buffer, 4-byte aligned, at least
 ///                `pulses.size() * 2` bytes. Each sample is
-///                `lanes0_7 << 8 | lanes8_15 << 16` (bits 8..23 map to
-///                DATA_OUT0..15). Must NOT alias `pulses`.
+///                `lanes0_7 << 16 | lanes8_15 << 24` (memory bits
+///                16..31 map to DATA_OUT0..15). Must NOT alias
+///                `pulses`.
 /// @return true on success; false on size/alignment violations.
 bool wave8I2s1ExpandTo32Samples(fl::span<const fl::u8> pulses,
                                 fl::span<fl::u8> output) FL_NO_EXCEPT;

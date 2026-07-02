@@ -286,7 +286,12 @@ bool I2sPeripheralEsp32DevEsp::initialize(
     // DMA drains the descriptor into the FIFO, up to 64 samples before
     // they reach the pins.)
     i2s->conf1.val = 0;
-    i2s->conf1.tx_stop_en = 1;
+    // tx_stop_en stays 0 (Yves baseline): bench-tested `= 1` produced
+    // ZERO wire output — the FIFO is empty at the instant `tx_start`
+    // is set (DMA prefetch hasn't landed yet), so the auto-stop latches
+    // before the first sample ever ships. Post-frame underrun clocking
+    // is handled by stopping TX from the completion path instead.
+    i2s->conf1.tx_stop_en = 0;
     i2s->conf1.tx_pcm_bypass = 1;
 
     // Mono channel mode routing everything to the right channel path
