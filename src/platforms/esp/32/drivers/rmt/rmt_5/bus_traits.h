@@ -37,7 +37,7 @@ template<> struct BusTraits<Bus::RMT> {
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
     static void registerWithManager() FL_NO_EXCEPT {
-        ChannelManager::instance().addDriver(default_bus_priority(Bus::RMT), instancePtr());
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::RMT, 0), instancePtr());
     }
 };
 

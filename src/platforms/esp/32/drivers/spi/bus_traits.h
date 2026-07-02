@@ -41,7 +41,7 @@ template<> struct BusTraits<Bus::SPI> {
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
     static void registerWithManager() FL_NO_EXCEPT {
-        ChannelManager::instance().addDriver(default_bus_priority(Bus::SPI), instancePtr());
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::SPI, 0), instancePtr());
     }
 };
 

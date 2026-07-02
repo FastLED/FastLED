@@ -68,8 +68,13 @@ namespace fl {
 class ChannelEngineI2sEsp32Dev : public IChannelDriver {
   public:
     /// @brief Construct with a peripheral (real or mock).
+    /// @param i2s_port Which I2S block this engine drives (FastLED#3576
+    ///        Phase 1): 1 = primary bank (`Bus::FLEX_IO` instance 0),
+    ///        0 = second bank (`Bus::FLEX_IO` instance 1, contended
+    ///        with the clocked-SPI driver via the port-claim registry).
     explicit ChannelEngineI2sEsp32Dev(
-        fl::shared_ptr<II2sPeripheralEsp32Dev> peripheral) FL_NO_EXCEPT;
+        fl::shared_ptr<II2sPeripheralEsp32Dev> peripheral,
+        u8 i2s_port = 1) FL_NO_EXCEPT;
 
     ~ChannelEngineI2sEsp32Dev() override;
 
@@ -83,7 +88,10 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
     DriverState poll() FL_NO_EXCEPT override;
 
     fl::string getName() const FL_NO_EXCEPT override {
-        return fl::string::from_literal("I2S");
+        // Distinct names per bank so affinity binding and the
+        // AutoResearch exclusive-driver selector can target each block.
+        return (mI2sPort == 0) ? fl::string::from_literal("I2S0")
+                               : fl::string::from_literal("I2S");
     }
 
     /// @brief Reports both clockless and SPI capability per the
@@ -181,6 +189,9 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
     u32 mCachedT2;
     u32 mCachedT3;
     bool mWave8LutValid;
+
+    // FastLED#3576 Phase 1 — which I2S block this engine drives (0/1).
+    u8 mI2sPort;
 };
 
 /// @brief Factory that builds a `ChannelEngineI2sEsp32Dev` wrapping a
@@ -195,5 +206,13 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
 /// returns nullptr so the channel-manager registration path skips
 /// cleanly.
 fl::shared_ptr<IChannelDriver> createI2sEsp32DevEngine() FL_NO_EXCEPT;
+
+/// @brief Port-selecting factory (FastLED#3576 Phase 1). `port == 1` is
+///        the primary bank (identical to the no-arg overload); `port ==
+///        0` builds the second bank ("I2S0", `Bus::FLEX_IO` instance 1)
+///        wrapping the per-port peripheral singleton. I2S0 is contended
+///        with the clocked-SPI driver — the port-claim registry
+///        arbitrates at initialize() time.
+fl::shared_ptr<IChannelDriver> createI2sEsp32DevEngine(u8 port) FL_NO_EXCEPT;
 
 } // namespace fl

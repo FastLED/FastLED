@@ -268,15 +268,18 @@ Engines are tried in priority order (highest first) until one accepts the channe
 
 | Engine | Priority | Platforms | Notes |
 |--------|----------|-----------|-------|
-| **I2S_SPI** | 10 | ESP32-dev (original) | Native I2S parallel SPI for true SPI chipsets |
+| **I2S** (unified) | 10 | ESP32-dev (original) | I2S1 wave8 clockless bank (16 lanes) + SPI-chipset delegation, `Bus::FLEX_IO` instance 0 |
 | **LCD_SPI** | 10 | ESP32-S3 | LCD_CAM SPI driver for true SPI chipsets |
+| **I2S0** (second bank) | 9 | ESP32-dev (original) | Second 16-lane wave8 clockless bank on I2S0 (`Bus::FLEX_IO` instance 1) — 32 parallel lanes total; contended with the clocked-SPI use of I2S0 (port-claim registry, first mode wins) |
 | **PARLIO** | 4 | ESP32-P4, C6, H2, C5 | Parallel I/O with hardware timing |
 | **LCD_RGB** | 3 | ESP32-P4 | LCD RGB peripheral (parallel clockless) |
 | **RMT** | 2 (Recommended default) | All ESP32 variants | Reliable, broad chipset support |
 | **LCD_CLOCKLESS** | 2 | ESP32-S3 | LCD_CAM clockless (replaces the misnamed I2S) |
 | **I2S** | 1 | ESP32-S3 | LCD_CAM via legacy I80 bus (experimental) |
 | **SPI** | 0 | ESP32, S2, S3 | DMA-based, deprioritized due to reliability |
-| **UART** | -1 | All ESP32 variants | Wave8 encoding (experimental, not recommended) |
+| **UART** | -1 | All ESP32 variants | Wave10/wave4 frame-geometry encoding, per-chipset selection |
+
+**Classic-ESP32 32-lane operation (FastLED#3576 Phase 1):** the I2S engines are capacity-aware — the primary bank accepts at most 16 clockless channels per frame, so the 17th+ channel overflows to the `I2S0` second bank, then to RMT. Each I2S block is a shared resource between its clockless bank and the clocked-SPI driver: ownership is arbitrated at `initialize()` time by the port-claim registry (`platforms/esp/32/drivers/i2s/i2s_port_claim.h`) — whichever mode claims a block first per session keeps it, and the other driver's channels fall through the priority list cleanly.
 
 **Teensy 4.x:**
 

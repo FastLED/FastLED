@@ -48,6 +48,8 @@ FL_EXTERN_C_BEGIN
 #include "platforms/esp/esp_version.h"
 FL_EXTERN_C_END
 
+#include "platforms/esp/32/drivers/i2s/i2s_port_claim.h"  // cross-driver I2S0 ownership (FastLED#3576)
+
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 // IWYU pragma: begin_keep
 #include "esp_private/periph_ctrl.h"
@@ -65,6 +67,9 @@ FL_EXTERN_C_END
 // ESP32 lldesc_t has 12-bit size/length fields, max usable value = 4092
 // (must be divisible by 4 for DMA alignment).
 #define I2S_DMA_MAX_DATA_LEN 4092
+
+// Owner tag for the cross-driver I2S port-claim registry (FastLED#3576).
+static constexpr const char *kI2sSpiOwner = "I2S_SPI";
 
 namespace fl {
 namespace detail {
@@ -168,6 +173,13 @@ bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NO_EXCEPT {
 
     if (config.clock_gpio < 0) {
         FL_WARN_F("I2sSpiPeripheralEsp: Invalid clock_gpio");
+        return false;
+    }
+
+    // FastLED#3576 Phase 1 — I2S0 is contended with the second
+    // clockless bank (ChannelEngineI2sEsp32Dev port 0). First claim
+    // wins; released in deinitialize().
+    if (!i2sPortClaim(0, kI2sSpiOwner)) {
         return false;
     }
 
@@ -282,6 +294,7 @@ bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NO_EXCEPT {
         heap_caps_malloc(dmaBytes, MALLOC_CAP_DMA | MALLOC_CAP_8BIT));
     if (mDmaBuffer == nullptr) {
         FL_WARN_F("I2sSpiPeripheralEsp: Failed to allocate DMA buffer");
+        i2sPortRelease(0, kI2sSpiOwner);
         return false;
     }
     fl::memset(mDmaBuffer, 0, dmaBytes);
@@ -301,6 +314,7 @@ bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NO_EXCEPT {
         heap_caps_free(mDmaBuffer);
         mDmaBuffer = nullptr;
         mDmaBufferWords = 0;
+        i2sPortRelease(0, kI2sSpiOwner);
         return false;
     }
     fl::memset(mDmaDescs, 0, mDmaDescCount * sizeof(lldesc_t));
@@ -341,6 +355,7 @@ bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NO_EXCEPT {
         heap_caps_free(mDmaBuffer);
         mDmaBuffer = nullptr;
         mDmaBufferWords = 0;
+        i2sPortRelease(0, kI2sSpiOwner);
         return false;
     }
 
@@ -381,6 +396,7 @@ void I2sSpiPeripheralEsp::deinitialize() FL_NO_EXCEPT {
     if (mInitialized) {
         periph_module_disable(PERIPH_I2S0_MODULE);
     }
+    i2sPortRelease(0, kI2sSpiOwner);
 
     mInitialized = false;
     mCallback = nullptr;
