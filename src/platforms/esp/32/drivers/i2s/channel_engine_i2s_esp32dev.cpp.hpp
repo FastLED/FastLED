@@ -256,6 +256,7 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
         }
     }
 
+<<<<<<< HEAD
     // Size the scratch buffer: max per-lane byte count across all
     // in-flight channels. Three regions (see packScratchBuffer):
     //   [0, 2W)        — 32-bit DMA samples (4 bytes per pulse), the
@@ -263,6 +264,12 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
     //   [2W, 3W)       — raw wave8 pulse pairs (2 bytes per pulse)
     //   [3W, 3W + 16b) — 16-lane-strided transpose input
     // where W = wave8I2s1EncodedFrameSize(bytes_per_lane).
+=======
+    // Size the scratch buffer for wave8 output: max per-lane byte count
+    // across all in-flight channels × 16 lanes × 8 pulses = 128 output
+    // bytes per input byte-position. `wave8I2s1EncodedFrameSize()` gives
+    // us `bytes_per_lane * 128`.
+>>>>>>> origin/master
     size_t bytes_per_lane = 0;
     for (const auto &data : mInFlightChannels) {
         if (data) {
@@ -270,10 +277,20 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
             if (sz > bytes_per_lane) bytes_per_lane = sz;
         }
     }
+<<<<<<< HEAD
     const size_t wave8_size = wave8I2s1EncodedFrameSize(bytes_per_lane);
     const size_t output_size = wave8I2s1Encoded32FrameSize(bytes_per_lane);
     const size_t input_size = 16 * bytes_per_lane;
     const size_t required = output_size + wave8_size + input_size;
+=======
+    // Buffer sized for wave8 output PLUS the 16-lane input scratch that
+    // `packScratchBuffer()` uses as its transpose input. Input goes
+    // AFTER the output region since the encoder writes the whole output
+    // in place and the callers only read the output prefix.
+    const size_t output_size = wave8I2s1EncodedFrameSize(bytes_per_lane);
+    const size_t input_size = 16 * bytes_per_lane;
+    const size_t required = output_size + input_size;
+>>>>>>> origin/master
     if (required == 0) {
         for (auto &data : mInFlightChannels) {
             if (data) {
@@ -419,6 +436,7 @@ size_t ChannelEngineI2sEsp32Dev::packScratchBuffer() FL_NO_EXCEPT {
     // buffer content is the exact DMA byte stream the peripheral emits
     // on the wire.
     //
+<<<<<<< HEAD
     // Two stages (FastLED#3569 root-cause fix):
     //   1. `encodeChannelWave8_i2s1` — shared 16-wide transpose kernel,
     //      2 bytes per pulse period, written to the middle region.
@@ -426,6 +444,14 @@ size_t ChannelEngineI2sEsp32Dev::packScratchBuffer() FL_NO_EXCEPT {
     //      one 32-bit sample with lanes at bits 8..23, because I2S1 in
     //      `tx_bits_mod = 32` LCD mode clocks one u32 per pixel clock
     //      and presents sample bit (n + 8) on DATA_OUT(n).
+=======
+    // Layout: for each byte-position (0..bytes_per_lane), gather one
+    // byte from each active lane into a 16-slot row (zero-padded for
+    // inactive lanes), transpose to 16 lanes × 8 pulses × 1 byte =
+    // 128 output bytes. Callers ensured `mScratchSize >=
+    // bytes_per_lane * 128` via the wave8I2s1EncodedFrameSize()
+    // pre-alloc in show().
+>>>>>>> origin/master
     //
     // Chipset timing: for now assumes WS2812B 800kHz across all
     // channels. Per-channel timing plumbing (build LUT from
@@ -443,6 +469,7 @@ size_t ChannelEngineI2sEsp32Dev::packScratchBuffer() FL_NO_EXCEPT {
     if (bytes_per_lane == 0 || num_lanes == 0) return 0;
     if (num_lanes > 16) num_lanes = 16;  // wave8 kernel is 16-wide
 
+<<<<<<< HEAD
     // Region layout — see the matching pre-alloc math in show().
     const size_t input_size = 16 * bytes_per_lane;
     const size_t wave8_size = wave8I2s1EncodedFrameSize(bytes_per_lane);
@@ -459,6 +486,32 @@ size_t ChannelEngineI2sEsp32Dev::packScratchBuffer() FL_NO_EXCEPT {
     // Build lane-strided input: lane 0's bytes contiguous, then lane 1,
     // etc. Zero first so inactive-lane slots don't feed uninitialised
     // memory into the 16-wide transpose.
+=======
+    // Build lane-strided input: lane 0's bytes contiguous, then lane 1,
+    // etc. Total input is 16 * bytes_per_lane; unused-lane slots are
+    // zero-padded so the 16-wide transpose kernel doesn't read
+    // uninitialised memory.
+    const size_t input_size = 16 * bytes_per_lane;
+    const size_t output_size = wave8I2s1EncodedFrameSize(bytes_per_lane);
+
+    // Reuse the scratch buffer for input + output. Put input at the
+    // end (last input_size bytes) and encode into the start
+    // (first output_size bytes). The 4×-per-byte pipe4 encoder consumes
+    // input positions monotonically before writing later output rows,
+    // so an in-place scheme is safe as long as output_size >= input_size,
+    // which is always true (output_size = input_size * 8).
+    if (mScratchSize < output_size + input_size) {
+        // Fallback: bail cleanly. `show()` should have pre-sized to
+        // `output_size` at minimum; this belt-and-suspenders check is
+        // defense against a stale scratch buffer surviving a show()
+        // that used a much smaller frame.
+        return 0;
+    }
+    fl::u8* const input = mScratchBuffer + output_size;
+    fl::u8* const output = mScratchBuffer;
+
+    // Zero the input region first (covers inactive lanes).
+>>>>>>> origin/master
     fl::memset(input, 0, input_size);
     size_t lane_idx = 0;
     for (const auto &data : mInFlightChannels) {
@@ -470,6 +523,7 @@ size_t ChannelEngineI2sEsp32Dev::packScratchBuffer() FL_NO_EXCEPT {
         ++lane_idx;
     }
 
+<<<<<<< HEAD
     // Build the wave8 LUT for the target chipset timing, cached on the
     // engine instance and filled IN PLACE via the out-param
     // `buildWave8ByteExpansionLUT` overload — the by-value overload
@@ -497,6 +551,17 @@ size_t ChannelEngineI2sEsp32Dev::packScratchBuffer() FL_NO_EXCEPT {
     }
     if (!wave8I2s1ExpandTo32Samples(
             fl::span<const fl::u8>(wave8_tmp, wave8_size),
+=======
+    // Build the wave8 LUT for the target chipset timing. Default to
+    // WS2812B 800kHz until per-channel timing lookup is wired.
+    const ChipsetTiming timing = to_runtime_timing<TIMING_WS2812_800KHZ>();
+    const Wave8BitExpansionLut bit_lut = buildWave8ExpansionLUT(timing);
+    const Wave8ByteExpansionLut byte_lut = buildWave8ByteExpansionLUT(bit_lut);
+
+    if (!encodeChannelWave8_i2s1(
+            fl::span<const fl::u8>(input, input_size),
+            bytes_per_lane, num_lanes, byte_lut,
+>>>>>>> origin/master
             fl::span<fl::u8>(output, output_size))) {
         return 0;
     }

@@ -240,8 +240,11 @@ bool I2sPeripheralEsp32DevEsp::initialize(
     i2s->conf2.lcd_tx_wrx2_en = 0;
     i2s->conf2.lcd_tx_sdx2_en = 0;
 
-    // Sample-rate configuration — Yves baseline (32-bit) restored
-    // after `= 16` triggered spurious DMA interrupts flooding the ISR.
+    // Sample-rate configuration — `tx_bits_mod = 32` (Yves's proven
+    // value): one 32-bit sample per pixel clock, with DATA_OUT(n)
+    // presenting sample bit n+8. The engine feeds this format via
+    // `wave8I2s1ExpandTo32Samples()` (one u32 per pulse, lanes at bits
+    // 8..23) — see FastLED#3569 for the full mapping derivation.
     i2s->sample_rate_conf.val = 0;
     i2s->sample_rate_conf.tx_bits_mod = 32;
     i2s->sample_rate_conf.tx_bck_div_num = 1;
