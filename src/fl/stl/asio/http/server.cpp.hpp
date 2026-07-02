@@ -846,6 +846,14 @@ bool Server::start(int port) {
 
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.server_port = static_cast<u16>(port);
+    // Route handlers execute ON the httpd task and run full fl::json /
+    // fl::string / Response machinery. The IDF default stack (4 KB) is
+    // not enough for that: overflows landed in adjacent heap blocks and
+    // corrupted unrelated main-task objects (FastLED#3588 — classic
+    // ESP32 crashed building RPC responses while a client hammered the
+    // server). FreeRTOS heap-allocated task stacks give no early
+    // warning, so size generously.
+    config.stack_size = 8192;
 
     esp_err_t err = httpd_start(&s_esp_httpd, &config);
     if (err != ESP_OK) {

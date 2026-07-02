@@ -11,12 +11,25 @@
 namespace fl {
 
 // StringHolder implementations
-// Assumes fl::malloc/fl::realloc/fl::free cannot return NULL (OOM is terminal)
+//
+// OOM hardening (FastLED#3588): on classic ESP32 with WiFi + an HTTP
+// server active, free heap drops below 20 KB and fl::malloc genuinely
+// returns NULL. The previous "OOM is terminal" assumption turned that
+// into UB (writes through null; realloc leak plus null mData with a
+// stale nonzero capacity) and crashed unattended bench devices. On
+// failure a holder now degrades to a coherent empty state
+// (mData=null, mLength=0, mCapacity=0) and grow() keeps the old
+// buffer.
 
 StringHolder::StringHolder(const char *str)
     : mData((char*)fl::malloc(strlen(str) + 1))
     , mLength(strlen(str))
     , mCapacity(mLength + 1) {
+    if (mData == nullptr) {
+        mLength = 0;
+        mCapacity = 0;
+        return;
+    }
     fl::memcpy(mData, str, mLength);
     mData[mLength] = '\0';
 }
@@ -25,6 +38,11 @@ StringHolder::StringHolder(size length)
     : mData((char*)fl::malloc(length + 1))
     , mLength(length)
     , mCapacity(length + 1) {
+    if (mData == nullptr) {
+        mLength = 0;
+        mCapacity = 0;
+        return;
+    }
     mData[mLength] = '\0';
 }
 
@@ -32,6 +50,11 @@ StringHolder::StringHolder(const char *str, size length)
     : mData((char*)fl::malloc(length + 1))
     , mLength(length)
     , mCapacity(length + 1) {
+    if (mData == nullptr) {
+        mLength = 0;
+        mCapacity = 0;
+        return;
+    }
     fl::memcpy(mData, str, mLength);
     mData[mLength] = '\0';
 }
@@ -48,9 +71,14 @@ void StringHolder::grow(size newLength) {
         return;
     }
 
-    // Use fl::realloc for efficient growth without memory move
-    // fl::realloc may expand in place or copy to larger block as needed
-    mData = (char*)fl::realloc(mData, newLength + 1);
+    // Use fl::realloc for efficient growth without memory move.
+    // Keep the old buffer if the allocation fails — the string simply
+    // does not grow (callers observe the unchanged length).
+    char *grown = (char*)fl::realloc(mData, newLength + 1);
+    if (grown == nullptr) {
+        return;
+    }
+    mData = grown;
     mLength = newLength;
     mCapacity = newLength + 1;
     mData[mLength] = '\0'; // Ensure null-termination

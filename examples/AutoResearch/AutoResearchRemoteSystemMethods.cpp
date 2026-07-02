@@ -31,6 +31,13 @@
 #if FASTLED_ESP32_HAS_PARLIO
 #include "platforms/esp/32/drivers/parlio/parlio_engine.h"
 #endif
+FL_EXTERN_C_BEGIN
+// IWYU pragma: begin_keep
+#include "esp_heap_caps.h"  // ok platform headers - heapCheck RPC
+#include "freertos/FreeRTOS.h"  // ok platform headers - heapCheck RPC
+#include "freertos/task.h"  // ok platform headers - heapCheck RPC
+// IWYU pragma: end_keep
+FL_EXTERN_C_END
 #endif
 #include "fl/stl/optional.h"
 #include "fl/stl/json.h"
@@ -237,6 +244,23 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
     // investigation). Params: [{addr: <u32>, count?: 1-16}]. The caller
     // is expected to pass valid peripheral/SRAM addresses; an unmapped
     // address faults exactly as it would from any other code.
+    // "heapCheck" — heap integrity + stats (FastLED#3588 corruption
+    // bisect). heap_caps_check_integrity_all walks every block; with
+    // poisoning configured in the IDF libs it also validates canaries.
+#if defined(FL_IS_ESP32)
+    remote.bind("heapCheck", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+        const bool intact = heap_caps_check_integrity_all(true);
+        response.set("success", true);
+        response.set("intact", intact);
+        response.set("free", static_cast<int64_t>(heap_caps_get_free_size(MALLOC_CAP_8BIT)));
+        response.set("minFree", static_cast<int64_t>(heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT)));
+        response.set("largest", static_cast<int64_t>(heap_caps_get_largest_free_block(MALLOC_CAP_8BIT)));
+        response.set("loopStackHighWater", static_cast<int64_t>(uxTaskGetStackHighWaterMark(nullptr)));
+        return response;
+    });
+#endif
+
     remote.bind("peekMem", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
         if (!args.is_object() || !args.contains("addr") ||
