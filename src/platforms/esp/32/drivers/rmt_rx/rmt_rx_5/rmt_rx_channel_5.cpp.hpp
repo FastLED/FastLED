@@ -554,6 +554,16 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
  * IRAM_ATTR must be specified only once (on definition), not separately on
  * declaration.
  */
+// Peekable wait() telemetry (FastLED#3586): harness tests run with logs
+// suppressed, so exit-path forensics go through memory instead.
+// [0]=wait calls, [1]=last exit (1=arm-fail 2=timeout 3=buffer-filled 4=natural), [2]=symbols, [3]=callbacks
+// FL_LINT_ALLOW_GLOBAL(bench probe read via peekMem at a fixed symbol address)
+volatile fl::u32 g_rmtrx_wait_dbg[4] = {0, 0, 0, 0};
+// FL_LINT_ALLOW_GLOBAL(bench probe read via peekMem at a fixed symbol address)
+volatile fl::u32 g_rmtrx_max_symbols = 0;
+// FL_LINT_ALLOW_GLOBAL(bench probe read via peekMem at a fixed symbol address)
+volatile fl::u32 g_rmtrx_first_symbols[4] = {0};
+
 class RmtRxChannelImpl : public RmtRxChannel {
   public:
     RmtRxChannelImpl(int pin) FL_NO_EXCEPT
@@ -988,10 +998,12 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // Only allocate and arm if not already receiving (begin() wasn't
         // called) Check if accumulation buffer is empty to determine if we need
         // to arm
+        g_rmtrx_wait_dbg[0] = g_rmtrx_wait_dbg[0] + 1;
         if (mAccumulationBuffer.empty()) {
             // Allocate buffer and arm receiver
             if (!allocateAndArm()) {
                 FL_WARN_F("wait(): failed to allocate and arm");
+                g_rmtrx_wait_dbg[1] = 1; // exit: arm failure
                 return RxWaitResult::TIMEOUT; // Treat as timeout
             }
         } else {
@@ -1009,6 +1021,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
             // Check if buffer filled (success condition)
             if (mSymbolsReceived >= mBufferSize) {
                 FL_LOG_RX("wait(): buffer filled (" << mSymbolsReceived << ")");
+                g_rmtrx_wait_dbg[1] = 3; // exit: buffer filled
+                g_rmtrx_wait_dbg[2] = static_cast<fl::u32>(mSymbolsReceived);
+                g_rmtrx_wait_dbg[3] = mCallbackCount;
                 return RxWaitResult::SUCCESS;
             }
 
@@ -1016,6 +1031,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
             if (elapsed_us >= timeout_us) {
                 FL_ERROR_F("RMT RX timeout after %sus, received %s symbols (expected %s)", elapsed_us, mSymbolsReceived, mBufferSize);
                 FL_ERROR_F("RMT RX: No data received from TX pin - check that PARLIO/SPI/RMT TX is transmitting");
+                g_rmtrx_wait_dbg[1] = 2; // exit: timeout
+                g_rmtrx_wait_dbg[2] = static_cast<fl::u32>(mSymbolsReceived);
+                g_rmtrx_wait_dbg[3] = mCallbackCount;
                 return RxWaitResult::TIMEOUT;
             }
 
@@ -1031,6 +1049,18 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // ESP-IDF ended the receive after one fill (likely due to idle
         // timeout from signal_range_max_ns). See issue #2254.
         FL_WARN_F("[RMT RX] wait(): symbols=%s callbacks=%s use_dma=%s", mSymbolsReceived, mCallbackCount, (mUseDma ? "true" : "false"));
+        g_rmtrx_wait_dbg[1] = 4; // exit: natural completion
+        g_rmtrx_wait_dbg[2] = static_cast<fl::u32>(mSymbolsReceived);
+        g_rmtrx_wait_dbg[3] = mCallbackCount;
+        for (int k = 0; k < 4; ++k) {
+            g_rmtrx_first_symbols[k] =
+                (static_cast<fl::size>(k) < mSymbolsReceived && k < static_cast<int>(mAccumulationBuffer.size()))
+                    ? static_cast<fl::u32>(mAccumulationBuffer[k])
+                    : 0;
+        }
+        if (static_cast<fl::u32>(mSymbolsReceived) > (g_rmtrx_max_symbols)) {
+            g_rmtrx_max_symbols = static_cast<fl::u32>(mSymbolsReceived);
+        }
         return RxWaitResult::SUCCESS;
     }
 
