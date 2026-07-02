@@ -31,7 +31,15 @@ AutoResearchNetState& getNetState() {
 // ESP32 Implementation
 // ============================================================================
 
+// ESP32-H2 (and other WiFi-less ESP32 family members) must take the
+// stub branch — esp_wifi.h does not even preprocess there
+// (CONFIG_ESP_WIFI_* are absent from its sdkconfig). Gate on actual
+// WiFi silicon, not on the family macro. (FastLED#3576 Phase 4)
 #if defined(FL_IS_ESP32)
+#include "soc/soc_caps.h"  // SOC_WIFI_SUPPORTED
+#endif
+
+#if defined(FL_IS_ESP32) && defined(SOC_WIFI_SUPPORTED) && SOC_WIFI_SUPPORTED
 
 // Unified HTTP server API (must be included before Arduino.h to avoid INADDR_NONE conflict)
 #include "fl/stl/asio/http/server.h"
@@ -448,7 +456,7 @@ fl::json stopNet() {
     return response;
 }
 
-#else  // !FL_IS_ESP32
+#else  // !FL_IS_ESP32 || !SOC_WIFI_SUPPORTED
 
 // ============================================================================
 // Stub Implementation for Non-ESP32 Platforms

@@ -19,6 +19,7 @@
 #include "AutoResearchNet.h"
 #include "AutoResearchOta.h"
 #include "fl/remote/transport/serial.h"
+#include "fl/stl/vector.h"
 #include "fl/system/heap.h"
 #include "Common.h"
 #include "AutoResearchTest.h"
@@ -82,8 +83,17 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
             response.set("error", "out_of_range");
             return response;
         }
-        static uint8_t src_buf[8192];
-        static uint8_t dst_buf[8192];
+        // Heap-allocated on first use: 16 KB of static buffers
+        // overflowed ESP32-S2's dram0 bss by 3.7 KB (FastLED#3576
+        // Phase 4 compile matrix).
+        static fl::vector<uint8_t> src_vec;
+        static fl::vector<uint8_t> dst_vec;
+        if (src_vec.size() < 8192) {
+            src_vec.resize(8192);
+            dst_vec.resize(8192);
+        }
+        uint8_t *src_buf = src_vec.data();
+        uint8_t *dst_buf = dst_vec.data();
         for (int i = 0; i < bytes; ++i) {
             src_buf[i] = static_cast<uint8_t>(i & 0xFF);
         }
