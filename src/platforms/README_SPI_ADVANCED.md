@@ -1121,8 +1121,9 @@ uv run test.py
 uv run test.py quad_spi
 uv run test.py spi_bus_manager
 
-# With QEMU (ESP32 hardware emulation)
-uv run test.py --qemu esp32s3
+# With QEMU (ESP32 hardware emulation via fbuild — Docker path retired)
+uv run ci/ci-compile.py esp32s3 --examples <sketch> --merged-bin --defines FASTLED_ESP32_IS_QEMU
+uv run fbuild test-emu --emulator qemu --environment esp32s3 --timeout 120 .build/pio/esp32s3
 ```
 
 ### Debugging Tools

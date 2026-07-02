@@ -53,53 +53,29 @@ The easiest way to run the tests is just use `./test`
 
 ## QEMU Emulation Testing
 
-FastLED supports testing ESP32-S3 examples in QEMU emulation, providing a powerful way to validate code without physical hardware.
+FastLED validates ESP32 examples end-to-end in QEMU. The previous Docker-based `./test --qemu esp32s3` runner (which pulled `niteris/fastled-simulator-*` images) was retired along with the rest of the platform-Docker infrastructure — fbuild now drives the Espressif QEMU binary directly, and the exact invocation lives in `.github/workflows/qemu_docker_template.yml`.
 
-### Running ESP32-S3 Examples in QEMU
-
-```bash
-# Test default examples (BlinkParallel, RMT5WorkerPool)
-./test --qemu esp32s3
-
-# Test specific examples
-./test --qemu esp32s3 BlinkParallel
-./test --qemu esp32s3 RMT5WorkerPool BlinkParallel
-
-# Quick validation test (setup verification only)
-FASTLED_QEMU_QUICK_TEST=true ./test --qemu esp32s3
-```
-
-### What QEMU Testing Does
-
-1. **Automatic QEMU Installation**: Downloads and sets up ESP32-S3 QEMU emulator
-2. **Cross-Platform Compilation**: Builds examples for ESP32-S3 target architecture
-3. **Emulated Execution**: Runs compiled firmware in QEMU virtual environment
-4. **Automated Validation**: Monitors execution for success/failure indicators
-
-### QEMU Test Output
-
-The QEMU tests provide detailed feedback:
-- **Build Status**: Compilation success/failure for each example
-- **Execution Results**: Runtime behavior in emulated environment
-- **Summary Statistics**: Pass/fail counts and timing information
-- **Error Details**: Specific failure reasons when tests don't pass
-
-### Supported Platforms
-
-Currently supported QEMU platforms:
-- **esp32s3**: ESP32-S3 SoC emulation
-
-Future platforms may include additional ESP32 variants as QEMU support expands.
-
-### Advanced QEMU Usage
+### Running ESP32 Examples in QEMU locally
 
 ```bash
-# Run with verbose output to see detailed build and execution logs
-./test --qemu esp32s3 --verbose
+# 1. Stage the sketch — produces .build/pio/<env>/ with firmware + partitions.
+uv run ci/ci-compile.py esp32s3 \
+    --examples BlinkParallel \
+    --merged-bin \
+    --defines FASTLED_ESP32_IS_QEMU \
+    --verbose
 
-# Test in non-interactive mode (useful for CI/CD)
-./test --qemu esp32s3 --no-interactive
+# 2. Emulate with fbuild (auto-downloads the Espressif QEMU binary on first run).
+uv run fbuild test-emu \
+    --emulator qemu \
+    --environment esp32s3 \
+    --timeout 120 \
+    --halt-on-success "setup starting" \
+    --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:" \
+    .build/pio/esp32s3
 ```
+
+Swap `esp32s3` for `esp32dev`, `esp32c3`, or any other QEMU-supported target. CI runs the same two-step sequence in `qemu_docker_template.yml`.
 
 ## VSCode
 

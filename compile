@@ -23,9 +23,6 @@ fi
 cd "$(dirname "$0")"
 
 # if .venv not found, create virtual environment.
-# (The FASTLED_DOCKER skip-guard that lived here was removed in #2812 — the
-# niteris/fastled-compiler-* compilation Docker images that set that env var
-# are decommissioned.)
 if [ ! -d .venv ]; then
     ./install
 fi

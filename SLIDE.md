@@ -162,7 +162,7 @@ arduino-cli compile --fqbn esp32:esp32:esp32 Blink
 # FastLED developer experience
 uv run test.py --cpp                    # All C++ tests
 uv run ci/wasm_compile.py Blink         # WASM target
-uv run test.py --qemu esp32s3           # Hardware emulation
+uv run fbuild test-emu --emulator qemu --environment esp32s3 .build/pio/esp32s3   # Hardware emulation
 bash lint                                # Auto-formatting
 ```
 
@@ -327,19 +327,23 @@ Visual suggestion: Circular diagram showing the continuous feedback loop with ti
 
 ---
 
-### SLIDE 16: Docker Integration
-**Reproducible Builds at Scale**
+### SLIDE 16: Native fbuild (no Docker in the loop)
+**Reproducible Builds Without the Container Tax**
 
 ```bash
-# Single command for ESP32 compilation (all deps in Docker)
-bash compile --docker esp32s3 examples/Blink
+# Single command for ESP32 compilation (all deps managed by fbuild)
+bash compile esp32s3 examples/Blink
 
 # What happens under the hood:
-# 1. Pulls fastled/build-env:esp32 image
-# 2. Mounts source code volume
-# 3. Runs PlatformIO build
-# 4. Exports .bin firmware
+# 1. fbuild resolves cached toolchain + framework under .fbuild/cache/
+# 2. Compiles directly (no PlatformIO, no Docker layer)
+# 3. Exports .bin firmware
 ```
+
+The Docker build path (`bash compile --docker`, `niteris/fastled-compiler-*`
+images) was retired in #2812 once fbuild replaced PlatformIO as the default
+backend — fbuild does not self-poison the way PlatformIO did, which was the
+only thing the container images were solving for.
 
 **Advantages**:
 - No local toolchain installation
@@ -385,7 +389,8 @@ Test types:
 **Hardware-in-the-Loop Without Hardware**
 
 ```bash
-uv run test.py --qemu esp32s3
+uv run ci/ci-compile.py esp32s3 --examples Blink --merged-bin --defines FASTLED_ESP32_IS_QEMU
+uv run fbuild test-emu --emulator qemu --environment esp32s3 --timeout 120 .build/pio/esp32s3
 ```
 
 **What's emulated**:

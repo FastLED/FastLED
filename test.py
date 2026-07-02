@@ -502,14 +502,6 @@ def main() -> None:
             python_test_change = _fp_results["python"]
             wasm_change = _fp_results["wasm"]
 
-        # Handle --docker flag: run tests in Docker container
-        if args.docker:
-            from ci.runners.docker_runner import run_docker_tests
-
-            ts_print("=== Docker Testing ===")
-            exit_code = run_docker_tests(args)
-            sys.exit(exit_code)
-
         # Handle --run flag (unified emulation interface)
         if args.run is not None:
             if len(args.run) < 1:
@@ -538,15 +530,7 @@ def main() -> None:
                 sys.exit(1)
 
             # Route to appropriate backend
-            if backend == "qemu":
-                from ci.runners.qemu_runner import run_qemu_tests
-
-                ts_print(f"=== QEMU Testing ({platform}) ===")
-                # Convert --run to --qemu format for backward compatibility
-                args.qemu = args.run
-                run_qemu_tests(args)
-                return
-            elif backend == "avr8js":
+            if backend == "avr8js":
                 from ci.runners.avr8js_runner import run_avr8js_tests
 
                 ts_print(f"=== avr8js Testing ({platform}) ===")
@@ -554,19 +538,18 @@ def main() -> None:
                 run_avr8js_tests(args)
                 return
             else:
+                # QEMU (and future emulators) no longer ship a local runner —
+                # the Docker-based QEMU path was retired along with the rest
+                # of the platform-Docker infrastructure. Local QEMU testing
+                # goes through fbuild directly, mirroring what CI runs in
+                # .github/workflows/qemu_docker_template.yml.
                 ts_print(
-                    f"Error: Unknown backend '{backend}' for platform '{platform}'"
+                    f"Error: No local runner for backend '{backend}' (platform '{platform}')."
+                )
+                ts_print(
+                    "For ESP32 QEMU, run fbuild test-emu directly (see qemu_docker_template.yml)."
                 )
                 sys.exit(1)
-
-        # Handle QEMU testing (deprecated - use --run)
-        if args.qemu is not None:
-            from ci.runners.qemu_runner import run_qemu_tests
-
-            ts_print("=== QEMU Testing ===")
-            ts_print("Note: --qemu is deprecated, use --run instead")
-            run_qemu_tests(args)
-            return
 
         # Track test success/failure for fingerprint status
         tests_passed = False

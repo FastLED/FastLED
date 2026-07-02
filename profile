@@ -36,7 +36,6 @@ if [ $# -eq 0 ]; then
     echo "Usage: bash profile <function> [options]"
     echo ""
     echo "Options:"
-    echo "  --docker              Run in Docker (consistent environment)"
     echo "  --iterations N        Number of benchmark iterations (default: 20)"
     echo "  --build-mode MODE     Build mode: quick, debug, release, profile (default: release)"
     echo "  --no-generate         Skip test generation (use existing profiler)"
@@ -46,9 +45,8 @@ if [ $# -eq 0 ]; then
     echo "Examples:"
     echo "  bash profile sincos16                    # Fast benchmarking (release mode)"
     echo "  bash profile sincos16 --debuggable       # With stack traces (quick mode)"
-    echo "  bash profile sincos16 --docker           # In Docker container"
     echo "  bash profile sincos16 --iterations 50    # More iterations"
-    echo "  bash profile 'fl::Perlin::pnoise2d' --docker --callgrind"
+    echo "  bash profile 'fl::Perlin::pnoise2d' --callgrind"
     exit 0
 fi
 

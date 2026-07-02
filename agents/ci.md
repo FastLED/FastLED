@@ -100,18 +100,18 @@ Edit `tests/profile/profile_<function>.cpp` to:
 
 **3. Build & Run Benchmarks:**
 ```bash
-# Local (20 iterations, release mode)
+# Native local build (20 iterations, release mode)
 bash profile <function>
 
-# Docker (consistent environment, recommended)
-bash profile <function> --docker
-
 # More iterations for better statistics
-bash profile <function> --docker --iterations 50
+bash profile <function> --iterations 50
 
-# With callgrind analysis (requires valgrind)
-bash profile <function> --docker --callgrind
+# With callgrind analysis (requires valgrind on Linux/WSL2)
+bash profile <function> --callgrind
 ```
+
+`bash profile --docker` was retired along with the host `fastled-unit-tests`
+image — profiling is native only.
 
 **4. Analyze Results:**
 Results are automatically parsed and saved:
@@ -146,13 +146,13 @@ Read the `.ai.json` file for:
 User: "Optimize sincos16 with profile-guided optimization"
 
 AI Steps:
-1. bash profile sincos16 --docker --iterations 30
+1. bash profile sincos16 --iterations 30
 2. [Reads profile_sincos16_results.ai.json]
    → Median: 47.8 ns/call
-3. [Analyzes bottlenecks - maybe via callgrind]
+3. [Analyzes bottlenecks - maybe via callgrind on Linux/WSL2]
    → LUT bandwidth bottleneck identified
 4. [Creates sincos16_optimized with smaller LUT]
-5. bash profile sincos16_optimized --docker --iterations 30
+5. bash profile sincos16_optimized --iterations 30
 6. [Results: 38.1 ns/call]
    → Speedup: 20% faster (47.8 → 38.1 ns/call)
 7. [Validates accuracy with generated tests]

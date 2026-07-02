@@ -21,18 +21,18 @@ Profile tests enable AI-driven profile-guided optimization by:
 ## Quick Start
 
 ```bash
-# Generate and profile a function
+# Generate and profile a function (native local build)
 bash profile sincos16
 
-# Profile in Docker (consistent environment)
-bash profile sincos16 --docker
-
 # More iterations for better statistics
-bash profile sincos16 --docker --iterations 50
+bash profile sincos16 --iterations 50
 
-# With callgrind analysis
-bash profile sincos16 --docker --callgrind
+# With callgrind analysis (Linux/WSL2 only; valgrind not available on Windows)
+bash profile sincos16 --callgrind
 ```
+
+The `--docker` flag was retired along with the host `fastled-unit-tests` image
+in the platform-Docker sweep — profiling is native only.
 
 ## Generated Files
 
@@ -81,14 +81,14 @@ int main() {
 
 ```bash
 # 1. Profile baseline
-bash profile sincos16 --docker --iterations 30
+bash profile sincos16 --iterations 30
 # Result: 47.8 ns/call (median)
 
 # 2. Create optimized variant
 # (Edit src/fl/math.cpp - reduce LUT size)
 
 # 3. Profile optimized
-bash profile sincos16_optimized --docker --iterations 30
+bash profile sincos16_optimized --iterations 30
 # Result: 38.1 ns/call (median)
 
 # 4. Calculate speedup
@@ -182,10 +182,9 @@ uv run test.py <function> --cpp --build-mode release --build
 
 1. **Sufficient iterations** - 100k+ calls for stable timing
 2. **Warmup phase** - Prime caches before measurement
-3. **Docker for consistency** - Use `--docker` flag
-4. **Multiple runs** - bash profile runs 20+ iterations
-5. **Prevent optimization** - Use volatile and __attribute__((noinline))
-6. **Realistic inputs** - Test with actual usage patterns
+3. **Multiple runs** - bash profile runs 20+ iterations
+4. **Prevent optimization** - Use volatile and __attribute__((noinline))
+5. **Realistic inputs** - Test with actual usage patterns
 
 ## See Also
 

@@ -8,7 +8,7 @@
 // Usage:
 //   ./audio_detector_performance              # Human-readable report
 //   ./audio_detector_performance baseline     # JSON output for profiling pipeline
-//   bash profile audio_detector_performance --iterations 50 --docker
+//   bash profile audio_detector_performance --iterations 50
 
 #include "fl/audio/audio_processor.h"
 #include "fl/audio/audio.h"

@@ -1,20 +1,10 @@
-"""Docker build utilities for FastLED PlatformIO compilation."""
+"""Docker helpers for FastLED — AVR8JS emulator only.
 
-from ci.docker_utils.container_db import (
-    ContainerDatabase,
-    ContainerRecord,
-    cleanup_container,
-    cleanup_orphaned_containers,
-    prepare_container,
-    process_exists,
-)
+The per-platform compile Docker images (`niteris/fastled-compiler-*`), per-platform
+QEMU simulator images (`niteris/fastled-simulator-*`), and the host unit-tests
+image (`fastled-unit-tests`) were all retired. Only the AVR8JS emulator wrapper
+remains, and it is driven directly by `ci.docker_utils.avr8js_docker` — this
+package exists to house that module + its Dockerfile.
+"""
 
-
-__all__ = [
-    "ContainerDatabase",
-    "ContainerRecord",
-    "cleanup_container",
-    "cleanup_orphaned_containers",
-    "prepare_container",
-    "process_exists",
-]
+__all__: list[str] = []

@@ -1,40 +1,46 @@
 # FastLED Docker Helpers
 
-This directory hosts Docker helpers for FastLED's **emulator** and **test-runner** workflows. The earlier compilation-Docker system (the `niteris/fastled-compiler-*` image family on Docker Hub plus the local `fastled-platformio-*` images) was decommissioned in #2812 — fbuild does not self-poison the way PlatformIO did, so the per-platform compiler images were no longer earning their cost.
+This directory hosts the **AVR8JS emulator** Docker helper only. All other Docker
+paths for FastLED — per-platform compilation, per-platform ESP32 QEMU
+simulation, and the host unit-tests image — have been retired. fbuild is the
+default and only compile backend; `fbuild test-emu --emulator qemu` drives ESP32
+QEMU natively.
 
 ## What's here now
 
-### Emulator Docker (kept)
+- **`Dockerfile.avr8js`** — AVR8JS-based emulator image used by
+  `.github/workflows/avr8js_uno_test.yml` to run Arduino Uno / ATtiny firmware
+  in JavaScript.
+- **`avr8js/`** — Node packages + entrypoint scripts baked into the avr8js
+  image.
+- **`avr8js_docker.py`** — Python runner (`DockerAVR8jsRunner`) that pulls +
+  invokes the avr8js image. Used from CI and from the local
+  `ci.runners.avr8js_runner.run_avr8js_tests` entrypoint (`bash test --run uno`).
 
-- **`Dockerfile.avr8js`** — AVR8JS-based emulator image used by `avr8js_uno_test.yml` to run Arduino Uno firmware in JavaScript.
-- **`avr8js/`** — Node packages + entrypoint scripts baked into the avr8js image.
-- **`avr8js_docker.py`** — Python runner that invokes the avr8js image.
-- **`qemu_esp32_docker.py`** — Qemu-based ESP32 emulator runner used by the `qemu_esp32*_test.yml` workflows.
-- **`README.qemu.md`** — qemu-specific usage notes.
+## What was retired
 
-### Test-runner Docker (kept)
+The following used to live here and are now gone:
 
-- **`container_db.py`** — SQLite-backed container lifecycle tracking. Used by `ci/runners/docker_runner.py` (the `bash test --docker` path) to keep containers alive between runs and clean up after dead processes.
-- **`cleanup_orphans.py`** — standalone CLI for purging orphaned tracked containers (`uv run python -m ci.docker.cleanup_orphans`).
-- **`test_container_db.py`** — unit tests for `container_db.py`.
+| Removed | Killed in | Why |
+|---|---|---|
+| `Dockerfile.base`, `Dockerfile.template` | #2812 | Built `niteris/fastled-compiler-base` and per-platform compiler images. |
+| `build.sh`, `docker_build_utils.py`, `generate_platformio_ini.py` | #2812 | In-container layered build orchestration. |
+| `image_priority_tracker.py` | #2812 | Smart-rebuild scheduler that drove `docker_compiler_smart_build.yml`. |
+| `prune_old_images.py` | #2812 | Pruned local `fastled-platformio-*` images. |
+| `diagnose_sync.sh` | #2812 | Diagnosed rsync sync between host and compile-Docker container. |
+| `DOCKER_DESIGN.md`, `task.md`, `RSYNC_FIX.md` | #2812 | Architecture notes for the retired compile-Docker system. |
+| `qemu_esp32_docker.py`, `qemu_test_integration.py`, `README.qemu.md` | this sweep | Docker-based ESP32 QEMU runner. CI now runs `fbuild test-emu --emulator qemu` directly. |
+| `build_platforms.py` | this sweep | `DOCKER_PLATFORMS` board → platform-family mapping — only ever used to derive the retired `niteris/fastled-simulator-*` image names. |
+| `build_image.py` | this sweep | Image-name hashing — only consumer was the retired QEMU Docker runner. |
+| `DockerManager.py` | this sweep | Generic `docker run` / `docker stop` subprocess wrapper — only consumer was the retired QEMU Docker runner. |
+| `container_db.py`, `cleanup_orphans.py`, `test_container_db.py` | this sweep | SQLite-backed container lifecycle tracking for `bash test --docker`. |
+| `ci/runners/qemu_runner.py`, `ci/install-qemu.py` | this sweep | Local QEMU test entrypoints that pulled and executed the retired simulator images. |
+| `ci/runners/docker_runner.py`, `docker/unit-tests/` | this sweep | Host `fastled-unit-tests` image + `bash test --docker` wrapper. |
 
-### Shared utilities (kept, possibly pruned)
-
-- **`build_image.py`** — image-name hashing. After #2812 only `generate_config_hash()` and `get_platformio_version()` remain (used by the qemu runner). The compile-Docker helpers (`extract_architecture`, `generate_docker_tag`) were removed.
-- **`DockerManager.py`** — generic `docker run` / `docker stop` subprocess wrapper. Retained because `qemu_esp32_docker.py` calls `run_container_streaming()` on it. The compile-side orchestrator that also used to call in here is gone.
-- **`build_platforms.py`** — board → platform-family mapping. Retained because `qemu_esp32_docker.py` calls `get_platform_for_board()` to derive `niteris/fastled-simulator-*` image names. The mirror compiler-image names that historically used this mapping are no longer published.
-
-### What was deleted in #2812
-
-| Removed | Why |
-|---|---|
-| `Dockerfile.base`, `Dockerfile.template` | Built the `niteris/fastled-compiler-base` and per-platform compiler images. |
-| `build.sh`, `docker_build_utils.py`, `generate_platformio_ini.py` | In-container layered build orchestration. |
-| `image_priority_tracker.py` | Smart-rebuild scheduler that drove `docker_compiler_smart_build.yml`. |
-| `prune_old_images.py` | Pruned local `fastled-platformio-*` images (image family no longer exists). |
-| `diagnose_sync.sh` | Diagnosed rsync sync between host and compile-Docker container. |
-| `DOCKER_DESIGN.md`, `task.md`, `RSYNC_FIX.md` | Architecture / design notes for the retired system. |
-
-The matching workflows (`.github/workflows/docker_compiler_*.yml`, `docker_merge_platform.yml`, `docker_build_compiler.yml`) and the compile-side Python wrapper (`ci/compiler/docker_manager.py`, `ci/build_docker_image_pio.py`) were removed in the same PR. The `--docker` and `--build` flags on `bash compile` are gone.
-
-`bash test --docker` and `bash profile --docker` still work today against the published Docker Hub images, but will be audited and retired separately (#2812 Phase 6 — Docker Hub image deprecation).
+The matching workflows (`.github/workflows/docker_compiler_*.yml`,
+`docker_merge_platform.yml`, `docker_build_compiler.yml`) and the compile-side
+Python wrapper (`ci/compiler/docker_manager.py`, `ci/build_docker_image_pio.py`)
+were removed in #2812. `bash compile --docker`, `bash compile --build`, `bash
+test --docker`, `bash test --qemu`, and `bash profile --docker` are all gone.
+Callgrind now requires a Linux host (WSL2 on Windows) — the Windows path used to
+be to run callgrind inside `fastled-unit-tests`, but that image is gone too.

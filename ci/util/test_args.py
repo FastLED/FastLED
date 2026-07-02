@@ -139,12 +139,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     parser.add_argument(
         "--run",
         nargs="+",
-        help="Run examples in emulation. Usage: --run esp32s3|uno [example_names...]. Auto-detects QEMU for ESP32 or avr8js for AVR.",
-    )
-    parser.add_argument(
-        "--qemu",
-        nargs="+",
-        help="(Deprecated - use --run) Run examples in QEMU emulation. Usage: --qemu esp32s3 [example_names...]",
+        help="Run examples in emulation. Usage: --run uno [example_names...]. Currently only the avr8js backend has a local runner; the Docker-based QEMU backend was retired along with the platform-Docker infrastructure — use fbuild test-emu directly for ESP32 QEMU.",
     )
     parser.add_argument(
         "--no-fingerprint",
@@ -157,19 +152,9 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         help="Force rerun of all tests, ignore fingerprint cache (same as --no-fingerprint)",
     )
     parser.add_argument(
-        "--build",
-        action="store_true",
-        help="Build Docker images if missing (use with --qemu)",
-    )
-    parser.add_argument(
         "--no-unity",
         action="store_true",
         help="This option will be re-enabled in the near future. How we always assume no unity builds.",
-    )
-    parser.add_argument(
-        "--docker",
-        action="store_true",
-        help="Run tests inside Docker container (Linux environment). Implies --debug unless --quick or --release is specified.",
     )
     parser.add_argument(
         "--list-tests",
@@ -228,12 +213,9 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         debug=parsed_args.debug,
         build_mode=parsed_args.build_mode,
         run=parsed_args.run,
-        qemu=parsed_args.qemu,
         no_fingerprint=parsed_args.no_fingerprint,
         force=parsed_args.force,
-        build=parsed_args.build,
         no_unity=parsed_args.no_unity,
-        docker=parsed_args.docker,
         list_tests=parsed_args.list_tests,
         log_failures=Path(parsed_args.log_failures)
         if parsed_args.log_failures
@@ -241,25 +223,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         setup_only=parsed_args.setup_only,
     )
 
-    # Handle --docker flag: implies --debug unless --quick or --release is specified
-    if test_args.docker:
-        # Determine the effective build mode
-        if test_args.build_mode is None and not test_args.quick:
-            # No explicit build mode and no --quick flag: default to debug
-            test_args.debug = True
-            ts_print(
-                "⚠️  --docker implies --debug mode (sanitizers enabled). "
-                "Use --quick or --build-mode release for faster builds."
-            )
-        elif test_args.quick:
-            ts_print("Docker mode: using quick build (--quick specified)")
-        elif test_args.build_mode:
-            ts_print(
-                f"Docker mode: using {test_args.build_mode} build (--build-mode specified)"
-            )
-
     # Save original test query before disambiguation modifies it
-    # (Docker runner needs the raw query, not the meson target name)
     test_args.raw_test_query = test_args.test
 
     # Auto-enable --py or --cpp mode when a specific test is provided
