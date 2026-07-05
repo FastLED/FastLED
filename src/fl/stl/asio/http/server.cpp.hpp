@@ -5,6 +5,7 @@
 
 #include "fl/stl/asio/http/server.h"
 #include "fl/stl/stdio.h"  // fl::snprintf — avoids _svfprintf_r (#2773 item 1.1)
+#include "fl/stl/atomic.h"
 #include "fl/task/executor.h"
 #include "platforms/esp/is_esp.h"  // ok platform headers - for FL_IS_ESP32  // IWYU pragma: keep
 
@@ -655,7 +656,26 @@ struct EspPendingRequest {
     fl::size body_len;
     Response* response; // filled by the main task
     SemaphoreHandle_t done;
+    // Ownership handshake (the original stack-allocated design left a
+    // DANGLING pointer in the queue when the 5 s handler wait timed
+    // out — the runner then wrote through freed httpd stack memory).
+    // 0 = queued, 1 = runner processing, 3 = abandoned by httpd.
+    fl::atomic<int> state;
 };
+
+void espRequestCleanup(EspPendingRequest* item) {
+    if (!item) return;
+    if (item->response) {
+        delete item->response; // ok bare allocation - see marshaling protocol
+    }
+    if (item->body) {
+        fl::free(item->body);
+    }
+    if (item->done) {
+        vSemaphoreDelete(item->done);
+    }
+    delete item; // ok bare allocation - see marshaling protocol
+}
 
 QueueHandle_t s_esp_request_queue = nullptr;
 
@@ -675,6 +695,13 @@ public:
             if (!item) {
                 continue;
             }
+            int expected = 0;
+            if (!item->state.compare_exchange_strong(expected, 1)) {
+                // httpd side abandoned this request (its wait timed
+                // out) — we own the cleanup.
+                espRequestCleanup(item);
+                continue;
+            }
             Request fl_req;
             fl_req.mMethod = item->method;
             fl_req.mPath = item->uri;
@@ -682,7 +709,7 @@ public:
             if (item->body && item->body_len > 0) {
                 fl_req.mBody = string(item->body, item->body_len);
             }
-            Response* resp = new Response(); // ok bare allocation - handed to the httpd task, deleted there after send
+            Response* resp = new Response(); // ok bare allocation - freed via espRequestCleanup
             if (item->server && item->route_index < item->server->mRoutes.size()) {
                 *resp = item->server->mRoutes[item->route_index].handler(fl_req);
             } else {
@@ -743,18 +770,24 @@ int Server::handle_esp_request(void* raw_req) {
         return ESP_FAIL;
     }
 
-    EspPendingRequest item = {};
-    item.server = ctx->server;
-    item.route_index = ctx->route_index;
+    EspPendingRequest* item = new EspPendingRequest(); // ok bare allocation - freed via espRequestCleanup by whichever side owns it last
+    item->server = ctx->server;
+    item->route_index = ctx->route_index;
+    item->body = nullptr;
+    item->body_len = 0;
+    item->response = nullptr;
+    item->method[0] = '\0';
+    item->uri[0] = '\0';
+    item->state.store(0);
     switch (req->method) {
-        case HTTP_POST:   fl::strncpy(item.method, "POST", sizeof(item.method) - 1); break;
-        case HTTP_PUT:    fl::strncpy(item.method, "PUT", sizeof(item.method) - 1); break;
-        case HTTP_DELETE: fl::strncpy(item.method, "DELETE", sizeof(item.method) - 1); break;
-        default:          fl::strncpy(item.method, "GET", sizeof(item.method) - 1); break;
+        case HTTP_POST:   fl::strncpy(item->method, "POST", sizeof(item->method) - 1); break;
+        case HTTP_PUT:    fl::strncpy(item->method, "PUT", sizeof(item->method) - 1); break;
+        case HTTP_DELETE: fl::strncpy(item->method, "DELETE", sizeof(item->method) - 1); break;
+        default:          fl::strncpy(item->method, "GET", sizeof(item->method) - 1); break;
     }
-    fl::strncpy(item.uri, req->uri, sizeof(item.uri) - 1);
+    fl::strncpy(item->uri, req->uri, sizeof(item->uri) - 1);
     // Strip query string from the path
-    for (char* c = item.uri; *c; ++c) {
+    for (char* c = item->uri; *c; ++c) {
         if (*c == '?') { *c = '\0'; break; }
     }
 
@@ -771,31 +804,40 @@ int Server::handle_esp_request(void* raw_req) {
                 received += ret;
             }
             buf[received] = '\0';
-            item.body = buf;
-            item.body_len = static_cast<fl::size>(received);
+            item->body = buf;
+            item->body_len = static_cast<fl::size>(received);
         }
     }
 
-    item.done = xSemaphoreCreateBinary();
-    if (!item.done) {
-        if (item.body) fl::free(item.body);
+    item->done = xSemaphoreCreateBinary();
+    if (!item->done) {
+        espRequestCleanup(item);
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "No memory");
         return ESP_FAIL;
     }
 
-    EspPendingRequest* item_ptr = &item;
-    esp_err_t result = ESP_OK;
-    if (xQueueSend(s_esp_request_queue, &item_ptr, pdMS_TO_TICKS(100)) != pdTRUE) {
+    if (xQueueSend(s_esp_request_queue, &item, pdMS_TO_TICKS(100)) != pdTRUE) {
+        espRequestCleanup(item); // never queued — we own it
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Server busy");
-        result = ESP_FAIL;
-    } else if (xSemaphoreTake(item.done, pdMS_TO_TICKS(5000)) != pdTRUE) {
-        // Main loop didn't service the request (e.g. blocked in a long
-        // operation) - tell the client to retry rather than corrupting
-        // state by running the fl:: handler on this task.
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Main loop busy");
-        result = ESP_FAIL;
-    } else if (item.response) {
-        Response* resp = item.response;
+        return ESP_FAIL;
+    }
+
+    esp_err_t result = ESP_OK;
+    if (xSemaphoreTake(item->done, pdMS_TO_TICKS(5000)) != pdTRUE) {
+        int expected = 0;
+        if (item->state.compare_exchange_strong(expected, 3)) {
+            // Runner has not started: it will see 'abandoned' and clean
+            // up. We must NOT free — the pointer is still in the queue.
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Main loop busy");
+            return ESP_FAIL;
+        }
+        // Runner won the race and is (or was) processing — wait for its
+        // give, then fall through and serve normally.
+        (void)xSemaphoreTake(item->done, portMAX_DELAY);
+    }
+
+    if (item->response) {
+        Response* resp = item->response;
         char status_str[32];
         fl::snprintf(status_str, sizeof(status_str), "%d", resp->mStatusCode);
         httpd_resp_set_status(req, status_str);
@@ -803,13 +845,11 @@ int Server::handle_esp_request(void* raw_req) {
             httpd_resp_set_hdr(req, it->first.c_str(), it->second.c_str());
         }
         httpd_resp_send(req, resp->mBody.c_str(), resp->mBody.size());
-        delete resp; // ok bare allocation - constructed on the main task, settled via semaphore
+    } else {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "No response");
+        result = ESP_FAIL;
     }
-
-    if (item.body) {
-        fl::free(item.body);
-    }
-    vSemaphoreDelete(item.done);
+    espRequestCleanup(item); // served — we own the cleanup
     return result;
 }
 
