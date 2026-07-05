@@ -9,6 +9,8 @@
 #include "fl/stl/unordered_map.h"  // IWYU pragma: keep
 #include "fl/remote/rpc/rpc_invokers.h"  // IWYU pragma: keep
 #include "fl/remote/rpc/rpc_mode.h"
+#include "fl/remote/rpc/response_stream.h"
+#include "fl/system/sketch_macros.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -52,6 +54,12 @@ struct RpcEntry {
     // For response-aware async methods (with ResponseSend& parameter)
     fl::function<void(ResponseSend&, const json&)> mResponseAwareFn;
     bool mIsResponseAware = false;
+
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    // For streamed sync methods that write their JSON-RPC result directly.
+    StreamingRpcHandler mStreamingFn;
+    bool mIsStreaming = false;
+#endif
 };
 
 // =============================================================================

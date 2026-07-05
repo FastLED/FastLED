@@ -75,6 +75,7 @@
 #include "fl/remote/rpc/rpc_handle.h"
 #include "fl/remote/rpc/rpc_registry.h"
 #include "fl/remote/rpc/rpc_mode.h"
+#include "fl/remote/rpc/response_stream.h"
 #include "fl/remote/rpc/runtime_rpc_binding.h"  // RuntimeRpcBinding (low-memory dispatch, #3246)
 #include "fl/system/sketch_macros.h"             // FL_PLATFORM_HAS_LARGE_MEMORY
 
@@ -225,6 +226,9 @@ public:
     /// Set response sink for sending ACK responses (used by async functions)
     void setResponseSink(fl::function<void(const fl::json&)> sink);
 
+    /// Set response stream sink for methods registered with bindStreaming().
+    void setResponseStreamSink(fl::ResponseStreamSink sink) FL_NO_EXCEPT;
+
     // =========================================================================
     // Method Registration (Binding)
     // =========================================================================
@@ -259,6 +263,11 @@ public:
     void bindAsync(const char* name,
                    fl::function<void(ResponseSend&, const json&)> fn,
                    fl::RpcMode mode = fl::RpcMode::ASYNC);
+
+    /// Bind a method that streams its JSON-RPC result directly to the transport.
+    /// The callback writes only the `result` payload; the RPC layer writes the
+    /// JSON-RPC envelope and request id.
+    void bindStreaming(const char* name, fl::StreamingRpcHandler fn) FL_NO_EXCEPT;
 
     // =========================================================================
     // Method Retrieval
@@ -396,6 +405,9 @@ public:
 private:
     fl::unordered_map<fl::string, detail::RpcEntry> mRegistry;
     fl::function<void(const fl::json&)> mResponseSink;  // For sending ACK responses
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    fl::ResponseStreamSink mResponseStreamSink;
+#endif
 };
 
 // RpcFactory is kept as an alias for backwards compatibility

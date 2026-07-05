@@ -23,7 +23,7 @@ void JsonStreamWriter::flush() FL_NO_EXCEPT {
     }
 }
 
-void JsonStreamWriter::putc(char c) FL_NO_EXCEPT {
+void JsonStreamWriter::writeChar(char c) FL_NO_EXCEPT {
     if (mLen >= kBufSize) {
         flush();
     }
@@ -35,12 +35,12 @@ void JsonStreamWriter::puts(const char *s) FL_NO_EXCEPT {
         return;
     }
     for (; *s; ++s) {
-        putc(*s);
+        writeChar(*s);
     }
 }
 
 void JsonStreamWriter::putEscaped(const char *s) FL_NO_EXCEPT {
-    putc('"');
+    writeChar('"');
     if (s) {
         for (; *s; ++s) {
             const unsigned char c = static_cast<unsigned char>(*s);
@@ -57,16 +57,16 @@ void JsonStreamWriter::putEscaped(const char *s) FL_NO_EXCEPT {
                         // Control character → \u00XX
                         static const char *kHex = "0123456789abcdef";
                         puts("\\u00");
-                        putc(kHex[(c >> 4) & 0xF]);
-                        putc(kHex[c & 0xF]);
+                        writeChar(kHex[(c >> 4) & 0xF]);
+                        writeChar(kHex[c & 0xF]);
                     } else {
-                        putc(static_cast<char>(c));
+                        writeChar(static_cast<char>(c));
                     }
                     break;
             }
         }
     }
-    putc('"');
+    writeChar('"');
 }
 
 void JsonStreamWriter::prefixForValue() FL_NO_EXCEPT {
@@ -79,7 +79,7 @@ void JsonStreamWriter::prefixForValue() FL_NO_EXCEPT {
     // container already has a prior element.
     if (mDepth > 0) {
         if (mNeedComma[mDepth - 1]) {
-            putc(',');
+            writeChar(',');
         }
         mNeedComma[mDepth - 1] = true;
     }
@@ -88,7 +88,7 @@ void JsonStreamWriter::prefixForValue() FL_NO_EXCEPT {
 void JsonStreamWriter::prefixForKey() FL_NO_EXCEPT {
     if (mDepth > 0) {
         if (mNeedComma[mDepth - 1]) {
-            putc(',');
+            writeChar(',');
         }
         mNeedComma[mDepth - 1] = true;
     }
@@ -96,7 +96,7 @@ void JsonStreamWriter::prefixForKey() FL_NO_EXCEPT {
 
 void JsonStreamWriter::beginObject() FL_NO_EXCEPT {
     prefixForValue();
-    putc('{');
+    writeChar('{');
     if (mDepth < kMaxDepth) {
         mNeedComma[mDepth] = false;
     }
@@ -107,12 +107,12 @@ void JsonStreamWriter::endObject() FL_NO_EXCEPT {
     if (mDepth > 0) {
         --mDepth;
     }
-    putc('}');
+    writeChar('}');
 }
 
 void JsonStreamWriter::beginArray() FL_NO_EXCEPT {
     prefixForValue();
-    putc('[');
+    writeChar('[');
     if (mDepth < kMaxDepth) {
         mNeedComma[mDepth] = false;
     }
@@ -123,13 +123,13 @@ void JsonStreamWriter::endArray() FL_NO_EXCEPT {
     if (mDepth > 0) {
         --mDepth;
     }
-    putc(']');
+    writeChar(']');
 }
 
 void JsonStreamWriter::key(const char *k) FL_NO_EXCEPT {
     prefixForKey();
     putEscaped(k);
-    putc(':');
+    writeChar(':');
     mPendingKey = true;
 }
 
@@ -143,7 +143,7 @@ void JsonStreamWriter::value(fl::i64 n) FL_NO_EXCEPT {
     char buf[24];
     int len = fl::itoa64(n, buf, 10);
     for (int i = 0; i < len; ++i) {
-        putc(buf[i]);
+        writeChar(buf[i]);
     }
 }
 

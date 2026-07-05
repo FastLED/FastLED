@@ -50,6 +50,64 @@
 #include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/frame.h"
 
+namespace {
+
+struct HelpEntry {
+    const char* name;
+    const char* phase;
+    const char* args;
+    const char* returns;
+    const char* description;
+};
+
+void streamHelpEntry(fl::JsonStreamWriter& writer, const HelpEntry& entry) {
+    writer.beginObject();
+    writer.member("name", entry.name);
+    writer.member("phase", entry.phase);
+    writer.member("args", entry.args);
+    writer.member("returns", entry.returns);
+    writer.member("description", entry.description);
+    writer.endObject();
+}
+
+static const HelpEntry kHelpEntries[] = {
+    {"start", "Phase 1: Basic Control", "[]", "void", "Trigger test matrix execution"},
+    {"status", "Phase 1: Basic Control", "[]", "{startReceived, testComplete, frameCounter, state}", "Query current test state"},
+    {"drivers", "Phase 1: Basic Control", "[]", "[{name, priority, enabled}, ...]", "List available drivers"},
+    {"getConfig", "Phase 2: Configuration", "[]", "{drivers, laneRange, stripSizes, totalTestCases}", "Query current test matrix configuration"},
+    {"setDrivers", "Phase 2: Configuration", "[driver1, driver2, ...]", "{success, driversSet, testCases}", "Configure enabled drivers"},
+    {"setLaneRange", "Phase 2: Configuration", "[minLanes, maxLanes]", "{success, minLanes, maxLanes, testCases}", "Configure lane range (1-16)"},
+    {"setStripSizes", "Phase 2: Configuration", "[size] or [shortSize, longSize]", "{success, stripSizesSet, testCases}", "Configure strip sizes"},
+    {"runTestCase", "Phase 3: Selective Execution", "[testCaseIndex]", "{success, testCaseIndex, result}", "Run single test case by index"},
+    {"runDriver", "Phase 3: Selective Execution", "[driverName]", "{success, driver, testsRun, results}", "Run all tests for specific driver"},
+    {"runAll", "Phase 3: Selective Execution", "[]", "{success, totalCases, passedCases, skippedCases, results}", "Run full test matrix with JSON results"},
+    {"getResults", "Phase 3: Selective Execution", "[]", "[{driver, lanes, stripSize, ...}, ...]", "Return all test results"},
+    {"getResult", "Phase 3: Selective Execution", "[testCaseIndex]", "{driver, lanes, stripSize, ...}", "Return specific test case result"},
+    {"reset", "Phase 4: Utility", "[]", "{success, message, testCasesCleared}", "Reset test state without device reboot"},
+    {"halt", "Phase 4: Utility", "[]", "{success, message}", "Trigger sketch halt"},
+    {"ping", "Phase 4: Utility", "[]", "{success, message, timestamp, uptimeMs, frameCounter}", "Health check with timestamp"},
+    {"getPins", "Phase 5: Pin Configuration", "[]", "{txPin, rxPin, defaults: {txPin, rxPin}, platform}", "Query current and default pin configuration"},
+    {"setTxPin", "Phase 5: Pin Configuration", "[pin]", "{success, txPin, previousTxPin, testCases}", "Set TX pin (regenerates test cases)"},
+    {"setRxPin", "Phase 5: Pin Configuration", "[pin]", "{success, rxPin, previousRxPin, rxChannelRecreated}", "Set RX pin (recreates RX channel)"},
+    {"setPins", "Phase 5: Pin Configuration", "[{txPin, rxPin}] or [txPin, rxPin]", "{success, txPin, rxPin, rxChannelRecreated, testCases}", "Set both TX and RX pins atomically"},
+    {"findConnectedPins", "Phase 5: Pin Configuration", "[{startPin, endPin, autoApply}] (all optional)", "{success, found, txPin, rxPin, autoApplied, testedPairs}", "Probe adjacent pin pairs to find jumper wire connection"},
+    {"help", "Phase 4: Utility", "[]", "[{name, phase, args, returns, description}, ...]", "List all RPC functions with descriptions"},
+    {"testSimd", "Phase 4: Utility", "[]", "{success, passed, totalTests, passedTests, failedTests, failures:[string]}", "Run comprehensive SIMD test suite (85 tests)"},
+    {"testSimdBenchmark", "Phase 4: Utility", "[{iterations}] (optional, default 10000)", "{success, iterations, float_us, s16x16_us, simd_us}", "Benchmark multiply speed: float vs s16x16 vs s16x16x4 SIMD"},
+    {"animartrixPerlinBench", "Phase 4: Utility", "[{iterations}] (optional, default 100, max 10000)", "{success, iterations, pnoise_calls_per_iter, pnoise_float_us, pnoise_i16_us, speedup_x1000}", "Animartrix-representative Perlin noise bench: scalar float pnoise vs s16x16 fixed-point pnoise2d (16x16 grid per iter, mirrors a real frame). Answers: how much does fixed-point beat float for Animartrix's hot path on this hardware?"},
+    {"wave8ExpandBenchmark", "Phase 4: Utility", "[{iterations}] (optional, default 30000, max 200000)", "{success, iterations, expand_nibble_us, expand_byte_us, expand_batched_us, transpose16_nibble_us, transpose16_byte_us, sink}", "Bench PARLIO Wave8 expansion (#2526): nibble vs byte vs batched LUT, plus full per-byte-position cost (expansion + 16-lane transpose)"},
+    {"ieee754CodecTest", "Phase 4: Utility", "[]", "{success, tests_run, tests_failed, first_failure, expected_bits, actual_bits}", "On-device verification of the integer-only IEEE 754 decimal codec (#3039): parse, format, round-trip, overflow/underflow, and NaN rejection without strtof/libm."},
+    {"parlioEncodeBenchmark", "Phase 4: Utility", "[{iterations}] (optional, default 12000, max 200000)", "{success, iters, lanes, leds_per_lane, scratchPsramOk, outputPsramOk, perpos_ss_us, perpos_sp_us, perpos_ps_us, perpos_pp_us, frame_ss_us, frame_sp_us, frame_ps_us, frame_pp_us, sink}", "Bench full PARLIO encode hot loop (16-lane gather + BF1 pipe4 direct encode) with SRAM and optional PSRAM placements; answers PSRAM hypothesis + ISR-streaming feasibility"},
+    {"timingDriftTest", "Phase 4: Utility", "[{pin, numLeds, iterations}] (all optional; default pin=4, numLeds=35, iterations=10)", "{success, pin, num_leds, iterations, cpu_mhz, show_count, show_min_us, show_max_us, show_total_us, iter_ms:[...]}", "Issue #2994 repro for compounded per-sequence timing drift on master vs 3.10.3. Replays the reporter's WS2812B-ring + millisDelay-gated fade sketch and returns per-sequence wall time (theoretical 2495 ms; on 3.10.3 rock-steady, on master 2563-2752)."},
+    {"parlioStreamValidate", "Phase 4: Utility", "[{baseTxPin, txPins, numLanes, numLeds, iterations, timeoutMs}] (all optional; txPins overrides contiguous baseTxPin)", "{success, completed, baseTxPin, txPins, lanes, leds_per_lane, iterations, perIterUs:[...], steadyAvgUs, failedIter, underrunCount, txDoneCount, workerIsrCount, ringError, hardwareIdle}", "Functional test of the PARLIO ISR-chunked streaming engine (#2548). Drives N back-to-back FastLED.show() calls through the production engine (which uses BF1+pipe4 on 16-lane Wave8 since #2559) and verifies all complete within timeout. Catches hangs/stalls."},
+    {"flexioRxBenchmark", "Phase 4: Utility", "[{frequency_hz=1000, duration_ms=100, tx_pin=3, rx_pin=4}] (all optional)", "{success, frequency_hz, duration_ms, tx_pin, rx_pin, edges_captured, periods, period_mean_ns, period_sigma_ns, period_min_ns, period_max_ns}", "Square-wave validation for the FlexIO RX backend (Teensy 4.x only, FastLED#2764 Phase 2). Drives tx_pin via analogWriteFrequency at 50%% duty, captures via RxBackend::FLEXIO on rx_pin, reports per-period statistics."},
+    {"flexioObjectFledTest", "Phase 4: Utility", "[{test_case=0..4, tx_pin=3, rx_pin=4, capture_ms=50}] (all optional)", "{success, test_case, tx_pin, rx_pin, num_leds, expected_bytes, decoded_bytes, matched, mismatched, edges_captured}", "End-to-end ObjectFLED TX -> FlexIO RX loopback verification (Teensy 4.x only, FastLED#2764 Phase 3). Drives WS2812 patterns through Bus::FLEX_IO slot 0, captures via RxBackend::FLEXIO, decodes the bit stream, and reports byte-level match counts. Five fixed test patterns: 0=red, 1=RGB triple, 2=all zeros, 3=all ones, 4=100-LED alternating."},
+};
+
+static const fl::size kHelpEntryCount = sizeof(kHelpEntries) / sizeof(kHelpEntries[0]);
+
+}  // namespace
+
 
 void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
     // Register "setDebug" function - enable/disable runtime debug logging
@@ -350,267 +408,20 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
     });
 
     // Register "help" function - list all RPC functions with descriptions
-    remote.bind("help", [this](const fl::json& args) -> fl::json {
-        fl::json functions = fl::json::array();
+    remote.bindStreaming("help", [](fl::JsonStreamWriter& writer, const fl::json& args, const fl::json& requestId) {
+        (void)args;
+        (void)requestId;
 
-        // Phase 1: Basic Control
-        fl::json start_fn = fl::json::object();
-        start_fn.set("name", "start");
-        start_fn.set("phase", "Phase 1: Basic Control");
-        start_fn.set("args", "[]");
-        start_fn.set("returns", "void");
-        start_fn.set("description", "Trigger test matrix execution");
-        functions.push_back(start_fn);
-
-        fl::json status_fn = fl::json::object();
-        status_fn.set("name", "status");
-        status_fn.set("phase", "Phase 1: Basic Control");
-        status_fn.set("args", "[]");
-        status_fn.set("returns", "{startReceived, testComplete, frameCounter, state}");
-        status_fn.set("description", "Query current test state");
-        functions.push_back(status_fn);
-
-        fl::json drivers_fn = fl::json::object();
-        drivers_fn.set("name", "drivers");
-        drivers_fn.set("phase", "Phase 1: Basic Control");
-        drivers_fn.set("args", "[]");
-        drivers_fn.set("returns", "[{name, priority, enabled}, ...]");
-        drivers_fn.set("description", "List available drivers");
-        functions.push_back(drivers_fn);
-
-        // Phase 2: Configuration
-        fl::json getConfig_fn = fl::json::object();
-        getConfig_fn.set("name", "getConfig");
-        getConfig_fn.set("phase", "Phase 2: Configuration");
-        getConfig_fn.set("args", "[]");
-        getConfig_fn.set("returns", "{drivers, laneRange, stripSizes, totalTestCases}");
-        getConfig_fn.set("description", "Query current test matrix configuration");
-        functions.push_back(getConfig_fn);
-
-        fl::json setDrivers_fn = fl::json::object();
-        setDrivers_fn.set("name", "setDrivers");
-        setDrivers_fn.set("phase", "Phase 2: Configuration");
-        setDrivers_fn.set("args", "[driver1, driver2, ...]");
-        setDrivers_fn.set("returns", "{success, driversSet, testCases}");
-        setDrivers_fn.set("description", "Configure enabled drivers");
-        functions.push_back(setDrivers_fn);
-
-        fl::json setLaneRange_fn = fl::json::object();
-        setLaneRange_fn.set("name", "setLaneRange");
-        setLaneRange_fn.set("phase", "Phase 2: Configuration");
-        setLaneRange_fn.set("args", "[minLanes, maxLanes]");
-        setLaneRange_fn.set("returns", "{success, minLanes, maxLanes, testCases}");
-        setLaneRange_fn.set("description", "Configure lane range (1-16)");
-        functions.push_back(setLaneRange_fn);
-
-        fl::json setStripSizes_fn = fl::json::object();
-        setStripSizes_fn.set("name", "setStripSizes");
-        setStripSizes_fn.set("phase", "Phase 2: Configuration");
-        setStripSizes_fn.set("args", "[size] or [shortSize, longSize]");
-        setStripSizes_fn.set("returns", "{success, stripSizesSet, testCases}");
-        setStripSizes_fn.set("description", "Configure strip sizes");
-        functions.push_back(setStripSizes_fn);
-
-        // Phase 3: Selective Execution
-        fl::json runTestCase_fn = fl::json::object();
-        runTestCase_fn.set("name", "runTestCase");
-        runTestCase_fn.set("phase", "Phase 3: Selective Execution");
-        runTestCase_fn.set("args", "[testCaseIndex]");
-        runTestCase_fn.set("returns", "{success, testCaseIndex, result}");
-        runTestCase_fn.set("description", "Run single test case by index");
-        functions.push_back(runTestCase_fn);
-
-        fl::json runDriver_fn = fl::json::object();
-        runDriver_fn.set("name", "runDriver");
-        runDriver_fn.set("phase", "Phase 3: Selective Execution");
-        runDriver_fn.set("args", "[driverName]");
-        runDriver_fn.set("returns", "{success, driver, testsRun, results}");
-        runDriver_fn.set("description", "Run all tests for specific driver");
-        functions.push_back(runDriver_fn);
-
-        fl::json runAll_fn = fl::json::object();
-        runAll_fn.set("name", "runAll");
-        runAll_fn.set("phase", "Phase 3: Selective Execution");
-        runAll_fn.set("args", "[]");
-        runAll_fn.set("returns", "{success, totalCases, passedCases, skippedCases, results}");
-        runAll_fn.set("description", "Run full test matrix with JSON results");
-        functions.push_back(runAll_fn);
-
-        fl::json getResults_fn = fl::json::object();
-        getResults_fn.set("name", "getResults");
-        getResults_fn.set("phase", "Phase 3: Selective Execution");
-        getResults_fn.set("args", "[]");
-        getResults_fn.set("returns", "[{driver, lanes, stripSize, ...}, ...]");
-        getResults_fn.set("description", "Return all test results");
-        functions.push_back(getResults_fn);
-
-        fl::json getResult_fn = fl::json::object();
-        getResult_fn.set("name", "getResult");
-        getResult_fn.set("phase", "Phase 3: Selective Execution");
-        getResult_fn.set("args", "[testCaseIndex]");
-        getResult_fn.set("returns", "{driver, lanes, stripSize, ...}");
-        getResult_fn.set("description", "Return specific test case result");
-        functions.push_back(getResult_fn);
-
-        // Phase 4: Utility and Control
-        fl::json reset_fn = fl::json::object();
-        reset_fn.set("name", "reset");
-        reset_fn.set("phase", "Phase 4: Utility");
-        reset_fn.set("args", "[]");
-        reset_fn.set("returns", "{success, message, testCasesCleared}");
-        reset_fn.set("description", "Reset test state without device reboot");
-        functions.push_back(reset_fn);
-
-        fl::json halt_fn = fl::json::object();
-        halt_fn.set("name", "halt");
-        halt_fn.set("phase", "Phase 4: Utility");
-        halt_fn.set("args", "[]");
-        halt_fn.set("returns", "{success, message}");
-        halt_fn.set("description", "Trigger sketch halt");
-        functions.push_back(halt_fn);
-
-        fl::json ping_fn = fl::json::object();
-        ping_fn.set("name", "ping");
-        ping_fn.set("phase", "Phase 4: Utility");
-        ping_fn.set("args", "[]");
-        ping_fn.set("returns", "{success, message, timestamp, uptimeMs, frameCounter}");
-        ping_fn.set("description", "Health check with timestamp");
-        functions.push_back(ping_fn);
-
-        // Phase 5: Pin Configuration
-        fl::json getPins_fn = fl::json::object();
-        getPins_fn.set("name", "getPins");
-        getPins_fn.set("phase", "Phase 5: Pin Configuration");
-        getPins_fn.set("args", "[]");
-        getPins_fn.set("returns", "{txPin, rxPin, defaults: {txPin, rxPin}, platform}");
-        getPins_fn.set("description", "Query current and default pin configuration");
-        functions.push_back(getPins_fn);
-
-        fl::json setTxPin_fn = fl::json::object();
-        setTxPin_fn.set("name", "setTxPin");
-        setTxPin_fn.set("phase", "Phase 5: Pin Configuration");
-        setTxPin_fn.set("args", "[pin]");
-        setTxPin_fn.set("returns", "{success, txPin, previousTxPin, testCases}");
-        setTxPin_fn.set("description", "Set TX pin (regenerates test cases)");
-        functions.push_back(setTxPin_fn);
-
-        fl::json setRxPin_fn = fl::json::object();
-        setRxPin_fn.set("name", "setRxPin");
-        setRxPin_fn.set("phase", "Phase 5: Pin Configuration");
-        setRxPin_fn.set("args", "[pin]");
-        setRxPin_fn.set("returns", "{success, rxPin, previousRxPin, rxChannelRecreated}");
-        setRxPin_fn.set("description", "Set RX pin (recreates RX channel)");
-        functions.push_back(setRxPin_fn);
-
-        fl::json setPins_fn = fl::json::object();
-        setPins_fn.set("name", "setPins");
-        setPins_fn.set("phase", "Phase 5: Pin Configuration");
-        setPins_fn.set("args", "[{txPin, rxPin}] or [txPin, rxPin]");
-        setPins_fn.set("returns", "{success, txPin, rxPin, rxChannelRecreated, testCases}");
-        setPins_fn.set("description", "Set both TX and RX pins atomically");
-        functions.push_back(setPins_fn);
-
-        fl::json findConnectedPins_fn = fl::json::object();
-        findConnectedPins_fn.set("name", "findConnectedPins");
-        findConnectedPins_fn.set("phase", "Phase 5: Pin Configuration");
-        findConnectedPins_fn.set("args", "[{startPin, endPin, autoApply}] (all optional)");
-        findConnectedPins_fn.set("returns", "{success, found, txPin, rxPin, autoApplied, testedPairs}");
-        findConnectedPins_fn.set("description", "Probe adjacent pin pairs to find jumper wire connection");
-        functions.push_back(findConnectedPins_fn);
-
-        fl::json help_fn = fl::json::object();
-        help_fn.set("name", "help");
-        help_fn.set("phase", "Phase 4: Utility");
-        help_fn.set("args", "[]");
-        help_fn.set("returns", "[{name, phase, args, returns, description}, ...]");
-        help_fn.set("description", "List all RPC functions with descriptions");
-        functions.push_back(help_fn);
-
-        fl::json testSimd_fn = fl::json::object();
-        testSimd_fn.set("name", "testSimd");
-        testSimd_fn.set("phase", "Phase 4: Utility");
-        testSimd_fn.set("args", "[]");
-        testSimd_fn.set("returns", "{success, passed, totalTests, passedTests, failedTests, failures:[string]}");
-        testSimd_fn.set("description", "Run comprehensive SIMD test suite (85 tests)");
-        functions.push_back(testSimd_fn);
-
-        fl::json testSimdBenchmark_fn = fl::json::object();
-        testSimdBenchmark_fn.set("name", "testSimdBenchmark");
-        testSimdBenchmark_fn.set("phase", "Phase 4: Utility");
-        testSimdBenchmark_fn.set("args", "[{iterations}] (optional, default 10000)");
-        testSimdBenchmark_fn.set("returns", "{success, iterations, float_us, s16x16_us, simd_us}");
-        testSimdBenchmark_fn.set("description", "Benchmark multiply speed: float vs s16x16 vs s16x16x4 SIMD");
-        functions.push_back(testSimdBenchmark_fn);
-
-        fl::json animartrixPerlinBench_fn = fl::json::object();
-        animartrixPerlinBench_fn.set("name", "animartrixPerlinBench");
-        animartrixPerlinBench_fn.set("phase", "Phase 4: Utility");
-        animartrixPerlinBench_fn.set("args", "[{iterations}] (optional, default 100, max 10000)");
-        animartrixPerlinBench_fn.set("returns", "{success, iterations, pnoise_calls_per_iter, pnoise_float_us, pnoise_i16_us, speedup_x1000}");
-        animartrixPerlinBench_fn.set("description", "Animartrix-representative Perlin noise bench: scalar float pnoise vs s16x16 fixed-point pnoise2d (16x16 grid per iter, mirrors a real frame). Answers: how much does fixed-point beat float for Animartrix's hot path on this hardware?");
-        functions.push_back(animartrixPerlinBench_fn);
-
-        fl::json wave8ExpandBenchmark_fn = fl::json::object();
-        wave8ExpandBenchmark_fn.set("name", "wave8ExpandBenchmark");
-        wave8ExpandBenchmark_fn.set("phase", "Phase 4: Utility");
-        wave8ExpandBenchmark_fn.set("args", "[{iterations}] (optional, default 30000, max 200000)");
-        wave8ExpandBenchmark_fn.set("returns", "{success, iterations, expand_nibble_us, expand_byte_us, expand_batched_us, transpose16_nibble_us, transpose16_byte_us, sink}");
-        wave8ExpandBenchmark_fn.set("description", "Bench PARLIO Wave8 expansion (#2526): nibble vs byte vs batched LUT, plus full per-byte-position cost (expansion + 16-lane transpose)");
-        functions.push_back(wave8ExpandBenchmark_fn);
-
-        fl::json ieee754CodecTest_fn = fl::json::object();
-        ieee754CodecTest_fn.set("name", "ieee754CodecTest");
-        ieee754CodecTest_fn.set("phase", "Phase 4: Utility");
-        ieee754CodecTest_fn.set("args", "[]");
-        ieee754CodecTest_fn.set("returns", "{success, tests_run, tests_failed, first_failure, expected_bits, actual_bits}");
-        ieee754CodecTest_fn.set("description", "On-device verification of the integer-only IEEE 754 decimal codec (#3039): parse, format, round-trip, overflow/underflow, and NaN rejection without strtof/libm.");
-        functions.push_back(ieee754CodecTest_fn);
-
-        fl::json parlioEncodeBenchmark_fn = fl::json::object();
-        parlioEncodeBenchmark_fn.set("name", "parlioEncodeBenchmark");
-        parlioEncodeBenchmark_fn.set("phase", "Phase 4: Utility");
-        parlioEncodeBenchmark_fn.set("args", "[{iterations}] (optional, default 12000, max 200000)");
-        parlioEncodeBenchmark_fn.set("returns", "{success, iters, lanes, leds_per_lane, scratchPsramOk, outputPsramOk, perpos_ss_us, perpos_sp_us, perpos_ps_us, perpos_pp_us, frame_ss_us, frame_sp_us, frame_ps_us, frame_pp_us, sink}");
-        parlioEncodeBenchmark_fn.set("description", "Bench full PARLIO encode hot loop (16-lane gather + BF1 pipe4 direct encode) with SRAM and optional PSRAM placements; answers PSRAM hypothesis + ISR-streaming feasibility");
-        functions.push_back(parlioEncodeBenchmark_fn);
-
-        fl::json timingDriftTest_fn = fl::json::object();
-        timingDriftTest_fn.set("name", "timingDriftTest");
-        timingDriftTest_fn.set("phase", "Phase 4: Utility");
-        timingDriftTest_fn.set("args", "[{pin, numLeds, iterations}] (all optional; default pin=4, numLeds=35, iterations=10)");
-        timingDriftTest_fn.set("returns", "{success, pin, num_leds, iterations, cpu_mhz, show_count, show_min_us, show_max_us, show_total_us, iter_ms:[...]}");
-        timingDriftTest_fn.set("description", "Issue #2994 repro for compounded per-sequence timing drift on master vs 3.10.3. Replays the reporter's WS2812B-ring + millisDelay-gated fade sketch and returns per-sequence wall time (theoretical 2495 ms; on 3.10.3 rock-steady, on master 2563-2752).");
-        functions.push_back(timingDriftTest_fn);
-
-        fl::json parlioStreamValidate_fn = fl::json::object();
-        parlioStreamValidate_fn.set("name", "parlioStreamValidate");
-        parlioStreamValidate_fn.set("phase", "Phase 4: Utility");
-        parlioStreamValidate_fn.set("args", "[{baseTxPin, txPins, numLanes, numLeds, iterations, timeoutMs}] (all optional; txPins overrides contiguous baseTxPin)");
-        parlioStreamValidate_fn.set("returns", "{success, completed, baseTxPin, txPins, lanes, leds_per_lane, iterations, perIterUs:[...], steadyAvgUs, failedIter, underrunCount, txDoneCount, workerIsrCount, ringError, hardwareIdle}");
-        parlioStreamValidate_fn.set("description", "Functional test of the PARLIO ISR-chunked streaming engine (#2548). Drives N back-to-back FastLED.show() calls through the production engine (which uses BF1+pipe4 on 16-lane Wave8 since #2559) and verifies all complete within timeout. Catches hangs/stalls.");
-        functions.push_back(parlioStreamValidate_fn);
-
-        fl::json flexioRxBenchmark_fn = fl::json::object();
-        flexioRxBenchmark_fn.set("name", "flexioRxBenchmark");
-        flexioRxBenchmark_fn.set("phase", "Phase 4: Utility");
-        flexioRxBenchmark_fn.set("args", "[{frequency_hz=1000, duration_ms=100, tx_pin=3, rx_pin=4}] (all optional)");
-        flexioRxBenchmark_fn.set("returns", "{success, frequency_hz, duration_ms, tx_pin, rx_pin, edges_captured, periods, period_mean_ns, period_sigma_ns, period_min_ns, period_max_ns}");
-        flexioRxBenchmark_fn.set("description", "Square-wave validation for the FlexIO RX backend (Teensy 4.x only, FastLED#2764 Phase 2). Drives tx_pin via analogWriteFrequency at 50%% duty, captures via RxBackend::FLEXIO on rx_pin, reports per-period statistics.");
-        functions.push_back(flexioRxBenchmark_fn);
-
-        fl::json flexioObjectFledTest_fn = fl::json::object();
-        flexioObjectFledTest_fn.set("name", "flexioObjectFledTest");
-        flexioObjectFledTest_fn.set("phase", "Phase 4: Utility");
-        flexioObjectFledTest_fn.set("args", "[{test_case=0..4, tx_pin=3, rx_pin=4, capture_ms=50}] (all optional)");
-        flexioObjectFledTest_fn.set("returns", "{success, test_case, tx_pin, rx_pin, num_leds, expected_bytes, decoded_bytes, matched, mismatched, edges_captured}");
-        flexioObjectFledTest_fn.set("description", "End-to-end ObjectFLED TX -> FlexIO RX loopback verification (Teensy 4.x only, FastLED#2764 Phase 3). Drives WS2812 patterns through Bus::FLEX_IO slot 0, captures via RxBackend::FLEXIO, decodes the bit stream, and reports byte-level match counts. Five fixed test patterns: 0=red, 1=RGB triple, 2=all zeros, 3=all ones, 4=100-LED alternating.");
-        functions.push_back(flexioObjectFledTest_fn);
-
-        fl::json response = fl::json::object();
-        response.set("success", true);
-        response.set("totalFunctions", static_cast<int64_t>(functions.size()));
-        response.set("functions", functions);
-        return response;
+        writer.beginObject();
+        writer.member("success", true);
+        writer.member("totalFunctions", static_cast<fl::i64>(kHelpEntryCount));
+        writer.key("functions");
+        writer.beginArray();
+        for (fl::size i = 0; i < kHelpEntryCount; ++i) {
+            streamHelpEntry(writer, kHelpEntries[i]);
+        }
+        writer.endArray();
+        writer.endObject();
     });
 }
 

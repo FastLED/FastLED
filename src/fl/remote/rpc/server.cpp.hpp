@@ -29,6 +29,14 @@ void Server::setResponseSink(ResponseSink sink) {
     mResponseSink = fl::move(sink);
 }
 
+void Server::setResponseStreamSink(ResponseStreamSink sink) FL_NO_EXCEPT {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    mResponseStreamSink = fl::move(sink);
+#else
+    (void)sink;
+#endif
+}
+
 size_t Server::update() {
     size_t processed = pull();
     size_t sent = push();

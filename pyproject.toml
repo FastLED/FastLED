@@ -190,6 +190,13 @@ dependencies = [
     # incremental builds produce stale .obj files after a git pull that
     # changes transitive headers (symptom: `undefined symbol: ...` link
     # errors hours after a header actually changed).
+    # 1.12.13 (released 2026-07-05): picks up running-process 4.5.8,
+    # suppresses Windows console flashes during compiler identity probes,
+    # and fixes daemon wedging on large-crate full-codegen misses
+    # (zackees/zccache#957, #958, #959).
+    # 1.12.12 (released 2026-07-02): journals embedded compile outcomes,
+    # restoring hit-ratio/miss-reason telemetry for soldr-routed rustc
+    # compiles (zackees/zccache#950).
     # 1.12.5 (released 2026-06-14): native-file lifecycle fix on Windows
     # (zackees/zccache#710, surfaced in FastLED #3048). The meson-snapshot
     # restore path no longer leaves `meson_native.txt` in a broken state
@@ -198,7 +205,7 @@ dependencies = [
     # `FileNotFoundError: meson_native.txt` / `ninja: error: rebuilding
     # 'build.ninja': subcommand failed` cascade we hit during long-session
     # `bash test --cpp` cycles.
-    "zccache>=1.12.7",
+    "zccache>=1.12.13",
     "ninja",
     "meson>=1.11.0",
     "download",

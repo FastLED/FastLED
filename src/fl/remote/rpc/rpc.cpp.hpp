@@ -25,6 +25,14 @@ void Rpc::setResponseSink(fl::function<void(const fl::json&)> sink) {
     mResponseSink = fl::move(sink);
 }
 
+void Rpc::setResponseStreamSink(fl::ResponseStreamSink sink) FL_NO_EXCEPT {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    mResponseStreamSink = fl::move(sink);
+#else
+    (void)sink;
+#endif
+}
+
 // =============================================================================
 // Rpc::bindAsync() - Bind async method with ResponseSend parameter
 // =============================================================================
@@ -50,7 +58,7 @@ void Rpc::bindAsync(const char* name,
 
     // Create a placeholder invoker (actual invocation handled in handle())
     struct PlaceholderInvoker : public detail::ErasedInvoker {
-        fl::tuple<TypeConversionResult, json> invoke(const json&) override {
+        fl::tuple<TypeConversionResult, json> invoke(const json&) FL_NO_EXCEPT override {
             // Should not be called - handle() will call mResponseAwareFn directly
             return fl::make_tuple(TypeConversionResult::success(), json(nullptr));
         }
@@ -58,6 +66,38 @@ void Rpc::bindAsync(const char* name,
     entry.mInvoker = fl::make_shared<PlaceholderInvoker>();
 
     mRegistry[key] = fl::move(entry);
+}
+
+// =============================================================================
+// Rpc::bindStreaming() - Bind streaming method with JsonStreamWriter parameter
+// =============================================================================
+
+void Rpc::bindStreaming(const char* name, fl::StreamingRpcHandler fn) FL_NO_EXCEPT {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    fl::string key(name);
+
+    detail::RpcEntry entry;
+    entry.mTypeTag = detail::TypeTag<void(const json&)>::id();
+    entry.mMode = RpcMode::SYNC;
+    entry.mIsStreaming = true;
+    entry.mStreamingFn = fl::move(fn);
+
+    entry.mSchemaGenerator = fl::make_shared<detail::TypedSchemaGenerator<void(const json&)>>();
+    entry.mDescription = "";
+    entry.mTags = {};
+
+    struct PlaceholderInvoker : public detail::ErasedInvoker {
+        fl::tuple<TypeConversionResult, json> invoke(const json&) FL_NO_EXCEPT override {
+            return fl::make_tuple(TypeConversionResult::success(), json(nullptr));
+        }
+    };
+    entry.mInvoker = fl::make_shared<PlaceholderInvoker>();
+
+    mRegistry[key] = fl::move(entry);
+#else
+    (void)name;
+    (void)fn;
+#endif
 }
 
 // =============================================================================
@@ -131,6 +171,34 @@ json Rpc::handle(const json& request) {
     // Check if this is an async function
     const detail::RpcEntry& entry = it->second;
 #if FL_PLATFORM_HAS_LARGE_MEMORY
+    if (entry.mIsStreaming) {
+        if (!mResponseStreamSink) {
+            return detail::makeJsonRpcError(-32603, "Streaming response sink not configured", request["id"]);
+        }
+
+        fl::StreamingRpcHandler streamFn = entry.mStreamingFn;
+        fl::json paramsCopy = params;
+        fl::json requestId = request.contains("id") ? request["id"] : json(nullptr);
+        const bool includeId = request.contains("id");
+        mResponseStreamSink([streamFn, paramsCopy, requestId, includeId](fl::JsonStreamWriter& writer) {
+            streamJsonRpcResultEnvelope(
+                writer,
+                requestId,
+                includeId,
+                [streamFn, paramsCopy, requestId](fl::JsonStreamWriter& resultWriter) {
+                    if (streamFn) {
+                        streamFn(resultWriter, paramsCopy, requestId);
+                    } else {
+                        resultWriter.valueNull();
+                    }
+                });
+        });
+
+        fl::json skip = fl::json::object();
+        skip.set("noEnqueue", true);
+        return skip;
+    }
+
     bool isAsync = (entry.mMode == RpcMode::ASYNC || entry.mMode == RpcMode::ASYNC_STREAM);
 
     // Check if this is a response-aware function (uses ResponseSend&)

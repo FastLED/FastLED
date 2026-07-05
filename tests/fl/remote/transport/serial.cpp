@@ -179,6 +179,46 @@ FL_TEST_CASE("Serial: formatJsonResponse - with prefix") {
     FL_REQUIRE(formatted.find("42") != fl::string::npos);
 }
 
+FL_TEST_CASE("Serial: createSerialResponseStreamSink - streams framed JSON") {
+    fl::string output;
+    fl::size maxWrite = 0;
+
+    fl::inject_write_bytes_handler([&](const fl::u8* data, fl::size size) -> fl::size {
+        output.append(reinterpret_cast<const char*>(data), size);  // ok reinterpret cast
+        if (size > maxWrite) {
+            maxWrite = size;
+        }
+        return size;
+    });
+
+    auto sink = fl::createSerialResponseStreamSink("REMOTE: ");
+    sink([](fl::JsonStreamWriter& writer) {
+        writer.beginObject();
+        writer.member("jsonrpc", "2.0");
+        writer.key("result");
+        writer.beginArray();
+        for (int i = 0; i < 64; ++i) {
+            writer.value("abcdef0123456789");
+        }
+        writer.endArray();
+        writer.member("id", 5);
+        writer.endObject();
+    });
+
+    fl::clear_io_handlers();
+
+    FL_REQUIRE(output.starts_with("REMOTE: "));
+    FL_REQUIRE(output.back() == '\n');
+    FL_CHECK(maxWrite <= fl::JsonStreamWriter::kBufSize);
+
+    fl::string jsonText = output.substr(fl::strlen("REMOTE: "));
+    jsonText = jsonText.substr(0, jsonText.size() - 1);
+    fl::json parsed = fl::json::parse(jsonText);
+    FL_CHECK_EQ(parsed["jsonrpc"].as_string().value_or(""), "2.0");
+    FL_CHECK_EQ(parsed["id"].as_int().value_or(0), 5);
+    FL_CHECK_EQ(parsed["result"].size(), 64);
+}
+
 // =============================================================================
 // String Optimization Comparison Tests
 // =============================================================================

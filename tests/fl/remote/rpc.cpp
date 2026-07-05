@@ -4,3 +4,4 @@
 #include "tests/fl/remote/rpc/response_send.hpp"
 #include "tests/fl/remote/rpc/rpc.hpp"
 #include "tests/fl/remote/rpc/runtime_rpc_binding.hpp"
+#include "tests/fl/remote/rpc/streaming.hpp"

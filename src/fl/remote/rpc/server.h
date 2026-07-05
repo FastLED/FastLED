@@ -5,6 +5,8 @@
 #include "fl/stl/optional.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/noexcept.h"
+#include "fl/remote/rpc/response_stream.h"
+#include "fl/system/sketch_macros.h"
 
 namespace fl {
 
@@ -70,6 +72,14 @@ public:
     void setResponseSink(ResponseSink sink);
 
     /**
+     * @brief Set streaming response sink callback
+     *
+     * The callback is invoked once per complete streamed JSON document. It
+     * owns transport framing such as serial prefixes and trailing newlines.
+     */
+    void setResponseStreamSink(ResponseStreamSink sink) FL_NO_EXCEPT;
+
+    /**
      * @brief Main update: pull + push
      */
     size_t update();
@@ -88,6 +98,9 @@ protected:
     RequestSource mRequestSource;
     ResponseSink mResponseSink;
     RequestHandler mRequestHandler;
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    ResponseStreamSink mResponseStreamSink;
+#endif
     fl::vector<fl::json> mOutgoingQueue;
 };
 

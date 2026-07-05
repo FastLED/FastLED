@@ -307,9 +307,19 @@ void Remote::clear(ClearFlags flags) {
 
 // Constructor
 
-Remote::Remote(RequestSource source, ResponseSink sink)
+Remote::Remote(RequestSource source, ResponseSink sink) FL_NO_EXCEPT
+    : Remote(fl::move(source), fl::move(sink), ResponseStreamSink{})
+{}
+
+Remote::Remote(RequestSource source, ResponseSink sink, ResponseStreamSink streamSink) FL_NO_EXCEPT
     : Server(fl::move(source), fl::move(sink))
 {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    setResponseStreamSink(fl::move(streamSink));
+#else
+    (void)streamSink;
+#endif
+
     // Set request handler to processRpc
     setRequestHandler([this](const fl::json& request) {
         return processRpc(request);
@@ -322,6 +332,14 @@ Remote::Remote(RequestSource source, ResponseSink sink)
             mResponseSink(response);
         }
     });
+
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    mRpc.setResponseStreamSink([this](fl::JsonStreamCallback writeJson) {
+        if (mResponseStreamSink) {
+            mResponseStreamSink(fl::move(writeJson));
+        }
+    });
+#endif
 }
 
 // Server Coordination

@@ -11,6 +11,7 @@
 #include "fl/stl/strstream.h"  // IWYU pragma: keep
 #include "fl/remote/rpc/rpc.h"
 #include "fl/remote/rpc/rpc_mode.h"
+#include "fl/remote/rpc/response_stream.h"
 #include "fl/remote/rpc/server.h"
 #include "fl/remote/types.h"
 #include "fl/net/rpc_scheduler.h"
@@ -69,7 +70,12 @@ public:
      *   );
      *   // In main loop: transport->update(millis()); remote.update(millis());
      */
-    Remote(RequestSource source, ResponseSink sink);
+    Remote(RequestSource source, ResponseSink sink) FL_NO_EXCEPT;
+
+    /**
+     * @brief Construct with I/O callbacks, including streamed response output.
+     */
+    Remote(RequestSource source, ResponseSink sink, ResponseStreamSink streamSink) FL_NO_EXCEPT;
 
     // Non-copyable, non-movable (lambda captures 'this')
     Remote(const Remote&) FL_NO_EXCEPT = delete;
@@ -100,6 +106,11 @@ public:
                    fl::function<void(fl::ResponseSend&, const fl::json&)> fn,
                    fl::RpcMode mode = fl::RpcMode::ASYNC) {
         mRpc.bindAsync(name, fl::move(fn), mode);
+    }
+
+    /// Register method that streams its JSON-RPC result directly to the transport.
+    void bindStreaming(const char* name, fl::StreamingRpcHandler fn) FL_NO_EXCEPT {
+        mRpc.bindStreaming(name, fl::move(fn));
     }
 
     /// Get bound method by name for direct C++ invocation
