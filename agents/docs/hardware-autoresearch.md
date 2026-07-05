@@ -1,5 +1,26 @@
 # Hardware AutoResearch
 
+## 🚨 Port-scan BEFORE claiming a board is "not attached" (REQUIRED)
+
+**Never state "board X is not attached" / "static-verified only, target board absent" without first enumerating what is physically connected in the same session.** Multiple boards are often attached at once. Enumerate with fbuild's native scanner (NOT raw pyserial):
+
+```bash
+fbuild port scan
+```
+
+Two rows per port — OS identity plus a `└─ vendor / product` line resolved from the FastLED boards DB:
+
+```
+COM11     10C4:EA60    Silicon Labs CP210x USB to UART Bridge (COM11)    ser=0254F7A1
+          └─ Arduino / NodeMCU 0.9 (ESP-12 Module)       # ESP32-WROOM-class
+COM25     303A:1001    USB Serial Device (COM25)         ser=…
+          └─ Espressif Systems / WEMOS LOLIN S3          # ESP32-S3
+COM10     1FC9:0132    USB Serial Device (COM10)         ser=0B03400A
+          └─ NXP Semiconductors / LPC-Link2 CMSIS-DAP    # LPC845-BRK
+```
+
+Do NOT reason about attachment from memory or from "which board this task is about." Read the scan. Full rule + history (two incidents where boards were wrongly declared absent): `agents/docs/cpp-standards.md` → "Check if the target hardware might already be attached (REQUIRED)".
+
 ## Live Device Testing (AI Agents)
 **PRIMARY TOOL: `bash autoresearch`** - Hardware-in-the-loop autoresearch framework:
 
@@ -67,6 +88,26 @@ bash autoresearch --all --skip-lint --timeout 180
 3. autoresearch opens the VCOM and runs the RPC bench.
 
 Steps 1 and 2 are both fbuild's responsibility. autoresearch is a bench-orchestration tool; it is not a flasher. If fbuild lacks a deployer for your target, file the gap at https://github.com/FastLED/fbuild/issues and let autoresearch fail loudly — do **not** add a `pyocd`/`lpc21isp`/`esptool`/etc. call from autoresearch as a "temporary" fallback. The wedge story on 2026-07-01 (LPC-Link2 CMSIS-DAP v1 firmware hanging pyocd's Windows HID for 8 minutes) is exactly the class of bug that happens when deployment is scattered instead of centralised. Full rule: `agents/docs/build-system.md` → "Deployment (flash / upload) is fbuild's job — ALWAYS". The nxplpc deployer (lpc21isp UART ISP path) shipped in FastLED/fbuild#595 and was refined in #923 + #928; `bash autoresearch lpc845 ...` flows through it via `fbuild deploy` and never touches CMSIS-DAP HID.
+
+### 🚨 Device serial: fbuild's Rust monitor ONLY — NEVER raw pyserial
+
+**Never open a device serial port with `pyserial` (`import serial; serial.Serial(...)`) in autoresearch, bench runners, or any CI code.** All device serial I/O goes through fbuild's native (Rust) serial monitor:
+
+```python
+from ci.rpc_client import RpcClient
+from ci.util.serial_interface import create_serial_interface
+
+iface = create_serial_interface(port)          # FbuildSerialAdapter (Rust) by default
+client = RpcClient(port, serial_interface=iface)
+await client.connect()
+resp = await client.send("echo", args=[42])    # mandatory JSON-RPC id correlation
+```
+
+`create_serial_interface(...)` returns the fbuild-backed `FbuildSerialAdapter` unless `use_pyserial=True` is *explicitly* passed (which nothing in autoresearch should do). `RpcClient` on top of it gives correct framing, mandatory request-id correlation, retries, crash-trace decoding, and reconnect.
+
+**Why the rule exists** (silicon-diagnosed 2026-07-04): the LPC845 SPI/UART bench runners were hand-rolling raw `pyserial` request/response loops. On Windows pyserial these were unreliable — replies were dropped roughly one-per-session (`in_waiting` under-reports, `reset_input_buffer()` before a write races the reply, byte-at-a-time reads straddle the port timeout). The firmware answered every RPC correctly; the *pyserial transport* lost them. Routing through `RpcClient`/fbuild's Rust monitor — the same path `ble.py`, `decode.py`, `driver_sweep.py`, and the coroutine tests already use — makes device serial deterministic.
+
+The only sanctioned pyserial touch is fbuild's own `PySerialAdapter` fallback inside `ci/util/serial_interface.py` (selected only via `use_pyserial=True`) and the DTR-reset helper there. Application/bench code must go through `create_serial_interface` + `RpcClient`. See also `agents/docs/python-standards.md` → "Device serial".
 
 ### Synthesised `platformio.ini` (no root dependency)
 

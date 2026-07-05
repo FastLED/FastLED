@@ -65,9 +65,10 @@ namespace autoresearch {
 namespace dma_spi {
 
 // Default pin assignment matches the LPC845-BRK SPI0 typical routing.
-// FastPin::setOutput() runs against these, but the actual MOSI/SCK
-// carrier is routed by SWM independently — fbuild's SystemInit
-// configures SPI0 to sensible defaults.
+// Since #3580 the driver's init() owns the full peripheral plumbing —
+// SPI clock enable, FCLKSEL function-clock select, reset release, and
+// SWM routing of SCK/MOSI to these pins. No startup-code cooperation
+// is required.
 //
 // If the user needs to move pins, override at compile time via
 // `-DFASTLED_LPC_SPI_DMA_HARNESS_DATA_PIN=<N>` /
@@ -134,8 +135,23 @@ inline fl::string transferOnceHandler(int byte_count, int byte_pattern) FL_NO_EX
     // Poll for done() without WFI so the elapsed measurement matches
     // the CPU-busy-wait cost path. (Callers wanting the WFI sleep path
     // use `waitDma()` — that's not what we're measuring here.)
+    //
+    // Bounded spin (#3580 diagnosis): a healthy 512-byte stream at 4 MHz
+    // SCK completes in ~1 ms; 2M iterations ≈ 1 s at 24 MHz. On timeout,
+    // return a register snapshot instead of wedging into the watchdog:
+    //   "0,dma_active,chan_xfercfg,chan_ctlstat,spi_stat,dma_errint"
+    fl::u32 spins = 0;
     while (!HarnessDriver::done()) {
-        // spin
+        if (++spins > 2000000u) {
+            fl::sstream d;
+            d << 0 << ','
+              << DMA0->COMMON[0].ACTIVE << ','
+              << DMA0->CHANNEL[FASTLED_LPC_SPI_DMA_CHANNEL].XFERCFG << ','
+              << DMA0->CHANNEL[FASTLED_LPC_SPI_DMA_CHANNEL].CTLSTAT << ','
+              << SPI0->STAT << ','
+              << DMA0->COMMON[0].ERRINT;
+            return d.str();
+        }
     }
     const fl::u32 t_end = micros();
 
@@ -210,18 +226,87 @@ inline fl::string measureSckHandler(int divider_hint) FL_NO_EXCEPT {
 
 // Bind the three handlers on the passed-in `Remote`. Call from
 // AutoResearchLowMemory.h under `#if defined(FASTLED_LPC_SPI_DMA)`.
+#if FASTLED_LPC_DMA_ISR
+// ISR-refilled streaming proof (#3453 follow-up). Streams a frame larger
+// than the whole encode buffer (multi-chunk, ping-pong ISR refill) while
+// beacon-toggling on the main thread. CSV: "success,total_us,toggle_count".
+// A stalled refill chain times out into a register-snapshot CSV.
+//
+// RAM budget (#3585): the LPC845-BRK AutoResearch build's JSON-RPC stack
+// leaves only ~3 KB shared between heap and stack on the 16 KB part. The
+// DMA completion ISR (encode + descriptor arm) preempts that stack at its
+// deepest point; a large `stream_src` static shrank the gap until the ISR
+// pushed the stack into the heap and corrupted a return address (wild-PC
+// HardFault, not a driver logic bug — the ping-pong is correct). 512 bytes
+// is a genuine multi-chunk stream (2 chunks + 1 ISR refill at kHalfCap=256)
+// and keeps enough headroom. Do NOT raise this on the 16 KB bench build.
+#ifndef FASTLED_LPC_SPI_DMA_STREAM_BYTES
+#define FASTLED_LPC_SPI_DMA_STREAM_BYTES 512
+#endif
+inline fl::string streamOverlapHandler(int byte_count, int byte_pattern) FL_NO_EXCEPT {
+    static fl::u8 stream_src[FASTLED_LPC_SPI_DMA_STREAM_BYTES] = {0};
+    int len = byte_count;
+    if (len <= 0) return fl::string("0,0,0");
+    if (len > FASTLED_LPC_SPI_DMA_STREAM_BYTES)
+        len = FASTLED_LPC_SPI_DMA_STREAM_BYTES;
+    const fl::u8 pat = static_cast<fl::u8>(byte_pattern & 0xFF);
+    for (int i = 0; i < len; ++i) stream_src[i] = pat;
+
+    HarnessDriver& drv = harnessDriver();
+    drv.waitFully();
+
+    const fl::u32 t_start = micros();
+    if (!HarnessDriver::kickDmaStreamAsync(stream_src,
+                                           static_cast<fl::u32>(len))) {
+        return fl::string("0,kick_refused,0");
+    }
+    volatile fl::u32 toggle_count = 0;
+    fl::u32 spins = 0;
+    while (!HarnessDriver::streamDone()) {
+        ++toggle_count;
+        if (++spins > 4000000u) {
+            fl::sstream d;
+            d << 0 << ',' << DMA0->COMMON[0].ACTIVE << ','
+              << DMA0->CHANNEL[FASTLED_LPC_SPI_DMA_CHANNEL].CTLSTAT << ','
+              << SPI0->STAT;
+            return d.str();
+        }
+    }
+    const fl::u32 total_us = micros() - t_start;
+
+    fl::sstream s;
+    s << 1 << ',' << total_us << ',' << toggle_count;
+    return s.str();
+}
+#endif  // FASTLED_LPC_DMA_ISR
+
+// Args arrive as a JSON array (the house RpcClient convention — a single
+// `const fl::json&` param that IS the positional-arg array). Read
+// `args[N]` positionally. This is what lets the bench run over fbuild's
+// Rust serial monitor (ci.rpc_client.RpcClient) instead of raw pyserial;
+// see agents/docs/hardware-autoresearch.md "Device serial".
+inline int argInt(const fl::json& args, fl::size i, int fallback) FL_NO_EXCEPT {
+    return static_cast<int>(args[i].as_int().value_or(fallback));
+}
+
 inline void bind(fl::Remote& remote) FL_NO_EXCEPT {
     remote.bind("dmaSpiTransferOnce",
-        [](int byte_count, int byte_pattern) -> fl::string {
-            return transferOnceHandler(byte_count, byte_pattern);
+        [](const fl::json& args) -> fl::string {
+            return transferOnceHandler(argInt(args, 0, 0), argInt(args, 1, 0));
         });
+#if FASTLED_LPC_DMA_ISR
+    remote.bind("dmaSpiStreamOverlap",
+        [](const fl::json& args) -> fl::string {
+            return streamOverlapHandler(argInt(args, 0, 0), argInt(args, 1, 0));
+        });
+#endif
     remote.bind("dmaSpiTransferOverlap",
-        [](int byte_count, int byte_pattern) -> fl::string {
-            return transferOverlapHandler(byte_count, byte_pattern);
+        [](const fl::json& args) -> fl::string {
+            return transferOverlapHandler(argInt(args, 0, 0), argInt(args, 1, 0));
         });
     remote.bind("dmaSpiMeasureSck",
-        [](int divider_hint) -> fl::string {
-            return measureSckHandler(divider_hint);
+        [](const fl::json& args) -> fl::string {
+            return measureSckHandler(argInt(args, 0, 6));
         });
 }
 

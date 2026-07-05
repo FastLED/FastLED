@@ -111,6 +111,12 @@ class Args:
     # metrics. Mutually exclusive with --pwm-dma-cl (both claim DMA0).
     dma_spi: bool
 
+    # LPC845 async UART TX bench (#3453 follow-up: ISR-refillable drivers).
+    # Drives `ARMHardwareUARTOutputDMA<>` (USART1 TX + DMA0 ch3, ISR chunk
+    # chaining) while USART0 keeps serving the RPC console. Mutually
+    # exclusive with the other LPC DMA harnesses at the flash budget.
+    dma_uart: bool
+
     # Multi-frame capture — number of back-to-back show()/capture cycles per pattern.
     # None = driver-default (SPI → 2, others → 1). Explicit value overrides.
     # See issues #2254 and #2288 (ESP32-S3 SPI second-frame degradation).
@@ -412,6 +418,16 @@ See Also:
             "channels and the LowMemory flash budget doesn't fit both). "
             "LPC804 not supported — silicon has no DMA peripheral (see "
             "agents/docs/peripheral-existence.md).",
+        )
+        lpc_group.add_argument(
+            "--dma-uart",
+            action="store_true",
+            help="LPC845-only async UART TX bench (#3453 follow-up). "
+            "Drives `ARMHardwareUARTOutputDMA<>` — USART1 TX via DMA0 "
+            "channel 3, chunks chained from the DMA completion ISR — "
+            "while USART0 keeps serving the RPC console. Reports "
+            "stream timing + beacon-toggle async proof. Mutually "
+            "exclusive with --dma-spi / --pwm-dma-cl (flash budget).",
         )
 
         # Standard options
@@ -760,6 +776,7 @@ See Also:
             ws2812_loopback=parsed.ws2812_loopback,
             pwm_dma_cl=parsed.pwm_dma_cl,
             dma_spi=parsed.dma_spi,
+            dma_uart=parsed.dma_uart,
             frames=parsed.frames,
             tight_timing=parsed.tight_timing,
             tight_timing_iterations=parsed.tight_timing_iterations,

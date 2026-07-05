@@ -541,6 +541,27 @@ def run_ruff() -> bool:
     if result.returncode != 0:
         return False
 
+    print("Running pyserial ban checks (AutoResearch complex)")
+
+    # Ban raw pyserial in ci/autoresearch/ — device serial must go through
+    # fbuild's Rust monitor (RpcClient / create_serial_interface). See
+    # ci/lint_python/pyserial_checker.py and
+    # agents/docs/hardware-autoresearch.md -> "Device serial".
+    result = subprocess.run(
+        [
+            "uv",
+            "run",
+            "python",
+            "ci/lint_python/pyserial_checker.py",
+            "ci/autoresearch",
+            "--exclude",
+            "ci/tmp",
+        ],
+        capture_output=False,
+    )
+    if result.returncode != 0:
+        return False
+
     print("✅ ruff passed")
     return True
 

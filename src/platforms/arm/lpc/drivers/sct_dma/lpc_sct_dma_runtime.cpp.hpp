@@ -8,6 +8,7 @@
 #if defined(FL_IS_ARM_LPC_845) || defined(FL_IS_STUB) || defined(FASTLED_STUB_IMPL)
 
 #include "platforms/arm/lpc/drivers/sct_dma/lpc_sct_dma_runtime.h"
+#include "platforms/arm/lpc/lpc_dma_descriptor_table.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
 
@@ -80,9 +81,12 @@ void LpcSctDmaTransmitter::init() FL_NO_EXCEPT {
 
     // ----- DMA controller -----
     DMA0->CTRL = 1UL;                   // enable controller
-    // TODO(2842): allocate aligned descriptor block and wire SRAMBASE.
-    // The legacy driver punts to the SDK clock_config.h conventional
-    // address; the runtime form inherits the same assumption.
+    // Own the descriptor table (shared 25-channel block from
+    // lpc_dma_descriptor_table.h). SRAMBASE resets to 0 and nothing in
+    // the ACLPC startup programs it — arming a channel without this
+    // makes the engine fetch descriptors from the flash vector table
+    // and scribble RAM through garbage pointers (FastLED #3580).
+    fl::lpc::ensureDmaSramBase();
 
     const u32 base = FASTLED_LPC_PWM_DMA_BASECH;
     for (u32 i = 0; i < 3; ++i) {

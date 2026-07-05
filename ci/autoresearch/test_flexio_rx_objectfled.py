@@ -16,7 +16,7 @@ Five test cases (parent issue Phase 3 table):
     | 4 | 100-LED alternating R/G/B        | 300                    |
 
 Usage:
-    uv run python ci/autoresearch/test_flexio_rx_objectfled.py [--port COM20]
+    uv run python -m ci.autoresearch.test_flexio_rx_objectfled [--port COM20]
 
 Exits 0 on all pass, 1 on any failure.
 """
@@ -28,19 +28,38 @@ import json
 import sys
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from typeguard import typechecked
 
+# `pyserial` is checked at `main()` entry, not at import — see the matching
+# rationale in test_flexio_rx_squarewave.py.
+from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402,F401
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
-# `pyserial` is checked at `main()` entry, not at import — see the matching
-# rationale in test_flexio_rx_squarewave.py.
-try:
-    import serial  # type: ignore
-except ImportError:  # pragma: no cover — handled at main() entry
-    serial = None  # type: ignore
+def send_rpc(
+    s,
+    method,
+    args=None,
+    request_id=None,
+    timeout: float = 10.0,
+):
+    """Shim over RpcBench (`s`) so run_* keep their reply["result"] shape.
+
+    Device serial goes through fbuild's Rust monitor (never raw pyserial);
+    see agents/docs/hardware-autoresearch.md -> "Device serial". The
+    request_id kwarg is accepted for call-site compatibility and ignored
+    (RpcClient assigns its own correlation ids).
+    """
+    _ = request_id
+    result = s.call(method, args=args, timeout=timeout)
+    if result is None:
+        return None
+    if result is METHOD_NOT_FOUND:
+        return {"error": {"code": -32601, "message": "method not found"}}
+    return {"result": result}
 
 
 DEFAULT_PORT = "COM20"
@@ -73,42 +92,6 @@ CASES: list[TestCase] = [
     TestCase(3, "3.4 / All ones", 3),
     TestCase(4, "3.5 / 100-LED alternating", 300),
 ]
-
-
-def send_rpc(
-    s: Any,
-    method: str,
-    args: dict[str, Any] | None = None,
-    request_id: int = 1,
-    timeout: float = 15.0,
-) -> dict[str, Any] | None:
-    params = [args] if args is not None else [{}]
-    req = {"method": method, "params": params, "id": request_id}
-    s.write((json.dumps(req, separators=(",", ":")) + "\n").encode("ascii"))
-    s.flush()
-    deadline = time.time() + timeout
-    buf = b""
-    while time.time() < deadline:
-        chunk = s.read(s.in_waiting or 1)
-        if not chunk:
-            continue
-        buf += chunk
-        while b"\n" in buf:
-            line, _, buf = buf.partition(b"\n")
-            text = line.decode("ascii", errors="replace").strip()
-            for prefix in ("REMOTE: ", "RESULT: "):
-                if text.startswith(prefix):
-                    text = text[len(prefix) :]
-                    break
-            if not (text.startswith("{") and text.endswith("}")):
-                continue
-            try:
-                msg = json.loads(text)
-            except json.JSONDecodeError:
-                continue
-            if isinstance(msg, dict) and msg.get("id") == request_id:
-                return msg
-    return None
 
 
 @typechecked
@@ -161,32 +144,16 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = p.parse_args(argv)
 
-    if serial is None:
-        print(
-            "ERROR: pyserial not installed. Run: uv pip install pyserial",
-            file=sys.stderr,
-        )
-        return 2
-
     print(f"[flexio-objectfled] opening {args.port} @ {args.baud}")
     try:
-        s = serial.Serial(args.port, args.baud, timeout=0.1)
+        s = RpcBench(args.port)
     except KeyboardInterrupt as ki:
-        # Catch Ctrl-C before the bare `Exception`/`SerialException` block so
-        # interactive users can abort cleanly. `handle_keyboard_interrupt`
-        # routes the signal through the project-wide interrupt handler
-        # (required by the KBI002 lint).
         handle_keyboard_interrupt(ki)
         raise
-    except serial.SerialException as e:
-        print(f"ERROR: could not open {args.port}: {e}", file=sys.stderr)
-        return 2
+    except Exception as e:  # noqa: BLE001
+        print(f"Could not connect to {args.port}: {e}")
+        return 1
     with s:
-        s.dtr = True
-        s.rts = True
-        time.sleep(1.0)
-        s.reset_input_buffer()
-
         ping = send_rpc(s, "ping", request_id=1, timeout=5.0)
         if not ping or "result" not in ping:
             print(

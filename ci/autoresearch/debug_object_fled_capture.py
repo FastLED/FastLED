@@ -2,23 +2,83 @@
 
 Bypasses the autoresearch wrapper's serial filtering so we see every
 FL_WARN line the device emits during the test. Sends runSingleTest
-synchronously and dumps everything to stdout for 30 seconds.
+synchronously and firehose-dumps everything to stdout.
 
 Usage:
-    uv run python ci/autoresearch/debug_object_fled_capture.py --port COM20
+    uv run python -m ci.autoresearch.debug_object_fled_capture --port COM20
 
 Goal: characterize where runSingleTest stalls on Teensy 4 after the
 dual-circuit FlexPWM RX fix from PR #3222 (issue #3219).
+
+Device serial goes through fbuild's native (Rust) serial monitor, never
+raw pyserial — see agents/docs/hardware-autoresearch.md -> "Device
+serial". This is a raw firehose logger, so it drives the SerialInterface
+(write + read_lines) directly rather than the RPC-oriented RpcBench.
 """
 
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 import sys
 import time
+from pathlib import Path
 
-import serial
+from ci.util.serial_interface import create_serial_interface  # noqa: E402
+
+
+async def _run(args: argparse.Namespace) -> int:
+    print(
+        f"[direct] connecting {args.port} @ {args.baud} (fbuild Rust serial)",
+        flush=True,
+    )
+    iface = create_serial_interface(args.port, baud_rate=args.baud)
+    await iface.connect()
+    await iface.reset_device(None)  # DTR/RTS reset, transport-appropriate
+
+    # Set pins explicitly so we don't rely on prior findConnectedPins.
+    set_pins = {
+        "jsonrpc": "2.0",
+        "method": "setPins",
+        "params": [[args.tx_pin, args.rx_pin]],
+        "id": 1,
+    }
+    await iface.write(json.dumps(set_pins, separators=(",", ":")) + "\n")
+
+    run_single = {
+        "jsonrpc": "2.0",
+        "method": "runSingleTest",
+        "params": [
+            {
+                "driver": "OBJECT_FLED",
+                "laneSizes": [100],
+                "pattern": "MSB_LSB_A",
+                "iterations": 1,
+                "timing": "WS2812B-V5",
+            }
+        ],
+        "id": 2,
+    }
+    req = json.dumps(run_single, separators=(",", ":")) + "\n"
+    print(f"[direct] TX: {req.strip()}", flush=True)
+    await iface.write(req)
+
+    # Firehose-log every line the device emits for wait_s seconds.
+    deadline = time.time() + args.wait_s
+    t0 = time.time()
+    line_count = 0
+    while time.time() < deadline:
+        async for line in iface.read_lines(timeout=1.0):
+            print(f"[{time.time() - t0:6.2f}] {line.rstrip()}", flush=True)
+            line_count += 1
+        # read_lines yields until its per-batch timeout; loop until wait_s.
+
+    print(
+        f"\n[direct] window closed after {args.wait_s:.1f}s, captured {line_count} lines",
+        flush=True,
+    )
+    return 0
 
 
 def main() -> int:
@@ -35,84 +95,7 @@ def main() -> int:
         "--rx-pin", default=4, type=int, help="RX pin (must match jumper wire)"
     )
     args = p.parse_args()
-
-    print(f"[direct] opening {args.port} @ {args.baud}", flush=True)
-    s = serial.Serial(args.port, args.baud, timeout=0.05)
-    with s:
-        s.dtr = True
-        s.rts = True
-        # Boot drain.
-        print("[direct] sleeping 3s for boot drain ...", flush=True)
-        time.sleep(3.0)
-        s.reset_input_buffer()
-
-        # Set pins explicitly so we don't rely on prior findConnectedPins.
-        set_pins_req = (
-            '{"jsonrpc":"2.0","method":"setPins","params":[['
-            + str(args.tx_pin)
-            + ","
-            + str(args.rx_pin)
-            + ']],"id":1}\n'
-        )
-        print(f"[direct] TX: {set_pins_req.strip()}", flush=True)
-        s.write(set_pins_req.encode())
-        s.flush()
-        time.sleep(0.5)
-
-        # Drain any setPins response so it doesn't pollute the runSingleTest trace.
-        while True:
-            chunk = s.read(256)
-            if not chunk:
-                break
-
-        # Now send runSingleTest for OBJECT_FLED.
-        rpc = {
-            "jsonrpc": "2.0",
-            "method": "runSingleTest",
-            "params": [
-                {
-                    "driver": "OBJECT_FLED",
-                    "laneSizes": [100],
-                    "pattern": "MSB_LSB_A",
-                    "iterations": 1,
-                    "timing": "WS2812B-V5",
-                }
-            ],
-            "id": 2,
-        }
-        req = json.dumps(rpc, separators=(",", ":")) + "\n"
-        print(f"[direct] TX: {req.strip()}", flush=True)
-        s.write(req.encode())
-        s.flush()
-
-        # Now firehose-log everything for wait_s seconds.
-        deadline = time.time() + args.wait_s
-        last_print = time.time()
-        accum = b""
-        line_count = 0
-        while time.time() < deadline:
-            chunk = s.read(s.in_waiting or 1)
-            if chunk:
-                accum += chunk
-                while b"\n" in accum:
-                    line, _, accum = accum.partition(b"\n")
-                    text = line.decode("ascii", errors="replace").rstrip()
-                    elapsed = time.time() - last_print
-                    print(f"[{elapsed:6.2f}] {text}", flush=True)
-                    line_count += 1
-                    last_print = time.time()
-            time.sleep(0.005)
-
-        # Flush any residual bytes.
-        if accum:
-            text = accum.decode("ascii", errors="replace").rstrip()
-            print(f"[final-partial] {text}", flush=True)
-
-        print(
-            f"\n[direct] window closed after {args.wait_s:.1f}s, captured {line_count} lines",
-            flush=True,
-        )
-        return 0
+    return asyncio.run(_run(args))
 
 
 if __name__ == "__main__":

@@ -5,16 +5,20 @@ Used to isolate buffer-position-dependent decode failures in #3219:
   length (DMA buffer overflow, sustained TX/RX skew, etc.).
 - If laneSizes=[5] still fails, the bug fires every frame regardless
   of position.
+
+Device serial goes through fbuild's native (Rust) serial monitor via
+`RpcBench`, never raw pyserial — see agents/docs/hardware-autoresearch.md
+-> "Device serial".
 """
 
 from __future__ import annotations
 
 import argparse
-import json
 import sys
-import time
+from pathlib import Path
 
-import serial
+from ci.autoresearch.rpc_bench import RpcBench  # noqa: E402
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402
 
 
 def main() -> int:
@@ -28,61 +32,33 @@ def main() -> int:
     args = p.parse_args()
 
     print(
-        f"[direct-small] {args.port} @ {args.baud}, laneSize={args.lane_size}",
+        f"[direct-small] {args.port} @ {args.baud}, laneSize={args.lane_size} "
+        f"(fbuild Rust serial)",
         flush=True,
     )
-    s = serial.Serial(args.port, args.baud, timeout=0.05)
-    with s:
-        s.dtr = True
-        s.rts = True
-        time.sleep(3.0)
-        s.reset_input_buffer()
+    try:
+        bench = RpcBench(args.port, timeout=max(15.0, args.wait_s))
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:  # noqa: BLE001
+        print(f"[direct-small] could not connect to {args.port}: {e}", flush=True)
+        return 1
 
-        set_pins = (
-            '{"jsonrpc":"2.0","method":"setPins","params":[['
-            + str(args.tx_pin)
-            + ","
-            + str(args.rx_pin)
-            + ']],"id":1}\n'
+    with bench:
+        bench.call("setPins", args=[args.tx_pin, args.rx_pin], timeout=5.0)
+        result = bench.call(
+            "runSingleTest",
+            args={
+                "driver": "OBJECT_FLED",
+                "laneSizes": [args.lane_size],
+                "pattern": "MSB_LSB_A",
+                "iterations": 1,
+                "timing": "WS2812B-V5",
+            },
+            timeout=args.wait_s,
         )
-        s.write(set_pins.encode())
-        s.flush()
-        time.sleep(0.5)
-        while s.read(256):
-            pass
-
-        rpc = {
-            "jsonrpc": "2.0",
-            "method": "runSingleTest",
-            "params": [
-                {
-                    "driver": "OBJECT_FLED",
-                    "laneSizes": [args.lane_size],
-                    "pattern": "MSB_LSB_A",
-                    "iterations": 1,
-                    "timing": "WS2812B-V5",
-                }
-            ],
-            "id": 2,
-        }
-        req = json.dumps(rpc, separators=(",", ":")) + "\n"
-        print(f"[direct-small] TX: {req.strip()}", flush=True)
-        s.write(req.encode())
-        s.flush()
-
-        deadline = time.time() + args.wait_s
-        accum = b""
-        while time.time() < deadline:
-            chunk = s.read(s.in_waiting or 1)
-            if chunk:
-                accum += chunk
-                while b"\n" in accum:
-                    line, _, accum = accum.partition(b"\n")
-                    print(line.decode("ascii", errors="replace").rstrip(), flush=True)
-            time.sleep(0.005)
-
-        if accum:
-            print(accum.decode("ascii", errors="replace").rstrip(), flush=True)
+        print(f"[direct-small] result: {result}", flush=True)
         return 0
 
 

@@ -20,7 +20,7 @@ the M0+ polling loop adds 1–2 µs of capture jitter per edge — see
 timing budget.)
 
 Usage:
-    uv run python ci/autoresearch/test_lpc_pin_toggle_rx.py [--port COM10]
+    uv run python -m ci.autoresearch.test_lpc_pin_toggle_rx [--port COM10]
 
 Talks to the AutoResearchLpc firmware over the same raw-serial
 JSON-RPC protocol as the bring-up echo test (`phases.py
@@ -38,13 +38,34 @@ import json
 import sys
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
+from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402,F401
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402
 
-try:
-    import serial  # type: ignore
-except ImportError:
-    serial = None  # type: ignore
+
+def send_rpc(
+    s,
+    method,
+    args=None,
+    request_id=None,
+    timeout: float = 10.0,
+):
+    """Shim over RpcBench (`s`) so run_* keep their reply["result"] shape.
+
+    Device serial goes through fbuild's Rust monitor (never raw pyserial);
+    see agents/docs/hardware-autoresearch.md -> "Device serial". The
+    request_id kwarg is accepted for call-site compatibility and ignored
+    (RpcClient assigns its own correlation ids).
+    """
+    _ = request_id
+    result = s.call(method, args=args, timeout=timeout)
+    if result is None:
+        return None
+    if result is METHOD_NOT_FOUND:
+        return {"error": {"code": -32601, "message": "method not found"}}
+    return {"result": result}
 
 
 DEFAULT_PORT = "COM10"
@@ -66,51 +87,6 @@ CASES: list[BenchCase] = [
     BenchCase("1.2 / 10 kHz", 10_000, 100, 100_000, 500, 2.0),
     BenchCase("1.3 / 100 kHz", 100_000, 100, 10_000, 500, 2.0),
 ]
-
-
-def send_rpc(
-    s: "serial.Serial",
-    method: str,
-    args: list[Any] | None = None,
-    request_id: int = 1,
-    timeout: float = 10.0,
-) -> dict[str, Any] | None:
-    """Send a JSON-RPC request and return the first matching response.
-
-    `args` is a *list of positional args* (matching the AutoResearchLpc
-    sketch's typed-binding signature like `pinToggleRx(int, int, int, int)`),
-    NOT a dict — the LPC bring-up sketch doesn't use the FlexIO-style
-    `[{"key": value, ...}]` wrapper because the typed binding gives a
-    smaller flash footprint on the LPC845's 64 KB budget.
-    """
-    params = args if args is not None else []
-    req = {"jsonrpc": "2.0", "method": method, "params": params, "id": request_id}
-    s.write((json.dumps(req, separators=(",", ":")) + "\n").encode("ascii"))
-    s.flush()
-
-    deadline = time.time() + timeout
-    buf = b""
-    while time.time() < deadline:
-        chunk = s.read(s.in_waiting or 1)
-        if not chunk:
-            continue
-        buf += chunk
-        while b"\n" in buf:
-            line, _, buf = buf.partition(b"\n")
-            text = line.decode("ascii", errors="replace").strip()
-            for prefix in ("REMOTE: ", "RESULT: "):
-                if text.startswith(prefix):
-                    text = text[len(prefix) :]
-                    break
-            if not (text.startswith("{") and text.endswith("}")):
-                continue
-            try:
-                msg = json.loads(text)
-            except json.JSONDecodeError:
-                continue
-            if isinstance(msg, dict) and msg.get("id") == request_id:
-                return msg
-    return None
 
 
 def parse_csv_result(csv: str) -> dict[str, int]:
@@ -181,31 +157,21 @@ def main() -> int:
     )
     args = p.parse_args()
 
-    if serial is None:
-        print(
-            "ERROR: pyserial not installed. Run: uv pip install pyserial",
-            file=sys.stderr,
-        )
-        return 2
-
     print(f"[lpc-pin-toggle-rx] opening {args.port} @ {args.baud}")
     try:
-        s = serial.Serial(args.port, args.baud, timeout=0.1)
-    except serial.SerialException as e:
-        print(f"ERROR: could not open {args.port}: {e}", file=sys.stderr)
-        return 2
+        s = RpcBench(args.port)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:  # noqa: BLE001
+        print(f"Could not connect to {args.port}: {e}")
+        return 1
 
     with s:
         # The LPC845-BRK uses a CMSIS-DAP USB-CDC bridge; DTR/RTS toggles
         # reset the target. Hold them de-asserted and let the boot banner
         # drain before sending any RPC. This matches the bring-up echo
         # test's open sequence (phases.py::_run_bring_up_tests).
-        s.dtr = False
-        s.rts = False
-        time.sleep(0.5)
-        s.reset_input_buffer()
-        time.sleep(2.0)
-        s.reset_input_buffer()
 
         # Health check via the bring-up sketch's echo RPC. Confirms the
         # serial pipe + JSON-RPC parser are alive before we trust the

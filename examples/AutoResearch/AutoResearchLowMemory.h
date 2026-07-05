@@ -112,6 +112,18 @@
 #include "AutoResearchSpiDma.h"
 #endif
 
+// #3453 follow-up: LPC845 async UART TX harness (DMA + ISR chunk chain).
+// Opt-in via `-DFASTLED_LPC_UART_DMA=1` (+ `-DFASTLED_LPC_DMA_ISR=1` for
+// the ISR chaining; without it streams are capped at one descriptor).
+// Same flash-budget exclusivity as the other DMA harnesses.
+#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA) && \
+    (defined(FASTLED_LPC_SPI_DMA) || defined(FASTLED_LPC_PWM_DMA))
+#error "FASTLED_LPC_UART_DMA is mutually exclusive with the SPI/PWM DMA harnesses on LPC845: the LowMemory flash budget fits one bench at a time. Pick one for the AutoResearch build."
+#endif
+#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA)
+#include "AutoResearchUartDma.h"
+#endif
+
 namespace {
 fl::Remote* g_low_memory_remote = nullptr;
 
@@ -388,6 +400,13 @@ inline void autoResearchLowMemorySetup() {
     // Header self-gates on FL_IS_ARM_LPC_845 && FASTLED_LPC_SPI_DMA.
 #if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_SPI_DMA)
     autoresearch::dma_spi::bind(remote);
+#endif
+
+    // #3453 follow-up: async UART TX bench. Binds uartDmaStreamOnce /
+    // uartDmaStreamOverlap. Header self-gates on
+    // FL_IS_ARM_LPC_845 && FASTLED_LPC_UART_DMA.
+#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA)
+    autoresearch::uart_dma::bind(remote);
 #endif
 
 #endif  // FL_IS_ARM_LPC && !FASTLED_AUTORESEARCH_IEEE754_MODE

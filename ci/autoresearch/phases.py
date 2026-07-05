@@ -50,6 +50,7 @@ from ci.util.port_utils import (
     detect_attached_chip,
     environment_has_wifi,
     kill_port_users,
+    port_exists,
 )
 from ci.util.sketch_resolver import parse_timeout
 
@@ -912,6 +913,17 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         # LPC845-BRK silicon 2026-07-02). The bench's largest case is
         # 512 bytes, so 512 loses no coverage and frees 4.5 KB.
         lpc_bench_defines.append("FASTLED_LPC_SPI_DMA_MAX_BYTES=512")
+        # ISR-refilled streaming (kickDmaStreamAsync ping-pong refill).
+        # Requires the ACLPC core with named weak IRQ vector slots
+        # (framework-arduino-lpc8xx#38, pinned via fbuild ≥ 2.4.0).
+        lpc_bench_defines.append("FASTLED_LPC_DMA_ISR=1")
+    if getattr(args, "dma_uart", False):
+        # Async UART bench (#3453 follow-up). FASTLED_LPC_DMA_ISR turns on
+        # the shared DMA0 IRQ hub for ISR chunk chaining — requires the
+        # ACLPC core with named weak IRQ vector slots
+        # (framework-arduino-lpc8xx#38).
+        lpc_bench_defines.append("FASTLED_LPC_UART_DMA=1")
+        lpc_bench_defines.append("FASTLED_LPC_DMA_ISR=1")
     if getattr(args, "pwm_dma_cl", False):
         lpc_bench_defines.append("FASTLED_LPC_PWM_DMA=1")
 
@@ -1197,6 +1209,10 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
             deferred_defines.append("FASTLED_LPC_SPI_DMA=1")
             # Same 16 KB-RAM cap rationale as the parse-time path above.
             deferred_defines.append("FASTLED_LPC_SPI_DMA_MAX_BYTES=512")
+            deferred_defines.append("FASTLED_LPC_DMA_ISR=1")
+        if getattr(args, "dma_uart", False):
+            deferred_defines.append("FASTLED_LPC_UART_DMA=1")
+            deferred_defines.append("FASTLED_LPC_DMA_ISR=1")
         if getattr(args, "pwm_dma_cl", False):
             deferred_defines.append("FASTLED_LPC_PWM_DMA=1")
 
@@ -1342,22 +1358,17 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
             if is_interrupted():
                 raise KeyboardInterrupt()
             kill_port_users(upload_port)
-            try:
-                import serial
-
-                with serial.Serial(upload_port, 115200, timeout=0.1) as _ser:
-                    port_ready = True
-                    elapsed = time.time() - start_time
-                    print(f"\u2705 Serial port available after {elapsed:.1f}s")
-                    break
-            except KeyboardInterrupt as ki:
-                handle_keyboard_interrupt(ki)
-                raise
-            except Exception:
-                for _ in range(5):
-                    if is_interrupted():
-                        raise KeyboardInterrupt()
-                    time.sleep(0.1)
+            # OS-level port-availability poll (never a raw pyserial open of
+            # the device \u2014 see the PYS001 ban).
+            if port_exists(upload_port):
+                port_ready = True
+                elapsed = time.time() - start_time
+                print(f"\u2705 Serial port available after {elapsed:.1f}s")
+                break
+            for _ in range(5):
+                if is_interrupted():
+                    raise KeyboardInterrupt()
+                time.sleep(0.1)
 
         if not port_ready:
             print(
@@ -1367,26 +1378,16 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
         kill_port_users(upload_port)
         time.sleep(0.5)
     elif upload_port and build_driver.name == "fbuild":
-        import serial
-
         port_ready = False
         for _ in range(10):
             if is_interrupted():
                 raise KeyboardInterrupt()
-            try:
-                with serial.Serial(upload_port, 115200, timeout=0.1) as _ser:
-                    port_ready = True
-                    break
-            except KeyboardInterrupt as ki:
-                handle_keyboard_interrupt(ki)
-                raise
-            except (serial.SerialException, OSError):
-                time.sleep(0.3)
-            except Exception as e:
-                print(
-                    f"\u26a0\ufe0f  Unexpected error checking port: {type(e).__name__}: {e}"
-                )
-                time.sleep(0.3)
+            # OS-level port-availability poll (never a raw pyserial open \u2014
+            # see the PYS001 ban).
+            if port_exists(upload_port):
+                port_ready = True
+                break
+            time.sleep(0.3)
         if not port_ready:
             print(
                 f"\u26a0\ufe0f  Port {upload_port} not available after 3s, proceeding anyway..."
@@ -1738,6 +1739,23 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
                 )
                 return 1
             return await _run_lpc_dma_spi_tests(ctx)
+        # #3453 follow-up: --dma-uart runs the async UART TX bench.
+        if getattr(ctx.args, "dma_uart", False):
+            if final_environment not in LPC_DMA_SPI_ENVS:
+                print(
+                    "--dma-uart is only supported on LPC845 boards "
+                    "(lpc845brk, lpc845, lpcxpresso845max)."
+                )
+                return 1
+            if getattr(ctx.args, "dma_spi", False) or getattr(
+                ctx.args, "pwm_dma_cl", False
+            ):
+                print(
+                    "--dma-uart is mutually exclusive with --dma-spi / "
+                    "--pwm-dma-cl (LowMemory flash budget fits one bench)."
+                )
+                return 1
+            return await _run_lpc_uart_dma_tests(ctx)
         return await _run_bring_up_tests(ctx)
 
     # GPIO-only mode
@@ -2265,28 +2283,26 @@ async def _run_bring_up_tests(ctx: RunContext) -> int:
     print("=" * 60)
     print()
 
-    import serial as _serial  # local — avoid top-level import in this hot path
+    # Device serial via fbuild's Rust monitor (never raw pyserial — see
+    # agents/docs/hardware-autoresearch.md "Device serial"). This is a raw
+    # line-inspection check (echo round-trip + the FL_WARN handler marker),
+    # so it drives the SerialInterface write/read_lines directly rather than
+    # the RPC-oriented RpcBench. reset_device() asserts DTR/RTS = "host
+    # ready", which the LPC845-BRK's LPC11U35 USB-VCOM bridge requires as a
+    # flow gate (hardcoding it False previously dropped every LPC845 byte —
+    # the "zero bytes" false alarm under FastLED #3300 / #3325).
+    from ci.util.serial_interface import create_serial_interface
 
     sentinel = 4242
-    ser = None
+    iface = None
     try:
-        print("   Opening serial port...", end="", flush=True)
-        ser = _serial.Serial(upload_port, 115200, timeout=2)
-        # Assert DTR/RTS = True (universal "host ready" idle state).
-        # ESP32 native USB CDC tolerates this (it's the post-reset idle state);
-        # LPC845-BRK *requires* DTR=True because the LPC11U35 USB-VCOM bridge
-        # uses DTR as a flow gate. Previously hardcoded to False here, which
-        # silently dropped every byte the LPC845 transmitted and produced the
-        # bring-up "zero bytes" false alarm under FastLED #3300 / #3325.
-        # See ci/util/pyserial_monitor.py for the same fix on the monitor path,
-        # and ci/util/serial_probe.py for the agent-facing helper that mirrors
-        # this default.
-        ser.dtr = True  # type: ignore[assignment]
-        ser.rts = True  # type: ignore[assignment]
-        await asyncio.sleep(0.5)
-        ser.reset_input_buffer()
-        await asyncio.sleep(2.0)  # let boot banner drain
-        ser.reset_input_buffer()
+        print("   Connecting serial (fbuild Rust monitor)...", end="", flush=True)
+        iface = create_serial_interface(upload_port)
+        await iface.connect()
+        await iface.reset_device(None)
+        # Drain the boot banner.
+        async for _line in iface.read_lines(timeout=2.0):
+            pass
         print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
 
         req = (
@@ -2295,43 +2311,34 @@ async def _run_bring_up_tests(ctx: RunContext) -> int:
             + '],"id":1}\n'
         )
         print(f"   TX: {req.strip()}", flush=True)
-        ser.write(req.encode())
-        ser.flush()
+        await iface.write(req)
 
-        # Collect for up to 5 seconds or until we see a complete REMOTE: line
+        # Collect for up to 5 seconds or until we see the echo reply.
         deadline = time.monotonic() + 5.0
-        accumulated = b""
+        accumulated = ""
         while time.monotonic() < deadline:
-            await asyncio.sleep(0.2)
-            if ser.in_waiting:
-                accumulated += ser.read(ser.in_waiting)
-                if (
-                    b'"result":' in accumulated
-                    and b"\r\n" in accumulated
-                    and b"REMOTE:" in accumulated
-                ):
-                    break
+            async for line in iface.read_lines(timeout=1.0):
+                accumulated += line + "\n"
+            if '"result":' in accumulated and "REMOTE:" in accumulated:
+                break
 
         print(f"   RX: {accumulated!r}", flush=True)
         print()
 
         # Look for the echo result
-        result_token = f'"result":{sentinel}'.encode()
-        echo_ok = result_token in accumulated
+        echo_ok = f'"result":{sentinel}' in accumulated
         # Look for the FL_DBG line from fl::Remote (only present when
         # FASTLED_FORCE_DBG or LARGE_MEMORY — bonus signal, not required)
-        dbg_token = b"Stored request ID for echo"
-        log_ok = dbg_token in accumulated
+        log_ok = "Stored request ID for echo" in accumulated
         # Look for the FL_WARN_LIT marker the bring-up sketch emits from
         # inside the `echo` handler. Setup-time FL_WARN_LITs are emitted
         # too, but the boot-banner drain above clears them — this token
         # fires per-request and survives the drain. Works on Low-memory
         # targets (FastLED #3002) because FL_WARN_LIT routes through
         # fl::println(const char*) without the sstream/log_emit machinery.
-        warn_token = b"FL_WARN: echo invoked"
-        warn_ok = warn_token in accumulated
+        warn_ok = "FL_WARN: echo invoked" in accumulated
         # Look for the REMOTE: prefix proving Serial.println via the sink
-        remote_ok = b"REMOTE: " in accumulated
+        remote_ok = "REMOTE: " in accumulated
 
         passed = echo_ok and remote_ok and warn_ok
         if passed:
@@ -2374,8 +2381,8 @@ async def _run_bring_up_tests(ctx: RunContext) -> int:
         print(f"{Fore.RED}BRING-UP TEST ERROR: {e}{Style.RESET_ALL}")
         return 1
     finally:
-        if ser is not None:
-            ser.close()
+        if iface is not None:
+            await iface.close()
 
 
 async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:
@@ -2383,9 +2390,8 @@ async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:
 
     Delegates to `ci/autoresearch/test_lpc_pin_toggle_rx.py` so the
     bench logic stays in one place (the script is also runnable
-    stand-alone for ad-hoc bring-up). Uses `subprocess` to keep the
-    pyserial dependency contained to the script — the autoresearch
-    runner itself stays import-free of `serial`.
+    stand-alone for ad-hoc bring-up). The script talks to the device
+    through fbuild's Rust serial monitor (RpcBench), never raw pyserial.
     """
     upload_port = ctx.upload_port
     assert upload_port is not None
@@ -2404,7 +2410,8 @@ async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:
         "uv",
         "run",
         "python",
-        "ci/autoresearch/test_lpc_pin_toggle_rx.py",
+        "-m",
+        "ci.autoresearch.test_lpc_pin_toggle_rx",
         "--port",
         upload_port,
         "--tx-pin",
@@ -2449,7 +2456,8 @@ async def _run_lpc_ws2812_loopback_tests(ctx: RunContext) -> int:
         "uv",
         "run",
         "python",
-        "ci/autoresearch/test_lpc_ws2812_loopback.py",
+        "-m",
+        "ci.autoresearch.test_lpc_ws2812_loopback",
         "--port",
         upload_port,
         "--tx-pin",
@@ -2501,7 +2509,8 @@ async def _run_lpc_pwm_dma_cl_tests(ctx: RunContext) -> int:
         "uv",
         "run",
         "python",
-        "ci/autoresearch/test_lpc_pwm_dma_cl.py",
+        "-m",
+        "ci.autoresearch.test_lpc_pwm_dma_cl",
         "--port",
         upload_port,
         "--tx-pin",
@@ -2525,7 +2534,7 @@ async def _run_lpc_dma_spi_tests(ctx: RunContext) -> int:
     already be present in `build_flags`.
 
     Compile-time build flag: `-DFASTLED_LPC_SPI_DMA=1` (optionally
-    combined with `-DFASTLED_LPC_SPI_DMA_CHANNEL=4` for SPI1). See
+    combined with `-DFASTLED_LPC_SPI_DMA_CHANNEL=13` for SPI1). See
     `examples/AutoResearch/AutoResearchSpiDma.h`.
     """
     final_environment = (ctx.final_environment or "").lower()
@@ -2553,7 +2562,7 @@ async def _run_lpc_dma_spi_tests(ctx: RunContext) -> int:
     )
     print("   Build flag: -DFASTLED_LPC_SPI_DMA=1 (see")
     print("   examples/AutoResearch/AutoResearchSpiDma.h)")
-    print("   Optional: -DFASTLED_LPC_SPI_DMA_CHANNEL=6 (SPI1 default)")
+    print("   Optional: -DFASTLED_LPC_SPI_DMA_CHANNEL=13 (SPI1; SPI0=11 default)")
     print("   Wiring: no jumper required for transferOnce/Overlap timing;")
     print("   SCK measurement is wall-clock derived, not SCT-captured.")
     print("=" * 60)
@@ -2563,11 +2572,65 @@ async def _run_lpc_dma_spi_tests(ctx: RunContext) -> int:
         "uv",
         "run",
         "python",
-        "ci/autoresearch/test_lpc_dma_spi.py",
+        "-m",
+        "ci.autoresearch.test_lpc_dma_spi",
         "--port",
         upload_port,
         "--core-hz",
         str(core_hz),
+    ]
+    result = subprocess.run(cmd)
+    return 0 if result.returncode == 0 else 1
+
+
+async def _run_lpc_uart_dma_tests(ctx: RunContext) -> int:
+    """Run the #3453 follow-up async UART TX bench.
+
+    Exercises `ARMHardwareUARTOutputDMA<>` (USART1 TX + DMA0 channel 3,
+    ISR chunk chaining via the lpc_dma_isr.h hub) on real silicon while
+    USART0 keeps serving the RPC console. LPC845 low-memory builds bind
+    the `uartDmaStreamOnce` / `uartDmaStreamOverlap` handlers when
+    `FASTLED_LPC_UART_DMA` is set at compile time (injected by the
+    `--dma-uart` flag together with `FASTLED_LPC_DMA_ISR=1`).
+
+    Requires the ACLPC core with named weak IRQ vector slots
+    (framework-arduino-lpc8xx#38) — on older cores the ISR chain stalls
+    after the first 1024-byte descriptor and the bench reports a
+    register-snapshot timeout instead of wedging.
+    """
+    final_environment = (ctx.final_environment or "").lower()
+    if final_environment not in LPC_DMA_SPI_ENVS:
+        print(
+            "--dma-uart is only supported on LPC845 boards "
+            "(lpc845brk, lpc845, lpcxpresso845max)."
+        )
+        return 1
+
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+
+    baud = 1_000_000  # matches FASTLED_LPC_UART_DMA_HARNESS_BAUD default
+
+    print()
+    print("=" * 60)
+    print("LPC845 async UART TX bench — #3453 follow-up (ISR chunk chain)")
+    print(f"   Target: {final_environment} (USART1 @ {baud} baud, DMA0 ch3)")
+    print("   Driver: ARMHardwareUARTOutputDMA<>")
+    print("   Build flags: -DFASTLED_LPC_UART_DMA=1 -DFASTLED_LPC_DMA_ISR=1")
+    print("   Console: USART0 stays live throughout (that's the point).")
+    print("=" * 60)
+    print()
+
+    cmd = [
+        "uv",
+        "run",
+        "python",
+        "-m",
+        "ci.autoresearch.test_lpc_uart_dma",
+        "--port",
+        upload_port,
+        "--baud-wire",
+        str(baud),
     ]
     result = subprocess.run(cmd)
     return 0 if result.returncode == 0 else 1

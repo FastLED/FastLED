@@ -109,6 +109,28 @@ class ComportResult:
     all_ports: list[ListPortInfo] = field(default_factory=lambda: [])
 
 
+def port_exists(port: str) -> bool:
+    """Return True if `port` is currently enumerated by the OS.
+
+    Uses OS-level port enumeration (list_ports), NOT a device serial
+    connection — this is the sanctioned way to poll for a port
+    (re)appearing (e.g. after an OTA reboot) without opening raw pyserial
+    on the device. Callers in the AutoResearch complex must use this
+    instead of `serial.Serial(port)` availability probes (see the PYS001
+    ban in ci/lint_python/pyserial_checker.py).
+    """
+    try:
+        names = {p.device for p in serial.tools.list_ports.comports()}
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception:
+        return False
+    # Windows `\\.\COM10` prefix vs bare `COM10` — normalize both ways.
+    stripped = port.replace("\\\\.\\", "").replace("\\.\\", "")
+    return port in names or stripped in names
+
+
 def auto_detect_upload_port(expected_environment: str | None) -> ComportResult:
     """Auto-detect the upload port from available serial ports.
 

@@ -118,13 +118,42 @@ public:
     void setSelect(Selectable *pSelect) FL_NO_EXCEPT { mPSelect = pSelect; }
 
     /// Initialize SPI peripheral as master, 8-bit, MSB-first, CPOL=0, CPHA=0.
-    /// The user's startup code is responsible for:
-    ///   (a) enabling the SPI clock in SYSCON->SYSAHBCLKCTRL[11] / [12]
-    ///       (SPI0 / SPI1) on LPC845, or SYSCON->SYSAHBCLKCTRL0[11] on LPC804
-    ///   (b) routing MOSI/SCK through SWM to the requested pins
+    /// On LPC845 this is fully self-contained (clock enable, FCLKSEL
+    /// function-clock select, reset release, SWM routing) — the same
+    /// plumbing the DMA sibling silicon-validated in #3580; without it
+    /// the first spi->STAT read stalls the AHB bus forever. On LPC804
+    /// the old contract still applies: the user's startup enables the
+    /// SPI clock (SYSAHBCLKCTRL0[11]) and routes pins via SWM.
     void init() FL_NO_EXCEPT {
         FastPin<_DATA_PIN>::setOutput();
         FastPin<_CLOCK_PIN>::setOutput();
+
+#if defined(FL_IS_ARM_LPC_845)
+        const bool is_spi0 = (pSPIX == FL_LPC_SPI0_BASE);
+        SYSCON->SYSAHBCLKCTRL0 |=
+            (is_spi0 ? SYSCON_SYSAHBCLKCTRL0_SPI0_MASK
+                     : SYSCON_SYSAHBCLKCTRL0_SPI1_MASK) |
+            SYSCON_SYSAHBCLKCTRL0_SWM_MASK;
+        SYSCON->PRESETCTRL0 |=
+            (is_spi0 ? SYSCON_PRESETCTRL0_SPI0_RST_N_MASK
+                     : SYSCON_PRESETCTRL0_SPI1_RST_N_MASK);
+        SYSCON->FCLKSEL[is_spi0 ? 9 : 10] = SYSCON_FCLKSEL_SEL(0x1u);
+        if (is_spi0) {
+            SWM0->PINASSIGN.PINASSIGN3 =
+                (SWM0->PINASSIGN.PINASSIGN3 & ~SWM_PINASSIGN3_SPI0_SCK_IO_MASK) |
+                SWM_PINASSIGN3_SPI0_SCK_IO(_CLOCK_PIN);
+            SWM0->PINASSIGN.PINASSIGN4 =
+                (SWM0->PINASSIGN.PINASSIGN4 & ~SWM_PINASSIGN4_SPI0_MOSI_IO_MASK) |
+                SWM_PINASSIGN4_SPI0_MOSI_IO(_DATA_PIN);
+        } else {
+            SWM0->PINASSIGN.PINASSIGN5 =
+                (SWM0->PINASSIGN.PINASSIGN5 &
+                 ~(SWM_PINASSIGN5_SPI1_SCK_IO_MASK |
+                   SWM_PINASSIGN5_SPI1_MOSI_IO_MASK)) |
+                SWM_PINASSIGN5_SPI1_SCK_IO(_CLOCK_PIN) |
+                SWM_PINASSIGN5_SPI1_MOSI_IO(_DATA_PIN);
+        }
+#endif  // FL_IS_ARM_LPC_845
 
         SPI_Type *spi = spi_block();
 

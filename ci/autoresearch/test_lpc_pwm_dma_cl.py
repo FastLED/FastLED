@@ -28,7 +28,7 @@ bytes to the transmitter, this runner proves the transmitter puts
 those bytes on the wire in the WS2812 protocol.
 
 Usage:
-    uv run python ci/autoresearch/test_lpc_pwm_dma_cl.py \\
+    uv run python -m ci.autoresearch.test_lpc_pwm_dma_cl \\
         [--port COM10] [--tx-pin 10] [--rx-pin 11]
 
 Exits 0 on success, 1 on any failed assertion / RPC error.
@@ -40,60 +40,34 @@ import argparse
 import json
 import sys
 import time
+from pathlib import Path
 from typing import Any
 
+from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402,F401
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402
 
-try:
-    import serial  # type: ignore
-except ImportError:
-    serial = None  # type: ignore
+
+def send_rpc(
+    s,
+    method,
+    args=None,
+    timeout: float = 10.0,
+):
+    """Shim over RpcBench (`s`) so run_* keep their reply["result"] shape.
+
+    Device serial goes through fbuild's Rust monitor (never raw pyserial);
+    see agents/docs/hardware-autoresearch.md -> "Device serial".
+    """
+    result = s.call(method, args=args, timeout=timeout)
+    if result is None:
+        return None
+    if result is METHOD_NOT_FOUND:
+        return {"error": {"code": -32601, "message": "method not found"}}
+    return {"result": result}
 
 
 DEFAULT_PORT = "COM10"
 DEFAULT_BAUD = 115200
-
-
-def send_rpc(
-    s: "serial.Serial",
-    method: str,
-    args: list[Any] | None = None,
-    request_id: int = 1,
-    timeout: float = 10.0,
-) -> dict[str, Any] | None:
-    """JSON-RPC send/receive helper.
-
-    Mirrors the shape of `test_lpc_ws2812_loopback.py::send_rpc` — kept
-    inline here so the runner has no cross-file dependencies beyond
-    stdlib + pyserial.
-    """
-    params = args if args is not None else []
-    req = {"jsonrpc": "2.0", "method": method, "params": params, "id": request_id}
-    s.write((json.dumps(req, separators=(",", ":")) + "\n").encode("ascii"))
-    s.flush()
-
-    deadline = time.time() + timeout
-    buf = b""
-    while time.time() < deadline:
-        chunk = s.read(s.in_waiting or 1)
-        if not chunk:
-            continue
-        buf += chunk
-        while b"\n" in buf:
-            line, _, buf = buf.partition(b"\n")
-            text = line.decode("ascii", errors="replace").strip()
-            for prefix in ("REMOTE: ", "RESULT: "):
-                if text.startswith(prefix):
-                    text = text[len(prefix) :]
-                    break
-            if not (text.startswith("{") and text.endswith("}")):
-                continue
-            try:
-                msg = json.loads(text)
-            except json.JSONDecodeError:
-                continue
-            if isinstance(msg, dict) and msg.get("id") == request_id:
-                return msg
-    return None
 
 
 def expected_grb_bytes(led_count: int, rgb: int) -> list[int]:
@@ -105,7 +79,7 @@ def expected_grb_bytes(led_count: int, rgb: int) -> list[int]:
 
 
 def run_capture_self(
-    s: "serial.Serial",
+    s: "RpcBench",
     led_count: int,
     rgb: int,
     data_pin: int,
@@ -169,23 +143,20 @@ def main() -> int:
     ap.add_argument("--rx-pin", type=int, default=11)
     args = ap.parse_args()
 
-    if serial is None:
-        print("pyserial not available; install with `uv sync`")
-        return 1
-
     print("LPC SCT+DMA channels-API self-loopback — FastLED #3468")
     print(f"  Port: {args.port} @ {DEFAULT_BAUD}")
     print(f"  Wiring: jumper P0_{args.tx_pin} -> P0_{args.rx_pin}")
 
     try:
-        s = serial.Serial(args.port, DEFAULT_BAUD, timeout=0.1)
-    except serial.SerialException as e:
-        print(f"Could not open {args.port}: {e}")
+        s = RpcBench(args.port)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:  # noqa: BLE001
+        print(f"Could not connect to {args.port}: {e}")
         return 1
 
     # Give the LPC845 a moment to boot after opening the port.
-    time.sleep(0.5)
-    s.reset_input_buffer()
 
     all_pass = True
 

@@ -12,13 +12,13 @@ firmware crash, init returning false, DMA hanging past its 50 ms
 timeout, etc.
 
 Usage:
-    uv run python ci/autoresearch/test_flexio_spi_smoke.py [--port COM20]
+    uv run python -m ci.autoresearch.test_flexio_spi_smoke [--port COM20]
 
 The host MUST have a Teensy 4.x flashed with the AutoResearch sketch
 already on the named serial port. Typical pre-flight:
 
     bash autoresearch teensy41 --skip-lint   # flash + verify boot
-    uv run python ci/autoresearch/test_flexio_spi_smoke.py
+    uv run python -m ci.autoresearch.test_flexio_spi_smoke
 
 Exits 0 on success, 1 on any failed assertion / RPC error.
 """
@@ -28,16 +28,12 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
-
-try:
-    import serial  # type: ignore[import-not-found]
-except ImportError:
-    print("[flexio-spi-smoke] pyserial not installed; run `uv sync`")
-    sys.exit(1)
+from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402
 
 
 @dataclass(frozen=True)
@@ -60,39 +56,23 @@ CASES = [
 
 
 def send_rpc(
-    s: "serial.Serial",
+    s: "RpcBench",
     method: str,
     args: dict[str, Any] | None = None,
-    request_id: int = 1,
+    request_id: int | None = None,
     timeout: float = 10.0,
 ) -> dict[str, Any] | None:
-    params = [args] if args is not None else [{}]
-    req = {"method": method, "params": params, "id": request_id}
-    s.write((json.dumps(req, separators=(",", ":")) + "\n").encode("ascii"))
-    s.flush()
-    deadline = time.time() + timeout
-    buf = b""
-    while time.time() < deadline:
-        chunk = s.read(s.in_waiting or 1)
-        if not chunk:
-            continue
-        buf += chunk
-        while b"\n" in buf:
-            line, _, buf = buf.partition(b"\n")
-            text = line.decode("ascii", errors="replace").strip()
-            for prefix in ("REMOTE: ", "RESULT: "):
-                if text.startswith(prefix):
-                    text = text[len(prefix) :]
-                    break
-            if not (text.startswith("{") and text.endswith("}")):
-                continue
-            try:
-                msg = json.loads(text)
-            except json.JSONDecodeError:
-                continue
-            if isinstance(msg, dict) and msg.get("id") == request_id:
-                return msg
-    return None
+    """Shim over RpcBench (`s`) — device serial via fbuild's Rust monitor,
+    never raw pyserial (agents/docs/hardware-autoresearch.md). request_id
+    is accepted for call-site compatibility and ignored (RpcClient assigns
+    its own correlation ids)."""
+    _ = request_id
+    result = s.call(method, args=args, timeout=timeout)
+    if result is None:
+        return None
+    if result is METHOD_NOT_FOUND:
+        return {"error": {"code": -32601, "message": "method not found"}}
+    return {"result": result}
 
 
 def evaluate(case: SmokeCase, result: dict[str, Any]) -> tuple[bool, str]:
@@ -137,9 +117,15 @@ def main() -> int:
     parser.add_argument("--baud", type=int, default=115200)
     args = parser.parse_args()
 
-    print(f"[flexio-spi-smoke] opening {args.port} @ {args.baud}")
-    s = serial.Serial(args.port, args.baud, timeout=0.05)
-    time.sleep(0.5)  # let the line settle
+    print(f"[flexio-spi-smoke] connecting {args.port} @ {args.baud} (Rust serial)")
+    try:
+        s = RpcBench(args.port)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:  # noqa: BLE001
+        print(f"[flexio-spi-smoke] could not connect to {args.port}: {e}")
+        return 1
 
     # Ping first -- if this fails the firmware is dead.
     ping = send_rpc(s, "ping", request_id=1)
