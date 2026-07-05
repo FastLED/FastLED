@@ -291,6 +291,7 @@ public:
     
     // Constructor for fl::vector<float> - converts to JSON array
     json(const fl::vector<float>& vec) FL_NO_EXCEPT : mValue(fl::make_shared<json_value>(json_array{})) {
+        if (!mValue) { return; }  // FastLED#3588: OOM-degraded empty
         auto ptr = mValue->data.ptr<json_array>();
         if (ptr) {
             for (const auto& item : vec) {
@@ -368,6 +369,7 @@ public:
     // Assignment operator for fl::vector<float>
     json& operator=(fl::vector<float> vec) FL_NO_EXCEPT {
         mValue = fl::make_shared<json_value>(json_array{});
+        if (!mValue) { return *this; }  // FastLED#3588: OOM-degraded empty
         auto ptr = mValue->data.ptr<json_array>();
         if (ptr) {
             for (const auto& item : vec) {
@@ -700,6 +702,8 @@ public:
         if (!mValue) {
             mValue = fl::make_shared<json_value>(json_array{});
         }
+        // FastLED#3588: make_shared may degrade to empty under OOM.
+        if (!mValue) { return json(nullptr); }
         // If we're indexing into a specialized array, convert it to regular json_array first
         if (mValue->data.is<fl::vector<i16>>() ||
             mValue->data.is<fl::vector<u8>>() ||
@@ -751,6 +755,8 @@ public:
         if (!mValue || !mValue->is_object()) {
             mValue = fl::make_shared<json_value>(json_object{});
         }
+        // FastLED#3588: make_shared may degrade to empty under OOM.
+        if (!mValue) { return json(nullptr); }
         // Get reference to the json_value
         auto objPtr = mValue->data.ptr<json_object>();
         if (objPtr) {
@@ -863,6 +869,12 @@ public:
         if (!mValue || !mValue->is_object()) {
             mValue = fl::make_shared<json_value>(json_object{});
         }
+        // FastLED#3588: make_shared degrades to an empty shared_ptr under
+        // OOM, so mValue can be null here — dereferencing it would read
+        // through null. Degrade gracefully (the set becomes a no-op).
+        if (!mValue) {
+            return;
+        }
         // Directly assign the value to the object without going through json::operator[]
         auto objPtr = mValue->data.ptr<json_object>();
         if (objPtr) {
@@ -909,6 +921,8 @@ public:
         if (!mValue || !mValue->is_array()) {
             mValue = fl::make_shared<json_value>(json_array{});
         }
+        // FastLED#3588: make_shared may degrade to empty under OOM.
+        if (!mValue) { return; }
         // If we're pushing to a packed array, convert it to regular json_array first
         if (mValue->is_array() &&
             (mValue->data.is<fl::vector<i16>>() ||

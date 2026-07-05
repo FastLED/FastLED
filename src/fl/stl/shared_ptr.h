@@ -412,14 +412,23 @@ private:
 // make_shared with optimized inlined storage (single allocation)
 template<typename T, typename... Args>
 shared_ptr<T> make_shared(Args&&... args) FL_NO_EXCEPT {
-    auto* control = new detail::InlinedControlBlock<T>();
-    if (control == nullptr) {
-        // OOM (embedded new returns null with -fno-exceptions): degrade
-        // to an empty shared_ptr instead of placement-constructing at a
-        // garbage offset from null (FastLED#3588 — crashed classic
-        // ESP32 when WiFi + HTTP server pushed free heap under 20 KB).
-        return shared_ptr<T>();
+    // Allocate the control block's raw memory explicitly and null-check it
+    // BEFORE constructing. `new detail::InlinedControlBlock<T>()` cannot be
+    // trusted to skip construction on allocation failure: its custom
+    // operator new returns null under OOM, but the new-expression still
+    // runs the constructor on that null pointer — writing through address 0
+    // (EXCVADDR 0 crash) — and the old `if (control == nullptr)` guard was
+    // dead code because it ran only AFTER the null construction. This was
+    // the primary FastLED#3588 corruptor: under low free heap (which an
+    // active WiFi SoftAP creates, but so does any memory pressure) every
+    // make_shared<json_value> in the JSON-RPC build path faulted. Separate
+    // allocation from construction so the null check actually protects it.
+    void* mem = detail::InlinedControlBlock<T>::operator new(
+        sizeof(detail::InlinedControlBlock<T>));
+    if (mem == nullptr) {
+        return shared_ptr<T>();  // OOM — degrade to an empty shared_ptr
     }
+    auto* control = ::new (mem) detail::InlinedControlBlock<T>();  // global placement new on valid memory
     T* obj = control->get_object();
     new(obj) T(fl::forward<Args>(args)...);  // Placement new
     control->object_constructed = true;

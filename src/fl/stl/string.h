@@ -28,8 +28,17 @@
 #include "fl/stl/move.h"
 #include "fl/stl/noexcept.h"
 
+// Inline (SSO) buffer size for fl::string, in bytes. Every fl::string
+// object carries this buffer, and — because fl::json_value's variant is
+// sized to its largest alternative (fl::string) — EVERY json value (even
+// an int or bool) pays for it too. At the old default of 64 a single
+// JSON-RPC response with a few hundred values consumed tens of KB and
+// exhausted the heap on classic ESP32 once WiFi was up (FastLED#3588).
+// 32 still keeps typical keys/short values inline while roughly halving
+// the per-string and per-json-value footprint. Override by defining
+// FASTLED_STR_INLINED_SIZE before including FastLED.
 #ifndef FASTLED_STR_INLINED_SIZE
-#define FASTLED_STR_INLINED_SIZE 64
+#define FASTLED_STR_INLINED_SIZE 32
 #endif
 
 
