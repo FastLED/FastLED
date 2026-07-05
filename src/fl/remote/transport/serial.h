@@ -26,6 +26,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/strstream.h"
 #include "fl/stl/string_view.h"
+#include "fl/remote/rpc/response_stream.h"
 
 namespace fl {
 
@@ -88,6 +89,9 @@ inline fl::optional<fl::string> readSerialLine(SerialReader& serial, char delimi
 /// @note Works across all FastLED platforms
 struct SerialWriter {
     void println(const char* str) { fl::println(str); }
+    void write(const char* data, fl::size len) {
+        fl::write_bytes(reinterpret_cast<const fl::u8*>(data), len);  // ok reinterpret cast
+    }
 };
 
 // =============================================================================
@@ -165,6 +169,29 @@ createSerialResponseSink(const char* prefix = "REMOTE: ") {
         SerialWriter serial;
         fl::string formatted = formatJsonResponse(response, prefix);
         writeSerialLine(serial, formatted);
+    };
+}
+
+/// @brief Create a streamed JSON-RPC ResponseSink that writes directly to serial
+/// @param prefix Optional prefix to prepend to responses (default: "REMOTE: ")
+/// @return Streaming response sink suitable for fl::Remote constructor
+inline fl::ResponseStreamSink
+createSerialResponseStreamSink(const char* prefix = "REMOTE: ") {
+    return [prefix](fl::JsonStreamCallback writeJson) {
+        SerialWriter serial;
+        if (prefix && prefix[0] != '\0') {
+            serial.write(prefix, fl::strlen(prefix));
+        }
+
+        fl::JsonStreamWriter writer([&serial](const char* data, fl::size len) {
+            serial.write(data, len);
+        });
+        if (writeJson) {
+            writeJson(writer);
+        }
+        writer.flush();
+        serial.write("\n", 1);
+        fl::flush();
     };
 }
 

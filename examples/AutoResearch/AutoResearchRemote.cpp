@@ -92,6 +92,21 @@ void printRemoteResponseRaw(const fl::json& response) {
     Serial.flush();                     // ok serial - ok autoresearch rpc serial - host waits for RPC boundary
 }
 
+void printRemoteStreamRaw(fl::JsonStreamCallback writeJson) {
+    static const char kPrefix[] = "REMOTE: ";
+    Serial.write(reinterpret_cast<const uint8_t*>(kPrefix), sizeof(kPrefix) - 1);  // ok serial - ok autoresearch rpc serial - RPC response boundary
+
+    fl::JsonStreamWriter writer([](const char* data, fl::size len) {
+        Serial.write(reinterpret_cast<const uint8_t*>(data), static_cast<size_t>(len));  // ok serial - ok autoresearch rpc serial - streamed JSON bytes
+    });
+    if (writeJson) {
+        writeJson(writer);
+    }
+    writer.flush();
+    Serial.println();  // ok serial - ok autoresearch rpc serial - RPC response boundary
+    Serial.flush();    // ok serial - ok autoresearch rpc serial - host waits for RPC boundary
+}
+
 }  // namespace
 
 void printStreamRaw(const char* messageType, const fl::json& data) {
@@ -399,7 +414,8 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
 AutoResearchRemoteControl::AutoResearchRemoteControl()
     : mRemote(fl::make_unique<fl::Remote>(
         fl::createSerialRequestSource(),
-        printRemoteResponseRaw
+        printRemoteResponseRaw,
+        printRemoteStreamRaw
     )) {
     // mState will be set by registerFunctions()
 }
