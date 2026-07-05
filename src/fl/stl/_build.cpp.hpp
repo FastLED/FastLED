@@ -19,6 +19,7 @@
 #include "fl/stl/ios.cpp.hpp"
 #include "fl/stl/istream.cpp.hpp"
 #include "fl/stl/json.cpp.hpp"
+#include "fl/stl/json_stream_writer.cpp.hpp"
 #include "fl/stl/malloc.cpp.hpp"
 #include "fl/stl/memory_resource.cpp.hpp"
 #include "fl/stl/not_null.cpp.hpp"
