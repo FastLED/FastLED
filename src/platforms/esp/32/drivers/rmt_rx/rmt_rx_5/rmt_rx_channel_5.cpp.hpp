@@ -1698,9 +1698,21 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // OVERWRITTEN on next callback
 
         // Calculate how many symbols we can safely copy (prevent buffer
-        // overflow)
+        // overflow).
+        //
+        // FastLED#3588 hardening: this subtraction UNDERFLOWS if a late
+        // callback (a receiver draining the previous capture) lands
+        // while the main task is between the accumulation buffer's
+        // clear() and its refill in allocateAndArm() — size()==0 with a
+        // stale nonzero offset wraps available_space to a huge value,
+        // and the copy below would spray RMT symbols across neighboring
+        // heap allocations. Guard the ordering explicitly. (This is a
+        // real out-of-bounds write, but note the #3588 crash reproduces
+        // even with this fix in place — it is not the sole cause.)
+        const size_t acc_size = self->mAccumulationBuffer.size();
+        const size_t acc_offset = self->mAccumulationOffset;
         size_t available_space =
-            self->mAccumulationBuffer.size() - self->mAccumulationOffset;
+            (acc_offset < acc_size) ? (acc_size - acc_offset) : 0;
         size_t symbols_to_copy = (received_count < available_space)
                                      ? received_count
                                      : available_space;
