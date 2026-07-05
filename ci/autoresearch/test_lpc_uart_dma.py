@@ -29,7 +29,7 @@ Requires the ACLPC core with named weak IRQ vector slots
 case 1 reports the device-side timeout snapshot.
 
 Usage:
-    uv run python ci/autoresearch/test_lpc_uart_dma.py [--port COM10]
+    uv run python -m ci.autoresearch.test_lpc_uart_dma [--port COM10]
 
 Exits 0 on success, 1 on any failed assertion / RPC error.
 """
@@ -42,12 +42,6 @@ import json
 import sys
 from pathlib import Path
 from typing import Any
-
-
-# Repo root on sys.path so `ci.*` imports resolve when run directly.
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
 
 from ci.rpc_client import RpcClient, RpcError, RpcTimeoutError  # noqa: E402
 from ci.util.serial_interface import create_serial_interface  # noqa: E402

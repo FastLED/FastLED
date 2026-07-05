@@ -12,13 +12,13 @@ the worst-case bugs: firmware crash on init, DMA hanging past its 50 ms
 timeout, FlexPWM2 mis-programming, etc.
 
 Usage:
-    uv run python ci/autoresearch/test_objectfled_spi_smoke.py [--port COM20]
+    uv run python -m ci.autoresearch.test_objectfled_spi_smoke [--port COM20]
 
 Pre-flight: a Teensy 4.x flashed with the AutoResearch sketch on the
 named serial port. Typical:
 
     bash autoresearch teensy41 --skip-lint
-    uv run python ci/autoresearch/test_objectfled_spi_smoke.py
+    uv run python -m ci.autoresearch.test_objectfled_spi_smoke
 
 Exits 0 on success, 1 on any failed assertion / RPC error.
 """
@@ -31,12 +31,6 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-
-
-# Repo root on sys.path so `ci.*` imports resolve when run directly.
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
 
 from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402

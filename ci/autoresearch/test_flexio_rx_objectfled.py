@@ -16,7 +16,7 @@ Five test cases (parent issue Phase 3 table):
     | 4 | 100-LED alternating R/G/B        | 300                    |
 
 Usage:
-    uv run python ci/autoresearch/test_flexio_rx_objectfled.py [--port COM20]
+    uv run python -m ci.autoresearch.test_flexio_rx_objectfled [--port COM20]
 
 Exits 0 on all pass, 1 on any failure.
 """
@@ -33,19 +33,10 @@ from typing import Any
 
 from typeguard import typechecked
 
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt
-
-
 # `pyserial` is checked at `main()` entry, not at import — see the matching
 # rationale in test_flexio_rx_squarewave.py.
-
-
-# Repo root on sys.path so `ci.*` imports resolve when run directly.
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402,F401
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 def send_rpc(

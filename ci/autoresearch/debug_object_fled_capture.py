@@ -5,7 +5,7 @@ FL_WARN line the device emits during the test. Sends runSingleTest
 synchronously and firehose-dumps everything to stdout.
 
 Usage:
-    uv run python ci/autoresearch/debug_object_fled_capture.py --port COM20
+    uv run python -m ci.autoresearch.debug_object_fled_capture --port COM20
 
 Goal: characterize where runSingleTest stalls on Teensy 4 after the
 dual-circuit FlexPWM RX fix from PR #3222 (issue #3219).
@@ -24,12 +24,6 @@ import json
 import sys
 import time
 from pathlib import Path
-
-
-# Repo root on sys.path so `ci.*` imports resolve when run directly.
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
 
 from ci.util.serial_interface import create_serial_interface  # noqa: E402
 

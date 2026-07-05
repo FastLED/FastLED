@@ -43,12 +43,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-
-# Repo root on sys.path so `ci.*` imports resolve when run directly.
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402,F401
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402
 

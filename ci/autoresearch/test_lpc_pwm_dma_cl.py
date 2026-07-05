@@ -28,7 +28,7 @@ bytes to the transmitter, this runner proves the transmitter puts
 those bytes on the wire in the WS2812 protocol.
 
 Usage:
-    uv run python ci/autoresearch/test_lpc_pwm_dma_cl.py \\
+    uv run python -m ci.autoresearch.test_lpc_pwm_dma_cl \\
         [--port COM10] [--tx-pin 10] [--rx-pin 11]
 
 Exits 0 on success, 1 on any failed assertion / RPC error.
@@ -42,12 +42,6 @@ import sys
 import time
 from pathlib import Path
 from typing import Any
-
-
-# Repo root on sys.path so `ci.*` imports resolve when run directly.
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
 
 from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402,F401
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402

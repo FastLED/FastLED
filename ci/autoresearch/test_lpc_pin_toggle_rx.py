@@ -20,7 +20,7 @@ the M0+ polling loop adds 1–2 µs of capture jitter per edge — see
 timing budget.)
 
 Usage:
-    uv run python ci/autoresearch/test_lpc_pin_toggle_rx.py [--port COM10]
+    uv run python -m ci.autoresearch.test_lpc_pin_toggle_rx [--port COM10]
 
 Talks to the AutoResearchLpc firmware over the same raw-serial
 JSON-RPC protocol as the bring-up echo test (`phases.py
@@ -40,12 +40,6 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-
-
-# Repo root on sys.path so `ci.*` imports resolve when run directly.
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
 
 from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402,F401
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402

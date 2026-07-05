@@ -14,7 +14,7 @@ Three rates, mirroring the parent issue's Phase 2 table:
     | 100 kHz   |    10 000ns | <    100 ns    | ±1 %             |
 
 Usage:
-    uv run python ci/autoresearch/test_flexio_rx_squarewave.py [--port COM20]
+    uv run python -m ci.autoresearch.test_flexio_rx_squarewave [--port COM20]
 
 Talks to the AutoResearch firmware over the raw serial JSON-RPC protocol
 (the same path the in-tree `RpcClient` uses, but without the fbuild
@@ -33,17 +33,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-
 # `pyserial` is checked at `main()` entry, not at import, so test discovery
 # (e.g. pytest collection on a CI runner without the dep installed) does not
 # abort before the caller can decide to skip the hardware bench.
-
-
-# Repo root on sys.path so `ci.*` imports resolve when run directly.
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402,F401
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402
 
