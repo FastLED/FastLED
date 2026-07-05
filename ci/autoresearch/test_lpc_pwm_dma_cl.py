@@ -79,7 +79,7 @@ def expected_grb_bytes(led_count: int, rgb: int) -> list[int]:
 
 
 def run_capture_self(
-    s: "serial.Serial",
+    s: "RpcBench",
     led_count: int,
     rgb: int,
     data_pin: int,

@@ -47,7 +47,10 @@ class RpcBench:
         )
 
     def call(
-        self, method: str, args: list[Any] | None = None, timeout: float | None = None
+        self,
+        method: str,
+        args: list[Any] | dict[str, Any] | None = None,
+        timeout: float | None = None,
     ) -> Any:
         """Return the RPC result, None on timeout, or METHOD_NOT_FOUND.
 
