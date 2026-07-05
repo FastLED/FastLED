@@ -350,14 +350,17 @@ FL_TEST_CASE("String find_first_of operations") {
     }
 
     FL_SUBCASE("find_first_of on heap string") {
-        // Create a string that uses heap allocation
+        // Create a string that uses heap allocation. Positions are
+        // relative to the inline size so this works for any
+        // FASTLED_STR_INLINED_SIZE (the 'b' position must stay in range).
+        const fl::size bpos = FASTLED_STR_INLINED_SIZE + 5;
         fl::string s(FASTLED_STR_INLINED_SIZE + 10, 'x');
-        s.replace(10, 1, "a");  // Put an 'a' at position 10
-        s.replace(50, 1, "b");  // Put a 'b' at position 50
+        s.replace(10, 1, "a");     // Put an 'a' at position 10
+        s.replace(bpos, 1, "b");   // Put a 'b' past the inline boundary
 
         FL_CHECK(s.find_first_of("ab") == 10);  // Find 'a' at position 10
-        FL_CHECK(s.find_first_of("ab", 11) == 50);  // Find 'b' at position 50
-        FL_CHECK(s.find_first_of("ab", 51) == fl::string::npos);  // No more matches
+        FL_CHECK(s.find_first_of("ab", 11) == bpos);  // Find 'b'
+        FL_CHECK(s.find_first_of("ab", bpos + 1) == fl::string::npos);  // No more matches
     }
 
     FL_SUBCASE("find_first_of comparison with find") {
@@ -552,13 +555,16 @@ FL_TEST_CASE("String find_last_of operations") {
     }
 
     FL_SUBCASE("find_last_of on heap string") {
-        // Create a string that uses heap allocation
+        // Create a string that uses heap allocation. Positions are
+        // relative to the inline size so this works for any
+        // FASTLED_STR_INLINED_SIZE (the 'b' position must stay in range).
+        const fl::size bpos = FASTLED_STR_INLINED_SIZE + 5;
         fl::string s(FASTLED_STR_INLINED_SIZE + 10, 'x');
-        s.replace(10, 1, "a");  // Put an 'a' at position 10
-        s.replace(50, 1, "b");  // Put a 'b' at position 50
+        s.replace(10, 1, "a");     // Put an 'a' at position 10
+        s.replace(bpos, 1, "b");   // Put a 'b' past the inline boundary
 
-        FL_CHECK(s.find_last_of("ab") == 50);  // Last match is 'b' at position 50
-        FL_CHECK(s.find_last_of("ab", 49) == 10);  // Before position 50, 'a' at position 10
+        FL_CHECK(s.find_last_of("ab") == bpos);  // Last match is 'b'
+        FL_CHECK(s.find_last_of("ab", bpos - 1) == 10);  // Before 'b', 'a' at position 10
         FL_CHECK(s.find_last_of("ab", 9) == fl::string::npos);  // No matches before position 10
     }
 

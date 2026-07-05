@@ -181,12 +181,13 @@ FL_TEST_CASE("String find_first_not_of operations") {
 
     FL_SUBCASE("find_first_not_of on heap string") {
         // Create a string that uses heap allocation
+        const fl::size zpos = FASTLED_STR_INLINED_SIZE + 5;  // in-range for any inline size
         fl::string s(FASTLED_STR_INLINED_SIZE + 10, 'x');
-        s.replace(10, 1, "y");  // Put a 'y' at position 10
-        s.replace(50, 1, "z");  // Put a 'z' at position 50
+        s.replace(10, 1, "y");     // Put a 'y' at position 10
+        s.replace(zpos, 1, "z");   // Put a 'z' past the inline boundary
 
         FL_CHECK(s.find_first_not_of("x") == 10);  // First non-'x' is 'y' at position 10
-        FL_CHECK(s.find_first_not_of("x", 11) == 50);  // Next non-'x' is 'z' at position 50
+        FL_CHECK(s.find_first_not_of("x", 11) == zpos);  // Next non-'x' is 'z'
         FL_CHECK(s.find_first_not_of("xyz") == fl::string::npos);  // All are x, y, or z
     }
 
@@ -486,12 +487,13 @@ FL_TEST_CASE("String find_last_not_of operations") {
 
     FL_SUBCASE("find_last_not_of on heap string") {
         // Create a string that uses heap allocation
+        const fl::size zpos = FASTLED_STR_INLINED_SIZE + 5;  // in-range for any inline size
         fl::string s(FASTLED_STR_INLINED_SIZE + 10, 'x');
-        s.replace(10, 1, "y");  // Put a 'y' at position 10
-        s.replace(50, 1, "z");  // Put a 'z' at position 50
+        s.replace(10, 1, "y");     // Put a 'y' at position 10
+        s.replace(zpos, 1, "z");   // Put a 'z' past the inline boundary
 
-        FL_CHECK(s.find_last_not_of("x") == 50);  // Last non-'x' is 'z' at position 50
-        FL_CHECK(s.find_last_not_of("x", 49) == 10);  // Previous non-'x' is 'y' at position 10
+        FL_CHECK(s.find_last_not_of("x") == zpos);  // Last non-'x' is 'z'
+        FL_CHECK(s.find_last_not_of("x", zpos - 1) == 10);  // Previous non-'x' is 'y' at position 10
         FL_CHECK(s.find_last_not_of("xyz") == fl::string::npos);  // All are x, y, or z
     }
 

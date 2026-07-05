@@ -7,6 +7,7 @@
 #include "fl/stl/comparators.h"
 #include "fl/stl/flat_map_basic.h"  // type-erased binary-search helpers (#3235 Tier 2D)
 #include "fl/stl/pair.h"
+#include "fl/stl/singleton.h"  // fl::Singleton — OOM sink for operator[] (#3588)
 #include "fl/stl/vector.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/memory_resource.h"
@@ -106,9 +107,27 @@ class flat_map {
         if (it != end() && !mLess(key, it->first) && !mLess(it->first, key)) {
             return it->second;
         }
-        // Key not found, insert it with default value
+        // Key not found, insert it with default value.
         bool success = mData.insert(it, value_type(key, Value()));
-        FASTLED_ASSERT(success, "Insert failed in flat_map::operator[]");
+        if (!success) {
+            // FastLED#3588: under memory pressure the backing vector
+            // could not grow, so the key was NOT inserted. The old code
+            // then did `find(key)` (which returns end(), the key being
+            // absent) and returned `end()->second` — a reference ONE PAST
+            // the buffer. The caller's assignment through it wrote a value
+            // into the neighboring heap allocation, corrupting it (e.g. a
+            // shared_ptr control block, detonating later as a wild-pointer
+            // refcount decrement). Degrade gracefully instead: hand back a
+            // discardable sink so the caller's write is dropped rather than
+            // corrupting the heap. This matches the library's no-throw OOM
+            // policy (a failed insert simply does not take effect). The
+            // sink is a process-lifetime Singleton (shared, never
+            // destroyed) so the reference stays valid across DLL
+            // boundaries and does not add per-map storage.
+            Value& sink = fl::SingletonShared<Value, 3588>::instance();
+            sink = Value();
+            return sink;
+        }
         // Find the newly inserted element
         it = find(key);
         return it->second;
