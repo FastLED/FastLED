@@ -31,7 +31,11 @@ int strncmp(const char* s1, const char* s2, size_t n) FL_NO_EXCEPT;
 // fl::strcpy - wrapper for strcpy (use with caution - prefer strncpy)
 char* strcpy(char* dest, const char* src) FL_NO_EXCEPT;
 
-// fl::strncpy - wrapper for strncpy
+// fl::strncpy - bounded string copy that ALWAYS null-terminates.
+// Copies at most n chars from src, then writes a terminator at
+// dest[copied] (copied <= n). Pass n = capacity - 1 (dest sized >= n+1).
+// Differs from ::strncpy, which leaves dest unterminated when
+// strlen(src) >= n. Remaining destination bytes up to n are zero-padded.
 char* strncpy(char* dest, const char* src, size_t n) FL_NO_EXCEPT;
 
 // fl::strcat - wrapper for strcat (use with caution - prefer strncat)
