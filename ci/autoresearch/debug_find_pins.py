@@ -1,79 +1,64 @@
 """Direct test of findConnectedPins RPC -- isolate wrapper vs firmware.
 
-If this script gets a response in <2s, the firmware path is healthy
-and the wrapper hang is wrapper-side. If it hangs too, the firmware
-itself is the wedge.
+If this script gets a response in <2s, the firmware path is healthy and
+the wrapper hang is wrapper-side. If it hangs too, the firmware itself is
+the wedge.
+
+Device serial goes through fbuild's native (Rust) serial monitor via
+`RpcBench`, never raw pyserial — see agents/docs/hardware-autoresearch.md
+-> "Device serial".
 """
 
 from __future__ import annotations
 
-import json
 import sys
 import time
+from pathlib import Path
 
-import serial
+
+# Repo root on sys.path so `ci.*` imports resolve when run directly.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from ci.autoresearch.rpc_bench import RpcBench  # noqa: E402
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402
 
 
 def main() -> int:
     port = sys.argv[1] if len(sys.argv) > 1 else "COM20"
-    print(f"[direct] opening {port}", flush=True)
-    s = serial.Serial(port, 115200, timeout=0.05)
-    with s:
-        s.dtr = True
-        s.rts = True
-        time.sleep(3.0)
-        s.reset_input_buffer()
+    print(f"[direct] connecting {port} (fbuild Rust serial)", flush=True)
+    try:
+        bench = RpcBench(port, timeout=12.0)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:  # noqa: BLE001
+        print(f"[direct] could not connect to {port}: {e}", flush=True)
+        return 1
 
-        # ping
-        ping = '{"jsonrpc":"2.0","method":"ping","params":[{}],"id":1}\n'
-        print(f"[direct] TX: {ping.strip()}", flush=True)
-        s.write(ping.encode())
-        s.flush()
-        time.sleep(0.5)
-        while s.read(256):
-            pass
+    with bench:
+        # ping — confirm the firmware answers at all.
+        if bench.call("ping", args=[{}], timeout=5.0) is None:
+            print("[direct] ping timed out — firmware-side wedge", flush=True)
+            return 1
 
-        # findConnectedPins
-        find = (
-            '{"jsonrpc":"2.0","method":"findConnectedPins",'
-            '"params":[[{"startPin":0,"endPin":8,"autoApply":true}]],"id":2}\n'
-        )
+        # findConnectedPins — the call under test, with timing.
         t0 = time.time()
-        print(f"\n[direct] TX: {find.strip()}", flush=True)
-        s.write(find.encode())
-        s.flush()
-
-        deadline = time.time() + 10.0
-        accum = b""
-        seen_response = False
-        while time.time() < deadline:
-            chunk = s.read(s.in_waiting or 1)
-            if chunk:
-                accum += chunk
-                while b"\n" in accum:
-                    line, _, accum = accum.partition(b"\n")
-                    text = line.decode("ascii", errors="replace").rstrip()
-                    elapsed = time.time() - t0
-                    print(f"[{elapsed:6.3f}s] {text}", flush=True)
-                    if (
-                        '"id":2' in text
-                        and text.startswith(("REMOTE:", "{"))
-                        and ("result" in text or "error" in text)
-                    ):
-                        seen_response = True
-                        print(
-                            f"\n[direct] === RESPONSE in {elapsed:.3f}s ===",
-                            flush=True,
-                        )
-                        deadline = time.time() + 0.3  # drain briefly
-            time.sleep(0.005)
-
-        if not seen_response:
+        print("[direct] TX: findConnectedPins(startPin=0, endPin=8)", flush=True)
+        result = bench.call(
+            "findConnectedPins",
+            args=[{"startPin": 0, "endPin": 8, "autoApply": True}],
+            timeout=10.0,
+        )
+        elapsed = time.time() - t0
+        if result is None:
             print(
-                f"\n[direct] NO RESPONSE in 10s -- firmware-side hang",
+                f"\n[direct] NO RESPONSE in {elapsed:.3f}s -- firmware-side hang",
                 flush=True,
             )
             return 1
+        print(f"\n[direct] === RESPONSE in {elapsed:.3f}s ===\n{result}", flush=True)
         return 0
 
 

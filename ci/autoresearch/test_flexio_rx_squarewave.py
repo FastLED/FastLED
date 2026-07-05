@@ -30,16 +30,45 @@ import json
 import sys
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 
 # `pyserial` is checked at `main()` entry, not at import, so test discovery
 # (e.g. pytest collection on a CI runner without the dep installed) does not
 # abort before the caller can decide to skip the hardware bench.
-try:
-    import serial  # type: ignore
-except ImportError:  # pragma: no cover — handled at main() entry
-    serial = None  # type: ignore
+
+
+# Repo root on sys.path so `ci.*` imports resolve when run directly.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402,F401
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402
+
+
+def send_rpc(
+    s,
+    method,
+    args=None,
+    request_id=None,
+    timeout: float = 10.0,
+):
+    """Shim over RpcBench (`s`) so run_* keep their reply["result"] shape.
+
+    Device serial goes through fbuild's Rust monitor (never raw pyserial);
+    see agents/docs/hardware-autoresearch.md -> "Device serial". The
+    request_id kwarg is accepted for call-site compatibility and ignored
+    (RpcClient assigns its own correlation ids).
+    """
+    _ = request_id
+    result = s.call(method, args=args, timeout=timeout)
+    if result is None:
+        return None
+    if result is METHOD_NOT_FOUND:
+        return {"error": {"code": -32601, "message": "method not found"}}
+    return {"result": result}
 
 
 DEFAULT_PORT = "COM20"
@@ -61,42 +90,6 @@ CASES: list[BenchCase] = [
     BenchCase("2.2 / 10 kHz", 10_000, 100, 100_000, 500, 1.0),
     BenchCase("2.3 / 100 kHz", 100_000, 100, 10_000, 100, 1.0),
 ]
-
-
-def send_rpc(
-    s: "serial.Serial",
-    method: str,
-    args: dict[str, Any] | None = None,
-    request_id: int = 1,
-    timeout: float = 10.0,
-) -> dict[str, Any] | None:
-    params = [args] if args is not None else [{}]
-    req = {"method": method, "params": params, "id": request_id}
-    s.write((json.dumps(req, separators=(",", ":")) + "\n").encode("ascii"))
-    s.flush()
-    deadline = time.time() + timeout
-    buf = b""
-    while time.time() < deadline:
-        chunk = s.read(s.in_waiting or 1)
-        if not chunk:
-            continue
-        buf += chunk
-        while b"\n" in buf:
-            line, _, buf = buf.partition(b"\n")
-            text = line.decode("ascii", errors="replace").strip()
-            for prefix in ("REMOTE: ", "RESULT: "):
-                if text.startswith(prefix):
-                    text = text[len(prefix) :]
-                    break
-            if not (text.startswith("{") and text.endswith("}")):
-                continue
-            try:
-                msg = json.loads(text)
-            except json.JSONDecodeError:
-                continue
-            if isinstance(msg, dict) and msg.get("id") == request_id:
-                return msg
-    return None
 
 
 def evaluate(case: BenchCase, result: dict[str, Any]) -> tuple[bool, str]:
@@ -145,25 +138,16 @@ def main() -> int:
     )
     args = p.parse_args()
 
-    if serial is None:
-        print(
-            "ERROR: pyserial not installed. Run: uv pip install pyserial",
-            file=sys.stderr,
-        )
-        return 2
-
     print(f"[flexio-rx-bench] opening {args.port} @ {args.baud}")
     try:
-        s = serial.Serial(args.port, args.baud, timeout=0.1)
-    except serial.SerialException as e:
-        print(f"ERROR: could not open {args.port}: {e}", file=sys.stderr)
-        return 2
+        s = RpcBench(args.port)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:  # noqa: BLE001
+        print(f"Could not connect to {args.port}: {e}")
+        return 1
     with s:
-        s.dtr = True
-        s.rts = True
-        time.sleep(1.0)
-        s.reset_input_buffer()
-
         ping = send_rpc(s, "ping", request_id=1, timeout=5.0)
         if not ping or "result" not in ping:
             print(

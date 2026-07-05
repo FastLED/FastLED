@@ -271,26 +271,23 @@ async def run_ota_autoresearch(
                     # we need to drop the AP connection to avoid network issues.
                     wifi.restore(original_ssid)
 
-                    # Wait for serial port to reappear after reboot
+                    # Wait for serial port to reappear after reboot. Use
+                    # OS-level port enumeration (never a raw pyserial open
+                    # of the device — see the PYS001 ban).
                     print("    Waiting for device to reboot...")
-                    import serial as pyserial
+                    from ci.util.port_utils import port_exists
 
                     port_ready = False
                     max_wait = 20.0
                     start_time = time.time()
 
                     while time.time() - start_time < max_wait:
-                        try:
-                            with pyserial.Serial(upload_port, 115200, timeout=0.1):
-                                port_ready = True
-                                elapsed = time.time() - start_time
-                                print(f"    Serial port available after {elapsed:.1f}s")
-                                break
-                        except KeyboardInterrupt as ki:
-                            handle_keyboard_interrupt(ki)
-                            raise
-                        except Exception:
-                            await asyncio.sleep(0.5)
+                        if port_exists(upload_port):
+                            port_ready = True
+                            elapsed = time.time() - start_time
+                            print(f"    Serial port available after {elapsed:.1f}s")
+                            break
+                        await asyncio.sleep(0.5)
 
                     if not port_ready:
                         print(

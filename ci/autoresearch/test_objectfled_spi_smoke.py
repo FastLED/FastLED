@@ -28,9 +28,18 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
+
+
+# Repo root on sys.path so `ci.*` imports resolve when run directly.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402
 
 
 # NOTE: pyserial import is deferred to main() so `test_*.py` discovery by
@@ -65,36 +74,19 @@ def send_rpc(
     s: Any,
     method: str,
     args: dict[str, Any] | None = None,
-    request_id: int = 1,
+    request_id: int | None = None,
     timeout: float = 10.0,
 ) -> dict[str, Any] | None:
-    params = [args] if args is not None else [{}]
-    req = {"method": method, "params": params, "id": request_id}
-    s.write((json.dumps(req, separators=(",", ":")) + "\n").encode("ascii"))
-    s.flush()
-    deadline = time.time() + timeout
-    buf = b""
-    while time.time() < deadline:
-        chunk = s.read(s.in_waiting or 1)
-        if not chunk:
-            continue
-        buf += chunk
-        while b"\n" in buf:
-            line, _, buf = buf.partition(b"\n")
-            text = line.decode("ascii", errors="replace").strip()
-            for prefix in ("REMOTE: ", "RESULT: "):
-                if text.startswith(prefix):
-                    text = text[len(prefix) :]
-                    break
-            if not (text.startswith("{") and text.endswith("}")):
-                continue
-            try:
-                msg = json.loads(text)
-            except json.JSONDecodeError:
-                continue
-            if isinstance(msg, dict) and msg.get("id") == request_id:
-                return msg
-    return None
+    """Shim over RpcBench (`s`) — device serial via fbuild's Rust monitor,
+    never raw pyserial (agents/docs/hardware-autoresearch.md). request_id
+    is accepted for compatibility and ignored (RpcClient owns ids)."""
+    _ = request_id
+    result = s.call(method, args=args, timeout=timeout)
+    if result is None:
+        return None
+    if result is METHOD_NOT_FOUND:
+        return {"error": {"code": -32601, "message": "method not found"}}
+    return {"result": result}
 
 
 def evaluate(case: SmokeCase, result: dict[str, Any]) -> tuple[bool, str]:
@@ -125,12 +117,6 @@ def evaluate(case: SmokeCase, result: dict[str, Any]) -> tuple[bool, str]:
 
 
 def main() -> int:
-    try:
-        import serial  # type: ignore[import-not-found]
-    except ImportError:
-        print("[objectfled-spi-smoke] pyserial not installed; run `uv sync`")
-        return 1
-
     doc = __doc__ or ""
     description = doc.splitlines()[0] if doc else ""
     parser = argparse.ArgumentParser(description=description)
@@ -138,9 +124,15 @@ def main() -> int:
     parser.add_argument("--baud", type=int, default=115200)
     args = parser.parse_args()
 
-    print(f"[objectfled-spi-smoke] opening {args.port} @ {args.baud}")
-    s = serial.Serial(args.port, args.baud, timeout=0.05)
-    time.sleep(0.5)
+    print(f"[objectfled-spi-smoke] connecting {args.port} @ {args.baud} (Rust serial)")
+    try:
+        s = RpcBench(args.port)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:  # noqa: BLE001
+        print(f"[objectfled-spi-smoke] could not connect to {args.port}: {e}")
+        return 1
 
     ping = send_rpc(s, "ping", request_id=1)
     if not ping or "result" not in ping:
