@@ -151,13 +151,16 @@ FL_TEST_CASE("fl::strncpy") {
         FL_CHECK_EQ(buffer[4], '\0');
     }
 
-    FL_SUBCASE("copy with n < source length - no null terminator") {
+    FL_SUBCASE("copy with n < source length - always null terminated") {
+        // fl::strncpy differs from ::strncpy: it ALWAYS terminates. With
+        // n=3 and a longer source it copies 3 chars then writes the
+        // terminator at buffer[3] (in bounds; callers size dest >= n+1).
         fl::memset(buffer, 'X', sizeof(buffer));
         fl::strncpy(buffer, "hello", 3);
         FL_CHECK_EQ(buffer[0], 'h');
         FL_CHECK_EQ(buffer[1], 'e');
         FL_CHECK_EQ(buffer[2], 'l');
-        FL_CHECK_EQ(buffer[3], 'X');  // Original content preserved
+        FL_CHECK_EQ(buffer[3], '\0');  // Always null-terminated
     }
 
     FL_SUBCASE("return value is destination") {

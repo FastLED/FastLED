@@ -48,7 +48,25 @@ char* strcpy(char* dest, const char* src) FL_NO_EXCEPT {
 }
 
 char* strncpy(char* dest, const char* src, size_t n) FL_NO_EXCEPT {
-    return ::strncpy(dest, src, n);
+    // Unlike ::strncpy, this ALWAYS null-terminates: it copies at most n
+    // characters from src, then writes a terminator at dest[copied]
+    // (copied <= n). Callers pass n = capacity - 1 (dest sized >= n+1),
+    // so the terminator is always in bounds. This closes the classic
+    // strncpy hazard where a source of length >= n leaves dest
+    // unterminated and downstream string walks run off the buffer
+    // (FastLED#3588: an unterminated HTTP request URI let a query-strip
+    // loop write a stray null byte one past a heap allocation).
+    size_t i = 0;
+    for (; i < n && src[i] != '\0'; ++i) {
+        dest[i] = src[i];
+    }
+    dest[i] = '\0';
+    // Preserve ::strncpy's zero-padding of the remaining destination
+    // bytes so callers relying on that behavior are unaffected.
+    for (size_t j = i + 1; j < n; ++j) {
+        dest[j] = '\0';
+    }
+    return dest;
 }
 
 char* strcat(char* dest, const char* src) FL_NO_EXCEPT {
