@@ -16,6 +16,7 @@
 
 #include "fl/log/log.h"
 #include "fl/stl/iterator.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/static_assert.h"
 
 // RX device logging: Disabled by default to reduce noise
@@ -96,6 +97,27 @@ constexpr u32 kNonDmaRxSymbols = 256;
 #else
 constexpr u32 kNonDmaRxSymbols = 64;
 #endif
+
+// DMA RX pool size (FastLED#3591). Drives BOTH the internal DMA
+// descriptor pool that rmt_new_rx_channel() allocates AND the matching
+// MALLOC_CAP_DMA|MALLOC_CAP_INTERNAL user buffer in allocateAndArm() —
+// the two MUST stay equal (kDmaRxSymbols), or the DMA engine writes past
+// a smaller user buffer (bench: StoreProhibited/Cache-error crash on
+// ESP32-S3). The prior code used 14336 for the pool but a mismatched
+// 14000 for the user buffer — a latent overflow that only stayed benign
+// because the 56 KB user buffer never actually allocated under WiFi.
+//
+// This 14336-symbol pool + matching user buffer needs ~112 KB of
+// contiguous DMA-internal RAM, which heap_caps_malloc CANNOT satisfy on
+// ESP32-S3 once WiFi is up — so DMA capture cleanly and deterministically
+// falls back to the non-DMA ping-pong path (which streams via
+// en_partial_rx and captures every S3 driver's frames reliably; bench:
+// UART/LCD_CLOCKLESS/LCD_SPI 4/4). The fallback is now observable through
+// the RmtRxDebug::dma_tally telemetry instead of being silent. Shrinking
+// the pool to make DMA fit is deferred: a 1024-symbol pool allocates and
+// arms, but S3 DMA-cache coherency at that size is not yet stable
+// (LCD_SPI Cache error), and the non-DMA path already suffices.
+constexpr u32 kDmaRxSymbols = 14336;
 
 /**
  * @brief Convert RMT ticks to nanoseconds
@@ -555,18 +577,39 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
  * declaration.
  */
 // Peekable wait() telemetry (FastLED#3586): harness tests run with logs
-// suppressed, so exit-path forensics go through memory instead.
-// [0]=wait calls, [1]=last exit (1=arm-fail 2=timeout 3=buffer-filled 4=natural), [2]=symbols, [3]=callbacks
-// FL_LINT_ALLOW_GLOBAL(bench probe read via peekMem at a fixed symbol address)
-volatile fl::u32 g_rmtrx_wait_dbg[4] = {0, 0, 0, 0};
-// FL_LINT_ALLOW_GLOBAL(bench probe read via peekMem at a fixed symbol address)
-volatile fl::u32 g_rmtrx_max_symbols = 0;
-// FL_LINT_ALLOW_GLOBAL(bench probe read via peekMem at a fixed symbol address)
-volatile fl::u32 g_rmtrx_first_symbols[4] = {0};
-// FL_LINT_ALLOW_GLOBAL(bench probe read via peekMem at a fixed symbol address)
-volatile fl::u32 g_rmtrx_cb_raw_symbols = 0;
-// FL_LINT_ALLOW_GLOBAL(bench probe read via peekMem at a fixed symbol address)
-volatile fl::u32 g_rmtrx_cb_first_raw = 0;
+// suppressed, so exit-path forensics go through memory instead. All
+// bench telemetry lives in ONE lazily-constructed singleton
+// (fl::Singleton<RmtRxDebug>) rather than a scatter of BSS globals, so
+// nothing is reserved unless an RMT-RX capture actually runs. The ISR
+// reaches it through a cached pointer (mDebug) to avoid emitting a
+// global-address literal inside the IRAM callback (the l32r
+// "literal placed after use" link failure on Xtensa).
+struct RmtRxDebug {
+    // wait() exit forensics:
+    // [0]=wait calls [1]=last exit (1=arm-fail 2=timeout 3=buffer-filled
+    // 4=natural) [2]=symbols [3]=callbacks
+    volatile fl::u32 wait_dbg[4] = {0, 0, 0, 0};
+    volatile fl::u32 max_symbols = 0;
+    volatile fl::u32 first_symbols[4] = {0, 0, 0, 0};
+    volatile fl::u32 cb_raw_symbols = 0;
+    volatile fl::u32 cb_first_raw = 0;
+    // begin()/arm outcome (FastLED#3591 — S3 DMA arm forensics):
+    // [0]=requested_dma [1]=dma_slot_granted [2]=fell_back_to_nondma
+    // [3]=stage (1=dma-buf-alloc-fail 2=rmt_new_rx fail 3=enable fail
+    //           4=skip-phase fail 5=arm fail 6=SUCCESS-dma 7=SUCCESS-nondma)
+    volatile fl::u32 begin_dbg[4] = {0, 0, 0, 0};
+    // Accumulating DMA-path tallies (NEVER reset — survive the per-begin
+    // reset and any non-DMA retry, so a single post-run peek gives an
+    // unambiguous verdict on whether DMA capture ever succeeds on S3):
+    // [0]=DMA requested, [1]=DMA armed OK, [2]=fell back to non-DMA,
+    // [3]=DMA arm failed after the slot was granted.
+    volatile fl::u32 dma_tally[4] = {0, 0, 0, 0};
+    // Fine-grained DMA arm-failure site (latched, never reset):
+    // 1=DMA buffer heap_caps_malloc failed, 2=rmt_receive(DMA) rejected.
+    volatile fl::u32 dma_fail_where = 0;
+    // esp_err_t returned by the failing rmt_receive in DMA mode.
+    volatile fl::u32 dma_receive_err = 0;
+};
 
 class RmtRxChannelImpl : public RmtRxChannel {
   public:
@@ -581,7 +624,8 @@ class RmtRxChannelImpl : public RmtRxChannel {
           mDmaAllocated(false), mDmaCapableBuffer(nullptr),
           mDmaCapableBufferSize(0), mInternalBuffer(),
           mAccumulationBuffer(), mAccumulationOffset(0), mCallbackCount(0),
-          mMemoryRegistered(false), mMemoryChannelId(0) {
+          mMemoryRegistered(false), mMemoryChannelId(0),
+          mDebug(&fl::Singleton<RmtRxDebug>::instance()) {
         FL_LOG_RX("RmtRxChannel constructed with pin="
                << pin << " (other hardware params will be set in begin())");
 
@@ -736,6 +780,14 @@ class RmtRxChannelImpl : public RmtRxChannel {
         mStartLow = config.start_low;
         mIoLoopBack = config.io_loop_back;
         mUseDma = use_dma_req;
+        // FastLED#3591 telemetry (peekable; logs suppressed during tests).
+        mDebug->begin_dbg[0] = use_dma_req ? 1u : 0u;
+        mDebug->begin_dbg[1] = 0u;
+        mDebug->begin_dbg[2] = 0u;
+        mDebug->begin_dbg[3] = 0u;
+        if (use_dma_req) {
+            mDebug->dma_tally[0] = mDebug->dma_tally[0] + 1; // DMA requested
+        }
 #if !SOC_RMT_SUPPORT_RX_PINGPONG
         // FastLED#3569 — on chips without RX ping-pong a non-DMA receive is
         // strictly one-shot: symbols beyond the channel's hardware block can
@@ -809,12 +861,13 @@ class RmtRxChannelImpl : public RmtRxChannel {
         //   DMA:     sizes ESP-IDF's DMA descriptor chain. Per rmt_rx.c:210-211:
         //     num_dma_nodes = max(2, mem_block_symbols * 4 / 4095 + 1)
         //   and the per-rmt_receive() user-buffer cap is num_dma_nodes * 4092
-        //   bytes (=1023 symbols/node). So to pass a 14000-symbol user buffer
-        //   (= 56 KB) we need â‰¥14 DMA nodes, which means mem_block_symbols â‰¥
-        //   14336. Set 14336 to cover ~595 WS2812B LEDs in a single rmt_receive.
-        //   Memory cost: 14336 Ã— 4 = 56 KB internal-RAM DMA buffer â€” ESP32-S3
-        //   has ~320 KB so ~18%. See issue #2254.
-        rx_config.mem_block_symbols = mUseDma ? 14336 : kNonDmaRxSymbols;
+        //   bytes (=1023 symbols/node). kDmaRxSymbols (14336) → 14 nodes,
+        //   which the matching user buffer in allocateAndArm() also uses.
+        //   Total ~112 KB of DMA-internal RAM (pool + user buffer) — this
+        //   cannot be allocated on ESP32-S3 with WiFi up, so DMA capture
+        //   deterministically falls back to the non-DMA ping-pong path
+        //   (FastLED#3591; observable via RmtRxDebug::dma_tally). See #2254.
+        rx_config.mem_block_symbols = mUseDma ? kDmaRxSymbols : kNonDmaRxSymbols;
         // Interrupt priority level 3 (maximum supported by ESP-IDF RMT driver
         // API) Note: Both RISC-V and Xtensa platforms are limited to level 3 by
         // driver validation RISC-V hardware supports 1-7, but ESP-IDF
@@ -905,8 +958,11 @@ class RmtRxChannelImpl : public RmtRxChannel {
                 mUseDma = false;
                 rx_config.flags.with_dma = 0;
                 rx_config.mem_block_symbols = kNonDmaRxSymbols;
+                mDebug->begin_dbg[2] = 1; // fell back: shared DMA slot busy
+                mDebug->dma_tally[2] = mDebug->dma_tally[2] + 1;
             } else {
                 mDmaAllocated = true;
+                mDebug->begin_dbg[1] = 1; // DMA slot granted
             }
         }
 
@@ -914,6 +970,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         esp_err_t err = rmt_new_rx_channel(&rx_config, &mChannel);
         if (err != ESP_OK) {
             FL_WARN_F("Failed to create RX channel: %s (%s)", static_cast<int>(err), esp_err_to_name(err));
+            mDebug->begin_dbg[3] = 2; // stage: rmt_new_rx_channel failed
             // Unregister from memory manager on failure
             if (mMemoryRegistered) {
                 auto &memMgr = RmtMemoryManager::instance();
@@ -944,6 +1001,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // We must call rmt_enable() before calling rmt_receive()
         if (!enable()) {
             FL_WARN_F("Failed to enable RX channel");
+            mDebug->begin_dbg[3] = 3; // stage: enable failed
             rmt_del_channel(mChannel);
             mChannel = nullptr;
             return false;
@@ -955,6 +1013,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         if (!mUseDma) {
             if (!handleSkipPhase()) {
                 FL_WARN_F("Failed to handle skip phase in begin()");
+                mDebug->begin_dbg[3] = 4; // stage: skip phase failed
                 rmt_disable(mChannel);
                 rmt_del_channel(mChannel);
                 mChannel = nullptr;
@@ -965,6 +1024,8 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // Allocate buffer and arm receiver for actual capture
         if (!allocateAndArm()) {
             FL_WARN_F("Failed to arm receiver in begin()");
+            mDebug->begin_dbg[3] = 5; // stage: arm failed
+            if (mUseDma) { mDebug->dma_tally[3] = mDebug->dma_tally[3] + 1; }
             rmt_disable(mChannel);
             rmt_del_channel(mChannel);
             mChannel = nullptr;
@@ -984,6 +1045,8 @@ class RmtRxChannelImpl : public RmtRxChannel {
             return false;
         }
 
+        mDebug->begin_dbg[3] = mUseDma ? 6u : 7u; // stage: success (dma / nondma)
+        if (mUseDma) { mDebug->dma_tally[1] = mDebug->dma_tally[1] + 1; }
         FL_LOG_RX("RX receiver armed and ready");
         return true;
     }
@@ -1002,12 +1065,12 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // Only allocate and arm if not already receiving (begin() wasn't
         // called) Check if accumulation buffer is empty to determine if we need
         // to arm
-        g_rmtrx_wait_dbg[0] = g_rmtrx_wait_dbg[0] + 1;
+        mDebug->wait_dbg[0] = mDebug->wait_dbg[0] + 1;
         if (mAccumulationBuffer.empty()) {
             // Allocate buffer and arm receiver
             if (!allocateAndArm()) {
                 FL_WARN_F("wait(): failed to allocate and arm");
-                g_rmtrx_wait_dbg[1] = 1; // exit: arm failure
+                mDebug->wait_dbg[1] = 1; // exit: arm failure
                 return RxWaitResult::TIMEOUT; // Treat as timeout
             }
         } else {
@@ -1025,9 +1088,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
             // Check if buffer filled (success condition)
             if (mSymbolsReceived >= mBufferSize) {
                 FL_LOG_RX("wait(): buffer filled (" << mSymbolsReceived << ")");
-                g_rmtrx_wait_dbg[1] = 3; // exit: buffer filled
-                g_rmtrx_wait_dbg[2] = static_cast<fl::u32>(mSymbolsReceived);
-                g_rmtrx_wait_dbg[3] = mCallbackCount;
+                mDebug->wait_dbg[1] = 3; // exit: buffer filled
+                mDebug->wait_dbg[2] = static_cast<fl::u32>(mSymbolsReceived);
+                mDebug->wait_dbg[3] = mCallbackCount;
                 return RxWaitResult::SUCCESS;
             }
 
@@ -1035,9 +1098,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
             if (elapsed_us >= timeout_us) {
                 FL_ERROR_F("RMT RX timeout after %sus, received %s symbols (expected %s)", elapsed_us, mSymbolsReceived, mBufferSize);
                 FL_ERROR_F("RMT RX: No data received from TX pin - check that PARLIO/SPI/RMT TX is transmitting");
-                g_rmtrx_wait_dbg[1] = 2; // exit: timeout
-                g_rmtrx_wait_dbg[2] = static_cast<fl::u32>(mSymbolsReceived);
-                g_rmtrx_wait_dbg[3] = mCallbackCount;
+                mDebug->wait_dbg[1] = 2; // exit: timeout
+                mDebug->wait_dbg[2] = static_cast<fl::u32>(mSymbolsReceived);
+                mDebug->wait_dbg[3] = mCallbackCount;
                 return RxWaitResult::TIMEOUT;
             }
 
@@ -1053,17 +1116,17 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // ESP-IDF ended the receive after one fill (likely due to idle
         // timeout from signal_range_max_ns). See issue #2254.
         FL_WARN_F("[RMT RX] wait(): symbols=%s callbacks=%s use_dma=%s", mSymbolsReceived, mCallbackCount, (mUseDma ? "true" : "false"));
-        g_rmtrx_wait_dbg[1] = 4; // exit: natural completion
-        g_rmtrx_wait_dbg[2] = static_cast<fl::u32>(mSymbolsReceived);
-        g_rmtrx_wait_dbg[3] = mCallbackCount;
+        mDebug->wait_dbg[1] = 4; // exit: natural completion
+        mDebug->wait_dbg[2] = static_cast<fl::u32>(mSymbolsReceived);
+        mDebug->wait_dbg[3] = mCallbackCount;
         for (int k = 0; k < 4; ++k) {
-            g_rmtrx_first_symbols[k] =
+            mDebug->first_symbols[k] =
                 (static_cast<fl::size>(k) < mSymbolsReceived && k < static_cast<int>(mAccumulationBuffer.size()))
                     ? static_cast<fl::u32>(mAccumulationBuffer[k])
                     : 0;
         }
-        if (static_cast<fl::u32>(mSymbolsReceived) > (g_rmtrx_max_symbols)) {
-            g_rmtrx_max_symbols = static_cast<fl::u32>(mSymbolsReceived);
+        if (static_cast<fl::u32>(mSymbolsReceived) > (mDebug->max_symbols)) {
+            mDebug->max_symbols = static_cast<fl::u32>(mSymbolsReceived);
         }
         return RxWaitResult::SUCCESS;
     }
@@ -1384,7 +1447,12 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // ISR re-submission on typical long strips. Partial-rx ISR still fires
         // every ~1023-symbol DMA node fill, streaming into the accumulation
         // buffer via rxDoneCallback.
-        constexpr size_t DMA_BUFFER_SIZE = 14000;
+        // FastLED#3591: the DMA user buffer must match the DMA descriptor
+        // pool sized by mem_block_symbols (kDmaRxSymbols). Sizing it
+        // independently overflows the buffer when the pool is larger — the
+        // DMA engine writes past a smaller user buffer (bench:
+        // StoreProhibited crash). Keep them equal.
+        const size_t DMA_BUFFER_SIZE = kDmaRxSymbols;
         const size_t hw_buffer_size = mUseDma ? DMA_BUFFER_SIZE : NONDMA_BUFFER_SIZE;
 
         if (mUseDma) {
@@ -1399,6 +1467,8 @@ class RmtRxChannelImpl : public RmtRxChannel {
                     heap_caps_malloc(bytes, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL));
                 if (!mDmaCapableBuffer) {
                     FL_WARN_F("allocateAndArm(): heap_caps_malloc(%s, DMA|INTERNAL) failed", bytes);
+                    mDebug->begin_dbg[3] = 1; // stage: DMA buffer alloc failed
+                    mDebug->dma_fail_where = 1; // latch: DMA buffer alloc
                     return false;
                 }
                 mDmaCapableBufferSize = hw_buffer_size;
@@ -1594,6 +1664,10 @@ class RmtRxChannelImpl : public RmtRxChannel {
                         buffer_size * sizeof(rmt_symbol_word_t), &rx_params);
         if (err != ESP_OK) {
             FL_WARN_F("Failed to start RX receive: %s", static_cast<int>(err));
+            if (mUseDma) {
+                mDebug->dma_fail_where = 2;   // latch: rmt_receive(DMA) rejected
+                mDebug->dma_receive_err = static_cast<fl::u32>(err);
+            }
             return false;
         }
 
@@ -1633,16 +1707,16 @@ class RmtRxChannelImpl : public RmtRxChannel {
         self->mCallbackCount =
             self->mCallbackCount + 1; // Debug: Track callback invocations
         size_t received_count = data->num_symbols;
-#if defined(__riscv)
-        // Bench telemetry (FastLED#3586). RISC-V only: on Xtensa the
-        // global-address literals in this IRAM ISR trip "l32r: literal
-        // placed after use" at link time.
-        g_rmtrx_cb_raw_symbols = static_cast<fl::u32>(received_count);
+        // Bench telemetry (FastLED#3586). Reached through the cached
+        // singleton pointer (self->mDebug) rather than a global symbol —
+        // a member deref emits no absolute-address literal, so this is
+        // safe in the IRAM ISR on Xtensa too (a direct global reference
+        // here tripped the "l32r: literal placed after use" link error).
+        self->mDebug->cb_raw_symbols = static_cast<fl::u32>(received_count);
         if (received_count > 0) {
-            g_rmtrx_cb_first_raw =
+            self->mDebug->cb_first_raw =
                 *reinterpret_cast<const fl::u32 *>(data->received_symbols); // ok reinterpret cast - bench telemetry
         }
-#endif
         const rmt_symbol_word_t *src = data->received_symbols;
         size_t src_offset = 0; // symbols consumed by in-stream skip
 
@@ -1790,6 +1864,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
     // RMT Memory Manager coordination (prevents TX/RX conflicts on ESP32-S3)
     bool mMemoryRegistered;       ///< Whether this RX channel is registered with memory manager
     u8 mMemoryChannelId;     ///< Channel ID for memory manager tracking (pin + 128)
+    RmtRxDebug *mDebug;      ///< Cached bench-telemetry singleton (never null after ctor)
 };
 
 // Factory method implementation
