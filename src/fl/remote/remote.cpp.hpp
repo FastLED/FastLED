@@ -307,11 +307,11 @@ void Remote::clear(ClearFlags flags) {
 
 // Constructor
 
-Remote::Remote(RequestSource source, ResponseSink sink)
+Remote::Remote(RequestSource source, ResponseSink sink) FL_NO_EXCEPT
     : Remote(fl::move(source), fl::move(sink), ResponseStreamSink{})
 {}
 
-Remote::Remote(RequestSource source, ResponseSink sink, ResponseStreamSink streamSink)
+Remote::Remote(RequestSource source, ResponseSink sink, ResponseStreamSink streamSink) FL_NO_EXCEPT
     : Server(fl::move(source), fl::move(sink))
 {
 #if FL_PLATFORM_HAS_LARGE_MEMORY

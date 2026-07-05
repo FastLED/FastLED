@@ -70,12 +70,12 @@ public:
      *   );
      *   // In main loop: transport->update(millis()); remote.update(millis());
      */
-    Remote(RequestSource source, ResponseSink sink);
+    Remote(RequestSource source, ResponseSink sink) FL_NO_EXCEPT;
 
     /**
      * @brief Construct with I/O callbacks, including streamed response output.
      */
-    Remote(RequestSource source, ResponseSink sink, ResponseStreamSink streamSink);
+    Remote(RequestSource source, ResponseSink sink, ResponseStreamSink streamSink) FL_NO_EXCEPT;
 
     // Non-copyable, non-movable (lambda captures 'this')
     Remote(const Remote&) FL_NO_EXCEPT = delete;
@@ -109,7 +109,7 @@ public:
     }
 
     /// Register method that streams its JSON-RPC result directly to the transport.
-    void bindStreaming(const char* name, fl::StreamingRpcHandler fn) {
+    void bindStreaming(const char* name, fl::StreamingRpcHandler fn) FL_NO_EXCEPT {
         mRpc.bindStreaming(name, fl::move(fn));
     }
 

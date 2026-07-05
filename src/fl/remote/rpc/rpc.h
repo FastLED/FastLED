@@ -227,7 +227,7 @@ public:
     void setResponseSink(fl::function<void(const fl::json&)> sink);
 
     /// Set response stream sink for methods registered with bindStreaming().
-    void setResponseStreamSink(fl::ResponseStreamSink sink);
+    void setResponseStreamSink(fl::ResponseStreamSink sink) FL_NO_EXCEPT;
 
     // =========================================================================
     // Method Registration (Binding)
@@ -267,7 +267,7 @@ public:
     /// Bind a method that streams its JSON-RPC result directly to the transport.
     /// The callback writes only the `result` payload; the RPC layer writes the
     /// JSON-RPC envelope and request id.
-    void bindStreaming(const char* name, fl::StreamingRpcHandler fn);
+    void bindStreaming(const char* name, fl::StreamingRpcHandler fn) FL_NO_EXCEPT;
 
     // =========================================================================
     // Method Retrieval

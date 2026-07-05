@@ -89,7 +89,7 @@ inline fl::optional<fl::string> readSerialLine(SerialReader& serial, char delimi
 /// @note Works across all FastLED platforms
 struct SerialWriter {
     void println(const char* str) { fl::println(str); }
-    void write(const char* data, fl::size len) {
+    void write(const char* data, fl::size len) FL_NO_EXCEPT {
         fl::write_bytes(reinterpret_cast<const fl::u8*>(data), len);  // ok reinterpret cast
     }
 };
@@ -176,7 +176,7 @@ createSerialResponseSink(const char* prefix = "REMOTE: ") {
 /// @param prefix Optional prefix to prepend to responses (default: "REMOTE: ")
 /// @return Streaming response sink suitable for fl::Remote constructor
 inline fl::ResponseStreamSink
-createSerialResponseStreamSink(const char* prefix = "REMOTE: ") {
+createSerialResponseStreamSink(const char* prefix = "REMOTE: ") FL_NO_EXCEPT {
     return [prefix](fl::JsonStreamCallback writeJson) {
         SerialWriter serial;
         if (prefix && prefix[0] != '\0') {

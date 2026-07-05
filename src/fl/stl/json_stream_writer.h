@@ -69,7 +69,7 @@ class JsonStreamWriter {
     void flush() FL_NO_EXCEPT;
 
   private:
-    void putc(char c) FL_NO_EXCEPT;
+    void writeChar(char c) FL_NO_EXCEPT;
     void puts(const char *s) FL_NO_EXCEPT;
     void putEscaped(const char *s) FL_NO_EXCEPT;
     void prefixForValue() FL_NO_EXCEPT;  // emit comma/nothing before a value

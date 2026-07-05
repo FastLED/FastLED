@@ -77,7 +77,7 @@ public:
      * The callback is invoked once per complete streamed JSON document. It
      * owns transport framing such as serial prefixes and trailing newlines.
      */
-    void setResponseStreamSink(ResponseStreamSink sink);
+    void setResponseStreamSink(ResponseStreamSink sink) FL_NO_EXCEPT;
 
     /**
      * @brief Main update: pull + push

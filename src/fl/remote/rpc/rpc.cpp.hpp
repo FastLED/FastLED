@@ -25,7 +25,7 @@ void Rpc::setResponseSink(fl::function<void(const fl::json&)> sink) {
     mResponseSink = fl::move(sink);
 }
 
-void Rpc::setResponseStreamSink(fl::ResponseStreamSink sink) {
+void Rpc::setResponseStreamSink(fl::ResponseStreamSink sink) FL_NO_EXCEPT {
 #if FL_PLATFORM_HAS_LARGE_MEMORY
     mResponseStreamSink = fl::move(sink);
 #else
@@ -58,7 +58,7 @@ void Rpc::bindAsync(const char* name,
 
     // Create a placeholder invoker (actual invocation handled in handle())
     struct PlaceholderInvoker : public detail::ErasedInvoker {
-        fl::tuple<TypeConversionResult, json> invoke(const json&) override {
+        fl::tuple<TypeConversionResult, json> invoke(const json&) FL_NO_EXCEPT override {
             // Should not be called - handle() will call mResponseAwareFn directly
             return fl::make_tuple(TypeConversionResult::success(), json(nullptr));
         }
@@ -72,7 +72,7 @@ void Rpc::bindAsync(const char* name,
 // Rpc::bindStreaming() - Bind streaming method with JsonStreamWriter parameter
 // =============================================================================
 
-void Rpc::bindStreaming(const char* name, fl::StreamingRpcHandler fn) {
+void Rpc::bindStreaming(const char* name, fl::StreamingRpcHandler fn) FL_NO_EXCEPT {
 #if FL_PLATFORM_HAS_LARGE_MEMORY
     fl::string key(name);
 
@@ -87,7 +87,7 @@ void Rpc::bindStreaming(const char* name, fl::StreamingRpcHandler fn) {
     entry.mTags = {};
 
     struct PlaceholderInvoker : public detail::ErasedInvoker {
-        fl::tuple<TypeConversionResult, json> invoke(const json&) override {
+        fl::tuple<TypeConversionResult, json> invoke(const json&) FL_NO_EXCEPT override {
             return fl::make_tuple(TypeConversionResult::success(), json(nullptr));
         }
     };
