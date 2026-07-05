@@ -37,16 +37,20 @@ Exits 0 on success, 1 on any failed assertion / RPC error.
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 import sys
-import time
+from pathlib import Path
 from typing import Any
 
 
-try:
-    import serial  # type: ignore
-except ImportError:
-    serial = None  # type: ignore
+# Repo root on sys.path so `ci.*` imports resolve when run directly.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from ci.rpc_client import RpcClient, RpcError, RpcTimeoutError  # noqa: E402
+from ci.util.serial_interface import create_serial_interface  # noqa: E402
 
 
 DEFAULT_PORT = "COM10"
@@ -57,42 +61,62 @@ DEFAULT_BAUD = 115200
 DEFAULT_WIRE_BAUD = 1_000_000
 
 
+class UartBench:
+    """Synchronous facade over the async fbuild-backed RpcClient.
+
+    Device serial goes through fbuild's native (Rust) serial monitor,
+    NEVER raw pyserial — see agents/docs/hardware-autoresearch.md
+    "Device serial". Same pattern as test_lpc_dma_spi.py::SpiBench.
+    """
+
+    def __init__(self, port: str, timeout: float = 15.0) -> None:
+        self._loop = asyncio.new_event_loop()
+        iface = create_serial_interface(port)
+        self._client = RpcClient(port, timeout=timeout, serial_interface=iface)
+        self._loop.run_until_complete(
+            self._client.connect(boot_wait=3.0, drain_boot=True)
+        )
+
+    def call(
+        self, method: str, args: list[Any] | None = None, timeout: float | None = None
+    ) -> Any:
+        try:
+            resp = self._loop.run_until_complete(
+                self._client.send(method, args=args, timeout=timeout)
+            )
+        except (RpcTimeoutError, RpcError):
+            return None
+        # CSV-string result: RpcClient coerces non-dict results to {} but
+        # keeps the full line in raw_line — recover the string there.
+        line = resp.raw_line or ""
+        for prefix in ("REMOTE: ", "RESULT: "):
+            if line.startswith(prefix):
+                line = line[len(prefix) :]
+                break
+        try:
+            obj = json.loads(line)
+        except (json.JSONDecodeError, ValueError):
+            return None
+        return obj.get("result")
+
+    def close(self) -> None:
+        try:
+            self._loop.run_until_complete(self._client.close())
+        finally:
+            self._loop.close()
+
+
 def send_rpc(
-    s: "serial.Serial",
+    bench: "UartBench",
     method: str,
     args: list[Any] | None = None,
-    request_id: int = 1,
     timeout: float = 15.0,
 ) -> dict[str, Any] | None:
-    """JSON-RPC send/receive helper (mirrors test_lpc_dma_spi.py)."""
-    params = args if args is not None else []
-    req = {"jsonrpc": "2.0", "method": method, "params": params, "id": request_id}
-    s.write((json.dumps(req, separators=(",", ":")) + "\n").encode("ascii"))
-    s.flush()
-
-    deadline = time.time() + timeout
-    buf = b""
-    while time.time() < deadline:
-        chunk = s.read(s.in_waiting or 1)
-        if not chunk:
-            continue
-        buf += chunk
-        while b"\n" in buf:
-            line, _, buf = buf.partition(b"\n")
-            text = line.decode("ascii", errors="replace").strip()
-            for prefix in ("REMOTE: ", "RESULT: "):
-                if text.startswith(prefix):
-                    text = text[len(prefix) :]
-                    break
-            if not (text.startswith("{") and text.endswith("}")):
-                continue
-            try:
-                msg = json.loads(text)
-            except json.JSONDecodeError:
-                continue
-            if isinstance(msg, dict) and msg.get("id") == request_id:
-                return msg
-    return None
+    """Shim so run_* helpers keep their `reply["result"]` shape."""
+    result = bench.call(method, args=args, timeout=timeout)
+    if result is None:
+        return None
+    return {"result": result}
 
 
 def parse_csv_result(result: Any) -> list[str] | None:
@@ -110,7 +134,7 @@ def wire_time_us(byte_count: int, wire_baud: int) -> int:
 
 
 def run_stream_once(
-    s: "serial.Serial", byte_count: int, byte_pattern: int, wire_baud: int
+    s: "UartBench", byte_count: int, byte_pattern: int, wire_baud: int
 ) -> bool:
     print()
     print(
@@ -148,7 +172,7 @@ def run_stream_once(
 
 
 def run_stream_overlap(
-    s: "serial.Serial", byte_count: int, byte_pattern: int, wire_baud: int
+    s: "UartBench", byte_count: int, byte_pattern: int, wire_baud: int
 ) -> bool:
     print()
     print(
@@ -196,32 +220,24 @@ def main() -> int:
     )
     args = ap.parse_args()
 
-    if serial is None:
-        print("FAIL — pyserial not available")
-        return 1
-
     print("LPC async UART TX bench — FastLED #3453 follow-up")
-    print(f"  Port: {args.port} @ {args.baud} (console on USART0)")
+    print(f"  Port: {args.port} @ {args.baud} (console on USART0, Rust serial)")
     print(f"  Wire: USART1 @ {args.baud_wire} baud via DMA0 ch3 + ISR chain")
 
     try:
-        s = serial.Serial(args.port, args.baud, timeout=0.25)
-    except serial.SerialException as e:
-        print(f"FAIL — cannot open {args.port}: {e}")
+        bench = UartBench(args.port)
+    except (RpcError, OSError) as e:
+        print(f"FAIL — cannot connect to {args.port}: {e}")
         return 1
 
-    time.sleep(0.5)
     try:
-        s.reset_input_buffer()
-    except serial.SerialException:
-        pass
+        ok = True
+        # 2048 bytes = two full descriptors → exercises the ISR chunk chain.
+        ok &= run_stream_once(bench, 2048, 0xA5, args.baud_wire)
+        ok &= run_stream_overlap(bench, 2048, 0x5A, args.baud_wire)
+    finally:
+        bench.close()
 
-    ok = True
-    # 2048 bytes = two full descriptors → exercises the ISR chunk chain.
-    ok &= run_stream_once(s, 2048, 0xA5, args.baud_wire)
-    ok &= run_stream_overlap(s, 2048, 0x5A, args.baud_wire)
-
-    s.close()
     print()
     print("=" * 60)
     if ok:

@@ -39,20 +39,27 @@ Exits 0 on success, 1 on any failed assertion / RPC error.
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 import sys
-import time
+from pathlib import Path
 from typing import Any
 
 
-try:
-    import serial  # type: ignore
-except ImportError:
-    serial = None  # type: ignore
+# Repo root on sys.path so `ci.*` imports resolve when run directly.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from ci.rpc_client import RpcClient, RpcError, RpcTimeoutError  # noqa: E402
+from ci.util.serial_interface import create_serial_interface  # noqa: E402
 
 
 DEFAULT_PORT = "COM10"
 DEFAULT_BAUD = 115200
+
+# Sentinel: the firmware doesn't have this RPC bound (non-ISR build).
+_METHOD_NOT_FOUND = object()
 
 # Compile-time defaults in AutoResearchSpiDma.h. If the host overrides
 # via -DFASTLED_LPC_SPI_DMA_HARNESS_DIVIDER=<N>, adjust here or pass
@@ -61,46 +68,79 @@ DEFAULT_HARNESS_DIVIDER = 6
 DEFAULT_HARNESS_CORE_HZ = 24_000_000
 
 
+class SpiBench:
+    """Synchronous facade over the async fbuild-backed RpcClient.
+
+    Device serial goes through fbuild's native (Rust) serial monitor —
+    NEVER raw pyserial (see agents/docs/hardware-autoresearch.md "Device
+    serial"). The raw-pyserial version of this runner dropped replies
+    ~one-per-session on Windows; RpcClient gives mandatory JSON-RPC id
+    correlation and correct framing over that transport.
+    """
+
+    def __init__(self, port: str, timeout: float = 10.0) -> None:
+        self._loop = asyncio.new_event_loop()
+        iface = create_serial_interface(port)
+        self._client = RpcClient(port, timeout=timeout, serial_interface=iface)
+        self._loop.run_until_complete(
+            self._client.connect(boot_wait=3.0, drain_boot=True)
+        )
+
+    def call(
+        self, method: str, args: list[Any] | None = None, timeout: float | None = None
+    ) -> Any:
+        """Return the RPC's `result` (a CSV string for these handlers),
+        None on timeout, or _METHOD_NOT_FOUND when the device doesn't
+        have the method bound (non-ISR build)."""
+        try:
+            resp = self._loop.run_until_complete(
+                self._client.send(method, args=args, timeout=timeout)
+            )
+        except RpcTimeoutError:
+            return None
+        except RpcError as e:
+            msg = str(e).lower()
+            if "not found" in msg or "unknown method" in msg or "method" in msg:
+                return _METHOD_NOT_FOUND
+            return None
+        # These handlers return a CSV *string* result. RpcClient coerces
+        # non-dict results to {} (it targets JSON-object handlers), but
+        # preserves the full line in raw_line — recover the string there.
+        line = resp.raw_line or ""
+        for prefix in ("REMOTE: ", "RESULT: "):
+            if line.startswith(prefix):
+                line = line[len(prefix) :]
+                break
+        try:
+            obj = json.loads(line)
+        except (json.JSONDecodeError, ValueError):
+            return resp.data
+        return obj.get("result", resp.data)
+
+    def close(self) -> None:
+        try:
+            self._loop.run_until_complete(self._client.close())
+        finally:
+            self._loop.close()
+
+
 def send_rpc(
-    s: "serial.Serial",
+    bench: SpiBench,
     method: str,
     args: list[Any] | None = None,
-    request_id: int = 1,
     timeout: float = 10.0,
 ) -> dict[str, Any] | None:
-    """JSON-RPC send/receive helper.
+    """Thin shim so the run_* helpers keep their `reply["result"]` shape.
 
-    Mirrors `test_lpc_pwm_dma_cl.py::send_rpc` — kept inline so the
-    runner has no cross-file dependencies beyond stdlib + pyserial.
+    Returns {"result": <csv>} on success, {"error": ...} when the method
+    isn't bound, or None on timeout.
     """
-    params = args if args is not None else []
-    req = {"jsonrpc": "2.0", "method": method, "params": params, "id": request_id}
-    s.write((json.dumps(req, separators=(",", ":")) + "\n").encode("ascii"))
-    s.flush()
-
-    deadline = time.time() + timeout
-    buf = b""
-    while time.time() < deadline:
-        chunk = s.read(s.in_waiting or 1)
-        if not chunk:
-            continue
-        buf += chunk
-        while b"\n" in buf:
-            line, _, buf = buf.partition(b"\n")
-            text = line.decode("ascii", errors="replace").strip()
-            for prefix in ("REMOTE: ", "RESULT: "):
-                if text.startswith(prefix):
-                    text = text[len(prefix) :]
-                    break
-            if not (text.startswith("{") and text.endswith("}")):
-                continue
-            try:
-                msg = json.loads(text)
-            except json.JSONDecodeError:
-                continue
-            if isinstance(msg, dict) and msg.get("id") == request_id:
-                return msg
-    return None
+    result = bench.call(method, args=args, timeout=timeout)
+    if result is None:
+        return None
+    if result is _METHOD_NOT_FOUND:
+        return {"error": {"code": -32601, "message": "method not found"}}
+    return {"result": result}
 
 
 def parse_csv_result(result: Any) -> list[str] | None:
@@ -113,7 +153,7 @@ def parse_csv_result(result: Any) -> list[str] | None:
 
 
 def run_transfer_once(
-    s: "serial.Serial",
+    s: "SpiBench",
     byte_count: int,
     byte_pattern: int,
     divider: int,
@@ -155,7 +195,7 @@ def run_transfer_once(
 
 
 def run_transfer_overlap(
-    s: "serial.Serial",
+    s: "SpiBench",
     byte_count: int,
     byte_pattern: int,
 ) -> bool:
@@ -196,8 +236,50 @@ def run_transfer_overlap(
     return ok
 
 
+def run_stream_overlap(s: "SpiBench") -> bool:
+    """ISR-refilled streaming async proof (#3453 follow-up, #3585).
+
+    Streams a multi-chunk frame (default 512 B = 2 kHalfCap chunks + 1 ISR
+    refill) via ``dmaSpiStreamOverlap`` while the device beacon-toggles on
+    the main thread. Runs the RPC three times back-to-back — the repeat is
+    the point: the ISR ping-pong must survive re-arming without corrupting
+    memory (the #3585 stack/heap-collision regression). Only bound on
+    ``-DFASTLED_LPC_DMA_ISR=1`` firmware; a missing handler is a SKIP.
+    """
+    print()
+    print("  RPC dmaSpiStreamOverlap ×3 (ISR ping-pong refill, #3453/#3585)")
+    for attempt in range(1, 4):
+        reply = send_rpc(
+            s,
+            "dmaSpiStreamOverlap",
+            args=[512, 0x40 + attempt],
+        )
+        if reply is None:
+            print("    FAIL — no reply")
+            return False
+        if "error" in reply and "result" not in reply:
+            # method-not-found ⇒ non-ISR build ⇒ skip (not a failure).
+            print("    SKIP — dmaSpiStreamOverlap not bound (non-ISR build)")
+            return True
+        parts = parse_csv_result(reply.get("result"))
+        if parts is None or len(parts) < 3:
+            print(f"    FAIL — run {attempt} malformed CSV: {reply.get('result')!r}")
+            return False
+        try:
+            total_us = int(parts[1])
+            toggles = int(parts[2])
+        except ValueError as e:
+            print(f"    FAIL — run {attempt} CSV parse error: {e}")
+            return False
+        if toggles <= 0 or total_us <= 0:
+            print(f"    FAIL — run {attempt}: toggles={toggles}, total_us={total_us}")
+            return False
+        print(f"    run {attempt}: PASS — total={total_us} us, toggles={toggles}")
+    return True
+
+
 def run_measure_sck(
-    s: "serial.Serial",
+    s: "SpiBench",
     divider: int,
     core_hz: int,
 ) -> bool:
@@ -270,41 +352,41 @@ def main() -> int:
     )
     args = ap.parse_args()
 
-    if serial is None:
-        print("pyserial not available; install with `uv sync`")
-        return 1
-
     print("LPC SPI+DMA async driver bench — FastLED #3456 (Phase 1 of #3453)")
-    print(f"  Port: {args.port} @ {DEFAULT_BAUD}")
+    print(f"  Port: {args.port} @ {DEFAULT_BAUD} (fbuild Rust serial monitor)")
     print(
         f"  Expected SCK: {args.core_hz // max(1, args.divider)} Hz "
         f"(core={args.core_hz}, divider={args.divider})"
     )
 
     try:
-        s = serial.Serial(args.port, DEFAULT_BAUD, timeout=0.1)
-    except serial.SerialException as e:
-        print(f"Could not open {args.port}: {e}")
+        bench = SpiBench(args.port)
+    except (RpcError, OSError) as e:
+        print(f"Could not connect to {args.port}: {e}")
         return 1
 
-    # Give the LPC845 a moment to boot after opening the port.
-    time.sleep(0.5)
-    s.reset_input_buffer()
+    try:
+        all_pass = True
 
-    all_pass = True
+        # Case 1: small single-shot transfer.
+        all_pass &= run_transfer_once(bench, 32, 0xA5, args.divider, args.core_hz)
 
-    # Case 1: small single-shot transfer.
-    all_pass &= run_transfer_once(s, 32, 0xA5, args.divider, args.core_hz)
+        # Case 2: larger single-shot transfer — exercises the DMA descriptor
+        # path proper (bytes > 16 → DMA engages per the driver's fast-path).
+        all_pass &= run_transfer_once(bench, 256, 0x5A, args.divider, args.core_hz)
 
-    # Case 2: larger single-shot transfer — exercises the DMA descriptor
-    # path proper (bytes > 16 → DMA engages per the driver's fast-path).
-    all_pass &= run_transfer_once(s, 256, 0x5A, args.divider, args.core_hz)
+        # Case 3: async proof.
+        all_pass &= run_transfer_overlap(bench, 512, 0xFF)
 
-    # Case 3: async proof.
-    all_pass &= run_transfer_overlap(s, 512, 0xFF)
+        # Case 4: SCK rate measurement.
+        all_pass &= run_measure_sck(bench, args.divider, args.core_hz)
 
-    # Case 4: SCK rate measurement.
-    all_pass &= run_measure_sck(s, args.divider, args.core_hz)
+        # Case 5: ISR-refilled streaming (#3453 follow-up). Only bound when the
+        # firmware was built with -DFASTLED_LPC_DMA_ISR=1; a build without it
+        # returns "method not found", which we treat as skip-not-fail.
+        all_pass &= run_stream_overlap(bench)
+    finally:
+        bench.close()
 
     print()
     print("=" * 60)

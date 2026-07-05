@@ -163,14 +163,21 @@ inline fl::string streamOverlapHandler(int byte_count, int byte_pattern) FL_NO_E
     return s.str();
 }
 
+// Args as a JSON array (house RpcClient convention — single `const
+// fl::json&` that is the positional-arg array). Lets the bench run over
+// fbuild's Rust serial monitor instead of raw pyserial.
+inline int argInt(const fl::json& args, fl::size i, int fallback) FL_NO_EXCEPT {
+    return static_cast<int>(args[i].as_int().value_or(fallback));
+}
+
 inline void bind(fl::Remote& remote) FL_NO_EXCEPT {
     remote.bind("uartDmaStreamOnce",
-        [](int byte_count, int byte_pattern) -> fl::string {
-            return streamOnceHandler(byte_count, byte_pattern);
+        [](const fl::json& args) -> fl::string {
+            return streamOnceHandler(argInt(args, 0, 0), argInt(args, 1, 0));
         });
     remote.bind("uartDmaStreamOverlap",
-        [](int byte_count, int byte_pattern) -> fl::string {
-            return streamOverlapHandler(byte_count, byte_pattern);
+        [](const fl::json& args) -> fl::string {
+            return streamOverlapHandler(argInt(args, 0, 0), argInt(args, 1, 0));
         });
 }
 

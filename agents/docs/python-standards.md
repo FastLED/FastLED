@@ -44,6 +44,25 @@ Prefer `@dataclass` over tuples and dicts for function return types:
 - Ruff's **BLE001** (blind-except) rule can detect this but is NOT active by default
 - Consider enabling BLE001 with `--select BLE001` for automatic detection
 
+## Device serial - No raw pyserial
+- **NEVER open a device serial port with `pyserial` (`import serial; serial.Serial(...)`)** in autoresearch, bench runners, or any CI code. Route through fbuild's native (Rust) serial monitor.
+- Use `ci.util.serial_interface.create_serial_interface(port)` (returns the fbuild-backed `FbuildSerialAdapter` by default) and `ci.rpc_client.RpcClient` on top of it — the same path `ci/autoresearch/{ble,decode,driver_sweep}.py` and the coroutine tests already use. You get correct framing, mandatory JSON-RPC id correlation, retries, crash-trace decoding, and reconnect for free.
+- **Correct:**
+  ```python
+  from ci.rpc_client import RpcClient
+  from ci.util.serial_interface import create_serial_interface
+  iface = create_serial_interface(port)
+  client = RpcClient(port, serial_interface=iface)
+  await client.connect()
+  resp = await client.send("echo", args=[42])
+  ```
+- **Wrong:**
+  ```python
+  import serial
+  s = serial.Serial(port, 115200, timeout=1)   # raw pyserial — banned
+  ```
+- **Why:** on Windows, hand-rolled pyserial request/response loops drop replies (~one per session) — `in_waiting` under-reports, a pre-write `reset_input_buffer()` races the reply, byte-at-a-time reads straddle the port timeout. Silicon-diagnosed 2026-07-04 on the LPC845 SPI/UART benches: the firmware answered every RPC; pyserial lost them. The only sanctioned pyserial touch is fbuild's own `PySerialAdapter` fallback inside `ci/util/serial_interface.py` (selected only via an explicit `use_pyserial=True`). Full rationale: `agents/docs/hardware-autoresearch.md` → "Device serial: fbuild's Rust monitor ONLY".
+
 ## Process Execution - No bare subprocess
 - **NEVER use `subprocess.run()` or `subprocess.Popen()` directly** — use `RunningProcess.run()` instead
 - `RunningProcess` (from the `running_process` package) wraps subprocess with proper timeout handling, streaming, and interrupt propagation

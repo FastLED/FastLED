@@ -231,8 +231,17 @@ inline fl::string measureSckHandler(int divider_hint) FL_NO_EXCEPT {
 // than the whole encode buffer (multi-chunk, ping-pong ISR refill) while
 // beacon-toggling on the main thread. CSV: "success,total_us,toggle_count".
 // A stalled refill chain times out into a register-snapshot CSV.
+//
+// RAM budget (#3585): the LPC845-BRK AutoResearch build's JSON-RPC stack
+// leaves only ~3 KB shared between heap and stack on the 16 KB part. The
+// DMA completion ISR (encode + descriptor arm) preempts that stack at its
+// deepest point; a large `stream_src` static shrank the gap until the ISR
+// pushed the stack into the heap and corrupted a return address (wild-PC
+// HardFault, not a driver logic bug — the ping-pong is correct). 512 bytes
+// is a genuine multi-chunk stream (2 chunks + 1 ISR refill at kHalfCap=256)
+// and keeps enough headroom. Do NOT raise this on the 16 KB bench build.
 #ifndef FASTLED_LPC_SPI_DMA_STREAM_BYTES
-#define FASTLED_LPC_SPI_DMA_STREAM_BYTES 1024
+#define FASTLED_LPC_SPI_DMA_STREAM_BYTES 512
 #endif
 inline fl::string streamOverlapHandler(int byte_count, int byte_pattern) FL_NO_EXCEPT {
     static fl::u8 stream_src[FASTLED_LPC_SPI_DMA_STREAM_BYTES] = {0};
@@ -271,24 +280,33 @@ inline fl::string streamOverlapHandler(int byte_count, int byte_pattern) FL_NO_E
 }
 #endif  // FASTLED_LPC_DMA_ISR
 
+// Args arrive as a JSON array (the house RpcClient convention — a single
+// `const fl::json&` param that IS the positional-arg array). Read
+// `args[N]` positionally. This is what lets the bench run over fbuild's
+// Rust serial monitor (ci.rpc_client.RpcClient) instead of raw pyserial;
+// see agents/docs/hardware-autoresearch.md "Device serial".
+inline int argInt(const fl::json& args, fl::size i, int fallback) FL_NO_EXCEPT {
+    return static_cast<int>(args[i].as_int().value_or(fallback));
+}
+
 inline void bind(fl::Remote& remote) FL_NO_EXCEPT {
     remote.bind("dmaSpiTransferOnce",
-        [](int byte_count, int byte_pattern) -> fl::string {
-            return transferOnceHandler(byte_count, byte_pattern);
+        [](const fl::json& args) -> fl::string {
+            return transferOnceHandler(argInt(args, 0, 0), argInt(args, 1, 0));
         });
 #if FASTLED_LPC_DMA_ISR
     remote.bind("dmaSpiStreamOverlap",
-        [](int byte_count, int byte_pattern) -> fl::string {
-            return streamOverlapHandler(byte_count, byte_pattern);
+        [](const fl::json& args) -> fl::string {
+            return streamOverlapHandler(argInt(args, 0, 0), argInt(args, 1, 0));
         });
 #endif
     remote.bind("dmaSpiTransferOverlap",
-        [](int byte_count, int byte_pattern) -> fl::string {
-            return transferOverlapHandler(byte_count, byte_pattern);
+        [](const fl::json& args) -> fl::string {
+            return transferOverlapHandler(argInt(args, 0, 0), argInt(args, 1, 0));
         });
     remote.bind("dmaSpiMeasureSck",
-        [](int divider_hint) -> fl::string {
-            return measureSckHandler(divider_hint);
+        [](const fl::json& args) -> fl::string {
+            return measureSckHandler(argInt(args, 0, 6));
         });
 }
 
