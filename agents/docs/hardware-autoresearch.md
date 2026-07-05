@@ -1,5 +1,26 @@
 # Hardware AutoResearch
 
+## 🚨 Port-scan BEFORE claiming a board is "not attached" (REQUIRED)
+
+**Never state "board X is not attached" / "static-verified only, target board absent" without first enumerating what is physically connected in the same session.** Multiple boards are often attached at once. Enumerate with fbuild's native scanner (NOT raw pyserial):
+
+```bash
+fbuild port scan
+```
+
+Two rows per port — OS identity plus a `└─ vendor / product` line resolved from the FastLED boards DB:
+
+```
+COM11     10C4:EA60    Silicon Labs CP210x USB to UART Bridge (COM11)    ser=0254F7A1
+          └─ Arduino / NodeMCU 0.9 (ESP-12 Module)       # ESP32-WROOM-class
+COM25     303A:1001    USB Serial Device (COM25)         ser=…
+          └─ Espressif Systems / WEMOS LOLIN S3          # ESP32-S3
+COM10     1FC9:0132    USB Serial Device (COM10)         ser=0B03400A
+          └─ NXP Semiconductors / LPC-Link2 CMSIS-DAP    # LPC845-BRK
+```
+
+Do NOT reason about attachment from memory or from "which board this task is about." Read the scan. Full rule + history (two incidents where boards were wrongly declared absent): `agents/docs/cpp-standards.md` → "Check if the target hardware might already be attached (REQUIRED)".
+
 ## Live Device Testing (AI Agents)
 **PRIMARY TOOL: `bash autoresearch`** - Hardware-in-the-loop autoresearch framework:
 
