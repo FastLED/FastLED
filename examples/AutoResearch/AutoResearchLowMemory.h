@@ -46,7 +46,8 @@
 // flag set, `LpcSctRxChannel::begin()` programs the SCT for hardware
 // edge-capture; without it the driver is a no-op stub (host tests still
 // work via `injectEdges()`).
-#if !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
+#if !defined(FASTLED_AUTORESEARCH_IEEE754_MODE) && \
+    !defined(FASTLED_AUTORESEARCH_FAULT_TEST)
 #ifndef FASTLED_LPC_RX_SCT
 #define FASTLED_LPC_RX_SCT 1
 #endif
@@ -55,8 +56,8 @@
 // The LPC845-BRK low-memory build fits FastLED + Remote + the WS2812 loopback
 // RPC in normal mode. The dedicated IEEE754 mode deliberately omits it.
 #if defined(FL_IS_ARM_LPC_845) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE) && \
-    !defined(FASTLED_LPC_SPI_DMA) && !defined(FASTLED_LPC_PWM_DMA) && \
-    !FASTLED_AUTORESEARCH_LPC_UART_DMA
+    !defined(FASTLED_AUTORESEARCH_FAULT_TEST) && !defined(FASTLED_LPC_SPI_DMA) && \
+    !defined(FASTLED_LPC_PWM_DMA) && !FASTLED_AUTORESEARCH_LPC_UART_DMA
 #define FASTLED_AUTORESEARCH_LPC_WS2812 1
 #endif
 
@@ -71,6 +72,7 @@
 #include <Arduino.h>
 #include "fl/remote/remote.h"
 #include "fl/remote/transport/serial.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/wdt/watchdog.h"
 #include "fl/log/log.h"
 #include "fl/stl/cstdio.h"  // fl::serial_begin -- HWCDC-safe Serial.begin wrapper
@@ -84,7 +86,8 @@
 // types are platform-gated behind `FL_IS_ARM_LPC` -- they only exist on
 // the real LPC build. So the include + every RX usage below must be gated
 // the same way.
-#if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
+#if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE) && \
+    !defined(FASTLED_AUTORESEARCH_FAULT_TEST)
 #include "fl/channels/rx_sct_capture.h"
 #include "fl/stl/strstream.h"
 #endif
@@ -139,7 +142,8 @@
 namespace {
 fl::Remote* g_low_memory_remote = nullptr;
 
-#if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
+#if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE) && \
+    !defined(FASTLED_AUTORESEARCH_FAULT_TEST)
 // Period-stat helpers for `pinToggleRx`. Mirrors the FlexIO RX benchmark
 // logic in `examples/AutoResearch/AutoResearchRemote.cpp::flexioRxBenchmark`
 // but inline so we don't pull in the AutoResearch ObjectFLED bus.
@@ -183,7 +187,31 @@ inline LowMemPinTogglePeriodStats computeLowMemPeriodStats(
     s.max_ns   = max_ns;
     return s;
 }
-#endif  // FL_IS_ARM_LPC && !FASTLED_AUTORESEARCH_IEEE754_MODE
+#endif  // FL_IS_ARM_LPC && !FASTLED_AUTORESEARCH_IEEE754_MODE && !FAULT_TEST
+
+#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_AUTORESEARCH_FAULT_TEST)
+FL_NO_RETURN FL_NO_INLINE void triggerLowMemoryNullFault() FL_NO_EXCEPT {
+    volatile fl::u32* const p =
+        reinterpret_cast<volatile fl::u32*>(0u);  // ok reinterpret cast - fault test
+    *p = 0x3302u;
+    while (true) {}
+}
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(infinite-recursion)
+FL_NO_INLINE int recurseLowMemoryStackBlow(int depth) FL_NO_EXCEPT {
+    volatile fl::u8 pad[64] = {0};
+    pad[static_cast<fl::u8>(depth) & 0x3Fu] = static_cast<fl::u8>(depth);
+    // LPC845/M0+ has no stack-limit trap; unbounded recursion can corrupt the
+    // runtime before the HardFault handler can emit. Burn stack frames, then
+    // force the HardFault path while the diagnostic surface is still intact.
+    if (depth >= 32) {
+        triggerLowMemoryNullFault();
+    }
+    return recurseLowMemoryStackBlow(depth + 1) + pad[depth & 0x3F];
+}
+FL_DISABLE_WARNING_POP
+#endif  // FL_IS_ARM_LPC_845 && FASTLED_AUTORESEARCH_FAULT_TEST
 
 }  // namespace
 
@@ -211,6 +239,26 @@ inline void autoResearchLowMemorySetup() {
         return v;
     });
 
+#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_AUTORESEARCH_FAULT_TEST)
+    remote.bind("trigger_oom", []() -> bool {
+        // Intentional #3302 fault input: ask the 16 KB SRAM target for
+        // far more RAM than exists. If the platform allocator returns null
+        // instead of trapping, dereference null to exercise HardFault emit.
+        volatile char* const p = new char[16UL * 1024UL * 1024UL];  // ok bare allocation
+        if (p == nullptr) {
+            triggerLowMemoryNullFault();
+        }
+        p[0] = 0x33;
+        triggerLowMemoryNullFault();
+        return false;
+    });
+    remote.bind("trigger_stackblow", []() -> bool {
+        (void)recurseLowMemoryStackBlow(0);
+        triggerLowMemoryNullFault();
+        return false;
+    });
+#endif  // FL_IS_ARM_LPC_845 && FASTLED_AUTORESEARCH_FAULT_TEST
+
 #if defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
     remote.bind("ieee754CodecTest", [](const fl::json& args) -> fl::json {
         (void)args;
@@ -226,7 +274,8 @@ inline void autoResearchLowMemorySetup() {
     });
 #endif
 
-#if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
+#if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE) && \
+    !defined(FASTLED_AUTORESEARCH_FAULT_TEST)
     // pinToggleRx (FastLED #3021 Phase 1) — bit-bang square wave on tx_pin
     // and capture SCT edges on rx_pin. CSV stats out.
     remote.bind("pinToggleRx",

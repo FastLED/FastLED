@@ -945,6 +945,8 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             lpc_bench_defines.append(f"FL_LPC_UART_DMA_CLOCKLESS_RX_PIN={args.rx_pin}")
     if getattr(args, "pwm_dma_cl", False):
         lpc_bench_defines.append("FASTLED_LPC_PWM_DMA=1")
+    if getattr(args, "fault_emit_test", False):
+        lpc_bench_defines.append("FASTLED_AUTORESEARCH_FAULT_TEST=1")
 
     # Resolve project root (always the user's invocation cwd) and build_dir.
     #
@@ -1259,6 +1261,8 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                 )
         if getattr(args, "pwm_dma_cl", False):
             deferred_defines.append("FASTLED_LPC_PWM_DMA=1")
+        if getattr(args, "fault_emit_test", False):
+            deferred_defines.append("FASTLED_AUTORESEARCH_FAULT_TEST=1")
 
         try:
             ctx.build_dir = synthesise_autoresearch_project(
@@ -1813,6 +1817,14 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
                 )
                 return 1
             return await _run_lpc_uart_dma_tests(ctx)
+        if getattr(ctx.args, "fault_emit_test", False):
+            if final_environment not in LPC_WS2812_ENVS:
+                print(
+                    "--fault-emit-test is only supported on LPC845 boards "
+                    "(lpc845brk, lpc845, lpcxpresso845max)."
+                )
+                return 1
+            return await _run_lpc_fault_emit_tests(ctx)
         return await _run_bring_up_tests(ctx)
 
     # GPIO-only mode
@@ -2440,6 +2452,116 @@ async def _run_bring_up_tests(ctx: RunContext) -> int:
     finally:
         if iface is not None:
             await iface.close()
+
+
+async def _run_lpc_fault_emit_tests(ctx: RunContext) -> int:
+    """Run FastLED #3302 intentional-fault diagnostic validation."""
+
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+    build_dir = ctx.build_dir
+    final_environment = (ctx.final_environment or "lpc845").lower()
+    build_environment = _build_environment_for_mode(ctx) or final_environment
+
+    print()
+    print("=" * 60)
+    print("LPC845 FAULT-EMIT MODE — intentional OOM + stack fault (#3302)")
+    print("=" * 60)
+    print("   Firmware flag: -DFASTLED_AUTORESEARCH_FAULT_TEST=1")
+    print("   Expected: each trigger emits FAULT diagnostics before reset")
+    print()
+
+    async def trigger_and_capture(method: str) -> tuple[bool, str]:
+        from ci.util.serial_interface import create_serial_interface
+
+        iface = create_serial_interface(upload_port)
+        lines: list[str] = []
+        try:
+            print(f"   Connecting serial for {method}...", end="", flush=True)
+            await iface.connect()
+            await iface.reset_device(None)
+            async for _line in iface.read_lines(timeout=2.0):
+                pass
+            print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
+
+            request = (
+                json.dumps(
+                    {"jsonrpc": "2.0", "method": method, "params": [], "id": 1},
+                    separators=(",", ":"),
+                )
+                + "\n"
+            )
+            print(f"   TX: {request.strip()}", flush=True)
+            await iface.write(request)
+
+            deadline = time.monotonic() + 8.0
+            saw_fault = False
+            saw_normal_result = False
+            while time.monotonic() < deadline:
+                async for line in iface.read_lines(timeout=0.5):
+                    lines.append(line)
+                    if "FAULT:" in line:
+                        saw_fault = True
+                    if "REMOTE:" in line and '"result"' in line:
+                        saw_normal_result = True
+                if saw_fault or saw_normal_result:
+                    break
+
+            output = "\n".join(lines)
+            print(f"   RX: {output!r}", flush=True)
+            if saw_normal_result:
+                print(
+                    f"   {Fore.RED}FAIL{Style.RESET_ALL} - {method} returned "
+                    "normally instead of faulting"
+                )
+                return False, output
+            if saw_fault:
+                print(f"   {Fore.GREEN}PASS{Style.RESET_ALL} - {method} emitted FAULT")
+                return True, output
+            print(f"   {Fore.RED}FAIL{Style.RESET_ALL} - {method} did not emit FAULT")
+            return False, output
+        finally:
+            try:
+                await iface.close()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
+                raise
+            except Exception as e:
+                print(
+                    f"   {Fore.YELLOW}WARN{Style.RESET_ALL} - serial close "
+                    f"after {method} fault raised: {e}"
+                )
+
+    results: list[tuple[str, bool, str]] = []
+    for index, method in enumerate(("trigger_oom", "trigger_stackblow")):
+        if index > 0:
+            print()
+            print("   Re-flashing fresh fault-test firmware before next trigger...")
+            if not _build_and_deploy_nxplpc(
+                build_dir,
+                environment=build_environment,
+                upload_port=upload_port,
+                verbose=ctx.args.verbose,
+            ):
+                return 1
+        ok, output = await trigger_and_capture(method)
+        results.append((method, ok, output))
+        if not ok:
+            print()
+            print(f"{Fore.RED}FAULT-EMIT TEST FAILED{Style.RESET_ALL}")
+            return 1
+
+    print()
+    print("=" * 60)
+    print(f"{Fore.GREEN}PASS - #3302 fault emit validation confirmed.{Style.RESET_ALL}")
+    for method, _ok, output in results:
+        first_fault = next(
+            (line for line in output.splitlines() if "FAULT:" in line),
+            "<missing>",
+        )
+        print(f"   {method}: {first_fault}")
+    print("=" * 60)
+    return 0
 
 
 async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:

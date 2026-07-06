@@ -40,6 +40,8 @@ Driver Selection (optional - omit for GPIO-only mode):
   --pwm-dma-cl        LPC845-only: channels-API SCT+DMA clockless
                       self-loopback (FastLED #3468). Jumper P0_10↔P0_11.
   --dma-uart          LPC845-only: raw async UART TX DMA bench
+  --fault-emit-test   LPC845-only: trigger intentional OOM/stack faults and
+                      assert FAULT diagnostics (FastLED #3302)
   --all               Test all drivers
   --simd              Test SIMD operations only (no LED drivers needed)
   --coroutine         Test coroutine/task creation, stop, await (no LED drivers needed)
