@@ -332,9 +332,11 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
 
     // Build URLs
     char url_ping[128];
-    char url_data[128];
+    char url_status[128];
+    char url_leds[128];
     snprintf(url_ping, sizeof(url_ping), "http://%s:%u/ping", host_ip, port);
-    snprintf(url_data, sizeof(url_data), "http://%s:%u/data", host_ip, port);
+    snprintf(url_status, sizeof(url_status), "http://%s:%u/status", host_ip, port);
+    snprintf(url_leds, sizeof(url_leds), "http://%s:%u/leds", host_ip, port);
 
     // Test 1: GET /ping
     {
@@ -350,9 +352,23 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
 
     FastLED.watchdog().feed();  // between blocking HTTP tests (single-core WDT)
 
-    // Test 2: GET /data
+    // Test 2: GET /status
     {
-        fl::json r = runHttpGetTest(url_data, "GET /data");
+        fl::json r = runHttpGetTest(url_status, "GET /status");
+        auto passed = r[fl::string("passed")].as_bool();
+        if (passed.has_value() && passed.value()) {
+            tests_passed++;
+        } else {
+            tests_failed++;
+        }
+        results.push_back(r);
+    }
+
+    FastLED.watchdog().feed();  // between blocking HTTP tests (single-core WDT)
+
+    // Test 3: GET /leds
+    {
+        fl::json r = runHttpGetTest(url_leds, "GET /leds");
         auto passed = r[fl::string("passed")].as_bool();
         if (passed.has_value() && passed.value()) {
             tests_passed++;
