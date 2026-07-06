@@ -3,7 +3,7 @@
 #include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
 
-#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA)
+#if defined(FL_IS_ARM_LPC_845) && FASTLED_LPC_UART_DMA
 
 #include "platforms/arm/lpc/drivers/uart_dma/channel_engine_lpc_uart_dma.h"
 #include "fl/chipsets/chipset_timing_config.h"
@@ -132,7 +132,8 @@ bool ChannelEngineLpcUartDma::canHandle(
         return false;
     }
     const int pin = data->getPin();
-    if (pin < 0 || pin > 31) {
+    if (pin < 0 || pin > 0x35 ||
+        !lpc::LpcUartDmaRuntime::isMovableUartPin(static_cast<u8>(pin))) {
         return false;
     }
     return lpcUartCanRepresentTiming(data->getTiming());

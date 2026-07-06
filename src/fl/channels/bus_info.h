@@ -148,7 +148,7 @@ template<> struct DeviceInfoResolver<Bus::UART, 0> {
 
 template<> struct DeviceInfoResolver<Bus::UART, 0> {
     static inline DeviceInfo get() FL_NO_EXCEPT {
-#if defined(FASTLED_LPC_UART_DMA)
+#if FASTLED_LPC_UART_DMA
         return makeInfo(Bus::UART, 0, "LPC_USART_DMA", "USART TX DMA");
 #else
         return makeNoop(Bus::UART, 0, "UART DMA disabled");

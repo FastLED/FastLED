@@ -38,9 +38,10 @@
 
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 #include "platforms/arm/is_arm.h"
 
-#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA)
+#if defined(FL_IS_ARM_LPC_845) && FASTLED_LPC_UART_DMA
 
 // IWYU pragma: begin_keep
 #include <LPC845.h>
@@ -57,6 +58,7 @@ extern fl::u32 g_fastled_lpc_uart_loopback_rx_arm_status;
 extern fl::u32 g_fastled_lpc_uart_loopback_rx_arm_tx_len;
 extern fl::u32 g_fastled_lpc_uart_loopback_rx_arm_xfer_readback;
 extern fl::u32 g_fastled_lpc_uart_loopback_rx_arm_desc0_readback;
+extern fl::u8 g_fastled_lpc_uart_loopback_rx_pin;
 }
 #endif
 
@@ -66,12 +68,13 @@ namespace fl {
 // reserved for the console, USART3/4 share their IRQ slots with pin
 // interrupts and their FCLKSEL/clock plumbing differs (no FRG output on
 // some muxes); add them when a board actually needs four lanes.
-#ifndef FASTLED_LPC_UART_DMA_INSTANCE
+#if !defined(FASTLED_LPC_UART_DMA_INSTANCE)
 #define FASTLED_LPC_UART_DMA_INSTANCE 1
 #endif
 
 /// @brief LPC845 USARTn TX + DMA0 async output.
-/// @tparam _TX_PIN  PIO0_n index the SWM routes Un_TXD onto.
+/// @tparam _TX_PIN  SWM pin code the driver routes Un_TXD onto:
+///                  PIO0_n => n, PIO1_n => 0x20 + n.
 /// @tparam _BAUD    Wire baud rate (main_clk 24 MHz / 16x OSR ⇒ max
 ///                  practical ~1.5 Mbaud at integer BRG; 3 Mbaud needs
 ///                  OSR=8 — the driver picks OSR/BRG for minimal error).
@@ -98,6 +101,13 @@ class LpcUartDmaRuntime {
     static constexpr u32 kUsartCfgRxPol = (1UL << 22);
     static constexpr u32 kUsartCfgTxPol = (1UL << 23);
     static constexpr u32 kSwmPinMask = 0xFFu;
+    static constexpr u8 kSwmPinUnassigned = 0xFFu;
+    // UM11029 Tables 181/182: U1/U2 TXD/RXD movable-function assignments
+    // accept PIO0_0..PIO0_31 and PIO1_0..PIO1_21.
+    static constexpr u8 kLastMovableUartPin = 0x35u;
+    static constexpr bool swmPinAllowed(u8 pin) FL_NO_EXCEPT {
+        return pin <= kLastMovableUartPin;
+    }
     static constexpr u32 swmMask(u32 shift) FL_NO_EXCEPT {
         return kSwmPinMask << shift;
     }
@@ -105,6 +115,11 @@ class LpcUartDmaRuntime {
         return (static_cast<u32>(pin) & kSwmPinMask) << shift;
     }
 #if defined(FL_LPC_UART_DMA_LOOPBACK_TEST)
+#if !defined(FL_LPC_UART_DMA_CLOCKLESS_RX_PIN)
+#define FL_LPC_UART_DMA_CLOCKLESS_RX_PIN 0xFF
+#endif
+    static constexpr u8 kDefaultLoopbackRxPin =
+        static_cast<u8>(FL_LPC_UART_DMA_CLOCKLESS_RX_PIN);
     static constexpr u32 kDmaBase = 0x50008000u;
     static volatile u32& dmaReg(u32 offset) FL_NO_EXCEPT {
         return *reinterpret_cast<volatile u32*>(kDmaBase + offset);  // ok reinterpret cast - DMA0 MMIO
@@ -121,10 +136,18 @@ public:
         volatile bool running = false;
     };
 
+    static constexpr bool isMovableUartPin(u8 pin) FL_NO_EXCEPT {
+        return swmPinAllowed(pin);
+    }
+
 #if defined(FL_LPC_UART_DMA_LOOPBACK_TEST)
-    static void prepareLoopbackRxBuffer(u8* dst, u32 len) FL_NO_EXCEPT {
+    static void prepareLoopbackRxBuffer(
+            u8* dst, u32 len,
+            u8 rxPin = kDefaultLoopbackRxPin) FL_NO_EXCEPT {
         g_fastled_lpc_uart_loopback_rx_dst = dst;
         g_fastled_lpc_uart_loopback_rx_len = len;
+        g_fastled_lpc_uart_loopback_rx_pin =
+            swmPinAllowed(rxPin) ? rxPin : kSwmPinUnassigned;
         g_fastled_lpc_uart_loopback_rx_arm_status = 0;
         g_fastled_lpc_uart_loopback_rx_arm_tx_len = 0;
         g_fastled_lpc_uart_loopback_rx_arm_xfer_readback = 0;
@@ -136,6 +159,8 @@ public:
         if (g_fastled_lpc_uart_loopback_rx_dst == nullptr || len == 0u) {
             return 0;
         }
+        // The RX GPIO can move through SWM, but UM11029 Table 296 fixes the
+        // DMA request to the selected USART instance: U1_RX=2, U2_RX=4.
         const u32 mask = (1UL << kLoopbackRxDmaChannel);
         if ((dmaReg(0x058u) & mask) != 0u) {  // INTA0: SETINTA completion.
             return len;
@@ -158,6 +183,7 @@ public:
         dmaReg(0x058u) = mask;  // INTA0 W1C
         g_fastled_lpc_uart_loopback_rx_dst = nullptr;
         g_fastled_lpc_uart_loopback_rx_len = 0;
+        g_fastled_lpc_uart_loopback_rx_pin = kSwmPinUnassigned;
     }
 #endif
 
@@ -167,37 +193,13 @@ public:
                                   SYSCON_SYSAHBCLKCTRL0_SWM_MASK;
         SYSCON->PRESETCTRL0 |= SYSCON_PRESETCTRL0_UART2_RST_N_MASK;
         SYSCON->FCLKSEL[2] = SYSCON_FCLKSEL_SEL(0x1u);
-#if defined(FL_LPC_UART_DMA_CLOCKLESS_RX_PIN)
-        // UM11029 Table 182: PINASSIGN2[23:16]=U2_TXD_O,
-        // PINASSIGN2[31:24]=U2_RXD_I.
-        SWM0->PINASSIGN.PINASSIGN2 =
-            (SWM0->PINASSIGN.PINASSIGN2 &
-             ~(swmMask(16u) | swmMask(24u))) |
-            swmValue(txPin, 16u) |
-            swmValue(static_cast<u8>(FL_LPC_UART_DMA_CLOCKLESS_RX_PIN), 24u);
-#else
-        SWM0->PINASSIGN.PINASSIGN2 =
-            (SWM0->PINASSIGN.PINASSIGN2 & ~SWM_PINASSIGN2_U2_TXD_O_MASK) |
-            SWM_PINASSIGN2_U2_TXD_O(txPin);
-#endif
+        routeUart2Pins(txPin);
 #else
         SYSCON->SYSAHBCLKCTRL0 |= SYSCON_SYSAHBCLKCTRL0_UART1_MASK |
                                   SYSCON_SYSAHBCLKCTRL0_SWM_MASK;
         SYSCON->PRESETCTRL0 |= SYSCON_PRESETCTRL0_UART1_RST_N_MASK;
         SYSCON->FCLKSEL[1] = SYSCON_FCLKSEL_SEL(0x1u);
-#if defined(FL_LPC_UART_DMA_CLOCKLESS_RX_PIN)
-        // UM11029 Table 181: PINASSIGN1[15:8]=U1_TXD_O,
-        // PINASSIGN1[23:16]=U1_RXD_I.
-        SWM0->PINASSIGN.PINASSIGN1 =
-            (SWM0->PINASSIGN.PINASSIGN1 &
-             ~(swmMask(8u) | swmMask(16u))) |
-            swmValue(txPin, 8u) |
-            swmValue(static_cast<u8>(FL_LPC_UART_DMA_CLOCKLESS_RX_PIN), 16u);
-#else
-        SWM0->PINASSIGN.PINASSIGN1 =
-            (SWM0->PINASSIGN.PINASSIGN1 & ~SWM_PINASSIGN1_U1_TXD_O_MASK) |
-            SWM_PINASSIGN1_U1_TXD_O(txPin);
-#endif
+        routeUart1Pins(txPin);
 #endif
 
         USART_Type* u = uartBlock();
@@ -230,9 +232,9 @@ public:
 #if defined(FL_LPC_UART_DMA_LOOPBACK_TEST)
         // AutoResearch-only: when an RX pin is provided, verify through the
         // board-level jumper. Otherwise fall back to UM11029 Table 324 LOOP.
-#if !defined(FL_LPC_UART_DMA_CLOCKLESS_RX_PIN)
-        cfg |= kUsartCfgLoop;
-#endif
+        if (!hasLoopbackRxPin()) {
+            cfg |= kUsartCfgLoop;
+        }
         // The clockless UART path intentionally inverts TX, so the verifier
         // inverts RX too whether the signal arrives by pin or internal LOOP.
         if (invertTx) {
@@ -333,6 +335,46 @@ public:
     }
 
 private:
+    static bool hasLoopbackRxPin() FL_NO_EXCEPT {
+#if defined(FL_LPC_UART_DMA_LOOPBACK_TEST)
+        return swmPinAllowed(g_fastled_lpc_uart_loopback_rx_pin);
+#else
+        return false;
+#endif
+    }
+
+    static u8 loopbackRxPin() FL_NO_EXCEPT {
+#if defined(FL_LPC_UART_DMA_LOOPBACK_TEST)
+        return g_fastled_lpc_uart_loopback_rx_pin;
+#else
+        return kSwmPinUnassigned;
+#endif
+    }
+
+    static void routeUart1Pins(u8 txPin) FL_NO_EXCEPT {
+        u32 assign = (SWM0->PINASSIGN.PINASSIGN1 & ~swmMask(8u)) |
+                     swmValue(txPin, 8u);
+        if (hasLoopbackRxPin()) {
+            // UM11029 Table 181: PINASSIGN1[15:8]=U1_TXD_O and
+            // PINASSIGN1[23:16]=U1_RXD_I. Both accept any movable UART pin.
+            assign = (assign & ~swmMask(16u)) |
+                     swmValue(loopbackRxPin(), 16u);
+        }
+        SWM0->PINASSIGN.PINASSIGN1 = assign;
+    }
+
+    static void routeUart2Pins(u8 txPin) FL_NO_EXCEPT {
+        u32 assign = (SWM0->PINASSIGN.PINASSIGN2 & ~swmMask(16u)) |
+                     swmValue(txPin, 16u);
+        if (hasLoopbackRxPin()) {
+            // UM11029 Table 182: PINASSIGN2[23:16]=U2_TXD_O and
+            // PINASSIGN2[31:24]=U2_RXD_I. Both accept any movable UART pin.
+            assign = (assign & ~swmMask(24u)) |
+                     swmValue(loopbackRxPin(), 24u);
+        }
+        SWM0->PINASSIGN.PINASSIGN2 = assign;
+    }
+
 #if defined(FL_LPC_UART_DMA_LOOPBACK_TEST)
     static void armLoopbackRxIfRequested(u32 txLen) FL_NO_EXCEPT {
         u8* const dst = g_fastled_lpc_uart_loopback_rx_dst;
@@ -362,6 +404,8 @@ private:
         }
         u->STAT = (1u << 8) | (1u << 13) | (1u << 14);
 
+        // The RX GPIO can move through SWM, but UM11029 Table 296 fixes the
+        // DMA request to the selected USART instance: U1_RX=2, U2_RX=4.
         const u32 mask = (1UL << kLoopbackRxDmaChannel);
         dmaReg(0x028u) = mask;  // ENABLECLR0
         while ((dmaReg(0x038u) & mask) != 0u) {
@@ -408,6 +452,10 @@ private:
 
 template <u8 _TX_PIN, u32 _BAUD>
 class ARMHardwareUARTOutputDMA {
+    FL_STATIC_ASSERT(lpc::LpcUartDmaRuntime::isMovableUartPin(_TX_PIN),
+                     "LPC845 UART DMA TX pin must be a movable USART pin "
+                     "(PIO0_0..PIO0_31 or PIO1_0..PIO1_21)");
+
     static inline USART_Type* uart_block() __attribute__((always_inline)) {
 #if FASTLED_LPC_UART_DMA_INSTANCE == 2
         return USART2;

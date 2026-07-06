@@ -81,13 +81,12 @@ template<> struct DefaultBus<SpiChipsetConfig> {
 
 #elif defined(FL_IS_ARM_LPC)
 
-// LPC8xx / LPC11Uxx / LPC15xx have no parallel-IO clockless peripheral.
-// Clockless output goes through the shared M0 cycle-counted C++ driver
+// LPC845 defaults clockless AUTO to the USART DMA engine. Other LPC8xx /
+// LPC11Uxx / LPC15xx targets keep the shared cycle-counted C++ driver
 // (FASTLED_M0_USE_C_IMPLEMENTATION in led_sysdefs_arm_lpc.h), which is
-// what Bus::BIT_BANG names — the same engine that LPC's
-// ClocklessController template uses today.
+// what Bus::BIT_BANG names.
 template<> struct DefaultBus<ClocklessChipset> {
-#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA)
+#if defined(FL_IS_ARM_LPC_845) && FASTLED_LPC_UART_DMA
     static constexpr Bus value = Bus::UART;
 #else
     static constexpr Bus value = Bus::BIT_BANG;

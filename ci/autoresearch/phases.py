@@ -923,29 +923,26 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         # ACLPC core with named weak IRQ vector slots
         # (framework-arduino-lpc8xx#38).
         lpc_bench_defines.append("FASTLED_LPC_UART_DMA=1")
+        lpc_bench_defines.append("FASTLED_AUTORESEARCH_LPC_UART_DMA=1")
         lpc_bench_defines.append("FASTLED_LPC_DMA_ISR=1")
     requested_env = (args.environment or args.environment_positional or "").lower()
     if requested_env in LPC_WS2812_ENVS:
         if getattr(args, "pin_toggle_rx", False):
             lpc_bench_defines.append("FASTLED_LPC_RX_SCT=1")
-        if (
-            getattr(args, "ws2812_loopback", False)
-            or getattr(args, "pwm_dma_cl", False)
+        if getattr(args, "ws2812_loopback", False) or getattr(
+            args, "pwm_dma_cl", False
         ):
             lpc_bench_defines.append("FASTLED_LPC_RX_SCT_DMA=1")
     if getattr(args, "uart", False) and requested_env in LPC_WS2812_ENVS:
         lpc_bench_defines.append("FASTLED_LPC_UART_DMA=1")
+        lpc_bench_defines.append("FASTLED_AUTORESEARCH_LPC_UART_DMA=1")
         lpc_bench_defines.append("FASTLED_LPC_DMA_ISR=1")
         lpc_bench_defines.append("FL_LPC_UART_DMA_CLOCKLESS_TEST=1")
         lpc_bench_defines.append("FL_LPC_UART_DMA_LOOPBACK_TEST=1")
         if args.tx_pin is not None:
-            lpc_bench_defines.append(
-                f"FL_LPC_UART_DMA_CLOCKLESS_TX_PIN={args.tx_pin}"
-            )
+            lpc_bench_defines.append(f"FL_LPC_UART_DMA_CLOCKLESS_TX_PIN={args.tx_pin}")
         if args.rx_pin is not None:
-            lpc_bench_defines.append(
-                f"FL_LPC_UART_DMA_CLOCKLESS_RX_PIN={args.rx_pin}"
-            )
+            lpc_bench_defines.append(f"FL_LPC_UART_DMA_CLOCKLESS_RX_PIN={args.rx_pin}")
     if getattr(args, "pwm_dma_cl", False):
         lpc_bench_defines.append("FASTLED_LPC_PWM_DMA=1")
 
@@ -1234,19 +1231,21 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
             deferred_defines.append("FASTLED_LPC_DMA_ISR=1")
         if getattr(args, "dma_uart", False):
             deferred_defines.append("FASTLED_LPC_UART_DMA=1")
+            deferred_defines.append("FASTLED_AUTORESEARCH_LPC_UART_DMA=1")
             deferred_defines.append("FASTLED_LPC_DMA_ISR=1")
         if (ctx.final_environment or "").lower() in LPC_WS2812_ENVS:
             if getattr(args, "pin_toggle_rx", False):
                 deferred_defines.append("FASTLED_LPC_RX_SCT=1")
-            if (
-                getattr(args, "ws2812_loopback", False)
-                or getattr(args, "pwm_dma_cl", False)
+            if getattr(args, "ws2812_loopback", False) or getattr(
+                args, "pwm_dma_cl", False
             ):
                 deferred_defines.append("FASTLED_LPC_RX_SCT_DMA=1")
-        if getattr(args, "uart", False) and (
-            ctx.final_environment or ""
-        ).lower() in LPC_WS2812_ENVS:
+        if (
+            getattr(args, "uart", False)
+            and (ctx.final_environment or "").lower() in LPC_WS2812_ENVS
+        ):
             deferred_defines.append("FASTLED_LPC_UART_DMA=1")
+            deferred_defines.append("FASTLED_AUTORESEARCH_LPC_UART_DMA=1")
             deferred_defines.append("FASTLED_LPC_DMA_ISR=1")
             deferred_defines.append("FL_LPC_UART_DMA_CLOCKLESS_TEST=1")
             deferred_defines.append("FL_LPC_UART_DMA_LOOPBACK_TEST=1")
@@ -2663,9 +2662,7 @@ async def _run_lpc_uart_clockless_tests(ctx: RunContext) -> int:
     print(f"   Wiring required: jumper P0_{tx_pin} -> P0_{rx_pin} on LPC845-BRK")
     print("   API: FastLED.addLeds<WS2812, PIN, GRB>() + FastLED.show()")
     print("   Driver: ChannelEngineLpcUartDma via Bus::UART / Bus::AUTO")
-    print(
-        "   Verifier: USART TX-DMA on the data pin, USART RX-DMA on --rx-pin"
-    )
+    print("   Verifier: USART TX-DMA on the data pin, USART RX-DMA on --rx-pin")
     print("   Build flags: -DFASTLED_LPC_UART_DMA=1 -DFASTLED_LPC_DMA_ISR=1")
     print("=" * 60)
     print()

@@ -34,10 +34,10 @@
 //                            0x50000000 GPIO controller with 12-bit
 //                            masked-access semantics per UM10398 sec. 9.
 
-// LPC845 can opt into UART+DMA clockless output with FASTLED_LPC_UART_DMA=1.
-// That adapter supplies fl::ClocklessController first so AUTO/default
-// clockless output uses the UART DMA engine.
-#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA)
+// LPC845 defaults clockless AUTO output to UART+DMA
+// (FASTLED_LPC_UART_DMA=1 from is_lpc.h). The adapter supplies
+// fl::ClocklessController first so default addLeds<> uses the UART DMA engine.
+#if defined(FL_IS_ARM_LPC_845) && FASTLED_LPC_UART_DMA
 #include "platforms/arm/lpc/clockless_channel_lpc_uart_dma.h"
 #endif
 

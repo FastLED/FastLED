@@ -29,7 +29,7 @@
 
 #include <FastLED.h>
 
-#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA)
+#if defined(FL_IS_ARM_LPC_845) && FASTLED_LPC_UART_DMA
 
 #if defined(FL_LPC_UART_DMA_CLOCKLESS_TEST)
 #include "fl/channels/bus.h"
@@ -51,10 +51,10 @@ namespace uart_dma {
 // header; the bench never reads the wire (wall-clock timing only), the
 // pin just has to exist for SWM. 1 Mbaud keeps a 2048-byte stream at
 // ~20 ms — inside the RPC window with margin.
-#ifndef FASTLED_LPC_UART_DMA_HARNESS_TX_PIN
+#if !defined(FASTLED_LPC_UART_DMA_HARNESS_TX_PIN)
 #define FASTLED_LPC_UART_DMA_HARNESS_TX_PIN 9
 #endif
-#ifndef FASTLED_LPC_UART_DMA_HARNESS_BAUD
+#if !defined(FASTLED_LPC_UART_DMA_HARNESS_BAUD)
 #define FASTLED_LPC_UART_DMA_HARNESS_BAUD 1000000
 #endif
 
@@ -65,7 +65,7 @@ using HarnessDriver = fl::ARMHardwareUARTOutputDMA<
 // Stream source. 2048 bytes = two full 1024-transfer descriptors →
 // at least one ISR chunk-chain per stream, which is the property under
 // test. Must outlive the stream (DMA reads it in place).
-#ifndef FASTLED_LPC_UART_DMA_HARNESS_BYTES
+#if !defined(FASTLED_LPC_UART_DMA_HARNESS_BYTES)
 #define FASTLED_LPC_UART_DMA_HARNESS_BYTES 2048
 #endif
 
@@ -178,10 +178,10 @@ inline int argInt(const fl::json& args, fl::size i, int fallback) FL_NO_EXCEPT {
 
 #if defined(FL_LPC_UART_DMA_CLOCKLESS_TEST)
 
-#ifndef FL_LPC_UART_DMA_CLOCKLESS_TX_PIN
+#if !defined(FL_LPC_UART_DMA_CLOCKLESS_TX_PIN)
 #define FL_LPC_UART_DMA_CLOCKLESS_TX_PIN 10
 #endif
-#ifndef FL_LPC_UART_DMA_CLOCKLESS_LEDS
+#if !defined(FL_LPC_UART_DMA_CLOCKLESS_LEDS)
 #define FL_LPC_UART_DMA_CLOCKLESS_LEDS 8
 #endif
 
@@ -324,10 +324,12 @@ inline fl::string clocklessLoopbackSelfHandler(
         int capture_ms) FL_NO_EXCEPT {
     if (led_count != FL_LPC_UART_DMA_CLOCKLESS_LEDS ||
         data_pin != FL_LPC_UART_DMA_CLOCKLESS_TX_PIN ||
-        rx_pin < 0 || rx_pin > 31 || capture_ms <= 0 || capture_ms > 200) {
+        rx_pin < 0 || rx_pin > 0x35 ||
+        !fl::lpc::LpcUartDmaRuntime::isMovableUartPin(
+            static_cast<fl::u8>(rx_pin)) ||
+        capture_ms <= 0 || capture_ms > 200) {
         return fl::string("0,args");
     }
-    (void)rx_pin;
 
     ensureClocklessFastLedRegistered();
     FastLED.setBrightness(255);
@@ -356,7 +358,8 @@ inline fl::string clocklessLoopbackSelfHandler(
         received[i] = 0xA5u;
     }
     fl::lpc::LpcUartDmaRuntime::prepareLoopbackRxBuffer(
-        received, static_cast<fl::u32>(expected_count));
+        received, static_cast<fl::u32>(expected_count),
+        static_cast<fl::u8>(rx_pin));
 
     FastLED.show();
 
@@ -437,7 +440,9 @@ inline fl::string clocklessLoopbackSelfHandler(
 inline fl::string clocklessProbeHandler(
         int step, int data_pin, int rx_pin) FL_NO_EXCEPT {
     if (data_pin != FL_LPC_UART_DMA_CLOCKLESS_TX_PIN ||
-        rx_pin < 0 || rx_pin > 31) {
+        rx_pin < 0 || rx_pin > 0x35 ||
+        !fl::lpc::LpcUartDmaRuntime::isMovableUartPin(
+            static_cast<fl::u8>(rx_pin))) {
         return fl::string("0,args");
     }
     if (step <= 0) {
