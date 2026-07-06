@@ -26,6 +26,7 @@ from psutil import Process
 from serial.tools.list_ports_common import ListPortInfo
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+from ci.util.usb_vendors import vendor_name
 
 
 # Mapping from detected ESP chip type to PlatformIO environment
@@ -70,11 +71,40 @@ ENVIRONMENT_TO_VCOM_VID_PIDS: dict[str, tuple[tuple[int, int], ...]] = {
     # Newer LPC845-BRK / LPCXpresso boards ship with the LPC-Link2
     # CMSIS-DAP firmware pre-flashed; either variant is acceptable for
     # AutoResearch as long as the VCOM stream reaches the host.
-    "lpc845brk": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
-    "lpc845": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
-    "lpc804": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
-    "lpcxpresso845max": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
-    "lpcxpresso804": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
+    # LPC8xx auto-detect keys ONLY on the unambiguous LPC-Link2 CMSIS-DAP
+    # fingerprint (1FC9:0132, NXP's own VID:PID — what modern LPC845-BRK /
+    # LPCXpresso boards ship with, see FastLED #3494).
+    #
+    # The legacy LPC11U35 "LPCXpresso VCOM" firmware enumerates as 16C0:0483
+    # — the community V-USB ID that PJRC Teensy ALSO uses. On Windows both
+    # present an identical generic "USB Serial Device" (manufacturer
+    # "Microsoft", no product string), so they are indistinguishable by
+    # VID:PID, vendor name, or descriptor. Rather than let an lpc* target
+    # silently grab a co-attached Teensy, we drop 16C0:0483 here: a board on
+    # the legacy VCOM firmware must be selected with an explicit --port.
+    "lpc845brk": ((0x1FC9, 0x0132),),
+    "lpc845": ((0x1FC9, 0x0132),),
+    "lpc804": ((0x1FC9, 0x0132),),
+    "lpcxpresso845max": ((0x1FC9, 0x0132),),
+    "lpcxpresso804": ((0x1FC9, 0x0132),),
+    # PJRC Teensy 3.x/4.x/LC: the USB CDC data port enumerates as
+    # 16C0:0483 (USB_SERIAL builds) or 16C0:0489 (USB_MIDI_SERIAL / audio
+    # composite — the CDC function still appears under that PID). Without
+    # this fingerprint, teensy* environments fell through to the generic
+    # USB-serial heuristic, which PREFERS CP2102/CH340/FTDI adapters and
+    # therefore mis-selected a co-attached ESP32 (CP210x) instead of the
+    # Teensy — deploying teensy firmware against the wrong board. 16C0:0483
+    # is the community "V-USB" VID:PID shared with the LPC11U35 VCOM
+    # firmware; if you attach an LPC845-BRK running LPCXpresso VCOM AND a
+    # Teensy at once, pass an explicit --port. See fbuild#962 (the same
+    # fix on fbuild's `port scan` resolver).
+    "teensy40": ((0x16C0, 0x0483), (0x16C0, 0x0489)),
+    "teensy41": ((0x16C0, 0x0483), (0x16C0, 0x0489)),
+    "teensylc": ((0x16C0, 0x0483), (0x16C0, 0x0489)),
+    "teensy31": ((0x16C0, 0x0483), (0x16C0, 0x0489)),
+    "teensy35": ((0x16C0, 0x0483), (0x16C0, 0x0489)),
+    "teensy36": ((0x16C0, 0x0483), (0x16C0, 0x0489)),
+    "teensymm": ((0x16C0, 0x0483), (0x16C0, 0x0489)),
 }
 
 # Backwards-compatibility shim — the old single-VID:PID map is derived
@@ -107,6 +137,16 @@ class ComportResult:
     selected_port: str | None
     error_message: str | None = None
     all_ports: list[ListPortInfo] = field(default_factory=lambda: [])
+
+
+def _describe_port(port: ListPortInfo) -> str:
+    """`COMx=VID:PID (Vendor Name)` for diagnostics, using the lazy-loaded
+    USB vendor table (the same authoritative data `fbuild port scan` uses)."""
+    if not (port.vid and port.pid):
+        return f"{port.device}=----:----"
+    vendor = vendor_name(port.vid)
+    suffix = f" ({vendor})" if vendor else ""
+    return f"{port.device}={port.vid:04X}:{port.pid:04X}{suffix}"
 
 
 def port_exists(port: str) -> bool:
@@ -208,15 +248,23 @@ def auto_detect_upload_port(expected_environment: str | None) -> ComportResult:
         ENVIRONMENT_TO_VCOM_VID_PIDS.get(expected_env) if expected_env else None
     )
     if expected_vid_pids:
-        accepted = set(expected_vid_pids)
-        for port in usb_ports:
-            if (port.vid, port.pid) in accepted:
-                return ComportResult(
-                    ok=True,
-                    selected_port=port.device,
-                    error_message=None,
-                    all_ports=all_ports,
-                )
+        # Match in DECLARED PREFERENCE ORDER: try each VID:PID pair in turn
+        # and return the first attached port carrying it. This lets an entry
+        # list its UNAMBIGUOUS fingerprint first (e.g. LPC-Link2 1FC9:0132)
+        # ahead of a shared/legacy one (16C0:0483, which the PJRC Teensy and
+        # the legacy LPCXpresso-VCOM firmware both use), so a co-attached
+        # Teensy can't shadow the LPC probe and vice-versa. A plain set would
+        # instead return whichever port enumerated first — nondeterministic
+        # when both boards are present.
+        for expected in expected_vid_pids:
+            for port in usb_ports:
+                if (port.vid, port.pid) == expected:
+                    return ComportResult(
+                        ok=True,
+                        selected_port=port.device,
+                        error_message=None,
+                        all_ports=all_ports,
+                    )
         # Fingerprint expected but no port matched. Don't fall through to the
         # ESP probe — the wrong port will fail later with PermissionError or
         # silent timeout. Report explicitly so the user can plug the board in.
@@ -230,12 +278,7 @@ def auto_detect_upload_port(expected_environment: str | None) -> ComportResult:
                 f"No USB serial port matched expected VCOM fingerprint for "
                 f"'{expected_environment}' (VID:PID {formatted_expected}). "
                 f"Detected USB ports: "
-                + ", ".join(
-                    f"{p.device}={p.vid:04X}:{p.pid:04X}"
-                    if p.vid and p.pid
-                    else f"{p.device}=----:----"
-                    for p in usb_ports
-                )
+                + ", ".join(_describe_port(p) for p in usb_ports)
             ),
             all_ports=all_ports,
         )
