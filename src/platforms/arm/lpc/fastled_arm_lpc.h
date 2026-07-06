@@ -34,16 +34,21 @@
 //                            0x50000000 GPIO controller with 12-bit
 //                            masked-access semantics per UM10398 sec. 9.
 
-// LPC845 has an optional PWM+DMA-to-GPIO clockless driver (Stage 2c of #2836,
-// see #2842). It is opt-in via FASTLED_LPC_PWM_DMA=1 because it consumes the
-// SCT plus 3 DMA channels — a global resource users may want for other
-// peripherals. When the macro is set on an LPC845 build, the channels-API
-// SCT+DMA engine supplies fl::ClocklessController via
-// `clockless_channel_lpc.h` (#3517 Phase A.2 — the classic legacy template
-// in `clockless_arm_lpc_pwm_dma.h` is superseded and slated for retirement
-// once silicon validation confirms parity). Without the flag the Stage 2a
-// bit-bang driver in `clockless_arm_lpc.h` remains the default.
-#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_PWM_DMA)
+// LPC845 can opt into UART+DMA clockless output with FASTLED_LPC_UART_DMA=1.
+// That adapter supplies fl::ClocklessController first so AUTO/default
+// clockless output uses the UART DMA engine.
+#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA)
+#include "platforms/arm/lpc/clockless_channel_lpc_uart_dma.h"
+#endif
+
+// LPC845 also has an optional PWM+DMA-to-GPIO clockless driver (Stage 2c of
+// #2836, see #2842). It is opt-in via FASTLED_LPC_PWM_DMA=1 because it
+// consumes the SCT plus 3 DMA channels, a global resource users may want for
+// other peripherals. When UART has not already provided the template, the
+// channels-API SCT+DMA engine supplies fl::ClocklessController via
+// `clockless_channel_lpc.h` (#3517 Phase A.2). Without either DMA flag the
+// Stage 2a bit-bang driver in `clockless_arm_lpc.h` remains the default.
+#if !defined(FL_CLOCKLESS_CONTROLLER_DEFINED) && defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_PWM_DMA)
 #include "platforms/arm/lpc/clockless_channel_lpc.h"
 #endif
 // Include the bit-bang default on any build that has NOT already picked a

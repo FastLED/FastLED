@@ -50,12 +50,17 @@
 
 // The LPC845-BRK low-memory build fits FastLED + Remote + the WS2812 loopback
 // RPC in normal mode. The dedicated IEEE754 mode deliberately omits it.
-#if defined(FL_IS_ARM_LPC_845) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
+#if defined(FL_IS_ARM_LPC_845) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE) && \
+    !defined(FASTLED_LPC_SPI_DMA) && !defined(FASTLED_LPC_PWM_DMA) && \
+    !defined(FASTLED_LPC_UART_DMA)
 #define FASTLED_AUTORESEARCH_LPC_WS2812 1
 #endif
 
-// The WS2812 loopback uses the SCT->DMA RX capture path.
-#if defined(FASTLED_AUTORESEARCH_LPC_WS2812) && !defined(FASTLED_LPC_RX_SCT_DMA)
+// The WS2812 loopback uses the SCT->DMA RX capture path. The UART clockless
+// verifier uses USART RX-DMA instead, so keep SCT-DMA out of that build;
+// UM11029 Table 296 fixes USART1_RX/USART1_TX on DMA channels 2/3.
+#if defined(FASTLED_AUTORESEARCH_LPC_WS2812) && \
+    !defined(FASTLED_LPC_RX_SCT_DMA)
 #define FASTLED_LPC_RX_SCT_DMA 1
 #endif
 

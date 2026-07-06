@@ -144,6 +144,18 @@ template<> struct DeviceInfoResolver<Bus::UART, 0> {
     }
 };
 
+#elif defined(FL_IS_ARM_LPC_845)
+
+template<> struct DeviceInfoResolver<Bus::UART, 0> {
+    static inline DeviceInfo get() FL_NO_EXCEPT {
+#if defined(FASTLED_LPC_UART_DMA)
+        return makeInfo(Bus::UART, 0, "LPC_USART_DMA", "USART TX DMA");
+#else
+        return makeNoop(Bus::UART, 0, "UART DMA disabled");
+#endif
+    }
+};
+
 #elif defined(FL_IS_ESP32)
 
 template<> struct DeviceInfoResolver<Bus::RMT, 0> {
