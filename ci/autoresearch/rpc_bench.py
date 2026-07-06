@@ -69,6 +69,49 @@ class RpcBench:
                 return METHOD_NOT_FOUND
             return None
         # Non-empty dict result — hand it straight back.
+        return self._extract_result(resp)
+
+    def call_flat(
+        self,
+        method: str,
+        args: list[Any] | None = None,
+        timeout: float | None = None,
+    ) -> Any:
+        """Call RPC methods bound with positional C++ parameters."""
+
+        async def _call_flat():
+            if not self._client.is_connected:
+                raise RpcError("Not connected")
+            serial = self._client._serial
+            if serial is None:
+                raise RpcError("Not connected")
+            request_id = self._client._next_id
+            self._client._next_id = (request_id + 1) & 0xFFFFFFFF
+            cmd = {
+                "method": method,
+                "params": args if args is not None else [],
+                "id": request_id,
+            }
+            await serial.write(json.dumps(cmd, separators=(",", ":")) + "\n")
+            self._client._sent_count += 1
+            effective_timeout = timeout if timeout is not None else self._client.timeout
+            return await self._client._wait_for_response(
+                effective_timeout, expected_id=request_id
+            )
+
+        try:
+            resp = self._loop.run_until_complete(_call_flat())
+        except RpcTimeoutError:
+            return None
+        except RpcError as e:
+            msg = str(e).lower()
+            if "not found" in msg or "unknown method" in msg or "method" in msg:
+                return METHOD_NOT_FOUND
+            return None
+        return self._extract_result(resp)
+
+    @staticmethod
+    def _extract_result(resp) -> Any:
         if isinstance(resp.data, dict) and resp.data:
             return resp.data
         # CSV/string result: recover from the raw line RpcClient preserved.
@@ -82,6 +125,19 @@ class RpcBench:
         except (json.JSONDecodeError, ValueError):
             return resp.data
         return obj.get("result", resp.data)
+
+    def reset_and_drain(self) -> bool:
+        """Reset through the fbuild serial backend and drain boot output."""
+
+        async def _reset() -> bool:
+            serial = self._client._serial
+            if serial is None:
+                return False
+            ok = await serial.reset_device(None)
+            await self._client.drain_boot_output()
+            return ok
+
+        return bool(self._loop.run_until_complete(_reset()))
 
     def close(self) -> None:
         try:

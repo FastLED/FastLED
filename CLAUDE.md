@@ -9,6 +9,7 @@
 | Writing/editing C++ code | `agents/docs/cpp-standards.md` |
 | Verifying a peripheral exists on a chip before writing driver code | `agents/docs/peripheral-existence.md` (halt on phantom — do not fabricate missing `<Peripheral>_Type` in vendor headers) |
 | Defining a register map / accessing MCU peripherals | `agents/docs/register-maps.md` (use vendor CMSIS PAL — do not hand-roll shims) |
+| Looking up MCU datasheets / user manuals | Prefer https://github.com/FastLED/datasheets when available, then vendor primary documentation |
 | Creating an API wrapper type | `agents/docs/cpp-standards.md` → "API Object Pattern" |
 | Adding a global setting / configuration knob | `agents/docs/cpp-standards.md` → "Public Settings Pattern" (new setters go on `CFastLED`, not as bare `fl::set_*` free functions) |
 | Writing/editing Python code | `agents/docs/python-standards.md` |

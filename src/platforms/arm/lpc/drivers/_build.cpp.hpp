@@ -9,3 +9,4 @@
 
 // begin sub directory includes
 #include "platforms/arm/lpc/drivers/sct_dma/_build.cpp.hpp"
+#include "platforms/arm/lpc/drivers/uart_dma/_build.cpp.hpp"

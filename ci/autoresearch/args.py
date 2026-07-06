@@ -246,7 +246,7 @@ See Also:
         driver_group.add_argument(
             "--uart",
             action="store_true",
-            help="Test only UART driver",
+            help="Test only UART driver (LPC845: UART DMA clockless RX-DMA loopback)",
         )
         driver_group.add_argument(
             "--lcd",
@@ -428,6 +428,11 @@ See Also:
             "while USART0 keeps serving the RPC console. Reports "
             "stream timing + beacon-toggle async proof. Mutually "
             "exclusive with --dma-spi / --pwm-dma-cl (flash budget).",
+        )
+        lpc_group.description = (
+            lpc_group.description
+            + " Use the top-level --uart flag on LPC845 for the UART DMA "
+            "clockless FastLED API loopback (#3611)."
         )
 
         # Standard options

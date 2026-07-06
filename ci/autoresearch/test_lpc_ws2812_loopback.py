@@ -62,7 +62,7 @@ def send_rpc(
     (RpcClient assigns its own correlation ids).
     """
     _ = request_id
-    result = s.call(method, args=args, timeout=timeout)
+    result = s.call_flat(method, args=args, timeout=timeout)
     if result is None:
         return None
     if result is METHOD_NOT_FOUND:
