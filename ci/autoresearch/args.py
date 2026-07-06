@@ -429,8 +429,9 @@ See Also:
             "stream timing + beacon-toggle async proof. Mutually "
             "exclusive with --dma-spi / --pwm-dma-cl (flash budget).",
         )
+        lpc_description = lpc_group.description or ""
         lpc_group.description = (
-            lpc_group.description
+            lpc_description
             + " Use the top-level --uart flag on LPC845 for the UART DMA "
             "clockless FastLED API loopback (#3611)."
         )

@@ -22,6 +22,14 @@ DEFAULT_BAUD = 115200
 DEFAULT_LED_COUNT = 8
 
 
+def lpc_swm_pin_label(pin: int) -> str:
+    if 0 <= pin <= 31:
+        return f"P0_{pin}"
+    if 0x20 <= pin <= 0x35:
+        return f"P1_{pin - 0x20}"
+    return f"pin {pin}"
+
+
 def send_rpc(
     s: "RpcBench",
     method: str,
@@ -144,8 +152,9 @@ def main() -> int:
     print("LPC UART DMA clockless RX-DMA loopback - FastLED #3611")
     print(f"  Port: {args.port} @ {DEFAULT_BAUD}")
     print(
-        f"  UART loopback: bridge U1_TXD P0_{args.tx_pin} -> "
-        f"U1_RXD P0_{args.rx_pin}"
+        "  UART loopback: bridge "
+        f"U1_TXD {lpc_swm_pin_label(args.tx_pin)} -> "
+        f"U1_RXD {lpc_swm_pin_label(args.rx_pin)}"
     )
 
     try:

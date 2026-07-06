@@ -14,7 +14,7 @@
 #include "platforms/arm/lpc/is_lpc.h"
 
 #if defined(FL_IS_ARM_LPC_845)
-#if defined(FASTLED_LPC_UART_DMA)
+#if FASTLED_LPC_UART_DMA
 #include "platforms/arm/lpc/drivers/uart_dma/bus_traits.h"
 #endif
 #if defined(FASTLED_LPC_PWM_DMA)
@@ -29,7 +29,7 @@ namespace platforms {
 
 inline void enableAllChannelDrivers() FL_NO_EXCEPT {
 #if defined(FL_IS_ARM_LPC_845)
-#if defined(FASTLED_LPC_UART_DMA)
+#if FASTLED_LPC_UART_DMA
     BusTraits<Bus::UART, 0>::registerWithManager();
 #endif
     // Register the LPC clockless fallback bus as SCT+DMA when

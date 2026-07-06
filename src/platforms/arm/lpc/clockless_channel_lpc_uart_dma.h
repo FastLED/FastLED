@@ -8,7 +8,7 @@
 #include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
 
-#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA)
+#if defined(FL_IS_ARM_LPC_845) && FASTLED_LPC_UART_DMA
 
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 #define FL_CLOCKLESS_LPC_UART_CHANNEL_ENGINE_DEFINED 1

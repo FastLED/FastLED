@@ -38,6 +38,10 @@
 #define FASTLED_AUTORESEARCH_IEEE754_MODE 1
 #endif
 
+#if !defined(FASTLED_AUTORESEARCH_LPC_UART_DMA)
+#define FASTLED_AUTORESEARCH_LPC_UART_DMA 0
+#endif
+
 // Opt in to the SCT input-capture RX backend (FastLED #3021). With this
 // flag set, `LpcSctRxChannel::begin()` programs the SCT for hardware
 // edge-capture; without it the driver is a no-op stub (host tests still
@@ -52,7 +56,7 @@
 // RPC in normal mode. The dedicated IEEE754 mode deliberately omits it.
 #if defined(FL_IS_ARM_LPC_845) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE) && \
     !defined(FASTLED_LPC_SPI_DMA) && !defined(FASTLED_LPC_PWM_DMA) && \
-    !defined(FASTLED_LPC_UART_DMA)
+    !FASTLED_AUTORESEARCH_LPC_UART_DMA
 #define FASTLED_AUTORESEARCH_LPC_WS2812 1
 #endif
 
@@ -117,15 +121,18 @@
 #include "AutoResearchSpiDma.h"
 #endif
 
-// #3453 follow-up: LPC845 async UART TX harness (DMA + ISR chunk chain).
-// Opt-in via `-DFASTLED_LPC_UART_DMA=1` (+ `-DFASTLED_LPC_DMA_ISR=1` for
-// the ISR chaining; without it streams are capped at one descriptor).
-// Same flash-budget exclusivity as the other DMA harnesses.
-#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA) && \
-    (defined(FASTLED_LPC_SPI_DMA) || defined(FASTLED_LPC_PWM_DMA))
-#error "FASTLED_LPC_UART_DMA is mutually exclusive with the SPI/PWM DMA harnesses on LPC845: the LowMemory flash budget fits one bench at a time. Pick one for the AutoResearch build."
+// #3453 follow-up: LPC845 async UART TX harness (DMA + ISR chunk chain) and
+// #3611 UART clockless loopback verifier. The UART DMA driver is now the
+// LPC845 library default, so the AutoResearch RPC harness has its own flag.
+#if defined(FL_IS_ARM_LPC_845) && FASTLED_AUTORESEARCH_LPC_UART_DMA && \
+    !FASTLED_LPC_UART_DMA
+#error "FASTLED_AUTORESEARCH_LPC_UART_DMA requires FASTLED_LPC_UART_DMA=1."
 #endif
-#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA)
+#if defined(FL_IS_ARM_LPC_845) && FASTLED_AUTORESEARCH_LPC_UART_DMA && \
+    (defined(FASTLED_LPC_SPI_DMA) || defined(FASTLED_LPC_PWM_DMA))
+#error "FASTLED_AUTORESEARCH_LPC_UART_DMA is mutually exclusive with the SPI/PWM DMA harnesses on LPC845: the LowMemory flash budget fits one bench at a time. Pick one for the AutoResearch build."
+#endif
+#if defined(FL_IS_ARM_LPC_845) && FASTLED_AUTORESEARCH_LPC_UART_DMA
 #include "AutoResearchUartDma.h"
 #endif
 
@@ -407,10 +414,10 @@ inline void autoResearchLowMemorySetup() {
     autoresearch::dma_spi::bind(remote);
 #endif
 
-    // #3453 follow-up: async UART TX bench. Binds uartDmaStreamOnce /
-    // uartDmaStreamOverlap. Header self-gates on
-    // FL_IS_ARM_LPC_845 && FASTLED_LPC_UART_DMA.
-#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA)
+    // #3453/#3611: UART DMA AutoResearch harness. Binds either the raw
+    // UART DMA stream bench or the clockless loopback verifier, depending
+    // on the build flags injected by `bash autoresearch`.
+#if defined(FL_IS_ARM_LPC_845) && FASTLED_AUTORESEARCH_LPC_UART_DMA
     autoresearch::uart_dma::bind(remote);
 #endif
 
