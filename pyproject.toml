@@ -5,9 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.3.15 (released 2026-06-30).
+    # Pin to fbuild 2.3.24 (released 2026-07-02).
     #
     # Pin history:
+    #   2.3.24 -- latest PyPI/GitHub release as of 2026-07-05; rolls up the
+    #             post-2.3.15 daemon spawn, serial attach/reset-dispatch, and
+    #             deploy fixes needed for current hardware validation runs
+    #             (FastLED/fbuild#889/#893/#895/#897/#906/#908/#923/#928/#935).
     #   2.3.15 -- carries the Windows compile env fix (TMP/TEMP propagation)
     #             AND the path-separator fix that surfaced immediately after
     #             (forward-slash paths so cc1's spec-file pass doesn't eat
@@ -136,7 +140,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.3.15",
+    "fbuild==2.3.24",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
