@@ -25,7 +25,7 @@
 // FastLED #3459 / PR #3460). The shared bit-bang specialization must
 // step aside on that platform to avoid a redefinition. Every other
 // platform continues to use the universal-GPIO fallback below.
-#if !defined(FL_IS_ARM_LPC_845)
+#if !(defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_PWM_DMA))
 
 namespace fl {
 
@@ -49,4 +49,4 @@ template<> struct BusSupports<Bus::BIT_BANG, SpiChipsetConfig>  : fl::true_type 
 
 }  // namespace fl
 
-#endif  // !FL_IS_ARM_LPC_845
+#endif  // !(FL_IS_ARM_LPC_845 && FASTLED_LPC_PWM_DMA)

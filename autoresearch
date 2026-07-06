@@ -32,13 +32,14 @@ Driver Selection (optional - omit for GPIO-only mode):
   --parlio            Test parallel I/O driver
   --rmt               Test RMT (Remote Control) driver
   --spi               Test SPI driver
-  --uart              Test UART driver
+  --uart              Test UART driver (LPC845: UART DMA clockless RX-DMA loopback)
   --lcd               Test LCD_CLOCKLESS driver (ESP32-S3 only)
   --lcd-spi           Test LCD_SPI driver (ESP32-S3 only)
   --lcd-rgb           Test LCD RGB driver (ESP32-P4 only)
   --object-fled       Test ObjectFLED DMA driver (Teensy 4.x only)
   --pwm-dma-cl        LPC845-only: channels-API SCT+DMA clockless
                       self-loopback (FastLED #3468). Jumper P0_10↔P0_11.
+  --dma-uart          LPC845-only: raw async UART TX DMA bench
   --all               Test all drivers
   --simd              Test SIMD operations only (no LED drivers needed)
   --coroutine         Test coroutine/task creation, stop, await (no LED drivers needed)

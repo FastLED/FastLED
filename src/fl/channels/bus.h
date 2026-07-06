@@ -87,7 +87,11 @@ template<> struct DefaultBus<SpiChipsetConfig> {
 // what Bus::BIT_BANG names — the same engine that LPC's
 // ClocklessController template uses today.
 template<> struct DefaultBus<ClocklessChipset> {
+#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA)
+    static constexpr Bus value = Bus::UART;
+#else
     static constexpr Bus value = Bus::BIT_BANG;
+#endif
 };
 
 // LPC845 / LPC804 have a hardware SPI driver (spi_arm_lpc.h, UM11029).
@@ -125,6 +129,8 @@ template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 
 template<> struct BusInstanceCount<Bus::FLEX_IO> { static constexpr fl::u8 value = 2; };
 template<> struct BusInstanceCount<Bus::SPI> { static constexpr fl::u8 value = 2; };
 template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 2; };
+#elif defined(FL_IS_ARM_LPC_845)
+template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 1; };
 #endif
 
 inline const char* busName(Bus b, fl::u8 which = 0) FL_NO_EXCEPT {

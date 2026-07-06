@@ -40,9 +40,10 @@ What the harness asserts:
 - **`bash autoresearch lpc845brk --bring-up`** — `echo` RPC round-trips; FL_WARN literal reaches the host; proves Serial + JSON-RPC + log pipeline intact.
 - **`bash autoresearch lpc845brk --pin-toggle-rx`** — SCT input-capture latches a bit-banged square wave; orchestrator asserts mean ±2 % and σ thresholds across 1/10/100 kHz rates ([#3035](https://github.com/FastLED/FastLED/issues/3035) Phase 1).
 - **`bash autoresearch lpc845brk --ws2812-loopback`** — WS2812 byte-match: `FastLED.show()` drives 1/3/100 LEDs through the bit-bang clockless path, SCT-RX latches the wire, decoder asserts `mismatched == 0` ([#3035](https://github.com/FastLED/FastLED/issues/3035) Phase 2b).
+- **`bash autoresearch lpc845brk --uart`** — UART DMA WS2812 byte-match: `FastLED.addLeds<WS2812, PIN, GRB>()` drives the default `Bus::UART` path, a jumper bridges TX to the configured USART RX pin, USART RX-DMA captures the encoded bytes, and the host byte-compares decoded GRB data. `--dma-uart` remains the raw async USART transport bench.
 - **Link-symbol check** — `arm-none-eabi-nm -C firmware.elf | grep -E '(aeabi_d|aeabi_f|f2iz|d2iz|__l2f|__floatdisf)'` stays empty after [#3038](https://github.com/FastLED/FastLED/pull/3038). The harness can fold this into its reporting path so the no-soft-FP invariant is asserted on every run.
 
-Once all four run green against an LPC845-BRK with the loopback jumper, [#2880](https://github.com/FastLED/FastLED/issues/2880) closes and the table above flips its LPC845 / LPC804 rows to "✅ hardware verified". No human-eyeball scope trace required.
+Once the required checks run green against an LPC845-BRK with the loopback jumper, [#2880](https://github.com/FastLED/FastLED/issues/2880) closes and the table above flips its LPC845 / LPC804 rows to "✅ hardware verified". No human-eyeball scope trace required.
 
 ## Register-map authoring note (issue #2990)
 
@@ -153,6 +154,8 @@ worked anti-example.
 - `drivers/sct_dma/channel_engine_lpc_sct_dma.{h,cpp.hpp}` — Channels-API `IChannelDriver` for the LPC845 SCT + 3-DMA-channel clockless engine ([#3460](https://github.com/FastLED/FastLED/pull/3460)). Wraps the same SCT/DMA machinery as `clockless_arm_lpc_pwm_dma.h` but plugs into the portable `ChannelManager` dispatch, with async `pollAndAdvance()` chunk progression (no busy-wait in `show()`). Host-side TX→RX byte-match test through `engine.show()` verified in [#3472](https://github.com/FastLED/FastLED/pull/3472).
 - `drivers/sct_dma/lpc_sct_dma_runtime.{h,cpp.hpp}` — Runtime SCT+DMA helper (chunked encode → 3 DMA channels → GPIO SET/CLR), shared by the channels-API engine.
 - `drivers/sct_dma/bus_traits.h` — `BusTraits<Bus::BIT_BANG>` specialization routing LPC845 bit-bang bus to the SCT/DMA channels engine when `FASTLED_LPC_PWM_DMA` is set; kept behind `!FL_IS_ARM_LPC_845` in the shared bit-bang traits to avoid duplicate specialization.
+- `drivers/uart_dma/*` — `BusTraits<Bus::UART>` specialization and `ChannelEngineLpcUartDma`, routing LPC845 clockless AUTO/UART output through USART TX + DMA when `FASTLED_LPC_UART_DMA` is set.
+- `clockless_channel_lpc_uart_dma.h` — Legacy `addLeds<WS2812, PIN, GRB>()` adapter that selects the UART DMA channel engine by default under `FASTLED_LPC_UART_DMA`.
 - `rx_sct_capture.{h,cpp.hpp}` — LPC845 SCT input-capture RX device used by the AutoResearch loopback harness; drives byte-match assertions for the bit-bang, PWM+DMA, and channels-API TX paths.
 - `led_sysdefs_arm_lpc.h` — System defines (sets `FL_IS_ARM_M0_PLUS`, `F_CPU`, forces `FASTLED_M0_USE_C_IMPLEMENTATION`, includes `<LPC845.h>` / `<LPC804.h>` CMSIS device headers).
 - `fastpin_arm_lpc.h` — see above.
@@ -170,6 +173,7 @@ Build-time opt-ins (default off). Define before including `FastLED.h` or via bui
 - **`FASTLED_LPC_SPI_DMA`** — LPC845 only. Activates the DMA-async SPI driver (`spi_arm_lpc_dma.h`) in place of the polled `spi_arm_lpc.h` for APA102 / SK9822 / WS2801. Fires a compile-time `#error` if set on an LPC804 build (silicon has no DMA peripheral).
 - **`FASTLED_LPC_SPI_DMA_CHANNEL`** — LPC845 + `FASTLED_LPC_SPI_DMA`. DMA0 channel index feeding SPI TX. Default `4` (SPI0_TX); override to `6` for SPI1_TX.
 - **`FASTLED_LPC_SPI_DMA_MAX_BYTES`** — LPC845 + `FASTLED_LPC_SPI_DMA`. Static DMA descriptor pool size (default `2048`).
+- **`FASTLED_LPC_UART_DMA`** — LPC845 only. Activates the UART DMA clockless engine and makes clockless AUTO/default bus selection resolve to `Bus::UART`. AutoResearch `--uart` verifies this path with a TX→RX jumper and USART RX-DMA byte compare.
 - **`FASTLED_M0_USE_C_IMPLEMENTATION`** — Already set unconditionally by `led_sysdefs_arm_lpc.h`. The LPC8xx GPIO controller exposes SET[port] and CLR[port] at byte offsets `0x2200 / 0x2280` from the controller base, beyond the 5-bit imm5*4 encoding the M0/M0+ STR-immediate-offset instruction supports. The shared inline-assembly clockless driver assumes both offsets fit a single str-with-immediate; LPC routes through the portable C++ implementation, which performs an indexed store instead.
 - **`FASTLED_ALLOW_INTERRUPTS`** — Default `1`.
 - **`FASTLED_USE_PROGMEM`** — Default `0`.
