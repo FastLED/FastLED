@@ -3,16 +3,16 @@
 /// @file _build.cpp.hpp
 /// @brief Unity build header for the LPC845 UART DMA channel engine.
 
-#include <stdint.h>
+#include "fl/stl/int.h"
 
 #if defined(FL_LPC_UART_DMA_LOOPBACK_TEST)
 extern "C" {
-uint8_t* g_fastled_lpc_uart_loopback_rx_dst = nullptr;
-uint32_t g_fastled_lpc_uart_loopback_rx_len = 0;
-uint32_t g_fastled_lpc_uart_loopback_rx_arm_status = 0;
-uint32_t g_fastled_lpc_uart_loopback_rx_arm_tx_len = 0;
-uint32_t g_fastled_lpc_uart_loopback_rx_arm_xfer_readback = 0;
-uint32_t g_fastled_lpc_uart_loopback_rx_arm_desc0_readback = 0;
+fl::u8* g_fastled_lpc_uart_loopback_rx_dst = nullptr;
+fl::u32 g_fastled_lpc_uart_loopback_rx_len = 0;
+fl::u32 g_fastled_lpc_uart_loopback_rx_arm_status = 0;
+fl::u32 g_fastled_lpc_uart_loopback_rx_arm_tx_len = 0;
+fl::u32 g_fastled_lpc_uart_loopback_rx_arm_xfer_readback = 0;
+fl::u32 g_fastled_lpc_uart_loopback_rx_arm_desc0_readback = 0;
 }
 #endif
 

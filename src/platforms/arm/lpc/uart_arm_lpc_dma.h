@@ -51,12 +51,12 @@
 
 #if defined(FL_LPC_UART_DMA_LOOPBACK_TEST)
 extern "C" {
-extern uint8_t* g_fastled_lpc_uart_loopback_rx_dst;
-extern uint32_t g_fastled_lpc_uart_loopback_rx_len;
-extern uint32_t g_fastled_lpc_uart_loopback_rx_arm_status;
-extern uint32_t g_fastled_lpc_uart_loopback_rx_arm_tx_len;
-extern uint32_t g_fastled_lpc_uart_loopback_rx_arm_xfer_readback;
-extern uint32_t g_fastled_lpc_uart_loopback_rx_arm_desc0_readback;
+extern fl::u8* g_fastled_lpc_uart_loopback_rx_dst;
+extern fl::u32 g_fastled_lpc_uart_loopback_rx_len;
+extern fl::u32 g_fastled_lpc_uart_loopback_rx_arm_status;
+extern fl::u32 g_fastled_lpc_uart_loopback_rx_arm_tx_len;
+extern fl::u32 g_fastled_lpc_uart_loopback_rx_arm_xfer_readback;
+extern fl::u32 g_fastled_lpc_uart_loopback_rx_arm_desc0_readback;
 }
 #endif
 
