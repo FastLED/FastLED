@@ -71,6 +71,27 @@ bash autoresearch esp32s3 --rmt --timeout 120
 bash autoresearch --all --skip-lint --timeout 180
 ```
 
+### LPC845 Fault-Emit Validation
+
+Use this mode when validating the LPC845 crash diagnostics tracked by
+[FastLED #3302](https://github.com/FastLED/FastLED/issues/3302). It builds the
+low-memory AutoResearch sketch with `FASTLED_AUTORESEARCH_FAULT_TEST=1`, flashes
+the attached LPC845, deliberately triggers OOM and stack-blow RPCs, and asserts
+that the device emits a `FAULT:` diagnostic before reset.
+
+```bash
+fbuild port scan
+bash autoresearch lpc845 --fault-emit-test --upload-port COM10 --timeout 120s --skip-lint
+```
+
+The test intentionally crashes the target twice. A pass means both triggers
+emitted `FAULT:` diagnostics and the harness re-flashed between triggers. If it
+fails with no `FAULT:` line, treat the LPC safety nets as regressed: consult
+[FastLED #3300](https://github.com/FastLED/FastLED/issues/3300),
+[FastLED #3302](https://github.com/FastLED/FastLED/issues/3302), and
+[ArduinoCore-LPC8xx #30](https://github.com/zackees/ArduinoCore-LPC8xx/pull/30)
+before debugging unrelated AutoResearch transport layers.
+
 ### Common Options
 - `--skip-lint` - Skip linting for faster iteration
 - `--timeout <seconds>` - Custom timeout (default: 120s)
