@@ -1,5 +1,6 @@
 // IWYU pragma: private
 
+#include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
 
 #if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_UART_DMA)
