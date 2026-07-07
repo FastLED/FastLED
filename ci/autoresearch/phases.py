@@ -365,6 +365,15 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     Pure computation — no hardware I/O.
     Returns RunContext on success, int exit code on validation failure.
     """
+    if args.lpuart:
+        print(
+            "warning: --lpuart is deprecated; use --uart. "
+            "Treating --lpuart as --uart for this run.",
+            file=sys.stderr,
+        )
+        args.uart = True
+        args.lpuart = False
+
     final_environment = args.environment_positional or args.environment
 
     if args.lcd and not final_environment:
@@ -414,7 +423,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             sys.exit(2)
 
     is_teensy4 = _is_teensy4_environment(final_environment)
-    is_teensy_specific_driver = args.object_fled or args.flex_io or args.lpuart
+    is_teensy_specific_driver = args.object_fled or args.flex_io
 
     if args.use_root_platformio_ini and (is_teensy4 or is_teensy_specific_driver):
         print(
@@ -460,8 +469,6 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             drivers.append("OBJECT_FLED")
         if args.flex_io:
             drivers.append("FLEX_IO")
-        if args.lpuart:
-            drivers.append("LPUART")
 
     parallel_mode = args.parallel
     if parallel_mode:

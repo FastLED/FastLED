@@ -33,10 +33,13 @@ Driver Selection (optional - omit for GPIO-only mode):
   --rmt               Test RMT (Remote Control) driver
   --spi               Test SPI driver
   --uart              Test UART driver (LPC845: UART DMA clockless RX-DMA loopback)
+  --lpuart            Deprecated alias for --uart; emits a warning
   --lcd               Test LCD_CLOCKLESS driver (ESP32-S3 only)
   --lcd-spi           Test LCD_SPI driver (ESP32-S3 only)
   --lcd-rgb           Test LCD RGB driver (ESP32-P4 only)
   --object-fled       Test ObjectFLED DMA driver (Teensy 4.x only)
+  --flex-io           Test FlexIO clockless driver (Teensy 4.x only)
+  --flexio [0|1]      Deprecated alias for --flex-io; default 0, 1 enables it
   --pwm-dma-cl        LPC845-only: channels-API SCT+DMA clockless
                       self-loopback (FastLED #3468). Jumper P0_10↔P0_11.
   --dma-uart          LPC845-only: raw async UART TX DMA bench
