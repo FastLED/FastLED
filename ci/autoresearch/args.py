@@ -162,7 +162,8 @@ Driver Selection (JSON-RPC):
   Driver selection happens at runtime via JSON-RPC (no recompilation needed).
   You can instantly switch between drivers without rebuilding firmware.
 
-  MANDATORY: You MUST specify at least one driver flag:
+  Optional: omit driver/special flags for GPIO-only bring-up.
+  Specify one or more driver flags when validating a driver:
     --parlio       Test only PARLIO driver
     --rmt          Test only RMT driver
     --spi          Test only SPI driver (Teensy 4.x resolves to SPI_UNIFIED)
@@ -171,7 +172,8 @@ Driver Selection (JSON-RPC):
     --lcd-spi      Test only LCD_SPI driver (ESP32-S3 only, APA102/SK9822)
     --lcd-rgb      Test only LCD RGB driver (ESP32-P4 only)
     --object-fled  Test only ObjectFLED DMA driver (Teensy 4.x)
-    --lpuart       Reserved for future Teensy 4.x LPUART driver; currently unavailable
+    --flexio [0|1] Deprecated alias for --flex-io; default 0, 1 enables it
+    --lpuart       Deprecated alias for --uart; emits a warning
     --all          Test all currently implemented drivers
 
 Strip Size Configuration:
@@ -277,9 +279,18 @@ See Also:
             help="Test only FlexIO clockless driver (Teensy 4.x only; requires --tx-pin in {6-13,32})",
         )
         driver_group.add_argument(
+            "--flexio",
+            dest="flexio_alias",
+            nargs="?",
+            const="0",
+            choices=("0", "1"),
+            default=None,
+            help="Deprecated numeric alias for --flex-io; default 0, pass 1 to enable",
+        )
+        driver_group.add_argument(
             "--lpuart",
             action="store_true",
-            help="Test only LPUART clockless driver (Teensy 4.x only; pin to LPUARTn mapping is board-dependent -- see kLpuartPins[] in lpuart_driver.cpp.hpp)",
+            help="Deprecated alias for --uart; emits a warning and will be removed after the transition",
         )
         driver_group.add_argument(
             "--all",
@@ -735,6 +746,29 @@ See Also:
                 file=sys.stderr,
             )
 
+        if parsed.lpuart:
+            print(
+                "warning: --lpuart is deprecated; use --uart. "
+                "Treating --lpuart as --uart for this run.",
+                file=sys.stderr,
+            )
+            parsed.uart = True
+
+        if parsed.flexio_alias is not None:
+            if parsed.flexio_alias == "1":
+                print(
+                    "warning: --flexio is deprecated; use --flex-io. "
+                    "Treating --flexio 1 as --flex-io for this run.",
+                    file=sys.stderr,
+                )
+                parsed.flex_io = True
+            else:
+                print(
+                    "warning: --flexio is deprecated; omit it or use "
+                    "--flex-io to enable FlexIO.",
+                    file=sys.stderr,
+                )
+
         # Convert argparse.Namespace to Args dataclass
         return Args(
             environment_positional=parsed.environment_positional,
@@ -747,7 +781,7 @@ See Also:
             lcd_rgb=parsed.lcd_rgb,
             object_fled=parsed.object_fled,
             flex_io=parsed.flex_io,
-            lpuart=parsed.lpuart,
+            lpuart=False,
             all=parsed.all,
             simd=parsed.simd,
             coroutine=parsed.coroutine,

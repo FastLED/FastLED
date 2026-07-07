@@ -101,6 +101,7 @@ def _make_args(**overrides) -> Args:
         pwm_dma_cl=False,
         dma_spi=False,
         dma_uart=False,
+        fault_emit_test=False,
         # Default existing-test behavior: use the legacy root-platformio.ini
         # path so the ``fake_project_dir`` fixture's hand-written ini is the
         # one read. Tests that exercise the new synthesised-ini path (#3281)
@@ -554,14 +555,42 @@ class TestParseArgsAndBuildCommands:
         assert command["params"]["driver"] == "FLEX_IO"
         assert "pinTx" not in command["params"]
 
-    def test_lpuart_is_reserved_not_selectable(self, fake_project_dir: Path) -> None:
+    def test_lpuart_is_deprecated_alias_for_uart(
+        self, fake_project_dir: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         args = _make_args(
             parlio=False,
             lpuart=True,
             project_dir=fake_project_dir,
         )
         result = _parse_args_and_build_commands(args)
-        assert result == 1
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["UART"]
+        assert result.json_rpc_commands[0]["params"]["driver"] == "UART"
+        assert args.uart is True
+        assert args.lpuart is False
+        assert "--lpuart is deprecated; use --uart" in capsys.readouterr().err
+
+    def test_flexio_alias_defaults_to_zero_when_present(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        args = Args.parse_args(["--flexio"])
+        assert args.flex_io is False
+        assert "omit it or use --flex-io" in capsys.readouterr().err
+
+    def test_flexio_alias_one_enables_flex_io(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        args = Args.parse_args(["--flexio", "1"])
+        assert args.flex_io is True
+        assert "--flexio is deprecated; use --flex-io" in capsys.readouterr().err
+
+    def test_flexio_alias_zero_is_noop(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        args = Args.parse_args(["--flexio", "0"])
+        assert args.flex_io is False
+        assert "omit it or use --flex-io" in capsys.readouterr().err
 
     def test_multiple_drivers(self, fake_project_dir: Path) -> None:
         args = _make_args(parlio=True, rmt=True, spi=True, project_dir=fake_project_dir)
@@ -750,7 +779,10 @@ class TestParseArgsAndBuildCommands:
 
         assert isinstance(result, RunContext), result
         mock_synth.assert_called_once_with(
-            "esp32s3", project_root=tmp_path.resolve(), verbose=False
+            "esp32s3",
+            project_root=tmp_path.resolve(),
+            verbose=False,
+            extra_defines=[],
         )
         assert result.build_dir == fake_build_dir
 
@@ -1382,7 +1414,7 @@ class TestRunSchemaAndPinSetup:
         ctx = _make_ctx(args=args)
         mock_discovery = MagicMock(success=True, tx_pin=5, rx_pin=6, client=AsyncMock())
         with patch(
-            f"{_PATCH_MOD}.run_pin_discovery",
+            f"{_PATCH_MOD}.run_pin_discovery_segmented",
             new_callable=AsyncMock,
             return_value=mock_discovery,
         ):
@@ -1406,7 +1438,7 @@ class TestRunSchemaAndPinSetup:
         )
         with (
             patch(
-                f"{_PATCH_MOD}.run_pin_discovery",
+                f"{_PATCH_MOD}.run_pin_discovery_segmented",
                 new_callable=AsyncMock,
                 return_value=mock_discovery,
             ),

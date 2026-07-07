@@ -26,28 +26,291 @@ Do NOT reason about attachment from memory or from "which board this task is abo
 
 The `bash autoresearch` command is the **preferred entry point** for AI agents doing live device testing. It provides a complete autoresearch framework with pre-configured expect/fail patterns designed for hardware testing.
 
-### MANDATORY: Driver Selection Required
+### Agent Runbook: Evidence to AutoResearch Docs
 
-You **must** specify at least one LED driver to test using one of these flags:
+Use this workflow when updating AutoResearch agent documentation from prior
+Codex sessions, issue history, or hardware bring-up notes. The goal is to turn
+messy chat history into verified command examples and agent rules without
+copying stale or hallucinated syntax into the repo.
+
+**Source of truth order:**
+
+1. Current repo code: `autoresearch`, `ci/autoresearch/args.py`,
+   `ci/autoresearch/phases.py`, `ci/autoresearch/runner.py`.
+2. Firmware harness: `examples/AutoResearch/AutoResearch.ino`,
+   `examples/AutoResearch/AutoResearchRemote.cpp`,
+   `examples/AutoResearch/AutoResearchLowMemory.h`, and driver-specific
+   headers under `examples/AutoResearch/`.
+3. Repo docs: this file, `CLAUDE.md`, `agents/docs/build-system.md`,
+   `src/fl/channels/README.md`, and platform READMEs such as
+   `src/platforms/arm/lpc/README.md`.
+4. MCU facts: prefer https://github.com/FastLED/datasheets, then vendor
+   primary manuals. Separate datasheet facts from what the local jumper wiring
+   and AutoResearch output actually proved.
+5. Chat logs and issue comments are evidence pointers only. Re-check every
+   command, flag, RPC name, board name, and wiring claim against the sources
+   above before documenting it.
+
+Reference links for agents:
+
+- [CLAUDE.md](../../CLAUDE.md)
+- [hardware-autoresearch.md](hardware-autoresearch.md)
+- [autoresearch wrapper](../../autoresearch)
+- [ci/autoresearch/args.py](../../ci/autoresearch/args.py)
+- [ci/autoresearch/phases.py](../../ci/autoresearch/phases.py)
+- [examples/AutoResearch](../../examples/AutoResearch)
+- [fl/channels README](../../src/fl/channels/README.md)
+- [LPC platform README](../../src/platforms/arm/lpc/README.md)
+- [FastLED/datasheets](https://github.com/FastLED/datasheets)
+
+**Mining Codex chat logs for evidence:**
+
+Local Codex archives commonly live under:
+
+```text
+C:\Users\niteris\.codex\sessions\YYYY\MM\DD\rollout-*.jsonl
+C:\Users\niteris\.codex\history.jsonl
+C:\Users\niteris\.codex\logs_2.sqlite
+C:\Users\niteris\.codex\goals_1.sqlite
+C:\Users\niteris\.codex\memories_1.sqlite
+```
+
+Do a deterministic reduction before asking any model to read logs:
+
+```bash
+rg -i -l "autoresearch|auto research|fbuild port scan|esp32|esp32s3|esp32c6|lpc845|lpc8|teensy|rpc|function binding|cmd args|fault-emit|dma-uart|uart" C:\Users\niteris\.codex\sessions
+```
+
+Normalize hit windows into indexed records so reviewers can cite exact
+messages:
+
+```json
+{
+  "log_id": "2026-07-06T13-31-14",
+  "path": "C:/Users/niteris/.codex/sessions/...jsonl",
+  "messages": [
+    {"idx": 0, "line": 1, "role": "user", "text": "..."},
+    {"idx": 1, "line": 2, "role": "assistant", "text": "..."}
+  ]
+}
+```
+
+Lower-cost agents may classify shards, but they must be gatekeepers, not final
+doc authors. Prompt them to return strict JSON with `answer: "yes" | "no"` as
+the first decision, plus `attention_indices`, exact commands seen,
+boards/families, flags, files/docs, user corrections, and open questions. Send
+only the `yes` records and low-confidence `no` records to GPT-5.5 for synthesis.
+GPT-5.5 must verify parser syntax and firmware bindings against the repo before
+writing docs.
+
+Gatekeeper prompt template:
+
+```text
+You are a binary relevance classifier for FastLED AutoResearch documentation.
+
+For this chat log, answer YES only if it contains evidence useful for improving
+AutoResearch agent documentation, including:
+- bash autoresearch command shapes
+- board bringup
+- ESP32/LPC/Teensy/generic board behavior
+- fbuild port scan
+- AutoResearch RPC/function bindings
+- command-line args or mode flags
+- user corrections about how agents should use AutoResearch
+
+Answer NO if it only mentions unrelated coding work, generic FastLED work,
+or hardware work without AutoResearch documentation value.
+
+Return strict JSON only:
+{
+  "answer": "yes" | "no",
+  "confidence": 0.0-1.0,
+  "attention_indices": [message idx numbers],
+  "reason": "one short sentence",
+  "summary_for_gpt55": "2-4 sentence evidence summary, empty if no",
+  "commands_seen": [],
+  "boards_or_families": [],
+  "flags_seen": [],
+  "files_or_docs_mentioned": [],
+  "user_corrections": [],
+  "open_questions": []
+}
+```
+
+### Board Bring-up Workflow
+
+For a new board or a newly attached board, prove the transport before proving a
+driver:
+
+1. Run `fbuild port scan` and record the board identity, VID/PID, serial number,
+   and port. Do not claim a board is absent without this scan.
+2. Confirm the board has an entry in `ci/boards.py` or can be detected by the
+   AutoResearch/fbuild path. If the deploy backend is missing, file the gap in
+   FastLED/fbuild; do not add direct flash-tool calls.
+3. Run GPIO-only AutoResearch first. With no driver flag, current
+   `bash autoresearch` runs pin discovery plus toggle-capture where supported.
+4. For constrained boards that use low-memory mode, prove the minimal RPC/serial
+   path before adding driver benches. On LPC845 this is the echo bring-up.
+5. Add one driver/API validation mode at a time, then rerun with the exact
+   command that will appear in issue/PR closeout.
+
+Canonical command shapes:
+
+```bash
+# Generic / auto-detected board: GPIO-only bring-up.
+fbuild port scan
+bash autoresearch --upload-port <port> --timeout 120s
+
+# Generic known environment.
+bash autoresearch <environment> --upload-port <port> --timeout 120s
+
+# ESP32 family examples.
+bash autoresearch esp32s3 --parlio --upload-port <port> --timeout 120s
+bash autoresearch esp32s3 --lcd --lanes 2 --upload-port <port> --timeout 120s
+bash autoresearch esp32p4 --lcd-rgb --upload-port <port> --timeout 120s
+bash autoresearch esp32c6 --parlio --upload-port <port> --timeout 120s
+bash autoresearch esp32s3 --net --upload-port <port> --timeout 120s
+bash autoresearch esp32s3 --ota --upload-port <port> --timeout 120s
+bash autoresearch esp32s3 --ble --upload-port <port> --timeout 120s
+
+# LPC low-memory bring-up and targeted validation.
+bash autoresearch lpc845 --upload-port <port> --timeout 120s --skip-lint
+bash autoresearch lpc845 --pin-toggle-rx --upload-port <port> --timeout 120s --skip-lint
+bash autoresearch lpc845 --ws2812-loopback --upload-port <port> --timeout 120s --skip-lint
+bash autoresearch lpc845 --uart --upload-port <port> --timeout 120s --skip-lint
+bash autoresearch lpc845 --dma-uart --upload-port <port> --timeout 120s --skip-lint
+bash autoresearch lpc845 --fault-emit-test --upload-port <port> --timeout 120s --skip-lint
+
+# Teensy 4.x bring-up and driver validation.
+bash autoresearch teensy41 --upload-port <port> --timeout 120s
+bash autoresearch teensy41 --object-fled --tx-pin <tx> --rx-pin <rx> --timeout 120s
+bash autoresearch teensy41 --flex-io --tx-pin <tx> --rx-pin <rx> --timeout 120s
+```
+
+`<environment>` is the optional positional argument parsed by
+`ci/autoresearch/args.py`; `--env <environment>` is the equivalent named form.
+Use the positional form in docs unless the task specifically needs `--env`.
+
+### Validation Levels
+
+Pick the narrowest validation level that proves the claim:
+
+- **Board transport:** `fbuild port scan` plus GPIO-only AutoResearch or
+  low-memory echo. This proves build, deploy, reset, serial, and minimal RPC.
+- **Basic features:** use existing special modes such as `--simd`,
+  `--coroutine`, `--ieee754`, `--net`, `--ota`, `--ble`, or a direct
+  `RpcClient` call to a bound method listed by `help` / `rpc.discover`.
+- **Driver behavior:** use `bash autoresearch <board> --<driver>` and let the
+  host generate JSON-RPC `runSingleTest` / `runParallelTest` commands.
+- **Public FastLED API behavior:** route through the user-facing API under test
+  (`FastLED.addLeds`, channels config, `Bus::AUTO`, explicit `Bus::UART`,
+  etc.). Raw peripheral benches such as `--dma-uart` are supporting evidence,
+  not replacements for public API validation.
+- **Failure/safety behavior:** use dedicated modes such as
+  `--fault-emit-test`; capture decisive `FAULT:`, `REMOTE:`, or `RESULT:` lines.
+
+Closeout evidence must include the command, board, port, wiring, decisive
+output, commit/PR URL, and issue URL. Stale chat comments, CI compile-only
+results, and old serial buffers do not close hardware issues when a board can
+be tested locally.
+
+### Driver Development and New Modes
+
+Add new AutoResearch functionality in the harness, not as a one-off sketch or
+raw serial probe.
+
+Firmware side:
+
+1. For full-memory boards, add or reuse a handler in
+   `examples/AutoResearch/AutoResearchRemote.cpp` or a helper included from
+   `examples/AutoResearch/AutoResearch.ino`.
+2. Register the method with `mRemote->bind("methodName", ...)` and update the
+   `help` manifest in the same file so agents can discover it.
+3. For low-memory boards, add the smallest possible binding in
+   `examples/AutoResearch/AutoResearchLowMemory.h`, guarded by the relevant
+   compile-time macro so unrelated benches stay out of flash.
+4. Keep output machine-readable. Prefer JSON-RPC responses and `RESULT:` JSONL;
+   do not add free-form `Serial.print` control paths.
+
+Host side:
+
+1. Add a command-line flag in `ci/autoresearch/args.py`.
+2. Wire the flag in `ci/autoresearch/phases.py`, including any required staged
+   build defines passed to `synthesise_autoresearch_project`.
+3. Put reusable bench code in `ci/autoresearch/test_*.py` or a small helper
+   module under `ci/autoresearch/`.
+4. Use `ci.rpc_client.RpcClient` over the fbuild-backed serial interface. Do
+   not open raw `pyserial` ports in bench or acceptance code.
+5. Add or update parser/unit tests when the mode changes CLI behavior.
+
+For channels-API or bus-selection work, read `src/fl/channels/README.md` before
+choosing the test surface. Example: on LPC845, `--uart` validates the UART DMA
+clockless loopback through the normal FastLED LED API; `--dma-uart` validates
+the lower-level async UART TX DMA bench.
+
+### Low-Memory vs Full-Memory Strategy
+
+`examples/AutoResearch/AutoResearch.ino` is shared by constrained and rich
+targets. It auto-enables `FASTLED_AUTORESEARCH_LOW_MEMORY` when
+`FL_PLATFORM_HAS_LARGE_MEMORY == 0`.
+
+Low-memory boards, such as LPC845/LPC804:
+
+- Keep one bench per build. Flash/RAM budget may not fit SPI DMA, UART DMA,
+  SCT/PWM DMA, fault tests, and WS2812 loopback together.
+- Gate each feature with a macro such as `FASTLED_AUTORESEARCH_FAULT_TEST`,
+  `FASTLED_AUTORESEARCH_LPC_UART_DMA`, `FASTLED_LPC_SPI_DMA`, or
+  `FASTLED_LPC_PWM_DMA`.
+- Use `--skip-lint` and `--quiet` when the target is constrained and the task
+  is hardware validation rather than broad lint feedback.
+- Prefer echo, pin-toggle, byte-match loopback, and focused fault tests over a
+  full driver matrix.
+- Treat silence as possible crash/reset/USART routing failure. First prove
+  board, port, firmware freshness, and wiring; then add or use fault/crash
+  diagnostics.
+
+Full-memory boards, such as ESP32-family and Teensy 4.x:
+
+- Use the full RPC harness and `AutoResearchRemote.cpp` bindings.
+- Validate multiple drivers, lanes, strip sizes, custom colors, networking,
+  OTA, BLE, decode, SIMD, and coroutine modes when relevant.
+- Larger cases such as `--strip-sizes large` or `xlarge` belong here, not on
+  LPC8xx-class parts.
+- Driver development should converge on public API validation once raw
+  peripheral probes have explained the hardware behavior.
+
+### Choose GPIO-only or a Test Mode
+
+Use no driver flag for GPIO-only board bring-up, or specify one or more flags
+to validate a driver, subsystem, or special mode:
+- `(none)` - GPIO-only mode: pin discovery + toggle capture where supported
 - `--parlio` - Test parallel I/O driver
 - `--rmt` - Test RMT (Remote Control) driver
 - `--spi` - Test SPI driver
 - `--uart` - Test UART driver
-- `--i2s` - Test I2S LCD_CAM driver (ESP32-S3 only)
+- `--lcd` - Test LCD_CLOCKLESS driver (ESP32-S3 only)
+- `--lcd-spi` - Test LCD_SPI driver (ESP32-S3 only)
 - `--lcd-rgb` - Test LCD RGB driver (ESP32-P4 only)
-- `--all` - Test all drivers (equivalent to `--parlio --rmt --spi --uart --i2s --lcd-rgb`)
+- `--object-fled` - Test ObjectFLED DMA driver (Teensy 4.x only)
+- `--flex-io` - Test FlexIO clockless driver (Teensy 4.x only)
+- `--flexio [0|1]` - Deprecated compatibility alias for `--flex-io`; default
+  `0`, pass `1` to enable, emits a warning
+- `--lpuart` - Deprecated compatibility alias for `--uart`; emits a warning
+- `--all` - Test all implemented drivers for the selected board
 - `--parallel` - Test multiple drivers simultaneously (requires 2+ drivers)
 - `--ieee754` - Special mode: run integer IEEE 754 decimal codec verification without LED driver loopback
+- `--simd`, `--coroutine`, `--net`, `--ota`, `--ble`, `--decode` - Special
+  feature validation modes
 
 ### Usage Examples
 ```bash
-# Test specific driver (MANDATORY - must specify at least one)
+# Test a specific driver, or omit driver flags for GPIO-only bring-up
 bash autoresearch --parlio                    # Auto-detect environment
 bash autoresearch esp32s3 --parlio            # Specify esp32s3 environment
 bash autoresearch --rmt
 bash autoresearch --spi
 bash autoresearch --uart
-bash autoresearch --i2s                       # ESP32-S3 only
+bash autoresearch --lcd                       # ESP32-S3 LCD_CLOCKLESS
 bash autoresearch --lcd-rgb                   # ESP32-P4 only
 bash autoresearch lpc845 --ieee754            # LPC low-memory IEEE 754 codec check
                                               # (lpc845brk still works as a deprecated alias — #3220)
@@ -170,7 +433,7 @@ bash autoresearch --spi --strip-sizes large            # 500, 3000 LEDs
 # Use custom strip sizes (comma-separated LED counts)
 bash autoresearch --parlio --strip-sizes 100,300       # Test with 100 and 300 LED strips
 bash autoresearch --rmt --strip-sizes 100,300,1000     # Test with 100, 300, and 1000 LED strips
-bash autoresearch --i2s --strip-sizes 500              # Test with single 500 LED strip
+bash autoresearch --lcd --strip-sizes 500              # Test with single 500 LED strip
 
 # Combined configuration
 bash autoresearch --all --strip-sizes 100,500,3000
@@ -188,18 +451,18 @@ Configure number of lanes for autoresearch testing via JSON-RPC:
 ```bash
 # Test with specific lane count
 bash autoresearch --parlio --lanes 2                   # Test with exactly 2 lanes
-bash autoresearch --i2s --lanes 4                      # Test with exactly 4 lanes
+bash autoresearch --lcd --lanes 4                      # Test with exactly 4 lanes
 
 # Test with lane range
 bash autoresearch --rmt --lanes 1-4                    # Test with 1 to 4 lanes (tests all combinations)
 bash autoresearch --spi --lanes 2-8                    # Test with 2 to 8 lanes
 
 # Set per-lane LED counts (NEW)
-bash autoresearch --i2s --lane-counts 100,200,300      # 3 lanes with 100, 200, 300 LEDs per lane
+bash autoresearch --lcd --lane-counts 100,200,300      # 3 lanes with 100, 200, 300 LEDs per lane
 bash autoresearch --parlio --lane-counts 50,100        # 2 lanes with 50 and 100 LEDs per lane
 
 # Combined with strip sizes
-bash autoresearch --i2s --lanes 2 --strip-sizes 100,300  # 2 lanes, strips of 100 and 300 LEDs
+bash autoresearch --lcd --lanes 2 --strip-sizes 100,300  # 2 lanes, strips of 100 and 300 LEDs
 ```
 
 **Default:** 1-8 lanes (firmware default)
@@ -210,7 +473,7 @@ Configure custom RGB color pattern for autoresearch testing:
 # Custom color patterns (hex RGB format)
 bash autoresearch --parlio --color-pattern ff00aa      # Pink color (RGB: 255, 0, 170)
 bash autoresearch --rmt --color-pattern 0x00ff00       # Green color (RGB: 0, 255, 0)
-bash autoresearch --i2s --color-pattern 112233         # Dark blue (RGB: 17, 34, 51)
+bash autoresearch --lcd --color-pattern 112233         # Dark blue (RGB: 17, 34, 51)
 
 # Combined with lane configuration
 bash autoresearch --parlio --lane-counts 100,200 --color-pattern ff0000  # 2 lanes, red color
@@ -219,24 +482,24 @@ bash autoresearch --parlio --lane-counts 100,200 --color-pattern ff0000  # 2 lan
 **Note:** Custom color patterns require firmware support via the `setSolidColor` RPC command. This command may need to be implemented in the firmware if not already available.
 
 ### Error Handling
-If you run `bash autoresearch` without specifying a driver, you'll get a helpful error message:
+If you run `bash autoresearch` without specifying a driver or special mode, it
+runs GPIO-only board bring-up. Use this intentionally for first contact with a
+new board or when validating the build/deploy/serial/RPC path before a driver
+bench.
+
+```bash
+bash autoresearch                       # Auto-detect device, GPIO-only bring-up
+bash autoresearch teensy41              # Known environment, GPIO-only bring-up
+bash autoresearch lpc845 --upload-port COM10 --timeout 120s --skip-lint
 ```
-ERROR: No LED driver specified. You must specify at least one driver to test.
 
-Available driver options:
-  --parlio    Test parallel I/O driver
-  --rmt       Test RMT (Remote Control) driver
-  --spi       Test SPI driver
-  --uart      Test UART driver
-  --i2s       Test I2S LCD_CAM driver (ESP32-S3 only)
-  --lcd-rgb   Test LCD RGB driver (ESP32-P4 only)
-  --all       Test all drivers
+Use a driver or special-mode flag when the claim is about a specific subsystem:
 
-Example commands:
-  bash autoresearch --parlio
-  bash autoresearch esp32s3 --parlio
-  bash autoresearch --rmt --spi
-  bash autoresearch --all
+```bash
+bash autoresearch esp32s3 --parlio
+bash autoresearch --rmt --spi
+bash autoresearch --all
+bash autoresearch lpc845 --uart --upload-port COM10 --timeout 120s --skip-lint
 ```
 
 ### What bash autoresearch Does
