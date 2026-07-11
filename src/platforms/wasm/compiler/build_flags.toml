@@ -264,7 +264,7 @@ link_flags = [
     "-sSTACK_OVERFLOW_CHECK=0",             # Disable stack overflow checking
 
     # Compatibility and Performance Options
-    "-sWASM_BIGINT=0",                      # Disable BigInt for faster execution
+    "-sWASM_BIGINT=0",                      # Quick-mode override: disable BigInt for faster execution
     "-sERROR_ON_UNDEFINED_SYMBOLS=1",       # Error on undefined symbols (was hiding missing addLeds)
 ]
 
@@ -304,6 +304,9 @@ flags = [
 
     # WebAssembly Configuration
     "-sWASM=1",                                # Generate WebAssembly output (not asm.js)
+    # Dynamic main/side modules must agree on i64 import/export types. Quick
+    # mode overrides this below for its faster non-BigInt ABI.
+    "-sWASM_BIGINT=1",                          # Explicit default ABI for all link modes
 
     # Linker Performance Optimization
     "-fuse-ld=wasm-ld",                      # Explicitly use wasm-ld (default, but explicit for clarity)
