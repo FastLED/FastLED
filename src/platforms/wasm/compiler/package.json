@@ -8,11 +8,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "three": "0.170.0"
+    "@fastled/gfx": "https://github.com/zackees/ledmapper/releases/download/gfx-v0.1.0/fastled-gfx-0.1.0.tgz",
+    "three": "0.183.2"
   },
   "devDependencies": {
-    "vite": "^6.0.0",
+    "@types/three": "^0.183.1",
     "typescript": "^5.7.0",
-    "@types/three": "^0.170.0"
+    "vite": "^6.0.0"
   }
 }

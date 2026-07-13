@@ -92,12 +92,14 @@ declare class GraphicsManager {
   [key: string]: any;
 }
 
-/**
- * Graphics Manager for 3D rendering with Three.js
- */
-declare class GraphicsManagerThreeJS {
-  constructor(options: { canvasId: string; threeJsModules: any });
-  
+/** Graphics Manager backed by the shared @fastled/gfx package. */
+declare class GraphicsManagerGfx {
+  constructor(options: { canvasId?: string; canvas?: HTMLCanvasElement | OffscreenCanvas; paneSize?: number; diameter?: number });
+  updateScreenMap(screenMaps: any): void;
+  updateCanvas(frameData: any): void;
+  reset(): void;
+  dispose(): void;
+  auto_bloom_enabled: boolean;
   [key: string]: any;
 }
 
@@ -231,7 +233,7 @@ declare global {
     _pendingUiDebugMode: boolean;
 
     // Graphics
-    graphicsManager: GraphicsManager | GraphicsManagerThreeJS;
+    graphicsManager: GraphicsManager | GraphicsManagerGfx;
     updateCanvas: (frameData: FrameData | (any[] & {screenMap?: ScreenMapData})) => void;
     screenMap: ScreenMapData;
     handleStripMapping: any;
@@ -351,7 +353,7 @@ export {
   FastLEDAsyncController,
   JsonUiManager,
   GraphicsManager,
-  GraphicsManagerThreeJS,
+  GraphicsManagerGfx,
   VideoRecorder,
   JsonInspector,
   FastLEDEvents,

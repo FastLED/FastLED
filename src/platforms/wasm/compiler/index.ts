@@ -26,7 +26,7 @@ import { JsonUiManager } from './modules/ui/ui_manager.ts';
 
 // Graphics System imports
 import { GraphicsManager } from './modules/graphics/graphics_manager.ts';
-import { GraphicsManagerThreeJS } from './modules/graphics/graphics_manager_threejs.ts';
+import { GraphicsManagerGfx } from './modules/graphics/graphics_manager_gfx.ts';
 
 // Utility imports
 import { JsonInspector } from './modules/utils/json_inspector.ts';
@@ -482,7 +482,7 @@ function updateCanvas(frameData) {
         // Default to ThreeJS renderer (gfx=1) if no parameter specified
         const explicitlyRequested = FORCE_THREEJS_RENDERER ? 'gfx=1' : 'default (gfx=1)';
         console.log(`Creating Beautiful GraphicsManager with canvas ID (${explicitlyRequested})`, canvasId);
-        graphicsManager = new GraphicsManagerThreeJS(currentGraphicsArgs);
+        graphicsManager = new GraphicsManagerGfx(currentGraphicsArgs);
       }
     } catch (error) {
       console.error('Failed to create graphics manager:', error);
