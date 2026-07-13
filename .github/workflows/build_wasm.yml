@@ -91,13 +91,11 @@ jobs:
       - name: Compile fastled.js, fastled.wasm, and index.html
         run: |
           uv run ci/wasm_compile.py examples/wasm
-        continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
         shell: bash
 
       - name: Scan for wasm/js/html artifacts
         run: |
           find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
-        continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
 
       - name: Check for required artifacts
         run: |
