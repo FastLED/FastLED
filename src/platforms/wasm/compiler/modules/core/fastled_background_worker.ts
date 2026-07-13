@@ -24,57 +24,8 @@
 
 /* global postMessage, self, performance, requestAnimationFrame, cancelAnimationFrame */
 
-// CRITICAL FIX: Workers don't support import maps, but Three.js jsm files use bare "three" imports.
-// Solution: Use local vendor files with patched relative imports to three.module.js
-
 // VideoRecorder import removed - recording now happens on main thread with mirror canvas
 // Worker only captures and transfers frames as ImageBitmap for main thread MediaRecorder
-
-/**
- * Loads ThreeJS modules for 3D rendering in worker context
- * @returns {Promise<Object>} ThreeJS modules object
- */
-async function loadThreeJSModules() {
-  workerLog('LOG', 'BACKGROUND_WORKER', 'Loading ThreeJS modules in worker context...');
-
-  try {
-    // WORKER FIX: Use local vendor files with relative paths
-    // Workers don't support import maps, so we need to use full relative paths
-    const [
-      THREE,
-      { EffectComposer },
-      { RenderPass },
-      { UnrealBloomPass },
-      { OutputPass },
-      BufferGeometryUtils
-    ] = await Promise.all([
-      import('../../vendor/three/three.module.js'),
-      import('../../vendor/three/examples/jsm/postprocessing/EffectComposer.js'),
-      import('../../vendor/three/examples/jsm/postprocessing/RenderPass.js'),
-      import('../../vendor/three/examples/jsm/postprocessing/UnrealBloomPass.js'),
-      import('../../vendor/three/examples/jsm/postprocessing/OutputPass.js'),
-      import('../../vendor/three/examples/jsm/utils/BufferGeometryUtils.js')
-    ]);
-
-    const modules = {
-      THREE,
-      EffectComposer,
-      RenderPass,
-      UnrealBloomPass,
-      OutputPass,
-      BufferGeometryUtils
-    };
-
-    workerLog('LOG', 'BACKGROUND_WORKER', 'ThreeJS modules loaded successfully', {
-      moduleNames: Object.keys(modules)
-    });
-
-    return modules;
-  } catch (error) {
-    workerLog('ERROR', 'BACKGROUND_WORKER', 'Failed to load ThreeJS modules', error);
-    throw error;
-  }
-}
 
 /**
  * @typedef {Object} WorkerState
@@ -508,20 +459,15 @@ async function initializeGraphicsManager() {
         usePixelatedRendering: true
       });
     } else {
-      // Default to ThreeJS renderer (gfx=1) if no parameter specified
+      // Default to the shared @fastled/gfx renderer (gfx=1) if no parameter specified
       const explicitlyRequested = FORCE_THREEJS_RENDERER ? 'gfx=1' : 'default (gfx=1)';
-      workerLog('LOG', 'BACKGROUND_WORKER', `ThreeJS renderer (${explicitlyRequested}) - loading ThreeJS modules...`);
+      workerLog('LOG', 'BACKGROUND_WORKER', `Shared gfx renderer (${explicitlyRequested}) - loading package adapter...`);
 
-      const threeJsModules = await loadThreeJSModules();
-      workerLog('LOG', 'BACKGROUND_WORKER', 'ThreeJS modules loaded, creating GraphicsManagerThreeJS...');
-
-      const graphicsManagerModule = await import('../graphics/graphics_manager_threejs.js');
-      workerState.graphicsManager = new graphicsManagerModule.GraphicsManagerThreeJS({
+      const graphicsManagerModule = await import('../graphics/graphics_manager_gfx.js');
+      workerState.graphicsManager = new graphicsManagerModule.GraphicsManagerGfx({
         canvas: workerState.canvas, // Pass OffscreenCanvas directly
-        threeJsModules: threeJsModules
       });
-
-      workerLog('LOG', 'BACKGROUND_WORKER', 'Beautiful 3D GraphicsManager (ThreeJS) initialized in worker mode');
+      workerLog('LOG', 'BACKGROUND_WORKER', 'Shared @fastled/gfx GraphicsManager initialized in worker mode');
     }
 
     // The graphics manager will handle WebGL setup internally
