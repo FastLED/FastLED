@@ -136,6 +136,7 @@ class Args:
     # Emits a deprecation warning when set. Slated for removal one release
     # cycle after #3281 lands.
     use_root_platformio_ini: bool
+    watchdog_soak: bool = False
 
     @staticmethod
     def parse_args(argv: list[str] | None = None) -> "Args":
@@ -317,6 +318,11 @@ See Also:
             "--rpc-smoke",
             action="store_true",
             help="Validate pin-free JSON-RPC discovery, health, payload, and error handling",
+        )
+        driver_group.add_argument(
+            "--watchdog-soak",
+            action="store_true",
+            help="Exercise deliberateHang watchdog recovery and post-reset RPC smoke",
         )
         driver_group.add_argument(
             "--wave2d-perf",
@@ -793,6 +799,7 @@ See Also:
             coroutine=parsed.coroutine,
             ieee754=parsed.ieee754,
             rpc_smoke=parsed.rpc_smoke,
+            watchdog_soak=parsed.watchdog_soak,
             wave2d_perf=parsed.wave2d_perf,
             environment=parsed.environment,
             verbose=parsed.verbose,

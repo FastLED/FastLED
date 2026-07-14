@@ -403,6 +403,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     coroutine_test_mode = args.coroutine
     ieee754_test_mode = args.ieee754
     rpc_smoke_mode = args.rpc_smoke
+    watchdog_soak_mode = args.watchdog_soak
 
     # Parse --wave2d-perf "<W>x<H>" — None disables the mode.
     # Cf. #3124 for the planned --perf-XX convention rename.
@@ -549,6 +550,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         and not coroutine_test_mode
         and not ieee754_test_mode
         and not rpc_smoke_mode
+        and not watchdog_soak_mode
         and not net_server_mode
         and not net_client_mode
         and not net_loopback_mode
@@ -1072,6 +1074,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         coroutine_test_mode=coroutine_test_mode,
         ieee754_test_mode=ieee754_test_mode,
         rpc_smoke_mode=rpc_smoke_mode,
+        watchdog_soak_mode=watchdog_soak_mode,
         wave2d_perf_grid=wave2d_perf_grid,
         net_server_mode=net_server_mode,
         net_client_mode=net_client_mode,
@@ -1100,7 +1103,7 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
     is_teensy = (
         ctx.final_environment is not None and "teensy" in ctx.final_environment.lower()
     )
-    stock_rp2040_transport = args.rpc_smoke and (
+    stock_rp2040_transport = (args.rpc_smoke or args.watchdog_soak) and (
         (ctx.final_environment or "").lower() in {"rp2040", "rpipico"}
     )
 
@@ -1516,7 +1519,7 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     """
     args = ctx.args
     upload_port = ctx.upload_port
-    if upload_port is None and ctx.rpc_smoke_mode and ctx.use_fbuild:
+    if upload_port is None and (ctx.rpc_smoke_mode or ctx.watchdog_soak_mode) and ctx.use_fbuild:
         # Stock RP2040 deployment starts from BOOTSEL mass-storage and may
         # return before Windows has published the application CDC endpoint.
         # Re-scan by USB identity instead of asserting on the pre-deploy port.
@@ -1537,6 +1540,7 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         args.skip_schema
         or args.quiet
         or args.rpc_smoke
+        or args.watchdog_soak
         or final_environment in constrained_platforms
     )
 
@@ -1634,7 +1638,7 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print(
             "\n\U0001f4cc IEEE754 codec mode: skipping pin discovery and GPIO pre-test"
         )
-    elif ctx.rpc_smoke_mode:
+    elif ctx.rpc_smoke_mode or ctx.watchdog_soak_mode:
         print("\n\U0001f4cc RPC smoke mode: skipping pin discovery and GPIO pre-test")
     elif ctx.net_server_mode or ctx.net_client_mode or ctx.net_loopback_mode:
         print("\n\U0001f4cc Network mode: skipping pin discovery and GPIO pre-test")
@@ -1704,7 +1708,7 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
             f"TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
         )
 
-    if not ctx.rpc_smoke_mode:
+    if not (ctx.rpc_smoke_mode or ctx.watchdog_soak_mode):
         _ensure_leading_set_pins_command(ctx)
 
     # GPIO connectivity pre-test
@@ -1718,7 +1722,7 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         pass
     elif ctx.ieee754_test_mode:
         pass
-    elif ctx.rpc_smoke_mode:
+    elif ctx.rpc_smoke_mode or ctx.watchdog_soak_mode:
         pass
     elif ctx.net_server_mode or ctx.net_client_mode or ctx.net_loopback_mode:
         pass
@@ -1889,6 +1893,96 @@ async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
             pass
 
 
+async def _run_watchdog_soak(ctx: RunContext) -> int:
+    """Trigger deliberateHang, reacquire CDC, then rerun the RPC smoke set."""
+    old_port = ctx.upload_port
+    if not old_port:
+        print("RESULT: watchdog soak FAIL: no application port")
+        return 1
+    from ci.util.serial_interface import create_serial_interface
+
+    # Do not reuse a pre-deploy adapter after fbuild has re-enumerated CDC.
+    # Construct a fresh handle for the deliberate-hang acknowledgement.
+    iface = create_serial_interface(old_port, use_pyserial=not ctx.use_fbuild)
+    client = RpcClient(old_port, timeout=8.0, serial_interface=iface)
+    try:
+        await client.connect()
+        await client.drain_boot_output(verbose=False)
+        await asyncio.sleep(0.5)
+        before = await client.send("ping", args={}, timeout=8.0)
+        if not before.success or not isinstance(before.data, dict):
+            print(f"RESULT: watchdog soak FAIL: pre-reset ping {before.data!r}")
+            return 1
+        before_uptime = before.data.get("uptimeMs")
+        print(f"WATCHDOG: pre-reset ping uptimeMs={before_uptime}")
+        acknowledgement = await client.send("deliberateHang", args={}, timeout=8.0)
+        if not acknowledgement.success:
+            print(
+                f"RESULT: watchdog soak FAIL: deliberateHang acknowledgement "
+                f"{acknowledgement.data!r}"
+            )
+            return 1
+        print(f"WATCHDOG: deliberateHang acknowledgement={acknowledgement.data!r}")
+    except RpcTimeoutError as exc:
+        print(f"RESULT: watchdog soak FAIL: no deliberateHang acknowledgement: {exc}")
+        return 1
+    finally:
+        try:
+            await client.close()
+        except Exception:
+            pass
+
+    # The old handle must disappear before accepting a re-enumerated endpoint.
+    deadline = time.monotonic() + min(20.0, ctx.remaining_seconds(minimum=1.0))
+    while time.monotonic() < deadline and port_exists(old_port):
+        await asyncio.sleep(0.1)
+    print(f"WATCHDOG: application port disconnected={not port_exists(old_port)}")
+    new_port: str | None = None
+    while time.monotonic() < deadline:
+        detected = await asyncio.to_thread(auto_detect_upload_port, "rp2040")
+        candidate = detected.selected_port
+        if candidate and (not port_exists(old_port) or candidate != old_port):
+            new_port = candidate
+            break
+        if candidate and port_exists(candidate):
+            # Windows commonly reuses COM11; its disappearance above is the
+            # reset evidence, so the same name is valid after re-enumeration.
+            new_port = candidate
+            break
+        await asyncio.sleep(0.2)
+    if not new_port:
+        print("RESULT: watchdog soak FAIL: application CDC did not re-enumerate")
+        return 1
+
+    new_iface = create_serial_interface(new_port, use_pyserial=not ctx.use_fbuild)
+    recovery = RpcClient(new_port, timeout=8.0, serial_interface=new_iface)
+    try:
+        await recovery.connect()
+        await recovery.drain_boot_output(verbose=False)
+        after = await recovery.send("ping", timeout=8.0)
+        if not after.success or not isinstance(after.data, dict):
+            print(f"RESULT: watchdog soak FAIL: post-reset ping {after.data!r}")
+            return 1
+        after_uptime = after.data.get("uptimeMs")
+        print(
+            f"WATCHDOG: post-reset ping uptimeMs={after_uptime} "
+            f"port={new_port} reset_evidence={after_uptime is not None and before_uptime is not None and after_uptime < before_uptime}"
+        )
+    finally:
+        try:
+            await recovery.close()
+        except Exception:
+            pass
+    ctx.upload_port = new_port
+    # The recovery client owns and closes this interface; smoke creates a
+    # fresh one for the post-reset RPC sequence.
+    ctx.serial_iface = None
+    smoke_rc = await _run_rpc_smoke_tests(ctx)
+    if smoke_rc == 0:
+        print("RESULT: watchdog soak PASS (ack, disconnect, CDC recovery, ping, RPC smoke)")
+    return smoke_rc
+
+
 async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int:
     """Execute GPIO-only, special modes, or main RPC test loop.
 
@@ -1905,6 +1999,8 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     # BEFORE the gpio_only_mode early-return so the harness actually runs the
     # echo check instead of bailing with a "no tests requested" success.
     final_environment = (ctx.final_environment or "").lower()
+    if ctx.watchdog_soak_mode:
+        return await _run_watchdog_soak(ctx)
     if ctx.rpc_smoke_mode:
         return await _run_rpc_smoke_tests(ctx)
 
