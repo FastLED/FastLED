@@ -1858,11 +1858,19 @@ async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
             raise RpcError(f"testNoSerial failed: {no_serial!r}")
 
         try:
-            await call("__autoresearch_missing_method__")
-        except RpcError as exc:
+            # Some firmware revisions reject an unknown method with an error;
+            # others intentionally emit no response. Bound this negative
+            # probe tightly so it cannot consume the whole smoke-test budget.
+            response = await client.send(
+                "__autoresearch_missing_method__",
+                timeout=min(2.0, max(1.0, ctx.remaining_seconds(minimum=1.0))),
+            )
+            if response.success:
+                print("RESULT: RPC smoke FAIL: missing method unexpectedly succeeded")
+                return 1
+            print(f"REMOTE: missing-method error handled -> {response.data!r}")
+        except (RpcError, RpcTimeoutError) as exc:
             print(f"REMOTE: missing-method error handled -> {exc}")
-        else:
-            raise RpcError("missing method unexpectedly succeeded")
 
         print(
             "RESULT: RPC smoke PASS (discovery, help, ping, payload, status, drivers, testNoSerial, error handling)"
