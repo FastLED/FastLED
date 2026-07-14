@@ -28,6 +28,7 @@ class Args:
     simd: bool
     coroutine: bool
     ieee754: bool
+    rpc_smoke: bool
     # Wave2D perf benchmark — accepts "<W>x<H>" (e.g. "32x32") or None.
     # Cf. issue #3124 for the future --perf-XX / --test-XX convention.
     wave2d_perf: str | None
@@ -311,6 +312,11 @@ See Also:
             "--ieee754",
             action="store_true",
             help="Run on-device integer IEEE 754 decimal codec verification (#3039)",
+        )
+        driver_group.add_argument(
+            "--rpc-smoke",
+            action="store_true",
+            help="Validate pin-free JSON-RPC discovery, health, payload, and error handling",
         )
         driver_group.add_argument(
             "--wave2d-perf",
@@ -786,6 +792,7 @@ See Also:
             simd=parsed.simd,
             coroutine=parsed.coroutine,
             ieee754=parsed.ieee754,
+            rpc_smoke=parsed.rpc_smoke,
             wave2d_perf=parsed.wave2d_perf,
             environment=parsed.environment,
             verbose=parsed.verbose,

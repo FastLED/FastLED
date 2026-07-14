@@ -3,8 +3,18 @@
 from __future__ import annotations
 
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 from typing import IO, Protocol, runtime_checkable
+
+
+@dataclass(frozen=True)
+class DeployResult:
+    """Structured build/deploy result, including post-flash port handoff."""
+
+    success: bool
+    port: str | None = None
+    message: str = ""
 
 
 @runtime_checkable
@@ -34,7 +44,7 @@ class BuildDriver(Protocol):
         clean: bool = False,
         quiet: bool = False,
         log_file: IO[str] | None = None,
-    ) -> bool: ...
+    ) -> bool | DeployResult: ...
 
     def firmware_path(self, build_dir: Path, environment: str) -> Path: ...
 
@@ -66,10 +76,10 @@ class FbuildDriver:
         clean: bool = False,
         quiet: bool = False,
         log_file: IO[str] | None = None,
-    ) -> bool:
+    ) -> DeployResult:
         from ci.util.fbuild_runner import run_fbuild_deploy
 
-        return run_fbuild_deploy(
+        result = run_fbuild_deploy(
             build_dir,
             environment=environment,
             upload_port=upload_port,
@@ -77,6 +87,11 @@ class FbuildDriver:
             clean=clean,
             quiet=quiet,
             log_file=log_file,
+        )
+        return DeployResult(
+            success=result.success,
+            port=result.port,
+            message=result.output,
         )
 
     def firmware_path(self, build_dir: Path, environment: str) -> Path:

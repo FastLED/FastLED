@@ -27,6 +27,7 @@ from ci.autoresearch.phases import (
     _run_schema_and_pin_setup,
     _run_tests_or_special_mode,
 )
+from ci.rpc_client import RpcError
 from ci.util.port_utils import ChipDetectionResult, auto_detect_upload_port
 
 
@@ -57,6 +58,7 @@ def _make_args(**overrides) -> Args:
         simd=False,
         coroutine=False,
         ieee754=False,
+        rpc_smoke=False,
         wave2d_perf=None,
         environment=None,
         verbose=False,
@@ -150,6 +152,7 @@ def _make_ctx(**overrides) -> RunContext:
         simd_test_mode=False,
         coroutine_test_mode=False,
         ieee754_test_mode=False,
+        rpc_smoke_mode=False,
         wave2d_perf_grid=None,
         net_server_mode=False,
         net_client_mode=False,
@@ -1500,6 +1503,48 @@ class TestRunTestsOrSpecialMode:
         with patch(f"{_PATCH_MOD}.RpcClient", return_value=mock_client):
             rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
         assert rc == 0
+
+    def test_rpc_smoke_mode_validates_core_surface(self) -> None:
+        ctx = _make_ctx(rpc_smoke_mode=True)
+        qctx = QuietContext(quiet=False)
+
+        def response(data):
+            item = MagicMock()
+            item.success = True
+            item.data = data
+            return item
+
+        mock_client = AsyncMock()
+        mock_client.send = AsyncMock(
+            side_effect=[
+                response({"methods": ["ping"]}),
+                response([{"name": "ping"}]),
+                response({"uptimeMs": 1}),
+                response({"uptimeMs": 2}),
+                response(
+                    {
+                        "received": {
+                            "text": "rp2040-rpc-smoke",
+                            "number": 2040,
+                            "nested": {"ok": True, "values": [1, 2, 3]},
+                        }
+                    }
+                ),
+                response({"ready": True}),
+                response([]),
+                response({"success": True}),
+                RpcError("RPC Error -32601: Method not found"),
+            ]
+        )
+        mock_client.connect = AsyncMock()
+        mock_client.drain_boot_output = AsyncMock()
+        mock_client.close = AsyncMock()
+
+        with patch(f"{_PATCH_MOD}.RpcClient", return_value=mock_client):
+            rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
+
+        assert rc == 0
+        assert mock_client.send.await_count == 9
 
     def test_ble_mode_delegates(self) -> None:
         ctx = _make_ctx(ble_mode=True)
