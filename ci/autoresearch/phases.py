@@ -1915,7 +1915,9 @@ async def _run_watchdog_soak(ctx: RunContext) -> int:
             return 1
         before_uptime = before.data.get("uptimeMs")
         print(f"WATCHDOG: pre-reset ping uptimeMs={before_uptime}")
-        acknowledgement = await client.send("deliberateHang", args={}, timeout=8.0)
+        acknowledgement = await client.send(
+            "deliberateHang", args={}, timeout=8.0, return_on_ack=True
+        )
         if not acknowledgement.success:
             print(
                 f"RESULT: watchdog soak FAIL: deliberateHang acknowledgement "
