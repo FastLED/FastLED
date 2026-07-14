@@ -359,6 +359,7 @@ class RpcClient:
         args: list[Any] | dict[str, Any] | None = None,
         timeout: float | None = None,
         retries: int = 1,
+        return_on_ack: bool = False,
     ) -> RpcResponse:
         """Send JSON-RPC command and wait for response with mandatory ID correlation (async).
 
@@ -414,7 +415,9 @@ class RpcClient:
 
                 # Await response with ID matching (mandatory)
                 response = await self._wait_for_response(
-                    attempt_timeout, expected_id=request_id
+                    attempt_timeout,
+                    expected_id=request_id,
+                    return_on_ack=return_on_ack,
                 )
                 return response
 
@@ -582,7 +585,9 @@ class RpcClient:
             f"No response with key '{match_key}' after {retries} attempts"
         )
 
-    async def _wait_for_response(self, timeout: float, expected_id: int) -> RpcResponse:
+    async def _wait_for_response(
+        self, timeout: float, expected_id: int, return_on_ack: bool = False
+    ) -> RpcResponse:
         """Wait for and parse JSON-RPC response with mandatory ID matching (async).
 
         Args:
@@ -686,6 +691,13 @@ class RpcClient:
                         and "acknowledged" in response_data
                         and response_data["acknowledged"] is True
                     ):
+                        if return_on_ack:
+                            return RpcResponse(
+                                success=True,
+                                data=response_data,
+                                raw_line=line,
+                                _id=response_id,
+                            )
                         # ACK -> keep iterating the SAME generator so the
                         # final REMOTE response line goes to the SAME
                         # consumer. (Pre-#3219 fix recursed into a fresh

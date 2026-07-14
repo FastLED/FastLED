@@ -146,7 +146,7 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
         response.set("hangDelayMs", static_cast<int64_t>(200));
         response.set("watchdogExpected", true);
         return response;
-    });
+    }, fl::RpcMode::ASYNC);
 
     // Register "drivers" function - list available drivers
     remote.bind("drivers", [this](const fl::json& args) -> fl::json {
