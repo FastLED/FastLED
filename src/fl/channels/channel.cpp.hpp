@@ -227,10 +227,10 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
     // Set the LED data array
     setLeds(leds);
 
-    // Sync mSettings from ChannelOptions so the mWhiteCfg variant (and any
-    // other future fields) survives to showPixels(). The setter calls below
-    // are then idempotent overlays on top of the same data.
-    mSettings = options;
+    // Initialize the inherited per-channel controller settings so mWhiteCfg
+    // and future ChannelOptions fields survive to showPixels(). The setter
+    // calls below are idempotent overlays on the same data.
+    CLEDController::mSettings = options;
 
     // Set color correction/temperature/dither/rgbw from ChannelOptions
     setCorrection(options.mCorrection);
@@ -259,9 +259,9 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     // Set the LED data array
     setLeds(leds);
 
-    // Sync mSettings from ChannelOptions so the mWhiteCfg variant survives
-    // to showPixels(). See sibling ChipsetVariant constructor for rationale.
-    mSettings = options;
+    // Initialize the inherited per-channel controller settings so mWhiteCfg
+    // survives to showPixels(). See the sibling constructor for rationale.
+    CLEDController::mSettings = options;
 
     // Set color correction/temperature/dither/rgbw from ChannelOptions
     setCorrection(options.mCorrection);
@@ -284,9 +284,9 @@ void Channel::applyConfig(const ChannelConfig& config) {
         mName = config.mName.value();
     }
     setLeds(config.mLeds);
-    // Sync mSettings from incoming options so the mWhiteCfg variant survives
-    // to showPixels(). Setters below are idempotent overlays on the same data.
-    mSettings = config.options;
+    // Replace the inherited per-channel controller settings so mWhiteCfg and
+    // future options survive to showPixels(). Setters below are idempotent.
+    CLEDController::mSettings = config.options;
     mBus = config.options.mBus;
     mBusWhich = config.options.mBusWhich;
     setCorrection(config.options.mCorrection);
