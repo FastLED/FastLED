@@ -594,7 +594,7 @@ void loop() {
         // Arduino-Pico's USB CDC stack may still have the JSON response in
         // its buffered writer when the deliberate hang disables interrupts.
         // Flush it explicitly so the host records the ACK before reset.
-        Serial.flush();
+        fl::flush(1000);  // ok autoresearch rpc serial - drain ACK before watchdog hang
 #endif
         // noInterrupts() is an Arduino-only macro; guard it so the host stub
         // build (which compiles this .ino for the unit-test framework) doesn't
