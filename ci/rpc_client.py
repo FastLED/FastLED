@@ -57,13 +57,13 @@ class RpcResponse:
     """
 
     success: bool
-    data: dict[str, Any]
+    data: Any
     raw_line: str
     _id: int = 0  # Internal: Request ID from JSON-RPC 2.0 (always present, hidden from public API)
 
     def get(self, key: str, default: Any = None) -> Any:
         """Get value from response data."""
-        return self.data.get(key, default)
+        return self.data.get(key, default) if isinstance(self.data, dict) else default
 
     def __getitem__(self, key: str) -> Any:
         """Allow dict-like access to response data."""
@@ -71,7 +71,7 @@ class RpcResponse:
 
     def __contains__(self, key: str) -> bool:
         """Check if key exists in response data."""
-        return key in self.data
+        return isinstance(self.data, dict) and key in self.data
 
 
 class RpcTimeoutError(TimeoutError):
@@ -718,12 +718,13 @@ class RpcClient:
                         # Void functions return null - treat as successful execution
                         success = True
 
-                    # Ensure response_data is always a dict for consistent API
-                    final_response_data: dict[str, Any]
-                    if response_data is None or not isinstance(response_data, dict):
-                        final_response_data = {}
-                    else:
-                        final_response_data = response_data  # type: ignore[assignment]
+                    # Preserve array/scalar results as well as object results.
+                    # JSON-RPC discovery/help return arrays; collapsing those
+                    # to {} made it impossible for acceptance modes to validate
+                    # the actual manifest.
+                    final_response_data: Any = (
+                        {} if response_data is None else response_data
+                    )
 
                     return RpcResponse(
                         success=success,

@@ -47,6 +47,7 @@ class FbuildCommandResult:
     success: bool
     output: str
     returncode: int | None = None
+    port: str | None = None
 
 
 @typechecked
@@ -622,7 +623,7 @@ def run_fbuild_deploy(
     timeout: float = 1800,
     quiet: bool = False,
     log_file: IO[str] | None = None,
-) -> bool:
+) -> FbuildCommandResult:
     """Deploy firmware using fbuild with optional monitoring.
 
     Uses the daemon's combined build+deploy path which checks the firmware
@@ -641,7 +642,8 @@ def run_fbuild_deploy(
         log_file: File to redirect verbose output to in quiet mode
 
     Returns:
-        True if deploy (and optional monitoring) succeeded, False otherwise
+        Structured result with success and the post-deploy application port
+        when fbuild reports one.
     """
     import subprocess
 
@@ -656,7 +658,7 @@ def run_fbuild_deploy(
     fbuild_exe = get_fbuild_executable()
     if fbuild_exe is None:
         print("BUILD+FLASH FAIL fbuild not found on PATH")
-        return False
+        return FbuildCommandResult(success=False, output="fbuild not found")
 
     cmd: list[str] = [
         fbuild_exe,
@@ -707,6 +709,12 @@ def run_fbuild_deploy(
             print(proc.stdout, file=out, end="")
         returncode = proc.returncode
         success = returncode == 0
+        returned_port: str | None = None
+        for line in proc.stdout.splitlines() if proc.stdout else []:
+            if line.startswith("FBUILD_DEPLOY_PORT="):
+                candidate = line.partition("=")[2].strip()
+                if candidate:
+                    returned_port = candidate
 
         elapsed = time.monotonic() - t0
         if quiet:
@@ -718,7 +726,12 @@ def run_fbuild_deploy(
             else:
                 print(f"\n❌ Deploy failed (fbuild) [{elapsed:.1f}s]\n")
 
-        return success
+        return FbuildCommandResult(
+            success=success,
+            output=proc.stdout or "",
+            returncode=returncode,
+            port=returned_port,
+        )
 
     except KeyboardInterrupt as ki:
         from ci.util.global_interrupt_handler import handle_keyboard_interrupt
@@ -729,11 +742,13 @@ def run_fbuild_deploy(
     except subprocess.TimeoutExpired:
         elapsed = time.monotonic() - t0
         print(f"BUILD+FLASH FAIL timeout after {elapsed:.1f}s")
-        return False
+        return FbuildCommandResult(
+            success=False, output=f"deploy timeout after {elapsed:.1f}s"
+        )
     except Exception as e:
         elapsed = time.monotonic() - t0
         print(f"BUILD+FLASH FAIL {e}")
-        return False
+        return FbuildCommandResult(success=False, output=f"deploy error: {e}")
 
 
 def run_fbuild_monitor(

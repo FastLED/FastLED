@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any, TypeGuard
 from colorama import Fore, Style
 
 from ci.autoresearch.args import Args
-from ci.autoresearch.build_driver import select_build_driver
+from ci.autoresearch.build_driver import DeployResult, select_build_driver
 from ci.autoresearch.context import (
     DEFAULT_EXPECT_PATTERNS,
     DEFAULT_FAIL_ON_PATTERN,
@@ -37,7 +37,7 @@ from ci.autoresearch.gpio import (
     run_pin_discovery_segmented,
 )
 from ci.debug_attached import run_cpp_lint
-from ci.rpc_client import RpcClient, RpcCrashError, RpcTimeoutError
+from ci.rpc_client import RpcClient, RpcCrashError, RpcError, RpcTimeoutError
 from ci.util.blocker_alert import blocker_alert
 from ci.util.crash_trace_decoder import CrashTraceDecoder
 from ci.util.global_interrupt_handler import (
@@ -189,6 +189,9 @@ def _autoresearch_watchdog_thread(
                 mon.__exit__(None, None, None)
                 return
         except KeyboardInterrupt as ki:  # noqa: BLE001
+            handle_keyboard_interrupt(ki)
+            raise
+        except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
             raise
         except Exception:
@@ -399,6 +402,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     simd_test_mode = args.simd
     coroutine_test_mode = args.coroutine
     ieee754_test_mode = args.ieee754
+    rpc_smoke_mode = args.rpc_smoke
 
     # Parse --wave2d-perf "<W>x<H>" — None disables the mode.
     # Cf. #3124 for the planned --perf-XX convention rename.
@@ -495,6 +499,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             or simd_test_mode
             or coroutine_test_mode
             or ieee754_test_mode
+            or rpc_smoke_mode
             or net_server_mode
             or net_client_mode
             or net_loopback_mode
@@ -510,7 +515,13 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     # Validate mutual exclusivity
     if (
         net_server_mode or net_client_mode or net_loopback_mode or ota_mode or ble_mode
-    ) and (drivers or simd_test_mode or coroutine_test_mode or ieee754_test_mode):
+    ) and (
+        drivers
+        or simd_test_mode
+        or coroutine_test_mode
+        or ieee754_test_mode
+        or rpc_smoke_mode
+    ):
         print(
             f"{Fore.RED}\u274c Error: --net/--net-server/--net-client/--ota/--ble cannot be combined with driver flags, --simd, or --coroutine{Style.RESET_ALL}"
         )
@@ -537,6 +548,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         and not simd_test_mode
         and not coroutine_test_mode
         and not ieee754_test_mode
+        and not rpc_smoke_mode
         and not net_server_mode
         and not net_client_mode
         and not net_loopback_mode
@@ -1059,6 +1071,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         simd_test_mode=simd_test_mode,
         coroutine_test_mode=coroutine_test_mode,
         ieee754_test_mode=ieee754_test_mode,
+        rpc_smoke_mode=rpc_smoke_mode,
         wave2d_perf_grid=wave2d_perf_grid,
         net_server_mode=net_server_mode,
         net_client_mode=net_client_mode,
@@ -1087,9 +1100,12 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
     is_teensy = (
         ctx.final_environment is not None and "teensy" in ctx.final_environment.lower()
     )
+    stock_rp2040_transport = args.rpc_smoke and (
+        (ctx.final_environment or "").lower() in {"rp2040", "rpipico"}
+    )
 
     upload_port = args.upload_port
-    if not upload_port:
+    if not upload_port and not stock_rp2040_transport:
         expected_environment = None if is_teensy else ctx.final_environment
         max_wait_s = 60
         poll_interval_s = 1.0
@@ -1160,14 +1176,20 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
 
         upload_port = result.selected_port
 
-    assert upload_port is not None, "upload_port should be set by auto-detection"
+    if stock_rp2040_transport and not upload_port:
+        print(
+            "📦 Stock RP2040 transport: no pre-deploy serial port required; "
+            "fbuild will discover RPI-RP2 and return the application CDC port."
+        )
+    else:
+        assert upload_port is not None, "upload_port should be set by auto-detection"
     ctx.upload_port = upload_port
 
     # Auto-detect environment from attached chip
     detected_chip_type: str | None = None
     detected_environment: str | None = None
 
-    if not ctx.final_environment:
+    if not ctx.final_environment and upload_port is not None:
         print("\U0001f50d Detecting attached chip type...")
         chip_result = detect_attached_chip(upload_port)
         if chip_result.ok and chip_result.environment:
@@ -1387,18 +1409,29 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
             qctx.emit("BUILD+DEPLOY FAIL (nxplpc)")
             qctx.emit_log_path()
             return 1
-    elif not build_driver.deploy(
-        build_dir,
-        environment=build_environment,
-        upload_port=upload_port,
-        verbose=args.verbose,
-        clean=args.clean,
-        quiet=args.quiet,
-        log_file=qctx.log_file,
-    ):
-        qctx.emit("BUILD+FLASH FAIL")
-        qctx.emit_log_path()
-        return 1
+    else:
+        deploy_result = build_driver.deploy(
+            build_dir,
+            environment=build_environment,
+            upload_port=upload_port,
+            verbose=args.verbose,
+            clean=args.clean,
+            quiet=args.quiet,
+            log_file=qctx.log_file,
+        )
+        deploy_success = (
+            deploy_result.success
+            if isinstance(deploy_result, DeployResult)
+            else bool(deploy_result)
+        )
+        if isinstance(deploy_result, DeployResult) and deploy_result.port:
+            ctx.upload_port = deploy_result.port
+            upload_port = deploy_result.port
+            print(f"✅ fbuild returned application port: {deploy_result.port}")
+        if not deploy_success:
+            qctx.emit("BUILD+FLASH FAIL")
+            qctx.emit_log_path()
+            return 1
 
     # Wait for serial port to become available after upload
     if upload_port and build_driver.name == "platformio":
@@ -1490,7 +1523,10 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     # Validate RPC commands against device schema
     constrained_platforms = ["esp32c6", "esp32c2", "esp32p4", "teensy41", "teensy40"]
     skip_schema = (
-        args.skip_schema or args.quiet or final_environment in constrained_platforms
+        args.skip_schema
+        or args.quiet
+        or args.rpc_smoke
+        or final_environment in constrained_platforms
     )
 
     if skip_schema:
@@ -1587,6 +1623,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print(
             "\n\U0001f4cc IEEE754 codec mode: skipping pin discovery and GPIO pre-test"
         )
+    elif ctx.rpc_smoke_mode:
+        print("\n\U0001f4cc RPC smoke mode: skipping pin discovery and GPIO pre-test")
     elif ctx.net_server_mode or ctx.net_client_mode or ctx.net_loopback_mode:
         print("\n\U0001f4cc Network mode: skipping pin discovery and GPIO pre-test")
     elif ctx.ota_mode:
@@ -1655,7 +1693,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
             f"TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
         )
 
-    _ensure_leading_set_pins_command(ctx)
+    if not ctx.rpc_smoke_mode:
+        _ensure_leading_set_pins_command(ctx)
 
     # GPIO connectivity pre-test
     if final_environment in LPC_BRING_UP_ENVS:
@@ -1667,6 +1706,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     elif ctx.coroutine_test_mode:
         pass
     elif ctx.ieee754_test_mode:
+        pass
+    elif ctx.rpc_smoke_mode:
         pass
     elif ctx.net_server_mode or ctx.net_client_mode or ctx.net_loopback_mode:
         pass
@@ -1723,6 +1764,107 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
 # ============================================================
 
 
+async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
+    """Validate the pin-free JSON-RPC transport and core system surface."""
+    upload_port = ctx.upload_port
+    if not upload_port:
+        print("❌ RPC smoke requires the post-deploy application port")
+        return 1
+
+    from ci.util.serial_interface import create_serial_interface
+
+    client = RpcClient(
+        upload_port,
+        timeout=min(10.0, max(1.0, ctx.remaining_seconds(minimum=1.0))),
+        serial_interface=ctx.serial_iface
+        or create_serial_interface(upload_port, use_pyserial=not ctx.use_fbuild),
+        crash_decoder=ctx.crash_decoder,
+    )
+
+    async def call(name: str, args: Any = None) -> Any:
+        response = await client.send(
+            name,
+            args=args,
+            timeout=max(1.0, ctx.remaining_seconds(minimum=1.0)),
+        )
+        if not response.success:
+            raise RpcError(f"{name} returned unsuccessful response: {response.data!r}")
+        print(f"REMOTE: {name} -> {response.data!r}")
+        return response.data
+
+    try:
+        await client.connect()
+        await client.drain_boot_output(verbose=False)
+
+        discovered = await call("rpc.discover")
+        if not isinstance(discovered, (dict, list)) or not discovered:
+            raise RpcError("rpc.discover returned an empty or invalid manifest")
+
+        help_manifest = await call("help")
+        if not isinstance(help_manifest, list) or not help_manifest:
+            raise RpcError("help returned an empty or invalid manifest")
+
+        first_ping = await call("ping")
+        await asyncio.sleep(0.01)
+        second_ping = await call("ping")
+        first_uptime = (
+            first_ping.get("uptimeMs") if isinstance(first_ping, dict) else None
+        )
+        second_uptime = (
+            second_ping.get("uptimeMs") if isinstance(second_ping, dict) else None
+        )
+        if (
+            not isinstance(first_uptime, (int, float))
+            or not isinstance(second_uptime, (int, float))
+            or second_uptime < first_uptime
+        ):
+            raise RpcError("ping uptime did not advance monotonically")
+
+        payload = {
+            "text": "rp2040-rpc-smoke",
+            "number": 2040,
+            "nested": {"ok": True, "values": [1, 2, 3]},
+        }
+        echoed = await call("debugTest", payload)
+        if not isinstance(echoed, dict) or echoed.get("received") != payload:
+            raise RpcError(f"debugTest payload mismatch: {echoed!r}")
+
+        status = await call("status")
+        if not isinstance(status, dict) or status.get("ready") is not True:
+            raise RpcError(f"status did not report ready: {status!r}")
+
+        drivers = await call("drivers")
+        if not isinstance(drivers, list):
+            raise RpcError(f"drivers returned a non-array result: {drivers!r}")
+
+        no_serial = await call("testNoSerial")
+        if not isinstance(no_serial, dict) or no_serial.get("success") is not True:
+            raise RpcError(f"testNoSerial failed: {no_serial!r}")
+
+        try:
+            await call("__autoresearch_missing_method__")
+        except RpcError as exc:
+            print(f"REMOTE: missing-method error handled -> {exc}")
+        else:
+            raise RpcError("missing method unexpectedly succeeded")
+
+        print(
+            "RESULT: RPC smoke PASS (discovery, help, ping, payload, status, drivers, testNoSerial, error handling)"
+        )
+        return 0
+    except (RpcCrashError, RpcTimeoutError, RpcError, OSError) as exc:
+        print(f"RESULT: RPC smoke FAIL: {exc}")
+        return 1
+    finally:
+        try:
+            await client.close()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception:
+            pass
+
+
 async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int:
     """Execute GPIO-only, special modes, or main RPC test loop.
 
@@ -1739,6 +1881,9 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     # BEFORE the gpio_only_mode early-return so the harness actually runs the
     # echo check instead of bailing with a "no tests requested" success.
     final_environment = (ctx.final_environment or "").lower()
+    if ctx.rpc_smoke_mode:
+        return await _run_rpc_smoke_tests(ctx)
+
     if final_environment in LPC_BRING_UP_ENVS:
         if ctx.ieee754_test_mode:
             return await _run_ieee754_tests(ctx)

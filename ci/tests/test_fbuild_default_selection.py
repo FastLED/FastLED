@@ -95,6 +95,14 @@ def test_autoresearch_parse_args_warns_for_deprecated_fbuild_flags(
     assert "--no-fbuild is deprecated and has no effect" in captured.err
 
 
+def test_autoresearch_parse_args_supports_pin_free_rpc_smoke() -> None:
+    parsed = Args.parse_args(["rp2040", "--rpc-smoke"])
+
+    assert parsed.environment_positional == "rp2040"
+    assert parsed.rpc_smoke is True
+    assert parsed.auto_discover_pins is True
+
+
 def test_debug_attached_parse_args_warns_for_deprecated_fbuild_flags(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
