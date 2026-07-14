@@ -1812,7 +1812,12 @@ async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
             raise RpcError("rpc.discover returned an empty or invalid manifest")
 
         help_manifest = await call("help")
-        if not isinstance(help_manifest, list) or not help_manifest:
+        help_functions = (
+            help_manifest.get("functions")
+            if isinstance(help_manifest, dict)
+            else help_manifest
+        )
+        if not isinstance(help_functions, list) or not help_functions:
             raise RpcError("help returned an empty or invalid manifest")
 
         first_ping = await call("ping")
