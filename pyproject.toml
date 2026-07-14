@@ -5,9 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.4.0 (released 2026-07-06).
+    # Pin to fbuild 2.5.1 (released 2026-07-13).
     #
     # Pin history:
+    #   2.5.1 -- upgrades PyO3 to 0.29 and fixes duplicate objc dylib
+    #             linkage on macOS (FastLED/fbuild#1026/#1027). It includes
+    #             the 2.5.0 USB inventory, deploy tooling, build-cache,
+    #             daemon arbitration, and build-flag propagation rollup.
     #   2.4.0 -- carries daemon serial lock diagnostics/recovery for stale
     #             serial sessions: `daemon locks` now exposes owner metadata,
     #             ages/activity, and pending attaches, while `clear-locks`
@@ -148,7 +152,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.4.0",
+    "fbuild==2.5.1",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
