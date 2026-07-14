@@ -276,7 +276,6 @@ private:
                                          // disable re-emits the diagnostic.
     const i32 mId;
     fl::string mName;               // User-specified or auto-generated name
-    ChannelOptions mSettings;           // Per-channel settings (gamma, rgbw, etc.)
     ChannelDataPtr mChannelData;
     fl::ScreenMap mScreenMap;        // Screen map for JS canvas visualization
 };

@@ -6,8 +6,10 @@
 #include "fl/channels/bus.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/channel.h"
+#include "fl/channels/channel_events.h"
 #include "fl/channels/channel_typed.h"
 #include "fl/channels/config.h"
+#include "fl/channels/data.h"
 #include "fl/channels/manager.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/gfx/crgb.h"
@@ -101,6 +103,81 @@ FL_TEST_CASE("runtime FastLED.add(cfg) with cfg.options.mBus = Bus::BIT_BANG") {
     FL_CHECK(channel->getPin() == 2);
 
     channel->removeFromDrawList();
+}
+
+FL_TEST_CASE("ChannelConfig RGBW settings encode four bytes per pixel") {
+    CRGB workspace[2] = {CRGB::Red, CRGB::Blue};
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelOptions options;
+    options.mBus = fl::Bus::BIT_BANG;
+    options.mWhiteCfg = fl::RgbwDefault::value();
+
+    fl::enableDrivers<fl::Bus::BIT_BANG>();
+    fl::ChannelConfig config(fl::ClocklessChipset(9, timing),
+                             fl::span<CRGB>(workspace, 2), RGB, options);
+    auto channel = fl::Channel::create(config);
+    FL_REQUIRE(channel != nullptr);
+
+    bool encoded = false;
+    fl::ChannelPixelFormat pixelFormat = fl::ChannelPixelFormat::RGB;
+    size_t encodedBytes = 0;
+    auto& events = fl::ChannelEvents::instance();
+    int listenerId = events.onChannelDataEncoded.add(
+        [&](const fl::IChannel& source, const fl::ChannelData& data) {
+            if (&source == channel.get()) {
+                encoded = true;
+                pixelFormat = data.getPixelFormat();
+                encodedBytes = data.getData().size();
+            }
+        });
+
+    FastLED.add(channel);
+    FastLED.show();
+    FastLED.remove(channel);
+    events.onChannelDataEncoded.remove(listenerId);
+
+    FL_REQUIRE(encoded);
+    FL_CHECK_EQ(pixelFormat, fl::ChannelPixelFormat::RGBW);
+    FL_CHECK_EQ(encodedBytes, 8u);
+}
+
+FL_TEST_CASE("CLEDController RGBW setter reaches Channel encoding") {
+    CRGB workspace[2] = {CRGB::Red, CRGB::Blue};
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelOptions options;
+    options.mBus = fl::Bus::BIT_BANG;
+
+    fl::enableDrivers<fl::Bus::BIT_BANG>();
+    fl::ChannelConfig config(fl::ClocklessChipset(10, timing),
+                             fl::span<CRGB>(workspace, 2), RGB, options);
+    auto channel = fl::Channel::create(config);
+    FL_REQUIRE(channel != nullptr);
+
+    fl::CLEDController& controller = *channel;
+    controller.setRgbw(fl::RgbwDefault::value());
+    FL_REQUIRE(controller.getRgbw().active());
+
+    bool encoded = false;
+    fl::ChannelPixelFormat pixelFormat = fl::ChannelPixelFormat::RGB;
+    size_t encodedBytes = 0;
+    auto& events = fl::ChannelEvents::instance();
+    int listenerId = events.onChannelDataEncoded.add(
+        [&](const fl::IChannel& source, const fl::ChannelData& data) {
+            if (&source == channel.get()) {
+                encoded = true;
+                pixelFormat = data.getPixelFormat();
+                encodedBytes = data.getData().size();
+            }
+        });
+
+    FastLED.add(channel);
+    FastLED.show();
+    FastLED.remove(channel);
+    events.onChannelDataEncoded.remove(listenerId);
+
+    FL_REQUIRE(encoded);
+    FL_CHECK_EQ(pixelFormat, fl::ChannelPixelFormat::RGBW);
+    FL_CHECK_EQ(encodedBytes, 8u);
 }
 
 FL_STATIC_ASSERT(
