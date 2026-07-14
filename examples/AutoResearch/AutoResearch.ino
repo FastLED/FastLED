@@ -589,7 +589,13 @@ void loop() {
     // and is reflashable.
     // ========================================================================
     if (g_autoresearch_state->deliberate_hang_requested) {
-        delay(200);  // give Serial TX FIFO time to flush
+        delay(200);  // give the RPC response time to enter the USB TX FIFO
+#if !defined(FL_IS_STUB) && !defined(FL_IS_WASM)
+        // Arduino-Pico's USB CDC stack may still have the JSON response in
+        // its buffered writer when the deliberate hang disables interrupts.
+        // Flush it explicitly so the host records the ACK before reset.
+        Serial.flush();
+#endif
         // noInterrupts() is an Arduino-only macro; guard it so the host stub
         // build (which compiles this .ino for the unit-test framework) doesn't
         // hit an undeclared identifier. On host the while(1) below still spins
