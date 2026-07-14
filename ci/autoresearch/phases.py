@@ -1516,7 +1516,18 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     """
     args = ctx.args
     upload_port = ctx.upload_port
-    assert upload_port is not None
+    if upload_port is None and ctx.rpc_smoke_mode and ctx.use_fbuild:
+        # Stock RP2040 deployment starts from BOOTSEL mass-storage and may
+        # return before Windows has published the application CDC endpoint.
+        # Re-scan by USB identity instead of asserting on the pre-deploy port.
+        result = auto_detect_upload_port(expected_environment="rp2040")
+        if result.selected_port:
+            upload_port = result.selected_port
+            ctx.upload_port = upload_port
+            print(f"✅ Discovered RP2040 application port: {upload_port}")
+    if upload_port is None:
+        print("❌ No application serial port was returned after fbuild deployment")
+        return 1
     use_fbuild = ctx.use_fbuild
     final_environment = ctx.final_environment
 
