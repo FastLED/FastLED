@@ -159,6 +159,7 @@ class RunContext:
     gpio_only_mode: bool
     parallel_mode: bool
     rpc_smoke_mode: bool = False
+    watchdog_soak_mode: bool = False
 
     # Resolved after port/environment detection
     final_environment: str | None = None
