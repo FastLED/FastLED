@@ -711,8 +711,10 @@ def run_fbuild_deploy(
         success = returncode == 0
         returned_port: str | None = None
         for line in proc.stdout.splitlines() if proc.stdout else []:
-            if line.startswith("FBUILD_DEPLOY_PORT="):
-                candidate = line.partition("=")[2].strip()
+            marker = "FBUILD_DEPLOY_PORT="
+            if marker in line:
+                suffix = line.split(marker, 1)[1].strip()
+                candidate = suffix.split()[0] if suffix else ""
                 if candidate:
                     returned_port = candidate
 
