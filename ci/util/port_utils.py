@@ -60,6 +60,15 @@ NO_WIFI_ENVIRONMENTS: set[str] = {"esp32h2", "esp32p4"}
 # has a richer fingerprint table; this map only carries the entries
 # autoresearch needs for default-port selection.
 ENVIRONMENT_TO_VCOM_VID_PIDS: dict[str, tuple[tuple[int, int], ...]] = {
+    # RP2040 Pico application CDC (the ROM BOOTSEL interface is 2E8A:0003
+    # and is intentionally not a serial port). Keep this fingerprint strict:
+    # falling back to an arbitrary CP210x/CH340 port can run RPC against a
+    # different attached board.
+    "rp2040": ((0x2E8A, 0x000A), (0x2E8A, 0x000F)),
+    "rpipico": ((0x2E8A, 0x000A),),
+    "rpipicow": ((0x2E8A, 0x000A),),
+    "rpipico2": ((0x2E8A, 0x000F),),
+    "rpipico2w": ((0x2E8A, 0x000F),),
     # LPC8xx family: the on-board debug probe can be either
     #   * LPC11U35 running the LPCXpresso VCOM firmware — 16C0:0483
     #     (the community "V-USB" VID:PID; shared with PJRC Teensy).

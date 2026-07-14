@@ -1113,6 +1113,50 @@ class TestAutoDetectUploadPort:
         assert result.ok is True
         assert result.selected_port == "COM12"
 
+    def test_rp2040_requires_application_cdc_fingerprint(self) -> None:
+        """A nearby CP210x must never be selected for an RP2040 run."""
+        port = ListPortInfo("COM11")
+        port.description = "Silicon Labs CP210x USB to UART Bridge"
+        port.hwid = "USB VID:PID=10C4:EA60"
+        port.vid = 0x10C4
+        port.pid = 0xEA60
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[port],
+        ):
+            result = auto_detect_upload_port("rp2040")
+        assert result.ok is False
+        assert result.selected_port is None
+        assert "2E8A:000A" in (result.error_message or "")
+
+    def test_rp2040_application_cdc_fingerprint_matches(self) -> None:
+        port = ListPortInfo("COM11")
+        port.description = "USB Serial Device"
+        port.hwid = "USB VID:PID=2E8A:000A"
+        port.vid = 0x2E8A
+        port.pid = 0x000A
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[port],
+        ):
+            result = auto_detect_upload_port("rp2040")
+        assert result.ok is True
+        assert result.selected_port == "COM11"
+
+    def test_rpipico2_application_cdc_fingerprint_matches(self) -> None:
+        port = ListPortInfo("COM12")
+        port.description = "USB Serial Device"
+        port.hwid = "USB VID:PID=2E8A:000F"
+        port.vid = 0x2E8A
+        port.pid = 0x000F
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[port],
+        ):
+            result = auto_detect_upload_port("rpipico2")
+        assert result.ok is True
+        assert result.selected_port == "COM12"
+
     def test_lpc845brk_lpc_link2_cmsis_dap_fingerprint_matches(self) -> None:
         """LPC845-BRK with LPC-Link2 CMSIS-DAP firmware (1FC9:0132) is accepted.
 
