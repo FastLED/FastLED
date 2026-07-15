@@ -17,6 +17,7 @@ from ci.meson.meson_setup_execute import (
     write_meson_native_file,
 )
 from ci.meson.meson_setup_phases import CompilerDetection, MarkerPaths
+from ci.meson.runner import _setup_sanitizer_env
 from ci.meson.runner_helpers import _start_zccache_session
 
 
@@ -211,6 +212,36 @@ class TestMesonNativeToolchain(unittest.TestCase):
             with self.subTest(meson_file=relative_path.as_posix()):
                 content = (project_root / relative_path).read_text(encoding="utf-8")
                 self.assertIn("get_option('cpp_args')", content)
+
+    def test_apple_debug_disables_unsupported_leak_detection(self) -> None:
+        import clang_tool_chain
+
+        prepared = {
+            "ASAN_OPTIONS": "fast_unwind_on_malloc=0:symbolize=1:detect_leaks=1",
+            "LSAN_OPTIONS": "symbolize=1",
+        }
+        with (
+            TemporaryDirectory() as temp_dir,
+            patch("ci.meson.runner.sys.platform", "darwin"),
+            patch.dict(
+                clang_tool_chain.__dict__,
+                {"prepare_sanitizer_environment": lambda **_kwargs: prepared},
+            ),
+            patch.dict(os.environ, {}, clear=True),
+        ):
+            source_dir = Path(temp_dir)
+            suppressions = source_dir / "tests" / "lsan_suppressions.txt"
+            suppressions.parent.mkdir()
+            suppressions.write_text("leak:known_false_positive\n", encoding="utf-8")
+            _setup_sanitizer_env(source_dir, verbose=False)
+            options = os.environ["ASAN_OPTIONS"].split(":")
+            lsan_options = os.environ["LSAN_OPTIONS"]
+
+        self.assertIn("fast_unwind_on_malloc=0", options)
+        self.assertIn("symbolize=1", options)
+        self.assertIn("detect_leaks=0", options)
+        self.assertNotIn("detect_leaks=1", options)
+        self.assertNotIn("suppressions=", lsan_options)
 
     def test_apple_non_debug_keeps_clang_tool_chain(self) -> None:
         compiler = self._compiler()
