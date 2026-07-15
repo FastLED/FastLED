@@ -17,8 +17,8 @@ from ci.meson.meson_setup_execute import (
     write_meson_native_file,
 )
 from ci.meson.meson_setup_phases import CompilerDetection, MarkerPaths
-from ci.meson.runner import _setup_sanitizer_env
 from ci.meson.runner_helpers import _start_zccache_session
+from ci.meson.sanitizer_env import setup_sanitizer_env
 
 
 class TestMesonNativeToolchain(unittest.TestCase):
@@ -222,7 +222,7 @@ class TestMesonNativeToolchain(unittest.TestCase):
         }
         with (
             TemporaryDirectory() as temp_dir,
-            patch("ci.meson.runner.sys.platform", "darwin"),
+            patch("ci.meson.sanitizer_env.sys.platform", "darwin"),
             patch.dict(
                 clang_tool_chain.__dict__,
                 {"prepare_sanitizer_environment": lambda **_kwargs: prepared},
@@ -233,7 +233,7 @@ class TestMesonNativeToolchain(unittest.TestCase):
             suppressions = source_dir / "tests" / "lsan_suppressions.txt"
             suppressions.parent.mkdir()
             suppressions.write_text("leak:known_false_positive\n", encoding="utf-8")
-            _setup_sanitizer_env(source_dir, verbose=False)
+            setup_sanitizer_env(source_dir, verbose=False)
             options = os.environ["ASAN_OPTIONS"].split(":")
             lsan_options = os.environ["LSAN_OPTIONS"]
 
@@ -242,6 +242,17 @@ class TestMesonNativeToolchain(unittest.TestCase):
         self.assertIn("detect_leaks=0", options)
         self.assertNotIn("detect_leaks=1", options)
         self.assertNotIn("suppressions=", lsan_options)
+
+    def test_unit_and_example_runners_share_sanitizer_setup(self) -> None:
+        project_root = Path(__file__).parents[2]
+        for relative_path in (
+            Path("ci/meson/runner.py"),
+            Path("ci/util/meson_example_runner.py"),
+        ):
+            with self.subTest(runner=relative_path.as_posix()):
+                content = (project_root / relative_path).read_text(encoding="utf-8")
+                self.assertIn("setup_sanitizer_env(source_dir, verbose)", content)
+                self.assertNotIn("prepare_sanitizer_environment", content)
 
     def test_apple_non_debug_keeps_clang_tool_chain(self) -> None:
         compiler = self._compiler()

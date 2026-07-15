@@ -16,7 +16,6 @@ This file owns the entry point ``run_meson_build_and_test`` and the CLI.
 
 import argparse
 import glob
-import os
 import sys
 import time
 from pathlib import Path
@@ -31,6 +30,7 @@ from ci.meson.build_timer import BuildTimer
 from ci.meson.compiler import check_meson_installed
 from ci.meson.phase_tracker import PhaseTracker
 from ci.meson.runner_helpers import _safe_rmtree, _start_zccache_session
+from ci.meson.sanitizer_env import setup_sanitizer_env
 from ci.meson.sequential_runner import (
     DirectTestContext,
     SequentialCompileContext,
@@ -41,49 +41,6 @@ from ci.meson.streaming_runner import StreamingContext, run_streaming_path
 from ci.meson.test_execution import MesonTestResult, run_meson_test
 from ci.util.build_lock import libfastled_build_lock
 from ci.util.timestamp_print import ts_print as _ts_print
-
-
-def _setup_sanitizer_env(source_dir: Path, verbose: bool) -> None:
-    """Configure ASan/LSan options for debug builds via clang-tool-chain."""
-    from clang_tool_chain import (
-        prepare_sanitizer_environment,  # noqa: PLC0415 - lazy: ~60ms on non-debug
-    )
-
-    sanitizer_flags = ["-fsanitize=address"]
-    sanitizer_env = prepare_sanitizer_environment(
-        base_env=os.environ.copy(),
-        compiler_flags=sanitizer_flags,
-    )
-
-    if sys.platform == "darwin":
-        # Apple's Xcode ASan runtime on the macos-26 runner rejects
-        # detect_leaks=1 before main() with "not supported on this platform."
-        # LeakSanitizer is therefore unavailable on this runtime; keep all ASan
-        # and UBSan instrumentation active while disabling only that option.
-        asan_options = sanitizer_env.get("ASAN_OPTIONS", "")
-        options = [
-            option
-            for option in asan_options.split(":")
-            if option and not option.startswith("detect_leaks=")
-        ]
-        options.append("detect_leaks=0")
-        sanitizer_env["ASAN_OPTIONS"] = ":".join(options)
-
-    os.environ.update(sanitizer_env)
-
-    lsan_suppressions = source_dir / "tests" / "lsan_suppressions.txt"
-    if sys.platform != "darwin" and lsan_suppressions.exists():
-        existing_lsan = os.environ.get("LSAN_OPTIONS", "")
-        suppression_opt = f"suppressions={lsan_suppressions}"
-        if existing_lsan:
-            os.environ["LSAN_OPTIONS"] = f"{existing_lsan}:{suppression_opt}"
-        else:
-            os.environ["LSAN_OPTIONS"] = suppression_opt
-
-    if verbose:
-        symbolizer_path = sanitizer_env.get("ASAN_SYMBOLIZER_PATH")
-        if symbolizer_path:
-            _ts_print(f"[MESON] Set ASAN_SYMBOLIZER_PATH={symbolizer_path}")
 
 
 def _resolve_test_name_candidates(
@@ -189,7 +146,7 @@ def run_meson_build_and_test(
 
     use_debug = build_mode == "debug"
     if use_debug:
-        _setup_sanitizer_env(source_dir, verbose)
+        setup_sanitizer_env(source_dir, verbose)
 
     _ts_print(f"Preparing build ({build_mode} mode)...")
     _start_zccache_session(build_dir, build_mode)

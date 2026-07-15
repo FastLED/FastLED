@@ -22,6 +22,7 @@ from running_process import RunningProcess
 
 from ci.meson.build_config import perform_ninja_maintenance, setup_meson_build
 from ci.meson.compiler import check_meson_installed, get_meson_executable
+from ci.meson.sanitizer_env import setup_sanitizer_env
 from ci.meson.test_execution import MesonTestResult
 from ci.util.build_lock import libfastled_build_lock
 from ci.util.output_formatter import TimestampFormatter
@@ -438,19 +439,10 @@ def run_meson_examples(
     # bin/ (which owns libclang_rt.asan_dynamic-x86_64.dll) to PATH; without
     # it every example .exe fails to start with 0xC0000135 STATUS_DLL_NOT_FOUND
     # — the failure mode that had `example tests windows` red on master
-    # since 2026-06-23. Mirrors the same call ci/meson/runner.py makes for
-    # the unit-test runner; the example runner had grown its own --debug
-    # path without the equivalent env prep.
+    # since 2026-06-23. The shared helper also applies the macOS-specific
+    # ASan options used by the unit-test runner.
     if build_mode == "debug":
-        from clang_tool_chain import (  # noqa: PLC0415 - lazy import: ~60ms
-            prepare_sanitizer_environment,
-        )
-
-        sanitizer_env = prepare_sanitizer_environment(
-            base_env=os.environ.copy(),
-            compiler_flags=["-fsanitize=address"],
-        )
-        os.environ.update(sanitizer_env)
+        setup_sanitizer_env(source_dir, verbose)
 
     # Construct mode-specific build directory
     # This enables caching per mode when source unchanged but flags differ
