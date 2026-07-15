@@ -110,3 +110,30 @@ frame. Feed the watchdog only between independently bounded operations so a
 real capture or TX wedge remains observable.
 
 The ESP32-WROOM incident narrative follows in the next phase.
+
+## Classic ESP32-WROOM postmortem
+
+Classic ESP32 work repeatedly showed that console readiness, scheduler
+progress, peripheral ownership, and wire data are separate layers. Identify
+the attached board with `fbuild port scan` and use the production record in
+[FastLED/boards](https://github.com/FastLED/boards); CP210x reset behavior is
+transport evidence, not an LED-driver conclusion.
+
+| Incident | Sources | False lead and discriminator | Root cause and working fix | Permanent rule / evidence |
+| --- | --- | --- | --- | --- |
+| Ready versus ingest | [#3446](https://github.com/FastLED/FastLED/issues/3446), [#3447](https://github.com/FastLED/FastLED/issues/3447), [#3452](https://github.com/FastLED/FastLED/issues/3452) | A ready banner or CP210x reset transition was treated as proof the command ran. A bounded RPC request/response and scheduler-progress observation separated console readiness from handler ingestion. | Keep transport, command acknowledgement, and peripheral test as separate gates. | A boot/ready line proves boot only; require RPC evidence before interpreting silence as driver behavior. |
+| API seams and ownership | [#3458](https://github.com/FastLED/FastLED/issues/3458), [#3461](https://github.com/FastLED/FastLED/issues/3461), [#3465](https://github.com/FastLED/FastLED/issues/3465), [#3467](https://github.com/FastLED/FastLED/issues/3467), [#3469](https://github.com/FastLED/FastLED/issues/3469), [#3470](https://github.com/FastLED/FastLED/issues/3470), [#3471](https://github.com/FastLED/FastLED/issues/3471), [#3473](https://github.com/FastLED/FastLED/issues/3473) | A singleton mock or a static peripheral claim looked sufficient. Deterministic failure injection plus real RX backends exposed lifecycle and shared TX/RX ownership gaps. | Put resource claims, rollback, stop, and release behind explicit seams testable with real backend behavior. | A mock proves a contract path, not a GPIO/peripheral result; pair it with resource-lifecycle tests. |
+| Do not remove wire proof | [#3474](https://github.com/FastLED/FastLED/issues/3474), [#3477](https://github.com/FastLED/FastLED/issues/3477), [#3479](https://github.com/FastLED/FastLED/issues/3479), [#3512](https://github.com/FastLED/FastLED/issues/3512), [#3526](https://github.com/FastLED/FastLED/issues/3526) | A new architecture was assumed better because it compiled or looked cleaner. Raw wire and replacement-path evidence exposed that the proven I2S route had been removed prematurely. | Preserve a known-good data path until the replacement has equivalent physical proof and a rollback plan. | Architecture preference never outranks existing attached-board proof. Evidence: design/static until wire proof is repeated. |
+| Loopback qualification | [#3568](https://github.com/FastLED/FastLED/issues/3568), [#3569](https://github.com/FastLED/FastLED/issues/3569), [#3570](https://github.com/FastLED/FastLED/issues/3570), [#3571](https://github.com/FastLED/FastLED/issues/3571) | A jumper, an edge counter, or a decoded partial frame was treated as decisive. Mapping/clock/descriptor/stop/heap/stack checks plus raw edges and byte-exact decode separated those claims. | Qualify an independent RX oracle before attributing a result to TX; include stop and memory behavior in the same lifecycle test. | GPIO proof, raw-edge proof, timing proof, and byte-exact proof are cumulative—not interchangeable. |
+| UART margin and pressure | [#3572](https://github.com/FastLED/FastLED/issues/3572), [#3573](https://github.com/FastLED/FastLED/issues/3573), [#3588](https://github.com/FastLED/FastLED/issues/3588), [#3589](https://github.com/FastLED/FastLED/issues/3589), [#3597](https://github.com/FastLED/FastLED/issues/3597), [#3598](https://github.com/FastLED/FastLED/issues/3598), [#3599](https://github.com/FastLED/FastLED/issues/3599), [#3600](https://github.com/FastLED/FastLED/issues/3600), [#3603](https://github.com/FastLED/FastLED/issues/3603), [#3604](https://github.com/FastLED/FastLED/issues/3604) | Passing a nominal waveform hid symbol-separation margin, concurrent pressure, and response/telemetry heap cost. Failure injection, streamed/collated diagnostics, and resource pressure distinguished data-path defects from observability cost. | Bound diagnostic output, retain failure evidence, and test OOM/stack/resource recovery after isolated driver success. | A passing single frame is not a resource conclusion. Require a pressure matrix and a same-session known-good control. |
+
+### ESP32 quiet-control rule
+
+Before increasing a timeout, account for every `fl::print`, `Serial.print*`,
+`FL_PRINT`, `FL_WARN`, `AR_FL_WARN`, collated edge dump, and JSON-RPC payload.
+Diagnostics are part of the memory and transport budget. Keep raw-edge and
+byte-mismatch evidence on failures, cap it in normal paths, and state whether
+the conclusion came from an attached board, a host test, or static inspection.
+
+The final integration phase links this guide from the agent runbooks and
+consolidates the reusable checklists.
