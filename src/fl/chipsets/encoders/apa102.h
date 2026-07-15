@@ -131,8 +131,10 @@ FL_OPTIMIZE_O2
 void encodeAPA102_AutoBrightness(InputIterator first, InputIterator last,
                                  OutputIterator out) FL_NO_EXCEPT {
     if (first == last) {
-        // Empty range - just write start frame (no end frame needed for 0 LEDs)
+        // Preserve a complete frame even at zero LEDs. This matters when a
+        // previously longer cascade is reconfigured through the public API.
         *out++ = 0x00; *out++ = 0x00; *out++ = 0x00; *out++ = 0x00;
+        *out++ = 0xFF; *out++ = 0xFF; *out++ = 0xFF; *out++ = 0xFF;
         return;
     }
 
