@@ -18,6 +18,7 @@
 | Test-Driven Development (TDD) | Use `/tdd` or `/tdd-implement` skills |
 | Editing `.fled` container docs or `src/fl/fled/` | `agents/docs/fled-format.md` |
 | Hardware autoresearch / `bash autoresearch` | `agents/docs/hardware-autoresearch.md` |
+| Hardware driver bring-up evidence or postmortems | `agents/docs/driver-bringup-postmortems.md` |
 | Debugging a C++ crash | `agents/docs/debugging.md` |
 | Investigating binary size / flash bloat | `agents/docs/binary-size-analysis.md` |
 | Creating a new C++ linter | `agents/docs/linter-architecture.md` |

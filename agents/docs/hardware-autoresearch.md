@@ -55,6 +55,7 @@ Reference links for agents:
 
 - [CLAUDE.md](../../CLAUDE.md)
 - [hardware-autoresearch.md](hardware-autoresearch.md)
+- [driver bring-up postmortems](driver-bringup-postmortems.md)
 - [autoresearch wrapper](../../autoresearch)
 - [ci/autoresearch/args.py](../../ci/autoresearch/args.py)
 - [ci/autoresearch/phases.py](../../ci/autoresearch/phases.py)
