@@ -6,6 +6,7 @@
 namespace fl {
 
 enum class RxBackend : u8 {
+    PIO = 7,               ///< RP2040/RP2350 PIO receive backend.
     PLATFORM_DEFAULT = 0,  ///< Use the recommended backend for the active platform (RMT on ESP32; FlexPWM on Teensy 4.x with FLEXIO as an opt-in alternative — see FastLED#2764; LPC_SCT_CAPTURE on LPC845; native RX on stub/host builds).
     RMT = 1,               ///< ESP32-only RMT capture backend.
     ISR = 2,               ///< Platform-neutral interrupt-driven edge capture backend when available.
@@ -24,6 +25,7 @@ inline const char* toString(RxBackend backend) FL_NO_EXCEPT {
     case RxBackend::FLEXIO: return "FLEXIO";
     case RxBackend::LPC_SCT_CAPTURE: return "LPC_SCT_CAPTURE";
     case RxBackend::I2S_RX: return "I2S_RX";
+    case RxBackend::PIO: return "PIO";
     }
     return "UNKNOWN";
 }

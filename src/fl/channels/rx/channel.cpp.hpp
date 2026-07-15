@@ -37,6 +37,8 @@ static fl::shared_ptr<RxDevice> createBackendDevice(const RxChannelConfig& confi
         return RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(config.pin);
     case RxBackend::I2S_RX:
         return RxDevice::create<RxDeviceType::I2S_RX>(config.pin);
+    case RxBackend::PIO:
+        return RxDevice::create<RxDeviceType::PIO>(config.pin);
     }
     return RxDevice::create<RxDeviceType::PLATFORM_DEFAULT>(config.pin);
 }

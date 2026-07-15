@@ -161,6 +161,7 @@ enum class RxWaitResult : u8 {
  * factory pattern for compile-time device selection.
  */
 enum class RxDeviceType : u8 {
+    PIO = 7,              ///< PIO receiver (RP2040/RP2350)
     PLATFORM_DEFAULT = 0,  ///< Platform default (RMT on ESP32, FLEXPWM on Teensy 4.x; FLEXIO available as opt-in on Teensy 4 — see FastLED#2764; LPC_SCT_CAPTURE on LPC845)
     ISR = 1,              ///< GPIO ISR-based receiver (ESP32)
     RMT = 2,              ///< RMT-based receiver (ESP32)
@@ -184,6 +185,7 @@ inline const char* toString(RxDeviceType type) FL_NO_EXCEPT {
     case RxDeviceType::FLEXIO:  return "FLEXIO";
     case RxDeviceType::LPC_SCT_CAPTURE: return "LPC_SCT_CAPTURE";
     case RxDeviceType::I2S_RX: return "I2S_RX";
+    case RxDeviceType::PIO: return "PIO";
     }
     return "UNKNOWN";
 }
@@ -442,5 +444,6 @@ template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>(int pin
 template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) FL_NO_EXCEPT;
 template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXPWM>(int pin) FL_NO_EXCEPT;
 template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(int pin) FL_NO_EXCEPT;
+template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PIO>(int pin) FL_NO_EXCEPT;
 
 } // namespace fl

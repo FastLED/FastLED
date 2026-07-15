@@ -148,6 +148,24 @@ FL_TEST_CASE("CFastLED - addRx creates RxChannel") {
     FL_CHECK(channel->config().pin == 8);
 }
 
+FL_TEST_CASE("RxChannel - PIO backend supports host lifecycle and edge injection") {
+    RxChannelConfig config(9, RxBackend::PIO);
+    config.edge_capacity = 4;
+    auto channel = RxChannel::create(config);
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK(channel->backend() == RxBackend::PIO);
+
+#ifdef FL_IS_STUB
+    FL_CHECK(channel->begin(config));
+    EdgeTime edges[] = {EdgeTime(true, 400), EdgeTime(false, 850)};
+    FL_CHECK(channel->injectEdges(fl::span<const EdgeTime>(edges)));
+    FL_CHECK(channel->wait(0) == RxWaitResult::SUCCESS);
+    EdgeTime captured[2];
+    FL_CHECK_EQ(channel->getRawEdgeTimes(captured), 2u);
+    FL_CHECK_EQ(captured[0].ns, 400u);
+#endif
+}
+
 // ============================================================
 // EdgeTime packed structure tests (merged from edge_time.cpp)
 // ============================================================

@@ -39,7 +39,25 @@
 // IWYU pragma: end_keep
 #endif
 
+#ifdef FL_IS_RP
+// IWYU pragma: begin_keep
+#include "platforms/arm/rp/rpcommon/rx_pio_channel.h"  // ok platform headers
+// IWYU pragma: end_keep
+#endif
+
 namespace fl {
+
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PIO>(int pin) FL_NO_EXCEPT {
+#ifdef FL_IS_RP
+    return RpPioRxDevice::create(pin);
+#elif defined(FL_IS_STUB)
+    return NativeRxDevice::create(pin);
+#else
+    (void)pin;
+    return createDummy();
+#endif
+}
 
 // Private static helper - creates dummy device (singleton pattern)
 fl::shared_ptr<RxDevice> RxDevice::createDummy() FL_NO_EXCEPT {
@@ -369,10 +387,14 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(int pin
     return RxDevice::createDummy();
 }
 
-// DEFAULT maps to RMT on unsupported platforms (returns dummy)
+// DEFAULT maps to PIO on RP and RMT elsewhere (returns dummy if unsupported).
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PLATFORM_DEFAULT>(int pin) FL_NO_EXCEPT {
+#ifdef FL_IS_RP
+    return RxDevice::create<RxDeviceType::PIO>(pin);
+#else
     return RxDevice::create<RxDeviceType::RMT>(pin);
+#endif
 }
 
 #endif // FL_IS_ESP32 / FL_IS_TEENSY_4X / FL_IS_ARM_LPC / FL_IS_STUB
