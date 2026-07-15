@@ -250,7 +250,7 @@ class PixelIterator {
     /// @brief Encode pixels in SK9822 format (zero allocation)
     /// @param out Output buffer to write encoded bytes
     /// @param hd_gamma Enable high-definition gamma correction (per-LED brightness)
-    /// @note Protocol: Same as APA102 but end frame uses 0x00 instead of 0xFF
+    /// @note Protocol: Same as APA102, including the all-ones end clock frame.
     template <typename CONTAINER_UIN8_T>
     void writeSK9822(CONTAINER_UIN8_T* out, bool hd_gamma = false) FL_NO_EXCEPT {
         auto back_ins = fl::back_inserter(*out);
