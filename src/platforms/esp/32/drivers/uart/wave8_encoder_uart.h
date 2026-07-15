@@ -116,6 +116,10 @@ struct Wave10Lut {
 /// @return Populated Wave10Lut, or all-zero LUT if timing is infeasible
 Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NO_EXCEPT;
 
+/// @brief Build a UART waveform LUT with a backend-specific baud ceiling.
+Wave10Lut buildWave10LutForMaxBaud(const ChipsetTimingConfig& timing,
+                                   u32 max_baud_rate) FL_NO_EXCEPT;
+
 /// @brief Check if a chipset timing can be accurately represented by UART
 ///
 /// Validates that:
@@ -129,6 +133,10 @@ Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NO_EXCEPT;
 /// @param timing Chipset timing configuration
 /// @return true if timing is representable, false otherwise
 bool canRepresentTiming(const ChipsetTimingConfig& timing) FL_NO_EXCEPT;
+
+/// @brief Timing feasibility with a backend-specific baud ceiling.
+bool canRepresentTimingForMaxBaud(const ChipsetTimingConfig& timing,
+                                  u32 max_baud_rate) FL_NO_EXCEPT;
 
 namespace detail {
 

@@ -1,3 +1,5 @@
+#pragma once
+
 // IWYU pragma: private
 
 /// @file wave8_encoder_uart.cpp
@@ -111,7 +113,8 @@ struct UartWaveFit {
 /// Shared by buildWave10Lut() and canRepresentTiming() so the LUT that
 /// gets built is always judged by the same rules that admitted it.
 UartWaveFit fitUartWave(const ChipsetTimingConfig& timing,
-                        u8 pulses_per_bit) FL_NO_EXCEPT {
+                        u8 pulses_per_bit,
+                        u32 max_baud_rate) FL_NO_EXCEPT {
     UartWaveFit fit = {};
     const u32 period_ns = timing.total_period_ns();
     if (period_ns == 0) return fit;
@@ -120,7 +123,7 @@ UartWaveFit fitUartWave(const ChipsetTimingConfig& timing,
     // UART ceiling.
     const u64 baud =
         static_cast<u64>(pulses_per_bit) * 1000000000ULL / period_ns;
-    if (baud == 0 || baud > kMaxUartBaudRate) return fit;
+    if (baud == 0 || baud > max_baud_rate) return fit;
 
     const u32 pulse_width_ns = period_ns / pulses_per_bit;
     if (pulse_width_ns == 0) return fit;
@@ -176,6 +179,11 @@ UartWaveFit fitUartWave(const ChipsetTimingConfig& timing,
 } // anonymous namespace
 
 Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
+    return buildWave10LutForMaxBaud(timing, kMaxUartBaudRate);
+}
+
+Wave10Lut buildWave10LutForMaxBaud(const ChipsetTimingConfig& timing,
+                                   u32 max_baud_rate) FL_NO_EXCEPT {
     Wave10Lut result = {};
 
     // Evaluate both frame geometries (FastLED#3572 follow-up):
@@ -186,8 +194,8 @@ Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
     // Pick the feasible geometry with the smaller total quantization
     // error. P=5 wins ties and near-ties (50 ns hysteresis) so the
     // long-proven wave10 shapes stay stable for existing chipsets.
-    const UartWaveFit fit5 = fitUartWave(timing, 5);
-    const UartWaveFit fit4 = fitUartWave(timing, 4);
+    const UartWaveFit fit5 = fitUartWave(timing, 5, max_baud_rate);
+    const UartWaveFit fit4 = fitUartWave(timing, 4, max_baud_rate);
 
     u8 P = 0;
     UartWaveFit fit = {};
@@ -220,9 +228,15 @@ Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
 }
 
 bool canRepresentTiming(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
+    return canRepresentTimingForMaxBaud(timing, kMaxUartBaudRate);
+}
+
+bool canRepresentTimingForMaxBaud(const ChipsetTimingConfig& timing,
+                                  u32 max_baud_rate) FL_NO_EXCEPT {
     // Feasible if EITHER frame geometry fits — same helper as
     // buildWave10Lut(), so admission and construction can't drift.
-    return fitUartWave(timing, 5).ok || fitUartWave(timing, 4).ok;
+    return fitUartWave(timing, 5, max_baud_rate).ok ||
+           fitUartWave(timing, 4, max_baud_rate).ok;
 }
 
 FL_IRAM FL_OPTIMIZE_FUNCTION

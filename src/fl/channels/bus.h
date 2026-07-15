@@ -130,6 +130,8 @@ template<> struct BusInstanceCount<Bus::SPI> { static constexpr fl::u8 value = 2
 template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 2; };
 #elif defined(FL_IS_ARM_LPC_845)
 template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 1; };
+#elif defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 2; };
 #endif
 
 inline const char* busName(Bus b, fl::u8 which = 0) FL_NO_EXCEPT {
