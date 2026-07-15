@@ -560,6 +560,25 @@ class TestParseArgsAndBuildCommands:
         assert command["params"]["driver"] == "FLEX_IO"
         assert "pinTx" not in command["params"]
 
+    def test_flex_io_driver_name_maps_to_pio1_on_rp2040(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            flex_io=True,
+            environment_positional="rp2040",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["PIO1"]
+        assert result.json_rpc_commands[0]["params"]["driver"] == "PIO1"
+
     def test_lpuart_is_deprecated_alias_for_uart(
         self, fake_project_dir: Path, capsys: pytest.CaptureFixture[str]
     ) -> None:
