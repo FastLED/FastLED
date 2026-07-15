@@ -361,6 +361,33 @@ static size_t decodeSpiEdges(fl::shared_ptr<fl::RxChannel> rx_channel,
     return led_bytes_written;
 }
 
+// Collect expensive raw-edge evidence only for a failed run.  The normal RPC
+// soak path must remain allocation-quiet, but a failed decode or byte compare
+// still needs the same postmortem snapshot as a failed RX wait.
+void collectRawEdgeDiagnostics(fl::shared_ptr<fl::RxChannel> rx_channel,
+                               fl::RunResult* diagnostics) {
+    if (!rx_channel || !diagnostics || !diagnostics->rawEdgeSample.empty()) {
+        return;
+    }
+
+    fl::vector<fl::EdgeTime> edges;
+    edges.resize(256);
+    diagnostics->rawEdgesAfterWait =
+        static_cast<int>(rx_channel->getRawEdgeTimes(edges, 0));
+
+    fl::vector<fl::EdgeTime> sample_edges;
+    sample_edges.resize(32);
+    const size_t sample_count = rx_channel->getRawEdgeTimes(sample_edges, 0);
+    fl::sstream sample;
+    for (size_t i = 0; i < sample_count; ++i) {
+        if (i > 0) {
+            sample << ' ';
+        }
+        sample << (sample_edges[i].high ? 'H' : 'L') << sample_edges[i].ns;
+    }
+    diagnostics->rawEdgeSample = sample.str();
+}
+
 // Capture transmitted LED data via RX loopback
 // - rx_channel: Shared pointer to RX device (persistent across calls)
 // - rx_buffer: Buffer to store received bytes
@@ -373,6 +400,12 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
                const fl::ChipsetTimingConfig& timing,
                const char* driver_name,
                fl::RunResult* diagnostics) {
+    // The RPC runner disables log output for normal tests. Keep successful
+    // captures allocation-quiet too: constructing diagnostic strings and
+    // copying edge snapshots on every frame defeats that guard during a
+    // repeated-frame soak. Failure paths still collect full evidence below.
+    const bool logs_enabled = fl::getLogLevel() >=
+        static_cast<fl::u8>(fl::LogLevel::FL_LOG_LEVEL_WARN);
     if (diagnostics) {
         diagnostics->captureWaitResult = -1;
         diagnostics->rawEdgesAfterWait = 0;
@@ -448,7 +481,11 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         // that have no RMT — that label burned an hour of Teensy-4 debug
         // (FastLED#3059). Just say "external RX" so the label stays correct
         // regardless of backend.
-        AR_FL_WARN("[CAPTURE] " << driver_name << " TX -> external RX: External GPIO wire (io_loop_back=false, use_dma=true)");
+        if (logs_enabled) {
+            AR_FL_WARN("[CAPTURE] " << driver_name
+                        << " TX -> external RX: External GPIO wire "
+                        << "(io_loop_back=false, use_dma=true)");
+        }
     }
 
     // Driver-aware capture strategy:
@@ -462,7 +499,9 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     if (is_rmt_driver) {
         // RMT: Two-TX approach for ESP32-S3 compatibility
         // First TX without RX armed (diagnostics), then arm RX, then second TX
-        AR_FL_WARN("[CAPTURE] RMT: Two-TX approach (ESP32-S3 workaround)");
+        if (logs_enabled) {
+            AR_FL_WARN("[CAPTURE] RMT: Two-TX approach (ESP32-S3 workaround)");
+        }
         FastLED.show();
         if (!FastLED.wait(TX_WAIT_TIMEOUT_MS)) {
             FL_ERROR("[CAPTURE] TX wait timeout (pre-arm) - driver may be stalled");
@@ -488,7 +527,9 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
             AR_FL_WARN("[CAPTURE] RX begin() failed for pin " << rx_channel->getPin());
             return 0;
         }
-        AR_FL_WARN("[CAPTURE] RX armed, calling FastLED.show()...");
+        if (logs_enabled) {
+            AR_FL_WARN("[CAPTURE] RX armed, calling FastLED.show()...");
+        }
 
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
         fl::atomic_int rising_edges(0);
@@ -514,7 +555,9 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         }
 #endif
         FastLED.show();
-        AR_FL_WARN("[CAPTURE] FastLED.show() returned, calling wait...");
+        if (logs_enabled) {
+            AR_FL_WARN("[CAPTURE] FastLED.show() returned, calling wait...");
+        }
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
         if (edge_counter_attached && edge_counter.is_valid()) {
             fl::isr::detach_handler(edge_counter);
@@ -534,7 +577,9 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         if (is_object_fled_driver) {
             fl::objectFledDiagnosticsRecord("afterFastLedWait");
         }
-        AR_FL_WARN("[CAPTURE] FastLED.wait() done");
+        if (logs_enabled) {
+            AR_FL_WARN("[CAPTURE] FastLED.wait() done");
+        }
     }
 
 
@@ -544,29 +589,22 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     // WS2812B: ~30μs per LED → 3000 LEDs = 90ms, use 150ms
     // UART with inverted TX produces same waveform timing as WS2812
     const uint32_t rx_wait_ms = is_uart_driver ? 500 : 150;
-    AR_FL_WARN("[CAPTURE] Waiting for RX completion (" << rx_wait_ms << "ms timeout)...");
+    if (logs_enabled) {
+        AR_FL_WARN("[CAPTURE] Waiting for RX completion (" << rx_wait_ms
+                    << "ms timeout)...");
+    }
     auto wait_result = rx_channel->wait(rx_wait_ms);
     if (diagnostics) {
         diagnostics->captureWaitResult = static_cast<int>(wait_result);
-        // Heap-allocated (was 2 KB + 256 B FixedVectors on the loopTask
-        // stack at its deepest point — FastLED#3569).
-        fl::vector<fl::EdgeTime> edges;
-        edges.resize(256);
-        diagnostics->rawEdgesAfterWait = static_cast<int>(rx_channel->getRawEdgeTimes(edges, 0));
         diagnostics->decodeOutputCapacity = static_cast<int>(rx_buffer.size());
-        fl::vector<fl::EdgeTime> sample_edges;
-        sample_edges.resize(32);
-        const size_t sample_count = rx_channel->getRawEdgeTimes(sample_edges, 0);
-        fl::sstream sample;
-        for (size_t i = 0; i < sample_count; ++i) {
-            if (i > 0) {
-                sample << ' ';
-            }
-            sample << (sample_edges[i].high ? 'H' : 'L') << sample_edges[i].ns;
+        if (wait_result != fl::RxWaitResult::SUCCESS) {
+            collectRawEdgeDiagnostics(rx_channel, diagnostics);
         }
-        diagnostics->rawEdgeSample = sample.str();
     }
-    AR_FL_WARN("[CAPTURE] RX wait returned: " << static_cast<int>(wait_result));
+    if (logs_enabled) {
+        AR_FL_WARN("[CAPTURE] RX wait returned: "
+                    << static_cast<int>(wait_result));
+    }
 
     if (wait_result != fl::RxWaitResult::SUCCESS) {
         AR_FL_WARN("RX wait failed (timeout or no data received)");
@@ -950,6 +988,9 @@ void runMultiTest(const char* test_name,
     }
 
     fl::vector<fl::RunResult> run_results;
+    int total_passed = 0;
+    int total_failed = 0;
+    bool retained_success = false;
 
     // Multi-lane limitation: Only test Lane 0
     size_t channels_to_test = config.tx_configs.size() > 1 ? 1 : config.tx_configs.size();
@@ -960,8 +1001,15 @@ void runMultiTest(const char* test_name,
 
     // Execute multiple runs
     for (int run = 1; run <= multi_config.num_runs; run++) {
-        // Print progress to keep output flowing (prevents auto-exit timeout)
-        if (run % 3 == 1 || multi_config.num_runs <= 5) {
+        // runSingleTest executes synchronously inside the RPC task, so the
+        // sketch loop cannot feed its five-second watchdog while a legitimate
+        // repeated-frame soak is in progress. Each capture is independently
+        // bounded by the TX/RX waits below; feed between them rather than
+        // relaxing the watchdog or adding serial progress chatter.
+        FastLED.watchdog().feed();
+        // Do not construct progress strings under ScopedLogDisable: a long
+        // hardware soak otherwise performs throwaway heap allocations.
+        if (kLogsEnabled && (run % 3 == 1 || multi_config.num_runs <= 5)) {
             AR_FL_WARN("[Run " << run << "/" << multi_config.num_runs << "] Testing...");
         }
 
@@ -986,6 +1034,10 @@ void runMultiTest(const char* test_name,
                 result.mismatchedBytes = static_cast<int>(result.totalBytes);
                 result.captureFailed = true;
                 result.passed = false;
+                // This also covers decoder failures after a successful RX
+                // wait: capture() reports zero bytes, so preserve the raw
+                // edge snapshot before this run exits.
+                collectRawEdgeDiagnostics(config.rx_channel, &result);
                 break;
             }
 
@@ -999,7 +1051,7 @@ void runMultiTest(const char* test_name,
             // FastLED#3219 stack of fixes). Collapsing into a single
             // space-separated hex string keeps the diagnostic value while
             // dropping per-pattern serial overhead from ~2.1 KB to ~80 bytes.
-            {
+            if (kLogsEnabled) {
                 fl::sstream hex_dump;
                 size_t dump_count = (bytes_captured < 24) ? bytes_captured : 24;
                 for (size_t i = 0; i < dump_count; i++) {
@@ -1133,9 +1185,10 @@ void runMultiTest(const char* test_name,
 
             result.mismatches = mismatches;
             result.passed = (mismatches == 0);
+            if (!result.passed) {
+                collectRawEdgeDiagnostics(config.rx_channel, &result);
+            }
         }
-
-        run_results.push_back(result);
 
         // Print run result if configured (sstream construction skipped
         // when logs disabled -- see kLogsEnabled note at function top).
@@ -1160,16 +1213,28 @@ void runMultiTest(const char* test_name,
                 }
             }
         }
+
+        if (result.passed) {
+            ++total_passed;
+        } else {
+            ++total_failed;
+        }
+
+        // The RPC response includes only failed pattern details. Keeping every
+        // successful result during a long frame soak needlessly grows the
+        // transient heap (and used to make the 16-frame RP PIO run wedge).
+        // Retain one representative successful capture for byte-evidence;
+        // retain every failure so its full postmortem remains available.
+        if (!result.passed || !retained_success || multi_config.num_runs == 1) {
+            if (result.passed) {
+                retained_success = true;
+            }
+            run_results.push_back(fl::move(result));
+        }
+        FastLED.watchdog().feed();
     }
 
     // Summary statistics
-    int total_passed = 0;
-    int total_failed = 0;
-    for (const auto& r : run_results) {
-        if (r.passed) total_passed++;
-        else total_failed++;
-    }
-
     // Summary FL_WARN -- gated on log level (see kLogsEnabled note above)
     // to prevent heap thrash under autoresearch ScopedLogDisable.
     if (kLogsEnabled) {
