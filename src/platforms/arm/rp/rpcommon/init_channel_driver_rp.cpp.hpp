@@ -31,6 +31,7 @@
 #include "platforms/shared/spi_hw_8.h"
 #include "platforms/arm/rp/rpcommon/init_channel_driver.h"
 #include "platforms/arm/rp/rpcommon/rp_uart_bus_traits.h"
+#include "platforms/arm/rp/rpcommon/rp_spi_bus_traits.h"
 #include "platforms/arm/rp/rpcommon/rp_pio_tx_bus_traits.h"
 
 namespace fl {
@@ -138,6 +139,11 @@ void initChannelDrivers() {
     // USB CDC remains the sketch/RPC transport and is never registered here.
     BusTraits<Bus::UART, 0>::registerWithManager();
     BusTraits<Bus::UART, 1>::registerWithManager();
+    // Keep fixed PL022 SPI separate from the PIO multi-lane adapter above.
+    // Explicit Bus::SPI instance selection names SPI0 or SPI1 and therefore
+    // cannot be silently routed to a PIO parallel-SPI implementation.
+    BusTraits<Bus::SPI, 0>::registerWithManager();
+    BusTraits<Bus::SPI, 1>::registerWithManager();
     BusTraits<Bus::FLEX_IO, 0>::registerWithManager();
     BusTraits<Bus::FLEX_IO, 1>::registerWithManager();
 

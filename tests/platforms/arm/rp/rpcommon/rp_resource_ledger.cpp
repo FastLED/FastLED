@@ -24,6 +24,9 @@ FL_TEST_CASE("RP resource ledger rejects duplicate and out-of-range claims") {
     FL_CHECK(ledger.claimUart(0));
     FL_CHECK_FALSE(ledger.claimUart(0));
     FL_CHECK_FALSE(ledger.claimUart(2));
+    FL_CHECK(ledger.claimSpi(1));
+    FL_CHECK_FALSE(ledger.claimSpi(1));
+    FL_CHECK_FALSE(ledger.claimSpi(2));
     FL_CHECK(ledger.claimPin(29));
     FL_CHECK_FALSE(ledger.claimPin(30));
 }
@@ -34,17 +37,20 @@ FL_TEST_CASE("RP resource ledger cleanup restores partial acquisitions") {
     FL_REQUIRE(ledger.claimPioStateMachine(1, 3));
     FL_REQUIRE(ledger.claimDmaChannel(1));
     FL_REQUIRE(ledger.claimUart(1));
+    FL_REQUIRE(ledger.claimSpi(0));
     FL_REQUIRE(ledger.claimPin(4));
 
     FL_CHECK(ledger.releasePin(4));
     FL_CHECK(ledger.releaseDmaChannel(1));
     FL_CHECK(ledger.releaseUart(1));
+    FL_CHECK(ledger.releaseSpi(0));
     FL_CHECK(ledger.releasePioStateMachine(1, 3));
     FL_CHECK_FALSE(ledger.releasePioStateMachine(1, 3));
 
     FL_CHECK(ledger.claimPioStateMachine(1, 3));
     FL_CHECK(ledger.claimDmaChannel(1));
     FL_CHECK(ledger.claimUart(1));
+    FL_CHECK(ledger.claimSpi(0));
     FL_CHECK(ledger.claimPin(4));
 }
 
