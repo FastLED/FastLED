@@ -25,7 +25,11 @@ from ci.meson.streaming import (  # noqa: E402
 from ci.meson.streaming import (
     TestResult as StreamingTestResult,
 )
-from ci.meson.streaming_runner import validate_test_artifact  # noqa: E402
+from ci.meson.streaming_runner import (  # noqa: E402
+    _test_process_timeout_seconds,
+    _wait_for_test_process,
+    validate_test_artifact,
+)
 
 
 _T = TypeVar("_T")
@@ -131,6 +135,26 @@ class TestStreamingExecutionCoordination(unittest.TestCase):
         self.assertFalse(_wait_for_dll_touch(done, timeout=0.0))
         done.set()
         self.assertTrue(_wait_for_dll_touch(done, timeout=0.0))
+
+    def test_runner_timeout_preserves_captured_output(self) -> None:
+        """Watchdog phase markers survive the outer Python timeout."""
+        process = MagicMock()
+        process.wait.side_effect = TimeoutError("runner stalled")
+        process.stdout = "[FASTLED RUNNER] phase: dynamic-load\n"
+
+        result = _wait_for_test_process(process)
+
+        self.assertFalse(result.success)
+        self.assertIn("runner stalled", result.output)
+        self.assertIn("phase: dynamic-load", result.output)
+
+    def test_macos_runner_timeout_is_bounded(self) -> None:
+        """A pre-main Apple stall cannot consume a ten-minute worker slot."""
+        with patch("ci.meson.streaming_runner.sys.platform", "darwin"):
+            self.assertEqual(90, _test_process_timeout_seconds())
+
+        with patch("ci.meson.streaming_runner.sys.platform", "linux"):
+            self.assertEqual(600, _test_process_timeout_seconds())
 
     def test_dll_touch_timeout_is_reported_in_compile_output(self) -> None:
         """Timeout diagnostics propagate to callers and persisted failure logs."""

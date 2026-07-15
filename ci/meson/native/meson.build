@@ -409,6 +409,23 @@ elif build_mode == 'profile'
   ]
 endif
 
+# The Apple runner watchdog can interrupt dyld while sanitizer initialization
+# holds loader locks. Compile its complete call chain without instrumentation so
+# the SIGALRM handler remains limited to async-signal-safe system calls.
+apple_runner_watchdog_libs = []
+if is_macos
+  apple_runner_watchdog_lib = static_library('apple_runner_watchdog',
+    files('../../../tests/shared/apple_runner_watchdog.cpp'),
+    cpp_args: runner_cpp_args + [
+      path_norm_I_src,
+      '-fno-sanitize=all',
+    ],
+    implicit_include_directories: false,
+    install: false
+  )
+  apple_runner_watchdog_libs += [apple_runner_watchdog_lib]
+endif
+
 # ============================================================================
 # Legacy aliases for backward compatibility
 # ============================================================================

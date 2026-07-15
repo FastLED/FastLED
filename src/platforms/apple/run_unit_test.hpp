@@ -19,105 +19,31 @@
 #ifdef FL_IS_APPLE
 
 // IWYU pragma: begin_keep
-#include <chrono>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <cstddef>
 #include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <cstdio>
-#include <csignal>
 #include <dlfcn.h>       // For dlopen, dlsym, dlclose
 #include <mach-o/dyld.h> // For _NSGetExecutablePath
-#include <unistd.h>      // For alarm
 #include "fl/stl/noexcept.h"
+#include "platforms/apple/runner_watchdog.hpp"
 // IWYU pragma: end_keep
 
 // Crash handler setup (defined in crash_handler_main.cpp)
 extern "C" void runner_setup_crash_handler();
-// Stack trace printer (defined in crash_handler_main.cpp)
-extern "C" void runner_print_stacktrace();
-
-namespace runner_watchdog {
-
-static volatile bool g_active = false;
-static double g_timeout_seconds = 20.0;
-
-static void alarm_handler(int) FL_NO_EXCEPT {
-    if (!g_active) {
-        return;
-    }
-
-    fprintf(stderr, "\n");
-    fprintf(stderr, "================================================================================\n");
-    fprintf(stderr, "RUNNER WATCHDOG TIMEOUT\n");
-    fprintf(stderr, "================================================================================\n");
-    fprintf(stderr, "Test exceeded runner timeout of %.1f seconds\n", g_timeout_seconds);
-    fprintf(stderr, "Dumping stack trace...\n");
-    fprintf(stderr, "================================================================================\n");
-    fprintf(stderr, "\n");
-
-    runner_print_stacktrace();
-
-    fprintf(stderr, "\n");
-    fprintf(stderr, "================================================================================\n");
-    fprintf(stderr, "END RUNNER WATCHDOG\n");
-    fprintf(stderr, "Exiting with code 1\n");
-    fprintf(stderr, "================================================================================\n");
-    fprintf(stderr, "\n");
-
-    _exit(1);
-}
-
-static void setup(double timeout_seconds = 20.0) FL_NO_EXCEPT {
-    const char* disable_env = getenv("FASTLED_DISABLE_TIMEOUT_WATCHDOG");
-    if (disable_env && (strcmp(disable_env, "1") == 0 || strcmp(disable_env, "true") == 0)) {
-        return;
-    }
-
-    const char* timeout_env = getenv("FASTLED_TEST_TIMEOUT");
-    if (timeout_env) {
-        double parsed = atof(timeout_env);
-        if (parsed > 0.0) {
-            timeout_seconds = parsed;
-        }
-    }
-
-    g_timeout_seconds = timeout_seconds;
-    g_active = true;
-
-    struct sigaction sa;
-    memset(&sa, 0, sizeof(sa));
-    sa.sa_handler = alarm_handler;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-
-    if (sigaction(SIGALRM, &sa, nullptr) == 0) {
-        alarm(static_cast<unsigned int>(timeout_seconds));
-        printf("Runner watchdog enabled (%.1f seconds)\n", timeout_seconds);
-    }
-}
-
-static void cancel() FL_NO_EXCEPT {
-    if (!g_active) {
-        return;
-    }
-    g_active = false;
-    alarm(0);
-    signal(SIGALRM, SIG_DFL);
-}
-
-} // namespace runner_watchdog
-
 // Function signature for the test entry point exported by test DLLs/SOs
 typedef int (*RunTestsFunc)(int argc, const char** argv);
 
 int main(int argc, char** argv) FL_NO_EXCEPT {
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kStartup);
+    apple_runner_watchdog::setup();
+
     // Setup crash handler BEFORE loading any shared libraries
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kCrashHandlerSetup);
     runner_setup_crash_handler();
 
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kPathResolution);
     std::string so_path;
     const std::string shared_lib_ext = ".dylib";
 
@@ -158,17 +84,21 @@ int main(int argc, char** argv) FL_NO_EXCEPT {
 
     // Load shared library with RTLD_NOW for immediate symbol resolution
     // This helps ASAN properly track symbols from the loaded library
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kDynamicLoad);
     void* handle = dlopen(so_path.c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (!handle) {
         std::cout << "Error: Failed to load " << so_path << " (" << dlerror() << ")" << std::endl;
+        apple_runner_watchdog::cancel();
         return 1;
     }
 
     // Get run_tests function
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kSymbolLookup);
     RunTestsFunc run_tests = (RunTestsFunc)dlsym(handle, "run_tests");
     if (!run_tests) {
         std::cout << "Error: Failed to find run_tests() in " << so_path << " (" << dlerror() << ")" << std::endl;
         dlclose(handle);
+        apple_runner_watchdog::cancel();
         return 1;
     }
 
@@ -191,20 +121,16 @@ int main(int argc, char** argv) FL_NO_EXCEPT {
         test_argv = const_cast<const char**>(argv);
     }
 
-    // Start watchdog timer
-    runner_watchdog::setup();
-
     // Call test function with arguments
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kInvocation);
     int test_result = run_tests(test_argc, test_argv);
-
-    // Cancel watchdog - tests completed normally
-    runner_watchdog::cancel();
 
     // Cleanup: Skip dlclose when running with AddressSanitizer
     // ASAN runs leak detection at program exit. If we dlclose() the shared library
     // before that, ASAN cannot symbolize addresses from the unloaded library,
     // resulting in "<unknown module>" in stack traces.
     // See: https://github.com/google/sanitizers/issues/899
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kTeardown);
 #if !defined(__SANITIZE_ADDRESS__) && !defined(__has_feature)
     dlclose(handle);
 #elif defined(__has_feature)
@@ -213,6 +139,8 @@ int main(int argc, char** argv) FL_NO_EXCEPT {
 #endif
 #endif
 
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kCompleted);
+    apple_runner_watchdog::cancel();
     return test_result;
 }
 
