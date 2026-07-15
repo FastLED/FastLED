@@ -33,8 +33,9 @@ class RpPioEdgeCapture {
         return ns > kMaxEdgeNs ? kMaxEdgeNs : static_cast<u32>(ns);
     }
 
+    template <typename EdgeStorage>
     bool appendCounter(bool high, u32 remaining_counter, u32 pio_clock_hz,
-                       u32 setup_cycles, fl::vector<EdgeTime>* edges,
+                       u32 setup_cycles, EdgeStorage* edges,
                        size_t capacity) FL_NO_EXCEPT {
         if (pio_clock_hz == 0) return false;
         const u64 counter_ticks = ~remaining_counter;
@@ -47,7 +48,8 @@ class RpPioEdgeCapture {
                               edges, capacity);
     }
 
-    bool appendDuration(bool high, u32 duration_ns, fl::vector<EdgeTime>* edges,
+    template <typename EdgeStorage>
+    bool appendDuration(bool high, u32 duration_ns, EdgeStorage* edges,
                         size_t capacity) FL_NO_EXCEPT {
         if (edges == nullptr) return false;
         if (duration_ns < mMinSignalNs) return true;

@@ -10,7 +10,8 @@ ChannelEngineRpPio::ChannelEngineRpPio(
     fl::shared_ptr<IRpPioTxPeripheral> peripheral, u8 which) FL_NO_EXCEPT
     : mPeripheral(fl::move(peripheral)), mWhich(which), mCurrentChannel(0),
       mLatchStartUs(0), mLatchDurationUs(0), mActive(false),
-      mActiveLaneCount(1), mLatchPending(false), mFailed(false) {}
+      mActiveLaneCount(1), mLatchPending(false), mFailed(false),
+      mLastStartAttempted(false), mLastStartSucceeded(false), mLastWordCount(0) {}
 
 ChannelEngineRpPio::~ChannelEngineRpPio() {
     releaseInFlight();
@@ -45,7 +46,11 @@ void ChannelEngineRpPio::show() FL_NO_EXCEPT {
     mPendingChannels.clear();
     mCurrentChannel = 0;
     mFailed = false;
+    mLastStartAttempted = false;
+    mLastStartSucceeded = false;
+    mLastWordCount = 0;
     mError.clear();
+    mLastError.clear();
     for (const ChannelDataPtr& channel : mInFlightChannels) {
         if (channel) channel->setInUse(true);
     }
@@ -128,7 +133,10 @@ bool ChannelEngineRpPio::beginTransmission(const ChannelDataPtr& channel) FL_NO_
             mPioWords.push_back(plane << (32u - mActiveLaneCount));
         }
     }
-    return mPeripheral->startTxDma(mPioWords.data(), mPioWords.size());
+    mLastStartAttempted = true;
+    mLastWordCount = mPioWords.size();
+    mLastStartSucceeded = mPeripheral->startTxDma(mPioWords.data(), mPioWords.size());
+    return mLastStartSucceeded;
 }
 
 void ChannelEngineRpPio::releaseInFlight() FL_NO_EXCEPT {
@@ -145,6 +153,7 @@ void ChannelEngineRpPio::releaseInFlight() FL_NO_EXCEPT {
 }
 
 IChannelDriver::DriverState ChannelEngineRpPio::fail(const char* message) FL_NO_EXCEPT {
+    mLastError = message;
     if (mPeripheral) {
         mPeripheral->abort();
         mPeripheral->deinitialize();

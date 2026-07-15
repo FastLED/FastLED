@@ -13,6 +13,10 @@
 #if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
 
 #include "AutoResearchTest.h"
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+#include "fl/stl/atomic.h"
+#include "fl/stl/isr.h"
+#endif
 #include "LegacyClocklessProxy.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_diagnostics.h"
 #include <FastLED.h>
@@ -48,6 +52,15 @@
 #include "color.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/iterator.h"
+
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+void countRpPioRxRisingEdges(void* user_data) {
+    auto* edges = static_cast<fl::atomic_int*>(user_data);
+    if (edges != nullptr) {
+        edges->fetch_add(1);
+    }
+}
+#endif
 
 // Phase 0: Include PARLIO debug instrumentation
 #if defined(ESP32) && FASTLED_ESP32_HAS_PARLIO
@@ -356,12 +369,15 @@ static size_t decodeSpiEdges(fl::shared_ptr<fl::RxChannel> rx_channel,
 // Returns number of bytes captured, or 0 on error
 size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
                fl::span<uint8_t> rx_buffer,
+               size_t expected_data_bytes,
                const fl::ChipsetTimingConfig& timing,
                const char* driver_name,
                fl::RunResult* diagnostics) {
     if (diagnostics) {
         diagnostics->captureWaitResult = -1;
         diagnostics->rawEdgesAfterWait = 0;
+        diagnostics->rpPioGpioTransitions = -1;
+        diagnostics->rxBeginError.clear();
     }
 
     if (!rx_channel) {
@@ -382,6 +398,27 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
                        || (fl::strcmp(driver_name, "LPUART") == 0);
     bool is_object_fled_driver = (fl::strcmp(driver_name, "OBJECT_FLED") == 0);
     rx_config.edge_capacity = rx_buffer.size() * 8;
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+    // RP's platform-default RX resolves to PIO, while RxChannel retains the
+    // requested PLATFORM_DEFAULT enum. Recognize both that public default and
+    // an explicit PIO backend so the DMA capture is sized per frame.
+    const bool is_rp_pio_capture =
+        rx_channel->backend() == fl::RxBackend::PIO ||
+        fl::strcmp(driver_name, "PIO0") == 0 || fl::strcmp(driver_name, "PIO1") == 0;
+    if (is_rp_pio_capture) {
+        // The shared result buffer is intentionally sized for the largest
+        // AutoResearch run, not this frame. PIO DMA stores one word for each
+        // high and low phase, so using that whole buffer here would request
+        // several MiB on a Pico and leave DMA with an invalid destination.
+        constexpr size_t kPioPhasesPerDataByte = 16;
+        if (expected_data_bytes >
+            (static_cast<size_t>(-1) - 1u) / kPioPhasesPerDataByte) {
+            FL_ERROR("[CAPTURE] PIO edge-capacity overflow");
+            return 0;
+        }
+        rx_config.edge_capacity = expected_data_bytes * kPioPhasesPerDataByte + 1u;
+    }
+#endif
 
     // Internal loopback configuration: Enable ONLY for RMT TX -> RMT RX scenarios
     // When driver_name == "RMT", enable io_loop_back to route RMT TX output to RMT RX internally
@@ -434,6 +471,7 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
 
         // Arm RX for capture
         if (!rx_channel->begin(rx_config)) {
+            if (diagnostics) diagnostics->rxBeginError = rx_channel->lastBeginError();
             FL_ERROR("Failed to arm RX receiver");
             return 0;
         }
@@ -446,13 +484,46 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     } else {
         // Non-RMT (PARLIO, SPI, etc.): Single-TX approach
         if (!rx_channel->begin(rx_config)) {
+            if (diagnostics) diagnostics->rxBeginError = rx_channel->lastBeginError();
             AR_FL_WARN("[CAPTURE] RX begin() failed for pin " << rx_channel->getPin());
             return 0;
         }
         AR_FL_WARN("[CAPTURE] RX armed, calling FastLED.show()...");
 
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+        fl::atomic_int rising_edges(0);
+        fl::isr::handle edge_counter;
+        bool edge_counter_attached = false;
+        const bool measure_rp_pio =
+            (fl::strcmp(driver_name, "PIO0") == 0 || fl::strcmp(driver_name, "PIO1") == 0) &&
+            diagnostics != nullptr;
+        if (measure_rp_pio) {
+            // FastLED.show() drives the channel engine until it reaches its
+            // terminal state, so polling GPIO after show() is too late to
+            // observe a short clockless frame. Count rising edges through the
+            // shared FastLED ISR dispatcher while show() is running instead.
+            // This is deliberately a binary physical oracle: an IRQ count
+            // above zero proves the jumper carries TX activity, while the PIO
+            // RX backend remains responsible for exact-byte verification.
+            fl::isr::config edge_config;
+            edge_config.handler = countRpPioRxRisingEdges;
+            edge_config.user_data = &rising_edges;
+            edge_config.flags = fl::isr::ISR_FLAG_EDGE_RISING;
+            edge_counter_attached = fl::isr::attach_external_handler(
+                static_cast<fl::u8>(rx_channel->getPin()), edge_config, &edge_counter) == 0;
+        }
+#endif
         FastLED.show();
         AR_FL_WARN("[CAPTURE] FastLED.show() returned, calling wait...");
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+        if (edge_counter_attached && edge_counter.is_valid()) {
+            fl::isr::detach_handler(edge_counter);
+        }
+        if ((fl::strcmp(driver_name, "PIO0") == 0 || fl::strcmp(driver_name, "PIO1") == 0) &&
+            diagnostics != nullptr) {
+            diagnostics->rpPioGpioTransitions = edge_counter_attached ? rising_edges.load() : -1;
+        }
+#endif
         if (!FastLED.wait(TX_WAIT_TIMEOUT_MS)) {
             if (is_object_fled_driver) {
                 fl::objectFledDiagnosticsRecord("afterFastLedWaitTimeout");
@@ -747,7 +818,8 @@ void runTest(const char* test_name,
             continue;
         }
 
-        size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing, config.driver_name);
+        size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, num_leds * 3u,
+                                        config.timing, config.driver_name);
 
         if (bytes_captured == 0) {
             FL_ERROR("[" << ctx.driver_name << "/" << ctx.timing_name << "/" << ctx.pattern_name
@@ -904,7 +976,8 @@ void runMultiTest(const char* test_name,
             result.totalBytes = num_leds * 3;
 
             // Capture RX data
-            size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, config.timing, config.driver_name, &result);
+            size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, num_leds * 3u,
+                                            config.timing, config.driver_name, &result);
             result.capturedBytes = static_cast<int>(bytes_captured);
 
             if (bytes_captured == 0) {

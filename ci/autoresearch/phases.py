@@ -78,17 +78,21 @@ def _is_teensy4_environment(final_environment: str | None) -> bool:
     )
 
 
-def _driver_name_for_environment(driver: str, final_environment: str | None) -> str:
+def _driver_name_for_environment(
+    driver: str, final_environment: str | None, rp_pio_index: int = 1
+) -> str:
     if driver == "SPI" and _is_teensy4_environment(final_environment):
         return "SPI_UNIFIED"
     if (
         driver == "FLEX_IO"
         and final_environment is not None
-        and final_environment.lower() in ("rp2040", "rpipico")
+        and final_environment.lower()
+        in ("rp2040", "rpipico", "rp2350", "rpipico2")
     ):
-        # RP exposes concrete PIO engines, which are the names accepted by
-        # the RPC driver registry. PIO1 leaves PIO0 available to the RX oracle.
-        return "PIO1"
+        # RP exposes two independent PIO engines as PIO0 and PIO1.  Their
+        # concrete names must remain distinct so a runtime-exclusive test can
+        # select one physical PIO block without replacing the other.
+        return f"PIO{rp_pio_index}"
     return driver
 
 
@@ -436,7 +440,9 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             sys.exit(2)
 
     is_teensy4 = _is_teensy4_environment(final_environment)
-    is_teensy_specific_driver = args.object_fled or args.flex_io
+    is_teensy_specific_driver = (args.object_fled or args.flex_io) and (
+        is_teensy4 or final_environment is None
+    )
 
     if args.use_root_platformio_ini and (is_teensy4 or is_teensy_specific_driver):
         print(
@@ -481,9 +487,27 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         if args.object_fled:
             drivers.append("OBJECT_FLED")
         if args.flex_io:
-            drivers.append("FLEX_IO")
+            is_rp = final_environment is not None and final_environment.lower() in (
+                "rp2040",
+                "rpipico",
+                "rp2350",
+                "rpipico2",
+            )
+            if args.rp_pio_both and is_rp:
+                drivers.extend(("PIO0", "PIO1"))
+            else:
+                drivers.append(
+                    _driver_name_for_environment(
+                        "FLEX_IO", final_environment, args.rp_pio_index
+                    )
+                )
 
     parallel_mode = args.parallel
+    if args.rp_pio_both and (not args.flex_io or not parallel_mode):
+        print(
+            f"{Fore.RED}❌ --rp-pio-both requires --flex-io --parallel{Style.RESET_ALL}"
+        )
+        return 1
     if parallel_mode:
         if len(drivers) < 2:
             print(
@@ -3506,11 +3530,35 @@ def _validate_test_rpc_response(
     expected_tx_pin, expected_rx_pin = _expected_test_pins(
         method, cmd, expected_tx_pin, expected_rx_pin
     )
+    is_concurrent_resource_test = (
+        method == "runParallelTest"
+        and data.get("concurrent_resource_test") is True
+        and set(expected_drivers) == {"PIO0", "PIO1"}
+    )
+    if is_concurrent_resource_test and data.get("show_success") is not True:
+        errors.append("concurrent resource test requires show_success=true")
+    if is_concurrent_resource_test:
+        response_drivers = data.get("drivers")
+        if not isinstance(response_drivers, list):
+            errors.append("concurrent resource test requires driver entries")
+        else:
+            pins_by_driver: dict[str, int] = {}
+            for entry in response_drivers:
+                if not isinstance(entry, dict):
+                    continue
+                name = entry.get("driver")
+                pin_tx = entry.get("pinTx")
+                if isinstance(name, str) and _is_plain_int(pin_tx):
+                    pins_by_driver[name] = pin_tx
+            if set(pins_by_driver) != {"PIO0", "PIO1"}:
+                errors.append("concurrent resource test requires PIO0 and PIO1 TX pins")
+            elif pins_by_driver["PIO0"] == pins_by_driver["PIO1"]:
+                errors.append("concurrent resource test requires distinct PIO TX pins")
     if expected_tx_pin is not None or expected_rx_pin is not None:
         capture_backend = data.get("captureBackend")
         if not isinstance(capture_backend, str) or not capture_backend:
             errors.append("missing string captureBackend")
-        if data.get("passed") is True:
+        if data.get("passed") is True and not is_concurrent_resource_test:
             capture_evidence_bytes = data.get("captureEvidenceBytes")
             capture_evidence_raw_edges = data.get("captureEvidenceRawEdges")
             has_capture_bytes = (
@@ -3793,6 +3841,26 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         print(f"   Lane: {failure.get('lane', 'unknown')}")
                         print(f"   Expected: {failure.get('expected', 'unknown')}")
                         print(f"   Actual: {failure.get('actual', 'unknown')}")
+
+                    if "rpPioActive" in test_data:
+                        print(
+                            "   RP PIO: "
+                            f"active={test_data['rpPioActive']} "
+                            f"lastError={test_data.get('rpPioLastError', '')!r} "
+                            f"started={test_data.get('rpPioStartSucceeded')} "
+                            f"words={test_data.get('rpPioWordCount')}"
+                        )
+                        patterns = test_data.get("patterns")
+                        if isinstance(patterns, list) and patterns:
+                            first_pattern = patterns[0]
+                            if (
+                                isinstance(first_pattern, dict)
+                                and "rpPioGpioTransitions" in first_pattern
+                            ):
+                                print(
+                                    "   RP PIO GPIO transitions: "
+                                    f"{first_pattern['rpPioGpioTransitions']}"
+                                )
 
                     display_tight_timing(test_data)
                     display_objectfled_diagnostics(test_data)

@@ -92,6 +92,8 @@ struct RunResult {
     int decodeError;                ///< DecodeError value, or -1 when decode succeeded/not run
     int decodeBytes;                ///< Bytes reported directly by decode()
     int decodeOutputCapacity;       ///< Output span size passed to decode()
+    int rpPioGpioTransitions;       ///< CPU-observed RX-pin transitions during RP PIO TX
+    fl::string rxBeginError;         ///< Machine-readable reason when RX begin() fails
     fl::string rawEdgeSample;       ///< Compact first-edge sample for failures
     int mismatchedBytes;            ///< Number of individual bytes that differ
     int lsbOnlyErrors;              ///< Bytes where (expected ^ actual) == 0x01
@@ -102,8 +104,8 @@ struct RunResult {
     RunResult() : run_number(0), total_leds(0), mismatches(0),
                   totalBytes(0), capturedBytes(0), captureWaitResult(-1),
                   rawEdgesAfterWait(0), decodeOk(-1), decodeError(-1),
-                  decodeBytes(0), decodeOutputCapacity(0), mismatchedBytes(0),
-                  lsbOnlyErrors(0), captureFailed(false), passed(false) {}
+                  decodeBytes(0), decodeOutputCapacity(0), rpPioGpioTransitions(-1),
+                  mismatchedBytes(0), lsbOnlyErrors(0), captureFailed(false), passed(false) {}
 };
 
 /// @brief Multi-run test configuration
@@ -127,11 +129,13 @@ struct MultiRunConfig {
 // Capture transmitted LED data via RX loopback
 // - rx_channel: Shared pointer to RX device (persistent across calls)
 // - rx_buffer: Buffer to store received bytes
+// - expected_data_bytes: bytes in the current frame (bounds RP PIO DMA storage)
 // - timing: Chipset timing configuration for RX decoder
 // - driver_name: Name of the TX driver being tested (e.g., "RMT", "PARLIO") - enables io_loop_back only for RMT
 // Returns number of bytes captured, or 0 on error
 size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
                fl::span<uint8_t> rx_buffer,
+               size_t expected_data_bytes,
                const fl::ChipsetTimingConfig& timing,
                const char* driver_name,
                fl::RunResult* diagnostics = nullptr);

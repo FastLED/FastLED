@@ -282,6 +282,9 @@ def display_pattern_details(result: dict[str, Any]) -> None:
         raw_edges = pat.get("rawEdgesAfterWait")
         if capture_wait is not None or raw_edges is not None:
             print(f"    RX wait/raw:      {capture_wait}/{raw_edges}")
+        begin_error = pat.get("rxBeginError")
+        if begin_error:
+            print(f"    RX begin error:   {begin_error}")
         decode_ok = pat.get("decodeOk")
         decode_error = pat.get("decodeError")
         decode_bytes = pat.get("decodeBytes")

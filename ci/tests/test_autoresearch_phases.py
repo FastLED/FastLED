@@ -26,6 +26,7 @@ from ci.autoresearch.phases import (
     _run_build_deploy,
     _run_schema_and_pin_setup,
     _run_tests_or_special_mode,
+    _validate_test_rpc_response,
 )
 from ci.rpc_client import RpcError
 from ci.util.port_utils import ChipDetectionResult, auto_detect_upload_port
@@ -105,6 +106,10 @@ def _make_args(**overrides) -> Args:
         dma_uart=False,
         rp_spi_loopback=False,
         rp_spi_index=0,
+        rp_spi_public_api=False,
+        rp_spi_chipset="apa102",
+        rp_pio_index=1,
+        rp_pio_both=False,
         fault_emit_test=False,
         # Default existing-test behavior: use the legacy root-platformio.ini
         # path so the ``fake_project_dir`` fixture's hand-written ini is the
@@ -578,6 +583,78 @@ class TestParseArgsAndBuildCommands:
         assert isinstance(result, RunContext)
         assert result.drivers == ["PIO1"]
         assert result.json_rpc_commands[0]["params"]["driver"] == "PIO1"
+
+    def test_flex_io_selects_pio0_on_rp2040(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            flex_io=True,
+            rp_pio_index=0,
+            environment_positional="rp2040",
+            project_dir=fake_project_dir,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["PIO0"]
+        assert result.json_rpc_commands[0]["params"]["driver"] == "PIO0"
+
+    def test_rp_pio_both_generates_one_parallel_command(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            flex_io=True,
+            rp_pio_both=True,
+            parallel=True,
+            environment_positional="rp2040",
+            project_dir=fake_project_dir,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["PIO0", "PIO1"]
+        assert result.json_rpc_commands[0]["method"] == "runParallelTest"
+
+    def test_rp_pio_parallel_response_uses_resource_evidence(self) -> None:
+        command = {
+            "method": "runParallelTest",
+            "params": {
+                "drivers": [
+                    {"driver": "PIO0", "laneSizes": [100]},
+                    {"driver": "PIO1", "laneSizes": [100]},
+                ]
+            },
+        }
+        response = {
+            "success": True,
+            "passed": True,
+            "totalTests": 1,
+            "passedTests": 1,
+            "drivers": [
+                {"driver": "PIO0", "pinTx": 11},
+                {"driver": "PIO1", "pinTx": 12},
+            ],
+            "captureBackend": "PIO_RX",
+            "captureEvidenceBytes": 0,
+            "captureEvidenceRawEdges": 0,
+            "requestedTxPin": 11,
+            "requestedRxPin": 8,
+            "actualTxPin": 11,
+            "actualRxPin": 8,
+            "concurrent_resource_test": True,
+            "show_success": True,
+        }
+        assert _validate_test_rpc_response(
+            "runParallelTest", command, response, 11, 8
+        ) == []
 
     def test_lpuart_is_deprecated_alias_for_uart(
         self, fake_project_dir: Path, capsys: pytest.CaptureFixture[str]

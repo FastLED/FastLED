@@ -13,12 +13,16 @@
 
 namespace fl {
 
+constexpr size_t kRpPioRxEdgeCapacity = 100u * 3u * 16u + 1u;
+using RpPioRxEdgeStorage = fl::FixedVector<EdgeTime, kRpPioRxEdgeCapacity>;
+
 /// @brief RP PIO RX lifecycle device. Capture programming is Phase 2.
 class RpPioRxDevice : public RxDevice {
   public:
     static fl::shared_ptr<RxDevice> create(int pin) FL_NO_EXCEPT;
 
     bool begin(const RxConfig& config) FL_NO_EXCEPT override;
+    const char* lastBeginError() const FL_NO_EXCEPT override { return mLastBeginError; }
     bool finished() const FL_NO_EXCEPT override;
     RxWaitResult wait(u32 timeout_ms) FL_NO_EXCEPT override;
     fl::result<u32, DecodeError> decode(const ChipsetTiming4Phase& timing,
@@ -50,15 +54,17 @@ class RpPioRxDevice : public RxDevice {
     bool mFinished;
     bool mOverflow;
     bool mProgramLoaded;
-    bool mNextHigh;
     bool mIdleHigh;
-    bool mFirstDuration;
+    bool mSampleHigh;
+    bool mHaveSample;
+    const char* mLastBeginError;
     size_t mDmaWordCount;
     size_t mDmaWordsProcessed;
-    u16 mProgramInstructions[13];
+    size_t mSampleRunTicks;
+    u16 mProgramInstructions[16];
     RpPioEdgeCapture mCapture;
-    fl::vector<u32> mDmaWords;
-    fl::vector<EdgeTime> mEdges;
+    u32* mDmaWords;
+    RpPioRxEdgeStorage* mEdges;
 };
 
 }  // namespace fl
