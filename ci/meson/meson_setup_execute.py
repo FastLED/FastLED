@@ -49,7 +49,35 @@ from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
-def detect_compiler_and_cache(markers: MarkerPaths, verbose: bool) -> CompilerDetection:
+def _resolve_xcode_tool(tool: str) -> str:
+    """Return the selected Xcode tool path without relying on PATH shims."""
+    try:
+        result = RunningProcess.run(
+            ["xcrun", "--find", tool],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except (subprocess.SubprocessError, OSError) as error:
+        raise RuntimeError(f"Unable to resolve Xcode tool {tool!r}: {error}") from error
+
+    if result.returncode != 0:
+        detail = result.stderr.strip() if result.stderr else "unknown xcrun error"
+        raise RuntimeError(f"Unable to resolve Xcode tool {tool!r}: {detail}")
+
+    path = result.stdout.strip()
+    if not path:
+        raise RuntimeError(f"xcrun returned no path for Xcode tool {tool!r}")
+    return path
+
+
+def detect_compiler_and_cache(
+    markers: MarkerPaths, verbose: bool, build_mode: str
+) -> CompilerDetection:
     """Detect clang-tool-chain wrappers + zccache + version strings.
 
     Caches the compiler and zccache version strings via marker mtimes so we
@@ -89,10 +117,17 @@ def detect_compiler_and_cache(markers: MarkerPaths, verbose: bool) -> CompilerDe
             _ts_print("[MESON]   - clang-tool-chain-ar")
         raise RuntimeError("clang-tool-chain wrapper commands not available")
 
+    apple_debug = sys.platform == "darwin" and build_mode == "debug"
     current_compiler_version = ""
     version_from_cache = False
-    clangxx_path = Path(clangxx_wrapper)
-    if markers.compiler_version.exists() and clangxx_path.exists():
+    selected_clangxx = (
+        _resolve_xcode_tool("clang++") if apple_debug else clangxx_wrapper
+    )
+    clangxx_path = Path(selected_clangxx)
+    # Always query Apple debug clang. A marker written by the former Clang 19
+    # toolchain can be newer than the selected Xcode binary, and reusing that
+    # marker would retain ASan objects with an incompatible runtime ABI.
+    if not apple_debug and markers.compiler_version.exists() and clangxx_path.exists():
         try:
             compiler_mtime = clangxx_path.stat().st_mtime
             marker_mtime = markers.compiler_version.stat().st_mtime
@@ -106,9 +141,9 @@ def detect_compiler_and_cache(markers: MarkerPaths, verbose: bool) -> CompilerDe
         except OSError:
             pass
     if not version_from_cache:
-        fast_compiler = _resolve_fast_compiler_binary()
+        fast_compiler = None if apple_debug else _resolve_fast_compiler_binary()
         current_compiler_version = get_compiler_version(
-            fast_compiler if fast_compiler else clangxx_wrapper
+            fast_compiler if fast_compiler else selected_clangxx
         )
 
     current_zccache_version = ""
@@ -152,6 +187,7 @@ def write_meson_native_file(
     *,
     native_file_path: Path,
     compiler: CompilerDetection,
+    build_mode: str,
 ) -> None:
     """Generate/update the Meson native file with tool paths + platform info.
 
@@ -162,18 +198,27 @@ def write_meson_native_file(
     instead of timing out under zccache. See issue #2714.
     """
     try:
-        fast = _resolve_fast_native_entries()
-        if fast.cc is not None:
-            c_compiler = fast.cc
-            cpp_compiler = fast.cxx
-            ar_tool = fast.ar
-        else:
-            c_compiler = f"['{compiler.clang_wrapper}']"
-            cpp_compiler = f"['{compiler.clangxx_wrapper}']"
-            ar_tool = f"['{compiler.llvm_ar_wrapper}']"
-
         is_windows = sys.platform.startswith("win") or os.name == "nt"
         is_darwin = sys.platform == "darwin"
+
+        if is_darwin and build_mode == "debug":
+            # macOS 26.4 deadlocks before main() with older ASan runtimes
+            # (LLVM #200447). Xcode 26.4+ contains Apple's fixed compiler-rt,
+            # so compile and link sanitized Apple targets with the selected
+            # Xcode toolchain as one ABI-compatible unit.
+            c_compiler = f"['{_resolve_xcode_tool('clang')}']"
+            cpp_compiler = f"['{_resolve_xcode_tool('clang++')}']"
+            ar_tool = f"['{_resolve_xcode_tool('ar')}']"
+        else:
+            fast = _resolve_fast_native_entries()
+            if fast.cc is not None:
+                c_compiler = fast.cc
+                cpp_compiler = fast.cxx
+                ar_tool = fast.ar
+            else:
+                c_compiler = f"['{compiler.clang_wrapper}']"
+                cpp_compiler = f"['{compiler.clangxx_wrapper}']"
+                ar_tool = f"['{compiler.llvm_ar_wrapper}']"
 
         machine = platform.machine().lower()
         if machine in ("x86_64", "amd64"):
@@ -199,8 +244,8 @@ def write_meson_native_file(
 # This file is auto-generated by meson_runner.py to configure tool paths.
 # It persists across build regenerations when ninja detects meson.build changes.
 #
-# IMPORTANT: LLD linker is forced via -fuse-ld=lld in meson.build link_args.
-# This ensures consistent linker behavior across Windows, Linux, and macOS.
+# clang-tool-chain builds use LLD. Apple debug builds use Xcode clang + ld64
+# so the compiler instrumentation and fixed platform sanitizer runtime match.
 
 [binaries]
 c = {c_compiler}
@@ -223,7 +268,7 @@ endian = 'little'
         _ts_print(f"[MESON] Warning: Could not write native file: {e}", file=sys.stderr)
 
 
-def build_setup_env(compiler: CompilerDetection) -> dict[str, str]:
+def build_setup_env(compiler: CompilerDetection, build_mode: str) -> dict[str, str]:
     """Build the environment dict for ``meson setup``.
 
     Uses raw compiler binaries when resolvable (avoids ~3.6s Python wrapper
@@ -233,6 +278,12 @@ def build_setup_env(compiler: CompilerDetection) -> dict[str, str]:
     env = os.environ.copy()
     if compiler.cache_binary:
         env.setdefault("ZCCACHE_STRICT_PATHS", "absolute")
+
+    if sys.platform == "darwin" and build_mode == "debug":
+        env["CC"] = _resolve_xcode_tool("clang")
+        env["CXX"] = _resolve_xcode_tool("clang++")
+        env["AR"] = _resolve_xcode_tool("ar")
+        return env
 
     fast_compiler = _resolve_fast_compiler_binary()
     if fast_compiler:

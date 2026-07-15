@@ -185,14 +185,15 @@ example_compile_args = base_compile_args
 # ============================================================================
 # UNIFIED LINK CONFIGURATION
 # ============================================================================
-# clang-tool-chain provides uniform GNU-style behavior across all platforms.
-# This allows us to use the same link flags everywhere with minimal exceptions.
+# clang-tool-chain provides uniform GNU-style behavior across platforms. Apple
+# debug builds use the selected Xcode compiler/runtime together because macOS
+# 26.4 requires the fixed compiler-rt shipped with Xcode 26.4+.
 
 # Detect platform for the few remaining differences
 is_windows = build_machine.system() == 'windows'
 is_macos = build_machine.system() == 'darwin'
 
-# macOS uses ld64.lld which does not accept GNU-style --no-undefined.
+# macOS uses ld64 or ld64.lld, neither of which accepts GNU-style --no-undefined.
 # On macOS the linker errors on undefined symbols by default, so we just
 # omit the flag there. Windows and Linux LLD accept it as expected.
 # See FastLED #2612 and PR #2567.
@@ -222,6 +223,9 @@ endforeach
 # Core link arguments (shared by all targets)
 # ============================================================================
 core_link_args = ['-fuse-ld=lld']
+if is_macos and build_mode == 'debug'
+  core_link_args = []
+endif
 if build_mode == 'release'
   # Enable thin LTO at link time for release builds
   core_link_args += ['-flto=thin']
@@ -242,23 +246,11 @@ if build_mode == 'debug'
   sanitizer_link_args = [
     '-fsanitize=address',
     '-fsanitize=undefined',
-    '-shared-libasan',  # Use shared ASan runtime (required for DLL architecture)
   ]
-  if is_macos
-    # macOS 26.4 deadlocks before main() with older ASan runtimes while they
-    # inspect dyld's shared cache (LLVM #200447, FastLED #3642). GitHub's
-    # macos-26 image ships Xcode 26.5 by default, whose compiler-rt contains
-    # Apple's fix. Keep clang-tool-chain for compilation, but make its driver
-    # link the platform-compatible Xcode sanitizer runtime.
-    xcrun_program = find_program('xcrun')
-    apple_clang_resource_dir = run_command(
-      xcrun_program,
-      'clang',
-      '-print-resource-dir',
-      check: true
-    ).stdout().strip()
-    sanitizer_link_args += ['-resource-dir=' + apple_clang_resource_dir]
-    message('Using Xcode sanitizer runtime: ' + apple_clang_resource_dir)
+  if not is_macos
+    # Darwin only supports its shared sanitizer runtime and selects it by
+    # default. Other platforms need this explicit flag for the DLL architecture.
+    sanitizer_link_args += ['-shared-libasan']
   endif
 endif
 

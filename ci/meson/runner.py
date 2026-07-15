@@ -177,7 +177,7 @@ def run_meson_build_and_test(
         _setup_sanitizer_env(source_dir, verbose)
 
     _ts_print(f"Preparing build ({build_mode} mode)...")
-    _start_zccache_session(build_dir)
+    _start_zccache_session(build_dir, build_mode)
 
     phase_tracker = PhaseTracker(build_dir, build_mode)
     phase_tracker.set_phase("CONFIGURE")
