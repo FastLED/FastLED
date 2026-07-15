@@ -9,6 +9,7 @@
 #include "fl/system/fastled.h"
 
 #include "platforms/arm/rp/rpcommon/clockless_rp_pio_auto.h"
+#include "platforms/arm/rp/rpcommon/rp_pio_dma_resource_manager.h"
 #include "platforms/arm/rp/rpcommon/parallel_transpose.h"
 #include "fl/gfx/rectangular_draw_buffer.h"
 #include "fl/stl/singleton.h"
@@ -56,37 +57,43 @@ struct Rp2040PinGroup {
 
     void cleanup() {
         if (dma_chan != -1) {
-            dma_channel_unclaim(dma_chan);
+            RpPioDmaResourceManager::instance().releaseDmaChannel(dma_chan);
             dma_chan = -1;
         }
         if (sm != -1 && pio != nullptr) {
             pio_sm_set_enabled(pio, sm, false);
-            pio_sm_unclaim(pio, sm);
+            RpPioDmaResourceManager::instance().releasePioStateMachine(pio, sm);
             sm = -1;
         }
+        RpPioDmaResourceManager::instance().releasePins(base_pin, num_pins);
         transpose_buffer.reset();
         buffer_size = 0;
     }
 
     bool allocateResources() {
-        // Try to claim PIO and DMA resources
-        pio = pio0;  // Start with pio0
-        sm = pio_claim_unused_sm(pio, false);
-        if (sm == -1) {
-            // Try pio1
-            pio = pio1;
-            sm = pio_claim_unused_sm(pio, false);
-            if (sm == -1) {
-                FL_WARN_F("Failed to claim PIO state machine for pin group starting at GPIO %s", (int)base_pin);
-                return false;
-            }
+        auto& resources = RpPioDmaResourceManager::instance();
+        int state_machine = -1;
+        if (!resources.claimPioStateMachine(&pio, &state_machine)) {
+            FL_WARN_F("Failed to claim PIO state machine for pin group starting at GPIO %s", (int)base_pin);
+            return false;
         }
+        sm = static_cast<i32>(state_machine);
 
-        dma_chan = dma_claim_unused_channel(false);
-        if (dma_chan == -1) {
-            pio_sm_unclaim(pio, sm);
+        int dma_channel = -1;
+        if (!resources.claimDmaChannel(&dma_channel)) {
+            resources.releasePioStateMachine(pio, state_machine);
             sm = -1;
             FL_WARN_F("Failed to claim DMA channel for pin group starting at GPIO %s", (int)base_pin);
+            return false;
+        }
+        dma_chan = static_cast<i32>(dma_channel);
+
+        if (!resources.claimPins(base_pin, num_pins)) {
+            resources.releaseDmaChannel(dma_channel);
+            resources.releasePioStateMachine(pio, state_machine);
+            dma_chan = -1;
+            sm = -1;
+            FL_WARN_F("Failed to claim pins for parallel group starting at GPIO %s", (int)base_pin);
             return false;
         }
 

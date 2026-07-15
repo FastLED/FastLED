@@ -31,6 +31,7 @@
 #pragma GCC diagnostic pop
 
 #include "platforms/arm/rp/rpcommon/pio_gen.h"
+#include "platforms/arm/rp/rpcommon/rp_pio_dma_resource_manager.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
@@ -167,44 +168,42 @@ public:
             T3_mult = T3;
         }
         
-        PIO pio;
-        int sm;
+        PIO pio = nullptr;
+        int sm = -1;
         int offset = -1;
-        
-	#if defined(FL_IS_RP2350)
-		// RP2350 features three PIO instances!
-		const PIO pios[NUM_PIOS] = { pio0, pio1, pio2 };
-	#elif defined(FL_IS_RP2040)
-        // RP2040: find an unclaimed PIO state machine and upload the clockless program
-        // There are two PIO instances, each with four state machines
-		const PIO pios[NUM_PIOS] = { pio0, pio1 };
-	#else
-		#error "Unsupported RP platform: expected FL_IS_RP2040 or FL_IS_RP2350"
-	#endif
-        // iterate over PIO instances
-        for (u32 i = 0; i < NUM_PIOS; i++) {
-            pio = pios[i];
-            sm = pio_claim_unused_sm(pio, false); // claim a state machine
-            if (sm == -1) continue; // skip this PIO if no unused sm
-            
+        auto& resources = RpPioDmaResourceManager::instance();
+        while (resources.claimPioStateMachine(&pio, &sm)) {
             offset = add_clockless_pio_program(pio, T1_mult, T2_mult, T3_mult);
             if (offset == -1) {
-                pio_sm_unclaim(pio, sm); // unclaim the state machine and skip this PIO
-                continue;                // if program couldn't be added
+                resources.releasePioStateMachine(pio, sm);
+                pio = nullptr;
+                sm = -1;
+                continue;
             }
-            
-            break; // found pio and sm that work
+            break;
         }
-        if (offset == -1) return; // couldn't find good pio and sm
+        if (offset == -1) return;
 
         // Store PIO, state machine, and offset for later use
         mPio = pio;
         mSm = sm;
         mPioOffset = offset;
 
-        // claim an unused DMA channel (there's 12 in total,, so this should also usually work out fine)
-        dma_channel = dma_claim_unused_channel(false);
-        if (dma_channel == -1) return; // no free DMA channel
+        if (!resources.claimDmaChannel(&dma_channel)) {
+            resources.releasePioStateMachine(mPio, mSm);
+            mPio = nullptr;
+            mSm = -1;
+            return;
+        }
+
+        if (!resources.claimPins(DATA_PIN, 1)) {
+            resources.releaseDmaChannel(dma_channel);
+            resources.releasePioStateMachine(mPio, mSm);
+            dma_channel = -1;
+            mPio = nullptr;
+            mSm = -1;
+            return;
+        }
 
 
         // setup PIO state machine
