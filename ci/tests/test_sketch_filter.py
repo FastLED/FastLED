@@ -751,7 +751,17 @@ class TestAutoResearchFilter:
 
     @pytest.mark.parametrize(
         "board_name",
-        ["esp32s3", "esp32c6", "esp32p4", "teensy40", "teensy41"],
+        [
+            "esp32s3",
+            "esp32c6",
+            "esp32p4",
+            "teensy40",
+            "teensy41",
+            "lpc845",
+            "lpc845brk",
+            "lpcxpresso845max",
+            "lpcxpresso804",
+        ],
     )
     def test_autoresearch_supported_boards_compile(self, board_name: str) -> None:
         from ci.boards import create_board

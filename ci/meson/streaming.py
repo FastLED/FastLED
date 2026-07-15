@@ -35,6 +35,10 @@ from ci.util.timestamp_print import ts_print as _ts_print
 # runner.exe / example_runner.exe (Windows-only transient failure; see #2268).
 _LLD_PERM_DENIED_MAX_RETRIES = 3
 
+# DLL mtime optimization should take milliseconds. Bound the wait so a hung
+# filesystem operation cannot stall the entire build indefinitely.
+_DLL_TOUCH_MAX_WAIT_SECONDS = 30.0
+
 
 @dataclass
 class StreamingResult:
@@ -64,6 +68,17 @@ class CompileOnlyResult:
     compile_output: str = ""
     compiled_tests: list[Path] = field(default_factory=list)
     compile_sub_phases: dict[str, float] = field(default_factory=dict)
+
+
+def _wait_for_dll_touch(done: threading.Event, timeout: float) -> bool:
+    """Wait for DLL mtime optimization while keeping Ctrl+C responsive."""
+    deadline = time.monotonic() + timeout
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return done.is_set()
+        if done.wait(timeout=min(0.2, remaining)):
+            return True
 
 
 def stream_compile_only(
@@ -523,9 +538,16 @@ def stream_compile_only(
     # Wait before stabilization and before returning artifacts to the caller;
     # loading a DLL concurrently with os.utime() fails intermittently on
     # Windows and can race the macOS dynamic loader.
-    # Poll so Ctrl+C remains responsive if the optimizer thread stalls.
-    while not dll_touch_done.wait(timeout=0.2):
-        pass
+    # Poll so Ctrl+C remains responsive, but fail instead of hanging forever
+    # if the optimizer thread stalls in a filesystem operation.
+    touch_timeout = min(float(compile_timeout), _DLL_TOUCH_MAX_WAIT_SECONDS)
+    if not _wait_for_dll_touch(dll_touch_done, touch_timeout):
+        timeout_message = (
+            f"[MESON] DLL mtime optimization timed out after {touch_timeout:.1f}s"
+        )
+        print_error(timeout_message)
+        compilation_output = f"{compilation_output}\n{timeout_message}".strip()
+        compilation_failed = True
 
     # Record compilation completion checkpoint and end time for sub-phases
     compile_sub_phases["compile_done"] = time.time()

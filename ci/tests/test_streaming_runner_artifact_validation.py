@@ -7,16 +7,20 @@ the validator catches anomalous cache/tool output before a runner loads it.
 
 import concurrent.futures
 import os
+import threading
 import time
 import unittest
+from contextlib import nullcontext
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Callable, TypeVar
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from ci.meson.streaming import (  # noqa: E402
     CompileOnlyResult,
+    _wait_for_dll_touch,
     stream_compile_and_run_tests,
+    stream_compile_only,
 )
 from ci.meson.streaming import (
     TestResult as StreamingTestResult,
@@ -120,6 +124,35 @@ class TestValidateTestArtifact(unittest.TestCase):
 class TestStreamingExecutionCoordination(unittest.TestCase):
     """Streaming execution starts only after a successful compile phase."""
 
+    def test_dll_touch_wait_is_bounded(self) -> None:
+        """A stalled optimizer reports failure instead of waiting forever."""
+        done = threading.Event()
+
+        self.assertFalse(_wait_for_dll_touch(done, timeout=0.0))
+        done.set()
+        self.assertTrue(_wait_for_dll_touch(done, timeout=0.0))
+
+    def test_dll_touch_timeout_is_reported_in_compile_output(self) -> None:
+        """Timeout diagnostics propagate to callers and persisted failure logs."""
+        process = MagicMock()
+        process.line_iter.return_value = nullcontext(iter(()))
+        process.wait.return_value = 0
+        process.stdout = "ninja completed"
+
+        with (
+            TemporaryDirectory() as tmp,
+            patch("ci.meson.streaming.get_meson_executable", return_value="meson"),
+            patch("ci.meson.streaming.kill_stale_runner_processes", return_value=0),
+            patch("ci.meson.streaming.RunningProcess", return_value=process),
+            patch("ci.meson.streaming._wait_for_dll_touch", return_value=False),
+        ):
+            result = stream_compile_only(Path(tmp) / "build", compile_timeout=1)
+
+        self.assertFalse(result.success)
+        self.assertIn(
+            "DLL mtime optimization timed out after 1.0s", result.compile_output
+        )
+
     def test_test_starts_after_compile_completes(self) -> None:
         """A pre-link status callback must not start a test process."""
         test_path = Path("build/tests/example.dylib")
@@ -127,6 +160,8 @@ class TestStreamingExecutionCoordination(unittest.TestCase):
         observed_compile_states: list[bool] = []
 
         def fake_compile_only(*args: object, **kwargs: object) -> CompileOnlyResult:
+            # The pre-fix implementation supplied this removed kwarg. Keep the
+            # compatibility hook so this regression remains RED on old code.
             callback = kwargs.get("on_test_compiled")
             if callable(callback):
                 callback(test_path)
@@ -160,6 +195,7 @@ class TestStreamingExecutionCoordination(unittest.TestCase):
         executed_paths: list[Path] = []
 
         def fake_compile_only(*args: object, **kwargs: object) -> CompileOnlyResult:
+            # Exercise the pre-fix early-execution path when run against it.
             callback = kwargs.get("on_test_compiled")
             if callable(callback):
                 callback(test_path)
