@@ -81,6 +81,14 @@ def _is_teensy4_environment(final_environment: str | None) -> bool:
 def _driver_name_for_environment(driver: str, final_environment: str | None) -> str:
     if driver == "SPI" and _is_teensy4_environment(final_environment):
         return "SPI_UNIFIED"
+    if (
+        driver == "FLEX_IO"
+        and final_environment is not None
+        and final_environment.lower() in ("rp2040", "rpipico")
+    ):
+        # RP exposes concrete PIO engines, which are the names accepted by
+        # the RPC driver registry. PIO1 leaves PIO0 available to the RX oracle.
+        return "PIO1"
     return driver
 
 
