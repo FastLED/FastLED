@@ -77,4 +77,36 @@ snapshot, and same-session recovery control. Audit every stall or silence for
 macros, and JSON-RPC chatter before changing a timeout. Preserve a proven path
 until a replacement has physical wire evidence at an equal or higher level.
 
-The RP2040 and ESP32-WROOM incident narratives follow in the next phases.
+## RP2040 / Pico postmortem
+
+The Pico history is a transport-first lesson: a board may be healthy while a
+deploy changes its application CDC port, and a successful serial attach does
+not prove that an RPC handler consumed a command. Board identity belongs in
+[FastLED/boards](https://github.com/FastLED/boards); record it with `fbuild
+port scan` at run time instead of freezing a VID/PID table in this guide.
+
+| Incident | Sources | False lead and discriminator | Root cause and working fix | Permanent rule / evidence |
+| --- | --- | --- | --- | --- |
+| Port reacquisition | [#3633](https://github.com/FastLED/FastLED/issues/3633), [`f7df508ddc`](https://github.com/FastLED/FastLED/commit/f7df508ddc), [`8b6b5958db`](https://github.com/FastLED/FastLED/commit/8b6b5958db), [`d4d93a4607`](https://github.com/FastLED/FastLED/commit/d4d93a4607) | An empty deploy-port marker was interpreted as a dead board. A fresh fbuild scan plus a post-deploy application-port reacquisition distinguished expected CDC replacement from failure. | Treat the deploy result as the transport authority and reconnect through the fbuild-backed adapter. | Never cache a pre-flash port or infer BOOTSEL failure from a disappearing application CDC port. Evidence: board transport/RPC, not driver proof. |
+| RPC contract | [`1ec820b372`](https://github.com/FastLED/FastLED/commit/1ec820b372), [`0534dcc69e`](https://github.com/FastLED/FastLED/commit/0534dcc69e) | A silent command was assumed to be a serial failure. `help`/discovery plus a bounded unknown-method probe separated a missing binding from transport loss. | Publish structured method manifests and keep a negative probe bounded. | Prove discovery, ping, valid request, and invalid request before testing a peripheral. Evidence: RPC only. |
+| Watchdog recovery | [`fdd17ded00`](https://github.com/FastLED/FastLED/commit/fdd17ded00), [`9db07346ed`](https://github.com/FastLED/FastLED/commit/9db07346ed), [#3640](https://github.com/FastLED/FastLED/issues/3640) [`9cebcfac68`](https://github.com/FastLED/FastLED/commit/9cebcfac68), and [#3641](https://github.com/FastLED/FastLED/issues/3641) [`24b4cfcb9e`](https://github.com/FastLED/FastLED/commit/24b4cfcb9e) | A missing acknowledgement was mistaken for a failed reset. Flushing the acknowledgement before the intentional hang and then requiring disconnect, re-enumeration, ping, and RPC smoke separated the two. | Make reset recovery an end-to-end transaction, not a reset assertion. | A watchdog claim needs an acknowledged trigger and a post-reset RPC control. Evidence: recovery/transport; it does not prove LED data. |
+| PIO loopback closeout | [#3658](https://github.com/FastLED/FastLED/issues/3658), [#3675](https://github.com/FastLED/FastLED/pull/3675), [#3661](https://github.com/FastLED/FastLED/issues/3661), and [#3676](https://github.com/FastLED/FastLED/pull/3676) | CPU edge counts and a GPIO toggle were initially tempting proof of a clockless driver. The discriminator was an independent PIO RX oracle on the physical GPIO11-to-GPIO8 jumper. | Serialize PIO program/state-machine/DMA/capture ownership; make short-frame capture deterministic; feed the existing watchdog between bounded repeated captures, not by lengthening it. | Keep a physical jumper, exact-byte decode, concurrent-resource check, structured exhaustion rejection, and same-session known-good recovery. Evidence: byte exact, resource, and soak only for the recorded PIO/GPIO matrix. |
+
+The Phase 8 merged-main run on the Pico was 100 LEDs, four patterns, and 16
+frames per pattern in 7.229 s. The adjacent 101-LED PIO RX capacity request
+returned `dma_buffer_size` in 18 ms and the 100-LED control immediately passed
+again. The failed/premature alternatives were extending the host timeout,
+calling direct flashing/serial tooling, and treating a GPIO pulse count as
+byte proof.
+
+### RP2040 quiet-control rule
+
+For a synchronous RPC soak, first audit `fl::print`, `Serial.print*`,
+`FL_PRINT`, `FL_WARN`, `AR_FL_WARN`, and response construction. Success-path
+edge dumps and progress strings can create heap/transport pressure even when
+their output is disabled. Preserve detailed raw-edge snapshots for RX wait,
+decode, and comparison failures; do not create them for every successful
+frame. Feed the watchdog only between independently bounded operations so a
+real capture or TX wedge remains observable.
+
+The ESP32-WROOM incident narrative follows in the next phase.
