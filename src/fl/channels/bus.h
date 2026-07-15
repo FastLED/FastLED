@@ -131,6 +131,7 @@ template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 
 #elif defined(FL_IS_ARM_LPC_845)
 template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 1; };
 #elif defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+template<> struct BusInstanceCount<Bus::FLEX_IO> { static constexpr fl::u8 value = 2; };
 template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 2; };
 #endif
 

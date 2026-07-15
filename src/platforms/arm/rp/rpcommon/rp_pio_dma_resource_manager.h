@@ -142,6 +142,46 @@ class RpPioDmaResourceManager {
         return true;
     }
 
+    /// @brief Atomically claim one PIO state machine, DMA channel, and GPIO.
+    bool claimPioDmaAndPin(PIO* pio_out, int* state_machine_out,
+                           int* dma_channel_out, u8 pin,
+                           u8 pio_index) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        if (pio_out == nullptr || state_machine_out == nullptr ||
+            dma_channel_out == nullptr) {
+            return false;
+        }
+        if (pio_index >= NUM_PIOS) return false;
+        PIO claimed_pio = pioForIndex(pio_index);
+        const int claimed_sm = pio_claim_unused_sm(claimed_pio, false);
+        if (claimed_sm >= 0 &&
+            !mLedger.claimPioStateMachine(pio_index, static_cast<u8>(claimed_sm))) {
+            pio_sm_unclaim(claimed_pio, static_cast<uint>(claimed_sm));
+            return false;
+        }
+        if (claimed_sm < 0 || !mLedger.claimPin(pin)) {
+            if (claimed_sm >= 0) {
+                pio_sm_unclaim(claimed_pio, static_cast<uint>(claimed_sm));
+                mLedger.releasePioStateMachine(static_cast<u8>(pioIndex(claimed_pio)),
+                                               static_cast<u8>(claimed_sm));
+            }
+            return false;
+        }
+        const int dma = dma_claim_unused_channel(false);
+        if (dma < 0 || !mLedger.claimDmaChannel(static_cast<u8>(dma))) {
+            if (dma >= 0) dma_channel_unclaim(static_cast<uint>(dma));
+            mLedger.releasePin(pin);
+            pio_sm_unclaim(claimed_pio, static_cast<uint>(claimed_sm));
+            mLedger.releasePioStateMachine(static_cast<u8>(pioIndex(claimed_pio)),
+                                           static_cast<u8>(claimed_sm));
+            return false;
+        }
+        *pio_out = claimed_pio;
+        *state_machine_out = claimed_sm;
+        *dma_channel_out = dma;
+        return true;
+    }
+
     bool claimPins(u8 first_pin, u8 count) FL_NO_EXCEPT {
         LockGuard lock(*this);
         for (u8 offset = 0; offset < count; ++offset) {
