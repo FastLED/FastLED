@@ -735,9 +735,19 @@ class TestAutoResearchFilter:
 
         assert sketch_filter is not None, "AutoResearch should have a @filter directive"
         assert sketch_filter.require == {
-            "board": ["esp32s3", "esp32c6", "esp32p4", "teensy41", "teensy40"]
+            "board": [
+                "esp32s3",
+                "esp32c6",
+                "esp32p4",
+                "teensy41",
+                "teensy40",
+                "lpc845",
+                "lpc845brk",
+                "lpcxpresso845max",
+                "lpcxpresso804",
+            ]
         }
-        assert sketch_filter.exclude == {"memory": ["low"]}
+        assert sketch_filter.exclude == {}
 
     @pytest.mark.parametrize(
         "board_name",

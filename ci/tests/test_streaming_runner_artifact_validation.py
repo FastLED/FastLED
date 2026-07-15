@@ -1,19 +1,47 @@
 """Tests for streaming-runner artifact validation (FastLED #3011).
 
-`validate_test_artifact` is the gate that catches the false-pass /
-false-fail mode where Ninja's "Linking <X>" announcement submits a
-test to the runner, the link then fails (e.g. zccache daemon crash
-under the parallel-link storm), and the runner loads either a
-missing DLL (clean build) or a stale one from a previous build.
+`validate_test_artifact` is the defense-in-depth gate for missing or stale
+artifacts. Execution waits for the full build to finish (FastLED #3642), and
+the validator catches anomalous cache/tool output before a runner loads it.
 """
 
+import concurrent.futures
+import os
 import time
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import Any, Callable, TypeVar
+from unittest.mock import patch
 
-from ci.meson.streaming import TestResult  # noqa: E402
+from ci.meson.streaming import (  # noqa: E402
+    CompileOnlyResult,
+    stream_compile_and_run_tests,
+)
+from ci.meson.streaming import (
+    TestResult as StreamingTestResult,
+)
 from ci.meson.streaming_runner import validate_test_artifact  # noqa: E402
+
+
+_T = TypeVar("_T")
+
+
+class _ImmediateExecutor:
+    """Deterministic executor for testing compile/run phase ordering."""
+
+    def __init__(self, max_workers: int) -> None:
+        self.max_workers = max_workers
+
+    def submit(
+        self, fn: Callable[..., _T], /, *args: Any, **kwargs: Any
+    ) -> concurrent.futures.Future[_T]:
+        future: concurrent.futures.Future[_T] = concurrent.futures.Future()
+        future.set_result(fn(*args, **kwargs))
+        return future
+
+    def shutdown(self, wait: bool = True, *, cancel_futures: bool = False) -> None:
+        pass
 
 
 class TestValidateTestArtifact(unittest.TestCase):
@@ -35,7 +63,7 @@ class TestValidateTestArtifact(unittest.TestCase):
             build_start = time.time()
             result = validate_test_artifact(dll, build_start)
             self.assertIsNotNone(result)
-            assert isinstance(result, TestResult)
+            assert isinstance(result, StreamingTestResult)
             self.assertFalse(result.success)
             self.assertIn("Test artifact missing", result.output)
             self.assertIn(str(dll), result.output)
@@ -50,7 +78,7 @@ class TestValidateTestArtifact(unittest.TestCase):
             build_start = dll_mtime + 100.0  # 100 s AFTER the file was written
             result = validate_test_artifact(dll, build_start)
             self.assertIsNotNone(result)
-            assert isinstance(result, TestResult)
+            assert isinstance(result, StreamingTestResult)
             self.assertFalse(result.success)
             self.assertIn("Stale test artifact", result.output)
             self.assertIn(str(dll), result.output)
@@ -79,14 +107,113 @@ class TestValidateTestArtifact(unittest.TestCase):
 
             # Missing case
             missing = validate_test_artifact(dll, build_start)
-            assert isinstance(missing, TestResult)
+            assert isinstance(missing, StreamingTestResult)
             self.assertIn("re-run", missing.output.lower())
 
             # Stale case
             dll.write_bytes(b"old")
             stale = validate_test_artifact(dll, dll.stat().st_mtime + 5.0)
-            assert isinstance(stale, TestResult)
+            assert isinstance(stale, StreamingTestResult)
             self.assertIn("zccache stop", stale.output)
+
+
+class TestStreamingExecutionCoordination(unittest.TestCase):
+    """Streaming execution starts only after a successful compile phase."""
+
+    def test_test_starts_after_compile_completes(self) -> None:
+        """A pre-link status callback must not start a test process."""
+        test_path = Path("build/tests/example.dylib")
+        compile_finished = False
+        observed_compile_states: list[bool] = []
+
+        def fake_compile_only(*args: object, **kwargs: object) -> CompileOnlyResult:
+            callback = kwargs.get("on_test_compiled")
+            if callable(callback):
+                callback(test_path)
+
+            nonlocal compile_finished
+            compile_finished = True
+            return CompileOnlyResult(success=True, compiled_tests=[test_path])
+
+        def test_callback(path: Path) -> StreamingTestResult:
+            self.assertEqual(test_path, path)
+            observed_compile_states.append(compile_finished)
+            return StreamingTestResult(success=True)
+
+        with (
+            patch(
+                "ci.meson.streaming.stream_compile_only", side_effect=fake_compile_only
+            ),
+            patch(
+                "ci.meson.streaming.concurrent.futures.ThreadPoolExecutor",
+                side_effect=_ImmediateExecutor,
+            ),
+        ):
+            result = stream_compile_and_run_tests(Path("build"), test_callback)
+
+        self.assertTrue(result.success)
+        self.assertEqual([True], observed_compile_states)
+
+    def test_failed_compile_runs_no_tests(self) -> None:
+        """Artifacts mentioned before a failed link must never execute."""
+        test_path = Path("build/tests/stale.dylib")
+        executed_paths: list[Path] = []
+
+        def fake_compile_only(*args: object, **kwargs: object) -> CompileOnlyResult:
+            callback = kwargs.get("on_test_compiled")
+            if callable(callback):
+                callback(test_path)
+            return CompileOnlyResult(success=False, compiled_tests=[test_path])
+
+        def test_callback(path: Path) -> StreamingTestResult:
+            executed_paths.append(path)
+            return StreamingTestResult(success=True)
+
+        with (
+            patch(
+                "ci.meson.streaming.stream_compile_only", side_effect=fake_compile_only
+            ),
+            patch(
+                "ci.meson.streaming.concurrent.futures.ThreadPoolExecutor",
+                side_effect=_ImmediateExecutor,
+            ),
+        ):
+            result = stream_compile_and_run_tests(Path("build"), test_callback)
+
+        self.assertFalse(result.success)
+        self.assertEqual([], executed_paths)
+
+    def test_no_parallel_uses_one_worker(self) -> None:
+        """NO_PARALLEL must constrain the streaming executor to one worker."""
+        worker_counts: list[int] = []
+
+        def capture_executor(
+            max_workers: int,
+        ) -> _ImmediateExecutor:
+            worker_counts.append(max_workers)
+            return _ImmediateExecutor(max_workers=max_workers)
+
+        with (
+            patch.dict(os.environ, {"NO_PARALLEL": "1"}),
+            patch("ci.util.cpu_count.os.cpu_count", return_value=3),
+            patch(
+                "ci.meson.streaming.stream_compile_only",
+                return_value=CompileOnlyResult(
+                    success=True,
+                    compiled_tests=[Path("build/tests/example.dylib")],
+                ),
+            ),
+            patch(
+                "ci.meson.streaming.concurrent.futures.ThreadPoolExecutor",
+                side_effect=capture_executor,
+            ),
+        ):
+            result = stream_compile_and_run_tests(
+                Path("build"), lambda _: StreamingTestResult(success=True)
+            )
+
+        self.assertTrue(result.success)
+        self.assertEqual([1], worker_counts)
 
 
 if __name__ == "__main__":

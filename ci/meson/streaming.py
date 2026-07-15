@@ -25,6 +25,7 @@ from ci.meson.link_retry import (
 from ci.meson.mtime_stabilizer import stabilize_dll_mtimes
 from ci.meson.output import print_error, print_success
 from ci.meson.phase_tracker import PhaseTracker
+from ci.util.cpu_count import cpu_count
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.tee import StreamTee
 from ci.util.timestamp_print import ts_print as _ts_print
@@ -72,13 +73,13 @@ def stream_compile_only(
     compile_timeout: int = 600,
     build_optimizer: Optional[BuildOptimizer] = None,
     build_timer=None,
-    on_test_compiled: Optional[Callable[[Path], None]] = None,
 ) -> CompileOnlyResult:
     """
     Stream compilation only - collect all compiled test paths without running them.
 
-    Monitors Ninja output to detect when test executables finish linking,
-    collecting them for later execution.
+    Monitors Ninja output to collect test artifacts for later execution.
+    Ninja's ``Linking target`` line is a pre-link announcement, so callers
+    must not execute collected artifacts until this function returns success.
 
     Args:
         build_dir: Meson build directory
@@ -377,12 +378,6 @@ def stream_compile_only(
                             if verbose:
                                 _ts_print(f"[MESON] Test built: {test_path.name}")
                             compiled_tests.append(test_path)
-                            if on_test_compiled is not None:
-                                # Wait for DLL touch thread to finish before
-                                # submitting tests — os.utime() on Windows
-                                # conflicts with LoadLibrary (error 126).
-                                dll_touch_done.wait()
-                                on_test_compiled(test_path)
 
             # Check compilation result
             returncode = cast(int, proc.wait())
@@ -524,6 +519,14 @@ def stream_compile_only(
     while producer.is_alive():
         producer.join(timeout=0.2)
 
+    # The build optimizer may still be touching DLL mtimes after Ninja exits.
+    # Wait before stabilization and before returning artifacts to the caller;
+    # loading a DLL concurrently with os.utime() fails intermittently on
+    # Windows and can race the macOS dynamic loader.
+    # Poll so Ctrl+C remains responsive if the optimizer thread stalls.
+    while not dll_touch_done.wait(timeout=0.2):
+        pass
+
     # Record compilation completion checkpoint and end time for sub-phases
     compile_sub_phases["compile_done"] = time.time()
     if build_timer is not None:
@@ -556,11 +559,10 @@ def stream_compile_and_run_tests(
     max_failures: int = 10,
 ) -> StreamingResult:
     """
-    Stream test compilation and execution with overlap.
+    Compile test artifacts, then execute them concurrently.
 
-    Tests start executing as soon as they finish linking, while remaining
-    tests continue compiling. This reduces total wall-clock time compared
-    to a sequential compile-then-run approach.
+    Ninja emits link status before a library is safe to load. Compilation must
+    finish successfully before any test process starts (FastLED #3642).
 
     Args:
         build_dir: Meson build directory
@@ -580,10 +582,8 @@ def stream_compile_and_run_tests(
     if test_file_filter:
         setattr(test_callback, "_test_file_filter", test_file_filter)
 
-    # Prepare concurrent test execution infrastructure.
-    # Tests are submitted to the executor as they finish linking (during
-    # compilation), overlapping test execution with ongoing compilation.
-    max_workers = min(os.cpu_count() or 4, 16)
+    # Respect --no-parallel/NO_PARALLEL while retaining the existing cap.
+    max_workers = min(cpu_count(), 16)
     halt_event = threading.Event()
     _kill_all = getattr(test_callback, "kill_all", None)
 
@@ -607,38 +607,13 @@ def stream_compile_and_run_tests(
         except Exception as e:
             return _WorkerResult(test_path, TestResult(success=False), str(e))
 
-    # Do NOT use `with` for the executor — its __exit__ calls
-    # shutdown(wait=True) which blocks until every running worker
-    # finishes, making Ctrl+C unresponsive for up to 600s per test.
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
-    futures: list[concurrent.futures.Future[_WorkerResult]] = []
-    futures_lock = threading.Lock()
-
     # Prepare filter for test_file_filter
     filter_needle = (
         test_file_filter.replace(".hpp", "").lower() if test_file_filter else None
     )
 
-    def _on_test_compiled(test_path: Path) -> None:
-        """Submit a newly compiled test for execution immediately.
-
-        Called from the Ninja producer thread as each test finishes linking,
-        allowing test execution to overlap with ongoing compilation.
-        """
-        if halt_event.is_set():
-            return
-        if filter_needle and filter_needle not in test_path.name.lower():
-            return
-        try:
-            future = executor.submit(_run_one_test, test_path)
-        except RuntimeError:
-            # Executor was shut down (e.g. compilation failed concurrently)
-            return
-        with futures_lock:
-            futures.append(future)
-
-    # Compile and run tests with overlap — tests start executing as soon
-    # as they finish linking while remaining tests continue compiling.
+    # Compile every artifact before launching a dynamic-library runner. Ninja's
+    # link progress line is emitted before ld64/lld finishes writing the file.
     cr = stream_compile_only(
         build_dir=build_dir,
         target=target,
@@ -646,27 +621,56 @@ def stream_compile_and_run_tests(
         compile_timeout=compile_timeout,
         build_optimizer=build_optimizer,
         build_timer=build_timer,
-        on_test_compiled=_on_test_compiled,
     )
 
     if not cr.success:
-        # Compilation failed — cancel pending tests and shutdown
-        halt_event.set()
-        if _kill_all:
-            _kill_all()
-        with futures_lock:
-            for f in futures:
-                f.cancel()
-        executor.shutdown(wait=False, cancel_futures=True)
         return StreamingResult(
             success=False,
             compile_output=cr.compile_output,
             compile_sub_phases=cr.compile_sub_phases,
         )
 
-    # Take snapshot of futures (no more will be added after compile returns)
-    with futures_lock:
-        all_futures = list(futures)
+    # Do NOT use `with` for the executor — its __exit__ calls
+    # shutdown(wait=True) which blocks until every running worker
+    # finishes, making Ctrl+C unresponsive for up to 600s per test.
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
+    futures: list[concurrent.futures.Future[_WorkerResult]] = []
+
+    def _submit_test(test_path: Path) -> None:
+        """Submit a test only after the complete build succeeds."""
+        if halt_event.is_set():
+            return
+        if filter_needle and filter_needle not in test_path.name.lower():
+            return
+        try:
+            future = executor.submit(_run_one_test, test_path)
+        except RuntimeError:
+            # Executor was shut down during interruption/failure cleanup.
+            return
+        futures.append(future)
+
+    try:
+        for test_path in cr.compiled_tests:
+            _submit_test(test_path)
+    except KeyboardInterrupt as ki:
+        halt_event.set()
+        if _kill_all:
+            _kill_all()
+        for f in futures:
+            f.cancel()
+        executor.shutdown(wait=False, cancel_futures=True)
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception:
+        halt_event.set()
+        if _kill_all:
+            _kill_all()
+        for f in futures:
+            f.cancel()
+        executor.shutdown(wait=False, cancel_futures=True)
+        raise
+
+    all_futures = list(futures)
 
     if not all_futures:
         # No tests found during compilation (build was fully cached).
@@ -691,7 +695,6 @@ def stream_compile_and_run_tests(
     try:
         # Wait sequentially so output order matches submission order
         # (tests still execute in parallel across worker threads).
-        # Many tests will have already completed during compilation.
         for future in all_futures:
             if halt_event.is_set():
                 break

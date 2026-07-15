@@ -46,7 +46,7 @@ The `ci.meson` package is organized into 9 focused modules following a tier-base
 
 ### Tier 4: Advanced Operations
 
-- **`streaming.py`** (~770 lines) - Parallel streaming compilation and testing
+- **`streaming.py`** (~770 lines) - Streaming compilation followed by parallel testing
   - Functions: `stream_compile_and_run_tests()`
 
 ### Tier 5: Orchestration
@@ -56,7 +56,7 @@ The `ci.meson` package is organized into 9 focused modules following a tier-base
   - Backed by: `runner_helpers.py`, `streaming_runner.py`, `sequential_runner.py`
 
 - **`runner_helpers.py`** (~420 lines) - Timing, recovery, cleanup, failure logs
-- **`streaming_runner.py`** (~360 lines) - Streaming compile + parallel test execution
+- **`streaming_runner.py`** (~360 lines) - Compile-then-run parallel test execution
 - **`sequential_runner.py`** (~545 lines) - Per-target compile + direct test invocation
 
 ## Migration Guide

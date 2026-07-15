@@ -2,8 +2,8 @@
 """Streaming execution path for ``run_meson_build_and_test``.
 
 Extracted from ``ci/meson/runner.py``. Runs ``stream_compile_and_run_tests``
-which compiles + executes tests in parallel — as soon as a test finishes
-linking it's launched while other tests are still compiling.
+which compiles all artifacts before executing tests in parallel. The phase
+boundary prevents dynamic loaders from opening partially linked libraries.
 
 This module owns the streaming-specific concerns: a test-callback closure
 that captures per-test output (so failures can be summarized at the end),
@@ -50,15 +50,10 @@ def validate_test_artifact(
     missing or stale, so the caller can surface the failure directly
     instead of silently running broken/old code.
 
-    Why this matters (FastLED #3011): the streaming compiler submits
-    tests to the runner as soon as Ninja prints ``[N/M] Linking <X>``
-    — but that line is Ninja's PRE-link announcement, NOT a success
-    signal. If the link then FAILS (zccache daemon crash under the
-    parallel-link storm, ld.lld permission error, etc.) ``test_path``
-    is either missing entirely (clean build) or stale from a previous
-    build sitting in the same build dir. Running it produces a
-    false pass or false fail; refusing to run it surfaces the link
-    failure where it belongs.
+    Why this matters (FastLED #3011): collected paths come from Ninja's
+    ``[N/M] Linking <X>`` PRE-link announcement. Execution is deferred until
+    the complete build succeeds (FastLED #3642), and this validator remains a
+    defense against a missing or stale artifact left by tool/cache anomalies.
     """
     if not test_path.exists():
         return TestResult(
@@ -271,10 +266,8 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
         """
         try:
             # FastLED #3011 — refuse to run missing or stale artifacts.
-            # The streaming compiler submits tests as soon as Ninja prints
-            # "Linking <X>" (a PRE-link announcement, not success). If
-            # the link then fails, what's at test_path is either nothing
-            # or yesterday's DLL — running it produces false pass / fail.
+            # Execution now waits for the full build (FastLED #3642), while
+            # this check preserves defense against anomalous cache/tool output.
             failure = validate_test_artifact(test_path, ctx.start_time)
             if failure is not None:
                 return failure

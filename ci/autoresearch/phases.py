@@ -1931,6 +1931,8 @@ async def _run_watchdog_soak(ctx: RunContext) -> int:
     finally:
         try:
             await client.close()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
         except Exception:
             pass
 
@@ -1973,6 +1975,8 @@ async def _run_watchdog_soak(ctx: RunContext) -> int:
     finally:
         try:
             await recovery.close()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
         except Exception:
             pass
     ctx.upload_port = new_port
