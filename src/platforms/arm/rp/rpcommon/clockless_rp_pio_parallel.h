@@ -69,6 +69,7 @@
 #include "platforms/arm/rp/rpcommon/parallel_transpose.h"
 #include "fastled_delay.h"
 #include "platforms/arm/rp/is_rp.h"
+#include "platforms/arm/rp/rpcommon/rp_pio_dma_resource_manager.h"
 
 // Hardware headers for RP2040/RP2350
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
@@ -177,30 +178,41 @@ public:
         }
 
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
-        // Initialize GPIO pins
+        auto& resources = RpPioDmaResourceManager::instance();
+        int state_machine = -1;
+        if (!resources.claimPioStateMachine(&mPio, &state_machine)) {
+            fl::free(mTransposeBuffer);
+            mTransposeBuffer = nullptr;
+            return;
+        }
+        mSm = static_cast<u32>(state_machine);
+
+        int dma_channel = -1;
+        if (!resources.claimDmaChannel(&dma_channel)) {
+            resources.releasePioStateMachine(mPio, state_machine);
+            fl::free(mTransposeBuffer);
+            mTransposeBuffer = nullptr;
+            mPio = nullptr;
+            mSm = -1;
+            return;
+        }
+        mDmaChan = static_cast<i32>(dma_channel);
+
+        if (!resources.claimPins(BASE_PIN, NUM_LANES)) {
+            resources.releaseDmaChannel(dma_channel);
+            resources.releasePioStateMachine(mPio, state_machine);
+            fl::free(mTransposeBuffer);
+            mTransposeBuffer = nullptr;
+            mPio = nullptr;
+            mSm = -1;
+            mDmaChan = -1;
+            return;
+        }
+
+        // Configure pins only after ownership has been claimed.
         for (int i = 0; i < NUM_LANES; i++) {
             gpio_init(BASE_PIN + i);
             gpio_set_dir(BASE_PIN + i, GPIO_OUT);
-        }
-
-        // Try to claim PIO and DMA on actual hardware
-        #if defined(FL_IS_RP2040)
-            mPio = pio0;  // Simplified: just use pio0
-        #elif defined(FL_IS_RP2350)
-            mPio = pio0;  // Simplified: just use pio0
-        #endif
-
-        mSm = pio_claim_unused_sm(mPio, false);
-        if (mSm == -1) {
-            fl::free(mTransposeBuffer);
-            return;
-        }
-
-        mDmaChan = dma_claim_unused_channel(false);
-        if (mDmaChan == -1) {
-            pio_sm_unclaim(mPio, mSm);
-            fl::free(mTransposeBuffer);
-            return;
         }
 #endif
     }
@@ -287,14 +299,15 @@ private:
     void cleanup() FL_NO_EXCEPT {
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
         if (mDmaChan != -1) {
-            dma_channel_unclaim(mDmaChan);
+            RpPioDmaResourceManager::instance().releaseDmaChannel(mDmaChan);
             mDmaChan = -1;
         }
         if (mSm != -1 && mPio != nullptr) {
             pio_sm_set_enabled(mPio, mSm, false);
-            pio_sm_unclaim(mPio, mSm);
+            RpPioDmaResourceManager::instance().releasePioStateMachine(mPio, mSm);
             mSm = -1;
         }
+        RpPioDmaResourceManager::instance().releasePins(BASE_PIN, NUM_LANES);
 #endif
         if (mTransposeBuffer != nullptr) {
             fl::free(mTransposeBuffer);

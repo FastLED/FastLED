@@ -25,6 +25,7 @@
 #include "hardware/pio.h"
 // IWYU pragma: end_keep
 #include "platforms/arm/rp/rpcommon/pio_asm.h"
+#include "platforms/arm/rp/rpcommon/rp_pio_dma_resource_manager.h"
 #include "fl/log/log.h"
 #include "fl/stl/limits.h"
 // IWYU pragma: begin_keep
@@ -273,30 +274,20 @@ bool SPIQuadRP2040::begin(const SpiHw4::Config& config) {
     mData2Pin = config.data2_pin;
     mData3Pin = config.data3_pin;
 
-    // Find available PIO instance and state machine
-#if defined(FL_IS_RP2040)
-    const PIO pios[NUM_PIOS] = { pio0, pio1 };
-#elif defined(FL_IS_RP2350)
-    const PIO pios[NUM_PIOS] = { pio0, pio1, pio2 };
-#endif
-
+    // Claim PIO through the shared RP ownership manager.
+    auto& resources = RpPioDmaResourceManager::instance();
     mPIO = nullptr;
     mStateMachine = -1;
     mPIOOffset = -1;
 
-    for (u32 i = 0; i < NUM_PIOS; i++) {
-        PIO pio = pios[i];
-        int sm = pio_claim_unused_sm(pio, false);
-        if (sm == -1) continue;
-
-        int offset = add_spi_quad_pio_program(pio);
+    while (resources.claimPioStateMachine(&mPIO, &mStateMachine)) {
+        int offset = add_spi_quad_pio_program(mPIO);
         if (offset == -1) {
-            pio_sm_unclaim(pio, sm);
+            resources.releasePioStateMachine(mPIO, mStateMachine);
+            mPIO = nullptr;
+            mStateMachine = -1;
             continue;
         }
-
-        mPIO = pio;
-        mStateMachine = sm;
         mPIOOffset = offset;
         break;
     }
@@ -307,10 +298,9 @@ bool SPIQuadRP2040::begin(const SpiHw4::Config& config) {
     }
 
     // Claim DMA channel
-    mDMAChannel = dma_claim_unused_channel(false);
-    if (mDMAChannel == -1) {
+    if (!resources.claimDmaChannel(&mDMAChannel)) {
         FL_WARN_F("SPIQuadRP2040: No available DMA channel");
-        pio_sm_unclaim(mPIO, mStateMachine);
+        resources.releasePioStateMachine(mPIO, mStateMachine);
         return false;
     }
 
@@ -320,10 +310,33 @@ bool SPIQuadRP2040::begin(const SpiHw4::Config& config) {
         // Full quad mode - all 4 pins must be consecutive
         if (mData1Pin != mData0Pin + 1 || mData2Pin != mData0Pin + 2 || mData3Pin != mData0Pin + 3) {
             FL_WARN_F("SPIQuadRP2040: Data pins must be consecutive (D0, D0+1, D0+2, D0+3)");
-            dma_channel_unclaim(mDMAChannel);
-            pio_sm_unclaim(mPIO, mStateMachine);
+            resources.releaseDmaChannel(mDMAChannel);
+            resources.releasePioStateMachine(mPIO, mStateMachine);
             return false;
         }
+    }
+
+    bool pins_claimed = resources.claimPins(mData0Pin, 1) &&
+                        resources.claimPins(mClockPin, 1);
+    if (pins_claimed && mData1Pin >= 0) {
+        pins_claimed = resources.claimPins(mData1Pin, 1);
+    }
+    if (pins_claimed && mData2Pin >= 0) {
+        pins_claimed = resources.claimPins(mData2Pin, 1);
+    }
+    if (pins_claimed && mData3Pin >= 0) {
+        pins_claimed = resources.claimPins(mData3Pin, 1);
+    }
+    if (!pins_claimed) {
+        resources.releasePins(mData0Pin, 1);
+        resources.releasePins(mClockPin, 1);
+        if (mData1Pin >= 0) resources.releasePins(mData1Pin, 1);
+        if (mData2Pin >= 0) resources.releasePins(mData2Pin, 1);
+        if (mData3Pin >= 0) resources.releasePins(mData3Pin, 1);
+        resources.releaseDmaChannel(mDMAChannel);
+        resources.releasePioStateMachine(mPIO, mStateMachine);
+        FL_WARN_F("SPIQuadRP2040: Pins are already owned by another RP PIO driver");
+        return false;
     }
 
     // Initialize active data pins
@@ -567,14 +580,20 @@ void SPIQuadRP2040::cleanup() {
         // Disable and unclaim PIO state machine
         if (mPIO != nullptr && mStateMachine != -1) {
             pio_sm_set_enabled(mPIO, mStateMachine, false);
-            pio_sm_unclaim(mPIO, mStateMachine);
+            RpPioDmaResourceManager::instance().releasePioStateMachine(mPIO, mStateMachine);
         }
 
         // Release DMA channel
         if (mDMAChannel != -1) {
-            dma_channel_unclaim(mDMAChannel);
+            RpPioDmaResourceManager::instance().releaseDmaChannel(mDMAChannel);
             mDMAChannel = -1;
         }
+        auto& resources = RpPioDmaResourceManager::instance();
+        resources.releasePins(mData0Pin, 1);
+        resources.releasePins(mClockPin, 1);
+        if (mData1Pin >= 0) resources.releasePins(mData1Pin, 1);
+        if (mData2Pin >= 0) resources.releasePins(mData2Pin, 1);
+        if (mData3Pin >= 0) resources.releasePins(mData3Pin, 1);
 
         mInitialized = false;
     }

@@ -1,0 +1,178 @@
+#pragma once
+
+// IWYU pragma: private
+
+/// @file rp_pio_dma_resource_manager.h
+/// @brief Pico SDK adapter for FastLED's RP PIO, DMA, and pin ownership ledger.
+
+#include "platforms/arm/rp/is_rp.h"
+
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+
+#include "platforms/arm/rp/rpcommon/rp_resource_ledger.h"
+#include "fl/stl/singleton.h"
+
+// IWYU pragma: begin_keep
+#include "hardware/dma.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
+#include "hardware/pio.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
+#include "hardware/sync.h"
+// IWYU pragma: end_keep
+
+namespace fl {
+
+/// @brief Coordinates SDK claims with the host-testable FastLED ownership ledger.
+///
+/// Pico SDK claim functions protect hardware resources shared with user code.
+/// The ledger mirrors successful SDK claims under a hardware spinlock, so
+/// cleanup and partial-initialization rollback are deterministic across both
+/// RP cores.
+class RpPioDmaResourceManager {
+  public:
+    static RpPioDmaResourceManager& instance() FL_NO_EXCEPT {
+        return Singleton<RpPioDmaResourceManager>::instance();
+    }
+
+    bool claimPioStateMachine(PIO* pio_out, int* state_machine_out) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        if (pio_out == nullptr || state_machine_out == nullptr) {
+            return false;
+        }
+
+        for (u8 pio_index = 0; pio_index < NUM_PIOS; ++pio_index) {
+            PIO pio = pioForIndex(pio_index);
+            int state_machine = pio_claim_unused_sm(pio, false);
+            if (state_machine < 0) {
+                continue;
+            }
+            if (mLedger.claimPioStateMachine(pio_index, static_cast<u8>(state_machine))) {
+                *pio_out = pio;
+                *state_machine_out = state_machine;
+                return true;
+            }
+            pio_sm_unclaim(pio, static_cast<uint>(state_machine));
+        }
+        return false;
+    }
+
+    void releasePioStateMachine(PIO pio, int state_machine) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        if (pio == nullptr || state_machine < 0) {
+            return;
+        }
+        const int pio_index = pioIndex(pio);
+        if (pio_index < 0) {
+            return;
+        }
+        pio_sm_unclaim(pio, static_cast<uint>(state_machine));
+        mLedger.releasePioStateMachine(static_cast<u8>(pio_index),
+                                       static_cast<u8>(state_machine));
+    }
+
+    bool claimDmaChannel(int* channel_out) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        if (channel_out == nullptr) {
+            return false;
+        }
+        const int channel = dma_claim_unused_channel(false);
+        if (channel < 0) {
+            return false;
+        }
+        if (mLedger.claimDmaChannel(static_cast<u8>(channel))) {
+            *channel_out = channel;
+            return true;
+        }
+        dma_channel_unclaim(static_cast<uint>(channel));
+        return false;
+    }
+
+    void releaseDmaChannel(int channel) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        if (channel < 0) {
+            return;
+        }
+        dma_channel_unclaim(static_cast<uint>(channel));
+        mLedger.releaseDmaChannel(static_cast<u8>(channel));
+    }
+
+    bool claimPins(u8 first_pin, u8 count) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        for (u8 offset = 0; offset < count; ++offset) {
+            if (!mLedger.claimPin(first_pin + offset)) {
+                while (offset > 0) {
+                    --offset;
+                    mLedger.releasePin(first_pin + offset);
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void releasePins(u8 first_pin, u8 count) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        for (u8 offset = 0; offset < count; ++offset) {
+            mLedger.releasePin(first_pin + offset);
+        }
+    }
+
+    RpPioDmaResourceManager() FL_NO_EXCEPT
+        : mLedger(NUM_PIOS, RpResourceLedger::kMaxStateMachinesPerPio,
+                  NUM_DMA_CHANNELS, RpResourceLedger::kMaxPins)
+        , mLock(spin_lock_instance(spin_lock_claim_unused(true))) {}
+
+  private:
+    class LockGuard {
+      public:
+        explicit LockGuard(RpPioDmaResourceManager& manager) FL_NO_EXCEPT
+            : mLock(manager.mLock)
+            , mInterruptState(spin_lock_blocking(mLock)) {}
+
+        ~LockGuard() {
+            spin_unlock(mLock, mInterruptState);
+        }
+
+      private:
+        spin_lock_t* mLock;
+        u32 mInterruptState;
+    };
+
+    static PIO pioForIndex(u8 index) FL_NO_EXCEPT {
+        if (index == 0) {
+            return pio0;
+        }
+        if (index == 1) {
+            return pio1;
+        }
+#if defined(FL_IS_RP2350)
+        return pio2;
+#else
+        return nullptr;
+#endif
+    }
+
+    static int pioIndex(PIO pio) FL_NO_EXCEPT {
+        if (pio == pio0) {
+            return 0;
+        }
+        if (pio == pio1) {
+            return 1;
+        }
+#if defined(FL_IS_RP2350)
+        if (pio == pio2) {
+            return 2;
+        }
+#endif
+        return -1;
+    }
+
+    RpResourceLedger mLedger;
+    spin_lock_t* mLock;
+};
+
+}  // namespace fl
+
+#endif  // defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
