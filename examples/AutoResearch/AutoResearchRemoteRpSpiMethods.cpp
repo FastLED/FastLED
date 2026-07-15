@@ -10,6 +10,7 @@
 
 #include <Arduino.h>
 
+#include "FastLED.h"
 #include "fl/channels/data.h"
 #include "fl/chipsets/spi.h"
 #include "fl/remote/remote.h"
@@ -112,6 +113,78 @@ fl::json runLoopback(int mosi_pin, int miso_pin, int sck_pin, int clock_hz) {
     return response;
 }
 
+template <bool Sk9822>
+fl::json runPublicApiLoopback(int pattern) {
+    constexpr fl::u8 kMosiPin = 11;
+    constexpr fl::u8 kSckPin = 10;
+    constexpr size_t kLedCount = 33;
+    constexpr size_t kFrameBytes = 4 + (kLedCount * 4) + 8;
+    static CRGB leds[kLedCount];
+    static bool initialized = false;
+    fl::json response = fl::json::object();
+
+    if (!initialized) {
+        if constexpr (Sk9822) {
+            FastLED.addLeds<SK9822, kMosiPin, kSckPin, RGB, 8000000,
+                            fl::Bus::SPI, 1>(leds, kLedCount);
+        } else {
+            FastLED.addLeds<APA102, kMosiPin, kSckPin, RGB, 8000000,
+                            fl::Bus::SPI, 1>(leds, kLedCount);
+        }
+        initialized = true;
+    }
+
+    for (size_t index = 0; index < kLedCount; ++index) leds[index] = CRGB::Black;
+    switch (pattern) {
+        case 1: for (size_t index = 0; index < kLedCount; ++index) leds[index] = CRGB::Red; break;
+        case 2: for (size_t index = 0; index < kLedCount; ++index) leds[index] = CRGB::Green; break;
+        case 3: for (size_t index = 0; index < kLedCount; ++index) leds[index] = CRGB::Blue; break;
+        case 4: for (size_t index = 0; index < kLedCount; ++index) leds[index] = CRGB::White; break;
+        case 5: leds[16] = CRGB::Red; break;
+        default: break;
+    }
+    if (pattern < 0 || pattern > 5) {
+        response.set("success", false);
+        response.set("error", "InvalidPattern");
+        return response;
+    }
+
+    fl::u8 captured[kFrameBytes] = {};
+    auto& driver = fl::BusTraits<fl::Bus::SPI, 1>::instance();
+    if (!driver.captureNextRxBytes(captured, sizeof(captured))) {
+        response.set("success", false);
+        response.set("error", "DriverBusy");
+        return response;
+    }
+    FastLED.show();
+    FastLED.wait(2000);
+
+    bool exact = driver.lastActualClockHz() > 0;
+    for (size_t index = 0; index < 4; ++index) exact = exact && captured[index] == 0x00;
+    for (size_t led = 0; led < kLedCount; ++led) {
+        const size_t offset = 4 + (led * 4);
+        exact = exact && captured[offset] == 0xFF;
+        exact = exact && captured[offset + 1] == leds[led].r;
+        exact = exact && captured[offset + 2] == leds[led].g;
+        exact = exact && captured[offset + 3] == leds[led].b;
+    }
+    for (size_t index = 4 + (kLedCount * 4); index < kFrameBytes; ++index) {
+        exact = exact && captured[index] == 0xFF;
+    }
+
+    fl::json data = fl::json::object();
+    data.set("chipset", Sk9822 ? "SK9822" : "APA102");
+    data.set("pattern", static_cast<int64_t>(pattern));
+    data.set("actualClockHz", static_cast<int64_t>(driver.lastActualClockHz()));
+    data.set("wireIdle", true);
+    data.set("frameBytes", static_cast<int64_t>(kFrameBytes));
+    response.set("success", exact);
+    response.set("message", exact ? "RP SPI public API loopback passed."
+                                  : "RP SPI public API loopback failed.");
+    response.set("data", data);
+    return response;
+}
+
 #endif
 
 }  // namespace
@@ -161,6 +234,29 @@ void AutoResearchRemoteControl::bindRpSpiMethods(fl::Remote& remote) {
         response.set("error", "InvalidSpiIndex");
         response.set("message", "spi_index must be 0 or 1.");
         return response;
+#endif
+    });
+    remote.bind("rpSpiPublicApiLoopback", [this](const fl::json& args) -> fl::json {
+#if !defined(FL_IS_RP2040) && !defined(FL_IS_RP2350)
+        (void)args;
+        fl::json response = fl::json::object();
+        response.set("success", false);
+        response.set("error", "PlatformNotSupported");
+        return response;
+#else
+        if (mState) mState->rx_channel.reset();
+        if (!args.is_object() || !args.contains("sk9822") ||
+            !args["sk9822"].is_bool() || !args.contains("pattern") ||
+            !args["pattern"].is_int()) {
+            fl::json response = fl::json::object();
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            return response;
+        }
+        const bool sk9822 = args["sk9822"].as_bool().value();
+        const int pattern = static_cast<int>(args["pattern"].as_int().value());
+        return sk9822 ? runPublicApiLoopback<true>(pattern)
+                      : runPublicApiLoopback<false>(pattern);
 #endif
     });
 }

@@ -96,7 +96,8 @@
 // DATA_RATE_MHZ() returns Hz (not clock dividers) so that the SPI_DATA_RATE
 // template parameter can be passed directly to the channel encoder.
 #if !defined(FASTLED_SPI_USES_CHANNEL_API)
-#if FASTLED_HAS_CHANNELS && (defined(FL_IS_ESP32) || defined(FL_IS_TEENSY_4X))
+#if FASTLED_HAS_CHANNELS && (defined(FL_IS_ESP32) || defined(FL_IS_TEENSY_4X) || \
+                            defined(FL_IS_RP2040) || defined(FL_IS_RP2350))
 #define FASTLED_SPI_USES_CHANNEL_API 1
 #else
 #define FASTLED_SPI_USES_CHANNEL_API 0
@@ -1011,9 +1012,9 @@ public:
 	#elif FASTLED_SPI_USES_CHANNEL_API
 
 	/// Add an SPI based CLEDController via Channel API.
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO>
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
 	::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		fl::busKeepAlive<B>();
+		fl::busKeepAlive<B, B_WHICH>();
 		int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 		int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
@@ -1021,6 +1022,7 @@ public:
 		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder);
 		fl::ChannelConfig config(spiCfg, fl::span<CRGB>(data + nOffset, nLeds), RGB_ORDER);
 		config.options.mBus = B;
+		config.options.mBusWhich = B_WHICH;
 		static fl::ChannelPtr sChannel;
 		if (!sChannel) {
 			sChannel = add(config);
@@ -1029,9 +1031,9 @@ public:
 	}
 
 	/// Add an SPI based CLEDController via Channel API (default RGB order and speed).
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::Bus B = fl::Bus::AUTO>
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		fl::busKeepAlive<B>();
+		fl::busKeepAlive<B, B_WHICH>();
 		int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 		int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
@@ -1043,6 +1045,7 @@ public:
 				? GRB : RGB;
 		fl::ChannelConfig config(spiCfg, fl::span<CRGB>(data + nOffset, nLeds), order);
 		config.options.mBus = B;
+		config.options.mBusWhich = B_WHICH;
 		static fl::ChannelPtr sChannel;
 		if (!sChannel) {
 			sChannel = add(config);
@@ -1051,9 +1054,9 @@ public:
 	}
 
 	/// Add an SPI based CLEDController via Channel API (default speed).
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
 	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		fl::busKeepAlive<B>();
+		fl::busKeepAlive<B, B_WHICH>();
 		int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 		int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
@@ -1061,6 +1064,7 @@ public:
 		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder);
 		fl::ChannelConfig config(spiCfg, fl::span<CRGB>(data + nOffset, nLeds), RGB_ORDER);
 		config.options.mBus = B;
+		config.options.mBusWhich = B_WHICH;
 		static fl::ChannelPtr sChannel;
 		if (!sChannel) {
 			sChannel = add(config);

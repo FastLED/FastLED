@@ -170,6 +170,8 @@ FastLED.addLeds<WS2812, 4, GRB, fl::Bus::RMT>(leds, 60);
 
 // SPI: pin to SPI at compile time.
 FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(12), fl::Bus::SPI>(leds, 60);
+// Select the second SPI instance when a platform exposes more than one.
+FastLED.addLeds<APA102, 11, 10, RGB, DATA_RATE_MHZ(12), fl::Bus::SPI, 1>(leds, 60);
 ```
 
 The Bus parameter triggers linker keep-alive in every variant. For the SPI variants on the `FASTLED_SPI_USES_CHANNEL_API` branch, the parameter also populates `cfg.options.mBus = B` so the channel routes through the named driver at runtime. Non-Channel-API controllers (older `ClocklessController` subclasses that pre-date the Channel API) keep their platform-default routing and rely on the linker keep-alive alone — for full runtime routing through a specific Bus, prefer `FastLED.add(cfg)` with `cfg.options.mBus = B`.

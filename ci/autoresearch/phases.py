@@ -547,6 +547,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     gpio_only_mode = (
         not drivers
         and not getattr(args, "rp_spi_loopback", False)
+        and not getattr(args, "rp_spi_public_api", False)
         and not simd_test_mode
         and not coroutine_test_mode
         and not ieee754_test_mode
@@ -1520,7 +1521,11 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     """
     args = ctx.args
     upload_port = ctx.upload_port
-    if upload_port is None and (ctx.rpc_smoke_mode or ctx.watchdog_soak_mode) and ctx.use_fbuild:
+    if (
+        upload_port is None
+        and (ctx.rpc_smoke_mode or ctx.watchdog_soak_mode)
+        and ctx.use_fbuild
+    ):
         # Stock RP2040 deployment starts from BOOTSEL mass-storage and may
         # return before Windows has published the application CDC endpoint.
         # Re-scan by USB identity instead of asserting on the pre-deploy port.
@@ -1986,7 +1991,9 @@ async def _run_watchdog_soak(ctx: RunContext) -> int:
     ctx.serial_iface = None
     smoke_rc = await _run_rpc_smoke_tests(ctx)
     if smoke_rc == 0:
-        print("RESULT: watchdog soak PASS (ack, disconnect, CDC recovery, ping, RPC smoke)")
+        print(
+            "RESULT: watchdog soak PASS (ack, disconnect, CDC recovery, ping, RPC smoke)"
+        )
     return smoke_rc
 
 
@@ -2013,6 +2020,9 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
 
     if getattr(ctx.args, "rp_spi_loopback", False):
         return await _run_rp_spi_loopback_tests(ctx)
+
+    if getattr(ctx.args, "rp_spi_public_api", False):
+        return await _run_rp_spi_public_api_tests(ctx)
 
     if final_environment in LPC_BRING_UP_ENVS:
         if ctx.ieee754_test_mode:
@@ -3062,8 +3072,12 @@ async def _run_rp_spi_loopback_tests(ctx: RunContext) -> int:
     print()
     print("=" * 60)
     print("RP2040 fixed-SPI DMA byte-loopback")
-    print(f"   Wiring: GPIO{tx_pin} (SPI{spi_index} MOSI) -> GPIO{rx_pin} (SPI{spi_index} MISO)")
-    print(f"   SCK: GPIO{sck_pin} (SPI{spi_index}); no SCK loopback connection is required")
+    print(
+        f"   Wiring: GPIO{tx_pin} (SPI{spi_index} MOSI) -> GPIO{rx_pin} (SPI{spi_index} MISO)"
+    )
+    print(
+        f"   SCK: GPIO{sck_pin} (SPI{spi_index}); no SCK loopback connection is required"
+    )
     print(f"   Engine: ChannelEngineRpSpi via BusTraits<Bus::SPI, {spi_index}>")
     print("   Rates: 1 MHz, 8 MHz, 24 MHz; byte-exact MISO capture + wire-idle")
     print("=" * 60)
@@ -3084,6 +3098,30 @@ async def _run_rp_spi_loopback_tests(ctx: RunContext) -> int:
         str(spi_index),
     ]
     result = subprocess.run(cmd)
+    return 0 if result.returncode == 0 else 1
+
+
+async def _run_rp_spi_public_api_tests(ctx: RunContext) -> int:
+    """Verify APA102/SK9822 framing through the RP SPI1 public API path."""
+    if (ctx.final_environment or "").lower() != "rp2040":
+        print("--rp-spi-public-api is only supported on the rp2040 environment.")
+        return 1
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+    print("RP2040 SPI1 public API loopback: GPIO11 MOSI -> GPIO8 MISO, GPIO10 SCK")
+    result = subprocess.run(
+        [
+            "uv",
+            "run",
+            "python",
+            "-m",
+            "ci.autoresearch.test_rp_spi_public_api",
+            "--port",
+            upload_port,
+            "--chipset",
+            ctx.args.rp_spi_chipset,
+        ]
+    )
     return 0 if result.returncode == 0 else 1
 
 

@@ -121,6 +121,8 @@ class Args:
     # RP2040 fixed-SPI DMA byte-loopback harness.
     rp_spi_loopback: bool
     rp_spi_index: int
+    rp_spi_public_api: bool
+    rp_spi_chipset: str
 
     # LPC845 fault emit validation (#3302).
     fault_emit_test: bool
@@ -266,6 +268,17 @@ See Also:
             choices=(0, 1),
             default=0,
             help="RP fixed SPI instance for --rp-spi-loopback (default: 0).",
+        )
+        driver_group.add_argument(
+            "--rp-spi-public-api",
+            action="store_true",
+            help="RP2040: verify APA102/SK9822 through FastLED.addLeds() on SPI1.",
+        )
+        driver_group.add_argument(
+            "--rp-spi-chipset",
+            choices=("apa102", "sk9822"),
+            default="apa102",
+            help="Chipset for --rp-spi-public-api (default: apa102).",
         )
         driver_group.add_argument(
             "--uart",
@@ -860,6 +873,8 @@ See Also:
             dma_uart=parsed.dma_uart,
             rp_spi_loopback=parsed.rp_spi_loopback,
             rp_spi_index=parsed.rp_spi_index,
+            rp_spi_public_api=parsed.rp_spi_public_api,
+            rp_spi_chipset=parsed.rp_spi_chipset,
             fault_emit_test=parsed.fault_emit_test,
             frames=parsed.frames,
             tight_timing=parsed.tight_timing,
