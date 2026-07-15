@@ -10,7 +10,7 @@ ChannelEngineRpPio::ChannelEngineRpPio(
     fl::shared_ptr<IRpPioTxPeripheral> peripheral, u8 which) FL_NO_EXCEPT
     : mPeripheral(fl::move(peripheral)), mWhich(which), mCurrentChannel(0),
       mLatchStartUs(0), mLatchDurationUs(0), mActive(false),
-      mLatchPending(false), mFailed(false) {}
+      mActiveLaneCount(1), mLatchPending(false), mFailed(false) {}
 
 ChannelEngineRpPio::~ChannelEngineRpPio() {
     releaseInFlight();
@@ -74,7 +74,7 @@ IChannelDriver::DriverState ChannelEngineRpPio::poll() FL_NO_EXCEPT {
         return DriverState::DRAINING;
     }
     mLatchPending = false;
-    ++mCurrentChannel;
+    mCurrentChannel += mActiveLaneCount;
     if (startNextTransmission()) return DriverState::BUSY;
     if (mCurrentChannel < mInFlightChannels.size()) {
         return fail("RP PIO: unable to start queued channel");
@@ -94,17 +94,39 @@ bool ChannelEngineRpPio::beginTransmission(const ChannelDataPtr& channel) FL_NO_
     if (!mPeripheral || !canHandle(channel)) return false;
     const fl::vector_psram<u8>& input = channel->getData();
     if (input.empty()) return false;
+    // Batch only an adjacent run that is provably safe: same wire timing,
+    // byte count, and consecutive pins. This keeps a short/mismatched strip
+    // from receiving padding or a different timing waveform.
+    u8 run = 1;
+    while (run < 8 && mCurrentChannel + run < mInFlightChannels.size()) {
+        const ChannelDataPtr& next = mInFlightChannels[mCurrentChannel + run];
+        if (!next || next->getPin() != channel->getPin() + run ||
+            next->getTiming() != channel->getTiming() ||
+            next->getData().size() != input.size()) break;
+        ++run;
+    }
+    mActiveLaneCount = run >= 8 ? 8 : run >= 4 ? 4 : run >= 2 ? 2 : 1;
     RpPioTxConfig config;
     config.tx_pin = static_cast<u8>(channel->getPin());
+    config.lane_count = mActiveLaneCount;
     config.timing = channel->getTiming();
     if (!mPeripheral->configure(config)) return false;
 
     // Autopull is configured for eight bits. Every byte occupies the MSB of
     // one DMA word, so the PIO emits exactly the requested bytes: no final
     // zero-padding can become a partial extra LED symbol.
-    mPioWords.resize(input.size());
-    for (size_t index = 0; index < input.size(); ++index) {
-        mPioWords[index] = static_cast<u32>(input[index]) << 24;
+    mPioWords.clear();
+    for (size_t byte_index = 0; byte_index < input.size(); ++byte_index) {
+        for (int bit = 7; bit >= 0; --bit) {
+            u32 plane = 0;
+            for (u8 lane = 0; lane < mActiveLaneCount; ++lane) {
+                const u8 value = mInFlightChannels[mCurrentChannel + lane]
+                                     ->getData()[byte_index];
+                plane |= static_cast<u32>((value >> bit) & 1u)
+                         << (mActiveLaneCount - 1u - lane);
+            }
+            mPioWords.push_back(plane << (32u - mActiveLaneCount));
+        }
     }
     return mPeripheral->startTxDma(mPioWords.data(), mPioWords.size());
 }
@@ -119,6 +141,7 @@ void ChannelEngineRpPio::releaseInFlight() FL_NO_EXCEPT {
     mLatchStartUs = 0;
     mLatchDurationUs = 0;
     mLatchPending = false;
+    mActiveLaneCount = 1;
 }
 
 IChannelDriver::DriverState ChannelEngineRpPio::fail(const char* message) FL_NO_EXCEPT {

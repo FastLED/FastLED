@@ -46,6 +46,7 @@ class ChannelEngineRpPio final : public IChannelDriver {
     size_t mCurrentChannel;
     u32 mLatchStartUs;
     u32 mLatchDurationUs;
+    u8 mActiveLaneCount;
     bool mActive;
     bool mLatchPending;
     bool mFailed;

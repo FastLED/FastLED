@@ -38,7 +38,7 @@ u32 scaledCycles(u32 ns, u32 clock_hz, float divider) FL_NO_EXCEPT {
 
 RpPioTxPeripheral::RpPioTxPeripheral(u8 pio_index) FL_NO_EXCEPT
     : mPio(nullptr), mStateMachine(-1), mDmaChannel(-1), mPin(-1),
-      mProgramOffset(-1), mPioIndex(pio_index), mProgram(nullptr), mInitialized(false) {}
+      mProgramOffset(-1), mLaneCount(1), mPioIndex(pio_index), mProgram(nullptr), mInitialized(false) {}
 
 RpPioTxPeripheral::~RpPioTxPeripheral() { deinitialize(); }
 
@@ -60,7 +60,7 @@ bool RpPioTxPeripheral::createProgram(const ChipsetTimingConfig& timing) FL_NO_E
     mProgram = new ProgramStorage(); // owned and freed by deinitialize
     if (mProgram == nullptr) return false;
     mProgram->instructions[0] = static_cast<pio_instr>(
-        PIO_INSTR_OUT | PIO_OUT_DST_X | PIO_OUT_CNT(1));
+        PIO_INSTR_OUT | PIO_OUT_DST_X | PIO_OUT_CNT(mLaneCount));
     mProgram->instructions[1] = static_cast<pio_instr>(
         PIO_INSTR_SET | PIO_SET_DST_PINS | PIO_SET_DATA(1) | PIO_DELAY(t1 - 1, 0));
     mProgram->instructions[2] = static_cast<pio_instr>(
@@ -84,15 +84,15 @@ bool RpPioTxPeripheral::createProgram(const ChipsetTimingConfig& timing) FL_NO_E
     pio_sm_config config = pio_get_default_sm_config();
     sm_config_set_wrap(&config, static_cast<uint>(mProgramOffset),
                        static_cast<uint>(mProgramOffset + 3));
-    sm_config_set_set_pins(&config, static_cast<uint>(mPin), 1);
-    sm_config_set_out_pins(&config, static_cast<uint>(mPin), 1);
-    // One DMA word per byte (byte stored in MSB), so autopull after eight
-    // shifts preserves exact byte boundaries and avoids final zero padding.
-    sm_config_set_out_shift(&config, false, true, 8);
+    sm_config_set_set_pins(&config, static_cast<uint>(mPin), mLaneCount);
+    sm_config_set_out_pins(&config, static_cast<uint>(mPin), mLaneCount);
+    // One DMA word per emitted bit-plane. Autopull after lane_count shifts
+    // preserves exact byte boundaries and avoids final zero padding.
+    sm_config_set_out_shift(&config, false, true, mLaneCount);
     sm_config_set_clkdiv(&config, divider);
     pio_gpio_init(pio, static_cast<uint>(mPin));
     pio_sm_set_consecutive_pindirs(pio, static_cast<uint>(mStateMachine),
-                                   static_cast<uint>(mPin), 1, true);
+                                   static_cast<uint>(mPin), mLaneCount, true);
     pio_sm_init(pio, static_cast<uint>(mStateMachine),
                 static_cast<uint>(mProgramOffset), &config);
     pio_sm_set_enabled(pio, static_cast<uint>(mStateMachine), true);
@@ -101,18 +101,21 @@ bool RpPioTxPeripheral::createProgram(const ChipsetTimingConfig& timing) FL_NO_E
 
 bool RpPioTxPeripheral::configure(const RpPioTxConfig& config) FL_NO_EXCEPT {
     deinitialize();
-    if (config.tx_pin > 29) return false;
+    if (config.tx_pin > 29 || (config.lane_count != 1 && config.lane_count != 2 &&
+        config.lane_count != 4 && config.lane_count != 8) ||
+        static_cast<u16>(config.tx_pin) + config.lane_count > 30) return false;
     PIO pio = nullptr;
     int sm = -1;
     int dma = -1;
     if (!RpPioDmaResourceManager::instance().claimPioDmaAndPin(
-            &pio, &sm, &dma, config.tx_pin, mPioIndex)) {
+            &pio, &sm, &dma, config.tx_pin, config.lane_count, mPioIndex)) {
         return false;
     }
     mPio = pio;
     mStateMachine = sm;
     mDmaChannel = dma;
     mPin = config.tx_pin;
+    mLaneCount = config.lane_count;
     if (!createProgram(config.timing)) {
         deinitialize();
         return false;
@@ -177,7 +180,7 @@ void RpPioTxPeripheral::deinitialize() FL_NO_EXCEPT {
     if (mPin >= 0) {
         gpio_set_function(static_cast<uint>(mPin), GPIO_FUNC_SIO);
         gpio_set_dir(static_cast<uint>(mPin), GPIO_IN);
-        RpPioDmaResourceManager::instance().releasePins(static_cast<u8>(mPin), 1);
+        RpPioDmaResourceManager::instance().releasePins(static_cast<u8>(mPin), mLaneCount);
     }
     delete mProgram;
     mPio = nullptr;
@@ -185,6 +188,7 @@ void RpPioTxPeripheral::deinitialize() FL_NO_EXCEPT {
     mDmaChannel = -1;
     mPin = -1;
     mProgramOffset = -1;
+    mLaneCount = 1;
     mProgram = nullptr;
     mInitialized = false;
 }
