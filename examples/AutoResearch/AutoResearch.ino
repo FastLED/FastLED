@@ -458,6 +458,24 @@ void setup() {
     // if RPC routing is broken on a platform, fix the routing (see #2541).
 
     // ========================================================================
+    // Remote RPC Function Registration (before fallible peripheral setup)
+    // ========================================================================
+    // Pin-free bring-up and diagnostics must remain reachable even when a
+    // platform has no usable RX channel yet. In particular, stock RP2040
+    // boards can fail createRxDevice() during initial bring-up; registering
+    // below that early return left a live CDC transport with an empty RPC
+    // registry.
+    ss.clear();
+    ss << "\n[REMOTE RPC] Registering JSON RPC functions for dynamic control";
+    RemoteControlSingleton::instance().registerFunctions(g_autoresearch_state);
+
+    autoresearch::setupRpcAsyncTask(RemoteControlSingleton::instance(), 10);
+
+    // Stub: register self-running autoresearch client (no-op on hardware).
+    autoresearch::maybeRegisterStubAutorun(RemoteControlSingleton::instance(),
+                                          g_autoresearch_state);
+
+    // ========================================================================
     // RX Channel Setup
     // ========================================================================
 
@@ -484,29 +502,6 @@ void setup() {
 
     // PARLIO streaming validation (#2548) is now RPC-driven via the
     // `parlioStreamValidate` handler registered in AutoResearchRemote.cpp.
-
-    // ========================================================================
-    // Remote RPC Function Registration (EARLY - before GPIO baseline test)
-    // ========================================================================
-    // IMPORTANT: Register RPC functions BEFORE the GPIO baseline test so that
-    // even if setup() fails early, the testGpioConnection command can be used
-    // to diagnose hardware connection issues.
-
-    ss.clear();
-    ss << "\n[REMOTE RPC] Registering JSON RPC functions for dynamic control";
-
-    // Initialize RemoteControl singleton and register all RPC functions
-    RemoteControlSingleton::instance().registerFunctions(g_autoresearch_state);
-
-
-    // ========================================================================
-    // Async Task Setup - JSON-RPC Processing
-    // ========================================================================
-    autoresearch::setupRpcAsyncTask(RemoteControlSingleton::instance(), 10);
-
-    // Stub: register self-running autoresearch client (no-op on ESP32)
-    autoresearch::maybeRegisterStubAutorun(RemoteControlSingleton::instance(),
-                                          g_autoresearch_state);
 
     // ========================================================================
     // GPIO Baseline Test - Verify GPIO→GPIO path works before testing PARLIO

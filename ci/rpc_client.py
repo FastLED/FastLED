@@ -752,6 +752,8 @@ class RpcClient:
             raise
         except RpcCrashError:
             raise  # Re-raise crash errors without masking them
+        except RpcError:
+            raise  # Preserve structured JSON-RPC errors for the caller.
         except Exception as e:
             if self.verbose:
                 print(f"⚠️  [RPC] Exception during read_lines: {e}")
