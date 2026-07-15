@@ -82,6 +82,19 @@ base_common = [
   '-fno-strict-aliasing',      # Prevent strict aliasing optimizations
 ]
 
+# macOS SDK 15+ can deadlock in ASan's pre-main global registration when an
+# instrumented executable dynamically loads instrumented libraries (Apple
+# Feedback FB16513866; FastLED #3642). Keep ASan heap/stack instrumentation and
+# UBSan enabled, but disable the affected ASan globals pass on Apple debug
+# builds. This must be applied to both runners and every library they load.
+apple_asan_dlopen_workaround_args = []
+if build_machine.system() == 'darwin'
+  apple_asan_dlopen_workaround_args = [
+    '-mllvm',
+    '-asan-globals=0',
+  ]
+endif
+
 # Stack trace preservation flags (used in debug and quick modes only)
 stack_trace_flags = [
   '-fno-omit-frame-pointer',      # Keep frame pointers for stack traces
@@ -104,7 +117,7 @@ if build_mode == 'debug'
     '-g3',                      # Full debug symbols (variables, macros, everything)
     '-fsanitize=address',       # Address sanitizer (detect memory errors)
     '-fsanitize=undefined',     # Undefined behavior sanitizer
-  ]
+  ] + apple_asan_dlopen_workaround_args
 elif build_mode == 'quick'
   # Quick mode: Default mode for fast development iteration
   # No optimization, no debug symbols, no sanitizers
@@ -390,7 +403,7 @@ if build_mode == 'debug'
     '-g3',
     '-fsanitize=address',
     '-fsanitize=undefined',
-  ]
+  ] + apple_asan_dlopen_workaround_args
 elif build_mode == 'quick'
   runner_cpp_args += stack_trace_flags + [
     '-O1',
