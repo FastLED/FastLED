@@ -246,7 +246,7 @@ def setup_meson_build(
 
     check_obsolete_zig_wrappers(source_dir)
 
-    compiler = detect_compiler_and_cache(markers, verbose)
+    compiler = detect_compiler_and_cache(markers, verbose, build_mode)
 
     # Late-stage compiler-version check: requires the detected compiler.
     if already_configured:
@@ -313,9 +313,13 @@ def setup_meson_build(
                 reconfigure=True,
             )
 
-    write_meson_native_file(native_file_path=native_file_path, compiler=compiler)
+    write_meson_native_file(
+        native_file_path=native_file_path,
+        compiler=compiler,
+        build_mode=build_mode,
+    )
 
-    env = build_setup_env(compiler)
+    env = build_setup_env(compiler, build_mode)
 
     if skip_meson_setup:
         handle_skip_meson_setup(

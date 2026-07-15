@@ -54,10 +54,25 @@ def _setup_sanitizer_env(source_dir: Path, verbose: bool) -> None:
         base_env=os.environ.copy(),
         compiler_flags=sanitizer_flags,
     )
+
+    if sys.platform == "darwin":
+        # Apple's Xcode ASan runtime on the macos-26 runner rejects
+        # detect_leaks=1 before main() with "not supported on this platform."
+        # LeakSanitizer is therefore unavailable on this runtime; keep all ASan
+        # and UBSan instrumentation active while disabling only that option.
+        asan_options = sanitizer_env.get("ASAN_OPTIONS", "")
+        options = [
+            option
+            for option in asan_options.split(":")
+            if option and not option.startswith("detect_leaks=")
+        ]
+        options.append("detect_leaks=0")
+        sanitizer_env["ASAN_OPTIONS"] = ":".join(options)
+
     os.environ.update(sanitizer_env)
 
     lsan_suppressions = source_dir / "tests" / "lsan_suppressions.txt"
-    if lsan_suppressions.exists():
+    if sys.platform != "darwin" and lsan_suppressions.exists():
         existing_lsan = os.environ.get("LSAN_OPTIONS", "")
         suppression_opt = f"suppressions={lsan_suppressions}"
         if existing_lsan:
@@ -177,7 +192,7 @@ def run_meson_build_and_test(
         _setup_sanitizer_env(source_dir, verbose)
 
     _ts_print(f"Preparing build ({build_mode} mode)...")
-    _start_zccache_session(build_dir)
+    _start_zccache_session(build_dir, build_mode)
 
     phase_tracker = PhaseTracker(build_dir, build_mode)
     phase_tracker.set_phase("CONFIGURE")

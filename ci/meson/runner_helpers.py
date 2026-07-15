@@ -355,15 +355,15 @@ def _write_testlog_failures(build_dir: Path, log_dir: Path) -> None:
         _write_failure_log(log_dir, safe_name, "run", content)
 
 
-def _start_zccache_session(build_dir: Path) -> None:
+def _start_zccache_session(build_dir: Path, build_mode: str) -> None:
     """Start a zccache session with logging to the build directory.
 
     Sets ZCCACHE_SESSION_ID in os.environ so all subsequent compiler
     invocations through zccache use this session and get logged.
     The session auto-cleans up via PID monitoring when the process exits.
 
-    Also sets ZCCACHE_LINK_DEPLOY_CMD so zccache invokes
-    `clang-tool-chain-libdeploy` after each cache-miss link. This
+    Except for Apple debug builds, also sets ZCCACHE_LINK_DEPLOY_CMD so
+    zccache invokes `clang-tool-chain-libdeploy` after each cache-miss link. This
     materializes runtime DLLs next to the linked binary (on Windows
     these otherwise don't get deployed because the native ctc-clang++
     trampoline skips Python post-link hooks) and lets zccache's
@@ -371,7 +371,13 @@ def _start_zccache_session(build_dir: Path) -> None:
     fixing flaky error-126 DLL load failures under parallel test
     execution. See https://github.com/FastLED/FastLED/issues/2329.
     """
-    if "ZCCACHE_LINK_DEPLOY_CMD" not in os.environ:
+    if sys.platform == "darwin" and build_mode == "debug":
+        # Apple sanitizer builds use Xcode clang and compiler-rt as one matched
+        # toolchain. clang-tool-chain-libdeploy sources the bundled compiler-rt
+        # and can reintroduce the older, ABI-incompatible ASan runtime after the
+        # link, so it must not run on this path.
+        os.environ.pop("ZCCACHE_LINK_DEPLOY_CMD", None)
+    elif "ZCCACHE_LINK_DEPLOY_CMD" not in os.environ:
         os.environ["ZCCACHE_LINK_DEPLOY_CMD"] = "clang-tool-chain-libdeploy"
     os.environ.setdefault("ZCCACHE_STRICT_PATHS", "absolute")
     # ZCCACHE_PROBE_BYPASS=1 setdefault removed as a probe per #3129 A9

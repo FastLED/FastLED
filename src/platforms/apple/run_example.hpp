@@ -24,17 +24,18 @@
 #include <mach-o/dyld.h> // For _NSGetExecutablePath
 // IWYU pragma: end_keep
 
-// Timeout watchdog for hung example detection
-#include "timeout_watchdog.h"  // ok include path
 #include "fl/stl/noexcept.h"
+#include "platforms/apple/runner_watchdog.hpp"
 
 int main(int argc, char** argv) FL_NO_EXCEPT {
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kStartup);
+    apple_runner_watchdog::setup();
+
     // Setup crash handler BEFORE loading any shared libraries
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kCrashHandlerSetup);
     runner_setup_crash_handler();
 
-    // Setup timeout watchdog to detect hung examples
-    timeout_watchdog::setup();  // Default: 20 seconds, configurable via FASTLED_TEST_TIMEOUT
-
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kPathResolution);
     std::string so_path;
     const std::string shared_lib_ext = ".dylib";
 
@@ -75,17 +76,21 @@ int main(int argc, char** argv) FL_NO_EXCEPT {
 
     // Load shared library with RTLD_NOW for immediate symbol resolution
     // This helps ASAN properly track symbols from the loaded library
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kDynamicLoad);
     void* handle = dlopen(so_path.c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (!handle) {
         std::cout << "Error: Failed to load " << so_path << " (" << dlerror() << ")" << std::endl;
+        apple_runner_watchdog::cancel();
         return 1;
     }
 
     // Get run_example function
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kSymbolLookup);
     RunExampleFunc run_example = (RunExampleFunc)dlsym(handle, "run_example");
     if (!run_example) {
         std::cout << "Error: Failed to find run_example() in " << so_path << " (" << dlerror() << ")" << std::endl;
         dlclose(handle);
+        apple_runner_watchdog::cancel();
         return 1;
     }
 
@@ -109,6 +114,7 @@ int main(int argc, char** argv) FL_NO_EXCEPT {
     }
 
     // Call example function with arguments
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kInvocation);
     int example_result = run_example(example_argc, example_argv);
 
     // Cleanup: Skip dlclose when running with AddressSanitizer
@@ -116,6 +122,7 @@ int main(int argc, char** argv) FL_NO_EXCEPT {
     // before that, ASAN cannot symbolize addresses from the unloaded library,
     // resulting in "<unknown module>" in stack traces.
     // See: https://github.com/google/sanitizers/issues/899
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kTeardown);
 #if !defined(__SANITIZE_ADDRESS__) && !defined(__has_feature)
     dlclose(handle);
 #elif defined(__has_feature)
@@ -124,6 +131,8 @@ int main(int argc, char** argv) FL_NO_EXCEPT {
 #endif
 #endif
 
+    apple_runner_watchdog::set_phase(apple_runner_watchdog::Phase::kCompleted);
+    apple_runner_watchdog::cancel();
     return example_result;
 }
 

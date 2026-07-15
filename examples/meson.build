@@ -156,7 +156,7 @@ example_runner_exe = executable('example_runner',
   files('../tests/shared/example_runner.cpp'),
   cpp_args: runner_cpp_args + [path_norm_I_src, path_norm_I_stub, path_norm_I_tests],
   link_args: runner_link_args,
-  link_with: [crash_handler_lib],  # Shared crash handler from root meson.build
+  link_with: [crash_handler_lib] + apple_runner_watchdog_libs,
   implicit_include_directories: false,
   install: false
 )

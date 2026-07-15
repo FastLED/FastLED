@@ -185,14 +185,15 @@ example_compile_args = base_compile_args
 # ============================================================================
 # UNIFIED LINK CONFIGURATION
 # ============================================================================
-# clang-tool-chain provides uniform GNU-style behavior across all platforms.
-# This allows us to use the same link flags everywhere with minimal exceptions.
+# clang-tool-chain provides uniform GNU-style behavior across platforms. Apple
+# debug builds use the selected Xcode compiler/runtime together because macOS
+# 26.4 requires the fixed compiler-rt shipped with Xcode 26.4+.
 
 # Detect platform for the few remaining differences
 is_windows = build_machine.system() == 'windows'
 is_macos = build_machine.system() == 'darwin'
 
-# macOS uses ld64.lld which does not accept GNU-style --no-undefined.
+# macOS uses ld64 or ld64.lld, neither of which accepts GNU-style --no-undefined.
 # On macOS the linker errors on undefined symbols by default, so we just
 # omit the flag there. Windows and Linux LLD accept it as expected.
 # See FastLED #2612 and PR #2567.
@@ -222,6 +223,9 @@ endforeach
 # Core link arguments (shared by all targets)
 # ============================================================================
 core_link_args = ['-fuse-ld=lld']
+if is_macos and build_mode == 'debug'
+  core_link_args = []
+endif
 if build_mode == 'release'
   # Enable thin LTO at link time for release builds
   core_link_args += ['-flto=thin']
@@ -242,8 +246,12 @@ if build_mode == 'debug'
   sanitizer_link_args = [
     '-fsanitize=address',
     '-fsanitize=undefined',
-    '-shared-libasan',  # Use shared ASan runtime (required for DLL architecture)
   ]
+  if not is_macos
+    # Darwin only supports its shared sanitizer runtime and selects it by
+    # default. Other platforms need this explicit flag for the DLL architecture.
+    sanitizer_link_args += ['-shared-libasan']
+  endif
 endif
 
 # ============================================================================
@@ -409,6 +417,23 @@ elif build_mode == 'profile'
   ]
 endif
 
+# The Apple runner watchdog can interrupt dyld while sanitizer initialization
+# holds loader locks. Compile its complete call chain without instrumentation so
+# the SIGALRM handler remains limited to async-signal-safe system calls.
+apple_runner_watchdog_libs = []
+if is_macos
+  apple_runner_watchdog_lib = static_library('apple_runner_watchdog',
+    files('../../../tests/shared/apple_runner_watchdog.cpp'),
+    cpp_args: runner_cpp_args + [
+      path_norm_I_src,
+      '-fno-sanitize=all',
+    ],
+    implicit_include_directories: false,
+    install: false
+  )
+  apple_runner_watchdog_libs += [apple_runner_watchdog_lib]
+endif
+
 # ============================================================================
 # Legacy aliases for backward compatibility
 # ============================================================================
@@ -545,6 +570,7 @@ fastled_pch = custom_target('fastled_pch',
     '@INPUT@',
     '-o', '@OUTPUT@',
     '-MD', '-MF', '@DEPFILE@',
+    get_option('cpp_args'),          # Includes native-file SDK selection on Apple debug
     base_compile_args,
     '-fPIC',
     fastled_pch_abs_include_args,

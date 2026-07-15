@@ -45,6 +45,7 @@ test_pch = custom_target('test_pch',
     test_pch_input_abs,            # Canonical absolute forward-slash spelling
     '-o', '@OUTPUT@',              # test_pch.h.pch
     '-MD', '-MF', '@DEPFILE@',     # Generate dependency file (will be fixed by wrapper)
+    get_option('cpp_args'),        # Includes native-file SDK selection on Apple debug
     unit_test_compile_args,        # Same flags as all tests
     '-fPIC',                       # Required: tests build as shared_library which needs PIC
     test_abs_include_args,
@@ -85,7 +86,7 @@ runner_exe = executable('runner',
   'shared/runner.cpp',
   cpp_args: runner_cpp_args + [path_norm_I_src, path_norm_I_stub, path_norm_I_tests],
   link_args: runner_link_args,
-  link_with: [crash_handler_lib],  # Shared crash handler from root meson.build
+  link_with: [crash_handler_lib] + apple_runner_watchdog_libs,
   implicit_include_directories: false,
   install: false
 )

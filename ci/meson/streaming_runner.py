@@ -12,6 +12,7 @@ stale-build recovery retry, and the no-tests-ran fallback.
 """
 
 import os
+import sys
 import threading
 import time
 from dataclasses import dataclass
@@ -38,6 +39,45 @@ from ci.meson.test_execution import MesonTestResult, run_meson_test
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
+
+
+_DEFAULT_TEST_PROCESS_TIMEOUT_SECONDS = 600
+_MACOS_TEST_PROCESS_TIMEOUT_SECONDS = 90
+
+
+def _test_process_timeout_seconds() -> int:
+    """Return the outer runner timeout for the current platform.
+
+    Apple runners have their own 20-second watchdog.  Keep a wider Python
+    deadline so normal watchdog diagnostics can flush, while still bounding a
+    pre-main sanitizer/dyld stall that cannot arm the in-process watchdog.
+    """
+    if sys.platform == "darwin":
+        return _MACOS_TEST_PROCESS_TIMEOUT_SECONDS
+    return _DEFAULT_TEST_PROCESS_TIMEOUT_SECONDS
+
+
+def _wait_for_test_process(proc: RunningProcess) -> TestResult:
+    """Wait for a runner and retain its captured output on every failure.
+
+    ``RunningProcess.wait()`` raises on timeout after killing the child.  The
+    captured stream remains available on ``proc.stdout``; include it in the
+    returned failure so phase markers and sanitizer diagnostics reach CI logs.
+    """
+    try:
+        returncode = proc.wait(echo=False)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as error:
+        captured = str(proc.stdout)
+        output = f"[MESON] Test execution error: {error}"
+        if captured:
+            output += f"\n[MESON] Captured runner output:\n{captured}"
+        return TestResult(success=False, output=output)
+
+    captured = str(proc.stdout)
+    return TestResult(success=returncode == 0, output=captured)
 
 
 def validate_test_artifact(
@@ -298,7 +338,7 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
             proc = RunningProcess(
                 cmd,
                 cwd=ctx.source_dir,
-                timeout=600,
+                timeout=_test_process_timeout_seconds(),
                 auto_run=True,
                 check=False,
                 env=env,
@@ -308,17 +348,16 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
             with active_procs_lock:
                 active_procs.add(proc)
             try:
-                returncode = proc.wait(echo=False)
+                result = _wait_for_test_process(proc)
             finally:
                 with active_procs_lock:
                     active_procs.discard(proc)
-            captured = str(proc.stdout)
 
-            if returncode != 0:
+            if not result.success:
                 with failed_outputs_lock:
-                    failed_test_outputs[test_path.stem] = captured
+                    failed_test_outputs[test_path.stem] = result.output
 
-            return TestResult(success=returncode == 0, output=captured)
+            return result
 
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
@@ -327,10 +366,13 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
                 output="[MESON] Test interrupted by user",
             )
         except Exception as e:
-            return TestResult(
+            result = TestResult(
                 success=False,
                 output=f"[MESON] Test execution error: {e}",
             )
+            with failed_outputs_lock:
+                failed_test_outputs[test_path.stem] = result.output
+            return result
 
     def _kill_active_procs() -> None:
         """Kill all running test subprocesses (called on halt)."""
