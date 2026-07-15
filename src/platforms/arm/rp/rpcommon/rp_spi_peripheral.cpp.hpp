@@ -88,8 +88,19 @@ bool RpSpiPeripheral::configure(const RpSpiConfig& config) FL_NO_EXCEPT {
 u32 RpSpiPeripheral::actualClockHz() const FL_NO_EXCEPT { return mActualClockHz; }
 
 bool RpSpiPeripheral::startTxDma(const u8* data, size_t size) FL_NO_EXCEPT {
+    return startTxDmaImpl(data, size, nullptr, 0);
+}
+
+bool RpSpiPeripheral::startTxDmaCaptureRx(const u8* data, size_t size,
+                                          u8* rx_data, size_t rx_size) FL_NO_EXCEPT {
+    return startTxDmaImpl(data, size, rx_data, rx_size);
+}
+
+bool RpSpiPeripheral::startTxDmaImpl(const u8* data, size_t size, u8* rx_data,
+                                     size_t rx_size) FL_NO_EXCEPT {
     if (!mInitialized || data == nullptr || size == 0 || mTxDmaChannel < 0 ||
-        mRxDmaChannel < 0 || size > 0xffffffffu) {
+        mRxDmaChannel < 0 || size > 0xffffffffu ||
+        (rx_data != nullptr && rx_size < size)) {
         return false;
     }
     spi_inst_t* spi = spiForIndex(mSpiIndex);
@@ -99,10 +110,10 @@ bool RpSpiPeripheral::startTxDma(const u8* data, size_t size) FL_NO_EXCEPT {
         static_cast<uint>(mRxDmaChannel));
     channel_config_set_transfer_data_size(&rx_config, DMA_SIZE_8);
     channel_config_set_read_increment(&rx_config, false);
-    channel_config_set_write_increment(&rx_config, false);
+    channel_config_set_write_increment(&rx_config, rx_data != nullptr);
     channel_config_set_dreq(&rx_config, spi_get_dreq(spi, false));
     dma_channel_configure(static_cast<uint>(mRxDmaChannel), &rx_config,
-                          &mRxSink, &spi_get_hw(spi)->dr,
+                          rx_data == nullptr ? &mRxSink : rx_data, &spi_get_hw(spi)->dr,
                           static_cast<uint32_t>(size), false);
     dma_channel_config tx_config = dma_channel_get_default_config(
         static_cast<uint>(mTxDmaChannel));

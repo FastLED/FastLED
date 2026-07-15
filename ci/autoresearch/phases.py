@@ -546,6 +546,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
 
     gpio_only_mode = (
         not drivers
+        and not getattr(args, "rp_spi_loopback", False)
         and not simd_test_mode
         and not coroutine_test_mode
         and not ieee754_test_mode
@@ -2010,6 +2011,9 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     if ctx.rpc_smoke_mode:
         return await _run_rpc_smoke_tests(ctx)
 
+    if getattr(ctx.args, "rp_spi_loopback", False):
+        return await _run_rp_spi_loopback_tests(ctx)
+
     if final_environment in LPC_BRING_UP_ENVS:
         if ctx.ieee754_test_mode:
             return await _run_ieee754_tests(ctx)
@@ -3035,6 +3039,49 @@ async def _run_lpc_dma_spi_tests(ctx: RunContext) -> int:
         upload_port,
         "--core-hz",
         str(core_hz),
+    ]
+    result = subprocess.run(cmd)
+    return 0 if result.returncode == 0 else 1
+
+
+async def _run_rp_spi_loopback_tests(ctx: RunContext) -> int:
+    """Run byte-exact loopback through the RP fixed-SPI channel engine."""
+    final_environment = (ctx.final_environment or "").lower()
+    if final_environment != "rp2040":
+        print("--rp-spi-loopback is only supported on the rp2040 environment.")
+        return 1
+
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+    spi_index = ctx.args.rp_spi_index
+    default_tx_pin = 3 if spi_index == 0 else 11
+    default_rx_pin = 0 if spi_index == 0 else 8
+    sck_pin = 2 if spi_index == 0 else 10
+    tx_pin = ctx.args.tx_pin if ctx.args.tx_pin is not None else default_tx_pin
+    rx_pin = ctx.args.rx_pin if ctx.args.rx_pin is not None else default_rx_pin
+    print()
+    print("=" * 60)
+    print("RP2040 fixed-SPI DMA byte-loopback")
+    print(f"   Wiring: GPIO{tx_pin} (SPI{spi_index} MOSI) -> GPIO{rx_pin} (SPI{spi_index} MISO)")
+    print(f"   SCK: GPIO{sck_pin} (SPI{spi_index}); no SCK loopback connection is required")
+    print(f"   Engine: ChannelEngineRpSpi via BusTraits<Bus::SPI, {spi_index}>")
+    print("   Rates: 1 MHz, 8 MHz, 24 MHz; byte-exact MISO capture + wire-idle")
+    print("=" * 60)
+    print()
+    cmd = [
+        "uv",
+        "run",
+        "python",
+        "-m",
+        "ci.autoresearch.test_rp_spi_loopback",
+        "--port",
+        upload_port,
+        "--mosi-pin",
+        str(tx_pin),
+        "--miso-pin",
+        str(rx_pin),
+        "--spi-index",
+        str(spi_index),
     ]
     result = subprocess.run(cmd)
     return 0 if result.returncode == 0 else 1

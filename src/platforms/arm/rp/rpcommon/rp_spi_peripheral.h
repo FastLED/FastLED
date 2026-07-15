@@ -18,6 +18,8 @@ class RpSpiPeripheral final : public IRpSpiPeripheral {
     bool configure(const RpSpiConfig& config) FL_NO_EXCEPT override;
     u32 actualClockHz() const FL_NO_EXCEPT override;
     bool startTxDma(const u8* data, size_t size) FL_NO_EXCEPT override;
+    bool startTxDmaCaptureRx(const u8* data, size_t size,
+                             u8* rx_data, size_t rx_size) FL_NO_EXCEPT override;
     bool isTxDmaBusy() const FL_NO_EXCEPT override;
     bool isRxDmaBusy() const FL_NO_EXCEPT override;
     bool isWireBusy() const FL_NO_EXCEPT override;
@@ -27,6 +29,9 @@ class RpSpiPeripheral final : public IRpSpiPeripheral {
     void deinitialize() FL_NO_EXCEPT override;
 
   private:
+    bool startTxDmaImpl(const u8* data, size_t size, u8* rx_data,
+                        size_t rx_size) FL_NO_EXCEPT;
+
     int mTxDmaChannel;
     int mRxDmaChannel;
     int mSpiIndex;

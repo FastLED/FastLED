@@ -116,4 +116,5 @@ private:
     void bindNetworkMethods(fl::Remote& remote);
     void bindAsyncMethods(fl::Remote& remote);
     void bindBenchmarkMethods(fl::Remote& remote);
+    void bindRpSpiMethods(fl::Remote& remote);
 };

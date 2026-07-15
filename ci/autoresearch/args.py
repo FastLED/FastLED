@@ -118,6 +118,10 @@ class Args:
     # exclusive with the other LPC DMA harnesses at the flash budget.
     dma_uart: bool
 
+    # RP2040 fixed-SPI DMA byte-loopback harness.
+    rp_spi_loopback: bool
+    rp_spi_index: int
+
     # LPC845 fault emit validation (#3302).
     fault_emit_test: bool
 
@@ -249,6 +253,19 @@ See Also:
             "--spi",
             action="store_true",
             help="Test only SPI driver (Teensy 4.x resolves to SPI_UNIFIED)",
+        )
+        driver_group.add_argument(
+            "--rp-spi-loopback",
+            action="store_true",
+            help="RP2040-only: fixed SPI0/SPI1 DMA byte-loopback "
+            + "through the channel engine; requires MOSI-to-MISO jumper.",
+        )
+        driver_group.add_argument(
+            "--rp-spi-index",
+            type=int,
+            choices=(0, 1),
+            default=0,
+            help="RP fixed SPI instance for --rp-spi-loopback (default: 0).",
         )
         driver_group.add_argument(
             "--uart",
@@ -841,6 +858,8 @@ See Also:
             pwm_dma_cl=parsed.pwm_dma_cl,
             dma_spi=parsed.dma_spi,
             dma_uart=parsed.dma_uart,
+            rp_spi_loopback=parsed.rp_spi_loopback,
+            rp_spi_index=parsed.rp_spi_index,
             fault_emit_test=parsed.fault_emit_test,
             frames=parsed.frames,
             tight_timing=parsed.tight_timing,

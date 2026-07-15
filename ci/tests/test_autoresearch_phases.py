@@ -103,6 +103,8 @@ def _make_args(**overrides) -> Args:
         pwm_dma_cl=False,
         dma_spi=False,
         dma_uart=False,
+        rp_spi_loopback=False,
+        rp_spi_index=0,
         fault_emit_test=False,
         # Default existing-test behavior: use the legacy root-platformio.ini
         # path so the ``fake_project_dir`` fixture's hand-written ini is the
@@ -657,6 +659,28 @@ class TestParseArgsAndBuildCommands:
         assert isinstance(result, RunContext)
         assert result.gpio_only_mode is True
         assert result.drivers == []
+
+    def test_rp_spi_loopback_is_not_gpio_only(self, fake_project_dir: Path) -> None:
+        args = _make_args(
+            parlio=False,
+            rp_spi_loopback=True,
+            environment_positional="rp2040",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.gpio_only_mode is False
+        assert result.drivers == []
+
+    def test_rp_spi_loopback_flag_parses(self) -> None:
+        args = Args.parse_args(["--rp-spi-loopback", "--rp-spi-index", "1"])
+        assert args.rp_spi_loopback is True
+        assert args.rp_spi_index == 1
 
     def test_simd_mode(self, fake_project_dir: Path) -> None:
         args = _make_args(parlio=False, simd=True, project_dir=fake_project_dir)
@@ -1519,6 +1543,23 @@ class TestRunTestsOrSpecialMode:
         qctx = QuietContext(quiet=False)
         rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
         assert rc == 0
+
+    def test_rp_spi_loopback_delegates_on_rp2040(self) -> None:
+        ctx = _make_ctx(
+            args=_make_args(parlio=False, rp_spi_loopback=True),
+            drivers=[],
+            gpio_only_mode=False,
+            final_environment="rp2040",
+        )
+        qctx = QuietContext(quiet=False)
+        with patch(
+            f"{_PATCH_MOD}._run_rp_spi_loopback_tests",
+            new_callable=AsyncMock,
+            return_value=0,
+        ) as loopback:
+            rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
+        assert rc == 0
+        loopback.assert_awaited_once_with(ctx)
 
     def test_simd_mode_pass(self) -> None:
         ctx = _make_ctx(simd_test_mode=True)

@@ -21,6 +21,11 @@ class ChannelEngineRpSpi final : public IChannelDriver {
     void show() FL_NO_EXCEPT override;
     DriverState poll() FL_NO_EXCEPT override;
 
+    /// Capture MISO for the next queued transfer. This is an internal
+    /// diagnostic hook; normal FastLED output continues to discard RX bytes.
+    bool captureNextRxBytes(u8* data, size_t size) FL_NO_EXCEPT;
+    u32 lastActualClockHz() const FL_NO_EXCEPT { return mLastActualClockHz; }
+
     fl::string getName() const FL_NO_EXCEPT override {
         return mSpiIndex == 0 ? fl::string::from_literal("SPI0")
                               : fl::string::from_literal("SPI1");
@@ -42,6 +47,9 @@ class ChannelEngineRpSpi final : public IChannelDriver {
     u8 mSpiIndex;
     size_t mCurrentChannel;
     u32 mStartUs;
+    u32 mLastActualClockHz;
+    u8* mRxCapture;
+    size_t mRxCaptureSize;
     bool mActive;
     bool mFailed;
     fl::string mError;
