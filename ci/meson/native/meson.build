@@ -82,19 +82,6 @@ base_common = [
   '-fno-strict-aliasing',      # Prevent strict aliasing optimizations
 ]
 
-# macOS SDK 15+ can deadlock in ASan's pre-main global registration when an
-# instrumented executable dynamically loads instrumented libraries (Apple
-# Feedback FB16513866; FastLED #3642). Keep ASan heap/stack instrumentation and
-# UBSan enabled, but disable the affected ASan globals pass on Apple debug
-# builds. This must be applied to both runners and every library they load.
-apple_asan_dlopen_workaround_args = []
-if build_machine.system() == 'darwin'
-  apple_asan_dlopen_workaround_args = [
-    '-mllvm',
-    '-asan-globals=0',
-  ]
-endif
-
 # Stack trace preservation flags (used in debug and quick modes only)
 stack_trace_flags = [
   '-fno-omit-frame-pointer',      # Keep frame pointers for stack traces
@@ -117,7 +104,7 @@ if build_mode == 'debug'
     '-g3',                      # Full debug symbols (variables, macros, everything)
     '-fsanitize=address',       # Address sanitizer (detect memory errors)
     '-fsanitize=undefined',     # Undefined behavior sanitizer
-  ] + apple_asan_dlopen_workaround_args
+  ]
 elif build_mode == 'quick'
   # Quick mode: Default mode for fast development iteration
   # No optimization, no debug symbols, no sanitizers
@@ -257,6 +244,22 @@ if build_mode == 'debug'
     '-fsanitize=undefined',
     '-shared-libasan',  # Use shared ASan runtime (required for DLL architecture)
   ]
+  if is_macos
+    # macOS 26.4 deadlocks before main() with older ASan runtimes while they
+    # inspect dyld's shared cache (LLVM #200447, FastLED #3642). GitHub's
+    # macos-26 image ships Xcode 26.5 by default, whose compiler-rt contains
+    # Apple's fix. Keep clang-tool-chain for compilation, but make its driver
+    # link the platform-compatible Xcode sanitizer runtime.
+    xcrun_program = find_program('xcrun')
+    apple_clang_resource_dir = run_command(
+      xcrun_program,
+      'clang',
+      '-print-resource-dir',
+      check: true
+    ).stdout().strip()
+    sanitizer_link_args += ['-resource-dir=' + apple_clang_resource_dir]
+    message('Using Xcode sanitizer runtime: ' + apple_clang_resource_dir)
+  endif
 endif
 
 # ============================================================================
@@ -403,7 +406,7 @@ if build_mode == 'debug'
     '-g3',
     '-fsanitize=address',
     '-fsanitize=undefined',
-  ] + apple_asan_dlopen_workaround_args
+  ]
 elif build_mode == 'quick'
   runner_cpp_args += stack_trace_flags + [
     '-O1',
