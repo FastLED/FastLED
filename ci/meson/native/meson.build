@@ -570,6 +570,7 @@ fastled_pch = custom_target('fastled_pch',
     '@INPUT@',
     '-o', '@OUTPUT@',
     '-MD', '-MF', '@DEPFILE@',
+    get_option('cpp_args'),          # Includes native-file SDK selection on Apple debug
     base_compile_args,
     '-fPIC',
     fastled_pch_abs_include_args,

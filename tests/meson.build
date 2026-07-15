@@ -45,6 +45,7 @@ test_pch = custom_target('test_pch',
     test_pch_input_abs,            # Canonical absolute forward-slash spelling
     '-o', '@OUTPUT@',              # test_pch.h.pch
     '-MD', '-MF', '@DEPFILE@',     # Generate dependency file (will be fixed by wrapper)
+    get_option('cpp_args'),        # Includes native-file SDK selection on Apple debug
     unit_test_compile_args,        # Same flags as all tests
     '-fPIC',                       # Required: tests build as shared_library which needs PIC
     test_abs_include_args,

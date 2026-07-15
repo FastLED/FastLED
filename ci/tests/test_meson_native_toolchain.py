@@ -10,6 +10,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from ci.meson.meson_setup_execute import (
+    _resolve_xcode_sdk_root,
     _resolve_xcode_tool,
     build_setup_env,
     detect_compiler_and_cache,
@@ -64,6 +65,27 @@ class TestMesonNativeToolchain(unittest.TestCase):
         ):
             _resolve_xcode_tool("clang")
 
+    def test_xcode_sdk_root_resolution_uses_running_process(self) -> None:
+        completed = SimpleNamespace(
+            returncode=0,
+            stdout="/Applications/Xcode.app/SDKs/MacOSX.sdk\n",
+            stderr="",
+        )
+        with patch(
+            "ci.meson.meson_setup_execute.RunningProcess.run",
+            return_value=completed,
+        ) as run:
+            path = _resolve_xcode_sdk_root()
+
+        self.assertEqual(path, "/Applications/Xcode.app/SDKs/MacOSX.sdk")
+        run.assert_called_once_with(
+            ["xcrun", "--sdk", "macosx", "--show-sdk-path"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+
     def test_apple_debug_uses_one_xcode_toolchain(self) -> None:
         """Sanitized Apple objects and runtimes must have matching ASan ABIs."""
         compiler = self._compiler()
@@ -82,6 +104,10 @@ class TestMesonNativeToolchain(unittest.TestCase):
                     "ci.meson.meson_setup_execute._resolve_xcode_tool",
                     side_effect=xcode_tools.__getitem__,
                 ),
+                patch(
+                    "ci.meson.meson_setup_execute._resolve_xcode_sdk_root",
+                    return_value="/Applications/Xcode.app/SDKs/MacOSX.sdk",
+                ),
             ):
                 write_meson_native_file(
                     native_file_path=native_file,
@@ -95,6 +121,14 @@ class TestMesonNativeToolchain(unittest.TestCase):
         self.assertIn("cpp = ['/Applications/Xcode.app/usr/bin/clang++']", content)
         self.assertIn("ar = ['/Applications/Xcode.app/usr/bin/ar']", content)
         self.assertIn("system = 'darwin'", content)
+        self.assertIn(
+            "cpp_args = ['-isysroot', '/Applications/Xcode.app/SDKs/MacOSX.sdk']",
+            content,
+        )
+        self.assertIn(
+            "cpp_link_args = ['-isysroot', '/Applications/Xcode.app/SDKs/MacOSX.sdk']",
+            content,
+        )
         self.assertNotIn("clang-tool-chain-cpp", content)
 
     def test_apple_debug_ignores_stale_compiler_version_marker(self) -> None:
@@ -153,6 +187,10 @@ class TestMesonNativeToolchain(unittest.TestCase):
                 side_effect=xcode_tools.__getitem__,
             ),
             patch(
+                "ci.meson.meson_setup_execute._resolve_xcode_sdk_root",
+                return_value="/Xcode/SDKs/MacOSX.sdk",
+            ),
+            patch(
                 "ci.meson.meson_setup_execute._resolve_fast_compiler_binary"
             ) as resolve_fast,
         ):
@@ -161,7 +199,18 @@ class TestMesonNativeToolchain(unittest.TestCase):
         self.assertEqual(env["CC"], xcode_tools["clang"])
         self.assertEqual(env["CXX"], xcode_tools["clang++"])
         self.assertEqual(env["AR"], xcode_tools["ar"])
+        self.assertEqual(env["SDKROOT"], "/Xcode/SDKs/MacOSX.sdk")
         resolve_fast.assert_not_called()
+
+    def test_custom_pch_commands_inherit_native_cpp_args(self) -> None:
+        project_root = Path(__file__).parents[2]
+        for relative_path in (
+            Path("ci/meson/native/meson.build"),
+            Path("tests/meson.build"),
+        ):
+            with self.subTest(meson_file=relative_path.as_posix()):
+                content = (project_root / relative_path).read_text(encoding="utf-8")
+                self.assertIn("get_option('cpp_args')", content)
 
     def test_apple_non_debug_keeps_clang_tool_chain(self) -> None:
         compiler = self._compiler()

@@ -75,6 +75,32 @@ def _resolve_xcode_tool(tool: str) -> str:
     return path
 
 
+def _resolve_xcode_sdk_root() -> str:
+    """Return the active macOS SDK root for direct Xcode compiler calls."""
+    try:
+        result = RunningProcess.run(
+            ["xcrun", "--sdk", "macosx", "--show-sdk-path"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except (subprocess.SubprocessError, OSError) as error:
+        raise RuntimeError(f"Unable to resolve the macOS SDK root: {error}") from error
+
+    if result.returncode != 0:
+        detail = result.stderr.strip() if result.stderr else "unknown xcrun error"
+        raise RuntimeError(f"Unable to resolve the macOS SDK root: {detail}")
+
+    path = result.stdout.strip()
+    if not path:
+        raise RuntimeError("xcrun returned no macOS SDK root")
+    return path
+
+
 def detect_compiler_and_cache(
     markers: MarkerPaths, verbose: bool, build_mode: str
 ) -> CompilerDetection:
@@ -200,6 +226,7 @@ def write_meson_native_file(
     try:
         is_windows = sys.platform.startswith("win") or os.name == "nt"
         is_darwin = sys.platform == "darwin"
+        apple_builtin_options = ""
 
         if is_darwin and build_mode == "debug":
             # macOS 26.4 deadlocks before main() with older ASan runtimes
@@ -209,6 +236,17 @@ def write_meson_native_file(
             c_compiler = f"['{_resolve_xcode_tool('clang')}']"
             cpp_compiler = f"['{_resolve_xcode_tool('clang++')}']"
             ar_tool = f"['{_resolve_xcode_tool('ar')}']"
+            sdk_root = _resolve_xcode_sdk_root()
+            # Directly invoking the Xcode toolchain binary does not select an
+            # SDK. Apply the active macOS SDK to compiler probes, compilation,
+            # and links so libc++, system libraries, and frameworks resolve.
+            apple_builtin_options = f"""
+[built-in options]
+c_args = ['-isysroot', '{sdk_root}']
+cpp_args = ['-isysroot', '{sdk_root}']
+c_link_args = ['-isysroot', '{sdk_root}']
+cpp_link_args = ['-isysroot', '{sdk_root}']
+"""
         else:
             fast = _resolve_fast_native_entries()
             if fast.cc is not None:
@@ -251,6 +289,7 @@ def write_meson_native_file(
 c = {c_compiler}
 cpp = {cpp_compiler}
 ar = {ar_tool}
+{apple_builtin_options}
 
 [host_machine]
 system = '{host_system}'
@@ -283,6 +322,7 @@ def build_setup_env(compiler: CompilerDetection, build_mode: str) -> dict[str, s
         env["CC"] = _resolve_xcode_tool("clang")
         env["CXX"] = _resolve_xcode_tool("clang++")
         env["AR"] = _resolve_xcode_tool("ar")
+        env["SDKROOT"] = _resolve_xcode_sdk_root()
         return env
 
     fast_compiler = _resolve_fast_compiler_binary()
