@@ -31,6 +31,7 @@
 #include "platforms/shared/spi_hw_8.h"
 #include "platforms/arm/rp/rpcommon/init_channel_driver.h"
 #include "platforms/arm/rp/rpcommon/rp_uart_bus_traits.h"
+#include "platforms/arm/rp/rpcommon/rp_pio_tx_bus_traits.h"
 
 namespace fl {
 
@@ -137,6 +138,8 @@ void initChannelDrivers() {
     // USB CDC remains the sketch/RPC transport and is never registered here.
     BusTraits<Bus::UART, 0>::registerWithManager();
     BusTraits<Bus::UART, 1>::registerWithManager();
+    BusTraits<Bus::FLEX_IO, 0>::registerWithManager();
+    BusTraits<Bus::FLEX_IO, 1>::registerWithManager();
 
     FL_DBG_F("RP2040/RP2350: Channel drivers initialized");
 }
