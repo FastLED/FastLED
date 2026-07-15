@@ -109,6 +109,10 @@ bool RxChannel::begin(const RxChannelConfig& config) FL_NO_EXCEPT {
     return mDevice ? mDevice->begin(toRxConfig(mConfig)) : false;
 }
 
+const char* RxChannel::lastBeginError() const FL_NO_EXCEPT {
+    return mDevice ? mDevice->lastBeginError() : "rx_device_unavailable";
+}
+
 void RxChannel::setConfig(const RxChannelConfig& config) FL_NO_EXCEPT {
     if (!config.name.empty()) {
         mName = config.name;

@@ -33,6 +33,7 @@ public:
     RxBackend backend() const FL_NO_EXCEPT;
 
     bool begin(const RxChannelConfig& config) FL_NO_EXCEPT;
+    const char* lastBeginError() const FL_NO_EXCEPT;
     void setConfig(const RxChannelConfig& config) FL_NO_EXCEPT;
     bool finished() const FL_NO_EXCEPT;
     RxWaitResult wait(u32 timeout_ms) FL_NO_EXCEPT;

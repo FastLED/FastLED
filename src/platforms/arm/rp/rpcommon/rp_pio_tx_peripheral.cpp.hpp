@@ -77,8 +77,8 @@ bool RpPioTxPeripheral::createProgram(const ChipsetTimingConfig& timing) FL_NO_E
     #endif
 #endif
     PIO pio = static_cast<PIO>(mPio);
-    if (!pio_can_add_program(pio, &mProgram->program)) return false;
-    mProgramOffset = static_cast<int>(pio_add_program(pio, &mProgram->program));
+    if (!RpPioDmaResourceManager::instance().addPioProgram(
+            pio, &mProgram->program, &mProgramOffset)) return false;
     mProgram->terminal_pc = static_cast<u32>(mProgramOffset);
 
     pio_sm_config config = pio_get_default_sm_config();
@@ -95,6 +95,13 @@ bool RpPioTxPeripheral::createProgram(const ChipsetTimingConfig& timing) FL_NO_E
                                    static_cast<uint>(mPin), mLaneCount, true);
     pio_sm_init(pio, static_cast<uint>(mStateMachine),
                 static_cast<uint>(mProgramOffset), &config);
+    // A PIO output latch survives a prior state-machine use.  The program
+    // initially blocks at OUT waiting for its first DMA word, so establish
+    // the clockless idle-low level before exposing that blocked state on the
+    // GPIO.  This also gives an external RX sampler an unambiguous frame
+    // boundary after a GPIO connectivity probe.
+    const u32 pin_mask = ((1u << mLaneCount) - 1u) << mPin;
+    pio_sm_set_pins_with_mask(pio, static_cast<uint>(mStateMachine), 0, pin_mask);
     pio_sm_set_enabled(pio, static_cast<uint>(mStateMachine), true);
     return true;
 }
@@ -171,7 +178,8 @@ void RpPioTxPeripheral::deinitialize() FL_NO_EXCEPT {
         pio_sm_clear_fifos(pio, static_cast<uint>(mStateMachine));
     }
     if (pio != nullptr && mProgram != nullptr && mProgramOffset >= 0) {
-        pio_remove_program(pio, &mProgram->program, static_cast<uint>(mProgramOffset));
+        RpPioDmaResourceManager::instance().removePioProgram(
+            pio, &mProgram->program, mProgramOffset);
     }
     if (mDmaChannel >= 0) RpPioDmaResourceManager::instance().releaseDmaChannel(mDmaChannel);
     if (pio != nullptr && mStateMachine >= 0) {

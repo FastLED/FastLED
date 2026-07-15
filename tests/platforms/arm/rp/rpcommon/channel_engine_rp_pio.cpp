@@ -120,6 +120,8 @@ FL_TEST_CASE("RP PIO TX preserves pending work and cleans up errors") {
     FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::ERROR);
     FL_CHECK_FALSE(first->isInUse());
     FL_CHECK_FALSE(second->isInUse());
+    FL_CHECK_EQ(engine.lastError(), fl::string("RP PIO: peripheral error"));
+    FL_CHECK_FALSE(engine.isActive());
     FL_CHECK(peripheral->abortCalls > 0);
     FL_CHECK(peripheral->deinitializeCalls > 0);
 }

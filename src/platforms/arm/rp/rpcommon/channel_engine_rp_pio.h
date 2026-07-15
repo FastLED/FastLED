@@ -24,6 +24,12 @@ class ChannelEngineRpPio final : public IChannelDriver {
     void show() FL_NO_EXCEPT override;
     DriverState poll() FL_NO_EXCEPT override;
 
+    bool isActive() const FL_NO_EXCEPT { return mActive; }
+    const fl::string& lastError() const FL_NO_EXCEPT { return mLastError; }
+    bool lastStartAttempted() const FL_NO_EXCEPT { return mLastStartAttempted; }
+    bool lastStartSucceeded() const FL_NO_EXCEPT { return mLastStartSucceeded; }
+    size_t lastWordCount() const FL_NO_EXCEPT { return mLastWordCount; }
+
     fl::string getName() const FL_NO_EXCEPT override {
         return mWhich == 0 ? fl::string::from_literal("PIO0")
                            : fl::string::from_literal("PIO1");
@@ -50,7 +56,11 @@ class ChannelEngineRpPio final : public IChannelDriver {
     bool mActive;
     bool mLatchPending;
     bool mFailed;
+    bool mLastStartAttempted;
+    bool mLastStartSucceeded;
+    size_t mLastWordCount;
     fl::string mError;
+    fl::string mLastError;
 };
 
 }  // namespace fl

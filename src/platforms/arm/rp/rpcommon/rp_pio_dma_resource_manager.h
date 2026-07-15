@@ -58,6 +58,70 @@ class RpPioDmaResourceManager {
         return false;
     }
 
+    /// @brief Atomically claim a PIO state machine and install a program.
+    ///
+    /// PIO instruction memory is shared by all four state machines in a
+    /// block. Keeping the can-add/add pair inside the resource-manager lock
+    /// prevents two RP cores from reserving the same apparent free slot.
+    bool claimPioStateMachineAndAddProgram(const pio_program* program,
+                                           PIO* pio_out, int* state_machine_out,
+                                           int* program_offset_out) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        if (program == nullptr || pio_out == nullptr || state_machine_out == nullptr ||
+            program_offset_out == nullptr) {
+            return false;
+        }
+        for (u8 pio_index = 0; pio_index < NUM_PIOS; ++pio_index) {
+            PIO pio = pioForIndex(pio_index);
+            const int state_machine = pio_claim_unused_sm(pio, false);
+            if (state_machine < 0) continue;
+            if (!mLedger.claimPioStateMachine(pio_index, static_cast<u8>(state_machine))) {
+                pio_sm_unclaim(pio, static_cast<uint>(state_machine));
+                continue;
+            }
+            if (pio_can_add_program(pio, program)) {
+                const uint offset = pio_add_program(pio, program);
+                *pio_out = pio;
+                *state_machine_out = state_machine;
+                *program_offset_out = static_cast<int>(offset);
+                return true;
+            }
+            pio_sm_unclaim(pio, static_cast<uint>(state_machine));
+            mLedger.releasePioStateMachine(pio_index, static_cast<u8>(state_machine));
+        }
+        return false;
+    }
+
+    bool addPioProgram(PIO pio, const pio_program* program,
+                       int* program_offset_out) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        if (pio == nullptr || program == nullptr || program_offset_out == nullptr ||
+            !pio_can_add_program(pio, program)) {
+            return false;
+        }
+        *program_offset_out = static_cast<int>(pio_add_program(pio, program));
+        return true;
+    }
+
+    void removePioProgram(PIO pio, const pio_program* program,
+                          int program_offset) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        if (pio == nullptr || program == nullptr || program_offset < 0) return;
+        pio_remove_program(pio, program, static_cast<uint>(program_offset));
+    }
+
+    bool claimPioRxCaptureBuffer(void* owner) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        if (owner == nullptr || mPioRxCaptureOwner != nullptr) return false;
+        mPioRxCaptureOwner = owner;
+        return true;
+    }
+
+    void releasePioRxCaptureBuffer(void* owner) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        if (mPioRxCaptureOwner == owner) mPioRxCaptureOwner = nullptr;
+    }
+
     void releasePioStateMachine(PIO pio, int state_machine) FL_NO_EXCEPT {
         LockGuard lock(*this);
         if (pio == nullptr || state_machine < 0) {
@@ -257,7 +321,8 @@ class RpPioDmaResourceManager {
     RpPioDmaResourceManager() FL_NO_EXCEPT
         : mLedger(NUM_PIOS, RpResourceLedger::kMaxStateMachinesPerPio,
                   NUM_DMA_CHANNELS, RpResourceLedger::kMaxPins)
-        , mLock(spin_lock_instance(spin_lock_claim_unused(true))) {}
+        , mLock(spin_lock_instance(spin_lock_claim_unused(true)))
+        , mPioRxCaptureOwner(nullptr) {}
 
   private:
     class LockGuard {
@@ -306,6 +371,7 @@ class RpPioDmaResourceManager {
 
     RpResourceLedger mLedger;
     spin_lock_t* mLock;
+    void* mPioRxCaptureOwner;
 };
 
 }  // namespace fl

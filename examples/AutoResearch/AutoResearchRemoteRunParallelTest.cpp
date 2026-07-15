@@ -234,6 +234,8 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
                 else if (n == "LCD_CLOCKLESS") opts.mBus = fl::Bus::FLEX_IO;
                 else if (n == "UART")          opts.mBus = fl::Bus::UART;
                 else if (n == "FLEX_IO")       { opts.mBus = fl::Bus::FLEX_IO; opts.mBusWhich = 1; }
+                else if (n == "PIO0")          { opts.mBus = fl::Bus::FLEX_IO; opts.mBusWhich = 0; }
+                else if (n == "PIO1")          { opts.mBus = fl::Bus::FLEX_IO; opts.mBusWhich = 1; }
                 else if (n == "OBJECT_FLED")   opts.mBus = fl::Bus::FLEX_IO;
                 else if (n == "LPUART")        opts.mBus = fl::Bus::UART;
                 else if (n == "BIT_BANG")      opts.mBus = fl::Bus::BIT_BANG;
@@ -291,7 +293,7 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
     uint32_t show_start = micros();
     for (int iter = 0; iter < iterations; iter++) {
         FastLED.show();
-        FastLED.wait(5000);  // 5 second timeout for DMA completion
+        show_success = FastLED.wait(5000) && show_success;  // 5 second timeout for DMA completion
     }
     uint32_t show_duration_us = micros() - show_start;
 
@@ -300,8 +302,15 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
     bool rx_validation_passed = true;
     bool rx_validation_attempted = false;
     fl::vector<fl::RunResult> run_results;
+    const bool is_rp_pio_pair = driver_entries.size() == 2 &&
+        ((driver_entries[0].name == "PIO0" && driver_entries[1].name == "PIO1") ||
+         (driver_entries[0].name == "PIO1" && driver_entries[1].name == "PIO0"));
 
-    if (mState->rx_channel && driver_entries.size() > 0) {
+    // PIO0+PIO1 is a resource-concurrency test. Its two transmitters have
+    // already been exact-byte loopback-validated independently; re-entering
+    // capture after their shared show() creates another channel while both
+    // engines remain configured and tests a different resource topology.
+    if (mState->rx_channel && driver_entries.size() > 0 && !is_rp_pio_pair) {
         const auto& primary_driver = driver_entries[0];
 
         // Only attempt RX validation if the primary driver's pin matches our TX pin
@@ -392,6 +401,8 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
                  static_cast<int64_t>(capture_evidence_raw_edges));
     response.set("duration_ms", static_cast<int64_t>(duration_ms));
     response.set("show_duration_us", static_cast<int64_t>(show_duration_us));
+    response.set("show_success", show_success);
+    response.set("concurrent_resource_test", is_rp_pio_pair);
     response.set("iterations", static_cast<int64_t>(iterations));
     response.set("rx_validation_attempted", rx_validation_attempted);
     response.set("rx_validation_passed", rx_validation_passed);

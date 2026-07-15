@@ -311,6 +311,10 @@ public:
      */
     virtual bool begin(const RxConfig& config) FL_NO_EXCEPT = 0;
 
+    /// @brief Machine-readable reason from the most recent failed begin().
+    /// @return Empty string when the device has no additional diagnostic.
+    virtual const char* lastBeginError() const FL_NO_EXCEPT { return ""; }
+
     /**
      * @brief Check if receive operation is complete
      * @return true if receive finished, false if still in progress

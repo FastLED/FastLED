@@ -38,12 +38,16 @@
 #include "AutoResearchTimingDrift.h"
 #include "AutoResearchParlioStream.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_diagnostics.h"
+#include "platforms/arm/rp/is_rp.h"
 #if defined(FL_IS_TEENSY_4X)
 #include "platforms/arm/teensy/teensy4_common/rx_flexpwm_channel.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/flexio_driver.h"
 #endif
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+#include "platforms/arm/rp/rpcommon/rp_pio_tx_bus_traits.h"
+#endif
 #include <Arduino.h>
 
 #include "fl/net/ble.h"
@@ -1012,6 +1016,18 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
                                      : fl::string("none");
     response.set("captureBackend", capture_backend.c_str());
     response.set("laneCount", static_cast<int64_t>(lane_sizes.size()));
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+    if (driver_name == "PIO0" || driver_name == "PIO1") {
+        auto& pio = driver_name == "PIO0"
+                        ? fl::BusTraits<fl::Bus::FLEX_IO, 0>::instance()
+                        : fl::BusTraits<fl::Bus::FLEX_IO, 1>::instance();
+        response.set("rpPioActive", pio.isActive());
+        response.set("rpPioLastError", pio.lastError().c_str());
+        response.set("rpPioStartAttempted", pio.lastStartAttempted());
+        response.set("rpPioStartSucceeded", pio.lastStartSucceeded());
+        response.set("rpPioWordCount", static_cast<int64_t>(pio.lastWordCount()));
+    }
+#endif
 
     fl::json sizes_response = fl::json::array();
     for (int size : lane_sizes) {
@@ -1109,6 +1125,13 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
             pat.set("decodeBytes", static_cast<int64_t>(rr.decodeBytes));
             pat.set("decodeOutputCapacity",
                     static_cast<int64_t>(rr.decodeOutputCapacity));
+            if (rr.rpPioGpioTransitions >= 0) {
+                pat.set("rpPioGpioTransitions",
+                        static_cast<int64_t>(rr.rpPioGpioTransitions));
+            }
+            if (!rr.rxBeginError.empty()) {
+                pat.set("rxBeginError", rr.rxBeginError.c_str());
+            }
             if (!rr.rawEdgeSample.empty()) {
                 pat.set("rawEdgeSample", rr.rawEdgeSample.c_str());
             }

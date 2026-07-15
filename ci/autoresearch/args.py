@@ -123,6 +123,10 @@ class Args:
     rp_spi_index: int
     rp_spi_public_api: bool
     rp_spi_chipset: str
+    # RP PIO TX engine used by --flex-io on RP2040/RP2350.
+    rp_pio_index: int
+    # Select both PIO TX engines for a parallel RP run.
+    rp_pio_both: bool
 
     # LPC845 fault emit validation (#3302).
     fault_emit_test: bool
@@ -309,6 +313,18 @@ See Also:
             "--flex-io",
             action="store_true",
             help="Test only FlexIO clockless driver (Teensy 4.x only; requires --tx-pin in {6-13,32})",
+        )
+        driver_group.add_argument(
+            "--rp-pio-index",
+            type=int,
+            choices=(0, 1),
+            default=1,
+            help="RP2040/RP2350 PIO engine for --flex-io (default: 1).",
+        )
+        driver_group.add_argument(
+            "--rp-pio-both",
+            action="store_true",
+            help="RP2040/RP2350: select PIO0 and PIO1 together (requires --flex-io --parallel).",
         )
         driver_group.add_argument(
             "--flexio",
@@ -875,6 +891,8 @@ See Also:
             rp_spi_index=parsed.rp_spi_index,
             rp_spi_public_api=parsed.rp_spi_public_api,
             rp_spi_chipset=parsed.rp_spi_chipset,
+            rp_pio_index=parsed.rp_pio_index,
+            rp_pio_both=parsed.rp_pio_both,
             fault_emit_test=parsed.fault_emit_test,
             frames=parsed.frames,
             tight_timing=parsed.tight_timing,
