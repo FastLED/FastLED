@@ -113,6 +113,51 @@ class RpPioDmaResourceManager {
         mLedger.releaseUart(uart);
     }
 
+    /// @brief Atomically claim a PL022 SPI block, its TX/RX DMA lanes, and
+    /// the canonical MOSI/MISO/SCK GPIO triple.
+    bool claimSpiDmaAndPins(u8 spi, u8 mosi_pin, u8 miso_pin, u8 sck_pin,
+                            int* tx_dma_out, int* rx_dma_out) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        if (tx_dma_out == nullptr || rx_dma_out == nullptr ||
+            !mLedger.claimSpi(spi)) {
+            return false;
+        }
+        const u8 pins[] = {mosi_pin, miso_pin, sck_pin};
+        u8 claimed_pins = 0;
+        while (claimed_pins < 3 && mLedger.claimPin(pins[claimed_pins])) {
+            ++claimed_pins;
+        }
+        if (claimed_pins != 3) {
+            while (claimed_pins > 0) mLedger.releasePin(pins[--claimed_pins]);
+            mLedger.releaseSpi(spi);
+            return false;
+        }
+        const int tx_dma = dma_claim_unused_channel(false);
+        if (tx_dma < 0 || !mLedger.claimDmaChannel(static_cast<u8>(tx_dma))) {
+            if (tx_dma >= 0) dma_channel_unclaim(static_cast<uint>(tx_dma));
+            for (u8 pin : pins) mLedger.releasePin(pin);
+            mLedger.releaseSpi(spi);
+            return false;
+        }
+        const int rx_dma = dma_claim_unused_channel(false);
+        if (rx_dma < 0 || !mLedger.claimDmaChannel(static_cast<u8>(rx_dma))) {
+            if (rx_dma >= 0) dma_channel_unclaim(static_cast<uint>(rx_dma));
+            dma_channel_unclaim(static_cast<uint>(tx_dma));
+            mLedger.releaseDmaChannel(static_cast<u8>(tx_dma));
+            for (u8 pin : pins) mLedger.releasePin(pin);
+            mLedger.releaseSpi(spi);
+            return false;
+        }
+        *tx_dma_out = tx_dma;
+        *rx_dma_out = rx_dma;
+        return true;
+    }
+
+    void releaseSpi(u8 spi) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        mLedger.releaseSpi(spi);
+    }
+
     /// @brief Atomically acquire the complete UART TX resource set.
     ///
     /// A UART driver must not momentarily own only the UART block while a PIO
@@ -160,11 +205,6 @@ class RpPioDmaResourceManager {
             return false;
         }
         if (claimed_sm < 0) {
-            if (claimed_sm >= 0) {
-                pio_sm_unclaim(claimed_pio, static_cast<uint>(claimed_sm));
-                mLedger.releasePioStateMachine(static_cast<u8>(pioIndex(claimed_pio)),
-                                               static_cast<u8>(claimed_sm));
-            }
             return false;
         }
         u8 claimed_pins = 0;

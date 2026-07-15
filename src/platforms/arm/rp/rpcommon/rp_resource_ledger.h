@@ -3,7 +3,7 @@
 // IWYU pragma: private
 
 /// @file rp_resource_ledger.h
-/// @brief Lock-free ownership ledger shared by RP2040/RP2350 PIO drivers.
+/// @brief Lock-free ownership ledger shared by RP2040/RP2350 channel drivers.
 ///
 /// The Pico SDK owns the hardware claim bits. This ledger records FastLED's
 /// matching ownership so a driver can make rollback and cleanup deterministic
@@ -24,6 +24,7 @@ class RpResourceLedger {
     static constexpr u8 kMaxDmaChannels = 32;
     static constexpr u8 kMaxPins = 64;
     static constexpr u8 kMaxUarts = 2;
+    static constexpr u8 kMaxSpis = 2;
 
     RpResourceLedger(u8 pio_blocks = kMaxPioBlocks,
                      u8 state_machines_per_pio = kMaxStateMachinesPerPio,
@@ -88,6 +89,18 @@ class RpResourceLedger {
         return uart < kMaxUarts && isBitClaimed(mUartsClaimed, uart);
     }
 
+    bool claimSpi(u8 spi) FL_NO_EXCEPT {
+        return spi < kMaxSpis && claimBit(mSpisClaimed, spi);
+    }
+
+    bool releaseSpi(u8 spi) FL_NO_EXCEPT {
+        return spi < kMaxSpis && releaseBit(mSpisClaimed, spi);
+    }
+
+    bool isSpiClaimed(u8 spi) const FL_NO_EXCEPT {
+        return spi < kMaxSpis && isBitClaimed(mSpisClaimed, spi);
+    }
+
     bool claimPin(u8 pin) FL_NO_EXCEPT {
         return pin < mPins && claimBit(mPinsClaimed[pin / 32], pin % 32);
     }
@@ -106,6 +119,7 @@ class RpResourceLedger {
         }
         mDmaChannelsClaimed.store(0, memory_order_release);
         mUartsClaimed.store(0, memory_order_release);
+        mSpisClaimed.store(0, memory_order_release);
         for (u8 word = 0; word < 2; ++word) {
             mPinsClaimed[word].store(0, memory_order_release);
         }
@@ -147,6 +161,7 @@ class RpResourceLedger {
     atomic<u32> mPioStateMachines[kMaxPioBlocks];
     atomic<u32> mDmaChannelsClaimed;
     atomic<u32> mUartsClaimed;
+    atomic<u32> mSpisClaimed;
     atomic<u32> mPinsClaimed[2];
 };
 

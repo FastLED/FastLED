@@ -103,6 +103,12 @@ template<> struct DefaultBus<SpiChipsetConfig> {
 };
 #endif
 
+#elif defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+
+template<> struct DefaultBus<SpiChipsetConfig> {
+    static constexpr Bus value = Bus::SPI;
+};
+
 #endif
 
 template<Bus B> struct BusInstanceCount {
@@ -132,6 +138,7 @@ template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 
 template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 1; };
 #elif defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 template<> struct BusInstanceCount<Bus::FLEX_IO> { static constexpr fl::u8 value = 2; };
+template<> struct BusInstanceCount<Bus::SPI> { static constexpr fl::u8 value = 2; };
 template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 2; };
 #endif
 
@@ -181,13 +188,20 @@ inline const char* busDriverName(Bus b, fl::u8 which = 0, bool spi = false) FL_N
 #endif
         case Bus::AUTO:
         case Bus::BIT_BANG:
-        case Bus::SPI:
         case Bus::DUAL_SPI:
         case Bus::QUAD_SPI:
         case Bus::OCTAL_SPI:
         case Bus::RMT:
             (void)spi;
             return busName(b, which);
+        case Bus::SPI:
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+            (void)spi;
+            return which == 0 ? "SPI0" : "SPI1";
+#else
+            (void)spi;
+            return busName(b, which);
+#endif
         case Bus::UART:
             (void)which;
             (void)spi;
