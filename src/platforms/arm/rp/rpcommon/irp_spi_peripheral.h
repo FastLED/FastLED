@@ -33,6 +33,12 @@ class IRpSpiPeripheral {
     virtual bool configure(const RpSpiConfig& config) FL_NO_EXCEPT = 0;
     virtual u32 actualClockHz() const FL_NO_EXCEPT = 0;
     virtual bool startTxDma(const u8* data, size_t size) FL_NO_EXCEPT = 0;
+    /// Start a TX transfer while capturing the simultaneous MISO bytes.
+    ///
+    /// This is used by the RP SPI loopback diagnostic. Production callers use
+    /// startTxDma(), which drains RX into a single-byte sink.
+    virtual bool startTxDmaCaptureRx(const u8* data, size_t size,
+                                     u8* rx_data, size_t rx_size) FL_NO_EXCEPT = 0;
     virtual bool isTxDmaBusy() const FL_NO_EXCEPT = 0;
     virtual bool isRxDmaBusy() const FL_NO_EXCEPT = 0;
     virtual bool isWireBusy() const FL_NO_EXCEPT = 0;

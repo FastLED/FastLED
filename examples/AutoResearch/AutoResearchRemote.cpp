@@ -441,6 +441,7 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
     bindNetworkMethods(*mRemote);
     bindAsyncMethods(*mRemote);
     bindBenchmarkMethods(*mRemote);
+    bindRpSpiMethods(*mRemote);
 }
 
 

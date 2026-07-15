@@ -33,6 +33,13 @@ class SpiMock final : public IRpSpiPeripheral {
         rxBusy = startOk;
         return startOk;
     }
+    bool startTxDmaCaptureRx(const u8* data, size_t size, u8* rx_data,
+                             size_t rx_size) FL_NO_EXCEPT override {
+        ++captureCalls;
+        if (rx_data == nullptr || rx_size < size) return false;
+        for (size_t index = 0; index < size; ++index) rx_data[index] = data[index];
+        return startTxDma(data, size);
+    }
     bool isTxDmaBusy() const FL_NO_EXCEPT override { return txBusy; }
     bool isRxDmaBusy() const FL_NO_EXCEPT override { return rxBusy; }
     bool isWireBusy() const FL_NO_EXCEPT override { return wireBusy; }
@@ -52,6 +59,7 @@ class SpiMock final : public IRpSpiPeripheral {
     u32 timeUs = 0;
     int configureCalls = 0;
     int startCalls = 0;
+    int captureCalls = 0;
     int abortCalls = 0;
     int deinitializeCalls = 0;
     size_t byteCount = 0;
@@ -111,6 +119,19 @@ FL_TEST_CASE("RP SPI1 accepts only canonical RX SCK MOSI triples and clamps cloc
     FL_CHECK_EQ(peripheral->lastConfig.miso_pin, 24);
     FL_CHECK_EQ(peripheral->lastConfig.clock_hz, 62500000u);
     FL_CHECK_EQ(peripheral->startCalls, 1);
+}
+
+FL_TEST_CASE("RP SPI captures exact loopback bytes through the channel engine") {
+    auto peripheral = fl::make_shared<SpiMock>();
+    ChannelEngineRpSpi engine(peripheral, 0);
+    u8 captured[2] = {0, 0};
+    FL_REQUIRE(engine.captureNextRxBytes(captured, sizeof(captured)));
+    engine.enqueue(makeChannel(3, 2, 8000000));
+    engine.show();
+    FL_CHECK_EQ(peripheral->captureCalls, 1);
+    FL_CHECK_EQ(captured[0], 0xA5);
+    FL_CHECK_EQ(captured[1], 0x5A);
+    FL_CHECK_EQ(engine.lastActualClockHz(), 6000000u);
 }
 
 FL_TEST_CASE("RP SPI releases all channels on RX or peripheral failure") {

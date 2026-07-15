@@ -14,7 +14,8 @@ constexpr u32 kRpSpiTimeoutUs = 1000000;
 ChannelEngineRpSpi::ChannelEngineRpSpi(
     fl::shared_ptr<IRpSpiPeripheral> peripheral, u8 spi_index) FL_NO_EXCEPT
     : mPeripheral(fl::move(peripheral)), mSpiIndex(spi_index),
-      mCurrentChannel(0), mStartUs(0), mActive(false), mFailed(false) {}
+      mCurrentChannel(0), mStartUs(0), mLastActualClockHz(0),
+      mRxCapture(nullptr), mRxCaptureSize(0), mActive(false), mFailed(false) {}
 
 ChannelEngineRpSpi::~ChannelEngineRpSpi() {
     releaseInFlight();
@@ -76,6 +77,13 @@ void ChannelEngineRpSpi::show() FL_NO_EXCEPT {
     }
 }
 
+bool ChannelEngineRpSpi::captureNextRxBytes(u8* data, size_t size) FL_NO_EXCEPT {
+    if (mActive || data == nullptr || size == 0) return false;
+    mRxCapture = data;
+    mRxCaptureSize = size;
+    return true;
+}
+
 IChannelDriver::DriverState ChannelEngineRpSpi::poll() FL_NO_EXCEPT {
     if (mFailed) return fail(mError.c_str());
     if (!mActive) return DriverState::READY;
@@ -123,10 +131,19 @@ bool ChannelEngineRpSpi::beginTransmission(const ChannelDataPtr& channel) FL_NO_
     config.cpol = false;
     config.cpha = false;
     config.msb_first = true;
-    if (!mPeripheral->configure(config) || mPeripheral->actualClockHz() == 0 ||
-        !mPeripheral->startTxDma(channel->getData().data(), channel->getData().size())) {
+    if (!mPeripheral->configure(config) || mPeripheral->actualClockHz() == 0) {
         return false;
     }
+    mLastActualClockHz = mPeripheral->actualClockHz();
+    const bool capture_requested = mRxCapture != nullptr;
+    const bool started = capture_requested
+        ? mPeripheral->startTxDmaCaptureRx(channel->getData().data(),
+                                           channel->getData().size(), mRxCapture,
+                                           mRxCaptureSize)
+        : mPeripheral->startTxDma(channel->getData().data(), channel->getData().size());
+    mRxCapture = nullptr;
+    mRxCaptureSize = 0;
+    if (!started) return false;
     mStartUs = mPeripheral->nowMicros();
     return true;
 }
@@ -138,6 +155,8 @@ void ChannelEngineRpSpi::releaseInFlight() FL_NO_EXCEPT {
     mInFlightChannels.clear();
     mCurrentChannel = 0;
     mStartUs = 0;
+    mRxCapture = nullptr;
+    mRxCaptureSize = 0;
 }
 
 IChannelDriver::DriverState ChannelEngineRpSpi::fail(const char* message) FL_NO_EXCEPT {
