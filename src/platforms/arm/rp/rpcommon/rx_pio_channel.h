@@ -7,6 +7,7 @@
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 #include "fl/channels/rx.h"
+#include "platforms/arm/rp/rpcommon/rp_pio_edge_capture.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/vector.h"
 
@@ -33,15 +34,30 @@ class RpPioRxDevice : public RxDevice {
     friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NO_EXCEPT;
     explicit RpPioRxDevice(int pin) FL_NO_EXCEPT;
     void stop() FL_NO_EXCEPT;
+    void collectDurations() FL_NO_EXCEPT;
+    void finishTailIfIdle() FL_NO_EXCEPT;
 
     int mPin;
     void* mPio;
     int mStateMachine;
     int mDmaChannel;
+    int mProgramOffset;
+    u32 mPioClockHz;
+    u32 mTailLimitNs;
+    u32 mLastTransitionUs;
     size_t mCapacity;
     bool mArmed;
     bool mFinished;
     bool mOverflow;
+    bool mProgramLoaded;
+    bool mNextHigh;
+    bool mIdleHigh;
+    bool mFirstDuration;
+    size_t mDmaWordCount;
+    size_t mDmaWordsProcessed;
+    u16 mProgramInstructions[13];
+    RpPioEdgeCapture mCapture;
+    fl::vector<u32> mDmaWords;
     fl::vector<EdgeTime> mEdges;
 };
 

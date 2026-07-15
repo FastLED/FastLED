@@ -12,6 +12,7 @@
 #include "fl/stl/move.h"
 #include "fl/stl/shared_ptr.h"
 #include "platforms/is_platform.h"
+#include "platforms/arm/rp/rpcommon/rp_pio_edge_capture.h"
 #include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -164,6 +165,63 @@ FL_TEST_CASE("RxChannel - PIO backend supports host lifecycle and edge injection
     FL_CHECK_EQ(channel->getRawEdgeTimes(captured), 2u);
     FL_CHECK_EQ(captured[0].ns, 400u);
 #endif
+}
+
+FL_TEST_CASE("RP PIO RX duration counter converts asymmetric phases") {
+    RpPioEdgeCapture capture;
+    fl::vector<EdgeTime> edges;
+    capture.reset(100, 0);
+    FL_REQUIRE(capture.appendCounter(true, ~3u, 20000000u, 2u, &edges, 4));
+    FL_REQUIRE(capture.appendCounter(false, ~2u, 20000000u, 5u, &edges, 4));
+    FL_REQUIRE_EQ(edges.size(), 2u);
+    FL_CHECK(edges[0].high == 1);
+    FL_CHECK(edges[0].ns == 400u);
+    FL_CHECK(edges[1].high == 0);
+    FL_CHECK(edges[1].ns == 450u);
+}
+
+FL_TEST_CASE("RP PIO RX duration counter filters glitches and skips configured phases") {
+    RpPioEdgeCapture capture;
+    fl::vector<EdgeTime> edges;
+    capture.reset(100, 0);
+    FL_REQUIRE(capture.appendDuration(true, 400, &edges, 4));
+    FL_REQUIRE(capture.appendDuration(false, 50, &edges, 4));
+    FL_REQUIRE(capture.appendDuration(true, 400, &edges, 4));
+    FL_REQUIRE_EQ(edges.size(), 1u);
+    FL_CHECK(edges[0].high == 1);
+    FL_CHECK(edges[0].ns == 800u);
+
+    capture.reset(100, 2);
+    edges.clear();
+    FL_REQUIRE(capture.appendDuration(false, 850, &edges, 4));
+    FL_REQUIRE(capture.appendDuration(true, 400, &edges, 4));
+    FL_REQUIRE(capture.appendDuration(false, 850, &edges, 4));
+    FL_REQUIRE_EQ(edges.size(), 1u);
+    FL_CHECK(edges[0].high == 0);
+    FL_CHECK(edges[0].ns == 850u);
+
+    capture.reset(100, 0);  // Inverted idle-high input begins with a low phase.
+    edges.clear();
+    FL_REQUIRE(capture.appendDuration(false, 850, &edges, 4));
+    FL_REQUIRE(capture.appendDuration(true, 400, &edges, 4));
+    FL_REQUIRE_EQ(edges.size(), 2u);
+    FL_CHECK(edges[0].high == 0);
+    FL_CHECK(edges[1].high == 1);
+}
+
+FL_TEST_CASE("RP PIO RX duration counter reports capacity and saturates safely") {
+    RpPioEdgeCapture capture;
+    fl::vector<EdgeTime> edges;
+    capture.reset(0, 0);
+    FL_REQUIRE(capture.appendDuration(true, 400, &edges, 2));
+    FL_REQUIRE(capture.appendDuration(false, 850, &edges, 2));
+    FL_CHECK(!capture.appendDuration(true, 400, &edges, 2));
+    FL_REQUIRE_EQ(edges.size(), 2u);
+    FL_CHECK(edges[0].high == 1);
+    FL_CHECK(edges[1].high == 0);
+    FL_CHECK(RpPioEdgeCapture::durationNs(0xffffffffull, 1u) == 0x7fffffffu);
+    FL_REQUIRE(capture.appendCounter(true, 0u, 1u, 2u, &edges, 3));
+    FL_CHECK(capture.saturated());
 }
 
 // ============================================================
