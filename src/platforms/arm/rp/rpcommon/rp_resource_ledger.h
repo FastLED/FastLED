@@ -23,6 +23,7 @@ class RpResourceLedger {
     static constexpr u8 kMaxStateMachinesPerPio = 4;
     static constexpr u8 kMaxDmaChannels = 32;
     static constexpr u8 kMaxPins = 64;
+    static constexpr u8 kMaxUarts = 2;
 
     RpResourceLedger(u8 pio_blocks = kMaxPioBlocks,
                      u8 state_machines_per_pio = kMaxStateMachinesPerPio,
@@ -70,6 +71,23 @@ class RpResourceLedger {
         return channel < mDmaChannels && isBitClaimed(mDmaChannelsClaimed, channel);
     }
 
+    /// @brief Claim one of the RP2040/RP2350 hardware UART blocks.
+    ///
+    /// The SDK has no UART claim bit equivalent to PIO SM/DMA claims.  Keep
+    /// this ownership here so a FastLED UART lane cannot reconfigure a UART
+    /// concurrently used by another FastLED lane (or after partial rollback).
+    bool claimUart(u8 uart) FL_NO_EXCEPT {
+        return uart < kMaxUarts && claimBit(mUartsClaimed, uart);
+    }
+
+    bool releaseUart(u8 uart) FL_NO_EXCEPT {
+        return uart < kMaxUarts && releaseBit(mUartsClaimed, uart);
+    }
+
+    bool isUartClaimed(u8 uart) const FL_NO_EXCEPT {
+        return uart < kMaxUarts && isBitClaimed(mUartsClaimed, uart);
+    }
+
     bool claimPin(u8 pin) FL_NO_EXCEPT {
         return pin < mPins && claimBit(mPinsClaimed[pin / 32], pin % 32);
     }
@@ -87,6 +105,7 @@ class RpResourceLedger {
             mPioStateMachines[pio].store(0, memory_order_release);
         }
         mDmaChannelsClaimed.store(0, memory_order_release);
+        mUartsClaimed.store(0, memory_order_release);
         for (u8 word = 0; word < 2; ++word) {
             mPinsClaimed[word].store(0, memory_order_release);
         }
@@ -127,6 +146,7 @@ class RpResourceLedger {
     u8 mPins;
     atomic<u32> mPioStateMachines[kMaxPioBlocks];
     atomic<u32> mDmaChannelsClaimed;
+    atomic<u32> mUartsClaimed;
     atomic<u32> mPinsClaimed[2];
 };
 

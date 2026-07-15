@@ -98,6 +98,50 @@ class RpPioDmaResourceManager {
         mLedger.releaseDmaChannel(static_cast<u8>(channel));
     }
 
+    /// @brief Claim a hardware UART block and mirror it in the FastLED ledger.
+    ///
+    /// Pico SDK exposes no uart_claim_* API.  Serial ownership is therefore
+    /// coordinated exclusively under this manager's spinlock; callers must
+    /// release it before returning the UART to user code.
+    bool claimUart(u8 uart) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        return mLedger.claimUart(uart);
+    }
+
+    void releaseUart(u8 uart) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        mLedger.releaseUart(uart);
+    }
+
+    /// @brief Atomically acquire the complete UART TX resource set.
+    ///
+    /// A UART driver must not momentarily own only the UART block while a PIO
+    /// lane claims its pin (or vice versa).  This single critical section is
+    /// the UART equivalent of a transaction: UART ownership, GPIO ownership,
+    /// and an SDK DMA claim either all succeed or are rolled back here.
+    bool claimUartDmaAndPin(u8 uart, u8 pin, int* dma_channel_out) FL_NO_EXCEPT {
+        LockGuard lock(*this);
+        if (dma_channel_out == nullptr || !mLedger.claimUart(uart)) {
+            return false;
+        }
+        if (!mLedger.claimPin(pin)) {
+            mLedger.releaseUart(uart);
+            return false;
+        }
+        const int dma_channel = dma_claim_unused_channel(false);
+        if (dma_channel < 0 ||
+            !mLedger.claimDmaChannel(static_cast<u8>(dma_channel))) {
+            if (dma_channel >= 0) {
+                dma_channel_unclaim(static_cast<uint>(dma_channel));
+            }
+            mLedger.releasePin(pin);
+            mLedger.releaseUart(uart);
+            return false;
+        }
+        *dma_channel_out = dma_channel;
+        return true;
+    }
+
     bool claimPins(u8 first_pin, u8 count) FL_NO_EXCEPT {
         LockGuard lock(*this);
         for (u8 offset = 0; offset < count; ++offset) {

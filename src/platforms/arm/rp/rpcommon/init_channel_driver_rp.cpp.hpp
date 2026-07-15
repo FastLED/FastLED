@@ -30,6 +30,7 @@
 #include "platforms/shared/spi_hw_4.h"
 #include "platforms/shared/spi_hw_8.h"
 #include "platforms/arm/rp/rpcommon/init_channel_driver.h"
+#include "platforms/arm/rp/rpcommon/rp_uart_bus_traits.h"
 
 namespace fl {
 
@@ -131,6 +132,11 @@ void initChannelDrivers() {
 
     // Register true SPI hardware (priority 6-8)
     detail::addSpiHardwareIfPossible(manager);
+
+    // RP2040 has two PL011 UART blocks. They are explicit Bus::UART lanes;
+    // USB CDC remains the sketch/RPC transport and is never registered here.
+    BusTraits<Bus::UART, 0>::registerWithManager();
+    BusTraits<Bus::UART, 1>::registerWithManager();
 
     FL_DBG_F("RP2040/RP2350: Channel drivers initialized");
 }
