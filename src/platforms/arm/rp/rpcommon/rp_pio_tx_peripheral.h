@@ -32,6 +32,7 @@ class RpPioTxPeripheral final : public IRpPioTxPeripheral {
     int mDmaChannel;
     int mPin;
     int mProgramOffset;
+    u8 mLaneCount;
     u8 mPioIndex;
     ProgramStorage* mProgram;
     bool mInitialized;

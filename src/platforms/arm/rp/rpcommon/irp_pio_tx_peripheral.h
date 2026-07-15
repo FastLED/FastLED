@@ -14,6 +14,7 @@ namespace fl {
 
 struct RpPioTxConfig {
     u8 tx_pin = 0;
+    u8 lane_count = 1;
     ChipsetTimingConfig timing;
 };
 

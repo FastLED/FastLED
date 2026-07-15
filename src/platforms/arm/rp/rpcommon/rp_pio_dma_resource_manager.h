@@ -144,7 +144,7 @@ class RpPioDmaResourceManager {
 
     /// @brief Atomically claim one PIO state machine, DMA channel, and GPIO.
     bool claimPioDmaAndPin(PIO* pio_out, int* state_machine_out,
-                           int* dma_channel_out, u8 pin,
+                           int* dma_channel_out, u8 pin, u8 pin_count,
                            u8 pio_index) FL_NO_EXCEPT {
         LockGuard lock(*this);
         if (pio_out == nullptr || state_machine_out == nullptr ||
@@ -159,7 +159,7 @@ class RpPioDmaResourceManager {
             pio_sm_unclaim(claimed_pio, static_cast<uint>(claimed_sm));
             return false;
         }
-        if (claimed_sm < 0 || !mLedger.claimPin(pin)) {
+        if (claimed_sm < 0) {
             if (claimed_sm >= 0) {
                 pio_sm_unclaim(claimed_pio, static_cast<uint>(claimed_sm));
                 mLedger.releasePioStateMachine(static_cast<u8>(pioIndex(claimed_pio)),
@@ -167,10 +167,21 @@ class RpPioDmaResourceManager {
             }
             return false;
         }
+        u8 claimed_pins = 0;
+        while (claimed_pins < pin_count && mLedger.claimPin(pin + claimed_pins)) {
+            ++claimed_pins;
+        }
+        if (claimed_pins != pin_count) {
+            while (claimed_pins > 0) mLedger.releasePin(pin + --claimed_pins);
+            pio_sm_unclaim(claimed_pio, static_cast<uint>(claimed_sm));
+            mLedger.releasePioStateMachine(static_cast<u8>(pioIndex(claimed_pio)),
+                                           static_cast<u8>(claimed_sm));
+            return false;
+        }
         const int dma = dma_claim_unused_channel(false);
         if (dma < 0 || !mLedger.claimDmaChannel(static_cast<u8>(dma))) {
             if (dma >= 0) dma_channel_unclaim(static_cast<uint>(dma));
-            mLedger.releasePin(pin);
+            for (u8 offset = 0; offset < pin_count; ++offset) mLedger.releasePin(pin + offset);
             pio_sm_unclaim(claimed_pio, static_cast<uint>(claimed_sm));
             mLedger.releasePioStateMachine(static_cast<u8>(pioIndex(claimed_pio)),
                                            static_cast<u8>(claimed_sm));

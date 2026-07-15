@@ -77,13 +77,20 @@ FL_TEST_CASE("RP PIO TX waits for terminal state after DMA") {
     engine.enqueue(channel);
     engine.show();
     FL_REQUIRE(channel->isInUse());
-    FL_CHECK_EQ(peripheral->wordCount, static_cast<size_t>(4));
+    FL_CHECK_EQ(peripheral->wordCount, static_cast<size_t>(32));
     FL_CHECK_EQ(peripheral->firstWord, 0x00000000u);
-    FL_REQUIRE_EQ(peripheral->capturedWords.size(), static_cast<size_t>(4));
+    FL_REQUIRE_EQ(peripheral->capturedWords.size(), static_cast<size_t>(32));
     FL_CHECK_EQ(peripheral->capturedWords[0], 0x00000000u);
-    FL_CHECK_EQ(peripheral->capturedWords[1], 0xFF000000u);
-    FL_CHECK_EQ(peripheral->capturedWords[2], 0xAA000000u);
-    FL_CHECK_EQ(peripheral->capturedWords[3], 0x55000000u);
+    for (size_t index = 0; index < 8; ++index) {
+        FL_CHECK_EQ(peripheral->capturedWords[index], 0u); // 0x00
+        FL_CHECK_EQ(peripheral->capturedWords[8 + index], 0x80000000u); // 0xFF
+    }
+    FL_CHECK_EQ(peripheral->capturedWords[16], 0x80000000u); // 0xAA MSB
+    FL_CHECK_EQ(peripheral->capturedWords[17], 0u);
+    FL_CHECK_EQ(peripheral->capturedWords[18], 0x80000000u);
+    FL_CHECK_EQ(peripheral->capturedWords[19], 0u);
+    FL_CHECK_EQ(peripheral->capturedWords[24], 0u); // 0x55 MSB
+    FL_CHECK_EQ(peripheral->capturedWords[25], 0x80000000u);
     FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);
     peripheral->dmaBusy = false;
     FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::DRAINING);
@@ -123,7 +130,7 @@ FL_TEST_CASE("RP PIO TX rejects a failed second queued start") {
     fl::vector_psram<u8> bytes;
     bytes.push_back(0x42);
     auto first = makeChannel(5, bytes);
-    auto second = makeChannel(6, bytes);
+    auto second = makeChannel(7, bytes); // non-consecutive: must serialize
     engine.enqueue(first);
     engine.enqueue(second);
     engine.show();
@@ -135,6 +142,52 @@ FL_TEST_CASE("RP PIO TX rejects a failed second queued start") {
     FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::ERROR);
     FL_CHECK_FALSE(first->isInUse());
     FL_CHECK_FALSE(second->isInUse());
+}
+
+FL_TEST_CASE("RP PIO TX batches only equal-length consecutive compatible lanes") {
+    auto peripheral = fl::make_shared<PioTxMock>();
+    ChannelEngineRpPio engine(peripheral, 0);
+    fl::vector_psram<u8> leftBytes;
+    leftBytes.push_back(0x80);
+    fl::vector_psram<u8> rightBytes;
+    rightBytes.push_back(0x00);
+    auto left = makeChannel(10, leftBytes);
+    auto right = makeChannel(11, rightBytes);
+    engine.enqueue(left);
+    engine.enqueue(right);
+    engine.show();
+    FL_REQUIRE_EQ(peripheral->lastConfig.tx_pin, 10);
+    FL_REQUIRE_EQ(peripheral->lastConfig.lane_count, 2);
+    FL_REQUIRE_EQ(peripheral->capturedWords.size(), static_cast<size_t>(8));
+    // Lane 0 occupies the most-significant emitted bit and lane 1 the next.
+    FL_CHECK_EQ(peripheral->capturedWords[0], 0x80000000u);
+    for (size_t index = 1; index < peripheral->capturedWords.size(); ++index) {
+        FL_CHECK_EQ(peripheral->capturedWords[index], 0u);
+    }
+    peripheral->dmaBusy = false;
+    peripheral->terminal = true;
+    FL_REQUIRE_EQ(engine.poll(), IChannelDriver::DriverState::DRAINING);
+    peripheral->timeUs += 1000;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(left->isInUse());
+    FL_CHECK_FALSE(right->isInUse());
+}
+
+FL_TEST_CASE("RP PIO TX selects four and eight lane batches only for full runs") {
+    for (u8 lanes = 4; lanes <= 8; lanes = static_cast<u8>(lanes * 2)) {
+        auto peripheral = fl::make_shared<PioTxMock>();
+        ChannelEngineRpPio engine(peripheral, 1);
+        fl::vector_psram<u8> bytes;
+        bytes.push_back(0xFF);
+        for (u8 lane = 0; lane < lanes; ++lane) {
+            engine.enqueue(makeChannel(12 + lane, bytes));
+        }
+        engine.show();
+        FL_CHECK_EQ(peripheral->lastConfig.lane_count, lanes);
+        FL_CHECK_EQ(peripheral->capturedWords.size(), static_cast<size_t>(8));
+        FL_CHECK_EQ(peripheral->capturedWords[0],
+                    ((1u << lanes) - 1u) << (32u - lanes));
+    }
 }
 
 }  // FL_TEST_FILE
