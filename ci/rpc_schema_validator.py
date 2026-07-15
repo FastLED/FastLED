@@ -13,7 +13,7 @@ Usage:
     try:
         validator.validate_request('runSingleTest', {'driver': 'PARLIO', 'laneSizes': [10]})
         # Send request to device...
-    except ValidationError as e:
+    except ValueError as e:
         print(f"Invalid request: {e}")
 """
 
@@ -22,7 +22,7 @@ import time
 from typing import Any, Optional, cast
 
 import serial
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
@@ -48,6 +48,60 @@ class RpcSchema(BaseModel):
 
     jsonrpc: str
     methods: dict[str, MethodInfo]
+
+
+def parse_rpc_schema(result: Any) -> RpcSchema:
+    """Normalize supported ``rpc.discover`` results into ``RpcSchema``.
+
+    FastLED devices use a compact tuple representation to keep embedded
+    serialization costs low::
+
+        {"schema": [[name, return_type, [[param, type], ...], mode], ...]}
+
+    Keep accepting the older expanded representation so the host harness can
+    validate firmware on either side of the schema-format migration.
+    """
+    if not isinstance(result, dict):
+        raise ValueError("rpc.discover result must be an object")
+
+    if "methods" in result:
+        return RpcSchema.model_validate(result)
+
+    compact_methods = result.get("schema")
+    if not isinstance(compact_methods, list):
+        raise ValueError("rpc.discover result has neither 'methods' nor 'schema'")
+
+    methods: dict[str, MethodInfo] = {}
+    for index, method in enumerate(compact_methods):
+        if not isinstance(method, list) or len(method) < 3:
+            raise ValueError(f"schema entry {index} must contain name, return type, and params")
+
+        name, return_type, compact_params = method[:3]
+        if not isinstance(name, str) or not name:
+            raise ValueError(f"schema entry {index} has an invalid method name")
+        if name in methods:
+            raise ValueError(f"schema contains duplicate method '{name}'")
+        if not isinstance(return_type, str):
+            raise ValueError(f"schema entry {index} has an invalid return type")
+        if not isinstance(compact_params, list):
+            raise ValueError(f"schema entry {index} has invalid params")
+
+        params: list[ParamInfo] = []
+        for param_index, param in enumerate(compact_params):
+            if not isinstance(param, list) or len(param) < 2:
+                raise ValueError(
+                    f"schema entry {index} param {param_index} must contain name and type"
+                )
+            param_name, param_type = param[:2]
+            if not isinstance(param_name, str) or not isinstance(param_type, str):
+                raise ValueError(
+                    f"schema entry {index} param {param_index} has invalid name or type"
+                )
+            params.append(ParamInfo(name=param_name, type=param_type))
+
+        methods[name] = MethodInfo(returnType=return_type, params=params)
+
+    return RpcSchema(jsonrpc="2.0", methods=methods)
 
 
 class RpcSchemaValidator:
@@ -107,7 +161,7 @@ class RpcSchemaValidator:
                             response = json.loads(json_str)
 
                             if "result" in response:
-                                self.schema = RpcSchema(**response["result"])
+                                self.schema = parse_rpc_schema(response["result"])
                                 print(
                                     f"✅ Fetched schema: {len(self.schema.methods)} methods"
                                 )
@@ -140,7 +194,7 @@ class RpcSchemaValidator:
             args: Method arguments (object or array)
 
         Raises:
-            ValidationError: If request doesn't match schema
+            ValueError: If request doesn't match schema
             KeyError: If method not found in schema
         """
         if not self.schema:
@@ -153,12 +207,21 @@ class RpcSchemaValidator:
 
         method_info = self.schema.methods[method]
 
+        # Most FastLED handlers intentionally accept one opaque ``const json&``
+        # payload. The compact device schema represents that as arg0:unknown;
+        # it proves the method exists but cannot describe the payload's keys.
+        if len(method_info.params) == 1:
+            only_param = method_info.params[0]
+            if only_param.name == "arg0" and only_param.type == "unknown":
+                return
+
+        if not method_info.params and args in (None, [], {}):
+            return
+
         # Validate against expected parameters
         # Note: The RPC system unwraps single-element arrays, so we validate the object directly
         if not isinstance(args, dict):
-            raise ValidationError(
-                f"Expected object for {method}, got {type(args).__name__}"
-            )
+            raise ValueError(f"Expected object for {method}, got {type(args).__name__}")
 
         # Type narrowing: after isinstance check, args is guaranteed to be dict
         args_dict = cast(dict[str, Any], args)
@@ -178,9 +241,7 @@ class RpcSchemaValidator:
             errors.append(f"Unknown parameters: {extra}")
 
         if errors:
-            raise ValidationError(
-                f"Validation errors for {method}: {'; '.join(errors)}"
-            )
+            raise ValueError(f"Validation errors for {method}: {'; '.join(errors)}")
 
     def get_method_schema(self, method: str) -> MethodInfo:
         """Get schema for a specific method"""
@@ -229,7 +290,7 @@ def main():
                 {"driver": "PARLIO", "laneSizes": [10], "iterations": 1},
             )
             print("  ✅ Valid request")
-        except ValidationError as e:
+        except ValueError as e:
             print(f"  ❌ Invalid request: {e}")
 
     except KeyboardInterrupt as ki:
