@@ -5,7 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.5.1 (released 2026-07-13).
+    # Pin to fbuild 2.5.2 (released 2026-07-15). This includes the RP2040
+    # UF2 deploy-path handling required by AutoResearch hardware validation.
     #
     # Pin history:
     #   2.5.1 -- upgrades PyO3 to 0.29 and fixes duplicate objc dylib
@@ -152,7 +153,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.1",
+    "fbuild==2.5.2",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
