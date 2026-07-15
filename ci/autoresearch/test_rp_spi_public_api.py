@@ -34,7 +34,7 @@ def main() -> int:
                 if not result.get("success") or not isinstance(data, dict):
                     print(f"FAIL — {pattern}: {result}")
                     return 1
-                if data.get("frameBytes") != 144 or data.get("wireIdle") is not True:
+                if data.get("frameBytes") != 1068 or data.get("wireIdle") is not True:
                     print(f"FAIL — {pattern}: malformed frame evidence {data}")
                     return 1
                 print(

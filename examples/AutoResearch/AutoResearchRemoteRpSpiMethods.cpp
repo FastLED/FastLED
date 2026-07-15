@@ -117,8 +117,8 @@ template <bool Sk9822>
 fl::json runPublicApiLoopback(int pattern) {
     constexpr fl::u8 kMosiPin = 11;
     constexpr fl::u8 kSckPin = 10;
-    constexpr size_t kLedCount = 33;
-    constexpr size_t kFrameBytes = 4 + (kLedCount * 4) + 8;
+    constexpr size_t kLedCount = 257;
+    constexpr size_t kFrameBytes = 4 + (kLedCount * 4) + 36;
     static CRGB leds[kLedCount];
     static bool initialized = false;
     fl::json response = fl::json::object();
