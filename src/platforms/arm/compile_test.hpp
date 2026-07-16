@@ -101,7 +101,11 @@ static void arm_compile_tests() {
     #error "RP2040 platforms should have FASTLED_ALLOW_INTERRUPTS set to 1"
     #endif
     #ifdef FASTLED_FORCE_SOFTWARE_SPI
-    // RP2040 forces software SPI - this is expected
+    // The legacy SPI manager remains software-only; public SPI chipsets use
+    // the channel API instead.
+    #endif
+    #if FASTLED_SPI_USES_CHANNEL_API != 1
+    #error "RP2040 public SPI chipsets must use the Channel API"
     #endif
 #endif
 

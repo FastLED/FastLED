@@ -33,7 +33,11 @@
 // - RP2040: Cortex-M0+ → defined in led_sysdefs_arm_rp2040.h
 // - RP2350: Cortex-M33 → NOT defined (uses compiler's __ARM_ARCH_8M_MAIN__)
 
-// TODO: PORT SPI TO HW
+// The legacy SPIOutput template remains software-only on RP2xxx. Public
+// APA102/SK9822 addLeds() calls are routed through the RP channel API by
+// FASTLED_SPI_USES_CHANNEL_API and use ChannelEngineRpSpi with PL022 SPI0/1.
+// Keep this define for callers that explicitly use the legacy SPI manager;
+// removing it would silently select an unimplemented legacy hardware backend.
 //#define FASTLED_SPI_BYTE_ONLY
 #define FASTLED_FORCE_SOFTWARE_SPI
 // Force FAST_SPI_INTERRUPTS_WRITE_PINS on becuase two cores running
