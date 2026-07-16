@@ -1651,6 +1651,9 @@ def generate_manifest(example_name: str, output_dir: Path) -> None:
     )
     data_files: list[dict[str, str | int]] = []
     _SKIP = frozenset(("fastled_js", ".build"))
+    # clangd/editor integration artifacts (`fastled --write-clangd`, IDE
+    # setups) that match data extensions but must never ship as sketch data.
+    _SKIP_FILES = frozenset(("compile_commands.json",))
 
     # Use os.scandir with directory pruning — avoids walking fastled_js/ and .build/
     # On Windows, DirEntry.stat() reuses FindFirstFile data (no extra syscall)
@@ -1666,9 +1669,18 @@ def generate_manifest(example_name: str, output_dir: Path) -> None:
                 for entry in it:
                     try:
                         if entry.is_dir(follow_symlinks=False):
-                            if entry.name not in _SKIP:
+                            # Prune hidden dirs (.vscode, .build variants) in
+                            # addition to the explicit skip list.
+                            if entry.name not in _SKIP and not entry.name.startswith(
+                                "."
+                            ):
                                 stack.append(entry.path)
                         elif entry.is_file(follow_symlinks=False):
+                            # IDE/tooling artifacts live next to the .ino but
+                            # are not sketch data: listing them makes the
+                            # frontend fetch (and 404) them at runtime.
+                            if entry.name.startswith(".") or entry.name in _SKIP_FILES:
+                                continue
                             _, ext = os.path.splitext(entry.name)
                             if ext.lower() in data_extensions:
                                 rel_path = entry.path[example_len:]
