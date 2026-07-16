@@ -52,16 +52,15 @@
 // inverter, active high.
 #define PIN_EL_INNER 5
 #define PIN_EL_OUTER 6
+#define PIN_EL_WIRE 10
 
 // EL inverters must be gated slowly - low-frequency PWM at 50 Hz.
 #define EL_PWM_FREQ_HZ 50
 
-// On-screen preview (WASM) and optional debug strip (hardware): a single
-// WS2812 run laid out as an inner disc plus an outer ring.
+// On-screen preview (WASM) and optional debug strip (hardware): one channel
+// per geometry-native EL output.
 #define PIN_PREVIEW 3
-#define INNER_PREVIEW_LEDS 12
-#define OUTER_PREVIEW_LEDS 24
-#define NUM_PREVIEW_LEDS (INNER_PREVIEW_LEDS + OUTER_PREVIEW_LEDS)
+#define NUM_PREVIEW_LEDS 3
 
 // ---------------------------------------------------------------------------
 // EL panel drive: 50 Hz low-frequency PWM through the fl pin API
@@ -75,19 +74,23 @@ void initPanels() {
 #ifndef __EMSCRIPTEN__
     fl::pinMode(PIN_EL_INNER, fl::PinMode::Output);
     fl::pinMode(PIN_EL_OUTER, fl::PinMode::Output);
+    fl::pinMode(PIN_EL_WIRE, fl::PinMode::Output);
     fl::setPwmFrequency(PIN_EL_INNER, EL_PWM_FREQ_HZ);
     fl::setPwmFrequency(PIN_EL_OUTER, EL_PWM_FREQ_HZ);
+    fl::setPwmFrequency(PIN_EL_WIRE, EL_PWM_FREQ_HZ);
     fl::analogWrite(PIN_EL_INNER, 0);
     fl::analogWrite(PIN_EL_OUTER, 0);
+    fl::analogWrite(PIN_EL_WIRE, 0);
 #endif
 }
 
-void writePanels(uint8_t innerDuty, uint8_t outerDuty) {
+void writePanels(uint8_t innerDuty, uint8_t wireDuty, uint8_t outerDuty) {
 #ifndef __EMSCRIPTEN__
     // Skip rewrites of an unchanged duty: the 50 Hz PWM only latches a new
     // value once per 20 ms period anyway.
     static int lastInner = -1;
     static int lastOuter = -1;
+    static int lastWire = -1;
     if (innerDuty != lastInner) {
         fl::analogWrite(PIN_EL_INNER, innerDuty);
         lastInner = innerDuty;
@@ -96,8 +99,13 @@ void writePanels(uint8_t innerDuty, uint8_t outerDuty) {
         fl::analogWrite(PIN_EL_OUTER, outerDuty);
         lastOuter = outerDuty;
     }
+    if (wireDuty != lastWire) {
+        fl::analogWrite(PIN_EL_WIRE, wireDuty);
+        lastWire = wireDuty;
+    }
 #else
     FASTLED_UNUSED(innerDuty);
+    FASTLED_UNUSED(wireDuty);
     FASTLED_UNUSED(outerDuty);
 #endif
 }
@@ -129,17 +137,19 @@ fl::UISlider fadeSeconds("Panel Fade Seconds", 0.25f, 0.05f, 2.0f, 0.05f);
 float gInnerLevel = 0.0f;
 float gOuterLevel = 0.0f;
 
-// Preview layout: inner disc at radius 14, outer ring at radius 40.
-fl::ScreenMap previewMap =
-    fl::ScreenMap(NUM_PREVIEW_LEDS, 0.5f, [](int index, fl::vec2f &pt_out) {
-        const bool isInner = index < INNER_PREVIEW_LEDS;
-        const int count = isInner ? INNER_PREVIEW_LEDS : OUTER_PREVIEW_LEDS;
-        const int i = isInner ? index : index - INNER_PREVIEW_LEDS;
-        const float radius = isInner ? 14.0f : 40.0f;
-        const float angle = (float(i) / float(count)) * 2.0f * FL_M_PI;
-        pt_out.x = 50.0f + radius * fl::cos(angle);
-        pt_out.y = 50.0f + radius * fl::sin(angle);
-    });
+// Preview layout: two filled triangular EL panels and one thick EL wire.
+fl::ScreenMap makePreviewMap() {
+    fl::ScreenMap map(NUM_PREVIEW_LEDS, 0.5f);
+    const fl::vec2f left[] = {{30.0f, 50.0f}, {10.0f, 25.0f}, {10.0f, 75.0f}};
+    const fl::vec2f wire[] = {{42.0f, 50.0f}, {58.0f, 50.0f}};
+    const fl::vec2f right[] = {{70.0f, 50.0f}, {90.0f, 25.0f}, {90.0f, 75.0f}};
+    map.setShape(0, fl::ScreenMap::Shape::EL_PANEL, left, 3);
+    map.setShape(1, fl::ScreenMap::Shape::EL_WIRE, wire, 2, 5.0f);
+    map.setShape(2, fl::ScreenMap::Shape::EL_PANEL, right, 3);
+    return map;
+}
+
+fl::ScreenMap previewMap = makePreviewMap();
 
 // Raise a panel envelope when a bass spike crosses its threshold. Intensity
 // scales with how far the beat lands above the threshold, with a floor so
@@ -218,12 +228,13 @@ void loop() {
         // Drive the EL panels: envelope -> 50 Hz PWM duty.
         const uint8_t innerDuty = uint8_t(gInnerLevel * 255.0f);
         const uint8_t outerDuty = uint8_t(gOuterLevel * 255.0f);
-        writePanels(innerDuty, outerDuty);
+        const uint8_t wireDuty = uint8_t(((gInnerLevel + gOuterLevel) * 0.5f) * 255.0f);
+        writePanels(innerDuty, wireDuty, outerDuty);
 
         // Preview: inner disc = aqua (sensitive), outer ring = ice blue (loud).
-        fill_solid(previewLeds, INNER_PREVIEW_LEDS, CHSV(128, 200, innerDuty));
-        fill_solid(previewLeds + INNER_PREVIEW_LEDS, OUTER_PREVIEW_LEDS,
-                   CHSV(160, 80, outerDuty));
+        previewLeds[0] = CRGB(innerDuty, 0, 0);
+        previewLeds[1] = CRGB(0, wireDuty, 0);
+        previewLeds[2] = CRGB(0, 0, outerDuty);
 
         FastLED.show(); // audio is auto-pumped here
     }

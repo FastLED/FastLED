@@ -17,6 +17,10 @@ export interface StripData {
     y: number[];
   };
   diameter?: number;
+  type?: 'el_wire' | 'el_panel';
+  vertices_x?: number[];
+  vertices_y?: number[];
+  thickness?: number;
 }
 
 export interface ScreenMapData {

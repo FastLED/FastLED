@@ -156,8 +156,14 @@ def inject_ar_optimization_patches(build_dir: Path, source_dir: Path) -> bool:
     Returns:
         True if both patches are active after this call, False if not applicable
     """
-    ar_wrapper_script = source_dir / "ci" / "meson" / "ar_content_preserving.py"
-    build_ninja_path = build_dir / "build.ninja"
+    # Ninja runs archive commands with the build directory as cwd. Keep the
+    # wrapper absolute even when the caller supplied a relative source/build
+    # path; otherwise Ninja resolves it under `.build/meson-quick/ci/meson`
+    # and the first archive link fails before tests can start (FastLED#3693).
+    ar_wrapper_script = (
+        source_dir / "ci" / "meson" / "ar_content_preserving.py"
+    ).resolve()
+    build_ninja_path = (build_dir / "build.ninja").resolve()
 
     if not ar_wrapper_script.exists() or not build_ninja_path.exists():
         return False

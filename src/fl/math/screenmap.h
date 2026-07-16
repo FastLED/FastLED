@@ -5,6 +5,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/vector.h"
 /* Screenmap maps strip indexes to x,y coordinates. This is used for FastLED Web
  * to map the 1D strip to a 2D screen. Note that the strip can have arbitrary
  * size. this was first motivated by the effort to port theChromancer project to
@@ -37,6 +38,11 @@ using XYMapPtr = shared_ptr<XYMap>;
 // This class is cheap to copy as it uses smart pointers for shared data.
 class ScreenMap {
   public:
+    struct Shape {
+        enum Type { EL_WIRE, EL_PANEL } type;
+        fl::vector<vec2f> vertices;
+        float thickness = 0.0f;
+    };
     static ScreenMap Circle(int numLeds, float cm_between_leds = 1.5f,
                             float cm_led_diameter = 0.5f,
                             float completion = 1.0f) FL_NO_EXCEPT;
@@ -91,6 +97,12 @@ class ScreenMap {
     // Get the bounding box of all points in the screen map
     vec2f getBounds() const FL_NO_EXCEPT;
 
+    void setShape(u32 index, Shape::Type type, const vec2f *vertices, u32 count,
+                  float thickness = 0.0f) FL_NO_EXCEPT;
+    bool hasShapes() const FL_NO_EXCEPT;
+    u32 getShapeCount() const FL_NO_EXCEPT;
+    const Shape &getShape(u32 index) const FL_NO_EXCEPT;
+
     static bool ParseJson(const char *jsonStrScreenMap,
                           fl::flat_map<string, ScreenMap> *segmentMaps,
                           string *err = nullptr) FL_NO_EXCEPT;
@@ -125,6 +137,7 @@ class ScreenMap {
     float mDiameter = -1.0f; // Only serialized if it's not > 0.0f.
     LUTXYFLOATPtr mLookUpTable;
     XYMapPtr mSourceXYMap;  // Optional: source XYMap for encoding pipeline
+    fl::vector<Shape> mShapes;
 };
 
 } // namespace fl
