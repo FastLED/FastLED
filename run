@@ -3,7 +3,7 @@ set -e
 
 cd "$(dirname "$0")"
 
-# bash run wasm <example_name> - Compile WASM example and serve with live-server
+# bash run wasm <example_name> - Compile WASM example and serve with isolation
 # Example: bash run wasm AnimartrixRing
 
 if [ $# -eq 0 ]; then
@@ -49,15 +49,7 @@ if [ $COMPILE_EXIT -ne 0 ]; then
     exit $COMPILE_EXIT
 fi
 
-# Step 2: Check if live-server is installed
-if ! command -v live-server &> /dev/null; then
-    echo ""
-    echo "Error: live-server not found"
-    echo "Install it with: npm install -g live-server"
-    exit 1
-fi
-
-# Step 3: Serve with live-server
+# Step 3: Serve with the COOP/COEP headers required by WASM pthreads.
 OUTPUT_DIR="examples/${EXAMPLE_NAME}/fastled_js"
 
 if [ ! -d "$OUTPUT_DIR" ]; then
@@ -71,8 +63,8 @@ echo "=========================================="
 echo "Step 2: Serving ${OUTPUT_DIR}"
 echo "=========================================="
 echo ""
-echo "Starting live-server..."
+echo "Starting cross-origin-isolated WASM server..."
 echo "Press Ctrl+C to stop"
 echo ""
 
-live-server "$OUTPUT_DIR"
+uv run python ci/wasm_server.py "$OUTPUT_DIR"
