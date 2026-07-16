@@ -33,7 +33,11 @@ template <
 	fl::u32 SPI_SPEED = DATA_RATE_MHZ(6),
 	fl::FiveBitGammaCorrectionMode GAMMA_CORRECTION_MODE = fl::FiveBitGammaCorrectionMode::kFiveBitGammaCorrectionMode_Null,
 	fl::u32 START_FRAME = 0x00000000,
-	fl::u32 END_FRAME = 0xFF000000
+	// The vendor datasheet requires all ones for the end clocks. These clocks
+	// shift the final LED frame through a long cascade; a zero (or partial)
+	// end frame is not a substitute because it can be misread as a start
+	// frame. Matches encodeAPA102()/encodeSK9822() in fl/chipsets/encoders/.
+	fl::u32 END_FRAME = 0xFFFFFFFF
 >
 class APA102Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef fl::SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
@@ -265,6 +269,14 @@ public:
 		// - End frame: (num_leds / 32) + 1 DWords = 4 * ((num_leds / 32) + 1) bytes
 		return 4 + (num_leds * 4) + (4 * ((num_leds / 32) + 1));
 	}
+
+	/// Get the configured start frame DWord.
+	/// @returns the raw START_FRAME template value
+	static constexpr fl::u32 getStartFrame() { return START_FRAME; }
+
+	/// Get the configured end frame DWord.
+	/// @returns the raw END_FRAME template value
+	static constexpr fl::u32 getEndFrame() { return END_FRAME; }
 };
 
 /// APA102 high definition controller class.
@@ -290,13 +302,13 @@ class APA102ControllerHD : public APA102Controller<
 	SPI_SPEED,
 	fl::FiveBitGammaCorrectionMode::kFiveBitGammaCorrectionMode_BitShift,
 	fl::u32(0x00000000),
-	fl::u32(0x00000000)> {
+	fl::u32(0xFFFFFFFF)> {
 public:
   APA102ControllerHD() FL_NO_EXCEPT = default;
   APA102ControllerHD(const APA102ControllerHD&) FL_NO_EXCEPT = delete;
 };
 
-/// SK9822 controller class. It's exactly the same as the APA102Controller protocol but with a different END_FRAME and default SPI_SPEED.
+/// SK9822 controller class. It's exactly the same as the APA102Controller protocol but with a different default SPI_SPEED.
 /// @tparam DATA_PIN the data pin for these LEDs
 /// @tparam CLOCK_PIN the clock pin for these LEDs
 /// @tparam RGB_ORDER the RGB ordering for these LEDs
@@ -314,11 +326,11 @@ class SK9822Controller : public APA102Controller<
 	SPI_SPEED,
 	fl::FiveBitGammaCorrectionMode::kFiveBitGammaCorrectionMode_Null,
 	0x00000000,
-	0x00000000
+	0xFFFFFFFF
 > {
 };
 
-/// SK9822 controller class. It's exactly the same as the APA102Controller protocol but with a different END_FRAME and default SPI_SPEED.
+/// SK9822 controller class. It's exactly the same as the APA102Controller protocol but with a different default SPI_SPEED.
 /// @tparam DATA_PIN the data pin for these LEDs
 /// @tparam CLOCK_PIN the clock pin for these LEDs
 /// @tparam RGB_ORDER the RGB ordering for these LEDs
@@ -336,7 +348,7 @@ class SK9822ControllerHD : public APA102Controller<
 	SPI_SPEED,
 	fl::FiveBitGammaCorrectionMode::kFiveBitGammaCorrectionMode_BitShift,
 	0x00000000,
-	0x00000000
+	0xFFFFFFFF
 > {
 };
 
@@ -354,7 +366,7 @@ class HD107Controller : public APA102Controller<
 	SPI_SPEED,
 	fl::FiveBitGammaCorrectionMode::kFiveBitGammaCorrectionMode_Null,
 	0x00000000,
-	0x00000000
+	0xFFFFFFFF
 > {};
 
 /// HD107HD is just the APA102HD with a default 40Mhz clock rate.

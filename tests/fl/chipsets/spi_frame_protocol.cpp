@@ -3,6 +3,7 @@
 
 #include "test.h"
 
+#include "fl/chipsets/apa102.h"
 #include "fl/chipsets/encoders/apa102.h"
 #include "fl/chipsets/encoders/sk9822.h"
 #include "fl/stl/array.h"
@@ -98,6 +99,37 @@ FL_TEST_CASE("Auto-brightness encoders keep an empty public frame complete") {
     encodeSK9822_AutoBrightness(empty.begin(), empty.end(), fl::back_inserter(sk));
     checkFrame(apa, 0, 31);
     checkFrame(sk, 0, 31);
+}
+
+FL_TEST_CASE("Legacy addLeds controllers use all-ones end clocks matching the encoder contract") {
+    // The channel-engine encoders above emit an all-ones (0xFFFFFFFF) end
+    // clock DWord per #3669. The legacy addLeds<> controller templates must
+    // agree, or a long SK9822/APA102 cascade driven through the classic path
+    // gets an end frame that can be misread as a new start frame (#3682).
+    using Apa102 = APA102Controller<2, 3>;
+    using Apa102HD = APA102ControllerHD<2, 3>;
+    using Sk9822 = SK9822Controller<2, 3>;
+    using Sk9822HD = SK9822ControllerHD<2, 3>;
+    using Hd107 = HD107Controller<2, 3>;
+    using Hd107HD = HD107HDController<2, 3>;
+
+    FL_CHECK_EQ(Apa102::getStartFrame(), 0x00000000u);
+    FL_CHECK_EQ(Apa102::getEndFrame(), 0xFFFFFFFFu);
+
+    FL_CHECK_EQ(Apa102HD::getStartFrame(), 0x00000000u);
+    FL_CHECK_EQ(Apa102HD::getEndFrame(), 0xFFFFFFFFu);
+
+    FL_CHECK_EQ(Sk9822::getStartFrame(), 0x00000000u);
+    FL_CHECK_EQ(Sk9822::getEndFrame(), 0xFFFFFFFFu);
+
+    FL_CHECK_EQ(Sk9822HD::getStartFrame(), 0x00000000u);
+    FL_CHECK_EQ(Sk9822HD::getEndFrame(), 0xFFFFFFFFu);
+
+    FL_CHECK_EQ(Hd107::getStartFrame(), 0x00000000u);
+    FL_CHECK_EQ(Hd107::getEndFrame(), 0xFFFFFFFFu);
+
+    FL_CHECK_EQ(Hd107HD::getStartFrame(), 0x00000000u);
+    FL_CHECK_EQ(Hd107HD::getEndFrame(), 0xFFFFFFFFu);
 }
 
 }  // FL_TEST_FILE
