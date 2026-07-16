@@ -48,13 +48,16 @@ jobs:
       fail-fast: false
       matrix:
         # Representative cross-section: ESP32 (toolchain via pioarduino),
-        # Teensy 4.x (ARM EABI), and a tiny AVR (avr-gcc). One example
-        # per board to keep the run cost bounded.
+        # Teensy 4.x (ARM EABI), and a tiny AVR (avr-gcc). The Teensy pair
+        # keeps both the minimal-size baseline and the Audio LDF/link path
+        # covered on the same board.
         include:
           - board: esp32dev
             example: Blink
-          - board: teensy40
+          - board: teensy41
             example: Blink
+          - board: teensy41
+            example: AudioInput
           - board: uno
             example: Blink
     steps:
