@@ -112,7 +112,7 @@ bool RpPioRxDevice::begin(const RxConfig& config) FL_NO_EXCEPT {
         mLastBeginError = "dma_buffer_size";
         return false;
     }
-    pio_instr* instructions = reinterpret_cast<pio_instr*>(mProgramInstructions); // ok reinterpret cast
+    pio_instr* instructions = mProgramInstructions; // pio_instr is u16
     buildPioRxSampleProgram(instructions, config.start_low);
     const pio_program program = makePioRxDurationProgram(instructions);
     auto& resources = RpPioDmaResourceManager::instance();
