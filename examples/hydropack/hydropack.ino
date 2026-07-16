@@ -12,8 +12,9 @@
 //   - triangles: loud - fire only on a substantially stronger transient
 //
 // The output is gated by calibrated sound pressure and an adaptive bass beat.
-// This keeps ordinary conversation and random noise dark without waiting for
-// a tempo lock before the first visible musical hit.
+// A short music-presence latch needs two bass beats and rejects high-ZCF hiss,
+// keeping ordinary conversation and isolated noise dark without a rigid BPM
+// lock before every visible musical hit.
 // Once music is established, FastLED's Vibe detector tracks its running bass
 // average; relative bass energy is about 1.0 at the current average. A loud
 // hit lights the center, then launches into the triangles.
@@ -43,6 +44,10 @@ constexpr uint8_t kRightTriangleStart = 12;
 constexpr uint8_t kPreviewLedCount = 18;
 constexpr uint32_t kTriangleLaunchDelayMs = 5;
 constexpr float kDefaultStageThresholdDbSpl = 80.0f;
+constexpr uint8_t kMusicBeatsToActivate = 2;
+constexpr uint32_t kMusicBeatWindowMs = 1600;
+constexpr uint32_t kMusicHoldMs = 2000;
+constexpr float kMaximumMusicZcf = 0.40f;
 
 CRGB previewLeds[kPreviewLedCount];
 
@@ -76,9 +81,9 @@ fl::UIAudio audioUi("Audio Input", audioConfig);
 
 fl::UITitle title("HydroPack Stage Music Launch");
 fl::UIDescription description(
-    "The INMP441 sound-pressure gate and adaptive bass beat detector keep "
-    "conversation dark. On musical bass beats, the center fires "
-    "at the sensitive level and stronger hits launch to both triangles.");
+    "The INMP441 sound-pressure gate needs two low-hiss bass beats to arm "
+    "music mode. Conversation and one-off noise stay dark; musical bass "
+    "fires the center, with stronger hits launching to both triangles.");
 
 fl::UISlider stageThresholdDbSpl("Minimum Music Level (dB SPL)",
                                  kDefaultStageThresholdDbSpl, 60.0f, 105.0f,
@@ -99,6 +104,9 @@ uint32_t gTriangleFireAtMs = 0;
 fl::audio::SoundLevelMeter gSoundLevelMeter;
 fl::shared_ptr<fl::audio::Processor> gAudio;
 float gSoundPressureDbSpl = 33.0f;
+uint8_t gMusicBeatCount = 0;
+uint32_t gFirstMusicBeatMs = 0;
+uint32_t gMusicActiveUntilMs = 0;
 
 void updateSoundLevel() {
     if (!gAudio) {
@@ -110,6 +118,35 @@ void updateSoundLevel() {
     }
     gSoundLevelMeter.processBlock(sample.pcm());
     gSoundPressureDbSpl = static_cast<float>(gSoundLevelMeter.getSPL());
+}
+
+bool isMusicPresent() {
+    const fl::audio::Sample &sample = gAudio->getSample();
+    if (!sample.isValid() || sample.zcf() >= kMaximumMusicZcf) {
+        return false;
+    }
+
+    const uint32_t now = millis();
+    if (now < gMusicActiveUntilMs) {
+        // Each qualifying bass beat extends the short music-present hold.
+        gMusicActiveUntilMs = now + kMusicHoldMs;
+        return true;
+    }
+
+    if (gMusicBeatCount == 0 || now - gFirstMusicBeatMs > kMusicBeatWindowMs) {
+        gMusicBeatCount = 1;
+        gFirstMusicBeatMs = now;
+        return false;
+    }
+
+    ++gMusicBeatCount;
+    if (gMusicBeatCount < kMusicBeatsToActivate) {
+        return false;
+    }
+
+    gMusicBeatCount = 0;
+    gMusicActiveUntilMs = now + kMusicHoldMs;
+    return true;
 }
 
 void fireAnalyzer(float bass, float threshold, float minIntensity,
@@ -169,7 +206,8 @@ void setup() {
         // beat callback.
         updateSoundLevel();
         if (!levels.bassSpike ||
-            gSoundPressureDbSpl < stageThresholdDbSpl.value()) {
+            gSoundPressureDbSpl < stageThresholdDbSpl.value() ||
+            !isMusicPresent()) {
             return;
         }
         fireAnalyzer(levels.bass, centerThreshold.value(), 0.35f,

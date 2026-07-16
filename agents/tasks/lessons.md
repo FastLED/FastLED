@@ -15,3 +15,7 @@
 - For HydroPack's audience-safe behavior, use FastLED's INMP441-calibrated
   SPL meter with its adaptive bass-beat detector rather than a custom
   sound-floor histogram or a separate tempo lock.
+
+- For a responsive music-only visual, use two qualifying bass beats in a
+  short window plus a low-ZCF check to arm a temporary music-present state;
+  this rejects one-off speech/noise without requiring a rigid BPM lock.
