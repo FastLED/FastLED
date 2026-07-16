@@ -33,7 +33,6 @@
 
 // IWYU pragma: private
 
-#include "fl/stl/singleton.h"
 #include "fl/stl/stdint.h"
 
 #ifndef __ASSEMBLER__
