@@ -6,6 +6,7 @@ from threading import Lock, Semaphore, Thread
 
 PRINT_LOCK = Lock()
 _QUEUE_CAPACITY = 1024
+_WRITER_WAKE_TIMEOUT_SECONDS = 0.5
 _PRINT_QUEUE: Queue[str | None] = Queue(maxsize=_QUEUE_CAPACITY)
 _PRINT_READY = Semaphore(0)
 _WRITER: Thread | None = None
@@ -18,7 +19,16 @@ _SHUTTING_DOWN = False
 def _write_batches() -> None:
     """Drain queued lines in batches and flush each batch to the pipe."""
     while True:
-        _PRINT_READY.acquire()
+        woke = _PRINT_READY.acquire(timeout=_WRITER_WAKE_TIMEOUT_SECONDS)
+        if not woke:
+            # A missed notification must not strand the interpreter at exit.
+            # Shutdown enqueues the sentinel before setting this flag, so an
+            # empty queue here means there is no remaining output to drain.
+            with PRINT_LOCK:
+                if _SHUTTING_DOWN and _PRINT_QUEUE.empty():
+                    return
+                if _PRINT_QUEUE.empty():
+                    continue
         stopping = False
         while not stopping:
             batch: list[str] = []
@@ -72,8 +82,10 @@ def _shutdown_writer() -> None:
     with PRINT_LOCK:
         if _SHUTTING_DOWN:
             return
-        _SHUTTING_DOWN = True
         _PRINT_QUEUE.put(None)
+        # Publish shutdown only after the sentinel is guaranteed to be in the
+        # queue.  A timed writer wake can then safely drain and exit.
+        _SHUTTING_DOWN = True
         _signal_writer()
     _PRINT_QUEUE.join()
     _WRITER.join()
