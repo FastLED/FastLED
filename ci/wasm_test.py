@@ -36,8 +36,15 @@ def parse_args():
     )
     parser.add_argument(
         "--gfx",
-        default="0",
-        help="Graphics mode parameter (default: 0)",
+        default=None,
+        help="Graphics mode override (0=legacy 2D, 1=shared gfx renderer). "
+        "Default: no parameter, exercising the renderer users actually get.",
+    )
+    parser.add_argument(
+        "--allow-console-errors",
+        action="store_true",
+        help="Report browser console errors without failing the test "
+        "(default: any console error or uncaught page exception fails).",
     )
     return parser.parse_args()
 
@@ -206,7 +213,9 @@ async def main() -> None:
 
                 page.on("pageerror", page_error_handler)
 
-                test_url = f"http://localhost:{port}/?gfx={args.gfx}"
+                test_url = f"http://localhost:{port}/"
+                if args.gfx is not None:
+                    test_url += f"?gfx={args.gfx}"
                 console.print(f"[dim]Navigating to: {test_url}[/dim]")
                 await page.goto(
                     test_url,
@@ -293,6 +302,20 @@ async def main() -> None:
                         f"[bold red]✗ Error:[/bold red] FastLED.js failed to initialize within {max_wait_ms // 1000} seconds",
                     )
                     raise Exception("FastLED.js failed to initialize")
+
+                # Rendering alone is not success: any console error or uncaught
+                # page exception fails the run so runtime regressions (bad
+                # screenmaps, 404'd resources, worker crashes) can't ship
+                # silently. Opt out with --allow-console-errors.
+                fatal_errors = [e for e in browser_errors if e.startswith("[error]")]
+                if fatal_errors and not args.allow_console_errors:
+                    console.print(
+                        f"[bold red]✗ Error:[/bold red] {len(fatal_errors)} browser console "
+                        "error(s) detected (pass --allow-console-errors to downgrade)"
+                    )
+                    raise Exception(
+                        f"Browser console errors detected: {fatal_errors[:5]}"
+                    )
 
             except KeyboardInterrupt as ki:
                 handle_keyboard_interrupt(ki)

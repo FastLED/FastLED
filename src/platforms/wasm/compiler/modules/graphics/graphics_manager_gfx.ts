@@ -10,17 +10,32 @@ function asBytes(value) {
   return null;
 }
 
-/** Convert FastLED's `{group: {strips: {id: {x, y}}}}` shape to package JSON. */
+/** Extract `{x, y, diameter?}` from a strip entry. The engine's wire shape
+ * nests coordinates as `{map: {x, y}, diameter}` (see js_bindings.cpp.hpp and
+ * graphics_manager.ts); bare `{x, y}` is accepted for pre-normalized data. */
+function stripCoords(strip) {
+  if (Array.isArray(strip?.x) && Array.isArray(strip?.y)) return strip;
+  if (Array.isArray(strip?.map?.x) && Array.isArray(strip?.map?.y)) {
+    const entry = { x: strip.map.x, y: strip.map.y };
+    if (typeof strip.diameter === 'number') entry.diameter = strip.diameter;
+    return entry;
+  }
+  return null;
+}
+
+/** Convert FastLED's `{group: {strips: {id: {map: {x, y}, diameter}}}}` shape to package JSON. */
 export function toGfxScreenmap(screenMaps) {
   if (screenMaps?.map) return screenMaps;
   const map = {};
   for (const [groupId, group] of Object.entries(screenMaps ?? {})) {
     if (group?.strips && typeof group.strips === 'object') {
       for (const [stripId, strip] of Object.entries(group.strips)) {
-        if (Array.isArray(strip?.x) && Array.isArray(strip?.y)) map[`${groupId}:${stripId}`] = strip;
+        const coords = stripCoords(strip);
+        if (coords) map[`${groupId}:${stripId}`] = coords;
       }
-    } else if (Array.isArray(group?.x) && Array.isArray(group?.y)) {
-      map[groupId] = group;
+    } else {
+      const coords = stripCoords(group);
+      if (coords) map[groupId] = coords;
     }
   }
   if (Object.keys(map).length === 0) throw new Error('screenmap: no coordinate strips found');
@@ -61,7 +76,10 @@ export class GraphicsManagerGfx {
   }
 
   updateScreenMap(screenMapsData) {
-    this.screenMaps = screenMapsData ?? {};
+    // Keep the previous screenmap when an empty update arrives; strips can
+    // register a moment after the first frames at startup.
+    if (!screenMapsData || Object.keys(screenMapsData).length === 0) return;
+    this.screenMaps = screenMapsData;
     if (this.core) this.core.setScreenmap(toGfxScreenmap(this.screenMaps));
   }
 
@@ -69,7 +87,9 @@ export class GraphicsManagerGfx {
     if (!frameData) return;
     if (frameData.screenMap) this.updateScreenMap(frameData.screenMap);
     if (!this.core) {
-      if (Object.keys(this.screenMaps).length === 0) throw new Error('screenmap: frame arrived before initialization');
+      // Frames can legitimately arrive before the screenmap during startup;
+      // skip them until coordinates exist instead of erroring every frame.
+      if (Object.keys(this.screenMaps).length === 0) return;
       this.core = createGfxCore({
         canvas: this.canvas,
         screenmap: toGfxScreenmap(this.screenMaps),
@@ -78,7 +98,11 @@ export class GraphicsManagerGfx {
         bloom: this._autoBloom ? { mode: 'auto' } : { mode: 'off' },
       });
     }
-    this.core.pushFrame(combineFrame(frameData));
+    const frame = combineFrame(frameData);
+    // Startup ticks can deliver zero strip bytes before the first show();
+    // the core treats a short frame as an error, so skip until data exists.
+    if (frame.byteLength === 0) return;
+    this.core.pushFrame(frame);
   }
 
   reset() { this.core?.dispose(); this.core = null; }
