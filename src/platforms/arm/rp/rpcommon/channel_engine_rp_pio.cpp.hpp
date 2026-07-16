@@ -6,11 +6,30 @@
 
 namespace fl {
 
+namespace {
+
+// Keep native PL022 SPI preferred whenever the selected pair has a legal
+// hardware mux. FLEX_IO owns the remaining arbitrary PIO pin pairs.
+bool isNativeSpiPinPair(const SpiChipsetConfig& config) FL_NO_EXCEPT {
+    static constexpr u8 kMosi[] = {3, 7, 19, 23, 11, 15, 27};
+    static constexpr u8 kSck[] = {2, 6, 18, 22, 10, 14, 26};
+    for (size_t index = 0; index < sizeof(kMosi) / sizeof(kMosi[0]); ++index) {
+        if (config.dataPin == kMosi[index] && config.clockPin == kSck[index]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+}  // namespace
+
 ChannelEngineRpPio::ChannelEngineRpPio(
-    fl::shared_ptr<IRpPioTxPeripheral> peripheral, u8 which) FL_NO_EXCEPT
-    : mPeripheral(fl::move(peripheral)), mWhich(which), mCurrentChannel(0),
-      mLatchStartUs(0), mLatchDurationUs(0), mActive(false),
-      mActiveLaneCount(1), mLatchPending(false), mFailed(false),
+    fl::shared_ptr<IRpPioTxPeripheral> peripheral,
+    fl::shared_ptr<IRpPioSpiPeripheral> spi_peripheral) FL_NO_EXCEPT
+    : mPeripheral(fl::move(peripheral)), mSpiPeripheral(fl::move(spi_peripheral)),
+      mCurrentChannel(0), mLatchStartUs(0), mLatchDurationUs(0),
+      mActiveLaneCount(1), mActiveMode(Mode::Clockless), mActive(false),
+      mLatchPending(false), mFailed(false),
       mLastStartAttempted(false), mLastStartSucceeded(false), mLastWordCount(0) {}
 
 ChannelEngineRpPio::~ChannelEngineRpPio() {
@@ -19,17 +38,26 @@ ChannelEngineRpPio::~ChannelEngineRpPio() {
         mPeripheral->abort();
         mPeripheral->deinitialize();
     }
+    if (mSpiPeripheral) {
+        mSpiPeripheral->abort();
+        mSpiPeripheral->deinitialize();
+    }
 }
 
 bool ChannelEngineRpPio::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
-    if (!data || !data->isClockless() || data->getPin() < 0 || data->getPin() > 29) {
-        return false;
+    if (!data) return false;
+    if (data->isClockless()) {
+        if (!mPeripheral || data->getPin() < 0 || data->getPin() > 29) return false;
+        const ChipsetTimingConfig& timing = data->getTiming();
+        // pio_gen needs at least one cycle in each segment and subtracts two from
+        // the low tail instruction. Reject impossible runtime programs early.
+        return timing.t1_ns != 0 && timing.t2_ns != 0 && timing.t3_ns != 0 &&
+               timing.total_period_ns() >= 250;
     }
-    const ChipsetTimingConfig& timing = data->getTiming();
-    // pio_gen needs at least one cycle in each segment and subtracts two from
-    // the low tail instruction. Reject impossible runtime programs early.
-    return timing.t1_ns != 0 && timing.t2_ns != 0 && timing.t3_ns != 0 &&
-           timing.total_period_ns() >= 250;
+    const SpiChipsetConfig* spi = data->getChipset().ptr<SpiChipsetConfig>();
+    return mSpiPeripheral && spi != nullptr && spi->dataPin >= 0 && spi->dataPin <= 29 &&
+           spi->clockPin >= 0 && spi->clockPin <= 29 && spi->dataPin != spi->clockPin &&
+           spi->timing.clock_hz != 0 && !isNativeSpiPinPair(*spi);
 }
 
 void ChannelEngineRpPio::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
@@ -64,6 +92,21 @@ void ChannelEngineRpPio::show() FL_NO_EXCEPT {
 IChannelDriver::DriverState ChannelEngineRpPio::poll() FL_NO_EXCEPT {
     if (mFailed) return fail(mError.c_str());
     if (!mActive) return DriverState::READY;
+    if (mActiveMode == Mode::Spi) {
+        if (!mSpiPeripheral) return fail("RP PIO SPI: missing peripheral");
+        if (mSpiPeripheral->hasError()) return fail("RP PIO SPI: peripheral error");
+        if (mSpiPeripheral->isDmaBusy()) return DriverState::BUSY;
+        if (!mSpiPeripheral->isTerminalComplete()) return DriverState::DRAINING;
+        ++mCurrentChannel;
+        if (startNextTransmission()) return DriverState::BUSY;
+        if (mCurrentChannel < mInFlightChannels.size()) {
+            return fail("RP PIO SPI: unable to start queued channel");
+        }
+        mSpiPeripheral->deinitialize();
+        releaseInFlight();
+        mActive = false;
+        return DriverState::READY;
+    }
     if (!mPeripheral) return fail("RP PIO: missing peripheral");
     if (mPeripheral->hasError()) return fail("RP PIO: peripheral error");
     if (mPeripheral->isDmaBusy()) return DriverState::BUSY;
@@ -96,7 +139,29 @@ bool ChannelEngineRpPio::startNextTransmission() FL_NO_EXCEPT {
 }
 
 bool ChannelEngineRpPio::beginTransmission(const ChannelDataPtr& channel) FL_NO_EXCEPT {
-    if (!mPeripheral || !canHandle(channel)) return false;
+    if (!canHandle(channel)) return false;
+    if (channel->isSpi()) {
+        const fl::vector_psram<u8>& input = channel->getData();
+        const SpiChipsetConfig& chipset = channel->getChipset().get<SpiChipsetConfig>();
+        if (input.empty() || !mSpiPeripheral) return false;
+        RpPioSpiConfig config;
+        config.mosi_pin = static_cast<u8>(chipset.dataPin);
+        config.sck_pin = static_cast<u8>(chipset.clockPin);
+        config.clock_hz = chipset.timing.clock_hz;
+        if (!mSpiPeripheral->configure(config)) return false;
+        mPioWords.clear();
+        mPioWords.reserve(input.size());
+        for (u8 byte : input) {
+            mPioWords.push_back(static_cast<u32>(byte) << 24);
+        }
+        mActiveLaneCount = 1;
+        mActiveMode = Mode::Spi;
+        mLastStartAttempted = true;
+        mLastWordCount = mPioWords.size();
+        mLastStartSucceeded = mSpiPeripheral->startTxDma(mPioWords.data(), mPioWords.size());
+        return mLastStartSucceeded;
+    }
+    if (!mPeripheral) return false;
     const fl::vector_psram<u8>& input = channel->getData();
     if (input.empty()) return false;
     // Batch only an adjacent run that is provably safe: same wire timing,
@@ -111,6 +176,7 @@ bool ChannelEngineRpPio::beginTransmission(const ChannelDataPtr& channel) FL_NO_
         ++run;
     }
     mActiveLaneCount = run >= 8 ? 8 : run >= 4 ? 4 : run >= 2 ? 2 : 1;
+    mActiveMode = Mode::Clockless;
     RpPioTxConfig config;
     config.tx_pin = static_cast<u8>(channel->getPin());
     config.lane_count = mActiveLaneCount;
@@ -157,6 +223,10 @@ IChannelDriver::DriverState ChannelEngineRpPio::fail(const char* message) FL_NO_
     if (mPeripheral) {
         mPeripheral->abort();
         mPeripheral->deinitialize();
+    }
+    if (mSpiPeripheral) {
+        mSpiPeripheral->abort();
+        mSpiPeripheral->deinitialize();
     }
     releaseInFlight();
     mActive = false;

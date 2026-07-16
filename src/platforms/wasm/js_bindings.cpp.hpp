@@ -123,6 +123,21 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
 
         // Add diameter
         stripMapObj.set("diameter", screenMap.getDiameter());
+        if (screenMap.hasShapes()) {
+            fl::json shapes = fl::json::array();
+            for (fl::u32 shapeIndex = 0; shapeIndex < screenMap.getShapeCount(); ++shapeIndex) {
+                const auto &shape = screenMap.getShape(shapeIndex);
+                fl::json shapeObj = fl::json::object();
+                shapeObj.set("type", shape.type == fl::ScreenMap::Shape::EL_WIRE ? "el_wire" : "el_panel");
+                fl::json vx = fl::json::array();
+                fl::json vy = fl::json::array();
+                for (const auto &vertex : shape.vertices) { vx.push_back(fl::json(vertex.x)); vy.push_back(fl::json(vertex.y)); }
+                shapeObj.set("x", vx); shapeObj.set("y", vy);
+                if (shape.type == fl::ScreenMap::Shape::EL_WIRE) shapeObj.set("thickness", shape.thickness);
+                shapes.push_back(shapeObj);
+            }
+            stripMapObj.set("shapes", shapes);
+        }
 
         // Add this strip to the strips object
         stripsObj.set(fl::to_string(stripIndex), stripMapObj);
@@ -289,6 +304,21 @@ void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
 
         // Add diameter
         stripMapObj.set("diameter", screenMap.getDiameter());
+        if (screenMap.hasShapes()) {
+            fl::json shapes = fl::json::array();
+            for (fl::u32 shapeIndex = 0; shapeIndex < screenMap.getShapeCount(); ++shapeIndex) {
+                const auto &shape = screenMap.getShape(shapeIndex);
+                fl::json shapeObj = fl::json::object();
+                shapeObj.set("type", shape.type == fl::ScreenMap::Shape::EL_WIRE ? "el_wire" : "el_panel");
+                fl::json vx = fl::json::array();
+                fl::json vy = fl::json::array();
+                for (const auto &vertex : shape.vertices) { vx.push_back(fl::json(vertex.x)); vy.push_back(fl::json(vertex.y)); }
+                shapeObj.set("x", vx); shapeObj.set("y", vy);
+                if (shape.type == fl::ScreenMap::Shape::EL_WIRE) shapeObj.set("thickness", shape.thickness);
+                shapes.push_back(shapeObj);
+            }
+            stripMapObj.set("shapes", shapes);
+        }
 
         // Add this strip to the strips object
         stripsObj.set(fl::to_string(stripIndex), stripMapObj);

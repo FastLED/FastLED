@@ -162,6 +162,44 @@ static bool parseV2SegmentArray(const fl::json& segmentsArr,
         }
         fl::vector<float> y_array = jsonArrayToFloatVector(segVal["y"]);
 
+        string type = "led_strip";
+        if (segVal.contains("type") && segVal["type"].has_value()) {
+            auto typeOpt = segVal["type"].as_string();
+            if (!typeOpt) { *err = "v2 segment '" + id + "' has invalid 'type'"; return false; }
+            type = *typeOpt;
+        }
+        const bool isWire = type == "el_wire";
+        const bool isPanel = type == "el_panel";
+        if (type != "led_strip" && !isWire && !isPanel) {
+            *err = "v2 segment '" + id + "' has unsupported type '" + type + "'";
+            return false;
+        }
+        if (x_array.size() != y_array.size()) {
+            *err = "v2 segment '" + id + "' has mismatched x/y lengths";
+            return false;
+        }
+        const size_t minVertices = isWire ? 2 : isPanel ? 3 : 0;
+        if ((isWire || isPanel) && x_array.size() < minVertices) {
+            *err = "v2 segment '" + id + "' has too few vertices";
+            return false;
+        }
+        float thickness = 0.0f;
+        if (isWire) {
+            if (!segVal.contains("thickness") || !segVal["thickness"].has_value()) {
+                *err = "v2 el_wire segment '" + id + "' missing thickness";
+                return false;
+            }
+            auto thicknessOpt = segVal["thickness"].as_float();
+            if (!thicknessOpt || *thicknessOpt <= 0.0f) {
+                *err = "v2 el_wire segment '" + id + "' requires positive thickness";
+                return false;
+            }
+            thickness = static_cast<float>(*thicknessOpt);
+        } else if (segVal.contains("thickness")) {
+            *err = "v2 segment '" + id + "' thickness is only valid for el_wire";
+            return false;
+        }
+
         // Optional: diameter (not in canonical v2 but accepted as a backward-compat
         // hint when present; otherwise the per-group `diameter` could be wired here
         // in a future iteration).
@@ -174,9 +212,17 @@ static bool parseV2SegmentArray(const fl::json& segmentsArr,
         }
 
         auto n = fl::min(x_array.size(), y_array.size());
-        ScreenMap segment_map(n, diameter);
-        for (size_t i = 0; i < n; i++) {
-            segment_map.set(i, vec2f{x_array[i], y_array[i]});
+        ScreenMap segment_map(isWire || isPanel ? 1 : static_cast<u32>(n), diameter);
+        if (isWire || isPanel) {
+            fl::vector<vec2f> vertices;
+            vertices.reserve(n);
+            for (size_t i = 0; i < n; i++) vertices.push_back({x_array[i], y_array[i]});
+            segment_map.setShape(0, isWire ? ScreenMap::Shape::EL_WIRE : ScreenMap::Shape::EL_PANEL, vertices.data(), static_cast<u32>(n), thickness);
+        }
+        if (!isWire && !isPanel) {
+            for (size_t i = 0; i < n; i++) {
+                segment_map.set(static_cast<u16>(i), vec2f{x_array[i], y_array[i]});
+            }
         }
         (*segmentMaps)[id] = fl::move(segment_map);
     }
@@ -490,6 +536,7 @@ ScreenMap::ScreenMap(const ScreenMap &other) {
     length = other.length;
     mLookUpTable = other.mLookUpTable;
     mSourceXYMap = other.mSourceXYMap;
+    mShapes = other.mShapes;
 }
 
 ScreenMap::ScreenMap(ScreenMap&& other) {
@@ -497,6 +544,7 @@ ScreenMap::ScreenMap(ScreenMap&& other) {
     length = other.length;
     fl::swap(mLookUpTable, other.mLookUpTable);
     fl::swap(mSourceXYMap, other.mSourceXYMap);
+    fl::swap(mShapes, other.mShapes);
     other.mLookUpTable.reset();
     other.mSourceXYMap.reset();
 }
@@ -553,6 +601,30 @@ vec2f ScreenMap::getBounds() const {
     return {maxX - minX, maxY - minY};
 }
 
+void ScreenMap::setShape(u32 index, Shape::Type type, const vec2f *vertices, u32 count,
+                         float thickness) FL_NO_EXCEPT {
+    if (!vertices || count == 0) return;
+    if (index >= mShapes.size()) mShapes.resize(index + 1);
+    Shape &shape = mShapes[index];
+    shape.type = type;
+    shape.thickness = thickness;
+    shape.vertices.clear();
+    shape.vertices.reserve(count);
+    for (u32 i = 0; i < count; ++i) shape.vertices.push_back(vertices[i]);
+}
+
+bool ScreenMap::hasShapes() const FL_NO_EXCEPT { return !mShapes.empty(); }
+u32 ScreenMap::getShapeCount() const FL_NO_EXCEPT { return static_cast<u32>(mShapes.size()); }
+
+const ScreenMap::Shape &ScreenMap::getShape(u32 index) const FL_NO_EXCEPT {
+    static const Shape emptyShape = [] {
+        Shape shape;
+        shape.type = Shape::EL_PANEL;
+        return shape;
+    }();
+    return index < mShapes.size() ? mShapes[index] : emptyShape;
+}
+
 const vec2f &ScreenMap::empty() {
     static const vec2f s_empty = vec2f(0, 0); // okay static in header
     return s_empty;
@@ -581,6 +653,7 @@ ScreenMap &ScreenMap::operator=(const ScreenMap &other) FL_NO_EXCEPT {
         length = other.length;
         mLookUpTable = other.mLookUpTable;
         mSourceXYMap = other.mSourceXYMap;
+        mShapes = other.mShapes;
     }
     return *this;
 }
@@ -591,6 +664,7 @@ ScreenMap &ScreenMap::operator=(ScreenMap &&other) FL_NO_EXCEPT {
         length = other.length;
         mLookUpTable = fl::move(other.mLookUpTable);
         mSourceXYMap = fl::move(other.mSourceXYMap);
+        mShapes = fl::move(other.mShapes);
         other.length = 0;
         other.mDiameter = -1.0f;
     }

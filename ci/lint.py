@@ -333,9 +333,9 @@ def main() -> int:
         # Create duration tracker
         tracker = DurationTracker()
 
-        # Determine if we should run in parallel
-        # Parallel mode: 2+ stages and not in single-mode (--cpp/--js)
-        parallel = len(stages) > 1 and not args.js_only and not args.cpp_only
+        # Run every multi-stage invocation concurrently.  `--cpp` includes the
+        # C++, Meson, and repository-policy checks, all of which are independent.
+        parallel = len(stages) > 1
 
         # Create orchestrator
         orchestrator = LintOrchestrator(stages, tracker, parallel)

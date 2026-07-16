@@ -9,31 +9,14 @@
 #include "fl/system/fastled.h"
 
 #include "platforms/arm/rp/rpcommon/clockless_rp_pio_auto.h"
-#include "platforms/arm/rp/rpcommon/rp_pio_dma_resource_manager.h"
+#include "platforms/arm/rp/rpcommon/rp_pio_tx_peripheral.h"
 #include "platforms/arm/rp/rpcommon/parallel_transpose.h"
 #include "fl/gfx/rectangular_draw_buffer.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/vector.h"
 #include "fl/log/log.h"
-#include "fl/math/math.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/stl/assert.h"
-#include "fl/stl/cstring.h"
-#include "fl/stl/allocator.h"
 #include "fl/stl/flat_map.h"
-#include "fl/log/log.h"
-
-// Hardware headers for RP2040/RP2350
-// IWYU pragma: begin_keep
-#include "hardware/pio.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
-#include "hardware/dma.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
-#include "hardware/gpio.h"
-
-// IWYU pragma: end_keep
 namespace fl {
 
 /// @brief Represents a group of consecutive GPIO pins for parallel output
@@ -42,71 +25,10 @@ struct Rp2040PinGroup {
     fl::u8 num_pins;      ///< Number of consecutive pins (2, 4, or 8)
     fl::vector<fl::u8> pins;  ///< List of all pins in this group (sorted)
 
-    PIO pio;          ///< PIO instance (pio0 or pio1)
-    fl::i32 sm;           ///< State machine index (-1 if not allocated)
-    fl::i32 dma_chan;     ///< DMA channel (-1 if not allocated)
-
     fl::unique_ptr<fl::u8[]> transpose_buffer;  ///< Bit-transposed output buffer
     fl::u32 buffer_size;  ///< Size of transpose buffer
 
-    Rp2040PinGroup() : base_pin(0), num_pins(0), pio(nullptr), sm(-1), dma_chan(-1), buffer_size(0) {}
-
-    ~Rp2040PinGroup() {
-        cleanup();
-    }
-
-    void cleanup() {
-        if (dma_chan != -1) {
-            RpPioDmaResourceManager::instance().releaseDmaChannel(dma_chan);
-            dma_chan = -1;
-        }
-        if (sm != -1 && pio != nullptr) {
-            pio_sm_set_enabled(pio, sm, false);
-            RpPioDmaResourceManager::instance().releasePioStateMachine(pio, sm);
-            sm = -1;
-        }
-        RpPioDmaResourceManager::instance().releasePins(base_pin, num_pins);
-        transpose_buffer.reset();
-        buffer_size = 0;
-    }
-
-    bool allocateResources() {
-        auto& resources = RpPioDmaResourceManager::instance();
-        int state_machine = -1;
-        if (!resources.claimPioStateMachine(&pio, &state_machine)) {
-            FL_WARN_F("Failed to claim PIO state machine for pin group starting at GPIO %s", (int)base_pin);
-            return false;
-        }
-        sm = static_cast<i32>(state_machine);
-
-        int dma_channel = -1;
-        if (!resources.claimDmaChannel(&dma_channel)) {
-            resources.releasePioStateMachine(pio, state_machine);
-            sm = -1;
-            FL_WARN_F("Failed to claim DMA channel for pin group starting at GPIO %s", (int)base_pin);
-            return false;
-        }
-        dma_chan = static_cast<i32>(dma_channel);
-
-        if (!resources.claimPins(base_pin, num_pins)) {
-            resources.releaseDmaChannel(dma_channel);
-            resources.releasePioStateMachine(pio, state_machine);
-            dma_chan = -1;
-            sm = -1;
-            FL_WARN_F("Failed to claim pins for parallel group starting at GPIO %s", (int)base_pin);
-            return false;
-        }
-
-        // Initialize GPIO pins for output
-        for (fl::u8 i = 0; i < num_pins; i++) {
-            gpio_init(base_pin + i);
-            gpio_set_dir(base_pin + i, GPIO_OUT);
-        }
-
-        FL_DBG_F("Allocated resources for %s-pin parallel group at GPIO %s (PIO%s, SM%s, DMA%s)", (int)num_pins, (int)base_pin, (pio == pio0 ? 0 : 1), sm, dma_chan);
-
-        return true;
-    }
+    Rp2040PinGroup() : base_pin(0), num_pins(0), buffer_size(0) {}
 };
 
 /// @brief Singleton group manager for RP2040 parallel output
@@ -244,24 +166,13 @@ class RP2040ParallelGroup {
             return;  // No data to show
         }
 
-        bool drawlist_changed = mRectDrawBuffer.mDrawListChangedThisFrame;
-
-        if (drawlist_changed) {
-            // Pin configuration changed - rebuild groups
+        if (mRectDrawBuffer.mDrawListChangedThisFrame) {
+            // Pin configuration changed - rebuild the software grouping. PIO,
+            // DMA, and GPIO claims are made by RpPioTxPeripheral for the
+            // duration of each transfer, so this path cannot retain stale
+            // claims when a sketch changes its LED topology.
             FL_DBG_F("Pin configuration changed, rebuilding groups");
             detectPinGroups();
-
-            // Allocate resources for each group
-            for (auto it = mPinGroups.begin(); it != mPinGroups.end(); ++it) {
-                Rp2040PinGroup* group = it->get();
-                if (group->num_pins > 1) {
-                    // Parallel group - allocate PIO/DMA
-                    if (!group->allocateResources()) {
-                        // Allocation failed - skip this group
-                        continue;
-                    }
-                }
-            }
         }
 
         // Output each group
@@ -279,6 +190,41 @@ class RP2040ParallelGroup {
     }
 
   private:
+    /// Transfer one already-transposed frame through the shared RP PIO/DMA
+    /// implementation. The words are kept alive until the PIO reaches its
+    /// blocking OUT instruction, not merely until DMA reports idle.
+    bool transmitWords(fl::u8 pin, fl::u8 lanes,
+                       const fl::vector<fl::u32>& words) {
+        RpPioTxPeripheral peripheral(0);
+        RpPioTxConfig config;
+        config.tx_pin = pin;
+        config.lane_count = lanes;
+        config.timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+        if (!peripheral.configure(config) ||
+            !peripheral.startTxDma(words.data(), words.size())) {
+            FL_WARN_F("Unable to start %s-lane PIO transfer at GPIO %s",
+                      (int)lanes, (int)pin);
+            return false;
+        }
+
+        const u32 start_us = fl::micros();
+        while (peripheral.isDmaBusy()) {
+            if (static_cast<u32>(fl::micros() - start_us) > 1000000u) {
+                peripheral.abort();
+                FL_WARN_F("Timed out waiting for DMA at GPIO %s", (int)pin);
+                return false;
+            }
+        }
+        while (!peripheral.isTerminalComplete()) {
+            if (static_cast<u32>(fl::micros() - start_us) > 1000000u) {
+                peripheral.abort();
+                FL_WARN_F("Timed out waiting for PIO completion at GPIO %s", (int)pin);
+                return false;
+            }
+        }
+        return true;
+    }
+
     /// @brief Output a single pin (non-parallel fallback)
     void outputSinglePin(Rp2040PinGroup* group) {
         fl::u8 pin = group->base_pin;
@@ -286,21 +232,21 @@ class RP2040ParallelGroup {
         // Get LED data for this pin from RectangularDrawBuffer
         fl::span<fl::u8> led_data = mRectDrawBuffer.getLedsBufferBytesForPin(pin, false);
 
-        // TODO: Implement sequential PIO output for single pins
-        // For now, just log that we would output this data
-        FL_DBG_F("Sequential output for GPIO %s (%s bytes)", (int)pin, led_data.size());
-
-        // In a full implementation, this would use the regular non-parallel
-        // clockless driver from clockless_rp_pio.h
+        fl::vector<fl::u32> words;
+        words.reserve(led_data.size() * 8);
+        for (u8 byte : led_data) {
+            for (int bit = 7; bit >= 0; --bit) {
+                words.push_back(((static_cast<u32>(byte >> bit) & 1u) << 31));
+            }
+        }
+        if (transmitWords(pin, 1, words)) {
+            FL_DBG_F("Sequential output for GPIO %s (%s bytes)",
+                     (int)pin, led_data.size());
+        }
     }
 
     /// @brief Output a parallel group with bit transposition
     void outputParallelGroup(Rp2040PinGroup* group) {
-        if (group->sm == -1 || group->dma_chan == -1) {
-            FL_WARN_F("Parallel group at GPIO %s has no allocated resources, skipping", (int)group->base_pin);
-            return;
-        }
-
         // Check if any strip in this parallel group is RGBW
         // If any strip is RGBW, we treat the entire group as RGBW (pad RGB strips with W=0)
         bool any_rgbw = false;
@@ -361,14 +307,19 @@ class RP2040ParallelGroup {
 
         FL_DBG_F("Transposed %s-pin group at GPIO %s (%s LEDs, %s bytes)", group->num_pins, (int)group->base_pin, max_leds, needed_buffer_size);
 
-        // TODO: Configure PIO program and start DMA transfer
-        // For now, just log that we would output this data
-        FL_DBG_F("Parallel output for %s pins starting at GPIO %s (%s bytes)", group->num_pins, (int)group->base_pin, needed_buffer_size);
-
-        // In a full implementation, this would:
-        // 1. Configure PIO program with WS2812 timing
-        // 2. Start DMA transfer of transpose_buffer to PIO
-        // 3. Wait for DMA completion
+        // transpose_* emits one byte per bit plane. RpPioTxPeripheral consumes
+        // one 32-bit DMA word per plane, with the active lane bits in the MSB.
+        fl::vector<fl::u32> words;
+        words.reserve(needed_buffer_size);
+        for (fl::u32 i = 0; i < needed_buffer_size; ++i) {
+            const u32 plane = group->transpose_buffer[i] &
+                              static_cast<u32>((1u << group->num_pins) - 1u);
+            words.push_back(plane << (32u - group->num_pins));
+        }
+        if (transmitWords(group->base_pin, group->num_pins, words)) {
+            FL_DBG_F("Parallel output for %s pins starting at GPIO %s (%s bytes)",
+                     group->num_pins, (int)group->base_pin, needed_buffer_size);
+        }
     }
 };
 

@@ -8,7 +8,7 @@
 /// to ChannelManager::instance().
 ///
 /// Priority Order:
-/// - SPI_UNIFIED (6-8): True SPI hardware (octal/quad/dual-lane via PIO)
+/// - SPI_UNIFIED: True single-lane SPI channel hardware
 ///
 /// Architecture Pattern:
 /// This follows the ESP32 pattern:
@@ -26,9 +26,6 @@
 #include "fl/log/log.h"
 #include "fl/log/log.h"
 #include "fl/stl/shared_ptr.h"
-#include "platforms/shared/spi_hw_2.h"
-#include "platforms/shared/spi_hw_4.h"
-#include "platforms/shared/spi_hw_8.h"
 #include "platforms/arm/rp/rpcommon/init_channel_driver.h"
 #include "platforms/arm/rp/rpcommon/rp_uart_bus_traits.h"
 #include "platforms/arm/rp/rpcommon/rp_spi_bus_traits.h"
@@ -46,47 +43,11 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
     fl::vector<int> priorities;
     fl::vector<const char*> names;
 
-    // ========================================================================
-    // Collect SpiHw8 controllers (highest priority: 8)
-    // ========================================================================
-    const auto& hw8Controllers = SpiHw8::getAll();
-    FL_DBG_F("RP2040/RP2350: Found %s SpiHw8 controllers", hw8Controllers.size());
-
-    for (const auto& ctrl : hw8Controllers) {
-        if (ctrl) {
-            controllers.push_back(ctrl);
-            priorities.push_back(8);
-            names.push_back(ctrl->getName());  // "SPI0" or "SPI1"
-        }
-    }
-
-    // ========================================================================
-    // Collect SpiHw4 controllers (medium priority: 7)
-    // ========================================================================
-    const auto& hw4Controllers = SpiHw4::getAll();
-    FL_DBG_F("RP2040/RP2350: Found %s SpiHw4 controllers", hw4Controllers.size());
-
-    for (const auto& ctrl : hw4Controllers) {
-        if (ctrl) {
-            controllers.push_back(ctrl);
-            priorities.push_back(7);
-            names.push_back(ctrl->getName());  // "SPI0" or "SPI1"
-        }
-    }
-
-    // ========================================================================
-    // Collect SpiHw2 controllers (lower priority: 6)
-    // ========================================================================
-    const auto& hw2Controllers = SpiHw2::getAll();
-    FL_DBG_F("RP2040/RP2350: Found %s SpiHw2 controllers", hw2Controllers.size());
-
-    for (const auto& ctrl : hw2Controllers) {
-        if (ctrl) {
-            controllers.push_back(ctrl);
-            priorities.push_back(6);
-            names.push_back(ctrl->getName());  // "SPI0" or "SPI1"
-        }
-    }
+    // RP2040's PIO-based SpiHw2/4/8 controllers are intentionally not added
+    // here. They are multi-lane backends for MultiLaneDevice, which owns the
+    // lane buffers and performs the required bit transposition before DMA.
+    // SpiChannelEngineAdapter receives independent ChannelData buffers and
+    // cannot safely reinterpret them as a parallel transfer.
 
     // ========================================================================
     // Create unified adapter with all controllers

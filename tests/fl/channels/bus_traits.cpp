@@ -100,11 +100,14 @@ FL_TEST_CASE("FastLED.addLeds<APA102, ..., fl::Bus::BIT_BANG> SPI variant compil
 
 FL_TEST_CASE("FastLED.addLeds default-AUTO call sites compile") {
     static CRGB clockless[8];
-    static CRGB spi[8];
+    static CRGB apa102[8];
+    static CRGB sk9822[8];
     auto& a = FastLED.addLeds<WS2812, 3, GRB>(clockless, 8);
-    auto& b = FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(12)>(spi, 8);
+    auto& b = FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(12)>(apa102, 8);
+    auto& c = FastLED.addLeds<SK9822, 24, 19, RGB, DATA_RATE_MHZ(12)>(sk9822, 8);
     (void)a;
     (void)b;
+    (void)c;
 }
 
 FL_TEST_CASE("enableDrivers<Bus::BIT_BANG>() is idempotent") {

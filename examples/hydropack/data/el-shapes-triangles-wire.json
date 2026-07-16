@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "groups": {
+    "left-panel": { "color": "#ef4444" },
+    "center-wire": { "color": "#22c55e" },
+    "right-panel": { "color": "#3b82f6" }
+  },
+  "segments": [
+    {
+      "id": "left-panel",
+      "type": "el_panel",
+      "pin": "pin1",
+      "group": "left-panel",
+      "x": [-20, -42, -42],
+      "y": [0, -24, 24]
+    },
+    {
+      "id": "center-wire",
+      "type": "el_wire",
+      "pin": "pin2",
+      "group": "center-wire",
+      "x": [-10, 10],
+      "y": [0, 0],
+      "thickness": 5
+    },
+    {
+      "id": "right-panel",
+      "type": "el_panel",
+      "pin": "pin3",
+      "group": "right-panel",
+      "x": [20, 42, 42],
+      "y": [0, -24, 24]
+    }
+  ]
+}
