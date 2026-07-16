@@ -13,9 +13,8 @@
 //
 // FastLED's normalized spectral-flux beat confidence arms music mode. Vibe
 // remains the actual real-time bass response: its spikes drive the animation
-// only while music mode is armed. The arming latch needs two bass beats in a
-// broad musical tempo range and rejects high-ZCF hiss. The beat spacing may
-// speed up or slow down; it is evidence of music, not an animation BPM lock.
+// only while music mode is armed. Music mode warms up over five seconds of
+// recurring confident beats, with no fixed BPM or tempo-consistency lock.
 // Once music is established, FastLED's Vibe detector tracks its running bass
 // average; relative bass energy is about 1.0 at the current average. A loud
 // hit lights the center, then launches into the triangles.
@@ -42,12 +41,17 @@
 constexpr uint8_t kTriangleLedCount = 6;
 constexpr uint8_t kCenterStart = 6;
 constexpr uint8_t kRightTriangleStart = 12;
-constexpr uint8_t kPreviewLedCount = 18;
+constexpr uint8_t kHydroPackLedCount = 18;
+#if defined(FL_IS_WASM)
+constexpr uint8_t kDebugLedIndex = kHydroPackLedCount;
+constexpr uint8_t kPreviewLedCount = kHydroPackLedCount + 1;
+#else
+constexpr uint8_t kPreviewLedCount = kHydroPackLedCount;
+#endif
 constexpr uint32_t kTriangleLaunchDelayMs = 5;
 constexpr float kDefaultStageThresholdDbSpl = 80.0f;
-constexpr uint8_t kMusicBeatsToActivate = 2;
-constexpr uint32_t kMinimumMusicBeatIntervalMs = 250;
-constexpr uint32_t kMaximumMusicBeatIntervalMs = 2000;
+constexpr uint32_t kMusicWarmupMs = 5000;
+constexpr uint32_t kMaximumMusicBeatGapMs = 2000;
 constexpr uint32_t kMusicHoldMs = 2000;
 constexpr float kMaximumMusicZcf = 0.40f;
 constexpr float kDefaultMinimumBeatConfidence = 0.25f;
@@ -66,6 +70,10 @@ const fl::vec2f kHydroPackLedLayout[] = {
     // Right triangle (>)
     {88.0f, 50.0f}, {78.0f, 42.0f}, {78.0f, 58.0f},
     {68.0f, 34.0f}, {68.0f, 50.0f}, {68.0f, 66.0f},
+#if defined(FL_IS_WASM)
+    // Preview-only widget LED: beat confidence, not part of the fixture.
+    {96.0f, 10.0f},
+#endif
 };
 
 static_assert(sizeof(kHydroPackLedLayout) / sizeof(kHydroPackLedLayout[0]) ==
@@ -84,9 +92,9 @@ fl::UIAudio audioUi("Audio Input", audioConfig);
 
 fl::UITitle title("HydroPack Stage Music Launch");
 fl::UIDescription description(
-    "The INMP441 sound-pressure gate needs two confident low-hiss bass beats "
-    "to arm music mode, at any reasonable tempo. Conversation and one-off "
-    "noise stay dark; musical bass "
+    "The INMP441 sound-pressure gate warms up for five seconds of confident "
+    "beats before arming music mode. Conversation and one-off noise stay "
+    "dark; musical bass "
     "fires the center, with stronger hits launching to both triangles.");
 
 fl::UISlider stageThresholdDbSpl("Minimum Music Level (dB SPL)",
@@ -95,6 +103,8 @@ fl::UISlider stageThresholdDbSpl("Minimum Music Level (dB SPL)",
 fl::UISlider minimumBeatConfidence("Minimum Beat Confidence",
                                    kDefaultMinimumBeatConfidence, 0.0f, 1.0f,
                                    0.05f);
+fl::UICheckbox showBeatConfidenceDebug("Show Beat Confidence Debug LED",
+                                       true);
 fl::UISlider centerThreshold("Center (Sensitive) Threshold", 1.05f, 1.0f,
                              3.0f, 0.05f);
 fl::UISlider triangleThreshold("Triangles (Loud) Threshold", 1.65f, 1.0f,
@@ -111,8 +121,9 @@ uint32_t gTriangleFireAtMs = 0;
 fl::audio::SoundLevelMeter gSoundLevelMeter;
 fl::shared_ptr<fl::audio::Processor> gAudio;
 float gSoundPressureDbSpl = 33.0f;
-uint8_t gMusicBeatCount = 0;
-uint32_t gFirstMusicBeatMs = 0;
+float gBeatConfidence = 0.0f;
+uint32_t gMusicWarmupStartedMs = 0;
+uint32_t gLastQualifyingBeatMs = 0;
 uint32_t gMusicActiveUntilMs = 0;
 
 void updateSoundLevel() {
@@ -134,26 +145,22 @@ bool isMusicPresent() {
     }
 
     const uint32_t now = millis();
-    if (now < gMusicActiveUntilMs) {
+    if (static_cast<int32_t>(now - gMusicActiveUntilMs) < 0) {
         // Each qualifying bass beat extends the short music-present hold.
         gMusicActiveUntilMs = now + kMusicHoldMs;
         return true;
     }
 
-    const uint32_t intervalMs = now - gFirstMusicBeatMs;
-    if (gMusicBeatCount == 0 || intervalMs > kMaximumMusicBeatIntervalMs ||
-        intervalMs < kMinimumMusicBeatIntervalMs) {
-        gMusicBeatCount = 1;
-        gFirstMusicBeatMs = now;
+    if (gMusicWarmupStartedMs == 0 ||
+        now - gLastQualifyingBeatMs > kMaximumMusicBeatGapMs) {
+        gMusicWarmupStartedMs = now;
+    }
+    gLastQualifyingBeatMs = now;
+
+    if (now - gMusicWarmupStartedMs < kMusicWarmupMs) {
         return false;
     }
 
-    ++gMusicBeatCount;
-    if (gMusicBeatCount < kMusicBeatsToActivate) {
-        return false;
-    }
-
-    gMusicBeatCount = 0;
     gMusicActiveUntilMs = now + kMusicHoldMs;
     return true;
 }
@@ -191,6 +198,13 @@ void renderPreview() {
     for (uint8_t i = 0; i < kTriangleLedCount; ++i) {
         previewLeds[kCenterStart + i] = centerColor;
     }
+#if defined(FL_IS_WASM)
+    const uint8_t debugBrightness =
+        showBeatConfidenceDebug.value() ? toByte(gBeatConfidence * 255.0f)
+                                         : 0;
+    previewLeds[kDebugLedIndex] =
+        CRGB(debugBrightness, debugBrightness, debugBrightness);
+#endif
 }
 
 void setup() {
@@ -205,6 +219,7 @@ void setup() {
     fadeSeconds.setGroup("Two-Level Bass Analyzers");
     stageThresholdDbSpl.setGroup("Stage Music Gate");
     minimumBeatConfidence.setGroup("Stage Music Gate");
+    showBeatConfidenceDebug.setGroup("Debug");
 
     // The unified input is browser audio on WASM and INMP441 I2S on ESP32.
     gAudio = FastLED.add(audioUi);
@@ -233,7 +248,8 @@ void setup() {
         }
     });
     gAudio->onBeat([]() {
-        if (gAudio->getBeatConfidence() < minimumBeatConfidence.value() ||
+        gBeatConfidence = gAudio->getBeatConfidence();
+        if (gBeatConfidence < minimumBeatConfidence.value() ||
             gSoundPressureDbSpl < stageThresholdDbSpl.value()) {
             return;
         }
@@ -262,6 +278,9 @@ void loop() {
             gCenterLevel = fl::clamp(gCenterLevel - decay, 0.0f, 1.0f);
             gTriangleLevel = fl::clamp(gTriangleLevel - decay, 0.0f, 1.0f);
         }
+        const float confidenceDecay = float(deltaMs) / 750.0f;
+        gBeatConfidence =
+            fl::clamp(gBeatConfidence - confidenceDecay, 0.0f, 1.0f);
 
         renderPreview();
         FastLED.show();  // Auto-pumps browser or I2S microphone audio.

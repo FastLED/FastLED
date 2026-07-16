@@ -16,12 +16,14 @@
   SPL meter with its adaptive bass-beat detector rather than a custom
   sound-floor histogram or a separate tempo lock.
 
-- For a responsive music-only visual, use two qualifying bass beats in a
-  broad 30-240 BPM-equivalent range plus a low-ZCF check to arm a temporary
-  music-present state. Treat that range as music evidence, never a fixed
-  tempo-consistency or animation-lock requirement.
+- For a responsive music-only visual, require five seconds of recurring
+  qualifying beat evidence plus a low-ZCF check to arm a temporary
+  music-present state. Never use a fixed tempo-consistency or animation lock.
 
 - FastLED's `getBeatConfidence()` is a normalized 0-1 spectral-flux score;
   use it only to arm music mode. Keep Vibe as the immediate rhythmic response
   after arming. FFT operates on short PCM frames, while the detector compares
   the resulting spectrum across frames.
+
+- A WASM-only debug LED can expose the latest beat-confidence pulse without
+  adding a physical output pixel to the HydroPack fixture.
