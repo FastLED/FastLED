@@ -1,44 +1,31 @@
 // FL_AGENT_ALLOW_NEW_EXAMPLE
-/// @file    hydropack.ino
-/// @brief   HydroPack: dual EL-panel beat visualizer. The inner panel fires
-///          on sensitive (quiet) beats, the outer panel only on loud beats.
-///          INMP441 mic -> normalized bass detection -> 50 Hz PWM gates.
+/// @file hydropack.ino
+/// @brief HydroPack: an LED approximation of the < | > EL layout with two
+///          adaptive microphone indicators: Sensitive and Loud.
 /// @example hydropack.ino
 
 // @filter: (mem is large) and (platform is esp32*)
 
-// This sketch targets the ESP32-C3 and is also a valid FastLED WASM sketch:
-//   pip install fastled
-//   fastled examples/hydropack
-// On WASM the audio comes from the browser (microphone or audio file) and the
-// two EL panels are rendered as an inner disc + outer ring preview. On the
-// ESP32-C3 the audio comes from a real INMP441 and the panels are driven by
-// low-frequency 50 Hz PWM suitable for gating an EL inverter.
+// This is deliberately an LED prototype, not an EL renderer. It draws two
+// triangular clusters and a center bar using ordinary addressable LEDs, then
+// adds two status LEDs below them:
+//   - cyan: Sensitive - fires on a bass transient just above the song average
+//   - magenta: Loud - fires only on a substantially stronger transient
 //
-// For a continuous-envelope EL panel example (browser audio only), see
-// examples/ElPanelReactive. HydroPack differs in that it is spike-gated:
-// panels flash on discrete beats instead of tracking the audio level, and it
-// wires a real INMP441 for standalone wearable use.
-//
-// Audio pipeline ("normalize, then select-filter"):
-//   1. Signal conditioning (DC removal, spike filter, noise gate) plus the
-//      INMP441 frequency-response profile normalize the raw mic signal.
-//   2. The vibe detector tracks the bass band of the FFT and self-normalizes
-//      it against the running song average (~1.0 = average loudness), so the
-//      same thresholds work at whisper and club volume.
-//   3. Rising bass energy (a spike) is split by loudness: beats just above
-//      the average fire the sensitive inner panel; only strong hits fire the
-//      loud outer panel.
+// The detector is FastLED's built-in Vibe detector. Like Songstone's adaptive
+// window, it tracks a slow running song average; relative bass energy is about
+// 1.0 at the current average. FastLED's adaptive noise-floor tracker gates
+// microphone hiss before Vibe sees it. A loud hit therefore fires both LEDs,
+// while a moderate hit fires Sensitive only.
 
 #include <Arduino.h>
 #include <FastLED.h>
 
 #include "fl/math/math.h"
-#include "fl/system/pin.h"
 #include "fl/ui/ui.h"
 
 // ---------------------------------------------------------------------------
-// Configuration (ESP32-C3 pin map)
+// Configuration
 // ---------------------------------------------------------------------------
 
 // INMP441 wiring (matches examples/AudioInput):
@@ -48,169 +35,124 @@
 #define I2S_SD 8
 #define I2S_CLK 4
 
-// EL panel gate pins. Each drives the enable line / transistor gate of an EL
-// inverter, active high.
-#define PIN_EL_INNER 5
-#define PIN_EL_OUTER 6
-#define PIN_EL_WIRE 10
-
-// EL inverters must be gated slowly - low-frequency PWM at 50 Hz.
-#define EL_PWM_FREQ_HZ 50
-
-// On-screen preview (WASM) and optional debug strip (hardware): one channel
-// per geometry-native EL output.
 #define PIN_PREVIEW 3
-#define NUM_PREVIEW_LEDS 3
 
-// ---------------------------------------------------------------------------
-// EL panel drive: 50 Hz low-frequency PWM through the fl pin API
-// ---------------------------------------------------------------------------
-// fl::setPwmFrequency() + fl::analogWrite() pick the right PWM backend per
-// platform (LEDC on ESP32, including the Arduino core 2.x/3.x differences).
-// The browser preview has no PWM hardware, so the calls are skipped there;
-// the preview LEDs are the panels on WASM.
+constexpr uint8_t kGeometryLedCount = 18;
+constexpr uint8_t kSensitiveIndicator = 18;
+constexpr uint8_t kLoudIndicator = 19;
+constexpr uint8_t kPreviewLedCount = 20;
 
-void initPanels() {
-#ifndef __EMSCRIPTEN__
-    fl::pinMode(PIN_EL_INNER, fl::PinMode::Output);
-    fl::pinMode(PIN_EL_OUTER, fl::PinMode::Output);
-    fl::pinMode(PIN_EL_WIRE, fl::PinMode::Output);
-    fl::setPwmFrequency(PIN_EL_INNER, EL_PWM_FREQ_HZ);
-    fl::setPwmFrequency(PIN_EL_OUTER, EL_PWM_FREQ_HZ);
-    fl::setPwmFrequency(PIN_EL_WIRE, EL_PWM_FREQ_HZ);
-    fl::analogWrite(PIN_EL_INNER, 0);
-    fl::analogWrite(PIN_EL_OUTER, 0);
-    fl::analogWrite(PIN_EL_WIRE, 0);
-#endif
+CRGB previewLeds[kPreviewLedCount];
+
+// Six LEDs form each triangle, six form the center bar, and the last two are
+// the explicitly labeled audio indicators. The layout reads < | > in the
+// WASM screenmap renderer without relying on EL panel/wire primitives.
+const fl::vec2f kHydroPackLedLayout[] = {
+    // Left triangle (<)
+    {12.0f, 50.0f}, {22.0f, 42.0f}, {22.0f, 58.0f},
+    {32.0f, 34.0f}, {32.0f, 50.0f}, {32.0f, 66.0f},
+    // Center bar (|)
+    {50.0f, 30.0f}, {50.0f, 38.0f}, {50.0f, 46.0f},
+    {50.0f, 54.0f}, {50.0f, 62.0f}, {50.0f, 70.0f},
+    // Right triangle (>)
+    {88.0f, 50.0f}, {78.0f, 42.0f}, {78.0f, 58.0f},
+    {68.0f, 34.0f}, {68.0f, 50.0f}, {68.0f, 66.0f},
+    // Sensitive, Loud
+    {44.0f, 88.0f}, {56.0f, 88.0f},
+};
+
+static_assert(sizeof(kHydroPackLedLayout) / sizeof(kHydroPackLedLayout[0]) ==
+                  kPreviewLedCount,
+              "HydroPack screenmap must contain every preview LED");
+
+fl::ScreenMap makePreviewMap() {
+    return fl::ScreenMap(kHydroPackLedLayout, 1.4f);
 }
 
-void writePanels(uint8_t innerDuty, uint8_t wireDuty, uint8_t outerDuty) {
-#ifndef __EMSCRIPTEN__
-    // Skip rewrites of an unchanged duty: the 50 Hz PWM only latches a new
-    // value once per 20 ms period anyway.
-    static int lastInner = -1;
-    static int lastOuter = -1;
-    static int lastWire = -1;
-    if (innerDuty != lastInner) {
-        fl::analogWrite(PIN_EL_INNER, innerDuty);
-        lastInner = innerDuty;
-    }
-    if (outerDuty != lastOuter) {
-        fl::analogWrite(PIN_EL_OUTER, outerDuty);
-        lastOuter = outerDuty;
-    }
-    if (wireDuty != lastWire) {
-        fl::analogWrite(PIN_EL_WIRE, wireDuty);
-        lastWire = wireDuty;
-    }
-#else
-    FASTLED_UNUSED(innerDuty);
-    FASTLED_UNUSED(wireDuty);
-    FASTLED_UNUSED(outerDuty);
-#endif
-}
-
-// ---------------------------------------------------------------------------
-// Globals
-// ---------------------------------------------------------------------------
-
-CRGB previewLeds[NUM_PREVIEW_LEDS];
+fl::ScreenMap previewMap = makePreviewMap();
 
 fl::audio::Config audioConfig = fl::audio::Config::CreateInmp441(
     I2S_WS, I2S_SD, I2S_CLK, fl::audio::AudioChannel::Right);
 fl::UIAudio audioUi("Audio Input", audioConfig);
 
-fl::UITitle title("HydroPack");
+fl::UITitle title("HydroPack LED Audio Prototype");
 fl::UIDescription description(
-    "Dual EL-panel beat visualizer. The INMP441 signal is normalized, then "
-    "bass beats are split by loudness: the inner panel fires on sensitive "
-    "beats, the outer panel only on loud ones. Panels are gated with 50 Hz "
-    "low-frequency PWM.");
+    "LED approximation of the < | > layout. Cyan is Sensitive: it fires on "
+    "moderate bass hits. Magenta is Loud: it fires only on strong hits. "
+    "Both thresholds adapt to the current song and microphone noise floor.");
 
-// Vibe bass is self-normalizing: ~1.0 = the song's running average, so the
-// thresholds read as "x times louder than average".
-fl::UISlider innerThreshold("Inner (Sensitive) Threshold", 1.05f, 1.0f, 3.0f, 0.05f);
-fl::UISlider outerThreshold("Outer (Loud) Threshold", 1.6f, 1.0f, 6.0f, 0.05f);
-fl::UISlider fadeSeconds("Panel Fade Seconds", 0.25f, 0.05f, 2.0f, 0.05f);
+fl::UISlider sensitiveThreshold("Sensitive Threshold", 1.05f, 1.0f, 3.0f,
+                                0.05f);
+fl::UISlider loudThreshold("Loud Threshold", 1.65f, 1.0f, 6.0f, 0.05f);
+fl::UISlider fadeSeconds("Indicator Fade Seconds", 0.25f, 0.05f, 2.0f,
+                          0.05f);
 
-// Beat envelopes, 0.0-1.0. Raised by the audio callback, decayed in loop().
-float gInnerLevel = 0.0f;
-float gOuterLevel = 0.0f;
+// 0.0-1.0 envelopes. The audio callback raises them and the render loop
+// decays them. Keeping two independent envelopes makes the behavior visible:
+// Sensitive can remain lit while Loud stays dark.
+float gSensitiveLevel = 0.0f;
+float gLoudLevel = 0.0f;
 
-// Preview layout: two filled triangular EL panels and one thick EL wire.
-fl::ScreenMap makePreviewMap() {
-    fl::ScreenMap map(NUM_PREVIEW_LEDS, 0.5f);
-    const fl::vec2f left[] = {{30.0f, 50.0f}, {10.0f, 25.0f}, {10.0f, 75.0f}};
-    const fl::vec2f wire[] = {{42.0f, 50.0f}, {58.0f, 50.0f}};
-    const fl::vec2f right[] = {{70.0f, 50.0f}, {90.0f, 25.0f}, {90.0f, 75.0f}};
-    map.setShape(0, fl::ScreenMap::Shape::EL_PANEL, left, 3);
-    map.setShape(1, fl::ScreenMap::Shape::EL_WIRE, wire, 2, 5.0f);
-    map.setShape(2, fl::ScreenMap::Shape::EL_PANEL, right, 3);
-    return map;
-}
-
-fl::ScreenMap previewMap = makePreviewMap();
-
-// Raise a panel envelope when a bass spike crosses its threshold. Intensity
-// scales with how far the beat lands above the threshold, with a floor so
-// barely-over beats still visibly flash.
-void firePanel(float bass, float threshold, float minIntensity, float &level) {
+void fireIndicator(float bass, float threshold, float minIntensity,
+                   float &level) {
     if (bass <= threshold) {
         return;
     }
-    const float intensity =
-        fl::clamp((bass - threshold) / threshold, minIntensity, 1.0f);
+    const float intensity = fl::clamp((bass - threshold) / threshold,
+                                      minIntensity, 1.0f);
     level = fl::max(level, intensity);
 }
 
-// ---------------------------------------------------------------------------
-// Arduino setup / loop
-// ---------------------------------------------------------------------------
+uint8_t toByte(float value) {
+    return static_cast<uint8_t>(fl::clamp(value, 0.0f, 255.0f));
+}
+
+void renderPreview() {
+    // The physical-layout LEDs are electric blue only while an indicator is
+    // active. Quiet input is fully dark.
+    const float combined = fl::max(gSensitiveLevel, gLoudLevel);
+    const uint8_t geometryBrightness = toByte(combined * 160.0f);
+    for (uint8_t i = 0; i < kGeometryLedCount; ++i) {
+        previewLeds[i] = CRGB(0, geometryBrightness / 3, geometryBrightness);
+    }
+
+    const uint8_t sensitive = toByte(gSensitiveLevel * 255.0f);
+    const uint8_t loud = toByte(gLoudLevel * 255.0f);
+    previewLeds[kSensitiveIndicator] = CRGB(0, sensitive, sensitive);
+    previewLeds[kLoudIndicator] = CRGB(loud, 0, loud);
+}
 
 void setup() {
     Serial.begin(115200);
 
-    FastLED.addLeds<WS2812B, PIN_PREVIEW, GRB>(previewLeds, NUM_PREVIEW_LEDS)
+    FastLED.addLeds<WS2812B, PIN_PREVIEW, GRB>(previewLeds, kPreviewLedCount)
         .setScreenMap(previewMap);
     FastLED.setBrightness(255);
 
-    initPanels();
+    sensitiveThreshold.setGroup("Adaptive Audio Indicators");
+    loudThreshold.setGroup("Adaptive Audio Indicators");
+    fadeSeconds.setGroup("Adaptive Audio Indicators");
 
-    innerThreshold.setGroup("Beat Detection");
-    outerThreshold.setGroup("Beat Detection");
-    fadeSeconds.setGroup("Beat Detection");
-
-    // Unified audio path: browser audio on WASM, INMP441 over I2S on the
-    // ESP32-C3. Samples are auto-pumped into the processor during show().
+    // The unified input is browser audio on WASM and INMP441 I2S on ESP32.
     auto audio = FastLED.add(audioUi);
     if (!audio) {
         FL_WARN("HydroPack: no audio processor available");
         return;
     }
 
-    // Normalization: the conditioning pipeline (DC removal, spike filter,
-    // noise gate) is on by default; adaptive noise floor tracking keeps
-    // quiet-room hiss from triggering the panels.
     audio->setNoiseFloorTrackingEnabled(true);
-
-    // Select-filter: only rising bass energy counts as a beat, then the
-    // self-normalized level picks which panel(s) fire.
     audio->onVibeLevels([](const fl::audio::detector::VibeLevels &levels) {
         if (!levels.bassSpike) {
             return;
         }
-        // Inner panel: sensitive - beats just above the running average.
-        firePanel(levels.bass, innerThreshold.value(), 0.35f, gInnerLevel);
-        // Outer panel: loud beats only.
-        firePanel(levels.bass, outerThreshold.value(), 0.5f, gOuterLevel);
+        fireIndicator(levels.bass, sensitiveThreshold.value(), 0.35f,
+                      gSensitiveLevel);
+        fireIndicator(levels.bass, loudThreshold.value(), 0.50f, gLoudLevel);
     });
 }
 
 void loop() {
-    // 100 fps is plenty for a 50 Hz output device; pacing the frame keeps a
-    // battery-powered wearable from busy-looping at full speed.
     EVERY_N_MILLIS(10) {
-        // Frame-time based decay so the fade speed is FPS independent.
         static uint32_t lastMs = 0;
         static bool firstFrame = true;
         const uint32_t now = millis();
@@ -221,22 +163,12 @@ void loop() {
         const float fade = fadeSeconds.value();
         if (fade > 0.0f && deltaMs > 0) {
             const float decay = float(deltaMs) / (1000.0f * fade);
-            gInnerLevel = fl::clamp(gInnerLevel - decay, 0.0f, 1.0f);
-            gOuterLevel = fl::clamp(gOuterLevel - decay, 0.0f, 1.0f);
+            gSensitiveLevel = fl::clamp(gSensitiveLevel - decay, 0.0f, 1.0f);
+            gLoudLevel = fl::clamp(gLoudLevel - decay, 0.0f, 1.0f);
         }
 
-        // Drive the EL panels: envelope -> 50 Hz PWM duty.
-        const uint8_t innerDuty = uint8_t(gInnerLevel * 255.0f);
-        const uint8_t outerDuty = uint8_t(gOuterLevel * 255.0f);
-        const uint8_t wireDuty = uint8_t(((gInnerLevel + gOuterLevel) * 0.5f) * 255.0f);
-        writePanels(innerDuty, wireDuty, outerDuty);
-
-        // Preview: inner disc = aqua (sensitive), outer ring = ice blue (loud).
-        previewLeds[0] = CRGB(innerDuty, 0, 0);
-        previewLeds[1] = CRGB(0, wireDuty, 0);
-        previewLeds[2] = CRGB(0, 0, outerDuty);
-
-        FastLED.show(); // audio is auto-pumped here
+        renderPreview();
+        FastLED.show();  // Auto-pumps browser or I2S microphone audio.
     }
     delay(1);
 }
