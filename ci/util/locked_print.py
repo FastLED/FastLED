@@ -9,4 +9,7 @@ def locked_print(string: str):
     with PRINT_LOCK:
         # print only prints so much, break up the string into lines
         for line in string.splitlines():
-            print(line)
+            # Build output is commonly piped through ``tee`` in CI.  Without
+            # an explicit flush, Python block-buffers stdout and hides live
+            # compiler progress until the buffer fills or the process exits.
+            print(line, flush=True)
