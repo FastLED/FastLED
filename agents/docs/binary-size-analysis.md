@@ -25,7 +25,7 @@ bash bloat esp32s3 --no-summary
 
 `bash bloat <board>` hides every choice that was previously a per-invocation footgun — toolchain prefix, ELF path, `--nm` override, output directory. Use it instead of running `nm`/`size`/`xtensa-esp32s3-elf-nm` by hand.
 
-Supported boards live in `ci/bloat.py::BOARD_CHIP_MAP` (esp32, esp32s2, esp32s3, esp32c3, esp32c6, esp32h2). Adding a new board is a one-line entry mapping the board id to its architecture + chip prefix; the script resolves the cross-toolchain `nm` from the PIO packages directory.
+The wrapper also recognizes fbuild's current through-PIO artifact layout, `.build/pio/<board>/.fbuild/build/release/firmware.elf`, and lets fbuild resolve the toolchain there. `ci/bloat.py::BOARD_CHIP_MAP` is only needed for legacy PIO artifacts (esp32, esp32s2, esp32s3, esp32c3, esp32c6, esp32h2).
 
 ## Artifacts
 

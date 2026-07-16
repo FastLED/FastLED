@@ -102,13 +102,36 @@ impl FileContentChecker for PlatformsFlNamespaceChecker {
         if normalized.contains("/examples/") || normalized.contains("/tests/") {
             return false;
         }
+        if normalized.ends_with("/platforms/arm/teensy/sdfat/SdFatConfig.h")
+            || normalized.ends_with("/platforms/arm/teensy/sdfat/common/DebugMacros.h")
+        {
+            return false;
+        }
         if ends_with_any(&normalized, &["_build.hpp", "_build.cpp", "_build.cpp.hpp"]) {
             return false;
         }
-        ends_with_any(&normalized, &[".h", ".cpp", ".hpp"])
+        ends_with_any(&normalized, &[".h", ".cpp", ".hpp", ".cpp.hpp"])
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let normalized = normalize_path(&file_content.path);
+        if normalized.contains("/platforms/arm/teensy/sdfat/")
+            || normalized.contains("/platforms/arm/teensy/audio/")
+        {
+            if file_content
+                .content
+                .contains("namespace fl { namespace platforms")
+                || file_content
+                    .content
+                    .contains("namespace fl {\nnamespace platforms")
+            {
+                return Vec::new();
+            }
+            return vec![(
+                0,
+                "Private Teensy imports must be declared in namespace fl::platforms (nested namespaces permitted); no global-namespace exemption is allowed.".to_string(),
+            )];
+        }
         if file_content.content.contains("namespace fl")
             || file_content.content.contains("// ok no namespace fl")
         {
@@ -248,4 +271,3 @@ impl FileContentChecker for LoggingInIramChecker {
         violations
     }
 }
-

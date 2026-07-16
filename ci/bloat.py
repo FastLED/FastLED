@@ -12,7 +12,8 @@ What it does:
     1. Locates the latest firmware.elf for the build, preferring the
        fbuild-native layout `.fbuild/build/<board>/release/firmware.elf`
        and falling back to the legacy PIO path
-       `.build/pio/<board>/.pio/build/<board>/firmware.elf`.
+       `.build/pio/<board>/.fbuild/build/release/firmware.elf`, then the
+       legacy `.build/pio/<board>/.pio/build/<board>/firmware.elf`.
     2. Invokes `fbuild symbols` against it.
         - For fbuild-native ELFs: `fbuild symbols` auto-locates the sibling
           `build_info_<board>.json` (emitted by fbuild after every link)
@@ -145,13 +146,21 @@ def find_elf(board: str, build_root: Path) -> ElfLocation:
 
     Priority order:
       1. `.fbuild/build/<board>/release/firmware.elf` (fbuild-native)
-      2. `<build_root>/pio/<board>/.pio/build/<board>/firmware.elf` (PIO)
-      3. `<build_root>/<board>/firmware.elf` (legacy fbuild layout, pre-#487)
+      2. `<build_root>/pio/<board>/.fbuild/build/release/firmware.elf`
+         (current fbuild-through-PIO layout)
+      3. `<build_root>/pio/<board>/.pio/build/<board>/firmware.elf` (PIO)
+      4. `<build_root>/<board>/firmware.elf` (legacy fbuild layout, pre-#487)
     """
     project_root = Path.cwd()
     fbuild_elf = project_root / ".fbuild" / "build" / board / "release" / "firmware.elf"
     if fbuild_elf.is_file():
         return ElfLocation(elf=fbuild_elf, fbuild_native=True)
+
+    pio_fbuild_elf = (
+        build_root / "pio" / board / ".fbuild" / "build" / "release" / "firmware.elf"
+    )
+    if pio_fbuild_elf.is_file():
+        return ElfLocation(elf=pio_fbuild_elf, fbuild_native=True)
 
     candidates = [
         build_root / "pio" / board / ".pio" / "build" / board / "firmware.elf",
