@@ -11,10 +11,11 @@
 //   - center: sensitive - fires on a transient just above the song average
 //   - triangles: loud - fire only on a substantially stronger transient
 //
-// The output is gated by calibrated sound pressure and an adaptive bass beat.
-// A short music-presence latch needs two bass beats and rejects high-ZCF hiss,
-// keeping ordinary conversation and isolated noise dark without a rigid BPM
-// lock before every visible musical hit.
+// FastLED's normalized spectral-flux beat confidence arms music mode. Vibe
+// remains the actual real-time bass response: its spikes drive the animation
+// only while music mode is armed. The arming latch needs two bass beats in a
+// broad musical tempo range and rejects high-ZCF hiss. The beat spacing may
+// speed up or slow down; it is evidence of music, not an animation BPM lock.
 // Once music is established, FastLED's Vibe detector tracks its running bass
 // average; relative bass energy is about 1.0 at the current average. A loud
 // hit lights the center, then launches into the triangles.
@@ -45,9 +46,11 @@ constexpr uint8_t kPreviewLedCount = 18;
 constexpr uint32_t kTriangleLaunchDelayMs = 5;
 constexpr float kDefaultStageThresholdDbSpl = 80.0f;
 constexpr uint8_t kMusicBeatsToActivate = 2;
-constexpr uint32_t kMusicBeatWindowMs = 1600;
+constexpr uint32_t kMinimumMusicBeatIntervalMs = 250;
+constexpr uint32_t kMaximumMusicBeatIntervalMs = 2000;
 constexpr uint32_t kMusicHoldMs = 2000;
 constexpr float kMaximumMusicZcf = 0.40f;
+constexpr float kDefaultMinimumBeatConfidence = 0.25f;
 
 CRGB previewLeds[kPreviewLedCount];
 
@@ -81,13 +84,17 @@ fl::UIAudio audioUi("Audio Input", audioConfig);
 
 fl::UITitle title("HydroPack Stage Music Launch");
 fl::UIDescription description(
-    "The INMP441 sound-pressure gate needs two low-hiss bass beats to arm "
-    "music mode. Conversation and one-off noise stay dark; musical bass "
+    "The INMP441 sound-pressure gate needs two confident low-hiss bass beats "
+    "to arm music mode, at any reasonable tempo. Conversation and one-off "
+    "noise stay dark; musical bass "
     "fires the center, with stronger hits launching to both triangles.");
 
 fl::UISlider stageThresholdDbSpl("Minimum Music Level (dB SPL)",
                                  kDefaultStageThresholdDbSpl, 60.0f, 105.0f,
                                  1.0f);
+fl::UISlider minimumBeatConfidence("Minimum Beat Confidence",
+                                   kDefaultMinimumBeatConfidence, 0.0f, 1.0f,
+                                   0.05f);
 fl::UISlider centerThreshold("Center (Sensitive) Threshold", 1.05f, 1.0f,
                              3.0f, 0.05f);
 fl::UISlider triangleThreshold("Triangles (Loud) Threshold", 1.65f, 1.0f,
@@ -133,7 +140,9 @@ bool isMusicPresent() {
         return true;
     }
 
-    if (gMusicBeatCount == 0 || now - gFirstMusicBeatMs > kMusicBeatWindowMs) {
+    const uint32_t intervalMs = now - gFirstMusicBeatMs;
+    if (gMusicBeatCount == 0 || intervalMs > kMaximumMusicBeatIntervalMs ||
+        intervalMs < kMinimumMusicBeatIntervalMs) {
         gMusicBeatCount = 1;
         gFirstMusicBeatMs = now;
         return false;
@@ -147,6 +156,10 @@ bool isMusicPresent() {
     gMusicBeatCount = 0;
     gMusicActiveUntilMs = now + kMusicHoldMs;
     return true;
+}
+
+bool isMusicModeActive() {
+    return static_cast<int32_t>(millis() - gMusicActiveUntilMs) < 0;
 }
 
 void fireAnalyzer(float bass, float threshold, float minIntensity,
@@ -191,6 +204,7 @@ void setup() {
     triangleThreshold.setGroup("Two-Level Bass Analyzers");
     fadeSeconds.setGroup("Two-Level Bass Analyzers");
     stageThresholdDbSpl.setGroup("Stage Music Gate");
+    minimumBeatConfidence.setGroup("Stage Music Gate");
 
     // The unified input is browser audio on WASM and INMP441 I2S on ESP32.
     gAudio = FastLED.add(audioUi);
@@ -207,7 +221,7 @@ void setup() {
         updateSoundLevel();
         if (!levels.bassSpike ||
             gSoundPressureDbSpl < stageThresholdDbSpl.value() ||
-            !isMusicPresent()) {
+            !isMusicModeActive()) {
             return;
         }
         fireAnalyzer(levels.bass, centerThreshold.value(), 0.35f,
@@ -217,6 +231,13 @@ void setup() {
                          gPendingTriangleLevel);
             gTriangleFireAtMs = millis() + kTriangleLaunchDelayMs;
         }
+    });
+    gAudio->onBeat([]() {
+        if (gAudio->getBeatConfidence() < minimumBeatConfidence.value() ||
+            gSoundPressureDbSpl < stageThresholdDbSpl.value()) {
+            return;
+        }
+        isMusicPresent();
     });
 }
 
