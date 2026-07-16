@@ -15,6 +15,11 @@
 // ESP32-C3 the audio comes from a real INMP441 and the panels are driven by
 // low-frequency 50 Hz PWM suitable for gating an EL inverter.
 //
+// For a continuous-envelope EL panel example (browser audio only), see
+// examples/ElPanelReactive. HydroPack differs in that it is spike-gated:
+// panels flash on discrete beats instead of tracking the audio level, and it
+// wires a real INMP441 for standalone wearable use.
+//
 // Audio pipeline ("normalize, then select-filter"):
 //   1. Signal conditioning (DC removal, spike filter, noise gate) plus the
 //      INMP441 frequency-response profile normalize the raw mic signal.
@@ -29,6 +34,7 @@
 #include <FastLED.h>
 
 #include "fl/math/math.h"
+#include "fl/system/pin.h"
 #include "fl/ui/ui.h"
 
 // ---------------------------------------------------------------------------
@@ -47,11 +53,8 @@
 #define PIN_EL_INNER 5
 #define PIN_EL_OUTER 6
 
-// EL inverters must be gated slowly - low-frequency PWM at 50 Hz. 12-bit
-// resolution keeps 50 Hz inside the LEDC divider range (higher resolutions
-// lower the minimum reachable frequency).
+// EL inverters must be gated slowly - low-frequency PWM at 50 Hz.
 #define EL_PWM_FREQ_HZ 50
-#define EL_PWM_RESOLUTION_BITS 12
 
 // On-screen preview (WASM) and optional debug strip (hardware): a single
 // WS2812 run laid out as an inner disc plus an outer ring.
@@ -61,61 +64,43 @@
 #define NUM_PREVIEW_LEDS (INNER_PREVIEW_LEDS + OUTER_PREVIEW_LEDS)
 
 // ---------------------------------------------------------------------------
-// EL panel driver: 50 Hz low-frequency PWM
+// EL panel drive: 50 Hz low-frequency PWM through the fl pin API
 // ---------------------------------------------------------------------------
+// fl::setPwmFrequency() + fl::analogWrite() pick the right PWM backend per
+// platform (LEDC on ESP32, including the Arduino core 2.x/3.x differences).
+// The browser preview has no PWM hardware, so the calls are skipped there;
+// the preview LEDs are the panels on WASM.
 
-#if defined(FL_IS_ESP32)
-
-#ifndef ESP_ARDUINO_VERSION_MAJOR
-#define ESP_ARDUINO_VERSION_MAJOR 2 // Assume the old LEDC API when undefined
+void initPanels() {
+#ifndef __EMSCRIPTEN__
+    fl::pinMode(PIN_EL_INNER, fl::PinMode::Output);
+    fl::pinMode(PIN_EL_OUTER, fl::PinMode::Output);
+    fl::setPwmFrequency(PIN_EL_INNER, EL_PWM_FREQ_HZ);
+    fl::setPwmFrequency(PIN_EL_OUTER, EL_PWM_FREQ_HZ);
+    fl::analogWrite(PIN_EL_INNER, 0);
+    fl::analogWrite(PIN_EL_OUTER, 0);
 #endif
+}
 
-class ElPanel {
-  public:
-    void begin(int pin, uint8_t channel) {
-        mPin = pin;
-        mChannel = channel;
-#if ESP_ARDUINO_VERSION_MAJOR >= 3
-        // Arduino core 3.x: ledcAttach auto-assigns a channel.
-        ledcAttach(mPin, EL_PWM_FREQ_HZ, EL_PWM_RESOLUTION_BITS);
+void writePanels(uint8_t innerDuty, uint8_t outerDuty) {
+#ifndef __EMSCRIPTEN__
+    // Skip rewrites of an unchanged duty: the 50 Hz PWM only latches a new
+    // value once per 20 ms period anyway.
+    static int lastInner = -1;
+    static int lastOuter = -1;
+    if (innerDuty != lastInner) {
+        fl::analogWrite(PIN_EL_INNER, innerDuty);
+        lastInner = innerDuty;
+    }
+    if (outerDuty != lastOuter) {
+        fl::analogWrite(PIN_EL_OUTER, outerDuty);
+        lastOuter = outerDuty;
+    }
 #else
-        // Arduino core 2.x: explicit channel setup.
-        ledcSetup(mChannel, EL_PWM_FREQ_HZ, EL_PWM_RESOLUTION_BITS);
-        ledcAttachPin(mPin, mChannel);
+    FASTLED_UNUSED(innerDuty);
+    FASTLED_UNUSED(outerDuty);
 #endif
-        write(0);
-    }
-
-    // level: 0-255 beat envelope, mapped onto the 12-bit 50 Hz duty cycle.
-    void write(uint8_t level) {
-        const uint32_t maxDuty = (1u << EL_PWM_RESOLUTION_BITS) - 1;
-        const uint32_t duty = (uint32_t(level) * maxDuty) / 255;
-#if ESP_ARDUINO_VERSION_MAJOR >= 3
-        ledcWrite(mPin, duty); // 3.x keys writes by pin
-#else
-        ledcWrite(mChannel, duty); // 2.x keys writes by channel
-#endif
-    }
-
-  private:
-    int mPin = -1;
-    uint8_t mChannel = 0;
-};
-
-#else
-
-// No PWM hardware on this target (WASM / host preview): the panels are
-// visualized through the preview LEDs only.
-class ElPanel {
-  public:
-    void begin(int pin, uint8_t channel) {
-        FASTLED_UNUSED(pin);
-        FASTLED_UNUSED(channel);
-    }
-    void write(uint8_t level) { FASTLED_UNUSED(level); }
-};
-
-#endif // FL_IS_ESP32
+}
 
 // ---------------------------------------------------------------------------
 // Globals
@@ -140,9 +125,6 @@ fl::UISlider innerThreshold("Inner (Sensitive) Threshold", 1.05f, 1.0f, 3.0f, 0.
 fl::UISlider outerThreshold("Outer (Loud) Threshold", 1.6f, 1.0f, 6.0f, 0.05f);
 fl::UISlider fadeSeconds("Panel Fade Seconds", 0.25f, 0.05f, 2.0f, 0.05f);
 
-ElPanel innerPanel;
-ElPanel outerPanel;
-
 // Beat envelopes, 0.0-1.0. Raised by the audio callback, decayed in loop().
 float gInnerLevel = 0.0f;
 float gOuterLevel = 0.0f;
@@ -159,6 +141,18 @@ fl::ScreenMap previewMap =
         pt_out.y = 50.0f + radius * fl::sin(angle);
     });
 
+// Raise a panel envelope when a bass spike crosses its threshold. Intensity
+// scales with how far the beat lands above the threshold, with a floor so
+// barely-over beats still visibly flash.
+void firePanel(float bass, float threshold, float minIntensity, float &level) {
+    if (bass <= threshold) {
+        return;
+    }
+    const float intensity =
+        fl::clamp((bass - threshold) / threshold, minIntensity, 1.0f);
+    level = fl::max(level, intensity);
+}
+
 // ---------------------------------------------------------------------------
 // Arduino setup / loop
 // ---------------------------------------------------------------------------
@@ -170,8 +164,7 @@ void setup() {
         .setScreenMap(previewMap);
     FastLED.setBrightness(255);
 
-    innerPanel.begin(PIN_EL_INNER, 0);
-    outerPanel.begin(PIN_EL_OUTER, 1);
+    initPanels();
 
     innerThreshold.setGroup("Beat Detection");
     outerThreshold.setGroup("Beat Detection");
@@ -196,50 +189,43 @@ void setup() {
         if (!levels.bassSpike) {
             return;
         }
-        const float bass = levels.bass;
-
         // Inner panel: sensitive - beats just above the running average.
-        const float innerT = innerThreshold.value();
-        if (bass > innerT) {
-            const float intensity =
-                fl::clamp((bass - innerT) / innerT, 0.35f, 1.0f);
-            gInnerLevel = fl::max(gInnerLevel, intensity);
-        }
-
+        firePanel(levels.bass, innerThreshold.value(), 0.35f, gInnerLevel);
         // Outer panel: loud beats only.
-        const float outerT = outerThreshold.value();
-        if (bass > outerT) {
-            const float intensity =
-                fl::clamp((bass - outerT) / outerT, 0.5f, 1.0f);
-            gOuterLevel = fl::max(gOuterLevel, intensity);
-        }
+        firePanel(levels.bass, outerThreshold.value(), 0.5f, gOuterLevel);
     });
 }
 
 void loop() {
-    // Frame-time based decay so the fade speed is FPS independent.
-    static uint32_t lastMs = 0;
-    const uint32_t now = millis();
-    const uint32_t deltaMs = (lastMs == 0) ? 0 : (now - lastMs);
-    lastMs = now;
+    // 100 fps is plenty for a 50 Hz output device; pacing the frame keeps a
+    // battery-powered wearable from busy-looping at full speed.
+    EVERY_N_MILLIS(10) {
+        // Frame-time based decay so the fade speed is FPS independent.
+        static uint32_t lastMs = 0;
+        static bool firstFrame = true;
+        const uint32_t now = millis();
+        const uint32_t deltaMs = firstFrame ? 0 : (now - lastMs);
+        firstFrame = false;
+        lastMs = now;
 
-    const float fade = fadeSeconds.value();
-    if (fade > 0.0f && deltaMs > 0) {
-        const float decay = float(deltaMs) / (1000.0f * fade);
-        gInnerLevel = fl::clamp(gInnerLevel - decay, 0.0f, 1.0f);
-        gOuterLevel = fl::clamp(gOuterLevel - decay, 0.0f, 1.0f);
+        const float fade = fadeSeconds.value();
+        if (fade > 0.0f && deltaMs > 0) {
+            const float decay = float(deltaMs) / (1000.0f * fade);
+            gInnerLevel = fl::clamp(gInnerLevel - decay, 0.0f, 1.0f);
+            gOuterLevel = fl::clamp(gOuterLevel - decay, 0.0f, 1.0f);
+        }
+
+        // Drive the EL panels: envelope -> 50 Hz PWM duty.
+        const uint8_t innerDuty = uint8_t(gInnerLevel * 255.0f);
+        const uint8_t outerDuty = uint8_t(gOuterLevel * 255.0f);
+        writePanels(innerDuty, outerDuty);
+
+        // Preview: inner disc = aqua (sensitive), outer ring = ice blue (loud).
+        fill_solid(previewLeds, INNER_PREVIEW_LEDS, CHSV(128, 200, innerDuty));
+        fill_solid(previewLeds + INNER_PREVIEW_LEDS, OUTER_PREVIEW_LEDS,
+                   CHSV(160, 80, outerDuty));
+
+        FastLED.show(); // audio is auto-pumped here
     }
-
-    // Drive the EL panels: envelope -> 50 Hz PWM duty.
-    const uint8_t innerDuty = uint8_t(gInnerLevel * 255.0f);
-    const uint8_t outerDuty = uint8_t(gOuterLevel * 255.0f);
-    innerPanel.write(innerDuty);
-    outerPanel.write(outerDuty);
-
-    // Preview: inner disc = aqua (sensitive), outer ring = ice blue (loud).
-    fill_solid(previewLeds, INNER_PREVIEW_LEDS, CHSV(128, 200, innerDuty));
-    fill_solid(previewLeds + INNER_PREVIEW_LEDS, OUTER_PREVIEW_LEDS,
-               CHSV(160, 80, outerDuty));
-
-    FastLED.show(); // audio is auto-pumped here
+    delay(1);
 }
