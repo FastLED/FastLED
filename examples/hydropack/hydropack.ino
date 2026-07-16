@@ -40,7 +40,7 @@ constexpr uint8_t kTriangleLedCount = 6;
 constexpr uint8_t kCenterStart = 6;
 constexpr uint8_t kRightTriangleStart = 12;
 constexpr uint8_t kPreviewLedCount = 18;
-constexpr uint32_t kTriangleLaunchDelayMs = 35;
+constexpr uint32_t kTriangleLaunchDelayMs = 5;
 
 CRGB previewLeds[kPreviewLedCount];
 
@@ -85,8 +85,8 @@ fl::UISlider triangleThreshold("Triangles (Loud) Threshold", 1.65f, 1.0f,
 fl::UISlider fadeSeconds("Launch Fade Seconds", 0.25f, 0.05f, 2.0f, 0.05f);
 
 // The two analyzers have independent envelopes but share one bass input.
-// The loud analyzer is released after a brief delay to make the center-to-
-// triangles animation read as an outward launch.
+// The loud analyzer is released 5 ms after the center, preserving an outward
+// launch without adding a perceptible artificial delay.
 float gCenterLevel = 0.0f;
 float gTriangleLevel = 0.0f;
 float gPendingTriangleLevel = 0.0f;
