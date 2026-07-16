@@ -124,6 +124,8 @@ jobs:
           set -o pipefail
           ./compile --no-interactive --no-parallel --log-failures failures --max-failures 3  ${{ inputs.args }} | tee build.log
         shell: bash
+        env:
+          PYTHONUNBUFFERED: "1"
 
       - name: Build summary and failure logs
         if: failure()
