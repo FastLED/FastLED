@@ -33,7 +33,7 @@ static void verifyLEDFrame(const fl::vector<fl::u8>& data, size_t offset,
     FL_CHECK(data[offset + 3] == R);
 }
 
-// Helper: Verify end frame (⌈num_leds/32⌉ DWords of 0xFF)
+// Helper: Verify end frame ((num_leds / 32) + 1 DWords of 0xFF)
 static void verifyEndFrame(const fl::vector<fl::u8>& data, size_t offset, size_t num_leds) {
     size_t end_dwords = (num_leds / 32) + 1;
     size_t end_bytes = end_dwords * 4;

@@ -28,7 +28,7 @@ namespace fl {
 ///
 /// **Supported chipsets:**
 /// - APA102/DotStar - 4-wire SPI with global brightness per LED (default 6 MHz)
-/// - SK9822 - Similar to APA102 with different end frame (default 12 MHz)
+/// - SK9822 - Similar to APA102, same all-ones end clocks (default 12 MHz)
 /// - HD108 - High-definition 16-bit SPI chipset (default 25 MHz)
 /// - WS2801 - 3-wire SPI protocol (default 1 MHz)
 /// - WS2803 - Variant of WS2801 (default 25 MHz)

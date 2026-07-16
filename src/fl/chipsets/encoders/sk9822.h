@@ -9,7 +9,7 @@
 /// Protocol:
 /// - Start frame: 4 bytes of 0x00
 /// - LED data: [0xE0|brightness][B][G][R] (4 bytes per LED)
-/// - End frame: ceil(num_leds/32) DWords of 0xFF
+/// - End frame: (num_leds / 32) + 1 DWords of 0xFF
 ///
 /// Brightness modes:
 /// - Global: All LEDs use same 5-bit brightness
