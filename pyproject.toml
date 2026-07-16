@@ -222,7 +222,7 @@ dependencies = [
     # `FileNotFoundError: meson_native.txt` / `ninja: error: rebuilding
     # 'build.ninja': subcommand failed` cascade we hit during long-session
     # `bash test --cpp` cycles.
-    "zccache>=1.12.13",
+    "zccache>=1.12.15",
     "ninja",
     "meson>=1.11.0",
     "download",
@@ -252,11 +252,11 @@ dependencies = [
     "ty>=0.0.15",
     "bleak>=0.22.3",
     # soldr drives the Rust C++ linter's cold-build rebuild path (zccache +
-    # shared target tree). Pinned floor matches the version FastLED currently
-    # tests against; the binary-cache layer in ci/lint_cpp/rust_binary_cache.py
+    # shared target tree). Pinned floor matches the current zccache/soldr
+    # releases; the binary-cache layer in ci/lint_cpp/rust_binary_cache.py
     # only invokes soldr when the crate sources change, so the per-call cost
     # of having soldr installed but unused is zero. See FastLED #3288.
-    "soldr>=0.7.55",
+    "soldr>=0.8.18",
 ]
 
 [build-system]
