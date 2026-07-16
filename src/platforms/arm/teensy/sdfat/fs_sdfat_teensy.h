@@ -18,7 +18,7 @@ struct SdFatState {
     bool begun = false;
 };
 
-// Defined in fs_sdfat_teensy.cpp.hpp so this private header never exposes
+// Defined in file_system_sd.cpp.hpp so this private header never exposes
 // the singleton implementation or its storage.
 SdFatState &sdfat_state() FL_NO_EXCEPT;
 
