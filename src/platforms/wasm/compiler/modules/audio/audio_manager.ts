@@ -1164,24 +1164,70 @@ export class AudioManager {
    * @param {HTMLElement} controlDiv - The control container
    */
   setupMicrophoneHandler(micButton, controlDiv) {
-    let isCapturing = false;
+    let state = 'idle';
 
     micButton.addEventListener('click', async () => {
-      if (!isCapturing) {
-        // Start microphone capture
+      if (state === 'starting' || state === 'stopping') {
+        return;
+      }
+
+      if (state === 'capturing') {
+        state = 'stopping';
         try {
-          await this.startMicrophoneCapture(micButton, controlDiv);
-          isCapturing = true;
-        } catch (error) {
-          console.error('🎤 Failed to start microphone capture:', error);
+          await this.stopMicrophoneCapture(micButton, controlDiv);
+        } finally {
+          state = 'idle';
+        }
+        return;
+      }
+
+      state = 'starting';
+      micButton.disabled = true;
+      try {
+        await this.startMicrophoneCapture(micButton, controlDiv);
+        state = 'capturing';
+      } catch (error) {
+        console.error('🎤 Failed to start microphone capture:', error);
+        this.resetMicrophoneUi(micButton, controlDiv);
+        try {
+          const message = await this.getMicrophoneErrorMessage(error);
+          this.showAudioError(controlDiv, message);
+        } catch (messageError) {
+          console.error('🎤 Failed to determine microphone error:', messageError);
           this.showAudioError(controlDiv, 'Failed to access microphone. Please check permissions.');
         }
-      } else {
-        // Stop microphone capture
-        await this.stopMicrophoneCapture(micButton, controlDiv);
-        isCapturing = false;
+      } finally {
+        state = state === 'capturing' ? state : 'idle';
+        micButton.disabled = false;
       }
     });
+  }
+
+  /**
+   * Convert browser microphone errors into useful user-facing messages.
+   * Dismissing the permission prompt is reported as NotAllowedError by
+   * Chromium, so use the Permissions API state to distinguish it from a
+   * previously denied permission when the browser exposes that state.
+   */
+  async getMicrophoneErrorMessage(error) {
+    if (error?.name === 'AbortError') {
+      return 'Microphone Access Cancelled';
+    }
+
+    if (error?.name === 'NotAllowedError') {
+      try {
+        const permission = await navigator.permissions?.query({ name: 'microphone' });
+        if (!permission || permission.state === 'prompt') {
+          return 'Microphone Access Cancelled';
+        }
+      } catch (permissionError) {
+        if (AUDIO_DEBUG.enabled) {
+          console.warn('🎤 Could not query microphone permission state:', permissionError);
+        }
+      }
+    }
+
+    return 'Failed to access microphone. Please check permissions.';
   }
 
   /**
@@ -1190,9 +1236,13 @@ export class AudioManager {
    * @param {HTMLElement} controlDiv - The control container
    */
   async startMicrophoneCapture(micButton, controlDiv) {
+    let stream = null;
+    const audioInput = controlDiv.querySelector('input[type="file"]');
+    const audioId = audioInput ? audioInput.id : 'unknown';
+
     try {
       // Request microphone access
-      const stream = await navigator.mediaDevices.getUserMedia({
+      stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
@@ -1201,20 +1251,14 @@ export class AudioManager {
         }
       });
 
-      // Update button state
-      micButton.textContent = '🛑 Stop Recording';
-      micButton.className = 'audio-mic-button recording';
-      micButton.title = 'Stop microphone recording';
-
-      // Get the audio input ID from the container
-      const audioInput = controlDiv.querySelector('input[type="file"]');
-      const audioId = audioInput ? audioInput.id : 'unknown';
-
       // Clean up any previous audio context
       await this.cleanupPreviousAudioContext(audioId);
 
       // Small delay to ensure cleanup is complete
       await new Promise((resolve) => { setTimeout(resolve, 100); });
+
+      // Store before setup so a partial pipeline can be cleaned up on error.
+      this.storeMediaStream(audioId, stream);
 
       // Create audio element for the stream
       const audio = this.createStreamAudioElement(controlDiv, stream);
@@ -1225,12 +1269,23 @@ export class AudioManager {
       // Update UI to show recording state
       this.updateAudioProcessingIndicator(controlDiv);
 
-      // Store the stream for cleanup
-      this.storeMediaStream(audioId, stream);
+      // Update button state only after the complete pipeline is ready.
+      micButton.textContent = '🛑 Stop Recording';
+      micButton.className = 'audio-mic-button recording';
+      micButton.title = 'Stop microphone recording';
 
       console.log('🎤 Microphone capture started successfully');
     } catch (error) {
       console.error('🎤 Error starting microphone capture:', error);
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      try {
+        await this.cleanupPreviousAudioContext(audioId);
+      } catch (cleanupError) {
+        console.error('🎤 Error cleaning up failed microphone startup:', cleanupError);
+      }
+      this.resetMicrophoneUi(micButton, controlDiv);
       throw error;
     }
   }
@@ -1264,20 +1319,33 @@ export class AudioManager {
         controlDiv.removeChild(existingAudio);
       }
 
-      // Reset button state
-      micButton.textContent = '🎤 Microphone';
-      micButton.className = 'audio-mic-button';
-      micButton.title = 'Capture audio from microphone';
-
-      // Remove processing indicator
-      const existingIndicator = controlDiv.querySelector('.audio-indicator');
-      if (existingIndicator) {
-        controlDiv.removeChild(existingIndicator);
-      }
-
       console.log('🎤 Microphone capture stopped');
     } catch (error) {
       console.error('🎤 Error stopping microphone capture:', error);
+    } finally {
+      this.resetMicrophoneUi(micButton, controlDiv);
+    }
+  }
+
+  /**
+   * Restore the microphone control to its reusable idle state.
+   */
+  resetMicrophoneUi(micButton, controlDiv) {
+    micButton.textContent = '🎤 Microphone';
+    micButton.className = 'audio-mic-button';
+    micButton.title = 'Capture audio from microphone';
+    micButton.disabled = false;
+
+    const existingIndicator = controlDiv.querySelector('.audio-indicator');
+    if (existingIndicator) {
+      controlDiv.removeChild(existingIndicator);
+    }
+
+    const existingAudio = controlDiv.querySelector('audio');
+    if (existingAudio) {
+      existingAudio.pause();
+      existingAudio.srcObject = null;
+      controlDiv.removeChild(existingAudio);
     }
   }
 
