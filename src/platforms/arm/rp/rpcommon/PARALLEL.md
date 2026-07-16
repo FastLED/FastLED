@@ -88,7 +88,7 @@ FastLED.addLeds<WS2812, 15>(...); // ── Group 3: Sequential (GPIO 15 alone)
 **Resources Used:**
 - Group 1 (4-pin): 1 PIO state machine + 1 DMA channel
 - Group 2 (2-pin): 1 PIO state machine + 1 DMA channel
-- Group 3 (1-pin): Uses existing non-parallel driver (TODO: implement fallback)
+- Group 3 (1-pin): Uses the same PIO/DMA engine in single-lane mode
 
 ## Hardware Requirements
 
@@ -270,9 +270,9 @@ void loop() {
    - Dedicated RGBW transpose functions for optimal performance
    - Mixed RGB/RGBW strips in same parallel group supported (see RGBW section below)
 
-3. **Sequential fallback TODO** for single pins
-   - Single non-consecutive pins currently use placeholder
-   - Will integrate with existing clockless driver in future update
+3. **Sequential fallback** uses the same timing-safe PIO/DMA engine in
+   single-lane mode, so mixed consecutive/non-consecutive layouts remain fully
+   functional.
 
 ## Troubleshooting
 
