@@ -11,9 +11,9 @@
 //   - center: sensitive - fires on a transient just above the song average
 //   - triangles: loud - fire only on a substantially stronger transient
 //
-// FastLED's normalized spectral-flux beat confidence arms music mode. Vibe
-// remains the actual real-time bass response: its spikes drive the animation
-// only while music mode is armed. Music mode warms up over five seconds of
+// Vibe's normalized bass-rise confidence arms music mode and drives the
+// actual real-time response. It is codec-level independent, unlike a fixed
+// raw spectral-flux threshold. Music mode warms up over two seconds of
 // recurring confident beats, with no fixed BPM or tempo-consistency lock.
 // Once music is established, FastLED's Vibe detector tracks its running bass
 // average; relative bass energy is about 1.0 at the current average. A loud
@@ -42,19 +42,24 @@ constexpr uint8_t kTriangleLedCount = 6;
 constexpr uint8_t kCenterStart = 6;
 constexpr uint8_t kRightTriangleStart = 12;
 constexpr uint8_t kHydroPackLedCount = 18;
-#if defined(FL_IS_WASM)
-constexpr uint8_t kDebugLedIndex = kHydroPackLedCount;
-constexpr uint8_t kPreviewLedCount = kHydroPackLedCount + 1;
-#else
 constexpr uint8_t kPreviewLedCount = kHydroPackLedCount;
-#endif
 constexpr uint32_t kTriangleLaunchDelayMs = 5;
-constexpr float kDefaultStageThresholdDbSpl = 80.0f;
-constexpr uint32_t kMusicWarmupMs = 5000;
+constexpr float kDefaultStageThresholdDbSpl = 72.0f;
+constexpr uint32_t kMusicWarmupMs = 2000;
 constexpr uint32_t kMaximumMusicBeatGapMs = 2000;
 constexpr uint32_t kMusicHoldMs = 2000;
+constexpr float kMusicModeFadeSeconds = 0.5f;
 constexpr float kMaximumMusicZcf = 0.40f;
-constexpr float kDefaultMinimumBeatConfidence = 0.25f;
+constexpr float kDefaultMinimumBeatConfidence = 0.05f;
+// Locked HydroPack response: the center detects ordinary bass hits; the
+// triangles require a substantially louder hit. Two cascaded envelopes keep
+// the attack sharp while giving the center a slightly longer tail.
+constexpr float kCenterBassThreshold = 1.05f;
+constexpr float kTriangleBassThreshold = 1.65f;
+constexpr float kCenterEnvelopeAttackSeconds = 0.015f;
+constexpr float kCenterEnvelopeFadeSeconds = 0.060f;
+constexpr float kTriangleEnvelopeAttackSeconds = 0.015f;
+constexpr float kTriangleEnvelopeFadeSeconds = 0.040f;
 
 CRGB previewLeds[kPreviewLedCount];
 
@@ -70,10 +75,6 @@ const fl::vec2f kHydroPackLedLayout[] = {
     // Right triangle (>)
     {88.0f, 50.0f}, {78.0f, 42.0f}, {78.0f, 58.0f},
     {68.0f, 34.0f}, {68.0f, 50.0f}, {68.0f, 66.0f},
-#if defined(FL_IS_WASM)
-    // Preview-only widget LED: beat confidence, not part of the fixture.
-    {96.0f, 10.0f},
-#endif
 };
 
 static_assert(sizeof(kHydroPackLedLayout) / sizeof(kHydroPackLedLayout[0]) ==
@@ -92,7 +93,7 @@ fl::UIAudio audioUi("Audio Input", audioConfig);
 
 fl::UITitle title("HydroPack Stage Music Launch");
 fl::UIDescription description(
-    "The INMP441 sound-pressure gate warms up for five seconds of confident "
+    "The INMP441 sound-pressure gate warms up for two seconds of confident "
     "beats before arming music mode. Conversation and one-off noise stay "
     "dark; musical bass "
     "fires the center, with stronger hits launching to both triangles.");
@@ -100,23 +101,23 @@ fl::UIDescription description(
 fl::UISlider stageThresholdDbSpl("Minimum Music Level (dB SPL)",
                                  kDefaultStageThresholdDbSpl, 60.0f, 105.0f,
                                  1.0f);
-fl::UISlider minimumBeatConfidence("Minimum Beat Confidence",
+fl::UISlider minimumBeatConfidence("Minimum Vibe Beat Confidence",
                                    kDefaultMinimumBeatConfidence, 0.0f, 1.0f,
                                    0.05f);
-fl::UICheckbox showBeatConfidenceDebug("Show Beat Confidence Debug LED",
-                                       true);
-fl::UISlider centerThreshold("Center (Sensitive) Threshold", 1.05f, 1.0f,
-                             3.0f, 0.05f);
-fl::UISlider triangleThreshold("Triangles (Loud) Threshold", 1.65f, 1.0f,
-                               6.0f, 0.05f);
-fl::UISlider fadeSeconds("Launch Fade Seconds", 0.25f, 0.05f, 2.0f, 0.05f);
+#if defined(FL_IS_WASM)
+fl::UICheckbox streamDetectorFrames("Stream Detector Frames", true);
+#endif
 
 // The two analyzers have independent envelopes but share one bass input.
 // The loud analyzer is released 5 ms after the center, preserving an outward
 // launch without adding a perceptible artificial delay.
 float gCenterLevel = 0.0f;
 float gTriangleLevel = 0.0f;
+float gCenterEnvelopeStage = 0.0f;
+float gTriangleEnvelopeStage = 0.0f;
+float gCenterTrigger = 0.0f;
 float gPendingTriangleLevel = 0.0f;
+float gTriangleTrigger = 0.0f;
 uint32_t gTriangleFireAtMs = 0;
 fl::audio::SoundLevelMeter gSoundLevelMeter;
 fl::shared_ptr<fl::audio::Processor> gAudio;
@@ -125,6 +126,7 @@ float gBeatConfidence = 0.0f;
 uint32_t gMusicWarmupStartedMs = 0;
 uint32_t gLastQualifyingBeatMs = 0;
 uint32_t gMusicActiveUntilMs = 0;
+float gMusicModeLevel = 0.0f;
 
 void updateSoundLevel() {
     if (!gAudio) {
@@ -169,14 +171,58 @@ bool isMusicModeActive() {
     return static_cast<int32_t>(millis() - gMusicActiveUntilMs) < 0;
 }
 
+float getVibeBeatConfidence(
+    const fl::audio::detector::VibeLevels &levels) {
+    const float bassAverage = gAudio->getVibeBassAtt();
+    if (!levels.bassSpike || bassAverage <= 0.0f) {
+        return 0.0f;
+    }
+    return fl::clamp((levels.bass - bassAverage) / bassAverage, 0.0f, 1.0f);
+}
+
 void fireAnalyzer(float bass, float threshold, float minIntensity,
-                  float &level) {
+                  float &trigger) {
     if (bass <= threshold) {
         return;
     }
     const float intensity = fl::clamp((bass - threshold) / threshold,
                                       minIntensity, 1.0f);
-    level = fl::max(level, intensity);
+    trigger = fl::max(trigger, intensity);
+}
+
+float applyAttackDecay(float value, float target, float attackSeconds,
+                       float decaySeconds, float deltaSeconds) {
+    const float seconds = target > value ? attackSeconds : decaySeconds;
+    if (seconds <= 0.0f) {
+        return target;
+    }
+    const float amount = fl::clamp(deltaSeconds / seconds, 0.0f, 1.0f);
+    return value + (target - value) * amount;
+}
+
+void advanceDoubleEnvelope(float &trigger, float &stage, float &level,
+                           float attackSeconds, float decaySeconds,
+                           float deltaSeconds) {
+    // Two cascaded attack/decay filters soften the event into a natural
+    // envelope. Both stages share an intentionally short attack; their decay
+    // is independently adjustable for the center and triangle elements.
+    stage = applyAttackDecay(stage, trigger, attackSeconds, decaySeconds,
+                             deltaSeconds);
+    level = applyAttackDecay(level, stage, attackSeconds, decaySeconds,
+                              deltaSeconds);
+    trigger = 0.0f;
+}
+
+float advanceLinearFade(float value, float target, float durationSeconds,
+                        float deltaSeconds) {
+    if (durationSeconds <= 0.0f) {
+        return target;
+    }
+    const float step = deltaSeconds / durationSeconds;
+    if (target > value) {
+        return fl::min(target, value + step);
+    }
+    return fl::max(target, value - step);
 }
 
 uint8_t toByte(float value) {
@@ -186,8 +232,10 @@ uint8_t toByte(float value) {
 void renderPreview() {
     // Quiet is fully dark. The sensitive center appears first; a loud hit
     // subsequently drives the two triangle clusters outward from it.
-    const uint8_t centerBrightness = toByte(gCenterLevel * 200.0f);
-    const uint8_t triangleBrightness = toByte(gTriangleLevel * 180.0f);
+    const uint8_t centerBrightness =
+        toByte(gCenterLevel * gMusicModeLevel * 200.0f);
+    const uint8_t triangleBrightness =
+        toByte(gTriangleLevel * gMusicModeLevel * 180.0f);
     const CRGB centerColor(0, centerBrightness / 3, centerBrightness);
     const CRGB triangleColor(0, triangleBrightness / 3, triangleBrightness);
 
@@ -198,20 +246,6 @@ void renderPreview() {
     for (uint8_t i = 0; i < kTriangleLedCount; ++i) {
         previewLeds[kCenterStart + i] = centerColor;
     }
-#if defined(FL_IS_WASM)
-    // Keep the widget visibly red at zero, then turn it bright green as the
-    // 0-1 confidence rises. A black zero was indistinguishable from a missing
-    // debug LED in the preview.
-    const uint8_t debugRed =
-        showBeatConfidenceDebug.value()
-            ? toByte(24.0f * (1.0f - gBeatConfidence))
-            : 0;
-    const uint8_t debugGreen =
-        showBeatConfidenceDebug.value()
-            ? toByte(16.0f + gBeatConfidence * 239.0f)
-            : 0;
-    previewLeds[kDebugLedIndex] = CRGB(debugRed, debugGreen, 0);
-#endif
 }
 
 void setup() {
@@ -221,12 +255,11 @@ void setup() {
         .setScreenMap(previewMap);
     FastLED.setBrightness(255);
 
-    centerThreshold.setGroup("Two-Level Bass Analyzers");
-    triangleThreshold.setGroup("Two-Level Bass Analyzers");
-    fadeSeconds.setGroup("Two-Level Bass Analyzers");
     stageThresholdDbSpl.setGroup("Stage Music Gate");
     minimumBeatConfidence.setGroup("Stage Music Gate");
-    showBeatConfidenceDebug.setGroup("Debug");
+#if defined(FL_IS_WASM)
+    streamDetectorFrames.setGroup("Debug");
+#endif
 
     // The unified input is browser audio on WASM and INMP441 I2S on ESP32.
     gAudio = FastLED.add(audioUi);
@@ -241,27 +274,45 @@ void setup() {
         // floor, rather than only the relatively loud blocks that trigger a
         // beat callback.
         updateSoundLevel();
-        gBeatConfidence = gAudio->getBeatConfidence();
+        gBeatConfidence = getVibeBeatConfidence(levels);
+#if defined(FL_IS_WASM)
+        // Keep this as one compact line per analysis frame. It deliberately
+        // polls both independent rhythm detectors: raw Beat is an onset
+        // detector; Tempo is the recurring-rhythm estimator. Calling these
+        // getters also enables their lazy detector instances for the next
+        // audio frame, so the trace diagnoses the real WASM signal path.
+        if (streamDetectorFrames.value()) {
+            const fl::audio::Sample &sample = gAudio->getSample();
+            fl::printf(
+                "HYDRO frame=%lu spl=%.1f zcf=%.3f silent=%u "
+                "beat=%.3f bpm=%.1f tempo=%.3f tempo_bpm=%.1f "
+                "vibe_bass=%.3f vibe_att=%.3f vibe_conf=%.3f spike=%u "
+                "bass_raw=%.3f gate=%u\\n",
+                static_cast<unsigned long>(millis()), gSoundPressureDbSpl,
+                sample.zcf(), gAudio->isSilent() ? 1U : 0U,
+                gAudio->getBeatConfidence(), gAudio->getBPM(),
+                gAudio->getTempoConfidence(), gAudio->getTempoBPM(),
+                levels.bass, gAudio->getVibeBassAtt(), gBeatConfidence,
+                levels.bassSpike ? 1U : 0U, levels.bassRaw,
+                isMusicModeActive() ? 1U : 0U);
+        }
+#endif
+        if (gBeatConfidence >= minimumBeatConfidence.value() &&
+            gSoundPressureDbSpl >= stageThresholdDbSpl.value()) {
+            isMusicPresent();
+        }
         if (!levels.bassSpike ||
             gSoundPressureDbSpl < stageThresholdDbSpl.value() ||
             !isMusicModeActive()) {
             return;
         }
-        fireAnalyzer(levels.bass, centerThreshold.value(), 0.35f,
-                     gCenterLevel);
-        if (levels.bass > triangleThreshold.value()) {
-            fireAnalyzer(levels.bass, triangleThreshold.value(), 0.50f,
+        fireAnalyzer(levels.bass, kCenterBassThreshold, 0.35f,
+                     gCenterTrigger);
+        if (levels.bass > kTriangleBassThreshold) {
+            fireAnalyzer(levels.bass, kTriangleBassThreshold, 0.50f,
                          gPendingTriangleLevel);
             gTriangleFireAtMs = millis() + kTriangleLaunchDelayMs;
         }
-    });
-    gAudio->onBeat([]() {
-        gBeatConfidence = gAudio->getBeatConfidence();
-        if (gBeatConfidence < minimumBeatConfidence.value() ||
-            gSoundPressureDbSpl < stageThresholdDbSpl.value()) {
-            return;
-        }
-        isMusicPresent();
     });
 }
 
@@ -276,15 +327,25 @@ void loop() {
 
         if (gPendingTriangleLevel > 0.0f &&
             static_cast<int32_t>(now - gTriangleFireAtMs) >= 0) {
-            gTriangleLevel = fl::max(gTriangleLevel, gPendingTriangleLevel);
+            gTriangleTrigger = fl::max(gTriangleTrigger,
+                                       gPendingTriangleLevel);
             gPendingTriangleLevel = 0.0f;
         }
 
-        const float fade = fadeSeconds.value();
-        if (fade > 0.0f && deltaMs > 0) {
-            const float decay = float(deltaMs) / (1000.0f * fade);
-            gCenterLevel = fl::clamp(gCenterLevel - decay, 0.0f, 1.0f);
-            gTriangleLevel = fl::clamp(gTriangleLevel - decay, 0.0f, 1.0f);
+        if (deltaMs > 0) {
+            const float deltaSeconds = float(deltaMs) * 0.001f;
+            gMusicModeLevel = advanceLinearFade(
+                gMusicModeLevel, isMusicModeActive() ? 1.0f : 0.0f,
+                kMusicModeFadeSeconds, deltaSeconds);
+            advanceDoubleEnvelope(gCenterTrigger, gCenterEnvelopeStage,
+                                  gCenterLevel,
+                                  kCenterEnvelopeAttackSeconds,
+                                  kCenterEnvelopeFadeSeconds, deltaSeconds);
+            advanceDoubleEnvelope(gTriangleTrigger, gTriangleEnvelopeStage,
+                                  gTriangleLevel,
+                                  kTriangleEnvelopeAttackSeconds,
+                                  kTriangleEnvelopeFadeSeconds,
+                                  deltaSeconds);
         }
         renderPreview();
         FastLED.show();  // Auto-pumps browser or I2S microphone audio.

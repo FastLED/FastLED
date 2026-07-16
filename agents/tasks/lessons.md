@@ -20,10 +20,10 @@
   qualifying beat evidence plus a low-ZCF check to arm a temporary
   music-present state. Never use a fixed tempo-consistency or animation lock.
 
-- FastLED's `getBeatConfidence()` is a normalized 0-1 spectral-flux score;
-  use it only to arm music mode. Keep Vibe as the immediate rhythmic response
-  after arming. FFT operates on short PCM frames, while the detector compares
-  the resulting spectrum across frames.
+- For browser media, derive the 0-1 music confidence from Vibe's normalized
+  bass rise above its short-term average. The generic raw spectral-flux beat
+  detector can remain below its fixed threshold despite healthy decoded audio.
 
-- A WASM-only debug LED can expose the latest beat-confidence pulse without
-  adding a physical output pixel to the HydroPack fixture.
+- A WASM-only per-frame telemetry toggle can expose raw Beat and Tempo
+  confidence alongside Vibe levels without adding a physical output pixel to
+  the HydroPack fixture.
