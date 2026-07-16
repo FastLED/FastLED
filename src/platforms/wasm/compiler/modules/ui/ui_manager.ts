@@ -1409,7 +1409,7 @@ export class JsonUiManager {
 
     // First pass: organize elements by group and analyze layout requirements
     jsonData.forEach((data) => {
-      console.log('data:', data);
+      if (this.debugMode) console.log('data:', data);
       const { group } = data;
       const hasGroup = group !== '' && group !== undefined && group !== null;
 
@@ -1417,7 +1417,7 @@ export class JsonUiManager {
       this.addElementLayoutHints(data);
 
       if (hasGroup) {
-        console.log(`Group ${group} found, for item ${data.name}`);
+        if (this.debugMode) console.log(`Group ${group} found, for item ${data.name}`);
         if (!groupedElements.has(group)) {
           groupedElements.set(group, []);
         }
