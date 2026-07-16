@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 from ci.lint_meson.backslash_path_checker import BackslashPathChecker
+from ci.lint_meson.path_norm_join_checker import PathNormJoinChecker
 from ci.util.check_files import FileContentChecker, MultiCheckerFileProcessor
 
 
@@ -21,8 +22,13 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
 def _collect_meson_files(root: Path) -> list[str]:
-    """Find all meson.build files under root."""
-    return sorted(str(p) for p in root.rglob("meson.build") if ".build" not in p.parts)
+    """Find repository Meson files, excluding generated and nested worktrees."""
+    excluded_directories = {".build", ".claude", ".git"}
+    return sorted(
+        str(path)
+        for path in root.rglob("meson.build")
+        if not excluded_directories.intersection(path.relative_to(root).parts)
+    )
 
 
 def _collect_violations(
@@ -68,6 +74,7 @@ def run_meson_lint() -> bool:
     # All checkers — add new checkers here
     checkers: list[FileContentChecker] = [
         BackslashPathChecker(),
+        PathNormJoinChecker(),
     ]
 
     processor = MultiCheckerFileProcessor()
