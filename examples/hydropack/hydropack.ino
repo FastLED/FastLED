@@ -1,22 +1,21 @@
 // FL_AGENT_ALLOW_NEW_EXAMPLE
 /// @file hydropack.ino
-/// @brief HydroPack: an LED approximation of the < | > EL layout with two
-///          adaptive microphone indicators: Sensitive and Loud.
+/// @brief HydroPack: two adaptive bass analyzers animate an LED < | > layout.
 /// @example hydropack.ino
 
 // @filter: (mem is large) and (platform is esp32*)
 
 // This is deliberately an LED prototype, not an EL renderer. It draws two
-// triangular clusters and a center bar using ordinary addressable LEDs, then
-// adds two status LEDs below them:
-//   - cyan: Sensitive - fires on a bass transient just above the song average
-//   - magenta: Loud - fires only on a substantially stronger transient
+// triangular clusters and a center bar using ordinary addressable LEDs. Two
+// independent threshold analyzers consume the same self-normalized bass input:
+//   - center: sensitive - fires on a transient just above the song average
+//   - triangles: loud - fire only on a substantially stronger transient
 //
 // The detector is FastLED's built-in Vibe detector. Like Songstone's adaptive
 // window, it tracks a slow running song average; relative bass energy is about
 // 1.0 at the current average. FastLED's adaptive noise-floor tracker gates
-// microphone hiss before Vibe sees it. A loud hit therefore fires both LEDs,
-// while a moderate hit fires Sensitive only.
+// microphone hiss before Vibe sees it. A loud hit lights the center, then
+// launches into the triangles; a moderate hit lights the center only.
 
 #include <Arduino.h>
 #include <FastLED.h>
@@ -37,16 +36,16 @@
 
 #define PIN_PREVIEW 3
 
-constexpr uint8_t kGeometryLedCount = 18;
-constexpr uint8_t kSensitiveIndicator = 18;
-constexpr uint8_t kLoudIndicator = 19;
-constexpr uint8_t kPreviewLedCount = 20;
+constexpr uint8_t kTriangleLedCount = 6;
+constexpr uint8_t kCenterStart = 6;
+constexpr uint8_t kRightTriangleStart = 12;
+constexpr uint8_t kPreviewLedCount = 18;
+constexpr uint32_t kTriangleLaunchDelayMs = 35;
 
 CRGB previewLeds[kPreviewLedCount];
 
-// Six LEDs form each triangle, six form the center bar, and the last two are
-// the explicitly labeled audio indicators. The layout reads < | > in the
-// WASM screenmap renderer without relying on EL panel/wire primitives.
+// Six LEDs form each triangle and six form the center bar. The layout reads
+// < | > in the WASM screenmap renderer without EL panel/wire primitives.
 const fl::vec2f kHydroPackLedLayout[] = {
     // Left triangle (<)
     {12.0f, 50.0f}, {22.0f, 42.0f}, {22.0f, 58.0f},
@@ -57,8 +56,6 @@ const fl::vec2f kHydroPackLedLayout[] = {
     // Right triangle (>)
     {88.0f, 50.0f}, {78.0f, 42.0f}, {78.0f, 58.0f},
     {68.0f, 34.0f}, {68.0f, 50.0f}, {68.0f, 66.0f},
-    // Sensitive, Loud
-    {44.0f, 88.0f}, {56.0f, 88.0f},
 };
 
 static_assert(sizeof(kHydroPackLedLayout) / sizeof(kHydroPackLedLayout[0]) ==
@@ -75,26 +72,28 @@ fl::audio::Config audioConfig = fl::audio::Config::CreateInmp441(
     I2S_WS, I2S_SD, I2S_CLK, fl::audio::AudioChannel::Right);
 fl::UIAudio audioUi("Audio Input", audioConfig);
 
-fl::UITitle title("HydroPack LED Audio Prototype");
+fl::UITitle title("HydroPack Two-Level Bass Launch");
 fl::UIDescription description(
-    "LED approximation of the < | > layout. Cyan is Sensitive: it fires on "
-    "moderate bass hits. Magenta is Loud: it fires only on strong hits. "
-    "Both thresholds adapt to the current song and microphone noise floor.");
+    "Two analyzers read the same adaptive bass signal. The center bar fires "
+    "at the sensitive level. Stronger hits launch out to both triangles. "
+    "Quiet input is fully dark.");
 
-fl::UISlider sensitiveThreshold("Sensitive Threshold", 1.05f, 1.0f, 3.0f,
-                                0.05f);
-fl::UISlider loudThreshold("Loud Threshold", 1.65f, 1.0f, 6.0f, 0.05f);
-fl::UISlider fadeSeconds("Indicator Fade Seconds", 0.25f, 0.05f, 2.0f,
-                          0.05f);
+fl::UISlider centerThreshold("Center (Sensitive) Threshold", 1.05f, 1.0f,
+                             3.0f, 0.05f);
+fl::UISlider triangleThreshold("Triangles (Loud) Threshold", 1.65f, 1.0f,
+                               6.0f, 0.05f);
+fl::UISlider fadeSeconds("Launch Fade Seconds", 0.25f, 0.05f, 2.0f, 0.05f);
 
-// 0.0-1.0 envelopes. The audio callback raises them and the render loop
-// decays them. Keeping two independent envelopes makes the behavior visible:
-// Sensitive can remain lit while Loud stays dark.
-float gSensitiveLevel = 0.0f;
-float gLoudLevel = 0.0f;
+// The two analyzers have independent envelopes but share one bass input.
+// The loud analyzer is released after a brief delay to make the center-to-
+// triangles animation read as an outward launch.
+float gCenterLevel = 0.0f;
+float gTriangleLevel = 0.0f;
+float gPendingTriangleLevel = 0.0f;
+uint32_t gTriangleFireAtMs = 0;
 
-void fireIndicator(float bass, float threshold, float minIntensity,
-                   float &level) {
+void fireAnalyzer(float bass, float threshold, float minIntensity,
+                  float &level) {
     if (bass <= threshold) {
         return;
     }
@@ -108,18 +107,20 @@ uint8_t toByte(float value) {
 }
 
 void renderPreview() {
-    // The physical-layout LEDs are electric blue only while an indicator is
-    // active. Quiet input is fully dark.
-    const float combined = fl::max(gSensitiveLevel, gLoudLevel);
-    const uint8_t geometryBrightness = toByte(combined * 160.0f);
-    for (uint8_t i = 0; i < kGeometryLedCount; ++i) {
-        previewLeds[i] = CRGB(0, geometryBrightness / 3, geometryBrightness);
-    }
+    // Quiet is fully dark. The sensitive center appears first; a loud hit
+    // subsequently drives the two triangle clusters outward from it.
+    const uint8_t centerBrightness = toByte(gCenterLevel * 200.0f);
+    const uint8_t triangleBrightness = toByte(gTriangleLevel * 180.0f);
+    const CRGB centerColor(0, centerBrightness / 3, centerBrightness);
+    const CRGB triangleColor(0, triangleBrightness / 3, triangleBrightness);
 
-    const uint8_t sensitive = toByte(gSensitiveLevel * 255.0f);
-    const uint8_t loud = toByte(gLoudLevel * 255.0f);
-    previewLeds[kSensitiveIndicator] = CRGB(0, sensitive, sensitive);
-    previewLeds[kLoudIndicator] = CRGB(loud, 0, loud);
+    for (uint8_t i = 0; i < kTriangleLedCount; ++i) {
+        previewLeds[i] = triangleColor;
+        previewLeds[kRightTriangleStart + i] = triangleColor;
+    }
+    for (uint8_t i = 0; i < kTriangleLedCount; ++i) {
+        previewLeds[kCenterStart + i] = centerColor;
+    }
 }
 
 void setup() {
@@ -129,9 +130,9 @@ void setup() {
         .setScreenMap(previewMap);
     FastLED.setBrightness(255);
 
-    sensitiveThreshold.setGroup("Adaptive Audio Indicators");
-    loudThreshold.setGroup("Adaptive Audio Indicators");
-    fadeSeconds.setGroup("Adaptive Audio Indicators");
+    centerThreshold.setGroup("Two-Level Bass Analyzers");
+    triangleThreshold.setGroup("Two-Level Bass Analyzers");
+    fadeSeconds.setGroup("Two-Level Bass Analyzers");
 
     // The unified input is browser audio on WASM and INMP441 I2S on ESP32.
     auto audio = FastLED.add(audioUi);
@@ -145,9 +146,13 @@ void setup() {
         if (!levels.bassSpike) {
             return;
         }
-        fireIndicator(levels.bass, sensitiveThreshold.value(), 0.35f,
-                      gSensitiveLevel);
-        fireIndicator(levels.bass, loudThreshold.value(), 0.50f, gLoudLevel);
+        fireAnalyzer(levels.bass, centerThreshold.value(), 0.35f,
+                     gCenterLevel);
+        if (levels.bass > triangleThreshold.value()) {
+            fireAnalyzer(levels.bass, triangleThreshold.value(), 0.50f,
+                         gPendingTriangleLevel);
+            gTriangleFireAtMs = millis() + kTriangleLaunchDelayMs;
+        }
     });
 }
 
@@ -160,11 +165,17 @@ void loop() {
         firstFrame = false;
         lastMs = now;
 
+        if (gPendingTriangleLevel > 0.0f &&
+            static_cast<int32_t>(now - gTriangleFireAtMs) >= 0) {
+            gTriangleLevel = fl::max(gTriangleLevel, gPendingTriangleLevel);
+            gPendingTriangleLevel = 0.0f;
+        }
+
         const float fade = fadeSeconds.value();
         if (fade > 0.0f && deltaMs > 0) {
             const float decay = float(deltaMs) / (1000.0f * fade);
-            gSensitiveLevel = fl::clamp(gSensitiveLevel - decay, 0.0f, 1.0f);
-            gLoudLevel = fl::clamp(gLoudLevel - decay, 0.0f, 1.0f);
+            gCenterLevel = fl::clamp(gCenterLevel - decay, 0.0f, 1.0f);
+            gTriangleLevel = fl::clamp(gTriangleLevel - decay, 0.0f, 1.0f);
         }
 
         renderPreview();

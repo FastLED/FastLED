@@ -7,3 +7,7 @@
 
 - For the current HydroPack prototype, prioritize a readable ordinary-LED
   approximation of the < | > layout over further EL-shape fidelity.
+
+- HydroPack's two sensitivity levels are visual layers, not separate status
+  dots: use the sensitive analyzer for the center and the loud analyzer for
+  the triangles so strong bass appears to launch outward.

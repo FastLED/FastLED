@@ -3,8 +3,7 @@
   "groups": {
     "left-triangle": { "color": "#0088ff" },
     "center-bar": { "color": "#0088ff" },
-    "right-triangle": { "color": "#0088ff" },
-    "audio-indicators": { "color": "#00ffff" }
+    "right-triangle": { "color": "#0088ff" }
   },
   "segments": [
     {
@@ -27,13 +26,6 @@
       "group": "right-triangle",
       "x": [88, 78, 78, 68, 68, 68],
       "y": [50, 42, 58, 34, 50, 66]
-    },
-    {
-      "id": "audio-indicators",
-      "pin": "pin1",
-      "group": "audio-indicators",
-      "x": [44, 56],
-      "y": [88, 88]
     }
   ]
 }
