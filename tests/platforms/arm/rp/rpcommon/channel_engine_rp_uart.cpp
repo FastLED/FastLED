@@ -7,12 +7,10 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/move.h"
 #include "fl/stl/shared_ptr.h"
+// The engine implementation is pure C++ against IRpUartPeripheral and is
+// compiled into the library on every platform, so the lifecycle contract is
+// testable without a Pico SDK installation through the public header alone.
 #include "platforms/arm/rp/rpcommon/channel_engine_rp_uart.h"
-
-// The hardware unity build is intentionally RP-gated.  Include the pure
-// engine implementation in this host test so the lifecycle contract remains
-// testable without a Pico SDK installation.
-#include "platforms/arm/rp/rpcommon/channel_engine_rp_uart.cpp.hpp"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
