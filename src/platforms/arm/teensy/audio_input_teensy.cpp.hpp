@@ -9,6 +9,9 @@ namespace fl {
 
 #if TEENSY_AUDIO_LIBRARY_AVAILABLE
 
+namespace platforms {
+namespace teensy {
+
 // TeensyAudioRecorder implementation
 
 TeensyAudioRecorder::TeensyAudioRecorder() : AudioStream(2, inputQueueArray) {
@@ -121,15 +124,15 @@ Teensy_I2S_Audio::Teensy_I2S_Audio(const audio::ConfigI2S& config)
     if (static_cast<audio::TeensyI2S::I2SPort>(mConfig.mI2sNum) == audio::TeensyI2S::I2SPort::I2S1) {
         mI2sInput = fl::make_shared<AudioInputI2S>();
         // Create connections: I2S -> Recorder
-        mConnectionLeft = fl::make_shared<AudioConnection>(*mI2sInput, 0, *mRecorder, 0);   // Left
-        mConnectionRight = fl::make_shared<AudioConnection>(*mI2sInput, 1, *mRecorder, 1);  // Right
+        mConnectionLeft = fl::make_shared<FastLEDTeensyAudioConnection>(*mI2sInput, 0, *mRecorder, 0);   // Left
+        mConnectionRight = fl::make_shared<FastLEDTeensyAudioConnection>(*mI2sInput, 1, *mRecorder, 1);  // Right
     }
 #if defined(FL_IS_TEENSY_4X)
     else if (static_cast<audio::TeensyI2S::I2SPort>(mConfig.mI2sNum) == audio::TeensyI2S::I2SPort::I2S2) {
         mI2sInput2 = fl::make_shared<AudioInputI2S2>();
         // Create connections: I2S2 -> Recorder
-        mConnectionLeft = fl::make_shared<AudioConnection>(*mI2sInput2, 0, *mRecorder, 0);   // Left
-        mConnectionRight = fl::make_shared<AudioConnection>(*mI2sInput2, 1, *mRecorder, 1);  // Right
+        mConnectionLeft = fl::make_shared<FastLEDTeensyAudioConnection>(*mI2sInput2, 0, *mRecorder, 0);   // Left
+        mConnectionRight = fl::make_shared<FastLEDTeensyAudioConnection>(*mI2sInput2, 1, *mRecorder, 1);  // Right
     }
 #endif
     else {
@@ -293,6 +296,9 @@ audio::Sample Teensy_I2S_Audio::read() {
     return result;
 }
 
+} // namespace teensy
+} // namespace platforms
+
 // Platform-specific audio input creation function for Teensy
 fl::shared_ptr<audio::IInput> teensy_create_audio_input(
     const audio::Config& config,
@@ -301,7 +307,7 @@ fl::shared_ptr<audio::IInput> teensy_create_audio_input(
     if (config.is<audio::ConfigI2S>()) {
         FL_WARN_F("Creating Teensy I2S audio source");
         audio::ConfigI2S i2s_config = config.get<audio::ConfigI2S>();
-        auto audio = fl::make_shared<Teensy_I2S_Audio>(i2s_config);
+        auto audio = fl::make_shared<platforms::teensy::Teensy_I2S_Audio>(i2s_config);
 
         // Check if initialization failed
         fl::string init_error;
@@ -338,7 +344,7 @@ fl::shared_ptr<audio::IInput> teensy_create_audio_input(
     fl::string* error_message
 ) FL_NO_EXCEPT {
     FL_UNUSED(config);
-    const char* ERROR_MESSAGE = "Teensy Audio Library not found. Install from Arduino Library Manager.";
+    const char* ERROR_MESSAGE = "Teensy I2S audio is not available on this board.";
     FL_WARN_F("%s", ERROR_MESSAGE);
     if (error_message) {
         *error_message = ERROR_MESSAGE;

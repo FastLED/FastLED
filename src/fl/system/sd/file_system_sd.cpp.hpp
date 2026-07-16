@@ -22,6 +22,7 @@
 #include "fl/system/file_system.h"
 #include "fl/stl/has_include.h"
 #include "fl/log/log.h"
+#include "platforms/is_platform.h"
 
 #ifdef FASTLED_TESTING
 // Stub filesystem maps to the host's real disk (for unit tests).
@@ -40,13 +41,31 @@
 // IWYU pragma: end_keep
 #define FASTLED_HAS_SDCARD_IMPL 1
 
+#elif defined(FL_IS_TEENSY)
+// Teensy's Arduino SD wrapper declares a process-wide `SD` object.  Keep
+// FastLED's optional filesystem on the SdFat path instead, whose state is
+// privately owned and lazy behind an implementation-only fl::Singleton.
+// IWYU pragma: begin_keep
+#include "platforms/arm/teensy/sdfat/fs_sdfat_teensy.h" // ok platform headers
+// IWYU pragma: end_keep
+#include "fl/stl/singleton.h"
+
+namespace fl { namespace platforms { namespace teensy {
+
+SdFatState &sdfat_state() FL_NO_EXCEPT {
+    return fl::Singleton<SdFatState>::instance();
+}
+
+} } } // namespace fl::platforms::teensy
+
+#define FASTLED_HAS_SDCARD_IMPL 1
+
 #elif FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>)
-// Arduino SD library is on the include path. `fs_sdcard_arduino.hpp`
+// Arduino SD library is on the include path. `fs_sdcard_arduino.cpp.hpp`
 // provides an `inline` `make_sdcard_filesystem` definition that uses
 // the real Arduino `SD`/`FS` libraries. Pulling those into
 // `fl.system.sd+.cpp.o` is fine — the linker only links this TU when
 // the user calls beginSd, so non-SD sketches see none of it.
-#include "platforms/fs_sdcard_arduino.hpp"
 #define FASTLED_HAS_SDCARD_IMPL 1
 
 #else

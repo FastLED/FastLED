@@ -1,0 +1,60 @@
+// IWYU pragma: private
+/**
+ * Copyright (c) 2011-2021 Bill Greiman
+ * This file is part of the SdFat library for SD memory cards.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+// Private implementation unit, included by sdfat/_build.cpp.hpp.
+#define DBG_FILE "FatVolume.cpp"
+#include "platforms/arm/teensy/sdfat/common/DebugMacros.h"
+#include "FatLib.h"  // ok include path
+#include "fl/stl/singleton.h"
+
+namespace fl { namespace platforms { namespace teensy { namespace sdfat {
+
+FatVolume* FatVolume::mCwv = fl::Singleton<FatVolume*>::instance();
+//------------------------------------------------------------------------------
+bool FatVolume::chdir(const char *path) {
+  FatFile dir;
+  if (!dir.open(vwd(), path, O_RDONLY)) {
+    DBG_FAIL_MACRO;
+    goto fail;
+  }
+  if (!dir.isDir()) {
+    DBG_FAIL_MACRO;
+    goto fail;
+  }
+  mVwd = dir;
+  return true;
+
+ fail:
+  return false;
+}
+
+}  // namespace sdfat
+}  // namespace teensy
+}  // namespace platforms
+}  // namespace fl
+
+#ifdef DBG_FILE
+#undef DBG_FILE
+#endif

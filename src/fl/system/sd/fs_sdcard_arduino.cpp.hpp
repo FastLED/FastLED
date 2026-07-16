@@ -1,6 +1,12 @@
-#pragma once
+// Arduino SD-card implementation. This file contains external Arduino library
+// headers and definitions, so it must only be included by the SD implementation
+// translation unit rather than exposed through FastLED's header graph.
 
-// fs card arduino implementation.
+#include "fl/stl/has_include.h"
+#include "fl/system/sd/fs_sdcard_arduino.h"
+#include "platforms/is_platform.h"
+
+#if !defined(FL_IS_TEENSY) && FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>)
 
 // IWYU pragma: begin_keep
 #include <SPI.h>
@@ -35,7 +41,7 @@ private:
 
 public:
     SdFatFileHandle(SdFile file, const char* path) : _file(fl::move(file)), _path(path) {}
-    ~SdFatFileHandle() override {
+    ~SdFatFileHandle() FL_NO_EXCEPT override {
         if (_file.isOpen()) {
             _file.close();
         }
@@ -93,7 +99,7 @@ private:
 
 public:
     SDFileHandle(File file, const char* path) : _file(file), _path(path) {}
-    ~SDFileHandle() override {
+    ~SDFileHandle() FL_NO_EXCEPT override {
         if (_file) {
             _file.close();
         }
@@ -202,3 +208,7 @@ inline FsImplPtr make_sdcard_filesystem(int cs_pin) FL_NO_EXCEPT {
 }
 
 } // namespace fl
+
+#define FASTLED_HAS_SDCARD_ARDUINO_IMPL 1
+
+#endif  // !defined(FL_IS_TEENSY) && FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>)
