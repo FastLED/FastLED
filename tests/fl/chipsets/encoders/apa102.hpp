@@ -314,9 +314,12 @@ FL_TEST_CASE("encodeAPA102_AutoBrightness() - empty range") {
 
     fl::encodeAPA102_AutoBrightness(leds.begin(), leds.end(), fl::back_inserter(output));
 
-    // Empty range: only start frame (no end frame for 0 LEDs)
-    FL_CHECK(output.size() == 4);
+    // Empty range: still a complete frame (start + one end DWord). This
+    // matters when a previously longer cascade is reconfigured through the
+    // public API.
+    FL_CHECK(output.size() == 8);
     verifyStartFrame(output, 0);
+    verifyEndFrame(output, 4, 0);
 }
 
 FL_TEST_CASE("encodeAPA102_AutoBrightness() - single LED max brightness") {

@@ -4,9 +4,11 @@
 /// SK9822 Protocol Format:
 /// - Start frame: 4 bytes of 0x00
 /// - LED frames: [0xE0|brightness][B][G][R] (4 bytes per LED)
-/// - End frame: (num_leds / 32) + 1 DWords of 0x00 (differs from APA102)
+/// - End frame: (num_leds / 32) + 1 DWords of 0xFF (all-ones end clocks)
 ///
-/// Key difference from APA102: End frame uses 0x00 instead of 0xFF
+/// The vendor datasheet requires all-ones end clocks: they shift the final
+/// LED frame through a long cascade, and a zero frame is not a substitute
+/// because it is itself a valid start-frame pattern (see FastLED#3669).
 
 #include "fl/chipsets/encoders/sk9822.h"
 #include "fl/stl/array.h"
@@ -59,13 +61,13 @@ void verifyLED(const fl::vector<u8>& output, size_t& offset, u8 expected_bri5, u
     FL_CHECK_EQ(output[offset++], r);  // Red
 }
 
-/// Verify end frame: (num_leds / 32) + 1 DWords of 0x00
+/// Verify end frame: (num_leds / 32) + 1 DWords of 0xFF
 void verifyEndFrame(const fl::vector<u8>& output, size_t& offset, size_t num_leds) {
     size_t end_dwords = (num_leds / 32) + 1;
     size_t end_bytes = end_dwords * 4;
 
     for (size_t i = 0; i < end_bytes; i++) {
-        FL_CHECK_EQ(output[offset++], 0x00);  // SK9822 uses 0x00 (differs from APA102's 0xFF)
+        FL_CHECK_EQ(output[offset++], 0xFF);  // All-ones end clocks (FastLED#3669)
     }
 
     // Verify we consumed all bytes
@@ -141,9 +143,9 @@ FL_TEST_CASE("SK9822 - encodeSK9822() 32 LEDs end frame calculation") {
     // Expected: start(4) + 32*LED(4) + end(8) = 140 bytes
     FL_CHECK_EQ(output.size(), 140);
 
-    // Verify end frame is 8 bytes of 0x00
+    // Verify end frame is 8 bytes of 0xFF
     for (size_t i = 132; i < 140; i++) {
-        FL_CHECK_EQ(output[i], 0x00);
+        FL_CHECK_EQ(output[i], 0xFF);
     }
 }
 
@@ -175,9 +177,9 @@ FL_TEST_CASE("SK9822 - encodeSK9822() 64 LEDs end frame calculation") {
     // Expected: start(4) + 40*LED(4) + end(8) = 172 bytes
     FL_CHECK_EQ(output.size(), 172);
 
-    // Verify end frame is 8 bytes of 0x00
+    // Verify end frame is 8 bytes of 0xFF
     for (size_t i = 164; i < 172; i++) {
-        FL_CHECK_EQ(output[i], 0x00);
+        FL_CHECK_EQ(output[i], 0xFF);
     }
 }
 
@@ -279,17 +281,18 @@ FL_TEST_CASE("SK9822 - encodeSK9822_HD() zero LEDs") {
 }
 
 FL_TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() empty range") {
-    // Test empty pixel array
+    // Test empty pixel array: still a full frame, matching the non-auto encoder
     fl::vector<fl::array<u8, 3>> pixels;
 
     fl::vector<u8> output;
     encodeSK9822_AutoBrightness(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
-    // Expected: start frame only (4 bytes)
-    FL_CHECK_EQ(output.size(), 4);
+    // Expected: start(4) + end(4) = 8 bytes
+    FL_CHECK_EQ(output.size(), 8);
 
     size_t offset = 0;
     verifyStartFrame(output, offset);
+    verifyEndFrame(output, offset, 0);
 }
 
 FL_TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() single LED") {
@@ -361,8 +364,10 @@ FL_TEST_CASE("SK9822 - encodeSK9822_AutoBrightness() first LED color scaling") {
     FL_CHECK_EQ(output[4] & 0xE0, 0xE0);  // Top 3 bits should be 111
 }
 
-FL_TEST_CASE("SK9822 - End frame uses 0x00 (differs from APA102)") {
-    // Critical test: Verify SK9822 end frame uses 0x00, NOT 0xFF
+FL_TEST_CASE("SK9822 - End frame uses 0xFF (all-ones end clocks)") {
+    // Critical test: Verify SK9822 end frame uses all-ones end clocks, which
+    // shift the final LED frame through a long cascade (FastLED#3669). A zero
+    // frame is not a substitute: it is itself a valid start-frame pattern.
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makePixel(255, 255, 255));
 
@@ -370,15 +375,14 @@ FL_TEST_CASE("SK9822 - End frame uses 0x00 (differs from APA102)") {
     encodeSK9822(pixels.begin(), pixels.end(), fl::back_inserter(output));
 
     // End frame starts at offset 8 (start=4, LED=4)
-    // End frame: 4 bytes of 0x00
+    // End frame: 4 bytes of 0xFF
     for (size_t i = 8; i < 12; i++) {
-        FL_CHECK_EQ(output[i], 0x00);  // SK9822 uses 0x00
-        FL_CHECK_NE(output[i], 0xFF);  // NOT 0xFF (APA102 uses 0xFF)
+        FL_CHECK_EQ(output[i], 0xFF);
     }
 }
 
-FL_TEST_CASE("SK9822 - All three encoders use 0x00 end frames") {
-    // Verify all three encoder functions use 0x00 end frames
+FL_TEST_CASE("SK9822 - All three encoders use 0xFF end frames") {
+    // Verify all three encoder functions use all-ones end frames
     fl::vector<fl::array<u8, 3>> pixels;
     pixels.push_back(makePixel(255, 0, 0));
 
@@ -388,24 +392,24 @@ FL_TEST_CASE("SK9822 - All three encoders use 0x00 end frames") {
     // Test encodeSK9822
     fl::vector<u8> output1;
     encodeSK9822(pixels.begin(), pixels.end(), fl::back_inserter(output1));
-    FL_CHECK_EQ(output1[8], 0x00);   // End frame byte 1
-    FL_CHECK_EQ(output1[9], 0x00);   // End frame byte 2
-    FL_CHECK_EQ(output1[10], 0x00);  // End frame byte 3
-    FL_CHECK_EQ(output1[11], 0x00);  // End frame byte 4
+    FL_CHECK_EQ(output1[8], 0xFF);   // End frame byte 1
+    FL_CHECK_EQ(output1[9], 0xFF);   // End frame byte 2
+    FL_CHECK_EQ(output1[10], 0xFF);  // End frame byte 3
+    FL_CHECK_EQ(output1[11], 0xFF);  // End frame byte 4
 
     // Test encodeSK9822_HD
     fl::vector<u8> output2;
     encodeSK9822_HD(pixels.begin(), pixels.end(), brightness.begin(), fl::back_inserter(output2));
-    FL_CHECK_EQ(output2[8], 0x00);   // End frame byte 1
-    FL_CHECK_EQ(output2[9], 0x00);   // End frame byte 2
-    FL_CHECK_EQ(output2[10], 0x00);  // End frame byte 3
-    FL_CHECK_EQ(output2[11], 0x00);  // End frame byte 4
+    FL_CHECK_EQ(output2[8], 0xFF);   // End frame byte 1
+    FL_CHECK_EQ(output2[9], 0xFF);   // End frame byte 2
+    FL_CHECK_EQ(output2[10], 0xFF);  // End frame byte 3
+    FL_CHECK_EQ(output2[11], 0xFF);  // End frame byte 4
 
     // Test encodeSK9822_AutoBrightness
     fl::vector<u8> output3;
     encodeSK9822_AutoBrightness(pixels.begin(), pixels.end(), fl::back_inserter(output3));
-    FL_CHECK_EQ(output3[8], 0x00);   // End frame byte 1
-    FL_CHECK_EQ(output3[9], 0x00);   // End frame byte 2
-    FL_CHECK_EQ(output3[10], 0x00);  // End frame byte 3
-    FL_CHECK_EQ(output3[11], 0x00);  // End frame byte 4
+    FL_CHECK_EQ(output3[8], 0xFF);   // End frame byte 1
+    FL_CHECK_EQ(output3[9], 0xFF);   // End frame byte 2
+    FL_CHECK_EQ(output3[10], 0xFF);  // End frame byte 3
+    FL_CHECK_EQ(output3[11], 0xFF);  // End frame byte 4
 }
