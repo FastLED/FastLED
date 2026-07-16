@@ -5,7 +5,7 @@
 ///          INMP441 mic -> normalized bass detection -> 50 Hz PWM gates.
 /// @example hydropack.ino
 
-// @filter: (mem is large)
+// @filter: (mem is large) and (platform is esp32*)
 
 // This sketch targets the ESP32-C3 and is also a valid FastLED WASM sketch:
 //   pip install fastled
