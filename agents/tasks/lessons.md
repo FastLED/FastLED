@@ -12,5 +12,6 @@
   dots: use the sensitive analyzer for the center and the loud analyzer for
   the triangles so strong bass appears to launch outward.
 
-- For HydroPack's audience-safe behavior, prefer FastLED's INMP441-calibrated
-  SPL meter and tempo stability gate over a custom sound-floor histogram.
+- For HydroPack's audience-safe behavior, use FastLED's INMP441-calibrated
+  SPL meter with its adaptive bass-beat detector rather than a custom
+  sound-floor histogram or a separate tempo lock.

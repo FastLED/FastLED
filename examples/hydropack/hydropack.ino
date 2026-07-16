@@ -11,8 +11,9 @@
 //   - center: sensitive - fires on a transient just above the song average
 //   - triangles: loud - fire only on a substantially stronger transient
 //
-// The output is gated by calibrated sound pressure, a stable musical tempo,
-// and a bass beat. This keeps ordinary conversation and random noise dark.
+// The output is gated by calibrated sound pressure and an adaptive bass beat.
+// This keeps ordinary conversation and random noise dark without waiting for
+// a tempo lock before the first visible musical hit.
 // Once music is established, FastLED's Vibe detector tracks its running bass
 // average; relative bass energy is about 1.0 at the current average. A loud
 // hit lights the center, then launches into the triangles.
@@ -42,7 +43,6 @@ constexpr uint8_t kRightTriangleStart = 12;
 constexpr uint8_t kPreviewLedCount = 18;
 constexpr uint32_t kTriangleLaunchDelayMs = 5;
 constexpr float kDefaultStageThresholdDbSpl = 80.0f;
-constexpr float kMinimumTempoConfidence = 0.50f;
 
 CRGB previewLeds[kPreviewLedCount];
 
@@ -76,8 +76,8 @@ fl::UIAudio audioUi("Audio Input", audioConfig);
 
 fl::UITitle title("HydroPack Stage Music Launch");
 fl::UIDescription description(
-    "The INMP441 sound-pressure gate and stable beat detector keep "
-    "conversation dark. On confident musical bass beats, the center fires "
+    "The INMP441 sound-pressure gate and adaptive bass beat detector keep "
+    "conversation dark. On musical bass beats, the center fires "
     "at the sensitive level and stronger hits launch to both triangles.");
 
 fl::UISlider stageThresholdDbSpl("Minimum Music Level (dB SPL)",
@@ -99,8 +99,6 @@ uint32_t gTriangleFireAtMs = 0;
 fl::audio::SoundLevelMeter gSoundLevelMeter;
 fl::shared_ptr<fl::audio::Processor> gAudio;
 float gSoundPressureDbSpl = 33.0f;
-float gTempoConfidence = 0.0f;
-bool gTempoStable = false;
 
 void updateSoundLevel() {
     if (!gAudio) {
@@ -165,27 +163,19 @@ void setup() {
     }
 
     gAudio->setNoiseFloorTrackingEnabled(true);
-    gAudio->onVibeLevels([](const fl::audio::detector::VibeLevels &) {
+    gAudio->onVibeLevels([](const fl::audio::detector::VibeLevels &levels) {
         // Feed every block so the calibrated meter observes the actual quiet
         // floor, rather than only the relatively loud blocks that trigger a
         // beat callback.
         updateSoundLevel();
-    });
-    gAudio->onTempoWithConfidence([](float, float confidence) {
-        gTempoConfidence = confidence;
-    });
-    gAudio->onTempoStable([]() { gTempoStable = true; });
-    gAudio->onTempoUnstable([]() { gTempoStable = false; });
-    gAudio->onBeat([]() {
-        const float bass = gAudio->getVibeBass();
-        if (!gTempoStable || gTempoConfidence < kMinimumTempoConfidence ||
-            gSoundPressureDbSpl < stageThresholdDbSpl.value() ||
-            !gAudio->isVibeBassSpike()) {
+        if (!levels.bassSpike ||
+            gSoundPressureDbSpl < stageThresholdDbSpl.value()) {
             return;
         }
-        fireAnalyzer(bass, centerThreshold.value(), 0.35f, gCenterLevel);
-        if (bass > triangleThreshold.value()) {
-            fireAnalyzer(bass, triangleThreshold.value(), 0.50f,
+        fireAnalyzer(levels.bass, centerThreshold.value(), 0.35f,
+                     gCenterLevel);
+        if (levels.bass > triangleThreshold.value()) {
+            fireAnalyzer(levels.bass, triangleThreshold.value(), 0.50f,
                          gPendingTriangleLevel);
             gTriangleFireAtMs = millis() + kTriangleLaunchDelayMs;
         }
