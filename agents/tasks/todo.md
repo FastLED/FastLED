@@ -15,3 +15,4 @@
 - [x] Add independent sensitive and loud adaptive-audio indicators.
 - [x] Compile the WASM example and launch its local preview.
 - [x] Review and push the FastLED PR.
+- [x] Gate HydroPack launches on calibrated SPL and stable musical tempo.

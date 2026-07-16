@@ -1,6 +1,6 @@
 // FL_AGENT_ALLOW_NEW_EXAMPLE
 /// @file hydropack.ino
-/// @brief HydroPack: two adaptive bass analyzers animate an LED < | > layout.
+/// @brief HydroPack: stage-level musical bass animates an LED < | > layout.
 /// @example hydropack.ino
 
 // @filter: (mem is large) and (platform is esp32*)
@@ -11,11 +11,11 @@
 //   - center: sensitive - fires on a transient just above the song average
 //   - triangles: loud - fire only on a substantially stronger transient
 //
-// The detector is FastLED's built-in Vibe detector. Like Songstone's adaptive
-// window, it tracks a slow running song average; relative bass energy is about
-// 1.0 at the current average. FastLED's adaptive noise-floor tracker gates
-// microphone hiss before Vibe sees it. A loud hit lights the center, then
-// launches into the triangles; a moderate hit lights the center only.
+// The output is gated by calibrated sound pressure, a stable musical tempo,
+// and a bass beat. This keeps ordinary conversation and random noise dark.
+// Once music is established, FastLED's Vibe detector tracks its running bass
+// average; relative bass energy is about 1.0 at the current average. A loud
+// hit lights the center, then launches into the triangles.
 
 #include <Arduino.h>
 #include <FastLED.h>
@@ -41,6 +41,8 @@ constexpr uint8_t kCenterStart = 6;
 constexpr uint8_t kRightTriangleStart = 12;
 constexpr uint8_t kPreviewLedCount = 18;
 constexpr uint32_t kTriangleLaunchDelayMs = 5;
+constexpr float kDefaultStageThresholdDbSpl = 80.0f;
+constexpr float kMinimumTempoConfidence = 0.50f;
 
 CRGB previewLeds[kPreviewLedCount];
 
@@ -72,12 +74,15 @@ fl::audio::Config audioConfig = fl::audio::Config::CreateInmp441(
     I2S_WS, I2S_SD, I2S_CLK, fl::audio::AudioChannel::Right);
 fl::UIAudio audioUi("Audio Input", audioConfig);
 
-fl::UITitle title("HydroPack Two-Level Bass Launch");
+fl::UITitle title("HydroPack Stage Music Launch");
 fl::UIDescription description(
-    "Two analyzers read the same adaptive bass signal. The center bar fires "
-    "at the sensitive level. Stronger hits launch out to both triangles. "
-    "Quiet input is fully dark.");
+    "The INMP441 sound-pressure gate and stable beat detector keep "
+    "conversation dark. On confident musical bass beats, the center fires "
+    "at the sensitive level and stronger hits launch to both triangles.");
 
+fl::UISlider stageThresholdDbSpl("Minimum Music Level (dB SPL)",
+                                 kDefaultStageThresholdDbSpl, 60.0f, 105.0f,
+                                 1.0f);
 fl::UISlider centerThreshold("Center (Sensitive) Threshold", 1.05f, 1.0f,
                              3.0f, 0.05f);
 fl::UISlider triangleThreshold("Triangles (Loud) Threshold", 1.65f, 1.0f,
@@ -91,6 +96,23 @@ float gCenterLevel = 0.0f;
 float gTriangleLevel = 0.0f;
 float gPendingTriangleLevel = 0.0f;
 uint32_t gTriangleFireAtMs = 0;
+fl::audio::SoundLevelMeter gSoundLevelMeter;
+fl::shared_ptr<fl::audio::Processor> gAudio;
+float gSoundPressureDbSpl = 33.0f;
+float gTempoConfidence = 0.0f;
+bool gTempoStable = false;
+
+void updateSoundLevel() {
+    if (!gAudio) {
+        return;
+    }
+    const fl::audio::Sample &sample = gAudio->getSample();
+    if (!sample.isValid() || sample.pcm().empty()) {
+        return;
+    }
+    gSoundLevelMeter.processBlock(sample.pcm());
+    gSoundPressureDbSpl = static_cast<float>(gSoundLevelMeter.getSPL());
+}
 
 void fireAnalyzer(float bass, float threshold, float minIntensity,
                   float &level) {
@@ -133,23 +155,37 @@ void setup() {
     centerThreshold.setGroup("Two-Level Bass Analyzers");
     triangleThreshold.setGroup("Two-Level Bass Analyzers");
     fadeSeconds.setGroup("Two-Level Bass Analyzers");
+    stageThresholdDbSpl.setGroup("Stage Music Gate");
 
     // The unified input is browser audio on WASM and INMP441 I2S on ESP32.
-    auto audio = FastLED.add(audioUi);
-    if (!audio) {
+    gAudio = FastLED.add(audioUi);
+    if (!gAudio) {
         FL_WARN("HydroPack: no audio processor available");
         return;
     }
 
-    audio->setNoiseFloorTrackingEnabled(true);
-    audio->onVibeLevels([](const fl::audio::detector::VibeLevels &levels) {
-        if (!levels.bassSpike) {
+    gAudio->setNoiseFloorTrackingEnabled(true);
+    gAudio->onVibeLevels([](const fl::audio::detector::VibeLevels &) {
+        // Feed every block so the calibrated meter observes the actual quiet
+        // floor, rather than only the relatively loud blocks that trigger a
+        // beat callback.
+        updateSoundLevel();
+    });
+    gAudio->onTempoWithConfidence([](float, float confidence) {
+        gTempoConfidence = confidence;
+    });
+    gAudio->onTempoStable([]() { gTempoStable = true; });
+    gAudio->onTempoUnstable([]() { gTempoStable = false; });
+    gAudio->onBeat([]() {
+        const float bass = gAudio->getVibeBass();
+        if (!gTempoStable || gTempoConfidence < kMinimumTempoConfidence ||
+            gSoundPressureDbSpl < stageThresholdDbSpl.value() ||
+            !gAudio->isVibeBassSpike()) {
             return;
         }
-        fireAnalyzer(levels.bass, centerThreshold.value(), 0.35f,
-                     gCenterLevel);
-        if (levels.bass > triangleThreshold.value()) {
-            fireAnalyzer(levels.bass, triangleThreshold.value(), 0.50f,
+        fireAnalyzer(bass, centerThreshold.value(), 0.35f, gCenterLevel);
+        if (bass > triangleThreshold.value()) {
+            fireAnalyzer(bass, triangleThreshold.value(), 0.50f,
                          gPendingTriangleLevel);
             gTriangleFireAtMs = millis() + kTriangleLaunchDelayMs;
         }

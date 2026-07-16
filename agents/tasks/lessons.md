@@ -11,3 +11,6 @@
 - HydroPack's two sensitivity levels are visual layers, not separate status
   dots: use the sensitive analyzer for the center and the loud analyzer for
   the triangles so strong bass appears to launch outward.
+
+- For HydroPack's audience-safe behavior, prefer FastLED's INMP441-calibrated
+  SPL meter and tempo stability gate over a custom sound-floor histogram.
