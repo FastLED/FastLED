@@ -10,6 +10,7 @@
 #include "platforms/arm/rp/rpcommon/clockless_rp_pio_auto.cpp.hpp"
 #include "platforms/arm/rp/rpcommon/init_channel_driver_rp.cpp.hpp"
 #include "platforms/arm/rp/rpcommon/rp_pio_tx_peripheral.cpp.hpp"
+#include "platforms/arm/rp/rpcommon/rp_pio_spi_peripheral.cpp.hpp"
 #include "platforms/arm/rp/rpcommon/rp_spi_peripheral.cpp.hpp"
 #include "platforms/arm/rp/rpcommon/rp_uart_peripheral.cpp.hpp"
 #include "platforms/arm/rp/rpcommon/rx_pio_channel.cpp.hpp"

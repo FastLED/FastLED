@@ -13,6 +13,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/type_traits.h"
 #include "platforms/arm/rp/rpcommon/channel_engine_rp_pio.h"
+#include "platforms/arm/rp/rpcommon/rp_pio_spi_peripheral.h"
 #include "platforms/arm/rp/rpcommon/rp_pio_tx_peripheral.h"
 
 namespace fl {
@@ -21,10 +22,12 @@ namespace detail {
 template<u8 Which>
 struct RpPioTxBusHolder {
     fl::shared_ptr<RpPioTxPeripheral> peripheral;
+    fl::shared_ptr<RpPioSpiPeripheral> spiPeripheral;
     fl::shared_ptr<ChannelEngineRpPio> driver;
     RpPioTxBusHolder() FL_NO_EXCEPT
         : peripheral(fl::make_shared<RpPioTxPeripheral>(Which)),
-          driver(fl::make_shared<ChannelEngineRpPio>(peripheral, Which)) {}
+          spiPeripheral(fl::make_shared<RpPioSpiPeripheral>(Which)),
+          driver(fl::make_shared<ChannelEngineRpPio>(peripheral, spiPeripheral)) {}
 };
 
 template<u8 Which>
@@ -55,6 +58,8 @@ template<> struct BusTraits<Bus::FLEX_IO, 1> {
 
 template<> struct BusSupports<Bus::FLEX_IO, ClocklessChipset, 0> : fl::true_type {};
 template<> struct BusSupports<Bus::FLEX_IO, ClocklessChipset, 1> : fl::true_type {};
+template<> struct BusSupports<Bus::FLEX_IO, SpiChipsetConfig, 0> : fl::true_type {};
+template<> struct BusSupports<Bus::FLEX_IO, SpiChipsetConfig, 1> : fl::true_type {};
 
 }  // namespace fl
 
