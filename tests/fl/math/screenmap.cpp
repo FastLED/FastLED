@@ -281,6 +281,34 @@ FL_TEST_CASE("ScreenMap v2 JSON parsing — malformed segments errors cleanly") 
     FL_CHECK(err.size() > 0);
 }
 
+FL_TEST_CASE("ScreenMap v2 JSON parsing — EL geometry remains shape-native") {
+    const char* json = R"({
+        "version": 2,
+        "segments": [
+            { "id": "left", "pin": 1, "group": "g", "type": "el_panel",
+              "x": [-20, -40, -40], "y": [0, -20, 20] },
+            { "id": "wire", "pin": 2, "group": "g", "type": "el_wire",
+              "x": [-10, 10], "y": [0, 0], "thickness": 5.0 },
+            { "id": "right", "pin": 3, "group": "g", "type": "el_panel",
+              "x": [20, 40, 40], "y": [0, -20, 20] }
+        ]
+    })";
+
+    fl::flat_map<string, ScreenMap> segmentMaps;
+    string err;
+    FL_CHECK(ScreenMap::ParseJson(json, &segmentMaps, &err));
+    FL_CHECK(segmentMaps.size() == 3);
+    FL_CHECK(segmentMaps["left"].getLength() == 1);
+    FL_CHECK(segmentMaps["wire"].getLength() == 1);
+    FL_CHECK(segmentMaps["left"].hasShapes());
+    FL_CHECK(segmentMaps["left"].getShapeCount() == 1);
+    FL_CHECK(segmentMaps["left"].getShape(0).type == ScreenMap::Shape::EL_PANEL);
+    FL_CHECK(segmentMaps["left"].getShape(0).vertices.size() == 3);
+    FL_CHECK(segmentMaps["wire"].getShape(0).type == ScreenMap::Shape::EL_WIRE);
+    FL_CHECK(segmentMaps["wire"].getShape(0).thickness == 5.0f);
+    FL_CHECK(segmentMaps["wire"].getShape(0).vertices.size() == 2);
+}
+
 // Grouped tests
 #include "tests/fl/math/xymap.hpp"
 

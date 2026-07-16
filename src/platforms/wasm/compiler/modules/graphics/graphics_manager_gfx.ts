@@ -27,16 +27,42 @@ function stripCoords(strip) {
 export function toGfxScreenmap(screenMaps) {
   if (screenMaps?.map) return screenMaps;
   const map = {};
+  const segments = [];
+  const groups = {};
+  let hasShapes = false;
   for (const [groupId, group] of Object.entries(screenMaps ?? {})) {
     if (group?.strips && typeof group.strips === 'object') {
       for (const [stripId, strip] of Object.entries(group.strips)) {
+        if (Array.isArray(strip?.shapes)) {
+          hasShapes = true;
+          groups[String(groupId)] = { color: '#ffffff' };
+          for (const [shapeIndex, shape] of strip.shapes.entries()) {
+            segments.push({ id: `${groupId}:${stripId}:shape${shapeIndex}`, type: shape.type,
+              pin: String(groupId), group: String(groupId), x: shape.x ?? [], y: shape.y ?? [],
+              ...(shape.thickness !== undefined ? { thickness: shape.thickness } : {}) });
+          }
+          continue;
+        }
         const coords = stripCoords(strip);
         if (coords) map[`${groupId}:${stripId}`] = coords;
       }
     } else {
+      if (Array.isArray(group?.shapes)) {
+        hasShapes = true;
+        groups[String(groupId)] = { color: '#ffffff' };
+        for (const [shapeIndex, shape] of group.shapes.entries()) {
+          segments.push({ id: `${String(groupId)}:shape${shapeIndex}`, type: shape.type, pin: String(groupId), group: String(groupId),
+            x: shape.x ?? [], y: shape.y ?? [], ...(shape.thickness !== undefined ? { thickness: shape.thickness } : {}) });
+        }
+        continue;
+      }
       const coords = stripCoords(group);
       if (coords) map[groupId] = coords;
     }
+  }
+  if (hasShapes) {
+    for (const id of Object.keys(map)) groups[id] = { color: '#ffffff' };
+    return { version: 2, groups, segments: [...segments, ...Object.entries(map).map(([id, value]) => ({ id, type: 'led_strip', pin: id, group: id, x: value.x ?? [], y: value.y ?? [], ...(value.diameter !== undefined ? { diameter: value.diameter } : {}) }))] };
   }
   if (Object.keys(map).length === 0) throw new Error('screenmap: no coordinate strips found');
   return { map };
