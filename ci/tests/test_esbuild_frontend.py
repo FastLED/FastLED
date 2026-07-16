@@ -7,10 +7,14 @@ import importlib
 from pathlib import Path
 
 
-def test_frontend_dependency_hash_tracks_both_manifests(monkeypatch, tmp_path: Path) -> None:
+def test_frontend_dependency_hash_tracks_both_manifests(
+    monkeypatch, tmp_path: Path
+) -> None:
     module = importlib.import_module("ci.esbuild_frontend")
     (tmp_path / "package.json").write_text('{"dependencies":{}}', encoding="utf-8")
-    (tmp_path / "package-lock.json").write_text('{"lockfileVersion":3}', encoding="utf-8")
+    (tmp_path / "package-lock.json").write_text(
+        '{"lockfileVersion":3}', encoding="utf-8"
+    )
     monkeypatch.setattr(module, "FRONTEND_DIR", tmp_path)
 
     actual = module._frontend_dependency_hash()
@@ -20,7 +24,9 @@ def test_frontend_dependency_hash_tracks_both_manifests(monkeypatch, tmp_path: P
     assert actual == expected
 
 
-def test_frontend_dependencies_run_npm_ci_once_per_manifest_hash(monkeypatch, tmp_path: Path) -> None:
+def test_frontend_dependencies_run_npm_ci_once_per_manifest_hash(
+    monkeypatch, tmp_path: Path
+) -> None:
     module = importlib.import_module("ci.esbuild_frontend")
     (tmp_path / "package.json").write_text('{"dependencies":{}}', encoding="utf-8")
     lockfile = tmp_path / "package-lock.json"

@@ -8,7 +8,7 @@
 /// Protocol:
 /// - Start frame: 4 bytes of 0x00
 /// - LED data: [0xE0|brightness][B][G][R] (4 bytes per LED)
-/// - End frame: ⌈num_leds/32⌉ DWords of 0xFF
+/// - End frame: (num_leds / 32) + 1 DWords of 0xFF
 ///
 /// Brightness modes:
 /// - Global: All LEDs use same 5-bit brightness (from first pixel)
@@ -65,7 +65,7 @@ void encodeAPA102(InputIterator first, InputIterator last, OutputIterator out,
         ++num_leds;
     }
 
-    // End frame: ⌈num_leds/32⌉ DWords of 0xFF
+    // End frame: (num_leds / 32) + 1 DWords of 0xFF
     size_t end_dwords = (num_leds / 32) + 1;
     for (size_t i = 0; i < end_dwords * 4; i++) {
         *out++ = 0xFF;
@@ -108,7 +108,7 @@ void encodeAPA102_HD(InputIterator first, InputIterator last,
         ++num_leds;
     }
 
-    // End frame: ⌈num_leds/32⌉ DWords of 0xFF
+    // End frame: (num_leds / 32) + 1 DWords of 0xFF
     size_t end_dwords = (num_leds / 32) + 1;
     for (size_t i = 0; i < end_dwords * 4; i++) {
         *out++ = 0xFF;

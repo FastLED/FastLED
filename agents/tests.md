@@ -306,7 +306,7 @@ Some test directories use a **consolidation pattern** where multiple `.cpp` file
 
 When creating a new test file, **mirror the source directory structure**:
 - Source at `src/fl/stl/flat_map.h` → test at `tests/fl/stl/flat_map.cpp`
-- Source at `src/platforms/esp/32/drivers/uart/wave8_encoder_uart.h` → test at `tests/platforms/esp/32/drivers/uart/wave8_encoder_uart.cpp`
+- Source at `src/fl/channels/uart_wave_encoder.h` → test at `tests/fl/channels/uart_wave_encoder.cpp`
 
 Before creating a new file, always check:
 1. Is there an existing test file for the same source file? → **Add your test there**

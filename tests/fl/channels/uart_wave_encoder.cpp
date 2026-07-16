@@ -1,4 +1,4 @@
-/// @file test_wave8_encoder_uart.cpp
+/// @file uart_wave_encoder.cpp
 /// @brief Unit tests for UART wave10 encoder
 ///
 /// Tests the wave10 LUT generation, timing predicate, and encoding
@@ -6,7 +6,7 @@
 
 #include "test.h"
 
-#include "platforms/esp/32/drivers/uart/wave8_encoder_uart.h"
+#include "fl/channels/uart_wave_encoder.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/cstddef.h"

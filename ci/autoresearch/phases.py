@@ -86,8 +86,7 @@ def _driver_name_for_environment(
     if (
         driver == "FLEX_IO"
         and final_environment is not None
-        and final_environment.lower()
-        in ("rp2040", "rpipico", "rp2350", "rpipico2")
+        and final_environment.lower() in ("rp2040", "rpipico", "rp2350", "rpipico2")
     ):
         # RP exposes two independent PIO engines as PIO0 and PIO1.  Their
         # concrete names must remain distinct so a runtime-exclusive test can

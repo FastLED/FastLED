@@ -2,6 +2,8 @@
 
 #include "platforms/arm/rp/rpcommon/rx_pio_channel.h"
 
+#include "platforms/arm/rp/is_rp.h"
+
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 #include "platforms/arm/rp/rpcommon/rp_pio_dma_resource_manager.h"
@@ -34,6 +36,7 @@ struct PioRxCaptureBuffers {
     RpPioRxEdgeStorage edges;
 };
 
+// FL_LINT_ALLOW_GLOBAL(static DMA capture target; must stay in static storage, not heap or lazy-init)
 PioRxCaptureBuffers gPioRxCaptureBuffers;
 
 const pio_instr kPioRxDurationTemplate[kPioRxProgramLength] = {};
@@ -109,7 +112,7 @@ bool RpPioRxDevice::begin(const RxConfig& config) FL_NO_EXCEPT {
         mLastBeginError = "dma_buffer_size";
         return false;
     }
-    pio_instr* instructions = reinterpret_cast<pio_instr*>(mProgramInstructions);
+    pio_instr* instructions = mProgramInstructions; // pio_instr is u16
     buildPioRxSampleProgram(instructions, config.start_low);
     const pio_program program = makePioRxDurationProgram(instructions);
     auto& resources = RpPioDmaResourceManager::instance();

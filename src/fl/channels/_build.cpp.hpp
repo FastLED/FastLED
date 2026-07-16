@@ -14,6 +14,7 @@
 #include "fl/channels/id_tracker.cpp.hpp"
 #include "fl/channels/manager.cpp.hpp"
 #include "fl/channels/rx.cpp.hpp"
+#include "fl/channels/uart_wave_encoder.cpp.hpp"
 #include "fl/channels/validation.cpp.hpp"
 #include "fl/channels/wave3.cpp.hpp"
 #include "fl/channels/wave8.cpp.hpp"

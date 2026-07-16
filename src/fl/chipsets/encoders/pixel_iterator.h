@@ -218,7 +218,7 @@ class PixelIterator {
     /// @brief Encode pixels in APA102/DOTSTAR format (zero allocation)
     /// @param out Output buffer to write encoded bytes
     /// @param hd_gamma Enable high-definition gamma correction (per-LED brightness)
-    /// @note Protocol: [Start:32b 0x00][LED:[0xE0|bri5][B][G][R]]×N[End:⌈N/32⌉×32b 0xFF]
+    /// @note Protocol: [Start:32b 0x00][LED:[0xE0|bri5][B][G][R]] x N, then [End: (N/32)+1 x 32b 0xFF]
     template <typename CONTAINER_UIN8_T>
     void writeAPA102(CONTAINER_UIN8_T* out, bool hd_gamma = false) FL_NO_EXCEPT {
         auto back_ins = fl::back_inserter(*out);

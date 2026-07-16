@@ -584,9 +584,7 @@ class TestParseArgsAndBuildCommands:
         assert result.drivers == ["PIO1"]
         assert result.json_rpc_commands[0]["params"]["driver"] == "PIO1"
 
-    def test_flex_io_selects_pio0_on_rp2040(
-        self, fake_project_dir: Path
-    ) -> None:
+    def test_flex_io_selects_pio0_on_rp2040(self, fake_project_dir: Path) -> None:
         args = _make_args(
             parlio=False,
             flex_io=True,
@@ -652,9 +650,10 @@ class TestParseArgsAndBuildCommands:
             "concurrent_resource_test": True,
             "show_success": True,
         }
-        assert _validate_test_rpc_response(
-            "runParallelTest", command, response, 11, 8
-        ) == []
+        assert (
+            _validate_test_rpc_response("runParallelTest", command, response, 11, 8)
+            == []
+        )
 
     def test_lpuart_is_deprecated_alias_for_uart(
         self, fake_project_dir: Path, capsys: pytest.CaptureFixture[str]

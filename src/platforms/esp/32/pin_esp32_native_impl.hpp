@@ -15,6 +15,7 @@
 /// - PinMode::InputPulldown (3) = INPUT_PULLDOWN (GPIO_MODE_INPUT with pull-down)
 
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/int.h"
 #include "platforms/esp/is_esp.h"
 #include "platforms/esp/esp_version.h"
 
@@ -181,25 +182,6 @@ inline u16 analogRead(int pin) FL_NO_EXCEPT {
 
 #endif  // ESP_IDF_VERSION_5_OR_HIGHER
 
-inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
-    // ESP-IDF does not provide a simple analogWrite API like Arduino
-    // This would require LEDC (LED PWM Controller) setup
-    // Stub implementation - no-op
-    (void)pin;
-    (void)val;
-}
-
-inline void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
-    // ESP-IDF native: Full LEDC 16-bit PWM would require:
-    // 1. Channel allocation (16 channels available)
-    // 2. ledc_timer_config for 16-bit resolution
-    // 3. ledc_channel_config to attach pin to channel
-    // 4. ledc_set_duty + ledc_update_duty to set value
-    // Stub implementation for now - no-op
-    (void)pin;
-    (void)val;
-}
-
 inline void setAdcRange(AdcRange range) FL_NO_EXCEPT {
     // ESP32 uses ADC attenuation instead of reference voltage
     // This would need to be implemented per-channel in analogRead
@@ -232,19 +214,20 @@ struct LedcPinAlloc {
     ledc_channel_t channel;
     ledc_timer_t timer;
     u32 frequency_hz;
+    u32 resolution_bits;
 };
 
 // okay static in header
 static LedcPinAlloc g_ledc_alloc[FL_LEDC_MAX_CHANNELS] = {
-    {-1, LEDC_CHANNEL_0, LEDC_TIMER_0, 0},
-    {-1, LEDC_CHANNEL_1, LEDC_TIMER_0, 0},
-    {-1, LEDC_CHANNEL_2, LEDC_TIMER_1, 0},
-    {-1, LEDC_CHANNEL_3, LEDC_TIMER_1, 0},
-    {-1, LEDC_CHANNEL_4, LEDC_TIMER_2, 0},
-    {-1, LEDC_CHANNEL_5, LEDC_TIMER_2, 0},
+    {-1, LEDC_CHANNEL_0, LEDC_TIMER_0, 0, 0},
+    {-1, LEDC_CHANNEL_1, LEDC_TIMER_0, 0, 0},
+    {-1, LEDC_CHANNEL_2, LEDC_TIMER_1, 0, 0},
+    {-1, LEDC_CHANNEL_3, LEDC_TIMER_1, 0, 0},
+    {-1, LEDC_CHANNEL_4, LEDC_TIMER_2, 0, 0},
+    {-1, LEDC_CHANNEL_5, LEDC_TIMER_2, 0, 0},
 #if FL_LEDC_MAX_CHANNELS >= 8
-    {-1, LEDC_CHANNEL_6, LEDC_TIMER_3, 0},
-    {-1, LEDC_CHANNEL_7, LEDC_TIMER_3, 0},
+    {-1, LEDC_CHANNEL_6, LEDC_TIMER_3, 0, 0},
+    {-1, LEDC_CHANNEL_7, LEDC_TIMER_3, 0, 0},
 #endif
 };
 
@@ -310,12 +293,21 @@ inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NO_EXCEPT {
         ratio >>= 1;
         resolution++;
     }
-    // Clamp resolution to valid range [1, 16]
+    // Clamp resolution to the SoC's LEDC timer width (14 bits on C3/S2/S3,
+    // 20 on the original ESP32). A fixed clamp of 16 would make low
+    // frequencies like 50 Hz fail ledc_timer_config on 14-bit parts.
+#if defined(SOC_LEDC_TIMER_BIT_WIDTH)
+    const u32 max_resolution = SOC_LEDC_TIMER_BIT_WIDTH;
+#elif defined(SOC_LEDC_TIMER_BIT_WIDE_NUM)
+    const u32 max_resolution = SOC_LEDC_TIMER_BIT_WIDE_NUM;
+#else
+    const u32 max_resolution = 16;
+#endif
     if (resolution < 1) {
         resolution = 1;
     }
-    if (resolution > 16) {
-        resolution = 16;
+    if (resolution > max_resolution) {
+        resolution = max_resolution;
     }
 #endif
 
@@ -353,6 +345,7 @@ inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NO_EXCEPT {
     // Record the allocation
     alloc.pin = pin;
     alloc.frequency_hz = frequency_hz;
+    alloc.resolution_bits = resolution;
 
     return 0;
 }
@@ -364,6 +357,45 @@ inline u32 getPwmFrequencyNative(int pin) FL_NO_EXCEPT {
         }
     }
     return 0;  // Not configured
+}
+
+// Write a duty value to the LEDC channel configured by setPwmFrequencyNative().
+// `val` is scaled from [0, in_max] to the channel's duty resolution.
+inline void ledcWriteScaledDuty(int pin, u32 val, u32 in_max) FL_NO_EXCEPT {
+    for (int i = 0; i < FL_LEDC_MAX_CHANNELS; i++) {
+        if (g_ledc_alloc[i].pin != pin) {
+            continue;
+        }
+        const LedcPinAlloc& alloc = g_ledc_alloc[i];
+        if (alloc.resolution_bits == 0) {
+            return;
+        }
+        const u32 max_duty = (1u << alloc.resolution_bits) - 1;
+        if (val > in_max) {
+            val = in_max;
+        }
+        u32 duty = static_cast<u32>(
+            (static_cast<u64>(val) * max_duty + (in_max / 2)) / in_max);
+        // LEDC quirk: max_duty is 99.99% duty; max_duty + 1 is true full-on.
+        if (val == in_max) {
+            duty = max_duty + 1;
+        }
+        ledc_set_duty(FL_LEDC_SPEED_MODE, alloc.channel, duty);
+        ledc_update_duty(FL_LEDC_SPEED_MODE, alloc.channel);
+        return;
+    }
+    // No LEDC allocation for this pin (setPwmFrequency was not called): no-op.
+}
+
+inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
+    // Arduino-style 8-bit duty input (0-255) onto the LEDC channel that
+    // setPwmFrequencyNative() configured for this pin.
+    ledcWriteScaledDuty(pin, val, 255);
+}
+
+inline void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
+    // 16-bit duty input (0-65535) onto the configured LEDC channel.
+    ledcWriteScaledDuty(pin, val, 65535);
 }
 
 }  // namespace platforms

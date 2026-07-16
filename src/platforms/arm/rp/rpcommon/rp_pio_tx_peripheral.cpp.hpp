@@ -2,6 +2,8 @@
 
 #include "platforms/arm/rp/rpcommon/rp_pio_tx_peripheral.h"
 
+#include "platforms/arm/rp/is_rp.h"
+
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 #include "fl/stl/chrono.h"
@@ -57,7 +59,7 @@ bool RpPioTxPeripheral::createProgram(const ChipsetTimingConfig& timing) FL_NO_E
     const u32 t3 = scaledCycles(timing.t3_ns, clock_hz, divider);
     if (t1 > 16 || t2 > 16 || t3 < 2 || t3 > 17) return false;
 
-    mProgram = new ProgramStorage(); // owned and freed by deinitialize
+    mProgram = new ProgramStorage(); // owned and freed by deinitialize // ok bare allocation
     if (mProgram == nullptr) return false;
     mProgram->instructions[0] = static_cast<pio_instr>(
         PIO_INSTR_OUT | PIO_OUT_DST_X | PIO_OUT_CNT(mLaneCount));
@@ -145,7 +147,7 @@ bool RpPioTxPeripheral::startTxDma(const u32* words, size_t word_count) FL_NO_EX
         dma_channel_is_busy(static_cast<uint>(mDmaChannel))) return false;
     dma_channel_set_read_addr(static_cast<uint>(mDmaChannel), words, false);
     dma_channel_set_trans_count(static_cast<uint>(mDmaChannel),
-                                static_cast<uint32_t>(word_count), true);
+                                static_cast<u32>(word_count), true);
     return true;
 }
 
@@ -190,7 +192,7 @@ void RpPioTxPeripheral::deinitialize() FL_NO_EXCEPT {
         gpio_set_dir(static_cast<uint>(mPin), GPIO_IN);
         RpPioDmaResourceManager::instance().releasePins(static_cast<u8>(mPin), mLaneCount);
     }
-    delete mProgram;
+    delete mProgram; // ok bare allocation
     mPio = nullptr;
     mStateMachine = -1;
     mDmaChannel = -1;

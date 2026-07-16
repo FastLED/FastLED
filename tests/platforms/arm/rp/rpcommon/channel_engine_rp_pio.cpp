@@ -8,7 +8,6 @@
 #include "fl/stl/move.h"
 #include "fl/stl/shared_ptr.h"
 #include "platforms/arm/rp/rpcommon/channel_engine_rp_pio.h"
-#include "platforms/arm/rp/rpcommon/channel_engine_rp_pio.cpp.hpp"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

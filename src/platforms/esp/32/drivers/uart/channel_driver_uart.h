@@ -37,7 +37,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 #include "platforms/esp/32/drivers/uart/iuart_peripheral.h"
-#include "platforms/esp/32/drivers/uart/wave8_encoder_uart.h"
+#include "fl/channels/uart_wave_encoder.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {

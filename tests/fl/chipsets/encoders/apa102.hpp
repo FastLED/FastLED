@@ -33,7 +33,7 @@ static void verifyLEDFrame(const fl::vector<fl::u8>& data, size_t offset,
     FL_CHECK(data[offset + 3] == R);
 }
 
-// Helper: Verify end frame (⌈num_leds/32⌉ DWords of 0xFF)
+// Helper: Verify end frame ((num_leds / 32) + 1 DWords of 0xFF)
 static void verifyEndFrame(const fl::vector<fl::u8>& data, size_t offset, size_t num_leds) {
     size_t end_dwords = (num_leds / 32) + 1;
     size_t end_bytes = end_dwords * 4;
@@ -314,9 +314,12 @@ FL_TEST_CASE("encodeAPA102_AutoBrightness() - empty range") {
 
     fl::encodeAPA102_AutoBrightness(leds.begin(), leds.end(), fl::back_inserter(output));
 
-    // Empty range: only start frame (no end frame for 0 LEDs)
-    FL_CHECK(output.size() == 4);
+    // Empty range: still a complete frame (start + one end DWord). This
+    // matters when a previously longer cascade is reconfigured through the
+    // public API.
+    FL_CHECK(output.size() == 8);
     verifyStartFrame(output, 0);
+    verifyEndFrame(output, 4, 0);
 }
 
 FL_TEST_CASE("encodeAPA102_AutoBrightness() - single LED max brightness") {

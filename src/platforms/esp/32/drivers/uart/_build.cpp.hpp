@@ -11,7 +11,8 @@
 
 #include "platforms/esp/32/drivers/uart/channel_driver_uart.cpp.hpp"
 #include "platforms/esp/32/drivers/uart/uart_peripheral_esp.cpp.hpp"
-#include "platforms/esp/32/drivers/uart/wave8_encoder_uart.cpp.hpp"
+// The waveN encoder implementation is platform-neutral and compiled by
+// fl/channels/_build.cpp.hpp (fl/channels/uart_wave_encoder.cpp.hpp).
 
 // BusTraits<Bus::UART> specialization.
 #include "platforms/esp/32/drivers/uart/bus_traits.h"
