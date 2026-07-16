@@ -1,4 +1,4 @@
-﻿/// @file channel_driver_uart.cpp
+/// @file channel_driver_uart.cpp
 /// @brief Consolidated UART channel driver tests
 ///
 /// Tests cover:
@@ -982,10 +982,10 @@ FL_TEST_CASE("ChannelEngineUART - Single channel enqueue and show") {
         FL_CHECK(captured[2] == 0x8F);  // 01
         FL_CHECK(captured[3] == 0xEF);  // 00
 
-        // 0x00 â†’ all 0xEF
+        // 0x00 → all 0xEF
         for (int i = 4; i < 8; i++) FL_CHECK(captured[i] == 0xEF);
 
-        // 0xFF â†’ all 0x8C
+        // 0xFF → all 0x8C
         for (int i = 8; i < 12; i++) FL_CHECK(captured[i] == 0x8C);
     }
 }
@@ -1134,7 +1134,7 @@ FL_TEST_CASE("ChannelEngineUART - canHandle validates timing") {
     }
 
     FL_SUBCASE("Rejects infeasible timing (TM1829-1600kHz)") {
-        // TM1829-1600k: T1=100, T2=300, T3=200, period=600ns â†’ 8.3 Mbps
+        // TM1829-1600k: T1=100, T2=300, T3=200, period=600ns → 8.3 Mbps
         ChipsetTimingConfig timing(100, 300, 200, 500);
         fl::vector_psram<uint8_t> data(30);
         auto ch = fl::make_shared<ChannelData>(
