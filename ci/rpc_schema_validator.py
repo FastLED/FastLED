@@ -74,7 +74,9 @@ def parse_rpc_schema(result: Any) -> RpcSchema:
     methods: dict[str, MethodInfo] = {}
     for index, method in enumerate(compact_methods):
         if not isinstance(method, list) or len(method) < 3:
-            raise ValueError(f"schema entry {index} must contain name, return type, and params")
+            raise ValueError(
+                f"schema entry {index} must contain name, return type, and params"
+            )
 
         name, return_type, compact_params = method[:3]
         if not isinstance(name, str) or not name:

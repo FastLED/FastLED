@@ -2,6 +2,8 @@
 
 #include "platforms/arm/rp/rpcommon/rp_uart_peripheral.h"
 
+#include "platforms/arm/rp/is_rp.h"
+
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 #include "platforms/arm/rp/rpcommon/rp_pio_dma_resource_manager.h"
@@ -107,7 +109,7 @@ bool RpUartPeripheral::startTxDma(const u8* data, size_t size) FL_NO_EXCEPT {
     channel_config_set_dreq(&config, uart_get_dreq_num(uart, true));
     dma_channel_configure(static_cast<uint>(mDmaChannel), &config,
                           &uart_get_hw(uart)->dr, data,
-                          static_cast<uint32_t>(size), true);
+                          static_cast<u32>(size), true);
     return true;
 }
 

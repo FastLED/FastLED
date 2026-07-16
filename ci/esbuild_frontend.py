@@ -126,7 +126,10 @@ def ensure_frontend_dependencies() -> None:
     dependency_hash = _frontend_dependency_hash()
     node_modules = FRONTEND_DIR / "node_modules"
     marker = node_modules / FRONTEND_DEPENDENCY_MARKER
-    if marker.is_file() and marker.read_text(encoding="utf-8").strip() == dependency_hash:
+    if (
+        marker.is_file()
+        and marker.read_text(encoding="utf-8").strip() == dependency_hash
+    ):
         return
 
     result = subprocess.run(["npm", "ci", "--ignore-scripts"], cwd=str(FRONTEND_DIR))

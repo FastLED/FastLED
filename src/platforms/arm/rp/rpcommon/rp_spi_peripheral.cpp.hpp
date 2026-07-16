@@ -2,6 +2,8 @@
 
 #include "platforms/arm/rp/rpcommon/rp_spi_peripheral.h"
 
+#include "platforms/arm/rp/is_rp.h"
+
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 #include "platforms/arm/rp/rpcommon/rp_pio_dma_resource_manager.h"
@@ -114,7 +116,7 @@ bool RpSpiPeripheral::startTxDmaImpl(const u8* data, size_t size, u8* rx_data,
     channel_config_set_dreq(&rx_config, spi_get_dreq(spi, false));
     dma_channel_configure(static_cast<uint>(mRxDmaChannel), &rx_config,
                           rx_data == nullptr ? &mRxSink : rx_data, &spi_get_hw(spi)->dr,
-                          static_cast<uint32_t>(size), false);
+                          static_cast<u32>(size), false);
     dma_channel_config tx_config = dma_channel_get_default_config(
         static_cast<uint>(mTxDmaChannel));
     channel_config_set_transfer_data_size(&tx_config, DMA_SIZE_8);
@@ -125,7 +127,7 @@ bool RpSpiPeripheral::startTxDmaImpl(const u8* data, size_t size, u8* rx_data,
     dma_start_channel_mask(1u << static_cast<uint>(mRxDmaChannel));
     dma_channel_configure(static_cast<uint>(mTxDmaChannel), &tx_config,
                           &spi_get_hw(spi)->dr, data,
-                          static_cast<uint32_t>(size), true);
+                          static_cast<u32>(size), true);
     return true;
 }
 

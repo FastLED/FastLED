@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from dataclasses import dataclass
 from typing import Any
 
 from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench
@@ -20,9 +21,18 @@ DEFAULT_PORT = "COM10"
 RATES_HZ = (1_000_000, 8_000_000, 24_000_000)
 
 
-def pins_for_spi(spi_index: int) -> tuple[int, int, int]:
+@dataclass(slots=True, frozen=True)
+class SpiPins:
+    """Canonical MOSI, MISO, and SCK pins for an RP SPI instance."""
+
+    mosi: int
+    miso: int
+    sck: int
+
+
+def pins_for_spi(spi_index: int) -> SpiPins:
     """Return the canonical MOSI, MISO, and SCK pins for an RP SPI instance."""
-    return (3, 0, 2) if spi_index == 0 else (11, 8, 10)
+    return SpiPins(3, 0, 2) if spi_index == 0 else SpiPins(11, 8, 10)
 
 
 def run_case(
@@ -87,9 +97,10 @@ def main() -> int:
     parser.add_argument("--mosi-pin", type=int)
     parser.add_argument("--miso-pin", type=int)
     args = parser.parse_args()
-    default_mosi, default_miso, sck_pin = pins_for_spi(args.spi_index)
-    mosi_pin = args.mosi_pin if args.mosi_pin is not None else default_mosi
-    miso_pin = args.miso_pin if args.miso_pin is not None else default_miso
+    default_pins = pins_for_spi(args.spi_index)
+    sck_pin = default_pins.sck
+    mosi_pin = args.mosi_pin if args.mosi_pin is not None else default_pins.mosi
+    miso_pin = args.miso_pin if args.miso_pin is not None else default_pins.miso
 
     print(f"RP2040 SPI{args.spi_index} DMA byte-loopback — FastLED #3659")
     print(f"  Port: {args.port}")
@@ -118,7 +129,9 @@ def main() -> int:
         print(f"FAIL — unable to run RP SPI loopback: {error}")
         return 1
     if passed:
-        print(f"PASS — SPI{args.spi_index} DMA loopback is byte-exact at all requested rates.")
+        print(
+            f"PASS — SPI{args.spi_index} DMA loopback is byte-exact at all requested rates."
+        )
         return 0
     print("FAIL — RP SPI loopback did not meet the byte-exact contract.")
     return 1
