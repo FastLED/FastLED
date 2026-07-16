@@ -43,7 +43,7 @@ wasm_all_sources = fastled_sources + platforms_shared_files
 # ci/meson/shared/meson.build.
 wasm_abs_include_args = [
   path_norm_I_src,
-  '-I' + path_norm_root / 'src/platforms/wasm/compiler',
+  '-I' + path_norm_root + '/src/platforms/wasm/compiler',
 ]
 
 fastled_wasm_lib = static_library('fastled',

@@ -203,12 +203,12 @@ foreach example_name : example_paths.keys()
     # (issue #2328). DO NOT use include_directories() — Meson emits these as
     # backslash + relative paths on Windows, which defeats #pragma once dedup.
     # inc_dir is project-relative (e.g. "examples/Blink" or "examples\\Blink");
-    # normalize to path_norm_root / <rest> via forward-slash '/' operator.
+    # normalize to path_norm_root + '/' + <rest> with literal separators.
     per_example_I_args = []
     foreach inc_dir : example_include_dirs
         # Canonicalize any backslashes the discovery script may have emitted
         inc_dir_fwd = inc_dir.replace('\\', '/')
-        per_example_I_args += ['-I' + path_norm_root / inc_dir_fwd]
+        per_example_I_args += ['-I' + path_norm_root + '/' + inc_dir_fwd]
     endforeach
 
     # Construct proper path: <example_root>/<example_name>.ino

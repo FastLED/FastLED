@@ -225,6 +225,8 @@ def run_cpp_lint(
         cmd = ["uv", "run", "python", "ci/lint_cpp/run_all_checkers.py"]
         if use_rust_cpp_lint:
             cmd.append("--rust")
+        else:
+            cmd.append("--no-rust")
 
         # 900s (15 min) covers cold CI runners that must `cargo install`
         # the zccache binary from source — happens on macOS when soldr's

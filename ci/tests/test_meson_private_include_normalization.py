@@ -14,6 +14,22 @@ from ci.meson.build_config import (
 
 
 class TestMesonPrivateIncludeNormalization(unittest.TestCase):
+    def test_wasm_include_roots_use_literal_forward_slash_composition(self) -> None:
+        """Meson's path join reintroduces backslashes on Windows (issue #2328)."""
+        project_root = Path(__file__).parents[2]
+        wasm_meson = (project_root / "ci" / "meson" / "wasm" / "meson.build").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn(
+            "'-I' + path_norm_root + '/src/platforms/wasm/compiler'",
+            wasm_meson,
+        )
+        self.assertNotIn(
+            "path_norm_root / 'src/platforms/wasm/compiler'",
+            wasm_meson,
+        )
+
     def test_normalizes_quoted_and_unquoted_private_includes(self) -> None:
         with TemporaryDirectory() as temp_dir:
             build_dir = Path(temp_dir)

@@ -42,8 +42,11 @@ def _wasm_fast_path() -> int | None:
     Returns exit code if handled, None to fall through to full argument parser.
     Saves ~130ms by skipping CompilationArgumentParser and its 62 transitive imports.
     """
-    # argv: ci-compile.py wasm ExampleName [--run] [--just-compile] [-v]
+    # argv: ci-compile.py wasm ExampleName [--clean] [--run] [--just-compile] [-v]
     args = sys.argv[1:]
+    has_clean = "--clean" in args
+    if has_clean:
+        args = [arg for arg in args if arg != "--clean"]
     if not args or args[0].lower() != "wasm":
         return None
     rest = args[1:]
@@ -78,6 +81,8 @@ def _wasm_fast_path() -> int | None:
         # --run needs wasm_compile for Playwright test orchestration
         saved_argv = sys.argv
         sys.argv = ["ci.wasm_compile", f"examples/{example}"]
+        if has_clean:
+            sys.argv.append("--force")
         sys.argv.append("--run")
         try:
             from ci.wasm_compile import main as wasm_compile_main
@@ -96,7 +101,12 @@ def _wasm_fast_path() -> int | None:
 
     from ci.wasm_build import build as wasm_build
 
-    rc = wasm_build(example=example, output=str(output_js), verbose=has_verbose)
+    rc = wasm_build(
+        example=example,
+        output=output_js.as_posix(),
+        verbose=has_verbose,
+        force=has_clean,
+    )
     if rc == 0:
         print("WASM compilation successful")
     else:
