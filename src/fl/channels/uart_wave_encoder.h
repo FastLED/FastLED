@@ -8,9 +8,7 @@
 ///
 /// The implementation originated with the ESP UART backend, but it models
 /// only an inverted UART frame and `ChipsetTimingConfig`; ESP UART, RP UART
-/// DMA, and future backends all consume this stable channel-layer API. The
-/// legacy ESP-path header (`platforms/esp/32/drivers/uart/wave8_encoder_uart.h`)
-/// forwards here for source compatibility.
+/// DMA, and future backends all consume this stable channel-layer API.
 ///
 /// ## Wave10 Concept
 ///
@@ -18,8 +16,8 @@
 /// automatic start/stop bits as part of the waveform:
 ///
 /// ```
-/// LED bit A: [START=H] [D0] [D1] [D2] [D3]     ← 5 pulses, START fixed HIGH
-/// LED bit B: [D4]      [D5] [D6] [D7] [STOP=L]  ← 5 pulses, STOP fixed LOW
+/// LED bit A: [START=H] [D0] [D1] [D2] [D3]     <- 5 pulses, START fixed HIGH
+/// LED bit B: [D4]      [D5] [D6] [D7] [STOP=L]  <- 5 pulses, STOP fixed LOW
 /// ```
 ///
 /// ## Dynamic LUT Generation
@@ -28,14 +26,14 @@
 /// enabling support for any clockless LED protocol (WS2812, SK6812, WS2811, etc.)
 ///
 /// ## Encoding Ratio
-/// - 2 LED bits → 1 UART byte (8 data bits)
-/// - 1 LED byte (8 bits) → 4 UART bytes
-/// - 1 RGB LED (3 bytes) → 12 UART bytes
+/// - 2 LED bits -> 1 UART byte (8 data bits)
+/// - 1 LED byte (8 bits) -> 4 UART bytes
+/// - 1 RGB LED (3 bytes) -> 12 UART bytes
 ///
 /// ## Timing Feasibility
 ///
 /// A chipset is compatible when:
-/// 1. Required baud rate ≤ 5.0 Mbps (ESP32 UART limit)
+/// 1. Required baud rate <= 5.0 Mbps (ESP32 UART limit)
 /// 2. T0H and T1H map to different pulse counts in [1, 4]
 /// 3. Quantized timing is within half a pulse width of nominal
 
@@ -61,9 +59,9 @@ constexpr u32 kMaxUartBaudRate = 5000000;
 /// The UART frame (with TX inversion) is treated as two P-pulse LED bit
 /// slots, where P = `pulses_per_bit`:
 ///
-/// - **P = 5 (wave10, 8 data bits + start/stop = 10-bit frame)** — the
+/// - **P = 5 (wave10, 8 data bits + start/stop = 10-bit frame)** -- the
 ///   classic geometry: baud = 5/period.
-/// - **P = 4 (wave8-frame, 6 data bits + start/stop = 8-bit frame)** —
+/// - **P = 4 (wave8-frame, 6 data bits + start/stop = 8-bit frame)** --
 ///   20% lower baud (4/period): reaches faster chipsets under the
 ///   ESP32's 5 Mbps cap and provides an alternative quantization grid
 ///   (e.g. SK6812's T0H/T1H are exact multiples of period/4).
@@ -73,11 +71,11 @@ constexpr u32 kMaxUartBaudRate = 5000000;
 ///
 /// Valid HIGH pulse count per LED bit: [1, P-1]
 /// - Bit A: START=H provides 1 guaranteed HIGH; the slot's final pulse
-///   must be LOW for the H→L transition
+///   must be LOW for the H->L transition
 /// - Bit B: first data pulse must be HIGH for the leading edge; STOP=L
 ///   provides the trailing LOW
 struct Wave10Lut {
-    u8 lut[4];         ///< 2-bit input → UART data byte
+    u8 lut[4];         ///< 2-bit input -> UART data byte
     u8 pulses_per_bit; ///< Frame geometry: 5 (wave10) or 4 (wave8-frame); 0 = infeasible
 
     /// @brief UART word length for this geometry (2P - 2 data bits)
@@ -110,8 +108,8 @@ struct Wave10Lut {
 /// transmitted with TX inversion at the derived baud rate.
 ///
 /// The 10-bit UART frame is modeled as two 5-pulse LED bit slots:
-/// - Bit A: [START=H] [D0..D3] — START provides leading HIGH edge
-/// - Bit B: [D4..D7] [STOP=L] — STOP provides trailing LOW
+/// - Bit A: [START=H] [D0..D3] -- START provides leading HIGH edge
+/// - Bit B: [D4..D7] [STOP=L] -- STOP provides trailing LOW
 ///
 /// For each LED bit value (0 or 1), the HIGH pulse count within its
 /// 5-pulse slot is computed from the chipset's T0H/T1H timing.
@@ -127,7 +125,7 @@ Wave10Lut buildWave10LutForMaxBaud(const ChipsetTimingConfig& timing,
 /// @brief Check if a chipset timing can be accurately represented by UART
 ///
 /// Validates that:
-/// 1. Required baud rate ≤ 5.0 Mbps
+/// 1. Required baud rate <= 5.0 Mbps
 /// 2. T0H pulse count is in [1, 4]
 /// 3. T1H pulse count is in [1, 4]
 /// 4. T0H and T1H pulse counts are distinguishable (different)

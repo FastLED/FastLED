@@ -1,4 +1,4 @@
-/// @file test_wave8_encoder_uart.cpp
+﻿/// @file uart_wave_encoder.cpp
 /// @brief Unit tests for UART wave10 encoder
 ///
 /// Tests the wave10 LUT generation, timing predicate, and encoding
@@ -6,7 +6,7 @@
 
 #include "test.h"
 
-#include "platforms/esp/32/drivers/uart/wave8_encoder_uart.h"
+#include "fl/channels/uart_wave_encoder.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/cstddef.h"
@@ -240,12 +240,12 @@ FL_TEST_CASE("Wave10 - buildWave10Lut for WS2812") {
 }
 
 FL_TEST_CASE("Wave10 - buildWave10Lut for WS2812B-V5 enforces symbol separation") {
-    // WS2812B-V5: T1=225, T2=355, T3=645, period=1225 — the AutoResearch
+    // WS2812B-V5: T1=225, T2=355, T3=645, period=1225 â€” the AutoResearch
     // bench default. pulse_width = 1225/5 = 245ns.
-    // T0H = 225 → 1 pulse (245ns). T1H = 580 → best-fit rounds to 2
-    // (490ns), only 245ns above the 0-symbol — under the 400ns minimum
+    // T0H = 225 â†’ 1 pulse (245ns). T1H = 580 â†’ best-fit rounds to 2
+    // (490ns), only 245ns above the 0-symbol â€” under the 400ns minimum
     // wire separation (real LEDs' 0/1 sampling threshold sits near
-    // 550-625ns; the bench RX decoder's 500ns threshold flapped —
+    // 550-625ns; the bench RX decoder's 500ns threshold flapped â€”
     // FastLED#3569 WROOM bench). The separation rule must widen it to
     // 3 pulses (735ns).
     ChipsetTimingConfig timing(225, 355, 645, 280);
@@ -276,10 +276,10 @@ FL_TEST_CASE("Wave10 - buildWave10Lut for WS2812B-V5 enforces symbol separation"
 
 FL_TEST_CASE("Wave10 - buildWave10Lut for SK6812 selects wave4 geometry") {
     // SK6812: T1=300, T2=600, T3=300, period=1200
-    // P=5 grid (240ns pulses): T0H 300→1 (err 60), T1H 900→4 (err 60);
-    // total error 120ns. P=4 grid (300ns pulses): T0H 300→1 EXACT,
-    // T1H 900→3 EXACT; total error 0. The geometry selector picks P=4
-    // (6 data bits @ 3.33 Mbps) — SK6812's timing is an exact multiple
+    // P=5 grid (240ns pulses): T0H 300â†’1 (err 60), T1H 900â†’4 (err 60);
+    // total error 120ns. P=4 grid (300ns pulses): T0H 300â†’1 EXACT,
+    // T1H 900â†’3 EXACT; total error 0. The geometry selector picks P=4
+    // (6 data bits @ 3.33 Mbps) â€” SK6812's timing is an exact multiple
     // of period/4.
     ChipsetTimingConfig timing(300, 600, 300, 80);
     Wave10Lut lut = buildWave10Lut(timing);
@@ -312,7 +312,7 @@ FL_TEST_CASE("Wave10 - buildWave10Lut for SK6812 selects wave4 geometry") {
 
     FL_SUBCASE("Legacy static baud formula still reports the P=5 rate") {
         u32 baud = Wave10Lut::computeBaudRate(timing);
-        // 5e9 / 1200 = 4166666 (fixed-wave10 formula — the selected
+        // 5e9 / 1200 = 4166666 (fixed-wave10 formula â€” the selected
         // geometry's actual rate comes from lut.baudRate(), tested above)
         FL_CHECK_EQ(baud, 4166666u);
     }
@@ -325,8 +325,8 @@ FL_TEST_CASE("Wave10 - buildWave10Lut for WS2811-400") {
 
     FL_SUBCASE("Pulse counts are correct") {
         // pulse_width = 2500/5 = 500ns
-        // T0H = 500ns → 500/500 = 1.0 → 1 pulse
-        // T1H = 1200ns → 1200/500 = 2.4 → rounds to 2
+        // T0H = 500ns â†’ 500/500 = 1.0 â†’ 1 pulse
+        // T1H = 1200ns â†’ 1200/500 = 2.4 â†’ rounds to 2
         auto p00 = measureHalfFrames(lut.lut[0]);
         FL_CHECK_EQ(p00.high_count_a, 1);
 
@@ -424,8 +424,8 @@ FL_TEST_CASE("Wave10 - canRepresentTiming accepts valid chipsets") {
     }
 
     FL_SUBCASE("LPD1886-1250kHz (wave10 infeasible at 6.25 Mbps; wave4 fits at 5.0 Mbps)") {
-        // period 800ns: P=4 grid = 200ns pulses — T0H 200→1 exact,
-        // T1H 600→3 exact, separation 400ns exactly at the floor.
+        // period 800ns: P=4 grid = 200ns pulses â€” T0H 200â†’1 exact,
+        // T1H 600â†’3 exact, separation 400ns exactly at the floor.
         // New coverage unlocked by the wave8-frame geometry.
         ChipsetTimingConfig timing(200, 400, 200, 0);
         FL_CHECK(canRepresentTiming(timing));
@@ -449,7 +449,7 @@ FL_TEST_CASE("Wave10 - canRepresentTiming rejects infeasible chipsets") {
 
 FL_TEST_CASE("Wave10 - canRepresentTiming baud rate boundary") {
     FL_SUBCASE("Exactly at 5.0 Mbps limit") {
-        // period = 5e9 / 5e6 = 1000ns → baud = 5,000,000
+        // period = 5e9 / 5e6 = 1000ns â†’ baud = 5,000,000
         ChipsetTimingConfig timing(200, 400, 400, 0);
         u32 baud = Wave10Lut::computeBaudRate(timing);
         FL_CHECK_EQ(baud, 5000000u);
