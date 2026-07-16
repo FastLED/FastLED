@@ -199,11 +199,18 @@ void renderPreview() {
         previewLeds[kCenterStart + i] = centerColor;
     }
 #if defined(FL_IS_WASM)
-    const uint8_t debugBrightness =
-        showBeatConfidenceDebug.value() ? toByte(gBeatConfidence * 255.0f)
-                                         : 0;
-    previewLeds[kDebugLedIndex] =
-        CRGB(debugBrightness, debugBrightness, debugBrightness);
+    // Keep the widget visibly red at zero, then turn it bright green as the
+    // 0-1 confidence rises. A black zero was indistinguishable from a missing
+    // debug LED in the preview.
+    const uint8_t debugRed =
+        showBeatConfidenceDebug.value()
+            ? toByte(24.0f * (1.0f - gBeatConfidence))
+            : 0;
+    const uint8_t debugGreen =
+        showBeatConfidenceDebug.value()
+            ? toByte(16.0f + gBeatConfidence * 239.0f)
+            : 0;
+    previewLeds[kDebugLedIndex] = CRGB(debugRed, debugGreen, 0);
 #endif
 }
 
@@ -234,6 +241,7 @@ void setup() {
         // floor, rather than only the relatively loud blocks that trigger a
         // beat callback.
         updateSoundLevel();
+        gBeatConfidence = gAudio->getBeatConfidence();
         if (!levels.bassSpike ||
             gSoundPressureDbSpl < stageThresholdDbSpl.value() ||
             !isMusicModeActive()) {
@@ -278,10 +286,6 @@ void loop() {
             gCenterLevel = fl::clamp(gCenterLevel - decay, 0.0f, 1.0f);
             gTriangleLevel = fl::clamp(gTriangleLevel - decay, 0.0f, 1.0f);
         }
-        const float confidenceDecay = float(deltaMs) / 750.0f;
-        gBeatConfidence =
-            fl::clamp(gBeatConfidence - confidenceDecay, 0.0f, 1.0f);
-
         renderPreview();
         FastLED.show();  // Auto-pumps browser or I2S microphone audio.
     }
