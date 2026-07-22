@@ -8,18 +8,12 @@
 
 // Platform-specific includes for ESP32
 #if defined(FL_IS_ESP32)
-    #if defined(ARDUINO)
-        // Arduino ESP32 - include esp_system.h for heap functions
-        FL_EXTERN_C_BEGIN
-        #include "esp_system.h"
-        FL_EXTERN_C_END
-    #else
-        // ESP-IDF native mode needs heap caps header
-        FL_EXTERN_C_BEGIN
-        #include "esp_heap_caps.h"
-#include "fl/stl/noexcept.h"
-        FL_EXTERN_C_END
-    #endif
+    // esp_heap_caps.h is a core ESP-IDF header, present identically under
+    // Arduino-ESP32 (which bundles ESP-IDF) and bare ESP-IDF builds.
+    FL_EXTERN_C_BEGIN
+    #include "esp_heap_caps.h"
+    #include "fl/stl/noexcept.h"
+    FL_EXTERN_C_END
 #endif
 
 namespace fl {
@@ -29,13 +23,7 @@ namespace platforms {
 /// @return Number of free bytes in heap
 inline size_t getFreeHeap() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP32)
-    #if defined(ARDUINO)
-        // Arduino ESP32 - use esp_get_free_heap_size from SDK
-        return esp_get_free_heap_size();
-    #else
-        // ESP-IDF native
-        return heap_caps_get_free_size(MALLOC_CAP_DEFAULT);
-    #endif
+    return heap_caps_get_free_size(MALLOC_CAP_DEFAULT);
 #else
     return 0;
 #endif
@@ -58,12 +46,7 @@ inline size_t getHeapSize() FL_NO_EXCEPT {
 /// @return Minimum free heap ever recorded (low water mark)
 inline size_t getMinFreeHeap() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP32)
-    #if defined(ARDUINO)
-        return esp_get_minimum_free_heap_size();
-    #else
-        // ESP-IDF native
-        return heap_caps_get_minimum_free_size(MALLOC_CAP_DEFAULT);
-    #endif
+    return heap_caps_get_minimum_free_size(MALLOC_CAP_DEFAULT);
 #else
     return 0;
 #endif
