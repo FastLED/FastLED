@@ -1425,6 +1425,12 @@ NUCLEO_F439ZI = Board(
     platform="ststm32",
 )
 
+# Nucleo board for STM32G070
+NUCLEO_G070RB = Board(
+    board_name="nucleo_g070rb",
+    platform="ststm32",
+)
+
 # Arduino UNO Q board support.
 # PlatformIO does not yet ship an ArduinoCore-zephyr UNO Q platform, so CI uses
 # the STM32duino STM32U585ZITxQ toolchain as a compile target while preserving

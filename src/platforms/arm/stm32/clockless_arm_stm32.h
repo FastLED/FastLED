@@ -25,11 +25,71 @@ FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
 #endif
 
+#include "platforms/arm/is_arm.h"
+#include "platforms/arm/common/m0clockless.h"
+
 namespace fl {
 // Definition for a single channel clockless controller for the stm32 family of chips, like that used in the spark core
 // See clockless.h for detailed info on how the template parameters are used.
 
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
+
+#if defined(FL_IS_ARM_M0_PLUS) || defined(FL_IS_ARM_M0) || defined(__ARM_ARCH_6M__)
+
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+    typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
+    typedef typename FastPin<DATA_PIN>::port_t data_t;
+
+    data_t mPinMask;
+    data_ptr_t mPort;
+    CMinWait<WAIT_TIME> mWait;
+
+public:
+    virtual void init() FL_NO_EXCEPT {
+        FastPin<DATA_PIN>::setOutput();
+        mPinMask = FastPin<DATA_PIN>::mask();
+        mPort = FastPin<DATA_PIN>::port();
+    }
+
+    virtual u16 getMaxRefreshRate() const { return 400; }
+
+protected:
+    virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
+        mWait.wait();
+        fl::interruptsDisable();
+        if(!showRGBInternal(pixels)) {
+            fl::interruptsEnable();
+            delayMicroseconds(WAIT_TIME);
+            fl::interruptsDisable();
+            showRGBInternal(pixels);
+        }
+        fl::interruptsEnable();
+        mWait.mark();
+    }
+
+    static u32 showRGBInternal(PixelController<RGB_ORDER> pixels) FL_NO_EXCEPT {
+        if (pixels.size() == 0) {
+            return 1;   // nonzero means success
+        }
+        struct M0ClocklessData data;
+        data.d[0] = pixels.d[0];
+        data.d[1] = pixels.d[1];
+        data.d[2] = pixels.d[2];
+        data.s[0] = pixels.mColorAdjustment.premixed[0];
+        data.s[1] = pixels.mColorAdjustment.premixed[1];
+        data.s[2] = pixels.mColorAdjustment.premixed[2];
+        data.e[0] = pixels.e[0];
+        data.e[1] = pixels.e[1];
+        data.e[2] = pixels.e[2];
+        data.adj = pixels.mAdvance;
+
+        typename FastPin<DATA_PIN>::port_ptr_t portBase = FastPin<DATA_PIN>::port();
+        return showLedData<4, 20, TIMING, RGB_ORDER, WAIT_TIME>(portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
+    }
+};
+
+#else
 
 #if defined(FL_IS_STM32_F2)
 // The photon runs faster than the others
@@ -124,10 +184,12 @@ protected:
         const u32 t1t2_clocks = t1_clocks + t2_clocks;
         const u32 t1t2t3_clocks = t1t2_clocks + t3_clocks;
 
-        // Get access to the clock
+        // Get access to the clock if available (Cortex-M3/M4/M7/M33)
+#if defined(CoreDebug) && defined(DWT)
         CoreDebug->DEMCR  |= CoreDebug_DEMCR_TRCENA_Msk;
         DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
         DWT->CYCCNT = 0;
+#endif
 
         FASTLED_REGISTER data_ptr_t port = FastPin<DATA_PIN>::port();
         FASTLED_REGISTER data_t hi = *port | FastPin<DATA_PIN>::mask();;
@@ -138,7 +200,9 @@ protected:
 
         u32 next_mark = t1t2t3_clocks;
 
+#if defined(DWT)
         DWT->CYCCNT = 0;
+#endif
 
         // Detect RGBW mode using pattern from RP2040 drivers
         const bool is_rgbw = rgbw.active();
@@ -158,11 +222,13 @@ protected:
             }
             first_pixel = false;
             // if interrupts took longer than 45µs, punt on the current frame
+#if defined(DWT)
             if(DWT->CYCCNT > next_mark) {
                 if((DWT->CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*clks_per_us)) {
                     fl::interruptsEnable(); return 0;\
                 }
             }
+#endif
 
             hi = *port | FastPin<DATA_PIN>::mask();
             lo = *port & ~FastPin<DATA_PIN>::mask();
@@ -198,9 +264,15 @@ protected:
         // Only need final enable if interrupts weren't re-enabled in the loop
         fl::interruptsEnable();
         #endif
+#if defined(DWT)
         return DWT->CYCCNT;
+#else
+        return 1;  // nonzero means success
+#endif
     }
 };
+
+#endif
 
 }  // namespace fl
 

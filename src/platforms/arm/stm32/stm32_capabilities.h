@@ -50,6 +50,8 @@
     #define FASTLED_STM32_FAMILY_NAME "STM32L4"
 #elif defined(FL_IS_STM32_H7)
     #define FASTLED_STM32_FAMILY_NAME "STM32H7"
+#elif defined(FL_IS_STM32_G0)
+    #define FASTLED_STM32_FAMILY_NAME "STM32G0"
 #elif defined(FL_IS_STM32_G4)
     #define FASTLED_STM32_FAMILY_NAME "STM32G4"
 #elif defined(FL_IS_STM32_U5)
@@ -91,6 +93,15 @@
     #define FASTLED_STM32_HAS_DMAMUX  // H7 has DMAMUX for flexible routing
     #define FASTLED_STM32_HAS_BDMA    // H7 has BDMA for low-power domain
     #define FASTLED_STM32_HAS_MDMA    // H7 has MDMA for memory-to-memory
+#endif
+
+// STM32G0 uses channel-based DMA with DMAMUX
+#if defined(FL_IS_STM32_G0)
+    #define FASTLED_STM32_DMA_CHANNEL_BASED
+    #define FASTLED_STM32_DMA_CONTROLLERS 1
+    #define FASTLED_STM32_DMA_CHANNELS_PER_CONTROLLER 7
+    #define FASTLED_STM32_DMA_TOTAL_CHANNELS 7
+    #define FASTLED_STM32_HAS_DMAMUX  // G0 has DMAMUX for flexible channel routing
 #endif
 
 // STM32G4 uses DMA with DMAMUX
@@ -305,6 +316,24 @@
             #endif
         #endif
 
+    #elif defined(FL_IS_STM32_G0)
+        // G0 LL driver headers
+        #if FL_HAS_INCLUDE("stm32g0xx_ll_tim.h")
+            #include "stm32g0xx_ll_tim.h"
+        #endif
+        #if FL_HAS_INCLUDE("stm32g0xx_ll_dma.h")
+            #include "stm32g0xx_ll_dma.h"
+        #endif
+        #if FL_HAS_INCLUDE("stm32g0xx_ll_gpio.h")
+            #include "stm32g0xx_ll_gpio.h"
+        #endif
+        #if FL_HAS_INCLUDE("stm32g0xx_ll_bus.h")
+            #include "stm32g0xx_ll_bus.h"
+        #endif
+        #if FL_HAS_INCLUDE("stm32g0xx_ll_dmamux.h")
+            #include "stm32g0xx_ll_dmamux.h"
+        #endif
+
     #elif defined(FL_IS_STM32_G4)
         // G4 LL driver headers
         #if FL_HAS_INCLUDE("stm32g4xx_ll_tim.h")
@@ -415,7 +444,8 @@
 #if !defined(FL_IS_STM32_F1) && !defined(FL_IS_STM32_F2) && \
     !defined(FL_IS_STM32_F4) && !defined(FL_IS_STM32_F7) && \
     !defined(FL_IS_STM32_L4) && !defined(FL_IS_STM32_H7) && \
-    !defined(FL_IS_STM32_G4) && !defined(FL_IS_STM32_U5)
+    !defined(FL_IS_STM32_G0) && !defined(FL_IS_STM32_G4) && \
+    !defined(FL_IS_STM32_U5)
     #warning "No specific STM32 family detected - using conservative defaults"
 #endif
 

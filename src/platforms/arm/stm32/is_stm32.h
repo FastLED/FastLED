@@ -54,6 +54,8 @@
     defined(STM32H723xx) || defined(STM32H725xx) || defined(STM32H730xx) || \
     defined(STM32H735xx) || defined(STM32H755xx) || defined(STM32H757xx) || \
     defined(STM32H7A3xx) || defined(STM32H7B3xx) || \
+    /* STM32G0 Family */ \
+    defined(STM32G0) || defined(STM32G0xx) || \
     /* STM32G4 Family (170 MHz, Motor Control) */ \
     defined(STM32G4) || defined(STM32G4xx) || \
     /* STM32U5 Family (160 MHz, Ultra Low Power) */ \
@@ -102,6 +104,12 @@
     defined(STM32H735xx) || defined(STM32H755xx) || defined(STM32H757xx) || \
     defined(STM32H7A3xx) || defined(STM32H7B3xx)
 #define FL_IS_STM32_H7
+#endif
+
+// FL_IS_STM32_G0 - STM32G0 Family
+#if defined(STM32G0) || defined(STM32G0xx)
+#define FL_IS_STM32_G0
+#define FL_IS_ARM_M0_PLUS
 #endif
 
 // FL_IS_STM32_G4 - STM32G4 Family (170 MHz, 32-128 KB RAM, 128-512 KB Flash, Mainstream)

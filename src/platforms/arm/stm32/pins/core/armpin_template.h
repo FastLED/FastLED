@@ -40,8 +40,21 @@ public:
   typedef volatile u32 * port_ptr_t;
   typedef u32 port_t;
 
-  inline static void setOutput() { pinMode(PIN, PinMode::Output); }
-  inline static void setInput() { pinMode(PIN, PinMode::Input); }
+  inline static void setOutput() {
+    // Configure physical MCU hardware GPIO registers via Arduino BSP
+    ::pinMode(PIN, OUTPUT);
+
+    // Update FastLED's internal pin state tracking
+    fl::pinMode(PIN, PinMode::Output);
+  }
+
+  inline static void setInput() {
+    // Configure physical MCU hardware GPIO registers via Arduino BSP
+    ::pinMode(PIN, INPUT);
+
+    // Update FastLED's internal pin state tracking
+    fl::pinMode(PIN, PinMode::Input);
+  }
 
   // Set pin HIGH - use BSRR lower 16 bits (same for ALL families)
   inline static void hi() FL_NO_EXCEPT __attribute__ ((always_inline)) {

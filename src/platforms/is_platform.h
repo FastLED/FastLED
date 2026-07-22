@@ -21,6 +21,7 @@
 /// - FL_IS_STM32_F7: STM32F7 family
 /// - FL_IS_STM32_L4: STM32L4 family (low-power)
 /// - FL_IS_STM32_H7: STM32H7 family (Giga R1, high-performance)
+/// - FL_IS_STM32_G0: STM32G0 family
 /// - FL_IS_STM32_G4: STM32G4 family (motor control)
 /// - FL_IS_STM32_U5: STM32U5 family (ultra-low-power)
 ///
