@@ -54,6 +54,7 @@ src/fl/stl/fixed_point/          ← implementation directory
 
 ## Platform Dispatch Headers
 - FastLED uses dispatch headers in `src/platforms/` (e.g., `int.h`, `io_arduino.h`) that route to platform-specific implementations via coarse-to-fine detection. See `src/platforms/README.md` for details.
+- **ESP32: dispatch Arduino-vs-native on capability detection, not `#ifdef ARDUINO`.** Ask "is the ESP-IDF driver header available" (`FL_HAS_INCLUDE("driver/gpio.h")`), not "is Arduino the active framework" — Arduino-ESP32 bundles the same ESP-IDF drivers, so capability detection picks the IDF-native implementation under both Arduino and bare ESP-IDF, with Arduino APIs reachable only as an explicit opt-in (e.g. `FL_ESP32_SPI_ARDUINO=1`). See `src/platforms/esp/32/ARCHITECTURE.md` → "No Environment Directories (Arduino vs ESP-IDF)" for the full rule, exceptions (platform identification, host-mock selection), and reference implementation (`pin_esp32_native.hpp`). Established by FastLED#3715/#3722.
 - **Platform-specific headers (`src/platforms/**`)**: Header files typically do NOT need platform guards (e.g., `#ifdef ESP32`). Only the `.cpp` implementation files require guards. When the `.cpp` file is guarded from compilation, the header won't be included. This approach provides better IDE code assistance and IntelliSense support.
   - Correct pattern:
     - `header.h`: No platform guards (clean interface)
