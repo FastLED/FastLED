@@ -40,9 +40,6 @@
 #include "platforms/esp/32/drivers/rmt/rmt_4/irmt4_peripheral.h"
 
 FL_EXTERN_C_BEGIN
-// IWYU pragma: begin_keep
-#include <esp32-hal.h>
-// IWYU pragma: end_keep
 #if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR > 3
 #include "esp_intr_alloc.h"
 #else
