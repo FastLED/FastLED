@@ -14,9 +14,10 @@
 /// that PlatformIO's LDF may not automatically detect when using chain mode.
 
 // SPI: No Arduino SPI.h dependency — the default backend is ESP-IDF's
-// driver/spi_master.h (see core/fastspi_esp32_idf.h). The Arduino SPIClass
-// backend is a FASTLED_ESP32_SPI_ARDUINO=1 opt-in escape hatch only; users
-// who set that flag are expected to also declare their own <SPI.h> LDF need.
+// driver/spi_master.h (see core/fastspi_esp32_idf.h), used for both
+// Arduino-ESP32 and bare ESP-IDF builds. The Arduino SPIClass backend is a
+// FL_ESP32_SPI_ARDUINO=1 opt-in escape hatch only; users who set that flag
+// are expected to also declare their own <SPI.h> LDF need.
 
 // WARNING: Do NOT add WiFi.h, Wire.h, FS.h, or other large framework libraries here.
 // PlatformIO's LDF scans #include directives even inside #if 0 blocks, which causes
