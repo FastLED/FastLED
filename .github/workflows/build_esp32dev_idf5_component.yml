@@ -1,0 +1,59 @@
+name: esp32dev_idf5_component
+
+# Compile-smoke via ESP-IDF's genuine CMake/idf.py component build system
+# (framework="arduino, espidf" — CONFIG_AUTOSTART_ARDUINO=y runs the .ino
+# sketch from inside an IDF app_main), instead of PlatformIO's Arduino-only
+# source-discovery build. Exercises the real idf_component_register() /
+# CMakeLists.txt path — the distribution mechanism #2121 (idf component
+# registry) depends on — and, combined with FastLED#3715's other changes
+# (which made the IDF-native code path the default rather than something
+# gated behind "Arduino absent"), the same native code a true bare-IDF
+# build would use.
+#
+# NOT a substitute for a genuine app_main()-only (no Arduino.h at all)
+# bare-IDF build — ARDUINO is still defined here. See FastLED#3724 for the
+# follow-up plan to add that.
+#
+# Only single-file .ino examples are safe on this board (see the
+# ESP32_C2_DEVKITM_1 comment in ci/boards.py): the dual "arduino, espidf"
+# component build does not auto-discover example .cpp files in
+# subdirectories (examples/Codec/, examples/Downscale/, etc.).
+#
+# Part of FastLED#3715 / #3724.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - '!src/platforms/arm/**'
+      - '!src/platforms/wasm/**'
+      - '!src/platforms/avr/**'
+      - 'src/platforms/esp/**'
+      - 'examples/Blink/**'
+      - 'ci/**'
+      - '.github/workflows/build_esp32dev_idf5_component.yml'
+      - '.github/workflows/build_template.yml'
+      - 'CMakeLists.txt'
+      - 'platformio.ini'
+      - 'library.json'
+      - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  pull_request:
+    paths:
+      - 'src/platforms/esp/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/build_esp32dev_idf5_component.yml'
+      - 'ci/boards.py'
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: esp32dev_idf5_component --examples Blink
