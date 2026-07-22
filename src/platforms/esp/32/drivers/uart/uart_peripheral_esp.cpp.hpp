@@ -12,11 +12,7 @@
 
 #include "platforms/esp/32/drivers/uart/uart_peripheral_esp.h"
 #include "fl/log/log.h"
-#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
-// IWYU pragma: begin_keep
-#include "fl/system/arduino.h"
-// IWYU pragma: end_keep
 
 // Include ESP-IDF headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
