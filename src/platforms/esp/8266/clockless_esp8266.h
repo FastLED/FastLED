@@ -9,6 +9,7 @@
 #include "fastled_delay.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
+#include "fl/system/delay.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -64,7 +65,7 @@ protected:
       #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
       ++_retry_cnt;
       #endif
-      delayMicroseconds(WAIT_TIME);
+      fl::delayMicroseconds(WAIT_TIME);
     }
     mWait.mark();
   }
