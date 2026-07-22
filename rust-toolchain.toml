@@ -1,0 +1,12 @@
+# Pins the Rust toolchain used to build ci/lint_cpp_rs (fastled-lint).
+#
+# Without a pin, soldr resolves rustc from PATH. On hosts where a non-rustup
+# Rust shadows rustup (e.g. chocolatey ships an x86_64-pc-windows-gnu build
+# with no msvc std), soldr still canonicalizes the build target to
+# x86_64-pc-windows-msvc and every crate fails with:
+#   error[E0463]: can't find crate for `std`
+# With this file present, soldr (and rustup-proxied cargo) resolve the
+# toolchain through rustup instead of PATH, which always carries the host
+# target's std.
+[toolchain]
+channel = "stable"
