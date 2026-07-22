@@ -10,18 +10,22 @@
 #if defined(FL_IS_ESP32)
 
 #include "fl/stl/has_include.h"
-// IWYU pragma: begin_keep
-#include "fl/system/arduino.h"
-// IWYU pragma: end_keep
 
 #if FL_HAS_INCLUDE("driver/ledc.h")
     // IWYU pragma: begin_keep
     #include "driver/ledc.h"
     // IWYU pragma: end_keep
     #define FL_CLED_HAS_LEDC 1
+#else
+    // No driver/ledc.h on this toolchain (very old Arduino-ESP32 core) —
+    // fall back to the Arduino LEDC wrapper API.
+    // IWYU pragma: begin_keep
+    #include "fl/system/arduino.h"
+    // IWYU pragma: end_keep
 #endif
 
 #include "platforms/esp/32/feature_flags/enabled.h"
+#include "platforms/esp/esp_version.h"
 #include "fl/log/log.h"
 
 namespace fl {
@@ -52,7 +56,51 @@ bool CLED::begin(const CLEDConfig& config) FL_NO_EXCEPT {
         return false;
     }
 
-    // Arduino LEDC setup - API differs between Arduino Core 2.x and 3.x
+#ifdef FL_CLED_HAS_LEDC
+    // Native ESP-IDF LEDC setup — identical under Arduino-ESP32 (which
+    // bundles driver/ledc.h) and bare ESP-IDF builds. CLED models its
+    // channel space the same way write16() below does: group = channel/8
+    // selects the speed mode (low-speed only on chips without
+    // SOC_LEDC_SUPPORT_HS_MODE), and each group's 8 channels share 4
+    // timers, 2 channels per timer.
+    u8 group = config.channel / 8;
+    u8 channel_in_group = config.channel % 8;
+    ledc_mode_t mode = ledc_mode_t(group);
+    ledc_timer_t timer = ledc_timer_t(channel_in_group / 2);
+
+    ledc_timer_config_t timer_cfg = {};
+    timer_cfg.speed_mode = mode;
+    timer_cfg.timer_num = timer;
+    timer_cfg.duty_resolution = static_cast<ledc_timer_bit_t>(config.resolution_bits);
+    timer_cfg.freq_hz = config.frequency;
+#if ESP_IDF_VERSION_4_OR_HIGHER
+    // clk_cfg field and LEDC_AUTO_CLK added in IDF 4.0
+    timer_cfg.clk_cfg = LEDC_AUTO_CLK;
+#endif
+
+    if (ledc_timer_config(&timer_cfg) != ESP_OK) {
+        FL_WARN_F("CLED: LEDC timer config failed for channel %s", config.channel);
+        return false;
+    }
+
+    ledc_channel_config_t ch_cfg = {};
+    ch_cfg.speed_mode = mode;
+    ch_cfg.channel = ledc_channel_t(channel_in_group);
+    ch_cfg.timer_sel = timer;
+    ch_cfg.intr_type = LEDC_INTR_DISABLE;
+    ch_cfg.gpio_num = config.pin;
+    ch_cfg.duty = 0;
+    ch_cfg.hpoint = 0;
+
+    if (ledc_channel_config(&ch_cfg) != ESP_OK) {
+        FL_WARN_F("CLED: LEDC channel config failed for channel %s", config.channel);
+        return false;
+    }
+
+    FL_DBG_F("CLED: Initialized channel %s at %s Hz, %s bits", config.channel, config.frequency, config.resolution_bits);
+#else
+    // No driver/ledc.h on this toolchain — fall back to the Arduino LEDC
+    // wrapper API, which differs between Arduino Core 2.x and 3.x.
 #ifndef ESP_ARDUINO_VERSION_MAJOR
     #define ESP_ARDUINO_VERSION_MAJOR 2  // Assume old API if not defined
 #endif
@@ -81,6 +129,7 @@ bool CLED::begin(const CLEDConfig& config) FL_NO_EXCEPT {
 
     FL_DBG_F("CLED: Initialized channel %s at %s Hz, %s bits", config.channel, freq, config.resolution_bits);
 #endif
+#endif  // FL_CLED_HAS_LEDC
 
     mInitialized = true;
 
