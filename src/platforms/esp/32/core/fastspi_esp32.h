@@ -18,10 +18,12 @@
 // but no longer required. Use FASTLED_FORCE_SOFTWARE_SPI to disable hardware SPI if needed.
 //
 // The ESP-IDF native backend (driver/spi_master.h) is the default ESP32 SPI
-// implementation, used for both Arduino-ESP32 (which bundles ESP-IDF) and
-// bare ESP-IDF builds — there is no behavioral difference between the two.
-// FL_ESP32_SPI_ARDUINO=1 is a temporary escape hatch back to the retired
-// Arduino SPIClass backend if a regression is found; file a bug at
+// implementation, used identically for both Arduino-ESP32 (which bundles
+// ESP-IDF) and bare ESP-IDF builds. It is a separate implementation from
+// the retired Arduino SPIClass backend, not a thin wrapper around it — the
+// two have not been hardware-validated against each other bit-for-bit.
+// FL_ESP32_SPI_ARDUINO=1 is a temporary escape hatch back to the Arduino
+// SPIClass backend if a regression is found; file a bug at
 // github.com/FastLED/FastLED/issues if you need it.
 
 // ok no namespace fl
