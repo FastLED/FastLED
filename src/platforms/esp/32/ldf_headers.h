@@ -13,13 +13,11 @@
 /// ESP32 uses the Arduino ESP32 framework which provides several built-in libraries
 /// that PlatformIO's LDF may not automatically detect when using chain mode.
 
-// Force LDF to detect SPI library dependency
-// FastLED's ESP32 FastSPI implementation uses <SPI.h> from the Arduino ESP32 framework
-#if 0
-// IWYU pragma: begin_keep
-#include <SPI.h>
-// IWYU pragma: end_keep
-#endif
+// SPI: No Arduino SPI.h dependency — the default backend is ESP-IDF's
+// driver/spi_master.h (see core/fastspi_esp32_idf.h), used for both
+// Arduino-ESP32 and bare ESP-IDF builds. The Arduino SPIClass backend is a
+// FL_ESP32_SPI_ARDUINO=1 opt-in escape hatch only; users who set that flag
+// are expected to also declare their own <SPI.h> LDF need.
 
 // WARNING: Do NOT add WiFi.h, Wire.h, FS.h, or other large framework libraries here.
 // PlatformIO's LDF scans #include directives even inside #if 0 blocks, which causes

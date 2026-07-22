@@ -16,6 +16,15 @@
 // FASTLED_ALL_PINS_HARDWARE_SPI is now deprecated on ESP32. Hardware SPI is enabled
 // by default via GPIO matrix routing. The define is accepted for backwards compatibility
 // but no longer required. Use FASTLED_FORCE_SOFTWARE_SPI to disable hardware SPI if needed.
+//
+// The ESP-IDF native backend (driver/spi_master.h) is the default ESP32 SPI
+// implementation, used identically for both Arduino-ESP32 (which bundles
+// ESP-IDF) and bare ESP-IDF builds. It is a separate implementation from
+// the retired Arduino SPIClass backend, not a thin wrapper around it — the
+// two have not been hardware-validated against each other bit-for-bit.
+// FL_ESP32_SPI_ARDUINO=1 is a temporary escape hatch back to the Arduino
+// SPIClass backend if a regression is found; file a bug at
+// github.com/FastLED/FastLED/issues if you need it.
 
 // ok no namespace fl
 
@@ -31,13 +40,14 @@
 
 // Dispatch to platform-specific implementation
 
-#if defined(ARDUINO) && !defined(FL_NO_ARDUINO)
-    // Arduino framework build - use Arduino SPI implementation
+#if defined(FL_ESP32_SPI_ARDUINO) && FL_ESP32_SPI_ARDUINO && defined(ARDUINO)
+    // Opt-in escape hatch back to the Arduino SPIClass backend.
     // IWYU pragma: begin_keep
     #include "platforms/esp/32/core/fastspi_esp32_arduino.h"
     // IWYU pragma: end_keep
 #else
-    // Pure ESP-IDF build or NO_ARDUINO override - use native SPI
+    // Default: native ESP-IDF SPI (driver/spi_master.h). Used for both
+    // Arduino-ESP32 (which bundles ESP-IDF) and bare ESP-IDF builds.
     // IWYU pragma: begin_keep
     #include "platforms/esp/32/core/fastspi_esp32_idf.h"
     // IWYU pragma: end_keep
