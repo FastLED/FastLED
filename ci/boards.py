@@ -849,6 +849,38 @@ ESP32DEV_IDF6 = Board(
     platform_needs_install=True,
 )
 
+# ESP-IDF component-build smoke test (FastLED#3724, part of #3715).
+#
+# framework="arduino, espidf" makes PlatformIO build via ESP-IDF's
+# CMake/idf.py component system (CONFIG_AUTOSTART_ARDUINO=y runs the .ino
+# sketch's setup()/loop() from within an IDF app_main — see
+# ci/compiler/pio.py's sdkconfig.defaults handling). This is NOT the same
+# as a pure bare-IDF app_main() project, but it does exercise the real
+# idf_component_register()/CMakeLists.txt path (see root CMakeLists.txt)
+# instead of PlatformIO's Arduino-only source-discovery build — the actual
+# distribution mechanism #2121 (idf component registry) depends on.
+#
+# Combined with #3715's other changes (which made the IDF-native code path
+# the *default*, not something gated behind "Arduino absent"), this leg
+# already exercises nearly all of the same code as a true bare-IDF build:
+# ARDUINO is still defined here (Arduino runs as an IDF component), so this
+# does NOT prove behavior with <Arduino.h> completely unavailable — that
+# residual gap needs a genuine app_main()-only harness project, which is
+# out of scope for this pass; see FastLED#3724 for the follow-up plan.
+#
+# Scope note (#3724 / see the ESP32_C2_DEVKITM_1 comment above): the dual
+# "arduino, espidf" component build does not auto-discover example .cpp
+# files in subdirectories (examples/Codec/, examples/Downscale/, etc.) —
+# only single-file .ino examples like Blink are safe to compile with this
+# board until that LDF gap is fixed.
+ESP32DEV_IDF5_COMPONENT = Board(
+    board_name="esp32dev_idf5_component",
+    real_board_name="esp32dev",
+    platform=ESP32_IDF_5_3_PIOARDUINO,
+    framework="arduino, espidf",
+    board_partitions="huge_app.csv",
+)
+
 # Heap-poisoning debug variant (FastLED#3588): same pioarduino platform
 # as esp32dev but with custom_sdkconfig, which makes pioarduino rebuild
 # the IDF libs from source with comprehensive heap poisoning + end-of-
