@@ -5,6 +5,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/static_assert.h"
+#include "fl/system/delay.h"
 #include "platforms/esp/32/core/clock_cycles.h"
 #include "esp_intr_alloc.h"
 #include "eorder.h"
@@ -87,7 +88,7 @@ public:
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
 	    ++_retry_cnt;
 #endif
-	    delayMicroseconds(WAIT_TIME * 10);
+	    fl::delayMicroseconds(WAIT_TIME * 10);
 	    // ets_intr_lock();
 		interrupt_lock();
 	}
