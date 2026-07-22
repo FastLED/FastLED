@@ -280,12 +280,21 @@ The ESP32 platform has **two completely different SPI subsystems**:
 
 ### 2. No Environment Directories (Arduino vs ESP-IDF)
 
-**Decision**: Handle Arduino vs ESP-IDF differences inline with minimal `#ifdef ARDUINO`.
+**Decision**: Handle Arduino vs ESP-IDF differences inline, dispatching on **capability detection** (`FL_HAS_INCLUDE("driver/gpio.h")`, `FL_HAS_INCLUDE(<Arduino.h>)`) rather than `#ifdef ARDUINO`.
 
 **Rationale**:
 - Differences are typically <10 lines per file (e.g., `#include <Arduino.h>` vs `#include "esp_system.h"`)
-- Arduino-ESP32 framework uses ESP-IDF underneath, so most APIs are identical
+- Arduino-ESP32 framework uses ESP-IDF underneath, so most APIs are identical — the ESP-IDF driver headers this code asks for via `FL_HAS_INCLUDE` are present under Arduino too
 - Separate directories would duplicate 95% of code
+
+**Rule (FastLED#3715): dispatch on the presence of the Espressif driver header you need, never on `ARDUINO`.** `#ifdef ARDUINO` inverts the real question — "is the IDF driver available" — into "is Arduino the active framework", which makes Arduino-ESP32 the default runtime for code paths that work identically under bare ESP-IDF. `pin_esp32_native.hpp` (`FL_HAS_INCLUDE("driver/gpio.h") && FL_HAS_INCLUDE("driver/ledc.h")`) is the reference pattern: the native/IDF implementation is selected whenever the driver header is discoverable — which is true for both Arduino-ESP32 (which bundles the same ESP-IDF drivers) and bare ESP-IDF — and Arduino becomes an explicit, narrow opt-in (e.g. `FASTLED_ESP32_SPI_ARDUINO=1` in `core/fastspi_esp32.h`) rather than the silent default.
+
+Two categories of exception to the "no `defined(ARDUINO)`" rule are expected and fine, and don't need converting:
+
+1. **Platform identification**, not dispatch: `is_esp.h`'s `ARDUINO_ARCH_ESP32`/`ARDUINO_ARCH_ESP8266` checks identify which chip family is compiling, not which framework/API surface to call.
+2. **Host-mock selection**: files under `drivers/*/​*_mock.cpp.hpp` and their matching `channel_driver_*.cpp.hpp` dispatchers guard on `!defined(ARDUINO) && (linux/apple/win)` to select the host test-double vs the real device implementation — that's choosing device-vs-host, not Arduino-vs-IDF, and both device-side arms already dispatch on capability detection internally.
+
+`io_esp.cpp.hpp`'s `FL_HAS_INCLUDE(<Arduino.h>)` probe is itself the correct pattern (capability detection, not `#ifdef ARDUINO`) — it already selects `io_esp_idf.hpp` whenever `Arduino.h` is genuinely absent, so bare ESP-IDF builds get working console I/O with no additional change needed. See FastLED#3720 for why a broader default flip there was rejected (it would have regressed the USB-Serial-JTAG bring-up work in #2665/#2668).
 
 **When might this change?**: If Arduino-specific code becomes substantial (e.g., >50 lines per file).
 
