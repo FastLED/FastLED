@@ -47,10 +47,21 @@ on:
       - 'uv.lock'
   pull_request:
     paths:
+      - 'src/**'
+      - '!src/platforms/arm/**'
+      - '!src/platforms/wasm/**'
+      - '!src/platforms/avr/**'
       - 'src/platforms/esp/**'
-      - 'CMakeLists.txt'
+      - 'examples/Blink/**'
+      - 'ci/**'
       - '.github/workflows/build_esp32dev_idf5_component.yml'
-      - 'ci/boards.py'
+      - '.github/workflows/build_template.yml'
+      - 'CMakeLists.txt'
+      - 'platformio.ini'
+      - 'library.json'
+      - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
 
 jobs:
   build:
