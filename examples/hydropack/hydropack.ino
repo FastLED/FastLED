@@ -23,6 +23,7 @@
 #include <FastLED.h>
 
 #include "fl/math/math.h"
+#include "fl/stl/static_assert.h"
 #include "fl/ui/ui.h"
 
 // ---------------------------------------------------------------------------
@@ -77,9 +78,9 @@ const fl::vec2f kHydroPackLedLayout[] = {
     {68.0f, 34.0f}, {68.0f, 50.0f}, {68.0f, 66.0f},
 };
 
-static_assert(sizeof(kHydroPackLedLayout) / sizeof(kHydroPackLedLayout[0]) ==
-                  kPreviewLedCount,
-              "HydroPack screenmap must contain every preview LED");
+FL_STATIC_ASSERT(sizeof(kHydroPackLedLayout) / sizeof(kHydroPackLedLayout[0]) ==
+                     kPreviewLedCount,
+                 "HydroPack screenmap must contain every preview LED");
 
 fl::ScreenMap makePreviewMap() {
     return fl::ScreenMap(kHydroPackLedLayout, 1.4f);
