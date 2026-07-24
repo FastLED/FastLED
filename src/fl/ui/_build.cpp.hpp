@@ -2,6 +2,7 @@
 /// @brief Unity build header for fl/ui/ directory
 
 #include "fl/ui/audio.cpp.hpp"
+#include "fl/ui/audio_reactive.cpp.hpp"
 #include "fl/ui/button.cpp.hpp"
 #include "fl/ui/checkbox.cpp.hpp"
 #include "fl/ui/description.cpp.hpp"
