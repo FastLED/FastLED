@@ -416,11 +416,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     rpc_smoke_mode = args.rpc_smoke
     watchdog_soak_mode = args.watchdog_soak
 
-    # Parse --wave2d-perf "<W>x<H>" — None disables the mode.
+    # Parse --perf-wave2d "<W>x<H>" — None disables the mode.
     # Cf. #3124 for the planned --perf-XX convention rename.
-    wave2d_perf_grid: tuple[int, int] | None = None
-    if args.wave2d_perf is not None:
-        spec = str(args.wave2d_perf).lower().strip()
+    perf_wave2d_grid: tuple[int, int] | None = None
+    if args.perf_wave2d is not None:
+        spec = str(args.perf_wave2d).lower().strip()
         try:
             if "x" not in spec:
                 raise ValueError("expected 'WxH' form")
@@ -429,11 +429,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             h_val = int(h_str)
             if not (4 <= w_val <= 1024 and 4 <= h_val <= 1024):
                 raise ValueError("W and H must be in [4, 1024]")
-            wave2d_perf_grid = (w_val, h_val)
+            perf_wave2d_grid = (w_val, h_val)
         except ValueError as exc:
             print(
-                f"{Fore.RED}❌ --wave2d-perf: invalid grid spec "
-                f"{args.wave2d_perf!r}: {exc}{Style.RESET_ALL}",
+                f"{Fore.RED}❌ --perf-wave2d: invalid grid spec "
+                f"{args.perf_wave2d!r}: {exc}{Style.RESET_ALL}",
                 file=sys.stderr,
             )
             sys.exit(2)
@@ -999,7 +999,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             lpc_bench_defines.append(f"FL_LPC_UART_DMA_CLOCKLESS_RX_PIN={args.rx_pin}")
     if getattr(args, "pwm_dma_cl", False):
         lpc_bench_defines.append("FASTLED_LPC_PWM_DMA=1")
-    if getattr(args, "fault_emit_test", False):
+    if getattr(args, "test_fault_emit", False):
         lpc_bench_defines.append("FASTLED_AUTORESEARCH_FAULT_TEST=1")
 
     # Resolve project root (always the user's invocation cwd) and build_dir.
@@ -1108,7 +1108,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         ieee754_test_mode=ieee754_test_mode,
         rpc_smoke_mode=rpc_smoke_mode,
         watchdog_soak_mode=watchdog_soak_mode,
-        wave2d_perf_grid=wave2d_perf_grid,
+        perf_wave2d_grid=perf_wave2d_grid,
         net_server_mode=net_server_mode,
         net_client_mode=net_client_mode,
         net_loopback_mode=net_loopback_mode,
@@ -1326,7 +1326,7 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                 )
         if getattr(args, "pwm_dma_cl", False):
             deferred_defines.append("FASTLED_LPC_PWM_DMA=1")
-        if getattr(args, "fault_emit_test", False):
+        if getattr(args, "test_fault_emit", False):
             deferred_defines.append("FASTLED_AUTORESEARCH_FAULT_TEST=1")
 
         try:
@@ -2140,10 +2140,10 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
                 )
                 return 1
             return await _run_lpc_uart_dma_tests(ctx)
-        if getattr(ctx.args, "fault_emit_test", False):
+        if getattr(ctx.args, "test_fault_emit", False):
             if final_environment not in LPC_WS2812_ENVS:
                 print(
-                    "--fault-emit-test is only supported on LPC845 boards "
+                    "--test-fault-emit is only supported on LPC845 boards "
                     "(lpc845brk, lpc845, lpcxpresso845max)."
                 )
                 return 1
@@ -2237,8 +2237,8 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
         return await _run_ieee754_tests(ctx)
 
     # Wave2D perf benchmark mode (#3113 Task 1 / #3122 A1)
-    if ctx.wave2d_perf_grid is not None:
-        return await _run_wave2d_perf_tests(ctx)
+    if ctx.perf_wave2d_grid is not None:
+        return await _run_perf_wave2d_tests(ctx)
 
     # (LPC bring-up mode short-circuits earlier — see the gpio_only_mode
     # block above; reached only by ESP32/Teensy-class targets.)
@@ -2247,7 +2247,7 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     return await _run_rpc_tests(ctx, qctx)
 
 
-async def _run_wave2d_perf_tests(ctx: RunContext) -> int:
+async def _run_perf_wave2d_tests(ctx: RunContext) -> int:
     """Run the Wave2D perf benchmark via RPC chain.
 
     Implements meta #3113 Task 1 host side. Wires the device-side
@@ -2267,11 +2267,11 @@ async def _run_wave2d_perf_tests(ctx: RunContext) -> int:
     If any probe in 1-3 fails, results are stamped UNTRUSTED in the
     output. (Cf. issue #3124 for the planned --perf-XX flag-rename.)
     """
-    assert ctx.wave2d_perf_grid is not None
+    assert ctx.perf_wave2d_grid is not None
     upload_port = ctx.upload_port
     assert upload_port is not None
     serial_iface = ctx.serial_iface
-    grid_w, grid_h = ctx.wave2d_perf_grid
+    grid_w, grid_h = ctx.perf_wave2d_grid
 
     print()
     print("=" * 60)

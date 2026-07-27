@@ -149,7 +149,7 @@ class RunContext:
     ieee754_test_mode: bool
     # Wave2D perf benchmark — None disables, otherwise (W, H).
     # See issue #3124 for the planned --perf-XX convention rename.
-    wave2d_perf_grid: tuple[int, int] | None
+    perf_wave2d_grid: tuple[int, int] | None
     net_server_mode: bool
     net_client_mode: bool
     net_loopback_mode: bool

@@ -31,7 +31,7 @@ class Args:
     rpc_smoke: bool
     # Wave2D perf benchmark — accepts "<W>x<H>" (e.g. "32x32") or None.
     # Cf. issue #3124 for the future --perf-XX / --test-XX convention.
-    wave2d_perf: str | None
+    perf_wave2d: str | None
 
     # Standard options
     environment: str | None
@@ -129,7 +129,7 @@ class Args:
     rp_pio_both: bool
 
     # LPC845 fault emit validation (#3302).
-    fault_emit_test: bool
+    test_fault_emit: bool
 
     # Multi-frame capture — number of back-to-back show()/capture cycles per pattern.
     # None = driver-default (SPI → 2, others → 1). Explicit value overrides.
@@ -371,7 +371,7 @@ See Also:
             help="Exercise deliberateHang watchdog recovery and post-reset RPC smoke",
         )
         driver_group.add_argument(
-            "--wave2d-perf",
+            "--perf-wave2d",
             type=str,
             default=None,
             metavar="WxH",
@@ -502,7 +502,7 @@ See Also:
             "exclusive with --dma-spi / --pwm-dma-cl (flash budget).",
         )
         lpc_group.add_argument(
-            "--fault-emit-test",
+            "--test-fault-emit",
             action="store_true",
             help="LPC845-only fault-emission validation (#3302). Builds "
             "the gated low-memory fault RPCs, triggers intentional OOM "
@@ -846,7 +846,7 @@ See Also:
             ieee754=parsed.ieee754,
             rpc_smoke=parsed.rpc_smoke,
             watchdog_soak=parsed.watchdog_soak,
-            wave2d_perf=parsed.wave2d_perf,
+            perf_wave2d=parsed.perf_wave2d,
             environment=parsed.environment,
             verbose=parsed.verbose,
             skip_lint=parsed.skip_lint,
@@ -893,7 +893,7 @@ See Also:
             rp_spi_chipset=parsed.rp_spi_chipset,
             rp_pio_index=parsed.rp_pio_index,
             rp_pio_both=parsed.rp_pio_both,
-            fault_emit_test=parsed.fault_emit_test,
+            test_fault_emit=parsed.test_fault_emit,
             frames=parsed.frames,
             tight_timing=parsed.tight_timing,
             tight_timing_iterations=parsed.tight_timing_iterations,
