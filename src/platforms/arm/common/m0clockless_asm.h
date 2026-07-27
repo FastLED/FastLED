@@ -108,8 +108,8 @@ showLedData(volatile fl::u32 *_port, fl::u32 _bitmask, const fl::u8 *_leds, fl::
   //   T2 (800ns) = (800 * 48 + 500) / 1000 = 38 cycles
   //   T3 (450ns) = (450 * 48 + 500) / 1000 = 22 cycles
   /////////////////////////////////////////////////////////////////////////////
-#if defined(GET_CPU_FREQUENCY)
-  static constexpr fl::u32 clock_hz = GET_CPU_FREQUENCY();
+#if defined(FL_CPU_FREQUENCY)
+  static constexpr fl::u32 clock_hz = FL_CPU_FREQUENCY();
 #else
   static constexpr fl::u32 clock_hz = F_CPU;
 #endif

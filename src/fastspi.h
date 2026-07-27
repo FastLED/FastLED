@@ -84,10 +84,10 @@
 
 #else
 // Software SPI platforms: return clock divider (CPU cycles per bit)
-// Use GET_CPU_FREQUENCY() for compile-time constant, avoiding issues with
+// Use FL_CPU_FREQUENCY() for compile-time constant, avoiding issues with
 // STM32duino where F_CPU may be defined as runtime SystemCoreClock variable
-#define FL_DATA_RATE_MHZ(X) ((GET_CPU_FREQUENCY() / 1000000L) / X)
-#define FL_DATA_RATE_KHZ(X) ((GET_CPU_FREQUENCY() / 1000L) / X)
+#define FL_DATA_RATE_MHZ(X) ((FL_CPU_FREQUENCY() / 1000000L) / X)
+#define FL_DATA_RATE_KHZ(X) ((FL_CPU_FREQUENCY() / 1000L) / X)
 #define FL_TO_CLOCK_DIVIDER(FREQ_MHZ, CPU_FREQ_MHZ) ((CPU_FREQ_MHZ) / (FREQ_MHZ))
 #endif
 
