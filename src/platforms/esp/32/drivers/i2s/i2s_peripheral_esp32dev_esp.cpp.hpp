@@ -45,6 +45,7 @@
 #include "platforms/esp/32/drivers/i2s/i2s_peripheral_esp32dev_esp.h"
 #include "platforms/esp/32/drivers/i2s/i2s_periph_compat.h"  // fl_i2s_periph_enable — IDF-version-safe power gate
 #include "platforms/esp/32/drivers/i2s/i2s_port_claim.h"     // cross-driver I2S port ownership (FastLED#3576)
+#include "platforms/esp/32/core/clock_divider.h"             // shared fractional divider solver (FastLED#3562)
 
 #include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
@@ -83,51 +84,23 @@ constexpr const char *kI2sClocklessOwner = "I2S_CLOCKLESS";
 /// @brief Solve the classic-ESP32 I2S1 fractional clock divider
 ///        (`clkm_conf.clkm_div_{num,a,b}`) for a target frequency.
 ///
-/// Selects `(N, A, B)` such that `80 MHz / (N + B/A)` best matches
-/// `target_hz`. Adapted from Yves's `i2s_define_bit_patterns` — same
-/// algorithm, just wrapped so it produces the divider triple without
-/// building the per-chipset pulse LUT (the modern engine uses wave8
-/// encoding, not per-chipset pulse patterns).
+/// Thin wrapper over the shared solver (FastLED#3562) that pins the base
+/// clock to the 80 MHz APB reference and the I2S hardware limits (A <= 63,
+/// N >= 2). The math itself lives in `platforms/esp/32/core/clock_divider.h`
+/// so SPI/RMT can reuse it.
 inline void solveI2sClockDivider(u32 target_hz,
                                   int* out_N, int* out_A, int* out_B) FL_NO_EXCEPT {
-    if (target_hz == 0) {
-        *out_N = 10;   // Default to 8 MHz (wave8 @ 800 kHz)
-        *out_A = 1;
-        *out_B = 0;
-        return;
-    }
-    const double f_target = static_cast<double>(target_hz);
-    const double f_base   = static_cast<double>(kI2sBaseClkHz);
-    int N = static_cast<int>(f_base / f_target);
-    if (N < 2) N = 2;
-    const double residual = (f_base / f_target) - static_cast<double>(N);
-
-    // Fractional part B/A — A ≤ 63 hardware limit. Sweep A, pick the
-    // (A, B) that minimises |residual - B/A|.
-    int best_A = 1;
-    int best_B = 0;
-    double best_err = residual;
-    for (int A = 1; A < 64; ++A) {
-        for (int B = 0; B < A; ++B) {
-            const double err = residual - (static_cast<double>(B) / A);
-            const double abs_err = err < 0 ? -err : err;
-            if (abs_err < best_err) {
-                best_err = abs_err;
-                best_A = A;
-                best_B = B;
-            }
-        }
-    }
-    // Double-precision 0.9999 corner: `A == B` collapses to the integer
-    // next up. Kept from Yves's original code.
-    if (best_A == best_B) {
-        best_A = 1;
-        best_B = 0;
-        ++N;
-    }
-    *out_N = N;
-    *out_A = best_A;
-    *out_B = best_B;
+    // 8 MHz (wave8 @ 800 kHz) is the I2S clockless default when no pixel
+    // clock is configured. The fallback lives here, not in the shared solver:
+    // "what frequency do we want when unspecified" is a driver policy, not
+    // divider arithmetic.
+    const u32 effective_hz = (target_hz == 0) ? 8000000u : target_hz;
+    const fl::platforms::esp32::ClkDividerNAB d =
+        fl::platforms::esp32::solveFractionalDivider(kI2sBaseClkHz, effective_hz,
+                                                     /*max_A=*/63, /*min_N=*/2);
+    *out_N = d.N;
+    *out_A = d.A;
+    *out_B = d.B;
 }
 
 // Register-level reset helpers — inline replacements for Yves's
