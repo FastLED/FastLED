@@ -323,13 +323,21 @@ FL_FORCE_INLINE fl::u8 load_and_prepare_dither(fl::u8 pixel, M0ClocklessData* da
  * apply_scale - Apply color correction scaling
  * Equivalent to: scale4 macro
  *
- * The assembly version stores scale factors as 32-bit fixed-point multipliers.
- * After multiplication, the high 16 bits contain the scaled result.
+ * Scale factors live in M0ClocklessData.s[] as plain 8-bit brightness/color-
+ * correction values (0..255, or 1..256 under FASTLED_SCALE8_FIXED). The result
+ * is scale8(): the product's bits 15:8.
+ *
+ * The assembly reaches the same place by a different route: scale4 leaves the
+ * raw product in bn, then swapbbn1 does `lsl b, bn, #16`, so product bit 15
+ * lands in b bit 31 -- exactly the bit qlo4 shifts into the carry first. The
+ * byte the assembly clocks out is therefore product bits 15:8, not 23:16.
+ * Shifting by 16 here made the result always 0 (255 * 256 == 65280 < 65536),
+ * which blanked every pixel. See issue #3504.
  */
 FL_FORCE_INLINE fl::u8 apply_scale(fl::u8 pixel, fl::u32 scale_factor) FL_NO_EXCEPT {
     fl::u32 result = (fl::u32)pixel * scale_factor;
-    // Extract high byte (bits 23:16) as the scaled result
-    return (fl::u8)(result >> 16);
+    // Extract bits 15:8 as the scaled result (scale8 semantics)
+    return (fl::u8)(result >> 8);
 }
 
 /**
