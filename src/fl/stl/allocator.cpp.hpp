@@ -60,8 +60,20 @@ void *(*Alloc)(fl::size) = DefaultAlloc;
 void (*Dealloc)(void *) = DefaultFree;
 
 #if defined(FASTLED_TESTING)
-// Test hook interface pointer
-MallocFreeHook* gMallocFreeHook = nullptr;
+// Test hook interface pointer. Storage lives inside a Singleton so
+// `--gc-sections` can drop it together with Singleton<T>::instance() when no
+// test installs a hook (FastLED#3484 / #3481).
+// Already inside this file's anonymous namespace.
+//
+// Safe to call from inside Malloc()/Free(): Singleton<T>::instance()
+// placement-news into a static char buffer and never touches the heap, so
+// routing the hook lookup through it cannot recurse back into the allocator.
+struct MallocFreeHookState {
+    MallocFreeHook* hook = nullptr;
+};
+inline MallocFreeHook*& malloc_free_hook() FL_NO_EXCEPT {
+    return fl::Singleton<MallocFreeHookState>::instance().hook;
+}
 
 int& tls_reintrancy_count() {
     return SingletonThreadLocal<int>::instance();
@@ -103,11 +115,11 @@ void SetMallocFreeHook(MallocFreeHook* hook) {
     // triggering recursive Malloc() that would corrupt the reentrancy counter.
     (void)tls_reintrancy_count();
 
-    gMallocFreeHook = hook;
+    malloc_free_hook() = hook;
 }
 
 void ClearMallocFreeHook() {
-    gMallocFreeHook = nullptr;
+    malloc_free_hook() = nullptr;
 }
 #endif
 
@@ -124,10 +136,10 @@ void *PSRamAllocate(fl::size size, bool zero) {
     }
     
 #if defined(FASTLED_TESTING)
-    if (gMallocFreeHook && ptr) {
+    if (malloc_free_hook() && ptr) {
         MemoryGuard allows_hook;
         if (allows_hook.enabled()) {
-            gMallocFreeHook->onMalloc(ptr, size);
+            malloc_free_hook()->onMalloc(ptr, size);
         }
     }
 #endif
@@ -137,11 +149,11 @@ void *PSRamAllocate(fl::size size, bool zero) {
 
 void PSRamDeallocate(void *ptr) {
 #if defined(FASTLED_TESTING)
-    if (gMallocFreeHook && ptr) {
-        // gMallocFreeHook->onFree(ptr);
+    if (malloc_free_hook() && ptr) {
+        // malloc_free_hook()->onFree(ptr);
         MemoryGuard allows_hook;
         if (allows_hook.enabled()) {
-            gMallocFreeHook->onFree(ptr);
+            malloc_free_hook()->onFree(ptr);
         }
     }
 #endif
@@ -153,10 +165,10 @@ void* Malloc(fl::size size) {
     void* ptr = Alloc(size); 
     
 #if defined(FASTLED_TESTING)
-    if (gMallocFreeHook && ptr) {
+    if (malloc_free_hook() && ptr) {
         MemoryGuard allows_hook;    
         if (allows_hook.enabled()) {
-            gMallocFreeHook->onMalloc(ptr, size);
+            malloc_free_hook()->onMalloc(ptr, size);
         }
     }
 #endif
@@ -166,10 +178,10 @@ void* Malloc(fl::size size) {
 
 void Free(void *ptr) {
 #if defined(FASTLED_TESTING)
-    if (gMallocFreeHook && ptr) {
+    if (malloc_free_hook() && ptr) {
         MemoryGuard allows_hook;
         if (allows_hook.enabled()) {
-            gMallocFreeHook->onFree(ptr);
+            malloc_free_hook()->onFree(ptr);
         }
     }
 #endif
