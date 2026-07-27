@@ -508,6 +508,19 @@ def check_full_run_cache(
         return None
 
 
+# The full set of source-tree watermarks a full-run cache entry is gated on.
+# Persisting a partial set would leave an ungated directory, so writes require
+# all four.
+_WATERMARK_KEYS = frozenset(
+    {
+        "src_max_file_mtime",
+        "tests_max_file_mtime",
+        "examples_max_file_mtime",
+        "meson_max_file_mtime",
+    }
+)
+
+
 def capture_source_watermarks(cwd: Optional[Path] = None) -> "dict[str, float]":
     """Snapshot source-tree mtimes to gate a test run that is about to start.
 
@@ -581,16 +594,15 @@ def save_full_run_result(
             except OSError:
                 pass
 
-        marks = (
-            watermarks
-            if watermarks is not None
-            else {
-                "src_max_file_mtime": _get_max_source_file_mtime(cwd / "src"),
-                "tests_max_file_mtime": _get_max_source_file_mtime(cwd / "tests"),
-                "examples_max_file_mtime": _get_max_source_file_mtime(cwd / "examples"),
-                "meson_max_file_mtime": _meson_max,
-            }
-        )
+        # A complete pre-run watermark is mandatory. There is deliberately no
+        # scan-now fallback: scanning here (after the run) is the original bug
+        # -- it folds files added during the run into the watermark and marks
+        # them as covered by a pass they never took part in. If the caller
+        # cannot supply a full set, skip persisting entirely. The cost is one
+        # extra full run next time; the alternative is a silent stale green.
+        if watermarks is None or not _WATERMARK_KEYS <= watermarks.keys():
+            return
+        marks = {k: watermarks[k] for k in _WATERMARK_KEYS}
 
         data = {
             "result": "pass",

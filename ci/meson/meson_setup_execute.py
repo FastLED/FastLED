@@ -625,6 +625,14 @@ def build_meson_setup_cmd(
             wrapped.extend(["--input-file", str(sidecar)])
         # `--` separates wrapper flags from the trailing meson args.
         wrapped.append("--")
+        # `--reconfigure` must survive the wrapper. Without it the wrapper runs
+        # a plain `meson setup` against an already-configured dir, meson prints
+        # "Directory already configured" and regenerates nothing -- so a
+        # source-triggered reconfigure (e.g. a newly added test file) is
+        # detected, reported, and then silently dropped. Only `--clean` picked
+        # the file up.
+        if reconfigure:
+            wrapped.append("--reconfigure")
         wrapped.extend(meson_args)
         return wrapped
 

@@ -76,6 +76,8 @@ class FingerprintManager:
         self.fingerprint_dir.mkdir(exist_ok=True)
         self._fingerprints: dict[str, FingerprintResult] = {}
         self._prev_fingerprints: dict[str, Optional[FingerprintResult]] = {}
+        # name -> max source mtime seen at the START of this invocation's check
+        self._observed_max_mtime: dict[str, float] = {}
 
     def _get_fingerprint_file(self, name: str) -> Path:
         # For cpp_test and examples, include build mode in filename to separate caches per build mode
@@ -97,6 +99,7 @@ class FingerprintManager:
                         num_tests_passed=data.get("num_tests_passed"),
                         duration_seconds=data.get("duration_seconds"),
                         test_name=data.get("test_name"),
+                        source_max_mtime=data.get("source_max_mtime"),
                     )
                 except json.JSONDecodeError:
                     ts_print(f"Invalid {name} fingerprint file. Recalculating...")
@@ -118,6 +121,8 @@ class FingerprintManager:
             fingerprint_dict["duration_seconds"] = fingerprint.duration_seconds
         if fingerprint.test_name is not None:
             fingerprint_dict["test_name"] = fingerprint.test_name
+        if fingerprint.source_max_mtime is not None:
+            fingerprint_dict["source_max_mtime"] = fingerprint.source_max_mtime
         with open(fingerprint_file, "w") as f:
             json.dump(fingerprint_dict, f, indent=2)
 
@@ -144,6 +149,17 @@ class FingerprintManager:
                     fingerprint.num_tests_passed = prev_fp.num_tests_passed
                     fingerprint.duration_seconds = prev_fp.duration_seconds
                     fingerprint.test_name = prev_fp.test_name
+            # Persist the watermark from this invocation's opening scan. On a
+            # fast-path hit nothing was rebuilt, so carry the previous value
+            # forward rather than advancing it -- advancing would absorb any
+            # file added since that run into a pass it never took part in.
+            if fingerprint.source_max_mtime is None:
+                observed = self._observed_max_mtime.get(name)
+                prev_seen = self._prev_fingerprints.get(name)
+                if observed is not None:
+                    fingerprint.source_max_mtime = observed
+                elif prev_seen is not None:
+                    fingerprint.source_max_mtime = prev_seen.source_max_mtime
             self.write(name, fingerprint)
 
     def update_test_metadata(
@@ -203,18 +219,31 @@ class FingerprintManager:
         if not fp_file.exists():
             return False
         try:
-            fp_mtime = fp_file.stat().st_mtime
             max_file_mtime = max(
                 (_get_max_source_file_mtime(d, exts=exts) for d in dirs), default=0.0
             )
-            if max_file_mtime > fp_mtime:
-                return False  # a source file was modified after fingerprint write
+            # Remember what this scan saw. If a run follows, save_all() persists
+            # it as the new watermark, describing the tree at that run's START.
+            self._observed_max_mtime[name] = max_file_mtime
             prev = self.read(name)
             if prev is None or prev.status != "success":
                 return False  # no previous result or previous run failed
-            # Fast-path fires: record the cached result without running the calculator
+            # Gate on the watermark recorded when the cached run BEGAN. There is
+            # deliberately no fall back to fp_file.stat().st_mtime: that file is
+            # written at run END, so a source file created mid-run compares as
+            # older and is skipped forever. A cache without a watermark (written
+            # before this field existed) simply takes the slow path once.
+            if prev.source_max_mtime is None:
+                return False
+            if max_file_mtime > prev.source_max_mtime:
+                return False  # a source file changed after the cached run began
+            # Fast-path fires: nothing will be rebuilt, so do NOT advance the
+            # watermark -- keep the one the cached run was actually gated on.
+            self._observed_max_mtime.pop(name, None)
             self._prev_fingerprints[name] = prev
-            self._fingerprints[name] = FingerprintResult(hash=prev.hash)
+            self._fingerprints[name] = FingerprintResult(
+                hash=prev.hash, source_max_mtime=prev.source_max_mtime
+            )
             return True
         except OSError:
             return False

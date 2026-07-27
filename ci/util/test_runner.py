@@ -1904,23 +1904,25 @@ def runner(
                                 # rescanning here would fold any file added
                                 # since that run into the watermark and mark it
                                 # as covered by a pass it never took part in.
-                                _carry = {
-                                    _k: _saved_tr[_k]
-                                    for _k in (
-                                        "src_max_file_mtime",
-                                        "tests_max_file_mtime",
-                                        "examples_max_file_mtime",
-                                        "meson_max_file_mtime",
-                                    )
-                                    if _k in _saved_tr
-                                }
-                                save_full_run_result(
-                                    _build_dir_tr,
-                                    _saved_tr.get("num_passed", 0),
-                                    _saved_tr.get("num_tests", 0),
-                                    _saved_tr.get("duration", 0.0),
-                                    watermarks=_carry or None,
+                                _keys = (
+                                    "src_max_file_mtime",
+                                    "tests_max_file_mtime",
+                                    "examples_max_file_mtime",
+                                    "meson_max_file_mtime",
                                 )
+                                # Only refresh when the whole watermark set
+                                # survives. A partial carry (e.g. a cache file
+                                # written before watermarks existed) would
+                                # leave a directory ungated, so drop the
+                                # refresh instead -- the next run just re-runs.
+                                if all(_k in _saved_tr for _k in _keys):
+                                    save_full_run_result(
+                                        _build_dir_tr,
+                                        _saved_tr.get("num_passed", 0),
+                                        _saved_tr.get("num_tests", 0),
+                                        _saved_tr.get("duration", 0.0),
+                                        watermarks={_k: _saved_tr[_k] for _k in _keys},
+                                    )
                     except KeyboardInterrupt as ki:
                         handle_keyboard_interrupt(ki)
                     except Exception:
