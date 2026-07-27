@@ -180,7 +180,7 @@ bash autoresearch lpc845 --pin-toggle-rx --upload-port <port> --timeout 120s --s
 bash autoresearch lpc845 --ws2812-loopback --upload-port <port> --timeout 120s --skip-lint
 bash autoresearch lpc845 --uart --upload-port <port> --timeout 120s --skip-lint
 bash autoresearch lpc845 --dma-uart --upload-port <port> --timeout 120s --skip-lint
-bash autoresearch lpc845 --fault-emit-test --upload-port <port> --timeout 120s --skip-lint
+bash autoresearch lpc845 --test-fault-emit --upload-port <port> --timeout 120s --skip-lint
 
 # Teensy 4.x bring-up and driver validation.
 bash autoresearch teensy41 --upload-port <port> --timeout 120s
@@ -208,7 +208,7 @@ Pick the narrowest validation level that proves the claim:
   etc.). Raw peripheral benches such as `--dma-uart` are supporting evidence,
   not replacements for public API validation.
 - **Failure/safety behavior:** use dedicated modes such as
-  `--fault-emit-test`; capture decisive `FAULT:`, `REMOTE:`, or `RESULT:` lines.
+  `--test-fault-emit`; capture decisive `FAULT:`, `REMOTE:`, or `RESULT:` lines.
 
 Closeout evidence must include the command, board, port, wiring, decisive
 output, commit/PR URL, and issue URL. Stale chat comments, CI compile-only
@@ -345,7 +345,7 @@ that the device emits a `FAULT:` diagnostic before reset.
 
 ```bash
 fbuild port scan
-bash autoresearch lpc845 --fault-emit-test --upload-port COM10 --timeout 120s --skip-lint
+bash autoresearch lpc845 --test-fault-emit --upload-port COM10 --timeout 120s --skip-lint
 ```
 
 The test intentionally crashes the target twice. A pass means both triggers

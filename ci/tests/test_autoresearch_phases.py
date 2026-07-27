@@ -60,7 +60,7 @@ def _make_args(**overrides) -> Args:
         coroutine=False,
         ieee754=False,
         rpc_smoke=False,
-        wave2d_perf=None,
+        perf_wave2d=None,
         environment=None,
         verbose=False,
         skip_lint=True,
@@ -110,7 +110,7 @@ def _make_args(**overrides) -> Args:
         rp_spi_chipset="apa102",
         rp_pio_index=1,
         rp_pio_both=False,
-        fault_emit_test=False,
+        test_fault_emit=False,
         # Default existing-test behavior: use the legacy root-platformio.ini
         # path so the ``fake_project_dir`` fixture's hand-written ini is the
         # one read. Tests that exercise the new synthesised-ini path (#3281)
@@ -160,7 +160,7 @@ def _make_ctx(**overrides) -> RunContext:
         coroutine_test_mode=False,
         ieee754_test_mode=False,
         rpc_smoke_mode=False,
-        wave2d_perf_grid=None,
+        perf_wave2d_grid=None,
         net_server_mode=False,
         net_client_mode=False,
         net_loopback_mode=False,
