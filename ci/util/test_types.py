@@ -158,6 +158,12 @@ class FingerprintResult:
     num_tests_passed: Optional[int] = None
     duration_seconds: Optional[float] = None
     test_name: Optional[str] = None  # Human-readable test category name
+    # Max source-file mtime observed when this fingerprint's run STARTED.
+    # The mtime fast-path gates on this, never on the fingerprint file's own
+    # mtime: that file is written when the run ENDS, so a source file created
+    # while the run was in flight looks older than the cache and gets skipped
+    # on every later run while the suite still reports green.
+    source_max_mtime: Optional[float] = None
 
     def get_cache_summary(self) -> str:
         """Get a human-readable summary of cached test results"""

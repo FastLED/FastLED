@@ -460,21 +460,13 @@ def check_full_run_cache(
         ):
             return None
 
-        # 2a. Check meson.build files (detects build config changes)
+        # 2a. Check meson.build files (detects build config changes).
+        # _max_meson_build_mtime raises on an unreadable (as opposed to
+        # absent) build file rather than under-reporting the max, which here
+        # would read as "unchanged" and serve a stale entry. The enclosing
+        # except turns that into a cache miss -- fail closed.
         cwd = Path.cwd()
-        _meson_files = [
-            cwd / "meson.build",
-            cwd / "tests" / "meson.build",
-            cwd / "ci" / "meson" / "native" / "meson.build",
-            cwd / "ci" / "meson" / "wasm" / "meson.build",
-            cwd / "examples" / "meson.build",
-        ]
-        _meson_max = 0.0
-        for mf in _meson_files:
-            try:
-                _meson_max = max(_meson_max, mf.stat().st_mtime)
-            except OSError:
-                pass
+        _meson_max = _max_meson_build_mtime(cwd)
         if _meson_max > saved.get("meson_max_file_mtime", -1.0) + 0.001:
             return None
 
@@ -508,8 +500,87 @@ def check_full_run_cache(
         return None
 
 
+# The full set of source-tree watermarks a full-run cache entry is gated on.
+# Persisting a partial set would leave an ungated directory, so writes require
+# all four.
+_WATERMARK_KEYS = frozenset(
+    {
+        "src_max_file_mtime",
+        "tests_max_file_mtime",
+        "examples_max_file_mtime",
+        "meson_max_file_mtime",
+    }
+)
+
+
+def _meson_build_files(root: Path) -> "list[Path]":
+    """The build-definition files whose mtimes gate every cache entry."""
+    return [
+        root / "meson.build",
+        root / "tests" / "meson.build",
+        root / "ci" / "meson" / "native" / "meson.build",
+        root / "ci" / "meson" / "wasm" / "meson.build",
+        root / "examples" / "meson.build",
+    ]
+
+
+def _max_meson_build_mtime(root: Path) -> float:
+    """Max mtime across the build-definition files. Fails closed.
+
+    A missing file is expected and skipped -- not every checkout has, say,
+    examples/meson.build. Any OTHER stat error (permissions, I/O) is raised
+    rather than swallowed.
+
+    Swallowing those would silently produce a LOW maximum, and low is the
+    dangerous direction: on the check side the comparison is
+    `now > saved -> invalidate`, so an under-reported "now" reads as
+    "unchanged" and serves a stale cache entry for a build definition that
+    actually changed. That is the same silent-staleness failure this module's
+    watermarks exist to prevent, so it must not be reintroduced by an
+    over-broad except.
+    """
+    max_mtime = 0.0
+    for mf in _meson_build_files(root):
+        try:
+            max_mtime = max(max_mtime, mf.stat().st_mtime)
+        except FileNotFoundError:
+            continue  # optional build file, genuinely absent
+        except OSError as e:
+            raise OSError(f"cannot stat build definition {mf}: {e}") from e
+    return max_mtime
+
+
+def capture_source_watermarks(cwd: Optional[Path] = None) -> "dict[str, float]":
+    """Snapshot source-tree mtimes to gate a test run that is about to start.
+
+    Must be called BEFORE the run whose result it will describe. Scanning at
+    save time instead is wrong: a file added while the suite was running gets
+    folded into the watermark, so the cache claims that file's state was tested
+    when it never was, and every later run skips on a stale pass. Capturing up
+    front leaves such a file strictly newer than the watermark, so the next run
+    correctly rebuilds. See the test-discovery counterpart in
+    meson_setup_phases._write_test_list_watermark.
+
+    Raises:
+        OSError: if a build-definition file exists but cannot be stat'd. The
+            caller must not fall back to a partial value -- see
+            _max_meson_build_mtime.
+    """
+    root = cwd if cwd is not None else Path.cwd()
+    return {
+        "src_max_file_mtime": _get_max_source_file_mtime(root / "src"),
+        "tests_max_file_mtime": _get_max_source_file_mtime(root / "tests"),
+        "examples_max_file_mtime": _get_max_source_file_mtime(root / "examples"),
+        "meson_max_file_mtime": _max_meson_build_mtime(root),
+    }
+
+
 def save_full_run_result(
-    build_dir: Path, num_passed: int, num_tests: int, duration: float
+    build_dir: Path,
+    num_passed: int,
+    num_tests: int,
+    duration: float,
+    watermarks: "Optional[dict[str, float]]" = None,
 ) -> None:
     """Save full test suite result for future fast-path.
 
@@ -517,26 +588,30 @@ def save_full_run_result(
     Stores build-state gates so future runs can skip fingerprint + imports
     when nothing has changed. Also captures examples/ mtime so the
     'bash test --cpp' ultra-early exit can correctly detect example changes.
+
+    Args:
+        watermarks: Source mtimes from capture_source_watermarks(), taken
+            BEFORE the run. REQUIRED and must be complete -- if omitted or
+            partial this fails closed and returns WITHOUT persisting a cache
+            entry. There is deliberately no scan-now fallback: scanning at save
+            time cannot distinguish "unchanged" from "changed while we were
+            running", so it would cache a pass over files that were never
+            tested. Callers that cannot supply a full set simply forgo the
+            fast path for one run.
     """
     cache_file = get_full_run_cache_file(build_dir)
     try:
         build_ninja = build_dir / "build.ninja"
-        cwd = Path.cwd()
 
-        # Compute meson.build max mtime
-        _meson_files = [
-            cwd / "meson.build",
-            cwd / "tests" / "meson.build",
-            cwd / "ci" / "meson" / "native" / "meson.build",
-            cwd / "ci" / "meson" / "wasm" / "meson.build",
-            cwd / "examples" / "meson.build",
-        ]
-        _meson_max = 0.0
-        for mf in _meson_files:
-            try:
-                _meson_max = max(_meson_max, mf.stat().st_mtime)
-            except OSError:
-                pass
+        # A complete pre-run watermark is mandatory. There is deliberately no
+        # scan-now fallback: scanning here (after the run) is the original bug
+        # -- it folds files added during the run into the watermark and marks
+        # them as covered by a pass they never took part in. If the caller
+        # cannot supply a full set, skip persisting entirely. The cost is one
+        # extra full run next time; the alternative is a silent stale green.
+        if watermarks is None or not _WATERMARK_KEYS <= watermarks.keys():
+            return
+        marks = {k: watermarks[k] for k in _WATERMARK_KEYS}
 
         data = {
             "result": "pass",
@@ -546,10 +621,7 @@ def save_full_run_result(
             "build_ninja_mtime": (
                 build_ninja.stat().st_mtime if build_ninja.exists() else 0.0
             ),
-            "src_max_file_mtime": _get_max_source_file_mtime(cwd / "src"),
-            "tests_max_file_mtime": _get_max_source_file_mtime(cwd / "tests"),
-            "examples_max_file_mtime": _get_max_source_file_mtime(cwd / "examples"),
-            "meson_max_file_mtime": _meson_max,
+            **marks,
         }
 
         with open(cache_file, "w", encoding="utf-8") as f:
