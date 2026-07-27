@@ -39,9 +39,9 @@ FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz) FL_NO_EXCEPT {
 /// Platform-specific implementation of nanosecond delay with auto-detected frequency (STM32)
 /// @param ns Number of nanoseconds
 FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns) FL_NO_EXCEPT {
-  // Use GET_CPU_FREQUENCY() which provides a compile-time constant for STM32
+  // Use FL_CPU_FREQUENCY() which provides a compile-time constant for STM32
   // This avoids issues with F_CPU being defined as runtime SystemCoreClock on STM32duino
-  u32 hz = GET_CPU_FREQUENCY();
+  u32 hz = FL_CPU_FREQUENCY();
   delayNanoseconds_impl(ns, hz);
 }
 

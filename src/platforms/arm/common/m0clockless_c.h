@@ -397,8 +397,8 @@ static constexpr fl::u32 ns_to_cycles(fl::u32 ns) FL_NO_EXCEPT {
   // gnu++11. Keep the constants in plain digits so the header stays portable
   // across both C++11 and C++14+ builds. Enforced by BareDigitSeparatorChecker
   // in ci/lint_cpp_rs/src/checkers/.
-#if defined(GET_CPU_FREQUENCY)
-  return (fl::u32)(((u64)ns * (u64)GET_CPU_FREQUENCY() + 999999999ULL) / 1000000000ULL);
+#if defined(FL_CPU_FREQUENCY)
+  return (fl::u32)(((u64)ns * (u64)FL_CPU_FREQUENCY() + 999999999ULL) / 1000000000ULL);
 #else
   return (fl::u32)(((u64)ns * (u64)F_CPU + 999999999ULL) / 1000000000ULL);
 #endif

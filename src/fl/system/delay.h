@@ -34,9 +34,9 @@ constexpr fl::u32 cycles_from_ns(fl::u32 ns, fl::u32 hz) FL_NO_EXCEPT {
 
 /// Compute cycles using default CPU frequency (compile-time)
 /// @param ns Number of nanoseconds
-/// @return Number of cycles using GET_CPU_FREQUENCY()
+/// @return Number of cycles using FL_CPU_FREQUENCY()
 constexpr fl::u32 cycles_from_ns_default(fl::u32 ns) FL_NO_EXCEPT {
-  return cycles_from_ns(ns, GET_CPU_FREQUENCY());
+  return cycles_from_ns(ns, FL_CPU_FREQUENCY());
 }
 
 } // namespace detail
