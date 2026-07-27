@@ -37,18 +37,20 @@ jobs:
       # regression that must be FIXED (in code or in the build system), not
       # hidden by raising the cap.
       #
-      # Current redness is a CODE SIZE gap, not a build-flag gap. #3298 (fbuild
-      # dropping ESP32 board-level build_flags/build_unflags) is FIXED —
-      # verified 2026-07-27 against
+      # Current redness is a CODE SIZE gap, not a build-flag gap. The flag
+      # propagation tracked by #3298 (fbuild dropping ESP32 board-level
+      # build_flags/build_unflags) is FIXED — note that is the propagation
+      # half only; #3298's own ceiling criterion is still unmet. Verified
+      # 2026-07-27 against
       # .build/pio/esp32dev/.fbuild/build/release/compile_commands.json:
       # `-Os -fno-exceptions -fno-rtti -fno-unwind-tables -ffunction-sections
       # -fdata-sections` are present in all 58 translation units, and
       # build_unflags strips both `-Og` and `-g` (token-exact scan finds no
       # `-g*` and no `-O` other than `-Os`).
       #
-      # With the flags fully applied, esp32dev Blink is 391543 bytes (382 KB) —
-      # down from the 401240 bytes recorded in #3298, but still ~52 KB over
-      # this ceiling. Closing that remainder is the ongoing per-symbol bloat
+      # With the flags fully applied, esp32dev Blink is 391543 bytes — down
+      # from the 401240 bytes recorded in #3298, but still 61543 bytes
+      # (~61.5 KB) over this ceiling. Closing that remainder is the per-symbol bloat
       # work (#2974 / #2886 and children), NOT a flag-plumbing fix. Do not
       # raise this number to chase it.
       #
