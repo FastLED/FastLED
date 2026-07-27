@@ -29,7 +29,11 @@ constexpr u32 cycles_from_ns_stm32(u32 ns, u32 hz) FL_NO_EXCEPT {
 FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz) FL_NO_EXCEPT {
   u32 cycles = cycles_from_ns_stm32(ns, hz);
   if (cycles == 0) return;
+#if defined(DWT) || (defined(__CORTEX_M) && (__CORTEX_M >= 3))
   delay_cycles_dwt_arm(cycles);
+#else
+  delayMicroseconds((ns + 999) / 1000);
+#endif
 }
 
 /// Platform-specific implementation of nanosecond delay with auto-detected frequency (STM32)

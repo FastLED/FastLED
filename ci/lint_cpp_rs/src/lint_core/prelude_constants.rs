@@ -707,6 +707,8 @@ const NATIVE_TO_MODERN_DEFINES: &[(&str, &str)] = &[
     ("STM32L4xx", "FL_IS_STM32_L4"),
     ("STM32H7", "FL_IS_STM32_H7"),
     ("STM32H7xx", "FL_IS_STM32_H7"),
+    ("STM32G0", "FL_IS_STM32_G0"),
+    ("STM32G0xx", "FL_IS_STM32_G0"),
     ("STM32G4", "FL_IS_STM32_G4"),
     ("STM32G4xx", "FL_IS_STM32_G4"),
     ("STM32U5", "FL_IS_STM32_U5"),

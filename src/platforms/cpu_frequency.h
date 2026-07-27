@@ -25,6 +25,9 @@
 #elif defined(STM32F1) || defined(__STM32F1__) || defined(STM32F10X_MD)
   // STM32F1: 72 MHz
   #define GET_CPU_FREQUENCY() 72000000UL
+#elif defined(STM32G0xx)
+  // STM32G0: 64 MHz
+  #define GET_CPU_FREQUENCY() 64000000UL
 #elif defined(STM32U5) || defined(STM32U5xx) || defined(STM32U585xx) || \
       defined(STM32U585XX) || defined(ARDUINO_UNO_Q) || \
       defined(CONFIG_BOARD_ARDUINO_UNO_Q) || defined(CONFIG_SOC_STM32U585XX)

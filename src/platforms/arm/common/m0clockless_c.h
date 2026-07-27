@@ -34,6 +34,7 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
 #include "platforms/arm/is_arm.h"  // FL_IS_ARM_M0_PLUS (loop-delay period selection)
+#include "platforms/cpu_frequency.h"
 
 // CMSIS interrupt-control intrinsics used by `showLedData`. These live as
 // `__STATIC_INLINE` functions in `cmsis_gcc.h` per Cortex-M CMSIS bundle.
@@ -48,7 +49,7 @@
 // Skip entirely when a CMSIS device header is on the include path (it declares
 // these as functions, which the #ifndef guards below cannot detect, so defining
 // them here would clash). LPC builds set FASTLED_HAS_CMSIS in led_sysdefs.
-#if !defined(FASTLED_HAS_CMSIS)
+#if !defined(FASTLED_HAS_CMSIS) && !defined(__CMSIS_GCC_H) && !defined(__CMSIS_GCC_M_H)
 #ifndef __get_PRIMASK
 static inline fl::u32 __get_PRIMASK(void) FL_NO_EXCEPT {
     fl::u32 primask;
@@ -396,7 +397,11 @@ static constexpr fl::u32 ns_to_cycles(fl::u32 ns) FL_NO_EXCEPT {
   // gnu++11. Keep the constants in plain digits so the header stays portable
   // across both C++11 and C++14+ builds. Enforced by BareDigitSeparatorChecker
   // in ci/lint_cpp_rs/src/checkers/.
+#if defined(GET_CPU_FREQUENCY)
+  return (fl::u32)(((u64)ns * (u64)GET_CPU_FREQUENCY() + 999999999ULL) / 1000000000ULL);
+#else
   return (fl::u32)(((u64)ns * (u64)F_CPU + 999999999ULL) / 1000000000ULL);
+#endif
 }
 
 template<int HI_OFFSET, int LO_OFFSET, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME>

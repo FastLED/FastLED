@@ -1,6 +1,6 @@
 # FastLED Platform: STM32
 
-STM32 family support (e.g., F1, F2, F4 series).
+STM32 family support (e.g., F1, F2, F4, G0, H7, U5 series).
 
 ## Supported Cores
 

@@ -37,6 +37,7 @@
 
 #include "fl/chipsets/timing_traits.h"
 #include "platforms/arm/is_arm.h"
+#include "platforms/cpu_frequency.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -107,9 +108,14 @@ showLedData(volatile fl::u32 *_port, fl::u32 _bitmask, const fl::u8 *_leds, fl::
   //   T2 (800ns) = (800 * 48 + 500) / 1000 = 38 cycles
   //   T3 (450ns) = (450 * 48 + 500) / 1000 = 22 cycles
   /////////////////////////////////////////////////////////////////////////////
-  static constexpr fl::u32 T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
-  static constexpr fl::u32 T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
-  static constexpr fl::u32 T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
+#if defined(GET_CPU_FREQUENCY)
+  static constexpr fl::u32 clock_hz = GET_CPU_FREQUENCY();
+#else
+  static constexpr fl::u32 clock_hz = F_CPU;
+#endif
+  static constexpr fl::u32 T1 = (TIMING::T1 * (clock_hz / 1000000UL) + 500) / 1000;
+  static constexpr fl::u32 T2 = (TIMING::T2 * (clock_hz / 1000000UL) + 500) / 1000;
+  static constexpr fl::u32 T3 = (TIMING::T3 * (clock_hz / 1000000UL) + 500) / 1000;
 
   /////////////////////////////////////////////////////////////////////////////
   // REGISTER ALLOCATION

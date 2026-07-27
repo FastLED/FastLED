@@ -117,6 +117,22 @@
   #include "families/stm32u5.h"  // nolint
 
 // ========================================
+// STM32G0 Family (HAS_BRR = true)
+// ========================================
+
+  // IWYU pragma: end_keep
+#elif defined(ARDUINO_NUCLEO_G070RB)
+  #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/g0/nucleo_g070rb.h"
+  // IWYU pragma: begin_keep
+  #include "families/stm32g0.h"  // nolint
+
+  // IWYU pragma: end_keep
+#elif defined(ARDUINO_GENERIC_G070KBTX) || defined(ARDUINO_GENERIC_G070RBTX) || defined(ARDUINO_GENERIC_G070CBTX) || defined(STM32G0) || defined(STM32G0xx) || defined(STM32G070xx)
+  #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/g0/generic_g0.h"
+  // IWYU pragma: begin_keep
+  #include "families/stm32g0.h"  // nolint
+
+// ========================================
 // Unknown Board - Error with Guidance
 // ========================================
 
