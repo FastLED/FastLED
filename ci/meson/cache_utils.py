@@ -508,8 +508,45 @@ def check_full_run_cache(
         return None
 
 
+def capture_source_watermarks(cwd: Optional[Path] = None) -> "dict[str, float]":
+    """Snapshot source-tree mtimes to gate a test run that is about to start.
+
+    Must be called BEFORE the run whose result it will describe. Scanning at
+    save time instead is wrong: a file added while the suite was running gets
+    folded into the watermark, so the cache claims that file's state was tested
+    when it never was, and every later run skips on a stale pass. Capturing up
+    front leaves such a file strictly newer than the watermark, so the next run
+    correctly rebuilds. See the test-discovery counterpart in
+    meson_setup_phases._write_test_list_watermark.
+    """
+    root = cwd if cwd is not None else Path.cwd()
+    _meson_files = [
+        root / "meson.build",
+        root / "tests" / "meson.build",
+        root / "ci" / "meson" / "native" / "meson.build",
+        root / "ci" / "meson" / "wasm" / "meson.build",
+        root / "examples" / "meson.build",
+    ]
+    _meson_max = 0.0
+    for mf in _meson_files:
+        try:
+            _meson_max = max(_meson_max, mf.stat().st_mtime)
+        except OSError:
+            pass
+    return {
+        "src_max_file_mtime": _get_max_source_file_mtime(root / "src"),
+        "tests_max_file_mtime": _get_max_source_file_mtime(root / "tests"),
+        "examples_max_file_mtime": _get_max_source_file_mtime(root / "examples"),
+        "meson_max_file_mtime": _meson_max,
+    }
+
+
 def save_full_run_result(
-    build_dir: Path, num_passed: int, num_tests: int, duration: float
+    build_dir: Path,
+    num_passed: int,
+    num_tests: int,
+    duration: float,
+    watermarks: "Optional[dict[str, float]]" = None,
 ) -> None:
     """Save full test suite result for future fast-path.
 
@@ -517,6 +554,12 @@ def save_full_run_result(
     Stores build-state gates so future runs can skip fingerprint + imports
     when nothing has changed. Also captures examples/ mtime so the
     'bash test --cpp' ultra-early exit can correctly detect example changes.
+
+    Args:
+        watermarks: Source mtimes from capture_source_watermarks(), taken
+            BEFORE the run. Omitting them falls back to scanning now, which
+            cannot distinguish "unchanged" from "changed while we were
+            running" and so can cache a pass over untested files.
     """
     cache_file = get_full_run_cache_file(build_dir)
     try:
@@ -538,6 +581,17 @@ def save_full_run_result(
             except OSError:
                 pass
 
+        marks = (
+            watermarks
+            if watermarks is not None
+            else {
+                "src_max_file_mtime": _get_max_source_file_mtime(cwd / "src"),
+                "tests_max_file_mtime": _get_max_source_file_mtime(cwd / "tests"),
+                "examples_max_file_mtime": _get_max_source_file_mtime(cwd / "examples"),
+                "meson_max_file_mtime": _meson_max,
+            }
+        )
+
         data = {
             "result": "pass",
             "num_passed": num_passed,
@@ -546,10 +600,7 @@ def save_full_run_result(
             "build_ninja_mtime": (
                 build_ninja.stat().st_mtime if build_ninja.exists() else 0.0
             ),
-            "src_max_file_mtime": _get_max_source_file_mtime(cwd / "src"),
-            "tests_max_file_mtime": _get_max_source_file_mtime(cwd / "tests"),
-            "examples_max_file_mtime": _get_max_source_file_mtime(cwd / "examples"),
-            "meson_max_file_mtime": _meson_max,
+            **marks,
         }
 
         with open(cache_file, "w", encoding="utf-8") as f:

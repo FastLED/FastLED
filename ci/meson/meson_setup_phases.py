@@ -385,22 +385,46 @@ def check_meson_build_modified(source_dir: Path, build_dir: Path) -> bool:
     return False
 
 
+def _write_test_list_watermark(build_dir: Path, max_tests_dir_mtime: float) -> None:
+    """Persist the tests/ dir mtime that the current cached list corresponds to.
+
+    Written atomically: a torn watermark would be parsed as corrupt and force a
+    full rescan, which is safe but silently costs ~400ms on every build.
+    """
+    watermark_path = build_dir / "test_list_watermark.txt"
+    temp_path = watermark_path.with_suffix(".tmp")
+    try:
+        temp_path.write_text(f"{max_tests_dir_mtime!r}\n")
+        temp_path.replace(watermark_path)
+    except OSError:
+        try:
+            temp_path.unlink()
+        except OSError:
+            pass
+
+
 def detect_test_file_changes(
     source_dir: Path, build_dir: Path, max_tests_dir_mtime: float
 ) -> bool:
     """Return True when discovered test files differ from the cached list."""
     test_list_cache_path = build_dir / "test_list_cache.txt"
-    skip_test_discovery = False
+    # Watermark = the max tests/ dir mtime observed by the scan that produced
+    # the cached list. It must NOT be the cache file's own mtime: the cache is
+    # written *after* discovery, so a test file created in between would carry
+    # an older parent-dir mtime than the cache and be masked forever -- the
+    # fast path would report "no changes" on every subsequent run and the new
+    # test would silently never build, while the suite still reported green.
+    # Comparing against a watermark captured *before* the scan makes anything
+    # added during or after that scan strictly newer, so it is always caught.
+    watermark_path = build_dir / "test_list_watermark.txt"
     if test_list_cache_path.exists():
         try:
-            tlc_mtime = test_list_cache_path.stat().st_mtime
-            if max_tests_dir_mtime <= tlc_mtime:
-                skip_test_discovery = True
-        except OSError:
+            watermark = float(watermark_path.read_text().strip())
+            if max_tests_dir_mtime <= watermark:
+                return False
+        except (OSError, ValueError):
+            # No/corrupt watermark -- fall through to the authoritative compare.
             pass
-
-    if skip_test_discovery:
-        return False
 
     try:
         import importlib.util
@@ -489,12 +513,10 @@ def detect_test_file_changes(
                     temp_cache.unlink()
                 except (OSError, IOError):
                     pass
+            _write_test_list_watermark(build_dir, max_tests_dir_mtime)
             return True
-        # No changes — touch cache so directory-mtime fast-path activates next run.
-        try:
-            test_list_cache.touch()
-        except OSError:
-            pass
+        # No changes — record the watermark so the fast path activates next run.
+        _write_test_list_watermark(build_dir, max_tests_dir_mtime)
         return False
 
     except KeyboardInterrupt as ki:

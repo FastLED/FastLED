@@ -1531,8 +1531,14 @@ def runner(
     # Skip if fingerprint cache indicates no changes
     if test_categories.unit_only:
         if cpp_test_change:
+            from ci.meson.cache_utils import capture_source_watermarks
             from ci.meson.runner import run_meson_build_and_test
             from ci.util.paths import PROJECT_ROOT
+
+            # Snapshot the tree BEFORE building/running. Capturing after the run
+            # would absorb any file added meanwhile into the watermark, caching
+            # a pass over code that was never compiled or executed.
+            _watermarks = capture_source_watermarks(PROJECT_ROOT)
 
             build_dir = PROJECT_ROOT / ".build" / "meson"
             test_name = args.test if args.test else None
@@ -1700,6 +1706,7 @@ def runner(
                         result.num_tests_passed,
                         result.num_tests_run,
                         result.duration,
+                        watermarks=_watermarks,
                     )
                 except KeyboardInterrupt as ki:
                     handle_keyboard_interrupt(ki)
@@ -1891,11 +1898,28 @@ def runner(
                         if _cache_file_tr.exists():
                             _saved_tr = _json.loads(_cache_file_tr.read_text())
                             if _saved_tr.get("result") == "pass":
+                                # Refresh ONLY build_ninja_mtime. Carry the
+                                # original watermarks forward untouched -- this
+                                # path runs when tests were SKIPPED, so
+                                # rescanning here would fold any file added
+                                # since that run into the watermark and mark it
+                                # as covered by a pass it never took part in.
+                                _carry = {
+                                    _k: _saved_tr[_k]
+                                    for _k in (
+                                        "src_max_file_mtime",
+                                        "tests_max_file_mtime",
+                                        "examples_max_file_mtime",
+                                        "meson_max_file_mtime",
+                                    )
+                                    if _k in _saved_tr
+                                }
                                 save_full_run_result(
                                     _build_dir_tr,
                                     _saved_tr.get("num_passed", 0),
                                     _saved_tr.get("num_tests", 0),
                                     _saved_tr.get("duration", 0.0),
+                                    watermarks=_carry or None,
                                 )
                     except KeyboardInterrupt as ki:
                         handle_keyboard_interrupt(ki)
