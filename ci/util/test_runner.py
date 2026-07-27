@@ -1538,7 +1538,13 @@ def runner(
             # Snapshot the tree BEFORE building/running. Capturing after the run
             # would absorb any file added meanwhile into the watermark, caching
             # a pass over code that was never compiled or executed.
-            _watermarks = capture_source_watermarks(PROJECT_ROOT)
+            # An unreadable build file must not take down the test run: fall
+            # back to None, which makes save_full_run_result skip persisting.
+            # Worst case is one lost fast path, never a stale green.
+            try:
+                _watermarks = capture_source_watermarks(PROJECT_ROOT)
+            except OSError:
+                _watermarks = None
 
             build_dir = PROJECT_ROOT / ".build" / "meson"
             test_name = args.test if args.test else None
