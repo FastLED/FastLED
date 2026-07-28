@@ -30,9 +30,13 @@
 // (whose docstring declares that scanner mirrors this checker). Do NOT
 // reimplement with `str::parse` — Rust's numeric parsers reject the `0x`/`0b`
 // prefixes AND the C++ `u`/`l`/`f` suffixes, so hex register masks like
-// `constexpr u32 kMask = 0x8000u;` get misreported as non-literal. Keep the
-// two implementations in sync; `test_singleton_elision_rust_python_parity`
-// pins the shared cases.
+// `constexpr u32 kMask = 0x8000u;` get misreported as non-literal.
+//
+// Keep this grammar and TRIVIAL_RHS_RE in sync by hand — there is no
+// cross-language parity test. The Rust side is pinned by
+// `singleton_elision_accepts_suffixed_and_prefixed_literals` and
+// `singleton_elision_still_flags_non_literal_constexpr` in
+// lint_core/tests.rs.
 fn trivial_rhs_regex() -> &'static regex::Regex {
     static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
     RE.get_or_init(|| {
@@ -41,7 +45,8 @@ fn trivial_rhs_regex() -> &'static regex::Regex {
             r"[-+]?0[xX][0-9a-fA-F]+[uUlL]*",             // hex literal
             r"|[-+]?0[bB][01]+[uUlL]*",                   // binary literal
             r"|[-+]?\d+[uUlL]*",                          // int literal
-            r"|[-+]?\d*\.\d+[fF]?",                       // float literal
+            // float literal, incl. `10.f`, `1e-6f`, `2.5e3f`, `1.5L`
+            r"|[-+]?(?:\d*\.\d+|\d+\.\d*|\d+)(?:[eE][-+]?\d+)?[fFlL]?",
             r"|nullptr|NULL|true|false",                  // symbolic constants
             r#"|"[^"]*""#,                                // string literal
             r"|'.'",                                      // char literal

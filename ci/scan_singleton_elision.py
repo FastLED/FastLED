@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 """
 Scan the FastLED tree for namespace-scope variables that should be wrapped
-in `fl::Singleton<T>` for `--gc-sections` elision. Mirrors the logic that
-`ci/lint_cpp_rs/src/checkers/singleton_elision.rs` will implement once the
-Rust linter integration is fully wired.
+in `fl::Singleton<T>` for `--gc-sections` elision.
+
+NOT authoritative. `ci/lint_cpp_rs/src/checkers/singleton_elision.rs` is the
+enforcement path that `bash lint` runs; this is an ad-hoc reporting tool that
+approximates it. The two share the TRIVIAL_RHS_RE literal grammar and the
+FL_LINT_ALLOW_GLOBAL / FL_LINT_ALLOW_GLOBAL_FILE opt-outs, but they still
+report different totals (62 here vs 39 there as of FastLED#3754) because the
+Rust checker carries additional skip heuristics this scanner lacks. Trust the
+Rust checker; use this only for a rough bucketed overview.
 
 Report shape:
   - Per-file violation count (top-N)
@@ -49,7 +55,7 @@ TRIVIAL_RHS_RE = re.compile(
     r"[-+]?0[xX][0-9a-fA-F]+[uUlL]*"  # hex literal
     r"|[-+]?0[bB][01]+[uUlL]*"  # binary literal
     r"|[-+]?\d+[uUlL]*"  # int literal
-    r"|[-+]?\d*\.\d+[fF]?"  # float literal
+    r"|[-+]?(?:\d*\.\d+|\d+\.\d*|\d+)(?:[eE][-+]?\d+)?[fFlL]?"  # float literal (incl. 10.f, 1e-6f, 1.5L)
     r"|nullptr|NULL|true|false"  # symbolic constants
     r"|\".*\""  # string literal
     r"|'.'"  # char literal
@@ -218,12 +224,29 @@ def scan_file(path: Path) -> list[tuple[int, str, str]]:
     except OSError:
         return []
 
+    # File-level opt-out, matching the Rust checker's first-15-lines scan.
+    for line in lines[:15]:
+        if "FL_LINT_ALLOW_GLOBAL_FILE" in line:
+            return []
+
     violations: list[tuple[int, str, str]] = []
     depth = 0
     namespace_stack: list[int] = []  # depths that are inside a `namespace X {`
     in_block_comment = False
+    # `FL_LINT_ALLOW_GLOBAL` is a comment-only marker, so it is invisible
+    # after strip_comments(). Track it off the raw line, and let a
+    # comment-only marker line carry over to the declaration beneath it --
+    # the preferred style, and what the Rust checker accepts.
+    prev_line_had_marker = False
 
     for idx, raw in enumerate(lines):
+        raw_stripped = raw.strip()
+        carry_marker = prev_line_had_marker
+        this_line_marker = "FL_LINT_ALLOW_GLOBAL" in raw
+        prev_line_had_marker = this_line_marker and (
+            raw_stripped.startswith("//") or raw_stripped.startswith("/*")
+        )
+
         code, in_block_comment = strip_comments(raw, in_block_comment)
 
         stripped = code.strip()
@@ -253,6 +276,8 @@ def scan_file(path: Path) -> list[tuple[int, str, str]]:
         # Namespace-scope means line_depth == 0 (TU scope) or line_depth is
         # in namespace_stack (we're inside `namespace X { … }`).
         if line_depth == 0 or line_depth in namespace_stack:
+            if this_line_marker or carry_marker:
+                continue
             is_def, name, type_pretty = looks_like_var_def(code)
             if is_def:
                 violations.append((idx + 1, name, type_pretty))

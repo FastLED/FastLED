@@ -381,6 +381,11 @@ FL_WARN(\"still checked because remote files are always guarded\");\n",
             "0x80000000u", "0xFF", "0b1010", "0x8000uL",
             "nullptr", "NULL", "true", "false",
             "\"text\"", "'c'", "MAX_LEDS", "(1u << 3)", "(0x1u << 12)",
+            // Exponent / trailing-dot / long-double float spellings. FastLED
+            // timing and gamma tables use these freely; missing them keeps
+            // the warn-only stream noisy and #3492 (hard-fail at zero)
+            // unreachable.
+            "1e-6f", "2.5e3f", "10.f", "1.5L", "1E9",
         ] {
             let src = format!("namespace fl {{\nconstexpr auto kX = {rhs};\n}}\n");
             assert!(
