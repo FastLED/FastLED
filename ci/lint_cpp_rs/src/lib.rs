@@ -1,6 +1,7 @@
 // Keep lib.rs as the crate-level dispatch surface; implementation lives in small source files.
 include!("lint_core/prelude_constants.rs");
 include!("lint_core/banned_header_data.rs");
+include!("lint_core/warn_only.rs");
 include!("lint_core/processor_registry_cli.rs");
 include!("lint_core/regexes.rs");
 include!("lint_core/path_helpers.rs");
