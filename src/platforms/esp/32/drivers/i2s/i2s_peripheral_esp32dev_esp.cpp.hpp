@@ -77,6 +77,13 @@ namespace {
 // `f_out = I2S_BASE_CLK / (N + B/A)`.
 constexpr u32 kI2sBaseClkHz = 80000000u;
 
+// Width of the destination bitfield for the integer divider. `clkm_div_num`
+// is 8 bits in soc/esp32/include/soc/i2s_struct.h (verified against the
+// vendor header, not just the TRM), so 255 is the largest value that
+// survives the assignment. Its siblings clkm_div_a / clkm_div_b are 6 bits,
+// which is where the solver's max_A = 63 comes from.
+constexpr int kI2sMaxDivN = 255;
+
 // Owner tag for the cross-driver port-claim registry. Stable literal —
 // claim identity is the pointer.
 constexpr const char *kI2sClocklessOwner = "I2S_CLOCKLESS";
@@ -97,7 +104,27 @@ inline void solveI2sClockDivider(u32 target_hz,
     const u32 effective_hz = (target_hz == 0) ? 8000000u : target_hz;
     const fl::platforms::esp32::ClkDividerNAB d =
         fl::platforms::esp32::solveFractionalDivider(kI2sBaseClkHz, effective_hz,
-                                                     /*max_A=*/63, /*min_N=*/2);
+                                                     /*max_A=*/63, /*min_N=*/2,
+                                                     /*max_N=*/kI2sMaxDivN);
+    if (d.saturated) {
+        // The requested clock needs a bigger divider than clkm_div_num can
+        // hold. The solver clamped instead of letting the bitfield
+        // assignment below wrap silently, so the peripheral runs at the
+        // slowest rate it can rather than at a wrapped-around fast one.
+        //
+        // Report the clock actually programmed, computed from the solved
+        // triple: the floor is base / (N + B/A), not base / N, so quoting
+        // 80 MHz / 255 would understate the divider by nearly a full count.
+        // u64 because base * a overflows u32 (80e6 * 63 = 5.04e9).
+        const u32 achieved_hz = static_cast<u32>(
+            (static_cast<u64>(kI2sBaseClkHz) * static_cast<u64>(d.a)) /
+            (static_cast<u64>(d.n) * static_cast<u64>(d.a) +
+             static_cast<u64>(d.b)));
+        FL_WARN_F("I2S: pixel clock %u Hz is below the minimum this divider "
+                  "can reach; clamping to ~%u Hz",
+                  static_cast<unsigned>(effective_hz),
+                  static_cast<unsigned>(achieved_hz));
+    }
     *out_N = d.n;
     *out_A = d.a;
     *out_B = d.b;
