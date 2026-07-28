@@ -11,6 +11,8 @@ from __future__ import annotations
 from collections import Counter
 from pathlib import Path
 
+from pytest import CaptureFixture
+
 from ci.lint_python import subprocess_capture_checker as checker
 
 
@@ -49,7 +51,7 @@ def test_narrow_update_keeps_unscanned_entries(tmp_path: Path) -> None:
 
 
 def test_narrow_scan_does_not_claim_unscanned_entries_improved(
-    tmp_path: Path, capsys
+    tmp_path: Path, capsys: CaptureFixture[str]
 ) -> None:
     """A narrow scan must not report unexamined baseline entries as fixed."""
     scanned = tmp_path / "clean.py"
