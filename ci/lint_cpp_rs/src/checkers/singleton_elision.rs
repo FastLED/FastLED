@@ -305,7 +305,18 @@ impl FileContentChecker for SingletonElisionChecker {
             let end_pos = code
                 .find(|c: char| end_marker.contains(&c))
                 .unwrap_or(code.len());
-            let head = &code[..end_pos];
+            // Trim before the split below. `end_pos` stops just *before* the
+            // `=` / `;` / `[`, so for the ordinary spelling `int x = 0;` the
+            // head is "int x " -- with a trailing space. The `rsplit` on
+            // non-identifier characters would then split on that trailing
+            // space and hand back the empty tail, the name would come out as
+            // "" and the `name.is_empty()` guard below would skip the line.
+            //
+            // Since virtually every real declaration puts a space before the
+            // initializer, that made the whole checker a silent no-op: it
+            // reported zero violations tree-wide while the Python scanner
+            // found 101. See FastLED#3482.
+            let head = code[..end_pos].trim();
 
             // Class-static-member out-of-class definitions like
             // `constexpr bool numeric_limits<char>::is_signed = true;` or

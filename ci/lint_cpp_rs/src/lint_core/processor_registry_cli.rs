@@ -657,7 +657,12 @@ where
         OutputFormat::Text => print_text_results(&violations, &config.project_root),
     }
 
-    Ok(if violations.is_empty() { 0 } else { 1 })
+    // Warn-only checkers are reported but must not affect the exit code --
+    // that is the whole point of the rollout mechanism.
+    let blocking = violations
+        .iter()
+        .any(|violation| !is_warn_only(&violation.checker));
+    Ok(if blocking { 1 } else { 0 })
 }
 
 fn selected_contains_structural_alias(selected: &HashSet<String>, checker_name: &str) -> bool {
@@ -767,23 +772,6 @@ Usage:\n\
 When no files are supplied, scans src/, examples/, and tests/ under --project-root.\n\
 Use --list-checkers to print the Rust-supported checker names."
     );
-}
-
-fn print_text_results(violations: &[LintViolation], project_root: &Path) {
-    if violations.is_empty() {
-        println!("All Rust C++ linting checks passed!");
-        return;
-    }
-
-    let mut current_checker = "";
-    for violation in violations {
-        if violation.checker != current_checker {
-            current_checker = &violation.checker;
-            println!("\n[{current_checker}]");
-        }
-        let display_path = relative_display_path(&violation.path, project_root);
-        println!("  {display_path}:{}: {}", violation.line, violation.message);
-    }
 }
 
 fn collect_input_files(project_root: &Path, inputs: &[String]) -> Result<Vec<PathBuf>, DynError> {

@@ -30,6 +30,28 @@ SRC_ROOT = PROJECT_ROOT / "src"
 EXAMPLES_ROOT = PROJECT_ROOT / "examples"
 TESTS_ROOT = PROJECT_ROOT / "tests"
 
+# Checkers whose findings are printed but do NOT fail the run.
+#
+# Lets a checker be rolled out against a tree that already violates it: the
+# findings are visible immediately while the migration lands incrementally,
+# and the checker is promoted to hard-fail once the count reaches zero.
+# Without this, enabling a checker on a dirty tree is all-or-nothing -- either
+# CI breaks at once or the checker stays off and silently guards nothing.
+#
+# Must stay in sync with WARN_ONLY_CHECKERS in
+# ci/lint_cpp_rs/src/lint_core/warn_only.rs -- the Rust binary
+# owns its own exit code, and this orchestrator tallies the same findings a
+# second time, so both layers have to agree or the stricter one wins.
+# ci/tests/test_warn_only_checkers_sync.py asserts the two lists match.
+WARN_ONLY_CHECKERS = frozenset(
+    {
+        # FastLED#3482 -- pre-existing namespace-scope globals; migration to
+        # fl::Singleton<T> tracked under FastLED#3481. Promote to hard-fail
+        # via FastLED#3492 when the count reaches zero.
+        "SingletonElisionChecker",
+    }
+)
+
 
 def collect_all_files_by_directory() -> dict[str, list[str]]:
     """Collect files organized by directory for targeted checker application."""
@@ -285,6 +307,7 @@ def format_and_print_results(
             truncating output. Set to 0 for unlimited.
     """
     total_violations = 0
+    warn_only_violations = 0
 
     for checker_name, checker_results in sorted(results.items()):
         if not checker_results.has_violations():
@@ -292,11 +315,17 @@ def format_and_print_results(
 
         file_count = checker_results.file_count()
         violation_count = checker_results.total_violations()
-        total_violations += violation_count
+        warn_only = checker_name in WARN_ONLY_CHECKERS
+        if warn_only:
+            warn_only_violations += violation_count
+        else:
+            total_violations += violation_count
 
+        suffix = " (warn-only — not failing CI)" if warn_only else ""
         print(f"\n{'=' * 80}")
         print(
-            f"[{checker_name}] Found {violation_count} violation(s) in {file_count} file(s):"
+            f"[{checker_name}] Found {violation_count} violation(s) "
+            f"in {file_count} file(s):{suffix}"
         )
         print("=" * 80)
 
@@ -332,11 +361,26 @@ def format_and_print_results(
                 f" ({remaining} more not shown)"
             )
 
+    if warn_only_violations > 0:
+        print(f"\n{'=' * 80}")
+        print(
+            f"⚠️  {warn_only_violations} warn-only violation(s) "
+            "— reported, not failing CI."
+        )
+        print("=" * 80)
+
     if total_violations > 0:
         print(f"\n{'=' * 80}")
         print(f"❌ Total violations: {total_violations}")
         print("=" * 80)
         return 1
+    elif warn_only_violations > 0:
+        # Not "all checks passed" -- findings exist, they just do not block.
+        # Saying otherwise is how a warn-only rollout gets forgotten.
+        print("\n" + "=" * 80)
+        print("✅ No blocking C++ lint violations.")
+        print("=" * 80)
+        return 0
     else:
         print("\n" + "=" * 80)
         print("✅ All C++ linting checks passed!")
