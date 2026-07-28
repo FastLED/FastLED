@@ -20,8 +20,15 @@
 // IWYU pragma: end_keep
 #include "platforms/is_platform.h"
 
-// Check for Arduino I2S library availability and completeness
-#if defined(FL_IS_SAMD21)
+// Check known-broken platforms before probing or including I2S.h. On Renesas
+// boards the library header can exist while including it fails because the
+// bundled FSP does not provide r_i2s_api.h.
+#if defined(ARDUINO_UNOR4_WIFI) || defined(ARDUINO_UNOR4_MINIMA) || \
+    defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_RENESAS_UNO) || \
+    defined(_RENESAS_RA_) || defined(ARDUINO_FSP)
+#define ARDUINO_I2S_FULLY_SUPPORTED 0
+#define ARDUINO_I2S_BROKEN_REASON "Renesas FSP missing r_i2s_api.h header"
+#elif defined(FL_IS_SAMD21)
 #define ARDUINO_I2S_FULLY_SUPPORTED 0
 #define ARDUINO_I2S_BROKEN_REASON "I2S not supported on SAMD21"
 #elif FL_HAS_INCLUDE(<I2S.h>)
@@ -31,13 +38,7 @@
 // IWYU pragma: end_keep
 
 // Define ARDUINO_I2S_FULLY_SUPPORTED only when ALL I2S components are present and functional
-#if defined(ARDUINO_UNOR4_WIFI) || defined(ARDUINO_UNOR4_MINIMA) || \
-    defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_RENESAS_UNO) || \
-    defined(_RENESAS_RA_) || defined(ARDUINO_FSP)
-    // Known broken: Renesas RA platforms with incomplete FSP I2S support
-    #define ARDUINO_I2S_FULLY_SUPPORTED 0
-    #define ARDUINO_I2S_BROKEN_REASON "Renesas FSP missing r_i2s_api.h header"
-#elif !defined(I2S_PHILIPS_MODE) || !defined(I2S_LEFT_JUSTIFIED_MODE) || !defined(I2S_RIGHT_JUSTIFIED_MODE)
+#if !defined(I2S_PHILIPS_MODE) || !defined(I2S_LEFT_JUSTIFIED_MODE) || !defined(I2S_RIGHT_JUSTIFIED_MODE)
     // Missing essential I2S mode constants - incomplete library implementation
     #define ARDUINO_I2S_FULLY_SUPPORTED 0
     #define ARDUINO_I2S_BROKEN_REASON "Missing I2S mode constants (incomplete library)"
