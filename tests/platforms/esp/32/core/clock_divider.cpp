@@ -170,3 +170,77 @@ FL_TEST_CASE("esp32 clock divider: degenerate inputs do not divide by zero") {
     FL_CHECK(zero_base.a == 1);
     FL_CHECK(zero_base.b == 0);
 }
+
+FL_TEST_CASE("esp32 clock divider: max_N bounds the integer divider (#3745)") {
+    // clkm_div_num on classic-ESP32 I2S is 8 bits, so 255 is the largest
+    // value that survives the register assignment. Assigning 800 to it would
+    // silently truncate to 800 & 0xFF == 32, running the peripheral at
+    // 80 MHz / 32 = 2.5 MHz instead of the requested 100 kHz -- a 25x error
+    // with no diagnostic. The solver clamps instead.
+    constexpr int kFieldMax = 255;
+
+    // 80 MHz / 255 == 313725.49 Hz is the slowest reachable clock. Just above
+    // it still solves normally.
+    const ClkDividerNAB reachable =
+        solveFractionalDivider(kApbClockHz, 320000u, 63, 2, kFieldMax);
+    FL_CHECK(reachable.n <= kFieldMax);
+    FL_CHECK(!reachable.saturated);
+
+    // The exact boundary: 80 MHz / 255 must land on N == 255 and not tip over.
+    const ClkDividerNAB boundary =
+        solveFractionalDivider(kApbClockHz, kApbClockHz / kFieldMax, 63, 2,
+                               kFieldMax);
+    FL_CHECK(boundary.n <= kFieldMax);
+
+    // Just over: 100 kHz would solve to N == 800. Must clamp and say so.
+    const ClkDividerNAB over =
+        solveFractionalDivider(kApbClockHz, 100000u, 63, 2, kFieldMax);
+    FL_CHECK(over.n == kFieldMax);
+    FL_CHECK(over.saturated);
+    // A clamped result must still be a legal triple, not a half-updated one.
+    FL_CHECK(over.a == 1);
+    FL_CHECK(over.b == 0);
+
+    // The truncation this guards against: without the bound the solver
+    // returns 800, and 800 & 0xFF is 32 -- a value that looks perfectly
+    // plausible in the register.
+    const ClkDividerNAB unbounded =
+        solveFractionalDivider(kApbClockHz, 100000u, 63, 2);
+    FL_CHECK(unbounded.n == 800);
+    FL_CHECK((unbounded.n & 0xFF) == 32);
+    FL_CHECK(!unbounded.saturated);
+}
+
+FL_TEST_CASE("esp32 clock divider: existing callers keep their behavior") {
+    // max_N defaults to kMaxDivider, so every pre-#3745 call site must solve
+    // to exactly what it did before and never report saturation.
+    using fl::platforms::esp32::kMaxDivider;
+
+    const u32 rates[] = {8000000u, 3200000u, 2400000u, 1000000u, 400000u};
+    for (u32 hz : rates) {
+        const ClkDividerNAB with_default = solveFractionalDivider(kApbClockHz, hz);
+        const ClkDividerNAB explicit_max =
+            solveFractionalDivider(kApbClockHz, hz, 63, 2, kMaxDivider);
+        FL_CHECK(with_default.n == explicit_max.n);
+        FL_CHECK(with_default.a == explicit_max.a);
+        FL_CHECK(with_default.b == explicit_max.b);
+        FL_CHECK(!with_default.saturated);
+    }
+
+    // Hitting the int-representability guard is not a hardware saturation --
+    // it means the caller asked for a sub-hertz clock, a different failure.
+    const ClkDividerNAB huge = solveFractionalDivider(4294967295u, 1u);
+    FL_CHECK(huge.n == kMaxDivider);
+    FL_CHECK(!huge.saturated);
+}
+
+FL_TEST_CASE("esp32 clock divider: max_N below min_N cannot fabricate an illegal N") {
+    // Nonsensical limits must still yield something the hardware accepts:
+    // the min_N floor wins, because a divider under it is unwritable.
+    const ClkDividerNAB d =
+        solveFractionalDivider(kApbClockHz, 8000000u, 63, /*min_N=*/2,
+                               /*max_N=*/1);
+    FL_CHECK(d.n == 2);
+    FL_CHECK(d.a == 1);
+    FL_CHECK(d.b == 0);
+}
