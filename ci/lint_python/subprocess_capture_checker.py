@@ -189,13 +189,22 @@ def check_file(path: str, source: str) -> list[tuple[int, str, str]]:
     return visitor.violations
 
 
+def _rel_path(path: Path) -> str:
+    """Project-relative posix path, or the path itself if outside the tree."""
+    try:
+        return path.resolve().relative_to(PROJECT_ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
 def _baseline_key(path: Path, code: str) -> str:
     """Stable per-file/per-code key, independent of line numbers."""
-    try:
-        rel = path.resolve().relative_to(PROJECT_ROOT).as_posix()
-    except ValueError:
-        rel = path.as_posix()
-    return f"{rel}|{code}"
+    return f"{_rel_path(path)}|{code}"
+
+
+def _key_file(key: str) -> str:
+    """The file portion of a baseline key."""
+    return key.rsplit("|", 1)[0]
 
 
 def load_baseline(path: Path = DEFAULT_BASELINE) -> Counter[str]:
@@ -283,11 +292,16 @@ def main(argv: list[str] | None = None) -> int:
 
     counts: Counter[str] = Counter()
     detail: dict[str, list[str]] = {}
+    # Which files this invocation actually looked at. A baseline entry for a
+    # file outside this set says nothing about that file -- it was simply not
+    # examined -- so it must never be treated as fixed or dropped.
+    scanned: set[str] = set()
     for path in files:
         try:
             source = path.read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
+        scanned.add(_rel_path(path))
         if not _SUBPROCESS_RE.search(source):
             continue
         for line_no, code, message in check_file(str(path), source):
@@ -296,13 +310,25 @@ def main(argv: list[str] | None = None) -> int:
             detail.setdefault(key, []).append(f"{path}:{line_no}: {message}")
 
     baseline_path = Path(args.baseline)
-    if args.update_baseline:
-        write_baseline(counts, baseline_path)
-        total = sum(counts.values())
-        print(f"Wrote baseline with {total} finding(s) across {len(counts)} entries.")
-        return 0
-
     baseline = load_baseline(baseline_path)
+
+    if args.update_baseline:
+        # Merge rather than overwrite. Running with a narrow path list
+        # (`... check.py some_file.py --update-baseline`) would otherwise
+        # rewrite the whole file from that one file's findings and silently
+        # delete every other entry, turning the ratchet off everywhere.
+        merged = Counter(
+            {k: v for k, v in baseline.items() if _key_file(k) not in scanned}
+        )
+        merged.update(counts)
+        write_baseline(merged, baseline_path)
+        total = sum(merged.values())
+        kept = len(merged) - len(counts)
+        print(
+            f"Wrote baseline with {total} finding(s) across {len(merged)} entries "
+            f"({len(scanned)} file(s) rescanned, {kept} untouched entry(ies) kept)."
+        )
+        return 0
 
     regressions = 0
     for key, count in sorted(counts.items()):
@@ -324,8 +350,14 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
+    # Only files this run actually scanned can be said to have improved.
+    # Without the `scanned` filter a narrow invocation reports every baselined
+    # entry in the repo as "now gone", which is both wrong and an invitation
+    # to run --update-baseline and wipe them.
     improved = sum(
-        max(0, allowed - counts.get(key, 0)) for key, allowed in baseline.items()
+        max(0, allowed - counts.get(key, 0))
+        for key, allowed in baseline.items()
+        if _key_file(key) in scanned
     )
     if improved:
         print(

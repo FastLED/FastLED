@@ -90,11 +90,9 @@ ci/tests/test_wasm_flags.py|SRC004|1
 ci/tools/add_fl_noexcept.py|SRC001|1
 ci/tools/add_fl_noexcept.py|SRC004|1
 ci/tools/check_array_params.py|SRC001|1
-ci/tools/check_array_params.py|SRC004|1
 ci/tools/check_ast_combined.py|SRC001|1
 ci/tools/check_ast_combined.py|SRC004|1
 ci/tools/check_noexcept.py|SRC001|1
-ci/tools/check_noexcept.py|SRC004|1
 ci/tools/coderabbit_addressor.py|SRC001|1
 ci/tools/generate_audio_fixtures.py|SRC001|2
 ci/tools/generate_audio_fixtures.py|SRC004|2
