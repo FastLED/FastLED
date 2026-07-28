@@ -8,23 +8,27 @@ namespace fl {
 namespace audio {
 namespace detector {
 
+// Diagnostic FFT counter. Deliberately a plain constant-initialized static,
+// NOT a fl::Singleton -- see the rationale on `sVibeFFTCount` in vibe.cpp.hpp
+// and FastLED#3486.
+// FL_LINT_ALLOW_GLOBAL(constant-initialized POD scalar -- already elidable under -fdata-sections; Singleton wrapping is a net size regression and loses constant-initialization. See FastLED#3486.)
 static int sFrequencyBandsFFTCount = 0;
-int FrequencyBands::getPrivateFFTCount() { return sFrequencyBandsFFTCount; }
-void FrequencyBands::resetPrivateFFTCount() { sFrequencyBandsFFTCount = 0; }
+int FrequencyBands::getPrivateFFTCount() FL_NO_EXCEPT { return sFrequencyBandsFFTCount; }
+void FrequencyBands::resetPrivateFFTCount() FL_NO_EXCEPT { sFrequencyBandsFFTCount = 0; }
 
 namespace {
 // Number of fft::FFT bins — higher count gives better frequency resolution
 // and cleaner band separation. With 64 bins, the CQ kernel provides
 // good frequency isolation for all three bands (bass, mid, treble).
-const int kNumBands = 64;
+constexpr int kNumBands = 64;
 
 // fft::FFT frequency range covering bass through treble.
 // Range [100, 10000] covers the bass (20-250), mid (250-4000), and treble
 // (4000-20000) ranges with good CQ kernel resolution. The ratio of 100x
 // keeps the highest-frequency kernel window large enough for the 512-sample
 // fft::FFT (N_window = 512 / (10000/100) = 5 samples minimum).
-const float kFFTMinFreq = 100.0f;
-const float kFFTMaxFreq = 10000.0f;
+constexpr float kFFTMinFreq = 100.0f;
+constexpr float kFFTMaxFreq = 10000.0f;
 
 } // namespace
 

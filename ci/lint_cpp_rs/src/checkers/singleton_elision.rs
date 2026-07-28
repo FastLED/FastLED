@@ -23,6 +23,41 @@
 // `fl::detail::singleton_registry` backing itself, ISR-only IRAM handles
 // where the ISR path is invisible to the linker, etc.).
 
+// Recognizes a right-hand side that is a pure compile-time literal, so a
+// `constexpr` bound to it emits no storage and must not be flagged.
+//
+// This is a direct port of `TRIVIAL_RHS_RE` in `ci/scan_singleton_elision.py`
+// (whose docstring declares that scanner mirrors this checker). Do NOT
+// reimplement with `str::parse` — Rust's numeric parsers reject the `0x`/`0b`
+// prefixes AND the C++ `u`/`l`/`f` suffixes, so hex register masks like
+// `constexpr u32 kMask = 0x8000u;` get misreported as non-literal. Keep the
+// two implementations in sync; `test_singleton_elision_rust_python_parity`
+// pins the shared cases.
+fn trivial_rhs_regex() -> &'static regex::Regex {
+    static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+    RE.get_or_init(|| {
+        regex::Regex::new(concat!(
+            r"^\s*(",
+            r"[-+]?0[xX][0-9a-fA-F]+[uUlL]*",             // hex literal
+            r"|[-+]?0[bB][01]+[uUlL]*",                   // binary literal
+            r"|[-+]?\d+[uUlL]*",                          // int literal
+            r"|[-+]?\d*\.\d+[fF]?",                       // float literal
+            r"|nullptr|NULL|true|false",                  // symbolic constants
+            r#"|"[^"]*""#,                                // string literal
+            r"|'.'",                                      // char literal
+            r"|[A-Z_][A-Z0-9_]*",                         // single all-caps macro
+            r"|\(\s*[-+]?0[xX][0-9a-fA-F]+[uUlL]*\s*<<\s*\d+\s*\)", // (0x1u << N)
+            r"|\(\s*[-+]?\d+[uUlL]*\s*<<\s*\d+\s*\)",     // (1u << N)
+            r")\s*$",
+        ))
+        .expect("trivial-RHS regex must compile")
+    })
+}
+
+fn is_trivial_rhs(rhs: &str) -> bool {
+    trivial_rhs_regex().is_match(rhs)
+}
+
 struct SingletonElisionChecker;
 
 impl FileContentChecker for SingletonElisionChecker {
@@ -272,8 +307,6 @@ impl FileContentChecker for SingletonElisionChecker {
             // Skip `constexpr` when the value is a pure literal (compiler
             // will inline; no storage). Keep the check when it's not
             // literal-shaped since address-taken constexpr still emits.
-            // Simple heuristic: if the RHS after `=` is a simple integer
-            // literal, string literal, or `nullptr`, skip.
             // (We deliberately keep other constexpr in the violation set —
             // author can inspect and move to Singleton<T> or annotate.)
             let is_constexpr = trimmed.starts_with("constexpr ")
@@ -282,14 +315,7 @@ impl FileContentChecker for SingletonElisionChecker {
             if is_constexpr {
                 if let Some(eq_pos) = code.find('=') {
                     let rhs = code[eq_pos + 1..].trim_end_matches(';').trim();
-                    let is_trivial = rhs.parse::<i64>().is_ok()
-                        || rhs.parse::<f64>().is_ok()
-                        || rhs == "nullptr"
-                        || rhs == "true"
-                        || rhs == "false"
-                        || (rhs.starts_with('"') && rhs.ends_with('"'))
-                        || (rhs.starts_with('\'') && rhs.ends_with('\''));
-                    if is_trivial {
+                    if is_trivial_rhs(rhs) {
                         continue;
                     }
                 }

@@ -208,3 +208,24 @@ FL_TEST_CASE("audio::detector::FrequencyBands - tone sweep normalized levels tra
     FL_CHECK_LT(midMaxDelta, 0.5f);
     FL_CHECK_LT(trebMaxDelta, 0.5f);
 }
+
+FL_TEST_CASE("audio::detector::FrequencyBands - private FFT counter tracks updates") {
+    // Coverage for the diagnostic counter API, which had none. Delta form:
+    // the counter is process-wide and this header is linked into a DLL
+    // alongside the other detector suites. See FastLED#3486.
+    audio::detector::FrequencyBands::resetPrivateFFTCount();
+    FL_CHECK_EQ(audio::detector::FrequencyBands::getPrivateFFTCount(), 0);
+
+    audio::detector::FrequencyBands detector;
+    const int before = audio::detector::FrequencyBands::getPrivateFFTCount();
+    for (int i = 0; i < 4; ++i) {
+        auto sample = makeSample(440.0f, i * 12, 16000.0f);
+        auto ctx = fl::make_shared<audio::Context>(sample);
+        ctx->setSampleRate(44100);
+        detector.update(ctx);
+    }
+    FL_CHECK_EQ(audio::detector::FrequencyBands::getPrivateFFTCount(), before + 4);
+
+    audio::detector::FrequencyBands::resetPrivateFFTCount();
+    FL_CHECK_EQ(audio::detector::FrequencyBands::getPrivateFFTCount(), 0);
+}

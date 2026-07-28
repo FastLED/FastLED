@@ -50,8 +50,8 @@ public:
     int getSampleRate() const { return mSampleRate; }
 
     // Diagnostic counters
-    static int getPrivateFFTCount();
-    static void resetPrivateFFTCount();
+    static int getPrivateFFTCount() FL_NO_EXCEPT;
+    static void resetPrivateFFTCount() FL_NO_EXCEPT;
 
 private:
     int mSampleRate = 44100;
