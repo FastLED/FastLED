@@ -543,6 +543,28 @@ def run_ruff() -> bool:
     if result.returncode != 0:
         return False
 
+    print("Running raw-subprocess ratchet checks")
+
+    # Restrict stdlib `subprocess` in favor of RunningProcess, which drains
+    # pipes concurrently. Baselined per file/code in
+    # ci/lint_python/subprocess_baseline.txt: counts may shrink freely, any
+    # increase fails. See ci/lint_python/subprocess_capture_checker.py.
+    result = subprocess.run(
+        [
+            "uv",
+            "run",
+            "python",
+            "ci/lint_python/subprocess_capture_checker.py",
+            "ci",
+            "test.py",
+            "--exclude",
+            "ci/tmp",
+        ],
+        capture_output=False,
+    )
+    if result.returncode != 0:
+        return False
+
     print("Running pyserial ban checks (AutoResearch complex)")
 
     # Ban raw pyserial in ci/autoresearch/ — device serial must go through

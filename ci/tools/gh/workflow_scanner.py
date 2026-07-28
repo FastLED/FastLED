@@ -31,6 +31,8 @@ import threading
 from dataclasses import dataclass
 from typing import Any, Optional
 
+from running_process import RunningProcess
+
 
 @dataclass
 class JobInfo:
@@ -217,20 +219,28 @@ class WorkflowScanner:
 
             cmd = ["gh", "api", api_path, "--paginate"]
 
-            # Run command and capture output
-            process = subprocess.Popen(
+            # Read all output into memory -- the context lookback below needs
+            # random access to the lines, so there is nothing to stream.
+            #
+            # This used to be a Popen that piped stderr and then never read it.
+            # `gh api --paginate` writes progress and rate-limit messages to
+            # stderr, so once that buffer filled, gh blocked on write(), stdout
+            # never reached EOF, and the line-reading comprehension hung before
+            # wait(timeout=60) was ever reached. Running in a worker thread,
+            # that stalled the whole scanner with no diagnostic.
+            result = RunningProcess.run(
                 cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=60,
             )
 
-            if process.stdout is None:
+            if not result.stdout:
                 return error_blocks
 
-            # Read all lines into memory (we need to do context lookback)
-            all_lines = [line.rstrip() for line in process.stdout]
-            process.wait(timeout=60)
+            all_lines = [line.rstrip() for line in result.stdout.splitlines()]
 
             # Find all lines matching error keywords
             error_indices: set[int] = set()

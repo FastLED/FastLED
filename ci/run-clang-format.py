@@ -12,7 +12,6 @@ A diff output is produced and a sensible exit code is returned.
 from __future__ import print_function, unicode_literals
 
 import argparse
-import codecs
 import difflib
 import errno
 import fnmatch
@@ -24,7 +23,9 @@ import subprocess
 import sys
 import traceback
 from functools import partial
-from typing import Any, Generator, Optional
+from typing import Any, Generator, Optional, cast
+
+from running_process import RunningProcess
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
@@ -178,46 +179,41 @@ def run_clang_format_diff(args: Any, file: str) -> tuple[list[str], list[str]]:
     if sys.version_info[0] >= 3:
         encoding_py3["encoding"] = "utf-8"
 
+    # This used to drain stdout to EOF and only then start reading stderr,
+    # with the comment "hopefully the stderr pipe won't get full and block the
+    # process". It can: a file that makes clang-format emit more than the
+    # ~64 KB pipe buffer of diagnostics blocks the child in write() while we
+    # sit in readlines() on the other pipe. RunningProcess drains both
+    # concurrently, so the hope is no longer load-bearing.
+    #
+    # The Python 2 fallback branch that used to live here was unreachable
+    # (guarded by sys.version_info[0] >= 3, always true) and has been dropped.
     try:
-        if sys.version_info[0] >= 3:
-            proc: subprocess.Popen[str] = subprocess.Popen(
-                invocation,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                universal_newlines=True,
-                encoding="utf-8",
-            )
-        else:
-            proc: subprocess.Popen[str] = subprocess.Popen(
-                invocation,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                universal_newlines=True,
-            )
+        result = RunningProcess.run(
+            invocation,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
     except OSError as exc:
         raise DiffError(
             "Command '{}' failed to start: {}".format(
                 subprocess.list2cmdline(invocation), exc
             )
         )
-    proc_stdout = proc.stdout
-    proc_stderr = proc.stderr
-    assert proc_stdout is not None
-    assert proc_stderr is not None
-    if sys.version_info[0] < 3:
-        # make the pipes compatible with Python 3,
-        # reading lines should output unicode
-        encoding = "utf-8"
-        proc_stdout = codecs.getreader(encoding)(proc_stdout)
-        proc_stderr = codecs.getreader(encoding)(proc_stderr)
-    # hopefully the stderr pipe won't get full and block the process
-    outs = list(proc_stdout.readlines())
-    errs = list(proc_stderr.readlines())
-    proc.wait()
-    if proc.returncode:
+    # keepends=True matches the old readlines() behavior exactly -- make_diff
+    # feeds these straight to difflib, which expects newline-terminated lines.
+    # The intermediate str annotations pin RunningProcess's loosely-typed
+    # stdout/stderr so the list[str] contract below still type-checks.
+    stdout_text = cast(str, result.stdout or "")
+    stderr_text = cast(str, result.stderr or "")
+    outs: list[str] = stdout_text.splitlines(keepends=True)
+    errs: list[str] = stderr_text.splitlines(keepends=True)
+    if result.returncode:
         raise DiffError(
             "Command '{}' returned non-zero exit status {}".format(
-                subprocess.list2cmdline(invocation), proc.returncode
+                subprocess.list2cmdline(invocation), result.returncode
             ),
             errs,
         )
