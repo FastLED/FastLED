@@ -180,9 +180,12 @@ shared_test_cpp_args = test_abs_include_args + unit_test_compile_args + [
 
 test_shared_objs_lib = static_library('test_shared_objs',
   [
-    path_norm_root + '/tests/doctest_main.cpp',
-    path_norm_root + '/tests/shared/fl_unittest.cpp',
-    path_norm_root + '/tests/misc/coroutine_impl.cpp',
+    # Relative, for the same reason as test_sources below: an absolute source
+    # path makes meson flatten the whole path into the object file's name
+    # (FastLED#2887).
+    'doctest_main.cpp',
+    'shared/fl_unittest.cpp',
+    'misc/coroutine_impl.cpp',
     test_pch,
   ],
   cpp_args: shared_test_cpp_args,
@@ -199,9 +202,16 @@ foreach test_name : test_names
 
   # Test sources: only the unique test file + PCH dependency
   # doctest_main.cpp and fl_unittest.cpp are pre-compiled in shared_test_objects
-  test_source_abs = path_norm_root + '/tests/' + test_file
+  # Relative, not absolute. Meson derives each object file's name from the
+  # source path it is given; an absolute source gets the entire path flattened
+  # into that name, e.g.
+  #   C__Users_me_dev_fastled_.claude_worktrees_my-branch_tests_misc_foo.cpp.obj
+  # `test_file` is already relative to this directory, so passing it directly
+  # collapses the object name to misc_foo.cpp.obj -- around 90 characters
+  # shorter per object. That matters on Windows, where the encoded name is what
+  # pushed builds under .claude/worktrees/<branch>/ past MAX_PATH (FastLED#2887).
   test_sources = [
-    test_source_abs,
+    test_file,
     test_pch,
   ]
   test_cpp_args = shared_test_cpp_args
