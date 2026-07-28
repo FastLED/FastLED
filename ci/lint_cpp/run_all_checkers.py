@@ -374,6 +374,13 @@ def format_and_print_results(
         print(f"❌ Total violations: {total_violations}")
         print("=" * 80)
         return 1
+    elif warn_only_violations > 0:
+        # Not "all checks passed" -- findings exist, they just do not block.
+        # Saying otherwise is how a warn-only rollout gets forgotten.
+        print("\n" + "=" * 80)
+        print("✅ No blocking C++ lint violations.")
+        print("=" * 80)
+        return 0
     else:
         print("\n" + "=" * 80)
         print("✅ All C++ linting checks passed!")
