@@ -201,48 +201,56 @@ class ProfileRunner:
             env["LD_LIBRARY_PATH"] = dll_dir + os.pathsep + env["LD_LIBRARY_PATH"]
         else:
             env["LD_LIBRARY_PATH"] = dll_dir
-        proc = subprocess.Popen(
+        # Raw Popen is deliberate here: the timeout path has to attach a
+        # debugger to a *live* PID before killing it, which neither
+        # subprocess.run nor RunningProcess.run expose. See the drain note
+        # below for why communicate() rather than a poll loop.
+        proc = subprocess.Popen(  # noqa: SRC002 - needs live PID on timeout
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            # Test binaries print non-ASCII (arrows, box drawing) and this
+            # runs on Windows, where the locale codec is cp1252.
+            encoding="utf-8",
+            errors="replace",
             env=env,
         )
 
         start_time = time.time()
 
-        while True:
-            retcode = proc.poll()
-
-            if retcode is not None:
-                stdout, stderr = proc.communicate()
-                output = stdout + stderr
-
-                if retcode == 0:
-                    return RunWithTimeoutResult(
-                        success=True, output=output, pid_if_timeout=None
-                    )
-                else:
-                    return RunWithTimeoutResult(
-                        success=False, output=output, pid_if_timeout=None
-                    )
-
+        # communicate() drains stdout and stderr concurrently (reader threads
+        # on Windows, selectors on POSIX) and enforces the timeout itself.
+        #
+        # This previously polled in a sleep loop and only read the pipes after
+        # the child had already exited. Both pipes were left unattended, so a
+        # test emitting more than the ~64 KB pipe buffer blocked forever in
+        # write(); poll() then never returned, and the loop ran to the full
+        # timeout. The harness would report TIMEOUT and attach a debugger to a
+        # process that was not hung at all -- it was blocked on us not reading.
+        try:
+            stdout, stderr = proc.communicate(timeout=timeout_seconds)
+        except subprocess.TimeoutExpired:
+            # The child is still alive here: communicate() does not kill on
+            # timeout, so the debugger gets a live process to inspect.
+            pid = proc.pid
             elapsed = time.time() - start_time
-            if elapsed > timeout_seconds:
-                pid = proc.pid
-                print(f"\n🚨 TIMEOUT EXCEEDED after {elapsed:.1f}s!")
-                print(f"📍 Attaching debugger to PID {pid}...")
+            print(f"\n🚨 TIMEOUT EXCEEDED after {elapsed:.1f}s!")
+            print(f"📍 Attaching debugger to PID {pid}...")
 
-                handle_hung_test(pid, self.test_name, timeout_seconds)
+            handle_hung_test(pid, self.test_name, timeout_seconds)
 
-                proc.kill()
-                proc.wait()
+            proc.kill()
+            proc.communicate()  # reap and close the pipes we opened
 
-                return RunWithTimeoutResult(
-                    success=False, output="TIMEOUT", pid_if_timeout=pid
-                )
+            return RunWithTimeoutResult(
+                success=False, output="TIMEOUT", pid_if_timeout=pid
+            )
 
-            time.sleep(0.1)
+        output = stdout + stderr
+        return RunWithTimeoutResult(
+            success=proc.returncode == 0, output=output, pid_if_timeout=None
+        )
 
     def run_benchmark(self) -> bool:
         """Run benchmark iterations and collect results"""
