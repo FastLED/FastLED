@@ -243,9 +243,9 @@ constexpr NamedGamut kDciP3D60  = {{0.6800f, 0.3200f}, {0.2650f, 0.6900f},
 // after a gamut switch on the currently active profile.
 namespace { void invalidate_colorimetric_caches_for(const DiodeProfile* profile) FL_NO_EXCEPT; }
 
-void set_input_gamut(DiodeProfile* profile, InputGamut g,
-                     const float white_xy[2]) FL_NO_EXCEPT {
-    if (profile == nullptr) return;
+void set_input_gamut(DiodeProfile& profile_ref, InputGamut g,
+                     const float* white_xy) FL_NO_EXCEPT {
+    DiodeProfile* const profile = &profile_ref;
     auto apply = [profile](const float r[2], const float gp[2],
                            const float b[2], const float w[2]) {
         profile->input_xy_r[0] = r[0];  profile->input_xy_r[1] = r[1];
@@ -280,8 +280,22 @@ void set_input_gamut(DiodeProfile* profile, InputGamut g,
     // leave the profile's input_xy_* untouched — also nothing to invalidate.
 }
 
-void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NO_EXCEPT {
+void set_input_gamut(DiodeProfile& profile, InputGamut g) FL_NO_EXCEPT {
     set_input_gamut(profile, g, nullptr);
+}
+
+// Deprecated pointer forwarders (FastLED#3234). The historical contract was a
+// silent no-op on nullptr, so that is preserved here rather than dereferencing
+// -- a sketch that relied on it must not start crashing at the deprecation.
+void set_input_gamut(DiodeProfile* profile, InputGamut g,
+                     const float white_xy[2]) FL_NO_EXCEPT {
+    if (profile == nullptr) return;
+    set_input_gamut(*profile, g, white_xy);
+}
+
+void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NO_EXCEPT {
+    if (profile == nullptr) return;
+    set_input_gamut(*profile, g, nullptr);
 }
 
 fl::shared_ptr<const DiodeProfile> make_diode_profile(
@@ -299,7 +313,7 @@ fl::shared_ptr<const DiodeProfile> make_diode_profile(
     const DiodeProfile& profile, InputGamut g,
     const float white_xy[2]) FL_NO_EXCEPT {
     DiodeProfile copy = profile;
-    set_input_gamut(&copy, g, white_xy);
+    set_input_gamut(copy, g, white_xy);
     return make_diode_profile(copy);
 }
 

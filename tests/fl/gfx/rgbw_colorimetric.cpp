@@ -350,7 +350,7 @@ FL_TEST_CASE("source matrix matches published sRGB->XYZ matrix (Rec709 opt-in)")
     //   Y = 0.2126729 R + 0.7151522 G + 0.0721750 B
     //   Z = 0.0193339 R + 0.1191920 G + 0.9503041 B
     DiodeProfile p = kRgbwDefaultProfile;
-    set_input_gamut(&p, InputGamut::Rec709);
+    set_input_gamut(p, InputGamut::Rec709);
     float M[3][3];
     FL_CHECK(build_source_matrix(p.input_xy_r, p.input_xy_g,
                                  p.input_xy_b, p.input_xy_w, M));
@@ -416,6 +416,64 @@ FL_TEST_CASE("rgb colorimetric cache: source space solve is finite and normalize
 }
 
 
+FL_TEST_CASE("set_input_gamut: deprecated pointer overloads still work") {
+    // The pointer forms are kept so existing sketches calling
+    // set_input_gamut(&profile, ...) keep compiling (FastLED#3234). They must
+    // stay behaviourally identical to the reference forms.
+    DiodeProfile via_ptr = kRgbwDefaultProfile;
+    DiodeProfile via_ref = kRgbwDefaultProfile;
+
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING(deprecated-declarations)
+    set_input_gamut(&via_ptr, InputGamut::Rec2020);
+    FL_DISABLE_WARNING_POP
+    set_input_gamut(via_ref, InputGamut::Rec2020);
+
+    // All eight mutated coordinates, not a sample: a forwarder that dropped or
+    // transposed a single component would otherwise slip through.
+    FL_CHECK_CLOSE(via_ptr.input_xy_r[0], via_ref.input_xy_r[0], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_r[1], via_ref.input_xy_r[1], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_g[0], via_ref.input_xy_g[0], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_g[1], via_ref.input_xy_g[1], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_b[0], via_ref.input_xy_b[0], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_b[1], via_ref.input_xy_b[1], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_w[0], via_ref.input_xy_w[0], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_w[1], via_ref.input_xy_w[1], 1e-9f);
+}
+
+FL_TEST_CASE("set_input_gamut: deprecated pointer overload forwards white_xy") {
+    // The 3-argument forwarder has an extra argument to lose; check it lands.
+    DiodeProfile via_ptr = kRgbwDefaultProfile;
+    DiodeProfile via_ref = kRgbwDefaultProfile;
+    const float custom_white[2] = {0.3457f, 0.3585f};  // D50
+
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING(deprecated-declarations)
+    set_input_gamut(&via_ptr, InputGamut::Rec709, custom_white);
+    FL_DISABLE_WARNING_POP
+    set_input_gamut(via_ref, InputGamut::Rec709, custom_white);
+
+    FL_CHECK_CLOSE(via_ptr.input_xy_w[0], custom_white[0], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_w[1], custom_white[1], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_w[0], via_ref.input_xy_w[0], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_w[1], via_ref.input_xy_w[1], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_r[0], via_ref.input_xy_r[0], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_b[1], via_ref.input_xy_b[1], 1e-9f);
+}
+
+FL_TEST_CASE("set_input_gamut: null pointer stays a silent no-op") {
+    // Historical contract. A sketch that relied on passing a null profile must
+    // not start crashing just because the pointer form is now deprecated --
+    // which is why the forwarder null-checks instead of dereferencing.
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING(deprecated-declarations)
+    set_input_gamut(static_cast<DiodeProfile*>(nullptr), InputGamut::Rec709);
+    const float w[2] = {0.3f, 0.3f};
+    set_input_gamut(static_cast<DiodeProfile*>(nullptr), InputGamut::Rec709, w);
+    FL_DISABLE_WARNING_POP
+    FL_CHECK(true);  // reaching here without a crash is the assertion
+}
+
 FL_TEST_CASE("set_input_gamut: Native copies LED primaries") {
     DiodeProfile p = kRgbwDefaultProfile;
     // First trash input_xy_* so we can prove Native restored them.
@@ -423,7 +481,7 @@ FL_TEST_CASE("set_input_gamut: Native copies LED primaries") {
     p.input_xy_g[0] = 0; p.input_xy_g[1] = 0;
     p.input_xy_b[0] = 0; p.input_xy_b[1] = 0;
     p.input_xy_w[0] = 0; p.input_xy_w[1] = 0;
-    set_input_gamut(&p, InputGamut::Native);
+    set_input_gamut(p, InputGamut::Native);
     FL_CHECK_CLOSE(p.input_xy_r[0], p.xy_r[0], 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_g[0], p.xy_g[0], 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_b[0], p.xy_b[0], 1e-6f);
@@ -435,21 +493,21 @@ FL_TEST_CASE("set_input_gamut: Native copies LED primaries") {
 
 FL_TEST_CASE("set_input_gamut: named gamuts populate canonical primaries") {
     DiodeProfile p = kRgbwDefaultProfile;
-    set_input_gamut(&p, InputGamut::Rec709);
+    set_input_gamut(p, InputGamut::Rec709);
     FL_CHECK_CLOSE(p.input_xy_r[0], 0.6400f, 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_g[1], 0.6000f, 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_w[0], 0.31272f, 1e-5f);
 
-    set_input_gamut(&p, InputGamut::Rec2020);
+    set_input_gamut(p, InputGamut::Rec2020);
     FL_CHECK_CLOSE(p.input_xy_r[0], 0.7080f, 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_g[0], 0.1700f, 1e-6f);
 
-    set_input_gamut(&p, InputGamut::DciP3D65);
+    set_input_gamut(p, InputGamut::DciP3D65);
     FL_CHECK_CLOSE(p.input_xy_r[0], 0.6800f, 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_g[0], 0.2650f, 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_w[0], 0.31272f, 1e-5f);  // D65
 
-    set_input_gamut(&p, InputGamut::DciP3D60);
+    set_input_gamut(p, InputGamut::DciP3D60);
     // Same primaries as DciP3D65, different white (ACES D60).
     FL_CHECK_CLOSE(p.input_xy_r[0], 0.6800f, 1e-6f);
     FL_CHECK_CLOSE(p.input_xy_w[0], 0.32168f, 1e-5f);
@@ -460,7 +518,7 @@ FL_TEST_CASE("set_input_gamut: named gamuts populate canonical primaries") {
 FL_TEST_CASE("set_input_gamut: white override honored") {
     DiodeProfile p = kRgbwDefaultProfile;
     const float custom_white[2] = {0.34567f, 0.35850f};  // D50
-    set_input_gamut(&p, InputGamut::Rec709, custom_white);
+    set_input_gamut(p, InputGamut::Rec709, custom_white);
     FL_CHECK_CLOSE(p.input_xy_r[0], 0.6400f, 1e-6f);  // primaries: Rec709
     FL_CHECK_CLOSE(p.input_xy_w[0], 0.34567f, 1e-6f); // white: override
     FL_CHECK_CLOSE(p.input_xy_w[1], 0.35850f, 1e-6f);
@@ -1430,7 +1488,7 @@ inline DiodeProfile native_profile() {
     // can just copy it. Explicit set_input_gamut(InputGamut::Native) makes
     // the contract obvious in the test source.
     DiodeProfile p = kRgbwDefaultProfile;
-    set_input_gamut(&p, InputGamut::Native);
+    set_input_gamut(p, InputGamut::Native);
     return p;
 }
 
@@ -1631,7 +1689,7 @@ FL_TEST_CASE("issue #2748: non-native input gamut bypasses topology guard") {
     // contract, sRGB pure blue (out of LED hull) would be passed through
     // verbatim and produce a black output once quantized.
     DiodeProfile p = kRgbwDefaultProfile;
-    set_input_gamut(&p, InputGamut::Rec709);  // input != LED native
+    set_input_gamut(p, InputGamut::Rec709);  // input != LED native
     ProfileCache cache; fastled_mirror::build_cache(&p, &cache);
 
     float rgbw[4] = {0};
@@ -1757,20 +1815,20 @@ FL_TEST_CASE("issue #2748: public dispatch — boosted mode preserves native top
 
 FL_TEST_CASE("issue #2748: is_native_input_gamut helper agrees with profile flags") {
     DiodeProfile p = kRgbwDefaultProfile;
-    set_input_gamut(&p, InputGamut::Native);
+    set_input_gamut(p, InputGamut::Native);
     FL_CHECK(is_native_input_gamut(p));
 
-    set_input_gamut(&p, InputGamut::Rec709);
+    set_input_gamut(p, InputGamut::Rec709);
     FL_CHECK(!is_native_input_gamut(p));
 
-    set_input_gamut(&p, InputGamut::Rec2020);
+    set_input_gamut(p, InputGamut::Rec2020);
     FL_CHECK(!is_native_input_gamut(p));
 
-    set_input_gamut(&p, InputGamut::DciP3D65);
+    set_input_gamut(p, InputGamut::DciP3D65);
     FL_CHECK(!is_native_input_gamut(p));
 
     // Restore Native so subsequent tests in this TU see expected defaults.
-    set_input_gamut(&p, InputGamut::Native);
+    set_input_gamut(p, InputGamut::Native);
     FL_CHECK(is_native_input_gamut(p));
 }
 

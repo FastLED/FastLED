@@ -89,16 +89,38 @@ enum class InputGamut : u8 {
 // input_xy_r/g/b and sets input_xy_w to D65. For named gamuts, uses the
 // standard published primary chromaticities + that gamut's reference white.
 // Mutates `profile` in place; subsequent solver calls observe the new gamut
-// (the cache is keyed on the profile pointer and rebuilds automatically).
-// No-op if `profile == nullptr`.
-void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NO_EXCEPT;
+// (the cache is keyed on the profile address and rebuilds automatically).
+//
+// Takes a reference: the profile is required and is mutated, so there is no
+// meaningful "no profile" call. A nullable pointer would advertise an
+// optional argument that does not exist (FastLED#3234).
+void set_input_gamut(DiodeProfile& profile, InputGamut g) FL_NO_EXCEPT;
 
 // Same as the above, but lets you optionally override the input white point.
-// `white_xy` either points to a 2-float (x, y) chromaticity OR is `nullptr`
-// to fall back to the gamut's standard reference white (equivalent to the
-// 2-argument overload above). Use the override for niche cases (D50
-// photography workflow, D60 ACES cinema, a custom calibration target) where
-// the standard gamut's reference white doesn't match your content.
+// `white_xy` stays a POINTER because it is genuinely optional: either a
+// 2-float (x, y) chromaticity OR `nullptr` to fall back to the gamut's
+// standard reference white (equivalent to the 2-argument overload). Use the
+// override for niche cases (D50 photography workflow, D60 ACES cinema, a
+// custom calibration target) where the standard reference white doesn't
+// match your content.
+//
+// Spelled `const float*` rather than `const float[2]`: an array-spelled
+// parameter decays to a pointer anyway, so the extent would be an unenforced
+// promise, and this repo bans the misleading spelling outright (see
+// ci/tools/check_array_params.py). Nullability is the real contract here, so
+// the pointer says what it means; the required length lives in this comment
+// because no signature can encode both "exactly 2" and "or null".
+void set_input_gamut(DiodeProfile& profile, InputGamut g,
+                     const float* white_xy) FL_NO_EXCEPT;
+
+// Deprecated pointer overloads -- kept so existing sketches calling
+// `set_input_gamut(&profile, ...)` keep compiling. They forward to the
+// reference forms above and preserve the historical silent no-op on
+// `nullptr`. Prefer the reference overloads in new code.
+FL_DEPRECATED("Pass the profile by reference: set_input_gamut(profile, g)")
+void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NO_EXCEPT;
+
+FL_DEPRECATED("Pass the profile by reference: set_input_gamut(profile, g, white_xy)")
 void set_input_gamut(DiodeProfile* profile, InputGamut g,
                      const float white_xy[2]) FL_NO_EXCEPT;
 
