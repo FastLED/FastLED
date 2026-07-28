@@ -110,8 +110,8 @@ inline ClkDividerNAB solveFractionalDivider(u32 base_hz, u32 target_hz,
     // left to clamp. Saturating here keeps the result monotonic and
     // representable for any u32 pair.
     const double ratio = f_base / f_target;
-    if (ratio >= static_cast<double>(max_N)) {
-        out.n = max_N;
+    if (ratio >= static_cast<double>(kMaxDivider)) {
+        out.n = kMaxDivider;
         out.a = 1;
         out.b = 0;
         // Only a genuine hardware limit counts as saturation. Hitting the
@@ -123,6 +123,22 @@ inline ClkDividerNAB solveFractionalDivider(u32 base_hz, u32 target_hz,
 
     int N = static_cast<int>(ratio);
     if (N < min_N) N = min_N;
+    // Clamp N to the field width *before* the fractional search, not by
+    // returning early. max_N bounds N alone, but the divisor is N + B/A, so
+    // the largest representable divisor is max_N + (max_A-1)/max_A -- for
+    // I2S, 255 + 62/63 = 255.984, not 255. Returning max_N/1 as soon as
+    // ratio crossed max_N both discarded that fractional headroom and
+    // wrongly reported saturation for targets in the 80MHz/255.984 ..
+    // 80MHz/255 band (312520..313725 Hz), which are perfectly reachable.
+    //
+    // Clamping here instead leaves a residual > 1 for genuinely
+    // out-of-range targets, and the sweep below then naturally settles on
+    // the largest legal fraction -- the closest bounded triple rather than
+    // an arbitrarily coarse one.
+    if (N > max_N) {
+        N = max_N;
+        out.saturated = true;
+    }
     const double residual = ratio - static_cast<double>(N);
 
     // Fractional part B/A. Sweep A within the hardware limit and pick the
@@ -151,12 +167,19 @@ inline ClkDividerNAB solveFractionalDivider(u32 base_hz, u32 target_hz,
         ++N;
     }
 
-    // Clamp last: the ++N above can push an in-range solve one past the
-    // field width, so checking before it would let that case through.
+    // The ++N above can push an in-range solve one past the field width.
+    // Fall back to the largest legal divisor -- max_N with the biggest
+    // fraction the denominator allows -- rather than max_N/1, which would
+    // throw away nearly a whole count of division.
     if (N > max_N) {
         N = max_N;
-        best_A = 1;
-        best_B = 0;
+        if (max_A >= 2) {
+            best_A = max_A;
+            best_B = max_A - 1;
+        } else {
+            best_A = 1;
+            best_B = 0;
+        }
         out.saturated = (max_N < kMaxDivider);
     }
 

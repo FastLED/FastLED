@@ -107,14 +107,23 @@ inline void solveI2sClockDivider(u32 target_hz,
                                                      /*max_A=*/63, /*min_N=*/2,
                                                      /*max_N=*/kI2sMaxDivN);
     if (d.saturated) {
-        // Below ~313 kHz (80 MHz / 255) the divider no longer fits
-        // clkm_div_num. The solver clamped instead of letting the bitfield
+        // The requested clock needs a bigger divider than clkm_div_num can
+        // hold. The solver clamped instead of letting the bitfield
         // assignment below wrap silently, so the peripheral runs at the
         // slowest rate it can rather than at a wrapped-around fast one.
+        //
+        // Report the clock actually programmed, computed from the solved
+        // triple: the floor is base / (N + B/A), not base / N, so quoting
+        // 80 MHz / 255 would understate the divider by nearly a full count.
+        // u64 because base * a overflows u32 (80e6 * 63 = 5.04e9).
+        const u32 achieved_hz = static_cast<u32>(
+            (static_cast<u64>(kI2sBaseClkHz) * static_cast<u64>(d.a)) /
+            (static_cast<u64>(d.n) * static_cast<u64>(d.a) +
+             static_cast<u64>(d.b)));
         FL_WARN_F("I2S: pixel clock %u Hz is below the minimum this divider "
                   "can reach; clamping to ~%u Hz",
                   static_cast<unsigned>(effective_hz),
-                  static_cast<unsigned>(kI2sBaseClkHz / kI2sMaxDivN));
+                  static_cast<unsigned>(achieved_hz));
     }
     *out_N = d.n;
     *out_A = d.a;

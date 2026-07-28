@@ -179,27 +179,41 @@ FL_TEST_CASE("esp32 clock divider: max_N bounds the integer divider (#3745)") {
     // with no diagnostic. The solver clamps instead.
     constexpr int kFieldMax = 255;
 
-    // 80 MHz / 255 == 313725.49 Hz is the slowest reachable clock. Just above
-    // it still solves normally.
+    constexpr int kMaxA = 63;
+
     const ClkDividerNAB reachable =
-        solveFractionalDivider(kApbClockHz, 320000u, 63, 2, kFieldMax);
+        solveFractionalDivider(kApbClockHz, 320000u, kMaxA, 2, kFieldMax);
     FL_CHECK(reachable.n <= kFieldMax);
     FL_CHECK(!reachable.saturated);
 
+    // The divisor is N + B/A, so the slowest reachable clock is
+    // 80 MHz / (255 + 62/63) == 312519 Hz, NOT 80 MHz / 255 == 313725 Hz.
+    // Targets in that band need N == 255 *plus* a fraction; bounding N must
+    // not cost them their fractional part or mislabel them unreachable.
+    const ClkDividerNAB in_fractional_band =
+        solveFractionalDivider(kApbClockHz, 313000u, kMaxA, 2, kFieldMax);
+    FL_CHECK(in_fractional_band.n == kFieldMax);
+    FL_CHECK(in_fractional_band.b > 0);       // fraction preserved
+    FL_CHECK(!in_fractional_band.saturated);  // genuinely reachable
+
     // The exact boundary: 80 MHz / 255 must land on N == 255 and not tip over.
     const ClkDividerNAB boundary =
-        solveFractionalDivider(kApbClockHz, kApbClockHz / kFieldMax, 63, 2,
+        solveFractionalDivider(kApbClockHz, kApbClockHz / kFieldMax, kMaxA, 2,
                                kFieldMax);
     FL_CHECK(boundary.n <= kFieldMax);
+    FL_CHECK(!boundary.saturated);
 
-    // Just over: 100 kHz would solve to N == 800. Must clamp and say so.
+    // Genuinely out of range: 100 kHz needs N == 800. Must clamp, say so, and
+    // still return the *closest* bounded triple -- 255 + 62/63, the largest
+    // legal divisor -- rather than a coarse 255/1 that discards the fraction.
     const ClkDividerNAB over =
-        solveFractionalDivider(kApbClockHz, 100000u, 63, 2, kFieldMax);
+        solveFractionalDivider(kApbClockHz, 100000u, kMaxA, 2, kFieldMax);
     FL_CHECK(over.n == kFieldMax);
     FL_CHECK(over.saturated);
+    FL_CHECK(over.a == kMaxA);
+    FL_CHECK(over.b == kMaxA - 1);
     // A clamped result must still be a legal triple, not a half-updated one.
-    FL_CHECK(over.a == 1);
-    FL_CHECK(over.b == 0);
+    FL_CHECK(over.b < over.a);
 
     // The truncation this guards against: without the bound the solver
     // returns 800, and 800 & 0xFF is 32 -- a value that looks perfectly
@@ -241,6 +255,11 @@ FL_TEST_CASE("esp32 clock divider: max_N below min_N cannot fabricate an illegal
         solveFractionalDivider(kApbClockHz, 8000000u, 63, /*min_N=*/2,
                                /*max_N=*/1);
     FL_CHECK(d.n == 2);
-    FL_CHECK(d.a == 1);
-    FL_CHECK(d.b == 0);
+    // 8 MHz needs a divisor of 10, unreachable once N is pinned to 2, so this
+    // saturates and returns the largest legal fraction on top of that N. The
+    // point of the case is that `n` never drops below min_N to chase the
+    // target -- an N the hardware cannot encode is worse than a slow clock.
+    FL_CHECK(d.saturated);
+    FL_CHECK(d.b < d.a);
+    FL_CHECK(d.a <= 63);
 }
