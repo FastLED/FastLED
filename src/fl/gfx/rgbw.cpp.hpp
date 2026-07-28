@@ -244,7 +244,7 @@ constexpr NamedGamut kDciP3D60  = {{0.6800f, 0.3200f}, {0.2650f, 0.6900f},
 namespace { void invalidate_colorimetric_caches_for(const DiodeProfile* profile) FL_NO_EXCEPT; }
 
 void set_input_gamut(DiodeProfile& profile_ref, InputGamut g,
-                     const float white_xy[2]) FL_NO_EXCEPT {
+                     const float* white_xy) FL_NO_EXCEPT {
     DiodeProfile* const profile = &profile_ref;
     auto apply = [profile](const float r[2], const float gp[2],
                            const float b[2], const float w[2]) {

@@ -429,9 +429,36 @@ FL_TEST_CASE("set_input_gamut: deprecated pointer overloads still work") {
     FL_DISABLE_WARNING_POP
     set_input_gamut(via_ref, InputGamut::Rec2020);
 
+    // All eight mutated coordinates, not a sample: a forwarder that dropped or
+    // transposed a single component would otherwise slip through.
     FL_CHECK_CLOSE(via_ptr.input_xy_r[0], via_ref.input_xy_r[0], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_r[1], via_ref.input_xy_r[1], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_g[0], via_ref.input_xy_g[0], 1e-9f);
     FL_CHECK_CLOSE(via_ptr.input_xy_g[1], via_ref.input_xy_g[1], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_b[0], via_ref.input_xy_b[0], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_b[1], via_ref.input_xy_b[1], 1e-9f);
     FL_CHECK_CLOSE(via_ptr.input_xy_w[0], via_ref.input_xy_w[0], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_w[1], via_ref.input_xy_w[1], 1e-9f);
+}
+
+FL_TEST_CASE("set_input_gamut: deprecated pointer overload forwards white_xy") {
+    // The 3-argument forwarder has an extra argument to lose; check it lands.
+    DiodeProfile via_ptr = kRgbwDefaultProfile;
+    DiodeProfile via_ref = kRgbwDefaultProfile;
+    const float custom_white[2] = {0.3457f, 0.3585f};  // D50
+
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING(deprecated-declarations)
+    set_input_gamut(&via_ptr, InputGamut::Rec709, custom_white);
+    FL_DISABLE_WARNING_POP
+    set_input_gamut(via_ref, InputGamut::Rec709, custom_white);
+
+    FL_CHECK_CLOSE(via_ptr.input_xy_w[0], custom_white[0], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_w[1], custom_white[1], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_w[0], via_ref.input_xy_w[0], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_w[1], via_ref.input_xy_w[1], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_r[0], via_ref.input_xy_r[0], 1e-9f);
+    FL_CHECK_CLOSE(via_ptr.input_xy_b[1], via_ref.input_xy_b[1], 1e-9f);
 }
 
 FL_TEST_CASE("set_input_gamut: null pointer stays a silent no-op") {

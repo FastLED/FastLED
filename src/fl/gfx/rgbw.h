@@ -103,10 +103,17 @@ void set_input_gamut(DiodeProfile& profile, InputGamut g) FL_NO_EXCEPT;
 // override for niche cases (D50 photography workflow, D60 ACES cinema, a
 // custom calibration target) where the standard reference white doesn't
 // match your content.
+//
+// Spelled `const float*` rather than `const float[2]`: an array-spelled
+// parameter decays to a pointer anyway, so the extent would be an unenforced
+// promise, and this repo bans the misleading spelling outright (see
+// ci/tools/check_array_params.py). Nullability is the real contract here, so
+// the pointer says what it means; the required length lives in this comment
+// because no signature can encode both "exactly 2" and "or null".
 void set_input_gamut(DiodeProfile& profile, InputGamut g,
-                     const float white_xy[2]) FL_NO_EXCEPT;
+                     const float* white_xy) FL_NO_EXCEPT;
 
-// Deprecated pointer overloads — kept so existing sketches calling
+// Deprecated pointer overloads -- kept so existing sketches calling
 // `set_input_gamut(&profile, ...)` keep compiling. They forward to the
 // reference forms above and preserve the historical silent no-op on
 // `nullptr`. Prefer the reference overloads in new code.
