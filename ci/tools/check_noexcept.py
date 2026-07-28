@@ -321,6 +321,11 @@ def _run_clang_query(
         input=build_query(file_regex),
         capture_output=True,
         text=True,
+        # See check_array_params._run_clang_query: text=True without an
+        # explicit encoding decodes clang-query's UTF-8 output with the
+        # locale codec and crashes on Windows.
+        encoding="utf-8",
+        errors="replace",
         cwd=str(PROJECT_ROOT),
         timeout=300,
     )
