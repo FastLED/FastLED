@@ -376,6 +376,12 @@ def _run_clang_query(
         input=build_query(file_regex),
         capture_output=True,
         text=True,
+        # clang-query emits UTF-8. Without pinning it, text=True decodes with
+        # the locale codec (cp1252 on Windows), which raises inside the
+        # subprocess reader thread and leaves stdout as None -- the check then
+        # dies on `None + str` instead of reporting findings.
+        encoding="utf-8",
+        errors="replace",
         cwd=str(PROJECT_ROOT),
         timeout=300,
     )
