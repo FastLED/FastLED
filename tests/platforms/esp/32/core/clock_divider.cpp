@@ -60,7 +60,7 @@ void referenceSolve(fl::u32 target_hz, int *out_N, int *out_A, int *out_B) {
 // Realised output frequency for a solved triple.
 double realisedHz(fl::u32 base_hz, const ClkDividerNAB &d) {
     return static_cast<double>(base_hz) /
-           (static_cast<double>(d.N) + static_cast<double>(d.B) / d.A);
+           (static_cast<double>(d.n) + static_cast<double>(d.b) / d.a);
 }
 
 }  // namespace
@@ -77,9 +77,9 @@ FL_TEST_CASE("esp32 clock divider: matches the pre-hoist I2S solver") {
         int rN = 0, rA = 0, rB = 0;
         referenceSolve(hz, &rN, &rA, &rB);
         const ClkDividerNAB d = solveFractionalDivider(kApbClockHz, hz, 63, 2);
-        FL_CHECK(d.N == rN);
-        FL_CHECK(d.A == rA);
-        FL_CHECK(d.B == rB);
+        FL_CHECK(d.n == rN);
+        FL_CHECK(d.a == rA);
+        FL_CHECK(d.b == rB);
     }
 }
 
@@ -87,19 +87,19 @@ FL_TEST_CASE("esp32 clock divider: 8 MHz default resolves to N=10") {
     // The wave8 @ 800 kHz default. 80 MHz / 10 == 8 MHz exactly, so the
     // fractional part must stay empty rather than picking a near-equal B/A.
     const ClkDividerNAB d = solveFractionalDivider(kApbClockHz, 8000000u);
-    FL_CHECK(d.N == 10);
-    FL_CHECK(d.A == 1);
-    FL_CHECK(d.B == 0);
+    FL_CHECK(d.n == 10);
+    FL_CHECK(d.a == 1);
+    FL_CHECK(d.b == 0);
 }
 
 FL_TEST_CASE("esp32 clock divider: respects hardware limits") {
     for (fl::u32 hz = 300000u; hz <= 20000000u; hz += 700000u) {
         const ClkDividerNAB d = solveFractionalDivider(kApbClockHz, hz, 63, 2);
-        FL_CHECK(d.N >= 2);          // min_N floor
-        FL_CHECK(d.A >= 1);          // never a zero denominator
-        FL_CHECK(d.A <= 63);         // I2S clkm_div_a field width
-        FL_CHECK(d.B >= 0);
-        FL_CHECK(d.B < d.A);         // B/A stays a proper fraction
+        FL_CHECK(d.n >= 2);          // min_N floor
+        FL_CHECK(d.a >= 1);          // never a zero denominator
+        FL_CHECK(d.a <= 63);         // I2S clkm_div_a field width
+        FL_CHECK(d.b >= 0);
+        FL_CHECK(d.b < d.a);         // B/A stays a proper fraction
     }
 }
 
@@ -120,30 +120,53 @@ FL_TEST_CASE("esp32 clock divider: generalises over base clock") {
     // target.
     const ClkDividerNAB apb = solveFractionalDivider(80000000u, 8000000u);
     const ClkDividerNAB half = solveFractionalDivider(40000000u, 8000000u);
-    FL_CHECK(apb.N == 10);
-    FL_CHECK(half.N == 5);
+    FL_CHECK(apb.n == 10);
+    FL_CHECK(half.n == 5);
 }
 
 FL_TEST_CASE("esp32 clock divider: min_N floor is honoured") {
     // Target above base/min_N cannot be reached; the solver must clamp to
     // min_N rather than emitting N=1 or N=0 that the hardware would reject.
     const ClkDividerNAB d = solveFractionalDivider(kApbClockHz, 79000000u, 63, 2);
-    FL_CHECK(d.N >= 2);
+    FL_CHECK(d.n >= 2);
 
     const ClkDividerNAB d4 = solveFractionalDivider(kApbClockHz, 79000000u, 63, 4);
-    FL_CHECK(d4.N >= 4);
+    FL_CHECK(d4.n >= 4);
+}
+
+FL_TEST_CASE("esp32 clock divider: oversized ratios stay representable") {
+    using fl::platforms::esp32::kMaxDivider;
+
+    // base/target can exceed INT_MAX for extreme u32 pairs -- 4.29e9 / 1 is
+    // past 2.147e9. Casting that to int is undefined, so the solver has to
+    // saturate *before* the cast; there would be no defined value to clamp
+    // afterwards.
+    const ClkDividerNAB huge = solveFractionalDivider(4294967295u, 1u);
+    FL_CHECK(huge.n == kMaxDivider);
+    FL_CHECK(huge.a == 1);
+    FL_CHECK(huge.b == 0);
+
+    // Just under the clamp: still a normal solve, no saturation.
+    const ClkDividerNAB ok = solveFractionalDivider(kApbClockHz, 1u);
+    FL_CHECK(ok.n > 0);
+    FL_CHECK(ok.n < kMaxDivider);
+    FL_CHECK(ok.a >= 1);
+    FL_CHECK(ok.b < ok.a);
+
+    // Saturation must never produce a divider the caller can't use.
+    FL_CHECK(huge.n > 0);
 }
 
 FL_TEST_CASE("esp32 clock divider: degenerate inputs do not divide by zero") {
     // Callers are expected to substitute their own fallback frequency, but a
     // zero must not produce inf/NaN or an out-of-range divider.
     const ClkDividerNAB zero_target = solveFractionalDivider(kApbClockHz, 0u);
-    FL_CHECK(zero_target.N == 2);
-    FL_CHECK(zero_target.A == 1);
-    FL_CHECK(zero_target.B == 0);
+    FL_CHECK(zero_target.n == 2);
+    FL_CHECK(zero_target.a == 1);
+    FL_CHECK(zero_target.b == 0);
 
     const ClkDividerNAB zero_base = solveFractionalDivider(0u, 8000000u);
-    FL_CHECK(zero_base.N == 2);
-    FL_CHECK(zero_base.A == 1);
-    FL_CHECK(zero_base.B == 0);
+    FL_CHECK(zero_base.n == 2);
+    FL_CHECK(zero_base.a == 1);
+    FL_CHECK(zero_base.b == 0);
 }

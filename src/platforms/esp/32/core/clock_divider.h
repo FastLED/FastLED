@@ -27,12 +27,23 @@ namespace esp32 {
 /// Reference clock for APB-derived peripherals on the classic ESP32.
 constexpr u32 kApbClockHz = 80000000u;
 
-/// Solved divider triple: `f_out = base_hz / (N + B/A)`.
+/// Solved divider triple: `f_out = base_hz / (n + b/a)`.
+///
+/// Lowercase members per the plain-aggregate convention; the uppercase
+/// N/A/B in the formulas below is the register-datasheet spelling
+/// (`clkm_conf.clkm_div_{num,a,b}`).
 struct ClkDividerNAB {
-    int N;
-    int A;
-    int B;
+    int n;
+    int a;
+    int b;
 };
+
+/// Largest integer divider the solver will report. The real hardware fields
+/// are far narrower (I2S `clkm_div_num` is 8 bits), so this is not a
+/// hardware limit — it exists so `base_hz / target_hz` cannot overflow the
+/// `int` it is cast into. A u32 base over a target of 1 Hz reaches ~4.29e9,
+/// which is past INT_MAX and would make the cast undefined.
+constexpr int kMaxDivider = 2147483000;
 
 /// @brief Solve `base_hz / (N + B/A)` for the closest match to `target_hz`.
 ///
@@ -58,17 +69,30 @@ inline ClkDividerNAB solveFractionalDivider(u32 base_hz, u32 target_hz,
                                             int min_N = 2) FL_NO_EXCEPT {
     ClkDividerNAB out;
     if (target_hz == 0 || base_hz == 0) {
-        out.N = min_N;
-        out.A = 1;
-        out.B = 0;
+        out.n = min_N;
+        out.a = 1;
+        out.b = 0;
         return out;
     }
 
     const double f_target = static_cast<double>(target_hz);
     const double f_base = static_cast<double>(base_hz);
-    int N = static_cast<int>(f_base / f_target);
+
+    // Clamp before the cast, not after: a ratio past INT_MAX makes
+    // static_cast<int> undefined, so there would be no well-defined value
+    // left to clamp. Saturating here keeps the result monotonic and
+    // representable for any u32 pair.
+    const double ratio = f_base / f_target;
+    if (ratio >= static_cast<double>(kMaxDivider)) {
+        out.n = kMaxDivider;
+        out.a = 1;
+        out.b = 0;
+        return out;
+    }
+
+    int N = static_cast<int>(ratio);
     if (N < min_N) N = min_N;
-    const double residual = (f_base / f_target) - static_cast<double>(N);
+    const double residual = ratio - static_cast<double>(N);
 
     // Fractional part B/A. Sweep A within the hardware limit and pick the
     // (A, B) minimising |residual - B/A|. Seeding best_err with `residual`
@@ -96,9 +120,9 @@ inline ClkDividerNAB solveFractionalDivider(u32 base_hz, u32 target_hz,
         ++N;
     }
 
-    out.N = N;
-    out.A = best_A;
-    out.B = best_B;
+    out.n = N;
+    out.a = best_A;
+    out.b = best_B;
     return out;
 }
 

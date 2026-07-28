@@ -98,9 +98,9 @@ inline void solveI2sClockDivider(u32 target_hz,
     const fl::platforms::esp32::ClkDividerNAB d =
         fl::platforms::esp32::solveFractionalDivider(kI2sBaseClkHz, effective_hz,
                                                      /*max_A=*/63, /*min_N=*/2);
-    *out_N = d.N;
-    *out_A = d.A;
-    *out_B = d.B;
+    *out_N = d.n;
+    *out_A = d.a;
+    *out_B = d.b;
 }
 
 // Register-level reset helpers — inline replacements for Yves's
