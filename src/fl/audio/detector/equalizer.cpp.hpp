@@ -14,12 +14,12 @@ namespace {
 // Bass:   bins 0-3   (~90-320 Hz)
 // Mid:    bins 4-10  (~320-2560 Hz)
 // Treble: bins 11-15 (~2560-5120 Hz)
-const int kBassStart = 0;
-const int kBassEnd = 3;
-const int kMidStart = 4;
-const int kMidEnd = 10;
-const int kTrebleStart = 11;
-const int kTrebleEnd = 15;
+constexpr int kBassStart = 0;
+constexpr int kBassEnd = 3;
+constexpr int kMidStart = 4;
+constexpr int kMidEnd = 10;
+constexpr int kTrebleStart = 11;
+constexpr int kTrebleEnd = 15;
 
 /// Apply fft::FFT scaling mode to a single bin value
 inline float applyScaling(float value, FFTScalingMode mode) {

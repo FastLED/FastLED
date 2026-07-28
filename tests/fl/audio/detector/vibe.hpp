@@ -1129,3 +1129,23 @@ FL_TEST_CASE("audio::detector::Vibe - silence-to-audio transition snaps back (no
     // bass should exceed 1.0 — no attack lag from the envelope.
     FL_CHECK_GT(detector.getBass(), 0.5f);
 }
+
+FL_TEST_CASE("audio::detector::Vibe - private FFT counter tracks updates") {
+    // Coverage for the diagnostic counter API, which had none. Guards the
+    // reset/increment/read contract so a future storage change (FastLED#3486
+    // considered and rejected a fl::Singleton wrap) cannot silently break it.
+    //
+    // Delta form on purpose: the counter is process-wide and this header is
+    // linked into a DLL alongside the other detector suites, so an absolute
+    // total is not stable against unrelated test cases.
+    audio::detector::Vibe::resetPrivateFFTCount();
+    FL_CHECK_EQ(audio::detector::Vibe::getPrivateFFTCount(), 0);
+
+    audio::detector::Vibe detector;
+    const int before = audio::detector::Vibe::getPrivateFFTCount();
+    feedFrames(detector, 3, 440.0f);
+    FL_CHECK_EQ(audio::detector::Vibe::getPrivateFFTCount(), before + 3);
+
+    audio::detector::Vibe::resetPrivateFFTCount();
+    FL_CHECK_EQ(audio::detector::Vibe::getPrivateFFTCount(), 0);
+}

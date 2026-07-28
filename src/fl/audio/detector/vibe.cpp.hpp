@@ -16,9 +16,18 @@ namespace fl {
 namespace audio {
 namespace detector {
 
+// Diagnostic FFT counter. Deliberately a plain constant-initialized static,
+// NOT a fl::Singleton -- see FastLED#3486. Builds pass -fdata-sections
+// (ci/boards.py), so this lands in its own `.bss` section and --gc-sections
+// already drops it in sketches that never link Vibe. Wrapping it in a
+// Singleton would add a second word for the instance pointer, a lazy-init
+// branch at every access, and -- because Singleton<T>::instance() hand-rolls
+// `if (!ptr)` instead of using a magic static -- an init race between the
+// audio task and loop() on multi-core targets.
+// FL_LINT_ALLOW_GLOBAL(constant-initialized POD scalar -- already elidable under -fdata-sections; Singleton wrapping is a net size regression and loses constant-initialization. See FastLED#3486.)
 static int sVibeFFTCount = 0;
-int Vibe::getPrivateFFTCount() { return sVibeFFTCount; }
-void Vibe::resetPrivateFFTCount() { sVibeFFTCount = 0; }
+int Vibe::getPrivateFFTCount() FL_NO_EXCEPT { return sVibeFFTCount; }
+void Vibe::resetPrivateFFTCount() FL_NO_EXCEPT { sVibeFFTCount = 0; }
 
 
 Vibe::Vibe() {

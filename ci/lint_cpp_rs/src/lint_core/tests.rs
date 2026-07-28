@@ -363,4 +363,100 @@ FL_WARN(\"still checked because remote files are always guarded\");\n",
         assert_eq!(json["line"], 7);
         assert_eq!(json["message"], "example message");
     }
+
+    // ---- SingletonElisionChecker (FastLED#3486) ----
+
+    fn singleton_elision_violations(src: &str) -> Vec<(usize, String)> {
+        SingletonElisionChecker.check_file_content(&file("src/fl/probe.cpp.hpp", src))
+    }
+
+    #[test]
+    fn singleton_elision_accepts_suffixed_and_prefixed_literals() {
+        // Rust's numeric parsers reject BOTH the `0x`/`0b` prefixes and the
+        // C++ `u`/`l`/`f` suffixes, so a parse-based triviality test
+        // misreports register masks as non-literal. Cases mirror
+        // TRIVIAL_RHS_RE in ci/scan_singleton_elision.py.
+        for rhs in [
+            "100.0f", "10000.0f", "64u", "1uLL", "64", "-3",
+            "0x80000000u", "0xFF", "0b1010", "0x8000uL",
+            "nullptr", "NULL", "true", "false",
+            "\"text\"", "'c'", "MAX_LEDS", "(1u << 3)", "(0x1u << 12)",
+            // Exponent / trailing-dot / long-double float spellings. FastLED
+            // timing and gamma tables use these freely; missing them keeps
+            // the warn-only stream noisy and #3492 (hard-fail at zero)
+            // unreachable.
+            "1e-6f", "2.5e3f", "10.f", "1.5L", "1E9",
+        ] {
+            let src = format!("namespace fl {{\nconstexpr auto kX = {rhs};\n}}\n");
+            assert!(
+                singleton_elision_violations(&src).is_empty(),
+                "expected `{rhs}` to be treated as a trivial literal",
+            );
+        }
+    }
+
+    #[test]
+    fn singleton_elision_still_flags_non_literal_constexpr() {
+        // Suffix/prefix tolerance must not swallow real initializers.
+        // Only expression RHS forms are pinned here. `compute()` and
+        // `Table{1, 2, 3}` are deliberately absent: the checker skips lines
+        // containing `(` as probable function declarations, and `{` opens a
+        // brace depth so the decl no longer reads as namespace-scope. Both
+        // predate this change and are not what these cases pin down.
+        for rhs in ["kMin * 2.0f", "kOther + 1", "0xFF + 1"] {
+            let src = format!("namespace fl {{\nconstexpr auto kX = {rhs};\n}}\n");
+            assert_eq!(
+                singleton_elision_violations(&src).len(),
+                1,
+                "expected `{rhs}` to stay flagged",
+            );
+        }
+    }
+
+    #[test]
+    fn singleton_elision_honors_allow_global_marker() {
+        let src = "namespace fl {\n\
+                   // FL_LINT_ALLOW_GLOBAL(deliberate)\n\
+                   static int sCounter = 0;\n\
+                   }\n";
+        assert!(singleton_elision_violations(src).is_empty());
+
+        let unannotated = "namespace fl {\nstatic int sCounter = 0;\n}\n";
+        assert_eq!(singleton_elision_violations(unannotated).len(), 1);
+    }
+
+    #[test]
+    fn singleton_elision_ignores_third_party() {
+        let checker = SingletonElisionChecker;
+        let project_root = std::env::current_dir().unwrap();
+        let project_root = project_root
+            .ancestors()
+            .find(|candidate| candidate.join("src").join("fl").exists())
+            .map(|path| path.to_path_buf())
+            .unwrap_or(project_root);
+
+        let third_party = normalize_path(
+            &project_root
+                .join("src")
+                .join("third_party")
+                .join("vendor.cpp")
+                .to_string_lossy(),
+        );
+        assert!(!checker.should_process_file(&third_party, &project_root));
+
+        let ours = normalize_path(
+            &project_root
+                .join("src")
+                .join("fl")
+                .join("probe.cpp.hpp")
+                .to_string_lossy(),
+        );
+        assert!(checker.should_process_file(&ours, &project_root));
+
+        // Headers are StaticInHeaderChecker's job, not this checker's.
+        let header = normalize_path(
+            &project_root.join("src").join("fl").join("probe.h").to_string_lossy(),
+        );
+        assert!(!checker.should_process_file(&header, &project_root));
+    }
 }
