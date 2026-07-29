@@ -26,6 +26,23 @@ namespace fl {
 /// - %p: pointers (formatted as 0x... hex)
 /// - %%: literal % character
 ///
+/// Generic placeholder:
+/// - {}: formats the next argument by picking the natural specifier for its
+///   C++ type, so callers do not have to choose between %d / %u / %ld / %s /
+///   %p or call .c_str(). Supported argument types are the same set the %
+///   specifiers support: all integral types (%d), bool (as "true"/"false"),
+///   char (as a character, %c), float/double (%f), const char* and
+///   fl::string / fl::string_view (%s), pointers (%p), and unscoped enums
+///   (as their underlying integer). Scoped enums (enum class) do not compile
+///   through {} or %d; cast at the call site.
+///   Passing any other type to {} is a compile error - {} deliberately does
+///   not fall back to a generic streaming path, to keep code size flat.
+/// - {{: literal { character
+/// - }}: literal } character
+/// - A lone { or } that is not part of the above passes through literally.
+/// - A {} with no remaining argument emits <missing_arg>, matching the
+///   behavior of a % specifier with no remaining argument.
+///
 /// Example usage:
 /// @code
 /// fl::printf("Value: %d, Name: %s", 42, "test");
@@ -54,6 +71,23 @@ void printf(const char* format, const Args&... args) FL_NO_EXCEPT;
 /// - %X: hexadecimal (uppercase)
 /// - %p: pointers (formatted as 0x... hex)
 /// - %%: literal % character
+///
+/// Generic placeholder:
+/// - {}: formats the next argument by picking the natural specifier for its
+///   C++ type, so callers do not have to choose between %d / %u / %ld / %s /
+///   %p or call .c_str(). Supported argument types are the same set the %
+///   specifiers support: all integral types (%d), bool (as "true"/"false"),
+///   char (as a character, %c), float/double (%f), const char* and
+///   fl::string / fl::string_view (%s), pointers (%p), and unscoped enums
+///   (as their underlying integer). Scoped enums (enum class) do not compile
+///   through {} or %d; cast at the call site.
+///   Passing any other type to {} is a compile error - {} deliberately does
+///   not fall back to a generic streaming path, to keep code size flat.
+/// - {{: literal { character
+/// - }}: literal } character
+/// - A lone { or } that is not part of the above passes through literally.
+/// - A {} with no remaining argument emits <missing_arg>, matching the
+///   behavior of a % specifier with no remaining argument.
 ///
 /// Example usage:
 /// @code
@@ -192,7 +226,13 @@ inline FormatSpec parse_format_spec(const char*& format) FL_NO_EXCEPT {
         spec.type = 'x'; // Normalize to lowercase for processing
     }
 
-    ++format;
+    // Only advance past the type character if there actually is one. A format
+    // string ending in a bare '%' leaves spec.type == '\0'; advancing here
+    // would step past the NUL terminator and make the caller's loop read out
+    // of bounds.
+    if (spec.type != '\0') {
+        ++format;
+    }
     return spec;
 }
 
@@ -556,6 +596,139 @@ inline void format_arg(sstream& stream, const FormatSpec& spec, const char* arg)
 void format_arg(sstream& stream, const FormatSpec& spec, const fl::string& arg) FL_NO_EXCEPT;
 void format_arg(sstream& stream, const FormatSpec& spec, const fl::string_view& arg) FL_NO_EXCEPT;
 
+///////////////// GENERIC "{}" PLACEHOLDER SUPPORT /////////////////
+
+// The generic "{}" placeholder saves the caller from hand-picking between
+// %d / %u / %ld / %s / %p and from writing .c_str(): the natural specifier for
+// the argument's C++ type is selected automatically and then handed to the
+// SAME format_arg machinery the '%' path uses. That reuse is deliberate - it
+// shares instantiations with the '%' path: a TU compiled with '{}' emits an
+// identical symbol table to the same TU written with the hand-picked '%'
+// specifier (verified with nm over 10 argument types).
+//
+// Caveat, so nobody is surprised: format_impl's '{}' branch is compiled even
+// for call sites that only use '%', because the format string is a runtime
+// pointer and the branch cannot be discarded. Those call sites therefore emit
+// small format_arg_generic<T> forwarders they did not previously have. Each is
+// a one-line tail call into an already-existing format_arg<T> and inlines at
+// -Os, but the cost is paid tree-wide, not only by '{}' users.
+//
+// "{}" is intentionally constrained to the type set '%' already supports
+// (integral, bool, char, float/double, const char*, fl::string,
+// fl::string_view, pointers). It does NOT fall back to sstream::operator<<
+// for arbitrary types: that would re-introduce the per-call-site operator<<
+// chain instantiations that issue #3158 removed (measured at ~5-10 KB on
+// ESP32-S3, with sstream::operator<<(char) alone at 1.25 KB per #3078).
+// Passing an unsupported type to "{}" is therefore a compile error, not a
+// silent code-size regression.
+
+// Integral types (including bool) format like "%d". The 'd' path stringifies
+// through the same code as %d/%u, so signed and unsigned both render exactly
+// as they do today; bool keeps its "true"/"false" rendering.
+template<typename T>
+typename fl::enable_if<fl::is_integral<T>::value>::type
+format_arg_generic(sstream& stream, const T& arg) FL_NO_EXCEPT {
+    format_arg(stream, FormatSpec('d'), arg);
+}
+
+// Enums format as their underlying integer, like "%d" and like sstream's own
+// is_enum overload. This overload is REQUIRED for correctness, not just
+// convenience: an unscoped enum fails is_integral, but implicitly converts to
+// char, so without it overload resolution silently selects the char overload
+// below and `fl::printf("{}", GREEN)` with `enum Color { GREEN = 66 }` prints
+// "B" instead of "66". Same trap applies to any type with an implicit
+// conversion to char.
+template<typename T>
+typename fl::enable_if<fl::is_enum<T>::value>::type
+format_arg_generic(sstream& stream, const T& arg) FL_NO_EXCEPT {
+    using underlying_t = typename fl::underlying_type<T>::type;
+    format_arg(stream, FormatSpec('d'), static_cast<underlying_t>(arg));
+}
+
+// Floating point types format like "%f" (default precision).
+template<typename T>
+typename fl::enable_if<fl::is_floating_point<T>::value>::type
+format_arg_generic(sstream& stream, const T& arg) FL_NO_EXCEPT {
+    format_arg(stream, FormatSpec('f'), arg);
+}
+
+// Pointers format like "%p" ("0x" + lowercase hex address).
+// Character pointers are handled by the more specialized overloads below.
+template<typename T>
+typename fl::enable_if<fl::is_pointer<T>::value>::type
+format_arg_generic(sstream& stream, const T& arg) FL_NO_EXCEPT {
+    format_arg(stream, FormatSpec('p'), arg);
+}
+
+// char renders as a character, like "%c" (not as its numeric value).
+inline void format_arg_generic(sstream& stream, char arg) FL_NO_EXCEPT {
+    format_arg(stream, FormatSpec('c'), arg);
+}
+
+// C strings render their contents, like "%s" (including the "(null)"
+// sentinel for a null pointer).
+inline void format_arg_generic(sstream& stream, const char* arg) FL_NO_EXCEPT {
+    format_arg(stream, FormatSpec('s'), arg);
+}
+
+inline void format_arg_generic(sstream& stream, char* arg) FL_NO_EXCEPT {
+    format_arg(stream, FormatSpec('s'), static_cast<const char*>(arg));
+}
+
+// NOTE: no const char(&)[N] overload here on purpose. Array-to-pointer is an
+// lvalue transformation excluded from ICS ranking, so a string literal is an
+// Exact Match for BOTH an array template and the non-template const char*
+// overload above -- and the non-template wins the tiebreak. An array overload
+// would be dead code, and adding one would only risk a per-N instantiation.
+
+// fl::string / fl::string_view render like "%s" - no .c_str() needed.
+inline void format_arg_generic(sstream& stream, const fl::string& arg) FL_NO_EXCEPT {
+    format_arg(stream, FormatSpec('s'), arg);
+}
+
+inline void format_arg_generic(sstream& stream, const fl::string_view& arg) FL_NO_EXCEPT {
+    format_arg(stream, FormatSpec('s'), arg);
+}
+
+
+// Handle a '{' or '}' found in the format string.
+// Returns true if a generic "{}" placeholder was consumed, in which case the
+// caller is responsible for emitting an argument. Otherwise the brace text was
+// written to `stream` literally. Either way `format` is advanced past the
+// characters that were consumed, so callers must `continue` (never fall through
+// to an extra ++format) after calling this.
+//
+// Rules:
+// - "{}" is a generic placeholder
+// - "{{" is a literal '{' and "}}" is a literal '}'
+// - a lone '{' or '}' passes through literally rather than being an error
+inline bool parse_brace(sstream& stream, const char*& format) FL_NO_EXCEPT {
+    if (*format == '{') {
+        if (format[1] == '}') {
+            format += 2;
+            return true;
+        }
+        if (format[1] == '{') {
+            stream << "{";
+            format += 2;
+            return false;
+        }
+        stream << "{";
+        ++format;
+        return false;
+    }
+
+    // *format == '}'
+    if (format[1] == '}') {
+        stream << "}";
+        format += 2;
+        return false;
+    }
+    stream << "}";
+    ++format;
+    return false;
+}
+
 // Specialized format_arg for char arrays (string literals like "hello")
 template<fl::size N>
 void format_arg(sstream& stream, const FormatSpec& spec, const char (&arg)[N]) FL_NO_EXCEPT {
@@ -575,6 +748,12 @@ inline void format_impl(sstream& stream, const char* format) FL_NO_EXCEPT {
                 stream << "<missing_arg>";
                 continue;
             }
+        } else if (*format == '{' || *format == '}') {
+            if (parse_brace(stream, format)) {
+                // Generic placeholder with no argument left to consume.
+                stream << "<missing_arg>";
+            }
+            continue;
         } else {
             // Create a single-character string since sstream treats char as number
             char temp_str[2] = {*format, '\0'};
@@ -599,6 +778,17 @@ void format_impl(sstream& stream, const char* format, const T& first, const Args
                 format_impl(stream, format, rest...);
                 return;
             }
+        } else if (*format == '{' || *format == '}') {
+            if (parse_brace(stream, format)) {
+                // Generic placeholder: format the first argument by
+                // picking the natural specifier for its type (NOT through
+                // sstream::operator<<, which is what this design avoids) and
+                // continue with the rest.
+                format_arg_generic(stream, first);
+                format_impl(stream, format, rest...);
+                return;
+            }
+            continue;
         } else {
             // Create a single-character string since sstream treats char as number
             char temp_str[2] = {*format, '\0'};
@@ -628,6 +818,23 @@ void format_impl(sstream& stream, const char* format, const T& first, const Args
 /// - %X: hexadecimal (uppercase)
 /// - %p: pointers (formatted as 0x... hex)
 /// - %%: literal % character
+///
+/// Generic placeholder:
+/// - {}: formats the next argument by picking the natural specifier for its
+///   C++ type, so callers do not have to choose between %d / %u / %ld / %s /
+///   %p or call .c_str(). Supported argument types are the same set the %
+///   specifiers support: all integral types (%d), bool (as "true"/"false"),
+///   char (as a character, %c), float/double (%f), const char* and
+///   fl::string / fl::string_view (%s), pointers (%p), and unscoped enums
+///   (as their underlying integer). Scoped enums (enum class) do not compile
+///   through {} or %d; cast at the call site.
+///   Passing any other type to {} is a compile error - {} deliberately does
+///   not fall back to a generic streaming path, to keep code size flat.
+/// - {{: literal { character
+/// - }}: literal } character
+/// - A lone { or } that is not part of the above passes through literally.
+/// - A {} with no remaining argument emits <missing_arg>, matching the
+///   behavior of a % specifier with no remaining argument.
 ///
 /// Example usage:
 /// @code
@@ -659,6 +866,23 @@ void printf(const char* format, const Args&... args) FL_NO_EXCEPT {
 /// - %X: hexadecimal (uppercase)
 /// - %p: pointers (formatted as 0x... hex)
 /// - %%: literal % character
+///
+/// Generic placeholder:
+/// - {}: formats the next argument by picking the natural specifier for its
+///   C++ type, so callers do not have to choose between %d / %u / %ld / %s /
+///   %p or call .c_str(). Supported argument types are the same set the %
+///   specifiers support: all integral types (%d), bool (as "true"/"false"),
+///   char (as a character, %c), float/double (%f), const char* and
+///   fl::string / fl::string_view (%s), pointers (%p), and unscoped enums
+///   (as their underlying integer). Scoped enums (enum class) do not compile
+///   through {} or %d; cast at the call site.
+///   Passing any other type to {} is a compile error - {} deliberately does
+///   not fall back to a generic streaming path, to keep code size flat.
+/// - {{: literal { character
+/// - }}: literal } character
+/// - A lone { or } that is not part of the above passes through literally.
+/// - A {} with no remaining argument emits <missing_arg>, matching the
+///   behavior of a % specifier with no remaining argument.
 ///
 /// Example usage:
 /// @code
