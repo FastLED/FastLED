@@ -8,22 +8,29 @@
 #include "fl/stl/strstream.h"
 #include "fl/log/log.h"
 #include "fl/stl/assert.h"
+#include "fl/stl/singleton.h"
 #include "fl/sensors/pir.h"
 
 namespace fl {
 
 namespace {
-int g_counter = 0;
+// Auto-naming counter for unnamed PIR buttons. Behind Singleton<T> so
+// --gc-sections can drop the storage with the accessor when a sketch never
+// constructs a PIR (FastLED#3488).
+struct PirNameCounter {
+    int value = 0;
+};
+
 string getButtonName(const char *button_name) {
     if (button_name) {
         return string(button_name);
     }
-    int count = g_counter++;
+    int count = fl::Singleton<PirNameCounter>::instance().value++;
     if (count == 0) {
         return string("PIR");
     }
     sstream s;
-    s << "PirLowLevel " << g_counter++;
+    s << "PirLowLevel " << fl::Singleton<PirNameCounter>::instance().value++;
     return s.str();
 }
 } // namespace

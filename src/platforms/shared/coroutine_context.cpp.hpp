@@ -17,34 +17,39 @@ namespace fl {
 namespace platforms {
 
 //=============================================================================
-// ICoroutinePlatform singleton — settable, defaults to NullCoroutinePlatform
-//=============================================================================
-
-static ICoroutinePlatform* sCoroutinePlatformInstance = nullptr;
-
-ICoroutinePlatform& ICoroutinePlatform::instance() FL_NO_EXCEPT {
-    if (sCoroutinePlatformInstance) {
-        return *sCoroutinePlatformInstance;
-    }
-    return fl::Singleton<NullCoroutinePlatform>::instance();
-}
-
-void ICoroutinePlatform::setInstance(ICoroutinePlatform* p) FL_NO_EXCEPT {
-    sCoroutinePlatformInstance = p;
-}
-
-//=============================================================================
 // Global coroutine state
 //=============================================================================
 
-/// @brief Global coroutine state — runner context and current coroutine pointer.
+/// @brief Global coroutine state — registered platform, runner context, and
+/// current coroutine pointer.
+///
+/// Held behind Singleton<T> rather than as namespace-scope variables so
+/// --gc-sections can drop the storage together with the accessor when a
+/// sketch never touches coroutines (FastLED#3488).
 struct CoroutineGlobals {
+    ICoroutinePlatform* platform = nullptr; ///< Registered platform, if any
     void* runner_ctx = nullptr;        ///< Platform handle for runner (main thread)
     CoroutineContext* current = nullptr; ///< Currently executing coroutine
 };
 
 static CoroutineGlobals& globals() FL_NO_EXCEPT {
     return fl::Singleton<CoroutineGlobals>::instance();
+}
+
+//=============================================================================
+// ICoroutinePlatform singleton — settable, defaults to NullCoroutinePlatform
+//=============================================================================
+
+ICoroutinePlatform& ICoroutinePlatform::instance() FL_NO_EXCEPT {
+    ICoroutinePlatform* registered = globals().platform;
+    if (registered) {
+        return *registered;
+    }
+    return fl::Singleton<NullCoroutinePlatform>::instance();
+}
+
+void ICoroutinePlatform::setInstance(ICoroutinePlatform* p) FL_NO_EXCEPT {
+    globals().platform = p;
 }
 
 /// @brief Lazy-init the runner's platform context (created on first use)
