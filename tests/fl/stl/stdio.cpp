@@ -10,6 +10,7 @@
 #include "fl/stl/ostream.h"
 #include "fl/stl/stdio.h"
 #include "fl/stl/string.h"
+#include "fl/stl/vector.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -784,6 +785,541 @@ FL_TEST_CASE("fl::snprintf vs fl::snprintf return value comparison") {
         
         // Both should be null-terminated and truncated to the same content
         FL_REQUIRE_EQ(fl::strlen(buffer1), fl::strlen(buffer2));
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Generic "{}" placeholder (issue #3174)
+///////////////////////////////////////////////////////////////////////////////
+
+FL_TEST_CASE("fl::snprintf generic {} placeholder with scalar types") {
+    char buf[128];
+
+    FL_SUBCASE("signed integer") {
+        fl::snprintf(buf, sizeof(buf), "Value: {}", 42);
+        FL_CHECK(fl::string(buf) == "Value: 42");
+    }
+
+    FL_SUBCASE("negative integer") {
+        fl::snprintf(buf, sizeof(buf), "Value: {}", -7);
+        FL_CHECK(fl::string(buf) == "Value: -7");
+    }
+
+    FL_SUBCASE("unsigned integer") {
+        unsigned int value = 4000000000U;
+        fl::snprintf(buf, sizeof(buf), "Value: {}", value);
+        FL_CHECK(fl::string(buf) == "Value: 4000000000");
+    }
+
+    FL_SUBCASE("64-bit integers") {
+        fl::i64 signed64 = -9223372036854775807LL;
+        fl::u64 unsigned64 = 18446744073709551615ULL;
+        fl::snprintf(buf, sizeof(buf), "{} / {}", signed64, unsigned64);
+        FL_CHECK(fl::string(buf) == "-9223372036854775807 / 18446744073709551615");
+    }
+
+    FL_SUBCASE("bool renders as true/false") {
+        fl::snprintf(buf, sizeof(buf), "{} and {}", true, false);
+        FL_CHECK(fl::string(buf) == "true and false");
+    }
+
+    FL_SUBCASE("char renders as a character, not a number") {
+        fl::snprintf(buf, sizeof(buf), "Letter: {}", 'A');
+        FL_CHECK(fl::string(buf) == "Letter: A");
+    }
+
+    FL_SUBCASE("C string") {
+        fl::snprintf(buf, sizeof(buf), "Hello, {}!", "world");
+        FL_CHECK(fl::string(buf) == "Hello, world!");
+    }
+
+    FL_SUBCASE("const char* variable") {
+        const char* name = "Alice";
+        fl::snprintf(buf, sizeof(buf), "Name: {}", name);
+        FL_CHECK(fl::string(buf) == "Name: Alice");
+    }
+
+    FL_SUBCASE("null const char* uses the (null) sentinel") {
+        const char* name = nullptr;
+        fl::snprintf(buf, sizeof(buf), "Name: {}", name);
+        FL_CHECK(fl::string(buf) == "Name: (null)");
+    }
+
+    FL_SUBCASE("fl::string needs no .c_str()") {
+        fl::string name("Bob");
+        fl::snprintf(buf, sizeof(buf), "Name: {}", name);
+        FL_CHECK(fl::string(buf) == "Name: Bob");
+    }
+
+    FL_SUBCASE("fl::string_view") {
+        fl::string_view view("Carol");
+        fl::snprintf(buf, sizeof(buf), "Name: {}", view);
+        FL_CHECK(fl::string(buf) == "Name: Carol");
+    }
+
+    FL_SUBCASE("pointer renders as 0x hex like %p") {
+        int value = 5;
+        int* ptr = &value;
+        fl::snprintf(buf, sizeof(buf), "Ptr: {}", ptr);
+        fl::string result(buf);
+        FL_CHECK(result.find("Ptr: 0x") == 0);
+        // No sentinel and no crash: an actual address was rendered.
+        FL_CHECK(result.find("<") == fl::string::npos);
+        FL_CHECK(result.size() > 7);
+    }
+
+    FL_SUBCASE("null pointer renders as 0x0") {
+        // to_hex(0) is deterministic, so assert the exact string. A prefix-only
+        // check would also pass on "Ptr: 0xdeadbeef".
+        int* p = nullptr;
+        fl::snprintf(buf, sizeof(buf), "Ptr: {}", p);
+        FL_CHECK(fl::string(buf) == "Ptr: 0x0");
+    }
+
+    FL_SUBCASE("float") {
+        fl::snprintf(buf, sizeof(buf), "Pi: {}", 3.14159f);
+        fl::string result(buf);
+        FL_CHECK(result.find("Pi: 3.14") == 0);
+    }
+
+    FL_SUBCASE("double") {
+        fl::snprintf(buf, sizeof(buf), "Val: {}", 2.5);
+        fl::string result(buf);
+        FL_CHECK(result.find("Val: 2.5") == 0);
+    }
+}
+
+FL_TEST_CASE("fl::snprintf generic {} matches the equivalent % specifier") {
+    // "{}" is sugar over the existing format_arg machinery: for every supported
+    // type it must produce byte-identical output to the specifier a caller
+    // would have had to pick by hand. That is the whole ergonomic win.
+    char generic[128];
+    char explicit_spec[128];
+
+    FL_SUBCASE("int matches %d") {
+        fl::snprintf(generic, sizeof(generic), "{}", -12345);
+        fl::snprintf(explicit_spec, sizeof(explicit_spec), "%d", -12345);
+        FL_CHECK(fl::strcmp(generic, explicit_spec) == 0);
+    }
+
+    FL_SUBCASE("unsigned matches %u") {
+        unsigned int value = 4000000000U;
+        fl::snprintf(generic, sizeof(generic), "{}", value);
+        fl::snprintf(explicit_spec, sizeof(explicit_spec), "%u", value);
+        FL_CHECK(fl::strcmp(generic, explicit_spec) == 0);
+    }
+
+    FL_SUBCASE("long long matches %lld") {
+        fl::i64 value = -9223372036854775807LL;
+        fl::snprintf(generic, sizeof(generic), "{}", value);
+        fl::snprintf(explicit_spec, sizeof(explicit_spec), "%lld", value);
+        FL_CHECK(fl::strcmp(generic, explicit_spec) == 0);
+    }
+
+    FL_SUBCASE("char matches %c") {
+        fl::snprintf(generic, sizeof(generic), "{}", 'Z');
+        fl::snprintf(explicit_spec, sizeof(explicit_spec), "%c", 'Z');
+        FL_CHECK(fl::strcmp(generic, explicit_spec) == 0);
+    }
+
+    FL_SUBCASE("C string matches %s") {
+        fl::snprintf(generic, sizeof(generic), "{}", "hello");
+        fl::snprintf(explicit_spec, sizeof(explicit_spec), "%s", "hello");
+        FL_CHECK(fl::strcmp(generic, explicit_spec) == 0);
+    }
+
+    FL_SUBCASE("fl::string matches %s") {
+        fl::string value("hello");
+        fl::snprintf(generic, sizeof(generic), "{}", value);
+        fl::snprintf(explicit_spec, sizeof(explicit_spec), "%s", value);
+        FL_CHECK(fl::strcmp(generic, explicit_spec) == 0);
+    }
+
+    FL_SUBCASE("float matches %f") {
+        fl::snprintf(generic, sizeof(generic), "{}", 3.14159f);
+        fl::snprintf(explicit_spec, sizeof(explicit_spec), "%f", 3.14159f);
+        FL_CHECK(fl::strcmp(generic, explicit_spec) == 0);
+    }
+
+    FL_SUBCASE("pointer matches %p") {
+        int value = 5;
+        int* ptr = &value;
+        fl::snprintf(generic, sizeof(generic), "{}", ptr);
+        fl::snprintf(explicit_spec, sizeof(explicit_spec), "%p", ptr);
+        FL_CHECK(fl::strcmp(generic, explicit_spec) == 0);
+    }
+}
+
+FL_TEST_CASE("fl::snprintf generic {} formats enums as their underlying integer") {
+    // Regression guard. An unscoped enum fails is_integral but implicitly
+    // converts to char, so without a dedicated is_enum overload, overload
+    // resolution silently picks format_arg_generic(sstream&, char) and this
+    // renders "B" (ASCII 66) instead of "66". Silent wrong output, and it
+    // contradicts the documented "unsupported types are a compile error".
+    char buf[128];
+
+    FL_SUBCASE("unscoped enum with a printable-ASCII value") {
+        enum Color { GREEN = 66 };
+        fl::snprintf(buf, sizeof(buf), "c={}", GREEN);
+        FL_CHECK(fl::string(buf) == "c=66");
+    }
+
+    // NOTE: scoped enums (enum class) are deliberately NOT covered. They do
+    // not compile through {} -- nor through %d today -- because format_impl
+    // compiles its '%' branch for every argument type and format_arg's body
+    // needs an implicit conversion a scoped enum does not have. Unchanged by
+    // this feature; cast explicitly at the call site.
+
+    FL_SUBCASE("enum matches the %d spelling") {
+        enum Big { VALUE = 4242 };
+        char viaBrace[64];
+        char viaPct[64];
+        fl::snprintf(viaBrace, sizeof(viaBrace), "{}", VALUE);
+        fl::snprintf(viaPct, sizeof(viaPct), "%d", static_cast<int>(VALUE));
+        FL_CHECK(fl::string(viaBrace) == fl::string(viaPct));
+        FL_CHECK(fl::string(viaBrace) == "4242");
+    }
+}
+
+FL_TEST_CASE("fl::snprintf generic {} distinguishes char from small integers") {
+    // char renders as a character; fl::u8 / signed char render numerically.
+    // Pinning the asymmetry so it cannot drift silently.
+    char buf[128];
+
+    FL_SUBCASE("char renders as a character") {
+        fl::snprintf(buf, sizeof(buf), "{}", static_cast<char>(66));
+        FL_CHECK(fl::string(buf) == "B");
+    }
+
+    FL_SUBCASE("fl::u8 renders numerically") {
+        fl::snprintf(buf, sizeof(buf), "{}", static_cast<fl::u8>(66));
+        FL_CHECK(fl::string(buf) == "66");
+    }
+
+    FL_SUBCASE("signed char renders numerically") {
+        fl::snprintf(buf, sizeof(buf), "{}", static_cast<signed char>(66));
+        FL_CHECK(fl::string(buf) == "66");
+    }
+}
+
+FL_TEST_CASE("fl::snprintf generic {} argument count behavior") {
+    char buf[128];
+
+    FL_SUBCASE("too few arguments emits <missing_arg>") {
+        fl::snprintf(buf, sizeof(buf), "a={} b={}", 1);
+        FL_CHECK(fl::string(buf) == "a=1 b=<missing_arg>");
+    }
+
+    FL_SUBCASE("no arguments at all emits <missing_arg>") {
+        fl::snprintf(buf, sizeof(buf), "value: {}");
+        FL_CHECK(fl::string(buf) == "value: <missing_arg>");
+    }
+
+    FL_SUBCASE("extra arguments are silently ignored") {
+        fl::snprintf(buf, sizeof(buf), "a={}", 1, 2, 3);
+        FL_CHECK(fl::string(buf) == "a=1");
+    }
+
+    FL_SUBCASE("multiple placeholders consume arguments in order") {
+        fl::snprintf(buf, sizeof(buf), "{}-{}-{}", 1, "two", 'c');
+        FL_CHECK(fl::string(buf) == "1-two-c");
+    }
+}
+
+FL_TEST_CASE("fl::snprintf brace escaping and literal braces") {
+    char buf[128];
+
+    FL_SUBCASE("{{ is a literal {") {
+        fl::snprintf(buf, sizeof(buf), "{{}");
+        FL_CHECK(fl::string(buf) == "{}");
+    }
+
+    FL_SUBCASE("}} is a literal }") {
+        fl::snprintf(buf, sizeof(buf), "a}}b");
+        FL_CHECK(fl::string(buf) == "a}b");
+    }
+
+    FL_SUBCASE("escaped braces around a placeholder") {
+        fl::snprintf(buf, sizeof(buf), "{{{}}}", 42);
+        FL_CHECK(fl::string(buf) == "{42}");
+    }
+
+    FL_SUBCASE("lone { passes through literally") {
+        fl::snprintf(buf, sizeof(buf), "a{b", 42);
+        FL_CHECK(fl::string(buf) == "a{b");
+    }
+
+    FL_SUBCASE("lone } passes through literally") {
+        fl::snprintf(buf, sizeof(buf), "a}b");
+        FL_CHECK(fl::string(buf) == "a}b");
+    }
+
+    FL_SUBCASE("{ at end of string does not overrun") {
+        fl::snprintf(buf, sizeof(buf), "value{");
+        FL_CHECK(fl::string(buf) == "value{");
+    }
+
+    FL_SUBCASE("} at end of string does not overrun") {
+        fl::snprintf(buf, sizeof(buf), "value}");
+        FL_CHECK(fl::string(buf) == "value}");
+    }
+
+    FL_SUBCASE("unmatched { before a real placeholder") {
+        fl::snprintf(buf, sizeof(buf), "{x {}", 7);
+        FL_CHECK(fl::string(buf) == "{x 7");
+    }
+}
+
+FL_TEST_CASE("fl::snprintf mixes {} and % specifiers") {
+    char buf[128];
+
+    FL_SUBCASE("{} then %d") {
+        fl::snprintf(buf, sizeof(buf), "{} and %d", "text", 42);
+        FL_CHECK(fl::string(buf) == "text and 42");
+    }
+
+    FL_SUBCASE("%d then {}") {
+        fl::snprintf(buf, sizeof(buf), "%d and {}", 42, "text");
+        FL_CHECK(fl::string(buf) == "42 and text");
+    }
+
+    FL_SUBCASE("%% literal alongside {}") {
+        fl::snprintf(buf, sizeof(buf), "{}%% done", 50);
+        FL_CHECK(fl::string(buf) == "50% done");
+    }
+
+    FL_SUBCASE("interleaved with braces and padding") {
+        fl::snprintf(buf, sizeof(buf), "{{%05d}} {}", 42, true);
+        FL_CHECK(fl::string(buf) == "{00042} true");
+    }
+}
+
+FL_TEST_CASE("fl::printf generic {} placeholder print path") {
+    fl::inject_print_handler(test_helper::capture_print);
+
+    FL_SUBCASE("scalar and string through fl::printf") {
+        test_helper::clear_capture();
+        fl::printf("Name: {}, Age: {}", "Alice", 25);
+        FL_CHECK(test_helper::get_capture() == fl::string("Name: Alice, Age: 25"));
+    }
+
+    FL_SUBCASE("fl::string through fl::printf") {
+        test_helper::clear_capture();
+        fl::string name("Bob");
+        fl::printf("Name: {}", name);
+        FL_CHECK(test_helper::get_capture() == fl::string("Name: Bob"));
+    }
+
+    FL_SUBCASE("missing arg through fl::printf") {
+        test_helper::clear_capture();
+        fl::printf("Name: {}");
+        FL_CHECK(test_helper::get_capture() == fl::string("Name: <missing_arg>"));
+    }
+
+    FL_SUBCASE("escaped braces through fl::printf") {
+        test_helper::clear_capture();
+        fl::printf("{{{}}}", 1);
+        FL_CHECK(test_helper::get_capture() == fl::string("{1}"));
+    }
+
+    fl::clear_io_handlers();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Documented behavior for mismatched / malformed % format strings.
+//
+// These sentinels are the CURRENT contract of fl::printf. They are asserted
+// here so that any change to them is a deliberate, visible break:
+//   <type_error>       argument type cannot satisfy the specifier
+//   <string_not_hex>   a C string was passed to %x
+//   <unknown_format>   unrecognized or absent specifier character
+//   <missing_arg>      no argument remains for the placeholder
+//   (null)             a null C string passed to %s
+// The overriding guarantee is bounded, deterministic output: no crash and no
+// read through an invalid pointer.
+///////////////////////////////////////////////////////////////////////////////
+
+FL_TEST_CASE("fl::snprintf documented mismatch behavior") {
+    char buf[128];
+
+    FL_SUBCASE("%d with a string argument") {
+        fl::snprintf(buf, sizeof(buf), "number: %d", "number");
+        FL_CHECK(fl::string(buf) == "number: <type_error>");
+    }
+
+    FL_SUBCASE("%i with a string argument") {
+        fl::snprintf(buf, sizeof(buf), "number: %i", "number");
+        FL_CHECK(fl::string(buf) == "number: <type_error>");
+    }
+
+    FL_SUBCASE("%u with a string argument") {
+        fl::snprintf(buf, sizeof(buf), "number: %u", "number");
+        FL_CHECK(fl::string(buf) == "number: <type_error>");
+    }
+
+    FL_SUBCASE("%f with a string argument") {
+        fl::snprintf(buf, sizeof(buf), "number: %f", "number");
+        FL_CHECK(fl::string(buf) == "number: <type_error>");
+    }
+
+    FL_SUBCASE("%x with a string argument") {
+        fl::snprintf(buf, sizeof(buf), "hex: %x", "number");
+        FL_CHECK(fl::string(buf) == "hex: <string_not_hex>");
+    }
+
+    FL_SUBCASE("%s with an integer argument stringifies the integer") {
+        // %s routes through sstream, so an int degrades to its decimal text
+        // rather than being treated as a pointer to dereference.
+        fl::snprintf(buf, sizeof(buf), "text: %s", 42);
+        FL_CHECK(fl::string(buf) == "text: 42");
+    }
+
+    FL_SUBCASE("%s with a null C string") {
+        const char* s = nullptr;
+        fl::snprintf(buf, sizeof(buf), "text: %s", s);
+        FL_CHECK(fl::string(buf) == "text: (null)");
+    }
+
+    FL_SUBCASE("%f with an integer argument") {
+        fl::snprintf(buf, sizeof(buf), "float: %f", 42);
+        FL_CHECK(fl::string(buf) == "float: <type_error>");
+    }
+
+    FL_SUBCASE("%p with a non-pointer argument") {
+        fl::snprintf(buf, sizeof(buf), "ptr: %p", 42);
+        FL_CHECK(fl::string(buf) == "ptr: <unknown_format>");
+    }
+
+    FL_SUBCASE("%p with a null pointer") {
+        int* p = nullptr;
+        fl::snprintf(buf, sizeof(buf), "ptr: %p", p);
+        fl::string result(buf);
+        FL_CHECK(result.find("ptr: 0x") == 0);
+        FL_CHECK(result.find("<") == fl::string::npos);
+    }
+
+    FL_SUBCASE("%d with a non-pointer, non-integer argument") {
+        fl::snprintf(buf, sizeof(buf), "value: %d", 1.5f);
+        FL_CHECK(fl::string(buf) == "value: <type_error>");
+    }
+}
+
+FL_TEST_CASE("fl::snprintf documented malformed format behavior") {
+    char buf[128];
+
+    FL_SUBCASE("trailing % with no argument") {
+        fl::snprintf(buf, sizeof(buf), "done %");
+        FL_CHECK(fl::string(buf) == "done <missing_arg>");
+    }
+
+    FL_SUBCASE("trailing % with an argument") {
+        fl::snprintf(buf, sizeof(buf), "done %", 42);
+        FL_CHECK(fl::string(buf) == "done <unknown_format>");
+    }
+
+    FL_SUBCASE("truncated specifier at end of string does not read past the NUL") {
+        // Regression guard for the parse_format_spec out-of-bounds fix.
+        // Before it, parse_format_spec advanced past the type character
+        // unconditionally; for a format string that ends mid-specifier the
+        // type char IS the NUL terminator, so the pointer stepped past the
+        // end of the buffer and the caller's `while (*format)` read heap
+        // garbage. These truncated forms walked further past the terminator
+        // than a bare trailing '%' does, so they are the stronger guard.
+        // Run under --debug (ASAN) for this to be meaningful.
+        const char* truncated[] = {"%-", "%5", "%.", "%l", "%ll", "%h",
+                                   "%#0", "%.3", "%05"};
+        for (const char* fmt : truncated) {
+            // Exact-size heap copy so ASAN has a real redzone immediately
+            // after the NUL, rather than the slack of a string literal.
+            // fl::vector heap-allocates (unlike fl::string, which has inline
+            // storage for short strings and would hide the overrun).
+            const fl::size len = fl::string(fmt).size();
+            fl::vector<char> exact;
+            exact.resize(len + 1);
+            for (fl::size i = 0; i < len; ++i) {
+                exact[i] = fmt[i];
+            }
+            exact[len] = ' ';
+
+            fl::snprintf(buf, sizeof(buf), exact.data());
+            // Bounded, NUL-terminated output is all that is guaranteed; the
+            // exact sentinel is not the point of this test.
+            FL_CHECK(fl::string(buf).size() < sizeof(buf));
+
+            fl::snprintf(buf, sizeof(buf), exact.data(), 42);
+            FL_CHECK(fl::string(buf).size() < sizeof(buf));
+        }
+    }
+
+    FL_SUBCASE("unknown specifier %q") {
+        fl::snprintf(buf, sizeof(buf), "value: %q", 42);
+        FL_CHECK(fl::string(buf) == "value: <unknown_format>");
+    }
+
+    FL_SUBCASE("unknown specifier %q with no argument") {
+        fl::snprintf(buf, sizeof(buf), "value: %q");
+        FL_CHECK(fl::string(buf) == "value: <missing_arg>");
+    }
+
+    FL_SUBCASE("incomplete width form") {
+        fl::snprintf(buf, sizeof(buf), "value: %5");
+        FL_CHECK(fl::string(buf) == "value: <missing_arg>");
+    }
+
+    FL_SUBCASE("incomplete precision form") {
+        fl::snprintf(buf, sizeof(buf), "value: %.2", 1.5f);
+        FL_CHECK(fl::string(buf) == "value: <unknown_format>");
+    }
+
+    FL_SUBCASE("literal %%") {
+        fl::snprintf(buf, sizeof(buf), "100%% sure");
+        FL_CHECK(fl::string(buf) == "100% sure");
+    }
+
+    FL_SUBCASE("literal %% with no arguments and trailing text") {
+        fl::snprintf(buf, sizeof(buf), "%%%%");
+        FL_CHECK(fl::string(buf) == "%%");
+    }
+}
+
+FL_TEST_CASE("fl::snprintf {} respects buffer boundaries") {
+    FL_SUBCASE("truncated {} output stays NUL terminated") {
+        char buf[8];
+        int written = fl::snprintf(buf, sizeof(buf), "value={}", 1234567890);
+        FL_CHECK(written == 7);
+        FL_CHECK(fl::strlen(buf) == 7);
+        FL_CHECK(buf[7] == '\0');
+        FL_CHECK(fl::string(buf) == "value=1");
+    }
+
+    FL_SUBCASE("truncated string {} output stays NUL terminated") {
+        char buf[6];
+        fl::string value("a very long string that will not fit");
+        int written = fl::snprintf(buf, sizeof(buf), "{}", value);
+        FL_CHECK(written == 5);
+        FL_CHECK(fl::strlen(buf) == 5);
+        FL_CHECK(buf[5] == '\0');
+        FL_CHECK(fl::string(buf) == "a ver");
+    }
+
+    FL_SUBCASE("size 1 buffer only gets a NUL") {
+        char buf[1];
+        int written = fl::snprintf(buf, sizeof(buf), "{}", 42);
+        FL_CHECK(written == 0);
+        FL_CHECK(buf[0] == '\0');
+    }
+
+    FL_SUBCASE("null buffer is a no-op") {
+        int written = fl::snprintf(static_cast<char*>(nullptr), 16, "{}", 42);
+        FL_CHECK(written == 0);
+    }
+
+    FL_SUBCASE("fl::sprintf deduces size and truncates safely") {
+        char buf[10];
+        fl::sprintf(buf, "abc={}", 123456789);
+        FL_CHECK(fl::strlen(buf) == 9);
+        FL_CHECK(buf[9] == '\0');
+        FL_CHECK(fl::string(buf) == "abc=12345");
     }
 }
 
