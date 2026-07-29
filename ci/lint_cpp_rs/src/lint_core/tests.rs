@@ -459,4 +459,236 @@ FL_WARN(\"still checked because remote files are always guarded\");\n",
         );
         assert!(!checker.should_process_file(&header, &project_root));
     }
+
+    // ---- FastLED#3287: container raw-pointer checkers ----
+
+    #[test]
+    fn container_non_contiguous_flags_data_call() {
+        let checker = ContainerNonContiguousPtrChecker;
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.cpp",
+            "fl::deque<u8> chunks;\nconst u8* raw = chunks.data();\n",
+        ));
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].0, 2);
+        assert!(hits[0].1.contains("non-contiguous"));
+    }
+
+    #[test]
+    fn container_non_contiguous_flags_element_addresses() {
+        let checker = ContainerNonContiguousPtrChecker;
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.cpp",
+            concat!(
+                "fl::deque<u8> chunks;\n",
+                "auto* a = &chunks[0];\n",
+                "auto* b = &chunks.at(1);\n",
+                "auto* c = &chunks.front();\n",
+                "auto* d = &chunks.back();\n",
+                "fl::circular_buffer<int> ring;\n",
+                "auto* e = &ring[2];\n",
+            ),
+        ));
+        assert_eq!(hits.len(), 5);
+        assert_eq!(
+            hits.iter().map(|hit| hit.0).collect::<Vec<_>>(),
+            vec![2, 3, 4, 5, 7]
+        );
+    }
+
+    #[test]
+    fn container_non_contiguous_ignores_contiguous_containers() {
+        let checker = ContainerNonContiguousPtrChecker;
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.cpp",
+            "fl::vector<u8> bytes;\nconst u8* raw = bytes.data();\nauto* first = &bytes[0];\n",
+        ));
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn container_element_address_allows_data_on_contiguous() {
+        let checker = ContainerElementAddressChecker;
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.cpp",
+            "fl::vector<u8> bytes;\nconst u8* raw = bytes.data();\n",
+        ));
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn container_element_address_flags_contiguous_element_address() {
+        let checker = ContainerElementAddressChecker;
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.cpp",
+            "fl::vector<Group> groups;\nGroup* found = &groups[i];\n",
+        ));
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].0, 2);
+        assert!(hits[0].1.contains("fl::span"));
+    }
+
+    #[test]
+    fn container_element_address_flags_member_declared_below_use() {
+        // Class members are declared at the bottom of the class, below the
+        // accessors that use them -- the declaration scan must be whole-file.
+        let checker = ContainerElementAddressChecker;
+        let hits = checker.check_file_content(&file(
+            "src/platforms/shared/mock/peripheral_mock.h",
+            concat!(
+                "class Mock {\n",
+                "  public:\n",
+                "    const Record* last() const {\n",
+                "        return &mRecords[mRecords.size() - 1];\n",
+                "    }\n",
+                "  private:\n",
+                "    fl::vector<Record> mRecords;\n",
+                "};\n",
+            ),
+        ));
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].0, 4);
+    }
+
+    #[test]
+    fn container_ptr_follows_member_qualified_receivers() {
+        // Regression guard (CodeRabbit on #3759). The scanner originally
+        // parsed one identifier after `&` and bailed when the next token was
+        // a `.`/`->` whose member was not at/front/back -- so `&this->mQueue[0]`
+        // and `&obj.mQueue[0]` were silently skipped. Members are the common
+        // shape for fl::deque FIELDS, which is exactly what the whole-file
+        // declaration scan exists to catch, so this was a hole in the
+        // HARD-FAIL tier, not just the warn tier.
+        let non_contiguous = ContainerNonContiguousPtrChecker;
+        let contiguous = ContainerElementAddressChecker;
+        let source = concat!(
+            "fl::deque<int> mQueue;
+",
+            "fl::vector<int> mVec;
+",
+            "int* a = &this->mQueue[0];
+",
+            "int* b = &obj.mQueue[0];
+",
+            "int* c = &this->mQueue.front();
+",
+            "int* d = &state.inner.mQueue[2];
+",
+            "int* e = &this->mVec[0];
+",
+            "int* f = this->mVec.data();
+",
+        );
+        let hard = non_contiguous.check_file_content(&file("src/fl/example.cpp", source));
+        assert_eq!(hard.len(), 4, "expected 4 hard-fail hits, got {hard:?}");
+
+        let warn = contiguous.check_file_content(&file("src/fl/example.cpp", source));
+        // Only `&this->mVec[0]`. `.data()` on a contiguous container is fine.
+        assert_eq!(warn.len(), 1, "expected 1 warn hit, got {warn:?}");
+    }
+
+    #[test]
+    fn container_ptr_does_not_match_logical_and_operator() {
+        // A naive `&\s*(\w+)\s*\[` pattern matches the second `&` of `&&`
+        // and produced 7 false positives out of 11 during development.
+        let non_contiguous = ContainerNonContiguousPtrChecker;
+        let contiguous = ContainerElementAddressChecker;
+        let source = concat!(
+            "fl::deque<u8> annexB;\n",
+            "fl::vector<u8> a;\n",
+            "fl::vector<u8> b;\n",
+            "if (annexB[i] == 0 && annexB[i + 1] == 0) { return; }\n",
+            "if (ok && b[i]) { return; }\n",
+            "if (a[i] && b[j]) { return; }\n",
+            "u8 masked = flags & a[i];\n",
+        );
+        assert!(non_contiguous
+            .check_file_content(&file("src/fl/example.cpp", source))
+            .is_empty());
+        assert!(contiguous
+            .check_file_content(&file("src/fl/example.cpp", source))
+            .is_empty());
+    }
+
+    #[test]
+    fn container_ptr_honors_inline_suppression() {
+        let checker = ContainerNonContiguousPtrChecker;
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.cpp",
+            "fl::deque<u8> chunks;\nauto* p = chunks.data();  // fl-lint: container-data-ptr-ok legacy C API\n",
+        ));
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn container_ptr_honors_preceding_line_suppression() {
+        let checker = ContainerElementAddressChecker;
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.cpp",
+            "fl::vector<u8> bytes;\n// fl-lint: container-data-ptr-ok legacy C API\nauto* p = &bytes[0];\n",
+        ));
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn container_ptr_ignores_undeclared_and_raw_arrays() {
+        let non_contiguous = ContainerNonContiguousPtrChecker;
+        let contiguous = ContainerElementAddressChecker;
+        // `lane_waves` is a raw C array with no fl:: declaration in view;
+        // issue #3287 scopes raw arrays out explicitly.
+        let source = concat!(
+            "fl::vector<u8> anchor;\n",
+            "u8 lane_waves[8];\n",
+            "memcpy(dst, &lane_waves[0], 8);\n",
+            "auto* p = unknown.data();\n",
+        );
+        assert!(non_contiguous
+            .check_file_content(&file("src/fl/example.cpp", source))
+            .is_empty());
+        assert!(contiguous
+            .check_file_content(&file("src/fl/example.cpp", source))
+            .is_empty());
+    }
+
+    #[test]
+    fn container_ptr_ignores_comments_and_string_literals() {
+        let checker = ContainerNonContiguousPtrChecker;
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.cpp",
+            concat!(
+                "fl::deque<u8> chunks;\n",
+                "// auto* p = chunks.data();\n",
+                "/* auto* q = &chunks[0]; */\n",
+                "const char* msg = \"chunks.data()\";\n",
+            ),
+        ));
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn container_ptr_drops_names_shadowed_by_raw_arrays() {
+        // tests/fl/slice.cpp declares `fl::array<int, 4> arr` and
+        // `int arr[] = {5, 6, 7}` in sibling FL_SUBCASE blocks. Name matching
+        // is per-file, not scope-aware, so an ambiguous name must be dropped.
+        let checker = ContainerElementAddressChecker;
+        let hits = checker.check_file_content(&file(
+            "tests/fl/slice.cpp",
+            concat!(
+                "fl::array<int, 4> arr = {7, 8, 9, 10};\n",
+                "int arr[] = {5, 6, 7};\n",
+                "span<int, 3> s(&arr[0], 3);\n",
+            ),
+        ));
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn container_ptr_skips_third_party() {
+        assert!(!ContainerNonContiguousPtrChecker
+            .should_process_file("src/third_party/foo.h", Path::new(".")));
+        assert!(!ContainerElementAddressChecker
+            .should_process_file("src/third_party/foo.h", Path::new(".")));
+        assert!(ContainerNonContiguousPtrChecker
+            .should_process_file("src/fl/deque.h", Path::new(".")));
+    }
 }

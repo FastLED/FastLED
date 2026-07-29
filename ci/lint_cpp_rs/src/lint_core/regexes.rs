@@ -669,3 +669,24 @@ fn regex_legacy_log_macro() -> &'static Regex {
         Regex::new(&format!(r"\b({})\s*\(", MACROS.join("|"))).unwrap()
     })
 }
+
+/// `name.data()` / `name->data()` -- captures the receiver identifier.
+/// Used by the FastLED#3287 container-pointer checkers in
+/// `checkers/container_ptr.rs`.
+fn regex_container_data_call() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\b([A-Za-z_]\w*)\s*(?:\.|->)\s*data\s*\(\s*\)").unwrap())
+}
+
+/// Raw C array declaration (`int arr[] = {...};`, `u8 buf[8];`) -- captures
+/// the leading type token and the declared name. Used by the FastLED#3287
+/// container-pointer checkers to drop names that are ambiguous within a file.
+fn regex_raw_array_declaration() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        Regex::new(
+            r"^\s*(?:const\s+|volatile\s+|static\s+|constexpr\s+|unsigned\s+|signed\s+)*([A-Za-z_]\w*(?:::[A-Za-z_]\w*)*)\s*[*&]?\s+([A-Za-z_]\w*)\s*\[[^\]]*\]\s*(?:=|;)",
+        )
+        .unwrap()
+    })
+}

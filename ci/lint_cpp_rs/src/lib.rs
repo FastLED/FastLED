@@ -19,4 +19,5 @@ include!("checkers/public_settings.rs");
 include!("checkers/unity_build.rs");
 include!("checkers/structural_passes.rs");
 include!("checkers/singleton_elision.rs");
+include!("checkers/container_ptr.rs");
 include!("lint_core/tests.rs");

@@ -49,6 +49,11 @@ WARN_ONLY_CHECKERS = frozenset(
         # fl::Singleton<T> tracked under FastLED#3481. Promote to hard-fail
         # via FastLED#3492 when the count reaches zero.
         "SingletonElisionChecker",
+        # FastLED#3287 -- raw pointers into CONTIGUOUS fl:: containers are
+        # brittle rather than UB. The non-contiguous tier
+        # (ContainerNonContiguousPtrChecker) hard-fails; this one reports
+        # while the existing sites migrate to fl::span / iterators.
+        "ContainerElementAddressChecker",
     }
 )
 
