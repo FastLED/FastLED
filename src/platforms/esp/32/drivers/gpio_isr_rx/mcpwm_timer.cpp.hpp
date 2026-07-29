@@ -73,7 +73,10 @@ using fl::u32;
 // Constants
 // ============================================================================
 
-static const char* MCPWM_TIMER_TAG = "mcpwm_timer";
+// constexpr, not `const char*`: the latter is a mutable pointer that occupies
+// storage of its own on top of the string literal. As a compile-time constant
+// it emits nothing unless its address is taken (FastLED#3483).
+static constexpr const char* MCPWM_TIMER_TAG = "mcpwm_timer";
 
 // MCPWM configuration
 #define MCPWM_GROUP_ID 0
