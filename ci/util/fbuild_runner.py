@@ -35,6 +35,7 @@ from pathlib import Path
 from typing import IO, Any, cast
 
 from fbuild import Daemon, connect_daemon
+from running_process import EndOfStream, RunningProcess
 from typeguard import typechecked
 
 from ci.util.cpu_count import cpu_count
@@ -133,6 +134,25 @@ def fbuild_subprocess_env() -> dict[str, str]:
 def ensure_fbuild_daemon() -> None:
     """Ensure the fbuild daemon is running."""
     Daemon.ensure_running()
+
+
+def _kill_quietly(proc: Any) -> None:
+    """Best-effort kill of a RunningProcess, ignoring teardown failures.
+
+    Used on the timeout and interrupt paths: subprocess.run() reaped the child
+    for us, RunningProcess does not, and a still-running board build keeps the
+    fbuild daemon lock held after this function returns (FastLED#3441).
+    """
+    if proc is None:
+        return
+    try:
+        proc.kill()
+    except (OSError, RuntimeError, ValueError):
+        # Already exited, never started, or the handle is gone -- all fine, the
+        # goal is just "not still running". Deliberately NOT a blanket
+        # `except Exception`: a KeyboardInterrupt arriving during teardown must
+        # keep propagating to the caller's handler.
+        pass
 
 
 def _get_output(quiet: bool, log_file: IO[str] | None) -> IO[str]:
@@ -696,27 +716,51 @@ def run_fbuild_deploy(
     try:
         print(f"Running: {subprocess.list2cmdline(cmd)}", file=out)
         print(file=out)
-        proc = subprocess.run(
+        # Stream fbuild's output line-by-line instead of buffering it until the
+        # process exits (FastLED#3441). A board build can run for minutes, and
+        # with subprocess.run(stdout=PIPE) none of the compile progress -- or
+        # the actual failure, for a failing build -- appeared until after the
+        # wait. `out` is already the quiet/log_file-aware sink from
+        # _get_output(), so writing lines to it preserves both destinations.
+        #
+        # RunningProcess is the repo's standard streaming runner (see
+        # ci/compiler/pio.py); it also gives us the timeout and interrupt
+        # handling this function relied on subprocess.run for.
+        proc = RunningProcess(
             cmd,
             timeout=int(timeout),
             env=env,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
             check=False,
+            auto_run=True,
         )
-        if proc.stdout:
-            print(proc.stdout, file=out, end="")
-        returncode = proc.returncode
-        success = returncode == 0
+        collected: list[str] = []
         returned_port: str | None = None
-        for line in proc.stdout.splitlines() if proc.stdout else []:
-            marker = "FBUILD_DEPLOY_PORT="
+        marker = "FBUILD_DEPLOY_PORT="
+        while (raw_line := proc.get_next_line(timeout=int(timeout))) is not None:
+            if isinstance(raw_line, EndOfStream):
+                break
+            # get_next_line() is typed str | bytes | EndOfStream | None. We run
+            # with RunningProcess's default text=True so it is str in practice,
+            # but decode defensively rather than casting the type away.
+            line = (
+                raw_line
+                if isinstance(raw_line, str)
+                else raw_line.decode("utf-8", errors="replace")
+            )
+            print(line, file=out, flush=True)
+            collected.append(line)
+            # Parse as we stream so the port is still captured when the run
+            # later times out or is interrupted mid-flight.
             if marker in line:
                 suffix = line.split(marker, 1)[1].strip()
                 candidate = suffix.split()[0] if suffix else ""
                 if candidate:
                     returned_port = candidate
+
+        proc.wait()
+        stdout_text = "\n".join(collected)
+        returncode = proc.returncode
+        success = returncode == 0
 
         elapsed = time.monotonic() - t0
         if quiet:
@@ -730,7 +774,7 @@ def run_fbuild_deploy(
 
         return FbuildCommandResult(
             success=success,
-            output=proc.stdout or "",
+            output=stdout_text,
             returncode=returncode,
             port=returned_port,
         )
@@ -739,10 +783,17 @@ def run_fbuild_deploy(
         from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
         print("\nKeyboardInterrupt: Stopping deploy")
+        _kill_quietly(locals().get("proc"))
         handle_keyboard_interrupt(ki)
         raise
     except subprocess.TimeoutExpired:
+        # running_process.TimeoutExpired subclasses subprocess.TimeoutExpired,
+        # so this still catches the streaming runner's timeout.
         elapsed = time.monotonic() - t0
+        # subprocess.run() reaped the child on timeout; RunningProcess does
+        # not, so kill it explicitly or a multi-minute board build keeps
+        # running (and keeps holding the fbuild daemon lock) after we return.
+        _kill_quietly(locals().get("proc"))
         print(f"BUILD+FLASH FAIL timeout after {elapsed:.1f}s")
         return FbuildCommandResult(
             success=False, output=f"deploy timeout after {elapsed:.1f}s"
