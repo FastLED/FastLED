@@ -22,6 +22,11 @@ pub const WARN_ONLY_CHECKERS: &[&str] = &[
     // fl::Singleton<T> is tracked by the sub-issues under FastLED#3481.
     // Promote to hard-fail via FastLED#3492 once the count reaches zero.
     "SingletonElisionChecker",
+    // FastLED#3287 -- taking a raw pointer into a CONTIGUOUS fl:: container
+    // is not UB today, only brittle. The non-contiguous tier
+    // (ContainerNonContiguousPtrChecker) hard-fails; this one reports while
+    // the handful of existing sites migrate to fl::span / iterators.
+    "ContainerElementAddressChecker",
 ];
 
 /// True when `checker`'s findings must not affect the exit code.

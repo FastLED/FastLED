@@ -27,3 +27,5 @@ grouped by related policy area:
   test aggregation, banned header, and namespace include checks.
 - `platform_policy.rs`: native platform define, noexcept special member,
   enum-class, platform namespace, and logging-in-IRAM checks.
+- `container_ptr.rs`: raw pointers into `fl::` containers (FastLED#3287) --
+  hard-fail on non-contiguous containers, warn-only on contiguous ones.

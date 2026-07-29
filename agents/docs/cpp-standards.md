@@ -140,6 +140,34 @@ When the no-op only makes sense for the host/stub build (because it pretends to 
   - Avoid: `std::vector<uint8_t> getData()` (unnecessary copy)
   - Use `fl::span<const T>` for read-only views to prevent accidental modification
 
+## No Raw Pointers Into `fl::` Containers (lint-enforced)
+
+Do not treat an `fl::` container as a flat buffer by taking a raw pointer into
+its storage. `fl::deque<T>` stores elements as a chunked map of fixed-size
+blocks (PR #3282), so `&dq[0]` / `dq.data()` addresses at most one chunk —
+that was the `json::to_string_native` overrun and the #3286 audio-detector
+crash. Even on containers that ARE contiguous today the idiom is brittle to
+layout changes and bypasses bounds checking.
+
+Banned forms on `fl::` containers: `.data()` (non-contiguous containers only),
+`&c[i]`, `&c.at(i)`, `&c.front()`, `&c.back()`.
+
+Use instead:
+
+- `fl::span<T>` — a bounded view; contiguity is proven at the type level.
+- An iterator pair `[begin, end)` — works for any container, including `fl::deque`.
+- An explicit copy for legacy C APIs:
+  `fl::vector<T> flat(dq.begin(), dq.end()); use(flat.data(), flat.size());`
+
+Enforced by two Rust lint checkers in
+`ci/lint_cpp_rs/src/checkers/container_ptr.rs` (FastLED#3287):
+`ContainerNonContiguousPtrChecker` hard-fails on `fl::deque` /
+`fl::circular_buffer`; `ContainerElementAddressChecker` is warn-only for
+address-of-element on `fl::vector` / `fl::string` / `fl::array` and friends.
+Genuine C-API interop sites can carry a `// fl-lint: container-data-ptr-ok`
+comment (line suffix or the line immediately above), justified by a short
+reason.
+
 ## Macro Definition Patterns
 
 ### Type 1: Platform/Feature Detection Macros (defined/undefined pattern)
