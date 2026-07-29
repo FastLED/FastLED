@@ -5,6 +5,7 @@
 #include "fl/log/log.h"
 #include "fl/stl/stdio.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/singleton.h"
 
 namespace fl {
 namespace test {
@@ -227,9 +228,17 @@ bool TestContext::matchesFilter(const char* name, const char* filter) const FL_N
 }
 
 // Skip test support - global state
-// Thread-local would be ideal, but for embedded compatibility we use a global
-static bool sCurrentTestSkipped = false;
-static const char* sSkipReason = nullptr;
+// Thread-local would be ideal, but for embedded compatibility we use a global.
+// Held behind Singleton<T> rather than as namespace-scope variables so
+// --gc-sections can drop the storage with its accessor (FastLED#3488).
+struct SkipState {
+    bool skipped = false;
+    const char* reason = nullptr;
+};
+
+static SkipState& skipState() FL_NO_EXCEPT {
+    return fl::Singleton<SkipState>::instance();
+}
 
 void TestContext::runTestCase(const TestCaseInfo& info) FL_NO_EXCEPT {
     mStats.mTestCasesRun++;
@@ -246,7 +255,7 @@ void TestContext::runTestCase(const TestCaseInfo& info) FL_NO_EXCEPT {
     mShouldReenter = true;
 
     // Reset skip flag for this test
-    sCurrentTestSkipped = false;
+    skipState().skipped = false;
 
     // Record test start time if we have a time function
     if (mGetMillis) {
@@ -255,7 +264,7 @@ void TestContext::runTestCase(const TestCaseInfo& info) FL_NO_EXCEPT {
 
     // Run the test multiple times to explore all subcase paths
     // On each run, we follow the path in mNextSubcaseStack and then discover one new subcase
-    while (mShouldReenter && !mCurrentTestTimedOut && !sCurrentTestSkipped) {
+    while (mShouldReenter && !mCurrentTestTimedOut && !skipState().skipped) {
         mShouldReenter = false;
         mCurrentSubcaseDepth = 0;
         mSubcaseDiscoveryDepth = 0;
@@ -268,7 +277,7 @@ void TestContext::runTestCase(const TestCaseInfo& info) FL_NO_EXCEPT {
         info.mFunc();
 
         // Check for skip (FL_SKIP was called)
-        if (sCurrentTestSkipped) {
+        if (skipState().skipped) {
             break;
         }
 
@@ -287,7 +296,7 @@ void TestContext::runTestCase(const TestCaseInfo& info) FL_NO_EXCEPT {
         mStats.mTotalDurationMs += testDurationMs;
     }
 
-    if (sCurrentTestSkipped) {
+    if (skipState().skipped) {
         mStats.mTestCasesSkipped++;
         mReporter->testCaseEnd(true, testDurationMs);  // Skipped tests count as "not failed"
     } else if (mCurrentTestFailed || mCurrentTestTimedOut) {
@@ -483,16 +492,16 @@ void fail(const char* msg, const char* file, int line, bool isFatal) FL_NO_EXCEP
 // Skip test support functions
 // =============================================================================
 
-// Note: sCurrentTestSkipped and sSkipReason are defined above runTestCase()
+// Note: the skip state singleton is defined above runTestCase()
 
 void skipTest(const char* reason, const char* file, int line) FL_NO_EXCEPT {
-    sCurrentTestSkipped = true;
-    sSkipReason = reason;
+    skipState().skipped = true;
+    skipState().reason = reason;
     fl::printf("  [SKIPPED] %s:%d: %s\n", file, line, reason);
 }
 
 bool isTestSkipped() FL_NO_EXCEPT {
-    return sCurrentTestSkipped;
+    return skipState().skipped;
 }
 
 // =============================================================================

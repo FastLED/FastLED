@@ -8,6 +8,7 @@
 #include "fl/log/log.h"
 #include "fl/log/log.h"
 #include "fl/stl/stdio.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/string.h"
 // IWYU pragma: begin_keep
 #include <emscripten.h>
@@ -16,8 +17,15 @@
 
 namespace fl {
 
-// Global instance pointer for C callback
-static WasmAudioInput* g_wasmAudioInput = nullptr;
+// Global instance pointer for the JS -> C callback. Held behind
+// Singleton<T> rather than as a namespace-scope variable so --gc-sections
+// can drop the storage with its accessor when a sketch never creates a
+// WasmAudioInput (FastLED#3488).
+namespace {
+struct WasmAudioInputHolder {
+    WasmAudioInput* ptr = nullptr;
+};
+}  // namespace
 
 WasmAudioInput::WasmAudioInput()
     : mHead(0)
@@ -34,15 +42,16 @@ WasmAudioInput::WasmAudioInput()
     }
 
     // Set global instance for C callback
-    g_wasmAudioInput = this;
+    fl::Singleton<WasmAudioInputHolder>::instance().ptr = this;
 
     FL_DBG_F("WasmAudioInput created - ring buffer: %s slots x %s samples", RING_BUFFER_SLOTS, BLOCK_SIZE);
 }
 
 WasmAudioInput::~WasmAudioInput() {
     stop();
-    if (g_wasmAudioInput == this) {
-        g_wasmAudioInput = nullptr;
+    WasmAudioInputHolder& holder = fl::Singleton<WasmAudioInputHolder>::instance();
+    if (holder.ptr == this) {
+        holder.ptr = nullptr;
     }
 }
 
@@ -196,7 +205,7 @@ fl::shared_ptr<audio::IInput> wasm_create_audio_input(const audio::Config& confi
 }
 
 WasmAudioInput* wasm_get_audio_input() {
-    return g_wasmAudioInput;
+    return fl::Singleton<WasmAudioInputHolder>::instance().ptr;
 }
 
 } // namespace fl
@@ -214,7 +223,8 @@ extern "C" {
  */
 EMSCRIPTEN_KEEPALIVE
 void pushAudioSamples(const fl::i16* samples, int count, fl::u32 timestamp) {
-    if (!fl::g_wasmAudioInput) {
+    fl::WasmAudioInput* input = fl::wasm_get_audio_input();
+    if (!input) {
         static bool warned = false;
         if (!warned) {
             warned = true;
@@ -229,7 +239,7 @@ void pushAudioSamples(const fl::i16* samples, int count, fl::u32 timestamp) {
         return;
     }
 
-    fl::g_wasmAudioInput->pushSamples(samples, count, timestamp);
+    input->pushSamples(samples, count, timestamp);
 }
 
 } // extern "C"
