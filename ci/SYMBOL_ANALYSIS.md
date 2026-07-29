@@ -180,8 +180,9 @@ Successfully tested platforms:
 esp32_boards = ["esp32dev", "esp32", "esp32s2", ...]
 
 # FastLED-specific filtering
-if any(keyword in search_text for keyword in [
-    "fastled", "cfastled", "crgb", "hsv", ...]):
+if any(
+    keyword in search_text for keyword in ["fastled", "cfastled", "crgb", "hsv", ...]
+):
     fastled_symbols.append(symbol_info)
 ```
 

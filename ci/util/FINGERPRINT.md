@@ -151,11 +151,14 @@ class FingerprintResult:
 def calculate_fingerprint() -> FingerprintResult:
     """Fingerprint entire src/ directory"""
 
+
 def calculate_cpp_test_fingerprint(args: TestArgs) -> FingerprintResult:
     """Fingerprint for C++ tests (includes debug flag)"""
 
+
 def calculate_examples_fingerprint() -> FingerprintResult:
     """Fingerprint for example compilation"""
+
 
 def calculate_python_test_fingerprint() -> FingerprintResult:
     """Fingerprint for Python tests"""

@@ -133,7 +133,11 @@ class ProfileRunner:
             "test.py",
             self.test_name,
             "--cpp",
-            "--build",  # Build-only mode
+            # NOTE: no "--build" here. test.py has no such flag, and because
+            # "--build" is a unique prefix of "--build-mode", argparse
+            # abbreviation-matching consumed the real flag's value and every
+            # `bash profile <target>` invocation died with
+            # "--build-mode: expected one argument". See FastLED#3765.
             "--build-mode",
             self.build_mode,
         ]

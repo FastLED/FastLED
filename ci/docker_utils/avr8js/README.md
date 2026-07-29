@@ -57,10 +57,7 @@ from ci.docker_utils.avr8js_docker import DockerAVR8jsRunner
 
 runner = DockerAVR8jsRunner()
 exit_code = runner.run(
-    elf_path=Path("firmware.elf"),
-    mcu="atmega328p",
-    frequency=16000000,
-    timeout=30
+    elf_path=Path("firmware.elf"), mcu="atmega328p", frequency=16000000, timeout=30
 )
 ```
 
