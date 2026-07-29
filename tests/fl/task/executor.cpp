@@ -1,3 +1,4 @@
+#include "fl/stl/chrono.h"  // fl::micros
 #include "fl/task/executor.h"
 #include "fl/task/task.h"
 #include "fl/task/promise.h"
@@ -1070,3 +1071,46 @@ FL_TEST_CASE("global coordination - await releases lock for other threads") {
 #endif // FASTLED_STUB_IMPL
 
 } // FL_TEST_FILE
+
+FL_TEST_CASE("fl::task::run SYSTEM yield paths") {
+    // FastLED#3765.
+    //
+    // NOTE ON COVERAGE, because it is easy to over-read this test: the
+    // microseconds>0 branch is NOT observable here. Host CoroutineRunner::run()
+    // early-returns when no coroutine is registered (coroutine_context.cpp.hpp,
+    // `if (mCount == 0) return;`), and on ESP32 any non-zero request floors to
+    // one FreeRTOS tick regardless of the value. So clamping the request to the
+    // caller's remaining budget is a correctness/consistency change with no
+    // behavior change on either platform as exercised by this suite. It is only
+    // observable with coroutines registered, where the old hardcoded 1000 would
+    // pump them past the caller's deadline.
+    //
+    // What IS observable, and what this pins, is the zero-budget path: it must
+    // take the cheap fl::yield() and must not sleep.
+    using fl::task::ExecFlags;
+
+    FL_SUBCASE("a zero budget does not sleep") {
+        run(0, ExecFlags::SYSTEM);  // warm up lazy init
+
+        fl::u32 best = 0xFFFFFFFFu;
+        for (int i = 0; i < 5; ++i) {
+            const fl::u32 t0 = fl::micros();
+            run(0, ExecFlags::SYSTEM);
+            const fl::u32 dt = fl::micros() - t0;
+            if (dt < best) {
+                best = dt;
+            }
+        }
+        // Best-of-N: this bounds a wall clock, so a single sample can be
+        // inflated by OS preemption. A regression that made this path sleep
+        // would raise every sample, which best-of-N cannot hide.
+        FL_CHECK_LT(best, 250u);
+    }
+
+    FL_SUBCASE("a small budget still terminates") {
+        // Guards against the deadline loop failing to make progress.
+        const fl::u32 t0 = fl::micros();
+        run(50, ExecFlags::SYSTEM);
+        FL_CHECK_LT(fl::micros() - t0, 100000u);
+    }
+}
