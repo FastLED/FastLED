@@ -290,61 +290,96 @@ fn find_element_address_uses(code: &str) -> Vec<(String, String)> {
             continue;
         }
 
+        // Walk the whole receiver chain: `&a[0]`, `&this->a[0]`,
+        // `&obj.a[0]`, `&mState.mQueue[i]`. The container is named by the
+        // LAST identifier before the subscript or accessor, so re-anchor on
+        // each member as the chain is consumed.
+        //
+        // Without this, a member-qualified receiver was silently skipped --
+        // and members are the common shape for fl::deque FIELDS, which is
+        // precisely what the whole-file declaration scan exists to catch. It
+        // was a hole in the hard-fail tier, not just the warn tier.
         let mut cursor = index + 1;
-        while cursor < bytes.len() && (bytes[cursor] == b' ' || bytes[cursor] == b'\t') {
-            cursor += 1;
-        }
-        let name_start = cursor;
-        while cursor < bytes.len()
-            && (bytes[cursor].is_ascii_alphanumeric() || bytes[cursor] == b'_')
-        {
-            cursor += 1;
-        }
-        if cursor == name_start {
-            index += 1;
-            continue;
-        }
-        let name = code[name_start..cursor].to_string();
-        let after_name = cursor;
-        index = cursor;
+        loop {
+            while cursor < bytes.len() && (bytes[cursor] == b' ' || bytes[cursor] == b'\t') {
+                cursor += 1;
+            }
+            let name_start = cursor;
+            while cursor < bytes.len()
+                && (bytes[cursor].is_ascii_alphanumeric() || bytes[cursor] == b'_')
+            {
+                cursor += 1;
+            }
+            if cursor == name_start {
+                break;
+            }
+            let name = code[name_start..cursor].to_string();
 
-        let rest = code[after_name..].trim_start();
-        if rest.starts_with('[') {
-            let form = format!("&{name}[...]");
-            uses.push((name, form));
-            continue;
-        }
-        let member_rest = if let Some(stripped) = rest.strip_prefix("->") {
-            stripped
-        } else if let Some(stripped) = rest.strip_prefix('.') {
-            stripped
-        } else {
-            continue;
-        };
-        let member_rest = member_rest.trim_start();
-        let member_length = member_rest
-            .bytes()
-            .take_while(|byte| byte.is_ascii_alphanumeric() || *byte == b'_')
-            .count();
-        let member = &member_rest[..member_length];
-        if !member_rest[member_length..].trim_start().starts_with('(') {
-            continue;
-        }
-        match member {
-            "at" => {
-                let form = format!("&{name}.at(...)");
-                uses.push((name, form));
+            let mut after = cursor;
+            while after < bytes.len() && (bytes[after] == b' ' || bytes[after] == b'\t') {
+                after += 1;
             }
-            "front" => {
-                let form = format!("&{name}.front()");
+
+            // `name[` -- subscript on the thing we just named.
+            if after < bytes.len() && bytes[after] == b'[' {
+                let form = format!("&{name}[...]");
                 uses.push((name, form));
+                cursor = after;
+                break;
             }
-            "back" => {
-                let form = format!("&{name}.back()");
-                uses.push((name, form));
+
+            // `name->member` / `name.member`
+            let separator = if after + 1 < bytes.len()
+                && bytes[after] == b'-'
+                && bytes[after + 1] == b'>'
+            {
+                2
+            } else if after < bytes.len() && bytes[after] == b'.' {
+                1
+            } else {
+                cursor = after;
+                break;
+            };
+
+            let mut member_start = after + separator;
+            while member_start < bytes.len()
+                && (bytes[member_start] == b' ' || bytes[member_start] == b'\t')
+            {
+                member_start += 1;
             }
-            _ => {}
+            let mut member_end = member_start;
+            while member_end < bytes.len()
+                && (bytes[member_end].is_ascii_alphanumeric() || bytes[member_end] == b'_')
+            {
+                member_end += 1;
+            }
+            if member_end == member_start {
+                cursor = member_end;
+                break;
+            }
+            let member = &code[member_start..member_end];
+
+            let mut paren = member_end;
+            while paren < bytes.len() && (bytes[paren] == b' ' || bytes[paren] == b'\t') {
+                paren += 1;
+            }
+
+            // An accessor CALL terminates the chain: `&x.front()`.
+            if paren < bytes.len() && bytes[paren] == b'(' {
+                match member {
+                    "at" => uses.push((name.clone(), format!("&{name}.at(...)"))),
+                    "front" => uses.push((name.clone(), format!("&{name}.front()"))),
+                    "back" => uses.push((name.clone(), format!("&{name}.back()"))),
+                    _ => {}
+                }
+                cursor = paren;
+                break;
+            }
+
+            // Plain member access: re-anchor on the member and keep walking.
+            cursor = member_start;
         }
+        index = index + 1;
     }
 
     uses

@@ -551,6 +551,43 @@ FL_WARN(\"still checked because remote files are always guarded\");\n",
     }
 
     #[test]
+    fn container_ptr_follows_member_qualified_receivers() {
+        // Regression guard (CodeRabbit on #3759). The scanner originally
+        // parsed one identifier after `&` and bailed when the next token was
+        // a `.`/`->` whose member was not at/front/back -- so `&this->mQueue[0]`
+        // and `&obj.mQueue[0]` were silently skipped. Members are the common
+        // shape for fl::deque FIELDS, which is exactly what the whole-file
+        // declaration scan exists to catch, so this was a hole in the
+        // HARD-FAIL tier, not just the warn tier.
+        let non_contiguous = ContainerNonContiguousPtrChecker;
+        let contiguous = ContainerElementAddressChecker;
+        let source = concat!(
+            "fl::deque<int> mQueue;
+",
+            "fl::vector<int> mVec;
+",
+            "int* a = &this->mQueue[0];
+",
+            "int* b = &obj.mQueue[0];
+",
+            "int* c = &this->mQueue.front();
+",
+            "int* d = &state.inner.mQueue[2];
+",
+            "int* e = &this->mVec[0];
+",
+            "int* f = this->mVec.data();
+",
+        );
+        let hard = non_contiguous.check_file_content(&file("src/fl/example.cpp", source));
+        assert_eq!(hard.len(), 4, "expected 4 hard-fail hits, got {hard:?}");
+
+        let warn = contiguous.check_file_content(&file("src/fl/example.cpp", source));
+        // Only `&this->mVec[0]`. `.data()` on a contiguous container is fine.
+        assert_eq!(warn.len(), 1, "expected 1 warn hit, got {warn:?}");
+    }
+
+    #[test]
     fn container_ptr_does_not_match_logical_and_operator() {
         // A naive `&\s*(\w+)\s*\[` pattern matches the second `&` of `&&`
         // and produced 7 false positives out of 11 during development.
