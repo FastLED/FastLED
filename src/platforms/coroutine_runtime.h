@@ -41,11 +41,6 @@ public:
     /// @param us Microseconds budget for background work
     virtual void pumpCoroutines(fl::u32 us) FL_NO_EXCEPT = 0;
 
-    /// Check if the platform needs deep yields (≥1 FreeRTOS tick) to prevent
-    /// WiFi/lwIP task starvation. On ESP32, returns true when WiFi is active.
-    /// Other platforms return false (no RTOS priority inversion).
-    virtual bool needsDeepYield() const FL_NO_EXCEPT { return false; }
-
     /// Yield the current execution context for approximately `us` microseconds.
     /// Safe to call from ANY context (main thread, coroutine thread, worker thread).
     /// Used by fl::platforms::await() to yield while polling a promise.

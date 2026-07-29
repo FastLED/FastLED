@@ -39,14 +39,6 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
 #include "soc/soc_caps.h"
 // IWYU pragma: end_keep
-#ifndef SOC_WIFI_SUPPORTED
-#define SOC_WIFI_SUPPORTED 0
-#endif
-#if SOC_WIFI_SUPPORTED
-#include "esp_wifi.h"
-// Weak symbol: resolves to nullptr when WiFi component is not linked
-FL_LINK_WEAK esp_err_t esp_wifi_get_mode(wifi_mode_t *mode);
-#endif
 FL_EXTERN_C_END
 
 namespace fl {
@@ -85,31 +77,6 @@ public:
         vTaskDelay(ticks);
     }
 
-    bool needsDeepYield() const FL_NO_EXCEPT override {
-        // Cache WiFi detection — recheck at most once per second.
-        static TickType_t s_lastCheck = 0;
-        static bool s_cached = false;
-        TickType_t now = xTaskGetTickCount();
-        if ((now - s_lastCheck) >= pdMS_TO_TICKS(1000)) {
-            s_lastCheck = now;
-            s_cached = isWiFiActive();
-        }
-        return s_cached;
-    }
-
-private:
-    static bool isWiFiActive() FL_NO_EXCEPT {
-#if SOC_WIFI_SUPPORTED
-        if (esp_wifi_get_mode == nullptr) {
-            return false; // WiFi component not linked
-        }
-        wifi_mode_t mode;
-        if (esp_wifi_get_mode(&mode) == ESP_OK && mode != WIFI_MODE_NULL) {
-            return true;
-        }
-#endif
-        return false;
-    }
 };
 
 //=============================================================================

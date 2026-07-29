@@ -132,9 +132,26 @@ void run(fl::u32 microseconds, ExecFlags flags) {
         // When microseconds == 0 the caller wants the cheapest possible
         // yield (we are between other pumped subsystems and will loop
         // again immediately), so we keep the lightweight fl::yield() path.
+        //
+        // The sleep is clamped to whatever is left of the caller's budget,
+        // mirroring the COROUTINES branch below. This used to be a hardcoded
+        // pumpCoroutines(1000) that ignored `microseconds` entirely, so a
+        // caller asking for run(250, SYSTEM) slept 1000 us and overshot its
+        // own deadline by 750 us on every platform where pumpCoroutines
+        // honors the requested duration (host/stub -- CoroutineRunner::run).
+        //
+        // ESP32 behavior is unchanged: pumpCoroutines() there converts us to
+        // FreeRTOS ticks and floors at one tick for ANY non-zero request
+        // (coroutine_esp32.impl.hpp, the `if (ticks == 0) ticks = 1` branch
+        // added for #2254), so 250 and 1000 both yield exactly one tick. The
+        // deep-yield guarantee #2254 depends on still holds.
         if (do_system) {
             if (microseconds > 0) {
-                fl::platforms::ICoroutineRuntime::instance().pumpCoroutines(1000);
+                const fl::u32 time_left = remaining();
+                if (time_left) {
+                    fl::platforms::ICoroutineRuntime::instance().pumpCoroutines(
+                        fl::min(1000u, time_left));
+                }
             } else {
                 fl::yield();
             }
