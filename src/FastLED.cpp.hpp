@@ -16,7 +16,8 @@
 #include "fl/system/yield.h"  // for fl::yield
 #include "fl/system/sketch_macros.h"
 #if SKETCH_HAS_LARGE_MEMORY
-#include "fl/task/executor.h"  // for task::run (WiFi yield in show() spin loop)
+#include "fl/task/executor.h"
+#include "fl/net/network_detector.h"  // adaptive yield gate in the refresh throttle (#3762)
 #endif
 #include "fl/log/log.h"  // for FL_WARN
 #include "fl/stl/assert.h"  // for FL_ASSERT
@@ -232,14 +233,61 @@ void CFastLED::clear(ClearFlags flags) {
 // FL_LINT_ALLOW_GLOBAL(intentional ATtiny85 code-size optimization — moving to Singleton<T> reverses the size win documented above)
 static void* gControllersData[MAX_CLED_CONTROLLERS];
 
+// Refresh-rate throttle shared by show() and showColor().
+//
+// This mirrors the tiered wait already shipped in
+// IChannelDriver::waitForCondition (refs #2818 for the spin tier, #2815/#2817
+// for the adaptive yield). show() was the last call site still taking an
+// UNCONDITIONAL deep yield, which is the root cause of FastLED#2994.
+//
+// Why it matters: fl::task::run(<non-zero>, SYSTEM) routes to
+// pumpCoroutines(), which on ESP32 floors at one FreeRTOS tick
+// (coroutine_esp32.impl.hpp, the `if (ticks == 0) ticks = 1` branch added for
+// the #2254 websocket-starvation fix). That is >=1 ms at
+// CONFIG_FREERTOS_HZ=1000 and >=10 ms at the 100 Hz default. With
+// setMaxRefreshRate(800) the throttle only needs 1250 us, so every frame
+// overshot to a tick boundary -- ~500 shows per sequence x sub-ms jitter is
+// the 63-300 ms drift reported in #2994, against a rock-steady 2495 ms on
+// 3.10.3 (which used a plain busy-wait).
+//
+// Two tiers:
+//   - No radio up: taskYIELD() only. Equal-priority tasks still run, and there
+//     is no tick floor, so the wait stays microsecond-accurate.
+//   - Radio up: keep the deep yield -- WiFi/lwIP/BT genuinely need the CPU --
+//     but stop taking it once less than the spin budget remains, so the final
+//     stretch is spun out instead of overshooting past our deadline.
+static void throttleToMaxRefreshRate(fl::u32 minMicros) FL_NO_EXCEPT {
+	if (!minMicros) {
+		return;
+	}
+#if SKETCH_HAS_LARGE_MEMORY
+	const fl::u32 spinBudget = fl::detail::getWaitSpinBudgetUs();
+#endif
+	while (true) {
+		const fl::u32 elapsed = fl::micros() - lastshow;
+		if (elapsed >= minMicros) {
+			return;
+		}
+#if SKETCH_HAS_LARGE_MEMORY
+		const fl::u32 remaining = minMicros - elapsed;
+		// Deep yield only while a radio is up AND there is more than the spin
+		// budget left to burn. Once inside the budget we spin, because a deep
+		// yield costs a whole tick and would overshoot the deadline.
+		if (remaining > spinBudget && fl::NetworkDetector::isAnyNetworkActive()) {
+			fl::task::run(250, fl::task::ExecFlags::SYSTEM);
+		} else {
+			// taskYIELD()-equivalent: equal-priority tasks still get CPU, but
+			// there is no FreeRTOS tick floor, so this stays sub-microsecond.
+			fl::task::run(0, fl::task::ExecFlags::SYSTEM);
+		}
+#endif
+	}
+}
+
 FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 	FL_SCOPED_TRACE;
 	onBeginFrame();
-	while(mNMinMicros && ((fl::micros()-lastshow) < mNMinMicros)) {
-#if SKETCH_HAS_LARGE_MEMORY
-		fl::task::run(250, fl::task::ExecFlags::SYSTEM);
-#endif
-	}
+	throttleToMaxRefreshRate(mNMinMicros);
 	lastshow = fl::micros();
 
 	// If we have a function for computing power, use it!
@@ -314,11 +362,7 @@ CLEDController & CFastLED::operator[](int x) {
 }
 
 void CFastLED::showColor(const CRGB & color, fl::u8 scale) {
-	while(mNMinMicros && ((fl::micros()-lastshow) < mNMinMicros)) {
-#if SKETCH_HAS_LARGE_MEMORY
-		fl::task::run(250, fl::task::ExecFlags::SYSTEM);
-#endif
-	}
+	throttleToMaxRefreshRate(mNMinMicros);
 	lastshow = fl::micros();
 
 	// If we have a function for computing power, use it!
