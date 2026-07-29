@@ -151,7 +151,7 @@ config = CacheConfig(
     cache_type=CacheType.TWO_LAYER,
     cache_dir=Path(".cache"),
     build_mode=BuildMode.DEBUG,
-    description="My custom cache for XYZ"
+    description="My custom cache for XYZ",
 )
 
 # Cache file: .cache/fingerprint/my_custom_cache_debug.json
