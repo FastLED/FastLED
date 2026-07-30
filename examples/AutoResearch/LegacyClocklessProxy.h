@@ -12,6 +12,7 @@
 
 enum class LegacyClocklessChipset : uint8_t {
     WS2812B,
+    WS2814,
     SK6812,
 };
 
@@ -48,6 +49,8 @@ inline const char* legacyClocklessChipsetName(LegacyClocklessChipset chipset) {
     switch (chipset) {
         case LegacyClocklessChipset::WS2812B:
             return "WS2812B";
+        case LegacyClocklessChipset::WS2814:
+            return "WS2814";
         case LegacyClocklessChipset::SK6812:
             return "SK6812";
     }
@@ -64,13 +67,52 @@ inline bool legacyClocklessChipsetFromName(const fl::string& name,
         if (out) *out = LegacyClocklessChipset::SK6812;
         return true;
     }
+    if (name == "WS2814") {
+        if (out) *out = LegacyClocklessChipset::WS2814;
+        return true;
+    }
     return false;
+}
+
+inline bool legacyClocklessChipsetHasAutomaticRgbw(
+    LegacyClocklessChipset chipset) {
+    return chipset == LegacyClocklessChipset::WS2814;
+}
+
+/// @brief Name of the driver to which public legacy templates are bound.
+///
+/// AutoResearch selects Channel drivers at runtime, but the public
+/// CHIPSET<PIN> API chooses its controller at compile time. Return the known
+/// binding on ESP32 so the RPC layer can reject a request that would otherwise
+/// claim to test one driver while transmitting through another.
+inline const char* legacyClocklessBoundDriverName() {
+#if defined(FL_IS_ESP32)
+  #if defined(FL_ESP32_LEGACY_CLOCKLESS_USE_RMT) && \
+      FL_ESP32_LEGACY_CLOCKLESS_USE_RMT
+    return "RMT";
+  #elif FASTLED_ESP32_HAS_PARLIO && \
+        (defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32C6) || \
+         defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5))
+    return "PARLIO";
+  #elif FASTLED_ESP32_HAS_RMT && \
+        !defined(FASTLED_ESP32_USE_CLOCKLESS_SPI)
+    return "RMT";
+  #elif FASTLED_ESP32_HAS_CLOCKLESS_SPI
+    return "SPI";
+  #else
+    return "BIT_BANG";
+  #endif
+#elif defined(FL_IS_TEENSY_4X)
+    return "OBJECT_FLED";
+#else
+    return nullptr;
+#endif
 }
 
 /// @brief Proxy that creates a legacy clockless controller from runtime inputs.
 ///
 /// The legacy FastLED API requires compile-time template pin parameters:
-///   FastLED.addLeds<WS2812B, PIN>(leds, numLeds)
+///   FastLED.addLeds<CHIPSET, PIN>(leds, numLeds)
 ///
 /// This proxy uses a switch statement to dispatch supported AutoResearch legacy
 /// pin and chipset values to the corresponding template instantiation, enabling
@@ -102,6 +144,8 @@ class LegacyClocklessProxy {
         switch (chipset) {
             case LegacyClocklessChipset::WS2812B:
                 return createTyped<WS2812B<PIN, RGB>>(leds, numLeds, rgbw);
+            case LegacyClocklessChipset::WS2814:
+                return createTyped<WS2814<PIN, RGB>>(leds, numLeds, rgbw);
             case LegacyClocklessChipset::SK6812:
                 return createTyped<SK6812<PIN, RGB>>(leds, numLeds, rgbw);
         }

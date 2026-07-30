@@ -193,6 +193,19 @@ struct TIMING_WS2813 {
     };
 };
 
+/// WS2814 RGBW controller @ 800 kHz
+/// Four-phase: TH0=320ns, TH1=640ns, TL0=960ns, TL1=640ns
+/// @note The 1280ns bit period and 300us reset satisfy the WS2814 V1.4
+///       datasheet requirements.
+struct TIMING_WS2814 {
+    enum : u32 {
+        T1 = 320,
+        T2 = 320,
+        T3 = 640,
+        RESET = 300
+    };
+};
+
 /// SK6812 RGBW controller @ 800 kHz
 /// Four-phase: TH0=300ns, TH1=900ns, TL0=900ns, TL1=300ns
 struct TIMING_SK6812 {

@@ -93,6 +93,12 @@ FL_TEST_CASE("Different drivers") {
     }
 }
 
+FL_TEST_CASE("RMT internal loopback requires the same TX and RX GPIO") {
+    FL_CHECK_TRUE(validation::useRmtInternalLoopback(true, 0, 0));
+    FL_CHECK_FALSE(validation::useRmtInternalLoopback(true, 0, 1));
+    FL_CHECK_FALSE(validation::useRmtInternalLoopback(false, 0, 0));
+}
+
 FL_TEST_CASE("Invalid driver name - empty") {
     SingleTestConfig config = makeBasicConfig();
     config.driver_name = "";

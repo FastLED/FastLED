@@ -30,7 +30,7 @@ protected:
 		mRgb.clear();
 		PixelController<RGB> pixels_rgb = pixels; // Converts to RGB pixels
 		pixels_rgb.disableColorAdjustment();
-		auto iterator = pixels_rgb.as_iterator(RgbwInvalid());
+		auto iterator = pixels_rgb.as_iterator(this->getRgbw());
 		iterator.writeWS2812(&mRgb);
 		mTracker.update(mRgb);
 	}
@@ -53,7 +53,7 @@ protected:
 		mRgb.clear();
 		PixelController<RGB> pixels_rgb = pixels; // Converts to RGB pixels
 		pixels_rgb.disableColorAdjustment();
-		auto iterator = pixels_rgb.as_iterator(RgbwInvalid());
+		auto iterator = pixels_rgb.as_iterator(this->getRgbw());
 		iterator.writeWS2812(&mRgb);
 		mTracker.update(mRgb);
 	}
@@ -77,7 +77,7 @@ protected:
 		mRgb.clear();
 		PixelController<RGB> pixels_rgb = pixels; // Converts to RGB pixels
 		pixels_rgb.disableColorAdjustment();
-		auto iterator = pixels_rgb.as_iterator(RgbwInvalid());
+		auto iterator = pixels_rgb.as_iterator(this->getRgbw());
 		iterator.writeWS2812(&mRgb);
 		mTracker.update(mRgb);
 	}

@@ -12,6 +12,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/channels/options.h"
+#include "fl/log/log.h"
 #include "fl/stl/span.h"
 #include "fl/stl/noexcept.h"
 
@@ -50,6 +51,38 @@ protected:
     /// @note Subclasses can use DeferRegister to control when they join the linked list
     CLEDController(RegistrationMode mode) FL_NO_EXCEPT;
 
+    void applyRgbw(const Rgbw& arg) FL_NO_EXCEPT {
+        if (!arg.active()) {
+            mSettings.mWhiteCfg.reset();
+        } else {
+            prepare_rgbw_colorimetric(arg);
+            mSettings.mWhiteCfg = arg;
+        }
+    }
+
+    /// Configure a chipset-owned RGBW policy that public white-channel
+    /// setters cannot replace.
+    void setFixedRgbw(const Rgbw& arg) FL_NO_EXCEPT {
+        applyRgbw(arg);
+    }
+
+    /// Return the name of a chipset whose wire format owns its white-channel
+    /// policy. Overriding this virtual avoids per-controller policy storage.
+    virtual const char* fixedWhiteChannelChipset() const FL_NO_EXCEPT {
+        return nullptr;
+    }
+
+    bool rejectFixedWhiteChannelChange(const char* operation) const FL_NO_EXCEPT {
+        const char* chipset = fixedWhiteChannelChipset();
+        if (chipset == nullptr) {
+            return false;
+        }
+        FL_WARN_F("%s has fixed R,G,B,W output; %s is unsupported and was "
+                  "ignored",
+                  chipset, operation);
+        return true;
+    }
+
 public:
     /// @brief Add this controller to the linked list
     /// @note Used with DeferRegister mode to explicitly add controller to list
@@ -73,20 +106,15 @@ public:
     virtual void show(const CRGB *data, int nLeds, fl::u8 brightness) FL_NO_EXCEPT = 0;
 
     CLEDController& setRgbw(const Rgbw& arg = RgbwDefault::value()) FL_NO_EXCEPT {
-        // Note that at this time (Sept 13th, 2024) this is only implemented in the ESP32 driver
-        // directly. For an emulated version please see RGBWEmulatedController in chipsets.h
-        //
+        if (rejectFixedWhiteChannelChange("setRgbw()")) {
+            return *this;
+        }
         // (#2558) mSettings.mWhiteCfg is now a fl::variant<Empty, Rgbw, Rgbww>;
         // assigning Rgbw selects the 4-channel alternative. The legacy
         // "setRgbw(RgbwInvalid::value()) → disable" semantics are preserved
         // by translating an inactive Rgbw into Empty so observers see the
         // same "no white channel" state they did before the variant migration.
-        if (!arg.active()) {
-            mSettings.mWhiteCfg.reset();
-        } else {
-            prepare_rgbw_colorimetric(arg);
-            mSettings.mWhiteCfg = arg;
-        }
+        applyRgbw(arg);
         return *this;  // builder pattern.
     }
 
@@ -96,6 +124,9 @@ public:
     /// Symmetric with setRgbw: passing RgbwwInvalid::value() clears the channel
     /// to plain RGB rather than storing an inactive Rgbww.
     CLEDController& setRgbww(const Rgbww& arg = RgbwwDefault::value()) FL_NO_EXCEPT {
+        if (rejectFixedWhiteChannelChange("setRgbww()")) {
+            return *this;
+        }
         if (!arg.active()) {
             mSettings.mWhiteCfg.reset();
         } else {
@@ -107,6 +138,9 @@ public:
     /// @brief Reset this channel to plain 3-channel RGB (clears any RGBW/RGBWW
     /// configuration). Equivalent to assigning an empty mWhiteCfg.
     CLEDController& clearWhiteChannel() FL_NO_EXCEPT {
+        if (rejectFixedWhiteChannelChange("clearWhiteChannel()")) {
+            return *this;
+        }
         mSettings.mWhiteCfg.reset();
         return *this;
     }

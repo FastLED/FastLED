@@ -18,6 +18,7 @@ from typing import Protocol, runtime_checkable
 
 import serial as pyserial
 
+from ci.util.fbuild_runner import ensure_fbuild_daemon
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
@@ -147,13 +148,55 @@ class FbuildSerialAdapter:
     ) -> None:
         from fbuild.api import SerialMonitor
 
-        self._monitor = SerialMonitor(
-            port=port,
-            baud_rate=baud_rate,
-            auto_reconnect=auto_reconnect,
-            verbose=verbose,
-        )
+        self._serial_monitor_type = SerialMonitor
+        self._monitor_args = {
+            "port": port,
+            "baud_rate": baud_rate,
+            "auto_reconnect": auto_reconnect,
+            "verbose": verbose,
+        }
+        self._monitor = self._new_monitor()
         self._executor = ThreadPoolExecutor(max_workers=1)
+
+    def _new_monitor(self):  # type: ignore[no-untyped-def]
+        return self._serial_monitor_type(**self._monitor_args)
+
+    @staticmethod
+    def _is_daemon_connection_error(exc: Exception) -> bool:
+        message = str(exc).lower()
+        return "daemon websocket" in message or (
+            "daemon" in message
+            and (
+                "connection refused" in message
+                or "actively refused" in message
+                or "forcibly closed" in message
+                or "lost connection" in message
+            )
+        )
+
+    def _connect_with_daemon_recovery(self):  # type: ignore[no-untyped-def]
+        """Open the monitor, restarting a lost post-deploy daemon once."""
+        try:
+            return self._monitor.__enter__()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as first_error:
+            if not self._is_daemon_connection_error(first_error):
+                raise
+
+            # A completed fbuild ESP32 deploy can outlive the daemon process
+            # that launched its esptool child. Re-establish the daemon and
+            # rebuild SerialMonitor so it does not retain the dead WebSocket.
+            try:
+                ensure_fbuild_daemon()
+                self._monitor = self._new_monitor()
+                return self._monitor.__enter__()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
+                raise
+            except Exception as recovery_error:
+                raise recovery_error from first_error
 
     def _warn_once(self) -> None:
         if not FbuildSerialAdapter._warned:
@@ -171,7 +214,7 @@ class FbuildSerialAdapter:
         return await loop.run_in_executor(self._executor, func, *args)
 
     async def connect(self) -> None:
-        await self._run_in_thread(self._monitor.__enter__)
+        await self._run_in_thread(self._connect_with_daemon_recovery)
 
     async def close(self) -> None:
         await self._run_in_thread(self._monitor.__exit__, None, None, None)

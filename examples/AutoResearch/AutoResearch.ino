@@ -47,15 +47,16 @@ void loop()  { autoResearchLowMemoryLoop(); }
 // - Each channel in the span is validated sequentially with its own RX channel
 
 // Hardware Setup:
-//   ⚠️ IMPORTANT: Physical jumper wire required for non-RMT TX → RMT RX loopback
+//   ⚠️ IMPORTANT: Physical jumper wire required when TX and RX use different GPIOs
 //
-//   When non-RMT peripherals are used for TX (e.g., SPI, ParallelIO):
-//   - Connect GPIO PIN_TX to itself with a physical jumper wire
-//   - Internal loopback (io_loop_back flag) only works for RMT TX → RMT RX
+//   When TX and RX use distinct pins:
+//   - Connect GPIO PIN_TX to GPIO PIN_RX with a physical jumper wire
+//   - This applies to RMT as well as SPI, ParallelIO, UART, and I2S TX
 //   - ESP32 GPIO matrix cannot route other peripheral outputs internally to RMT input
 //
-//   When RMT is used for TX (lower peripheral priority or disable other peripherals):
-//   - No jumper wire needed - io_loop_back works for RMT TX → RMT RX
+//   When RMT TX and RMT RX use the same GPIO:
+//   - No jumper wire is needed; io_loop_back uses ESP-IDF's same-pin path
+//   - This preserves the ESP32-S3 RMT workaround
 //
 //   Alternative: Connect an LED strip between TX pin and ground, then connect
 //   RX pin to LED data line to capture actual LED protocol timing (requires

@@ -175,6 +175,28 @@ static bool isUCS7604(fl::ClocklessEncoder encoder) {
            encoder == fl::ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600;
 }
 
+static bool legacyLaneUsesRgbw(const fl::AutoResearchConfig& config,
+                               fl::size lane) {
+    if (config.legacy_rgbw) {
+        return true;
+    }
+    return lane < config.legacy_chipsets.size() &&
+           legacyClocklessChipsetHasAutomaticRgbw(
+               config.legacy_chipsets[lane]);
+}
+
+static fl::vector<uint8_t> buildExpectedClockless(
+    fl::span<CRGB> leds, bool rgbw) {
+    PixelController<RGB> pixels(
+        leds.data(), static_cast<int>(leds.size()),
+        ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    PixelIterator iterator = pixels.as_iterator(
+        rgbw ? RgbwDefault::value() : RgbwInvalid::value());
+    fl::vector<uint8_t> expected;
+    iterator.writeWS2812(&expected);
+    return expected;
+}
+
 /// @brief Build expected UCS7604 encoded bytes from LED data
 /// @param leds LED data span
 /// @param encoder Encoder selector identifying the UCS7604 variant
@@ -391,12 +413,15 @@ void collectRawEdgeDiagnostics(fl::shared_ptr<fl::RxChannel> rx_channel,
 // Capture transmitted LED data via RX loopback
 // - rx_channel: Shared pointer to RX device (persistent across calls)
 // - rx_buffer: Buffer to store received bytes
+// - expected_data_bytes: bytes in the current frame
+// - tx_pin: GPIO driven by the tested TX controller
 // - timing: Chipset timing configuration for RX decoder
-// - driver_name: Name of the TX driver being tested (e.g., "RMT", "PARLIO") - enables io_loop_back only for RMT
+// - driver_name: Name of the TX driver being tested (e.g., "RMT", "PARLIO")
 // Returns number of bytes captured, or 0 on error
 size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
                fl::span<uint8_t> rx_buffer,
                size_t expected_data_bytes,
+               int tx_pin,
                const fl::ChipsetTimingConfig& timing,
                const char* driver_name,
                fl::RunResult* diagnostics) {
@@ -453,12 +478,18 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     }
 #endif
 
-    // Internal loopback configuration: Enable ONLY for RMT TX -> RMT RX scenarios
-    // When driver_name == "RMT", enable io_loop_back to route RMT TX output to RMT RX internally
-    // This is REQUIRED for ESP32-S3 because TX GPIO output stops when RX is active on different GPIO
-    // For other drivers (PARLIO, SPI, UART, I2S), disable io_loop_back (use external GPIO wire)
     bool is_rmt_driver = (fl::strcmp(driver_name, "RMT") == 0);
-    rx_config.io_loop_back = is_rmt_driver;
+    const int rx_pin = rx_channel->getPin();
+    // ESP-IDF's RMT io_loop_back path requires TX and RX to share one GPIO.
+    // AutoResearch normally discovers a physical TX->RX jumper on two
+    // different pins; enabling io_loop_back in that case disconnects the RX
+    // channel from the external GPIO path and yields a successful wait with
+    // zero edges on ESP32-C6. Keep the ESP32-S3 same-pin workaround, but use
+    // the physical jumper whenever TX and RX are distinct.
+    const bool use_rmt_internal_loopback =
+        fl::validation::useRmtInternalLoopback(
+            is_rmt_driver, tx_pin, rx_pin);
+    rx_config.io_loop_back = use_rmt_internal_loopback;
     // RX DMA streaming: extends capture past the non-DMA cap by sizing
     // mem_block_symbols = 14336 so ESP-IDF allocates ~14 DMA descriptor
     // nodes (each 4092 bytes), yielding a 57 KB user-buffer cap — enough to
@@ -473,8 +504,8 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     // PLATFORM_DEFAULT), which silently reverted rxBackend overrides
     // like I2S_RX back to RMT (FastLED#3576 Phase 3).
     rx_config.backend = rx_channel->backend();
-    if (is_rmt_driver) {
-        AR_FL_WARN("[CAPTURE] RMT TX -> RMT RX: Internal loopback enabled (io_loop_back=true)");
+    if (use_rmt_internal_loopback) {
+        AR_FL_WARN("[CAPTURE] RMT TX -> RMT RX: Same-pin internal loopback enabled");
     } else {
         // The RX peripheral is platform-dependent (RMT on ESP32, FlexPWM on
         // Teensy 4, LPC_SCT on LPC845, …). Don't claim "RMT RX" on platforms
@@ -483,8 +514,10 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         // regardless of backend.
         if (logs_enabled) {
             AR_FL_WARN("[CAPTURE] " << driver_name
-                        << " TX -> external RX: External GPIO wire "
-                        << "(io_loop_back=false, use_dma=true)");
+                        << " TX GPIO " << tx_pin << " -> RX GPIO " << rx_pin
+                        << ": External jumper "
+                        << "(io_loop_back=false, use_dma="
+                        << (rx_config.use_dma ? "true" : "false") << ")");
         }
     }
 
@@ -613,7 +646,7 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         ss << "   1. Connect physical jumper wire from TX GPIO to RX GPIO " << rx_channel->getPin() << "\n";
         ss << "   2. Check that both TX and RX pins are correctly configured\n";
         ss << "   3. Verify the GPIO connection is working (GPIO baseline test should pass)\n";
-        ss << "   4. For RMT TX → RMT RX: Ensure io_loop_back=true in RxConfig";
+        ss << "   4. RMT internal loopback requires TX and RX to use the same GPIO";
         AR_FL_WARN(ss.str());
         if (!is_uart_driver) {
             return 0;
@@ -829,6 +862,10 @@ void runTest(const char* test_name,
         // Build test context for detailed error reporting
         const auto& leds = config.tx_configs[config_idx].mLeds;
         size_t num_leds = leds.size();
+        const bool lane_uses_rgbw =
+            legacyLaneUsesRgbw(config, config_idx);
+        const size_t expected_data_bytes =
+            num_leds * (lane_uses_rgbw ? 4u : 3u);
 
         fl::TestContext ctx{
             config.driver_name,
@@ -856,7 +893,9 @@ void runTest(const char* test_name,
             continue;
         }
 
-        size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, num_leds * 3u,
+        size_t bytes_captured = capture(config.rx_channel, config.rx_buffer,
+                                        expected_data_bytes,
+                                        config.tx_configs[config_idx].getDataPin(),
                                         config.timing, config.driver_name);
 
         if (bytes_captured == 0) {
@@ -892,6 +931,29 @@ void runTest(const char* test_name,
             int total_bytes = static_cast<int>(expected_len);
             AR_FL_WARN("Accuracy: " << (100.0 * (total_bytes - mismatches) / total_bytes) << "% ("
                     << (total_bytes - mismatches) << "/" << total_bytes << " bytes match)");
+        } else if (lane_uses_rgbw) {
+            const fl::vector<uint8_t> expected =
+                buildExpectedClockless(
+                    config.tx_configs[config_idx].mLeds, true);
+            const size_t expected_len = expected.size();
+            const size_t compare_len =
+                bytes_captured < expected_len ? bytes_captured : expected_len;
+            for (size_t i = 0; i < compare_len; ++i) {
+                if (expected[i] != config.rx_buffer[i]) {
+                    ++mismatches;
+                }
+            }
+            if (bytes_captured < expected_len) {
+                mismatches +=
+                    static_cast<int>(expected_len - bytes_captured);
+            }
+
+            AR_FL_WARN("RGBW bytes captured: " << bytes_captured
+                       << " (expected: " << expected_len << ")");
+            AR_FL_WARN("Accuracy: "
+                       << (100.0 * (expected_len - mismatches) / expected_len)
+                       << "% (" << (expected_len - mismatches) << "/"
+                       << expected_len << " bytes match)");
         } else {
             // WS2812: Compare raw RGB per-LED
             size_t bytes_expected = num_leds * 3;
@@ -999,6 +1061,15 @@ void runMultiTest(const char* test_name,
         AR_FL_WARN("[MULTI-LANE] Testing " << config.tx_configs.size() << " lanes, testing Lane 0 only");
     }
 
+    // The tested lane and its pixel buffer are stable across repeated frames,
+    // so construct the RGBW wire-order expectation once instead of allocating
+    // and rebuilding it for every capture.
+    fl::vector<uint8_t> expected_rgbw;
+    if (channels_to_test > 0 && legacyLaneUsesRgbw(config, 0)) {
+        expected_rgbw =
+            buildExpectedClockless(config.tx_configs[0].mLeds, true);
+    }
+
     // Execute multiple runs
     for (int run = 1; run <= multi_config.num_runs; run++) {
         // runSingleTest executes synchronously inside the RPC task, so the
@@ -1020,12 +1091,20 @@ void runMultiTest(const char* test_name,
         for (size_t config_idx = 0; config_idx < channels_to_test; config_idx++) {
             const auto& leds = config.tx_configs[config_idx].mLeds;
             size_t num_leds = leds.size();
+            const bool lane_uses_rgbw =
+                legacyLaneUsesRgbw(config, config_idx);
+            const size_t expected_data_bytes =
+                num_leds * (lane_uses_rgbw ? 4u : 3u);
             result.total_leds = num_leds;
-            result.totalBytes = num_leds * 3;
+            result.totalBytes = static_cast<int>(expected_data_bytes);
 
             // Capture RX data
-            size_t bytes_captured = capture(config.rx_channel, config.rx_buffer, num_leds * 3u,
-                                            config.timing, config.driver_name, &result);
+            size_t bytes_captured =
+                capture(config.rx_channel, config.rx_buffer,
+                        expected_data_bytes,
+                        config.tx_configs[config_idx].getDataPin(),
+                        config.timing,
+                        config.driver_name, &result);
             result.capturedBytes = static_cast<int>(bytes_captured);
 
             if (bytes_captured == 0) {
@@ -1098,6 +1177,77 @@ void runMultiTest(const char* test_name,
                 // Count missing bytes as mismatches
                 if (bytes_captured < expected_len) {
                     mismatches += static_cast<int>(expected_len - bytes_captured);
+                }
+            } else if (lane_uses_rgbw) {
+                const fl::vector<uint8_t>& expected = expected_rgbw;
+                size_t verified_leds = 0;
+                for (size_t i = 0; i < num_leds; ++i) {
+                    const size_t byte_offset = i * 4;
+                    if (byte_offset + 3 >= bytes_captured) {
+                        break;
+                    }
+                    verified_leds = i + 1;
+
+                    bool led_mismatch = false;
+                    for (size_t channel = 0; channel < 4; ++channel) {
+                        const uint8_t expected_byte =
+                            expected[byte_offset + channel];
+                        const uint8_t actual_byte =
+                            config.rx_buffer[byte_offset + channel];
+                        if (expected_byte != actual_byte) {
+                            ++result.mismatchedBytes;
+                            if ((expected_byte ^ actual_byte) == 0x01) {
+                                ++result.lsbOnlyErrors;
+                            }
+                            led_mismatch = true;
+                        }
+                    }
+
+                    if (led_mismatch) {
+                        if (mismatches == 0) {
+                            AR_FL_WARN("\n[RGBW CORRUPTION @ LED "
+                                       << static_cast<int>(i) << ", Run "
+                                       << run << "]");
+                            const size_t corruption_edge_index = i * 64;
+                            const size_t offset =
+                                corruption_edge_index > 4
+                                    ? corruption_edge_index - 4
+                                    : 0;
+                            dumpRawEdgeTiming(
+                                config.rx_channel, config.timing,
+                                fl::EdgeRange(offset, 9));
+                        }
+                        ++mismatches;
+
+                        if (result.errors.size() <
+                            static_cast<size_t>(
+                                multi_config.max_errors_per_run)) {
+                            result.errors.push_back(fl::LEDError(
+                                static_cast<int>(i),
+                                expected[byte_offset + 0],
+                                expected[byte_offset + 1],
+                                expected[byte_offset + 2],
+                                expected[byte_offset + 3],
+                                config.rx_buffer[byte_offset + 0],
+                                config.rx_buffer[byte_offset + 1],
+                                config.rx_buffer[byte_offset + 2],
+                                config.rx_buffer[byte_offset + 3]));
+                        }
+                    }
+                }
+
+                if (verified_leds < num_leds) {
+                    const size_t unchecked = num_leds - verified_leds;
+                    mismatches += static_cast<int>(unchecked);
+                    result.mismatchedBytes +=
+                        static_cast<int>(unchecked * 4);
+                    AR_FL_WARN("[TRUNCATED RGBW CAPTURE] Only verified "
+                               << verified_leds << "/" << num_leds
+                               << " LEDs (" << bytes_captured
+                               << " bytes captured, needed "
+                               << expected_data_bytes << "). Marking "
+                               << unchecked
+                               << " unchecked LEDs as mismatches.");
                 }
             } else {
                 // WS2812: Per-LED RGB comparison
@@ -1407,7 +1557,7 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
 // AutoResearch using the legacy template addLeds API (supports multi-lane)
 // Nearly identical to autoResearchChipsetTiming() — only channel creation differs:
 //   Normal:  FastLED.add(channel_config) → Channel
-//   Legacy:  LegacyClocklessProxy(pin, leds, numLeds) → WS2812B<PIN> → ClocklessIdf5 → Channel
+//   Legacy:  LegacyClocklessProxy(pin, leds, numLeds) -> CHIPSET<PIN> -> ClocklessIdf5 -> Channel
 void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
                                  int& driver_total, int& driver_passed,
                                  uint32_t& out_show_duration_ms,
@@ -1480,7 +1630,11 @@ void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
     // Measure show-only duration (excludes setup/teardown overhead)
     uint32_t show_start_ms = millis();
 
-    for (int pattern_id = 0; pattern_id < 4; pattern_id++) {
+    const bool ws2814_visual_validation =
+        !config.legacy_chipsets.empty() &&
+        config.legacy_chipsets[0] == LegacyClocklessChipset::WS2814;
+    const int pattern_count = ws2814_visual_validation ? 8 : 4;
+    for (int pattern_id = 0; pattern_id < pattern_count; pattern_id++) {
         // Apply pattern to all lanes
         for (size_t i = 0; i < config.tx_configs.size(); i++) {
             setMixedBitPattern(
@@ -1490,6 +1644,12 @@ void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
             );
         }
         runMultiTest(getBitPatternName(pattern_id), config, multi_config, total, passed, out_results);
+        if (ws2814_visual_validation && pattern_id >= 4) {
+            // Leave each isolated R/G/B/W frame visible long enough for the
+            // attached physical strip to be checked while RX independently
+            // verifies the exact four-byte frame.
+            delay(250);
+        }
     }
 
     out_show_duration_ms += millis() - show_start_ms;
@@ -1542,6 +1702,22 @@ void setMixedBitPattern(CRGB* leds, size_t count, int pattern_id) {
             }
             break;
 
+        case 4:
+            fill_solid(leds, count, CRGB::Red);
+            break;
+
+        case 5:
+            fill_solid(leds, count, CRGB::Green);
+            break;
+
+        case 6:
+            fill_solid(leds, count, CRGB::Blue);
+            break;
+
+        case 7:
+            fill_solid(leds, count, CRGB::White);
+            break;
+
         default:
             // Fallback: all black
             fill_solid(leds, count, CRGB::Black);
@@ -1556,6 +1732,10 @@ const char* getBitPatternName(int pattern_id) {
         case 1: return "Pattern B (R=0x55, G=0xFF, B=0x00)";
         case 2: return "Pattern C (R=0x0F, G=0xAA, B=0xF0)";
         case 3: return "Pattern D (RGB Solid Alternating)";
+        case 4: return "Pattern E (Isolated Red)";
+        case 5: return "Pattern F (Isolated Green)";
+        case 6: return "Pattern G (Isolated Blue)";
+        case 7: return "Pattern H (Isolated White)";
         default: return "Unknown Pattern";
     }
 }

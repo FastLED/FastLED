@@ -463,6 +463,14 @@ class WS2811 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class WS2813 : public WS2813Controller<DATA_PIN, RGB_ORDER> {};
 
+/// @brief WS2814 RGBW controller class.
+/// @details Enables RGBW output automatically with white in the fourth byte.
+/// WS2814 owns this fixed wire format; explicit white-channel setters emit a
+/// warning and are ignored.
+/// @copydetails WS2814Controller
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
+class WS2814 : public WS2814Controller<DATA_PIN, RGB_ORDER> {};
+
 /// @brief APA104 controller class.
 /// @copydetails WS2811Controller800Khz
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
