@@ -455,7 +455,12 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     bool is_uart_driver = (fl::strcmp(driver_name, "UART") == 0)
                        || (fl::strcmp(driver_name, "LPUART") == 0);
     bool is_object_fled_driver = (fl::strcmp(driver_name, "OBJECT_FLED") == 0);
-    rx_config.edge_capacity = rx_buffer.size() * 8;
+    rx_config.edge_capacity = fl::validation::captureEdgeCapacity(
+        rx_buffer.size(), expected_data_bytes, rx_channel->backend());
+    if (rx_config.edge_capacity == 0) {
+        FL_ERROR("[CAPTURE] RX edge-capacity overflow");
+        return 0;
+    }
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
     // RP's platform-default RX resolves to PIO, while RxChannel retains the
     // requested PLATFORM_DEFAULT enum. Recognize both that public default and

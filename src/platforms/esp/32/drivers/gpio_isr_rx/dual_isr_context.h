@@ -84,7 +84,7 @@ _Static_assert(_Alignof(EdgeEntry) == 4, "EdgeEntry must be 4-byte aligned");
  * - Main thread: Initializes, polls done flag, reads output buffer
  *
  * Atomicity:
- * - write_index: Atomic uint32_t (updated by fast ISR with RV32A atomic ops or careful ordering)
+ * - write_index: Aligned uint32_t (single producer, acquire/release ordering)
  * - read_index: Updated only by slow ISR (no atomicity needed)
  * - armed: Atomic bool (slow ISR disarms when done)
  * - done: Atomic bool (slow ISR signals completion)
@@ -127,8 +127,8 @@ typedef struct __attribute__((aligned(64))) {
     /**
      * @brief Current write index (updated by fast ISR)
      * Type: uint32_t (atomic)
-     * Access: Fast ISR writes (atomic increment), slow ISR reads (atomic load)
-     * Atomicity: Updated with RV32A atomic instructions (lr.w/sc.w) or careful ordering
+     * Access: Fast ISR writes after a release fence, slow ISR uses an acquire load
+     * Atomicity: Aligned RV32 word store with a single writer
      * Range: [0, buffer_size - 1]
      */
     volatile uint32_t write_index;
@@ -171,8 +171,15 @@ typedef struct __attribute__((aligned(64))) {
      */
     uint32_t gpio_bit_mask;
 
+    /**
+     * @brief GPIO interrupt status write-one-to-clear register address
+     * Type: uint32_t (GPIO_STATUS_W1TC_REG or GPIO_STATUS1_W1TC_REG)
+     * Access: Fast ISR writes gpio_bit_mask after sampling each edge
+     */
+    uint32_t gpio_status_w1tc_reg_addr;
+
     // ========================================================================
-    // MEDIUM-HOT PATH: Configuration values (bytes 32-47)
+    // MEDIUM-HOT PATH: Configuration values (starts at byte 40)
     // ========================================================================
 
     /**
@@ -270,6 +277,22 @@ typedef struct __attribute__((aligned(64))) {
 #ifdef __cplusplus
 FL_STATIC_ASSERT(sizeof(DualIsrContext) <= 128, "DualIsrContext must fit in 2 cache lines or less");
 FL_STATIC_ASSERT(alignof(DualIsrContext) == 64, "DualIsrContext must be 64-byte aligned");
+#if defined(__riscv)
+FL_STATIC_ASSERT(__builtin_offsetof(DualIsrContext, buffer) == 0,
+                 "fast_isr.S buffer offset mismatch");
+FL_STATIC_ASSERT(__builtin_offsetof(DualIsrContext, armed) == 20,
+                 "fast_isr.S armed offset mismatch");
+FL_STATIC_ASSERT(
+    __builtin_offsetof(DualIsrContext, mcpwm_capture_reg_addr) == 24,
+    "fast_isr.S MCPWM register offset mismatch");
+FL_STATIC_ASSERT(__builtin_offsetof(DualIsrContext, gpio_in_reg_addr) == 28,
+                 "fast_isr.S GPIO input register offset mismatch");
+FL_STATIC_ASSERT(__builtin_offsetof(DualIsrContext, gpio_bit_mask) == 32,
+                 "fast_isr.S GPIO mask offset mismatch");
+FL_STATIC_ASSERT(
+    __builtin_offsetof(DualIsrContext, gpio_status_w1tc_reg_addr) == 36,
+    "fast_isr.S GPIO status register offset mismatch");
+#endif
 #else
 _Static_assert(sizeof(DualIsrContext) <= 128, "DualIsrContext must fit in 2 cache lines or less");
 _Static_assert(_Alignof(DualIsrContext) == 64, "DualIsrContext must be 64-byte aligned");
@@ -318,14 +341,13 @@ _Static_assert(_Alignof(DualIsrContext) == 64, "DualIsrContext must be 64-byte a
  * Atomic Access Patterns:
  *
  * 1. write_index (fast ISR to slow ISR communication):
- *    - Fast ISR: Atomic increment with wrap-around
+ *    - Fast ISR: Single-producer store with release ordering
  *      ```asm
- *      loop:
- *          lr.w t1, (write_index_addr)      # Load-reserved
- *          addi t2, t1, 1                    # Increment
- *          remu t2, t2, buffer_size          # Wrap-around (or AND if power of 2)
- *          sc.w t3, t2, (write_index_addr)   # Store-conditional
- *          bnez t3, loop                     # Retry if failed
+ *          lw t1, 0(write_index_addr)       # Sole producer reads index
+ *          addi t2, t1, 1                   # Increment
+ *          and t2, t2, buffer_size_mask     # Wrap around
+ *          fence rw, w                      # Publish entry before index
+ *          sw t2, 0(write_index_addr)       # Aligned atomic word store
  *      ```
  *    - Slow ISR: Atomic load
  *      ```c
@@ -382,10 +404,9 @@ _Static_assert(_Alignof(DualIsrContext) == 64, "DualIsrContext must be 64-byte a
  *    - GPIO register address precomputed (direct register access)
  *    - Bit mask precomputed (no shift in ISR)
  *
- * 4. Atomic operation cost:
- *    - RV32A lr.w/sc.w: ~5-10 cycles (depends on contention)
- *    - Non-atomic load: ~1-2 cycles
- *    - Use atomics only where strictly necessary
+ * 4. Synchronization cost:
+ *    - The producer uses one release fence and an aligned word store.
+ *    - The consumer uses an acquire load.
  */
 
 #ifdef __cplusplus

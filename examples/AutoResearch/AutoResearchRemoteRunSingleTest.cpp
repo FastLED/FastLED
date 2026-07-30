@@ -891,6 +891,22 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         }
     }
 
+    // ESP32-C6 RMT RX merges PARLIO's waveform into its frame envelope even
+    // while the GPIO input sees every edge (FastLED#3586). Keep explicit
+    // backend overrides available for diagnostics, but use the independent
+    // GPIO ISR timestamp path for normal C6 PARLIO wire validation.
+#if defined(FL_IS_ESP_32C6)
+    constexpr bool is_esp32_c6 = true;
+#else
+    constexpr bool is_esp32_c6 = false;
+#endif
+    rx_backend_override = fl::validation::resolveCaptureBackend(
+        rx_backend_override, have_backend_override,
+        driver_name == "PARLIO", is_esp32_c6);
+    if (rx_backend_override != fl::RxBackend::PLATFORM_DEFAULT) {
+        have_backend_override = true;
+    }
+
     if (have_backend_override) {
         fl::RxChannelConfig rx_cfg(pin_rx, rx_backend_override);
         rx_channel_to_use = FastLED.addRx(rx_cfg);
