@@ -707,7 +707,12 @@ See Also:
         parser.add_argument(
             "--legacy",
             action="store_true",
-            help="Test using legacy template addLeds API (WS2812B<PIN>) instead of Channel API. Supports consecutive TX pins 0-8; pin 22 is single-lane for the current ObjectFLED loopback.",
+            help=(
+                "Test using the legacy template addLeds API instead of the "
+                "Channel API (WS2812B<PIN> by default; WS2814<PIN> with "
+                "--chipset ws2814). Supports consecutive TX pins 0-8; pin "
+                "22 is single-lane for the current ObjectFLED loopback."
+            ),
         )
         parser.add_argument(
             "--legacy-mixed-timings",
@@ -730,9 +735,13 @@ See Also:
         # Chipset selection
         parser.add_argument(
             "--chipset",
-            choices=["ws2812", "ucs7604"],
+            choices=["ws2812", "ws2814", "ucs7604"],
             default="ws2812",
-            help="Chipset timing to use for autoresearch (default: ws2812). ucs7604 uses UCS7604-800KHZ timing with 16-bit encoding.",
+            help=(
+                "Chipset to use for autoresearch (default: ws2812). "
+                "ws2814 requires --legacy and exercises automatic RGBW output; "
+                "ucs7604 uses UCS7604-800KHZ timing with 16-bit encoding."
+            ),
         )
 
         # Multi-frame capture (second-frame degradation detection)

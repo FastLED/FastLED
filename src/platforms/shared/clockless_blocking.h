@@ -21,6 +21,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/static_assert.h"
+#include "fl/stl/vector.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fl/log/log.h"
 #include "controller.h"
@@ -111,6 +112,17 @@ protected:
         // Wait for minimum time since last frame
         mWait.wait();
 
+        // Conversion, scaling, dithering, and allocation must finish before the
+        // timing-critical wire frame begins. Otherwise the work between pixels
+        // lengthens the low interval and can be interpreted as a reset.
+        fl::vector<u8> encoded;
+        if (pixels.mLen > 0 &&
+            !encodePixelData(pixels, this->getRgbw(), &encoded)) {
+            FL_WARN_F("GENERIC clockless controller could not allocate its "
+                      "encoded frame; output was skipped");
+            return;
+        }
+
         // Disable interrupts to ensure timing accuracy
         // (LED protocols are very timing-sensitive on most platforms)
 
@@ -119,8 +131,8 @@ protected:
 #endif
 
         // Send all pixel data
-        if (pixels.mLen > 0) {
-            sendPixelData(pixels);
+        if (!encoded.empty()) {
+            sendPixelData(encoded);
         }
 
         // Re-enable interrupts
@@ -133,17 +145,39 @@ protected:
     }
 
 private:
-    /// Send raw pixel data with precise timing
-    FASTLED_FORCE_INLINE static void sendPixelData(PixelController<RGB_ORDER> & pixels)
-    {
-        // Get color component order
-        u16 pixel_count = pixels.mLen;
-        u8 *data = (u8 *)pixels.mData;
+    static bool encodePixelData(PixelController<RGB_ORDER>& pixels,
+                                const Rgbw& rgbw,
+                                fl::vector<u8>* encoded) FL_NO_EXCEPT {
+        const fl::size bytes_per_pixel = rgbw.active() ? 4 : 3;
+        const fl::size expected_size =
+            static_cast<fl::size>(pixels.mLen) * bytes_per_pixel;
+        encoded->reserve(expected_size);
 
-        // Iterate through all bytes in all pixels
-        for (u16 i = 0; i < pixel_count * 3; ++i) {
-            u8 byte = data[i];
-            sendByte(byte);
+        while (pixels.has(1)) {
+            pixels.stepDithering();
+            if (rgbw.active()) {
+                u8 bytes[4];
+                pixels.loadAndScaleRGBW(
+                    rgbw, &bytes[0], &bytes[1], &bytes[2], &bytes[3]);
+                for (fl::size i = 0; i < 4; ++i) {
+                    encoded->push_back(bytes[i]);
+                }
+            } else {
+                encoded->push_back(pixels.loadAndScale0());
+                encoded->push_back(pixels.loadAndScale1());
+                encoded->push_back(pixels.loadAndScale2());
+            }
+            pixels.advanceData();
+        }
+        return encoded->size() == expected_size;
+    }
+
+    /// Send raw pixel data with precise timing
+    FASTLED_FORCE_INLINE static void
+    sendPixelData(const fl::vector<u8>& encoded)
+    {
+        for (fl::size i = 0; i < encoded.size(); ++i) {
+            sendByte(encoded[i]);
         }
 
         // Send reset code: line low for at least 50µs

@@ -502,6 +502,18 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 )
 
     parallel_mode = args.parallel
+    if args.legacy and parallel_mode:
+        print(
+            f"{Fore.RED}\u274c Error: --legacy cannot be combined with --parallel; "
+            f"legacy chipset templates bind one compile-time driver{Style.RESET_ALL}"
+        )
+        return 1
+    if args.legacy and len(drivers) != 1:
+        print(
+            f"{Fore.RED}\u274c Error: --legacy requires exactly one driver because "
+            f"the template controller is compile-time bound{Style.RESET_ALL}"
+        )
+        return 1
     if args.rp_pio_both and (not args.flex_io or not parallel_mode):
         print(
             f"{Fore.RED}❌ --rp-pio-both requires --flex-io --parallel{Style.RESET_ALL}"
@@ -654,8 +666,10 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 return 1
         min_lanes = requested_min_lanes
         max_lanes = requested_max_lanes
+        legacy_chipset_name = "WS2814" if args.chipset == "ws2814" else "WS2812B"
         print(
-            "\u2139\ufe0f  Legacy API mode: using WS2812B<PIN> template path (supported TX pins 0-8; pin 22 single-lane current loopback)"
+            f"\u2139\ufe0f  Legacy API mode: using {legacy_chipset_name}<PIN> template path "
+            "(supported TX pins 0-8; pin 22 single-lane current loopback)"
         )
         if args.legacy_mixed_timings:
             print(
@@ -673,6 +687,25 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         )
         print(f"\u274c Error: {flag} requires --legacy")
         return 1
+
+    if args.chipset == "ws2814":
+        if not args.legacy:
+            print(
+                "\u274c Error: --chipset ws2814 requires --legacy so AutoResearch exercises the public WS2814<PIN> template"
+            )
+            return 1
+        if args.use_root_platformio_ini:
+            print(
+                "\u274c Error: --chipset ws2814 cannot use "
+                "--use-root-platformio-ini; the staged project is required "
+                "to bind the public template to the requested RMT driver"
+            )
+            return 1
+        if args.legacy_mixed_timings or args.legacy_rgbw_small_counts:
+            print(
+                "\u274c Error: --chipset ws2814 cannot be combined with legacy mixed/RGBW override modes"
+            )
+            return 1
 
     if min_lanes is not None and max_lanes is not None:
         if min_lanes < 1 or max_lanes < 1 or min_lanes > max_lanes:
@@ -810,6 +843,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
 
     chipset_timing_map = {
         "ws2812": "WS2812B-V5",
+        "ws2814": "WS2814",
         "ucs7604": "UCS7604-800KHZ",
     }
     timing_name = chipset_timing_map.get(args.chipset, "WS2812B-V5")
@@ -858,7 +892,9 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         test_config["useLegacyApi"] = True
                         if args.legacy_rgbw_small_counts:
                             test_config["legacyRgbw"] = True
-                        if args.legacy_mixed_timings:
+                        if args.chipset == "ws2814":
+                            test_config["legacyChipsets"] = ["WS2814"] * lane_count
+                        elif args.legacy_mixed_timings:
                             test_config["legacyChipsets"] = [
                                 "WS2812B" if i % 2 == 0 else "SK6812"
                                 for i in range(lane_count)
@@ -957,50 +993,55 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     # this the bench RPCs are unbound and every call reports "no reply"
     # against perfectly healthy firmware. The two flags are mutually
     # exclusive host-side (both claim DMA0 channels + flash budget).
-    lpc_bench_defines: list[str] = []
+    bench_defines: list[str] = []
+    if args.legacy and args.rmt and args.chipset == "ws2814":
+        # ESP32-C6/P4/H2/C5 normally bind legacy templates to PARLIO. This
+        # request-scoped define moves the existing public template path to
+        # the existing RMT controller so the requested/reported driver is real.
+        bench_defines.append("FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1")
     if getattr(args, "dma_spi", False):
-        lpc_bench_defines.append("FASTLED_LPC_SPI_DMA=1")
+        bench_defines.append("FASTLED_LPC_SPI_DMA=1")
         # Cap the SPI+DMA buffers for the 16 KB-RAM bench build. At the
         # driver default (2048) the u16 encode buffer (4 KB) + the u8
         # harness buffer (2 KB) push static RAM to 94% and the first RPC
         # HardFaults at PC=0 when heap/stack collide (observed on
         # LPC845-BRK silicon 2026-07-02). The bench's largest case is
         # 512 bytes, so 512 loses no coverage and frees 4.5 KB.
-        lpc_bench_defines.append("FASTLED_LPC_SPI_DMA_MAX_BYTES=512")
+        bench_defines.append("FASTLED_LPC_SPI_DMA_MAX_BYTES=512")
         # ISR-refilled streaming (kickDmaStreamAsync ping-pong refill).
         # Requires the ACLPC core with named weak IRQ vector slots
         # (framework-arduino-lpc8xx#38, pinned via fbuild ≥ 2.4.0).
-        lpc_bench_defines.append("FASTLED_LPC_DMA_ISR=1")
+        bench_defines.append("FASTLED_LPC_DMA_ISR=1")
     if getattr(args, "dma_uart", False):
         # Async UART bench (#3453 follow-up). FASTLED_LPC_DMA_ISR turns on
         # the shared DMA0 IRQ hub for ISR chunk chaining — requires the
         # ACLPC core with named weak IRQ vector slots
         # (framework-arduino-lpc8xx#38).
-        lpc_bench_defines.append("FASTLED_LPC_UART_DMA=1")
-        lpc_bench_defines.append("FASTLED_AUTORESEARCH_LPC_UART_DMA=1")
-        lpc_bench_defines.append("FASTLED_LPC_DMA_ISR=1")
+        bench_defines.append("FASTLED_LPC_UART_DMA=1")
+        bench_defines.append("FASTLED_AUTORESEARCH_LPC_UART_DMA=1")
+        bench_defines.append("FASTLED_LPC_DMA_ISR=1")
     requested_env = (args.environment or args.environment_positional or "").lower()
     if requested_env in LPC_WS2812_ENVS:
         if getattr(args, "pin_toggle_rx", False):
-            lpc_bench_defines.append("FASTLED_LPC_RX_SCT=1")
+            bench_defines.append("FASTLED_LPC_RX_SCT=1")
         if getattr(args, "ws2812_loopback", False) or getattr(
             args, "pwm_dma_cl", False
         ):
-            lpc_bench_defines.append("FASTLED_LPC_RX_SCT_DMA=1")
+            bench_defines.append("FASTLED_LPC_RX_SCT_DMA=1")
     if getattr(args, "uart", False) and requested_env in LPC_WS2812_ENVS:
-        lpc_bench_defines.append("FASTLED_LPC_UART_DMA=1")
-        lpc_bench_defines.append("FASTLED_AUTORESEARCH_LPC_UART_DMA=1")
-        lpc_bench_defines.append("FASTLED_LPC_DMA_ISR=1")
-        lpc_bench_defines.append("FL_LPC_UART_DMA_CLOCKLESS_TEST=1")
-        lpc_bench_defines.append("FL_LPC_UART_DMA_LOOPBACK_TEST=1")
+        bench_defines.append("FASTLED_LPC_UART_DMA=1")
+        bench_defines.append("FASTLED_AUTORESEARCH_LPC_UART_DMA=1")
+        bench_defines.append("FASTLED_LPC_DMA_ISR=1")
+        bench_defines.append("FL_LPC_UART_DMA_CLOCKLESS_TEST=1")
+        bench_defines.append("FL_LPC_UART_DMA_LOOPBACK_TEST=1")
         if args.tx_pin is not None:
-            lpc_bench_defines.append(f"FL_LPC_UART_DMA_CLOCKLESS_TX_PIN={args.tx_pin}")
+            bench_defines.append(f"FL_LPC_UART_DMA_CLOCKLESS_TX_PIN={args.tx_pin}")
         if args.rx_pin is not None:
-            lpc_bench_defines.append(f"FL_LPC_UART_DMA_CLOCKLESS_RX_PIN={args.rx_pin}")
+            bench_defines.append(f"FL_LPC_UART_DMA_CLOCKLESS_RX_PIN={args.rx_pin}")
     if getattr(args, "pwm_dma_cl", False):
-        lpc_bench_defines.append("FASTLED_LPC_PWM_DMA=1")
+        bench_defines.append("FASTLED_LPC_PWM_DMA=1")
     if getattr(args, "test_fault_emit", False):
-        lpc_bench_defines.append("FASTLED_AUTORESEARCH_FAULT_TEST=1")
+        bench_defines.append("FASTLED_AUTORESEARCH_FAULT_TEST=1")
 
     # Resolve project root (always the user's invocation cwd) and build_dir.
     #
@@ -1038,7 +1079,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 final_environment,
                 project_root=project_root,
                 verbose=args.verbose,
-                extra_defines=lpc_bench_defines,
+                extra_defines=bench_defines,
             )
         except KeyboardInterrupt as ki:
             # Let user-initiated interrupts propagate via the project's
@@ -1291,6 +1332,8 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
         # Same driver-gate defines as the parse-time synthesis path — the
         # LPC bench harnesses compile out without their gate macro.
         deferred_defines: list[str] = []
+        if args.legacy and args.rmt and args.chipset == "ws2814":
+            deferred_defines.append("FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1")
         if getattr(args, "dma_spi", False):
             deferred_defines.append("FASTLED_LPC_SPI_DMA=1")
             # Same 16 KB-RAM cap rationale as the parse-time path above.
@@ -3525,6 +3568,42 @@ def _validate_test_rpc_response(
         for driver in expected_drivers:
             if driver not in actual_drivers:
                 errors.append(f"missing expected driver {driver}")
+
+    params = cmd.get("params")
+    is_ws2814_legacy = (
+        method == "runSingleTest"
+        and isinstance(params, dict)
+        and params.get("useLegacyApi") is True
+        and isinstance(params.get("legacyChipsets"), list)
+        and bool(params["legacyChipsets"])
+        and params["legacyChipsets"][0] == "WS2814"
+    )
+    patterns = data.get("patterns")
+    if is_ws2814_legacy:
+        if not isinstance(patterns, list) or not patterns:
+            errors.append("WS2814 response requires a non-empty patterns list")
+        else:
+            for index, pattern in enumerate(patterns):
+                if not isinstance(pattern, dict):
+                    errors.append(f"patterns[{index}] must be an object for WS2814")
+                    continue
+                total_leds = pattern.get("totalLeds")
+                total_bytes = pattern.get("totalBytes")
+                if not _is_plain_int(total_leds):
+                    errors.append(
+                        f"patterns[{index}] missing integer totalLeds for WS2814"
+                    )
+                    continue
+                expected_total_bytes = total_leds * 4
+                if not _is_plain_int(total_bytes):
+                    errors.append(
+                        f"patterns[{index}] missing integer totalBytes for WS2814"
+                    )
+                elif total_bytes != expected_total_bytes:
+                    errors.append(
+                        f"patterns[{index}].totalBytes={total_bytes} does not match "
+                        f"WS2814 expected {expected_total_bytes}"
+                    )
 
     expected_tx_pin, expected_rx_pin = _expected_test_pins(
         method, cmd, expected_tx_pin, expected_rx_pin

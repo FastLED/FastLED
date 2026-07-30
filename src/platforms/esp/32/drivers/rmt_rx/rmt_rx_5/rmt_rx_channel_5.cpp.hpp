@@ -728,13 +728,23 @@ class RmtRxChannelImpl : public RmtRxChannel {
         }
 #endif
 
-        // If the DMA setting changed on an already-created channel, we have to
-        // tear it down â€” ESP-IDF bakes `flags.with_dma` into the channel at
-        // rmt_new_rx_channel() time, so toggling on a later begin() is a no-op
-        // unless we rebuild. Also release the shared DMA slot and any DRAM
-        // capture buffer so first-time init below allocates cleanly.
-        if (mChannel && use_dma_req != mUseDma) {
-            FL_WARN_F("[RMT RX] use_dma changed (%s -> %s) - rebuilding channel", (mUseDma ? "true" : "false"), (use_dma_req ? "true" : "false"));
+        // If a channel-creation flag changed on an already-created channel, we
+        // have to tear it down. ESP-IDF bakes both `flags.with_dma` and
+        // `flags.io_loop_back` into rmt_new_rx_channel(), so updating the
+        // cached values and merely re-arming would silently retain the old
+        // GPIO path. Also release the shared DMA slot and any DRAM capture
+        // buffer so first-time init below allocates cleanly.
+        const bool use_dma_changed = use_dma_req != mUseDma;
+        const bool io_loop_back_changed =
+            config.io_loop_back != mIoLoopBack;
+        if (mChannel && (use_dma_changed || io_loop_back_changed)) {
+            FL_WARN_F(
+                "[RMT RX] channel flags changed "
+                "(use_dma %s -> %s, io_loop_back %s -> %s) - rebuilding",
+                (mUseDma ? "true" : "false"),
+                (use_dma_req ? "true" : "false"),
+                (mIoLoopBack ? "true" : "false"),
+                (config.io_loop_back ? "true" : "false"));
             rmt_disable(mChannel);
             rmt_del_channel(mChannel);
             mChannel = nullptr;

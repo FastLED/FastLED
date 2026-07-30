@@ -68,15 +68,29 @@ struct LEDError {
     uint8_t expected_r;     ///< Expected R value
     uint8_t expected_g;     ///< Expected G value
     uint8_t expected_b;     ///< Expected B value
+    uint8_t expected_w;     ///< Expected W value when has_white is true
     uint8_t actual_r;       ///< Actual R value
     uint8_t actual_g;       ///< Actual G value
     uint8_t actual_b;       ///< Actual B value
+    uint8_t actual_w;       ///< Actual W value when has_white is true
+    bool has_white;         ///< Whether this error contains an RGBW value
 
     LEDError(int idx, uint8_t exp_r, uint8_t exp_g, uint8_t exp_b,
              uint8_t act_r, uint8_t act_g, uint8_t act_b)
         : led_index(idx)
+        , expected_r(exp_r), expected_g(exp_g), expected_b(exp_b), expected_w(0)
+        , actual_r(act_r), actual_g(act_g), actual_b(act_b), actual_w(0)
+        , has_white(false) {}
+
+    LEDError(int idx, uint8_t exp_r, uint8_t exp_g, uint8_t exp_b,
+             uint8_t exp_w, uint8_t act_r, uint8_t act_g, uint8_t act_b,
+             uint8_t act_w)
+        : led_index(idx)
         , expected_r(exp_r), expected_g(exp_g), expected_b(exp_b)
-        , actual_r(act_r), actual_g(act_g), actual_b(act_b) {}
+        , expected_w(exp_w)
+        , actual_r(act_r), actual_g(act_g), actual_b(act_b)
+        , actual_w(act_w)
+        , has_white(true) {}
 };
 
 /// @brief Single run result with error tracking
@@ -84,7 +98,7 @@ struct RunResult {
     int run_number;                 ///< Run iteration number (1-based)
     int total_leds;                 ///< Total LEDs tested
     int mismatches;                 ///< Number of LED mismatches
-    int totalBytes;                 ///< Total bytes compared (num_leds * 3)
+    int totalBytes;                 ///< Total bytes compared (3 or 4 per LED)
     int capturedBytes;              ///< Bytes decoded from the RX channel
     int captureWaitResult;          ///< RxWaitResult value, or -1 before wait
     int rawEdgesAfterWait;          ///< Raw edges visible after RX wait/decode
@@ -130,12 +144,14 @@ struct MultiRunConfig {
 // - rx_channel: Shared pointer to RX device (persistent across calls)
 // - rx_buffer: Buffer to store received bytes
 // - expected_data_bytes: bytes in the current frame (bounds RP PIO DMA storage)
+// - tx_pin: GPIO driven by the tested TX controller
 // - timing: Chipset timing configuration for RX decoder
-// - driver_name: Name of the TX driver being tested (e.g., "RMT", "PARLIO") - enables io_loop_back only for RMT
+// - driver_name: Name of the TX driver being tested (e.g., "RMT", "PARLIO")
 // Returns number of bytes captured, or 0 on error
 size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
                fl::span<uint8_t> rx_buffer,
                size_t expected_data_bytes,
+               int tx_pin,
                const fl::ChipsetTimingConfig& timing,
                const char* driver_name,
                fl::RunResult* diagnostics = nullptr);
@@ -179,7 +195,8 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
                            int num_runs_per_pattern = 1);
 
 // AutoResearch using the legacy template addLeds API (supports multi-lane)
-// Uses LegacyClocklessProxy to map runtime pin to WS2812B<PIN> template instantiation
+// Uses LegacyClocklessProxy to map runtime pins and chipset names to public
+// CHIPSET<PIN> template instantiations.
 // @param config All autoresearch configuration (one or more tx_configs, pins must be 0-8)
 // @param total Output parameter - total tests run (incremented)
 // @param passed Output parameter - tests passed (incremented)

@@ -1013,12 +1013,12 @@ FastLED supports virtually every LED chipset available:
 
 | **Clockless (3-wire)** | **SPI-based (4-wire)** | **Specialty** |
 |------------------------|------------------------|---------------|
-| **WS281x Family**: WS2811, WS2812 (NeoPixel), WS2812B-V5, WS2812B-Mini-V3, WS2813, WS2815 | **APA102 / DotStars**: Including HD107s (40MHz turbo) | **SmartMatrix Panels** |
+| **WS281x Family**: WS2811, WS2812 (NeoPixel), WS2812B-V5, WS2812B-Mini-V3, WS2813, WS2814 RGBW, WS2815 | **APA102 / DotStars**: Including HD107s (40MHz turbo) | **SmartMatrix Panels** |
 | **TM180x Series**: TM1809/4, TM1803 | **High-Speed SPI**: LPD8806, WS2801, SM16716 | **DMX Output** |
 | **Other 3-wire**: UCS1903, GW6205, SM16824E | **APA102HD**: Driver-level gamma correction | **P9813 Total Control** |
 | | **HD108/NS108**: 16-bit high-definition with gamma | |
 
-**RGBW Support**: WS2816 and other white-channel LED strips • **Overclocking**: WS2812 up to 70% speed boost
+**RGBW Support**: WS2814 automatically emits fixed `R,G,B,W` output; explicit `setRgbw()` calls warn and are ignored • **Overclocking**: WS2812 up to 70% speed boost
 
 More details: [Chipset Reference Wiki](https://github.com/FastLED/FastLED/wiki/Chipset-reference)
 
@@ -1030,13 +1030,25 @@ More details: [Chipset Reference Wiki](https://github.com/FastLED/FastLED/wiki/C
 | WS2812B-V5 | 220 | 580 | 1160 | `WS2812BV5` | Newer variant with tighter timing tolerances |
 | WS2812B-Mini-V3 | 220 | 580 | 1160 | `WS2812BMiniV3` | Compact 3535 package, same timing as V5 |
 | WS2813 | 320 | 640 | 1280 | `WS2813` | Backup data line for improved reliability |
+| WS2814 | 320 | 640 | 1280 | `WS2814` | RGBW; 300 us reset; DIN2 is an auxiliary data input |
 
 Usage example:
 ```cpp
 // For WS2812B-V5 or WS2812B-Mini-V3 strips
 FastLED.addLeds<WS2812BV5, DATA_PIN, GRB>(leds, NUM_LEDS);
 FastLED.addLeds<WS2812BMiniV3, DATA_PIN, GRB>(leds, NUM_LEDS);
+
+// WS2814 automatically enables RGBW output in R,G,B,W byte order.
+FastLED.addLeds<WS2814, DATA_PIN, RGB>(leds, NUM_LEDS);
 ```
+
+WS2814's DIN2 pin is an auxiliary input used by the chipset's backup-data
+scheme, not a second FastLED output. Wire it according to the strip or module
+datasheet; no second data-pin template argument is required.
+
+Power WS2814 LEDs from a suitable external 5 V supply, connect the supply and
+microcontroller grounds together, and translate 3.3 V data to 5 V with a
+5 V HCT/AHCT buffer such as a 74AHCT125.
 
 ### APA102 High Definition Mode
 ```cpp

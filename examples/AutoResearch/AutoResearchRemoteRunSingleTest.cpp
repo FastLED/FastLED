@@ -665,11 +665,29 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
                 if (!legacyClocklessChipsetFromName(chipset_name, &chipset)) {
                     response.set("success", false);
                     response.set("error", "UnsupportedLegacyChipset");
-                    response.set("message", "supported legacyChipsets: WS2812B, SK6812");
+                    response.set(
+                        "message",
+                        "supported legacyChipsets: WS2812B, WS2814, SK6812");
                     return response;
                 }
                 legacy_chipsets[i] = chipset;
             }
+        }
+    }
+
+    const char* legacy_driver_name = nullptr;
+    if (use_legacy_api) {
+        legacy_driver_name = legacyClocklessBoundDriverName();
+        if (legacy_driver_name != nullptr &&
+            driver_name != legacy_driver_name) {
+            response.set("success", false);
+            response.set("error", "LegacyDriverMismatch");
+            fl::sstream msg;
+            msg << "Legacy templates are compile-time bound to "
+                << legacy_driver_name << ", but the request selected "
+                << driver_name.c_str();
+            response.set("message", msg.str().c_str());
+            return response;
         }
     }
 
@@ -775,7 +793,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     }
 
     // Get timing configuration
-    // Legacy API: default WS2812B<PIN> template uses TIMING_WS2812_800KHZ.
+    // Legacy API: resolve timing from the selected public chipset template.
     // If mixed legacy chipsets are requested, lane 0 timing is used for RX
     // decode because AutoResearch captures only lane 0.
     // Channel API: Uses timing_name from RPC (default: WS2812B-V5)
@@ -787,7 +805,10 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         if (!legacy_chipsets.empty()) {
             first_chipset = legacy_chipsets[0];
         }
-        if (first_chipset == LegacyClocklessChipset::SK6812) {
+        if (first_chipset == LegacyClocklessChipset::WS2814) {
+            resolved_timing = fl::makeTimingConfig<fl::TIMING_WS2814>();
+            resolved_encoder = fl::encoder_for<fl::TIMING_WS2814>();
+        } else if (first_chipset == LegacyClocklessChipset::SK6812) {
             resolved_timing = fl::makeTimingConfig<fl::TIMING_SK6812>();
             resolved_encoder = fl::encoder_for<fl::TIMING_SK6812>();
         } else {
@@ -932,7 +953,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         }
 
         if (use_legacy_api) {
-            // Legacy API path: WS2812B<PIN> template instantiation
+            // Legacy API path: selected CHIPSET<PIN> template instantiation
             for (int iter = 0; iter < iterations; iter++) {
                 int iter_total = 0, iter_passed = 0;
                 autoResearchChipsetTimingLegacy(autoresearch_config, iter_total, iter_passed, show_duration_ms, &run_results, frame_count);
@@ -1037,6 +1058,9 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     response.set("pattern", pattern.c_str());
     response.set("useLegacyApi", use_legacy_api);
     if (use_legacy_api) {
+        if (legacy_driver_name != nullptr) {
+            response.set("legacyDriver", legacy_driver_name);
+        }
         response.set("legacyRgbw", legacy_rgbw);
         fl::json legacy_chipsets_response = fl::json::array();
         for (LegacyClocklessChipset chipset : legacy_chipsets) {
@@ -1116,6 +1140,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
             fl::json pat = fl::json::object();
             pat.set("runNumber", static_cast<int64_t>(rr.run_number));
             pat.set("totalLeds", static_cast<int64_t>(rr.total_leds));
+            pat.set("totalBytes", static_cast<int64_t>(rr.totalBytes));
             pat.set("mismatchedLeds", static_cast<int64_t>(rr.mismatches));
             pat.set("capturedBytes", static_cast<int64_t>(rr.capturedBytes));
             pat.set("captureWaitResult", static_cast<int64_t>(rr.captureWaitResult));
@@ -1154,11 +1179,18 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
                     expected.push_back(static_cast<int64_t>(e.expected_r));
                     expected.push_back(static_cast<int64_t>(e.expected_g));
                     expected.push_back(static_cast<int64_t>(e.expected_b));
+                    if (e.has_white) {
+                        expected.push_back(
+                            static_cast<int64_t>(e.expected_w));
+                    }
                     err.set("expected", expected);
                     fl::json actual = fl::json::array();
                     actual.push_back(static_cast<int64_t>(e.actual_r));
                     actual.push_back(static_cast<int64_t>(e.actual_g));
                     actual.push_back(static_cast<int64_t>(e.actual_b));
+                    if (e.has_white) {
+                        actual.push_back(static_cast<int64_t>(e.actual_w));
+                    }
                     err.set("actual", actual);
                     errs.push_back(err);
                 }

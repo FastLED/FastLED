@@ -62,6 +62,13 @@ public:
 
     virtual void init() FL_NO_EXCEPT override { }
 
+#if defined(FASTLED_TESTING)
+    /// @brief Encoded controller output for host backend-path tests.
+    const ChannelDataPtr& channelDataForTesting() const FL_NO_EXCEPT {
+        return mChannelData;
+    }
+#endif
+
 protected:
     virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT override
     {

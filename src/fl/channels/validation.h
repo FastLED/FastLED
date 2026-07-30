@@ -22,6 +22,20 @@ namespace validation {
 
 namespace fl {
 
+namespace validation {
+
+/// @brief Whether an RMT validation capture should use ESP-IDF loopback.
+///
+/// ESP-IDF's internal RMT path only connects TX and RX channels configured on
+/// the same GPIO. Distinct pins require a physical jumper and must leave the
+/// RX channel attached to its external GPIO input.
+inline bool useRmtInternalLoopback(bool is_rmt_driver, int tx_pin,
+                                   int rx_pin) FL_NO_EXCEPT {
+    return is_rmt_driver && tx_pin == rx_pin;
+}
+
+}  // namespace validation
+
 /// @brief Single test configuration - fully stateless
 struct SingleTestConfig {
     string driver_name;           ///< Driver to test (e.g., "PARLIO", "RMT")

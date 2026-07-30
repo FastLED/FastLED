@@ -5,10 +5,16 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.5.2 (released 2026-07-15). This includes the RP2040
-    # UF2 deploy-path handling required by AutoResearch hardware validation.
+    # Pin to fbuild 2.5.4. Its monitor WebSocket streaming and Windows
+    # serial-health fixes are required for AutoResearch to keep the daemon
+    # alive through the first RPC on attached boards. It also includes the
+    # RP2040 UF2 deploy-path handling added in 2.5.2.
     #
     # Pin history:
+    #   2.5.4 -- monitor WebSocket streaming and Windows serial-health fixes;
+    #             2.5.2 repeatedly lost the daemon at the first serial
+    #             WebSocket during attached ESP32-C6 AutoResearch runs.
+    #   2.5.2 -- RP2040 UF2 deploy-path handling required by AutoResearch.
     #   2.5.1 -- upgrades PyO3 to 0.29 and fixes duplicate objc dylib
     #             linkage on macOS (FastLED/fbuild#1026/#1027). It includes
     #             the 2.5.0 USB inventory, deploy tooling, build-cache,
@@ -153,7 +159,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.2",
+    "fbuild==2.5.4",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",

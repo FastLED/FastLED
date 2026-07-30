@@ -36,7 +36,27 @@ namespace fl {
 // `FastLED.setExclusiveDriver<fl::Bus::FLEX_IO, 0>()` if desired.
 // See `agents/docs/cpp-standards.md` -> "Runtime driver selection is
 // `Bus::FLEX_IO` — legacy chipset templates are not (REQUIRED)".
-#if FASTLED_ESP32_HAS_PARLIO && \
+#if defined(FL_ESP32_LEGACY_CLOCKLESS_USE_RMT) && \
+    FL_ESP32_LEGACY_CLOCKLESS_USE_RMT && !FASTLED_ESP32_HAS_RMT
+  #error "FL_ESP32_LEGACY_CLOCKLESS_USE_RMT requires ESP32 RMT support"
+#endif
+
+#if defined(FL_ESP32_LEGACY_CLOCKLESS_USE_RMT) && \
+    FL_ESP32_LEGACY_CLOCKLESS_USE_RMT
+  // Narrow legacy-template override for validation builds that must exercise
+  // the existing RMT controller even on chips whose normal legacy default is
+  // PARLIO (ESP32-C6/P4/H2/C5). AutoResearch injects this only for an explicit
+  // --legacy --rmt request; ordinary sketches retain the platform default.
+  #if FASTLED_RMT5
+    template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+    using ClocklessController = ClocklessIdf5<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+  #else
+    template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
+    using ClocklessController = ClocklessIdf4<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+  #endif
+  #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
+
+#elif FASTLED_ESP32_HAS_PARLIO && \
       (defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32C6) || \
        defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5))
   // PARLIO is the clockless default on ESP32-P4/C6/H2/C5.

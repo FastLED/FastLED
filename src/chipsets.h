@@ -468,6 +468,33 @@ class WS2811Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2813Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2813, RGB_ORDER> {};
 
+/// WS2814 RGBW controller - references centralized timing from
+/// fl::TIMING_WS2814 and automatically enables four-channel output.
+/// @see fl::TIMING_WS2814 in fl/chipsets/led_timing.h (320, 320, 640 ns)
+template <int DATA_PIN, EOrder RGB_ORDER = RGB>
+class WS2814Controller
+    : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2814,
+                                         RGB_ORDER, 0, false,
+                                         fl::TIMING_WS2814::RESET> {
+    using Base = fl::ClocklessControllerImpl<
+        DATA_PIN, fl::TIMING_WS2814, RGB_ORDER, 0, false,
+        fl::TIMING_WS2814::RESET>;
+
+  public:
+    WS2814Controller() FL_NO_EXCEPT {
+        this->setFixedRgbw(fl::RgbwDefault::value());
+    }
+
+    void init() FL_NO_EXCEPT override {
+        Base::init();
+    }
+
+  protected:
+    const char* fixedWhiteChannelChipset() const FL_NO_EXCEPT override {
+        return "WS2814";
+    }
+};
+
 /// WS2812 controller @ 800 kHz - references centralized timing from fl::TIMING_WS2812_800KHZ
 /// @note Timing: 250ns, 625ns, 375ns (overclockable via FASTLED_OVERCLOCK_WS2812)
 /// @see fl::TIMING_WS2812_800KHZ in fl::chipsets::led_timing.h (250, 625, 375 ns)

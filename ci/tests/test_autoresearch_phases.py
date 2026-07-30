@@ -410,6 +410,167 @@ class TestParseArgsAndBuildCommands:
             assert params["legacyRgbw"] is True
             assert "legacyChipsets" not in params
 
+    def test_ws2814_chipset_requires_legacy(self, fake_project_dir: Path) -> None:
+        args = _make_args(
+            parlio=False,
+            rmt=True,
+            chipset="ws2814",
+            project_dir=fake_project_dir,
+        )
+        assert _parse_args_and_build_commands(args) == 1
+
+    def test_ws2814_rejects_legacy_parallel(self, fake_project_dir: Path) -> None:
+        args = _make_args(
+            parlio=True,
+            rmt=True,
+            legacy=True,
+            chipset="ws2814",
+            parallel=True,
+            project_dir=fake_project_dir,
+        )
+        assert _parse_args_and_build_commands(args) == 1
+
+    def test_ws2814_rejects_legacy_rgbw_override(self, fake_project_dir: Path) -> None:
+        args = _make_args(
+            parlio=False,
+            rmt=True,
+            legacy=True,
+            legacy_rgbw_small_counts=True,
+            chipset="ws2814",
+            project_dir=fake_project_dir,
+        )
+        assert _parse_args_and_build_commands(args) == 1
+
+    def test_ws2814_rejects_root_platformio_ini(self, fake_project_dir: Path) -> None:
+        args = _make_args(
+            parlio=False,
+            rmt=True,
+            legacy=True,
+            chipset="ws2814",
+            environment_positional="esp32c6",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=True,
+        )
+        assert _parse_args_and_build_commands(args) == 1
+
+    def test_ws2814_esp32c6_rmt_legacy_canonical_command(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            rmt=True,
+            legacy=True,
+            chipset="ws2814",
+            strip_sizes="1,2,3,4",
+            environment_positional="esp32c6",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ) as mock_synth:
+            result = _parse_args_and_build_commands(args)
+
+        assert isinstance(result, RunContext)
+        mock_synth.assert_called_once_with(
+            "esp32c6",
+            project_root=fake_project_dir.resolve(),
+            verbose=False,
+            extra_defines=["FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1"],
+        )
+        assert result.drivers == ["RMT"]
+        assert len(result.json_rpc_commands) == 4
+        for strip_size, command in zip(
+            [1, 2, 3, 4], result.json_rpc_commands, strict=True
+        ):
+            assert command["method"] == "runSingleTest"
+            assert command["params"] == {
+                "driver": "RMT",
+                "laneSizes": [strip_size],
+                "pattern": "MSB_LSB_A",
+                "iterations": 1,
+                "timing": "WS2814",
+                "useLegacyApi": True,
+                "legacyChipsets": ["WS2814"],
+            }
+            assert "legacyRgbw" not in command["params"]
+
+    def test_ws2814_legacy_chipset_repeats_for_each_lane(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            rmt=True,
+            legacy=True,
+            chipset="ws2814",
+            lanes="3",
+            tx_pin=0,
+            environment_positional="esp32c6",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+
+        assert isinstance(result, RunContext)
+        params = result.json_rpc_commands[0]["params"]
+        assert params["laneSizes"] == [100, 100, 100]
+        assert params["legacyChipsets"] == ["WS2814", "WS2814", "WS2814"]
+        assert "legacyRgbw" not in params
+
+    def test_ws2814_failure_response_requires_four_byte_total(self) -> None:
+        command = {
+            "method": "runSingleTest",
+            "params": {
+                "driver": "RMT",
+                "laneSizes": [2],
+                "useLegacyApi": True,
+                "legacyChipsets": ["WS2814"],
+            },
+        }
+        response = {
+            "success": True,
+            "passed": False,
+            "totalTests": 4,
+            "passedTests": 0,
+            "driver": "RMT",
+            "patterns": [
+                {
+                    "totalLeds": 2,
+                    "totalBytes": 8,
+                    "capturedBytes": 0,
+                }
+            ],
+        }
+        assert (
+            _validate_test_rpc_response("runSingleTest", command, response, None, None)
+            == []
+        )
+
+        del response["patterns"][0]["totalBytes"]
+        assert _validate_test_rpc_response(
+            "runSingleTest", command, response, None, None
+        ) == ["patterns[0] missing integer totalBytes for WS2814"]
+
+        response["patterns"] = []
+        assert _validate_test_rpc_response(
+            "runSingleTest", command, response, None, None
+        ) == ["WS2814 response requires a non-empty patterns list"]
+
+        response["patterns"] = ["malformed"]
+        assert _validate_test_rpc_response(
+            "runSingleTest", command, response, None, None
+        ) == ["patterns[0] must be an object for WS2814"]
+
+        response["patterns"] = [{"totalBytes": 8}]
+        assert _validate_test_rpc_response(
+            "runSingleTest", command, response, None, None
+        ) == ["patterns[0] missing integer totalLeds for WS2814"]
+
     def test_legacy_mixed_timings_requires_legacy(self, fake_project_dir: Path) -> None:
         args = _make_args(
             object_fled=True,
@@ -1039,6 +1200,64 @@ class TestResolvePortAndEnvironment:
         assert rc is None
         assert ctx.upload_port == "COM9"
         auto_detect.assert_called_once_with(expected_environment="esp32c6")
+
+    def test_ws2814_deferred_synthesis_injects_rmt_binding(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
+        staged_dir = tmp_path / ".build" / "pio" / "esp32c6"
+        staged_dir.mkdir(parents=True)
+        args = _make_args(
+            upload_port=None,
+            environment_positional=None,
+            parlio=False,
+            rmt=True,
+            legacy=True,
+            chipset="ws2814",
+            project_dir=tmp_path,
+            use_root_platformio_ini=False,
+        )
+        ctx = _make_ctx(
+            args=args,
+            upload_port=None,
+            final_environment=None,
+            build_dir=tmp_path.resolve(),
+        )
+        port_result = MagicMock(ok=True, selected_port="COM9")
+        chip_result = MagicMock(
+            ok=True,
+            chip_type="ESP32-C6",
+            environment="esp32c6",
+        )
+        with (
+            patch(
+                f"{_PATCH_MOD}.auto_detect_upload_port",
+                return_value=port_result,
+            ),
+            patch(
+                f"{_PATCH_MOD}.detect_attached_chip",
+                return_value=chip_result,
+            ),
+            patch(
+                "ci.autoresearch.staging.synthesise_autoresearch_project",
+                return_value=staged_dir,
+            ) as synth,
+            patch(
+                f"{_PATCH_MOD}.select_build_driver",
+                return_value=_make_mock_driver(),
+            ),
+        ):
+            rc = asyncio.run(_resolve_port_and_environment(ctx))
+
+        assert rc is None
+        assert ctx.final_environment == "esp32c6"
+        assert ctx.build_dir == staged_dir
+        synth.assert_called_once_with(
+            "esp32c6",
+            project_root=tmp_path.resolve(),
+            verbose=False,
+            extra_defines=["FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1"],
+        )
 
     def test_teensy_auto_detect_rejects_root_platformio_ini(self) -> None:
         ctx = _make_ctx(upload_port=None, final_environment=None)
