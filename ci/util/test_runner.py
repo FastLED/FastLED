@@ -1546,25 +1546,40 @@ def runner(
     # Determine test categories first to check if we should use meson
     test_categories = determine_test_categories(args)
 
+    # Snapshot the tree BEFORE building/running, for whichever unit-test branch
+    # runs below. Capturing after the run would absorb any file added meanwhile
+    # into the watermark, caching a pass over code that was never compiled or
+    # executed.
+    #
+    # An unreadable build file must not take down the test run: fall back to
+    # None, which makes save_full_run_result skip persisting. Worst case is one
+    # lost fast path, never a stale green.
+    #
+    # Captured out here rather than inside a branch. Only the mixed branch
+    # feeds save_full_run_result, but the capture used to live in the
+    # unit-only branch -- which returns first and never consumed it. So the
+    # value was computed where it was useless and unbound where it was needed:
+    # every `bash test --cpp` raised NameError into a swallowing
+    # `except Exception: pass`, .full_run_cache.json was never written, and the
+    # fast path it gates could never fire (#3783). Binding at function scope
+    # means no branch can omit it again.
+    _watermarks: Optional[dict[str, float]] = None
+    if test_categories.unit and not test_categories.unit_only and cpp_test_change:
+        from ci.meson.cache_utils import capture_source_watermarks
+        from ci.util.paths import PROJECT_ROOT
+
+        try:
+            _watermarks = capture_source_watermarks(PROJECT_ROOT)
+        except OSError:
+            _watermarks = None
+
     # Always use Meson build system for unit tests (Python build system has been removed)
     # Only return early if unit tests are the ONLY thing running (unit_only mode)
     # Skip if fingerprint cache indicates no changes
     if test_categories.unit_only:
         if cpp_test_change:
-            from ci.meson.cache_utils import capture_source_watermarks
             from ci.meson.runner import run_meson_build_and_test
             from ci.util.paths import PROJECT_ROOT
-
-            # Snapshot the tree BEFORE building/running. Capturing after the run
-            # would absorb any file added meanwhile into the watermark, caching
-            # a pass over code that was never compiled or executed.
-            # An unreadable build file must not take down the test run: fall
-            # back to None, which makes save_full_run_result skip persisting.
-            # Worst case is one lost fast path, never a stale green.
-            try:
-                _watermarks = capture_source_watermarks(PROJECT_ROOT)
-            except OSError:
-                _watermarks = None
 
             build_dir = PROJECT_ROOT / ".build" / "meson"
             test_name = args.test if args.test else None
@@ -1728,9 +1743,22 @@ def runner(
                     print(summary)
                 sys.exit(1)
 
-            # Save full-run cache after successful complete test suite run
-            # so the CASE 2 ultra-early exit can fire on next invocation.
-            if result.num_tests_run and result.num_tests_run == result.num_tests_passed:
+            # Save full-run cache after a successful COMPLETE suite run so the
+            # CASE 2 ultra-early exit can fire on the next invocation.
+            #
+            # A narrowed run must never be persisted here. This entry is
+            # replayed as an unconditional green for the whole suite, and its
+            # watermarks cover the entire tree -- so caching `bash test Foo`
+            # would let the next `bash test --cpp` exit 0 having compiled and
+            # run nothing. That is the stale-green #3763 was filed over, in its
+            # most dangerous form. Same condition the fingerprint writer above
+            # uses to stamp scope="partial" (#3783).
+            _full_scope_save = not (test_name or test_file_filter)
+            if (
+                _full_scope_save
+                and result.num_tests_run
+                and result.num_tests_run == result.num_tests_passed
+            ):
                 try:
                     from ci.meson.cache_utils import save_full_run_result
                     from ci.util.paths import PROJECT_ROOT
@@ -1747,11 +1775,20 @@ def runner(
                         result.num_tests_run,
                         result.duration,
                         watermarks=_watermarks,
+                        num_examples_passed=result.num_examples_passed,
+                        num_examples_run=result.num_examples_run,
+                        examples_included=result.examples_included,
                     )
                 except KeyboardInterrupt as ki:
                     handle_keyboard_interrupt(ki)
-                except Exception:
-                    pass  # Non-critical
+                except Exception as e:  # noqa: BLE001 - best-effort, see below
+                    # Persisting the fast-path cache is best-effort: a failure
+                    # costs one slower run, never correctness, so it must not
+                    # fail the suite. But it must not be SILENT either -- a
+                    # NameError sat in this exact handler undetected for the
+                    # life of #3783, disabling the fast path entirely with no
+                    # signal. Stay tolerant, become loud.
+                    ts_print(f"[cache] full-run cache not saved: {e!r}")
         else:
             # Fingerprint cache hit - skip unit tests
             cache_msg = _format_cache_hit_message(
@@ -1962,11 +1999,29 @@ def runner(
                                         _saved_tr.get("num_tests", 0),
                                         _saved_tr.get("duration", 0.0),
                                         watermarks={_k: _saved_tr[_k] for _k in _keys},
+                                        # Carry the split with the counts it
+                                        # describes; dropping it here would
+                                        # relabel an attributed run as
+                                        # unattributable on every refresh.
+                                        num_examples_passed=_saved_tr.get(
+                                            "num_examples_passed"
+                                        ),
+                                        num_examples_run=_saved_tr.get(
+                                            "num_examples_run"
+                                        ),
+                                        examples_included=_saved_tr.get(
+                                            "examples_included"
+                                        ),
                                     )
                     except KeyboardInterrupt as ki:
                         handle_keyboard_interrupt(ki)
-                    except Exception:
-                        pass  # Non-critical optimization; fail silently
+                    except Exception as e:  # noqa: BLE001 - best-effort, see below
+                        # Same bargain as the writer above: never fail a green
+                        # run over a cache refresh, never fail silently either
+                        # (#3783). A malformed entry can be any shape here --
+                        # json.loads happily returns a non-dict -- so the catch
+                        # stays broad and reports instead.
+                        ts_print(f"[cache] full-run cache not refreshed: {e!r}")
             summary = _format_timing_summary(all_timings)
             # Use print() instead of ts_print() to avoid orphan timestamps
             # before multi-line content (the summary starts with \n)
