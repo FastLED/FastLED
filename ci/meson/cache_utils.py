@@ -50,7 +50,12 @@ def compute_files_content_hash(files: Iterable[Path], root: Path) -> str:
         try:
             rel_path = f.relative_to(root).as_posix()
         except ValueError:
-            rel_path = f.as_posix()
+            # Outside *root*: use the ABSOLUTE path. A bare f.as_posix() would
+            # keep a relative path, which can collide with an identically-named
+            # relative path inside root when the contents match -- and a
+            # collision here means an external file's change is invisible to
+            # the cache.
+            rel_path = f.absolute().as_posix()
         try:
             content_digest = hashlib.sha256(f.read_bytes()).digest()
         except OSError:

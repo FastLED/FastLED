@@ -105,6 +105,34 @@ class TestContentHash(unittest.TestCase):
                 with_outside, compute_files_content_hash(files + [outside], root)
             )
 
+    def test_relative_path_outside_root_cannot_collide_with_one_inside(self) -> None:
+        """An outside-root file is keyed by its ABSOLUTE path.
+
+        Keying it by the relative path it was passed as lets it collide with an
+        identically-named path inside *root* whenever the contents match, and a
+        collision means the external file's edits are invisible to the cache.
+        """
+        with TemporaryDirectory() as tmp:
+            work = Path(tmp) / "work"
+            root = work / "inside"
+            root.mkdir(parents=True)
+            files = _tree(root)  # root/pkg/a.cpp, root/pkg/b.h
+
+            # Same relative path, same content, but OUTSIDE root.
+            (work / "pkg").mkdir()
+            (work / "pkg" / "a.cpp").write_bytes(files[0].read_bytes())
+
+            prev = os.getcwd()
+            os.chdir(work)
+            try:
+                outside_rel = Path("pkg") / "a.cpp"
+                self.assertNotEqual(
+                    compute_files_content_hash([files[0]], root),
+                    compute_files_content_hash([outside_rel], root),
+                )
+            finally:
+                os.chdir(prev)
+
     def test_unreadable_file_is_distinct_from_an_empty_one(self) -> None:
         """An unreadable file must not hash the same as a genuinely empty one,
         or a transient lock would silently read as 'unchanged'."""
