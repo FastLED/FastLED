@@ -144,3 +144,8 @@ ci/lint_cpp_rs/target/
 
 # Compile failure logs (./compile --log-failures failures)
 failures/
+
+# Agent scratch: per-issue worktrees and session task notes. Checked-in
+# copies of the tree here also trip the meson/path linters on stale files.
+.worktrees/
+TASK.md
