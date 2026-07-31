@@ -17,7 +17,37 @@ from ci.meson.output import (
 )
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.output_formatter import TimestampFormatter
+from ci.util.test_types import describe_test_counts
 from ci.util.timestamp_print import ts_print as _ts_print
+
+
+# Meson suite holding the example targets, as passed to --no-suite.
+EXAMPLES_SUITE = "fastled:examples"
+
+
+def _bare_suite(suite: str) -> str:
+    """Strip meson's optional ``project:`` qualifier from a suite name."""
+    return suite.rsplit(":", 1)[-1]
+
+
+def examples_are_included(
+    exclude_suites: "Optional[list[str]]", test_name: "Optional[str]" = None
+) -> bool:
+    """True when the examples suite was in scope for a run.
+
+    Meson accepts a suite either bare (``examples``) or project-qualified
+    (``fastled:examples``), and this repo's own docstrings advertise both
+    forms. Matching only the qualified spelling would read a genuine
+    ``--no-suite examples`` exclusion as "examples were included" and assert
+    coverage of a population that never ran (#3779), so normalize first.
+
+    A ``test_name`` selects one target, which likewise cannot cover the suite.
+    """
+    if test_name:
+        return False
+    if not exclude_suites:
+        return True
+    return _bare_suite(EXAMPLES_SUITE) not in {_bare_suite(s) for s in exclude_suites}
 
 
 @dataclass
@@ -32,6 +62,12 @@ class MesonTestResult:
     compilation_skipped: bool = (
         False  # True when result came from cache (no compilation)
     )
+    # Portion of the totals above contributed by example targets, and whether
+    # examples were part of this run's request at all. ``None`` means the path
+    # that produced this result cannot attribute its counts (#3779).
+    num_examples_run: Optional[int] = None
+    num_examples_passed: Optional[int] = None
+    examples_included: Optional[bool] = None
     failed_test_names: list[str] = field(default_factory=list)
     # Phase timing breakdown (seconds) - for detailed performance analysis
     meson_setup_time: float = 0.0
@@ -250,8 +286,25 @@ def run_meson_test(
         actual_passed = expected_total if expected_total > 0 else num_passed
         actual_run = expected_total if expected_total > 0 else num_run
 
+        # Name the populations this total covers (#3779). ``meson test``
+        # reports one suite-wide number with no unit/example split, but the
+        # suite exclusions say which populations were eligible: with examples
+        # excluded every test counted is a unit test, so the total is fully
+        # attributable. With them included the split stays unknown -- say so
+        # rather than inventing one.
+        examples_included = examples_are_included(exclude_suites, test_name)
+        num_examples_run = None if examples_included else 0
+        num_examples_passed = None if examples_included else 0
+        breakdown = describe_test_counts(
+            num_passed=actual_passed,
+            num_run=actual_run,
+            num_examples_passed=num_examples_passed,
+            num_examples_run=num_examples_run,
+            examples_included=examples_included,
+        )
+
         print_success(
-            f"✅ All tests passed ({actual_passed}/{actual_run} in {duration:.2f}s)"
+            f"✅ All tests passed ({breakdown.describe(f' in {duration:.2f}s')})"
         )
         return MesonTestResult(
             success=True,
@@ -259,6 +312,9 @@ def run_meson_test(
             num_tests_run=actual_run,
             num_tests_passed=actual_passed,
             num_tests_failed=0,  # Meson returned 0, so no failures
+            num_examples_run=num_examples_run,
+            num_examples_passed=num_examples_passed,
+            examples_included=examples_included,
         )
 
     except KeyboardInterrupt as ki:

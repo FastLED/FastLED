@@ -101,6 +101,9 @@ class FingerprintManager:
                         test_name=data.get("test_name"),
                         source_max_mtime=data.get("source_max_mtime"),
                         scope=data.get("scope"),
+                        num_examples_run=data.get("num_examples_run"),
+                        num_examples_passed=data.get("num_examples_passed"),
+                        examples_included=data.get("examples_included"),
                     )
                 except json.JSONDecodeError:
                     ts_print(f"Invalid {name} fingerprint file. Recalculating...")
@@ -126,6 +129,12 @@ class FingerprintManager:
             fingerprint_dict["source_max_mtime"] = fingerprint.source_max_mtime
         if fingerprint.scope is not None:
             fingerprint_dict["scope"] = fingerprint.scope
+        if fingerprint.num_examples_run is not None:
+            fingerprint_dict["num_examples_run"] = fingerprint.num_examples_run
+        if fingerprint.num_examples_passed is not None:
+            fingerprint_dict["num_examples_passed"] = fingerprint.num_examples_passed
+        if fingerprint.examples_included is not None:
+            fingerprint_dict["examples_included"] = fingerprint.examples_included
         with open(fingerprint_file, "w") as f:
             json.dump(fingerprint_dict, f, indent=2)
 
@@ -152,9 +161,13 @@ class FingerprintManager:
                     fingerprint.num_tests_passed = prev_fp.num_tests_passed
                     fingerprint.duration_seconds = prev_fp.duration_seconds
                     fingerprint.test_name = prev_fp.test_name
-                    # Carry scope with the counts it describes -- splitting
-                    # them would relabel a filtered result as a full one.
+                    # Carry scope and the unit/example split with the counts
+                    # they describe -- splitting them would relabel a filtered
+                    # or unit-only result as a full one.
                     fingerprint.scope = prev_fp.scope
+                    fingerprint.num_examples_run = prev_fp.num_examples_run
+                    fingerprint.num_examples_passed = prev_fp.num_examples_passed
+                    fingerprint.examples_included = prev_fp.examples_included
             # Persist the watermark from this invocation's opening scan. On a
             # fast-path hit nothing was rebuilt, so carry the previous value
             # forward rather than advancing it -- advancing would absorb any
@@ -176,11 +189,18 @@ class FingerprintManager:
         duration_seconds: float,
         test_name: Optional[str] = None,
         scope: Optional[str] = None,
+        num_examples_run: Optional[int] = None,
+        num_examples_passed: Optional[int] = None,
+        examples_included: Optional[bool] = None,
     ) -> None:
         """Update the test metadata for a fingerprint before saving.
 
         ``scope`` is "full" when the run covered the whole suite and
-        "partial" when a filter narrowed it (#3763).
+        "partial" when a filter narrowed it (#3763). The ``examples_*``
+        arguments split the totals into the two populations a C++ run covers
+        so the replayed line cannot present a unit-only count as a full pass
+        (#3779); leave them ``None`` when the producing path cannot attribute
+        its counts.
         """
         if name in self._fingerprints:
             self._fingerprints[name].num_tests_run = num_tests_run
@@ -189,6 +209,9 @@ class FingerprintManager:
             if test_name:
                 self._fingerprints[name].test_name = test_name
             self._fingerprints[name].scope = scope
+            self._fingerprints[name].num_examples_run = num_examples_run
+            self._fingerprints[name].num_examples_passed = num_examples_passed
+            self._fingerprints[name].examples_included = examples_included
 
     def get_prev_fingerprint(self, name: str) -> Optional[FingerprintResult]:
         """Get the previous fingerprint data (from last run) for display"""

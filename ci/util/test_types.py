@@ -145,6 +145,133 @@ class TestCategories:
                 raise TypeError(f"{field_name} must be bool, got {type(value)}")
 
 
+@dataclass(frozen=True)
+class RunBreakdown:
+    """How a test run's pass counts should be described.
+
+    ``counts`` names each population that actually executed; ``notes`` says
+    what did not, and is empty when everything requested ran. They are kept
+    apart so each surface can slot its own duration/scope text in between.
+    """
+
+    counts: str
+    notes: str
+
+    def describe(self, middle: str = "") -> str:
+        """Render as ``counts + middle + notes``.
+
+        Every surface slots its own text (" passed", " in 3.2s", a scope
+        annotation) between the two halves, which is why they are stored
+        apart. Routing all of them through here keeps one separator: both
+        halves already contain commas, so comma-joining produced strings with
+        commas at three nesting levels that could not be read apart.
+        """
+        return self.counts + middle + (f"; {self.notes}" if self.notes else "")
+
+
+def describe_test_counts(
+    *,
+    num_passed: int,
+    num_run: int,
+    num_examples_passed: Optional[int],
+    num_examples_run: Optional[int],
+    examples_included: Optional[bool],
+    filtered: bool = False,
+) -> RunBreakdown:
+    """Describe a C++ run's totals, using whatever attribution was recorded.
+
+    This is the single entry point for every reporting surface, so a run is
+    described identically in the headline, the summary table, and the replayed
+    cache line. Each surface previously repeated this three-way ``is None``
+    guard and its own fallback wording, which is how the same run came to be
+    described two different ways in one terminal output.
+
+    Three levels of knowledge are possible, and none of them may claim more
+    than was recorded (#3779):
+
+    * full split recorded -- name both populations and their counts;
+    * only *which* populations were eligible -- name them, not the split;
+    * nothing recorded -- replay the bare total and say the split is unknown.
+
+    ``filtered`` marks a run narrowed by a name/file selector. A population
+    that ran nothing under a filter was skipped by the selector, not verified
+    as up to date, and must not be described as cached.
+    """
+    if (
+        num_examples_run is not None
+        and num_examples_passed is not None
+        and examples_included is not None
+    ):
+        return format_run_breakdown(
+            unit_passed=num_passed - num_examples_passed,
+            unit_run=num_run - num_examples_run,
+            examples_passed=num_examples_passed,
+            examples_run=num_examples_run,
+            examples_included=examples_included,
+            filtered=filtered,
+        )
+    if examples_included is not None:
+        # The populations are known but not their sizes -- ``meson test``
+        # reports one suite-wide number. Name the coverage, claim no split.
+        if examples_included:
+            return RunBreakdown(f"{num_passed}/{num_run} unit + examples", "")
+        return RunBreakdown(f"{num_passed}/{num_run} unit", "examples not requested")
+    return RunBreakdown(f"{num_passed}/{num_run}", "unit/example split unrecorded")
+
+
+def format_run_breakdown(
+    *,
+    unit_passed: int,
+    unit_run: int,
+    examples_passed: int,
+    examples_run: int,
+    examples_included: bool,
+    filtered: bool = False,
+) -> RunBreakdown:
+    """Render pass counts with the unit/example split spelled out.
+
+    ``bash test --cpp`` covers two populations -- unit tests and example
+    compile targets -- and either can be skipped because its artifacts were
+    already up to date. Summing them into one anonymous denominator makes
+    "274 unit tests, examples cached" indistinguishable from "274 of the 357
+    things I expected", which is the ambiguity #3779 was filed over. So name
+    each population that ran, and say plainly which one did not.
+
+    ``examples_included`` is False when examples were never requested (the
+    unit-only mode passes ``--no-suite fastled:examples``); that is a
+    different statement from "requested but already cached".
+
+    Prefer :func:`describe_test_counts` unless the full split is already known
+    -- it handles the partially-attributed cases this function cannot express.
+    """
+    parts: list[str] = []
+    if unit_run:
+        parts.append(f"{unit_passed}/{unit_run} unit")
+    if examples_run:
+        parts.append(f"{examples_passed}/{examples_run} examples")
+
+    # Why a population contributed nothing decides what may be claimed about
+    # it. Under a filter it was never selected; otherwise its binaries were
+    # already up to date. Only the latter is evidence of anything.
+    missing = "not matched by filter" if filtered else "cached, not re-run"
+    notes: list[str] = []
+    if not unit_run:
+        notes.append(f"unit tests {missing}")
+    if not examples_included:
+        notes.append("examples not requested")
+    elif not examples_run:
+        notes.append(f"examples {missing}")
+
+    # Keep the totals visible even when nothing ran: the notes explain the
+    # zero, but a reader still needs to tell an empty run from a corrupt entry.
+    counts = (
+        ", ".join(parts)
+        if parts
+        else f"{unit_passed + examples_passed}/{unit_run + examples_run}"
+    )
+    return RunBreakdown(counts, "; ".join(notes))
+
+
 @typechecked
 @dataclass
 class FingerprintResult:
@@ -170,12 +297,22 @@ class FingerprintResult:
     # an authoritative full-suite pass and there is no way to tell the two
     # apart after the fact (#3763).
     scope: Optional[str] = None
+    # Split of the counts above into the two populations a C++ run covers.
+    # None means this fingerprint predates the breakdown (#3779) -- the totals
+    # are still replayed, but without claiming which populations they cover.
+    num_examples_run: Optional[int] = None
+    num_examples_passed: Optional[int] = None
+    examples_included: Optional[bool] = None
 
     def get_cache_summary(self) -> str:
         """Get a human-readable summary of cached test results"""
         if self.num_tests_run is not None and self.num_tests_passed is not None:
+            # `is not None`, not truthiness: 0.0s is a real duration for an
+            # instantly-replayed run, and dropping it loses information.
             duration_str = (
-                f" in {self.duration_seconds:.2f}s" if self.duration_seconds else ""
+                f" in {self.duration_seconds:.2f}s"
+                if self.duration_seconds is not None
+                else ""
             )
             # Say where the number came from. "partial" is called out; a missing
             # scope is from a fingerprint written before this field existed, so
@@ -186,10 +323,21 @@ class FingerprintResult:
                 scope_str = ""
             else:
                 scope_str = ", scope unrecorded"
-            return (
-                f"{self.num_tests_passed}/{self.num_tests_run} "
-                f"passed{duration_str}{scope_str}"
+            # Name the populations the counts cover. Without the split a
+            # unit-only total is indistinguishable from a unit+examples one
+            # under identical wording (#3779).
+            breakdown = describe_test_counts(
+                num_passed=self.num_tests_passed,
+                num_run=self.num_tests_run,
+                num_examples_passed=self.num_examples_passed,
+                num_examples_run=self.num_examples_run,
+                examples_included=self.examples_included,
+                # #3778 already records a narrowed run as "partial"; that is
+                # the same fact `filtered` needs, so a replayed filtered run
+                # cannot claim its untouched populations were merely cached.
+                filtered=self.scope == "partial",
             )
+            return breakdown.describe(f" passed{duration_str}{scope_str}")
         return ""
 
     def should_skip(self, current: "FingerprintResult") -> bool:

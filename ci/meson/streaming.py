@@ -50,6 +50,29 @@ class StreamingResult:
     compile_output: str = ""
     failed_names: list[str] = field(default_factory=list)
     compile_sub_phases: dict[str, float] = field(default_factory=dict)
+    # Subset of the totals above contributed by example targets. Only
+    # artifacts Ninja relinked this run are executed, so a population whose
+    # binaries were already up to date silently contributes zero -- callers
+    # need the split to say so out loud rather than shrinking one total
+    # (#3779).
+    num_passed_examples: int = 0
+    num_failed_examples: int = 0
+
+
+def is_example_artifact(test_path: Path) -> bool:
+    """True when a built artifact is an example rather than a unit test.
+
+    The build lays unit-test binaries under ``<build>/tests/`` and example
+    binaries under ``<build>/examples/``; that directory is the only surviving
+    marker of which population an artifact belongs to.
+
+    Phrased as "not a unit test" so this stays the single discriminator: the
+    streaming runner calls it to choose between ``runner`` and
+    ``example_runner``, and counting an artifact as a unit test while handing
+    it to ``example_runner`` would let the two disagree -- exactly the kind of
+    silent miscount #3779 is about.
+    """
+    return test_path.parent.name != "tests"
 
 
 @dataclass
@@ -711,6 +734,8 @@ def stream_compile_and_run_tests(
 
     num_passed = 0
     num_failed = 0
+    num_passed_examples = 0
+    num_failed_examples = 0
     failed_names: list[str] = []
     tests_completed = 0
 
@@ -723,8 +748,11 @@ def stream_compile_and_run_tests(
             wr = future.result()
             tests_completed += 1
             idx = tests_completed
+            is_example = is_example_artifact(wr.test_path)
             if wr.test_result.success:
                 num_passed += 1
+                if is_example:
+                    num_passed_examples += 1
                 if not verbose:
                     print_success(f"  [{idx}/{total}] ✓ {wr.test_path.stem}")
                 else:
@@ -734,6 +762,8 @@ def stream_compile_and_run_tests(
                             _ts_print(f"  {line}")
             else:
                 num_failed += 1
+                if is_example:
+                    num_failed_examples += 1
                 failed_names.append(wr.test_path.stem)
                 if wr.error_msg:
                     _ts_print(
@@ -796,4 +826,6 @@ def stream_compile_and_run_tests(
         compile_output=cr.compile_output,
         failed_names=failed_names,
         compile_sub_phases=cr.compile_sub_phases,
+        num_passed_examples=num_passed_examples,
+        num_failed_examples=num_failed_examples,
     )
