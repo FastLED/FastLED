@@ -2,8 +2,13 @@
 Example metadata caching for Meson build system.
 
 This module provides hash-based caching to avoid re-running example discovery scripts
-when example files haven't changed. It tracks all example file metadata (path + mtime + size)
+when example files haven't changed. It tracks all example file paths and contents,
 and invalidates the cache only when examples are added, deleted, or modified.
+
+The hash is deliberately content-based rather than mtime-based: ``git checkout``,
+``git worktree add`` and branch switches rewrite example mtimes with byte-identical
+content, and an mtime hash treated every one of those as an example change — which
+cost a full ~20-30s meson reconfigure each time (issue #3761).
 
 Usage:
   # Check cache validity (exit 0 if valid, 1 if invalid)
@@ -19,40 +24,54 @@ Usage:
 import argparse
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
+
+from ci.meson.cache_utils import should_skip_scan_dir
 
 
 CACHE_FILENAME = "example_metadata.cache"
 
 
-def compute_example_files_hash(examples_dir: Path) -> str:
-    """
-    Compute a hash of all example file metadata (path + mtime + size).
+_EXAMPLE_SOURCE_EXTS = (".ino", ".cpp", ".h")
 
-    This provides a fast way to detect if any example files have been added,
-    deleted, or modified without re-parsing all example files.
+
+def iter_example_files(examples_dir: Path) -> list[Path]:
+    """
+    Return every file whose content the example metadata depends on.
+
+    That is the ``.ino`` / ``.cpp`` / ``.h`` tree under *examples_dir* plus the
+    discovery script itself, deduplicated and in a stable order.
+
+    Build-artifact directories (``.build``, ``.fbuild``, ``build``, ``bin``,
+    ``.vscode``, ...) are pruned via :func:`should_skip_scan_dir`. They are
+    already invisible to ``discover_examples_all.py`` (which skips dot-dirs)
+    and to the mtime fast path (which uses the same predicate), so hashing
+    them would make a plain ``bash compile <board> --examples Blink`` look like
+    an example-source change and force a needless reconfigure — the very
+    false-positive class issue #3761 is about.
 
     Args:
         examples_dir: Root directory containing example files
 
     Returns:
-        SHA256 hash of all example file metadata
+        Deduplicated list of paths, sorted within each extension group
     """
-    # Find all .ino files and additional .cpp files
+    by_ext: dict[str, list[Path]] = {ext: [] for ext in _EXAMPLE_SOURCE_EXTS}
+
+    for dirpath, dirnames, filenames in os.walk(examples_dir):
+        # Prune in place so os.walk never descends into build artifacts.
+        dirnames[:] = [d for d in dirnames if not should_skip_scan_dir(d)]
+        for name in filenames:
+            ext = os.path.splitext(name)[1]
+            if ext in by_ext:
+                by_ext[ext].append(Path(dirpath) / name)
+
+    # Preserve the historical grouping: all .ino, then .cpp, then .h.
     example_files: list[Path] = []
-
-    # Find all .ino files recursively
-    for f in sorted(examples_dir.rglob("*.ino")):
-        example_files.append(f)
-
-    # Find all .cpp files in example subdirectories
-    for f in sorted(examples_dir.rglob("*.cpp")):
-        example_files.append(f)
-
-    # Find all .h files in example subdirectories (for dependencies)
-    for f in sorted(examples_dir.rglob("*.h")):
-        example_files.append(f)
+    for ext in _EXAMPLE_SOURCE_EXTS:
+        example_files.extend(sorted(by_ext[ext]))
 
     # Also include the discovery script itself so changes to it invalidate the cache
     this_script = Path(__file__).parent / "discover_examples_all.py"
@@ -67,24 +86,67 @@ def compute_example_files_hash(examples_dir: Path) -> str:
             seen.add(f)
             unique_files.append(f)
 
-    # Create hash input from file metadata
-    hash_input: list[str] = []
-    for f in unique_files:
-        if f.is_file():
-            from os import stat_result
+    return unique_files
 
-            stat: stat_result = f.stat()
-            # Use absolute path for scripts outside examples_dir
-            try:
-                rel_path: str = f.relative_to(examples_dir).as_posix()
-            except ValueError:
-                rel_path = f.as_posix()
-            # Include path, mtime, and size in hash
-            hash_input.append(f"{rel_path}:{stat.st_mtime:.6f}:{stat.st_size}")
 
-    # Compute SHA256 hash
-    hash_str = "\n".join(hash_input)
-    return hashlib.sha256(hash_str.encode()).hexdigest()
+def max_example_files_mtime(examples_dir: Path) -> float:
+    """
+    Return the newest mtime across every example file (0.0 if there are none).
+
+    This is the cheap probe that guards the full content hash: an in-place edit
+    bumps the edited file's mtime, so a tree whose files are all older than a
+    known-good marker cannot have been edited since. It does *not* observe
+    additions or deletions — pair it with :func:`get_max_dir_mtime`, which
+    catches those via the parent directory's mtime.
+    """
+    newest = 0.0
+    for f in iter_example_files(examples_dir):
+        try:
+            mtime = f.stat().st_mtime
+        except OSError:
+            continue
+        if mtime > newest:
+            newest = mtime
+    return newest
+
+
+def compute_example_files_hash(examples_dir: Path) -> str:
+    """
+    Compute a hash of all example file paths and contents.
+
+    This detects examples being added, deleted, or modified without re-parsing
+    all example files. See the module docstring for why this hashes content
+    rather than mtimes (issue #3761).
+
+    Args:
+        examples_dir: Root directory containing example files
+
+    Returns:
+        SHA256 hash of all example file paths + contents
+    """
+    digest = hashlib.sha256()
+    for f in iter_example_files(examples_dir):
+        if not f.is_file():
+            continue
+        # Use absolute path for scripts outside examples_dir
+        try:
+            rel_path: str = f.relative_to(examples_dir).as_posix()
+        except ValueError:
+            rel_path = f.as_posix()
+        try:
+            content_digest = hashlib.sha256(f.read_bytes()).digest()
+        except OSError:
+            # Unreadable (Windows AV/indexer lock, permissions). Use a distinct
+            # marker so it cannot collide with a genuinely empty file, and so
+            # the hash still differs from the readable version — failing toward
+            # a reconfigure rather than silently reporting "unchanged".
+            content_digest = b"<unreadable>".ljust(32, b"\0")
+        digest.update(rel_path.encode())
+        digest.update(b"\0")
+        digest.update(content_digest)
+        digest.update(b"\n")
+
+    return digest.hexdigest()
 
 
 def load_cache(build_dir: Path) -> dict[str, str | float] | None:

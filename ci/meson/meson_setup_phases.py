@@ -11,6 +11,8 @@ invocation.
 # pyright: reportMissingImports=false, reportUnknownVariableType=false
 
 import json
+import os
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
@@ -527,60 +529,93 @@ def detect_test_file_changes(
         return True
 
 
-def detect_example_file_changes(source_dir: Path, build_dir: Path) -> bool:
-    """Return True when ``examples/`` files have been added/removed/modified."""
+def detect_example_file_changes(source_dir: Path, build_dir: Path) -> "str | None":
+    """Return a reconfigure reason when ``examples/`` needs re-discovery, else None.
+
+    The reason is distinct for "cache missing" vs "files actually changed": a
+    missing cache means we *cannot prove* the examples are unchanged, which is
+    not the same claim as having observed a change (issue #3761). The caller
+    prints the returned reason, so this does not print one itself.
+
+    This never deletes the cache. Deleting it made a single false positive
+    self-perpetuating: only meson's ``--update`` rewrites the file, so any run
+    that was fully fingerprint-cached (meson never invoked) left the cache
+    missing and guaranteed another false "example files changed" next time.
+
+    The cache file's mtime doubles as a "contents last verified at" marker, and
+    is re-stamped whenever the content hash matches. Without that re-stamp a
+    single ``git checkout`` would leave every later run paying the full content
+    hash (~0.2s for ~300 files) forever, because the checkout's mtimes stay
+    newer than the cache the fast path compares against.
+    """
     try:
-        from ci.meson.example_metadata_cache import compute_example_files_hash
+        from ci.meson.example_metadata_cache import (
+            compute_example_files_hash,
+            max_example_files_mtime,
+        )
 
         examples_dir = source_dir / "examples"
         example_cache_file = build_dir / "examples" / "example_metadata.cache"
 
         if not examples_dir.exists():
-            return False
+            return None
 
-        skip_example_hash = False
-        if example_cache_file.exists():
-            try:
-                cache_mtime = example_cache_file.stat().st_mtime
-                max_example_dir_mtime = get_max_dir_mtime(examples_dir)
-                if max_example_dir_mtime <= cache_mtime:
-                    skip_example_hash = True
-            except OSError:
-                pass
+        if not example_cache_file.exists():
+            return "example metadata cache missing - cannot prove examples unchanged"
 
-        if skip_example_hash:
-            return False
-
-        current_example_hash = compute_example_files_hash(examples_dir)
-        cached_example_hash = ""
-        if example_cache_file.exists():
-            try:
-                with open(example_cache_file, "r") as f:
-                    cache_data = json.load(f)
-                cached_example_hash = cache_data.get("hash", "")
-            except KeyboardInterrupt as ki:
-                handle_keyboard_interrupt(ki)
-            except Exception:
-                cached_example_hash = ""
-
-        if current_example_hash != cached_example_hash:
-            print_warning(
-                "[MESON] ⚠️  Detected example file changes (files added/removed/modified)"
+        # Fast path: if nothing under examples/ is newer than the last-verified
+        # marker, the contents cannot have changed since. Both probes are
+        # needed — file mtimes catch in-place edits, directory mtimes catch
+        # additions and deletions (which leave sibling files untouched).
+        try:
+            verified_at = example_cache_file.stat().st_mtime
+            newest = max(
+                get_max_dir_mtime(examples_dir), max_example_files_mtime(examples_dir)
             )
-            if example_cache_file.exists():
-                try:
-                    example_cache_file.unlink()
-                except OSError:
-                    pass
-            return True
-        return False
+            # Strict `<`: an entry whose mtime lands in the same clock tick as
+            # the marker (Windows' system clock granularity is ~15ms) must fall
+            # through to the hash rather than be assumed unchanged.
+            if newest < verified_at:
+                return None
+        except OSError:
+            pass
+
+        cached_example_hash = ""
+        try:
+            # save_cache() writes UTF-8; reading with the platform locale codec
+            # (cp1252 on Windows) turns any non-ASCII example path or @filter
+            # string into a permanent decode failure, and therefore a
+            # reconfigure on every single run.
+            with open(example_cache_file, "r", encoding="utf-8") as f:
+                cache_data = json.load(f)
+            cached_example_hash = cache_data.get("hash", "")
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+        except Exception:
+            cached_example_hash = ""
+
+        if not cached_example_hash:
+            return "example metadata cache unreadable - cannot prove examples unchanged"
+
+        # Stamp the marker from *before* the hash, so an edit that lands while
+        # we are hashing still looks newer than the marker on the next run.
+        verify_started = time.time()
+        if compute_example_files_hash(examples_dir) != cached_example_hash:
+            return "example files changed"
+
+        # Contents match: re-arm the fast path so the next run skips the hash.
+        try:
+            os.utime(example_cache_file, (verify_started, verify_started))
+        except OSError:
+            pass
+        return None
 
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         _ts_print(f"[MESON] Warning: Could not check example file changes: {e}")
-        return True
+        return "example file check failed"
 
 
 def check_obsolete_zig_wrappers(source_dir: Path) -> None:

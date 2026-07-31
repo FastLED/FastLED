@@ -14,7 +14,7 @@ import sys
 import threading
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, TypeGuard
+from typing import TYPE_CHECKING, Any, TypeGuard, cast
 
 from colorama import Fore, Style
 
@@ -3583,10 +3583,14 @@ def _validate_test_rpc_response(
         if not isinstance(patterns, list) or not patterns:
             errors.append("WS2814 response requires a non-empty patterns list")
         else:
-            for index, pattern in enumerate(patterns):
-                if not isinstance(pattern, dict):
+            for index, entry in enumerate(patterns):
+                if not isinstance(entry, dict):
                     errors.append(f"patterns[{index}] must be an object for WS2814")
                     continue
+                # `entry` comes off an untyped JSON payload; narrowing it with a
+                # bare `dict` leaves ty with dict[Never, Never], which rejects
+                # every string key. Re-state the payload shape explicitly.
+                pattern = cast("dict[str, Any]", entry)
                 total_leds = pattern.get("totalLeds")
                 total_bytes = pattern.get("totalBytes")
                 if not _is_plain_int(total_leds):

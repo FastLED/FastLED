@@ -43,7 +43,7 @@ _SOURCE_EXTS = frozenset([".cpp", ".h", ".hpp", ".c", ".ino"])
 _PY_SOURCE_EXTS = frozenset([".py"])
 
 
-def _should_skip_scan_dir(name: str) -> bool:
+def should_skip_scan_dir(name: str) -> bool:
     """Return True if this directory should be excluded from source file scanning."""
     if name in _SKIP_DIR_NAMES:
         return True
@@ -86,7 +86,7 @@ def get_max_dir_mtime(root: Path) -> float:
                 for entry in it:
                     try:
                         if entry.is_dir(follow_symlinks=False):
-                            if not _should_skip_scan_dir(entry.name):
+                            if not should_skip_scan_dir(entry.name):
                                 stack.append(entry.path)
                     except OSError:
                         pass
@@ -126,7 +126,7 @@ def _get_max_source_file_mtime(
                     try:
                         name = entry.name
                         if entry.is_dir(follow_symlinks=False):
-                            if not _should_skip_scan_dir(name):
+                            if not should_skip_scan_dir(name):
                                 stack.append(entry.path)
                         elif entry.is_file(follow_symlinks=False):
                             _, ext = os.path.splitext(name)
