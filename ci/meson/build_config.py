@@ -202,10 +202,12 @@ def setup_meson_build(
         force_reconfigure = True
         force_reconfigure_reason = "test files changed"
 
-    # Example files added/removed/modified → reconfigure.
-    if already_configured and detect_example_file_changes(source_dir, build_dir):
-        force_reconfigure = True
-        force_reconfigure_reason = "example files changed"
+    # Example files added/removed/modified (or unprovable) → reconfigure.
+    if already_configured:
+        example_reason = detect_example_file_changes(source_dir, build_dir)
+        if example_reason:
+            force_reconfigure = True
+            force_reconfigure_reason = example_reason
 
     skip_meson_setup = already_configured and not reconfigure and not force_reconfigure
     native_file_path = build_dir / "meson_native.txt"

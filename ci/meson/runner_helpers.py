@@ -144,7 +144,9 @@ def _recover_stale_build(
             build_dir / "test_list_cache.txt",
             build_dir / ".source_files_hash",
             build_dir / "tests" / "test_metadata.cache",
-            build_dir / "example_metadata.cache",
+            # Nested under examples/ — save_cache() writes it to meson's
+            # current_build_dir. The flat path here was a silent no-op.
+            build_dir / "examples" / "example_metadata.cache",
         ]
         for cache_file in cache_files:
             if cache_file.exists():
