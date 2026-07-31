@@ -24,6 +24,7 @@ from ci.lint_platformio.check_no_internal_platformio import (
     SANCTIONED_PLATFORMIO_SURFACE,
     NoInternalPlatformIOChecker,
 )
+from ci.lint_platformio.run_all_checkers import parse_args, resolve_warn_only
 from ci.util.check_files import FileContent
 
 
@@ -91,6 +92,44 @@ class TestRealInvocationsAreCaught(unittest.TestCase):
         self.assertEqual(len(_violations("ci/x.py", src)), 1)
 
 
+class TestUnrelatedAdjacentLiteralsAreNotJoined(unittest.TestCase):
+    """Regression: joining every literal on a line invented violations.
+
+    Two single-word literals in unrelated expressions would concatenate into
+    ``pio run`` and fail the build for code that never touches PlatformIO.
+    Only literals separated purely by list punctuation may be joined.
+    """
+
+    def test_unrelated_literals_are_not_joined(self) -> None:
+        for src in (
+            'if mode == "pio": step = "run"\n',
+            'd = {"pio": 1, "run": 2}\n',
+            'x = "pio" if flag else None; y = "run"\n',
+            'assert a == "pio" and b == "run"\n',
+        ):
+            with self.subTest(src=src.strip()):
+                self.assertEqual(_violations("ci/x.py", src), [])
+
+    def test_genuine_argv_lists_still_join(self) -> None:
+        for src in (
+            'cmd = ["pio", "run", "-d", str(d)]\n',
+            "subprocess.run(['pio', 'run'])\n",
+            'run(["platformio", "run"])\n',
+        ):
+            with self.subTest(src=src.strip()):
+                self.assertEqual(len(_violations("ci/x.py", src)), 1)
+
+    def test_known_limitation_argv_split_across_lines(self) -> None:
+        """Documents a gap rather than leaving it silently assumed-covered.
+
+        The checker is line-oriented, so an argv list broken across physical
+        lines is not detected. Closing this needs cross-line expression
+        tracking; until then the gap is explicit, not accidental.
+        """
+        src = 'cmd = [\n    "pio",\n    "run",\n]\n'
+        self.assertEqual(_violations("ci/x.py", src), [])
+
+
 class TestProseIsNotCaught(unittest.TestCase):
     """Documentation describing the rule must not trip it."""
 
@@ -152,6 +191,23 @@ class TestAllowlisting(unittest.TestCase):
     def test_sanctioned_and_debt_lists_are_disjoint(self) -> None:
         debt_paths = {path for path, _reason in MIGRATION_DEBT}
         self.assertEqual(debt_paths & set(SANCTIONED_PLATFORMIO_SURFACE), set())
+
+
+class TestCliFlags(unittest.TestCase):
+    """Error mode is the default; warn-only must be opted into explicitly."""
+
+    def test_default_is_error_mode(self) -> None:
+        self.assertFalse(resolve_warn_only(parse_args([])))
+
+    def test_warn_only_flag(self) -> None:
+        self.assertTrue(resolve_warn_only(parse_args(["--warn-only"])))
+
+    def test_list_violations_does_not_fail(self) -> None:
+        self.assertTrue(resolve_warn_only(parse_args(["--list-violations"])))
+
+    def test_error_flag_is_a_no_op(self) -> None:
+        """--error used to enable the gate; it is now the default."""
+        self.assertFalse(resolve_warn_only(parse_args(["--error"])))
 
 
 class TestFileSelection(unittest.TestCase):

@@ -26,6 +26,11 @@ To downgrade to warn-only, pass ``warn_only=True`` to ``run_platformio_lint``
 Matching is invocation-shaped, not mention-shaped: comment tails, backtick
 spans, and prose inside string literals and docstrings are masked out before
 patterns are applied, while argv lists like ``["pio", "run"]`` ARE caught.
+
+Known limitation: matching is line-oriented, so an argv list broken across
+physical lines is not detected. Closing that needs cross-line expression
+tracking; ``test_known_limitation_argv_split_across_lines`` pins the gap so
+it stays explicit rather than assumed-covered.
 """
 
 from __future__ import annotations
@@ -294,14 +299,28 @@ def _comment_chars(file_path: str) -> tuple[str, ...]:
 
 
 @dataclass(slots=True)
+class Literal:
+    """A string literal, with the span it occupied in the source line.
+
+    Positions matter: two literals may only be joined into a candidate
+    command if nothing but list punctuation separates them. Joining every
+    literal on a line would flag ``if mode == "pio": step = "run"``.
+    """
+
+    text: str
+    start: int
+    end: int
+
+
+@dataclass(slots=True)
 class MaskedLine:
     """One line split into the part that executes and the part that documents.
 
     Attributes:
         residue: The line with every prose region blanked out — what's left
             is bare code, e.g. a shell command in a YAML ``run:`` step.
-        literals: Contents of string literals that opened and closed on this
-            line. Checked separately, since ``"--platformio"`` is a real flag
+        literals: String literals that opened and closed on this line.
+            Checked separately, since ``"--platformio"`` is a real flag
             definition while ``"see --platformio for details"`` is prose.
         in_string: The triple-quote delimiter still open at end-of-line, or
             ``None``. Threaded into the next line so multi-line docstrings
@@ -309,8 +328,50 @@ class MaskedLine:
     """
 
     residue: str
-    literals: list[str]
+    literals: list[Literal]
     in_string: str | None
+
+
+# Characters that may sit between two literals of the same argv construct:
+# list/call punctuation and the quote marks themselves. Anything else (an
+# operator, a keyword, a bare identifier) means the literals belong to
+# different expressions and must not be joined.
+_ARGV_SEPARATORS = re.compile(r"^[\s,\[\]()'\"]*$")
+
+
+def _argv_groups(literals: list[Literal], line: str) -> list[str]:
+    """Join only literals that are genuinely adjacent in one argv construct.
+
+    ``["pio", "run"]`` is one command spelled across two tokens and must be
+    caught. ``if mode == "pio": step = "run"`` is two unrelated statements
+    that happen to share a line; joining those would fail the build for code
+    that never shells out to PlatformIO.
+    """
+    groups: list[str] = []
+    current: list[str] = []
+    previous: Literal | None = None
+
+    for lit in literals:
+        token = lit.text.strip()
+        # A literal containing whitespace is a sentence, not a command word.
+        if not token or " " in token:
+            previous = None
+            if current:
+                groups.append(" ".join(current))
+                current = []
+            continue
+
+        gap = line[previous.end : lit.start] if previous is not None else ""
+        if previous is not None and not _ARGV_SEPARATORS.match(gap):
+            groups.append(" ".join(current))
+            current = []
+
+        current.append(token)
+        previous = lit
+
+    if current:
+        groups.append(" ".join(current))
+    return groups
 
 
 def _is_contraction(line: str, i: int) -> bool:
@@ -325,7 +386,7 @@ def _mask_prose(
 ) -> MaskedLine:
     """Split a line into executable residue and documentation."""
     residue: list[str] = []
-    literals: list[str] = []
+    literals: list[Literal] = []
     n = len(line)
     i = 0
 
@@ -334,7 +395,7 @@ def _mask_prose(
         idx = line.find(in_string)
         if idx == -1:
             return MaskedLine("", [], in_string)
-        literals.append(line[:idx])
+        literals.append(Literal(line[:idx], 0, idx))
         i = idx + len(in_string)
         in_string = None
 
@@ -364,9 +425,13 @@ def _mask_prose(
             if triple is not None:
                 close = line.find(triple, i + len(triple))
                 if close == -1:
-                    literals.append(line[i + len(triple) :])
+                    literals.append(
+                        Literal(line[i + len(triple) :], i + len(triple), len(line))
+                    )
                     return MaskedLine("".join(residue), literals, triple)
-                literals.append(line[i + len(triple) : close])
+                literals.append(
+                    Literal(line[i + len(triple) : close], i + len(triple), close)
+                )
                 i = close + len(triple)
                 continue
             j = i + 1
@@ -374,7 +439,7 @@ def _mask_prose(
                 j += 2 if line[j] == "\\" else 1
             if j >= n:
                 break  # unterminated literal; remainder is prose
-            literals.append(line[i + 1 : j])
+            literals.append(Literal(line[i + 1 : j], i + 1, j))
             i = j + 1
             continue
 
@@ -429,7 +494,7 @@ class NoInternalPlatformIOChecker(FileContentChecker):
             if _line_is_comment(line):
                 continue
 
-            category = self._first_match(masked.residue, masked.literals)
+            category = self._first_match(masked.residue, masked.literals, line)
             if category is None:
                 continue
 
@@ -440,23 +505,20 @@ class NoInternalPlatformIOChecker(FileContentChecker):
         return []
 
     @staticmethod
-    def _first_match(residue: str, literals: list[str]) -> str | None:
+    def _first_match(residue: str, literals: list[Literal], line: str) -> str | None:
         """Return the category of the first real violation on a line, if any."""
-        # Only argv-shaped tokens take part in the join. A literal containing
-        # whitespace is a sentence, not a command word, and joining it would
-        # resurrect exactly the prose false positives this pass removes.
-        joined = " ".join(
-            tok for tok in (lit.strip() for lit in literals) if tok and " " not in tok
-        )
+        groups = _argv_groups(literals, line)
 
         for pattern, category, _hint in _PATTERNS:
             # Bare code — an actual shell command or YAML `run:` step.
             if pattern.search(residue):
                 return category
             # A string literal that IS the token, e.g. argparse("--platformio").
-            if any(pattern.fullmatch(lit.strip()) for lit in literals):
+            if any(pattern.fullmatch(lit.text.strip()) for lit in literals):
                 return category
             # Split argv lists, e.g. ["pio", "run"].
-            if category in _COMMAND_CATEGORIES and pattern.search(joined):
+            if category in _COMMAND_CATEGORIES and any(
+                pattern.search(group) for group in groups
+            ):
                 return category
         return None

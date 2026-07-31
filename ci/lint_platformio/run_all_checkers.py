@@ -174,7 +174,7 @@ def run_platformio_lint(warn_only: bool | None = None) -> bool:
     return False
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Lint for forbidden internal PlatformIO build usage (issue #2701).",
     )
@@ -193,10 +193,22 @@ def main() -> int:
         action="store_true",
         help="Print the current violation punchlist without failing.",
     )
-    args = parser.parse_args()
+    return parser
 
-    warn_only = args.warn_only or args.list_violations
-    ok = run_platformio_lint(warn_only=warn_only)
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse ``argv`` (defaults to ``sys.argv[1:]``). Split out for testing."""
+    return build_parser().parse_args(argv)
+
+
+def resolve_warn_only(args: argparse.Namespace) -> bool:
+    """Map parsed flags to warn-only mode. ``--error`` is a deprecated no-op."""
+    return bool(args.warn_only or args.list_violations)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    ok = run_platformio_lint(warn_only=resolve_warn_only(args))
     return 0 if ok else 1
 
 
