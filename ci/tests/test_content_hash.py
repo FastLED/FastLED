@@ -1,0 +1,131 @@
+"""Tests for the shared content-hash helper (issue #3773, follows #3761).
+
+The three metadata caches (src/, tests/, examples/) used to key on
+``path:mtime:size``. ``git checkout``, ``git worktree add`` and branch switches
+rewrite mtimes with byte-identical content, so every one of those invalidated
+the cache and forced the rediscovery the cache exists to avoid. #3761 fixed the
+examples cache; this covers the extracted helper all three now share.
+"""
+
+from __future__ import annotations
+
+import os
+import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+from ci.meson.cache_utils import compute_files_content_hash
+
+
+def _tree(root: Path) -> list[Path]:
+    (root / "pkg").mkdir(parents=True)
+    a = root / "pkg" / "a.cpp"
+    b = root / "pkg" / "b.h"
+    a.write_text("int a() { return 1; }\n")
+    b.write_text("#pragma once\n")
+    return [a, b]
+
+
+class TestContentHash(unittest.TestCase):
+    def test_mtime_churn_does_not_change_the_hash(self) -> None:
+        """The whole point: a git checkout must not invalidate the cache."""
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            files = _tree(root)
+            before = compute_files_content_hash(files, root)
+
+            for f in files:
+                st = f.stat()
+                os.utime(f, (st.st_atime + 10_000, st.st_mtime + 10_000))
+
+            self.assertEqual(before, compute_files_content_hash(files, root))
+
+    def test_content_edit_changes_the_hash(self) -> None:
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            files = _tree(root)
+            before = compute_files_content_hash(files, root)
+            files[0].write_text("int a() { return 2; }\n")
+            self.assertNotEqual(before, compute_files_content_hash(files, root))
+
+    def test_rename_changes_the_hash(self) -> None:
+        """Paths participate, so identical content under a new name differs."""
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            files = _tree(root)
+            before = compute_files_content_hash(files, root)
+            renamed = files[0].with_name("renamed.cpp")
+            files[0].rename(renamed)
+            self.assertNotEqual(
+                before, compute_files_content_hash([renamed, files[1]], root)
+            )
+
+    def test_order_is_significant_so_callers_must_sort(self) -> None:
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            files = _tree(root)
+            self.assertNotEqual(
+                compute_files_content_hash(files, root),
+                compute_files_content_hash(list(reversed(files)), root),
+            )
+
+    def test_dropping_a_file_changes_the_hash(self) -> None:
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            files = _tree(root)
+            self.assertNotEqual(
+                compute_files_content_hash(files, root),
+                compute_files_content_hash(files[:1], root),
+            )
+
+    def test_missing_files_are_skipped_not_fatal(self) -> None:
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            files = _tree(root)
+            expected = compute_files_content_hash(files, root)
+            with_ghost = files + [root / "pkg" / "does_not_exist.cpp"]
+            self.assertEqual(expected, compute_files_content_hash(with_ghost, root))
+
+    def test_file_outside_root_still_contributes(self) -> None:
+        """The examples cache hashes its discovery script, which lives outside."""
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp) / "inside"
+            root.mkdir()
+            files = _tree(root)
+            outside = Path(tmp) / "outside.py"
+            outside.write_text("# discovery script\n")
+
+            base = compute_files_content_hash(files, root)
+            with_outside = compute_files_content_hash(files + [outside], root)
+            self.assertNotEqual(base, with_outside)
+
+            # And its *content* matters, not just its presence.
+            outside.write_text("# discovery script, changed\n")
+            self.assertNotEqual(
+                with_outside, compute_files_content_hash(files + [outside], root)
+            )
+
+    def test_unreadable_file_is_distinct_from_an_empty_one(self) -> None:
+        """An unreadable file must not hash the same as a genuinely empty one,
+        or a transient lock would silently read as 'unchanged'."""
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "pkg").mkdir()
+            empty = root / "pkg" / "empty.cpp"
+            empty.write_text("")
+            empty_hash = compute_files_content_hash([empty], root)
+
+            # The marker used for an unreadable file is a fixed 32-byte token;
+            # assert it does not collide with sha256(b"") for the same path.
+            import hashlib
+
+            digest = hashlib.sha256()
+            digest.update("pkg/empty.cpp".encode())
+            digest.update(b"\0")
+            digest.update(b"<unreadable>".ljust(32, b"\0"))
+            digest.update(b"\n")
+            self.assertNotEqual(empty_hash, digest.hexdigest())
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -28,7 +28,10 @@ import os
 import sys
 from pathlib import Path
 
-from ci.meson.cache_utils import should_skip_scan_dir
+from ci.meson.cache_utils import (
+    compute_files_content_hash,
+    should_skip_scan_dir,
+)
 
 
 CACHE_FILENAME = "example_metadata.cache"
@@ -124,29 +127,9 @@ def compute_example_files_hash(examples_dir: Path) -> str:
     Returns:
         SHA256 hash of all example file paths + contents
     """
-    digest = hashlib.sha256()
-    for f in iter_example_files(examples_dir):
-        if not f.is_file():
-            continue
-        # Use absolute path for scripts outside examples_dir
-        try:
-            rel_path: str = f.relative_to(examples_dir).as_posix()
-        except ValueError:
-            rel_path = f.as_posix()
-        try:
-            content_digest = hashlib.sha256(f.read_bytes()).digest()
-        except OSError:
-            # Unreadable (Windows AV/indexer lock, permissions). Use a distinct
-            # marker so it cannot collide with a genuinely empty file, and so
-            # the hash still differs from the readable version — failing toward
-            # a reconfigure rather than silently reporting "unchanged".
-            content_digest = b"<unreadable>".ljust(32, b"\0")
-        digest.update(rel_path.encode())
-        digest.update(b"\0")
-        digest.update(content_digest)
-        digest.update(b"\n")
-
-    return digest.hexdigest()
+    # Paths outside examples_dir (the discovery script) fall back to their
+    # absolute path inside the helper, so they still contribute uniquely.
+    return compute_files_content_hash(iter_example_files(examples_dir), examples_dir)
 
 
 def load_cache(build_dir: Path) -> dict[str, str | float] | None:

@@ -8,11 +8,62 @@ All functions here are pure data-reading/writing utilities that gate build skip
 decisions. They must remain free of any non-stdlib imports.
 """
 
+import hashlib
 import json
 import os
 import platform
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, Optional
+
+
+# ---------------------------------------------------------------------------
+# Content hashing
+# ---------------------------------------------------------------------------
+
+
+def compute_files_content_hash(files: Iterable[Path], root: Path) -> str:
+    """
+    Hash each file's path plus a digest of its contents.
+
+    Deliberately *content*-based rather than mtime-based. ``git checkout``,
+    ``git worktree add`` and branch switches rewrite mtimes with byte-identical
+    content, so an mtime hash treats every one of those as a source change and
+    forces the expensive rediscovery the cache exists to avoid (issue #3761 for
+    ``examples/``, #3773 for ``src/`` and ``tests/``).
+
+    Callers pass their own file list: the three metadata caches select files
+    very differently, and folding that selection in here would be how a real
+    source directory quietly stops being hashed.
+
+    Args:
+        files: Files to hash, in a stable order (the order is significant).
+        root: Directory paths are reported relative to. Files outside it fall
+            back to their absolute path so they still contribute uniquely.
+
+    Returns:
+        SHA256 hex digest over the (path, content) pairs.
+    """
+    digest = hashlib.sha256()
+    for f in files:
+        if not f.is_file():
+            continue
+        try:
+            rel_path = f.relative_to(root).as_posix()
+        except ValueError:
+            rel_path = f.as_posix()
+        try:
+            content_digest = hashlib.sha256(f.read_bytes()).digest()
+        except OSError:
+            # Unreadable (AV/indexer lock, permissions). Use a distinct marker
+            # so it cannot collide with a genuinely empty file, and so the hash
+            # still differs from the readable version -- failing toward a
+            # rediscovery rather than silently reporting "unchanged".
+            content_digest = b"<unreadable>".ljust(32, b"\0")
+        digest.update(rel_path.encode())
+        digest.update(b"\0")
+        digest.update(content_digest)
+        digest.update(b"\n")
+    return digest.hexdigest()
 
 
 # ---------------------------------------------------------------------------
