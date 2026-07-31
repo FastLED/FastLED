@@ -1582,7 +1582,10 @@ def runner(
                     print(summary)
                 sys.exit(1)
 
-            # Update fingerprint metadata for cache display on next run
+            # Update fingerprint metadata for cache display on next run.
+            # Record whether this run covered the whole suite: the counts are
+            # replayed verbatim on later cache hits, so a filtered run's number
+            # must never be presentable as a full-suite pass (#3763).
             if fingerprint_manager is not None:
                 fingerprint_manager.update_test_metadata(
                     "cpp_test",
@@ -1590,6 +1593,7 @@ def runner(
                     num_tests_passed=result.num_tests_passed,
                     duration_seconds=result.duration,
                     test_name="cpp_unit_tests",
+                    scope="partial" if (test_name or test_file_filter) else "full",
                 )
 
             # Print timing summary table for unit-only mode
@@ -1673,7 +1677,10 @@ def runner(
                 compile_test_link_time=result.compile_test_link_time,
             )
 
-            # Update fingerprint metadata for cache display on next run
+            # Update fingerprint metadata for cache display on next run.
+            # Record whether this run covered the whole suite: the counts are
+            # replayed verbatim on later cache hits, so a filtered run's number
+            # must never be presentable as a full-suite pass (#3763).
             if fingerprint_manager is not None:
                 fingerprint_manager.update_test_metadata(
                     "cpp_test",
@@ -1681,6 +1688,7 @@ def runner(
                     num_tests_passed=result.num_tests_passed,
                     duration_seconds=result.duration,
                     test_name="cpp_unit_tests",
+                    scope="partial" if (test_name or test_file_filter) else "full",
                 )
 
             if not result.success:

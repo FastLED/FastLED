@@ -164,6 +164,12 @@ class FingerprintResult:
     # while the run was in flight looks older than the cache and gets skipped
     # on every later run while the suite still reports green.
     source_max_mtime: Optional[float] = None
+    # Provenance of the counts above: "full" when the run covered the whole
+    # suite, "partial" when a filter/selection narrowed it. Cached counts are
+    # replayed verbatim on later runs, so without this a subset result reads as
+    # an authoritative full-suite pass and there is no way to tell the two
+    # apart after the fact (#3763).
+    scope: Optional[str] = None
 
     def get_cache_summary(self) -> str:
         """Get a human-readable summary of cached test results"""
@@ -171,7 +177,19 @@ class FingerprintResult:
             duration_str = (
                 f" in {self.duration_seconds:.2f}s" if self.duration_seconds else ""
             )
-            return f"{self.num_tests_passed}/{self.num_tests_run} passed{duration_str}"
+            # Say where the number came from. "partial" is called out; a missing
+            # scope is from a fingerprint written before this field existed, so
+            # it is reported as unverified rather than silently as a full pass.
+            if self.scope == "partial":
+                scope_str = ", filtered run - NOT the full suite"
+            elif self.scope == "full":
+                scope_str = ""
+            else:
+                scope_str = ", scope unrecorded"
+            return (
+                f"{self.num_tests_passed}/{self.num_tests_run} "
+                f"passed{duration_str}{scope_str}"
+            )
         return ""
 
     def should_skip(self, current: "FingerprintResult") -> bool:

@@ -100,6 +100,7 @@ class FingerprintManager:
                         duration_seconds=data.get("duration_seconds"),
                         test_name=data.get("test_name"),
                         source_max_mtime=data.get("source_max_mtime"),
+                        scope=data.get("scope"),
                     )
                 except json.JSONDecodeError:
                     ts_print(f"Invalid {name} fingerprint file. Recalculating...")
@@ -123,6 +124,8 @@ class FingerprintManager:
             fingerprint_dict["test_name"] = fingerprint.test_name
         if fingerprint.source_max_mtime is not None:
             fingerprint_dict["source_max_mtime"] = fingerprint.source_max_mtime
+        if fingerprint.scope is not None:
+            fingerprint_dict["scope"] = fingerprint.scope
         with open(fingerprint_file, "w") as f:
             json.dump(fingerprint_dict, f, indent=2)
 
@@ -149,6 +152,9 @@ class FingerprintManager:
                     fingerprint.num_tests_passed = prev_fp.num_tests_passed
                     fingerprint.duration_seconds = prev_fp.duration_seconds
                     fingerprint.test_name = prev_fp.test_name
+                    # Carry scope with the counts it describes -- splitting
+                    # them would relabel a filtered result as a full one.
+                    fingerprint.scope = prev_fp.scope
             # Persist the watermark from this invocation's opening scan. On a
             # fast-path hit nothing was rebuilt, so carry the previous value
             # forward rather than advancing it -- advancing would absorb any
@@ -169,14 +175,20 @@ class FingerprintManager:
         num_tests_passed: int,
         duration_seconds: float,
         test_name: Optional[str] = None,
+        scope: Optional[str] = None,
     ) -> None:
-        """Update the test metadata for a fingerprint before saving"""
+        """Update the test metadata for a fingerprint before saving.
+
+        ``scope`` is "full" when the run covered the whole suite and
+        "partial" when a filter narrowed it (#3763).
+        """
         if name in self._fingerprints:
             self._fingerprints[name].num_tests_run = num_tests_run
             self._fingerprints[name].num_tests_passed = num_tests_passed
             self._fingerprints[name].duration_seconds = duration_seconds
             if test_name:
                 self._fingerprints[name].test_name = test_name
+            self._fingerprints[name].scope = scope
 
     def get_prev_fingerprint(self, name: str) -> Optional[FingerprintResult]:
         """Get the previous fingerprint data (from last run) for display"""
