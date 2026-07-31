@@ -313,6 +313,13 @@ class MaskedLine:
     in_string: str | None
 
 
+def _is_contraction(line: str, i: int) -> bool:
+    """True if ``line[i]`` is an apostrophe inside a word, e.g. ``don't``."""
+    return (
+        i > 0 and i + 1 < len(line) and line[i - 1].isalnum() and line[i + 1].isalnum()
+    )
+
+
 def _mask_prose(
     line: str, comment_chars: tuple[str, ...], in_string: str | None
 ) -> MaskedLine:
@@ -342,6 +349,14 @@ def _mask_prose(
             if close == -1:
                 break  # unterminated quote span; treat remainder as prose
             i = close + 1
+            continue
+
+        if ch == "'" and _is_contraction(line, i):
+            # An apostrophe inside a word ("don't") is not a quote. Treating
+            # it as one opens a phantom literal that swallows the rest of the
+            # line — which would let `echo don't && pio run` slip the gate.
+            residue.append(ch)
+            i += 1
             continue
 
         if ch in "\"'":

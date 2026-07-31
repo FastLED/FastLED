@@ -73,6 +73,23 @@ class TestRealInvocationsAreCaught(unittest.TestCase):
         src = 'args = ["esp32s3", "--examples", example, "--platformio"]\n'
         self.assertEqual(len(_violations("ci/x.py", src)), 1)
 
+    def test_contraction_does_not_hide_a_later_invocation(self) -> None:
+        """Regression: an apostrophe must not open a phantom string literal.
+
+        Treating ``'`` in ``don't`` as a quote swallowed the rest of the
+        line, so a real invocation after a contraction slipped the gate.
+        """
+        for src in (
+            "  - run: echo don't bother && pio run\n",
+            "  - run: echo it's fine; platformio run\n",
+        ):
+            with self.subTest(src=src.strip()):
+                self.assertEqual(len(_violations("ci/x.yml", src)), 1)
+
+    def test_single_quoted_argv_list_is_caught(self) -> None:
+        src = "subprocess.run(['pio', 'run', '-d', d])\n"
+        self.assertEqual(len(_violations("ci/x.py", src)), 1)
+
 
 class TestProseIsNotCaught(unittest.TestCase):
     """Documentation describing the rule must not trip it."""
