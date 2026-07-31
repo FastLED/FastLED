@@ -4,13 +4,14 @@
 Walks the repo, applies ``NoInternalPlatformIOChecker``, and prints any
 violations.
 
-WARN MODE (default): exits 0 even if violations are found. The companion
-sweep PR will remove the violating call sites; until then we don't want
-the linter to gate CI red.
+ERROR MODE (default since the #2701 sweep): any violation fails the lint.
+PlatformIO may be invoked only from the explicitly enumerated surface in
+``check_no_internal_platformio.SANCTIONED_PLATFORMIO_SURFACE``; a new call
+site anywhere else is a hard failure.
 
-To run as an error gate (CI green = no violations):
-  - Pass ``--error`` on the CLI, OR
-  - Set ``FASTLED_LINT_PLATFORMIO_ERROR=1`` in the env
+To downgrade to warn-only (escape hatch for bisecting a bad sweep):
+  - Pass ``--warn-only`` on the CLI, OR
+  - Set ``FASTLED_LINT_PLATFORMIO_WARN_ONLY=1`` in the env
 
 To dump the current punchlist:
   uv run python ci/lint_platformio/run_all_checkers.py --list-violations
@@ -128,13 +129,13 @@ def run_platformio_lint(warn_only: bool | None = None) -> bool:
     Args:
         warn_only: If True, always return True (warn mode). If False,
             return False when violations exist (error mode). If None,
-            consult ``FASTLED_LINT_PLATFORMIO_ERROR`` (defaults to warn).
+            consult ``FASTLED_LINT_PLATFORMIO_WARN_ONLY`` (defaults to error).
 
     Returns:
         True if clean OR warn-only mode is active.
     """
     if warn_only is None:
-        warn_only = os.environ.get("FASTLED_LINT_PLATFORMIO_ERROR", "") != "1"
+        warn_only = os.environ.get("FASTLED_LINT_PLATFORMIO_WARN_ONLY", "") == "1"
 
     files = _collect_files(PROJECT_ROOT)
     if not files:
@@ -173,25 +174,41 @@ def run_platformio_lint(warn_only: bool | None = None) -> bool:
     return False
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Lint for forbidden internal PlatformIO build usage (issue #2701).",
     )
     parser.add_argument(
         "--error",
         action="store_true",
-        help="Fail (exit 1) if any violation is found. Default is warn-only.",
+        help="Deprecated no-op: error mode is now the default.",
+    )
+    parser.add_argument(
+        "--warn-only",
+        action="store_true",
+        help="Report violations but exit 0. Escape hatch; default is to fail.",
     )
     parser.add_argument(
         "--list-violations",
         action="store_true",
-        help="Alias for the default behavior: print the current violation punchlist.",
+        help="Print the current violation punchlist without failing.",
     )
-    args = parser.parse_args()
+    return parser
 
-    # --list-violations is the default warn-mode behavior; alias for clarity.
-    warn_only = not args.error
-    ok = run_platformio_lint(warn_only=warn_only)
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse ``argv`` (defaults to ``sys.argv[1:]``). Split out for testing."""
+    return build_parser().parse_args(argv)
+
+
+def resolve_warn_only(args: argparse.Namespace) -> bool:
+    """Map parsed flags to warn-only mode. ``--error`` is a deprecated no-op."""
+    return bool(args.warn_only or args.list_violations)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    ok = run_platformio_lint(warn_only=resolve_warn_only(args))
     return 0 if ok else 1
 
 

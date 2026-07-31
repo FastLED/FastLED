@@ -104,15 +104,6 @@ jobs:
             rm -rf "$purge_root"
           fi
 
-      - name: Install Platform
-        if: inputs.platform != ''
-        run: |
-          uv run pio pkg -g install ${{ inputs.platform }}
-
-      - name: PlatformIO Versions
-        run: |
-          uv run platformio --version
-
       - name: Build FastLED examples with "./compile --no-interactive  ${{ inputs.args }}"
         id: build_examples
         # The ``FASTLED_FAIL_ON_ROOT_MERGE`` tripwire from #3278 was
