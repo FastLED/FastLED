@@ -2,7 +2,7 @@
 Test metadata caching for Meson build system.
 
 This module provides hash-based caching to avoid re-running organize_tests.py
-when test files haven't changed. It tracks all test file metadata (path + mtime + size)
+when test files haven't changed. It tracks all test file paths and contents
 and invalidates the cache only when tests are added, deleted, or modified.
 
 Usage:
@@ -20,12 +20,13 @@ Usage:
 """
 
 import argparse
-import hashlib
 import json
 import sys
 from itertools import chain
 from pathlib import Path
 from typing import Dict, List, Set
+
+from ci.meson.cache_utils import compute_files_content_hash
 
 
 CACHE_FILENAME = "test_metadata.cache"
@@ -33,16 +34,22 @@ CACHE_FILENAME = "test_metadata.cache"
 
 def compute_test_files_hash(tests_dir: Path) -> str:
     """
-    Compute a hash of all test file metadata (path + mtime + size).
+    Compute a hash of all test file paths and contents.
 
     This provides a fast way to detect if any test files have been added,
     deleted, or modified without re-parsing all test files.
+
+    Content-based, not mtime-based: ``git checkout``, ``git worktree add`` and
+    branch switches rewrite mtimes with byte-identical content, and an mtime
+    hash treated every one of those as a test-tree change, re-running discovery
+    inside each configure for nothing (issue #3773; #3761 was the same bug in
+    the examples cache).
 
     Args:
         tests_dir: Root directory containing test files
 
     Returns:
-        SHA256 hash of all test file metadata
+        SHA256 hash of all test file paths + contents
     """
     # Find all *.cpp / *.ino files recursively, same logic as discover_tests.py
     from discover_tests import TEST_SOURCE_GLOBS
@@ -70,18 +77,7 @@ def compute_test_files_hash(tests_dir: Path) -> str:
 
     unique_files = test_files  # already deduplicated by rglob + sorted
 
-    # Create hash input from file metadata
-    hash_input = []
-    for f in unique_files:
-        if f.is_file():
-            stat = f.stat()
-            rel_path = f.relative_to(tests_dir).as_posix()
-            # Include path, mtime, and size in hash
-            hash_input.append(f"{rel_path}:{stat.st_mtime:.6f}:{stat.st_size}")
-
-    # Compute SHA256 hash
-    hash_str = "\n".join(hash_input)
-    return hashlib.sha256(hash_str.encode()).hexdigest()
+    return compute_files_content_hash(unique_files, tests_dir)
 
 
 def load_cache(build_dir: Path) -> dict | None:

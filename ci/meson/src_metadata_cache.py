@@ -2,7 +2,7 @@
 Source file metadata caching for Meson build system.
 
 This module provides hash-based caching to avoid re-running source discovery scripts
-when source files haven't changed. It tracks all .cpp file metadata (path + mtime + size)
+when source files haven't changed. It tracks all .cpp file paths and contents
 and invalidates the cache only when sources are added, deleted, or modified.
 
 Usage:
@@ -17,18 +17,20 @@ Usage:
 """
 
 import argparse
-import hashlib
 import json
 import sys
 from dataclasses import dataclass
-from os import stat_result
 from pathlib import Path
 
 from typeguard import typechecked
 
+from ci.meson.cache_utils import compute_files_content_hash
+
 
 CACHE_FILENAME = "src_metadata.cache"
-CACHE_VERSION = 2
+# Bumped to 3: the hash switched from mtime-based to content-based (#3773),
+# so entries written by an older version are not comparable.
+CACHE_VERSION = 3
 
 
 @typechecked
@@ -44,33 +46,30 @@ class CacheEntry:
 
 def compute_src_files_hash(src_dir: Path, pattern: str) -> str:
     """
-    Compute a hash of all source file metadata (path + mtime + size).
+    Compute a hash of all source file paths and contents.
 
     This provides a fast way to detect if any source files have been added,
     deleted, or modified without re-parsing all source files.
+
+    Content-based, not mtime-based: ``git checkout``, ``git worktree add`` and
+    branch switches rewrite mtimes with byte-identical content, and an mtime
+    hash treated every one of those as a source change, re-running discovery
+    inside each configure for nothing (issue #3773; #3761 was the same bug in
+    the examples cache).
+
+    The file selection is deliberately left as a plain ``rglob`` with no
+    build-artifact pruning: ``src/fl/build/`` is a real source directory (see
+    ``library.json`` -> ``build.srcFilter``), so a name-based "skip build dirs"
+    filter here would silently stop hashing shipped sources.
 
     Args:
         src_dir: Root directory containing source files
         pattern: File pattern to match (default: "*.cpp")
 
     Returns:
-        SHA256 hash of all source file metadata
+        SHA256 hash of all source file paths + contents
     """
-    # Find all files matching pattern recursively
-    source_files = sorted(src_dir.rglob(pattern))
-
-    # Create hash input from file metadata
-    hash_input: list[str] = []
-    for f in source_files:
-        if f.is_file():
-            stat: stat_result = f.stat()
-            rel_path: str = f.relative_to(src_dir).as_posix()
-            # Include path, mtime, and size in hash
-            hash_input.append(f"{rel_path}:{stat.st_mtime:.6f}:{stat.st_size}")
-
-    # Compute SHA256 hash
-    hash_str = "\n".join(hash_input)
-    return hashlib.sha256(hash_str.encode()).hexdigest()
+    return compute_files_content_hash(sorted(src_dir.rglob(pattern)), src_dir)
 
 
 def load_cache(build_dir: Path) -> CacheEntry | None:
