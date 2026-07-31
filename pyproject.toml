@@ -297,7 +297,12 @@ select = [
 ]
 # Register custom checker codes so ruff accepts # noqa: DCT001 etc.
 # KBI001/002/003 are emitted by ci/lint_python/keyboard_interrupt_checker.py.
-external = ["DCT001", "DCT002", "KBI001", "KBI002", "KBI003"]
+external = [
+    "DCT001", "DCT002", "KBI001", "KBI002", "KBI003",
+    # ci/lint_python/subprocess_capture_checker.py. Without these,
+    # ruff reads `# noqa: SRC00x` as an unused suppression.
+    "SRC001", "SRC002", "SRC003", "SRC004", "SRC005",
+]
 
 [tool.ruff.lint.isort]
 # Configure import sorting to match isort's black profile

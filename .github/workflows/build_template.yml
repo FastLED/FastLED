@@ -25,6 +25,15 @@ permissions:
 jobs:
   build:
     runs-on: ${{ inputs.runs-on }}
+    # Bound the job so a hang fails loudly instead of silently.
+    #
+    # Without this, GitHub's 360-minute default applies: a wedged compile sits
+    # "in_progress" for six hours and is then killed with no diagnostic, which
+    # is exactly how every esp32s3 run stalled with nothing to look at
+    # (FastLED#3791). Board builds normally finish in well under 20 minutes,
+    # so 45 leaves generous headroom for a cold toolchain download while still
+    # turning a hang into a bounded, reportable failure.
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4

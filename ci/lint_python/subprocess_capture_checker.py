@@ -1,25 +1,37 @@
-"""Checker that restricts raw `subprocess` use in favor of `RunningProcess`.
+"""Checker that bans the stdlib `subprocess` API in favor of `RunningProcess`.
 
-The project standard is `RunningProcess` (from the `running_process` package)
-rather than the stdlib `subprocess` API. It streams output incrementally
-instead of accumulating it, which keeps long-running builds observable and
-avoids the pipe-buffer failure mode described below.
+Policy: **no stdlib subprocess anywhere.** `RunningProcess` (from the
+`running_process` package) is the one sanctioned way to spawn a child. It
+drains stdout and stderr concurrently through an atomic queue, so output stays
+observable while the process runs and neither pipe can wedge the child.
+
+Why the stdlib API is not good enough
+-------------------------------------
+When a child is spawned with both ``stdout=PIPE`` and ``stderr=PIPE`` and the
+parent drains only one of them, the child blocks as soon as the un-drained
+pipe fills its OS buffer -- roughly 64 KB on Linux, ~8 KB on Windows -- and the
+parent then waits forever for a child that can never finish. Measured in this
+repository: a child writing 20k lines to stderr while the parent read only
+stdout never returned, while the identical child under ``RunningProcess``
+completed in 0.3s. A verbose build easily clears 64 KB of stderr, which is why
+this reads as "fine locally, hangs in CI".
+
+``subprocess.run`` avoids that specific deadlock (it calls
+``Popen.communicate()`` internally), but it still accumulates all output
+in memory and hands it back only at exit, so a long build shows nothing until
+it finishes -- and a hung child is indistinguishable from a slow one.
 
 Error codes
 -----------
 SRC001
-    ``subprocess.run(...)`` capturing output. Prefer ``RunningProcess.run()``,
-    a drop-in replacement.
+    ``subprocess.run(...)``. Use ``RunningProcess.run()`` -- a drop-in
+    replacement that streams instead of accumulating.
 
 SRC002
-    ``subprocess.Popen(...)``. This is the genuinely deadlock-prone API: when
-    a child writes more than the OS pipe buffer holds (~64 KB) and the parent
-    is blocked in ``wait()`` or is draining only one of two pipes, both sides
-    block forever. ``RunningProcess`` drains concurrently.
+    ``subprocess.Popen(...)``. The deadlock-prone API; see above.
 
 SRC003
-    ``subprocess.check_output(...)`` / ``subprocess.check_call(...)``. Same
-    reasoning as SRC001.
+    ``subprocess.check_output`` / ``check_call`` / ``call``.
 
 SRC004
     A capturing call in text mode with no explicit ``encoding=``. Python then
@@ -30,22 +42,28 @@ SRC004
     output was never readable. Pass ``encoding="utf-8"`` (usually with
     ``errors="replace"``).
 
-A note on SRC001 vs SRC002
---------------------------
-``subprocess.run`` internally calls ``Popen.communicate()``, which drains both
-pipes concurrently (threads on Windows, selectors on POSIX) and therefore does
-*not* deadlock. SRC001 is a convention rule -- prefer one process API -- while
-SRC002 flags a real hazard. They are deliberately separate codes so the
-ratchet can be tightened on SRC002 first.
+SRC005
+    ``Popen(stdout=PIPE, stderr=PIPE)`` with no ``communicate()`` -- the exact
+    shape that hangs. Unlike the other codes this is held at **zero** rather
+    than ratcheted: it is a live deadlock, not a style preference. The
+    baseline deliberately contains no SRC005 entries, so a new one fails the
+    build immediately.
+
+SRC006
+    ``os.system`` / ``os.popen``. Worse than subprocess: ``os.system`` returns
+    no handle at all and ``os.popen`` gives a single undrainable pipe, so
+    neither can be bounded, interrupted, or drained.
 
 Baseline
 --------
-The repository predates this check, so a per-file/per-code baseline of known
+The repository predates this policy, so a per-file/per-code baseline of known
 violations is stored alongside this module. Counts may shrink freely; any
-increase fails. Regenerate after an intentional migration with::
+increase fails. That makes the ban a ratchet: existing call sites migrate to
+``RunningProcess`` over time and no new ones can appear. Regenerate after an
+intentional migration with::
 
-    uv run python ci/lint_python/subprocess_capture_checker.py ci \\
-        --update-baseline
+    uv run python ci/lint_python/subprocess_capture_checker.py ci test.py \
+        tests build.py mcp_server.py --exclude ci/tmp --update-baseline
 """
 
 from __future__ import annotations
@@ -62,12 +80,12 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_BASELINE = Path(__file__).resolve().parent / "subprocess_baseline.txt"
 
 # Regex pre-filter: quickly skip files with no subprocess usage at all.
-_SUBPROCESS_RE = re.compile(r"subprocess\s*\.")
+_SUBPROCESS_RE = re.compile(r"subprocess\s*\.|os\s*\.\s*(?:system|popen)\s*\(")
 
 _MESSAGES = {
     "SRC001": (
-        "SRC001 subprocess.run(...) capturing output. Use `RunningProcess.run()` "
-        "from `running_process` -- a drop-in replacement that streams instead of "
+        "SRC001 subprocess.run(...). Use `RunningProcess.run()` from "
+        "`running_process` -- a drop-in replacement that streams instead of "
         "accumulating."
     ),
     "SRC002": (
@@ -76,8 +94,18 @@ _MESSAGES = {
         "child never exits. Use `RunningProcess`, which drains concurrently."
     ),
     "SRC003": (
-        "SRC003 subprocess.check_output/check_call(...). Use `RunningProcess.run()` "
-        "from `running_process`."
+        "SRC003 subprocess.check_output/check_call/call(...). Use "
+        "`RunningProcess.run()` from `running_process`."
+    ),
+    "SRC005": (
+        "SRC005 subprocess.Popen(stdout=PIPE, stderr=PIPE) with no "
+        "communicate() DEADLOCKS once either pipe fills. Use "
+        "`RunningProcess` (it drains both streams concurrently), or "
+        "`stderr=subprocess.STDOUT` to merge into one pipe."
+    ),
+    "SRC006": (
+        "SRC006 os.system/os.popen shells out with no way to drain or bound "
+        "the child. Use `RunningProcess`."
     ),
     "SRC004": (
         "SRC004 capturing subprocess call in text mode without an explicit "
@@ -96,6 +124,14 @@ class SubprocessVisitor(ast.NodeVisitor):
         self.source_lines = source_lines or []
 
     def visit_Call(self, node: ast.Call) -> None:  # noqa: N802
+        # `os.system` / `os.popen` are spawn APIs too, and worse than
+        # subprocess: os.system gives no handle at all, os.popen gives one
+        # undrainable pipe. Neither can be bounded or interrupted.
+        if self._is_os_spawn(node) and not self._has_noqa(node.lineno):
+            self._add(node.lineno, "SRC006")
+            self.generic_visit(node)
+            return
+
         attr = self._subprocess_attr(node)
         if attr is None:
             self.generic_visit(node)
@@ -107,11 +143,16 @@ class SubprocessVisitor(ast.NodeVisitor):
 
         captures = self._captures_output(node)
 
-        if attr == "run" and captures:
+        if attr == "run":
             self._add(node.lineno, "SRC001")
         elif attr == "Popen":
             self._add(node.lineno, "SRC002")
-        elif attr in ("check_output", "check_call"):
+            # SRC005 is the subset of SRC002 that actually deadlocks. Reported
+            # in addition to SRC002 so the broad convention rule can stay on
+            # its large baseline while this one is held at zero.
+            if self._is_undrained_dual_pipe(node):
+                self._add(node.lineno, "SRC005")
+        elif attr in ("check_output", "check_call", "call"):
             self._add(node.lineno, "SRC003")
 
         # The decode hazard only exists when the parent actually reads and
@@ -128,6 +169,15 @@ class SubprocessVisitor(ast.NodeVisitor):
     def _add(self, lineno: int, code: str) -> None:
         self.violations.append((lineno, code, _MESSAGES[code]))
 
+    def _is_os_spawn(self, node: ast.Call) -> bool:
+        """True for `os.system(...)` / `os.popen(...)`."""
+        func = node.func
+        if not isinstance(func, ast.Attribute):
+            return False
+        if not (isinstance(func.value, ast.Name) and func.value.id == "os"):
+            return False
+        return func.attr in ("system", "popen")
+
     def _subprocess_attr(self, node: ast.Call) -> str | None:
         """Return the attribute name for a `subprocess.<attr>(...)` call."""
         func = node.func
@@ -136,6 +186,73 @@ class SubprocessVisitor(ast.NodeVisitor):
         if not (isinstance(func.value, ast.Name) and func.value.id == "subprocess"):
             return None
         return func.attr
+
+    def _is_undrained_dual_pipe(self, node: ast.Call) -> bool:
+        """True for the exact shape that deadlocks.
+
+        `Popen(stdout=PIPE, stderr=PIPE)` where nothing ever calls
+        `.communicate()` on the result. With both pipes open the parent must
+        drain both concurrently; draining one and then waiting wedges the
+        moment the other fills its OS buffer (~64 KB on Linux, ~8 KB on
+        Windows). Measured on this repo: a child writing 20k lines to stderr
+        while the parent read only stdout never returned, while the same child
+        under `RunningProcess` finished in 0.3s.
+
+        `communicate()` is the stdlib's own correct drain (it selects/threads
+        over both), so its presence anywhere in the enclosing function clears
+        the call. That is deliberately generous: this rule is meant to be held
+        at zero, so a false positive is more expensive than a missed exotic
+        case, and the broader SRC002 still covers everything.
+
+        `stderr=subprocess.STDOUT` is safe and does NOT trigger: it merges
+        stderr into the single stdout pipe, leaving nothing undrained.
+        """
+        stdout_piped = False
+        stderr_piped = False
+        for kw in node.keywords:
+            if kw.arg == "stdout" and self._is_pipe(kw.value):
+                stdout_piped = True
+            elif kw.arg == "stderr" and self._is_pipe(kw.value):
+                stderr_piped = True
+        if not (stdout_piped and stderr_piped):
+            return False
+        return not self._function_calls_communicate(node)
+
+    def _function_calls_communicate(self, node: ast.Call) -> bool:
+        """True when `.communicate(` appears in the enclosing function body.
+
+        Scope is found by text search rather than AST parent links (ast nodes
+        carry no parent pointer): walk outward from the Popen line to the
+        nearest enclosing `def` and scan to the end of its indented block.
+        """
+        if not self.source_lines:
+            return False
+        index = node.lineno - 1
+        if index >= len(self.source_lines):
+            return False
+
+        # Walk up to the enclosing `def` / `async def`.
+        start = 0
+        def_indent = 0
+        for i in range(index, -1, -1):
+            stripped = self.source_lines[i].lstrip()
+            if stripped.startswith("def ") or stripped.startswith("async def "):
+                start = i
+                def_indent = len(self.source_lines[i]) - len(stripped)
+                break
+
+        # Walk down to the end of that block.
+        end = len(self.source_lines)
+        for i in range(start + 1, len(self.source_lines)):
+            line = self.source_lines[i]
+            if not line.strip():
+                continue
+            indent = len(line) - len(line.lstrip())
+            if indent <= def_indent and i > start:
+                end = i
+                break
+
+        return any(".communicate(" in line for line in self.source_lines[start:end])
 
     def _captures_output(self, node: ast.Call) -> bool:
         """True when the call captures stdout/stderr through a pipe."""
