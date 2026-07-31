@@ -250,6 +250,25 @@ def fbuild_supports_compile_many() -> bool:
 # can render it back without unit conversion.
 _FLASH_SIZE_RE = re.compile(r"^\s*Flash:\s+([0-9.]+(?:\s*KB|\s*MB|\s*bytes))\s*/")
 _RAM_SIZE_RE = re.compile(r"^\s*RAM:\s+([0-9.]+(?:\s*KB|\s*MB|\s*bytes))\s*/")
+_FBUILD_BUILD_ERROR_RE = re.compile(r"(?m)^\s*build error:\s+")
+
+
+def _output_contains_fbuild_build_error(output: str) -> bool:
+    """Return True when fbuild emitted its explicit build-failure marker.
+
+    fbuild's daemon formats build failures as a bare ``build error: <msg>``
+    log line (fbuild ``handlers/operations/build.rs`` + ``deploy.rs``) and the
+    CLI exits with the response's ``exit_code`` verbatim. fbuild already
+    guards against a zero ``exit_code`` arriving alongside ``success=false``
+    in ``cli/deploy.rs`` (fbuild issue #130), but only on the ``test-emu``
+    path -- ``cli/build.rs`` and the main ``cli/deploy.rs`` exit unclamped. A
+    zero exit there would silently read as a green build, so corroborate the
+    return code against the marker.
+
+    Only matches at line start: ``compile-many`` embeds the same text
+    mid-line in its per-sketch summary, where it is not a whole-run failure.
+    """
+    return _FBUILD_BUILD_ERROR_RE.search(output) is not None
 
 
 def _parse_size_info_from_log(log_path: Path | None) -> tuple[str | None, str | None]:
@@ -379,6 +398,8 @@ def run_fbuild_compile(
         )
         output = str(process.stdout)
         success = returncode == 0
+        if success and _output_contains_fbuild_build_error(output):
+            success = False
     except KeyboardInterrupt as ki:
         from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
@@ -474,6 +495,10 @@ def _run_fbuild_batch_command(
         )
         output = str(process.stdout)
         sketch_results = _parse_compile_many_results(output)
+        # No _output_contains_fbuild_build_error() guard here on purpose:
+        # compile-many reports `build error` mid-line per sketch, so it does
+        # not indicate whole-run failure. The result-count check below is this
+        # path's equivalent corroboration.
         success = returncode == 0
         expected_results = len(sketch_project_dirs)
         if success and len(sketch_results) != expected_results:
@@ -761,6 +786,11 @@ def run_fbuild_deploy(
         stdout_text = "\n".join(collected)
         returncode = proc.returncode
         success = returncode == 0
+        # `fbuild deploy` builds before it flashes, so it can emit the same
+        # build-failure marker on a zero exit. See
+        # _output_contains_fbuild_build_error().
+        if success and _output_contains_fbuild_build_error(stdout_text):
+            success = False
 
         elapsed = time.monotonic() - t0
         if quiet:

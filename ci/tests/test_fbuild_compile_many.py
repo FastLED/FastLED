@@ -161,6 +161,53 @@ def test_run_fbuild_ci_fails_when_output_is_partially_unparseable(
     assert "weird output format" in result.output
 
 
+def test_run_fbuild_compile_fails_on_build_error_with_zero_returncode(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    class FakeRunningProcess:
+        def __init__(
+            self,
+            cmd: list[str],
+            timeout: int,
+            auto_run: bool,
+            capture: bool,
+            env: dict[str, str] | None = None,
+        ) -> None:
+            assert cmd[:4] == ["fbuild.exe", str(tmp_path), "build", "-e"]
+            assert timeout == 1800
+            assert auto_run is False
+            assert capture is True
+            assert env is not None
+            self.stdout = "\n".join(
+                [
+                    "   0.00 =   BUILDING lpc845brk   =",
+                    "build error: build failed: local library 'FastLED' compilation failed",
+                    "fbuild version: 2.2.30",
+                ]
+            )
+            self.returncode = 0
+
+        def start(self) -> None:
+            pass
+
+        def wait(self, echo: bool) -> int:
+            assert echo is True
+            return 0
+
+    monkeypatch.setattr(fbuild_runner, "get_fbuild_executable", lambda: "fbuild.exe")
+    monkeypatch.setattr("running_process.RunningProcess", FakeRunningProcess)
+
+    result = fbuild_runner.run_fbuild_compile(
+        tmp_path,
+        environment="lpc845brk",
+        verbose=False,
+    )
+
+    assert result.success is False
+    assert result.returncode == 0
+    assert "build error:" in result.output
+
+
 def test_pio_compiler_build_prefers_ci_results(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
