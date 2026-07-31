@@ -279,6 +279,60 @@ def test_cached(build_dir: Path, test_name: str, artifact_path: Path) -> bool:
         return False
 
 
+def _cpp_run_breakdown(fp: dict, num_passed: int, num_run: int) -> "tuple[str, str]":
+    """Render a cached cpp_test count with its unit/example split.
+
+    Stdlib-only mirror of ci.util.test_types.format_run_breakdown -- importing
+    that module costs ~62ms, which is more than this whole early-exit path is
+    allowed to spend (see the module docstring on intentional duplication).
+    Keep the wording in step with the canonical implementation.
+
+    A total alone cannot say whether examples were part of the run, so
+    "274 unit, examples cached" and "274 of the 357 expected" render
+    identically (#3779).
+
+    Returns ``(counts, notes)``; ``notes`` is empty when every requested
+    population ran.
+    """
+    ex_run = fp.get("num_examples_run")
+    ex_passed = fp.get("num_examples_passed")
+    included = fp.get("examples_included")
+    if ex_run is None or ex_passed is None or included is None:
+        if included is not None:
+            # Populations known, sizes not -- name the coverage, claim no split.
+            if included:
+                return f"{num_passed}/{num_run} unit + examples", ""
+            return f"{num_passed}/{num_run} unit", "examples not requested"
+        # Written before the split was recorded -- replay the total, but do
+        # not let it imply coverage it cannot vouch for.
+        return f"{num_passed}/{num_run}", "unit/example split unrecorded"
+
+    # #3778 records a narrowed run as scope="partial"; a population that ran
+    # nothing under a filter was skipped, not verified as up to date.
+    missing = (
+        "not matched by filter"
+        if fp.get("scope") == "partial"
+        else "cached, not re-run"
+    )
+    parts = []
+    if num_run - ex_run:
+        parts.append(f"{num_passed - ex_passed}/{num_run - ex_run} unit")
+    if ex_run:
+        parts.append(f"{ex_passed}/{ex_run} examples")
+    notes = []
+    if not (num_run - ex_run):
+        notes.append(f"unit tests {missing}")
+    if not included:
+        notes.append("examples not requested")
+    elif not ex_run:
+        notes.append(f"examples {missing}")
+
+    # Keep the totals visible when nothing ran, so an empty run stays
+    # distinguishable from a corrupt entry.
+    counts = ", ".join(parts) if parts else f"{num_passed}/{num_run}"
+    return counts, "; ".join(notes)
+
+
 def full_run_cache(
     build_dir: Path, include_examples: bool = False
 ) -> tuple[int, int, float] | None:
@@ -552,7 +606,11 @@ def argv_ultra_early_exit(start_time: float) -> None:
             _nt = _cpp_fp.get("num_tests_run")
             _dur = _cpp_fp.get("duration_seconds")
             if _np is not None and _nt is not None and _dur is not None:
-                _cpp_label = f"cpp_unit_tests ({_np}/{_nt} passed in {_dur:.2f}s)"
+                _counts, _notes = _cpp_run_breakdown(_cpp_fp, _np, _nt)
+                _cpp_label = (
+                    f"cpp_unit_tests ({_counts} passed in {_dur:.2f}s"
+                    f"{'; ' + _notes if _notes else ''})"
+                )
 
             _rows = [
                 (_cpp_label, "skipped"),
@@ -601,9 +659,17 @@ def argv_ultra_early_exit(start_time: float) -> None:
                 import time  # noqa: PLC0415 - lazy import
 
                 _np_fr, _nt_fr, _dur_fr = _cached_fr
+                # .full_run_cache.json records only a total -- it has no
+                # unit/example attribution, and the CURRENT invocation's flags
+                # describe this reader, not the run that wrote the entry (a
+                # --unit run's cache can be served here to --cpp). Claiming a
+                # coverage this entry never recorded would be the very
+                # fabrication #3779 is about, so report the total and say the
+                # split is unknown.
                 print(
                     f"✓ Fingerprint cache valid - skipping C++ unit tests "
-                    f"[{_np_fr}/{_nt_fr} passed in {_dur_fr:.2f}s]"
+                    f"[{_np_fr}/{_nt_fr} passed in {_dur_fr:.2f}s, "
+                    f"unit/example split unrecorded]"
                 )
                 print(f"Total: {time.time() - start_time:.2f}s")
                 sys.exit(0)

@@ -45,6 +45,7 @@ from ci.util.color_output import print_cache_hit
 
 
 if TYPE_CHECKING:
+    from ci.meson.test_execution import MesonTestResult
     from ci.util.fingerprint import FingerprintManager
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.test_exceptions import (
@@ -58,6 +59,7 @@ from ci.util.test_types import (
     TestResult,
     TestResultType,
     TestSuiteResult,
+    describe_test_counts,
     determine_test_categories,
 )
 from ci.util.timestamp_print import ts_print
@@ -816,6 +818,24 @@ def _create_skipped_timing(
     # Include cached summary in the name if available
     display_name = f"{test_name} ({cached_summary})" if cached_summary else test_name
     return ProcessTiming(name=display_name, duration=0.0, command=command, skipped=True)
+
+
+def _describe_cpp_counts(result: "MesonTestResult") -> str:
+    """Label a C++ result row with the populations its counts cover.
+
+    The summary table carried the same anonymous denominator as the headline,
+    so a unit-only row and a unit+examples row were indistinguishable (#3779).
+    A result from a path that cannot attribute its counts says so rather than
+    implying coverage it never verified.
+    """
+    breakdown = describe_test_counts(
+        num_passed=result.num_tests_passed,
+        num_run=result.num_tests_run,
+        num_examples_passed=result.num_examples_passed,
+        num_examples_run=result.num_examples_run,
+        examples_included=result.examples_included,
+    )
+    return breakdown.describe(" passed")
 
 
 def _format_cache_hit_message(
@@ -1594,6 +1614,9 @@ def runner(
                     duration_seconds=result.duration,
                     test_name="cpp_unit_tests",
                     scope="partial" if (test_name or test_file_filter) else "full",
+                    num_examples_run=result.num_examples_run,
+                    num_examples_passed=result.num_examples_passed,
+                    examples_included=result.examples_included,
                 )
 
             # Print timing summary table for unit-only mode
@@ -1603,7 +1626,7 @@ def runner(
 
                 show_zccache_stats()
             unit_timing = ProcessTiming(
-                name=f"cpp_unit_tests ({result.num_tests_passed}/{result.num_tests_run} passed)",
+                name=f"cpp_unit_tests ({_describe_cpp_counts(result)})",
                 duration=result.duration,
                 command="meson test",
                 skipped=False,
@@ -1663,7 +1686,7 @@ def runner(
 
             # Create timing entry for summary
             meson_test_timing = ProcessTiming(
-                name=f"cpp_unit_tests ({result.num_tests_passed}/{result.num_tests_run} passed)",
+                name=f"cpp_unit_tests ({_describe_cpp_counts(result)})",
                 duration=result.duration,
                 command="meson test",
                 skipped=False,
@@ -1689,6 +1712,9 @@ def runner(
                     duration_seconds=result.duration,
                     test_name="cpp_unit_tests",
                     scope="partial" if (test_name or test_file_filter) else "full",
+                    num_examples_run=result.num_examples_run,
+                    num_examples_passed=result.num_examples_passed,
+                    examples_included=result.examples_included,
                 )
 
             if not result.success:

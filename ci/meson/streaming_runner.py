@@ -34,10 +34,19 @@ from ci.meson.runner_helpers import (
     _write_failure_log,
     _write_testlog_failures,
 )
-from ci.meson.streaming import TestResult, stream_compile_and_run_tests
-from ci.meson.test_execution import MesonTestResult, run_meson_test
+from ci.meson.streaming import (
+    TestResult,
+    is_example_artifact,
+    stream_compile_and_run_tests,
+)
+from ci.meson.test_execution import (
+    MesonTestResult,
+    examples_are_included,
+    run_meson_test,
+)
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.output_formatter import TimestampFormatter
+from ci.util.test_types import describe_test_counts
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
@@ -239,10 +248,23 @@ def _handle_streaming_failure(
     failed_outputs_lock: threading.Lock,
     duration: float,
     num_tests_run: int,
+    include_examples: bool,
 ) -> MesonTestResult:
     """Print failure details and write logs after the streaming path failed."""
+    # Attribute the failure counts too. An anonymous denominator is least
+    # affordable here: "355/357" cannot say whether the 2 failures were unit
+    # tests or examples, nor which population the total covers (#3779).
+    num_examples_run = sr.num_passed_examples + sr.num_failed_examples
+    breakdown = describe_test_counts(
+        num_passed=sr.num_passed,
+        num_run=num_tests_run,
+        num_examples_passed=sr.num_passed_examples,
+        num_examples_run=num_examples_run,
+        examples_included=include_examples,
+        filtered=bool(ctx.test_file_filter),
+    )
     print_error(
-        f"[MESON] ❌ Some tests failed ({sr.num_passed}/{num_tests_run} tests in {duration:.2f}s)"
+        f"[MESON] ❌ Some tests failed ({breakdown.describe(f' in {duration:.2f}s')})"
     )
     # Snapshot under lock — workers may still be running after shutdown(wait=False).
     with failed_outputs_lock:
@@ -282,6 +304,9 @@ def _handle_streaming_failure(
         num_tests_passed=sr.num_passed,
         num_tests_failed=sr.num_failed,
         failed_test_names=sr.failed_names,
+        num_examples_run=num_examples_run,
+        num_examples_passed=sr.num_passed_examples,
+        examples_included=include_examples,
     )
 
 
@@ -314,12 +339,12 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
 
             if test_path.suffix.lower() in (".dll", ".so", ".dylib"):
                 runner_suffix = ".exe" if os.name == "nt" else ""
-                if test_path.parent.name == "tests":
-                    runner = ctx.build_dir / "tests" / f"runner{runner_suffix}"
-                else:
+                if is_example_artifact(test_path):
                     runner = (
                         ctx.build_dir / "examples" / f"example_runner{runner_suffix}"
                     )
+                else:
+                    runner = ctx.build_dir / "tests" / f"runner{runner_suffix}"
                 if not runner.exists():
                     return TestResult(
                         success=False,
@@ -390,9 +415,7 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
     # Debug builds with ASAN are significantly slower (esp. Windows CI).
     compile_timeout = 2700 if ctx.use_debug else 600
 
-    include_examples = not (
-        ctx.exclude_suites and "fastled:examples" in ctx.exclude_suites
-    )
+    include_examples = examples_are_included(ctx.exclude_suites)
     compile_target = "all-with-examples" if include_examples else None
 
     if compile_target == "all-with-examples":
@@ -442,19 +465,38 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
 
     if not sr.success:
         return _handle_streaming_failure(
-            ctx, sr, failed_test_outputs, failed_outputs_lock, duration, num_tests_run
+            ctx,
+            sr,
+            failed_test_outputs,
+            failed_outputs_lock,
+            duration,
+            num_tests_run,
+            include_examples,
         )
 
     _ts_print(ctx.build_timer.format_table())
-    print_success(
-        f"✅ All tests passed ({sr.num_passed}/{num_tests_run} in {duration:.2f}s)"
+    num_examples_run = sr.num_passed_examples + sr.num_failed_examples
+    breakdown = describe_test_counts(
+        num_passed=sr.num_passed,
+        num_run=num_tests_run,
+        num_examples_passed=sr.num_passed_examples,
+        num_examples_run=num_examples_run,
+        examples_included=include_examples,
+        # A name/file selector drops non-matching artifacts before they are
+        # ever submitted, so a population that ran nothing under one was
+        # filtered out -- not verified as up to date.
+        filtered=bool(ctx.test_file_filter),
     )
+    print_success(f"✅ All tests passed ({breakdown.describe(f' in {duration:.2f}s')})")
     result = MesonTestResult(
         success=True,
         duration=duration,
         num_tests_run=num_tests_run,
         num_tests_passed=sr.num_passed,
         num_tests_failed=sr.num_failed,
+        num_examples_run=num_examples_run,
+        num_examples_passed=sr.num_passed_examples,
+        examples_included=include_examples,
     )
     result = _apply_phase_timing(result, ctx.build_timer)
     _apply_compile_sub_phases(result, sr.compile_sub_phases)
