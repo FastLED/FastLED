@@ -189,6 +189,30 @@ def test_deploy_reports_failure_exit_code(
     assert "undefined reference" in result.output
 
 
+def test_deploy_fails_on_build_error_with_zero_returncode(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A `build error:` marker outweighs a zero exit code."""
+    sink = _RecordingSink()
+    _install_fake_fbuild(
+        monkeypatch,
+        tmp_path,
+        script_body=(
+            "print('   0.00 =   BUILDING esp32s3   =', flush=True)\n"
+            'print("build error: build failed: local library "\n'
+            "      \"'FastLED' compilation failed\", flush=True)\n"
+        ),
+        sink=sink,
+    )
+
+    result = fbuild_runner.run_fbuild_deploy(
+        build_dir=tmp_path, environment="esp32s3", timeout=60
+    )
+    assert result.success is False
+    assert result.returncode == 0
+    assert "build error:" in result.output
+
+
 def test_deploy_writes_to_log_file_in_quiet_mode(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
