@@ -22,6 +22,10 @@ pub const WARN_ONLY_CHECKERS: &[&str] = &[
     // fl::Singleton<T> is tracked by the sub-issues under FastLED#3481.
     // Promote to hard-fail via FastLED#3492 once the count reaches zero.
     "SingletonElisionChecker",
+    // FastLED#3483 -- integer constants split out of SingletonElisionChecker.
+    // Same pre-existing tree, same rollout: report while the ~30 sites gain
+    // `constexpr`, then promote. Fixing a hit silences both rules at once.
+    "PreferConstexprChecker",
     // FastLED#3287 -- taking a raw pointer into a CONTIGUOUS fl:: container
     // is not UB today, only brittle. The non-contiguous tier
     // (ContainerNonContiguousPtrChecker) hard-fails; this one reports while

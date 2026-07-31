@@ -420,9 +420,194 @@ FL_WARN(\"still checked because remote files are always guarded\");\n",
                    static int sCounter = 0;\n\
                    }\n";
         assert!(singleton_elision_violations(src).is_empty());
+        assert!(prefer_constexpr_violations(src).is_empty());
 
+        // Unannotated, this sample is an integral type bound to a literal, so
+        // after FastLED#3483 it belongs to PreferConstexprChecker rather than
+        // SingletonElisionChecker. Assert the partition directly: exactly one
+        // rule owns it, never both and never neither.
         let unannotated = "namespace fl {\nstatic int sCounter = 0;\n}\n";
-        assert_eq!(singleton_elision_violations(unannotated).len(), 1);
+        let singleton_hits = singleton_elision_violations(unannotated).len();
+        let constexpr_hits = prefer_constexpr_violations(unannotated).len();
+        assert_eq!(
+            singleton_hits + constexpr_hits,
+            1,
+            "expected exactly one rule to claim the declaration \
+             (singleton={singleton_hits}, constexpr={constexpr_hits})"
+        );
+        assert_eq!(
+            constexpr_hits, 1,
+            "an integer constant belongs to PreferConstexpr"
+        );
+    }
+
+    // ---- PreferConstexprChecker (FastLED#3483) ----
+    //
+    // The tree currently has ZERO instances of this pattern -- every case the
+    // issue cited (`int PRIORITY_*`, `const int kBassStart`) had already been
+    // converted to `constexpr` by the time the rule was written. So these
+    // tests are the whole evidence that the rule fires at all, and that it
+    // partitions cleanly against SingletonElisionChecker rather than
+    // shadowing it.
+
+    fn prefer_constexpr_violations(src: &str) -> Vec<(usize, String)> {
+        PreferConstexprChecker.check_file_content(&file("src/fl/probe.cpp.hpp", src))
+    }
+
+    #[test]
+    fn prefer_constexpr_flags_plain_integer_constant() {
+        // The motivating shape from FastLED#3483.
+        let src = "namespace fl {
+int PRIORITY_PARLIO = 3;
+}
+";
+        let hits = prefer_constexpr_violations(src);
+        assert_eq!(hits.len(), 1, "expected the integer constant to be flagged");
+        assert!(
+            hits[0].1.contains("constexpr"),
+            "message must name the fix, got: {}",
+            hits[0].1
+        );
+        // ...and the Singleton rule must NOT also claim it, or one
+        // declaration carries two contradictory fixes.
+        assert!(
+            singleton_elision_violations(src).is_empty(),
+            "PreferConstexpr candidates must be excluded from SingletonElision"
+        );
+    }
+
+    #[test]
+    fn prefer_constexpr_flags_const_int() {
+        let src = "namespace fl {
+const int kBassStart = 20;
+}
+";
+        assert_eq!(prefer_constexpr_violations(src).len(), 1);
+        assert!(singleton_elision_violations(src).is_empty());
+    }
+
+    #[test]
+    fn prefer_constexpr_accepts_hex_and_shift_literals() {
+        // No parenthesised forms here: the shared scanner skips any line with
+        // `(` before `;` as a probable function declaration, so `(1u << 3)`
+        // never reaches either rule. Pre-existing caveat, same one noted in
+        // singleton_elision_still_flags_non_literal_constexpr.
+        for rhs in ["0xFF", "0b1010", "64u", "-3", "true"] {
+            let src = format!("namespace fl {{
+int kX = {rhs};
+}}
+");
+            assert_eq!(
+                prefer_constexpr_violations(&src).len(),
+                1,
+                "expected `{rhs}` to read as an integer literal",
+            );
+        }
+    }
+
+    #[test]
+    fn prefer_constexpr_ignores_mutable_state_that_merely_starts_at_a_literal() {
+        // `bool sInitialized = false;` matches "integral type bound to an
+        // integer literal" exactly like a real constant does. Advising
+        // `constexpr` here does not compile -- and it would also steal the
+        // declaration from SingletonElisionChecker, where mutable driver
+        // state belongs. This case is why the rule scans for assignments.
+        let src = "namespace fl {
+                   bool sInitialized = false;
+                   void init() { sInitialized = true; }
+                   }
+";
+        assert!(
+            prefer_constexpr_violations(src).is_empty(),
+            "assigned-later state must not be called a constant"
+        );
+        // It stays with the Singleton rule -- not dropped by both.
+        assert_eq!(singleton_elision_violations(src).len(), 1);
+    }
+
+    #[test]
+    fn prefer_constexpr_ignores_compound_assignment_and_increment() {
+        for mutation in ["sCount += 1;", "sCount++;", "sCount |= 2;"] {
+            let src = format!(
+                "namespace fl {{
+int sCount = 0;
+void bump() {{ {mutation} }}
+}}
+"
+            );
+            assert!(
+                prefer_constexpr_violations(&src).is_empty(),
+                "`{mutation}` marks sCount mutable",
+            );
+        }
+    }
+
+    #[test]
+    fn prefer_constexpr_does_not_confuse_comparison_with_assignment() {
+        // `==` is a read, not a write; the constant must stay flagged.
+        let src = "namespace fl {
+                   int kMode = 2;
+                   bool isMode() { return kMode == 2; }
+                   }
+";
+        assert_eq!(prefer_constexpr_violations(src).len(), 1);
+    }
+
+    #[test]
+    fn prefer_constexpr_matches_whole_identifiers_only() {
+        // Assigning `kModeExtra` must not mark `kMode` mutable.
+        let src = "namespace fl {
+                   int kMode = 2;
+                   void f() { kModeExtra = 5; }
+                   }
+";
+        assert_eq!(prefer_constexpr_violations(src).len(), 1);
+    }
+
+    #[test]
+    fn prefer_constexpr_leaves_non_integral_types_to_singleton() {
+        // Pointers, handles and volatile hardware state are not constants.
+        for decl in [
+            "QueueHandle_t s_queue = 0;",
+            "void *pMatrix = nullptr;",
+            "volatile u32 g_millis = 0;",
+            "float kGain = 1.5f;",
+        ] {
+            let src = format!("namespace fl {{
+{decl}
+}}
+");
+            assert!(
+                prefer_constexpr_violations(&src).is_empty(),
+                "`{decl}` is not an integer constant",
+            );
+            assert_eq!(
+                singleton_elision_violations(&src).len(),
+                1,
+                "`{decl}` must still be reported by SingletonElision",
+            );
+        }
+    }
+
+    #[test]
+    fn prefer_constexpr_skips_already_constexpr() {
+        let src = "namespace fl {
+constexpr int kX = 5;
+}
+";
+        assert!(prefer_constexpr_violations(src).is_empty());
+        // Fixing a hit silences BOTH rules -- the issue's acceptance criterion.
+        assert!(singleton_elision_violations(src).is_empty());
+    }
+
+    #[test]
+    fn prefer_constexpr_honors_allow_global_marker() {
+        let src = "namespace fl {
+                   // FL_LINT_ALLOW_GLOBAL(deliberate)
+                   int kX = 5;
+                   }
+";
+        assert!(prefer_constexpr_violations(src).is_empty());
     }
 
     #[test]
