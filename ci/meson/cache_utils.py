@@ -637,6 +637,9 @@ def save_full_run_result(
     num_tests: int,
     duration: float,
     watermarks: "Optional[dict[str, float]]" = None,
+    num_examples_passed: "Optional[int]" = None,
+    num_examples_run: "Optional[int]" = None,
+    examples_included: "Optional[bool]" = None,
 ) -> None:
     """Save full test suite result for future fast-path.
 
@@ -654,6 +657,10 @@ def save_full_run_result(
             running", so it would cache a pass over files that were never
             tested. Callers that cannot supply a full set simply forgo the
             fast path for one run.
+        num_examples_passed / num_examples_run / examples_included: which
+            populations the counts above cover (#3779). Omit them when the
+            producing path cannot attribute its counts -- the replayed line
+            then says the split is unrecorded rather than inventing one.
     """
     cache_file = get_full_run_cache_file(build_dir)
     try:
@@ -679,6 +686,14 @@ def save_full_run_result(
             ),
             **marks,
         }
+        # Optional attribution -- absent keys mean "not recorded", which every
+        # reader already renders honestly.
+        if num_examples_passed is not None:
+            data["num_examples_passed"] = num_examples_passed
+        if num_examples_run is not None:
+            data["num_examples_run"] = num_examples_run
+        if examples_included is not None:
+            data["examples_included"] = examples_included
 
         with open(cache_file, "w", encoding="utf-8") as f:
             json.dump(data, f)

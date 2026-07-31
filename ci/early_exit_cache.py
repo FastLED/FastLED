@@ -335,7 +335,7 @@ def _cpp_run_breakdown(fp: dict, num_passed: int, num_run: int) -> "tuple[str, s
 
 def full_run_cache(
     build_dir: Path, include_examples: bool = False
-) -> tuple[int, int, float] | None:
+) -> tuple[int, int, float, dict] | None:
     """Check if full test suite result is cached (stdlib only, no ci.* imports).
 
     Verifies that:
@@ -352,7 +352,8 @@ def full_run_cache(
         include_examples: If True, also check examples/ for changes.
 
     Returns:
-        Tuple of (num_passed, num_tests, duration) on cache hit, else None.
+        Tuple of (num_passed, num_tests, duration, raw_entry) on cache hit,
+        else None. ``raw_entry`` carries any recorded unit/example split.
     """
     cache_file = build_dir / ".full_run_cache.json"
     if not cache_file.exists():
@@ -399,10 +400,18 @@ def full_run_cache(
             ex_max = max_file_mtime(Path("examples"))
             if ex_max > saved.get("examples_max_file_mtime", -1.0) + 0.001:
                 return None
+            # Fail closed: never serve an entry that recorded no example
+            # coverage to a caller that asked for examples. Comparing mtimes
+            # alone would replay a unit-only pass as though examples had run.
+            if saved.get("examples_included") is False:
+                return None
+        # Hand back the raw entry too: it carries the unit/example attribution
+        # when the writing run recorded one (#3779).
         return (
             int(saved.get("num_passed", 0)),
             int(saved.get("num_tests", 0)),
             float(saved.get("duration", 0.0)),
+            saved,
         )
     except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
         return None
@@ -658,18 +667,17 @@ def argv_ultra_early_exit(start_time: float) -> None:
             if _cached_fr:
                 import time  # noqa: PLC0415 - lazy import
 
-                _np_fr, _nt_fr, _dur_fr = _cached_fr
-                # .full_run_cache.json records only a total -- it has no
-                # unit/example attribution, and the CURRENT invocation's flags
-                # describe this reader, not the run that wrote the entry (a
-                # --unit run's cache can be served here to --cpp). Claiming a
-                # coverage this entry never recorded would be the very
-                # fabrication #3779 is about, so report the total and say the
-                # split is unknown.
+                _np_fr, _nt_fr, _dur_fr, _entry_fr = _cached_fr
+                # Describe the run from what the ENTRY recorded, never from
+                # this invocation's flags -- those describe the reader, and a
+                # --unit run's cache can be served here to --cpp. An entry
+                # written before the split existed still reports honestly as
+                # unrecorded (#3779).
+                _counts_fr, _notes_fr = _cpp_run_breakdown(_entry_fr, _np_fr, _nt_fr)
                 print(
                     f"✓ Fingerprint cache valid - skipping C++ unit tests "
-                    f"[{_np_fr}/{_nt_fr} passed in {_dur_fr:.2f}s, "
-                    f"unit/example split unrecorded]"
+                    f"[{_counts_fr} passed in {_dur_fr:.2f}s"
+                    f"{'; ' + _notes_fr if _notes_fr else ''}]"
                 )
                 print(f"Total: {time.time() - start_time:.2f}s")
                 sys.exit(0)
