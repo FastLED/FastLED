@@ -5,12 +5,20 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.5.4. Its monitor WebSocket streaming and Windows
-    # serial-health fixes are required for AutoResearch to keep the daemon
-    # alive through the first RPC on attached boards. It also includes the
-    # RP2040 UF2 deploy-path handling added in 2.5.2.
+    # Pin to fbuild 2.5.5. It carries the 2.5.4 monitor WebSocket streaming and
+    # Windows serial-health fixes required for AutoResearch to keep the daemon
+    # alive through the first RPC on attached boards, plus the RP2040 UF2
+    # deploy-path handling added in 2.5.2.
     #
     # Pin history:
+    #   2.5.5 -- refreshes the embedded zccache (pin moved to upstream main
+    #             `5ee292f`; zccache published no tag past 1.12.17, so the
+    #             version string is unchanged across ~150 commits of cache
+    #             durability and security hardening). Also realigns
+    #             `running-process` onto the same git rev zccache uses --
+    #             a registry pin plus zccache's git pin put two copies of its
+    #             unmangled `rp_*_public` C symbols in the link
+    #             (FastLED/fbuild#1215). No fbuild API change.
     #   2.5.4 -- monitor WebSocket streaming and Windows serial-health fixes;
     #             2.5.2 repeatedly lost the daemon at the first serial
     #             WebSocket during attached ESP32-C6 AutoResearch runs.
@@ -159,7 +167,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.4",
+    "fbuild==2.5.5",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
