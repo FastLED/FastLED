@@ -16,6 +16,7 @@
 #include "fl/stl/utility.h"
 #include "fl/stl/atomic.h"
 #include "fl/system/delay.h"
+#include "fl/system/yield.h"  // fl::yield — control for the timing check
 #include "platforms/stub/mutex_stub_stl.h"
 #include "platforms/stub/thread_stub_stl.h"
 #include "fl/stl/vector.h"
@@ -1092,19 +1093,51 @@ FL_TEST_CASE("fl::task::run SYSTEM yield paths") {
     FL_SUBCASE("a zero budget does not sleep") {
         run(0, ExecFlags::SYSTEM);  // warm up lazy init
 
-        fl::u32 best = 0xFFFFFFFFu;
-        for (int i = 0; i < 5; ++i) {
+        // This bounds a wall clock, so it is only meaningful when the machine
+        // is idle enough to measure. Alongside the candidate we time a bare
+        // fl::yield() -- the very call the zero-budget path is supposed to
+        // take, and one that by definition cannot sleep. Interleaving the two
+        // means OS preemption inflates both together, so the control tells us
+        // whether the measurement is trustworthy at all.
+        //
+        // Why a control and not just a bigger threshold (FastLED#3772): under
+        // real full-suite load the *minimum* of 5 samples was measured at
+        // 6.6ms and 17ms on a 16-core box -- 26x and 69x the 250us bound. At
+        // that noise level a 1ms sleep is undetectable by any wall-clock
+        // method, so raising the threshold cannot fix it and would only blunt
+        // the check on the idle machines where it does work. Instead: keep the
+        // tight bound, and decline to assert when the control proves the
+        // environment cannot support the measurement.
+        const int kSamples = 32;
+        fl::u32 best_run = 0xFFFFFFFFu;
+        fl::u32 best_yield = 0xFFFFFFFFu;
+        for (int i = 0; i < kSamples; ++i) {
             const fl::u32 t0 = fl::micros();
             run(0, ExecFlags::SYSTEM);
-            const fl::u32 dt = fl::micros() - t0;
-            if (dt < best) {
-                best = dt;
+            const fl::u32 dt_run = fl::micros() - t0;
+            if (dt_run < best_run) {
+                best_run = dt_run;
+            }
+
+            const fl::u32 t1 = fl::micros();
+            fl::yield();
+            const fl::u32 dt_yield = fl::micros() - t1;
+            if (dt_yield < best_yield) {
+                best_yield = dt_yield;
             }
         }
-        // Best-of-N: this bounds a wall clock, so a single sample can be
-        // inflated by OS preemption. A regression that made this path sleep
-        // would raise every sample, which best-of-N cannot hide.
-        FL_CHECK_LT(best, 250u);
+
+        // The control cannot sleep. If even it exceeds the bound, the box is
+        // too contended for this to mean anything -- report inconclusive
+        // rather than a false failure.
+        if (best_yield < 250u) {
+            FL_CHECK_LT(best_run, 250u);
+        } else {
+            FL_WARN("zero-budget sleep check skipped: machine too contended "
+                    "to measure (bare fl::yield() best-of-"
+                    << kSamples << " was " << best_yield
+                    << "us, over the 250us bound)");
+        }
     }
 
     FL_SUBCASE("a small budget still terminates") {
