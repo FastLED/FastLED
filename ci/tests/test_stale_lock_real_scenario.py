@@ -110,7 +110,11 @@ with FileLock(lock_path, operation="real_test_scenario"):
         proc = subprocess.Popen(
             [sys.executable, str(script_path), str(self.lock_path)],
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            # DEVNULL, not PIPE: this test never reads stderr, and an
+            # un-drained second pipe deadlocks the child once it fills
+            # (SRC005). Discarding matches the existing behaviour exactly --
+            # the output was already going nowhere.
+            stderr=subprocess.DEVNULL,
             text=True,
             bufsize=1,  # Line buffered
         )
@@ -333,7 +337,11 @@ else:
         proc = subprocess.Popen(
             [sys.executable, str(script_path)],
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            # DEVNULL, not PIPE: this test never reads stderr, and an
+            # un-drained second pipe deadlocks the child once it fills
+            # (SRC005). Discarding matches the existing behaviour exactly --
+            # the output was already going nowhere.
+            stderr=subprocess.DEVNULL,
             text=True,
             bufsize=1,
         )
@@ -425,7 +433,11 @@ else:
             proc = subprocess.Popen(
                 [sys.executable, str(script_path), str(self.lock_path)],
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                # DEVNULL, not PIPE: this test never reads stderr, and an
+                # un-drained second pipe deadlocks the child once it fills
+                # (SRC005). Discarding matches the existing behaviour exactly --
+                # the output was already going nowhere.
+                stderr=subprocess.DEVNULL,
                 text=True,
                 bufsize=1,
             )

@@ -557,6 +557,12 @@ def run_ruff() -> bool:
             "ci/lint_python/subprocess_capture_checker.py",
             "ci",
             "test.py",
+            # tests/, build.py and mcp_server.py were previously unscanned, so
+            # a deadlocking Popen could land there unnoticed. They contribute
+            # no SRC005 today; their pre-existing SRC001/002/004 are baselined.
+            "tests",
+            "build.py",
+            "mcp_server.py",
             "--exclude",
             "ci/tmp",
         ],
