@@ -123,10 +123,22 @@ class TestContentHash(unittest.TestCase):
             (work / "pkg").mkdir()
             (work / "pkg" / "a.cpp").write_bytes(files[0].read_bytes())
 
+            # The collision only exists when the caller passes a *relative*
+            # path, because Path.as_posix() on an absolute path is already
+            # absolute. Reproducing it therefore requires the cwd to be `work`
+            # so that "pkg/a.cpp" names the outside file -- os.path.relpath()
+            # from the ambient cwd yields a long "../.." form that collides
+            # with nothing and would make this test vacuous.
+            #
+            # cwd is restored in finally. Note this is process-global: it is
+            # safe under pytest's default in-process serial execution and under
+            # xdist (separate worker processes), but do not make this class
+            # thread-parallel without revisiting it.
             prev = os.getcwd()
             os.chdir(work)
             try:
                 outside_rel = Path("pkg") / "a.cpp"
+                self.assertFalse(outside_rel.is_absolute())
                 self.assertNotEqual(
                     compute_files_content_hash([files[0]], root),
                     compute_files_content_hash([outside_rel], root),
