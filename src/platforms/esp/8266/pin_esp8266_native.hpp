@@ -160,7 +160,10 @@ inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
                 GPF(pin) = GPFFS(GPFFS_GPIO(pin));
                 // Disable output (write 1 to bit position to disable)
                 GPEC = (1 << pin);
-                // Configure as input with open-drain disabled, no pull resistors
+                // Clear the interrupt-type field and set the driver bit.
+                // GPCD=1 is open-drain; the core does the same for a plain
+                // INPUT, so this matches wiring_digital.cpp rather than
+                // disabling open-drain as the previous comment claimed.
                 GPC(pin) = (GPC(pin) & ~(0xF << GPCI)) | (1 << GPCD);
                 break;
 
