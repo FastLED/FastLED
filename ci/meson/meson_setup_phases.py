@@ -590,7 +590,13 @@ def detect_example_file_changes(source_dir: Path, build_dir: Path) -> "str | Non
                 cache_data = json.load(f)
             cached_example_hash = cache_data.get("hash", "")
         except KeyboardInterrupt as ki:
+            # Re-raise like the outer handler does. handle_keyboard_interrupt()
+            # only raises on the main thread; from a worker it just notifies and
+            # returns, so without this a Ctrl-C would fall through and be
+            # reported as "cache unreadable" — forcing a reconfigure out of an
+            # interrupt instead of unwinding.
             handle_keyboard_interrupt(ki)
+            raise
         except Exception:
             cached_example_hash = ""
 
