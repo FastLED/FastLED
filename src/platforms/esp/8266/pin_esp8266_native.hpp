@@ -6,12 +6,15 @@
 /// ESP8266 SDK native GPIO implementation
 ///
 /// Provides pin control functions using ESP8266 SDK GPIO register APIs.
-/// This file is used when building without Arduino framework.
+/// Used for BOTH Arduino and non-Arduino builds (see pin_esp8266.hpp) -- this
+/// previously claimed to be non-Arduino only, which made #3735 look
+/// unreachable from an Arduino-core sketch when it was not.
 ///
 /// Implementation based on ESP8266 Arduino core's wiring_digital.cpp:
 /// https://github.com/esp8266/Arduino/blob/master/cores/esp8266/core_esp8266_wiring_digital.cpp
 
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/system/pin.h"
 
 FL_EXTERN_C_BEGIN
@@ -55,12 +58,28 @@ namespace platforms {
 #define GPEC     ESP8266_REG(0x314)  // Enable clear (write 1 to disable output)
 #define GPI      ESP8266_REG(0x318)  // Input level (read-only)
 
-// GPIO pin configuration register (one per pin)
+// GPIO pin configuration register (one per pin).
+// The GPIO_PIN block IS indexed linearly by GPIO number, so this formula is
+// correct here -- unlike the IO_MUX block below, which is not. Keeping the two
+// straight is the whole of issue #3735.
 #define GPC(p)   ESP8266_REG(0x328 + ((p & 0xF) * 4))
 
-// GPIO pin function register (one per pin)
-#undef GPF
-#define GPF(p)   ESP8266_REG(0x800 + ((p & 0xF) * 4))
+// GPIO pin function (IO_MUX) register -- deliberately NOT redefined.
+//
+// Use the vendor definition from <esp8266_peri.h>, which indexes a lookup
+// table:
+//
+//     #define GPF(p) ESP8266_REG(0x800 + esp8266_gpioToFn[(p & 0xF)])
+//
+// The IO_MUX block is ordered by PAD NAME, not by GPIO number: 0x04 is
+// MTDI (GPIO12), 0x34 is GPIO0, 0x30 is SD_CMD (GPIO11), and so on. A linear
+// `(p & 0xF) * 4` formula therefore addresses the wrong pad for almost every
+// pin. It sent GPIO12 to offset 0x30 -- SD_CMD, one of the pads wired to the
+// external SPI flash -- so configuring GPIO12 as a LED pin took flash
+// chip-select away from SPI0. The next instruction-cache miss could not be
+// serviced and the chip hung inside addLeds() until the watchdog fired
+// (#3735). GPIO13/14/15 landed on the harmless GPIO0/2/4 mux registers, which
+// is why only GPIO12 crashed.
 
 // GPIO pin input read macro
 #undef GPIP
@@ -82,16 +101,44 @@ namespace platforms {
 // Pin function register bit positions
 #define GPFPU    7   // Pull-up enable (1 = enable)
 #define GPFPD    6   // Pull-down enable (1 = enable)
-#undef GPFFS
-#define GPFFS    4   // Function select bits (4-6)
 
-// GPIO function select helper - sets function select bits to GPIO mode
-#undef GPFFS_GPIO
-#define GPFFS_GPIO(p)  (((p) < 16) ? 0 : 0)  // Function 0 = GPIO for pins 0-15
-#undef GP16FFS
-#define GP16FFS(v)     ((v) << 0)  // GPIO16 function select
-#undef GP16FPD
-#define GP16FPD        6   // GPIO16 pull-down bit
+// GPFFS(f) and GPFFS_GPIO(p) are deliberately NOT redefined -- use the vendor
+// definitions from <esp8266_peri.h>.
+//
+// Which function number means "GPIO" differs per pad: 0 for GPIO0/2/4/5, 1 for
+// GPIO16, and 3 for everything else, because pads like MTDI/MTCK/MTMS/MTDO
+// (GPIO12-15) default to JTAG on function 0. FastLED previously defined
+// GPFFS_GPIO(p) as a constant 0, which selects JTAG rather than GPIO on those
+// pads -- a second, independent defect that would have left GPIO12-15 mute
+// even once the register offset above was corrected (#3735).
+// GP16FFS(f) and GP16FPD are likewise NOT redefined. The shadowing copies were
+// wrong in the same way: GP16FPD was 6, but bit 6 of the GPIO16 function
+// register is GP16FFS2 (function-select bit 2), not the pull-down -- the
+// vendor puts the pull-down at bit 3. Enabling the GPIO16 pull-down therefore
+// re-muxed the pad instead. GP16FFS(f) also dropped the split field layout
+// (bits 0-1 plus bit 6), which only went unnoticed because every call site
+// passes 0.
+
+// Pin the vendor semantics so a future shim cannot silently take over again.
+// Each of these fails against the pre-#3735 redefinitions, which is exactly
+// when it needs to: the original defect was invisible at compile time and only
+// showed up as a watchdog reset on real silicon.
+FL_STATIC_ASSERT(GPFFS_GPIO(12) == 3,
+                 "GPIO12 (MTDI) selects GPIO on FUNC3; FUNC0 is JTAG (#3735)");
+FL_STATIC_ASSERT(GPFFS_GPIO(13) == 3 && GPFFS_GPIO(14) == 3
+                     && GPFFS_GPIO(15) == 3,
+                 "GPIO13-15 (MTCK/MTMS/MTDO) select GPIO on FUNC3 (#3735)");
+FL_STATIC_ASSERT(GPFFS_GPIO(0) == 0 && GPFFS_GPIO(2) == 0
+                     && GPFFS_GPIO(4) == 0 && GPFFS_GPIO(5) == 0,
+                 "GPIO0/2/4/5 select GPIO on FUNC0 (#3735)");
+FL_STATIC_ASSERT(GPFFS_GPIO(16) == 1,
+                 "GPIO16 selects GPIO on FUNC1 (#3735)");
+FL_STATIC_ASSERT(GP16FPD == 3,
+                 "GPIO16 pull-down is bit 3; bit 6 is function-select bit 2 "
+                 "(#3735)");
+FL_STATIC_ASSERT(GP16FFS(4) == (1 << 6),
+                 "GPIO16 function-select is split: bits 0-1 plus bit 6 "
+                 "(#3735)");
 
 // ============================================================================
 // Digital Pin Functions
@@ -108,8 +155,9 @@ inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
         // Configure pins 0-15
         switch (mode_int) {
             case 0:  // Input
-                // Set GPIO function (function select = 0)
-                GPF(pin) = 0;
+                // Select the GPIO function for this pad. The correct function
+                // number is pad-dependent, so ask the vendor macro (#3735).
+                GPF(pin) = GPFFS(GPFFS_GPIO(pin));
                 // Disable output (write 1 to bit position to disable)
                 GPEC = (1 << pin);
                 // Configure as input with open-drain disabled, no pull resistors
@@ -117,8 +165,8 @@ inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
                 break;
 
             case 1:  // Output
-                // Set GPIO function (function select = 0)
-                GPF(pin) = 0;
+                // Select the GPIO function for this pad (#3735).
+                GPF(pin) = GPFFS(GPFFS_GPIO(pin));
                 // Clear open-drain and interrupt config
                 GPC(pin) = (GPC(pin) & ~((0xF << GPCI) | (1 << GPCD)));
                 // Enable output (write 1 to bit position to enable)
@@ -126,8 +174,11 @@ inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
                 break;
 
             case 2:  // InputPullup
-                // Set GPIO function with pull-up enabled
-                GPF(pin) = (1 << GPFPU);
+                // Select the GPIO function for this pad, then enable the
+                // pull-up. Writing only the pull-up bit would clear the
+                // function-select field and mux the pad away from GPIO
+                // (#3735).
+                GPF(pin) = GPFFS(GPFFS_GPIO(pin)) | (1 << GPFPU);
                 // Disable output
                 GPEC = (1 << pin);
                 // Configure as input with open-drain enabled (required for pull-up)
