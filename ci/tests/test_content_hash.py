@@ -13,6 +13,7 @@ import os
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest import mock
 
 from ci.meson.cache_utils import compute_files_content_hash
 
@@ -134,25 +135,41 @@ class TestContentHash(unittest.TestCase):
                 os.chdir(prev)
 
     def test_unreadable_file_is_distinct_from_an_empty_one(self) -> None:
-        """An unreadable file must not hash the same as a genuinely empty one,
-        or a transient lock would silently read as 'unchanged'."""
+        """An unreadable file must not hash the same as a genuinely empty one.
+
+        If it did, a file locked by AV or an indexer would hash identically to
+        an empty file, and a later edit made while it was still unlocked-but-
+        empty-looking would read as "unchanged". Drives the helper against a
+        real read failure rather than asserting against a hand-built digest,
+        so it would catch the helper skipping the file or hashing it as b"".
+        """
         with TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "pkg").mkdir()
-            empty = root / "pkg" / "empty.cpp"
-            empty.write_text("")
-            empty_hash = compute_files_content_hash([empty], root)
+            target = root / "pkg" / "empty.cpp"
+            target.write_text("")
 
-            # The marker used for an unreadable file is a fixed 32-byte token;
-            # assert it does not collide with sha256(b"") for the same path.
-            import hashlib
+            empty_hash = compute_files_content_hash([target], root)
 
-            digest = hashlib.sha256()
-            digest.update("pkg/empty.cpp".encode())
-            digest.update(b"\0")
-            digest.update(b"<unreadable>".ljust(32, b"\0"))
-            digest.update(b"\n")
-            self.assertNotEqual(empty_hash, digest.hexdigest())
+            real_read_bytes = Path.read_bytes
+
+            def deny(self: Path) -> bytes:
+                if self == target:
+                    raise PermissionError(13, "locked by another process")
+                return real_read_bytes(self)
+
+            with mock.patch.object(Path, "read_bytes", deny):
+                unreadable_hash = compute_files_content_hash([target], root)
+
+            self.assertNotEqual(
+                empty_hash,
+                unreadable_hash,
+                "an unreadable file must not hash like an empty one",
+            )
+
+            # And it must still be hashed, not silently dropped: a skipped file
+            # would collapse to the digest of an empty file list.
+            self.assertNotEqual(unreadable_hash, compute_files_content_hash([], root))
 
 
 if __name__ == "__main__":
