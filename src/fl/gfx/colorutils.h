@@ -140,12 +140,30 @@ inline void fadeUsingColor(fl::span<CRGB> leds, const CRGB &colormask) FL_NO_EXC
 
 /// Computes a new color blended some fraction of the way between two other
 /// colors.
+///
+/// This is the linear-interpolation entry point for both pixel types, and is
+/// what to reach for when looking for a "CHSV lerp" — see the CHSV overload
+/// below. For CRGB it is equivalent to the CRGB::lerp8() member function; both
+/// spellings exist for historical reasons.
+///
 /// @param p1 the first color to blend
 /// @param p2 the second color to blend
 /// @param amountOfP2 the fraction of p2 to blend into p1
+/// @see CRGB::lerp8()
 CRGB blend(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) FL_NO_EXCEPT;
 
 /// @copydoc blend(const CRGB&, const CRGB&, fract8)
+///
+/// Interpolating in HSV space preserves saturation and value far better than
+/// interpolating the equivalent RGB colors, so prefer this over converting to
+/// CRGB and blending there.
+///
+/// Hue is circular, so unlike the CRGB overload this one has to be told which
+/// way around the color wheel to travel — hence @p directionCode, and hence
+/// there being no `CHSV::lerp8()` member to mirror CRGB::lerp8(). The default
+/// ::SHORTEST_HUES takes whichever arc is shorter; use ::LONGEST_HUES,
+/// ::FORWARD_HUES, or ::BACKWARD_HUES to force a particular sweep.
+///
 /// @param directionCode the direction to travel around the color wheel
 CHSV blend(const CHSV &p1, const CHSV &p2, fract8 amountOfP2,
            TGradientDirectionCode directionCode = SHORTEST_HUES) FL_NO_EXCEPT;
