@@ -122,4 +122,32 @@ FL_TEST_CASE("enableDrivers<Bus::BIT_BANG>() is idempotent") {
     FL_CHECK(registered2.get() == &fl::BusTraits<fl::Bus::BIT_BANG>::instance());
 }
 
+
+// Issues #974 and #976: `template instantiation depth exceeds maximum` when a
+// software-SPI chipset was given an explicit data rate. delaycycles<N> used to
+// recurse linearly (N -> N-1); it now splits binary, with <0>/<1>/<2> base
+// cases present in every translation unit.
+//
+// Scope note, so this is not mistaken for full coverage: FASTLED_STUB_IMPL is
+// in the *hardware* SPI branch of fastspi.h, so DATA_RATE_KHZ here expands to
+// a frequency, not to the cycles-per-bit divider that fed delaycycles. These
+// cases pin the template surface -- that every rate, including the
+// pathological ones from the reports, instantiates -- but the software-SPI
+// path that actually broke can only be exercised by compiling for a
+// software-SPI platform. Verified there by hand:
+// `bash compile uno --examples Apa102` with DATA_RATE_KHZ(1).
+
+FL_TEST_CASE("SPI chipsets instantiate across the data-rate range (#974, #976)") {
+    static CRGB slowest[8];
+    static CRGB slow[8];
+    static CRGB mid[8];
+    static CRGB fast[8];
+    // DATA_RATE_KHZ(1) is the exact rate from #976.
+    auto& a = FastLED.addLeds<SK9822, 23, 18, BGR, DATA_RATE_KHZ(1)>(slowest, 8);
+    auto& b = FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_KHZ(500)>(slow, 8);
+    auto& c = FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(1)>(mid, 8);
+    auto& d = FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(24)>(fast, 8);
+    (void)a; (void)b; (void)c; (void)d;
+}
+
 }  // FL_TEST_FILE
