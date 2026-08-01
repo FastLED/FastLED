@@ -417,9 +417,13 @@ template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class WS2812BV5 : public WS2812BV5Controller<DATA_PIN, RGB_ORDER> {};
 
 /// @brief GS1903 controller class.
-/// @copydetails WS2812Controller800Khz
+/// @copydetails GS1903Controller
+/// @note Previously an alias for WS2812Controller800Khz. The GS1903 datasheet
+///       specifies TH0=300ns / TH1=900ns with a ±50ns tolerance, so WS2812's
+///       250ns / 875ns fell outside the window and worked only by margin.
+///       See https://github.com/FastLED/FastLED/issues/739
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
-class GS1903 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
+class GS1903 : public GS1903Controller<DATA_PIN, RGB_ORDER> {};
 
 /// @brief SK6812 controller class.
 /// @copydetails SK6812Controller
