@@ -327,6 +327,24 @@ struct TIMING_SM16703 {
     };
 };
 
+/// GS1903 RGB controller @ 800 kHz (12 V)
+/// Four-phase: TH0=300ns, TH1=900ns, TL0=900ns, TL1=300ns, TRST>40µs
+/// @note Same bit timing as the SM16703, but the GS1903 datasheet specifies a
+///       ±50ns tolerance -- a third of the WS2812's ±150ns. That is why this
+///       has its own entry rather than reusing WS2812 timing: at TH0=250ns /
+///       TH1=875ns the WS2812 numbers sit outside the GS1903's window, which
+///       produced the intermittent "sometimes works, sometimes doesn't"
+///       behavior reported in issue #739.
+/// @see https://github.com/FastLED/FastLED/issues/739
+struct TIMING_GS1903 {
+    enum : u32 {
+        T1 = 300,
+        T2 = 600,
+        T3 = 300,
+        RESET = 280
+    };
+};
+
 /// SM16824E RGBW controller @ 800 kHz
 /// Four-phase: TH0=300ns, TH1=900ns, TL0=900ns, TL1=300ns, TRST=200µs
 /// Datasheet typicals are identical to the SM16703 / WS2811-800kHz RZ family,

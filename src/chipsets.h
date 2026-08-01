@@ -583,6 +583,11 @@ class SK6812Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
 class SM16703Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_SM16703, RGB_ORDER> {};
 
+/// GS1903 controller - references centralized timing from fl::TIMING_GS1903
+/// @see fl::TIMING_GS1903 in chipsets::led_timing.h (300, 600, 300 ns)
+template <int DATA_PIN, EOrder RGB_ORDER = RGB>
+class GS1903Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_GS1903, RGB_ORDER> {};
+
 /// PL9823 controller - references centralized timing from fl::TIMING_PL9823
 /// @see fl::TIMING_PL9823 in chipsets::led_timing.h (350, 1010, 350 ns)
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
