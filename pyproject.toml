@@ -221,6 +221,18 @@ dependencies = [
     # incremental builds produce stale .obj files after a git pull that
     # changes transitive headers (symptom: `undefined symbol: ...` link
     # errors hours after a header actually changed).
+    # 1.13.0 (released 2026-07-31): 163 commits since 1.12.17. Bumped for
+    # three fixes that map onto failures seen during long local sessions:
+    # the warm-cache deadlock and perf-watchdog fix (zackees/zccache#1151),
+    # which is the shape of the `embedded zccache compile timed out after
+    # 300s` wedge; shortened artifact locks with deferred metadata GC
+    # (#1180); and a daemon shutdown fix that drains the index-writer WAL
+    # instead of aborting it, alongside embedded-cache durability hardening
+    # (#1193). Also correctness-relevant: the C/C++ compiler binary identity
+    # is now part of the cache key (#1166), so a toolchain swap can no
+    # longer serve objects built by the previous compiler. Security: journal
+    # environments no longer persist secrets (#1179), and daemon-owned
+    # artifact retention is bounded (#1169).
     # 1.12.13 (released 2026-07-05): picks up running-process 4.5.8,
     # suppresses Windows console flashes during compiler identity probes,
     # and fixes daemon wedging on large-crate full-codegen misses
@@ -236,7 +248,7 @@ dependencies = [
     # `FileNotFoundError: meson_native.txt` / `ninja: error: rebuilding
     # 'build.ninja': subcommand failed` cascade we hit during long-session
     # `bash test --cpp` cycles.
-    "zccache>=1.12.15",
+    "zccache>=1.13.0",
     "ninja",
     "meson>=1.11.0",
     "download",
