@@ -58,7 +58,19 @@ bool CLEDController::isInList() const {
 
 void CLEDController::clearLedDataInternal(int nLeds) {
     // On common code that runs on avr, every byte counts.
-    fl::u16 n = nLeds >= 0 ? static_cast<fl::u16>(nLeds) : static_cast<fl::u16>(mLeds.size());
+    //
+    // mLeds spans one lane, not the whole buffer. A parallel controller is
+    // registered with the PER-LANE count -- addLeds<NUM_LANES, ...>(data,
+    // nLeds) forwards nLeds -- while the caller's array is NUM_LANES * nLeds.
+    // Clearing mLeds.size() therefore blanked only the first strip and left
+    // the rest lit, which is FastLED#1017.
+    //
+    // lanes() is 1 for every ordinary controller, so this is a no-op there. It
+    // reports the template lane count on parallel controllers, which is what
+    // the caller allocated, so this cannot run past the end of their array
+    // even when fewer lanes were actually claimed.
+    fl::u16 n = nLeds >= 0 ? static_cast<fl::u16>(nLeds)
+                           : static_cast<fl::u16>(mLeds.size() * lanes());
     if (mLeds.data()) {
         fl::memset((void*)mLeds.data(), 0, sizeof(CRGB) * n);
     }
