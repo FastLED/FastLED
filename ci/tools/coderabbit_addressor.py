@@ -34,7 +34,7 @@ CODERABBIT_LOGINS = {"coderabbitai", "coderabbitai[bot]"}
 SECURITY_KEYWORDS = [
     "security",
     "cve",
-    " auth",
+    "auth",
     "credential",
     "secret",
     "rce",
@@ -46,6 +46,31 @@ SECURITY_KEYWORDS = [
     "buffer overflow",
     "out-of-bounds",
 ]
+
+# Matched with word boundaries. Plain substring matching produced constant false
+# positives: "rce" fired on "Sou(rce)" -- and every guideline-sourced CodeRabbit
+# comment ends with "_Source: Coding guidelines_" -- as well as on "enfo(rce)s"
+# and "resou(rce)s". That routed ordinary maintainability nits into
+# security-flag, where the skill forbids auto-fixing and the --check hook counts
+# them as permanently unresolved, blocking merge forever.
+_SECURITY_RE = re.compile(
+    r"\b(" + "|".join(re.escape(kw) for kw in SECURITY_KEYWORDS) + r")\b"
+)
+
+# CodeRabbit appends boilerplate to every comment: HTML marker comments, a
+# collapsed "Prompt for AI Agents" / "Committable suggestion" <details> block,
+# and quoted coding-guideline text. None of it describes the finding, but it is
+# full of trigger words, so classification looks at the prose only.
+_BOILERPLATE_RE = re.compile(
+    r"<!--.*?-->|<details>.*?</details>",
+    re.DOTALL | re.IGNORECASE,
+)
+
+
+def _classifiable_text(body: str) -> str:
+    """Strip CodeRabbit boilerplate so keywords match the finding, not the footer."""
+    return _BOILERPLATE_RE.sub(" ", body)
+
 
 STYLE_KEYWORDS = [
     "nit:",
@@ -70,17 +95,16 @@ class Comment:
 
     @property
     def classification(self) -> str:
-        body_lower = self.body.lower()
-        for kw in SECURITY_KEYWORDS:
-            if kw in body_lower:
-                return "security-flag"
+        prose_lower = _classifiable_text(self.body).lower()
+        if _SECURITY_RE.search(prose_lower):
+            return "security-flag"
         if re.search(r"```suggestion", self.body):
             return "valid-fix"
         for kw in STYLE_KEYWORDS:
-            if kw in body_lower:
+            if kw in prose_lower:
                 return "style"
         if any(
-            tok in body_lower
+            tok in prose_lower
             for tok in (
                 "should be",
                 "bug:",
