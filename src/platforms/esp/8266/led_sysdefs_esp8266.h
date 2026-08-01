@@ -19,7 +19,21 @@ typedef volatile fl::u32 RwReg;
 typedef fl::u32 prog_uint32_t;
 
 
-// Default to NOT using PROGMEM here
+// Vestigial on ESP8266 -- this value does NOT control data placement here.
+//
+// fastled_progmem.h dispatches on platform before it ever tests this flag:
+// its `#elif defined(ESP8266)` arm pulls in progmem_esp8266.h, which maps
+// FL_PROGMEM to real PROGMEM and FL_PGM_READ_* to real pgm_read_*. The
+// `#if (FASTLED_USE_PROGMEM == 1)` branch sits further down, inside an
+// `#else` that ESP8266 never reaches. FastLED tables are therefore
+// flash-resident on this platform regardless of the 0 below -- verified by
+// symbol placement: a DEFINE_GRADIENT_PALETTE lands in .irom0.text
+// (0x402xxxxx), not DRAM.
+//
+// Kept at 0 because platforms/esp/compile_test.hpp asserts it and user code
+// may branch on it. Do not read it as "ESP8266 keeps constants in RAM" --
+// that was true before the platform dispatch was added, and is exactly what
+// issue #743 reported.
 #ifndef FASTLED_USE_PROGMEM
 # define FASTLED_USE_PROGMEM 0
 #endif

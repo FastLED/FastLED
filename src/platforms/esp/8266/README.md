@@ -17,10 +17,17 @@ ESP8266 family support (Xtensa).
 
 Notes:
 - Typical settings: `FASTLED_USE_PROGMEM=0`, `FASTLED_ALLOW_INTERRUPTS=1`; long ISRs will impact signal quality.
+- `FASTLED_USE_PROGMEM=0` does **not** mean constants live in RAM here — see below.
 
 ## Optional feature defines
 
-- **`FASTLED_USE_PROGMEM`**: Control PROGMEM usage. Default `0` in `led_sysdefs_esp8266.h`.
+- **`FASTLED_USE_PROGMEM`**: Default `0` in `led_sysdefs_esp8266.h`, but **vestigial on this platform** — it does not control data placement.
+
+  `fastled_progmem.h` dispatches on platform before testing the flag: its `#elif defined(ESP8266)` arm includes `progmem_esp8266.h`, which maps `FL_PROGMEM` to real `PROGMEM` and `FL_PGM_READ_*` to real `pgm_read_*`. The `#if (FASTLED_USE_PROGMEM == 1)` branch lives in an `#else` that ESP8266 never reaches.
+
+  So FastLED tables — palettes, gamma/sine LUTs, noise permutation tables — are flash-resident regardless. A `DEFINE_GRADIENT_PALETTE` links into `.irom0.text` (`0x402xxxxx`), not DRAM.
+
+  Setting it to `1` is a compile error (`platforms/esp/compile_test.hpp`), and would change nothing if it weren't. See [#743](https://github.com/FastLED/FastLED/issues/743).
 - **`FASTLED_ALLOW_INTERRUPTS`**: Allow interrupts during show. Default `1` in `led_sysdefs_esp8266.h`.
 - **`FASTLED_INTERRUPT_RETRY_COUNT`**: Max retries when a frame aborts due to long ISRs/NMIs. Default `2` (see `fastled_config.h`). Used by both single-lane and block drivers.
 
