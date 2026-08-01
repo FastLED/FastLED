@@ -301,7 +301,7 @@ external = [
     "DCT001", "DCT002", "KBI001", "KBI002", "KBI003",
     # ci/lint_python/subprocess_capture_checker.py. Without these,
     # ruff reads `# noqa: SRC00x` as an unused suppression.
-    "SRC001", "SRC002", "SRC003", "SRC004", "SRC005",
+    "SRC001", "SRC002", "SRC003", "SRC004", "SRC005", "SRC006",
 ]
 
 [tool.ruff.lint.isort]
