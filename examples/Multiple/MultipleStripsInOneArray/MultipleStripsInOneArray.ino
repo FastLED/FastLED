@@ -7,6 +7,10 @@
 // MultipleStripsInOneArray - see https://github.com/FastLED/FastLED/wiki/Multiple-Controller-Examples for more info on
 // using multiple controllers.  In this example, we're going to set up four NEOPIXEL strips on three
 // different pins, each strip will be referring to a different part of the single led array
+//
+// The segments are equal-sized here only to keep the arithmetic readable.  Each
+// addLeds() call takes its own offset and its own length, so unequal segments
+// work just as well -- see MultiArrays.ino for a mixed-length example.
 
 #include <FastLED.h>
 
