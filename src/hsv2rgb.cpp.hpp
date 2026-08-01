@@ -422,7 +422,13 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
     // This is one of the good places to scale the green down,
     // although the client can scale green down as well.
     if( G2 ) g = g >> 1;
-    if( Gscale ) g = scale8_video_LEAVING_R1_DIRTY( g, Gscale);
+    // Deliberately the cleaning variant. The _LEAVING_R1_DIRTY form only pays
+    // off when several calls are batched before one cleanup_R1(), and this is a
+    // lone call whose dirty R1 outlives it on three separate paths: sat == 255
+    // and val == 255 both skip their blocks entirely, and the sat == 0 branch
+    // below just assigns 255s. Any of those returns to the caller with AVR's
+    // __zero_reg__ non-zero. See issue #668.
+    if( Gscale ) g = scale8_video( g, Gscale);
 
     // Scale down colors if we're desaturated at all
     // and add the brightness_floor to r, g, and b.
@@ -463,6 +469,10 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
         val = scale8_video_LEAVING_R1_DIRTY( val, val);
         if( val == 0 ) {
             r=0; g=0; b=0;
+            // The scale8_video_LEAVING_R1_DIRTY above dirtied R1 and this
+            // branch does no further scaling, so it has to clean up itself --
+            // only the else branch below batches into its own cleanup_R1().
+            cleanup_R1();
         } else {
             // nscale8x3_video( r, g, b, val);
 #if (FASTLED_SCALE8_FIXED==1)
