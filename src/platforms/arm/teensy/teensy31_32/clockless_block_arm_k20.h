@@ -58,6 +58,8 @@ public:
 		long microsTaken = CLKS_TO_MICROS(clocks);
 		MS_COUNTER += (1 + (microsTaken / 1000));
 		#endif
+		// Only read when interrupts are disabled; keep the call, drop the warning.
+		FASTLED_UNUSED(clocks);
 
 		mWait.mark();
 	}
@@ -260,6 +262,8 @@ public:
 		long microsTaken = CLKS_TO_MICROS(clocks);
 		MS_COUNTER += (1 + (microsTaken / 1000));
 		#endif
+		// Only read when interrupts are disabled; keep the call, drop the warning.
+		FASTLED_UNUSED(clocks);
 
 		mWait.mark();
 	}
