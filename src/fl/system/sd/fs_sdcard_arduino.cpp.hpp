@@ -6,7 +6,14 @@
 #include "fl/system/sd/fs_sdcard_arduino.h"
 #include "platforms/is_platform.h"
 
-#if !defined(FL_IS_TEENSY) && FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>)
+// <SPI.h> is probed alongside the others because this block includes it
+// unconditionally below. ESP8266 satisfied the SD.h/fs.h half of this guard --
+// its core ships an unrelated <fs.h> for the flash filesystem -- while SPI was
+// not on the include path, so the platform failed to build at all with
+// "fatal error: SPI.h: No such file or directory". Every header this block
+// needs has to be in the condition that admits it.
+#if !defined(FL_IS_TEENSY) && FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>) &&      \
+    FL_HAS_INCLUDE(<SPI.h>)
 
 // IWYU pragma: begin_keep
 #include <SPI.h>
