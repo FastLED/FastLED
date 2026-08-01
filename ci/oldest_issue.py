@@ -64,6 +64,18 @@ def _parse_created_at(raw: str) -> datetime:
     return datetime.fromisoformat(raw.replace("Z", "+00:00"))
 
 
+def _output(result: object) -> str:
+    """Combined stdout+stderr from a RunningProcess result.
+
+    RunningProcess merges the child's stderr into stdout and leaves .stderr as
+    None, so reading .stderr alone silently sees nothing -- which made every
+    error message here blank and, worse, made the "already exists" check below
+    never match.
+    """
+    parts = [getattr(result, "stdout", None), getattr(result, "stderr", None)]
+    return " ".join(p.strip() for p in parts if p).strip()
+
+
 def fetch_issues(repo: str) -> list[Issue]:
     """Fetch all open issues via gh, sorted oldest-first."""
     result = RunningProcess.run(
@@ -93,7 +105,7 @@ def fetch_issues(repo: str) -> list[Issue]:
     )
     if result.returncode != 0:
         raise RuntimeError(
-            f"gh issue list failed ({result.returncode}): {result.stderr}"
+            f"gh issue list failed ({result.returncode}): {_output(result)}"
         )
 
     issues = [
@@ -141,12 +153,9 @@ def defer_issue(repo: str, number: int, reason: str | None) -> None:
         capture_output=True,
         text=True,
     )
-    if label_result.returncode != 0 and "already exists" not in (
-        label_result.stderr or ""
-    ):
-        raise RuntimeError(
-            f"failed to create label {DEFERRED_LABEL!r}: {label_result.stderr}"
-        )
+    label_output = _output(label_result)
+    if label_result.returncode != 0 and "already exists" not in label_output:
+        raise RuntimeError(f"failed to create label {DEFERRED_LABEL!r}: {label_output}")
 
     result = RunningProcess.run(
         [
@@ -165,7 +174,7 @@ def defer_issue(repo: str, number: int, reason: str | None) -> None:
         text=True,
     )
     if result.returncode != 0:
-        raise RuntimeError(f"failed to label #{number}: {result.stderr}")
+        raise RuntimeError(f"failed to label #{number}: {_output(result)}")
 
     if reason:
         comment_result = RunningProcess.run(
@@ -190,7 +199,7 @@ def defer_issue(repo: str, number: int, reason: str | None) -> None:
         if comment_result.returncode != 0:
             raise RuntimeError(
                 f"labeled #{number} deferred, but posting the reason comment "
-                f"failed: {comment_result.stderr}"
+                f"failed: {_output(comment_result)}"
             )
     print(f"Deferred #{number}" + (f": {reason}" if reason else ""))
 
