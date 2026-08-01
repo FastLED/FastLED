@@ -1,12 +1,18 @@
 // @filter: (memory is large)
 
 /// @file    MultiArrays.ino
-/// @brief   Demonstrates how to use multiple LED strips, each with their own data
+/// @brief   Demonstrates how to use multiple LED strips of *different* lengths
 /// @example MultiArrays.ino
 
 // MultiArrays - see https://github.com/FastLED/FastLED/wiki/Multiple-Controller-Examples for more info on
 // using multiple controllers.  In this example, we're going to set up three NEOPIXEL strips on three
-// different pins, each strip getting its own CRGB array to be played with
+// different pins, each strip getting its own CRGB array to be played with.
+//
+// The strips deliberately have three DIFFERENT lengths.  There is no requirement
+// that strips be the same size -- each addLeds() call carries its own array and
+// its own count, so mixing a 60-LED strip with a 12-LED ring works fine.  Only
+// the "array of arrays" style (see ArrayOfLedArrays.ino) forces equal lengths,
+// and that is a C array limitation, not a FastLED one.
 
 /*
  * SAFE PIN REFERENCE FOR MULTI-ARRAY PROJECTS
@@ -87,10 +93,19 @@
 
 #include <FastLED.h>
 
-#define NUM_LEDS_PER_STRIP 60
-CRGB redLeds[NUM_LEDS_PER_STRIP];
-CRGB greenLeds[NUM_LEDS_PER_STRIP];
-CRGB blueLeds[NUM_LEDS_PER_STRIP];
+// Three strips, three different lengths -- e.g. a 60-LED strip, a 24-LED ring
+// and a 12-LED ring.
+#define NUM_LEDS_RED   60
+#define NUM_LEDS_GREEN 24
+#define NUM_LEDS_BLUE  12
+
+// The longest strip, so the animation below can walk past the end of the
+// shorter ones without indexing out of bounds.
+#define MAX_STRIP_LEN NUM_LEDS_RED
+
+CRGB redLeds[NUM_LEDS_RED];
+CRGB greenLeds[NUM_LEDS_GREEN];
+CRGB blueLeds[NUM_LEDS_BLUE];
 
 // Platform-specific safe pin definitions
 // These pins are chosen to avoid strapping pins, flash pins, USB pins, etc.
@@ -158,41 +173,47 @@ CRGB blueLeds[NUM_LEDS_PER_STRIP];
 // For mirroring strips, all the "special" stuff happens just in setup.  We
 // just addLeds multiple times, once for each strip
 void setup() {
+  // Each addLeds() call gets its own array AND its own length -- they do not
+  // have to agree with each other.
+
   // tell FastLED there's 60 NEOPIXEL leds on pin PIN_RED
-  FastLED.addLeds<NEOPIXEL, PIN_RED>(redLeds, NUM_LEDS_PER_STRIP);
+  FastLED.addLeds<NEOPIXEL, PIN_RED>(redLeds, NUM_LEDS_RED);
 
-  // tell FastLED there's 60 NEOPIXEL leds on pin PIN_GREEN
-  FastLED.addLeds<NEOPIXEL, PIN_GREEN>(greenLeds, NUM_LEDS_PER_STRIP);
+  // tell FastLED there's 24 NEOPIXEL leds on pin PIN_GREEN
+  FastLED.addLeds<NEOPIXEL, PIN_GREEN>(greenLeds, NUM_LEDS_GREEN);
 
-  // tell FastLED there's 60 NEOPIXEL leds on pin PIN_BLUE
-  FastLED.addLeds<NEOPIXEL, PIN_BLUE>(blueLeds, NUM_LEDS_PER_STRIP);
+  // tell FastLED there's 12 NEOPIXEL leds on pin PIN_BLUE
+  FastLED.addLeds<NEOPIXEL, PIN_BLUE>(blueLeds, NUM_LEDS_BLUE);
 
 }
 
+// Walk one dot along every strip at once.  Because the strips are different
+// lengths, the shorter ones wrap around more often -- hence the modulo.  That
+// is the whole trick to animating mixed-length strips: keep a separate index
+// per strip, never one shared index.
+static void moveDot(int step, const CRGB &color) {
+  int r = step % NUM_LEDS_RED;
+  int g = step % NUM_LEDS_GREEN;
+  int b = step % NUM_LEDS_BLUE;
+
+  redLeds[r]   = color;
+  greenLeds[g] = color;
+  blueLeds[b]  = color;
+  FastLED.show();
+
+  // clear our current dots before we move on
+  redLeds[r]   = CRGB::Black;
+  greenLeds[g] = CRGB::Black;
+  blueLeds[b]  = CRGB::Black;
+  delay(100);
+}
+
 void loop() {
-  for(int i = 0; i < NUM_LEDS_PER_STRIP; i++) {
-    // set our current dot to red, green, and blue
-    redLeds[i] = CRGB::Red;
-    greenLeds[i] = CRGB::Green;
-    blueLeds[i] = CRGB::Blue;
-    FastLED.show();
-    // clear our current dot before we move on
-    redLeds[i] = CRGB::Black;
-    greenLeds[i] = CRGB::Black;
-    blueLeds[i] = CRGB::Black;
-    delay(100);
+  for(int i = 0; i < MAX_STRIP_LEN; i++) {
+    moveDot(i, CRGB::Red);
   }
 
-  for(int i = NUM_LEDS_PER_STRIP-1; i >= 0; i--) {
-    // set our current dot to red, green, and blue
-    redLeds[i] = CRGB::Red;
-    greenLeds[i] = CRGB::Green;
-    blueLeds[i] = CRGB::Blue;
-    FastLED.show();
-    // clear our current dot before we move on
-    redLeds[i] = CRGB::Black;
-    greenLeds[i] = CRGB::Black;
-    blueLeds[i] = CRGB::Black;
-    delay(100);
+  for(int i = MAX_STRIP_LEN-1; i >= 0; i--) {
+    moveDot(i, CRGB::Blue);
   }
 }
