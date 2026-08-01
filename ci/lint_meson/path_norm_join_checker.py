@@ -1,12 +1,33 @@
 #!/usr/bin/env python3
 """Reject Meson ``/`` joins on canonical forward-slash path variables.
 
-``path_norm_*`` values are deliberately composed with ``+ '/' +``. Meson's
-``/`` operator uses the host-native separator, so applying it to one of those
-values on Windows creates a mixed-separator path and defeats compiler/PCH
-caches. A small lexer removes comments and quoted strings before a regex
-checks the unambiguous unsafe token sequence; a full Meson parser would add
-substantial complexity without improving this focused rule.
+``path_norm_*`` values are deliberately composed with ``+ '/' +``, so that the
+spelling of every derived path is fixed by *our* source rather than by the
+behaviour of whichever Meson is installed.
+
+That distinction is the whole point, and it is easy to get wrong:
+
+- Older Meson implemented ``/`` as a bare ``os.path.join``, which on Windows
+  injects a native separator: ``path_norm_root / 'src'`` produced
+  ``C:/Users/.../fastled\\src``. clang passes that ``-I`` through verbatim, the
+  PCH canonicalises one spelling and the consuming TU sees another,
+  ``#pragma once`` stops deduping, and the build dies with
+  ``error: redefinition of ...``. Reproduced and root-caused 2026-06-02.
+- Current Meson (1.11.1, ``mesonbuild/interpreter/primitives/string.py``
+  ``_op_div``) appends ``.replace('\\\\', '/')``, so ``/`` now normalises and
+  that specific hazard is gone.
+
+The rule is kept anyway. A build whose include spelling depends on the Meson
+version is a build that breaks on upgrade, and this is the exact failure mode
+that keeps costing days to diagnose. Literal concatenation cannot regress.
+
+Do not "modernise" this away on the grounds that ``/`` is safe today --
+see ``ci/tests/test_meson_div_separator.py``, which pins the behaviour this
+reasoning depends on.
+
+A small lexer removes comments and quoted strings before a regex checks the
+unambiguous token sequence; a full Meson parser would add substantial
+complexity without improving this focused rule.
 """
 
 import re
@@ -59,10 +80,13 @@ class PathNormJoinChecker(FileContentChecker):
                 self.violations.setdefault(file_content.path, []).append(
                     (
                         line_number,
-                        f"Meson's '/' operator injects native separators when "
-                        f"joining {variable}. Use string concatenation with a "
-                        f"literal forward slash instead: {variable} + '/' + "
-                        "'relative/path'.",
+                        f"Compose {variable} with a literal forward slash "
+                        f"instead: {variable} + '/' + 'relative/path'. "
+                        "Meson's '/' normalises separators in current "
+                        "versions but did not always, and a build whose "
+                        "include spelling depends on the Meson version "
+                        "breaks on upgrade -- mixed separators defeat "
+                        "#pragma once across the PCH boundary.",
                     )
                 )
         return []
