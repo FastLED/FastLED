@@ -189,6 +189,77 @@ FL_TEST_CASE("HSV to RGB Conversion Accuracy Comparison") {
     FL_CHECK_LT(rainbow_stats.average, fullspectrum_stats.average);
 }
 
+FL_TEST_CASE("rgb2hsv_approximate - orange is not reported as green (issue #436)") {
+    // The Orange->Yellow branch computed (g - 85) + (171 - r), which goes
+    // negative for every r > 171 and then wrapped when truncated to u8 inside
+    // qsub8(). Orange came back green: rgb(255,153,0) reported hue 122.
+    struct Case {
+        u8 r, g, b;
+        u8 expected_hue;
+        const char *source;
+    };
+    const Case cases[] = {
+        {255, 153, 0, 26, "issue body"},
+        {255, 128, 0, 21, "cad435 #ff8000"},
+        {255, 166, 0, 24, "DrJaymz"},
+        {255, 143, 0, 25, "5chmidti precise impl"},
+    };
+
+    for (const auto &c : cases) {
+        CRGB original(c.r, c.g, c.b);
+        CHSV hsv = rgb2hsv_approximate(original);
+        CRGB roundtrip;
+        hsv2rgb_rainbow(hsv, roundtrip);
+        FL_WARN("rgb(" << (int)c.r << "," << (int)c.g << "," << (int)c.b
+                       << ") -> hue " << (int)hsv.hue << " -> rgb("
+                       << (int)roundtrip.r << "," << (int)roundtrip.g << ","
+                       << (int)roundtrip.b << ")   [" << c.source
+                       << ", standard-HSV hue would be " << (int)c.expected_hue
+                       << "]");
+        // Orange must land in the red..yellow arc, never in the greens. This
+        // is the actual regression: these all returned 110-130 before.
+        FL_CHECK_LE((int)hsv.hue, (int)HUE_YELLOW);
+        // rgb2hsv_approximate inverts hsv2rgb_rainbow, not a textbook HSV
+        // hexagon, so correctness is round-trip fidelity rather than agreement
+        // with a standard-HSV hue. Green must stay the middle channel and blue
+        // must stay dark -- i.e. it still looks orange.
+        FL_CHECK_GT((int)roundtrip.r, (int)roundtrip.g);
+        FL_CHECK_GT((int)roundtrip.g, (int)roundtrip.b);
+    }
+}
+
+FL_TEST_CASE("rgb2hsv_approximate - hue stays in the red..yellow arc red -> yellow") {
+    // Sweeping green up at full red walks hue from red toward yellow. The
+    // underflow made this jump out into the greens partway through (46 -> 115
+    // -> 121 -> 126 -> 35), which is what made the bug so visible in fades.
+    //
+    // KNOWN LIMITATION: there is still a small backwards step of about 5 at
+    // g=128, where the Red-Orange and Orange-Yellow branches meet. The branch
+    // boundary sits at g = r/2, which does not correspond to HUE_ORANGE, so
+    // the two branches are calibrated against different endpoints. Closing
+    // that gap means recalibrating both branches together rather than fixing
+    // one expression, so it is left for follow-up -- a 5-unit seam is not
+    // visible where a 70-unit jump into green very much was.
+    const int kKnownSeam = 8;
+    int previous = -1;
+    for (int g = 0; g <= 255; g += 15) {
+        CHSV hsv = rgb2hsv_approximate(CRGB(255, g, 0));
+        FL_WARN("rgb(255," << g << ",0) -> hue " << (int)hsv.hue);
+        // The real regression check: never leave the red..yellow arc.
+        FL_CHECK_LE((int)hsv.hue, (int)HUE_YELLOW + 4);
+        FL_CHECK_GE((int)hsv.hue, previous - kKnownSeam);
+        previous = static_cast<int>(hsv.hue);
+    }
+}
+
+FL_TEST_CASE("rgb2hsv_approximate - greys report zero saturation") {
+    for (int level = 0; level <= 255; level += 51) {
+        CHSV hsv = rgb2hsv_approximate(CRGB(level, level, level));
+        FL_WARN("grey " << level << " -> sat " << (int)hsv.sat);
+        FL_CHECK_EQ((int)hsv.sat, 0);
+    }
+}
+
 FL_TEST_CASE("HSV to RGB Conversion - Specific Color Tests") {
     FL_WARN("=== Specific Color Conversion Tests ===");
     

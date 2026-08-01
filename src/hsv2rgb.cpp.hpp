@@ -678,9 +678,23 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
             h = HUE_RED;
             h += scale8( g, FIXFRAC8(32,85));
         } else {
-            // R-G < G, we're in Orange-Yellow
+            // R-G < G, we're in Orange-Yellow.
+            //
+            // This used to read `(g - 85) + (171 - r)`. Reaching this branch
+            // requires g >= r/2, and r is the largest channel, so r > 171 is
+            // the normal case here -- making (171 - r) negative. The sum was
+            // then truncated to u8 by qsub8() and wrapped to a large value,
+            // sending orange out into the greens: rgb(255,153,0) returned hue
+            // 122 instead of ~26. See issue #436.
+            //
+            // (255 - r) is the same measure of "how far r has fallen" but
+            // cannot go negative, and the sum (g - 85) + (255 - r) has a
+            // minimum of ~42 over this branch's own entry condition, so the
+            // wrap is structurally impossible rather than merely unlikely.
+            // Spans ~42..170, hence FIXFRAC8(32,170) to land the top of the
+            // range on HUE_YELLOW.
             h = HUE_ORANGE;
-            h += scale8( qsub8((g - 85) + (171 - r), 4), FIXFRAC8(32,85)); //221
+            h += scale8( qsub8((g - 85) + (255 - r), 4), FIXFRAC8(32,170));
         }
 
     } else if ( highest == g) {
