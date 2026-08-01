@@ -417,6 +417,13 @@ struct CRGB {
     static CRGB computeAdjustment(u8 scale, const CRGB & colorCorrection, const CRGB & colorTemperature) FL_NO_EXCEPT;
 
     /// Return a new CRGB object after performing a linear interpolation between this object and the passed in object
+    /// @note Equivalent to the free function `blend(*this, other, amountOf2)`.
+    ///       There is deliberately no `CHSV::lerp8` — interpolating hue requires
+    ///       choosing which way around the color wheel to travel, so the CHSV
+    ///       equivalent is `blend(const CHSV&, const CHSV&, fract8, TGradientDirectionCode)`,
+    ///       which takes that direction as a parameter.
+    /// @see blend(const CRGB&, const CRGB&, fract8)
+    /// @see blend(const CHSV&, const CHSV&, fract8, TGradientDirectionCode)
     CRGB lerp8( const CRGB& other, fract8 amountOf2) const FL_NO_EXCEPT;
 
     /// @copydoc lerp8
