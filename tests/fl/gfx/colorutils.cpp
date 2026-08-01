@@ -253,3 +253,11 @@ FL_TEST_CASE("ColorFromPaletteHD supports existing RGB palette families") {
 }
 
 } // FL_TEST_FILE
+
+FL_TEST_CASE("RGB and HSV progmem palette types are distinct (issue #807)") {
+    // Both were `typedef fl::u32 X[16]`, i.e. THE SAME TYPE. So an RGB
+    // progmem palette bound silently to every CHSV palette constructor, and
+    // loadProgmemPalette(CHSV*, ...) reinterpreted red/green/blue as
+    // hue/sat/val -- garbage, with nothing to catch it.
+    FL_CHECK(!(fl::is_same<TProgmemRGBPalette16, TProgmemHSVPalette16>::value));
+}
