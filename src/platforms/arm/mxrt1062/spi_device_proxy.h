@@ -30,7 +30,8 @@
 #include "fl/stl/stddef.h"
 #include "fl/log/log.h"
 // IWYU pragma: begin_keep
-#include <SPI.h>
+// Local LPSPI fork instead of the Arduino SPI library (#3777).
+#include "platforms/arm/teensy/teensy4_common/lpspi/lpspi_bus.h"
 #include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 
@@ -47,14 +48,13 @@ namespace fl {
 /// @tparam DATA_PIN GPIO pin for SPI data (MOSI)
 /// @tparam CLOCK_PIN GPIO pin for SPI clock (SCK)
 /// @tparam SPI_CLOCK_RATE SPI clock speed in Hz
-/// @tparam SPIObject Reference to SPIClass object (SPI, SPI1, or SPI2)
 /// @tparam SPI_INDEX SPI peripheral index (0, 1, or 2)
-template<u8 DATA_PIN, u8 CLOCK_PIN, u32 SPI_CLOCK_RATE, SPIClass & SPIObject, int SPI_INDEX>
+template<u8 DATA_PIN, u8 CLOCK_PIN, u32 SPI_CLOCK_RATE, int SPI_INDEX>
 class SPIDeviceProxy {
 private:
     SPIBusHandle mHandle;                    // Handle from SPIBusManager
     SPIBusManager* mBusManager;              // Pointer to global bus manager
-    fl::unique_ptr<Teensy4HardwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_CLOCK_RATE, SPIObject, SPI_INDEX>> mSingleSPI;
+    fl::unique_ptr<Teensy4HardwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_CLOCK_RATE, SPI_INDEX>> mSingleSPI;
     fl::vector<u8> mWriteBuffer;        // Buffered writes (for Dual/Quad-SPI)
     bool mInitialized;                       // Whether init() was called
     bool mBusInitialized;                    // Whether bus manager has been initialized
@@ -127,7 +127,7 @@ public:
         const SPIBusInfo* bus = mBusManager->getBusInfo(mHandle.bus_id);
         if (bus && bus->bus_type == SPIBusType::SINGLE_SPI && !mSingleSPI) {
             // We're using single-SPI - create owned Teensy4HardwareSPIOutput instance
-            mSingleSPI = fl::make_unique<Teensy4HardwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_CLOCK_RATE, SPIObject, SPI_INDEX>>();
+            mSingleSPI = fl::make_unique<Teensy4HardwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_CLOCK_RATE, SPI_INDEX>>();
             mSingleSPI->init();
         }
         // For Dual/Quad-SPI, bus manager handles hardware - we just buffer writes
