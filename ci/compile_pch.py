@@ -204,6 +204,31 @@ def hash_input_files(files: list[Path]) -> str:
     return h.hexdigest()
 
 
+def hash_compile_flags(args: list[str]) -> str:
+    """Hash the full compiler argument vector, byte for byte.
+
+    Deliberately NOT normalized. Two spellings of the same include root --
+    ``-IC:/x/src`` and ``-IC:\\x\\src`` -- must produce different digests,
+    because a PCH built under one spelling cannot be reused under the other:
+    clang canonicalizes header identity at PCH-build time, so the consuming
+    TU re-parses headers the PCH already contains, ``#pragma once`` fails to
+    dedupe, and the build dies with "redefinition of ...".
+
+    Normalizing here would collapse exactly the difference we need to catch
+    and reintroduce the stale-PCH bug this guards.
+
+    Kept separate from :func:`hash_input_files` on purpose: that hash is also
+    computed by :func:`invalidate_stale_pch`, which never sees the arguments.
+    Mixing args into it made the two disagree and deleted every freshly built
+    PCH.
+    """
+    h = hashlib.sha256()
+    for arg in args:
+        h.update(arg.encode("utf-8"))
+        h.update(b"\x00")  # unambiguous separator: args may contain spaces
+    return h.hexdigest()
+
+
 def invalidate_stale_pch(pch_file: Path) -> None:
     """Delete a PCH file if its input files have changed since it was built.
 
@@ -219,16 +244,22 @@ def invalidate_stale_pch(pch_file: Path) -> None:
 
     saved_depfile = pch_file.with_name(pch_file.name.replace(".pch", ".d.cache"))
     hash_file = Path(str(pch_file) + ".input_hash")
-    if not saved_depfile.exists() or not hash_file.exists():
+    flags_file = Path(str(pch_file) + ".flags_hash")
+    if not saved_depfile.exists() or not hash_file.exists() or not flags_file.exists():
         # Missing tracking files means we can't verify the PCH is fresh.
         # Delete it to force a safe rebuild rather than risking a stale-PCH
         # compiler error that would fail the entire build.
+        #
+        # flags_file is included so a PCH left behind by a build predating
+        # flag hashing -- which may have been built under a different include
+        # spelling -- is discarded rather than trusted.
         print(
             f"PCH tracking files missing — removing {pch_file.name} to force rebuild",
             file=sys.stderr,
         )
         pch_file.unlink(missing_ok=True)
         hash_file.unlink(missing_ok=True)
+        flags_file.unlink(missing_ok=True)
         return
 
     try:
@@ -277,14 +308,35 @@ def main() -> int:
     # saved copy (.d.cache) from the previous successful build.
     saved_depfile = Path(str(depfile) + ".cache") if depfile else None
     hash_file = Path(str(pch_output) + ".input_hash") if pch_output else None
-    if pch_output and saved_depfile and hash_file and pch_output.exists():
-        if saved_depfile.exists() and hash_file.exists():
+    flags_file = Path(str(pch_output) + ".flags_hash") if pch_output else None
+    current_flags_hash = hash_compile_flags(args)
+    if (
+        pch_output
+        and saved_depfile
+        and hash_file
+        and flags_file
+        and pch_output.exists()
+    ):
+        if saved_depfile.exists() and hash_file.exists() and flags_file.exists():
             try:
                 input_files = parse_depfile_inputs(saved_depfile)
                 if input_files:
                     current_hash = hash_input_files(input_files)
                     stored_hash = hash_file.read_text(encoding="utf-8").strip()
-                    if current_hash == stored_hash:
+                    stored_flags = flags_file.read_text(encoding="utf-8").strip()
+                    # Both must match. The input hash alone cannot see a
+                    # changed include spelling: the resolved dependency set is
+                    # identical, so its digest is identical, and the PCH built
+                    # under the old spelling gets reused and poisons the build.
+                    if (
+                        current_hash == stored_hash
+                        and current_flags_hash != stored_flags
+                    ):
+                        print(
+                            "PCH compiler flags changed - rebuilding",
+                            file=sys.stderr,
+                        )
+                    elif current_hash == stored_hash:
                         print(
                             "PCH inputs unchanged (hash match) - skipping compilation",
                             file=sys.stderr,
@@ -314,7 +366,12 @@ def main() -> int:
             traceback.print_exc(file=sys.stderr)
 
         # Save depfile copy and input hash for next build's cache check
-        if saved_depfile and hash_file and depfile.exists():
+        if saved_depfile and hash_file and flags_file and depfile.exists():
+            # Written before the input hash: if the process dies between the
+            # two, the next run sees a flags sidecar with no input hash and
+            # rebuilds. The reverse order would leave an input hash with no
+            # flags sidecar, which is the state we treat as untrustworthy.
+            flags_file.write_text(current_flags_hash, encoding="utf-8")
             try:
                 shutil.copy2(str(depfile), str(saved_depfile))
                 input_files = parse_depfile_inputs(saved_depfile)
