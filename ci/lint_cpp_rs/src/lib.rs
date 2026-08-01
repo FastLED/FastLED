@@ -17,6 +17,7 @@ include!("checkers/platform_policy.rs");
 include!("checkers/bare_legacy.rs");
 include!("checkers/public_settings.rs");
 include!("checkers/unity_build.rs");
+include!("checkers/unity_build_files.rs");
 include!("checkers/structural_passes.rs");
 include!("checkers/singleton_elision.rs");
 include!("checkers/prefer_constexpr.rs");
