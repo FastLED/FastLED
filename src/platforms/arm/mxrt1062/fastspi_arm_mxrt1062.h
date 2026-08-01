@@ -6,9 +6,9 @@
 #include "platforms/arm/teensy/is_teensy.h"
 
 #if defined(FL_IS_TEENSY_4X)
-// IWYU pragma: begin_keep
-#include <SPI.h>
-// IWYU pragma: end_keep
+// Local LPSPI fork instead of the Arduino SPI library -- see
+// platforms/arm/teensy/teensy4_common/lpspi/lpspi_hardware.h (#3777).
+#include "platforms/arm/teensy/teensy4_common/lpspi/lpspi_bus.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 
@@ -17,7 +17,7 @@ FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
 
-template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_RATE, SPIClass & _SPIObject, int _SPI_INDEX>
+template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_RATE, int _SPI_INDEX>
 class Teensy4HardwareSPIOutput {
 	Selectable *mPSelect = nullptr;
 	u32  mBitCount = 0;
@@ -41,19 +41,20 @@ public:
 	void setSelect(Selectable *pSelect) { /* TODO */ }
 
 	// initialize the SPI subssytem
-	void init() { _SPIObject.begin(); }
+	void init() { fl::platforms::teensy::LpspiBus::get(_SPI_INDEX).begin(); }
 
 	// latch the CS select
 	void inline select() FL_NO_EXCEPT __attribute__((always_inline)) {
 		// begin the SPI transaction
-		_SPIObject.beginTransaction(SPISettings(_SPI_CLOCK_RATE, MSBFIRST, SPI_MODE0));
+		fl::platforms::teensy::LpspiBus::get(_SPI_INDEX).beginTransaction(
+			fl::platforms::teensy::LpspiSettings(_SPI_CLOCK_RATE, MSBFIRST, SPI_MODE0));
 		if(mPSelect != nullptr) { mPSelect->select(); }
 	}
 
 	// release the CS select
 	void inline release() FL_NO_EXCEPT __attribute__((always_inline)) {
 		if(mPSelect != nullptr) { mPSelect->release(); }
-		_SPIObject.endTransaction();
+		fl::platforms::teensy::LpspiBus::get(_SPI_INDEX).endTransaction();
 	}
 
 	void endTransaction() FL_NO_EXCEPT {
@@ -67,7 +68,7 @@ public:
 	// write a byte out via SPI (returns immediately on writing register) -
 	void inline writeByte(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
 		if(mBitCount == 0) {
-			_SPIObject.transfer(b);
+			fl::platforms::teensy::LpspiBus::get(_SPI_INDEX).transfer(b);
 		} else {
 			// There's been a bit of data written, add that to the output as well
 			u32 outData = (mBitData << 8) | b;
@@ -84,12 +85,12 @@ public:
 	// write a word out via SPI (returns immediately on writing register)
 	void inline writeWord(u16 w) FL_NO_EXCEPT __attribute__((always_inline)) {
 		writeByte(((w>>8) & 0xFF));
-		_SPIObject.transfer(w & 0xFF);
+		fl::platforms::teensy::LpspiBus::get(_SPI_INDEX).transfer(w & 0xFF);
 	}
 
 	// A raw set of writing byte values, assumes setup/init/waiting done elsewhere
 	static void writeBytesValueRaw(u8 value, int len) FL_NO_EXCEPT {
-		while(len--) { _SPIObject.transfer(value); }
+		while(len--) { fl::platforms::teensy::LpspiBus::get(_SPI_INDEX).transfer(value); }
 	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
@@ -121,7 +122,7 @@ public:
 		bc = (bc + 1) & 0x07;
 		if (!bc) {
 			mBitCount = 0;
-			_SPIObject.transfer(mBitData);
+			fl::platforms::teensy::LpspiBus::get(_SPI_INDEX).transfer(mBitData);
 		}
 		mBitCount = bc;
 	}
