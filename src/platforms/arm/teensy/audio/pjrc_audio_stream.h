@@ -113,7 +113,17 @@ protected:
 	AudioStream::initialize_memory(data, num); \
 })
 
-#define CYCLE_COUNTER_APPROX_PERCENT(n) (((float)((u32)(n) * 6400u) * (float)(AUDIO_SAMPLE_RATE_EXACT / AUDIO_BLOCK_SAMPLES)) / (float)(F_CPU_ACTUAL))
+// F_CPU_ACTUAL exists only on Teensy 4.x (IMXRT), where the core clock can be
+// changed at runtime and so differs from the compile-time F_CPU. On Teensy 3.x
+// the clock is fixed, F_CPU is exact, and F_CPU_ACTUAL is never defined --
+// referencing it there is a compile error rather than a wrong number.
+#if defined(F_CPU_ACTUAL)
+#define FASTLED_AUDIO_CPU_HZ F_CPU_ACTUAL
+#else
+#define FASTLED_AUDIO_CPU_HZ F_CPU
+#endif
+
+#define CYCLE_COUNTER_APPROX_PERCENT(n) (((float)((u32)(n) * 6400u) * (float)(AUDIO_SAMPLE_RATE_EXACT / AUDIO_BLOCK_SAMPLES)) / (float)(FASTLED_AUDIO_CPU_HZ))
 
 #define AudioProcessorUsage() (CYCLE_COUNTER_APPROX_PERCENT(AudioStream::cpuCyclesTotal()))
 #define AudioProcessorUsageMax() (CYCLE_COUNTER_APPROX_PERCENT(AudioStream::cpuCyclesTotalMax()))
