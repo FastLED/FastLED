@@ -14,6 +14,7 @@ Uses a centralized SQLite database with PID-based stale lock detection for robus
 
 import os
 import platform
+import sys
 import time
 from contextlib import contextmanager
 from pathlib import Path
@@ -40,6 +41,24 @@ _LOCK_GRACE_S: float = 2.0
 #
 # Override via FASTLED_LOCK_MAX_HOLD_S env var for testing or unusual builds.
 _DEFAULT_MAX_HOLD_S: float = 3600.0  # 60 minutes
+
+
+def _diag(message: str) -> None:
+    """Emit an operational diagnostic on stderr.
+
+    This module is a library: it runs inside whatever process took the lock,
+    and that process's stdout may be a machine-readable channel. Writing lock
+    progress there corrupts it -- ci/tests/test_stale_lock_real_scenario.py
+    spawns a child that prints `PID:<n>` then `READY` on stdout and parses
+    those lines, and a "Detected stale lock ... Removing..." notice landing in
+    between made the handshake read `READY` as the stale-lock text and fail.
+
+    stderr is the correct channel for this: diagnostics stay visible to a
+    human watching the build, without being mistaken for output.
+    (ci/util/file_lock_rw.py already routes the equivalent message through
+    `logger.info` for the same reason.)
+    """
+    print(message, file=sys.stderr)
 
 
 def _is_process_alive_psutil(pid: int) -> bool:
@@ -86,7 +105,7 @@ def _dump_blocking_stacks(lock_name: str, elapsed: float) -> None:
 
         yellow = "\033[33m"
         reset = "\033[0m"
-        print(
+        _diag(
             f"{yellow}[LOCK] Blocked on '{lock_name}' for {elapsed:.0f}s - dumping stacks:{reset}"
         )
         dump_thread_stacks()
@@ -181,7 +200,7 @@ class BuildLock:
                 BuildLock._stale_lock_warned = True
                 if all_dead:
                     dead_pids = [h["owner_pid"] for h in holders]
-                    print(
+                    _diag(
                         f"Detected stale lock '{self._lock_name}' (dead PIDs: {dead_pids}). Removing..."
                     )
                 else:
@@ -189,14 +208,14 @@ class BuildLock:
                         f"PID {h['owner_pid']} ({(now - h['acquired_at']):.0f}s)"
                         for h in wedged_holders
                     ]
-                    print(
+                    _diag(
                         f"Detected wedged lock '{self._lock_name}' "
                         f"(holder(s) past {max_hold:.0f}s max-hold: {', '.join(parts)}). Stealing..."
                     )
 
             # Force-break: either all holders are dead, or one is wedged past max-hold.
             if self._db.force_break(self._lock_name):
-                print(f"Removed stale lock: {self._lock_name}")
+                _diag(f"Removed stale lock: {self._lock_name}")
                 BuildLock._stale_lock_warned = False
                 return True
 
@@ -236,7 +255,7 @@ class BuildLock:
 
         while True:
             if is_interrupted():
-                print("\nKeyboardInterrupt: Aborting lock acquisition")
+                _diag("\nKeyboardInterrupt: Aborting lock acquisition")
                 raise KeyboardInterrupt()
 
             elapsed = time.time() - start_time
@@ -244,7 +263,7 @@ class BuildLock:
             # Check for stale lock periodically (every ~1 second)
             if elapsed - last_stale_check >= 1.0:
                 if self._check_stale_lock():
-                    print("Stale lock removed, retrying acquisition...")
+                    _diag("Stale lock removed, retrying acquisition...")
                 last_stale_check = elapsed
 
             # Try to acquire
@@ -269,14 +288,14 @@ class BuildLock:
             if not warning_shown and elapsed >= _LOCK_GRACE_S:
                 yellow = "\033[33m"
                 reset = "\033[0m"
-                print(f"{yellow}Waiting for lock '{self._lock_name}'{reset}")
+                _diag(f"{yellow}Waiting for lock '{self._lock_name}'{reset}")
                 # Show who holds the lock with psutil process info
                 try:
                     holders = self._db.get_lock_info(self._lock_name)
                     for h in holders:
                         held_secs = time.time() - h["acquired_at"]
                         proc_info = _get_process_info(h["owner_pid"])
-                        print(
+                        _diag(
                             f"{yellow}  Held by PID {h['owner_pid']} "
                             f"(held {held_secs:.0f}s, {proc_info}){reset}"
                         )
@@ -403,7 +422,12 @@ def libfastled_build_lock(
 
     try:
         if lock_duration > 1.0:
-            ts_print(f"🔒 Lock acquired after {lock_duration:.1f}s wait")
+            # stderr for the same reason as _diag: library progress must not
+            # land in a host process's stdout. ts_print forwards **kwargs.
+            ts_print(
+                f"🔒 Lock acquired after {lock_duration:.1f}s wait",
+                file=sys.stderr,
+            )
         yield lock
     finally:
         lock.release()
