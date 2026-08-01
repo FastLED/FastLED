@@ -39,17 +39,25 @@ shared_defines = ['-DFASTLED_USE_PROGMEM=0']
 # literal '/' string concatenation so paths are absolute + forward-slash +
 # spelled identically everywhere.
 #
-# Why NOT meson's `/` path-join operator: on Windows it emits the native
-# separator (backslash) regardless of how its operands are spelled. So
-# `path_norm_root / 'src'` ends up as `C:/Users/.../fastled3\src` — a
-# single backslash injected mid-path. clang/zccache pass that `-I` flag
-# through verbatim, then when `#include "fl/stl/cstdio.h"` resolves
-# against it the resulting include path becomes `C:/.../fastled3\src/fl/
-# stl/cstdio.h` with mixed separators. The PCH canonicalizes one slash
-# spelling; the test TU sees another; `#pragma once` fails to dedupe and
-# the user sees `error: redefinition of 'LogLevel'`. Reproduced and root-
-# caused on 2026-06-02 against `bash test --cpp` after merging #2683 and
-# #2684. Literal `+ '/' +` concatenation keeps everything forward-slash.
+# Why NOT meson's `/` path-join operator. On the Meson in use when this was
+# written, `/` was a bare os.path.join, which on Windows emits the native
+# separator regardless of how its operands are spelled: `path_norm_root /
+# 'src'` ended up as `C:/Users/.../fastled3\src` — a single backslash
+# injected mid-path. clang/zccache pass that `-I` flag through verbatim,
+# then `#include "fl/stl/cstdio.h"` resolves against it to
+# `C:/.../fastled3\src/fl/stl/cstdio.h` with mixed separators. The PCH
+# canonicalizes one slash spelling; the test TU sees another; `#pragma
+# once` fails to dedupe and the user sees `error: redefinition of
+# 'LogLevel'`. Reproduced and root-caused on 2026-06-02 against
+# `bash test --cpp` after merging #2683 and #2684.
+#
+# Current Meson (1.11.1) appends `.replace('\\', '/')` inside `_op_div`, so
+# `/` normalizes today and that specific hazard is gone. The convention
+# stays regardless: literal `+ '/' +` fixes the spelling in *our* source,
+# so it cannot regress with a Meson upgrade or downgrade. A build whose
+# include spelling depends on the toolchain version is one upgrade away
+# from this bug returning, and it costs days to re-diagnose every time.
+# `ci/tests/test_meson_div_separator.py` pins the behaviour above.
 path_norm_root = meson.project_source_root().replace('\\', '/')
 
 # Canonical absolute forward-slash -I args for the four project-wide
