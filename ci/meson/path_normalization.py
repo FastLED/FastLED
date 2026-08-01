@@ -235,17 +235,57 @@ def find_strict_path_violations(build_dir: Path) -> list[str]:
         command = entry_dict.get("command")
         if not isinstance(command, str):
             continue
-        for match in _STRICT_PATH_FLAG_RE.finditer(command):
-            raw = match.group("path")
-            normalized = raw.replace("\\", "/")
-            if "\\" in raw:
-                violations.append(f"{match.group('prefix').lstrip(chr(34))}{raw}")
-                continue
-            if not _is_forward_slash_absolute(normalized):
-                violations.append(f"{match.group('prefix').lstrip(chr(34))}{raw}")
-                continue
-            if _has_dot_components(normalized):
-                violations.append(f"{match.group('prefix').lstrip(chr(34))}{raw}")
+        violations.extend(scan_command_for_strict_path_violations(command))
+    violations.extend(find_ninja_strict_path_violations(build_dir))
+    return violations
+
+
+def scan_command_for_strict_path_violations(command: str) -> list[str]:
+    """Strict-path offenders in a single command line."""
+    violations: list[str] = []
+    for match in _STRICT_PATH_FLAG_RE.finditer(command):
+        raw = match.group("path")
+        normalized = raw.replace("\\", "/")
+        if "\\" in raw:
+            violations.append(f"{match.group('prefix').lstrip(chr(34))}{raw}")
+            continue
+        if not _is_forward_slash_absolute(normalized):
+            violations.append(f"{match.group('prefix').lstrip(chr(34))}{raw}")
+            continue
+        if _has_dot_components(normalized):
+            violations.append(f"{match.group('prefix').lstrip(chr(34))}{raw}")
+    return violations
+
+
+def find_ninja_strict_path_violations(build_dir: Path) -> list[str]:
+    """Strict-path offenders in ``build.ninja`` command lines.
+
+    ``compile_commands.json`` covers compile targets only. The PCH is built by
+    a Meson *custom target*, which never appears there -- ``compile_pch.py``
+    occurs zero times in a generated ``compile_commands.json`` while the
+    consuming ``-include-pch`` flags occur hundreds of times. So the include
+    flags a PCH is *consumed* with were validated and the ones it is *built*
+    with were not, even though a mismatch between the two is precisely what
+    makes clang re-parse headers the PCH already contains and fail with
+    "redefinition of ...".
+
+    Scanning ``build.ninja`` closes that gap: it is the only generated file
+    that contains the PCH build command.
+    """
+    ninja_file = build_dir / "build.ninja"
+    if not ninja_file.exists():
+        return []
+    try:
+        text = ninja_file.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+
+    violations: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("COMMAND = "):
+            continue
+        violations.extend(scan_command_for_strict_path_violations(stripped))
     return violations
 
 
