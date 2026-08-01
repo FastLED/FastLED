@@ -544,13 +544,18 @@ class TM1803Controller400Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::
 
 /// TM1829 controller @ 800 kHz - references centralized timing from fl::TIMING_TM1829_800KHZ
 /// @see fl::TIMING_TM1829_800KHZ in chipsets::led_timing.h (340, 340, 550 ns)
+/// @note The TM1829 drives an *inverted* line (LOW-then-HIGH per bit, idling HIGH),
+///       hence FLIP=true, and needs a 500us latch gap, hence WAIT_TIME=500.
+///       FLIP is currently only honored by the nRF52 backend; see
+///       https://github.com/FastLED/FastLED/issues/8
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1829Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_TM1829_800KHZ, RGB_ORDER> {};
+class TM1829Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_TM1829_800KHZ, RGB_ORDER, 0, true, 500> {};
 
 /// TM1829 controller @ 1600 kHz - references centralized timing from fl::TIMING_TM1829_1600KHZ
 /// @see fl::TIMING_TM1829_1600KHZ in chipsets::led_timing.h (100, 300, 200 ns)
+/// @copydetails TM1829Controller800Khz
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1829Controller1600Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_TM1829_1600KHZ, RGB_ORDER> {};
+class TM1829Controller1600Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_TM1829_1600KHZ, RGB_ORDER, 0, true, 500> {};
 
 /// LPD1886 controller @ 1250 kHz - references centralized timing from fl::TIMING_LPD1886_1250KHZ
 /// @see fl::TIMING_LPD1886_1250KHZ in chipsets::led_timing.h (200, 400, 200 ns)
