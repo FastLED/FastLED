@@ -6,6 +6,7 @@
 #include "fl/stl/pair.h"
 #include "fl/stl/utility.h"
 #include "fl/stl/vector.h"
+#include "fl/gfx/colorutils.h"
 #include "chsv.h"
 #include "crgb.h"
 #include "test.h"
@@ -303,29 +304,81 @@ FL_TEST_CASE("HSV to RGB Conversion - Specific Color Tests") {
     FL_WARN("");
 }
 
-FL_TEST_CASE("HSV to RGB Conversion - Hue Sweep Test") {
-    FL_WARN("=== Hue Sweep Conversion Test ===");
-    FL_WARN("Testing full hue range at maximum saturation and brightness");
-    FL_WARN("");
-    FL_WARN("Hue   Rainbow RGB     Spectrum RGB    FullSpectrum RGB");
-    FL_WARN("----  -----------     ------------    ----------------");
-    
-    // Test hue sweep at full saturation and brightness
-    // Increased step from 1 to 4 for performance (256 -> 64 iterations = 75% reduction)
-    // Still provides excellent hue sweep coverage with 64 samples
-    for (int hue = 0; hue < 256; hue += 4) {
-        CHSV hsv(hue, 255, 255);
-        
-        CRGB rainbow_rgb, spectrum_rgb, fullspectrum_rgb;
-        hsv2rgb_rainbow(hsv, rainbow_rgb);
-        hsv2rgb_spectrum(hsv, spectrum_rgb);
-        hsv2rgb_fullspectrum(hsv, fullspectrum_rgb);
-        
-        FL_WARN(hue << "   (" << (int)rainbow_rgb.r << "," << (int)rainbow_rgb.g << "," << (int)rainbow_rgb.b << ")   (" <<
-                (int)spectrum_rgb.r << "," << (int)spectrum_rgb.g << "," << (int)spectrum_rgb.b << ")   (" <<
-                (int)fullspectrum_rgb.r << "," << (int)fullspectrum_rgb.g << "," << (int)fullspectrum_rgb.b << ")");
+// The hue ramps are hand-written piecewise functions: eight 32-hue sections
+// selected by bit tests on the hue, joined by magic constants (K85/K170/K171)
+// and compile-time switches (Y1/Y2/G2/Gscale). Nothing structurally forces one
+// section to end on the value the next one starts from, so a wrong constant
+// surfaces as a single off-colour pixel mid-ramp -- exactly the "unexpected red
+// pixel midway through the yellow region" reported in FastLED#668.
+//
+// Measured maxima at full saturation/value are rainbow=6, spectrum=4,
+// fullspectrum=6. A broken section boundary is tens, so 8 leaves room for a
+// constant to be nudged without hiding a real break.
+static const int kMaxHueStep = 8;
+
+static int iabs(int v) { return v < 0 ? -v : v; }
+
+// Largest per-channel change between two adjacent colors.
+static int channel_step(const CRGB& a, const CRGB& b) {
+    const int dr = iabs(int(b.r) - int(a.r));
+    const int dg = iabs(int(b.g) - int(a.g));
+    const int db = iabs(int(b.b) - int(a.b));
+    int worst = dr > dg ? dr : dg;
+    return db > worst ? db : worst;
+}
+
+static void check_ramp_is_continuous(const char* name,
+                                     void (*convert)(const CHSV&, CRGB&)) {
+    int worst = 0;
+    int worst_hue = -1;
+    for (int hue = 0; hue < 256; hue++) {
+        const int next = (hue + 1) & 0xFF;  // includes the 255 -> 0 wrap
+        CRGB a, b;
+        convert(CHSV(fl::u8(hue), 255, 255), a);
+        convert(CHSV(fl::u8(next), 255, 255), b);
+        const int step = channel_step(a, b);
+        if (step > worst) {
+            worst = step;
+            worst_hue = hue;
+        }
     }
-    FL_WARN("");
+    if (worst > kMaxHueStep) {
+        FL_WARN(name << ": discontinuity of " << worst << " between hue "
+                     << worst_hue << " and " << ((worst_hue + 1) & 0xFF)
+                     << " (allowed " << kMaxHueStep << ")");
+    }
+    FL_CHECK(worst <= kMaxHueStep);
+}
+
+FL_TEST_CASE("HSV to RGB Conversion - hue ramps have no discontinuity") {
+    // Every adjacent hue pair, not a sample of every fourth one: a lone bad
+    // hue is the whole failure mode, and sampling steps right over it.
+    check_ramp_is_continuous("rainbow", hsv2rgb_rainbow);
+    check_ramp_is_continuous("spectrum", hsv2rgb_spectrum);
+    check_ramp_is_continuous("fullspectrum", hsv2rgb_fullspectrum);
+}
+
+FL_TEST_CASE("fill_rainbow has no isolated off-colour pixel (issue #668)") {
+    // #668 reported a lone red pixel partway through the yellow region of a
+    // 114-LED strip filled with exactly this call.
+    const int kNumLeds = 114;
+    CRGB leds[kNumLeds];
+    fill_rainbow(leds, kNumLeds, 0, 1);
+
+    int worst = 0;
+    int worst_index = -1;
+    for (int i = 1; i < kNumLeds; i++) {
+        const int step = channel_step(leds[i - 1], leds[i]);
+        if (step > worst) {
+            worst = step;
+            worst_index = i;
+        }
+    }
+    if (worst > kMaxHueStep) {
+        FL_WARN("fill_rainbow: pixel " << worst_index << " jumps by " << worst
+                                       << " (allowed " << kMaxHueStep << ")");
+    }
+    FL_CHECK(worst <= kMaxHueStep);
 }
 
 } // FL_TEST_FILE
