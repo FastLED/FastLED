@@ -6,7 +6,11 @@
 #include "fl/system/sd/fs_sdcard_arduino.h"
 #include "platforms/is_platform.h"
 
-#if !defined(FL_IS_TEENSY) && FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>)
+// SPI.h is checked alongside SD.h/fs.h because the body below includes it
+// unconditionally. On ESP8266 both <SD.h> and <fs.h> resolve (fs.h is the
+// core's own filesystem header), so the guard passed while <SPI.h> was not on
+// the include path -- breaking every ESP8266 build, SD-card sketch or not.
+#if !defined(FL_IS_TEENSY) && FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>) && FL_HAS_INCLUDE(<SPI.h>)
 
 // IWYU pragma: begin_keep
 #include <SPI.h>
