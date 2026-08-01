@@ -60,6 +60,32 @@ struct hsv8 {
         return raw[x];
     }
 
+    /// Compare two HSV colors field by field.
+    ///
+    /// Without these, `a == b` on two CHSV values found no operator on the
+    /// type and instead converted BOTH operands to RGB, comparing the
+    /// rendering rather than the colors. Anything that renders alike then
+    /// compared equal: `CHSV(0,0,0) == CHSV(128,0,0)` was true (both black),
+    /// and so was `CHSV(10,20,30) == CHSV(10,20,31)` (both round to the same
+    /// RGB). Reported in 2018 as FastLED#691.
+    ///
+    /// Hidden friends rather than members: C++20 synthesizes a reversed
+    /// candidate for a member `operator==`, which trips
+    /// -Wambiguous-reversed-operator at every call site. Same reasoning and
+    /// same shape as the palette comparisons in colorutils.h (#2724).
+    friend FASTLED_FORCE_INLINE bool operator==(const hsv8& lhs,
+                                                const hsv8& rhs) FL_NO_EXCEPT
+    {
+        return lhs.h == rhs.h && lhs.s == rhs.s && lhs.v == rhs.v;
+    }
+
+    /// @copydoc operator==
+    friend FASTLED_FORCE_INLINE bool operator!=(const hsv8& lhs,
+                                                const hsv8& rhs) FL_NO_EXCEPT
+    {
+        return !(lhs == rhs);
+    }
+
     /// Default constructor
     /// @warning Default values are UNITIALIZED!
     constexpr hsv8() FL_NO_EXCEPT : h(0), s(0), v(0) { }
