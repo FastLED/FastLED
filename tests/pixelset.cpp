@@ -164,4 +164,43 @@ FL_TEST_CASE("CPixelView reversed - indexing walks the strip backwards") {
     FL_CHECK_EQ((int)reversed[kHalf - 1].r, kHalf);
 }
 
+
+// Issue #822: "More functions could stand to be defined as const, especially
+// the comparison operator definitions ... This lets code use
+// `const CHSVPalette256 &p`, for example, in comparisons like `p == other`."
+//
+// These are compile-time assertions as much as runtime ones: each body below
+// failed to compile before the corresponding fix.
+
+FL_TEST_CASE("a const CRGBSet reports its size (issue #822)") {
+    CRGB raw[16];
+    const CRGBSet s(raw, 16);
+    FL_CHECK_EQ(s.size(), 16);
+}
+
+FL_TEST_CASE("iterators compare against the temporary from end() (issue #822)") {
+    // operator==/!= took a mutable lvalue reference, so they could not bind
+    // the rvalue returned by end(). The canonical loop did not compile, and
+    // every loop inside pixelset.h hoists end() into a named variable to
+    // dodge it.
+    CRGB raw[8];
+    CRGBSet s(raw, 8);
+    int seen = 0;
+    for (auto it = s.begin(); it != s.end(); ++it) {
+        *it = CRGB(1, 2, 3);
+        ++seen;
+    }
+    FL_CHECK_EQ(seen, 8);
+    FL_CHECK_EQ(raw[7], CRGB(1, 2, 3));
+}
+
+FL_TEST_CASE("a const CRGBSet iterates (issue #822)") {
+    CRGB raw[4];
+    for (int i = 0; i < 4; ++i) { raw[i] = CRGB(i, 0, 0); }
+    const CRGBSet s(raw, 4);
+    int total = 0;
+    for (auto it = s.begin(); it != s.end(); ++it) { total += (*it).r; }
+    FL_CHECK_EQ(total, 0 + 1 + 2 + 3);
+}
+
 } // FL_TEST_FILE

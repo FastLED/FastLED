@@ -126,7 +126,7 @@ public:
 
     /// Get the size of this set
     /// @return the size of the set, in number of LEDs
-    int size() { return fl::abs(len); }
+    int size() const { return fl::abs(len); }
 
     /// Whether or not this set goes backwards
     /// @return whether or not the set is backwards
@@ -463,8 +463,13 @@ public:
         FASTLED_FORCE_INLINE pixelset_iterator_base& operator++() { leds += dir; return *this; }  ///< Increment LED pointer in data direction
         FASTLED_FORCE_INLINE pixelset_iterator_base operator++(int) { pixelset_iterator_base tmp(*this); leds += dir; return tmp; }  ///< @copydoc operator++()
 
-        FASTLED_FORCE_INLINE bool operator==(pixelset_iterator_base & other) const { return leds == other.leds; /* && set==other.set; */ }    ///< Check if iterator is at the same position
-        FASTLED_FORCE_INLINE bool operator!=(pixelset_iterator_base & other) const { return leds != other.leds; /* || set != other.set; */ }  ///< Check if iterator is not at the same position
+        // `const &`, not `&`: taking a mutable lvalue reference meant these
+        // could not bind a temporary, so the idiomatic
+        // `for (it = s.begin(); it != s.end(); ++it)` failed to compile
+        // against the rvalue returned by end(). Every loop in this file works
+        // around that by hoisting `end()` into a named variable first. #822.
+        FASTLED_FORCE_INLINE bool operator==(const pixelset_iterator_base & other) const { return leds == other.leds; /* && set==other.set; */ }    ///< Check if iterator is at the same position
+        FASTLED_FORCE_INLINE bool operator!=(const pixelset_iterator_base & other) const { return leds != other.leds; /* || set != other.set; */ }  ///< Check if iterator is not at the same position
 
         FASTLED_FORCE_INLINE PIXEL_TYPE& operator*() const { return *leds; }  ///< Dereference operator, to get underlying pointer to the LEDs
     };
