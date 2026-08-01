@@ -14,11 +14,28 @@
 #pragma once
 
 #include "fl/stl/compiler_control.h"  // IWYU pragma: keep
+#include "fl/stl/int.h"  // IWYU pragma: keep
 #include "led_sysdefs.h"  // IWYU pragma: keep
 
-/// Constant for "not a pin"
-/// @todo Unused, remove?
-#define NO_PIN 255
+/// Constant for "not a pin".
+///
+/// Deliberately a constant and not a macro. As `#define NO_PIN 255` this
+/// replaced the token everywhere the preprocessor saw it, so any other
+/// library that used `NO_PIN` as an identifier -- an enumerator, a class
+/// member, a local -- failed to compile purely because FastLED.h had been
+/// included first. Reported as FastLED#893.
+///
+/// A constant obeys normal scoping instead. A colliding declaration inside
+/// another namespace, a class, or a function simply shadows this one, which
+/// is what the authors of that code expected. (A second declaration at
+/// global scope still conflicts -- unqualified lookup finds both and reports
+/// an ambiguity -- but that is an ordinary, diagnosable name clash rather
+/// than the preprocessor rewriting a token it had no business touching.)
+///
+/// Kept at namespace scope under the original spelling rather than deleted,
+/// so sketches that already reference NO_PIN continue to build. Nothing
+/// inside FastLED uses it.
+constexpr fl::u8 NO_PIN = 255;
 
 // Include base class definitions (Selectable, FastPin<>, FastPinBB, __FL_PORT_INFO, etc.)
 #include "fl/system/fastpin_base.h"  // IWYU pragma: keep
