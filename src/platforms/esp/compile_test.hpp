@@ -9,8 +9,14 @@ namespace fl {
 
 #ifdef ESP8266
 void esp8266_compile_tests() {
+// Pinned to 0, but note the flag is inert on ESP8266: fastled_progmem.h
+// selects progmem_esp8266.h from its `#elif defined(ESP8266)` arm, before
+// the `#if (FASTLED_USE_PROGMEM == 1)` test is ever reached. Tables are
+// flash-resident either way. This assert exists so the declared value and
+// the platform's real behavior don't drift further apart -- setting it to 1
+// would not move data, only make the header claim something new. See #743.
 #if FASTLED_USE_PROGMEM != 0
-#error "FASTLED_USE_PROGMEM should be 0 for ESP8266"
+#error "FASTLED_USE_PROGMEM must stay 0 on ESP8266 (it is inert there; PROGMEM is selected by platform dispatch in fastled_progmem.h, not by this flag)"
 #endif
 
 #if !defined(SKETCH_HAS_LARGE_MEMORY_OVERRIDDEN)
