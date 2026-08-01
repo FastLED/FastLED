@@ -91,8 +91,10 @@ fn is_integral_type_name(type_pretty: &str) -> bool {
 /// This is the difference between a constant and mutable state that merely
 /// *starts* at a literal. Driver files are full of the latter:
 ///
-///     bool sInitialized = false;      // assigned in init() — NOT a constant
-///     int  PRIORITY_PARLIO = 3;       // never reassigned — a constant
+/// ```text
+/// bool sInitialized = false;      // assigned in init() -- NOT a constant
+/// int  PRIORITY_PARLIO = 3;       // never reassigned -- a constant
+/// ```
 ///
 /// Both match "integral type bound to an integer literal", so without this
 /// check the rule tells an author to write `constexpr bool sInitialized =

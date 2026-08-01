@@ -69,6 +69,21 @@ jobs:
           restore-keys: |
             rust-lint-${{ runner.os }}-
 
+      - name: Rust C++ linter unit tests
+        # The crate carries ~53 tests covering real rule behaviour -- the
+        # SRC00x subprocess codes, SingletonElision/PreferConstexpr's
+        # partition, the unity-build structural checks -- and until now CI
+        # never ran them. Only `bash lint --cpp` below ran, which exercises
+        # the BINARY but not its tests, so a broken rule shipped silently.
+        #
+        # Two things were already broken when this step was added: the
+        # crate's own 1,000-line-per-file rule (unity_build.rs had reached
+        # 1,205) and a doctest that tried to compile a C++ snippet as Rust.
+        # Both are fixed in the same change.
+        run: |
+          uv run soldr cargo test --release --manifest-path ci/lint_cpp_rs/Cargo.toml
+        shell: bash
+
       - name: C++ lint (Rust path)
         # Exercises the Rust C++ linter (`fastled-lint`) end-to-end via the
         # default `bash lint --cpp` path on every PR. The binary is rebuilt
