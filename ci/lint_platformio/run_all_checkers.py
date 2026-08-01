@@ -79,8 +79,75 @@ _INTEREST_SUFFIXES: tuple[str, ...] = (
 )
 
 
+def _git_ignored(root: Path, paths: list[str]) -> set[str]:
+    """Subset of `paths` that git ignores.
+
+    Returns an empty set when git is unavailable or errors, so the checker
+    still works outside a checkout -- failing open here only means scanning a
+    few extra files, never missing a real one.
+    """
+    if not paths:
+        return set()
+
+    # Feed repo-relative POSIX paths: git echoes back exactly the spelling it
+    # was given, so anything else makes the returned names impossible to map
+    # onto the absolute paths the walk produced.
+    rel_to_abs: dict[str, str] = {}
+    for absolute in paths:
+        try:
+            rel = os.path.relpath(absolute, root).replace("\\", "/")
+        except ValueError:
+            continue  # different drive on Windows; cannot be repo-relative
+        rel_to_abs[rel] = absolute
+    if not rel_to_abs:
+        return set()
+
+    try:
+        from running_process import RunningProcess  # noqa: PLC0415 - lazy
+
+        # `git check-ignore --stdin` echoes back only the ignored paths and
+        # exits 1 when none match, so check=False.
+        result = RunningProcess.run(
+            ["git", "check-ignore", "--stdin"],
+            input="\n".join(rel_to_abs) + "\n",
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            cwd=str(root),
+            check=False,
+            timeout=60,
+        )
+    except KeyboardInterrupt as ki:
+        from ci.util.global_interrupt_handler import (  # noqa: PLC0415 - lazy
+            handle_keyboard_interrupt,
+        )
+
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception:
+        # Fail open: git missing, not a checkout, or check-ignore erroring just
+        # means we scan a few extra files. Never a missed violation.
+        return set()
+
+    out = result.stdout or ""
+    ignored: set[str] = set()
+    for line in out.splitlines():
+        rel = line.strip().replace("\\", "/")
+        if rel in rel_to_abs:
+            ignored.add(rel_to_abs[rel])
+    return ignored
+
+
 def _collect_files(root: Path) -> list[str]:
-    """Walk the repo and collect files of interest, pruning skip dirs."""
+    """Walk the repo and collect files of interest, pruning skip dirs.
+
+    Git-ignored files are excluded. They cannot reach CI -- a developer's
+    local scratch script is not repository content -- so gating on them just
+    fails `bash lint` for something the reviewer will never see. This bit
+    people with a root `tmp.sh` containing `pio run -v`: ignored by
+    .gitignore, invisible to CI, and yet a hard lint failure locally.
+    """
     files: list[str] = []
     for dirpath, dirnames, filenames in os.walk(root):
         # In-place prune
@@ -91,6 +158,10 @@ def _collect_files(root: Path) -> list[str]:
             if name.endswith(_INTEREST_SUFFIXES):
                 files.append(os.path.join(dirpath, name))
     files.sort()
+
+    ignored = _git_ignored(root, files)
+    if ignored:
+        files = [f for f in files if f not in ignored]
     return files
 
 
