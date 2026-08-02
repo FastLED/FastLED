@@ -71,8 +71,9 @@ void streamHelpEntry(fl::JsonStreamWriter& writer, const HelpEntry& entry) {
 }
 
 static const HelpEntry kHelpEntries[] = {
+    {"rpc.discover", "JSON-RPC", "[]", "{schema:[[name, ...], ...]}", "Discover the registered JSON-RPC method schema"},
     {"start", "Phase 1: Basic Control", "[]", "void", "Trigger test matrix execution"},
-    {"status", "Phase 1: Basic Control", "[]", "{startReceived, testComplete, frameCounter, state}", "Query current test state"},
+    {"status", "Phase 1: Basic Control", "[]", "{ready, platform, rpcReady, ledRxAvailable, pinTx, pinRx}", "Query RPC, platform, and LED RX readiness"},
     {"drivers", "Phase 1: Basic Control", "[]", "[{name, priority, enabled}, ...]", "List available drivers"},
     {"getConfig", "Phase 2: Configuration", "[]", "{drivers, laneRange, stripSizes, totalTestCases}", "Query current test matrix configuration"},
     {"setDrivers", "Phase 2: Configuration", "[driver1, driver2, ...]", "{success, driversSet, testCases}", "Configure enabled drivers"},
@@ -86,6 +87,9 @@ static const HelpEntry kHelpEntries[] = {
     {"reset", "Phase 4: Utility", "[]", "{success, message, testCasesCleared}", "Reset test state without device reboot"},
     {"halt", "Phase 4: Utility", "[]", "{success, message}", "Trigger sketch halt"},
     {"ping", "Phase 4: Utility", "[]", "{success, message, timestamp, uptimeMs, frameCounter}", "Health check with timestamp"},
+    {"debugTest", "Phase 4: Utility", "object", "{success, received}", "Echo an exact nested JSON payload"},
+    {"testNoSerial", "Phase 4: Utility", "[]", "{success, message, serial_safe}", "Verify RPC execution without device-side serial logging"},
+    {"testRpConcurrency", "Phase 4: Utility", "[]", "{success, supported, backend, core1Ready, core1Done, recursiveMutexReady, generation, expected, actual}", "Exercise mutex and semaphore synchronization across both RP physical cores"},
     {"getPins", "Phase 5: Pin Configuration", "[]", "{txPin, rxPin, defaults: {txPin, rxPin}, platform}", "Query current and default pin configuration"},
     {"setTxPin", "Phase 5: Pin Configuration", "[pin]", "{success, txPin, previousTxPin, testCases}", "Set TX pin (regenerates test cases)"},
     {"setRxPin", "Phase 5: Pin Configuration", "[pin]", "{success, rxPin, previousRxPin, rxChannelRecreated}", "Set RX pin (recreates RX channel)"},
@@ -256,6 +260,9 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
         }
 
         int old_pin = mState->pin_tx;
+        if (new_pin != old_pin) {
+            mState->invalidateLedRxValidation();
+        }
         mState->pin_tx = new_pin;
 
         response.set("success", true);
@@ -288,25 +295,21 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
         bool rx_recreated = false;
 
         if (pin_changed) {
-            mState->pin_rx = new_pin;
-
-            // Recreate RX channel with new pin
-            // Destroy old RX channel
-            mState->rx_channel.reset();
-
-            // Create new RX channel on new pin using factory
-            mState->rx_channel = mState->rx_factory(new_pin);
-
-            if (mState->rx_channel) {
-                rx_recreated = true;
-            } else {
+            fl::shared_ptr<fl::RxChannel> replacement_rx;
+            if (mState->rx_factory) {
+                replacement_rx = mState->rx_factory(new_pin);
+            }
+            if (!replacement_rx) {
                 response.set("error", "RxChannelCreationFailed");
                 response.set("message", "Failed to create RX channel on new pin");
                 response.set("pinRx", static_cast<int64_t>(new_pin));
-                // Restore old pin value
-                mState->pin_rx = old_pin;
                 return response;
             }
+
+            mState->invalidateLedRxValidation();
+            mState->pin_rx = new_pin;
+            mState->rx_channel = replacement_rx;
+            rx_recreated = true;
         }
 
         response.set("success", true);
@@ -361,35 +364,33 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
 
         int old_tx_pin = mState->pin_tx;
         int old_rx_pin = mState->pin_rx;
+        bool tx_pin_changed = (new_tx_pin != old_tx_pin);
         bool rx_pin_changed = (new_rx_pin != old_rx_pin);
         bool rx_recreated = false;
 
-        // Update TX pin
-        mState->pin_tx = new_tx_pin;
-
-        // Update RX pin and recreate channel if changed
+        fl::shared_ptr<fl::RxChannel> replacement_rx;
         if (rx_pin_changed) {
-            mState->pin_rx = new_rx_pin;
-
-            // Destroy old RX channel
-            mState->rx_channel.reset();
-
-            // Create new RX channel using factory
-            mState->rx_channel = mState->rx_factory(new_rx_pin);
-
-            if (mState->rx_channel) {
-                rx_recreated = true;
-            } else {
-                // Rollback both pins
-                mState->pin_tx = old_tx_pin;
-                mState->pin_rx = old_rx_pin;
+            if (mState->rx_factory) {
+                replacement_rx = mState->rx_factory(new_rx_pin);
+            }
+            if (!replacement_rx) {
                 response.set("error", "RxChannelCreationFailed");
-                response.set("message", "Failed to create RX channel - pins restored to previous values");
+                response.set("message", "Failed to create RX channel - previous pins preserved");
                 response.set("pinRx", static_cast<int64_t>(new_rx_pin));
                 return response;
             }
-        } else {
-            mState->pin_rx = new_rx_pin;
+        }
+
+        // Commit pins, validation, and channel as one state transition only
+        // after any replacement channel has been created successfully.
+        if (tx_pin_changed || rx_pin_changed) {
+            mState->invalidateLedRxValidation();
+        }
+        mState->pin_tx = new_tx_pin;
+        mState->pin_rx = new_rx_pin;
+        if (rx_pin_changed) {
+            mState->rx_channel = replacement_rx;
+            rx_recreated = true;
         }
 
         response.set("success", true);

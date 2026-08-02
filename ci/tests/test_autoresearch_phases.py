@@ -21,6 +21,7 @@ from ci.autoresearch.build_driver import BuildDriver
 from ci.autoresearch.context import QuietContext, RunContext
 from ci.autoresearch.phases import (
     _build_environment_for_mode,
+    _is_valid_rp_concurrency_result,
     _parse_args_and_build_commands,
     _resolve_port_and_environment,
     _run_build_deploy,
@@ -29,12 +30,51 @@ from ci.autoresearch.phases import (
     _run_watchdog_soak,
     _validate_test_rpc_response,
 )
-from ci.rpc_client import RpcError
+from ci.rpc_client import RpcError, RpcTimeoutError
 from ci.util.port_utils import ChipDetectionResult, auto_detect_upload_port
 
 
 # Module path for patching symbols imported into phases.py
 _PATCH_MOD = "ci.autoresearch.phases"
+
+
+@pytest.mark.parametrize(
+    "counters",
+    [
+        {},
+        {"actual": None, "expected": None},
+        {"actual": True, "expected": True},
+        {"actual": 0, "expected": 0},
+        {"actual": -1, "expected": -1},
+        {"actual": 199, "expected": 200},
+    ],
+)
+def test_rp_concurrency_gate_requires_matching_integer_counters(
+    counters: dict[str, object],
+) -> None:
+    result: dict[str, object] = {
+        "success": True,
+        "supported": True,
+        "core1Ready": True,
+        "core1Done": True,
+        "recursiveMutexReady": True,
+        **counters,
+    }
+    assert _is_valid_rp_concurrency_result(result) is False
+
+
+def test_rp_concurrency_gate_accepts_matching_integer_counters() -> None:
+    assert _is_valid_rp_concurrency_result(
+        {
+            "success": True,
+            "supported": True,
+            "core1Ready": True,
+            "core1Done": True,
+            "recursiveMutexReady": True,
+            "actual": 200,
+            "expected": 200,
+        }
+    )
 
 
 # ============================================================
@@ -234,6 +274,19 @@ class TestParseArgsAndBuildCommands:
             "OBJECT_FLED",
             "FLEX_IO",
         }
+
+    def test_perf_wave2d_is_not_classified_as_gpio_only(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            perf_wave2d="32x32",
+            project_dir=fake_project_dir,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.perf_wave2d_grid == (32, 32)
+        assert result.gpio_only_mode is False
 
     def test_all_drivers_teensy4_only_real_teensy_drivers(
         self, fake_project_dir: Path
@@ -2091,6 +2144,25 @@ class TestRunSchemaAndPinSetup:
         assert ctx.effective_tx_pin is None
         assert ctx.effective_rx_pin is None
 
+    def test_perf_wave2d_skips_all_pin_setup(self) -> None:
+        args = _make_args(skip_schema=True, parlio=False, perf_wave2d="32x32")
+        ctx = _make_ctx(
+            args=args,
+            drivers=[],
+            json_rpc_commands=[],
+            perf_wave2d_grid=(32, 32),
+        )
+        with patch(
+            f"{_PATCH_MOD}.run_gpio_pretest",
+            new_callable=AsyncMock,
+        ) as pretest:
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+        assert rc is None
+        assert ctx.effective_tx_pin is None
+        assert ctx.effective_rx_pin is None
+        assert ctx.json_rpc_commands == []
+        pretest.assert_not_awaited()
+
     def test_lpc_fbuild_uses_pyserial_for_rpc(self) -> None:
         args = _make_args(skip_schema=True)
         ctx = _make_ctx(
@@ -2218,13 +2290,23 @@ class TestRunTestsOrSpecialMode:
         assert rc == 0
 
     def test_rpc_smoke_mode_validates_core_surface(self) -> None:
-        ctx = _make_ctx(rpc_smoke_mode=True, final_environment="rp2350")
+        ctx = _make_ctx(rpc_smoke_mode=True, final_environment="rp2350w")
         qctx = QuietContext(quiet=False)
         expected_payload = {
-            "text": "rp2350-rpc-smoke",
+            "text": "rp2350w-rpc-smoke",
             "number": 2350,
             "nested": {"ok": True, "values": [1, 2, 3]},
         }
+
+        required_methods = [
+            "help",
+            "ping",
+            "debugTest",
+            "status",
+            "drivers",
+            "testNoSerial",
+            "testRpConcurrency",
+        ]
 
         def response(data):
             item = MagicMock()
@@ -2235,15 +2317,145 @@ class TestRunTestsOrSpecialMode:
         mock_client = AsyncMock()
         mock_client.send = AsyncMock(
             side_effect=[
-                response({"methods": ["ping"]}),
-                response([{"name": "ping"}]),
+                response({"schema": [[name] for name in required_methods]}),
+                response(
+                    {
+                        "success": True,
+                        "functions": [
+                            {"name": name}
+                            for name in ["rpc.discover", *required_methods]
+                        ],
+                    }
+                ),
                 response({"uptimeMs": 1}),
                 response({"uptimeMs": 2}),
                 response({"received": expected_payload}),
-                response({"ready": True}),
+                response(
+                    {
+                        "ready": True,
+                        "platform": "Raspberry Pi Pico 2 W (RP2350)",
+                        "rpcReady": True,
+                        "ledRxAvailable": False,
+                    }
+                ),
                 response([]),
-                response({"success": True}),
-                RpcError("RPC Error -32601: Method not found"),
+                response(
+                    {
+                        "success": True,
+                        "message": "RPC works from task context",
+                        "serial_safe": False,
+                    }
+                ),
+                response(
+                    {
+                        "success": True,
+                        "supported": True,
+                        "backend": "pico-sdk-mutex+arduino-core1",
+                        "core1Ready": True,
+                        "core1Done": True,
+                        "recursiveMutexReady": True,
+                        "expected": 2000,
+                        "actual": 2000,
+                    }
+                ),
+                RpcError(
+                    "Method not found",
+                    code=-32601,
+                    data={"method": "__autoresearch_missing_method__"},
+                ),
+            ]
+        )
+        mock_client.connect = AsyncMock()
+        mock_client.drain_boot_output = AsyncMock()
+        mock_client.close = AsyncMock()
+
+        with patch(f"{_PATCH_MOD}.RpcClient", return_value=mock_client):
+            rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
+
+        assert rc == 0
+        assert mock_client.send.await_count == 10
+        debug_test_call = mock_client.send.await_args_list[4]
+        assert debug_test_call.args == ("debugTest",)
+        assert debug_test_call.kwargs["args"] == expected_payload
+
+    def test_rpc_smoke_rejects_missing_required_discovery_method(self) -> None:
+        ctx = _make_ctx(rpc_smoke_mode=True, final_environment="rp2350w")
+        qctx = QuietContext(quiet=False)
+
+        def response(data):
+            item = MagicMock()
+            item.success = True
+            item.data = data
+            return item
+
+        mock_client = AsyncMock()
+        mock_client.send = AsyncMock(
+            return_value=response({"schema": [["ping"], ["status"]]})
+        )
+        mock_client.connect = AsyncMock()
+        mock_client.drain_boot_output = AsyncMock()
+        mock_client.close = AsyncMock()
+
+        with patch(f"{_PATCH_MOD}.RpcClient", return_value=mock_client):
+            rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
+
+        assert rc == 1
+
+    def test_rpc_smoke_non_rp_target_skips_rp_concurrency(self) -> None:
+        ctx = _make_ctx(rpc_smoke_mode=True, final_environment="esp32s3")
+        qctx = QuietContext(quiet=False)
+        required_methods = [
+            "help",
+            "ping",
+            "debugTest",
+            "status",
+            "drivers",
+            "testNoSerial",
+        ]
+
+        def response(data):
+            item = MagicMock()
+            item.success = True
+            item.data = data
+            return item
+
+        payload = {
+            "text": "rp2040-rpc-smoke",
+            "number": 2040,
+            "nested": {"ok": True, "values": [1, 2, 3]},
+        }
+        mock_client = AsyncMock()
+        mock_client.send = AsyncMock(
+            side_effect=[
+                response({"schema": [[name] for name in required_methods]}),
+                response(
+                    {
+                        "functions": [
+                            {"name": name}
+                            for name in ["rpc.discover", *required_methods]
+                        ]
+                    }
+                ),
+                response({"uptimeMs": 1}),
+                response({"uptimeMs": 2}),
+                response({"received": payload}),
+                response(
+                    {
+                        "ready": True,
+                        "platform": "ESP32-S3",
+                        "rpcReady": True,
+                        "ledRxAvailable": False,
+                    }
+                ),
+                response([]),
+                response(
+                    {
+                        "success": True,
+                        "message": "RPC works from task context",
+                        "serial_safe": False,
+                    }
+                ),
+                RpcError("Method not found", code=-32601),
             ]
         )
         mock_client.connect = AsyncMock()
@@ -2255,9 +2467,114 @@ class TestRunTestsOrSpecialMode:
 
         assert rc == 0
         assert mock_client.send.await_count == 9
-        debug_test_call = mock_client.send.await_args_list[4]
-        assert debug_test_call.args == ("debugTest",)
-        assert debug_test_call.kwargs["args"] == expected_payload
+        assert all(
+            call.args[0] != "testRpConcurrency"
+            for call in mock_client.send.await_args_list
+        )
+
+    def test_rpc_smoke_rejects_timeout_for_unknown_method(self) -> None:
+        ctx = _make_ctx(rpc_smoke_mode=True, final_environment="rp2350w")
+        qctx = QuietContext(quiet=False)
+        methods = [
+            "help",
+            "ping",
+            "debugTest",
+            "status",
+            "drivers",
+            "testNoSerial",
+            "testRpConcurrency",
+        ]
+
+        def response(data):
+            item = MagicMock()
+            item.success = True
+            item.data = data
+            return item
+
+        payload = {
+            "text": "rp2350w-rpc-smoke",
+            "number": 2350,
+            "nested": {"ok": True, "values": [1, 2, 3]},
+        }
+        mock_client = AsyncMock()
+        mock_client.send = AsyncMock(
+            side_effect=[
+                response({"schema": [[name] for name in methods]}),
+                response(
+                    {
+                        "functions": [
+                            {"name": name} for name in ["rpc.discover", *methods]
+                        ]
+                    }
+                ),
+                response({"uptimeMs": 1}),
+                response({"uptimeMs": 2}),
+                response({"received": payload}),
+                response(
+                    {
+                        "ready": True,
+                        "platform": "Raspberry Pi Pico 2 W (RP2350)",
+                        "rpcReady": True,
+                        "ledRxAvailable": False,
+                    }
+                ),
+                response([]),
+                response(
+                    {
+                        "success": True,
+                        "message": "RPC works from task context",
+                        "serial_safe": False,
+                    }
+                ),
+                response(
+                    {
+                        "success": True,
+                        "supported": True,
+                        "core1Ready": True,
+                        "core1Done": True,
+                        "recursiveMutexReady": True,
+                        "expected": 2000,
+                        "actual": 2000,
+                    }
+                ),
+                RpcTimeoutError("missing method timed out"),
+            ]
+        )
+        mock_client.connect = AsyncMock()
+        mock_client.drain_boot_output = AsyncMock()
+        mock_client.close = AsyncMock()
+
+        with patch(f"{_PATCH_MOD}.RpcClient", return_value=mock_client):
+            rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
+
+        assert rc == 1
+        assert mock_client.send.await_count == 10
+
+    def test_rp_coroutine_mode_reports_null_backend_as_unsupported(self) -> None:
+        ctx = _make_ctx(
+            coroutine_test_mode=True,
+            final_environment="rp2350w",
+        )
+        qctx = QuietContext(quiet=False)
+
+        response = MagicMock()
+        response.get = lambda key, default=None: {
+            "success": False,
+            "supported": False,
+            "backend": "null",
+            "reason": "RP2xxx currently selects the generic Arduino null coroutine backend",
+            "passed": 0,
+        }.get(key, default)
+
+        mock_client = AsyncMock()
+        mock_client.send_and_match = AsyncMock(return_value=response)
+        mock_client.connect = AsyncMock()
+        mock_client.close = AsyncMock()
+
+        with patch(f"{_PATCH_MOD}.RpcClient", return_value=mock_client):
+            rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
+
+        assert rc == 0
 
     def test_rp2350_watchdog_reacquires_active_environment_and_device(self) -> None:
         ctx = _make_ctx(

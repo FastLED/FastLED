@@ -452,6 +452,18 @@ void AutoResearchRemoteControl::bindAsyncMethods(fl::Remote& remote) {
         (void)args;
         fl::json r = fl::json::object();
 
+#if defined(FL_IS_RP)
+        r.set("success", false);
+        r.set("supported", false);
+        r.set("backend", "null");
+        r.set("reason", "RP2xxx currently selects the generic Arduino null coroutine backend");
+        r.set("passed", static_cast<int64_t>(0));
+        r.set("failed", static_cast<int64_t>(0));
+        r.set("total", static_cast<int64_t>(0));
+        r.set("results", fl::json::object());
+        return r;
+#else
+
         const char* test_names[] = {
             "testCoroutineBasic",
             "testCoroutineStop",
@@ -499,6 +511,7 @@ void AutoResearchRemoteControl::bindAsyncMethods(fl::Remote& remote) {
         r.set("total", static_cast<int64_t>(num_tests));
         r.set("results", results);
         return r;
+#endif
     });
 }
 

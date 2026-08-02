@@ -15,6 +15,7 @@
 #include "fl/chipsets/spi.h"
 #include "fl/remote/remote.h"
 #include "fl/stl/json.h"
+#include "fl/stl/limits.h"
 #include "fl/stl/move.h"
 #include "fl/stl/vector.h"
 #include "platforms/arm/rp/is_rp.h"
@@ -36,12 +37,18 @@ constexpr fl::u8 kLoopbackPattern[] = {
 
 bool parseInt(const fl::json& config, const char* key, int* value) {
     if (!config.contains(key) || !config[key].is_int()) return false;
-    *value = static_cast<int>(config[key].as_int().value());
+    const fl::i64 parsed = config[key].as_int().value();
+    if (parsed < static_cast<fl::i64>((fl::numeric_limits<int>::min)()) ||
+        parsed > static_cast<fl::i64>((fl::numeric_limits<int>::max)())) {
+        return false;
+    }
+    *value = static_cast<int>(parsed);
     return true;
 }
 
 template <fl::u8 Which>
-fl::json runLoopback(int mosi_pin, int miso_pin, int sck_pin, int clock_hz) {
+fl::json runLoopback(const fl::shared_ptr<AutoResearchState>& runtime_state,
+                     int mosi_pin, int miso_pin, int sck_pin, int clock_hz) {
     fl::json response = fl::json::object();
     const int expected_mosi = Which == 0 ? 3 : 11;
     const int expected_miso = Which == 0 ? 0 : 8;
@@ -58,6 +65,13 @@ fl::json runLoopback(int mosi_pin, int miso_pin, int sck_pin, int clock_hz) {
         response.set("error", "InvalidClock");
         response.set("message", "clock_hz must be in [100000, 62500000].");
         return response;
+    }
+
+    // The request is now fully validated. Release AutoResearch's diagnostic
+    // PIO reservation only when the fixed-SPI operation will actually run.
+    if (runtime_state) {
+        runtime_state->rx_channel.reset();
+        runtime_state->invalidateLedRxValidation();
     }
 
     fl::vector_psram<fl::u8> tx;
@@ -114,7 +128,9 @@ fl::json runLoopback(int mosi_pin, int miso_pin, int sck_pin, int clock_hz) {
 }
 
 template <bool Sk9822>
-fl::json runPublicApiLoopback(int pattern) {
+fl::json runPublicApiLoopback(
+    const fl::shared_ptr<AutoResearchState>& runtime_state,
+    int pattern) {
     constexpr fl::u8 kMosiPin = 11;
     constexpr fl::u8 kSckPin = 10;
     constexpr size_t kLedCount = 257;
@@ -122,6 +138,17 @@ fl::json runPublicApiLoopback(int pattern) {
     static CRGB leds[kLedCount];
     static bool initialized = false;
     fl::json response = fl::json::object();
+
+    if (pattern < 0 || pattern > 5) {
+        response.set("success", false);
+        response.set("error", "InvalidPattern");
+        return response;
+    }
+
+    if (runtime_state) {
+        runtime_state->rx_channel.reset();
+        runtime_state->invalidateLedRxValidation();
+    }
 
     if (!initialized) {
         if constexpr (Sk9822) {
@@ -143,12 +170,6 @@ fl::json runPublicApiLoopback(int pattern) {
         case 5: leds[16] = CRGB::Red; break;
         default: break;
     }
-    if (pattern < 0 || pattern > 5) {
-        response.set("success", false);
-        response.set("error", "InvalidPattern");
-        return response;
-    }
-
     fl::u8 captured[kFrameBytes] = {};
     auto& driver = fl::BusTraits<fl::Bus::SPI, 1>::instance();
     if (!driver.captureNextRxBytes(captured, sizeof(captured))) {
@@ -199,10 +220,6 @@ void AutoResearchRemoteControl::bindRpSpiMethods(fl::Remote& remote) {
         response.set("message", "rpSpiLoopback requires an RP2040 or RP2350 target.");
         return response;
 #else
-        // AutoResearch's GPIO pre-test owns its RX pin through a PIO receive
-        // channel. Release that diagnostic reservation before fixed SPI claims
-        // the same MISO pin through the RP resource manager.
-        if (mState) mState->rx_channel.reset();
         if (!args.is_object()) {
             fl::json response = fl::json::object();
             response.set("success", false);
@@ -227,8 +244,14 @@ void AutoResearchRemoteControl::bindRpSpiMethods(fl::Remote& remote) {
             response.set("message", "spi_index, mosi_pin, miso_pin, sck_pin, and clock_hz must be integers.");
             return response;
         }
-        if (spi_index == 0) return runLoopback<0>(mosi_pin, miso_pin, sck_pin, clock_hz);
-        if (spi_index == 1) return runLoopback<1>(mosi_pin, miso_pin, sck_pin, clock_hz);
+        if (spi_index == 0) {
+            return runLoopback<0>(mState, mosi_pin, miso_pin, sck_pin,
+                                  clock_hz);
+        }
+        if (spi_index == 1) {
+            return runLoopback<1>(mState, mosi_pin, miso_pin, sck_pin,
+                                  clock_hz);
+        }
         fl::json response = fl::json::object();
         response.set("success", false);
         response.set("error", "InvalidSpiIndex");
@@ -244,7 +267,6 @@ void AutoResearchRemoteControl::bindRpSpiMethods(fl::Remote& remote) {
         response.set("error", "PlatformNotSupported");
         return response;
 #else
-        if (mState) mState->rx_channel.reset();
         if (!args.is_object() || !args.contains("sk9822") ||
             !args["sk9822"].is_bool() || !args.contains("pattern") ||
             !args["pattern"].is_int()) {
@@ -253,10 +275,17 @@ void AutoResearchRemoteControl::bindRpSpiMethods(fl::Remote& remote) {
             response.set("error", "InvalidArgs");
             return response;
         }
+        const fl::i64 pattern_value = args["pattern"].as_int().value();
+        if (pattern_value < 0 || pattern_value > 5) {
+            fl::json response = fl::json::object();
+            response.set("success", false);
+            response.set("error", "InvalidPattern");
+            return response;
+        }
         const bool sk9822 = args["sk9822"].as_bool().value();
-        const int pattern = static_cast<int>(args["pattern"].as_int().value());
-        return sk9822 ? runPublicApiLoopback<true>(pattern)
-                      : runPublicApiLoopback<false>(pattern);
+        const int pattern = static_cast<int>(pattern_value);
+        return sk9822 ? runPublicApiLoopback<true>(mState, pattern)
+                      : runPublicApiLoopback<false>(mState, pattern);
 #endif
     });
 }

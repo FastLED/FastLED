@@ -374,24 +374,32 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
         if (auto_apply) {
             int old_tx = mState->pin_tx;
             int old_rx = mState->pin_rx;
+            bool tx_changed = (found_tx != old_tx);
             bool rx_changed = (found_rx != old_rx);
 
-            mState->pin_tx = found_tx;
-            mState->pin_rx = found_rx;
-
-            // Recreate RX channel if pin changed
-            if (rx_changed && mState->rx_factory) {
-                mState->rx_channel.reset();
-                mState->rx_channel = mState->rx_factory(found_rx);
-                if (!mState->rx_channel) {
-                    // Restore old values
-                    mState->pin_tx = old_tx;
-                    mState->pin_rx = old_rx;
+            fl::shared_ptr<fl::RxChannel> replacement_rx;
+            if (rx_changed) {
+                if (mState->rx_factory) {
+                    replacement_rx = mState->rx_factory(found_rx);
+                }
+                if (!replacement_rx) {
+                    response.set("success", false);
                     response.set("error", "RxChannelCreationFailed");
                     response.set("message", "Failed to recreate RX channel on discovered pin");
                     response.set("autoApplied", false);
                     return response;
                 }
+            }
+
+            // Commit only after the replacement channel is ready, preserving
+            // the prior channel and validation state on factory failure.
+            if (tx_changed || rx_changed) {
+                mState->invalidateLedRxValidation();
+            }
+            mState->pin_tx = found_tx;
+            mState->pin_rx = found_rx;
+            if (rx_changed) {
+                mState->rx_channel = replacement_rx;
             }
 
             FL_DBG("[PIN PROBE] Auto-applied pins: TX=" << found_tx << ", RX=" << found_rx);

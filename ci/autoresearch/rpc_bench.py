@@ -16,15 +16,28 @@ can call RPCs without each managing its own event loop.
 from __future__ import annotations
 
 import json
+import sys
+from argparse import ArgumentParser
 from typing import Any
 
 from ci.rpc_client import RpcClient, RpcError, RpcTimeoutError
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.serial_interface import create_serial_interface
 
 
 # Returned by RpcBench.call() when the device does not have the method
 # bound (e.g. a build without an optional feature's RPC).
 METHOD_NOT_FOUND = object()
+
+
+def _is_method_not_found(error: RpcError) -> bool:
+    """Classify structured errors, with text fallback for legacy firmware."""
+    if error.code == -32601:
+        return True
+    if error.code is not None:
+        return False
+    message = str(error).lower()
+    return "not found" in message or "unknown method" in message or "method" in message
 
 
 class RpcBench:
@@ -64,8 +77,7 @@ class RpcBench:
         except RpcTimeoutError:
             return None
         except RpcError as e:
-            msg = str(e).lower()
-            if "not found" in msg or "unknown method" in msg or "method" in msg:
+            if _is_method_not_found(e):
                 return METHOD_NOT_FOUND
             return None
         # Non-empty dict result — hand it straight back.
@@ -104,8 +116,7 @@ class RpcBench:
         except RpcTimeoutError:
             return None
         except RpcError as e:
-            msg = str(e).lower()
-            if "not found" in msg or "unknown method" in msg or "method" in msg:
+            if _is_method_not_found(e):
                 return METHOD_NOT_FOUND
             return None
         return self._extract_result(resp)
@@ -152,3 +163,52 @@ class RpcBench:
 
     def __exit__(self, *_exc: object) -> None:
         self.close()
+
+
+def _parse_cli_args_json(value: str) -> list[Any] | dict[str, Any] | None:
+    parsed = json.loads(value)
+    if parsed is None or isinstance(parsed, (list, dict)):
+        return parsed
+    raise ValueError("RPC args must decode to an array, object, or null")
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Call one RPC method through the repository's fbuild-backed transport."""
+    parser = ArgumentParser(description=__doc__)
+    parser.add_argument("port", help="Application serial port, for example COM17")
+    parser.add_argument("method", help="JSON-RPC method name")
+    parser.add_argument("--args", default="{}", help="JSON array/object arguments")
+    parser.add_argument("--timeout", type=float, default=10.0)
+    parsed = parser.parse_args(argv)
+
+    try:
+        rpc_args = _parse_cli_args_json(parsed.args)
+    except (json.JSONDecodeError, ValueError) as exc:
+        parser.error(str(exc))
+
+    try:
+        with RpcBench(parsed.port, timeout=parsed.timeout) as bench:
+            result = bench.call(parsed.method, args=rpc_args, timeout=parsed.timeout)
+    except KeyboardInterrupt as exc:
+        handle_keyboard_interrupt(exc)
+        return 130
+    except Exception as exc:  # noqa: BLE001 - CLI must report transport failures
+        print(f"RESULT: RPC call FAIL: {exc}")
+        return 1
+
+    if result is METHOD_NOT_FOUND:
+        print("RESULT: RPC call FAIL: method not found")
+        return 1
+    if result is None:
+        print("RESULT: RPC call FAIL: timeout or transport error")
+        return 1
+    print(f"REMOTE: {parsed.method} -> {result!r}")
+    if isinstance(result, dict) and result.get("success") is False:
+        print("RESULT: RPC call FAIL: method reported success=false")
+        return 1
+    print("RESULT: RPC call PASS")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

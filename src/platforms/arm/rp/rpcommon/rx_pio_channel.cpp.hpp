@@ -92,8 +92,8 @@ RpPioRxDevice::RpPioRxDevice(int pin) FL_NO_EXCEPT
       mProgramOffset(-1), mPioClockHz(0), mTailLimitNs(1), mLastTransitionUs(0),
       mCapacity(0), mArmed(false), mFinished(false), mOverflow(false),
       mProgramLoaded(false), mIdleHigh(false), mSampleHigh(false), mHaveSample(false),
-      mLastBeginError(""), mDmaWordCount(0), mDmaWords(nullptr), mEdges(nullptr),
-      mDmaWordsProcessed(0), mSampleRunTicks(0) {}
+      mLastBeginError(""), mDmaWordCount(0), mDmaWordsProcessed(0),
+      mSampleRunTicks(0), mDmaWords(nullptr), mEdges(nullptr) {}
 
 RpPioRxDevice::~RpPioRxDevice() FL_NO_EXCEPT { stop(); }
 

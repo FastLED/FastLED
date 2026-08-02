@@ -23,6 +23,8 @@
 #include "Common.h"
 #include "AutoResearchTest.h"
 #include "AutoResearchHelpers.h"
+#include "AutoResearchPlatform.h"
+#include "AutoResearchRpConcurrency.h"
 #include "AutoResearchEdgeProbe.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/unique_ptr.h"
@@ -114,6 +116,9 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
     remote.bind("status", [this](const fl::json& args) -> fl::json {
         fl::json status = fl::json::object();
         status.set("ready", true);
+        status.set("platform", autoresearch::chipName());
+        status.set("rpcReady", true);
+        status.set("ledRxAvailable", mState->led_rx_available);
         status.set("pinTx", static_cast<int64_t>(mState->pin_tx));
         status.set("pinRx", static_cast<int64_t>(mState->pin_rx));
         return status;
@@ -221,6 +226,13 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
         response.set("serial_safe", false);
         return response;
     });
+
+    remote.bind("testRpConcurrency", [this](const fl::json& args) -> fl::json {
+        (void)args;
+        mRemote->sendAsyncResponse("testRpConcurrency",
+                                   autoresearch::runRpConcurrencyTest());
+        return fl::json(nullptr);
+    }, fl::RpcMode::ASYNC);
 
     // "parlioMetrics" — PARLIO engine ISR/DMA counters (C6 bring-up,
     // FastLED#3576 Phase 7). Reads the engine's debug metrics AFTER a

@@ -622,11 +622,15 @@ void loop() {
             // Test RX channel with manual GPIO toggle to confirm hardware path works
             // This isolates GPIO/hardware issues from PARLIO driver issues
             // Buffer size = 100 symbols, hz = 40MHz (same as LED autoresearch)
-            const bool gpio_ok = testRxChannel(g_autoresearch_state->rx_channel, PIN_TX, PIN_RX, 40000000, 100);
+            const int pin_tx = g_autoresearch_state->pin_tx;
+            const int pin_rx = g_autoresearch_state->pin_rx;
+            const bool gpio_ok = testRxChannel(
+                g_autoresearch_state->rx_channel, pin_tx, pin_rx, 40000000, 100);
+            g_autoresearch_state->led_rx_available = gpio_ok;
             fl::json gpioData = fl::json::object();
             gpioData.set("success", gpio_ok);
-            gpioData.set("pinTx", static_cast<int64_t>(PIN_TX));
-            gpioData.set("pinRx", static_cast<int64_t>(PIN_RX));
+            gpioData.set("pinTx", static_cast<int64_t>(pin_tx));
+            gpioData.set("pinRx", static_cast<int64_t>(pin_rx));
             gpioData.set("hz", static_cast<int64_t>(40000000));
             gpioData.set("symbols", static_cast<int64_t>(100));
             printStreamRaw("gpioBaseline", gpioData);

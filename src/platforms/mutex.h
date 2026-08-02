@@ -14,7 +14,7 @@
 ///
 /// Supported platforms:
 /// - ESP32: FreeRTOS mutex wrappers
-/// - RP2040/RP2350: Pico SDK spinlock-based mutexes
+/// - RP2040/RP2350: Pico SDK mutex_t / recursive_mutex_t wrappers
 /// - STM32: FreeRTOS mutex wrappers (when FreeRTOS is available)
 /// - SAMD21/SAMD51: CMSIS interrupt-based mutex
 /// - Teensy: Interrupt-based mutex using critical sections
@@ -32,7 +32,7 @@
 // Platform dispatch
 #ifdef FL_IS_ESP32
     #include "platforms/esp/32/mutex_esp32.h"  // IWYU pragma: keep
-#elif defined(FL_IS_RP2040)
+#elif defined(FL_IS_RP)
     #include "platforms/arm/rp/mutex_rp.h"  // IWYU pragma: keep
 #elif defined(FL_IS_STM32) && FL_HAS_INCLUDE("FreeRTOS.h")
     #include "platforms/arm/stm32/mutex_stm32.h"  // IWYU pragma: keep
