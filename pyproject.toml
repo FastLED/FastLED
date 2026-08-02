@@ -5,12 +5,16 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.5.5. It carries the 2.5.4 monitor WebSocket streaming and
-    # Windows serial-health fixes required for AutoResearch to keep the daemon
-    # alive through the first RPC on attached boards, plus the RP2040 UF2
-    # deploy-path handling added in 2.5.2.
+    # Pin to fbuild 2.5.6. It carries library-dependency fixes for Teensy/STM32,
+    # stale daemon/install-lock recovery, and hardened RP2350 UF2 deployment,
+    # plus the monitor WebSocket and serial-health fixes required by
+    # AutoResearch.
     #
     # Pin history:
+    #   2.5.6 -- honors lib_deps on Teensy/STM32, reclaims dead-owner package
+    #             install locks and stale daemon endpoints, hardens RP2350 UF2
+    #             deployment, and improves ESP32 esptool provisioning errors
+    #             (FastLED/fbuild#1224/#1226/#1227/#1235).
     #   2.5.5 -- refreshes the embedded zccache (pin moved to upstream main
     #             `5ee292f`; zccache published no tag past 1.12.17, so the
     #             version string is unchanged across ~150 commits of cache
@@ -167,7 +171,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.5",
+    "fbuild==2.5.6",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
