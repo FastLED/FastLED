@@ -66,7 +66,7 @@ ENVIRONMENT_TO_VCOM_VID_PIDS: dict[str, tuple[tuple[int, int], ...]] = {
     # different attached board.
     "rp2040": ((0x2E8A, 0x000A),),
     "rpipico": ((0x2E8A, 0x000A),),
-    "rpipicow": ((0x2E8A, 0x000A),),
+    "rpipicow": ((0x2E8A, 0xF00A),),
     # Arduino-Pico assigns distinct application CDC identities to Pico 2
     # and Pico 2 W. Keep them board-exact so a non-W RP2350 cannot be
     # selected for an rp2350w run when both variants are attached.
