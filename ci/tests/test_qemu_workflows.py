@@ -61,6 +61,12 @@ def test_all_five_badge_legs_use_native_template() -> None:
     assert "QEMU_LCD_CLOCKLESS_REGISTRATION: PASS" in all_callers
     assert "FL_QEMU_VALIDATE_LCD_CLOCKLESS" in all_callers
 
+    driver_test = (
+        ROOT / "examples" / "SpecialDrivers" / "ESP" / "DriverTest" / "DriverTest.ino"
+    ).read_text(encoding="utf-8")
+    assert "FastLED.enableAllDrivers();" in driver_test
+    assert "setExclusiveDriver<fl::Bus::FLEX_IO" not in driver_test
+
 
 def test_retired_merged_bin_flag_is_rejected() -> None:
     parser = CompilationArgumentParser(ROOT)

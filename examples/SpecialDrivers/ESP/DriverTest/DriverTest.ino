@@ -121,17 +121,10 @@ void setup() {
 
 #if defined(FL_QEMU_VALIDATE_LCD_CLOCKLESS)
     // Espressif QEMU does not model LCD_CAM transmit-completion interrupts.
-    // Validate the strongest supported behavior: link, register, and select
-    // the real ESP32-S3 LCD clockless driver before any transmission.
-    FastLED.setExclusiveDriver<fl::Bus::FLEX_IO, 0>();
-#endif
-
-    // Initialize FastLED with WS2812 strip
-    // The driver can be switched at runtime using setExclusiveDriver()
-    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
-    FastLED.setBrightness(TEST_BRIGHTNESS);
-
-#if defined(FL_QEMU_VALIDATE_LCD_CLOCKLESS)
+    // Validate the strongest supported behavior: link and register the real
+    // ESP32-S3 LCD clockless driver without requiring a private BusTraits
+    // header in this public example.
+    FastLED.enableAllDrivers();
     bool lcdClocklessRegistered = false;
     const auto drivers = FastLED.getDriverInfos();
     for (fl::size i = 0; i < drivers.size(); ++i) {
@@ -145,6 +138,11 @@ void setup() {
                        : "QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL");
     return;
 #endif
+
+    // Initialize FastLED with WS2812 strip
+    // The driver can be switched at runtime using setExclusiveDriver()
+    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
+    FastLED.setBrightness(TEST_BRIGHTNESS);
 
     // Create and run the test suite
     DriverTestRunner runner(leds, NUM_LEDS);
