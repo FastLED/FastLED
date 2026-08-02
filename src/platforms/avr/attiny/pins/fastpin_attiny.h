@@ -212,10 +212,21 @@ _FL_DEFPIN(16, 2, C); _FL_DEFPIN(17, 3, C); _FL_DEFPIN(18, 4, C); _FL_DEFPIN(19,
 #define SPI_UART0_CLOCK 12
 #endif
 
+// The tinyAVR 2K and 4K parts (ATtiny2YZ / ATtiny4YZ) are deliberately caught
+// here, BEFORE the pin-map arms below, and are left with no pin definitions.
+// A minimal FastLED Blink links to ~4.8KB on this family, so a 4KB part cannot
+// hold the library at all -- see #973. FastPin<> is intentionally left
+// unspecialized so the failure is a compile error rather than a link-time
+// overflow.
+//
+// Do NOT list any part from this arm in the pin-map arms below: the #elif chain
+// reaches this one first, so a duplicate listing there is unreachable and only
+// creates the false impression that the part is supported (which is exactly the
+// confusion #973 ran into).
 #elif defined(__AVR_ATtiny202__) || defined(__AVR_ATtiny204__) || defined(__AVR_ATtiny212__) || defined(__AVR_ATtiny214__)  || defined(__AVR_ATtiny402__) || defined(__AVR_ATtiny404__) || defined(__AVR_ATtiny406__) || defined(__AVR_ATtiny407__) || defined(__AVR_ATtiny412__) || defined(__AVR_ATtiny414__) || defined(__AVR_ATtiny416__) || defined(__AVR_ATtiny417__)
 #pragma message "ATtiny2YZ or ATtiny4YZ have very limited storage. This library could use up to more than 100% of its flash size"
 
-#elif defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtiny1604__) || defined(__AVR_ATtiny804__) || defined(__AVR_ATtiny404__)
+#elif defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtiny1604__) || defined(__AVR_ATtiny804__)
 #define MAX_PIN 12
 _FL_DEFPIN( 0, 4, A); _FL_DEFPIN( 1, 5, A); _FL_DEFPIN( 2, 6, A); _FL_DEFPIN( 3, 7, A);
 _FL_DEFPIN( 4, 3, B); _FL_DEFPIN( 5, 2, B); _FL_DEFPIN( 6, 1, B); _FL_DEFPIN( 7, 0, B);
@@ -228,7 +239,7 @@ _FL_DEFPIN( 8, 1, A); _FL_DEFPIN( 9, 2, A); _FL_DEFPIN(10, 3, A); _FL_DEFPIN(11,
 #define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
-#elif defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtiny1616__) || defined(__AVR_ATtiny816__) || defined(__AVR_ATtiny416__) || defined(__AVR_ATtiny3216__)
+#elif defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtiny1616__) || defined(__AVR_ATtiny816__) || defined(__AVR_ATtiny3216__)
 
 #define MAX_PIN 18
 _FL_DEFPIN( 0, 4, A); _FL_DEFPIN( 1, 5, A); _FL_DEFPIN( 2, 6, A); _FL_DEFPIN( 3, 7, A);
