@@ -49,6 +49,7 @@ from ci.util.port_utils import (
     auto_detect_upload_port,
     detect_attached_chip,
     environment_has_wifi,
+    get_port_serial_number,
     kill_port_users,
     port_exists,
 )
@@ -69,6 +70,23 @@ if TYPE_CHECKING:
 # unwind cleanly before we kill the process. Per session 2026-06-22 spec.
 WATCHDOG_GRACE_SECONDS = 20.0
 FLEX_IO_TEENSY_DEFAULT_TX_PIN = 6
+RP2040_ENVIRONMENTS = frozenset({"rp2040", "rpipico", "rpipicow"})
+RP2350_ENVIRONMENTS = frozenset({"rp2350", "rpipico2", "rp2350w", "rpipico2w"})
+RP2XXX_ENVIRONMENTS = RP2040_ENVIRONMENTS | RP2350_ENVIRONMENTS
+
+
+def _active_rp2xxx_environment(environment: str | None) -> str | None:
+    normalized = (environment or "").strip().lower()
+    return normalized if normalized in RP2XXX_ENVIRONMENTS else None
+
+
+def _canonical_board_environment(environment: str | None) -> str | None:
+    """Resolve a real PlatformIO board alias to its registered CI environment."""
+    if not environment:
+        return None
+    from ci.boards import create_board
+
+    return create_board(environment.strip()).board_name
 
 
 def _is_teensy4_environment(final_environment: str | None) -> bool:
@@ -85,8 +103,7 @@ def _driver_name_for_environment(
         return "SPI_UNIFIED"
     if (
         driver == "FLEX_IO"
-        and final_environment is not None
-        and final_environment.lower() in ("rp2040", "rpipico", "rp2350", "rpipico2")
+        and _active_rp2xxx_environment(final_environment) is not None
     ):
         # RP exposes two independent PIO engines as PIO0 and PIO1.  Their
         # concrete names must remain distinct so a runtime-exclusive test can
@@ -388,7 +405,9 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         args.uart = True
         args.lpuart = False
 
-    final_environment = args.environment_positional or args.environment
+    final_environment = _canonical_board_environment(
+        args.environment_positional or args.environment
+    )
 
     if args.lcd and not final_environment:
         final_environment = "esp32s3"
@@ -486,12 +505,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         if args.object_fled:
             drivers.append("OBJECT_FLED")
         if args.flex_io:
-            is_rp = final_environment is not None and final_environment.lower() in (
-                "rp2040",
-                "rpipico",
-                "rp2350",
-                "rpipico2",
-            )
+            is_rp = _active_rp2xxx_environment(final_environment) is not None
             if args.rp_pio_both and is_rp:
                 drivers.extend(("PIO0", "PIO1"))
             else:
@@ -1177,12 +1191,13 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
     is_teensy = (
         ctx.final_environment is not None and "teensy" in ctx.final_environment.lower()
     )
-    stock_rp2040_transport = (args.rpc_smoke or args.watchdog_soak) and (
-        (ctx.final_environment or "").lower() in {"rp2040", "rpipico"}
+    rp2xxx_environment = _active_rp2xxx_environment(ctx.final_environment)
+    stock_rp2xxx_transport = bool(rp2xxx_environment) and (
+        args.rpc_smoke or args.watchdog_soak
     )
 
     upload_port = args.upload_port
-    if not upload_port and not stock_rp2040_transport:
+    if not upload_port and not stock_rp2xxx_transport:
         expected_environment = None if is_teensy else ctx.final_environment
         max_wait_s = 60
         poll_interval_s = 1.0
@@ -1253,9 +1268,9 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
 
         upload_port = result.selected_port
 
-    if stock_rp2040_transport and not upload_port:
+    if stock_rp2xxx_transport and not upload_port:
         print(
-            "📦 Stock RP2040 transport: no pre-deploy serial port required; "
+            f"📦 Stock {rp2xxx_environment} transport: no pre-deploy serial port required; "
             "fbuild will discover RPI-RP2 and return the application CDC port."
         )
     else:
@@ -1311,6 +1326,8 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                 )
                 return 1
         print()
+
+    ctx.final_environment = _canonical_board_environment(ctx.final_environment)
 
     if args.use_root_platformio_ini and _reject_teensy_root_platformio_ini(
         ctx.final_environment
@@ -1595,19 +1612,34 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     """
     args = ctx.args
     upload_port = ctx.upload_port
+    rp2xxx_environment = _active_rp2xxx_environment(ctx.final_environment)
     if (
         upload_port is None
         and (ctx.rpc_smoke_mode or ctx.watchdog_soak_mode)
         and ctx.use_fbuild
+        and rp2xxx_environment is not None
     ):
-        # Stock RP2040 deployment starts from BOOTSEL mass-storage and may
+        # Stock RP2xxx deployment starts from BOOTSEL mass-storage and may
         # return before Windows has published the application CDC endpoint.
-        # Re-scan by USB identity instead of asserting on the pre-deploy port.
-        result = auto_detect_upload_port(expected_environment="rp2040")
-        if result.selected_port:
-            upload_port = result.selected_port
-            ctx.upload_port = upload_port
-            print(f"✅ Discovered RP2040 application port: {upload_port}")
+        # Poll by USB identity instead of asserting on the pre-deploy port.
+        wait_seconds = min(10.0, ctx.remaining_seconds())
+        deadline = time.monotonic() + max(0.0, wait_seconds)
+        while True:
+            result = await asyncio.to_thread(
+                auto_detect_upload_port,
+                expected_environment=rp2xxx_environment,
+            )
+            if result.selected_port:
+                upload_port = result.selected_port
+                ctx.upload_port = upload_port
+                print(
+                    f"✅ Discovered {rp2xxx_environment} application port: "
+                    f"{upload_port}"
+                )
+                break
+            if time.monotonic() >= deadline:
+                break
+            await asyncio.sleep(min(0.1, max(0.0, deadline - time.monotonic())))
     if upload_port is None:
         print("❌ No application serial port was returned after fbuild deployment")
         return 1
@@ -1920,9 +1952,13 @@ async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
         ):
             raise RpcError("ping uptime did not advance monotonically")
 
+        active_environment = (
+            _active_rp2xxx_environment(ctx.final_environment) or "rp2040"
+        )
+        chip_number = 2350 if active_environment in RP2350_ENVIRONMENTS else 2040
         payload = {
-            "text": "rp2040-rpc-smoke",
-            "number": 2040,
+            "text": f"{active_environment}-rpc-smoke",
+            "number": chip_number,
             "nested": {"ok": True, "values": [1, 2, 3]},
         }
         echoed = await call("debugTest", payload)
@@ -1979,6 +2015,7 @@ async def _run_watchdog_soak(ctx: RunContext) -> int:
     if not old_port:
         print("RESULT: watchdog soak FAIL: no application port")
         return 1
+    original_serial_number = get_port_serial_number(old_port)
     from ci.util.serial_interface import create_serial_interface
 
     # Do not reuse a pre-deploy adapter after fbuild has re-enumerated CDC.
@@ -2021,9 +2058,17 @@ async def _run_watchdog_soak(ctx: RunContext) -> int:
     while time.monotonic() < deadline and port_exists(old_port):
         await asyncio.sleep(0.1)
     print(f"WATCHDOG: application port disconnected={not port_exists(old_port)}")
+    expected_environment = _active_rp2xxx_environment(ctx.final_environment)
+    if expected_environment is None:
+        print("RESULT: watchdog soak FAIL: active environment is not RP2xxx")
+        return 1
     new_port: str | None = None
     while time.monotonic() < deadline:
-        detected = await asyncio.to_thread(auto_detect_upload_port, "rp2040")
+        detected = await asyncio.to_thread(
+            auto_detect_upload_port,
+            expected_environment,
+            expected_serial_number=original_serial_number,
+        )
         candidate = detected.selected_port
         if candidate and (not port_exists(old_port) or candidate != old_port):
             new_port = candidate

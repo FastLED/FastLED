@@ -85,6 +85,10 @@ constexpr const char* chipName() {
     return "ESP32-P4 (dual-core RISC-V)";
 #elif defined(FL_IS_TEENSY_4X)
     return "Teensy 4.x (Cortex-M7)";
+#elif defined(ARDUINO_RASPBERRY_PI_PICO_2W) || defined(ARDUINO_RPIPICO2W)
+    return "Raspberry Pi Pico 2 W (RP2350)";
+#elif defined(FL_IS_RP2350)
+    return "RP2350";
 #else
     return "Unknown platform";
 #endif

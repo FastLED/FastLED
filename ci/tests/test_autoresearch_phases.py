@@ -26,6 +26,7 @@ from ci.autoresearch.phases import (
     _run_build_deploy,
     _run_schema_and_pin_setup,
     _run_tests_or_special_mode,
+    _run_watchdog_soak,
     _validate_test_rpc_response,
 )
 from ci.rpc_client import RpcError
@@ -726,13 +727,25 @@ class TestParseArgsAndBuildCommands:
         assert command["params"]["driver"] == "FLEX_IO"
         assert "pinTx" not in command["params"]
 
-    def test_flex_io_driver_name_maps_to_pio1_on_rp2040(
-        self, fake_project_dir: Path
+    @pytest.mark.parametrize(
+        "environment",
+        (
+            "rp2040",
+            "rpipico",
+            "rpipicow",
+            "rp2350",
+            "rpipico2",
+            "rp2350w",
+            "rpipico2w",
+        ),
+    )
+    def test_flex_io_driver_name_maps_to_pio1_on_rp2xxx_aliases(
+        self, fake_project_dir: Path, environment: str
     ) -> None:
         args = _make_args(
             parlio=False,
             flex_io=True,
-            environment_positional="rp2040",
+            environment_positional=environment,
             project_dir=fake_project_dir,
             use_root_platformio_ini=False,
         )
@@ -762,16 +775,29 @@ class TestParseArgsAndBuildCommands:
         assert result.drivers == ["PIO0"]
         assert result.json_rpc_commands[0]["params"]["driver"] == "PIO0"
 
-    def test_rp_pio_both_generates_one_parallel_command(
-        self, fake_project_dir: Path
+    @pytest.mark.parametrize(
+        "environment",
+        (
+            "rp2040",
+            "rpipico",
+            "rpipicow",
+            "rp2350",
+            "rpipico2",
+            "rp2350w",
+            "rpipico2w",
+        ),
+    )
+    def test_rp_pio_both_generates_one_parallel_command_for_rp2xxx_aliases(
+        self, fake_project_dir: Path, environment: str
     ) -> None:
         args = _make_args(
             parlio=False,
             flex_io=True,
             rp_pio_both=True,
             parallel=True,
-            environment_positional="rp2040",
+            environment_positional=environment,
             project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -1069,6 +1095,44 @@ class TestParseArgsAndBuildCommands:
         )
         assert result.build_dir == fake_build_dir
 
+    @pytest.mark.parametrize(
+        ("requested_environment", "canonical_environment"),
+        (
+            ("rpipico", "rp2040"),
+            ("rpipico2", "rp2350"),
+            ("rpipico2w", "rp2350w"),
+        ),
+    )
+    def test_rp_board_alias_stages_the_canonical_environment(
+        self,
+        tmp_path: Path,
+        requested_environment: str,
+        canonical_environment: str,
+    ) -> None:
+        (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
+        fake_build_dir = tmp_path / ".build" / "pio" / canonical_environment
+        fake_build_dir.mkdir(parents=True)
+        args = _make_args(
+            environment_positional=requested_environment,
+            project_dir=tmp_path,
+            use_root_platformio_ini=False,
+        )
+
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_build_dir,
+        ) as mock_synth:
+            result = _parse_args_and_build_commands(args)
+
+        assert isinstance(result, RunContext)
+        assert result.final_environment == canonical_environment
+        mock_synth.assert_called_once_with(
+            canonical_environment,
+            project_root=tmp_path.resolve(),
+            verbose=False,
+            extra_defines=[],
+        )
+
     def test_synthesised_path_defers_when_board_unknown(self, tmp_path: Path) -> None:
         """When the board is NOT known up-front (no positional, no --env,
         no --lcd*) and the legacy flag is OFF, parse-time synthesis must NOT
@@ -1200,6 +1264,38 @@ class TestResolvePortAndEnvironment:
         assert rc is None
         assert ctx.upload_port == "COM9"
         auto_detect.assert_called_once_with(expected_environment="esp32c6")
+
+    @pytest.mark.parametrize(
+        "environment", ("rp2350", "rpipico2", "rp2350w", "rpipico2w")
+    )
+    def test_rp2xxx_rpc_smoke_allows_fbuild_no_port_transport(
+        self, environment: str
+    ) -> None:
+        args = _make_args(
+            environment=environment,
+            upload_port=None,
+            parlio=False,
+            rpc_smoke=True,
+        )
+        ctx = _make_ctx(
+            args=args,
+            final_environment=environment,
+            upload_port=None,
+            rpc_smoke_mode=True,
+        )
+
+        with (
+            patch(f"{_PATCH_MOD}.auto_detect_upload_port") as auto_detect,
+            patch(
+                f"{_PATCH_MOD}.select_build_driver",
+                return_value=_make_mock_driver(),
+            ),
+        ):
+            rc = asyncio.run(_resolve_port_and_environment(ctx))
+
+        assert rc is None
+        assert ctx.upload_port is None
+        auto_detect.assert_not_called()
 
     def test_ws2814_deferred_synthesis_injects_rmt_binding(
         self, tmp_path: Path
@@ -1481,6 +1577,22 @@ class TestAutoDetectUploadPort:
         assert result.ok is True
         assert result.selected_port == "COM11"
 
+    def test_rp2040_rejects_rp2350_application_cdc_fingerprint(self) -> None:
+        rp2350 = ListPortInfo("COM12")
+        rp2350.description = "USB Serial Device"
+        rp2350.hwid = "USB VID:PID=2E8A:000F"
+        rp2350.vid = 0x2E8A
+        rp2350.pid = 0x000F
+
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[rp2350],
+        ):
+            result = auto_detect_upload_port("rp2040")
+
+        assert result.ok is False
+        assert result.selected_port is None
+
     def test_rpipico2_application_cdc_fingerprint_matches(self) -> None:
         port = ListPortInfo("COM12")
         port.description = "USB Serial Device"
@@ -1494,6 +1606,142 @@ class TestAutoDetectUploadPort:
             result = auto_detect_upload_port("rpipico2")
         assert result.ok is True
         assert result.selected_port == "COM12"
+
+    @pytest.mark.parametrize(
+        ("environment", "pid"),
+        (
+            ("rp2350", 0x000F),
+            ("rpipico2", 0x000F),
+            ("rp2350w", 0xF00F),
+            ("rpipico2w", 0xF00F),
+        ),
+    )
+    def test_rp2350_aliases_accept_board_exact_application_cdc_fingerprint(
+        self, environment: str, pid: int
+    ) -> None:
+        port = ListPortInfo("COM17")
+        port.description = "USB Serial Device"
+        port.hwid = f"USB VID:PID=2E8A:{pid:04X}"
+        port.vid = 0x2E8A
+        port.pid = pid
+
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[port],
+        ):
+            result = auto_detect_upload_port(environment)
+
+        assert result.ok is True
+        assert result.selected_port == "COM17"
+
+    @pytest.mark.parametrize(
+        ("environment", "wrong_pid"),
+        (("rp2350", 0xF00F), ("rp2350w", 0x000F)),
+    )
+    def test_rp2350_variants_reject_each_others_application_identity(
+        self, environment: str, wrong_pid: int
+    ) -> None:
+        other_variant = ListPortInfo("COM12")
+        other_variant.description = "USB Serial Device"
+        other_variant.hwid = f"USB VID:PID=2E8A:{wrong_pid:04X}"
+        other_variant.vid = 0x2E8A
+        other_variant.pid = wrong_pid
+
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[other_variant],
+        ):
+            result = auto_detect_upload_port(environment)
+
+        assert result.ok is False
+        assert result.selected_port is None
+
+    def test_rp2350w_strict_fingerprint_skips_unrelated_usb_serial(self) -> None:
+        unrelated = ListPortInfo("COM11")
+        unrelated.description = "Silicon Labs CP210x USB to UART Bridge"
+        unrelated.hwid = "USB VID:PID=10C4:EA60"
+        unrelated.vid = 0x10C4
+        unrelated.pid = 0xEA60
+
+        rp2350 = ListPortInfo("COM17")
+        rp2350.description = "USB Serial Device"
+        rp2350.hwid = "USB VID:PID=2E8A:F00F"
+        rp2350.vid = 0x2E8A
+        rp2350.pid = 0xF00F
+
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[unrelated, rp2350],
+        ):
+            result = auto_detect_upload_port("rp2350w")
+
+        assert result.ok is True
+        assert result.selected_port == "COM17"
+
+    def test_rp2350_strict_fingerprint_skips_attached_esp32c6(self) -> None:
+        esp32c6 = ListPortInfo("COM9")
+        esp32c6.description = "USB JTAG/serial debug unit"
+        esp32c6.hwid = "USB VID:PID=303A:1001"
+        esp32c6.vid = 0x303A
+        esp32c6.pid = 0x1001
+
+        rp2350 = ListPortInfo("COM17")
+        rp2350.description = "USB Serial Device"
+        rp2350.hwid = "USB VID:PID=2E8A:F00F"
+        rp2350.vid = 0x2E8A
+        rp2350.pid = 0xF00F
+
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[esp32c6, rp2350],
+        ):
+            result = auto_detect_upload_port("rp2350w")
+
+        assert result.ok is True
+        assert result.selected_port == "COM17"
+
+    def test_rp2350_strict_fingerprint_rejects_unrelated_usb_serial(self) -> None:
+        unrelated = ListPortInfo("COM11")
+        unrelated.description = "Silicon Labs CP210x USB to UART Bridge"
+        unrelated.hwid = "USB VID:PID=10C4:EA60"
+        unrelated.vid = 0x10C4
+        unrelated.pid = 0xEA60
+
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[unrelated],
+        ):
+            result = auto_detect_upload_port("rp2350")
+
+        assert result.ok is False
+        assert result.selected_port is None
+        assert "2E8A:000F" in (result.error_message or "")
+
+    def test_rp2350w_serial_identity_selects_original_board(self) -> None:
+        replacement = ListPortInfo("COM18")
+        replacement.description = "USB Serial Device"
+        replacement.hwid = "USB VID:PID=2E8A:F00F"
+        replacement.vid = 0x2E8A
+        replacement.pid = 0xF00F
+        replacement.serial_number = "OTHER-RP2350W"
+
+        original = ListPortInfo("COM19")
+        original.description = "USB Serial Device"
+        original.hwid = "USB VID:PID=2E8A:F00F"
+        original.vid = 0x2E8A
+        original.pid = 0xF00F
+        original.serial_number = "2DCB876B587EA334"
+
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[replacement, original],
+        ):
+            result = auto_detect_upload_port(
+                "rp2350w", expected_serial_number="2DCB876B587EA334"
+            )
+
+        assert result.ok is True
+        assert result.selected_port == "COM19"
 
     def test_lpc845brk_lpc_link2_cmsis_dap_fingerprint_matches(self) -> None:
         """LPC845-BRK with LPC-Link2 CMSIS-DAP firmware (1FC9:0132) is accepted.
@@ -1556,6 +1804,20 @@ class TestRunBuildDeploy:
         assert rc is None
         mock_driver.install_packages.assert_called_once()
         mock_driver.deploy.assert_called_once()
+
+    def test_canonical_rp2350w_environment_is_used_for_fbuild_deploy(self) -> None:
+        mock_driver = _make_mock_driver()
+        ctx = _make_ctx(
+            args=_make_args(skip_lint=True),
+            build_driver=mock_driver,
+            final_environment="rp2350w",
+        )
+        qctx = QuietContext(quiet=False)
+
+        rc = asyncio.run(_run_build_deploy(ctx, qctx))
+
+        assert rc is None
+        assert mock_driver.deploy.call_args.kwargs["environment"] == "rp2350w"
 
     def test_build_deploy_install_failure(self) -> None:
         mock_driver = _make_mock_driver(install_ok=False)
@@ -1621,6 +1883,34 @@ class TestRunBuildDeploy:
 
 class TestRunSchemaAndPinSetup:
     """Test _run_schema_and_pin_setup (mocks RPC client)."""
+
+    def test_rp2350_postdeploy_rescan_polls_until_cdc_appears(self) -> None:
+        ctx = _make_ctx(
+            final_environment="rp2350",
+            upload_port=None,
+            use_fbuild=True,
+            rpc_smoke_mode=True,
+        )
+        missed = MagicMock(selected_port=None)
+        discovered = MagicMock(selected_port="COM17")
+
+        with (
+            patch(
+                f"{_PATCH_MOD}.auto_detect_upload_port",
+                side_effect=[missed, missed, discovered],
+            ) as auto_detect,
+            patch(
+                "ci.util.serial_interface.create_serial_interface",
+                return_value=MagicMock(),
+            ),
+            patch(f"{_PATCH_MOD}.CrashTraceDecoder", return_value=MagicMock()),
+        ):
+            rc = asyncio.run(_run_schema_and_pin_setup(ctx))
+
+        assert rc is None
+        assert ctx.upload_port == "COM17"
+        assert auto_detect.call_count == 3
+        auto_detect.assert_called_with(expected_environment="rp2350")
 
     def test_cli_pin_override(self) -> None:
         args = _make_args(tx_pin=3, rx_pin=4, skip_schema=True)
@@ -1904,8 +2194,13 @@ class TestRunTestsOrSpecialMode:
         assert rc == 0
 
     def test_rpc_smoke_mode_validates_core_surface(self) -> None:
-        ctx = _make_ctx(rpc_smoke_mode=True)
+        ctx = _make_ctx(rpc_smoke_mode=True, final_environment="rp2350")
         qctx = QuietContext(quiet=False)
+        expected_payload = {
+            "text": "rp2350-rpc-smoke",
+            "number": 2350,
+            "nested": {"ok": True, "values": [1, 2, 3]},
+        }
 
         def response(data):
             item = MagicMock()
@@ -1920,15 +2215,7 @@ class TestRunTestsOrSpecialMode:
                 response([{"name": "ping"}]),
                 response({"uptimeMs": 1}),
                 response({"uptimeMs": 2}),
-                response(
-                    {
-                        "received": {
-                            "text": "rp2040-rpc-smoke",
-                            "number": 2040,
-                            "nested": {"ok": True, "values": [1, 2, 3]},
-                        }
-                    }
-                ),
+                response({"received": expected_payload}),
                 response({"ready": True}),
                 response([]),
                 response({"success": True}),
@@ -1944,6 +2231,65 @@ class TestRunTestsOrSpecialMode:
 
         assert rc == 0
         assert mock_client.send.await_count == 9
+        debug_test_call = mock_client.send.await_args_list[4]
+        assert debug_test_call.args == ("debugTest",)
+        assert debug_test_call.kwargs["args"] == expected_payload
+
+    def test_rp2350_watchdog_reacquires_active_environment_and_device(self) -> None:
+        ctx = _make_ctx(
+            final_environment="rp2350w",
+            upload_port="COM17",
+            use_fbuild=True,
+            watchdog_soak_mode=True,
+        )
+
+        def response(data):
+            item = MagicMock()
+            item.success = True
+            item.data = data
+            return item
+
+        initial_client = AsyncMock()
+        initial_client.send = AsyncMock(
+            side_effect=[
+                response({"uptimeMs": 100}),
+                response({"success": True}),
+            ]
+        )
+        recovery_client = AsyncMock()
+        recovery_client.send = AsyncMock(return_value=response({"uptimeMs": 1}))
+        detected = MagicMock(selected_port="COM18")
+
+        with (
+            patch(
+                "ci.util.serial_interface.create_serial_interface",
+                return_value=MagicMock(),
+            ),
+            patch(
+                f"{_PATCH_MOD}.RpcClient",
+                side_effect=[initial_client, recovery_client],
+            ),
+            patch(f"{_PATCH_MOD}.port_exists", return_value=False),
+            patch(
+                f"{_PATCH_MOD}.get_port_serial_number",
+                return_value="2DCB876B587EA334",
+            ),
+            patch(
+                f"{_PATCH_MOD}.auto_detect_upload_port", return_value=detected
+            ) as auto_detect,
+            patch(
+                f"{_PATCH_MOD}._run_rpc_smoke_tests",
+                new_callable=AsyncMock,
+                return_value=0,
+            ),
+        ):
+            rc = asyncio.run(_run_watchdog_soak(ctx))
+
+        assert rc == 0
+        assert ctx.upload_port == "COM18"
+        auto_detect.assert_called_once_with(
+            "rp2350w", expected_serial_number="2DCB876B587EA334"
+        )
 
     def test_ble_mode_delegates(self) -> None:
         ctx = _make_ctx(ble_mode=True)
