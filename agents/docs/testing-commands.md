@@ -200,53 +200,29 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 **Requirements:**
 - Install live-server: `npm install -g live-server`
 
-## AVR8JS Emulator (Local, No Docker)
+## AVR8JS Emulator
 
-Run AVR firmware in the avr8js emulator locally using Node.js — no Docker needed.
+The maintained AVR8JS runner compiles with fbuild, locates the generated
+firmware, and runs the AVR emulator in its dedicated Docker image:
 
-**One-time setup:**
 ```bash
-cd ci/docker_utils/avr8js && npm install && cd -
+bash test --run uno Blink
 ```
 
-**Workflow: Compile → Run**
-```bash
-# 1. Compile sketch for UNO (uses PlatformIO, may use Docker for compilation)
-bash compile uno --examples Blink --local
-
-# 2. Run hex in avr8js emulator (pure Node.js, no Docker)
-npx --prefix ci/docker_utils/avr8js tsx ci/docker_utils/avr8js/main.ts \
-  .build/pio/uno/.pio/build/uno/firmware.hex --timeout 5 --verbose
-```
-
-**Options:**
-- `--timeout <seconds>` — Simulated time limit (default: 30)
-- `--verbose` — Show execution stats (wall time, cycles, performance %)
-
-**Performance:** avr8js runs at ~140-180% of real 16MHz clock speed.
-
-**Output:** Serial (UART) output prints to stdout. The emulator checks for "Test loop" in output by default (exit code 1 if missing — safe to ignore for non-test sketches).
-
-**Supported boards:** uno (ATmega328P), nano_every (ATmega4809). ATtiny85/88 lack hardware UART so serial output won't work.
-
-**Hex file location:** `.build/pio/<board>/.pio/build/<board>/firmware.hex`
-
-**Files:**
-- `ci/docker_utils/avr8js/main.ts` — Entry point
-- `ci/docker_utils/avr8js/execute.ts` — AVR CPU emulator wrapper
-- `ci/docker_utils/avr8js/package.json` — Node dependencies (avr8js, tsx)
+This Docker path is AVR8JS-specific. ESP32 QEMU uses fbuild's native runner
+described below.
 
 ## QEMU Commands
 
-The Docker-based QEMU pipeline (`ci/install-qemu.py`, `bash test --qemu ...`) was retired along with the rest of the platform-Docker infrastructure. Local QEMU runs go through fbuild directly — the exact invocation matches what CI runs in `.github/workflows/qemu_docker_template.yml`:
+QEMU runs through fbuild directly. The exact invocation matches what CI runs in `.github/workflows/qemu_template.yml`:
 
 ```bash
-# 1. Stage the sketch (produces .build/pio/<env>/ with firmware + partitions).
-uv run ci/ci-compile.py esp32s3 \
-    --examples Blink \
-    --merged-bin \
-    --defines FASTLED_ESP32_IS_QEMU \
-    --verbose
+# 1. Stage source/config only; this does not compile firmware.
+uv run ci/stage_fbuild_project.py \
+    --board esp32s3 \
+    --example Blink \
+    --define FASTLED_ESP32_IS_QEMU \
+    --build-dir .build/fbuild/esp32s3
 
 # 2. Emulate with fbuild (auto-downloads the Espressif QEMU binary).
 uv run fbuild test-emu \
@@ -255,5 +231,5 @@ uv run fbuild test-emu \
     --timeout 120 \
     --halt-on-success "setup starting" \
     --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:" \
-    .build/pio/esp32s3
+    .build/fbuild/esp32s3
 ```

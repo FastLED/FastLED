@@ -20,11 +20,10 @@ Click this button or visit `https://gitpod.io/#https://github.com/FastLED/FastLE
 ## What's Included
 
 - **Python 3.11** with uv package manager
-- **PlatformIO** for embedded development
+- **fbuild** for embedded development
 - **C++ toolchain** (clang, gcc, ninja, meson)
-- **QEMU** for ESP32 emulation
+- **fbuild's native QEMU runner** for ESP32 emulation
 - **VS Code extensions**:
-  - PlatformIO IDE
   - Python + Pylance
   - C/C++ tools
 
@@ -39,9 +38,9 @@ uv run test.py
 # Run C++ tests only
 uv run test.py --cpp
 
-# Run QEMU emulation via fbuild (Docker QEMU path retired — fbuild drives the Espressif QEMU binary directly)
-uv run ci/ci-compile.py esp32s3 --examples Blink --merged-bin --defines FASTLED_ESP32_IS_QEMU
-uv run fbuild test-emu --emulator qemu --environment esp32s3 --timeout 120 .build/pio/esp32s3
+# Run QEMU emulation via fbuild's native runner
+uv run ci/stage_fbuild_project.py --board esp32s3 --example Blink --define FASTLED_ESP32_IS_QEMU
+uv run fbuild test-emu --emulator qemu --environment esp32s3 --timeout 120 .build/fbuild/esp32s3
 
 # Compile for specific platforms
 uv run ci/ci-compile.py uno --examples Blink
@@ -69,7 +68,7 @@ For FastLED development, QEMU emulation provides excellent hardware validation w
 ## Performance Notes
 
 - **Build speed**: Cloud instances use 2-4 cores (free tier)
-- **Caching**: PlatformIO cache is mounted for faster rebuilds
+- **Caching**: fbuild's `~/.fastled` cache is mounted for faster rebuilds
 - **First build**: May take 5-10 minutes for initial dependency downloads
 - **Subsequent builds**: Much faster due to caching
 
@@ -89,9 +88,9 @@ For FastLED development, QEMU emulation provides excellent hardware validation w
 - Check that Python 3.11 feature is properly specified
 - Ensure Dockerfile has correct base image
 
-### PlatformIO not working
-- Run `pio --version` to verify installation
-- Try reinstalling: `pip install --upgrade platformio`
+### fbuild not working
+- Run `uv run fbuild --version` to verify the pinned installation
+- Run `uv sync` to restore the repository-managed toolchain
 
 ### Tests fail
 - First build takes longer - wait for complete dependency installation

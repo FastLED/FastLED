@@ -1,0 +1,58 @@
+"""Regression tests for the native-fbuild QEMU badge workflows."""
+
+from pathlib import Path
+
+import pytest
+
+from ci.compiler.argument_parser import CompilationArgumentParser
+
+
+ROOT = Path(__file__).resolve().parents[2]
+WORKFLOWS = ROOT / ".github" / "workflows"
+
+
+def test_qemu_template_uses_fbuild_native_runner_only() -> None:
+    template = (WORKFLOWS / "qemu_template.yml").read_text(encoding="utf-8")
+
+    assert "ci/stage_fbuild_project.py" in template
+    assert "fbuild test-emu" in template
+    assert "--emulator qemu" in template
+    assert '--halt-on-success "${{ inputs.success_pattern }}"' in template
+    assert "TEST_SUITE_COMPLETE: FAIL" in template
+    assert "ci-compile.py" not in template
+    assert "merged-bin" not in template
+    assert "docker" not in template.lower()
+    assert not (WORKFLOWS / "qemu_docker_template.yml").exists()
+
+
+def test_all_five_badge_legs_use_native_template() -> None:
+    callers = {
+        "qemu_esp32dev_test.yml": ["BlinkParallel"],
+        "qemu_esp32c3_test.yml": ["BlinkParallel", "Test"],
+        "qemu_esp32s3_test.yml": [
+            "BlinkParallel",
+            "SpecialDrivers/ESP/DriverTest",
+        ],
+    }
+
+    for workflow_name, sketches in callers.items():
+        workflow = (WORKFLOWS / workflow_name).read_text(encoding="utf-8")
+        assert "uses: ./.github/workflows/qemu_template.yml" in workflow
+        assert "pull_request:" in workflow
+        for sketch in sketches:
+            assert sketch in workflow
+
+    all_callers = "\n".join(
+        (WORKFLOWS / workflow_name).read_text(encoding="utf-8")
+        for workflow_name in callers
+    )
+    assert "Test finished - completed 2 iterations" in all_callers
+    assert "Test loop!" in all_callers
+    assert "TEST_SUITE_COMPLETE: PASS" in all_callers
+
+
+def test_retired_merged_bin_flag_is_rejected() -> None:
+    parser = CompilationArgumentParser(ROOT)
+
+    with pytest.raises(SystemExit):
+        parser.parse(["esp32dev", "Blink", "--merged-bin"])

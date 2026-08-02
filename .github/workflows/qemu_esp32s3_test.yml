@@ -6,30 +6,54 @@ concurrency:
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/**/*.cpp'
+      - 'src/**/*.h'
+      - 'src/**/*.hpp'
+      - 'examples/**/*.ino'
+      - 'examples/**/*.cpp'
+      - 'examples/**/*.h'
+      - 'ci/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - 'platformio.ini'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - 'library.properties'
+      - '.github/workflows/qemu_esp32s3_test.yml'
+      - '.github/workflows/qemu_template.yml'
   push:
     branches: [master]
     paths:
       - 'src/**/*.cpp'
       - 'src/**/*.h'
+      - 'src/**/*.hpp'
       - 'examples/**/*.ino'
       - 'examples/**/*.cpp'
       - 'examples/**/*.h'
+      - 'ci/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
       - 'platformio.ini'
       - 'CMakeLists.txt'
       - 'library.json'
+      - 'library.properties'
       - '.github/workflows/qemu_esp32s3_test.yml'
-      - '.github/workflows/qemu_docker_template.yml'
+      - '.github/workflows/qemu_template.yml'
 jobs:
   esp32s3_qemu_rmt:
-    uses: ./.github/workflows/qemu_docker_template.yml
+    uses: ./.github/workflows/qemu_template.yml
     with:
       platform: esp32s3
       platform_display: ESP32-S3
       sketch: BlinkParallel
+      success_pattern: Test finished - completed 2 iterations
 
   esp32s3_qemu_lcd:
-    uses: ./.github/workflows/qemu_docker_template.yml
+    uses: ./.github/workflows/qemu_template.yml
     with:
       platform: esp32s3
       platform_display: ESP32-S3
       sketch: SpecialDrivers/ESP/DriverTest
+      success_pattern: 'TEST_SUITE_COMPLETE: PASS'

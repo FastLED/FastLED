@@ -139,7 +139,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     parser.add_argument(
         "--run",
         nargs="+",
-        help="Run examples in emulation. Usage: --run uno [example_names...]. Currently only the avr8js backend has a local runner; the Docker-based QEMU backend was retired along with the platform-Docker infrastructure — use fbuild test-emu directly for ESP32 QEMU.",
+        help="Run examples in emulation. Usage: --run uno [example_names...]. The integrated runner currently supports avr8js; use ci/stage_fbuild_project.py plus fbuild test-emu for ESP32 QEMU.",
     )
     parser.add_argument(
         "--no-fingerprint",

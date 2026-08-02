@@ -1,8 +1,9 @@
 # fbuild_qemu_smoke
 
-Minimal standalone PlatformIO project used by `ci/tests/test_fbuild_qemu.py` to
+Minimal standalone fbuild project used by `ci/tests/test_fbuild_qemu.py` to
 verify that fbuild's native QEMU path (`fbuild test-emu`) can build and boot a
-FastLED sketch on ESP32-QEMU.
+FastLED sketch on ESP32-QEMU. Its `platformio.ini` is fbuild's compatible
+project manifest; PlatformIO is not invoked.
 
 The sketch includes FastLED and a `WS2812` controller addition so a failure in
 library resolution, compile, link, or early boot surfaces as a test failure.

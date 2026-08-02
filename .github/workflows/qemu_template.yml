@@ -1,14 +1,8 @@
 name: ESP32 QEMU Test Template (fbuild)
 
-# Reusable template: build + run an ESP32 sketch in QEMU via
-# `fbuild test-emu --emulator qemu`. Replaces the legacy Docker-based
-# pipeline (espressif/idf image, hand-rolled merged.bin assembly, bash
-# wait-loops). fbuild auto-downloads the Espressif QEMU binary and handles
-# timeout + halt-on-regex + artifact locating natively.
-#
-# ESP32-C3 support depends on FastLED/fbuild#85. Until that ships, C3 runs
-# will fail — esp32c3 is kept in the matrix so the green signal (once the
-# fbuild fix lands) re-enables it automatically.
+# Reusable native-fbuild QEMU workflow. FastLED stages the selected example as
+# a project, then `fbuild test-emu` owns compilation, flash-image preparation,
+# emulator download, process supervision, and success/error matching.
 
 on:
   workflow_call:
@@ -25,21 +19,17 @@ on:
         description: 'Arduino sketch/example to test (e.g., BlinkParallel, Blink)'
         required: true
         type: string
+      success_pattern:
+        description: 'Regex emitted only after the sketch completes meaningful work'
+        required: true
+        type: string
 
 permissions:
   contents: read
-  actions: read
-  id-token: write
-  pull-requests: read
 
 jobs:
   qemu_test:
     runs-on: ubuntu-latest
-    # The ``FASTLED_FAIL_ON_ROOT_MERGE`` tripwire from #3278 was retired
-    # in #3279 Phase 4 along with the legacy merge code path it guarded.
-    # CI no longer has any code path that can silently inject root
-    # ``platformio.ini`` flags into the build, so the env var is no
-    # longer set by default.
 
     steps:
       - name: Checkout
@@ -48,10 +38,8 @@ jobs:
           persist-credentials: false
 
       - name: Install QEMU runtime libraries (libSDL2)
-        # The Espressif QEMU binary that fbuild auto-downloads is dynamically
-        # linked against libSDL2-2.0.so.0. ubuntu-latest runners don't ship it,
-        # so QEMU dies with exit 127 (dynamic-linker failure) before any
-        # `-display`/`-nographic` flag can take effect. See FastLED #2639.
+        # The Espressif QEMU binary that fbuild downloads is dynamically
+        # linked against libSDL2-2.0.so.0 on Linux.
         run: |
           sudo apt-get update -y
           sudo apt-get install -y --no-install-recommends libsdl2-2.0-0
@@ -74,38 +62,29 @@ jobs:
       - name: Install project dependencies (includes fbuild)
         run: uv sync
 
+      - name: Stage ${{ inputs.sketch }} for native fbuild
+        run: |
+          uv run ci/stage_fbuild_project.py \
+            --board ${{ inputs.platform }} \
+            --example ${{ inputs.sketch }} \
+            --define FASTLED_ESP32_IS_QEMU \
+            --build-dir .build/fbuild/${{ inputs.platform }} \
+            --verbose
+
       - name: "fbuild test-emu — build + emulate ${{ inputs.sketch }} on ${{ inputs.platform_display }}"
         id: test_emu
-        # Build + stage the sketch via ci-compile.py (produces
-        # .build/pio/<env>/ with platformio.ini + firmware + bootloader/
-        # partitions), then run fbuild test-emu against that staged project.
-        #
-        # Success semantics match the legacy Docker pipeline: reaching
-        # "setup starting" is enough. The RMT peripheral is not fully
-        # modeled in QEMU, so driver-backed sketches (BlinkParallel,
-        # DriverTest) stall inside showPixels() before hitting loop() —
-        # treating setup-then-stall as success is what the Docker
-        # pipeline did (via a 120s timeout treated as pass, plus a
-        # "setup starting" grep).
-        #
-        # --halt-on-success fires as soon as the setup message lands,
-        # which short-circuits the stall and keeps CI fast.
-        # --halt-on-error still catches real crashes (Guru Meditation /
-        # abort()) early rather than waiting out the full 120s timeout.
+        # Each caller supplies a sketch-specific marker after meaningful work;
+        # entering setup() alone is not success. fbuild owns the build,
+        # flash-image layout, QEMU process, timeout, and regex matching.
         run: |
           set -o pipefail
-          uv run ci/ci-compile.py ${{ inputs.platform }} \
-            --examples ${{ inputs.sketch }} \
-            --merged-bin \
-            --defines FASTLED_ESP32_IS_QEMU \
-            --verbose
           uv run fbuild test-emu \
             --emulator qemu \
             --environment ${{ inputs.platform }} \
             --timeout 120 \
-            --halt-on-success "setup starting" \
-            --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:" \
-            .build/pio/${{ inputs.platform }} 2>&1 | tee qemu_output.log
+            --halt-on-success "${{ inputs.success_pattern }}" \
+            --halt-on-error "Guru Meditation|abort\(\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL" \
+            .build/fbuild/${{ inputs.platform }} 2>&1 | tee qemu_output.log
         shell: bash
 
       - name: Display QEMU output
@@ -118,7 +97,7 @@ jobs:
             echo "=== Stats ==="
             echo "Lines:            $(wc -l < qemu_output.log)"
             echo "Boot messages:    $(grep -c 'rst:' qemu_output.log || echo 0)"
-            echo "Setup messages:   $(grep -c 'setup starting' qemu_output.log || echo 0)"
+            echo "Success markers:  $(grep -c '${{ inputs.success_pattern }}' qemu_output.log || echo 0)"
             echo "Loop iterations:  $(grep -c 'Starting loop iteration' qemu_output.log || echo 0)"
           else
             echo "(no output log produced)"
