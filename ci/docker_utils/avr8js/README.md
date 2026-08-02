@@ -33,7 +33,7 @@ See `FINDINGS.md` in the project root for complete root cause analysis.
 
 ```
 Test.ino (Arduino sketch)
-  ↓ Compile with PlatformIO
+  ↓ Compile with fbuild
 firmware.hex
   ↓ Docker volume mount
 AVR8JS Emulator (Node.js/TypeScript)

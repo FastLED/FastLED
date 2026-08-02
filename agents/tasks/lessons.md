@@ -2,6 +2,16 @@
 
 <!-- Add lessons from corrections and discoveries here -->
 
+- QEMU CI must use fbuild's native `test-emu` runner as the owner of the
+  build, flash-image preparation, and emulation lifecycle. Do not repair or
+  extend PlatformIO-shaped merged-bin artifact plumbing while PlatformIO is
+  being phased out; retain only the minimum example staging fbuild requires.
+
+- QEMU success markers must match the emulator's actual hardware model. For
+  unmodeled LED peripherals, assert a real build, boot, and driver/channel
+  registration and label it as such; reserve transmit-completion assertions
+  for hardware-in-the-loop tests.
+
 - Inspect the actual WASM compiler manifest before assuming an npm dependency: it
   currently pins the `@fastled/gfx` GitHub Release tarball by exact URL.
 

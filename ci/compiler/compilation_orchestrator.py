@@ -7,7 +7,7 @@ It handles compilation workflow, result collection, and statistics reporting.
 
 import os
 import time
-from concurrent.futures import Future, as_completed
+from concurrent.futures import as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
@@ -80,8 +80,6 @@ def compile_board_examples(
     defines: list[str],
     verbose: bool,
     global_cache_dir: Optional[Path] = None,
-    merged_bin: bool = False,
-    merged_bin_output: Optional[Path] = None,
     extra_packages: Optional[list[str]] = None,
     max_failures: Optional[int] = None,
     skip_filters: bool = False,
@@ -115,11 +113,6 @@ def compile_board_examples(
     print(f"\n{'=' * 60}")
     print(f"COMPILING BOARD: {board.board_name}")
     print(f"EXAMPLES: {', '.join(examples)}")
-    if merged_bin:
-        print("MERGED-BIN MODE: Enabled")
-        if merged_bin_output:
-            print(f"MERGED-BIN OUTPUT: {merged_bin_output}")
-
     # Show cache directories in verbose mode only
     paths = FastLEDPaths(board.board_name)
     if verbose:
@@ -175,35 +168,7 @@ def compile_board_examples(
             use_fbuild=use_fbuild,
         )
 
-        # Build all examples - use merged-bin method if requested
-        if merged_bin:
-            # Validate board supports merged binary
-            if not compiler.supports_merged_bin():
-                raise RuntimeError(
-                    f"Board {board.board_name} does not support merged binary. "
-                    f"Supported platforms: ESP32, ESP8266"
-                )
-
-            # Build with merged binary (only one example allowed in this mode)
-            if len(examples) != 1:
-                raise RuntimeError(
-                    f"Merged-bin mode requires exactly one example, got {len(examples)}"
-                )
-
-            result = compiler.build_with_merged_bin(
-                examples[0], output_path=merged_bin_output
-            )
-            futures: list[Future[SketchResult]] = []
-
-            # Wrap the result in a completed future for consistency
-            from concurrent.futures import Future as ConcurrentFuture
-
-            future: ConcurrentFuture[SketchResult] = ConcurrentFuture()
-            future.set_result(result)
-            futures.append(future)
-        else:
-            # Build all examples normally
-            futures = compiler.build(examples)
+        futures = compiler.build(examples)
 
         # Wait for completion and collect results
         results: list[SketchResult] = []

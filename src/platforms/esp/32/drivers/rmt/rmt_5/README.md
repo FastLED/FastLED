@@ -1551,16 +1551,16 @@ All lint checks: PASS
 
 ### QEMU Test Framework
 
-The Docker-based QEMU path was retired. Use `fbuild test-emu --emulator qemu` directly (auto-downloads Espressif QEMU) — same invocation as CI in `.github/workflows/qemu_docker_template.yml`:
+Use fbuild's native QEMU runner — the same invocation as CI in `.github/workflows/qemu_template.yml`:
 
 ```bash
 # Stage + emulate on ESP32-S3 (Xtensa LX7)
-uv run ci/ci-compile.py esp32s3 --examples <sketch> --merged-bin --defines FASTLED_ESP32_IS_QEMU
-uv run fbuild test-emu --emulator qemu --environment esp32s3 --timeout 120 .build/pio/esp32s3
+uv run ci/stage_fbuild_project.py --board esp32s3 --example BlinkParallel --define FASTLED_ESP32_IS_QEMU --build-dir .build/fbuild/esp32s3
+uv run fbuild test-emu --emulator qemu --environment esp32s3 --timeout 120 --halt-on-success "Initialized 4 LED strips with 256 LEDs each" --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL" .build/fbuild/esp32s3
 
 # Stage + emulate on ESP32-C3 (RISC-V) — same shape
-uv run ci/ci-compile.py esp32c3 --examples <sketch> --merged-bin --defines FASTLED_ESP32_IS_QEMU
-uv run fbuild test-emu --emulator qemu --environment esp32c3 --timeout 120 .build/pio/esp32c3
+uv run ci/stage_fbuild_project.py --board esp32c3 --example BlinkParallel --define FASTLED_ESP32_IS_QEMU --build-dir .build/fbuild/esp32c3
+uv run fbuild test-emu --emulator qemu --environment esp32c3 --timeout 120 --halt-on-success "Initialized 4 LED strips with 256 LEDs each" --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL" .build/fbuild/esp32c3
 ```
 
 ### Test Scenarios

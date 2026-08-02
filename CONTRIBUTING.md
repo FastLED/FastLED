@@ -53,29 +53,29 @@ The easiest way to run the tests is just use `./test`
 
 ## QEMU Emulation Testing
 
-FastLED validates ESP32 examples end-to-end in QEMU. The previous Docker-based `./test --qemu esp32s3` runner (which pulled `niteris/fastled-simulator-*` images) was retired along with the rest of the platform-Docker infrastructure — fbuild now drives the Espressif QEMU binary directly, and the exact invocation lives in `.github/workflows/qemu_docker_template.yml`.
+FastLED validates ESP32 examples end-to-end with fbuild's native QEMU runner. The exact CI invocation lives in `.github/workflows/qemu_template.yml`.
 
 ### Running ESP32 Examples in QEMU locally
 
 ```bash
-# 1. Stage the sketch — produces .build/pio/<env>/ with firmware + partitions.
-uv run ci/ci-compile.py esp32s3 \
-    --examples BlinkParallel \
-    --merged-bin \
-    --defines FASTLED_ESP32_IS_QEMU \
-    --verbose
+# 1. Stage source/config only; fbuild performs the build in the next command.
+uv run ci/stage_fbuild_project.py \
+    --board esp32s3 \
+    --example BlinkParallel \
+    --define FASTLED_ESP32_IS_QEMU \
+    --build-dir .build/fbuild/esp32s3
 
 # 2. Emulate with fbuild (auto-downloads the Espressif QEMU binary on first run).
 uv run fbuild test-emu \
     --emulator qemu \
     --environment esp32s3 \
     --timeout 120 \
-    --halt-on-success "setup starting" \
-    --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:" \
-    .build/pio/esp32s3
+    --halt-on-success "Initialized 4 LED strips with 256 LEDs each" \
+    --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL" \
+    .build/fbuild/esp32s3
 ```
 
-Swap `esp32s3` for `esp32dev`, `esp32c3`, or any other QEMU-supported target. CI runs the same two-step sequence in `qemu_docker_template.yml`.
+Swap `esp32s3` for `esp32dev`, `esp32c3`, or any other QEMU-supported target. CI runs the same two-step sequence in `qemu_template.yml`.
 
 ## VSCode
 
@@ -94,14 +94,6 @@ This will:
 - Generate `compile_commands.json` for IntelliSense
 - Set up debugging capabilities
 
-### Alternative: PlatformIO
-
-You can also use the [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension for compilation:
-
- * Make sure you have [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) installed.
- * Click the compile button.
-
-![image](https://github.com/user-attachments/assets/616cc35b-1736-4bb0-b53c-468580be66f4)
 *Changes in non platform specific code can be tested quickly in our webcompiler by invoking the script `./wasm` at the project root*
 
 ## VSCode Debugging Guide

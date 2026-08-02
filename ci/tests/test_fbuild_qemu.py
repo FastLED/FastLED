@@ -15,21 +15,48 @@ from __future__ import annotations
 
 import os
 import shutil
-import subprocess
 from pathlib import Path
 
 import pytest
+from running_process import RunningProcess
+
+from ci.stage_fbuild_project import _parse_args, stage_fbuild_project
 
 
 ROOT = Path(__file__).resolve().parents[2]
 PROJECT_DIR = ROOT / "tests" / "fbuild_qemu_smoke"
 SUCCESS_MARKER = "FBUILD-QEMU-TEST-OK"
-
-
-pytestmark = pytest.mark.skipif(
-    shutil.which("fbuild") is None,
-    reason="fbuild CLI not on PATH — install with `uv pip install fbuild`",
+ERROR_PATTERN = (
+    r"Guru Meditation|abort\(\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|"
+    r"QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL"
 )
+
+
+def test_stage_fbuild_argument_parser_accepts_explicit_argv() -> None:
+    """The staging CLI can be tested without mutating process arguments."""
+    args = _parse_args(["--board", "esp32dev", "--example", "Blink"])
+
+    assert args.board == "esp32dev"
+    assert args.example == "Blink"
+
+
+def test_stage_fbuild_qemu_project_without_compiling(tmp_path: Path) -> None:
+    """Staging prepares a native-fbuild project without building firmware."""
+    staged_dir = tmp_path / "esp32dev"
+
+    result = stage_fbuild_project(
+        board_name="esp32dev",
+        example="Blink",
+        defines=["FASTLED_ESP32_IS_QEMU"],
+        build_dir=staged_dir,
+    )
+
+    assert result.success
+    assert result.build_dir == staged_dir
+    assert (staged_dir / "platformio.ini").is_file()
+    assert (staged_dir / "src" / "sketch" / "Blink.ino").is_file()
+    assert (staged_dir / "lib" / "FastLED" / "FastLED.h").is_file()
+    assert not (staged_dir / ".fbuild" / "build").exists()
 
 
 @pytest.mark.skipif(
@@ -39,6 +66,10 @@ pytestmark = pytest.mark.skipif(
 @pytest.mark.skipif(
     os.environ.get("FASTLED_SKIP_FBUILD_QEMU") == "1",
     reason="FASTLED_SKIP_FBUILD_QEMU=1",
+)
+@pytest.mark.skipif(
+    shutil.which("fbuild") is None,
+    reason="fbuild CLI not on PATH — install with `uv pip install fbuild`",
 )
 def test_fbuild_test_emu_esp32dev() -> None:
     """`fbuild test-emu` builds and boots the smoke sketch under ESP32 QEMU."""
@@ -52,22 +83,26 @@ def test_fbuild_test_emu_esp32dev() -> None:
         "qemu",
         "--timeout",
         "10",
+        "--halt-on-success",
+        SUCCESS_MARKER,
+        "--halt-on-error",
+        ERROR_PATTERN,
     ]
-    proc = subprocess.run(
+    proc = RunningProcess.run(
         cmd,
+        cwd=ROOT,
+        check=False,
         capture_output=True,
         text=True,
         timeout=600,
     )
-    output = proc.stdout + "\n" + proc.stderr
+    output = proc.stdout or ""
     assert proc.returncode == 0, (
         f"fbuild test-emu exited with rc={proc.returncode}.\n"
-        f"CMD: {subprocess.list2cmdline(cmd)}\n"
-        f"--- STDOUT ---\n{proc.stdout}\n"
-        f"--- STDERR ---\n{proc.stderr}"
+        f"CMD: {cmd!r}\n"
+        f"--- OUTPUT ---\n{output}"
     )
     assert SUCCESS_MARKER in output, (
         f"Expected marker {SUCCESS_MARKER!r} not found in emulator output.\n"
-        f"--- STDOUT ---\n{proc.stdout}\n"
-        f"--- STDERR ---\n{proc.stderr}"
+        f"--- OUTPUT ---\n{output}"
     )

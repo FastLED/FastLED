@@ -8,17 +8,8 @@ FastLED Example Compiler
 Streamlined compiler that uses the PioCompiler to build FastLED examples for various boards.
 This replaces the previous complex compilation system with a simpler approach using the Pio compiler.
 
-ESP32 QEMU Support:
--------------------
-When using -o/--out with ESP32 boards and a directory path or filename containing "qemu",
-the compiler automatically generates properly merged flash images for QEMU testing.
-The merged flash image includes:
-  - Bootloader at 0x1000 (ESP32) or 0x0 (ESP32-C3/S3)
-  - Partition table at 0x8000
-  - boot_app0 at 0xe000
-  - Application firmware at 0x10000
-
-Uses esptool.py when available, falls back to manual binary merge if not installed.
+ESP32 QEMU builds use ``ci/stage_fbuild_project.py`` followed by fbuild's
+native ``test-emu`` command. This compiler does not assemble emulator images.
 """
 
 import os
@@ -181,7 +172,6 @@ def main() -> int:
             extra_packages=config.extra_packages,
             verbose=config.verbose,
             output_path=config.output_path,
-            merged_bin=config.merged_bin,
             log_failures=config.log_failures,
             max_failures=config.max_failures,
             wasm_run=config.wasm_run,
@@ -304,11 +294,6 @@ def main() -> int:
 
     # Compile for each board
     for board in boards:
-        # Determine merged-bin output path if requested
-        merged_bin_output = None
-        if config.merged_bin and config.output_path:
-            merged_bin_output = config.output_path
-
         from ci.compiler.argument_parser import BuildBackend
 
         result = compile_board_examples(
@@ -317,8 +302,6 @@ def main() -> int:
             defines=defines,
             verbose=config.verbose,
             global_cache_dir=config.global_cache_dir,
-            merged_bin=config.merged_bin,
-            merged_bin_output=merged_bin_output,
             extra_packages=config.extra_packages if config.extra_packages else None,
             max_failures=config.max_failures,
             skip_filters=config.skip_filters,

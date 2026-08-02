@@ -8,7 +8,7 @@ from ci.util.zccache_config import show_zccache_stats
 
 
 def run_avr8js_tests(args: TestArgs) -> None:
-    """Run AVR examples in avr8js emulation using Docker."""
+    """Build AVR examples with fbuild and emulate them using Docker."""
     from running_process import RunningProcess
 
     from ci.docker_utils.avr8js_docker import DockerAVR8jsRunner
@@ -109,7 +109,7 @@ def run_avr8js_tests(args: TestArgs) -> None:
             ts_print(
                 f"  Target board: {board} ({config['mcu']} @ {config['frequency']}Hz)"
             )
-            ts_print("  Compiler: PlatformIO via ci/ci-compile.py")
+            ts_print("  Compiler: fbuild via ci/ci-compile.py")
             ts_print()
 
             # Build the example for the specified board

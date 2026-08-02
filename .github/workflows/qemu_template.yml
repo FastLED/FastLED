@@ -1,0 +1,150 @@
+name: ESP32 QEMU Test Template (fbuild)
+
+# Reusable native-fbuild QEMU workflow. FastLED stages the selected example as
+# a project, then `fbuild test-emu` owns compilation, flash-image preparation,
+# emulator download, process supervision, and success/error matching.
+
+on:
+  workflow_call:
+    inputs:
+      platform:
+        description: 'ESP32 platform to test (esp32dev, esp32c3, esp32s3, etc.)'
+        required: true
+        type: string
+      platform_display:
+        description: 'Display name for the platform (e.g., ESP32-DEV, ESP32-C3)'
+        required: true
+        type: string
+      sketch:
+        description: 'Arduino sketch/example to test (e.g., BlinkParallel, Blink)'
+        required: true
+        type: string
+      extra_define:
+        description: 'Optional test-only preprocessor definition'
+        required: false
+        default: ''
+        type: string
+      success_pattern:
+        description: 'Regex emitted after the sketch completes its QEMU-supported assertion'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  qemu_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install QEMU runtime libraries (libSDL2)
+        # The Espressif QEMU binary that fbuild downloads is dynamically
+        # linked against libSDL2-2.0.so.0 on Linux.
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends libsdl2-2.0-0
+
+      - name: Pin python version
+        run: echo "3.11" > .python-version
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
+          version: "0.8.0"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install project dependencies (includes fbuild)
+        run: uv sync
+
+      - name: Stage ${{ inputs.sketch }} for native fbuild
+        env:
+          BOARD: ${{ inputs.platform }}
+          BUILD_DIR: .build/fbuild/${{ inputs.platform }}
+          EXAMPLE: ${{ inputs.sketch }}
+          EXTRA_DEFINE: ${{ inputs.extra_define }}
+        run: |
+          EXTRA_DEFINE_ARGS=()
+          if [ -n "$EXTRA_DEFINE" ]; then
+            EXTRA_DEFINE_ARGS=(--define "$EXTRA_DEFINE")
+          fi
+          uv run ci/stage_fbuild_project.py \
+            --board "$BOARD" \
+            --example "$EXAMPLE" \
+            --define FASTLED_ESP32_IS_QEMU \
+            "${EXTRA_DEFINE_ARGS[@]}" \
+            --build-dir "$BUILD_DIR" \
+            --verbose
+
+      - name: "fbuild test-emu — build + emulate ${{ inputs.sketch }} on ${{ inputs.platform_display }}"
+        id: test_emu
+        # Peripheral-heavy legs assert registration because Espressif QEMU
+        # does not model the LED transmit-completion interrupts.
+        env:
+          BOARD: ${{ inputs.platform }}
+          BUILD_DIR: .build/fbuild/${{ inputs.platform }}
+          SUCCESS_PATTERN: ${{ inputs.success_pattern }}
+        run: |
+          set -o pipefail
+          uv run fbuild test-emu \
+            --emulator qemu \
+            --environment "$BOARD" \
+            --timeout 120 \
+            --halt-on-success "$SUCCESS_PATTERN" \
+            --halt-on-error "Guru Meditation|abort\(\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL" \
+            "$BUILD_DIR" 2>&1 | tee qemu_output.log
+        shell: bash
+
+      - name: Display QEMU output
+        if: always()
+        env:
+          PLATFORM_DISPLAY: ${{ inputs.platform_display }}
+          SUCCESS_PATTERN: ${{ inputs.success_pattern }}
+        run: |
+          echo "=== $PLATFORM_DISPLAY QEMU Output (first 200 lines) ==="
+          if [ -f qemu_output.log ]; then
+            head -200 qemu_output.log
+            echo ""
+            echo "=== Stats ==="
+            echo "Lines:            $(wc -l < qemu_output.log)"
+            echo "Boot messages:    $(grep -c 'rst:' qemu_output.log || true)"
+            echo "Success markers:  $(grep -c -- "$SUCCESS_PATTERN" qemu_output.log || true)"
+            echo "Loop iterations:  $(grep -c 'Starting loop iteration' qemu_output.log || true)"
+          else
+            echo "(no output log produced)"
+          fi
+
+      - name: Generate artifact name
+        id: artifact_name
+        if: always()
+        env:
+          SKETCH_NAME: ${{ inputs.sketch }}
+        run: |
+          echo "sketch=${SKETCH_NAME////-}" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Upload QEMU log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.platform }}-qemu-failure-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
+          path: qemu_output.log
+          if-no-files-found: warn
+
+      - name: Upload QEMU log on success
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.platform }}-qemu-success-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
+          path: qemu_output.log
+          if-no-files-found: warn

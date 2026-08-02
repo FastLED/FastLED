@@ -215,23 +215,32 @@ This section outlines comprehensive test criteria for validating RMT interrupt s
 
 #### QEMU Setup Commands
 
-The Docker-based QEMU path (`ci/install-qemu.py`, `test.py --qemu`) was retired along with the rest of the platform-Docker infrastructure. fbuild's `test-emu --emulator qemu` auto-downloads the Espressif QEMU binary and runs the sketch directly — no image pull, no container. Invocation mirrors `.github/workflows/qemu_docker_template.yml`:
+fbuild's `test-emu --emulator qemu` owns the build and runs the sketch in Espressif QEMU. Invocation mirrors `.github/workflows/qemu_template.yml`:
 
 ```bash
-# Stage sketch
-uv run ci/ci-compile.py esp32s3 \
-    --examples <sketch> --merged-bin \
-    --defines FASTLED_ESP32_IS_QEMU --verbose
+# Stage source/config without compiling
+uv run ci/stage_fbuild_project.py \
+    --board esp32s3 --example BlinkParallel \
+    --define FASTLED_ESP32_IS_QEMU \
+    --build-dir .build/fbuild/esp32s3
 
 # Emulate on ESP32-S3 (Xtensa)
 uv run fbuild test-emu --emulator qemu \
     --environment esp32s3 --timeout 120 \
-    .build/pio/esp32s3
+    --halt-on-success "Initialized 4 LED strips with 256 LEDs each" \
+    --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL" \
+    .build/fbuild/esp32s3
 
 # Emulate on ESP32-C3 (RISC-V) — same shape, swap env
+uv run ci/stage_fbuild_project.py \
+    --board esp32c3 --example BlinkParallel \
+    --define FASTLED_ESP32_IS_QEMU \
+    --build-dir .build/fbuild/esp32c3
 uv run fbuild test-emu --emulator qemu \
     --environment esp32c3 --timeout 120 \
-    .build/pio/esp32c3
+    --halt-on-success "Initialized 4 LED strips with 256 LEDs each" \
+    --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL" \
+    .build/fbuild/esp32c3
 ```
 
 #### Platform Coverage Matrix

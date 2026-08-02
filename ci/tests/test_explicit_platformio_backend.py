@@ -50,9 +50,6 @@ class _FakePioCompiler:
     def cancel_all(self) -> None:
         pass
 
-    def supports_merged_bin(self) -> bool:
-        return False
-
 
 def _patch_orchestrator(monkeypatch: pytest.MonkeyPatch) -> None:
     """Patch the heavy deps of ``compile_board_examples`` for unit testing."""

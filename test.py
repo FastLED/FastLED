@@ -538,16 +538,14 @@ def main() -> None:
                 run_avr8js_tests(args)
                 return
             else:
-                # QEMU (and future emulators) no longer ship a local runner —
-                # the Docker-based QEMU path was retired along with the rest
-                # of the platform-Docker infrastructure. Local QEMU testing
-                # goes through fbuild directly, mirroring what CI runs in
-                # .github/workflows/qemu_docker_template.yml.
+                # ESP32 QEMU goes through fbuild's native runner, mirroring
+                # .github/workflows/qemu_template.yml.
                 ts_print(
                     f"Error: No local runner for backend '{backend}' (platform '{platform}')."
                 )
                 ts_print(
-                    "For ESP32 QEMU, run fbuild test-emu directly (see qemu_docker_template.yml)."
+                    "For ESP32 QEMU, stage the example and run fbuild test-emu "
+                    "(see qemu_template.yml)."
                 )
                 sys.exit(1)
 

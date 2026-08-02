@@ -6,27 +6,56 @@ concurrency:
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/**/*.cpp'
+      - 'src/**/*.h'
+      - 'src/**/*.hpp'
+      - 'examples/**/*.ino'
+      - 'examples/**/*.cpp'
+      - 'examples/**/*.h'
+      - 'ci/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - 'library.properties'
+      - '.github/workflows/qemu_esp32c3_test.yml'
+      - '.github/workflows/qemu_template.yml'
   push:
     branches: [master]
     paths:
       - 'src/**/*.cpp'
       - 'src/**/*.h'
+      - 'src/**/*.hpp'
       - 'examples/**/*.ino'
       - 'examples/**/*.cpp'
       - 'examples/**/*.h'
-      - 'platformio.ini'
+      - 'ci/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
       - 'CMakeLists.txt'
       - 'library.json'
+      - 'library.properties'
       - '.github/workflows/qemu_esp32c3_test.yml'
-      - '.github/workflows/qemu_docker_template.yml'
+      - '.github/workflows/qemu_template.yml'
+
+permissions:
+  contents: read
+
 jobs:
   esp32c3_qemu_test:
     strategy:
       fail-fast: false
       matrix:
-        sketch: [BlinkParallel, Test]
-    uses: ./.github/workflows/qemu_docker_template.yml
+        include:
+          - sketch: BlinkParallel
+            success_pattern: Initialized 4 LED strips with 256 LEDs each
+          - sketch: Test
+            success_pattern: Test loop!
+    uses: ./.github/workflows/qemu_template.yml
     with:
       platform: esp32c3
       platform_display: ESP32-C3
       sketch: ${{ matrix.sketch }}
+      success_pattern: ${{ matrix.success_pattern }}

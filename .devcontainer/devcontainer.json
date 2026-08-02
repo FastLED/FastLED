@@ -19,7 +19,6 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "platformio.platformio-ide",
         "ms-python.python",
         "ms-python.vscode-pylance",
         "ms-vscode.cpptools-extension-pack"
@@ -40,7 +39,7 @@
   "forwardPorts": [3000, 8080],
 
   "mounts": [
-    "source=${localWorkspaceFolder}/.platformio,target=/home/vscode/.platformio,type=bind,consistency=cached"
+    "source=fastled-fbuild-cache,target=/home/vscode/.fastled,type=volume"
   ],
 
   "remoteUser": "vscode"

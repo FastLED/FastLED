@@ -96,8 +96,6 @@ ci/test_all_lint_caches_stress.py|SRC001|3
 ci/tests/test_bin_2_elf.py|SRC001|1
 ci/tests/test_clean_worktrees.py|SRC003|2
 ci/tests/test_elf.py|SRC001|1
-ci/tests/test_fbuild_qemu.py|SRC001|1
-ci/tests/test_fbuild_qemu.py|SRC004|1
 ci/tests/test_platformio_url_resolution.py|SRC006|1
 ci/tests/test_renesas_i2s_include_guard.py|SRC001|1
 ci/tests/test_stale_lock_real_scenario.py|SRC002|3

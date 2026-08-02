@@ -1,14 +1,13 @@
 FROM mcr.microsoft.com/devcontainers/python:1-3.11-bullseye
 
-# Install system dependencies for embedded development and QEMU
+# Install system dependencies for embedded development and fbuild's QEMU runtime
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends \
     build-essential \
     clang-format \
     ninja-build \
     git-lfs \
-    qemu-system \
-    qemu-user \
+    libsdl2-2.0-0 \
     && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 # Install UV package manager

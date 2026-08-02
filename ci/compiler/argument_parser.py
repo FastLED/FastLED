@@ -40,7 +40,6 @@ class CompilationConfig:
     verbose: bool = False
     # Output options
     output_path: Optional[Path] = None
-    merged_bin: bool = False
     log_failures: Optional[Path] = None
     max_failures: Optional[int] = None
 
@@ -63,21 +62,6 @@ class CompilationConfig:
     def validate(self) -> list[str]:
         """Validate configuration and return list of error messages."""
         errors: list[str] = []
-
-        # Validate merged-bin requirements
-        if self.merged_bin:
-            if len(self.examples) != 1:
-                errors.append(
-                    f"--merged-bin requires exactly one sketch, got {len(self.examples)}"
-                )
-            if len(self.boards) != 1:
-                errors.append(
-                    f"--merged-bin requires exactly one board, got {len(self.boards)}"
-                )
-            if self.boards and not self.boards[0].board_name.startswith("esp"):
-                errors.append(
-                    f"--merged-bin only supports ESP32/ESP8266, got {self.boards[0].board_name}"
-                )
 
         # Validate output path requirements
         if self.output_path:
@@ -119,12 +103,13 @@ class CompilationArgumentParser:
         """Parse arguments and return validated config."""
         parser = self._create_parser()
 
-        # Parse arguments with intelligent unknown handling
-        try:
-            parsed = parser.parse_intermixed_args(args)
-            unknown: list[str] = []
-        except SystemExit:
-            parsed, unknown = parser.parse_known_args(args)
+        # Parse interspersed positional examples while retaining unknown values
+        # for the explicit option/error handling below.
+        parsed, unknown = parser.parse_known_intermixed_args(args)
+
+        unknown_options = [arg for arg in unknown if arg.startswith("-")]
+        if unknown_options:
+            parser.error(f"unrecognized arguments: {' '.join(unknown_options)}")
 
         # Add unknown non-flag arguments as examples
         if unknown:
@@ -205,12 +190,6 @@ class CompilationArgumentParser:
             help="Output path for build artifact. Requires exactly one sketch. "
             "If path ends with '/', treated as directory. If has suffix, treated as file. "
             "Use '-o .' to save in current directory with sketch name.",
-        )
-        parser.add_argument(
-            "--merged-bin",
-            action="store_true",
-            help="Generate merged binary for QEMU/flashing (ESP32/ESP8266 only). "
-            "Produces a single flash image instead of separate bootloader/firmware/partition files.",
         )
         parser.add_argument(
             "--log-failures",
@@ -334,7 +313,6 @@ class CompilationArgumentParser:
             extra_packages=extra_packages,
             verbose=args.verbose,
             output_path=Path(args.out) if args.out else None,
-            merged_bin=args.merged_bin,
             log_failures=Path(args.log_failures) if args.log_failures else None,
             max_failures=args.max_failures if hasattr(args, "max_failures") else None,
             wasm_run=args.run,
