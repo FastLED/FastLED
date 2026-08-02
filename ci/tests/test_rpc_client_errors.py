@@ -34,8 +34,11 @@ def test_json_rpc_error_is_not_masked_as_timeout() -> None:
     async def _run() -> None:
         client = RpcClient("FAKE", serial_interface=_ErrorSerial())
         await client.connect(boot_wait=0, drain_boot=False)
-        with pytest.raises(RpcError, match=r"-32601.*Method not found"):
+        with pytest.raises(RpcError, match=r"-32601.*Method not found") as caught:
             await client.send("missing", timeout=0.1)
+        assert caught.value.code == -32601
+        assert caught.value.message == "Method not found: missing"
+        assert caught.value.data is None
         await client.close()
 
     asyncio.run(_run())

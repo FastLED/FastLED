@@ -6,7 +6,7 @@
 // Include platform detection BEFORE the guard
 #include "platforms/arm/rp/is_rp.h"
 
-#ifdef FL_IS_RP2040
+#ifdef FL_IS_RP
 
 #include "platforms/arm/rp/semaphore_rp.h"
 #include "fl/log/log.h"
@@ -213,4 +213,4 @@ template bool CountingSemaphoreRP<1>::try_acquire_until(const std::chrono::time_
 } // namespace platforms
 } // namespace fl
 
-#endif // FL_IS_RP2040
+#endif // FL_IS_RP

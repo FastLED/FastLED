@@ -83,7 +83,22 @@ class RpcTimeoutError(TimeoutError):
 class RpcError(Exception):
     """RPC operation failed."""
 
-    pass
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: int | None = None,
+        data: Any = None,
+    ) -> None:
+        self.code = code
+        self.message = message
+        self.data = data
+        display_message = message
+        if code is not None:
+            display_message = f"RPC Error {code}: {message}"
+            if data is not None:
+                display_message += f" (data: {json.dumps(data)})"
+        super().__init__(display_message)
 
 
 class RpcCrashError(RpcError):
@@ -661,19 +676,18 @@ class RpcClient:
                         # Extract error details (code and message are standard fields)
                         if isinstance(error_obj, dict):
                             error_code = error_obj.get("code")  # type: ignore[assignment]
-                            error_message = error_obj.get(  # type: ignore[assignment]
-                                "message", "Unknown error"
+                            error_message = str(
+                                error_obj.get("message", "Unknown error")
                             )
                             error_data = error_obj.get("data")  # type: ignore[assignment]
 
-                            # Build detailed error message
-                            msg = f"RPC Error {error_code}: {error_message}"
-                            if error_data:
-                                import json as json_module
-
-                                msg += f" (data: {json_module.dumps(error_data)})"
-
-                            raise RpcError(msg)
+                            raise RpcError(
+                                error_message,
+                                code=(
+                                    error_code if isinstance(error_code, int) else None
+                                ),
+                                data=error_data,
+                            )
                         else:
                             # Malformed error object (should be dict)
                             raise RpcError(f"Malformed error object: {error_obj}")

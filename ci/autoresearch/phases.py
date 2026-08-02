@@ -610,6 +610,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         and not ieee754_test_mode
         and not rpc_smoke_mode
         and not watchdog_soak_mode
+        and perf_wave2d_grid is None
         and not net_server_mode
         and not net_client_mode
         and not net_loopback_mode
@@ -1752,6 +1753,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         )
     elif ctx.rpc_smoke_mode or ctx.watchdog_soak_mode:
         print("\n\U0001f4cc RPC smoke mode: skipping pin discovery and GPIO pre-test")
+    elif ctx.perf_wave2d_grid is not None:
+        print("\n\U0001f4cc Wave2D mode: skipping pin discovery and GPIO pre-test")
     elif ctx.net_server_mode or ctx.net_client_mode or ctx.net_loopback_mode:
         print("\n\U0001f4cc Network mode: skipping pin discovery and GPIO pre-test")
     elif ctx.ota_mode:
@@ -1820,7 +1823,9 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
             f"TX={ctx.effective_tx_pin}, RX={ctx.effective_rx_pin}"
         )
 
-    if not (ctx.rpc_smoke_mode or ctx.watchdog_soak_mode):
+    if not (
+        ctx.rpc_smoke_mode or ctx.watchdog_soak_mode or ctx.perf_wave2d_grid is not None
+    ):
         _ensure_leading_set_pins_command(ctx)
 
     # GPIO connectivity pre-test
@@ -1835,6 +1840,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     elif ctx.ieee754_test_mode:
         pass
     elif ctx.rpc_smoke_mode or ctx.watchdog_soak_mode:
+        pass
+    elif ctx.perf_wave2d_grid is not None:
         pass
     elif ctx.net_server_mode or ctx.net_client_mode or ctx.net_loopback_mode:
         pass
@@ -1891,6 +1898,27 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
 # ============================================================
 
 
+def _is_valid_rp_concurrency_result(result: Any) -> bool:
+    """Return whether an RP concurrency response proves the full gate."""
+    if not isinstance(result, dict):
+        return False
+    actual = result.get("actual")
+    expected = result.get("expected")
+    return (
+        result.get("success") is True
+        and result.get("supported") is True
+        and result.get("core1Ready") is True
+        and result.get("core1Done") is True
+        and result.get("recursiveMutexReady") is True
+        and isinstance(actual, int)
+        and not isinstance(actual, bool)
+        and isinstance(expected, int)
+        and not isinstance(expected, bool)
+        and expected > 0
+        and actual == expected
+    )
+
+
 async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
     """Validate the pin-free JSON-RPC transport and core system surface."""
     upload_port = ctx.upload_port
@@ -1916,16 +1944,37 @@ async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
         )
         if not response.success:
             raise RpcError(f"{name} returned unsuccessful response: {response.data!r}")
-        print(f"REMOTE: {name} -> {response.data!r}")
+        if name in {"rpc.discover", "help"}:
+            method_count = len(_rpc_manifest_method_names(response.data))
+            print(f"REMOTE: {name} -> {method_count} methods")
+        else:
+            print(f"REMOTE: {name} -> {response.data!r}")
         return response.data
 
     try:
         await client.connect()
         await client.drain_boot_output(verbose=False)
 
+        rp_environment = _active_rp2xxx_environment(ctx.final_environment)
+        required_methods = {
+            "help",
+            "ping",
+            "debugTest",
+            "status",
+            "drivers",
+            "testNoSerial",
+        }
+        if rp_environment is not None:
+            required_methods.add("testRpConcurrency")
+
         discovered = await call("rpc.discover")
-        if not isinstance(discovered, (dict, list)) or not discovered:
-            raise RpcError("rpc.discover returned an empty or invalid manifest")
+        discovered_methods = _rpc_manifest_method_names(discovered)
+        missing_discovered = sorted(required_methods - discovered_methods)
+        if missing_discovered:
+            raise RpcError(
+                "rpc.discover omitted required methods: "
+                + ", ".join(missing_discovered)
+            )
 
         help_manifest = await call("help")
         help_functions = (
@@ -1933,8 +1982,10 @@ async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
             if isinstance(help_manifest, dict)
             else help_manifest
         )
-        if not isinstance(help_functions, list) or not help_functions:
-            raise RpcError("help returned an empty or invalid manifest")
+        help_methods = _rpc_manifest_method_names(help_functions)
+        missing_help = sorted(({"rpc.discover"} | required_methods) - help_methods)
+        if missing_help:
+            raise RpcError("help omitted required methods: " + ", ".join(missing_help))
 
         first_ping = await call("ping")
         await asyncio.sleep(0.01)
@@ -1948,13 +1999,11 @@ async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
         if (
             not isinstance(first_uptime, (int, float))
             or not isinstance(second_uptime, (int, float))
-            or second_uptime < first_uptime
+            or second_uptime <= first_uptime
         ):
             raise RpcError("ping uptime did not advance monotonically")
 
-        active_environment = (
-            _active_rp2xxx_environment(ctx.final_environment) or "rp2040"
-        )
+        active_environment = rp_environment or "rp2040"
         chip_number = 2350 if active_environment in RP2350_ENVIRONMENTS else 2040
         payload = {
             "text": f"{active_environment}-rpc-smoke",
@@ -1966,35 +2015,71 @@ async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
             raise RpcError(f"debugTest payload mismatch: {echoed!r}")
 
         status = await call("status")
-        if not isinstance(status, dict) or status.get("ready") is not True:
-            raise RpcError(f"status did not report ready: {status!r}")
+        expected_platform = {
+            "rp2350": "RP2350",
+            "rpipico2": "RP2350",
+            "rp2350w": "Raspberry Pi Pico 2 W (RP2350)",
+            "rpipico2w": "Raspberry Pi Pico 2 W (RP2350)",
+        }.get(active_environment)
+        if (
+            not isinstance(status, dict)
+            or status.get("ready") is not True
+            or status.get("rpcReady") is not True
+            or not isinstance(status.get("ledRxAvailable"), bool)
+            or (
+                expected_platform is not None
+                and status.get("platform") != expected_platform
+            )
+        ):
+            raise RpcError(
+                "status did not prove the pin-free RPC/platform state: "
+                f"expected platform={expected_platform!r}, got {status!r}"
+            )
 
         drivers = await call("drivers")
         if not isinstance(drivers, list):
             raise RpcError(f"drivers returned a non-array result: {drivers!r}")
 
         no_serial = await call("testNoSerial")
-        if not isinstance(no_serial, dict) or no_serial.get("success") is not True:
+        if (
+            not isinstance(no_serial, dict)
+            or no_serial.get("success") is not True
+            or no_serial.get("serial_safe") is not False
+            or not isinstance(no_serial.get("message"), str)
+        ):
             raise RpcError(f"testNoSerial failed: {no_serial!r}")
 
+        if rp_environment is not None:
+            concurrency = await call("testRpConcurrency")
+            if not _is_valid_rp_concurrency_result(concurrency):
+                raise RpcError(
+                    f"RP mutex/semaphore dual-core validation failed: {concurrency!r}"
+                )
+
+        missing_method_returned = False
         try:
-            # Some firmware revisions reject an unknown method with an error;
-            # others intentionally emit no response. Bound this negative
-            # probe tightly so it cannot consume the whole smoke-test budget.
-            response = await client.send(
+            await client.send(
                 "__autoresearch_missing_method__",
                 timeout=min(2.0, max(1.0, ctx.remaining_seconds(minimum=1.0))),
             )
-            if response.success:
-                print("RESULT: RPC smoke FAIL: missing method unexpectedly succeeded")
-                return 1
-            print(f"REMOTE: missing-method error handled -> {response.data!r}")
-        except (RpcError, RpcTimeoutError) as exc:
-            print(f"REMOTE: missing-method error handled -> {exc}")
+            missing_method_returned = True
+        except RpcError as exc:
+            if exc.code != -32601:
+                raise RpcError(
+                    "missing method returned the wrong JSON-RPC error code: "
+                    f"{exc.code!r} ({exc})"
+                ) from exc
+            print(
+                "REMOTE: missing-method structured error -> "
+                f"code={exc.code}, message={exc.message!r}, data={exc.data!r}"
+            )
+        if missing_method_returned:
+            raise RpcError("missing method unexpectedly returned a result")
 
-        print(
-            "RESULT: RPC smoke PASS (discovery, help, ping, payload, status, drivers, testNoSerial, error handling)"
-        )
+        validated = "discovery, help, ping, payload, status, drivers, testNoSerial"
+        if rp_environment is not None:
+            validated += ", RP concurrency"
+        print(f"RESULT: RPC smoke PASS ({validated}, error handling)")
         return 0
     except (RpcCrashError, RpcTimeoutError, RpcError, OSError) as exc:
         print(f"RESULT: RPC smoke FAIL: {exc}")
@@ -2007,6 +2092,29 @@ async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
             raise
         except Exception:
             pass
+
+
+def _rpc_manifest_method_names(manifest: Any) -> set[str]:
+    """Extract method names from rpc.discover or AutoResearch help payloads."""
+    if isinstance(manifest, dict):
+        for key in ("methods", "schema", "functions"):
+            if key in manifest:
+                return _rpc_manifest_method_names(manifest[key])
+        return set()
+    if not isinstance(manifest, list):
+        return set()
+
+    names: set[str] = set()
+    for entry in manifest:
+        if isinstance(entry, str):
+            names.add(entry)
+        elif isinstance(entry, dict):
+            name = entry.get("name")
+            if isinstance(name, str):
+                names.add(name)
+        elif isinstance(entry, list) and entry and isinstance(entry[0], str):
+            names.add(entry[0])
+    return names
 
 
 async def _run_watchdog_soak(ctx: RunContext) -> int:
@@ -3366,6 +3474,12 @@ async def _run_coroutine_tests(ctx: RunContext) -> int:
         )
         print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
         print()
+
+        if response.get("supported", True) is False:
+            backend = response.get("backend", "unknown")
+            reason = response.get("reason", "no real coroutine backend")
+            print(f"RESULT: COROUTINE UNSUPPORTED (backend={backend}): {reason}")
+            return 0
 
         total = response.get("total", 0)
         passed_count = response.get("passed", 0)

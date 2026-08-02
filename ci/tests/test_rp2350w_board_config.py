@@ -1,5 +1,6 @@
 """Board-definition contracts for Raspberry Pi Pico 2 and Pico 2 W."""
 
+import re
 from pathlib import Path
 
 from ci.boards import create_board
@@ -11,6 +12,10 @@ AUTORESEARCH_INO = REPO_ROOT / "examples" / "AutoResearch" / "AutoResearch.ino"
 AUTORESEARCH_PLATFORM = (
     REPO_ROOT / "examples" / "AutoResearch" / "AutoResearchPlatform.h"
 )
+MUTEX_DISPATCH = REPO_ROOT / "src" / "platforms" / "mutex.h"
+MUTEX_IMPL = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "mutex_rp.cpp.hpp"
+SEMAPHORE_DISPATCH = REPO_ROOT / "src" / "platforms" / "semaphore.h"
+SEMAPHORE_IMPL = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "semaphore_rp.cpp.hpp"
 
 
 def test_rp2350w_selects_the_pico_2_w_board_profile() -> None:
@@ -57,3 +62,19 @@ def test_autoresearch_identity_prioritizes_pico_2_w() -> None:
     assert pico_2_w_branch < generic_rp2350_branch
     assert 'return "Raspberry Pi Pico 2 W (RP2350)";' in source
     assert 'return "RP2350";' in source
+
+
+def test_rp_platform_dispatches_real_mutex_and_semaphore_backends() -> None:
+    for source_path in (
+        MUTEX_DISPATCH,
+        MUTEX_IMPL,
+        SEMAPHORE_DISPATCH,
+        SEMAPHORE_IMPL,
+    ):
+        source = source_path.read_text(encoding="utf-8")
+        assert not re.search(r"\bFL_IS_RP2040\b", source), (
+            f"{source_path} still guards on FL_IS_RP2040"
+        )
+        assert re.search(r"\bFL_IS_RP\b", source), (
+            f"{source_path} does not guard on FL_IS_RP"
+        )

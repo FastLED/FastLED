@@ -42,11 +42,17 @@ struct AutoResearchState {
     int default_pin_rx;
     RxDeviceFactory rx_factory;
     bool gpio_baseline_test_done = false;  // Track whether GPIO baseline test has run in loop()
+    bool led_rx_available = false;  // True only after the configured RX path validates
     bool debug_enabled = false;  // Runtime debug logging toggle (default: off)
     bool net_server_active = false;  // Network server autoresearch active
     bool net_client_active = false;  // Network client autoresearch active
     bool ble_server_active = false;  // BLE GATT server autoresearch active
     bool deliberate_hang_requested = false;  // Watchdog autoresearch hang trigger (#2731)
+
+    void invalidateLedRxValidation() {
+        led_rx_available = false;
+        gpio_baseline_test_done = false;
+    }
 };
 
 /// @brief Print JSON directly to Serial, bypassing fl::println and ScopedLogDisable

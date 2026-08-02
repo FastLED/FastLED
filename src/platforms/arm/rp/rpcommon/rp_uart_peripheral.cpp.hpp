@@ -38,8 +38,8 @@ bool pinInList(u8 pin, const u8* pins, size_t count) FL_NO_EXCEPT {
 }  // namespace
 
 RpUartPeripheral::RpUartPeripheral() FL_NO_EXCEPT
-    : mDmaChannel(-1), mUartIndex(-1), mTxPin(-1), mInitialized(false),
-      mOwnsUart(false), mOwnsPin(false), mActualBaudRate(0) {}
+    : mDmaChannel(-1), mUartIndex(-1), mTxPin(-1), mActualBaudRate(0),
+      mInitialized(false), mOwnsUart(false), mOwnsPin(false) {}
 
 RpUartPeripheral::~RpUartPeripheral() { deinitialize(); }
 
