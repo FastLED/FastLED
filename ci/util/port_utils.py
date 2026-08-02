@@ -64,11 +64,16 @@ ENVIRONMENT_TO_VCOM_VID_PIDS: dict[str, tuple[tuple[int, int], ...]] = {
     # and is intentionally not a serial port). Keep this fingerprint strict:
     # falling back to an arbitrary CP210x/CH340 port can run RPC against a
     # different attached board.
-    "rp2040": ((0x2E8A, 0x000A), (0x2E8A, 0x000F)),
+    "rp2040": ((0x2E8A, 0x000A),),
     "rpipico": ((0x2E8A, 0x000A),),
     "rpipicow": ((0x2E8A, 0x000A),),
+    # Arduino-Pico assigns distinct application CDC identities to Pico 2
+    # and Pico 2 W. Keep them board-exact so a non-W RP2350 cannot be
+    # selected for an rp2350w run when both variants are attached.
+    "rp2350": ((0x2E8A, 0x000F),),
     "rpipico2": ((0x2E8A, 0x000F),),
-    "rpipico2w": ((0x2E8A, 0x000F),),
+    "rp2350w": ((0x2E8A, 0xF00F),),
+    "rpipico2w": ((0x2E8A, 0xF00F),),
     # LPC8xx family: the on-board debug probe can be either
     #   * LPC11U35 running the LPCXpresso VCOM firmware — 16C0:0483
     #     (the community "V-USB" VID:PID; shared with PJRC Teensy).
@@ -140,7 +145,29 @@ def port_exists(port: str) -> bool:
     return port in names or stripped in names
 
 
-def auto_detect_upload_port(expected_environment: str | None) -> ComportResult:
+def get_port_serial_number(port: str) -> str | None:
+    """Return the USB serial identity for an enumerated application port."""
+    stripped = port.replace("\\\\.\\", "").replace("\\.\\", "")
+    try:
+        for candidate in serial.tools.list_ports.comports():
+            candidate_name = candidate.device.replace("\\\\.\\", "").replace(
+                "\\.\\", ""
+            )
+            if candidate_name == stripped:
+                return candidate.serial_number
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception:
+        return None
+    return None
+
+
+def auto_detect_upload_port(
+    expected_environment: str | None,
+    *,
+    expected_serial_number: str | None = None,
+) -> ComportResult:
     """Auto-detect the upload port from available serial ports.
 
     Only considers USB devices - filters out Bluetooth and other non-USB ports.
@@ -152,6 +179,11 @@ def auto_detect_upload_port(expected_environment: str | None) -> ComportResult:
         - CH340/CH341 (WCH)
         - FTDI chips
         - Generic USB-Serial converters
+
+    Args:
+        expected_environment: Board environment used for strict fingerprinting.
+        expected_serial_number: Optional stable USB identity that a matching
+            board must retain across re-enumeration.
 
     Returns:
         ComportResult with detection status and diagnostics
@@ -219,7 +251,11 @@ def auto_detect_upload_port(expected_environment: str | None) -> ComportResult:
     if expected_vid_pids:
         accepted = set(expected_vid_pids)
         for port in usb_ports:
-            if (port.vid, port.pid) in accepted:
+            serial_matches = (
+                expected_serial_number is None
+                or port.serial_number == expected_serial_number
+            )
+            if (port.vid, port.pid) in accepted and serial_matches:
                 return ComportResult(
                     ok=True,
                     selected_port=port.device,
@@ -237,7 +273,13 @@ def auto_detect_upload_port(expected_environment: str | None) -> ComportResult:
             selected_port=None,
             error_message=(
                 f"No USB serial port matched expected VCOM fingerprint for "
-                f"'{expected_environment}' (VID:PID {formatted_expected}). "
+                f"'{expected_environment}' (VID:PID {formatted_expected}"
+                + (
+                    f", serial {expected_serial_number}"
+                    if expected_serial_number
+                    else ""
+                )
+                + "). "
                 f"Detected USB ports: "
                 + ", ".join(
                     f"{p.device}={p.vid:04X}:{p.pid:04X}"

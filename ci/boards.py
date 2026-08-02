@@ -1196,6 +1196,17 @@ RPI_PICO2 = Board(
     board_build_filesystem_size="0.5m",
 )
 
+RPI_PICO2_W = Board(
+    board_name="rp2350w",
+    real_board_name="rpipico2w",
+    platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
+    platform_needs_install=True,  # Install platform package to get the boards
+    platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico/releases/download/4.5.3/rp2040-4.5.3.zip",
+    framework="arduino",
+    board_build_core="earlephilhower",
+    board_build_filesystem_size="0.5m",
+)
+
 # NXP LPC8xx family. PlatformIO has no native Arduino-capable nxplpc
 # platform, so use the FastLED fork (transferred from zackees/ in 2026-06-28) that
 # layers framework-arduino-lpc8xx on top of

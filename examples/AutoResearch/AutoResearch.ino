@@ -1,6 +1,6 @@
 // @filter
 // require:
-//   - board: esp32s3,esp32c6,esp32p4,teensy41,teensy40,lpc845,lpc845brk,lpcxpresso845max,lpcxpresso804
+//   - board: esp32s3,esp32c6,esp32p4,teensy41,teensy40,rp2350,rp2350w,lpc845,lpc845brk,lpcxpresso845max,lpcxpresso804
 // @end-filter
 //
 // Low-memory mode (FastLED #3030): on Low-tier targets (LPC8xx etc., per
@@ -67,6 +67,8 @@ void loop()  { autoResearchLowMemoryLoop(); }
 //   - ESP32-S3 (Xtensa)
 //   - ESP32-C3 (RISC-V)
 //   - ESP32-C6 (RISC-V)
+//   - Raspberry Pi Pico 2 (RP2350)
+//   - Raspberry Pi Pico 2 W (RP2350 + CYW43)
 //
 // Expected Output:
 //   Serial monitor will show:
