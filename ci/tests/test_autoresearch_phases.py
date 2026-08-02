@@ -1593,6 +1593,30 @@ class TestAutoDetectUploadPort:
         assert result.ok is False
         assert result.selected_port is None
 
+    def test_rpipicow_uses_its_board_exact_application_identity(
+        self: "TestAutoDetectUploadPort",
+    ) -> None:
+        pico = ListPortInfo("COM11")
+        pico.description = "USB Serial Device"
+        pico.hwid = "USB VID:PID=2E8A:000A"
+        pico.vid = 0x2E8A
+        pico.pid = 0x000A
+
+        pico_w = ListPortInfo("COM12")
+        pico_w.description = "USB Serial Device"
+        pico_w.hwid = "USB VID:PID=2E8A:F00A"
+        pico_w.vid = 0x2E8A
+        pico_w.pid = 0xF00A
+
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[pico, pico_w],
+        ):
+            result = auto_detect_upload_port("rpipicow")
+
+        assert result.ok is True
+        assert result.selected_port == "COM12"
+
     def test_rpipico2_application_cdc_fingerprint_matches(self) -> None:
         port = ListPortInfo("COM12")
         port.description = "USB Serial Device"
