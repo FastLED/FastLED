@@ -1593,7 +1593,9 @@ class TestAutoDetectUploadPort:
         assert result.ok is False
         assert result.selected_port is None
 
-    def test_rpipicow_uses_its_board_exact_application_identity(self) -> None:
+    def test_rpipicow_uses_its_board_exact_application_identity(
+        self: "TestAutoDetectUploadPort",
+    ) -> None:
         pico = ListPortInfo("COM11")
         pico.description = "USB Serial Device"
         pico.hwid = "USB VID:PID=2E8A:000A"
