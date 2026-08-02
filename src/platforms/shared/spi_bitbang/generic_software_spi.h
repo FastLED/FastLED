@@ -156,10 +156,28 @@ public:
 	/// We want to make sure that the clock pulse is held high for a minimum of 35 ns.
 	#define MIN_DELAY ((NS(35)>3) ? (NS(35) - 3) : 1)
 
+	/// Half the requested bit period, in cycles, for SPI_SPEED > 10.
+	#define FL_SPI_HALF_PERIOD ((SPI_SPEED - 6) / 2)
+
+	/// Extra cycles to add on top of MIN_DELAY to reach the requested half period.
+	///
+	/// SPI_SPEED is unsigned, so `FL_SPI_HALF_PERIOD - MIN_DELAY` wraps to ~4e9
+	/// whenever the requested half period is shorter than the 35ns minimum
+	/// pulse -- which then becomes the CYCLES template argument of
+	/// delaycycles<>. That is the #974 failure: on a Teensy 3.6 (180 MHz,
+	/// MIN_DELAY = 4) a plain DATA_RATE_MHZ(4) yields SPI_SPEED = 12, so
+	/// (12-6)/2 - 4 = -1 wraps to 4294967295 cycles of NOP. Clamp to zero
+	/// instead: MIN_DELAY has already been emitted and it is longer than the
+	/// half period being asked for, so no additional delay is owed.
+	#define FL_SPI_HI_EXTRA_DELAY \
+		((SPI_SPEED > 10) \
+			? ((FL_SPI_HALF_PERIOD > MIN_DELAY) ? (FL_SPI_HALF_PERIOD - MIN_DELAY) : 0) \
+			: (SPI_SPEED))
+
 	/// Delay for the clock signal 'high' period
-	#define CLOCK_HI_DELAY do { delaycycles<MIN_DELAY>(); delaycycles<((SPI_SPEED > 10) ? (((SPI_SPEED-6) / 2) - MIN_DELAY) : (SPI_SPEED))>(); } while(0);
+	#define CLOCK_HI_DELAY do { delaycycles<MIN_DELAY>(); delaycycles<FL_SPI_HI_EXTRA_DELAY>(); } while(0);
 	/// Delay for the clock signal 'low' period
-	#define CLOCK_LO_DELAY do { delaycycles<((SPI_SPEED > 10) ? ((SPI_SPEED-6) / 2) : (SPI_SPEED))>(); } while(0);
+	#define CLOCK_LO_DELAY do { delaycycles<((SPI_SPEED > 10) ? FL_SPI_HALF_PERIOD : (SPI_SPEED))>(); } while(0);
 #endif
 
 	/// Write the BIT'th bit out via SPI, setting the data pin then strobing the clock
