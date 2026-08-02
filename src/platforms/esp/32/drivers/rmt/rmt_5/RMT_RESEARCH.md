@@ -227,11 +227,19 @@ uv run ci/stage_fbuild_project.py \
 # Emulate on ESP32-S3 (Xtensa)
 uv run fbuild test-emu --emulator qemu \
     --environment esp32s3 --timeout 120 \
+    --halt-on-success "Initialized 4 LED strips with 256 LEDs each" \
+    --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL" \
     .build/fbuild/esp32s3
 
 # Emulate on ESP32-C3 (RISC-V) — same shape, swap env
+uv run ci/stage_fbuild_project.py \
+    --board esp32c3 --example BlinkParallel \
+    --define FASTLED_ESP32_IS_QEMU \
+    --build-dir .build/fbuild/esp32c3
 uv run fbuild test-emu --emulator qemu \
     --environment esp32c3 --timeout 120 \
+    --halt-on-success "Initialized 4 LED strips with 256 LEDs each" \
+    --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL" \
     .build/fbuild/esp32c3
 ```
 

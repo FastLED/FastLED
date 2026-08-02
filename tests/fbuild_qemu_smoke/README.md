@@ -11,7 +11,9 @@ library resolution, compile, link, or early boot surfaces as a test failure.
 Run manually:
 
 ```
-fbuild test-emu tests/fbuild_qemu_smoke -e esp32dev --emulator qemu --timeout 10
+fbuild test-emu tests/fbuild_qemu_smoke -e esp32dev --emulator qemu --timeout 10 \
+  --halt-on-success 'FBUILD-QEMU-TEST-OK' \
+  --halt-on-error 'Guru Meditation|abort\(\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL'
 ```
 
 If the emulator prints `FBUILD-QEMU-TEST-OK` the path is working end-to-end.

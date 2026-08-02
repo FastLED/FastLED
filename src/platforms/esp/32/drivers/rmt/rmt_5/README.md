@@ -1556,11 +1556,11 @@ Use fbuild's native QEMU runner — the same invocation as CI in `.github/workfl
 ```bash
 # Stage + emulate on ESP32-S3 (Xtensa LX7)
 uv run ci/stage_fbuild_project.py --board esp32s3 --example BlinkParallel --define FASTLED_ESP32_IS_QEMU --build-dir .build/fbuild/esp32s3
-uv run fbuild test-emu --emulator qemu --environment esp32s3 --timeout 120 .build/fbuild/esp32s3
+uv run fbuild test-emu --emulator qemu --environment esp32s3 --timeout 120 --halt-on-success "Initialized 4 LED strips with 256 LEDs each" --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL" .build/fbuild/esp32s3
 
 # Stage + emulate on ESP32-C3 (RISC-V) — same shape
 uv run ci/stage_fbuild_project.py --board esp32c3 --example BlinkParallel --define FASTLED_ESP32_IS_QEMU --build-dir .build/fbuild/esp32c3
-uv run fbuild test-emu --emulator qemu --environment esp32c3 --timeout 120 .build/fbuild/esp32c3
+uv run fbuild test-emu --emulator qemu --environment esp32c3 --timeout 120 --halt-on-success "Initialized 4 LED strips with 256 LEDs each" --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL" .build/fbuild/esp32c3
 ```
 
 ### Test Scenarios

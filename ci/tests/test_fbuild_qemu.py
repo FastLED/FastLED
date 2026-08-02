@@ -20,12 +20,24 @@ from pathlib import Path
 import pytest
 from running_process import RunningProcess
 
-from ci.stage_fbuild_project import stage_fbuild_project
+from ci.stage_fbuild_project import _parse_args, stage_fbuild_project
 
 
 ROOT = Path(__file__).resolve().parents[2]
 PROJECT_DIR = ROOT / "tests" / "fbuild_qemu_smoke"
 SUCCESS_MARKER = "FBUILD-QEMU-TEST-OK"
+ERROR_PATTERN = (
+    r"Guru Meditation|abort\(\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|"
+    r"QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL"
+)
+
+
+def test_stage_fbuild_argument_parser_accepts_explicit_argv() -> None:
+    """The staging CLI can be tested without mutating process arguments."""
+    args = _parse_args(["--board", "esp32dev", "--example", "Blink"])
+
+    assert args.board == "esp32dev"
+    assert args.example == "Blink"
 
 
 def test_stage_fbuild_qemu_project_without_compiling(tmp_path: Path) -> None:
@@ -71,6 +83,10 @@ def test_fbuild_test_emu_esp32dev() -> None:
         "qemu",
         "--timeout",
         "10",
+        "--halt-on-success",
+        SUCCESS_MARKER,
+        "--halt-on-error",
+        ERROR_PATTERN,
     ]
     proc = RunningProcess.run(
         cmd,

@@ -103,12 +103,9 @@ class CompilationArgumentParser:
         """Parse arguments and return validated config."""
         parser = self._create_parser()
 
-        # Parse arguments with intelligent unknown handling
-        try:
-            parsed = parser.parse_intermixed_args(args)
-            unknown: list[str] = []
-        except SystemExit:
-            parsed, unknown = parser.parse_known_args(args)
+        # Parse interspersed positional examples while retaining unknown values
+        # for the explicit option/error handling below.
+        parsed, unknown = parser.parse_known_intermixed_args(args)
 
         unknown_options = [arg for arg in unknown if arg.startswith("-")]
         if unknown_options:

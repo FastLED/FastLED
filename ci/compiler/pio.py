@@ -390,6 +390,30 @@ def _init_platformio_build(
     return InitResult(success=True, output="", build_dir=build_dir)
 
 
+def init_fbuild_project(
+    board: Board,
+    verbose: bool,
+    example: str,
+    paths: FastLEDPaths,
+    build_dir: Optional[Path] = None,
+    additional_defines: Optional[list[str]] = None,
+    additional_include_dirs: Optional[list[str]] = None,
+    additional_libs: Optional[list[str]] = None,
+) -> InitResult:
+    """Stage an Arduino-compatible project for fbuild without invoking PIO."""
+    return _init_platformio_build(
+        board=board,
+        verbose=verbose,
+        example=example,
+        paths=paths,
+        build_dir=build_dir,
+        additional_defines=additional_defines,
+        additional_include_dirs=additional_include_dirs,
+        additional_libs=additional_libs,
+        use_fbuild=True,
+    )
+
+
 class PioCompiler(Compiler):
     def __init__(
         self,

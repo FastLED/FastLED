@@ -19,8 +19,13 @@ on:
         description: 'Arduino sketch/example to test (e.g., BlinkParallel, Blink)'
         required: true
         type: string
+      extra_define:
+        description: 'Optional test-only preprocessor definition'
+        required: false
+        default: ''
+        type: string
       success_pattern:
-        description: 'Regex emitted only after the sketch completes meaningful work'
+        description: 'Regex emitted after the sketch completes its QEMU-supported assertion'
         required: true
         type: string
 
@@ -63,42 +68,58 @@ jobs:
         run: uv sync
 
       - name: Stage ${{ inputs.sketch }} for native fbuild
+        env:
+          BOARD: ${{ inputs.platform }}
+          BUILD_DIR: .build/fbuild/${{ inputs.platform }}
+          EXAMPLE: ${{ inputs.sketch }}
+          EXTRA_DEFINE: ${{ inputs.extra_define }}
         run: |
+          EXTRA_DEFINE_ARGS=()
+          if [ -n "$EXTRA_DEFINE" ]; then
+            EXTRA_DEFINE_ARGS=(--define "$EXTRA_DEFINE")
+          fi
           uv run ci/stage_fbuild_project.py \
-            --board ${{ inputs.platform }} \
-            --example ${{ inputs.sketch }} \
+            --board "$BOARD" \
+            --example "$EXAMPLE" \
             --define FASTLED_ESP32_IS_QEMU \
-            --build-dir .build/fbuild/${{ inputs.platform }} \
+            "${EXTRA_DEFINE_ARGS[@]}" \
+            --build-dir "$BUILD_DIR" \
             --verbose
 
       - name: "fbuild test-emu — build + emulate ${{ inputs.sketch }} on ${{ inputs.platform_display }}"
         id: test_emu
-        # Each caller supplies a sketch-specific marker after meaningful work;
-        # entering setup() alone is not success. fbuild owns the build,
-        # flash-image layout, QEMU process, timeout, and regex matching.
+        # Peripheral-heavy legs assert registration because Espressif QEMU
+        # does not model the LED transmit-completion interrupts.
+        env:
+          BOARD: ${{ inputs.platform }}
+          BUILD_DIR: .build/fbuild/${{ inputs.platform }}
+          SUCCESS_PATTERN: ${{ inputs.success_pattern }}
         run: |
           set -o pipefail
           uv run fbuild test-emu \
             --emulator qemu \
-            --environment ${{ inputs.platform }} \
+            --environment "$BOARD" \
             --timeout 120 \
-            --halt-on-success "${{ inputs.success_pattern }}" \
-            --halt-on-error "Guru Meditation|abort\(\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL" \
-            .build/fbuild/${{ inputs.platform }} 2>&1 | tee qemu_output.log
+            --halt-on-success "$SUCCESS_PATTERN" \
+            --halt-on-error "Guru Meditation|abort\(\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL" \
+            "$BUILD_DIR" 2>&1 | tee qemu_output.log
         shell: bash
 
       - name: Display QEMU output
         if: always()
+        env:
+          PLATFORM_DISPLAY: ${{ inputs.platform_display }}
+          SUCCESS_PATTERN: ${{ inputs.success_pattern }}
         run: |
-          echo "=== ${{ inputs.platform_display }} QEMU Output (first 200 lines) ==="
+          echo "=== $PLATFORM_DISPLAY QEMU Output (first 200 lines) ==="
           if [ -f qemu_output.log ]; then
             head -200 qemu_output.log
             echo ""
             echo "=== Stats ==="
             echo "Lines:            $(wc -l < qemu_output.log)"
-            echo "Boot messages:    $(grep -c 'rst:' qemu_output.log || echo 0)"
-            echo "Success markers:  $(grep -c '${{ inputs.success_pattern }}' qemu_output.log || echo 0)"
-            echo "Loop iterations:  $(grep -c 'Starting loop iteration' qemu_output.log || echo 0)"
+            echo "Boot messages:    $(grep -c 'rst:' qemu_output.log || true)"
+            echo "Success markers:  $(grep -c -- "$SUCCESS_PATTERN" qemu_output.log || true)"
+            echo "Loop iterations:  $(grep -c 'Starting loop iteration' qemu_output.log || true)"
           else
             echo "(no output log produced)"
           fi
@@ -106,8 +127,9 @@ jobs:
       - name: Generate artifact name
         id: artifact_name
         if: always()
+        env:
+          SKETCH_NAME: ${{ inputs.sketch }}
         run: |
-          SKETCH_NAME="${{ inputs.sketch }}"
           echo "sketch=${SKETCH_NAME////-}" >> $GITHUB_OUTPUT
         shell: bash
 

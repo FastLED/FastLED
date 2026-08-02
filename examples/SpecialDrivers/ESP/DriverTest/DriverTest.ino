@@ -119,10 +119,32 @@ void setup() {
 
     Serial.println("SpecialDrivers/ESP/DriverTest setup starting");
 
+#if defined(FL_QEMU_VALIDATE_LCD_CLOCKLESS)
+    // Espressif QEMU does not model LCD_CAM transmit-completion interrupts.
+    // Validate the strongest supported behavior: link, register, and select
+    // the real ESP32-S3 LCD clockless driver before any transmission.
+    FastLED.setExclusiveDriver<fl::Bus::FLEX_IO, 0>();
+#endif
+
     // Initialize FastLED with WS2812 strip
     // The driver can be switched at runtime using setExclusiveDriver()
     FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
     FastLED.setBrightness(TEST_BRIGHTNESS);
+
+#if defined(FL_QEMU_VALIDATE_LCD_CLOCKLESS)
+    bool lcdClocklessRegistered = false;
+    const auto drivers = FastLED.getDriverInfos();
+    for (fl::size i = 0; i < drivers.size(); ++i) {
+        if (fl::strcmp(drivers[i].name.c_str(), "LCD_CLOCKLESS") == 0) {
+            lcdClocklessRegistered = true;
+            break;
+        }
+    }
+    Serial.println(lcdClocklessRegistered
+                       ? "QEMU_LCD_CLOCKLESS_REGISTRATION: PASS"
+                       : "QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL");
+    return;
+#endif
 
     // Create and run the test suite
     DriverTestRunner runner(leds, NUM_LEDS);

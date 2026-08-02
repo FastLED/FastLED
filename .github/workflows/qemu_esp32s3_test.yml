@@ -17,7 +17,6 @@ on:
       - 'ci/**'
       - 'pyproject.toml'
       - 'uv.lock'
-      - 'platformio.ini'
       - 'CMakeLists.txt'
       - 'library.json'
       - 'library.properties'
@@ -35,12 +34,15 @@ on:
       - 'ci/**'
       - 'pyproject.toml'
       - 'uv.lock'
-      - 'platformio.ini'
       - 'CMakeLists.txt'
       - 'library.json'
       - 'library.properties'
       - '.github/workflows/qemu_esp32s3_test.yml'
       - '.github/workflows/qemu_template.yml'
+
+permissions:
+  contents: read
+
 jobs:
   esp32s3_qemu_rmt:
     uses: ./.github/workflows/qemu_template.yml
@@ -48,7 +50,7 @@ jobs:
       platform: esp32s3
       platform_display: ESP32-S3
       sketch: BlinkParallel
-      success_pattern: Test finished - completed 2 iterations
+      success_pattern: Initialized 4 LED strips with 256 LEDs each
 
   esp32s3_qemu_lcd:
     uses: ./.github/workflows/qemu_template.yml
@@ -56,4 +58,5 @@ jobs:
       platform: esp32s3
       platform_display: ESP32-S3
       sketch: SpecialDrivers/ESP/DriverTest
-      success_pattern: 'TEST_SUITE_COMPLETE: PASS'
+      extra_define: FL_QEMU_VALIDATE_LCD_CLOCKLESS
+      success_pattern: 'QEMU_LCD_CLOCKLESS_REGISTRATION: PASS'

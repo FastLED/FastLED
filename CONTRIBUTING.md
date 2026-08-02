@@ -70,8 +70,8 @@ uv run fbuild test-emu \
     --emulator qemu \
     --environment esp32s3 \
     --timeout 120 \
-    --halt-on-success "setup starting" \
-    --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:" \
+    --halt-on-success "Initialized 4 LED strips with 256 LEDs each" \
+    --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL" \
     .build/fbuild/esp32s3
 ```
 

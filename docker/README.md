@@ -18,9 +18,10 @@ See `ci/docker_utils/README.md` for the runner API.
 
 ### 2. VS Code DevContainer (`.devcontainer/`)
 
-Development container for VS Code with Python, QEMU, and build tools
-pre-installed. Open the project in VS Code and select "Reopen in Container" when
-prompted.
+Development container for VS Code with Python, fbuild, the SDL runtime, and
+build tools. fbuild downloads and manages Espressif QEMU on first use; the
+container does not supply a separate QEMU installation. Open the project in VS
+Code and select "Reopen in Container" when prompted.
 
 ## When to Use Which Image
 

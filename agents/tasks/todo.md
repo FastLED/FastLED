@@ -16,13 +16,18 @@
   artifacts in a legacy environment-nested directory and failed before QEMU.
 - Replaced the reusable job with source-only staging plus native
   `fbuild test-emu`; removed Docker QEMU and manual flash-image plumbing.
-- All five legs now require sketch-specific runtime markers, including the
-  complete DriverTest pass marker, instead of accepting entry into `setup()`.
-- Local evidence: native ESP32-DEV fbuild/QEMU exit 0, 22 focused tests,
-  728 remaining Python tests, 362 C++ tests/examples, actionlint, full lint,
-  and three-cycle pre-push review. One unrelated MinGW Renesas guard test and
-  one fbuild smoke rerun were environment-blocked by another worktree's daemon;
-  isolated PR jobs are the acceptance evidence.
+- All five legs now require explicit runtime assertions: BlinkParallel proves
+  four channels registered, Test proves loop execution, and the S3 LCD leg
+  proves the real LCD_CLOCKLESS driver linked and registered. Transmission is
+  intentionally left to HIL because Espressif QEMU lacks those interrupts.
+- Local evidence: native ESP32-DEV fbuild/QEMU exit 0; the latest focused run
+  passed 8 tests with one daemon-owned smoke test deselected; all 362 C++
+  tests/examples passed; actionlint, full lint, staged-manifest verification,
+  and the final two-cycle pre-push review are green. The broad Python run
+  passed 766 tests, skipped 34, and passed 39 subtests; its sole failure is an
+  unchanged current-master AutoResearch board-list expectation. The unrelated
+  MinGW Renesas guard remains excluded, and another worktree owns the shared
+  fbuild daemon, so the isolated PR jobs are the acceptance evidence.
 
 ## WASM gfx electrical-group update
 

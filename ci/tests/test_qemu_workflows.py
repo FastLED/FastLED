@@ -17,8 +17,17 @@ def test_qemu_template_uses_fbuild_native_runner_only() -> None:
     assert "ci/stage_fbuild_project.py" in template
     assert "fbuild test-emu" in template
     assert "--emulator qemu" in template
-    assert '--halt-on-success "${{ inputs.success_pattern }}"' in template
+    assert '--halt-on-success "$SUCCESS_PATTERN"' in template
     assert "TEST_SUITE_COMPLETE: FAIL" in template
+    assert "QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL" in template
+    assert 'EXTRA_DEFINE_ARGS=(--define "$EXTRA_DEFINE")' in template
+    assert '--board "$BOARD"' in template
+    assert '--example "$EXAMPLE"' in template
+    assert "--environment ${{ inputs.platform }}" not in template
+    assert "--board ${{ inputs.platform }}" not in template
+    assert "--example ${{ inputs.sketch }}" not in template
+    assert "grep -c '${{ inputs.success_pattern }}'" not in template
+    assert 'SKETCH_NAME="${{ inputs.sketch }}"' not in template
     assert "ci-compile.py" not in template
     assert "merged-bin" not in template
     assert "docker" not in template.lower()
@@ -39,6 +48,7 @@ def test_all_five_badge_legs_use_native_template() -> None:
         workflow = (WORKFLOWS / workflow_name).read_text(encoding="utf-8")
         assert "uses: ./.github/workflows/qemu_template.yml" in workflow
         assert "pull_request:" in workflow
+        assert "permissions:\n  contents: read" in workflow
         for sketch in sketches:
             assert sketch in workflow
 
@@ -46,9 +56,10 @@ def test_all_five_badge_legs_use_native_template() -> None:
         (WORKFLOWS / workflow_name).read_text(encoding="utf-8")
         for workflow_name in callers
     )
-    assert "Test finished - completed 2 iterations" in all_callers
+    assert "Initialized 4 LED strips with 256 LEDs each" in all_callers
     assert "Test loop!" in all_callers
-    assert "TEST_SUITE_COMPLETE: PASS" in all_callers
+    assert "QEMU_LCD_CLOCKLESS_REGISTRATION: PASS" in all_callers
+    assert "FL_QEMU_VALIDATE_LCD_CLOCKLESS" in all_callers
 
 
 def test_retired_merged_bin_flag_is_rejected() -> None:

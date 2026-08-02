@@ -40,7 +40,10 @@ uv run test.py --cpp
 
 # Run QEMU emulation via fbuild's native runner
 uv run ci/stage_fbuild_project.py --board esp32s3 --example Blink --define FASTLED_ESP32_IS_QEMU
-uv run fbuild test-emu --emulator qemu --environment esp32s3 --timeout 120 .build/fbuild/esp32s3
+uv run fbuild test-emu --emulator qemu --environment esp32s3 --timeout 120 \
+  --halt-on-success 'Blink setup complete - starting blink loop' \
+  --halt-on-error 'Guru Meditation|abort\(\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL' \
+  .build/fbuild/esp32s3
 
 # Compile for specific platforms
 uv run ci/ci-compile.py uno --examples Blink

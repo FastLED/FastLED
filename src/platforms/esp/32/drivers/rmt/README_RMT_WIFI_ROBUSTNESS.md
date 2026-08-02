@@ -409,7 +409,7 @@ Increase to 3-4× memory blocks for even more buffering headroom.
 
 1. ✅ Change `rmt5_worker.cpp:204` from `LEVEL3` to `LEVEL4`
 2. ✅ Enable `CONFIG_RMT_ISR_IRAM_SAFE=y` in build
-3. ✅ Stage with `uv run ci/stage_fbuild_project.py --board esp32s3 --example BlinkParallel --define FASTLED_ESP32_IS_QEMU`, then test with `uv run fbuild test-emu --emulator qemu --environment esp32s3 --timeout 120 .build/fbuild/esp32s3`.
+3. ✅ Stage with `uv run ci/stage_fbuild_project.py --board esp32s3 --example BlinkParallel --define FASTLED_ESP32_IS_QEMU`, then test with `uv run fbuild test-emu --emulator qemu --environment esp32s3 --timeout 120 --halt-on-success 'Initialized 4 LED strips with 256 LEDs each' --halt-on-error 'Guru Meditation|abort\(\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL' .build/fbuild/esp32s3`.
 
 ### Phase 2 (Short-term - Validate)
 

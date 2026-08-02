@@ -501,8 +501,9 @@ The LCD_CAM driver family includes two variants using different peripherals:
 
 ### Known Limitations
 - ESP32-P4 support limited (hardware not widely available yet)
-- QEMU test infrastructure has path issues (merged.bin location)
-- Some advanced drivers (LCD_CAM, PARLIO) not fully tested in CI
+- Espressif QEMU does not model every LED peripheral interrupt; CI validates
+  build, boot, and driver/channel registration, while transmission requires HIL
+- Advanced-driver electrical output (LCD_CAM, PARLIO) still requires HIL
 
 ## Future Enhancements
 

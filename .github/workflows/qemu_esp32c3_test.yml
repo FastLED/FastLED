@@ -17,7 +17,6 @@ on:
       - 'ci/**'
       - 'pyproject.toml'
       - 'uv.lock'
-      - 'platformio.ini'
       - 'CMakeLists.txt'
       - 'library.json'
       - 'library.properties'
@@ -35,12 +34,15 @@ on:
       - 'ci/**'
       - 'pyproject.toml'
       - 'uv.lock'
-      - 'platformio.ini'
       - 'CMakeLists.txt'
       - 'library.json'
       - 'library.properties'
       - '.github/workflows/qemu_esp32c3_test.yml'
       - '.github/workflows/qemu_template.yml'
+
+permissions:
+  contents: read
+
 jobs:
   esp32c3_qemu_test:
     strategy:
@@ -48,7 +50,7 @@ jobs:
       matrix:
         include:
           - sketch: BlinkParallel
-            success_pattern: Test finished - completed 2 iterations
+            success_pattern: Initialized 4 LED strips with 256 LEDs each
           - sketch: Test
             success_pattern: Test loop!
     uses: ./.github/workflows/qemu_template.yml

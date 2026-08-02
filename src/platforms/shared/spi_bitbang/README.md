@@ -420,28 +420,6 @@ For detailed hardware octal-SPI information, see:
 3. **Fallback**: When hardware SPI unavailable
 4. **Low-level debugging**: Inspect GPIO events with ring buffer
 
-## 📋 Test Running Environment (QEMU)
-
-### QEMU RISC-V Testing
-
-To test examples in QEMU, stage the source/config and let fbuild own the build and emulator:
-
-```bash
-# Stage + emulate an example on esp32c3
-uv run ci/stage_fbuild_project.py \
-    --board esp32c3 \
-    --example Esp32C3_SingleSPI_ISR \
-    --define FASTLED_ESP32_IS_QEMU \
-    --build-dir .build/fbuild/esp32c3
-uv run fbuild test-emu \
-    --emulator qemu \
-    --environment esp32c3 \
-    --timeout 120 \
-    .build/fbuild/esp32c3
-```
-
-Examples produce serial output that can be regex-matched for pass/fail validation via `fbuild test-emu`'s `--halt-on-success` / `--halt-on-error` flags.
-
 ## 📚 Additional Documentation
 
 - **`LOOP.md`** (project root) - Project iteration loop and task tracking

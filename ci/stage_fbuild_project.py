@@ -13,7 +13,7 @@ from pathlib import Path
 from ci.boards import create_board
 from ci.compiler.compiler import InitResult
 from ci.compiler.path_manager import FastLEDPaths, resolve_project_root
-from ci.compiler.pio import _init_platformio_build
+from ci.compiler.pio import init_fbuild_project
 
 
 def stage_fbuild_project(
@@ -29,18 +29,17 @@ def stage_fbuild_project(
         resolve_project_root() / ".build" / "fbuild" / board.board_name
     )
     paths = FastLEDPaths(board.board_name)
-    return _init_platformio_build(
+    return init_fbuild_project(
         board=board,
         verbose=verbose,
         example=example,
         paths=paths,
         build_dir=target_dir,
         additional_defines=defines,
-        use_fbuild=True,
     )
 
 
-def _parse_args() -> argparse.Namespace:
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Stage a FastLED example for a native fbuild command"
     )
@@ -55,7 +54,7 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--build-dir", type=Path, help="Staged project directory")
     parser.add_argument("--verbose", action="store_true")
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def main() -> int:
