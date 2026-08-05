@@ -16,6 +16,9 @@ MUTEX_DISPATCH = REPO_ROOT / "src" / "platforms" / "mutex.h"
 MUTEX_IMPL = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "mutex_rp.cpp.hpp"
 SEMAPHORE_DISPATCH = REPO_ROOT / "src" / "platforms" / "semaphore.h"
 SEMAPHORE_IMPL = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "semaphore_rp.cpp.hpp"
+WIFI_API = REPO_ROOT / "src" / "fl" / "net" / "wifi.h"
+RP_WIFI_IMPL = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "wifi_rp.cpp.hpp"
+RP_BUILD = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "_build.cpp.hpp"
 
 
 def test_rp2350w_selects_the_pico_2_w_board_profile() -> None:
@@ -78,3 +81,16 @@ def test_rp_platform_dispatches_real_mutex_and_semaphore_backends() -> None:
         assert re.search(r"\bFL_IS_RP\b", source), (
             f"{source_path} does not guard on FL_IS_RP"
         )
+
+
+def test_rp2350w_selects_the_cyw43_wifi_backend() -> None:
+    """Pico 2 W must not silently fall through to the no-WiFi stubs."""
+    api_source = WIFI_API.read_text(encoding="utf-8")
+    implementation = RP_WIFI_IMPL.read_text(encoding="utf-8")
+    build_source = RP_BUILD.read_text(encoding="utf-8")
+
+    assert "FL_IS_RP2350" in api_source
+    assert "PICO_CYW43_SUPPORTED" in api_source
+    assert "FL_HAS_INCLUDE(<WiFi.h>)" in api_source
+    assert "WiFi.beginNoBlock" in implementation
+    assert '"platforms/arm/rp/wifi_rp.cpp.hpp"' in build_source

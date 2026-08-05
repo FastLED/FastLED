@@ -11,6 +11,7 @@
 #include "platforms/arm/rp/io_rp.cpp.hpp"
 #include "platforms/arm/rp/mutex_rp.cpp.hpp"
 #include "platforms/arm/rp/semaphore_rp.cpp.hpp"
+#include "platforms/arm/rp/wifi_rp.cpp.hpp"
 
 // begin sub directory includes
 #include "platforms/arm/rp/rp2040/_build.cpp.hpp"
