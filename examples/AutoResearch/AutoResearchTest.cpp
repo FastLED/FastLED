@@ -462,7 +462,8 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     // an explicit PIO backend so the DMA capture is sized per frame.
     const bool is_rp_pio_capture =
         rx_channel->backend() == fl::RxBackend::PIO ||
-        fl::strcmp(driver_name, "PIO0") == 0 || fl::strcmp(driver_name, "PIO1") == 0;
+        fl::strcmp(driver_name, "PIO0") == 0 || fl::strcmp(driver_name, "PIO1") == 0 ||
+        fl::strcmp(driver_name, "PIO2") == 0;
     if (is_rp_pio_capture) {
         // The shared result buffer is intentionally sized for the largest
         // AutoResearch run, not this frame. PIO DMA stores one word for each
@@ -569,7 +570,8 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         fl::isr::handle edge_counter;
         bool edge_counter_attached = false;
         const bool measure_rp_pio =
-            (fl::strcmp(driver_name, "PIO0") == 0 || fl::strcmp(driver_name, "PIO1") == 0) &&
+            (fl::strcmp(driver_name, "PIO0") == 0 || fl::strcmp(driver_name, "PIO1") == 0 ||
+             fl::strcmp(driver_name, "PIO2") == 0) &&
             diagnostics != nullptr;
         if (measure_rp_pio) {
             // FastLED.show() drives the channel engine until it reaches its
@@ -595,7 +597,8 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         if (edge_counter_attached && edge_counter.is_valid()) {
             fl::isr::detach_handler(edge_counter);
         }
-        if ((fl::strcmp(driver_name, "PIO0") == 0 || fl::strcmp(driver_name, "PIO1") == 0) &&
+        if ((fl::strcmp(driver_name, "PIO0") == 0 || fl::strcmp(driver_name, "PIO1") == 0 ||
+             fl::strcmp(driver_name, "PIO2") == 0) &&
             diagnostics != nullptr) {
             diagnostics->rpPioGpioTransitions = edge_counter_attached ? rising_edges.load() : -1;
         }

@@ -105,7 +105,7 @@ def _driver_name_for_environment(
         driver == "FLEX_IO"
         and _active_rp2xxx_environment(final_environment) is not None
     ):
-        # RP exposes two independent PIO engines as PIO0 and PIO1.  Their
+        # RP2040 exposes PIO0/PIO1; RP2350 adds PIO2. Their
         # concrete names must remain distinct so a runtime-exclusive test can
         # select one physical PIO block without replacing the other.
         return f"PIO{rp_pio_index}"
@@ -531,6 +531,15 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     if args.rp_pio_both and (not args.flex_io or not parallel_mode):
         print(
             f"{Fore.RED}❌ --rp-pio-both requires --flex-io --parallel{Style.RESET_ALL}"
+        )
+        return 1
+    if (
+        args.flex_io
+        and args.rp_pio_index == 2
+        and _active_rp2xxx_environment(final_environment) not in RP2350_ENVIRONMENTS
+    ):
+        print(
+            f"{Fore.RED}❌ --rp-pio-index 2 requires an RP2350 target{Style.RESET_ALL}"
         )
         return 1
     if parallel_mode:

@@ -136,7 +136,11 @@ template<> struct BusInstanceCount<Bus::SPI> { static constexpr fl::u8 value = 2
 template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 2; };
 #elif defined(FL_IS_ARM_LPC_845)
 template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 1; };
-#elif defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+#elif defined(FL_IS_RP2350)
+template<> struct BusInstanceCount<Bus::FLEX_IO> { static constexpr fl::u8 value = 3; };
+template<> struct BusInstanceCount<Bus::SPI> { static constexpr fl::u8 value = 2; };
+template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 2; };
+#elif defined(FL_IS_RP2040)
 template<> struct BusInstanceCount<Bus::FLEX_IO> { static constexpr fl::u8 value = 2; };
 template<> struct BusInstanceCount<Bus::SPI> { static constexpr fl::u8 value = 2; };
 template<> struct BusInstanceCount<Bus::UART> { static constexpr fl::u8 value = 2; };
@@ -165,6 +169,14 @@ inline const char* busDriverName(Bus b, fl::u8 which = 0, bool spi = false) FL_N
 #if defined(FL_IS_TEENSY_4X)
             (void)spi;
             return which == 0 ? "OBJECT_FLED" : "FLEX_IO";
+#elif defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+            (void)spi;
+            if (which == 0) return "PIO0";
+            if (which == 1) return "PIO1";
+            #if defined(FL_IS_RP2350)
+            if (which == 2) return "PIO2";
+            #endif
+            return "FLEX_IO_UNAVAILABLE";
 #elif defined(FL_IS_ESP32)
 #if FASTLED_HAS_PARLIO
             (void)which;

@@ -156,6 +156,28 @@ template<> struct DeviceInfoResolver<Bus::UART, 0> {
     }
 };
 
+#elif defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+
+template<> struct DeviceInfoResolver<Bus::FLEX_IO, 0> {
+    static inline DeviceInfo get() FL_NO_EXCEPT {
+        return makeInfo(Bus::FLEX_IO, 0, "PIO", "RP PIO0");
+    }
+};
+
+template<> struct DeviceInfoResolver<Bus::FLEX_IO, 1> {
+    static inline DeviceInfo get() FL_NO_EXCEPT {
+        return makeInfo(Bus::FLEX_IO, 1, "PIO", "RP PIO1");
+    }
+};
+
+#if defined(FL_IS_RP2350)
+template<> struct DeviceInfoResolver<Bus::FLEX_IO, 2> {
+    static inline DeviceInfo get() FL_NO_EXCEPT {
+        return makeInfo(Bus::FLEX_IO, 2, "PIO", "RP2350 PIO2");
+    }
+};
+#endif
+
 #elif defined(FL_IS_ESP32)
 
 template<> struct DeviceInfoResolver<Bus::RMT, 0> {

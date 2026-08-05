@@ -88,6 +88,9 @@ fl::json autoResearchDeviceJson(const fl::string& name) {
         name == "LCD_CLOCKLESS" || name == "I2S" || name == "I2S_SPI") {
         return fl::deviceJson<fl::Bus::FLEX_IO, 0>();
     }
+    if (name == "PIO0") return fl::deviceJson<fl::Bus::FLEX_IO, 0>();
+    if (name == "PIO1") return fl::deviceJson<fl::Bus::FLEX_IO, 1>();
+    if (name == "PIO2") return fl::deviceJson<fl::Bus::FLEX_IO, 2>();
 
     fl::json info = fl::json::object();
     info.set("bus", static_cast<int64_t>(0));

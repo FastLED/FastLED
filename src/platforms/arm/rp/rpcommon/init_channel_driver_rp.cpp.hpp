@@ -107,6 +107,9 @@ void initChannelDrivers() {
     BusTraits<Bus::SPI, 1>::registerWithManager();
     BusTraits<Bus::FLEX_IO, 0>::registerWithManager();
     BusTraits<Bus::FLEX_IO, 1>::registerWithManager();
+#if defined(FL_IS_RP2350)
+    BusTraits<Bus::FLEX_IO, 2>::registerWithManager();
+#endif
 
     FL_DBG_F("RP2040/RP2350: Channel drivers initialized");
 }

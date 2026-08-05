@@ -19,7 +19,8 @@ class ChannelEngineRpPio final : public IChannelDriver {
   public:
     explicit ChannelEngineRpPio(fl::shared_ptr<IRpPioTxPeripheral> peripheral,
                                 fl::shared_ptr<IRpPioSpiPeripheral> spi_peripheral =
-                                    fl::shared_ptr<IRpPioSpiPeripheral>()) FL_NO_EXCEPT;
+                                    fl::shared_ptr<IRpPioSpiPeripheral>(),
+                                const char* driver_name = "FLEX_IO") FL_NO_EXCEPT;
     ~ChannelEngineRpPio() override;
 
     bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
@@ -34,7 +35,7 @@ class ChannelEngineRpPio final : public IChannelDriver {
     size_t lastWordCount() const FL_NO_EXCEPT { return mLastWordCount; }
 
     fl::string getName() const FL_NO_EXCEPT override {
-        return fl::string::from_literal("FLEX_IO");
+        return fl::string::from_literal(mDriverName);
     }
     Capabilities getCapabilities() const FL_NO_EXCEPT override {
         return Capabilities(true, true);
@@ -50,6 +51,7 @@ class ChannelEngineRpPio final : public IChannelDriver {
 
     fl::shared_ptr<IRpPioTxPeripheral> mPeripheral;
     fl::shared_ptr<IRpPioSpiPeripheral> mSpiPeripheral;
+    const char* mDriverName;
     fl::vector<ChannelDataPtr> mPendingChannels;
     fl::vector<ChannelDataPtr> mInFlightChannels;
     fl::vector<u32> mPioWords;

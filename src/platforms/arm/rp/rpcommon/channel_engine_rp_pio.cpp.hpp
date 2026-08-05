@@ -25,8 +25,10 @@ bool isNativeSpiPinPair(const SpiChipsetConfig& config) FL_NO_EXCEPT {
 
 ChannelEngineRpPio::ChannelEngineRpPio(
     fl::shared_ptr<IRpPioTxPeripheral> peripheral,
-    fl::shared_ptr<IRpPioSpiPeripheral> spi_peripheral) FL_NO_EXCEPT
+    fl::shared_ptr<IRpPioSpiPeripheral> spi_peripheral,
+    const char* driver_name) FL_NO_EXCEPT
     : mPeripheral(fl::move(peripheral)), mSpiPeripheral(fl::move(spi_peripheral)),
+      mDriverName(driver_name != nullptr ? driver_name : "FLEX_IO"),
       mCurrentChannel(0), mLatchStartUs(0), mLatchDurationUs(0),
       mActiveLaneCount(1), mActiveMode(Mode::Clockless), mActive(false),
       mLatchPending(false), mFailed(false),

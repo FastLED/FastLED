@@ -312,14 +312,17 @@ See Also:
         driver_group.add_argument(
             "--flex-io",
             action="store_true",
-            help="Test only FlexIO clockless driver (Teensy 4.x only; requires --tx-pin in {6-13,32})",
+            help=(
+                "Test FlexIO clockless (Teensy 4.x; requires --tx-pin in {6-13,32}) "
+                "or RP PIO clockless (RP2040/RP2350)"
+            ),
         )
         driver_group.add_argument(
             "--rp-pio-index",
             type=int,
-            choices=(0, 1),
+            choices=(0, 1, 2),
             default=1,
-            help="RP2040/RP2350 PIO engine for --flex-io (default: 1).",
+            help="RP PIO engine for --flex-io; PIO2 requires RP2350 (default: 1).",
         )
         driver_group.add_argument(
             "--rp-pio-both",
