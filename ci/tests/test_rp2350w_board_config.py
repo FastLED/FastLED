@@ -19,6 +19,8 @@ SEMAPHORE_IMPL = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "semaphore_rp.
 WIFI_API = REPO_ROOT / "src" / "fl" / "net" / "wifi.h"
 RP_WIFI_IMPL = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "wifi_rp.cpp.hpp"
 RP_BUILD = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "_build.cpp.hpp"
+AUTORESEARCH_NET = REPO_ROOT / "examples" / "AutoResearch" / "AutoResearchNet.cpp"
+AUTORESEARCH_SKETCH = REPO_ROOT / "examples" / "AutoResearch" / "AutoResearch.ino"
 
 
 def test_rp2350w_selects_the_pico_2_w_board_profile() -> None:
@@ -94,3 +96,16 @@ def test_rp2350w_selects_the_cyw43_wifi_backend() -> None:
     assert "FL_HAS_INCLUDE(<WiFi.h>)" in api_source
     assert "WiFi.beginNoBlock" in implementation
     assert '"platforms/arm/rp/wifi_rp.cpp.hpp"' in build_source
+
+
+def test_rp2350w_autoresearch_exposes_the_cyw43_http_peer_surface() -> None:
+    """The C6 peer can drive RP2350W HTTP through the existing RPC plane."""
+    net_source = AUTORESEARCH_NET.read_text(encoding="utf-8")
+    sketch_source = AUTORESEARCH_SKETCH.read_text(encoding="utf-8")
+
+    assert "defined(FL_IS_RP2350)" in net_source
+    assert "WiFiClient" in net_source
+    assert "WiFiServer" in net_source
+    assert "fl::Singleton<RpPeerState>::instance()" in net_source
+    assert "void pollNetServer()" in net_source
+    assert "pollNetServer();" in sketch_source

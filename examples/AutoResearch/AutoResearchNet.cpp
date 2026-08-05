@@ -486,7 +486,246 @@ fl::json stopNet() {
     return response;
 }
 
-#else  // !FL_IS_ESP32 || !SOC_WIFI_SUPPORTED
+void pollNetServer() {}
+
+#elif defined(FL_IS_RP2350) && defined(PICO_CYW43_SUPPORTED)
+
+// ============================================================================
+// RP2350W CYW43 peer implementation
+// ============================================================================
+//
+// Arduino-Pico exposes lwIP through WiFiClient/WiFiServer rather than the
+// ESP-IDF APIs used above. Keep this deliberately small: it provides the same
+// GET endpoints as the C6 fixture and the matching outbound GET checks, while
+// the sketch loop calls pollNetServer() to service one peer at a time.
+
+#include "fl/net/wifi.h"
+#include "fl/stl/cstdio.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/singleton.h"
+#include "fl/stl/unique_ptr.h"
+
+// IWYU pragma: begin_keep
+#include <WiFi.h>
+// IWYU pragma: end_keep
+
+namespace {
+
+struct RpPeerState {
+    fl::unique_ptr<WiFiServer> server;
+    fl::unique_ptr<WiFiClient> client;
+    char request[128] = {};
+    size_t request_length = 0;
+};
+
+RpPeerState& rpPeerState() {
+    return fl::Singleton<RpPeerState>::instance();
+}
+
+void writeHttpResponse(WiFiClient& client, const char* body,
+                       const char* content_type) {
+    client.print("HTTP/1.1 200 OK\r\nContent-Type: ");
+    client.print(content_type);
+    client.print("\r\nContent-Length: ");
+    client.print(fl::strlen(body));
+    client.print("\r\nConnection: close\r\n\r\n");
+    client.print(body);
+    client.stop();
+}
+
+fl::json runRpHttpGetTest(const char* host_ip, uint16_t port,
+                          const char* path, const char* test_name) {
+    fl::json result = fl::json::object();
+    result.set("test", test_name);
+
+    WiFiClient client;
+    if (!client.connect(host_ip, port)) {
+        result.set("passed", false);
+        result.set("error", "TCP connect failed");
+        return result;
+    }
+
+    client.print("GET ");
+    client.print(path);
+    client.print(" HTTP/1.1\r\nHost: ");
+    client.print(host_ip);
+    client.print("\r\nConnection: close\r\n\r\n");
+
+    const uint32_t deadline_ms = millis() + 2000;
+    while (!client.available() && client.connected() &&
+           static_cast<int32_t>(millis() - deadline_ms) < 0) {
+        FastLED.watchdog().feed();
+        delay(1);
+    }
+
+    char status_line[64];
+    size_t length = 0;
+    while (client.available() && length + 1 < sizeof(status_line)) {
+        const int ch = client.read();
+        if (ch < 0 || ch == '\n') {
+            break;
+        }
+        if (ch != '\r') {
+            status_line[length++] = static_cast<char>(ch);
+        }
+    }
+    status_line[length] = '\0';
+    client.stop();
+
+    const bool passed = fl::strncmp(status_line, "HTTP/1.1 200", 12) == 0 ||
+                        fl::strncmp(status_line, "HTTP/1.0 200", 12) == 0;
+    result.set("status_line", status_line);
+    result.set("passed", passed);
+    if (!passed) {
+        result.set("error", "Expected HTTP 200");
+    }
+    return result;
+}
+
+} // namespace
+
+fl::json startNetServer() {
+    fl::json response = fl::json::object();
+    if (!fl::net::wifi::isConnected()) {
+        response.set("success", false);
+        response.set("error", "WiFi station is not connected");
+        return response;
+    }
+
+    RpPeerState& state = rpPeerState();
+    if (!state.server) {
+        state.server = fl::make_unique<WiFiServer>(AUTORESEARCH_NET_SERVER_PORT);
+        state.server->begin();
+        state.server->setNoDelay(true);
+    }
+    s_net_state.http_server_active = true;
+    response.set("success", true);
+    response.set("ip", fl::net::wifi::ipAddress().c_str());
+    response.set("port", static_cast<int64_t>(AUTORESEARCH_NET_SERVER_PORT));
+    return response;
+}
+
+fl::json startNetClient() {
+    fl::json response = fl::json::object();
+    response.set("success", fl::net::wifi::isConnected());
+    response.set("ip", fl::net::wifi::ipAddress().c_str());
+    return response;
+}
+
+fl::json runNetClientTest(const char* host_ip, uint16_t port) {
+    fl::json response = fl::json::object();
+    if (host_ip == nullptr || *host_ip == '\0' ||
+        !fl::net::wifi::isConnected()) {
+        response.set("success", false);
+        response.set("error", "WiFi station is not connected");
+        return response;
+    }
+
+    fl::json results = fl::json::array();
+    const char* paths[] = {"/ping", "/status", "/leds"};
+    const char* names[] = {"GET /ping", "GET /status", "GET /leds"};
+    int passed = 0;
+    for (size_t i = 0; i < 3; ++i) {
+        fl::json result = runRpHttpGetTest(host_ip, port, paths[i], names[i]);
+        const auto result_passed = result[fl::string("passed")].as_bool();
+        if (result_passed.has_value() && result_passed.value()) {
+            ++passed;
+        }
+        results.push_back(result);
+        FastLED.watchdog().feed();
+    }
+
+    response.set("success", passed == 3);
+    response.set("tests_passed", static_cast<int64_t>(passed));
+    response.set("tests_failed", static_cast<int64_t>(3 - passed));
+    response.set("results", results);
+    return response;
+}
+
+fl::json runNetLoopback() {
+    fl::json response = fl::json::object();
+    response.set("success", false);
+    response.set("error", "Loopback is not applicable to the CYW43 peer path");
+    return response;
+}
+
+fl::json stopNet() {
+    fl::json response = fl::json::object();
+    RpPeerState& state = rpPeerState();
+    if (state.client) {
+        state.client->stop();
+        state.client.reset();
+    }
+    state.request_length = 0;
+    if (state.server) {
+        state.server->stop();
+        state.server.reset();
+    }
+    s_net_state.http_server_active = false;
+    s_net_state.wifi_ap_active = false;
+    fl::net::wifi::stop();
+    response.set("success", true);
+    return response;
+}
+
+void pollNetServer() {
+    RpPeerState& state = rpPeerState();
+    if (!state.server) {
+        return;
+    }
+    if (!state.client && state.server->hasClient()) {
+        state.client = fl::make_unique<WiFiClient>(state.server->accept());
+        state.request_length = 0;
+    }
+    if (!state.client || !state.client->available()) {
+        return;
+    }
+
+    bool request_line_complete = false;
+    while (state.client->available() &&
+           state.request_length + 1 < sizeof(state.request)) {
+        const int ch = state.client->read();
+        if (ch < 0) {
+            break;
+        }
+        if (ch == '\n') {
+            request_line_complete = true;
+            break;
+        }
+        if (ch != '\r') {
+            state.request[state.request_length++] = static_cast<char>(ch);
+        }
+    }
+    if (!request_line_complete) {
+        if (state.request_length + 1 == sizeof(state.request)) {
+            state.client->print(
+                "HTTP/1.1 414 URI Too Long\r\nConnection: close\r\n\r\n");
+            state.client->stop();
+            state.client.reset();
+            state.request_length = 0;
+        }
+        return;
+    }
+    state.request[state.request_length] = '\0';
+
+    if (fl::strncmp(state.request, "GET /ping ", 10) == 0) {
+        writeHttpResponse(*state.client, "pong", "text/plain");
+    } else if (fl::strncmp(state.request, "GET /status ", 12) == 0) {
+        writeHttpResponse(*state.client,
+                          "{\"chip\":\"rp2350w\",\"network\":\"cyw43\"}",
+                          "application/json");
+    } else if (fl::strncmp(state.request, "GET /leds ", 10) == 0) {
+        writeHttpResponse(*state.client, "{\"num_leds\":10,\"brightness\":64}",
+                          "application/json");
+    } else {
+        state.client->print("HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n");
+        state.client->stop();
+    }
+    state.client.reset();
+    state.request_length = 0;
+}
+
+#else  // !FL_IS_ESP32 && !FL_IS_RP2350
 
 // ============================================================================
 // Stub Implementation for Non-ESP32 Platforms
@@ -528,6 +767,8 @@ fl::json stopNet() {
     return response;
 }
 
-#endif  // FL_IS_ESP32
+void pollNetServer() {}
+
+#endif  // FL_IS_ESP32 || FL_IS_RP2350
 
 #endif  // !FASTLED_AUTORESEARCH_LOW_MEMORY
