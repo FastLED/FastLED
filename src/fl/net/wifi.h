@@ -34,8 +34,10 @@
 #endif
 
 /// 1 when a real WiFi implementation is compiled in; 0 → stubs.
-#if defined(FL_IS_ESP32) && defined(SOC_WIFI_SUPPORTED) && SOC_WIFI_SUPPORTED && \
-    FL_HAS_INCLUDE(<esp_wifi.h>)
+#if (defined(FL_IS_ESP32) && defined(SOC_WIFI_SUPPORTED) && SOC_WIFI_SUPPORTED && \
+     FL_HAS_INCLUDE(<esp_wifi.h>)) || \
+    (defined(FL_IS_RP2350) && defined(PICO_CYW43_SUPPORTED) && \
+     FL_HAS_INCLUDE(<WiFi.h>))
 #define FL_WIFI_AVAILABLE 1
 #else
 #define FL_WIFI_AVAILABLE 0
@@ -61,8 +63,8 @@ const char* toString(Status s) FL_NO_EXCEPT;
 /// @brief Start an asynchronous station-mode join.
 ///
 /// Returns immediately; poll status()/isConnected(). Calling again with
-/// different credentials restarts the join. Coexists with an active
-/// SoftAP (APSTA mode).
+/// different credentials restarts the join. On platforms with APSTA support,
+/// it can coexist with an active SoftAP.
 /// @return false if the WiFi driver could not be started at all.
 bool connectSta(const char* ssid, const char* password) FL_NO_EXCEPT;
 
