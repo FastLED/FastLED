@@ -203,6 +203,11 @@ void loop()  { autoResearchLowMemoryLoop(); }
 // ============================================================================
 
 #include <FastLED.h>
+#if defined(PICO_CYW43_SUPPORTED)
+// Keep Arduino-Pico's WiFi library visible to fbuild's sketch dependency
+// resolver. The RP2350W implementation itself remains in AutoResearchNet.cpp.
+#include <WiFi.h>
+#endif
 #include "fl/channels/all_drivers.h"  // for FastLED.enableAllDrivers() post-#2428
 #include "fl/wdt/watchdog.h"  // FL_WATCHDOG_AUTO() — unified cross-platform WDT guard
 #include "fl/stl/undef.h"  // Undefine Arduino macros (DEFAULT, INPUT, OUTPUT)
@@ -577,6 +582,10 @@ void loop() {
     for (int i = 0; i < 100; i++) {
         fl::task::run();
     }
+
+    // Arduino-Pico's CYW43 HTTP endpoint runs cooperatively from loop().
+    // ESP32's native HTTP server has its own task, so this is a no-op there.
+    pollNetServer();
 
     // ========================================================================
     // Watchdog autoresearch trigger (FastLED#2731) — when the host RPC sends

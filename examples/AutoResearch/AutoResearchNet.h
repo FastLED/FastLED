@@ -55,6 +55,10 @@ fl::json runNetLoopback();
 /// @return JSON with {success: true} on success
 fl::json stopNet();
 
+/// @brief Service pending peer HTTP requests from the sketch loop.
+/// ESP32 uses its native HTTP server task; Arduino-Pico uses this poll hook.
+void pollNetServer();
+
 /// @brief Get current network autoresearch state.
 /// @return Reference to the global net state
 AutoResearchNetState& getNetState();
