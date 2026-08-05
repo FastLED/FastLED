@@ -46,7 +46,7 @@ constexpr int default_bus_priority(Bus b, fl::u8 which) FL_NO_EXCEPT {
     // secondary (classic-ESP32 I2S0 second bank, ESP32-P4 LCD_RGB —
     // FastLED#3576 Phase 1).
     return
-        b == Bus::FLEX_IO   ? (which == 0 ? 4 : 3) :
+        b == Bus::FLEX_IO   ? (which == 0 ? 4 : which == 1 ? 3 : 2) :
         b == Bus::RMT       ? 2  :
         b == Bus::SPI       ? 1  :
         b == Bus::DUAL_SPI  ? 1  :

@@ -236,6 +236,7 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
                 else if (n == "FLEX_IO")       { opts.mBus = fl::Bus::FLEX_IO; opts.mBusWhich = 1; }
                 else if (n == "PIO0")          { opts.mBus = fl::Bus::FLEX_IO; opts.mBusWhich = 0; }
                 else if (n == "PIO1")          { opts.mBus = fl::Bus::FLEX_IO; opts.mBusWhich = 1; }
+                else if (n == "PIO2")          { opts.mBus = fl::Bus::FLEX_IO; opts.mBusWhich = 2; }
                 else if (n == "OBJECT_FLED")   opts.mBus = fl::Bus::FLEX_IO;
                 else if (n == "LPUART")        opts.mBus = fl::Bus::UART;
                 else if (n == "BIT_BANG")      opts.mBus = fl::Bus::BIT_BANG;

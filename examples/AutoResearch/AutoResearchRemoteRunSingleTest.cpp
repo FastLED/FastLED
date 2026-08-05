@@ -1048,6 +1048,16 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         response.set("rpPioStartSucceeded", pio.lastStartSucceeded());
         response.set("rpPioWordCount", static_cast<int64_t>(pio.lastWordCount()));
     }
+    #if defined(FL_IS_RP2350)
+    if (driver_name == "PIO2") {
+        auto& pio = fl::BusTraits<fl::Bus::FLEX_IO, 2>::instance();
+        response.set("rpPioActive", pio.isActive());
+        response.set("rpPioLastError", pio.lastError().c_str());
+        response.set("rpPioStartAttempted", pio.lastStartAttempted());
+        response.set("rpPioStartSucceeded", pio.lastStartSucceeded());
+        response.set("rpPioWordCount", static_cast<int64_t>(pio.lastWordCount()));
+    }
+    #endif
 #endif
 
     fl::json sizes_response = fl::json::array();

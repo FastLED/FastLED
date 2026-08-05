@@ -828,6 +828,33 @@ class TestParseArgsAndBuildCommands:
         assert result.drivers == ["PIO0"]
         assert result.json_rpc_commands[0]["params"]["driver"] == "PIO0"
 
+    def test_flex_io_selects_pio2_on_rp2350(self, fake_project_dir: Path) -> None:
+        args = _make_args(
+            parlio=False,
+            flex_io=True,
+            rp_pio_index=2,
+            environment_positional="rp2350w",
+            project_dir=fake_project_dir,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["PIO2"]
+        assert result.json_rpc_commands[0]["params"]["driver"] == "PIO2"
+
+    def test_flex_io_rejects_pio2_on_rp2040(self, fake_project_dir: Path) -> None:
+        args = _make_args(
+            parlio=False,
+            flex_io=True,
+            rp_pio_index=2,
+            environment_positional="rp2040",
+            project_dir=fake_project_dir,
+        )
+        assert _parse_args_and_build_commands(args) == 1
+
     @pytest.mark.parametrize(
         "environment",
         (

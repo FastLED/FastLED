@@ -4,6 +4,7 @@
 #include "test.h"
 
 #include "fl/channels/data.h"
+#include "fl/channels/manager.h"
 #include "fl/chipsets/spi.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/move.h"
@@ -315,6 +316,28 @@ FL_TEST_CASE("RP FLEX_IO PIO SPI sends arbitrary pin pairs") {
     FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::READY);
     FL_CHECK_FALSE(channel->isInUse());
     FL_CHECK_EQ(spiMock.deinitializeCalls, 1);
+}
+
+FL_TEST_CASE("RP PIO instances preserve distinct concrete driver names") {
+    const fl::shared_ptr<IRpPioSpiPeripheral> no_spi;
+    auto pio0 = fl::make_shared<ChannelEngineRpPio>(
+        fl::make_shared<PioTxMock>(), no_spi, "PIO0");
+    auto pio1 = fl::make_shared<ChannelEngineRpPio>(
+        fl::make_shared<PioTxMock>(), no_spi, "PIO1");
+    auto pio2 = fl::make_shared<ChannelEngineRpPio>(
+        fl::make_shared<PioTxMock>(), no_spi, "PIO2");
+
+    ChannelManager& manager = ChannelManager::instance();
+    manager.clearAllDrivers();
+    manager.addDriver(4, pio0);
+    manager.addDriver(3, pio1);
+    manager.addDriver(2, pio2);
+
+    FL_CHECK_EQ(manager.getDriverCount(), static_cast<fl::size>(3));
+    FL_CHECK(manager.getDriverByName("PIO0") != nullptr);
+    FL_CHECK(manager.getDriverByName("PIO1") != nullptr);
+    FL_CHECK(manager.getDriverByName("PIO2") != nullptr);
+    manager.clearAllDrivers();
 }
 
 FL_TEST_CASE("RP FLEX_IO defers native SPI pin pairs to the hardware driver") {
