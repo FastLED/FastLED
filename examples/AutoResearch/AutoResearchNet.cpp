@@ -599,7 +599,8 @@ void writeHttpNotFoundResponse(WiFiClient& client, const char* body) {
 }
 
 fl::json runRpHttpGetTest(const char* host_ip, uint16_t port,
-                          const char* path, const char* test_name) {
+                          const char* path, const char* test_name,
+                          const char* expected_fragment) {
     fl::json result = fl::json::object();
     result.set("test", test_name);
 
@@ -635,14 +636,31 @@ fl::json runRpHttpGetTest(const char* host_ip, uint16_t port,
         }
     }
     status_line[length] = '\0';
+    char response[256] = {};
+    size_t response_length = 0;
+    while (static_cast<int32_t>(millis() - deadline_ms) < 0 &&
+           (client.connected() || client.available())) {
+        while (client.available() && response_length + 1 < sizeof(response)) {
+            const int ch = client.read();
+            if (ch < 0) {
+                break;
+            }
+            response[response_length++] = static_cast<char>(ch);
+        }
+        FastLED.watchdog().feed();
+        delay(1);
+    }
     client.stop();
+    response[response_length] = '\0';
 
     const bool passed = fl::strncmp(status_line, "HTTP/1.1 200", 12) == 0 ||
                         fl::strncmp(status_line, "HTTP/1.0 200", 12) == 0;
+    const bool content_ok = expected_fragment == nullptr ||
+                            fl::strstr(response, expected_fragment) != nullptr;
     result.set("status_line", status_line);
-    result.set("passed", passed);
-    if (!passed) {
-        result.set("error", "Expected HTTP 200");
+    result.set("passed", passed && content_ok);
+    if (!passed || !content_ok) {
+        result.set("error", passed ? "Unexpected response body" : "Expected HTTP 200");
     }
     return result;
 }
@@ -780,9 +798,12 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
                            "/rpc/ping", "/rpc/status"};
     const char* names[] = {"GET /ping", "GET /status", "GET /leds",
                            "GET /rpc/discover", "GET /rpc/ping", "GET /rpc/status"};
+    const char* expected[] = {"pong", "\"chip\"", "num_leds", "\"methods\"",
+                              "\"pong\":true", "\"ready\":true"};
     int passed = 0;
     for (size_t i = 0; i < 6; ++i) {
-        fl::json result = runRpHttpGetTest(host_ip, port, paths[i], names[i]);
+        fl::json result = runRpHttpGetTest(host_ip, port, paths[i], names[i],
+                                           expected[i]);
         const auto result_passed = result[fl::string("passed")].as_bool();
         if (result_passed.has_value() && result_passed.value()) {
             ++passed;
