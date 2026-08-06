@@ -5,12 +5,14 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.5.13. It carries library-dependency fixes for Teensy/STM32,
-    # stale daemon/install-lock recovery, and hardened RP2350 UF2 deployment,
-    # plus the monitor WebSocket and serial-health fixes required by
-    # AutoResearch.
+    # Pin to fbuild 2.5.14. It carries library-dependency fixes for Teensy/STM32,
+    # stale daemon/install-lock recovery, and hardened RP2350 UF2 deployment
+    # that binds picotool to the selected board rather than a USB enumeration.
     #
     # Pin history:
+    #   2.5.14 -- binds RP2040/RP2350 picotool deployment to the selected
+    #              board and refuses Windows USB Code 43 devices
+    #              (FastLED/fbuild#1260).
     #   2.5.13 -- canonicalizes named local `symlink://` and `file://` roots
     #              before resolving manifest-relative paths (FastLED/fbuild#1258).
     #   2.5.12 -- resolves named local `symlink://` and `file://` library
@@ -184,7 +186,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.13",
+    "fbuild==2.5.14",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",

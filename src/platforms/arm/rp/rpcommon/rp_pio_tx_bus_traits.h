@@ -11,6 +11,7 @@
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/manager.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/type_traits.h"
 #include "platforms/arm/rp/rpcommon/channel_engine_rp_pio.h"
 #include "platforms/arm/rp/rpcommon/rp_pio_spi_peripheral.h"
@@ -38,8 +39,7 @@ struct RpPioTxBusHolder {
 
 template<u8 Which>
 inline fl::shared_ptr<ChannelEngineRpPio> rpPioTxInstancePtr() FL_NO_EXCEPT {
-    static RpPioTxBusHolder<Which> holder;
-    return holder.driver;
+    return SingletonShared<RpPioTxBusHolder<Which>>::instance().driver;
 }
 
 }  // namespace detail
