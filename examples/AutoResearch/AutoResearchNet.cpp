@@ -212,6 +212,34 @@ static bool startHttpServer() {
         return resp;
     });
 
+    // Network-carried JSON-RPC contract for the peer fixture. These responses
+    // stay string-only because the ESP HTTP task must not construct fl::json
+    // objects concurrently with the sketch loop (#3588).
+    espNetState().http_server->get("/rpc/discover", [](const fl::asio::http::Request&) {
+        fl::asio::http::Response resp = fl::asio::http::Response::ok(
+            "{\"jsonrpc\":\"2.0\",\"result\":{\"methods\":[\"rpc.discover\",\"ping\",\"debugTest\",\"status\"]},\"id\":1}");
+        resp.header("Content-Type", "application/json");
+        return resp;
+    });
+    espNetState().http_server->get("/rpc/ping", [](const fl::asio::http::Request&) {
+        fl::asio::http::Response resp = fl::asio::http::Response::ok(
+            "{\"jsonrpc\":\"2.0\",\"result\":{\"pong\":true},\"id\":1}");
+        resp.header("Content-Type", "application/json");
+        return resp;
+    });
+    espNetState().http_server->get("/rpc/status", [](const fl::asio::http::Request&) {
+        fl::asio::http::Response resp = fl::asio::http::Response::ok(
+            "{\"jsonrpc\":\"2.0\",\"result\":{\"ready\":true},\"id\":1}");
+        resp.header("Content-Type", "application/json");
+        return resp;
+    });
+    espNetState().http_server->get("/rpc/unknown", [](const fl::asio::http::Request&) {
+        fl::asio::http::Response resp = fl::asio::http::Response::not_found();
+        resp.body("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32601,\"message\":\"Method not found\"},\"id\":1}");
+        resp.header("Content-Type", "application/json");
+        return resp;
+    });
+
     if (!espNetState().http_server->start(getNetState().server_port)) {
         FL_WARN("[NET] HTTP server failed to start: " << espNetState().http_server->last_error().c_str());
         espNetState().http_server.reset();
@@ -346,9 +374,15 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
     char url_ping[128];
     char url_status[128];
     char url_leds[128];
+    char url_rpc_discover[128];
+    char url_rpc_ping[128];
+    char url_rpc_status[128];
     snprintf(url_ping, sizeof(url_ping), "http://%s:%u/ping", host_ip, port);
     snprintf(url_status, sizeof(url_status), "http://%s:%u/status", host_ip, port);
     snprintf(url_leds, sizeof(url_leds), "http://%s:%u/leds", host_ip, port);
+    snprintf(url_rpc_discover, sizeof(url_rpc_discover), "http://%s:%u/rpc/discover", host_ip, port);
+    snprintf(url_rpc_ping, sizeof(url_rpc_ping), "http://%s:%u/rpc/ping", host_ip, port);
+    snprintf(url_rpc_status, sizeof(url_rpc_status), "http://%s:%u/rpc/status", host_ip, port);
 
     // Test 1: GET /ping
     {
@@ -388,6 +422,20 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
             tests_failed++;
         }
         results.push_back(r);
+    }
+
+    const char* rpc_urls[] = {url_rpc_discover, url_rpc_ping, url_rpc_status};
+    const char* rpc_names[] = {"GET /rpc/discover", "GET /rpc/ping", "GET /rpc/status"};
+    for (size_t i = 0; i < 3; ++i) {
+        fl::json r = runHttpGetTest(rpc_urls[i], rpc_names[i]);
+        auto passed = r[fl::string("passed")].as_bool();
+        if (passed.has_value() && passed.value()) {
+            tests_passed++;
+        } else {
+            tests_failed++;
+        }
+        results.push_back(r);
+        FastLED.watchdog().feed();
     }
 
     response.set("success", tests_failed == 0);
@@ -541,6 +589,14 @@ void writeHttpResponse(WiFiClient& client, const char* body,
     client.stop();
 }
 
+void writeHttpNotFoundResponse(WiFiClient& client, const char* body) {
+    client.print("HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\nContent-Length: ");
+    client.print(fl::strlen(body));
+    client.print("\r\nConnection: close\r\n\r\n");
+    client.print(body);
+    client.stop();
+}
+
 fl::json runRpHttpGetTest(const char* host_ip, uint16_t port,
                           const char* path, const char* test_name) {
     fl::json result = fl::json::object();
@@ -630,10 +686,12 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
     }
 
     fl::json results = fl::json::array();
-    const char* paths[] = {"/ping", "/status", "/leds"};
-    const char* names[] = {"GET /ping", "GET /status", "GET /leds"};
+    const char* paths[] = {"/ping", "/status", "/leds", "/rpc/discover",
+                           "/rpc/ping", "/rpc/status"};
+    const char* names[] = {"GET /ping", "GET /status", "GET /leds",
+                           "GET /rpc/discover", "GET /rpc/ping", "GET /rpc/status"};
     int passed = 0;
-    for (size_t i = 0; i < 3; ++i) {
+    for (size_t i = 0; i < 6; ++i) {
         fl::json result = runRpHttpGetTest(host_ip, port, paths[i], names[i]);
         const auto result_passed = result[fl::string("passed")].as_bool();
         if (result_passed.has_value() && result_passed.value()) {
@@ -643,9 +701,9 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
         FastLED.watchdog().feed();
     }
 
-    response.set("success", passed == 3);
+    response.set("success", passed == 6);
     response.set("tests_passed", static_cast<int64_t>(passed));
-    response.set("tests_failed", static_cast<int64_t>(3 - passed));
+    response.set("tests_failed", static_cast<int64_t>(6 - passed));
     response.set("results", results);
     return response;
 }
@@ -725,6 +783,21 @@ void pollNetServer() {
     } else if (fl::strncmp(state.request, "GET /leds ", 10) == 0) {
         writeHttpResponse(*state.client, "{\"num_leds\":10,\"brightness\":64}",
                           "application/json");
+    } else if (fl::strncmp(state.request, "GET /rpc/discover ", 18) == 0) {
+        writeHttpResponse(*state.client,
+                          "{\"jsonrpc\":\"2.0\",\"result\":{\"methods\":[\"rpc.discover\",\"ping\",\"debugTest\",\"status\"]},\"id\":1}",
+                          "application/json");
+    } else if (fl::strncmp(state.request, "GET /rpc/ping ", 14) == 0) {
+        writeHttpResponse(*state.client,
+                          "{\"jsonrpc\":\"2.0\",\"result\":{\"pong\":true},\"id\":1}",
+                          "application/json");
+    } else if (fl::strncmp(state.request, "GET /rpc/status ", 16) == 0) {
+        writeHttpResponse(*state.client,
+                          "{\"jsonrpc\":\"2.0\",\"result\":{\"ready\":true},\"id\":1}",
+                          "application/json");
+    } else if (fl::strncmp(state.request, "GET /rpc/unknown ", 17) == 0) {
+        writeHttpNotFoundResponse(*state.client,
+                                  "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32601,\"message\":\"Method not found\"},\"id\":1}");
     } else {
         state.client->print("HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n");
         state.client->stop();
