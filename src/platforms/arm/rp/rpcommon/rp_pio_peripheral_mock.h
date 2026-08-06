@@ -6,9 +6,9 @@
 /// @brief Host-testable RP PIO TX/SPI peripheral implementations.
 ///
 /// These mocks implement the same peripheral seams used by
-/// `ChannelEngineRpPio`. They deliberately carry no global state: each test
-/// owns its peripheral, can inject a lifecycle failure, and can inspect the
-/// exact words submitted to DMA.
+/// `ChannelEngineRpPio`. Each represents one hardware peripheral, so tests
+/// access it through `instance()` and reset it before use. The backing storage
+/// lives in a test-only `.cpp.hpp` behind `fl::Singleton<T>`.
 
 #include "fl/stl/vector.h"
 #include "platforms/arm/rp/rpcommon/irp_pio_spi_peripheral.h"
@@ -18,6 +18,8 @@ namespace fl {
 
 class RpPioTxPeripheralMock final : public IRpPioTxPeripheral {
   public:
+    static RpPioTxPeripheralMock& instance() FL_NO_EXCEPT;
+
     bool configure(const RpPioTxConfig& config) FL_NO_EXCEPT override {
         lastConfig = config;
         ++configureCalls;
@@ -83,6 +85,8 @@ class RpPioTxPeripheralMock final : public IRpPioTxPeripheral {
 
 class RpPioSpiPeripheralMock final : public IRpPioSpiPeripheral {
   public:
+    static RpPioSpiPeripheralMock& instance() FL_NO_EXCEPT;
+
     bool configure(const RpPioSpiConfig& config) FL_NO_EXCEPT override {
         lastConfig = config;
         ++configureCalls;

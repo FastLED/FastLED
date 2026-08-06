@@ -9,6 +9,7 @@
 #include "platforms/arm/rp/rpcommon/channel_engine_rp_uart.cpp.hpp"
 #include "platforms/arm/rp/rpcommon/clockless_rp_pio_auto.cpp.hpp"
 #include "platforms/arm/rp/rpcommon/init_channel_driver_rp.cpp.hpp"
+#include "platforms/arm/rp/rpcommon/rp_pio_peripheral_mock.cpp.hpp"
 #include "platforms/arm/rp/rpcommon/rp_pio_spi_peripheral.cpp.hpp"
 #include "platforms/arm/rp/rpcommon/rp_pio_tx_peripheral.cpp.hpp"
 #include "platforms/arm/rp/rpcommon/rp_spi_peripheral.cpp.hpp"
