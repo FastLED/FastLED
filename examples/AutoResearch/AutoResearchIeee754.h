@@ -7,6 +7,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/singleton.h"
 
 namespace autoresearch {
 namespace ieee754_check {
@@ -31,6 +32,45 @@ struct FormatCase {
     int precision;
     const char* expected_text;
 };
+
+struct Ieee754CaseState {
+    ParseCase parse_cases[15];
+    FormatCase format_cases[9];
+    fl::u32 round_trip_bits[10];
+
+    Ieee754CaseState()
+        : parse_cases{{"0", 0x00000000u, true},
+                      {"-0", 0x80000000u, true},
+                      {"1", 0x3F800000u, true},
+                      {"-1", 0xBF800000u, true},
+                      {"0.5", 0x3F000000u, true},
+                      {"2.5", 0x40200000u, true},
+                      {"3.14159", 0x40490FD0u, false},
+                      {"2.71828", 0x402DF84Du, false},
+                      {"100", 0x42C80000u, true},
+                      {"1000", 0x447A0000u, true},
+                      {"1e30", 0x7149F2CAu, false},
+                      {"1e-30", 0x0DA24260u, false},
+                      {"1e-40", 0x00000000u, true},
+                      {"1e40", 0x7F800000u, true},
+                      {"-1e40", 0xFF800000u, true}},
+          format_cases{{0x00000000u, 6, "0.000000"},
+                       {0x80000000u, 6, "-0.000000"},
+                       {0x3F800000u, 6, "1.000000"},
+                       {0xBF800000u, 6, "-1.000000"},
+                       {0x3F000000u, 6, "0.500000"},
+                       {0x41200000u, 2, "10.00"},
+                       {0x7F800000u, 6, "inf"},
+                       {0xFF800000u, 6, "-inf"},
+                       {0x7FC00000u, 6, "nan"}},
+          round_trip_bits{0x00000000u, 0x80000000u, 0x3F800000u, 0xBF800000u,
+                          0x3F000000u, 0x40200000u, 0x40490FDBu, 0x40B00000u,
+                          0x42C80000u, 0x447A0000u} {}
+};
+
+inline Ieee754CaseState& ieee754CaseState() {
+    return fl::SingletonShared<Ieee754CaseState>::instance();
+}
 
 inline fl::u32 absDiff(fl::u32 a, fl::u32 b) FL_NO_EXCEPT {
     return a > b ? a - b : b - a;
@@ -65,26 +105,10 @@ inline Result run() {
     r.success = true;
     r.first_failure = nullptr;
 
-    static const ParseCase kParseCases[] = {
-        {"0", 0x00000000u, true},
-        {"-0", 0x80000000u, true},
-        {"1", 0x3F800000u, true},
-        {"-1", 0xBF800000u, true},
-        {"0.5", 0x3F000000u, true},
-        {"2.5", 0x40200000u, true},
-        {"3.14159", 0x40490FD0u, false},
-        {"2.71828", 0x402DF84Du, false},
-        {"100", 0x42C80000u, true},
-        {"1000", 0x447A0000u, true},
-        {"1e30", 0x7149F2CAu, false},
-        {"1e-30", 0x0DA24260u, false},
-        {"1e-40", 0x00000000u, true},
-        {"1e40", 0x7F800000u, true},
-        {"-1e40", 0xFF800000u, true},
-    };
+    Ieee754CaseState& state = ieee754CaseState();
 
-    for (fl::size i = 0; i < sizeof(kParseCases) / sizeof(kParseCases[0]); ++i) {
-        const ParseCase& c = kParseCases[i];
+    for (fl::size i = 0; i < sizeof(state.parse_cases) / sizeof(state.parse_cases[0]); ++i) {
+        const ParseCase& c = state.parse_cases[i];
         fl::size consumed = 0;
         const fl::u32 actual =
             fl::ieee754_parse_decimal(c.text, fl::strlen(c.text), &consumed);
@@ -95,33 +119,15 @@ inline Result run() {
                     c.expected_bits, actual);
     }
 
-    static const FormatCase kFormatCases[] = {
-        {0x00000000u, 6, "0.000000"},
-        {0x80000000u, 6, "-0.000000"},
-        {0x3F800000u, 6, "1.000000"},
-        {0xBF800000u, 6, "-1.000000"},
-        {0x3F000000u, 6, "0.500000"},
-        {0x41200000u, 2, "10.00"},
-        {0x7F800000u, 6, "inf"},
-        {0xFF800000u, 6, "-inf"},
-        {0x7FC00000u, 6, "nan"},
-    };
-
-    for (fl::size i = 0; i < sizeof(kFormatCases) / sizeof(kFormatCases[0]); ++i) {
-        const FormatCase& c = kFormatCases[i];
+    for (fl::size i = 0; i < sizeof(state.format_cases) / sizeof(state.format_cases[0]); ++i) {
+        const FormatCase& c = state.format_cases[i];
         const fl::string actual = fl::ieee754_format_decimal(c.bits, c.precision);
         recordCheck(r, c.expected_text, actual == c.expected_text,
                     c.bits, c.bits);
     }
 
-    static const fl::u32 kRoundTripBits[] = {
-        0x00000000u, 0x80000000u, 0x3F800000u, 0xBF800000u,
-        0x3F000000u, 0x40200000u, 0x40490FDBu, 0x40B00000u,
-        0x42C80000u, 0x447A0000u,
-    };
-
-    for (fl::size i = 0; i < sizeof(kRoundTripBits) / sizeof(kRoundTripBits[0]); ++i) {
-        const fl::u32 expected = kRoundTripBits[i];
+    for (fl::size i = 0; i < sizeof(state.round_trip_bits) / sizeof(state.round_trip_bits[0]); ++i) {
+        const fl::u32 expected = state.round_trip_bits[i];
         const fl::string text = fl::ieee754_format_decimal(expected, 9);
         const fl::u32 actual =
             fl::ieee754_parse_decimal(text.c_str(), text.size());

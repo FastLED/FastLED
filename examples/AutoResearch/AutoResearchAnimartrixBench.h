@@ -20,13 +20,25 @@
 #include "fl/fx/2d/animartrix_detail/perlin_float.h"
 #include "fl/fx/2d/animartrix_detail/perlin_i16_optimized.h"
 #include "fl/math/fixed_point/s16x16.h"
+#include "fl/stl/singleton.h"
 
 namespace autoresearch {
 namespace animartrix_check {
 
 // Volatile sink to defeat dead-code elimination on both the float and
 // the i16 outputs. Same trick the SIMD multiply benchmark uses.
-static volatile int32_t g_animartrix_bench_sink;
+struct PerlinBenchState {
+    volatile int32_t sink;
+    int32_t fade_lut[257];
+
+    PerlinBenchState() : sink(0) {
+        fl::perlin_i16_optimized::init_fade_lut(fade_lut);
+    }
+};
+
+inline PerlinBenchState& perlinBenchState() {
+    return fl::SingletonShared<PerlinBenchState>::instance();
+}
 
 struct PerlinBenchResult {
     int64_t iterations;
@@ -50,12 +62,8 @@ inline PerlinBenchResult runPerlinBenchmark(int iters) {
     // static-in-header rule stays happy and C++11's thread-safe init
     // guarantees a single initialization across calls. The float path
     // has no equivalent setup.
-    struct FadeLut {
-        int32_t table[257];
-        FadeLut() { fl::perlin_i16_optimized::init_fade_lut(table); }
-    };
-    static const FadeLut fade_lut_holder;  // C++11 magic statics
-    const int32_t* fade_lut = fade_lut_holder.table;
+    PerlinBenchState& state = perlinBenchState();
+    const int32_t* fade_lut = state.fade_lut;
 
     constexpr int GRID = 16;          // 16x16 pixel pass per iteration
     constexpr float STEP_F = 0.05f;   // Animartrix-typical pixel step in noise space
@@ -85,7 +93,7 @@ inline PerlinBenchResult runPerlinBenchmark(int iters) {
             }
         }
         uint32_t t1 = micros();
-        g_animartrix_bench_sink = sink;
+        state.sink = sink;
         r.pnoise_float_us = static_cast<int64_t>(t1 - t0);
     }
 
@@ -115,7 +123,7 @@ inline PerlinBenchResult runPerlinBenchmark(int iters) {
             }
         }
         uint32_t t1 = micros();
-        g_animartrix_bench_sink = sink;
+        state.sink = sink;
         r.pnoise_i16_us = static_cast<int64_t>(t1 - t0);
     }
 

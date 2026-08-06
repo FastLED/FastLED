@@ -76,6 +76,7 @@
 #include "fl/wdt/watchdog.h"
 #include "fl/log/log.h"
 #include "fl/stl/cstdio.h"  // fl::serial_begin -- HWCDC-safe Serial.begin wrapper
+#include "fl/stl/singleton.h"
 
 #if defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
 #include "AutoResearchIeee754.h"
@@ -139,8 +140,52 @@
 #include "AutoResearchUartDma.h"
 #endif
 
+namespace autoresearch {
+namespace low_memory {
+
+struct RemoteState {
+    fl::Remote remote;
+
+    RemoteState()
+        : remote(fl::createSerialRequestSource(),
+                 fl::createSerialResponseSink("REMOTE: ")) {}
+};
+
+inline RemoteState& remoteState() {
+    return fl::SingletonShared<RemoteState>::instance();
+}
+
+#if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE) && \
+    !defined(FASTLED_AUTORESEARCH_FAULT_TEST)
+struct PinToggleState {
+    fl::EdgeTime edges[64];
+};
+
+inline PinToggleState& pinToggleState() {
+    return fl::SingletonShared<PinToggleState>::instance();
+}
+#endif
+
+#if defined(FASTLED_AUTORESEARCH_LPC_WS2812)
+struct Ws2812State {
+    CRGB leds[100];
+    uint8_t expected[300];
+    uint8_t decoded[300];
+    fl::EdgeTime probe[64];
+    bool fastled_initialized;
+
+    Ws2812State() : fastled_initialized(false) {}
+};
+
+inline Ws2812State& ws2812State() {
+    return fl::SingletonShared<Ws2812State>::instance();
+}
+#endif
+
+}  // namespace low_memory
+}  // namespace autoresearch
+
 namespace {
-fl::Remote* g_low_memory_remote = nullptr;
 
 #if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE) && \
     !defined(FASTLED_AUTORESEARCH_FAULT_TEST)
@@ -230,10 +275,7 @@ inline void autoResearchLowMemorySetup() {
     // exactly what we want (one Remote bound to the singleton Serial
     // transport). The included-once-per-sketch model of `.ino` builds
     // also reduces to a single TU in practice.
-    static fl::Remote remote(  // okay static in header
-        fl::createSerialRequestSource(),
-        fl::createSerialResponseSink("REMOTE: "));
-    g_low_memory_remote = &remote;
+    fl::Remote& remote = autoresearch::low_memory::remoteState().remote;
     remote.bind("echo", [](int v) -> int {
         FL_WARN_LIT("FL_WARN: echo invoked");
         return v;
@@ -326,7 +368,7 @@ inline void autoResearchLowMemorySetup() {
 
             // Static storage keeps this off the stack; the small fixed size
             // keeps .bss below the LPC845-BRK early-init failure threshold.
-            static fl::EdgeTime edges_buf[kLowMemEdgeBufSize];
+            fl::EdgeTime* edges_buf = autoresearch::low_memory::pinToggleState().edges;
             const fl::size n_read = rx->getRawEdgeTimes(
                 fl::span<fl::EdgeTime>(edges_buf, sizeof(edges_buf) / sizeof(edges_buf[0])));
 
@@ -354,7 +396,9 @@ inline void autoResearchLowMemorySetup() {
                 case 4: num_leds = 100; break;
                 default: num_leds = 1; break;
             }
-            static CRGB leds_buf[100];
+            autoresearch::low_memory::Ws2812State& ws_state =
+                autoresearch::low_memory::ws2812State();
+            CRGB* leds_buf = ws_state.leds;
             for (int i = 0; i < num_leds; ++i) {
                 switch (test_case) {
                     case 0: leds_buf[i] = CRGB(0xFF, 0x00, 0x00); break;
@@ -376,7 +420,7 @@ inline void autoResearchLowMemorySetup() {
                 }
             }
             const int expected_bytes = num_leds * 3;
-            static uint8_t expected_buf[300];
+            uint8_t* expected_buf = ws_state.expected;
             for (int i = 0; i < num_leds; ++i) {
                 expected_buf[i * 3 + 0] = leds_buf[i].g;
                 expected_buf[i * 3 + 1] = leds_buf[i].r;
@@ -402,15 +446,14 @@ inline void autoResearchLowMemorySetup() {
             if (tx_pin != kFixedTxPin) {
                 return fl::string("0,0,0,0,0,0,0,0");
             }
-            static bool fastled_inited = false;
-            if (!fastled_inited) {
+            if (!ws_state.fastled_initialized) {
                 FastLED.addLeds<WS2812, kFixedTxPin, GRB>(leds_buf, 100);
-                fastled_inited = true;
+                ws_state.fastled_initialized = true;
             }
             FastLED.show();
             rx->wait(capture_ms);
 
-            static uint8_t decoded_buf[300];
+            uint8_t* decoded_buf = ws_state.decoded;
             for (int i = 0; i < expected_bytes; ++i) decoded_buf[i] = 0;
 
             fl::ChipsetTiming4Phase timing =
@@ -433,7 +476,7 @@ inline void autoResearchLowMemorySetup() {
             // Diagnostic-only raw-edge sample. Keep this small in .bss; the
             // decoder uses the RX channel's bounded capture vector above.
             constexpr fl::size kLowMemWs2812ProbeSize = 64u;
-            static fl::EdgeTime probe[kLowMemWs2812ProbeSize];
+            fl::EdgeTime* probe = ws_state.probe;
             const fl::size edges_captured = rx->getRawEdgeTimes(
                 fl::span<fl::EdgeTime>(probe, kLowMemWs2812ProbeSize));
 
@@ -475,7 +518,5 @@ inline void autoResearchLowMemorySetup() {
 
 inline void autoResearchLowMemoryLoop() {
     fl::Watchdog::instance().feed();
-    if (g_low_memory_remote) {
-        g_low_memory_remote->update(millis());
-    }
+    autoresearch::low_memory::remoteState().remote.update(millis());
 }

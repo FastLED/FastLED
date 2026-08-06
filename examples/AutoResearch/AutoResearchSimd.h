@@ -1110,7 +1110,15 @@ inline bool test_f32_pipeline_mul_add_clamp() {
 // Each test runs 4-wide unrolled loops with feedback to prevent elimination.
 // s16x16x4 has no division operator, so that cell is skipped.
 
-static volatile uint32_t g_bench_sink;
+struct SimdBenchmarkState {
+    volatile uint32_t sink;
+
+    SimdBenchmarkState() : sink(0) {}
+};
+
+inline SimdBenchmarkState& simdBenchmarkState() {
+    return fl::SingletonShared<SimdBenchmarkState>::instance();
+}
 
 struct BenchmarkResult {
     int64_t iterations;
@@ -1135,7 +1143,7 @@ inline int64_t benchFloat4(int iters, Op op) {
     }
     uint32_t t1 = micros();
     uint32_t tmp; fl::memcpy(&tmp, &a0, sizeof(tmp));
-    g_bench_sink = tmp;
+    simdBenchmarkState().sink = tmp;
     return static_cast<int64_t>(t1 - t0);
 }
 
@@ -1153,7 +1161,7 @@ inline int64_t benchS16x16_4(int iters, Op op) {
         b2 = a2 + bump; b3 = a3 + bump;
     }
     uint32_t t1 = micros();
-    g_bench_sink = static_cast<uint32_t>(a0.raw());
+    simdBenchmarkState().sink = static_cast<uint32_t>(a0.raw());
     return static_cast<int64_t>(t1 - t0);
 }
 
@@ -1173,7 +1181,7 @@ inline int64_t benchSimd4(int iters, Op op) {
         b = a + bump;
     }
     uint32_t t1 = micros();
-    g_bench_sink = extract_u32_4(a.raw, 0);
+    simdBenchmarkState().sink = extract_u32_4(a.raw, 0);
     return static_cast<int64_t>(t1 - t0);
 }
 
@@ -1200,7 +1208,7 @@ inline int64_t benchS8x8_4(int iters, Op op) {
         b2 = a2 + bump; b3 = a3 + bump;
     }
     uint32_t t1 = micros();
-    g_bench_sink = static_cast<uint32_t>(a0.raw());
+    simdBenchmarkState().sink = static_cast<uint32_t>(a0.raw());
     return static_cast<int64_t>(t1 - t0);
 }
 
@@ -1218,7 +1226,7 @@ inline int64_t benchU16x16_4(int iters, Op op) {
         b2 = a2 + bump; b3 = a3 + bump;
     }
     uint32_t t1 = micros();
-    g_bench_sink = static_cast<uint32_t>(a0.raw());
+    simdBenchmarkState().sink = static_cast<uint32_t>(a0.raw());
     return static_cast<int64_t>(t1 - t0);
 }
 

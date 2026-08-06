@@ -29,6 +29,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/int.h"
 #include "fl/stl/span.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/vector.h"
 
 #if defined(ESP32) && FASTLED_ESP32_HAS_PARLIO
@@ -44,6 +45,15 @@ namespace parlio_stream {
 
 constexpr int kMaxIterations = 16;  // result struct iter timing array fixed size
 constexpr int kMaxLanes = 16;
+constexpr int kMaxLeds = 256;
+
+struct ParlioLedState {
+    CRGB leds[kMaxLanes][kMaxLeds];
+};
+
+inline ParlioLedState& parlioLedState() {
+    return fl::SingletonShared<ParlioLedState>::instance();
+}
 
 inline bool isFastLedOutputPinValid(int pin) {
     if (pin < 0 || pin >= 64) {
@@ -129,9 +139,8 @@ inline ValidateResult validateParlioStreaming(int base_tx_pin,
     // Reuse a single static heap-resident LED buffer sized for the canonical
     // worst case (16 lanes × 256 LEDs). Test callers must stay within these
     // bounds. Static to avoid repeated allocation across RPC calls.
-    constexpr int kMaxLEDs = 256;
-    if (num_leds > kMaxLEDs) return r;
-    static CRGB leds[kMaxLanes][kMaxLEDs];
+    if (num_leds > kMaxLeds) return r;
+    CRGB (*leds)[kMaxLeds] = parlioLedState().leds;
     for (int lane = 0; lane < num_lanes; ++lane) {
         for (int i = 0; i < num_leds; ++i) {
             leds[lane][i] = CRGB(0xF0, 0x0F, 0xAA);  // Pattern A (mixed bits)

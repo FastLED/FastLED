@@ -53,12 +53,21 @@
 #include "fl/remote/remote.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/vector.h"
 #include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h" // ok platform headers — AutoResearch driver-specific test needs the concrete engine type
 
 namespace autoresearch {
 namespace pwm_dma_cl {
+
+struct PwmDmaClocklessState {
+    fl::u8 decoded[128];
+};
+
+inline PwmDmaClocklessState& pwmDmaClocklessState() FL_NO_EXCEPT {
+    return fl::SingletonShared<PwmDmaClocklessState>::instance();
+}
 
 // Standard WS2812B timing. Callers can override per-frame if the engine
 // gains multi-chipset support later; today the engine's `canHandle()`
@@ -209,7 +218,7 @@ inline fl::string captureSelfHandler(int led_count, fl::u32 rgb,
 
     // Decode captured edges → GRB bytes.
     const fl::size decoded_cap = static_cast<fl::size>(led_count * 3);
-    static fl::u8 decoded[128] = {0};
+    fl::u8* decoded = pwmDmaClocklessState().decoded;
     if (decoded_cap > sizeof(decoded)) return fl::string("0");
     auto result = rx->decode(ws2812b_decoder_timing(),
                              fl::span<fl::u8>(decoded, decoded_cap));

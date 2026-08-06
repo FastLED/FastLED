@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any
 
 from colorama import Fore, Style
 
-from ci.rpc_client import RpcClient, RpcTimeoutError
+from ci.rpc_client import RpcClient, RpcError, RpcTimeoutError
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 

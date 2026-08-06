@@ -20,6 +20,7 @@
 #include "AutoResearchOta.h"
 #include "fl/remote/transport/serial.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/singleton.h"
 #include "fl/system/heap.h"
 #include "Common.h"
 #include "AutoResearchTest.h"
@@ -52,6 +53,18 @@
 #include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/frame.h"
 
+namespace {
+
+struct PerfProbeMemcpyState {
+    fl::vector<uint8_t> source;
+    fl::vector<uint8_t> destination;
+};
+
+PerfProbeMemcpyState& perfProbeMemcpyState() {
+    return fl::Singleton<PerfProbeMemcpyState>::instance();
+}
+
+}  // namespace
 
 void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
     // ====== AutoResearch perf-instrumentation sanity probes ======
@@ -86,8 +99,9 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         // Heap-allocated on first use: 16 KB of static buffers
         // overflowed ESP32-S2's dram0 bss by 3.7 KB (FastLED#3576
         // Phase 4 compile matrix).
-        static fl::vector<uint8_t> src_vec;
-        static fl::vector<uint8_t> dst_vec;
+        PerfProbeMemcpyState& state = perfProbeMemcpyState();
+        fl::vector<uint8_t>& src_vec = state.source;
+        fl::vector<uint8_t>& dst_vec = state.destination;
         if (src_vec.size() < 8192) {
             src_vec.resize(8192);
             dst_vec.resize(8192);
