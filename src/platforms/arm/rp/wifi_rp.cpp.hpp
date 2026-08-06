@@ -14,6 +14,7 @@
 
 #include "fl/stl/cstdio.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/singleton.h"
 
 // IWYU pragma: begin_keep
 #include <WiFi.h>
@@ -30,14 +31,16 @@ struct WifiState {
     bool ap_active = false;
 };
 
-// FL_LINT_ALLOW_GLOBAL(platform WiFi state is a singleton supplied by Arduino-Pico)
-WifiState g_state;
+WifiState& wifiState() {
+    return fl::Singleton<WifiState>::instance();
+}
 
 Status currentStatus() FL_NO_EXCEPT {
+    WifiState& state = wifiState();
     if (WiFi.isConnected()) {
         return Status::CONNECTED;
     }
-    if (g_state.sta_requested) {
+    if (state.sta_requested) {
         const int link_status = WiFi.status();
         if (link_status == WL_CONNECT_FAILED ||
             link_status == WL_NO_SSID_AVAIL ||
@@ -47,7 +50,7 @@ Status currentStatus() FL_NO_EXCEPT {
         }
         return Status::CONNECTING;
     }
-    return g_state.ap_active ? Status::AP_ACTIVE : Status::IDLE;
+    return state.ap_active ? Status::AP_ACTIVE : Status::IDLE;
 }
 
 fl::string ipToString(IPAddress ip) FL_NO_EXCEPT {
@@ -63,6 +66,7 @@ fl::string ipToString(IPAddress ip) FL_NO_EXCEPT {
 } // namespace
 
 bool connectSta(const char* ssid, const char* password) FL_NO_EXCEPT {
+    WifiState& state = wifiState();
     if (ssid == nullptr || *ssid == '\0') {
         return false;
     }
@@ -78,12 +82,13 @@ bool connectSta(const char* ssid, const char* password) FL_NO_EXCEPT {
     // coming up, so beginNoBlock's return value cannot distinguish that
     // healthy intermediate state from a startup failure. Report initiation
     // success and let status() surface a driver/link failure asynchronously.
-    g_state.sta_requested = true;
-    g_state.ap_active = false;
+    state.sta_requested = true;
+    state.ap_active = false;
     return true;
 }
 
 bool startAp(const char* ssid, const char* password, u8 channel) FL_NO_EXCEPT {
+    WifiState& state = wifiState();
     if (ssid == nullptr || *ssid == '\0') {
         return false;
     }
@@ -96,15 +101,16 @@ bool startAp(const char* ssid, const char* password, u8 channel) FL_NO_EXCEPT {
         return false;
     }
 
-    g_state.sta_requested = false;
-    g_state.ap_active = true;
+    state.sta_requested = false;
+    state.ap_active = true;
     return true;
 }
 
 void stop() FL_NO_EXCEPT {
+    WifiState& state = wifiState();
     WiFi.end();
-    g_state.sta_requested = false;
-    g_state.ap_active = false;
+    state.sta_requested = false;
+    state.ap_active = false;
 }
 
 Status status() FL_NO_EXCEPT {
@@ -120,7 +126,7 @@ fl::string ipAddress() FL_NO_EXCEPT {
 }
 
 fl::string apIpAddress() FL_NO_EXCEPT {
-    return g_state.ap_active ? ipToString(WiFi.softAPIP()) : fl::string();
+    return wifiState().ap_active ? ipToString(WiFi.softAPIP()) : fl::string();
 }
 
 } // namespace wifi

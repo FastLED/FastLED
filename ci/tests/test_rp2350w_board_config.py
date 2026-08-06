@@ -18,6 +18,9 @@ SEMAPHORE_DISPATCH = REPO_ROOT / "src" / "platforms" / "semaphore.h"
 SEMAPHORE_IMPL = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "semaphore_rp.cpp.hpp"
 WIFI_API = REPO_ROOT / "src" / "fl" / "net" / "wifi.h"
 RP_WIFI_IMPL = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "wifi_rp.cpp.hpp"
+ESP_WIFI_IMPL = (
+    REPO_ROOT / "src" / "platforms" / "esp" / "32" / "net" / "wifi_esp32.cpp.hpp"
+)
 RP_BUILD = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "_build.cpp.hpp"
 AUTORESEARCH_NET = REPO_ROOT / "examples" / "AutoResearch" / "AutoResearchNet.cpp"
 AUTORESEARCH_SKETCH = REPO_ROOT / "examples" / "AutoResearch" / "AutoResearch.ino"
@@ -95,7 +98,20 @@ def test_rp2350w_selects_the_cyw43_wifi_backend() -> None:
     assert "PICO_CYW43_SUPPORTED" in api_source
     assert "FL_HAS_INCLUDE(<WiFi.h>)" in api_source
     assert "WiFi.beginNoBlock" in implementation
+    assert "fl::Singleton<WifiState>::instance()" in implementation
+    assert "#if defined(PICO_CYW43_SUPPORTED)" in AUTORESEARCH_NET.read_text(
+        encoding="utf-8"
+    )
     assert '"platforms/arm/rp/wifi_rp.cpp.hpp"' in build_source
+
+
+def test_wifi_backends_are_platform_scoped_singletons() -> None:
+    """The unity build must not compile ESP implementation code for RP targets."""
+    implementation = ESP_WIFI_IMPL.read_text(encoding="utf-8")
+
+    assert "#if FL_WIFI_AVAILABLE && defined(FL_IS_ESP32)" in implementation
+    assert "fl::Singleton<WifiState>::instance()" in implementation
+    assert "WifiState g_state" not in implementation
 
 
 def test_rp2350w_autoresearch_exposes_the_cyw43_http_peer_surface() -> None:

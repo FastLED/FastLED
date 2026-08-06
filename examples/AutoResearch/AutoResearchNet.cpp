@@ -5,6 +5,15 @@
 // Uses ESP-IDF native APIs for WiFi Soft AP and HTTP client.
 // Guarded with FL_IS_ESP32 - no-op stubs on other platforms.
 
+// Keep the Arduino-Pico WiFi library visible to the LDF before the
+// header-derived low-memory guard below. The RP2350W peer owns
+// WiFiClient/WiFiServer, so this is its direct framework dependency.
+#if defined(PICO_CYW43_SUPPORTED)
+// IWYU pragma: begin_keep
+#include <WiFi.h>
+// IWYU pragma: end_keep
+#endif
+
 // Gate out under low-memory mode -- the LowMemory bring-up surface
 // (AutoResearchLowMemory.h) doesn't expose any network endpoints and the
 // fl::net HTTP / asio machinery is several KB that won't fit on the
@@ -504,10 +513,6 @@ void pollNetServer() {}
 #include "fl/stl/cstring.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/unique_ptr.h"
-
-// IWYU pragma: begin_keep
-#include <WiFi.h>
-// IWYU pragma: end_keep
 
 namespace {
 
