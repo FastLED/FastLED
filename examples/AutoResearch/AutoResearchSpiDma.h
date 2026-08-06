@@ -58,6 +58,7 @@
 
 #include "fl/remote/remote.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/sstream.h"
 #include "platforms/arm/lpc/spi_arm_lpc_dma.h" // ok platform headers — AutoResearch driver-specific test needs the concrete SPI DMA driver
 
@@ -91,22 +92,42 @@ using HarnessDriver = fl::ARMHardwareSPIOutputDMA<
     static_cast<fl::u8>(FASTLED_LPC_SPI_DMA_HARNESS_CLOCK_PIN),
     static_cast<fl::u32>(FASTLED_LPC_SPI_DMA_HARNESS_DIVIDER)>;
 
+struct SpiDmaHarnessState {
+    fl::u8 buffer[FASTLED_LPC_SPI_DMA_MAX_BYTES];
+    HarnessDriver driver;
+    bool initialized;
+
+    SpiDmaHarnessState() : initialized(false) {}
+};
+
+#if FASTLED_LPC_DMA_ISR
+struct SpiDmaStreamState {
+    fl::u8 source[FASTLED_LPC_SPI_DMA_STREAM_BYTES];
+};
+
+inline SpiDmaStreamState& spiDmaStreamState() FL_NO_EXCEPT {
+    return fl::SingletonShared<SpiDmaStreamState>::instance();
+}
+#endif
+
+inline SpiDmaHarnessState& spiDmaHarnessState() FL_NO_EXCEPT {
+    return fl::SingletonShared<SpiDmaHarnessState>::instance();
+}
+
 // Bench buffer: sized to the driver's encode-buffer capacity so callers
 // can hit the widest DMA descriptor the driver will accept.
 inline fl::u8* harnessBuffer() FL_NO_EXCEPT {
-    static fl::u8 buf[FASTLED_LPC_SPI_DMA_MAX_BYTES] = {0};
-    return buf;
+    return spiDmaHarnessState().buffer;
 }
 
 // Lazy driver instantiation — first RPC call configures SPI+DMA once.
 inline HarnessDriver& harnessDriver() FL_NO_EXCEPT {
-    static HarnessDriver drv;
-    static bool inited = false;
-    if (!inited) {
-        drv.init();
-        inited = true;
+    SpiDmaHarnessState& state = spiDmaHarnessState();
+    if (!state.initialized) {
+        state.driver.init();
+        state.initialized = true;
     }
-    return drv;
+    return state.driver;
 }
 
 // Bounds guard for host-supplied lengths — matches
@@ -244,7 +265,7 @@ inline fl::string measureSckHandler(int divider_hint) FL_NO_EXCEPT {
 #define FASTLED_LPC_SPI_DMA_STREAM_BYTES 512
 #endif
 inline fl::string streamOverlapHandler(int byte_count, int byte_pattern) FL_NO_EXCEPT {
-    static fl::u8 stream_src[FASTLED_LPC_SPI_DMA_STREAM_BYTES] = {0};
+    fl::u8* stream_src = spiDmaStreamState().source;
     int len = byte_count;
     if (len <= 0) return fl::string("0,0,0");
     if (len > FASTLED_LPC_SPI_DMA_STREAM_BYTES)

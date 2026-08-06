@@ -6,6 +6,7 @@
 #if SKETCH_HAS_LOTS_OF_MEMORY
 
 #include "AutoResearchEdgeProbe.h"
+#include "fl/stl/singleton.h"
 
 #include "platforms/is_platform.h"
 
@@ -196,7 +197,12 @@ const fl::u32 *edgeProbeStamps(fl::u32 &count) {
 fl::u32 edgeProbeCpuMhz() { return 1; }
 fl::u32 edgeProbeSelfTestEdges() { return 0; }
 fl::u32 edgeProbeState() { return 0; }
-const fl::u32 *edgeProbeRmtLive() { static const fl::u32 z[4] = {0}; return z; }
+struct EdgeProbeNoopState {
+    fl::u32 rmt_live[4];
+};
+const fl::u32 *edgeProbeRmtLive() {
+    return fl::Singleton<EdgeProbeNoopState>::instance().rmt_live;
+}
 
 #endif // FL_IS_ESP32
 

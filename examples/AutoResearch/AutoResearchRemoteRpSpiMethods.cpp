@@ -17,6 +17,7 @@
 #include "fl/stl/json.h"
 #include "fl/stl/limits.h"
 #include "fl/stl/move.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/vector.h"
 #include "platforms/arm/rp/is_rp.h"
 
@@ -27,13 +28,6 @@
 namespace {
 
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
-
-constexpr fl::u8 kLoopbackPattern[] = {
-    0x00, 0xFF, 0x55, 0xAA, 0x12, 0x34, 0x56, 0x78,
-    0x87, 0x65, 0x43, 0x21, 0x0F, 0xF0, 0xCC, 0x33,
-    0x11, 0xEE, 0x22, 0xDD, 0x44, 0xBB, 0x88, 0x77,
-    0x66, 0x99, 0x3C, 0xC3, 0x5A, 0xA5, 0x7E, 0x81,
-};
 
 bool parseInt(const fl::json& config, const char* key, int* value) {
     if (!config.contains(key) || !config[key].is_int()) return false;
@@ -49,6 +43,12 @@ bool parseInt(const fl::json& config, const char* key, int* value) {
 template <fl::u8 Which>
 fl::json runLoopback(const fl::shared_ptr<AutoResearchState>& runtime_state,
                      int mosi_pin, int miso_pin, int sck_pin, int clock_hz) {
+    const fl::u8 loopback_pattern[] = {
+        0x00, 0xFF, 0x55, 0xAA, 0x12, 0x34, 0x56, 0x78,
+        0x87, 0x65, 0x43, 0x21, 0x0F, 0xF0, 0xCC, 0x33,
+        0x11, 0xEE, 0x22, 0xDD, 0x44, 0xBB, 0x88, 0x77,
+        0x66, 0x99, 0x3C, 0xC3, 0x5A, 0xA5, 0x7E, 0x81,
+    };
     fl::json response = fl::json::object();
     const int expected_mosi = Which == 0 ? 3 : 11;
     const int expected_miso = Which == 0 ? 0 : 8;
@@ -75,8 +75,8 @@ fl::json runLoopback(const fl::shared_ptr<AutoResearchState>& runtime_state,
     }
 
     fl::vector_psram<fl::u8> tx;
-    tx.assign(kLoopbackPattern, kLoopbackPattern + sizeof(kLoopbackPattern));
-    fl::u8 captured[sizeof(kLoopbackPattern)] = {};
+    tx.assign(loopback_pattern, loopback_pattern + sizeof(loopback_pattern));
+    fl::u8 captured[sizeof(loopback_pattern)] = {};
     auto channel = fl::ChannelData::create(
         fl::SpiChipsetConfig(mosi_pin, sck_pin,
                              fl::SpiEncoder::apa102(static_cast<fl::u32>(clock_hz))),
@@ -105,10 +105,10 @@ fl::json runLoopback(const fl::shared_ptr<AutoResearchState>& runtime_state,
     bool exact_match = state == fl::IChannelDriver::DriverState::READY;
     fl::json expected = fl::json::array();
     fl::json received = fl::json::array();
-    for (size_t index = 0; index < sizeof(kLoopbackPattern); ++index) {
-        expected.push_back(static_cast<int64_t>(kLoopbackPattern[index]));
+    for (size_t index = 0; index < sizeof(loopback_pattern); ++index) {
+        expected.push_back(static_cast<int64_t>(loopback_pattern[index]));
         received.push_back(static_cast<int64_t>(captured[index]));
-        exact_match = exact_match && captured[index] == kLoopbackPattern[index];
+        exact_match = exact_match && captured[index] == loopback_pattern[index];
     }
 
     fl::json data = fl::json::object();
@@ -128,6 +128,19 @@ fl::json runLoopback(const fl::shared_ptr<AutoResearchState>& runtime_state,
 }
 
 template <bool Sk9822>
+struct PublicApiLoopbackState {
+    CRGB leds[257];
+    bool initialized;
+
+    PublicApiLoopbackState() : initialized(false) {}
+};
+
+template <bool Sk9822>
+PublicApiLoopbackState<Sk9822>& publicApiLoopbackState() {
+    return fl::Singleton<PublicApiLoopbackState<Sk9822>>::instance();
+}
+
+template <bool Sk9822>
 fl::json runPublicApiLoopback(
     const fl::shared_ptr<AutoResearchState>& runtime_state,
     int pattern) {
@@ -135,8 +148,8 @@ fl::json runPublicApiLoopback(
     constexpr fl::u8 kSckPin = 10;
     constexpr size_t kLedCount = 257;
     constexpr size_t kFrameBytes = 4 + (kLedCount * 4) + 36;
-    static CRGB leds[kLedCount];
-    static bool initialized = false;
+    PublicApiLoopbackState<Sk9822>& state = publicApiLoopbackState<Sk9822>();
+    CRGB* leds = state.leds;
     fl::json response = fl::json::object();
 
     if (pattern < 0 || pattern > 5) {
@@ -150,7 +163,7 @@ fl::json runPublicApiLoopback(
         runtime_state->invalidateLedRxValidation();
     }
 
-    if (!initialized) {
+    if (!state.initialized) {
         if constexpr (Sk9822) {
             FastLED.addLeds<SK9822, kMosiPin, kSckPin, RGB, 8000000,
                             fl::Bus::SPI, 1>(leds, kLedCount);
@@ -158,7 +171,7 @@ fl::json runPublicApiLoopback(
             FastLED.addLeds<APA102, kMosiPin, kSckPin, RGB, 8000000,
                             fl::Bus::SPI, 1>(leds, kLedCount);
         }
-        initialized = true;
+        state.initialized = true;
     }
 
     for (size_t index = 0; index < kLedCount; ++index) leds[index] = CRGB::Black;

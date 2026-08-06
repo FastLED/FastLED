@@ -43,6 +43,7 @@
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
 #include "fl/stl/span.h"
+#include "fl/stl/singleton.h"
 #include <Arduino.h>
 
 // #3428: FlexIO2 SPI mode bring-up smoke test (`flexioSpiSelfTest` RPC).
@@ -61,6 +62,19 @@
 #include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/frame.h"
 
+namespace {
+
+#if defined(FL_IS_TEENSY_4X)
+struct FlexIoObjectFledState {
+    CRGB leds[100];
+};
+
+FlexIoObjectFledState& flexIoObjectFledState() {
+    return fl::Singleton<FlexIoObjectFledState>::instance();
+}
+#endif
+
+}  // namespace
 
 void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     // Register "flexioRxBenchmark" — square-wave validation for the new
@@ -287,7 +301,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
 
         // 1. Build the test pattern. Fixed upper bound (100 LEDs) covers
         //    case 4 — the larger cases reuse the same static buffer.
-        static CRGB leds_buf[100];
+        CRGB* leds_buf = flexIoObjectFledState().leds;
         int num_leds = 0;
         switch (test_case) {
             case 0:

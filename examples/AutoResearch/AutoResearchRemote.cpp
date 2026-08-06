@@ -93,8 +93,7 @@ void printRemoteResponseRaw(const fl::json& response) {
 }
 
 void printRemoteStreamRaw(fl::JsonStreamCallback writeJson) {
-    static const char kPrefix[] = "REMOTE: ";
-    Serial.write(reinterpret_cast<const uint8_t*>(kPrefix), sizeof(kPrefix) - 1);  // ok serial - ok autoresearch rpc serial - RPC response boundary
+    Serial.print("REMOTE: ");  // ok serial - ok autoresearch rpc serial - RPC response boundary
 
     fl::JsonStreamWriter writer([](const char* data, fl::size len) {
         Serial.write(reinterpret_cast<const uint8_t*>(data), static_cast<size_t>(len));  // ok serial - ok autoresearch rpc serial - streamed JSON bytes

@@ -29,6 +29,7 @@
 
 #include "FastLED.h"
 #include "fl/stl/int.h"
+#include "fl/stl/singleton.h"
 #include "LegacyClocklessProxy.h"
 
 #include <Arduino.h>  // millis(), micros(), delay()
@@ -38,6 +39,14 @@ namespace timing_drift {
 
 constexpr int kMaxIterations = 64;
 constexpr int kMaxLeds = 256;
+
+struct TimingDriftState {
+    CRGB leds[kMaxLeds];
+};
+
+inline TimingDriftState& timingDriftState() {
+    return fl::SingletonShared<TimingDriftState>::instance();
+}
 
 /// Faithful emulation of the millisDelay library used by the issue sketch:
 /// start(t) arms a deadline; justFinished() fires true exactly once when
@@ -85,7 +94,7 @@ inline DriftResult run(int pin, int num_leds, int iterations) {
     if (num_leds > kMaxLeds) num_leds = kMaxLeds;
     r.num_leds = num_leds;
 
-    static CRGB leds[kMaxLeds];
+    CRGB* leds = timingDriftState().leds;
     for (int i = 0; i < num_leds; ++i) {
         leds[i] = CRGB::Black;
     }

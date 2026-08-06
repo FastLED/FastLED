@@ -29,6 +29,7 @@
 #include "fl/wdt/watchdog.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/unique_ptr.h"
+#include "fl/stl/singleton.h"
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 #include "platforms/esp/32/feature_flags/enabled.h"
@@ -75,6 +76,16 @@ FL_EXTERN_C_END
 #include "fl/fx/frame.h"
 
 namespace {
+
+#if defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_PARLIO
+struct ParlioRawTestState {
+    uint8_t buffer[512];
+};
+
+ParlioRawTestState& parlioRawTestState() {
+    return fl::Singleton<ParlioRawTestState>::instance();
+}
+#endif
 
 fl::json autoResearchDeviceJson(const fl::string& name) {
     if (name == "RMT") return fl::deviceJson<fl::Bus::RMT>();
@@ -305,7 +316,7 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
         cfg.trans_queue_depth = (size_t)depth;
         cfg.max_transfer_size = (size_t)mts;
         cfg.output_clk_freq_hz = (uint32_t)hz;
-        cfg.sample_edge = PARLIO_SAMPLE_EDGE_POS;
+        cfg.shift_edge = PARLIO_SAMPLE_EDGE_POS;
         cfg.bit_pack_order = PARLIO_BIT_PACK_ORDER_MSB;
         if (burst > 0) cfg.dma_burst_size = (size_t)burst;
         for (int i = 0; i < 16; ++i) cfg.data_gpio_nums[i] = (gpio_num_t)-1;
@@ -318,7 +329,7 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
             return response;
         }
         err = parlio_tx_unit_enable(unit);
-        static uint8_t buf[512];
+        uint8_t* buf = parlioRawTestState().buffer;
         for (int i = 0; i < 512; ++i) buf[i] = (uint8_t)pattern;
         parlio_transmit_config_t tcfg = {};
         tcfg.idle_value = 0;

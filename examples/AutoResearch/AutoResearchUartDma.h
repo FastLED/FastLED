@@ -39,6 +39,7 @@
 #endif
 #include "fl/remote/remote.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/sstream.h"
 #include "platforms/arm/lpc/uart_arm_lpc_dma.h" // ok platform headers — AutoResearch driver-specific test needs the concrete UART DMA driver
 
@@ -69,15 +70,23 @@ using HarnessDriver = fl::ARMHardwareUARTOutputDMA<
 #define FASTLED_LPC_UART_DMA_HARNESS_BYTES 2048
 #endif
 
+struct UartDmaHarnessState {
+    fl::u8 buffer[FASTLED_LPC_UART_DMA_HARNESS_BYTES];
+    HarnessDriver driver;
+};
+
+inline UartDmaHarnessState& uartDmaHarnessState() FL_NO_EXCEPT {
+    return fl::SingletonShared<UartDmaHarnessState>::instance();
+}
+
 inline fl::u8* harnessBuffer() FL_NO_EXCEPT {
-    static fl::u8 buf[FASTLED_LPC_UART_DMA_HARNESS_BYTES] = {0};
-    return buf;
+    return uartDmaHarnessState().buffer;
 }
 
 inline HarnessDriver& harnessDriver() FL_NO_EXCEPT {
-    static HarnessDriver drv;
-    drv.init();
-    return drv;
+    UartDmaHarnessState& state = uartDmaHarnessState();
+    state.driver.init();
+    return state.driver;
 }
 
 inline int clampByteCount(int n) FL_NO_EXCEPT {
@@ -185,20 +194,35 @@ inline int argInt(const fl::json& args, fl::size i, int fallback) FL_NO_EXCEPT {
 #define FL_LPC_UART_DMA_CLOCKLESS_LEDS 8
 #endif
 
+constexpr fl::size kClocklessEncodedBytes =
+    FL_LPC_UART_DMA_CLOCKLESS_LEDS * 3u * 4u;
+
+struct UartDmaClocklessState {
+    fl::CRGB leds[FL_LPC_UART_DMA_CLOCKLESS_LEDS];
+    fl::u8 expected[kClocklessEncodedBytes];
+    fl::u8 received[kClocklessEncodedBytes];
+    bool registered;
+
+    UartDmaClocklessState() : registered(false) {}
+};
+
+inline UartDmaClocklessState& uartDmaClocklessState() FL_NO_EXCEPT {
+    return fl::SingletonShared<UartDmaClocklessState>::instance();
+}
+
 inline fl::CRGB* clocklessLeds() FL_NO_EXCEPT {
-    static fl::CRGB leds[FL_LPC_UART_DMA_CLOCKLESS_LEDS];
-    return leds;
+    return uartDmaClocklessState().leds;
 }
 
 inline bool ensureClocklessFastLedRegistered() FL_NO_EXCEPT {
-    static bool registered = false;
-    if (!registered) {
+    UartDmaClocklessState& state = uartDmaClocklessState();
+    if (!state.registered) {
         FastLED.addLeds<WS2812,
                         static_cast<fl::u8>(FL_LPC_UART_DMA_CLOCKLESS_TX_PIN),
                         GRB>(clocklessLeds(), FL_LPC_UART_DMA_CLOCKLESS_LEDS);
-        registered = true;
+        state.registered = true;
     }
-    return registered;
+    return state.registered;
 }
 
 inline USART_Type* clocklessUartBlock() FL_NO_EXCEPT {
@@ -341,13 +365,12 @@ inline fl::string clocklessLoopbackSelfHandler(
         leds[i] = fl::CRGB(r, g, b);
     }
 
-    constexpr fl::size kMaxEncoded =
-        FL_LPC_UART_DMA_CLOCKLESS_LEDS * 3u * 4u;
-    static fl::u8 expected[kMaxEncoded];
-    static fl::u8 received[kMaxEncoded];
+    UartDmaClocklessState& state = uartDmaClocklessState();
+    fl::u8* expected = state.expected;
+    fl::u8* received = state.received;
     fl::u32 expected_baud = 0;
     const fl::size expected_count = clocklessEncodeExpectedUartBytes(
-        led_count, rgb, expected, kMaxEncoded, expected_baud);
+        led_count, rgb, expected, kClocklessEncodedBytes, expected_baud);
     if (expected_count == 0u) {
         return fl::string("0,encode");
     }
