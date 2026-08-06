@@ -560,6 +560,7 @@ void pollNetServer() {}
 // the sketch loop calls pollNetServer() to service one peer at a time.
 
 #include "fl/net/wifi.h"
+#include "fl/stl/array.h"
 #include "fl/stl/cstdio.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/singleton.h"
@@ -646,6 +647,95 @@ fl::json runRpHttpGetTest(const char* host_ip, uint16_t port,
     return result;
 }
 
+uint32_t fnv1a(const char* bytes, size_t length) {
+    uint32_t hash = 2166136261u;
+    for (size_t i = 0; i < length; ++i) {
+        hash ^= static_cast<uint8_t>(bytes[i]);
+        hash *= 16777619u;
+    }
+    return hash;
+}
+
+fl::json runRpHttpPayloadEchoTest(const char* host_ip, uint16_t port) {
+    constexpr size_t kPayloadBytes = 4096;
+    fl::array<char, kPayloadBytes> payload;
+    for (size_t i = 0; i < payload.size(); ++i) {
+        payload[i] = static_cast<char>('A' + static_cast<char>(i % 23));
+    }
+    const uint32_t expected_hash = fnv1a(payload.data(), payload.size());
+
+    fl::json result = fl::json::object();
+    result.set("test", "POST /echo 4096-byte FNV-1a");
+    result.set("bytes", static_cast<int64_t>(payload.size()));
+    result.set("expected_hash", static_cast<int64_t>(expected_hash));
+
+    WiFiClient client;
+    if (!client.connect(host_ip, port)) {
+        result.set("passed", false);
+        result.set("error", "TCP connect failed");
+        return result;
+    }
+    client.print("POST /echo HTTP/1.1\r\nHost: ");
+    client.print(host_ip);
+    client.print("\r\nContent-Type: application/octet-stream\r\nContent-Length: ");
+    client.print(payload.size());
+    client.print("\r\nConnection: close\r\n\r\n");
+    client.write(reinterpret_cast<const uint8_t*>(payload.data()), payload.size());
+
+    const uint32_t deadline_ms = millis() + 4000;
+    char status_line[64] = {};
+    size_t status_length = 0;
+    bool status_done = false;
+    bool header_done = false;
+    uint8_t header_match = 0;
+    uint32_t received_hash = 2166136261u;
+    size_t received_bytes = 0;
+    while (static_cast<int32_t>(millis() - deadline_ms) < 0 &&
+           (client.connected() || client.available())) {
+        while (client.available()) {
+            const int value = client.read();
+            if (value < 0) {
+                break;
+            }
+            const char ch = static_cast<char>(value);
+            if (!status_done) {
+                if (ch == '\n') {
+                    status_done = true;
+                } else if (ch != '\r' && status_length + 1 < sizeof(status_line)) {
+                    status_line[status_length++] = ch;
+                }
+                continue;
+            }
+            if (!header_done) {
+                header_match = ch == "\r\n\r\n"[header_match]
+                    ? static_cast<uint8_t>(header_match + 1) : 0;
+                if (header_match == 4) {
+                    header_done = true;
+                }
+                continue;
+            }
+            received_hash ^= static_cast<uint8_t>(ch);
+            received_hash *= 16777619u;
+            ++received_bytes;
+        }
+        FastLED.watchdog().feed();
+        delay(1);
+    }
+    client.stop();
+    status_line[status_length] = '\0';
+    const bool status_ok = fl::strncmp(status_line, "HTTP/1.1 200", 12) == 0 ||
+                           fl::strncmp(status_line, "HTTP/1.0 200", 12) == 0;
+    const bool passed = status_ok && received_bytes == payload.size() &&
+                        received_hash == expected_hash;
+    result.set("received_bytes", static_cast<int64_t>(received_bytes));
+    result.set("received_hash", static_cast<int64_t>(received_hash));
+    result.set("passed", passed);
+    if (!passed) {
+        result.set("error", "Echo payload hash mismatch");
+    }
+    return result;
+}
+
 } // namespace
 
 fl::json startNetServer() {
@@ -701,9 +791,16 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
         FastLED.watchdog().feed();
     }
 
-    response.set("success", passed == 6);
+    fl::json payload_result = runRpHttpPayloadEchoTest(host_ip, port);
+    const auto payload_passed = payload_result[fl::string("passed")].as_bool();
+    if (payload_passed.has_value() && payload_passed.value()) {
+        ++passed;
+    }
+    results.push_back(payload_result);
+
+    response.set("success", passed == 7);
     response.set("tests_passed", static_cast<int64_t>(passed));
-    response.set("tests_failed", static_cast<int64_t>(6 - passed));
+    response.set("tests_failed", static_cast<int64_t>(7 - passed));
     response.set("results", results);
     return response;
 }
