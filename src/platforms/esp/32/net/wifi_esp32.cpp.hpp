@@ -11,12 +11,14 @@
 /// disconnect, then FAILED). SoftAP can coexist (APSTA).
 
 #include "fl/net/wifi.h"
+#include "platforms/esp/is_esp.h"
 
-#if FL_WIFI_AVAILABLE
+#if FL_WIFI_AVAILABLE && defined(FL_IS_ESP32)
 
 #include "fl/log/log.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/singleton.h"
 
 FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
@@ -47,30 +49,33 @@ struct WifiState {
     int retries = 0;
 };
 
-// FL_LINT_ALLOW_GLOBAL(referenced from a C event-handler callback registered with the IDF event loop; zero-init POD keeps status readable before begin)
-WifiState g_state;
+WifiState& wifiState() {
+    return fl::Singleton<WifiState>::instance();
+}
 
 void wifiEventHandler(void *, esp_event_base_t base, i32 id, void *) {
+    WifiState& state = wifiState();
     if (base == WIFI_EVENT) {
         if (id == WIFI_EVENT_STA_START) {
             esp_wifi_connect();
         } else if (id == WIFI_EVENT_STA_DISCONNECTED) {
-            if (g_state.sta_requested && g_state.retries < kMaxStaRetries) {
-                ++g_state.retries;
-                g_state.status = Status::CONNECTING;
+            if (state.sta_requested && state.retries < kMaxStaRetries) {
+                ++state.retries;
+                state.status = Status::CONNECTING;
                 esp_wifi_connect();
-            } else if (g_state.sta_requested) {
-                g_state.status = Status::FAILED;
+            } else if (state.sta_requested) {
+                state.status = Status::FAILED;
             }
         }
     } else if (base == IP_EVENT && id == IP_EVENT_STA_GOT_IP) {
-        g_state.retries = 0;
-        g_state.status = Status::CONNECTED;
+        state.retries = 0;
+        state.status = Status::CONNECTED;
     }
 }
 
 /// One-time driver + netif + event plumbing. Idempotent.
 bool ensureDriver() FL_NO_EXCEPT {
+    WifiState& state = wifiState();
     esp_err_t err = esp_netif_init();
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
         FL_WARN_F("wifi: esp_netif_init failed: %s", esp_err_to_name(err));
@@ -81,7 +86,7 @@ bool ensureDriver() FL_NO_EXCEPT {
         FL_WARN_F("wifi: event loop create failed: %s", esp_err_to_name(err));
         return false;
     }
-    if (!g_state.handlers_registered) {
+    if (!state.handlers_registered) {
         if (esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID,
                                                 &wifiEventHandler, nullptr,
                                                 nullptr) != ESP_OK ||
@@ -91,7 +96,7 @@ bool ensureDriver() FL_NO_EXCEPT {
             FL_WARN_F("wifi: event handler registration failed");
             return false;
         }
-        g_state.handlers_registered = true;
+        state.handlers_registered = true;
     }
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     err = esp_wifi_init(&cfg);
@@ -103,12 +108,13 @@ bool ensureDriver() FL_NO_EXCEPT {
 }
 
 bool applyMode() FL_NO_EXCEPT {
+    WifiState& state = wifiState();
     wifi_mode_t mode = WIFI_MODE_NULL;
-    if (g_state.sta_requested && g_state.ap_active) {
+    if (state.sta_requested && state.ap_active) {
         mode = WIFI_MODE_APSTA;
-    } else if (g_state.sta_requested) {
+    } else if (state.sta_requested) {
         mode = WIFI_MODE_STA;
-    } else if (g_state.ap_active) {
+    } else if (state.ap_active) {
         mode = WIFI_MODE_AP;
     }
     esp_err_t err = esp_wifi_set_mode(mode);
@@ -136,15 +142,16 @@ fl::string netifIp(esp_netif_t *netif) FL_NO_EXCEPT {
 } // anonymous namespace
 
 bool connectSta(const char *ssid, const char *password) FL_NO_EXCEPT {
+    WifiState& state = wifiState();
     if (ssid == nullptr || *ssid == '\0') {
         return false;
     }
     if (!ensureDriver()) {
         return false;
     }
-    if (g_state.sta_netif == nullptr) {
-        g_state.sta_netif = esp_netif_create_default_wifi_sta();
-        if (g_state.sta_netif == nullptr) {
+    if (state.sta_netif == nullptr) {
+        state.sta_netif = esp_netif_create_default_wifi_sta();
+        if (state.sta_netif == nullptr) {
             FL_WARN_F("wifi: STA netif creation failed");
             return false;
         }
@@ -159,9 +166,9 @@ bool connectSta(const char *ssid, const char *password) FL_NO_EXCEPT {
                     sizeof(cfg.sta.password) - 1);
     }
 
-    g_state.sta_requested = true;
-    g_state.retries = 0;
-    g_state.status = Status::CONNECTING;
+    state.sta_requested = true;
+    state.retries = 0;
+    state.status = Status::CONNECTING;
     if (!applyMode()) {
         return false;
     }
@@ -175,25 +182,26 @@ bool connectSta(const char *ssid, const char *password) FL_NO_EXCEPT {
         FL_WARN_F("wifi: start failed: %s", esp_err_to_name(err));
         return false;
     }
-    if (g_state.driver_started) {
+    if (state.driver_started) {
         // Driver was already running (mode change) — STA_START will not
         // re-fire, so kick the join directly.
         esp_wifi_connect();
     }
-    g_state.driver_started = true;
+    state.driver_started = true;
     return true;
 }
 
 bool startAp(const char *ssid, const char *password, u8 channel) FL_NO_EXCEPT {
+    WifiState& state = wifiState();
     if (ssid == nullptr || *ssid == '\0') {
         return false;
     }
     if (!ensureDriver()) {
         return false;
     }
-    if (g_state.ap_netif == nullptr) {
-        g_state.ap_netif = esp_netif_create_default_wifi_ap();
-        if (g_state.ap_netif == nullptr) {
+    if (state.ap_netif == nullptr) {
+        state.ap_netif = esp_netif_create_default_wifi_ap();
+        if (state.ap_netif == nullptr) {
             FL_WARN_F("wifi: AP netif creation failed");
             return false;
         }
@@ -214,59 +222,60 @@ bool startAp(const char *ssid, const char *password, u8 channel) FL_NO_EXCEPT {
         cfg.ap.authmode = WIFI_AUTH_OPEN;
     }
 
-    g_state.ap_active = true;
+    state.ap_active = true;
     if (!applyMode()) {
-        g_state.ap_active = false;
+        state.ap_active = false;
         return false;
     }
     esp_err_t err = esp_wifi_set_config(WIFI_IF_AP, &cfg);
     if (err != ESP_OK) {
         FL_WARN_F("wifi: AP set_config failed: %s", esp_err_to_name(err));
-        g_state.ap_active = false;
+        state.ap_active = false;
         return false;
     }
     err = esp_wifi_start();
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
         FL_WARN_F("wifi: start failed: %s", esp_err_to_name(err));
-        g_state.ap_active = false;
+        state.ap_active = false;
         return false;
     }
-    g_state.driver_started = true;
-    if (g_state.status == Status::IDLE ||
-        g_state.status == Status::UNSUPPORTED) {
-        g_state.status = Status::AP_ACTIVE;
+    state.driver_started = true;
+    if (state.status == Status::IDLE ||
+        state.status == Status::UNSUPPORTED) {
+        state.status = Status::AP_ACTIVE;
     }
     return true;
 }
 
 void stop() FL_NO_EXCEPT {
-    g_state.sta_requested = false;
-    g_state.ap_active = false;
-    if (g_state.driver_started) {
+    WifiState& state = wifiState();
+    state.sta_requested = false;
+    state.ap_active = false;
+    if (state.driver_started) {
         esp_wifi_stop();
-        g_state.driver_started = false;
+        state.driver_started = false;
     }
-    g_state.status = Status::IDLE;
+    state.status = Status::IDLE;
 }
 
 Status status() FL_NO_EXCEPT {
-    return g_state.status;
+    return wifiState().status;
 }
 
 bool isConnected() FL_NO_EXCEPT {
-    return g_state.status == Status::CONNECTED;
+    return wifiState().status == Status::CONNECTED;
 }
 
 fl::string ipAddress() FL_NO_EXCEPT {
-    return netifIp(g_state.sta_netif);
+    return netifIp(wifiState().sta_netif);
 }
 
 fl::string apIpAddress() FL_NO_EXCEPT {
-    return netifIp(g_state.ap_netif);
+    return netifIp(wifiState().ap_netif);
 }
 
 } // namespace wifi
 } // namespace net
 } // namespace fl
 
-#endif // FL_WIFI_AVAILABLE
+#endif // FL_WIFI_AVAILABLE && FL_IS_ESP32

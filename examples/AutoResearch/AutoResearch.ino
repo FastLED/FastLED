@@ -203,11 +203,6 @@ void loop()  { autoResearchLowMemoryLoop(); }
 // ============================================================================
 
 #include <FastLED.h>
-#if defined(PICO_CYW43_SUPPORTED)
-// Keep Arduino-Pico's WiFi library visible to fbuild's sketch dependency
-// resolver. The RP2350W implementation itself remains in AutoResearchNet.cpp.
-#include <WiFi.h>
-#endif
 #include "fl/channels/all_drivers.h"  // for FastLED.enableAllDrivers() post-#2428
 #include "fl/wdt/watchdog.h"  // FL_WATCHDOG_AUTO() — unified cross-platform WDT guard
 #include "fl/stl/undef.h"  // Undefine Arduino macros (DEFAULT, INPUT, OUTPUT)
