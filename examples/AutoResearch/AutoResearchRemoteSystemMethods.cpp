@@ -26,6 +26,7 @@
 #include "AutoResearchPlatform.h"
 #include "AutoResearchRpConcurrency.h"
 #include "AutoResearchEdgeProbe.h"
+#include "fl/wdt/watchdog.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/unique_ptr.h"
 #include "platforms/is_platform.h"
@@ -212,12 +213,15 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
     // Register "ping" function - health check with timestamp
     remote.bind("ping", [this](const fl::json& args) -> fl::json {
         uint32_t now = millis();
+        const fl::ResetCause reset_cause = FastLED.watchdog().lastResetCause();
 
         fl::json response = fl::json::object();
         response.set("success", true);
         response.set("message", "pong");
         response.set("timestamp", static_cast<int64_t>(now));
         response.set("uptimeMs", static_cast<int64_t>(now));
+        response.set("lastResetCause", fl::resetCauseName(reset_cause).data());
+        response.set("lastResetWasWatchdog", reset_cause == fl::ResetCause::WATCHDOG);
         return response;
     });
 

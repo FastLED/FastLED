@@ -741,6 +741,8 @@ class TestAutoResearchFilter:
                 "esp32p4",
                 "teensy41",
                 "teensy40",
+                "rp2350",
+                "rp2350w",
                 "lpc845",
                 "lpc845brk",
                 "lpcxpresso845max",

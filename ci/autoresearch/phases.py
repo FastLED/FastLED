@@ -270,6 +270,20 @@ def start_autoresearch_watchdog(ctx: "RunContext") -> None:
     thread.start()
 
 
+def stop_autoresearch_watchdog(ctx: "RunContext") -> None:
+    """Cancel the host watchdog after the complete AutoResearch run returns.
+
+    Per-phase cleanup deliberately keeps the watchdog armed because a blocked
+    serial close is exactly the failure it protects against. Once every phase
+    has returned, however, the daemon must not outlive its caller.
+    """
+    cancel_event = ctx._watchdog_task
+    if cancel_event is None:
+        return
+    cancel_event.set()
+    ctx._watchdog_task = None
+
+
 def extend_autoresearch_watchdog_deadline(
     ctx: "RunContext", extra_seconds: float
 ) -> None:
@@ -2210,10 +2224,25 @@ async def _run_watchdog_soak(ctx: RunContext) -> int:
             print(f"RESULT: watchdog soak FAIL: post-reset ping {after.data!r}")
             return 1
         after_uptime = after.data.get("uptimeMs")
+        watchdog_reset = after.data.get("lastResetWasWatchdog") is True
+        uptime_reset = (
+            isinstance(before_uptime, int)
+            and not isinstance(before_uptime, bool)
+            and isinstance(after_uptime, int)
+            and not isinstance(after_uptime, bool)
+            and after_uptime < before_uptime
+        )
         print(
             f"WATCHDOG: post-reset ping uptimeMs={after_uptime} "
-            f"port={new_port} reset_evidence={after_uptime is not None and before_uptime is not None and after_uptime < before_uptime}"
+            f"port={new_port} resetCause={after.data.get('lastResetCause')!r} "
+            f"watchdog_reset={watchdog_reset} uptime_reset={uptime_reset}"
         )
+        if not watchdog_reset or not uptime_reset:
+            print(
+                "RESULT: watchdog soak FAIL: re-enumerated device did not prove "
+                "the deliberate hang caused a watchdog reset"
+            )
+            return 1
     finally:
         try:
             await recovery.close()

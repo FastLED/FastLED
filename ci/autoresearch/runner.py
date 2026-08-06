@@ -30,6 +30,7 @@ from ci.autoresearch.phases import (
     _run_native_autoresearch,
     _run_schema_and_pin_setup,
     _run_tests_or_special_mode,
+    stop_autoresearch_watchdog,
 )
 from ci.util.global_interrupt_handler import (
     handle_keyboard_interrupt,
@@ -92,6 +93,18 @@ async def run(args: Args | None = None) -> int:
     if isinstance(result, int):
         return result
     ctx = result
+
+    try:
+        return await _run_context(ctx, args)
+    finally:
+        # The watchdog remains armed through deploy, RPC work, and every
+        # phase-level cleanup path. It is safe to cancel only after this
+        # complete top-level run has returned.
+        stop_autoresearch_watchdog(ctx)
+
+
+async def _run_context(ctx: Any, args: Args) -> int:
+    """Run all post-parse phases while the caller owns watchdog cleanup."""
 
     # Early return: --decode mode
     if ctx.decode_mode:
