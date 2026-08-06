@@ -29,6 +29,7 @@ from ci.autoresearch.phases import (
     _run_tests_or_special_mode,
     _run_watchdog_soak,
     _validate_test_rpc_response,
+    stop_autoresearch_watchdog,
 )
 from ci.rpc_client import RpcError, RpcTimeoutError
 from ci.util.port_utils import ChipDetectionResult, auto_detect_upload_port
@@ -1900,6 +1901,12 @@ class TestAutoDetectUploadPort:
 class TestRunBuildDeploy:
     """Test _run_build_deploy (uses mock BuildDriver)."""
 
+    @pytest.fixture(autouse=True)
+    def disable_host_watchdog_for_unit_deploys(self):
+        """Direct phase tests do not own the runner watchdog lifecycle."""
+        with patch(f"{_PATCH_MOD}.start_autoresearch_watchdog"):
+            yield
+
     def test_build_deploy_success(self) -> None:
         mock_driver = _make_mock_driver()
         ctx = _make_ctx(build_driver=mock_driver)
@@ -1978,6 +1985,16 @@ class TestRunBuildDeploy:
         flash.assert_called_once()
         assert flash.call_args.kwargs["environment"] == "lpc845brk_ieee754"
         mock_driver.deploy.assert_not_called()
+
+    def test_stopping_host_watchdog_signals_and_clears_the_runner_handle(self) -> None:
+        ctx = _make_ctx()
+        cancel_event = MagicMock()
+        ctx._watchdog_task = cancel_event
+
+        stop_autoresearch_watchdog(ctx)
+
+        cancel_event.set.assert_called_once_with()
+        assert ctx._watchdog_task is None
 
 
 # ============================================================
@@ -2625,7 +2642,9 @@ class TestRunTestsOrSpecialMode:
             ]
         )
         recovery_client = AsyncMock()
-        recovery_client.send = AsyncMock(return_value=response({"uptimeMs": 1}))
+        recovery_client.send = AsyncMock(
+            return_value=response({"uptimeMs": 1, "lastResetWasWatchdog": True})
+        )
         detected = MagicMock(selected_port="COM18")
 
         with (
@@ -2658,6 +2677,59 @@ class TestRunTestsOrSpecialMode:
         auto_detect.assert_called_once_with(
             "rp2350w", expected_serial_number="2DCB876B587EA334"
         )
+
+    def test_rp2350_watchdog_rejects_reenumeration_without_watchdog_reset(self) -> None:
+        ctx = _make_ctx(
+            final_environment="rp2350w",
+            upload_port="COM17",
+            use_fbuild=True,
+            watchdog_soak_mode=True,
+        )
+
+        def response(data):
+            item = MagicMock()
+            item.success = True
+            item.data = data
+            return item
+
+        initial_client = AsyncMock()
+        initial_client.send = AsyncMock(
+            side_effect=[
+                response({"uptimeMs": 100}),
+                response({"success": True}),
+            ]
+        )
+        recovery_client = AsyncMock()
+        recovery_client.send = AsyncMock(
+            return_value=response({"uptimeMs": 1, "lastResetWasWatchdog": False})
+        )
+        detected = MagicMock(selected_port="COM18")
+
+        with (
+            patch(
+                "ci.util.serial_interface.create_serial_interface",
+                return_value=MagicMock(),
+            ),
+            patch(
+                f"{_PATCH_MOD}.RpcClient",
+                side_effect=[initial_client, recovery_client],
+            ),
+            patch(f"{_PATCH_MOD}.port_exists", return_value=False),
+            patch(
+                f"{_PATCH_MOD}.get_port_serial_number",
+                return_value="2DCB876B587EA334",
+            ),
+            patch(f"{_PATCH_MOD}.auto_detect_upload_port", return_value=detected),
+            patch(
+                f"{_PATCH_MOD}._run_rpc_smoke_tests",
+                new_callable=AsyncMock,
+                return_value=0,
+            ) as rpc_smoke,
+        ):
+            rc = asyncio.run(_run_watchdog_soak(ctx))
+
+        assert rc == 1
+        rpc_smoke.assert_not_awaited()
 
     def test_ble_mode_delegates(self) -> None:
         ctx = _make_ctx(ble_mode=True)

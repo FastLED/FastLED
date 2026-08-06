@@ -86,7 +86,7 @@ static const HelpEntry kHelpEntries[] = {
     {"getResult", "Phase 3: Selective Execution", "[testCaseIndex]", "{driver, lanes, stripSize, ...}", "Return specific test case result"},
     {"reset", "Phase 4: Utility", "[]", "{success, message, testCasesCleared}", "Reset test state without device reboot"},
     {"halt", "Phase 4: Utility", "[]", "{success, message}", "Trigger sketch halt"},
-    {"ping", "Phase 4: Utility", "[]", "{success, message, timestamp, uptimeMs, frameCounter}", "Health check with timestamp"},
+    {"ping", "Phase 4: Utility", "[]", "{success, message, timestamp, uptimeMs, lastResetCause, lastResetWasWatchdog, frameCounter}", "Health check with timestamp and reset evidence"},
     {"debugTest", "Phase 4: Utility", "object", "{success, received}", "Echo an exact nested JSON payload"},
     {"testNoSerial", "Phase 4: Utility", "[]", "{success, message, serial_safe}", "Verify RPC execution without device-side serial logging"},
     {"testRpConcurrency", "Phase 4: Utility", "[]", "{success, supported, backend, core1Ready, core1Done, recursiveMutexReady, generation, expected, actual}", "Exercise mutex and semaphore synchronization across both RP physical cores"},
