@@ -16,13 +16,15 @@
 
 #include "AutoResearchOta.h"
 #include "fl/stl/json.h"
+#include "fl/stl/singleton.h"
 #include "fl/log/log.h"
 
-// Global OTA state
-static AutoResearchOtaState s_ota_state;
+struct OtaStateHolder {
+    AutoResearchOtaState state;
+};
 
 AutoResearchOtaState& getOtaState() {
-    return s_ota_state;
+    return fl::Singleton<OtaStateHolder>::instance().state;
 }
 
 // ============================================================================
@@ -51,18 +53,25 @@ AutoResearchOtaState& getOtaState() {
 #include <esp_event.h>
 // IWYU pragma: end_keep
 
-// Static handles
-static fl::unique_ptr<fl::net::OTA> s_ota;
-static esp_netif_t* s_ota_netif_ap = nullptr;
-static bool s_ota_event_loop_initialized = false;
-static bool s_ota_wifi_initialized = false;
+struct EspOtaRuntimeState {
+    fl::unique_ptr<fl::net::OTA> ota;
+    esp_netif_t* netif_ap = nullptr;
+    bool event_loop_initialized = false;
+    bool wifi_initialized = false;
+};
+
+EspOtaRuntimeState& getEspOtaRuntimeState() {
+    return fl::Singleton<EspOtaRuntimeState>::instance();
+}
 
 // ============================================================================
 // WiFi Soft AP Setup (same pattern as AutoResearchNet.cpp::initWifiAP)
 // ============================================================================
 
 static bool initOtaWifiAP() {
-    if (s_ota_state.wifi_ap_active) {
+    AutoResearchOtaState& otaState = getOtaState();
+    EspOtaRuntimeState& runtimeState = getEspOtaRuntimeState();
+    if (otaState.wifi_ap_active) {
         return true;  // Already active
     }
 
@@ -74,33 +83,33 @@ static bool initOtaWifiAP() {
     }
 
     // Create default event loop (safe to call multiple times)
-    if (!s_ota_event_loop_initialized) {
+    if (!runtimeState.event_loop_initialized) {
         err = esp_event_loop_create_default();
         if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
             FL_WARN("[OTA] esp_event_loop_create_default failed: " << esp_err_to_name(err));
             return false;
         }
-        s_ota_event_loop_initialized = true;
+        runtimeState.event_loop_initialized = true;
     }
 
     // Create default WiFi AP netif
-    if (!s_ota_netif_ap) {
-        s_ota_netif_ap = esp_netif_create_default_wifi_ap();
-        if (!s_ota_netif_ap) {
+    if (!runtimeState.netif_ap) {
+        runtimeState.netif_ap = esp_netif_create_default_wifi_ap();
+        if (!runtimeState.netif_ap) {
             FL_WARN("[OTA] esp_netif_create_default_wifi_ap failed");
             return false;
         }
     }
 
     // Initialize WiFi with default config
-    if (!s_ota_wifi_initialized) {
+    if (!runtimeState.wifi_initialized) {
         wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
         err = esp_wifi_init(&cfg);
         if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
             FL_WARN("[OTA] esp_wifi_init failed: " << esp_err_to_name(err));
             return false;
         }
-        s_ota_wifi_initialized = true;
+        runtimeState.wifi_initialized = true;
     }
 
     // Configure AP
@@ -130,7 +139,7 @@ static bool initOtaWifiAP() {
         return false;
     }
 
-    s_ota_state.wifi_ap_active = true;
+    otaState.wifi_ap_active = true;
     FL_WARN("[OTA] WiFi AP started: SSID=" << AUTORESEARCH_OTA_SSID << " IP=" << AUTORESEARCH_OTA_AP_IP);
     return true;
 }
@@ -141,6 +150,8 @@ static bool initOtaWifiAP() {
 
 fl::json startOta() {
     fl::json response = fl::json::object();
+    AutoResearchOtaState& otaState = getOtaState();
+    EspOtaRuntimeState& runtimeState = getEspOtaRuntimeState();
 
     // Start WiFi AP
     if (!initOtaWifiAP()) {
@@ -150,15 +161,15 @@ fl::json startOta() {
     }
 
     // Create and start OTA server
-    s_ota = fl::make_unique<fl::net::OTA>();
-    if (!s_ota->begin(AUTORESEARCH_OTA_HOSTNAME, AUTORESEARCH_OTA_OTA_PASSWORD)) {
+    runtimeState.ota = fl::make_unique<fl::net::OTA>();
+    if (!runtimeState.ota->begin(AUTORESEARCH_OTA_HOSTNAME, AUTORESEARCH_OTA_OTA_PASSWORD)) {
         response.set("success", false);
         response.set("error", "Failed to start OTA server");
-        s_ota.reset();
+        runtimeState.ota.reset();
         return response;
     }
 
-    s_ota_state.ota_active = true;
+    otaState.ota_active = true;
     FL_WARN("[OTA] OTA server started: hostname=" << AUTORESEARCH_OTA_HOSTNAME);
 
     response.set("success", true);
@@ -173,18 +184,20 @@ fl::json startOta() {
 
 fl::json stopOta() {
     fl::json response = fl::json::object();
+    AutoResearchOtaState& otaState = getOtaState();
+    EspOtaRuntimeState& runtimeState = getEspOtaRuntimeState();
 
     // Stop OTA server
-    if (s_ota.get()) {
-        s_ota.reset();
-        s_ota_state.ota_active = false;
+    if (runtimeState.ota.get()) {
+        runtimeState.ota.reset();
+        otaState.ota_active = false;
         FL_WARN("[OTA] OTA server stopped");
     }
 
     // Stop WiFi
-    if (s_ota_state.wifi_ap_active) {
+    if (otaState.wifi_ap_active) {
         esp_wifi_stop();
-        s_ota_state.wifi_ap_active = false;
+        otaState.wifi_ap_active = false;
         FL_WARN("[OTA] WiFi AP stopped");
     }
 
