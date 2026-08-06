@@ -133,6 +133,9 @@ def _make_args(**overrides) -> Args:
         net_server=False,
         net_client=False,
         net=False,
+        net_peer=False,
+        peer_environment="esp32c6",
+        peer_upload_port=None,
         ota=False,
         ble=False,
         parallel=False,
@@ -206,6 +209,7 @@ def _make_ctx(**overrides) -> RunContext:
         net_server_mode=False,
         net_client_mode=False,
         net_loopback_mode=False,
+        net_peer_mode=False,
         ota_mode=False,
         ble_mode=False,
         decode_mode=False,
@@ -1002,6 +1006,48 @@ class TestParseArgsAndBuildCommands:
         result = _parse_args_and_build_commands(args)
         assert isinstance(result, int)
         assert result == 1
+
+    def test_net_peer_requires_explicit_rp2350w_and_c6_ports(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            net_peer=True,
+            environment_positional="rp2350w",
+            upload_port="COM17",
+            peer_upload_port="COM9",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=True,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.net_peer_mode is True
+        assert result.gpio_only_mode is False
+
+    def test_net_peer_rejects_missing_companion_port(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            net_peer=True,
+            environment_positional="rp2350w",
+            upload_port="COM17",
+            project_dir=fake_project_dir,
+        )
+        assert _parse_args_and_build_commands(args) == 1
+
+    def test_net_peer_rejects_wrong_primary_environment(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            net_peer=True,
+            environment_positional="esp32c6",
+            upload_port="COM17",
+            peer_upload_port="COM9",
+            project_dir=fake_project_dir,
+        )
+        assert _parse_args_and_build_commands(args) == 1
 
     def test_lane_range_parsing(self, fake_project_dir: Path) -> None:
         args = _make_args(lanes="1-4", project_dir=fake_project_dir)
@@ -1929,6 +1975,34 @@ class TestRunBuildDeploy:
 
         assert rc is None
         assert mock_driver.deploy.call_args.kwargs["environment"] == "rp2350w"
+
+    def test_net_peer_deploys_c6_through_fbuild_on_explicit_port(self) -> None:
+        mock_driver = _make_mock_driver()
+        ctx = _make_ctx(
+            args=_make_args(
+                skip_lint=True,
+                net_peer=True,
+                environment_positional="rp2350w",
+                upload_port="COM17",
+                peer_upload_port="COM9",
+            ),
+            build_driver=mock_driver,
+            final_environment="rp2350w",
+            upload_port="COM17",
+            net_peer_mode=True,
+        )
+        qctx = QuietContext(quiet=False)
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=Path("/fake/peer-project"),
+        ) as stage_peer:
+            rc = asyncio.run(_run_build_deploy(ctx, qctx))
+
+        assert rc is None
+        stage_peer.assert_called_once()
+        assert mock_driver.deploy.call_count == 2
+        assert mock_driver.deploy.call_args.kwargs["environment"] == "esp32c6"
+        assert mock_driver.deploy.call_args.kwargs["upload_port"] == "COM9"
 
     def test_build_deploy_install_failure(self) -> None:
         mock_driver = _make_mock_driver(install_ok=False)

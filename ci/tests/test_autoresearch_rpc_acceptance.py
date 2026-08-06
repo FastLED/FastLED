@@ -40,6 +40,7 @@ def _make_ctx(
         net_server_mode=False,
         net_client_mode=False,
         net_loopback_mode=False,
+        net_peer_mode=False,
         ota_mode=False,
         ble_mode=False,
         decode_mode=False,

@@ -569,6 +569,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     net_server_mode = args.net_server
     net_client_mode = args.net_client
     net_loopback_mode = args.net
+    net_peer_mode = args.net_peer
     ota_mode = args.ota
     ble_mode = args.ble
     decode_mode = args.decode is not None
@@ -584,6 +585,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             or net_server_mode
             or net_client_mode
             or net_loopback_mode
+            or net_peer_mode
             or ota_mode
             or ble_mode
         )
@@ -595,7 +597,12 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
 
     # Validate mutual exclusivity
     if (
-        net_server_mode or net_client_mode or net_loopback_mode or ota_mode or ble_mode
+        net_server_mode
+        or net_client_mode
+        or net_loopback_mode
+        or net_peer_mode
+        or ota_mode
+        or ble_mode
     ) and (
         drivers
         or simd_test_mode
@@ -604,15 +611,35 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         or rpc_smoke_mode
     ):
         print(
-            f"{Fore.RED}\u274c Error: --net/--net-server/--net-client/--ota/--ble cannot be combined with driver flags, --simd, or --coroutine{Style.RESET_ALL}"
+            f"{Fore.RED}\u274c Error: network, OTA, and BLE modes cannot be combined with driver flags, --simd, or --coroutine{Style.RESET_ALL}"
         )
         return 1
-    net_mode_count = sum([net_server_mode, net_client_mode, net_loopback_mode])
+    net_mode_count = sum(
+        [net_server_mode, net_client_mode, net_loopback_mode, net_peer_mode]
+    )
     if net_mode_count > 1:
         print(
-            f"{Fore.RED}\u274c Error: --net, --net-server, and --net-client are mutually exclusive{Style.RESET_ALL}"
+            f"{Fore.RED}\u274c Error: --net, --net-server, --net-client, and --net-peer are mutually exclusive{Style.RESET_ALL}"
         )
         return 1
+    if net_peer_mode:
+        primary_environment = (final_environment or "").lower()
+        peer_environment = args.peer_environment.lower()
+        if primary_environment not in {"rp2350w", "rpipico2w"}:
+            print(
+                f"{Fore.RED}\u274c --net-peer requires rp2350w or rpipico2w as the primary environment{Style.RESET_ALL}"
+            )
+            return 1
+        if peer_environment != "esp32c6":
+            print(
+                f"{Fore.RED}\u274c --net-peer currently requires --peer-environment esp32c6{Style.RESET_ALL}"
+            )
+            return 1
+        if not args.upload_port or not args.peer_upload_port:
+            print(
+                f"{Fore.RED}\u274c --net-peer requires both --upload-port and --peer-upload-port{Style.RESET_ALL}"
+            )
+            return 1
     if ota_mode and net_mode_count > 0:
         print(
             f"{Fore.RED}\u274c Error: --ota cannot be combined with --net/--net-server/--net-client{Style.RESET_ALL}"
@@ -637,6 +664,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         and not net_server_mode
         and not net_client_mode
         and not net_loopback_mode
+        and not net_peer_mode
         and not ota_mode
         and not ble_mode
     )
@@ -1191,6 +1219,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         net_server_mode=net_server_mode,
         net_client_mode=net_client_mode,
         net_loopback_mode=net_loopback_mode,
+        net_peer_mode=net_peer_mode,
         ota_mode=ota_mode,
         ble_mode=ble_mode,
         decode_mode=decode_mode,
@@ -1553,6 +1582,58 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
             qctx.emit_log_path()
             return 1
 
+    if ctx.net_peer_mode:
+        # A peer run must remain entirely on fbuild's deploy path.  In
+        # particular, do not open a direct serial flasher or fall back to a
+        # host-managed WiFi workflow: both boards are selected by explicit
+        # ports and the subsequent validation is device-to-device.
+        if build_driver.name != "fbuild":
+            print("❌ --net-peer requires the fbuild deployment backend")
+            return 1
+        peer_environment = args.peer_environment.lower()
+        peer_upload_port = args.peer_upload_port
+        assert peer_upload_port is not None
+        from ci.autoresearch.staging import synthesise_autoresearch_project
+
+        try:
+            peer_build_dir = synthesise_autoresearch_project(
+                peer_environment,
+                project_root=args.project_dir.resolve(),
+                verbose=args.verbose,
+            )
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as e:
+            print(f"❌ Failed to stage --net-peer companion project: {e}")
+            return 1
+
+        print(
+            f"📦 Deploying --net-peer companion {peer_environment} "
+            f"to explicit port {peer_upload_port}"
+        )
+        peer_result = build_driver.deploy(
+            peer_build_dir,
+            environment=peer_environment,
+            upload_port=peer_upload_port,
+            verbose=args.verbose,
+            clean=args.clean,
+            quiet=args.quiet,
+            log_file=qctx.log_file,
+        )
+        peer_success = (
+            peer_result.success
+            if isinstance(peer_result, DeployResult)
+            else bool(peer_result)
+        )
+        if isinstance(peer_result, DeployResult) and peer_result.port:
+            args.peer_upload_port = peer_result.port
+            print(f"✅ fbuild returned companion application port: {peer_result.port}")
+        if not peer_success:
+            qctx.emit("BUILD+FLASH FAIL (--net-peer companion)")
+            qctx.emit_log_path()
+            return 1
+
     # Wait for serial port to become available after upload
     if upload_port and build_driver.name == "platformio":
         print(
@@ -1778,7 +1859,12 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print("\n\U0001f4cc RPC smoke mode: skipping pin discovery and GPIO pre-test")
     elif ctx.perf_wave2d_grid is not None:
         print("\n\U0001f4cc Wave2D mode: skipping pin discovery and GPIO pre-test")
-    elif ctx.net_server_mode or ctx.net_client_mode or ctx.net_loopback_mode:
+    elif (
+        ctx.net_server_mode
+        or ctx.net_client_mode
+        or ctx.net_loopback_mode
+        or ctx.net_peer_mode
+    ):
         print("\n\U0001f4cc Network mode: skipping pin discovery and GPIO pre-test")
     elif ctx.ota_mode:
         print("\n\U0001f4cc OTA mode: skipping pin discovery and GPIO pre-test")
@@ -1866,7 +1952,12 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         pass
     elif ctx.perf_wave2d_grid is not None:
         pass
-    elif ctx.net_server_mode or ctx.net_client_mode or ctx.net_loopback_mode:
+    elif (
+        ctx.net_server_mode
+        or ctx.net_client_mode
+        or ctx.net_loopback_mode
+        or ctx.net_peer_mode
+    ):
         pass
     elif ctx.ota_mode:
         pass
@@ -2399,6 +2490,18 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     net_server_mode = ctx.net_server_mode
     net_client_mode = ctx.net_client_mode
     net_loopback_mode = ctx.net_loopback_mode
+
+    if ctx.net_peer_mode:
+        from ci.autoresearch.net import run_net_peer_autoresearch
+
+        peer_upload_port = ctx.args.peer_upload_port
+        assert peer_upload_port is not None
+        return await run_net_peer_autoresearch(
+            upload_port=upload_port,
+            peer_upload_port=peer_upload_port,
+            serial_iface=serial_iface,
+            timeout=ctx.remaining_seconds(),
+        )
 
     if (net_server_mode or net_client_mode) and ctx.final_environment:
         if not environment_has_wifi(ctx.final_environment):

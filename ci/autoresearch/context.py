@@ -153,6 +153,7 @@ class RunContext:
     net_server_mode: bool
     net_client_mode: bool
     net_loopback_mode: bool
+    net_peer_mode: bool
     ota_mode: bool
     ble_mode: bool
     decode_mode: bool
