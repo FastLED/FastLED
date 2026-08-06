@@ -275,13 +275,41 @@ static bool initNetifForLoopback() {
     return true;
 }
 
-/// @brief Run a single HTTP GET test and return result
-static fl::json runHttpGetTest(const char* url, const char* test_name) {
+struct HttpResponseCapture {
+    char body[256] = {};
+    size_t length = 0;
+    bool truncated = false;
+};
+
+static esp_err_t captureHttpResponse(esp_http_client_event_t* event) {
+    if (event->event_id != HTTP_EVENT_ON_DATA || event->data == nullptr ||
+        event->data_len <= 0 || event->user_data == nullptr) {
+        return ESP_OK;
+    }
+    HttpResponseCapture* capture =
+        static_cast<HttpResponseCapture*>(event->user_data);
+    const size_t available = sizeof(capture->body) - 1 - capture->length;
+    const size_t incoming = static_cast<size_t>(event->data_len);
+    const size_t copied = incoming < available ? incoming : available;
+    fl::memcpy(capture->body + capture->length, event->data, copied);
+    capture->length += copied;
+    capture->body[capture->length] = '\0';
+    capture->truncated = capture->truncated || copied != incoming;
+    return ESP_OK;
+}
+
+/// @brief Run a single HTTP GET test and return result.
+static fl::json runHttpGetTest(const char* url, const char* test_name,
+                               int expected_status,
+                               const char* expected_fragment) {
     fl::json result = fl::json::object();
     result.set("test", test_name);
 
+    HttpResponseCapture capture;
     esp_http_client_config_t config = {};
     config.url = url;
+    config.event_handler = captureHttpResponse;
+    config.user_data = &capture;
     // Must stay below the task-WDT window: esp_http_client_perform()
     // blocks the loop task, and on single-core chips (ESP32-C6) a 5 s
     // block starved the idle task -> WDT panic_abort mid-test
@@ -308,10 +336,20 @@ static fl::json runHttpGetTest(const char* url, const char* test_name) {
     int status = esp_http_client_get_status_code(client);
     result.set("status_code", static_cast<int64_t>(status));
 
-    if (status != 200) {
+    const bool status_ok = status == expected_status;
+    const bool content_ok = expected_fragment == nullptr ||
+                            fl::strstr(capture.body, expected_fragment) != nullptr;
+    result.set("body_truncated", capture.truncated);
+    if (!status_ok || !content_ok || capture.truncated) {
         result.set("passed", false);
         fl::sstream ss;
-        ss << "Expected status 200, got " << status;
+        if (!status_ok) {
+            ss << "Expected status " << expected_status << ", got " << status;
+        } else if (capture.truncated) {
+            ss << "Response body exceeded capture limit";
+        } else {
+            ss << "Unexpected response body";
+        }
         result.set("error", ss.str().c_str());
     } else {
         result.set("passed", true);
@@ -377,16 +415,18 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
     char url_rpc_discover[128];
     char url_rpc_ping[128];
     char url_rpc_status[128];
+    char url_rpc_unknown[128];
     snprintf(url_ping, sizeof(url_ping), "http://%s:%u/ping", host_ip, port);
     snprintf(url_status, sizeof(url_status), "http://%s:%u/status", host_ip, port);
     snprintf(url_leds, sizeof(url_leds), "http://%s:%u/leds", host_ip, port);
     snprintf(url_rpc_discover, sizeof(url_rpc_discover), "http://%s:%u/rpc/discover", host_ip, port);
     snprintf(url_rpc_ping, sizeof(url_rpc_ping), "http://%s:%u/rpc/ping", host_ip, port);
     snprintf(url_rpc_status, sizeof(url_rpc_status), "http://%s:%u/rpc/status", host_ip, port);
+    snprintf(url_rpc_unknown, sizeof(url_rpc_unknown), "http://%s:%u/rpc/unknown", host_ip, port);
 
     // Test 1: GET /ping
     {
-        fl::json r = runHttpGetTest(url_ping, "GET /ping");
+        fl::json r = runHttpGetTest(url_ping, "GET /ping", 200, "pong");
         auto passed = r[fl::string("passed")].as_bool();
         if (passed.has_value() && passed.value()) {
             tests_passed++;
@@ -400,7 +440,7 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
 
     // Test 2: GET /status
     {
-        fl::json r = runHttpGetTest(url_status, "GET /status");
+        fl::json r = runHttpGetTest(url_status, "GET /status", 200, "\"chip\":\"rp2350w\"");
         auto passed = r[fl::string("passed")].as_bool();
         if (passed.has_value() && passed.value()) {
             tests_passed++;
@@ -414,7 +454,7 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
 
     // Test 3: GET /leds
     {
-        fl::json r = runHttpGetTest(url_leds, "GET /leds");
+        fl::json r = runHttpGetTest(url_leds, "GET /leds", 200, "num_leds");
         auto passed = r[fl::string("passed")].as_bool();
         if (passed.has_value() && passed.value()) {
             tests_passed++;
@@ -424,10 +464,16 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
         results.push_back(r);
     }
 
-    const char* rpc_urls[] = {url_rpc_discover, url_rpc_ping, url_rpc_status};
-    const char* rpc_names[] = {"GET /rpc/discover", "GET /rpc/ping", "GET /rpc/status"};
-    for (size_t i = 0; i < 3; ++i) {
-        fl::json r = runHttpGetTest(rpc_urls[i], rpc_names[i]);
+    const char* rpc_urls[] = {url_rpc_discover, url_rpc_ping, url_rpc_status,
+                              url_rpc_unknown};
+    const char* rpc_names[] = {"GET /rpc/discover", "GET /rpc/ping",
+                               "GET /rpc/status", "GET /rpc/unknown"};
+    const int rpc_statuses[] = {200, 200, 200, 404};
+    const char* rpc_expected[] = {"\"methods\"", "\"pong\":true",
+                                  "\"ready\":true", "-32601"};
+    for (size_t i = 0; i < 4; ++i) {
+        fl::json r = runHttpGetTest(rpc_urls[i], rpc_names[i], rpc_statuses[i],
+                                    rpc_expected[i]);
         auto passed = r[fl::string("passed")].as_bool();
         if (passed.has_value() && passed.value()) {
             tests_passed++;
@@ -483,7 +529,8 @@ fl::json runNetLoopback() {
 
     // Test 1: GET /ping
     {
-        fl::json r = runHttpGetTest(url_ping, "GET /ping (loopback)");
+        fl::json r = runHttpGetTest(url_ping, "GET /ping (loopback)", 200,
+                                    "pong");
         auto passed = r[fl::string("passed")].as_bool();
         if (passed.has_value() && passed.value()) {
             tests_passed++;
@@ -495,7 +542,8 @@ fl::json runNetLoopback() {
 
     // Test 2: GET /status
     {
-        fl::json r = runHttpGetTest(url_status, "GET /status (loopback)");
+        fl::json r = runHttpGetTest(url_status, "GET /status (loopback)", 200,
+                                    "\"chip\"");
         auto passed = r[fl::string("passed")].as_bool();
         if (passed.has_value() && passed.value()) {
             tests_passed++;
@@ -507,7 +555,8 @@ fl::json runNetLoopback() {
 
     // Test 3: GET /leds
     {
-        fl::json r = runHttpGetTest(url_leds, "GET /leds (loopback)");
+        fl::json r = runHttpGetTest(url_leds, "GET /leds (loopback)", 200,
+                                    "num_leds");
         auto passed = r[fl::string("passed")].as_bool();
         if (passed.has_value() && passed.value()) {
             tests_passed++;
@@ -600,6 +649,7 @@ void writeHttpNotFoundResponse(WiFiClient& client, const char* body) {
 
 fl::json runRpHttpGetTest(const char* host_ip, uint16_t port,
                           const char* path, const char* test_name,
+                          int expected_status,
                           const char* expected_fragment) {
     fl::json result = fl::json::object();
     result.set("test", test_name);
@@ -653,14 +703,19 @@ fl::json runRpHttpGetTest(const char* host_ip, uint16_t port,
     client.stop();
     response[response_length] = '\0';
 
-    const bool passed = fl::strncmp(status_line, "HTTP/1.1 200", 12) == 0 ||
-                        fl::strncmp(status_line, "HTTP/1.0 200", 12) == 0;
+    char expected_status_code[4] = {};
+    fl::snprintf(expected_status_code, sizeof(expected_status_code), "%d",
+                 expected_status);
+    const bool has_http_prefix = fl::strncmp(status_line, "HTTP/1.1 ", 9) == 0 ||
+                                 fl::strncmp(status_line, "HTTP/1.0 ", 9) == 0;
+    const bool passed = has_http_prefix &&
+                        fl::strncmp(status_line + 9, expected_status_code, 3) == 0;
     const bool content_ok = expected_fragment == nullptr ||
                             fl::strstr(response, expected_fragment) != nullptr;
     result.set("status_line", status_line);
     result.set("passed", passed && content_ok);
     if (!passed || !content_ok) {
-        result.set("error", passed ? "Unexpected response body" : "Expected HTTP 200");
+        result.set("error", passed ? "Unexpected response body" : "Unexpected HTTP status");
     }
     return result;
 }
@@ -795,15 +850,17 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
 
     fl::json results = fl::json::array();
     const char* paths[] = {"/ping", "/status", "/leds", "/rpc/discover",
-                           "/rpc/ping", "/rpc/status"};
+                           "/rpc/ping", "/rpc/status", "/rpc/unknown"};
     const char* names[] = {"GET /ping", "GET /status", "GET /leds",
-                           "GET /rpc/discover", "GET /rpc/ping", "GET /rpc/status"};
+                           "GET /rpc/discover", "GET /rpc/ping", "GET /rpc/status",
+                           "GET /rpc/unknown"};
+    const int expected_statuses[] = {200, 200, 200, 200, 200, 200, 404};
     const char* expected[] = {"pong", "\"chip\"", "num_leds", "\"methods\"",
-                              "\"pong\":true", "\"ready\":true"};
+                              "\"pong\":true", "\"ready\":true", "-32601"};
     int passed = 0;
-    for (size_t i = 0; i < 6; ++i) {
+    for (size_t i = 0; i < 7; ++i) {
         fl::json result = runRpHttpGetTest(host_ip, port, paths[i], names[i],
-                                           expected[i]);
+                                           expected_statuses[i], expected[i]);
         const auto result_passed = result[fl::string("passed")].as_bool();
         if (result_passed.has_value() && result_passed.value()) {
             ++passed;
@@ -819,9 +876,9 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
     }
     results.push_back(payload_result);
 
-    response.set("success", passed == 7);
+    response.set("success", passed == 8);
     response.set("tests_passed", static_cast<int64_t>(passed));
-    response.set("tests_failed", static_cast<int64_t>(7 - passed));
+    response.set("tests_failed", static_cast<int64_t>(8 - passed));
     response.set("results", results);
     return response;
 }
