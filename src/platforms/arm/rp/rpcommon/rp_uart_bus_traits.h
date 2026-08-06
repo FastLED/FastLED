@@ -11,6 +11,7 @@
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/manager.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/type_traits.h"
 #include "platforms/arm/rp/rpcommon/channel_engine_rp_uart.h"
 #include "platforms/arm/rp/rpcommon/rp_uart_peripheral.h"
@@ -18,18 +19,18 @@
 namespace fl {
 namespace detail {
 
+template<u8 UartIndex>
 struct RpUartBusHolder {
     fl::shared_ptr<RpUartPeripheral> peripheral;
     fl::shared_ptr<ChannelEngineRpUart> driver;
-    explicit RpUartBusHolder(u8 uart_index) FL_NO_EXCEPT
+    RpUartBusHolder() FL_NO_EXCEPT
         : peripheral(fl::make_shared<RpUartPeripheral>()),
-          driver(fl::make_shared<ChannelEngineRpUart>(peripheral, uart_index)) {}
+          driver(fl::make_shared<ChannelEngineRpUart>(peripheral, UartIndex)) {}
 };
 
 template<u8 UartIndex>
 inline fl::shared_ptr<ChannelEngineRpUart> rpUartInstancePtr() FL_NO_EXCEPT {
-    static RpUartBusHolder holder(UartIndex);
-    return holder.driver;
+    return SingletonShared<RpUartBusHolder<UartIndex>>::instance().driver;
 }
 
 }  // namespace detail

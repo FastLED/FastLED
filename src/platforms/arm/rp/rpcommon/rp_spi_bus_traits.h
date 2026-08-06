@@ -11,6 +11,7 @@
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/manager.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/type_traits.h"
 #include "platforms/arm/rp/rpcommon/channel_engine_rp_spi.h"
 #include "platforms/arm/rp/rpcommon/rp_spi_peripheral.h"
@@ -29,8 +30,7 @@ struct RpSpiBusHolder {
 
 template<u8 Which>
 inline fl::shared_ptr<ChannelEngineRpSpi> rpSpiInstancePtr() FL_NO_EXCEPT {
-    static RpSpiBusHolder<Which> holder;
-    return holder.driver;
+    return SingletonShared<RpSpiBusHolder<Which>>::instance().driver;
 }
 
 }  // namespace detail

@@ -9,140 +9,14 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/move.h"
 #include "fl/stl/shared_ptr.h"
-#include "fl/stl/singleton.h"
 #include "platforms/arm/rp/rpcommon/channel_engine_rp_pio.h"
+#include "platforms/arm/rp/rpcommon/rp_pio_peripheral_mock.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
 
 namespace {
-
-class PioTxMock final : public IRpPioTxPeripheral {
-  public:
-    bool configure(const RpPioTxConfig& config) FL_NO_EXCEPT override {
-        lastConfig = config;
-        ++configureCalls;
-        return configureOk;
-    }
-    bool startTxDma(const u32* words, size_t word_count) FL_NO_EXCEPT override {
-        ++startCalls;
-        firstWord = word_count == 0 ? 0 : words[0];
-        wordCount = word_count;
-        capturedWords.clear();
-        for (size_t index = 0; index < word_count; ++index) {
-            capturedWords.push_back(words[index]);
-        }
-        dmaBusy = startOk;
-        return startOk;
-    }
-    bool isDmaBusy() const FL_NO_EXCEPT override { return dmaBusy; }
-    bool isTerminalComplete() const FL_NO_EXCEPT override { return terminal; }
-    bool hasError() const FL_NO_EXCEPT override { return error; }
-    u32 nowMicros() const FL_NO_EXCEPT override { return timeUs; }
-    void abort() FL_NO_EXCEPT override { ++abortCalls; dmaBusy = false; }
-    void deinitialize() FL_NO_EXCEPT override { ++deinitializeCalls; }
-
-    RpPioTxConfig lastConfig;
-    bool configureOk = true;
-    bool startOk = true;
-    bool dmaBusy = false;
-    bool terminal = false;
-    bool error = false;
-    int configureCalls = 0;
-    int startCalls = 0;
-    int abortCalls = 0;
-    int deinitializeCalls = 0;
-    size_t wordCount = 0;
-    u32 firstWord = 0;
-    u32 timeUs = 0;
-    fl::vector<u32> capturedWords;
-};
-
-class PioSpiMock final {
-  public:
-    static PioSpiMock& instance() FL_NO_EXCEPT {
-        return Singleton<PioSpiMock>::instance();
-    }
-
-    void reset() FL_NO_EXCEPT {
-        lastConfig = RpPioSpiConfig();
-        configureOk = true;
-        startOk = true;
-        dmaBusy = false;
-        terminal = false;
-        error = false;
-        configureCalls = 0;
-        startCalls = 0;
-        abortCalls = 0;
-        deinitializeCalls = 0;
-        capturedWords.clear();
-    }
-
-    bool configure(const RpPioSpiConfig& config) FL_NO_EXCEPT {
-        lastConfig = config;
-        ++configureCalls;
-        return configureOk;
-    }
-    bool startTxDma(const u32* words, size_t word_count) FL_NO_EXCEPT {
-        ++startCalls;
-        capturedWords.clear();
-        for (size_t index = 0; index < word_count; ++index) {
-            capturedWords.push_back(words[index]);
-        }
-        dmaBusy = startOk;
-        return startOk;
-    }
-    bool isDmaBusy() const FL_NO_EXCEPT { return dmaBusy; }
-    bool isTerminalComplete() const FL_NO_EXCEPT { return terminal; }
-    bool hasError() const FL_NO_EXCEPT { return error; }
-    u32 nowMicros() const FL_NO_EXCEPT { return 0; }
-    void abort() FL_NO_EXCEPT { ++abortCalls; dmaBusy = false; }
-    void deinitialize() FL_NO_EXCEPT { ++deinitializeCalls; }
-
-    RpPioSpiConfig lastConfig;
-    bool configureOk = true;
-    bool startOk = true;
-    bool dmaBusy = false;
-    bool terminal = false;
-    bool error = false;
-    int configureCalls = 0;
-    int startCalls = 0;
-    int abortCalls = 0;
-    int deinitializeCalls = 0;
-    fl::vector<u32> capturedWords;
-};
-
-fl::shared_ptr<IRpPioSpiPeripheral> createSpiMockPeripheral() {
-    class MockWrapper final : public IRpPioSpiPeripheral {
-      public:
-        bool configure(const RpPioSpiConfig& config) FL_NO_EXCEPT override {
-            return PioSpiMock::instance().configure(config);
-        }
-        bool startTxDma(const u32* words, size_t word_count) FL_NO_EXCEPT override {
-            return PioSpiMock::instance().startTxDma(words, word_count);
-        }
-        bool isDmaBusy() const FL_NO_EXCEPT override {
-            return PioSpiMock::instance().isDmaBusy();
-        }
-        bool isTerminalComplete() const FL_NO_EXCEPT override {
-            return PioSpiMock::instance().isTerminalComplete();
-        }
-        bool hasError() const FL_NO_EXCEPT override {
-            return PioSpiMock::instance().hasError();
-        }
-        u32 nowMicros() const FL_NO_EXCEPT override {
-            return PioSpiMock::instance().nowMicros();
-        }
-        void abort() FL_NO_EXCEPT override { PioSpiMock::instance().abort(); }
-        void deinitialize() FL_NO_EXCEPT override {
-            PioSpiMock::instance().deinitialize();
-        }
-    };
-
-    PioSpiMock::instance().reset();
-    return fl::make_shared<MockWrapper>();
-}
 
 ChannelDataPtr makeChannel(int pin, const fl::vector_psram<u8>& bytes) {
     fl::vector_psram<u8> copy = bytes;
@@ -161,7 +35,7 @@ ChannelDataPtr makeSpiChannel(int mosi_pin, int sck_pin, u32 clock_hz,
 }  // namespace
 
 FL_TEST_CASE("RP PIO TX waits for terminal state after DMA") {
-    auto peripheral = fl::make_shared<PioTxMock>();
+    auto peripheral = fl::make_shared<RpPioTxPeripheralMock>();
     ChannelEngineRpPio engine(peripheral);
     fl::vector_psram<u8> bytes;
     bytes.push_back(0x00);
@@ -199,7 +73,7 @@ FL_TEST_CASE("RP PIO TX waits for terminal state after DMA") {
 }
 
 FL_TEST_CASE("RP PIO TX preserves pending work and cleans up errors") {
-    auto peripheral = fl::make_shared<PioTxMock>();
+    auto peripheral = fl::make_shared<RpPioTxPeripheralMock>();
     ChannelEngineRpPio engine(peripheral);
     fl::vector_psram<u8> firstBytes;
     firstBytes.push_back(0x12);
@@ -222,7 +96,7 @@ FL_TEST_CASE("RP PIO TX preserves pending work and cleans up errors") {
 }
 
 FL_TEST_CASE("RP PIO TX rejects a failed second queued start") {
-    auto peripheral = fl::make_shared<PioTxMock>();
+    auto peripheral = fl::make_shared<RpPioTxPeripheralMock>();
     ChannelEngineRpPio engine(peripheral);
     fl::vector_psram<u8> bytes;
     bytes.push_back(0x42);
@@ -242,7 +116,7 @@ FL_TEST_CASE("RP PIO TX rejects a failed second queued start") {
 }
 
 FL_TEST_CASE("RP PIO TX batches only equal-length consecutive compatible lanes") {
-    auto peripheral = fl::make_shared<PioTxMock>();
+    auto peripheral = fl::make_shared<RpPioTxPeripheralMock>();
     ChannelEngineRpPio engine(peripheral);
     fl::vector_psram<u8> leftBytes;
     leftBytes.push_back(0x80);
@@ -272,7 +146,7 @@ FL_TEST_CASE("RP PIO TX batches only equal-length consecutive compatible lanes")
 
 FL_TEST_CASE("RP PIO TX selects four and eight lane batches only for full runs") {
     for (u8 lanes = 4; lanes <= 8; lanes = static_cast<u8>(lanes * 2)) {
-        auto peripheral = fl::make_shared<PioTxMock>();
+        auto peripheral = fl::make_shared<RpPioTxPeripheralMock>();
         ChannelEngineRpPio engine(peripheral);
         fl::vector_psram<u8> bytes;
         bytes.push_back(0xFF);
@@ -288,9 +162,8 @@ FL_TEST_CASE("RP PIO TX selects four and eight lane batches only for full runs")
 }
 
 FL_TEST_CASE("RP FLEX_IO PIO SPI sends arbitrary pin pairs") {
-    auto clockless = fl::make_shared<PioTxMock>();
-    auto spi = createSpiMockPeripheral();
-    PioSpiMock& spiMock = PioSpiMock::instance();
+    auto clockless = fl::make_shared<RpPioTxPeripheralMock>();
+    auto spi = fl::make_shared<RpPioSpiPeripheralMock>();
     ChannelEngineRpPio engine(clockless, spi);
     fl::vector_psram<u8> bytes;
     bytes.push_back(0xA5);
@@ -303,29 +176,29 @@ FL_TEST_CASE("RP FLEX_IO PIO SPI sends arbitrary pin pairs") {
     engine.enqueue(channel);
     engine.show();
     FL_CHECK(channel->isInUse());
-    FL_CHECK_EQ(spiMock.lastConfig.mosi_pin, 5);
-    FL_CHECK_EQ(spiMock.lastConfig.sck_pin, 9);
-    FL_CHECK_EQ(spiMock.lastConfig.clock_hz, 4000000u);
-    FL_REQUIRE_EQ(spiMock.capturedWords.size(), static_cast<size_t>(2));
-    FL_CHECK_EQ(spiMock.capturedWords[0], 0xA5000000u);
-    FL_CHECK_EQ(spiMock.capturedWords[1], 0x5A000000u);
+    FL_CHECK_EQ(spi->lastConfig.mosi_pin, 5);
+    FL_CHECK_EQ(spi->lastConfig.sck_pin, 9);
+    FL_CHECK_EQ(spi->lastConfig.clock_hz, 4000000u);
+    FL_REQUIRE_EQ(spi->capturedWords.size(), static_cast<size_t>(2));
+    FL_CHECK_EQ(spi->capturedWords[0], 0xA5000000u);
+    FL_CHECK_EQ(spi->capturedWords[1], 0x5A000000u);
     FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);
-    spiMock.dmaBusy = false;
+    spi->dmaBusy = false;
     FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::DRAINING);
-    spiMock.terminal = true;
+    spi->terminal = true;
     FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::READY);
     FL_CHECK_FALSE(channel->isInUse());
-    FL_CHECK_EQ(spiMock.deinitializeCalls, 1);
+    FL_CHECK_EQ(spi->deinitializeCalls, 1);
 }
 
 FL_TEST_CASE("RP PIO instances preserve distinct concrete driver names") {
     const fl::shared_ptr<IRpPioSpiPeripheral> no_spi;
     auto pio0 = fl::make_shared<ChannelEngineRpPio>(
-        fl::make_shared<PioTxMock>(), no_spi, "PIO0");
+        fl::make_shared<RpPioTxPeripheralMock>(), no_spi, "PIO0");
     auto pio1 = fl::make_shared<ChannelEngineRpPio>(
-        fl::make_shared<PioTxMock>(), no_spi, "PIO1");
+        fl::make_shared<RpPioTxPeripheralMock>(), no_spi, "PIO1");
     auto pio2 = fl::make_shared<ChannelEngineRpPio>(
-        fl::make_shared<PioTxMock>(), no_spi, "PIO2");
+        fl::make_shared<RpPioTxPeripheralMock>(), no_spi, "PIO2");
 
     ChannelManager& manager = ChannelManager::instance();
     manager.clearAllDrivers();
@@ -341,8 +214,8 @@ FL_TEST_CASE("RP PIO instances preserve distinct concrete driver names") {
 }
 
 FL_TEST_CASE("RP FLEX_IO defers native SPI pin pairs to the hardware driver") {
-    auto clockless = fl::make_shared<PioTxMock>();
-    auto spi = createSpiMockPeripheral();
+    auto clockless = fl::make_shared<RpPioTxPeripheralMock>();
+    auto spi = fl::make_shared<RpPioSpiPeripheralMock>();
     ChannelEngineRpPio engine(clockless, spi);
     fl::vector_psram<u8> bytes;
     bytes.push_back(0x01);
