@@ -52,6 +52,7 @@ AutoResearchNetState& getNetState() {
 // Unified HTTP server API (must be included before Arduino.h to avoid INADDR_NONE conflict)
 #include "fl/stl/asio/http/server.h"
 
+#include "fl/stl/array.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/sstream.h"
@@ -304,6 +305,11 @@ struct HttpResponseCapture {
     bool truncated = false;
 };
 
+struct HttpResponseHash {
+    uint32_t hash = 2166136261u;
+    size_t bytes = 0;
+};
+
 static esp_err_t captureHttpResponse(esp_http_client_event_t* event) {
     if (event->event_id != HTTP_EVENT_ON_DATA || event->data == nullptr ||
         event->data_len <= 0 || event->user_data == nullptr) {
@@ -319,6 +325,76 @@ static esp_err_t captureHttpResponse(esp_http_client_event_t* event) {
     capture->body[capture->length] = '\0';
     capture->truncated = capture->truncated || copied != incoming;
     return ESP_OK;
+}
+
+static esp_err_t hashHttpResponse(esp_http_client_event_t* event) {
+    if (event->event_id != HTTP_EVENT_ON_DATA || event->data == nullptr ||
+        event->data_len <= 0 || event->user_data == nullptr) {
+        return ESP_OK;
+    }
+    HttpResponseHash* response = static_cast<HttpResponseHash*>(event->user_data);
+    const char* data = static_cast<const char*>(event->data);
+    for (int i = 0; i < event->data_len; ++i) {
+        response->hash ^= static_cast<uint8_t>(data[i]);
+        response->hash *= 16777619u;
+    }
+    response->bytes += static_cast<size_t>(event->data_len);
+    return ESP_OK;
+}
+
+static uint32_t fnv1a(const char* bytes, size_t length) {
+    uint32_t hash = 2166136261u;
+    for (size_t i = 0; i < length; ++i) {
+        hash ^= static_cast<uint8_t>(bytes[i]);
+        hash *= 16777619u;
+    }
+    return hash;
+}
+
+static fl::json runHttpPayloadEchoTest(const char* url) {
+    constexpr size_t kPayloadBytes = 4096;
+    fl::array<char, kPayloadBytes> payload;
+    for (size_t i = 0; i < payload.size(); ++i) {
+        payload[i] = static_cast<char>('A' + static_cast<char>(i % 23));
+    }
+    const uint32_t expected_hash = fnv1a(payload.data(), payload.size());
+
+    fl::json result = fl::json::object();
+    result.set("test", "POST /echo 4096-byte FNV-1a");
+    result.set("bytes", static_cast<int64_t>(payload.size()));
+    result.set("expected_hash", static_cast<int64_t>(expected_hash));
+
+    HttpResponseHash response;
+    esp_http_client_config_t config = {};
+    config.url = url;
+    config.event_handler = hashHttpResponse;
+    config.user_data = &response;
+    config.timeout_ms = 4000;
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    if (!client) {
+        result.set("passed", false);
+        result.set("error", "Failed to init HTTP client");
+        return result;
+    }
+    esp_http_client_set_method(client, HTTP_METHOD_POST);
+    esp_http_client_set_header(client, "Content-Type", "application/octet-stream");
+    esp_http_client_set_post_field(client, payload.data(),
+                                   static_cast<int>(payload.size()));
+
+    const esp_err_t err = esp_http_client_perform(client);
+    const int status = esp_http_client_get_status_code(client);
+    esp_http_client_cleanup(client);
+    const bool passed = err == ESP_OK && status == 200 &&
+                        response.bytes == payload.size() &&
+                        response.hash == expected_hash;
+    result.set("status_code", static_cast<int64_t>(status));
+    result.set("received_bytes", static_cast<int64_t>(response.bytes));
+    result.set("received_hash", static_cast<int64_t>(response.hash));
+    result.set("passed", passed);
+    if (!passed) {
+        result.set("error", "Echo payload hash mismatch");
+    }
+    return result;
 }
 
 /// @brief Run one bounded HTTP peer request and validate its response.
@@ -448,6 +524,7 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
     char url_rpc_status[128];
     char url_rpc_unknown[128];
     char url_rpc[128];
+    char url_echo[128];
     snprintf(url_ping, sizeof(url_ping), "http://%s:%u/ping", host_ip, port);
     snprintf(url_status, sizeof(url_status), "http://%s:%u/status", host_ip, port);
     snprintf(url_leds, sizeof(url_leds), "http://%s:%u/leds", host_ip, port);
@@ -456,6 +533,7 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
     snprintf(url_rpc_status, sizeof(url_rpc_status), "http://%s:%u/rpc/status", host_ip, port);
     snprintf(url_rpc_unknown, sizeof(url_rpc_unknown), "http://%s:%u/rpc/unknown", host_ip, port);
     snprintf(url_rpc, sizeof(url_rpc), "http://%s:%u/rpc", host_ip, port);
+    snprintf(url_echo, sizeof(url_echo), "http://%s:%u/echo", host_ip, port);
 
     // Test 1: GET /ping
     {
@@ -543,6 +621,16 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
         results.push_back(r);
         FastLED.watchdog().feed();
     }
+
+    fl::json payload_result = runHttpPayloadEchoTest(url_echo);
+    const auto payload_passed = payload_result[fl::string("passed")].as_bool();
+    if (payload_passed.has_value() && payload_passed.value()) {
+        ++tests_passed;
+    } else {
+        ++tests_failed;
+    }
+    results.push_back(payload_result);
+    FastLED.watchdog().feed();
 
     response.set("success", tests_failed == 0);
     response.set("tests_passed", static_cast<int64_t>(tests_passed));
@@ -682,7 +770,7 @@ struct RpPeerState {
     fl::unique_ptr<WiFiClient> client;
     char request[512] = {};
     size_t request_length = 0;
-    char body[256] = {};
+    char body[4097] = {};
     size_t body_length = 0;
     size_t expected_body_length = 0;
     bool headers_complete = false;
@@ -1060,8 +1148,10 @@ void pollNetServer() {
         return;
     }
 
+    const bool is_post = fl::strncmp(state.request, "POST ", 5) == 0;
     const bool is_post_rpc = fl::strncmp(state.request, "POST /rpc ", 10) == 0;
-    if (is_post_rpc && state.expected_body_length == 0) {
+    const bool is_post_echo = fl::strncmp(state.request, "POST /echo ", 11) == 0;
+    if (is_post && state.expected_body_length == 0) {
         const char* content_length = fl::strstr(state.request, "\r\nContent-Length:");
         if (content_length == nullptr) {
             state.client->print("HTTP/1.1 411 Length Required\r\nConnection: close\r\n\r\n");
@@ -1102,7 +1192,7 @@ void pollNetServer() {
             return;
         }
     }
-    while (is_post_rpc && state.client->available() &&
+    while (is_post && state.client->available() &&
            state.body_length < state.expected_body_length) {
         const int ch = state.client->read();
         if (ch < 0) {
@@ -1110,7 +1200,7 @@ void pollNetServer() {
         }
         state.body[state.body_length++] = static_cast<char>(ch);
     }
-    if (is_post_rpc && state.body_length < state.expected_body_length) {
+    if (is_post && state.body_length < state.expected_body_length) {
         return;
     }
     state.body[state.body_length] = '\0';
@@ -1139,6 +1229,8 @@ void pollNetServer() {
     } else if (fl::strncmp(state.request, "GET /rpc/unknown ", 17) == 0) {
         writeHttpNotFoundResponse(*state.client,
                                   "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32601,\"message\":\"Method not found\"},\"id\":1}");
+    } else if (is_post_echo) {
+        writeHttpResponse(*state.client, state.body, "application/octet-stream");
     } else if (is_post_rpc) {
         if (!fl::strstr(state.body, "\"jsonrpc\":\"2.0\"") ||
             !fl::strstr(state.body, "\"method\"")) {
