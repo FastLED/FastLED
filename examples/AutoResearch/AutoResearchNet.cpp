@@ -27,14 +27,12 @@
 
 #include "AutoResearchNet.h"
 #include "FastLED.h"
-#include "fl/stl/json.h"
 #include "fl/log/log.h"
-
-// Global net state
-static AutoResearchNetState s_net_state;
+#include "fl/stl/json.h"
+#include "fl/stl/singleton.h"
 
 AutoResearchNetState& getNetState() {
-    return s_net_state;
+    return fl::Singleton<AutoResearchNetState>::instance();
 }
 
 // ============================================================================
@@ -68,18 +66,23 @@ AutoResearchNetState& getNetState() {
 #include <esp_http_client.h>
 // IWYU pragma: end_keep
 
-// Static handles
-static fl::unique_ptr<fl::asio::http::Server> s_http_server;
-static esp_netif_t* s_netif_ap = nullptr;
-static bool s_event_loop_initialized = false;
-static bool s_wifi_initialized = false;
+struct EspNetState {
+    fl::unique_ptr<fl::asio::http::Server> http_server;
+    esp_netif_t* netif_ap = nullptr;
+    bool event_loop_initialized = false;
+    bool wifi_initialized = false;
+};
+
+EspNetState& espNetState() {
+    return fl::Singleton<EspNetState>::instance();
+}
 
 // ============================================================================
 // WiFi Soft AP Setup
 // ============================================================================
 
 static bool initWifiAP() {
-    if (s_net_state.wifi_ap_active) {
+    if (getNetState().wifi_ap_active) {
         return true;  // Already active
     }
 
@@ -91,33 +94,33 @@ static bool initWifiAP() {
     }
 
     // Create default event loop (safe to call multiple times)
-    if (!s_event_loop_initialized) {
+    if (!espNetState().event_loop_initialized) {
         err = esp_event_loop_create_default();
         if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
             FL_WARN("[NET] esp_event_loop_create_default failed: " << esp_err_to_name(err));
             return false;
         }
-        s_event_loop_initialized = true;
+        espNetState().event_loop_initialized = true;
     }
 
     // Create default WiFi AP netif
-    if (!s_netif_ap) {
-        s_netif_ap = esp_netif_create_default_wifi_ap();
-        if (!s_netif_ap) {
+    if (!espNetState().netif_ap) {
+        espNetState().netif_ap = esp_netif_create_default_wifi_ap();
+        if (!espNetState().netif_ap) {
             FL_WARN("[NET] esp_netif_create_default_wifi_ap failed");
             return false;
         }
     }
 
     // Initialize WiFi with default config
-    if (!s_wifi_initialized) {
+    if (!espNetState().wifi_initialized) {
         wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
         err = esp_wifi_init(&cfg);
         if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
             FL_WARN("[NET] esp_wifi_init failed: " << esp_err_to_name(err));
             return false;
         }
-        s_wifi_initialized = true;
+        espNetState().wifi_initialized = true;
     }
 
     // Configure AP
@@ -147,7 +150,7 @@ static bool initWifiAP() {
         return false;
     }
 
-    s_net_state.wifi_ap_active = true;
+    getNetState().wifi_ap_active = true;
     FL_WARN("[NET] WiFi AP started: SSID=" << AUTORESEARCH_NET_SSID << " IP=" << AUTORESEARCH_NET_AP_IP);
     return true;
 }
@@ -157,14 +160,14 @@ static bool initWifiAP() {
 // ============================================================================
 
 static bool startHttpServer() {
-    if (s_http_server.get()) {
+    if (espNetState().http_server.get()) {
         return true;  // Already running
     }
 
-    s_http_server = fl::make_unique<fl::asio::http::Server>();
+    espNetState().http_server = fl::make_unique<fl::asio::http::Server>();
 
     // Register routes using the unified API
-    s_http_server->get("/ping", [](const fl::asio::http::Request&) {
+    espNetState().http_server->get("/ping", [](const fl::asio::http::Request&) {
         return fl::asio::http::Response::ok("pong");
     });
 
@@ -174,7 +177,7 @@ static bool startHttpServer() {
     // (bisect: string-only handlers are stable, fl::json handlers crash
     // the main task within one request). Until fl::json is audited for
     // cross-task use, handlers format responses with fl::snprintf.
-    s_http_server->get("/status", [](const fl::asio::http::Request&) {
+    espNetState().http_server->get("/status", [](const fl::asio::http::Request&) {
         char body[128];
 #if defined(FL_IS_ESP_32S3)
         const char* chip = "esp32s3";
@@ -194,14 +197,14 @@ static bool startHttpServer() {
         return resp;
     });
 
-    s_http_server->post("/echo", [](const fl::asio::http::Request& req) {
+    espNetState().http_server->post("/echo", [](const fl::asio::http::Request& req) {
         if (!req.has_body()) {
             return fl::asio::http::Response::bad_request("No body");
         }
         return fl::asio::http::Response::ok(req.body());
     });
 
-    s_http_server->get("/leds", [](const fl::asio::http::Request&) {
+    espNetState().http_server->get("/leds", [](const fl::asio::http::Request&) {
         // Static body — see the fl::json cross-task note above (#3588).
         fl::asio::http::Response resp =
             fl::asio::http::Response::ok("{\"num_leds\":10,\"brightness\":64}");
@@ -209,14 +212,14 @@ static bool startHttpServer() {
         return resp;
     });
 
-    if (!s_http_server->start(s_net_state.server_port)) {
-        FL_WARN("[NET] HTTP server failed to start: " << s_http_server->last_error().c_str());
-        s_http_server.reset();
+    if (!espNetState().http_server->start(getNetState().server_port)) {
+        FL_WARN("[NET] HTTP server failed to start: " << espNetState().http_server->last_error().c_str());
+        espNetState().http_server.reset();
         return false;
     }
 
-    s_net_state.http_server_active = true;
-    FL_WARN("[NET] HTTP server started on port " << s_net_state.server_port);
+    getNetState().http_server_active = true;
+    FL_WARN("[NET] HTTP server started on port " << getNetState().server_port);
     return true;
 }
 
@@ -232,14 +235,14 @@ static bool initNetifForLoopback() {
         return false;
     }
 
-    if (!s_event_loop_initialized) {
+    if (!espNetState().event_loop_initialized) {
         err = esp_event_loop_create_default();
         if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
             FL_WARN("[NET] esp_event_loop_create_default failed: "
                     << esp_err_to_name(err));
             return false;
         }
-        s_event_loop_initialized = true;
+        espNetState().event_loop_initialized = true;
     }
     return true;
 }
@@ -313,7 +316,7 @@ fl::json startNetServer() {
     response.set("ssid", AUTORESEARCH_NET_SSID);
     response.set("password", AUTORESEARCH_NET_PASSWORD);
     response.set("ip", AUTORESEARCH_NET_AP_IP);
-    response.set("port", static_cast<int64_t>(s_net_state.server_port));
+    response.set("port", static_cast<int64_t>(getNetState().server_port));
     return response;
 }
 
@@ -414,7 +417,7 @@ fl::json runNetLoopback() {
         return response;
     }
 
-    FL_WARN("[NET] Loopback test: server running on port " << s_net_state.server_port);
+    FL_WARN("[NET] Loopback test: server running on port " << getNetState().server_port);
 
     // Small delay to let server settle
     delay(100);
@@ -424,11 +427,11 @@ fl::json runNetLoopback() {
     char url_status[128];
     char url_leds[128];
     snprintf(url_ping, sizeof(url_ping), "http://127.0.0.1:%u/ping",
-             s_net_state.server_port);
+             getNetState().server_port);
     snprintf(url_status, sizeof(url_status), "http://127.0.0.1:%u/status",
-             s_net_state.server_port);
+             getNetState().server_port);
     snprintf(url_leds, sizeof(url_leds), "http://127.0.0.1:%u/leds",
-             s_net_state.server_port);
+             getNetState().server_port);
 
     // Test 1: GET /ping
     {
@@ -477,17 +480,17 @@ fl::json stopNet() {
     fl::json response = fl::json::object();
 
     // Stop HTTP server (unified API)
-    if (s_http_server.get()) {
-        s_http_server->stop();
-        s_http_server.reset();
-        s_net_state.http_server_active = false;
+    if (espNetState().http_server.get()) {
+        espNetState().http_server->stop();
+        espNetState().http_server.reset();
+        getNetState().http_server_active = false;
         FL_WARN("[NET] HTTP server stopped");
     }
 
     // Stop WiFi
-    if (s_net_state.wifi_ap_active) {
+    if (getNetState().wifi_ap_active) {
         esp_wifi_stop();
-        s_net_state.wifi_ap_active = false;
+        getNetState().wifi_ap_active = false;
         FL_WARN("[NET] WiFi AP stopped");
     }
 
@@ -603,7 +606,7 @@ fl::json startNetServer() {
         state.server->begin();
         state.server->setNoDelay(true);
     }
-    s_net_state.http_server_active = true;
+    getNetState().http_server_active = true;
     response.set("success", true);
     response.set("ip", fl::net::wifi::ipAddress().c_str());
     response.set("port", static_cast<int64_t>(AUTORESEARCH_NET_SERVER_PORT));
@@ -666,8 +669,8 @@ fl::json stopNet() {
         state.server->stop();
         state.server.reset();
     }
-    s_net_state.http_server_active = false;
-    s_net_state.wifi_ap_active = false;
+    getNetState().http_server_active = false;
+    getNetState().wifi_ap_active = false;
     fl::net::wifi::stop();
     response.set("success", true);
     return response;
