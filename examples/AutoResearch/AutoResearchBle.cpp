@@ -15,12 +15,14 @@
 #if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
 
 #include "AutoResearchBle.h"
+#include "fl/stl/singleton.h"
 
-// Global BLE state
-static AutoResearchBleState s_ble_state;
+struct BleStateHolder {
+    AutoResearchBleState state;
+};
 
 AutoResearchBleState& getBleState() {
-    return s_ble_state;
+    return fl::Singleton<BleStateHolder>::instance().state;
 }
 
 #endif  // !FASTLED_AUTORESEARCH_LOW_MEMORY
