@@ -1,12 +1,12 @@
 // IWYU pragma: private
 
 #include "platforms/arm/teensy/audio/pjrc_i2s_config.h" // IWYU pragma: keep
+#include "fl/stl/stdint.h"
 
 #if defined(__IMXRT1062__)
 
 // IWYU pragma: begin_keep
 #include <Arduino.h>
-#include "utility/imxrt_hw.h"
 // IWYU pragma: end_keep
 
 namespace fl {
@@ -17,6 +17,43 @@ namespace {
 
 // Keep this import independent of the PJRC Audio library's AudioStream.h.
 constexpr int kAudioSampleRateHz = 44100;
+
+// FastLED change: vendored from the Teensyduino 1.60 Audio library
+// (`libraries/Audio/utility/imxrt_hw.cpp`, MIT, Copyright (c) 2019 Frank Bösing).
+//
+// This file previously reached outside the directory via
+// `#include "utility/imxrt_hw.h"` to call the library's `set_audioClock`. That
+// contradicted this directory's design (see README.md: it is a FastLED-owned
+// subset that "deliberately does not use the umbrella Audio.h header") and it
+// only linked when a sketch happened to pull the whole Audio library in.
+// Sketches that use FastLED's I2S input without the Audio library failed at
+// link time with `undefined reference to set_audioClock(int, long, unsigned
+// long, bool)`. Importing the one routine we actually need removes the last
+// dependency on the external library. See FastLED #3838.
+//
+// Kept in this anonymous namespace on purpose: a file-local definition cannot
+// collide with the Audio library's global `::set_audioClock` in sketches that
+// legitimately link both.
+FLASHMEM void set_audioClock(int nfact, fl::i32 nmult, fl::u32 ndiv,
+                             bool force = false) { // sets PLL4
+	if (!force && (CCM_ANALOG_PLL_AUDIO & CCM_ANALOG_PLL_AUDIO_ENABLE)) return;
+
+	CCM_ANALOG_PLL_AUDIO = CCM_ANALOG_PLL_AUDIO_BYPASS
+	                     | CCM_ANALOG_PLL_AUDIO_ENABLE
+	                     | CCM_ANALOG_PLL_AUDIO_POWERDOWN
+	                     | CCM_ANALOG_PLL_AUDIO_DIV_SELECT(nfact);
+
+	CCM_ANALOG_PLL_AUDIO_NUM   = nmult & CCM_ANALOG_PLL_AUDIO_NUM_MASK;
+	CCM_ANALOG_PLL_AUDIO_DENOM = ndiv & CCM_ANALOG_PLL_AUDIO_DENOM_MASK;
+
+	CCM_ANALOG_PLL_AUDIO &= ~CCM_ANALOG_PLL_AUDIO_POWERDOWN; // switch on PLL
+	while (!(CCM_ANALOG_PLL_AUDIO & CCM_ANALOG_PLL_AUDIO_LOCK)) {} // wait for lock
+
+	// post-divider: the audio path uses 1 (other valid values are 2 and 4)
+	CCM_ANALOG_MISC2 &= ~(CCM_ANALOG_MISC2_DIV_MSB | CCM_ANALOG_MISC2_DIV_LSB);
+
+	CCM_ANALOG_PLL_AUDIO &= ~CCM_ANALOG_PLL_AUDIO_BYPASS; // disable bypass
+}
 
 } // namespace
 
