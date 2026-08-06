@@ -84,6 +84,9 @@ class Args:
     net_server: bool
     net_client: bool
     net: bool
+    net_peer: bool
+    peer_environment: str
+    peer_upload_port: str | None
 
     # OTA autoresearch mode
     ota: bool
@@ -410,6 +413,23 @@ See Also:
             "--net",
             action="store_true",
             help="Self-contained loopback test: ESP32 starts HTTP server, then GETs localhost (no WiFi needed)",
+        )
+        net_group.add_argument(
+            "--net-peer",
+            action="store_true",
+            help=(
+                "Deploy RP2350W and ESP32-C6 to explicit ports, then validate "
+                "device-to-device WiFi and HTTP without changing host WiFi"
+            ),
+        )
+        net_group.add_argument(
+            "--peer-environment",
+            default="esp32c6",
+            help="Companion board for --net-peer (currently esp32c6 only)",
+        )
+        net_group.add_argument(
+            "--peer-upload-port",
+            help="Explicit serial port for the --net-peer companion board",
         )
 
         # OTA autoresearch mode
@@ -890,6 +910,9 @@ See Also:
             net_server=parsed.net_server,
             net_client=parsed.net_client,
             net=parsed.net,
+            net_peer=parsed.net_peer,
+            peer_environment=parsed.peer_environment,
+            peer_upload_port=parsed.peer_upload_port,
             ota=parsed.ota,
             ble=parsed.ble,
             parallel=parsed.parallel,

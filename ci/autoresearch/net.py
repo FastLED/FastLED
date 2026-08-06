@@ -4,6 +4,7 @@ Provides WiFi management, HTTP server, and autoresearch flows for
 --net-server and --net-client modes.
 """
 
+import asyncio
 import os
 import platform as platform_mod
 import subprocess
@@ -429,6 +430,162 @@ async def run_net_loopback_autoresearch(
         if client:
             try:
                 await client.send("stopNet", timeout=10.0)
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
+            except Exception:
+                pass
+            await client.close()
+
+
+async def run_net_peer_autoresearch(
+    upload_port: str,
+    peer_upload_port: str,
+    serial_iface: "SerialInterface | None",
+    timeout: float = 120.0,
+) -> int:
+    """Validate RP2350W <-> ESP32-C6 networking without touching host WiFi.
+
+    Both firmware images have already been deployed through fbuild by the
+    caller. The C6 hosts its SoftAP and HTTP server, while the RP2350W joins
+    as a station. Each cycle validates HTTP in both directions, tears down the
+    RP network state, and verifies that its serial JSON-RPC endpoint remains
+    responsive before reconnecting.
+    """
+    from ci.util.serial_interface import create_serial_interface
+
+    print()
+    print("=" * 60)
+    print("NETWORK AUTORESEARCH MODE: RP2350W <-> ESP32-C6 PEER")
+    print("=" * 60)
+    print("  Host WiFi is not used or changed by this mode.")
+
+    deadline = time.monotonic() + timeout
+    primary: RpcClient | None = None
+    peer: RpcClient | None = None
+
+    def rpc_timeout() -> float:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise RpcTimeoutError("--net-peer deadline expired")
+        return min(15.0, remaining)
+
+    async def rpc_data(
+        client: RpcClient, method: str, params: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        response = await client.send(method, params or {}, timeout=rpc_timeout())
+        if not isinstance(response.data, dict):
+            raise RpcError(f"{method} returned a non-object response")
+        return response.data
+
+    async def assert_ping(client: RpcClient, name: str) -> None:
+        await rpc_data(client, "ping")
+        print(f"  {name} serial RPC ping: {Fore.GREEN}PASS{Style.RESET_ALL}")
+
+    try:
+        # The primary interface was built by the normal fbuild-backed setup
+        # phase. Construct the companion interface the same way; no raw
+        # pyserial connection and no direct flash utility is involved.
+        peer_iface = create_serial_interface(peer_upload_port)
+        primary = RpcClient(
+            upload_port, timeout=rpc_timeout(), serial_interface=serial_iface
+        )
+        peer = RpcClient(
+            peer_upload_port, timeout=rpc_timeout(), serial_interface=peer_iface
+        )
+        print(f"  Connecting RP2350W on {upload_port}...")
+        await primary.connect(boot_wait=3.0, drain_boot=True)
+        print(f"  Connecting ESP32-C6 on {peer_upload_port}...")
+        await peer.connect(boot_wait=3.0, drain_boot=True)
+
+        primary_status = await rpc_data(primary, "status")
+        if "rp2350" not in str(primary_status.get("platform", "")).lower():
+            raise RpcError(
+                "Primary --net-peer board did not identify as RP2350: "
+                f"{primary_status.get('platform')!r}"
+            )
+        peer_status = await rpc_data(peer, "status")
+        if "esp32-c6" not in str(peer_status.get("platform", "")).lower():
+            raise RpcError(
+                "Companion --net-peer board did not identify as ESP32-C6: "
+                f"{peer_status.get('platform')!r}"
+            )
+
+        c6_server = await rpc_data(peer, "startNetServer")
+        if not c6_server.get("success"):
+            raise RpcError(f"ESP32-C6 startNetServer failed: {c6_server}")
+        ssid = c6_server.get("ssid")
+        password = c6_server.get("password")
+        c6_ip = c6_server.get("ip")
+        c6_port = c6_server.get("port")
+        if (
+            not isinstance(ssid, str)
+            or not isinstance(password, str)
+            or not isinstance(c6_ip, str)
+            or not isinstance(c6_port, int)
+        ):
+            raise RpcError(f"ESP32-C6 returned incomplete AP details: {c6_server}")
+
+        for cycle in range(1, 11):
+            print(f"\n--- Peer network cycle {cycle}/10 ---")
+            connect = await rpc_data(
+                primary, "wifiConnect", {"ssid": ssid, "password": password}
+            )
+            if not connect.get("success"):
+                raise RpcError(f"RP2350W wifiConnect failed: {connect}")
+
+            rp_ip: str | None = None
+            for _ in range(20):
+                wifi_status = await rpc_data(primary, "wifiStatus")
+                candidate_ip = wifi_status.get("ip")
+                if wifi_status.get("connected") and isinstance(candidate_ip, str):
+                    rp_ip = candidate_ip
+                    break
+                await asyncio.sleep(min(0.5, rpc_timeout()))
+            if not rp_ip:
+                raise RpcTimeoutError("RP2350W did not join the ESP32-C6 AP")
+
+            rp_server = await rpc_data(primary, "startNetServer")
+            rp_port = rp_server.get("port")
+            if not rp_server.get("success") or not isinstance(rp_port, int):
+                raise RpcError(f"RP2350W startNetServer failed: {rp_server}")
+
+            rp_to_c6 = await rpc_data(
+                primary, "runNetClientTest", {"host_ip": c6_ip, "port": c6_port}
+            )
+            if not rp_to_c6.get("success"):
+                raise RpcError(f"RP2350W -> ESP32-C6 HTTP failed: {rp_to_c6}")
+            c6_to_rp = await rpc_data(
+                peer, "runNetClientTest", {"host_ip": rp_ip, "port": rp_port}
+            )
+            if not c6_to_rp.get("success"):
+                raise RpcError(f"ESP32-C6 -> RP2350W HTTP failed: {c6_to_rp}")
+
+            stop_result = await rpc_data(primary, "stopNet")
+            if not stop_result.get("success"):
+                raise RpcError(f"RP2350W stopNet failed: {stop_result}")
+            await assert_ping(primary, "RP2350W")
+
+        await assert_ping(peer, "ESP32-C6")
+        print(
+            f"\n{Fore.GREEN}NET PEER AUTORESEARCH PASSED (10 reconnect cycles){Style.RESET_ALL}"
+        )
+        return 0
+    except KeyboardInterrupt as ki:
+        print("\n\n  Interrupted by user")
+        handle_keyboard_interrupt(ki)
+        return 130
+    except (RpcError, RpcTimeoutError) as e:
+        print(f"\n  {Fore.RED}Network peer autoresearch failed: {e}{Style.RESET_ALL}")
+        return 1
+    except Exception as e:
+        print(f"\n  {Fore.RED}Network peer autoresearch error: {e}{Style.RESET_ALL}")
+        return 1
+    finally:
+        for client in (primary, peer):
+            if client is None:
+                continue
+            try:
+                await client.send("stopNet", timeout=2.0)
             except KeyboardInterrupt as ki:
                 handle_keyboard_interrupt(ki)
             except Exception:
