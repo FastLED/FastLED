@@ -7,8 +7,10 @@
 /// `watchdog_caused_reboot()` (+ `VREG_AND_CHIP_RESET` on RP2040,
 /// `POWMAN.CHIP_RESET` on RP2350 for richer cause detection).
 ///
-/// **Persist storage** uses `watchdog_hw->scratch[0..3]` (16 bytes) — the
-/// SDK reserves `scratch[4..7]` for bootrom magic / `reset_usb_boot()`.
+/// **Persist storage** uses the low 14 bytes of `watchdog_hw->scratch[0..3]`.
+/// The upper two bytes of `scratch[3]` hold FastLED's consecutive watchdog
+/// reset count; the SDK reserves `scratch[4..7]` for bootrom magic /
+/// `reset_usb_boot()`.
 /// Survives soft resets, NOT power cycles. RP2350 adds VBAT-backed
 /// `POWMAN.SCRATCH[0..7]` which Phase 3 can use for power-cycle survival.
 ///
@@ -16,6 +18,7 @@
 /// path to UF2 mode without touching BOOTSEL pin physically.
 
 #include "fl/wdt/watchdog.h"
+#include "fl/stl/singleton.h"
 #include "platforms/arm/rp/is_rp.h"
 
 // IWYU pragma: begin_keep
@@ -25,7 +28,7 @@
 // IWYU pragma: end_keep
 
 #define FL_WATCHDOG_HAS_HARDWARE
-#define FL_WATCHDOG_PERSIST_BYTES 16   // scratch[0..3] = 4 x 32-bit = 16 bytes
+#define FL_WATCHDOG_PERSIST_BYTES 14   // scratch[0..2] + low half of scratch[3]
 #define FL_WATCHDOG_HAS_BOOTLOADER_REBOOT
 
 #if defined(FL_IS_RP2350)
@@ -38,15 +41,23 @@ namespace fl {
 namespace platforms {
 
 struct RpWatchdogState {
-    fl::u16    crash_count = 0;
     bool       armed = false;
     ResetCause cached_cause = ResetCause::UNKNOWN;
     bool       cause_cached = false;
 };
 
 inline RpWatchdogState& rpWatchdogState() {
-    static RpWatchdogState s{};  // okay static in header — single-TU `.impl.hpp`
-    return s;
+    return fl::Singleton<RpWatchdogState>::instance();
+}
+
+inline fl::u16 rpCrashCount() {
+    return static_cast<fl::u16>(watchdog_hw->scratch[3] >> 16);
+}
+
+inline void rpSetCrashCount(fl::u16 count) {
+    // Preserve bytes 12 and 13, which are the final public persist bytes.
+    watchdog_hw->scratch[3] = (watchdog_hw->scratch[3] & 0x0000FFFFu)
+        | (static_cast<fl::u32>(count) << 16);
 }
 
 inline ResetCause rpDetectResetCause() {
@@ -90,8 +101,15 @@ ResetCause Watchdog::lastResetCause() const FL_NO_EXCEPT {
     if (!s.cause_cached) {
         s.cached_cause = platforms::rpDetectResetCause();
         s.cause_cached = true;
-        if (s.cached_cause == ResetCause::WATCHDOG && s.crash_count < 0xFFFF) {
-            s.crash_count++;
+        if (s.cached_cause == ResetCause::WATCHDOG) {
+            fl::u16 crash_count = platforms::rpCrashCount();
+            if (crash_count < 0xFFFFu) {
+                platforms::rpSetCrashCount(static_cast<fl::u16>(crash_count + 1));
+            }
+        } else {
+            // A non-watchdog reset breaks a crash loop, matching the former
+            // RAM-backed behavior while retaining the WDT count across reset.
+            platforms::rpSetCrashCount(0);
         }
     }
     return s.cached_cause;
@@ -118,9 +136,9 @@ void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NO_EXCEPT {
 
 fl::u16 Watchdog::consecutiveCrashCount() const FL_NO_EXCEPT {
     (void)lastResetCause();
-    return platforms::rpWatchdogState().crash_count;
+    return platforms::rpCrashCount();
 }
-void Watchdog::markCleanShutdown() FL_NO_EXCEPT { platforms::rpWatchdogState().crash_count = 0; }
+void Watchdog::markCleanShutdown() FL_NO_EXCEPT { platforms::rpSetCrashCount(0); }
 bool Watchdog::isInSafeMode() const FL_NO_EXCEPT { return consecutiveCrashCount() >= mSafeModeThreshold; }
 fl::u16 Watchdog::safeModeThreshold() const FL_NO_EXCEPT { return mSafeModeThreshold; }
 void    Watchdog::setSafeModeThreshold(fl::u16 t) FL_NO_EXCEPT { mSafeModeThreshold = t; }

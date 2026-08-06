@@ -411,6 +411,27 @@ void setup() {
     }
 #endif
 
+    // The RP watchdog count is retained through a watchdog reboot. Do this
+    // before allocating buffers, binding RPC handlers, claiming PIO, or
+    // enabling any LED driver: repeated early-startup failures then leave the
+    // USB CDC control path alive instead of endlessly retrying the risky path.
+    // This is intentionally AutoResearch-only; normal user sketches choose
+    // their own recovery policy through FastLED.watchdog().
+#if !defined(FL_IS_STUB) && !defined(FL_IS_WASM)
+    const fl::u16 watchdog_crash_count = FastLED.watchdog().consecutiveCrashCount();
+    if (FastLED.watchdog().isInSafeMode()) {
+        fl::json recovery = fl::json::object();
+        recovery.set("reason", "watchdog_reset_loop");
+        recovery.set("crashCount", static_cast<int64_t>(watchdog_crash_count));
+        recovery.set("safeModeThreshold", static_cast<int64_t>(FastLED.watchdog().safeModeThreshold()));
+        printStreamRaw("safeMode", recovery);
+        while (true) {
+            FastLED.watchdog().feed();
+            delay(100);
+        }
+    }
+#endif
+
     // Watchdog was armed at the very top of setup() above with the longer
     // AUTORESEARCH_SETUP_WATCHDOG_TIMEOUT_MS window so a hang here (RPC bind,
     // singleton init, wedged serial) auto-reboots the chip. FL_WATCHDOG_AUTO()
