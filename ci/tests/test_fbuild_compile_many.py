@@ -32,6 +32,16 @@ def test_fbuild_executable_override_uses_explicit_local_binary(
     assert fbuild_runner.get_fbuild_executable() == str(binary)
 
 
+def test_fbuild_executable_override_rejects_missing_binary(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    missing = tmp_path / "missing-fbuild"
+    monkeypatch.setenv("FBUILD_EXECUTABLE", str(missing))
+
+    with pytest.raises(FileNotFoundError, match="FBUILD_EXECUTABLE"):
+        fbuild_runner.get_fbuild_executable()
+
+
 def test_run_fbuild_ci_uses_expected_command_and_parses_results(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

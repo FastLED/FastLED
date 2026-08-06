@@ -52,7 +52,10 @@ def test_rp2350w_ble_transport_uses_btstack_with_singleton_state() -> None:
 
     assert "#include <BTstackLib.h>" in source
     assert "fl::Singleton<RpBleRuntime>" in source
-    assert "att_server_notify" in source
+    assert "att_server_request_to_send_notification" in source
+    assert "att_server_get_mtu" in source
+    assert "notification_offset" in source
+    assert "notify failed: %u" in source
 
 
 def test_rp2350_and_rp2350w_keep_distinct_board_profiles() -> None:

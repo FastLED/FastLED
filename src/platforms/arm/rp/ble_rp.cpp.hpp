@@ -39,14 +39,79 @@ struct TransportState {
     hci_con_handle_t connection = HCI_CON_HANDLE_INVALID;
     bool connected = false;
     fl::string last_tx_value;
+    fl::vector<u8> notification_payload;
+    size_t notification_offset = 0;
+    bool notification_scheduled = false;
 };
 
 struct RpBleRuntime {
     TransportState* active = nullptr;
+    // BTstack retains this registration until it can send. Keep it in the
+    // singleton so destroying a transport cannot leave it with freed storage.
+    btstack_context_callback_registration_t notification_callback = {};
+    bool notification_callback_pending = false;
 };
 
 RpBleRuntime& rpBleRuntime() FL_NO_EXCEPT {
     return fl::Singleton<RpBleRuntime>::instance();
+}
+
+static void onNotificationReady(void* context);
+
+static void scheduleNotification(TransportState* state) {
+    if (state == nullptr || rpBleRuntime().active != state || !state->connected ||
+        state->tx_handle == 0 || state->notification_offset >= state->notification_payload.size() ||
+        state->notification_scheduled) {
+        return;
+    }
+
+    RpBleRuntime& runtime = rpBleRuntime();
+    if (runtime.notification_callback_pending) {
+        return;
+    }
+    // BTstack may invoke the callback before this request function returns.
+    state->notification_scheduled = true;
+    runtime.notification_callback_pending = true;
+    runtime.notification_callback.callback = onNotificationReady;
+    runtime.notification_callback.context = state;
+    const u8 result = att_server_request_to_send_notification(
+        &runtime.notification_callback, state->connection);
+    if (result != ERROR_CODE_SUCCESS) {
+        state->notification_scheduled = false;
+        runtime.notification_callback_pending = false;
+        FL_WARN_F("[BLE RP] notification scheduling failed: %u", static_cast<unsigned>(result));
+    }
+}
+
+static void onNotificationReady(void* context) {
+    TransportState* state = static_cast<TransportState*>(context);
+    RpBleRuntime& runtime = rpBleRuntime();
+    runtime.notification_callback_pending = false;
+    if (state == nullptr || runtime.active != state) {
+        scheduleNotification(runtime.active);
+        return;
+    }
+    state->notification_scheduled = false;
+    if (!state->connected || state->tx_handle == 0 ||
+        state->notification_offset >= state->notification_payload.size()) {
+        return;
+    }
+
+    const u16 mtu = att_server_get_mtu(state->connection);
+    const size_t max_payload = mtu > 3 ? static_cast<size_t>(mtu - 3) : 20;
+    const size_t remaining = state->notification_payload.size() - state->notification_offset;
+    const size_t chunk_size = remaining < max_payload ? remaining : max_payload;
+    const u8 result = att_server_notify(
+        state->connection, state->tx_handle,
+        state->notification_payload.data() + state->notification_offset,
+        static_cast<u16>(chunk_size));
+    if (result != ERROR_CODE_SUCCESS) {
+        FL_WARN_F("[BLE RP] notify failed: %u", static_cast<unsigned>(result));
+        return;
+    }
+
+    state->notification_offset += chunk_size;
+    scheduleNotification(state);
 }
 
 static int nextRingIndex(int index) FL_NO_EXCEPT {
@@ -103,6 +168,8 @@ static void onDisconnected(BLEDevice*) { // ok no noexcept
     }
     state->connection = HCI_CON_HANDLE_INVALID;
     state->connected = false;
+    state->notification_payload.clear();
+    state->notification_offset = 0;
 }
 
 TransportState* createTransport(const char* device_name) FL_NO_EXCEPT {
@@ -138,7 +205,10 @@ void destroyTransport(TransportState* state) FL_NO_EXCEPT {
         return;
     }
     if (rpBleRuntime().active == state) {
-        rpBleRuntime().active = nullptr;
+        RpBleRuntime& runtime = rpBleRuntime();
+        runtime.active = nullptr;
+        // A pending callback receives null and returns before state is deleted.
+        runtime.notification_callback.context = nullptr;
     }
     fl::unique_ptr<TransportState> holder(state);
 }
@@ -189,17 +259,13 @@ getTransportCallbacks(TransportState* state) FL_NO_EXCEPT {
         if (!state->connected || state->tx_handle == 0) {
             return;
         }
-        fl::vector<u8> payload;
-        payload.reserve(state->last_tx_value.size());
+        state->notification_payload.clear();
+        state->notification_payload.reserve(state->last_tx_value.size());
         for (char value : state->last_tx_value) {
-            payload.push_back(static_cast<u8>(value));
+            state->notification_payload.push_back(static_cast<u8>(value));
         }
-        const u8 result = att_server_notify(
-            state->connection, state->tx_handle, payload.data(),
-            static_cast<u16>(payload.size()));
-        if (result != ERROR_CODE_SUCCESS) {
-            FL_WARN_F("[BLE RP] notify failed: %s", result);
-        }
+        state->notification_offset = 0;
+        scheduleNotification(state);
     };
 
     return {request_source, response_sink};

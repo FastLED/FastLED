@@ -582,9 +582,6 @@ class Board:
             for key, value in sorted(self.board_build_options.items()):
                 lines.append(f"board_build.{key} = {value}")
 
-        if self.lib_deps:
-            lines.append(f"lib_deps = {','.join(self.lib_deps)}")
-
         # Force DIO flash mode ONLY for QEMU builds
         # QEMU doesn't support QIO flash mode which requires setting the QIE bit
         # Hardware builds should use QIO for better performance (30-50% faster)
@@ -727,16 +724,14 @@ class Board:
                 lines.append("lib_ldf_mode = chain")
             lines.append("lib_archive = true")
 
-            # Build lib_deps with additional libs only (FastLED is copied to lib/FastLED)
-            # PlatformIO supports multiple lib_deps entries on separate lines
-            if additional_libs:
-                # Format as multi-line lib_deps for proper PlatformIO parsing
-                if len(additional_libs) == 1:
-                    lines.append(f"lib_deps = {additional_libs[0]}")
-                else:
-                    lines.append("lib_deps =")
-                    for entry in additional_libs:
-                        lines.append(f"    {entry}")
+        # PlatformIO treats repeated lib_deps options as replacements, not a
+        # merge. Combine board requirements and caller-supplied requirements
+        # before emitting the single environment option.
+        lib_deps: list[str] = list(self.lib_deps or [])
+        if additional_libs:
+            lib_deps.extend(additional_libs)
+        if lib_deps:
+            lines.append(f"lib_deps = {','.join(lib_deps)}")
 
         return "\n".join(lines) + "\n"
 
