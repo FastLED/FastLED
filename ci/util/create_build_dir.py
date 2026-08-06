@@ -389,6 +389,9 @@ def create_build_dir(
         cmd_list.append(
             f"--project-option=board_build.filesystem_size={board.board_build_filesystem_size}"
         )
+    if board.board_build_options:
+        for key, value in sorted(board.board_build_options.items()):
+            cmd_list.append(f"--project-option=board_build.{key}={value}")
     if build_flags is not None:
         for build_flag in build_flags:
             cmd_list.append(f"--project-option=build_flags={build_flag}")

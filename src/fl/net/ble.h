@@ -23,9 +23,13 @@
 #include "fl/stl/noexcept.h"
 #include "fl/stl/pair.h"
 
-// BLE requires: ESP32 + IDF 5+ + NimBLE headers present
+// BLE requires either ESP32 + IDF 5+ + NimBLE headers, or an RP2350W build
+// that selected Arduino-Pico's BTstack menu.
 #if defined(FL_IS_ESP32) && defined(FL_IS_IDF_5_OR_HIGHER) \
     && FL_HAS_INCLUDE(<nimble/nimble_port.h>)
+#define FL_BLE_AVAILABLE 1
+#elif defined(FL_IS_RP2350) && defined(ENABLE_BLE) && ENABLE_BLE \
+    && FL_HAS_INCLUDE(<BTstackLib.h>)
 #define FL_BLE_AVAILABLE 1
 #else
 #define FL_BLE_AVAILABLE 0

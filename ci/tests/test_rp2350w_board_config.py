@@ -22,6 +22,7 @@ ESP_WIFI_IMPL = (
     REPO_ROOT / "src" / "platforms" / "esp" / "32" / "net" / "wifi_esp32.cpp.hpp"
 )
 RP_BUILD = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "_build.cpp.hpp"
+RP_BLE_IMPL = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "ble_rp.cpp.hpp"
 AUTORESEARCH_NET = REPO_ROOT / "examples" / "AutoResearch" / "AutoResearchNet.cpp"
 AUTORESEARCH_SKETCH = REPO_ROOT / "examples" / "AutoResearch" / "AutoResearch.ino"
 
@@ -42,6 +43,16 @@ def test_rp2350w_selects_the_pico_2_w_board_profile() -> None:
     assert "[env:rp2350w]" in ini
     assert "board = rpipico2w" in ini
     assert "board_build.core = earlephilhower" in ini
+    assert "board_build.ipbtstack = ipv4btcble" in ini
+    assert "lib_deps = BTstackLib" in ini
+
+
+def test_rp2350w_ble_transport_uses_btstack_with_singleton_state() -> None:
+    source = RP_BLE_IMPL.read_text(encoding="utf-8")
+
+    assert "#include <BTstackLib.h>" in source
+    assert "fl::Singleton<RpBleRuntime>" in source
+    assert "att_server_notify" in source
 
 
 def test_rp2350_and_rp2350w_keep_distinct_board_profiles() -> None:

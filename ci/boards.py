@@ -65,6 +65,8 @@ class Board:
     board_build_flash_size: str | None = (
         None  # Flash size for ESP32 boards (e.g., '4MB')
     )
+    board_build_options: dict[str, str] | None = None
+    lib_deps: list[str] | None = None
     build_flags: list[str] | None = None  # Reserved for future use.
     build_unflags: list[str] | None = None  # New: unflag options
     defines: list[str] | None = None
@@ -219,6 +221,11 @@ class Board:
             )
         if self.board_build_flash_size:
             options.append(f"board_build.flash_size={self.board_build_flash_size}")
+        if self.board_build_options:
+            for key, value in sorted(self.board_build_options.items()):
+                options.append(f"board_build.{key}={value}")
+        if self.lib_deps:
+            options.append(f"lib_deps={','.join(self.lib_deps)}")
         if self.defines:
             for define in self.defines:
                 options.append(f"build_flags=-D{define}")
@@ -570,6 +577,13 @@ class Board:
             lines.append(f"board_build.flash_size = {self.board_build_flash_size}")
             # Also set upload flash size to override board defaults
             lines.append(f"board_upload.flash_size = {self.board_build_flash_size}")
+
+        if self.board_build_options:
+            for key, value in sorted(self.board_build_options.items()):
+                lines.append(f"board_build.{key} = {value}")
+
+        if self.lib_deps:
+            lines.append(f"lib_deps = {','.join(self.lib_deps)}")
 
         # Force DIO flash mode ONLY for QEMU builds
         # QEMU doesn't support QIO flash mode which requires setting the QIE bit
@@ -1205,6 +1219,10 @@ RPI_PICO2_W = Board(
     framework="arduino",
     board_build_core="earlephilhower",
     board_build_filesystem_size="0.5m",
+    # Arduino-Pico's default IPv4 profile excludes BTstack. Enable the Pico W
+    # BLE-capable archive so FastLED's RP2350W transport can link.
+    board_build_options={"ipbtstack": "ipv4btcble"},
+    lib_deps=["BTstackLib"],
 )
 
 # NXP LPC8xx family. PlatformIO has no native Arduino-capable nxplpc

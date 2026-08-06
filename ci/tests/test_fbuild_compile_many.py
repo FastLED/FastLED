@@ -22,6 +22,16 @@ def test_cpu_count_no_longer_caps_on_github_actions(
     assert cpu_count_module.cpu_count() == 8
 
 
+def test_fbuild_executable_override_uses_explicit_local_binary(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    binary = tmp_path / "fbuild.exe"
+    binary.write_bytes(b"")
+    monkeypatch.setenv("FBUILD_EXECUTABLE", str(binary))
+
+    assert fbuild_runner.get_fbuild_executable() == str(binary)
+
+
 def test_run_fbuild_ci_uses_expected_command_and_parses_results(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
