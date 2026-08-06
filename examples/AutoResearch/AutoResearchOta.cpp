@@ -18,10 +18,21 @@
 #include "fl/stl/json.h"
 #include "fl/stl/singleton.h"
 #include "fl/log/log.h"
+#include "fl/stl/vector.h"
 
 struct OtaStateHolder {
     AutoResearchOtaState state;
 };
+
+struct RpOtaUpdateState {
+    bool pending = false;
+    char host[16] = {};
+    uint16_t port = 0;
+};
+
+RpOtaUpdateState& getRpOtaUpdateState() {
+    return fl::Singleton<RpOtaUpdateState>::instance();
+}
 
 AutoResearchOtaState& getOtaState() {
     return fl::Singleton<OtaStateHolder>::instance().state;
@@ -51,6 +62,9 @@ AutoResearchOtaState& getOtaState() {
 #include <esp_wifi.h>
 #include <esp_netif.h>
 #include <esp_event.h>
+#include <esp_http_server.h>
+#include <LittleFS.h>
+#include <mbedtls/sha256.h>
 // IWYU pragma: end_keep
 
 struct EspOtaRuntimeState {
@@ -60,8 +74,100 @@ struct EspOtaRuntimeState {
     bool wifi_initialized = false;
 };
 
+struct OtaArtifactState {
+    File file;
+    httpd_handle_t server = nullptr;
+    size_t expected_size = 0;
+    size_t received_size = 0;
+    size_t served_requests = 0;
+    char expected_sha256[65] = {};
+};
+
+OtaArtifactState& getOtaArtifactState() {
+    return fl::Singleton<OtaArtifactState>::instance();
+}
+
 EspOtaRuntimeState& getEspOtaRuntimeState() {
     return fl::Singleton<EspOtaRuntimeState>::instance();
+}
+
+static bool copySha256(char* destination, size_t capacity, const char* source) {
+    if (source == nullptr || capacity != 65) {
+        return false;
+    }
+    size_t index = 0;
+    while (source[index] != '\0') {
+        const char value = source[index];
+        const bool is_digit = value >= '0' && value <= '9';
+        const bool is_lower = value >= 'a' && value <= 'f';
+        if ((!is_digit && !is_lower) || index + 1 >= capacity) {
+            return false;
+        }
+        destination[index] = value;
+        ++index;
+    }
+    if (index != 64) {
+        return false;
+    }
+    destination[index] = '\0';
+    return true;
+}
+
+static bool sha256File(const char* path, char* output, size_t output_capacity) {
+    if (output_capacity != 65) {
+        return false;
+    }
+    File file = LittleFS.open(path, FILE_READ);
+    if (!file || file.isDirectory()) {
+        return false;
+    }
+    mbedtls_sha256_context context;
+    mbedtls_sha256_init(&context);
+    mbedtls_sha256_starts(&context, 0);
+    uint8_t bytes[512];
+    while (file.available()) {
+        const size_t read = file.read(bytes, sizeof(bytes));
+        if (read == 0) {
+            file.close();
+            mbedtls_sha256_free(&context);
+            return false;
+        }
+        mbedtls_sha256_update(&context, bytes, read);
+    }
+    uint8_t digest[32];
+    mbedtls_sha256_finish(&context, digest);
+    mbedtls_sha256_free(&context);
+    file.close();
+    for (size_t index = 0; index < sizeof(digest); ++index) {
+        output[index * 2] = "0123456789abcdef"[digest[index] >> 4];
+        output[index * 2 + 1] = "0123456789abcdef"[digest[index] & 0x0f];
+    }
+    output[64] = '\0';
+    return true;
+}
+
+static esp_err_t serveOtaArtifact(httpd_req_t* request) {
+    ++getOtaArtifactState().served_requests;
+    File file = LittleFS.open("/rp2350.bin", FILE_READ);
+    if (!file || file.isDirectory()) {
+        return httpd_resp_send_err(request, HTTPD_404_NOT_FOUND, "Artifact unavailable");
+    }
+    httpd_resp_set_type(request, "application/octet-stream");
+    char length[16];
+    snprintf(length, sizeof(length), "%u", static_cast<unsigned>(file.size()));
+    httpd_resp_set_hdr(request, "Content-Length", length);
+    uint8_t bytes[512];
+    while (file.available()) {
+        const size_t read = file.read(bytes, sizeof(bytes));
+        if (read == 0 || httpd_resp_send_chunk(request,
+                                                reinterpret_cast<const char*>(bytes),
+                                                read) != ESP_OK) {
+            file.close();
+            return ESP_FAIL;
+        }
+    }
+    file.close();
+    return httpd_resp_send_chunk(request, nullptr, 0);
 }
 
 // ============================================================================
@@ -205,6 +311,133 @@ fl::json stopOta() {
     return response;
 }
 
+fl::json beginOtaArtifact(size_t expected_size, const char* sha256) {
+    fl::json response = fl::json::object();
+    OtaArtifactState& state = getOtaArtifactState();
+    if (expected_size == 0 || !copySha256(state.expected_sha256,
+                                           sizeof(state.expected_sha256), sha256)) {
+        response.set("success", false);
+        response.set("error", "Invalid artifact metadata");
+        return response;
+    }
+    if (!LittleFS.begin(true)) {
+        response.set("success", false);
+        response.set("error", "LittleFS mount failed");
+        return response;
+    }
+    if (expected_size > LittleFS.totalBytes()) {
+        response.set("success", false);
+        response.set("error", "Artifact exceeds fixture filesystem");
+        return response;
+    }
+    if (state.file) {
+        state.file.close();
+    }
+    LittleFS.remove("/rp2350.bin.part");
+    state.file = LittleFS.open("/rp2350.bin.part", FILE_WRITE);
+    if (!state.file) {
+        response.set("success", false);
+        response.set("error", "Artifact staging open failed");
+        return response;
+    }
+    state.expected_size = expected_size;
+    state.received_size = 0;
+    response.set("success", true);
+    response.set("capacity", static_cast<int64_t>(LittleFS.totalBytes()));
+    return response;
+}
+
+fl::json writeOtaArtifact(fl::vector<fl::u8> bytes) {
+    fl::json response = fl::json::object();
+    OtaArtifactState& state = getOtaArtifactState();
+    if (!state.file || bytes.empty() ||
+        bytes.size() > state.expected_size - state.received_size) {
+        response.set("success", false);
+        response.set("error", "Invalid artifact chunk");
+        return response;
+    }
+    const size_t written = state.file.write(bytes.data(), bytes.size());
+    state.received_size += written;
+    response.set("success", written == bytes.size());
+    response.set("received", static_cast<int64_t>(state.received_size));
+    if (written != bytes.size()) {
+        response.set("error", "Artifact write failed");
+    }
+    return response;
+}
+
+fl::json finishOtaArtifact() {
+    fl::json response = fl::json::object();
+    OtaArtifactState& state = getOtaArtifactState();
+    if (!state.file || state.received_size != state.expected_size) {
+        response.set("success", false);
+        response.set("error", "Artifact size mismatch");
+        return response;
+    }
+    state.file.close();
+    char actual_sha256[65];
+    if (!sha256File("/rp2350.bin.part", actual_sha256, sizeof(actual_sha256)) ||
+        fl::strcmp(actual_sha256, state.expected_sha256) != 0) {
+        LittleFS.remove("/rp2350.bin.part");
+        response.set("success", false);
+        response.set("error", "Artifact SHA-256 mismatch");
+        return response;
+    }
+    LittleFS.remove("/rp2350.bin");
+    if (!LittleFS.rename("/rp2350.bin.part", "/rp2350.bin")) {
+        response.set("success", false);
+        response.set("error", "Artifact publish failed");
+        return response;
+    }
+    response.set("success", true);
+    response.set("size", static_cast<int64_t>(state.received_size));
+    response.set("sha256", actual_sha256);
+    return response;
+}
+
+fl::json startOtaArtifactServer() {
+    fl::json response = fl::json::object();
+    OtaArtifactState& state = getOtaArtifactState();
+    if (!LittleFS.begin(true) || !LittleFS.exists("/rp2350.bin")) {
+        response.set("success", false);
+        response.set("error", "No published RP2350 artifact");
+        return response;
+    }
+    if (!state.server) {
+        httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+        config.server_port = 8081;
+        if (httpd_start(&state.server, &config) != ESP_OK) {
+            response.set("success", false);
+            response.set("error", "Artifact HTTP server start failed");
+            return response;
+        }
+        httpd_uri_t artifact = {};
+        artifact.uri = "/rp2350.bin";
+        artifact.method = HTTP_GET;
+        artifact.handler = serveOtaArtifact;
+        if (httpd_register_uri_handler(state.server, &artifact) != ESP_OK) {
+            httpd_stop(state.server);
+            state.server = nullptr;
+            response.set("success", false);
+            response.set("error", "Artifact HTTP route registration failed");
+            return response;
+        }
+    }
+    response.set("success", true);
+    response.set("ip", AUTORESEARCH_OTA_AP_IP);
+    response.set("port", static_cast<int64_t>(8081));
+    return response;
+}
+
+fl::json otaArtifactStatus() {
+    fl::json response = fl::json::object();
+    OtaArtifactState& state = getOtaArtifactState();
+    response.set("success", LittleFS.begin(true) && LittleFS.exists("/rp2350.bin"));
+    response.set("servedRequests", static_cast<int64_t>(state.served_requests));
+    response.set("received", static_cast<int64_t>(state.received_size));
+    return response;
+}
+
 #else  // !FL_IS_ESP32 || !SOC_WIFI_SUPPORTED
 
 // ============================================================================
@@ -224,6 +457,99 @@ fl::json stopOta() {
     return response;
 }
 
+fl::json beginOtaArtifact(size_t expected_size, const char* sha256) {
+    fl::json response = fl::json::object();
+    response.set("success", false);
+    response.set("error", "Artifact staging only supported on ESP32-C6");
+    return response;
+}
+
+fl::json writeOtaArtifact(fl::vector<fl::u8> bytes) {
+    fl::json response = fl::json::object();
+    response.set("success", false);
+    response.set("error", "Artifact staging only supported on ESP32-C6");
+    return response;
+}
+
+fl::json finishOtaArtifact() {
+    fl::json response = fl::json::object();
+    response.set("success", false);
+    response.set("error", "Artifact staging only supported on ESP32-C6");
+    return response;
+}
+
+fl::json startOtaArtifactServer() {
+    fl::json response = fl::json::object();
+    response.set("success", false);
+    response.set("error", "Artifact server only supported on ESP32-C6");
+    return response;
+}
+
+fl::json otaArtifactStatus() {
+    fl::json response = fl::json::object();
+    response.set("success", false);
+    response.set("error", "Artifact server only supported on ESP32-C6");
+    return response;
+}
+
 #endif  // FL_IS_ESP32
+
+#if defined(FL_IS_RP2350) && defined(PICO_CYW43_SUPPORTED)
+#include <HTTPUpdate.h>
+#include <WiFi.h>
+
+fl::json queueOtaArtifactUpdate(const char* host, uint16_t port) {
+    fl::json response = fl::json::object();
+    RpOtaUpdateState& state = getRpOtaUpdateState();
+    if (host == nullptr || port == 0) {
+        response.set("success", false);
+        response.set("error", "Invalid artifact endpoint");
+        return response;
+    }
+    size_t index = 0;
+    while (host[index] != '\0' && index + 1 < sizeof(state.host)) {
+        state.host[index] = host[index];
+        ++index;
+    }
+    if (host[index] != '\0') {
+        response.set("success", false);
+        response.set("error", "Artifact host is too long");
+        return response;
+    }
+    state.host[index] = '\0';
+    state.port = port;
+    state.pending = true;
+    response.set("success", true);
+    response.set("accepted", true);
+    return response;
+}
+
+void pollOtaArtifactUpdate() {
+    RpOtaUpdateState& state = getRpOtaUpdateState();
+    if (!state.pending) {
+        return;
+    }
+    state.pending = false;
+    WiFiClient client;
+    HTTPUpdate updater;
+    const t_httpUpdate_return result = updater.update(client, state.host, state.port,
+                                                       "/rp2350.bin");
+    if (result != HTTP_UPDATE_OK) {
+        FL_WARN("[OTA] RP2350W artifact update failed: " << updater.getLastErrorString());
+    }
+}
+
+#else
+
+fl::json queueOtaArtifactUpdate(const char* host, uint16_t port) {
+    fl::json response = fl::json::object();
+    response.set("success", false);
+    response.set("error", "Artifact update only supported on RP2350W");
+    return response;
+}
+
+void pollOtaArtifactUpdate() {}
+
+#endif
 
 #endif  // !FASTLED_AUTORESEARCH_LOW_MEMORY

@@ -44,7 +44,7 @@ def test_rp2350w_selects_the_pico_2_w_board_profile() -> None:
     assert "board = rpipico2w" in ini
     assert "board_build.core = earlephilhower" in ini
     assert "board_build.ipbtstack = ipv4btcble" in ini
-    assert "lib_deps = BTstackLib" in ini
+    assert "lib_deps = BTstackLib,HTTPUpdate" in ini
 
 
 def test_rp2350w_ble_transport_uses_btstack_with_singleton_state() -> None:

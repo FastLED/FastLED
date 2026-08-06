@@ -213,6 +213,7 @@ void loop()  { autoResearchLowMemoryLoop(); }
 #include "AutoResearchRemote.h"
 #include "AutoResearchBle.h"
 #include "AutoResearchNet.h"
+#include "AutoResearchOta.h"
 #include "AutoResearchAsync.h"
 #include "AutoResearchPlatform.h"
 #include "AutoResearchSimd.h"
@@ -602,6 +603,9 @@ void loop() {
     // Arduino-Pico's CYW43 HTTP endpoint runs cooperatively from loop().
     // ESP32's native HTTP server has its own task, so this is a no-op there.
     pollNetServer();
+    // A peer OTA request is queued by JSON-RPC, then executed from loop after
+    // the acceptance response is safely written to USB serial.
+    pollOtaArtifactUpdate();
 
     // ========================================================================
     // Watchdog autoresearch trigger (FastLED#2731) — when the host RPC sends

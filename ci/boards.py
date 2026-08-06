@@ -1222,7 +1222,10 @@ RPI_PICO2_W = Board(
     # Arduino-Pico's default IPv4 profile excludes BTstack. Enable the Pico W
     # BLE-capable archive so FastLED's RP2350W transport can link.
     board_build_options={"ipbtstack": "ipv4btcble"},
-    lib_deps=["BTstackLib"],
+    # BTstackLib is required for FastLED BLE. HTTPUpdate is required by the
+    # device-to-device OTA AutoResearch flow and must be explicit for fbuild
+    # to compile/link the Arduino-Pico core library.
+    lib_deps=["BTstackLib", "HTTPUpdate"],
 )
 
 # NXP LPC8xx family. PlatformIO has no native Arduino-capable nxplpc
