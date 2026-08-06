@@ -5,12 +5,17 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.5.10. It carries library-dependency fixes for Teensy/STM32,
+    # Pin to fbuild 2.5.13. It carries library-dependency fixes for Teensy/STM32,
     # stale daemon/install-lock recovery, and hardened RP2350 UF2 deployment,
     # plus the monitor WebSocket and serial-health fixes required by
     # AutoResearch.
     #
     # Pin history:
+    #   2.5.13 -- canonicalizes named local `symlink://` and `file://` roots
+    #              before resolving manifest-relative paths (FastLED/fbuild#1258).
+    #   2.5.12 -- resolves named local `symlink://` and `file://` library
+    #              dependencies without writing generated artifacts into the
+    #              source checkout (FastLED/fbuild#1256).
     #   2.5.10 -- restores Arduino-Pico framework header visibility and
     #              applies its data-declared network flags, including
     #              LWIP_CHECKSUM_CTRL_PER_NETIF (FastLED/fbuild#1252).
@@ -179,7 +184,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.10",
+    "fbuild==2.5.13",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
