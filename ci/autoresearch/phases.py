@@ -36,7 +36,7 @@ from ci.autoresearch.gpio import (
     run_pin_discovery,
     run_pin_discovery_segmented,
 )
-from ci.autoresearch.usb_power import warn_selective_suspend
+from ci.autoresearch.usb_power import absent_port_error, warn_selective_suspend
 from ci.debug_attached import run_cpp_lint
 from ci.rpc_client import RpcClient, RpcCrashError, RpcError, RpcTimeoutError
 from ci.util.blocker_alert import blocker_alert
@@ -1522,6 +1522,17 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
     upload_port = ctx.upload_port
     build_driver = ctx.build_driver
     assert build_driver is not None
+
+    # Preflight: an explicitly-named port that is not attached can only fail,
+    # and it fails at deploy — after ~7 minutes of install, lint and build.
+    # Checked before Phase 0 so the operator gets the real reason in seconds.
+    # Only an explicit --upload-port is gated: without one, fbuild can still
+    # reach an RP-series board through the BOOTSEL volume with no CDC record.
+    if args.upload_port:
+        absent = absent_port_error(args.upload_port)
+        if absent:
+            print(f"\n❌ {absent}")
+            return 1
 
     # Phase 0: Package Installation
     if not build_driver.install_packages(build_dir, build_environment):
