@@ -24,6 +24,32 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 MERGE_RE = re.compile(r"\bgh\s+pr\s+merge\b")
+# `gh pr merge [<number> | <url> | <branch>]` — we can only act on a number
+# or a PR URL ending in one.
+PR_ARG_RE = re.compile(
+    r"\bgh\s+pr\s+merge\s+(?:[^\s]*/pull/)?(\d+)\b|"
+    r"\bgh\s+pr\s+merge\b(?:\s+--?[^\s]+(?:[= ][^\s]+)?)*?\s+(?:[^\s]*/pull/)?(\d+)\b"
+)
+REPO_ARG_RE = re.compile(r"(?:--repo|-R)[= ]\s*([\w.-]+/[\w.-]+)")
+# A PR URL carries its own owner/repo; without this a
+# `gh pr merge https://github.com/OWNER/NAME/pull/N` would be checked
+# against the current checkout instead of OWNER/NAME.
+PR_URL_RE = re.compile(r"github\.com/([\w.-]+/[\w.-]+)/pull/\d+")
+
+
+def _target(command: str) -> tuple[str | None, str | None]:
+    """Extract the (pr_number, repo_slug) the merge command targets.
+
+    Either may be None: `gh pr merge` with no number means "the PR for the
+    current branch", and no `--repo` means "the current checkout".
+    """
+    pr_match = PR_ARG_RE.search(command)
+    pr = None
+    if pr_match:
+        pr = pr_match.group(1) or pr_match.group(2)
+    repo_match = REPO_ARG_RE.search(command) or PR_URL_RE.search(command)
+    repo = repo_match.group(1) if repo_match else None
+    return pr, repo
 
 
 def main() -> int:
@@ -44,9 +70,21 @@ def main() -> int:
     if not MERGE_RE.search(command):
         return 0
 
+    # Check the PR the command actually targets. Without this the hook always
+    # inspected the current checkout's branch, so merging a sibling project's
+    # PR (`gh pr merge N --repo OWNER/NAME`) was judged against the wrong
+    # repository — and blocked with "no PR found for current branch" whenever
+    # the current branch had no PR of its own.
+    pr, repo = _target(command)
+    cmd = ["uv", "run", "python", "ci/tools/coderabbit_addressor.py", "--check"]
+    if pr:
+        cmd.append(pr)
+    if repo and pr:
+        cmd.extend(["--repo", repo])
+
     try:
         result = subprocess.run(
-            ["uv", "run", "python", "ci/tools/coderabbit_addressor.py", "--check"],
+            cmd,
             capture_output=True,
             text=True,
             timeout=30,
@@ -58,6 +96,18 @@ def main() -> int:
         return 0
 
     if result.returncode == 0:
+        return 0
+
+    # Exit 2 from the addressor means "could not identify a PR", not
+    # "this PR has unresolved reviews". Blocking then is a false positive:
+    # there is no review state to protect. Only a real unresolved-comment
+    # verdict (exit 1) blocks.
+    if result.returncode != 1:
+        sys.stderr.write(result.stderr or "")
+        sys.stderr.write(
+            "\n[check_pr_merge_reviews] Could not identify a PR to check; "
+            "allowing merge.\n"
+        )
         return 0
 
     sys.stderr.write(result.stderr or "")
