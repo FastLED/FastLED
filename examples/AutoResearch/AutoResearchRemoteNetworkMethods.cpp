@@ -342,6 +342,48 @@ void AutoResearchRemoteControl::bindNetworkMethods(fl::Remote& remote) {
         return stopOta();
     });
 
+    remote.bind("beginOtaArtifact", [](const fl::json& args) -> fl::json {
+        if (!args.contains("size") || !args["size"].is_int() ||
+            !args.contains("sha256") || !args["sha256"].is_string()) {
+            fl::json response = fl::json::object();
+            response.set("success", false);
+            response.set("error", "Expected size and sha256");
+            return response;
+        }
+        const int64_t size = args["size"].as_int().value();
+        return beginOtaArtifact(size > 0 ? static_cast<size_t>(size) : 0,
+                                args["sha256"].as_string().value().c_str());
+    });
+
+    remote.bind("writeOtaArtifact", [](fl::vector<fl::u8> bytes) -> fl::json {
+        return writeOtaArtifact(fl::move(bytes));
+    });
+
+    remote.bind("finishOtaArtifact", [](const fl::json& args) -> fl::json {
+        return finishOtaArtifact();
+    });
+
+    remote.bind("startOtaArtifactServer", [](const fl::json& args) -> fl::json {
+        return startOtaArtifactServer();
+    });
+
+    remote.bind("otaArtifactStatus", [](const fl::json& args) -> fl::json {
+        return otaArtifactStatus();
+    });
+
+    remote.bind("applyOtaArtifact", [](const fl::json& args) -> fl::json {
+        if (!args.contains("host") || !args["host"].is_string() ||
+            !args.contains("port") || !args["port"].is_int()) {
+            fl::json response = fl::json::object();
+            response.set("success", false);
+            response.set("error", "Expected host and port");
+            return response;
+        }
+        const int64_t port = args["port"].as_int().value();
+        return queueOtaArtifactUpdate(args["host"].as_string().value().c_str(),
+                                      port > 0 ? static_cast<uint16_t>(port) : 0);
+    });
+
     // ========================================================================
     // BLE Validation RPC Functions
     // ========================================================================

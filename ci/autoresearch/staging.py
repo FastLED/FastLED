@@ -35,6 +35,7 @@ def synthesise_autoresearch_project(
     project_root: Path | None,
     verbose: bool,
     extra_defines: list[str] | None = None,
+    ota_fixture: bool = False,
 ) -> Path:
     """Stage ``.build/pio/<board>/`` and write a synthesised ``platformio.ini``.
 
@@ -47,6 +48,8 @@ def synthesise_autoresearch_project(
             the synthesised ``build_flags``. Used by driver-specific bench
             modes (e.g. ``--dma-spi`` adds ``FASTLED_LPC_SPI_DMA=1`` so the
             AutoResearchSpiDma handlers compile in — FastLED #3456).
+        ota_fixture: Select the C6-only partition table that reserves space
+            for a staged RP2350W firmware image during peer OTA validation.
 
     Returns:
         Absolute path to the staged build directory, ready to be handed to
@@ -89,5 +92,17 @@ def synthesise_autoresearch_project(
             f"Failed to synthesise autoresearch project for board "
             f"'{board_name}': {init_result.output}"
         )
+
+    if ota_fixture:
+        if board_name != "esp32c6":
+            raise RuntimeError("The OTA fixture partition is only valid for esp32c6")
+        partitions = build_dir / "src" / "sketch" / "esp32c6_ota_fixture.csv"
+        if not partitions.is_file():
+            raise RuntimeError(f"Missing OTA fixture partition table: {partitions}")
+        ini = build_dir / "platformio.ini"
+        with ini.open("a", encoding="utf-8") as output:
+            output.write(
+                "\nboard_build.partitions = src/sketch/esp32c6_ota_fixture.csv\n"
+            )
 
     return build_dir

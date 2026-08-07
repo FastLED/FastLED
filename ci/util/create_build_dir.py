@@ -389,6 +389,9 @@ def create_build_dir(
         cmd_list.append(
             f"--project-option=board_build.filesystem_size={board.board_build_filesystem_size}"
         )
+    if board.board_build_options:
+        for key, value in sorted(board.board_build_options.items()):
+            cmd_list.append(f"--project-option=board_build.{key}={value}")
     if build_flags is not None:
         for build_flag in build_flags:
             cmd_list.append(f"--project-option=build_flags={build_flag}")
@@ -397,8 +400,11 @@ def create_build_dir(
         cmd_list.append(f"--project-option=build_flags={build_flags_str}")
     if board.customsdk:
         cmd_list.append(f"--project-option=custom_sdkconfig={customsdk}")
+    lib_deps: list[str] = list(board.lib_deps or [])
     if extra_packages:
-        cmd_list.append(f"--project-option=lib_deps={','.join(extra_packages)}")
+        lib_deps.extend(extra_packages)
+    if lib_deps:
+        cmd_list.append(f"--project-option=lib_deps={','.join(lib_deps)}")
     if no_install_deps:
         cmd_list.append("--no-install-dependencies")
 

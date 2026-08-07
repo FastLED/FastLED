@@ -84,10 +84,20 @@ _COMPILE_MANY_RESULT_RE = re.compile(
 def get_fbuild_executable() -> str | None:
     """Resolve the ``fbuild`` executable for the active Python environment.
 
+    ``FBUILD_EXECUTABLE`` is an explicit local-development override. It keeps
+    the normal virtualenv pin authoritative while allowing a merged local
+    fbuild binary to validate a consumer before the next release.
+
     Prefer the sibling script next to the current interpreter so ``uv run``
     reliably uses the version locked in this repo's virtualenv instead of an
     older global ``fbuild`` earlier on ``PATH``.
     """
+    override = os.environ.get("FBUILD_EXECUTABLE")
+    if override:
+        candidate = Path(override)
+        if candidate.is_file():
+            return str(candidate)
+        raise FileNotFoundError(f"FBUILD_EXECUTABLE does not name a file: {candidate}")
     script_dir = Path(sys.executable).resolve().parent
     candidates = [
         script_dir / "fbuild",

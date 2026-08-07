@@ -11,9 +11,10 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import hashlib
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import httpx
 from colorama import Fore, Style
@@ -25,6 +26,152 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 if TYPE_CHECKING:
     from ci.util.serial_interface import SerialInterface
+
+
+async def run_ota_peer_autoresearch(
+    upload_port: str,
+    peer_upload_port: str,
+    serial_iface: "SerialInterface | None",
+    firmware_path: Path,
+    timeout: float = 360.0,
+) -> int:
+    """Update RP2350W from an ESP32-C6 fixture without host WiFi access.
+
+    Both boards are deployed by fbuild before this function runs. The host uses
+    the normal fbuild-backed RPC transport only to stage the RP image onto the
+    C6. The RP then fetches that verified artifact over their private WiFi link.
+    """
+    from ci.util.serial_interface import create_serial_interface
+
+    print("\nOTA PEER AUTORESEARCH: RP2350W <- ESP32-C6")
+    print("  Host WiFi is not used or changed by this mode.")
+    if not firmware_path.is_file():
+        print(
+            f"  {Fore.RED}RP2350W firmware is missing: {firmware_path}{Style.RESET_ALL}"
+        )
+        return 1
+
+    artifact = firmware_path.read_bytes()
+    sha256 = hashlib.sha256(artifact).hexdigest()
+    deadline = time.monotonic() + timeout
+    primary: RpcClient | None = None
+    peer: RpcClient | None = None
+
+    def rpc_timeout() -> float:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise RpcTimeoutError("--net-peer --ota deadline expired")
+        return min(20.0, remaining)
+
+    async def rpc_data(
+        client: RpcClient, method: str, params: list[Any] | dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        response = await client.send(method, params or {}, timeout=rpc_timeout())
+        if not isinstance(response.data, dict):
+            raise RuntimeError(f"{method} returned a non-object response")
+        return response.data
+
+    try:
+        primary = RpcClient(
+            upload_port, timeout=rpc_timeout(), serial_interface=serial_iface
+        )
+        peer = RpcClient(
+            peer_upload_port,
+            timeout=rpc_timeout(),
+            serial_interface=create_serial_interface(peer_upload_port),
+        )
+        await primary.connect(boot_wait=3.0, drain_boot=True)
+        await peer.connect(boot_wait=3.0, drain_boot=True)
+
+        primary_status = await rpc_data(primary, "status")
+        peer_status = await rpc_data(peer, "status")
+        if "rp2350" not in str(primary_status.get("platform", "")).lower():
+            raise RuntimeError(f"Primary board is not RP2350W: {primary_status}")
+        if "esp32-c6" not in str(peer_status.get("platform", "")).lower():
+            raise RuntimeError(f"Companion board is not ESP32-C6: {peer_status}")
+
+        begin = await rpc_data(
+            peer, "beginOtaArtifact", {"size": len(artifact), "sha256": sha256}
+        )
+        if not begin.get("success"):
+            raise RuntimeError(f"C6 refused OTA artifact: {begin}")
+        for offset in range(0, len(artifact), 512):
+            encoded = base64.b64encode(artifact[offset : offset + 512]).decode("ascii")
+            written = await rpc_data(peer, "writeOtaArtifact", [encoded])
+            if not written.get("success"):
+                raise RuntimeError(
+                    f"C6 artifact write failed at byte {offset}: {written}"
+                )
+        finished = await rpc_data(peer, "finishOtaArtifact")
+        if not finished.get("success") or finished.get("sha256") != sha256:
+            raise RuntimeError(f"C6 artifact verification failed: {finished}")
+
+        c6_server = await rpc_data(peer, "startNetServer")
+        if not c6_server.get("success"):
+            raise RuntimeError(f"C6 AP start failed: {c6_server}")
+        artifact_server = await rpc_data(peer, "startOtaArtifactServer")
+        host = artifact_server.get("ip")
+        port = artifact_server.get("port")
+        if (
+            not artifact_server.get("success")
+            or not isinstance(host, str)
+            or not isinstance(port, int)
+        ):
+            raise RuntimeError(f"C6 artifact server failed: {artifact_server}")
+
+        joined = await rpc_data(
+            primary,
+            "wifiConnect",
+            {"ssid": c6_server.get("ssid"), "password": c6_server.get("password")},
+        )
+        if not joined.get("success"):
+            raise RuntimeError(f"RP2350W WiFi join failed: {joined}")
+        for _ in range(20):
+            wifi = await rpc_data(primary, "wifiStatus")
+            if wifi.get("connected"):
+                break
+            await asyncio.sleep(min(0.5, rpc_timeout()))
+        else:
+            raise RpcTimeoutError("RP2350W did not join the C6 AP")
+
+        accepted = await rpc_data(
+            primary, "applyOtaArtifact", {"host": host, "port": port}
+        )
+        if not accepted.get("success"):
+            raise RuntimeError(f"RP2350W rejected OTA artifact: {accepted}")
+        await primary.close()
+        primary = None
+        await asyncio.sleep(min(8.0, rpc_timeout()))
+
+        primary = RpcClient(
+            upload_port,
+            timeout=rpc_timeout(),
+            serial_interface=create_serial_interface(upload_port),
+        )
+        await primary.connect(boot_wait=8.0, drain_boot=True)
+        await rpc_data(primary, "ping")
+        served = await rpc_data(peer, "otaArtifactStatus")
+        if not served.get("success") or int(served.get("servedRequests", 0)) < 1:
+            raise RuntimeError(f"C6 did not serve the RP2350W artifact: {served}")
+        print(f"{Fore.GREEN}OTA PEER AUTORESEARCH PASSED{Style.RESET_ALL}")
+        return 0
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        return 130
+    except (RpcTimeoutError, RuntimeError, OSError) as error:
+        print(f"{Fore.RED}OTA peer autoresearch failed: {error}{Style.RESET_ALL}")
+        return 1
+    finally:
+        for client, stop_method in ((primary, "stopNet"), (peer, "stopNet")):
+            if client is None:
+                continue
+            try:
+                await client.send(stop_method, timeout=2.0)
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
+            except Exception:
+                pass
+            await client.close()
 
 
 async def run_ota_autoresearch(

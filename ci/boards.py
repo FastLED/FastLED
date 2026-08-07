@@ -65,6 +65,8 @@ class Board:
     board_build_flash_size: str | None = (
         None  # Flash size for ESP32 boards (e.g., '4MB')
     )
+    board_build_options: dict[str, str] | None = None
+    lib_deps: list[str] | None = None
     build_flags: list[str] | None = None  # Reserved for future use.
     build_unflags: list[str] | None = None  # New: unflag options
     defines: list[str] | None = None
@@ -219,6 +221,11 @@ class Board:
             )
         if self.board_build_flash_size:
             options.append(f"board_build.flash_size={self.board_build_flash_size}")
+        if self.board_build_options:
+            for key, value in sorted(self.board_build_options.items()):
+                options.append(f"board_build.{key}={value}")
+        if self.lib_deps:
+            options.append(f"lib_deps={','.join(self.lib_deps)}")
         if self.defines:
             for define in self.defines:
                 options.append(f"build_flags=-D{define}")
@@ -571,6 +578,10 @@ class Board:
             # Also set upload flash size to override board defaults
             lines.append(f"board_upload.flash_size = {self.board_build_flash_size}")
 
+        if self.board_build_options:
+            for key, value in sorted(self.board_build_options.items()):
+                lines.append(f"board_build.{key} = {value}")
+
         # Force DIO flash mode ONLY for QEMU builds
         # QEMU doesn't support QIO flash mode which requires setting the QIE bit
         # Hardware builds should use QIO for better performance (30-50% faster)
@@ -713,16 +724,14 @@ class Board:
                 lines.append("lib_ldf_mode = chain")
             lines.append("lib_archive = true")
 
-            # Build lib_deps with additional libs only (FastLED is copied to lib/FastLED)
-            # PlatformIO supports multiple lib_deps entries on separate lines
-            if additional_libs:
-                # Format as multi-line lib_deps for proper PlatformIO parsing
-                if len(additional_libs) == 1:
-                    lines.append(f"lib_deps = {additional_libs[0]}")
-                else:
-                    lines.append("lib_deps =")
-                    for entry in additional_libs:
-                        lines.append(f"    {entry}")
+        # PlatformIO treats repeated lib_deps options as replacements, not a
+        # merge. Combine board requirements and caller-supplied requirements
+        # before emitting the single environment option.
+        lib_deps: list[str] = list(self.lib_deps or [])
+        if additional_libs:
+            lib_deps.extend(additional_libs)
+        if lib_deps:
+            lines.append(f"lib_deps = {','.join(lib_deps)}")
 
         return "\n".join(lines) + "\n"
 
@@ -1205,6 +1214,13 @@ RPI_PICO2_W = Board(
     framework="arduino",
     board_build_core="earlephilhower",
     board_build_filesystem_size="0.5m",
+    # Arduino-Pico's default IPv4 profile excludes BTstack. Enable the Pico W
+    # BLE-capable archive so FastLED's RP2350W transport can link.
+    board_build_options={"ipbtstack": "ipv4btcble"},
+    # BTstackLib is required for FastLED BLE. HTTPUpdate is required by the
+    # device-to-device OTA AutoResearch flow and must be explicit for fbuild
+    # to compile/link the Arduino-Pico core library.
+    lib_deps=["BTstackLib", "HTTPUpdate"],
 )
 
 # NXP LPC8xx family. PlatformIO has no native Arduino-capable nxplpc

@@ -7,6 +7,7 @@
 // Root directory implementations (alphabetical order)
 
 // begin current directory includes
+#include "platforms/arm/rp/ble_rp.cpp.hpp"
 #include "platforms/arm/rp/init_rp.cpp.hpp"
 #include "platforms/arm/rp/io_rp.cpp.hpp"
 #include "platforms/arm/rp/mutex_rp.cpp.hpp"

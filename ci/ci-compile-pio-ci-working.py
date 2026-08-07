@@ -352,6 +352,15 @@ def compile_with_pio_ci(
                 ]
             )
 
+        if board.board_build_options:
+            for key, value in sorted(board.board_build_options.items()):
+                cmd_list.extend(["--project-option", f"board_build.{key}={value}"])
+
+        if board.lib_deps:
+            cmd_list.extend(
+                ["--project-option", f"lib_deps={','.join(board.lib_deps)}"]
+            )
+
         # Add defines
         all_defines = defines.copy()
         if board.defines:

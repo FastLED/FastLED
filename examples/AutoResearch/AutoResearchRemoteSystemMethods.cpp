@@ -316,7 +316,7 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
         cfg.trans_queue_depth = (size_t)depth;
         cfg.max_transfer_size = (size_t)mts;
         cfg.output_clk_freq_hz = (uint32_t)hz;
-        cfg.shift_edge = PARLIO_SAMPLE_EDGE_POS;
+        cfg.shift_edge = PARLIO_SHIFT_EDGE_POS;
         cfg.bit_pack_order = PARLIO_BIT_PACK_ORDER_MSB;
         if (burst > 0) cfg.dma_burst_size = (size_t)burst;
         for (int i = 0; i < 16; ++i) cfg.data_gpio_nums[i] = (gpio_num_t)-1;
