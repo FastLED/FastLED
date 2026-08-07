@@ -192,6 +192,62 @@ bash autoresearch teensy41 --flex-io --tx-pin <tx> --rx-pin <rx> --timeout 120s
 `ci/autoresearch/args.py`; `--env <environment>` is the equivalent named form.
 Use the positional form in docs unless the task specifically needs `--env`.
 
+### Choosing (and not choosing) `--upload-port`
+
+`--upload-port` disambiguates *which* board to flash when several are attached.
+It is not a way to force a board that is not enumerating, and passing it
+reflexively can hurt:
+
+- **RP-series (RP2040 / RP2350).** fbuild deliberately excludes known-unhealthy
+  Raspberry Pi CDC records from deploy selection and continues via the
+  BOOTSEL-volume path (FastLED/fbuild#1147). Naming the port explicitly pins
+  deploy to that one record and skips the fallback, turning a recoverable
+  situation into a hard failure. Omit `--upload-port` unless two RP boards are
+  attached at once.
+- **If a board is in BOOTSEL with no working CDC port**, flash the UF2 directly:
+  `--upload-port UF2=<volume>` (e.g. `UF2=E:\`). This bypasses the serial port
+  entirely and uses the bootrom's own USB stack.
+- **ESP32 / Teensy / LPC** benches usually *do* want an explicit port, because
+  several identical boards are typically attached.
+
+### Windows USB selective suspend
+
+Windows may power down a USB port mid-session ("USB selective suspend" in the
+power plan, "allow the computer to turn off this device" per device). A board
+that does not resume cleanly comes back as
+`Unknown USB Device (Device Descriptor Request Failed)` — problem code 43 — and
+its stale COM record then shows `health=phantom` in `fbuild port scan`.
+
+That looks identical to a wedged board and has sent investigations down the
+wrong path (see #3864). Before assuming a board is wedged, check whether it is
+even attached:
+
+```powershell
+Get-PnpDevice -Class Ports | Select-Object Status, Present, FriendlyName
+Get-PnpDeviceProperty -InstanceId '<instance>' -KeyName DEVPKEY_Device_LastArrivalDate
+```
+
+`health=phantom` means **the devnode is a leftover record for hardware that is
+not currently attached** — not that the device is broken. `Present = False`
+plus an old `LastArrivalDate` means "plug it in", not "recover it".
+
+`bash autoresearch` runs a preflight (`ci/autoresearch/usb_power.py`) that warns
+before deploy when selective suspend is allowed on the target's hub chain, or —
+when the board is absent so the chain cannot be resolved — when it is enabled in
+the active power plan. The warning is advisory and never fails a run. To turn it
+off, from an elevated shell:
+
+```powershell
+powercfg -setacvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 `
+    48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0
+```
+
+Distinguishing firmware wedge from hardware fault: **BOOTSEL uses the bootrom's
+USB stack**, independent of application firmware. A board that enumerates in
+BOOTSEL but not in application mode has a firmware problem; one that fails even
+in BOOTSEL has a cable/power/hardware problem, and no software recovery will
+help.
+
 ### Validation Levels
 
 Pick the narrowest validation level that proves the claim:
