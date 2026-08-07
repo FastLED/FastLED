@@ -9,6 +9,7 @@ wedged board, and the reason a real investigation went down the wrong path.
 from __future__ import annotations
 
 from ci.autoresearch.usb_power import (
+    PortPresence,
     absent_port_error,
     hub_chain_power_off,
     humanise_age,
@@ -150,8 +151,10 @@ def test_warn_never_raises(capsys) -> None:
 
 
 def test_parse_presence_reads_both_fields() -> None:
-    assert parse_presence("True|42") == (True, 42)
-    assert parse_presence("False|432000") == (False, 432000)
+    assert parse_presence("True|42") == PortPresence(present=True, last_seen_secs=42)
+    assert parse_presence("False|432000") == PortPresence(
+        present=False, last_seen_secs=432000
+    )
 
 
 def test_parse_presence_unknown_is_not_absent() -> None:
@@ -160,11 +163,13 @@ def test_parse_presence_unknown_is_not_absent() -> None:
     A query failure that reported absence would abort a run against a board
     that is sitting there perfectly healthy.
     """
-    assert parse_presence("") == (None, None)
-    assert parse_presence("garbage with no pipe") == (None, None)
-    assert parse_presence("Maybe|42") == (None, 42)
+    assert parse_presence("") == PortPresence(present=None, last_seen_secs=None)
+    assert parse_presence("garbage with no pipe") == PortPresence(
+        present=None, last_seen_secs=None
+    )
+    assert parse_presence("Maybe|42") == PortPresence(present=None, last_seen_secs=42)
     # Present but no arrival date recorded — still a definite presence answer.
-    assert parse_presence("True|") == (True, None)
+    assert parse_presence("True|") == PortPresence(present=True, last_seen_secs=None)
 
 
 def test_humanise_age_scales() -> None:

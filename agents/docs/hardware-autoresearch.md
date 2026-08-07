@@ -214,7 +214,7 @@ An explicit `--upload-port` is checked for presence *before* the build, because
 a port that is not attached can only fail — and it used to fail at deploy, after
 roughly seven minutes of package install, lint and build:
 
-```
+```text
 ❌ COM17 is not attached, last seen 5d ago. Windows keeps the record after a
    board is unplugged, so this is a stale devnode, not a fault — plug the board
    in and re-run.
