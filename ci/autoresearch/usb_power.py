@@ -61,6 +61,99 @@ def _powershell(script: str, run: CommandRunner) -> str:
     return run(["powershell", "-NoProfile", "-NonInteractive", "-Command", script])
 
 
+def parse_presence(output: str) -> tuple[Optional[bool], Optional[int]]:
+    """Parse `present|last_arrival_unix_seconds` into (present, seconds-ago).
+
+    Both fields are independently optional. `(None, None)` means the host
+    could not say — which must never be reported as "absent", or a healthy
+    board would be blamed for a query failure.
+    """
+    for line in output.splitlines():
+        line = line.strip()
+        if "|" not in line:
+            continue
+        present_raw, _, arrived_raw = line.partition("|")
+        present: Optional[bool]
+        if present_raw.strip().lower() == "true":
+            present = True
+        elif present_raw.strip().lower() == "false":
+            present = False
+        else:
+            present = None
+        arrived: Optional[int] = None
+        try:
+            arrived = int(arrived_raw.strip())
+        except ValueError:
+            arrived = None
+        return present, arrived
+    return None, None
+
+
+def port_presence(
+    port: str, platform: str = sys.platform, run: CommandRunner = _run
+) -> tuple[Optional[bool], Optional[int]]:
+    """Whether `port` is in the live device tree, and when it was last seen.
+
+    Returns `(present, seconds_since_last_arrival)`. `(None, _)` off Windows
+    or when the query fails. `platform` is injectable so this can be tested on
+    non-Windows CI, matching `selective_suspend_warnings`.
+    """
+    if platform != "win32":
+        return None, None
+    script = f"""
+$ErrorActionPreference='SilentlyContinue'
+$d = Get-PnpDevice -Class Ports | Where-Object {{ $_.FriendlyName -match '\\({port}\\)' }} | Select-Object -First 1
+if (-not $d) {{ exit 0 }}
+$a = (Get-PnpDeviceProperty -InstanceId $d.InstanceId -KeyName 'DEVPKEY_Device_LastArrivalDate').Data
+$secs = ''
+if ($a) {{ $secs = [int]((Get-Date) - $a).TotalSeconds }}
+Write-Output ("{{0}}|{{1}}" -f $d.Present, $secs)
+"""
+    return parse_presence(_powershell(script, run))
+
+
+def humanise_age(secs: int) -> str:
+    """Coarse age: `45s`, `12m`, `3h`, `6d` — enough to tell live from stale."""
+    if secs < 60:
+        return f"{secs}s"
+    if secs < 3600:
+        return f"{secs // 60}m"
+    if secs < 86_400:
+        return f"{secs // 3600}h"
+    return f"{secs // 86_400}d"
+
+
+def absent_port_error(
+    port: str, platform: str = sys.platform, run: CommandRunner = _run
+) -> Optional[str]:
+    """Error text when an explicitly-requested port is not attached.
+
+    `None` means "carry on" — including when presence is unknowable. Only an
+    unambiguous `Present = False` stops a run.
+
+    Why this exists: `bash autoresearch --upload-port COM17` used to install
+    packages, lint and build for ~7 minutes before fbuild refused the deploy
+    on a board that was never plugged in. Worse, the refusal reads as a wedged
+    devnode, which is how FastLED #3864 lost hours to a board that had simply
+    been unplugged for six days.
+
+    Deliberately scoped to an *explicitly named* port. With no `--upload-port`
+    fbuild can still reach an RP-series board through the BOOTSEL volume even
+    with no working CDC record, so absence there is not fatal.
+    """
+    present, arrived = port_presence(port, platform=platform, run=run)
+    if present is not False:
+        return None
+    seen = f", last seen {humanise_age(arrived)} ago" if arrived is not None else ""
+    return (
+        f"{port} is not attached{seen}. Windows keeps the record after a board "
+        f"is unplugged, so this is a stale devnode, not a fault — plug the board "
+        f"in and re-run. (Deploy would fail after the build otherwise. For an "
+        f"RP-series board already in BOOTSEL, omit --upload-port or pass "
+        f"--upload-port UF2=<volume>.)"
+    )
+
+
 def plan_selective_suspend_enabled(run: CommandRunner = _run) -> Optional[bool]:
     """Is USB selective suspend enabled in the active power plan?
 

@@ -9,7 +9,10 @@ wedged board, and the reason a real investigation went down the wrong path.
 from __future__ import annotations
 
 from ci.autoresearch.usb_power import (
+    absent_port_error,
     hub_chain_power_off,
+    humanise_age,
+    parse_presence,
     plan_selective_suspend_enabled,
     selective_suspend_warnings,
     warn_selective_suspend,
@@ -141,3 +144,60 @@ def test_warn_never_raises(capsys) -> None:
 
     warn_selective_suspend("COM17", run=exploding)  # must not propagate
     warn_selective_suspend(None, run=exploding)
+
+
+# --- Absent-port preflight (the ~7-minute build that could only fail) --------
+
+
+def test_parse_presence_reads_both_fields() -> None:
+    assert parse_presence("True|42") == (True, 42)
+    assert parse_presence("False|432000") == (False, 432000)
+
+
+def test_parse_presence_unknown_is_not_absent() -> None:
+    """No output, or an unparseable field, must never mean "not attached".
+
+    A query failure that reported absence would abort a run against a board
+    that is sitting there perfectly healthy.
+    """
+    assert parse_presence("") == (None, None)
+    assert parse_presence("garbage with no pipe") == (None, None)
+    assert parse_presence("Maybe|42") == (None, 42)
+    # Present but no arrival date recorded — still a definite presence answer.
+    assert parse_presence("True|") == (True, None)
+
+
+def test_humanise_age_scales() -> None:
+    assert humanise_age(45) == "45s"
+    assert humanise_age(700) == "11m"
+    assert humanise_age(7200) == "2h"
+    assert humanise_age(432000) == "5d"
+
+
+def test_absent_port_error_fires_only_on_definite_absence() -> None:
+    win = {"platform": "win32"}
+    assert absent_port_error("COM17", run=lambda cmd: "False|432000", **win) is not None
+    assert absent_port_error("COM9", run=lambda cmd: "True|60", **win) is None
+    # Unknown must be permissive, not fatal.
+    assert absent_port_error("COM9", run=lambda cmd: "", **win) is None
+
+
+def test_absent_port_error_no_op_off_windows() -> None:
+    """Linux/macOS CI has no Get-PnpDevice; must never block a run there."""
+    calls: list[list[str]] = []
+
+    def run(cmd: list[str]) -> str:
+        calls.append(cmd)
+        return "False|432000"
+
+    assert absent_port_error("COM17", platform="linux", run=run) is None
+    assert calls == [], "must not shell out on non-Windows"
+
+
+def test_absent_port_error_explains_stale_record_and_bootsel() -> None:
+    """The message has to pre-empt the wrong conclusion, not just say "no"."""
+    msg = absent_port_error("COM17", platform="win32", run=lambda cmd: "False|432000")
+    assert msg is not None
+    assert "5d ago" in msg
+    assert "stale devnode, not a fault" in msg
+    assert "BOOTSEL" in msg

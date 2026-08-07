@@ -210,6 +210,25 @@ reflexively can hurt:
 - **ESP32 / Teensy / LPC** benches usually *do* want an explicit port, because
   several identical boards are typically attached.
 
+An explicit `--upload-port` is checked for presence *before* the build, because
+a port that is not attached can only fail — and it used to fail at deploy, after
+roughly seven minutes of package install, lint and build:
+
+```
+❌ COM17 is not attached, last seen 5d ago. Windows keeps the record after a
+   board is unplugged, so this is a stale devnode, not a fault — plug the board
+   in and re-run.
+```
+
+Two deliberate limits on that check. It fires only when the port is named
+explicitly, since without one fbuild can still reach an RP board through the
+BOOTSEL volume with no CDC record at all. And it fires only on an unambiguous
+`Present = False`; if the host cannot answer, the run proceeds, because a query
+failure must never block a board that is sitting there healthy.
+
+For a fuller picture of one port — problem code, hub chain, last-seen,
+remediation — use `fbuild port doctor --port COM17`.
+
 ### Windows USB selective suspend
 
 Windows may power down a USB port mid-session ("USB selective suspend" in the
