@@ -15,6 +15,7 @@ from ci.autoresearch.usb_power import (
     humanise_age,
     parse_presence,
     plan_selective_suspend_enabled,
+    port_presence,
     selective_suspend_warnings,
     warn_selective_suspend,
 )
@@ -206,3 +207,55 @@ def test_absent_port_error_explains_stale_record_and_bootsel() -> None:
     assert "5d ago" in msg
     assert "stale devnode, not a fault" in msg
     assert "BOOTSEL" in msg
+
+
+# --- PowerShell interpolation allowlist --------------------------------------
+
+
+def test_port_presence_refuses_non_com_names_without_shelling_out() -> None:
+    """`port` lands in a single-quoted PowerShell literal, so a value with a
+    quote could close the string and run code as the invoking user. Refused by
+    allowlist rather than escaped — and the runner must never even be called."""
+    calls: list[list[str]] = []
+
+    def run(cmd: list[str]) -> str:
+        calls.append(cmd)
+        return "True|1"
+
+    hostile = "COM1') ; Remove-Item C:\\ -Recurse ; ('"
+    assert port_presence(hostile, platform="win32", run=run) == PortPresence(
+        present=None, last_seen_secs=None
+    )
+    # A legitimate non-COM upload-port form must also be refused: `UF2=E:\`
+    # names a volume, not a COM device, and its trailing backslash would
+    # corrupt the -match regex.
+    assert port_presence("UF2=E:\\", platform="win32", run=run) == PortPresence(
+        present=None, last_seen_secs=None
+    )
+    assert calls == [], "must not shell out for a non-COM port name"
+
+
+def test_absent_port_error_never_aborts_on_a_non_com_port() -> None:
+    """Refusal is 'unknown', so a UF2 deploy is never blocked by this check."""
+    assert (
+        absent_port_error("UF2=E:\\", platform="win32", run=lambda c: "False|9") is None
+    )
+
+
+def test_hub_chain_refuses_non_com_names() -> None:
+    calls: list[list[str]] = []
+
+    def run(cmd: list[str]) -> str:
+        calls.append(cmd)
+        return "USB\\X|True\n"
+
+    assert hub_chain_power_off("COM1'; calc; '", run=run) == []
+    assert calls == []
+
+
+def test_com_allowlist_still_accepts_real_ports() -> None:
+    """The guard must not be so tight that it breaks the actual use case."""
+    for good in ("COM9", "COM17", "com3", "COM255"):
+        assert port_presence(good, platform="win32", run=lambda c: "True|5") == (
+            PortPresence(present=True, last_seen_secs=5)
+        )
