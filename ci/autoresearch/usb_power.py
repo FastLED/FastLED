@@ -22,7 +22,10 @@ from __future__ import annotations
 
 import re
 import sys
+from dataclasses import dataclass
 from typing import Callable, Optional
+
+from typeguard import typechecked
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
@@ -61,13 +64,28 @@ def _powershell(script: str, run: CommandRunner) -> str:
     return run(["powershell", "-NoProfile", "-NonInteractive", "-Command", script])
 
 
-def parse_presence(output: str) -> tuple[Optional[bool], Optional[int]]:
-    """Parse `present|last_arrival_unix_seconds` into (present, seconds-ago).
+@typechecked
+@dataclass(frozen=True)
+class PortPresence:
+    """Whether a port is in the live device tree, and when it was last seen.
 
-    Both fields are independently optional. `(None, None)` means the host
-    could not say — which must never be reported as "absent", or a healthy
-    board would be blamed for a query failure.
+    `present` is deliberately tri-state. `None` means the host could not say,
+    and callers must treat that as "no opinion" rather than "absent" — see
+    `absent_port_error`, where conflating the two would abort a run against a
+    perfectly healthy board.
+
+    `last_seen_secs` is seconds since `DEVPKEY_Device_LastArrivalDate`, or
+    `None` when no arrival date is recorded. It is independent of `present`:
+    an attached board still has an arrival date, and an absent one usually
+    does too — that is exactly what makes it useful.
     """
+
+    present: Optional[bool]
+    last_seen_secs: Optional[int]
+
+
+def parse_presence(output: str) -> PortPresence:
+    """Parse a `present|last_arrival_seconds_ago` line."""
     for line in output.splitlines():
         line = line.strip()
         if "|" not in line:
@@ -85,21 +103,20 @@ def parse_presence(output: str) -> tuple[Optional[bool], Optional[int]]:
             arrived = int(arrived_raw.strip())
         except ValueError:
             arrived = None
-        return present, arrived
-    return None, None
+        return PortPresence(present=present, last_seen_secs=arrived)
+    return PortPresence(present=None, last_seen_secs=None)
 
 
 def port_presence(
     port: str, platform: str = sys.platform, run: CommandRunner = _run
-) -> tuple[Optional[bool], Optional[int]]:
-    """Whether `port` is in the live device tree, and when it was last seen.
+) -> PortPresence:
+    """Query the host for `port`'s presence and last-arrival time.
 
-    Returns `(present, seconds_since_last_arrival)`. `(None, _)` off Windows
-    or when the query fails. `platform` is injectable so this can be tested on
+    `platform` is injectable so the Windows behaviour is exercised on
     non-Windows CI, matching `selective_suspend_warnings`.
     """
     if platform != "win32":
-        return None, None
+        return PortPresence(present=None, last_seen_secs=None)
     script = f"""
 $ErrorActionPreference='SilentlyContinue'
 $d = Get-PnpDevice -Class Ports | Where-Object {{ $_.FriendlyName -match '\\({port}\\)' }} | Select-Object -First 1
@@ -141,10 +158,11 @@ def absent_port_error(
     fbuild can still reach an RP-series board through the BOOTSEL volume even
     with no working CDC record, so absence there is not fatal.
     """
-    present, arrived = port_presence(port, platform=platform, run=run)
-    if present is not False:
+    presence = port_presence(port, platform=platform, run=run)
+    if presence.present is not False:
         return None
-    seen = f", last seen {humanise_age(arrived)} ago" if arrived is not None else ""
+    age = presence.last_seen_secs
+    seen = f", last seen {humanise_age(age)} ago" if age is not None else ""
     return (
         f"{port} is not attached{seen}. Windows keeps the record after a board "
         f"is unplugged, so this is a stale devnode, not a fault — plug the board "
