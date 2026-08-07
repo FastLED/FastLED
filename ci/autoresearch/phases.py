@@ -36,6 +36,7 @@ from ci.autoresearch.gpio import (
     run_pin_discovery,
     run_pin_discovery_segmented,
 )
+from ci.autoresearch.usb_power import warn_selective_suspend
 from ci.debug_attached import run_cpp_lint
 from ci.rpc_client import RpcClient, RpcCrashError, RpcError, RpcTimeoutError
 from ci.util.blocker_alert import blocker_alert
@@ -1538,6 +1539,12 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
         print()
 
     # Phase 2+3: Build + Deploy
+    # Host power management is a common cause of a board vanishing mid-session
+    # and coming back as code 43 / health=phantom, which reads like a wedged
+    # board. Surface it before deploy so the operator sees it next to the
+    # failure rather than after a recovery hunt. Warning only — never fatal.
+    warn_selective_suspend(upload_port)
+
     print(f"\U0001f4e6 Using {build_driver.name}")
 
     if final_environment_norm in LPC_BRING_UP_ENVS:

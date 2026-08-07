@@ -14,11 +14,21 @@
 // Check if the esp_h264 component is available.
 // Install via: idf.py add-dependency "espressif/esp_h264^1.2.0"
 // Or add to idf_component.yml: espressif/esp_h264: "^1.2.0"
-#if FL_HAS_INCLUDE("esp_h264_dec.h")
+//
+// Probe the *software* decoder header specifically. `esp_h264_dec_sw_new`
+// and `esp_h264_dec_cfg_sw_t` — the two symbols this file actually uses —
+// live in `sw/include/esp_h264_dec_sw.h`, not in the interface-level
+// `esp_h264_dec.h`. Probing the latter reported the component as available
+// while leaving those two undeclared, which is why the esp32p4 build failed
+// with "'esp_h264_dec_sw_new' was not declared in this scope". The sw header
+// includes `esp_h264_dec.h` itself, so the interface types still come along.
+#if FL_HAS_INCLUDE("esp_h264_dec_sw.h")
 #define FL_H264_HW_AVAILABLE 1
 #include "esp_h264_dec.h"
+#include "esp_h264_dec_sw.h"
 #include "esp_h264_types.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/unique_ptr.h"
 #else
 #define FL_H264_HW_AVAILABLE 0
 #endif
@@ -88,7 +98,11 @@ struct H264HwDecoder::Impl {
     bool ready = false;
     bool error = false;
     fl::string errorMsg;
-    Frame currentFrame{0};
+    // Held by pointer because Frame has a const member and therefore a
+    // deleted copy-assignment (and no move-assignment), so a decoded frame
+    // cannot be assigned over a Frame value. Replacing the pointer is the
+    // only way to swap in a newly decoded frame.
+    fl::unique_ptr<Frame> currentFrame;
 
     fl::vector<fl::u8> mp4Data;
     fl::vector<fl::u8> annexB;
@@ -262,7 +276,8 @@ DecodeResult H264HwDecoder::decode() FL_NO_EXCEPT {
                 }
             }
 
-            mImpl->currentFrame = Frame(rgbBuf.data(), w, h, PixelFormat::RGB888, 0);
+            mImpl->currentFrame = fl::make_unique<Frame>(
+                rgbBuf.data(), w, h, PixelFormat::RGB888, 0);
             mImpl->frameDecoded = true;
             return DecodeResult::Success;
         }
@@ -274,7 +289,12 @@ DecodeResult H264HwDecoder::decode() FL_NO_EXCEPT {
 }
 
 Frame H264HwDecoder::getCurrentFrame() FL_NO_EXCEPT {
-    return mImpl->currentFrame;
+    // Matches the previous value-member behaviour: before any successful
+    // decode, hand back an empty frame rather than dereferencing null.
+    if (!mImpl->currentFrame) {
+        return Frame(0);
+    }
+    return *mImpl->currentFrame;
 }
 
 bool H264HwDecoder::hasMoreFrames() const FL_NO_EXCEPT {

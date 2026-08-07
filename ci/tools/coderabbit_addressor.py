@@ -133,6 +133,13 @@ class Comment:
         return "false-positive"
 
 
+# Repo slug to operate on, when the caller targets a repository other than
+# the checkout we are running inside (e.g. the merge hook inspecting a
+# `gh pr merge --repo OWNER/NAME` for a sibling project). None means
+# "resolve from the current checkout".
+_REPO_OVERRIDE: Optional[str] = None
+
+
 def _run_gh(args: list[str]) -> str:
     result = subprocess.run(
         ["gh"] + args,
@@ -154,6 +161,8 @@ def _current_pr() -> Optional[int]:
 
 
 def _repo_slug() -> str:
+    if _REPO_OVERRIDE:
+        return _REPO_OVERRIDE
     out = _run_gh(["repo", "view", "--json", "nameWithOwner"])
     return json.loads(out)["nameWithOwner"]
 
@@ -262,11 +271,30 @@ def main() -> int:
     ap.add_argument(
         "pr", nargs="?", type=int, help="PR number (default: current branch)"
     )
+    ap.add_argument(
+        "--repo",
+        metavar="OWNER/NAME",
+        help=(
+            "Repository to inspect, when it is not the current checkout "
+            "(e.g. a sibling project). Requires an explicit PR number, since "
+            "'the PR for the current branch' is meaningless across repos."
+        ),
+    )
     group = ap.add_mutually_exclusive_group(required=True)
     group.add_argument("--plan", action="store_true")
     group.add_argument("--reply", nargs=2, metavar=("COMMENT_ID", "MESSAGE"))
     group.add_argument("--check", action="store_true")
     args = ap.parse_args()
+
+    if args.repo:
+        if args.pr is None:
+            print(
+                "[address-reviews] --repo requires an explicit PR number",
+                file=sys.stderr,
+            )
+            return 2
+        global _REPO_OVERRIDE
+        _REPO_OVERRIDE = args.repo
 
     pr = args.pr or _current_pr()
     if pr is None:
