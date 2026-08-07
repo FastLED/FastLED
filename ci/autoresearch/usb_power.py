@@ -34,6 +34,10 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 _USB_SUBGROUP_GUID = "2a737441-1930-4402-8d77-b2bebba308a3"
 _SELECTIVE_SUSPEND_GUID = "48e6b7a6-50f5-4782-a5d4-53bb8f07e226"
 
+# Only a plain COMn name is ever interpolated into a PowerShell script. See
+# `port_presence` for why this is an allowlist and not an escape.
+_COM_PORT_RE = re.compile(r"^COM\d+$", re.IGNORECASE)
+
 # How many parents to walk from the COM port up toward the root hub. Four
 # covers port -> composite device -> hub -> root hub with room to spare.
 _MAX_ANCESTORS = 4
@@ -114,8 +118,17 @@ def port_presence(
 
     `platform` is injectable so the Windows behaviour is exercised on
     non-Windows CI, matching `selective_suspend_warnings`.
+
+    Anything that is not a plain `COMn` name returns "unknown" without
+    shelling out. That is an allowlist rather than an escape, for two
+    reasons. It closes the injection path — `port` reaches a single-quoted
+    PowerShell literal, so a value containing `'` could otherwise close the
+    string and run arbitrary code as the invoking user. And it is also a
+    correctness fix: `--upload-port` legitimately accepts forms like
+    `UF2=E:\\`, whose trailing backslash would corrupt the `-match` regex.
+    Neither form names a COM device, so there is nothing to look up.
     """
-    if platform != "win32":
+    if platform != "win32" or not _COM_PORT_RE.match(port):
         return PortPresence(present=None, last_seen_secs=None)
     script = f"""
 $ErrorActionPreference='SilentlyContinue'
@@ -206,7 +219,12 @@ def hub_chain_power_off(port: str, run: CommandRunner = _run) -> list[tuple[str,
     Returns (instance_id, power_off_allowed) pairs, nearest ancestor first.
     Empty when the port is not present or nothing can be resolved — an absent
     board has no live hub chain to inspect.
+
+    Same `COMn` allowlist as `port_presence`: `port` lands in a single-quoted
+    PowerShell literal, so anything else is refused rather than escaped.
     """
+    if not _COM_PORT_RE.match(port):
+        return []
     script = f"""
 $ErrorActionPreference='SilentlyContinue'
 $dev = Get-PnpDevice -Class Ports -PresentOnly |
