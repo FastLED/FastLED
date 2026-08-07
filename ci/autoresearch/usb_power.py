@@ -36,7 +36,18 @@ _SELECTIVE_SUSPEND_GUID = "48e6b7a6-50f5-4782-a5d4-53bb8f07e226"
 
 # Only a plain COMn name is ever interpolated into a PowerShell script. See
 # `port_presence` for why this is an allowlist and not an escape.
+#
+# Matched with `fullmatch`, never `match`: `$` also matches *before* a final
+# newline, so `re.match(r"^COM\d+$", "COM1\n")` succeeds and would let a value
+# that is not a plain COMn name reach the script. The anchors are kept as
+# belt-and-braces for any future caller that reaches for `match` out of habit.
 _COM_PORT_RE = re.compile(r"^COM\d+$", re.IGNORECASE)
+
+
+def _is_com_port(port: str) -> bool:
+    """Is `port` a plain `COMn` name safe to interpolate into PowerShell?"""
+    return _COM_PORT_RE.fullmatch(port) is not None
+
 
 # How many parents to walk from the COM port up toward the root hub. Four
 # covers port -> composite device -> hub -> root hub with room to spare.
@@ -128,7 +139,7 @@ def port_presence(
     `UF2=E:\\`, whose trailing backslash would corrupt the `-match` regex.
     Neither form names a COM device, so there is nothing to look up.
     """
-    if platform != "win32" or not _COM_PORT_RE.match(port):
+    if platform != "win32" or not _is_com_port(port):
         return PortPresence(present=None, last_seen_secs=None)
     script = f"""
 $ErrorActionPreference='SilentlyContinue'
@@ -223,7 +234,7 @@ def hub_chain_power_off(port: str, run: CommandRunner = _run) -> list[tuple[str,
     Same `COMn` allowlist as `port_presence`: `port` lands in a single-quoted
     PowerShell literal, so anything else is refused rather than escaped.
     """
-    if not _COM_PORT_RE.match(port):
+    if not _is_com_port(port):
         return []
     script = f"""
 $ErrorActionPreference='SilentlyContinue'

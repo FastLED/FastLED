@@ -259,3 +259,23 @@ def test_com_allowlist_still_accepts_real_ports() -> None:
         assert port_presence(good, platform="win32", run=lambda c: "True|5") == (
             PortPresence(present=True, last_seen_secs=5)
         )
+
+
+def test_com_allowlist_rejects_trailing_newline() -> None:
+    """`$` matches before a final newline, so `re.match` accepts "COM1\n".
+
+    Only `fullmatch` rejects it. Without this the guard would pass a value
+    that is not a plain COMn name into PowerShell construction.
+    """
+    calls: list[list[str]] = []
+
+    def run(cmd: list[str]) -> str:
+        calls.append(cmd)
+        return "True|1"
+
+    for sneaky in ("COM1\n", "COM1\r\n", "COM1 ", " COM1", "COM1\t"):
+        assert port_presence(sneaky, platform="win32", run=run) == PortPresence(
+            present=None, last_seen_secs=None
+        ), f"{sneaky!r} must be rejected"
+        assert hub_chain_power_off(sneaky, run=run) == []
+    assert calls == [], "must not shell out for a non-COM port name"
