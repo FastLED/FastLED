@@ -605,6 +605,12 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
                 pixelIterator.writeSM16716(&data);
                 break;
 
+            case SpiChipset::MY9221:
+                // MY9221 samples data on every clock edge (DDR). The standard
+                // SPI channel encoder path cannot express that framing; drive
+                // it via addLeds<MY9221, DATA, CLOCK>(...) instead.
+                break;
+
             case SpiChipset::HD108:
                 pixelIterator.writeHD108(&data);
                 break;

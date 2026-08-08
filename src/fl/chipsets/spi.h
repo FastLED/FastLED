@@ -144,6 +144,15 @@ struct SpiEncoder {
         return config;
     }
 
+    /// @brief Create MY9221 encoder configuration
+    /// @param clock_hz Clock frequency (default 1MHz)
+    /// @note MY9221 uses dual-edge (DDR) clocking. The Channel SPI path cannot
+    ///       drive it correctly; use `addLeds<MY9221, DATA, CLOCK>(...)`.
+    static inline SpiEncoder my9221(u32 clock_hz = 1000000) FL_NO_EXCEPT {
+        SpiEncoder config = {SpiChipset::MY9221, clock_hz};
+        return config;
+    }
+
     /// @brief Look up the default SpiEncoder for a given chipset
     /// @param chipset The SPI chipset enum value
     /// @param speed_hz_override If nonzero, overrides the chipset's default clock speed
@@ -166,6 +175,7 @@ struct SpiEncoder {
             case SpiChipset::LPD8806:   enc = lpd8806(); break;
             case SpiChipset::LPD6803:   enc = lpd6803(); break;
             case SpiChipset::SM16716:   enc = sm16716(); break;
+            case SpiChipset::MY9221:    enc = my9221(); break;
             default: break; // unknown chipset: keep fallback
         }
         if (speed_hz_override != 0) {

@@ -4,6 +4,7 @@
 #include "test.h"
 
 #include "fl/chipsets/apa102.h"
+#include "fl/chipsets/my9221.h"
 #include "fl/chipsets/encoders/apa102.h"
 #include "fl/chipsets/encoders/sk9822.h"
 #include "fl/stl/array.h"
@@ -130,6 +131,13 @@ FL_TEST_CASE("Legacy addLeds controllers use all-ones end clocks matching the en
 
     FL_CHECK_EQ(Hd107HD::getStartFrame(), 0x00000000u);
     FL_CHECK_EQ(Hd107HD::getEndFrame(), 0xFFFFFFFFu);
+}
+
+FL_TEST_CASE("MY9221Controller instantiates for the classic addLeds path") {
+    // Forces the dual-edge bit-bang template body to compile on host/stub.
+    MY9221Controller<2, 3> controller;
+    controller.init();
+    FL_CHECK_TRUE(true);
 }
 
 }  // FL_TEST_FILE

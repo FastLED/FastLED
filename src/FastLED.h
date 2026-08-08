@@ -264,6 +264,7 @@ enum ESPIChipsets {
 	WS2801    = static_cast<int>(fl::SpiChipset::WS2801),    ///< WS2801 LED chipset
 	WS2803    = static_cast<int>(fl::SpiChipset::WS2803),    ///< WS2803 LED chipset
 	SM16716   = static_cast<int>(fl::SpiChipset::SM16716),   ///< SM16716 LED chipset
+	MY9221    = static_cast<int>(fl::SpiChipset::MY9221),    ///< MY9221 12-channel LED driver (dual-edge clocked; 4 RGB LEDs per chip)
 	P9813     = static_cast<int>(fl::SpiChipset::P9813),     ///< P9813 LED chipset
 	APA102    = static_cast<int>(fl::SpiChipset::APA102),    ///< APA102 LED chipset
 	SK9822    = static_cast<int>(fl::SpiChipset::SK9822),    ///< SK9822 LED chipset
@@ -978,6 +979,7 @@ public:
 	_FL_MAP_CLOCKED_CHIPSET(WS2801, WS2801Controller)
 	_FL_MAP_CLOCKED_CHIPSET(WS2803, WS2803Controller)
 	_FL_MAP_CLOCKED_CHIPSET(SM16716, SM16716Controller)
+	_FL_MAP_CLOCKED_CHIPSET(MY9221, MY9221Controller)
 	_FL_MAP_CLOCKED_CHIPSET(P9813, P9813Controller)
 
 	// Both DOTSTAR and APA102 use the same controller class
