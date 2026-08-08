@@ -16,6 +16,7 @@ enum class SpiChipset {
 	WS2801,    ///< WS2801 LED chipset
 	WS2803,    ///< WS2803 LED chipset
 	SM16716,   ///< SM16716 LED chipset
+	MY9221,    ///< MY9221 12-channel LED driver (dual-edge clocked; 4 RGB LEDs per chip)
 	P9813,     ///< P9813 LED chipset
 	APA102,    ///< APA102 LED chipset
 	SK9822,    ///< SK9822 LED chipset

@@ -565,6 +565,10 @@ FL_TEST_CASE("spiEncoderForChipset returns correct defaults") {
     enc = SpiEncoder::spiEncoderForChipset(SpiChipset::SM16716);
     FL_CHECK_EQ(enc.chipset, SpiChipset::SM16716);
     FL_CHECK_EQ(enc.clock_hz, 16000000u);
+
+    enc = SpiEncoder::spiEncoderForChipset(SpiChipset::MY9221);
+    FL_CHECK_EQ(enc.chipset, SpiChipset::MY9221);
+    FL_CHECK_EQ(enc.clock_hz, 1000000u);
 }
 
 FL_TEST_CASE("spiEncoderForChipset speed override") {
@@ -878,6 +882,10 @@ FL_TEST_CASE("SPI factory methods produce correct chipset and speed") {
     e = SpiEncoder::sm16716();
     FL_CHECK_EQ(e.chipset, SpiChipset::SM16716);
     FL_CHECK_EQ(e.clock_hz, 16000000u);
+
+    e = SpiEncoder::my9221();
+    FL_CHECK_EQ(e.chipset, SpiChipset::MY9221);
+    FL_CHECK_EQ(e.clock_hz, 1000000u);
 }
 
 FL_TEST_CASE("SPI factory methods accept custom clock speed") {

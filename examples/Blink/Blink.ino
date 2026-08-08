@@ -71,6 +71,7 @@ void setup() {
     // FastLED.addLeds<WS2801, PIN_DATA, CLOCK_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<WS2803, PIN_DATA, CLOCK_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<SM16716, PIN_DATA, CLOCK_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<MY9221, PIN_DATA, CLOCK_PIN, RGB>(leds, NUM_LEDS);  // 4 RGB LEDs per chip
     // FastLED.addLeds<P9813, PIN_DATA, CLOCK_PIN, RGB>(leds, NUM_LEDS);  // BGR ordering is typical
     // FastLED.addLeds<DOTSTAR, PIN_DATA, CLOCK_PIN, RGB>(leds, NUM_LEDS);  // BGR ordering is typical
     // FastLED.addLeds<APA102, PIN_DATA, CLOCK_PIN, RGB>(leds, NUM_LEDS);  // BGR ordering is typical
