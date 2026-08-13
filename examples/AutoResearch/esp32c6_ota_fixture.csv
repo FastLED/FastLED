@@ -1,0 +1,7 @@
+# The C6 fixture needs room for both AutoResearch and one RP2350W update
+# image.  This is selected only for `--net-peer --ota`; ordinary C6 builds
+# retain the framework's huge_app.csv layout.
+# Name, Type, SubType, Offset, Size, Flags
+nvs, data, nvs, 0x9000, 0x5000,
+app0, app, factory, 0x10000, 0x290000,
+spiffs, data, spiffs, 0x2a0000, 0x160000,

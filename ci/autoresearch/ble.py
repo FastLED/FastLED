@@ -128,8 +128,10 @@ async def run_ble_autoresearch(
         pong_received = False
 
         # Try notifications first (preferred mechanism)
+        notification_payload = ""
         async for line in ble_iface.read_lines(timeout=3.0):
-            payload = line
+            notification_payload += line
+            payload = notification_payload
             if payload.startswith("REMOTE: "):
                 payload = payload[8:]
             try:

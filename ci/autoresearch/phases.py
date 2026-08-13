@@ -641,7 +641,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 f"{Fore.RED}\u274c --net-peer requires both --upload-port and --peer-upload-port{Style.RESET_ALL}"
             )
             return 1
-    if ota_mode and net_mode_count > 0:
+    if ota_mode and net_mode_count > 0 and not net_peer_mode:
         print(
             f"{Fore.RED}\u274c Error: --ota cannot be combined with --net/--net-server/--net-client{Style.RESET_ALL}"
         )
@@ -1618,6 +1618,7 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
                 peer_environment,
                 project_root=args.project_dir.resolve(),
                 verbose=args.verbose,
+                ota_fixture=bool(args.ota),
             )
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
@@ -2510,6 +2511,22 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     net_loopback_mode = ctx.net_loopback_mode
 
     if ctx.net_peer_mode:
+        if ctx.ota_mode:
+            from ci.autoresearch.ota import run_ota_peer_autoresearch
+
+            peer_upload_port = ctx.args.peer_upload_port
+            assert peer_upload_port is not None
+            if ctx.final_environment is None or ctx.build_driver is None:
+                raise RuntimeError("Peer OTA firmware path is unavailable")
+            return await run_ota_peer_autoresearch(
+                upload_port=upload_port,
+                peer_upload_port=peer_upload_port,
+                serial_iface=serial_iface,
+                firmware_path=ctx.build_driver.firmware_path(
+                    ctx.build_dir, ctx.final_environment
+                ),
+                timeout=ctx.remaining_seconds(),
+            )
         from ci.autoresearch.net import run_net_peer_autoresearch
 
         peer_upload_port = ctx.args.peer_upload_port

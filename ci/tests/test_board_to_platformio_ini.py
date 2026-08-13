@@ -48,6 +48,14 @@ class TestBoardToPlatformioIni(unittest.TestCase):
         self.assertIn("-DFASTLED_TEST=1", lines)
         self.assertIn("-O2", lines)
 
+    def test_lib_deps_are_merged_into_one_option(self) -> None:
+        board = Board(board_name="custom", lib_deps=["board-lib"])
+
+        ini = board.to_platformio_ini(project_root=".", additional_libs=["extra-lib"])
+
+        self.assertEqual(ini.count("lib_deps ="), 1)
+        self.assertIn("lib_deps = board-lib,extra-lib", ini)
+
 
 if __name__ == "__main__":
     unittest.main()

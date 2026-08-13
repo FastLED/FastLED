@@ -6,8 +6,9 @@
 #pragma once
 
 #include "fl/net/ble.h"
+#include "platforms/esp/is_esp.h"
 
-#if FL_BLE_AVAILABLE
+#if FL_BLE_AVAILABLE && defined(FL_IS_ESP32)
 
 #include "fl/stl/int.h"
 #include "fl/system/heap.h"
@@ -502,4 +503,4 @@ getTransportCallbacks(TransportState* state) FL_NO_EXCEPT {
 } // namespace net
 } // namespace fl
 
-#endif // FL_BLE_AVAILABLE
+#endif // FL_BLE_AVAILABLE && FL_IS_ESP32
