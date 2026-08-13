@@ -11,6 +11,8 @@
     #include "platforms/esp/int_8266.h"
 #elif defined(ESP32)
     #include "platforms/esp/int.h"
+#elif defined(ARDUINO_ARCH_CI13XX)
+    #include "platforms/ci13xx/int.h"
 #elif defined(__AVR__)
     #include "platforms/avr/int.h"
 #elif defined(__IMXRT1062__)

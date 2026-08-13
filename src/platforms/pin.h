@@ -41,6 +41,8 @@
     #include "platforms/arm/silabs/pin_silabs.hpp"
 #elif defined(FL_IS_APOLLO3)
     #include "platforms/apollo3/pin_apollo3.hpp"
+#elif defined(FL_IS_CI13XX)
+    #include "platforms/ci13xx/pin_ci13xx.hpp"
 #elif defined(FL_IS_STUB)
     // Stub platform for testing — tracks pin state via fl::stub::setPinState
     #include "platforms/stub/pin_stub.hpp"

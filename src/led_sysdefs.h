@@ -58,6 +58,8 @@
 #include "platforms/esp/8266/led_sysdefs_esp8266.h"  // ok platform headers
 #elif defined(ESP32)
 #include "platforms/esp/32/core/led_sysdefs_esp32.h"  // ok platform headers
+#elif defined(ARDUINO_ARCH_CI13XX)
+#include "platforms/ci13xx/led_sysdefs_ci13xx.h"  // ok platform headers
 #elif defined(__AVR__) || defined(__AVR_ATmega4809__)
 // AVR platforms
 #include "platforms/avr/led_sysdefs_avr.h"  // ok platform headers

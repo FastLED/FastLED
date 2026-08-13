@@ -34,6 +34,11 @@
     #include "platforms/generic_pin.h"
     #include "platforms/esp/8266/fastpin_esp8266.h"
 
+#elif defined(ARDUINO_ARCH_CI13XX)
+    // Chipintelli CI1302/CI1303/CI1306 RISC-V microcontrollers
+    #include "platforms/generic_pin.h"
+    #include "platforms/ci13xx/fastpin_ci13xx.h"
+
 #elif defined(__AVR__)
     // AVR 8-bit microcontrollers (Arduino UNO, Nano, etc.)
     #include "platforms/generic_pin.h"
