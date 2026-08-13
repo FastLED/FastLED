@@ -50,6 +50,7 @@
 #include "fl/chipsets/ws2801.h"
 #include "fl/chipsets/p9813.h"
 #include "fl/chipsets/sm16716.h"
+#include "fl/chipsets/my9221.h"
 
 // Platform-specific clockless timing configuration
 //
@@ -319,6 +320,7 @@ class RGBWEmulatedController
 /// - WS2801 family: ws2801.h (WS2801, WS2803)
 /// - P9813: p9813.h
 /// - SM16716: sm16716.h
+/// - MY9221: my9221.h
 
 
 
