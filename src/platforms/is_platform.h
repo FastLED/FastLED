@@ -93,6 +93,9 @@
 /// Apollo3 Platforms:
 /// - FL_IS_APOLLO3: Ambiq Apollo3 platform (SparkFun Artemis family)
 ///
+/// Chipintelli Platforms:
+/// - FL_IS_CI13XX: Chipintelli CI1302/CI1303/CI1306 RISC-V platform
+///
 /// WebAssembly Platforms:
 /// - FL_IS_WASM: WebAssembly platform (Emscripten)
 ///
@@ -149,6 +152,7 @@
 #include "platforms/arm/stm32/is_stm32.h"
 #include "platforms/arm/teensy/is_teensy.h"
 #include "platforms/avr/is_avr.h"
+#include "platforms/ci13xx/is_ci13xx.h"
 #include "platforms/esp/is_esp.h"
 #include "platforms/posix/is_posix.h"
 #include "platforms/stub/is_stub.h"

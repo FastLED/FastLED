@@ -19,7 +19,8 @@ namespace fl {
 // ============================================================================
 
 void *aligned_alloc(fl::size_t alignment, fl::size_t size) {
-#if defined(FL_IS_AVR) || defined(FL_IS_ESP8266) || defined(FL_IS_ARM) || defined(FL_IS_APOLLO3)
+#if defined(FL_IS_AVR) || defined(FL_IS_ESP8266) || defined(FL_IS_ARM) || \
+    defined(FL_IS_APOLLO3) || defined(FL_IS_CI13XX)
     // Many bare-metal toolchains (newlib-nano on STM32, nRF52, SAMD, RP2040,
     // Teensy, etc.) ship an aligned_alloc that internally calls
     // posix_memalign, which doesn't exist on bare-metal and causes an
@@ -42,7 +43,8 @@ void *aligned_alloc(fl::size_t alignment, fl::size_t size) {
 }
 
 void aligned_free(void *ptr) {
-#if defined(FL_IS_AVR) || defined(FL_IS_ESP8266) || defined(FL_IS_ARM) || defined(FL_IS_APOLLO3)
+#if defined(FL_IS_AVR) || defined(FL_IS_ESP8266) || defined(FL_IS_ARM) || \
+    defined(FL_IS_APOLLO3) || defined(FL_IS_CI13XX)
     ::free(ptr);
 #elif defined(FL_IS_WIN)
     ::_aligned_free(ptr);

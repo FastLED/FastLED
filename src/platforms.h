@@ -48,6 +48,8 @@
 #include "platforms/esp/8266/fastled_esp8266.h"  // ok platform headers
 #elif defined(ESP32)
 #include "platforms/esp/32/core/fastled_esp32.h"  // ok platform headers
+#elif defined(ARDUINO_ARCH_CI13XX)
+#include "platforms/ci13xx/fastled_ci13xx.h"  // ok platform headers
 #elif defined(ARDUINO_ARCH_APOLLO3)
 #include "platforms/apollo3/fastled_apollo3.h"  // ok platform headers
 #elif defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_RENESAS_UNO) || defined(ARDUINO_ARCH_RENESAS_PORTENTA)

@@ -20,6 +20,7 @@
 #include "platforms/arduino/_build.cpp.hpp"
 #include "platforms/arm/_build.cpp.hpp"
 #include "platforms/avr/_build.cpp.hpp"
+#include "platforms/ci13xx/_build.cpp.hpp"
 #include "platforms/esp/_build.cpp.hpp"
 #include "platforms/posix/_build.cpp.hpp"
 #include "platforms/shared/_build.cpp.hpp"
