@@ -24,6 +24,9 @@ namespace {
 class FakeParallelController : public CLEDController {
   public:
     explicit FakeParallelController(int lanes) : mLanes(lanes) {}
+    int size() const FL_NO_EXCEPT override {
+        return CLEDController::size() * mLanes;
+    }
     int lanes() FL_NO_EXCEPT override { return mLanes; }
     void showColor(const CRGB &, int, fl::u8) FL_NO_EXCEPT override {}
     void show(const CRGB *, int, fl::u8) FL_NO_EXCEPT override {}
@@ -34,6 +37,18 @@ class FakeParallelController : public CLEDController {
 };
 
 }  // namespace
+
+FL_TEST_CASE("size dispatch includes every parallel-controller lane (#3828)") {
+    constexpr int kLanes = 4;
+    constexpr int kPerLane = 7;
+    static CRGB buffer[kLanes * kPerLane];
+
+    FakeParallelController ctrl(kLanes);
+    ctrl.setLeds(buffer, kPerLane);  // Parallel controllers store a per-lane span.
+    const CLEDController *base = &ctrl;
+
+    FL_CHECK_EQ(base->size(), kLanes * kPerLane);
+}
 
 FL_TEST_CASE("clearLedData clears every lane of a parallel controller (#1017)") {
     constexpr int kLanes = 4;
