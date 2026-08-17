@@ -12,6 +12,7 @@
 #include "fastled_delay.h"
 
 #include "eorder.h"
+#include "fl/system/yield.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
 namespace fl {
@@ -23,7 +24,6 @@ namespace fl {
 // nRF52832 has three PWM peripherals (PWM0, PWM1, PWM2)
 // nRF52840 has four PWM peripherals (PWM0, PWM1, PWM2, PWM3)
 // NOTE: Update platforms.cpp in root of FastLED library if this changes
-#define FASTLED_NRF52_PWM_ID 0
 
 extern u32 isrCount;
 
@@ -112,14 +112,16 @@ private:
 
     }
     FASTLED_NRF52_INLINE_ATTRIBUTE static void startPwmPlayback_EnableInterruptsAndShortcuts(NRF_PWM_Type * pwm) FL_NO_EXCEPT {
-        IRQn_Type irqn = PWM_Arbiter<FASTLED_NRF52_PWM_ID>::getIRQn();
+#if FL_NRF52_USE_PWM_INTERRUPTS
+        IRQn_Type irqn = PWM_Arbiter<FL_NRF52_PWM_ID>::getIRQn();
         // TODO: check API results...
         u32 result;
 
-        result = sd_nvic_SetPriority(irqn, configMAX_SYSCALL_INTERRUPT_PRIORITY);
+        result = sd_nvic_SetPriority(irqn, FL_NRF52_PWM_INTERRUPT_PRIORITY);
         (void)result;
         result = sd_nvic_EnableIRQ(irqn);
         (void)result;
+#endif
 
         // shortcuts prevent (up to) 4-cycle delay from interrupt handler to next action
         u32 shortsToEnable = 0;
@@ -130,13 +132,18 @@ private:
         shortsToEnable |= NRF_PWM_SHORT_LOOPSDONE_STOP_MASK;      ///< LOOPSDONE --> STOP task.
         nrf_pwm_shorts_set(pwm, shortsToEnable);
 
-        // mark which events should cause interrupts...
+        // Mark which events should cause interrupts. ArduinoCore-mbed owns the
+        // PWM IRQ handlers, so its playback completion is polled instead.
+#if FL_NRF52_USE_PWM_INTERRUPTS
         u32 interruptsToEnable = 0;
         interruptsToEnable |= NRF_PWM_INT_SEQEND0_MASK;
         interruptsToEnable |= NRF_PWM_INT_SEQEND1_MASK;
         interruptsToEnable |= NRF_PWM_INT_LOOPSDONE_MASK;
         interruptsToEnable |= NRF_PWM_INT_STOPPED_MASK;
         nrf_pwm_int_set(pwm, interruptsToEnable);
+#else
+        nrf_pwm_int_set(pwm, 0);
+#endif
 
     }
     FASTLED_NRF52_INLINE_ATTRIBUTE static void startPwmPlayback_StartTask(NRF_PWM_Type * pwm) FL_NO_EXCEPT {
@@ -157,8 +164,7 @@ private:
 
 public:
     static void isr_handler() FL_NO_EXCEPT {
-        NRF_PWM_Type * pwm = PWM_Arbiter<FASTLED_NRF52_PWM_ID>::getPWM();
-        IRQn_Type irqn = PWM_Arbiter<FASTLED_NRF52_PWM_ID>::getIRQn();
+        NRF_PWM_Type * pwm = PWM_Arbiter<FL_NRF52_PWM_ID>::getPWM();
 
         // Currently, only use SEQUENCE 0, so only event
         // of consequence is LOOPSDONE ...
@@ -171,15 +177,18 @@ public:
             releaseSequenceBuffer();
             // prevent further interrupts from PWM events
             nrf_pwm_int_set(pwm, 0);
-            // disable PWM interrupts - None of the PWM IRQs are shared
+            // Disable PWM interrupts. None of the PWM IRQs are shared
             // with other peripherals, avoiding complexity of shared IRQs.
+#if FL_NRF52_USE_PWM_INTERRUPTS
+            IRQn_Type irqn = PWM_Arbiter<FL_NRF52_PWM_ID>::getIRQn();
             sd_nvic_DisableIRQ(irqn);
+#endif
             // disable the PWM instance
             nrf_pwm_disable(pwm);
             // may take up to 4 cycles for writes to propagate (APB bus @ 16MHz)
             asm __volatile__ ( "NOP; NOP; NOP; NOP;" ) FL_NO_EXCEPT;
             // release the PWM arbiter to be re-used by another LED string
-            PWM_Arbiter<FASTLED_NRF52_PWM_ID>::releaseFromIsr();
+            PWM_Arbiter<FL_NRF52_PWM_ID>::releaseFromIsr();
         }
     }
 
@@ -276,8 +285,8 @@ public:
 
 
     FASTLED_NRF52_INLINE_ATTRIBUTE static void startPwmPlayback(u16 bytesToSend) FL_NO_EXCEPT {
-        PWM_Arbiter<FASTLED_NRF52_PWM_ID>::acquire(isr_handler);
-        NRF_PWM_Type * pwm = PWM_Arbiter<FASTLED_NRF52_PWM_ID>::getPWM();
+        PWM_Arbiter<FL_NRF52_PWM_ID>::acquire(isr_handler);
+        NRF_PWM_Type * pwm = PWM_Arbiter<FL_NRF52_PWM_ID>::getPWM();
 
         // mark the sequence as being in-use
         __sync_fetch_and_or(&s_SequenceBufferInUse, 1);
@@ -287,6 +296,32 @@ public:
         startPwmPlayback_ConfigurePwmSequence(pwm);
         startPwmPlayback_EnableInterruptsAndShortcuts(pwm);
         startPwmPlayback_StartTask(pwm);
+#if !FL_NRF52_USE_PWM_INTERRUPTS
+        const u32 playbackMicros = static_cast<u32>(
+            (static_cast<u64>(bytesToSend) * static_cast<u64>(_TOP) *
+             1000000ULL) /
+            static_cast<u64>(CLOCKLESS_FREQUENCY));
+        const u32 timeoutMicros = playbackMicros + 1000UL;
+        const u32 startMicros = fl::micros();
+        while (!nrf_pwm_event_check(pwm, NRF_PWM_EVENT_STOPPED)) {
+            if (static_cast<u32>(fl::micros() - startMicros) > timeoutMicros) {
+                nrf_pwm_task_trigger(pwm, NRF_PWM_TASK_STOP);
+                const u32 stopStartMicros = fl::micros();
+                while (!nrf_pwm_event_check(pwm, NRF_PWM_EVENT_STOPPED) &&
+                       static_cast<u32>(fl::micros() - stopStartMicros) <=
+                           1000UL) {
+                    fl::yield();
+                }
+                nrf_pwm_int_set(pwm, 0);
+                nrf_pwm_disable(pwm);
+                releaseSequenceBuffer();
+                PWM_Arbiter<FL_NRF52_PWM_ID>::releaseFromIsr();
+                return;
+            }
+            fl::yield();
+        }
+        isr_handler();
+#endif
         return;
     }
 
