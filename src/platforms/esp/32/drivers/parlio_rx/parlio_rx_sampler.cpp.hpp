@@ -28,6 +28,7 @@
     ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
 
 #include "fl/log/log.h"
+#include "fl/stl/cstring.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/shared_ptr.h"
@@ -90,6 +91,15 @@ class ParlioRxSampler final : public RxDevice {
     ~ParlioRxSampler() override { teardown(); }
 
     bool begin(const RxConfig &config) FL_NO_EXCEPT override {
+        // Re-arming without an intervening wait() would leave the previous
+        // transaction live (trans_queue_depth is 2, so a second receive
+        // queues silently) and would have us clear mBuffer underneath
+        // active DMA. Drop the in-flight capture first.
+        if (mArmed) {
+            resetUnit();
+            mArmed = false;
+        }
+
         mSignalRangeMaxNs = config.signal_range_max_ns;
         mRuns.clear();
         mFinished = false;
@@ -105,6 +115,13 @@ class ParlioRxSampler final : public RxDevice {
             teardown();
             return false;
         }
+
+        // Zero the buffer before every arm, not just on the calloc in
+        // allocBuffer(). A capture that times out only fills the buffer
+        // part-way, so without this the stale tail of the PREVIOUS frame
+        // survives and processSamples() — which always walks the full
+        // kCaptureBytes — decodes it as if it were current signal.
+        fl::memset(mBuffer, 0, kCaptureBytes);
 
         // Queue the capture. The unit is already enabled and the soft
         // delimiter running, so sampling begins immediately; wait()
