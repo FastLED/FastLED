@@ -24,10 +24,11 @@
 ///
 /// Landed so far:
 ///   * 3-state classifier + per-state visual banks + per-state audio mapping
+///   * VisualControlBus -- one struct of derived signals both engines consume
+///   * overlay compositor: trails + expanding pulse rings (engine-agnostic)
 ///
 /// Still to land (see #2256):
-///   * VisualControlBus -- one struct of derived signals both engines consume
-///   * engine-agnostic overlay compositor (trails / pulse / sector / sparkle)
+///   * overlay: sector emphasis and sparkle rendering
 ///   * mood-quadrant bias from MoodAnalyzer (valence x arousal)
 ///   * a second engine (NoiseRing) behind the same bus, with cross-fade
 ///   * patch schema + URL serialization, curated presets

@@ -38,7 +38,9 @@ it into ambient mode.
 | File | Purpose |
 |------|---------|
 | `MoodRing.ino` | Wiring: audio input, orchestrator, ring rendering, UI |
-| `sound_orchestrator.{h,cpp}` | The 3-state classifier and per-state audio→visual mapping |
+| `sound_orchestrator.{h,cpp}` | The 3-state classifier and animation-bank selection |
+| `visual_control_bus.{h,cpp}` | `SoundState`, the derived-signal bus, and its per-state policy |
+| `ring_overlay.{h,cpp}` | Post-process passes on the ring: trails and pulse rings |
 | `ring_screenmap.{h,cpp}` | Builds the circular `ScreenMap` inside a rectangular grid |
 | `auto_brightness.{h,cpp}` | Content-aware brightness compression |
 
@@ -58,16 +60,21 @@ Landed:
 
 - 3-state classifier with hysteresis and minimum dwell (#2713, PR #2809)
 - Per-state Animartrix visual banks and per-state audio→visual mapping
+- **VisualControlBus** (#3885) — one struct of derived signals
+  (`transportSpeed`, `radialPressure`, `rotationBias`, `paletteDrift`,
+  `sparkleDensity`, `decayAmount`, band levels, `pulseStrength`) that every
+  engine consumes. Keyed on `max(0, vibeBass - vibeBassAtt)`, so a transient
+  reads as a hit while sustained loudness does not.
+- **Overlay compositor** (#3885) — trails and expanding pulse rings on the 1D
+  ring buffer after the engine writes it, so it costs one implementation rather
+  than one per engine
 
 Still to land — see [#2256](https://github.com/FastLED/FastLED/issues/2256) for
 the full design and PR split:
 
-- **VisualControlBus** — one struct of derived signals (`transportSpeed`,
-  `radialPressure`, `rotationBias`, `paletteDrift`, `sparkleDensity`,
-  `decayAmount`, band levels, `pulseStrength`) that every engine consumes
-- **Overlay compositor** — trails, expanding pulse rings, sector emphasis, and
-  sparkle, running on the 1D ring buffer after the engine writes it, so it costs
-  one implementation rather than one per engine
+- **Overlay: sector emphasis and sparkle** — the remaining two passes. The bus
+  already carries `lowBand`/`midBand`/`highBand` and `sparkleDensity`, so they
+  attach without reopening the derivation
 - **Mood-quadrant bias** — `MoodAnalyzer` valence × arousal steering palette
   family and motion character
 - **NoiseRing engine** — a second, cheaper engine behind the same bus, with

@@ -33,12 +33,15 @@ float softKnee(float x) {
     if (x <= 0.0f) return 0.0f;
     if (x >= 1.0f) {
         // Above unity, compress hard rather than clip: keeps a very loud band
-        // distinguishable from a merely loud one.
+        // distinguishable from a merely loud one. Meets the lower branch at
+        // exactly 0.75 when x == 1.
         return 1.0f - 0.25f / (1.0f + (x - 1.0f) * 4.0f);
     }
-    // Below unity the curve is close to linear but eases at the top so the
-    // last 20% of range still moves.
-    return x * (1.25f - 0.25f * x);
+    // Below unity: near-linear at the bottom, easing toward the knee. Must
+    // evaluate to 0.75 at x == 1 so the two branches join -- an earlier
+    // version used (1.25 - 0.25x), which hit 1.0 here and made a band pinned
+    // at full scale read DIMMER than one at 0.999.
+    return x * (1.0f - 0.25f * x);
 }
 
 float EnvFollower::update(float target, float dtMs, float attackMs,

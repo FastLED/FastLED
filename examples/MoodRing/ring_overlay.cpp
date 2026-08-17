@@ -70,13 +70,27 @@ void RingOverlay::compositeTrails(fl::span<CRGB> leds, float decay) {
     if (keep > 0.98f) keep = 0.98f; // never fully self-sustaining
     const fl::u8 keep8 = static_cast<fl::u8>(keep * 255.0f);
 
+    // Persistence by per-channel max, NOT by accumulation.
+    //
+    // The obvious formulation -- fold a fraction of the live frame into the
+    // history and then add the history back -- has DC gain above 1: for a
+    // steady input L and survival k the echo settles at (L/4)/(1-k), so the
+    // output is L*(1 + 0.25/(1-k)). At the ambient decay of 0.85 that is 2.7x
+    // the engine's output, which clips the whole ring to white -- the exact
+    // opposite of the restrained look Silence is supposed to have.
+    //
+    // Taking the max of the live pixel and the decayed history is unity-gain
+    // by construction: a static frame yields exactly itself, and only a pixel
+    // that was brighter in the past can add anything. A decay of 0 collapses
+    // to a pure passthrough, which is what makes the overlay honestly additive.
     for (fl::size i = 0; i < n; ++i) {
         CRGB &t = mTrail[i];
         t.nscale8(keep8);
-        // Feed a quarter of the live frame into the history each frame.
-        t += CRGB(leds[i].r >> 2, leds[i].g >> 2, leds[i].b >> 2);
-        // Blend the echo back on top. CRGB::operator+= saturates.
-        leds[i] += t;
+        const CRGB live = leds[i];
+        if (live.r > t.r) t.r = live.r;
+        if (live.g > t.g) t.g = live.g;
+        if (live.b > t.b) t.b = live.b;
+        leds[i] = t;
     }
 }
 
