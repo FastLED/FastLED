@@ -6,15 +6,6 @@
 
 namespace mood_ring {
 
-const char *toString(SoundState s) {
-    switch (s) {
-    case SoundState::Silence:      return "Silence";
-    case SoundState::Disorganized: return "Disorganized";
-    case SoundState::BpmLocked:    return "BpmLocked";
-    }
-    return "?";
-}
-
 namespace {
 
 // State -> visual bank lookup tables.
@@ -173,63 +164,6 @@ SoundState SoundOrchestrator::classify(fl::u32 nowMs) {
     return mState;
 }
 
-float SoundOrchestrator::driveSilence(fl::u32 /*nowMs*/, float manualSpeedScalar) {
-    // Ambient: very slow, restrained. Time warp essentially off.
-    return mCfg.silenceSpeed * manualSpeedScalar;
-}
-
-float SoundOrchestrator::driveDisorganized(fl::u32 /*nowMs*/, float manualSpeedScalar) {
-    if (!mProcessor) return manualSpeedScalar;
-    // Map vibe.bass (self-normalizing, ~1.0 = average) into a speed modulation.
-    // This is the "time warp as secondary effect" knob: it still exists, but
-    // it's bounded by disorganizedSpeedSpan rather than dominating.
-    const float bass = mProcessor->getVibeBass();      // ~1.0 nominal
-    const float bassBoost = (bass - 1.0f) * mCfg.disorganizedSpeedSpan;
-    float speed = 1.0f + bassBoost;
-    if (speed < 0.1f) speed = 0.1f;
-    if (speed > 4.0f) speed = 4.0f;
-    return speed * manualSpeedScalar;
-}
-
-float SoundOrchestrator::driveBpmLocked(fl::u32 nowMs, float manualSpeedScalar) {
-    if (!mProcessor) return manualSpeedScalar;
-
-    // Baseline speed scales gently with BPM so faster songs read faster.
-    const float bpm = mProcessor->getBPM();
-    // Normalize BPM to a 0.6..1.6 multiplier around the nominal 120 BPM.
-    float bpmScale = 1.0f;
-    if (bpm > 1.0f) {
-        bpmScale = bpm / 120.0f;
-        if (bpmScale < 0.6f) bpmScale = 0.6f;
-        if (bpmScale > 1.6f) bpmScale = 1.6f;
-    }
-
-    // Pulse: kick/snare/downbeat events bump speed briefly and decay.
-    // Downbeats hit hardest (palette-level event); kicks medium; snares light.
-    auto pulseFromEvent = [&](fl::u32 t, float weight) -> float {
-        if (t == 0) return 0.0f;
-        const fl::u32 dt = nowMs - t;
-        if (dt >= mCfg.pulseDecayMs) return 0.0f;
-        const float k = 1.0f - (static_cast<float>(dt) / mCfg.pulseDecayMs);
-        return weight * k * k;  // ease-out square
-    };
-    const float kickPulse     = pulseFromEvent(mLastKickMs,     0.50f);
-    const float snarePulse    = pulseFromEvent(mLastSnareMs,    0.25f);
-    const float downbeatPulse = pulseFromEvent(mLastDownbeatMs, 0.80f);
-    float pulse = kickPulse + snarePulse + downbeatPulse;
-    if (pulse > 1.5f) pulse = 1.5f;
-
-    // measurePhase smoothly fills the inter-beat gap so visuals breathe
-    // between pulses rather than freezing. Phase is 0..1 within the measure.
-    const float phase = mProcessor->getMeasurePhase(); // 0..1
-    // Sine bow so phase contributes gently throughout the measure.
-    const float phaseBow = 0.15f * fl::sin(phase * 6.2831853f);
-
-    float speed = mCfg.bpmLockedBaseSpeed * bpmScale + pulse + phaseBow;
-    if (speed < 0.2f) speed = 0.2f;
-    return speed * manualSpeedScalar;
-}
-
 float SoundOrchestrator::tick(fl::u32 nowMs, float manualSpeedScalar) {
     if (mStateEnteredAtMs == 0) mStateEnteredAtMs = nowMs;
 
@@ -240,17 +174,28 @@ float SoundOrchestrator::tick(fl::u32 nowMs, float manualSpeedScalar) {
     }
     switchAnimationIfNeeded(mState, nowMs);
 
-    float speed;
-    switch (mState) {
-    case SoundState::Silence:      speed = driveSilence(nowMs, manualSpeedScalar);      break;
-    case SoundState::Disorganized: speed = driveDisorganized(nowMs, manualSpeedScalar); break;
-    case SoundState::BpmLocked:    speed = driveBpmLocked(nowMs, manualSpeedScalar);    break;
-    default:                       speed = manualSpeedScalar;                            break;
+    // Derive the bus, then apply only the field the engine owns. Everything
+    // else on the bus is for the overlay and, later, the second engine.
+    if (mProcessor) {
+        AudioEvents events;
+        events.lastKickMs = mLastKickMs;
+        events.lastSnareMs = mLastSnareMs;
+        events.lastDownbeatMs = mLastDownbeatMs;
+        events.hiHat = mProcessor->isHiHat();
+        events.beatNumber = mProcessor->getCurrentBeatNumber();
+        mDeriver.derive(*mProcessor, mState, mBusCfg, events, nowMs,
+                        manualSpeedScalar, &mBus);
+    } else {
+        // No processor: publish a neutral bus driven only by the manual slider,
+        // bounded the same way the derived path is so this branch cannot hand
+        // FxEngine something the normal path never would.
+        mBus = VisualControlBus{};
+        mBus.transportSpeed = clampTransportSpeed(manualSpeedScalar);
     }
 
-    if (mEngine) mEngine->setSpeed(speed);
-    mLastEngineSpeed = speed;
-    return speed;
+    if (mEngine) mEngine->setSpeed(mBus.transportSpeed);
+    mLastEngineSpeed = mBus.transportSpeed;
+    return mBus.transportSpeed;
 }
 
 } // namespace mood_ring

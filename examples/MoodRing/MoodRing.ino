@@ -24,10 +24,11 @@
 ///
 /// Landed so far:
 ///   * 3-state classifier + per-state visual banks + per-state audio mapping
+///   * VisualControlBus -- one struct of derived signals both engines consume
+///   * overlay compositor: trails + expanding pulse rings (engine-agnostic)
 ///
 /// Still to land (see #2256):
-///   * VisualControlBus -- one struct of derived signals both engines consume
-///   * engine-agnostic overlay compositor (trails / pulse / sector / sparkle)
+///   * overlay: sector emphasis and sparkle rendering
 ///   * mood-quadrant bias from MoodAnalyzer (valence x arousal)
 ///   * a second engine (NoiseRing) behind the same bus, with cross-fade
 ///   * patch schema + URL serialization, curated presets
@@ -56,8 +57,10 @@
 #include "fl/ui/ui.h"
 
 #include "auto_brightness.h"
+#include "ring_overlay.h"
 #include "ring_screenmap.h"
 #include "sound_orchestrator.h"
+#include "visual_control_bus.h"
 
 FASTLED_TITLE("MoodRing");
 
@@ -118,9 +121,22 @@ fl::UISlider orchestratorDwellMs("Orchestrator Min Dwell (ms)", 1500, 200, 5000,
 fl::UISlider orchestratorHysteresisMs("Orchestrator Hysteresis (ms)", 400, 0,
                                       2000, 50);
 
+// Visual control bus tunables.
+fl::UISlider busBaseSpeed("Base Speed", 1.0, 0, 4, 0.05);
+fl::UISlider busBassPunchGain("Bass Punch Gain", 1.5, 0, 3, 0.05);
+
+// Overlay. Turning both off leaves the engine's own output untouched, which is
+// how you check the overlay is purely additive.
+fl::UICheckbox overlayTrails("Overlay: Trails", true);
+fl::UICheckbox overlayPulse("Overlay: Pulse Ring", true);
+fl::UISlider overlayPulseOrigin("Pulse Origin Offset", 0, 0, NUM_LEDS - 1, 1);
+fl::UISlider overlayTrailDecay("Trail Decay Override", -1, -1, 1, 0.05);
+fl::UICheckbox debugPrintBus("Debug: Print Bus", false);
+
 // Processor + orchestrator (initialized in setup)
 fl::shared_ptr<fl::audio::Processor> gAudioProcessor;
 fl::shared_ptr<mood_ring::SoundOrchestrator> gOrchestrator;
+mood_ring::RingOverlay gOverlay;
 bool gAutoPump = false;
 
 void setup() {
@@ -182,6 +198,11 @@ void loop() {
             static_cast<fl::u32>(orchestratorHysteresisMs.value());
         gOrchestrator->setConfig(cfg);
 
+        mood_ring::BusConfig busCfg;
+        busCfg.baseSpeed = busBaseSpeed.value();
+        busCfg.bassPunchGain = busBassPunchGain.value();
+        gOrchestrator->setBusConfig(busCfg);
+
         const fl::u32 now = millis();
         gOrchestrator->tick(now, timeSpeed.value());
 
@@ -199,6 +220,33 @@ void loop() {
 
     // Draw the effect
     fxEngine.draw(millis(), leds);
+
+    // Composite the overlay on top of whatever the engine produced. This is a
+    // post-process on the 1D ring -- it never reaches into Animartrix, which is
+    // why a second engine will be able to reuse it unchanged.
+    if (enableOrchestrator.value()) {
+        gOverlay.config.trails = overlayTrails.value();
+        gOverlay.config.pulse = overlayPulse.value();
+        gOverlay.config.pulseOrigin = static_cast<int>(overlayPulseOrigin.value());
+        gOverlay.config.trailDecayOverride = overlayTrailDecay.value();
+        gOverlay.apply(leds, gOrchestrator->bus(), millis());
+
+        if (debugPrintBus.value()) {
+            static fl::u32 sFrame = 0;
+            if ((sFrame++ % 30) == 0) {
+                const mood_ring::VisualControlBus &b = gOrchestrator->bus();
+                printf("MoodRing bus: state=%s speed=%.2f radial=%.2f rot=%.2f "
+                       "drift=%.2f sparkle=%.2f decay=%.2f bands=%.2f/%.2f/%.2f "
+                       "pulse=%.2f%s pulses=%d\n",
+                       mood_ring::toString(gOrchestrator->state()),
+                       b.transportSpeed, b.radialPressure, b.rotationBias,
+                       b.paletteDrift, b.sparkleDensity, b.decayAmount,
+                       b.lowBand, b.midBand, b.highBand, b.pulseStrength,
+                       b.pulseIsDownbeat ? " DOWNBEAT" : "",
+                       gOverlay.activePulseCount());
+            }
+        }
+    }
 
     // Calculate final brightness
     uint8_t finalBrightness;

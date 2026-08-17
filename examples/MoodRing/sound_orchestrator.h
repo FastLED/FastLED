@@ -31,15 +31,12 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/stdint.h"
 
+#include "visual_control_bus.h"
+
 namespace mood_ring {
 
-enum class SoundState : fl::u8 {
-    Silence = 0,
-    Disorganized = 1,
-    BpmLocked = 2,
-};
-
-const char *toString(SoundState s);
+// SoundState and toString() live in visual_control_bus.h -- they are shared
+// vocabulary between the classifier, the bus derivation, and the overlay.
 
 struct OrchestratorConfig {
     // Classifier thresholds.
@@ -57,18 +54,11 @@ struct OrchestratorConfig {
     // before we accept a transition (additional hysteresis on top of dwell).
     fl::u32 classifierHysteresisMs = 400;
 
-    // BpmLocked: pulse decay (ms) for a single kick/snare/downbeat event.
-    fl::u32 pulseDecayMs       = 220;
-
-    // Disorganized: how much vibe.bass scales engine speed (above baseline 1.0).
-    float disorganizedSpeedSpan = 1.5f;
-
-    // Silence: ambient engine speed.
-    float silenceSpeed         = 0.25f;
-
-    // BpmLocked: engine baseline speed (BPM modulation rides on top).
-    float bpmLockedBaseSpeed   = 1.0f;
 };
+
+// NOTE: speed/pulse tuning used to live here. It moved to BusConfig and the
+// per-state policy in visual_control_bus.cpp when the bus landed (#3885):
+// events now drive a visible pulse on the ring instead of yanking the clock.
 
 /// Top-level orchestrator. Owns no audio data of its own; polls the supplied
 /// Processor on every tick() and drives the supplied FxEngine / Animartrix.
@@ -84,9 +74,19 @@ public:
     void begin();
 
     /// Per-frame tick. Pass the current millis() and a manual-speed scalar
-    /// (so the existing "Time Speed" slider still composes).
+    /// (so the existing "Time Speed" slider still composes). Classifies the
+    /// audio, switches the animation bank, derives the visual control bus, and
+    /// applies bus.transportSpeed to the engine.
     /// Returns the engine speed actually applied this tick.
     float tick(fl::u32 nowMs, float manualSpeedScalar);
+
+    /// The bus derived on the most recent tick. Consumers read this rather
+    /// than the raw detectors.
+    const VisualControlBus &bus() const { return mBus; }
+
+    /// Bus tunables (base speed, punch gain). Cheap; safe to set every tick.
+    void setBusConfig(const BusConfig &cfg) { mBusCfg = cfg; }
+    const BusConfig &busConfig() const { return mBusCfg; }
 
     /// Observability.
     SoundState state() const { return mState; }
@@ -102,11 +102,6 @@ private:
     static fl::AnimartrixAnim pickAnimationFor(SoundState s, fl::u32 nowMs);
     void switchAnimationIfNeeded(SoundState newState, fl::u32 nowMs);
 
-    // Per-state behavior.
-    float driveSilence(fl::u32 nowMs, float manualSpeedScalar);
-    float driveDisorganized(fl::u32 nowMs, float manualSpeedScalar);
-    float driveBpmLocked(fl::u32 nowMs, float manualSpeedScalar);
-
     // Classifier.
     SoundState classify(fl::u32 nowMs);
 
@@ -116,6 +111,9 @@ private:
     fl::FxEngine *mEngine;
 
     OrchestratorConfig mCfg{};
+    BusConfig mBusCfg{};
+    BusDeriver mDeriver;
+    VisualControlBus mBus{};
 
     SoundState mState = SoundState::Silence;
     fl::u32    mStateEnteredAtMs = 0;
