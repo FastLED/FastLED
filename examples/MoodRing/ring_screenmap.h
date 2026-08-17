@@ -1,6 +1,6 @@
 // ring_screenmap.h - Circular ScreenMap that samples from a rectangular grid
 //
-// NOTE: a twin of this file lives in examples/MoodRing/ring_screenmap.h.
+// NOTE: a twin of this file lives in examples/AnimartrixRing/ring_screenmap.h.
 // Examples cannot include across directories, so the file is duplicated.
 // Fix both, or neither.
 #pragma once

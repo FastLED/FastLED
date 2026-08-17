@@ -1,6 +1,6 @@
 // ring_screenmap.cpp
 //
-// NOTE: a twin of this file lives in examples/MoodRing/ring_screenmap.cpp.
+// NOTE: a twin of this file lives in examples/AnimartrixRing/ring_screenmap.cpp.
 // Examples cannot include across directories, so the file is duplicated.
 // Fix both, or neither.
 #include "ring_screenmap.h"

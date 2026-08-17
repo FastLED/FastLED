@@ -4,7 +4,7 @@
 #include "fl/math/math.h"
 #include "fl/stl/chrono.h"
 
-namespace animartrix_ring {
+namespace mood_ring {
 
 const char *toString(SoundState s) {
     switch (s) {
@@ -18,7 +18,7 @@ const char *toString(SoundState s) {
 namespace {
 
 // State -> visual bank lookup tables.
-// Per issue #2713 mapping:
+// Per issue #2713 / #2256 mapping:
 //   Silence      -> calm ambient (SLOW_FADE, WATER, PARAMETRIC_WATER, FLUFFY_BLOBS)
 //   Disorganized -> energy/spectrum (RGB_BLOBS5, WAVES, POLAR_WAVES, COMPLEX_KALEIDO)
 //   BpmLocked    -> beat geometry (RINGS, CHASING_SPIRALS, SPIRALUS, CENTER_FIELD)
@@ -253,4 +253,4 @@ float SoundOrchestrator::tick(fl::u32 nowMs, float manualSpeedScalar) {
     return speed;
 }
 
-} // namespace animartrix_ring
+} // namespace mood_ring

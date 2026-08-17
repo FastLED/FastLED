@@ -1,16 +1,28 @@
 // @filter: (memory is large)
 
-// AnimartrixRing: Sample a circle from an Animartrix rectangular grid.
-//
-// Audio model (issue #2713):
-//
-//   audio -> SoundOrchestrator { Silence | Disorganized | BpmLocked }
-//         -> per-state Animartrix bank
-//         -> per-state audio->visual mapping (energy, bass, kick, downbeat, ...)
-//
-// Time warp is preserved as a *secondary* effect inside the Disorganized state
-// (vibe.bass nudges engine speed within a bounded span). It is no longer the
-// primary audio interaction.
+/// @file    AnimartrixRing.ino
+/// @brief   Sample a circular LED ring out of a 2D Animartrix grid.
+/// @example AnimartrixRing.ino
+///
+/// This is the *minimal* demo of the technique: render Animartrix into a
+/// rectangular grid, then sample a circle out of that grid with a ScreenMap and
+/// Fx2dTo1d. Nothing else. No audio, no state machine, no orchestration.
+///
+///   Animartrix (16x16 grid) -> ScreenMap (circle of NUM_LEDS points)
+///                           -> Fx2dTo1d (bilinear sample) -> 1D ring
+///
+/// Pick an animation from the dropdown, scrub the speed slider, watch how each
+/// Animartrix pattern reads once it has been wrapped around a ring. That is the
+/// whole point of this sketch.
+///
+/// Looking for the audio-reactive version? That moved to `examples/MoodRing/`,
+/// which is the product-track sketch (sound classification, per-state visual
+/// banks, mood mapping). See issue #2256.
+///
+/// This sketch is fully compatible with the FastLED web compiler:
+/// 1. `pip install fastled`
+/// 2. cd into this directory
+/// 3. run `fastled`
 
 // Use SPI-based WS2812 driver instead of RMT on ESP32
 #define FASTLED_ESP32_USE_CLOCKLESS_SPI
@@ -19,30 +31,15 @@
 // build system
 #include "FastLED.h"
 
-#if defined(FL_IS_TEENSY)
-// Keep fbuild's library scanner aware of PJRC Audio sources for Teensy.
-#include <Audio.h>
-#endif
-
-#include "fl/math/math.h"
-#include "fl/math/screenmap.h"
-#include "fl/ui/ui.h"
 #include "fl/fx/2d/animartrix.hpp"
-#include "fl/audio/audio_processor.h"
-#include "fl/audio/detector/vibe.h"
 #include "fl/fx/fx2d_to_1d.h"
 #include "fl/fx/fx_engine.h"
-#include <FastLED.h>
+#include "fl/ui/ui.h"
 
 #include "auto_brightness.h"
-#include "sound_orchestrator.h"
+#include "ring_screenmap.h"
 
 FASTLED_TITLE("AnimartrixRing");
-
-#ifndef TWO_PI
-#define TWO_PI                                                                 \
-    6.2831853071795864769252867665590057683943387987502116419498891846156328125724179972560696506842341359
-#endif
 
 #define NUM_LEDS 244
 
@@ -56,31 +53,48 @@ FASTLED_TITLE("AnimartrixRing");
 #define GRID_WIDTH 16
 #define GRID_HEIGHT 16
 
+// 0.15 cm or 1.5mm -- appropriate for a dense LED rope.
+#define LED_DIAMETER 0.15f
+
+#define FIRST_ANIMATION fl::AnimartrixAnim::SLOW_FADE
+
 CRGB leds[NUM_LEDS];
 
-// Animartrix 2D effect
+// Animartrix 2D effect: the source image the ring samples from.
 XYMap xymap = XYMap::constructRectangularGrid(GRID_WIDTH, GRID_HEIGHT);
-auto animartrix = fl::make_shared<fl::Animartrix>(xymap, fl::AnimartrixAnim::SLOW_FADE);
+auto animartrix = fl::make_shared<fl::Animartrix>(xymap, FIRST_ANIMATION);
 
-// ScreenMap for the ring - defines circular sampling positions using a lambda
+// ScreenMap for the ring: places each LED on a circle inside the grid.
 fl::ScreenMap screenmap =
-    fl::ScreenMap(NUM_LEDS, 0.15f, [](int index, fl::vec2f &pt_out) {
-        float centerX = GRID_WIDTH / 2.0f;
-        float centerY = GRID_HEIGHT / 2.0f;
-        float radius = fl::min(GRID_WIDTH, GRID_HEIGHT) / 2.0f - 1;
-        float angle = (TWO_PI * index) / NUM_LEDS;
-        pt_out.x = centerX + fl::cos(angle) * radius;
-        pt_out.y = centerY + fl::sin(angle) * radius;
-    });
+    makeRingScreenMap(NUM_LEDS, GRID_WIDTH, GRID_HEIGHT, LED_DIAMETER);
 
-// Create the 2D-to-1D sampling effect
+// The 2D-to-1D sampling effect: bilinear-samples the grid at each ring point.
 auto fx2dTo1d = fl::make_shared<fl::Fx2dTo1d>(NUM_LEDS, animartrix, screenmap,
                                               fl::Fx2dTo1d::BILINEAR);
 
 // FxEngine for the 1D strip
 fl::FxEngine fxEngine(NUM_LEDS);
 
-// UI controls
+// UI controls. The dropdown order matches fl::AnimartrixAnim exactly, so the
+// selected index can be handed straight to Animartrix::fxSet().
+// Title comes from FASTLED_TITLE above -- do not declare a second fl::UITitle.
+fl::UIDescription description(
+    "Samples a circular ring out of a 2D Animartrix grid. @author of fx is "
+    "StefanPetrick");
+
+fl::UIDropdown fxIndex("Animartrix - index", {
+    "RGB_BLOBS5", "RGB_BLOBS4", "RGB_BLOBS3", "RGB_BLOBS2", "RGB_BLOBS",
+    "POLAR_WAVES", "SLOW_FADE", "ZOOM2", "ZOOM", "HOT_BLOB",
+    "SPIRALUS2", "SPIRALUS", "YVES", "SCALEDEMO1", "LAVA1",
+    "CALEIDO3", "CALEIDO2", "CALEIDO1", "DISTANCE_EXPERIMENT", "CENTER_FIELD",
+    "WAVES", "CHASING_SPIRALS", "ROTATING_BLOB", "RINGS", "COMPLEX_KALEIDO",
+    "COMPLEX_KALEIDO_2", "COMPLEX_KALEIDO_3", "COMPLEX_KALEIDO_4", "COMPLEX_KALEIDO_5", "COMPLEX_KALEIDO_6",
+    "WATER", "PARAMETRIC_WATER", "MODULE_EXPERIMENT1", "MODULE_EXPERIMENT2", "MODULE_EXPERIMENT3",
+    "MODULE_EXPERIMENT4", "MODULE_EXPERIMENT5", "MODULE_EXPERIMENT6", "MODULE_EXPERIMENT7", "MODULE_EXPERIMENT8",
+    "MODULE_EXPERIMENT9", "MODULE_EXPERIMENT10", "MODULE_EXPERIMENT_SM1", "MODULE_EXPERIMENT_SM2", "MODULE_EXPERIMENT_SM3",
+    "MODULE_EXPERIMENT_SM4", "MODULE_EXPERIMENT_SM5", "MODULE_EXPERIMENT_SM6", "MODULE_EXPERIMENT_SM8", "MODULE_EXPERIMENT_SM9",
+    "MODULE_EXPERIMENT_SM10", "FLUFFY_BLOBS"
+});
 fl::UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
 fl::UISlider brightness("Brightness", BRIGHTNESS, 0, 255, 1);
 fl::UICheckbox autoBrightness("Auto Brightness", true);
@@ -90,99 +104,39 @@ fl::UISlider autoBrightnessLowThreshold("Auto Brightness Low Threshold", 8, 0,
 fl::UISlider autoBrightnessHighThreshold("Auto Brightness High Threshold", 22,
                                          0, 100, 1);
 
-// Audio UI controls
-fl::UIAudio audio("Audio Input");
-fl::UICheckbox enableOrchestrator("Enable Sound Orchestrator", false);
-fl::UISlider orchestratorDwellMs("Orchestrator Min Dwell (ms)", 1500, 200, 5000, 100);
-fl::UISlider orchestratorHysteresisMs("Orchestrator Hysteresis (ms)", 400, 0, 2000, 50);
-
-// Processor + orchestrator (initialized in setup)
-fl::shared_ptr<fl::audio::Processor> gAudioProcessor;
-fl::shared_ptr<animartrix_ring::SoundOrchestrator> gOrchestrator;
-bool gAutoPump = false;
-
 void setup() {
     Serial.begin(115200);
 
     // Setup LED strip
-    fl::ScreenMap screenMapLocal(screenmap);
-    screenMapLocal.setDiameter(
-        0.15); // 0.15 cm or 1.5mm - appropriate for dense 144 LED rope
     FastLED.addLeds<WS2812, PIN_DATA>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
-        .setScreenMap(screenMapLocal);
+        .setScreenMap(screenmap);
     FastLED.setBrightness(brightness.value());
 
     // Add the 2D-to-1D effect to FxEngine
     fxEngine.addFx(fx2dTo1d);
 
-    // Route audio through FastLED.add() for auto-pump when available.
-    // gAutoPump may only be set true when FastLED.add() actually returned a
-    // live processor -- otherwise loop() would skip the manual pump path and
-    // the orchestrator would never see any samples.
-    auto input = audio.audioInput();
-    if (input) {
-        gAudioProcessor = FastLED.add(input);
-        if (gAudioProcessor) {
-            gAutoPump = true;
-            printf("AnimartrixRing: Audio routed via FastLED.add() (auto-pump)\n");
-        }
-    }
-    if (!gAudioProcessor) {
-        gAudioProcessor = fl::make_shared<fl::audio::Processor>();
-        gAutoPump = false;
-        printf("AnimartrixRing: Audio using manual pump (fallback)\n");
-    }
+    // Dropdown index maps 1:1 onto fl::AnimartrixAnim, so point it at the boot
+    // animation -- otherwise the UI would read "RGB_BLOBS5" (index 0) while
+    // FIRST_ANIMATION was actually rendering. loop() reconciles from there.
+    fxIndex.setSelectedIndex(static_cast<int>(FIRST_ANIMATION));
 
-    // Build the 3-state orchestrator. It owns nothing: it just polls the
-    // Processor, asks the Animartrix to switch banks, and pokes the FxEngine
-    // speed on every frame.
-    gOrchestrator = fl::make_shared<animartrix_ring::SoundOrchestrator>(
-        gAudioProcessor, animartrix, &fxEngine);
-    gOrchestrator->begin();
-
-    // Log state transitions so a developer can see the classifier in action.
-    static animartrix_ring::SoundState sLastState =
-        animartrix_ring::SoundState::Silence;
-    (void)sLastState;
-
-    Serial.println("AnimartrixRing setup complete (3-state orchestrator)");
+    Serial.println("AnimartrixRing setup complete");
 }
 
 void loop() {
-    // Manual audio pump fallback (e.g. WASM / when FastLED.add() didn't take).
-    if (!gAutoPump) {
-        fl::audio::Sample sample = audio.next();
-        if (sample.isValid() && enableOrchestrator.value()) {
-            gAudioProcessor->update(sample);
-        }
+    // Poll rather than use onChanged(): a value the web UI restores (persisted
+    // or from the URL) can land before the first frame, where the change
+    // detector absorbs it into its baseline and never fires. Comparing against
+    // the animation we last pushed cannot miss it. Same pattern as
+    // examples/Animartrix/Animartrix.ino.
+    static int sLastFxIndex = -1;
+    if (fxIndex.as_int() != sLastFxIndex) {
+        sLastFxIndex = fxIndex.as_int();
+        animartrix->fxSet(sLastFxIndex);
     }
 
-    // Per-frame orchestrator tick. When disabled, fall back to plain manual
-    // speed so the sketch still behaves like a non-audio Animartrix demo.
-    if (enableOrchestrator.value()) {
-        // Apply UI overrides cheaply on every tick.
-        animartrix_ring::OrchestratorConfig cfg = gOrchestrator->config();
-        cfg.minDwellMs = static_cast<fl::u32>(orchestratorDwellMs.value());
-        cfg.classifierHysteresisMs =
-            static_cast<fl::u32>(orchestratorHysteresisMs.value());
-        gOrchestrator->setConfig(cfg);
-
-        const fl::u32 now = millis();
-        gOrchestrator->tick(now, timeSpeed.value());
-
-        // Log state transitions.
-        static animartrix_ring::SoundState sLast =
-            animartrix_ring::SoundState::Silence;
-        if (gOrchestrator->state() != sLast) {
-            sLast = gOrchestrator->state();
-            printf("AnimartrixRing: state -> %s (engine speed=%.2f)\n",
-                   animartrix_ring::toString(sLast),
-                   gOrchestrator->lastEngineSpeed());
-        }
-    } else {
-        fxEngine.setSpeed(timeSpeed.value());
-    }
+    fxEngine.setSpeed(timeSpeed.value());
 
     // Draw the effect
     fxEngine.draw(millis(), leds);
@@ -190,7 +144,7 @@ void loop() {
     // Calculate final brightness
     uint8_t finalBrightness;
     if (autoBrightness.value()) {
-        float avgBri = getAverageBrightness(leds, NUM_LEDS);
+        float avgBri = getAverageBrightness(leds);
         finalBrightness = applyBrightnessCompression(
             avgBri, static_cast<uint8_t>(autoBrightnessMax.value()),
             autoBrightnessLowThreshold.value(),
