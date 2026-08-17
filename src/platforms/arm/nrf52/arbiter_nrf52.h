@@ -22,22 +22,22 @@ typedef void (*FASTLED_NRF52_PWM_INTERRUPT_HANDLER)();
 // See led_sysdefs_arm_nrf52.h for selection....
 //
 typedef enum _FASTLED_NRF52_ENABLED_PWM_INSTANCE { // ok plain enum
-#if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE0)
+#if FL_NRF52_ENABLE_PWM_INSTANCE0
     FASTLED_NRF52_PWM0_INSTANCE_IDX,
 #endif
-#if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE1)
+#if FL_NRF52_ENABLE_PWM_INSTANCE1
     FASTLED_NRF52_PWM1_INSTANCE_IDX,
 #endif
-#if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE2)
+#if FL_NRF52_ENABLE_PWM_INSTANCE2
     FASTLED_NRF52_PWM2_INSTANCE_IDX,
 #endif
-#if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE3)
+#if FL_NRF52_ENABLE_PWM_INSTANCE3
     FASTLED_NRF52_PWM3_INSTANCE_IDX,
 #endif
-    FASTLED_NRF52_PWM_INSTANCE_COUNT
+    FL_NRF52_PWM_INSTANCE_COUNT
 } FASTLED_NRF52_ENABLED_PWM_INSTANCES;
 
-FL_STATIC_ASSERT(FASTLED_NRF52_PWM_INSTANCE_COUNT > 0, "Instance count must be greater than zero -- define FASTLED_NRF52_ENABLE_PWM_INSTNACE[n] (replace `[n]` with digit)");
+FL_STATIC_ASSERT(FL_NRF52_PWM_INSTANCE_COUNT > 0, "Instance count must be greater than zero -- define FL_NRF52_ENABLE_PWM_INSTANCE[n] (replace `[n]` with digit)");
 
 template <fl::u32 _PWM_ID>
 class PWM_Arbiter {
@@ -83,29 +83,29 @@ public:
     FASTLED_NRF52_INLINE_ATTRIBUTE static IRQn_Type       getIRQn() { return s_PWM_IRQ; }
 };
 template <fl::u32 _PWM_ID> NRF_PWM_Type * const PWM_Arbiter<_PWM_ID>::s_PWM           =
-    #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE0)
+    #if FL_NRF52_ENABLE_PWM_INSTANCE0
         (_PWM_ID == 0 ? NRF_PWM0 :
     #endif
-    #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE1)
+    #if FL_NRF52_ENABLE_PWM_INSTANCE1
         (_PWM_ID == 1 ? NRF_PWM1 :
     #endif
-    #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE2)
+    #if FL_NRF52_ENABLE_PWM_INSTANCE2
         (_PWM_ID == 2 ? NRF_PWM2 :
     #endif
-    #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE3)
+    #if FL_NRF52_ENABLE_PWM_INSTANCE3
         (_PWM_ID == 3 ? NRF_PWM3 :
     #endif
         (NRF_PWM_Type*)-1
-    #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE0)
+    #if FL_NRF52_ENABLE_PWM_INSTANCE0
         )
     #endif
-    #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE1)
+    #if FL_NRF52_ENABLE_PWM_INSTANCE1
         )
     #endif
-    #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE2)
+    #if FL_NRF52_ENABLE_PWM_INSTANCE2
         )
     #endif
-    #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE3)
+    #if FL_NRF52_ENABLE_PWM_INSTANCE3
         )
     #endif
     ;

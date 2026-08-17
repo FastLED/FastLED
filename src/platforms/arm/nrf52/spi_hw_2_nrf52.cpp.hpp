@@ -396,7 +396,11 @@ void SPIDualNRF52::configureTimer(u32 clock_speed_hz) {
     // Set compare value to trigger at start of transmission
     // For dual-SPI, we just need a single trigger event
     // The SPIM peripherals will handle their own clock generation
+#if FL_NRF52_USE_LEGACY_HAL
+    nrf_timer_cc_write(mTimer, NRF_TIMER_CC_CHANNEL0, 1);
+#else
     nrf_timer_cc_set(mTimer, NRF_TIMER_CC_CHANNEL0, 1);
+#endif
 
     // Enable compare event
     nrf_timer_event_clear(mTimer, NRF_TIMER_EVENT_COMPARE0);

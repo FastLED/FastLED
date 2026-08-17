@@ -38,3 +38,14 @@
     defined(ARDUINO_NRF52_ADAFRUIT)
 #define FL_IS_NRF52
 #endif
+
+// Nordic renamed several nrfx HAL APIs after the SDK 15 generation bundled by
+// ArduinoCore-mbed. Keep the capability selection centralized and overridable
+// so newer Mbed board packages can select their actual HAL API generation.
+#if !defined(FL_NRF52_USE_LEGACY_HAL)
+    #if defined(__MBED__)
+        #define FL_NRF52_USE_LEGACY_HAL 1
+    #else
+        #define FL_NRF52_USE_LEGACY_HAL 0
+    #endif
+#endif

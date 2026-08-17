@@ -18,7 +18,10 @@
 #if defined(TARGET_SUPERMINI_NRF52840)    || \
     defined(TARGET_NICE_NANO_V2)          || \
     defined(TARGET_NRFMICRO)              || \
-    defined(TARGET_XIAOBLE_NRF52840_SENSE)
+    defined(TARGET_XIAOBLE_NRF52840_SENSE) || \
+    defined(TARGET_SEEED_XIAO_NRF52840_PLUS) || \
+    defined(SEEED_XIAO_NRF52840_PLUS)       || \
+    defined(ARDUINO_SEEED_XIAO_NRF52840_PLUS)
     #define __FASTLED_NRF52_USER_TARGET_OVERRIDE
 #endif
 
@@ -900,6 +903,44 @@
     // VBAT
     _FL_DEF_INVALID_PIN(32, 31, 0);  // D32 is P0.31 (VBAT)
 #endif // defined(ARDUINO_Seeed_XIAO_nRF52840_Sense)
+
+// Seeed XIAO nRF52840 Plus and Sense Plus. The ArduinoCore-mbed 2.9.3
+// variants use TARGET_SEEED_XIAO_NRF52840_PLUS for both models; Seeed's
+// PlatformIO package uses SEEED_XIAO_NRF52840_PLUS. The external header and
+// bottom-pad mappings are identical between them.
+#if defined(TARGET_SEEED_XIAO_NRF52840_PLUS) || \
+    defined(SEEED_XIAO_NRF52840_PLUS) || \
+    defined(ARDUINO_SEEED_XIAO_NRF52840_PLUS)
+    #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
+        #error "Cannot define more than one board at a time"
+    #else
+        #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
+    #endif
+
+    // External castellated pins D0..D10.
+    _FL_DEFPIN( 0,  2, 0); // D0  is P0.02
+    _FL_DEFPIN( 1,  3, 0); // D1  is P0.03
+    _FL_DEFPIN( 2, 28, 0); // D2  is P0.28
+    _FL_DEFPIN( 3, 29, 0); // D3  is P0.29
+    _FL_DEFPIN( 4,  4, 0); // D4  is P0.04
+    _FL_DEFPIN( 5,  5, 0); // D5  is P0.05
+    _FL_DEFPIN( 6, 43, 1); // D6  is P1.11
+    _FL_DEFPIN( 7, 44, 1); // D7  is P1.12
+    _FL_DEFPIN( 8, 45, 1); // D8  is P1.13
+    _FL_DEFPIN( 9, 46, 1); // D9  is P1.14
+    _FL_DEFPIN(10, 47, 1); // D10 is P1.15
+
+    // Extra bottom pads D11..D19 are Arduino pin numbers 30..38.
+    _FL_DEFPIN(30, 15, 0); // D11 is P0.15 (I2S SD)
+    _FL_DEFPIN(31, 19, 0); // D12 is P0.19 (I2S SCK)
+    _FL_DEFPIN(32, 33, 1); // D13 is P1.01 (I2S WS)
+    _FL_DEF_INVALID_PIN(33,  9, 0); // D14 is P0.09 (I2C pull / NFC1)
+    _FL_DEF_INVALID_PIN(34, 10, 0); // D15 is P0.10 (VDD enable / NFC2)
+    _FL_DEF_INVALID_PIN(35, 31, 0); // D16 is P0.31 (VBAT read)
+    _FL_DEFPIN(36, 39, 1); // D17 is P1.07 (MOSI1)
+    _FL_DEFPIN(37, 37, 1); // D18 is P1.05 (MISO1)
+    _FL_DEFPIN(38, 35, 1); // D19 is P1.03 (SCK1)
+#endif
 
 #if defined(ARDUINO_Seeed_XIAO_nRF52840)
     #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)

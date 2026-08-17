@@ -51,6 +51,86 @@ namespace fl {
 namespace isr {
 namespace platforms {
 
+// ArduinoCore-mbed ships Nordic's SDK 15 HAL, whose GPIOTE functions omit the
+// peripheral argument and use the older plural event type. Keep those API
+// differences isolated here so the ISR implementation also builds with the
+// newer nrfx HAL used by the Adafruit nRF52 core.
+#if FL_NRF52_USE_LEGACY_HAL
+using fastled_nrf_gpiote_event_t = nrf_gpiote_events_t;
+
+static bool fastled_gpiote_event_check(fastled_nrf_gpiote_event_t event) FL_NO_EXCEPT {
+    return nrf_gpiote_event_is_set(event);
+}
+
+static void fastled_gpiote_event_clear(fastled_nrf_gpiote_event_t event) FL_NO_EXCEPT {
+    nrf_gpiote_event_clear(event);
+}
+
+static void fastled_gpiote_event_configure(u32 channel, u32 pin,
+                                           nrf_gpiote_polarity_t polarity) FL_NO_EXCEPT {
+    nrf_gpiote_event_configure(channel, pin, polarity);
+}
+
+static void fastled_gpiote_event_enable(u32 channel) FL_NO_EXCEPT {
+    nrf_gpiote_event_enable(channel);
+}
+
+static void fastled_gpiote_event_disable(u32 channel) FL_NO_EXCEPT {
+    nrf_gpiote_event_disable(channel);
+}
+
+static void fastled_gpiote_int_enable(u32 mask) FL_NO_EXCEPT {
+    nrf_gpiote_int_enable(mask);
+}
+
+static void fastled_gpiote_int_disable(u32 mask) FL_NO_EXCEPT {
+    nrf_gpiote_int_disable(mask);
+}
+
+static void fastled_timer_cc_set(NRF_TIMER_Type* timer,
+                                 nrf_timer_cc_channel_t channel,
+                                 u32 value) FL_NO_EXCEPT {
+    nrf_timer_cc_write(timer, channel, value);
+}
+#else
+using fastled_nrf_gpiote_event_t = nrf_gpiote_event_t;
+
+static bool fastled_gpiote_event_check(fastled_nrf_gpiote_event_t event) FL_NO_EXCEPT {
+    return nrf_gpiote_event_check(NRF_GPIOTE, event);
+}
+
+static void fastled_gpiote_event_clear(fastled_nrf_gpiote_event_t event) FL_NO_EXCEPT {
+    nrf_gpiote_event_clear(NRF_GPIOTE, event);
+}
+
+static void fastled_gpiote_event_configure(u32 channel, u32 pin,
+                                           nrf_gpiote_polarity_t polarity) FL_NO_EXCEPT {
+    nrf_gpiote_event_configure(NRF_GPIOTE, channel, pin, polarity);
+}
+
+static void fastled_gpiote_event_enable(u32 channel) FL_NO_EXCEPT {
+    nrf_gpiote_event_enable(NRF_GPIOTE, channel);
+}
+
+static void fastled_gpiote_event_disable(u32 channel) FL_NO_EXCEPT {
+    nrf_gpiote_event_disable(NRF_GPIOTE, channel);
+}
+
+static void fastled_gpiote_int_enable(u32 mask) FL_NO_EXCEPT {
+    nrf_gpiote_int_enable(NRF_GPIOTE, mask);
+}
+
+static void fastled_gpiote_int_disable(u32 mask) FL_NO_EXCEPT {
+    nrf_gpiote_int_disable(NRF_GPIOTE, mask);
+}
+
+static void fastled_timer_cc_set(NRF_TIMER_Type* timer,
+                                 nrf_timer_cc_channel_t channel,
+                                 u32 value) FL_NO_EXCEPT {
+    nrf_timer_cc_set(timer, channel, value);
+}
+#endif
+
 // =============================================================================
 // Platform-Specific Handle Storage
 // =============================================================================
@@ -257,21 +337,19 @@ static void timer_interrupt_handler(int timer_idx, u8 channel) FL_NO_EXCEPT {
 }
 
 // Map GPIOTE channel index to event enum
-static nrf_gpiote_event_t get_gpiote_event(u8 channel) FL_NO_EXCEPT {
-    // Use proper enum values defined by Nordic SDK (offsetof-based)
-    switch (channel) {
-        case 0: return NRF_GPIOTE_EVENT_IN_0;
-        case 1: return NRF_GPIOTE_EVENT_IN_1;
-        case 2: return NRF_GPIOTE_EVENT_IN_2;
-        case 3: return NRF_GPIOTE_EVENT_IN_3;
-#if MAX_GPIOTE_CHANNELS > 4
-        case 4: return NRF_GPIOTE_EVENT_IN_4;
-        case 5: return NRF_GPIOTE_EVENT_IN_5;
-        case 6: return NRF_GPIOTE_EVENT_IN_6;
-        case 7: return NRF_GPIOTE_EVENT_IN_7;
-#endif
-        default: return NRF_GPIOTE_EVENT_IN_0;  // Fallback (should never happen)
+static fastled_nrf_gpiote_event_t get_gpiote_event(u8 channel) FL_NO_EXCEPT {
+    if (channel >= MAX_GPIOTE_CHANNELS) {
+        channel = 0;
     }
+    // Both Nordic HAL generations define these enum values as register
+    // offsets into the contiguous EVENTS_IN array.
+#if FL_NRF52_USE_LEGACY_HAL
+    return static_cast<fastled_nrf_gpiote_event_t>(
+        NRF_GPIOTE_EVENTS_IN_0 + channel * sizeof(u32));
+#else
+    return static_cast<fastled_nrf_gpiote_event_t>(
+        NRF_GPIOTE_EVENT_IN_0 + channel * sizeof(u32));
+#endif
 }
 
 // Timer ISR wrappers for each instance
@@ -324,10 +402,10 @@ extern "C" {
     // GPIOTE handler - weak to allow Arduino framework (WInterrupts.c) to override
     FL_LINK_WEAK void GPIOTE_IRQHandler(void) FL_NO_EXCEPT {
         for (u8 ch = 0; ch < MAX_GPIOTE_CHANNELS; ch++) {
-            nrf_gpiote_event_t event = get_gpiote_event(ch);
+            fastled_nrf_gpiote_event_t event = get_gpiote_event(ch);
 
-            if (nrf_gpiote_event_check(NRF_GPIOTE, event) && gpiote_handles[ch]) {
-                nrf_gpiote_event_clear(NRF_GPIOTE, event);
+            if (fastled_gpiote_event_check(event) && gpiote_handles[ch]) {
+                fastled_gpiote_event_clear(event);
 
                 if (gpiote_handles[ch]->user_handler) {
                     gpiote_handles[ch]->user_handler(gpiote_handles[ch]->user_data);
@@ -444,7 +522,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     // Set compare value using nrf_timer_cc_channel_t enum
     // SDK provides NRF_TIMER_CC_CHANNEL0..5 as the proper channel type
     nrf_timer_cc_channel_t cc_channel = static_cast<nrf_timer_cc_channel_t>(NRF_TIMER_CC_CHANNEL0 + channel);
-    nrf_timer_cc_set(timer, cc_channel, compare_value);
+    fastled_timer_cc_set(timer, cc_channel, compare_value);
 
     // Enable auto-reload unless one-shot mode requested
     if (!(config.flags & ISR_FLAG_ONE_SHOT)) {
@@ -527,12 +605,11 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     }
 
     // Configure GPIOTE channel
-    // SDK 15.x+ HAL functions require NRF_GPIOTE register pointer as first arg
-    nrf_gpiote_event_configure(NRF_GPIOTE, static_cast<u32>(gpiote_ch), pin, polarity);
-    nrf_gpiote_event_enable(NRF_GPIOTE, static_cast<u32>(gpiote_ch));
+    fastled_gpiote_event_configure(static_cast<u32>(gpiote_ch), pin, polarity);
+    fastled_gpiote_event_enable(static_cast<u32>(gpiote_ch));
 
     // Enable GPIOTE interrupt
-    nrf_gpiote_int_enable(NRF_GPIOTE, 1U << gpiote_ch);
+    fastled_gpiote_int_enable(1U << gpiote_ch);
 
     // Set NVIC priority and enable IRQ
     u8 nvic_priority = map_priority_to_nvic(config.priority);
@@ -579,8 +656,8 @@ int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
     } else {
         // Disable GPIOTE interrupt
         if (handle_data->gpiote_channel >= 0) {
-            nrf_gpiote_event_disable(NRF_GPIOTE, static_cast<u32>(handle_data->gpiote_channel));
-            nrf_gpiote_int_disable(NRF_GPIOTE, 1U << handle_data->gpiote_channel);
+            fastled_gpiote_event_disable(static_cast<u32>(handle_data->gpiote_channel));
+            fastled_gpiote_int_disable(1U << handle_data->gpiote_channel);
 
             free_gpiote_channel(handle_data->gpiote_channel);
         }
@@ -611,8 +688,8 @@ int enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
             static_cast<u32>(NRF_TIMER_INT_COMPARE0_MASK << handle_data->timer_channel));
         handle_data->is_enabled = true;
     } else {
-        nrf_gpiote_event_enable(NRF_GPIOTE, static_cast<u32>(handle_data->gpiote_channel));
-        nrf_gpiote_int_enable(NRF_GPIOTE, 1U << handle_data->gpiote_channel);
+        fastled_gpiote_event_enable(static_cast<u32>(handle_data->gpiote_channel));
+        fastled_gpiote_int_enable(1U << handle_data->gpiote_channel);
         handle_data->is_enabled = true;
     }
 
@@ -636,8 +713,8 @@ int disable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
             static_cast<u32>(NRF_TIMER_INT_COMPARE0_MASK << handle_data->timer_channel));
         handle_data->is_enabled = false;
     } else {
-        nrf_gpiote_event_disable(NRF_GPIOTE, static_cast<u32>(handle_data->gpiote_channel));
-        nrf_gpiote_int_disable(NRF_GPIOTE, 1U << handle_data->gpiote_channel);
+        fastled_gpiote_event_disable(static_cast<u32>(handle_data->gpiote_channel));
+        fastled_gpiote_int_disable(1U << handle_data->gpiote_channel);
         handle_data->is_enabled = false;
     }
 

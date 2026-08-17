@@ -53,10 +53,10 @@ Notes:
 - **`FASTLED_ALLOW_INTERRUPTS`**: Default `1`.
 - **`FASTLED_ALL_PINS_HARDWARE_SPI`**: Enabled by default unless forcing software SPI.
 - **`FASTLED_NRF52_SPIM`**: Select SPIM instance (e.g., `NRF_SPIM0`).
-- **`FASTLED_NRF52_ENABLE_PWM_INSTANCE0`**: Enable PWM instance used by clockless.
+- **`FL_NRF52_ENABLE_PWM_INSTANCE0`**: Enable PWM instance used by clockless.
 - **`FASTLED_NRF52_NEVER_INLINE`**: Controls inlining attribute via `FASTLED_NRF52_INLINE_ATTRIBUTE`.
 - **`FASTLED_NRF52_MAXIMUM_PIXELS_PER_STRING`**: Limit pixels per string in PWM-encoded path (default 144).
-- **`FASTLED_NRF52_PWM_ID`**: Select PWM instance index used.
+- **`FL_NRF52_PWM_ID`**: Select PWM instance index used.
 - **`FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING`**: Suppress pin-map warnings for unverified boards.
 - **`FASTLED_NRF52_ALLOW_NFC_PINS`**: Re-enable `P0.09` / `P0.10` (NFC1/NFC2) as valid FastLED output pins on every nRF52840 variant block (SuperMini, nice!nano v2, nRFMicro, XIAO nRF52840, XIAO nRF52840 Sense). Defining this macro is necessary but **not** sufficient: you also need either `CONFIG_NFCT_PINS_AS_GPIOS=1` in the BSP/build flags, **or** a call to `NFC_PINS_AS_GPIO()` at boot (Adafruit nRF52 core helper).
 - **`FASTLED_NRF52_ALLOW_USR_LED`**: Re-enable on-board user-LED pins (`P0.15` SuperMini/nice!nano v2, `P1.10` nRFMicro, and the XIAO RGB LEDs at `P0.26`/`P0.06`/`P0.30`) as valid FastLED output pins. Be careful: defining this risks a clash with any sketch (or BSP background task) that calls `digitalWrite(LED_BUILTIN, ...)` on the same pin.

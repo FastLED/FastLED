@@ -34,9 +34,24 @@
     #define FASTLED_ALLOW_INTERRUPTS 1
 #endif
 
-// Use PWM instance 0
+// Use PWM instance 0 by default. Individual instance flags remain overridable
+// for applications that reserve or coordinate more than one PWM peripheral.
 // See clockless_arm_nrf52.h and (in root of library) platforms.cpp
-#define FASTLED_NRF52_ENABLE_PWM_INSTANCE0
+#if !defined(FL_NRF52_PWM_ID)
+    #define FL_NRF52_PWM_ID 0
+#endif
+#if !defined(FL_NRF52_ENABLE_PWM_INSTANCE0)
+    #define FL_NRF52_ENABLE_PWM_INSTANCE0 (FL_NRF52_PWM_ID == 0)
+#endif
+#if !defined(FL_NRF52_ENABLE_PWM_INSTANCE1)
+    #define FL_NRF52_ENABLE_PWM_INSTANCE1 (FL_NRF52_PWM_ID == 1)
+#endif
+#if !defined(FL_NRF52_ENABLE_PWM_INSTANCE2)
+    #define FL_NRF52_ENABLE_PWM_INSTANCE2 (FL_NRF52_PWM_ID == 2)
+#endif
+#if !defined(FL_NRF52_ENABLE_PWM_INSTANCE3)
+    #define FL_NRF52_ENABLE_PWM_INSTANCE3 (FL_NRF52_PWM_ID == 3)
+#endif
 
 #if defined(FASTLED_NRF52_NEVER_INLINE)
     #define FASTLED_NRF52_INLINE_ATTRIBUTE FASTLED_FORCE_INLINE
@@ -52,6 +67,32 @@
 #include <nrf_pwm.h>    // for Clockless
 #include <nrf_nvic.h>   // for Clockless / anything else using interrupts
 // IWYU pragma: end_keep
+
+// Adafruit's FreeRTOS core requires PWM interrupts to use its maximum
+// syscall-safe priority. Mbed does not define that FreeRTOS setting, so use
+// the nRF52840's lowest application interrupt priority instead. Allow board
+// cores and applications to override the selection when needed.
+#if !defined(FL_NRF52_PWM_INTERRUPT_PRIORITY)
+    #if defined(configMAX_SYSCALL_INTERRUPT_PRIORITY)
+        #define FL_NRF52_PWM_INTERRUPT_PRIORITY configMAX_SYSCALL_INTERRUPT_PRIORITY
+    #elif defined(NRFX_PWM_DEFAULT_CONFIG_IRQ_PRIORITY)
+        #define FL_NRF52_PWM_INTERRUPT_PRIORITY NRFX_PWM_DEFAULT_CONFIG_IRQ_PRIORITY
+    #else
+        #define FL_NRF52_PWM_INTERRUPT_PRIORITY 7
+    #endif
+#endif
+
+// Mbed owns the nrfx PWM interrupt handlers. Use synchronous EasyDMA playback
+// there so FastLED does not replace a framework ISR or disturb its callback
+// dispatch. The Adafruit core keeps the existing asynchronous interrupt path.
+#if !defined(FL_NRF52_USE_PWM_INTERRUPTS)
+    #if defined(__MBED__)
+        #define FL_NRF52_USE_PWM_INTERRUPTS 0
+    #else
+        #define FL_NRF52_USE_PWM_INTERRUPTS 1
+    #endif
+#endif
+
 #include "fl/stl/stdint.h"
 #include "fl/stl/noexcept.h"
 typedef __I  fl::u32 RoReg;
@@ -76,12 +117,16 @@ typedef __IO fl::u32 RwReg;
 // or placed in a discardable section, but the references ensure the linker
 // pulls in heap_3.c.o from libFrameworkArduino.a
 //
-// Can be disabled by defining FASTLED_FORCE_NRF52_WRAP_MALLOC=0
-#if !defined(FASTLED_FORCE_NRF52_WRAP_MALLOC)
-    #define FASTLED_FORCE_NRF52_WRAP_MALLOC 1
+// Can be disabled by defining FL_NRF52_FORCE_WRAP_MALLOC=0
+#if !defined(FL_NRF52_FORCE_WRAP_MALLOC)
+    #if defined(__MBED__)
+        #define FL_NRF52_FORCE_WRAP_MALLOC 0
+    #else
+        #define FL_NRF52_FORCE_WRAP_MALLOC 1
+    #endif
 #endif
 
-#if FASTLED_FORCE_NRF52_WRAP_MALLOC && defined(FL_IS_NRF52)
+#if FL_NRF52_FORCE_WRAP_MALLOC && defined(FL_IS_NRF52)
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -116,6 +161,6 @@ static volatile void* fastled_nrf52_force_malloc_wrappers_link(void) FL_NO_EXCEP
 #ifdef __cplusplus
 }
 #endif
-#endif // FASTLED_FORCE_NRF52_WRAP_MALLOC && FL_IS_NRF52
+#endif // FL_NRF52_FORCE_WRAP_MALLOC && FL_IS_NRF52
 
 #endif // __LED_SYSDEFS_ARM_NRF52
