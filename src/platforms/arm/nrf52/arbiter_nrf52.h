@@ -38,6 +38,12 @@ typedef enum _FASTLED_NRF52_ENABLED_PWM_INSTANCE { // ok plain enum
 } FASTLED_NRF52_ENABLED_PWM_INSTANCES;
 
 FL_STATIC_ASSERT(FL_NRF52_PWM_INSTANCE_COUNT > 0, "Instance count must be greater than zero -- define FL_NRF52_ENABLE_PWM_INSTANCE[n] (replace `[n]` with digit)");
+FL_STATIC_ASSERT(
+    (FL_NRF52_PWM_ID == 0 && FL_NRF52_ENABLE_PWM_INSTANCE0) ||
+    (FL_NRF52_PWM_ID == 1 && FL_NRF52_ENABLE_PWM_INSTANCE1) ||
+    (FL_NRF52_PWM_ID == 2 && FL_NRF52_ENABLE_PWM_INSTANCE2) ||
+    (FL_NRF52_PWM_ID == 3 && FL_NRF52_ENABLE_PWM_INSTANCE3),
+    "FL_NRF52_PWM_ID must identify an enabled PWM instance");
 
 template <fl::u32 _PWM_ID>
 class PWM_Arbiter {

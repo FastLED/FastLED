@@ -3,10 +3,9 @@
 Nordic nRF52 family support.
 
 The maintained backend targets the Adafruit nRF52 / Bluefruit Arduino BSP used
-by FastLED CI. That BSP provides the Nordic SDK headers, FreeRTOS integration,
-SoftDevice support, PWM EasyDMA, and SPIM HAL APIs this backend includes.
-Arduino mbed OS nRF52 boards such as Arduino Nano 33 BLE and Nano 33 BLE Sense
-are not supported by this backend today.
+by FastLED CI and the Seeed XIAO nRF52840 Plus/Sense Plus with Seeed's
+ArduinoCore-mbed. Other Arduino mbed OS nRF52 boards, such as Arduino Nano 33
+BLE and Nano 33 BLE Sense, are not supported by this backend today.
 
 ## Clocked SPI LEDs
 
