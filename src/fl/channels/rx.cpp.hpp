@@ -13,6 +13,7 @@
 #ifdef FL_IS_ESP32
 // IWYU pragma: begin_keep
 #include "platforms/esp/32/drivers/i2s_rx/i2s_rx_sampler.h"  // ok platform headers
+#include "platforms/esp/32/drivers/parlio_rx/parlio_rx_sampler.h"  // ok platform headers
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_channel.h" // ok platform headers
 #include "platforms/esp/32/drivers/gpio_isr_rx/gpio_isr_rx.h" // ok platform headers
 #include "platforms/esp/32/feature_flags/enabled.h" // ok platform headers
@@ -174,6 +175,16 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::I2S_RX>(int pin) FL_NO_E
     return fl::make_shared<DummyRxDevice>("I2S_RX not supported on this chip");
 }
 
+// FastLED#3586 — PARLIO-RX oversampling backend (ESP32-C6 et al).
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PARLIO_RX>(int pin) FL_NO_EXCEPT {
+    auto device = createParlioRxSampler(pin);
+    if (device) {
+        return device;
+    }
+    return fl::make_shared<DummyRxDevice>("PARLIO_RX not supported on this chip");
+}
+
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(int pin) FL_NO_EXCEPT {
     (void)pin;
@@ -232,6 +243,12 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::I2S_RX>(int pin) FL_NO_E
 }
 
 template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PARLIO_RX>(int pin) FL_NO_EXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("PARLIO_RX not supported on this platform");
+}
+
+template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(int pin) FL_NO_EXCEPT {
     (void)pin;
     return fl::make_shared<DummyRxDevice>("LPC_SCT_CAPTURE RX not supported on Teensy");
@@ -251,6 +268,12 @@ template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::I2S_RX>(int pin) FL_NO_EXCEPT {
     (void)pin;
     return fl::make_shared<DummyRxDevice>("I2S_RX not supported on this platform");
+}
+
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PARLIO_RX>(int pin) FL_NO_EXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("PARLIO_RX not supported on this platform");
 }
 
 template <>
@@ -334,6 +357,12 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::I2S_RX>(int pin) FL_NO_E
 }
 
 template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PARLIO_RX>(int pin) FL_NO_EXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("PARLIO_RX not supported on this platform");
+}
+
+template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(int pin) FL_NO_EXCEPT {
     return NativeRxDevice::create(pin);
 }
@@ -379,6 +408,12 @@ template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::I2S_RX>(int pin) FL_NO_EXCEPT {
     (void)pin;
     return fl::make_shared<DummyRxDevice>("I2S_RX not supported on this platform");
+}
+
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PARLIO_RX>(int pin) FL_NO_EXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("PARLIO_RX not supported on this platform");
 }
 
 template <>

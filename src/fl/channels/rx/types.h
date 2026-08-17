@@ -13,6 +13,7 @@ enum class RxBackend : u8 {
     FLEXPWM = 3,           ///< Teensy 4.x-only FlexPWM capture backend.
     FLEXIO = 4,            ///< Teensy 4.x-only FlexIO capture backend (FLEXIO1 — FLEXIO2 is owned by the WS2812 TX driver). Hardware-verified by `flexioRxBenchmark` (1/10/100 kHz square wave) and `flexioObjectFledTest` (5-pattern ObjectFLED loopback). See FastLED#2764.
     LPC_SCT_CAPTURE = 5,   ///< LPC8xx SCT input-capture + DMA edge backend (LPC845 et al). Capture path is a skeleton until follow-up bench validation lands — see FastLED#3015. Decoder + injectEdges() are fully functional and host-tested today.
+    PARLIO_RX = 8,         ///< PARLIO 1-bit oversampling backend (ESP32-C6 et al) — DMA sampling at 16 MHz with no per-edge interrupt; the C6 answer to RMT RX being deaf to PARLIO/RMT clockless TX (FastLED#3586).
     I2S_RX = 6             ///< Classic-ESP32 I2S 1-bit oversampling backend — DMA sampling at 16 MHz, capture length limited by RAM instead of the RMT one-shot 256-symbol block (FastLED#3576 Phase 3).
 };
 
@@ -25,6 +26,7 @@ inline const char* toString(RxBackend backend) FL_NO_EXCEPT {
     case RxBackend::FLEXIO: return "FLEXIO";
     case RxBackend::LPC_SCT_CAPTURE: return "LPC_SCT_CAPTURE";
     case RxBackend::I2S_RX: return "I2S_RX";
+    case RxBackend::PARLIO_RX: return "PARLIO_RX";
     case RxBackend::PIO: return "PIO";
     }
     return "UNKNOWN";
