@@ -1,4 +1,8 @@
-// sound_orchestrator.h - 3-state audio orchestrator for AnimartrixRing.
+// sound_orchestrator.h - 3-state audio orchestrator for MoodRing.
+//
+// Originally landed in examples/AnimartrixRing (issue #2713, PR #2809) and
+// moved here when AnimartrixRing was reduced to a pure sampling demo. This is
+// the sound layer of the MoodRing product sketch -- see issue #2256.
 //
 // Classifies the live audio stream into one of three states:
 //   * Silence            -> ambient visuals (slow, restrained)
@@ -27,7 +31,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/stdint.h"
 
-namespace animartrix_ring {
+namespace mood_ring {
 
 enum class SoundState : fl::u8 {
     Silence = 0,
@@ -134,4 +138,4 @@ private:
     float mLastEngineSpeed = 1.0f;
 };
 
-} // namespace animartrix_ring
+} // namespace mood_ring
