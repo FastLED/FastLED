@@ -2,7 +2,7 @@
 
 **Minimal demo of one technique: sampling a circular LED ring out of a 2D Animartrix grid.**
 
-```
+```text
 Animartrix (16x16 grid) -> ScreenMap (circle of 244 points)
                         -> Fx2dTo1d (bilinear sample) -> 1D ring
 ```

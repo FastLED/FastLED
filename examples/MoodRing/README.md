@@ -12,7 +12,7 @@ Design doc and roadmap: [issue #2256](https://github.com/FastLED/FastLED/issues/
 
 ## Architecture
 
-```
+```text
 Mic -> fl::audio::Processor      silence / energy / eq / tempo / beat / percussion
     -> SoundOrchestrator         Silence | Disorganized | BpmLocked
     -> per-state Animartrix bank calm ambient / spectrum / beat geometry

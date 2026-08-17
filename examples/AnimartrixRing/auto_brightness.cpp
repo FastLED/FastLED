@@ -5,12 +5,15 @@
 // Fix both, or neither.
 #include "auto_brightness.h"
 
-float getAverageBrightness(CRGB *leds, int numLeds) {
-    uint32_t total = 0;
-    for (int i = 0; i < numLeds; i++) {
-        total += leds[i].r + leds[i].g + leds[i].b;
+float getAverageBrightness(fl::span<const CRGB> leds) {
+    if (leds.empty()) {
+        return 0.0f;
     }
-    float avgValue = float(total) / float(numLeds * 3);
+    uint32_t total = 0;
+    for (const CRGB &led : leds) {
+        total += led.r + led.g + led.b;
+    }
+    float avgValue = float(total) / float(leds.size() * 3);
     return (avgValue / 255.0f) * 100.0f;
 }
 

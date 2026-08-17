@@ -203,7 +203,7 @@ void loop() {
     // Calculate final brightness
     uint8_t finalBrightness;
     if (autoBrightness.value()) {
-        float avgBri = getAverageBrightness(leds, NUM_LEDS);
+        float avgBri = getAverageBrightness(leds);
         finalBrightness = applyBrightnessCompression(
             avgBri, static_cast<uint8_t>(autoBrightnessMax.value()),
             autoBrightnessLowThreshold.value(),
