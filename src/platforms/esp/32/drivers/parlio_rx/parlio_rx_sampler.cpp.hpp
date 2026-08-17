@@ -12,10 +12,20 @@
 #include "platforms/esp/32/drivers/parlio_rx/parlio_rx_sampler.h"
 #include "fl/stl/shared_ptr.h"
 
+#include "platforms/esp/esp_version.h"  // IWYU pragma: keep
 #include "soc/soc_caps.h"  // IWYU pragma: keep
 
+// The PARLIO *RX* driver (driver/parlio_rx.h) first shipped in ESP-IDF 5.3.
+// Earlier IDFs (5.1 / 5.2, i.e. Arduino-ESP32 3.0.x) already define the C6
+// capability macros below — SOC_PARLIO_SUPPORTED and
+// SOC_PARLIO_RX_UNITS_PER_GROUP == 1 — while providing no RX header or RX
+// API at all, so the caps alone are not a safe gate: they would let this TU
+// compile and then fail on the #include. Require 5.3+ as well; older IDFs
+// fall through to the nullptr stub and the channel layer substitutes a
+// DummyRxDevice.
 #if defined(SOC_PARLIO_SUPPORTED) && SOC_PARLIO_SUPPORTED && \
-    defined(SOC_PARLIO_RX_UNITS_PER_GROUP) && SOC_PARLIO_RX_UNITS_PER_GROUP > 0
+    defined(SOC_PARLIO_RX_UNITS_PER_GROUP) && SOC_PARLIO_RX_UNITS_PER_GROUP > 0 && \
+    ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
 
 #include "fl/log/log.h"
 #include "fl/stl/int.h"
@@ -124,13 +134,23 @@ class ParlioRxSampler final : public RxDevice {
         }
         mArmed = false;
 
-        // The DMA transfer completes when the whole buffer is filled,
-        // which at 16 MHz is a fixed ~4.1 ms regardless of the signal.
-        // Bound the wait by the caller's timeout so a dead line cannot
-        // hang the bench.
+        // The DMA transfer completes when the whole buffer is filled:
+        // kCaptureBytes * 8 = 262144 samples, a fixed ~16.4 ms at 16 MHz
+        // regardless of the signal. Bound the wait by the caller's timeout
+        // so a dead line cannot hang the bench — callers must therefore
+        // allow at least the fill time or every capture times out.
         esp_err_t err = parlio_rx_unit_wait_all_done(
             mUnit, static_cast<int>(timeout_ms));
-        if (err != ESP_OK && err != ESP_ERR_TIMEOUT) {
+        if (err == ESP_ERR_TIMEOUT) {
+            // parlio_rx_unit_receive() is asynchronous, so on timeout the
+            // transaction is still live and DMA is still writing mBuffer.
+            // Reset the unit before reading the buffer below; this also
+            // clears the transaction queue so the next begin() does not
+            // stack a second receive onto the same buffer (trans_queue_depth
+            // is 2, so that would otherwise succeed silently and let two
+            // transfers overwrite each other).
+            resetUnit();
+        } else if (err != ESP_OK) {
             FL_WARN_F("ParlioRxSampler: wait failed: %s",
                       esp_err_to_name(err));
             return RxWaitResult::TIMEOUT;
@@ -245,7 +265,7 @@ class ParlioRxSampler final : public RxDevice {
         mBuffer = static_cast<u8 *>(
             heap_caps_calloc(1, kCaptureBytes, MALLOC_CAP_DMA));
         if (mBuffer == nullptr) {
-            FL_WARN_F("ParlioRxSampler: DMA buffer alloc failed (%s bytes)",
+            FL_WARN_F("ParlioRxSampler: DMA buffer alloc failed (%d bytes)",
                       static_cast<int>(kCaptureBytes));
             return false;
         }
@@ -308,6 +328,24 @@ class ParlioRxSampler final : public RxDevice {
         }
 
         return true;
+    }
+
+    /// Stop DMA and drop any queued transaction without releasing
+    /// resources, leaving the unit armed-and-idle exactly as createUnit()
+    /// does. Used on the wait() timeout path.
+    void resetUnit() FL_NO_EXCEPT {
+        if (mUnit == nullptr) {
+            return;
+        }
+        if (mDelimiter != nullptr) {
+            parlio_rx_soft_delimiter_start_stop(mUnit, mDelimiter, false);
+        }
+        parlio_rx_unit_disable(mUnit);
+        // reset_queue = true discards the stale receive transaction.
+        parlio_rx_unit_enable(mUnit, true);
+        if (mDelimiter != nullptr) {
+            parlio_rx_soft_delimiter_start_stop(mUnit, mDelimiter, true);
+        }
     }
 
     void teardown() FL_NO_EXCEPT {
@@ -435,7 +473,7 @@ fl::shared_ptr<RxDevice> createParlioRxSampler(int pin) FL_NO_EXCEPT {
 
 } // namespace fl
 
-#else // no PARLIO RX unit on this SoC
+#else // no PARLIO RX unit on this SoC, or ESP-IDF older than 5.3
 
 namespace fl {
 fl::shared_ptr<RxDevice> createParlioRxSampler(int pin) FL_NO_EXCEPT {
@@ -444,6 +482,6 @@ fl::shared_ptr<RxDevice> createParlioRxSampler(int pin) FL_NO_EXCEPT {
 }
 } // namespace fl
 
-#endif // SOC_PARLIO_SUPPORTED && SOC_PARLIO_RX_UNITS_PER_GROUP
+#endif // SOC_PARLIO_SUPPORTED && SOC_PARLIO_RX_UNITS_PER_GROUP && IDF >= 5.3
 
 #endif // FL_IS_ESP32
