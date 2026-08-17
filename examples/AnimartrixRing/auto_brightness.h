@@ -1,4 +1,8 @@
 // auto_brightness.h - Content-aware brightness compression for LED strips
+//
+// NOTE: a twin of this file lives in examples/MoodRing/auto_brightness.h.
+// Examples cannot include across directories, so the file is duplicated.
+// Fix both, or neither.
 #pragma once
 
 #include "FastLED.h"

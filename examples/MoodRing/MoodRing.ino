@@ -95,7 +95,7 @@ auto fx2dTo1d = fl::make_shared<fl::Fx2dTo1d>(NUM_LEDS, animartrix, screenmap,
 fl::FxEngine fxEngine(NUM_LEDS);
 
 // Visual UI controls
-fl::UITitle title("MoodRing");
+// Title comes from FASTLED_TITLE above -- do not declare a second fl::UITitle.
 fl::UIDescription description(
     "A ring that listens to the room and lights the room back. Grant mic "
     "access, or drag in a .wav.");

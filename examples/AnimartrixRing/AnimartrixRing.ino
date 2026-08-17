@@ -77,7 +77,7 @@ fl::FxEngine fxEngine(NUM_LEDS);
 
 // UI controls. The dropdown order matches fl::AnimartrixAnim exactly, so the
 // selected index can be handed straight to Animartrix::fxSet().
-fl::UITitle title("AnimartrixRing");
+// Title comes from FASTLED_TITLE above -- do not declare a second fl::UITitle.
 fl::UIDescription description(
     "Samples a circular ring out of a 2D Animartrix grid. @author of fx is "
     "StefanPetrick");
@@ -116,20 +116,26 @@ void setup() {
     // Add the 2D-to-1D effect to FxEngine
     fxEngine.addFx(fx2dTo1d);
 
-    // Dropdown index maps 1:1 onto fl::AnimartrixAnim. Point it at the boot
-    // animation before wiring the callback, then push the value through once:
-    // onChanged only fires on a *change*, so without this the UI would read
-    // "RGB_BLOBS5" (index 0) while FIRST_ANIMATION was actually rendering.
+    // Dropdown index maps 1:1 onto fl::AnimartrixAnim, so point it at the boot
+    // animation -- otherwise the UI would read "RGB_BLOBS5" (index 0) while
+    // FIRST_ANIMATION was actually rendering. loop() reconciles from there.
     fxIndex.setSelectedIndex(static_cast<int>(FIRST_ANIMATION));
-    fxIndex.onChanged([](fl::UIDropdown &dropdown) {
-        animartrix->fxSet(dropdown.as_int());
-    });
-    animartrix->fxSet(fxIndex.as_int());
 
     Serial.println("AnimartrixRing setup complete");
 }
 
 void loop() {
+    // Poll rather than use onChanged(): a value the web UI restores (persisted
+    // or from the URL) can land before the first frame, where the change
+    // detector absorbs it into its baseline and never fires. Comparing against
+    // the animation we last pushed cannot miss it. Same pattern as
+    // examples/Animartrix/Animartrix.ino.
+    static int sLastFxIndex = -1;
+    if (fxIndex.as_int() != sLastFxIndex) {
+        sLastFxIndex = fxIndex.as_int();
+        animartrix->fxSet(sLastFxIndex);
+    }
+
     fxEngine.setSpeed(timeSpeed.value());
 
     // Draw the effect

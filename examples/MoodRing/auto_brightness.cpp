@@ -1,4 +1,8 @@
 // auto_brightness.cpp
+//
+// NOTE: a twin of this file lives in examples/AnimartrixRing/auto_brightness.cpp.
+// Examples cannot include across directories, so the file is duplicated.
+// Fix both, or neither.
 #include "auto_brightness.h"
 
 float getAverageBrightness(CRGB *leds, int numLeds) {
