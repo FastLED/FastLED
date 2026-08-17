@@ -10,6 +10,7 @@
 #include "fl/stl/optional.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
+#include "fl/channels/rx/types.h"
 
 // Forward declarations for detail modules
 namespace fl {
@@ -32,6 +33,56 @@ namespace validation {
 inline bool useRmtInternalLoopback(bool is_rmt_driver, int tx_pin,
                                    int rx_pin) FL_NO_EXCEPT {
     return is_rmt_driver && tx_pin == rx_pin;
+}
+
+/// @brief Select the independent capture backend used by AutoResearch.
+///
+/// ESP32-C6 RMT RX does not preserve PARLIO's sub-microsecond low phases even
+/// though the same pad's GPIO input sees them. Use the GPIO ISR timestamp
+/// backend for the default C6 PARLIO validation path. An explicit caller
+/// override remains authoritative for diagnostics.
+inline RxBackend resolveCaptureBackend(RxBackend requested_backend,
+                                       bool has_explicit_override,
+                                       bool is_parlio_driver,
+                                       bool is_esp32_c6) FL_NO_EXCEPT {
+    if (!has_explicit_override && is_parlio_driver && is_esp32_c6) {
+        return RxBackend::ISR;
+    }
+    return requested_backend;
+}
+
+/// @brief Compute the RX edge-buffer capacity for a validation frame.
+///
+/// GPIO ISR RX requires a power-of-two circular buffer. Size that buffer from
+/// the frame under test (two edges per bit plus framing headroom), rather than
+/// from AutoResearch's oversized shared byte buffer.
+inline size_t captureEdgeCapacity(size_t shared_buffer_bytes,
+                                  size_t expected_data_bytes,
+                                  RxBackend backend) FL_NO_EXCEPT {
+    constexpr size_t kEdgesPerByte = 16;
+    constexpr size_t kFramingEdges = 2;
+    const size_t max_size = static_cast<size_t>(-1);
+
+    if (backend != RxBackend::ISR) {
+        if (shared_buffer_bytes > max_size / 8) {
+            return 0;
+        }
+        return shared_buffer_bytes * 8;
+    }
+
+    if (expected_data_bytes > (max_size - kFramingEdges) / kEdgesPerByte) {
+        return 0;
+    }
+    const size_t required =
+        expected_data_bytes * kEdgesPerByte + kFramingEdges;
+    size_t capacity = 1;
+    while (capacity < required) {
+        if (capacity > max_size / 2) {
+            return 0;
+        }
+        capacity *= 2;
+    }
+    return capacity;
 }
 
 }  // namespace validation

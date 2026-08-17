@@ -99,6 +99,33 @@ FL_TEST_CASE("RMT internal loopback requires the same TX and RX GPIO") {
     FL_CHECK_FALSE(validation::useRmtInternalLoopback(false, 0, 0));
 }
 
+FL_TEST_CASE("C6 PARLIO validation avoids the conflicted RMT RX backend") {
+    FL_CHECK(validation::resolveCaptureBackend(
+                 RxBackend::PLATFORM_DEFAULT, false, true, true) ==
+             RxBackend::ISR);
+    FL_CHECK(validation::resolveCaptureBackend(
+                 RxBackend::PLATFORM_DEFAULT, false, true, false) ==
+             RxBackend::PLATFORM_DEFAULT);
+    FL_CHECK(validation::resolveCaptureBackend(
+                 RxBackend::PLATFORM_DEFAULT, false, false, true) ==
+             RxBackend::PLATFORM_DEFAULT);
+    FL_CHECK(validation::resolveCaptureBackend(
+                 RxBackend::RMT, true, true, true) ==
+             RxBackend::RMT);
+}
+
+FL_TEST_CASE("ISR validation capture uses a frame-sized power-of-two buffer") {
+    FL_CHECK_EQ(validation::captureEdgeCapacity(
+                    3300, 30, RxBackend::ISR),
+                512u);
+    FL_CHECK_EQ(validation::captureEdgeCapacity(
+                    3300, 300, RxBackend::ISR),
+                8192u);
+    FL_CHECK_EQ(validation::captureEdgeCapacity(
+                    3300, 30, RxBackend::RMT),
+                26400u);
+}
+
 FL_TEST_CASE("Invalid driver name - empty") {
     SingleTestConfig config = makeBasicConfig();
     config.driver_name = "";

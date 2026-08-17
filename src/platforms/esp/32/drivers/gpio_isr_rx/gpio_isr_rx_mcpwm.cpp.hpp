@@ -457,10 +457,13 @@ public:
 #ifdef GPIO_IN1_REG
             // Chips with >32 GPIOs (ESP32, ESP32-S2) have a second input register
             mIsrContext.gpio_in_reg_addr = (mPin < 32) ? GPIO_IN_REG : GPIO_IN1_REG;
+            mIsrContext.gpio_status_w1tc_reg_addr =
+                (mPin < 32) ? GPIO_STATUS_W1TC_REG : GPIO_STATUS1_W1TC_REG;
             u8 pin_bit = (mPin < 32) ? mPin : (mPin - 32);
 #else
             // Chips with <=32 GPIOs (ESP32-H2, ESP32-C3, ESP32-C6) only have GPIO_IN_REG
             mIsrContext.gpio_in_reg_addr = GPIO_IN_REG;
+            mIsrContext.gpio_status_w1tc_reg_addr = GPIO_STATUS_W1TC_REG;
             u8 pin_bit = mPin;
 #endif
             mIsrContext.gpio_bit_mask = (1U << pin_bit);
