@@ -100,9 +100,12 @@ FL_TEST_CASE("RMT internal loopback requires the same TX and RX GPIO") {
 }
 
 FL_TEST_CASE("C6 PARLIO validation avoids the conflicted RMT RX backend") {
+    // PARLIO_RX, not ISR: the GPIO ISR backend cannot resolve WS2812-rate
+    // edges on C6 (measured ~2 us capture ceiling vs the ~300 ns needed),
+    // so C6 PARLIO validation oversamples into DMA instead (#3586).
     FL_CHECK(validation::resolveCaptureBackend(
                  RxBackend::PLATFORM_DEFAULT, false, true, true) ==
-             RxBackend::ISR);
+             RxBackend::PARLIO_RX);
     FL_CHECK(validation::resolveCaptureBackend(
                  RxBackend::PLATFORM_DEFAULT, false, true, false) ==
              RxBackend::PLATFORM_DEFAULT);

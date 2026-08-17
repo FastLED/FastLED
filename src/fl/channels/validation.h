@@ -38,15 +38,21 @@ inline bool useRmtInternalLoopback(bool is_rmt_driver, int tx_pin,
 /// @brief Select the independent capture backend used by AutoResearch.
 ///
 /// ESP32-C6 RMT RX does not preserve PARLIO's sub-microsecond low phases even
-/// though the same pad's GPIO input sees them. Use the GPIO ISR timestamp
-/// backend for the default C6 PARLIO validation path. An explicit caller
-/// override remains authoritative for diagnostics.
+/// though the same pad's GPIO input sees them. An explicit caller override
+/// remains authoritative for diagnostics.
+///
+/// The GPIO ISR timestamp backend was used here originally (#3880) but
+/// cannot work: its measured capture ceiling is ~2 us between edges
+/// (min=2000 ns, under1us=0 across 1137 intervals of a 100-LED frame)
+/// while WS2812 needs ~300 ns resolution. PARLIO RX oversamples the pin
+/// into DMA at 16 MHz (62.5 ns) with no per-edge interrupt, which is the
+/// only path on C6 fast enough (FastLED#3586).
 inline RxBackend resolveCaptureBackend(RxBackend requested_backend,
                                        bool has_explicit_override,
                                        bool is_parlio_driver,
                                        bool is_esp32_c6) FL_NO_EXCEPT {
     if (!has_explicit_override && is_parlio_driver && is_esp32_c6) {
-        return RxBackend::ISR;
+        return RxBackend::PARLIO_RX;
     }
     return requested_backend;
 }
