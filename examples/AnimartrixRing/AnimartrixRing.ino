@@ -56,12 +56,13 @@ FASTLED_TITLE("AnimartrixRing");
 // 0.15 cm or 1.5mm -- appropriate for a dense LED rope.
 #define LED_DIAMETER 0.15f
 
+#define FIRST_ANIMATION fl::AnimartrixAnim::SLOW_FADE
+
 CRGB leds[NUM_LEDS];
 
 // Animartrix 2D effect: the source image the ring samples from.
 XYMap xymap = XYMap::constructRectangularGrid(GRID_WIDTH, GRID_HEIGHT);
-auto animartrix =
-    fl::make_shared<fl::Animartrix>(xymap, fl::AnimartrixAnim::SLOW_FADE);
+auto animartrix = fl::make_shared<fl::Animartrix>(xymap, FIRST_ANIMATION);
 
 // ScreenMap for the ring: places each LED on a circle inside the grid.
 fl::ScreenMap screenmap =
@@ -115,10 +116,15 @@ void setup() {
     // Add the 2D-to-1D effect to FxEngine
     fxEngine.addFx(fx2dTo1d);
 
-    // Dropdown index maps 1:1 onto fl::AnimartrixAnim.
+    // Dropdown index maps 1:1 onto fl::AnimartrixAnim. Point it at the boot
+    // animation before wiring the callback, then push the value through once:
+    // onChanged only fires on a *change*, so without this the UI would read
+    // "RGB_BLOBS5" (index 0) while FIRST_ANIMATION was actually rendering.
+    fxIndex.setSelectedIndex(static_cast<int>(FIRST_ANIMATION));
     fxIndex.onChanged([](fl::UIDropdown &dropdown) {
         animartrix->fxSet(dropdown.as_int());
     });
+    animartrix->fxSet(fxIndex.as_int());
 
     Serial.println("AnimartrixRing setup complete");
 }
