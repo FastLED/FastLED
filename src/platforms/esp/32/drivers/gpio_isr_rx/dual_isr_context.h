@@ -17,8 +17,10 @@
  * Performance:
  * - Fast ISR target: <20 cycles (~83 ns @ 240 MHz)
  * - Timestamp resolution: 12.5 ns (MCPWM hardware timer)
- * - Edge capture rate: >1 MHz
- * - CPU load: <20% during active capture
+ * - Sustained edge capture rate: ~385 kHz measured on ESP32-C6 @ 160 MHz
+ *   (min=2000 ns / avg=2599 ns between captures, 0 of 1137 intervals
+ *   under 1 us). NOT >1 MHz — the limit is ESP-IDF interrupt
+ *   entry/exit, not the fast ISR body. See FastLED#3586.
  *
  * Memory Layout:
  * - All structures placed in IRAM (.iram1 section) for zero-wait-state access

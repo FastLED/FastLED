@@ -6,12 +6,20 @@ High-performance GPIO edge capture driver for ESP32 RISC-V platforms (ESP32-C6, 
 
 | Metric | Value |
 |--------|-------|
-| ISR latency | ~130-150 ns (25-31 cycles @ 160 MHz) |
+| Sustained edge capture rate | **~385 kHz measured** — min 2000 ns / avg 2599 ns between captures on ESP32-C6 @ 160 MHz, 0 of 1137 intervals under 1 us (FastLED#3586) |
+| Fast ISR body | 25-31 cycles — the `fast_isr.S` assembly ONLY, not the cost of servicing an edge. The ~2 us floor is ~320 cycles, dominated by ESP-IDF interrupt entry/exit. |
 | Timestamp resolution | 12.5 ns (MCPWM @ 80 MHz) |
-| Edge capture rate | >1 MHz |
-| CPU overhead | <20% during capture |
+| CPU overhead | <20% during capture (unverified) |
 
-Compared to ESP-IDF standard GPIO ISR (~400 ns), this achieves **3-4x faster** edge capture.
+> **Not suitable for WS28xx waveform capture.** At ~2.6 us between captures this
+> cannot resolve the ~300 ns T0H a WS2812 bit requires — it is off by ~6.7x. For
+> clockless LED validation on SoCs with a PARLIO RX unit, use the `PARLIO_RX`
+> oversampling backend (`drivers/parlio_rx/`): 16 MHz DMA sampling, 62.5 ns
+> resolution, no interrupt per edge. See FastLED#3586.
+
+The "3-4x faster than a standard GPIO ISR" claim previously stated here compared
+the `fast_isr.S` body against a full ISR dispatch, which is not a like-for-like
+comparison: this driver still pays ESP-IDF's interrupt entry/exit on every edge.
 
 ## Architecture
 
@@ -19,7 +27,9 @@ Compared to ESP-IDF standard GPIO ISR (~400 ns), this achieves **3-4x faster** e
 GPIO Edge Event --> MCPWM Hardware Capture (~5-15 ns, automatic)
     |
     v
-Fast ISR (RISC-V assembly, ~130 ns total)
+Fast ISR (RISC-V assembly, ~130 ns of instructions — NOT the ~2.6 us
+            end-to-end cost per serviced edge, which is dominated by
+            ESP-IDF interrupt entry/exit)
   - Reads MCPWM timestamp register (2-3 cycles, precomputed address)
   - Reads GPIO level from GPIO_IN register (4-5 cycles)
   - Writes {timestamp, level} to circular buffer (atomic, RV32A lr.w/sc.w)

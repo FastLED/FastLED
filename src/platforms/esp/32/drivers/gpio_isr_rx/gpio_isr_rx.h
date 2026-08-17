@@ -48,7 +48,9 @@ struct EdgeTimestamp {
  * - Ultra-fast edge capture: <130 ns ISR latency
  * - Circular buffer: Lock-free communication between ISRs
  * - Filtering: Skip signals, jitter filter, timeout detection
- * - Edge capture rate: >1 MHz
+ * - Sustained edge capture rate: ~385 kHz measured on ESP32-C6 @ 160 MHz
+ *   (FastLED#3586). Too slow for WS28xx (~300 ns T0H) — use the
+ *   PARLIO_RX oversampling backend for clockless LED validation.
  *
  * Pin Configuration:
  * - IMPORTANT: The pin must be configured (pinMode) by the user BEFORE calling begin()

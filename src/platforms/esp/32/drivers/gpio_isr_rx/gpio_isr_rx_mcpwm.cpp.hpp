@@ -8,11 +8,27 @@
  * - Fast ISR (RISC-V assembly, GPIO edge-triggered): Captures edges with MCPWM timestamps
  * - Slow ISR (C, GPTimer 10µs interval): Processes buffer, applies filtering, manages completion
  *
- * Performance:
- * - Fast ISR: 25-31 cycles (~104-129 ns @ 240 MHz)
+ * Performance (MEASURED on ESP32-C6 @ 160 MHz — FastLED#3586):
  * - Timestamp resolution: 12.5 ns (MCPWM @ 80 MHz)
- * - Edge capture rate: >1 MHz
- * - CPU load target: <20% during active capture
+ * - Sustained edge capture rate: ~385 kHz, i.e. ~2.6 us between captures.
+ *   Instrumenting a full 100-LED WS2812 frame gave min=2000 ns,
+ *   max=3550 ns, avg=2599 ns, with ZERO of 1137 intervals under 1 us.
+ *   The distribution is tight, which is an ISR saturated at its service
+ *   rate rather than one dropping edges sporadically.
+ * - Fast ISR body: 25-31 cycles. This is the assembly in fast_isr.S ONLY
+ *   and is NOT the cost of servicing an edge. The ~2 us floor above is
+ *   ~320 cycles at 160 MHz, dominated by ESP-IDF interrupt entry/exit:
+ *   a handler registered through esp_intr_alloc() runs via the IDF
+ *   vector with full context save/restore, not as a true high-priority
+ *   vectored interrupt.
+ *
+ * Consequence: this backend CANNOT capture WS28xx-rate signals, which
+ * need ~300 ns resolution (T0H). It is off by ~6.7x. For clockless LED
+ * waveform validation on SoCs with a PARLIO RX unit, use the PARLIO_RX
+ * oversampling backend (drivers/parlio_rx/) — 16 MHz DMA sampling,
+ * 62.5 ns resolution, no interrupt per edge. An earlier version of this
+ * header advertised ">1 MHz edge capture rate" and "25-31 cycles",
+ * which sent debugging down the wrong path before the rate was measured.
  *
  * Integration:
  * - Uses DualIsrContext from dual_isr_context.h
