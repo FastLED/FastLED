@@ -27,7 +27,19 @@ float clampf(float v, float lo, float hi) {
 // Ambient breathing rate for the Silence state, in cycles per second.
 constexpr float kSilenceBreathHz = 0.12f;
 
+// Sign-preserving bound on the value handed to FxEngine. 4.0 (the audio-derived
+// ceiling) times 10.0 (the Time Speed slider's extreme) -- generous enough that
+// legitimate settings pass through untouched, tight enough that a bad scalar
+// cannot publish something wild.
+constexpr float kMaxAbsTransportSpeed = 40.0f;
+
 } // namespace
+
+float clampTransportSpeed(float v) {
+    if (v > kMaxAbsTransportSpeed) return kMaxAbsTransportSpeed;
+    if (v < -kMaxAbsTransportSpeed) return -kMaxAbsTransportSpeed;
+    return v;
+}
 
 float softKnee(float x) {
     if (x <= 0.0f) return 0.0f;
@@ -109,7 +121,14 @@ void BusDeriver::derive(fl::audio::Processor &p, SoundState state,
         speed = cfg.baseSpeed;
         break;
     }
-    out->transportSpeed = clampf(speed, 0.1f, 4.0f) * manualSpeedScalar;
+    // The audio-derived component is clamped to its documented band, then
+    // composed with the sketch's Time Speed scalar. The scalar is deliberately
+    // NOT folded into that clamp: the slider spans -10..10 and negative values
+    // run the animation backwards, so clamping the product to [0.1, 4.0] would
+    // silently delete reverse and slow-motion. The product still gets a
+    // sign-preserving magnitude bound so nothing unbounded reaches FxEngine.
+    out->transportSpeed =
+        clampTransportSpeed(clampf(speed, 0.1f, 4.0f) * manualSpeedScalar);
 
     // --- radial pressure ---
     if (state == SoundState::Silence) {

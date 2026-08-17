@@ -186,8 +186,11 @@ float SoundOrchestrator::tick(fl::u32 nowMs, float manualSpeedScalar) {
         mDeriver.derive(*mProcessor, mState, mBusCfg, events, nowMs,
                         manualSpeedScalar, &mBus);
     } else {
+        // No processor: publish a neutral bus driven only by the manual slider,
+        // bounded the same way the derived path is so this branch cannot hand
+        // FxEngine something the normal path never would.
         mBus = VisualControlBus{};
-        mBus.transportSpeed = manualSpeedScalar;
+        mBus.transportSpeed = clampTransportSpeed(manualSpeedScalar);
     }
 
     if (mEngine) mEngine->setSpeed(mBus.transportSpeed);

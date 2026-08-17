@@ -42,7 +42,11 @@ struct AudioEvents {
 /// fires and cleared on the next derive.
 struct VisualControlBus {
     // --- continuous ---
-    float transportSpeed = 1.0f;  ///< [0.1 .. 4.0] -> FxEngine::setSpeed
+    /// Engine speed handed to FxEngine::setSpeed. The audio-derived component
+    /// is [0.1 .. 4.0]; the sketch's Time Speed scalar is then composed on top
+    /// and MAY BE NEGATIVE (the slider spans -10..10 and reverse is a feature),
+    /// so the published value is the product, bounded by clampTransportSpeed().
+    float transportSpeed = 1.0f;
     float radialPressure = 0.0f;  ///< [0 .. 1] inward/outward bias
     float rotationBias = 0.0f;    ///< [-1 .. 1] clockwise vs counter
     float paletteDrift = 0.0f;    ///< [0 .. 1] rate of hue travel
@@ -98,6 +102,10 @@ class BusDeriver {
     fl::u32 mSeenSnareMs = 0;
     fl::u32 mSeenDownbeatMs = 0;
 };
+
+/// Sign-preserving bound on the value handed to FxEngine. Shared so the
+/// no-processor fallback cannot publish something the derived path never would.
+float clampTransportSpeed(float v);
 
 /// Soft-knee clip into [0,1]. Keeps the top of the range from pinning to 1.0
 /// the moment a band gets loud, which is what makes band-driven visuals look
