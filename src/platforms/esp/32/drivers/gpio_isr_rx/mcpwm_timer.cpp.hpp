@@ -98,6 +98,7 @@ typedef struct {
     mcpwm_cap_channel_handle_t channel_handle = nullptr;  ///< Capture channel handle
     int gpio_pin = -1;                                     ///< GPIO pin number
     bool initialized = false;                              ///< Initialization flag
+    bool running = false;                                  ///< Timer+channel enabled and counting
 } McpwmState;
 
 // Global MCPWM state via Singleton for safe initialization
@@ -294,6 +295,7 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) FL_NO_EXCEPT {
     // Step 5: Update state
     g_mcpwm_state().gpio_pin = gpio_pin;
     g_mcpwm_state().initialized = true;
+    g_mcpwm_state().running = false;  // Timer starts disabled; mcpwm_timer_start() arms it
 
     ESP_LOGI(MCPWM_TIMER_TAG, "MCPWM timer initialized successfully (reg_addr=0x%08lx)", reg_addr);
     return 0;
@@ -316,18 +318,40 @@ int mcpwm_timer_start() FL_NO_EXCEPT {
         return -1;
     }
 
-    esp_err_t ret = mcpwm_capture_timer_enable(g_mcpwm_state().timer_handle);
+    // Idempotent: re-arming without an intervening stop is a no-op rather than
+    // an ESP_ERR_INVALID_STATE. mcpwm_capture_timer_enable() requires the timer
+    // in its init state, so calling it twice logs a spurious error and leaves
+    // the caller thinking the arm failed.
+    if (g_mcpwm_state().running) {
+        return 0;
+    }
+
+    // The capture CHANNEL must be enabled before the timer. Without this the
+    // channel never latches a capture value, so the capture register the fast
+    // ISR reads stays at 0 and every recorded edge carries a zero timestamp
+    // (FastLED #3586: 256 edges captured, all "L0 H0").
+    esp_err_t ret = mcpwm_capture_channel_enable(g_mcpwm_state().channel_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(MCPWM_TIMER_TAG, "Failed to enable capture channel: %s", esp_err_to_name(ret));
+        return -1;
+    }
+
+    ret = mcpwm_capture_timer_enable(g_mcpwm_state().timer_handle);
     if (ret != ESP_OK) {
         ESP_LOGE(MCPWM_TIMER_TAG, "Failed to enable capture timer: %s", esp_err_to_name(ret));
+        mcpwm_capture_channel_disable(g_mcpwm_state().channel_handle);
         return -1;
     }
 
     ret = mcpwm_capture_timer_start(g_mcpwm_state().timer_handle);
     if (ret != ESP_OK) {
         ESP_LOGE(MCPWM_TIMER_TAG, "Failed to start capture timer: %s", esp_err_to_name(ret));
+        mcpwm_capture_timer_disable(g_mcpwm_state().timer_handle);
+        mcpwm_capture_channel_disable(g_mcpwm_state().channel_handle);
         return -1;
     }
 
+    g_mcpwm_state().running = true;
     ESP_LOGI(MCPWM_TIMER_TAG, "MCPWM timer started");
     return 0;
 }
@@ -349,20 +373,40 @@ int mcpwm_timer_stop() FL_NO_EXCEPT {
         return 0;  // Not an error - already stopped
     }
 
+    // Idempotent counterpart to mcpwm_timer_start(). Stopping an already-stopped
+    // timer previously logged "timer not enabled yet" from the IDF layer.
+    if (!g_mcpwm_state().running) {
+        return 0;
+    }
+
+    // Unwind in reverse of start(): timer stop -> timer disable -> channel disable.
+    // Clear `running` up front so a partial failure cannot strand the state as
+    // "running" and make every later arm a silent no-op.
+    g_mcpwm_state().running = false;
+    int result = 0;
+
     esp_err_t ret = mcpwm_capture_timer_stop(g_mcpwm_state().timer_handle);
     if (ret != ESP_OK) {
         ESP_LOGE(MCPWM_TIMER_TAG, "Failed to stop capture timer: %s", esp_err_to_name(ret));
-        return -1;
+        result = -1;
     }
 
     ret = mcpwm_capture_timer_disable(g_mcpwm_state().timer_handle);
     if (ret != ESP_OK) {
         ESP_LOGE(MCPWM_TIMER_TAG, "Failed to disable capture timer: %s", esp_err_to_name(ret));
-        return -1;
+        result = -1;
+    }
+
+    if (g_mcpwm_state().channel_handle) {
+        ret = mcpwm_capture_channel_disable(g_mcpwm_state().channel_handle);
+        if (ret != ESP_OK) {
+            ESP_LOGE(MCPWM_TIMER_TAG, "Failed to disable capture channel: %s", esp_err_to_name(ret));
+            result = -1;
+        }
     }
 
     ESP_LOGI(MCPWM_TIMER_TAG, "MCPWM timer stopped");
-    return 0;
+    return result;
 }
 
 /**
@@ -405,6 +449,7 @@ int mcpwm_timer_cleanup() FL_NO_EXCEPT {
     // Reset state
     g_mcpwm_state().gpio_pin = -1;
     g_mcpwm_state().initialized = false;
+    g_mcpwm_state().running = false;
 
     ESP_LOGI(MCPWM_TIMER_TAG, "MCPWM timer cleaned up");
     return 0;
