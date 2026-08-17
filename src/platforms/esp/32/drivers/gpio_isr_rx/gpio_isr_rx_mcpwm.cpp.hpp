@@ -621,6 +621,7 @@ public:
         mIsrContext.output_count = 0;
         mIsrContext.last_edge_timestamp = 0;
         mIsrContext.done = false;
+        mEdgesConverted = false;  // Fresh capture: ticks not yet converted to ns
 
         // Start MCPWM timer
         if (mcpwm_timer_start() != 0) {
@@ -695,9 +696,21 @@ public:
         EdgeEntry* output_ptr = const_cast<EdgeEntry*>(mOutputBuffer.data());
         auto* result_ptr = reinterpret_cast<EdgeTimestamp*>(output_ptr);  // ok reinterpret cast
 
-        for (size_t i = 0; i < count; i++) {
-            result_ptr[i].time_ns = (output_ptr[i].timestamp * 25) / 2;
-            result_ptr[i].level = output_ptr[i].level;
+        // This conversion is DESTRUCTIVE and IN PLACE: result_ptr aliases
+        // output_ptr, and EdgeTimestamp::time_ns is a union member overlaying
+        // the same 4 bytes as EdgeEntry::timestamp. Writing time_ns therefore
+        // overwrites the tick value it was computed from. Converting twice
+        // multiplies by 12.5 again, and both getRawEdgeTimes() and decode()
+        // call getEdges(), so a single capture was being scaled 12.5x, 156x,
+        // ... on each successive read (FastLED #3586: consecutive reads of one
+        // capture differed by exactly 12.5x on the bench). Convert once per
+        // capture; the flag is cleared when a new capture is armed.
+        if (!mEdgesConverted) {
+            for (size_t i = 0; i < count; i++) {
+                result_ptr[i].time_ns = (output_ptr[i].timestamp * 25) / 2;
+                result_ptr[i].level = output_ptr[i].level;
+            }
+            mEdgesConverted = true;
         }
 
         return fl::span<const EdgeTimestamp>(result_ptr, count);
@@ -781,6 +794,7 @@ public:
 
         mIsrContext.output_count = static_cast<u32>(edges.size());
         mIsrContext.done = true;
+        mEdgesConverted = false;  // Freshly written raw ticks await conversion
         return true;
     }
 
@@ -926,6 +940,9 @@ private:
     fl::vector<EdgeEntry> mOutputBuffer;   ///< Filtered output buffer
     DualIsrContext mIsrContext;
     bool mInitialized;
+    /// getEdges() is const but converts mOutputBuffer in place, so this caches
+    /// whether that one-time conversion already ran for the current capture.
+    mutable bool mEdgesConverted = false;
 #ifdef __riscv
     intr_handle_t mInterruptHandle = nullptr;  ///< ESP-IDF interrupt handle for cleanup
 #endif
