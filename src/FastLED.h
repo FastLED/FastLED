@@ -1028,7 +1028,6 @@ public:
 	/// Add an SPI based CLEDController via Channel API.
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
 	::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		fl::busKeepAlive<B, B_WHICH>();
 		int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 		int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
@@ -1039,7 +1038,8 @@ public:
 		config.options.mBusWhich = B_WHICH;
 		static fl::ChannelPtr sChannel;
 		if (!sChannel) {
-			sChannel = add(config);
+			sChannel = fl::TypedChannel<B, fl::SpiChipsetConfig, B_WHICH>::create(config);
+			add(sChannel);
 		}
 		return *sChannel;
 	}
@@ -1047,7 +1047,6 @@ public:
 	/// Add an SPI based CLEDController via Channel API (default RGB order and speed).
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		fl::busKeepAlive<B, B_WHICH>();
 		int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 		int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
@@ -1062,7 +1061,8 @@ public:
 		config.options.mBusWhich = B_WHICH;
 		static fl::ChannelPtr sChannel;
 		if (!sChannel) {
-			sChannel = add(config);
+			sChannel = fl::TypedChannel<B, fl::SpiChipsetConfig, B_WHICH>::create(config);
+			add(sChannel);
 		}
 		return *sChannel;
 	}
@@ -1070,7 +1070,6 @@ public:
 	/// Add an SPI based CLEDController via Channel API (default speed).
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
 	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		fl::busKeepAlive<B, B_WHICH>();
 		int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 		int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
@@ -1081,7 +1080,8 @@ public:
 		config.options.mBusWhich = B_WHICH;
 		static fl::ChannelPtr sChannel;
 		if (!sChannel) {
-			sChannel = add(config);
+			sChannel = fl::TypedChannel<B, fl::SpiChipsetConfig, B_WHICH>::create(config);
+			add(sChannel);
 		}
 		return *sChannel;
 	}

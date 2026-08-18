@@ -16,7 +16,7 @@ This doc is paired with `ci/lint/check_size_thresholds.py` (the lockdown lint) a
 |---|---|---:|---:|---|---|---|
 | uno | `check_uno_size.yml` | 11000 / -1 | 9300 / -1 | real ceiling | — | AVR ATmega328P has 32 KB flash. The `-1` second value is the `build_no_forced_inline` job's "no check" sentinel. Apa102 was tightened from 12050 → 9300 in `7edaf80f0` (a real optimisation, not a bump). |
 | bluepill | `check_bluepill_size.yml` | 55000 | 45000 | real ceiling | — | STM32F103C8 has 64 KB flash. Workflow created at current values in `bf76a0319` (2025-06-25). Never bumped. |
-| esp32dev | `check_esp32_size.yml` | 330000 | 330000 | real ceiling (CI currently RED on #3298) | #3298 | 330 KB is the canonical ceiling that PR #3268 restored on top of the `-Os -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections` size-strip flags. The 700 KB intermediate value (PR #2790, #3295) was a band-aid; PR #3303 reverted it. CI is RED until #3298 fixes fbuild's ESP32 `build_flags` / `build_unflags` propagation — the red signal is the point: it forces the underlying fbuild bug to be addressed instead of being hidden. **Do not raise above 330000 — fix #3298 instead.** |
+| esp32dev | `check_esp32_size.yml` | 340000 | 330000 | real ceilings | #3870 | #3870 found that the 402252-byte Blink result came from a silent PlatformIO fallback: build metadata exposes the fbuild size tool as `aliases.size`, while `compiled_size` looked only for `size_path`. The corrected fbuild measurement is 337355 B with Arduino-ESP32 3.3.11, so Blink received a narrow 10 KB framework rebaseline. Apa102 stays at 330000 after its templated `addLeds` path stopped enrolling every ESP32 driver; it measures 321275 B. |
 | teensy30 | `check_teensy30_size.yml` | 60000 | 50000 | real ceiling | — | MK20DX128 (Teensy 3.0) has 128 KB flash. Workflow created at current values in `f4317e954` (2025-06-25). Never bumped. |
 | teensy31 | `check_teensy31_size.yml` | 80000 | 65000 | real ceiling | — | MK20DX256 (Teensy 3.1) has 256 KB flash. Workflow created at current values in `f4317e954` (2025-06-25). Never bumped. |
 | teensy32 | `check_teensy32_size.yml` | 80000 | 65000 | real ceiling | — | MK20DX256 (Teensy 3.2) has 256 KB flash. Workflow created at current values. Never bumped. |
@@ -40,7 +40,8 @@ These are the events the audit found in `git log --all --follow --patch -- .gith
 | 2026-06-05 | `e646657d0` | 700000 → 330000 | restore canonical ceiling after fbuild + `--gc-sections` reinstated | restore |
 | 2026-06-19 | `876409988` (PR #3295) | 330000 → 700000 | band-aid: CI red on master because the `[env:esp32dev]` size-strip flags weren't reaching fbuild (#3298) | **band-aid (reverted)** |
 | 2026-06-19 | `5dd070abc` (PR #3268), `30ee2eba2` (PR #3295 follow-up) | (intermediate work) | port the size-strip flags into `ci/boards.py::ESP32DEV.build_flags` | progress on #3298 |
-| 2026-06-19 | `ee842e51d` (PR #3303) | 700000 → 330000 | lockdown + revert: 330000 is the real ceiling; CI stays red until #3298 is fixed | **current frozen value** |
+| 2026-06-19 | `ee842e51d` (PR #3303) | 700000 → 330000 | lockdown + revert: 330000 is the real ceiling; CI stays red until #3298 is fixed | superseded by #3870 |
+| 2026-08-18 | #3870 | Blink: 330000 → 340000; Apa102 unchanged | Correct the fbuild size-tool lookup (402252 B PIO fallback → 337355 B fbuild ELF); accommodate Arduino-ESP32 3.3.11 with 2645 B headroom. Remove Apa102's all-driver over-link (391463 B → 321275 B). | **current frozen values** |
 
 ### teensy41 (`check_teensy41_size.yml`)
 
@@ -70,11 +71,11 @@ The Apa102 link on teensy41 currently pulls in `fl::ifstream`, `fl::posix_filebu
 
 Once the Apa102 build measures ≤ 88000 B locally, the lockdown lint allows tightening back to 88000 in both the YAML and `FROZEN_THRESHOLDS`. Reference #2802 in the PR body.
 
-### #3298 — fbuild ESP32 board flag propagation (ceiling 330000, currently RED)
+### #3870 — ESP32 size measurement and driver over-link
 
-The 330 KB ceiling for esp32dev depends on `-Os -fno-exceptions -fno-rtti -fno-unwind-tables -fno-asynchronous-unwind-tables -ffunction-sections -fdata-sections` (and `build_unflags = -Og -g`) being honoured by the fbuild ESP32 toolchain. After PR #3295's Phase 4 cleanup, those flags live only in `ci/boards.py::ESP32DEV.build_flags` / `.build_unflags` — but fbuild produces a 401240-byte ELF that is identical with or without them, evidence that fbuild is dropping or overriding them.
+The size checker used the fbuild ELF only when build metadata contained a top-level `size_path`. PlatformIO metadata instead stores the executable at `aliases.size`, so the checker silently ran `pio size` and reported the comparison binary (402252 B). Reading the actual fbuild ELF gives 337355 B for Blink. The 340000 ceiling is a narrow rebaseline for the current Arduino-ESP32 3.3.11 framework, not a return to the historical 700 KB band-aid.
 
-The ceiling is correct. The fix is in fbuild's flag-propagation path; until that lands, `check_esp32_size` will stay red on master. Do not raise the ceiling. Reference #3298 in any related PR.
+Apa102 separately routed its compile-time `addLeds` template through the runtime `FastLED.add(config)` overload, which calls `enableAllDrivers()`. Registering only the resolved SPI bus removes unrelated RMT and other drivers; Apa102 falls from 391463 B to 321275 B and retains the 330000 ceiling.
 
 ## How to change a value here
 
@@ -91,5 +92,6 @@ The ceiling is correct. The fix is in fbuild's flag-propagation path; until that
 - Issue #2802 — teensy41 Apa102 over-link.
 - Issue #2608 — esp32dev 330 KB ceiling stale vs. 635 KB reality (closed once #3303 reverted to 330 KB; the underlying flag-port work moved to #3298).
 - Issue #3298 — fbuild not propagating ESP32 board-level `build_flags` / `build_unflags`.
+- Issue #3870 — ESP32 Blink measurement regression and deliberate 340 KB rebaseline.
 - PR #2790, PR #3295 — historical 700 KB band-aids (both reverted).
 - PR #2804 — teensy41 Apa102 band-aid (still in effect; tracked by #2802).

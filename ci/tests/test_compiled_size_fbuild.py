@@ -16,6 +16,7 @@ import pytest
 
 from ci.compiled_size import (
     _find_fbuild_elf,
+    _find_size_tool,
     _parse_size_tool_text,
 )
 
@@ -33,6 +34,19 @@ def test_parse_size_tool_text_handles_empty_output() -> None:
     """Malformed / empty size output must not raise; it returns None."""
     assert _parse_size_tool_text("") is None
     assert _parse_size_tool_text("error: no input file\n") is None
+
+
+def test_find_size_tool_uses_platformio_alias() -> None:
+    board_info = {"aliases": {"size": "/toolchain/bin/xtensa-size"}}
+    assert _find_size_tool(board_info) == Path("/toolchain/bin/xtensa-size")
+
+
+def test_find_size_tool_prefers_legacy_top_level_key() -> None:
+    board_info = {
+        "size_path": "/legacy/size",
+        "aliases": {"size": "/aliases/size"},
+    }
+    assert _find_size_tool(board_info) == Path("/legacy/size")
 
 
 def _make_fake_elf(p: Path) -> Path:

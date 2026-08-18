@@ -81,10 +81,10 @@ public:
     /// `fl::Channel` runtime object so the rest of the system (events,
     /// manager, draw list) is unchanged.
     static ChannelPtr create(const ChannelConfigOf<Chipset>& cfg) FL_NO_EXCEPT {
-        // Naming `BusTraits<kBus>::instance` here is the ODR-use that links
-        // the driver translation unit even in the static-only `--gc-sections`
-        // mode (issue #2428 Phase 5 binary-size fix).
-        (void)&BusTraits<kBus, Which>::instance;
+        // Register only the compile-time-selected bus specialization and its
+        // associated driver(s). This retains the required translation unit(s)
+        // without pulling in enableAllDrivers().
+        BusTraits<kBus, Which>::registerWithManager();
         ChannelConfig erased = cfg.toErased();
         erased.options.mBus = kBus;
         erased.options.mBusWhich = Which;
@@ -98,7 +98,7 @@ public:
     /// match `Chipset` -- there's no compile-time guarantee at this overload,
     /// so the static_assert above is the only contract.
     static ChannelPtr create(const ChannelConfig& cfg) FL_NO_EXCEPT {
-        (void)&BusTraits<kBus, Which>::instance;
+        BusTraits<kBus, Which>::registerWithManager();
         ChannelConfig erased = cfg;
         erased.options.mBus = kBus;
         erased.options.mBusWhich = Which;
