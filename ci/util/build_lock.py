@@ -21,7 +21,8 @@ from pathlib import Path
 from types import TracebackType
 from typing import Generator, Optional
 
-from ci.util.lock_database import LockDatabase
+from ci.util.file_lock_rw_util import is_process_alive
+from ci.util.lock_database import get_lock_database
 
 
 # Default timeout for lock acquisition (seconds).
@@ -59,22 +60,6 @@ def _diag(message: str) -> None:
     `logger.info` for the same reason.)
     """
     print(message, file=sys.stderr)
-
-
-def _is_process_alive_psutil(pid: int) -> bool:
-    """Check if a process is alive using psutil (more reliable than kernel32 on Windows)."""
-    try:
-        import psutil
-
-        return psutil.pid_exists(pid)
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-        raise
-    except Exception:
-        # Fallback to the existing kernel32/os.kill checker
-        from ci.util.file_lock_rw_util import is_process_alive
-
-        return is_process_alive(pid)
 
 
 def _get_process_info(pid: int) -> str:
@@ -143,7 +128,10 @@ class BuildLock:
             project_root = Path(__file__).parent.parent.parent
             db_path = project_root / ".cache" / "locks.db"
 
-        self._db = LockDatabase(db_path)
+        # Use the shared resolver so FASTLED_LOCK_DB_PATH can isolate tests and
+        # callers that explicitly provide a lock database. The path hint keeps
+        # the normal project/global selection unchanged when no override exists.
+        self._db = get_lock_database(db_path)
         self._lock_name = f"build:{lock_name}"
         self.lock_name = lock_name
         # Keep lock_file attribute for backward compatibility (logging/display)
@@ -173,7 +161,8 @@ class BuildLock:
              blocked indefinitely. The wedged process gets a deadman force-exit
              from test.py's watchdog separately.
 
-        Uses psutil for process liveness checks (more reliable than kernel32 on Windows).
+        Uses the shared platform liveness check, including Windows process wait
+        state so terminated-but-still-open process objects count as dead.
 
         Returns:
             True if lock was stale and removed, False otherwise
@@ -183,10 +172,7 @@ class BuildLock:
             if not holders:
                 return False
 
-            # Check all holders with psutil (more reliable than kernel32)
-            all_dead = all(
-                not _is_process_alive_psutil(h["owner_pid"]) for h in holders
-            )
+            all_dead = all(not is_process_alive(h["owner_pid"]) for h in holders)
 
             # Check for alive-but-wedged: any holder past max-hold threshold.
             now = time.time()

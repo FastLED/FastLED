@@ -11,10 +11,12 @@ These tests validate:
 - Re-entrancy
 """
 
+import errno
 import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from ci.util.file_lock_rw import (
     FileLock,
@@ -40,6 +42,24 @@ class TestProcessAlive(unittest.TestCase):
         self.assertFalse(is_process_alive(0))
         self.assertFalse(is_process_alive(-1))
         self.assertFalse(is_process_alive(999999))  # Unlikely to exist
+
+    @patch("ci.util.file_lock_rw_util.platform.system", return_value="Linux")
+    @patch(
+        "ci.util.file_lock_rw_util.os.kill",
+        side_effect=PermissionError(errno.EPERM, "operation not permitted"),
+    )
+    def test_permission_denied_process_is_alive(self, _kill, _system) -> None:
+        """EPERM proves a POSIX PID exists and must not permit lock stealing."""
+        self.assertTrue(is_process_alive(12345))
+
+    @patch("ci.util.file_lock_rw_util.platform.system", return_value="Linux")
+    @patch(
+        "ci.util.file_lock_rw_util.os.kill",
+        side_effect=ProcessLookupError(errno.ESRCH, "no such process"),
+    )
+    def test_missing_process_is_dead(self, _kill, _system) -> None:
+        """ESRCH is authoritative evidence that a POSIX PID is dead."""
+        self.assertFalse(is_process_alive(12345))
 
 
 class TestStaleLockDetection(unittest.TestCase):
