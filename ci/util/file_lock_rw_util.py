@@ -55,7 +55,9 @@ def is_process_alive(pid: int) -> bool:
             import ctypes
             from ctypes import wintypes
 
-            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+            win_dll = getattr(ctypes, "WinDLL")
+            get_last_error = getattr(ctypes, "get_last_error")
+            kernel32 = win_dll("kernel32", use_last_error=True)
             kernel32.OpenProcess.argtypes = [
                 wintypes.DWORD,
                 wintypes.BOOL,
@@ -73,7 +75,7 @@ def is_process_alive(pid: int) -> bool:
             wait_timeout = 258
             handle = kernel32.OpenProcess(synchronize, False, pid)
             if not handle:
-                error = ctypes.get_last_error()
+                error = get_last_error()
                 if error == error_invalid_parameter:
                     return False
                 # Access denied and transient query failures are not proof of
