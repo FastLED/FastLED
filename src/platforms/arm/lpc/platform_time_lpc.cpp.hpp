@@ -14,7 +14,9 @@ namespace fl {
 namespace platforms {
 namespace lpc_time {
 
+// FL_LINT_ALLOW_GLOBAL(constant-initialized SysTick ISR state; Singleton<T> adds pointer storage and a branch without improving linker elision)
 static volatile u32 g_millis = 0;
+// FL_LINT_ALLOW_GLOBAL(constant-initialized SysTick setup flag; Singleton<T> adds pointer storage and a branch without improving linker elision)
 static bool g_systick_started = false;
 
 static u32 ticks_per_ms() FL_NO_EXCEPT {
