@@ -677,6 +677,7 @@ void espRequestCleanup(EspPendingRequest* item) {
     delete item; // ok bare allocation - see marshaling protocol
 }
 
+// FL_LINT_ALLOW_GLOBAL(constant-initialized ESP-IDF queue handle; Singleton<T> adds pointer storage and a branch without improving linker elision)
 QueueHandle_t s_esp_request_queue = nullptr;
 
 } // anonymous namespace
@@ -944,6 +945,7 @@ string Response::to_string() const {
 
 // We store the httpd_handle_t in a file-scoped variable since the Server class
 // members (mListenSocket, mClientSockets) are typed for POSIX sockets.
+// FL_LINT_ALLOW_GLOBAL(constant-initialized ESP-IDF server handle; Singleton<T> adds pointer storage and a branch without improving linker elision)
 static httpd_handle_t s_esp_httpd = nullptr;
 static fl::vector<fl::unique_ptr<EspRouteContext>> s_esp_route_contexts;
 

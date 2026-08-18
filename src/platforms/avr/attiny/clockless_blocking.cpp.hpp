@@ -13,6 +13,7 @@
 namespace fl {
 
 #if (!defined(NO_CLOCK_CORRECTION) || (NO_CLOCK_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
+// FL_LINT_ALLOW_GLOBAL(constant-initialized ATtiny clock-correction state; Singleton<T> adds pointer storage and a branch without improving linker elision)
 u8 gTimeErrorAccum256ths = 0;
 #endif
 
