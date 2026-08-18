@@ -32,10 +32,10 @@ FL_DISABLE_WARNING(unused-parameter)
 #include "platforms/esp/compile_test.hpp"
 #elif defined(ARDUINO_ARCH_CI13XX)
 #include "platforms/ci13xx/compile_test.hpp"
+#elif defined(FL_IS_APOLLO3)
+#include "platforms/apollo3/compile_test.hpp"
 #elif defined(FL_IS_ARM)
 #include "platforms/arm/compile_test.hpp"
-#elif defined(APOLLO3) || defined(ARDUINO_ARCH_APOLLO3)
-#include "platforms/apollo3/compile_test.hpp"
 #elif defined(FASTLED_STUB_IMPL)
 #include "platforms/stub/compile_test.hpp"
 #include "fl/stl/noexcept.h"
@@ -125,10 +125,10 @@ FL_MAYBE_UNUSED static void compile_tests() FL_NO_EXCEPT {
     esp8266_compile_tests();
 #elif defined(ARDUINO_ARCH_CI13XX)
     ci13xx_compile_tests();
+#elif defined(FL_IS_APOLLO3)
+    apollo3_compile_tests();
 #elif defined(FL_IS_ARM)
     arm_compile_tests();
-#elif defined(APOLLO3) || defined(ARDUINO_ARCH_APOLLO3)
-    apollo3_compile_tests();
 #elif defined(FASTLED_STUB_IMPL)
     stub_compile_tests();
 #else
