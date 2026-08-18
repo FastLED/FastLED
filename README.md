@@ -62,6 +62,7 @@ FastLED's codebase is organized into several major areas. Each directory contain
 ## Table of Contents
 
 - [🎵 Audio Reactive LEDs](#-audio-reactive-leds)
+- [⏱️ Async Tasks Instead of delay()](#-async-tasks-instead-of-delay)
 - [🆕 Latest Feature](#-latest-feature)
 - [⭐ Community Growth](#-community-growth)
 - [🆕 Latest Features](#-latest-features)
@@ -216,6 +217,46 @@ void loop() {
 > **Platforms**: ESP32 (I2S / PDM) and Teensy. Code compiles on all platforms — callbacks are simply inert where hardware isn't available.
 
 **More examples & full API reference**: [src/fl/audio/README.md](src/fl/audio/README.md)
+
+## ⏱️ Async Tasks Instead of delay()
+
+**Run several independent animations, sensor reads, and network polls out of one `loop()` — no blocking, no hand-rolled `millis()` bookkeeping.** Each task is a small callback with its own schedule. `fl::task::run()` executes whichever tasks are due and returns. Adding a feature means adding a task, not rethreading the timing of everything already there.
+
+```cpp
+#include <FastLED.h>
+#include "fl/task/task.h"
+
+#define NUM_LEDS 60
+CRGB leds[NUM_LEDS];
+
+void setup() {
+    FastLED.addLeds<WS2812, 6>(leds, NUM_LEDS);
+
+    // Two blinkers on independent schedules
+    fl::task::every_ms(700).then([] {
+        static bool on = false;
+        on = !on;
+        leds[0] = on ? CRGB::Red : CRGB::Black;
+    });
+
+    fl::task::every_ms(400).then([] {
+        static bool on = false;
+        on = !on;
+        leds[1] = on ? CRGB::Blue : CRGB::Black;
+    });
+
+    // One task owns the hardware push
+    fl::task::at_framerate(60).then([] { FastLED.show(); });
+}
+
+void loop() {
+    fl::task::run();  // run whatever is due, then return
+}
+```
+
+> **Platforms**: the scheduler runs everywhere, down to AVR. Coroutines and `await()` — for sequential async like "fetch, wait for the reply, then apply it" — need an RTOS-capable target (ESP32, Teensy 4.x, host/WASM builds).
+
+**More examples & full API reference**: [src/fl/task/README.md](src/fl/task/README.md)
 
 ## 🆕 Latest Features
 
