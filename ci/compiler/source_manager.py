@@ -11,6 +11,10 @@ from pathlib import Path
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
+_GENERATED_EXAMPLE_DIRS = frozenset({".build", ".fbuild", ".pio", "fastled_js"})
+_GENERATED_EXAMPLE_FILES = frozenset({"compile_commands.json"})
+
+
 def _scandir_sync(
     source: str, dest: str, purge: bool = True, content: bool = False
 ) -> None:
@@ -216,8 +220,10 @@ def copy_example_source(project_root: Path, build_dir: Path, example: str) -> bo
     # Copy all files and subdirectories from example directory to sketch subdirectory
     ino_files: list[str] = []
     for file_path in example_path.iterdir():
-        if "fastled_js" in str(file_path):
-            # skip fastled_js output folder.
+        if file_path.is_dir() and file_path.name in _GENERATED_EXAMPLE_DIRS:
+            # Build output inside an example must never become sketch source.
+            continue
+        if file_path.is_file() and file_path.name in _GENERATED_EXAMPLE_FILES:
             continue
 
         if file_path.is_file():
