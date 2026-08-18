@@ -353,6 +353,14 @@
   #define FL_NO_INLINE
 #endif
 
+// Mark an error/recovery helper as cold so supported compilers optimize it for
+// size and keep it out of the normal instruction path.
+#if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
+  #define FL_COLD __attribute__((cold))
+#else
+  #define FL_COLD
+#endif
+
 // Place a function in RAM instead of flash, so it executes with zero flash
 // wait states. On parts whose flash cannot be fetched at full core speed
 // (e.g. LPC845 @ 30 MHz, no flash accelerator), the cycle-counted WS2812 bit

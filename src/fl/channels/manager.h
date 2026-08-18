@@ -30,6 +30,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/compiler_control.h"
 #include "platforms/channel_poll_signal.h"
 
 namespace fl {
@@ -247,6 +248,20 @@ public:
     void reset() FL_NO_EXCEPT;
 
 private:
+    enum class AddDriverSlowReason : u8 {
+        NULL_DRIVER,
+        EMPTY_NAME,
+        DUPLICATE_NAME,
+    };
+
+    /// Handle validation failures and the uncommon replacement flow outside
+    /// the normal driver-registration path.
+    FL_NO_INLINE FL_COLD bool addDriverSlow(
+        int priority,
+        const fl::shared_ptr<IChannelDriver>& driver,
+        const fl::string* engineName,
+        AddDriverSlowReason reason) FL_NO_EXCEPT;
+
     /// @brief Wait until a condition is met, with check-pump-delay logic
     /// @param condition Function that returns true when waiting should stop
     /// @param timeoutMs Optional timeout in milliseconds (0 = no timeout)

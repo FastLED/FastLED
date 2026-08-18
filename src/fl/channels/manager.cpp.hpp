@@ -5,8 +5,6 @@
 #include "fl/channels/detail/wait_spin_budget.h"
 #include "fl/stl/singleton.h"
 #include "fl/log/log.h"
-#include "fl/log/log.h"
-#include "fl/log/log.h"
 #include "fl/system/engine_events.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/algorithm.h"
@@ -84,9 +82,58 @@ u32 ChannelManager::pollNeededWaitSliceMs(u32 startTime, u32 timeoutMs) const FL
     return remaining < kPollNeededFallbackSliceMs ? remaining : kPollNeededFallbackSliceMs;
 }
 
+FL_NO_INLINE FL_COLD bool ChannelManager::addDriverSlow(
+    int priority,
+    const fl::shared_ptr<IChannelDriver>& driver,
+    const fl::string* engineName,
+    AddDriverSlowReason reason) FL_NO_EXCEPT {
+    if (reason == AddDriverSlowReason::NULL_DRIVER) {
+        FL_WARN_F("ChannelManager::addDriver() - Null driver provided");
+        return false;
+    }
+    if (reason == AddDriverSlowReason::EMPTY_NAME) {
+        FL_WARN_F("ChannelManager::addDriver() - Engine has empty name (driver->getName() returned empty string)");
+        return false;
+    }
+
+    for (const auto& entry : mDrivers) {
+        if (entry.name == *engineName) {
+            // True-duplicate fast path: same shared_ptr at same priority is
+            // a no-op (legacy clockless controllers may pre-bind the same
+            // driver singleton from many template instantiations). Skip the
+            // replace flow entirely so we don't waitForReady() or emit a
+            // spurious "Replacing" warning.
+            if (entry.driver == driver && entry.priority == priority) {
+                FL_DBG_F("ChannelManager::addDriver() - '%s' already registered at priority %s (idempotent no-op)", engineName->c_str(), priority);
+                return false;
+            }
+            FL_WARN_F("ChannelManager::addDriver() - Replacing existing driver '%s'", engineName->c_str());
+
+            FL_DBG_F("ChannelManager: Waiting for all drivers to become READY before replacement");
+            waitForReady();
+
+            // Re-scan after waiting: task pumping in waitForReady() can run
+            // callbacks, so do not retain an index or iterator across it.
+            for (size_t i = 0; i < mDrivers.size(); ++i) {
+                if (mDrivers[i].name != *engineName) {
+                    continue;
+                }
+                FL_DBG_F("ChannelManager: Removing old driver '%s' (shared_ptr may delete)", engineName->c_str());
+                if (mDrivers[i].driver) {
+                    mDrivers[i].driver->setPollNeededCallback(IChannelDriver::PollNeededCallback());
+                }
+                mDrivers.erase(mDrivers.begin() + i);
+                break;
+            }
+            return true;
+        }
+    }
+    return true;
+}
+
 void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driver) {
     if (!driver) {
-        FL_WARN_F("ChannelManager::addDriver() - Null driver provided");
+        (void)addDriverSlow(priority, driver, nullptr, AddDriverSlowReason::NULL_DRIVER);
         return;
     }
 
@@ -95,44 +142,17 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
 
     // Reject drivers with empty names
     if (engineName.empty()) {
-        FL_WARN_F("ChannelManager::addDriver() - Engine has empty name (driver->getName() returned empty string)");
+        (void)addDriverSlow(priority, driver, &engineName, AddDriverSlowReason::EMPTY_NAME);
         return;
     }
 
-    // Check if driver with this name already exists
-    bool replacing = false;
+    // A duplicate name takes the uncommon replacement/idempotency path.
     for (const auto& entry : mDrivers) {
         if (entry.name == engineName) {
-            // True-duplicate fast path: same shared_ptr at same priority is
-            // a no-op (legacy clockless controllers may pre-bind the same
-            // driver singleton from many template instantiations). Skip the
-            // replace flow entirely so we don't waitForReady() or emit a
-            // spurious "Replacing" warning.
-            if (entry.driver == driver && entry.priority == priority) {
-                FL_DBG_F("ChannelManager::addDriver() - '%s' already registered at priority %s (idempotent no-op)", engineName.c_str(), priority);
+            if (!addDriverSlow(priority, driver, &engineName, AddDriverSlowReason::DUPLICATE_NAME)) {
                 return;
             }
-            replacing = true;
-            FL_WARN_F("ChannelManager::addDriver() - Replacing existing driver '%s'", engineName.c_str());
             break;
-        }
-    }
-
-    // If replacing, wait for all drivers to become READY
-    if (replacing) {
-        FL_DBG_F("ChannelManager: Waiting for all drivers to become READY before replacement");
-        waitForReady();
-
-        // Remove the old driver with matching name (shared_ptr may trigger deletion)
-        for (size_t i = 0; i < mDrivers.size(); ++i) {
-            if (mDrivers[i].name == engineName) {
-                FL_DBG_F("ChannelManager: Removing old driver '%s' (shared_ptr may delete)", engineName.c_str());
-                if (mDrivers[i].driver) {
-                    mDrivers[i].driver->setPollNeededCallback(IChannelDriver::PollNeededCallback());
-                }
-                mDrivers.erase(mDrivers.begin() + i);
-                break;
-            }
         }
     }
 
