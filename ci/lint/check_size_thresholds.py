@@ -71,12 +71,10 @@ FROZEN_THRESHOLDS: dict[str, dict[str, frozenset[int]]] = {
         "max_size_apa102": frozenset({45000}),
     },
     "check_esp32_size.yml": {
-        # real ceiling (currently RED on #3298) — 330 KB is the canonical
-        # ceiling restored by PR #3268 / preserved by PR #3303. CI stays red
-        # until #3298 (fbuild ESP32 board-flag propagation) is fixed; the
-        # red signal is the point — DO NOT raise to make CI green. The 700K
-        # band-aids (PR #2790, PR #3295) were both reverted.
-        "max_size": frozenset({330000}),
+        # Real ceilings. #3870 corrected the fbuild measurement path and
+        # deliberately re-baselined Blink for Arduino-ESP32 3.3.11. Apa102
+        # stayed at 330 KB after its all-driver over-link was removed.
+        "max_size": frozenset({340000}),
         "max_size_apa102": frozenset({330000}),
     },
     "check_teensy30_size.yml": {

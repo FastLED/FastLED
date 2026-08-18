@@ -12,6 +12,9 @@
 // ESP32 always uses hardware SPI via GPIO matrix - no conditional needed
 // IWYU pragma: begin_keep
 #include "platforms/esp/32/core/fastspi_esp32.h"
+#include "platforms/esp/32/drivers/i2s_spi/bus_traits.h"
+#include "platforms/esp/32/drivers/lcd_spi/bus_traits.h"
+#include "platforms/esp/32/drivers/parlio/bus_traits.h"
 // IWYU pragma: end_keep
 
 

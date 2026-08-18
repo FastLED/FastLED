@@ -162,19 +162,19 @@ fl::TypedChannel<fl::Bus::DUAL_SPI, fl::ClocklessChipset>::create(cfg);  // comp
 
 `TypedChannel<Bus, Chipset>` lives in `fl/channels/channel_typed.h`. It returns a `ChannelPtr` to the regular non-template runtime `Channel` so callbacks, the draw list, and `ChannelManager` see one channel type.
 
-**`addLeds<>` Bus pinning (#2460):** every `FastLED.addLeds<>` variant accepts an optional trailing `fl::Bus B = fl::Bus::AUTO` template parameter. `B = AUTO` (the default) leaves call sites byte-for-byte unchanged; `B != AUTO` ODR-uses `fl::BusTraits<B>::instance` via `fl::busKeepAlive<B>()` so `--gc-sections` retains the named driver TU.
+**`addLeds<>` Bus pinning (#2460):** every `FastLED.addLeds<>` variant accepts an optional trailing `fl::Bus B = fl::Bus::AUTO` template parameter. For legacy and clockless controller paths, an explicit `B != AUTO` ODR-uses `fl::BusTraits<B>::instance` via `fl::busKeepAlive<B>()` so `--gc-sections` retains the named driver TU. On platforms where SPI controllers use the Channel API, `TypedChannel` resolves `AUTO` to `DefaultBus<SpiChipsetConfig>`, registers only that selected bus specialization and its associated driver(s) with `ChannelManager`, and creates the channel without calling `enableAllDrivers()`.
 
 ```cpp
 // Clockless: pin to RMT at compile time.
 FastLED.addLeds<WS2812, 4, GRB, fl::Bus::RMT>(leds, 60);
 
-// SPI: pin to SPI at compile time.
-FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(12), fl::Bus::SPI>(leds, 60);
-// Select the second SPI instance when a platform exposes more than one.
+// SPI: use the platform's compile-time default bus.
+FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(12), fl::Bus::AUTO>(leds, 60);
+// Or name a bus supported by the target (for example, RP2040 hardware SPI).
 FastLED.addLeds<APA102, 11, 10, RGB, DATA_RATE_MHZ(12), fl::Bus::SPI, 1>(leds, 60);
 ```
 
-The Bus parameter triggers linker keep-alive in every variant. For the SPI variants on the `FASTLED_SPI_USES_CHANNEL_API` branch, the parameter also populates `cfg.options.mBus = B` so the channel routes through the named driver at runtime. Non-Channel-API controllers (older `ClocklessController` subclasses that pre-date the Channel API) keep their platform-default routing and rely on the linker keep-alive alone — for full runtime routing through a specific Bus, prefer `FastLED.add(cfg)` with `cfg.options.mBus = B`.
+For SPI variants on the `FASTLED_SPI_USES_CHANNEL_API` branch, the Bus and instance parameters select a `TypedChannel<B, SpiChipsetConfig, Which>`. That factory resolves `AUTO`, registers the selected `BusTraits` specialization and its associated driver(s), and stores the resolved bus in the channel config, so the selected bus implementation is linked and available for dispatch. An explicit Bus must satisfy `BusSupports` for the target platform; `AUTO` is the portable choice. Non-Channel-API controllers (older `ClocklessController` subclasses that pre-date the Channel API) keep their platform-default routing and rely on linker keep-alive alone — for full runtime routing through a specific Bus, prefer `FastLED.add(cfg)` with `cfg.options.mBus = B`.
 
 ### Runtime Bus Selection (non-template `FastLED.add(cfg)`)
 

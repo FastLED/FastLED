@@ -174,6 +174,25 @@ def _run_size_on_elf(size_tool: Path, elf: Path) -> int | None:
     return _parse_size_tool_text(output)
 
 
+def _find_size_tool(board_info: dict[str, Any]) -> Path | None:
+    """Return the cross-toolchain size executable from build metadata.
+
+    PlatformIO metadata exposes tool paths under ``aliases``. Some older
+    metadata producers also emitted a top-level ``size_path`` key, so retain
+    that compatibility path first.
+    """
+    size_path = board_info.get("size_path")
+    if isinstance(size_path, str) and size_path:
+        return Path(size_path)
+
+    aliases = board_info.get("aliases")
+    if isinstance(aliases, dict):
+        alias = aliases.get("size")
+        if isinstance(alias, str) and alias:
+            return Path(alias)
+    return None
+
+
 def _find_fbuild_elf(board_info: dict[str, Any], build_dir: Path) -> Path | None:
     """Locate the ELF that fbuild produced for this build, if any.
 
@@ -233,9 +252,9 @@ def check_firmware_size(board: str, example: str | None = None) -> int:
     # PIO binary which is ~169 KB larger on esp32dev. Without this branch
     # the CI size-check measures the wrong build.
     fbuild_elf = _find_fbuild_elf(board_info, build_dir)
-    size_tool = board_info.get("size_path")
-    if fbuild_elf is not None and isinstance(size_tool, str) and size_tool:
-        size = _run_size_on_elf(Path(size_tool), fbuild_elf)
+    size_tool = _find_size_tool(board_info)
+    if fbuild_elf is not None and size_tool is not None:
+        size = _run_size_on_elf(size_tool, fbuild_elf)
         if size is not None:
             print(
                 f"[compiled_size] measured fbuild ELF: {fbuild_elf} "
@@ -244,7 +263,7 @@ def check_firmware_size(board: str, example: str | None = None) -> int:
             return size
         print(
             f"[compiled_size] WARNING: found fbuild ELF {fbuild_elf} "
-            f"but size tool {size_tool!r} returned no parsable output; "
+            f"but size tool {str(size_tool)!r} returned no parsable output; "
             f"falling through to pio size."
         )
     elif fbuild_elf is None:

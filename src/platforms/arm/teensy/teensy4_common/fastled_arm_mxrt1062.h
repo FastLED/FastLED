@@ -12,5 +12,6 @@
 #include "platforms/arm/teensy/teensy4_common/clockless_arm_mxrt1062.h"
 #include "platforms/arm/teensy/teensy4_common/block_clockless_arm_mxrt1062.h"
 #include "platforms/arm/teensy/teensy4_common/clockless_objectfled.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/bus_traits.h"
 
 #endif

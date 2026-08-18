@@ -72,6 +72,8 @@ FL_TEST_CASE("TypedChannel<Bus::AUTO, ClocklessChipset>::create resolves to host
 }
 
 FL_TEST_CASE("TypedChannel<Bus::BIT_BANG, ClocklessChipset>::create binds BIT_BANG") {
+    auto& manager = fl::ChannelManager::instance();
+    manager.clearAllDrivers();
     CRGB workspace[3];
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
     fl::ChannelConfigOf<fl::ClocklessChipset> cfg{
@@ -83,6 +85,7 @@ FL_TEST_CASE("TypedChannel<Bus::BIT_BANG, ClocklessChipset>::create binds BIT_BA
     FL_REQUIRE(channel != nullptr);
     FL_CHECK(channel->isClockless());
     FL_CHECK(channel->getPin() == 8);
+    FL_CHECK(manager.getDriverByName(fl::string::from_literal("BIT_BANG")) != nullptr);
 
     channel->removeFromDrawList();
 }

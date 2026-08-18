@@ -6,5 +6,6 @@
 
 #include "platforms/arm/rp/rp2040/fastpin_arm_rp2040.h"
 #include "platforms/arm/rp/rp2040/clockless_arm_rp2040.h"
+#include "platforms/arm/rp/rpcommon/rp_spi_bus_traits.h"
 
 #endif

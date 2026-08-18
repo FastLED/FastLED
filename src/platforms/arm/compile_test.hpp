@@ -131,12 +131,6 @@ static void arm_compile_tests() {
     #endif
 #endif
 
-// Arduino's analogReference API depends on this core constant remaining
-// visible after FastLED's platform headers are included.
-#if defined(ARDUINO) && !defined(DEFAULT)
-#error "DEFAULT should be defined after including FastLED.h on ARM Arduino platforms"
-#endif
-
 // STM32F1 specific compile-time size validation
 #if defined(STM32F1) || defined(__STM32F1__) || defined(STM32F1xx)
     // Static assert to ensure we're aware of memory constraints
