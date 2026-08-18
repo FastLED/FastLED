@@ -466,13 +466,11 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
     // Now scale everything down if we're at value < 255.
     if( val != 255 ) {
 
-        val = scale8_video_LEAVING_R1_DIRTY( val, val);
+        // This call is followed by branching before any other scale8 batch,
+        // so use the cleaning form rather than carrying dirty R1 through C++.
+        val = scale8_video( val, val);
         if( val == 0 ) {
             r=0; g=0; b=0;
-            // The scale8_video_LEAVING_R1_DIRTY above dirtied R1 and this
-            // branch does no further scaling, so it has to clean up itself --
-            // only the else branch below batches into its own cleanup_R1().
-            cleanup_R1();
         } else {
             // nscale8x3_video( r, g, b, val);
 #if (FASTLED_SCALE8_FIXED==1)
