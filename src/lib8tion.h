@@ -575,12 +575,11 @@ LIB8STATIC fract8 ease8InOutCubic( fract8 i)
 {
     fl::u8 ii  = scale8_LEAVING_R1_DIRTY(  i, i);
     fl::u8 iii = scale8_LEAVING_R1_DIRTY( ii, i);
+    // Do not rely on the generated multiplication instructions to restore
+    // AVR's zero register: honor the _LEAVING_R1_DIRTY contract explicitly.
+    cleanup_R1();
 
     fl::u16 r1 = (3 * (fl::u16)(ii)) - ( 2 * (fl::u16)(iii));
-
-    /* the code generated for the above *'s automatically
-       cleans up R1, so there's no need to explicitily call
-       cleanup_R1(); */
 
     fl::u8 result = r1;
 

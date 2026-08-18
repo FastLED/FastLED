@@ -186,6 +186,7 @@ void fadeUsingColor(CRGB *leds, fl::u16 numLeds, const CRGB &colormask) {
         leds[i].g = scale8_LEAVING_R1_DIRTY(leds[i].g, fg);
         leds[i].b = scale8(leds[i].b, fb);
     }
+    cleanup_R1();
 }
 
 // CRGB HeatColor( fl::u8 temperature)

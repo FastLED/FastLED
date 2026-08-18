@@ -876,4 +876,115 @@ constexpr int kX = 5;
         assert!(ContainerNonContiguousPtrChecker
             .should_process_file("src/fl/deque.h", Path::new(".")));
     }
+
+    #[test]
+    fn r1_cleanup_flags_dirty_early_return() {
+        let hits = R1CleanupChecker.check_file_content(&file(
+            "src/example.cpp",
+            concat!(
+                "u8 convert(bool stop) {\n",
+                "  u8 value = scale8_LEAVING_R1_DIRTY(1, 2);\n",
+                "  if (stop) { return value; }\n",
+                "  cleanup_R1();\n",
+                "  return value;\n",
+                "}\n",
+            ),
+        ));
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].0, 3);
+    }
+
+    #[test]
+    fn r1_cleanup_tracks_branch_that_skips_cleanup() {
+        let hits = R1CleanupChecker.check_file_content(&file(
+            "src/example.cpp",
+            concat!(
+                "void convert(bool scale, bool clean) {\n",
+                "  if (scale) value = scale8_video_LEAVING_R1_DIRTY(value, value);\n",
+                "  if (clean) { cleanup_R1(); }\n",
+                "}\n",
+            ),
+        ));
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].0, 4);
+    }
+
+    #[test]
+    fn r1_cleanup_accepts_cleanup_on_every_branch() {
+        let hits = R1CleanupChecker.check_file_content(&file(
+            "src/example.cpp",
+            concat!(
+                "u8 convert(bool zero) {\n",
+                "  u8 value = scale8_LEAVING_R1_DIRTY(1, 2);\n",
+                "  if (zero) { cleanup_R1(); return 0; }\n",
+                "  else { cleanup_R1(); return value; }\n",
+                "}\n",
+            ),
+        ));
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn r1_cleanup_flags_dirty_loop_iteration() {
+        let hits = R1CleanupChecker.check_file_content(&file(
+            "src/example.cpp",
+            concat!(
+                "void convert(int count) {\n",
+                "  for (int i = 0; i < count; ++i) {\n",
+                "    value = scale8_LEAVING_R1_DIRTY(value, 2);\n",
+                "  }\n",
+                "}\n",
+            ),
+        ));
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].0, 5);
+    }
+
+    #[test]
+    fn r1_cleanup_ignores_comments_and_strings() {
+        let hits = R1CleanupChecker.check_file_content(&file(
+            "src/example.cpp",
+            concat!(
+                "void convert() {\n",
+                "  // scale8_LEAVING_R1_DIRTY(value, 2);\n",
+                "  const char* text = \"scale8_LEAVING_R1_DIRTY\";\n",
+                "}\n",
+            ),
+        ));
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn r1_cleanup_tracks_calls_in_conditions() {
+        let hits = R1CleanupChecker.check_file_content(&file(
+            "src/example.cpp",
+            concat!(
+                "void convert() {\n",
+                "  if (scale8_LEAVING_R1_DIRTY(value, 2)) { return; }\n",
+                "  cleanup_R1();\n",
+                "}\n",
+            ),
+        ));
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].0, 2);
+    }
+
+    #[test]
+    fn r1_cleanup_flags_dirty_control_transfer() {
+        let hits = R1CleanupChecker.check_file_content(&file(
+            "src/example.cpp",
+            concat!(
+                "void convert(int count) {\n",
+                "  for (int i = 0; i < count; ++i) {\n",
+                "    value = scale8_LEAVING_R1_DIRTY(value, 2);\n",
+                "    if (value == 0) continue;\n",
+                "    cleanup_R1();\n",
+                "  }\n",
+                "}\n",
+            ),
+        ));
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].0, 7);
+    }
+
 }
