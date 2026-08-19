@@ -47,6 +47,7 @@
 #include "fl/channels/config.h"
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 #include "platforms/arm/rp/rpcommon/rp_pio_tx_bus_traits.h"
+#include "platforms/arm/rp/rpcommon/rp_uart_bus_traits.h"
 #endif
 #include <Arduino.h>
 
@@ -1054,6 +1055,18 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     response.set("captureBackend", capture_backend.c_str());
     response.set("laneCount", static_cast<int64_t>(lane_sizes.size()));
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+    if (driver_name == "UART0" || driver_name == "UART1") {
+        auto& uart = driver_name == "UART0"
+                         ? fl::BusTraits<fl::Bus::UART, 0>::instance()
+                         : fl::BusTraits<fl::Bus::UART, 1>::instance();
+        response.set("rpUartStartAttempted", uart.lastStartAttempted());
+        response.set("rpUartStartSucceeded", uart.lastStartSucceeded());
+        response.set("rpUartEncodedSize",
+                     static_cast<int64_t>(uart.lastEncodedSize()));
+        response.set("rpUartActualBaud",
+                     static_cast<int64_t>(uart.lastActualBaud()));
+        response.set("rpUartLastError", uart.lastError().c_str());
+    }
     if (driver_name == "PIO0" || driver_name == "PIO1") {
         auto& pio = driver_name == "PIO0"
                         ? fl::BusTraits<fl::Bus::FLEX_IO, 0>::instance()

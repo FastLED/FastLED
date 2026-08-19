@@ -3951,6 +3951,32 @@ def _validate_test_rpc_response(
     if not isinstance(data.get("passed"), bool):
         errors.append("missing boolean passed")
 
+    rp_uart_fields = (
+        "rpUartStartAttempted",
+        "rpUartStartSucceeded",
+        "rpUartEncodedSize",
+        "rpUartActualBaud",
+        "rpUartLastError",
+    )
+    command_params = cmd.get("params")
+    expected_driver = (
+        command_params.get("driver") if isinstance(command_params, dict) else None
+    )
+    requires_rp_uart_diagnostics = method == "runSingleTest" and expected_driver in {
+        "UART0",
+        "UART1",
+    }
+    if requires_rp_uart_diagnostics or any(field in data for field in rp_uart_fields):
+        for field in ("rpUartStartAttempted", "rpUartStartSucceeded"):
+            if not isinstance(data.get(field), bool):
+                errors.append(f"{field} must be boolean")
+        for field in ("rpUartEncodedSize", "rpUartActualBaud"):
+            value = data.get(field)
+            if not _is_plain_int(value) or value < 0:
+                errors.append(f"{field} must be a nonnegative integer")
+        if not isinstance(data.get("rpUartLastError"), str):
+            errors.append("rpUartLastError must be a string")
+
     total_tests = data.get("totalTests")
     passed_tests = data.get("passedTests")
     if not _is_plain_int(total_tests):
@@ -4129,6 +4155,20 @@ def _classify_test_failure(data: dict[str, Any]) -> tuple[str, str]:
     return ("test_failed", "test response reported failure")
 
 
+def _display_rp_uart_diagnostics(data: dict[str, Any]) -> None:
+    """Print the typed RP UART start evidence carried by runSingleTest."""
+    if "rpUartStartAttempted" not in data:
+        return
+    print(
+        "   RP UART: "
+        f"attempted={data['rpUartStartAttempted']} "
+        f"started={data.get('rpUartStartSucceeded')} "
+        f"encodedBytes={data.get('rpUartEncodedSize')} "
+        f"actualBaud={data.get('rpUartActualBaud')} "
+        f"lastError={data.get('rpUartLastError', '')!r}"
+    )
+
+
 async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
     """Execute main RPC test loop."""
     upload_port = ctx.upload_port
@@ -4290,6 +4330,7 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
 
                     display_tight_timing(test_data)
                     display_objectfled_diagnostics(test_data)
+                    _display_rp_uart_diagnostics(test_data)
 
                     if "drivers" in test_data and isinstance(
                         test_data["drivers"], list
@@ -4355,6 +4396,7 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
 
                     display_tight_timing(test_data)
                     display_objectfled_diagnostics(test_data)
+                    _display_rp_uart_diagnostics(test_data)
 
                     if "patterns" in test_data:
                         display_pattern_details(test_data)

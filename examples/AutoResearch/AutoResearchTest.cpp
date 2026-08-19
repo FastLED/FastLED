@@ -468,6 +468,7 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     // requested PLATFORM_DEFAULT enum. Recognize both that public default and
     // an explicit PIO backend so the DMA capture is sized per frame.
     const bool is_rp_pio_capture =
+        rx_channel->backend() == fl::RxBackend::PLATFORM_DEFAULT ||
         rx_channel->backend() == fl::RxBackend::PIO ||
         fl::strcmp(driver_name, "PIO0") == 0 || fl::strcmp(driver_name, "PIO1") == 0 ||
         fl::strcmp(driver_name, "PIO2") == 0;

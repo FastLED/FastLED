@@ -17,7 +17,9 @@ ChannelEngineRpUart::ChannelEngineRpUart(
     fl::shared_ptr<IRpUartPeripheral> peripheral, u8 uart_index) FL_NO_EXCEPT
     : mPeripheral(fl::move(peripheral)), mUartIndex(uart_index),
       mCurrentChannel(0), mLatchStartUs(0), mLatchDurationUs(0),
-      mActive(false), mLatchPending(false), mFailed(false) {}
+      mActive(false), mLatchPending(false), mFailed(false),
+      mLastStartAttempted(false), mLastStartSucceeded(false),
+      mLastEncodedSize(0), mLastActualBaud(0) {}
 
 ChannelEngineRpUart::~ChannelEngineRpUart() {
     releaseInFlight();
@@ -59,6 +61,11 @@ void ChannelEngineRpUart::show() FL_NO_EXCEPT {
     mCurrentChannel = 0;
     mFailed = false;
     mError.clear();
+    mLastStartAttempted = false;
+    mLastStartSucceeded = false;
+    mLastEncodedSize = 0;
+    mLastActualBaud = 0;
+    mLastError.clear();
     for (const ChannelDataPtr& channel : mInFlightChannels) {
         if (channel) {
             channel->setInUse(true);
@@ -69,7 +76,10 @@ void ChannelEngineRpUart::show() FL_NO_EXCEPT {
         // show() has no status return. Preserve the error until the manager's
         // next poll, while still releasing the input buffers on that poll.
         mFailed = true;
-        mError = "RP UART: unable to start queued channel";
+        if (mError.empty()) {
+            mError = "RP UART: unable to start queued channel";
+            mLastError = mError;
+        }
     }
 }
 
@@ -116,7 +126,8 @@ IChannelDriver::DriverState ChannelEngineRpUart::poll() FL_NO_EXCEPT {
         return DriverState::BUSY;
     }
     if (mCurrentChannel < mInFlightChannels.size()) {
-        return fail("RP UART: unable to start queued channel");
+        return fail(mError.empty() ? "RP UART: unable to start queued channel"
+                                   : mError.c_str());
     }
     mPeripheral->deinitialize();
     releaseInFlight();
@@ -136,17 +147,27 @@ bool ChannelEngineRpUart::startNextTransmission() FL_NO_EXCEPT {
 
 bool ChannelEngineRpUart::beginTransmission(const ChannelDataPtr& channel) FL_NO_EXCEPT {
     if (!mPeripheral || !canHandle(channel)) {
+        mError = "RP UART: invalid channel";
+        mLastError = mError;
         return false;
     }
     const fl::vector_psram<u8>& input = channel->getData();
     if (input.empty()) {
+        mError = "RP UART: empty channel";
+        mLastError = mError;
         return false;
     }
     const Wave10Lut lut = buildWave10LutForMaxBaud(channel->getTiming(),
                                                     kRpUartMaxBaudRate);
     if (lut.pulses_per_bit == 0) {
+        mError = "RP UART: timing is not representable";
+        mLastError = mError;
         return false;
     }
+    mLastStartAttempted = true;
+    mLastStartSucceeded = false;
+    mLastEncodedSize = 0;
+    mLastActualBaud = 0;
     RpUartConfig config;
     config.uart_index = mUartIndex;
     config.tx_pin = static_cast<u8>(channel->getPin());
@@ -154,9 +175,12 @@ bool ChannelEngineRpUart::beginTransmission(const ChannelDataPtr& channel) FL_NO
     config.data_bits = lut.dataBits();
     config.invert_tx = true;
     if (!mPeripheral->configure(config)) {
+        mError = "RP UART: peripheral configure failed";
+        mLastError = mError;
         return false;
     }
     const u32 actual_baud = mPeripheral->actualBaudRate();
+    mLastActualBaud = actual_baud;
     const u32 requested_baud = config.baud_rate;
     const u32 baud_error = actual_baud > requested_baud
                                ? actual_baud - requested_baud
@@ -165,13 +189,29 @@ bool ChannelEngineRpUart::beginTransmission(const ChannelDataPtr& channel) FL_NO
     // to 1%, leaving that margin intact instead of silently stretching every
     // high/low symbol beyond the timing model.
     if (actual_baud == 0 || static_cast<u64>(baud_error) * 100u > requested_baud) {
+        mError = "RP UART: achieved baud outside tolerance";
+        mLastError = mError;
         return false;
     }
     mEncodedBuffer.resize(calculateUartBufferSize(input.size()));
     const size_t encoded = encodeLedsToUart(input.data(), input.size(),
                                             mEncodedBuffer.data(),
                                             mEncodedBuffer.size(), lut);
-    return encoded != 0 && mPeripheral->startTxDma(mEncodedBuffer.data(), encoded);
+    mLastEncodedSize = encoded;
+    if (encoded == 0) {
+        mError = "RP UART: encoding failed";
+        mLastError = mError;
+        return false;
+    }
+    if (!mPeripheral->startTxDma(mEncodedBuffer.data(), encoded)) {
+        mError = "RP UART: DMA start failed";
+        mLastError = mError;
+        return false;
+    }
+    mLastStartSucceeded = true;
+    mError.clear();
+    mLastError.clear();
+    return true;
 }
 
 void ChannelEngineRpUart::releaseInFlight() FL_NO_EXCEPT {
@@ -189,6 +229,7 @@ void ChannelEngineRpUart::releaseInFlight() FL_NO_EXCEPT {
 }
 
 IChannelDriver::DriverState ChannelEngineRpUart::fail(const char* message) FL_NO_EXCEPT {
+    mLastError = message;
     if (mPeripheral) {
         mPeripheral->abort();
         mPeripheral->deinitialize();

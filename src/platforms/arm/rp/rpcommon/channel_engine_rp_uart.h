@@ -33,6 +33,12 @@ class ChannelEngineRpUart final : public IChannelDriver {
         return Capabilities(true, false);
     }
 
+    bool lastStartAttempted() const FL_NO_EXCEPT { return mLastStartAttempted; }
+    bool lastStartSucceeded() const FL_NO_EXCEPT { return mLastStartSucceeded; }
+    size_t lastEncodedSize() const FL_NO_EXCEPT { return mLastEncodedSize; }
+    u32 lastActualBaud() const FL_NO_EXCEPT { return mLastActualBaud; }
+    const fl::string& lastError() const FL_NO_EXCEPT { return mLastError; }
+
   private:
     bool startNextTransmission() FL_NO_EXCEPT;
     bool beginTransmission(const ChannelDataPtr& channel) FL_NO_EXCEPT;
@@ -52,6 +58,11 @@ class ChannelEngineRpUart final : public IChannelDriver {
     bool mLatchPending;
     bool mFailed;
     fl::string mError;
+    bool mLastStartAttempted;
+    bool mLastStartSucceeded;
+    size_t mLastEncodedSize;
+    u32 mLastActualBaud;
+    fl::string mLastError;
 };
 
 }  // namespace fl

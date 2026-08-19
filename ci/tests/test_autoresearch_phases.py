@@ -633,6 +633,76 @@ class TestParseArgsAndBuildCommands:
             "runSingleTest", command, response, None, None
         ) == ["patterns[0] missing integer totalLeds for WS2814"]
 
+    @pytest.mark.parametrize(
+        ("field", "value", "expected"),
+        (
+            ("rpUartStartAttempted", "yes", "rpUartStartAttempted must be boolean"),
+            ("rpUartStartSucceeded", 1, "rpUartStartSucceeded must be boolean"),
+            (
+                "rpUartEncodedSize",
+                -1,
+                "rpUartEncodedSize must be a nonnegative integer",
+            ),
+            (
+                "rpUartActualBaud",
+                True,
+                "rpUartActualBaud must be a nonnegative integer",
+            ),
+            ("rpUartLastError", None, "rpUartLastError must be a string"),
+        ),
+    )
+    def test_rp_uart_diagnostics_require_typed_contract(
+        self, field: str, value: object, expected: str
+    ) -> None:
+        command = {
+            "method": "runSingleTest",
+            "params": {"driver": "UART", "laneSizes": [1]},
+        }
+        response = {
+            "success": True,
+            "passed": False,
+            "totalTests": 1,
+            "passedTests": 0,
+            "driver": "UART",
+            "rpUartStartAttempted": True,
+            "rpUartStartSucceeded": False,
+            "rpUartEncodedSize": 0,
+            "rpUartActualBaud": 0,
+            "rpUartLastError": "RP UART: peripheral configure failed",
+        }
+        response[field] = value
+
+        errors = _validate_test_rpc_response(
+            "runSingleTest", command, response, None, None
+        )
+
+        assert expected in errors
+
+    def test_rp_uart_response_requires_complete_diagnostic_bundle(self) -> None:
+        command = {
+            "method": "runSingleTest",
+            "params": {"driver": "UART0", "laneSizes": [1]},
+        }
+        response = {
+            "success": True,
+            "passed": False,
+            "totalTests": 1,
+            "passedTests": 0,
+            "driver": "UART0",
+        }
+
+        errors = _validate_test_rpc_response(
+            "runSingleTest", command, response, None, None
+        )
+
+        assert errors == [
+            "rpUartStartAttempted must be boolean",
+            "rpUartStartSucceeded must be boolean",
+            "rpUartEncodedSize must be a nonnegative integer",
+            "rpUartActualBaud must be a nonnegative integer",
+            "rpUartLastError must be a string",
+        ]
+
     def test_legacy_mixed_timings_requires_legacy(self, fake_project_dir: Path) -> None:
         args = _make_args(
             object_fled=True,
@@ -2989,8 +3059,26 @@ class TestRunTestsOrSpecialMode:
             rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
         assert rc == 0
 
-    def test_rpc_test_failure(self) -> None:
-        ctx = _make_ctx()
+    def test_rpc_test_failure_surfaces_rp_uart_diagnostics(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        ctx = _make_ctx(
+            args=_make_args(parlio=False, uart=True),
+            drivers=["UART0"],
+            json_rpc_commands=[
+                {
+                    "method": "runSingleTest",
+                    "params": {
+                        "driver": "UART0",
+                        "laneSizes": [100],
+                        "pattern": "MSB_LSB_A",
+                        "iterations": 1,
+                        "timing": "WS2812B-V5",
+                    },
+                }
+            ],
+            final_environment="rp2350w",
+        )
         qctx = QuietContext(quiet=False)
 
         mock_client = AsyncMock()
@@ -2998,10 +3086,17 @@ class TestRunTestsOrSpecialMode:
         mock_response.data = {
             "success": True,
             "passed": False,
-            "driver": "PARLIO",
+            "driver": "UART0",
             "laneCount": 1,
             "laneSizes": [100],
             "duration_ms": 42,
+            "totalTests": 1,
+            "passedTests": 0,
+            "rpUartStartAttempted": True,
+            "rpUartStartSucceeded": False,
+            "rpUartEncodedSize": 0,
+            "rpUartActualBaud": 0,
+            "rpUartLastError": "RP UART: peripheral configure failed",
         }
         mock_client.send = AsyncMock(return_value=mock_response)
         mock_client.connect = AsyncMock()
@@ -3014,6 +3109,13 @@ class TestRunTestsOrSpecialMode:
         ):
             rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
         assert rc == 1
+        output = capsys.readouterr().out
+        assert "RP UART:" in output
+        assert "attempted=True" in output
+        assert "started=False" in output
+        assert "encodedBytes=0" in output
+        assert "actualBaud=0" in output
+        assert "lastError='RP UART: peripheral configure failed'" in output
 
     def test_rpc_control_success_without_passed_field(self) -> None:
         ctx = _make_ctx()
