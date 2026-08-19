@@ -728,6 +728,14 @@ Source of truth: `examples/AutoResearch/AutoResearchRemote.cpp` `mRemote->bind("
 | `runSingleTest` | `{driver, laneSizes, pattern?, timing?, iterations?}` | `{success, passed, totalTests, passedTests, duration_ms, driver, laneCount, laneSizes, pattern, firstFailure?}` |
 | `runParallelTest` | `{drivers:[{driver, laneSizes}, ...], pattern?, iterations?, timing?}` | `{success, passed, duration_ms, show_duration_us, drivers:[...], rx_validation_attempted, rx_validation_passed}` |
 
+RP UART `runSingleTest` responses also carry a typed diagnostic bundle:
+`rpUartStartAttempted:boolean`, `rpUartStartSucceeded:boolean`,
+`rpUartEncodedSize:nonnegative integer`,
+`rpUartActualBaud:nonnegative integer`, and `rpUartLastError:string`.
+`bash autoresearch` validates this contract and prints the bundle for both
+passing and failing UART tests so a zero-capture failure preserves its
+configuration, baud, encoding, or DMA-start cause.
+
 **Phase 4 — Utility & benchmarks**
 
 | Command | Args | Description |

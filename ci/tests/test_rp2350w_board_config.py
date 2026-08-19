@@ -42,9 +42,10 @@ def test_rp2350w_selects_the_pico_2_w_board_profile() -> None:
     assert board.framework == "arduino"
     assert board.board_build_core == "earlephilhower"
     assert board.platform_packages is not None
-    assert "arduino-pico/releases/download/4.5.3/rp2040-4.5.3.zip" in (
+    assert "arduino-pico/releases/download/5.7.0/rp2040-5.7.0.zip" in (
         board.platform_packages
     )
+    assert board.defines is None
 
     ini = board.to_platformio_ini()
     assert "[env:rp2350w]" in ini
@@ -98,6 +99,12 @@ def test_autoresearch_uses_uart_timing_for_both_rp_uart_engines() -> None:
 
     assert 'fl::strcmp(driver_name, "UART0") == 0' in source
     assert 'fl::strcmp(driver_name, "UART1") == 0' in source
+
+
+def test_autoresearch_frame_sizes_the_default_rp_pio_capture_buffer() -> None:
+    source = AUTORESEARCH_TEST.read_text(encoding="utf-8")
+
+    assert "rx_channel->backend() == fl::RxBackend::PLATFORM_DEFAULT" in source
 
 
 def test_autoresearch_reports_typed_device_info_for_both_rp_uart_engines() -> None:

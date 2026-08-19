@@ -91,6 +91,11 @@ FL_TEST_CASE("RP UART encoder represents every byte and preserves DMA versus wir
         FL_REQUIRE_EQ(peripheral->lastConfig.uart_index, 0);
         FL_REQUIRE_EQ(peripheral->lastConfig.tx_pin, 0);
         FL_REQUIRE_EQ(peripheral->bytes, static_cast<size_t>(4));
+        FL_REQUIRE(engine.lastStartAttempted());
+        FL_REQUIRE(engine.lastStartSucceeded());
+        FL_REQUIRE_EQ(engine.lastEncodedSize(), static_cast<size_t>(4));
+        FL_REQUIRE_EQ(engine.lastActualBaud(), peripheral->achievedBaud);
+        FL_REQUIRE(engine.lastError().empty());
         FL_REQUIRE_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);
         peripheral->dmaBusy = false;
         peripheral->wireBusy = true;
@@ -146,6 +151,9 @@ FL_TEST_CASE("RP UART start failure clears ownership and reports error on poll")
     engine.enqueue(channel);
     engine.show();
     FL_CHECK(channel->isInUse());
+    FL_CHECK(engine.lastStartAttempted());
+    FL_CHECK_FALSE(engine.lastStartSucceeded());
+    FL_CHECK_EQ(engine.lastError(), fl::string("RP UART: DMA start failed"));
     FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::ERROR);
     FL_CHECK_FALSE(channel->isInUse());
     FL_CHECK(peripheral->abortCalls > 0);
@@ -176,6 +184,8 @@ FL_TEST_CASE("RP UART reports a failed second start after preserving its latch i
     peripheral->timeUs += 1000;
     peripheral->configureOk = false;
     FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::ERROR);
+    FL_CHECK_EQ(engine.lastError(),
+                fl::string("RP UART: peripheral configure failed"));
     FL_CHECK_FALSE(first->isInUse());
     FL_CHECK_FALSE(second->isInUse());
 }
