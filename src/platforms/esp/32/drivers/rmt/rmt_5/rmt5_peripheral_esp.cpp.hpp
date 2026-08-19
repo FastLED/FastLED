@@ -55,6 +55,18 @@ FL_EXTERN_C_END
 namespace fl {
 namespace detail {
 
+#if FL_HAS_WARN
+namespace {
+
+FL_NO_INLINE FL_COLD void emitRmt5EncoderCreateFailure(
+    const char* encoder_kind, esp_err_t error) FL_NO_EXCEPT {
+    FL_WARN_F("[RMT5_ENCODER] Failed to create %s encoder: %s",
+              encoder_kind, esp_err_to_name(error));
+}
+
+} // namespace
+#endif
+
 //=============================================================================
 // Encoder Implementation (forward declaration)
 //=============================================================================
@@ -679,10 +691,10 @@ private:
         mBit1LowTicks = static_cast<u32>((timing.T3 + half_ns_per_tick) / ns_per_tick);
         mResetTicks = static_cast<u32>((timing.RESET * 1000ULL + half_ns_per_tick) / ns_per_tick);
 
-        FL_WARN_F("[RMT5_ENCODER] Timing config: resolution=%sHz, ns_per_tick=%s", resolution_hz, ns_per_tick);
-        FL_WARN_F("[RMT5_ENCODER] Bit0: high=%s ticks, low=%s ticks", mBit0HighTicks, mBit0LowTicks);
-        FL_WARN_F("[RMT5_ENCODER] Bit1: high=%s ticks, low=%s ticks", mBit1HighTicks, mBit1LowTicks);
-        FL_WARN_F("[RMT5_ENCODER] Reset: %s ticks", mResetTicks);
+        FL_DBG_F("[RMT5_ENCODER] Timing config: resolution=%sHz, ns_per_tick=%s", resolution_hz, ns_per_tick);
+        FL_DBG_F("[RMT5_ENCODER] Bit0: high=%s ticks, low=%s ticks", mBit0HighTicks, mBit0LowTicks);
+        FL_DBG_F("[RMT5_ENCODER] Bit1: high=%s ticks, low=%s ticks", mBit1HighTicks, mBit1LowTicks);
+        FL_DBG_F("[RMT5_ENCODER] Reset: %s ticks", mResetTicks);
 
         rmt_bytes_encoder_config_t bytes_config = {};
         bytes_config.bit0.level0 = 1;
@@ -697,14 +709,18 @@ private:
 
         esp_err_t ret = rmt_new_bytes_encoder(&bytes_config, &mBytesEncoder);
         if (ret != ESP_OK) {
-            FL_WARN_F("[RMT5_ENCODER] Failed to create bytes encoder: %s", esp_err_to_name(ret));
+#if FL_HAS_WARN
+            emitRmt5EncoderCreateFailure("bytes", ret);
+#endif
             return ret;
         }
 
         rmt_copy_encoder_config_t copy_config = {};
         ret = rmt_new_copy_encoder(&copy_config, &mCopyEncoder);
         if (ret != ESP_OK) {
-            FL_WARN_F("[RMT5_ENCODER] Failed to create copy encoder: %s", esp_err_to_name(ret));
+#if FL_HAS_WARN
+            emitRmt5EncoderCreateFailure("copy", ret);
+#endif
             rmt_del_encoder(mBytesEncoder);
             mBytesEncoder = nullptr;
             return ret;
@@ -715,7 +731,7 @@ private:
         mResetCode.duration1 = 0;
         mResetCode.level1 = 0;
 
-        FL_WARN_F("[RMT5_ENCODER] Encoder created successfully");
+        FL_DBG_F("[RMT5_ENCODER] Encoder created successfully");
         return ESP_OK;
     }
 

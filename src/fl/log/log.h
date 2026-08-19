@@ -106,6 +106,11 @@
   #define FASTLED_LOG_RUNTIME_ENABLED 0
 #endif
 
+// Public resolved gate for FL_WARN call sites and their supporting helpers.
+// Prefer this over coupling callers to FASTLED_LOG_RUNTIME_ENABLED, which is
+// the shared implementation gate for several log severities.
+#define FL_HAS_WARN FASTLED_LOG_RUNTIME_ENABLED
+
 // Lite gate for FL_WARN_LIT / FL_LOG_LIT - string-literal-only macros that
 // route through fl::println without the sstream / operator<< / log_emit
 // chain. These are intentionally usable on Low-memory targets (LPC845,
@@ -315,7 +320,7 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #endif
 
 #ifndef FL_WARN
-#if FASTLED_LOG_RUNTIME_ENABLED
+#if FL_HAS_WARN
 // FL_WARN: unified entry point - accepts both `"foo " << x` and `"foo %d", x`
 // via macro-level argument-count dispatch. Single-arg -> stream form (legacy
 // compatible); two-or-more args -> printf form. See #3272.
@@ -341,7 +346,7 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #define FL_WARN_FMT(...) FL_WARN(__VA_ARGS__)
 #define FL_WARN_FMT_IF(COND, ...) FL_WARN_IF(COND, __VA_ARGS__)
 
-// FL_WARN_LIT: defined below outside the FASTLED_LOG_RUNTIME_ENABLED block -
+// FL_WARN_LIT: defined below outside the FL_HAS_WARN block -
 // gated on FASTLED_LOG_LITE_ENABLED so it stays available on Low-memory
 // targets. See "Lite-variant literal macros" section below.
 
