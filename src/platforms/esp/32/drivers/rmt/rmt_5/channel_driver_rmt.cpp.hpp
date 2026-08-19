@@ -155,6 +155,68 @@ FL_NO_INLINE FL_COLD void emitPendingChannelLog(
 } // namespace
 #endif
 
+#if FL_HAS_WARN
+namespace {
+
+enum class RmtChannelWarning : u8 {
+    RX_DMA_CONFLICT,
+    DMA_TX_ALLOCATION_FAILED,
+    DMA_LEDGER_ALLOCATION_FAILED,
+    DMA_ENCODER_CREATION_FAILED,
+    DMA_CHANNEL_CREATION_FAILED,
+    TX_ALLOCATION_FAILED,
+    ENCODER_CREATION_FAILED,
+    RECONFIGURE_CALLBACK_FAILED,
+    RECONFIGURE_CHANNEL_FAILED,
+};
+
+/// Keep failure formatting out of createChannel() and reconfigureForNetwork().
+/// These branches are exceptional and should not inflate their normal paths.
+FL_NO_INLINE FL_COLD void emitRmtChannelWarning(
+    RmtChannelWarning event, int channel_id = 0,
+    fl::size available_words = 0, fl::size requested_words = 0,
+    fl::size dma_channels_in_use = 0) FL_NO_EXCEPT {
+    switch (event) {
+    case RmtChannelWarning::RX_DMA_CONFLICT:
+        FL_WARN_F("TX Channel: RX channel detected - disabling DMA to avoid TX/RX conflict");
+        break;
+    case RmtChannelWarning::DMA_TX_ALLOCATION_FAILED:
+        FL_WARN_F("Memory manager TX allocation failed for DMA channel %s",
+                  channel_id);
+        break;
+    case RmtChannelWarning::DMA_LEDGER_ALLOCATION_FAILED:
+        FL_WARN_F("DMA hardware creation succeeded but memory manager allocation failed");
+        break;
+    case RmtChannelWarning::DMA_ENCODER_CREATION_FAILED:
+        FL_WARN_F("Failed to create encoder for DMA channel");
+        break;
+    case RmtChannelWarning::DMA_CHANNEL_CREATION_FAILED:
+        FL_WARN_F("DMA channel creation failed - unexpected failure on DMA-capable platform, falling back to non-DMA");
+        break;
+    case RmtChannelWarning::TX_ALLOCATION_FAILED:
+        FL_WARN_F("Memory manager TX allocation failed for channel %s - insufficient on-chip memory",
+                  channel_id);
+        FL_WARN_F("  Available: %s words", available_words);
+        FL_WARN_F("  Requested: %s words", requested_words);
+        FL_WARN_F("  DMA channels in use: %s/1", dma_channels_in_use);
+        break;
+    case RmtChannelWarning::ENCODER_CREATION_FAILED:
+        FL_WARN_F("Failed to create encoder for channel");
+        break;
+    case RmtChannelWarning::RECONFIGURE_CALLBACK_FAILED:
+        FL_WARN_F("Failed to re-register callback for reconfigured channel %s",
+                  channel_id);
+        break;
+    case RmtChannelWarning::RECONFIGURE_CHANNEL_FAILED:
+        FL_WARN_F("Failed to recreate channel %s during Network reconfiguration",
+                  channel_id);
+        break;
+    }
+}
+
+} // namespace
+#endif
+
 //=============================================================================
 // ChannelEngineRMTImpl - Implementation class
 //=============================================================================
@@ -725,7 +787,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // This prevents the observed issue where TX transmissions never complete
         // when both TX (DMA) and RX are using the RMT peripheral simultaneously.
         if (tryDMA && memMgr.hasActiveRxChannels()) {
-            FL_WARN_F("TX Channel: RX channel detected - disabling DMA to avoid TX/RX conflict");
+#if FL_HAS_WARN
+            emitRmtChannelWarning(RmtChannelWarning::RX_DMA_CONFLICT);
+#endif
             tryDMA = false;
         }
         if (tryDMA) {
@@ -743,7 +807,11 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             size_t dma_alloc_words = 0;
             if (!memMgr.tryAllocateTx(state->memoryChannelId, true,
                                        networkActive, dma_alloc_words)) {
-                FL_WARN_F("Memory manager TX allocation failed for DMA channel %s", static_cast<int>(state->memoryChannelId));
+#if FL_HAS_WARN
+                emitRmtChannelWarning(
+                    RmtChannelWarning::DMA_TX_ALLOCATION_FAILED,
+                    static_cast<int>(state->memoryChannelId));
+#endif
                 return false;
             }
 
@@ -783,8 +851,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 // DMA SUCCESS - claim DMA slot in memory manager
                 if (!memMgr.allocateDMA(state->memoryChannelId,
                                         true)) { // true = TX channel
-                    FL_WARN_F("DMA hardware creation succeeded but memory "
-                            "manager allocation failed");
+#if FL_HAS_WARN
+                    emitRmtChannelWarning(
+                        RmtChannelWarning::DMA_LEDGER_ALLOCATION_FAILED);
+#endif
                     mPeripheral.deleteChannel(state->channel);
                     state->channel = nullptr;
                     memMgr.free(state->memoryChannelId, true);
@@ -800,7 +870,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 // Create encoder for this DMA channel
                 state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
                 if (!state->encoder) {
-                    FL_WARN_F("Failed to create encoder for DMA channel");
+#if FL_HAS_WARN
+                    emitRmtChannelWarning(
+                        RmtChannelWarning::DMA_ENCODER_CREATION_FAILED);
+#endif
                     mPeripheral.deleteChannel(state->channel);
                     state->channel = nullptr;
                     mDMAChannelsInUse--;
@@ -816,7 +889,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 // DMA FAILED - free memory and fall through to non-DMA
                 // Free memory allocation
                 memMgr.free(state->memoryChannelId, true);
-                FL_WARN_F("DMA channel creation failed - unexpected failure on DMA-capable platform, falling back to non-DMA");
+#if FL_HAS_WARN
+                emitRmtChannelWarning(
+                    RmtChannelWarning::DMA_CHANNEL_CREATION_FAILED);
+#endif
             }
         }
 
@@ -833,10 +909,15 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             //
             // Note: DMA channels consume 0 on-chip words, but ESP32-S3 only has
             // 1 DMA channel. Subsequent channels must use non-DMA (on-chip memory).
-            FL_WARN_F("Memory manager TX allocation failed for channel %s - insufficient on-chip memory", static_cast<int>(state->memoryChannelId));
-            FL_WARN_F("  Available: %s words", memMgr.availableTxWords());
-            FL_WARN_F("  Requested: %s words", (RmtMemoryManager::calculateMemoryBlocks(networkActive) * SOC_RMT_MEM_WORDS_PER_CHANNEL));
-            FL_WARN_F("  DMA channels in use: %s/1", memMgr.getDMAChannelsInUse());
+#if FL_HAS_WARN
+            emitRmtChannelWarning(
+                RmtChannelWarning::TX_ALLOCATION_FAILED,
+                static_cast<int>(state->memoryChannelId),
+                memMgr.availableTxWords(),
+                RmtMemoryManager::calculateMemoryBlocks(networkActive) *
+                    SOC_RMT_MEM_WORDS_PER_CHANNEL,
+                memMgr.getDMAChannelsInUse());
+#endif
             return false;
         }
 
@@ -914,7 +995,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // Create encoder for this channel
         state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
         if (!state->encoder) {
-            FL_WARN_F("Failed to create encoder for channel");
+#if FL_HAS_WARN
+            emitRmtChannelWarning(
+                RmtChannelWarning::ENCODER_CREATION_FAILED);
+#endif
             mPeripheral.deleteChannel(state->channel);
             state->channel = nullptr;
             // Free memory allocation
@@ -922,7 +1006,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             return false;
         }
 
-        FL_WARN_F("[RMT TX] Channel created on GPIO %s (%s symbols, non-DMA)", static_cast<int>(pin), mem_block_symbols);
+        FL_LOG_RMT_F("[RMT TX] Channel created on GPIO %s (%s symbols, non-DMA)", static_cast<int>(pin), mem_block_symbols);
         return true;
     }
 
@@ -1230,6 +1314,34 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         }
     }
 
+    /// Callback registration failure is exceptional. Keep its diagnostic and
+    /// rollback sequence out of the normal network-reconfiguration loop.
+    FL_NO_INLINE FL_COLD void handleReconfigureCallbackFailure(
+        ChannelState &state, RmtMemoryManager &memMgr,
+        fl::size channel_index) FL_NO_EXCEPT {
+#if FL_HAS_WARN
+        emitRmtChannelWarning(
+            RmtChannelWarning::RECONFIGURE_CALLBACK_FAILED,
+            static_cast<int>(channel_index));
+#else
+        (void)channel_index;
+#endif
+        if (state.channel) {
+            mPeripheral.deleteChannel(state.channel);
+            state.channel = nullptr;
+        }
+        if (state.encoder) {
+            mPeripheral.deleteEncoder(state.encoder);
+            state.encoder = nullptr;
+        }
+        if (state.useDMA) {
+            memMgr.freeDMA(state.memoryChannelId, true);
+            mDMAChannelsInUse--;
+            state.useDMA = false;
+        }
+        memMgr.free(state.memoryChannelId, true);
+    }
+
     /// @brief Reconfigure channels for network state change (destroy/recreate
     /// as needed)
     void reconfigureForNetwork() FL_NO_EXCEPT {
@@ -1310,29 +1422,17 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             if (createChannel(&state, state.pin, state.timing, 0)) {
                 // Re-register callback for the recreated channel
                 if (!registerChannelCallback(&state)) {
-                    FL_WARN_F("Failed to re-register callback for reconfigured channel %s", i);
-                    // Channel creation succeeded but callback failed - destroy it
-                    if (state.channel) {
-                        mPeripheral.deleteChannel(state.channel);
-                        state.channel = nullptr;
-                    }
-                    if (state.encoder) {
-                        mPeripheral.deleteEncoder(state.encoder);
-                        state.encoder = nullptr;
-                    }
-                    // Free memory allocation that createChannel() made
-                    if (state.useDMA) {
-                        memMgr.freeDMA(state.memoryChannelId, true);
-                        mDMAChannelsInUse--;
-                        state.useDMA = false;
-                    }
-                    memMgr.free(state.memoryChannelId, true);
+                    handleReconfigureCallbackFailure(state, memMgr, i);
                 } else {
                     reconfigured++;
                     FL_DBG_F("Successfully reconfigured channel %s", i);
                 }
             } else {
-                FL_WARN_F("Failed to recreate channel %s during Network reconfiguration", i);
+#if FL_HAS_WARN
+                emitRmtChannelWarning(
+                    RmtChannelWarning::RECONFIGURE_CHANNEL_FAILED,
+                    static_cast<int>(i));
+#endif
             }
         }
 
