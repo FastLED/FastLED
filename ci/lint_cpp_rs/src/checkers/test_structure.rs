@@ -606,12 +606,19 @@ impl FileContentChecker for NoexceptSpecialMembersChecker {
             let Some((kind, open_paren)) = info else {
                 continue;
             };
-            if signature_has_noexcept(&file_content.lines, index, open_paren) {
+            if signature_has_noexcept(
+                &file_content.lines,
+                index,
+                open_paren,
+                kind == "destructor",
+            ) {
                 continue;
             }
             violations.push((
                 index + 1,
-                format!("Missing FL_NO_EXCEPT on {kind}: {stripped}"),
+                format!(
+                    "Missing FL_NO_EXCEPT (or FL_DTOR_NOEXCEPT for destructors) on {kind}: {stripped}"
+                ),
             ));
         }
 

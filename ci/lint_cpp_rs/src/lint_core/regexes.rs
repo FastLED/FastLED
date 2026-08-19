@@ -323,6 +323,13 @@ fn regex_has_noexcept_special() -> &'static Regex {
     VALUE.get_or_init(|| Regex::new(r"\b(?:FL_NO_EXCEPT|noexcept)\b").unwrap())
 }
 
+fn regex_has_destructor_noexcept_special() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        Regex::new(r"\b(?:FL_NO_EXCEPT|FL_DTOR_NOEXCEPT|noexcept)\b").unwrap()
+    })
+}
+
 fn regex_destructor_decl() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"~(\w+)\s*\(").unwrap())
@@ -689,4 +696,22 @@ fn regex_raw_array_declaration() -> &'static Regex {
         )
         .unwrap()
     })
+}
+
+#[cfg(test)]
+mod noexcept_special_regex_tests {
+    use super::{regex_has_destructor_noexcept_special, regex_has_noexcept_special};
+
+    #[test]
+    fn destructor_only_marker_is_not_a_general_noexcept_marker() {
+        assert!(regex_has_noexcept_special().is_match("Widget(Widget&&) FL_NO_EXCEPT;"));
+        assert!(regex_has_noexcept_special().is_match("Widget(Widget&&) noexcept;"));
+        assert!(!regex_has_noexcept_special().is_match("Widget(Widget&&) FL_DTOR_NOEXCEPT;"));
+
+        let destructor_regex = regex_has_destructor_noexcept_special();
+        assert!(destructor_regex.is_match("~Widget() FL_NO_EXCEPT;"));
+        assert!(destructor_regex.is_match("~Widget() FL_DTOR_NOEXCEPT;"));
+        assert!(destructor_regex.is_match("~Widget() noexcept;"));
+        assert!(!destructor_regex.is_match("~Widget();"));
+    }
 }

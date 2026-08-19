@@ -145,7 +145,7 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) variant {
         }
     }
 
-    ~variant() FL_NO_EXCEPT { reset(); }
+    ~variant() FL_DTOR_NOEXCEPT { reset(); }
 
     variant &operator=(const variant &other) FL_NO_EXCEPT {
         if (this != &other) {
