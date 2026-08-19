@@ -25,6 +25,13 @@ RP_BUILD = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "_build.cpp.hpp"
 RP_BLE_IMPL = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "ble_rp.cpp.hpp"
 AUTORESEARCH_NET = REPO_ROOT / "examples" / "AutoResearch" / "AutoResearchNet.cpp"
 AUTORESEARCH_SKETCH = REPO_ROOT / "examples" / "AutoResearch" / "AutoResearch.ino"
+AUTORESEARCH_TEST = REPO_ROOT / "examples" / "AutoResearch" / "AutoResearchTest.cpp"
+AUTORESEARCH_SYSTEM_METHODS = (
+    REPO_ROOT / "examples" / "AutoResearch" / "AutoResearchRemoteSystemMethods.cpp"
+)
+AUTORESEARCH_PARALLEL = (
+    REPO_ROOT / "examples" / "AutoResearch" / "AutoResearchRemoteRunParallelTest.cpp"
+)
 
 
 def test_rp2350w_selects_the_pico_2_w_board_profile() -> None:
@@ -84,6 +91,31 @@ def test_autoresearch_identity_prioritizes_pico_2_w() -> None:
     assert pico_2_w_branch < generic_rp2350_branch
     assert 'return "Raspberry Pi Pico 2 W (RP2350)";' in source
     assert 'return "RP2350";' in source
+
+
+def test_autoresearch_uses_uart_timing_for_both_rp_uart_engines() -> None:
+    source = AUTORESEARCH_TEST.read_text(encoding="utf-8")
+
+    assert 'fl::strcmp(driver_name, "UART0") == 0' in source
+    assert 'fl::strcmp(driver_name, "UART1") == 0' in source
+
+
+def test_autoresearch_reports_typed_device_info_for_both_rp_uart_engines() -> None:
+    source = AUTORESEARCH_SYSTEM_METHODS.read_text(encoding="utf-8")
+
+    assert 'name == "UART0"' in source
+    assert "deviceJson<fl::Bus::UART, 0>()" in source
+    assert 'name == "UART1"' in source
+    assert "deviceJson<fl::Bus::UART, 1>()" in source
+
+
+def test_autoresearch_parallel_mode_preserves_rp_uart_instance_affinity() -> None:
+    source = AUTORESEARCH_PARALLEL.read_text(encoding="utf-8")
+
+    assert 'n == "UART0"' in source
+    assert "opts.mBusWhich = 0" in source
+    assert 'n == "UART1"' in source
+    assert "opts.mBusWhich = 1" in source
 
 
 def test_rp_platform_dispatches_real_mutex_and_semaphore_backends() -> None:

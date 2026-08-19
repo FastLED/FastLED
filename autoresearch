@@ -33,12 +33,20 @@ Driver Selection (optional - omit for GPIO-only mode):
   --rmt               Test RMT (Remote Control) driver
   --spi               Test SPI driver
   --uart              Test UART driver (LPC845: UART DMA clockless RX-DMA loopback)
+  --rp-uart-index N   RP2040/RP2350 UART engine for --uart: 0 or 1 (default: 0)
   --lpuart            Deprecated alias for --uart; emits a warning
   --lcd               Test LCD_CLOCKLESS driver (ESP32-S3 only)
   --lcd-spi           Test LCD_SPI driver (ESP32-S3 only)
   --lcd-rgb           Test LCD RGB driver (ESP32-P4 only)
   --object-fled       Test ObjectFLED DMA driver (Teensy 4.x only)
-  --flex-io           Test FlexIO clockless driver (Teensy 4.x only)
+  --flex-io           Test FlexIO (Teensy 4.x) or PIO (RP2040/RP2350) clockless driver
+  --rp-pio-index N    RP PIO engine for --flex-io: 0, 1, or RP2350-only 2
+  --rp-pio-both       RP: select PIO0 + PIO1 (requires --flex-io --parallel)
+  --rp-spi-loopback   RP2040/RP2350 fixed-SPI DMA byte loopback; requires
+                      GPIO3->GPIO0 (SPI0) or GPIO11->GPIO8 (SPI1)
+  --rp-spi-index N    RP fixed-SPI instance: 0 or 1 (default: 0)
+  --rp-spi-public-api RP2040/RP2350 SPI1 APA102/SK9822 public-API loopback
+  --rp-spi-chipset X  Chipset for --rp-spi-public-api: apa102 or sk9822
   --flexio [0|1]      Deprecated alias for --flex-io; default 0, 1 enables it
   --pwm-dma-cl        LPC845-only: channels-API SCT+DMA clockless
                       self-loopback (FastLED #3468). Jumper P0_10↔P0_11.
@@ -101,6 +109,9 @@ Examples:
   bash autoresearch --rmt --color-pattern ff00aa     # Test RMT with custom color (pink)
   bash autoresearch --parlio                         # Uses fbuild for compile/upload
   bash autoresearch --parlio --lcd-rgb --parallel --lanes 1  # Test PARLIO + LCD_RGB in parallel
+  bash autoresearch rp2350w --flex-io --rp-pio-index 2
+  bash autoresearch rp2350w --uart --rp-uart-index 0
+  bash autoresearch rp2350w --rp-spi-loopback --rp-spi-index 0
   bash autoresearch --net                             # ESP32 self-contained HTTP loopback test
   bash autoresearch --net-server                     # ESP32 WiFi AP + HTTP server autoresearch
   bash autoresearch --net-client                     # ESP32 WiFi AP + HTTP client autoresearch

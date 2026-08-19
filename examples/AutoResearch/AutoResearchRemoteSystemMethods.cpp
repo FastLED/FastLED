@@ -90,7 +90,10 @@ ParlioRawTestState& parlioRawTestState() {
 fl::json autoResearchDeviceJson(const fl::string& name) {
     if (name == "RMT") return fl::deviceJson<fl::Bus::RMT>();
     if (name == "SPI" || name == "SPI_UNIFIED") return fl::deviceJson<fl::Bus::SPI>();
-    if (name == "UART" || name == "LPUART") return fl::deviceJson<fl::Bus::UART>();
+    if (name == "UART" || name == "LPUART" || name == "UART0") {
+        return fl::deviceJson<fl::Bus::UART, 0>();
+    }
+    if (name == "UART1") return fl::deviceJson<fl::Bus::UART, 1>();
     if (name == "BIT_BANG" || name == "STUB") return fl::deviceJson<fl::Bus::BIT_BANG>();
 
     if (name == "FLEX_IO" || name == "LCD_RGB") {

@@ -25,6 +25,8 @@ from ci.autoresearch.phases import (
     _parse_args_and_build_commands,
     _resolve_port_and_environment,
     _run_build_deploy,
+    _run_rp_spi_loopback_tests,
+    _run_rp_spi_public_api_tests,
     _run_schema_and_pin_setup,
     _run_tests_or_special_mode,
     _run_watchdog_soak,
@@ -153,6 +155,7 @@ def _make_args(**overrides) -> Args:
         rp_spi_index=0,
         rp_spi_public_api=False,
         rp_spi_chipset="apa102",
+        rp_uart_index=0,
         rp_pio_index=1,
         rp_pio_both=False,
         test_fault_emit=False,
@@ -850,6 +853,40 @@ class TestParseArgsAndBuildCommands:
         assert result.drivers == ["PIO2"]
         assert result.json_rpc_commands[0]["params"]["driver"] == "PIO2"
 
+    @pytest.mark.parametrize(
+        ("environment", "uart_index", "driver"),
+        (
+            ("rp2040", 0, "UART0"),
+            ("rpipico", 1, "UART1"),
+            ("rp2350", 0, "UART0"),
+            ("rp2350w", 1, "UART1"),
+            ("rpipico2w", 0, "UART0"),
+        ),
+    )
+    def test_uart_selects_concrete_rp_uart_driver(
+        self,
+        fake_project_dir: Path,
+        environment: str,
+        uart_index: int,
+        driver: str,
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            uart=True,
+            rp_uart_index=uart_index,
+            environment_positional=environment,
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == [driver]
+        assert result.json_rpc_commands[0]["params"]["driver"] == driver
+
     def test_flex_io_rejects_pio2_on_rp2040(self, fake_project_dir: Path) -> None:
         args = _make_args(
             parlio=False,
@@ -1090,6 +1127,11 @@ class TestParseArgsAndBuildCommands:
         args = Args.parse_args(["--rp-spi-loopback", "--rp-spi-index", "1"])
         assert args.rp_spi_loopback is True
         assert args.rp_spi_index == 1
+
+    def test_rp_uart_index_flag_parses(self) -> None:
+        args = Args.parse_args(["--uart", "--rp-uart-index", "1"])
+        assert args.uart is True
+        assert args.rp_uart_index == 1
 
     def test_simd_mode(self, fake_project_dir: Path) -> None:
         args = _make_args(parlio=False, simd=True, project_dir=fake_project_dir)
@@ -1348,6 +1390,55 @@ class TestParseArgsAndBuildCommands:
 
 class TestResolvePortAndEnvironment:
     """Test _resolve_port_and_environment (mocks port detection)."""
+
+    def test_auto_detected_rp_normalizes_uart_driver_name(self, tmp_path: Path) -> None:
+        (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
+        staged_dir = tmp_path / ".build" / "pio" / "rp2350w"
+        staged_dir.mkdir(parents=True)
+        args = _make_args(
+            upload_port=None,
+            environment_positional=None,
+            parlio=False,
+            uart=True,
+            rp_uart_index=1,
+            project_dir=tmp_path,
+            use_root_platformio_ini=False,
+        )
+        ctx = _parse_args_and_build_commands(args)
+        assert isinstance(ctx, RunContext)
+        assert ctx.drivers == ["UART"]
+        assert ctx.json_rpc_commands[0]["params"]["driver"] == "UART"
+
+        port_result = MagicMock(ok=True, selected_port="COM17")
+        chip_result = MagicMock(
+            ok=True,
+            chip_type="RP2350",
+            environment="rp2350w",
+        )
+        with (
+            patch(
+                f"{_PATCH_MOD}.auto_detect_upload_port",
+                return_value=port_result,
+            ),
+            patch(
+                f"{_PATCH_MOD}.detect_attached_chip",
+                return_value=chip_result,
+            ),
+            patch(
+                "ci.autoresearch.staging.synthesise_autoresearch_project",
+                return_value=staged_dir,
+            ),
+            patch(
+                f"{_PATCH_MOD}.select_build_driver",
+                return_value=_make_mock_driver(),
+            ),
+        ):
+            rc = asyncio.run(_resolve_port_and_environment(ctx))
+
+        assert rc is None
+        assert ctx.final_environment == "rp2350w"
+        assert ctx.drivers == ["UART1"]
+        assert ctx.json_rpc_commands[0]["params"]["driver"] == "UART1"
 
     def test_auto_detect_port_success(self) -> None:
         ctx = _make_ctx(upload_port=None)
@@ -1949,8 +2040,11 @@ class TestRunBuildDeploy:
 
     @pytest.fixture(autouse=True)
     def disable_host_watchdog_for_unit_deploys(self):
-        """Direct phase tests do not own the runner watchdog lifecycle."""
-        with patch(f"{_PATCH_MOD}.start_autoresearch_watchdog"):
+        """Direct phase tests do not own host watchdog or USB inventory state."""
+        with (
+            patch(f"{_PATCH_MOD}.start_autoresearch_watchdog"),
+            patch(f"{_PATCH_MOD}.absent_port_error", return_value=None),
+        ):
             yield
 
     def test_build_deploy_success(self) -> None:
@@ -2378,6 +2472,42 @@ class TestRunTestsOrSpecialMode:
             rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
         assert rc == 0
         loopback.assert_awaited_once_with(ctx)
+
+    @pytest.mark.parametrize("environment", ("rp2350", "rp2350w", "rpipico2w"))
+    def test_rp_spi_loopback_runs_on_rp2350_aliases(self, environment: str) -> None:
+        ctx = _make_ctx(
+            args=_make_args(parlio=False, rp_spi_loopback=True),
+            drivers=[],
+            gpio_only_mode=False,
+            final_environment=environment,
+            upload_port="COM17",
+        )
+        completed = MagicMock(returncode=0)
+        with patch(f"{_PATCH_MOD}.RunningProcess.run", return_value=completed) as run:
+            rc = asyncio.run(_run_rp_spi_loopback_tests(ctx))
+        assert rc == 0
+        command = run.call_args.args[0]
+        assert command[:4] == ["uv", "run", "python", "-m"]
+        assert command[4] == "ci.autoresearch.test_rp_spi_loopback"
+        assert run.call_args.kwargs == {"check": False, "timeout": 60.0}
+
+    @pytest.mark.parametrize("environment", ("rp2350", "rp2350w", "rpipico2w"))
+    def test_rp_spi_public_api_runs_on_rp2350_aliases(self, environment: str) -> None:
+        ctx = _make_ctx(
+            args=_make_args(parlio=False, rp_spi_public_api=True),
+            drivers=[],
+            gpio_only_mode=False,
+            final_environment=environment,
+            upload_port="COM17",
+        )
+        completed = MagicMock(returncode=0)
+        with patch(f"{_PATCH_MOD}.RunningProcess.run", return_value=completed) as run:
+            rc = asyncio.run(_run_rp_spi_public_api_tests(ctx))
+        assert rc == 0
+        command = run.call_args.args[0]
+        assert command[:4] == ["uv", "run", "python", "-m"]
+        assert command[4] == "ci.autoresearch.test_rp_spi_public_api"
+        assert run.call_args.kwargs == {"check": False, "timeout": 60.0}
 
     def test_simd_mode_pass(self) -> None:
         ctx = _make_ctx(simd_test_mode=True)

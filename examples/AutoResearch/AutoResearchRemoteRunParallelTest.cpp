@@ -233,6 +233,8 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
                 else if (n == "LCD_SPI")       opts.mBus = fl::Bus::FLEX_IO;
                 else if (n == "LCD_CLOCKLESS") opts.mBus = fl::Bus::FLEX_IO;
                 else if (n == "UART")          opts.mBus = fl::Bus::UART;
+                else if (n == "UART0")         { opts.mBus = fl::Bus::UART; opts.mBusWhich = 0; }
+                else if (n == "UART1")         { opts.mBus = fl::Bus::UART; opts.mBusWhich = 1; }
                 else if (n == "FLEX_IO")       { opts.mBus = fl::Bus::FLEX_IO; opts.mBusWhich = 1; }
                 else if (n == "PIO0")          { opts.mBus = fl::Bus::FLEX_IO; opts.mBusWhich = 0; }
                 else if (n == "PIO1")          { opts.mBus = fl::Bus::FLEX_IO; opts.mBusWhich = 1; }

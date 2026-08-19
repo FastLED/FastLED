@@ -364,11 +364,25 @@ to validate a driver, subsystem, or special mode:
 - `--rmt` - Test RMT (Remote Control) driver
 - `--spi` - Test SPI driver
 - `--uart` - Test UART driver
+- `--rp-uart-index {0,1}` - Select the concrete RP2040/RP2350 UART engine
+  used by `--uart` (default `0`)
 - `--lcd` - Test LCD_CLOCKLESS driver (ESP32-S3 only)
 - `--lcd-spi` - Test LCD_SPI driver (ESP32-S3 only)
 - `--lcd-rgb` - Test LCD RGB driver (ESP32-P4 only)
 - `--object-fled` - Test ObjectFLED DMA driver (Teensy 4.x only)
-- `--flex-io` - Test FlexIO clockless driver (Teensy 4.x only)
+- `--flex-io` - Test FlexIO clockless on Teensy 4.x or PIO clockless on
+  RP2040/RP2350
+- `--rp-pio-index {0,1,2}` - Select the RP PIO engine used by `--flex-io`;
+  PIO2 requires RP2350
+- `--rp-pio-both` - Select RP PIO0 and PIO1 together; requires
+  `--flex-io --parallel`
+- `--rp-spi-loopback` / `--rp-spi-index {0,1}` - Run RP2040/RP2350
+  fixed-SPI DMA byte loopback on the selected SPI instance. The fixed pin
+  routes require GPIO3 MOSI to GPIO0 MISO for SPI0, or GPIO11 MOSI to GPIO8
+  MISO for SPI1; an arbitrary discovered TX/RX bridge does not replace that
+  wiring.
+- `--rp-spi-public-api` / `--rp-spi-chipset {apa102,sk9822}` - Verify
+  RP2040/RP2350 SPI1 output through the public `FastLED.addLeds()` API
 - `--flexio [0|1]` - Deprecated compatibility alias for `--flex-io`; default
   `0`, pass `1` to enable, emits a warning
 - `--lpuart` - Deprecated compatibility alias for `--uart`; emits a warning
@@ -386,6 +400,9 @@ bash autoresearch esp32s3 --parlio            # Specify esp32s3 environment
 bash autoresearch --rmt
 bash autoresearch --spi
 bash autoresearch --uart
+bash autoresearch rp2350w --uart --rp-uart-index 0
+bash autoresearch rp2350w --flex-io --rp-pio-index 2
+bash autoresearch rp2350w --rp-spi-loopback --rp-spi-index 0
 bash autoresearch esp32c6 --rmt --legacy --chipset ws2814 --strip-sizes 1,2,3,4
 bash autoresearch --lcd                       # ESP32-S3 LCD_CLOCKLESS
 bash autoresearch --lcd-rgb                   # ESP32-P4 only
