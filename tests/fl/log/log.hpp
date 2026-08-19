@@ -214,6 +214,14 @@ FL_TEST_CASE("FL_WARN macros are defined") {
     }
 }
 
+FL_TEST_CASE("category log gates are resolved booleans") {
+#if defined(FL_HAS_RMT_LOG)
+    FL_CHECK((FL_HAS_RMT_LOG == 0 || FL_HAS_RMT_LOG == 1));
+#else
+    FL_CHECK(false);
+#endif
+}
+
 FL_TEST_CASE("FL_WARN macro compiles and executes") {
     FL_SUBCASE("FL_WARN with string literal") {
         FL_WARN("Test warning message");

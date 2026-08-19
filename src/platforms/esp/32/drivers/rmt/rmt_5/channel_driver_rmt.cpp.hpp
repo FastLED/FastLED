@@ -105,6 +105,56 @@ static IRMT5Peripheral& getDefaultPeripheral() FL_NO_EXCEPT {
 #endif
 }
 
+#if FL_HAS_WARN || FL_HAS_RMT_LOG
+namespace {
+
+enum class PendingChannelLog : u8 {
+    MISSING_ENCODER,
+    BUFFER_ACQUIRE_FAILED,
+#if FL_HAS_RMT_LOG
+    ENABLE_FAILED,
+    RESET_FAILED,
+#endif
+    TRANSMIT_FAILED,
+#if FL_HAS_RMT_LOG
+    STARTED,
+#endif
+};
+
+FL_NO_INLINE FL_COLD void emitPendingChannelLog(
+    PendingChannelLog event, int pin, fl::size data_size,
+    bool use_dma) FL_NO_EXCEPT {
+    switch (event) {
+#if FL_HAS_WARN
+    case PendingChannelLog::MISSING_ENCODER:
+        FL_WARN_F("Channel missing encoder for pin %s", pin);
+        break;
+    case PendingChannelLog::BUFFER_ACQUIRE_FAILED:
+        FL_WARN_F("Failed to acquire pooled buffer for pin %s (%s bytes, DMA=%s)",
+                  pin, data_size, use_dma);
+        break;
+    case PendingChannelLog::TRANSMIT_FAILED:
+        FL_WARN_F("[RMT TX] transmit() FAILED on pin %s", pin);
+        break;
+#endif
+#if FL_HAS_RMT_LOG
+    case PendingChannelLog::ENABLE_FAILED:
+        FL_LOG_RMT_F("Failed to enable channel");
+        break;
+    case PendingChannelLog::RESET_FAILED:
+        FL_LOG_RMT_F("Failed to reset encoder");
+        break;
+    case PendingChannelLog::STARTED:
+        FL_LOG_RMT_F("Started transmission for pin %s (%s bytes)", pin,
+                     data_size);
+        break;
+#endif
+    }
+}
+
+} // namespace
+#endif
+
 //=============================================================================
 // ChannelEngineRMTImpl - Implementation class
 //=============================================================================
@@ -1001,6 +1051,20 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         state->transmissionComplete.store(false, fl::memory_order_release);
     }
 
+    FL_NO_INLINE FL_COLD void releaseFailedPendingChannel(
+        ChannelState* channel, bool disable_channel) FL_NO_EXCEPT {
+        if (disable_channel) {
+            mPeripheral.disableChannel(channel->channel);
+        }
+        if (channel->useDMA) {
+            mBufferPool.releaseDMA();
+        } else {
+            mBufferPool.releaseInternal(channel->pooledBuffer);
+        }
+        channel->pooledBuffer = fl::span<u8>();
+        releaseChannel(channel);
+    }
+
     /// @brief Process pending channels that couldn't be started earlier
     void processPendingChannels() FL_NO_EXCEPT {
         if (mPendingChannels.empty()) {
@@ -1023,7 +1087,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
             // Verify channel has encoder (should always be true if createChannel succeeded)
             if (!channel->encoder) {
-                FL_WARN_F("Channel missing encoder for pin %s", pending.pin);
+#if FL_HAS_WARN
+                emitPendingChannelLog(PendingChannelLog::MISSING_ENCODER,
+                                      pending.pin, dataSize, channel->useDMA);
+#endif
                 releaseChannel(channel);
                 ++i;
                 continue;
@@ -1040,7 +1107,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 mBufferPool.acquireInternal(dataSize);
 
             if (pooledBuffer.empty()) {
-                FL_WARN_F("Failed to acquire pooled buffer for pin %s (%s bytes, DMA=%s)", pending.pin, dataSize, channel->useDMA);
+#if FL_HAS_WARN
+                emitPendingChannelLog(PendingChannelLog::BUFFER_ACQUIRE_FAILED,
+                                      pending.pin, dataSize, channel->useDMA);
+#endif
                 releaseChannel(channel);
                 ++i;
                 continue;
@@ -1055,31 +1125,22 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
             bool enable_success = mPeripheral.enableChannel(channel->channel);
             if (!enable_success) {
-                FL_LOG_RMT_F("Failed to enable channel");
-                // Release buffer back to pool before releasing channel
-                if (channel->useDMA) {
-                    mBufferPool.releaseDMA();
-                } else {
-                    mBufferPool.releaseInternal(channel->pooledBuffer);
-                }
-                channel->pooledBuffer = fl::span<u8>();
-                releaseChannel(channel);
+#if FL_HAS_RMT_LOG
+                emitPendingChannelLog(PendingChannelLog::ENABLE_FAILED,
+                                      pending.pin, dataSize, channel->useDMA);
+#endif
+                releaseFailedPendingChannel(channel, false);
                 ++i;
                 continue;
             }
 
             // Explicitly reset encoder before each transmission to ensure clean state
             if (!mPeripheral.resetEncoder(channel->encoder)) {
-                FL_LOG_RMT_F("Failed to reset encoder");
-                mPeripheral.disableChannel(channel->channel);
-                // Release buffer back to pool before releasing channel
-                if (channel->useDMA) {
-                    mBufferPool.releaseDMA();
-                } else {
-                    mBufferPool.releaseInternal(channel->pooledBuffer);
-                }
-                channel->pooledBuffer = fl::span<u8>();
-                releaseChannel(channel);
+#if FL_HAS_RMT_LOG
+                emitPendingChannelLog(PendingChannelLog::RESET_FAILED,
+                                      pending.pin, dataSize, channel->useDMA);
+#endif
+                releaseFailedPendingChannel(channel, true);
                 ++i;
                 continue;
             }
@@ -1099,21 +1160,20 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                                                     pooledBuffer.data(),
                                                     pooledBuffer.size());
             if (!tx_success) {
-                FL_WARN_F("[RMT TX] transmit() FAILED on pin %s", static_cast<int>(channel->pin));
-                mPeripheral.disableChannel(channel->channel);
-                // Release buffer back to pool before releasing channel
-                if (channel->useDMA) {
-                    mBufferPool.releaseDMA();
-                } else {
-                    mBufferPool.releaseInternal(channel->pooledBuffer);
-                }
-                channel->pooledBuffer = fl::span<u8>();
-                releaseChannel(channel);
+#if FL_HAS_WARN
+                emitPendingChannelLog(PendingChannelLog::TRANSMIT_FAILED,
+                                      static_cast<int>(channel->pin), dataSize,
+                                      channel->useDMA);
+#endif
+                releaseFailedPendingChannel(channel, true);
                 ++i;
                 continue;
             }
 
-            FL_LOG_RMT_F("Started transmission for pin %s (%s bytes)", pending.pin, pending.data->getSize());
+#if FL_HAS_RMT_LOG
+            emitPendingChannelLog(PendingChannelLog::STARTED, pending.pin,
+                                  pending.data->getSize(), channel->useDMA);
+#endif
 
             // Remove from pending queue (swap with last and pop)
             if (i < mPendingChannels.size() - 1) {
