@@ -173,6 +173,14 @@ FL_TEST_CASE("debug macro configuration") {
 // ============================================================================
 
 FL_TEST_CASE("FL_WARN macros are defined") {
+    FL_SUBCASE("FL_HAS_WARN is a resolved boolean gate") {
+#if defined(FL_HAS_WARN)
+        FL_CHECK((FL_HAS_WARN == 0 || FL_HAS_WARN == 1));
+#else
+        FL_CHECK(false);
+#endif
+    }
+
     FL_SUBCASE("FL_WARN is defined") {
         #ifdef FL_WARN
         FL_CHECK(true);
@@ -544,4 +552,3 @@ FL_TEST_CASE("warning macro edge cases") {
         FL_CHECK(true);
     }
 }
-
