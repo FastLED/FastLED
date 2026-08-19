@@ -617,10 +617,12 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 
 /// @brief Remote Control Module (RMT) logging (ESP32)
 /// Logs RMT channel configuration, timing, and signal generation
-#ifdef FASTLED_LOG_RMT_ENABLED
+#if defined(FASTLED_LOG_RMT_ENABLED) && FL_HAS_WARN
+    #define FL_HAS_RMT_LOG 1
     #define FL_LOG_RMT(...) FL_WARN(__VA_ARGS__)
     #define FL_LOG_RMT_F(...) FL_WARN(__VA_ARGS__)
 #else
+    #define FL_HAS_RMT_LOG 0
     #define FL_LOG_RMT(...) do { } while(0)
     #define FL_LOG_RMT_F(...) FL_LOG_RMT(__VA_ARGS__)
 #endif
