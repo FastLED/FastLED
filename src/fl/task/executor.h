@@ -6,8 +6,8 @@
 /// This module provides a unified system for managing background operations
 /// across FastLED, including HTTP requests, timers, and other background tasks.
 ///
-/// The executor integrates with FastLED's engine events and can be pumped
-/// during delay() calls on WASM platforms for optimal responsiveness.
+/// The executor is pumped by fl::task::run(). Platform code may also call
+/// run() while yielding, but FastLED.show() does not update registered runners.
 ///
 /// @section Usage
 /// @code
@@ -35,10 +35,8 @@
 ///     MyRunner* runner = new MyRunner();
 ///     fl::task::Executor::instance().register_runner(runner);
 ///
-///     // Now your tasks will be automatically updated during:
-///     // - FastLED.show() calls (via engine events)
-///     // - delay() calls on WASM platforms
-///     // - Manual fl::task::run() calls
+///     // Pump registered runners from loop().
+///     fl::task::run();
 /// }
 /// @endcode
 
@@ -308,4 +306,3 @@ inline PromiseResult<T> await(Promise<T> p) {
 
 } // namespace task
 } // namespace fl
-

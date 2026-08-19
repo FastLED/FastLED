@@ -833,8 +833,6 @@ This section explains how the major graphics utilities fit together and how to u
 
     ```cpp
     #include <FastLED.h>
-    #include "fl/task.h"
-    #include "fl/async.h"
     #include "fl/math/corkscrew.h"
     #include "fl/grid.h"
 
@@ -863,13 +861,11 @@ This section explains how the major graphics utilities fit together and how to u
     void loop() {
         // The before_frame task is invoked automatically at the right time
         FastLED.show();
-        // Optionally pump other async work
-        fl::async_yield();
     }
     ```
 
     - The manual approach gives explicit control each frame.
-    - The `task::before_frame()` approach schedules work just‑in‑time before rendering without manual event wiring. Use `task::after_frame()` for post‑render work.
+    - The `task::before_frame()` approach schedules recurring work just‑in‑time before rendering without manual event wiring. Use `task::after_frame()` for recurring post‑render work; keep the returned handle and call `.cancel()` to stop either task.
 
 - **High‑definition HSV16**
   - Headers: `hsv16.h`, implementation in `hsv16.cpp`

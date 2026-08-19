@@ -334,9 +334,7 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 }
 
 void CFastLED::onEndFrame() {
-	#if FASTLED_HAS_ENGINE_EVENTS
 	fl::EngineEvents::onEndFrame();
-	#endif
 }
 
 int CFastLED::count() {
@@ -362,6 +360,7 @@ CLEDController & CFastLED::operator[](int x) {
 }
 
 void CFastLED::showColor(const CRGB & color, fl::u8 scale) {
+	onBeginFrame();
 	throttleToMaxRefreshRate(mNMinMicros);
 	lastshow = fl::micros();
 
@@ -402,6 +401,7 @@ void CFastLED::showColor(const CRGB & color, fl::u8 scale) {
 	}
 	countFPS();
 	onEndFrame();
+	onEndShowLeds();
 }
 
 void CFastLED::clear(bool writeData) {
@@ -766,9 +766,7 @@ namespace __cxxabiv1
 
 
 void CFastLED::onBeginFrame() {
-	#if FASTLED_HAS_ENGINE_EVENTS
 	fl::EngineEvents::onBeginFrame();
-	#endif
 }
 
 

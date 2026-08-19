@@ -63,9 +63,7 @@ inline void maybeRegisterStubAutorun(
         AutoResearchRemoteControl& /*remote*/,
         fl::shared_ptr<AutoResearchState> state) {
 #ifdef FL_IS_STUB
-    // Register a task that runs on the next async_run() cycle (during loop())
-    // Note: every_ms(0) fires immediately; after_frame() requires frame-task
-    // dispatch which isn't wired up in the stub example runner.
+    // Register a task that runs on the next async_run() cycle (during loop()).
     fl::task::every_ms(0, FL_TRACE).then([state]() {
         if (!state || state->drivers_available.empty()) {
             FL_ERROR("[STUB CLIENT] No drivers discovered — autoresearch cannot run");

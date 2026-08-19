@@ -17,6 +17,9 @@
 namespace fl {
 
 class CLEDController;  // forward declaration
+namespace task {
+class Scheduler;
+}
 
 class EngineEvents {
   public:
@@ -71,11 +74,7 @@ class EngineEvents {
 #endif
     }
 
-    static void onBeginFrame() FL_NO_EXCEPT {
-#if FASTLED_HAS_ENGINE_EVENTS
-        EngineEvents::getInstance()->_onBeginFrame();
-#endif
-    }
+    static void onBeginFrame() FL_NO_EXCEPT;
 
     static void onEndShowLeds() FL_NO_EXCEPT {
 #if FASTLED_HAS_ENGINE_EVENTS
@@ -83,11 +82,7 @@ class EngineEvents {
 #endif
     }
 
-    static void onEndFrame() FL_NO_EXCEPT {
-#if FASTLED_HAS_ENGINE_EVENTS
-        EngineEvents::getInstance()->_onEndFrame();
-#endif
-    }
+    static void onEndFrame() FL_NO_EXCEPT;
 
     static void onStripAdded(CLEDController *strip, fl::u32 num_leds) FL_NO_EXCEPT {
 #if FASTLED_HAS_ENGINE_EVENTS
@@ -124,6 +119,10 @@ class EngineEvents {
     ~EngineEvents() FL_NO_EXCEPT;
 
   private:
+    // Frame tasks use one dedicated final listener so they remain available
+    // when the general listener list is disabled on low-memory platforms.
+    static void setFrameTaskListener(Listener *listener) FL_NO_EXCEPT;
+
     // Safe to add a listeners during a callback.
     void _addListener(Listener *listener, int priority) FL_NO_EXCEPT;
     // Safe to remove self during a callback.
@@ -153,6 +152,7 @@ class EngineEvents {
 
     friend class fl::Singleton<EngineEvents>;
 #endif  // FASTLED_HAS_ENGINE_EVENTS
+    friend class task::Scheduler;
 };
 
 } // namespace fl
