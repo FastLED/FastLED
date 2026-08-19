@@ -201,17 +201,17 @@ Handle every_ms(int interval_ms, const TracePoint& trace) FL_NO_EXCEPT;
 Handle at_framerate(int fps) FL_NO_EXCEPT;
 Handle at_framerate(int fps, const TracePoint& trace) FL_NO_EXCEPT;
 
-// For most cases you want after_frame() instead of before_frame(), unless you
-// are doing operations that need to happen right before the frame is rendered.
-// Most of the time for ui stuff (button clicks, etc) you want after_frame(), so it
-// can be available for the next iteration of loop().
+// Frame tasks run at every matching FastLED frame boundary until canceled.
+// Prefer after_frame() unless work must happen immediately before rendering.
+// UI work usually belongs after_frame() so it is ready for the next loop.
 Handle before_frame() FL_NO_EXCEPT;
 Handle before_frame(const TracePoint& trace) FL_NO_EXCEPT;
 
-// Example: auto t = fl::task::after_frame().then([]() {...}
+// Keep the returned handle when the task will need to be canceled.
+// Example: auto t = fl::task::after_frame().then([]() {...});
 Handle after_frame() FL_NO_EXCEPT;
 Handle after_frame(const TracePoint& trace) FL_NO_EXCEPT;
-// Example: auto t = fl::task::after_frame([]() {...}
+// Example: auto t = fl::task::after_frame([]() {...});
 Handle after_frame(function<void()> on_then) FL_NO_EXCEPT;
 Handle after_frame(function<void()> on_then, const TracePoint& trace) FL_NO_EXCEPT;
 Handle coroutine(const CoroutineConfig& config) FL_NO_EXCEPT;

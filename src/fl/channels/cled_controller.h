@@ -179,14 +179,12 @@ public:
 
     // Compatibility with the 3.8.x codebase.
     VIRTUAL_IF_NOT_AVR void showLeds(fl::u8 brightness) FL_NO_EXCEPT {
-#if FASTLED_HAS_ENGINE_EVENTS
         fl::EngineEvents::onBeginFrame();
-#endif
         void* data = beginShowLeds(mLeds.size());
         showLedsInternal(brightness);
         endShowLeds(data);
-#if FASTLED_HAS_ENGINE_EVENTS
         fl::EngineEvents::onEndFrame();
+#if FASTLED_HAS_ENGINE_EVENTS
         fl::EngineEvents::onEndShowLeds();
 #endif
     }

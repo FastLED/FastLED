@@ -8,6 +8,11 @@
 
 namespace fl {
 
+namespace {
+// FL_LINT_ALLOW_GLOBAL(frame-task callback registry backing)
+EngineEvents::Listener *gFrameTaskListener = nullptr;
+}
+
 // Explicitly define constructor and destructor
 EngineEvents::EngineEvents() = default;
 EngineEvents::~EngineEvents() FL_NO_EXCEPT = default;
@@ -28,6 +33,28 @@ EngineEvents::Listener::~Listener() FL_NO_EXCEPT {
         ptr->_removeListener(this);
     }
 #endif
+}
+
+void EngineEvents::setFrameTaskListener(Listener *listener) FL_NO_EXCEPT {
+    gFrameTaskListener = listener;
+}
+
+void EngineEvents::onBeginFrame() FL_NO_EXCEPT {
+#if FASTLED_HAS_ENGINE_EVENTS
+    EngineEvents::getInstance()->_onBeginFrame();
+#endif
+    if (gFrameTaskListener) {
+        gFrameTaskListener->onBeginFrame();
+    }
+}
+
+void EngineEvents::onEndFrame() FL_NO_EXCEPT {
+#if FASTLED_HAS_ENGINE_EVENTS
+    EngineEvents::getInstance()->_onEndFrame();
+#endif
+    if (gFrameTaskListener) {
+        gFrameTaskListener->onEndFrame();
+    }
 }
 
 #if FASTLED_HAS_ENGINE_EVENTS

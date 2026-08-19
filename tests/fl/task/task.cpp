@@ -1,6 +1,7 @@
 
 
 #include "test.h"
+#include "FastLED.h"
 #include "fl/task/task.h"
 #include "fl/task/executor.h"
 #include "fl/system/engine_events.h"
@@ -14,30 +15,6 @@ FL_TEST_FILE(FL_FILEPATH) {
 
 
 
-
-namespace {
-
-// Helper class to track frame events for testing
-class TestFrameListener : public fl::EngineEvents::Listener {
-public:
-    TestFrameListener() {
-        fl::EngineEvents::addListener(this);
-    }
-    
-    ~TestFrameListener() {
-        fl::EngineEvents::removeListener(this);
-    }
-    
-    void onEndFrame() override {
-        frame_count++;
-        // Pump the scheduler to execute after_frame tasks specifically
-        fl::task::Scheduler::instance().update_after_frame_tasks();
-    }
-    
-    int frame_count = 0;
-};
-
-} // anonymous namespace
 
 FL_TEST_CASE("Task self-registration and destruction behavior [task]") {
     
@@ -58,7 +35,6 @@ FL_TEST_CASE("Task self-registration and destruction behavior [task]") {
         }
         
         // Simulate frame end event
-        TestFrameListener listener;
         fl::EngineEvents::onEndFrame();
         
         // Task should now execute due to auto-registration
@@ -81,7 +57,6 @@ FL_TEST_CASE("Task self-registration and destruction behavior [task]") {
         // Entire chain destructs here, but task was auto-registered
         
         // Simulate frame end event  
-        TestFrameListener listener;
         fl::EngineEvents::onEndFrame();
         
         // Task should execute
@@ -107,7 +82,6 @@ FL_TEST_CASE("Task self-registration and destruction behavior [task]") {
         }
         
         // Simulate frame end event
-        TestFrameListener listener;
         fl::EngineEvents::onEndFrame();
         
         // All 3 tasks should execute
@@ -121,23 +95,22 @@ FL_TEST_CASE("Task self-registration and destruction behavior [task]") {
         // Clear any leftover tasks from previous tests
         fl::task::Scheduler::instance().clear_all_tasks();
         
-        bool task_executed = false;
+        int execution_count = 0;
         
         // Old style should still work
         auto task = fl::task::after_frame()
-            .then([&task_executed]() {
-                task_executed = true;
+            .then([&execution_count]() {
+                ++execution_count;
             });
         
         // Manual add should work (though now redundant since auto-registration already happened)
         fl::task::Scheduler::instance().add_task(task);
         
         // Simulate frame end event
-        TestFrameListener listener;
         fl::EngineEvents::onEndFrame();
         
         // Task should execute (only once, not twice)
-        FL_CHECK(task_executed);
+        FL_CHECK_EQ(execution_count, 1);
         
         // Clean up
         fl::task::Scheduler::instance().clear_all_tasks();
@@ -160,7 +133,6 @@ FL_TEST_CASE("Task self-registration and destruction behavior [task]") {
         task.cancel();
         
         // Simulate frame end event
-        TestFrameListener listener;
         fl::EngineEvents::onEndFrame();
         
         // Task should NOT execute due to cancellation
@@ -255,29 +227,107 @@ FL_TEST_CASE("Task self-registration and destruction behavior [task]") {
         FL_CHECK_EQ(execution_count, 0); // Still 0
 
         
-        // Create a frame listener for this specific test
-        TestFrameListener listener;
-        
-        // Instead of calling FastLED.show(), directly trigger the driver events
-        // This tests the task system without requiring LED hardware setup
-        fl::EngineEvents::onEndFrame();
+        // No controller is required to exercise the real FastLED frame path.
+        FastLED.show();
         
         // The after_frame task should have executed
         FL_CHECK_EQ(execution_count, 1);
         
-        // Calling onEndFrame() again should execute the task again (it's been removed as one-shot)
-        // But since it's already removed, create another task to test
-        auto task2 = fl::task::after_frame()
-            .then([&execution_count]() {
-                execution_count++;
-            });
-        
-        fl::EngineEvents::onEndFrame();
+        // Frame tasks recur at every matching boundary until canceled.
+        FastLED.show();
+        FL_CHECK_EQ(execution_count, 2);
+
+        task.cancel();
+        FastLED.show();
         FL_CHECK_EQ(execution_count, 2);
         
         // Clean up
         fl::task::Scheduler::instance().clear_all_tasks();
     }
-} 
+}
+
+FL_TEST_CASE("before_frame and after_frame follow the engine lifecycle [task]") {
+    auto& scheduler = fl::task::Scheduler::instance();
+    scheduler.clear_all_tasks();
+
+    fl::vector<int> order;
+    auto before = fl::task::before_frame().then([&order]() {
+        order.push_back(1);
+    });
+    auto after = fl::task::after_frame().then([&order]() {
+        order.push_back(2);
+    });
+
+    FastLED.show();
+    FastLED.show();
+    FastLED.showColor(CRGB::Black);
+
+    FL_REQUIRE_EQ(order.size(), 6);
+    FL_CHECK_EQ(order[0], 1);
+    FL_CHECK_EQ(order[1], 2);
+    FL_CHECK_EQ(order[2], 1);
+    FL_CHECK_EQ(order[3], 2);
+    FL_CHECK_EQ(order[4], 1);
+    FL_CHECK_EQ(order[5], 2);
+
+    before.cancel();
+    after.cancel();
+    FastLED.show();
+    FL_CHECK_EQ(order.size(), 6);
+
+    scheduler.clear_all_tasks();
+}
+
+FL_TEST_CASE("frame task dispatch is deferred and non-reentrant [task]") {
+    auto& scheduler = fl::task::Scheduler::instance();
+    scheduler.clear_all_tasks();
+
+    int outer_count = 0;
+    int deferred_count = 0;
+    fl::task::Handle deferred;
+    auto outer = fl::task::before_frame().then([&]() {
+        ++outer_count;
+        if (outer_count == 1) {
+            deferred = fl::task::before_frame().then([&deferred_count]() {
+                ++deferred_count;
+            });
+            FastLED.onBeginFrame();
+        }
+    });
+
+    FastLED.onBeginFrame();
+    FL_CHECK_EQ(outer_count, 1);
+    FL_CHECK_EQ(deferred_count, 0);
+
+    FastLED.onBeginFrame();
+    FL_CHECK_EQ(outer_count, 2);
+    FL_CHECK_EQ(deferred_count, 1);
+
+    outer.cancel();
+    deferred.cancel();
+    scheduler.clear_all_tasks();
+}
+
+FL_TEST_CASE("frame task dispatch tolerates scheduler mutation [task]") {
+    auto& scheduler = fl::task::Scheduler::instance();
+    scheduler.clear_all_tasks();
+
+    auto timer = fl::task::every_ms(1000).then([]() {});
+    int second_count = 0;
+    auto first = fl::task::before_frame().then([&timer]() {
+        timer.cancel();
+        fl::task::run(0, fl::task::ExecFlags::TASKS);
+    });
+    auto second = fl::task::before_frame().then([&second_count]() {
+        ++second_count;
+    });
+
+    FastLED.onBeginFrame();
+    FL_CHECK_EQ(second_count, 1);
+
+    first.cancel();
+    second.cancel();
+    scheduler.clear_all_tasks();
+}
 
 } // FL_TEST_FILE

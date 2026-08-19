@@ -2,6 +2,28 @@
 
 <!-- Add tasks here as checkable items -->
 
+## Frame-task lifecycle (#3896)
+
+- [x] Reproduce the missing production dispatch and contradictory one-shot semantics.
+- [x] Compare repair, removal, and contract-narrowing strategies.
+- [x] Add failing lifecycle tests for automatic before/after dispatch and recurrence.
+- [x] Implement the selected engine-event integration and recurring semantics.
+- [x] Correct the frame-task and executor documentation.
+- [x] Run focused tests, lint, the C++ suite, and the pre-push review gate.
+- [ ] Push a PR, drive checks/reviews to green, merge it, and verify master.
+
+### Review
+
+- Selected automatic recurring frame tasks over removal (source-breaking) and
+  one-shot contract narrowing (inconsistent with the documented per-frame API).
+- Frame callbacks now use a lazy low-memory-safe engine hook, stable per-phase
+  snapshots, same-phase reentrancy guards, cancellation cleanup, and deferred
+  registration semantics.
+- RED reproduced missing dispatch in quick and sanitizer builds. GREEN evidence:
+  focused quick + sanitizer tests pass; all 279 C++ tests and 84 host examples
+  pass; full lint passes; the pre-push review is clean after fixing its scheduler
+  mutation finding.
+
 ## QEMU build badges
 
 - [x] Inventory the ESP32-DEV, ESP32-C3, and ESP32-S3 badge failures from current GitHub Actions logs.

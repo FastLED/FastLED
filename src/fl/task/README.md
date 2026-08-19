@@ -62,8 +62,9 @@ Nothing above it changes.
 
 ## `fl::task::run()` — the pump
 
-**`run()` must be called from `loop()`.** Nothing pumps the scheduler behind your back; if
-you never call it, your tasks never fire.
+**`run()` must be called from `loop()` for time-based tasks.** Frame tasks are the exception:
+`before_frame()` and `after_frame()` are pumped automatically by the FastLED frame lifecycle.
+If you never call `run()`, `every_ms()` and `at_framerate()` tasks never fire.
 
 ```cpp
 void loop() {
@@ -98,6 +99,8 @@ The 1 ms default yield is what keeps a busy render loop from starving the networ
 |---------|-------|
 | `fl::task::every_ms(int interval_ms)` | Every `interval_ms`, forever |
 | `fl::task::at_framerate(int fps)` | `fps` times a second, forever |
+| `fl::task::before_frame()` | Before every FastLED render, until canceled |
+| `fl::task::after_frame()` | After every FastLED render, until canceled |
 | `fl::task::coroutine(const CoroutineConfig&)` | Once, on its own OS task (see below) |
 
 Each builder has an overload taking a `TracePoint` — pass the `FL_TRACE` macro and the
@@ -132,10 +135,13 @@ blink.set_interval_ms(100);   // speed it up
 blink.cancel();               // stop it
 ```
 
-`every_ms` and `at_framerate` tasks recur until cancelled. Coroutines run once.
+`every_ms`, `at_framerate`, `before_frame`, and `after_frame` tasks recur until canceled.
+Coroutines run once. Frame tasks do not require `run()`; engine frame events dispatch them
+automatically.
 
-Callbacks run on whichever thread called `run()` and are not preempted — keep each one
-short. A callback that blocks for 200 ms delays every other task by 200 ms.
+Callbacks run on whichever thread called `run()` or initiated the frame and are not
+preempted — keep each one short. A callback that blocks for 200 ms delays every other
+task by 200 ms.
 
 ## Promises
 
@@ -238,7 +244,7 @@ Code using coroutines still compiles everywhere; where there is no support,
 
 ## Gotchas
 
-- **No `run()`, no tasks.** The single most common mistake.
+- **No `run()`, no time-based tasks.** Frame tasks follow FastLED frame events instead.
 - **`.then()` is what registers.** A handle with only `.catch_()` is inert.
 - **Don't block in a callback.** Everything else waits behind it. Long or blocking work
   belongs in a coroutine.
