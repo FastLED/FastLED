@@ -1,6 +1,5 @@
 // IWYU pragma: private
 
-// FL_LINT_ALLOW_GLOBAL_FILE(Tier 1d: ObjectFLED diagnostic snapshot state (s_events / s_lastPins / s_busyState + counters) is used from 40+ sites in this TU. Mechanical migration to `fl::Singleton<DiagState>` is tracked in FastLED#3487 — kept as-is here to keep the linter-landing PR focused.)
 #include "platforms/arm/teensy/is_teensy.h"
 
 #if defined(FL_IS_TEENSY_4X) && defined(FASTLED_OBJECTFLED_DIAGNOSTICS) && FASTLED_OBJECTFLED_DIAGNOSTICS
@@ -133,13 +132,21 @@ struct SnapshotEvent {
     u32 rxStandardPsr = 0;
 };
 
+// FL_LINT_ALLOW_GLOBAL(Constant-initialized, trivially destructible diagnostic snapshots; internal linkage and -fdata-sections already make them linker-elidable.)
 SnapshotEvent s_events[kMaxEvents];
+// FL_LINT_ALLOW_GLOBAL(Constant-initialized counter paired with s_events; Singleton would add lazy-init overhead without improving elision.)
 u8 s_eventCount = 0;
+// FL_LINT_ALLOW_GLOBAL(Constant-initialized overflow counter; kept direct for low-overhead diagnostic capture.)
 u32 s_overflowCount = 0;
+// FL_LINT_ALLOW_GLOBAL(Constant-initialized pin snapshot; internal linkage and -fdata-sections already make it linker-elidable.)
 u8 s_lastPins[kMaxPins];
+// FL_LINT_ALLOW_GLOBAL(Constant-initialized count paired with s_lastPins; Singleton would add an unnecessary indirection.)
 u8 s_lastPinCount = 0;
+// FL_LINT_ALLOW_GLOBAL(Constant-initialized, trivially destructible busy snapshot; no dynamic initialization to elide.)
 BusyStateSnapshot s_busyState;
+// FL_LINT_ALLOW_GLOBAL(Constant-initialized RX diagnostic flag; direct storage avoids a lazy Singleton check in capture paths.)
 bool s_rxPinValid = false;
+// FL_LINT_ALLOW_GLOBAL(Constant-initialized RX diagnostic pin; direct storage avoids a lazy Singleton check in capture paths.)
 u8 s_rxPin = 0;
 
 u32 ptrToU32(const volatile void* ptr) FL_NO_EXCEPT {
