@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, TypeGuard, cast
 
 from colorama import Fore, Style
+from running_process import RunningProcess
 
 from ci.autoresearch.args import Args
 from ci.autoresearch.build_driver import DeployResult, select_build_driver
@@ -98,7 +99,10 @@ def _is_teensy4_environment(final_environment: str | None) -> bool:
 
 
 def _driver_name_for_environment(
-    driver: str, final_environment: str | None, rp_pio_index: int = 1
+    driver: str,
+    final_environment: str | None,
+    rp_pio_index: int = 1,
+    rp_uart_index: int = 0,
 ) -> str:
     if driver == "SPI" and _is_teensy4_environment(final_environment):
         return "SPI_UNIFIED"
@@ -110,7 +114,58 @@ def _driver_name_for_environment(
         # concrete names must remain distinct so a runtime-exclusive test can
         # select one physical PIO block without replacing the other.
         return f"PIO{rp_pio_index}"
+    if driver == "UART" and _active_rp2xxx_environment(final_environment) is not None:
+        # RP exposes two concrete PL011 engines. The portable "UART" bus name
+        # is not registered as a runtime driver on this platform.
+        return f"UART{rp_uart_index}"
     return driver
+
+
+def _replace_driver_selection(
+    ctx: RunContext, current: str, replacements: list[str]
+) -> None:
+    """Replace a deferred driver name in the inventory and generated RPCs."""
+    expanded_drivers: list[str] = []
+    for driver in ctx.drivers:
+        expanded_drivers.extend(replacements if driver == current else (driver,))
+    ctx.drivers = expanded_drivers
+
+    for command in ctx.json_rpc_commands:
+        params = command.get("params")
+        if not isinstance(params, dict):
+            continue
+        if params.get("driver") == current:
+            # Multi-target replacements are generated only for parallel mode.
+            params["driver"] = replacements[0]
+        driver_entries = params.get("drivers")
+        if not isinstance(driver_entries, list):
+            continue
+        expanded_entries: list[Any] = []
+        for entry in driver_entries:
+            if not isinstance(entry, dict) or entry.get("driver") != current:
+                expanded_entries.append(entry)
+                continue
+            for replacement in replacements:
+                replacement_entry = dict(entry)
+                replacement_entry["driver"] = replacement
+                expanded_entries.append(replacement_entry)
+        params["drivers"] = expanded_entries
+
+
+def _normalize_deferred_driver_names(ctx: RunContext) -> None:
+    """Apply platform-specific names after USB board auto-detection."""
+    environment = ctx.final_environment
+    args = ctx.args
+    if _active_rp2xxx_environment(environment) is not None:
+        _replace_driver_selection(ctx, "UART", [f"UART{args.rp_uart_index}"])
+        pio_names = (
+            ["PIO0", "PIO1"]
+            if args.rp_pio_both and args.flex_io
+            else [f"PIO{args.rp_pio_index}"]
+        )
+        _replace_driver_selection(ctx, "FLEX_IO", pio_names)
+    elif _is_teensy4_environment(environment):
+        _replace_driver_selection(ctx, "SPI", ["SPI_UNIFIED"])
 
 
 def _uses_teensy_flex_io_default_tx(
@@ -510,7 +565,13 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         if args.spi:
             drivers.append(_driver_name_for_environment("SPI", final_environment))
         if args.uart:
-            drivers.append("UART")
+            drivers.append(
+                _driver_name_for_environment(
+                    "UART",
+                    final_environment,
+                    rp_uart_index=args.rp_uart_index,
+                )
+            )
         if args.lcd:
             drivers.append("LCD_CLOCKLESS")
         if args.lcd_spi:
@@ -1382,6 +1443,7 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
         print()
 
     ctx.final_environment = _canonical_board_environment(ctx.final_environment)
+    _normalize_deferred_driver_names(ctx)
 
     if args.use_root_platformio_ini and _reject_teensy_root_platformio_ini(
         ctx.final_environment
@@ -3460,9 +3522,11 @@ async def _run_lpc_dma_spi_tests(ctx: RunContext) -> int:
 async def _run_rp_spi_loopback_tests(ctx: RunContext) -> int:
     """Run byte-exact loopback through the RP fixed-SPI channel engine."""
     final_environment = (ctx.final_environment or "").lower()
-    if final_environment != "rp2040":
-        print("--rp-spi-loopback is only supported on the rp2040 environment.")
+    active_environment = _active_rp2xxx_environment(final_environment)
+    if active_environment is None:
+        print("--rp-spi-loopback requires an RP2040 or RP2350 environment.")
         return 1
+    chip_name = "RP2350" if active_environment in RP2350_ENVIRONMENTS else "RP2040"
 
     upload_port = ctx.upload_port
     assert upload_port is not None
@@ -3474,7 +3538,7 @@ async def _run_rp_spi_loopback_tests(ctx: RunContext) -> int:
     rx_pin = ctx.args.rx_pin if ctx.args.rx_pin is not None else default_rx_pin
     print()
     print("=" * 60)
-    print("RP2040 fixed-SPI DMA byte-loopback")
+    print(f"{chip_name} fixed-SPI DMA byte-loopback")
     print(
         f"   Wiring: GPIO{tx_pin} (SPI{spi_index} MOSI) -> GPIO{rx_pin} (SPI{spi_index} MISO)"
     )
@@ -3500,19 +3564,27 @@ async def _run_rp_spi_loopback_tests(ctx: RunContext) -> int:
         "--spi-index",
         str(spi_index),
     ]
-    result = subprocess.run(cmd)
+    result = RunningProcess.run(
+        cmd,
+        check=False,
+        timeout=ctx.remaining_seconds(),
+    )
     return 0 if result.returncode == 0 else 1
 
 
 async def _run_rp_spi_public_api_tests(ctx: RunContext) -> int:
     """Verify APA102/SK9822 framing through the RP SPI1 public API path."""
-    if (ctx.final_environment or "").lower() != "rp2040":
-        print("--rp-spi-public-api is only supported on the rp2040 environment.")
+    active_environment = _active_rp2xxx_environment(ctx.final_environment)
+    if active_environment is None:
+        print("--rp-spi-public-api requires an RP2040 or RP2350 environment.")
         return 1
+    chip_name = "RP2350" if active_environment in RP2350_ENVIRONMENTS else "RP2040"
     upload_port = ctx.upload_port
     assert upload_port is not None
-    print("RP2040 SPI1 public API loopback: GPIO11 MOSI -> GPIO8 MISO, GPIO10 SCK")
-    result = subprocess.run(
+    print(
+        f"{chip_name} SPI1 public API loopback: GPIO11 MOSI -> GPIO8 MISO, GPIO10 SCK"
+    )
+    result = RunningProcess.run(
         [
             "uv",
             "run",
@@ -3523,7 +3595,9 @@ async def _run_rp_spi_public_api_tests(ctx: RunContext) -> int:
             upload_port,
             "--chipset",
             ctx.args.rp_spi_chipset,
-        ]
+        ],
+        check=False,
+        timeout=ctx.remaining_seconds(),
     )
     return 0 if result.returncode == 0 else 1
 

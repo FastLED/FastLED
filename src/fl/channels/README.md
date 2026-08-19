@@ -170,7 +170,7 @@ FastLED.addLeds<WS2812, 4, GRB, fl::Bus::RMT>(leds, 60);
 
 // SPI: use the platform's compile-time default bus.
 FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(12), fl::Bus::AUTO>(leds, 60);
-// Or name a bus supported by the target (for example, RP2040 hardware SPI).
+// Or name a bus supported by the target (for example, RP2xxx hardware SPI).
 FastLED.addLeds<APA102, 11, 10, RGB, DATA_RATE_MHZ(12), fl::Bus::SPI, 1>(leds, 60);
 ```
 

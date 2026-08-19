@@ -35,6 +35,11 @@ FL_STATIC_ASSERT(fl::BusInstanceCount<fl::Bus::SPI>::value == 1,
                  "ESP32-C6 exposes one SPI entry");
 FL_STATIC_ASSERT(fl::BusInstanceCount<fl::Bus::UART>::value == 2,
                  "ESP32-C6 exposes two UART entries");
+#elif defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+FL_STATIC_ASSERT(fl::BusInstanceCount<fl::Bus::SPI>::value == 2,
+                 "RP2xxx exposes two SPI entries");
+FL_STATIC_ASSERT(fl::BusInstanceCount<fl::Bus::UART>::value == 2,
+                 "RP2xxx exposes two UART entries");
 #endif
 
 FL_TEST_CASE("deviceInfo reports BIT_BANG") {
@@ -52,6 +57,28 @@ FL_TEST_CASE("deviceInfo reports UART Which0") {
     FL_CHECK_EQ(info.which, 0);
     FL_CHECK_EQ(fl::string(info.bus_name), fl::string("UART"));
 }
+
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+FL_TEST_CASE("RP UART affinity names and device metadata preserve Which") {
+    FL_CHECK_EQ(fl::string(fl::busDriverName(fl::Bus::UART, 0)),
+                fl::string("UART0"));
+    FL_CHECK_EQ(fl::string(fl::busDriverName(fl::Bus::UART, 1)),
+                fl::string("UART1"));
+
+    auto uart0 = fl::deviceInfo<fl::Bus::UART, 0>();
+    auto uart1 = fl::deviceInfo<fl::Bus::UART, 1>();
+    FL_CHECK_EQ(uart0.which, 0);
+    FL_CHECK_EQ(uart1.which, 1);
+    FL_CHECK_FALSE(uart0.is_noop);
+    FL_CHECK_FALSE(uart1.is_noop);
+    FL_CHECK(uart0.runtime.available);
+    FL_CHECK(uart1.runtime.available);
+    FL_CHECK_EQ(fl::string(uart0.vendor_name), fl::string("PL011"));
+    FL_CHECK_EQ(fl::string(uart1.vendor_name), fl::string("PL011"));
+    FL_CHECK_EQ(fl::string(uart0.device_name), fl::string("RP UART0"));
+    FL_CHECK_EQ(fl::string(uart1.device_name), fl::string("RP UART1"));
+}
+#endif
 
 FL_TEST_CASE("deviceInfo reports SPI entries and out-of-range no-op") {
     auto spi0 = fl::deviceInfo<fl::Bus::SPI, 0>();

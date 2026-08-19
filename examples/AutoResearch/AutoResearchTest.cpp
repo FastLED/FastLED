@@ -453,7 +453,9 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     // Buffer size: 1 LED byte = 8 bits = 8 RMT symbols
     // UART with TX inversion produces standard WS2812 waveform, same symbol count
     bool is_uart_driver = (fl::strcmp(driver_name, "UART") == 0)
-                       || (fl::strcmp(driver_name, "LPUART") == 0);
+                       || (fl::strcmp(driver_name, "LPUART") == 0)
+                       || (fl::strcmp(driver_name, "UART0") == 0)
+                       || (fl::strcmp(driver_name, "UART1") == 0);
     bool is_object_fled_driver = (fl::strcmp(driver_name, "OBJECT_FLED") == 0);
     rx_config.edge_capacity = fl::validation::captureEdgeCapacity(
         rx_buffer.size(), expected_data_bytes, rx_channel->backend());

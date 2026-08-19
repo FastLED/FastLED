@@ -215,11 +215,14 @@ inline const char* busDriverName(Bus b, fl::u8 which = 0, bool spi = false) FL_N
             return busName(b, which);
 #endif
         case Bus::UART:
-            (void)which;
             (void)spi;
-#if defined(FL_IS_TEENSY_4X)
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+            return which == 0 ? "UART0" : "UART1";
+#elif defined(FL_IS_TEENSY_4X)
+            (void)which;
             return "LPUART";
 #else
+            (void)which;
             return "UART";
 #endif
     }

@@ -1,4 +1,4 @@
-"""Validate RP2040 SPI1 APA102/SK9822 output through FastLED's public API."""
+"""Validate RP2xxx SPI1 APA102/SK9822 output through FastLED's public API."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ def main() -> int:
     parser.add_argument("--port", required=True)
     parser.add_argument("--chipset", choices=("apa102", "sk9822"), required=True)
     args = parser.parse_args()
-    print(f"RP2040 SPI1 {args.chipset.upper()} public API loopback — FastLED #3660")
+    print(f"RP2xxx SPI1 {args.chipset.upper()} public API loopback - FastLED #3660")
     print("  Wiring: GPIO11 (MOSI) -> GPIO8 (MISO); GPIO10 is SCK output only")
     try:
         with RpcBench(args.port) as bench:
@@ -47,7 +47,7 @@ def main() -> int:
     except Exception as error:  # noqa: BLE001
         print(f"FAIL — unable to run RP SPI public API loopback: {error}")
         return 1
-    print(f"PASS — {args.chipset.upper()} public API framing is byte-exact on SPI1.")
+    print(f"PASS - {args.chipset.upper()} public API framing is byte-exact on SPI1.")
     return 0
 
 

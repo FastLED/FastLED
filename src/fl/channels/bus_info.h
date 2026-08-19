@@ -170,6 +170,18 @@ template<> struct DeviceInfoResolver<Bus::FLEX_IO, 1> {
     }
 };
 
+template<> struct DeviceInfoResolver<Bus::UART, 0> {
+    static inline DeviceInfo get() FL_NO_EXCEPT {
+        return makeInfo(Bus::UART, 0, "PL011", "RP UART0");
+    }
+};
+
+template<> struct DeviceInfoResolver<Bus::UART, 1> {
+    static inline DeviceInfo get() FL_NO_EXCEPT {
+        return makeInfo(Bus::UART, 1, "PL011", "RP UART1");
+    }
+};
+
 #if defined(FL_IS_RP2350)
 template<> struct DeviceInfoResolver<Bus::FLEX_IO, 2> {
     static inline DeviceInfo get() FL_NO_EXCEPT {

@@ -1,4 +1,4 @@
-"""Validate RP2040 fixed-SPI DMA loopback through ChannelEngineRpSpi.
+"""Validate RP2xxx fixed-SPI DMA loopback through ChannelEngineRpSpi.
 
 The companion AutoResearch RPC sends a fixed 32-byte pattern through
 ``BusTraits<Bus::SPI, N>``. RX DMA captures MISO while the engine waits for
@@ -90,7 +90,7 @@ def run_case(
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="RP2040 fixed-SPI DMA byte-loopback through ChannelEngineRpSpi"
+        description="RP2xxx fixed-SPI DMA byte-loopback through ChannelEngineRpSpi"
     )
     parser.add_argument("--port", default=DEFAULT_PORT)
     parser.add_argument("--spi-index", type=int, choices=(0, 1), default=0)
@@ -102,7 +102,7 @@ def main() -> int:
     mosi_pin = args.mosi_pin if args.mosi_pin is not None else default_pins.mosi
     miso_pin = args.miso_pin if args.miso_pin is not None else default_pins.miso
 
-    print(f"RP2040 SPI{args.spi_index} DMA byte-loopback — FastLED #3659")
+    print(f"RP2xxx SPI{args.spi_index} DMA byte-loopback - FastLED #3659")
     print(f"  Port: {args.port}")
     print(f"  Wiring: GPIO{mosi_pin} (MOSI) -> GPIO{miso_pin} (MISO)")
     print(f"  SCK: GPIO{sck_pin} (output only)")

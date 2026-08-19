@@ -121,11 +121,13 @@ class Args:
     # exclusive with the other LPC DMA harnesses at the flash budget.
     dma_uart: bool
 
-    # RP2040 fixed-SPI DMA byte-loopback harness.
+    # RP2040/RP2350 fixed-SPI DMA byte-loopback harness.
     rp_spi_loopback: bool
     rp_spi_index: int
     rp_spi_public_api: bool
     rp_spi_chipset: str
+    # RP PL011 UART engine used by --uart on RP2040/RP2350.
+    rp_uart_index: int
     # RP PIO TX engine used by --flex-io on RP2040/RP2350.
     rp_pio_index: int
     # Select both PIO TX engines for a parallel RP run.
@@ -266,7 +268,7 @@ See Also:
         driver_group.add_argument(
             "--rp-spi-loopback",
             action="store_true",
-            help="RP2040-only: fixed SPI0/SPI1 DMA byte-loopback "
+            help="RP2040/RP2350: fixed SPI0/SPI1 DMA byte-loopback "
             + "through the channel engine; requires MOSI-to-MISO jumper.",
         )
         driver_group.add_argument(
@@ -279,7 +281,7 @@ See Also:
         driver_group.add_argument(
             "--rp-spi-public-api",
             action="store_true",
-            help="RP2040: verify APA102/SK9822 through FastLED.addLeds() on SPI1.",
+            help="RP2040/RP2350: verify APA102/SK9822 through FastLED.addLeds() on SPI1.",
         )
         driver_group.add_argument(
             "--rp-spi-chipset",
@@ -291,6 +293,13 @@ See Also:
             "--uart",
             action="store_true",
             help="Test only UART driver (LPC845: UART DMA clockless RX-DMA loopback)",
+        )
+        driver_group.add_argument(
+            "--rp-uart-index",
+            type=int,
+            choices=(0, 1),
+            default=0,
+            help="RP UART engine for --uart on RP2040/RP2350 (default: 0).",
         )
         driver_group.add_argument(
             "--lcd",
@@ -926,6 +935,7 @@ See Also:
             rp_spi_index=parsed.rp_spi_index,
             rp_spi_public_api=parsed.rp_spi_public_api,
             rp_spi_chipset=parsed.rp_spi_chipset,
+            rp_uart_index=parsed.rp_uart_index,
             rp_pio_index=parsed.rp_pio_index,
             rp_pio_both=parsed.rp_pio_both,
             test_fault_emit=parsed.test_fault_emit,
