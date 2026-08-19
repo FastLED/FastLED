@@ -20,6 +20,61 @@ FL_EXTERN_C_END
 
 namespace fl {
 
+namespace {
+
+#if defined(FASTLED_LOG_RMT_ENABLED) && FASTLED_LOG_RUNTIME_ENABLED
+enum class AllocTxFallbackLog : u8 {
+    ATTEMPT,
+    SUCCESS,
+    FAILURE,
+};
+
+FL_NO_INLINE FL_COLD void emitAllocTxFallbackLog(
+    AllocTxFallbackLog event, u8 channel_id, size_t mem_blocks,
+    size_t words_needed, size_t fallback_words) FL_NO_EXCEPT {
+    switch (event) {
+    case AllocTxFallbackLog::ATTEMPT:
+        FL_LOG_RMT_F("RMT TX allocation failed with %s× buffering (%s words)", mem_blocks, words_needed);
+        FL_LOG_RMT_F("  Attempting fallback to 1× buffering (%s words)...", fallback_words);
+        break;
+    case AllocTxFallbackLog::SUCCESS:
+        FL_LOG_RMT_F("  [OK] Fallback successful: allocated %s words (single-buffer mode)", fallback_words);
+        FL_LOG_RMT_F("RMT TX channel %s allocated (non-DMA, %s words, single-buffer)", static_cast<int>(channel_id), fallback_words);
+        break;
+    case AllocTxFallbackLog::FAILURE:
+        FL_LOG_RMT_F("  [FAIL] Fallback failed: insufficient memory even for single-buffer");
+        break;
+    }
+}
+#endif
+
+#if FASTLED_LOG_RUNTIME_ENABLED
+FL_NO_INLINE FL_COLD void emitAllocTxFailureDiagnostic(
+    u8 channel_id, size_t words_needed, size_t mem_blocks,
+    bool networkActive, size_t total, size_t allocated, size_t reserved,
+    size_t available) FL_NO_EXCEPT {
+    FL_WARN_F("RMT TX allocation failed for channel %s", static_cast<int>(channel_id));
+    FL_WARN_F("  Requested: %s words (%s× buffer%s)", words_needed, mem_blocks, (networkActive ? ", Network mode" : ""));
+    FL_WARN_F("  Available: %s words", available);
+    FL_WARN_F("  Memory breakdown: Total=%s, Allocated=%s, Reserved=%s (external RMT usage)", total, allocated, reserved);
+
+    if (reserved > 0) {
+        FL_WARN_F("  Suggestion: %s words reserved by external RMT usage (e.g., USB CDC)", reserved);
+        FL_WARN_F("              Consider using DMA channels (use_dma=true) to bypass on-chip memory");
+    }
+    if (allocated > 0) {
+        FL_WARN_F("  Suggestion: %s words already allocated to other channels", allocated);
+        FL_WARN_F("              Consider reducing LED count or using fewer channels");
+    }
+    if (mem_blocks > 2 && networkActive) {
+        FL_WARN_F("  Suggestion: Network mode uses 3× buffering (%s words per channel)", (mem_blocks * SOC_RMT_MEM_WORDS_PER_CHANNEL));
+        FL_WARN_F("              Consider disabling network or using DMA channels");
+    }
+}
+#endif
+
+} // namespace
+
 // ============================================================================
 // Platform-Specific Memory Configuration
 // ============================================================================
@@ -417,17 +472,24 @@ RmtMemoryManager::handleAllocateTxFailure(u8 channel_id, size_t mem_blocks,
         size_t fallback_blocks = 1;
         size_t fallback_words = fallback_blocks * SOC_RMT_MEM_WORDS_PER_CHANNEL;
 
-        FL_LOG_RMT_F("RMT TX allocation failed with %s× buffering (%s words)", mem_blocks, words_needed);
-        FL_LOG_RMT_F("  Attempting fallback to %s× buffering (%s words)...", fallback_blocks, fallback_words);
+#if defined(FASTLED_LOG_RMT_ENABLED) && FASTLED_LOG_RUNTIME_ENABLED
+        emitAllocTxFallbackLog(AllocTxFallbackLog::ATTEMPT, channel_id,
+                               mem_blocks, words_needed, fallback_words);
+#endif
 
         if (tryAllocateWords(fallback_words, true)) {
-            FL_LOG_RMT_F("  [OK] Fallback successful: allocated %s words (single-buffer mode)", fallback_words);
             mLedger.allocations.push_back(ChannelAllocation(channel_id, fallback_words, true, false));
-            FL_LOG_RMT_F("RMT TX channel %s allocated (non-DMA, %s words, single-buffer)", static_cast<int>(channel_id), fallback_words);
+#if defined(FASTLED_LOG_RMT_ENABLED) && FASTLED_LOG_RUNTIME_ENABLED
+            emitAllocTxFallbackLog(AllocTxFallbackLog::SUCCESS, channel_id,
+                                   mem_blocks, words_needed, fallback_words);
+#endif
             return result<size_t, RmtMemoryError>::success(fallback_words);
         }
 
-        FL_LOG_RMT_F("  [FAIL] Fallback failed: insufficient memory even for single-buffer");
+#if defined(FASTLED_LOG_RMT_ENABLED) && FASTLED_LOG_RUNTIME_ENABLED
+        emitAllocTxFallbackLog(AllocTxFallbackLog::FAILURE, channel_id,
+                               mem_blocks, words_needed, fallback_words);
+#endif
     }
 
     // Fallback failed or not attempted - provide detailed diagnostic message.
@@ -441,23 +503,9 @@ RmtMemoryManager::handleAllocateTxFailure(u8 channel_id, size_t mem_blocks,
     size_t reserved = mLedger.reserved_tx_words;
     size_t available = getAvailableWords(true);
 
-    FL_WARN_F("RMT TX allocation failed for channel %s", static_cast<int>(channel_id));
-    FL_WARN_F("  Requested: %s words (%s× buffer%s)", words_needed, mem_blocks, (networkActive ? ", Network mode" : ""));
-    FL_WARN_F("  Available: %s words", available);
-    FL_WARN_F("  Memory breakdown: Total=%s, Allocated=%s, Reserved=%s (external RMT usage)", total, allocated, reserved);
-
-    if (reserved > 0) {
-        FL_WARN_F("  Suggestion: %s words reserved by external RMT usage (e.g., USB CDC)", reserved);
-        FL_WARN_F("              Consider using DMA channels (use_dma=true) to bypass on-chip memory");
-    }
-    if (allocated > 0) {
-        FL_WARN_F("  Suggestion: %s words already allocated to other channels", allocated);
-        FL_WARN_F("              Consider reducing LED count or using fewer channels");
-    }
-    if (mem_blocks > 2 && networkActive) {
-        FL_WARN_F("  Suggestion: Network mode uses 3× buffering (%s words per channel)", (mem_blocks * SOC_RMT_MEM_WORDS_PER_CHANNEL));
-        FL_WARN_F("              Consider disabling network or using DMA channels");
-    }
+    emitAllocTxFailureDiagnostic(channel_id, words_needed, mem_blocks,
+                                 networkActive, total, allocated, reserved,
+                                 available);
 #endif
 
     return result<size_t, RmtMemoryError>::failure(RmtMemoryError::INSUFFICIENT_TX_MEMORY);
