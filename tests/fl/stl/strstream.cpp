@@ -39,8 +39,30 @@
 #include "fl/math/fixed_point.h"
 #include "fl/stl/int.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/detail/string_holder.h"
 #include "fl/stl/ios.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/string.h"
+#include "fl/stl/variant.h"
+
+using NoexceptTestVariant = fl::variant<int, bool>;
+
+FL_STATIC_ASSERT(noexcept(static_cast<fl::StringHolder*>(nullptr)->~StringHolder()),
+                 "StringHolder destruction must not throw");
+FL_STATIC_ASSERT(noexcept(static_cast<fl::detail::ControlBlockBase*>(nullptr)
+                              ->~ControlBlockBase()),
+                 "shared_ptr control-block destruction must not throw");
+FL_STATIC_ASSERT(noexcept(static_cast<fl::shared_ptr<int>*>(nullptr)->~shared_ptr()),
+                 "shared_ptr destruction must not throw");
+FL_STATIC_ASSERT(noexcept(static_cast<NoexceptTestVariant*>(nullptr)->~variant()),
+                 "variant destruction must not throw");
+FL_STATIC_ASSERT(noexcept(static_cast<fl::basic_string*>(nullptr)->~basic_string()),
+                 "basic_string destruction must not throw");
+FL_STATIC_ASSERT(noexcept(static_cast<fl::string*>(nullptr)->~string()),
+                 "string destruction must not throw");
+FL_STATIC_ASSERT(noexcept(static_cast<fl::sstream*>(nullptr)->~sstream()),
+                 "sstream destruction must not throw");
 
 FL_TEST_FILE(FL_FILEPATH) {
 

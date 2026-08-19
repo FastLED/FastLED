@@ -17,7 +17,7 @@ basic_string::basic_string(fl::span<char, static_cast<fl::size>(-1)> storage) FL
 
 // ======= DESTRUCTOR =======
 
-basic_string::~basic_string() FL_NO_EXCEPT {}
+basic_string::~basic_string() FL_DTOR_NOEXCEPT {}
 
 // ======= string_view CONSTRUCTOR FROM basic_string =======
 // Defined here (in the same TU as basic_string itself) so

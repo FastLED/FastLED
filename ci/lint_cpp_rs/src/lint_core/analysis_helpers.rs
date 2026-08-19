@@ -479,12 +479,22 @@ fn join_multiline_signature(lines: &[String], start: usize) -> Option<String> {
     None
 }
 
-fn signature_has_noexcept(lines: &[String], start: usize, open_paren: usize) -> bool {
+fn signature_has_noexcept(
+    lines: &[String],
+    start: usize,
+    open_paren: usize,
+    allow_destructor_marker: bool,
+) -> bool {
     let Some((close_line, close_col)) = find_close_paren_multiline(lines, start, open_paren) else {
         return false;
     };
     let tail = &lines[close_line][close_col + 1..];
-    if regex_has_noexcept_special().is_match(tail) {
+    let noexcept_regex = if allow_destructor_marker {
+        regex_has_destructor_noexcept_special()
+    } else {
+        regex_has_noexcept_special()
+    };
+    if noexcept_regex.is_match(tail) {
         return true;
     }
     for offset in 1..6 {
@@ -493,7 +503,7 @@ fn signature_has_noexcept(lines: &[String], start: usize, open_paren: usize) -> 
             break;
         }
         let next = lines[idx].trim();
-        if regex_has_noexcept_special().is_match(next) {
+        if noexcept_regex.is_match(next) {
             return true;
         }
         if next.starts_with('{') || next.ends_with('{') || next == "};" {
@@ -515,4 +525,3 @@ fn platform_trampoline_suggestion(include_path: &str) -> &'static str {
         .find_map(|(pattern, replacement)| include_path.contains(pattern).then_some(*replacement))
         .unwrap_or("platforms/*.h (appropriate trampoline)")
 }
-

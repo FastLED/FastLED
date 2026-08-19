@@ -59,7 +59,7 @@ StringHolder::StringHolder(const char *str, size length)
     mData[mLength] = '\0';
 }
 
-StringHolder::~StringHolder() FL_NO_EXCEPT {
+StringHolder::~StringHolder() FL_DTOR_NOEXCEPT {
     fl::free(mData); // Release the memory
 }
 
