@@ -166,6 +166,18 @@ class CompilationArgumentParser:
             "--exclude-examples", type=str, help="Examples that should be excluded"
         )
         parser.add_argument(
+            "--shard-index",
+            type=int,
+            help="Zero-based shard index for an 'all' example build. "
+            "Requires --shard-count.",
+        )
+        parser.add_argument(
+            "--shard-count",
+            type=int,
+            help="Split an 'all' example build into this many deterministic shards. "
+            "Requires --shard-index.",
+        )
+        parser.add_argument(
             "--no-filter",
             action="store_true",
             help="Disable @filter directives (compile even if incompatible with board). "
@@ -373,7 +385,8 @@ class CompilationArgumentParser:
             examples = ["Blink"]
 
         # Check for special 'all' keyword
-        if "all" in examples:
+        requested_all = "all" in examples
+        if requested_all:
             # Remove 'all' keyword and discover all examples
             examples = self._discover_all_examples()
 
@@ -381,6 +394,25 @@ class CompilationArgumentParser:
         if hasattr(args, "exclude_examples") and args.exclude_examples:
             excludes = set(args.exclude_examples.split(","))
             examples = [ex for ex in examples if ex not in excludes]
+
+        # Large cross-platform sweeps can exceed a single CI job's timeout.
+        # Keep the selection derived from the sorted discovery result so every
+        # shard is deterministic, disjoint, and collectively exhaustive.
+        shard_index = getattr(args, "shard_index", None)
+        shard_count = getattr(args, "shard_count", None)
+        if (shard_index is None) != (shard_count is None):
+            raise ValueError("--shard-index and --shard-count must be used together")
+        if shard_index is not None and shard_count is not None:
+            if not requested_all:
+                raise ValueError("example sharding requires the 'all' keyword")
+            if shard_count <= 0:
+                raise ValueError("--shard-count must be a positive integer")
+            if shard_index < 0 or shard_index >= shard_count:
+                raise ValueError(
+                    "--shard-index must be in the range "
+                    f"0..{shard_count - 1}, got {shard_index}"
+                )
+            examples = examples[shard_index::shard_count]
 
         # Validate examples exist
         for example in examples:
