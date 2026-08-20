@@ -45,13 +45,13 @@ typedef fl::u32 prog_uint32_t;
 
 #define NEED_CXX_BITS
 
-// These can be overridden
+// Arduino ESP8266 board variants expose Dn constants as raw GPIO numbers (for
+// example, NodeMCU D5 is GPIO 14). Default to raw numbering so those constants
+// reach the intended GPIO instead of being remapped a second time. The legacy
+// board-label mappings remain available as explicit opt-ins.
 #if !defined(FASTLED_ESP8266_RAW_PIN_ORDER) && !defined(FASTLED_ESP8266_NODEMCU_PIN_ORDER) && !defined(FASTLED_ESP8266_D1_PIN_ORDER)
-# ifdef ARDUINO_ESP8266_NODEMCU
-#   define FASTLED_ESP8266_NODEMCU_PIN_ORDER
-# else
-#   define FASTLED_ESP8266_RAW_PIN_ORDER
-# endif
+# define FL_ESP8266_PIN_ORDER_DEFAULTED 1
+# define FASTLED_ESP8266_RAW_PIN_ORDER
 #endif
 
 // Platform-specific IRAM attribute for ISR handlers and interrupt-sensitive functions
