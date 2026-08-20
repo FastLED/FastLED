@@ -223,6 +223,23 @@ FL_TEST_CASE("WS2814 timing matches the 800 kHz RGBW protocol") {
     FL_CHECK_EQ(timing.total_period_ns(), 1280);
 }
 
+FL_TEST_CASE("WS2818 timing stays inside the datasheet pulse envelope") {
+    constexpr ChipsetTimingConfig timing =
+        makeTimingConfig<TIMING_WS2818>();
+
+    FL_CHECK_EQ(timing.t1_ns, 300);
+    FL_CHECK_EQ(timing.t2_ns, 300);
+    FL_CHECK_EQ(timing.t3_ns, 600);
+    FL_CHECK_EQ(timing.reset_us, 300);
+    FL_CHECK_EQ(timing.t1_ns + timing.t2_ns, 600);
+    FL_CHECK_EQ(timing.t2_ns + timing.t3_ns, 900);
+    FL_CHECK_EQ(timing.total_period_ns(), 1200);
+
+    // Compile the documented public template path, not only its timing trait.
+    WS2818<5, GRB> controller;
+    FL_CHECK_FALSE(controller.getRgbw().active());
+}
+
 FL_TEST_CASE("WS2814 enables RGBW with white in byte four") {
     static CRGB leds[1];
     CLEDController& controller =
