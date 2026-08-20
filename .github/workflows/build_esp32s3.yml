@@ -50,6 +50,13 @@ jobs:
     # `github.event.pull_request == null` lets push / workflow_dispatch / etc.
     # pass; the equality clause only matches when the PR head repo IS the base.
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
+    strategy:
+      fail-fast: false
+      # A serial esp32s3 all-example sweep takes several hours because each
+      # sketch rebuilds the framework sources. Keep full coverage while each
+      # reusable-workflow job remains below its 45-minute bound (#3791).
+      matrix:
+        shard_index: [0, 1, 2, 3, 4, 5, 6, 7]
     uses: ./.github/workflows/build_template.yml
     with:
-      args: esp32s3 all
+      args: esp32s3 all --shard-index ${{ matrix.shard_index }} --shard-count 8
