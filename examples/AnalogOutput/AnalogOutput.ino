@@ -1,3 +1,4 @@
+// @filter: (board is not atmega8*)
 /// @file    AnalogOutput.ino
 /// @brief   Demonstrates how to use FastLED color functions even without a "pixel-addressible" smart LED strip.
 /// @example AnalogOutput.ino

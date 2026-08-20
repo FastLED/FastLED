@@ -645,6 +645,36 @@ class TestPintestFilter:
         assert "atmega8" in reason.lower() or "board" in reason.lower()
 
 
+class TestAnalogOutputFilter:
+    """AnalogOutput needs more flash than the ATmega8A provides."""
+
+    def test_analog_output_skips_atmega8a(self) -> None:
+        from pathlib import Path
+
+        from ci.boards import ATMEGA8A, UNO
+
+        analog_output_path = (
+            Path(__file__).parent.parent.parent
+            / "examples"
+            / "AnalogOutput"
+            / "AnalogOutput.ino"
+        )
+        sketch_filter = parse_filter_from_sketch(analog_output_path)
+
+        assert sketch_filter is not None, "AnalogOutput should have a @filter directive"
+        should_skip, reason = should_skip_sketch(ATMEGA8A, sketch_filter)
+
+        assert should_skip is True, (
+            f"atmega8a should be skipped for AnalogOutput (reason: {reason})"
+        )
+        assert "atmega8" in reason.lower() or "board" in reason.lower()
+
+        should_skip, reason = should_skip_sketch(UNO, sketch_filter)
+        assert should_skip is False, (
+            f"uno should compile AnalogOutput (reason: {reason})"
+        )
+
+
 class TestAudioInputFilter:
     """Test AudioInput example filter behavior."""
 
