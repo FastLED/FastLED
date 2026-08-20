@@ -25,6 +25,7 @@ enum class SpiChipset {
 	DOTSTARHD, ///< APA102HD LED chipset alias
 	APA102HD,  ///< APA102 LED chipset with 5-bit gamma correction
 	HD107,     ///< Same as APA102, but in turbo 40-mhz mode.
+	HD107S = HD107, ///< Marketed HD107S part name; protocol-compatible alias of HD107.
 	HD107HD,   ///< Same as APA102HD, but in turbo 40-mhz mode.
 	HD108,     ///< 16-bit variant of HD107, always gamma corrected. No SD (standard definition) option available - all HD108s use gamma correction, and a non-gamma corrected version is not planned.
 };

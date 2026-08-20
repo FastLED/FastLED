@@ -1,8 +1,7 @@
 // @filter: (board is not stm32f103cb)  // Maple Mini lacks pins 1-4 (uses libmaple numbering)
 /// @file    HD107.ino
-/// @brief   Example showing how to use the HD107 and HD which has built in gamma correction.
-///          This simply the HD107HD examles but with this chipsets.
-/// @see     HD107HD.ino.
+/// @brief   Example showing how to use the HD107S (also named HD107).
+/// @details Compares gamma-corrected HD107HD output with standard HD107S output.
 
 #include <Arduino.h>
 #include <FastLED.h>
@@ -36,7 +35,7 @@ void setup() {
     delay(500); // power-up safety delay
     // Two strips of LEDs, one in HD mode, one in software gamma mode.
     FastLED.addLeds<HD107HD, STRIP_0_DATA_PIN, STRIP_0_CLOCK_PIN, RGB>(leds_hd, NUM_LEDS);
-    FastLED.addLeds<HD107,   STRIP_1_DATA_PIN, STRIP_1_CLOCK_PIN, RGB>(leds, NUM_LEDS);
+    FastLED.addLeds<HD107S,  STRIP_1_DATA_PIN, STRIP_1_CLOCK_PIN, RGB>(leds, NUM_LEDS);
 }
 
 uint8_t wrap_8bit(int i) {
