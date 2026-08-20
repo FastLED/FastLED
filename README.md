@@ -545,6 +545,32 @@ maintainer and include a minimal FastLED-only reproduction when possible.
 Messages such as `#pragma message: FastLED version ...` are informational build
 output, not warnings or errors.
 
+## Troubleshooting Random Flashes or Wrong Colors
+
+If a steady color produces random pixels, flashes, or resets, first rule out an
+electrical problem. Color-dependent failures are often load-dependent: lighting
+two channels draws more current than lighting one, so a marginal supply can fail
+only for particular RGB values.
+
+1. **Prove the power path.** Power the strip from a regulated 5 V supply sized
+   for the LED load; do not route strip current through a development board's
+   linear regulator. A regulator marked 5.0 V cannot produce regulated 5 V from
+   a 5 V USB input because it needs voltage headroom.
+2. **Use a common ground.** Connect the controller ground, LED ground, and
+   external-supply ground together with short, low-resistance wiring.
+3. **Stabilize the strip input.** Add bulk capacitance across 5 V and ground at
+   the strip, keep the data wire short, and place a 33–220 Ω resistor in series
+   with data near the controller.
+4. **Reduce the test load.** Start with one LED at low brightness and a fixed
+   solid color, then increase LED count and brightness. If corruption begins as
+   load rises, measure the 5 V rail at the strip while it is lit.
+5. **Check logic levels.** When a 3.3 V controller drives a 5 V strip, use a
+   74HCT-family level shifter if the strip does not reliably recognize the data
+   signal.
+
+Once the same minimal sketch and wiring work on a known-good controller and
+power supply, include that A/B result in a FastLED bug report.
+
 ## 🎮 Advanced Features
 
 ### Performance Leaders: Parallel Output Records
