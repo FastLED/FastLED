@@ -84,6 +84,8 @@ Tips:
 
 ### WASM (browser demos + JSON UI)
 
+- Try FastLED without hardware in the [FastLED Web Compiler](https://zackees.github.io/fastled-wasm/)
+- The [Wokwi FastLED playground](https://wokwi.com/playground/fastled) runs the `ColorPalette` example in an Arduino simulator
 - `examples/wasm/` and related WASM-focused examples run in the browser
 - The JSON UI system enables sliders, buttons, and other controls (see `src/platforms/wasm` and `src/fl/ui/ui.h`)
 - Typical flow: build to WebAssembly, serve the app, and interact via the browser UI
