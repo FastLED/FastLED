@@ -178,6 +178,9 @@ i32 PixelStream::framesDisplayed() const {
     if (mType == kStreaming) {
         return -1;
     }
+    if (mbytesPerFrame == 0) {
+        return 0;
+    }
     fl::size_t pos = mHandle->pos();
     if (pos < mPayloadOffset) return 0;
     return static_cast<i32>((pos - mPayloadOffset) / mbytesPerFrame);
@@ -192,6 +195,9 @@ i32 PixelStream::bytesRemaining() const {
 }
 
 i32 PixelStream::bytesRemainingInFrame() const {
+    if (mbytesPerFrame == 0) {
+        return 0;
+    }
     return bytesRemaining() % mbytesPerFrame;
 }
 
