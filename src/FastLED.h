@@ -274,6 +274,7 @@ enum ESPIChipsets {
 	DOTSTARHD = static_cast<int>(fl::SpiChipset::DOTSTARHD), ///< APA102HD LED chipset alias
 	APA102HD  = static_cast<int>(fl::SpiChipset::APA102HD),  ///< APA102 LED chipset with 5-bit gamma correction
 	HD107     = static_cast<int>(fl::SpiChipset::HD107),     ///< Same as APA102, but in turbo 40-mhz mode.
+	HD107S    = static_cast<int>(fl::SpiChipset::HD107S),    ///< Marketed HD107S part name; alias of HD107.
 	HD107HD   = static_cast<int>(fl::SpiChipset::HD107HD),   ///< Same as APA102HD, but in turbo 40-mhz mode.
 	HD108     = static_cast<int>(fl::SpiChipset::HD108),     ///< 16-bit variant of HD107, always gamma corrected. No SD (standard definition) option available - all HD108s use gamma correction, and a non-gamma corrected version is not planned.
 };

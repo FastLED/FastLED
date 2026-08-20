@@ -452,6 +452,13 @@ Lots of improvements in this release, read the full [change list here](https://g
 
 ![image](https://github.com/user-attachments/assets/9684ab7d-2eaa-40df-a00d-0dff18098917)
 
+HD107S strips use the APA102-compatible protocol at up to 40 MHz. Select them
+with `HD107S` (or the equivalent `HD107` name):
+
+```cpp
+FastLED.addLeds<HD107S, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
+```
+
 ## New in 3.9.12: WS2816 "HD" LED support
 
 ![image](https://github.com/user-attachments/assets/258ec44c-af82-44b7-ad7b-fac08daa9bcb)

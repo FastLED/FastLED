@@ -919,6 +919,20 @@ FL_TEST_CASE("DOTSTAR aliases match APA102 defaults") {
     FL_CHECK_NE(dotHD.chipset, apaHD.chipset);
 }
 
+FL_TEST_CASE("HD107S aliases the HD107 40 MHz protocol") {
+    FL_CHECK_EQ(static_cast<int>(SpiChipset::HD107S),
+                static_cast<int>(SpiChipset::HD107));
+    FL_CHECK_EQ(static_cast<int>(HD107S), static_cast<int>(HD107));
+
+    const auto encoder = SpiEncoder::spiEncoderForChipset(SpiChipset::HD107S);
+    FL_CHECK_EQ(encoder.chipset, SpiChipset::HD107);
+    FL_CHECK_EQ(encoder.clock_hz, 40000000u);
+
+    using LegacyAlias = CFastLED::ClockedChipsetHelper<HD107S, 2, 3>;
+    FL_STATIC_ASSERT(LegacyAlias::IS_VALID,
+                     "HD107S must select the HD107 controller mapping");
+}
+
 FL_TEST_CASE("P9813 channel routes with flag byte encoding") {
     auto mock = fl::make_shared<SpiCaptureMock>("P9813_ROUTE_TEST");
     ChannelManager& manager = ChannelManager::instance();
