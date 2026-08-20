@@ -588,6 +588,33 @@ class SK6822Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
 class SK6812Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_SK6812, RGB_ORDER> {};
 
+/// LC8816E fixed RGBW controller - references centralized timing from
+/// fl::TIMING_LC8816E and automatically emits the fourth white byte.
+/// @see fl::TIMING_LC8816E in fl/chipsets/led_timing.h (300, 600, 300 ns)
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+class LC8816EController
+    : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_LC8816E,
+                                         RGB_ORDER, 0, false,
+                                         fl::TIMING_LC8816E::RESET> {
+    using Base = fl::ClocklessControllerImpl<
+        DATA_PIN, fl::TIMING_LC8816E, RGB_ORDER, 0, false,
+        fl::TIMING_LC8816E::RESET>;
+
+  public:
+    LC8816EController() FL_NO_EXCEPT {
+        this->setFixedRgbw(fl::RgbwDefault::value());
+    }
+
+    void init() FL_NO_EXCEPT override {
+        Base::init();
+    }
+
+  protected:
+    const char* fixedWhiteChannelChipset() const FL_NO_EXCEPT override {
+        return "LC8816E";
+    }
+};
+
 /// SM16703 controller - references centralized timing from fl::TIMING_SM16703
 /// @see fl::TIMING_SM16703 in chipsets::led_timing.h (300, 600, 300 ns)
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>

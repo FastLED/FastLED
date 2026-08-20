@@ -231,6 +231,19 @@ struct TIMING_SK6812 {
     };
 };
 
+/// LC8816E RGBW controller @ 800 kHz
+/// Four-phase: TH0=300ns, TH1=900ns, TL0=900ns, TL1=300ns
+/// @note The native wire order is GRBW and each pixel consumes 32 bits.
+/// @see https://addressable-led.com/UploadFile/upi/file/20250703/LC8816E-RGBW.pdf
+struct TIMING_LC8816E {
+    enum : u32 {
+        T1 = 300,
+        T2 = 600,
+        T3 = 300,
+        RESET = 80
+    };
+};
+
 /// SK6822 RGB controller @ 800 kHz
 /// Four-phase: TH0=375ns, TH1=1375ns, TL0=1375ns, TL1=375ns
 struct TIMING_SK6822 {
