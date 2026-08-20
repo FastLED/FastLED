@@ -1499,11 +1499,11 @@ public:
 
 	/// @} Channel Bus Manager Controls
 
-	/// Wait for channel bus transmissions, up to the manager's default timeout.
+	/// Wait for all channel bus transmissions to complete.
 	/// @note Normal animation code does not need to call this after show(); the
 	/// next frame waits before reusing driver-owned data.
-	/// @note For completion-sensitive cleanup, prefer wait(timeout_ms) and check
-	/// its result. The no-argument completion contract is tracked in #3933.
+	/// @note This overload waits indefinitely while cooperatively running system
+	/// work. Use wait(timeout_ms) when the caller needs a bounded wait.
 	/// @note Safe to call on all platforms (no-op on platforms without channel bus).
 	void wait();
 
