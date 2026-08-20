@@ -53,6 +53,7 @@ Copy-paste ready recipes for popular LED effects.
 - [Twinkle/Sparkle](recipes/twinkle.md)
 - [Breathing Effect](recipes/breathing.md)
 - [Wave Patterns](recipes/waves.md)
+- [Save and Restore a CRGB Array](recipes/persist-crgb.md)
 
 ### [Troubleshooting](troubleshooting/)
 Solve common problems and debug your LED setup.
