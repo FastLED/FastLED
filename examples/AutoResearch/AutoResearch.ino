@@ -262,7 +262,9 @@ SET_LOOP_TASK_STACK_SIZE(16 * 1024);
 
 // Serial port timeout (milliseconds) - wait for serial monitor to attach
 static constexpr uint32_t SERIAL_TIMEOUT_MS = 120000;  // 120 seconds
-#if defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#if defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) ||                  \
+    defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) ||                 \
+    defined(CONFIG_IDF_TARGET_ESP32P4) || defined(FL_IS_RP)
 static constexpr uint32_t AUTORESEARCH_SERIAL_WAIT_MS = 2000;
 #else
 static constexpr uint32_t AUTORESEARCH_SERIAL_WAIT_MS = SERIAL_TIMEOUT_MS;

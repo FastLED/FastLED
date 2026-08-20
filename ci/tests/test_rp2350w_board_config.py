@@ -22,6 +22,9 @@ ESP_WIFI_IMPL = (
     REPO_ROOT / "src" / "platforms" / "esp" / "32" / "net" / "wifi_esp32.cpp.hpp"
 )
 RP_BUILD = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "_build.cpp.hpp"
+RP_WATCHDOG_IMPL = (
+    REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "watchdog_rp.impl.hpp"
+)
 RP_BLE_IMPL = REPO_ROOT / "src" / "platforms" / "arm" / "rp" / "ble_rp.cpp.hpp"
 AUTORESEARCH_NET = REPO_ROOT / "examples" / "AutoResearch" / "AutoResearchNet.cpp"
 AUTORESEARCH_SKETCH = REPO_ROOT / "examples" / "AutoResearch" / "AutoResearch.ino"
@@ -31,6 +34,9 @@ AUTORESEARCH_SYSTEM_METHODS = (
 )
 AUTORESEARCH_PARALLEL = (
     REPO_ROOT / "examples" / "AutoResearch" / "AutoResearchRemoteRunParallelTest.cpp"
+)
+AUTORESEARCH_RP_CONCURRENCY = (
+    REPO_ROOT / "examples" / "AutoResearch" / "AutoResearchRpConcurrency.cpp"
 )
 
 
@@ -82,6 +88,43 @@ def test_autoresearch_filter_admits_both_rp2350_profiles() -> None:
     for environment in ("rp2350", "rp2350w"):
         skip, reason = should_skip_sketch(create_board(environment), sketch_filter)
         assert skip is False, reason
+
+
+def test_rp_autoresearch_does_not_block_rpc_on_usb_dtr() -> None:
+    source = AUTORESEARCH_INO.read_text(encoding="utf-8")
+    wait_policy = source[
+        source.index("#if defined(FL_IS_ESP_32S3)") : source.index(
+            "const fl::RxBackend RX_BACKEND"
+        )
+    ]
+
+    assert "defined(FL_IS_RP)" in wait_policy
+
+
+def test_rp_bootloader_reboot_is_not_counted_as_a_watchdog_crash() -> None:
+    source = RP_WATCHDOG_IMPL.read_text(encoding="utf-8")
+
+    assert "#include <pico/version.h>" in source
+    assert "PICO_SDK_VERSION_MINOR >= 3" in source
+    assert "FL_RP_WATCHDOG_HAS_ENABLE_MARKER" in source
+    assert "FL_RP_WATCHDOG_HAS_DISABLE_API" in source
+    assert "if (watchdog_enable_caused_reboot()) return ResetCause::WATCHDOG;" in source
+    assert "if (watchdog_caused_reboot()) return ResetCause::WATCHDOG;" in source
+    assert "hw_clear_bits(&watchdog_hw->ctrl, WATCHDOG_CTRL_ENABLE_BITS);" in source
+    assert "if (watchdog_hw->reason) return ResetCause::SOFTWARE;" in source
+
+    begin_body = source[
+        source.index("void Watchdog::begin") : source.index("void Watchdog::feed")
+    ]
+    assert begin_body.index("(void)lastResetCause();") < begin_body.index(
+        "watchdog_enable(timeout_ms, true);"
+    )
+
+
+def test_rp_concurrency_probe_uses_a_separate_core1_stack() -> None:
+    source = AUTORESEARCH_RP_CONCURRENCY.read_text(encoding="utf-8")
+
+    assert "bool core1_separate_stack = true;" in source
 
 
 def test_autoresearch_identity_prioritizes_pico_2_w() -> None:

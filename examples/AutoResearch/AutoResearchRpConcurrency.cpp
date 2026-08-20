@@ -11,6 +11,11 @@
 #include "fl/stl/semaphore.h"
 #include "fl/stl/static_assert.h"
 
+// Arduino-Pico otherwise splits one 8 KB stack into two 4 KB halves when
+// setup1()/loop1() are present. The RPC/JSON call chain on core 0 can exceed
+// its half and overwrite core 1 while this diagnostic is running.
+bool core1_separate_stack = true;
+
 namespace {
 
 constexpr int kRpConcurrencyIterations = 100;
