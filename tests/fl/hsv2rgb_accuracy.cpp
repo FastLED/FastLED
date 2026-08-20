@@ -261,6 +261,14 @@ FL_TEST_CASE("rgb2hsv_approximate - greys report zero saturation") {
     }
 }
 
+FL_TEST_CASE("hsv2rgb_rainbow keeps mixed hues at low CHSV values (issue #1016)") {
+    CRGB rgb = hsv2rgb_rainbow(CHSV(80, 255, 30));
+
+    FL_CHECK_GT(rgb.r, 0);
+    FL_CHECK_GT(rgb.g, 0);
+    FL_CHECK_EQ(rgb.b, 0);
+}
+
 FL_TEST_CASE("HSV to RGB Conversion - Specific Color Tests") {
     FL_WARN("=== Specific Color Conversion Tests ===");
     
