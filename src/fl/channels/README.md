@@ -300,6 +300,13 @@ void setup() {
 
 Including the matching per-driver `bus_traits.h` is the explicit opt-in that makes the `BusTraits<Bus::X>` specialization visible at the call site — without that include the call fails to link and `--gc-sections` stays free to drop the driver TU.
 
+For parallel clocked-SPI output on the original ESP32, include
+`platforms/esp/32/drivers/i2s_spi/bus_traits.h` instead. Register one APA102,
+SK9822, or other clocked-SPI controller per data pin, give every controller the
+same clock pin, and select `Bus::FLEX_IO, 0` before registration as above. The
+I2S-SPI engine batches up to 16 data lanes into one transmission. ESP32-S3 uses
+the shown `lcd_spi/bus_traits.h` include with the same public API.
+
 ---
 
 ## Hardware Engine Selection
