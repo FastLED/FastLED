@@ -245,6 +245,7 @@ using fl::degrees;
 
 #include "fastspi.h"
 #include "chipsets.h"
+#include "fl/chipsets/analog.h"
 #include "fl/system/engine_events.h"
 
 #include "fl/gfx/leds.h"
@@ -926,6 +927,27 @@ public:
 	/// @note Safe to call multiple times - no-op if processor doesn't match
 	static void remove(fl::shared_ptr<fl::audio::Processor> processor);
 
+	/// @}
+
+	/// @name Adding analog PWM controllers
+	/// Add a three-pin PWM controller for a non-addressable RGB LED or strip.
+	/// The controller uses the first CRGB value and applies global brightness,
+	/// color correction, and color temperature during FastLED.show().
+	/// @param data pointer to one CRGB value for the complete analog output
+	/// @param nLedsOrOffset number of CRGB values, or offset with nLedsIfOffset
+	/// @param nLedsIfOffset number of CRGB values when an offset is supplied
+	/// @tparam CHIPSET three-pin controller template, normally ANALOG
+	/// @tparam RED_PIN PWM pin connected to the red channel
+	/// @tparam GREEN_PIN PWM pin connected to the green channel
+	/// @tparam BLUE_PIN PWM pin connected to the blue channel
+	/// @{
+	template<template<fl::u8, fl::u8, fl::u8> class CHIPSET,
+	         fl::u8 RED_PIN, fl::u8 GREEN_PIN, fl::u8 BLUE_PIN>
+	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset,
+	                                  int nLedsIfOffset = 0) {
+		static CHIPSET<RED_PIN, GREEN_PIN, BLUE_PIN> controller;
+		return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset);
+	}
 	/// @}
 
 	/// @name Adding SPI-based controllers

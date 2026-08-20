@@ -4,7 +4,6 @@
 
 #include <Arduino.h>
 #include <FastLED.h>
-#include "./compat.h"
 
 
 
@@ -13,11 +12,8 @@
 //
 // This example is designed to control an "analog" RGB LED strip
 // (or a single RGB LED) being driven by Arduino PWM output pins.
-// So this code never calls FastLED.addLEDs() or FastLED.show().
-//
-// This example illustrates one way you can use just the portions 
-// of FastLED that you need.  In this case, this code uses just the
-// fast HSV color conversion code.
+// FastLED's ANALOG controller applies brightness, color correction, and color
+// temperature before writing PWM duty cycles to the three output pins.
 // 
 // In this example, the RGB values are output on three separate
 // 'analog' PWM pins, one for red, one for green, and one for blue.
@@ -26,17 +22,13 @@
 #define GREENPIN 6
 #define BLUEPIN  3
 
-// showAnalogRGB: this is like FastLED.show(), but outputs on 
-// analog PWM output pins instead of sending data to an intelligent,
-// pixel-addressable LED strip.
-// 
-// This function takes the incoming RGB values and outputs the values
-// on three analog PWM output pins to the r, g, and b values respectively.
+CRGB leds[1];
+
+// Set the single analog RGB output color and update its PWM pins.
 void showAnalogRGB( const CRGB& rgb)
 {
-  analogWrite(REDPIN,   rgb.r );
-  analogWrite(GREENPIN, rgb.g );
-  analogWrite(BLUEPIN,  rgb.b );
+  leds[0] = rgb;
+  FastLED.show();
 }
 
 
@@ -63,9 +55,10 @@ void loop()
 
 
 void setup() {
-  pinMode(REDPIN,   OUTPUT);
-  pinMode(GREENPIN, OUTPUT);
-  pinMode(BLUEPIN,  OUTPUT);
+  FastLED.addLeds<ANALOG, REDPIN, GREENPIN, BLUEPIN>(leds, 1)
+    .setCorrection(TypicalLEDStrip)
+    .setTemperature(DirectSunlight);
+  FastLED.setBrightness(192);
 
   // Flash the "hello" color sequence: R, G, B, black.
   colorBars();
