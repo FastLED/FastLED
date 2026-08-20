@@ -2621,6 +2621,20 @@ FL_TEST_CASE("Wave3 integration - WS2812B_V5 falls back to wave8") {
     FL_CHECK_EQ(config7.clock_freq_hz, (u32)6530612);  // wave8 clock derived from WS2812B_V5 timing: 8e9 / 1225 ns (FastLED#3586)
 }
 
+FL_TEST_CASE("Wave8 integration - WS2811 400KHz derives 3.2MHz clock") {
+    resetMockHistory();
+    auto& driver = ParlioEngine::getInstance();
+
+    fl::vector<int> pins = {1};
+    ChipsetTimingConfig timing =
+        fl::makeTimingConfig<fl::TIMING_WS2811_400KHZ>();
+    bool init_ok = driver.initialize(1, pins, timing, 10);
+    FL_REQUIRE(init_ok);
+
+    auto& mock = ParlioPeripheralMock::instance();
+    FL_CHECK_EQ(mock.getConfig().clock_freq_hz, (u32)3200000);
+}
+
 FL_TEST_CASE("Wave3 integration - transmit produces correct output size") {
     resetMockHistory();
     auto& driver = ParlioEngine::getInstance();
