@@ -12,8 +12,8 @@
 //
 // This example is designed to control an "analog" RGB LED strip
 // (or a single RGB LED) being driven by Arduino PWM output pins.
-// FastLED's ANALOG controller applies brightness, color correction, and color
-// temperature before writing PWM duty cycles to the three output pins.
+// FastLED's ANALOG_RGB controller applies brightness, color correction, and
+// color temperature before writing PWM duty cycles to the three output pins.
 // 
 // In this example, the RGB values are output on three separate
 // 'analog' PWM pins, one for red, one for green, and one for blue.
@@ -55,7 +55,7 @@ void loop()
 
 
 void setup() {
-  FastLED.addLeds<ANALOG, REDPIN, GREENPIN, BLUEPIN>(leds, 1)
+  FastLED.addLeds<ANALOG_RGB, REDPIN, GREENPIN, BLUEPIN>(leds, 1)
     .setCorrection(TypicalLEDStrip)
     .setTemperature(DirectSunlight);
   FastLED.setBrightness(192);
