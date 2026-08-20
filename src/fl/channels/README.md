@@ -448,6 +448,13 @@ config when building one from scratch).
 
 Register callbacks for channel lifecycle events:
 
+`IChannel::name()` is stable only when the channel configuration supplies a
+name. If `ChannelConfig::mName` is unset, FastLED generates `Channel_<id>` only
+when `FASTLED_LOG_RUNTIME_ENABLED` is enabled; builds that compile runtime
+logging out return an empty string instead. Event listeners, telemetry, and
+other code that requires a stable name should use the named `ChannelConfig`
+constructor shown below or assign `config.mName` explicitly.
+
 ```cpp
 #include "FastLED.h"
 #include "fl/channels/channel.h"
@@ -469,6 +476,8 @@ void setup() {
         Serial.printf("%s -> %s\n", ch.name().c_str(), driver.c_str());
     });
 
+    // The named constructor sets ChannelConfig::mName, so callbacks receive
+    // "my_strip" even when FASTLED_LOG_RUNTIME_ENABLED is disabled.
     // Create channel (triggers onChannelCreated)
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
     fl::ChannelConfig config("my_strip", fl::ClocklessChipset(5, timing),
