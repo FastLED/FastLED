@@ -36,11 +36,11 @@
 #if defined(PICO_SDK_VERSION_MAJOR) && defined(PICO_SDK_VERSION_MINOR) \
     && (PICO_SDK_VERSION_MAJOR > 1 \
         || (PICO_SDK_VERSION_MAJOR == 1 && PICO_SDK_VERSION_MINOR >= 3))
-#define FL_RP_WATCHDOG_HAS_ENABLE_MARKER
+#define FL_WATCHDOG_HAS_RP_ENABLE_MARKER
 #endif
 
 #if defined(PICO_SDK_VERSION_MAJOR) && PICO_SDK_VERSION_MAJOR >= 2
-#define FL_RP_WATCHDOG_HAS_DISABLE_API
+#define FL_WATCHDOG_HAS_RP_DISABLE_API
 #endif
 
 #if defined(FL_IS_RP2350)
@@ -78,7 +78,7 @@ inline ResetCause rpDetectResetCause() {
     // timeout after watchdog_enable(); intentional bootloader/deploy resets
     // clear it. Counting every watchdog-caused reboot as a crash makes a few
     // normal deploys trip the retained safe-mode threshold and strand USB RPC.
-#if defined(FL_RP_WATCHDOG_HAS_ENABLE_MARKER)
+#if defined(FL_WATCHDOG_HAS_RP_ENABLE_MARKER)
     if (watchdog_enable_caused_reboot()) return ResetCause::WATCHDOG;
     // On RP2350 the SDK deliberately makes watchdog_caused_reboot() false
     // for non-normal boot types, including reset_usb_boot(). The raw reason
@@ -123,7 +123,7 @@ void Watchdog::disable() FL_NO_EXCEPT {
     // Pico SDK's `watchdog_disable()` clears WATCHDOG_CTRL_ENABLE_BITS, which
     // halts the counter. Subsequent `feed()` calls are still safe (they only
     // write LOAD).
-#if defined(FL_RP_WATCHDOG_HAS_DISABLE_API)
+#if defined(FL_WATCHDOG_HAS_RP_DISABLE_API)
     watchdog_disable();
 #else
     // Pico SDK 1.x has no watchdog_disable() helper. Its hardware struct and
@@ -210,5 +210,5 @@ void Watchdog::clearCrashReport() FL_NO_EXCEPT {}
 
 } // namespace fl
 
-#undef FL_RP_WATCHDOG_HAS_ENABLE_MARKER
-#undef FL_RP_WATCHDOG_HAS_DISABLE_API
+#undef FL_WATCHDOG_HAS_RP_ENABLE_MARKER
+#undef FL_WATCHDOG_HAS_RP_DISABLE_API

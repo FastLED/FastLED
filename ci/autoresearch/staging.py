@@ -75,11 +75,13 @@ def synthesise_autoresearch_project(
     # monkeypatch bridge that lived here is obsolete — autoresearch's
     # fbuild path no longer reads root platformio.ini regardless.
     defines = ["FASTLED_OBJECTFLED_DIAGNOSTICS=1"]
-    # AutoResearch's managed RP2350W fixture must remain recoverable when the
-    # CDC endpoint is wedged or cannot be opened. Arduino-Pico exposes the
-    # Pico SDK's target-bound USB reset interface behind this opt-in define;
-    # keep it scoped to the HIL fixture instead of changing normal RP builds.
-    if board_name == "rp2350w":
+    # AutoResearch's managed RP2350-family fixtures must remain recoverable
+    # when the CDC endpoint is wedged or cannot be opened. Arduino-Pico exposes
+    # the Pico SDK's target-bound USB reset interface behind this opt-in
+    # define; keep it scoped to AutoResearch instead of changing normal RP
+    # builds. Use the resolved board name so PlatformIO aliases (rpipico2 and
+    # rpipico2w) receive the same recovery interface as the canonical names.
+    if board.board_name in {"rp2350", "rp2350w"}:
         defines.append("ENABLE_PICOTOOL_USB=1")
     if extra_defines:
         defines.extend(extra_defines)

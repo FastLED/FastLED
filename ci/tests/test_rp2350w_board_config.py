@@ -106,8 +106,8 @@ def test_rp_bootloader_reboot_is_not_counted_as_a_watchdog_crash() -> None:
 
     assert "#include <pico/version.h>" in source
     assert "PICO_SDK_VERSION_MINOR >= 3" in source
-    assert "FL_RP_WATCHDOG_HAS_ENABLE_MARKER" in source
-    assert "FL_RP_WATCHDOG_HAS_DISABLE_API" in source
+    assert "FL_WATCHDOG_HAS_RP_ENABLE_MARKER" in source
+    assert "FL_WATCHDOG_HAS_RP_DISABLE_API" in source
     assert "if (watchdog_enable_caused_reboot()) return ResetCause::WATCHDOG;" in source
     assert "if (watchdog_caused_reboot()) return ResetCause::WATCHDOG;" in source
     assert "hw_clear_bits(&watchdog_hw->ctrl, WATCHDOG_CTRL_ENABLE_BITS);" in source
