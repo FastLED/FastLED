@@ -1060,7 +1060,7 @@ FastLED supports virtually every LED chipset available:
 
 | **Clockless (3-wire)** | **SPI-based (4-wire)** | **Specialty** |
 |------------------------|------------------------|---------------|
-| **WS281x Family**: WS2811, WS2812 (NeoPixel), WS2812B-V5, WS2812B-Mini-V3, WS2813, WS2814 RGBW, WS2815 | **APA102 / DotStars**: Including HD107s (40MHz turbo) | **SmartMatrix Panels** |
+| **WS281x Family**: WS2811, WS2812 (NeoPixel), WS2812B-V5, WS2812B-Mini-V3, WS2813, WS2814 RGBW, WS2815, WS2818 | **APA102 / DotStars**: Including HD107s (40MHz turbo) | **SmartMatrix Panels** |
 | **TM180x Series**: TM1809/4, TM1803 | **High-Speed SPI**: LPD8806, WS2801, SM16716 | **DMX Output** |
 | **Other 3-wire**: UCS1903, GW6205, SM16824E | **APA102HD**: Driver-level gamma correction | **P9813 Total Control** |
 | | **HD108/NS108**: 16-bit high-definition with gamma | |
@@ -1078,6 +1078,7 @@ More details: [Chipset Reference Wiki](https://github.com/FastLED/FastLED/wiki/C
 | WS2812B-Mini-V3 | 220 | 580 | 1160 | `WS2812BMiniV3` | Compact 3535 package, same timing as V5 |
 | WS2813 | 320 | 640 | 1280 | `WS2813` | Backup data line for improved reliability |
 | WS2814 | 320 | 640 | 1280 | `WS2814` | RGBW; 300 us reset; DIN2 is an auxiliary data input |
+| WS2818 | 300 | 600 | 1200 | `WS2818` | RGB; 300 us reset; BIN is the backup data input |
 
 Usage example:
 ```cpp
@@ -1087,6 +1088,9 @@ FastLED.addLeds<WS2812BMiniV3, DATA_PIN, GRB>(leds, NUM_LEDS);
 
 // WS2814 automatically enables RGBW output in R,G,B,W byte order.
 FastLED.addLeds<WS2814, DATA_PIN, RGB>(leds, NUM_LEDS);
+
+// WS2818 is an RGB chipset; GRB is the common strip color order.
+FastLED.addLeds<WS2818, DATA_PIN, GRB>(leds, NUM_LEDS);
 ```
 
 WS2814's DIN2 pin is an auxiliary input used by the chipset's backup-data
@@ -1096,6 +1100,11 @@ datasheet; no second data-pin template argument is required.
 Power WS2814 LEDs from a suitable external 5 V supply, connect the supply and
 microcontroller grounds together, and translate 3.3 V data to 5 V with a
 5 V HCT/AHCT buffer such as a 74AHCT125.
+
+WS2818's BI/BIN pin is the backup input, not a second FastLED output. Follow
+the strip or module datasheet for its backup-data and power wiring, share a
+common ground with the microcontroller, and use the logic level specified by
+that hardware.
 
 ### APA102 High Definition Mode
 ```cpp

@@ -35,7 +35,7 @@ ERROR_PATTERN = (
     r"Guru Meditation|abort\(\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|"
     r"QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL"
 )
-# fbuild 2.5.17 caps daemon-side long operations at 30 minutes. Keep the
+# fbuild 2.5.18 caps daemon-side long operations at 30 minutes. Keep the
 # process wrapper slightly longer so fbuild can return its structured result.
 FBUILD_DAEMON_LONG_OPERATION_TIMEOUT_SECONDS = 30 * 60
 FBUILD_TEST_EMU_PROCESS_TIMEOUT_SECONDS = (

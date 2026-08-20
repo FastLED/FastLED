@@ -480,6 +480,14 @@ class WS2813 : public WS2813Controller<DATA_PIN, RGB_ORDER> {};
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class WS2814 : public WS2814Controller<DATA_PIN, RGB_ORDER> {};
 
+/// @brief WS2818 RGB controller class.
+/// @details Drives the primary data input. The chipset's backup input is wired
+/// according to the strip or module datasheet and does not use a second
+/// FastLED data-pin template argument.
+/// @copydetails WS2818Controller
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
+class WS2818 : public WS2818Controller<DATA_PIN, RGB_ORDER> {};
+
 /// @brief APA104 controller class.
 /// @copydetails WS2811Controller800Khz
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>

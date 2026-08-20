@@ -13,6 +13,7 @@
 enum class LegacyClocklessChipset : uint8_t {
     WS2812B,
     WS2814,
+    WS2818,
     SK6812,
 };
 
@@ -51,6 +52,8 @@ inline const char* legacyClocklessChipsetName(LegacyClocklessChipset chipset) {
             return "WS2812B";
         case LegacyClocklessChipset::WS2814:
             return "WS2814";
+        case LegacyClocklessChipset::WS2818:
+            return "WS2818";
         case LegacyClocklessChipset::SK6812:
             return "SK6812";
     }
@@ -69,6 +72,10 @@ inline bool legacyClocklessChipsetFromName(const fl::string& name,
     }
     if (name == "WS2814") {
         if (out) *out = LegacyClocklessChipset::WS2814;
+        return true;
+    }
+    if (name == "WS2818") {
+        if (out) *out = LegacyClocklessChipset::WS2818;
         return true;
     }
     return false;
@@ -146,6 +153,8 @@ class LegacyClocklessProxy {
                 return createTyped<WS2812B<PIN, RGB>>(leds, numLeds, rgbw);
             case LegacyClocklessChipset::WS2814:
                 return createTyped<WS2814<PIN, RGB>>(leds, numLeds, rgbw);
+            case LegacyClocklessChipset::WS2818:
+                return createTyped<WS2818<PIN, RGB>>(leds, numLeds, rgbw);
             case LegacyClocklessChipset::SK6812:
                 return createTyped<SK6812<PIN, RGB>>(leds, numLeds, rgbw);
         }

@@ -206,6 +206,20 @@ struct TIMING_WS2814 {
     };
 };
 
+/// WS2818 RGB controller @ approximately 833 kHz
+/// Four-phase: TH0=300ns, TH1=600ns, TL0=900ns, TL1=600ns
+/// @note The 1200ns bit period and 300us reset satisfy the WS2818B
+///       datasheet pulse envelope and >280us reset requirement.
+/// @see https://www.tme.eu/Document/ddc250a349c0084fadc3ded4c327f335/WS2818B.pdf
+struct TIMING_WS2818 {
+    enum : u32 {
+        T1 = 300,
+        T2 = 300,
+        T3 = 600,
+        RESET = 300
+    };
+};
+
 /// SK6812 RGBW controller @ 800 kHz
 /// Four-phase: TH0=300ns, TH1=900ns, TL0=900ns, TL1=300ns
 struct TIMING_SK6812 {

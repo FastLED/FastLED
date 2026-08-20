@@ -584,6 +584,46 @@ class TestParseArgsAndBuildCommands:
         assert params["legacyChipsets"] == ["WS2814", "WS2814", "WS2814"]
         assert "legacyRgbw" not in params
 
+    def test_ws2818_esp32s3_rmt_legacy_canonical_command(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            rmt=True,
+            legacy=True,
+            chipset="ws2818",
+            strip_sizes="1,4",
+            environment_positional="esp32s3",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ) as mock_synth:
+            result = _parse_args_and_build_commands(args)
+
+        assert isinstance(result, RunContext)
+        mock_synth.assert_called_once_with(
+            "esp32s3",
+            project_root=fake_project_dir.resolve(),
+            verbose=False,
+            extra_defines=["FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1"],
+        )
+        assert result.drivers == ["RMT"]
+        assert [command["params"] for command in result.json_rpc_commands] == [
+            {
+                "driver": "RMT",
+                "laneSizes": [strip_size],
+                "pattern": "MSB_LSB_A",
+                "iterations": 1,
+                "timing": "WS2818",
+                "useLegacyApi": True,
+                "legacyChipsets": ["WS2818"],
+            }
+            for strip_size in (1, 4)
+        ]
+
     def test_ws2814_failure_response_requires_four_byte_total(self) -> None:
         command = {
             "method": "runSingleTest",
