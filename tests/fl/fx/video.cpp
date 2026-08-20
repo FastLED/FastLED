@@ -19,6 +19,7 @@
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 #include "fl/math/xymap.h"
+#include "fl/video/pixel_stream.h"
 #include "FastLED.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -80,6 +81,28 @@ class FakeFilebuf : public fl::filebuf {
     fl::vector<uint8_t> data;
     size_t mPos = 0;
 };
+
+FL_TEST_CASE("PixelStream zero frame size reports no displayed frames") {
+    FakeFilebufPtr fileHandle = fl::make_shared<FakeFilebuf>();
+    const uint8_t byte = 0x42;
+    FL_REQUIRE_EQ(fileHandle->writeData(&byte, 1), 1);
+
+    fl::PixelStream stream(0);
+    FL_REQUIRE(stream.begin(fileHandle));
+    FL_CHECK_EQ(stream.framesDisplayed(), 0);
+    FL_CHECK_EQ(stream.bytesRemainingInFrame(), 0);
+}
+
+FL_TEST_CASE("PixelStream zero frame size preserves streaming semantics") {
+    fl::memorybufPtr memoryStream = fl::make_shared<fl::memorybuf>(3);
+    const CRGB pixel = CRGB::Red;
+    FL_REQUIRE_EQ(memoryStream->writeCRGB(&pixel, 1), 1);
+
+    fl::PixelStream stream(0);
+    FL_REQUIRE(stream.begin(memoryStream));
+    FL_CHECK_EQ(stream.getType(), fl::PixelStream::kStreaming);
+    FL_CHECK_EQ(stream.framesDisplayed(), -1);
+}
 
 FL_TEST_CASE("video with memory stream") {
     // fl::Video video(LEDS_PER_FRAME, FPS);
