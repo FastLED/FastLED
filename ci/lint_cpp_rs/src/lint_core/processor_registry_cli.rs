@@ -942,27 +942,67 @@ fn split_line_comment(line: &str) -> &str {
 }
 
 fn strip_block_comments_from_line(line: &str, in_block_comment: &mut bool) -> String {
-    let mut visible = String::new();
-    let mut rest = line;
+    let bytes = line.as_bytes();
+    let mut visible = String::with_capacity(line.len());
+    let mut cursor = 0;
+    let mut visible_start = 0;
 
-    loop {
+    while cursor < bytes.len() {
         if *in_block_comment {
-            let Some(end) = rest.find("*/") else {
-                return visible;
-            };
-            rest = &rest[end + 2..];
-            *in_block_comment = false;
+            if bytes[cursor..].starts_with(b"*/") {
+                cursor += 2;
+                visible_start = cursor;
+                *in_block_comment = false;
+            } else {
+                cursor += 1;
+            }
             continue;
         }
 
-        let Some(start) = rest.find("/*") else {
-            visible.push_str(rest);
+        if bytes[cursor..].starts_with(b"//") {
+            visible.push_str(&line[visible_start..]);
             return visible;
-        };
-        visible.push_str(&rest[..start]);
-        rest = &rest[start + 2..];
-        *in_block_comment = true;
+        }
+        if bytes[cursor..].starts_with(b"/*") {
+            visible.push_str(&line[visible_start..cursor]);
+            cursor += 2;
+            *in_block_comment = true;
+            continue;
+        }
+        if bytes[cursor] == b'"'
+            || (bytes[cursor] == b'\'' && !is_digit_separator_quote(bytes, cursor))
+        {
+            cursor = quoted_literal_end(bytes, cursor, bytes[cursor]);
+            continue;
+        }
+        cursor += 1;
     }
+
+    if !*in_block_comment {
+        visible.push_str(&line[visible_start..]);
+    }
+    visible
+}
+
+fn quoted_literal_end(bytes: &[u8], start: usize, quote: u8) -> usize {
+    let mut cursor = start + 1;
+    while cursor < bytes.len() {
+        if bytes[cursor] == b'\\' {
+            cursor = (cursor + 2).min(bytes.len());
+        } else if bytes[cursor] == quote {
+            return cursor + 1;
+        } else {
+            cursor += 1;
+        }
+    }
+    bytes.len()
+}
+
+fn is_digit_separator_quote(bytes: &[u8], cursor: usize) -> bool {
+    cursor > 0
+        && cursor + 1 < bytes.len()
+        && bytes[cursor - 1].is_ascii_hexdigit()
+        && bytes[cursor + 1].is_ascii_hexdigit()
 }
 
 fn strip_string_literals(code: &str) -> String {

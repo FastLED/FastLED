@@ -1,9 +1,8 @@
 // Single-line regex bans ported from the Python checker fleet
 // (FastLED #3297 follow-up to #3288). Each struct here mirrors its
 // Python counterpart's `should_process_file` + `check_file_content`
-// semantics. The block-comment state machine follows the Python
-// "enter only on /* without */, exit only when the next line has */"
-// rule — see the per-checker tests in ../lint_core/tests.rs.
+// semantics. Block comments are stripped before matching so visible code on
+// either side of a multiline comment boundary is still inspected.
 
 // --- BareNoInlineChecker -----------------------------------------------------
 //
@@ -46,10 +45,11 @@ impl FileContentChecker for BareNoInlineChecker {
         let mut violations = Vec::new();
         let mut in_block_comment = false;
         for (index, line) in file_content.lines.iter().enumerate() {
-            if !python_style_pass_through_line(line, &mut in_block_comment, SUPPRESS) {
+            let visible = strip_block_comments_from_line(line, &mut in_block_comment);
+            if visible.trim_start().starts_with("//") || visible.contains(SUPPRESS) {
                 continue;
             }
-            let code = split_line_comment(line);
+            let code = split_line_comment(&visible);
             if regex_bare_noinline().is_match(code) {
                 violations.push((index + 1, line.trim_end().to_string()));
             }
@@ -104,10 +104,11 @@ impl FileContentChecker for BareSnprintfChecker {
         let mut violations = Vec::new();
         let mut in_block_comment = false;
         for (index, line) in file_content.lines.iter().enumerate() {
-            if !python_style_pass_through_line(line, &mut in_block_comment, SUPPRESS) {
+            let visible = strip_block_comments_from_line(line, &mut in_block_comment);
+            if visible.trim_start().starts_with("//") || visible.contains(SUPPRESS) {
                 continue;
             }
-            let code = split_line_comment(line);
+            let code = split_line_comment(&visible);
             for mat in regex_bare_snprintf().find_iter(code) {
                 if printf_family_has_qualifier_prefix(code, mat.start()) {
                     continue;
@@ -176,10 +177,11 @@ impl FileContentChecker for BareLibmChecker {
         let mut violations = Vec::new();
         let mut in_block_comment = false;
         for (index, line) in file_content.lines.iter().enumerate() {
-            if !python_style_pass_through_line(line, &mut in_block_comment, SUPPRESS) {
+            let visible = strip_block_comments_from_line(line, &mut in_block_comment);
+            if visible.trim_start().starts_with("//") || visible.contains(SUPPRESS) {
                 continue;
             }
-            let code = split_line_comment(line);
+            let code = split_line_comment(&visible);
             for mat in regex_bare_libm().find_iter(code) {
                 if libm_has_qualifier_prefix(code, mat.start()) {
                     continue;
@@ -226,10 +228,11 @@ impl FileContentChecker for FlNoUnderscoreChecker {
         let mut violations = Vec::new();
         let mut in_block_comment = false;
         for (index, line) in file_content.lines.iter().enumerate() {
-            if !python_style_pass_through_line(line, &mut in_block_comment, SUPPRESS) {
+            let visible = strip_block_comments_from_line(line, &mut in_block_comment);
+            if visible.trim_start().starts_with("//") || visible.contains(SUPPRESS) {
                 continue;
             }
-            let code = split_line_comment(line);
+            let code = split_line_comment(&visible);
             for mat in regex_fl_no_underscore().find_iter(code) {
                 let token = mat.as_str();
                 if FL_NO_UNDERSCORE_WHITELIST.contains(&token) {
@@ -291,24 +294,14 @@ impl FileContentChecker for LegacyLogMacroChecker {
         let mut violations = Vec::new();
         let mut in_block_comment = false;
         for (index, line) in file_content.lines.iter().enumerate() {
-            // Same block-comment + // line skip as the others, but with an
-            // ADDITIONAL skip on `#define` lines (the original macro
-            // definitions). No `// ok legacy log` suppression by design.
-            let trimmed = line.trim();
-            if in_block_comment {
-                if line.contains("*/") {
-                    in_block_comment = false;
-                }
-                continue;
-            }
-            if line.contains("/*") && !line.contains("*/") {
-                in_block_comment = true;
-                continue;
-            }
+            // Skip line comments and the original macro definitions after
+            // removing block comments. No suppression exists by design.
+            let visible = strip_block_comments_from_line(line, &mut in_block_comment);
+            let trimmed = visible.trim();
             if trimmed.starts_with("//") || trimmed.starts_with("#define") {
                 continue;
             }
-            let code = split_line_comment(line);
+            let code = split_line_comment(&visible);
             let Some(captures) = regex_legacy_log_macro().captures(code) else {
                 continue;
             };
@@ -415,8 +408,8 @@ impl FileContentChecker for IwyuPragmaPrivateChecker {
 // becomes `'999'` + stray digits — fatal parse error. Keep src/ portable
 // across C++11/14/17 by spelling out the digits.
 //
-// Comments are stripped before matching (via the shared
-// `python_style_pass_through_line` helper) so doxygen comments that mention
+// Comments are stripped before matching (via the shared block-comment
+// stripper) so doxygen comments that mention
 // the formula in pseudocode (`// = (ns * hz + 999'999'999) / 1'000'000'000`)
 // stay legal — the compiler never sees them.
 //
@@ -509,36 +502,6 @@ fn strip_double_quoted_strings(code: &str) -> String {
         out.push(ch);
     }
     out
-}
-
-// --- Shared helpers ----------------------------------------------------------
-//
-// All five checkers share the same Python-style "skip line on block comment
-// open or // line comment or // <suppress>" idiom. Centralizing it here keeps
-// the per-checker bodies focused on the rule.
-
-fn python_style_pass_through_line(
-    line: &str,
-    in_block_comment: &mut bool,
-    suppress: &str,
-) -> bool {
-    if *in_block_comment {
-        if line.contains("*/") {
-            *in_block_comment = false;
-        }
-        return false;
-    }
-    if line.contains("/*") && !line.contains("*/") {
-        *in_block_comment = true;
-        return false;
-    }
-    if line.trim_start().starts_with("//") {
-        return false;
-    }
-    if line.contains(suppress) {
-        return false;
-    }
-    true
 }
 
 // `\b` in Rust regex covers identifier-char boundary, but it ALSO allows `:`
