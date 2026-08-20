@@ -532,6 +532,12 @@ After installing the Arduino IDE, add FastLED through the Library Manager:
 
 **Need Help?** Visit [r/FastLED](https://reddit.com/r/FastLED) - thousands of knowledgeable users and extensive solution history!
 
+GitHub issues track behavior owned by FastLED. If a problem appears only when
+using an adapter library such as FastLED_NeoMatrix, report it to that adapter's
+maintainer and include a minimal FastLED-only reproduction when possible.
+Messages such as `#pragma message: FastLED version ...` are informational build
+output, not warnings or errors.
+
 ## 🎮 Advanced Features
 
 ### Performance Leaders: Parallel Output Records
