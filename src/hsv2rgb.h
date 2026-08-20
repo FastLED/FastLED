@@ -49,6 +49,13 @@
 /// The colorspace conversions here try to keep the apparent brightness
 /// constant even as the hue varies.
 ///
+/// @note `CHSV::val` is part of this 8-bit colorspace conversion. Very low
+/// values necessarily quantize individual RGB channels and can make a mixed
+/// hue appear closer to a primary color. For sensor-controlled output
+/// brightness, keep the color at full value and use `FastLED.setBrightness()`
+/// so the output pipeline can preserve the channel ratios with temporal
+/// dithering.
+///
 /// Adafruit's "Wheel" function, discussed [here](http://forums.adafruit.com/viewtopic.php?f=47&t=22483)
 /// is also of the "constant apparent brightness" variety.
 ///
