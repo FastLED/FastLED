@@ -52,6 +52,7 @@ void setup() {
     // FastLED.addLeds<WS2812BMiniV3, PIN_DATA, RGB>(leds, NUM_LEDS);  // GRB ordering is typical (same timing as V5)
     // FastLED.addLeds<GS1903, PIN_DATA, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<SK6812, PIN_DATA, RGB>(leds, NUM_LEDS);  // GRB ordering is typical
+    // FastLED.addLeds<LC8816E, PIN_DATA, GRB>(leds, NUM_LEDS);  // 12V GRBW; RGBW enabled automatically
     // FastLED.addLeds<SK6822, PIN_DATA, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<APA106, PIN_DATA, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<PL9823, PIN_DATA, RGB>(leds, NUM_LEDS);

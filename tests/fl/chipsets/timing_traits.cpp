@@ -5,6 +5,7 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fl/gfx/rgbw.h"
 #include "fl/stl/int.h"
+#include "fl/stl/scope_exit.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/vector.h"
 #include "pixel_controller.h"
@@ -193,6 +194,16 @@ fl::vector<u8> encodeWs2814Pixels(fl::span<CRGB> leds, const Rgbw& rgbw) {
     return bytes;
 }
 
+fl::vector<u8> encodeLc8816ePixels(fl::span<CRGB> leds, const Rgbw& rgbw) {
+    PixelController<GRB> pixels(
+        leds.data(), static_cast<int>(leds.size()),
+        ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    PixelIterator iterator = pixels.as_iterator(rgbw);
+    fl::vector<u8> bytes;
+    iterator.writeWS2812(&bytes);
+    return bytes;
+}
+
 #if defined(FASTLED_TESTING)
 class Ws2814BackendProbe : public WS2814<4, RGB> {
   public:
@@ -247,6 +258,47 @@ FL_TEST_CASE("WS2818 timing stays inside the datasheet pulse envelope") {
         5, fl::TIMING_WS2818, GRB, 0, false, fl::TIMING_WS2818::RESET>;
     FL_CHECK_TRUE((fl::is_base_of<ExpectedBase,
                                   WS2818Controller<5, GRB>>::value));
+}
+
+FL_TEST_CASE("LC8816E uses datasheet timing and fixed GRBW output") {
+    constexpr ChipsetTimingConfig timing =
+        makeTimingConfig<TIMING_LC8816E>();
+
+    FL_CHECK_EQ(timing.t1_ns, 300);
+    FL_CHECK_EQ(timing.t2_ns, 600);
+    FL_CHECK_EQ(timing.t3_ns, 300);
+    FL_CHECK_EQ(timing.reset_us, 80);
+    FL_CHECK_EQ(timing.t1_ns + timing.t2_ns, 900);
+    FL_CHECK_EQ(timing.t2_ns + timing.t3_ns, 900);
+    FL_CHECK_EQ(timing.total_period_ns(), 1200);
+
+    static CRGB leds[1];
+    CLEDController& controller =
+        FastLED.addLeds<LC8816E, 6, GRB>(leds, 1);
+    auto cleanup = fl::make_scope_exit(
+        [&controller]() { controller.removeFromDrawList(); });
+    const Rgbw rgbw = controller.getRgbw();
+    FL_CHECK_TRUE(rgbw.active());
+    FL_CHECK_EQ(rgbw.rgbw_mode, RGBW_MODE::kRGBWExactColors);
+    FL_CHECK_EQ(rgbw.w_placement, EOrderW::W3);
+
+    CRGB primaryColors[] = {
+        CRGB(255, 0, 0),
+        CRGB(0, 255, 0),
+        CRGB(0, 0, 255),
+        CRGB::White,
+    };
+    const fl::vector<u8> bytes = encodeLc8816ePixels(primaryColors, rgbw);
+    const u8 expectedGrbw[] = {
+        0, 255, 0, 0,
+        255, 0, 0, 0,
+        0, 0, 255, 0,
+        0, 0, 0, 255,
+    };
+    FL_REQUIRE_EQ(bytes.size(), sizeof(expectedGrbw));
+    for (fl::size i = 0; i < bytes.size(); ++i) {
+        FL_CHECK_EQ(bytes[i], expectedGrbw[i]);
+    }
 }
 
 FL_TEST_CASE("WS2814 enables RGBW with white in byte four") {

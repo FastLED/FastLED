@@ -436,6 +436,13 @@ class GS1903 : public GS1903Controller<DATA_PIN, RGB_ORDER> {};
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class SK6812 : public SK6812Controller<DATA_PIN, RGB_ORDER> {};
 
+/// @brief LC8816E 12V RGBW controller class.
+/// @details Enables 32-bit RGBW output automatically. The datasheet wire order
+/// is GRBW, so use the default GRB order unless the physical strip differs.
+/// @copydetails LC8816EController
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
+class LC8816E : public LC8816EController<DATA_PIN, RGB_ORDER> {};
+
 /// @brief SK6812 WWA controller alias.
 /// @details SK6812 WWA (Warm-White / White / Amber) strips use the same 800 kHz
 /// timing and wire protocol as regular SK6812 RGB strips. The three bytes per
