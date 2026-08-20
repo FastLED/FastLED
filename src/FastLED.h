@@ -1499,15 +1499,17 @@ public:
 
 	/// @} Channel Bus Manager Controls
 
-	/// Wait for all channel bus transmissions to complete
-	/// @note Polls the channel bus manager until it returns READY state
-	/// @note Uses delayMicroseconds(100) between polls to prevent watchdog timeout
-	/// @note Safe to call on all platforms (no-op on platforms without channel bus)
+	/// Wait for channel bus transmissions, up to the manager's default timeout.
+	/// @note Normal animation code does not need to call this after show(); the
+	/// next frame waits before reusing driver-owned data.
+	/// @note For completion-sensitive cleanup, prefer wait(timeout_ms) and check
+	/// its result. The no-argument completion contract is tracked in #3933.
+	/// @note Safe to call on all platforms (no-op on platforms without channel bus).
 	void wait();
 
-	/// Wait for all channel bus transmissions to complete with timeout
-	/// @param timeout_ms Maximum milliseconds to wait (0 = wait forever)
-	/// @return true if all engines became READY, false if timeout occurred
+	/// Wait for all channel bus transmissions to complete with timeout.
+	/// @param timeout_ms Maximum milliseconds to wait (0 = wait forever).
+	/// @return true if all drivers became READY, false if the timeout elapsed.
 	bool wait(fl::u32 timeout_ms);
 
 	/// Set the maximum power to be used, given in volts and milliamps.
