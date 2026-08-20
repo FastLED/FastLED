@@ -45,9 +45,13 @@ void setup() {
         /* placement */   fl::EOrderWW::WwWcEnd     // RGB, then warm-W, cool-W
     );
 
-    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    // For ordinary continuous 5-byte RGBWW chipsets:
+    auto chipset = fl::makeClockless<fl::TIMING_WS2812_800KHZ>(DATA_PIN);
+    // For TM1812 RGBCCT strips that pack two pixels into each 12-channel IC,
+    // use this instead (issue #995):
+    // auto chipset = fl::makeClockless<fl::TIMING_TM1812_RGBWW_800KHZ>(DATA_PIN);
     FastLED.add(fl::ChannelConfig(
-        DATA_PIN, timing,
+        chipset,
         fl::span<CRGB>(leds, NUM_LEDS),
         GRB,
         opts));
