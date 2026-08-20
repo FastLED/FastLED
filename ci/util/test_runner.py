@@ -74,9 +74,12 @@ class TestCounts:
 
 _IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 _TIMEOUT = 600 if _IS_GITHUB_ACTIONS else 240
-_GLOBAL_TIMEOUT = (
-    600 if _IS_GITHUB_ACTIONS else 600
-)  # Increased to 600s for local uno compilation
+# The default Python suite includes the native fbuild QEMU smoke test. Its
+# bounded child process may run for 1,860 seconds on a cold cache, so the
+# parent pytest worker must leave additional time to return that result.
+_PYTHON_TEST_TIMEOUT = 35 * 60
+_GLOBAL_TIMEOUT = max(600, _PYTHON_TEST_TIMEOUT)
+_TOP_LEVEL_TEST_TIMEOUT = _PYTHON_TEST_TIMEOUT + 2 * 60
 
 # Abort threshold for total failures across all processes (unit + examples)
 MAX_FAILURES_BEFORE_ABORT = 3
@@ -654,7 +657,7 @@ def create_python_test_process(
     return RunningProcess(
         cmd_str,
         auto_run=False,  # Don't auto-start - will be started in parallel later
-        timeout=_TIMEOUT,  # 2 minute timeout for Python tests
+        timeout=_PYTHON_TEST_TIMEOUT,
         output_formatter=TimestampFormatter(),
     )
 
@@ -938,15 +941,40 @@ class FailedTestEntry:
 
     @property
     def rerun_cmd(self) -> str:
+        if self.category == "python":
+            return "bash test --py"
+        if self.category == "integration":
+            return "bash test --full"
         if self.category == "example":
             return f"bash test {self.clean_name} --examples"
         return f"bash test {self.clean_name} --cpp"
 
     @property
     def debug_cmd(self) -> str:
+        if self.category == "python":
+            return "bash test --py --verbose"
+        if self.category == "integration":
+            return "bash test --full --verbose"
         if self.category == "example":
             return f"bash test {self.clean_name} --examples --debug"
         return f"bash test {self.clean_name} --debug"
+
+
+def _failed_test_entry(failure: TestFailureInfo) -> FailedTestEntry:
+    """Map a process or test-case failure to actionable rerun guidance."""
+    command = failure.command
+    command_text = " ".join(command) if isinstance(command, list) else command
+    normalized_command = command_text.replace("\\", "/").lower()
+
+    if "pytest" in normalized_command and "ci/tests" in normalized_command:
+        return FailedTestEntry(name=_get_friendly_test_name(command), category="python")
+    if "pytest" in normalized_command and "ci/test_integration" in normalized_command:
+        return FailedTestEntry(
+            name=_get_friendly_test_name(command), category="integration"
+        )
+
+    category = "example" if "example" in failure.test_name.lower() else "unit"
+    return FailedTestEntry(name=failure.test_name, category=category)
 
 
 def _format_failure_summary(
@@ -990,15 +1018,23 @@ def _format_failure_summary(
 
     # Loud banner for debug re-run — this is critical for AI agents to notice
     max_debug_show = 3
+    has_cpp_failure = any(ft.category in ("unit", "example") for ft in failed_tests)
     lines.append("\033[93m" + "!" * 60 + "\033[0m")
-    lines.append(
-        "\033[93m!!  AGENT ACTION REQUIRED: RE-RUN FAILED TESTS IN DEBUG  !!\033[0m"
-    )
+    if has_cpp_failure:
+        lines.append(
+            "\033[93m!!  AGENT ACTION REQUIRED: RE-RUN FAILED TESTS IN DEBUG  !!\033[0m"
+        )
+    else:
+        lines.append(
+            "\033[93m!!  AGENT ACTION REQUIRED: RE-RUN FAILED PROCESS VERBOSE !!\033[0m"
+        )
     lines.append("\033[93m" + "!" * 60 + "\033[0m")
     lines.append("")
-    lines.append("Quick mode does NOT enable sanitizers (ASAN/LSAN/UBSAN).")
-    lines.append("You MUST re-run each failed test in --debug mode to get")
-    lines.append("full diagnostics (stack traces, memory errors, UB detection).")
+    if has_cpp_failure:
+        lines.append("Quick mode does NOT enable sanitizers (ASAN/LSAN/UBSAN).")
+        lines.append("Re-run C++ failures in --debug mode for sanitizer diagnostics.")
+    else:
+        lines.append("Re-run the failed process with verbose output for diagnostics.")
     lines.append("")
     lines.append("\033[93mRun these commands NOW:\033[0m")
     for ft in failed_tests[:max_debug_show]:
@@ -2029,15 +2065,7 @@ def runner(
     except (TestExecutionFailedException, TestTimeoutException) as e:
         # Print failure summary table from exception details
         if e.failures:
-            failed_tests: list[FailedTestEntry] = []
-            for failure in e.failures:
-                # Determine category from test name or command
-                category = (
-                    "example" if "example" in failure.test_name.lower() else "unit"
-                )
-                failed_tests.append(
-                    FailedTestEntry(name=failure.test_name, category=category)
-                )
+            failed_tests = [_failed_test_entry(failure) for failure in e.failures]
             if failed_tests:
                 summary = _format_failure_summary(failed_tests)
                 print(summary)

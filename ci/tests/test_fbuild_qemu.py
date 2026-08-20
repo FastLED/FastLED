@@ -21,6 +21,11 @@ import pytest
 from running_process import RunningProcess
 
 from ci.stage_fbuild_project import _parse_args, stage_fbuild_project
+from ci.util.test_runner import (
+    _GLOBAL_TIMEOUT,
+    _TOP_LEVEL_TEST_TIMEOUT,
+    create_python_test_process,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -71,6 +76,27 @@ def test_fbuild_process_timeout_allows_daemon_diagnostic_grace() -> None:
         FBUILD_TEST_EMU_PROCESS_TIMEOUT_SECONDS
         > FBUILD_DAEMON_LONG_OPERATION_TIMEOUT_SECONDS
     )
+
+
+def test_python_worker_outlives_fbuild_process_timeout() -> None:
+    """The parent pytest worker must not mask the child fbuild result."""
+    worker = create_python_test_process(False)
+
+    assert worker.timeout is not None
+    assert worker.timeout > FBUILD_TEST_EMU_PROCESS_TIMEOUT_SECONDS
+
+
+def test_stuck_output_threshold_outlives_fbuild_process_timeout() -> None:
+    """A healthy quiet child must reach its explicit process deadline."""
+    assert _GLOBAL_TIMEOUT > FBUILD_TEST_EMU_PROCESS_TIMEOUT_SECONDS
+
+
+def test_top_level_watchdog_outlives_python_worker_and_deadman_grace() -> None:
+    """The outermost watchdog must not preempt the process-group result."""
+    worker = create_python_test_process(False)
+
+    assert worker.timeout is not None
+    assert _TOP_LEVEL_TEST_TIMEOUT > worker.timeout + 60
 
 
 @pytest.mark.skipif(

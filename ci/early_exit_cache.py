@@ -492,6 +492,11 @@ def check_single_test_cached(test_name_raw: str, build_dir: Path) -> bool:
     )
 
 
+def pytest_addopts_active() -> bool:
+    """Return whether external pytest options can change suite coverage."""
+    return bool(os.environ.get("PYTEST_ADDOPTS", "").strip())
+
+
 def argv_ultra_early_exit(start_time: float) -> None:
     """Check if test result is cached without running parse_args().
 
@@ -526,6 +531,9 @@ def argv_ultra_early_exit(start_time: float) -> None:
     Args:
         start_time: Time when test.py started (used for elapsed time reporting).
     """
+    if pytest_addopts_active():
+        return
+
     argv = sys.argv[1:]
 
     # --- CASE 0: No flags (bash test with no arguments) ---

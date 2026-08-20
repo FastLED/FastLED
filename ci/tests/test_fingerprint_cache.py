@@ -19,6 +19,7 @@ import time
 from pathlib import Path
 from typing import Optional
 from unittest import TestCase
+from unittest.mock import patch
 
 # Import the fingerprint cache module
 from ci.fingerprint.core import (
@@ -831,6 +832,20 @@ class TestFingerprintCache(TestCase):
             result,
             "Directory should be older than future reference time in modtime_only mode",
         )
+
+
+class TestPytestFingerprintEligibility(TestCase):
+    def test_filtered_pytest_options_disable_full_suite_cache(self) -> None:
+        from ci.early_exit_cache import pytest_addopts_active
+
+        with patch.dict(os.environ, {"PYTEST_ADDOPTS": "-k focused"}):
+            self.assertTrue(pytest_addopts_active())
+
+    def test_whitespace_pytest_options_preserve_cache(self) -> None:
+        from ci.early_exit_cache import pytest_addopts_active
+
+        with patch.dict(os.environ, {"PYTEST_ADDOPTS": "  \t"}):
+            self.assertFalse(pytest_addopts_active())
 
 
 def run_all_tests() -> bool:
