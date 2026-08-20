@@ -5,10 +5,14 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.5.17. It carries QEMU cache repair, complete Arduino-Pico
-    # board resolution, and the accumulated library/build fixes below.
+    # Pin to fbuild 2.5.18. It carries hardened USB/deploy recovery, current
+    # esptool probing, and the accumulated library/build fixes below.
     #
     # Pin history:
+    #   2.5.18 -- keeps RP application USB recoverable, supports managed
+    #              esptool 5.3 probing, recovers clean daemon shutdowns, and
+    #              maps explicitly excluded Windows ports correctly
+    #              (FastLED/fbuild#1303/#1304/#1318/#1320/#1321/#1322/#1323).
     #   2.5.17 -- repairs partial QEMU toolchain caches, completes Arduino-Pico
     #              board resolution, and corrects ESP32 flash/RAM size reporting
     #              (FastLED/fbuild#1296/#1297/#1301).
@@ -191,7 +195,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.17",
+    "fbuild==2.5.18",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
