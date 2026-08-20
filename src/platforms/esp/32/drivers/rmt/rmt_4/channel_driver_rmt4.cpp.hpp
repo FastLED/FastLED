@@ -207,7 +207,9 @@ ChannelEngineRMT4Impl::ChannelState *ChannelEngineRMT4Impl::acquireChannel(
             state.one = makeOneSymbol(timing);
 
             // Reset transmission state
-            state.transmissionComplete = false;
+            state.transmissionComplete.store(false, fl::memory_order_release);
+            state.resetWaitStarted = false;
+            state.resetStartTimeUs = 0;
             state.whichHalf = 0;
             state.pixelDataPos = 0;
             state.pixelData = nullptr;
@@ -252,7 +254,10 @@ ChannelEngineRMT4Impl::ChannelState *ChannelEngineRMT4Impl::acquireChannel(
     ChannelState newState;
     newState.channel = static_cast<rmt_channel_t>(mChannels.size());
     newState.inUse = true;
-    newState.transmissionComplete = false;
+    newState.transmissionComplete.store(false, fl::memory_order_release);
+    newState.resetWaitStarted = false;
+    newState.resetStartTimeUs = 0;
+    newState.resetDurationUs = 0;
     newState.whichHalf = 0;
     newState.memPtr = nullptr;
     newState.memStart = nullptr;
@@ -325,7 +330,10 @@ void ChannelEngineRMT4Impl::releaseChannel(ChannelState *state) FL_NO_EXCEPT {
 
     // Mark channel as idle (available for reuse)
     state->inUse = false;
-    state->transmissionComplete = false;
+    state->transmissionComplete.store(false, fl::memory_order_release);
+    state->resetWaitStarted = false;
+    state->resetStartTimeUs = 0;
+    state->resetDurationUs = 0;
 
     // Clear pixel data reference (buffer is owned by ChannelData)
     state->pixelData = nullptr;
@@ -365,7 +373,9 @@ bool ChannelEngineRMT4Impl::configureChannel(
     state->pin = pin;
     state->zero = makeZeroSymbol(timing);
     state->one = makeOneSymbol(timing);
-    state->transmissionComplete = false;
+    state->transmissionComplete.store(false, fl::memory_order_release);
+    state->resetWaitStarted = false;
+    state->resetStartTimeUs = 0;
     state->whichHalf = 0;
     state->pixelDataPos = 0;
 
@@ -528,7 +538,10 @@ void ChannelEngineRMT4Impl::startTransmission(
     state->pixelDataPos = 0;
     state->whichHalf = 0;
     state->memPtr = state->memStart;
-    state->transmissionComplete = false;
+    state->transmissionComplete.store(false, fl::memory_order_release);
+    state->resetWaitStarted = false;
+    state->resetStartTimeUs = 0;
+    state->resetDurationUs = data->getTiming().reset_us;
     state->lastFill = 0;
     state->transmissionStartTime = fl::millis(); // Start timeout timer
 
@@ -543,7 +556,7 @@ void ChannelEngineRMT4Impl::startTransmission(
         FL_WARN_F("startTransmission: setTxIntrEnable failed on channel %s",
                   state->channel);
         // Mark complete to trigger cleanup in poll()
-        state->transmissionComplete = true;
+        state->transmissionComplete.store(true, fl::memory_order_release);
         data->setInUse(false);
         return;
     }
@@ -610,7 +623,21 @@ IChannelDriver::DriverState ChannelEngineRMT4Impl::poll() FL_NO_EXCEPT {
             continue;
         }
 
-        if (state.transmissionComplete) {
+        if (state.transmissionComplete.load(fl::memory_order_acquire)) {
+            // TX-done leaves the RMT output connected in its configured LOW
+            // idle state. Start the conservative software latch interval on
+            // the first poll after completion; delaying the start can only
+            // lengthen, never shorten, the required LOW period.
+            if (!state.resetWaitStarted) {
+                state.resetWaitStarted = true;
+                state.resetStartTimeUs = fl::micros();
+            }
+            const u32 resetElapsedUs = fl::micros() - state.resetStartTimeUs;
+            if (resetElapsedUs < state.resetDurationUs) {
+                anyBusy = true;
+                continue;
+            }
+
             // Transmission complete - release channel and mark data available
             FL_WARN_F("poll: Channel %s completed", state.channel);
 

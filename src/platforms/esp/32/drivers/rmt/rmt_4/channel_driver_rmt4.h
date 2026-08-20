@@ -31,6 +31,7 @@
 
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
+#include "fl/stl/atomic.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/shared_ptr.h"
@@ -253,6 +254,67 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
     // Channel State Structure
     // ═══════════════════════════════════════════════════════════════════════════
     struct ChannelState {
+        ChannelState() FL_NO_EXCEPT
+            : channel(static_cast<rmt_channel_t>(0)),
+              pin(static_cast<gpio_num_t>(0)), inUse(false), zero{}, one{},
+              transmissionComplete(false), resetWaitStarted(false),
+              resetStartTimeUs(0), resetDurationUs(0), whichHalf(0),
+              memPtr(nullptr), memStart(nullptr), pixelData(nullptr),
+              pixelDataSize(0), pixelDataPos(0), cyclesPerFill(0),
+              maxCyclesPerFill(0), lastFill(0), transmissionStartTime(0),
+              sourceData() {}
+
+        ChannelState(const ChannelState& other) FL_NO_EXCEPT
+            : channel(other.channel), pin(other.pin), inUse(other.inUse),
+              zero(other.zero), one(other.one),
+              transmissionComplete(other.transmissionComplete.load(
+                  fl::memory_order_acquire)),
+              resetWaitStarted(other.resetWaitStarted),
+              resetStartTimeUs(other.resetStartTimeUs),
+              resetDurationUs(other.resetDurationUs), whichHalf(other.whichHalf),
+              memPtr(other.memPtr), memStart(other.memStart),
+              pixelData(other.pixelData), pixelDataSize(other.pixelDataSize),
+              pixelDataPos(other.pixelDataPos),
+              cyclesPerFill(other.cyclesPerFill),
+              maxCyclesPerFill(other.maxCyclesPerFill), lastFill(other.lastFill),
+              transmissionStartTime(other.transmissionStartTime),
+              sourceData(other.sourceData) {}
+
+        ChannelState& operator=(const ChannelState& other) FL_NO_EXCEPT {
+            if (this != &other) {
+                channel = other.channel;
+                pin = other.pin;
+                inUse = other.inUse;
+                zero = other.zero;
+                one = other.one;
+                transmissionComplete.store(
+                    other.transmissionComplete.load(fl::memory_order_acquire),
+                    fl::memory_order_release);
+                resetWaitStarted = other.resetWaitStarted;
+                resetStartTimeUs = other.resetStartTimeUs;
+                resetDurationUs = other.resetDurationUs;
+                whichHalf = other.whichHalf;
+                memPtr = other.memPtr;
+                memStart = other.memStart;
+                pixelData = other.pixelData;
+                pixelDataSize = other.pixelDataSize;
+                pixelDataPos = other.pixelDataPos;
+                cyclesPerFill = other.cyclesPerFill;
+                maxCyclesPerFill = other.maxCyclesPerFill;
+                lastFill = other.lastFill;
+                transmissionStartTime = other.transmissionStartTime;
+                sourceData = other.sourceData;
+            }
+            return *this;
+        }
+
+        ChannelState(ChannelState&& other) FL_NO_EXCEPT
+            : ChannelState(static_cast<const ChannelState&>(other)) {}
+
+        ChannelState& operator=(ChannelState&& other) FL_NO_EXCEPT {
+            return operator=(static_cast<const ChannelState&>(other));
+        }
+
         // Hardware Configuration
         rmt_channel_t channel;
         gpio_num_t pin;
@@ -263,7 +325,10 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
         rmt_item32_t one;
 
         // Transmission State
-        volatile bool transmissionComplete;
+        fl::atomic_bool transmissionComplete;
+        bool resetWaitStarted;
+        u32 resetStartTimeUs;
+        u32 resetDurationUs;
 
         // Double-Buffer State
         int whichHalf;
@@ -375,9 +440,6 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
             return;
         }
 
-        // Disconnect the GPIO from the RMT controller
-        gpio_matrix_out(state->pin, SIG_GPIO_OUT_IDX, 0, 0);
-
         // Disable TX interrupts for this channel (platform-specific)
 #if defined(FL_IS_ESP_32C3)
         RMT.int_ena.val &= ~(1 << channelNum);
@@ -395,8 +457,10 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
 #error "Unknown ESP32 target for RMT interrupt disable"
 #endif
 
-        // Mark transmission as complete (checked by pollDerived())
-        state->transmissionComplete = true;
+        // Keep the RMT signal connected after TX-done. The channel is
+        // configured idle-low, so poll() can enforce the chipset reset time
+        // before disconnecting and releasing this hardware channel.
+        state->transmissionComplete.store(true, fl::memory_order_release);
     }
 
     FL_NO_INLINE IRAM_ATTR void fillNextBuffer(ChannelState *state,

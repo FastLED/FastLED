@@ -125,6 +125,53 @@ FL_TEST_CASE("ChannelEngineI2S - initial state is READY") {
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
 }
 
+FL_TEST_CASE("ChannelEngineI2S - reset words round up to the requested interval") {
+    FL_CHECK_EQ(detail::calculateI2sResetWords(0, 5000000), 0u);
+    FL_CHECK_EQ(detail::calculateI2sResetWords(1, 2400001), 3u);
+    FL_CHECK_EQ(detail::calculateI2sResetWords(50, 5000000), 250u);
+    FL_CHECK_EQ(detail::calculateI2sResetWords(300, 5000000), 1500u);
+
+    size_t sizeBytes = 0;
+    const size_t maxBufferBytes =
+        (fl::numeric_limits<size_t>::max)() - 63u;
+    const u64 maxWords = static_cast<u64>(maxBufferBytes) / sizeof(u16);
+    FL_CHECK(
+        detail::calculateI2sBufferSize(maxWords, 0, 1000000, sizeBytes));
+    FL_CHECK_EQ(sizeBytes, static_cast<size_t>(maxWords * sizeof(u16)));
+    FL_CHECK_FALSE(
+        detail::calculateI2sBufferSize(maxWords, 1, 1000000, sizeBytes));
+}
+
+FL_TEST_CASE("ChannelEngineI2S - DMA buffer includes chipset reset tail") {
+    resetMockState();
+
+    auto peripheral = createMockPeripheral();
+    ChannelEngineI2S driver(peripheral);
+    ChipsetTimingConfig timing(350, 800, 450, 300, "LONG_RESET");
+    fl::vector_psram<uint8_t> data;
+    data.resize(3);
+    auto channelData = ChannelData::create(1, timing, fl::move(data));
+
+    driver.enqueue(channelData);
+    driver.show();
+
+    auto& mock = I2sLcdCamPeripheralMock::instance();
+    const auto& config = mock.getConfig();
+    const size_t dataWords = 3u * 64u;
+    const size_t resetWords =
+        detail::calculateI2sResetWords(timing.reset_us, config.pclk_hz);
+    FL_CHECK_EQ(config.max_transfer_bytes,
+                (dataWords + resetWords) * sizeof(u16));
+    const fl::span<const u16> transmitted = mock.getLastTransmitData();
+    FL_REQUIRE_EQ(transmitted.size(), dataWords + resetWords);
+    for (size_t i = dataWords; i < transmitted.size(); ++i) {
+        FL_CHECK_EQ(transmitted[i], 0u);
+    }
+
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+}
+
 //=============================================================================
 // Test Suite: Single Channel Transmission
 //=============================================================================
