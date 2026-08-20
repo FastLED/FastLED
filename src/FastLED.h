@@ -734,7 +734,8 @@ public:
 	/// @brief Add LED channel with runtime configuration (from ChannelConfig)
 	///
 	/// Creates and registers a Channel-based LED controller with runtime-configurable timing.
-	/// Returns a shared_ptr for lifetime control - controller auto-removes on destruction.
+	/// Returns a shared_ptr handle for later inspection, reconfiguration, or removal.
+	/// FastLED retains its own reference until remove(channel) is called.
 	///
 	/// @param config Channel configuration (pin, timing, leds, rgb order, settings)
 	/// @returns Shared pointer to Channel (extends CLEDController), or nullptr if unsupported
@@ -747,14 +748,15 @@ public:
 	/// auto channel = FastLED.add(config);
 	/// fill_solid(leds, NUM_LEDS, CRGB::Red);
 	/// FastLED.show();
-	/// channel.reset();  // Destroy controller
+	/// FastLED.remove(channel);  // Unregister and release FastLED's reference
 	/// @endcode
 	static fl::ChannelPtr add(const fl::ChannelConfig& config);
 
 	/// @brief Add multiple LED channels from a config array
 	///
 	/// Creates and registers multiple Channel-based LED controllers from an array of configurations.
-	/// Returns a vector of shared_ptrs for lifetime control.
+	/// Returns handles for later inspection, reconfiguration, or removal.
+	/// FastLED retains its own references until remove(channel) is called for each channel.
 	///
 	/// @param configs Span of ChannelConfig objects
 	/// @returns Vector of ChannelPtrs (one per config), or empty elements if unsupported
@@ -774,7 +776,8 @@ public:
 	/// @brief Add multiple LED channels from an initializer list
 	///
 	/// Creates and registers multiple Channel-based LED controllers from a brace-enclosed list.
-	/// Returns a vector of shared_ptrs for lifetime control.
+	/// Returns handles for later inspection, reconfiguration, or removal.
+	/// FastLED retains its own references until remove(channel) is called for each channel.
 	///
 	/// @param configs Initializer list of ChannelConfig objects
 	/// @returns Vector of ChannelPtrs (one per config)
@@ -792,7 +795,8 @@ public:
 	/// @brief Add multiple LED channels from a MultiChannelConfig
 	///
 	/// Creates and registers multiple Channel-based LED controllers from a MultiChannelConfig.
-	/// Returns a vector of shared_ptrs for lifetime control.
+	/// Returns handles for later inspection, reconfiguration, or removal.
+	/// FastLED retains its own references until remove(channel) is called for each channel.
 	///
 	/// @param multiConfig MultiChannelConfig containing multiple channel configurations
 	/// @returns Vector of ChannelPtrs (one per config), or empty elements if unsupported
