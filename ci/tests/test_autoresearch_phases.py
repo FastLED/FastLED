@@ -611,9 +611,7 @@ class TestParseArgsAndBuildCommands:
             extra_defines=["FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1"],
         )
         assert result.drivers == ["RMT"]
-        assert [
-            command["params"] for command in result.json_rpc_commands
-        ] == [
+        assert [command["params"] for command in result.json_rpc_commands] == [
             {
                 "driver": "RMT",
                 "laneSizes": [strip_size],

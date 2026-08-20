@@ -668,7 +668,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
                     response.set("error", "UnsupportedLegacyChipset");
                     response.set(
                         "message",
-                        "supported legacyChipsets: WS2812B, WS2814, SK6812");
+                        "supported legacyChipsets: WS2812B, WS2814, WS2818, SK6812");
                     return response;
                 }
                 legacy_chipsets[i] = chipset;
@@ -809,6 +809,9 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         if (first_chipset == LegacyClocklessChipset::WS2814) {
             resolved_timing = fl::makeTimingConfig<fl::TIMING_WS2814>();
             resolved_encoder = fl::encoder_for<fl::TIMING_WS2814>();
+        } else if (first_chipset == LegacyClocklessChipset::WS2818) {
+            resolved_timing = fl::makeTimingConfig<fl::TIMING_WS2818>();
+            resolved_encoder = fl::encoder_for<fl::TIMING_WS2818>();
         } else if (first_chipset == LegacyClocklessChipset::SK6812) {
             resolved_timing = fl::makeTimingConfig<fl::TIMING_SK6812>();
             resolved_encoder = fl::encoder_for<fl::TIMING_SK6812>();
@@ -825,6 +828,9 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         // are exact multiples of period/4 — FastLED#3572 follow-up).
         resolved_timing = fl::makeTimingConfig<fl::TIMING_SK6812>();
         resolved_encoder = fl::encoder_for<fl::TIMING_SK6812>();
+    } else if (timing_name == "WS2818") {
+        resolved_timing = fl::makeTimingConfig<fl::TIMING_WS2818>();
+        resolved_encoder = fl::encoder_for<fl::TIMING_WS2818>();
     } else {
         resolved_timing = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
         resolved_encoder = fl::encoder_for<fl::TIMING_WS2812B_V5>();

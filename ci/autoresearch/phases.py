@@ -794,7 +794,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 return 1
         min_lanes = requested_min_lanes
         max_lanes = requested_max_lanes
-        legacy_chipset_name = "WS2814" if args.chipset == "ws2814" else "WS2812B"
+        legacy_chipset_names = {
+            "ws2814": "WS2814",
+            "ws2818": "WS2818",
+        }
+        legacy_chipset_name = legacy_chipset_names.get(args.chipset, "WS2812B")
         print(
             f"\u2139\ufe0f  Legacy API mode: using {legacy_chipset_name}<PIN> template path "
             "(supported TX pins 0-8; pin 22 single-lane current loopback)"
@@ -816,22 +820,27 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         print(f"\u274c Error: {flag} requires --legacy")
         return 1
 
-    if args.chipset == "ws2814":
+    explicit_legacy_chipsets = {
+        "ws2814": "WS2814",
+        "ws2818": "WS2818",
+    }
+    if args.chipset in explicit_legacy_chipsets:
+        selected_chipset = explicit_legacy_chipsets[args.chipset]
         if not args.legacy:
             print(
-                "\u274c Error: --chipset ws2814 requires --legacy so AutoResearch exercises the public WS2814<PIN> template"
+                f"\u274c Error: --chipset {args.chipset} requires --legacy so AutoResearch exercises the public {selected_chipset}<PIN> template"
             )
             return 1
         if args.use_root_platformio_ini:
             print(
-                "\u274c Error: --chipset ws2814 cannot use "
+                f"\u274c Error: --chipset {args.chipset} cannot use "
                 "--use-root-platformio-ini; the staged project is required "
                 "to bind the public template to the requested RMT driver"
             )
             return 1
         if args.legacy_mixed_timings or args.legacy_rgbw_small_counts:
             print(
-                "\u274c Error: --chipset ws2814 cannot be combined with legacy mixed/RGBW override modes"
+                f"\u274c Error: --chipset {args.chipset} cannot be combined with legacy mixed/RGBW override modes"
             )
             return 1
 
@@ -972,6 +981,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     chipset_timing_map = {
         "ws2812": "WS2812B-V5",
         "ws2814": "WS2814",
+        "ws2818": "WS2818",
         "ucs7604": "UCS7604-800KHZ",
     }
     timing_name = chipset_timing_map.get(args.chipset, "WS2812B-V5")
@@ -1020,8 +1030,10 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         test_config["useLegacyApi"] = True
                         if args.legacy_rgbw_small_counts:
                             test_config["legacyRgbw"] = True
-                        if args.chipset == "ws2814":
-                            test_config["legacyChipsets"] = ["WS2814"] * lane_count
+                        if args.chipset in explicit_legacy_chipsets:
+                            test_config["legacyChipsets"] = [
+                                explicit_legacy_chipsets[args.chipset]
+                            ] * lane_count
                         elif args.legacy_mixed_timings:
                             test_config["legacyChipsets"] = [
                                 "WS2812B" if i % 2 == 0 else "SK6812"
@@ -1122,7 +1134,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     # against perfectly healthy firmware. The two flags are mutually
     # exclusive host-side (both claim DMA0 channels + flash budget).
     bench_defines: list[str] = []
-    if args.legacy and args.rmt and args.chipset == "ws2814":
+    if args.legacy and args.rmt and args.chipset in {"ws2814", "ws2818"}:
         # ESP32-C6/P4/H2/C5 normally bind legacy templates to PARLIO. This
         # request-scoped define moves the existing public template path to
         # the existing RMT controller so the requested/reported driver is real.
@@ -1465,7 +1477,7 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
         # Same driver-gate defines as the parse-time synthesis path — the
         # LPC bench harnesses compile out without their gate macro.
         deferred_defines: list[str] = []
-        if args.legacy and args.rmt and args.chipset == "ws2814":
+        if args.legacy and args.rmt and args.chipset in {"ws2814", "ws2818"}:
             deferred_defines.append("FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1")
         if getattr(args, "dma_spi", False):
             deferred_defines.append("FASTLED_LPC_SPI_DMA=1")

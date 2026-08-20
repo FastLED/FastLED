@@ -5,6 +5,7 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fl/gfx/rgbw.h"
 #include "fl/stl/int.h"
+#include "fl/stl/type_traits.h"
 #include "fl/stl/vector.h"
 #include "pixel_controller.h"
 #include "platforms/shared/clockless_blocking.h"
@@ -238,6 +239,14 @@ FL_TEST_CASE("WS2818 timing stays inside the datasheet pulse envelope") {
     // Compile the documented public template path, not only its timing trait.
     WS2818<5, GRB> controller;
     FL_CHECK_FALSE(controller.getRgbw().active());
+
+    // Bind the datasheet reset to the actual controller template. The generic
+    // clockless default is only 280us, which is not strictly greater than the
+    // WS2818B minimum.
+    using ExpectedBase = fl::ClocklessControllerImpl<
+        5, fl::TIMING_WS2818, GRB, 0, false, fl::TIMING_WS2818::RESET>;
+    FL_CHECK_TRUE((fl::is_base_of<ExpectedBase,
+                                  WS2818Controller<5, GRB>>::value));
 }
 
 FL_TEST_CASE("WS2814 enables RGBW with white in byte four") {

@@ -741,8 +741,9 @@ See Also:
             action="store_true",
             help=(
                 "Test using the legacy template addLeds API instead of the "
-                "Channel API (WS2812B<PIN> by default; WS2814<PIN> with "
-                "--chipset ws2814). Supports consecutive TX pins 0-8; pin "
+                "Channel API (WS2812B<PIN> by default; WS2814<PIN> or "
+                "WS2818<PIN> when selected). Supports consecutive TX pins "
+                "0-8; pin "
                 "22 is single-lane for the current ObjectFLED loopback."
             ),
         )
@@ -767,11 +768,13 @@ See Also:
         # Chipset selection
         parser.add_argument(
             "--chipset",
-            choices=["ws2812", "ws2814", "ucs7604"],
+            choices=["ws2812", "ws2814", "ws2818", "ucs7604"],
             default="ws2812",
             help=(
                 "Chipset to use for autoresearch (default: ws2812). "
                 "ws2814 requires --legacy and exercises automatic RGBW output; "
+                "ws2818 requires --legacy and exercises its RGB backup-input "
+                "chipset timing; "
                 "ucs7604 uses UCS7604-800KHZ timing with 16-bit encoding."
             ),
         )

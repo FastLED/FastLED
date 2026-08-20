@@ -497,6 +497,14 @@ class WS2814Controller
     }
 };
 
+/// WS2818 RGB controller with backup data input.
+/// @see fl::TIMING_WS2818 in fl/chipsets/led_timing.h (300, 300, 600 ns)
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+class WS2818Controller
+    : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2818,
+                                         RGB_ORDER, 0, false,
+                                         fl::TIMING_WS2818::RESET> {};
+
 /// WS2812 controller @ 800 kHz - references centralized timing from fl::TIMING_WS2812_800KHZ
 /// @note Timing: 250ns, 625ns, 375ns (overclockable via FASTLED_OVERCLOCK_WS2812)
 /// @see fl::TIMING_WS2812_800KHZ in fl::chipsets::led_timing.h (250, 625, 375 ns)
