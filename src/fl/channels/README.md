@@ -101,6 +101,50 @@ void loop() {
 
 Every `addLeds<>` variant also accepts an optional trailing `fl::Bus B = fl::Bus::AUTO` template parameter — see "Compile-Time Bus Selection" below for how to pin the driver from the call site.
 
+### Select a strip configuration at runtime
+
+The template arguments to `addLeds<>` must be known at compile time, so the
+template itself cannot be stored in a variable. Use the non-template Channel
+API when a saved setting or user input selects the chipset, pins, or color
+order during `setup()`:
+
+```cpp
+#include "FastLED.h"
+#include "fl/channels/config.h"
+
+constexpr int NUM_LEDS = 60;
+CRGB leds[NUM_LEDS];
+
+uint8_t readStripSetting() {
+    return 0;  // Replace with an EEPROM, file, web UI, or other saved setting.
+}
+
+void setup() {
+    const fl::ChannelConfig options[] = {
+        fl::ChannelConfig(fl::makeClockless<fl::TIMING_WS2813>(4),
+                          fl::span<CRGB>(leds, NUM_LEDS), GRB),
+        fl::ChannelConfig(fl::makeClockless<fl::TIMING_WS2812_800KHZ>(5),
+                          fl::span<CRGB>(leds, NUM_LEDS), RGB),
+        fl::ChannelConfig(fl::makeClockless<fl::TIMING_WS2811_400KHZ>(6),
+                          fl::span<CRGB>(leds, NUM_LEDS), BRG),
+    };
+
+    const uint8_t selected = readStripSetting();
+    if (selected < sizeof(options) / sizeof(options[0])) {
+        FastLED.add(options[selected]);
+    }
+}
+
+void loop() {
+    fill_rainbow(leds, NUM_LEDS, millis() / 16, 7);
+    FastLED.show();
+}
+```
+
+`makeClockless<>()` builds each supported timing value into the firmware. The
+resulting `ChannelConfig` objects are ordinary values, so the final selection
+can be made at runtime without a chipset switch statement.
+
 ### Compile-Time Bus Selection (`fl::Bus`)
 
 The `fl::Bus` enum (in `fl/channels/bus.h`) is the portable identifier that flows through both the templated APIs and the runtime registry overrides. Some portable values map to different concrete vendor drivers on different chips; `deviceInfo<Bus, Which>()` reports the concrete `vendor_name` and `device_name`.
