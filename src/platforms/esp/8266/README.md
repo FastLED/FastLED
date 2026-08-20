@@ -32,10 +32,9 @@ Notes:
 - **`FASTLED_INTERRUPT_RETRY_COUNT`**: Max retries when a frame aborts due to long ISRs/NMIs. Default `2` (see `fastled_config.h`). Used by both single-lane and block drivers.
 
 - **Pin order selection** (choose one before including `FastLED.h`):
-  - **`FASTLED_ESP8266_RAW_PIN_ORDER`**: Use raw GPIO numbering.
-  - **`FASTLED_ESP8266_NODEMCU_PIN_ORDER`**: Use NodeMCU D0/D1 labeling.
-  - **`FASTLED_ESP8266_D1_PIN_ORDER`**: Use Wemos D1-style mapping.
-  - If none are defined, the code defaults to NodeMCU on `ARDUINO_ESP8266_NODEMCU`, otherwise raw pin order.
+  - **`FASTLED_ESP8266_RAW_PIN_ORDER`**: Use raw GPIO numbering. This is the default. Arduino board constants such as NodeMCU `D5` already expand to raw GPIO numbers and work with this mode.
+  - **`FASTLED_ESP8266_NODEMCU_PIN_ORDER`**: Legacy NodeMCU board-label numbering for bare numeric pins (for example, `5` means D5/GPIO14). Do not use this mode with Arduino `Dn` constants, because they have already been mapped to GPIO numbers.
+  - **`FASTLED_ESP8266_D1_PIN_ORDER`**: Legacy Wemos D1-style mapping for bare numeric pins.
 
 - **SPI backend**
   - **`FASTLED_ALL_PINS_HARDWARE_SPI`**: Route clocked LED chipsets via the hardware SPI driver. See `fastspi_esp8266.h` notes.

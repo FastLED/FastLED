@@ -49,6 +49,20 @@ void esp8266_compile_tests() {
 #ifndef FASTLED_HAS_MILLIS
 #error "FASTLED_HAS_MILLIS should be defined for ESP8266"
 #endif
+
+// The Arduino NodeMCU variant defines D5 as the raw GPIO number 14. FastLED
+// must not select its legacy board-label mapping automatically, because that
+// mapping accepts only 0..10 and would reject D5 (and double-map D1..D4).
+#if defined(ARDUINO_ESP8266_NODEMCU) && defined(FL_ESP8266_PIN_ORDER_DEFAULTED)
+#ifndef FASTLED_ESP8266_RAW_PIN_ORDER
+#error "The default ESP8266 pin order must accept Arduino Dn constants as raw GPIO numbers"
+#endif
+#ifdef FASTLED_ESP8266_NODEMCU_PIN_ORDER
+#error "The legacy NodeMCU board-label mapping must remain opt-in"
+#endif
+    FL_STATIC_ASSERT(FastPin<14>::validpin(),
+                     "NodeMCU D5 (GPIO 14) must be a valid FastLED pin");
+#endif
 }
 #endif // FL_IS_ESP8266
 
