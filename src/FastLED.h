@@ -330,6 +330,9 @@ class TX1813N1 : public TM1829Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief TM1812 controller class.
 /// @copydetails TM1809Controller800Khz
+/// @note This legacy controller emits continuous RGB pixels. TM1812 RGBCCT
+/// strips with two 5-channel pixels per 12-channel IC use the Channels API
+/// with `fl::TIMING_TM1812_RGBWW_800KHZ`; see the RGBWW example.
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class TM1812 : public TM1809Controller800Khz<DATA_PIN, RGB_ORDER> {};
 

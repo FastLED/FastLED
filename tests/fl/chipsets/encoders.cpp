@@ -7,6 +7,7 @@
 #include "tests/fl/chipsets/encoders/p9813.hpp"
 #include "tests/fl/chipsets/encoders/sk9822.hpp"
 #include "tests/fl/chipsets/encoders/sm16716.hpp"
+#include "tests/fl/chipsets/encoders/tm1812.hpp"
 #include "tests/fl/chipsets/encoders/ws2801.hpp"
 #include "tests/fl/chipsets/encoders/ws2803.hpp"
 #include "tests/fl/chipsets/encoders/ws2812.hpp"

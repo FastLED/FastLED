@@ -272,6 +272,23 @@ struct TIMING_TM1809_800KHZ {
     };
 };
 
+/// TM1812 RGBCCT controller @ 800 kHz (issue #995)
+///
+/// Unlike the legacy RGB alias, this trait selects the TM1812 byte encoder:
+/// two 5-channel RGBWW pixels occupy ten of each IC's twelve output bytes and
+/// the encoder pads the remaining two. Timing values are the TM1812 V1.4
+/// datasheet typicals: T0H=400ns, T1H=850ns, bit period=1.25us.
+struct TIMING_TM1812_RGBWW_800KHZ {
+    enum : u32 {
+        T1 = 400,
+        T2 = 450,
+        T3 = 400,
+        RESET = 24
+    };
+    static constexpr ClocklessEncoder ENCODER =
+        ClocklessEncoder::CLOCKLESS_ENCODER_TM1812_RGBWW;
+};
+
 /// TM1829 RGB controller @ 800 kHz
 /// Four-phase: TH0=340ns, TH1=680ns, TL0=890ns, TL1=550ns
 struct TIMING_TM1829_800KHZ {
