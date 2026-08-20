@@ -5,11 +5,16 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.5.14. It carries library-dependency fixes for Teensy/STM32,
-    # stale daemon/install-lock recovery, and hardened RP2350 UF2 deployment
-    # that binds picotool to the selected board rather than a USB enumeration.
+    # Pin to fbuild 2.5.17. It carries QEMU cache repair, complete Arduino-Pico
+    # board resolution, and the accumulated library/build fixes below.
     #
     # Pin history:
+    #   2.5.17 -- repairs partial QEMU toolchain caches, completes Arduino-Pico
+    #              board resolution, and corrects ESP32 flash/RAM size reporting
+    #              (FastLED/fbuild#1296/#1297/#1301).
+    #   2.5.16 -- restores cached size reports, fixes normalized project locks,
+    #              and completes build fast-path coverage across orchestrators
+    #              (FastLED/fbuild#1277/#1278/#1288).
     #   2.5.14 -- binds RP2040/RP2350 picotool deployment to the selected
     #              board and refuses Windows USB Code 43 devices
     #              (FastLED/fbuild#1260).

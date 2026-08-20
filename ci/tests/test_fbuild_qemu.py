@@ -30,6 +30,12 @@ ERROR_PATTERN = (
     r"Guru Meditation|abort\(\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|"
     r"QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL"
 )
+# fbuild 2.5.17 caps daemon-side long operations at 30 minutes. Keep the
+# process wrapper slightly longer so fbuild can return its structured result.
+FBUILD_DAEMON_LONG_OPERATION_TIMEOUT_SECONDS = 30 * 60
+FBUILD_TEST_EMU_PROCESS_TIMEOUT_SECONDS = (
+    FBUILD_DAEMON_LONG_OPERATION_TIMEOUT_SECONDS + 60
+)
 
 
 def test_stage_fbuild_argument_parser_accepts_explicit_argv() -> None:
@@ -57,6 +63,14 @@ def test_stage_fbuild_qemu_project_without_compiling(tmp_path: Path) -> None:
     assert (staged_dir / "src" / "sketch" / "Blink.ino").is_file()
     assert (staged_dir / "lib" / "FastLED" / "FastLED.h").is_file()
     assert not (staged_dir / ".fbuild" / "build").exists()
+
+
+def test_fbuild_process_timeout_allows_daemon_diagnostic_grace() -> None:
+    """The outer wrapper must not mask fbuild's own long-operation result."""
+    assert (
+        FBUILD_TEST_EMU_PROCESS_TIMEOUT_SECONDS
+        > FBUILD_DAEMON_LONG_OPERATION_TIMEOUT_SECONDS
+    )
 
 
 @pytest.mark.skipif(
@@ -94,7 +108,7 @@ def test_fbuild_test_emu_esp32dev() -> None:
         check=False,
         capture_output=True,
         text=True,
-        timeout=600,
+        timeout=FBUILD_TEST_EMU_PROCESS_TIMEOUT_SECONDS,
     )
     output = proc.stdout or ""
     assert proc.returncode == 0, (
