@@ -3,9 +3,10 @@
 /// @file platforms/arm/rp/watchdog_rp.impl.hpp
 /// @brief RP2040 / RP2350 watchdog implementation.
 ///
-/// Pico SDK `hardware/watchdog.h` for begin/feed/disable. Reset cause via
-/// `watchdog_caused_reboot()` (+ `VREG_AND_CHIP_RESET` on RP2040,
-/// `POWMAN.CHIP_RESET` on RP2350 for richer cause detection).
+/// Pico SDK `hardware/watchdog.h` for begin/feed/disable. A timer expiry is
+/// distinguished from the SDK/bootrom's intentional watchdog-based reboot
+/// path with `watchdog_enable_caused_reboot()` on Pico SDK 1.3+. Older Pico
+/// SDKs fall back to `watchdog_caused_reboot()`.
 ///
 /// **Persist storage** uses the low 14 bytes of `watchdog_hw->scratch[0..3]`.
 /// The upper two bytes of `scratch[3]` hold FastLED's consecutive watchdog
@@ -25,11 +26,22 @@
 #include <hardware/watchdog.h>   // ok include — Pico SDK
 #include <hardware/structs/watchdog.h>  // ok include — scratch[0..7]
 #include <pico/bootrom.h>        // ok include — reset_usb_boot()
+#include <pico/version.h>        // ok include — watchdog API capability guard
 // IWYU pragma: end_keep
 
 #define FL_WATCHDOG_HAS_HARDWARE
 #define FL_WATCHDOG_PERSIST_BYTES 14   // scratch[0..2] + low half of scratch[3]
 #define FL_WATCHDOG_HAS_BOOTLOADER_REBOOT
+
+#if defined(PICO_SDK_VERSION_MAJOR) && defined(PICO_SDK_VERSION_MINOR) \
+    && (PICO_SDK_VERSION_MAJOR > 1 \
+        || (PICO_SDK_VERSION_MAJOR == 1 && PICO_SDK_VERSION_MINOR >= 3))
+#define FL_WATCHDOG_HAS_RP_ENABLE_MARKER
+#endif
+
+#if defined(PICO_SDK_VERSION_MAJOR) && PICO_SDK_VERSION_MAJOR >= 2
+#define FL_WATCHDOG_HAS_RP_DISABLE_API
+#endif
 
 #if defined(FL_IS_RP2350)
 #define FL_WATCHDOG_MAX_TIMEOUT_MS 16777u
@@ -61,10 +73,25 @@ inline void rpSetCrashCount(fl::u16 count) {
 }
 
 inline ResetCause rpDetectResetCause() {
+    // reset_usb_boot(), watchdog_reboot(), and UF2 flashing also use the
+    // watchdog reset hardware. The SDK's enable marker survives only a real
+    // timeout after watchdog_enable(); intentional bootloader/deploy resets
+    // clear it. Counting every watchdog-caused reboot as a crash makes a few
+    // normal deploys trip the retained safe-mode threshold and strand USB RPC.
+#if defined(FL_WATCHDOG_HAS_RP_ENABLE_MARKER)
+    if (watchdog_enable_caused_reboot()) return ResetCause::WATCHDOG;
+    // On RP2350 the SDK deliberately makes watchdog_caused_reboot() false
+    // for non-normal boot types, including reset_usb_boot(). The raw reason
+    // bit is still set, and the missing enable marker above proves this was
+    // an intentional watchdog-backed software reset rather than our timeout.
+    if (watchdog_hw->reason) return ResetCause::SOFTWARE;
+#else
+    // Pico SDK 1.x (used by Arduino Mbed RP2040) predates the enable-marker
+    // API. Preserve its supported watchdog detection even though that SDK
+    // cannot distinguish a timeout from an intentional watchdog-backed reset.
     if (watchdog_caused_reboot()) return ResetCause::WATCHDOG;
-    // RP2040 / RP2350 chip reset register read; the SDK exposes
-    // `watchdog_enable_caused_reboot()` to distinguish but we already
-    // covered the WDT case. Default to POWER_ON for first-boot heuristics.
+#endif
+    // Default to POWER_ON for first-boot heuristics.
     return ResetCause::POWER_ON;
 }
 
@@ -76,6 +103,10 @@ Watchdog& Watchdog::instance() FL_NO_EXCEPT {
 }
 
 void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
+    // Capture the previous boot's marker before watchdog_enable() writes the
+    // current boot's enable marker into scratch[4]. Reading it afterward
+    // makes every intentional SDK/bootrom reset look like a timer expiry.
+    (void)lastResetCause();
     if (timeout_ms == 0) timeout_ms = 1000;
     if (timeout_ms > FL_WATCHDOG_MAX_TIMEOUT_MS) timeout_ms = FL_WATCHDOG_MAX_TIMEOUT_MS;
     // Second arg `pause_on_debug` defaults to true — useful in dev so a
@@ -92,7 +123,13 @@ void Watchdog::disable() FL_NO_EXCEPT {
     // Pico SDK's `watchdog_disable()` clears WATCHDOG_CTRL_ENABLE_BITS, which
     // halts the counter. Subsequent `feed()` calls are still safe (they only
     // write LOAD).
+#if defined(FL_WATCHDOG_HAS_RP_DISABLE_API)
     watchdog_disable();
+#else
+    // Pico SDK 1.x has no watchdog_disable() helper. Its hardware struct and
+    // atomic register helper expose the same operation used by the 2.x API.
+    hw_clear_bits(&watchdog_hw->ctrl, WATCHDOG_CTRL_ENABLE_BITS);
+#endif
     platforms::rpWatchdogState().armed = false;
 }
 
@@ -172,3 +209,6 @@ WatchdogCrashReport Watchdog::readCrashReport() const FL_NO_EXCEPT {
 void Watchdog::clearCrashReport() FL_NO_EXCEPT {}
 
 } // namespace fl
+
+#undef FL_WATCHDOG_HAS_RP_ENABLE_MARKER
+#undef FL_WATCHDOG_HAS_RP_DISABLE_API
