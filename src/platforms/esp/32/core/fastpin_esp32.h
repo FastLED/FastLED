@@ -58,7 +58,13 @@ public:
   inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
   inline static void toggle() FL_NO_EXCEPT __attribute__ ((always_inline)) {
-      *port() ^= MASK;
+      // Never read-modify-write GPIO_OUT: a concurrent GPIO update could be
+      // overwritten. Use the per-bit atomic set/clear registers instead.
+      if (isset()) {
+          lo();
+      } else {
+          hi();
+      }
   }
 
   inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
