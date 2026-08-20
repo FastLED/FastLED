@@ -252,6 +252,52 @@ FL_TEST_CASE("Serpentine 2x2 with WS2812 GRB encodes pixels in expected byte ord
     }
 }
 
+FL_TEST_CASE("[#1009] Channels sharing one CRGB array keep independent color orders") {
+    CRGB leds[] = {
+        CRGB(0x11, 0x22, 0x33),
+        CRGB(0x44, 0x55, 0x66),
+        CRGB(0x77, 0x88, 0x99),
+        CRGB(0xaa, 0xbb, 0xcc),
+    };
+
+    auto mockEngine = fl::make_shared<ByteCapturingMockEngine>("MIXED_ORDER_CAPTURE");
+    ChannelManager& manager = ChannelManager::instance();
+    manager.addDriver(2002, mockEngine);
+    auto driverCleanup = fl::make_scope_exit([&]() {
+        manager.removeDriver(mockEngine);
+    });
+
+    const auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelOptions options;
+    auto rgbChannel = Channel::create(
+        ChannelConfig(13, timing, fl::span<CRGB>(leds, 2), RGB, options));
+    auto grbChannel = Channel::create(
+        ChannelConfig(14, timing, fl::span<CRGB>(leds + 2, 2), GRB, options));
+    FL_REQUIRE_TRUE(rgbChannel != nullptr);
+    FL_REQUIRE_TRUE(grbChannel != nullptr);
+
+    auto channelCleanup = fl::make_scope_exit([&]() {
+        FastLED.remove(rgbChannel);
+        FastLED.remove(grbChannel);
+    });
+
+    FastLED.add(rgbChannel);
+    FastLED.add(grbChannel);
+    mockEngine->mCapturedChannels.clear();
+    FastLED.show();
+
+    FL_REQUIRE_EQ(mockEngine->mCapturedChannels.size(), 2);
+    const ChannelDataPtr& rgbData = mockEngine->mCapturedChannels[0];
+    const ChannelDataPtr& grbData = mockEngine->mCapturedChannels[1];
+    FL_REQUIRE_EQ(rgbData->getPin(), 13);
+    FL_REQUIRE_EQ(grbData->getPin(), 14);
+
+    FL_CHECK_EQ(rgbData->getData(),
+                fl::vector<u8>({0x11, 0x22, 0x33, 0x44, 0x55, 0x66}));
+    FL_CHECK_EQ(grbData->getData(),
+                fl::vector<u8>({0x88, 0x77, 0x99, 0xbb, 0xaa, 0xcc}));
+}
+
 FL_TEST_CASE("XMap reverse addressing with APA102 encodes pixels in reverse order") {
     const int NUM_LEDS = 4;
 
