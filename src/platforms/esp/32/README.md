@@ -413,6 +413,40 @@ On ESP32, when using 9-16 lanes, the `SPIBusManager` automatically:
 3. Promotes to hexadeca-SPI mode
 4. Uses hardware-accelerated parallel transmission
 
+## `show()`, `wait()`, and FreeRTOS tasks
+
+Normal animation code should not add a fixed delay solely to make
+`FastLED.show()` work. The channel manager waits for the previous frame before
+it reuses driver-owned data for the next one, and the default ESP32 RMT path
+includes the minimum inter-frame latch fix from
+[PR #965](https://github.com/FastLED/FastLED/pull/965). A delay does not need to
+grow with LED count.
+
+`FastLED.delay(ms)` is an animation helper: it repeatedly calls `show()` while
+the interval elapses and yields between calls. Do not use it as a transmission-
+completion primitive in a FreeRTOS task.
+
+If a task must know that RMT, I2S, SPI, or another asynchronous backend has
+finished on the wire, use the explicit completion API:
+
+```cpp
+FastLED.show();
+if (!FastLED.wait(1000)) {
+    // A driver did not complete within one second.
+}
+```
+
+The wait cooperatively runs system work, so lower-priority and network tasks can
+continue. An application may still use `vTaskDelay()`, `fl::delay()`, or its own
+timer to set the animation frame rate; that is task scheduling, not an LED
+protocol requirement.
+
+Exact trait-based reset timing for the selectable IDF4 RMT and ESP32-S3 I2S
+channel backends is tracked in
+[issue #3932](https://github.com/FastLED/FastLED/issues/3932). If a problem is
+specific to one of those backends, an arbitrary application delay may hide the
+symptom, but fixing the backend timing is the correct solution.
+
 ## RMT backends (IDF4 vs IDF5) and how to select
 
 Two RMT implementations exist and are selected by IDF version unless you override it:
