@@ -634,9 +634,9 @@ fl::span<const fl::DriverInfo> CFastLED::getDriverInfos() const {
 
 void CFastLED::wait() {
 	fl::ChannelManager& manager = fl::channelManager();
-	// Wait for all drivers to become READY
-	// Calls async_run() and uses time-based delays to avoid busy-waiting
-	manager.waitForReady();
+	// A zero timeout means wait indefinitely. The void API cannot report a
+	// timeout, so returning early would violate its completion contract.
+	manager.waitForReady(0);
 }
 
 bool CFastLED::wait(fl::u32 timeout_ms) {
