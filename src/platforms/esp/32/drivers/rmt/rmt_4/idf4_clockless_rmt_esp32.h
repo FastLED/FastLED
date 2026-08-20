@@ -68,6 +68,9 @@ public:
     {
         // Create channel data with pin and timing configuration
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
+        if (WAIT_TIME > 0 && static_cast<u32>(WAIT_TIME) > timing.reset_us) {
+            timing.reset_us = static_cast<u32>(WAIT_TIME);
+        }
         mChannelData = ChannelData::create(DATA_PIN, timing);
     }
 

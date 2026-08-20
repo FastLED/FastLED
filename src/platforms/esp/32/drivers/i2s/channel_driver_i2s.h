@@ -65,12 +65,41 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/span.h"
 #include "fl/stl/atomic.h"
+#include "fl/stl/limits.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/unique_ptr.h"
 #include "platforms/esp/32/drivers/i2s/ii2s_lcd_cam_peripheral.h"
 #include "crgb.h"
 
 namespace fl {
+
+namespace detail {
+
+/// Convert a chipset reset interval to LCD_CAM words, rounding up so the
+/// encoded LOW tail is never shorter than requested.
+inline u64 calculateI2sResetWords(u32 reset_us, u32 pclk_hz) FL_NO_EXCEPT {
+    const u64 clocks = static_cast<u64>(reset_us) * pclk_hz;
+    return (clocks + 999999u) / 1000000u;
+}
+
+/// Calculate the complete DMA buffer size without narrowing or wrapping.
+inline bool calculateI2sBufferSize(u64 data_words, u32 reset_us, u32 pclk_hz,
+                                   size_t& size_bytes) FL_NO_EXCEPT {
+    // allocateBuffer() rounds up to the 64-byte DMA alignment, so reserve the
+    // maximum 63-byte adjustment here as part of the same overflow check.
+    constexpr size_t kDmaAlignmentAdjustment = 63u;
+    const size_t max_buffer_bytes =
+        (fl::numeric_limits<size_t>::max)() - kDmaAlignmentAdjustment;
+    const u64 max_words = static_cast<u64>(max_buffer_bytes) / sizeof(u16);
+    const u64 reset_words = calculateI2sResetWords(reset_us, pclk_hz);
+    if (data_words > max_words || reset_words > max_words - data_words) {
+        return false;
+    }
+    size_bytes = static_cast<size_t>((data_words + reset_words) * sizeof(u16));
+    return true;
+}
+
+} // namespace detail
 
 /// @brief Internal configuration structure for the I2S channel driver
 struct I2sChannelEngineConfig {

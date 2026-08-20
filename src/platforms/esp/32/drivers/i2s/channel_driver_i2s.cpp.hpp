@@ -380,20 +380,31 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         // Each byte = 64 bits of output (8 Wave8Bit × 8 bits each)
         // Each bit output as one 16-bit word
         // Buffer size = numLeds * 3 * 64 * 2 bytes = numLeds * 384 bytes
-        // Plus padding for reset signal
-        size_t reset_words = 64;  // ~50µs reset at typical clock
-        size_t data_words = static_cast<size_t>(mNumLeds) * mNumComponents * 64;
-        size_t total_words = data_words + reset_words;
-        size_t data_size = total_words * sizeof(u16);
+        // Append a LOW tail long enough for this chipset's reset/latch time.
+        // One uint16_t output word is presented per LCD_CAM pixel clock.
+        const u64 data_words =
+            static_cast<u64>(mNumLeds) * mNumComponents * 64u;
+        size_t data_size = 0;
+        if (!detail::calculateI2sBufferSize(
+                data_words, timing.reset_us, mConfig.pclk_hz, data_size)) {
+            FL_WARN_F("ChannelEngineI2S: DMA buffer size overflow");
+            return false;
+        }
+        const size_t total_words = data_size / sizeof(u16);
         pconfig.max_transfer_bytes = data_size;
         mBufferSize = data_size;
 
         FL_DBG_F("ChannelEngineI2S: Wave8 buffer size = %s bytes (%s words) for %s LEDs", data_size, total_words, mNumLeds);
 #else
         // Legacy transpose encoding
-        size_t offset_start = 0;
-        size_t offset_end = 24 * 3 * 2 * 2 * 2 + 2;
-        size_t data_size = mNumComponents * mNumLeds * 8 * 3 * 2 + offset_start + offset_end;
+        const u64 data_words =
+            static_cast<u64>(mNumComponents) * mNumLeds * 8u * 3u;
+        size_t data_size = 0;
+        if (!detail::calculateI2sBufferSize(
+                data_words, timing.reset_us, mConfig.pclk_hz, data_size)) {
+            FL_WARN_F("ChannelEngineI2S: DMA buffer size overflow");
+            return false;
+        }
         pconfig.max_transfer_bytes = data_size;
         mBufferSize = data_size;
 #endif
