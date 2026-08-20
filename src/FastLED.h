@@ -940,7 +940,7 @@ public:
 	/// @param data pointer to one CRGB value for the complete analog output
 	/// @param nLedsOrOffset number of CRGB values, or offset with nLedsIfOffset
 	/// @param nLedsIfOffset number of CRGB values when an offset is supplied
-	/// @tparam CHIPSET three-pin controller template, normally ANALOG
+	/// @tparam CHIPSET three-pin controller template, normally ANALOG_RGB
 	/// @tparam RED_PIN PWM pin connected to the red channel
 	/// @tparam GREEN_PIN PWM pin connected to the green channel
 	/// @tparam BLUE_PIN PWM pin connected to the blue channel

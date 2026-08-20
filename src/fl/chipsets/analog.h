@@ -52,4 +52,5 @@ class AnalogRGBController : public CPixelLEDController<RGB> {
 /// FastLED chipset-style wrapper for three-pin PWM RGB output.
 /// @see fl::AnalogRGBController
 template <fl::u8 RED_PIN, fl::u8 GREEN_PIN, fl::u8 BLUE_PIN>
-class ANALOG : public fl::AnalogRGBController<RED_PIN, GREEN_PIN, BLUE_PIN> {};
+class ANALOG_RGB
+    : public fl::AnalogRGBController<RED_PIN, GREEN_PIN, BLUE_PIN> {};

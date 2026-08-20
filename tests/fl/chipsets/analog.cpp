@@ -2,13 +2,14 @@
 /// @brief Tests for three-pin PWM analog RGB output.
 
 #include "FastLED.h"
+#include "fl/stl/scope_exit.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
 namespace {
 
-class RecordingAnalogController : public fl::AnalogRGBController<3, 5, 6> {
+class RecordingAnalogController : public ANALOG_RGB<3, 5, 6> {
   public:
     fl::u8 red = 0;
     fl::u8 green = 0;
@@ -33,6 +34,8 @@ FL_TEST_CASE("analog_rgb_applies_global_output_adjustments") {
     RecordingAnalogController controller;
 
     FastLED.addLeds(&controller, &led, 1);
+    auto cleanup = fl::make_scope_exit(
+        [&controller]() { controller.removeFromDrawList(); });
     controller.setDither(DISABLE_DITHER);
     FL_CHECK_EQ(fl::getPwmFrequency(RED_PIN), 500u);
     FL_CHECK_EQ(fl::getPwmFrequency(GREEN_PIN), 500u);
