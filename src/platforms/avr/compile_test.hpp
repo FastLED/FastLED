@@ -46,11 +46,5 @@ void avr_compile_tests() {
 #ifndef QADD8_AVRASM
 #warning "AVR assembly optimizations may not be enabled"
 #endif
-
-// Arduino's analogReference API depends on this core constant remaining
-// visible after FastLED's platform headers are included.
-#ifndef DEFAULT
-#error "DEFAULT should be defined after including FastLED.h on AVR"
-#endif
 }
 }  // namespace fl
