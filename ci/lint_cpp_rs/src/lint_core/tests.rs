@@ -645,6 +645,68 @@ constexpr int kX = 5;
         assert!(!checker.should_process_file(&header, &project_root));
     }
 
+    // ---- FastLED#3946: visible code around block comments ----
+
+    #[test]
+    fn bare_noinline_handles_block_comments() {
+        let checker = BareNoInlineChecker;
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.cpp",
+            concat!(
+                "__attribute__((noinline)) void before(); /* comment starts\n",
+                "still commented __attribute__((noinline))\n",
+                "*/ __attribute__((noinline)) void after();\n",
+                "/* __attribute__((noinline)) void hidden(); */\n",
+                "__attribute__((noinline)) void suppressed(); // ok noinline\n",
+                "// documentation mentions /* without opening a comment\n",
+                "const char *marker = \"/*\";\n",
+                "__attribute__((noinline)) void after_literals();\n",
+            ),
+        ));
+        assert_eq!(
+            hits.iter().map(|hit| hit.0).collect::<Vec<_>>(),
+            vec![1, 3, 8]
+        );
+    }
+
+    #[test]
+    fn bare_snprintf_handles_block_comments() {
+        let checker = BareSnprintfChecker;
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.cpp",
+            concat!(
+                "snprintf(buf, sizeof(buf), \"%d\", value); /* comment starts\n",
+                "still commented snprintf(buf, 1, \"x\");\n",
+                "*/ snprintf(buf, sizeof(buf), \"%d\", value);\n",
+                "/* snprintf(buf, sizeof(buf), \"%d\", value); */\n",
+                "snprintf(buf, sizeof(buf), \"%d\", value); // ok snprintf\n",
+            ),
+        ));
+        assert_eq!(
+            hits.iter().map(|hit| hit.0).collect::<Vec<_>>(),
+            vec![1, 3]
+        );
+    }
+
+    #[test]
+    fn legacy_log_macro_handles_block_comments() {
+        let checker = LegacyLogMacroChecker;
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.cpp",
+            concat!(
+                "FL_WARN(\"before\"); /* comment starts\n",
+                "still commented FL_WARN(\"hidden\");\n",
+                "*/ FL_ERROR(\"after\");\n",
+                "/* FL_DBG(\"hidden\"); */\n",
+                "#define FL_WARN(...)\n",
+            ),
+        ));
+        assert_eq!(
+            hits.iter().map(|hit| hit.0).collect::<Vec<_>>(),
+            vec![1, 3]
+        );
+    }
+
     // ---- FastLED#3287: container raw-pointer checkers ----
 
     #[test]
