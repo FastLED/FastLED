@@ -24,6 +24,7 @@ from ci.early_exit_cache import _cpp_run_breakdown
 from ci.meson.streaming import StreamingResult, is_example_artifact
 from ci.meson.test_execution import MesonTestResult, examples_are_included
 from ci.util.fingerprint import FingerprintManager
+from ci.util.test_exceptions import TestFailureInfo as FailureInfo
 from ci.util.test_runner import _describe_cpp_counts
 from ci.util.test_types import (
     FingerprintResult,
@@ -325,6 +326,61 @@ class TestResultRowLabel(unittest.TestCase):
     def test_unattributed_row_admits_it(self) -> None:
         """The meson-test fallback cannot split its total; it must not imply one."""
         self.assertEqual(self._row(), "357/357 passed; unit/example split unrecorded")
+
+
+class TestProcessFailureGuidance(unittest.TestCase):
+    """Process-level failures need suite-aware names and rerun commands."""
+
+    def test_pytest_timeout_gets_python_guidance(self) -> None:
+        from ci.util.test_runner import _failed_test_entry
+
+        failure = FailureInfo(
+            test_name="run",
+            command="uv run pytest --tb=short ci/tests --durations=0",
+            return_code=1,
+            output="Process killed due to global timeout",
+            error_type="global_timeout",
+        )
+
+        entry = _failed_test_entry(failure)
+
+        self.assertEqual(entry.name, "python_tests")
+        self.assertEqual(entry.category, "python")
+        self.assertEqual(entry.rerun_cmd, "bash test --py")
+        self.assertEqual(entry.debug_cmd, "bash test --py --verbose")
+
+    def test_cpp_unit_guidance_is_unchanged(self) -> None:
+        from ci.util.test_runner import _failed_test_entry
+
+        failure = FailureInfo(
+            test_name="fl_stl_vector",
+            command=".build/meson/tests/fl_stl_vector.exe",
+            return_code=1,
+            output="failed",
+        )
+
+        entry = _failed_test_entry(failure)
+
+        self.assertEqual(entry.category, "unit")
+        self.assertEqual(entry.rerun_cmd, "bash test fl_stl_vector --cpp")
+        self.assertEqual(entry.debug_cmd, "bash test fl_stl_vector --debug")
+
+    def test_integration_failure_gets_full_suite_guidance(self) -> None:
+        from ci.util.test_runner import _failed_test_entry
+
+        failure = FailureInfo(
+            test_name="integration_tests",
+            command="uv run pytest -s ci/test_integration -xvs --durations=0",
+            return_code=1,
+            output="failed",
+        )
+
+        entry = _failed_test_entry(failure)
+
+        self.assertEqual(entry.name, "integration_tests")
+        self.assertEqual(entry.category, "integration")
+        self.assertEqual(entry.rerun_cmd, "bash test --full")
+        self.assertEqual(entry.debug_cmd, "bash test --full --verbose")
 
 
 class TestSuiteExclusionDetection(unittest.TestCase):

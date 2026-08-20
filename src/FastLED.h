@@ -1651,9 +1651,14 @@ public:
 
 	/// Update all our controllers with the current led colors, using the passed in brightness
 	/// @param scale the brightness value to use in place of the stored value
+	/// @warning This function is not interrupt-safe and must not be called from an
+	/// interrupt service routine (ISR). On ESP32, doing so can deadlock or trigger
+	/// an interrupt-watchdog panic. Have the ISR set a flag, then call show() from
+	/// loop() or a normal task after leaving the interrupt context.
 	void show(fl::u8 scale);
 
 	/// Update all our controllers with the current led colors
+	/// @warning This function is not interrupt-safe. See show(fl::u8).
 	void show() { show(mScale); }
 
 	// Called automatically at the end of show().

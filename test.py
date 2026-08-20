@@ -18,6 +18,7 @@ from pathlib import Path
 from ci.early_exit_cache import (
     argv_ultra_early_exit,
     check_single_test_cached,
+    pytest_addopts_active,
 )
 
 
@@ -95,6 +96,7 @@ from ci.util.test_env import (
     setup_environment,
     setup_force_exit,
 )
+from ci.util.test_runner import _TOP_LEVEL_TEST_TIMEOUT
 from ci.util.test_types import (
     process_test_flags,
 )
@@ -114,7 +116,7 @@ import threading  # noqa: PLC0415 - lazy import (not at top level to speed up ea
 
 _CANCEL_WATCHDOG = threading.Event()
 
-_TIMEOUT_EVERYTHING = 600
+_TIMEOUT_EVERYTHING = _TOP_LEVEL_TEST_TIMEOUT
 
 _GDB_CRASH_DIR = Path(".gdb_crash")
 _GDB_CRASH_SEEN = _GDB_CRASH_DIR / ".seen"
@@ -183,7 +185,7 @@ def _get_run_platform_backends() -> dict[str, list[str]]:
 
 
 if os.environ.get("GITHUB_ACTIONS"):
-    _TIMEOUT_EVERYTHING = 1200  # Extended timeout for GitHub CI builds
+    _TIMEOUT_EVERYTHING = max(_TIMEOUT_EVERYTHING, 1200)
     ts_print(
         f"GitHub Actions environment detected - using extended timeout: {_TIMEOUT_EVERYTHING} seconds"
     )
@@ -444,6 +446,7 @@ def main() -> None:
             args.build_mode if args.build_mode else ("debug" if args.debug else "quick")
         )
         fingerprint_manager = FingerprintManager(cache_dir, build_mode=build_mode)
+        pytest_options_active = pytest_addopts_active()
 
         # Calculate fingerprints
         # OPTIMIZATION: When --no-fingerprint is set, skip computing fingerprints entirely.
@@ -688,6 +691,7 @@ def main() -> None:
                 force_python_test_change = (
                     python_test_change
                     or (args.test is not None)
+                    or pytest_options_active
                     or rebuild_mode != RebuildMode.CACHED
                 )
                 force_wasm_change = wasm_change or rebuild_mode != RebuildMode.CACHED
@@ -733,6 +737,7 @@ def main() -> None:
                 args.test is None
                 and not running_specific_examples
                 and not args.no_fingerprint
+                and not pytest_options_active
             )
             if running_all_tests:
                 status = "success" if tests_passed else "failure"
