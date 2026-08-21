@@ -68,8 +68,36 @@ def test_rp2350w_ble_transport_uses_btstack_with_singleton_state() -> None:
     assert "fl::Singleton<RpBleRuntime>" in source
     assert "att_server_request_to_send_notification" in source
     assert "att_server_get_mtu" in source
-    assert "notification_offset" in source
+    # Outbound responses queue in a bounded FIFO and drain in ATT-MTU
+    # chunks; a single shared buffer truncated an in-flight response when
+    # a second one was produced mid-transfer (FastLED#3955).
+    assert "BleNotifyQueue notifications" in source
+    assert "notifications.chunkSize" in source
+    assert "notifications.advance" in source
     assert "notify failed: %u" in source
+
+
+def test_rp2350w_ble_disconnect_clears_pending_notification_state() -> None:
+    """A dropped link must not leave the send-registration flags latched.
+
+    Otherwise a request that registered just before the drop blocks every
+    send on the next connection (FastLED#3955).
+    """
+    source = RP_BLE_IMPL.read_text(encoding="utf-8")
+
+    disconnect = source[
+        source.index("static void onDisconnected(") : source.index(
+            "TransportState* createTransport("
+        )
+    ]
+    assert "notifications.clear()" in disconnect
+    assert "notification_scheduled = false" in disconnect
+    assert "notification_callback_pending = false" in disconnect
+
+    destroy = source[
+        source.index("void destroyTransport(") : source.index("StatusInfo queryStatus(")
+    ]
+    assert "notification_callback_pending = false" in destroy
 
 
 def test_rp2350_and_rp2350w_keep_distinct_board_profiles() -> None:

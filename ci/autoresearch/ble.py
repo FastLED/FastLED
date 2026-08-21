@@ -12,12 +12,13 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from colorama import Fore, Style
 
 from ci.rpc_client import RpcClient, RpcTimeoutError
 from ci.util.ble_interface import BLE_CHAR_TX_UUID, BleInterface
+from ci.util.ble_notify_assembler import BleNotificationAssembler
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
@@ -127,17 +128,21 @@ async def run_ble_autoresearch(
         tests_failed = 0
         pong_received = False
 
-        # Try notifications first (preferred mechanism)
-        notification_payload = ""
-        async for line in ble_iface.read_lines(timeout=3.0):
-            notification_payload += line
-            payload = notification_payload
-            if payload.startswith("REMOTE: "):
-                payload = payload[8:]
-            try:
-                parsed = json.loads(payload)
-                result = parsed.get("result", {})
-                if isinstance(result, dict) and result.get("message") == "pong":
+        # Try notifications first (preferred mechanism). Each response is
+        # chunked across ATT-MTU-sized notifications, so fragments are
+        # reassembled per message rather than concatenated into one buffer
+        # that a single malformed value would poison (FastLED#3955).
+        assembler = BleNotificationAssembler()
+        async for fragment in ble_iface.read_lines(timeout=3.0):
+            for parsed in assembler.push(fragment):
+                if not isinstance(parsed, dict):
+                    continue
+                message = cast("dict[str, Any]", parsed)
+                result_value = message.get("result", {})
+                if not isinstance(result_value, dict):
+                    continue
+                result = cast("dict[str, Any]", result_value)
+                if result.get("message") == "pong":
                     print(
                         f"  {Fore.GREEN}PASS{Style.RESET_ALL} - "
                         f"Received pong via NOTIFY (transport={result.get('transport', '?')}, "
@@ -146,8 +151,8 @@ async def run_ble_autoresearch(
                     tests_passed += 1
                     pong_received = True
                     break
-            except json.JSONDecodeError:
-                continue
+            if pong_received:
+                break
 
         # Fallback: read TX characteristic value directly
         if not pong_received and ble_iface._client:
