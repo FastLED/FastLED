@@ -529,3 +529,129 @@ constexpr int kX = 5;
         assert_eq!(hits[0].0, 7);
     }
 
+    // ---- comment scanner literal state across physical lines (FastLED#3960) ----
+
+    /// Run the scanner over a whole file the way every caller does, carrying
+    /// state between physical lines.
+    fn scan_visible(src: &str) -> Vec<String> {
+        let mut state = CommentScanState::default();
+        src.lines()
+            .map(|line| strip_block_comments_from_line(line, &mut state))
+            .collect()
+    }
+
+    #[test]
+    fn scanner_keeps_code_after_a_raw_string_holding_comment_text() {
+        // The regression: `/*` inside a multiline raw string used to set
+        // in_block_comment, so every later line was stripped from checker
+        // input -- a silent false negative.
+        let src = concat!(
+            "const char* kDoc = R@@(
+",
+            "  /* not a comment, just text
+",
+            ")@@;
+",
+            "int visible_after = 1;
+",
+        )
+        .replace("@@", "\"");
+        let visible = scan_visible(&src);
+        assert!(
+            visible.last().unwrap().contains("visible_after"),
+            "code after a raw string must stay visible, got {visible:?}"
+        );
+    }
+
+    #[test]
+    fn scanner_handles_a_delimited_raw_string() {
+        let src = concat!(
+            "auto s = R@@delim(
+",
+            "  /* looks like a block comment but is raw-string text
+",
+            ")delim@@;
+",
+            "int after_delim = 2;
+",
+        )
+        .replace("@@", "\"");
+        let visible = scan_visible(&src);
+        assert!(visible.last().unwrap().contains("after_delim"), "{visible:?}");
+    }
+
+    #[test]
+    fn scanner_ignores_a_closing_delimiter_that_does_not_match() {
+        // `)other"` must NOT close an `R"delim(` raw string.
+        let src = concat!(
+            "auto s = R@@delim(
+",
+            ")other@@
+",
+            "  /* only a comment if the raw string wrongly closed above
+",
+            ")delim@@;
+",
+            "int after_mismatch = 3;
+",
+        )
+        .replace("@@", "\"");
+        let visible = scan_visible(&src);
+        assert!(visible.last().unwrap().contains("after_mismatch"), "{visible:?}");
+    }
+
+    #[test]
+    fn scanner_carries_a_backslash_continued_string() {
+        // A string continued with a trailing backslash keeps running; `/*`
+        // inside it is data.
+        let src = "const char* k = @@abc \\
+  /* still string@@;
+int after_cont = 4;
+"
+            .replace("@@", "\"")
+            .replace("\\", &"\\".to_string());
+        let visible = scan_visible(&src);
+        assert!(visible.last().unwrap().contains("after_cont"), "{visible:?}");
+    }
+
+    #[test]
+    fn scanner_still_strips_real_block_comments_across_lines() {
+        let src = "int a = 1; /* open
+hidden line
+*/ int b = 2;
+";
+        let visible = scan_visible(src);
+        assert!(visible[0].contains("int a = 1;"));
+        assert!(!visible[1].contains("hidden"), "{visible:?}");
+        assert!(visible[2].contains("int b = 2;"), "{visible:?}");
+    }
+
+    #[test]
+    fn scanner_does_not_open_a_block_comment_inside_a_line_comment() {
+        // This helper intentionally leaves `//` text in its output -- callers
+        // use split_line_comment for that. What it must do is stop *scanning*
+        // at `//`, so a `/*` there cannot swallow the following lines.
+        let visible = scan_visible("int a = 1; // /* not a real open
+int b = 2;
+");
+        assert!(visible[1].contains("int b = 2;"), "{visible:?}");
+    }
+
+    #[test]
+    fn scanner_keeps_char_literals_intact() {
+        let visible = scan_visible("char c = 'x'; /* g */ int d = 2;
+");
+        assert!(visible[0].contains("char c = 'x';"), "{visible:?}");
+        assert!(visible[0].contains("int d = 2;"), "{visible:?}");
+        assert!(!visible[0].contains(" g "), "{visible:?}");
+    }
+
+    #[test]
+    fn scanner_does_not_treat_identifier_r_as_a_raw_string() {
+        // `MYR"..."` is an ordinary string, not a raw string.
+        let src = "auto s = MYR@@plain@@; /* c */ int after_ident = 5;
+".replace("@@", "\"");
+        let visible = scan_visible(&src);
+        assert!(visible[0].contains("after_ident"), "{visible:?}");
+    }
+

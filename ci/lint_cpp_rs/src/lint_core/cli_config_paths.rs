@@ -254,18 +254,121 @@ fn split_line_comment(line: &str) -> &str {
     line.split("//").next().unwrap_or(line)
 }
 
-fn strip_block_comments_from_line(line: &str, in_block_comment: &mut bool) -> String {
+/// Where a physical line begins, for the comment scanner.
+///
+/// A single `bool` cannot express this. A raw string or a
+/// backslash-continued literal carries text across a line boundary, and that
+/// text may contain `/*` or `//` that are data, not comment introducers.
+/// Tracking only `in_block_comment` meant an unterminated `/*` inside such a
+/// literal swallowed every following line of real code, silently hiding
+/// diagnostics from every checker that funnels through this helper
+/// (FastLED#3960).
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+struct CommentScanState {
+    /// Inside `/* ... */`.
+    in_block_comment: bool,
+    /// Inside `R"delim( ... )delim"`, holding `delim`.
+    in_raw_string: Option<String>,
+    /// Inside a `"` or `'` literal continued by a trailing backslash.
+    in_quoted: Option<u8>,
+}
+
+fn find_subslice(haystack: &[u8], needle: &[u8]) -> Option<usize> {
+    if needle.is_empty() || haystack.len() < needle.len() {
+        return None;
+    }
+    haystack.windows(needle.len()).position(|window| window == needle)
+}
+
+/// Scan for the unescaped `quote` that closes a literal, starting at `from`.
+///
+/// Returns the index just past the closing quote, or `bytes.len()` when the
+/// literal does not close on this line.
+fn scan_quoted(bytes: &[u8], from: usize, quote: u8) -> usize {
+    let mut cursor = from;
+    while cursor < bytes.len() {
+        if bytes[cursor] == b'\\' {
+            cursor = (cursor + 2).min(bytes.len());
+        } else if bytes[cursor] == quote {
+            return cursor + 1;
+        } else {
+            cursor += 1;
+        }
+    }
+    bytes.len()
+}
+
+/// True when the `"` at `quote_pos` opens a raw string.
+///
+/// Only `R`, `LR`, `uR`, `UR` and `u8R` introduce one; a `"` after any other
+/// identifier character ending in `R` is an ordinary string.
+fn is_raw_string_open(bytes: &[u8], quote_pos: usize) -> bool {
+    if quote_pos == 0 || bytes[quote_pos - 1] != b'R' {
+        return false;
+    }
+    match quote_pos.checked_sub(2).map(|index| bytes[index]) {
+        None => true,
+        Some(b'L') | Some(b'u') | Some(b'U') => true,
+        Some(b'8') => quote_pos >= 3 && bytes[quote_pos - 3] == b'u',
+        Some(byte) => !(byte.is_ascii_alphanumeric() || byte == b'_'),
+    }
+}
+
+/// Read the delimiter of the raw string whose `"` sits at `quote_pos`.
+///
+/// Returns the delimiter and the index just past the opening `(`.
+fn raw_string_delimiter(bytes: &[u8], quote_pos: usize) -> Option<(String, usize)> {
+    let mut cursor = quote_pos + 1;
+    let mut delim = String::new();
+    while cursor < bytes.len() {
+        match bytes[cursor] {
+            b'(' => return Some((delim, cursor + 1)),
+            // The standard caps delimiters at 16 characters and excludes
+            // these; anything else here is not a raw string after all.
+            b')' | b'\\' | b'"' => return None,
+            byte if delim.len() < 16 => {
+                delim.push(byte as char);
+                cursor += 1;
+            }
+            _ => return None,
+        }
+    }
+    None
+}
+
+fn strip_block_comments_from_line(line: &str, state: &mut CommentScanState) -> String {
     let bytes = line.as_bytes();
     let mut visible = String::with_capacity(line.len());
     let mut cursor = 0;
     let mut visible_start = 0;
 
+    // Finish a literal carried over from the previous physical line before
+    // looking for any comment introducer: everything up to its terminator is
+    // literal data.
+    if let Some(delim) = state.in_raw_string.clone() {
+        let close = format!("){delim}\"");
+        match find_subslice(bytes, close.as_bytes()) {
+            Some(pos) => {
+                state.in_raw_string = None;
+                cursor = pos + close.len();
+            }
+            None => return line.to_string(),
+        }
+    } else if let Some(quote) = state.in_quoted {
+        let end = scan_quoted(bytes, 0, quote);
+        if end == bytes.len() && bytes.last() == Some(&b'\\') {
+            return line.to_string();
+        }
+        state.in_quoted = None;
+        cursor = end;
+    }
+
     while cursor < bytes.len() {
-        if *in_block_comment {
+        if state.in_block_comment {
             if bytes[cursor..].starts_with(b"*/") {
                 cursor += 2;
                 visible_start = cursor;
-                *in_block_comment = false;
+                state.in_block_comment = false;
             } else {
                 cursor += 1;
             }
@@ -279,19 +382,43 @@ fn strip_block_comments_from_line(line: &str, in_block_comment: &mut bool) -> St
         if bytes[cursor..].starts_with(b"/*") {
             visible.push_str(&line[visible_start..cursor]);
             cursor += 2;
-            *in_block_comment = true;
+            state.in_block_comment = true;
+            continue;
+        }
+        if bytes[cursor] == b'"' && is_raw_string_open(bytes, cursor) {
+            match raw_string_delimiter(bytes, cursor) {
+                Some((delim, body_start)) => {
+                    let close = format!("){delim}\"");
+                    match find_subslice(&bytes[body_start..], close.as_bytes()) {
+                        Some(pos) => cursor = body_start + pos + close.len(),
+                        None => {
+                            // Runs on to the next line; nothing after this is
+                            // code on this line.
+                            state.in_raw_string = Some(delim);
+                            cursor = bytes.len();
+                        }
+                    }
+                }
+                None => cursor += 1,
+            }
             continue;
         }
         if bytes[cursor] == b'"'
             || (bytes[cursor] == b'\'' && !is_digit_separator_quote(bytes, cursor))
         {
-            cursor = quoted_literal_end(bytes, cursor, bytes[cursor]);
+            let quote = bytes[cursor];
+            let end = scan_quoted(bytes, cursor + 1, quote);
+            if end == bytes.len() && bytes.last() == Some(&b'\\') {
+                // Backslash-continued literal: the rest is on the next line.
+                state.in_quoted = Some(quote);
+            }
+            cursor = end;
             continue;
         }
         cursor += 1;
     }
 
-    if !*in_block_comment {
+    if !state.in_block_comment {
         visible.push_str(&line[visible_start..]);
     }
     visible
