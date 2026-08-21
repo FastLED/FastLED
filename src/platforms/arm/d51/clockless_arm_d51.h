@@ -106,8 +106,8 @@ protected:
 		ARM_DWT_CYCCNT = 0;
 
 		FASTLED_REGISTER data_ptr_t port = FastPin<DATA_PIN>::port();
-		FASTLED_REGISTER data_t hi = *port | FastPin<DATA_PIN>::mask();
-		FASTLED_REGISTER data_t lo = *port & ~FastPin<DATA_PIN>::mask();
+		FASTLED_REGISTER data_t hi = FastPin<DATA_PIN>::hival();
+		FASTLED_REGISTER data_t lo = FastPin<DATA_PIN>::loval();
 		*port = lo;
 
 		// Setup the pixel controller and load/scale the first byte
@@ -126,8 +126,8 @@ protected:
 				if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return 0; }
 			}
 
-			hi = *port | FastPin<DATA_PIN>::mask();
-			lo = *port & ~FastPin<DATA_PIN>::mask();
+			hi = FastPin<DATA_PIN>::hival();
+			lo = FastPin<DATA_PIN>::loval();
 			#endif
 			// Write first byte, read next byte
 			writeBits<8+XTRA0>(next_mark, port, hi, lo, b);

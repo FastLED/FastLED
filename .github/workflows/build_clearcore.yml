@@ -1,0 +1,48 @@
+name: clearcore_same53
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'examples/Blink/**'
+      - 'ci/**'
+      - '.github/workflows/build_clearcore.yml'
+      - '.github/workflows/build_template.yml'
+      - 'CMakeLists.txt'
+      - 'platformio.ini'
+      - 'library.json'
+      - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'examples/Blink/**'
+      - 'ci/**'
+      - '.github/workflows/build_clearcore.yml'
+      - '.github/workflows/build_template.yml'
+      - 'CMakeLists.txt'
+      - 'platformio.ini'
+      - 'library.json'
+      - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      # Compile-only coverage against Teknic's ClearCore Arduino core.
+      # fbuild support must land and be released before this workflow does.
+      args: clearcore Blink
+      fbuild_version: "2.5.19"
+      prefer_setup_fbuild: true

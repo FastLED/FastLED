@@ -15,6 +15,15 @@ on:
         type: string
         required: false
         default: "ubuntu-latest"
+      fbuild_version:
+        type: string
+        required: false
+        default: "latest"
+      prefer_setup_fbuild:
+        description: Use the fbuild binary installed by the setup action instead of the uv dependency.
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -72,6 +81,7 @@ jobs:
       - name: Set up fbuild (install + cache)
         uses: FastLED/fbuild/.github/actions/setup@main
         with:
+          fbuild-version: ${{ inputs.fbuild_version }}
           # `ci/boards.py` holds the pinned platform SHAs (e.g. `_NXPLPC_PLATFORM`
           # for LPC804/845). When one of those pins changes the framework
           # tarball fbuild is expected to download changes too, and the
@@ -122,10 +132,14 @@ jobs:
         # build, so the env var is no longer set by default.
         run: |
           set -o pipefail
+          if [[ "$FBUILD_FROM_SETUP" == "true" ]]; then
+            export FBUILD_EXECUTABLE="$(command -v fbuild)"
+          fi
           ./compile --no-interactive --no-parallel --log-failures failures --max-failures 3  ${{ inputs.args }} | tee build.log
         shell: bash
         env:
           PYTHONUNBUFFERED: "1"
+          FBUILD_FROM_SETUP: ${{ inputs.prefer_setup_fbuild }}
 
       - name: Build summary and failure logs
         if: failure()

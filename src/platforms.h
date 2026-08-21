@@ -38,6 +38,8 @@
 #include "platforms/arm/d21/fastled_arm_d21.h"  // ok platform headers
 #elif defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
 #include "platforms/arm/d51/fastled_arm_d51.h"  // ok platform headers
+#elif defined(FL_IS_SAME53)
+#include "platforms/arm/same53/fastled_arm_same53.h"  // ok platform headers
 #elif defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
 // RP2350 (Raspberry Pi Pico 2)
 #include "platforms/arm/rp/rp2350/fastled_arm_rp2350.h"  // ok platform headers
