@@ -319,14 +319,15 @@ fn is_digit_separator_quote(bytes: &[u8], cursor: usize) -> bool {
 }
 
 fn strip_string_literals(code: &str) -> String {
+    let bytes = code.as_bytes();
     let mut result = String::with_capacity(code.len());
     let mut quote: Option<char> = None;
     let mut escaped = false;
 
-    for ch in code.chars() {
+    for (cursor, ch) in code.char_indices() {
         match quote {
             None => {
-                if ch == '"' || ch == '\'' {
+                if ch == '"' || (ch == '\'' && !is_digit_separator_quote(bytes, cursor)) {
                     quote = Some(ch);
                 }
                 result.push(ch);

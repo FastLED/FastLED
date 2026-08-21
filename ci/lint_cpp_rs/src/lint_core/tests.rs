@@ -340,6 +340,34 @@ FL_WARN(\"still checked because remote files are always guarded\");\n",
     }
 
     #[test]
+    fn strip_string_literals_keeps_code_after_digit_separator() {
+        // `0xCAFE'BEEF` is a C++14 digit separator, not a char
+        // literal. Everything after it must survive so downstream checkers
+        // still see the rest of the line.
+        let code = "u32 v = 0xCAFE'BEEF; thread_local int t;";
+        assert_eq!(strip_string_literals(code), code);
+    }
+
+    #[test]
+    fn strip_string_literals_still_blanks_char_literals() {
+        assert_eq!(
+            strip_string_literals("char c = 'a';"),
+            "char c = ' ';"
+        );
+    }
+
+    #[test]
+    fn thread_local_still_flagged_after_digit_separator() {
+        // Regression: a digit separator earlier on the line used to mask the
+        // remainder of that line from the checker.
+        let checker = ThreadLocalKeywordChecker;
+        let path_str = normalize_path("src/fl/synthetic.cpp");
+        let content = "u32 mask = 0xCAFE'BEEF; thread_local int t;\n";
+        let violations = checker.check_file_content(&file(&path_str, content));
+        assert_eq!(violations.len(), 1, "digit separator masked the line: {violations:?}");
+    }
+
+    #[test]
     fn bare_digit_separator_scope_excludes_third_party() {
         let checker = BareDigitSeparatorChecker;
         let project_root = std::env::current_dir().unwrap();
