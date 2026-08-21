@@ -147,12 +147,22 @@ static bool sha256File(const char* path, char* output, size_t output_capacity) {
 }
 
 static esp_err_t serveOtaArtifact(httpd_req_t* request) {
-    ++getOtaArtifactState().served_requests;
     File file = LittleFS.open("/rp2350.bin", FILE_READ);
     if (!file || file.isDirectory()) {
         return httpd_resp_send_err(request, HTTPD_404_NOT_FOUND, "Artifact unavailable");
     }
     httpd_resp_set_type(request, "application/octet-stream");
+    // Content-Length is REQUIRED by the client, even though the body streams
+    // out chunked. In the pinned arduino-pico core (rp2040-5.7.0),
+    // HTTPClient::_size is initialised to -1 and only ever assigned from a
+    // Content-Length header (HTTPClient.cpp:1111), and HTTPUpdate takes the
+    // `len > 0` branch or fails with HTTP_UE_SERVER_NOT_REPORT_SIZE
+    // (HTTPUpdate.cpp:232, :295). Dropping this header makes every
+    // applyOtaArtifact fail with "Server did not report size".
+    //
+    // So the #3956 review question "confirm this Arduino-Pico OTA client
+    // accepts chunked responses" resolves to: it does not — it decodes the
+    // chunked body but takes the image size from Content-Length. Keep both.
     char length[16];
     snprintf(length, sizeof(length), "%u", static_cast<unsigned>(file.size()));
     httpd_resp_set_hdr(request, "Content-Length", length);
@@ -163,11 +173,25 @@ static esp_err_t serveOtaArtifact(httpd_req_t* request) {
                                                 reinterpret_cast<const char*>(bytes),
                                                 read) != ESP_OK) {
             file.close();
+            // Deliberately NO terminating zero chunk here: in chunked framing
+            // a zero-length chunk means "body ended normally", so sending one
+            // after a failed read would present a half-written firmware image
+            // as a complete one. Returning ESP_FAIL drops the connection
+            // mid-stream, which is how the client detects the truncation.
             return ESP_FAIL;
         }
     }
     file.close();
-    return httpd_resp_send_chunk(request, nullptr, 0);
+    const esp_err_t finished = httpd_resp_send_chunk(request, nullptr, 0);
+    if (finished != ESP_OK) {
+        return finished;
+    }
+    // Count the request only once the whole artifact is on the wire. Bumping
+    // this up front made a 404 or a partial send look like a successful
+    // transfer, and the host asserts `servedRequests >= 1` as proof the
+    // RP2350W actually downloaded the image.
+    ++getOtaArtifactState().served_requests;
+    return ESP_OK;
 }
 
 // ============================================================================
@@ -495,6 +519,8 @@ fl::json otaArtifactStatus() {
 #endif  // FL_IS_ESP32
 
 #if defined(FL_IS_RP2350) && defined(PICO_CYW43_SUPPORTED)
+#include "FastLED.h"       // FastLED.watchdog()
+#include "fl/wdt/watchdog.h"
 #include <HTTPUpdate.h>
 #include <WiFi.h>
 
@@ -524,16 +550,37 @@ fl::json queueOtaArtifactUpdate(const char* host, uint16_t port) {
     return response;
 }
 
-void pollOtaArtifactUpdate() {
+void pollOtaArtifactUpdate(uint32_t watchdog_restore_ms) {
     RpOtaUpdateState& state = getRpOtaUpdateState();
     if (!state.pending) {
         return;
     }
     state.pending = false;
+
+    // updater.update() is a synchronous, multi-second firmware download run
+    // straight from loop(). The sketch feeds the watchdog only at the top and
+    // bottom of the loop scope, so a download longer than that window resets
+    // the board mid-flash-write.
+    //
+    // Re-arming with a longer timeout does NOT work here: Watchdog::begin()
+    // clamps to FL_WATCHDOG_MAX_TIMEOUT_MS, which is 16777 ms on RP2350
+    // (watchdog_rp.impl.hpp:47, :111) because the hardware counter is 24-bit
+    // microseconds. Asking for more silently yields ~16.8 s, and a real image
+    // download outruns that too. Halt the counter for the transfer and re-arm
+    // afterwards, so the loop is protected again the moment it returns.
+    fl::Watchdog& wdt = FastLED.watchdog();
+    wdt.feed();
+    wdt.disable();
+
     WiFiClient client;
     HTTPUpdate updater;
     const t_httpUpdate_return result = updater.update(client, state.host, state.port,
                                                        "/rp2350.bin");
+
+    // Re-arm before reporting, so a slow log write is already covered.
+    wdt.begin(watchdog_restore_ms);
+    wdt.feed();
+
     if (result != HTTP_UPDATE_OK) {
         FL_WARN("[OTA] RP2350W artifact update failed: " << updater.getLastErrorString());
     }
@@ -548,7 +595,7 @@ fl::json queueOtaArtifactUpdate(const char* host, uint16_t port) {
     return response;
 }
 
-void pollOtaArtifactUpdate() {}
+void pollOtaArtifactUpdate(uint32_t /*watchdog_restore_ms*/) {}
 
 #endif
 
