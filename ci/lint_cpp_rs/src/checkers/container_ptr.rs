@@ -93,7 +93,7 @@ fn scan_container_file(file_content: &FileContent) -> ContainerScan {
     let mut declarations: HashMap<String, ContainerKind> = HashMap::new();
     let mut shadowed: HashSet<String> = HashSet::new();
 
-    let mut in_block_comment = false;
+    let mut in_block_comment = CommentScanState::default();
     let mut previous_line_suppresses = false;
 
     for line in &file_content.lines {

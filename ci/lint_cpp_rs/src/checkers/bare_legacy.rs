@@ -43,7 +43,7 @@ impl FileContentChecker for BareNoInlineChecker {
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
         const SUPPRESS: &str = "// ok noinline";
         let mut violations = Vec::new();
-        let mut in_block_comment = false;
+        let mut in_block_comment = CommentScanState::default();
         for (index, line) in file_content.lines.iter().enumerate() {
             let visible = strip_block_comments_from_line(line, &mut in_block_comment);
             if visible.trim_start().starts_with("//") || visible.contains(SUPPRESS) {
@@ -102,7 +102,7 @@ impl FileContentChecker for BareSnprintfChecker {
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
         const SUPPRESS: &str = "// ok snprintf";
         let mut violations = Vec::new();
-        let mut in_block_comment = false;
+        let mut in_block_comment = CommentScanState::default();
         for (index, line) in file_content.lines.iter().enumerate() {
             let visible = strip_block_comments_from_line(line, &mut in_block_comment);
             if visible.trim_start().starts_with("//") || visible.contains(SUPPRESS) {
@@ -175,7 +175,7 @@ impl FileContentChecker for BareLibmChecker {
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
         const SUPPRESS: &str = "// ok libm";
         let mut violations = Vec::new();
-        let mut in_block_comment = false;
+        let mut in_block_comment = CommentScanState::default();
         for (index, line) in file_content.lines.iter().enumerate() {
             let visible = strip_block_comments_from_line(line, &mut in_block_comment);
             if visible.trim_start().starts_with("//") || visible.contains(SUPPRESS) {
@@ -226,7 +226,7 @@ impl FileContentChecker for FlNoUnderscoreChecker {
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
         const SUPPRESS: &str = "// ok no-underscore";
         let mut violations = Vec::new();
-        let mut in_block_comment = false;
+        let mut in_block_comment = CommentScanState::default();
         for (index, line) in file_content.lines.iter().enumerate() {
             let visible = strip_block_comments_from_line(line, &mut in_block_comment);
             if visible.trim_start().starts_with("//") || visible.contains(SUPPRESS) {
@@ -292,7 +292,7 @@ impl FileContentChecker for LegacyLogMacroChecker {
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
         let mut violations = Vec::new();
-        let mut in_block_comment = false;
+        let mut in_block_comment = CommentScanState::default();
         for (index, line) in file_content.lines.iter().enumerate() {
             // Skip line comments and the original macro definitions after
             // removing block comments. No suppression exists by design.
@@ -436,7 +436,7 @@ impl FileContentChecker for BareDigitSeparatorChecker {
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
         const SUPPRESS_TAIL: &str = "ok digit-separator";
         let mut violations = Vec::new();
-        let mut in_block_comment = false;
+        let mut in_block_comment = CommentScanState::default();
         for (index, line) in file_content.lines.iter().enumerate() {
             // Strip all `/* ... */` block comments (single-line AND multi-line),
             // advancing in_block_comment across line boundaries. This is what

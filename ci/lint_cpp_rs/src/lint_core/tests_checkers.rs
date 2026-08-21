@@ -529,3 +529,203 @@ constexpr int kX = 5;
         assert_eq!(hits[0].0, 7);
     }
 
+    // ---- comment scanner literal state across physical lines (FastLED#3960) ----
+
+    /// Run the scanner over a whole file the way every caller does, carrying
+    /// state between physical lines.
+    fn scan_visible(src: &str) -> Vec<String> {
+        let mut state = CommentScanState::default();
+        src.lines()
+            .map(|line| strip_block_comments_from_line(line, &mut state))
+            .collect()
+    }
+
+    #[test]
+    fn scanner_keeps_code_after_a_raw_string_holding_comment_text() {
+        // The regression: `/*` inside a multiline raw string used to set
+        // in_block_comment, so every later line was stripped from checker
+        // input -- a silent false negative.
+        let src = concat!(
+            "const char* kDoc = R@@(
+",
+            "  /* not a comment, just text
+",
+            ")@@;
+",
+            "int visible_after = 1;
+",
+        )
+        .replace("@@", "\"");
+        let visible = scan_visible(&src);
+        assert!(
+            visible.last().unwrap().contains("visible_after"),
+            "code after a raw string must stay visible, got {visible:?}"
+        );
+    }
+
+    #[test]
+    fn scanner_handles_a_delimited_raw_string() {
+        let src = concat!(
+            "auto s = R@@delim(
+",
+            "  /* looks like a block comment but is raw-string text
+",
+            ")delim@@;
+",
+            "int after_delim = 2;
+",
+        )
+        .replace("@@", "\"");
+        let visible = scan_visible(&src);
+        assert!(visible.last().unwrap().contains("after_delim"), "{visible:?}");
+    }
+
+    #[test]
+    fn scanner_ignores_a_closing_delimiter_that_does_not_match() {
+        // `)other"` must NOT close an `R"delim(` raw string.
+        let src = concat!(
+            "auto s = R@@delim(
+",
+            ")other@@
+",
+            "  /* only a comment if the raw string wrongly closed above
+",
+            ")delim@@;
+",
+            "int after_mismatch = 3;
+",
+        )
+        .replace("@@", "\"");
+        let visible = scan_visible(&src);
+        assert!(visible.last().unwrap().contains("after_mismatch"), "{visible:?}");
+    }
+
+    #[test]
+    fn scanner_carries_a_backslash_continued_string() {
+        // A string continued with a trailing backslash keeps running; `/*`
+        // inside it is data.
+        let src = "const char* k = @@abc \\
+  /* still string@@;
+int after_cont = 4;
+"
+            .replace("@@", "\"")
+            .replace("\\", &"\\".to_string());
+        let visible = scan_visible(&src);
+        assert!(visible.last().unwrap().contains("after_cont"), "{visible:?}");
+    }
+
+    #[test]
+    fn scanner_carries_a_backslash_continued_char_literal() {
+        // The `in_quoted = Some(b'\'')` path: a character literal continued
+        // with a trailing backslash, holding `/*` on the next physical line.
+        let src = "char c = '\\\n  /* still char';\nint after_char_cont = 5;\n";
+        let visible = scan_visible(src);
+        assert!(
+            visible.last().unwrap().contains("after_char_cont"),
+            "{visible:?}"
+        );
+    }
+
+    #[test]
+    fn scanner_does_not_treat_identifier_ending_in_encoded_r_as_a_raw_string() {
+        // Maximal munch lexes `nameLR"..."` as the identifier `nameLR`
+        // followed by an ordinary string, so `(` here is not a raw-string
+        // body opener and `/*` on the next line is a real comment.
+        for prefix in ["LR", "uR", "UR", "u8R"] {
+            let src = format!(
+                "int nameA = 1; const char* nameB{prefix}\"(x)\";\n/* real */ int after = 2;\n"
+            );
+            let visible = scan_visible(&src);
+            assert!(
+                visible[1].contains("int after = 2;"),
+                "prefix {prefix}: {visible:?}"
+            );
+            assert!(!visible[1].contains("real"), "prefix {prefix}: {visible:?}");
+        }
+    }
+
+    #[test]
+    fn scanner_accepts_a_quote_in_the_raw_string_delimiter() {
+        // `R"""(body)"""` is well formed: the delimiter is `""`. The `/*` in
+        // the body is data, so the code after the literal must stay visible.
+        let src = "const char* k = R\"\"\"(/* not a comment)\"\"\"; int after_quoted_delim = 6;\n";
+        let visible = scan_visible(src);
+        assert!(
+            visible[0].contains("int after_quoted_delim = 6;"),
+            "{visible:?}"
+        );
+    }
+
+    #[test]
+    fn scanner_rejects_a_delimiter_holding_a_space() {
+        // A space is not a d-char, so this is not a raw string and the block
+        // comment that follows is real.
+        let visible = scan_visible("auto s = R\"bad delim(x)\"; /* g */ int after_bad = 7;\n");
+        assert!(visible[0].contains("int after_bad = 7;"), "{visible:?}");
+        assert!(!visible[0].contains(" g "), "{visible:?}");
+    }
+
+    #[test]
+    fn line_comment_split_ignores_slashes_inside_a_raw_string() {
+        // `R"(//)"` is data, not a comment introducer; the code after it must
+        // survive for LoggingInIramChecker and every other split_line_comment
+        // caller.
+        let line = r#"const char* k = R"(//)"; FL_IRAM void f();"#;
+        let code = split_line_comment(line);
+        assert!(code.contains("FL_IRAM void f();"), "{code:?}");
+    }
+
+    #[test]
+    fn line_comment_split_ignores_slashes_inside_a_plain_string() {
+        let line = r#"const char* url = "https://example.com"; int after = 1;"#;
+        let code = split_line_comment(line);
+        assert!(code.contains("int after = 1;"), "{code:?}");
+    }
+
+    #[test]
+    fn line_comment_split_still_cuts_a_real_trailing_comment() {
+        let code = split_line_comment("int a = 1; // FL_IRAM void f();");
+        assert_eq!(code.trim(), "int a = 1;");
+    }
+
+    #[test]
+    fn scanner_still_strips_real_block_comments_across_lines() {
+        let src = "int a = 1; /* open
+hidden line
+*/ int b = 2;
+";
+        let visible = scan_visible(src);
+        assert!(visible[0].contains("int a = 1;"));
+        assert!(!visible[1].contains("hidden"), "{visible:?}");
+        assert!(visible[2].contains("int b = 2;"), "{visible:?}");
+    }
+
+    #[test]
+    fn scanner_does_not_open_a_block_comment_inside_a_line_comment() {
+        // This helper intentionally leaves `//` text in its output -- callers
+        // use split_line_comment for that. What it must do is stop *scanning*
+        // at `//`, so a `/*` there cannot swallow the following lines.
+        let visible = scan_visible("int a = 1; // /* not a real open
+int b = 2;
+");
+        assert!(visible[1].contains("int b = 2;"), "{visible:?}");
+    }
+
+    #[test]
+    fn scanner_keeps_char_literals_intact() {
+        let visible = scan_visible("char c = 'x'; /* g */ int d = 2;
+");
+        assert!(visible[0].contains("char c = 'x';"), "{visible:?}");
+        assert!(visible[0].contains("int d = 2;"), "{visible:?}");
+        assert!(!visible[0].contains(" g "), "{visible:?}");
+    }
+
+    #[test]
+    fn scanner_does_not_treat_identifier_r_as_a_raw_string() {
+        // `MYR"..."` is an ordinary string, not a raw string.
+        let src = "auto s = MYR@@plain@@; /* c */ int after_ident = 5;
+".replace("@@", "\"");
+        let visible = scan_visible(&src);
+        assert!(visible[0].contains("after_ident"), "{visible:?}");
+    }
+

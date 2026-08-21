@@ -201,7 +201,7 @@ impl FileContentChecker for RelativeIncludeChecker {
         }
 
         let mut violations = Vec::new();
-        let mut in_block_comment = false;
+        let mut in_block_comment = CommentScanState::default();
         for (index, line) in file_content.lines.iter().enumerate() {
             let visible_line = strip_block_comments_from_line(line, &mut in_block_comment);
             if regex_relative_include().is_match(&visible_line)
@@ -236,7 +236,7 @@ impl FileContentChecker for FastLEDHeaderUsageChecker {
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
         let mut violations = Vec::new();
-        let mut in_block_comment = false;
+        let mut in_block_comment = CommentScanState::default();
         let visible_lines: Vec<String> = file_content
             .lines
             .iter()

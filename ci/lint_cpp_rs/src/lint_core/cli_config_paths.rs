@@ -250,22 +250,191 @@ fn is_excluded_file(path: &str) -> bool {
         .any(|excluded| path.ends_with(excluded))
 }
 
-fn split_line_comment(line: &str) -> &str {
-    line.split("//").next().unwrap_or(line)
+/// Byte index of the first `//` on `line` that is not inside a literal.
+///
+/// `line` has already had block comments removed, so only string, character
+/// and raw-string literals can hide a `//` here. Scanning them is what keeps
+/// `R"(//)"; FL_IRAM ...` from truncating away the real code that follows
+/// (FastLED#3960).
+fn line_comment_start(line: &str) -> Option<usize> {
+    let bytes = line.as_bytes();
+    let mut cursor = 0;
+
+    while cursor < bytes.len() {
+        if bytes[cursor..].starts_with(b"//") {
+            return Some(cursor);
+        }
+        if bytes[cursor] == b'"' && is_raw_string_open(bytes, cursor) {
+            if let Some((delim, body_start)) = raw_string_delimiter(bytes, cursor) {
+                let close = format!("){delim}\"");
+                cursor = match find_subslice(&bytes[body_start..], close.as_bytes()) {
+                    Some(pos) => body_start + pos + close.len(),
+                    // Unterminated on this line: the rest is literal data.
+                    None => bytes.len(),
+                };
+                continue;
+            }
+            // Malformed delimiter: not a raw string after all, so fall
+            // through and read it as an ordinary string literal.
+        }
+        if bytes[cursor] == b'"'
+            || (bytes[cursor] == b'\'' && !is_digit_separator_quote(bytes, cursor))
+        {
+            cursor = scan_quoted(bytes, cursor + 1, bytes[cursor]);
+            continue;
+        }
+        cursor += 1;
+    }
+
+    None
 }
 
-fn strip_block_comments_from_line(line: &str, in_block_comment: &mut bool) -> String {
+fn split_line_comment(line: &str) -> &str {
+    match line_comment_start(line) {
+        Some(index) => &line[..index],
+        None => line,
+    }
+}
+
+/// Where a physical line begins, for the comment scanner.
+///
+/// A single `bool` cannot express this. A raw string or a
+/// backslash-continued literal carries text across a line boundary, and that
+/// text may contain `/*` or `//` that are data, not comment introducers.
+/// Tracking only `in_block_comment` meant an unterminated `/*` inside such a
+/// literal swallowed every following line of real code, silently hiding
+/// diagnostics from every checker that funnels through this helper
+/// (FastLED#3960).
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+struct CommentScanState {
+    /// Inside `/* ... */`.
+    in_block_comment: bool,
+    /// Inside `R"delim( ... )delim"`, holding `delim`.
+    in_raw_string: Option<String>,
+    /// Inside a `"` or `'` literal continued by a trailing backslash.
+    in_quoted: Option<u8>,
+}
+
+fn find_subslice(haystack: &[u8], needle: &[u8]) -> Option<usize> {
+    if needle.is_empty() || haystack.len() < needle.len() {
+        return None;
+    }
+    haystack.windows(needle.len()).position(|window| window == needle)
+}
+
+/// Scan for the unescaped `quote` that closes a literal, starting at `from`.
+///
+/// Returns the index just past the closing quote, or `bytes.len()` when the
+/// literal does not close on this line.
+fn scan_quoted(bytes: &[u8], from: usize, quote: u8) -> usize {
+    let mut cursor = from;
+    while cursor < bytes.len() {
+        if bytes[cursor] == b'\\' {
+            cursor = (cursor + 2).min(bytes.len());
+        } else if bytes[cursor] == quote {
+            return cursor + 1;
+        } else {
+            cursor += 1;
+        }
+    }
+    bytes.len()
+}
+
+/// True when the `"` at `quote_pos` opens a raw string.
+///
+/// Only `R`, `LR`, `uR`, `UR` and `u8R` introduce one, and the whole prefix
+/// must start at a non-identifier character: maximal munch lexes
+/// `nameLR"..."` as the identifier `nameLR` followed by an ordinary string,
+/// not as a raw string.
+fn is_raw_string_open(bytes: &[u8], quote_pos: usize) -> bool {
+    if quote_pos == 0 || bytes[quote_pos - 1] != b'R' {
+        return false;
+    }
+
+    // Longest encoding prefix that can sit in front of the `R`.
+    let prefix_len = if quote_pos >= 3 && &bytes[quote_pos - 3..quote_pos] == b"u8R" {
+        3
+    } else if quote_pos >= 2 && matches!(bytes[quote_pos - 2], b'L' | b'u' | b'U') {
+        2
+    } else {
+        1
+    };
+
+    match quote_pos.checked_sub(prefix_len + 1).map(|index| bytes[index]) {
+        // The prefix starts the line.
+        None => true,
+        Some(byte) => !is_ascii_identifier_byte(byte),
+    }
+}
+
+fn is_ascii_identifier_byte(byte: u8) -> bool {
+    byte.is_ascii_alphanumeric() || byte == b'_'
+}
+
+/// True for a character the standard allows in a raw-string delimiter.
+///
+/// [lex.string] admits any basic-source character except space, `(`, `)`,
+/// `\` and the control characters. `"` *is* admitted, so `R"""(body)"""` is a
+/// well-formed raw string with the two-character delimiter `""`. `$`, `@` and
+/// backtick are not basic-source characters.
+fn is_raw_delimiter_byte(byte: u8) -> bool {
+    byte.is_ascii_graphic() && !matches!(byte, b'(' | b')' | b'\\' | b'$' | b'@' | b'`')
+}
+
+/// Read the delimiter of the raw string whose `"` sits at `quote_pos`.
+///
+/// Returns the delimiter and the index just past the opening `(`.
+fn raw_string_delimiter(bytes: &[u8], quote_pos: usize) -> Option<(String, usize)> {
+    let mut cursor = quote_pos + 1;
+    let mut delim = String::new();
+    while cursor < bytes.len() {
+        match bytes[cursor] {
+            b'(' => return Some((delim, cursor + 1)),
+            // The standard caps the delimiter at 16 characters; anything
+            // outside the d-char set means this was not a raw string.
+            byte if is_raw_delimiter_byte(byte) && delim.len() < 16 => {
+                delim.push(byte as char);
+                cursor += 1;
+            }
+            _ => return None,
+        }
+    }
+    None
+}
+
+fn strip_block_comments_from_line(line: &str, state: &mut CommentScanState) -> String {
     let bytes = line.as_bytes();
     let mut visible = String::with_capacity(line.len());
     let mut cursor = 0;
     let mut visible_start = 0;
 
+    // Finish a literal carried over from the previous physical line before
+    // looking for any comment introducer: everything up to its terminator is
+    // literal data.
+    if let Some(delim) = state.in_raw_string.clone() {
+        let close = format!("){delim}\"");
+        match find_subslice(bytes, close.as_bytes()) {
+            Some(pos) => {
+                state.in_raw_string = None;
+                cursor = pos + close.len();
+            }
+            None => return line.to_string(),
+        }
+    } else if let Some(quote) = state.in_quoted {
+        let end = scan_quoted(bytes, 0, quote);
+        if end == bytes.len() && bytes.last() == Some(&b'\\') {
+            return line.to_string();
+        }
+        state.in_quoted = None;
+        cursor = end;
+    }
+
     while cursor < bytes.len() {
-        if *in_block_comment {
+        if state.in_block_comment {
             if bytes[cursor..].starts_with(b"*/") {
                 cursor += 2;
                 visible_start = cursor;
-                *in_block_comment = false;
+                state.in_block_comment = false;
             } else {
                 cursor += 1;
             }
@@ -279,36 +448,51 @@ fn strip_block_comments_from_line(line: &str, in_block_comment: &mut bool) -> St
         if bytes[cursor..].starts_with(b"/*") {
             visible.push_str(&line[visible_start..cursor]);
             cursor += 2;
-            *in_block_comment = true;
+            state.in_block_comment = true;
             continue;
+        }
+        if bytes[cursor] == b'"' && is_raw_string_open(bytes, cursor) {
+            let raw_start = cursor;
+            match raw_string_delimiter(bytes, cursor) {
+                Some((delim, body_start)) => {
+                    let close = format!("){delim}\"");
+                    match find_subslice(&bytes[body_start..], close.as_bytes()) {
+                        Some(pos) => cursor = body_start + pos + close.len(),
+                        None => {
+                            // Runs on to the next line; nothing after this is
+                            // code on this line.
+                            state.in_raw_string = Some(delim);
+                            cursor = bytes.len();
+                        }
+                    }
+                }
+                // Malformed delimiter: not a raw string after all, so fall
+                // through and read it as an ordinary string literal.
+                None => {}
+            }
+            if cursor != raw_start {
+                continue;
+            }
         }
         if bytes[cursor] == b'"'
             || (bytes[cursor] == b'\'' && !is_digit_separator_quote(bytes, cursor))
         {
-            cursor = quoted_literal_end(bytes, cursor, bytes[cursor]);
+            let quote = bytes[cursor];
+            let end = scan_quoted(bytes, cursor + 1, quote);
+            if end == bytes.len() && bytes.last() == Some(&b'\\') {
+                // Backslash-continued literal: the rest is on the next line.
+                state.in_quoted = Some(quote);
+            }
+            cursor = end;
             continue;
         }
         cursor += 1;
     }
 
-    if !*in_block_comment {
+    if !state.in_block_comment {
         visible.push_str(&line[visible_start..]);
     }
     visible
-}
-
-fn quoted_literal_end(bytes: &[u8], start: usize, quote: u8) -> usize {
-    let mut cursor = start + 1;
-    while cursor < bytes.len() {
-        if bytes[cursor] == b'\\' {
-            cursor = (cursor + 2).min(bytes.len());
-        } else if bytes[cursor] == quote {
-            return cursor + 1;
-        } else {
-            cursor += 1;
-        }
-    }
-    bytes.len()
 }
 
 fn is_digit_separator_quote(bytes: &[u8], cursor: usize) -> bool {

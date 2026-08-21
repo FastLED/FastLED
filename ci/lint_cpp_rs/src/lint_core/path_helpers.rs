@@ -198,7 +198,7 @@ fn strip_inline_block_comments(line: &str) -> String {
 }
 
 fn strip_comments_preserving_lines(lines: &[String]) -> String {
-    let mut in_block_comment = false;
+    let mut in_block_comment = CommentScanState::default();
     lines
         .iter()
         .map(|line| {
