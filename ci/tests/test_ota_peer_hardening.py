@@ -119,18 +119,19 @@ class TestServeOtaArtifactFraming(unittest.TestCase):
     contract that the host-side proof in ota.py depends on.
     """
 
-    def test_served_counter_increments_after_the_transfer(self) -> None:
+    @staticmethod
+    def _body() -> str:
         source = OTA_IMPL.read_text(encoding="utf-8")
         start = source.index("static esp_err_t serveOtaArtifact(")
-        body = source[start : source.index("\n}", start)]
+        # The handler's closing brace is the first one at column 0.
+        end = source.index("\n}", start)
+        return source[start:end]
 
+    def test_served_counter_increments_after_the_transfer(self) -> None:
+        body = self._body()
         open_at = body.index("LittleFS.open")
         bump_at = body.index("++getOtaArtifactState().served_requests")
-        self.assertGreater(
-            bump_at,
-            open_at,
-            "a 404 must not count as a served request",
-        )
+        self.assertGreater(bump_at, open_at, "a 404 must not count as a served request")
         terminator_at = body.rindex("httpd_resp_send_chunk(request, nullptr, 0)")
         self.assertGreater(
             bump_at,
@@ -138,19 +139,30 @@ class TestServeOtaArtifactFraming(unittest.TestCase):
             "the counter must bump only after the final chunk is accepted",
         )
 
-    def test_chunked_response_carries_no_content_length(self) -> None:
-        source = OTA_IMPL.read_text(encoding="utf-8")
-        start = source.index("static esp_err_t serveOtaArtifact(")
-        body = source[start : source.index("\n}", start)]
+    def test_response_reports_content_length_for_the_ota_client(self) -> None:
+        """The pinned arduino-pico HTTPUpdate requires Content-Length.
 
+        HTTPClient::_size starts at -1 and is only assigned from a
+        Content-Length header; HTTPUpdate fails with
+        HTTP_UE_SERVER_NOT_REPORT_SIZE unless that size is > 0. Dropping the
+        header would make every peer OTA fail, so it must stay even though
+        the body streams out chunked.
+        """
+        body = self._body()
         self.assertIn("httpd_resp_send_chunk", body)
-        # Look for the header call itself — prose mentioning Content-Length
-        # in a comment is fine, emitting the header is not.
-        self.assertNotIn(
-            'httpd_resp_set_hdr(request, "Content-Length"',
-            body,
-            "chunked transfer-encoding and Content-Length are conflicting framings",
-        )
+        self.assertIn('httpd_resp_set_hdr(request, "Content-Length"', body)
+
+    def test_failed_send_does_not_terminate_the_body(self) -> None:
+        """A zero-length chunk means 'body ended normally'.
+
+        Emitting one after a failed read would present a half-written image
+        as a complete one.
+        """
+        body = self._body()
+        failure_branch = body[
+            body.index("if (read == 0") : body.index("return ESP_FAIL;")
+        ]
+        self.assertNotIn("httpd_resp_send_chunk(request, nullptr, 0)", failure_branch)
 
 
 class TestRpcPortValidation(unittest.TestCase):
@@ -159,24 +171,32 @@ class TestRpcPortValidation(unittest.TestCase):
         self.assertIn("fl/net/port.h", source)
         # Both call sites must go through the checked parser rather than
         # narrowing directly.
-        self.assertEqual(source.count("fl::net::tryParsePort"), 2)
+        # At least the two OTA/net RPCs; a future third call site is fine.
+        self.assertGreaterEqual(source.count("fl::net::tryParsePort"), 2)
         self.assertNotIn("static_cast<uint16_t>(port)", source)
         self.assertNotIn("static_cast<uint16_t>(port_val.as_int().value())", source)
 
 
 class TestOtaWatchdogHandling(unittest.TestCase):
-    def test_blocking_update_widens_and_restores_the_window(self) -> None:
+    def test_blocking_update_halts_and_rearms_the_watchdog(self) -> None:
+        """begin() clamps to ~16.8 s on RP2350, so a longer timeout is a no-op.
+
+        The counter has to be halted across the download and re-armed after.
+        """
         source = OTA_IMPL.read_text(encoding="utf-8")
         start = source.index("void pollOtaArtifactUpdate(uint32_t watchdog_restore_ms)")
         body = source[start : source.index("\n}", start)]
+        # Collapse whitespace so clang-format line wrapping cannot break these.
+        flat = " ".join(body.split())
 
-        widen_at = body.index("wdt.begin(kOtaUpdateWatchdogTimeoutMs)")
-        # The call, not the comment that explains why it is wrapped.
-        update_at = body.index("result = updater.update(")
-        restore_at = body.index("wdt.begin(watchdog_restore_ms)")
+        disable_at = flat.index("wdt.disable();")
+        update_at = flat.index("result = updater.update(")
+        rearm_at = flat.index("wdt.begin(watchdog_restore_ms);")
 
-        self.assertLess(widen_at, update_at, "widen before the blocking download")
-        self.assertLess(update_at, restore_at, "restore after it returns")
+        self.assertLess(disable_at, update_at, "halt before the blocking download")
+        self.assertLess(update_at, rearm_at, "re-arm after it returns")
+        # Requesting a long timeout instead would be silently clamped.
+        self.assertNotIn("kOtaUpdateWatchdogTimeoutMs", flat)
 
 
 if __name__ == "__main__":
