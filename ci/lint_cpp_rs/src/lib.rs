@@ -3,6 +3,7 @@ include!("lint_core/prelude_constants.rs");
 include!("lint_core/banned_header_data.rs");
 include!("lint_core/warn_only.rs");
 include!("lint_core/processor_registry_cli.rs");
+include!("lint_core/cli_config_paths.rs");
 include!("lint_core/regexes.rs");
 include!("lint_core/path_helpers.rs");
 include!("lint_core/analysis_helpers.rs");
