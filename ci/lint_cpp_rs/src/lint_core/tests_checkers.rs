@@ -627,6 +627,45 @@ int after_cont = 4;
     }
 
     #[test]
+    fn scanner_does_not_treat_identifier_ending_in_encoded_r_as_a_raw_string() {
+        // Maximal munch lexes `nameLR"..."` as the identifier `nameLR`
+        // followed by an ordinary string, so `(` here is not a raw-string
+        // body opener and `/*` on the next line is a real comment.
+        for prefix in ["LR", "uR", "UR", "u8R"] {
+            let src = format!(
+                "int nameA = 1; const char* nameB{prefix}\"(x)\";\n/* real */ int after = 2;\n"
+            );
+            let visible = scan_visible(&src);
+            assert!(
+                visible[1].contains("int after = 2;"),
+                "prefix {prefix}: {visible:?}"
+            );
+            assert!(!visible[1].contains("real"), "prefix {prefix}: {visible:?}");
+        }
+    }
+
+    #[test]
+    fn scanner_accepts_a_quote_in_the_raw_string_delimiter() {
+        // `R"""(body)"""` is well formed: the delimiter is `""`. The `/*` in
+        // the body is data, so the code after the literal must stay visible.
+        let src = "const char* k = R\"\"\"(/* not a comment)\"\"\"; int after_quoted_delim = 6;\n";
+        let visible = scan_visible(src);
+        assert!(
+            visible[0].contains("int after_quoted_delim = 6;"),
+            "{visible:?}"
+        );
+    }
+
+    #[test]
+    fn scanner_rejects_a_delimiter_holding_a_space() {
+        // A space is not a d-char, so this is not a raw string and the block
+        // comment that follows is real.
+        let visible = scan_visible("auto s = R\"bad delim(x)\"; /* g */ int after_bad = 7;\n");
+        assert!(visible[0].contains("int after_bad = 7;"), "{visible:?}");
+        assert!(!visible[0].contains(" g "), "{visible:?}");
+    }
+
+    #[test]
     fn line_comment_split_ignores_slashes_inside_a_raw_string() {
         // `R"(//)"` is data, not a comment introducer; the code after it must
         // survive for LoggingInIramChecker and every other split_line_comment

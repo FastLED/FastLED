@@ -274,8 +274,8 @@ fn line_comment_start(line: &str) -> Option<usize> {
                 };
                 continue;
             }
-            cursor += 1;
-            continue;
+            // Malformed delimiter: not a raw string after all, so fall
+            // through and read it as an ordinary string literal.
         }
         if bytes[cursor] == b'"'
             || (bytes[cursor] == b'\'' && !is_digit_separator_quote(bytes, cursor))
@@ -342,18 +342,43 @@ fn scan_quoted(bytes: &[u8], from: usize, quote: u8) -> usize {
 
 /// True when the `"` at `quote_pos` opens a raw string.
 ///
-/// Only `R`, `LR`, `uR`, `UR` and `u8R` introduce one; a `"` after any other
-/// identifier character ending in `R` is an ordinary string.
+/// Only `R`, `LR`, `uR`, `UR` and `u8R` introduce one, and the whole prefix
+/// must start at a non-identifier character: maximal munch lexes
+/// `nameLR"..."` as the identifier `nameLR` followed by an ordinary string,
+/// not as a raw string.
 fn is_raw_string_open(bytes: &[u8], quote_pos: usize) -> bool {
     if quote_pos == 0 || bytes[quote_pos - 1] != b'R' {
         return false;
     }
-    match quote_pos.checked_sub(2).map(|index| bytes[index]) {
+
+    // Longest encoding prefix that can sit in front of the `R`.
+    let prefix_len = if quote_pos >= 3 && &bytes[quote_pos - 3..quote_pos] == b"u8R" {
+        3
+    } else if quote_pos >= 2 && matches!(bytes[quote_pos - 2], b'L' | b'u' | b'U') {
+        2
+    } else {
+        1
+    };
+
+    match quote_pos.checked_sub(prefix_len + 1).map(|index| bytes[index]) {
+        // The prefix starts the line.
         None => true,
-        Some(b'L') | Some(b'u') | Some(b'U') => true,
-        Some(b'8') => quote_pos >= 3 && bytes[quote_pos - 3] == b'u',
-        Some(byte) => !(byte.is_ascii_alphanumeric() || byte == b'_'),
+        Some(byte) => !is_ascii_identifier_byte(byte),
     }
+}
+
+fn is_ascii_identifier_byte(byte: u8) -> bool {
+    byte.is_ascii_alphanumeric() || byte == b'_'
+}
+
+/// True for a character the standard allows in a raw-string delimiter.
+///
+/// [lex.string] admits any basic-source character except space, `(`, `)`,
+/// `\` and the control characters. `"` *is* admitted, so `R"""(body)"""` is a
+/// well-formed raw string with the two-character delimiter `""`. `$`, `@` and
+/// backtick are not basic-source characters.
+fn is_raw_delimiter_byte(byte: u8) -> bool {
+    byte.is_ascii_graphic() && !matches!(byte, b'(' | b')' | b'\\' | b'$' | b'@' | b'`')
 }
 
 /// Read the delimiter of the raw string whose `"` sits at `quote_pos`.
@@ -365,10 +390,9 @@ fn raw_string_delimiter(bytes: &[u8], quote_pos: usize) -> Option<(String, usize
     while cursor < bytes.len() {
         match bytes[cursor] {
             b'(' => return Some((delim, cursor + 1)),
-            // The standard caps delimiters at 16 characters and excludes
-            // these; anything else here is not a raw string after all.
-            b')' | b'\\' | b'"' => return None,
-            byte if delim.len() < 16 => {
+            // The standard caps the delimiter at 16 characters; anything
+            // outside the d-char set means this was not a raw string.
+            byte if is_raw_delimiter_byte(byte) && delim.len() < 16 => {
                 delim.push(byte as char);
                 cursor += 1;
             }
@@ -428,6 +452,7 @@ fn strip_block_comments_from_line(line: &str, state: &mut CommentScanState) -> S
             continue;
         }
         if bytes[cursor] == b'"' && is_raw_string_open(bytes, cursor) {
+            let raw_start = cursor;
             match raw_string_delimiter(bytes, cursor) {
                 Some((delim, body_start)) => {
                     let close = format!("){delim}\"");
@@ -441,9 +466,13 @@ fn strip_block_comments_from_line(line: &str, state: &mut CommentScanState) -> S
                         }
                     }
                 }
-                None => cursor += 1,
+                // Malformed delimiter: not a raw string after all, so fall
+                // through and read it as an ordinary string literal.
+                None => {}
             }
-            continue;
+            if cursor != raw_start {
+                continue;
+            }
         }
         if bytes[cursor] == b'"'
             || (bytes[cursor] == b'\'' && !is_digit_separator_quote(bytes, cursor))
