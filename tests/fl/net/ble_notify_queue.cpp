@@ -125,6 +125,40 @@ FL_TEST_CASE("ble notify queue: empty and degenerate pushes are rejected") {
     FL_CHECK_EQ(queue.remaining(), size_t(0));
 }
 
+FL_TEST_CASE("ble notify queue: dropFront skips an undeliverable payload") {
+    // A payload the peer keeps refusing must not block the ones behind it.
+    BleNotifyQueue queue;
+    pushString(queue, fl::string("stuck"));
+    pushString(queue, fl::string("next"));
+
+    queue.advance(2); // partway through "stuck" before it starts failing
+    queue.dropFront();
+
+    FL_CHECK_EQ(queue.depth(), size_t(1));
+    // The survivor must start from offset zero, not inherit the dropped
+    // payload's progress.
+    FL_CHECK_EQ(drain(queue, 64), fl::string("next"));
+}
+
+FL_TEST_CASE("ble notify queue: dropFront on an empty queue is a no-op") {
+    BleNotifyQueue queue;
+    queue.dropFront();
+    FL_CHECK(queue.empty());
+    pushString(queue, fl::string("ok"));
+    FL_CHECK_EQ(drain(queue, 64), fl::string("ok"));
+}
+
+FL_TEST_CASE("ble notify queue: slots are reused across many cycles") {
+    // Exercises the ring wrap: far more payloads than there are slots.
+    BleNotifyQueue queue;
+    for (int i = 0; i < 20; ++i) {
+        pushString(queue, fl::string("payload"));
+        FL_CHECK_EQ(queue.depth(), size_t(1));
+        FL_CHECK_EQ(drain(queue, 3), fl::string("payload"));
+        FL_CHECK(queue.empty());
+    }
+}
+
 FL_TEST_CASE("ble notify queue: clear drops in-flight state on disconnect") {
     BleNotifyQueue queue;
     pushString(queue, fl::string("first"));

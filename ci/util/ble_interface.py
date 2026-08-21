@@ -1,20 +1,21 @@
-"""BLE serial interface adapter for FastLED validation.
+"""BLE GATT interface adapter for FastLED validation.
 
-Implements the SerialInterface protocol using Bleak (cross-platform BLE GATT client).
-This allows RpcClient to communicate over BLE using the same interface as serial.
+Wraps Bleak (cross-platform BLE GATT client) for talking to the device's
+JSON-RPC service.
 
-Usage:
-    iface = BleInterface(device_name="FastLED-C6")
-    await iface.connect()
-    await iface.write('{"jsonrpc":"2.0","method":"ping","id":1}\\n')
-    async for line in iface.read_lines(timeout=10.0):
-        print(line)
-    await iface.close()
+Note this is NOT interchangeable with SerialInterface for RpcClient:
+``read_lines`` yields raw ATT notification fragments, not whole lines. One
+response can span several fragments and one fragment can hold several
+responses, so a consumer doing ``line.startswith(prefix)`` per item will
+misparse. Feed the fragments through
+``ci.util.ble_notify_assembler.BleNotificationAssembler`` instead — see
+FastLED#3955.
 """
 
 from __future__ import annotations
 
 import asyncio
+import codecs
 from collections.abc import AsyncIterator
 
 from bleak import BleakClient, BleakGATTCharacteristic, BleakScanner
@@ -42,6 +43,10 @@ class BleInterface:
         self._scan_timeout = scan_timeout
         self._client: BleakClient | None = None
         self._rx_queue: asyncio.Queue[str] = asyncio.Queue()
+        # A multi-byte UTF-8 sequence can straddle two notifications. An
+        # incremental decoder holds the partial sequence until the rest
+        # arrives instead of emitting U+FFFD on both sides of the split.
+        self._decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
 
     def _notification_handler(
         self, _sender: BleakGATTCharacteristic, data: bytearray
@@ -54,7 +59,7 @@ class BleInterface:
         reassembled JSON (FastLED#3955). Consumers trim at message
         boundaries instead — see ci/util/ble_notify_assembler.py.
         """
-        text = data.decode("utf-8", errors="replace")
+        text = self._decoder.decode(bytes(data))
         if text:
             self._rx_queue.put_nowait(text)
 
@@ -76,6 +81,7 @@ class BleInterface:
         print(f"  [BLE] Connected to {device.address}")
 
         # Subscribe to NOTIFY on TX characteristic
+        self._decoder.reset()
         await client.start_notify(BLE_CHAR_TX_UUID, self._notification_handler)
         print(f"  [BLE] Subscribed to TX notifications")
 

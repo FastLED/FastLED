@@ -44,6 +44,8 @@ struct TransportState {
     // second one was produced mid-transfer (FastLED#3955).
     BleNotifyQueue notifications;
     bool notification_scheduled = false;
+    // Consecutive att_server_notify() failures for the in-flight payload.
+    u8 notify_failures = 0;
 };
 
 struct RpBleRuntime {
@@ -57,6 +59,9 @@ struct RpBleRuntime {
 RpBleRuntime& rpBleRuntime() FL_NO_EXCEPT {
     return fl::Singleton<RpBleRuntime>::instance();
 }
+
+// Attempts to deliver one payload before it is dropped as undeliverable.
+static constexpr u8 kMaxNotifyRetries = 5;
 
 static void onNotificationReady(void* context);
 
@@ -105,14 +110,27 @@ static void onNotificationReady(void* context) {
         state->connection, state->tx_handle,
         state->notifications.chunkData(), static_cast<u16>(chunk_size));
     if (result != ERROR_CODE_SUCCESS) {
-        FL_WARN_F("[BLE RP] notify failed: %u", static_cast<unsigned>(result));
-        // Leave the chunk queued and ask for another send window, or the
-        // rest of this response would never leave the device.
+        // Retry a bounded number of times: a transient refusal (ACL
+        // buffers full) clears on the next send window, but a permanent
+        // one (peer never enabled the CCC, bad handle) would otherwise
+        // spin request -> can-send-now -> fail forever, flooding the log
+        // and never draining. Warn once per payload, then drop it so the
+        // queue keeps moving.
+        if (state->notify_failures == 0) {
+            FL_WARN_F("[BLE RP] notify failed: %u", static_cast<unsigned>(result));
+        }
+        if (++state->notify_failures >= kMaxNotifyRetries) {
+            FL_WARN_F("[BLE RP] dropping undeliverable response after %u attempts",
+                      static_cast<unsigned>(kMaxNotifyRetries));
+            state->notify_failures = 0;
+            state->notifications.dropFront();
+        }
         scheduleNotification(state);
         return;
     }
 
     // Only now may the queue advance to the next response.
+    state->notify_failures = 0;
     state->notifications.advance(chunk_size);
     scheduleNotification(state);
 }
@@ -172,6 +190,7 @@ static void onDisconnected(BLEDevice*) { // ok no noexcept
     state->connection = HCI_CON_HANDLE_INVALID;
     state->connected = false;
     state->notifications.clear();
+    state->notify_failures = 0;
     // The BTstack registration dies with the connection, so the pending
     // flags must not survive it: a request that registered just before the
     // drop would otherwise block every send on the next connection.
@@ -271,6 +290,9 @@ getTransportCallbacks(TransportState* state) FL_NO_EXCEPT {
                                        state->last_tx_value.size())) {
             FL_WARN_F("[BLE RP] TX queue full, dropping response (%u bytes)",
                       static_cast<unsigned>(state->last_tx_value.size()));
+            // Still (re-)arm the drain: the queue may have filled because a
+            // previous scheduling attempt failed, and nothing else retries.
+            scheduleNotification(state);
             return;
         }
         scheduleNotification(state);

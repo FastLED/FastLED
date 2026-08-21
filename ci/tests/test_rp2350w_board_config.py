@@ -86,7 +86,9 @@ def test_rp2350w_ble_disconnect_clears_pending_notification_state() -> None:
     source = RP_BLE_IMPL.read_text(encoding="utf-8")
 
     disconnect = source[
-        source.index("static void onDisconnected(") : source.index("TransportState* createTransport(")
+        source.index("static void onDisconnected(") : source.index(
+            "TransportState* createTransport("
+        )
     ]
     assert "notifications.clear()" in disconnect
     assert "notification_scheduled = false" in disconnect

@@ -83,6 +83,34 @@ class TestBleNotificationAssembler(unittest.TestCase):
         self.assertEqual(len(values), 1)
         self.assertEqual(values[0]["result"]["message"], "pong")
 
+    def test_embedded_marker_does_not_truncate_a_valid_message(self) -> None:
+        """A payload may legitimately contain the literal REMOTE: marker.
+
+        Resyncing on any occurrence of it inside the buffer would chop a
+        half-arrived message in two and destroy it.
+        """
+        asm = BleNotificationAssembler()
+        message = REMOTE_PREFIX + json.dumps(
+            {"jsonrpc": "2.0", "id": 5, "result": {"log": "REMOTE: hello"}},
+            separators=(",", ":"),
+        )
+        collected: list[Any] = []
+        for fragment in _chunks(message, 20):
+            collected.extend(asm.push(fragment))
+        self.assertEqual(len(collected), 1)
+        self.assertEqual(collected[0]["result"]["log"], "REMOTE: hello")
+        self.assertEqual(asm.buffered, "")
+
+    def test_new_fragment_boundary_drops_a_stranded_partial(self) -> None:
+        """A response that never completed must not swallow the next one."""
+        asm = BleNotificationAssembler()
+        # First response is cut off mid-flight (device reset, link drop).
+        self.assertEqual(asm.push(REMOTE_PREFIX + '{"id":1,"result":{"mess'), [])
+        # The next fragment starts a fresh message.
+        values = asm.push(_pong(11))
+        self.assertEqual(len(values), 1)
+        self.assertEqual(values[0]["id"], 11)
+
     def test_partial_value_is_held_not_dropped(self) -> None:
         asm = BleNotificationAssembler()
         message = _pong(3)
