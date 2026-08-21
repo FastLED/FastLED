@@ -615,6 +615,41 @@ int after_cont = 4;
     }
 
     #[test]
+    fn scanner_carries_a_backslash_continued_char_literal() {
+        // The `in_quoted = Some(b'\'')` path: a character literal continued
+        // with a trailing backslash, holding `/*` on the next physical line.
+        let src = "char c = '\\\n  /* still char';\nint after_char_cont = 5;\n";
+        let visible = scan_visible(src);
+        assert!(
+            visible.last().unwrap().contains("after_char_cont"),
+            "{visible:?}"
+        );
+    }
+
+    #[test]
+    fn line_comment_split_ignores_slashes_inside_a_raw_string() {
+        // `R"(//)"` is data, not a comment introducer; the code after it must
+        // survive for LoggingInIramChecker and every other split_line_comment
+        // caller.
+        let line = r#"const char* k = R"(//)"; FL_IRAM void f();"#;
+        let code = split_line_comment(line);
+        assert!(code.contains("FL_IRAM void f();"), "{code:?}");
+    }
+
+    #[test]
+    fn line_comment_split_ignores_slashes_inside_a_plain_string() {
+        let line = r#"const char* url = "https://example.com"; int after = 1;"#;
+        let code = split_line_comment(line);
+        assert!(code.contains("int after = 1;"), "{code:?}");
+    }
+
+    #[test]
+    fn line_comment_split_still_cuts_a_real_trailing_comment() {
+        let code = split_line_comment("int a = 1; // FL_IRAM void f();");
+        assert_eq!(code.trim(), "int a = 1;");
+    }
+
+    #[test]
     fn scanner_still_strips_real_block_comments_across_lines() {
         let src = "int a = 1; /* open
 hidden line

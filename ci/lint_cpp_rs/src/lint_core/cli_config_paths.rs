@@ -250,8 +250,50 @@ fn is_excluded_file(path: &str) -> bool {
         .any(|excluded| path.ends_with(excluded))
 }
 
+/// Byte index of the first `//` on `line` that is not inside a literal.
+///
+/// `line` has already had block comments removed, so only string, character
+/// and raw-string literals can hide a `//` here. Scanning them is what keeps
+/// `R"(//)"; FL_IRAM ...` from truncating away the real code that follows
+/// (FastLED#3960).
+fn line_comment_start(line: &str) -> Option<usize> {
+    let bytes = line.as_bytes();
+    let mut cursor = 0;
+
+    while cursor < bytes.len() {
+        if bytes[cursor..].starts_with(b"//") {
+            return Some(cursor);
+        }
+        if bytes[cursor] == b'"' && is_raw_string_open(bytes, cursor) {
+            if let Some((delim, body_start)) = raw_string_delimiter(bytes, cursor) {
+                let close = format!("){delim}\"");
+                cursor = match find_subslice(&bytes[body_start..], close.as_bytes()) {
+                    Some(pos) => body_start + pos + close.len(),
+                    // Unterminated on this line: the rest is literal data.
+                    None => bytes.len(),
+                };
+                continue;
+            }
+            cursor += 1;
+            continue;
+        }
+        if bytes[cursor] == b'"'
+            || (bytes[cursor] == b'\'' && !is_digit_separator_quote(bytes, cursor))
+        {
+            cursor = scan_quoted(bytes, cursor + 1, bytes[cursor]);
+            continue;
+        }
+        cursor += 1;
+    }
+
+    None
+}
+
 fn split_line_comment(line: &str) -> &str {
-    line.split("//").next().unwrap_or(line)
+    match line_comment_start(line) {
+        Some(index) => &line[..index],
+        None => line,
+    }
 }
 
 /// Where a physical line begins, for the comment scanner.
