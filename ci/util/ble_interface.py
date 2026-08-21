@@ -46,8 +46,15 @@ class BleInterface:
     def _notification_handler(
         self, _sender: BleakGATTCharacteristic, data: bytearray
     ) -> None:
-        """Callback invoked by Bleak when device sends a NOTIFY on TX char."""
-        text = data.decode("utf-8", errors="replace").strip()
+        """Callback invoked by Bleak when device sends a NOTIFY on TX char.
+
+        The value is queued verbatim. A response longer than ATT_MTU - 3
+        arrives as several notifications, so stripping each one would drop
+        whitespace that falls on a chunk boundary and corrupt the
+        reassembled JSON (FastLED#3955). Consumers trim at message
+        boundaries instead — see ci/util/ble_notify_assembler.py.
+        """
+        text = data.decode("utf-8", errors="replace")
         if text:
             self._rx_queue.put_nowait(text)
 
@@ -102,7 +109,9 @@ class BleInterface:
             timeout: Maximum time to wait for lines in seconds.
 
         Yields:
-            Lines from BLE notifications (stripped of whitespace).
+            Raw notification values, in arrival order. These are ATT
+            fragments, not necessarily whole lines: one logical message
+            may span several, and one value may hold several messages.
         """
         deadline = asyncio.get_event_loop().time() + timeout
         while True:

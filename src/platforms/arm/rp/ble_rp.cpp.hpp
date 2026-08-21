@@ -11,6 +11,7 @@
 #if FL_BLE_AVAILABLE && defined(FL_IS_RP2350)
 
 #include "fl/log/log.h"
+#include "fl/net/ble_notify_queue.h"
 #include "fl/remote/transport/serial.h"
 #include "fl/stl/cctype.h"
 #include "fl/stl/int.h"
@@ -19,7 +20,6 @@
 #include "fl/stl/string.h"
 #include "fl/stl/string_view.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/stl/vector.h"
 
 // IWYU pragma: begin_keep
 #include <BTstackLib.h>
@@ -39,8 +39,10 @@ struct TransportState {
     hci_con_handle_t connection = HCI_CON_HANDLE_INVALID;
     bool connected = false;
     fl::string last_tx_value;
-    fl::vector<u8> notification_payload;
-    size_t notification_offset = 0;
+    // Completed responses waiting to go out, drained in ATT-MTU chunks.
+    // A single shared buffer here truncated an in-flight response when a
+    // second one was produced mid-transfer (FastLED#3955).
+    BleNotifyQueue notifications;
     bool notification_scheduled = false;
 };
 
@@ -60,7 +62,7 @@ static void onNotificationReady(void* context);
 
 static void scheduleNotification(TransportState* state) {
     if (state == nullptr || rpBleRuntime().active != state || !state->connected ||
-        state->tx_handle == 0 || state->notification_offset >= state->notification_payload.size() ||
+        state->tx_handle == 0 || state->notifications.empty() ||
         state->notification_scheduled) {
         return;
     }
@@ -92,25 +94,26 @@ static void onNotificationReady(void* context) {
         return;
     }
     state->notification_scheduled = false;
-    if (!state->connected || state->tx_handle == 0 ||
-        state->notification_offset >= state->notification_payload.size()) {
+    if (!state->connected || state->tx_handle == 0 || state->notifications.empty()) {
         return;
     }
 
     const u16 mtu = att_server_get_mtu(state->connection);
     const size_t max_payload = mtu > 3 ? static_cast<size_t>(mtu - 3) : 20;
-    const size_t remaining = state->notification_payload.size() - state->notification_offset;
-    const size_t chunk_size = remaining < max_payload ? remaining : max_payload;
+    const size_t chunk_size = state->notifications.chunkSize(max_payload);
     const u8 result = att_server_notify(
         state->connection, state->tx_handle,
-        state->notification_payload.data() + state->notification_offset,
-        static_cast<u16>(chunk_size));
+        state->notifications.chunkData(), static_cast<u16>(chunk_size));
     if (result != ERROR_CODE_SUCCESS) {
         FL_WARN_F("[BLE RP] notify failed: %u", static_cast<unsigned>(result));
+        // Leave the chunk queued and ask for another send window, or the
+        // rest of this response would never leave the device.
+        scheduleNotification(state);
         return;
     }
 
-    state->notification_offset += chunk_size;
+    // Only now may the queue advance to the next response.
+    state->notifications.advance(chunk_size);
     scheduleNotification(state);
 }
 
@@ -168,8 +171,12 @@ static void onDisconnected(BLEDevice*) { // ok no noexcept
     }
     state->connection = HCI_CON_HANDLE_INVALID;
     state->connected = false;
-    state->notification_payload.clear();
-    state->notification_offset = 0;
+    state->notifications.clear();
+    // The BTstack registration dies with the connection, so the pending
+    // flags must not survive it: a request that registered just before the
+    // drop would otherwise block every send on the next connection.
+    state->notification_scheduled = false;
+    rpBleRuntime().notification_callback_pending = false;
 }
 
 TransportState* createTransport(const char* device_name) FL_NO_EXCEPT {
@@ -209,6 +216,7 @@ void destroyTransport(TransportState* state) FL_NO_EXCEPT {
         runtime.active = nullptr;
         // A pending callback receives null and returns before state is deleted.
         runtime.notification_callback.context = nullptr;
+        runtime.notification_callback_pending = false;
     }
     fl::unique_ptr<TransportState> holder(state);
 }
@@ -259,12 +267,12 @@ getTransportCallbacks(TransportState* state) FL_NO_EXCEPT {
         if (!state->connected || state->tx_handle == 0) {
             return;
         }
-        state->notification_payload.clear();
-        state->notification_payload.reserve(state->last_tx_value.size());
-        for (char value : state->last_tx_value) {
-            state->notification_payload.push_back(static_cast<u8>(value));
+        if (!state->notifications.push(state->last_tx_value.c_str(),
+                                       state->last_tx_value.size())) {
+            FL_WARN_F("[BLE RP] TX queue full, dropping response (%u bytes)",
+                      static_cast<unsigned>(state->last_tx_value.size()));
+            return;
         }
-        state->notification_offset = 0;
         scheduleNotification(state);
     };
 
