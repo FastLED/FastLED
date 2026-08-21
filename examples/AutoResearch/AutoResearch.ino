@@ -607,7 +607,7 @@ void loop() {
     pollNetServer();
     // A peer OTA request is queued by JSON-RPC, then executed from loop after
     // the acceptance response is safely written to USB serial.
-    pollOtaArtifactUpdate();
+    pollOtaArtifactUpdate(AUTORESEARCH_WATCHDOG_TIMEOUT_MS);
 
     // ========================================================================
     // Watchdog autoresearch trigger (FastLED#2731) — when the host RPC sends

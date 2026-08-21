@@ -28,6 +28,24 @@ if TYPE_CHECKING:
     from ci.util.serial_interface import SerialInterface
 
 
+def _served_request_count(status: dict[str, Any]) -> int:
+    """Read `servedRequests` from an untrusted device status payload.
+
+    `int(status.get("servedRequests", 0))` raised ValueError/TypeError on a
+    non-numeric or null value, and neither is caught by the handler around
+    this flow — so a malformed device reply aborted the run with a traceback
+    instead of the normal failure message (FastLED#3956).
+
+    A value that is not a plain non-negative integer counts as zero served
+    requests, which surfaces as the ordinary "did not serve" RuntimeError.
+    """
+    value = status.get("servedRequests", 0)
+    # bool is an int subclass; True must not read as "1 request served".
+    if isinstance(value, bool) or not isinstance(value, int):
+        return 0
+    return value if value >= 0 else 0
+
+
 async def run_ota_peer_autoresearch(
     upload_port: str,
     peer_upload_port: str,
@@ -112,10 +130,16 @@ async def run_ota_peer_autoresearch(
         artifact_server = await rpc_data(peer, "startOtaArtifactServer")
         host = artifact_server.get("ip")
         port = artifact_server.get("port")
+        # `isinstance(port, int)` alone admits 0, negatives and values past
+        # 65535, which the device would then narrow and silently target a
+        # different endpoint (FastLED#3956). bool is an int subclass, so
+        # exclude it explicitly.
         if (
             not artifact_server.get("success")
             or not isinstance(host, str)
             or not isinstance(port, int)
+            or isinstance(port, bool)
+            or not 1 <= port <= 65535
         ):
             raise RuntimeError(f"C6 artifact server failed: {artifact_server}")
 
@@ -151,7 +175,7 @@ async def run_ota_peer_autoresearch(
         await primary.connect(boot_wait=8.0, drain_boot=True)
         await rpc_data(primary, "ping")
         served = await rpc_data(peer, "otaArtifactStatus")
-        if not served.get("success") or int(served.get("servedRequests", 0)) < 1:
+        if not served.get("success") or _served_request_count(served) < 1:
             raise RuntimeError(f"C6 did not serve the RP2350W artifact: {served}")
         print(f"{Fore.GREEN}OTA PEER AUTORESEARCH PASSED{Style.RESET_ALL}")
         return 0

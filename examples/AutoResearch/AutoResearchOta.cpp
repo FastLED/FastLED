@@ -147,15 +147,14 @@ static bool sha256File(const char* path, char* output, size_t output_capacity) {
 }
 
 static esp_err_t serveOtaArtifact(httpd_req_t* request) {
-    ++getOtaArtifactState().served_requests;
     File file = LittleFS.open("/rp2350.bin", FILE_READ);
     if (!file || file.isDirectory()) {
         return httpd_resp_send_err(request, HTTPD_404_NOT_FOUND, "Artifact unavailable");
     }
     httpd_resp_set_type(request, "application/octet-stream");
-    char length[16];
-    snprintf(length, sizeof(length), "%u", static_cast<unsigned>(file.size()));
-    httpd_resp_set_hdr(request, "Content-Length", length);
+    // No Content-Length here: httpd_resp_send_chunk() emits
+    // `Transfer-Encoding: chunked`, and sending both framings is a protocol
+    // conflict that an OTA client may resolve either way (FastLED#3956).
     uint8_t bytes[512];
     while (file.available()) {
         const size_t read = file.read(bytes, sizeof(bytes));
@@ -163,11 +162,23 @@ static esp_err_t serveOtaArtifact(httpd_req_t* request) {
                                                 reinterpret_cast<const char*>(bytes),
                                                 read) != ESP_OK) {
             file.close();
+            // Terminate the chunked stream so the peer sees a truncated
+            // response rather than a connection that never closes.
+            httpd_resp_send_chunk(request, nullptr, 0);
             return ESP_FAIL;
         }
     }
     file.close();
-    return httpd_resp_send_chunk(request, nullptr, 0);
+    const esp_err_t finished = httpd_resp_send_chunk(request, nullptr, 0);
+    if (finished != ESP_OK) {
+        return finished;
+    }
+    // Count the request only once the whole artifact is on the wire. Bumping
+    // this up front made a 404 or a partial send look like a successful
+    // transfer, and the host asserts `servedRequests >= 1` as proof the
+    // RP2350W actually downloaded the image.
+    ++getOtaArtifactState().served_requests;
+    return ESP_OK;
 }
 
 // ============================================================================
@@ -495,8 +506,16 @@ fl::json otaArtifactStatus() {
 #endif  // FL_IS_ESP32
 
 #if defined(FL_IS_RP2350) && defined(PICO_CYW43_SUPPORTED)
+#include "FastLED.h"       // FastLED.watchdog()
+#include "fl/wdt/watchdog.h"
 #include <HTTPUpdate.h>
 #include <WiFi.h>
+
+// Window held open across the blocking firmware download. A full RP2350W
+// image over a peer AP takes tens of seconds; this is generous enough not to
+// trip on a slow link, while still bounding a hung transfer instead of
+// disabling the watchdog outright (FastLED#3956).
+static constexpr uint32_t kOtaUpdateWatchdogTimeoutMs = 120000;
 
 fl::json queueOtaArtifactUpdate(const char* host, uint16_t port) {
     fl::json response = fl::json::object();
@@ -524,16 +543,32 @@ fl::json queueOtaArtifactUpdate(const char* host, uint16_t port) {
     return response;
 }
 
-void pollOtaArtifactUpdate() {
+void pollOtaArtifactUpdate(uint32_t watchdog_restore_ms) {
     RpOtaUpdateState& state = getRpOtaUpdateState();
     if (!state.pending) {
         return;
     }
     state.pending = false;
+
+    // updater.update() is a synchronous, multi-second firmware download run
+    // straight from loop(). The sketch feeds the watchdog only at the top and
+    // bottom of the loop scope, so a download longer than that window resets
+    // the board mid-flash-write. Widen the window across the call and restore
+    // it after, so the board is still protected once the loop resumes.
+    fl::Watchdog& wdt = FastLED.watchdog();
+    wdt.feed();
+    wdt.begin(kOtaUpdateWatchdogTimeoutMs);
+
     WiFiClient client;
     HTTPUpdate updater;
     const t_httpUpdate_return result = updater.update(client, state.host, state.port,
                                                        "/rp2350.bin");
+
+    // Restore before reporting, so a slow log write cannot run under the
+    // widened window.
+    wdt.begin(watchdog_restore_ms);
+    wdt.feed();
+
     if (result != HTTP_UPDATE_OK) {
         FL_WARN("[OTA] RP2350W artifact update failed: " << updater.getLastErrorString());
     }
@@ -548,7 +583,7 @@ fl::json queueOtaArtifactUpdate(const char* host, uint16_t port) {
     return response;
 }
 
-void pollOtaArtifactUpdate() {}
+void pollOtaArtifactUpdate(uint32_t /*watchdog_restore_ms*/) {}
 
 #endif
 

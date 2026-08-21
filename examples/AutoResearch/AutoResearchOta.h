@@ -51,7 +51,15 @@ fl::json otaArtifactStatus();
 fl::json queueOtaArtifactUpdate(const char* host, uint16_t port);
 
 /// @brief Execute a queued RP2350W update from the sketch loop.
-void pollOtaArtifactUpdate();
+///
+/// The HTTP update blocks for the whole firmware download, which routinely
+/// outruns the sketch's watchdog window. The window is widened for the
+/// duration and restored to @p watchdog_restore_ms afterwards, so a genuinely
+/// wedged loop still reboots (FastLED#3956).
+///
+/// @param watchdog_restore_ms timeout to re-arm the watchdog with once the
+///        update returns — pass the sketch's normal loop timeout.
+void pollOtaArtifactUpdate(uint32_t watchdog_restore_ms);
 
 /// @brief Get current OTA autoresearch state.
 /// @return Reference to the global OTA state

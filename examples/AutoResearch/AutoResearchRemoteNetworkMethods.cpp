@@ -25,6 +25,7 @@
 #include "AutoResearchTest.h"
 #include "AutoResearchHelpers.h"
 #include "fl/net/network_detector.h"
+#include "fl/net/port.h"
 #include "fl/net/wifi.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/unique_ptr.h"
@@ -226,9 +227,16 @@ void AutoResearchRemoteControl::bindNetworkMethods(fl::Remote& remote) {
         }
 
         fl::string host_ip = host_ip_val.as_string().value();
-        uint16_t port = static_cast<uint16_t>(port_val.as_int().value());
+        // Narrowing without a range check silently retargets the request:
+        // 70000 wraps to 4464 (FastLED#3956).
+        const fl::optional<fl::u16> port = fl::net::tryParsePort(port_val.as_int().value());
+        if (!port.has_value()) {
+            response.set("success", false);
+            response.set("error", "port must be in [1, 65535]");
+            return response;
+        }
 
-        return runNetClientTest(host_ip.c_str(), port);
+        return runNetClientTest(host_ip.c_str(), port.value());
     });
 
     // Register "runNetLoopback" - Self-contained loopback test (no WiFi needed)
@@ -379,9 +387,18 @@ void AutoResearchRemoteControl::bindNetworkMethods(fl::Remote& remote) {
             response.set("error", "Expected host and port");
             return response;
         }
-        const int64_t port = args["port"].as_int().value();
+        // `port > 0` alone rejects 65536 only because it happens to
+        // truncate to zero; 65537 would still slip through as port 1.
+        const fl::optional<fl::u16> port =
+            fl::net::tryParsePort(args["port"].as_int().value());
+        if (!port.has_value()) {
+            fl::json response = fl::json::object();
+            response.set("success", false);
+            response.set("error", "port must be in [1, 65535]");
+            return response;
+        }
         return queueOtaArtifactUpdate(args["host"].as_string().value().c_str(),
-                                      port > 0 ? static_cast<uint16_t>(port) : 0);
+                                      port.value());
     });
 
     // ========================================================================
