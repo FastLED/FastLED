@@ -788,7 +788,8 @@ def run_fbuild_deploy(
             # later times out or is interrupted mid-flight.
             if marker in line:
                 suffix = line.split(marker, 1)[1].strip()
-                candidate = suffix.split()[0] if suffix else ""
+                marker_value = suffix.partition(";")[0].strip()
+                candidate = marker_value.split()[0] if marker_value else ""
                 if candidate:
                     returned_port = candidate
 
