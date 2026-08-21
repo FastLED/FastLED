@@ -42,6 +42,7 @@
 /// - FL_IS_SAMD: General SAMD platform (any SAMD board)
 /// - FL_IS_SAMD21: SAMD21 family (Cortex-M0+, Arduino Zero, etc.)
 /// - FL_IS_SAMD51: SAMD51/SAME51 family (Cortex-M4F, Adafruit Metro M4, etc.)
+/// - FL_IS_SAME53: SAME53 family (Cortex-M4F, Teknic ClearCore)
 ///
 /// SAM Platforms (ARM-based):
 /// - FL_IS_SAM: General SAM platform (any SAM board)
@@ -148,6 +149,7 @@
 #include "platforms/arm/rp/is_rp.h"
 #include "platforms/arm/sam/is_sam.h"
 #include "platforms/arm/samd/is_samd.h"
+#include "platforms/arm/same53/is_same53.h"
 #include "platforms/arm/silabs/is_silabs.h"
 #include "platforms/arm/stm32/is_stm32.h"
 #include "platforms/arm/teensy/is_teensy.h"

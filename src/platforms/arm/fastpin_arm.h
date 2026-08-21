@@ -9,6 +9,8 @@
 
 // IWYU pragma: private
 
+#include "platforms/is_platform.h"
+
 #if defined(NRF51)
     #include "platforms/arm/nrf51/fastpin_arm_nrf51.h"
 #elif defined(NRF52_SERIES)
@@ -37,6 +39,9 @@
 #elif defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
     // Microchip SAMD51/SAME51
     #include "platforms/arm/d51/fastpin_arm_d51.h"
+#elif defined(FL_IS_SAME53)
+    // Microchip SAME53 (Teknic ClearCore)
+    #include "platforms/arm/same53/fastpin_arm_same53.h"
 #elif defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
     // RP2350 (Raspberry Pi Pico 2)
     #include "platforms/arm/rp/rp2350/fastpin_arm_rp2350.h"

@@ -32,6 +32,9 @@
 #include "samd/is_samd.h"
 // IWYU pragma: end_keep
 // IWYU pragma: begin_keep
+#include "same53/is_same53.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "silabs/is_silabs.h"
 // IWYU pragma: end_keep
 // IWYU pragma: begin_keep
@@ -69,7 +72,8 @@
     /* Microchip SAMD21 */ \
     defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || \
     defined(__SAMD21E17A__) || defined(__SAMD21E18A__) || \
-    /* Microchip SAMD51/SAME51 */ \
+    /* Microchip SAMD51/SAME51/SAME53 */ \
+    defined(FL_IS_SAME53) || \
     defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
     defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__) || \
     /* NXP LPC family - defined by lpc/is_lpc.h:                          \

@@ -1551,6 +1551,17 @@ SAMD51P20A_GRANDCENTRAL = Board(
     ],
 )
 
+# Teknic ClearCore (Microchip SAME53N19A, Cortex-M4F @ 120 MHz).
+# This is an fbuild-native board; its vendor Arduino core is pinned by fbuild.
+CLEARCORE_SAME53 = Board(
+    board_name="clearcore",
+    platform="atmelsam",
+    framework="arduino",
+    defines=[
+        "FASTLED_USES_ARDUINO_AUDIO_INPUT=0",  # ClearCore core has no I2S.h
+    ],
+)
+
 
 def _make_board_map(boards: list[Board]) -> dict[str, Board]:
     # make board map, but assert on duplicate board names
