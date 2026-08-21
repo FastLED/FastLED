@@ -424,20 +424,6 @@ fn strip_block_comments_from_line(line: &str, state: &mut CommentScanState) -> S
     visible
 }
 
-fn quoted_literal_end(bytes: &[u8], start: usize, quote: u8) -> usize {
-    let mut cursor = start + 1;
-    while cursor < bytes.len() {
-        if bytes[cursor] == b'\\' {
-            cursor = (cursor + 2).min(bytes.len());
-        } else if bytes[cursor] == quote {
-            return cursor + 1;
-        } else {
-            cursor += 1;
-        }
-    }
-    bytes.len()
-}
-
 fn is_digit_separator_quote(bytes: &[u8], cursor: usize) -> bool {
     cursor > 0
         && cursor + 1 < bytes.len()
