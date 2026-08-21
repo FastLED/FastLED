@@ -994,8 +994,22 @@ fl::json startNetServer() {
     RpPeerState& state = rpPeerState();
     if (!state.server) {
         state.server = fl::make_unique<WiFiServer>(AUTORESEARCH_NET_SERVER_PORT);
-        state.server->begin();
-        state.server->setNoDelay(true);
+        const uint32_t deadline_ms = millis() + 2000;
+        do {
+            state.server->begin();
+            if (*state.server) {
+                state.server->setNoDelay(true);
+                break;
+            }
+            FastLED.watchdog().feed();
+            delay(10);
+        } while (static_cast<int32_t>(millis() - deadline_ms) < 0);
+        if (!*state.server) {
+            state.server.reset();
+            response.set("success", false);
+            response.set("error", "TCP server failed to listen");
+            return response;
+        }
     }
     getNetState().http_server_active = true;
     response.set("success", true);

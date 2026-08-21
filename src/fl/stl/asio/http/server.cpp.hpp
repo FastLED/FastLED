@@ -12,6 +12,7 @@
 // Common includes needed by both POSIX/Windows and ESP32 implementations
 #include "fl/stl/cctype.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/limits.h"
 #include "fl/stl/malloc.h"
 #include "fl/log/log.h"
 
@@ -978,6 +979,16 @@ bool Server::start(int port) {
 
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.server_port = static_cast<u16>(port);
+    if (mRoutes.size() > (fl::numeric_limits<u16>::max)()) {
+        mLastError = "Too many HTTP routes";
+        FL_WARN_F("%s", "[HTTP] Too many routes for ESP-IDF HTTP server");
+        task::Executor::instance().unregister_runner(mAsyncRunner.get());
+        mAsyncRunner.reset();
+        return false;
+    }
+    if (mRoutes.size() > config.max_uri_handlers) {
+        config.max_uri_handlers = static_cast<u16>(mRoutes.size());
+    }
     // Route handlers execute ON the httpd task and run full fl::json /
     // fl::string / Response machinery. The IDF default stack (4 KB) is
     // not enough for that: overflows landed in adjacent heap blocks and
@@ -991,6 +1002,8 @@ bool Server::start(int port) {
     if (err != ESP_OK) {
         mLastError = "httpd_start failed";
         FL_WARN_F("[HTTP] httpd_start failed: %s", esp_err_to_name(err));
+        task::Executor::instance().unregister_runner(mAsyncRunner.get());
+        mAsyncRunner.reset();
         return false;
     }
 
@@ -1006,7 +1019,15 @@ bool Server::start(int port) {
 
         esp_err_t reg_err = httpd_register_uri_handler(s_esp_httpd, &uri_handler);
         if (reg_err != ESP_OK) {
-            FL_WARN_F("[HTTP] Failed to register route %s", mRoutes[i].path.c_str());
+            mLastError = "Failed to register route " + mRoutes[i].path;
+            FL_WARN_F("[HTTP] Failed to register route %s: %s",
+                      mRoutes[i].path.c_str(), esp_err_to_name(reg_err));
+            httpd_stop(s_esp_httpd);
+            s_esp_httpd = nullptr;
+            s_esp_route_contexts.clear();
+            task::Executor::instance().unregister_runner(mAsyncRunner.get());
+            mAsyncRunner.reset();
+            return false;
         }
         s_esp_route_contexts.push_back(fl::move(ctx));
     }

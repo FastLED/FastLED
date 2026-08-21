@@ -26,9 +26,12 @@ def test_net_peer_runs_ten_device_only_reconnect_cycles() -> None:
     peer.close = AsyncMock()
     primary_methods: list[str] = []
     peer_methods: list[str] = []
+    client_test_timeouts: list[float] = []
 
     async def primary_send(method: str, *_args: Any, **_kwargs: Any) -> MagicMock:
         primary_methods.append(method)
+        if method == "runNetClientTest":
+            client_test_timeouts.append(_kwargs["timeout"])
         responses = {
             "status": {"platform": "Raspberry Pi Pico 2 W (RP2350)"},
             "wifiConnect": {"success": True},
@@ -42,6 +45,8 @@ def test_net_peer_runs_ten_device_only_reconnect_cycles() -> None:
 
     async def peer_send(method: str, *_args: Any, **_kwargs: Any) -> MagicMock:
         peer_methods.append(method)
+        if method == "runNetClientTest":
+            client_test_timeouts.append(_kwargs["timeout"])
         responses = {
             "status": {"platform": "ESP32-C6 (RISC-V)"},
             "startNetServer": {
@@ -78,6 +83,8 @@ def test_net_peer_runs_ten_device_only_reconnect_cycles() -> None:
     assert primary_methods.count("runNetClientTest") == 10
     assert primary_methods.count("stopNet") >= 11
     assert peer_methods.count("runNetClientTest") == 10
+    assert len(client_test_timeouts) == 20
+    assert all(call_timeout > 20.0 for call_timeout in client_test_timeouts)
     assert "ping" in peer_methods
     primary.close.assert_awaited_once()
     peer.close.assert_awaited_once()

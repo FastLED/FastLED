@@ -221,3 +221,10 @@ def test_rp2350w_autoresearch_exposes_the_cyw43_http_peer_surface() -> None:
     assert "fl::Singleton<RpPeerState>::instance()" in net_source
     assert "void pollNetServer()" in net_source
     assert "pollNetServer();" in sketch_source
+    assert "const uint32_t deadline_ms = millis() + 2000;" in net_source
+    assert "state.server->begin();" in net_source
+    assert "if (*state.server)" in net_source
+    assert "FastLED.watchdog().feed();" in net_source
+    assert "delay(10);" in net_source
+    assert "} while (static_cast<int32_t>(millis() - deadline_ms) < 0);" in net_source
+    assert 'response.set("error", "TCP server failed to listen")' in net_source

@@ -463,16 +463,21 @@ async def run_net_peer_autoresearch(
     primary: RpcClient | None = None
     peer: RpcClient | None = None
 
-    def rpc_timeout() -> float:
+    def rpc_timeout(max_wait: float = 15.0) -> float:
         remaining = deadline - time.monotonic()
         if remaining <= 0:
             raise RpcTimeoutError("--net-peer deadline expired")
-        return min(15.0, remaining)
+        return min(max_wait, remaining)
 
     async def rpc_data(
-        client: RpcClient, method: str, params: dict[str, Any] | None = None
+        client: RpcClient,
+        method: str,
+        params: dict[str, Any] | None = None,
+        max_wait: float = 15.0,
     ) -> dict[str, Any]:
-        response = await client.send(method, params or {}, timeout=rpc_timeout())
+        response = await client.send(
+            method, params or {}, timeout=rpc_timeout(max_wait)
+        )
         if not isinstance(response.data, dict):
             raise RpcError(f"{method} returned a non-object response")
         return response.data
@@ -550,12 +555,18 @@ async def run_net_peer_autoresearch(
                 raise RpcError(f"RP2350W startNetServer failed: {rp_server}")
 
             rp_to_c6 = await rpc_data(
-                primary, "runNetClientTest", {"host_ip": c6_ip, "port": c6_port}
+                primary,
+                "runNetClientTest",
+                {"host_ip": c6_ip, "port": c6_port},
+                max_wait=30.0,
             )
             if not rp_to_c6.get("success"):
                 raise RpcError(f"RP2350W -> ESP32-C6 HTTP failed: {rp_to_c6}")
             c6_to_rp = await rpc_data(
-                peer, "runNetClientTest", {"host_ip": rp_ip, "port": rp_port}
+                peer,
+                "runNetClientTest",
+                {"host_ip": rp_ip, "port": rp_port},
+                max_wait=30.0,
             )
             if not c6_to_rp.get("success"):
                 raise RpcError(f"ESP32-C6 -> RP2350W HTTP failed: {c6_to_rp}")

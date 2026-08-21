@@ -142,8 +142,9 @@ def test_deploy_output_is_visible_before_process_exits(
     assert "late-line" in result.output
 
 
+@pytest.mark.parametrize("port", ["COM42", "/dev/ttyACM0"])
 def test_deploy_parses_port_marker_from_streamed_output(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, port: str
 ) -> None:
     """FBUILD_DEPLOY_PORT= is still picked up when parsed line-by-line."""
     sink = _RecordingSink()
@@ -152,7 +153,7 @@ def test_deploy_parses_port_marker_from_streamed_output(
         tmp_path,
         script_body=(
             "print('starting', flush=True)\n"
-            "print('FBUILD_DEPLOY_PORT=COM42 extra', flush=True)\n"
+            f"print('FBUILD_DEPLOY_PORT={port} extra', flush=True)\n"
             "print('finished', flush=True)\n"
         ),
         sink=sink,
@@ -162,7 +163,30 @@ def test_deploy_parses_port_marker_from_streamed_output(
         build_dir=tmp_path, environment="esp32s3", timeout=60
     )
     assert result.success is True
-    assert result.port == "COM42"
+    assert result.port == port
+
+
+def test_deploy_ignores_empty_port_marker_before_diagnostic(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """An empty marker must not turn the following semicolon into a port."""
+    sink = _RecordingSink()
+    _install_fake_fbuild(
+        monkeypatch,
+        tmp_path,
+        script_body=(
+            "print('deploy succeeded (full flash); FBUILD_DEPLOY_PORT=; "
+            "firmware flashed but runtime CDC did not recover', flush=True)\n"
+        ),
+        sink=sink,
+    )
+
+    result = fbuild_runner.run_fbuild_deploy(
+        build_dir=tmp_path, environment="rp2350w", timeout=60
+    )
+    assert result.success is True
+    assert result.port is None
+    assert "runtime CDC did not recover" in result.output
 
 
 def test_deploy_reports_failure_exit_code(
