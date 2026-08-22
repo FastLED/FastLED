@@ -5,10 +5,16 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.5.18. It carries hardened USB/deploy recovery, current
+    # Pin to fbuild 2.5.19. It carries hardened USB/deploy recovery, current
     # esptool probing, and the accumulated library/build fixes below.
     #
     # Pin history:
+    #   2.5.19 -- selects the exact runtime RP board profile from the verified
+    #              FastLED/boards USB identity registry instead of a local
+    #              VID/PID guess, and adds ClearCore SAME53 builds
+    #              (FastLED/fbuild#1333/#1335). Cascades the current
+    #              `usb-vids.proto.zstd` ingestion into this repo -- see
+    #              agents/docs/usb-vid-pid-registry.md.
     #   2.5.18 -- keeps RP application USB recoverable, supports managed
     #              esptool 5.3 probing, recovers clean daemon shutdowns, and
     #              maps explicitly excluded Windows ports correctly
@@ -195,7 +201,13 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.18",
+    "fbuild==2.5.19",
+    # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
+    # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
+    # transitively (clang-tool-chain-bins pulls it in today) so the documented
+    # `uv run python ci/util/audit_usb_registry.py` cannot break out from under
+    # us. See agents/docs/usb-vid-pid-registry.md.
+    "zstandard>=0.22.0",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",

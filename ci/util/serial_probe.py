@@ -46,8 +46,18 @@ import serial  # type: ignore[import-not-found]
 import serial.tools.list_ports  # type: ignore[import-not-found]
 
 
-# Known board USB VID:PID fingerprints. Add new entries here when porting to
-# a new board so port_utils.py can pick the right COM port without guessing.
+# Known board USB VID:PID fingerprints — display/diagnostic hints only.
+#
+# FROZEN — DO NOT ADD ENTRIES. USB VID:PID identity is owned by
+# https://github.com/FastLED/boards and reaches this repo through fbuild's
+# ingestion of the published `usb-vids.proto.zstd` archive; `fbuild port scan`
+# is the authority for naming an attached board. This table is never a
+# selection authority — it only labels ports that have already been chosen.
+#
+# A board that cannot be identified is a FastLED/boards gap: add the record
+# there, let fbuild ingest it, then cascade the `fbuild==X.Y.Z` pin in
+# pyproject.toml and relock locally. Full procedure:
+# agents/docs/usb-vid-pid-registry.md.
 BOARD_FINGERPRINTS: dict[tuple[int, int], str] = {
     # NXP LPC845-BRK ships with an LPC11U35 carrying both the CMSIS-DAP
     # debug interface AND a USB-VCOM bridge for the LPC845's USART0.
@@ -73,6 +83,8 @@ BOARD_FINGERPRINTS: dict[tuple[int, int], str] = {
     # FTDI FT232R — older Arduinos, some shields.
     (0x0403, 0x6001): "FTDI FT232R USB-UART",
     (0x0403, 0x6010): "FTDI FT2232 dual UART",
+    # Only literal here not yet resolvable from FastLED/boards --
+    # tracked as FastLED/boards#60. Remove once the registry publishes it.
     (0x0403, 0x6014): "FTDI FT232H USB-UART",
     # Teensy 3.x/4.x.
     (0x16C0, 0x0486): "PJRC / Teensy USB-Serial (alt)",

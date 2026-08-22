@@ -8,6 +8,7 @@
 |------|------|
 | Writing/editing C++ code | `agents/docs/cpp-standards.md` |
 | Verifying a peripheral exists on a chip before writing driver code | `agents/docs/peripheral-existence.md` (halt on phantom — do not fabricate missing `<Peripheral>_Type` in vendor headers) |
+| Adding or changing a board USB VID/PID | `agents/docs/usb-vid-pid-registry.md` (it lands in FastLED/boards first — never as a new literal in `ci/`) |
 | Defining a register map / accessing MCU peripherals | `agents/docs/register-maps.md` (use vendor CMSIS PAL — do not hand-roll shims) |
 | Looking up MCU datasheets / user manuals | Prefer https://github.com/FastLED/datasheets when available, then vendor primary documentation |
 | Creating an API wrapper type | `agents/docs/cpp-standards.md` → "API Object Pattern" |
@@ -88,6 +89,12 @@ See `agents/docs/build-system.md` for full command execution rules and forbidden
 - **Platform compilation timeout**: 15 minutes minimum for platform builds
 - **Override**: `FL_AGENT_ALLOW_ALL_CMDS=1` prefix bypasses forbidden command checks
 - See `agents/docs/build-system.md` for full rules
+
+### USB VID/PID identities live in FastLED/boards — ALWAYS
+- **Never introduce a board/device USB VID:PID into this repo as the place it first exists.** [FastLED/boards](https://github.com/FastLED/boards) is the source of truth; it publishes a zstd-compressed protobuf (`usb-vids.proto.zstd`) that fbuild ingests at build time and falls back to from its cache root. FastLED consumes it through `fbuild port scan` / `fbuild deploy`.
+- **Missing identity ⇒ fix the registry, then cascade.** Add it on the FastLED/boards data branch, let the `site.yml` workflow republish, cut an fbuild release, then move the `fbuild==X.Y.Z` pin in `pyproject.toml` and run `uv sync` to pick it up. `uv.lock` is gitignored here, so the pin is the only committed half of the cascade — but you must still relock/sync locally or you keep running the old wheel.
+- **The legacy tables are frozen.** `ENVIRONMENT_TO_VCOM_VID_PIDS` (`ci/util/port_utils.py`) and `BOARD_FINGERPRINTS` (`ci/util/serial_probe.py`) must not gain entries. Test fixtures may use concrete literals; they must never become runtime defaults.
+- Full rule, pipeline diagram, and cascade procedure: `agents/docs/usb-vid-pid-registry.md`. fbuild mirrors it in its own `CLAUDE.md` → "USB VID/PID source of truth" and `docs/usb-vidpid-audit.md`.
 
 ### Deployment (flash / upload) is fbuild's job — ALWAYS
 - **Never invoke flash tools directly from FastLED code.** No `pyocd`, `lpc21isp`, `esptool`, `avrdude`, `bossac`, `stm32flash`, `openocd load`, `dfu-util`, `teensy_loader_cli`, `JLinkExe`, or equivalents anywhere under `ci/`, `tests/`, `examples/`, or `src/`.
