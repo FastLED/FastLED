@@ -10,6 +10,7 @@
 #define FASTLED_STUB_WATCHDOG_NO_ABORT 1
 
 #include "fl/wdt/watchdog.h"
+#include "platforms/stub/time_stub.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/thread.h"
@@ -124,6 +125,59 @@ FL_TEST_CASE("fl::Watchdog — Tier 2 crash report API surface") {
     FL_CHECK_FALSE(r.valid);
 }
 
+// ---------------------------------------------------------------------------
+// Deterministic clock for the two timeout tests.
+//
+// These previously drove real time with sleep_for. That only guarantees a
+// LOWER bound, so on a loaded CI runner a single 50 ms sleep could overshoot
+// the 200 ms timeout, the correctly-fed watchdog would expire exactly as
+// designed, and the "does not fire" assertion would fail for a reason that is
+// not a bug (observed on macOS, FastLED#3978).
+//
+// Freezing the stub's clock removes wall time from the equation: the watchdog
+// now fires precisely when the test advances past the deadline.
+//
+// The stub derives millis(), micros(), and fl::chrono::steady_clock (which is
+// what the watchdog's deadline is built on) from the single root
+// fl::platforms::micros64(), so overriding that one function is enough. Note
+// fl::inject_time_provider() does NOT work here — it covers fl::millis() only.
+namespace {
+
+// Read from the watchdog's timer thread as well as the test thread, so atomic.
+fl::atomic<fl::u64> gMockNowUs{0};
+
+fl::u64 mockMicros64() {
+    return gMockNowUs.load();
+}
+
+// RAII so an early FL_CHECK failure cannot leave the clock frozen and corrupt
+// every later test case in this binary.
+struct ScopedMockClock {
+    explicit ScopedMockClock(fl::u64 start_ms = 100000) {
+        gMockNowUs.store(start_ms * 1000u);
+        setClockFunction(&mockMicros64);
+    }
+    ~ScopedMockClock() { clearClockFunction(); }
+
+    void advance(fl::u32 ms) {
+        gMockNowUs.store(gMockNowUs.load() + static_cast<fl::u64>(ms) * 1000u);
+    }
+};
+
+// The worker thread observes the clock on a real 10 ms tick, so a test that
+// expects a timeout must still wait for that observation after advancing. This
+// direction is safe: waiting longer can never cause a false failure, only a
+// slower pass. Bounded so a genuine regression fails instead of hanging.
+bool waitForFlag(fl::atomic<bool>& flag, fl::u32 timeout_ms = 2000) {
+    for (fl::u32 waited = 0; waited < timeout_ms; waited += 5) {
+        if (flag.load()) return true;
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(5));  // ok sleep for
+    }
+    return flag.load();
+}
+
+}  // namespace
+
 FL_TEST_CASE("fl::Watchdog — timeout fires callback and increments crash counter") {
     Watchdog& dog = Watchdog::instance();
     dog.markCleanShutdown();
@@ -136,13 +190,15 @@ FL_TEST_CASE("fl::Watchdog — timeout fires callback and increments crash count
     fired.store(false);
     dog.onTimeout([](void*) { fired.store(true); }, nullptr);
 
+    ScopedMockClock clock;
     dog.begin(50);
 
-    // Wait long enough for the stub timer thread (10 ms tick) to detect
-    // expiry + run the callback + bump the counter.
-    fl::this_thread::sleep_for(fl::chrono::milliseconds(300));  // ok sleep for
+    // Push mock time past the deadline, then wait for the worker's 10 ms tick
+    // to observe it. Unlike the old fixed 300 ms sleep, this cannot expire
+    // early: no real duration can advance the mocked clock.
+    clock.advance(100);
 
-    FL_CHECK(fired.load());
+    FL_CHECK(waitForFlag(fired));
     FL_CHECK(dog.consecutiveCrashCount() >= 1);
     FL_CHECK(dog.lastResetWasWatchdog());
 
@@ -162,11 +218,20 @@ FL_TEST_CASE("fl::Watchdog — feeding before timeout prevents fire") {
     fired.store(false);
     dog.onTimeout([](void*) { fired.store(true); }, nullptr);
 
+    ScopedMockClock clock;
     dog.begin(200);
     for (int i = 0; i < 10; ++i) {
-        fl::this_thread::sleep_for(fl::chrono::milliseconds(50));  // ok sleep for
+        // 50 ms of mock time per feed against a 200 ms timeout. Because the
+        // clock only moves here, the deadline is provably never reached — no
+        // amount of host scheduling jitter can change that.
+        clock.advance(50);
         dog.feed();
     }
+
+    // Give the worker several real ticks to prove it does NOT fire. Asserting
+    // immediately would pass even if the deadline logic were broken, simply
+    // because the worker had not looked yet.
+    fl::this_thread::sleep_for(fl::chrono::milliseconds(50));  // ok sleep for
     dog.disable();
 
     FL_CHECK_FALSE(fired.load());

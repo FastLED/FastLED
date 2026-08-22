@@ -28,4 +28,33 @@ void clearDelayFunction() FL_NO_EXCEPT;
 
 // Check if delay override is active (for fast testing)
 bool isDelayOverrideActive(void) FL_NO_EXCEPT;
+
+// ---------------------------------------------------------------------------
+// Clock override (for deterministic timing tests)
+// ---------------------------------------------------------------------------
+//
+// The stub derives millis(), micros(), and therefore fl::chrono::steady_clock
+// from one root, fl::platforms::micros64(). Overriding that root is enough to
+// put a test in full control of host time — there is no second clock to keep
+// in sync, and the three views can never disagree.
+//
+// This is what timing tests should use instead of sleeping. `sleep_for` only
+// guarantees a LOWER bound, so any assertion that depends on time NOT having
+// passed is a bet on the host scheduler; under CI load that bet loses (see
+// FastLED#3978). With a frozen clock, elapsed time is whatever the test says.
+//
+// The installed function is called from every thread that asks for the time,
+// so it must be safe to invoke concurrently. Always clear it when done —
+// prefer an RAII guard, so a failing assertion cannot leak a frozen clock into
+// the rest of the binary.
+//
+// Note `fl::inject_time_provider()` is a different, narrower seam: it replaces
+// fl::millis() only and leaves micros()/steady_clock on real time.
+void setClockFunction(fl::u64 (*micros64Func)()) FL_NO_EXCEPT;
+
+// Restore the real host clock.
+void clearClockFunction(void) FL_NO_EXCEPT;
+
+// True while a clock override is installed.
+bool isClockOverrideActive(void) FL_NO_EXCEPT;
 #endif  // !ARDUINO || FASTLED_USE_STUB_ARDUINO
