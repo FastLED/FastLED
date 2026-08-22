@@ -20,7 +20,7 @@ publishing one artifact that every consumer ingests.
 
 ## The publication pipeline
 
-```
+```text
 FastLED/boards data branches           source of truth
   (platformio / arduino / vendors / other)
               │

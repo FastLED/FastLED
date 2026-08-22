@@ -144,11 +144,26 @@ For a new board or a newly attached board, prove the transport before proving a
 driver:
 
 1. Run `fbuild port scan` and record the board identity, VID/PID, serial number,
-   and port. Do not claim a board is absent without this scan. If the scan cannot
-   name the board, the identity is missing from
-   [FastLED/boards](https://github.com/FastLED/boards) — fix it there and cascade
-   the fbuild bump; never add the literal to `ci/`. See
-   [usb-vid-pid-registry.md](usb-vid-pid-registry.md).
+   and port. Do not claim a board is absent without this scan.
+
+   **An unnamed port is not by itself a registry gap.** A missing
+   `└─ vendor / product` row has three plausible causes, and they look
+   identical from the scan output alone:
+   - a stale or cold local catalogue cache,
+   - an fbuild older than the release that published the identity,
+   - a genuine gap in [FastLED/boards](https://github.com/FastLED/boards).
+
+   Rule the first two out before concluding the third — check `fbuild --version`
+   against the pinned `fbuild==X.Y.Z`, then confirm against the published
+   catalogue rather than the cache:
+
+   ```bash
+   uv run python ci/util/audit_usb_registry.py
+   ```
+
+   Only if the pair is genuinely absent upstream do you push it to
+   FastLED/boards. Never add the literal to `ci/`. See
+   [usb-vid-pid-registry.md](usb-vid-pid-registry.md) for the push procedure.
 2. Confirm the board has an entry in `ci/boards.py` or can be detected by the
    AutoResearch/fbuild path. If the deploy backend is missing, file the gap in
    FastLED/fbuild; do not add direct flash-tool calls.
