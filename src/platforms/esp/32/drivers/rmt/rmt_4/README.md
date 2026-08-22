@@ -176,6 +176,13 @@ All interrupt handlers are marked `IRAM_ATTR` to ensure flash-safe execution:
 - RMT5 driver used when `FASTLED_RMT5=1` (IDF 5.x with new RMT API)
 - Both drivers are mutually exclusive (compile-time selection)
 
+> **IDF 4.x only.** Setting `FASTLED_RMT5=0` on ESP‑IDF 5.x or newer is rejected
+> by `FastLED.h` with a compile-time diagnostic. This driver does not build
+> against IDF 5 headers — `RMTMEM` is not exposed publicly there, and the TX/RX
+> engines predate the current `IChannelDriver` / `RmtRxChannel` contracts. The
+> chip table above describes silicon capability, not IDF 5 build support. See
+> FastLED#3936.
+
 ---
 
 ## Configuration Macros

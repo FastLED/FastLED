@@ -456,12 +456,20 @@ Two RMT implementations exist and are selected by IDF version unless you overrid
 
 Selection rules:
 - Default: `ESP_IDF_VERSION` decides. On IDF < 5, RMT5 is disabled; on IDF ≥ 5, RMT5 is enabled.
-- To force RMT4 on IDF5, set this build define (PlatformIO `platformio.ini`):
-  ```ini
-  build_flags =
-    -D FASTLED_RMT5=0
-  ```
-  This ensures only one RMT implementation is compiled. Do not link/use the IDF v5 `led_strip` driver in the same binary when forcing RMT4.
+- `-D FASTLED_RMT5=0` selects RMT4. **It is only supported on ESP‑IDF 4.x.**
+
+### RMT4 on IDF 5.x is not supported
+
+Forcing `-D FASTLED_RMT5=0` on ESP‑IDF 5.x or newer is rejected at compile time
+with a single diagnostic from `FastLED.h`. The legacy TX and RX engines do not
+build against IDF 5 headers: `RMTMEM` is no longer exposed publicly, and both
+engines predate the current `IChannelDriver` / `RmtRxChannel` contracts.
+
+Earlier releases suggested adding `-D ESP32_ARDUINO_NO_RGB_BUILTIN=1` to get past
+the guard. That define silences the guard but does not make the backend compile,
+so it is no longer recommended for this purpose. Use the RMT5 backend, which is
+already the IDF 5.x default — simply drop `-D FASTLED_RMT5=0`. If you need RMT4,
+build against ESP‑IDF 4.x. Tracking issue: FastLED#3936.
 
 Important compatibility note:
 - The RMT4 and RMT5 drivers cannot co‑exist in the same sketch/binary. Mixing both (e.g., using IDF v5 `led_strip` alongside FastLED’s RMT4) will trigger an Espressif runtime abort at startup.
@@ -481,10 +489,11 @@ Behavioral differences and practical guidance:
 
 Quick PlatformIO examples
 
-- Force RMT4 on IDF5 (legacy path):
+- Select RMT4 (legacy path) — requires an ESP‑IDF 4.x platform; rejected at
+  compile time on IDF 5.x and newer:
   ```ini
   [env:esp32dev_rmt4]
-  platform = espressif32
+  platform = espressif32@<pin to an IDF 4.x release>
   board = esp32dev
   framework = arduino
   build_flags =

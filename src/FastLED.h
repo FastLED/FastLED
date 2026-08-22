@@ -55,18 +55,24 @@
 #warning "-DFASTLED_ESP32_I2S is removed (FastLED#3526 Phase 2e). Drop the flag; the modern I2S engine is now on Bus::FLEX_IO, 0. Runtime select via FastLED.setExclusiveDriver<fl::Bus::FLEX_IO, 0>()."
 #endif
 
-// ESP32 RMT Driver conflict prevention
-// Arduino ESP32 Core 3.x (ESP-IDF 5.x+) includes a neopixelWrite() function that uses the RMT driver,
-// which conflicts with FastLED's legacy RMT4 driver (FASTLED_RMT5=0).
-// Disable Arduino's built-in RGB LED support to prevent the conflict.
-// This is only needed for ESP-IDF 5.x+ with legacy RMT4 driver, not earlier versions or RMT5 driver.
-// Only applies to platforms that actually have RMT hardware (excludes ESP32-C2 which lacks RMT).
-// Reference: https://github.com/espressif/arduino-esp32/issues/9866
+// Legacy RMT4 backend is ESP-IDF 4.x only.
+//
+// On IDF 5.x the legacy TX and RX implementations no longer build: RMTMEM is not
+// exposed by the public headers, and both engines predate the current
+// IChannelDriver / RmtRxChannel contracts. `-DFASTLED_RMT5=0` there produced a
+// wall of unrelated compiler errors, and the old guard sent users chasing
+// -DESP32_ARDUINO_NO_RGB_BUILTIN=1, which gets past the guard but not past the
+// build. Reject the combination up front with one accurate diagnostic instead.
+// RMT5 is already the IDF 5.x default, so nothing that builds today is lost.
+// See FastLED#3936.
+//
+// Note the version test: FASTLED_RMT5 also defaults to 0 on IDF 4.x, where RMT4
+// is the correct native backend and must keep building.
 #if defined(FL_IS_ESP32)
 #include "platforms/esp/esp_version.h"  // ok platform headers
 #include "platforms/esp/32/feature_flags/enabled.h"  // ok platform headers
-#if FASTLED_RMT5 == 0 && FASTLED_ESP32_HAS_RMT && !defined(ESP32_ARDUINO_NO_RGB_BUILTIN)
-#error "ESP-IDF 5.x+ with legacy RMT4 driver detected: Please define ESP32_ARDUINO_NO_RGB_BUILTIN=1 to prevent conflicts with Arduino's neopixelWrite() function. Add '-DESP32_ARDUINO_NO_RGB_BUILTIN=1' to your build flags or use '-DFASTLED_RMT5=1' to enable RMT5 driver."
+#if FASTLED_RMT5 == 0 && FASTLED_ESP32_HAS_RMT && ESP_IDF_VERSION_5_OR_HIGHER
+#error "FASTLED_RMT5=0 (legacy RMT4 backend) is not supported on ESP-IDF 5.x or newer. Remove -DFASTLED_RMT5=0 to use the RMT5 backend, which is the default on this IDF. RMT4 remains available only when building against ESP-IDF 4.x. See https://github.com/FastLED/FastLED/issues/3936"
 #endif
 #endif
 
