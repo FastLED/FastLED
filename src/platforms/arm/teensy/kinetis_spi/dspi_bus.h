@@ -203,9 +203,18 @@ inline fl::u32 dspiClockBits(fl::u32 hz) {
         }
     }
 
-    // CSSCK tracks BR, matching the existing FastLED K20/K66 LED path: the
-    // PCS-to-SCK delay is irrelevant here (SdFat drives chip select as a plain
-    // GPIO) but a delay no shorter than half a clock is always safe.
+    // CSSCK reuses the BR field value, matching the existing FastLED K20/K66
+    // LED path.
+    //
+    // Note the two fields do NOT share an encoding, so this is not "half a
+    // clock": BR field n selects scaler {2,4,6,8,16,32,...} while CSSCK field
+    // n selects 2^(n+1) uniformly. At the 3.75 MHz run setting (BR field 3)
+    // that inserts 16 bus cycles of tCSC, roughly 0.27 us against a 2.13 us
+    // byte. It is harmless -- SdFat drives chip select as a plain GPIO, so the
+    // PCS-to-SCK delay is never actually needed -- but it is not free either.
+    // Left as-is rather than switched to CSSCK(0) because the throughput cost
+    // is small and no Teensy 3.x hardware was available to re-validate the
+    // timing change; see FastLED#3972 follow-ups.
     fl::u32 ctar = SPI_CTAR_PBR(best_pbr) | SPI_CTAR_BR(best_br) |
                    SPI_CTAR_CSSCK(best_br);
     if (best_dbr) {
@@ -362,17 +371,6 @@ inline void DspiBus::end() {
 inline void DspiBus::begin() {
     SIM_SCGC6 |= SIM_SCGC6_SPI0;
 
-    // Park the module while the pads are re-muxed.
-    port().MCR = FL_DSPI_MCR_RUN | SPI_MCR_MDIS | SPI_MCR_HALT |
-                 SPI_MCR_CLR_TXF | SPI_MCR_CLR_RXF;
-
-    // MOSI = 11, MISO = 12, SCK = 13, all ALT2. These are SPI0's default pads
-    // on every Teensy 3.x; the alternates (7/8/14) are not exposed here
-    // because SdFat's pin-override branch is compiled out.
-    CORE_PIN11_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2);
-    CORE_PIN12_CONFIG = PORT_PCR_MUX(2);
-    CORE_PIN13_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2);
-
     beginTransaction(DspiSettings());
     endTransaction();
 }
@@ -383,9 +381,43 @@ inline void DspiBus::beginTransaction(const DspiSettings &settings) {
         mClockBits = dspiClockBits(mClock);
     }
 
-    // CTAR0 can only be written with the module disabled or halted.
-    port().MCR = FL_DSPI_MCR_RUN | SPI_MCR_MDIS | SPI_MCR_HALT |
-                 SPI_MCR_CLR_TXF | SPI_MCR_CLR_RXF;
+    // Re-mux the pads on every transaction, not once in begin().
+    //
+    // FastLED's own LED driver calls `disable_pins()` from `release()` at the
+    // end of every `show()` (fastspi_arm_k66.h:147,385 and the K20 twin),
+    // which hard-writes pins 11 and 13 back to `PORT_PCR_MUX(1)` -- GPIO. A
+    // one-time mux in begin() therefore survives only until the first
+    // `FastLED.show()` on a shared SPI0. After that the DSPI still completes
+    // frames internally, so `transfer()` returns on schedule and nothing
+    // hangs, but no SCK or MOSI reaches the card and MISO floats: 0xFF or
+    // garbage, surfacing as CMD0/ACMD41 timeouts and silently corrupt reads.
+    // These are idempotent register stores, so paying them per transaction is
+    // cheap next to a 512-byte block.
+    //
+    // MOSI = 11, MISO = 12, SCK = 13, all ALT2. These are SPI0's default pads
+    // on every Teensy 3.x; the alternates (7/8/14) are not exposed here
+    // because SdFat's pin-override branch is compiled out.
+    CORE_PIN11_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2);
+    CORE_PIN12_CONFIG = PORT_PCR_MUX(2);
+    CORE_PIN13_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2);
+
+    // Halt, then flush -- in two writes, and without MDIS.
+    //
+    // MDIS gates the clock to the DSPI's non-memory-mapped logic, which is
+    // where the FIFO counters live, so `CLR_TXF`/`CLR_RXF` raised in the same
+    // write as `MDIS` are not guaranteed to take effect. NXP's KSDK
+    // `DSPI_FlushFifo` and Teensyduino both flush under `HALT` alone. CTAR0 is
+    // memory-mapped and `HALT` alone satisfies the "module stopped"
+    // requirement for writing it.
+    port().MCR = FL_DSPI_MCR_RUN | SPI_MCR_HALT;
+    // `HALT` stops the module at the next frame boundary, not instantly. The
+    // LED path has `writeByteNoWait` variants that return with a frame still
+    // in flight, so wait for the Stopped state before rewriting CTAR0 --
+    // otherwise that frame finishes under a half-changed clock config.
+    while (port().SR & SPI_SR_TXRXS) {
+    }
+    port().MCR = FL_DSPI_MCR_RUN | SPI_MCR_HALT | SPI_MCR_CLR_TXF |
+                 SPI_MCR_CLR_RXF;
 
     port().CTAR0 = SPI_CTAR_FMSZ(7) | mClockBits | settings.modeBits();
 
