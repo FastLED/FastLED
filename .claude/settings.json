@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/check_forbidden_commands.py"
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/check_forbidden_commands.py"
           }
         ]
       },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/check_test_file_pairing.py"
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/check_test_file_pairing.py"
           }
         ]
       },
@@ -24,12 +24,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/tdd_guard.py",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/tdd_guard.py",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/protect_platform_headers.py",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/protect_platform_headers.py",
             "timeout": 10
           }
         ]
@@ -41,17 +41,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/lint-on-save.py",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/lint-on-save.py",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/auto_test_suggest.py",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/auto_test_suggest.py",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/compile_example.py",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/compile_example.py",
             "timeout": 300,
             "statusMessage": "Compiling example..."
           }
@@ -63,7 +63,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/check-on-start.py",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/check-on-start.py",
             "timeout": 10
           }
         ]
@@ -74,7 +74,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/check-on-stop.py",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/check-on-stop.py",
             "timeout": 600
           }
         ]
@@ -85,7 +85,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/desktop_notify.py",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/desktop_notify.py",
             "timeout": 10
           }
         ]
@@ -96,7 +96,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/git_context.py",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && uv run python ci/hooks/git_context.py",
             "timeout": 10
           }
         ]
