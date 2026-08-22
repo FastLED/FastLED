@@ -4,7 +4,7 @@
 /// @brief Host/stub watchdog implementation for unit tests.
 ///
 /// Provides a fully working `fl::Watchdog` for the host build using a
-/// thread-backed deadline timer. The stub never std::abort()s the test
+/// thread-backed expiry timer. The stub never std::abort()s the test
 /// process — host unit tests verify reset behavior by observing the callback
 /// firing and the crash counter incrementing. Real-hardware process
 /// termination is not simulated.
@@ -87,7 +87,19 @@ struct StubWatchdogState {
     fl::atomic<bool>                       enabled;
     fl::atomic<bool>                       stop;
     fl::atomic<fl::u32>                    timeout_ms;
-    fl::chrono::steady_clock::time_point   deadline;
+    // Last-fed timestamp, NOT an absolute deadline. Expiry is evaluated as
+    // `now - fed_at_ms >= timeout_ms` in unsigned arithmetic, which stays
+    // correct across a u32 wrap: the subtraction wraps in the same direction
+    // as the clock, so the delta is right even when `now < fed_at_ms`.
+    //
+    // Storing a future deadline instead would break at the wrap. A deadline
+    // computed just below 2^32 is unreachable once the clock rolls to a small
+    // value, so `now >= deadline` stays false and the watchdog never fires —
+    // silently, and precisely when a long-running process most needs it.
+    //
+    // Safe while the timeout is under the type's range; FL_WATCHDOG_MAX_TIMEOUT_MS
+    // (600000, 10 min) is far below the u32 millisecond span of ~49.7 days.
+    fl::u32                                fed_at_ms;
     WatchdogTimeoutCallback                cb;
     void*                                  cb_user;
     fl::function<void()>                   cb_fn;
@@ -97,7 +109,7 @@ struct StubWatchdogState {
     fl::thread                             worker;
 
     StubWatchdogState() FL_NO_EXCEPT
-        : enabled(false), stop(false), timeout_ms(0),
+        : enabled(false), stop(false), timeout_ms(0), fed_at_ms(0),
           cb(nullptr), cb_user(nullptr),
           reset_was_watchdog(false), fired(false), software_reboot(false) {}
 
@@ -151,12 +163,14 @@ inline void stubWatchdogTimerLoop() FL_NO_EXCEPT {
         // Host-only watchdog timer thread; not part of async-scheduler pumping.
         fl::this_thread::sleep_for(fl::chrono::milliseconds(10)); // ok sleep for
         if (!s.enabled.load()) continue;
-        fl::chrono::steady_clock::time_point dl;
+        fl::u32 fed_at;
         {
             fl::lock_guard<fl::mutex> g(s.mu);
-            dl = s.deadline;
+            fed_at = s.fed_at_ms;
         }
-        if (fl::chrono::steady_clock::now() >= dl) {
+        // Wrap-safe elapsed check — see the note on `fed_at_ms`.
+        const fl::u32 elapsed = fl::millis() - fed_at;
+        if (elapsed >= s.timeout_ms.load()) {
             WatchdogTimeoutCallback cb;
             void* user;
             fl::function<void()> cb_fn_copy;
@@ -203,7 +217,7 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
     auto& s = platforms::stubWatchdogState();
     fl::lock_guard<fl::mutex> g(s.mu);
     s.timeout_ms.store(timeout_ms);
-    s.deadline = fl::chrono::steady_clock::now() + fl::chrono::milliseconds(timeout_ms);
+    s.fed_at_ms = fl::millis();
     s.enabled.store(true);
 }
 
@@ -211,7 +225,7 @@ void Watchdog::feed() FL_NO_EXCEPT {
     auto& s = platforms::stubWatchdogState();
     if (!s.enabled.load()) return;
     fl::lock_guard<fl::mutex> g(s.mu);
-    s.deadline = fl::chrono::steady_clock::now() + fl::chrono::milliseconds(s.timeout_ms.load());
+    s.fed_at_ms = fl::millis();
 }
 
 void Watchdog::disable() FL_NO_EXCEPT {

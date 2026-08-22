@@ -206,6 +206,64 @@ FL_TEST_CASE("fl::Watchdog — timeout fires callback and increments crash count
     dog.markCleanShutdown();
 }
 
+// Wrap robustness. fl::millis() is u32 and rolls over roughly every 49.7 days;
+// micros() rolls over every ~71.6 minutes. An implementation that stored an
+// absolute deadline would compute an unreachable one just below the rollover
+// and then silently never fire. Expiry is therefore an unsigned elapsed
+// comparison (`now - fed_at >= timeout`), which wraps in the same direction as
+// the clock and stays correct.
+//
+// Only testable at all because the clock is mockable — parking real time three
+// seconds below 2^32 ms is not an option.
+FL_TEST_CASE("fl::Watchdog — fires across a u32 millisecond wrap") {
+    Watchdog& dog = Watchdog::instance();
+    dog.markCleanShutdown();
+    dog.clearCrashReport();
+
+    static fl::atomic<bool> fired;
+    fired.store(false);
+    dog.onTimeout([](void*) { fired.store(true); }, nullptr);
+
+    // Arm 3 s before the u32 millisecond rollover, then step over it.
+    constexpr fl::u64 kJustBelowWrapMs = 0xFFFFFFFFull - 3000ull;
+    ScopedMockClock clock(kJustBelowWrapMs);
+    dog.begin(1000);
+
+    clock.advance(5000);  // crosses the boundary; elapsed is still 5000 ms
+
+    FL_CHECK(waitForFlag(fired));
+
+    dog.disable();
+    dog.clearCrashReport();
+    dog.markCleanShutdown();
+}
+
+// The other half: a fed watchdog must NOT fire across the wrap either. Guards
+// against "fix" the wrap by making elapsed always look large.
+FL_TEST_CASE("fl::Watchdog — feeding across a u32 wrap still prevents fire") {
+    Watchdog& dog = Watchdog::instance();
+    dog.markCleanShutdown();
+    dog.clearCrashReport();
+
+    static fl::atomic<bool> fired;
+    fired.store(false);
+    dog.onTimeout([](void*) { fired.store(true); }, nullptr);
+
+    constexpr fl::u64 kJustBelowWrapMs = 0xFFFFFFFFull - 3000ull;
+    ScopedMockClock clock(kJustBelowWrapMs);
+    dog.begin(1000);
+
+    for (int i = 0; i < 12; ++i) {
+        clock.advance(500);  // half the timeout per feed, straddling the wrap
+        dog.feed();
+    }
+
+    fl::this_thread::sleep_for(fl::chrono::milliseconds(50));  // ok sleep for
+    dog.disable();
+
+    FL_CHECK_FALSE(fired.load());
+}
+
 FL_TEST_CASE("fl::Watchdog — feeding before timeout prevents fire") {
     Watchdog& dog = Watchdog::instance();
     dog.markCleanShutdown();
