@@ -164,11 +164,19 @@ inline void stubWatchdogTimerLoop() FL_NO_EXCEPT {
         // Host-only watchdog timer thread; not part of async-scheduler pumping.
         fl::this_thread::sleep_for(fl::chrono::milliseconds(10)); // ok sleep for
         if (!s.enabled.load()) continue;
-        fl::u32 fed_at;
-        {
-            fl::lock_guard<fl::mutex> g(s.mu);
-            fed_at = s.fed_at_ms;
-        }
+
+        // Read the timestamp, judge expiry, and disarm as ONE critical section.
+        //
+        // Sampling fed_at_ms, dropping the lock, and only then deciding would
+        // let a feed() land in the gap: the worker would judge against a stale
+        // timestamp and fire on a watchdog that was just fed. Deciding under
+        // the lock makes the feed either wholly before this tick (no expiry) or
+        // wholly after it (next tick sees the new timestamp).
+        //
+        // Callbacks are invoked AFTER the lock is released — user code must
+        // never run with s.mu held, or a callback that touches the watchdog
+        // deadlocks.
+        //
         // Wrap-safe elapsed check — see the note on `fed_at_ms`.
         //
         // fl::platforms::millis(), NOT fl::millis(): the latter takes a
@@ -182,18 +190,27 @@ inline void stubWatchdogTimerLoop() FL_NO_EXCEPT {
         // The platform-level call is lock-free and identical in value: both
         // derive from the same micros64() root, so it stays mockable and keeps
         // the same u32 wrap semantics.
-        const fl::u32 elapsed = fl::platforms::millis() - fed_at;
-        if (elapsed >= s.timeout_ms.load()) {
-            WatchdogTimeoutCallback cb;
-            void* user;
-            fl::function<void()> cb_fn_copy;
-            {
-                fl::lock_guard<fl::mutex> g(s.mu);
-                cb = s.cb;
-                user = s.cb_user;
-                cb_fn_copy = s.cb_fn;
-                s.enabled.store(false);
+        bool expired = false;
+        WatchdogTimeoutCallback cb = nullptr;
+        void* user = nullptr;
+        fl::function<void()> cb_fn_copy;
+        {
+            fl::lock_guard<fl::mutex> g(s.mu);
+            // Re-check under the lock: disable() may have landed since the
+            // unlocked check above.
+            if (s.enabled.load()) {
+                const fl::u32 elapsed = fl::platforms::millis() - s.fed_at_ms;
+                if (elapsed >= s.timeout_ms.load()) {
+                    expired = true;
+                    cb = s.cb;
+                    user = s.cb_user;
+                    cb_fn_copy = s.cb_fn;
+                    s.enabled.store(false);
+                }
             }
+        }
+
+        if (expired) {
             if (cb) cb(user);
             if (cb_fn_copy) cb_fn_copy();
             stubWatchdogReset();
