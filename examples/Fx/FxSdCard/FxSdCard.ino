@@ -27,8 +27,9 @@
 // a dependency finder will see it: fbuild selects a framework library solely
 // from unconditional top-level includes in the sketch, and the Teensy core
 // bundles SPI inside its own libraries/ folder, so the header resolves while
-// its sources are never compiled. Without this line every teensy board fails
-// to link with `undefined reference to SPIClass::*` (FastLED#3838). A guard
+// its sources are never compiled. Without this line the Teensy boards that
+// carry the SdFat/SPI path -- 3.5, 3.6, 4.0 and 4.1 -- fail to link with
+// `undefined reference to SPIClass::*` (FastLED#3838). A guard
 // does not work -- the finder skips conditional includes even when the
 // condition is true.
 #include <SPI.h>
