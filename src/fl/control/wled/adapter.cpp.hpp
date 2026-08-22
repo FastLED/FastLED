@@ -1,4 +1,12 @@
 // ok no header
+
+// This is FastLED's own translation unit, not user code. `FastLED.h` emits
+// user-facing `#warning`s (EOL boards, removed build flags) that are all
+// guarded on `!defined(FASTLED_INTERNAL)`, so without this the library warns
+// at itself and the user sees the same notice twice per build. Matches the
+// convention already used by bitswap/crgb/cled_controller/FastLED.cpp.hpp.
+#define FASTLED_INTERNAL
+
 #include "fl/fx/wled/adapter.h"
 #include "FastLED.h"  // ok include - WLED adapter needs global FastLED object
 #include "fl/stl/memory.h"
