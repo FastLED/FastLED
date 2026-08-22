@@ -53,11 +53,30 @@ def get_build_dir(mode: str) -> Path:
     return BUILD_DIR_PREFIX / f"meson-wasm-{mode}"
 
 
+def resolve_example_dir(example_name: str) -> Path:
+    """Resolve an example name to its directory.
+
+    Examples live either directly under examples/ (e.g. examples/Blink/) or
+    nested one or more levels deep (e.g. examples/Fx/FxCylon/). Accepts a bare
+    name ("FxCylon") or a relative path ("Fx/FxCylon").
+    """
+    examples_root = PROJECT_ROOT / "examples"
+    name = Path(example_name).name
+
+    direct = examples_root / example_name
+    if (direct / f"{name}.ino").exists():
+        return direct
+
+    for ino in examples_root.rglob(f"{name}.ino"):
+        if ino.parent.name == name:
+            return ino.parent
+
+    raise FileNotFoundError(f"Sketch not found: {examples_root / example_name}")
+
+
 def get_sketch_cache_dir(example_name: str) -> Path:
     """Get per-sketch cache directory next to the .ino file: <sketch_dir>/.build/wasm/."""
-    ino_file = PROJECT_ROOT / "examples" / example_name / f"{example_name}.ino"
-    if not ino_file.exists():
-        raise FileNotFoundError(f"Sketch not found: {ino_file}")
+    ino_file = resolve_example_dir(example_name) / f"{Path(example_name).name}.ino"
     d = ino_file.parent / ".build" / "wasm"
     d.mkdir(parents=True, exist_ok=True)
     return d
@@ -821,8 +840,8 @@ def create_wrapper(example_name: str, sketch_cache_dir: Path) -> Path:
 
     Returns path to the wrapper file.
     """
-    example_dir = PROJECT_ROOT / "examples" / example_name
-    ino_file = example_dir / f"{example_name}.ino"
+    example_dir = resolve_example_dir(example_name)
+    ino_file = example_dir / f"{Path(example_name).name}.ino"
 
     if not ino_file.exists():
         raise FileNotFoundError(f"Example not found: {ino_file}")
@@ -1135,8 +1154,8 @@ def compile_sketch(
     library_archive = build_dir / "ci" / "meson" / "wasm" / "libfastled.a"
     # Find the .ino file that the wrapper #includes
     example_name = wrapper_path.stem.replace("_wrapper", "")
-    example_dir = PROJECT_ROOT / "examples" / example_name
-    ino_file = example_dir / f"{example_name}.ino"
+    example_dir = resolve_example_dir(example_name)
+    ino_file = example_dir / f"{Path(example_name).name}.ino"
     if object_path.exists():
         object_mtime = object_path.stat().st_mtime
         wrapper_mtime = wrapper_path.stat().st_mtime
@@ -1645,7 +1664,7 @@ def copy_templates(output_dir: Path) -> None:
 
 def generate_manifest(example_name: str, output_dir: Path) -> None:
     """Generate files.json manifest for data files."""
-    example_dir = PROJECT_ROOT / "examples" / example_name
+    example_dir = resolve_example_dir(example_name)
     data_extensions = frozenset(
         (".json", ".csv", ".txt", ".cfg", ".bin", ".dat", ".mp3", ".wav")
     )
@@ -1711,7 +1730,7 @@ def generate_asset_manifest(example_name: str, output_dir: Path) -> None:
     """
     from ci.compiler.asset_scanner import scan_sketch_assets, write_manifest_json
 
-    sketch_dir = PROJECT_ROOT / "examples" / example_name
+    sketch_dir = resolve_example_dir(example_name)
     scan = scan_sketch_assets(sketch_dir)
     for warning in scan.warnings:
         print(f"[WASM] {warning}", file=sys.stderr)

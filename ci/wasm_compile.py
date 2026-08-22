@@ -94,7 +94,9 @@ def main() -> int:
     # Output to examples/<name>/fastled_js/fastled.js to match expected location
     from pathlib import Path
 
-    output_dir = Path("examples") / example_name / "fastled_js"
+    from ci.wasm_build import resolve_example_dir
+
+    output_dir = resolve_example_dir(example_name) / "fastled_js"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     output_js = output_dir / "fastled.js"
