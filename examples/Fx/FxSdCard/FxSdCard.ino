@@ -22,6 +22,16 @@
 ///   2. `cd` into this example dir
 ///   3. `fastled` at the repo root opens a browser-based runner.
 
+// This sketch reads its media from an SD card over SPI. The Arduino SPI
+// library is a real dependency of that path, and a sketch is the only place
+// a dependency finder will see it: fbuild selects a framework library solely
+// from unconditional top-level includes in the sketch, and the Teensy core
+// bundles SPI inside its own libraries/ folder, so the header resolves while
+// its sources are never compiled. Without this line every teensy board fails
+// to link with `undefined reference to SPIClass::*` (FastLED#3838). A guard
+// does not work -- the finder skips conditional includes even when the
+// condition is true.
+#include <SPI.h>
 #include "FastLED.h"
 #include "Arduino.h"
 
