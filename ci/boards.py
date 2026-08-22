@@ -61,6 +61,9 @@ class Board:
     framework: str | None = None
     board_build_mcu: str | None = None
     board_build_core: str | None = None
+    # Size of the LittleFS/SPIFFS partition (e.g. "1.5m"), emitted as
+    # `board_build.filesystem_size`. Wired through both ini emitters; no board
+    # sets it yet.
     board_build_filesystem_size: str | None = None
     board_build_flash_size: str | None = (
         None  # Flash size for ESP32 boards (e.g., '4MB')
@@ -71,7 +74,10 @@ class Board:
     build_unflags: list[str] | None = None  # New: unflag options
     defines: list[str] | None = None
     customsdk: str | None = None
-    board_partitions: str | None = None  # Reserved for future use.
+    # ESP32 partition-table CSV name (e.g. "huge_app.csv"), emitted as
+    # `board_build.partitions`. Set by several boards whose app exceeds the
+    # default 1.25MB app partition.
+    board_partitions: str | None = None
     no_board_spec: bool = (
         False  # For platforms like 'native' that don't need a board specification
     )
