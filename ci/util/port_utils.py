@@ -62,9 +62,10 @@ NO_WIFI_ENVIRONMENTS: set[str] = {"esp32h2", "esp32p4"}
 # for default-port selection (see FastLED #3300 for the LPC845-BRK case that
 # motivated it, and FastLED #3836 for its retirement).
 #
-# A board that cannot be identified is a FastLED/boards gap: add the record
-# on the appropriate data branch, let fbuild ingest it, then cascade the
-# `fbuild==X.Y.Z` pin in pyproject.toml and relock locally. Full procedure:
+# A board that cannot be identified is a FastLED/boards gap: push the record
+# there (we own it — one commit to the `other` data branch plus a site
+# rebuild, minutes not a ticket). fbuild picks it up on its next cache
+# refresh, so no fbuild release is normally needed. Full procedure:
 # agents/docs/usb-vid-pid-registry.md.
 #
 # ci/util/serial_probe.py has a richer fingerprint table; it is likewise

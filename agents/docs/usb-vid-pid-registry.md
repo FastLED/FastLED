@@ -62,19 +62,61 @@ design.
 
 ## What to do when an identity is missing
 
-1. **Confirm it is actually missing.** Decode the published artifact and look
-   the pair up. Do not infer absence from a failed port scan — a cold or stale
-   cache looks identical to a missing record.
-2. **Add it on the FastLED/boards data branch** (`vendors` or `other` for a
-   bare chip or debug probe; `platformio` / `arduino` for a board). The
-   `site.yml` workflow republishes the artifact on push.
-3. **Let fbuild ingest it** and cut an fbuild release.
-4. **Cascade the version into this repo** — see below. Until the pin moves,
-   FastLED still resolves against the older artifact.
+**Push it to FastLED/boards. Immediately. We own that repo — this is the
+standard way to get support, not an escalation.** Do not file an issue and
+wait, and do not add a local literal "for now".
 
-Never short-circuit steps 1–3 by adding the literal here "temporarily". The
-LPC845-BRK and RP2350W entries in `ci/util/port_utils.py` are exactly what a
-temporary exception looks like three months later.
+The whole round trip is one commit and a few minutes:
+
+```bash
+# 1. Confirm it is actually missing (do not infer absence from a failed
+#    port scan — a cold cache looks identical to a missing record).
+uv run python ci/util/audit_usb_registry.py
+
+# 2. Add the record on the `other` data branch of FastLED/boards.
+git clone https://github.com/FastLED/boards.git .extern-repos/boards
+cd .extern-repos/boards
+git worktree add ../boards-other origin/other -b curate/<topic>
+```
+
+Curated records are flat JSON arrays — one file per topic, alongside the
+existing `nxp_debug_probe_pids.json` / `teensy_pids.json`:
+
+```json
+[
+  { "_comment": "Why these exist, when, and for which issue.",
+    "_skip": "ignored by extract_other.py (only records with vid+pid+product are ingested)" },
+  { "vid": "0403", "pid": "6014",
+    "product": "FTDI FT232H (single-channel Hi-Speed USB to UART/FIFO)",
+    "_source": "Where this identity came from and what ships it." }
+]
+```
+
+```bash
+# 3. Verify the extractor ingests it BEFORE pushing.
+uv run --no-project python builders/extract_other.py --in ../boards-other --out /tmp/other.json
+
+# 4. Push straight to the data branch, then rebuild the site.
+git push origin curate/<topic>:other
+gh workflow run "Build site" -R FastLED/boards
+
+# 5. Re-run the audit once the rebuild completes (~2-4 min).
+uv run python ci/util/audit_usb_registry.py
+```
+
+`site.yml` triggers on any push to a data branch, with a nightly backstop and
+a `workflow_dispatch` override — dispatch it rather than waiting if the push
+trigger does not fire.
+
+**Do you also need an fbuild bump?** Usually no. fbuild fetches the published
+catalogue at runtime, so a boards push reaches every consumer on the next cache
+refresh without a release. Bump fbuild only when the *ingestion or resolution
+logic* changes, not when data changes. That is the "push boards, or push boards
+and fbuild" split.
+
+Never add the literal here "temporarily". The LPC845-BRK and RP2350W entries in
+`ci/util/port_utils.py` are exactly what a temporary exception looks like three
+months later.
 
 ## Cascading an fbuild version bump into FastLED
 
@@ -103,32 +145,35 @@ wheel and any verification you do is against the old registry snapshot.
 
 ## Migration status (audited 2026-08-22)
 
-Every VID:PID literal in this repo's `ci/` tree was checked against the live
-`usb-vids.proto.zstd` (36 vendors / 1056 products). **14 of 15 resolve from the
-registry**:
+Every VID:PID literal in this repo's `ci/` tree resolves from the published
+registry — **15 of 15**:
 
-| VID:PID | Identity | Registry |
-| --- | --- | --- |
-| `2E8A:000A` | rp2040 / rpipico application CDC | resolved |
-| `2E8A:F00A` | rpipicow application CDC | resolved |
-| `2E8A:000F` | rp2350 / rpipico2 application CDC | resolved |
-| `2E8A:F00F` | rp2350w / rpipico2w application CDC | resolved |
-| `2E8A:0003` | RP2 ROM BOOTSEL | resolved |
-| `16C0:0483` | LPCXpresso VCOM (LPC11U35) | resolved |
-| `16C0:0486` | PJRC / Teensy USB-Serial (alt) | resolved |
-| `1FC9:0132` | NXP LPC-Link2 CMSIS-DAP | resolved |
-| `303A:1001` | Espressif native USB CDC | resolved |
-| `10C4:EA60` | Silicon Labs CP2102 | resolved |
-| `1A86:7523` | WCH CH340 | resolved |
-| `1A86:55D4` | WCH CH343 | resolved |
-| `0403:6001` | FTDI FT232R | resolved |
-| `0403:6010` | FTDI FT2232 | resolved |
-| `0403:6014` | FTDI FT232H | **GAP** — FastLED/boards#60 |
+| VID:PID | Identity |
+| --- | --- |
+| `2E8A:000A` | rp2040 / rpipico application CDC |
+| `2E8A:F00A` | rpipicow application CDC |
+| `2E8A:000F` | rp2350 / rpipico2 application CDC |
+| `2E8A:F00F` | rp2350w / rpipico2w application CDC |
+| `2E8A:0003` | RP2 ROM BOOTSEL |
+| `16C0:0483` | LPCXpresso VCOM (LPC11U35) |
+| `16C0:0486` | PJRC / Teensy USB-Serial (alt) |
+| `1FC9:0132` | NXP LPC-Link2 CMSIS-DAP |
+| `303A:1001` | Espressif native USB CDC |
+| `10C4:EA60` | Silicon Labs CP2102 |
+| `1A86:7523` | WCH CH340 |
+| `1A86:55D4` | WCH CH343 |
+| `0403:6001` | FTDI FT232R |
+| `0403:6010` | FTDI FT2232 |
+| `0403:6014` | FTDI FT232H |
 
-The FTDI vendor entry exists but enumerates only `6001` and `6010`; `6014` is
-absent registry-wide. It is the sole blocker to deleting the local tables
-outright rather than freezing them. Do not close that gap by keeping the
-literal — track it in FastLED/boards#60.
+The audit initially found 14/15. The one gap — FTDI FT232H `0403:6014`, absent
+registry-wide — was closed the way this doc prescribes: one commit to the
+`other` data branch of FastLED/boards, site rebuild, done (FastLED/boards#60).
+That is the worked example. Total elapsed time was a few minutes, which is why
+the procedure above says push rather than file.
+
+Nothing local is now load-bearing: every literal in `ci/` is redundant with the
+registry and can be deleted once its call site routes through fbuild.
 
 Re-run the audit at any time:
 
@@ -136,17 +181,15 @@ Re-run the audit at any time:
 uv run python ci/util/audit_usb_registry.py
 ```
 
-It fetches the live artifact, decodes it, and reports which audited literals
-resolve. A cold or stale cache is indistinguishable from a missing record, so
-always check the published payload rather than a failed port scan.
+It fetches the published catalogue and exits non-zero if any audited literal
+stops resolving. `AUDITED_LITERALS` in that script is the checklist — it should
+shrink to empty as literals are retired.
 
-Two lists in that script carry the state. `AUDITED_LITERALS` is the checklist —
-it should shrink to empty as literals are retired. `KNOWN_GAPS` holds gaps
-already filed upstream; those print as `GAP*` with their tracking issue and do
-**not** fail the run, so the audit can be wired into CI without going
-permanently red. It exits 1 on a gap that is *not* filed, and also when a
-`KNOWN_GAPS` entry has since been published — that is the prompt to drop the
-allowlist entry and delete the local literal.
+The script reads `usb-ids.json`, the plain-JSON projection of the catalogue,
+and needs nothing outside the standard library. fbuild reads
+`usb-vids.proto.zstd` instead because it wants the compact binary form; both
+endpoints carry identical data, so there is no reason for a Python consumer to
+take on a zstd dependency and a protobuf decoder to read it.
 
 ## Existing local tables (legacy, do not extend)
 

@@ -1,46 +1,44 @@
 #!/usr/bin/env python3
 """Audit this repo's hardcoded USB VID:PID literals against FastLED/boards.
 
-The USB identity registry lives in https://github.com/FastLED/boards and is
-published as a zstd-compressed protobuf, `usb-vids.proto.zstd`. fbuild ingests
-that artifact; FastLED consumes it through fbuild. See
-`agents/docs/usb-vid-pid-registry.md` for the full rule and the cascade
-procedure.
+The USB identity registry lives in https://github.com/FastLED/boards. FastLED
+consumes it through fbuild. See `agents/docs/usb-vid-pid-registry.md` for the
+full rule and the publish procedure.
 
 This script exists so the migration status in that doc can be re-derived rather
-than trusted. It fetches the published artifact, decodes it, and reports which
-of the literals still present in `ci/` resolve from the registry.
+than trusted. It fetches the published catalogue, and reports which of the
+literals still present in `ci/` resolve from the registry.
 
     uv run python ci/util/audit_usb_registry.py
 
 Exit codes:
-    0 — every audited literal resolves, ignoring the gaps in KNOWN_GAPS
-    1 — an unfiled literal is missing, or a KNOWN_GAPS entry went stale
-    2 — the artifact could not be fetched or decoded
+    0 - every audited literal resolves from the registry
+    1 - at least one literal is missing
+    2 - the catalogue could not be fetched or parsed
 
-Exit 0 while a filed gap is outstanding is deliberate: it makes this safe to
-wire into CI or a pre-commit hook without going permanently red. Those show as
-`GAP*` with their tracking issue. A gap that is NOT in KNOWN_GAPS still fails.
+A missing literal is a registry gap. We own FastLED/boards, so the fix is to
+publish the record there (see the doc for the one-commit procedure), never to
+keep or add a local literal.
 
-A missing literal is a registry gap, never a reason to keep or add a local
-entry. `0403:6014` (FTDI FT232H) is the one known outstanding gap, tracked as
-FastLED/boards#60.
+Note on the endpoint: FastLED/boards publishes the same catalogue twice --
+`usb-ids.json` (plain JSON) and `usb-vids.proto.zstd` (zstd-compressed
+protobuf). fbuild consumes the protobuf because it wants the compact binary
+form. This script deliberately uses the JSON: it carries identical data and
+needs nothing outside the standard library, where the protobuf would drag in a
+zstd dependency and a hand-rolled wire-format decoder for zero benefit.
 """
 
 from __future__ import annotations
 
+import json
 import sys
 import urllib.request
-from typing import Iterator, NamedTuple
+from typing import Any, NamedTuple
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
-ARTIFACT_URL = "https://fastled.github.io/boards/usb-vids.proto.zstd"
-
-# Decompression guard: the published artifact is ~8 KB compressed and well
-# under a megabyte inflated. A far larger bound still refuses a zip bomb.
-MAX_INFLATED_BYTES = 64 << 20
+CATALOGUE_URL = "https://fastled.github.io/boards/usb-ids.json"
 
 FETCH_TIMEOUT_S = 30
 
@@ -55,7 +53,7 @@ class Literal(NamedTuple):
 
 
 # Every VID:PID literal in the ci/ tree. Keep in sync when a literal is
-# retired — the point of this list is that it shrinks to empty.
+# retired - the point of this list is that it shrinks to empty.
 AUDITED_LITERALS: tuple[Literal, ...] = (
     Literal(0x2E8A, 0x000A, "rp2040 / rpipico application CDC", "port_utils.py"),
     Literal(0x2E8A, 0xF00A, "rpipicow application CDC", "port_utils.py"),
@@ -75,214 +73,85 @@ AUDITED_LITERALS: tuple[Literal, ...] = (
 )
 
 
-# Gaps already filed upstream and accepted as outstanding. A known gap keeps
-# the exit code green so this script can be wired into CI or a pre-commit hook
-# without going permanently red; an *unknown* gap still fails. Delete an entry
-# once the registry publishes it — the audit then fails loudly if it regresses.
-KNOWN_GAPS: dict[tuple[int, int], str] = {
-    (0x0403, 0x6014): "FastLED/boards#60",
-}
+def fetch_catalogue(url: str = CATALOGUE_URL) -> dict[int, tuple[str, dict[int, str]]]:
+    """Fetch `usb-ids.json` and index it as {vid: (vendor_name, {pid: product})}.
 
+    Published shape:
 
-def _read_varint(buf: bytes, pos: int) -> tuple[int, int]:
-    """Decode a protobuf base-128 varint at `pos`; return (value, next_pos)."""
-    result = 0
-    shift = 0
-    while True:
-        if pos >= len(buf):
-            raise ValueError("truncated varint")
-        byte = buf[pos]
-        pos += 1
-        result |= (byte & 0x7F) << shift
-        if not byte & 0x80:
-            return result, pos
-        shift += 7
-        if shift > 63:
-            raise ValueError("varint too long")
+        {"0403": {"Vendor name": "FTDI",
+                  "PIDs": [{"6001": "Digilent chipKIT UNO32"}, ...]}, ...}
 
-
-def _iter_fields(buf: bytes) -> Iterator[tuple[int, int | bytes]]:
-    """Yield (field_number, value) for a protobuf message body.
-
-    The schema uses varint (0) and length-delimited (2). Fixed-width fields
-    (1, 5) are skipped rather than rejected so a forward-compatible upstream
-    addition does not abort the parse; only genuinely malformed wire types
-    raise. Callers ignore field numbers they do not recognise.
+    Keys are lowercase 4-digit hex. Unparseable entries are skipped rather than
+    aborting the run, so an upstream addition we do not understand cannot mask
+    the literals we do care about.
     """
-    pos = 0
-    while pos < len(buf):
-        key, pos = _read_varint(buf, pos)
-        field_number, wire_type = key >> 3, key & 0x07
-        if wire_type == 0:
-            value, pos = _read_varint(buf, pos)
-            yield field_number, value
-        elif wire_type == 2:
-            length, pos = _read_varint(buf, pos)
-            end = pos + length
-            if end > len(buf):
-                raise ValueError("length-delimited field overruns buffer")
-            yield field_number, buf[pos:end]
-            pos = end
-        elif wire_type in (1, 5):
-            # Fixed-width fields (8-byte / 4-byte). The schema does not use
-            # them today, but FastLED/boards owns it independently, so an
-            # added checksum or timestamp must not abort the parse — that
-            # would report "artifact undecodable" when every audited VID:PID
-            # is still present. Skip them the way any protobuf reader does.
-            width = 8 if wire_type == 1 else 4
-            end = pos + width
-            if end > len(buf):
-                raise ValueError("fixed-width field overruns buffer")
-            pos = end
-        else:
-            # Wire types 3 and 4 are the deprecated start/end-group pair; 6
-            # and 7 are unassigned. Any of them means genuinely malformed
-            # data rather than a forward-compatible schema addition.
-            raise ValueError(f"unsupported wire type {wire_type}")
-
-
-def _as_bytes(value: int | bytes) -> bytes:
-    if not isinstance(value, bytes):
-        raise ValueError("expected a length-delimited field")
-    return value
-
-
-def _as_int(value: int | bytes) -> int:
-    if isinstance(value, bytes):
-        raise ValueError("expected a varint field")
-    return value
-
-
-def decode_registry(raw: bytes) -> dict[int, tuple[str, dict[int, str]]]:
-    """Decode the inflated artifact into {vid: (vendor_name, {pid: product})}.
-
-    Schema (published by FastLED/boards):
-
-        message UsbVidDatabase { repeated Vendor vendors = 1; }
-        message Vendor  { uint32 vid = 1; string name = 2;
-                          repeated Product products = 3; }
-        message Product { uint32 pid = 1; string name = 2; }
-    """
-    registry: dict[int, tuple[str, dict[int, str]]] = {}
-    for field_number, value in _iter_fields(raw):
-        if field_number != 1:
-            continue
-        vid: int | None = None
-        vendor_name = ""
-        products: dict[int, str] = {}
-        for vendor_field, vendor_value in _iter_fields(_as_bytes(value)):
-            if vendor_field == 1:
-                vid = _as_int(vendor_value)
-            elif vendor_field == 2:
-                vendor_name = _as_bytes(vendor_value).decode("utf-8", "replace")
-            elif vendor_field == 3:
-                pid: int | None = None
-                product_name = ""
-                for product_field, product_value in _iter_fields(
-                    _as_bytes(vendor_value)
-                ):
-                    if product_field == 1:
-                        pid = _as_int(product_value)
-                    elif product_field == 2:
-                        product_name = _as_bytes(product_value).decode(
-                            "utf-8", "replace"
-                        )
-                if pid is not None:
-                    products[pid] = product_name
-        if vid is not None:
-            registry[vid] = (vendor_name, products)
-    return registry
-
-
-def fetch_artifact(url: str = ARTIFACT_URL) -> bytes:
-    """Download and inflate the published registry artifact."""
-    try:
-        import zstandard
-    except ImportError as exc:  # pragma: no cover - environment-dependent
-        raise RuntimeError(
-            "zstandard is required to decode usb-vids.proto.zstd. Run this "
-            "script with `uv run --with zstandard python "
-            "ci/util/audit_usb_registry.py`."
-        ) from exc
-
     with urllib.request.urlopen(url, timeout=FETCH_TIMEOUT_S) as response:
-        compressed = response.read()
-    return zstandard.ZstdDecompressor().decompress(
-        compressed, max_output_size=MAX_INFLATED_BYTES
-    )
+        payload: dict[str, Any] = json.loads(response.read().decode("utf-8"))
+
+    catalogue: dict[int, tuple[str, dict[int, str]]] = {}
+    for vid_hex, entry in payload.items():
+        try:
+            vid = int(vid_hex, 16)
+        except (TypeError, ValueError):
+            continue
+        if not isinstance(entry, dict):
+            continue
+        vendor_entry: dict[str, Any] = entry
+        vendor_name = str(vendor_entry.get("Vendor name", ""))
+        products: dict[int, str] = {}
+        pid_items: Any = vendor_entry.get("PIDs") or []
+        if not isinstance(pid_items, list):
+            continue
+        for item in pid_items:
+            if not isinstance(item, dict):
+                continue
+            pid_map: dict[str, Any] = item
+            for pid_hex, product in pid_map.items():
+                try:
+                    products[int(pid_hex, 16)] = str(product)
+                except (TypeError, ValueError):
+                    continue
+        catalogue[vid] = (vendor_name, products)
+    return catalogue
 
 
 def main() -> int:
     try:
-        raw = fetch_artifact()
-        registry = decode_registry(raw)
+        catalogue = fetch_catalogue()
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
     except Exception as exc:
-        print(f"FAILED to obtain the FastLED/boards registry: {exc}")
-        print(f"  artifact: {ARTIFACT_URL}")
+        print(f"FAILED to obtain the FastLED/boards catalogue: {exc}")
+        print(f"  endpoint: {CATALOGUE_URL}")
         return 2
 
-    vendor_count = len(registry)
-    product_count = sum(len(products) for _, products in registry.values())
+    vendor_count = len(catalogue)
+    product_count = sum(len(products) for _, products in catalogue.values())
     print(f"FastLED/boards registry: {vendor_count} vendors, {product_count} products")
     print(f"Auditing {len(AUDITED_LITERALS)} literals from ci/\n")
 
-    new_gaps: list[Literal] = []
-    known_gaps: list[Literal] = []
-    stale_known: list[Literal] = []
+    gaps: list[Literal] = []
     for entry in AUDITED_LITERALS:
         pair = f"{entry.vid:04X}:{entry.pid:04X}"
-        tracker = KNOWN_GAPS.get((entry.vid, entry.pid))
-        vendor = registry.get(entry.vid)
+        vendor = catalogue.get(entry.vid)
         if vendor is None or entry.pid not in vendor[1]:
-            if tracker is not None:
-                known_gaps.append(entry)
-                print(f"  GAP* {pair}  {entry.label}  [{entry.source}]  {tracker}")
-            else:
-                new_gaps.append(entry)
-                print(f"  GAP  {pair}  {entry.label}  [{entry.source}]")
+            gaps.append(entry)
+            print(f"  GAP  {pair}  {entry.label}  [{entry.source}]")
             continue
         vendor_name, products = vendor
         print(f"  OK   {pair}  {entry.label}  -> {vendor_name} / {products[entry.pid]}")
-        if tracker is not None:
-            stale_known.append(entry)
 
-    resolved = len(AUDITED_LITERALS) - len(new_gaps) - len(known_gaps)
+    resolved = len(AUDITED_LITERALS) - len(gaps)
     print(f"\n{resolved}/{len(AUDITED_LITERALS)} resolve from FastLED/boards")
-
-    if stale_known:
-        # The registry caught up. Prompt the cleanup rather than letting the
-        # allowlist quietly mask a gap that no longer exists.
-        print("\nKNOWN_GAPS is stale — these now resolve upstream:")
-        for entry in stale_known:
-            pair = f"{entry.vid:04X}:{entry.pid:04X}"
-            tracker = KNOWN_GAPS[(entry.vid, entry.pid)]
-            print(f"  {pair}  {entry.label}  ({tracker})")
+    if gaps:
         print(
-            "Drop them from KNOWN_GAPS and retire the literal from "
-            f"{stale_known[0].source}."
+            "\nEach GAP is a registry gap. We own FastLED/boards -- publish the\n"
+            "record there rather than keeping a local literal. One commit to the\n"
+            "`other` data branch; see agents/docs/usb-vid-pid-registry.md.\n"
+            "Allow a few minutes for the site rebuild before re-running."
         )
         return 1
-
-    if new_gaps:
-        print(
-            "\nEach GAP is a registry gap. Add the record on the FastLED/boards\n"
-            "data branch, let fbuild ingest it, then cascade the fbuild pin\n"
-            "in pyproject.toml. Do NOT keep or add a local literal.\n"
-            "See agents/docs/usb-vid-pid-registry.md."
-        )
-        return 1
-
-    if known_gaps:
-        print(
-            f"\n{len(known_gaps)} known gap(s) marked GAP*, already filed "
-            "upstream and accepted as outstanding.\nEvery other literal is "
-            "published and can be retired."
-        )
-        return 0
-
     print("\nAll audited literals are published upstream and can be retired.")
     return 0
 
