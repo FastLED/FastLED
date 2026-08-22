@@ -48,11 +48,11 @@
 // yet (FastLED #3972). Define `SD_SPI_USE_ARDUINO_SPI` to force that path back
 // on for Teensy 4 as an escape hatch.
 #if defined(FL_IS_TEENSY_4X) && !defined(SD_SPI_USE_ARDUINO_SPI)
-#define SD_SPI_USE_LPSPI_BUS 1
+#define FL_SDFAT_HAS_LPSPI_BUS
 #endif
 
 #if SPI_DRIVER_SELECT < 2
-#if defined(SD_SPI_USE_LPSPI_BUS)
+#if defined(FL_SDFAT_HAS_LPSPI_BUS)
 #include "platforms/arm/teensy/teensy4_common/lpspi/lpspi_bus.h"  // ok platform headers
 #else
 #include "SPI.h"

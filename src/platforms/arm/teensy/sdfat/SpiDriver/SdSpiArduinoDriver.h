@@ -36,7 +36,7 @@
 #define SD_USE_CUSTOM_SPI
 #endif  // SPI_DRIVER_SELECT == 0 && SD_HAS_CUSTOM_SPI
 namespace fl { namespace platforms { namespace teensy { namespace sdfat {
-#if defined(SD_SPI_USE_LPSPI_BUS)
+#if defined(FL_SDFAT_HAS_LPSPI_BUS)
 /** Port type for the FastLED LPSPI hardware driver (Teensy 4). */
 typedef fl::platforms::teensy::LpspiBus SpiPort_t;
 /** Transaction settings for the FastLED LPSPI hardware driver (Teensy 4). */
