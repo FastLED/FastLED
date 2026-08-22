@@ -55,10 +55,20 @@ NO_WIFI_ENVIRONMENTS: set[str] = {"esp32h2", "esp32p4"}
 # them all here lets the same PlatformIO env work regardless of which
 # firmware is on the on-board probe (see the LPC845-BRK note below).
 #
-# Add new entries here when porting to a new board. See FastLED #3300 for
-# the LPC845-BRK case that motivated this map. ci/util/serial_probe.py
-# has a richer fingerprint table; this map only carries the entries
-# autoresearch needs for default-port selection.
+# FROZEN — DO NOT ADD ENTRIES. USB VID:PID identity is owned by
+# https://github.com/FastLED/boards and reaches this repo through fbuild's
+# ingestion of the published `usb-vids.proto.zstd` archive. Every pair below
+# is already published there; this map survives only as a legacy fast path
+# for default-port selection (see FastLED #3300 for the LPC845-BRK case that
+# motivated it, and FastLED #3836 for its retirement).
+#
+# A board that cannot be identified is a FastLED/boards gap: add the record
+# on the appropriate data branch, let fbuild ingest it, then cascade the
+# `fbuild==X.Y.Z` pin in pyproject.toml and relock locally. Full procedure:
+# agents/docs/usb-vid-pid-registry.md.
+#
+# ci/util/serial_probe.py has a richer fingerprint table; it is likewise
+# frozen and is display/diagnostic only.
 ENVIRONMENT_TO_VCOM_VID_PIDS: dict[str, tuple[tuple[int, int], ...]] = {
     # RP2040 Pico application CDC (the ROM BOOTSEL interface is 2E8A:0003
     # and is intentionally not a serial port). Keep this fingerprint strict:
