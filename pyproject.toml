@@ -5,10 +5,17 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.5.19. It carries hardened USB/deploy recovery, current
+    # Pin to fbuild 2.5.20. It carries hardened USB/deploy recovery, current
     # esptool probing, and the accumulated library/build fixes below.
     #
     # Pin history:
+    #   2.5.20 -- fbuild provisions the Linux shared libraries Espressif QEMU
+    #              needs (libslirp/libSDL2/libpixman) itself instead of
+    #              requiring an apt-get step from the caller: it probes the
+    #              emulator and, on a host that cannot start it, downloads a
+    #              sha256-pinned runtime bundle and exports it on
+    #              LD_LIBRARY_PATH. This is what lets qemu_template.yml drop
+    #              its apt step (FastLED/fbuild#1352/#1355).
     #   2.5.19 -- selects the exact runtime RP board profile from the verified
     #              FastLED/boards USB identity registry instead of a local
     #              VID/PID guess, and adds ClearCore SAME53 builds
@@ -201,7 +208,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.19",
+    "fbuild==2.5.20",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented
