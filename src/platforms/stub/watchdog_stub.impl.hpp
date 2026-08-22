@@ -30,6 +30,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/mutex.h"
 #include "fl/stl/thread.h"
+#include "platforms/time_platform.h"
 
 #define FL_WATCHDOG_HAS_HARDWARE
 #define FL_WATCHDOG_PERSIST_BYTES 16
@@ -169,7 +170,19 @@ inline void stubWatchdogTimerLoop() FL_NO_EXCEPT {
             fed_at = s.fed_at_ms;
         }
         // Wrap-safe elapsed check — see the note on `fed_at_ms`.
-        const fl::u32 elapsed = fl::millis() - fed_at;
+        //
+        // fl::platforms::millis(), NOT fl::millis(): the latter takes a
+        // function-local static mutex under FASTLED_TESTING to consult the
+        // inject_time_provider seam. This worker calls it on every 10 ms tick,
+        // and at process teardown the static destruction order between that
+        // mutex and this state is unspecified — the thread can reach the mutex
+        // after it is gone, which throws std::system_error("mutex lock
+        // failed") out of a thread that cannot catch it and aborts the run.
+        //
+        // The platform-level call is lock-free and identical in value: both
+        // derive from the same micros64() root, so it stays mockable and keeps
+        // the same u32 wrap semantics.
+        const fl::u32 elapsed = fl::platforms::millis() - fed_at;
         if (elapsed >= s.timeout_ms.load()) {
             WatchdogTimeoutCallback cb;
             void* user;
@@ -217,7 +230,7 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
     auto& s = platforms::stubWatchdogState();
     fl::lock_guard<fl::mutex> g(s.mu);
     s.timeout_ms.store(timeout_ms);
-    s.fed_at_ms = fl::millis();
+    s.fed_at_ms = fl::platforms::millis();
     s.enabled.store(true);
 }
 
@@ -225,7 +238,7 @@ void Watchdog::feed() FL_NO_EXCEPT {
     auto& s = platforms::stubWatchdogState();
     if (!s.enabled.load()) return;
     fl::lock_guard<fl::mutex> g(s.mu);
-    s.fed_at_ms = fl::millis();
+    s.fed_at_ms = fl::platforms::millis();
 }
 
 void Watchdog::disable() FL_NO_EXCEPT {
