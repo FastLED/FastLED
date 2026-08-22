@@ -106,7 +106,7 @@ class SdSpiArduinoDriver {
   // SpiPort_t / SpiPortSettings_t are selected just above, driven by the
   // transport macro SdSpiDriver.h defines before including this header:
   // fl LpspiBus on Teensy 4, fl DspiBus on Teensy 3.x/LC, and SPIClass only
-  // when SD_SPI_USE_ARDUINO_SPI forces the framework path back on.
+  // when FL_SDFAT_USE_ARDUINO_SPI forces the framework path back on.
   SpiPort_t *mSpi;
   SpiPortSettings_t mSpiSettings;
 };

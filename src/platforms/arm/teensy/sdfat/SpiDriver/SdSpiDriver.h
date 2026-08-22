@@ -50,10 +50,10 @@
 // dependency: the frequency-to-CTAR mapping is computed from the K20/K64/K66
 // reference manual instead of transcribed from the GPL/LGPL tables.
 //
-// Define `SD_SPI_USE_ARDUINO_SPI` to force the Arduino path back on as an
+// Define `FL_SDFAT_USE_ARDUINO_SPI` to force the Arduino path back on as an
 // escape hatch. Nothing links in that configuration unless the sketch also
 // carries an unconditional `#include <SPI.h>`.
-#if !defined(SD_SPI_USE_ARDUINO_SPI)
+#if !defined(FL_SDFAT_USE_ARDUINO_SPI)
 #if defined(FL_IS_TEENSY_4X)
 #define FL_SDFAT_HAS_LPSPI_BUS
 #elif defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_LC)
