@@ -3,18 +3,15 @@
 // Upstream-derived from the USE_SDFAT branch of
 // src/platforms/fs_sdcard_arduino.hpp.
 
-#include "platforms/arm/teensy/is_teensy.h"  // ok platform headers
+// Deliberately no `#include <SPI.h>` here. Every Teensy now routes SdFat
+// through a FastLED-owned bus -- `LpspiBus` on Teensy 4 (FastLED#3971),
+// `DspiBus` on Teensy 3.x/LC (FastLED#3972) -- and pulling the framework
+// header in would keep the GPL/LGPL `SPI.h` in the translation unit and
+// re-expose the undefined `SPIClass`/`SPI` symbols the moment anything
+// referenced them again. `SdSpiDriver.h` supplies whichever transport header
+// the platform actually needs.
 
 // IWYU pragma: begin_keep
-#if !defined(FL_IS_TEENSY_4X)
-// Teensy 3.x still routes SdFat through Arduino `SPIClass`. Teensy 4 uses
-// FastLED's own `LpspiBus` (FastLED#3971), so pulling the framework header in
-// here would keep the GPL/LGPL `SPI.h` in the translation unit and re-expose
-// the undefined `SPIClass`/`SPI` symbols the moment anything referenced them
-// again. `SdSpiDriver.h` supplies whichever transport header the platform
-// actually needs.
-#include <SPI.h>
-#endif
 #include "platforms/arm/teensy/sdfat/SdFat.h"
 // IWYU pragma: end_keep
 

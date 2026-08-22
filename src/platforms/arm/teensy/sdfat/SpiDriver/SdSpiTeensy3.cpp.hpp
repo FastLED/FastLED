@@ -49,6 +49,9 @@ void SdSpiArduinoDriver::begin(SdSpiConfig spiConfig) {
 #if defined(FL_SDFAT_HAS_LPSPI_BUS)
     // Bus 0 is LPSPI4, the peripheral the Arduino global `SPI` wraps.
     m_spi = &fl::platforms::teensy::LpspiBus::get(0);
+#elif defined(FL_SDFAT_HAS_DSPI_BUS)
+    // Bus 0 is SPI0, the peripheral the Arduino global `SPI` wraps.
+    m_spi = &fl::platforms::teensy::DspiBus::get(0);
 #else
     m_spi = &SPI;
 #endif
