@@ -1319,12 +1319,19 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
         ctx.final_environment is not None and "teensy" in ctx.final_environment.lower()
     )
     rp2xxx_environment = _active_rp2xxx_environment(ctx.final_environment)
-    stock_rp2xxx_transport = bool(rp2xxx_environment) and (
-        args.rpc_smoke or args.watchdog_soak
-    )
+    # RP port selection belongs to fbuild for EVERY run mode, not just the
+    # stock rpc-smoke / watchdog-soak transports (FastLED#3836). An RP board
+    # enumerates as BOOTSEL mass-storage before deploy and only publishes its
+    # application CDC endpoint afterwards, so a pre-deploy scan here is either
+    # racing that transition or matching some other attached board. fbuild
+    # discovers RPI-RP2 and returns the application port from `deploy`.
+    #
+    # An explicit --upload-port still wins: it is read into `upload_port`
+    # above and short-circuits the detection below regardless of this flag.
+    fbuild_owns_rp_port = bool(rp2xxx_environment)
 
     upload_port = args.upload_port
-    if not upload_port and not stock_rp2xxx_transport:
+    if not upload_port and not fbuild_owns_rp_port:
         expected_environment = None if is_teensy else ctx.final_environment
         max_wait_s = 60
         poll_interval_s = 1.0
@@ -1395,9 +1402,9 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
 
         upload_port = result.selected_port
 
-    if stock_rp2xxx_transport and not upload_port:
+    if fbuild_owns_rp_port and not upload_port:
         print(
-            f"📦 Stock {rp2xxx_environment} transport: no pre-deploy serial port required; "
+            f"📦 {rp2xxx_environment}: no pre-deploy serial port required; "
             "fbuild will discover RPI-RP2 and return the application CDC port."
         )
     else:
@@ -1811,15 +1818,16 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     args = ctx.args
     upload_port = ctx.upload_port
     rp2xxx_environment = _active_rp2xxx_environment(ctx.final_environment)
-    if (
-        upload_port is None
-        and (ctx.rpc_smoke_mode or ctx.watchdog_soak_mode)
-        and ctx.use_fbuild
-        and rp2xxx_environment is not None
-    ):
-        # Stock RP2xxx deployment starts from BOOTSEL mass-storage and may
-        # return before Windows has published the application CDC endpoint.
-        # Poll by USB identity instead of asserting on the pre-deploy port.
+    if upload_port is None and ctx.use_fbuild and rp2xxx_environment is not None:
+        # RP2xxx deployment starts from BOOTSEL mass-storage and may return
+        # before Windows has published the application CDC endpoint. Poll by
+        # USB identity instead of asserting on the pre-deploy port.
+        #
+        # This covers every RP run mode, matching the pre-deploy gate in
+        # _resolve_port_and_environment (FastLED#3836). Narrowing it to
+        # rpc-smoke/watchdog-soak would leave driver-mode runs — which now
+        # also arrive here with no pre-deploy port — failing outright whenever
+        # fbuild's deploy did not return one.
         wait_seconds = min(10.0, ctx.remaining_seconds())
         deadline = time.monotonic() + max(0.0, wait_seconds)
         while True:

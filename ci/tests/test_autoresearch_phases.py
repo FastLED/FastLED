@@ -1596,24 +1596,27 @@ class TestResolvePortAndEnvironment:
     @pytest.mark.parametrize(
         "environment", ("rp2350", "rpipico2", "rp2350w", "rpipico2w")
     )
-    def test_rp2xxx_rpc_smoke_allows_fbuild_no_port_transport(
+    def test_rp2xxx_driver_mode_delegates_port_selection_to_fbuild(
         self, environment: str
     ) -> None:
         args = _make_args(
             environment=environment,
             upload_port=None,
-            parlio=False,
-            rpc_smoke=True,
+            parlio=True,
+            rpc_smoke=False,
         )
         ctx = _make_ctx(
             args=args,
             final_environment=environment,
             upload_port=None,
-            rpc_smoke_mode=True,
+            rpc_smoke_mode=False,
         )
 
         with (
-            patch(f"{_PATCH_MOD}.auto_detect_upload_port") as auto_detect,
+            patch(
+                f"{_PATCH_MOD}.auto_detect_upload_port",
+                side_effect=AssertionError("RP port selection belongs to fbuild"),
+            ) as auto_detect,
             patch(
                 f"{_PATCH_MOD}.select_build_driver",
                 return_value=_make_mock_driver(),
