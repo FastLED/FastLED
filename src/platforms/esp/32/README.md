@@ -493,7 +493,8 @@ Quick PlatformIO examples
   compile time on IDF 5.x and newer:
   ```ini
   [env:esp32dev_rmt4]
-  platform = espressif32@<pin to an IDF 4.x release>
+  ; IDF 4.4 — the release FastLED's esp32dev_idf44 CI job builds against
+  platform = https://github.com/platformio/platform-espressif32/archive/refs/tags/v4.4.0.zip
   board = esp32dev
   framework = arduino
   build_flags =
