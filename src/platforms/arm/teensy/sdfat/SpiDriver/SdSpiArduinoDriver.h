@@ -41,6 +41,11 @@ namespace fl { namespace platforms { namespace teensy { namespace sdfat {
 typedef fl::platforms::teensy::LpspiBus SpiPort_t;
 /** Transaction settings for the FastLED LPSPI hardware driver (Teensy 4). */
 typedef fl::platforms::teensy::LpspiSettings SpiPortSettings_t;
+#elif defined(FL_SDFAT_HAS_DSPI_BUS)
+/** Port type for the FastLED DSPI hardware driver (Teensy 3.x / LC). */
+typedef fl::platforms::teensy::DspiBus SpiPort_t;
+/** Transaction settings for the FastLED DSPI hardware driver (Teensy 3.x / LC). */
+typedef fl::platforms::teensy::DspiSettings SpiPortSettings_t;
 #else
 /** Port type for Arduino SPI hardware driver. */
 typedef SPIClass SpiPort_t;
@@ -98,9 +103,10 @@ class SdSpiArduinoDriver {
   }
 
  private:
-  // SpiPort_t / SpiPortSettings_t are selected in SdSpiDriver.h, which
-  // includes this header after declaring them: SPIClass/SPISettings on
-  // Teensy 3.x, fl LpspiBus/LpspiSettings on Teensy 4.
+  // SpiPort_t / SpiPortSettings_t are selected just above, driven by the
+  // transport macro SdSpiDriver.h defines before including this header:
+  // fl LpspiBus on Teensy 4, fl DspiBus on Teensy 3.x/LC, and SPIClass only
+  // when FL_SDFAT_USE_ARDUINO_SPI forces the framework path back on.
   SpiPort_t *mSpi;
   SpiPortSettings_t mSpiSettings;
 };

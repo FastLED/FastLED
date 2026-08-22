@@ -44,16 +44,28 @@
 // GPLv2/LGPLv2.1 and FastLED is MIT. `LpspiBus` (#3802) already owns the
 // registers, so the port type is simply retargeted at it.
 //
-// Teensy 3.x keeps the `SPIClass` path: the DSPI read side has not been ported
-// yet (FastLED #3972). Define `SD_SPI_USE_ARDUINO_SPI` to force that path back
-// on for Teensy 4 as an escape hatch.
-#if defined(FL_IS_TEENSY_4X) && !defined(SD_SPI_USE_ARDUINO_SPI)
+// The Kinetis Teensys (3.x and LC) get the same treatment through
+// `DspiBus`, which owns SPI0's DSPI registers directly (FastLED #3972). That
+// also retires the `SPISettings::ctar_clock_table` / `ctar_div_table`
+// dependency: the frequency-to-CTAR mapping is computed from the K20/K64/K66
+// reference manual instead of transcribed from the GPL/LGPL tables.
+//
+// Define `FL_SDFAT_USE_ARDUINO_SPI` to force the Arduino path back on as an
+// escape hatch. Nothing links in that configuration unless the sketch also
+// carries an unconditional `#include <SPI.h>`.
+#if !defined(FL_SDFAT_USE_ARDUINO_SPI)
+#if defined(FL_IS_TEENSY_4X)
 #define FL_SDFAT_HAS_LPSPI_BUS
+#elif defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_LC)
+#define FL_SDFAT_HAS_DSPI_BUS
+#endif
 #endif
 
 #if SPI_DRIVER_SELECT < 2
 #if defined(FL_SDFAT_HAS_LPSPI_BUS)
 #include "platforms/arm/teensy/teensy4_common/lpspi/lpspi_bus.h"  // ok platform headers
+#elif defined(FL_SDFAT_HAS_DSPI_BUS)
+#include "platforms/arm/teensy/kinetis_spi/dspi_bus.h"  // ok platform headers
 #else
 #include "SPI.h"
 #endif
