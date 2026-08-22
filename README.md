@@ -75,9 +75,11 @@ FastLED's codebase is organized into several major areas. Each directory contain
 📊 <strong>Detailed Build Status</strong>
 
 The **Smoke Build** badge above tracks `build.yml`, which compiles a small
-default example set per board. The per-board badges in this section run the
-full `<board> all` example sweep, so they can be red while the smoke badge is
-green. Treat the badges below as the authoritative per-board status.
+default example set across a subset of boards. The per-board badges in this
+section are the authoritative status for each board: most run that board's
+full `<board> all` example sweep, while some deliberately build a narrower
+set (called out next to those badges). A per-board badge can therefore be red
+while the smoke badge is green.
 
 ## Emulation Tests
 
@@ -167,7 +169,13 @@ badge before, so the breakage was not visible from this page.
 
 
 ### Quality Gates
-[![arduino_library_lint](https://github.com/FastLED/FastLED/actions/workflows/arduino_library_lint.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/arduino_library_lint.yml) [![iwyu](https://github.com/FastLED/FastLED/actions/workflows/iwyu.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/iwyu.yml) [![backend_flag_drift_teensy40](https://github.com/FastLED/FastLED/actions/workflows/backend_flag_drift_teensy40.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/backend_flag_drift_teensy40.yml) [![bloat_regression_esp32s3](https://github.com/FastLED/FastLED/actions/workflows/bloat_regression_esp32s3.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/bloat_regression_esp32s3.yml) [![nightly_fbuild_pio_parity](https://github.com/FastLED/FastLED/actions/workflows/nightly_fbuild_pio_parity.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/nightly_fbuild_pio_parity.yml)
+[![arduino_library_lint](https://github.com/FastLED/FastLED/actions/workflows/arduino_library_lint.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/arduino_library_lint.yml) [![iwyu](https://github.com/FastLED/FastLED/actions/workflows/iwyu.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/iwyu.yml) [![bloat_regression_esp32s3](https://github.com/FastLED/FastLED/actions/workflows/bloat_regression_esp32s3.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/bloat_regression_esp32s3.yml)
+
+### Informational Checks
+[![backend_flag_drift_teensy40](https://github.com/FastLED/FastLED/actions/workflows/backend_flag_drift_teensy40.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/backend_flag_drift_teensy40.yml) [![nightly_fbuild_pio_parity](https://github.com/FastLED/FastLED/actions/workflows/nightly_fbuild_pio_parity.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/nightly_fbuild_pio_parity.yml)
+
+*These two set `continue-on-error: true`; a red badge here reports drift and does
+not block merges.*
 
 ### Header Compilation Performance
 
