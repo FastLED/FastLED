@@ -327,6 +327,15 @@ inline void LpspiBus::beginTransaction(const LpspiSettings &settings) {
     }
 
     port().CR = 0;
+    // Flush both FIFOs before re-enabling. `CFGR1` leaves RX capture on, so
+    // every byte any driver clocks out also lands in the RX FIFO -- and the
+    // LED driver (spi_hw_4_mxrt1062.cpp.hpp) writes `TDR` in a loop without
+    // ever reading `RDR`. Sharing one `LpspiBus` between that driver and the
+    // SdFat transport would otherwise leave up to 16 stale bytes queued, and
+    // `transfer()` would return them instead of the card's reply -- silent
+    // data corruption rather than a failure. Clearing `MEN` alone does not
+    // flush; `RRF`/`RTF` do.
+    port().CR = LPSPI_CR_RRF | LPSPI_CR_RTF;
     port().CFGR1 = LPSPI_CFGR1_MASTER | LPSPI_CFGR1_SAMPLE;
     port().CCR = mCcr;
     port().TCR = settings.tcr();
