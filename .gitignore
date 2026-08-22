@@ -116,6 +116,9 @@ examples/**/*.ino.cpp
 ./*.log
 .loop
 .fbuild/*
+.fbuild/
+.compile-tmp/
+.tmp/
 
 # WASM frontend build (Vite)
 src/platforms/wasm/compiler/dist/
