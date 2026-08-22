@@ -42,12 +42,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install QEMU runtime libraries (libSDL2)
+      - name: Install QEMU runtime libraries (libSDL2, libslirp)
         # The Espressif QEMU binary that fbuild downloads is dynamically
-        # linked against libSDL2-2.0.so.0 on Linux.
+        # linked against libSDL2-2.0.so.0 and libslirp.so.0 on Linux.
+        # Neither is preinstalled on ubuntu-latest (24.04); without them
+        # qemu-system-xtensa / qemu-system-riscv32 fail at exec with
+        # "error while loading shared libraries".
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y --no-install-recommends libsdl2-2.0-0
+          sudo apt-get install -y --no-install-recommends libsdl2-2.0-0 libslirp0
 
       - name: Pin python version
         run: echo "3.11" > .python-version
