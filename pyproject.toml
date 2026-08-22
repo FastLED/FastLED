@@ -202,6 +202,12 @@ dependencies = [
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
     "fbuild==2.5.19",
+    # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
+    # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
+    # transitively (clang-tool-chain-bins pulls it in today) so the documented
+    # `uv run python ci/util/audit_usb_registry.py` cannot break out from under
+    # us. See agents/docs/usb-vid-pid-registry.md.
+    "zstandard>=0.22.0",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",

@@ -96,7 +96,7 @@ uv sync
 uv run fbuild --version
 ```
 
-**`uv.lock` is gitignored in this repo** (`.gitignore` line 52), so the pin in
+**`uv.lock` is gitignored in this repo**, so the pin in
 `pyproject.toml` is the only committed half of the cascade. Do not skip the
 relock anyway: without it your local environment keeps running the previous
 wheel and any verification you do is against the old registry snapshot.
@@ -136,11 +136,17 @@ Re-run the audit at any time:
 uv run python ci/util/audit_usb_registry.py
 ```
 
-It fetches the live artifact, decodes it, and exits non-zero while any
-audited literal is still unresolvable. A cold or stale cache is
-indistinguishable from a missing record, so always check the published
-payload rather than a failed port scan. `AUDITED_LITERALS` in that script is
-the checklist — it should shrink to empty as literals are retired.
+It fetches the live artifact, decodes it, and reports which audited literals
+resolve. A cold or stale cache is indistinguishable from a missing record, so
+always check the published payload rather than a failed port scan.
+
+Two lists in that script carry the state. `AUDITED_LITERALS` is the checklist —
+it should shrink to empty as literals are retired. `KNOWN_GAPS` holds gaps
+already filed upstream; those print as `GAP*` with their tracking issue and do
+**not** fail the run, so the audit can be wired into CI without going
+permanently red. It exits 1 on a gap that is *not* filed, and also when a
+`KNOWN_GAPS` entry has since been published — that is the prompt to drop the
+allowlist entry and delete the local literal.
 
 ## Existing local tables (legacy, do not extend)
 

@@ -14,9 +14,13 @@ of the literals still present in `ci/` resolve from the registry.
     uv run python ci/util/audit_usb_registry.py
 
 Exit codes:
-    0 — every audited literal resolves from the registry
-    1 — at least one literal is missing (file the gap at FastLED/boards)
+    0 — every audited literal resolves, ignoring the gaps in KNOWN_GAPS
+    1 — an unfiled literal is missing, or a KNOWN_GAPS entry went stale
     2 — the artifact could not be fetched or decoded
+
+Exit 0 while a filed gap is outstanding is deliberate: it makes this safe to
+wire into CI or a pre-commit hook without going permanently red. Those show as
+`GAP*` with their tracking issue. A gap that is NOT in KNOWN_GAPS still fails.
 
 A missing literal is a registry gap, never a reason to keep or add a local
 entry. `0403:6014` (FTDI FT232H) is the one known outstanding gap, tracked as
@@ -71,6 +75,15 @@ AUDITED_LITERALS: tuple[Literal, ...] = (
 )
 
 
+# Gaps already filed upstream and accepted as outstanding. A known gap keeps
+# the exit code green so this script can be wired into CI or a pre-commit hook
+# without going permanently red; an *unknown* gap still fails. Delete an entry
+# once the registry publishes it — the audit then fails loudly if it regresses.
+KNOWN_GAPS: dict[tuple[int, int], str] = {
+    (0x0403, 0x6014): "FastLED/boards#60",
+}
+
+
 def _read_varint(buf: bytes, pos: int) -> tuple[int, int]:
     """Decode a protobuf base-128 varint at `pos`; return (value, next_pos)."""
     result = 0
@@ -91,9 +104,10 @@ def _read_varint(buf: bytes, pos: int) -> tuple[int, int]:
 def _iter_fields(buf: bytes) -> Iterator[tuple[int, int | bytes]]:
     """Yield (field_number, value) for a protobuf message body.
 
-    Only the two wire types the schema uses are supported: varint (0) and
-    length-delimited (2). Anything else means the artifact schema changed and
-    the caller should fail loudly rather than guess.
+    The schema uses varint (0) and length-delimited (2). Fixed-width fields
+    (1, 5) are skipped rather than rejected so a forward-compatible upstream
+    addition does not abort the parse; only genuinely malformed wire types
+    raise. Callers ignore field numbers they do not recognise.
     """
     pos = 0
     while pos < len(buf):
@@ -109,7 +123,21 @@ def _iter_fields(buf: bytes) -> Iterator[tuple[int, int | bytes]]:
                 raise ValueError("length-delimited field overruns buffer")
             yield field_number, buf[pos:end]
             pos = end
+        elif wire_type in (1, 5):
+            # Fixed-width fields (8-byte / 4-byte). The schema does not use
+            # them today, but FastLED/boards owns it independently, so an
+            # added checksum or timestamp must not abort the parse — that
+            # would report "artifact undecodable" when every audited VID:PID
+            # is still present. Skip them the way any protobuf reader does.
+            width = 8 if wire_type == 1 else 4
+            end = pos + width
+            if end > len(buf):
+                raise ValueError("fixed-width field overruns buffer")
+            pos = end
         else:
+            # Wire types 3 and 4 are the deprecated start/end-group pair; 6
+            # and 7 are unassigned. Any of them means genuinely malformed
+            # data rather than a forward-compatible schema addition.
             raise ValueError(f"unsupported wire type {wire_type}")
 
 
@@ -201,20 +229,44 @@ def main() -> int:
     print(f"FastLED/boards registry: {vendor_count} vendors, {product_count} products")
     print(f"Auditing {len(AUDITED_LITERALS)} literals from ci/\n")
 
-    gaps: list[Literal] = []
+    new_gaps: list[Literal] = []
+    known_gaps: list[Literal] = []
+    stale_known: list[Literal] = []
     for entry in AUDITED_LITERALS:
         pair = f"{entry.vid:04X}:{entry.pid:04X}"
+        tracker = KNOWN_GAPS.get((entry.vid, entry.pid))
         vendor = registry.get(entry.vid)
         if vendor is None or entry.pid not in vendor[1]:
-            gaps.append(entry)
-            print(f"  GAP  {pair}  {entry.label}  [{entry.source}]")
+            if tracker is not None:
+                known_gaps.append(entry)
+                print(f"  GAP* {pair}  {entry.label}  [{entry.source}]  {tracker}")
+            else:
+                new_gaps.append(entry)
+                print(f"  GAP  {pair}  {entry.label}  [{entry.source}]")
             continue
         vendor_name, products = vendor
         print(f"  OK   {pair}  {entry.label}  -> {vendor_name} / {products[entry.pid]}")
+        if tracker is not None:
+            stale_known.append(entry)
 
-    resolved = len(AUDITED_LITERALS) - len(gaps)
+    resolved = len(AUDITED_LITERALS) - len(new_gaps) - len(known_gaps)
     print(f"\n{resolved}/{len(AUDITED_LITERALS)} resolve from FastLED/boards")
-    if gaps:
+
+    if stale_known:
+        # The registry caught up. Prompt the cleanup rather than letting the
+        # allowlist quietly mask a gap that no longer exists.
+        print("\nKNOWN_GAPS is stale — these now resolve upstream:")
+        for entry in stale_known:
+            pair = f"{entry.vid:04X}:{entry.pid:04X}"
+            tracker = KNOWN_GAPS[(entry.vid, entry.pid)]
+            print(f"  {pair}  {entry.label}  ({tracker})")
+        print(
+            "Drop them from KNOWN_GAPS and retire the literal from "
+            f"{stale_known[0].source}."
+        )
+        return 1
+
+    if new_gaps:
         print(
             "\nEach GAP is a registry gap. Add the record on the FastLED/boards\n"
             "data branch, let fbuild ingest it, then cascade the fbuild pin\n"
@@ -222,6 +274,15 @@ def main() -> int:
             "See agents/docs/usb-vid-pid-registry.md."
         )
         return 1
+
+    if known_gaps:
+        print(
+            f"\n{len(known_gaps)} known gap(s) marked GAP*, already filed "
+            "upstream and accepted as outstanding.\nEvery other literal is "
+            "published and can be retired."
+        )
+        return 0
+
     print("\nAll audited literals are published upstream and can be retired.")
     return 0
 

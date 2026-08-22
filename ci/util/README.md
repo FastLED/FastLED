@@ -20,4 +20,9 @@ Check the migration status at any time:
 uv run python ci/util/audit_usb_registry.py
 ```
 
+It exits 0 while the only outstanding gaps are ones already filed upstream
+(listed in `KNOWN_GAPS`, shown as `GAP*`), so it is safe to wire into CI. It
+exits 1 on an unfiled gap, or when a `KNOWN_GAPS` entry has been published and
+the literal can finally be retired.
+
 Full rule and cascade procedure: `agents/docs/usb-vid-pid-registry.md`.
