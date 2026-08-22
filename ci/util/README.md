@@ -9,10 +9,11 @@ are **frozen**. USB board identity is owned by
 [FastLED/boards](https://github.com/FastLED/boards) and reaches this repo
 through fbuild's ingestion of the published `usb-vids.proto.zstd` archive.
 
-Do not add entries to either table. If a board cannot be identified, add the
-record upstream, let fbuild ingest it, then cascade the `fbuild==X.Y.Z` pin in
-`pyproject.toml` and relock locally (`uv lock && uv sync`; `uv.lock` itself is
-gitignored here).
+Do not add entries to either table. If a board cannot be identified, push the
+record straight to FastLED/boards — we own it, so that is the normal fix, not
+an escalation. One commit to the `other` data branch plus a site rebuild; it
+takes minutes. fbuild picks the new data up on its next cache refresh, so a
+version bump is usually unnecessary.
 
 Check the migration status at any time:
 
@@ -20,9 +21,7 @@ Check the migration status at any time:
 uv run python ci/util/audit_usb_registry.py
 ```
 
-It exits 0 while the only outstanding gaps are ones already filed upstream
-(listed in `KNOWN_GAPS`, shown as `GAP*`), so it is safe to wire into CI. It
-exits 1 on an unfiled gap, or when a `KNOWN_GAPS` entry has been published and
-the literal can finally be retired.
+All 15 literals currently resolve upstream, so this exits 0 and is safe to wire
+into CI. Full procedure: `agents/docs/usb-vid-pid-registry.md`.
 
 Full rule and cascade procedure: `agents/docs/usb-vid-pid-registry.md`.
