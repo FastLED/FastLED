@@ -4,7 +4,7 @@
 
 Drive **30,000+ LEDs** on high-end devices • **Sub-$1 compatibility** on tiny chips • **Background rendering** for responsive apps • **Nearly every LED chipset supported** • [**#2 most popular Arduino library**](https://docs.arduino.cc/libraries/)
 
-[![Arduino's 2nd Most Popular Library](https://www.ardu-badge.com/badge/FastLED.svg)](https://www.ardu-badge.com/FastLED) [![Build Status](https://github.com/FastLED/FastLED/workflows/build/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build.yml) [![Project Tracker](https://img.shields.io/badge/Project-Tracker-blue?logo=github)](https://github.com/orgs/FastLED/projects/1)
+[![Arduino's 2nd Most Popular Library](https://www.ardu-badge.com/badge/FastLED.svg)](https://www.ardu-badge.com/FastLED) [![Smoke Build](https://github.com/FastLED/FastLED/workflows/build/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build.yml) [![Project Tracker](https://img.shields.io/badge/Project-Tracker-blue?logo=github)](https://github.com/orgs/FastLED/projects/1)
 
 [![Unit Tests (Linux)](https://github.com/FastLED/FastLED/actions/workflows/unit_test_linux.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/unit_test_linux.yml) [![Unit Tests (macOS)](https://github.com/FastLED/FastLED/actions/workflows/unit_test_macos.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/unit_test_macos.yml) [![Unit Tests (Windows)](https://github.com/FastLED/FastLED/actions/workflows/unit_test_windows.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/unit_test_windows.yml)
 
@@ -74,6 +74,11 @@ FastLED's codebase is organized into several major areas. Each directory contain
 
 📊 <strong>Detailed Build Status</strong>
 
+The **Smoke Build** badge above tracks `build.yml`, which compiles a small
+default example set per board. The per-board badges in this section run the
+full `<board> all` example sweep, so they can be red while the smoke badge is
+green. Treat the badges below as the authoritative per-board status.
+
 ## Emulation Tests
 
 **ESP32 (QEMU):** [![ESP32-DEV QEMU Test](https://github.com/FastLED/FastLED/actions/workflows/qemu_esp32dev_test.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/qemu_esp32dev_test.yml) [![ESP32-C3 QEMU Test](https://github.com/FastLED/FastLED/actions/workflows/qemu_esp32c3_test.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/qemu_esp32c3_test.yml) [![ESP32-S3 QEMU Test](https://github.com/FastLED/FastLED/actions/workflows/qemu_esp32s3_test.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/qemu_esp32s3_test.yml)
@@ -84,6 +89,8 @@ FastLED's codebase is organized into several major areas. Each directory contain
 **Core Boards:** [![uno](https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml) [![atmega8a](https://github.com/FastLED/FastLED/actions/workflows/build_atmega8a.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_atmega8a.yml) [![nano_every](https://github.com/FastLED/FastLED/actions/workflows/build_nano_every.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_nano_every.yml) [![uno_r4_wifi](https://github.com/FastLED/FastLED/actions/workflows/build_uno_r4_wifif.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_uno_r4_wifif.yml) [![atmega32u4_leonardo](https://github.com/FastLED/FastLED/actions/workflows/build_yun.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_yun.yml)
 
 **ARM Boards:** [![sam3x8e_due](https://github.com/FastLED/FastLED/actions/workflows/build_due.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_due.yml) [![ClearCore SAME53 compile](https://github.com/FastLED/FastLED/actions/workflows/build_clearcore.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_clearcore.yml)
+
+**Arduino Due (Digix):** [![digix](https://github.com/FastLED/FastLED/actions/workflows/build_digix.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_digix.yml)
 
 *ClearCore coverage is a compile-only Blink build against the pinned Teknic Arduino core; it does not claim hardware timing validation.*
 
@@ -110,6 +117,12 @@ FastLED's codebase is organized into several major areas. Each directory contain
 [![stm32f103c8_bluepill](https://github.com/FastLED/FastLED/actions/workflows/build_bluepill.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_bluepill.yml) [![stm32f411ce_blackpill](https://github.com/FastLED/FastLED/actions/workflows/build_blackpill_stm32f4.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_blackpill_stm32f4.yml) [![stm32f103cb_maplemini](https://github.com/FastLED/FastLED/actions/workflows/build_maple_map.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_maple_map.yml) [![stm32f103tb_tinystm](https://github.com/FastLED/FastLED/actions/workflows/build_stm103tb.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_stm103tb.yml) [![nucleo_f429zi](https://github.com/FastLED/FastLED/actions/workflows/build_nucleo_f429zi.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_nucleo_f429zi.yml) [![nucleo_f439zi](https://github.com/FastLED/FastLED/actions/workflows/build_nucleo_f439zi.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_nucleo_f439zi.yml) [![stm32h747xi_giga](https://github.com/FastLED/FastLED/actions/workflows/build_giga_r1.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_giga_r1.yml) [![arduino_uno_q](https://github.com/FastLED/FastLED/actions/workflows/build_arduino_uno_q.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_arduino_uno_q.yml)
 
 
+### NXP LPC (Cortex-M0+)
+[![lpc804](https://github.com/FastLED/FastLED/actions/workflows/build_lpc804.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_lpc804.yml) [![lpc845](https://github.com/FastLED/FastLED/actions/workflows/build_lpc845.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_lpc845.yml) [![lpc845brk](https://github.com/FastLED/FastLED/actions/workflows/build_lpc845brk.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_lpc845brk.yml) [![lpcxpresso804](https://github.com/FastLED/FastLED/actions/workflows/build_lpcxpresso804.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_lpcxpresso804.yml) [![lpcxpresso845max](https://github.com/FastLED/FastLED/actions/workflows/build_lpcxpresso845max.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_lpcxpresso845max.yml)
+
+*LPC804 and LPCXpresso804 are currently failing on master. These builds had no
+badge before, so the breakage was not visible from this page.
+
 ### Silicon Labs (SiLabs)
 [![ThingPlusMatter_mgm240s](https://github.com/FastLED/FastLED/actions/workflows/build_mgm240s_thingplusmatter.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_mgm240s_thingplusmatter.yml)
 
@@ -129,7 +142,11 @@ FastLED's codebase is organized into several major areas. Each directory contain
 
 **ESP32 Advanced:** [![esp32h2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32h2.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32h2.yml) [![esp32p4](https://github.com/FastLED/FastLED/actions/workflows/build_esp32p4.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32p4.yml)
 
+**RGBW:** [![rgbw](https://github.com/FastLED/FastLED/actions/workflows/build_rgbw.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rgbw.yml)
+
 **Special Features:** [![esp32_i2s_ws2812](https://github.com/FastLED/FastLED/actions/workflows/build_esp32_i2s_ws2812.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32_i2s_ws2812.yml) [![esp32 extra libs](https://github.com/FastLED/FastLED/actions/workflows/build_esp_extra_libs.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp_extra_libs.yml) [![esp32dev_namespace](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_namespace.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_namespace.yml)
+
+**IDF Variants:** [![esp32dev_idf4.4](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf4.4.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf4.4.yml) [![esp32dev_idf5_component](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf5_component.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf5_component.yml) [![esp32dev_idf6](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf6.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf6.yml)
 
 **Legacy:** [![esp32dev-idf3.3-lts](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf3.3.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf3.3.yml)
 
@@ -141,11 +158,16 @@ FastLED's codebase is organized into several major areas. Each directory contain
 **WebAssembly:** [![wasm](https://github.com/FastLED/FastLED/actions/workflows/build_wasm.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_wasm.yml) [![wasm_compile_test](https://github.com/FastLED/FastLED/actions/workflows/build_wasm_compilers.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_wasm_compilers.yml)
 
 ### Library Size Validation
+**STM32:** [![check_bluepill_size](https://github.com/FastLED/FastLED/actions/workflows/check_bluepill_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_bluepill_size.yml)
+
 **Core Platforms:** [![attiny85_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_attiny85.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_attiny85.yml) [![uno_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_uno_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_uno_size.yml) [![esp32dev_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_esp32_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_esp32_size.yml)
 
 **Teensy Platforms:** [![check_teensylc_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensylc_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensylc_size.yml) [![check_teensy30_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy30_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy30_size.yml) [![check_teensy31_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy31_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy31_size.yml) [![check_teensy32_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy32_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy32_size.yml) [![check_teensy35_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy35_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy35_size.yml) [![check_teensy36_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy36_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy36_size.yml) [![teensy41_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml)
 
 
+
+### Quality Gates
+[![arduino_library_lint](https://github.com/FastLED/FastLED/actions/workflows/arduino_library_lint.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/arduino_library_lint.yml) [![iwyu](https://github.com/FastLED/FastLED/actions/workflows/iwyu.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/iwyu.yml) [![backend_flag_drift_teensy40](https://github.com/FastLED/FastLED/actions/workflows/backend_flag_drift_teensy40.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/backend_flag_drift_teensy40.yml) [![bloat_regression_esp32s3](https://github.com/FastLED/FastLED/actions/workflows/bloat_regression_esp32s3.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/bloat_regression_esp32s3.yml) [![nightly_fbuild_pio_parity](https://github.com/FastLED/FastLED/actions/workflows/nightly_fbuild_pio_parity.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/nightly_fbuild_pio_parity.yml)
 
 ### Header Compilation Performance
 
