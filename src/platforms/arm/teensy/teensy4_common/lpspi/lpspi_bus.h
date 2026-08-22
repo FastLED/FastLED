@@ -13,10 +13,15 @@
 ///     begin / end                  clock gate + pad drive strength
 ///     beginTransaction / endTransaction   CCR divisor + CR/CFGR1/TCR
 ///
-/// Everything else in upstream SPIClass -- transfer*, DMA, async, setCS,
-/// usingInterrupt, the deprecated setters -- is deliberately absent. FastLED
-/// drives the data path itself via direct register access (see
-/// spi_hw_4_mxrt1062.cpp.hpp's transmit loop polling LPSPI_SR_TDF).
+///     transfer                     blocking byte / block exchange
+///     setTransferWriteFill         fill byte for a null tx buffer
+///
+/// Everything else in upstream SPIClass -- DMA, async, setCS, usingInterrupt,
+/// the deprecated setters -- is deliberately absent. FastLED's LED drivers
+/// drive the data path themselves via direct register access (see
+/// spi_hw_4_mxrt1062.cpp.hpp's transmit loop polling LPSPI_SR_TDF); the
+/// blocking `transfer` overloads exist for the SdFat transport, which needs
+/// a real full-duplex read.
 ///
 /// One behavioural simplification vs upstream: `beginTransaction` /
 /// `endTransaction` do NOT save and restore the NVIC interrupt masks. That
@@ -107,6 +112,27 @@ class LpspiBus {
         }
     }
 
+    /// Byte substituted for the transmit stream when `transfer()` is handed a
+    /// null tx buffer. Mirrors upstream `SPIClass::setTransferWriteFill`.
+    void setTransferWriteFill(fl::u8 fill) { mTransferWriteFill = fill; }
+
+    /// Blocking full-duplex block exchange, a plain loop over the single-byte
+    /// path above. `tx == nullptr` clocks out the fill byte set by
+    /// `setTransferWriteFill()`; `rx == nullptr` discards what comes back.
+    /// Deliberately no DMA and no async completion -- SdFat's driver is
+    /// synchronous, and the FIFO-batched form can be added later if profiling
+    /// asks for it.
+    void transfer(const void *tx, void *rx, fl::size count) {
+        const fl::u8 *src = static_cast<const fl::u8 *>(tx);
+        fl::u8 *dst = static_cast<fl::u8 *>(rx);
+        for (fl::size i = 0; i < count; ++i) {
+            const fl::u8 received = transfer(src ? src[i] : mTransferWriteFill);
+            if (dst) {
+                dst[i] = received;
+            }
+        }
+    }
+
     /// The peripheral register block, for drivers that drive data directly.
     IMXRT_LPSPI_t &port() { return *mPort; }
 
@@ -129,6 +155,8 @@ class LpspiBus {
 
     fl::u32 mClock = 0;
     fl::u32 mCcr = 0;
+
+    fl::u8 mTransferWriteFill = 0xFF;
 
     friend struct LpspiBusStorage;
 };
@@ -299,6 +327,15 @@ inline void LpspiBus::beginTransaction(const LpspiSettings &settings) {
     }
 
     port().CR = 0;
+    // Flush both FIFOs before re-enabling. `CFGR1` leaves RX capture on, so
+    // every byte any driver clocks out also lands in the RX FIFO -- and the
+    // LED driver (spi_hw_4_mxrt1062.cpp.hpp) writes `TDR` in a loop without
+    // ever reading `RDR`. Sharing one `LpspiBus` between that driver and the
+    // SdFat transport would otherwise leave up to 16 stale bytes queued, and
+    // `transfer()` would return them instead of the card's reply -- silent
+    // data corruption rather than a failure. Clearing `MEN` alone does not
+    // flush; `RRF`/`RTF` do.
+    port().CR = LPSPI_CR_RRF | LPSPI_CR_RTF;
     port().CFGR1 = LPSPI_CFGR1_MASTER | LPSPI_CFGR1_SAMPLE;
     port().CCR = mCcr;
     port().TCR = settings.tcr();

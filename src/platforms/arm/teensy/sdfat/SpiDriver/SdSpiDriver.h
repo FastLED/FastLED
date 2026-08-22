@@ -31,9 +31,37 @@
 #define SdSpiDriver_h
 #include "platforms/arm/teensy/sdfat/common/SysCall.h"
 #include "fl/stl/int.h"
+#include "platforms/arm/teensy/is_teensy.h"  // ok platform headers
+
+// Transport selection for the Arduino-shaped hardware driver.
+//
+// On Teensy 4 (IMXRT1062) SdFat's SPI port is FastLED's own `LpspiBus` rather
+// than the framework's `SPIClass`. This is not a preference: the Teensyduino
+// `SPI` library is only *compiled* when the library finder selects it from an
+// unconditional sketch-level `#include <SPI.h>`, so `SPIClass::begin`,
+// `SPIClass::transfer` and the global `SPI` object resolve as headers but
+// never link (FastLED #3970). The library also cannot be vendored -- it is
+// GPLv2/LGPLv2.1 and FastLED is MIT. `LpspiBus` (#3802) already owns the
+// registers, so the port type is simply retargeted at it.
+//
+// Teensy 3.x keeps the `SPIClass` path: the DSPI read side has not been ported
+// yet (FastLED #3972). Define `SD_SPI_USE_ARDUINO_SPI` to force that path back
+// on for Teensy 4 as an escape hatch.
+#if defined(FL_IS_TEENSY_4X) && !defined(SD_SPI_USE_ARDUINO_SPI)
+#define FL_SDFAT_HAS_LPSPI_BUS
+#endif
+
 #if SPI_DRIVER_SELECT < 2
+#if defined(FL_SDFAT_HAS_LPSPI_BUS)
+#include "platforms/arm/teensy/teensy4_common/lpspi/lpspi_bus.h"  // ok platform headers
+#else
 #include "SPI.h"
 #endif
+#endif
+
+// SpiPort_t / SpiPortSettings_t for SPI_DRIVER_SELECT < 2 are declared in
+// SdSpiArduinoDriver.h below, which is the only consumer and already opens
+// this namespace -- the include has to stay above any namespace here.
 #if SPI_DRIVER_SELECT == 0 && SD_HAS_CUSTOM_SPI
 #define SD_USE_CUSTOM_SPI
 #include "platforms/arm/teensy/sdfat/SpiDriver/SdSpiArduinoDriver.h"
@@ -94,10 +122,7 @@ inline bool spiOptionDedicated(fl::u8 opt) {(void)opt; return false;}
 /** Set SCK rate to 500 kHz for AVR. */
 #define SPI_SIXTEENTH_SPEED SD_SCK_HZ(500000)
 //------------------------------------------------------------------------------
-#if SPI_DRIVER_SELECT < 2
-/** Port type for Arduino SPI hardware driver. */
-typedef SPIClass SpiPort_t;
-#elif SPI_DRIVER_SELECT == 2
+#if SPI_DRIVER_SELECT == 2
 class SdSpiSoftDriver;
 /** Port type for software SPI driver. */
 typedef SdSpiSoftDriver SpiPort_t;
@@ -105,9 +130,9 @@ typedef SdSpiSoftDriver SpiPort_t;
 class SdSpiBaseClass;
 /** Port type for extrernal SPI driver. */
 typedef SdSpiBaseClass SpiPort_t;
-#else  // SPI_DRIVER_SELECT
+#elif SPI_DRIVER_SELECT >= 4
 typedef void*  SpiPort_t;
-#endif  // SPI_DRIVER_SELECT
+#endif  // SPI_DRIVER_SELECT (< 2 is handled above, next to its include)
 //------------------------------------------------------------------------------
 /**
  * \class SdSpiConfig

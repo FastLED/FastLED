@@ -36,6 +36,17 @@
 #define SD_USE_CUSTOM_SPI
 #endif  // SPI_DRIVER_SELECT == 0 && SD_HAS_CUSTOM_SPI
 namespace fl { namespace platforms { namespace teensy { namespace sdfat {
+#if defined(FL_SDFAT_HAS_LPSPI_BUS)
+/** Port type for the FastLED LPSPI hardware driver (Teensy 4). */
+typedef fl::platforms::teensy::LpspiBus SpiPort_t;
+/** Transaction settings for the FastLED LPSPI hardware driver (Teensy 4). */
+typedef fl::platforms::teensy::LpspiSettings SpiPortSettings_t;
+#else
+/** Port type for Arduino SPI hardware driver. */
+typedef SPIClass SpiPort_t;
+/** Transaction settings for Arduino SPI hardware driver. */
+typedef SPISettings SpiPortSettings_t;
+#endif
 class SdSpiConfig;
 /**
  * \class SdSpiArduinoDriver
@@ -83,12 +94,15 @@ class SdSpiArduinoDriver {
    * \param[in] maxSck Maximum SCK frequency.
    */
   void setSckSpeed(fl::u32 maxSck) {
-    mSpiSettings = SPISettings(maxSck, MSBFIRST, SPI_MODE0);
+    mSpiSettings = SpiPortSettings_t(maxSck, MSBFIRST, SPI_MODE0);
   }
 
  private:
-  SPIClass *mSpi;
-  SPISettings mSpiSettings;
+  // SpiPort_t / SpiPortSettings_t are selected in SdSpiDriver.h, which
+  // includes this header after declaring them: SPIClass/SPISettings on
+  // Teensy 3.x, fl LpspiBus/LpspiSettings on Teensy 4.
+  SpiPort_t *mSpi;
+  SpiPortSettings_t mSpiSettings;
 };
 // Keep the imported implementation's member spelling without changing it.
 #define m_spi mSpi
