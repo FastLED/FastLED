@@ -46,7 +46,12 @@ void SdSpiArduinoDriver::begin(SdSpiConfig spiConfig) {
     m_spi->setSCK(SDFAT_SDCARD_SCK_PIN);
 #endif  // defined(SDFAT_SDCARD_SPI) && defined(SDFAT_SDCARD_SS_PIN)
   } else {
+#if defined(SD_SPI_USE_LPSPI_BUS)
+    // Bus 0 is LPSPI4, the peripheral the Arduino global `SPI` wraps.
+    m_spi = &fl::platforms::teensy::LpspiBus::get(0);
+#else
     m_spi = &SPI;
+#endif
   }
   m_spi->begin();
 }
