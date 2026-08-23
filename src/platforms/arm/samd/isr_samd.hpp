@@ -87,6 +87,10 @@ constexpr u8 MAX_TIMER_INSTANCES = MAX_TIMER_INDEX - MIN_TIMER_INDEX + 1;
 // EIC configuration
 constexpr u8 MAX_EIC_CHANNELS = 16;
 
+// Error code for functionality that is not available on this SAMD variant.
+// Matches the value used by the other ARM ISR backends (see isr_sam.hpp).
+constexpr int ERR_NOT_IMPLEMENTED = -100;
+
 // Track allocated resources
 static bool timer_allocated[MAX_TIMER_INDEX + 1] = {};
 static bool eic_allocated[MAX_EIC_CHANNELS] = {};
@@ -192,6 +196,8 @@ static void free_timer(u8 timer_idx) FL_NO_EXCEPT {
 }
 
 // Allocate a free EIC channel
+// SAMD21 only: the SAMD51 EIC path is not implemented (see attach_external_handler).
+#if defined(FL_IS_SAMD21)
 static bool allocate_eic_channel(u8& channel) FL_NO_EXCEPT {
     // Critical section: prevent interrupt from modifying allocation state
     __disable_irq();
@@ -209,6 +215,7 @@ static bool allocate_eic_channel(u8& channel) FL_NO_EXCEPT {
     __enable_irq();
     return found;
 }
+#endif  // FL_IS_SAMD21
 
 // Free an EIC channel
 static void free_eic_channel(u8 channel) FL_NO_EXCEPT {
@@ -345,6 +352,10 @@ extern "C" {
 #endif
 
     // EIC (External Interrupt Controller) handler
+    // SAMD21 only: SAMD51 splits the EIC across EIC_0_Handler..EIC_15_Handler,
+    // which the Arduino SAMD core already defines. Defining EIC_Handler there
+    // would produce a symbol that is never wired into the vector table.
+#if defined(FL_IS_SAMD21)
     void EIC_Handler(void) FL_NO_EXCEPT {
         for (u8 ch = 0; ch < MAX_EIC_CHANNELS; ch++) {
             u32 flag = 1UL << ch;
@@ -360,6 +371,7 @@ extern "C" {
             }
         }
     }
+#endif  // FL_IS_SAMD21
 }
 
 // =============================================================================
@@ -523,6 +535,20 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
 }
 
 int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
+#if defined(FL_IS_SAMD51)
+    // SAMD51 splits the EIC into 16 separate vectors (EIC_0_Handler..EIC_15_Handler)
+    // rather than the single EIC_Handler that SAMD21 uses. The Arduino SAMD core
+    // (WInterrupts.c) defines all 16 of those handlers strongly and enables their
+    // IRQs at init, so FastLED cannot claim them without a duplicate-symbol link
+    // error. Report "not implemented" instead of silently attaching to a vector
+    // that will never fire (see the Arduino Due path in isr_sam.hpp).
+    (void)pin;
+    (void)config;
+    if (out_handle) {
+        *out_handle = isr_handle_t();  // Invalid handle
+    }
+    return ERR_NOT_IMPLEMENTED;
+#else
     if (!config.handler) {
         FL_WARN_F("attachExternalHandler: handler is null");
         return -1;  // Invalid parameter
@@ -554,17 +580,10 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     eic_handles[eic_ch] = handle_data;
 
     // Enable EIC clock
-#if defined(FL_IS_SAMD21)
     GCLK->CLKCTRL.reg = (u16)(GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID_EIC);
     while (GCLK->STATUS.bit.SYNCBUSY) {
         // Wait for sync
     }
-#elif defined(FL_IS_SAMD51)
-    GCLK->PCHCTRL[EIC_GCLK_ID].reg = GCLK_PCHCTRL_GEN_GCLK0 | GCLK_PCHCTRL_CHEN;
-    while (!(GCLK->PCHCTRL[EIC_GCLK_ID].reg & GCLK_PCHCTRL_CHEN)) {
-        // Wait for enable
-    }
-#endif
 
     // Configure GPIO pin for EIC function
     // Note: Pin-to-EIC-channel mapping is board-specific
@@ -574,15 +593,16 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
 
     PORT->Group[port].PINCFG[pin_num].reg |= PORT_PINCFG_PMUXEN;
 
-    // Set PMUX to function A (EIC) for the pin
+    // Select peripheral function A (EIC) for the pin. Function A is encoded as 0,
+    // so clear the pin's PMUX nibble rather than OR-ing a value in - an OR can
+    // never move the field away from a previously-selected peripheral.
     if (pin_num & 1) {
-        PORT->Group[port].PMUX[pin_num >> 1].reg |= PORT_PMUX_PMUXO_A;
+        PORT->Group[port].PMUX[pin_num >> 1].reg &= ~(u8)PORT_PMUX_PMUXO_Msk;
     } else {
-        PORT->Group[port].PMUX[pin_num >> 1].reg |= PORT_PMUX_PMUXE_A;
+        PORT->Group[port].PMUX[pin_num >> 1].reg &= ~(u8)PORT_PMUX_PMUXE_Msk;
     }
 
     // Enable EIC if not already enabled
-#if defined(FL_IS_SAMD21)
     // SAMD21 uses CTRL instead of CTRLA, and STATUS.SYNCBUSY instead of SYNCBUSY
     if (!EIC->CTRL.bit.ENABLE) {
         EIC->CTRL.bit.ENABLE = 0;
@@ -596,21 +616,6 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
             // Wait for sync
         }
     }
-#elif defined(FL_IS_SAMD51)
-    // SAMD51 uses CTRLA and dedicated SYNCBUSY register
-    if (!EIC->CTRLA.bit.ENABLE) {
-        EIC->CTRLA.bit.ENABLE = 0;
-        while (EIC->SYNCBUSY.bit.ENABLE) {
-            // Wait for sync
-        }
-
-        // Configure EIC
-        EIC->CTRLA.bit.ENABLE = 1;
-        while (EIC->SYNCBUSY.bit.ENABLE) {
-            // Wait for sync
-        }
-    }
-#endif
 
     // Determine sense configuration from flags
     u8 sense;
@@ -653,6 +658,7 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     }
 
     return 0;  // Success
+#endif  // FL_IS_SAMD51
 }
 
 int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
