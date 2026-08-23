@@ -86,7 +86,9 @@ def _wasm_fast_path() -> int | None:
     # skipping both wasm_compile and argparse (~47ms saved)
     from pathlib import Path
 
-    output_dir = Path("examples") / example / "fastled_js"
+    from ci.wasm_build import resolve_example_dir
+
+    output_dir = resolve_example_dir(example) / "fastled_js"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_js = output_dir / "fastled.js"
 
