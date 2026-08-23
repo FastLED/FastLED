@@ -1542,14 +1542,6 @@ SAMD51J19A_FEATHER_M4 = Board(
     framework="arduino",
     lib_ignore=["I2S"],  # I2S library has SAMD51 compatibility issues
     defines=[
-        # Feather M4 has no pin 3 -- fastpin_arm_d51.h says so outright
-        # ("no pins 2 3"), and Blink defaults to PIN_DATA 3, tripping the
-        # FastPin<3>::validpin() static assert. Blink guards the default with
-        # #ifndef, so a board define is the sanctioned override. Pin 6 is
-        # defined for this board.
-        "PIN_DATA=6",
-        # Apa102 defaults its clock to pin 2, which this board also lacks.
-        "STRIP_CLOCK_PIN=4",
         "FASTLED_USES_ARDUINO_AUDIO_INPUT=0",  # Disable Arduino audio (I2S not available)
     ],
 )

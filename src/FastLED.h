@@ -232,6 +232,9 @@
 
 #include "platforms.h"
 
+// Default example pins; must follow platforms.h so board pin tables win.
+#include "platforms/default_pins.h"
+
 // PlatformIO Library Dependency Finder (LDF) hint headers
 // These headers use #if 0 blocks to hint library dependencies to PlatformIO's LDF scanner
 // without actually compiling the code. This works around LDF's limitation of scanning

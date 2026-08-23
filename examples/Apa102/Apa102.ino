@@ -6,15 +6,16 @@
 
 #define NUM_LEDS  20
 
-// Guarded so a board whose variant lacks these pins can override them from
-// build flags, the same way Blink guards PIN_DATA. Adafruit Feather M4, for
-// one, has no pin 2 (see platforms/arm/d51/fastpin_arm_d51.h).
+// Defaults come from the board (platforms/default_pins.h) rather than a
+// literal, because a literal is a guess about hardware this sketch cannot
+// see -- Adafruit Feather M4 has no pin 2 at all. A sketch or build flag
+// defining these first still wins.
 #ifndef STRIP_DATA_PIN
-#define STRIP_DATA_PIN 1
+#define STRIP_DATA_PIN SPI_PIN_DATA_1
 #endif
 
 #ifndef STRIP_CLOCK_PIN
-#define STRIP_CLOCK_PIN 2
+#define STRIP_CLOCK_PIN SPI_PIN_CLOCK_1
 #endif
 
 CRGB leds[NUM_LEDS] = {0};     // Software gamma mode.

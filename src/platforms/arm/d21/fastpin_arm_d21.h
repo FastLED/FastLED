@@ -237,6 +237,13 @@ _FL_DEFPIN( 8, 11, 0); _FL_DEFPIN( 9, 9, 0); _FL_DEFPIN( 10, 10, 0);
 #elif defined(ADAFRUIT_ITSYBITSY_M0)
 
 #define MAX_PIN 16
+
+// Default example pins: this board's table starts at pin 2, so the
+// SPI_PIN_DATA_1 fallback of 1 would fail FastPin<>::validpin().
+// CLOCKLESS_PIN_1 (3) is present and needs no override.
+// See platforms/default_pins.h.
+#define SPI_PIN_DATA_1 2
+#define SPI_PIN_CLOCK_1 4
 _FL_DEFPIN( 2, 14, 0); _FL_DEFPIN( 3, 9, 0); _FL_DEFPIN( 4, 8, 0);
 _FL_DEFPIN( 5, 15, 0); _FL_DEFPIN( 6, 20, 0); _FL_DEFPIN( 7, 21, 0);
 _FL_DEFPIN( 8, 6, 0); _FL_DEFPIN( 9, 7, 0); _FL_DEFPIN( 10, 18, 0);

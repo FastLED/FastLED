@@ -126,6 +126,13 @@ _FL_DEFPIN(24, 14, 0); _FL_DEFPIN(25,  13, 0); _FL_DEFPIN(26,  12, 0);
 #elif defined(ADAFRUIT_FEATHER_M4_CAN)
 
 #define MAX_PIN 19
+
+// Default example pins: this board has no pin 2 or 3 (see the pin table
+// below), so the CLOCKLESS_PIN_1 / SPI_PIN_CLOCK_1 fallbacks of 3 and 2
+// would fail FastPin<>::validpin(). Pin 1 is present, so only the clock
+// needs moving. See platforms/default_pins.h.
+#define CLOCKLESS_PIN_1 5
+#define SPI_PIN_CLOCK_1 4
 // D0-D13, including D8 (neopixel)  no pins 2 3
 _FL_DEFPIN( 0, 17, 1); _FL_DEFPIN( 1, 16, 1);
 _FL_DEFPIN( 4, 14, 0); _FL_DEFPIN( 5, 16, 0); _FL_DEFPIN( 6,  18, 0);
@@ -147,6 +154,13 @@ _FL_DEFPIN(23, 22, 1); _FL_DEFPIN(24,  23, 1); _FL_DEFPIN(25,  17, 0);
 #elif defined(ADAFRUIT_FEATHER_M4_EXPRESS)
 
 #define MAX_PIN 19
+
+// Default example pins: this board has no pin 2 or 3 (see the pin table
+// below), so the CLOCKLESS_PIN_1 / SPI_PIN_CLOCK_1 fallbacks of 3 and 2
+// would fail FastPin<>::validpin(). Pin 1 is present, so only the clock
+// needs moving. See platforms/default_pins.h.
+#define CLOCKLESS_PIN_1 5
+#define SPI_PIN_CLOCK_1 4
 // D0-D13, including D8 (neopixel)  no pins 2 3
 _FL_DEFPIN( 0, 17, 1); _FL_DEFPIN( 1, 16, 1);
 _FL_DEFPIN( 4, 14, 0); _FL_DEFPIN( 5, 16, 0); _FL_DEFPIN( 6,  18, 0);
