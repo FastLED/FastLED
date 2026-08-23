@@ -39,8 +39,13 @@ namespace fl {
 /// @param format_on_fail  Format and mount when the storage is absent or
 ///                        corrupt. Off by default: reformatting discards
 ///                        whatever was there, which is rarely wanted
-///                        unprompted. Platforms with no such hook ignore it
-///                        and simply fail to mount.
+///                        unprompted.
+///
+///                        Honored on ESP32, whose core takes the flag
+///                        directly. ESP8266 exposes a no-argument
+///                        `begin()` with no such hook and ignores it —
+///                        an unformatted filesystem there simply fails to
+///                        mount, which is the safe outcome either way.
 FsImplPtr getEmbeddedFs(bool format_on_fail = false) FL_NO_EXCEPT;
 
 } // namespace fl

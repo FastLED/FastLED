@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @file fl/system/embedded_fs/_build.cpp.hpp
 /// @brief Unity-build aggregate for embedded (on-chip flash) storage.
 ///
