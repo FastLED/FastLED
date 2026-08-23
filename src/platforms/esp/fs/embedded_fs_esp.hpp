@@ -29,7 +29,7 @@
 #include <LittleFS.h>
 // IWYU pragma: end_keep
 
-#include "fl/stl/detail/file_handle.h"
+#include "fl/fs/file_handle.h"
 #include "fl/stl/memory.h"
 #include "fl/stl/string.h"
 
