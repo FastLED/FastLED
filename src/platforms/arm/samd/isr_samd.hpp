@@ -84,20 +84,15 @@ constexpr u8 MAX_TIMER_INDEX = 5;
 
 constexpr u8 MAX_TIMER_INSTANCES = MAX_TIMER_INDEX - MIN_TIMER_INDEX + 1;
 
-// EIC configuration
-constexpr u8 MAX_EIC_CHANNELS = 16;
-
 // Error code for functionality that is not available on this SAMD variant.
 // Matches the value used by the other ARM ISR backends (see isr_sam.hpp).
 constexpr int ERR_NOT_IMPLEMENTED = -100;
 
 // Track allocated resources
 static bool timer_allocated[MAX_TIMER_INDEX + 1] = {};
-static bool eic_allocated[MAX_EIC_CHANNELS] = {};
 
 // Storage for handles (to allow ISR to find user handler)
 static samd_isr_handle_data* timer_handles[MAX_TIMER_INDEX + 1] = {};
-static samd_isr_handle_data* eic_handles[MAX_EIC_CHANNELS] = {};
 
 // =============================================================================
 // Helper Functions
@@ -191,39 +186,6 @@ static void free_timer(u8 timer_idx) FL_NO_EXCEPT {
         __disable_irq();
         timer_allocated[timer_idx] = false;
         timer_handles[timer_idx] = nullptr;
-        __enable_irq();
-    }
-}
-
-// Allocate a free EIC channel
-// SAMD21 only: the SAMD51 EIC path is not implemented (see attach_external_handler).
-#if defined(FL_IS_SAMD21)
-static bool allocate_eic_channel(u8& channel) FL_NO_EXCEPT {
-    // Critical section: prevent interrupt from modifying allocation state
-    __disable_irq();
-
-    bool found = false;
-    for (u8 i = 0; i < MAX_EIC_CHANNELS; i++) {
-        if (!eic_allocated[i]) {
-            eic_allocated[i] = true;
-            channel = i;
-            found = true;
-            break;
-        }
-    }
-
-    __enable_irq();
-    return found;
-}
-#endif  // FL_IS_SAMD21
-
-// Free an EIC channel
-static void free_eic_channel(u8 channel) FL_NO_EXCEPT {
-    if (channel < MAX_EIC_CHANNELS) {
-        // Critical section: prevent interrupt from accessing freed resources
-        __disable_irq();
-        eic_allocated[channel] = false;
-        eic_handles[channel] = nullptr;
         __enable_irq();
     }
 }
@@ -351,27 +313,6 @@ extern "C" {
     }
 #endif
 
-    // EIC (External Interrupt Controller) handler
-    // SAMD21 only: SAMD51 splits the EIC across EIC_0_Handler..EIC_15_Handler,
-    // which the Arduino SAMD core already defines. Defining EIC_Handler there
-    // would produce a symbol that is never wired into the vector table.
-#if defined(FL_IS_SAMD21)
-    void EIC_Handler(void) FL_NO_EXCEPT {
-        for (u8 ch = 0; ch < MAX_EIC_CHANNELS; ch++) {
-            u32 flag = 1UL << ch;
-
-            if (EIC->INTFLAG.reg & flag) {
-                // Clear the interrupt flag
-                EIC->INTFLAG.reg = flag;
-
-                samd_isr_handle_data* handle = eic_handles[ch];
-                if (handle && handle->user_handler) {
-                    handle->user_handler(handle->user_data);
-                }
-            }
-        }
-    }
-#endif  // FL_IS_SAMD21
 }
 
 // =============================================================================
@@ -535,130 +476,34 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
 }
 
 int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
-#if defined(FL_IS_SAMD51)
-    // SAMD51 splits the EIC into 16 separate vectors (EIC_0_Handler..EIC_15_Handler)
-    // rather than the single EIC_Handler that SAMD21 uses. The Arduino SAMD core
-    // (WInterrupts.c) defines all 16 of those handlers strongly and enables their
-    // IRQs at init, so FastLED cannot claim them without a duplicate-symbol link
-    // error. Report "not implemented" instead of silently attaching to a vector
-    // that will never fire (see the Arduino Due path in isr_sam.hpp).
+    // External (pin) interrupts are not implemented on SAMD. The previous
+    // implementation could not work on either variant:
+    //
+    //   * It derived the pad as `pin / 32` / `pin % 32`, treating the Arduino pin
+    //     index as a raw PORT/bit index. Those only coincide by accident - e.g.
+    //     Arduino pin 5 is PB14 on a Metro M4 and PA15 on a Feather M0, not PA05 -
+    //     so it re-muxed an unrelated pad.
+    //   * It handed out EIC channels sequentially, but EXTINT lines are hardwired
+    //     per pad, so EIC->CONFIG/INTENSET were programmed for a channel the pin
+    //     is not on and the handler never fired.
+    //   * On SAMD21 it also needed a strong EIC_Handler, which collides with the
+    //     Arduino core's own strong definition in WInterrupts.c as soon as a
+    //     sketch calls attachInterrupt() (that pulls WInterrupts.o out of core.a;
+    //     the startup file's weak Dummy_Handler aliases and the static
+    //     __initialize() never do). SAMD51 splits the same vector across
+    //     EIC_0_Handler..EIC_15_Handler with the identical problem.
+    //
+    // Report the failure instead of mis-programming the peripheral, matching the
+    // Arduino Due backend in isr_sam.hpp. The collision-free implementation is to
+    // delegate to the core's attachInterrupt() and claim no vectors at all, using
+    // g_APinDescription[pin].ulExtInt for the channel; that is a larger change
+    // than this compile fix.
     (void)pin;
     (void)config;
     if (out_handle) {
         *out_handle = isr_handle_t();  // Invalid handle
     }
     return ERR_NOT_IMPLEMENTED;
-#else
-    if (!config.handler) {
-        FL_WARN_F("attachExternalHandler: handler is null");
-        return -1;  // Invalid parameter
-    }
-
-    // Allocate an EIC channel
-    u8 eic_ch = 0;
-    if (!allocate_eic_channel(eic_ch)) {
-        FL_WARN_F("attachExternalHandler: no free EIC channels");
-        return -3;  // Out of resources
-    }
-
-    // Allocate handle data
-    auto handle_owner = fl::make_unique<samd_isr_handle_data>();
-    auto* handle_data = handle_owner.get();
-    if (!handle_data) {
-        free_eic_channel(eic_ch);
-        FL_WARN_F("attachExternalHandler: failed to allocate handle data");
-        return -5;  // Out of memory
-    }
-
-    handle_data->is_timer = false;
-    handle_data->eic_channel = eic_ch;
-    handle_data->gpio_pin = pin;
-    handle_data->user_handler = config.handler;
-    handle_data->user_data = config.user_data;
-
-    // Store handle for ISR access
-    eic_handles[eic_ch] = handle_data;
-
-    // Enable EIC clock
-    GCLK->CLKCTRL.reg = (u16)(GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID_EIC);
-    while (GCLK->STATUS.bit.SYNCBUSY) {
-        // Wait for sync
-    }
-
-    // Configure GPIO pin for EIC function
-    // Note: Pin-to-EIC-channel mapping is board-specific
-    // For now, we use a simple mapping (this may need board-specific adjustments)
-    u8 port = pin / 32;
-    u8 pin_num = pin % 32;
-
-    PORT->Group[port].PINCFG[pin_num].reg |= PORT_PINCFG_PMUXEN;
-
-    // Select peripheral function A (EIC) for the pin. Function A is encoded as 0,
-    // so clear the pin's PMUX nibble rather than OR-ing a value in - an OR can
-    // never move the field away from a previously-selected peripheral.
-    if (pin_num & 1) {
-        PORT->Group[port].PMUX[pin_num >> 1].reg &= ~(u8)PORT_PMUX_PMUXO_Msk;
-    } else {
-        PORT->Group[port].PMUX[pin_num >> 1].reg &= ~(u8)PORT_PMUX_PMUXE_Msk;
-    }
-
-    // Enable EIC if not already enabled
-    // SAMD21 uses CTRL instead of CTRLA, and STATUS.SYNCBUSY instead of SYNCBUSY
-    if (!EIC->CTRL.bit.ENABLE) {
-        EIC->CTRL.bit.ENABLE = 0;
-        while (EIC->STATUS.bit.SYNCBUSY) {
-            // Wait for sync
-        }
-
-        // Configure EIC
-        EIC->CTRL.bit.ENABLE = 1;
-        while (EIC->STATUS.bit.SYNCBUSY) {
-            // Wait for sync
-        }
-    }
-
-    // Determine sense configuration from flags
-    u8 sense;
-    if (config.flags & ISR_FLAG_EDGE_RISING) {
-        sense = EIC_CONFIG_SENSE0_RISE_Val;
-    } else if (config.flags & ISR_FLAG_EDGE_FALLING) {
-        sense = EIC_CONFIG_SENSE0_FALL_Val;
-    } else {
-        sense = EIC_CONFIG_SENSE0_BOTH_Val;  // Default to both edges
-    }
-
-    // Configure EIC channel
-    u8 config_idx = eic_ch / 8;  // Each CONFIG register handles 8 channels
-    u8 sense_shift = (eic_ch % 8) * 4;  // 4 bits per channel
-
-    EIC->CONFIG[config_idx].reg &= ~(0xF << sense_shift);
-    EIC->CONFIG[config_idx].reg |= (sense << sense_shift);
-
-    // Enable interrupt for this channel
-    EIC->INTENSET.reg = (1UL << eic_ch);
-
-    // Configure NVIC
-    u8 nvic_priority = map_priority_to_nvic(config.priority);
-    NVIC_DisableIRQ(EIC_IRQn) FL_NO_EXCEPT;
-    NVIC_ClearPendingIRQ(EIC_IRQn) FL_NO_EXCEPT;
-    NVIC_SetPriority(EIC_IRQn, nvic_priority) FL_NO_EXCEPT;
-    NVIC_EnableIRQ(EIC_IRQn) FL_NO_EXCEPT;
-
-    FL_DBG_F("EIC interrupt attached on pin %s EIC channel %s", static_cast<int>(pin), static_cast<int>(eic_ch));
-
-    // Release ownership - pointer is now managed by the C API (eic_handles + out_handle)
-    handle_owner.release();
-
-    // Populate output handle
-    if (out_handle) {
-        out_handle->platform_handle = handle_data;
-        out_handle->handler = config.handler;
-        out_handle->user_data = config.user_data;
-        out_handle->platform_id = SAMD_PLATFORM_ID;
-    }
-
-    return 0;  // Success
-#endif  // FL_IS_SAMD51
 }
 
 int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
@@ -683,12 +528,6 @@ int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
 
             NVIC_DisableIRQ(handle_data->timer_irq);
             free_timer(handle_data->timer_index);
-        }
-    } else {
-        // Disable EIC interrupt
-        if (handle_data->eic_channel < MAX_EIC_CHANNELS) {
-            EIC->INTENCLR.reg = (1UL << handle_data->eic_channel);
-            free_eic_channel(handle_data->eic_channel);
         }
     }
 
@@ -720,8 +559,9 @@ int enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
             handle_data->is_enabled = true;
         }
     } else {
-        EIC->INTENSET.reg = (1UL << handle_data->eic_channel);
-        handle_data->is_enabled = true;
+        // Only timer handles can exist; attach_external_handler never produces
+        // one. Do not poke EIC with the sentinel channel (1UL << 0xFF is UB).
+        return ERR_NOT_IMPLEMENTED;
     }
 
     return 0;  // Success
@@ -747,8 +587,8 @@ int disable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
             handle_data->is_enabled = false;
         }
     } else {
-        EIC->INTENCLR.reg = (1UL << handle_data->eic_channel);
-        handle_data->is_enabled = false;
+        // See enable_handler(): no external handles are ever created.
+        return ERR_NOT_IMPLEMENTED;
     }
 
     return 0;  // Success
@@ -775,6 +615,7 @@ const char* get_error_string(int error_code) FL_NO_EXCEPT {
         case -3: return "Out of resources";
         case -4: return "Internal error";
         case -5: return "Out of memory";
+        case ERR_NOT_IMPLEMENTED: return "Not implemented (SAMD external pin interrupts are not supported)";
         default: return "Unknown error";
     }
 }
