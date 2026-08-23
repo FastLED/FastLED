@@ -55,6 +55,23 @@
 #warning "-DFASTLED_ESP32_I2S is removed (FastLED#3526 Phase 2e). Drop the flag; the modern I2S engine is now on Bus::FLEX_IO, 0. Runtime select via FastLED.setExclusiveDriver<fl::Bus::FLEX_IO, 0>()."
 #endif
 
+// Pre-4.0 Teensy boards are end-of-life.
+//
+// Teensy LC and 3.0-3.6 are discontinued. FastLED still compiles for them and
+// we still fix reported bugs, but they get no hardware validation -- see
+// FastLED#3983, where bench testing is scoped to Teensy 4.0/4.1 only. Users on
+// these boards should know they are on an unvalidated path before they debug
+// something we cannot reproduce.
+//
+// Note the guard covers BOTH umbrellas: `FL_IS_TEENSY_3X` is only 3.0-3.6, and
+// Teensy LC sits beside it rather than inside it (see
+// platforms/arm/teensy/is_teensy.h). Testing 3X alone would silently miss the
+// LC, which is the most end-of-life board of the set.
+#if (defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_LC)) &&                  \
+    !defined(FASTLED_INTERNAL) && !defined(FL_TEENSY_EOL_SUPPRESS_WARNING)
+#warning "This Teensy (pre-4.0) is out of production and FastLED no longer hardware-validates it. If you hit a problem, try FastLED 3.10.3, the last release verified against these boards, and please file a report at https://github.com/FastLED/FastLED/issues -- we do still fix these. Define FL_TEENSY_EOL_SUPPRESS_WARNING to silence this."
+#endif
+
 // Legacy RMT4 backend is ESP-IDF 4.x only.
 //
 // On IDF 5.x the legacy TX and RX implementations no longer build: RMTMEM is not
