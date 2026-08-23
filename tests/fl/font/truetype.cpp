@@ -10,7 +10,7 @@
 // Implementation is in libfastled.a via third_party/_build.cpp
 #include "third_party/stb/truetype/stb_truetype.h"
 
-#include "fl/system/file_system.h"
+#include "fl/fs/fs.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

@@ -1,7 +1,7 @@
 // Implementation file for fl::filebuf and fl::detail::posix_filebuf
 // This file contains out-of-line definitions to reduce header compilation overhead
 
-#include "fl/stl/detail/file_handle.h"
+#include "fl/fs/file_handle.h"
 #include "fl/stl/move.h"
 #include "fl/stl/noexcept.h"
 

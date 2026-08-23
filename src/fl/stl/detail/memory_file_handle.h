@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/stl/detail/file_handle.h"
+#include "fl/fs/file_handle.h"
 #include "fl/stl/circular_buffer.h"
 #include "fl/stl/span.h"
 #include "fl/math/math.h"

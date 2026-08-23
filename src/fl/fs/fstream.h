@@ -2,7 +2,7 @@
 
 #include "fl/stl/int.h"
 #include "fl/stl/bit_cast.h"
-#include "fl/stl/detail/file_handle.h"
+#include "fl/fs/file_handle.h"
 #include "fl/stl/shared_ptr.h"
 
 // Platform-aware file stream implementation (analogous to std::ifstream / std::ofstream)

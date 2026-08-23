@@ -6,7 +6,7 @@
 #include "fl/stl/assert.h"
 #include "fl/math/math.h"
 #include "fl/log/log.h"
-#include "fl/system/file_system.h"
+#include "fl/fs/fs.h"
 #include "fl/video/frame_interpolator.h"
 #include "fl/video/pixel_stream.h"
 #include "crgb.h"

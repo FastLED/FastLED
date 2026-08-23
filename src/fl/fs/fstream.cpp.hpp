@@ -1,7 +1,7 @@
 // Implementation file for fl::fstream, fl::ifstream, fl::ofstream
 // This file contains out-of-line definitions to reduce header compilation overhead
 
-#include "fl/stl/fstream.h"
+#include "fl/fs/fstream.h"
 #include "fl/stl/memory.h"
 #include "fl/stl/noexcept.h"
 
