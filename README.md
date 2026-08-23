@@ -92,6 +92,8 @@ while the smoke badge is green.
 
 **ARM Boards:** [![sam3x8e_due](https://github.com/FastLED/FastLED/actions/workflows/build_due.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_due.yml) [![ClearCore SAME53 compile](https://github.com/FastLED/FastLED/actions/workflows/build_clearcore.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_clearcore.yml)
 
+**Microchip SAMD (M0+/M4):** [![samd21](https://github.com/FastLED/FastLED/actions/workflows/build_samd21.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_samd21.yml) [![samd51j](https://github.com/FastLED/FastLED/actions/workflows/build_samd51j.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_samd51j.yml) [![metro_m4](https://github.com/FastLED/FastLED/actions/workflows/build_metro_m4.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_metro_m4.yml)
+
 **Arduino Due (Digix):** [![digix](https://github.com/FastLED/FastLED/actions/workflows/build_digix.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_digix.yml)
 
 *ClearCore coverage is a compile-only Blink build against the pinned Teknic Arduino core; it does not claim hardware timing validation.*

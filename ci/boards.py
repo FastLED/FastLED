@@ -1551,6 +1551,19 @@ SAMD51P20A_GRANDCENTRAL = Board(
     ],
 )
 
+# Builds with ADAFRUIT_METRO_M4_EXPRESS defined, which is the only SAMD51 board
+# define that exercises the Metro M4 Express branch of fastpin_arm_d51.h.
+SAMD51J19A_METRO_M4 = Board(
+    board_name="metro_m4",
+    real_board_name="adafruit_metro_m4",
+    platform="atmelsam",
+    framework="arduino",
+    lib_ignore=["I2S"],  # I2S library has SAMD51 compatibility issues
+    defines=[
+        "FASTLED_USES_ARDUINO_AUDIO_INPUT=0",  # Disable Arduino audio (I2S not available)
+    ],
+)
+
 # Teknic ClearCore (Microchip SAME53N19A, Cortex-M4F @ 120 MHz).
 # This is an fbuild-native board; its vendor Arduino core is pinned by fbuild.
 CLEARCORE_SAME53 = Board(
