@@ -102,10 +102,14 @@ FL_TEST_CASE("fl::resolve_asset - host fallback finds sibling .lnk") {
     // examples/AudioUrl/data/track.mp3.lnk exists in the repo; the raw
     // track.mp3 does NOT. Resolution must fall through to the .lnk and return
     // the URL declared inside.
+    //
+    // The .lnk stays in the TEXT format on purpose: fl::parse_lnk reads only
+    // that form, so a JSON .lnk here would resolve to "{" as the URL. fbuild
+    // accepts both since FastLED/fbuild#1362.
     asset_ref r = FL_ASSET("examples/AudioUrl/data/track.mp3");
     url resolved = fl::resolve_asset(r);
     FL_CHECK(resolved.isValid());
-    FL_CHECK_EQ(resolved.host(), string_view("www.soundhelix.com"));
+    FL_CHECK_EQ(resolved.host(), string_view("raw.githubusercontent.com"));
 }
 
 FL_TEST_CASE("fl::resolve_asset - unknown path returns invalid url") {
