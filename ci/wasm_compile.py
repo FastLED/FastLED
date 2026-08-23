@@ -42,8 +42,14 @@ def parse_args() -> tuple:
 def main() -> int:
     args, unknown_args = parse_args()
 
-    # Extract example name from sketch_dir (e.g., "examples/Blink" -> "Blink")
-    example_name = args.sketch_dir.split("/")[-1]
+    # Keep the sketch path relative to examples/ (e.g. "examples/Fx/FxCylon"
+    # -> "Fx/FxCylon") so resolution stays unambiguous when two sketches share
+    # a basename in different directories. `example_name` is the bare name and
+    # is used only for display and board filtering.
+    sketch_rel = args.sketch_dir.replace("\\", "/").strip("/")
+    if sketch_rel.startswith("examples/"):
+        sketch_rel = sketch_rel[len("examples/") :]
+    example_name = sketch_rel.split("/")[-1]
 
     # Check if sketch is filtered out for WASM platform
     try:
@@ -96,7 +102,7 @@ def main() -> int:
 
     from ci.wasm_build import resolve_example_dir
 
-    output_dir = resolve_example_dir(example_name) / "fastled_js"
+    output_dir = resolve_example_dir(sketch_rel) / "fastled_js"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     output_js = output_dir / "fastled.js"
@@ -108,7 +114,7 @@ def main() -> int:
     sys.argv = [
         "ci.wasm_build",
         "--example",
-        example_name,
+        sketch_rel,
         "-o",
         str(output_js),
     ] + unknown_args

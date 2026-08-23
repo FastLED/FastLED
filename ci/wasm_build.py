@@ -841,7 +841,11 @@ def create_wrapper(example_name: str, sketch_cache_dir: Path) -> Path:
     Returns path to the wrapper file.
     """
     example_dir = resolve_example_dir(example_name)
-    ino_file = example_dir / f"{Path(example_name).name}.ino"
+    # Derive filenames from the resolved directory, not the caller's string: a
+    # relative form like "Fx/FxCylon" would otherwise produce a nested wrapper
+    # path (sketch_cache_dir/Fx/FxCylon_wrapper.cpp) instead of a flat one.
+    sketch_name = example_dir.name
+    ino_file = example_dir / f"{sketch_name}.ino"
 
     if not ino_file.exists():
         raise FileNotFoundError(f"Example not found: {ino_file}")
@@ -855,9 +859,9 @@ def create_wrapper(example_name: str, sketch_cache_dir: Path) -> Path:
         and all(part not in excluded_dirs for part in f.parts)
     )
 
-    wrapper_path = sketch_cache_dir / f"{example_name}_wrapper.cpp"
+    wrapper_path = sketch_cache_dir / f"{sketch_name}_wrapper.cpp"
     lines = [
-        f"// Auto-generated wrapper for {example_name}.ino",
+        f"// Auto-generated wrapper for {sketch_name}.ino",
         "// C++20 header unit import — ~2x faster than PCH for sketch compilation.",
         '// The .ino\'s #include "FastLED.h" is a harmless no-op after this import.',
         'import "wasm_pch.h";',

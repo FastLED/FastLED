@@ -55,3 +55,22 @@ def test_every_nested_fx_example_resolves(name: str) -> None:
 
     assert resolved.is_dir()
     assert (resolved / f"{name}.ino").is_file()
+
+
+def test_relative_path_resolves_to_same_dir_as_bare_name() -> None:
+    """`Fx/FxCylon` and `FxCylon` must resolve identically.
+
+    Guards the wasm_compile path, which now forwards the full relative sketch
+    path so two sketches sharing a basename stay distinguishable.
+    """
+    assert resolve_example_dir("Fx/FxCylon") == resolve_example_dir("FxCylon")
+
+
+def test_resolved_dir_name_is_always_the_bare_sketch_name() -> None:
+    """Generated filenames derive from this, so it must never contain a separator.
+
+    Deriving from the caller's string instead would turn "Fx/FxCylon" into a
+    nested wrapper path (sketch_cache_dir/Fx/FxCylon_wrapper.cpp).
+    """
+    for name in ("FxCylon", "Fx/FxCylon"):
+        assert resolve_example_dir(name).name == "FxCylon"
