@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/int.h"
+#include "fl/stl/shared_ptr.h"  // filebuf_ptr
 #include "fl/stl/detail/file_io.h"  // For fl::FILE* and fl::fopen/fclose/etc.
 #include "fl/stl/span.h"
 #include "fl/stl/string.h"
@@ -75,6 +76,12 @@ public:
     bool seek(fl::size_t p) { return seek(p, seek_dir::beg); }
     fl::size_t bytesLeft() const { return bytes_left(); }
 };
+
+// Owning handle to a filebuf. Declared here, beside the type it points at,
+// so anything using the interface gets the alias from the same include.
+// Several headers redeclare this identical alias for their own closure;
+// duplicate identical using-declarations are legal, so they still compile.
+using filebuf_ptr = fl::shared_ptr<filebuf>;
 
 namespace detail {
 
