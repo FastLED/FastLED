@@ -1525,6 +1525,13 @@ SAMD21G18A_FEATHER = Board(
     real_board_name="adafruit_feather_m0",
     platform="atmelsam",
     framework="arduino",
+    # fbuild does not implement lib_ldf_mode and its chain scan reaches
+    # neither the #if 0 LDF hint in platforms/arm/samd/ldf_headers.h nor the
+    # real conditional include in fastspi_arm_sam.h, so the SAMD SPI backend
+    # needs SPI declared here too. fbuild calls lib_deps "the escape hatch
+    # for a dependency the finder scan never reaches". See #4011, #4016,
+    # FastLED/fbuild#1371. The src/ hint stays for PlatformIO consumers.
+    lib_deps=["SPI"],
 )
 
 SAMD21G18A_ZERO = Board(
@@ -1532,6 +1539,7 @@ SAMD21G18A_ZERO = Board(
     real_board_name="zeroUSB",
     platform="atmelsam",
     framework="arduino",
+    lib_deps=["SPI"],  # see samd21 / #4016
 )
 
 # SAMD51 boards (Cortex-M4F @ 120 MHz)
@@ -1544,6 +1552,7 @@ SAMD51J19A_FEATHER_M4 = Board(
     defines=[
         "FASTLED_USES_ARDUINO_AUDIO_INPUT=0",  # Disable Arduino audio (I2S not available)
     ],
+    lib_deps=["SPI"],  # see samd21 / #4016
 )
 
 SAMD51P20A_GRANDCENTRAL = Board(
@@ -1568,6 +1577,7 @@ SAMD51J19A_METRO_M4 = Board(
     defines=[
         "FASTLED_USES_ARDUINO_AUDIO_INPUT=0",  # Disable Arduino audio (I2S not available)
     ],
+    lib_deps=["SPI"],  # see samd21 / #4016
 )
 
 # Teknic ClearCore (Microchip SAME53N19A, Cortex-M4F @ 120 MHz).
