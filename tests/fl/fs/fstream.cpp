@@ -1,5 +1,5 @@
 #include "test.h"
-#include "fl/stl/fstream.h"
+#include "fl/fs/fstream.h"
 #include "fl/stl/cerrno.h"
 #include "platforms/stub/fs_stub.hpp"
 #include "test.h"

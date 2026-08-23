@@ -1,9 +1,3 @@
-# Known missing FL_NO_EXCEPT signatures for ci/tools/check_noexcept.py.
-# Generated with:
-#   uv run python ci/tools/check_noexcept.py --scope all --update-baseline
-#
-# Format: src/path|normalized source signature
-# New entries fail the default unified C++ linter.
 
 src/fl/audio/audio.cpp.hpp|Sample::Sample(fl::span<const fl::i16> span, fl::u32 timestamp) {
 src/fl/audio/audio.cpp.hpp|SampleImplPtr getOrCreate() {
@@ -2120,6 +2114,200 @@ src/fl/font/truetype.h|virtual i32 getKerning(i32 codepoint1, i32 codepoint2) co
 src/fl/font/truetype.h|virtual i32 getNumFonts() const = 0;
 src/fl/font/ttf_covenant5x5.cpp.hpp|fl::span<const u8> covenant5x5() {
 src/fl/font/ttf_covenant5x5.h|fl::span<const u8> covenant5x5();
+src/fl/fs/backend.h|virtual bool begin() = 0;
+src/fl/fs/backend.h|virtual bool ls(Visitor &visitor) {
+src/fl/fs/backend.h|virtual filebuf_ptr openRead(const char *path) = 0;
+src/fl/fs/backend.h|virtual void accept(const char *path) = 0;
+src/fl/fs/backend.h|virtual void end() = 0;
+src/fl/fs/file_handle.cpp.hpp|bool posix_filebuf::has_error() const {
+src/fl/fs/file_handle.cpp.hpp|bool posix_filebuf::is_eof() const {
+src/fl/fs/file_handle.cpp.hpp|bool posix_filebuf::is_open() const {
+src/fl/fs/file_handle.cpp.hpp|bool posix_filebuf::seek(fl::size_t pos, seek_dir dir) {
+src/fl/fs/file_handle.cpp.hpp|const char* posix_filebuf::error_message() const {
+src/fl/fs/file_handle.cpp.hpp|const char* posix_filebuf::path() const {
+src/fl/fs/file_handle.cpp.hpp|fl::size_t filebuf::bytes_left() const {
+src/fl/fs/file_handle.cpp.hpp|fl::size_t filebuf::pos() const {
+src/fl/fs/file_handle.cpp.hpp|fl::size_t posix_filebuf::read(char* buffer, fl::size_t count) {
+src/fl/fs/file_handle.cpp.hpp|fl::size_t posix_filebuf::size() const {
+src/fl/fs/file_handle.cpp.hpp|fl::size_t posix_filebuf::tell() {
+src/fl/fs/file_handle.cpp.hpp|fl::size_t posix_filebuf::write(const char* data, fl::size_t count) {
+src/fl/fs/file_handle.cpp.hpp|int posix_filebuf::error_code() const {
+src/fl/fs/file_handle.cpp.hpp|posix_filebuf::posix_filebuf(const char* path, const char* mode) : mFile(nullptr), mLastError(0), mPath(path ? path : "") {
+src/fl/fs/file_handle.cpp.hpp|void posix_filebuf::captureError() {
+src/fl/fs/file_handle.cpp.hpp|void posix_filebuf::clearErrorState() {
+src/fl/fs/file_handle.cpp.hpp|void posix_filebuf::clear_error() {
+src/fl/fs/file_handle.cpp.hpp|void posix_filebuf::close() {
+src/fl/fs/file_handle.h|bool available(fl::size_t n) const { return bytes_left() >= n; }
+src/fl/fs/file_handle.h|bool has_error() const override;
+src/fl/fs/file_handle.h|bool is_eof() const override;
+src/fl/fs/file_handle.h|bool is_open() const override;
+src/fl/fs/file_handle.h|bool seek(fl::size_t p) { return seek(p, seek_dir::beg); }
+src/fl/fs/file_handle.h|bool seek(fl::size_t pos, seek_dir dir) override;
+src/fl/fs/file_handle.h|bool valid() const { return is_open(); }
+src/fl/fs/file_handle.h|const char* error_message() const override;
+src/fl/fs/file_handle.h|const char* path() const override;
+src/fl/fs/file_handle.h|explicit posix_filebuf(const char* path, const char* mode);
+src/fl/fs/file_handle.h|fl::size_t bytesLeft() const { return bytes_left(); }
+src/fl/fs/file_handle.h|fl::size_t pos() const;
+src/fl/fs/file_handle.h|fl::size_t read(char* buffer, fl::size_t count) override;
+src/fl/fs/file_handle.h|fl::size_t read(fl::span<fl::u8> dst) {
+src/fl/fs/file_handle.h|fl::size_t read(fl::u8* dst, fl::size_t n) {
+src/fl/fs/file_handle.h|fl::size_t readRGB8(fl::span<CRGB> dst) {
+src/fl/fs/file_handle.h|fl::size_t size() const override;
+src/fl/fs/file_handle.h|fl::size_t tell() override;
+src/fl/fs/file_handle.h|fl::size_t write(const char* data, fl::size_t count) override;
+src/fl/fs/file_handle.h|int error_code() const override;
+src/fl/fs/file_handle.h|virtual bool available() const { return is_open() && !is_eof(); }
+src/fl/fs/file_handle.h|virtual bool has_error() const = 0;
+src/fl/fs/file_handle.h|virtual bool is_eof() const = 0;
+src/fl/fs/file_handle.h|virtual bool is_open() const = 0;
+src/fl/fs/file_handle.h|virtual bool seek(fl::size_t pos, seek_dir dir) = 0;
+src/fl/fs/file_handle.h|virtual const char* error_message() const = 0;
+src/fl/fs/file_handle.h|virtual const char* path() const = 0;
+src/fl/fs/file_handle.h|virtual fl::size_t bytes_left() const;
+src/fl/fs/file_handle.h|virtual fl::size_t read(char* buffer, fl::size_t count) = 0;
+src/fl/fs/file_handle.h|virtual fl::size_t size() const = 0;
+src/fl/fs/file_handle.h|virtual fl::size_t tell() = 0;
+src/fl/fs/file_handle.h|virtual fl::size_t write(const char* data, fl::size_t count) = 0;
+src/fl/fs/file_handle.h|virtual int error_code() const = 0;
+src/fl/fs/file_handle.h|virtual void clear_error() = 0;
+src/fl/fs/file_handle.h|virtual void close() = 0;
+src/fl/fs/file_handle.h|void captureError();
+src/fl/fs/file_handle.h|void clearErrorState();
+src/fl/fs/file_handle.h|void clear_error() override;
+src/fl/fs/file_handle.h|void close() override;
+src/fl/fs/fs.cpp.hpp|FileSystem::FileSystem() : mFs() {}
+src/fl/fs/fs.cpp.hpp|Video FileSystem::openVideo(const char *path, fl::size pixelsPerFrame, float fps, fl::size nFrameHistory) {
+src/fl/fs/fs.cpp.hpp|bool FileSystem::begin(FsImplPtr platform_filesystem) {
+src/fl/fs/fs.cpp.hpp|bool FileSystem::readJson(const char *path, json *doc) {
+src/fl/fs/fs.cpp.hpp|bool FileSystem::readScreenMap(const char *path, const char *name, ScreenMap *out, string *error) {
+src/fl/fs/fs.cpp.hpp|bool FileSystem::readScreenMaps(const char *path, fl::flat_map<string, ScreenMap> *out, string *error) {
+src/fl/fs/fs.cpp.hpp|bool FileSystem::readText(const char *path, fl::string *out) {
+src/fl/fs/fs.cpp.hpp|bool begin() override { return true; }
+src/fl/fs/fs.cpp.hpp|bool has_error() const override { return false; }
+src/fl/fs/fs.cpp.hpp|bool is_eof() const override { return true; }
+src/fl/fs/fs.cpp.hpp|bool is_open() const override { return false; }
+src/fl/fs/fs.cpp.hpp|bool seek(fl::size_t pos, seek_dir dir) override {
+src/fl/fs/fs.cpp.hpp|const char *error_message() const override { return "NullFileHandle"; }
+src/fl/fs/fs.cpp.hpp|const char *path() const override { return "nullptr filebuf"; }
+src/fl/fs/fs.cpp.hpp|filebuf_ptr openRead(const char *_path) override {
+src/fl/fs/fs.cpp.hpp|fl::ifstream FileSystem::openRead(const char *path) {
+src/fl/fs/fs.cpp.hpp|fl::size_t read(char *dst, fl::size_t bytesToRead) override {
+src/fl/fs/fs.cpp.hpp|fl::size_t size() const override { return 0; }
+src/fl/fs/fs.cpp.hpp|fl::size_t tell() override { return 0; }
+src/fl/fs/fs.cpp.hpp|fl::size_t write(const char *data, fl::size_t count) override {
+src/fl/fs/fs.cpp.hpp|int error_code() const override { return 0; }
+src/fl/fs/fs.cpp.hpp|void FileSystem::end() {
+src/fl/fs/fs.cpp.hpp|void clear_error() override {}
+src/fl/fs/fs.cpp.hpp|void close() override {}
+src/fl/fs/fs.cpp.hpp|void end() override {}
+src/fl/fs/fs.h|FramePtr loadJpeg(const char *path, const JpegConfig &config = JpegConfig(), fl::string *error_message = nullptr);
+src/fl/fs/fs.h|FsImplPtr make_sdcard_filesystem(int cs_pin);
+src/fl/fs/fs.h|Video openMpeg1Video(const char *path, fl::size pixelsPerFrame, float fps = 30.0f, fl::size nFrameHistory = 0);
+src/fl/fs/fs.h|Video openVideo(const char *path, fl::size pixelsPerFrame, float fps = 30.0f, fl::size nFrameHistory = 0);
+src/fl/fs/fs.h|bool begin(FsImplPtr platform_filesystem);
+src/fl/fs/fs.h|bool beginSd(int cs_pin);
+src/fl/fs/fs.h|bool readJson(const char *path, json *doc);
+src/fl/fs/fs.h|bool readScreenMap(const char *path, const char *name, ScreenMap *out, string *error = nullptr);
+src/fl/fs/fs.h|bool readScreenMaps(const char *path, fl::flat_map<string, ScreenMap> *out, string *error = nullptr);
+src/fl/fs/fs.h|bool readText(const char *path, string *out);
+src/fl/fs/fs.h|const char* getTestFileSystemRoot();
+src/fl/fs/fs.h|fl::Mp3DecoderPtr openMp3(const char *path, fl::string *error_message = nullptr);
+src/fl/fs/fs.h|fl::ifstream openRead(const char *path);
+src/fl/fs/fs.h|inline FramePtr loadJpegFromSD(int cs_pin, const char *filepath, const JpegConfig &config = JpegConfig(), fl::string *error_message = nullptr) {
+src/fl/fs/fs.h|void end();
+src/fl/fs/fs.h|void setTestFileSystemRoot(const char* root_path);
+src/fl/fs/fstream.cpp.hpp|const char* fstream::error_message() const {
+src/fl/fs/fstream.cpp.hpp|const char* ifstream::error_message() const {
+src/fl/fs/fstream.cpp.hpp|const char* ofstream::error_message() const {
+src/fl/fs/fstream.cpp.hpp|fl::size_t fstream::tellg() {
+src/fl/fs/fstream.cpp.hpp|fl::size_t ifstream::tellg() {
+src/fl/fs/fstream.cpp.hpp|fstream& fstream::read(char* buffer, fl::size_t count) {
+src/fl/fs/fstream.cpp.hpp|fstream& fstream::seekg(fl::size_t pos, ios::seekdir dir) {
+src/fl/fs/fstream.cpp.hpp|fstream& fstream::write(const char* data, fl::size_t count) {
+src/fl/fs/fstream.cpp.hpp|fstream::fstream(const char* path, ios::openmode mode) : mLastRead(0), mGood(false), mEof(false), mFail(true), mLocalError(0) {
+src/fl/fs/fstream.cpp.hpp|fstream::fstream(filebuf_ptr handle) : mHandle(handle), mLastRead(0), mGood(false), mEof(false), mFail(true), mLocalError(0) {
+src/fl/fs/fstream.cpp.hpp|ifstream& ifstream::read(char* buffer, fl::size_t count) {
+src/fl/fs/fstream.cpp.hpp|ifstream& ifstream::seekg(fl::size_t pos, ios::seekdir dir) {
+src/fl/fs/fstream.cpp.hpp|ifstream::ifstream(const char* path, ios::openmode mode) : mLastRead(0), mGood(false), mEof(false), mFail(true) {
+src/fl/fs/fstream.cpp.hpp|ifstream::ifstream(filebuf_ptr handle) : mHandle(handle), mLastRead(0), mGood(false), mEof(false), mFail(true) {
+src/fl/fs/fstream.cpp.hpp|int fstream::error() const {
+src/fl/fs/fstream.cpp.hpp|int ifstream::error() const {
+src/fl/fs/fstream.cpp.hpp|int ofstream::error() const {
+src/fl/fs/fstream.cpp.hpp|ofstream& ofstream::write(const char* data, fl::size_t count) {
+src/fl/fs/fstream.cpp.hpp|ofstream::ofstream(const char* path, ios::openmode mode) : mGood(false), mEof(false), mFail(true), mLocalError(0) {
+src/fl/fs/fstream.cpp.hpp|ofstream::ofstream(filebuf_ptr handle) : mHandle(handle), mGood(false), mEof(false), mFail(true), mLocalError(0) {
+src/fl/fs/fstream.cpp.hpp|void fstream::clear_error() {
+src/fl/fs/fstream.cpp.hpp|void fstream::close() {
+src/fl/fs/fstream.cpp.hpp|void fstream::open(const char* path, ios::openmode mode) {
+src/fl/fs/fstream.cpp.hpp|void ifstream::clear_error() {
+src/fl/fs/fstream.cpp.hpp|void ifstream::close() {
+src/fl/fs/fstream.cpp.hpp|void ifstream::open(const char* path, ios::openmode mode) {
+src/fl/fs/fstream.cpp.hpp|void ofstream::clear_error() {
+src/fl/fs/fstream.cpp.hpp|void ofstream::close() {
+src/fl/fs/fstream.cpp.hpp|void ofstream::open(const char* path, ios::openmode mode) {
+src/fl/fs/fstream.h|bool available() const {
+src/fl/fs/fstream.h|bool available(fl::size_t n) const {
+src/fl/fs/fstream.h|bool eof() const { return mEof; }
+src/fl/fs/fstream.h|bool eof() const { return mEof; }
+src/fl/fs/fstream.h|bool eof() const { return mEof; }
+src/fl/fs/fstream.h|bool fail() const { return mFail; }
+src/fl/fs/fstream.h|bool fail() const { return mFail; }
+src/fl/fs/fstream.h|bool fail() const { return mFail; }
+src/fl/fs/fstream.h|bool good() const { return mGood; }
+src/fl/fs/fstream.h|bool good() const { return mGood; }
+src/fl/fs/fstream.h|bool good() const { return mGood; }
+src/fl/fs/fstream.h|bool is_open() const {
+src/fl/fs/fstream.h|bool is_open() const {
+src/fl/fs/fstream.h|bool is_open() const {
+src/fl/fs/fstream.h|bool seek(fl::size_t p) {
+src/fl/fs/fstream.h|bool seek(fl::size_t p, seek_dir dir) {
+src/fl/fs/fstream.h|bool valid() const { return is_open(); }
+src/fl/fs/fstream.h|const char* error_message() const;
+src/fl/fs/fstream.h|const char* error_message() const;
+src/fl/fs/fstream.h|const char* error_message() const;
+src/fl/fs/fstream.h|const char* path() const {
+src/fl/fs/fstream.h|explicit fstream(const char* path, ios::openmode mode = ios::in | ios::out);
+src/fl/fs/fstream.h|explicit fstream(filebuf_ptr handle);
+src/fl/fs/fstream.h|explicit ifstream(const char* path, ios::openmode mode = ios::in);
+src/fl/fs/fstream.h|explicit ifstream(filebuf_ptr handle);
+src/fl/fs/fstream.h|explicit ofstream(const char* path, ios::openmode mode = ios::out);
+src/fl/fs/fstream.h|explicit ofstream(filebuf_ptr handle);
+src/fl/fs/fstream.h|filebuf_ptr rdbuf() const { return mHandle; }
+src/fl/fs/fstream.h|filebuf_ptr rdbuf() const { return mHandle; }
+src/fl/fs/fstream.h|filebuf_ptr rdbuf() const { return mHandle; }
+src/fl/fs/fstream.h|fl::size_t bytesLeft() const { return bytes_left(); }
+src/fl/fs/fstream.h|fl::size_t bytes_left() const {
+src/fl/fs/fstream.h|fl::size_t gcount() const {
+src/fl/fs/fstream.h|fl::size_t gcount() const {
+src/fl/fs/fstream.h|fl::size_t pos() const { return mHandle ? mHandle->pos() : 0; }
+src/fl/fs/fstream.h|fl::size_t read(fl::span<fl::u8> dst) {
+src/fl/fs/fstream.h|fl::size_t read(fl::u8* dst, fl::size_t n) {
+src/fl/fs/fstream.h|fl::size_t readRGB8(fl::span<CRGB> dst) {
+src/fl/fs/fstream.h|fl::size_t size() const {
+src/fl/fs/fstream.h|fl::size_t tellg();
+src/fl/fs/fstream.h|fl::size_t tellg();
+src/fl/fs/fstream.h|fstream& read(char* buffer, fl::size_t count);
+src/fl/fs/fstream.h|fstream& seekg(fl::size_t pos, ios::seekdir dir = ios::seekdir::beg);
+src/fl/fs/fstream.h|fstream& write(const char* data, fl::size_t count);
+src/fl/fs/fstream.h|ifstream& read(char* buffer, fl::size_t count);
+src/fl/fs/fstream.h|ifstream& seekg(fl::size_t pos, ios::seekdir dir = ios::seekdir::beg);
+src/fl/fs/fstream.h|int error() const;
+src/fl/fs/fstream.h|int error() const;
+src/fl/fs/fstream.h|int error() const;
+src/fl/fs/fstream.h|ofstream& write(const char* data, fl::size_t count);
+src/fl/fs/fstream.h|void clear_error();
+src/fl/fs/fstream.h|void clear_error();
+src/fl/fs/fstream.h|void clear_error();
+src/fl/fs/fstream.h|void close();
+src/fl/fs/fstream.h|void close();
+src/fl/fs/fstream.h|void close();
+src/fl/fs/fstream.h|void open(const char* path, ios::openmode mode = ios::in | ios::out);
+src/fl/fs/fstream.h|void open(const char* path, ios::openmode mode = ios::in);
+src/fl/fs/fstream.h|void open(const char* path, ios::openmode mode = ios::out);
+src/fl/fs/fstream.h|void updateState() {
+src/fl/fs/fstream.h|void updateState() {
+src/fl/fs/fstream.h|void updateState() {
 src/fl/fx/1d/particles.cpp.hpp|Particles1d::Particle::Particle() : pos(0), baseVel(0), birthTime(0), lifetime(0), active(false) {}
 src/fl/fx/1d/particles.cpp.hpp|Particles1d::Particles1d(u16 num_leds, u8 max_particles, u8 fade_rate) : Fx1d(num_leds), mFadeRate(fade_rate), mOverdrawCount(20), mSpeedMultiplier(1.0f), mCyclical(true), mParticles(max_particles) {
 src/fl/fx/1d/particles.cpp.hpp|fl::string Particles1d::fxName() const {
@@ -5792,63 +5980,6 @@ src/fl/stl/deque.h|void resize(fl::size new_size) {
 src/fl/stl/deque.h|void resize(fl::size new_size, const T& value) {
 src/fl/stl/deque.h|void shrink_to_fit() {
 src/fl/stl/deque.h|void swap(deque& other) {
-src/fl/stl/detail/file_handle.cpp.hpp|bool posix_filebuf::has_error() const {
-src/fl/stl/detail/file_handle.cpp.hpp|bool posix_filebuf::is_eof() const {
-src/fl/stl/detail/file_handle.cpp.hpp|bool posix_filebuf::is_open() const {
-src/fl/stl/detail/file_handle.cpp.hpp|bool posix_filebuf::seek(fl::size_t pos, seek_dir dir) {
-src/fl/stl/detail/file_handle.cpp.hpp|const char* posix_filebuf::error_message() const {
-src/fl/stl/detail/file_handle.cpp.hpp|const char* posix_filebuf::path() const {
-src/fl/stl/detail/file_handle.cpp.hpp|fl::size_t filebuf::bytes_left() const {
-src/fl/stl/detail/file_handle.cpp.hpp|fl::size_t filebuf::pos() const {
-src/fl/stl/detail/file_handle.cpp.hpp|fl::size_t posix_filebuf::read(char* buffer, fl::size_t count) {
-src/fl/stl/detail/file_handle.cpp.hpp|fl::size_t posix_filebuf::size() const {
-src/fl/stl/detail/file_handle.cpp.hpp|fl::size_t posix_filebuf::tell() {
-src/fl/stl/detail/file_handle.cpp.hpp|fl::size_t posix_filebuf::write(const char* data, fl::size_t count) {
-src/fl/stl/detail/file_handle.cpp.hpp|int posix_filebuf::error_code() const {
-src/fl/stl/detail/file_handle.cpp.hpp|posix_filebuf::posix_filebuf(const char* path, const char* mode) : mFile(nullptr), mLastError(0), mPath(path ? path : "") {
-src/fl/stl/detail/file_handle.cpp.hpp|void posix_filebuf::captureError() {
-src/fl/stl/detail/file_handle.cpp.hpp|void posix_filebuf::clearErrorState() {
-src/fl/stl/detail/file_handle.cpp.hpp|void posix_filebuf::clear_error() {
-src/fl/stl/detail/file_handle.cpp.hpp|void posix_filebuf::close() {
-src/fl/stl/detail/file_handle.h|bool available(fl::size_t n) const { return bytes_left() >= n; }
-src/fl/stl/detail/file_handle.h|bool has_error() const override;
-src/fl/stl/detail/file_handle.h|bool is_eof() const override;
-src/fl/stl/detail/file_handle.h|bool is_open() const override;
-src/fl/stl/detail/file_handle.h|bool seek(fl::size_t p) { return seek(p, seek_dir::beg); }
-src/fl/stl/detail/file_handle.h|bool seek(fl::size_t pos, seek_dir dir) override;
-src/fl/stl/detail/file_handle.h|bool valid() const { return is_open(); }
-src/fl/stl/detail/file_handle.h|const char* error_message() const override;
-src/fl/stl/detail/file_handle.h|const char* path() const override;
-src/fl/stl/detail/file_handle.h|explicit posix_filebuf(const char* path, const char* mode);
-src/fl/stl/detail/file_handle.h|fl::size_t bytesLeft() const { return bytes_left(); }
-src/fl/stl/detail/file_handle.h|fl::size_t pos() const;
-src/fl/stl/detail/file_handle.h|fl::size_t read(char* buffer, fl::size_t count) override;
-src/fl/stl/detail/file_handle.h|fl::size_t read(fl::span<fl::u8> dst) {
-src/fl/stl/detail/file_handle.h|fl::size_t read(fl::u8* dst, fl::size_t n) {
-src/fl/stl/detail/file_handle.h|fl::size_t readRGB8(fl::span<CRGB> dst) {
-src/fl/stl/detail/file_handle.h|fl::size_t size() const override;
-src/fl/stl/detail/file_handle.h|fl::size_t tell() override;
-src/fl/stl/detail/file_handle.h|fl::size_t write(const char* data, fl::size_t count) override;
-src/fl/stl/detail/file_handle.h|int error_code() const override;
-src/fl/stl/detail/file_handle.h|virtual bool available() const { return is_open() && !is_eof(); }
-src/fl/stl/detail/file_handle.h|virtual bool has_error() const = 0;
-src/fl/stl/detail/file_handle.h|virtual bool is_eof() const = 0;
-src/fl/stl/detail/file_handle.h|virtual bool is_open() const = 0;
-src/fl/stl/detail/file_handle.h|virtual bool seek(fl::size_t pos, seek_dir dir) = 0;
-src/fl/stl/detail/file_handle.h|virtual const char* error_message() const = 0;
-src/fl/stl/detail/file_handle.h|virtual const char* path() const = 0;
-src/fl/stl/detail/file_handle.h|virtual fl::size_t bytes_left() const;
-src/fl/stl/detail/file_handle.h|virtual fl::size_t read(char* buffer, fl::size_t count) = 0;
-src/fl/stl/detail/file_handle.h|virtual fl::size_t size() const = 0;
-src/fl/stl/detail/file_handle.h|virtual fl::size_t tell() = 0;
-src/fl/stl/detail/file_handle.h|virtual fl::size_t write(const char* data, fl::size_t count) = 0;
-src/fl/stl/detail/file_handle.h|virtual int error_code() const = 0;
-src/fl/stl/detail/file_handle.h|virtual void clear_error() = 0;
-src/fl/stl/detail/file_handle.h|virtual void close() = 0;
-src/fl/stl/detail/file_handle.h|void captureError();
-src/fl/stl/detail/file_handle.h|void clearErrorState();
-src/fl/stl/detail/file_handle.h|void clear_error() override;
-src/fl/stl/detail/file_handle.h|void close() override;
 src/fl/stl/detail/file_io.h|FILE* fopen(const char* path, const char* mode);
 src/fl/stl/detail/file_io.h|fl::size_t fread(void* buffer, fl::size_t size, fl::size_t count, FILE* file);
 src/fl/stl/detail/file_io.h|fl::size_t fwrite(const void* data, fl::size_t size, fl::size_t count, FILE* file);
@@ -6086,97 +6217,6 @@ src/fl/stl/detail/string_holder.cpp.hpp|StringHolder::StringHolder(const char *s
 src/fl/stl/detail/string_holder.cpp.hpp|StringHolder::StringHolder(const char *str, size length) : mData((char*)fl::malloc(length + 1)) , mLength(length) , mCapacity(length + 1) {
 src/fl/stl/detail/string_holder.cpp.hpp|StringHolder::StringHolder(size length) : mData((char*)fl::malloc(length + 1)) , mLength(length) , mCapacity(length + 1) {
 src/fl/stl/detail/string_holder.cpp.hpp|void StringHolder::grow(size newLength) {
-src/fl/stl/fstream.cpp.hpp|const char* fstream::error_message() const {
-src/fl/stl/fstream.cpp.hpp|const char* ifstream::error_message() const {
-src/fl/stl/fstream.cpp.hpp|const char* ofstream::error_message() const {
-src/fl/stl/fstream.cpp.hpp|fl::size_t fstream::tellg() {
-src/fl/stl/fstream.cpp.hpp|fl::size_t ifstream::tellg() {
-src/fl/stl/fstream.cpp.hpp|fstream& fstream::read(char* buffer, fl::size_t count) {
-src/fl/stl/fstream.cpp.hpp|fstream& fstream::seekg(fl::size_t pos, ios::seekdir dir) {
-src/fl/stl/fstream.cpp.hpp|fstream& fstream::write(const char* data, fl::size_t count) {
-src/fl/stl/fstream.cpp.hpp|fstream::fstream(const char* path, ios::openmode mode) : mLastRead(0), mGood(false), mEof(false), mFail(true), mLocalError(0) {
-src/fl/stl/fstream.cpp.hpp|fstream::fstream(filebuf_ptr handle) : mHandle(handle), mLastRead(0), mGood(false), mEof(false), mFail(true), mLocalError(0) {
-src/fl/stl/fstream.cpp.hpp|ifstream& ifstream::read(char* buffer, fl::size_t count) {
-src/fl/stl/fstream.cpp.hpp|ifstream& ifstream::seekg(fl::size_t pos, ios::seekdir dir) {
-src/fl/stl/fstream.cpp.hpp|ifstream::ifstream(const char* path, ios::openmode mode) : mLastRead(0), mGood(false), mEof(false), mFail(true) {
-src/fl/stl/fstream.cpp.hpp|ifstream::ifstream(filebuf_ptr handle) : mHandle(handle), mLastRead(0), mGood(false), mEof(false), mFail(true) {
-src/fl/stl/fstream.cpp.hpp|int fstream::error() const {
-src/fl/stl/fstream.cpp.hpp|int ifstream::error() const {
-src/fl/stl/fstream.cpp.hpp|int ofstream::error() const {
-src/fl/stl/fstream.cpp.hpp|ofstream& ofstream::write(const char* data, fl::size_t count) {
-src/fl/stl/fstream.cpp.hpp|ofstream::ofstream(const char* path, ios::openmode mode) : mGood(false), mEof(false), mFail(true), mLocalError(0) {
-src/fl/stl/fstream.cpp.hpp|ofstream::ofstream(filebuf_ptr handle) : mHandle(handle), mGood(false), mEof(false), mFail(true), mLocalError(0) {
-src/fl/stl/fstream.cpp.hpp|void fstream::clear_error() {
-src/fl/stl/fstream.cpp.hpp|void fstream::close() {
-src/fl/stl/fstream.cpp.hpp|void fstream::open(const char* path, ios::openmode mode) {
-src/fl/stl/fstream.cpp.hpp|void ifstream::clear_error() {
-src/fl/stl/fstream.cpp.hpp|void ifstream::close() {
-src/fl/stl/fstream.cpp.hpp|void ifstream::open(const char* path, ios::openmode mode) {
-src/fl/stl/fstream.cpp.hpp|void ofstream::clear_error() {
-src/fl/stl/fstream.cpp.hpp|void ofstream::close() {
-src/fl/stl/fstream.cpp.hpp|void ofstream::open(const char* path, ios::openmode mode) {
-src/fl/stl/fstream.h|bool available() const {
-src/fl/stl/fstream.h|bool available(fl::size_t n) const {
-src/fl/stl/fstream.h|bool eof() const { return mEof; }
-src/fl/stl/fstream.h|bool eof() const { return mEof; }
-src/fl/stl/fstream.h|bool eof() const { return mEof; }
-src/fl/stl/fstream.h|bool fail() const { return mFail; }
-src/fl/stl/fstream.h|bool fail() const { return mFail; }
-src/fl/stl/fstream.h|bool fail() const { return mFail; }
-src/fl/stl/fstream.h|bool good() const { return mGood; }
-src/fl/stl/fstream.h|bool good() const { return mGood; }
-src/fl/stl/fstream.h|bool good() const { return mGood; }
-src/fl/stl/fstream.h|bool is_open() const {
-src/fl/stl/fstream.h|bool is_open() const {
-src/fl/stl/fstream.h|bool is_open() const {
-src/fl/stl/fstream.h|bool seek(fl::size_t p) {
-src/fl/stl/fstream.h|bool seek(fl::size_t p, seek_dir dir) {
-src/fl/stl/fstream.h|bool valid() const { return is_open(); }
-src/fl/stl/fstream.h|const char* error_message() const;
-src/fl/stl/fstream.h|const char* error_message() const;
-src/fl/stl/fstream.h|const char* error_message() const;
-src/fl/stl/fstream.h|const char* path() const {
-src/fl/stl/fstream.h|explicit fstream(const char* path, ios::openmode mode = ios::in | ios::out);
-src/fl/stl/fstream.h|explicit fstream(filebuf_ptr handle);
-src/fl/stl/fstream.h|explicit ifstream(const char* path, ios::openmode mode = ios::in);
-src/fl/stl/fstream.h|explicit ifstream(filebuf_ptr handle);
-src/fl/stl/fstream.h|explicit ofstream(const char* path, ios::openmode mode = ios::out);
-src/fl/stl/fstream.h|explicit ofstream(filebuf_ptr handle);
-src/fl/stl/fstream.h|filebuf_ptr rdbuf() const { return mHandle; }
-src/fl/stl/fstream.h|filebuf_ptr rdbuf() const { return mHandle; }
-src/fl/stl/fstream.h|filebuf_ptr rdbuf() const { return mHandle; }
-src/fl/stl/fstream.h|fl::size_t bytesLeft() const { return bytes_left(); }
-src/fl/stl/fstream.h|fl::size_t bytes_left() const {
-src/fl/stl/fstream.h|fl::size_t gcount() const {
-src/fl/stl/fstream.h|fl::size_t gcount() const {
-src/fl/stl/fstream.h|fl::size_t pos() const { return mHandle ? mHandle->pos() : 0; }
-src/fl/stl/fstream.h|fl::size_t read(fl::span<fl::u8> dst) {
-src/fl/stl/fstream.h|fl::size_t read(fl::u8* dst, fl::size_t n) {
-src/fl/stl/fstream.h|fl::size_t readRGB8(fl::span<CRGB> dst) {
-src/fl/stl/fstream.h|fl::size_t size() const {
-src/fl/stl/fstream.h|fl::size_t tellg();
-src/fl/stl/fstream.h|fl::size_t tellg();
-src/fl/stl/fstream.h|fstream& read(char* buffer, fl::size_t count);
-src/fl/stl/fstream.h|fstream& seekg(fl::size_t pos, ios::seekdir dir = ios::seekdir::beg);
-src/fl/stl/fstream.h|fstream& write(const char* data, fl::size_t count);
-src/fl/stl/fstream.h|ifstream& read(char* buffer, fl::size_t count);
-src/fl/stl/fstream.h|ifstream& seekg(fl::size_t pos, ios::seekdir dir = ios::seekdir::beg);
-src/fl/stl/fstream.h|int error() const;
-src/fl/stl/fstream.h|int error() const;
-src/fl/stl/fstream.h|int error() const;
-src/fl/stl/fstream.h|ofstream& write(const char* data, fl::size_t count);
-src/fl/stl/fstream.h|void clear_error();
-src/fl/stl/fstream.h|void clear_error();
-src/fl/stl/fstream.h|void clear_error();
-src/fl/stl/fstream.h|void close();
-src/fl/stl/fstream.h|void close();
-src/fl/stl/fstream.h|void close();
-src/fl/stl/fstream.h|void open(const char* path, ios::openmode mode = ios::in | ios::out);
-src/fl/stl/fstream.h|void open(const char* path, ios::openmode mode = ios::in);
-src/fl/stl/fstream.h|void open(const char* path, ios::openmode mode = ios::out);
-src/fl/stl/fstream.h|void updateState() {
-src/fl/stl/fstream.h|void updateState() {
-src/fl/stl/fstream.h|void updateState() {
 src/fl/stl/hash.h|static inline u32 MurmurHash3_x86_32(const void *key, fl::size len, u32 seed = 0) {
 src/fl/stl/isr/critical_section.cpp.hpp|critical_section::critical_section() {
 src/fl/stl/isr/critical_section.cpp.hpp|void interrupt_disable() {
@@ -6651,52 +6691,6 @@ src/fl/system/engine_events.cpp.hpp|void EngineEvents::_onExit() {
 src/fl/system/engine_events.cpp.hpp|void EngineEvents::_onPlatformPreLoop() {
 src/fl/system/engine_events.cpp.hpp|void EngineEvents::_onStripAdded(CLEDController *strip, fl::u32 num_leds) {
 src/fl/system/engine_events.cpp.hpp|void EngineEvents::_removeListener(Listener *listener) {
-src/fl/system/file_system.cpp.hpp|FileSystem::FileSystem() : mFs() {}
-src/fl/system/file_system.cpp.hpp|Video FileSystem::openVideo(const char *path, fl::size pixelsPerFrame, float fps, fl::size nFrameHistory) {
-src/fl/system/file_system.cpp.hpp|bool FileSystem::begin(FsImplPtr platform_filesystem) {
-src/fl/system/file_system.cpp.hpp|bool FileSystem::readJson(const char *path, json *doc) {
-src/fl/system/file_system.cpp.hpp|bool FileSystem::readScreenMap(const char *path, const char *name, ScreenMap *out, string *error) {
-src/fl/system/file_system.cpp.hpp|bool FileSystem::readScreenMaps(const char *path, fl::flat_map<string, ScreenMap> *out, string *error) {
-src/fl/system/file_system.cpp.hpp|bool FileSystem::readText(const char *path, fl::string *out) {
-src/fl/system/file_system.cpp.hpp|bool begin() override { return true; }
-src/fl/system/file_system.cpp.hpp|bool has_error() const override { return false; }
-src/fl/system/file_system.cpp.hpp|bool is_eof() const override { return true; }
-src/fl/system/file_system.cpp.hpp|bool is_open() const override { return false; }
-src/fl/system/file_system.cpp.hpp|bool seek(fl::size_t pos, seek_dir dir) override {
-src/fl/system/file_system.cpp.hpp|const char *error_message() const override { return "NullFileHandle"; }
-src/fl/system/file_system.cpp.hpp|const char *path() const override { return "nullptr filebuf"; }
-src/fl/system/file_system.cpp.hpp|filebuf_ptr openRead(const char *_path) override {
-src/fl/system/file_system.cpp.hpp|fl::ifstream FileSystem::openRead(const char *path) {
-src/fl/system/file_system.cpp.hpp|fl::size_t read(char *dst, fl::size_t bytesToRead) override {
-src/fl/system/file_system.cpp.hpp|fl::size_t size() const override { return 0; }
-src/fl/system/file_system.cpp.hpp|fl::size_t tell() override { return 0; }
-src/fl/system/file_system.cpp.hpp|fl::size_t write(const char *data, fl::size_t count) override {
-src/fl/system/file_system.cpp.hpp|int error_code() const override { return 0; }
-src/fl/system/file_system.cpp.hpp|void FileSystem::end() {
-src/fl/system/file_system.cpp.hpp|void clear_error() override {}
-src/fl/system/file_system.cpp.hpp|void close() override {}
-src/fl/system/file_system.cpp.hpp|void end() override {}
-src/fl/system/file_system.h|FramePtr loadJpeg(const char *path, const JpegConfig &config = JpegConfig(), fl::string *error_message = nullptr);
-src/fl/system/file_system.h|FsImplPtr make_sdcard_filesystem(int cs_pin);
-src/fl/system/file_system.h|Video openMpeg1Video(const char *path, fl::size pixelsPerFrame, float fps = 30.0f, fl::size nFrameHistory = 0);
-src/fl/system/file_system.h|Video openVideo(const char *path, fl::size pixelsPerFrame, float fps = 30.0f, fl::size nFrameHistory = 0);
-src/fl/system/file_system.h|bool begin(FsImplPtr platform_filesystem);
-src/fl/system/file_system.h|bool beginSd(int cs_pin);
-src/fl/system/file_system.h|bool readJson(const char *path, json *doc);
-src/fl/system/file_system.h|bool readScreenMap(const char *path, const char *name, ScreenMap *out, string *error = nullptr);
-src/fl/system/file_system.h|bool readScreenMaps(const char *path, fl::flat_map<string, ScreenMap> *out, string *error = nullptr);
-src/fl/system/file_system.h|bool readText(const char *path, string *out);
-src/fl/system/file_system.h|const char* getTestFileSystemRoot();
-src/fl/system/file_system.h|fl::Mp3DecoderPtr openMp3(const char *path, fl::string *error_message = nullptr);
-src/fl/system/file_system.h|fl::ifstream openRead(const char *path);
-src/fl/system/file_system.h|inline FramePtr loadJpegFromSD(int cs_pin, const char *filepath, const JpegConfig &config = JpegConfig(), fl::string *error_message = nullptr) {
-src/fl/system/file_system.h|virtual bool begin() = 0;
-src/fl/system/file_system.h|virtual bool ls(Visitor &visitor) {
-src/fl/system/file_system.h|virtual filebuf_ptr openRead(const char *path) = 0;
-src/fl/system/file_system.h|virtual void accept(const char *path) = 0;
-src/fl/system/file_system.h|virtual void end() = 0;
-src/fl/system/file_system.h|void end();
-src/fl/system/file_system.h|void setTestFileSystemRoot(const char* root_path);
 src/fl/system/heap.cpp.hpp|HeapInfo getFreeHeap() {
 src/fl/system/heap.h|HeapInfo getFreeHeap();
 src/fl/system/heap.h|bool has_psram() const { return free_psram > 0; }
@@ -7091,3 +7085,9 @@ src/fl/video/video_impl.h|void pause(fl::u32 now);
 src/fl/video/video_impl.h|void resume(fl::u32 now);
 src/fl/video/video_impl.h|void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
 src/fl/video/video_impl.h|void setTimeScale(float timeScale);
+#
+#   uv run python ci/tools/check_noexcept.py --scope all --update-baseline
+# Format: src/path|normalized source signature
+# Generated with:
+# Known missing FL_NO_EXCEPT signatures for ci/tools/check_noexcept.py.
+# New entries fail the default unified C++ linter.

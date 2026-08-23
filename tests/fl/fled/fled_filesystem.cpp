@@ -13,13 +13,13 @@
 
 #include "fl/fled/fled.h"
 #include "fl/stl/cstring.h"
-#include "fl/stl/detail/file_handle.h"
+#include "fl/fs/file_handle.h"
 #include "fl/stl/flat_map.h"
 #include "fl/stl/int.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
-#include "fl/system/file_system.h"
+#include "fl/fs/fs.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

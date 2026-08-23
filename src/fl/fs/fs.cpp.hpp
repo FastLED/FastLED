@@ -1,4 +1,4 @@
-﻿#include "fl/system/file_system.h"
+﻿#include "fl/fs/fs.h"
 #include "fl/fled/fled.h"
 #include "fl/stl/has_include.h"
 #include "fl/log/log.h"
@@ -7,7 +7,7 @@
 
 // NOTE: SD card support (FileSystem::beginSd and make_sdcard_filesystem)
 // lives in a SEPARATE translation unit at
-// `src/fl/system/sd/file_system_sd.cpp.hpp`, compiled into
+// `src/fl/fs/sd/file_system_sd.cpp.hpp`, compiled into
 // `fl.system.sd+.cpp.o` via `src/fl/build/fl.system.sd+.cpp`.
 //
 // This split lets the linker tree-shake the entire SD chain (libSD.a,
@@ -87,7 +87,7 @@ class NullFileSystem : public FsImpl {
 
 
 // FileSystem::beginSd() is intentionally NOT defined in this TU. The
-// definition lives in `fl/system/sd/file_system_sd.cpp.hpp` which is
+// definition lives in `fl/fs/sd/file_system_sd.cpp.hpp` which is
 // compiled into its own `.o` (`fl.system.sd+.cpp.o`). The linker only
 // pulls that `.o` when the user actually calls `fs.beginSd(...)`,
 // keeping all SD library code (~15 KB on ESP32-S3) out of sketches that
@@ -211,6 +211,6 @@ bool FileSystem::readText(const char *path, fl::string *out) {
 } // namespace fl
 
 // `make_sdcard_filesystem(int cs_pin)` is defined in the separate SD TU
-// (`fl/system/sd/file_system_sd.cpp.hpp`). When the SD TU is not linked
+// (`fl/fs/sd/file_system_sd.cpp.hpp`). When the SD TU is not linked
 // (the user never calls `fs.beginSd()`), the symbol is also dead-stripped
 // alongside `FileSystem::beginSd` itself.

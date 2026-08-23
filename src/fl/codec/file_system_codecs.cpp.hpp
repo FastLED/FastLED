@@ -4,7 +4,7 @@
 /// Moved from file_system.cpp.hpp to break fl.system+ -> fl.codec+ dependency.
 /// Contains: openMp3(), loadJpeg(), openMpeg1Video(), Mpeg1FileHandle
 
-#include "fl/system/file_system.h"
+#include "fl/fs/fs.h"
 #include "fl/codec/idecoder.h"
 #include "fl/codec/jpeg.h"
 #include "fl/codec/mp3.h"

@@ -11,7 +11,7 @@
 /// TODO(#2284): ESP32 LittleFS / SD-card resolution is future work.
 
 #include "fl/asset/asset.h"
-#include "fl/stl/fstream.h"
+#include "fl/fs/fstream.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/string.h"
 #include "fl/stl/string_view.h"

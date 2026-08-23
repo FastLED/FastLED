@@ -3,7 +3,7 @@
 #include "fl/stl/shared_ptr.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
-#include "fl/stl/detail/file_handle.h"  // For fl::filebuf
+#include "fl/fs/file_handle.h"  // For fl::filebuf
 #include "fl/stl/shared_ptr.h"  // IWYU pragma: keep
 #include "fl/stl/function.h"
 #include "fl/audio/audio.h"

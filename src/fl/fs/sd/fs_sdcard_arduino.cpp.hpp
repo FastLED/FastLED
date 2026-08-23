@@ -3,7 +3,7 @@
 // translation unit rather than exposed through FastLED's header graph.
 
 #include "fl/stl/has_include.h"
-#include "fl/system/sd/fs_sdcard_arduino.h"
+#include "fl/fs/sd/fs_sdcard_arduino.h"
 #include "platforms/is_platform.h"
 
 // <SPI.h> is probed alongside the others because this block includes it
@@ -30,7 +30,7 @@
 
 
 #include "fl/stl/memory.h"
-#include "fl/system/file_system.h"
+#include "fl/fs/fs.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/noexcept.h"
 
