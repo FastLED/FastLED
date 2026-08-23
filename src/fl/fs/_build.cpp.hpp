@@ -13,3 +13,4 @@
 #include "fl/fs/file_handle.cpp.hpp"
 #include "fl/fs/fs.cpp.hpp"
 #include "fl/fs/fstream.cpp.hpp"
+#include "fl/fs/read.cpp.hpp"

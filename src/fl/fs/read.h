@@ -11,12 +11,12 @@
 /// @code
 ///     fl::FileSystem fs;
 ///     if (fs.begin(fl::getSdFs(5))) {
-///         fl::FramePtr frame = fl::readJpeg(fs, "photo.jpg");
+///         fl::FramePtr frame = fl::readJpeg(fs, "photo.jpg") FL_NO_EXCEPT;
 ///     }
 /// @endcode
 ///
-/// These forward to the corresponding `FileSystem` members, which remain
-/// for source compatibility. New code should prefer the free functions:
+/// Bodies live in `read.cpp.hpp`. These forward to the corresponding
+/// `FileSystem` members, which remain for source compatibility. New code should prefer the free functions:
 /// adding a format then costs one function here and no change to
 /// `FileSystem`, where today it widens the class every time.
 
@@ -31,59 +31,41 @@ class ScreenMap;
 class Fled;
 
 /// Decode a JPEG into a Frame. Null on failure; `error` receives why.
-inline FramePtr readJpeg(FileSystem &fs, const char *path,
-                         const JpegConfig &config = JpegConfig(),
-                         string *error = nullptr) {
-    return fs.loadJpeg(path, config, error);
-}
+FramePtr readJpeg(FileSystem &fs, const char *path,
+                  const JpegConfig &config = JpegConfig(),
+                  string *error = nullptr) FL_NO_EXCEPT;
 
 /// Streaming MP3 decoder over a file. Null on failure.
-inline Mp3DecoderPtr readMp3(FileSystem &fs, const char *path,
-                             string *error = nullptr) {
-    return fs.openMp3(path, error);
-}
+Mp3DecoderPtr readMp3(FileSystem &fs, const char *path,
+                             string *error = nullptr) FL_NO_EXCEPT;
 
 /// Raw-frame video. Null if the file could not be opened.
-inline Video readVideo(FileSystem &fs, const char *path,
+Video readVideo(FileSystem &fs, const char *path,
                        fl::size pixelsPerFrame, float fps = 30.0f,
-                       fl::size nFrameHistory = 0) {
-    return fs.openVideo(path, pixelsPerFrame, fps, nFrameHistory);
-}
+                       fl::size nFrameHistory = 0) FL_NO_EXCEPT;
 
 /// MPEG1 video. Null if the file could not be opened.
-inline Video readMpeg1Video(FileSystem &fs, const char *path,
+Video readMpeg1Video(FileSystem &fs, const char *path,
                             fl::size pixelsPerFrame, float fps = 30.0f,
-                            fl::size nFrameHistory = 0) {
-    return fs.openMpeg1Video(path, pixelsPerFrame, fps, nFrameHistory);
-}
+                            fl::size nFrameHistory = 0) FL_NO_EXCEPT;
 
 /// Whole file as text.
-inline bool readText(FileSystem &fs, const char *path, string *out) {
-    return fs.readText(path, out);
-}
+bool readText(FileSystem &fs, const char *path, string *out) FL_NO_EXCEPT;
 
 /// Parse a file as JSON.
-inline bool readJson(FileSystem &fs, const char *path, json *doc) {
-    return fs.readJson(path, doc);
-}
+bool readJson(FileSystem &fs, const char *path, json *doc) FL_NO_EXCEPT;
 
 /// One named screen map from a screenmap JSON file.
-inline bool readScreenMap(FileSystem &fs, const char *path, const char *name,
-                          ScreenMap *out, string *error = nullptr) {
-    return fs.readScreenMap(path, name, out, error);
-}
+bool readScreenMap(FileSystem &fs, const char *path, const char *name,
+                          ScreenMap *out, string *error = nullptr) FL_NO_EXCEPT;
 
 /// Every screen map in a screenmap JSON file, keyed by name.
-inline bool readScreenMaps(FileSystem &fs, const char *path,
+bool readScreenMaps(FileSystem &fs, const char *path,
                            fl::flat_map<string, ScreenMap> *out,
-                           string *error = nullptr) {
-    return fs.readScreenMaps(path, out, error);
-}
+                           string *error = nullptr) FL_NO_EXCEPT;
 
 /// Load a `.fled` container. Returns a null Fled if absent or malformed --
 /// the Fled type owns its own failure reporting.
-inline Fled readFled(FileSystem &fs, const char *path) FL_NO_EXCEPT {
-    return fs.loadFled(path);
-}
+Fled readFled(FileSystem &fs, const char *path) FL_NO_EXCEPT;
 
 } // namespace fl
