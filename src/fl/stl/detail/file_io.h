@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/stl/cstddef.h"  // fl::size_t
 #include "fl/stl/int.h"
 #include "platforms/is_platform.h"
 #include "fl/stl/cerrno.h"    // For fl::get_errno()
