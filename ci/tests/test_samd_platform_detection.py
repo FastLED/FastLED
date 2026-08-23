@@ -53,6 +53,13 @@ BOARD_MANIFEST_FLAGS = {
         "-D__SAMD51__",
         "-DARM_MATH_CM4",
     ],
+    "metro_m4 (adafruit_metro_m4)": [
+        "-DARDUINO_METRO_M4",
+        "-DADAFRUIT_METRO_M4_EXPRESS",
+        "-D__SAMD51J19A__",
+        "-D__SAMD51__",
+        "-DARM_MATH_CM4",
+    ],
 }
 
 
