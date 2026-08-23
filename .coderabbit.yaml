@@ -26,6 +26,78 @@ reviews:
         peripherals — one engine for both clockless and SPI modes" and
         `agents/docs/cpp-standards.md` → "Parallel-IO Driver: Unified
         Clockless + SPI Engine".
+    - path: "src/fl/**/*.h"
+      instructions: |
+        Public API expansion. A public header is a permanent commitment —
+        every symbol added is one FastLED has to keep working. Flag any PR
+        that widens a public class or header without showing that the
+        existing surface could not carry the change.
+
+        Ask, in order:
+        1. Does an existing generic entry point already do this? If a class
+           has a `begin(Interface)` seam, a new backend needs a free factory,
+           not a new `beginFoo()` member.
+        2. Could this be a free function instead of a member? Free functions
+           are found by ADL, do not enlarge the class, and do not force every
+           consumer of the header to recompile when they change.
+        3. Does the new symbol drag headers with it? A method whose signature
+           names a codec/format type pulls that header into the include graph
+           of everyone who includes this one — especially with
+           `// IWYU pragma: export`.
+        4. Does it scale? If the answer to "what happens when we add a third,
+           and a tenth?" is a proportionally larger class, the shape is wrong.
+
+        WORKED EXAMPLE — `fl/system/file_system.h` (see FastLED #4003).
+
+        `FileSystem` grew a member per backend (`beginSd`, `sd`) and a member
+        per format (`openVideo`, `openMpeg1Video`, `readText`, `readJson`,
+        `readScreenMaps`, `readScreenMap`, `loadJpeg`, `openMp3`, `loadFled`).
+        The header now re-exports `fl/fx/video.h` and `fl/codec/jpeg.h`, so
+        every sketch that opens a file also pulls in video and JPEG. It also
+        carries an inline `loadJpegFromSD()` body, which the API Object
+        Pattern says a wrapper header must not do.
+
+        WRONG — adding a LittleFS backend by extending the class:
+
+            class FileSystem {
+              public:
+                static FileSystem sd(int cs_pin);
+                bool beginSd(int cs_pin);
+                static FileSystem littleFs(bool format_on_fail = false);  // NEW
+                bool beginLittleFs(bool format_on_fail = false);          // NEW
+            };
+
+        Two more members, and two more again for the next backend. Every
+        consumer of the header recompiles, and the class keeps accreting.
+
+        RIGHT — a free factory paired with the seam that already exists:
+
+            // header: one free function, mirroring make_sdcard_filesystem
+            FsImplPtr make_littlefs_filesystem(bool format_on_fail = false) FL_NO_EXCEPT;
+
+            // call site: uses FileSystem::begin(FsImplPtr), already public
+            fl::FileSystem fs;
+            if (fs.begin(fl::make_littlefs_filesystem())) { ... }
+
+        `FileSystem` is unchanged. The Nth backend costs one free function
+        and no class surface. Reference: `agents/docs/cpp-standards.md` →
+        "API Object Pattern" (rule 2: the API object wraps, it does not
+        implement) and FastLED #4003.
+
+        This is guidance, not a veto — widening a public class is sometimes
+        right. Ask for the justification in the PR description; do not block
+        a change that argues its case.
+
+        DOES NOT APPLY to the Public Settings Pattern, which is a deliberate
+        exception in the opposite direction: a new `fl::set_*` / `enable_*` /
+        `disable_*` / `use_*` global setter MUST gain a matching `CFastLED`
+        method in `src/FastLED.h`. That is required widening — do not flag it
+        under this rule. See the separate `src/fl/**/*.h` instruction covering
+        that pattern.
+
+        Also does not apply to: per-object configuration on the object's own
+        API, anything under `fl::detail::` or an anonymous namespace, or a
+        header that is not part of the public surface.
     - path: "src/platforms/**/drivers/**/*peripheral*mock*.{h,cpp.hpp}"
       instructions: |
         Peripheral-mock singleton rule. FastLED peripheral mocks
