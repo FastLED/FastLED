@@ -28,6 +28,23 @@ FASTLED_SHARED_PTR(FsImpl);
 // warnings, but otherwise won't crash the system.
 FsImplPtr make_sdcard_filesystem(int cs_pin);
 
+// On-chip flash filesystem (LittleFS), for platforms whose core ships
+// <LittleFS.h> — ESP32, ESP8266 and RP2040 at time of writing. Returns
+// null elsewhere, so callers get a clean runtime failure rather than a
+// link error.
+//
+// Deliberately a free factory rather than a `FileSystem::beginLittleFs()`
+// member: pair it with the existing `FileSystem::begin(FsImplPtr)` seam
+// and no new class surface is needed.
+//
+//   fl::FileSystem fs;
+//   if (fs.begin(fl::make_littlefs_filesystem())) { ... }
+//
+// `format_on_fail` formats and mounts when the partition is missing or
+// corrupt. Off by default — silently reformatting flash discards whatever
+// was there, which is rarely what a sketch wants unprompted.
+FsImplPtr make_littlefs_filesystem(bool format_on_fail = false) FL_NO_EXCEPT;
+
 #ifdef FASTLED_TESTING
 // Test-specific functions for setting up filesystem root path
 // These are implemented in platforms/stub/fs_stub.hpp
