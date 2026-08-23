@@ -220,6 +220,63 @@ For a subsystem (e.g., `Watchdog`, `Audio`, `Codec`) that has multi-tier platfor
 
 **Distinction from Type 1 (`FL_IS_*`):** Type 1 says "I am running on platform X." Type 3 says "this component has feature Y on this platform." A single platform may carry many Type 3 flags from independent components.
 
+## Default Example Pins (`FL_PIN_*`) — Platform Declares, Header Falls Back
+
+Examples must not hardcode pin numbers. A literal in a sketch is a guess about hardware the sketch cannot see; the platform is the only layer that knows which pins exist.
+
+| Macro | Fallback | Use |
+|---|---|---|
+| `FL_PIN_CLOCKLESS_1` | `3` | data pin, single-wire chipsets (WS2812 etc.) |
+| `FL_PIN_SPI_DATA_1` | `1` | data pin, clocked chipsets (APA102 etc.) |
+| `FL_PIN_SPI_CLOCK_1` | `2` | clock pin, clocked chipsets |
+
+**The contract, both halves:**
+
+1. **A platform SHOULD declare its own value** beside its `_FL_DEFPIN` table (or its pin-mask block), guarded with `#ifndef` so a sketch or build flag still wins.
+2. **A platform that declares nothing gets the fallback**, defined in `src/platforms/default_pins.h`. That is a supported outcome, not an omission to be linted — most platforms are fine on pin 3.
+
+```cpp
+// in the platform's fastpin_*.h, next to the pin table that justifies it
+#ifndef FL_PIN_CLOCKLESS_1
+#define FL_PIN_CLOCKLESS_1 4
+#endif
+```
+
+`platforms/default_pins.h` is included from `FastLED.h` *after* `platforms.h`, so platform declarations always win. Declaring in a `.cpp.hpp` is wrong — examples need the value at preprocess time.
+
+**Examples consume the macro, never a literal:**
+
+```cpp
+#ifndef PIN_DATA
+#define PIN_DATA FL_PIN_CLOCKLESS_1   // sketch/build flag still overrides
+#endif
+```
+
+### Choosing a value
+
+Compiling is the floor, not the bar. `FastPin<N>::validpin()` catches only pins the platform declares invalid; it cannot catch a pin that exists and is still a bad default. A good value is:
+
+- **present in that board's `_FL_DEFPIN` table** — the compile-time failure, and the cheapest to check
+- **not the UART the examples print on** — most examples call `Serial.begin()`, so a default that lands on `RX`/`TX` has the sketch fighting its own console
+- **not a boot-strapping pin** — sampled at reset; an attached strip can hold it and stop the board booting
+- **not reserved for flash, PSRAM, or USB/JTAG**
+- **actually broken out** on the reference board for that platform
+
+Platform headers usually already record this. `fastpin_esp32.h` documents its UART and flash pins per variant in the `FASTLED_UNUSABLE_PIN_MASK` comments — read those before picking, rather than inferring from a datasheet.
+
+### Enforcement
+
+`ci/tests/test_samd_default_pins.py` parses each board branch's pin table, resolves all three macros (declared value, else fallback), and asserts the result is in that table. It is preprocessor/parser level, so it needs no cross-toolchain. Extend it as platforms declare values — the shape generalises beyond SAMD.
+
+### Why this exists
+
+Two failures, both invisible for a long time:
+
+- **Adafruit Feather M4 has no pin 2 and no pin 3** (`fastpin_arm_d51.h` says so outright: "no pins 2 3"). `Blink` hardcoded 3 and `Apa102` hardcoded 1/2, so neither compiled for that board — with a `validpin()` assertion whose message talks about ground and read-only and noisy pins, sending you to look at wiring rather than at a pin table. Nobody noticed because SAMD had never built at all (#4011).
+- **On ESP32 classic, GPIO 3 is `U0RXD`** — the pin `Serial` receives on. That compiles cleanly and is wrong on hardware, which is the worse failure: the example silently does nothing and there is nothing to search for.
+
+Tracking issue for the per-platform audit: **#4018**.
+
 ## Warning and Debug Output
 - **Use proper warning macros** from `fl/stl/compiler_control.h`
 - **Use `FL_DBG("message" << var)`** for debug prints (easily stripped in release builds)

@@ -13,6 +13,7 @@
 | Looking up MCU datasheets / user manuals | Prefer https://github.com/FastLED/datasheets when available, then vendor primary documentation |
 | Creating an API wrapper type | `agents/docs/cpp-standards.md` → "API Object Pattern" |
 | Adding a global setting / configuration knob | `agents/docs/cpp-standards.md` → "Public Settings Pattern" (new setters go on `CFastLED`, not as bare `fl::set_*` free functions) |
+| Choosing a default pin for an example, or porting an example off a hardcoded pin | `agents/docs/cpp-standards.md` -> "Default Example Pins" (platform declares `FL_PIN_CLOCKLESS_1`; undeclared falls back to 3) |
 | Writing/editing Python code | `agents/docs/python-standards.md` |
 | Editing meson.build files | `agents/docs/build-system.md` |
 | Running tests, Docker, WASM, QEMU | `agents/docs/testing-commands.md` |
