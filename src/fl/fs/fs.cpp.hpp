@@ -1,4 +1,4 @@
-﻿#include "fl/fs/fs.h"
+#include "fl/fs/fs.h"
 #include "fl/fled/fled.h"
 #include "fl/stl/has_include.h"
 #include "fl/log/log.h"
@@ -13,7 +13,7 @@
 // This split lets the linker tree-shake the entire SD chain (libSD.a,
 // libFS.a, Arduino's VFSImpl, the printf engine VFSFileImpl drags in
 // via snprintf) AUTOMATICALLY when the user never calls
-// `FileSystem::beginSd()` â€” no FASTLED_USE_SDCARD opt-in required, and
+// `FileSystem::beginSd()` -- no FASTLED_USE_SDCARD opt-in required, and
 // the macro that the earlier macro-gate PR (#2778 v1) shipped is
 // removed by this PR. See FastLED #2773 item 1.2 and the SD TU header
 // for the mechanism.

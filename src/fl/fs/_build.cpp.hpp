@@ -3,7 +3,7 @@
 /// @file fl/fs/_build.cpp.hpp
 /// @brief Unity-build aggregate for the filesystem subsystem.
 ///
-/// Covers the generic layer only — `FileSystem`, the stream types, and the
+/// Covers the generic layer only -- `FileSystem`, the stream types, and the
 /// format helpers. Storage backends live in sibling directories with their
 /// own aggregates (`fl/fs/sd/`, `fl/fs/embedded/`) and their own translation
 /// units, so the linker can drop a backend a sketch never mounts

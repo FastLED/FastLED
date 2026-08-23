@@ -14,7 +14,7 @@
 #include "fl/stl/noexcept.h"
 #include "fl/fs/backend.h"   // FsImpl, FsImplPtr   // IWYU pragma: export
 
-// Forward declaration — concrete Mp3Decoder lives in fl/codec/mp3.h
+// Forward declaration -- concrete Mp3Decoder lives in fl/codec/mp3.h
 namespace fl {
 class Mp3Decoder;
 using Mp3DecoderPtr = fl::shared_ptr<Mp3Decoder>;

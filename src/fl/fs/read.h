@@ -80,7 +80,7 @@ inline bool readScreenMaps(FileSystem &fs, const char *path,
     return fs.readScreenMaps(path, out, error);
 }
 
-/// Load a `.fled` container. Returns a null Fled if absent or malformed —
+/// Load a `.fled` container. Returns a null Fled if absent or malformed --
 /// the Fled type owns its own failure reporting.
 inline Fled readFled(FileSystem &fs, const char *path) FL_NO_EXCEPT {
     return fs.loadFled(path);

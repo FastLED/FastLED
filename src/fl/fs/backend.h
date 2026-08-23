@@ -8,12 +8,12 @@
 /// from a new medium.
 ///
 /// Splitting it out is the point: previously `FsImpl` shared a header with
-/// `FileSystem`, so the two audiences — people opening files and people
-/// implementing storage — read the same file for unrelated reasons
+/// `FileSystem`, so the two audiences -- people opening files and people
+/// implementing storage -- read the same file for unrelated reasons
 /// (FastLED #4003, #4008).
 ///
 /// To add a backend: subclass `FsImpl`, expose a free factory naming the
-/// *medium* rather than the driver (`getSdFs`, `getEmbeddedFs` — never
+/// *medium* rather than the driver (`getSdFs`, `getEmbeddedFs` -- never
 /// `getLittleFs`, see #4007), and hand it to `FileSystem::begin()`.
 
 #include "fl/fs/file_handle.h" // IWYU pragma: export
