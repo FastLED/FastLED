@@ -1525,9 +1525,6 @@ SAMD21G18A_FEATHER = Board(
     real_board_name="adafruit_feather_m0",
     platform="atmelsam",
     framework="arduino",
-    # SAMD routes into platforms/arm/sam/fastspi_arm_sam.h, which includes
-    # <SPI.h> under FL_IS_SAMD21/FL_IS_SAMD51. See #4011.
-    lib_deps=["SPI"],
 )
 
 SAMD21G18A_ZERO = Board(
@@ -1535,7 +1532,6 @@ SAMD21G18A_ZERO = Board(
     real_board_name="zeroUSB",
     platform="atmelsam",
     framework="arduino",
-    lib_deps=["SPI"],  # see samd21
 )
 
 # SAMD51 boards (Cortex-M4F @ 120 MHz)
@@ -1548,7 +1544,6 @@ SAMD51J19A_FEATHER_M4 = Board(
     defines=[
         "FASTLED_USES_ARDUINO_AUDIO_INPUT=0",  # Disable Arduino audio (I2S not available)
     ],
-    lib_deps=["SPI"],  # see samd21
 )
 
 SAMD51P20A_GRANDCENTRAL = Board(
@@ -1573,7 +1568,6 @@ SAMD51J19A_METRO_M4 = Board(
     defines=[
         "FASTLED_USES_ARDUINO_AUDIO_INPUT=0",  # Disable Arduino audio (I2S not available)
     ],
-    lib_deps=["SPI"],  # see samd21
 )
 
 # Teknic ClearCore (Microchip SAME53N19A, Cortex-M4F @ 120 MHz).
