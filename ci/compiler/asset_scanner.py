@@ -519,8 +519,28 @@ def _cpp_string_literal(s: str) -> str:
     return f'"{escaped}"'
 
 
-def announce_storage_requirements(scan: AssetScanResult) -> list[str]:
-    """Report what the sketch's assets need from the build, and return defines.
+def embedded_fs_defines(scan: AssetScanResult) -> list[str]:
+    """Preprocessor defines a build needs to satisfy the sketch's assets.
+
+    Separate from the reporting below so the decision is testable on its own
+    and has exactly one home. Empty unless some asset declares on-chip storage.
+
+    Today this is only non-empty for ESP8266. ESP32 needs no flag -- its
+    embedded filesystem is already selected automatically by
+    `platforms/embedded_fs.h` -- so on the platform people actually use for
+    LittleFS, an asset declaring `storage=littlefs` already works.
+
+    Nothing applies these yet: build defines are assembled per-board in
+    `ci/boards.py`, and this is per-sketch. Applying them would also currently
+    break the ESP8266 builds it targets, because that backend cannot compile
+    until FastLED/fbuild#1380 ships the core's littlefs submodule. Tracked in
+    FastLED#4020.
+    """
+    return ["FL_ESP8266_EMBEDDED_FS"] if scan.embedded_fs_assets() else []
+
+
+def announce_storage_requirements(scan: AssetScanResult) -> None:
+    """Report what the sketch's assets need from the build.
 
     An asset that declares ``storage=littlefs`` (or ``spiffs``) is stating a
     build requirement: the firmware has to be able to read on-chip flash. The
@@ -530,12 +550,13 @@ def announce_storage_requirements(scan: AssetScanResult) -> list[str]:
 
     Green because it is neither a warning nor an error. Nothing is wrong; the
     build is telling the user it did something on their behalf, and naming the
-    assets so the reason is visible rather than magic. A missing or wrong
-    target is the yellow case (see ``unknown_storage_targets``) and is reported
-    by the caller.
+    assets so the reason is visible rather than magic. An unrecognised target
+    is the yellow case -- a typo like `littleFS` would otherwise behave exactly
+    like "undeclared", which looks identical to working.
 
-    Returns the preprocessor defines the build should add, so the decision and
-    the message come from the same place and cannot drift apart.
+    Returns nothing on purpose. An earlier version returned the defines from
+    here and the caller dropped them, which read as if the build were applying
+    something it was not. `embedded_fs_defines` owns that decision.
     """
     from ci.util.color_output import print_green, print_yellow
 
@@ -550,7 +571,7 @@ def announce_storage_requirements(scan: AssetScanResult) -> list[str]:
 
     needs_fs = scan.embedded_fs_assets()
     if not needs_fs:
-        return []
+        return
 
     targets = sorted(scan.storage_targets & EMBEDDED_FS_TARGETS)
     shown = ", ".join(needs_fs[:4])
@@ -560,4 +581,3 @@ def announce_storage_requirements(scan: AssetScanResult) -> list[str]:
         f"assets: embedded filesystem ({'/'.join(targets)}) enabled "
         f"automatically -- {len(needs_fs)} asset(s) declare it: {shown}"
     )
-    return ["FASTLED_ESP8266_EMBEDDED_FS"]

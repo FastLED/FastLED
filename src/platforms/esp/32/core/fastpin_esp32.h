@@ -161,6 +161,14 @@ public:
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL)
 #endif
 
+
+
+#endif
+
+// NOTE: outside the FASTLED_UNUSABLE_PIN_MASK guard on purpose. A build that
+// defines its own mask would otherwise skip this default and fall back to pin
+// 3 -- reintroducing exactly the UART collision described below, but only for
+// builds that customize the mask, which is the worst place for it to hide.
 // Default data pin for examples -- see platforms/default_pins.h.
 //
 // Deliberately not 3. On ESP32 classic GPIO 3 is U0RXD, the pin Serial
@@ -178,9 +186,6 @@ public:
 // particular board's wiring. FastLED#4018 tracks the wider per-platform audit.
 #ifndef FL_PIN_CLOCKLESS_1
 #define FL_PIN_CLOCKLESS_1 4
-#endif
-
-
 #endif
 
 

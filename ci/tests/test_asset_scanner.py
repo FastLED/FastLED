@@ -11,6 +11,7 @@ from ci.compiler.asset_scanner import (
     AssetScanResult,
     _parse_lnk_content,
     announce_storage_requirements,
+    embedded_fs_defines,
     manifest_to_cpp_header,
     manifest_to_js_bootstrap,
     scan_sketch_assets,
@@ -392,7 +393,7 @@ def test_undeclared_storage_is_not_an_error() -> None:
 
     scan = AssetScanResult(manifest={"data/v.rgb": entry})
     assert scan.embedded_fs_assets() == []
-    assert announce_storage_requirements(scan) == []
+    assert embedded_fs_defines(scan) == []
 
 
 def test_on_chip_target_enables_the_filesystem() -> None:
@@ -403,7 +404,7 @@ def test_on_chip_target_enables_the_filesystem() -> None:
         }
     )
     assert scan.embedded_fs_assets() == ["data/v.rgb"]
-    assert announce_storage_requirements(scan) == ["FASTLED_ESP8266_EMBEDDED_FS"]
+    assert embedded_fs_defines(scan) == ["FL_ESP8266_EMBEDDED_FS"]
 
 
 def test_sdcard_alone_does_not_enable_the_filesystem() -> None:
@@ -412,7 +413,7 @@ def test_sdcard_alone_does_not_enable_the_filesystem() -> None:
         manifest={"data/v.rgb": AssetEntry(url="u", storage="sdcard")}
     )
     assert scan.embedded_fs_assets() == []
-    assert announce_storage_requirements(scan) == []
+    assert embedded_fs_defines(scan) == []
 
 
 def test_typo_target_is_reported_not_silently_ignored() -> None:
@@ -421,7 +422,7 @@ def test_typo_target_is_reported_not_silently_ignored() -> None:
         manifest={"data/v.rgb": AssetEntry(url="u", storage="littlefs2")}
     )
     assert scan.unknown_storage_targets() == {"littlefs2"}
-    assert announce_storage_requirements(scan) == []
+    assert embedded_fs_defines(scan) == []
 
 
 def test_storage_round_trips_through_the_manifest() -> None:
