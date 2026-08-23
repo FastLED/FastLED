@@ -68,8 +68,8 @@
 // platforms/arm/teensy/is_teensy.h). Testing 3X alone would silently miss the
 // LC, which is the most end-of-life board of the set.
 #if (defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_LC)) &&                  \
-    !defined(FASTLED_INTERNAL) && !defined(FASTLED_NO_TEENSY3_EOL_WARNING)
-#warning "This Teensy (pre-4.0) is out of production and FastLED no longer hardware-validates it. If you hit a problem, try FastLED 3.10.3, the last release verified against these boards, and please file a report at https://github.com/FastLED/FastLED/issues -- we do still fix these. Define FASTLED_NO_TEENSY3_EOL_WARNING to silence this."
+    !defined(FASTLED_INTERNAL) && !defined(FL_TEENSY_EOL_SUPPRESS_WARNING)
+#warning "This Teensy (pre-4.0) is out of production and FastLED no longer hardware-validates it. If you hit a problem, try FastLED 3.10.3, the last release verified against these boards, and please file a report at https://github.com/FastLED/FastLED/issues -- we do still fix these. Define FL_TEENSY_EOL_SUPPRESS_WARNING to silence this."
 #endif
 
 // Legacy RMT4 backend is ESP-IDF 4.x only.
