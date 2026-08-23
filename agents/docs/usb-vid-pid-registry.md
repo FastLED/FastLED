@@ -6,8 +6,11 @@ are both *consumers*. Neither repo is allowed to grow a hand-maintained USB
 identity catalogue, and a VID/PID must never be introduced into this repo as
 the place it first exists.
 
-If a board cannot be identified, the fix is a FastLED/boards change plus a
-version cascade — not a new literal in `ci/`.
+If a board cannot be identified, the fix is a FastLED/boards change — not a new
+literal in `ci/`. A data-only change needs nothing else: fbuild fetches the
+published catalogue at runtime, so it reaches consumers on the next cache
+refresh. Cascading an fbuild release is only for changes to ingestion or
+resolution *logic*.
 
 ## Why the registry, and not a local table
 
@@ -36,7 +39,8 @@ fbuild ingestion (build + runtime cache + fallback)
    crates/fbuild-core/src/usb/data.rs → USB_VIDS_PROTO_ZSTD_URL
    crates/fbuild-core/src/usb/profiles.rs → schema + SHA-256 verification
               │
-              │  version bump cascaded via the `fbuild==X.Y.Z` pin
+              │  runtime fetch + cache refresh — no release needed for data.
+              │  (an `fbuild==X.Y.Z` pin bump is only for logic changes)
               ▼
 FastLED (this repo) — `fbuild port scan`, `fbuild deploy`, autoresearch
 ```
@@ -75,8 +79,7 @@ uv run python ci/util/audit_usb_registry.py
 
 # 2. Add the record on the `other` data branch of FastLED/boards.
 git clone https://github.com/FastLED/boards.git .extern-repos/boards
-cd .extern-repos/boards
-git worktree add ../boards-other origin/other -b curate/<topic>
+git -C .extern-repos/boards worktree add ../boards-other origin/other -b curate/<topic>
 ```
 
 Curated records are flat JSON arrays — one file per topic, alongside the
@@ -94,10 +97,10 @@ existing `nxp_debug_probe_pids.json` / `teensy_pids.json`:
 
 ```bash
 # 3. Verify the extractor ingests it BEFORE pushing.
-uv run --no-project python builders/extract_other.py --in ../boards-other --out /tmp/other.json
+uv run --no-project python .extern-repos/boards/builders/extract_other.py     --in .extern-repos/boards-other     --out .tmp/other-layer.json
 
 # 4. Push straight to the data branch, then rebuild the site.
-git push origin curate/<topic>:other
+git -C .extern-repos/boards push origin curate/<topic>:other
 gh workflow run "Build site" -R FastLED/boards
 
 # 5. Re-run the audit once the rebuild completes (~2-4 min).
@@ -120,8 +123,13 @@ months later.
 
 ## Cascading an fbuild version bump into FastLED
 
-The registry reaches this repo only through the fbuild pin. When fbuild
-publishes a release carrying new USB identities:
+**Most registry changes never need this.** fbuild fetches the published
+catalogue at runtime, so new identities arrive on the next cache refresh with no
+release and no pin move. Bump the pin only when fbuild's *ingestion or
+resolution logic* changes — a new schema field, a different selection rule — not
+when data changes.
+
+When that is the case:
 
 ```bash
 # 1. Confirm the release is actually on PyPI before moving the pin.
