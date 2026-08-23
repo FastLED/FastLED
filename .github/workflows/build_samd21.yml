@@ -20,6 +20,21 @@ on:
       - 'library.properties'
       - 'pyproject.toml'
       - 'uv.lock'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'examples/**'
+      - 'ci/**'
+      - '.github/workflows/build_samd21.yml'
+      - '.github/workflows/build_template.yml'
+      - 'CMakeLists.txt'
+      - 'platformio.ini'
+      - 'library.json'
+      - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
 jobs:
   build:
     uses: ./.github/workflows/build_template.yml
