@@ -10,8 +10,10 @@
 ///     fl::UIAudio audio("Audio", FL_ASSET("data/track.mp3"));
 /// @endcode
 ///
-/// At build time, fbuild scans `<sketch>/data/` for `*.lnk` files containing
-/// URLs and emits a manifest. At runtime:
+/// At build time, `ci/compiler/asset_scanner.py` scans `<sketch>/data/` for
+/// `*.lnk` files and emits `fastled_js/asset_manifest.json` (see
+/// `ci/wasm_build.py`). It accepts both `.lnk` spellings: the text form this
+/// runtime parses, and the JSON form `fbuild lnk add` writes. At runtime:
 ///  - On WASM, the manifest is consulted to turn the relative path into the
 ///    URL the browser should fetch.
 ///  - On host/stub, the asset resolves to the file on disk — or, if the raw
