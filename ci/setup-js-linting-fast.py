@@ -67,8 +67,25 @@ def get_node_download_info():
     return url, filename, is_zip
 
 
+def _download_archive(url: str, download_path: Path, filename: str) -> None:
+    """Fetch the Node.js archive to ``download_path``."""
+    print(f"Downloading from: {url}")
+    with httpx.stream("GET", url, follow_redirects=True) as response:
+        response.raise_for_status()
+        with open(download_path, "wb") as f:
+            for chunk in response.iter_bytes(chunk_size=8192):
+                f.write(chunk)
+    print(f"SUCCESS: Downloaded {filename}")
+
+
 def download_and_extract_node():
-    """Download and extract Node.js binary"""
+    """Download and extract Node.js binary.
+
+    The downloaded archive is kept in ``TOOLS_DIR`` so a later re-setup (after
+    the extracted tree is cleaned, or the toolchain is reprovisioned) reuses it
+    instead of re-fetching ~30MB. A corrupt cached archive is discarded and
+    re-downloaded once rather than failing the setup.
+    """
     url, filename, is_zip = get_node_download_info()
     download_path = TOOLS_DIR / filename
 
@@ -85,14 +102,10 @@ def download_and_extract_node():
     TOOLS_DIR.mkdir(exist_ok=True)
     NODE_DIR.mkdir(exist_ok=True)
 
-    if not download_path.exists():
-        print(f"Downloading from: {url}")
-        with httpx.stream("GET", url, follow_redirects=True) as response:
-            response.raise_for_status()
-            with open(download_path, "wb") as f:
-                for chunk in response.iter_bytes(chunk_size=8192):
-                    f.write(chunk)
-        print(f"SUCCESS: Downloaded {filename}")
+    if download_path.exists():
+        print(f"Reusing cached archive: {download_path.name}")
+    else:
+        _download_archive(url, download_path, filename)
 
     # Extract Node.js
     if platform.system() == "Windows":
@@ -103,45 +116,55 @@ def download_and_extract_node():
     if not node_exe.exists():
         print("Extracting Node.js...")
 
-        if is_zip:
-            with zipfile.ZipFile(download_path, "r") as zip_ref:
-                zip_ref.extractall(NODE_DIR)
-            # Move contents from nested folder to NODE_DIR
-            nested_dir = NODE_DIR / f"node-v{NODE_VERSION}-win-{arch}"
-            if nested_dir.exists():
-                for item in nested_dir.iterdir():
-                    if item.is_dir():
-                        # For directories, move contents recursively
-                        target_dir = NODE_DIR / item.name
-                        if target_dir.exists():
-                            shutil.rmtree(target_dir)
-                        shutil.move(str(item), str(target_dir))
-                    else:
-                        # For files, move directly
-                        target_file = NODE_DIR / item.name
-                        if target_file.exists():
-                            target_file.unlink()
-                        item.rename(target_file)
-                nested_dir.rmdir()
-        else:
-            with tarfile.open(download_path, "r:*") as tar_ref:
-                tar_ref.extractall(NODE_DIR)
-            # Move contents from nested folder to NODE_DIR
-            nested_dir = (
-                NODE_DIR / f"node-v{NODE_VERSION}-{platform.system().lower()}-{arch}"
-            )
-            if nested_dir.exists():
-                for item in nested_dir.iterdir():
-                    item.rename(NODE_DIR / item.name)
-                nested_dir.rmdir()
+        try:
+            _extract(download_path, NODE_DIR, is_zip, arch)
+        except (zipfile.BadZipFile, tarfile.ReadError, EOFError) as exc:
+            # A retained archive can be truncated by an interrupted download.
+            # Discard it and fetch once more rather than failing setup.
+            print(f"Cached archive unusable ({exc}); re-downloading")
+            download_path.unlink(missing_ok=True)
+            _download_archive(url, download_path, filename)
+            _extract(download_path, NODE_DIR, is_zip, arch)
 
         print("SUCCESS: Node.js extracted")
 
-    # Clean up download file
-    if download_path.exists():
-        download_path.unlink()
+    # The archive is deliberately retained so a re-setup skips the download.
+    # Remove .cache/js-tools/ entirely to force a clean re-provision.
 
     return node_exe
+
+
+def _extract(download_path: Path, node_dir: Path, is_zip: bool, arch: str) -> None:
+    """Unpack the archive into ``node_dir``, flattening its nested top folder."""
+    if is_zip:
+        with zipfile.ZipFile(download_path, "r") as zip_ref:
+            zip_ref.extractall(node_dir)
+        nested_dir = node_dir / f"node-v{NODE_VERSION}-win-{arch}"
+        if nested_dir.exists():
+            for item in nested_dir.iterdir():
+                if item.is_dir():
+                    # For directories, move contents recursively
+                    target_dir = node_dir / item.name
+                    if target_dir.exists():
+                        shutil.rmtree(target_dir)
+                    shutil.move(str(item), str(target_dir))
+                else:
+                    # For files, move directly
+                    target_file = node_dir / item.name
+                    if target_file.exists():
+                        target_file.unlink()
+                    item.rename(target_file)
+            nested_dir.rmdir()
+    else:
+        with tarfile.open(download_path, "r:*") as tar_ref:
+            tar_ref.extractall(node_dir)
+        nested_dir = (
+            node_dir / f"node-v{NODE_VERSION}-{platform.system().lower()}-{arch}"
+        )
+        if nested_dir.exists():
+            for item in nested_dir.iterdir():
+                item.rename(node_dir / item.name)
+            nested_dir.rmdir()
 
 
 def setup_eslint():
