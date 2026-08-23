@@ -1,9 +1,24 @@
 """
 Asset Scanner for the FastLED v1 Asset Pipeline (issue #2284).
 
-Walks a sketch's ``data/`` directory looking for ``*.lnk`` files, parses each
-one for a URL plus optional ``key=value`` metadata lines, and emits a JSON
-manifest that fbuild consumers (notably the WASM loader) can read.
+Walks a sketch's ``data/`` directory looking for asset declarations and emits a
+JSON manifest that consumers (notably the WASM loader) can read.
+
+This is the single Python entry point for parsing asset declarations. It
+accepts every form in use so callers never need to care which one a sketch
+picked:
+
+    - ``*.lnk``, **text form** — the format the C++ runtime parses
+      (``fl::parse_lnk_with_metadata()`` in ``src/fl/stl/url.h``): first
+      non-comment line is the URL, then ``key=value`` metadata.
+    - ``*.lnk``, **JSON form** — what ``fbuild lnk add`` writes:
+      ``{"v": 1, "url": ..., "sha256": ..., "size": ..., "extract": ...}``.
+    - ``assets.json`` — one file declaring several assets at once.
+
+Format detection sniffs the first non-blank, non-comment character: ``{``
+means JSON, anything else is text. When a ``.lnk`` and an ``assets.json``
+entry name the same asset, the ``.lnk`` wins, so a sketch can override one
+entry of a shared manifest.
 
 v1 scope:
     - Platforms: WASM + host/stub only. ESP32 LittleFS is future work.
@@ -31,8 +46,18 @@ The same dict can be emitted to a JSON file and/or serialized to a
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any, cast
+
+
+#: Optional multi-asset manifest living beside the ``.lnk`` sidecars.
+ASSETS_JSON = "assets.json"
+
+#: One serialized manifest entry. This is a JSON wire shape, not a domain
+#: type — it is handed straight to ``json.dump`` — so it stays a plain dict
+#: rather than a dataclass.
+ManifestRecord = dict[str, "str | int | None"]
 
 
 # -----------------------------------------------------------------------------
@@ -50,11 +75,17 @@ class AssetEntry:
             v1 runtime ignores this; parser captures it for forward-compat.
         fallback: Optional mirror URL declared in the ``.lnk`` (``fallback=...``).
             v1 runtime ignores this; parser captures it for forward-compat.
+        size: Optional expected byte count. Only the JSON form carries this;
+            used for a cheap mismatch check before hashing.
+        extract: Optional archive handling (``"file"``/``"zip"``/``"tar.gz"``).
+            Only the JSON form carries this; captured for forward-compat.
     """
 
     url: str
     sha256: str | None = None
     fallback: str | None = None
+    size: int | None = None
+    extract: str | None = None
 
 
 @dataclass
@@ -73,9 +104,27 @@ class AssetScanResult:
     manifest: dict[str, AssetEntry] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
 
-    def to_json_dict(self) -> dict[str, dict[str, str | None]]:
-        """Return manifest as a plain nested dict for JSON serialization."""
-        return {key: asdict(entry) for key, entry in self.manifest.items()}
+    def to_json_dict(self) -> dict[str, ManifestRecord]:
+        """Return manifest as a plain nested dict for JSON serialization.
+
+        ``url``/``sha256``/``fallback`` are always present (existing consumers
+        rely on the shape, nulls included). ``size``/``extract`` are emitted
+        only when set, so a text-format ``.lnk`` serializes byte-identically to
+        how it did before those fields existed.
+        """
+        out: dict[str, ManifestRecord] = {}
+        for key, entry in self.manifest.items():
+            record: ManifestRecord = {
+                "url": entry.url,
+                "sha256": entry.sha256,
+                "fallback": entry.fallback,
+            }
+            if entry.size is not None:
+                record["size"] = entry.size
+            if entry.extract is not None:
+                record["extract"] = entry.extract
+            out[key] = record
+        return out
 
 
 # -----------------------------------------------------------------------------
@@ -83,19 +132,128 @@ class AssetScanResult:
 # -----------------------------------------------------------------------------
 
 
-def _parse_lnk_content(content: str) -> AssetEntry | None:
-    """Parse the text of a single ``.lnk`` file.
+def _parse_assets_json(content: str) -> tuple[dict[str, AssetEntry], list[str]]:
+    """Parse an ``assets.json`` declaring several assets at once.
 
-    Mirrors the C++ ``fl::parse_lnk_with_metadata()`` logic in
-    ``src/fl/stl/url.h``:
+    ``{"assets": {"video.rgb": {"urls": [...], "sha256": "...", "size": N}}}``
+
+    Returns the entries plus a list of non-fatal problems, so one bad entry
+    does not discard the rest.
+    """
+    problems: list[str] = []
+    try:
+        parsed: Any = json.loads(content)
+    except json.JSONDecodeError as exc:
+        return {}, [f"invalid JSON ({exc})"]
+    if not isinstance(parsed, dict):
+        return {}, ["top level must be an object"]
+
+    raw_entries: Any = cast("dict[str, Any]", parsed).get("assets")
+    if not isinstance(raw_entries, dict):
+        return {}, ["missing 'assets' object"]
+
+    out: dict[str, AssetEntry] = {}
+    for name, raw_spec in cast("dict[str, Any]", raw_entries).items():
+        if not isinstance(raw_spec, dict):
+            problems.append(f"entry {name!r} is not an object; skipped")
+            continue
+        spec = cast("dict[str, Any]", raw_spec)
+
+        raw_urls: Any = spec.get("urls")
+        if isinstance(raw_urls, list):
+            urls = [str(u) for u in cast("list[Any]", raw_urls)]
+        elif "url" in spec:
+            urls = [str(spec["url"])]
+        else:
+            urls = []
+        if not urls:
+            problems.append(f"entry {name!r} has no url/urls; skipped")
+            continue
+
+        size: Any = spec.get("size_bytes", spec.get("size"))
+        sha: Any = spec.get("sha256")
+        out[str(name)] = AssetEntry(
+            url=urls[0],
+            sha256=str(sha) if sha is not None else None,
+            fallback=urls[1] if len(urls) > 1 else None,
+            size=int(size) if size is not None else None,
+        )
+    return out, problems
+
+
+def _parse_lnk_json(content: str) -> AssetEntry | None:
+    """Parse fbuild's JSON ``.lnk`` schema.
+
+    ``{"v": 1, "url": "...", "sha256": "...", "size": N, "extract": "file"}``
+    — the form written by ``fbuild lnk add``. ``url`` may also be a list, in
+    which case the first entry is primary and the second becomes ``fallback``.
+
+    Returns ``None`` if the document is not usable as a ``.lnk``.
+    """
+    try:
+        parsed: Any = json.loads(content)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(parsed, dict):
+        return None
+    doc_typed: dict[str, Any] = cast("dict[str, Any]", parsed)
+
+    raw_url: Any = doc_typed.get("url")
+    if isinstance(raw_url, list):
+        urls = [str(u) for u in cast("list[Any]", raw_url)]
+    elif raw_url is not None:
+        urls = [str(raw_url)]
+    else:
+        urls = []
+    if not urls:
+        return None
+
+    fallback = doc_typed.get("fallback")
+    size = doc_typed.get("size")
+    sha = doc_typed.get("sha256")
+    extract = doc_typed.get("extract")
+
+    return AssetEntry(
+        url=urls[0],
+        sha256=str(sha) if sha is not None else None,
+        fallback=(
+            urls[1]
+            if len(urls) > 1
+            else (str(fallback) if fallback is not None else None)
+        ),
+        size=int(size) if size is not None else None,
+        extract=str(extract) if extract is not None else None,
+    )
+
+
+def _parse_lnk_content(content: str) -> AssetEntry | None:
+    """Parse a single ``.lnk`` file in either supported format.
+
+    Two formats exist in the ecosystem and both are accepted here, so a sketch
+    can use whichever its toolchain emits:
+
+    **Text** — the format the C++ runtime parses
+    (``fl::parse_lnk_with_metadata()`` in ``src/fl/stl/url.h``):
 
     - Comment lines (``#...``) and blank lines are skipped.
     - First non-comment line is the primary URL.
     - Subsequent ``key=value`` lines are recorded as metadata. Recognized
       keys: ``sha256``, ``fallback``. Unknown keys are silently ignored.
 
-    Returns ``None`` if no URL was found.
+    **JSON** — the format ``fbuild lnk add`` writes
+    (``{"v": 1, "url": ..., "sha256": ..., "size": ...}``).
+
+    The format is detected by sniffing the first non-blank, non-comment
+    character: ``{`` means JSON, anything else is text. Returns ``None`` if no
+    URL was found in either form.
     """
+    for probe in content.splitlines():
+        stripped = probe.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped.startswith("{"):
+            return _parse_lnk_json(content)
+        break
     primary_url: str | None = None
     sha256: str | None = None
     fallback: str | None = None
@@ -151,6 +309,21 @@ def scan_sketch_assets(sketch_dir: Path) -> AssetScanResult:
     data_dir = sketch_dir / "data"
     if not data_dir.is_dir():
         return result
+
+    # assets.json first, so a same-named .lnk below overrides it.
+    manifest_path = data_dir / ASSETS_JSON
+    if manifest_path.is_file():
+        rel_dir = data_dir.relative_to(sketch_dir).as_posix()
+        try:
+            entries, problems = _parse_assets_json(
+                manifest_path.read_text(encoding="utf-8")
+            )
+        except (OSError, UnicodeDecodeError) as exc:
+            entries, problems = {}, [f"read failed ({exc})"]
+        for problem in problems:
+            result.warnings.append(f"asset-scan: {manifest_path}: {problem}")
+        for name, entry in entries.items():
+            result.manifest[f"{rel_dir}/{name}"] = entry
 
     for lnk_path in sorted(data_dir.rglob("*.lnk")):
         if not lnk_path.is_file():
