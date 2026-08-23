@@ -153,30 +153,24 @@ def test_non_samd_build_is_not_detected_as_samd() -> None:
     assert "FL_IS_SAMD51" not in macros
 
 
-def test_samd_ldf_hint_declares_spi() -> None:
-    """The SAMD SPI backend needs <SPI.h>, so the LDF hint must declare it.
+def test_samd_does_not_route_into_the_arduino_spi_backend() -> None:
+    """SAMD must not claim platforms/arm/sam/ hardware SPI while #4016 is open.
 
-    This guards the trap that caused #4011 to take two rounds to fix. Both
-    ``platforms/arm/samd/ldf_headers.h`` and the FL_IS_SAMD gate in
-    ``platforms/ldf_headers.h`` that reaches it were unreachable while
-    detection was broken, so the file's "no additional LDF hints needed
-    currently" comment looked true and was not. Fixing detection made the
-    SPI include live and the build failed on a missing SPI.h.
+    That backend does `#include <SPI.h>`, and nothing available can supply it
+    under fbuild: lib_ldf_mode is unimplemented, the scan reaches neither an
+    `#if 0` LDF hint nor a conditional include, and `lib_deps = SPI` fails with
+    "library 'SPI' not found in registry" because framework-bundled libraries
+    are not registry packages (FastLED/fbuild#1371).
 
-    Tracked for a proper fix in #4016 -- until then the dependency is real and
-    must stay declared.
+    It also had never compiled on any board -- FL_IS_SAMD21/FL_IS_SAMD51 never
+    evaluated true until #4011 -- so routing SAMD to bit-bang SPI preserves the
+    behaviour every SAMD build has actually had, rather than switching on
+    untested code. #4016 tracks a real SERCOM backend.
     """
-    backend = (SRC / "platforms" / "arm" / "sam" / "fastspi_arm_sam.h").read_text(
-        encoding="utf-8"
-    )
-    if "#include <SPI.h>" not in backend:
-        pytest.skip("SAMD SPI backend no longer includes <SPI.h>; see #4016")
-
-    hint = (SRC / "platforms" / "arm" / "samd" / "ldf_headers.h").read_text(
-        encoding="utf-8"
-    )
-    assert "#include <SPI.h>" in hint, (
-        "platforms/arm/sam/fastspi_arm_sam.h includes <SPI.h> for SAMD, so "
-        "platforms/arm/samd/ldf_headers.h must hint it or SAMD builds fail "
-        "with 'SPI.h: No such file or directory'. See #4011 and #4016."
-    )
+    for name in ("spi_device_proxy.h", "spi_output_template.h"):
+        text = (SRC / "platforms" / name).read_text(encoding="utf-8")
+        assert "defined(FL_IS_SAM) || defined(FL_IS_SAMD)" not in text, (
+            f"platforms/{name} routes SAMD into platforms/arm/sam/, whose SPI "
+            "backend needs Arduino <SPI.h>. SAMD builds fail with 'SPI.h: No "
+            "such file or directory'. See #4011, #4016, FastLED/fbuild#1371."
+        )
