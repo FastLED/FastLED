@@ -52,17 +52,21 @@ reviews:
         4. Does it scale? If the answer to "what happens when we add a third,
            and a tenth?" is a proportionally larger class, the shape is wrong.
 
-        WORKED EXAMPLE — `fl/system/file_system.h` (see FastLED #4003).
+        WORKED EXAMPLE - the filesystem subsystem (FastLED #4003, #4007, #4008).
 
-        `FileSystem` grew a member per backend (`beginSd`, `sd`) and a member
-        per format (`openVideo`, `openMpeg1Video`, `readText`, `readJson`,
-        `readScreenMaps`, `readScreenMap`, `loadJpeg`, `openMp3`, `loadFled`).
-        The header now re-exports `fl/fx/video.h` and `fl/codec/jpeg.h`, so
-        every sketch that opens a file also pulls in video and JPEG. It also
-        carries an inline `loadJpegFromSD()` body, which the API Object
-        Pattern says a wrapper header must not do.
+        This is history now, and useful precisely because the end state is in
+        the tree to compare against. `FileSystem` had grown a member per
+        backend (`beginSd`, `sd`) AND a member per format (`openVideo`,
+        `openMpeg1Video`, `readText`, `readJson`, `readScreenMaps`,
+        `readScreenMap`, `loadJpeg`, `openMp3`, `loadFled`), in a header that
+        re-exported `fl/fx/video.h` and `fl/codec/jpeg.h` so every sketch
+        opening a file compiled both, and that carried an inline
+        `loadJpegFromSD()` body the API Object Pattern forbids.
 
-        WRONG — adding a LittleFS backend by extending the class:
+        No single addition was wrong. That is the point: each was locally
+        reasonable, and nothing asked "what about the tenth one?"
+
+        WRONG - adding a backend by extending the class:
 
             class FileSystem {
               public:
@@ -72,22 +76,39 @@ reviews:
                 bool beginLittleFs(bool format_on_fail = false);          // NEW
             };
 
-        Two more members, and two more again for the next backend. Every
-        consumer of the header recompiles, and the class keeps accreting.
+        Two more members, two more again for the next backend.
 
-        RIGHT — a free factory paired with the seam that already exists:
+        ALSO WRONG - naming the technology, even as a free function:
 
-            // header: one free function, mirroring make_sdcard_filesystem
-            FsImplPtr make_littlefs_filesystem(bool format_on_fail = false) FL_NO_EXCEPT;
+            FsImplPtr make_littlefs_filesystem(bool format_on_fail = false);
 
-            // call site: uses FileSystem::begin(FsImplPtr), already public
+        This looks like an improvement and is not. Once "LittleFS" is public,
+        every platform must hold an opinion about it - including the host
+        stub, which just maps to a directory on disk. ESP32 can back flash
+        with LittleFS, SPIFFS or FatFS, so the name is wrong for its own
+        siblings and blocks changing the default later.
+
+        RIGHT - name the medium, and use the seam that already exists:
+
+            // fl/fs/embedded/embedded_fs.h - one free function
+            FsImplPtr getEmbeddedFs(bool format_on_fail = false) FL_NO_EXCEPT;
+
+            // call site: FileSystem::begin(FsImplPtr) was already public
             fl::FileSystem fs;
-            if (fs.begin(fl::make_littlefs_filesystem())) { ... }
+            if (fs.begin(fl::getEmbeddedFs())) { ... }
 
-        `FileSystem` is unchanged. The Nth backend costs one free function
-        and no class surface. Reference: `agents/docs/cpp-standards.md` →
-        "API Object Pattern" (rule 2: the API object wraps, it does not
-        implement) and FastLED #4003.
+        `FileSystem` is untouched. Compare `getSdFs(cs_pin)`, which names a
+        removable card rather than the SdFat library driving it. The Nth
+        backend costs one free function and no class surface.
+
+        The same shape applies to formats: `fl/fs/read.h` declares `readJpeg`,
+        `readVideo`, `readJson` and friends as free functions over a
+        `FileSystem&`, so adding a format costs one function there instead of
+        widening the class.
+
+        Reference: `agents/docs/cpp-standards.md` -> "API Object Pattern"
+        (rule 2: the API object wraps, it does not implement), and
+        FastLED #4003 / #4007 / #4008 for how this one was unwound.
 
         This is guidance, not a veto — widening a public class is sometimes
         right. Ask for the justification in the PR description; do not block
