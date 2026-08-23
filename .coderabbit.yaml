@@ -37,9 +37,14 @@ reviews:
         1. Does an existing generic entry point already do this? If a class
            has a `begin(Interface)` seam, a new backend needs a free factory,
            not a new `beginFoo()` member.
-        2. Could this be a free function instead of a member? Free functions
-           are found by ADL, do not enlarge the class, and do not force every
-           consumer of the header to recompile when they change.
+        2. Could this be a free function instead of a member? It does not
+           enlarge the class, so the class stays stable as backends
+           accumulate, and it can move to its own header later so consumers
+           that never call it stop paying for it. Two things it does NOT buy
+           on its own: a free function declared in the same public header
+           still churns every consumer when that header changes, and ADL
+           only applies when a parameter type lives in the namespace — a
+           `bool` does not, so callers still write `fl::make_x(...)`.
         3. Does the new symbol drag headers with it? A method whose signature
            names a codec/format type pulls that header into the include graph
            of everyone who includes this one — especially with
