@@ -93,11 +93,14 @@ def _defined_macros(flags: list[str], header: str) -> set[str]:
         timeout=120,
     )
     assert proc.returncode == 0, f"preprocessing failed:\n{proc.stderr}"
-    return {
-        line.split()[1]
-        for line in proc.stdout.splitlines()
-        if line.startswith("#define") and len(line.split()) > 1
-    }
+    macros: set[str] = set()
+    for line in proc.stdout.splitlines():
+        if not line.startswith("#define"):
+            continue
+        parts = line.split()
+        if len(parts) > 1:
+            macros.add(parts[1])
+    return macros
 
 
 HEADER = "platforms/arm/samd/is_samd.h"
