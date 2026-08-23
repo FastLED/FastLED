@@ -1548,6 +1548,8 @@ SAMD51J19A_FEATHER_M4 = Board(
         # #ifndef, so a board define is the sanctioned override. Pin 6 is
         # defined for this board.
         "PIN_DATA=6",
+        # Apa102 defaults its clock to pin 2, which this board also lacks.
+        "STRIP_CLOCK_PIN=4",
         "FASTLED_USES_ARDUINO_AUDIO_INPUT=0",  # Disable Arduino audio (I2S not available)
     ],
 )
