@@ -10,5 +10,11 @@
 /// This file contains #if 0 blocks with library includes to hint dependencies
 /// to PlatformIO's LDF scanner without actually compiling the code.
 
-// SAMD platform - no additional LDF hints needed currently
-// Add library includes here if LDF issues are discovered
+// No hints needed: SAMD uses bit-bang SPI and pulls in no Arduino library.
+//
+// Do not restore a <SPI.h> hint here without reading FastLED#4011. The SAMD
+// hardware SPI backend does need it, but the hint alone cannot supply it:
+// fbuild does not implement lib_ldf_mode, its scan reaches neither an #if 0
+// hint nor a conditional include, and `lib_deps = SPI` fails as
+// "library 'SPI' not found in registry" because framework-bundled libraries
+// are not registry packages. See FastLED/fbuild#1371 and FastLED#4016.

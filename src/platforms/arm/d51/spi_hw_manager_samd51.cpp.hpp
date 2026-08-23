@@ -18,7 +18,13 @@
 
 #include "platforms/arm/samd/is_samd.h"
 
-#if defined(FL_IS_SAMD51)
+// Opt-in: this driver has never compiled. FL_IS_SAMD51 never evaluated true
+// until FastLED#4011 fixed SAMD detection, and in the meantime it drifted out
+// of sync with fl::DMABuffer, which now owns its memory and offers no
+// non-owning construction path -- so acquireDMABuffer() cannot return a view
+// over a caller-managed span. Reconciling that is a design change on a driver
+// that has also never run on hardware. FastLED#4017 tracks bring-up.
+#if defined(FL_IS_SAMD51) && defined(FASTLED_SAMD51_HW_SPI)
 
 #include "platforms/shared/spi_hw_2.h"
 #include "platforms/shared/spi_hw_4.h"
@@ -91,4 +97,4 @@ void initSpiHardware() {
 }  // namespace platforms
 }  // namespace fl
 
-#endif  // FL_IS_SAMD51
+#endif  // FL_IS_SAMD51 && FASTLED_SAMD51_HW_SPI

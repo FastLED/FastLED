@@ -27,7 +27,12 @@
 #elif defined(FL_IS_NRF52)
 #include "platforms/arm/nrf52/spi_device_proxy.h"
 
-#elif defined(FL_IS_SAM) || defined(FL_IS_SAMD)
+// SAMD is deliberately absent: platforms/arm/sam/ hardware SPI needs the
+// Arduino <SPI.h> library, and had never compiled on any board until
+// FastLED#4011 fixed SAMD detection. SAMD falls through to bit-bang SPI
+// below, which is the behaviour every SAMD build has actually had.
+// FastLED#4016 tracks bringing up a real SAMD SERCOM backend.
+#elif defined(FL_IS_SAM)
 #include "platforms/arm/sam/spi_device_proxy.h"
 
 #elif defined(FL_IS_STM32)

@@ -6,8 +6,17 @@
 
 #define NUM_LEDS  20
 
-#define STRIP_DATA_PIN 1
-#define STRIP_CLOCK_PIN 2
+// Defaults come from the board (platforms/default_pins.h) rather than a
+// literal, because a literal is a guess about hardware this sketch cannot
+// see -- Adafruit Feather M4 has no pin 2 at all. A sketch or build flag
+// defining these first still wins.
+#ifndef STRIP_DATA_PIN
+#define STRIP_DATA_PIN FL_PIN_SPI_DATA_1
+#endif
+
+#ifndef STRIP_CLOCK_PIN
+#define STRIP_CLOCK_PIN FL_PIN_SPI_CLOCK_1
+#endif
 
 CRGB leds[NUM_LEDS] = {0};     // Software gamma mode.
 

@@ -13,7 +13,7 @@
 // ground, and power), like the LPD8806 define both PIN_DATA and CLOCK_PIN
 // Clock pin only needed for SPI based chipsets when not using hardware SPI
 #ifndef PIN_DATA
-#define PIN_DATA 3
+#define PIN_DATA FL_PIN_CLOCKLESS_1
 #endif  // PIN_DATA
 
 #define CLOCK_PIN 13
