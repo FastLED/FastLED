@@ -14,6 +14,13 @@
 #include "fl/stl/noexcept.h"
 #include "fl/fs/backend.h"   // FsImpl, FsImplPtr   // IWYU pragma: export
 
+// Test-only hooks live in their own header so this one declares only the
+// public API (FastLED #4003). Included under the same guard so existing
+// test code keeps resolving them transitively.
+#ifdef FASTLED_TESTING
+#include "fl/fs/testing.h"  // IWYU pragma: export
+#endif
+
 // Forward declaration -- concrete Mp3Decoder lives in fl/codec/mp3.h
 namespace fl {
 class Mp3Decoder;
@@ -38,12 +45,6 @@ inline FsImplPtr getSdFs(int cs_pin) FL_NO_EXCEPT {
     return make_sdcard_filesystem(cs_pin);
 }
 
-#ifdef FASTLED_TESTING
-// Test-specific functions for setting up filesystem root path
-// These are implemented in platforms/stub/fs_stub.hpp
-void setTestFileSystemRoot(const char* root_path);
-const char* getTestFileSystemRoot();
-#endif
 
 } // namespace fl
 
@@ -108,18 +109,8 @@ class FileSystem {
 
 // Standalone helper function to load JPEG from SD card
 // Combines SD card initialization and JPEG loading in one convenient function
-inline FramePtr loadJpegFromSD(int cs_pin, const char *filepath,
-                                 const JpegConfig &config = JpegConfig(),
-                                 fl::string *error_message = nullptr) {
-    FileSystem fs;
-    if (!fs.beginSd(cs_pin)) {
-        if (error_message) {
-            *error_message = "Failed to initialize SD card on CS pin ";
-            error_message->append(static_cast<fl::u32>(cs_pin));
-        }
-        return FramePtr();
-    }
-    return fs.loadJpeg(filepath, config, error_message);
-}
+FramePtr loadJpegFromSD(int cs_pin, const char *filepath,
+                        const JpegConfig &config = JpegConfig(),
+                        fl::string *error_message = nullptr) FL_NO_EXCEPT;
 
 } // namespace fl

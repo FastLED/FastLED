@@ -2211,12 +2211,10 @@ src/fl/fs/fs.h|bool readJson(const char *path, json *doc);
 src/fl/fs/fs.h|bool readScreenMap(const char *path, const char *name, ScreenMap *out, string *error = nullptr);
 src/fl/fs/fs.h|bool readScreenMaps(const char *path, fl::flat_map<string, ScreenMap> *out, string *error = nullptr);
 src/fl/fs/fs.h|bool readText(const char *path, string *out);
-src/fl/fs/fs.h|const char* getTestFileSystemRoot();
 src/fl/fs/fs.h|fl::Mp3DecoderPtr openMp3(const char *path, fl::string *error_message = nullptr);
 src/fl/fs/fs.h|fl::ifstream openRead(const char *path);
 src/fl/fs/fs.h|inline FramePtr loadJpegFromSD(int cs_pin, const char *filepath, const JpegConfig &config = JpegConfig(), fl::string *error_message = nullptr) {
 src/fl/fs/fs.h|void end();
-src/fl/fs/fs.h|void setTestFileSystemRoot(const char* root_path);
 src/fl/fs/fstream.cpp.hpp|const char* fstream::error_message() const {
 src/fl/fs/fstream.cpp.hpp|const char* ifstream::error_message() const {
 src/fl/fs/fstream.cpp.hpp|const char* ofstream::error_message() const {

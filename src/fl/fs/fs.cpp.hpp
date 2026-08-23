@@ -208,6 +208,24 @@ bool FileSystem::readText(const char *path, fl::string *out) {
     return wrote;
 }
 
+
+// Convenience wrapper: mount an SD card and decode a JPEG in one call.
+// Out of line because the API header wraps, it does not implement
+// (agents/docs/cpp-standards.md -> API Object Pattern, rule 2; FastLED #4003).
+FramePtr loadJpegFromSD(int cs_pin, const char *filepath,
+                        const JpegConfig &config,
+                        fl::string *error_message) FL_NO_EXCEPT {
+    FileSystem fs;
+    if (!fs.beginSd(cs_pin)) {
+        if (error_message) {
+            *error_message = "Failed to initialize SD card on CS pin ";
+            error_message->append(static_cast<fl::u32>(cs_pin));
+        }
+        return FramePtr();
+    }
+    return fs.loadJpeg(filepath, config, error_message);
+}
+
 } // namespace fl
 
 // `make_sdcard_filesystem(int cs_pin)` is defined in the separate SD TU
