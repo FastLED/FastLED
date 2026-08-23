@@ -1,20 +1,25 @@
-/// @file fl/system/littlefs/fs_littlefs.cpp.hpp
-/// @brief Arduino LittleFS implementation of `FsImpl`.
+#pragma once
+
+// IWYU pragma: private
+
+/// @file platforms/esp/fs/embedded_fs_esp.hpp
+/// @brief LittleFS fragment backing `fl::getEmbeddedFs()` on ESP.
 ///
-/// LittleFS is the on-chip flash filesystem shipped by the ESP32, ESP8266
-/// and RP2040 Arduino cores. Unlike SD it needs no CS pin or SPI bus — it
-/// lives in a flash partition, which is why mounting fails for reasons SD
-/// never sees: no filesystem partition in the partition table, or an
-/// unformatted one.
+/// LittleFS is an implementation detail and stops here — the public API
+/// says "embedded storage" (FastLED #4007). ESP32 and ESP8266 cores both
+/// ship `<LittleFS.h>`; where they do not, the guard below degrades to the
+/// same null result the no-op fragment gives, so a build with an ESP
+/// target but no LittleFS library still compiles.
 ///
-/// This file includes external Arduino headers, so it is only ever pulled
-/// in by `src/fl/build/fl.system.littlefs+.cpp` — never through FastLED's
-/// header graph. The linker drops the whole TU when a sketch does not
-/// reference `make_littlefs_filesystem()`.
+/// A plain header, not a `.cpp.hpp`: it composes into whichever translation
+/// unit includes it, which is how the backend stays inside
+/// `fl.system.embedded_fs+.cpp.o` and gets dropped together with the entry
+/// point when a sketch never asks for embedded storage. Same shape as the
+/// platform fragments behind `platforms/delay.h`.
 
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/has_include.h"
-#include "fl/system/littlefs/fs_littlefs.h"
+#include "fl/system/file_system.h"
 #include "platforms/is_platform.h"
 
 #if FL_HAS_INCLUDE(<LittleFS.h>) && FL_HAS_INCLUDE(<FS.h>)
@@ -28,14 +33,12 @@
 #include "fl/stl/memory.h"
 #include "fl/stl/string.h"
 
-#define FASTLED_HAS_LITTLEFS_IMPL 1
-
 namespace fl {
+namespace platforms {
+namespace detail {
 
-namespace {
-
-/// `filebuf` over a LittleFS `File`. The File API mirrors Arduino SD's,
-/// so this parallels `SDFileHandle` in `fl/system/sd/`.
+/// `filebuf` over a LittleFS `File`. The File API mirrors Arduino SD's, so
+/// this parallels `SDFileHandle` in `fl/system/sd/`.
 class LittleFsFileHandle : public filebuf {
   private:
     File _file;
@@ -129,7 +132,7 @@ class FsLittleFs : public FsImpl {
         // partitionLabel); the remaining parameters default sensibly.
         return LittleFS.begin(_format_on_fail);
 #else
-        // ESP8266 / RP2040 cores expose a no-argument begin() with no
+        // The ESP8266 core exposes a no-argument begin() with no
         // format-on-fail hook, so an unformatted filesystem simply fails
         // to mount rather than being reformatted behind the user's back.
         FASTLED_UNUSED(_format_on_fail);
@@ -148,35 +151,26 @@ class FsLittleFs : public FsImpl {
     }
 };
 
-} // namespace
+} // namespace detail
 
-FsImplPtr make_littlefs_filesystem(bool format_on_fail) FL_NO_EXCEPT {
-    return fl::make_shared<FsLittleFs>(format_on_fail);
+inline FsImplPtr makeEmbeddedFs(bool format_on_fail) FL_NO_EXCEPT {
+    return fl::make_shared<detail::FsLittleFs>(format_on_fail);
 }
 
+} // namespace platforms
 } // namespace fl
 
-#else // no LittleFS on this platform
-
-#define FASTLED_HAS_LITTLEFS_IMPL 0
+#else // ESP target without the LittleFS library on the include path
 
 namespace fl {
+namespace platforms {
 
-// Fallback so a sketch calling make_littlefs_filesystem() on a platform
-// without LittleFS gets a null filesystem — and therefore a clean
-// `begin()` failure — instead of a link error.
-//
-// Deliberately a strong definition, unlike the SD fallback. The two
-// branches of this file are mutually exclusive, so exactly one
-// definition of this symbol exists in any build and there is nothing for
-// a weak symbol to defer to. It also has to be strong to be exported
-// from the shared library on Windows, which the host test build links
-// against.
-FsImplPtr make_littlefs_filesystem(bool format_on_fail) FL_NO_EXCEPT {
+inline FsImplPtr makeEmbeddedFs(bool format_on_fail) FL_NO_EXCEPT {
     FASTLED_UNUSED(format_on_fail);
     return FsImplPtr();
 }
 
+} // namespace platforms
 } // namespace fl
 
 #endif // FL_HAS_INCLUDE(<LittleFS.h>) && FL_HAS_INCLUDE(<FS.h>)

@@ -44,7 +44,7 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/fl.stl+.cpp",
     "fl/build/fl.system+.cpp",
     "fl/build/fl.system.sd+.cpp",
-    "fl/build/fl.system.littlefs+.cpp",
+    "fl/build/fl.system.embedded_fs+.cpp",
     "fl/build/fl.task+.cpp",
     "fl/build/fl.test+.cpp",
     "fl/build/fl.ui+.cpp",
