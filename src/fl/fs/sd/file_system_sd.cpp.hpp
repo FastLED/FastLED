@@ -1,4 +1,4 @@
-/// @file fl/system/sd/file_system_sd.cpp.hpp
+/// @file fl/fs/sd/file_system_sd.cpp.hpp
 /// @brief SD-card support split off from `file_system.cpp.hpp` so the
 /// linker can tree-shake the entire SD chain when nobody calls
 /// `FileSystem::beginSd()`.
@@ -19,7 +19,7 @@
 ///
 /// See FastLED #2773 item 1.2 for the original audit.
 
-#include "fl/system/file_system.h"
+#include "fl/fs/fs.h"
 #include "fl/stl/has_include.h"
 #include "fl/log/log.h"
 #include "platforms/is_platform.h"

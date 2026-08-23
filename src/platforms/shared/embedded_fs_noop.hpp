@@ -13,7 +13,7 @@
 /// already checking, rather than at link time.
 
 #include "fl/stl/compiler_control.h"
-#include "fl/system/file_system.h"
+#include "fl/fs/fs.h"
 
 namespace fl {
 namespace platforms {

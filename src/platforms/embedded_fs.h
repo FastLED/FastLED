@@ -5,7 +5,7 @@
 ///
 /// Selects exactly one platform fragment supplying
 /// `fl::platforms::makeEmbeddedFs(bool)`. The public entry point is
-/// `fl::getEmbeddedFs()` in `fl/system/embedded_fs/embedded_fs.h`; this
+/// `fl::getEmbeddedFs()` in `fl/fs/embedded/embedded_fs.h`; this
 /// header is how that reaches a backend without the backend's name
 /// appearing anywhere in `fl/` (FastLED #4007).
 ///

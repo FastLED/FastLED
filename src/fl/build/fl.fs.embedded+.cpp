@@ -1,4 +1,4 @@
-/// @file fl.system.embedded_fs+.cpp
+/// @file fl.fs.embedded+.cpp
 /// @brief Unity build entry-point for embedded (on-chip flash) storage,
 /// kept out of `fl.system+.cpp` so the linker can drop the filesystem
 /// chain when a sketch never calls `fl::getEmbeddedFs()`.
@@ -13,4 +13,4 @@
 #include "fl/system/arduino.h"
 // IWYU pragma: end_keep
 
-#include "fl/system/embedded_fs/_build.cpp.hpp"
+#include "fl/fs/embedded/_build.cpp.hpp"

@@ -1,6 +1,7 @@
-# .lnk asset link file — see FastLED issue #2284.
+# .lnk asset link file - see FastLED issue #2284.
 # The first non-comment line is the URL this asset resolves to.
 # Lines starting with '#' and blank lines are ignored.
-# Additional lines (metadata like sha256=, fallback=) are reserved for
-# future use and are ignored by the v1 parser.
-https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3
+# Mirrored into FastLED/assets so the digest below stays valid; pinning a
+# sha256 to a third-party host means an upstream re-encode breaks the build.
+https://raw.githubusercontent.com/FastLED/assets/main/examples/AudioUrl/track.mp3
+sha256=cadd2666c5571e12fafdb21697b26aef6f196a5a9c28e708129870167679991d

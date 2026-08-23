@@ -14,7 +14,6 @@
 #include "fl/stl/cstring.cpp.hpp"
 #include "fl/stl/deque_basic.cpp.hpp"
 #include "fl/stl/flat_map_basic.cpp.hpp"
-#include "fl/stl/fstream.cpp.hpp"
 #include "fl/stl/ieee754_string.cpp.hpp"
 #include "fl/stl/ios.cpp.hpp"
 #include "fl/stl/istream.cpp.hpp"

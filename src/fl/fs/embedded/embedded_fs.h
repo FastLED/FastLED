@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file fl/system/embedded_fs/embedded_fs.h
+/// @file fl/fs/embedded/embedded_fs.h
 /// @brief Storage built into the microcontroller itself.
 ///
 /// "Embedded" here names *where the bytes live* — on-chip flash, no card,
@@ -23,13 +23,13 @@
 /// than at link time.
 ///
 /// Tree-shaking: the body lives in `embedded_fs.cpp.hpp`, compiled into its
-/// own translation unit (`src/fl/build/fl.system.embedded_fs+.cpp`). A
+/// own translation unit (`src/fl/build/fl.fs.embedded+.cpp`). A
 /// sketch that never calls `getEmbeddedFs()` never references that TU, so
 /// the linker drops it and the whole filesystem chain with it — the same
 /// mechanism that keeps the SD chain out of non-SD sketches (#2773).
 
 #include "fl/stl/noexcept.h"
-#include "fl/system/file_system.h" // IWYU pragma: export
+#include "fl/fs/fs.h" // IWYU pragma: export
 
 namespace fl {
 

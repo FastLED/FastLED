@@ -1,4 +1,4 @@
-/// @file fl/system/embedded_fs/embedded_fs.cpp.hpp
+/// @file fl/fs/embedded/embedded_fs.cpp.hpp
 /// @brief Body of `fl::getEmbeddedFs()`.
 ///
 /// The public API says "embedded storage"; this file is where that maps
@@ -9,13 +9,13 @@
 ///
 /// Everything lands in one translation unit on purpose. The entry point
 /// and the backend it pulls in are compiled together into
-/// `fl.system.embedded_fs+.cpp.o`, so a sketch that never calls
+/// `fl.fs.embedded+.cpp.o`, so a sketch that never calls
 /// `getEmbeddedFs()` leaves the whole chain unreferenced and the linker
 /// drops the object outright. Splitting the entry point from its backend
 /// would defeat that: the backend would ride in on `platforms+.cpp.o`,
 /// which every sketch links.
 
-#include "fl/system/embedded_fs/embedded_fs.h"
+#include "fl/fs/embedded/embedded_fs.h"
 
 // Selects the platform fragment. A plain header, not a `.cpp.hpp`, so it
 // composes into this TU rather than needing its own build aggregate.

@@ -6,11 +6,11 @@
 // Test filesystem implementation for stub platform
 // Maps SD card operations to real hard drive paths for testing
 
-#include "fl/system/file_system.h"
+#include "fl/fs/fs.h"
 #include "fl/log/log.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/memory.h"
-#include "fl/stl/fstream.h"  // For file I/O operations
+#include "fl/fs/fstream.h"  // For file I/O operations
 #include "fl/stl/string.h"   // For fl::string
 #include "fl/stl/algorithm.h"  // For fl::replace in path conversion
 #include <cstdio>     // For file operations (remove, etc.)

@@ -11,7 +11,7 @@
 
 #include "test.h"
 
-#include "fl/system/embedded_fs/embedded_fs.h"
+#include "fl/fs/embedded/embedded_fs.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

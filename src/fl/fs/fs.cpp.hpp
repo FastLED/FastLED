@@ -1,4 +1,4 @@
-﻿#include "fl/system/file_system.h"
+#include "fl/fs/fs.h"
 #include "fl/fled/fled.h"
 #include "fl/stl/has_include.h"
 #include "fl/log/log.h"
@@ -7,13 +7,13 @@
 
 // NOTE: SD card support (FileSystem::beginSd and make_sdcard_filesystem)
 // lives in a SEPARATE translation unit at
-// `src/fl/system/sd/file_system_sd.cpp.hpp`, compiled into
+// `src/fl/fs/sd/file_system_sd.cpp.hpp`, compiled into
 // `fl.system.sd+.cpp.o` via `src/fl/build/fl.system.sd+.cpp`.
 //
 // This split lets the linker tree-shake the entire SD chain (libSD.a,
 // libFS.a, Arduino's VFSImpl, the printf engine VFSFileImpl drags in
 // via snprintf) AUTOMATICALLY when the user never calls
-// `FileSystem::beginSd()` â€” no FASTLED_USE_SDCARD opt-in required, and
+// `FileSystem::beginSd()` -- no FASTLED_USE_SDCARD opt-in required, and
 // the macro that the earlier macro-gate PR (#2778 v1) shipped is
 // removed by this PR. See FastLED #2773 item 1.2 and the SD TU header
 // for the mechanism.
@@ -87,7 +87,7 @@ class NullFileSystem : public FsImpl {
 
 
 // FileSystem::beginSd() is intentionally NOT defined in this TU. The
-// definition lives in `fl/system/sd/file_system_sd.cpp.hpp` which is
+// definition lives in `fl/fs/sd/file_system_sd.cpp.hpp` which is
 // compiled into its own `.o` (`fl.system.sd+.cpp.o`). The linker only
 // pulls that `.o` when the user actually calls `fs.beginSd(...)`,
 // keeping all SD library code (~15 KB on ESP32-S3) out of sketches that
@@ -208,9 +208,27 @@ bool FileSystem::readText(const char *path, fl::string *out) {
     return wrote;
 }
 
+
+// Convenience wrapper: mount an SD card and decode a JPEG in one call.
+// Out of line because the API header wraps, it does not implement
+// (agents/docs/cpp-standards.md -> API Object Pattern, rule 2; FastLED #4003).
+FramePtr loadJpegFromSD(int cs_pin, const char *filepath,
+                        const JpegConfig &config,
+                        fl::string *error_message) FL_NO_EXCEPT {
+    FileSystem fs;
+    if (!fs.beginSd(cs_pin)) {
+        if (error_message) {
+            *error_message = "Failed to initialize SD card on CS pin ";
+            error_message->append(static_cast<fl::u32>(cs_pin));
+        }
+        return FramePtr();
+    }
+    return fs.loadJpeg(filepath, config, error_message);
+}
+
 } // namespace fl
 
 // `make_sdcard_filesystem(int cs_pin)` is defined in the separate SD TU
-// (`fl/system/sd/file_system_sd.cpp.hpp`). When the SD TU is not linked
+// (`fl/fs/sd/file_system_sd.cpp.hpp`). When the SD TU is not linked
 // (the user never calls `fs.beginSd()`), the symbol is also dead-stripped
 // alongside `FileSystem::beginSd` itself.

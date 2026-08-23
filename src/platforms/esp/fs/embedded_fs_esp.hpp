@@ -13,13 +13,13 @@
 ///
 /// A plain header, not a `.cpp.hpp`: it composes into whichever translation
 /// unit includes it, which is how the backend stays inside
-/// `fl.system.embedded_fs+.cpp.o` and gets dropped together with the entry
+/// `fl.fs.embedded+.cpp.o` and gets dropped together with the entry
 /// point when a sketch never asks for embedded storage. Same shape as the
 /// platform fragments behind `platforms/delay.h`.
 
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/has_include.h"
-#include "fl/system/file_system.h"
+#include "fl/fs/fs.h"
 #include "platforms/is_platform.h"
 
 #if FL_HAS_INCLUDE(<LittleFS.h>) && FL_HAS_INCLUDE(<FS.h>)

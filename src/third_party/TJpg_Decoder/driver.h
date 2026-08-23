@@ -11,7 +11,7 @@
 #include "fl/stl/unique_ptr.h"
 #include "fl/codec/pixel.h"
 #include "fl/fx/frame.h"
-#include "fl/system/file_system.h"
+#include "fl/fs/fs.h"
 #include "fl/stl/noexcept.h"
 #include "src/tjpgd.h"
 

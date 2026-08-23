@@ -16,7 +16,7 @@
 // IWYU pragma: end_keep
 
 #include "fl/stl/memory.h"
-#include "fl/system/file_system.h"
+#include "fl/fs/fs.h"
 
 namespace fl { namespace platforms { namespace teensy {
 
