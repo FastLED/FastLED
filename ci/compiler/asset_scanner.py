@@ -54,6 +54,14 @@ from typing import Any, cast
 #: Optional multi-asset manifest living beside the ``.lnk`` sidecars.
 ASSETS_JSON = "assets.json"
 
+#: Storage targets an asset may declare, from FastLED/fbuild#1356. A target
+#: says where the bytes should END UP; the url says where they come from.
+STORAGE_TARGETS = frozenset({"littlefs", "spiffs", "sdcard", "firmware", "vfs", "none"})
+
+#: Targets backed by on-chip flash, i.e. the ones `fl::getEmbeddedFs()` serves.
+#: Declaring one of these is what pulls the embedded filesystem into a build.
+EMBEDDED_FS_TARGETS = frozenset({"littlefs", "spiffs"})
+
 #: One serialized manifest entry. This is a JSON wire shape, not a domain
 #: type — it is handed straight to ``json.dump`` — so it stays a plain dict
 #: rather than a dataclass.
@@ -79,6 +87,12 @@ class AssetEntry:
             used for a cheap mismatch check before hashing.
         extract: Optional archive handling (``"file"``/``"zip"``/``"tar.gz"``).
             Only the JSON form carries this; captured for forward-compat.
+        storage: Optional storage target — where the bytes should end up on the
+            device (``littlefs``, ``spiffs``, ``sdcard``, ``firmware``, ``vfs``,
+            ``none``). Absent means undeclared, which is not an error: a sketch
+            that never says where an asset goes still gets a manifest. Declaring
+            an on-chip target is what enables the embedded filesystem for the
+            build — see ``AssetScanResult.embedded_fs_assets``.
     """
 
     url: str
@@ -86,6 +100,7 @@ class AssetEntry:
     fallback: str | None = None
     size: int | None = None
     extract: str | None = None
+    storage: str | None = None
 
 
 @dataclass
@@ -103,6 +118,32 @@ class AssetScanResult:
 
     manifest: dict[str, AssetEntry] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
+
+    @property
+    def storage_targets(self) -> set[str]:
+        """Every distinct storage target declared by any asset."""
+        return {e.storage for e in self.manifest.values() if e.storage}
+
+    def embedded_fs_assets(self) -> list[str]:
+        """Asset paths that ask to live on on-chip flash, sorted.
+
+        A non-empty result is what pulls the embedded filesystem into a build:
+        the assets have declared they need it, so nothing else should have to.
+        """
+        return sorted(
+            path
+            for path, entry in self.manifest.items()
+            if entry.storage in EMBEDDED_FS_TARGETS
+        )
+
+    def unknown_storage_targets(self) -> set[str]:
+        """Declared targets outside the known vocabulary.
+
+        Not an error -- a newer tool may write a target this scanner predates.
+        Reported so a typo (``littleFS``, ``lfs``) does not silently behave as
+        "undeclared", which would look identical to working.
+        """
+        return {t for t in self.storage_targets if t not in STORAGE_TARGETS}
 
     def to_json_dict(self) -> dict[str, ManifestRecord]:
         """Return manifest as a plain nested dict for JSON serialization.
@@ -123,6 +164,8 @@ class AssetScanResult:
                 record["size"] = entry.size
             if entry.extract is not None:
                 record["extract"] = entry.extract
+            if entry.storage is not None:
+                record["storage"] = entry.storage
             out[key] = record
         return out
 
@@ -130,6 +173,25 @@ class AssetScanResult:
 # -----------------------------------------------------------------------------
 # Internals
 # -----------------------------------------------------------------------------
+
+
+def _storage_of(spec: dict[str, Any], default: str | None = None) -> str | None:
+    """Read a storage target from a JSON spec.
+
+    Accepts both shapes in circulation: a flat ``"storage": "littlefs"`` and
+    fbuild's proposed ``"dest": {"target": "littlefs"}`` (FastLED/fbuild#1356).
+    An unrecognised target is passed through rather than dropped -- the scanner
+    reports it and lets the build decide, so a newer descriptor written by a
+    newer tool is not silently discarded by an older scanner.
+    """
+    raw: Any = spec.get("storage")
+    if raw is None:
+        dest: Any = spec.get("dest")
+        if isinstance(dest, dict):
+            raw = cast("dict[str, Any]", dest).get("target")
+    if raw is None:
+        return default
+    return str(raw).strip().lower()
 
 
 def _parse_assets_json(content: str) -> tuple[dict[str, AssetEntry], list[str]]:
@@ -148,9 +210,19 @@ def _parse_assets_json(content: str) -> tuple[dict[str, AssetEntry], list[str]]:
     if not isinstance(parsed, dict):
         return {}, ["top level must be an object"]
 
-    raw_entries: Any = cast("dict[str, Any]", parsed).get("assets")
+    top: dict[str, Any] = cast("dict[str, Any]", parsed)
+    raw_entries: Any = top.get("assets")
     if not isinstance(raw_entries, dict):
         return {}, ["missing 'assets' object"]
+
+    # A file-level default so many assets can share one target without
+    # repeating it (FastLED/fbuild#1356). Per-entry always wins.
+    raw_defaults: Any = top.get("defaults")
+    default_storage = (
+        _storage_of(cast("dict[str, Any]", raw_defaults))
+        if isinstance(raw_defaults, dict)
+        else None
+    )
 
     out: dict[str, AssetEntry] = {}
     for name, raw_spec in cast("dict[str, Any]", raw_entries).items():
@@ -177,6 +249,7 @@ def _parse_assets_json(content: str) -> tuple[dict[str, AssetEntry], list[str]]:
             sha256=str(sha) if sha is not None else None,
             fallback=urls[1] if len(urls) > 1 else None,
             size=int(size) if size is not None else None,
+            storage=_storage_of(spec, default_storage),
         )
     return out, problems
 
@@ -223,6 +296,7 @@ def _parse_lnk_json(content: str) -> AssetEntry | None:
         ),
         size=int(size) if size is not None else None,
         extract=str(extract) if extract is not None else None,
+        storage=_storage_of(doc_typed),
     )
 
 
@@ -238,7 +312,8 @@ def _parse_lnk_content(content: str) -> AssetEntry | None:
     - Comment lines (``#...``) and blank lines are skipped.
     - First non-comment line is the primary URL.
     - Subsequent ``key=value`` lines are recorded as metadata. Recognized
-      keys: ``sha256``, ``fallback``. Unknown keys are silently ignored.
+      keys: ``sha256``, ``fallback``, ``storage``. Unknown keys are silently
+      ignored.
 
     **JSON** — the format ``fbuild lnk add`` writes
     (``{"v": 1, "url": ..., "sha256": ..., "size": ...}``).
@@ -257,6 +332,7 @@ def _parse_lnk_content(content: str) -> AssetEntry | None:
     primary_url: str | None = None
     sha256: str | None = None
     fallback: str | None = None
+    storage: str | None = None
 
     for raw_line in content.splitlines():
         line = raw_line.strip()
@@ -278,12 +354,16 @@ def _parse_lnk_content(content: str) -> AssetEntry | None:
             sha256 = value
         elif key == "fallback":
             fallback = value
+        elif key == "storage":
+            storage = value.lower()
         # else: unknown metadata key, ignore.
 
     if primary_url is None:
         return None
 
-    return AssetEntry(url=primary_url, sha256=sha256, fallback=fallback)
+    return AssetEntry(
+        url=primary_url, sha256=sha256, fallback=fallback, storage=storage
+    )
 
 
 # -----------------------------------------------------------------------------
@@ -437,3 +517,47 @@ def _cpp_string_literal(s: str) -> str:
         .replace("\t", "\\t")
     )
     return f'"{escaped}"'
+
+
+def announce_storage_requirements(scan: AssetScanResult) -> list[str]:
+    """Report what the sketch's assets need from the build, and return defines.
+
+    An asset that declares ``storage=littlefs`` (or ``spiffs``) is stating a
+    build requirement: the firmware has to be able to read on-chip flash. The
+    build satisfies that itself rather than making the user also remember a
+    flag -- so this prints, in green, that the filesystem was added and which
+    assets asked for it.
+
+    Green because it is neither a warning nor an error. Nothing is wrong; the
+    build is telling the user it did something on their behalf, and naming the
+    assets so the reason is visible rather than magic. A missing or wrong
+    target is the yellow case (see ``unknown_storage_targets``) and is reported
+    by the caller.
+
+    Returns the preprocessor defines the build should add, so the decision and
+    the message come from the same place and cannot drift apart.
+    """
+    from ci.util.color_output import print_green, print_yellow
+
+    unknown = scan.unknown_storage_targets()
+    if unknown:
+        print_yellow(
+            "assets: unrecognized storage target(s): "
+            + ", ".join(sorted(unknown))
+            + f". Known: {', '.join(sorted(STORAGE_TARGETS))}. "
+            "Treated as undeclared -- the asset will not pull in a filesystem."
+        )
+
+    needs_fs = scan.embedded_fs_assets()
+    if not needs_fs:
+        return []
+
+    targets = sorted(scan.storage_targets & EMBEDDED_FS_TARGETS)
+    shown = ", ".join(needs_fs[:4])
+    if len(needs_fs) > 4:
+        shown += f", +{len(needs_fs) - 4} more"
+    print_green(
+        f"assets: embedded filesystem ({'/'.join(targets)}) enabled "
+        f"automatically -- {len(needs_fs)} asset(s) declare it: {shown}"
+    )
+    return ["FASTLED_ESP8266_EMBEDDED_FS"]

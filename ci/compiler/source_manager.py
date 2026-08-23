@@ -279,6 +279,24 @@ def copy_example_source(project_root: Path, build_dir: Path, example: str) -> bo
             except ValueError:
                 print(f"Synced directory {file_path} to {dest_subdir}")
 
+    # Assets may declare where they belong on the device. An asset asking for
+    # on-chip flash is stating a build requirement, so say so rather than
+    # leaving the user to discover it -- see announce_storage_requirements.
+    # The example directory is scanned, not the copy: identical content, and it
+    # is the path the user recognises if something is misdeclared.
+    try:
+        from ci.compiler.asset_scanner import (
+            announce_storage_requirements,
+            scan_sketch_assets,
+        )
+
+        announce_storage_requirements(scan_sketch_assets(example_path))
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as exc:  # pragma: no cover - reporting must never break a build
+        print(f"asset scan skipped: {exc}")
+
     # Create or update stub main.cpp that includes the .ino files
     main_cpp_content = generate_main_cpp(ino_files)
     main_cpp_path = src_dir / "main.cpp"
