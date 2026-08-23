@@ -1593,11 +1593,24 @@ class TestResolvePortAndEnvironment:
         assert ctx.upload_port == "COM9"
         auto_detect.assert_called_once_with(expected_environment="esp32c6")
 
+    # Every environment in RP2XXX_ENVIRONMENTS, both families. The gate is
+    # `bool(_active_rp2xxx_environment(...))`, which spans
+    # RP2040_ENVIRONMENTS | RP2350_ENVIRONMENTS, so covering only the RP2350
+    # half would leave the rp2040 family asserting nothing.
     @pytest.mark.parametrize(
-        "environment", ("rp2350", "rpipico2", "rp2350w", "rpipico2w")
+        "environment",
+        (
+            "rp2040",
+            "rpipico",
+            "rpipicow",
+            "rp2350",
+            "rpipico2",
+            "rp2350w",
+            "rpipico2w",
+        ),
     )
     def test_rp2xxx_driver_mode_delegates_port_selection_to_fbuild(
-        self, environment: str
+        self: "TestResolvePortAndEnvironment", environment: str
     ) -> None:
         args = _make_args(
             environment=environment,
