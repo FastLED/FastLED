@@ -7,8 +7,8 @@ assertion whose message talks about ground and read-only and noisy pins. That
 sends you looking at wiring rather than at a pin table. It went unnoticed
 because SAMD had never built at all (#4011).
 
-The examples now default to `CLOCKLESS_PIN_1` / `SPI_PIN_DATA_1` /
-`SPI_PIN_CLOCK_1`, which a board may define beside its `_FL_DEFPIN` table.
+The examples now default to `FL_PIN_CLOCKLESS_1` / `FL_PIN_SPI_DATA_1` /
+`FL_PIN_SPI_CLOCK_1`, which a board may define beside its `_FL_DEFPIN` table.
 These tests check the resulting value is in that table, for every SAMD board --
 not only the four that CI compiles.
 
@@ -34,14 +34,14 @@ FASTPIN_HEADERS = (
 )
 
 # Fallbacks in platforms/default_pins.h, used when a board defines no override.
-FALLBACKS = {"CLOCKLESS_PIN_1": 3, "SPI_PIN_DATA_1": 1, "SPI_PIN_CLOCK_1": 2}
+FALLBACKS = {"FL_PIN_CLOCKLESS_1": 3, "FL_PIN_SPI_DATA_1": 1, "FL_PIN_SPI_CLOCK_1": 2}
 
 _OPEN = re.compile(r"^\s*#\s*(if|ifdef|ifndef)\b")
 _CLOSE = re.compile(r"^\s*#\s*endif\b")
 _BRANCH = re.compile(r"^\s*#\s*(?:el)?if\s+defined\s*\(\s*([A-Za-z_][A-Za-z0-9_]*)")
 _DEFPIN = re.compile(r"_FL_DEFPIN\(\s*(\d+)")
 _DEFAULT = re.compile(
-    r"^\s*#\s*define\s+(CLOCKLESS_PIN_1|SPI_PIN_DATA_1|SPI_PIN_CLOCK_1)\s+(\d+)"
+    r"^\s*#\s*define\s+(FL_PIN_CLOCKLESS_1|FL_PIN_SPI_DATA_1|FL_PIN_SPI_CLOCK_1)\s+(\d+)"
 )
 
 
