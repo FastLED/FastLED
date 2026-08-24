@@ -543,14 +543,18 @@ def announce_storage_requirements(scan: AssetScanResult) -> None:
     """Report what the sketch's assets need from the build.
 
     An asset that declares ``storage=littlefs`` (or ``spiffs``) is stating a
-    build requirement: the firmware has to be able to read on-chip flash. The
-    build satisfies that itself rather than making the user also remember a
-    flag -- so this prints, in green, that the filesystem was added and which
-    assets asked for it.
+    build requirement: the firmware has to be able to read on-chip flash. This
+    prints, in green, which assets asked for it and where that requirement is
+    already met.
 
-    Green because it is neither a warning nor an error. Nothing is wrong; the
-    build is telling the user it did something on their behalf, and naming the
-    assets so the reason is visible rather than magic. An unrecognised target
+    It does not claim the build enabled anything. ESP32 genuinely is automatic
+    -- `platforms/embedded_fs.h` selects LittleFS with no flag -- but ESP8266
+    still needs `FL_ESP8266_EMBEDDED_FS`, and `embedded_fs_defines` is not yet
+    consumed by any build layer (FastLED#4020). Saying "enabled automatically"
+    on ESP8266 would report work that did not happen, which is worse than
+    saying nothing: the user would stop looking.
+
+    Green because it is neither a warning nor an error. An unrecognised target
     is the yellow case -- a typo like `littleFS` would otherwise behave exactly
     like "undeclared", which looks identical to working.
 
@@ -578,6 +582,10 @@ def announce_storage_requirements(scan: AssetScanResult) -> None:
     if len(needs_fs) > 4:
         shown += f", +{len(needs_fs) - 4} more"
     print_green(
-        f"assets: embedded filesystem ({'/'.join(targets)}) enabled "
-        f"automatically -- {len(needs_fs)} asset(s) declare it: {shown}"
+        f"assets: {len(needs_fs)} asset(s) declare on-chip storage "
+        f"({'/'.join(targets)}): {shown}"
+    )
+    print_green(
+        "  ESP32 selects its embedded filesystem automatically. ESP8266 needs "
+        "-DFL_ESP8266_EMBEDDED_FS, which no build applies yet (FastLED#4020)."
     )

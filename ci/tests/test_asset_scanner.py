@@ -5,6 +5,8 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import pytest  # noqa: F401  # used in a type annotation only
+
 from ci.compiler.asset_scanner import (
     ASSETS_JSON,
     AssetEntry,
@@ -405,6 +407,26 @@ def test_on_chip_target_enables_the_filesystem() -> None:
     )
     assert scan.embedded_fs_assets() == ["data/v.rgb"]
     assert embedded_fs_defines(scan) == ["FL_ESP8266_EMBEDDED_FS"]
+
+
+def test_announcement_does_not_claim_work_it_did_not_do(
+    capsys: "pytest.CaptureFixture[str]",
+) -> None:
+    """No build consumes embedded_fs_defines yet (FastLED#4020).
+
+    So the report must name the requirement, not claim it was satisfied --
+    "enabled automatically" would send an ESP8266 user off looking elsewhere
+    for a failure whose cause is the missing define.
+    """
+    scan = AssetScanResult(
+        manifest={"data/v.rgb": AssetEntry(url="u", storage="littlefs")}
+    )
+    announce_storage_requirements(scan)
+
+    out = capsys.readouterr().out
+    assert "data/v.rgb" in out
+    assert "enabled automatically" not in out
+    assert "FL_ESP8266_EMBEDDED_FS" in out
 
 
 def test_sdcard_alone_does_not_enable_the_filesystem() -> None:
