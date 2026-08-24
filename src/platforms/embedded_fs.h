@@ -20,9 +20,13 @@
 #if defined(FL_IS_ESP32) || defined(FL_IS_ESP8266)
 // ESP cores back on-chip flash with LittleFS.
 #include "platforms/esp/fs/embedded_fs_esp.hpp"
+#elif defined(FL_IS_WASM)
+// The browser VFS stands in for on-chip flash so a LittleFS sketch runs
+// unmodified in the web preview.
+#include "platforms/wasm/fs/embedded_fs_wasm.hpp"
 #else
-// No embedded storage on this platform (host/stub, WASM, AVR, Teensy,
-// ARM). RP2040 also ships LittleFS and should gain a fragment here.
+// No embedded storage on this platform (host/stub, AVR, Teensy, ARM).
+// RP2040 also ships LittleFS and should gain a fragment here.
 #include "platforms/shared/embedded_fs_noop.hpp"
 #endif
 

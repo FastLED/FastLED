@@ -730,6 +730,63 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
  * @param {Object} moduleInstance - The loaded WASM module instance
  * @param {Array<Object>} filesJson - Array of files to load into the virtual filesystem
  */
+/**
+ * Resolves `window.fastledAssetManifest` entries into virtual-filesystem
+ * entries (FastLED issue #2284).
+ *
+ * A `.lnk` / `assets.json` asset lives at a remote URL and has no local file,
+ * so `files.json` cannot list it -- for a sketch whose only asset is a `.lnk`,
+ * `files.json` is literally `[]`. Until now the manifest was used only to hand
+ * C++ a URL to stream; nothing put the bytes into the filesystem. That left
+ * `fl::getEmbeddedFs()` with nothing to read, so a sketch written against ESP
+ * LittleFS could not be previewed in the browser -- the one platform whose job
+ * is to imitate the device was the one that could not.
+ *
+ * The fetch happens here rather than in `processFile` because
+ * `fastled_declare_files` needs a size before any streaming starts, and a
+ * remote asset's size is only known from its response. Issuing the request and
+ * reading `Content-Length` off the headers costs no extra round trip: the body
+ * is handed back and streamed by the normal path.
+ *
+ * A failed asset is skipped with a warning rather than aborting the load. One
+ * unreachable URL should not stop a sketch whose other assets are fine.
+ *
+ * @param {Object} manifest - path -> {url, sha256, fallback, size?}
+ * @returns {Promise<Array<Object>>} records shaped like `files.json` entries,
+ *   each carrying its already-open `response` for streaming.
+ */
+async function resolveManifestAssets(manifest) {
+  const entries = Object.entries(manifest || {});
+  if (entries.length === 0) return [];
+
+  const resolved = await Promise.all(entries.map(async ([path, spec]) => {
+    const url = spec && spec.url;
+    if (!url) {
+      console.warn(`Asset '${path}' has no url; skipping`);
+      return null;
+    }
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.warn(`Asset '${path}' fetch failed (${response.status}) from ${url}`);
+        return null;
+      }
+      // Prefer a size the declaration stated; fall back to the response.
+      const declared = Number(spec.size)
+        || Number(response.headers.get('content-length'))
+        || 0;
+      console.log(`Asset '${path}' -> ${url} (${declared} bytes)`);
+      // `embedded` marks this as backing fl::getEmbeddedFs(), which forces
+      // full load before setup() -- see the ordering below.
+      return { path, size: declared, response, embedded: true };
+    } catch (err) {
+      console.warn(`Asset '${path}' fetch threw:`, err);
+      return null;
+    }
+  }));
+  return resolved.filter(Boolean);
+}
+
 async function fastledLoadSetupLoop(
   frame_rate,
   moduleInstance,
@@ -737,20 +794,37 @@ async function fastledLoadSetupLoop(
 ) {
   console.log('Calling setup function...');
 
+  // Remote assets become filesystem entries alongside the local ones, so
+  // everything downstream -- declaration, streaming, fl::FileSystem -- treats
+  // them identically and neither C++ nor the loader needs to know the
+  // difference.
+  const manifestFiles = await resolveManifestAssets((window as any).fastledAssetManifest);
+  if (manifestFiles.length > 0) {
+    console.log(`Injecting ${manifestFiles.length} manifest asset(s) into the filesystem`);
+    filesJson = (filesJson || []).concat(manifestFiles);
+  }
+
   const fileManifest = getFileManifestJson(filesJson, frame_rate);
   moduleInstance.cwrap('fastled_declare_files', null, ['string'])(JSON.stringify(fileManifest));
   console.log('Files JSON:', filesJson);
 
   /**
-   * Processes a single file by streaming it to the WASM module
-   * @async
-   * @param {Object} file - File object with path and data
-   * @param {string} file.path - File path in the virtual filesystem
-   * @param {number} file.size - File size in bytes
+   * Streams one file into the WASM filesystem.
+   *
+   * Returns the number of bytes actually written so the caller can verify a
+   * file arrived whole. A short read is otherwise invisible: `FileData` keeps
+   * the declared capacity, so `is_eof()` stays false while `read()` returns 0,
+   * and a sketch waits forever on bytes that are never coming.
+   *
+   * @param {Object} file - {path, size, response?}
+   * @returns {Promise<number>} bytes written
    */
   const processFile = async (file) => {
+    let written = 0;
     try {
-      const response = await fetch(file.path);
+      // Manifest assets arrive with their response already open (the size had
+      // to be read from its headers); local files are fetched by path.
+      const response = file.response || await fetch(file.path);
       const reader = response.body.getReader();
 
       console.log(`File fetched: ${file.path}, size: ${file.size}`);
@@ -761,10 +835,12 @@ async function fastledLoadSetupLoop(
         if (done) break;
         // Allocate and copy chunk data
         jsAppendFileUint8(moduleInstance, file.path, value);
+        written += value.length;
       }
     } catch (error) {
       console.error(`Error processing file ${file.path}:`, error);
     }
+    return written;
   };
 
   /**
@@ -801,14 +877,51 @@ async function fastledLoadSetupLoop(
     console.log('FastLED Event System ready with stats:', fastLEDEvents.getEventStats());
   }
 
-  // Come back to this later - we want to partition the files into immediate and streaming files
-  // so that large projects don't try to download ALL the large files BEFORE setup/loop is called.
-  const [immediateFiles, streamingFiles] = partition(filesJson, ['.json', '.csv', '.txt', '.cfg']);
+  // Assets declared through the manifest back `fl::getEmbeddedFs()`, which on
+  // a device is LittleFS -- and on a device those files are simply *there*
+  // when setup() runs. Streaming them during loop() would make the browser
+  // diverge from the hardware in the way that matters most: a sketch reading
+  // an asset in setup() would see an empty file in the preview and a complete
+  // one on an ESP32, and the preview would be quietly lying.
+  //
+  // So embedded assets are always immediate and always awaited to completion,
+  // regardless of extension or size. The extension-based partition below still
+  // governs ordinary `files.json` entries, where streaming is a deliberate
+  // trade for startup latency on large sketch data.
+  const embeddedFiles = filesJson.filter((f) => f.embedded);
+  const localFiles = filesJson.filter((f) => !f.embedded);
+
+  const [immediateFiles, streamingFiles] = partition(localFiles, ['.json', '.csv', '.txt', '.cfg']);
+  if (embeddedFiles.length > 0) {
+    console.log(
+      'Embedded filesystem assets loaded fully before setup() (LittleFS parity):',
+      embeddedFiles.map((f) => f.path),
+    );
+  }
   console.log(
     'The following files will be immediatly available and can be read during setup():',
     immediateFiles,
   );
   console.log('The following files will be streamed in during loop():', streamingFiles);
+
+  // Embedded assets must be whole before setup(), and verified whole: a
+  // truncated download leaves FileData with its declared capacity intact, so
+  // is_eof() stays false while read() returns 0 -- a sketch would block on
+  // bytes that are never coming, with nothing in the log to explain it.
+  const embeddedResults = await Promise.all(embeddedFiles.map(async (file) => {
+    const written = await processFile(file);
+    const complete = file.size === 0 || written === file.size;
+    if (!complete) {
+      console.error(
+        `Embedded asset '${file.path}' is incomplete: wrote ${written} of ${file.size} bytes. `
+        + 'The filesystem will report the declared size while reads return nothing.',
+      );
+    }
+    return complete;
+  }));
+  if (embeddedFiles.length > 0 && embeddedResults.every(Boolean)) {
+    console.log(`All ${embeddedFiles.length} embedded asset(s) loaded completely before setup().`);
+  }
 
   const promiseImmediateFiles = fetchAllFiles(immediateFiles, () => {
     if (immediateFiles.length !== 0) {
