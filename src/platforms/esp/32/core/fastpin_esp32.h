@@ -162,6 +162,30 @@ public:
 #endif
 
 
+
+#endif
+
+// NOTE: outside the FASTLED_UNUSABLE_PIN_MASK guard on purpose. A build that
+// defines its own mask would otherwise skip this default and fall back to pin
+// 3 -- reintroducing exactly the UART collision described below, but only for
+// builds that customize the mask, which is the worst place for it to hide.
+// Default data pin for examples -- see platforms/default_pins.h.
+//
+// Deliberately not 3. On ESP32 classic GPIO 3 is U0RXD, the pin Serial
+// receives on; the mask comments above already flag "GPIO 1 & 3 commonly used
+// for UART". Blink calls Serial.begin(), so the generic fallback of 3 would
+// have an example drive an output onto its own console RX line. GPIO 3 is also
+// a strapping pin on S3 (JTAG source select) and on H2.
+//
+// GPIO 4 is outside FASTLED_UNUSABLE_PIN_MASK for every variant above, is not
+// a UART pin on any of them, and is not reserved for flash or USB-JTAG. It is
+// a boot-strap pin on C6, which is harmless here: strapping pins are sampled
+// at reset and are ordinary outputs afterwards.
+//
+// This is a compile-time default for examples, not a claim about any
+// particular board's wiring. FastLED#4018 tracks the wider per-platform audit.
+#ifndef FL_PIN_CLOCKLESS_1
+#define FL_PIN_CLOCKLESS_1 4
 #endif
 
 

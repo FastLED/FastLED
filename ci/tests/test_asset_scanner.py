@@ -5,10 +5,15 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import pytest  # noqa: F401  # used in a type annotation only
+
 from ci.compiler.asset_scanner import (
+    ASSETS_JSON,
     AssetEntry,
     AssetScanResult,
     _parse_lnk_content,
+    announce_storage_requirements,
+    embedded_fs_defines,
     manifest_to_cpp_header,
     manifest_to_js_bootstrap,
     scan_sketch_assets,
@@ -332,3 +337,121 @@ class TestRealCommittedLnkFiles(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ---------------------------------------------------------------------------
+# Storage targets: an asset declaring on-chip storage enables the filesystem
+# ---------------------------------------------------------------------------
+
+
+def _write(tmp_path: Path, rel: str, content: str) -> Path:
+    p = tmp_path / "sketch" / "data" / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(content, encoding="utf-8")
+    return tmp_path / "sketch"
+
+
+def test_text_lnk_declares_storage() -> None:
+    entry = _parse_lnk_content("https://example.com/v.rgb\nstorage=littlefs\n")
+    assert entry is not None
+    assert entry.storage == "littlefs"
+
+
+def test_json_lnk_declares_storage_flat_and_nested() -> None:
+    """Both shapes in circulation parse: flat, and fbuild#1356's dest.target."""
+    flat = _parse_lnk_content('{"v":1,"url":"https://e/v.rgb","storage":"littlefs"}')
+    assert flat is not None and flat.storage == "littlefs"
+
+    nested = _parse_lnk_content(
+        '{"v":2,"url":"https://e/v.rgb","dest":{"target":"spiffs","path":"/v"}}'
+    )
+    assert nested is not None and nested.storage == "spiffs"
+
+
+def test_assets_json_file_level_default_applies_and_entry_wins(tmp_path: Path) -> None:
+    sketch = _write(
+        tmp_path,
+        ASSETS_JSON,
+        json.dumps(
+            {
+                "defaults": {"storage": "littlefs"},
+                "assets": {
+                    "a.rgb": {"url": "https://e/a"},
+                    "b.rgb": {"url": "https://e/b", "storage": "sdcard"},
+                },
+            }
+        ),
+    )
+    scan = scan_sketch_assets(sketch)
+    assert scan.manifest["data/a.rgb"].storage == "littlefs"
+    assert scan.manifest["data/b.rgb"].storage == "sdcard"
+
+
+def test_undeclared_storage_is_not_an_error() -> None:
+    """Most sketches never say. That must stay silent and pull in nothing."""
+    entry = _parse_lnk_content("https://example.com/v.rgb\n")
+    assert entry is not None
+    assert entry.storage is None
+
+    scan = AssetScanResult(manifest={"data/v.rgb": entry})
+    assert scan.embedded_fs_assets() == []
+    assert embedded_fs_defines(scan) == []
+
+
+def test_on_chip_target_enables_the_filesystem() -> None:
+    scan = AssetScanResult(
+        manifest={
+            "data/v.rgb": AssetEntry(url="u", storage="littlefs"),
+            "data/m.json": AssetEntry(url="u", storage="sdcard"),
+        }
+    )
+    assert scan.embedded_fs_assets() == ["data/v.rgb"]
+    assert embedded_fs_defines(scan) == ["FL_ESP8266_EMBEDDED_FS"]
+
+
+def test_announcement_does_not_claim_work_it_did_not_do(
+    capsys: "pytest.CaptureFixture[str]",
+) -> None:
+    """No build consumes embedded_fs_defines yet (FastLED#4020).
+
+    So the report must name the requirement, not claim it was satisfied --
+    "enabled automatically" would send an ESP8266 user off looking elsewhere
+    for a failure whose cause is the missing define.
+    """
+    scan = AssetScanResult(
+        manifest={"data/v.rgb": AssetEntry(url="u", storage="littlefs")}
+    )
+    announce_storage_requirements(scan)
+
+    out = capsys.readouterr().out
+    assert "data/v.rgb" in out
+    assert "enabled automatically" not in out
+    assert "FL_ESP8266_EMBEDDED_FS" in out
+
+
+def test_sdcard_alone_does_not_enable_the_filesystem() -> None:
+    """An SD card is not on-chip flash; it must not drag LittleFS in."""
+    scan = AssetScanResult(
+        manifest={"data/v.rgb": AssetEntry(url="u", storage="sdcard")}
+    )
+    assert scan.embedded_fs_assets() == []
+    assert embedded_fs_defines(scan) == []
+
+
+def test_typo_target_is_reported_not_silently_ignored() -> None:
+    """A typo must not look identical to 'undeclared', which looks like working."""
+    scan = AssetScanResult(
+        manifest={"data/v.rgb": AssetEntry(url="u", storage="littlefs2")}
+    )
+    assert scan.unknown_storage_targets() == {"littlefs2"}
+    assert embedded_fs_defines(scan) == []
+
+
+def test_storage_round_trips_through_the_manifest() -> None:
+    scan = AssetScanResult(
+        manifest={"data/v.rgb": AssetEntry(url="u", storage="littlefs")}
+    )
+    assert scan.to_json_dict()["data/v.rgb"]["storage"] == "littlefs"
+
+    plain = AssetScanResult(manifest={"data/v.rgb": AssetEntry(url="u")})
+    assert "storage" not in plain.to_json_dict()["data/v.rgb"]
