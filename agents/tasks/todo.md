@@ -65,3 +65,27 @@
 - [x] Compile the WASM example and launch its local preview.
 - [x] Review and push the FastLED PR.
 - [x] Gate HydroPack launches on calibrated SPL and stable musical tempo.
+
+## SAMD51 unused Arduino I2S compile regression (#4030)
+
+- [x] Capture an unmasked SAMD51 RED build from current master.
+- [x] Add focused source-selection regression coverage.
+- [x] Exclude incompatible generic Arduino I2S on SAMD51 in source.
+- [x] Remove SAMD51-only CI `I2S` masks.
+- [x] Run focused tests, lint, the C++ suite, and all three SAMD51 board builds.
+- [x] Run the pre-push review gate.
+- [ ] Push a PR, drive checks/reviews green, merge, and verify master/issue state.
+
+### Review
+
+- RED: unmasked Metro M4 Blink/Apa102 both failed while preprocessing
+  `fl.audio+.cpp`, with SAMD51's `I2S` register macro expanded as a header name.
+- GREEN: the poisoned-header guard test passes; Metro M4, Feather M4, and
+  Grand Central M4 compile Blink/Apa102 without masks; SAMD21, Uno, and ESP32
+  Blink compile; full lint passes; all 284 native unit tests and 84 host
+  examples pass.
+- The full Python suite improved from 1037 to 1038 passes after the source fix;
+  its two remaining failures are unchanged WASM-path and QEMU-fixture failures
+  unrelated to this diff. The focused I2S guard selection passes independently.
+- The one-agent pre-push review is clean after improving failed-preprocessor
+  diagnostics with platform and exit-code context.

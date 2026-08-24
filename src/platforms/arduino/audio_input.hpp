@@ -31,6 +31,9 @@
 #elif defined(FL_IS_SAMD21)
 #define ARDUINO_I2S_FULLY_SUPPORTED 0
 #define ARDUINO_I2S_BROKEN_REASON "I2S not supported on SAMD21"
+#elif defined(FL_IS_SAMD51)
+#define ARDUINO_I2S_FULLY_SUPPORTED 0
+#define ARDUINO_I2S_BROKEN_REASON "Arduino I2S library is incompatible with SAMD51"
 #elif FL_HAS_INCLUDE(<I2S.h>)
 // IWYU pragma: begin_keep
 #include <I2S.h>
