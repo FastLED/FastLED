@@ -38,7 +38,7 @@
 // non-owning construction path -- so acquireDMABuffer() cannot return a view
 // over a caller-managed span. Reconciling that is a design change on a driver
 // that has also never run on hardware. FastLED#4017 tracks bring-up.
-#if defined(FL_IS_SAMD51) && defined(FASTLED_SAMD51_HW_SPI)
+#if defined(FL_IS_SAMD51) && defined(FL_SAMD51_HW_SPI)
 
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/log/log.h"
@@ -594,4 +594,4 @@ void initSpiHw4Instances() {
 
 }  // namespace fl
 
-#endif  // FL_IS_SAMD51 && FASTLED_SAMD51_HW_SPI
+#endif  // FL_IS_SAMD51 && FL_SAMD51_HW_SPI

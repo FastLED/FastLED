@@ -730,59 +730,113 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
  * @param {Object} moduleInstance - The loaded WASM module instance
  * @param {Array<Object>} filesJson - Array of files to load into the virtual filesystem
  */
+/** How long a single embedded asset may take to fetch before the build gives up. */
+const EMBEDDED_ASSET_TIMEOUT_MS = 30000;
+
+/**
+ * Hex-encodes a SHA-256 digest of the given bytes.
+ * @param {Uint8Array} bytes
+ * @returns {Promise<string>} lowercase hex, or '' if the platform has no SubtleCrypto
+ */
+async function sha256Hex(bytes) {
+  if (!globalThis.crypto || !globalThis.crypto.subtle) return '';
+  const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+/**
+ * Fetches one asset, following its declared `fallback` if the primary fails.
+ * @returns {Promise<Uint8Array|null>}
+ */
+async function fetchAssetBytes(path, spec) {
+  const urls = [spec.url, spec.fallback].filter(Boolean);
+  for (const url of urls) {
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(EMBEDDED_ASSET_TIMEOUT_MS) });
+      if (!response.ok) {
+        console.warn(`Asset '${path}': ${response.status} from ${url}`);
+        continue;
+      }
+      // Buffered rather than streamed on purpose. These assets must be whole
+      // before setup() anyway, and holding the bytes gives an exact length
+      // without depending on Content-Length -- which many hosts omit, exactly
+      // where a truncated download is most likely -- and allows the declared
+      // digest to be checked before anything reaches the sketch.
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      if (url !== spec.url) {
+        console.log(`Asset '${path}': primary failed, served from fallback ${url}`);
+      }
+      return bytes;
+    } catch (err) {
+      const why = (err && err.name === 'TimeoutError')
+        ? `timed out after ${EMBEDDED_ASSET_TIMEOUT_MS}ms`
+        : String(err);
+      console.warn(`Asset '${path}' from ${url}: ${why}`);
+    }
+  }
+  return null;
+}
+
 /**
  * Resolves `window.fastledAssetManifest` entries into virtual-filesystem
  * entries (FastLED issue #2284).
  *
  * A `.lnk` / `assets.json` asset lives at a remote URL and has no local file,
  * so `files.json` cannot list it -- for a sketch whose only asset is a `.lnk`,
- * `files.json` is literally `[]`. Until now the manifest was used only to hand
- * C++ a URL to stream; nothing put the bytes into the filesystem. That left
- * `fl::getEmbeddedFs()` with nothing to read, so a sketch written against ESP
- * LittleFS could not be previewed in the browser -- the one platform whose job
- * is to imitate the device was the one that could not.
+ * `files.json` is literally `[]`. Without this the manifest only ever handed
+ * C++ a URL to stream, so `fl::getEmbeddedFs()` had nothing to read and a
+ * sketch written against ESP LittleFS could not be previewed.
  *
- * The fetch happens here rather than in `processFile` because
- * `fastled_declare_files` needs a size before any streaming starts, and a
- * remote asset's size is only known from its response. Issuing the request and
- * reading `Content-Length` off the headers costs no extra round trip: the body
- * is handed back and streamed by the normal path.
- *
- * A failed asset is skipped with a warning rather than aborting the load. One
- * unreachable URL should not stop a sketch whose other assets are fine.
+ * Each asset is fetched whole, verified against its declared `sha256`, and
+ * only then handed on. A failure here is reported and the asset dropped: the
+ * sketch still starts, because a preview that never runs tells the user less
+ * than one that runs with a missing file and says so.
  *
  * @param {Object} manifest - path -> {url, sha256, fallback, size?}
  * @returns {Promise<Array<Object>>} records shaped like `files.json` entries,
- *   each carrying its already-open `response` for streaming.
+ *   each carrying the verified `bytes`.
  */
 async function resolveManifestAssets(manifest) {
   const entries = Object.entries(manifest || {});
   if (entries.length === 0) return [];
 
   const resolved = await Promise.all(entries.map(async ([path, spec]) => {
-    const url = spec && spec.url;
-    if (!url) {
+    if (!spec || !spec.url) {
       console.warn(`Asset '${path}' has no url; skipping`);
       return null;
     }
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        console.warn(`Asset '${path}' fetch failed (${response.status}) from ${url}`);
-        return null;
-      }
-      // Prefer a size the declaration stated; fall back to the response.
-      const declared = Number(spec.size)
-        || Number(response.headers.get('content-length'))
-        || 0;
-      console.log(`Asset '${path}' -> ${url} (${declared} bytes)`);
-      // `embedded` marks this as backing fl::getEmbeddedFs(), which forces
-      // full load before setup() -- see the ordering below.
-      return { path, size: declared, response, embedded: true };
-    } catch (err) {
-      console.warn(`Asset '${path}' fetch threw:`, err);
+    const bytes = await fetchAssetBytes(path, spec);
+    if (!bytes) {
+      console.error(`Asset '${path}' could not be fetched; the sketch will see no such file`);
       return null;
     }
+
+    if (spec.sha256) {
+      const actual = await sha256Hex(bytes);
+      if (actual && actual !== String(spec.sha256).toLowerCase()) {
+        console.error(
+          `Asset '${path}' failed integrity check: declared ${spec.sha256}, got ${actual}. Dropping it.`,
+        );
+        return null;
+      }
+      if (actual) console.log(`Asset '${path}' sha256 verified`);
+      else console.warn(`Asset '${path}': no SubtleCrypto, sha256 not verified`);
+    } else {
+      console.warn(`Asset '${path}' declares no sha256; contents are unverified`);
+    }
+
+    if (spec.size && Number(spec.size) !== bytes.length) {
+      console.warn(
+        `Asset '${path}': declared size ${spec.size} but received ${bytes.length} bytes`,
+      );
+    }
+    console.log(`Asset '${path}' -> ${spec.url} (${bytes.length} bytes)`);
+    // `embedded` marks this as backing fl::getEmbeddedFs(), which forces full
+    // load before setup() -- see the ordering below. The size is the real byte
+    // count, so the completeness check downstream can never be skipped.
+    return { path, size: bytes.length, bytes, embedded: true };
   }));
   return resolved.filter(Boolean);
 }
@@ -822,9 +876,14 @@ async function fastledLoadSetupLoop(
   const processFile = async (file) => {
     let written = 0;
     try {
-      // Manifest assets arrive with their response already open (the size had
-      // to be read from its headers); local files are fetched by path.
-      const response = file.response || await fetch(file.path);
+      // Manifest assets arrive already fetched and verified, so they are
+      // injected in one shot; local files are still streamed by path.
+      if (file.bytes) {
+        jsAppendFileUint8(moduleInstance, file.path, file.bytes);
+        console.log(`File fetched: ${file.path}, size: ${file.bytes.length}`);
+        return file.bytes.length;
+      }
+      const response = await fetch(file.path);
       const reader = response.body.getReader();
 
       console.log(`File fetched: ${file.path}, size: ${file.size}`);
@@ -910,7 +969,10 @@ async function fastledLoadSetupLoop(
   // bytes that are never coming, with nothing in the log to explain it.
   const embeddedResults = await Promise.all(embeddedFiles.map(async (file) => {
     const written = await processFile(file);
-    const complete = file.size === 0 || written === file.size;
+    // No `size === 0` escape hatch: an embedded asset's size is the real byte
+    // count from its buffer, so the check cannot silently disable itself the
+    // way it did when the size came from a possibly-absent Content-Length.
+    const complete = written === file.size;
     if (!complete) {
       console.error(
         `Embedded asset '${file.path}' is incomplete: wrote ${written} of ${file.size} bytes. `

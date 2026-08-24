@@ -122,6 +122,9 @@ async def _run(example: str, headless: bool, timeout_s: int) -> int:
         "loaded completely before setup()": "embedded asset(s) loaded completely before setup()"
         in joined,
         "no incomplete asset reported": "is incomplete: wrote" not in joined,
+        # The manifest declares a digest; trusting it unverified was #4025.
+        "sha256 verified": f"Asset '{ASSET_PATH}' sha256 verified" in joined,
+        "no integrity failure": "failed integrity check" not in joined,
     }
 
     # Ordering is the whole point, so assert it rather than trusting the text.
