@@ -1540,10 +1540,6 @@ SAMD51J19A_FEATHER_M4 = Board(
     real_board_name="adafruit_feather_m4",
     platform="atmelsam",
     framework="arduino",
-    lib_ignore=["I2S"],  # I2S library has SAMD51 compatibility issues
-    defines=[
-        "FASTLED_USES_ARDUINO_AUDIO_INPUT=0",  # Disable Arduino audio (I2S not available)
-    ],
 )
 
 SAMD51P20A_GRANDCENTRAL = Board(
@@ -1551,10 +1547,6 @@ SAMD51P20A_GRANDCENTRAL = Board(
     real_board_name="adafruit_grand_central_m4",
     platform="atmelsam",
     framework="arduino",
-    lib_ignore=["I2S"],  # I2S library has SAMD51 compatibility issues
-    defines=[
-        "FASTLED_USES_ARDUINO_AUDIO_INPUT=0",  # Disable Arduino audio (I2S not available)
-    ],
 )
 
 # Builds with ADAFRUIT_METRO_M4_EXPRESS defined, which is the only SAMD51 board
@@ -1564,10 +1556,6 @@ SAMD51J19A_METRO_M4 = Board(
     real_board_name="adafruit_metro_m4",
     platform="atmelsam",
     framework="arduino",
-    lib_ignore=["I2S"],  # I2S library has SAMD51 compatibility issues
-    defines=[
-        "FASTLED_USES_ARDUINO_AUDIO_INPUT=0",  # Disable Arduino audio (I2S not available)
-    ],
 )
 
 # Teknic ClearCore (Microchip SAME53N19A, Cortex-M4F @ 120 MHz).
