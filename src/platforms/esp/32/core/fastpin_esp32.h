@@ -188,6 +188,58 @@ public:
 #define FL_PIN_CLOCKLESS_1 4
 #endif
 
+// Default SPI pins for examples -- see platforms/default_pins.h.
+//
+// Deliberately not the generic 1/2 fallback: GPIO 1 is U0TXD on ESP32 classic,
+// the pin Serial transmits on, and the mask comments above flag "GPIO 1 & 3
+// commonly used for UART". A clocked chipset defaulting there drives its data
+// line onto the console. GPIO 2 is a strapping pin on classic, C3 and H2.
+//
+// Per-variant, because no single pair is safe across the family: below GPIO 6
+// everything is UART or strapping, 6-17 is flash on one variant or another,
+// and above 17 exceeds the pin count on C2/C3. Each pair below is outside that
+// variant's FASTLED_UNUSABLE_PIN_MASK, is not its UART, and is not a strapping
+// pin for it.
+//
+// Not taken from the Arduino core's MOSI/SCK, though that was the first
+// instinct: those are `static const uint8_t`, not macros, so `#if defined(MOSI)`
+// is always false and the guard silently selects the fallback instead. Seven
+// variants also set `MOSI = -1`, which would fail FastPin<>::validpin().
+//
+// Compile-time defaults for examples, not a claim about any board's wiring.
+// FastLED#4022 tracks confirming these on hardware.
+#if defined(FL_IS_ESP_32S2)
+#define FL_PIN_SPI_DATA_1_DEFAULT 35
+#define FL_PIN_SPI_CLOCK_1_DEFAULT 36
+#elif defined(FL_IS_ESP_32S3)
+#define FL_PIN_SPI_DATA_1_DEFAULT 11
+#define FL_PIN_SPI_CLOCK_1_DEFAULT 12
+#elif defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C2) || defined(FL_IS_ESP_32C5)
+#define FL_PIN_SPI_DATA_1_DEFAULT 7
+#define FL_PIN_SPI_CLOCK_1_DEFAULT 6
+#elif defined(FL_IS_ESP_32C6)
+#define FL_PIN_SPI_DATA_1_DEFAULT 19
+#define FL_PIN_SPI_CLOCK_1_DEFAULT 18
+#elif defined(FL_IS_ESP_32H2)
+#define FL_PIN_SPI_DATA_1_DEFAULT 11
+#define FL_PIN_SPI_CLOCK_1_DEFAULT 10
+#elif defined(FL_IS_ESP_32P4)
+#define FL_PIN_SPI_DATA_1_DEFAULT 23
+#define FL_PIN_SPI_CLOCK_1_DEFAULT 22
+#else
+// ESP32 classic, and any variant this file does not recognise. 23/18 are the
+// conventional VSPI MOSI/SCK and are free of flash, UART and strapping duty.
+#define FL_PIN_SPI_DATA_1_DEFAULT 23
+#define FL_PIN_SPI_CLOCK_1_DEFAULT 18
+#endif
+
+#ifndef FL_PIN_SPI_DATA_1
+#define FL_PIN_SPI_DATA_1 FL_PIN_SPI_DATA_1_DEFAULT
+#endif
+#ifndef FL_PIN_SPI_CLOCK_1
+#define FL_PIN_SPI_CLOCK_1 FL_PIN_SPI_CLOCK_1_DEFAULT
+#endif
+
 
 
 // SOC GPIO mask was not added until version IDF version 4.3.  Prior to this only ESP32 chip was supported, so only

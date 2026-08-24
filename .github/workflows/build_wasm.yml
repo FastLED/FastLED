@@ -106,6 +106,23 @@ jobs:
           fi
           echo "All required files are present."
 
+      # The asset pipeline is only provable by running the page: a build proves
+      # the loader code exists, not that bytes reach the filesystem. AudioUrl is
+      # the case that matters because its only asset is a remote `.lnk`, so its
+      # files.json is literally `[]` -- if the asset appears at all, it came
+      # through the manifest path. See FastLED#4026.
+      - name: Build AudioUrl for the asset-pipeline check
+        run: uv run ci/ci-compile.py wasm --examples AudioUrl
+        shell: bash
+
+      - name: Install Chromium for Playwright
+        run: uv run python -m playwright install --with-deps chromium
+        shell: bash
+
+      - name: Verify .lnk assets reach the WASM filesystem
+        run: uv run python ci/tests/verify_wasm_assets.py --timeout 45
+        shell: bash
+
       - name: Generate timestamp and random hex
         id: generate_id
         run: |
