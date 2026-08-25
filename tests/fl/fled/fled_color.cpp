@@ -205,6 +205,25 @@ FL_TEST_CASE("FLED_COLOR - non-rgb matrix values are reserved and rejected") {
 // Rule 1: unrecognized values are rejected, never silently defaulted
 // ============================================================================
 
+FL_TEST_CASE("FLED_COLOR - an explicit null color is treated as absent") {
+    // Omitting the key and setting it to null must not have opposite
+    // outcomes; many serializers emit null for an unset optional.
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":null}}", kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK(c.declared == false);
+    FL_CHECK(c.transfer == ColorTransfer::Srgb);
+}
+
+FL_TEST_CASE("FLED_COLOR - a typo'd matrix reads as unknown, not reserved") {
+    VideoColor c;
+    // Reserved YCbCr coefficient names stay "reserved"...
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"matrix\":\"ycbcr\"}}}",
+                     kRgb8, &c) == ColorStatus::MatrixUnsupported);
+    // ...but a typo is unrecognized, so the author is not sent to the spec.
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"matrix\":\"rbg\"}}}",
+                     kRgb8, &c) == ColorStatus::UnknownMatrix);
+}
+
 FL_TEST_CASE("FLED_COLOR - unknown values are rejected per field") {
     VideoColor c;
     FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":\"rec2100\"}}}",
@@ -320,6 +339,7 @@ FL_TEST_CASE("FLED_COLOR - malformed custom primaries are rejected") {
 FL_TEST_CASE("FLED_COLOR - every status has a non-empty message") {
     const ColorStatus all[] = {
         ColorStatus::Ok,
+        ColorStatus::NullOutput,
         ColorStatus::NoDefaultTuple,
         ColorStatus::NotAnObject,
         ColorStatus::UnknownPrimaries,
@@ -455,7 +475,7 @@ FL_TEST_CASE("FLED_COLOR - videoColor on a null Fled yields the default tuple") 
     FL_CHECK(null.videoColor(&c) == ColorStatus::Ok);
     FL_CHECK(c.declared == false);
     FL_CHECK(c.transfer == ColorTransfer::Srgb);
-    FL_CHECK(null.videoColor(nullptr) == ColorStatus::NotAnObject);
+    FL_CHECK(null.videoColor(nullptr) == ColorStatus::NullOutput);
 }
 
 }  // FL_TEST_FILE

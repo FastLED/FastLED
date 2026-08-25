@@ -30,6 +30,21 @@ TransferName parseTransferName(const fl::string& s) FL_NO_EXCEPT {
     return TransferName::Unrecognized;
 }
 
+// Matrix names that standard video metadata defines but that v1 reserves:
+// they describe YCbCr coefficient sets, and no v1 pixel format carries YCbCr.
+// Distinguished from outright-unknown values so the diagnostic can say
+// "reserved" (look it up in the spec) rather than "unrecognized" (you typoed).
+bool isReservedMatrixName(const fl::string& s) FL_NO_EXCEPT {
+    static const char* const kReserved[] = {
+        "bt709", "bt601", "bt470bg", "smpte170m", "bt2020ncl", "bt2020cl",
+        "ycbcr", "ycgco", "fcc",
+    };
+    for (fl::size i = 0; i < sizeof(kReserved) / sizeof(kReserved[0]); ++i) {
+        if (nameIs(s, kReserved[i])) return true;
+    }
+    return false;
+}
+
 // Display-encoded RGB family: rgb8, rgba8, rgb565le.
 bool isDisplayEncodedRgb(fl::u8 pf) FL_NO_EXCEPT {
     return pf == static_cast<fl::u8>(PixelFormat::Rgb8) ||
@@ -90,7 +105,7 @@ bool defaultVideoColor(fl::u8 pixelFormat, VideoColor* out) FL_NO_EXCEPT {
 
 ColorStatus resolveVideoColor(const fl::json& envelope, fl::u8 pixelFormat,
                               VideoColor* out) FL_NO_EXCEPT {
-    if (!out) return ColorStatus::NotAnObject;
+    if (!out) return ColorStatus::NullOutput;
 
     const bool hasTuple = pixelFormatHasDefaultTuple(pixelFormat);
 
@@ -103,7 +118,10 @@ ColorStatus resolveVideoColor(const fl::json& envelope, fl::u8 pixelFormat,
         const fl::json videoNode = envelope[kVideo];
         if (videoNode.is_object() && videoNode.contains(kColor)) {
             colorNode = videoNode[kColor];
-            present = true;
+            // An explicit JSON null means "not set" for most serializers.
+            // Treat it as absent rather than rejecting the file - omitting
+            // the key and nulling it should not have opposite outcomes.
+            present = !colorNode.is_null();
         }
     }
 
@@ -205,9 +223,10 @@ ColorStatus resolveVideoColor(const fl::json& envelope, fl::u8 pixelFormat,
         auto s = node.as_string();
         if (!s) return ColorStatus::UnknownMatrix;
         if (!nameIs(*s, "rgb")) {
-            // Recognized-but-reserved (ycbcr coefficient sets) and outright
-            // unknown both land here: v1 defines only the identity case.
-            return ColorStatus::MatrixUnsupported;
+            // "reserved" sends the author to the spec; "unrecognized" tells
+            // them they typoed. Conflating the two wastes their time.
+            return isReservedMatrixName(*s) ? ColorStatus::MatrixUnsupported
+                                            : ColorStatus::UnknownMatrix;
         }
         resolved.matrix = ColorMatrix::Rgb;
     }
@@ -235,6 +254,8 @@ const char* colorStatusMessage(ColorStatus status) FL_NO_EXCEPT {
     switch (status) {
     case ColorStatus::Ok:
         return "ok";
+    case ColorStatus::NullOutput:
+        return "resolveVideoColor called with a null out-pointer";
     case ColorStatus::NoDefaultTuple:
         return "video.color is absent and this pixel_format defines no default color tuple";
     case ColorStatus::NotAnObject:

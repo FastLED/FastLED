@@ -51,6 +51,9 @@ enum class ColorRange : fl::u8 {
 // diagnostic rather than a silent fallback.
 enum class ColorStatus : fl::u8 {
     Ok = 0,
+    // Caller passed a null out-pointer. API misuse, not a bad file - kept
+    // distinct so a diagnostic never sends someone hunting a valid envelope.
+    NullOutput,
     // `video.color` absent on a pixel format that defines no default tuple
     // (gray8, rgbw8). Not malformed - just undeclared, and unresolvable.
     NoDefaultTuple,

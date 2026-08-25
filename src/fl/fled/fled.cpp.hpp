@@ -133,7 +133,7 @@ float Fled::videoFps(float defaultFps) const FL_NO_EXCEPT {
 }
 
 fled::ColorStatus Fled::videoColor(fled::VideoColor *out) const FL_NO_EXCEPT {
-    if (!out) return fled::ColorStatus::NotAnObject;
+    if (!out) return fled::ColorStatus::NullOutput;
     if (!mImpl) {
         // Null bundle: no envelope, no header. Resolve as an undeclared
         // rgb8 payload so callers get the historical default tuple.
