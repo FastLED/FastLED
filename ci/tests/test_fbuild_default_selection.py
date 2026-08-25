@@ -84,6 +84,26 @@ def test_autoresearch_fbuild_install_packages_does_not_call_platformio(
     assert FbuildDriver().install_packages(Path("."), "esp32s3") is True
 
 
+def test_autoresearch_fbuild_firmware_path_uses_release_artifact(
+    tmp_path: Path,
+) -> None:
+    firmware = tmp_path / ".fbuild" / "build" / "release" / "firmware.bin"
+    firmware.parent.mkdir(parents=True)
+    firmware.touch()
+
+    assert FbuildDriver().firmware_path(tmp_path, "rp2350w") == firmware
+
+
+def test_autoresearch_fbuild_firmware_path_supports_environment_release(
+    tmp_path: Path,
+) -> None:
+    firmware = tmp_path / ".fbuild" / "build" / "rp2350w" / "release" / "firmware.bin"
+    firmware.parent.mkdir(parents=True)
+    firmware.touch()
+
+    assert FbuildDriver().firmware_path(tmp_path, "rp2350w") == firmware
+
+
 def test_autoresearch_parse_args_warns_for_deprecated_fbuild_flags(
     capsys: pytest.CaptureFixture[str],
 ) -> None:

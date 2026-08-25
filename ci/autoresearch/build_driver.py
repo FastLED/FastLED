@@ -95,7 +95,16 @@ class FbuildDriver:
         )
 
     def firmware_path(self, build_dir: Path, environment: str) -> Path:
-        return build_dir / ".fbuild" / "build" / environment / "firmware.bin"
+        fbuild_root = build_dir / ".fbuild" / "build"
+        release_firmware = fbuild_root / "release" / "firmware.bin"
+        if release_firmware.is_file():
+            return release_firmware
+
+        environment_firmware = fbuild_root / environment / "release" / "firmware.bin"
+        if environment_firmware.is_file():
+            return environment_firmware
+
+        return release_firmware
 
 
 class PlatformIODriver:
