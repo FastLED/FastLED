@@ -330,6 +330,12 @@ FL_TEST_CASE("FLED_COLOR - malformed custom primaries are rejected") {
                      "\"red\":\"0.64,0.33\",\"green\":[0.3,0.6],"
                      "\"blue\":[0.15,0.06],\"white\":[0.31,0.33]}}}}",
                      kRgb8, &c) == ColorStatus::MalformedCustomPrimaries);
+    // Three components is not an xy pair - accepting it would silently drop
+    // the extra value rather than telling the producer it wrote nonsense.
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":{"
+                     "\"red\":[0.64,0.33,1.0],\"green\":[0.3,0.6],"
+                     "\"blue\":[0.15,0.06],\"white\":[0.31,0.33]}}}}",
+                     kRgb8, &c) == ColorStatus::MalformedCustomPrimaries);
 }
 
 // ============================================================================
@@ -484,16 +490,43 @@ FL_TEST_CASE("FLED_COLOR - the serialized envelope carries the whole metadata") 
     FL_CHECK(static_cast<bool>(f));
 
     const fl::string dumped = f.json().to_string();
-    // Geometry, playback rate, and the full color tuple all survive.
-    FL_CHECK(dumped.find("map") != fl::string::npos);
-    FL_CHECK(dumped.find("fps") != fl::string::npos);
-    FL_CHECK(dumped.find("primaries") != fl::string::npos);
-    FL_CHECK(dumped.find("bt709") != fl::string::npos);
-    FL_CHECK(dumped.find("transfer") != fl::string::npos);
-    FL_CHECK(dumped.find("srgb") != fl::string::npos);
-    FL_CHECK(dumped.find("matrix") != fl::string::npos);
-    FL_CHECK(dumped.find("range") != fl::string::npos);
-    FL_CHECK(dumped.find("full") != fl::string::npos);
+
+    // Re-parse rather than substring-match: a token appearing *somewhere* in
+    // the string would not prove it survived in the right place, which is the
+    // only thing that makes the dump worth printing.
+    fl::json round = fl::json::parse(dumped);
+    FL_CHECK(round.is_object());
+
+    // Geometry survives, nested.
+    FL_CHECK(round.contains(fl::string("map")));
+    FL_CHECK(round["map"].is_object());
+    FL_CHECK(round["map"].contains(fl::string("a")));
+    FL_CHECK(round["map"]["a"]["x"].is_array());
+    FL_CHECK(round["map"]["a"]["y"].is_array());
+
+    // Playback rate survives with its value.
+    FL_CHECK(round["video"].is_object());
+    auto fps = round["video"]["fps"].as_float();
+    FL_CHECK(static_cast<bool>(fps));
+    FL_CHECK(*fps == 60.0f);
+
+    // The color tuple survives under video.color, key by key.
+    const fl::json color = round["video"]["color"];
+    FL_CHECK(color.is_object());
+    struct { const char* key; const char* value; } expected[4] = {
+        {"primaries", "bt709"}, {"transfer", "srgb"},
+        {"matrix", "rgb"},      {"range", "full"},
+    };
+    for (fl::size i = 0; i < 4; ++i) {
+        auto got = color[fl::string(expected[i].key)].as_string();
+        FL_CHECK(static_cast<bool>(got));
+        FL_CHECK(fl::strcmp(got->c_str(), expected[i].value) == 0);
+    }
+
+    // And the round-tripped envelope still resolves to the same declaration.
+    VideoColor c;
+    FL_CHECK(fl::fled::resolveVideoColor(round, kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK(c.declared == true);
 }
 
 FL_TEST_CASE("FLED_COLOR - videoColor on a null Fled yields the default tuple") {

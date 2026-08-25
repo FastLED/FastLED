@@ -59,10 +59,10 @@ bool isLinearRgb(fl::u8 pf) FL_NO_EXCEPT {
 // Reads one CIE xy pair: a 2-element array of numbers.
 bool readXy(const fl::json& node, float* outX, float* outY) FL_NO_EXCEPT {
     if (!node.is_array()) return false;
-    if (!node.contains(static_cast<fl::size>(0)) ||
-        !node.contains(static_cast<fl::size>(1))) {
-        return false;
-    }
+    // Exactly two, not at least two: [0.64, 0.33, 1] would otherwise resolve
+    // while silently dropping the third item. ledmapper's validator already
+    // requires exactly two, and the two must agree.
+    if (node.size() != 2) return false;
     auto x = node[static_cast<fl::size>(0)].as_float();
     auto y = node[static_cast<fl::size>(1)].as_float();
     if (!x || !y) return false;

@@ -162,9 +162,10 @@ function unresolved.
 
 `gray8` carries no chromaticity and `rgbw8`'s white channel is a device
 primary that RGB primaries cannot describe, so neither format inherits a
-default tuple. Their color metadata is all-or-nothing: absent or partial
-resolves to `NoDefaultTuple`, which is *unresolvable*, not *malformed* — the
-caller decides whether it cares, rather than treating the file as corrupt.
+default tuple. Their color metadata is all-or-nothing, and the two failures are
+reported distinctly: an **absent** declaration resolves to `NoDefaultTuple`,
+a **partial** one to `IncompleteForFormat`. Neither is *malformed* — the caller
+decides whether it cares, rather than treating the file as corrupt.
 
 ### Declaration verdicts vs. consumer policy
 
