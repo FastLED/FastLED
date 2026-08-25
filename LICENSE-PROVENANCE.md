@@ -4,7 +4,7 @@
 
 - Repository: <https://github.com/FastLED/license>
 - Release-candidate PR: <https://github.com/FastLED/license/pull/1>
-- Vendored source commit: `0dd2c2b18d79370e296b8676c01894cbf515d454`
+- Vendored source commit: `98cac7ae00070fee8c1f7cc837239cfa38a8c8a5`
 - Reviewed release tag: **PENDING LEGAL REVIEW**
 - Vendored artifact hashes: `LICENSE-ARTIFACTS.sha256`
 
