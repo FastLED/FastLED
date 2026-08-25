@@ -25,4 +25,4 @@ def test_release_source_license_headers_are_canonical() -> None:
         text=True,
         timeout=120,
     )
-    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.returncode == 0, (result.stdout or "") + (result.stderr or "")
