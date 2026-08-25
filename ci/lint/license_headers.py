@@ -1,5 +1,6 @@
 """FastLED reciprocal-license source-header compliance stage."""
 
+import argparse
 import hashlib
 from pathlib import Path
 
@@ -30,20 +31,23 @@ def verify_manifest(repo_root: Path, manifest_name: str) -> bool:
     return True
 
 
-def run() -> bool:
+def run(*, no_cache: bool = False) -> bool:
     repo_root = Path(__file__).parents[2]
     for manifest_name in ("LICENSE-ARTIFACTS.sha256", "EXCLUDED-SOURCE.sha256"):
         if not verify_manifest(repo_root, manifest_name):
             return False
+    command = [
+        "uv",
+        "run",
+        "tools/license_headers.py",
+        "check",
+        "--profile",
+        "release",
+    ]
+    if no_cache:
+        command.append("--no-cache")
     result = RunningProcess.run(
-        [
-            "uv",
-            "run",
-            "tools/license_headers.py",
-            "check",
-            "--profile",
-            "release",
-        ],
+        command,
         cwd=str(repo_root),
         check=False,
         capture_output=True,
@@ -58,4 +62,7 @@ def run() -> bool:
 
 
 if __name__ == "__main__":
-    raise SystemExit(0 if run() else 1)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--no-cache", action="store_true")
+    options = parser.parse_args()
+    raise SystemExit(0 if run(no_cache=options.no_cache) else 1)

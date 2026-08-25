@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff # v6
       - name: Check checkout
-        run: uv run python -m ci.lint.license_headers
+        run: uv run python -m ci.lint.license_headers --no-cache
       - name: Export source archive
         shell: bash
         run: |
@@ -28,4 +28,4 @@ jobs:
           tar -xf fastled-source.tar -C fastled-source
       - name: Check exported source archive without Git metadata
         working-directory: fastled-source
-        run: uv run python -m ci.lint.license_headers
+        run: uv run python -m ci.lint.license_headers --no-cache
