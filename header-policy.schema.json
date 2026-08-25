@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FastLED/license/blob/main/header-policy.schema.json",
+  "title": "FastLED source header policy",
+  "type": "object",
+  "required": ["schema_version", "license", "profiles", "comments"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "license": {
+      "type": "object",
+      "required": ["id", "header_version", "ai_document"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^LicenseRef-[A-Za-z0-9.-]+$"},
+        "header_version": {"type": "integer", "minimum": 1},
+        "ai_document": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "profiles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["roots", "extensions"],
+        "properties": {
+          "roots": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^(?![A-Za-z]:)(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!\\.$).+$"
+            },
+            "minItems": 1
+          },
+          "extensions": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+    "comments": {"type": "object", "additionalProperties": {"type": "string"}},
+    "old_license_ids": {"type": "array", "items": {"type": "string"}},
+    "exclusions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["pattern", "reason", "provenance"],
+        "properties": {
+          "pattern": {"type": "string"},
+          "reason": {"type": "string", "minLength": 1},
+          "provenance": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

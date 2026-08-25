@@ -1266,6 +1266,32 @@ Use the `compile` script to test on 20+ platforms:
 
 ---
 
+## License
+
+FastLED is offered under the custom [FastLED Reciprocal License 1.0](LICENSE),
+identified in source files as `LicenseRef-FastLED-Reciprocal-1.0`. The license
+incorporates [MPL 2.0](MPL-2.0.txt) in full and appends FastLED-specific terms;
+it is not ordinary MPL 2.0 and is not represented as OSI-approved.
+
+You may compile, statically or dynamically link, embed, ship, and commercially
+sell proprietary applications, sketches, firmware, plugins, and hardware that
+use FastLED without disclosing unrelated application source. Reciprocity stops
+at FastLED files and source derived from FastLED.
+
+If a first sale includes Modified FastLED, the complete FastLED modifications
+must be public on or before that sale—there is no grace period. Either a public
+fork or a public issue/bug report containing the exact upstream commit SHA and
+a complete reproducible unified diff satisfies that requirement, regardless of
+patch size. Historical FastLED releases offered under MIT remain available
+under MIT; see [LICENSE-MIT-LEGACY](LICENSE-MIT-LEGACY).
+
+See [LICENSE-AI-AGENT-INSTRUCTIONS.md](LICENSE-AI-AGENT-INSTRUCTIONS.md) for the
+separate, legally non-remedial AI-agent reporting instructions and
+[LICENSE-PROVENANCE.md](LICENSE-PROVENANCE.md) for the transition and pinned
+artifact record.
+
+---
+
 ## Daniel Garcia, Founder of FastLED
 
 In Memory of Daniel Garcia

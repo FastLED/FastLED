@@ -14,6 +14,7 @@ from pathlib import Path
 from ci.lint.args_parser import LintArgs, parse_lint_args
 from ci.lint.check_size_thresholds import run as run_size_thresholds_check
 from ci.lint.duration_tracker import DurationTracker
+from ci.lint.license_headers import run as run_license_header_check
 from ci.lint.orchestrator import LintOrchestrator
 from ci.lint.stage_impls import (
     run_clang_tidy,
@@ -257,6 +258,14 @@ def create_stages(args: LintArgs) -> list[LintStage]:
     # Runs whenever non-JS-only linting is invoked — repo hygiene check
     # for build/CI scripts. Skipped via --skip-platformio-check.
     if not args.js_only and not args.skip_platformio_check:
+        stages.append(
+            LintStage(
+                name="license_headers",
+                display_name="SOURCE LICENSE HEADERS",
+                run_fn=run_license_header_check,
+                timeout=210.0,
+            )
+        )
         stages.append(
             LintStage(
                 name="platformio_internal_usage",
