@@ -2,6 +2,36 @@
 
 <!-- Add tasks here as checkable items -->
 
+## minimp3 Phase 0 (#4051)
+
+- [x] Capture the missing minimp3 backend as a focused RED test.
+- [x] Vendor pinned CC0 minimp3 with provenance and a caller-owned scratch patch.
+- [x] Add the Helix-default dual-backend adapter without changing the public API.
+- [x] Add deterministic host golden coverage for both backends.
+- [x] Run focused debug/quick tests, lint, broader tests, and compile gates.
+- [x] Run the pre-push code-review gate.
+- [ ] Push, merge the closing PR, and verify issue #4051/G0 state.
+
+### Review
+
+- RED: the focused codec test failed because
+  `third_party/minimp3/minimp3.h` did not exist; the required debug rerun
+  reproduced the missing-backend failure.
+- GREEN: the golden corpus and scratch API pass; the full native gate passed
+  283 unit tests and 84 host examples; standard lint and IWYU pass; explicit
+  minimp3 builds pass on AVR and WASM, with the WASM compile database proving
+  the selector define reached every library TU; default-Helix AVR and WASM
+  also pass. A selected-minimp3 debug host run covers the public stream path.
+- The broad Python gate passed 1044 tests and skipped 34; its lone ESP32 QEMU
+  smoke failure was an orphaned fbuild daemon. After scoped daemon recovery,
+  the focused QEMU test built and emulated successfully in 481 seconds, and
+  the complete Python gate then passed cleanly.
+- The pre-push review is clean after correcting bitrate units/free-format
+  metadata, corrupt-tail stream progress, and full WASM selector cache
+  isolation (including stale-build recovery).
+- Strict-only Pyright remains non-green on current master with 916 unrelated
+  baseline errors; all diagnostics introduced by this diff were corrected.
+
 ## Frame-task lifecycle (#3896)
 
 - [x] Reproduce the missing production dispatch and contradictory one-shot semantics.

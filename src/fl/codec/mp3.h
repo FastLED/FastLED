@@ -10,13 +10,23 @@
 #include "fl/stl/string.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
 
+#if defined(FASTLED_MP3_BACKEND_HELIX) &&                                   \
+    defined(FASTLED_MP3_BACKEND_MINIMP3)
+#error "Select only one FastLED MP3 backend"
+#endif
+
+#if !defined(FASTLED_MP3_BACKEND_HELIX) &&                                  \
+    !defined(FASTLED_MP3_BACKEND_MINIMP3)
+#define FASTLED_MP3_BACKEND_HELIX
+#endif
+
 namespace fl {
 
 // MP3 metadata information structure
 struct Mp3Info {
     fl::u32 sampleRate = 0;      // Sample rate in Hz
     fl::u8 channels = 0;          // Number of channels (1=mono, 2=stereo)
-    fl::u32 bitrate = 0;          // Bitrate in kbps
+    fl::u32 bitrate = 0;          // Bitrate in bits per second
     fl::u32 duration = 0;         // Duration in milliseconds (may be 0 if unknown)
     fl::u8 version = 0;           // MPEG version (1, 2, or 2.5)
     fl::u8 layer = 0;             // MPEG layer (1, 2, or 3)
@@ -32,6 +42,8 @@ struct Mp3Info {
 namespace third_party {
     // Forward declarations of internal implementation classes
     class Mp3StreamDecoderImpl;
+    struct mp3dec_t;
+    union mp3dec_scratch_t;
 
     // Mp3Frame represents a decoded MP3 audio frame
     // This is exposed for testing purposes
@@ -40,7 +52,7 @@ namespace third_party {
         int samples;                // Samples per channel
         int channels;               // 1 (mono) or 2 (stereo)
         int sample_rate;            // Sample rate in Hz
-        int bitrate;                // Bitrate in kbps
+        int bitrate;                // Bitrate in bits per second
         int version;                // MPEG version
         int layer;                  // MPEG layer
     };
@@ -128,6 +140,74 @@ namespace third_party {
 
     private:
         void* mDecoder;  // HMP3Decoder handle
+    };
+
+    // Mp3Minimp3Decoder wraps the vendored minimp3 floating-point decoder.
+    // This is exposed for backend-parity testing.
+    class Mp3Minimp3Decoder {
+    public:
+        Mp3Minimp3Decoder() FL_NO_EXCEPT;
+        ~Mp3Minimp3Decoder() FL_NO_EXCEPT;
+
+        bool init() FL_NO_EXCEPT;
+        void reset() FL_NO_EXCEPT;
+
+        template <typename Fn>
+        int decode(const fl::u8* data, fl::size len,
+                   Fn on_frame) FL_NO_EXCEPT {
+            if (!mDecoder) {
+                return 0;
+            }
+
+            const fl::u8* inptr = data;
+            fl::size bytes_left = len;
+            int frames_decoded = 0;
+
+            while (bytes_left > 0) {
+                int offset = findSyncWord(inptr, bytes_left);
+                if (offset < 0) {
+                    break;
+                }
+
+                inptr += offset;
+                bytes_left -= offset;
+
+                int result = decodeFrame(&inptr, &bytes_left);
+                if (result == 0) {
+                    Mp3Frame frame;
+                    frame.pcm = mPcmBuffer.get();
+                    frame.samples = mFrameInfo.outputSamps / mFrameInfo.nChans;
+                    frame.channels = mFrameInfo.nChans;
+                    frame.sample_rate = mFrameInfo.samprate;
+                    frame.bitrate = mFrameInfo.bitrate;
+                    frame.version = mFrameInfo.version;
+                    frame.layer = mFrameInfo.layer;
+
+                    on_frame(frame);
+                    frames_decoded++;
+                } else if (bytes_left > 0) {
+                    inptr++;
+                    bytes_left--;
+                }
+            }
+
+            return frames_decoded;
+        }
+
+        fl::vector<audio::Sample>
+        decodeToAudioSamples(const fl::u8* data,
+                             fl::size len) FL_NO_EXCEPT;
+
+        int findSyncWord(const fl::u8* buf, fl::size len) FL_NO_EXCEPT;
+        int decodeFrame(const fl::u8** inbuf,
+                        fl::size* bytes_left) FL_NO_EXCEPT;
+
+        fl::unique_ptr<fl::i16[]> mPcmBuffer;
+        Mp3HelixDecoder::FrameInfo mFrameInfo;
+
+    private:
+        fl::unique_ptr<mp3dec_t> mDecoder;
+        fl::unique_ptr<mp3dec_scratch_t> mScratch;
     };
 }
 

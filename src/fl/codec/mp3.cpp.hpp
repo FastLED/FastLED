@@ -5,6 +5,7 @@
 // Include Helix MP3 decoder internal API (in fl::third_party namespace)
 // IWYU pragma: begin_keep
 #include "third_party/libhelix_mp3/pub/mp3dec.h"
+#include "third_party/minimp3/minimp3.h"
 #include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 
@@ -121,6 +122,150 @@ fl::vector<audio::Sample> Mp3HelixDecoder::decodeToAudioSamples(const fl::u8* da
     return samples;
 }
 
+namespace {
+
+int minimp3Version(const fl::u8* header) FL_NO_EXCEPT {
+    const int version_bits = (header[1] >> 3) & 0x03;
+    if (version_bits == 0x03) {
+        return 0; // MPEG-1, matching Helix's MPEGVersion encoding.
+    }
+    if (version_bits == 0x02) {
+        return 1; // MPEG-2.
+    }
+    return 2; // MPEG-2.5.
+}
+
+} // anonymous namespace
+
+Mp3Minimp3Decoder::Mp3Minimp3Decoder() FL_NO_EXCEPT
+    : mDecoder(nullptr), mScratch(nullptr) {
+    fl::memset(&mFrameInfo, 0, sizeof(mFrameInfo));
+}
+
+Mp3Minimp3Decoder::~Mp3Minimp3Decoder() FL_NO_EXCEPT {
+    reset();
+}
+
+bool Mp3Minimp3Decoder::init() FL_NO_EXCEPT {
+    if (mDecoder) {
+        return true;
+    }
+
+    mDecoder.reset(new mp3dec_t); // ok bare allocation (owned unique_ptr)
+    mScratch.reset(
+        new mp3dec_scratch_t); // ok bare allocation (owned unique_ptr)
+    mPcmBuffer.reset(new fl::i16[MAX_PCM_SAMPLES]); // ok bare allocation (array new)
+    if (!mDecoder || !mScratch || !mPcmBuffer) {
+        mDecoder.reset();
+        mScratch.reset();
+        mPcmBuffer.reset();
+        return false;
+    }
+
+    mp3dec_init(mDecoder.get());
+    return true;
+}
+
+void Mp3Minimp3Decoder::reset() FL_NO_EXCEPT {
+    mDecoder.reset();
+    mScratch.reset();
+    mPcmBuffer.reset();
+    fl::memset(&mFrameInfo, 0, sizeof(mFrameInfo));
+}
+
+int Mp3Minimp3Decoder::findSyncWord(const fl::u8* buf,
+                                    fl::size len) FL_NO_EXCEPT {
+    if (!buf || len < 4) {
+        return -1;
+    }
+
+    for (fl::size i = 0; i <= len - 4; ++i) {
+        const fl::u8 version = (buf[i + 1] >> 3) & 0x03;
+        const fl::u8 layer = (buf[i + 1] >> 1) & 0x03;
+        const fl::u8 bitrate = (buf[i + 2] >> 4) & 0x0f;
+        const fl::u8 sample_rate = (buf[i + 2] >> 2) & 0x03;
+        if (buf[i] == 0xff && (buf[i + 1] & 0xe0) == 0xe0 &&
+            version != 0x01 && layer != 0x00 && bitrate != 0x0f &&
+            sample_rate != 0x03) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1;
+}
+
+int Mp3Minimp3Decoder::decodeFrame(const fl::u8** inbuf,
+                                   fl::size* bytes_left) FL_NO_EXCEPT {
+    if (!mDecoder || !mScratch || !mPcmBuffer || !inbuf || !bytes_left ||
+        !*inbuf || *bytes_left == 0) {
+        return -1;
+    }
+
+    const fl::u8* input = *inbuf;
+    const fl::size max_input = 0x7fffffff;
+    const int input_bytes = static_cast<int>(
+        *bytes_left > max_input ? max_input : *bytes_left);
+    mp3dec_frame_info_t info = {};
+    const int samples = mp3dec_decode_frame_r(
+        mDecoder.get(), mScratch.get(), input, input_bytes, mPcmBuffer.get(),
+        &info);
+    if (samples <= 0 || info.frame_bytes <= 0 ||
+        static_cast<fl::size>(info.frame_bytes) > *bytes_left) {
+        return -1;
+    }
+
+    const fl::u8* header = input + info.frame_offset;
+    *inbuf += info.frame_bytes;
+    *bytes_left -= static_cast<fl::size>(info.frame_bytes);
+
+    int frame_bytes = info.frame_bytes - info.frame_offset;
+    if (frame_bytes > 0 && (header[2] & 0x02) != 0) {
+        --frame_bytes;
+    }
+    mFrameInfo.bitrate = info.bitrate_kbps * 1000;
+    if (mFrameInfo.bitrate == 0 && samples > 0 && frame_bytes > 0) {
+        mFrameInfo.bitrate =
+            (frame_bytes * info.hz * 8) / samples;
+    }
+    mFrameInfo.nChans = info.channels;
+    mFrameInfo.samprate = info.hz;
+    mFrameInfo.bitsPerSample = 16;
+    mFrameInfo.outputSamps = samples * info.channels;
+    mFrameInfo.layer = info.layer;
+    mFrameInfo.version = minimp3Version(header);
+    return 0;
+}
+
+fl::vector<audio::Sample>
+Mp3Minimp3Decoder::decodeToAudioSamples(const fl::u8* data,
+                                        fl::size len) FL_NO_EXCEPT {
+    fl::vector<audio::Sample> samples;
+
+    decode(data, len, [&](const Mp3Frame& frame) {
+        if (frame.channels == 2) {
+            fl::vector<fl::i16> mono_pcm;
+            mono_pcm.reserve(frame.samples);
+            for (int i = 0; i < frame.samples; ++i) {
+                const fl::i32 left = frame.pcm[i * 2];
+                const fl::i32 right = frame.pcm[i * 2 + 1];
+                mono_pcm.push_back(static_cast<fl::i16>((left + right) / 2));
+            }
+            samples.push_back(audio::Sample(mono_pcm));
+        } else {
+            samples.push_back(
+                audio::Sample(fl::span<const fl::i16>(frame.pcm,
+                                                       frame.samples)));
+        }
+    });
+
+    return samples;
+}
+
+#if defined(FASTLED_MP3_BACKEND_MINIMP3)
+using Mp3SelectedDecoder = Mp3Minimp3Decoder;
+#else
+using Mp3SelectedDecoder = Mp3HelixDecoder;
+#endif
+
 // Mp3StreamDecoderImpl - internal implementation of streaming MP3 decoder
 class Mp3StreamDecoderImpl {
   public:
@@ -143,7 +288,7 @@ class Mp3StreamDecoderImpl {
     bool findAndDecodeFrame(audio::Sample* out_sample);
 
     fl::filebuf_ptr mStream;
-    fl::unique_ptr<Mp3HelixDecoder> mDecoder;
+    fl::unique_ptr<Mp3SelectedDecoder> mDecoder;
     fl::vector<fl::u8> mBuffer;
     fl::size mBufferPos;
     fl::size mBufferFilled;
@@ -174,7 +319,7 @@ bool Mp3StreamDecoderImpl::begin(fl::filebuf_ptr stream) {
     }
 
     mStream = stream;
-    mDecoder = fl::make_unique<Mp3HelixDecoder>();
+    mDecoder = fl::make_unique<Mp3SelectedDecoder>();
     if (!mDecoder->init()) {
         mErrorMsg = "Failed to initialize MP3 decoder";
         mHasError = true;
@@ -244,7 +389,7 @@ bool Mp3StreamDecoderImpl::fillBuffer() {
         return bytesRead > 0;
     }
 
-    return mBufferFilled > mBufferPos;
+    return false;
 }
 
 bool Mp3StreamDecoderImpl::findAndDecodeFrame(audio::Sample* out_sample) {
@@ -280,6 +425,11 @@ bool Mp3StreamDecoderImpl::findAndDecodeFrame(audio::Sample* out_sample) {
 
     // Update buffer position based on how many bytes were consumed
     fl::size consumed = (decode_ptr - inptr);
+    if (result != 0 && consumed == 0 && bytes_left == BUFFER_SIZE) {
+        // A full buffer cannot grow to complete this frame. Drop one byte so
+        // corrupt input cannot pin the streaming decoder on the same sync.
+        consumed = 1;
+    }
     mBufferPos += consumed;
     mBytesProcessed += consumed;
 
@@ -340,21 +490,33 @@ bool Mp3StreamDecoderImpl::decodeNextFrame(audio::Sample* out_sample) {
         return false;
     }
 
-    // Try to decode from existing buffer
-    if (findAndDecodeFrame(out_sample)) {
-        return true;
-    }
-
-    // Need more data - try to fill buffer and decode again
-    while (fillBuffer()) {
+    while (true) {
+        const fl::size previous_position = mBufferPos;
         if (findAndDecodeFrame(out_sample)) {
             return true;
         }
-    }
 
-    // No more data available
-    mEndOfStream = true;
-    return false;
+        if (mBufferPos > previous_position) {
+            // The decoder rejected or skipped bytes. Retry the remainder before
+            // refilling so a valid frame after corruption is not discarded.
+            continue;
+        }
+
+        if (fillBuffer()) {
+            continue;
+        }
+
+        if (mBufferPos < mBufferFilled) {
+            // No more bytes are available to complete the current candidate.
+            // Advance through the tail so a later sync can still be recovered.
+            ++mBufferPos;
+            ++mBytesProcessed;
+            continue;
+        }
+
+        mEndOfStream = true;
+        return false;
+    }
 }
 
 }  // namespace third_party
@@ -446,7 +608,7 @@ Mp3Info Mp3::parseMp3Info(fl::span<const fl::u8> data, fl::string* error_message
     }
 
     // Use the decoder to parse the first frame
-    third_party::Mp3HelixDecoder decoder;
+    third_party::Mp3SelectedDecoder decoder;
     if (!decoder.init()) {
         if (error_message) {
             *error_message = "Failed to initialize MP3 decoder";

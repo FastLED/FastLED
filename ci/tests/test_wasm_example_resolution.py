@@ -7,7 +7,7 @@ layout, so every nested sketch failed with FileNotFoundError.
 
 import pytest
 
-from ci.wasm_build import PROJECT_ROOT, resolve_example_dir
+from ci.wasm_build import PROJECT_ROOT, get_sketch_cache_dir, resolve_example_dir
 
 
 def test_resolves_a_flat_example() -> None:
@@ -74,3 +74,12 @@ def test_resolved_dir_name_is_always_the_bare_sketch_name() -> None:
     """
     for name in ("FxCylon", "Fx/FxCylon"):
         assert resolve_example_dir(name).name == "FxCylon"
+
+
+def test_sketch_cache_isolated_across_backend_selector_switches() -> None:
+    default = get_sketch_cache_dir("Blink")
+    minimp3 = get_sketch_cache_dir("Blink", defines=["FASTLED_MP3_BACKEND_MINIMP3"])
+    restored_default = get_sketch_cache_dir("Blink")
+
+    assert minimp3 != default
+    assert restored_default == default

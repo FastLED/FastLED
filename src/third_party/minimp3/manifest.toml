@@ -1,0 +1,8 @@
+schema_version = 1
+name = "minimp3"
+license_expression = "CC0-1.0"
+upstream_repository = "https://github.com/lieff/minimp3"
+upstream_revision = "ea99364f61c14656440e8d77e9c233ccf3124633"
+license_file = "LICENSE"
+production_files = ["minimp3.h"]
+fastled_patch = "FASTLED.patch"

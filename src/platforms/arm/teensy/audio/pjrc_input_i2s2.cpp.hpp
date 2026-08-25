@@ -19,9 +19,11 @@ struct I2S2RxBuffer {
     fl::u32 data[AUDIO_BLOCK_SAMPLES];
 };
 
+// FL_LINT_ALLOW_GLOBAL(DMAMEM placement requires static storage)
+DMAMEM static I2S2RxBuffer gI2S2RxBuffer __attribute__((aligned(32)));
+
 inline fl::u32* i2s2_rx_buffer() {
-    static DMAMEM __attribute__((aligned(32))) I2S2RxBuffer buffer;
-    return buffer.data;
+    return gI2S2RxBuffer.data;
 }
 
 struct I2S2InputState {

@@ -57,6 +57,8 @@ def run_clang_query(scope: str) -> list[tuple[str, int]]:
     # Pick translation unit based on scope
     if "platforms" in scope:
         tu = "ci/tools/_noexcept_check_platforms_tu.cpp"
+    elif "third_party" in scope:
+        tu = "ci/tools/_noexcept_check_third_party_tu.cpp"
     else:
         tu = "src/fl/build/fl.system+.cpp"
 

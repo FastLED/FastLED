@@ -17,6 +17,8 @@ CLI (for meson run_command()):
 """
 
 import argparse
+import json
+import os
 import sys
 import tomllib
 from pathlib import Path
@@ -28,6 +30,25 @@ BUILD_FLAGS_TOML = (
     PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "build_flags.toml"
 )
 DEBUG_PATH_MAP_MODES = {"debug", "fast_debug"}
+
+
+def _extra_define_flags() -> list[str]:
+    raw = os.environ.get("FASTLED_WASM_EXTRA_DEFINES")
+    if not raw:
+        return []
+    parsed = json.loads(raw)
+    if not isinstance(parsed, list) or not all(
+        isinstance(item, str) for item in parsed
+    ):
+        raise ValueError("FASTLED_WASM_EXTRA_DEFINES must be a JSON string list")
+    typed = cast(list[str], parsed)
+    flags: list[str] = []
+    for item in typed:
+        if item.startswith("-D"):
+            flags.append(item)
+        else:
+            flags.append(f"-D{item}")
+    return flags
 
 
 def _load_toml() -> dict[str, Any]:
@@ -95,6 +116,7 @@ def get_lib_compile_flags_dict(mode: str = "quick") -> dict[str, list[str]]:
     compiler_flags = list(config.get("all", {}).get("compiler_flags", []))
 
     defines.extend(config.get("library", {}).get("defines", []))
+    defines.extend(_extra_define_flags())
 
     build_mode_config = config.get("build_modes", {}).get(mode, {})
     # Use library-specific flags if available, otherwise fall back to
@@ -128,6 +150,7 @@ def get_sketch_compile_flags_dict(mode: str = "quick") -> dict[str, list[str]]:
     compiler_flags = list(config.get("all", {}).get("compiler_flags", []))
 
     defines.extend(config.get("sketch", {}).get("defines", []))
+    defines.extend(_extra_define_flags())
     compiler_flags.extend(config.get("sketch", {}).get("compiler_flags", []))
 
     build_mode_config = config.get("build_modes", {}).get(mode, {})

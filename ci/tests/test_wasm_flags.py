@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from pytest import MonkeyPatch
+
 from ci import wasm_flags
 
 
@@ -29,6 +31,23 @@ def test_lib_quick_flags_do_not_emit_dwarf_prefix_maps() -> None:
 
     for flag in flags:
         assert not flag.startswith("-ffile-prefix-map="), flag
+
+
+def test_extra_defines_apply_to_library_and_sketch(
+    monkeypatch: MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(
+        "FASTLED_WASM_EXTRA_DEFINES",
+        '["FASTLED_MP3_BACKEND_MINIMP3", "VALUE=2"]',
+    )
+
+    for getter in (
+        wasm_flags.get_lib_compile_flags_dict,
+        wasm_flags.get_sketch_compile_flags_dict,
+    ):
+        defines = getter("quick")["defines"]
+        assert "-DFASTLED_MP3_BACKEND_MINIMP3" in defines
+        assert "-DVALUE=2" in defines
 
 
 def test_rglob_outputs_forward_slashes(tmp_path: Path) -> None:
