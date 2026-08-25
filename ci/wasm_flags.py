@@ -42,7 +42,13 @@ def _extra_define_flags() -> list[str]:
     ):
         raise ValueError("FASTLED_WASM_EXTRA_DEFINES must be a JSON string list")
     typed = cast(list[str], parsed)
-    return [item if item.startswith("-D") else f"-D{item}" for item in typed]
+    flags: list[str] = []
+    for item in typed:
+        if item.startswith("-D"):
+            flags.append(item)
+        else:
+            flags.append(f"-D{item}")
+    return flags
 
 
 def _load_toml() -> dict[str, Any]:

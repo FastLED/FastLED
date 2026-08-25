@@ -1,4 +1,3 @@
-warning: in the working copy of 'src\third_party\minimp3\minimp3.h', CRLF will be replaced by LF the next time Git touches it
 diff --git "a/minimp3.h" "b/minimp3.h"
 index 9fbd4d2cc..e0bc32c38 100644
 --- "a/minimp3.h"

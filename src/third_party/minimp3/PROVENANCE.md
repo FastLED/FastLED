@@ -14,4 +14,6 @@ not vendored.
 FastLED's source-level integration changes are recorded in `FASTLED.patch`.
 They add the `fl::third_party` namespace, `FL_NO_EXCEPT` API annotations, SPDX
 markers, and the caller-owned `mp3dec_decode_frame_r` scratch API. The original
-`mp3dec_decode_frame` entry point remains available for upstream compatibility.
+`mp3dec_decode_frame` entry point remains available for upstream compatibility,
+but it allocates its 16,384-byte scratch object on the stack. Constrained
+targets must use `mp3dec_decode_frame_r` with caller-owned storage instead.
