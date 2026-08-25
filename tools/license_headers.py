@@ -229,6 +229,8 @@ def resolve_ripgrep(root: Path) -> Path:
         diagnostics = (result.stderr or result.stdout or "no diagnostics").strip()
         raise RuntimeError(f"ripgrep download failed: {diagnostics}")
     candidates = sorted(target.rglob("rg.exe" if key[0] == "Windows" else "rg"))
+    if candidates and key[0] != "Windows":
+        candidates[0].chmod(candidates[0].stat().st_mode | stat.S_IXUSR)
     if not candidates or _rg_version(candidates[0], root) != minimum:
         raise RuntimeError("downloaded ripgrep archive has an unexpected layout or version")
     executable.parent.mkdir(parents=True, exist_ok=True)
@@ -463,20 +465,25 @@ def mark_success_stably(policy: Policy, profile: str, rg: Path) -> bool:
     Fresh zccache roots can report one content transition immediately after
     their first mark. Never bless that newer state blindly: rescan it first.
     """
-    fingerprint(policy, profile, "mark-success")
-    if fingerprint(policy, profile, "check") == 1:
-        return True
-    refreshed = inventory(policy, rg)
-    violations = [
-        finding
-        for finding in refreshed
-        if finding.state not in {State.CURRENT, State.EXCLUDED}
-    ]
-    if violations:
-        fingerprint(policy, profile, "mark-failure")
-        _print_findings(refreshed)
-        return False
-    fingerprint(policy, profile, "mark-success")
+    for _ in range(4):
+        fingerprint(policy, profile, "mark-success")
+        if fingerprint(policy, profile, "check") == 1:
+            return True
+        refreshed = inventory(policy, rg)
+        violations = [
+            finding
+            for finding in refreshed
+            if finding.state not in {State.CURRENT, State.EXCLUDED}
+        ]
+        if violations:
+            fingerprint(policy, profile, "mark-failure")
+            _print_findings(refreshed)
+            return False
+    fingerprint(policy, profile, "mark-failure")
+    print(
+        "license header fingerprint did not stabilize after four verified scans; "
+        "continuing without a cached success"
+    )
     return True
 
 

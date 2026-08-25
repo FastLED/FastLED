@@ -240,7 +240,7 @@ impl FileContentChecker for CppHppHeaderPairChecker {
             .iter()
             // The managed reciprocal-license notice occupies the first five
             // lines, so legacy pairing suppressions may begin at line six.
-            .take(16)
+            .take(10)
             .any(|line| line.contains("// ok no header"))
         {
             return Vec::new();
