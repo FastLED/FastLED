@@ -6,6 +6,8 @@ import asyncio
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
+
 from ci.autoresearch.net import run_net_peer_autoresearch
 from ci.autoresearch.ota import run_ota_peer_autoresearch
 
@@ -14,6 +16,23 @@ def _response(data: dict[str, Any]) -> MagicMock:
     response = MagicMock()
     response.data = data
     return response
+
+
+def test_ota_peer_reports_missing_firmware(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A missing fbuild artifact fails cleanly before opening either board."""
+    result = asyncio.run(
+        run_ota_peer_autoresearch(
+            upload_port="COM18",
+            peer_upload_port="COM9",
+            serial_iface=None,
+            firmware_path=None,
+        )
+    )
+
+    assert result == 1
+    assert "RP2350W firmware is missing: None" in capsys.readouterr().out
 
 
 def test_net_peer_runs_ten_device_only_reconnect_cycles() -> None:

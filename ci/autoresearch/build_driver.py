@@ -46,7 +46,7 @@ class BuildDriver(Protocol):
         log_file: IO[str] | None = None,
     ) -> bool | DeployResult: ...
 
-    def firmware_path(self, build_dir: Path, environment: str) -> Path: ...
+    def firmware_path(self, build_dir: Path, environment: str) -> Path | None: ...
 
 
 class FbuildDriver:
@@ -94,17 +94,11 @@ class FbuildDriver:
             message=result.output,
         )
 
-    def firmware_path(self, build_dir: Path, environment: str) -> Path:
-        fbuild_root = build_dir / ".fbuild" / "build"
-        release_firmware = fbuild_root / "release" / "firmware.bin"
-        if release_firmware.is_file():
-            return release_firmware
+    def firmware_path(self, build_dir: Path, environment: str) -> Path | None:
+        from fbuild import find_firmware
 
-        environment_firmware = fbuild_root / environment / "release" / "firmware.bin"
-        if environment_firmware.is_file():
-            return environment_firmware
-
-        return release_firmware
+        resolved = find_firmware(str(build_dir), environment, "firmware.bin")
+        return Path(resolved) if resolved is not None else None
 
 
 class PlatformIODriver:
