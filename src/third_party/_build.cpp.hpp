@@ -7,6 +7,7 @@
 #include "third_party/cq_kernel/_build.cpp.hpp"
 #include "third_party/libhelix_mp3/_build.cpp.hpp"
 #include "third_party/libnsgif/_build.cpp.hpp"
+#include "third_party/minimp3/_build.cpp.hpp"
 #include "third_party/mpeg1_decoder/_build.cpp.hpp"
 #include "third_party/object_fled/_build.cpp.hpp"
 #include "third_party/stb/_build.cpp.hpp"

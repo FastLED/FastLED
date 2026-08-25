@@ -40,7 +40,7 @@ def find_processes_locking_path(
     Returns:
         Set of process IDs holding locks on the path
     """
-    if not is_psutil_available():
+    if psutil is None:
         print("Warning: psutil not available, cannot detect lock holders")
         return set()
 
@@ -159,7 +159,7 @@ def kill_processes(pids: set[int], force: bool = True) -> bool:
     if not pids:
         return True
 
-    if not is_psutil_available():
+    if psutil is None:
         print("Warning: psutil not available, cannot kill processes")
         return False
 
@@ -298,7 +298,7 @@ def get_process_info(pids: set[int]) -> list[dict[str, Any]]:
     Returns:
         List of dictionaries with process information
     """
-    if not is_psutil_available():
+    if psutil is None:
         return []
 
     process_info: list[dict[str, Any]] = []

@@ -33,7 +33,7 @@ def _wasm_fast_path() -> int | None:
     Returns exit code if handled, None to fall through to full argument parser.
     Saves ~130ms by skipping CompilationArgumentParser and its 62 transitive imports.
     """
-    # argv: ci-compile.py wasm ExampleName [--clean] [--run] [--just-compile] [-v]
+    # argv: ci-compile.py wasm ExampleName [--clean] [--run] [--defines ...]
     args = sys.argv[1:]
     has_clean = "--clean" in args
     if has_clean:
@@ -46,21 +46,29 @@ def _wasm_fast_path() -> int | None:
     example = None
     has_run = False
     has_verbose = False
-    for a in rest:
+    defines: list[str] = []
+    index = 0
+    while index < len(rest):
+        a = rest[index]
         if a == "--run":
             has_run = True
         elif a in ("-v", "--verbose"):
             has_verbose = True
         elif a == "--just-compile":
             pass  # ignored, kept for compat
-        elif a.startswith("--examples"):
-            # --examples Blink or --examples=Blink
-            if "=" in a:
-                example = a.split("=", 1)[1]
-            elif rest.index(a) + 1 < len(rest):
-                example = rest[rest.index(a) + 1]
+        elif a == "--examples" and index + 1 < len(rest):
+            index += 1
+            example = rest[index]
+        elif a.startswith("--examples="):
+            example = a.split("=", 1)[1]
+        elif a == "--defines" and index + 1 < len(rest):
+            index += 1
+            defines.extend(item for item in rest[index].split(",") if item)
+        elif a.startswith("--defines="):
+            defines.extend(item for item in a.split("=", 1)[1].split(",") if item)
         elif not a.startswith("-") and example is None:
             example = a
+        index += 1
 
     if example is None:
         example = "wasm"
@@ -74,6 +82,8 @@ def _wasm_fast_path() -> int | None:
         sys.argv = ["ci.wasm_compile", f"examples/{example}"]
         if has_clean:
             sys.argv.append("--force")
+        if defines:
+            sys.argv.extend(["--defines", ",".join(defines)])
         sys.argv.append("--run")
         try:
             from ci.wasm_compile import main as wasm_compile_main
@@ -94,12 +104,21 @@ def _wasm_fast_path() -> int | None:
 
     from ci.wasm_build import build as wasm_build
 
-    rc = wasm_build(
-        example=example,
-        output=output_js.as_posix(),
-        verbose=has_verbose,
-        force=has_clean,
-    )
+    if defines:
+        rc = wasm_build(
+            example=example,
+            output=output_js.as_posix(),
+            verbose=has_verbose,
+            force=has_clean,
+            defines=defines,
+        )
+    else:
+        rc = wasm_build(
+            example=example,
+            output=output_js.as_posix(),
+            verbose=has_verbose,
+            force=has_clean,
+        )
     if rc == 0:
         print("WASM compilation successful")
     else:
@@ -208,6 +227,8 @@ def main() -> int:
         example = examples[0]
         saved_argv = sys.argv
         sys.argv = ["ci.wasm_compile", f"examples/{example}"]
+        if config.defines:
+            sys.argv.extend(["--defines", ",".join(config.defines)])
         if config.wasm_run:
             sys.argv.append("--run")
         try:

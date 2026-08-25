@@ -48,9 +48,12 @@ WASM_PCH_HEADER = (
 BUILD_DIR_PREFIX = PROJECT_ROOT / ".build"
 
 
-def get_build_dir(mode: str) -> Path:
+def get_build_dir(mode: str, defines: list[str] | None = None) -> Path:
     """Get the meson build directory for the given mode."""
-    return BUILD_DIR_PREFIX / f"meson-wasm-{mode}"
+    if not defines:
+        return BUILD_DIR_PREFIX / f"meson-wasm-{mode}"
+    define_key = hashlib.sha256(json.dumps(defines).encode()).hexdigest()[:12]
+    return BUILD_DIR_PREFIX / f"meson-wasm-{mode}-{define_key}"
 
 
 def resolve_example_dir(example_name: str) -> Path:
@@ -74,10 +77,19 @@ def resolve_example_dir(example_name: str) -> Path:
     raise FileNotFoundError(f"Sketch not found: {examples_root / example_name}")
 
 
-def get_sketch_cache_dir(example_name: str) -> Path:
-    """Get per-sketch cache directory next to the .ino file: <sketch_dir>/.build/wasm/."""
+def get_sketch_cache_dir(
+    example_name: str, mode: str = "quick", defines: list[str] | None = None
+) -> Path:
+    """Get a per-sketch cache isolated by build mode and compiler defines."""
     ino_file = resolve_example_dir(example_name) / f"{Path(example_name).name}.ino"
-    d = ino_file.parent / ".build" / "wasm"
+    cache_name = "wasm"
+    if mode != "quick" or defines:
+        signature = mode
+        if defines:
+            define_key = hashlib.sha256(json.dumps(defines).encode()).hexdigest()[:12]
+            signature = f"{signature}-{define_key}"
+        cache_name = f"wasm-{signature}"
+    d = ino_file.parent / ".build" / cache_name
     d.mkdir(parents=True, exist_ok=True)
     return d
 
@@ -432,7 +444,7 @@ def _is_stale_build_error(output: str) -> bool:
     return any(pattern in output_lower for pattern in _STALE_BUILD_PATTERNS)
 
 
-def _recover_stale_wasm_build(build_dir: Path) -> bool:
+def _recover_stale_wasm_build(build_dir: Path, mode: str) -> bool:
     """Recover from stale WASM build state by cleaning deps and reconfiguring.
 
     Returns True if recovery succeeded and caller should retry the build.
@@ -479,8 +491,6 @@ def _recover_stale_wasm_build(build_dir: Path) -> bool:
 
         # Step 4: Force Meson reconfiguration
         print("[WASM] Forcing Meson reconfiguration...")
-        # Extract mode from build dir name (e.g., "meson-wasm-quick" -> "quick")
-        mode = build_dir.name.replace("meson-wasm-", "")
         generated_cross = _render_wasm_cross_file(build_dir)
         cmd = [
             get_meson_executable(),
@@ -751,7 +761,9 @@ def ensure_meson_configured(build_dir: Path, mode: str, force: bool = False) -> 
     return True
 
 
-def build_library(build_dir: Path, verbose: bool = False) -> tuple[bool, bool]:
+def build_library(
+    build_dir: Path, mode: str, verbose: bool = False
+) -> tuple[bool, bool]:
     """
     Build libfastled.a using ninja.
 
@@ -796,7 +808,7 @@ def build_library(build_dir: Path, verbose: bool = False) -> tuple[bool, bool]:
         combined_output = (result.stdout or "") + (result.stderr or "")
         if _is_stale_build_error(combined_output):
             print("[WASM] Stale build state detected, auto-recovering...")
-            if _recover_stale_wasm_build(build_dir):
+            if _recover_stale_wasm_build(build_dir, mode):
                 print("[WASM] Retrying build after recovery...")
                 retry = subprocess.run(cmd, cwd=PROJECT_ROOT)
                 if retry.returncode == 0:
@@ -1753,12 +1765,18 @@ def build(
     mode: str = "quick",
     verbose: bool = False,
     force: bool = False,
+    defines: list[str] | None = None,
 ) -> int:
     """Core build function — callable directly without argparse overhead."""
+    previous_defines = os.environ.get("FASTLED_WASM_EXTRA_DEFINES")
+    if defines:
+        os.environ["FASTLED_WASM_EXTRA_DEFINES"] = json.dumps(defines)
+    else:
+        os.environ.pop("FASTLED_WASM_EXTRA_DEFINES", None)
     try:
         start_time = time.time()
-        build_dir = get_build_dir(mode)
-        sketch_cache_dir = get_sketch_cache_dir(example)
+        build_dir = get_build_dir(mode, defines)
+        sketch_cache_dir = get_sketch_cache_dir(example, mode, defines)
         output_js = Path(output)
         # Auto-fix: if output looks like a directory (no .js suffix), append fastled.js
         if output_js.suffix != ".js":
@@ -1773,7 +1791,7 @@ def build(
 
         # Step 2: Build library via ninja (skipped if source fingerprint matches)
         lib_start = time.time()
-        lib_ok, lib_was_rebuilt = build_library(build_dir, verbose)
+        lib_ok, lib_was_rebuilt = build_library(build_dir, mode, verbose)
         if not lib_ok:
             return 1
 
@@ -1803,13 +1821,13 @@ def build(
             # undefined symbols usually mean stale object files.  Nuke
             # caches and retry the full build pipeline once.
             print("[WASM] Link failed, attempting self-healing rebuild...")
-            if _recover_stale_wasm_build(build_dir):
+            if _recover_stale_wasm_build(build_dir, mode):
                 # Also invalidate sketch cache so it gets recompiled
                 sketch_o = sketch_cache_dir / "sketch.o"
                 if sketch_o.exists():
                     sketch_o.unlink(missing_ok=True)
                 # Retry: library → PCH → sketch → link
-                lib_ok2, _ = build_library(build_dir, verbose)
+                lib_ok2, _ = build_library(build_dir, mode, verbose)
                 if lib_ok2:
                     sketch_pch2 = build_sketch_pch(
                         build_dir, mode, lib_was_rebuilt=True, verbose=verbose
@@ -1865,6 +1883,11 @@ def build(
 
         traceback.print_exc()
         return 1
+    finally:
+        if previous_defines is None:
+            os.environ.pop("FASTLED_WASM_EXTRA_DEFINES", None)
+        else:
+            os.environ["FASTLED_WASM_EXTRA_DEFINES"] = previous_defines
 
 
 def main() -> int:
@@ -1882,8 +1905,12 @@ def main() -> int:
     parser.add_argument(
         "--force", action="store_true", help="Force meson reconfiguration"
     )
+    parser.add_argument("--defines", help="Comma-separated compiler definitions")
     args = parser.parse_args()
-    return build(args.example, args.output, args.mode, args.verbose, args.force)
+    defines = args.defines.split(",") if args.defines else None
+    return build(
+        args.example, args.output, args.mode, args.verbose, args.force, defines
+    )
 
 
 if __name__ == "__main__":
