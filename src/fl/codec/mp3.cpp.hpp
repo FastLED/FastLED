@@ -1,6 +1,7 @@
 #include "fl/codec/mp3.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/singleton.h"
 
 // Include Helix MP3 decoder internal API (in fl::third_party namespace)
 // IWYU pragma: begin_keep
@@ -12,12 +13,85 @@
 namespace fl {
 namespace third_party {
 
+namespace {
+#if defined(FASTLED_TESTING)
+struct Mp3MemoryHookState {
+    Mp3MemoryHook* hook = nullptr;
+};
+
+Mp3MemoryHook*& mp3MemoryHook() FL_NO_EXCEPT {
+    return fl::Singleton<Mp3MemoryHookState>::instance().hook;
+}
+#endif
+} // anonymous namespace
+
+const char* Mp3MemoryTagName(Mp3MemoryTag tag) FL_NO_EXCEPT {
+    switch (tag) {
+    case Mp3MemoryTag::DecoderState:
+        return "decoder-state";
+    case Mp3MemoryTag::Scratch:
+        return "scratch";
+    case Mp3MemoryTag::StreamBuffer:
+        return "stream-buffer";
+    case Mp3MemoryTag::PcmOutput:
+        return "pcm-output";
+    }
+    return "unknown";
+}
+
+#if defined(FASTLED_TESTING)
+void SetMp3MemoryHook(Mp3MemoryHook* hook) FL_NO_EXCEPT {
+    mp3MemoryHook() = hook;
+}
+
+void ClearMp3MemoryHook() FL_NO_EXCEPT {
+    mp3MemoryHook() = nullptr;
+}
+#endif
+
+FL_NO_INLINE void* Mp3MemoryAllocate(
+    fl::size bytes, Mp3MemoryTag tag) FL_NO_EXCEPT {
+#if defined(FASTLED_TESTING)
+    if (mp3MemoryHook() && !mp3MemoryHook()->allowAllocate(bytes, tag)) {
+        return nullptr;
+    }
+#endif
+    void* ptr = fl::Malloc(bytes);
+#if defined(FASTLED_TESTING)
+    if (ptr && mp3MemoryHook()) {
+        mp3MemoryHook()->onAllocate(ptr, bytes, tag);
+    }
+#else
+    FL_UNUSED(tag);
+#endif
+    return ptr;
+}
+
+void Mp3MemoryFree(void* ptr, fl::size bytes,
+                   Mp3MemoryTag tag) FL_NO_EXCEPT {
+    if (!ptr) {
+        return;
+    }
+#if defined(FASTLED_TESTING)
+    if (mp3MemoryHook()) {
+        mp3MemoryHook()->onFree(ptr, bytes, tag);
+    }
+#else
+    FL_UNUSED(bytes);
+    FL_UNUSED(tag);
+#endif
+    fl::Free(ptr);
+}
+
 // Maximum PCM output: 1152 samples/channel * 2 channels = 2304 samples
 constexpr fl::size MAX_PCM_SAMPLES = 2304;
 
 // Mp3HelixDecoder implementation
-Mp3HelixDecoder::Mp3HelixDecoder()
-    : mDecoder(nullptr) {
+Mp3HelixDecoder::Mp3HelixDecoder() FL_NO_EXCEPT
+    : mPcmBuffer(nullptr, Mp3MemoryDeleter<fl::i16>(
+                              sizeof(fl::i16) * MAX_PCM_SAMPLES,
+                              Mp3MemoryTag::PcmOutput)),
+      mDecoder(nullptr) {
     fl::memset(&mFrameInfo, 0, sizeof(mFrameInfo));
 }
 
@@ -37,7 +111,8 @@ bool Mp3HelixDecoder::init() {
     }
 
     // Allocate PCM buffer
-    mPcmBuffer.reset(new fl::i16[MAX_PCM_SAMPLES]);  // ok bare allocation (array new)
+    mPcmBuffer.reset(Mp3MemoryAllocateArray<fl::i16>(
+        MAX_PCM_SAMPLES, Mp3MemoryTag::PcmOutput));
     if (!mPcmBuffer) {
         MP3FreeDecoder(static_cast<HMP3Decoder>(mDecoder));
         mDecoder = nullptr;
@@ -138,7 +213,14 @@ int minimp3Version(const fl::u8* header) FL_NO_EXCEPT {
 } // anonymous namespace
 
 Mp3Minimp3Decoder::Mp3Minimp3Decoder() FL_NO_EXCEPT
-    : mDecoder(nullptr), mScratch(nullptr) {
+    : mPcmBuffer(nullptr, Mp3MemoryDeleter<fl::i16>(
+                              sizeof(fl::i16) * MAX_PCM_SAMPLES,
+                              Mp3MemoryTag::PcmOutput)),
+      mDecoder(nullptr, Mp3MemoryDeleter<mp3dec_t>(
+                            sizeof(mp3dec_t), Mp3MemoryTag::DecoderState)),
+      mScratch(nullptr, Mp3MemoryDeleter<mp3dec_scratch_t>(
+                            sizeof(mp3dec_scratch_t),
+                            Mp3MemoryTag::Scratch)) {
     fl::memset(&mFrameInfo, 0, sizeof(mFrameInfo));
 }
 
@@ -151,10 +233,12 @@ bool Mp3Minimp3Decoder::init() FL_NO_EXCEPT {
         return true;
     }
 
-    mDecoder.reset(new mp3dec_t); // ok bare allocation (owned unique_ptr)
-    mScratch.reset(
-        new mp3dec_scratch_t); // ok bare allocation (owned unique_ptr)
-    mPcmBuffer.reset(new fl::i16[MAX_PCM_SAMPLES]); // ok bare allocation (array new)
+    mDecoder.reset(Mp3MemoryAllocateArray<mp3dec_t>(
+        1, Mp3MemoryTag::DecoderState));
+    mScratch.reset(Mp3MemoryAllocateArray<mp3dec_scratch_t>(
+        1, Mp3MemoryTag::Scratch));
+    mPcmBuffer.reset(Mp3MemoryAllocateArray<fl::i16>(
+        MAX_PCM_SAMPLES, Mp3MemoryTag::PcmOutput));
     if (!mDecoder || !mScratch || !mPcmBuffer) {
         mDecoder.reset();
         mScratch.reset();
@@ -282,14 +366,18 @@ class Mp3StreamDecoderImpl {
     Mp3Info getInfo() const { return mInfo; }
 
   private:
-    static constexpr fl::size BUFFER_SIZE = 4096;
+#if defined(FASTLED_MP3_BACKEND_MINIMP3)
+    static constexpr fl::size BUFFER_SIZE = MP3_MINIMP3_STREAM_BUFFER_SIZE;
+#else
+    static constexpr fl::size BUFFER_SIZE = MP3_HELIX_STREAM_BUFFER_SIZE;
+#endif
 
     bool fillBuffer();
     bool findAndDecodeFrame(audio::Sample* out_sample);
 
     fl::filebuf_ptr mStream;
     fl::unique_ptr<Mp3SelectedDecoder> mDecoder;
-    fl::vector<fl::u8> mBuffer;
+    fl::unique_ptr<fl::u8[], Mp3MemoryDeleter<fl::u8>> mBuffer;
     fl::size mBufferPos;
     fl::size mBufferFilled;
     fl::size mBytesProcessed;
@@ -300,12 +388,13 @@ class Mp3StreamDecoderImpl {
     bool mHasDecodedFirstFrame;
 };
 
-Mp3StreamDecoderImpl::Mp3StreamDecoderImpl()
-    : mStream(nullptr), mBufferPos(0), mBufferFilled(0),
+Mp3StreamDecoderImpl::Mp3StreamDecoderImpl() FL_NO_EXCEPT
+    : mStream(nullptr),
+      mBuffer(nullptr, Mp3MemoryDeleter<fl::u8>(
+                           BUFFER_SIZE, Mp3MemoryTag::StreamBuffer)),
+      mBufferPos(0), mBufferFilled(0),
       mBytesProcessed(0), mHasError(false), mEndOfStream(false),
-      mHasDecodedFirstFrame(false) {
-    mBuffer.reserve(BUFFER_SIZE);
-}
+      mHasDecodedFirstFrame(false) {}
 
 Mp3StreamDecoderImpl::~Mp3StreamDecoderImpl() FL_NO_EXCEPT {
     end();
@@ -327,7 +416,14 @@ bool Mp3StreamDecoderImpl::begin(fl::filebuf_ptr stream) {
         return false;
     }
 
-    mBuffer.resize(BUFFER_SIZE);
+    mBuffer.reset(Mp3MemoryAllocateArray<fl::u8>(
+        BUFFER_SIZE, Mp3MemoryTag::StreamBuffer));
+    if (!mBuffer) {
+        mErrorMsg = "Failed to allocate MP3 stream buffer";
+        mHasError = true;
+        mDecoder.reset();
+        return false;
+    }
     mBufferPos = 0;
     mBufferFilled = 0;
     mBytesProcessed = 0;
@@ -344,7 +440,7 @@ void Mp3StreamDecoderImpl::end() {
         mStream->close();
         mStream = nullptr;
     }
-    mBuffer.clear();
+    mBuffer.reset();
 }
 
 bool Mp3StreamDecoderImpl::hasError(fl::string* msg) const {
@@ -357,7 +453,12 @@ bool Mp3StreamDecoderImpl::hasError(fl::string* msg) const {
 void Mp3StreamDecoderImpl::reset() {
     if (mDecoder) {
         mDecoder->reset();
-        mDecoder->init();
+        if (!mDecoder->init()) {
+            mErrorMsg = "Failed to reinitialize MP3 decoder";
+            mHasError = true;
+            mDecoder.reset();
+            return;
+        }
     }
     mBufferPos = 0;
     mBufferFilled = 0;
@@ -384,7 +485,8 @@ bool Mp3StreamDecoderImpl::fillBuffer() {
     // Fill the rest of the buffer from stream
     fl::size spaceAvailable = BUFFER_SIZE - mBufferFilled;
     if (spaceAvailable > 0 && mStream && mStream->available(1)) {
-        fl::size bytesRead = mStream->read(mBuffer.data() + mBufferFilled, spaceAvailable);
+        fl::size bytesRead =
+            mStream->read(mBuffer.get() + mBufferFilled, spaceAvailable);
         mBufferFilled += bytesRead;
         return bytesRead > 0;
     }
@@ -398,7 +500,7 @@ bool Mp3StreamDecoderImpl::findAndDecodeFrame(audio::Sample* out_sample) {
     }
 
     // Try to decode from current buffer
-    const fl::u8* inptr = mBuffer.data() + mBufferPos;
+    const fl::u8* inptr = mBuffer.get() + mBufferPos;
     fl::size bytes_left = mBufferFilled - mBufferPos;
 
     if (bytes_left == 0) {

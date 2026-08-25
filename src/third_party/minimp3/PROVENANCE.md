@@ -13,7 +13,13 @@ not vendored.
 
 FastLED's source-level integration changes are recorded in `FASTLED.patch`.
 They add the `fl::third_party` namespace, `FL_NO_EXCEPT` API annotations, SPDX
-markers, and the caller-owned `mp3dec_decode_frame_r` scratch API. The original
-`mp3dec_decode_frame` entry point remains available for upstream compatibility,
-but it allocates its 16,384-byte scratch object on the stack. Constrained
-targets must use `mp3dec_decode_frame_r` with caller-owned storage instead.
+markers, and the caller-owned `mp3dec_decode_frame_r` scratch API. FastLED does
+not expose upstream's `mp3dec_decode_frame` convenience entry point because it
+allocates scratch on the stack; all callers use `mp3dec_decode_frame_r` with
+owned storage instead. FastLED uses a 7,808-byte scratch arena and extends the
+decoder's persistent synthesis state so that it can serve as the synthesis
+workspace without a duplicate scratch copy. The upstream direct-decoder
+2,304-byte free-format frame cap and Phase 0's 4,096-byte stream buffer are
+retained; the stream buffer can discover unknown free-format spacing through
+2,045 bytes with upstream's three-header validation. The integration meets the
+24 KiB working-RAM budget without narrowing that Phase 0 streaming behavior.

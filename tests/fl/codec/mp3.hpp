@@ -1,5 +1,6 @@
 #include "test.h"
 #include "fl/codec/mp3.h"
+#include "fl/codec/mp3_memory.h"
 #include "fl/fs/fs.h"
 #include "fl/math/math.h"
 #include "fl/stl/detail/memory_file_handle.h"
@@ -9,6 +10,166 @@
 #endif
 
 using namespace fl::third_party;
+
+#ifdef FASTLED_TESTING
+namespace {
+
+class Mp3MemoryTestHook : public Mp3MemoryHook {
+public:
+    bool allowAllocate(fl::size, Mp3MemoryTag tag) FL_NO_EXCEPT override {
+        return !mRejectAllocations || tag != mRejectedTag;
+    }
+
+    void onAllocate(void* ptr, fl::size bytes,
+                    Mp3MemoryTag tag) FL_NO_EXCEPT override {
+        FL_REQUIRE(ptr != nullptr);
+        ++mAllocations;
+        mCurrent += bytes;
+        if (mCurrent > mPeak) {
+            mPeak = mCurrent;
+        }
+        mTagged[static_cast<unsigned>(tag)] += bytes;
+    }
+
+    void onFree(void*, fl::size bytes,
+                Mp3MemoryTag tag) FL_NO_EXCEPT override {
+        FL_REQUIRE_GE(mCurrent, bytes);
+        FL_REQUIRE_GE(mTagged[static_cast<unsigned>(tag)], bytes);
+        mCurrent -= bytes;
+        mTagged[static_cast<unsigned>(tag)] -= bytes;
+    }
+
+    fl::size current() const { return mCurrent; }
+    fl::size peak() const { return mPeak; }
+    fl::size allocations() const { return mAllocations; }
+    fl::size tagged(Mp3MemoryTag tag) const {
+        return mTagged[static_cast<unsigned>(tag)];
+    }
+    void reject(Mp3MemoryTag tag) {
+        mRejectAllocations = true;
+        mRejectedTag = tag;
+    }
+
+private:
+    fl::size mCurrent = 0;
+    fl::size mPeak = 0;
+    fl::size mAllocations = 0;
+    fl::size mTagged[4] = {};
+    bool mRejectAllocations = false;
+    Mp3MemoryTag mRejectedTag = Mp3MemoryTag::DecoderState;
+};
+
+constexpr fl::size selectedStreamBufferSize() {
+#if defined(FASTLED_MP3_BACKEND_MINIMP3)
+    return MP3_MINIMP3_STREAM_BUFFER_SIZE;
+#else
+    return MP3_HELIX_STREAM_BUFFER_SIZE;
+#endif
+}
+
+} // anonymous namespace
+
+FL_TEST_CASE("MP3 codec allocations report accounting tags") {
+    Mp3MemoryTestHook hook;
+    SetMp3MemoryHook(&hook);
+    {
+        Mp3Minimp3Decoder decoder;
+        FL_REQUIRE(decoder.init());
+        FL_CHECK_GT(hook.tagged(Mp3MemoryTag::DecoderState), 0);
+        FL_CHECK_GT(hook.tagged(Mp3MemoryTag::Scratch), 0);
+        FL_CHECK_GT(hook.allocations(), 1);
+    }
+    FL_CHECK_EQ(hook.current(), 0);
+    FL_CHECK_GT(hook.peak(), 0);
+    {
+        auto stream = fl::make_shared<fl::memorybuf>(16);
+        fl::Mp3Decoder decoder;
+        FL_REQUIRE(decoder.begin(stream));
+        FL_CHECK_EQ(hook.tagged(Mp3MemoryTag::StreamBuffer),
+                    selectedStreamBufferSize());
+        decoder.end();
+    }
+    FL_CHECK_EQ(hook.current(), 0);
+    ClearMp3MemoryHook();
+}
+
+FL_TEST_CASE("MP3 reset reports decoder reallocation failure") {
+    const Mp3MemoryTag tags[] = {
+        Mp3MemoryTag::DecoderState,
+        Mp3MemoryTag::Scratch,
+        Mp3MemoryTag::PcmOutput,
+    };
+    for (fl::size i = 0; i < sizeof(tags) / sizeof(tags[0]); ++i) {
+        Mp3MemoryTestHook hook;
+        SetMp3MemoryHook(&hook);
+        auto stream = fl::make_shared<fl::memorybuf>(16);
+        fl::Mp3Decoder decoder;
+        FL_REQUIRE(decoder.begin(stream));
+        FL_REQUIRE(decoder.isReady());
+
+        hook.reject(tags[i]);
+        decoder.reset();
+
+        FL_CHECK_FALSE(decoder.isReady());
+        FL_CHECK(decoder.hasError());
+        FL_CHECK_EQ(hook.current(), selectedStreamBufferSize());
+        decoder.end();
+        FL_CHECK_EQ(hook.current(), 0);
+        ClearMp3MemoryHook();
+    }
+}
+
+FL_TEST_CASE("MP3 initial allocation failures release partial state") {
+    const Mp3MemoryTag minimp3_tags[] = {
+        Mp3MemoryTag::DecoderState,
+        Mp3MemoryTag::Scratch,
+        Mp3MemoryTag::PcmOutput,
+    };
+    for (fl::size i = 0;
+         i < sizeof(minimp3_tags) / sizeof(minimp3_tags[0]); ++i) {
+        Mp3MemoryTestHook hook;
+        hook.reject(minimp3_tags[i]);
+        SetMp3MemoryHook(&hook);
+        {
+            Mp3Minimp3Decoder decoder;
+            FL_CHECK_FALSE(decoder.init());
+        }
+        FL_CHECK_EQ(hook.current(), 0);
+        ClearMp3MemoryHook();
+    }
+
+    const Mp3MemoryTag helix_tags[] = {
+        Mp3MemoryTag::DecoderState,
+        Mp3MemoryTag::Scratch,
+        Mp3MemoryTag::PcmOutput,
+    };
+    for (fl::size i = 0;
+         i < sizeof(helix_tags) / sizeof(helix_tags[0]); ++i) {
+        Mp3MemoryTestHook hook;
+        hook.reject(helix_tags[i]);
+        SetMp3MemoryHook(&hook);
+        {
+            Mp3HelixDecoder decoder;
+            FL_CHECK_FALSE(decoder.init());
+        }
+        FL_CHECK_EQ(hook.current(), 0);
+        ClearMp3MemoryHook();
+    }
+
+    Mp3MemoryTestHook hook;
+    hook.reject(Mp3MemoryTag::StreamBuffer);
+    SetMp3MemoryHook(&hook);
+    {
+        auto stream = fl::make_shared<fl::memorybuf>(16);
+        fl::Mp3Decoder decoder;
+        FL_CHECK_FALSE(decoder.begin(stream));
+        FL_CHECK_FALSE(decoder.isReady());
+        FL_CHECK(decoder.hasError());
+    }
+    FL_CHECK_EQ(hook.current(), 0);
+    ClearMp3MemoryHook();
+}
+#endif
 
 FL_TEST_CASE("minimp3 caller-owned scratch API is available") {
     mp3dec_t decoder;
@@ -160,6 +321,20 @@ FL_TEST_CASE("MP3 golden corpus has matching backend frame behavior") {
     }
 }
 
+FL_TEST_CASE("minimp3 Layer I synthesis matches its reference vector") {
+    fl::setTestFileSystemRoot("tests/data");
+    const fl::vector<fl::u8> bitstream =
+        loadMp3CorpusFile("codec/minimp3/ILL2_layer1.bit");
+    const fl::vector<fl::i16> reference = decodeLittleEndianPcm(
+        loadMp3CorpusFile("codec/minimp3/ILL2_layer1.pcm"));
+    const Mp3DecodeResult decoded =
+        decodeMp3Corpus<Mp3Minimp3Decoder>(bitstream);
+
+    FL_CHECK_GT(decoded.mFrames, 0);
+    FL_CHECK_EQ(decoded.mPcm.size(), reference.size());
+    FL_CHECK_GT(reportPsnr(reference, decoded.mPcm), 60.0);
+}
+
 FL_TEST_CASE("MP3 backends agree on resync and truncated input") {
     fl::setTestFileSystemRoot("tests/data");
     const fl::vector<fl::u8> bitstream =
@@ -208,6 +383,50 @@ FL_TEST_CASE("MP3 public stream terminates on truncated input") {
     FL_CHECK_GT(frames, 0);
     FL_CHECK_FALSE(decoder.hasError());
 }
+
+#if defined(FASTLED_MP3_BACKEND_MINIMP3)
+FL_TEST_CASE("MP3 public minimp3 stream discovers large free-format frames") {
+    fl::setTestFileSystemRoot("tests/data");
+    const fl::vector<fl::u8> source =
+        loadMp3CorpusFile("codec/minimp3/l3-he_free.bit");
+
+    Mp3Minimp3Decoder probe;
+    FL_REQUIRE(probe.init());
+    const int sync = probe.findSyncWord(source.data(), source.size());
+    FL_REQUIRE_GE(sync, 0);
+    const fl::u8* cursor = source.data() + sync;
+    fl::size remaining = source.size() - static_cast<fl::size>(sync);
+    const fl::u8* frames[3] = {};
+    fl::size frame_sizes[3] = {};
+    for (int i = 0; i < 3; ++i) {
+        frames[i] = cursor;
+        FL_REQUIRE_EQ(probe.decodeFrame(&cursor, &remaining), 0);
+        frame_sizes[i] = static_cast<fl::size>(cursor - frames[i]);
+        FL_REQUIRE_GT(frame_sizes[i], 4);
+    }
+
+    constexpr fl::size large_frame_size = 1200;
+    fl::vector<fl::u8> expanded;
+    expanded.resize(large_frame_size * 3);
+    fl::memset(expanded.data(), 0, expanded.size());
+    for (int i = 0; i < 3; ++i) {
+        FL_REQUIRE_LT(frame_sizes[i], large_frame_size);
+        fl::u8* destination = expanded.data() + large_frame_size * i;
+        fl::memcpy(destination, frames[i], frame_sizes[i]);
+        FL_REQUIRE_EQ(destination[2] & 0xf0, 0);
+        destination[2] &= static_cast<fl::u8>(~0x02u);
+    }
+
+    auto stream = fl::make_shared<fl::memorybuf>(expanded.size());
+    FL_REQUIRE_EQ(stream->write(fl::span<const fl::u8>(expanded)),
+                  expanded.size());
+    fl::Mp3Decoder decoder;
+    FL_REQUIRE(decoder.begin(stream));
+    fl::audio::Sample sample;
+    FL_CHECK(decoder.decodeNextFrame(&sample));
+    FL_CHECK_FALSE(decoder.hasError());
+}
+#endif
 
 FL_TEST_CASE("MP3 public stream recovers a valid frame after corruption") {
     fl::setTestFileSystemRoot("tests/data");

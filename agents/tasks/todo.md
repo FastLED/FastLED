@@ -10,7 +10,7 @@
 - [x] Add deterministic host golden coverage for both backends.
 - [x] Run focused debug/quick tests, lint, broader tests, and compile gates.
 - [x] Run the pre-push code-review gate.
-- [ ] Push, merge the closing PR, and verify issue #4051/G0 state.
+- [x] Push, merge the closing PR, and verify issue #4051/G0 state.
 
 ### Review
 
@@ -31,6 +31,49 @@
   isolation (including stale-build recovery).
 - Strict-only Pyright remains non-green on current master with 916 unrelated
   baseline errors; all diagnostics introduced by this diff were corrected.
+- PR #4057 merged as `30e763437`; issue #4051 closed automatically and the
+  parent tracker reports G0 complete (1/6 children).
+
+## minimp3 Phase 1 (#4052)
+
+- [x] Capture RED evidence for the missing codec memory ledger/instrumentation.
+- [x] Add tagged allocation accounting for decoder state, scratch, and stream buffer.
+- [x] Cross-check Linux heap measurements with heaptrack or Valgrind Massif.
+- [x] Add decode stack watermarking plus `-fstack-usage`, frame-size, and call-graph analysis.
+- [x] Enforce the 2 KiB decode-stack and 24 KiB working-RAM budgets.
+- [x] Measure and itemize codec static/flash symbols with `nm` and `size`.
+- [x] Add a machine-parsed `codec_memory_ledger.md` with a 2% regression gate.
+- [x] Run focused/broad validation and the pre-push code-review gate.
+- [ ] Push, merge the closing PR, and verify issue #4052/G1 state.
+
+### Review
+
+- RED baseline: issue #4052 is open and the repository has no codec memory
+  ledger, tagged codec accounting, stack-usage parser, or MP3 budget gate.
+- GREEN: the production profile reports 27,952-byte Helix and 23,180-byte
+  minimp3-float working RAM (persistent state, scratch, and stream staging).
+  Minimp3 is 1,396 bytes below the explicit 24 KiB target; pipeline peaks with
+  caller PCM are 32,560 and 27,788 bytes. The upstream 2,304-byte free-format
+  cap and 4,096-byte stream lookahead remain intact by reusing enlarged
+  persistent QMF state as synthesis and reorder workspace.
+- Optimized LLVM IR plus Clang `.su` files derive 552-byte and 2,032-byte
+  worst decoder paths and fail closed for missing roots or reachable frames.
+  Live stack-pointer watermarks conservatively observe 1,736 and 2,056 bytes,
+  including the measurement boundary and its 256-byte safety guard.
+- ELF `llvm-nm` inventories every named table: Helix totals 12,744 bytes and
+  minimp3-float 7,878 bytes. Separate Valgrind Massif processes dynamically
+  attribute 32,560-byte Helix and 27,788-byte minimp3 peaks, each exactly
+  matching its production allocation hook.
+- The audit gate passes on managed Ubuntu 24.04 and requires the real profile
+  binary. Allocation shape is exact, footprint growth is capped at 2%, and
+  parser tests cover deeper callgraphs, missing frames, Massif aggregation,
+  working-RAM enforcement, and unledgered tables. Default quick and selected-
+  minimp3 sanitizer codec tests pass, including 1,200-byte free-format public
+  streaming and allocation-failure cleanup; the broad Python suite and full
+  lint are green.
+- The final pre-push review is clean after preserving Phase 0 free-format
+  lookahead, isolating Massif by backend, making selector tests portable,
+  covering every partial OOM path, and adding Layer I synthesis parity.
 
 ## Frame-task lifecycle (#3896)
 

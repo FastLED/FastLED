@@ -1,0 +1,70 @@
+name: MP3 memory audit
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/fl/codec/mp3*'
+      - 'src/third_party/libhelix_mp3/**'
+      - 'src/third_party/minimp3/**'
+      - 'tests/fl/codec/mp3.hpp'
+      - 'tests/profile/mp3_memory_audit.cpp'
+      - 'ci/codec_memory/**'
+      - 'codec_memory_ledger.md'
+      - '.github/workflows/mp3_memory_audit.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'src/fl/codec/mp3*'
+      - 'src/third_party/libhelix_mp3/**'
+      - 'src/third_party/minimp3/**'
+      - 'tests/fl/codec/mp3.hpp'
+      - 'tests/profile/mp3_memory_audit.cpp'
+      - 'ci/codec_memory/**'
+      - 'codec_memory_ledger.md'
+      - '.github/workflows/mp3_memory_audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          version: '0.8.0'
+
+      - name: Install audit tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang llvm valgrind
+
+      - name: Install project dependencies
+        run: uv sync
+
+      - name: Verify codec allocation hooks
+        run: bash test --cpp tests/fl/codec.cpp
+
+      - name: Build production decoder memory profile
+        run: bash profile mp3_memory_audit --no-generate --iterations 1 --build-mode release
+
+      - name: Enforce heap, stack, and static memory ledger
+        run: >-
+          uv run python ci/codec_memory/audit.py --check
+          --profile-binary .build/meson-release/tests/profile/mp3_memory_audit

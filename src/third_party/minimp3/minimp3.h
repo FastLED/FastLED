@@ -12,7 +12,7 @@
 #include "fl/stl/stdint.h"
 
 #define MINIMP3_MAX_SAMPLES_PER_FRAME (1152*2)
-#define MINIMP3_SCRATCH_SIZE 16384
+#define MINIMP3_SCRATCH_SIZE 7808
 
 #ifdef __cplusplus
 namespace fl {
@@ -26,7 +26,7 @@ typedef struct
 
 typedef struct mp3dec_t
 {
-    float mdct_overlap[2][9*32], qmf_state[15*2*32];
+    float mdct_overlap[2][9*32], qmf_state[(15 + 18)*2*32];
     int reserv, free_format_bytes;
     unsigned char header[4], reserv_buf[511];
 } mp3dec_t;
@@ -52,9 +52,6 @@ int mp3dec_decode_frame_r(mp3dec_t *dec, mp3dec_scratch_t *scratch,
                           const uint8_t *mp3, int mp3_bytes,
                           mp3d_sample_t *pcm,
                           mp3dec_frame_info_t *info) FL_NO_EXCEPT;
-int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes,
-                        mp3d_sample_t *pcm,
-                        mp3dec_frame_info_t *info) FL_NO_EXCEPT;
 
 #ifdef __cplusplus
 }
@@ -259,7 +256,7 @@ typedef struct
     bs_t bs;
     uint8_t maindata[MAX_BITRESERVOIR_BYTES + MAX_L3_FRAME_PAYLOAD_BYTES];
     L3_gr_info_t gr_info[4];
-    float grbuf[2][576], scf[40], syn[18 + 15][2*32];
+    float grbuf[2][576], scf[40];
     uint8_t ist_pos[2][39];
 } mp3dec_scratch_internal_t;
 
@@ -1294,7 +1291,9 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_internal_t *s, L3_gr_info_t *g
         if (gr_info->n_short_sfb)
         {
             aa_bands = n_long_bands - 1;
-            L3_reorder(s->grbuf[ch] + n_long_bands*18, s->syn[0], gr_info->sfbtab + gr_info->n_long_sfb);
+            L3_reorder(s->grbuf[ch] + n_long_bands*18,
+                       h->qmf_state + 15*2*32,
+                       gr_info->sfbtab + gr_info->n_long_sfb);
         }
 
         L3_antialias(s->grbuf[ch], aa_bands);
@@ -1658,15 +1657,15 @@ static void mp3d_synth(float *xl, mp3d_sample_t *dstl, int nch, float *lins) FL_
 #endif /* MINIMP3_ONLY_SIMD */
 }
 
-static void mp3d_synth_granule(float *qmf_state, float *grbuf, int nbands, int nch, mp3d_sample_t *pcm, float *lins) FL_NO_EXCEPT
+static void mp3d_synth_granule(float *qmf_state, float *grbuf, int nbands,
+                               int nch, mp3d_sample_t *pcm) FL_NO_EXCEPT
 {
     int i;
+    float *lins = qmf_state;
     for (i = 0; i < nch; i++)
     {
         mp3d_DCT_II(grbuf + 576*i, nbands);
     }
-
-    memcpy(lins, qmf_state, sizeof(float)*15*64);
 
     for (i = 0; i < nbands; i += 2)
     {
@@ -1682,7 +1681,7 @@ static void mp3d_synth_granule(float *qmf_state, float *grbuf, int nbands, int n
     } else
 #endif /* MINIMP3_NONSTANDARD_BUT_LOGICAL */
     {
-        memcpy(qmf_state, lins + nbands*64, sizeof(float)*15*64);
+        memmove(qmf_state, lins + nbands*64, sizeof(float)*15*64);
     }
 }
 
@@ -1807,7 +1806,7 @@ int mp3dec_decode_frame_r(mp3dec_t *dec, mp3dec_scratch_t *scratch_storage,
             {
                 memset(scratch->grbuf[0], 0, 576*2*sizeof(float));
                 L3_decode(dec, scratch, scratch->gr_info + igr*info->channels, info->channels);
-                mp3d_synth_granule(dec->qmf_state, scratch->grbuf[0], 18, info->channels, pcm, scratch->syn[0]);
+                mp3d_synth_granule(dec->qmf_state, scratch->grbuf[0], 18, info->channels, pcm);
             }
         }
         L3_save_reservoir(dec, scratch);
@@ -1826,7 +1825,7 @@ int mp3dec_decode_frame_r(mp3dec_t *dec, mp3dec_scratch_t *scratch_storage,
             {
                 i = 0;
                 L12_apply_scf_384(sci, sci->scf + igr, scratch->grbuf[0]);
-                mp3d_synth_granule(dec->qmf_state, scratch->grbuf[0], 12, info->channels, pcm, scratch->syn[0]);
+                mp3d_synth_granule(dec->qmf_state, scratch->grbuf[0], 12, info->channels, pcm);
                 memset(scratch->grbuf[0], 0, 576*2*sizeof(float));
                 pcm += 384*info->channels;
             }
@@ -1839,14 +1838,6 @@ int mp3dec_decode_frame_r(mp3dec_t *dec, mp3dec_scratch_t *scratch_storage,
 #endif /* MINIMP3_ONLY_MP3 */
     }
     return success*hdr_frame_samples(dec->header);
-}
-
-int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes,
-                        mp3d_sample_t *pcm,
-                        mp3dec_frame_info_t *info) FL_NO_EXCEPT
-{
-    mp3dec_scratch_t scratch;
-    return mp3dec_decode_frame_r(dec, &scratch, mp3, mp3_bytes, pcm, info);
 }
 
 #ifdef MINIMP3_FLOAT_OUTPUT

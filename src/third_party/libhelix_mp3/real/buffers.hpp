@@ -51,6 +51,7 @@
 #include "coder.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/stdint.h"
+#include "fl/codec/mp3_memory.h"
 
 namespace fl {
 namespace third_party {
@@ -107,18 +108,26 @@ MP3DecInfo *AllocateBuffers(void) FL_NO_EXCEPT
 	IMDCTInfo *mi;
 	SubbandInfo *sbi;
 
-	mp3DecInfo = (MP3DecInfo *)malloc(sizeof(MP3DecInfo));
+	mp3DecInfo = (MP3DecInfo *)Mp3MemoryAllocate(
+		sizeof(MP3DecInfo), Mp3MemoryTag::DecoderState);
 	if (!mp3DecInfo)
 		return 0;
 	ClearBuffer(mp3DecInfo, sizeof(MP3DecInfo));
 	
-	fh =  (FrameHeader *)     malloc(sizeof(FrameHeader));
-	si =  (SideInfo *)        malloc(sizeof(SideInfo));
-	sfi = (ScaleFactorInfo *) malloc(sizeof(ScaleFactorInfo));
-	hi =  (HuffmanInfo *)     malloc(sizeof(HuffmanInfo));
-	di =  (DequantInfo *)     malloc(sizeof(DequantInfo));
-	mi =  (IMDCTInfo *)       malloc(sizeof(IMDCTInfo));
-	sbi = (SubbandInfo *)     malloc(sizeof(SubbandInfo));
+	fh = (FrameHeader *)Mp3MemoryAllocate(sizeof(FrameHeader),
+		Mp3MemoryTag::DecoderState);
+	si = (SideInfo *)Mp3MemoryAllocate(sizeof(SideInfo),
+		Mp3MemoryTag::DecoderState);
+	sfi = (ScaleFactorInfo *)Mp3MemoryAllocate(sizeof(ScaleFactorInfo),
+		Mp3MemoryTag::DecoderState);
+	hi = (HuffmanInfo *)Mp3MemoryAllocate(sizeof(HuffmanInfo),
+		Mp3MemoryTag::Scratch);
+	di = (DequantInfo *)Mp3MemoryAllocate(sizeof(DequantInfo),
+		Mp3MemoryTag::Scratch);
+	mi = (IMDCTInfo *)Mp3MemoryAllocate(sizeof(IMDCTInfo),
+		Mp3MemoryTag::Scratch);
+	sbi = (SubbandInfo *)Mp3MemoryAllocate(sizeof(SubbandInfo),
+		Mp3MemoryTag::Scratch);
 
 	mp3DecInfo->FrameHeaderPS =     (void *)fh;
 	mp3DecInfo->SideInfoPS =        (void *)si;
@@ -145,7 +154,12 @@ MP3DecInfo *AllocateBuffers(void) FL_NO_EXCEPT
 	return mp3DecInfo;
 }
 
-#define SAFE_FREE(x)	{if (x)	fl::free(x);	(x) = 0;}	/* helper macro */
+#define SAFE_FREE_TAGGED(x, type, tag)                                        \
+	{                                                                         \
+		if (x)                                                                 \
+			Mp3MemoryFree(x, sizeof(type), tag);                                 \
+		(x) = 0;                                                              \
+	}
 
 /**************************************************************************************
  * Function:    FreeBuffers
@@ -165,15 +179,23 @@ void FreeBuffers(MP3DecInfo *mp3DecInfo) FL_NO_EXCEPT
 	if (!mp3DecInfo)
 		return;
 
-	SAFE_FREE(mp3DecInfo->FrameHeaderPS);
-	SAFE_FREE(mp3DecInfo->SideInfoPS);
-	SAFE_FREE(mp3DecInfo->ScaleFactorInfoPS);
-	SAFE_FREE(mp3DecInfo->HuffmanInfoPS);
-	SAFE_FREE(mp3DecInfo->DequantInfoPS);
-	SAFE_FREE(mp3DecInfo->IMDCTInfoPS);
-	SAFE_FREE(mp3DecInfo->SubbandInfoPS);
+	SAFE_FREE_TAGGED(mp3DecInfo->FrameHeaderPS, FrameHeader,
+		Mp3MemoryTag::DecoderState);
+	SAFE_FREE_TAGGED(mp3DecInfo->SideInfoPS, SideInfo,
+		Mp3MemoryTag::DecoderState);
+	SAFE_FREE_TAGGED(mp3DecInfo->ScaleFactorInfoPS, ScaleFactorInfo,
+		Mp3MemoryTag::DecoderState);
+	SAFE_FREE_TAGGED(mp3DecInfo->HuffmanInfoPS, HuffmanInfo,
+		Mp3MemoryTag::Scratch);
+	SAFE_FREE_TAGGED(mp3DecInfo->DequantInfoPS, DequantInfo,
+		Mp3MemoryTag::Scratch);
+	SAFE_FREE_TAGGED(mp3DecInfo->IMDCTInfoPS, IMDCTInfo,
+		Mp3MemoryTag::Scratch);
+	SAFE_FREE_TAGGED(mp3DecInfo->SubbandInfoPS, SubbandInfo,
+		Mp3MemoryTag::Scratch);
 
-	SAFE_FREE(mp3DecInfo);
+	Mp3MemoryFree(mp3DecInfo, sizeof(MP3DecInfo),
+		Mp3MemoryTag::DecoderState);
 }
 
 }  // namespace third_party
