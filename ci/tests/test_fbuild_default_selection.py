@@ -109,7 +109,14 @@ def test_autoresearch_fbuild_firmware_path_returns_none_when_missing(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    monkeypatch.setattr("fbuild.find_firmware", lambda *_args: None)
+    def fake_find_firmware(
+        project_dir: str,
+        environment: str,
+        firmware_name: str | None = None,
+    ) -> None:
+        return None
+
+    monkeypatch.setattr("fbuild.find_firmware", fake_find_firmware)
 
     assert FbuildDriver().firmware_path(tmp_path, "rp2350w") is None
 
