@@ -208,7 +208,7 @@ def resolve_ripgrep(root: Path) -> Path:
     if executable.exists() and _rg_version(executable, root) == minimum:
         return executable
     archive = target.parent / asset
-    target.mkdir(parents=True, exist_ok=True)
+    target.parent.mkdir(parents=True, exist_ok=True)
     url = f"https://github.com/BurntSushi/ripgrep/releases/download/{RIPGREP_VERSION}/{asset}"
     result = _run(
         [
@@ -226,7 +226,8 @@ def resolve_ripgrep(root: Path) -> Path:
         timeout=300,
     )
     if result.returncode != 0:
-        raise RuntimeError(f"ripgrep download failed: {result.stderr.strip()}")
+        diagnostics = (result.stderr or result.stdout or "no diagnostics").strip()
+        raise RuntimeError(f"ripgrep download failed: {diagnostics}")
     candidates = sorted(target.rglob("rg.exe" if key[0] == "Windows" else "rg"))
     if not candidates or _rg_version(candidates[0], root) != minimum:
         raise RuntimeError("downloaded ripgrep archive has an unexpected layout or version")
