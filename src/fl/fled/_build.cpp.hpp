@@ -3,6 +3,7 @@
 
 // begin current directory includes
 #include "fl/fled/builder.cpp.hpp"
+#include "fl/fled/color.cpp.hpp"
 #include "fl/fled/fled.cpp.hpp"
 
 // begin sub directory includes

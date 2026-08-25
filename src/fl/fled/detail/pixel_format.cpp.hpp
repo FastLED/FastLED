@@ -12,6 +12,7 @@ fl::u8 bytesPerLed(fl::u8 pixelFormat) FL_NO_EXCEPT {
     case static_cast<fl::u8>(PixelFormat::Rgba8):    return 4;
     case static_cast<fl::u8>(PixelFormat::Rgbw8):    return 4;
     case static_cast<fl::u8>(PixelFormat::Rgb565Le): return 2;
+    case static_cast<fl::u8>(PixelFormat::Rgb16Linear): return 6;
     default:                                         return 0;
     }
 }
