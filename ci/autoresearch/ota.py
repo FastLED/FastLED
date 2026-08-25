@@ -50,7 +50,7 @@ async def run_ota_peer_autoresearch(
     upload_port: str,
     peer_upload_port: str,
     serial_iface: "SerialInterface | None",
-    firmware_path: Path,
+    firmware_path: Path | None,
     timeout: float = 360.0,
 ) -> int:
     """Update RP2350W from an ESP32-C6 fixture without host WiFi access.
@@ -63,7 +63,7 @@ async def run_ota_peer_autoresearch(
 
     print("\nOTA PEER AUTORESEARCH: RP2350W <- ESP32-C6")
     print("  Host WiFi is not used or changed by this mode.")
-    if not firmware_path.is_file():
+    if firmware_path is None or not firmware_path.is_file():
         print(
             f"  {Fore.RED}RP2350W firmware is missing: {firmware_path}{Style.RESET_ALL}"
         )

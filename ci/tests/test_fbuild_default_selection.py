@@ -85,23 +85,33 @@ def test_autoresearch_fbuild_install_packages_does_not_call_platformio(
 
 
 def test_autoresearch_fbuild_firmware_path_uses_release_artifact(
+    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    firmware = tmp_path / ".fbuild" / "build" / "release" / "firmware.bin"
-    firmware.parent.mkdir(parents=True)
-    firmware.touch()
+    firmware = tmp_path / "resolved" / "firmware.bin"
+    captured: list[tuple[str, str, str | None]] = []
+
+    def fake_find_firmware(
+        project_dir: str,
+        environment: str,
+        firmware_name: str | None = None,
+    ) -> str:
+        captured.append((project_dir, environment, firmware_name))
+        return str(firmware)
+
+    monkeypatch.setattr("fbuild.find_firmware", fake_find_firmware)
 
     assert FbuildDriver().firmware_path(tmp_path, "rp2350w") == firmware
+    assert captured == [(str(tmp_path), "rp2350w", "firmware.bin")]
 
 
-def test_autoresearch_fbuild_firmware_path_supports_environment_release(
+def test_autoresearch_fbuild_firmware_path_returns_none_when_missing(
+    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    firmware = tmp_path / ".fbuild" / "build" / "rp2350w" / "release" / "firmware.bin"
-    firmware.parent.mkdir(parents=True)
-    firmware.touch()
+    monkeypatch.setattr("fbuild.find_firmware", lambda *_args: None)
 
-    assert FbuildDriver().firmware_path(tmp_path, "rp2350w") == firmware
+    assert FbuildDriver().firmware_path(tmp_path, "rp2350w") is None
 
 
 def test_autoresearch_parse_args_warns_for_deprecated_fbuild_flags(
