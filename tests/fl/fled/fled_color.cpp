@@ -469,6 +469,33 @@ FL_TEST_CASE("FLED_COLOR - accepts ledmapper's emitted rgb16_linear envelope") {
     FL_CHECK(c.transfer == ColorTransfer::Linear);
 }
 
+FL_TEST_CASE("FLED_COLOR - the serialized envelope carries the whole metadata") {
+    // The WASM platform dumps json().to_string() to console.log when a .fled
+    // is injected (platforms/wasm/fs_wasm.cpp.hpp). That diagnostic is only
+    // useful if serializing round-trips every section, not just the one the
+    // reader happens to understand - so pin it here, on the host, where it
+    // can actually be asserted.
+    const char* env =
+        "{\"map\":{\"a\":{\"x\":[0],\"y\":[0]}},\"video\":{\"fps\":60,\"color\":"
+        "{\"primaries\":\"bt709\",\"transfer\":\"srgb\",\"matrix\":\"rgb\","
+        "\"range\":\"full\"}}}";
+    fl::vector<fl::u8> buf = buildBundle(0x00, env, fl::strlen(env));
+    Fled f = Fled::loadFromVector(fl::move(buf));
+    FL_CHECK(static_cast<bool>(f));
+
+    const fl::string dumped = f.json().to_string();
+    // Geometry, playback rate, and the full color tuple all survive.
+    FL_CHECK(dumped.find("map") != fl::string::npos);
+    FL_CHECK(dumped.find("fps") != fl::string::npos);
+    FL_CHECK(dumped.find("primaries") != fl::string::npos);
+    FL_CHECK(dumped.find("bt709") != fl::string::npos);
+    FL_CHECK(dumped.find("transfer") != fl::string::npos);
+    FL_CHECK(dumped.find("srgb") != fl::string::npos);
+    FL_CHECK(dumped.find("matrix") != fl::string::npos);
+    FL_CHECK(dumped.find("range") != fl::string::npos);
+    FL_CHECK(dumped.find("full") != fl::string::npos);
+}
+
 FL_TEST_CASE("FLED_COLOR - videoColor on a null Fled yields the default tuple") {
     Fled null;
     VideoColor c;
