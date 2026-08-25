@@ -403,6 +403,52 @@ FL_TEST_CASE("FLED_COLOR - a legacy bundle with no color still resolves") {
     FL_CHECK(c.transfer == ColorTransfer::Srgb);
 }
 
+// ============================================================================
+// Cross-repo conformance vectors
+//
+// These two envelopes are the VERBATIM output of ledmapper's producer
+// (src/moviemaker/recording.ts embedFps() -> buildVideoColor(format)), captured
+// from a real run. FastLED is the consumer half of this contract, so what the
+// producer actually emits must resolve here without complaint. If a future
+// ledmapper change alters the emitted shape, this is the test that notices.
+// ============================================================================
+
+FL_TEST_CASE("FLED_COLOR - accepts ledmapper's emitted rgb8 envelope verbatim") {
+    const char* env =
+        "{\"map\":{\"a\":{\"x\":[0],\"y\":[0]}},\"video\":{\"fps\":60,\"color\":"
+        "{\"primaries\":\"bt709\",\"transfer\":\"srgb\",\"matrix\":\"rgb\","
+        "\"range\":\"full\"}}}";
+    fl::vector<fl::u8> buf = buildBundle(0x00, env, fl::strlen(env));
+    Fled f = Fled::loadFromVector(fl::move(buf));
+    FL_CHECK(static_cast<bool>(f));
+
+    VideoColor c;
+    FL_CHECK(f.videoColor(&c) == ColorStatus::Ok);
+    FL_CHECK(c.declared == true);
+    FL_CHECK(c.primaries == ColorPrimaries::Bt709);
+    FL_CHECK(c.transfer  == ColorTransfer::Srgb);
+    FL_CHECK(c.matrix    == ColorMatrix::Rgb);
+    FL_CHECK(c.range     == ColorRange::Full);
+    // The rest of the envelope still parses normally alongside it.
+    FL_CHECK(f.videoFps() == 60.0f);
+}
+
+FL_TEST_CASE("FLED_COLOR - accepts ledmapper's emitted rgb16_linear envelope") {
+    const char* env =
+        "{\"map\":{\"a\":{\"x\":[0],\"y\":[0]}},\"video\":{\"fps\":60,\"color\":"
+        "{\"primaries\":\"bt709\",\"transfer\":\"linear\",\"matrix\":\"rgb\","
+        "\"range\":\"full\"}}}";
+    fl::vector<fl::u8> buf = buildBundle(0x05, env, fl::strlen(env));
+    Fled f = Fled::loadFromVector(fl::move(buf));
+    FL_CHECK(static_cast<bool>(f));
+    FL_CHECK_EQ(f.bytesPerLed(), 6);
+
+    VideoColor c;
+    FL_CHECK(f.videoColor(&c) == ColorStatus::Ok);
+    FL_CHECK(c.declared == true);
+    FL_CHECK(c.transfer == ColorTransfer::Linear);
+}
+
 FL_TEST_CASE("FLED_COLOR - videoColor on a null Fled yields the default tuple") {
     Fled null;
     VideoColor c;
