@@ -50,11 +50,14 @@
         "src/**/*.h",
         "src/**/*.hpp",
         "src/**/*.c",
+        "src/**/*.s",
+        "src/**/*.S",
         "examples/**/*.ino",
         "examples/**/*.cpp",
         "examples/**/*.h",
         "examples/**/*.hpp",
-        "ci/lint_cpp/*.py"
+        "ci/lint_cpp/*.py",
+        "ci/lint_cpp_rs/file_legal_policy.yaml"
       ],
       "tools": [
         "clang-format",

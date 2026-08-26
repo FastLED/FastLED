@@ -24,4 +24,5 @@ include!("checkers/singleton_elision.rs");
 include!("checkers/prefer_constexpr.rs");
 include!("checkers/container_ptr.rs");
 include!("checkers/r1_cleanup.rs");
+include!("checkers/file_legal.rs");
 include!("lint_core/tests.rs");
