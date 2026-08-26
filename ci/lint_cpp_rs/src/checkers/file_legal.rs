@@ -599,21 +599,12 @@ mod history_tests {
     }
 
     #[test]
+    #[ignore = "one-off audit: requires the repository's complete Git history"]
     fn live_fastled_history_contains_known_pre_and_post_move_authors() {
         let project_root = Path::new(env!("CARGO_MANIFEST_DIR"))
             .parent()
             .and_then(Path::parent)
             .unwrap();
-        let shallow = Command::new("git")
-            .current_dir(project_root)
-            .args(["rev-parse", "--is-shallow-repository"])
-            .output()
-            .unwrap();
-        assert!(shallow.status.success());
-        if String::from_utf8_lossy(&shallow.stdout).trim() == "true" {
-            eprintln!("skipping live history assertions in a shallow Git checkout");
-            return;
-        }
         let known_paths = [
             "src/FastLED.h",
             "src/chipsets.h",
