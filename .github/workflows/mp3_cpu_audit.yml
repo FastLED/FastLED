@@ -1,0 +1,90 @@
+name: MP3 CPU audit
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/fl/codec/mp3*'
+      - 'src/third_party/libhelix_mp3/**'
+      - 'src/third_party/minimp3/**'
+      - 'tests/data/codec/minimp3/**'
+      - 'ci/codec_cpu/**'
+      - 'ci/codec_memory/*_audit.cpp'
+      - 'codec_cpu_ledger.md'
+      - 'codec_cpu_trend.json'
+      - 'pyproject.toml'
+      - '.github/workflows/mp3_cpu_audit.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'src/fl/codec/mp3*'
+      - 'src/third_party/libhelix_mp3/**'
+      - 'src/third_party/minimp3/**'
+      - 'tests/data/codec/minimp3/**'
+      - 'ci/codec_cpu/**'
+      - 'ci/codec_memory/*_audit.cpp'
+      - 'codec_cpu_ledger.md'
+      - 'codec_cpu_trend.json'
+      - 'pyproject.toml'
+      - '.github/workflows/mp3_cpu_audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          version: '0.8.0'
+
+      - name: Install audit tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang llvm valgrind
+          for governor in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+            if [ -e "$governor" ]; then
+              echo performance | sudo tee "$governor"
+            fi
+          done
+
+      - name: Install project and MCU toolchains
+        run: |
+          uv sync
+          uv run pio pkg install -g -t 'espressif/toolchain-xtensa-esp32@8.4.0+2021r2-patch3'
+          uv run pio pkg install -g -t 'espressif/toolchain-riscv32-esp@12.2.0+20230208'
+          uv run pio pkg install -g -t 'platformio/toolchain-gccarmnoneeabi@1.120301.0'
+
+      - name: Verify the focused CPU gate
+        env:
+          PYTEST_ADDOPTS: -k codec_cpu_audit
+        run: bash test --py --verbose
+
+      - name: Enforce operation, host, and target-codegen trends
+        run: >-
+          uv run python ci/codec_cpu/audit.py --check
+          --write codec_cpu_current.json
+
+      - name: Upload measured report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codec-cpu-current
+          path: codec_cpu_current.json
+          if-no-files-found: error

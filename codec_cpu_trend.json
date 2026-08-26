@@ -1,0 +1,959 @@
+{
+  "backends": {
+    "helix": {
+      "codegen": {
+        "cortex-m0plus": {
+          "dct32": {
+            "inner_loop_instructions": 498,
+            "instructions": 885
+          },
+          "polyphase": {
+            "inner_loop_instructions": 1179,
+            "instructions": 2015
+          }
+        },
+        "cortex-m4": {
+          "dct32": {
+            "inner_loop_instructions": 536,
+            "instructions": 547
+          },
+          "polyphase": {
+            "inner_loop_instructions": 372,
+            "instructions": 679
+          }
+        },
+        "riscv32-esp": {
+          "dct32": {
+            "inner_loop_instructions": 0,
+            "instructions": 15
+          },
+          "polyphase": {
+            "inner_loop_instructions": 0,
+            "instructions": 776
+          }
+        },
+        "xtensa-esp32": {
+          "dct32": {
+            "inner_loop_instructions": 117,
+            "instructions": 551
+          },
+          "polyphase": {
+            "inner_loop_instructions": 1251,
+            "instructions": 2075
+          }
+        }
+      },
+      "host": {
+        "callgrind": {
+          "branch_misses": 453948,
+          "branches": 8294798,
+          "functions": {
+            "src/third_party/libhelix_mp3/mp3dec.hpp:fl::third_party::MP3Decode(void*, unsigned char const**, unsigned long*, short*, int)": 453016441,
+            "src/third_party/libhelix_mp3/real/assembly.h:fl::third_party::MADD64(long long, int, int)": 96979680,
+            "src/third_party/libhelix_mp3/real/assembly.h:fl::third_party::MULSHIFT32(int, int)": 34575695,
+            "src/third_party/libhelix_mp3/real/coder.h:clip_2n_helper(int, int)": 13639644,
+            "src/third_party/libhelix_mp3/real/dct32.hpp:fl::third_party::FDCT32(int*, int*, int, int, int)": 51799464,
+            "src/third_party/libhelix_mp3/real/dequant.hpp:fl::third_party::Dequantize(_MP3DecInfo*, int)": 26041174,
+            "src/third_party/libhelix_mp3/real/dqchan.hpp:fl::third_party::DequantBlock(int*, int*, int, int)": 18463953,
+            "src/third_party/libhelix_mp3/real/dqchan.hpp:fl::third_party::DequantChannel(int*, int*, int*, fl::third_party::_FrameHeader*, fl::third_party::_SideInfoSub*, fl::third_party::_ScaleFactorInfoSub*, fl::third_party::CriticalBandInfo*)": 20154627,
+            "src/third_party/libhelix_mp3/real/huffman.hpp:fl::third_party::DecodeHuffman(_MP3DecInfo*, unsigned char const*, int*, int, int, int)": 20646623,
+            "src/third_party/libhelix_mp3/real/huffman.hpp:fl::third_party::DecodeHuffmanQuads(int*, int, int, int, unsigned char const*, int)": 10927918,
+            "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::AntiAlias(int*, int)": 15353764,
+            "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::FreqInvertRescale(int*, int*, int, int)": 26233682,
+            "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::HybridTransform(int*, int*, int (*) [32], fl::third_party::_SideInfoSub*, fl::third_party::_BlockCount*)": 85424160,
+            "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::IMDCT(_MP3DecInfo*, int, int)": 101035762,
+            "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::IMDCT36(int*, int*, int*, int, int, int, int)": 81616669,
+            "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::idct9(int*)": 16979760,
+            "src/third_party/libhelix_mp3/real/polyphase.hpp:PolyphaseMono": 56829420,
+            "src/third_party/libhelix_mp3/real/polyphase.hpp:PolyphaseStereo": 192621420,
+            "src/third_party/libhelix_mp3/real/polyphase.hpp:fl::third_party::ClipToShort(int, int)": 12314880,
+            "src/third_party/libhelix_mp3/real/subband.hpp:fl::third_party::Subband(_MP3DecInfo*, short*)": 301950654
+          },
+          "instructions": 461845281
+        },
+        "counter_median": {
+          "branch_misses": 453948,
+          "cycles": 147513314,
+          "instructions": 461845281,
+          "ipc": 3.130872
+        },
+        "counter_source": {
+          "branch_misses": "Valgrind Callgrind simulated Bcm plus Bim",
+          "cycles": "Clang readcyclecounter median over 30 pinned runs",
+          "instructions": "Valgrind Callgrind deterministic Ir",
+          "ipc": "Callgrind Ir divided by median cycle counter"
+        },
+        "stage_coverage": {
+          "antialias": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "dequant": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "huffman": {
+            "instrumentation_sites": 3,
+            "mode": "dedicated"
+          },
+          "imdct": {
+            "instrumentation_sites": 3,
+            "mode": "dedicated"
+          },
+          "reorder": {
+            "fused_with": "dequant",
+            "instrumentation_sites": 0,
+            "mode": "fused"
+          },
+          "scalefactors": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "stereo": {
+            "instrumentation_sites": 3,
+            "mode": "dedicated"
+          },
+          "synthesis": {
+            "instrumentation_sites": 4,
+            "mode": "dedicated"
+          }
+        },
+        "stage_ns_median": {
+          "antialias": 2598.098,
+          "dequant": 5611.841,
+          "huffman": 6079.694,
+          "imdct": 16169.043,
+          "reorder": 0,
+          "scalefactors": 356.547,
+          "stereo": 1356.849,
+          "synthesis": 51345.789
+        }
+      },
+      "operations": {
+        "frames": 892,
+        "stages": {
+          "antialias": {
+            "macs_per_frame": 808,
+            "multiplies_per_frame": 1616,
+            "total_macs": 720736,
+            "total_multiplies": 1441472
+          },
+          "dequant": {
+            "macs_per_frame": 68.399103,
+            "multiplies_per_frame": 125.709641,
+            "total_macs": 61012,
+            "total_multiplies": 112133
+          },
+          "huffman": {
+            "macs_per_frame": 0,
+            "multiplies_per_frame": 0,
+            "total_macs": 0,
+            "total_multiplies": 0
+          },
+          "imdct": {
+            "macs_per_frame": 986.865471,
+            "multiplies_per_frame": 2559.20852,
+            "total_macs": 880284,
+            "total_multiplies": 2282814
+          },
+          "reorder": {
+            "macs_per_frame": 0,
+            "multiplies_per_frame": 0,
+            "total_macs": 0,
+            "total_multiplies": 0
+          },
+          "scalefactors": {
+            "macs_per_frame": 0,
+            "multiplies_per_frame": 0,
+            "total_macs": 0,
+            "total_multiplies": 0
+          },
+          "stereo": {
+            "macs_per_frame": 0,
+            "multiplies_per_frame": 0,
+            "total_macs": 0,
+            "total_multiplies": 0
+          },
+          "synthesis": {
+            "macs_per_frame": 21744.32287,
+            "multiplies_per_frame": 25195.802691,
+            "total_macs": 19395936,
+            "total_multiplies": 22474656
+          }
+        }
+      }
+    },
+    "minimp3-float": {
+      "codegen": {
+        "cortex-m0plus": {
+          "dct32": {
+            "inner_loop_instructions": 298,
+            "instructions": 325
+          },
+          "polyphase": {
+            "inner_loop_instructions": 0,
+            "instructions": 173
+          }
+        },
+        "cortex-m4": {
+          "dct32": {
+            "inner_loop_instructions": 264,
+            "instructions": 280
+          },
+          "polyphase": {
+            "inner_loop_instructions": 0,
+            "instructions": 130
+          }
+        },
+        "riscv32-esp": {
+          "dct32": {
+            "inner_loop_instructions": 0,
+            "instructions": 47
+          },
+          "polyphase": {
+            "inner_loop_instructions": 0,
+            "instructions": 185
+          }
+        },
+        "xtensa-esp32": {
+          "dct32": {
+            "inner_loop_instructions": 144,
+            "instructions": 160
+          },
+          "polyphase": {
+            "inner_loop_instructions": 0,
+            "instructions": 105
+          }
+        }
+      },
+      "host": {
+        "callgrind": {
+          "branch_misses": 555920,
+          "branches": 22461967,
+          "functions": {
+            "src/third_party/minimp3/minimp3.h:fl::third_party::L3_antialias(float*, int)": 10067934,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::L3_change_sign(float*)": 2097378,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::L3_dct3_9(float*)": 10311680,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::L3_decode(fl::third_party::mp3dec_t*, fl::third_party::mp3dec_scratch_internal_t*, fl::third_party::L3_gr_info_t*, int)": 71710842,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::L3_decode_scalefactors(unsigned char const*, unsigned char*, fl::third_party::bs_t*, fl::third_party::L3_gr_info_t const*, float*, int)": 3008422,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::L3_huffman(float*, fl::third_party::bs_t*, fl::third_party::L3_gr_info_t const*, float const*, int)": 17434586,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::L3_imdct36(float*, float*, float const*, int)": 34857040,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::L3_imdct_gr(float*, float*, unsigned int, unsigned int)": 35208030,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::L3_ldexp_q2(float, int)": 897555,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::L3_midside_stereo(float*, int)": 3644112,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::L3_pow_43(int)": 455424,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_scalefactors(unsigned char*, unsigned char*, unsigned char const*, unsigned char const*, fl::third_party::bs_t*, int)": 1357481,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_side_info(fl::third_party::bs_t*, fl::third_party::L3_gr_info_t*, unsigned char const*)": 1053557,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::get_bits(fl::third_party::bs_t*, int)": 1425121,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_DCT_II(float*, int)": 30475052,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_scale_pcm(float)": 19588608,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_granule(float*, float*, int, int, short*)": 173353159,
+            "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_pair(short*, int, float const*)": 4473360,
+            "src/third_party/minimp3/minimp3.h:mp3dec_decode_frame_r": 252867274
+          },
+          "instructions": 261532799
+        },
+        "counter_median": {
+          "branch_misses": 555920,
+          "cycles": 54515955,
+          "instructions": 261532799,
+          "ipc": 4.797363
+        },
+        "counter_source": {
+          "branch_misses": "Valgrind Callgrind simulated Bcm plus Bim",
+          "cycles": "Clang readcyclecounter median over 30 pinned runs",
+          "instructions": "Valgrind Callgrind deterministic Ir",
+          "ipc": "Callgrind Ir divided by median cycle counter"
+        },
+        "stage_coverage": {
+          "antialias": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "dequant": {
+            "fused_with": "huffman",
+            "instrumentation_sites": 0,
+            "mode": "fused"
+          },
+          "huffman": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "imdct": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "reorder": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "scalefactors": {
+            "instrumentation_sites": 2,
+            "mode": "dedicated"
+          },
+          "stereo": {
+            "instrumentation_sites": 3,
+            "mode": "dedicated"
+          },
+          "synthesis": {
+            "instrumentation_sites": 2,
+            "mode": "dedicated"
+          }
+        },
+        "stage_ns_median": {
+          "antialias": 970.501,
+          "dequant": 0,
+          "huffman": 8754.614,
+          "imdct": 3791.305,
+          "reorder": 13.933,
+          "scalefactors": 614.98,
+          "stereo": 500.496,
+          "synthesis": 23522.451
+        }
+      },
+      "operations": {
+        "frames": 892,
+        "stages": {
+          "antialias": {
+            "macs_per_frame": 1178.834081,
+            "multiplies_per_frame": 2357.668161,
+            "total_macs": 1051520,
+            "total_multiplies": 2103040
+          },
+          "dequant": {
+            "macs_per_frame": 21.7287,
+            "multiplies_per_frame": 331.96861,
+            "total_macs": 19382,
+            "total_multiplies": 296116
+          },
+          "huffman": {
+            "macs_per_frame": 0,
+            "multiplies_per_frame": 0,
+            "total_macs": 0,
+            "total_multiplies": 0
+          },
+          "imdct": {
+            "macs_per_frame": 5206.529148,
+            "multiplies_per_frame": 7051.192825,
+            "total_macs": 4644224,
+            "total_multiplies": 6289664
+          },
+          "reorder": {
+            "macs_per_frame": 0,
+            "multiplies_per_frame": 0,
+            "total_macs": 0,
+            "total_multiplies": 0
+          },
+          "scalefactors": {
+            "macs_per_frame": 0,
+            "multiplies_per_frame": 111.975336,
+            "total_macs": 0,
+            "total_multiplies": 99882
+          },
+          "stereo": {
+            "macs_per_frame": 0,
+            "multiplies_per_frame": 0,
+            "total_macs": 0,
+            "total_multiplies": 0
+          },
+          "synthesis": {
+            "macs_per_frame": 15306.780269,
+            "multiplies_per_frame": 29634.941704,
+            "total_macs": 13653648,
+            "total_multiplies": 26434368
+          }
+        }
+      }
+    }
+  },
+  "corpus": [
+    {
+      "bytes": 12538,
+      "path": "tests/data/codec/minimp3/l3-hecommon.bit",
+      "sha256": "21999b77716aeba047c7f55c2c1ce17b54c780b6dc007912f251b7ea189676ef"
+    },
+    {
+      "bytes": 192,
+      "path": "tests/data/codec/minimp3/l3-compl-cut.mp3",
+      "sha256": "9f5b4baaefc5403c2b55ad5a52c8d7e812ba9e25638f8b674a0d01df6008a7c7"
+    },
+    {
+      "bytes": 26645,
+      "path": "tests/data/codec/minimp3/l3-he_free.bit",
+      "sha256": "b55afc2a21492c4b3035d423f36fe87560ef34f65eb997da60af9b01f300362c"
+    },
+    {
+      "bytes": 132492,
+      "path": "tests/data/codec/minimp3/l3-lame-vbrtag.bit",
+      "sha256": "c59cc31ed4cc3556f3c1aad35ec7860a56449a3a2ca16b6f29579f0ca7684b71"
+    },
+    {
+      "bytes": 154224,
+      "path": "tests/data/codec/minimp3/M2L3_bitrate_16_all.bit",
+      "sha256": "69577544aa28b87f6217ad2060f4cec3b1835593c659683ed8437429a74d3640"
+    }
+  ],
+  "environment": {
+    "affinity_cpu": 0,
+    "compiler": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "governor": "not-exposed",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39"
+  },
+  "host_key": "AMD EPYC 9V74 80-Core Processor | Ubuntu clang version 18.1.3 (1ubuntu1) | not-exposed",
+  "profile_runs": 30,
+  "regression_tolerance": 0.05,
+  "schema_version": 2,
+  "host_baselines": {
+    "AMD EPYC 7763 64-Core Processor | Ubuntu clang version 18.1.3 (1ubuntu1) | not-exposed": {
+      "environment": {
+        "affinity_cpu": 0,
+        "compiler": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+        "cpu_model": "AMD EPYC 7763 64-Core Processor",
+        "governor": "not-exposed",
+        "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39"
+      },
+      "hosts": {
+        "helix": {
+          "callgrind": {
+            "branch_misses": 453948,
+            "branches": 8294798,
+            "functions": {
+              "src/third_party/libhelix_mp3/mp3dec.hpp:fl::third_party::MP3Decode(void*, unsigned char const**, unsigned long*, short*, int)": 453016441,
+              "src/third_party/libhelix_mp3/real/assembly.h:fl::third_party::MADD64(long long, int, int)": 96979680,
+              "src/third_party/libhelix_mp3/real/assembly.h:fl::third_party::MULSHIFT32(int, int)": 34575695,
+              "src/third_party/libhelix_mp3/real/coder.h:clip_2n_helper(int, int)": 13639644,
+              "src/third_party/libhelix_mp3/real/dct32.hpp:fl::third_party::FDCT32(int*, int*, int, int, int)": 51799464,
+              "src/third_party/libhelix_mp3/real/dequant.hpp:fl::third_party::Dequantize(_MP3DecInfo*, int)": 26041174,
+              "src/third_party/libhelix_mp3/real/dqchan.hpp:fl::third_party::DequantBlock(int*, int*, int, int)": 18463953,
+              "src/third_party/libhelix_mp3/real/dqchan.hpp:fl::third_party::DequantChannel(int*, int*, int*, fl::third_party::_FrameHeader*, fl::third_party::_SideInfoSub*, fl::third_party::_ScaleFactorInfoSub*, fl::third_party::CriticalBandInfo*)": 20154627,
+              "src/third_party/libhelix_mp3/real/huffman.hpp:fl::third_party::DecodeHuffman(_MP3DecInfo*, unsigned char const*, int*, int, int, int)": 20646623,
+              "src/third_party/libhelix_mp3/real/huffman.hpp:fl::third_party::DecodeHuffmanQuads(int*, int, int, int, unsigned char const*, int)": 10927918,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::AntiAlias(int*, int)": 15353764,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::FreqInvertRescale(int*, int*, int, int)": 26233682,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::HybridTransform(int*, int*, int (*) [32], fl::third_party::_SideInfoSub*, fl::third_party::_BlockCount*)": 85424160,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::IMDCT(_MP3DecInfo*, int, int)": 101035762,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::IMDCT36(int*, int*, int*, int, int, int, int)": 81616669,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::idct9(int*)": 16979760,
+              "src/third_party/libhelix_mp3/real/polyphase.hpp:PolyphaseMono": 56829420,
+              "src/third_party/libhelix_mp3/real/polyphase.hpp:PolyphaseStereo": 192621420,
+              "src/third_party/libhelix_mp3/real/polyphase.hpp:fl::third_party::ClipToShort(int, int)": 12314880,
+              "src/third_party/libhelix_mp3/real/subband.hpp:fl::third_party::Subband(_MP3DecInfo*, short*)": 301950654
+            },
+            "instructions": 461845281
+          },
+          "counter_median": {
+            "branch_misses": 453948,
+            "cycles": 125330104.5,
+            "instructions": 461845281,
+            "ipc": 3.685031
+          },
+          "counter_source": {
+            "branch_misses": "Valgrind Callgrind simulated Bcm plus Bim",
+            "cycles": "Clang readcyclecounter median over 30 pinned runs",
+            "instructions": "Valgrind Callgrind deterministic Ir",
+            "ipc": "Callgrind Ir divided by median cycle counter"
+          },
+          "stage_coverage": {
+            "antialias": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "dequant": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "huffman": {
+              "instrumentation_sites": 3,
+              "mode": "dedicated"
+            },
+            "imdct": {
+              "instrumentation_sites": 3,
+              "mode": "dedicated"
+            },
+            "reorder": {
+              "fused_with": "dequant",
+              "instrumentation_sites": 0,
+              "mode": "fused"
+            },
+            "scalefactors": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "stereo": {
+              "instrumentation_sites": 3,
+              "mode": "dedicated"
+            },
+            "synthesis": {
+              "instrumentation_sites": 4,
+              "mode": "dedicated"
+            }
+          },
+          "stage_ns_median": {
+            "antialias": 2333.295,
+            "dequant": 5011.896,
+            "huffman": 5620.746,
+            "imdct": 15191.41,
+            "reorder": 0,
+            "scalefactors": 317.643,
+            "stereo": 1219.54,
+            "synthesis": 46696.641
+          }
+        },
+        "minimp3-float": {
+          "callgrind": {
+            "branch_misses": 555920,
+            "branches": 22461967,
+            "functions": {
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_antialias(float*, int)": 10067934,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_change_sign(float*)": 2097378,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_dct3_9(float*)": 10311680,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_decode(fl::third_party::mp3dec_t*, fl::third_party::mp3dec_scratch_internal_t*, fl::third_party::L3_gr_info_t*, int)": 71710842,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_decode_scalefactors(unsigned char const*, unsigned char*, fl::third_party::bs_t*, fl::third_party::L3_gr_info_t const*, float*, int)": 3008422,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_huffman(float*, fl::third_party::bs_t*, fl::third_party::L3_gr_info_t const*, float const*, int)": 17434586,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_imdct36(float*, float*, float const*, int)": 34857040,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_imdct_gr(float*, float*, unsigned int, unsigned int)": 35208030,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_ldexp_q2(float, int)": 897555,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_midside_stereo(float*, int)": 3644112,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_pow_43(int)": 455424,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_scalefactors(unsigned char*, unsigned char*, unsigned char const*, unsigned char const*, fl::third_party::bs_t*, int)": 1357481,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_side_info(fl::third_party::bs_t*, fl::third_party::L3_gr_info_t*, unsigned char const*)": 1053557,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::get_bits(fl::third_party::bs_t*, int)": 1425121,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_DCT_II(float*, int)": 30475052,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_scale_pcm(float)": 19588608,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_granule(float*, float*, int, int, short*)": 173353159,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_pair(short*, int, float const*)": 4473360,
+              "src/third_party/minimp3/minimp3.h:mp3dec_decode_frame_r": 252867274
+            },
+            "instructions": 261532799
+          },
+          "counter_median": {
+            "branch_misses": 555920,
+            "cycles": 47335274,
+            "instructions": 261532799,
+            "ipc": 5.525114
+          },
+          "counter_source": {
+            "branch_misses": "Valgrind Callgrind simulated Bcm plus Bim",
+            "cycles": "Clang readcyclecounter median over 30 pinned runs",
+            "instructions": "Valgrind Callgrind deterministic Ir",
+            "ipc": "Callgrind Ir divided by median cycle counter"
+          },
+          "stage_coverage": {
+            "antialias": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "dequant": {
+              "fused_with": "huffman",
+              "instrumentation_sites": 0,
+              "mode": "fused"
+            },
+            "huffman": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "imdct": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "reorder": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "scalefactors": {
+              "instrumentation_sites": 2,
+              "mode": "dedicated"
+            },
+            "stereo": {
+              "instrumentation_sites": 3,
+              "mode": "dedicated"
+            },
+            "synthesis": {
+              "instrumentation_sites": 2,
+              "mode": "dedicated"
+            }
+          },
+          "stage_ns_median": {
+            "antialias": 938.232,
+            "dequant": 0,
+            "huffman": 7819.434,
+            "imdct": 3692.257,
+            "reorder": 12.388,
+            "scalefactors": 586.082,
+            "stereo": 464.267,
+            "synthesis": 22360.622
+          }
+        }
+      }
+    },
+    "INTEL(R) XEON(R) PLATINUM 8573C | Ubuntu clang version 18.1.3 (1ubuntu1) | performance": {
+      "environment": {
+        "affinity_cpu": 0,
+        "compiler": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+        "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+        "governor": "performance",
+        "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39"
+      },
+      "hosts": {
+        "helix": {
+          "callgrind": {
+            "branch_misses": 453948,
+            "branches": 8294798,
+            "functions": {
+              "src/third_party/libhelix_mp3/mp3dec.hpp:fl::third_party::MP3Decode(void*, unsigned char const**, unsigned long*, short*, int)": 453016441,
+              "src/third_party/libhelix_mp3/real/assembly.h:fl::third_party::MADD64(long long, int, int)": 96979680,
+              "src/third_party/libhelix_mp3/real/assembly.h:fl::third_party::MULSHIFT32(int, int)": 34575695,
+              "src/third_party/libhelix_mp3/real/coder.h:clip_2n_helper(int, int)": 13639644,
+              "src/third_party/libhelix_mp3/real/dct32.hpp:fl::third_party::FDCT32(int*, int*, int, int, int)": 51799464,
+              "src/third_party/libhelix_mp3/real/dequant.hpp:fl::third_party::Dequantize(_MP3DecInfo*, int)": 26041174,
+              "src/third_party/libhelix_mp3/real/dqchan.hpp:fl::third_party::DequantBlock(int*, int*, int, int)": 18463953,
+              "src/third_party/libhelix_mp3/real/dqchan.hpp:fl::third_party::DequantChannel(int*, int*, int*, fl::third_party::_FrameHeader*, fl::third_party::_SideInfoSub*, fl::third_party::_ScaleFactorInfoSub*, fl::third_party::CriticalBandInfo*)": 20154627,
+              "src/third_party/libhelix_mp3/real/huffman.hpp:fl::third_party::DecodeHuffman(_MP3DecInfo*, unsigned char const*, int*, int, int, int)": 20646623,
+              "src/third_party/libhelix_mp3/real/huffman.hpp:fl::third_party::DecodeHuffmanQuads(int*, int, int, int, unsigned char const*, int)": 10927918,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::AntiAlias(int*, int)": 15353764,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::FreqInvertRescale(int*, int*, int, int)": 26233682,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::HybridTransform(int*, int*, int (*) [32], fl::third_party::_SideInfoSub*, fl::third_party::_BlockCount*)": 85424160,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::IMDCT(_MP3DecInfo*, int, int)": 101035762,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::IMDCT36(int*, int*, int*, int, int, int, int)": 81616669,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::idct9(int*)": 16979760,
+              "src/third_party/libhelix_mp3/real/polyphase.hpp:PolyphaseMono": 56829420,
+              "src/third_party/libhelix_mp3/real/polyphase.hpp:PolyphaseStereo": 192621420,
+              "src/third_party/libhelix_mp3/real/polyphase.hpp:fl::third_party::ClipToShort(int, int)": 12314880,
+              "src/third_party/libhelix_mp3/real/subband.hpp:fl::third_party::Subband(_MP3DecInfo*, short*)": 301950654
+            },
+            "instructions": 461845281
+          },
+          "counter_median": {
+            "branch_misses": 453948,
+            "cycles": 121774722,
+            "instructions": 461845281,
+            "ipc": 3.79262
+          },
+          "counter_source": {
+            "branch_misses": "Valgrind Callgrind simulated Bcm plus Bim",
+            "cycles": "Clang readcyclecounter median over 30 pinned runs",
+            "instructions": "Valgrind Callgrind deterministic Ir",
+            "ipc": "Callgrind Ir divided by median cycle counter"
+          },
+          "stage_coverage": {
+            "antialias": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "dequant": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "huffman": {
+              "instrumentation_sites": 3,
+              "mode": "dedicated"
+            },
+            "imdct": {
+              "instrumentation_sites": 3,
+              "mode": "dedicated"
+            },
+            "reorder": {
+              "fused_with": "dequant",
+              "instrumentation_sites": 0,
+              "mode": "fused"
+            },
+            "scalefactors": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "stereo": {
+              "instrumentation_sites": 3,
+              "mode": "dedicated"
+            },
+            "synthesis": {
+              "instrumentation_sites": 4,
+              "mode": "dedicated"
+            }
+          },
+          "stage_ns_median": {
+            "antialias": 2471.105,
+            "dequant": 3705.591,
+            "huffman": 5451.54,
+            "imdct": 13588.925,
+            "reorder": 0,
+            "scalefactors": 375.003,
+            "stereo": 1003.123,
+            "synthesis": 44669.008
+          }
+        },
+        "minimp3-float": {
+          "callgrind": {
+            "branch_misses": 555920,
+            "branches": 22461967,
+            "functions": {
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_antialias(float*, int)": 10067934,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_change_sign(float*)": 2097378,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_dct3_9(float*)": 10311680,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_decode(fl::third_party::mp3dec_t*, fl::third_party::mp3dec_scratch_internal_t*, fl::third_party::L3_gr_info_t*, int)": 71710842,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_decode_scalefactors(unsigned char const*, unsigned char*, fl::third_party::bs_t*, fl::third_party::L3_gr_info_t const*, float*, int)": 3008422,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_huffman(float*, fl::third_party::bs_t*, fl::third_party::L3_gr_info_t const*, float const*, int)": 17434586,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_imdct36(float*, float*, float const*, int)": 34857040,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_imdct_gr(float*, float*, unsigned int, unsigned int)": 35208030,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_ldexp_q2(float, int)": 897555,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_midside_stereo(float*, int)": 3644112,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_pow_43(int)": 455424,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_scalefactors(unsigned char*, unsigned char*, unsigned char const*, unsigned char const*, fl::third_party::bs_t*, int)": 1357481,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_side_info(fl::third_party::bs_t*, fl::third_party::L3_gr_info_t*, unsigned char const*)": 1053557,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::get_bits(fl::third_party::bs_t*, int)": 1425121,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_DCT_II(float*, int)": 30475052,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_scale_pcm(float)": 19588608,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_granule(float*, float*, int, int, short*)": 173353159,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_pair(short*, int, float const*)": 4473360,
+              "src/third_party/minimp3/minimp3.h:mp3dec_decode_frame_r": 252867274
+            },
+            "instructions": 261532799
+          },
+          "counter_median": {
+            "branch_misses": 555920,
+            "cycles": 43579998,
+            "instructions": 261532799,
+            "ipc": 6.001212
+          },
+          "counter_source": {
+            "branch_misses": "Valgrind Callgrind simulated Bcm plus Bim",
+            "cycles": "Clang readcyclecounter median over 30 pinned runs",
+            "instructions": "Valgrind Callgrind deterministic Ir",
+            "ipc": "Callgrind Ir divided by median cycle counter"
+          },
+          "stage_coverage": {
+            "antialias": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "dequant": {
+              "fused_with": "huffman",
+              "instrumentation_sites": 0,
+              "mode": "fused"
+            },
+            "huffman": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "imdct": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "reorder": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "scalefactors": {
+              "instrumentation_sites": 2,
+              "mode": "dedicated"
+            },
+            "stereo": {
+              "instrumentation_sites": 3,
+              "mode": "dedicated"
+            },
+            "synthesis": {
+              "instrumentation_sites": 2,
+              "mode": "dedicated"
+            }
+          },
+          "stage_ns_median": {
+            "antialias": 945.05,
+            "dequant": 0,
+            "huffman": 6431.265,
+            "imdct": 3277.937,
+            "reorder": 12.399,
+            "scalefactors": 592.034,
+            "stereo": 435.912,
+            "synthesis": 18897.973
+          }
+        }
+      }
+    },
+    "Intel(R) Xeon(R) 6973P-C | Ubuntu clang version 18.1.3 (1ubuntu1) | performance": {
+      "environment": {
+        "affinity_cpu": 0,
+        "compiler": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+        "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+        "governor": "performance",
+        "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39"
+      },
+      "hosts": {
+        "helix": {
+          "callgrind": {
+            "branch_misses": 453948,
+            "branches": 8294798,
+            "functions": {
+              "src/third_party/libhelix_mp3/mp3dec.hpp:fl::third_party::MP3Decode(void*, unsigned char const**, unsigned long*, short*, int)": 453016441,
+              "src/third_party/libhelix_mp3/real/assembly.h:fl::third_party::MADD64(long long, int, int)": 96979680,
+              "src/third_party/libhelix_mp3/real/assembly.h:fl::third_party::MULSHIFT32(int, int)": 34575695,
+              "src/third_party/libhelix_mp3/real/coder.h:clip_2n_helper(int, int)": 13639644,
+              "src/third_party/libhelix_mp3/real/dct32.hpp:fl::third_party::FDCT32(int*, int*, int, int, int)": 51799464,
+              "src/third_party/libhelix_mp3/real/dequant.hpp:fl::third_party::Dequantize(_MP3DecInfo*, int)": 26041174,
+              "src/third_party/libhelix_mp3/real/dqchan.hpp:fl::third_party::DequantBlock(int*, int*, int, int)": 18463953,
+              "src/third_party/libhelix_mp3/real/dqchan.hpp:fl::third_party::DequantChannel(int*, int*, int*, fl::third_party::_FrameHeader*, fl::third_party::_SideInfoSub*, fl::third_party::_ScaleFactorInfoSub*, fl::third_party::CriticalBandInfo*)": 20154627,
+              "src/third_party/libhelix_mp3/real/huffman.hpp:fl::third_party::DecodeHuffman(_MP3DecInfo*, unsigned char const*, int*, int, int, int)": 20646623,
+              "src/third_party/libhelix_mp3/real/huffman.hpp:fl::third_party::DecodeHuffmanQuads(int*, int, int, int, unsigned char const*, int)": 10927918,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::AntiAlias(int*, int)": 15353764,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::FreqInvertRescale(int*, int*, int, int)": 26233682,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::HybridTransform(int*, int*, int (*) [32], fl::third_party::_SideInfoSub*, fl::third_party::_BlockCount*)": 85424160,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::IMDCT(_MP3DecInfo*, int, int)": 101035762,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::IMDCT36(int*, int*, int*, int, int, int, int)": 81616669,
+              "src/third_party/libhelix_mp3/real/imdct.hpp:fl::third_party::idct9(int*)": 16979760,
+              "src/third_party/libhelix_mp3/real/polyphase.hpp:PolyphaseMono": 56829420,
+              "src/third_party/libhelix_mp3/real/polyphase.hpp:PolyphaseStereo": 192621420,
+              "src/third_party/libhelix_mp3/real/polyphase.hpp:fl::third_party::ClipToShort(int, int)": 12314880,
+              "src/third_party/libhelix_mp3/real/subband.hpp:fl::third_party::Subband(_MP3DecInfo*, short*)": 301950654
+            },
+            "instructions": 461845281
+          },
+          "counter_median": {
+            "branch_misses": 453948,
+            "cycles": 86820769,
+            "instructions": 461845281,
+            "ipc": 5.319525
+          },
+          "counter_source": {
+            "branch_misses": "Valgrind Callgrind simulated Bcm plus Bim",
+            "cycles": "Clang readcyclecounter median over 30 pinned runs",
+            "instructions": "Valgrind Callgrind deterministic Ir",
+            "ipc": "Callgrind Ir divided by median cycle counter"
+          },
+          "stage_coverage": {
+            "antialias": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "dequant": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "huffman": {
+              "instrumentation_sites": 3,
+              "mode": "dedicated"
+            },
+            "imdct": {
+              "instrumentation_sites": 3,
+              "mode": "dedicated"
+            },
+            "reorder": {
+              "fused_with": "dequant",
+              "instrumentation_sites": 0,
+              "mode": "fused"
+            },
+            "scalefactors": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "stereo": {
+              "instrumentation_sites": 3,
+              "mode": "dedicated"
+            },
+            "synthesis": {
+              "instrumentation_sites": 4,
+              "mode": "dedicated"
+            }
+          },
+          "stage_ns_median": {
+            "antialias": 1717.367,
+            "dequant": 2882.306,
+            "huffman": 4053.29,
+            "imdct": 9725.711,
+            "reorder": 0,
+            "scalefactors": 276.168,
+            "stereo": 755.652,
+            "synthesis": 27702.874
+          }
+        },
+        "minimp3-float": {
+          "callgrind": {
+            "branch_misses": 555920,
+            "branches": 22461967,
+            "functions": {
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_antialias(float*, int)": 10067934,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_change_sign(float*)": 2097378,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_dct3_9(float*)": 10311680,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_decode(fl::third_party::mp3dec_t*, fl::third_party::mp3dec_scratch_internal_t*, fl::third_party::L3_gr_info_t*, int)": 71710842,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_decode_scalefactors(unsigned char const*, unsigned char*, fl::third_party::bs_t*, fl::third_party::L3_gr_info_t const*, float*, int)": 3008422,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_huffman(float*, fl::third_party::bs_t*, fl::third_party::L3_gr_info_t const*, float const*, int)": 17434586,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_imdct36(float*, float*, float const*, int)": 34857040,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_imdct_gr(float*, float*, unsigned int, unsigned int)": 35208030,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_ldexp_q2(float, int)": 897555,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_midside_stereo(float*, int)": 3644112,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_pow_43(int)": 455424,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_scalefactors(unsigned char*, unsigned char*, unsigned char const*, unsigned char const*, fl::third_party::bs_t*, int)": 1357481,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_side_info(fl::third_party::bs_t*, fl::third_party::L3_gr_info_t*, unsigned char const*)": 1053557,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::get_bits(fl::third_party::bs_t*, int)": 1425121,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_DCT_II(float*, int)": 30475052,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_scale_pcm(float)": 19588608,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_granule(float*, float*, int, int, short*)": 173353159,
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_pair(short*, int, float const*)": 4473360,
+              "src/third_party/minimp3/minimp3.h:mp3dec_decode_frame_r": 252867274
+            },
+            "instructions": 261532799
+          },
+          "counter_median": {
+            "branch_misses": 555920,
+            "cycles": 37331631,
+            "instructions": 261532799,
+            "ipc": 7.005662
+          },
+          "counter_source": {
+            "branch_misses": "Valgrind Callgrind simulated Bcm plus Bim",
+            "cycles": "Clang readcyclecounter median over 30 pinned runs",
+            "instructions": "Valgrind Callgrind deterministic Ir",
+            "ipc": "Callgrind Ir divided by median cycle counter"
+          },
+          "stage_coverage": {
+            "antialias": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "dequant": {
+              "fused_with": "huffman",
+              "instrumentation_sites": 0,
+              "mode": "fused"
+            },
+            "huffman": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "imdct": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "reorder": {
+              "instrumentation_sites": 1,
+              "mode": "dedicated"
+            },
+            "scalefactors": {
+              "instrumentation_sites": 2,
+              "mode": "dedicated"
+            },
+            "stereo": {
+              "instrumentation_sites": 3,
+              "mode": "dedicated"
+            },
+            "synthesis": {
+              "instrumentation_sites": 2,
+              "mode": "dedicated"
+            }
+          },
+          "stage_ns_median": {
+            "antialias": 723.134,
+            "dequant": 0,
+            "huffman": 5258.724,
+            "imdct": 2449.202,
+            "reorder": 10.267,
+            "scalefactors": 483.547,
+            "stereo": 339.904,
+            "synthesis": 14113.014
+          }
+        }
+      }
+    }
+  }
+}

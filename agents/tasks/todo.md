@@ -44,7 +44,71 @@
 - [x] Measure and itemize codec static/flash symbols with `nm` and `size`.
 - [x] Add a machine-parsed `codec_memory_ledger.md` with a 2% regression gate.
 - [x] Run focused/broad validation and the pre-push code-review gate.
-- [ ] Push, merge the closing PR, and verify issue #4052/G1 state.
+- [x] Push, merge the closing PR, and verify issue #4052/G1 state.
+
+## MP3 Phase 2 CPU profiling audit (#4053)
+
+- [x] Capture the focused RED signal for missing CPU audit/trend/codegen ledgers.
+- [x] Instrument exact multiply/MAC counts per decoder stage for both backends.
+- [x] Add N=30 host counters, attribution, and per-stage median timing reports.
+- [x] Enforce `codec_cpu_trend.json` with a 5% regression gate.
+- [x] Record `-Os` inner-loop codegen for Xtensa, RISC-V, M0+, and M4.
+- [x] Run focused and broad validation plus the pre-push review gate.
+- [ ] Push, merge the closing PR, and verify issue #4053/G2 state.
+
+### Review
+
+- RED: the focused test failed at collection because `ci/codec_cpu/audit.py`
+  and `codec_cpu_trend.json` did not exist.
+- Tier 1 now instruments optimized decoder LLVM IR and records exact totals
+  plus mechanically derived per-frame multiply/MAC counts for all eight
+  stages across the same 892-frame, five-file corpus for both backends.
+- Tier 3 cross-compiles the complete codec build translation units at `-Os`
+  and records whole-kernel and real loop-body instruction counts
+  for Xtensa ESP32, RISC-V ESP32, Cortex-M0+, and Cortex-M4.
+- Stage coverage is fail-closed: every dedicated stage requires static
+  instrumentation and a positive timing, while the two codec-specific fused
+  stages are declared explicitly. Multiply/MAC accounting uses one MAC per
+  accumulation, including Helix sums of `MULSHIFT32` products.
+- Host trends are keyed by CPU model, compiler, and governor so measurements
+  from unlike hosted runners cannot be compared; Callgrind requires at least
+  eight attributed codec functions and enforces normalized function shares.
+- Focused validation passes 24 tests, operation and four-target codegen audits
+  pass locally, lint is clean, and the repeated pre-push review is clean after
+  resolving all five initial findings plus two follow-up accounting findings.
+- The first native runs exposed compiler-dependent direct-use MAC attribution
+  and unavailable PMU hardware counters. The audit follows multiply results
+  through LLVM casts and spill slots to their consuming accumulations; Clang
+  14 Linux and Clang 21 Windows produce identical operation sites and exact
+  ledgers across the full corpus.
+- CodeRabbit's first pass is addressed: Callgrind event/value cardinality is
+  strict, fixture allocation/read failures clean up, unattributed operations
+  abort, the audit-only macro follows the `FL_` rule, and target codegen now
+  uses production inlining/contraction flags. Narrow callers retain minimp3's
+  otherwise fully inlined kernels without changing optimization inside them.
+- The N=30 stage timer and Callgrind attribution tiers are locally green.
+  GitHub's hosted Azure VM reports all `perf stat` PMU events as unsupported,
+  so the fail-closed host ledger records N=30 pinned Clang cycle-counter
+  medians plus deterministic Callgrind instructions and simulated branch
+  misses over the same decode regions, with explicit provenance and IPC
+  derived from those two sources. Schema validation recomputes every identity.
+- Native Ubuntu run 32927438193 captured the authoritative AMD EPYC 9V74 /
+  Clang 18 baseline: Helix median 147,513,314 cycles, 461,845,281 Callgrind
+  instructions, and 453,948 simulated branch misses; minimp3-float median
+  54,515,955 cycles, 261,532,799 instructions, and 555,920 branch misses.
+- Follow-up run 32927721702 proved the same `ubuntu-24.04` label rotates among
+  CPU models and captured the AMD EPYC 7763 profile. The trend selects a
+  distinct checked-in host baseline by CPU/compiler/governor key.
+- Run 32928148824 captured the third observed pool profile, Intel Xeon Platinum
+  8573C with the `performance` governor exposed.
+- Run 32928388694 captured Intel Xeon 6973P-C, the fourth observed pool model.
+  GitHub documents only the standard runner's core count and architecture, not
+  its CPU model. Every environment remains fail-closed: matching profiles gate
+  all trends at 5%, while unknown models upload evidence and fail for explicit
+  baseline onboarding.
+- Broad Python validation passed 1,070 tests, skipped 35, and passed 40
+  subtests; its sole cold-build QEMU timeout passed on the required immediate
+  focused rerun in 12m56s.
 
 ### Review
 
@@ -79,6 +143,8 @@
   closed, persistent Helix state is tagged accurately, and memory-tag hooks
   are bounds-checked and balance every bucket. Focused Python/C++ tests, the
   release profile, lint, WASM, Uno, and the repeated pre-push review are green.
+- PR #4058 merged as `b0969cbec`; issue #4052 closed automatically and the
+  Phase 2 branch was rebased onto the verified merge.
 
 ## Frame-task lifecycle (#3896)
 

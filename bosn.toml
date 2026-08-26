@@ -1,0 +1,20 @@
+[stack.cpu]
+dockerfile = "ci/codec_cpu/Dockerfile"
+family = "python"
+default = true
+
+[stack.cpu.mounts]
+repo = { source = ".", destination = "/repo", readonly = true }
+
+[stack.cpu.volumes]
+build-nonroot = { scope = "stack", destination = "/build-volume" }
+venv-nonroot = { scope = "stack", destination = "/venv-volume" }
+uv-cache-nonroot = { scope = "machine", destination = "/home/audit/.cache/uv" }
+
+[task.linux-host]
+stack = "cpu"
+cmd = "UV_LINK_MODE=copy UV_PROJECT_ENVIRONMENT=/venv-volume/project CODEC_CPU_BUILD=/build-volume/audit uv sync --frozen && UV_PROJECT_ENVIRONMENT=/venv-volume/project CODEC_CPU_BUILD=/build-volume/audit uv run --no-sync python ci/codec_cpu/audit.py --linux-host"
+
+[task.linux-cycles]
+stack = "cpu"
+cmd = "UV_LINK_MODE=copy UV_PROJECT_ENVIRONMENT=/venv-volume/project CODEC_CPU_BUILD=/build-volume/audit uv sync --frozen && UV_PROJECT_ENVIRONMENT=/venv-volume/project CODEC_CPU_BUILD=/build-volume/audit uv run --no-sync python ci/codec_cpu/audit.py --cycles"
