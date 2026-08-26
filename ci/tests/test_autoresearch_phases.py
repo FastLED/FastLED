@@ -2180,6 +2180,47 @@ class TestRunBuildDeploy:
         assert rc is None
         assert mock_driver.deploy.call_args.kwargs["environment"] == "rp2350w"
 
+    def test_absent_rp_port_is_delegated_to_fbuild_recovery(self) -> None:
+        mock_driver = _make_mock_driver()
+        ctx = _make_ctx(
+            args=_make_args(skip_lint=True, upload_port="COM18"),
+            build_driver=mock_driver,
+            final_environment="rp2350w",
+            upload_port="COM18",
+        )
+        qctx = QuietContext(quiet=False)
+
+        with patch(
+            f"{_PATCH_MOD}.absent_port_error",
+            return_value="COM18 is not attached",
+        ):
+            rc = asyncio.run(_run_build_deploy(ctx, qctx))
+
+        assert rc is None
+        mock_driver.install_packages.assert_called_once()
+        mock_driver.deploy.assert_called_once()
+        assert mock_driver.deploy.call_args.kwargs["upload_port"] == "COM18"
+
+    def test_absent_non_rp_port_still_fails_before_build(self) -> None:
+        mock_driver = _make_mock_driver()
+        ctx = _make_ctx(
+            args=_make_args(skip_lint=True, upload_port="COM9"),
+            build_driver=mock_driver,
+            final_environment="esp32c6",
+            upload_port="COM9",
+        )
+        qctx = QuietContext(quiet=False)
+
+        with patch(
+            f"{_PATCH_MOD}.absent_port_error",
+            return_value="COM9 is not attached",
+        ):
+            rc = asyncio.run(_run_build_deploy(ctx, qctx))
+
+        assert rc == 1
+        mock_driver.install_packages.assert_not_called()
+        mock_driver.deploy.assert_not_called()
+
     def test_net_peer_deploys_c6_through_fbuild_on_explicit_port(self) -> None:
         mock_driver = _make_mock_driver()
         ctx = _make_ctx(

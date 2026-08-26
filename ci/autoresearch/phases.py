@@ -1597,13 +1597,22 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
     build_driver = ctx.build_driver
     assert build_driver is not None
 
-    # Preflight: an explicitly-named port that is not attached can only fail,
-    # and it fails at deploy — after ~7 minutes of install, lint and build.
-    # Checked before Phase 0 so the operator gets the real reason in seconds.
-    # Only an explicit --upload-port is gated: without one, fbuild can still
-    # reach an RP-series board through the BOOTSEL volume with no CDC record.
+    # Preflight: an explicitly named absent non-RP port can only fail after a
+    # long build. RP deployment is different: fbuild owns the recovery ladder
+    # and can use an unambiguous BOOTSEL volume when the CDC name is stale.
     if args.upload_port:
         absent = absent_port_error(args.upload_port)
+        if (
+            absent
+            and build_driver.name == "fbuild"
+            and bool(_active_rp2xxx_environment(final_environment_norm))
+        ):
+            print(
+                f"\n{Fore.YELLOW}RP runtime port is absent; delegating "
+                f"{args.upload_port} to fbuild's CDC/BOOTSEL recovery ladder."
+                f"{Style.RESET_ALL}"
+            )
+            absent = None
         if absent:
             print(f"\n❌ {absent}")
             return 1
