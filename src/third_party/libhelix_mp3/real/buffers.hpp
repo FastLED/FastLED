@@ -125,9 +125,9 @@ MP3DecInfo *AllocateBuffers(void) FL_NO_EXCEPT
 	di = (DequantInfo *)Mp3MemoryAllocate(sizeof(DequantInfo),
 		Mp3MemoryTag::Scratch);
 	mi = (IMDCTInfo *)Mp3MemoryAllocate(sizeof(IMDCTInfo),
-		Mp3MemoryTag::Scratch);
+		Mp3MemoryTag::DecoderState);
 	sbi = (SubbandInfo *)Mp3MemoryAllocate(sizeof(SubbandInfo),
-		Mp3MemoryTag::Scratch);
+		Mp3MemoryTag::DecoderState);
 
 	mp3DecInfo->FrameHeaderPS =     (void *)fh;
 	mp3DecInfo->SideInfoPS =        (void *)si;
@@ -190,9 +190,9 @@ void FreeBuffers(MP3DecInfo *mp3DecInfo) FL_NO_EXCEPT
 	SAFE_FREE_TAGGED(mp3DecInfo->DequantInfoPS, DequantInfo,
 		Mp3MemoryTag::Scratch);
 	SAFE_FREE_TAGGED(mp3DecInfo->IMDCTInfoPS, IMDCTInfo,
-		Mp3MemoryTag::Scratch);
+		Mp3MemoryTag::DecoderState);
 	SAFE_FREE_TAGGED(mp3DecInfo->SubbandInfoPS, SubbandInfo,
-		Mp3MemoryTag::Scratch);
+		Mp3MemoryTag::DecoderState);
 
 	Mp3MemoryFree(mp3DecInfo, sizeof(MP3DecInfo),
 		Mp3MemoryTag::DecoderState);

@@ -35,6 +35,8 @@ const char* Mp3MemoryTagName(Mp3MemoryTag tag) FL_NO_EXCEPT {
         return "stream-buffer";
     case Mp3MemoryTag::PcmOutput:
         return "pcm-output";
+    case Mp3MemoryTag::Count:
+        break;
     }
     return "unknown";
 }

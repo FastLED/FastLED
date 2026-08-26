@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 from running_process import RunningProcess
@@ -30,6 +31,12 @@ EXACT_METRICS = {
     "working-ram",
     "pipeline-peak",
 }
+
+
+@dataclass(frozen=True)
+class AuditValues:
+    summary: dict[tuple[str, str], int]
+    tables: dict[tuple[str, str], int]
 
 
 def compiler_from_meson() -> Path:
@@ -102,7 +109,10 @@ def parse_stack_usage(path: Path) -> list[tuple[str, int, str]]:
         if len(parts) != 3:
             continue
         location_and_name, size_text, kind = parts
-        name = location_and_name.split(":", 3)[-1]
+        location = re.match(r"^.*:\d+:\d+:(.*)$", location_and_name)
+        if not location:
+            continue
+        name = location.group(1)
         rows.append((name, int(size_text), kind))
     return rows
 
@@ -183,7 +193,7 @@ def size_path() -> Path:
 
 def print_report(
     objects: dict[str, Path],
-) -> tuple[dict[tuple[str, str], int], dict[tuple[str, str], int]]:
+) -> AuditValues:
     compiler = compiler_from_meson()
     nm = nm_path(compiler)
     size_tool = size_path() if os.name != "nt" else None
@@ -264,7 +274,7 @@ def print_report(
     print(f"CALLGRAPH:minimp3-float:decode-depth={minimp3_depth}")
     if helix_depth > FRAME_LIMIT or minimp3_depth > FRAME_LIMIT:
         raise RuntimeError("static decode call graph exceeds the 2 KiB stack budget")
-    return metrics, tables
+    return AuditValues(metrics, tables)
 
 
 def parse_massif_codec_peak(path: Path) -> int:
@@ -293,7 +303,10 @@ def run_watermark(
     objects: dict[str, Path], hook_peaks: dict[str, int]
 ) -> dict[tuple[str, str], int]:
     if os.name == "nt":
-        return {}
+        raise RuntimeError("the full watermark audit requires Linux and Valgrind")
+    valgrind = shutil.which("valgrind")
+    if not valgrind:
+        raise RuntimeError("Valgrind is required for the full watermark audit")
     compiler = compiler_from_meson()
     binary = BUILD / "watermark"
     command = [
@@ -325,9 +338,6 @@ def run_watermark(
         )
         if match:
             metrics[(match.group(1), "stack-watermark-observed")] = int(match.group(2))
-    valgrind = shutil.which("valgrind")
-    if not valgrind:
-        return metrics
     for backend, hook_peak in hook_peaks.items():
         massif = BUILD / f"massif-{backend}.out"
         RunningProcess.run(
@@ -403,7 +413,7 @@ def profile_metrics(binary: Path) -> dict[tuple[str, str], int]:
     return metrics
 
 
-def ledger_values() -> tuple[dict[tuple[str, str], int], dict[tuple[str, str], int]]:
+def ledger_values() -> AuditValues:
     summary: dict[tuple[str, str], int] = {}
     tables: dict[tuple[str, str], int] = {}
     for line in (
@@ -416,14 +426,16 @@ def ledger_values() -> tuple[dict[tuple[str, str], int], dict[tuple[str, str], i
             tables[(cells[0], cells[2])] = int(cells[3])
     if not summary or not tables:
         raise RuntimeError("codec_memory_ledger.md is missing machine-readable rows")
-    return summary, tables
+    return AuditValues(summary, tables)
 
 
 def check_ledger(
     current: dict[tuple[str, str], int],
     current_tables: dict[tuple[str, str], int],
 ) -> None:
-    expected, expected_tables = ledger_values()
+    expected_values = ledger_values()
+    expected = expected_values.summary
+    expected_tables = expected_values.tables
     errors: list[str] = []
     for key, baseline in expected.items():
         if key not in current:
@@ -468,16 +480,22 @@ def check_ledger(
     print("LEDGER:PASS:all metrics within budgets and 2% regression allowance")
 
 
-def main() -> int:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--compile-only", action="store_true")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--profile-binary", type=Path)
-    args = parser.parse_args()
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
     try:
         objects = compile_objects()
         if not args.compile_only:
-            metrics, tables = print_report(objects)
+            report = print_report(objects)
+            metrics = report.summary
+            tables = report.tables
             if not args.profile_binary:
                 raise RuntimeError("full audit requires --profile-binary")
             metrics.update(profile_metrics(args.profile_binary))

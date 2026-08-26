@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 from pathlib import Path
 
 import pytest
@@ -11,33 +12,44 @@ MODULE_PATH = ROOT / "ci" / "codec_memory" / "audit.py"
 SPEC = importlib.util.spec_from_file_location("codec_memory_audit", MODULE_PATH)
 assert SPEC and SPEC.loader
 AUDIT = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = AUDIT
 SPEC.loader.exec_module(AUDIT)
 
 
 def test_checked_in_ledger_is_machine_readable_and_green() -> None:
-    summary, tables = AUDIT.ledger_values()
-    AUDIT.check_ledger(dict(summary), dict(tables))
+    values = AUDIT.ledger_values()
+    AUDIT.check_ledger(dict(values.summary), dict(values.tables))
 
 
-def test_regression_over_two_percent_fails_closed() -> None:
-    summary, tables = AUDIT.ledger_values()
-    current = dict(summary)
-    baseline = summary[("minimp3-float", "scratch")]
-    current[("minimp3-float", "scratch")] = int(baseline * 1.02) + 1
-    current[("minimp3-float", "codec-core")] = (
-        current[("minimp3-float", "decoder-state")]
-        + current[("minimp3-float", "scratch")]
-    )
-    with pytest.raises(RuntimeError, match="changed"):
-        AUDIT.check_ledger(current, dict(tables))
+def test_non_exact_metric_allows_two_percent_and_rejects_more() -> None:
+    values = AUDIT.ledger_values()
+    baseline = values.summary[("minimp3-float", "static-tables")]
+    within = dict(values.summary)
+    within[("minimp3-float", "static-tables")] = int(baseline * 1.02)
+    AUDIT.check_ledger(within, dict(values.tables))
+    over = dict(values.summary)
+    over[("minimp3-float", "static-tables")] = int(baseline * 1.02) + 1
+    with pytest.raises(RuntimeError, match="regressed"):
+        AUDIT.check_ledger(over, dict(values.tables))
 
 
 def test_new_static_table_requires_ledger_update() -> None:
-    summary, tables = AUDIT.ledger_values()
-    current_tables = dict(tables)
+    values = AUDIT.ledger_values()
+    current_tables = dict(values.tables)
     current_tables[("minimp3-float", "new_table")] = 4
     with pytest.raises(RuntimeError, match="missing from ledger"):
-        AUDIT.check_ledger(dict(summary), current_tables)
+        AUDIT.check_ledger(dict(values.summary), current_tables)
+
+
+def test_stack_usage_preserves_cpp_names_and_windows_paths(tmp_path: Path) -> None:
+    stack_usage = tmp_path / "codec.su"
+    stack_usage.write_text(
+        "C:\\repo\\codec.cpp:17:9:fl::codec::decode(int)\t128\tstatic\n",
+        encoding="utf-8",
+    )
+    assert AUDIT.parse_stack_usage(stack_usage) == [
+        ("fl::codec::decode(int)", 128, "static")
+    ]
 
 
 def test_callgraph_uses_new_reachable_callees() -> None:
@@ -86,16 +98,16 @@ def test_massif_peak_is_attributed_to_codec_allocator(tmp_path: Path) -> None:
 
 
 def test_working_ram_budget_includes_stream_buffer() -> None:
-    summary, tables = AUDIT.ledger_values()
-    current = dict(summary)
+    values = AUDIT.ledger_values()
+    current = dict(values.summary)
     current[("minimp3-float", "working-ram")] = AUDIT.RAM_LIMIT + 1
     with pytest.raises(RuntimeError, match="working RAM exceeds"):
-        AUDIT.check_ledger(current, dict(tables))
+        AUDIT.check_ledger(current, dict(values.tables))
 
 
 def test_missing_summary_metric_fails_closed() -> None:
-    summary, tables = AUDIT.ledger_values()
-    current = dict(summary)
+    values = AUDIT.ledger_values()
+    current = dict(values.summary)
     del current[("minimp3-float", "working-ram")]
     with pytest.raises(RuntimeError, match="missing current metric"):
-        AUDIT.check_ledger(current, dict(tables))
+        AUDIT.check_ledger(current, dict(values.tables))

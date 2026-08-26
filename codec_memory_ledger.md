@@ -17,8 +17,8 @@ Measurements use Clang 18, `-Os`, x86-64 Linux ELF, and the
 
 | backend | metric | bytes-or-count |
 | --- | --- | ---: |
-| helix | decoder-state | 2740 |
-| helix | scratch | 21116 |
+| helix | decoder-state | 18392 |
+| helix | scratch | 5464 |
 | helix | stream-buffer | 4096 |
 | helix | pcm-output | 4608 |
 | helix | codec-core | 23856 |

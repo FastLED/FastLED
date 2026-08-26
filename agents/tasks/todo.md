@@ -74,6 +74,11 @@
 - The final pre-push review is clean after preserving Phase 0 free-format
   lookahead, isolating Massif by backend, making selector tests portable,
   covering every partial OOM path, and adding Layer I synthesis parity.
+- The CodeRabbit follow-up is locally resolved: fork PRs run the gate,
+  stack-symbol parsing handles drive letters and C++ names, Valgrind fails
+  closed, persistent Helix state is tagged accurately, and memory-tag hooks
+  are bounds-checked and balance every bucket. Focused Python/C++ tests, the
+  release profile, lint, WASM, Uno, and the repeated pre-push review are green.
 
 ## Frame-task lifecycle (#3896)
 

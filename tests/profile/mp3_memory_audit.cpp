@@ -13,12 +13,16 @@ class AccountingHook : public Mp3MemoryHook {
 public:
     void onAllocate(void*, fl::size bytes,
                     Mp3MemoryTag tag) FL_NO_EXCEPT override {
+        const unsigned index = static_cast<unsigned>(tag);
+        if (index >= kTagCount) {
+            mValid = false;
+            return;
+        }
         ++mAllocations;
         mCurrent += bytes;
         if (mCurrent > mPeak) {
             mPeak = mCurrent;
         }
-        const unsigned index = static_cast<unsigned>(tag);
         mTaggedCurrent[index] += bytes;
         if (mTaggedCurrent[index] > mTaggedPeak[index]) {
             mTaggedPeak[index] = mTaggedCurrent[index];
@@ -27,23 +31,45 @@ public:
 
     void onFree(void*, fl::size bytes,
                 Mp3MemoryTag tag) FL_NO_EXCEPT override {
+        const unsigned index = static_cast<unsigned>(tag);
+        if (index >= kTagCount || bytes > mCurrent ||
+            bytes > mTaggedCurrent[index]) {
+            mValid = false;
+            return;
+        }
         mCurrent -= bytes;
-        mTaggedCurrent[static_cast<unsigned>(tag)] -= bytes;
+        mTaggedCurrent[index] -= bytes;
     }
 
     fl::size current() const { return mCurrent; }
     fl::size peak() const { return mPeak; }
     fl::size allocations() const { return mAllocations; }
+    bool valid() const { return mValid; }
+    bool balanced() const {
+        if (mCurrent != 0) {
+            return false;
+        }
+        for (unsigned index = 0; index < kTagCount; ++index) {
+            if (mTaggedCurrent[index] != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
     fl::size taggedPeak(Mp3MemoryTag tag) const {
-        return mTaggedPeak[static_cast<unsigned>(tag)];
+        const unsigned index = static_cast<unsigned>(tag);
+        return index < kTagCount ? mTaggedPeak[index] : 0;
     }
 
 private:
+    static constexpr unsigned kTagCount =
+        static_cast<unsigned>(Mp3MemoryTag::Count);
     fl::size mCurrent = 0;
     fl::size mPeak = 0;
     fl::size mAllocations = 0;
-    fl::size mTaggedCurrent[4] = {};
-    fl::size mTaggedPeak[4] = {};
+    fl::size mTaggedCurrent[kTagCount] = {};
+    fl::size mTaggedPeak[kTagCount] = {};
+    bool mValid = true;
 };
 
 template <typename Decoder>
@@ -66,9 +92,8 @@ bool measureBackend(const char* backend, fl::size stream_bytes) {
             hook.taggedPeak(Mp3MemoryTag::PcmOutput));
     }
     Mp3MemoryFree(stream, stream_bytes, Mp3MemoryTag::StreamBuffer);
-    const bool balanced = hook.current() == 0;
     ClearMp3MemoryHook();
-    return initialized && balanced;
+    return initialized && hook.valid() && hook.balanced();
 }
 
 } // anonymous namespace

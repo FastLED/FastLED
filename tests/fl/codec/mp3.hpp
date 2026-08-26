@@ -23,27 +23,33 @@ public:
     void onAllocate(void* ptr, fl::size bytes,
                     Mp3MemoryTag tag) FL_NO_EXCEPT override {
         FL_REQUIRE(ptr != nullptr);
+        const unsigned index = static_cast<unsigned>(tag);
+        FL_REQUIRE_LT(index, kTagCount);
         ++mAllocations;
         mCurrent += bytes;
         if (mCurrent > mPeak) {
             mPeak = mCurrent;
         }
-        mTagged[static_cast<unsigned>(tag)] += bytes;
+        mTagged[index] += bytes;
     }
 
     void onFree(void*, fl::size bytes,
                 Mp3MemoryTag tag) FL_NO_EXCEPT override {
+        const unsigned index = static_cast<unsigned>(tag);
+        FL_REQUIRE_LT(index, kTagCount);
         FL_REQUIRE_GE(mCurrent, bytes);
-        FL_REQUIRE_GE(mTagged[static_cast<unsigned>(tag)], bytes);
+        FL_REQUIRE_GE(mTagged[index], bytes);
         mCurrent -= bytes;
-        mTagged[static_cast<unsigned>(tag)] -= bytes;
+        mTagged[index] -= bytes;
     }
 
     fl::size current() const { return mCurrent; }
     fl::size peak() const { return mPeak; }
     fl::size allocations() const { return mAllocations; }
     fl::size tagged(Mp3MemoryTag tag) const {
-        return mTagged[static_cast<unsigned>(tag)];
+        const unsigned index = static_cast<unsigned>(tag);
+        FL_REQUIRE_LT(index, kTagCount);
+        return mTagged[index];
     }
     void reject(Mp3MemoryTag tag) {
         mRejectAllocations = true;
@@ -51,10 +57,12 @@ public:
     }
 
 private:
+    static constexpr unsigned kTagCount =
+        static_cast<unsigned>(Mp3MemoryTag::Count);
     fl::size mCurrent = 0;
     fl::size mPeak = 0;
     fl::size mAllocations = 0;
-    fl::size mTagged[4] = {};
+    fl::size mTagged[kTagCount] = {};
     bool mRejectAllocations = false;
     Mp3MemoryTag mRejectedTag = Mp3MemoryTag::DecoderState;
 };

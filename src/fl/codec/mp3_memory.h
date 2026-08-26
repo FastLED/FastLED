@@ -16,6 +16,7 @@ enum class Mp3MemoryTag : fl::u8 {
     Scratch = 1,
     StreamBuffer = 2,
     PcmOutput = 3,
+    Count = 4,
 };
 
 const char* Mp3MemoryTagName(Mp3MemoryTag tag) FL_NO_EXCEPT;
