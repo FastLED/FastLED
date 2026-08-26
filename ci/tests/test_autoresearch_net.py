@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -182,4 +183,10 @@ def test_ota_peer_stages_artifact_without_a_host_wifi_manager(tmp_path) -> None:
 
     assert result == 0
     assert peer.send.await_args_list[1].args[0] == "beginOtaArtifact"
-    assert any(call.args[0] == "writeOtaArtifact" for call in peer.send.await_args_list)
+    write_calls = [
+        call for call in peer.send.await_args_list if call.args[0] == "writeOtaArtifact"
+    ]
+    assert len(write_calls) == 1
+    encoded = write_calls[0].args[1]
+    assert isinstance(encoded, str), "RpcClient performs the one-parameter wrapping"
+    assert base64.b64decode(encoded) == b"firmware"

@@ -256,3 +256,49 @@ def test_rp2350w_autoresearch_exposes_the_cyw43_http_peer_surface() -> None:
     assert "delay(10);" in net_source
     assert "} while (static_cast<int32_t>(millis() - deadline_ms) < 0);" in net_source
     assert 'response.set("error", "TCP server failed to listen")' in net_source
+
+
+def test_esp32_autoresearch_serial_rx_queue_fits_ota_rpc_frames() -> None:
+    """A 512-byte OTA chunk expands beyond HWCDC's 256-byte default queue."""
+    source = AUTORESEARCH_SKETCH.read_text(encoding="utf-8")
+    init_buffers = source[
+        source.index("void init_serial_buffers()") : source.index(
+            "// Global State", source.index("void init_serial_buffers()")
+        )
+    ]
+    setup = source[source.index("void setup()") :]
+
+    assert "Serial.setRxBufferSize(4096);" in init_buffers
+    assert setup.index("init_serial_buffers();") < setup.index(
+        "fl::serial_begin(115200);"
+    )
+
+
+def test_rp_http_peer_passively_closes_completed_responses() -> None:
+    """The C6 must own TIME_WAIT so repeat cycles do not exhaust RP TCP PCBs."""
+    source = AUTORESEARCH_NET.read_text(encoding="utf-8")
+    state = source[source.index("struct RpPeerState") : source.index("RpPeerState&")]
+    reset = source[
+        source.index("void resetRpPeerRequest") : source.index("void writeHttpResponse")
+    ]
+    response = source[
+        source.index("void writeHttpResponse") : source.index(
+            "fl::json runRpHttpRequestTest"
+        )
+    ]
+    poll = source[source.index("void pollNetServer()") : source.index("#else  //")]
+
+    assert "bool mResponseSent = false;" in state
+    assert "state.mResponseSent = false;" in reset
+    assert "state.mResponseSent = true;" in response
+    assert "state.request_started_ms = millis();" in response
+    assert ".stop()" not in response
+    assert "if (state.mResponseSent)" in poll
+    passive_close = poll[
+        poll.index("if (state.mResponseSent)") : poll.index(
+            "while (state.client->available()"
+        )
+    ]
+    assert "!state.client->connected()" in passive_close
+    assert "state.client.reset();" in passive_close
+    assert "state.client->stop();" in passive_close, "retain a bounded timeout fallback"

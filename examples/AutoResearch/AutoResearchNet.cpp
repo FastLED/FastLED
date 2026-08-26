@@ -774,6 +774,7 @@ struct RpPeerState {
     size_t body_length = 0;
     size_t expected_body_length = 0;
     bool headers_complete = false;
+    bool mResponseSent = false;
     uint32_t request_started_ms = 0;
 };
 
@@ -786,28 +787,31 @@ void resetRpPeerRequest(RpPeerState& state) {
     state.body_length = 0;
     state.expected_body_length = 0;
     state.headers_complete = false;
+    state.mResponseSent = false;
     state.request_started_ms = 0;
     state.request[0] = '\0';
     state.body[0] = '\0';
 }
 
-void writeHttpResponse(WiFiClient& client, const char* body,
-                       const char* content_type) {
-    client.print("HTTP/1.1 200 OK\r\nContent-Type: ");
+void writeHttpResponse(RpPeerState& state, const char* body,
+                       const char* content_type, const char* status = "200 OK") {
+    WiFiClient& client = *state.client;
+    client.print("HTTP/1.1 ");
+    client.print(status);
+    client.print("\r\nContent-Type: ");
     client.print(content_type);
     client.print("\r\nContent-Length: ");
     client.print(fl::strlen(body));
     client.print("\r\nConnection: close\r\n\r\n");
     client.print(body);
-    client.stop();
+    // The declared body length lets the C6 finish and close first. Keeping the
+    // RP as the passive closer avoids accumulating lwIP closing-state PCBs.
+    state.mResponseSent = true;
+    state.request_started_ms = millis();
 }
 
-void writeHttpNotFoundResponse(WiFiClient& client, const char* body) {
-    client.print("HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\nContent-Length: ");
-    client.print(fl::strlen(body));
-    client.print("\r\nConnection: close\r\n\r\n");
-    client.print(body);
-    client.stop();
+void writeHttpNotFoundResponse(RpPeerState& state, const char* body) {
+    writeHttpResponse(state, body, "application/json", "404 Not Found");
 }
 
 fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
@@ -1131,6 +1135,21 @@ void pollNetServer() {
     if (!state.client) {
         return;
     }
+    if (state.mResponseSent) {
+        const bool peer_closed = !state.client->connected();
+        const bool deadline_expired =
+            static_cast<int32_t>(millis() - state.request_started_ms) >= 2000;
+        if (peer_closed || deadline_expired) {
+            if (!peer_closed) {
+                // A peer that ignores Connection: close still gets a bounded
+                // fallback so one client cannot hold the server forever.
+                state.client->stop();
+            }
+            state.client.reset();
+            resetRpPeerRequest(state);
+        }
+        return;
+    }
     if (static_cast<int32_t>(millis() - state.request_started_ms) >= 2000) {
         state.client->stop();
         state.client.reset();
@@ -1153,11 +1172,9 @@ void pollNetServer() {
     }
     if (!state.headers_complete) {
         if (state.request_length + 1 == sizeof(state.request)) {
-            state.client->print(
-                "HTTP/1.1 431 Request Header Fields Too Large\r\nConnection: close\r\n\r\n");
-            state.client->stop();
-            state.client.reset();
-            resetRpPeerRequest(state);
+            writeHttpResponse(state, "{\"error\":\"request headers too large\"}",
+                              "application/json",
+                              "431 Request Header Fields Too Large");
         }
         return;
     }
@@ -1168,10 +1185,8 @@ void pollNetServer() {
     if (is_post && state.expected_body_length == 0) {
         const char* content_length = fl::strstr(state.request, "\r\nContent-Length:");
         if (content_length == nullptr) {
-            state.client->print("HTTP/1.1 411 Length Required\r\nConnection: close\r\n\r\n");
-            state.client->stop();
-            state.client.reset();
-            resetRpPeerRequest(state);
+            writeHttpResponse(state, "{\"error\":\"content length required\"}",
+                              "application/json", "411 Length Required");
             return;
         }
         content_length = fl::strstr(content_length, ":");
@@ -1181,28 +1196,22 @@ void pollNetServer() {
         }
         while (*content_length >= '0' && *content_length <= '9') {
             if (state.expected_body_length > (sizeof(state.body) - 1) / 10) {
-                state.client->print("HTTP/1.1 413 Payload Too Large\r\nConnection: close\r\n\r\n");
-                state.client->stop();
-                state.client.reset();
-                resetRpPeerRequest(state);
+                writeHttpResponse(state, "{\"error\":\"payload too large\"}",
+                                  "application/json", "413 Payload Too Large");
                 return;
             }
             state.expected_body_length = state.expected_body_length * 10 +
                                          static_cast<size_t>(*content_length - '0');
             if (state.expected_body_length >= sizeof(state.body)) {
-                state.client->print("HTTP/1.1 413 Payload Too Large\r\nConnection: close\r\n\r\n");
-                state.client->stop();
-                state.client.reset();
-                resetRpPeerRequest(state);
+                writeHttpResponse(state, "{\"error\":\"payload too large\"}",
+                                  "application/json", "413 Payload Too Large");
                 return;
             }
             ++content_length;
         }
         if (state.expected_body_length == 0) {
-            state.client->print("HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n");
-            state.client->stop();
-            state.client.reset();
-            resetRpPeerRequest(state);
+            writeHttpResponse(state, "{\"error\":\"empty request body\"}",
+                              "application/json", "400 Bad Request");
             return;
         }
     }
@@ -1220,60 +1229,57 @@ void pollNetServer() {
     state.body[state.body_length] = '\0';
 
     if (fl::strncmp(state.request, "GET /ping ", 10) == 0) {
-        writeHttpResponse(*state.client, "pong", "text/plain");
+        writeHttpResponse(state, "pong", "text/plain");
     } else if (fl::strncmp(state.request, "GET /status ", 12) == 0) {
-        writeHttpResponse(*state.client,
+        writeHttpResponse(state,
                           "{\"chip\":\"rp2350w\",\"network\":\"cyw43\"}",
                           "application/json");
     } else if (fl::strncmp(state.request, "GET /leds ", 10) == 0) {
-        writeHttpResponse(*state.client, "{\"num_leds\":10,\"brightness\":64}",
+        writeHttpResponse(state, "{\"num_leds\":10,\"brightness\":64}",
                           "application/json");
     } else if (fl::strncmp(state.request, "GET /rpc/discover ", 18) == 0) {
-        writeHttpResponse(*state.client,
+        writeHttpResponse(state,
                           "{\"jsonrpc\":\"2.0\",\"result\":{\"methods\":[\"rpc.discover\",\"ping\",\"debugTest\",\"status\"]},\"id\":1}",
                           "application/json");
     } else if (fl::strncmp(state.request, "GET /rpc/ping ", 14) == 0) {
-        writeHttpResponse(*state.client,
+        writeHttpResponse(state,
                           "{\"jsonrpc\":\"2.0\",\"result\":{\"pong\":true},\"id\":1}",
                           "application/json");
     } else if (fl::strncmp(state.request, "GET /rpc/status ", 16) == 0) {
-        writeHttpResponse(*state.client,
+        writeHttpResponse(state,
                           "{\"jsonrpc\":\"2.0\",\"result\":{\"ready\":true},\"id\":1}",
                           "application/json");
     } else if (fl::strncmp(state.request, "GET /rpc/unknown ", 17) == 0) {
-        writeHttpNotFoundResponse(*state.client,
+        writeHttpNotFoundResponse(state,
                                   "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32601,\"message\":\"Method not found\"},\"id\":1}");
     } else if (is_post_echo) {
-        writeHttpResponse(*state.client, state.body, "application/octet-stream");
+        writeHttpResponse(state, state.body, "application/octet-stream");
     } else if (is_post_rpc) {
         if (!fl::strstr(state.body, "\"jsonrpc\":\"2.0\"") ||
             !fl::strstr(state.body, "\"method\"")) {
-            state.client->print("HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\nConnection: close\r\n\r\n");
-            state.client->print("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"Invalid Request\"},\"id\":1}");
-            state.client->stop();
+            writeHttpResponse(state,
+                              "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"Invalid Request\"},\"id\":1}",
+                              "application/json", "400 Bad Request");
         } else if (fl::strstr(state.body, "\"method\":\"rpc.discover\"")) {
-            writeHttpResponse(*state.client,
+            writeHttpResponse(state,
                               "{\"jsonrpc\":\"2.0\",\"result\":{\"methods\":[\"rpc.discover\",\"ping\",\"debugTest\",\"status\"]},\"id\":1}",
                               "application/json");
         } else if (fl::strstr(state.body, "\"method\":\"ping\"")) {
-            writeHttpResponse(*state.client,
+            writeHttpResponse(state,
                               "{\"jsonrpc\":\"2.0\",\"result\":{\"pong\":true},\"id\":1}",
                               "application/json");
         } else if (fl::strstr(state.body, "\"method\":\"status\"")) {
-            writeHttpResponse(*state.client,
+            writeHttpResponse(state,
                               "{\"jsonrpc\":\"2.0\",\"result\":{\"ready\":true},\"id\":1}",
                               "application/json");
         } else {
-            writeHttpResponse(*state.client,
+            writeHttpResponse(state,
                               "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32601,\"message\":\"Method not found\"},\"id\":1}",
                               "application/json");
         }
     } else {
-        state.client->print("HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n");
-        state.client->stop();
+        writeHttpNotFoundResponse(state, "{\"error\":\"not found\"}");
     }
-    state.client.reset();
-    resetRpPeerRequest(state);
 }
 
 #else  // !FL_IS_ESP32 && !FL_IS_RP2350

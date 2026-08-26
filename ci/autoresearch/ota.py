@@ -82,7 +82,9 @@ async def run_ota_peer_autoresearch(
         return min(20.0, remaining)
 
     async def rpc_data(
-        client: RpcClient, method: str, params: list[Any] | dict[str, Any] | None = None
+        client: RpcClient,
+        method: str,
+        params: list[Any] | dict[str, Any] | str | None = None,
     ) -> dict[str, Any]:
         response = await client.send(method, params or {}, timeout=rpc_timeout())
         if not isinstance(response.data, dict):
@@ -115,7 +117,7 @@ async def run_ota_peer_autoresearch(
             raise RuntimeError(f"C6 refused OTA artifact: {begin}")
         for offset in range(0, len(artifact), 512):
             encoded = base64.b64encode(artifact[offset : offset + 512]).decode("ascii")
-            written = await rpc_data(peer, "writeOtaArtifact", [encoded])
+            written = await rpc_data(peer, "writeOtaArtifact", encoded)
             if not written.get("success"):
                 raise RuntimeError(
                     f"C6 artifact write failed at byte {offset}: {written}"

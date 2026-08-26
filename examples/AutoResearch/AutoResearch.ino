@@ -345,6 +345,11 @@ fl::shared_ptr<AutoResearchState> g_autoresearch_state;  // Shared state pointer
 // Initialize serial buffers with platform-specific configuration
 // Note: Some boards (ESP32S2) don't support setTxBufferSize() on USBCDC interface
 void init_serial_buffers() {
+#if defined(FL_IS_ESP32)
+    // A 512-byte OTA chunk expands past the ESP HWCDC 256-byte RX default
+    // after base64 and JSON-RPC framing (FastLED#4059).
+    Serial.setRxBufferSize(4096);  // ok serial - platform-specific RX buffer sizing, no fl:: equivalent
+#endif
 #if defined(FL_IS_ESP32) && !defined(FL_IS_ESP_32S2)
     Serial.setTxBufferSize(4096);  // 4KB buffer (default is 256 bytes)  // ok serial - platform-specific TX buffer sizing, no fl:: equivalent
 #endif

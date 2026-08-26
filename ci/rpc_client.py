@@ -371,7 +371,7 @@ class RpcClient:
     async def send(
         self,
         function: str,
-        args: list[Any] | dict[str, Any] | None = None,
+        args: list[Any] | dict[str, Any] | str | None = None,
         timeout: float | None = None,
         retries: int = 1,
         return_on_ack: bool = False,
@@ -381,9 +381,9 @@ class RpcClient:
         Args:
             function: RPC function name
             args: Function arguments passed as the single `fl::json` RPC
-                parameter — a list for positional handlers, or a dict for
-                object-param handlers (default: {}). Wrapped verbatim into
-                `params` as `[args]`.
+                parameter - a list for positional handlers, a dict for
+                object-param handlers, or a string for scalar handlers
+                (default: {}). Wrapped verbatim into `params` as `[args]`.
             timeout: Override default timeout for this call
             retries: Number of retry attempts (default: 1 = no retries)
 
