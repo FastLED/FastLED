@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from running_process import RunningProcess
+from typeguard import typechecked
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -33,6 +34,7 @@ EXACT_METRICS = {
 }
 
 
+@typechecked
 @dataclass(frozen=True)
 class AuditValues:
     summary: dict[tuple[str, str], int]
@@ -109,7 +111,7 @@ def parse_stack_usage(path: Path) -> list[tuple[str, int, str]]:
         if len(parts) != 3:
             continue
         location_and_name, size_text, kind = parts
-        location = re.match(r"^.*:\d+:\d+:(.*)$", location_and_name)
+        location = re.match(r"^.+?:\d+:(?:\d+:)?(.*)$", location_and_name)
         if not location:
             continue
         name = location.group(1)

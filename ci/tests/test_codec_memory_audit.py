@@ -52,6 +52,17 @@ def test_stack_usage_preserves_cpp_names_and_windows_paths(tmp_path: Path) -> No
     ]
 
 
+def test_stack_usage_accepts_clang_without_column(tmp_path: Path) -> None:
+    stack_usage = tmp_path / "codec.su"
+    stack_usage.write_text(
+        "ci/codec.cpp:65:_ZN2fl5codec6decodeEv\t96\tstatic\n",
+        encoding="utf-8",
+    )
+    assert AUDIT.parse_stack_usage(stack_usage) == [
+        ("_ZN2fl5codec6decodeEv", 96, "static")
+    ]
+
+
 def test_callgraph_uses_new_reachable_callees() -> None:
     frames = {"decode": 100, "stage": 200, "new_stage": 300}
     original = {"decode": {"stage"}, "stage": set(), "new_stage": set()}

@@ -13,6 +13,26 @@
 namespace fl {
 namespace third_party {
 
+template <typename T>
+T* Mp3MemoryAllocateArray(fl::size count,
+                          Mp3MemoryTag tag) FL_NO_EXCEPT {
+    return static_cast<T*>(Mp3MemoryAllocate(sizeof(T) * count, tag));
+}
+
+template <typename T>
+Mp3MemoryDeleter<T>::Mp3MemoryDeleter() FL_NO_EXCEPT
+    : mBytes(0), mTag(Mp3MemoryTag::DecoderState) {}
+
+template <typename T>
+Mp3MemoryDeleter<T>::Mp3MemoryDeleter(
+    fl::size bytes, Mp3MemoryTag tag) FL_NO_EXCEPT
+    : mBytes(bytes), mTag(tag) {}
+
+template <typename T>
+void Mp3MemoryDeleter<T>::operator()(T* ptr) const FL_NO_EXCEPT {
+    Mp3MemoryFree(ptr, mBytes, mTag);
+}
+
 namespace {
 #if defined(FASTLED_TESTING)
 struct Mp3MemoryHookState {
@@ -42,6 +62,13 @@ const char* Mp3MemoryTagName(Mp3MemoryTag tag) FL_NO_EXCEPT {
 }
 
 #if defined(FASTLED_TESTING)
+Mp3MemoryHook::~Mp3MemoryHook() FL_NO_EXCEPT = default;
+
+bool Mp3MemoryHook::allowAllocate(fl::size,
+                                  Mp3MemoryTag) FL_NO_EXCEPT {
+    return true;
+}
+
 void SetMp3MemoryHook(Mp3MemoryHook* hook) FL_NO_EXCEPT {
     mp3MemoryHook() = hook;
 }
