@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/codec/common.h"  // IWYU pragma: keep
+#include "fl/codec/mp3_memory.h"
 #include "fl/audio/audio.h"  // IWYU pragma: keep
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
@@ -126,7 +127,7 @@ namespace third_party {
         int findSyncWord(const fl::u8* buf, fl::size len);
         int decodeFrame(const fl::u8** inbuf, fl::size* bytes_left);
 
-        fl::unique_ptr<fl::i16[]> mPcmBuffer;
+        fl::unique_ptr<fl::i16[], Mp3MemoryDeleter<fl::i16>> mPcmBuffer;
         struct FrameInfo {
             int bitrate;
             int nChans;
@@ -202,12 +203,13 @@ namespace third_party {
         int decodeFrame(const fl::u8** inbuf,
                         fl::size* bytes_left) FL_NO_EXCEPT;
 
-        fl::unique_ptr<fl::i16[]> mPcmBuffer;
+        fl::unique_ptr<fl::i16[], Mp3MemoryDeleter<fl::i16>> mPcmBuffer;
         Mp3HelixDecoder::FrameInfo mFrameInfo;
 
     private:
-        fl::unique_ptr<mp3dec_t> mDecoder;
-        fl::unique_ptr<mp3dec_scratch_t> mScratch;
+        fl::unique_ptr<mp3dec_t, Mp3MemoryDeleter<mp3dec_t>> mDecoder;
+        fl::unique_ptr<mp3dec_scratch_t, Mp3MemoryDeleter<mp3dec_scratch_t>>
+            mScratch;
     };
 }
 
