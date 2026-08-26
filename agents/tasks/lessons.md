@@ -37,3 +37,28 @@
 - A WASM-only per-frame telemetry toggle can expose raw Beat and Tempo
   confidence alongside Vibe levels without adding a physical output pixel to
   the HydroPack fixture.
+
+- When consuming a tool's stderr through `RunningProcess.run`, request
+  `stderr=PIPE` explicitly and test the real output format. Default capture
+  combines streams and leaves `result.stderr` unset.
+
+- GitHub-hosted Azure Linux VMs can return `<not supported>` for every PMU
+  event even after relaxing `perf_event_paranoid`. For a reproducible hosted
+  gate, record pinned N=30 compiler cycle-counter medians and pair them with
+  explicitly labeled deterministic Callgrind instruction/branch simulation;
+  never relabel simulated data as hardware `perf` output.
+
+- LLVM operation ledgers must follow product values through O0 casts and spill
+  slots before classifying accumulations; direct SSA-use matching changes
+  across compiler versions even when the source operations are identical.
+
+- Target codegen audits must keep production optimization flags. If a static
+  kernel is fully inlined and its symbol disappears, retain it with a narrow
+  no-inline audit caller and measure the optimized kernel body, rather than
+  disabling inlining for the entire translation unit.
+- When a regression test mutates a primary metric in a schema with validated
+  derived metrics, recompute the derived fields first so the test reaches the
+  intended regression gate instead of failing schema validation.
+- GitHub-hosted runner labels can rotate among materially different CPU
+  models. Host performance gates need separate environment-keyed baselines;
+  a single baseline for an OS label either flakes or compares unlike machines.
