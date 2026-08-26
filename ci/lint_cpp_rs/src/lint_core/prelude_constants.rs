@@ -11,7 +11,7 @@ use walkdir::WalkDir;
 
 type DynError = Box<dyn Error + Send + Sync>;
 
-const CPP_EXTENSIONS: &[&str] = &["cpp", "h", "hpp", "ino", "cpp.hpp"];
+const CPP_EXTENSIONS: &[&str] = &["c", "cpp", "h", "hpp", "ino", "cpp.hpp", "s", "S"];
 
 const EXCLUDED_FILES: &[&str] = &[
     "stub_main.cpp",
@@ -805,4 +805,3 @@ const NATIVE_COMPILER_ABSTRACTION_FILES: &[&str] = &[
     "type_traits.h",
     "m0clockless_c.h",
 ];
-

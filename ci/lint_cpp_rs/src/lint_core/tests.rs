@@ -10,6 +10,152 @@ mod tests {
         }
     }
 
+    fn legal_header(last_updated: &str, holders: &[&str]) -> String {
+        let holders_yaml = if holders.is_empty() {
+            "//   holders: []".to_string()
+        } else {
+            let holder_lines = holders
+                .iter()
+                .map(|name| {
+                    format!(
+                        "//     - {{name: {name}, years: {{first: 2020, last: 2026}}}}"
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
+            format!("//   holders:\n{holder_lines}")
+        };
+        format!(
+            "// FASTLED-FILE-LEGAL-BEGIN\n\
+// schema: fastled-file-legal/v1\n\
+// copyright:\n\
+{holders_yaml}\n\
+// license:\n\
+//   spdx_identifier: MIT\n\
+//   notice: |-\n\
+//     Distributed under the MIT License.\n\
+//     See LICENSE for details.\n\
+// audit:\n\
+//   created: 2020-01-02\n\
+//   last_updated: {last_updated}\n\
+//   recheck_after_days: 365\n\
+//   body_blake3: {}\n\
+// FASTLED-FILE-LEGAL-END\n"
+            , blake3::hash(b"").to_hex()
+        )
+    }
+
+    #[test]
+    fn file_legal_requires_header_for_owned_src_but_not_third_party() {
+        let checker = FileLegalChecker::for_date("2026-08-25").unwrap();
+        assert!(!checker.should_process_file("src/fl/example.h", Path::new(".")));
+        assert!(!checker.should_process_file("src/third_party/example.h", Path::new(".")));
+        assert!(!checker.should_process_file("tests/example.cpp", Path::new(".")));
+        let hits = checker.check_file_content(&file("src/fl/example.h", "#pragma once\n"));
+        assert_eq!(hits.len(), 1);
+        assert!(hits[0].1.contains("missing FASTLED-FILE-LEGAL block"));
+    }
+
+    #[test]
+    fn file_legal_accepts_current_mit_yaml_block() {
+        let checker = FileLegalChecker::for_date("2026-08-25").unwrap();
+        let content = format!("{}#pragma once\n", legal_header("2026-08-25", &["Zach Vorhies"]));
+        assert!(checker
+            .check_file_content(&file("src/fl/example.h", &content))
+            .is_empty());
+
+        let bom_content = format!("\u{feff}{}", legal_header("2026-08-25", &["Zach Vorhies"]));
+        assert!(checker
+            .check_file_content(&file("src/fl/example.h", &bom_content))
+            .is_empty());
+
+        let misplaced_bom = format!("{}\u{feff}#pragma once\n", legal_header("2026-08-25", &["Zach Vorhies"]));
+        let hits = checker.check_file_content(&file("src/fl/example.h", &misplaced_bom));
+        assert!(hits.iter().any(|hit| hit.1.contains("BOM")));
+    }
+
+    #[test]
+    fn file_legal_requires_zach_and_current_policy_license() {
+        let checker = FileLegalChecker::for_date("2026-08-25").unwrap();
+        let missing_owner = legal_header("2026-08-25", &[]);
+        let hits = checker.check_file_content(&file("src/fl/example.h", &missing_owner));
+        assert!(hits.iter().any(|hit| hit.1.contains("copyright holders")));
+
+        let wrong_license = legal_header("2026-08-25", &["Zach Vorhies"])
+            .replace("spdx_identifier: MIT", "spdx_identifier: Apache-2.0");
+        let hits = checker.check_file_content(&file("src/fl/example.h", &wrong_license));
+        assert!(hits.iter().any(|hit| hit.1.contains("license")));
+
+        let bot_holder = legal_header("2026-08-25", &["Cursor Agent", "Zach Vorhies"]);
+        let hits = checker.check_file_content(&file("src/fl/example.h", &bot_holder));
+        assert!(hits
+            .iter()
+            .any(|hit| hit.1.contains("automation identity")));
+    }
+
+    #[test]
+    fn file_legal_rejects_email_holders_but_excludes_third_party() {
+        let checker = FileLegalChecker::for_date("2026-08-25").unwrap();
+        let separator = char::from(64);
+        let email_name = format!("contributor{separator}ignored");
+        let content = legal_header("2026-08-25", &[&email_name, "Zach Vorhies"]);
+        let hits = checker.check_file_content(&file("src/fl/example.h", &content));
+        assert!(hits.iter().any(|hit| hit.1.contains("email addresses")));
+        assert!(!checker.should_process_file("src/third_party/example.h", Path::new(".")));
+    }
+
+    #[test]
+    fn file_legal_rechecks_only_after_policy_delta() {
+        let checker = FileLegalChecker::for_date("2026-08-25").unwrap();
+        let fresh = legal_header("2025-08-25", &["Zach Vorhies"]);
+        assert!(checker
+            .check_file_content(&file("src/fl/example.h", &fresh))
+            .is_empty());
+
+        let stale = legal_header("2025-08-24", &["Zach Vorhies"]);
+        assert!(checker
+            .check_file_content(&file("src/fl/example.h", &stale))
+            .is_empty());
+
+        let stale_changed = format!("{stale}#pragma once\n");
+        let hits = checker.check_file_content(&file("src/fl/example.h", &stale_changed));
+        assert!(hits.iter().any(|hit| hit.1.contains("legal notice audit expired")));
+    }
+
+    #[test]
+    fn file_legal_rejects_duplicate_or_noncanonical_blocks() {
+        let checker = FileLegalChecker::for_date("2026-08-25").unwrap();
+        let header = legal_header("2026-08-25", &["Zach Vorhies"]);
+        let duplicate = format!("{header}{header}");
+        let hits = checker.check_file_content(&file("src/fl/example.h", &duplicate));
+        assert!(hits.iter().any(|hit| hit.1.contains("exactly one")));
+
+        let malformed = header.replace("// schema:", "/* schema:");
+        let hits = checker.check_file_content(&file("src/fl/example.h", &malformed));
+        assert!(hits.iter().any(|hit| hit.1.contains("line-comment YAML")));
+    }
+
+    #[test]
+    fn file_legal_normalizes_zackees_and_appends_zach_last() {
+        let policy = file_legal_policy().unwrap();
+        let mut history = FileLegalHistory {
+            created: "2020-01-02".to_string(),
+            authors: Vec::new(),
+        };
+        history.touch("Zackees", "2021-02-03", policy);
+        history.touch("Another Contributor", "2022-04-05", policy);
+        history.touch("zackees", "2026-06-07", policy);
+        let rendered = render_file_legal_header(
+            &history,
+            "2026-08-25",
+            policy,
+            &blake3::hash(b"").to_hex().to_string(),
+        );
+        assert_eq!(rendered.matches("name: \"Zach Vorhies\"").count(), 1);
+        assert!(rendered.find("Another Contributor").unwrap() < rendered.find("Zach Vorhies").unwrap());
+        assert!(rendered.contains("years: {first: 2021, last: 2026}"));
+    }
+
     #[test]
     fn help_parse_exits_without_listing_checkers() {
         let config = CliConfig::parse(vec!["--help".to_string()]).unwrap();

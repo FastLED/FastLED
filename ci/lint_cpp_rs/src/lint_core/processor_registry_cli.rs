@@ -266,6 +266,7 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "enum_class",
         "esp_rom_printf",
         "fastled_header_usage",
+        "file_legal",
         "fl_is_defined",
         "headers_exist",
         "include_after_namespace",
@@ -349,6 +350,7 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "EspRomPrintfChecker",
         "ExampleSerialChecker",
         "FastLEDHeaderUsageChecker",
+        "FileLegalChecker",
         "FlIsDefinedChecker",
         "HeadersExistChecker",
         "IncludeAfterNamespaceChecker",
@@ -495,6 +497,7 @@ pub fn create_checkers(
         ("esp_rom_printf", Box::new(EspRomPrintfChecker)),
         ("example_serial", Box::new(ExampleSerialChecker)),
         ("fastled_header_usage", Box::new(FastLEDHeaderUsageChecker)),
+        ("file_legal", Box::new(FileLegalChecker::today())),
         ("fl_is_defined", Box::new(FlIsDefinedChecker)),
         ("headers_exist", Box::new(HeadersExistChecker)),
         (

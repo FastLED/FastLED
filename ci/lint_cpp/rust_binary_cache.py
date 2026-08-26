@@ -55,6 +55,7 @@ _FINGERPRINT_INPUTS = (
     # here when introduced — current crate has none of those.
     "ci/lint_cpp_rs/Cargo.toml",
     "ci/lint_cpp_rs/Cargo.lock",
+    "ci/lint_cpp_rs/file_legal_policy.yaml",
 )
 _SRC_DIR = RUST_CRATE_DIR / "src"
 

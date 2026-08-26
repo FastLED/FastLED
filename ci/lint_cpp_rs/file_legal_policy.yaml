@@ -1,0 +1,32 @@
+schema: fastled-file-legal-policy/v1
+enabled: false
+# Capture every historical human author when a notice is first created. Later
+# audits preserve that reviewed holder snapshot while refreshing audit metadata;
+# a future policy version may opt into incremental holder attribution.
+attribution_mode: initial_history_snapshot
+recheck_after_days: 365
+license:
+  spdx_identifier: MIT
+  notice: |-
+    Distributed under the MIT License.
+    See LICENSE for details.
+ignored_identities:
+  - Copilot
+  - Cursor Agent
+  - copilot-swe-agent[bot]
+owners:
+  - name: Daniel Garcia
+    aliases:
+      - Dan Garcia
+      - focalintent
+      - danielgarcia
+    always: false
+  - name: Mark Kriegsman
+    aliases:
+      - kriegsman
+    always: false
+  - name: Zach Vorhies
+    aliases:
+      - Zackees
+      - Zachary Vorhies
+    always: true
