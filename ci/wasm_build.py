@@ -1638,39 +1638,6 @@ def _run_npx(args: list[str], cwd: Path) -> int:
     return npx_func(args, cwd=str(cwd))
 
 
-def _get_vite_source_mtime(template_dir: Path) -> float:
-    """Get the most recent mtime of any Vite frontend source file.
-
-    Uses os.scandir with directory-level pruning instead of rglob to avoid
-    walking node_modules (2626 files, 420ms → 4ms). On Windows, DirEntry.stat()
-    reuses FindFirstFile data (no extra syscall per file).
-    """
-    max_mtime = 0.0
-    _EXTS = frozenset((".ts", ".js", ".html", ".css", ".json"))
-    _SKIP = frozenset(("node_modules", "dist"))
-    stack = [str(template_dir)]
-    while stack:
-        current = stack.pop()
-        try:
-            with os.scandir(current) as it:
-                for entry in it:
-                    try:
-                        if entry.is_dir(follow_symlinks=False):
-                            if entry.name not in _SKIP:
-                                stack.append(entry.path)
-                        elif entry.is_file(follow_symlinks=False):
-                            _, ext = os.path.splitext(entry.name)
-                            if ext in _EXTS:
-                                mtime = entry.stat(follow_symlinks=False).st_mtime
-                                if mtime > max_mtime:
-                                    max_mtime = mtime
-                    except OSError:
-                        pass
-        except OSError:
-            pass
-    return max_mtime
-
-
 def copy_templates(output_dir: Path) -> None:
     """Copy template files using the bundled esbuild frontend pipeline."""
     from ci.esbuild_frontend import copy_dist_to_output
