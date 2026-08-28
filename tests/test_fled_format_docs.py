@@ -13,14 +13,60 @@ def test_fled_format_mirror_documents_v1_layout_and_authority() -> None:
 
     assert "Authority:" in text
     assert "https://github.com/zackees/ledmapper/blob/main/docs/fled-format.md" in text
-    assert "https://github.com/zackees/ledmapper/blob/main/scripts/inspect-fled.mjs" in text
+    assert (
+        "https://github.com/zackees/ledmapper/blob/main/scripts/inspect-fled.mjs"
+        in text
+    )
     assert "| 0 | 4 | `magic`" in text
     assert "| 8 | 4 | `json_length`" in text
     assert "| `0x00` | `rgb8` | 3 |" in text
     assert "| `0x04` | `rgb565le` | 2 |" in text
+    assert "| `0x05` | `rgb16_linear` | 6 |" in text
     assert "channels" in text
     assert "script.micropython" in text
     assert "script.wasm" in text
+
+
+def test_fled_format_mirror_specifies_the_source_color_contract() -> None:
+    """The `.fled` mirror must carry the full `video.color` contract.
+
+    FastLED does not yet transform pixels by the declared source profile, but
+    a file that fails to *specify* its color encoding is unrecoverable later:
+    the numbers stop meaning anything definite. So the carry contract - the
+    four independent fields, the default tuple, and the rejection rules - is
+    spec'd and tested before any engine support exists.
+    """
+    text = _read("src/fl/fled/FLED_FORMAT.md")
+
+    assert "## Source Color Metadata" in text
+
+    # The four fields stay independent - never collapsed into one "BT.709".
+    for field in ("`primaries`", "`transfer`", "`matrix`", "`range`"):
+        assert field in text
+
+    # The default tuple, stated exactly.
+    assert '"primaries": "bt709"' in text
+    assert '"transfer": "srgb"' in text
+    assert '"matrix": "rgb"' in text
+    assert '"range": "full"' in text
+
+    # sRGB transfer is not the BT.709 OETF, and "none" is not a value.
+    assert "not** the BT.709 camera OETF" in text
+    assert '`"none"` is not a valid `transfer` value' in text
+
+    # Per-format color classes, including the formats with no default tuple.
+    assert "### Color classes by pixel format" in text
+    assert "no defined tuple" in text
+
+    # The rejection rules a validator must enforce.
+    assert "### Validation rules" in text
+    assert "never silently fall back" in text
+    assert "reserved" in text
+
+    # Forward compatibility: advisory for rgb8, mandatory via pixel_format.
+    assert "### Forward compatibility" in text
+    assert "advisory" in text
+    assert "not a version bump" in text
 
 
 def test_fled_readme_opens_with_format_spec_link() -> None:

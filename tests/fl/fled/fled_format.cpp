@@ -76,18 +76,20 @@ FL_TEST_CASE("FLED_FORMAT - bytesPerLed for all defined v1 pixel formats") {
     //   0x02 rgba8    -> 4 bpp
     //   0x03 rgbw8    -> 4 bpp
     //   0x04 rgb565le -> 2 bpp
+    //   0x05 rgb16_linear -> 6 bpp
     FL_CHECK_EQ(fl::fled::bytesPerLed(fl::u8(0x00)), fl::u8(3));
     FL_CHECK_EQ(fl::fled::bytesPerLed(fl::u8(0x01)), fl::u8(1));
     FL_CHECK_EQ(fl::fled::bytesPerLed(fl::u8(0x02)), fl::u8(4));
     FL_CHECK_EQ(fl::fled::bytesPerLed(fl::u8(0x03)), fl::u8(4));
     FL_CHECK_EQ(fl::fled::bytesPerLed(fl::u8(0x04)), fl::u8(2));
+    FL_CHECK_EQ(fl::fled::bytesPerLed(fl::u8(0x05)), fl::u8(6));
 }
 
 FL_TEST_CASE("FLED_FORMAT - bytesPerLed for reserved values returns 0") {
-    // Per spec: 0x05..0xff are reserved for future formats. Returning 0
+    // Per spec: 0x06..0xff are reserved for future formats. Returning 0
     // signals "consumer does not support" so callers reject before
     // reading frame bytes.
-    FL_CHECK_EQ(fl::fled::bytesPerLed(fl::u8(0x05)), fl::u8(0));
+    FL_CHECK_EQ(fl::fled::bytesPerLed(fl::u8(0x06)), fl::u8(0));
     FL_CHECK_EQ(fl::fled::bytesPerLed(fl::u8(0x10)), fl::u8(0));
     FL_CHECK_EQ(fl::fled::bytesPerLed(fl::u8(0xff)), fl::u8(0));
 }

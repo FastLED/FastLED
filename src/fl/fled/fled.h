@@ -15,6 +15,7 @@
 //     json()["video"] for metadata. No Video object is reconstructed here.
 //   - No script() accessor. Scripting is a future-v2 surface (docs only).
 
+#include "fl/fled/color.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/shared_ptr.h"
@@ -59,7 +60,7 @@ class Fled {
     fl::u8 pixelFormat() const FL_NO_EXCEPT;
 
     // Bytes-per-LED for the configured pixel_format, per FLED_FORMAT.md.
-    // Returns 0 for unknown / reserved pixel formats (0x05 - 0xff) - the
+    // Returns 0 for unknown / reserved pixel formats (0x06 - 0xff) - the
     // FLED_FORMAT.md spec says consumers should reject before reading
     // frame bytes in that case.
     fl::u8 bytesPerLed() const FL_NO_EXCEPT;
@@ -79,6 +80,17 @@ class Fled {
     // "If video.fps is absent, consumers may use an application default,
     // sketch parameter, or external playback setting."
     float videoFps(float defaultFps = 30.0f) const FL_NO_EXCEPT;
+
+    // Resolves video.color against the header's pixel_format per
+    // FLED_FORMAT.md "Source Color Metadata": applies the format's default
+    // tuple for absent keys and enforces every validation rule.
+    //
+    // Returns ColorStatus::Ok with *out populated, or a status naming the
+    // rejection. A null Fled resolves as if the envelope were empty.
+    //
+    // This only reports what the file declares its numbers to mean. FastLED
+    // does not yet transform pixels according to that declaration.
+    fled::ColorStatus videoColor(fled::VideoColor *out) const FL_NO_EXCEPT;
 
     // Parsed JSON envelope. For null Fled, returns a reference to a static
     // empty json (safe to chain into).

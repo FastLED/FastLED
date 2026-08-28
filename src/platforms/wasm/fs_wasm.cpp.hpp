@@ -49,6 +49,7 @@
 // IWYU pragma: end_keep
 
 #include "fl/log/log.h"
+#include "fl/fled/detail/parser.h"
 #include "fl/fs/fs.h"
 #include "fl/stl/json.h"
 #include "fl/math/math.h"
@@ -279,6 +280,87 @@ FileDataPtr _createIfNotExists(const fl::string &path, size_t len) {
     return entry;
 }
 
+// Dump a .fled file's JSON metadata envelope to the browser console.
+//
+// Files arrive here either whole (jsInjectFile) or in chunks (jsDeclareFile +
+// jsAppendFile), so this runs after every append and reports as soon as the
+// header plus the declared json_length have landed - not when the whole
+// payload has, which for a video is orders of magnitude later.
+//
+// printf is routed to console.log on this platform (see platforms/wasm/readme),
+// so println() is the console. Anything that is not a .fled stays silent: this
+// is a diagnostic for FLED bundles, not a log line for every asset.
+void _logFledEnvelopeOnce(const fl::string &path, const FileDataPtr &entry) {
+    if (!entry) {
+        return;
+    }
+
+    static fl::vector<fl::string> sReported;
+    static fl::mutex sReportedMutex;
+
+    const size_t have = entry->bytesRead();
+    if (have < 12) {
+        return;  // header not complete yet
+    }
+
+    // json_length lives at offset 8 as u32 little-endian.
+    fl::u8 header[12] = {0};
+    if (entry->read(0, header, 12) != 12) {
+        return;
+    }
+    if (header[0] != 'F' || header[1] != 'L' || header[2] != 'E' ||
+        header[3] != 'D') {
+        return;  // not a FLED container
+    }
+    const fl::u32 jsonLen =
+        static_cast<fl::u32>(header[8]) |
+        (static_cast<fl::u32>(header[9]) << 8) |
+        (static_cast<fl::u32>(header[10]) << 16) |
+        (static_cast<fl::u32>(header[11]) << 24);
+
+    const size_t envelopeEnd = 12u + static_cast<size_t>(jsonLen);
+    if (have < envelopeEnd) {
+        return;  // envelope still streaming
+    }
+
+    {
+        fl::unique_lock<fl::mutex> lock(sReportedMutex);
+        for (size_t i = 0; i < sReported.size(); ++i) {
+            if (sReported[i] == path) {
+                return;  // already reported this file
+            }
+        }
+        sReported.push_back(path);
+    }
+
+    fl::vector<fl::u8> buf;
+    buf.resize(envelopeEnd);
+    if (entry->read(0, buf.data(), envelopeEnd) != envelopeEnd) {
+        return;
+    }
+
+    fl::fled::ParsedHeader hdr{};
+    fl::json envelope;
+    if (!fl::fled::parseHeaderAndEnvelope(buf.data(), buf.size(), &hdr,
+                                          &envelope)) {
+        fl::println("[FLED] malformed container, cannot read metadata");
+        return;
+    }
+
+    fl::string out = "[FLED] ";
+    out += path;
+    out += " (v";
+    out += fl::to_string(static_cast<int>(hdr.version));
+    out += ", pixel_format 0x";
+    const char kHex[] = "0123456789abcdef";
+    char pf[3] = {kHex[(hdr.pixelFormat >> 4) & 0x0f],
+                  kHex[hdr.pixelFormat & 0x0f], '\0'};
+    out += pf;
+    out += ") metadata: ";
+    out += envelope.to_string();
+    fl::println(out.c_str());
+}
+
 } // namespace fl
 
 extern "C" {
@@ -292,6 +374,7 @@ EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const fl::u8 *data,
         return false;
     }
     inserted->append(data, len);
+    fl::_logFledEnvelopeOnce(fl::string(path), inserted);
     return true;
 }
 
@@ -303,6 +386,7 @@ EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const fl::u8 *data,
         return false;
     }
     entry->append(data, len);
+    fl::_logFledEnvelopeOnce(fl::string(path), entry);
     return true;
 }
 

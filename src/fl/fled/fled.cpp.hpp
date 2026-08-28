@@ -132,6 +132,18 @@ float Fled::videoFps(float defaultFps) const FL_NO_EXCEPT {
     return static_cast<float>(*fpsOpt);
 }
 
+fled::ColorStatus Fled::videoColor(fled::VideoColor *out) const FL_NO_EXCEPT {
+    if (!out) return fled::ColorStatus::NullOutput;
+    if (!mImpl) {
+        // Null bundle: no envelope, no header. Resolve as an undeclared
+        // rgb8 payload so callers get the historical default tuple.
+        return fled::resolveVideoColor(nullJson(),
+                                       static_cast<fl::u8>(fled::PixelFormat::Rgb8),
+                                       out);
+    }
+    return fled::resolveVideoColor(mImpl->envelope(), pixelFormat(), out);
+}
+
 // ---- blobs ----
 
 fl::shared_ptr<const fl::u8> Fled::blob(const char *sectionName,
