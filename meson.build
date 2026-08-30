@@ -31,7 +31,7 @@ host_python_name = 'python3'
 if build_machine.system() == 'windows'
   host_python_name = 'python'
 endif
-host_python = find_program(host_python_name, required: true)
+host_python = find_program(host_python_name, required: true, native: true)
 
 # Setup cache paths
 src_cache_script = meson.project_source_root() / 'ci' / 'meson' / 'src_metadata_cache.py'
