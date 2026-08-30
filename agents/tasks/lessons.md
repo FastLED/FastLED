@@ -1,5 +1,10 @@
 # Lessons Learned
 
+- Host-tool selection and host-tool import context are separate concerns. When
+  Meson executes repository Python helpers for an external consumer, provide
+  the repository root through the command environment so package imports do not
+  accidentally depend on the caller's working directory.
+
 <!-- Add lessons from corrections and discoveries here -->
 
 - Before diagnosing missing functionality in a local integration checkout,

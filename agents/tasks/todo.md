@@ -2,6 +2,20 @@
 
 <!-- Add tasks here as checkable items -->
 
+## Preserve FastLED imports for external Meson consumers
+
+- [x] Reproduce the foreign-working-directory `ModuleNotFoundError` in CI.
+- [x] Add a RED regression for the host Python command environment.
+- [x] Prepend the FastLED project root to `PYTHONPATH` for Meson helpers.
+- [x] Pass focused tests, full lint, and a cross-checkout Blink WASM compile.
+
+### Review
+
+- RED: the new environment regression failed and fastled-wasm DWARF smoke could
+  not import `ci.meson.cache_utils` from its checkout working directory.
+- GREEN: 3 focused tests pass, full lint passes, and fastled-wasm compiles Blink
+  successfully against this checkout from outside the FastLED project root.
+
 ## Normalize Meson host Python selection
 
 - [x] Reproduce the macOS failure caused by Meson invoking bare `python`.
