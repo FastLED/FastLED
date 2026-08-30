@@ -32,6 +32,8 @@ if build_machine.system() == 'windows'
   host_python_name = 'python'
 endif
 host_python = find_program(host_python_name, required: true, native: true)
+host_python_env = environment()
+host_python_env.prepend('PYTHONPATH', meson.project_source_root())
 
 # Setup cache paths
 src_cache_script = meson.project_source_root() / 'ci' / 'meson' / 'src_metadata_cache.py'
@@ -42,7 +44,8 @@ build_dir_path = meson.current_build_dir()
 # Check if cache is valid
 cache_check = run_command(
   host_python, src_cache_script, '--check', src_dir_path, build_dir_path, '--pattern', '*.cpp',
-  check: false
+  check: false,
+  env: host_python_env
 )
 
 if cache_check.returncode() == 0
@@ -64,7 +67,8 @@ else
   run_command(
     host_python, src_cache_script, '--update',
     src_dir_path, build_dir_path, all_sources_output, '--pattern', '*.cpp',
-    check: true
+    check: true,
+    env: host_python_env
   )
 endif
 

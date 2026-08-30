@@ -103,7 +103,8 @@ python_exe = host_python
 # Check if cache is valid
 cache_check = run_command(
   python_exe, cache_script, '--check', tests_source_dir, tests_build_dir,
-  check: false
+  check: false,
+  env: host_python_env
 )
 
 if cache_check.returncode() == 0
@@ -117,7 +118,8 @@ else
   discovery_result = run_command(
     python_exe, meson.current_source_dir() / 'organize_tests.py',
     tests_source_dir,
-    check: true
+    check: true,
+    env: host_python_env
   )
   test_metadata_output = discovery_result.stdout().strip()
 
@@ -125,7 +127,8 @@ else
   run_command(
     python_exe, cache_script, '--update',
     tests_source_dir, tests_build_dir, test_metadata_output,
-    check: true
+    check: true,
+    env: host_python_env
   )
 endif
 
