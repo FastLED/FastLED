@@ -1971,8 +1971,8 @@ class TestRunBuildDeploy:
         assert "No application serial port" in output
         assert "esp32s3" in output
 
-    def test_stock_rp_deploy_can_rescan_for_application_port_later(self) -> None:
-        """Stock RP smoke runs retain their post-deploy CDC rescan window."""
+    def test_stock_rp_deploy_without_application_port_fails_closed(self) -> None:
+        """RP smoke runs must not rediscover a potentially different board."""
         mock_driver = _make_mock_driver()
         mock_driver.deploy.return_value = DeployResult(success=True, port=None)
         ctx = _make_ctx(
@@ -1985,7 +1985,7 @@ class TestRunBuildDeploy:
 
         rc = asyncio.run(_run_build_deploy(ctx, QuietContext(quiet=False)))
 
-        assert rc is None
+        assert rc == 1
         assert ctx.upload_port is None
 
     def test_stopping_host_watchdog_signals_and_clears_the_runner_handle(self) -> None:
@@ -2014,33 +2014,23 @@ def test_legacy_usb_identity_tables_are_absent() -> None:
 class TestRunSchemaAndPinSetup:
     """Test _run_schema_and_pin_setup (mocks RPC client)."""
 
-    def test_rp2350_postdeploy_rescan_polls_until_cdc_appears(self) -> None:
+    def test_rp2350_missing_deploy_port_fails_closed_without_rescan(self) -> None:
         ctx = _make_ctx(
             final_environment="rp2350",
             upload_port=None,
             use_fbuild=True,
             rpc_smoke_mode=True,
         )
-        missed = MagicMock(selected_port=None)
-        discovered = MagicMock(selected_port="COM17")
 
-        with (
-            patch(
-                f"{_PATCH_MOD}.auto_detect_upload_port",
-                side_effect=[missed, missed, discovered],
-            ) as auto_detect,
-            patch(
-                "ci.util.serial_interface.create_serial_interface",
-                return_value=MagicMock(),
-            ),
-            patch(f"{_PATCH_MOD}.CrashTraceDecoder", return_value=MagicMock()),
-        ):
+        with patch(
+            f"{_PATCH_MOD}.auto_detect_upload_port",
+            side_effect=AssertionError("must not guess after deploy"),
+        ) as auto_detect:
             rc = asyncio.run(_run_schema_and_pin_setup(ctx))
 
-        assert rc is None
-        assert ctx.upload_port == "COM17"
-        assert auto_detect.call_count == 3
-        auto_detect.assert_called_with(expected_environment="rp2350")
+        assert rc == 1
+        assert ctx.upload_port is None
+        auto_detect.assert_not_called()
 
     def test_cli_pin_override(self) -> None:
         args = _make_args(tx_pin=3, rx_pin=4, skip_schema=True)
