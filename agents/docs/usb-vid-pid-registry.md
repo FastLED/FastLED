@@ -138,7 +138,15 @@ uv run python ci/util/audit_usb_registry.py
 
 It fetches the live artifact, decodes it, and reports which audited literals
 resolve. A cold or stale cache is indistinguishable from a missing record, so
-always check the published payload rather than a failed port scan.
+always check the published payload rather than a failed port scan. To check an
+observed pair directly, run:
+
+```bash
+uv run python ci/util/audit_usb_registry.py --lookup <VID:PID>
+```
+
+The lookup exits 0 and names the vendor/product when published, or exits 1 and
+reports `MISSING` when the exact pair is absent.
 
 Two lists in that script carry the state. `AUDITED_LITERALS` is the checklist —
 it should shrink to empty as literals are retired. `KNOWN_GAPS` holds gaps

@@ -145,9 +145,11 @@ driver:
 
 1. Run `fbuild port scan` and record the board identity, VID/PID, serial number,
    and port. Do not claim a board is absent without this scan. If the scan cannot
-   name the board, the identity is missing from
-   [FastLED/boards](https://github.com/FastLED/boards) — fix it there and cascade
-   the fbuild bump; never add the literal to `ci/`. See
+   name the board, check the published registry with
+   `uv run python ci/util/audit_usb_registry.py --lookup <VID:PID>`. If that
+   reports the pair missing, fix it in
+   [FastLED/boards](https://github.com/FastLED/boards) and cascade the fbuild
+   bump; never add the literal to `ci/`. See
    [usb-vid-pid-registry.md](usb-vid-pid-registry.md).
 2. Confirm the board has an entry in `ci/boards.py` or can be detected by the
    AutoResearch/fbuild path. If the deploy backend is missing, file the gap in
