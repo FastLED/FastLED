@@ -12,10 +12,11 @@ than trusted. It fetches the published artifact, decodes it, and reports which
 of the literals still present in `ci/` resolve from the registry.
 
     uv run python ci/util/audit_usb_registry.py
+    uv run python ci/util/audit_usb_registry.py --lookup 1234:5678
 
 Exit codes:
-    0 — every audited literal resolves, ignoring the gaps in KNOWN_GAPS
-    1 — an unfiled literal is missing, or a KNOWN_GAPS entry went stale
+    0 — every audited literal resolves, or the requested pair resolves
+    1 — an audited literal/requested pair is missing, or a known gap is stale
     2 — the artifact could not be fetched or decoded
 
 Exit 0 while a filed gap is outstanding is deliberate: it makes this safe to
@@ -29,6 +30,7 @@ FastLED/boards#60.
 
 from __future__ import annotations
 
+import argparse
 import sys
 import urllib.request
 from typing import Iterator, NamedTuple
@@ -212,7 +214,30 @@ def fetch_artifact(url: str = ARTIFACT_URL) -> bytes:
     )
 
 
-def main() -> int:
+def _vid_pid(value: str) -> tuple[int, int]:
+    """Parse a four-digit hexadecimal VID:PID command-line value."""
+    parts = value.split(":")
+    if len(parts) != 2 or any(len(part) != 4 for part in parts):
+        raise argparse.ArgumentTypeError("expected VID:PID as four hex digits each")
+    try:
+        vid, pid = (int(part, 16) for part in parts)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(
+            "expected VID:PID as four hex digits each"
+        ) from exc
+    return vid, pid
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--lookup",
+        type=_vid_pid,
+        metavar="VID:PID",
+        help="check whether one exact hexadecimal VID:PID pair is published",
+    )
+    args = parser.parse_args(argv)
+
     try:
         raw = fetch_artifact()
         registry = decode_registry(raw)
@@ -227,6 +252,18 @@ def main() -> int:
     vendor_count = len(registry)
     product_count = sum(len(products) for _, products in registry.values())
     print(f"FastLED/boards registry: {vendor_count} vendors, {product_count} products")
+
+    if args.lookup is not None:
+        vid, pid = args.lookup
+        pair = f"{vid:04X}:{pid:04X}"
+        vendor = registry.get(vid)
+        if vendor is None or pid not in vendor[1]:
+            print(f"MISSING {pair} from FastLED/boards")
+            return 1
+        vendor_name, products = vendor
+        print(f"FOUND {pair}  {vendor_name} / {products[pid]}")
+        return 0
+
     print(f"Auditing {len(AUDITED_LITERALS)} literals from ci/\n")
 
     new_gaps: list[Literal] = []
