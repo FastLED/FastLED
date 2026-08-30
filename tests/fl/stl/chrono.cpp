@@ -166,6 +166,29 @@ FL_TEST_CASE("fl::inject_time_provider - injection and clearing") {
     }
 }
 
+FL_TEST_CASE("fl::inject_time_provider - controls all time views") {
+    MockTimeProvider mock(1234);
+    inject_time_provider([&mock]() { return mock(); });
+
+    FL_CHECK_EQ(fl::millis(), 1234);
+    FL_CHECK_EQ(fl::micros(), 1234000);
+    FL_CHECK_EQ(fl::chrono::steady_clock::now().time_since_epoch().count(),
+                1234000);
+    FL_CHECK_EQ(fl::chrono::system_clock::now().time_since_epoch().count(),
+                1234000);
+
+    mock.advance(5);
+
+    FL_CHECK_EQ(fl::millis(), 1239);
+    FL_CHECK_EQ(fl::micros(), 1239000);
+    FL_CHECK_EQ(fl::chrono::steady_clock::now().time_since_epoch().count(),
+                1239000);
+    FL_CHECK_EQ(fl::chrono::system_clock::now().time_since_epoch().count(),
+                1239000);
+
+    clear_time_provider();
+}
+
 FL_TEST_CASE("fl::time - timing scenarios with mock") {
     FL_SUBCASE("animation timing simulation") {
         MockTimeProvider mock(0);
