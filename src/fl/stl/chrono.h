@@ -360,9 +360,9 @@ using time_provider_t = fl::function<fl::u32()>;
 
 /// Inject a custom time provider for testing
 ///
-/// This function allows unit tests to control the timing returned by fl::millis().
-/// Once injected, all calls to fl::millis() will use the provided function instead
-/// of the platform's native timing.
+/// This function allows unit tests to control the timing returned by fl::millis(),
+/// fl::micros(), and the FastLED chrono clocks. Once injected, all time views use
+/// the provided millisecond value instead of the platform's native timing.
 ///
 /// @param provider Function that returns the current time in milliseconds
 /// @note Only available in testing builds (when FASTLED_TESTING is defined)
