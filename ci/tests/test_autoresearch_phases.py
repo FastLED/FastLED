@@ -1905,6 +1905,27 @@ class TestAutoDetectUploadPort:
         assert result.ok is True
         assert result.selected_port == "COM11"
 
+    def test_rp2040_unique_match_rejects_identical_boards(self) -> None:
+        ports = []
+        for device in ("COM11", "COM12"):
+            port = ListPortInfo(device)
+            port.description = "USB Serial Device"
+            port.hwid = "USB VID:PID=2E8A:000A"
+            port.vid = 0x2E8A
+            port.pid = 0x000A
+            ports.append(port)
+
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=ports,
+        ):
+            result = auto_detect_upload_port("rp2040", require_unique_match=True)
+
+        assert result.ok is False
+        assert result.selected_port is None
+        assert "multiple" in (result.error_message or "").lower()
+        assert "--upload-port" in (result.error_message or "")
+
     def test_rp2040_rejects_rp2350_application_cdc_fingerprint(self) -> None:
         rp2350 = ListPortInfo("COM12")
         rp2350.description = "USB Serial Device"
@@ -2089,7 +2110,9 @@ class TestAutoDetectUploadPort:
             return_value=[replacement, original],
         ):
             result = auto_detect_upload_port(
-                "rp2350w", expected_serial_number="2DCB876B587EA334"
+                "rp2350w",
+                expected_serial_number="2DCB876B587EA334",
+                require_unique_match=True,
             )
 
         assert result.ok is True
@@ -2309,7 +2332,9 @@ class TestRunSchemaAndPinSetup:
         assert rc is None
         assert ctx.upload_port == "COM17"
         assert auto_detect.call_count == 3
-        auto_detect.assert_called_with(expected_environment="rp2350")
+        auto_detect.assert_called_with(
+            expected_environment="rp2350", require_unique_match=True
+        )
 
     def test_cli_pin_override(self) -> None:
         args = _make_args(tx_pin=3, rx_pin=4, skip_schema=True)

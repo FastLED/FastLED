@@ -1811,6 +1811,7 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     args = ctx.args
     upload_port = ctx.upload_port
     rp2xxx_environment = _active_rp2xxx_environment(ctx.final_environment)
+    port_detection_error: str | None = None
     if (
         upload_port is None
         and (ctx.rpc_smoke_mode or ctx.watchdog_soak_mode)
@@ -1826,7 +1827,9 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
             result = await asyncio.to_thread(
                 auto_detect_upload_port,
                 expected_environment=rp2xxx_environment,
+                require_unique_match=True,
             )
+            port_detection_error = result.error_message
             if result.selected_port:
                 upload_port = result.selected_port
                 ctx.upload_port = upload_port
@@ -1839,7 +1842,10 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
                 break
             await asyncio.sleep(min(0.1, max(0.0, deadline - time.monotonic())))
     if upload_port is None:
-        print("❌ No application serial port was returned after fbuild deployment")
+        message = "No application serial port was returned after fbuild deployment"
+        if port_detection_error:
+            message += f": {port_detection_error}"
+        print(f"❌ {message}")
         return 1
     use_fbuild = ctx.use_fbuild
     final_environment = ctx.final_environment

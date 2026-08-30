@@ -177,6 +177,7 @@ def auto_detect_upload_port(
     expected_environment: str | None,
     *,
     expected_serial_number: str | None = None,
+    require_unique_match: bool = False,
 ) -> ComportResult:
     """Auto-detect the upload port from available serial ports.
 
@@ -194,6 +195,8 @@ def auto_detect_upload_port(
         expected_environment: Board environment used for strict fingerprinting.
         expected_serial_number: Optional stable USB identity that a matching
             board must retain across re-enumeration.
+        require_unique_match: Reject fingerprint detection when multiple ports
+            match instead of silently selecting the first one.
 
     Returns:
         ComportResult with detection status and diagnostics
@@ -260,18 +263,33 @@ def auto_detect_upload_port(
     )
     if expected_vid_pids:
         accepted = set(expected_vid_pids)
-        for port in usb_ports:
-            serial_matches = (
+        matching_ports = [
+            port
+            for port in usb_ports
+            if (port.vid, port.pid) in accepted
+            and (
                 expected_serial_number is None
                 or port.serial_number == expected_serial_number
             )
-            if (port.vid, port.pid) in accepted and serial_matches:
-                return ComportResult(
-                    ok=True,
-                    selected_port=port.device,
-                    error_message=None,
-                    all_ports=all_ports,
-                )
+        ]
+        if require_unique_match and len(matching_ports) > 1:
+            devices = ", ".join(port.device for port in matching_ports)
+            return ComportResult(
+                ok=False,
+                selected_port=None,
+                error_message=(
+                    f"Multiple USB serial ports match '{expected_environment}' "
+                    f"({devices}); pass --upload-port to select the deployed board."
+                ),
+                all_ports=all_ports,
+            )
+        if matching_ports:
+            return ComportResult(
+                ok=True,
+                selected_port=matching_ports[0].device,
+                error_message=None,
+                all_ports=all_ports,
+            )
         # Fingerprint expected but no port matched. Don't fall through to the
         # ESP probe — the wrong port will fail later with PermissionError or
         # silent timeout. Report explicitly so the user can plug the board in.
