@@ -48,6 +48,7 @@ from ci.compiler.package_manager import (
 )
 from ci.compiler.path_manager import FastLEDPaths, resolve_project_root
 from ci.compiler.source_manager import (
+    CopyExampleResult,
     copy_boards_directory,
     copy_example_source,
     copy_fastled_library,
@@ -96,6 +97,32 @@ def _probe_root_platformio_build_flags(
             f"Warning: failed to probe root platformio.ini for env '{board_name}': {e}"
         )
         return []
+
+
+def _update_generated_build_defines(
+    platformio_ini_path: Path,
+    board_name: str,
+    previous_defines: list[str],
+    copy_result: CopyExampleResult,
+) -> None:
+    """Replace per-sketch defines in an already-generated compile config."""
+    from ci.compiler.platformio_ini import PlatformIOIni
+
+    platformio_ini = PlatformIOIni.parseFile(platformio_ini_path)
+    section = platformio_ini.config[f"env:{board_name}"]
+    previous_flags = {f"-D{define}" for define in previous_defines}
+    build_flags = [
+        flag.strip()
+        for flag in section.get("build_flags", "").splitlines()
+        if flag.strip() and flag.strip() not in previous_flags
+    ]
+    build_flags.extend(
+        f"-D{define}"
+        for define in copy_result.build_defines
+        if f"-D{define}" not in build_flags
+    )
+    section["build_flags"] = "\n" + "\n".join(build_flags)
+    platformio_ini.dump(platformio_ini_path)
 
 
 def _init_platformio_build(
@@ -242,32 +269,36 @@ def _init_platformio_build(
                 f"(see #3274 / #3278 / #3279)."
             )
 
+    # Stage first because asset declarations contribute per-sketch build defines.
+    print(create_building_banner(example))
+    copy_result = copy_example_source(project_root, build_dir, example)
+    if not copy_result.success:
+        error_msg = get_example_error_message(project_root, example)
+        warnings.warn(error_msg)
+        return InitResult(
+            success=False,
+            output=error_msg,
+            build_dir=build_dir,
+        )
+
+    merged_defines = list(additional_defines or [])
+    merged_defines.extend(
+        define for define in copy_result.build_defines if define not in merged_defines
+    )
+
     # Apply board-specific configuration
     if not apply_board_specific_config(
         board_with_sketch_include,
         platformio_ini,
         example,
         paths,
-        additional_defines,
+        merged_defines,
         merged_include_dirs,
         additional_libs,
     ):
         return InitResult(
             success=False,
             output=f"Failed to apply board configuration for {board.board_name}",
-            build_dir=build_dir,
-        )
-
-    # Print building banner first
-    print(create_building_banner(example))
-
-    ok_copy_src = copy_example_source(project_root, build_dir, example)
-    if not ok_copy_src:
-        error_msg = get_example_error_message(project_root, example)
-        warnings.warn(error_msg)
-        return InitResult(
-            success=False,
-            output=error_msg,
             build_dir=build_dir,
         )
 
@@ -465,6 +496,7 @@ class PioCompiler(Compiler):
         # No per-board lock needed
 
         self.initialized = False
+        self._sketch_build_defines: list[str] = []
         self.executor = ThreadPoolExecutor(max_workers=1)
 
     def _internal_init_build_no_lock(self, example: str) -> InitResult:
@@ -851,8 +883,8 @@ class PioCompiler(Compiler):
             # Copy example source for subsequent examples
             if self.initialized:
                 project_root = resolve_project_root()
-                ok_copy_src = copy_example_source(project_root, self.build_dir, example)
-                if not ok_copy_src:
+                copy_result = copy_example_source(project_root, self.build_dir, example)
+                if not copy_result.success:
                     error_msg = get_example_error_message(project_root, example)
                     result = SketchResult(
                         success=False,
@@ -864,6 +896,13 @@ class PioCompiler(Compiler):
                     future.set_result(result)
                     futures.append(future)
                     continue
+                _update_generated_build_defines(
+                    self.build_dir / "platformio.ini",
+                    self.board.board_name,
+                    self._sketch_build_defines,
+                    copy_result,
+                )
+                self._sketch_build_defines = copy_result.build_defines
 
             # Run fbuild on main thread — Ctrl+C works directly
             result = self._build_with_fbuild(example)
@@ -884,8 +923,8 @@ class PioCompiler(Compiler):
 
         # Copy example source to build directory
         project_root = resolve_project_root()
-        ok_copy_src = copy_example_source(project_root, self.build_dir, example)
-        if not ok_copy_src:
+        copy_result = copy_example_source(project_root, self.build_dir, example)
+        if not copy_result.success:
             error_msg = get_example_error_message(project_root, example)
             return SketchResult(
                 success=False,
@@ -893,6 +932,13 @@ class PioCompiler(Compiler):
                 build_dir=self.build_dir,
                 example=example,
             )
+        _update_generated_build_defines(
+            self.build_dir / "platformio.ini",
+            self.board.board_name,
+            self._sketch_build_defines,
+            copy_result,
+        )
+        self._sketch_build_defines = copy_result.build_defines
 
         # Cache configuration is handled through build flags during initialization
 

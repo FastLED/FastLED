@@ -530,11 +530,9 @@ def embedded_fs_defines(scan: AssetScanResult) -> list[str]:
     `platforms/embedded_fs.h` -- so on the platform people actually use for
     LittleFS, an asset declaring `storage=littlefs` already works.
 
-    Nothing applies these yet: build defines are assembled per-board in
-    `ci/boards.py`, and this is per-sketch. Applying them would also currently
-    break the ESP8266 builds it targets, because that backend cannot compile
-    until FastLED/fbuild#1380 ships the core's littlefs submodule. Tracked in
-    FastLED#4020.
+    ``copy_example_source`` carries these per-sketch requirements into the
+    generated compile configuration. fbuild#1380 supplies the ESP8266 core's
+    LittleFS submodule, so opting into that backend is now safe.
     """
     return ["FL_ESP8266_EMBEDDED_FS"] if scan.embedded_fs_assets() else []
 
@@ -547,12 +545,9 @@ def announce_storage_requirements(scan: AssetScanResult) -> None:
     prints, in green, which assets asked for it and where that requirement is
     already met.
 
-    It does not claim the build enabled anything. ESP32 genuinely is automatic
-    -- `platforms/embedded_fs.h` selects LittleFS with no flag -- but ESP8266
-    still needs `FL_ESP8266_EMBEDDED_FS`, and `embedded_fs_defines` is not yet
-    consumed by any build layer (FastLED#4020). Saying "enabled automatically"
-    on ESP8266 would report work that did not happen, which is worse than
-    saying nothing: the user would stop looking.
+    ESP32 is automatic -- `platforms/embedded_fs.h` selects LittleFS with no
+    flag -- while ESP8266 receives `FL_ESP8266_EMBEDDED_FS` through the staged
+    example's build requirements.
 
     Green because it is neither a warning nor an error. An unrecognised target
     is the yellow case -- a typo like `littleFS` would otherwise behave exactly
