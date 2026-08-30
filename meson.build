@@ -24,6 +24,15 @@ project('fastled', 'cpp',
 # the right #if-def guard in it to prevent compilation
 uv_prog = find_program('uv', required: true)
 
+# Host-side helpers must use the build machine's Python executable. During a
+# WASM cross-build host_machine.system() is 'emscripten', so it cannot identify
+# whether the command is running on Windows or a Unix-like build host.
+host_python_name = 'python3'
+if build_machine.system() == 'windows'
+  host_python_name = 'python'
+endif
+host_python = find_program(host_python_name, required: true)
+
 # Setup cache paths
 src_cache_script = meson.project_source_root() / 'ci' / 'meson' / 'src_metadata_cache.py'
 rglob_script = meson.project_source_root() / 'ci' / 'meson' / 'rglob.py'
@@ -32,7 +41,7 @@ build_dir_path = meson.current_build_dir()
 
 # Check if cache is valid
 cache_check = run_command(
-  'python', src_cache_script, '--check', src_dir_path, build_dir_path, '--pattern', '*.cpp',
+  host_python, src_cache_script, '--check', src_dir_path, build_dir_path, '--pattern', '*.cpp',
   check: false
 )
 
@@ -53,7 +62,7 @@ else
 
   # Update cache
   run_command(
-    'python', src_cache_script, '--update',
+    host_python, src_cache_script, '--update',
     src_dir_path, build_dir_path, all_sources_output, '--pattern', '*.cpp',
     check: true
   )

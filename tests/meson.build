@@ -162,7 +162,7 @@ test_env.prepend('PATH', fastled_lib_dir)
 # belt-and-suspenders injection.
 
 # Find python once for test wrapper (avoid 245 find_program calls inside loop)
-python_exe = find_program('python')
+python_exe = host_python
 
 # ============================================================================
 # SHARED TEST OBJECTS (compiled once, reused by all test DLLs)

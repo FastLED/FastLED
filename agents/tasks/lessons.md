@@ -2,6 +2,11 @@
 
 <!-- Add lessons from corrections and discoveries here -->
 
+- Before diagnosing missing functionality in a local integration checkout,
+  fetch and compare it with its upstream branch; a stale checkout can omit the
+  entire subsystem under test. For Meson host tools in a cross-build, branch on
+  `build_machine.system()`, never `host_machine.system()`.
+
 - QEMU CI must use fbuild's native `test-emu` runner as the owner of the
   build, flash-image preparation, and emulation lifecycle. Do not repair or
   extend PlatformIO-shaped merged-bin artifact plumbing while PlatformIO is
