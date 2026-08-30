@@ -24,6 +24,11 @@ namespace {
         static time_provider_t provider;
         return provider;
     }
+
+    fl::function<fl::u64()>& get_micros64_time_provider() {
+        static fl::function<fl::u64()> provider;
+        return provider;
+    }
 }
 
 void inject_time_provider(const time_provider_t& provider) {
@@ -34,6 +39,16 @@ void inject_time_provider(const time_provider_t& provider) {
 void clear_time_provider() {
     fl::unique_lock<fl::mutex> lock(get_time_mutex());
     get_time_provider() = time_provider_t{}; // Clear the function
+}
+
+void inject_micros64_time_provider(const fl::function<fl::u64()>& provider) {
+    fl::unique_lock<fl::mutex> lock(get_time_mutex());
+    get_micros64_time_provider() = provider;
+}
+
+void clear_micros64_time_provider() {
+    fl::unique_lock<fl::mutex> lock(get_time_mutex());
+    get_micros64_time_provider() = fl::function<fl::u64()>{};
 }
 
 // MockTimeProvider implementation
@@ -80,6 +95,38 @@ fl::u32 millis() {
 fl::u32 micros() {
     // Note: micros() does not support time injection
     return fl::platforms::micros();
+}
+
+fl::u64 micros64() {
+#ifdef FASTLED_TESTING
+    {
+        fl::unique_lock<fl::mutex> lock(get_time_mutex());
+        const auto& provider = get_micros64_time_provider();
+        if (provider) {
+            return provider();
+        }
+    }
+#endif
+
+    struct Micros64State {
+        fl::u64 accumulated = 0;
+        fl::u32 last_micros = 0;
+        bool initialized = false;
+        fl::mutex mutex;
+    };
+    static Micros64State state;
+
+    fl::unique_lock<fl::mutex> lock(state.mutex);
+    const fl::u32 current = fl::micros();
+    if (!state.initialized) {
+        state.accumulated = current;
+        state.last_micros = current;
+        state.initialized = true;
+        return state.accumulated;
+    }
+    state.accumulated += static_cast<fl::u32>(current - state.last_micros);
+    state.last_micros = current;
+    return state.accumulated;
 }
 
 namespace {

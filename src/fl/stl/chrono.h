@@ -294,13 +294,19 @@ fl::u32 millis() FL_NO_EXCEPT;
 /// @endcode
 fl::u32 micros() FL_NO_EXCEPT;
 
-// Now that fl::micros() is declared, implement clock::now() methods
+/// 64-bit monotonic microsecond timer.
+///
+/// Extends the platform's 32-bit microsecond counter using unsigned elapsed
+/// deltas, so the returned value never wraps in practical use.
+fl::u64 micros64() FL_NO_EXCEPT;
+
+// Now that fl::micros64() is declared, implement clock::now() methods
 inline chrono::steady_clock::time_point chrono::steady_clock::now() FL_NO_EXCEPT {
-    return time_point(duration(static_cast<fl::i64>(fl::micros())));
+    return time_point(duration(static_cast<fl::i64>(fl::micros64())));
 }
 
 inline chrono::system_clock::time_point chrono::system_clock::now() FL_NO_EXCEPT {
-    return time_point(duration(static_cast<fl::i64>(fl::micros())));
+    return time_point(duration(static_cast<fl::i64>(fl::micros64())));
 }
 
 /// 64-bit millisecond timer - returns milliseconds since system startup without wraparound
@@ -385,6 +391,12 @@ void inject_time_provider(const time_provider_t& provider) FL_NO_EXCEPT;
 /// @note Thread-safe: Uses appropriate locking in multi-threaded environments
 /// @note Safe to call multiple times or when no provider is injected
 void clear_time_provider() FL_NO_EXCEPT;
+
+/// Inject a 64-bit microsecond source for deterministic clock tests.
+void inject_micros64_time_provider(const fl::function<fl::u64()>& provider) FL_NO_EXCEPT;
+
+/// Restore the platform-backed 64-bit microsecond source.
+void clear_micros64_time_provider() FL_NO_EXCEPT;
 
 /// Reset the millis64() internal state for testing
 ///

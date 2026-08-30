@@ -55,6 +55,24 @@ FL_TEST_CASE("fl::time - basic functionality") {
 
 #ifdef FASTLED_TESTING
 
+FL_TEST_CASE("fl::chrono clocks remain monotonic across micros rollover") {
+    fl::u64 now_us = 0xFFFFFFF0ULL;
+    fl::inject_micros64_time_provider([&now_us]() { return now_us; });
+
+    const auto steady_before = fl::chrono::steady_clock::now();
+    const auto system_before = fl::chrono::system_clock::now();
+    now_us += 0x20;
+    const auto steady_after = fl::chrono::steady_clock::now();
+    const auto system_after = fl::chrono::system_clock::now();
+
+    FL_CHECK(steady_after > steady_before);
+    FL_CHECK(system_after > system_before);
+    FL_CHECK_EQ((steady_after - steady_before).count(), 0x20);
+    FL_CHECK_EQ((system_after - system_before).count(), 0x20);
+
+    fl::clear_micros64_time_provider();
+}
+
 FL_TEST_CASE("fl::MockTimeProvider - basic functionality") {
     FL_SUBCASE("constructor with initial time") {
         MockTimeProvider mock(1000);
