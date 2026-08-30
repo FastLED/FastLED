@@ -97,10 +97,12 @@ runner_exe = executable('runner',
 cache_script = meson.current_source_dir() / 'test_metadata_cache.py'
 tests_source_dir = meson.current_source_dir()
 tests_build_dir = meson.current_build_dir()
+# Find Python once for configuration helpers and test wrappers.
+python_exe = host_python
 
 # Check if cache is valid
 cache_check = run_command(
-  'python', cache_script, '--check', tests_source_dir, tests_build_dir,
+  python_exe, cache_script, '--check', tests_source_dir, tests_build_dir,
   check: false
 )
 
@@ -113,7 +115,7 @@ else
   message('Running test discovery (cache invalid or missing)')
 
   discovery_result = run_command(
-    'python', meson.current_source_dir() / 'organize_tests.py',
+    python_exe, meson.current_source_dir() / 'organize_tests.py',
     tests_source_dir,
     check: true
   )
@@ -121,7 +123,7 @@ else
 
   # Update cache
   run_command(
-    'python', cache_script, '--update',
+    python_exe, cache_script, '--update',
     tests_source_dir, tests_build_dir, test_metadata_output,
     check: true
   )
@@ -160,9 +162,6 @@ test_env.prepend('PATH', fastled_lib_dir)
 # upstream-blessed replacement. If ASan/MinGW DLLs go missing in CI,
 # revert this hunk + ci/meson/native/meson.build to re-enable the
 # belt-and-suspenders injection.
-
-# Find python once for test wrapper (avoid 245 find_program calls inside loop)
-python_exe = find_program('python')
 
 # ============================================================================
 # SHARED TEST OBJECTS (compiled once, reused by all test DLLs)

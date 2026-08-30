@@ -2,6 +2,24 @@
 
 <!-- Add tasks here as checkable items -->
 
+## Normalize Meson host Python selection
+
+- [x] Reproduce the macOS failure caused by Meson invoking bare `python`.
+- [x] Add a RED source-contract test for Windows versus macOS/Linux selection.
+- [x] Define one build-machine Python program and reuse it in Meson helpers.
+- [x] Run the focused regression test and Meson lint checks.
+- [x] Validate the WASM Blink compile through fastled-wasm's Tauri test mode.
+
+### Review
+
+- RED: `ci/tests/test_meson_python_selection.py` failed both assertions before
+  the normalized build-machine program was introduced.
+- GREEN: the focused regression test passes (2 tests), and the dependent
+  macOS Tauri run finds `python3`, compiles Blink, starts the pthread worker,
+  and captures a non-black WebGL frame.
+- Review: selection is intentionally based on `build_machine`, because these
+  Python helpers execute during configuration even for an Emscripten cross-build.
+
 ## minimp3 Phase 0 (#4051)
 
 - [x] Capture the missing minimp3 backend as a focused RED test.
