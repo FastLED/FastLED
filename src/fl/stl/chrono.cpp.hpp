@@ -95,6 +95,53 @@ fl::u32 micros() {
 }
 
 namespace {
+    struct Micros64State {
+        fl::u64 accumulated = 0;
+        fl::u32 last_micros = 0;
+        bool initialized = false;
+        fl::mutex mutex;
+    };
+
+    Micros64State& get_micros64_state() FL_NO_EXCEPT {
+        static Micros64State state;
+        return state;
+    }
+}
+
+#if FL_CHRONO_HAS_TEST_TIME_PROVIDER
+void micros64_reset() FL_NO_EXCEPT {
+    Micros64State& state = get_micros64_state();
+    fl::unique_lock<fl::mutex> lock(state.mutex);
+    state.accumulated = 0;
+    state.last_micros = 0;
+    state.initialized = false;
+}
+#endif
+
+fl::u64 micros64() FL_NO_EXCEPT {
+    Micros64State& state = get_micros64_state();
+    fl::unique_lock<fl::mutex> lock(state.mutex);
+    const fl::u32 current = fl::micros();
+    if (!state.initialized) {
+        state.accumulated = current;
+        state.last_micros = current;
+        state.initialized = true;
+        return state.accumulated;
+    }
+    state.accumulated += static_cast<fl::u32>(current - state.last_micros);
+    state.last_micros = current;
+    return state.accumulated;
+}
+
+chrono::steady_clock::time_point chrono::steady_clock::now() FL_NO_EXCEPT {
+    return time_point(duration(static_cast<fl::i64>(fl::micros64())));
+}
+
+chrono::system_clock::time_point chrono::system_clock::now() FL_NO_EXCEPT {
+    return time_point(duration(static_cast<fl::i64>(fl::micros64())));
+}
+
+namespace {
     // Thread-safe 64-bit millisecond counter state
     struct Millis64State {
         fl::u64 accumulated = 0;
