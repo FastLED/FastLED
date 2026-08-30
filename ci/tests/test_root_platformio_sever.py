@@ -98,7 +98,13 @@ class TestRootPlatformioSever(unittest.TestCase):
             mock.patch.object(
                 pio_module, "apply_board_specific_config", side_effect=fake_apply
             ),
-            mock.patch.object(pio_module, "copy_example_source", return_value=True),
+            mock.patch.object(
+                pio_module,
+                "copy_example_source",
+                return_value=pio_module.CopyExampleResult(
+                    success=True, build_defines=[]
+                ),
+            ),
             mock.patch.object(pio_module, "copy_fastled_library", return_value=True),
             mock.patch.object(pio_module, "copy_boards_directory", return_value=True),
         ):
