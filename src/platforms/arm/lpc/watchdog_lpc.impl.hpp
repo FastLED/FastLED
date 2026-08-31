@@ -174,9 +174,9 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
 #endif
     SYSCON->SYSAHBCLKCTRL0 |= SYSCON_SYSAHBCLKCTRL0_WWDT_MASK;
 
-    // TC is in WWDT ticks at the chip-specific divided oscillator rate. Round
-    // up so we never timeout EARLY (timeout_ms is the maximum allowed
-    // silence between feeds, undershooting it would crash live code).
+    // TC is in WWDT ticks at the chip-specific nominal oscillator rate. Round
+    // up so integer conversion does not shorten the nominal timeout. Actual
+    // timing remains subject to the oscillator tolerance documented above.
     // 64-bit intermediate: timeout_ms * kTickHz overflows u32 above
     // ~34.3 s, and the cap is 60 s — a wrapped product would program a
     // much SHORTER window than requested (CodeRabbit finding, PR #3550).
@@ -188,8 +188,8 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
 
 #if FL_LPC_WATCHDOG_NMI_BACKTRACE
     // Warning threshold: fire the WDT interrupt when the counter reaches
-    // the 10-bit maximum (1023 ticks ≈ 8 ms at 125 kHz) so the NMI hook
-    // below gets a window to print the wedged PC before the hard reset.
+    // the 10-bit maximum (nominally ~7.8 ms on LPC845 and ~4.1 ms on LPC804)
+    // so the NMI hook gets a window to print the wedged PC before hard reset.
     WWDT->WARNINT = WWDT_WARNINT_WARNINT_MASK;
 #endif
 
