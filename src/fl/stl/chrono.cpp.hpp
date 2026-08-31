@@ -24,6 +24,16 @@ namespace {
         static time_provider_t provider;
         return provider;
     }
+
+    bool get_injected_millis(fl::u32* value) FL_NO_EXCEPT {
+        fl::unique_lock<fl::mutex> lock(get_time_mutex());
+        const auto& provider = get_time_provider();
+        if (!provider) {
+            return false;
+        }
+        *value = provider();
+        return true;
+    }
 }
 
 void inject_time_provider(const time_provider_t& provider) {
@@ -62,14 +72,10 @@ fl::u32 MockTimeProvider::operator()() const {
 ///////////////////// PUBLIC API //////////////////////////////////////
 
 fl::u32 millis() {
-#ifdef FASTLED_TESTING
-    // Check for injected time provider first
-    {
-        fl::unique_lock<fl::mutex> lock(get_time_mutex());
-        const auto& provider = get_time_provider();
-        if (provider) {
-            return provider();
-        }
+#if FL_CHRONO_HAS_TEST_TIME_PROVIDER
+    fl::u32 injected_millis = 0;
+    if (get_injected_millis(&injected_millis)) {
+        return injected_millis;
     }
 #endif
 
@@ -78,7 +84,13 @@ fl::u32 millis() {
 }
 
 fl::u32 micros() {
-    // Note: micros() does not support time injection
+#if FL_CHRONO_HAS_TEST_TIME_PROVIDER
+    fl::u32 injected_millis = 0;
+    if (get_injected_millis(&injected_millis)) {
+        return injected_millis * 1000u;
+    }
+#endif
+
     return fl::platforms::micros();
 }
 
