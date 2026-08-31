@@ -96,7 +96,8 @@ int SpiChannelEngineAdapter::getPriority() const {
     return maxPriority;
 }
 
-int SpiChannelEngineAdapter::selectControllerForClockPin(int clockPin, Esp32SpiBus requestedBus) {
+int SpiChannelEngineAdapter::selectControllerForClockPin(
+    int clockPin, Esp32SpiBus requestedBus) FL_NO_EXCEPT {
     // Check if clock pin already assigned
     for (const auto& assignment : mClockPinAssignments) {
         if (assignment.clockPin == clockPin && assignment.requestedBus == requestedBus) {
