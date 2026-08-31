@@ -28,7 +28,11 @@ __attribute__ ((always_inline)) inline static u32 __clock_cycles() {
 
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
-template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 85>
+#ifndef FASTLED_ESP8266_CLOCKLESS_WAIT_TIME
+#define FASTLED_ESP8266_CLOCKLESS_WAIT_TIME 85
+#endif
+
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = FASTLED_ESP8266_CLOCKLESS_WAIT_TIME>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
