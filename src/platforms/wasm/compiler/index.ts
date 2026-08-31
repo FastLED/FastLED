@@ -748,7 +748,7 @@ async function sha256Hex(bytes) {
 
 /**
  * Fetches one asset, following its declared `fallback` if the primary fails.
- * @returns {Promise<Uint8Array|null>}
+ * @returns {Promise<{bytes: Uint8Array, cleanEnd: boolean}|null>}
  */
 async function fetchAssetBytes(path, spec) {
   const urls = [spec.url, spec.fallback].filter(Boolean);
@@ -768,7 +768,10 @@ async function fetchAssetBytes(path, spec) {
       if (url !== spec.url) {
         console.log(`Asset '${path}': primary failed, served from fallback ${url}`);
       }
-      return bytes;
+      // A resolved arrayBuffer() means the response body reached a clean end.
+      // Keep that fact explicit so unknown-size assets still have a meaningful
+      // completeness signal independent of future digest verification.
+      return { bytes, cleanEnd: true };
     } catch (err) {
       const why = (err && err.name === 'TimeoutError')
         ? `timed out after ${assetFetchTimeoutMs}ms`
@@ -807,11 +810,12 @@ async function resolveManifestAssets(manifest) {
       console.warn(`Asset '${path}' has no url; skipping`);
       return null;
     }
-    const bytes = await fetchAssetBytes(path, spec);
-    if (!bytes) {
+    const fetched = await fetchAssetBytes(path, spec);
+    if (!fetched || !fetched.cleanEnd) {
       console.error(`Asset '${path}' could not be fetched; the sketch will see no such file`);
       return null;
     }
+    const { bytes } = fetched;
 
     if (spec.sha256) {
       const actual = await sha256Hex(bytes);
@@ -827,10 +831,16 @@ async function resolveManifestAssets(manifest) {
       console.warn(`Asset '${path}' declares no sha256; contents are unverified`);
     }
 
-    if (spec.size && Number(spec.size) !== bytes.length) {
+    const hasDeclaredSize = spec.size !== undefined && spec.size !== null;
+    if (!hasDeclaredSize) {
       console.warn(
-        `Asset '${path}': declared size ${spec.size} but received ${bytes.length} bytes`,
+        `Asset '${path}' has no declared size; completeness was verified by clean stream end only`,
       );
+    } else if (Number(spec.size) !== bytes.length) {
+      console.error(
+        `Asset '${path}' is incomplete: declared size ${spec.size} but received ${bytes.length} bytes. Dropping it.`,
+      );
+      return null;
     }
     console.log(`Asset '${path}' -> ${spec.url} (${bytes.length} bytes)`);
     // `embedded` marks this as backing fl::getEmbeddedFs(), which forces full
@@ -871,7 +881,7 @@ async function fastledLoadSetupLoop(
    * and a sketch waits forever on bytes that are never coming.
    *
    * @param {Object} file - {path, size, response?}
-   * @returns {Promise<number>} bytes written
+   * @returns {Promise<{written: number, cleanEnd: boolean}>} transfer result
    */
   const processFile = async (file) => {
     let written = 0;
@@ -881,7 +891,7 @@ async function fastledLoadSetupLoop(
       if (file.bytes) {
         jsAppendFileUint8(moduleInstance, file.path, file.bytes);
         console.log(`File fetched: ${file.path}, size: ${file.bytes.length}`);
-        return file.bytes.length;
+        return { written: file.bytes.length, cleanEnd: true };
       }
       const response = await fetch(file.path, {
         signal: AbortSignal.timeout(assetFetchTimeoutMs),
@@ -904,13 +914,13 @@ async function fastledLoadSetupLoop(
         jsAppendFileUint8(moduleInstance, file.path, value);
         written += value.length;
       }
+      return { written, cleanEnd: true };
     } catch (error) {
       const why = (error && error.name === 'TimeoutError')
         ? `timed out after ${assetFetchTimeoutMs}ms`
         : String(error);
       throw new Error(`Asset '${file.path}' could not be loaded: ${why}`);
     }
-    return written;
   };
 
   /**
@@ -928,10 +938,13 @@ async function fastledLoadSetupLoop(
         console.error(result.reason);
         continue;
       }
-      const file = filesJson[index];
-      if (typeof file.size === 'number' && result.value !== file.size) {
+      const declaredSize = filesJson[index].size;
+      const complete = result.value.cleanEnd
+        && (declaredSize === undefined || declaredSize === null
+          || result.value.written === Number(declaredSize));
+      if (!complete) {
         const error = new Error(
-          `Asset '${file.path}' is incomplete: wrote ${result.value} of ${file.size} bytes`,
+          `Asset '${filesJson[index].path}' is incomplete: wrote ${result.value.written} of ${declaredSize} bytes.`,
         );
         failures.push(error);
         console.error(error);
@@ -1005,10 +1018,11 @@ async function fastledLoadSetupLoop(
     // No `size === 0` escape hatch: an embedded asset's size is the real byte
     // count from its buffer, so the check cannot silently disable itself the
     // way it did when the size came from a possibly-absent Content-Length.
-    const complete = result.value === file.size;
+    const { written, cleanEnd } = result.value;
+    const complete = cleanEnd && written === file.size;
     if (!complete) {
       console.error(
-        `Embedded asset '${file.path}' is incomplete: wrote ${result.value} of ${file.size} bytes. `
+        `Embedded asset '${file.path}' is incomplete: wrote ${written} of ${file.size} bytes. `
         + 'The filesystem will report the declared size while reads return nothing.',
       );
     }
