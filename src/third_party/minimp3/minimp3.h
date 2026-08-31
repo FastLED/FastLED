@@ -217,12 +217,33 @@ namespace MINIMP3_NAMESPACE {
 #define MP3D_SAT_MAX ((int32_t)0x7fffffff)
 #define MP3D_SAT_MIN (-MP3D_SAT_MAX)
 
-/* value * coefficient, where the coefficient is Q`bits`. */
+/* Saturating narrow of a 64-bit accumulator to a Q(MINIMP3_FRAC_BITS) sample. */
+static int32_t mp3d_sat64(int64_t value) FL_NO_EXCEPT
+{
+    if (value > MP3D_SAT_MAX) return MP3D_SAT_MAX;
+    if (value < MP3D_SAT_MIN) return MP3D_SAT_MIN;
+    return (int32_t)value;
+}
+
+/* value * coefficient, where the coefficient is Q`bits`.
+
+   Saturates on the way down to 32 bits. The coefficients are not all <= 1 --
+   the DCT-32 secants reach 10.19 -- so the product can leave int32 range for an
+   operand far below MP3D_SAT_MAX, which means the saturating adds around it
+   never get the chance to fire. Concretely, at Q27 a 10.19 secant wraps once
+   the operand passes about 3.14 in real units, an order of magnitude under the
+   format's +/-32; a mutated stream that drives dequantisation to the +/-1 clamp
+   reaches that comfortably by the time mid/side, antialias and the IMDCT have
+   each added gain. Wrapping there produces a sign-flipped full-scale sample --
+   an audible bang instead of a bounded clip.
+
+   Worth stating why this cannot be left to the fuzz gate: narrowing an int64 to
+   int32 is implementation-defined, not undefined, so UBSan does not see it. */
 static int32_t mp3d_mulshift(int32_t value, int32_t coef, int bits) FL_NO_EXCEPT
 {
     int64_t product = (int64_t)value * (int64_t)coef;
     product += (int64_t)1 << (bits - 1);
-    return (int32_t)(product >> bits);
+    return mp3d_sat64(product >> bits);
 }
 
 /* Left shift that is defined for negative inputs, with saturation. `shift` is
@@ -253,14 +274,6 @@ static int32_t mp3d_shr_round(int32_t value, int shift) FL_NO_EXCEPT
         return 0;
     }
     return (int32_t)(((int64_t)value + ((int64_t)1 << (shift - 1))) >> shift);
-}
-
-/* Saturating narrow of a 64-bit accumulator to a Q(MINIMP3_FRAC_BITS) sample. */
-static int32_t mp3d_sat64(int64_t value) FL_NO_EXCEPT
-{
-    if (value > MP3D_SAT_MAX) return MP3D_SAT_MAX;
-    if (value < MP3D_SAT_MIN) return MP3D_SAT_MIN;
-    return (int32_t)value;
 }
 
 /* Narrow a Q30 accumulator to a sample, rounding once (half toward +infinity,
@@ -465,8 +478,8 @@ typedef struct
        int8_t, unlike the Layer III gains' int16_t, because this array lives on
        the stack inside mp3dec_decode_frame_r rather than in the heap scratch
        arena, and 192 entries of it is the difference between meeting the 2 KiB
-       decode-stack budget and missing it. The exponents here span roughly
-       [-36, 1]: the table's own range plus the runtime 2**(21 - b/3) scale. */
+       decode-stack budget and missing it. The exponents here span [-37, -1]:
+       the table's own range plus the runtime 2**(21 - b/3) scale. */
     int32_t scf_mant[3*64];
     int8_t scf_exp[3*64];
 #else
