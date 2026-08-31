@@ -1024,7 +1024,10 @@ static int32_t mp3d_pow43(int x, int *exp) FL_NO_EXCEPT
     sign = 2*x & 64;
     num = (x & 63) - sign;
     den = (x & ~63) + sign;
-    frac = (int32_t)(((int64_t)num << 30) / den);
+    /* Multiply rather than shift: `num` is negative for half of all inputs
+       and shifting a negative value left is UB, which the differential fuzzer
+       caught under UBSan. */
+    frac = (int32_t)(((int64_t)num * ((int64_t)1 << 30)) / den);
     term = MP3D_Q30_POW43_C1 + mp3d_mulshift(frac, MP3D_Q30_POW43_C2, 30);
     /* Shift by 31 rather than 30: the polynomial reaches 1.72, which would
        carry a normalised mantissa past INT32_MAX. The lost bit is paid back
