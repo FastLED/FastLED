@@ -111,10 +111,11 @@ public:
 	virtual u16 getMaxRefreshRate() const { return 400; }
 
 	typedef union {
-		u8 bytes[12];
-		u16 shorts[6];
-		u32 raw[3];
+		u8 bytes[16];
+		u16 shorts[8];
+		u32 raw[4];
 	} Lines;
+	FL_STATIC_ASSERT(sizeof(Lines) >= 8 * sizeof(u16), "Lines must hold eight 16-bit output masks");
 
 	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) FL_NO_EXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
 		FASTLED_REGISTER Lines b2;
