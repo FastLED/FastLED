@@ -93,7 +93,7 @@ _FL_DEFPIN(23, 23, 1); _FL_DEFPIN(24,  1, 0); _FL_DEFPIN(25,  0, 0);
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
 // Actual pin definitions
-#elif defined(ADAFRUIT_METRO_M4_AIRLIFT_LITE) || defined(ADAFRUIT_METRO_M4_EXPRESS)
+#elif defined(ADAFRUIT_METRO_M4_AIRLIFT_LITE) || defined(ADAFRUIT_METRO_M4_EXPRESS) || defined(ARDUINO_METRO_M4)
 
 // The Metro M4 Express and the Metro M4 AirLift Lite share a pinout apart from
 // A3 (pin 17), so both boards use this table.

@@ -103,6 +103,22 @@ def _defined_macros(flags: list[str], header: str) -> set[str]:
     return macros
 
 
+def _preprocessed_header(flags: list[str], header: str) -> str:
+    """Preprocess a real FastLED header with the supplied board flags."""
+    cmd = [_compiler(), "-E", "-x", "c++", f"-I{SRC}", *flags, "-"]
+    proc = RunningProcess.run(
+        cmd,
+        input=f'#include "{header}"\n',
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=120,
+    )
+    assert proc.returncode == 0, f"preprocessing failed:\n{proc.stderr}"
+    return proc.stdout
+
+
 HEADER = "platforms/arm/samd/is_samd.h"
 
 
@@ -154,6 +170,25 @@ def test_non_samd_build_is_not_detected_as_samd() -> None:
     assert "FL_IS_SAMD" not in macros
     assert "FL_IS_SAMD21" not in macros
     assert "FL_IS_SAMD51" not in macros
+
+
+def test_arduino_metro_m4_board_macro_selects_d6_fastpin() -> None:
+    """#4004: Arduino's board macro must select the Metro M4 pin table.
+
+    ``ARDUINO_METRO_M4`` comes from ``build.board=METRO_M4`` in Adafruit
+    SAMD 1.7.17. D6 is PB15 in that release's ``variants/metro_m4`` table.
+    """
+    output = _preprocessed_header(
+        ["-DARDUINO_METRO_M4", "-D__SAMD51J19A__"],
+        "platforms/arm/d51/fastpin_arm_d51.h",
+    )
+    specialization = (
+        "template<> class FastPin<6> : public _ARMPIN<6, 15, 1ul << 15, 1> {}"
+    )
+    assert specialization in output, (
+        "ARDUINO_METRO_M4 did not select the Metro M4 table; FastPin<6> will "
+        "remain invalid instead of mapping to D6/PB15"
+    )
 
 
 def test_samd_does_not_route_into_the_arduino_spi_backend() -> None:
