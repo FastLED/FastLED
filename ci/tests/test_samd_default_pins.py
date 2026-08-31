@@ -39,7 +39,7 @@ FALLBACKS = {"FL_PIN_CLOCKLESS_1": 3, "FL_PIN_SPI_DATA_1": 1, "FL_PIN_SPI_CLOCK_
 _OPEN = re.compile(r"^\s*#\s*(if|ifdef|ifndef)\b")
 _CLOSE = re.compile(r"^\s*#\s*endif\b")
 _BRANCH = re.compile(r"^\s*#\s*(?:el)?if\s+defined\s*\(\s*([A-Za-z_][A-Za-z0-9_]*)")
-_DEFPIN = re.compile(r"_FL_DEFPIN\(\s*(\d+)")
+_DEFPIN = re.compile(r"_FL_DEFPIN\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)")
 _DEFAULT = re.compile(
     r"^\s*#\s*define\s+(FL_PIN_CLOCKLESS_1|FL_PIN_SPI_DATA_1|FL_PIN_SPI_CLOCK_1)\s+(\d+)"
 )
@@ -79,13 +79,15 @@ def _board_blocks(header: Path) -> dict[str, dict]:
 
         if m and depth == board_depth:
             current = m.group(1)
-            boards.setdefault(current, {"pins": set(), "defaults": {}})
+            boards.setdefault(current, {"pins": set(), "mappings": {}, "defaults": {}})
             continue
 
         if current is None:
             continue
         for pm in _DEFPIN.finditer(line):
-            boards[current]["pins"].add(int(pm.group(1)))
+            pin, bit, group = map(int, pm.groups())
+            boards[current]["pins"].add(pin)
+            boards[current]["mappings"][pin] = (bit, group)
         dm = _DEFAULT.match(line)
         if dm:
             boards[current]["defaults"][dm.group(1)] = int(dm.group(2))
@@ -141,3 +143,11 @@ def test_feather_m4_regression() -> None:
         )
         for macro in FALLBACKS:
             assert block["defaults"].get(macro, FALLBACKS[macro]) not in (2, 3)
+
+
+def test_qtpy_m0_onboard_neopixel_mapping() -> None:
+    """QT Py M0's PIN_NEOPIXEL (D11) is PA18, only in its board branch."""
+    blocks = _board_blocks(SRC / "platforms" / "arm" / "d21" / "fastpin_arm_d21.h")
+    qtpy = blocks["ADAFRUIT_QTPY_M0"]
+    assert qtpy["mappings"].get(11) == (18, 0)
+    assert qtpy["defaults"].get("FL_PIN_CLOCKLESS_1") == 11
