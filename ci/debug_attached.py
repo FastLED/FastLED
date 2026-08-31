@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Four-phase device workflow: Package Install → Lint → Compile → Upload+Monitor.
+"""Four-phase device workflow: Package Install → Lint → Deploy → Monitor.
 
 ⚠️ NOTE FOR AI AGENTS: For live device testing, prefer 'bash autoresearch' which provides
 a complete hardware autoresearch framework. This script is for advanced/custom workflows.
@@ -20,14 +20,9 @@ Phase 1: Linting (C++ linting only - catches ISR errors)
     - Enforces namespace, include, and code style rules
     - Can be skipped with --skip-lint flag for faster iteration
 
-Phase 2: Compile (NO LOCK - parallelizable)
-    - Builds the staged project for the target environment with fbuild
-    - No lock needed: Each project has isolated build directory
-    - Packages already installed, so no downloads triggered
-    - Multiple agents can compile different projects simultaneously
-
-Phase 3: Upload
-    - Uploads firmware to the attached device using fbuild
+Phases 2-3: Build + Upload
+    - Deploys the staged project for the target environment with fbuild
+    - Lets fbuild's board registry select the port when none is explicit
     - fbuild only rebuilds when source files or build inputs changed
     - Blocks if daemon indicates resource is busy
 
@@ -94,7 +89,7 @@ from ci.util.global_interrupt_handler import (
 from ci.util.json_rpc_handler import JsonRpcHandler
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.pio_runner import create_pio_process
-from ci.util.port_utils import auto_detect_upload_port, kill_port_users
+from ci.util.port_utils import kill_port_users
 from ci.util.sketch_resolver import parse_timeout, resolve_sketch_path
 
 
@@ -150,6 +145,37 @@ def run_cpp_lint() -> bool:
     except Exception as e:
         print(f"❌ Error running C++ linting: {e}")
         return False
+
+
+def _deploy_for_monitor(
+    build_dir: Path,
+    environment: str,
+    upload_port: str | None,
+    verbose: bool,
+) -> str | None:
+    """Deploy with fbuild and return the application port to monitor."""
+    if upload_port:
+        kill_port_users(upload_port)
+
+    from ci.util.fbuild_runner import run_fbuild_deploy
+
+    result = run_fbuild_deploy(
+        build_dir,
+        environment,
+        upload_port=upload_port,
+        verbose=verbose,
+    )
+    if not result.success:
+        return None
+
+    monitor_port = result.port or upload_port
+    if not monitor_port:
+        print(
+            "❌ fbuild deployed successfully but did not report the application "
+            "port required for monitoring"
+        )
+        return None
+    return monitor_port
 
 
 def run_compile(
@@ -1240,43 +1266,16 @@ def main() -> int:
         print(f"❌ Error parsing JSON-RPC commands: {e}")
         return 1
 
-    # Auto-detect upload port if not specified
+    # An explicit port remains an override. Otherwise fbuild chooses from the
+    # central board registry during deploy and reports the application port.
     upload_port = args.upload_port
-    if not upload_port:
-        result = auto_detect_upload_port(args.environment)
-        if not result.ok:
-            # Port detection failed - display detailed error and exit
-            print(f"{Fore.RED}{'=' * 60}")
-            print(f"{Fore.RED}⚠️  FATAL ERROR: PORT DETECTION FAILED")
-            print(f"{Fore.RED}{'=' * 60}")
-            print(f"\n{Fore.RED}{result.error_message}{Style.RESET_ALL}\n")
-
-            # Display all scanned ports for diagnostics
-            if result.all_ports:
-                print("Available ports (all non-USB):")
-                for port in result.all_ports:
-                    print(f"  {port.device}: {port.description}")
-                    print(f"    hwid: {port.hwid}")
-            else:
-                print("No serial ports detected on system.")
-
-            print(
-                f"\n{Fore.RED}Only USB devices are supported. Please connect a USB device and try again.{Style.RESET_ALL}"
-            )
-            print(
-                f"{Fore.RED}Note: Bluetooth serial ports (BTHENUM) are not supported.{Style.RESET_ALL}\n"
-            )
-            return 1
-
-        # Port detection succeeded
-        upload_port = result.selected_port
 
     print("FastLED Debug Attached Device")
     print("=" * 60)
     print(f"Project: {build_dir}")
     if args.environment:
         print(f"Environment: {args.environment}")
-    print(f"Upload port: {upload_port}")
+    print(f"Upload port: {upload_port or 'auto (fbuild board registry)'}")
     print("=" * 60)
     print()
 
@@ -1325,39 +1324,23 @@ def main() -> int:
             print()
 
         # ============================================================
-        # PHASE 2: Compile (NO LOCK - parallelizable)
+        # PHASES 2-3: Build + Upload
         # ============================================================
-        # No lock needed: each project has isolated build directory.
-        # Multiple agents can compile different projects simultaneously.
-
         print("📦 Using fbuild")
-        from ci.util.fbuild_runner import run_fbuild_compile
-
-        if not run_fbuild_compile(build_dir, args.environment, args.verbose).success:
-            return 1
-
-        # ============================================================
-        # PHASES 3-4: Upload + Monitor
-        # ============================================================
-        # Note: Device locking is handled by fbuild (daemon-based)
-
-        # Clean up orphaned processes holding the serial port
-        if upload_port:
-            kill_port_users(upload_port)
-
-        # Phase 3: Upload firmware (with incremental rebuild if needed)
-        from ci.util.fbuild_runner import run_fbuild_upload
-
-        if not run_fbuild_upload(
-            build_dir, args.environment, upload_port, args.verbose
-        ):
+        monitor_port = _deploy_for_monitor(
+            build_dir,
+            args.environment,
+            upload_port,
+            args.verbose,
+        )
+        if not monitor_port:
             return 1
 
         # Phase 4: Monitor serial output
         monitor_result = run_monitor(
             build_dir,
             args.environment,
-            upload_port,  # Use same port for monitoring
+            monitor_port,
             args.verbose,
             timeout_seconds,
             fail_keywords,

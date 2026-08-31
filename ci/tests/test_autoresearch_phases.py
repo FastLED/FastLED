@@ -1790,6 +1790,42 @@ class TestAutoDetectUploadPort:
             result.error_message or ""
         )
 
+    def test_non_esp_environment_does_not_guess_from_usb_descriptor(self) -> None:
+        port = ListPortInfo("COM9")
+        port.description = "CP210x USB to UART Bridge"
+        port.hwid = "USB VID:PID=10C4:EA60"
+
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[port],
+        ):
+            result = auto_detect_upload_port("rp2040")
+
+        assert result.ok is False
+        assert result.selected_port is None
+        assert "cannot be identified safely" in (result.error_message or "")
+
+    def test_expected_serial_number_selects_reenumerated_non_esp_port(self) -> None:
+        wrong_port = ListPortInfo("COM8")
+        wrong_port.description = "USB Serial Device"
+        wrong_port.hwid = "USB VID:PID=FFFF:0001"
+        wrong_port.serial_number = "OTHER"
+        expected_port = ListPortInfo("COM9")
+        expected_port.description = "USB Serial Device"
+        expected_port.hwid = "USB VID:PID=2E8A:F00F"
+        expected_port.serial_number = "BOARD-123"
+
+        with patch(
+            "ci.util.port_utils.serial.tools.list_ports.comports",
+            return_value=[wrong_port, expected_port],
+        ):
+            result = auto_detect_upload_port(
+                "rp2350w", expected_serial_number="BOARD-123"
+            )
+
+        assert result.ok is True
+        assert result.selected_port == "COM9"
+
 
 # ============================================================
 # Tests: _run_build_deploy

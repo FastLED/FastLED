@@ -117,14 +117,20 @@ def auto_detect_upload_port(
     Returns a structured result with success status, selected port, error details,
     and all scanned ports for diagnostics.
 
-    Prefers common ESP32/Arduino USB-to-serial chips:
+    Uses an exact serial-number match when one is supplied, and probes ESP
+    chips for ESP environments. A known non-ESP environment is not guessed
+    from generic USB descriptors; callers must defer to fbuild or supply an
+    explicit port.
+
+    Without an expected environment, prefers common USB-to-serial chips:
         - CP2102/CP210x (Silicon Labs)
         - CH340/CH341 (WCH)
         - FTDI chips
         - Generic USB-Serial converters
 
     Args:
-        expected_environment: Board environment used for strict fingerprinting.
+        expected_environment: Board environment used for ESP chip probing and
+            to prevent unsafe generic selection for known non-ESP boards.
         expected_serial_number: Optional stable USB identity that a matching
             board must retain across re-enumeration.
 
@@ -180,6 +186,25 @@ def auto_detect_upload_port(
 
     expected_env = expected_environment.lower() if expected_environment else None
 
+    if expected_serial_number:
+        for port in usb_ports:
+            if port.serial_number == expected_serial_number:
+                return ComportResult(
+                    ok=True,
+                    selected_port=port.device,
+                    error_message=None,
+                    all_ports=all_ports,
+                )
+        return ComportResult(
+            ok=False,
+            selected_port=None,
+            error_message=(
+                "No USB serial port matched expected serial number "
+                f"'{expected_serial_number}'"
+            ),
+            all_ports=all_ports,
+        )
+
     esp_environments = {env.lower() for env in CHIP_TO_ENVIRONMENT.values()}
     if expected_env in esp_environments:
         probe_notes: list[str] = []
@@ -220,6 +245,17 @@ def auto_detect_upload_port(
                 all_ports=all_ports,
             )
         # Probe was inconclusive; fall through to the USB descriptor heuristic.
+
+    if expected_env and expected_env not in esp_environments:
+        return ComportResult(
+            ok=False,
+            selected_port=None,
+            error_message=(
+                f"USB port for environment '{expected_environment}' cannot be "
+                "identified safely without fbuild board selection or an explicit port"
+            ),
+            all_ports=all_ports,
+        )
 
     # Select best USB port (prefer ESP32/Arduino chips if available)
     selected_port = None

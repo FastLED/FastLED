@@ -1600,7 +1600,6 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
     args = ctx.args
     build_dir = ctx.build_dir
     final_environment = ctx.final_environment
-    final_environment_norm = (final_environment or "").lower()
     build_environment = _build_environment_for_mode(ctx)
     upload_port = ctx.upload_port
     build_driver = ctx.build_driver
