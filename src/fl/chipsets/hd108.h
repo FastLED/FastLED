@@ -44,6 +44,12 @@ class HD108Controller : public CPixelLEDController<RGB_ORDER> {
 
 public:
 	HD108Controller() FL_NO_EXCEPT {}
+	#if defined(FL_IS_ESP32)
+	CLEDController &setSpiBus(fl::Esp32SpiBus bus) FL_NO_EXCEPT override {
+		mSPI.setBus(bus);
+		return *this;
+	}
+	#endif
 
 	void init() override { mSPI.init(); }
 

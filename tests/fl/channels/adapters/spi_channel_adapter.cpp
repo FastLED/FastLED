@@ -137,9 +137,10 @@ private:
 };
 
 /// @brief Create SPI channel data (APA102, SK9822, etc.)
-ChannelDataPtr createSpiChannelData(int dataPin = 5, int clockPin = 18) {
+ChannelDataPtr createSpiChannelData(int dataPin = 5, int clockPin = 18,
+                                    Esp32SpiBus spiBus = Esp32SpiBus::AUTO) {
     SpiEncoder encoder = SpiEncoder::apa102();
-    SpiChipsetConfig spiConfig{dataPin, clockPin, encoder};
+    SpiChipsetConfig spiConfig{dataPin, clockPin, encoder, spiBus};
     fl::vector_psram<uint8_t> data = {0x00, 0xFF, 0xAA, 0x55};
     return ChannelData::create(spiConfig, fl::move(data));
 }
@@ -536,6 +537,44 @@ FL_TEST_CASE("SpiChannelEngineAdapter - Multiple channels same clock pin") {
     // Both channels should be transmitted (batched together)
     // Mock transmit called once per channel in batch
     FL_CHECK_GT(spiHw1->getTransmitCount(), 0);
+}
+
+FL_TEST_CASE("SpiChannelEngineAdapter - explicit SPI host selects matching controller") {
+    auto spi2 = fl::make_shared<MockSpiHw>(1, "SPI2", 10);
+    auto spi3 = fl::make_shared<MockSpiHw>(1, "SPI3", 5);
+    spi2->setBusId(2);
+    spi3->setBusId(3);
+
+    fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spi2, spi3};
+    fl::vector<int> priorities = {10, 5};
+    fl::vector<const char*> names = {"SPI2", "SPI3"};
+    auto adapter = SpiChannelEngineAdapter::create(
+        controllers, priorities, names, "SPI_UNIFIED");
+
+    adapter->enqueue(createSpiChannelData(5, 18, Esp32SpiBus::SPI3));
+    adapter->show();
+
+    FL_CHECK_FALSE(spi2->wasTransmitCalled());
+    FL_CHECK_TRUE(spi3->wasTransmitCalled());
+}
+
+FL_TEST_CASE("SpiChannelEngineAdapter - AUTO preserves controller priority") {
+    auto preferred = fl::make_shared<MockSpiHw>(1, "preferred", 10);
+    auto fallback = fl::make_shared<MockSpiHw>(1, "fallback", 5);
+    preferred->setBusId(2);
+    fallback->setBusId(3);
+
+    fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {preferred, fallback};
+    fl::vector<int> priorities = {10, 5};
+    fl::vector<const char*> names = {"preferred", "fallback"};
+    auto adapter = SpiChannelEngineAdapter::create(
+        controllers, priorities, names, "SPI_UNIFIED");
+
+    adapter->enqueue(createSpiChannelData());
+    adapter->show();
+
+    FL_CHECK_TRUE(preferred->wasTransmitCalled());
+    FL_CHECK_FALSE(fallback->wasTransmitCalled());
 }
 
 } // FL_TEST_FILE

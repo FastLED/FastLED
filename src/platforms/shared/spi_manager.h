@@ -4,6 +4,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"
+#include "fl/spi_bus.h"
 
 // Shared SPI type definitions
 #include "platforms/shared/spi_types.h"
@@ -69,6 +70,7 @@ struct SPIBusInfo {
     u8 num_devices;            ///< Number of devices on this bus
     SPIDeviceInfo devices[16];      ///< Device list (max 16 for I2S parallel mode)
     u8 spi_bus_num;            ///< Hardware SPI bus number (2 or 3)
+    Esp32SpiBus requested_bus; ///< Explicit ESP32 host, or AUTO
     fl::shared_ptr<SpiHwBase> hw_controller;  ///< Polymorphic hardware controller (SpiHw1/2/4/8/16)
     bool is_initialized;            ///< Whether hardware is initialized
     const char* error_message;      ///< Error message if initialization failed
@@ -79,7 +81,7 @@ struct SPIBusInfo {
 
     SPIBusInfo()
  FL_NO_EXCEPT : clock_pin(0xFF), bus_type(SPIBusType::SOFT_SPI), num_devices(0),
-          spi_bus_num(0xFF), hw_controller(nullptr), is_initialized(false),
+          spi_bus_num(0xFF), requested_bus(Esp32SpiBus::AUTO), hw_controller(nullptr), is_initialized(false),
           error_message(nullptr) {}
 };
 
@@ -105,7 +107,8 @@ public:
     /// @param requested_speed_hz User-requested SPI speed in Hz (from DATA_RATE_MHZ)
     /// @param controller Pointer to controller instance
     /// @returns Handle to use for transmit operations
-    SPIBusHandle registerDevice(u8 clock_pin, u8 data_pin, u32 requested_speed_hz, void* controller) FL_NO_EXCEPT;
+    SPIBusHandle registerDevice(u8 clock_pin, u8 data_pin, u32 requested_speed_hz, void* controller,
+                                Esp32SpiBus requested_bus = Esp32SpiBus::AUTO) FL_NO_EXCEPT;
 
     /// Unregister a device (LED strip) from the manager
     /// Called by LED controller destructors
@@ -151,7 +154,7 @@ private:
     /// Find or create bus for a clock pin
     /// @param clock_pin Clock pin number
     /// @returns Pointer to bus, or nullptr if MAX_BUSES exceeded
-    SPIBusInfo* getOrCreateBus(u8 clock_pin) FL_NO_EXCEPT;
+    SPIBusInfo* getOrCreateBus(u8 clock_pin, Esp32SpiBus requested_bus) FL_NO_EXCEPT;
 
     /// Initialize a specific bus (promotes to multi-SPI if needed)
     /// @param bus Bus to initialize

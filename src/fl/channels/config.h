@@ -12,6 +12,7 @@
 #include "fl/chipsets/spi.h"
 #include "fl/gfx/eorder.h"
 #include "fl/channels/options.h"
+#include "fl/spi_bus.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/string.h"  // fl::string must be complete for Optional<fl::string> below  // IWYU pragma: keep
 #include "color.h"  // IWYU pragma: keep
@@ -103,14 +104,16 @@ struct SpiChipsetConfig {
     int dataPin;                    ///< GPIO data pin (MOSI)
     int clockPin;                   ///< GPIO clock pin (SCK)
     SpiEncoder timing;              ///< SPI encoder configuration
+    Esp32SpiBus spiBus;             ///< ESP-IDF host override, or AUTO
 
     /// @brief Constructor
-    SpiChipsetConfig(int dataPin, int clockPin, const SpiEncoder& timing) FL_NO_EXCEPT
-        : dataPin(dataPin), clockPin(clockPin), timing(timing) {}
+    SpiChipsetConfig(int dataPin, int clockPin, const SpiEncoder& timing,
+                     Esp32SpiBus spiBus = Esp32SpiBus::AUTO) FL_NO_EXCEPT
+        : dataPin(dataPin), clockPin(clockPin), timing(timing), spiBus(spiBus) {}
 
     /// @brief Default constructor (requires explicit protocol specification)
     /// @note Protocol defaults to APA102 as a reasonable fallback
-    SpiChipsetConfig() FL_NO_EXCEPT : dataPin(-1), clockPin(-1), timing{fl::SpiChipset::APA102, 6000000} {}
+    SpiChipsetConfig() FL_NO_EXCEPT : dataPin(-1), clockPin(-1), timing{fl::SpiChipset::APA102, 6000000}, spiBus(Esp32SpiBus::AUTO) {}
 
     /// @brief Copy constructor
     SpiChipsetConfig(const SpiChipsetConfig&) FL_NO_EXCEPT = default;
@@ -128,7 +131,8 @@ struct SpiChipsetConfig {
     bool operator==(const SpiChipsetConfig& other) const FL_NO_EXCEPT {
         return dataPin == other.dataPin &&
                clockPin == other.clockPin &&
-               timing == other.timing;
+               timing == other.timing &&
+               spiBus == other.spiBus;
     }
 
     /// @brief Inequality operator

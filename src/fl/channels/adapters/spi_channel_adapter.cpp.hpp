@@ -96,10 +96,10 @@ int SpiChannelEngineAdapter::getPriority() const {
     return maxPriority;
 }
 
-int SpiChannelEngineAdapter::selectControllerForClockPin(int clockPin) {
+int SpiChannelEngineAdapter::selectControllerForClockPin(int clockPin, Esp32SpiBus requestedBus) {
     // Check if clock pin already assigned
     for (const auto& assignment : mClockPinAssignments) {
-        if (assignment.clockPin == clockPin) {
+        if (assignment.clockPin == clockPin && assignment.requestedBus == requestedBus) {
             return assignment.controllerIndex;
         }
     }
@@ -109,6 +109,10 @@ int SpiChannelEngineAdapter::selectControllerForClockPin(int clockPin) {
     int bestPriority = -1;
 
     for (size_t i = 0; i < mControllers.size(); i++) {
+        if (requestedBus != Esp32SpiBus::AUTO &&
+            mControllers[i].controller->getBusId() != static_cast<int>(requestedBus)) {
+            continue;
+        }
         if (!canControllerHandleClockPin(mControllers[i], clockPin)) {
             continue;
         }
@@ -121,7 +125,7 @@ int SpiChannelEngineAdapter::selectControllerForClockPin(int clockPin) {
 
     // Record assignment
     if (bestIndex >= 0) {
-        mClockPinAssignments.push_back({clockPin, static_cast<size_t>(bestIndex)});
+        mClockPinAssignments.push_back({clockPin, requestedBus, static_cast<size_t>(bestIndex)});
     }
 
     return bestIndex;
@@ -311,7 +315,7 @@ fl::vector<SpiChannelEngineAdapter::ClockPinGroup> SpiChannelEngineAdapter::grou
         // Find existing group for this clock pin
         ClockPinGroup* existingGroup = nullptr;
         for (size_t i = 0; i < groups.size(); i++) {
-            if (groups[i].clockPin == clockPin) {
+            if (groups[i].clockPin == clockPin && groups[i].requestedBus == spiConfig.spiBus) {
                 existingGroup = &groups[i];
                 break;
             }
@@ -323,6 +327,7 @@ fl::vector<SpiChannelEngineAdapter::ClockPinGroup> SpiChannelEngineAdapter::grou
         } else {
             ClockPinGroup newGroup;
             newGroup.clockPin = clockPin;
+            newGroup.requestedBus = spiConfig.spiBus;
             newGroup.channels.push_back(channel);
             groups.push_back(newGroup);
         }
@@ -348,7 +353,7 @@ bool SpiChannelEngineAdapter::transmitBatch(fl::span<const ChannelDataPtr> chann
     int dataPin = channels[0]->getPin();  // MOSI pin from channel config
 
     // Select controller for this clock pin
-    int controllerIndex = selectControllerForClockPin(clockPin);
+    int controllerIndex = selectControllerForClockPin(clockPin, spiConfig.spiBus);
     if (controllerIndex < 0) {
         FL_WARN_F("SpiChannelEngineAdapter: No available controller for clock pin %s", clockPin);
         return false;
