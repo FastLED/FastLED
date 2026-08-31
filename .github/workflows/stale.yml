@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write
   contents: read
   issues: write
   pull-requests: write
@@ -33,12 +34,18 @@ jobs:
             status: blocked,
             priority: critical,
             deferred,
-            help wanted
+            help wanted,
+            pinned,
+            security,
+            never-stale
           exempt-pr-labels: >-
             status: in-progress,
             status: blocked,
             priority: critical,
-            deferred
+            deferred,
+            pinned,
+            security,
+            never-stale
           exempt-all-assignees: true
           exempt-all-milestones: true
           exempt-draft-pr: true
