@@ -17,9 +17,10 @@
 /// `platforms/watchdog.impl.cpp.hpp`).
 ///
 /// Uses the internal Watchdog Oscillator (WDOSC) — nominally 525 kHz after
-/// DIVSEL, divided by 4 inside the WWDT to give a ~131 kHz tick (we budget
-/// 125 kHz), so the 24-bit TC register lets us program timeouts from ~32 µs
-/// to ~134 s. The defaults in `begin()` clamp to a 1-second nominal window.
+/// DIVSEL, divided by 4 inside the WWDT to give a 131.25 kHz tick. LPC804's
+/// fixed 500 kHz LPOSC gives a 125 kHz WWDT tick. The 24-bit TC register lets
+/// us program timeouts from ~32 µs to ~134 s. The defaults in `begin()` clamp
+/// to a 1-second nominal window.
 ///
 /// **WDOSC accuracy:** the watchdog oscillator on LPC8xx is uncalibrated
 /// silicon and can drift ±40% across voltage/temperature corners (per
@@ -98,10 +99,14 @@ namespace platforms {
 namespace lpc_wwdt {
     // LPC845: WDOSC nominal tick after the WWDT-internal /4 prescaler. Per
     // UM11029 §4.6.7 Table 51, FREQSEL=0x2 selects a nominal 1.05 MHz
-    // source; DIVSEL=0x00 produces 525 kHz. LPC804 instead has a fixed
-    // 500 kHz LPOSC selected through LPOSCCLKEN (UM11065 §4.5.17). Both
-    // yield approximately 125 kHz after the WWDT prescaler.
+    // source; DIVSEL=0x00 produces 525 kHz, or 131.25 kHz after the WWDT
+    // prescaler. LPC804 instead has a fixed 500 kHz LPOSC selected through
+    // LPOSCCLKEN (UM11065 §4.5.17), yielding a 125 kHz WWDT tick.
+#if defined(FL_IS_ARM_LPC_845)
+    constexpr fl::u32 kTickHz = 131250u;
+#else
     constexpr fl::u32 kTickHz = 125000u;
+#endif
 #if defined(FL_IS_ARM_LPC_845)
     constexpr fl::u32 kWdtoscCtrl =
         SYSCON_WDTOSCCTRL_FREQSEL(0x2u) | SYSCON_WDTOSCCTRL_DIVSEL(0x00u);
