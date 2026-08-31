@@ -16,22 +16,21 @@
 /// different SYSCON layouts; they fall through to the no-op backend (see
 /// `platforms/watchdog.impl.cpp.hpp`).
 ///
-/// Uses the internal Watchdog Oscillator (WDOSC) — nominally 525 kHz after
-/// DIVSEL, divided by 4 inside the WWDT to give a 131.25 kHz tick. LPC804's
-/// fixed 500 kHz LPOSC gives a 125 kHz WWDT tick. The 24-bit TC register lets
-/// us program timeouts from ~32 µs to ~134 s. The defaults in `begin()` clamp
-/// to a 1-second nominal window.
+/// LPC845 uses the internal Watchdog Oscillator (WDOSC) — nominally 525 kHz
+/// after DIVSEL, divided by 4 inside the WWDT to give a 131.25 kHz tick.
+/// LPC804's fixed 1 MHz LPOSC gives a 250 kHz WWDT tick. The 24-bit TC register
+/// allows nominal windows up to ~128 s on LPC845 and ~67 s on LPC804;
+/// `begin()` caps the requested timeout at 60 s.
 ///
-/// **WDOSC accuracy:** the watchdog oscillator on LPC8xx is uncalibrated
-/// silicon and can drift ±40% across voltage/temperature corners (per
-/// UM11029 §4.6). That is fine for "panic reset after N seconds of hang" —
-/// the failure mode is "device reboots a bit early or late" — but is not
-/// a precision timer. Anyone needing accurate scheduling should NOT use
-/// this as a wakeup source.
+/// **Oscillator accuracy:** LPC845's WDOSC is uncalibrated silicon and can
+/// drift ±40% across voltage/temperature corners (UM11029 §4.6). LPC804's
+/// LPOSC is specified at 1 MHz ±3% (LPC804 data sheet, Table 17). This is fine
+/// for "panic reset after N seconds of hang" but is not a precision timer.
+/// Anyone needing accurate scheduling should NOT use this as a wakeup source.
 ///
 /// **Wedge backtrace (NMI warning hook):** `begin()` programs the WWDT
-/// warning threshold (WARNINT, 10-bit → fires ~8 ms before the reset at
-/// the 125 kHz tick) and routes the WDT interrupt line to the Cortex-M0+
+/// warning threshold (WARNINT, 10-bit → nominally ~7.8 ms before reset on
+/// LPC845 and ~4.1 ms on LPC804) and routes the WDT interrupt line to the Cortex-M0+
 /// NMI via `SYSCON->NMISRC`. The ACLPC startup file's `NMI_Handler` is a
 /// STRONG alias of `HardFault_Handler` (not overridable from here — a
 /// weak-alias upstreaming is possible later), and that shared handler
@@ -87,10 +86,9 @@ FL_IS_ARM_LPC_804 (LPC11xx/LPC15xx take the no-op backend)."
 
 #define FL_WATCHDOG_HAS_HARDWARE
 #define FL_WATCHDOG_PERSIST_BYTES 8
-// 24-bit TC at the divided WDOSC rate. Even at the slowest realistic
-// WDOSC corner (~280 kHz / 4 = 70 kHz tick) the TC ceiling is ~239 s;
-// at the nominal 125 kHz tick it is ~134 s. Cap at 60 s so we stay
-// comfortably inside the worst-case silicon corner.
+// 24-bit TC at the divided oscillator rate. At the nominal rates the TC
+// ceiling is ~128 s on LPC845 and ~67 s on LPC804. Cap at 60 s so both chips
+// remain below the register ceiling across their specified oscillator range.
 #define FL_WATCHDOG_MAX_TIMEOUT_MS 60000u
 
 namespace fl {
@@ -100,12 +98,12 @@ namespace lpc_wwdt {
     // LPC845: WDOSC nominal tick after the WWDT-internal /4 prescaler. Per
     // UM11029 §4.6.7 Table 51, FREQSEL=0x2 selects a nominal 1.05 MHz
     // source; DIVSEL=0x00 produces 525 kHz, or 131.25 kHz after the WWDT
-    // prescaler. LPC804 instead has a fixed 500 kHz LPOSC selected through
-    // LPOSCCLKEN (UM11065 §4.5.17), yielding a 125 kHz WWDT tick.
+    // prescaler. LPC804 instead has a fixed 1 MHz LPOSC selected through
+    // LPOSCCLKEN (UM11065 §4.5.17), yielding a 250 kHz WWDT tick.
 #if defined(FL_IS_ARM_LPC_845)
     constexpr fl::u32 kTickHz = 131250u;
 #else
-    constexpr fl::u32 kTickHz = 125000u;
+    constexpr fl::u32 kTickHz = 250000u;
 #endif
 #if defined(FL_IS_ARM_LPC_845)
     constexpr fl::u32 kWdtoscCtrl =
@@ -176,7 +174,7 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
 #endif
     SYSCON->SYSAHBCLKCTRL0 |= SYSCON_SYSAHBCLKCTRL0_WWDT_MASK;
 
-    // TC is in WWDT ticks; we are at ~125 kHz after the internal /4. Round
+    // TC is in WWDT ticks at the chip-specific divided oscillator rate. Round
     // up so we never timeout EARLY (timeout_ms is the maximum allowed
     // silence between feeds, undershooting it would crash live code).
     // 64-bit intermediate: timeout_ms * kTickHz overflows u32 above
