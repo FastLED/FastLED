@@ -152,6 +152,20 @@ inline void fadeUsingColor(fl::span<CRGB> leds, const CRGB &colormask) FL_NO_EXC
 /// @see CRGB::lerp8()
 CRGB blend(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) FL_NO_EXCEPT;
 
+/// Computes a perceptual interpolation between two RGB colors in Oklab.
+///
+/// This is an opt-in alternative to blend(); existing RGB blending remains
+/// channel-wise. CRGB channel values are treated as linear-light RGB with
+/// sRGB primaries, matching the input expected by the Oklab transform.
+/// Out-of-gamut results are clipped to the CRGB channel range.
+///
+/// @param p1 the first color to blend
+/// @param p2 the second color to blend
+/// @param amountOfP2 the fraction of p2 to blend into p1
+/// @return the perceptually interpolated RGB color
+CRGB blend_oklab(const CRGB &p1, const CRGB &p2,
+                 fract8 amountOfP2) FL_NO_EXCEPT;
+
 /// @copydoc blend(const CRGB&, const CRGB&, fract8)
 ///
 /// Interpolating in HSV space preserves saturation and value far better than
