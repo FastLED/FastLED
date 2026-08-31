@@ -178,13 +178,13 @@ private:
     Duration mDuration;
 };
 
-// Forward declarations for clock types (now() implemented after fl::micros() declaration)
+// Forward declarations for clock types (now() is implemented in chrono.cpp.hpp)
 struct steady_clock;  // IWYU pragma: keep
 struct system_clock;  // IWYU pragma: keep
 
 /// @brief Monotonic clock that never goes backwards
 ///
-/// Uses fl::micros() as the underlying time source, providing microsecond
+/// Uses fl::micros64() as the underlying time source, providing microsecond
 /// resolution across all FastLED platforms.
 struct steady_clock {
     using duration = microseconds;
@@ -193,14 +193,14 @@ struct steady_clock {
     using time_point = fl::chrono::time_point<steady_clock>;
     static constexpr bool is_steady = true;
 
-    /// Returns the current time point (implemented after fl::micros() declaration)
+    /// Returns the current time point.
     static time_point now() FL_NO_EXCEPT;
 };
 
 /// @brief Wall clock (may not be monotonic)
 ///
 /// On embedded platforms this behaves identically to steady_clock since
-/// there is no real-time clock available. Uses fl::micros() as the
+/// there is no real-time clock available. Uses fl::micros64() as the
 /// underlying time source.
 struct system_clock {
     using duration = microseconds;
@@ -209,7 +209,7 @@ struct system_clock {
     using time_point = fl::chrono::time_point<system_clock>;
     static constexpr bool is_steady = false;
 
-    /// Returns the current time point (implemented after fl::micros() declaration)
+    /// Returns the current time point.
     static time_point now() FL_NO_EXCEPT;
 };
 
@@ -297,14 +297,11 @@ fl::u32 millis() FL_NO_EXCEPT;
 /// @endcode
 fl::u32 micros() FL_NO_EXCEPT;
 
-// Now that fl::micros() is declared, implement clock::now() methods
-inline chrono::steady_clock::time_point chrono::steady_clock::now() FL_NO_EXCEPT {
-    return time_point(duration(static_cast<fl::i64>(fl::micros())));
-}
-
-inline chrono::system_clock::time_point chrono::system_clock::now() FL_NO_EXCEPT {
-    return time_point(duration(static_cast<fl::i64>(fl::micros())));
-}
+/// 64-bit monotonic microsecond timer.
+///
+/// Extends the platform's 32-bit microsecond counter using unsigned elapsed
+/// deltas, so the returned value never wraps in practical use.
+fl::u64 micros64() FL_NO_EXCEPT;
 
 /// 64-bit millisecond timer - returns milliseconds since system startup without wraparound
 ///
@@ -388,6 +385,9 @@ void inject_time_provider(const time_provider_t& provider) FL_NO_EXCEPT;
 /// @note Thread-safe: Uses appropriate locking in multi-threaded environments
 /// @note Safe to call multiple times or when no provider is injected
 void clear_time_provider() FL_NO_EXCEPT;
+
+/// Reset the micros64() rollover extender for deterministic clock tests.
+void micros64_reset() FL_NO_EXCEPT;
 
 /// Reset the millis64() internal state for testing
 ///
