@@ -1,11 +1,26 @@
 from pathlib import Path
 
 import pytest
+import yaml
 
 from ci.compiler.argument_parser import CompilationArgumentParser
 
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def test_esp32s3_workflow_names_each_shard_explicitly() -> None:
+    workflow_path = ROOT / ".github/workflows/build_esp32s3.yml"
+    workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    build_job = workflow["jobs"]["build"]
+
+    assert build_job["name"] == (
+        "ESP32-S3 examples shard ${{ matrix.shard_index }} (8 total)"
+    )
+    assert build_job["strategy"]["matrix"]["shard_index"] == list(range(8))
+    assert build_job["with"]["args"] == (
+        "esp32s3 all --shard-index ${{ matrix.shard_index }} --shard-count 8"
+    )
 
 
 def test_all_example_shards_are_disjoint_and_exhaustive() -> None:
