@@ -30,6 +30,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/mutex.h"
 #include "fl/stl/thread.h"
+#include "platforms/stub/watchdog_stub.h"
 
 #define FL_WATCHDOG_HAS_HARDWARE
 #define FL_WATCHDOG_PERSIST_BYTES 16
@@ -39,6 +40,24 @@
 
 namespace fl {
 namespace platforms {
+
+inline fl::atomic<StubWatchdogClock>& stubWatchdogClock() FL_NO_EXCEPT {
+    static fl::atomic<StubWatchdogClock> clock{nullptr};
+    return clock;
+}
+
+inline fl::chrono::steady_clock::time_point stubWatchdogNow() FL_NO_EXCEPT {
+    StubWatchdogClock clock = stubWatchdogClock().load();
+    return clock ? clock() : fl::chrono::steady_clock::now();
+}
+
+void setStubWatchdogClockForTesting(StubWatchdogClock clock) FL_NO_EXCEPT {
+    stubWatchdogClock().store(clock);
+}
+
+void clearStubWatchdogClockForTesting() FL_NO_EXCEPT {
+    stubWatchdogClock().store(nullptr);
+}
 
 // Persistent storage layout — survives within a single process. Magic word at
 // the front separates first-run garbage from genuine persisted state.
@@ -156,7 +175,7 @@ inline void stubWatchdogTimerLoop() FL_NO_EXCEPT {
             fl::lock_guard<fl::mutex> g(s.mu);
             dl = s.deadline;
         }
-        if (fl::chrono::steady_clock::now() >= dl) {
+        if (stubWatchdogNow() >= dl) {
             WatchdogTimeoutCallback cb;
             void* user;
             fl::function<void()> cb_fn_copy;
@@ -203,7 +222,7 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
     auto& s = platforms::stubWatchdogState();
     fl::lock_guard<fl::mutex> g(s.mu);
     s.timeout_ms.store(timeout_ms);
-    s.deadline = fl::chrono::steady_clock::now() + fl::chrono::milliseconds(timeout_ms);
+    s.deadline = platforms::stubWatchdogNow() + fl::chrono::milliseconds(timeout_ms);
     s.enabled.store(true);
 }
 
@@ -211,7 +230,7 @@ void Watchdog::feed() FL_NO_EXCEPT {
     auto& s = platforms::stubWatchdogState();
     if (!s.enabled.load()) return;
     fl::lock_guard<fl::mutex> g(s.mu);
-    s.deadline = fl::chrono::steady_clock::now() + fl::chrono::milliseconds(s.timeout_ms.load());
+    s.deadline = platforms::stubWatchdogNow() + fl::chrono::milliseconds(s.timeout_ms.load());
 }
 
 void Watchdog::disable() FL_NO_EXCEPT {
