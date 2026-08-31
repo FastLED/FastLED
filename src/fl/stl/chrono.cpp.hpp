@@ -14,51 +14,64 @@ namespace fl {
 #ifdef FASTLED_TESTING
 
 namespace {
-    // Thread-safe storage for injected time provider
-    fl::mutex& get_time_mutex() {
-        static fl::mutex mutex;
-        return mutex;
-    }
+    struct TimeProviderState {
+        fl::mutex mutex;
+        time_provider_t provider;
+        fl::function<fl::u64()> micros64Provider;
+    };
 
-    time_provider_t& get_time_provider() {
-        static time_provider_t provider;
-        return provider;
-    }
-
-    fl::function<fl::u64()>& get_micros64_time_provider() {
-        static fl::function<fl::u64()> provider;
-        return provider;
+    TimeProviderState& get_time_provider_state() {
+        // millis() may be called by background threads and static destructors
+        // after ordinary function-local statics have been destroyed. Retain this
+        // one bounded state object for the process lifetime so both its mutex and
+        // installed provider remain valid throughout teardown.
+        static TimeProviderState* const state = new TimeProviderState(); // ok bare allocation - intentionally retained for safe process teardown
+        return *state;
     }
 
     bool get_injected_millis(fl::u32* value) {
-        fl::unique_lock<fl::mutex> lock(get_time_mutex());
-        const auto& provider = get_time_provider();
-        if (!provider) {
+        TimeProviderState& state = get_time_provider_state();
+        fl::unique_lock<fl::mutex> lock(state.mutex);
+        if (!state.provider) {
             return false;
         }
-        *value = provider();
+        *value = state.provider();
+        return true;
+    }
+
+    bool get_injected_micros64(fl::u64* value) {
+        TimeProviderState& state = get_time_provider_state();
+        fl::unique_lock<fl::mutex> lock(state.mutex);
+        if (!state.micros64Provider) {
+            return false;
+        }
+        *value = state.micros64Provider();
         return true;
     }
 }
 
 void inject_time_provider(const time_provider_t& provider) {
-    fl::unique_lock<fl::mutex> lock(get_time_mutex());
-    get_time_provider() = provider;
+    TimeProviderState& state = get_time_provider_state();
+    fl::unique_lock<fl::mutex> lock(state.mutex);
+    state.provider = provider;
 }
 
 void clear_time_provider() {
-    fl::unique_lock<fl::mutex> lock(get_time_mutex());
-    get_time_provider() = time_provider_t{}; // Clear the function
+    TimeProviderState& state = get_time_provider_state();
+    fl::unique_lock<fl::mutex> lock(state.mutex);
+    state.provider = time_provider_t{}; // Clear the function
 }
 
 void inject_micros64_time_provider(const fl::function<fl::u64()>& provider) {
-    fl::unique_lock<fl::mutex> lock(get_time_mutex());
-    get_micros64_time_provider() = provider;
+    TimeProviderState& state = get_time_provider_state();
+    fl::unique_lock<fl::mutex> lock(state.mutex);
+    state.micros64Provider = provider;
 }
 
 void clear_micros64_time_provider() {
-    fl::unique_lock<fl::mutex> lock(get_time_mutex());
-    get_micros64_time_provider() = fl::function<fl::u64()>{};
+    TimeProviderState& state = get_time_provider_state();
+    fl::unique_lock<fl::mutex> lock(state.mutex);
+    state.micros64Provider = fl::function<fl::u64()>{};
 }
 
 // MockTimeProvider implementation
@@ -111,12 +124,9 @@ fl::u32 micros() {
 
 fl::u64 micros64() {
 #ifdef FASTLED_TESTING
-    {
-        fl::unique_lock<fl::mutex> lock(get_time_mutex());
-        const auto& provider = get_micros64_time_provider();
-        if (provider) {
-            return provider();
-        }
+    fl::u64 injected_micros = 0;
+    if (get_injected_micros64(&injected_micros)) {
+        return injected_micros;
     }
     fl::u32 injected_millis = 0;
     if (get_injected_millis(&injected_millis)) {
