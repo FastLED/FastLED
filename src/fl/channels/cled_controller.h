@@ -15,6 +15,7 @@
 #include "fl/log/log.h"
 #include "fl/stl/span.h"
 #include "fl/stl/noexcept.h"
+#include "fl/spi_bus.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -84,6 +85,12 @@ protected:
     }
 
 public:
+    /// Select an ESP-IDF SPI host for this clocked controller before init().
+    /// Non-ESP32 and non-SPI controllers ignore this setting.
+    virtual CLEDController &setSpiBus(Esp32SpiBus bus) FL_NO_EXCEPT {
+        (void)bus;
+        return *this;
+    }
     /// @brief Add this controller to the linked list
     /// @note Used with DeferRegister mode to explicitly add controller to list
     /// @note Safe to call multiple times - won't add if already in list

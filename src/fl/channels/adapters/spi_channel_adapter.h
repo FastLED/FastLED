@@ -137,13 +137,14 @@ private:
 
     struct ClockPinAssignment {
         int clockPin;
+        Esp32SpiBus requestedBus;
         size_t controllerIndex;  ///< Index into mControllers
     };
 
     /// @brief Select best controller for a given clock pin
     /// @param clockPin Clock pin number to route
     /// @returns Controller index, or -1 if none available
-    int selectControllerForClockPin(int clockPin);
+    int selectControllerForClockPin(int clockPin, Esp32SpiBus requestedBus);
 
     /// @brief Check if controller can handle this clock pin
     /// @param ctrl Controller to check
@@ -161,6 +162,7 @@ private:
     /// @brief Group data structure for channels with same clock pin
     struct ClockPinGroup {
         int clockPin;
+        Esp32SpiBus requestedBus = Esp32SpiBus::AUTO;
         fl::vector<ChannelDataPtr> channels;
     };
 

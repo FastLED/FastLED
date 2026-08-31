@@ -46,14 +46,15 @@ SPIBusManager::~SPIBusManager() {
     // Device destructors already handle cleanup via unregisterDevice(), so this is safe.
 }
 
-SPIBusHandle SPIBusManager::registerDevice(u8 clock_pin, u8 data_pin, u32 requested_speed_hz, void* controller) FL_NO_EXCEPT {
+SPIBusHandle SPIBusManager::registerDevice(u8 clock_pin, u8 data_pin, u32 requested_speed_hz, void* controller,
+                                           Esp32SpiBus requested_bus) FL_NO_EXCEPT {
     if (!controller) {
         FL_WARN_F("SPIBusManager: nullptr controller pointer");
         return SPIBusHandle();
     }
 
     // Find or create bus for this clock pin
-    SPIBusInfo* bus = getOrCreateBus(clock_pin);
+    SPIBusInfo* bus = getOrCreateBus(clock_pin, requested_bus);
     if (!bus) {
         FL_WARN_F("SPIBusManager: Too many different clock pins (max %s)", static_cast<int>(MAX_BUSES));
         return SPIBusHandle();
@@ -543,6 +544,7 @@ void SPIBusManager::reset() FL_NO_EXCEPT {
         mBuses[i].bus_type = SPIBusType::SOFT_SPI;
         mBuses[i].num_devices = 0;
         mBuses[i].spi_bus_num = 0xFF;
+        mBuses[i].requested_bus = Esp32SpiBus::AUTO;
         mBuses[i].hw_controller = nullptr;
         mBuses[i].is_initialized = false;
         mBuses[i].error_message = nullptr;
@@ -570,10 +572,10 @@ const SPIBusInfo* SPIBusManager::getBusInfo(u8 bus_id) const FL_NO_EXCEPT {
 // Private Methods
 // ============================================================================
 
-SPIBusInfo* SPIBusManager::getOrCreateBus(u8 clock_pin) FL_NO_EXCEPT {
+SPIBusInfo* SPIBusManager::getOrCreateBus(u8 clock_pin, Esp32SpiBus requested_bus) FL_NO_EXCEPT {
     // Search for existing bus with this clock pin
     for (u8 i = 0; i < mNumBuses; i++) {
-        if (mBuses[i].clock_pin == clock_pin) {
+        if (mBuses[i].clock_pin == clock_pin && mBuses[i].requested_bus == requested_bus) {
             return &mBuses[i];
         }
     }
@@ -584,6 +586,7 @@ SPIBusInfo* SPIBusManager::getOrCreateBus(u8 clock_pin) FL_NO_EXCEPT {
     }
 
     mBuses[mNumBuses].clock_pin = clock_pin;
+    mBuses[mNumBuses].requested_bus = requested_bus;
     mBuses[mNumBuses].num_devices = 0;
     mBuses[mNumBuses].bus_type = SPIBusType::SOFT_SPI;
     return &mBuses[mNumBuses++];
@@ -655,7 +658,9 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) FL_NO_EXCEPT {
         // Try each controller until we find one that works
         fl::shared_ptr<SpiHw2> dual_ctrl;
         for (const auto& ctrl : controllers) {
-            if (!ctrl->isInitialized()) {
+            const bool host_matches = bus.requested_bus == Esp32SpiBus::AUTO ||
+                ctrl->getBusId() == static_cast<int>(bus.requested_bus);
+            if (host_matches && !ctrl->isInitialized()) {
                 dual_ctrl = ctrl;
                 break;
             }
@@ -706,7 +711,9 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) FL_NO_EXCEPT {
         // Try each controller until we find one that works
         fl::shared_ptr<SpiHw4> quad_ctrl;
         for (const auto& ctrl : controllers) {
-            if (!ctrl->isInitialized()) {
+            const bool host_matches = bus.requested_bus == Esp32SpiBus::AUTO ||
+                ctrl->getBusId() == static_cast<int>(bus.requested_bus);
+            if (host_matches && !ctrl->isInitialized()) {
                 quad_ctrl = ctrl;
                 break;
             }
@@ -761,7 +768,9 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) FL_NO_EXCEPT {
         // Try each controller until we find one that works
         fl::shared_ptr<SpiHw8> octal_ctrl;
         for (const auto& ctrl : controllers) {
-            if (!ctrl->isInitialized()) {
+            const bool host_matches = bus.requested_bus == Esp32SpiBus::AUTO ||
+                ctrl->getBusId() == static_cast<int>(bus.requested_bus);
+            if (host_matches && !ctrl->isInitialized()) {
                 octal_ctrl = ctrl;
                 break;
             }
@@ -820,7 +829,9 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) FL_NO_EXCEPT {
         // Try each controller until we find one that works
         fl::shared_ptr<SpiHw16> hexadeca_ctrl;
         for (const auto& ctrl : controllers) {
-            if (!ctrl->isInitialized()) {
+            const bool host_matches = bus.requested_bus == Esp32SpiBus::AUTO ||
+                ctrl->getBusId() == static_cast<int>(bus.requested_bus);
+            if (host_matches && !ctrl->isInitialized()) {
                 hexadeca_ctrl = ctrl;
                 break;
             }

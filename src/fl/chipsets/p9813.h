@@ -36,6 +36,12 @@ class P9813Controller : public CPixelLEDController<RGB_ORDER> {
 
 public:
 	P9813Controller() FL_NO_EXCEPT {}
+	#if defined(FL_IS_ESP32)
+	CLEDController &setSpiBus(fl::Esp32SpiBus bus) FL_NO_EXCEPT override {
+		mSPI.setBus(bus);
+		return *this;
+	}
+	#endif
 
 	virtual void init() {
 		mSPI.init();

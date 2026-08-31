@@ -29,6 +29,12 @@ class WS2801Controller : public CPixelLEDController<RGB_ORDER> {
 
 public:
 	WS2801Controller() FL_NO_EXCEPT {}
+	#if defined(FL_IS_ESP32)
+	CLEDController &setSpiBus(fl::Esp32SpiBus bus) FL_NO_EXCEPT override {
+		mSPI.setBus(bus);
+		return *this;
+	}
+	#endif
 
 	/// Initialize the controller
 	virtual void init() {

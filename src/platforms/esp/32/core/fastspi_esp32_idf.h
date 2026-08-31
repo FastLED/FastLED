@@ -24,6 +24,7 @@ FL_EXTERN_C_BEGIN
 #include "esp_heap_caps.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
+#include "fl/spi_bus.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -58,7 +59,7 @@ public:
 
     ESP32SPIOutput()
         : mSPIHandle(nullptr)
-        , mHost(FASTLED_ESP32_DEFAULT_SPI_HOST)
+        , mHost(defaultHost())
         , mPSelect(nullptr)
         , mInitialized(false)
         , mInTransaction(false)
@@ -68,7 +69,7 @@ public:
 
     ESP32SPIOutput(Selectable* pSelect)
         : mSPIHandle(nullptr)
-        , mHost(FASTLED_ESP32_DEFAULT_SPI_HOST)
+        , mHost(defaultHost())
         , mPSelect(pSelect)
         , mInitialized(false)
         , mInTransaction(false)
@@ -89,6 +90,33 @@ public:
 
     void setSelect(Selectable* pSelect) FL_NO_EXCEPT {
         mPSelect = pSelect;
+    }
+
+    void setBus(Esp32SpiBus bus) FL_NO_EXCEPT {
+        switch (bus) {
+            case Esp32SpiBus::SPI2:
+                mHost = SPI2_HOST;
+                break;
+            case Esp32SpiBus::SPI3:
+#if SOC_SPI_PERIPH_NUM > 2
+                mHost = SPI3_HOST;
+#else
+                FL_WARN_F("SPI3 is unavailable on this ESP32 target; using the default SPI host");
+                mHost = defaultHost();
+#endif
+                break;
+            case Esp32SpiBus::AUTO:
+                mHost = defaultHost();
+                break;
+        }
+    }
+
+    static spi_host_device_t defaultHost() FL_NO_EXCEPT {
+#ifdef FASTLED_ESP32_SPI_BUS
+        return static_cast<spi_host_device_t>(FASTLED_ESP32_SPI_BUS);
+#else
+        return FASTLED_ESP32_DEFAULT_SPI_HOST;
+#endif
     }
 
     void init() FL_NO_EXCEPT {

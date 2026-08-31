@@ -1115,6 +1115,23 @@ public:
 		return *sChannel;
 	}
 
+	/// Add an SPI controller with an explicit ESP-IDF SPI host.
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
+	::CLEDController &addLeds(CRGB *data, int nLeds, fl::Esp32SpiBus spiBus) {
+		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
+			static_cast<fl::SpiChipset>(CHIPSET), SPI_DATA_RATE);
+		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder, spiBus);
+		fl::ChannelConfig config(spiCfg, fl::span<CRGB>(data, nLeds), RGB_ORDER);
+		config.options.mBus = B;
+		config.options.mBusWhich = B_WHICH;
+		static fl::ChannelPtr sChannel;
+		if (!sChannel) {
+			sChannel = fl::TypedChannel<B, fl::SpiChipsetConfig, B_WHICH>::create(config);
+			add(sChannel);
+		}
+		return *sChannel;
+	}
+
 	/// Add an SPI based CLEDController via Channel API (default RGB order and speed).
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
@@ -1168,6 +1185,19 @@ public:
 		typedef typename CHIP::template CONTROLLER_CLASS_WITH_ORDER_AND_FREQ<RGB_ORDER, SPI_DATA_RATE>::ControllerType ControllerTypeWithFreq;
 		static ControllerTypeWithFreq c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
+	}
+
+	/// Add an SPI controller on a selected ESP-IDF host.
+	/// @note SPI1 is reserved for flash/PSRAM; use SPI2 or SPI3.
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO>
+	::CLEDController &addLeds(CRGB *data, int nLeds, fl::Esp32SpiBus spiBus) {
+		fl::busKeepAlive<B>();
+		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
+		FL_STATIC_ASSERT(CHIP::IS_VALID, "Unsupported chipset");
+		typedef typename CHIP::template CONTROLLER_CLASS_WITH_ORDER_AND_FREQ<RGB_ORDER, SPI_DATA_RATE>::ControllerType ControllerTypeWithFreq;
+		static ControllerTypeWithFreq c;
+		c.setSpiBus(spiBus);
+		return addLeds(&c, data, nLeds, 0);
 	}
 
 	/// Add an SPI based CLEDController instance to the world (legacy path).

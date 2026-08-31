@@ -49,6 +49,7 @@ private:
     bool mInitialized;                       // Whether init() was called
     bool mBusInitialized;                    // Whether bus manager has been initialized
     bool mInTransaction;                     // Whether select() was called
+    Esp32SpiBus mRequestedBus;
 
 public:
     /// Constructor - just stores pins, actual setup happens in init()
@@ -58,8 +59,11 @@ public:
         , mInitialized(false)
         , mBusInitialized(false)
         , mInTransaction(false)
+        , mRequestedBus(Esp32SpiBus::AUTO)
     {
     }
+
+    void setBus(Esp32SpiBus bus) FL_NO_EXCEPT { mRequestedBus = bus; }
 
     /// Destructor - cleanup owned resources and unregister from bus manager
     ~SPIDeviceProxy() {
@@ -85,7 +89,7 @@ public:
         // Register with bus manager
         // NOTE: Bus manager will determine if we use Single/Quad/Soft SPI
         // based on how many devices share our clock pin
-        mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, SPI_SPEED, this);
+        mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, SPI_SPEED, this, mRequestedBus);
 
         if (!mHandle.is_valid) {
             FL_LOG_SPI_F("Failed to register with bus manager (pin %s:%s)", CLOCK_PIN, DATA_PIN);
@@ -118,6 +122,7 @@ public:
         if (bus && bus->bus_type == SPIBusType::SINGLE_SPI && !mSingleSPI) {
             // We're using single-SPI - create owned ESP32SPIOutput instance
             mSingleSPI = fl::make_unique<ESP32SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>>();
+            mSingleSPI->setBus(mRequestedBus);
             mSingleSPI->init();
         }
         // For Quad-SPI, bus manager handles hardware - we just buffer writes
