@@ -730,8 +730,8 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
  * @param {Object} moduleInstance - The loaded WASM module instance
  * @param {Array<Object>} filesJson - Array of files to load into the virtual filesystem
  */
-/** How long a single embedded asset may take to fetch before the build gives up. */
-const EMBEDDED_ASSET_TIMEOUT_MS = 30000;
+/** How long a single asset may take to fetch before the preview gives up. */
+const assetFetchTimeoutMs = 30000;
 
 /**
  * Hex-encodes a SHA-256 digest of the given bytes.
@@ -754,7 +754,7 @@ async function fetchAssetBytes(path, spec) {
   const urls = [spec.url, spec.fallback].filter(Boolean);
   for (const url of urls) {
     try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(EMBEDDED_ASSET_TIMEOUT_MS) });
+      const response = await fetch(url, { signal: AbortSignal.timeout(assetFetchTimeoutMs) });
       if (!response.ok) {
         console.warn(`Asset '${path}': ${response.status} from ${url}`);
         continue;
@@ -771,7 +771,7 @@ async function fetchAssetBytes(path, spec) {
       return bytes;
     } catch (err) {
       const why = (err && err.name === 'TimeoutError')
-        ? `timed out after ${EMBEDDED_ASSET_TIMEOUT_MS}ms`
+        ? `timed out after ${assetFetchTimeoutMs}ms`
         : String(err);
       console.warn(`Asset '${path}' from ${url}: ${why}`);
     }
@@ -883,7 +883,15 @@ async function fastledLoadSetupLoop(
         console.log(`File fetched: ${file.path}, size: ${file.bytes.length}`);
         return file.bytes.length;
       }
-      const response = await fetch(file.path);
+      const response = await fetch(file.path, {
+        signal: AbortSignal.timeout(assetFetchTimeoutMs),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} ${response.statusText}`);
+      }
+      if (!response.body) {
+        throw new Error('response has no readable body');
+      }
       const reader = response.body.getReader();
 
       console.log(`File fetched: ${file.path}, size: ${file.size}`);
@@ -897,7 +905,10 @@ async function fastledLoadSetupLoop(
         written += value.length;
       }
     } catch (error) {
-      console.error(`Error processing file ${file.path}:`, error);
+      const why = (error && error.name === 'TimeoutError')
+        ? `timed out after ${assetFetchTimeoutMs}ms`
+        : String(error);
+      throw new Error(`Asset '${file.path}' could not be loaded: ${why}`);
     }
     return written;
   };
@@ -909,13 +920,30 @@ async function fastledLoadSetupLoop(
    * @param {Function} [onComplete] - Optional callback when all files are loaded
    */
   const fetchAllFiles = async (filesJson, onComplete) => {
-    const promises = filesJson.map(async (file) => {
-      await processFile(file);
-    });
-    await Promise.all(promises);
+    const results = await Promise.allSettled(filesJson.map(processFile));
+    const failures = [];
+    for (const [index, result] of results.entries()) {
+      if (result.status === 'rejected') {
+        failures.push(result.reason);
+        console.error(result.reason);
+        continue;
+      }
+      const file = filesJson[index];
+      if (typeof file.size === 'number' && result.value !== file.size) {
+        const error = new Error(
+          `Asset '${file.path}' is incomplete: wrote ${result.value} of ${file.size} bytes`,
+        );
+        failures.push(error);
+        console.error(error);
+      }
+    }
+    if (failures.length > 0) {
+      throw new AggregateError(failures, `${failures.length} required asset(s) failed to load`);
+    }
     if (onComplete) {
       onComplete();
     }
+    return results;
   };
 
   // NOTE: Callback functions are now automatically registered by importing fastled_callbacks.js
@@ -944,9 +972,9 @@ async function fastledLoadSetupLoop(
   // one on an ESP32, and the preview would be quietly lying.
   //
   // So embedded assets are always immediate and always awaited to completion,
-  // regardless of extension or size. The extension-based partition below still
-  // governs ordinary `files.json` entries, where streaming is a deliberate
-  // trade for startup latency on large sketch data.
+  // regardless of extension or size. Ordinary `files.json` entries are also
+  // streamed into the virtual filesystem, but the bounded fetch is awaited so
+  // setup() never observes a partially loaded declared file.
   const embeddedFiles = filesJson.filter((f) => f.embedded);
   const localFiles = filesJson.filter((f) => !f.embedded);
 
@@ -961,28 +989,36 @@ async function fastledLoadSetupLoop(
     'The following files will be immediatly available and can be read during setup():',
     immediateFiles,
   );
-  console.log('The following files will be streamed in during loop():', streamingFiles);
+  console.log('The following files will be streamed before setup():', streamingFiles);
 
   // Embedded assets must be whole before setup(), and verified whole: a
   // truncated download leaves FileData with its declared capacity intact, so
   // is_eof() stays false while read() returns 0 -- a sketch would block on
   // bytes that are never coming, with nothing in the log to explain it.
-  const embeddedResults = await Promise.all(embeddedFiles.map(async (file) => {
-    const written = await processFile(file);
+  const embeddedResults = await Promise.allSettled(embeddedFiles.map(processFile));
+  const embeddedComplete = embeddedResults.map((result, index) => {
+    const file = embeddedFiles[index];
+    if (result.status === 'rejected') {
+      console.error(result.reason);
+      return false;
+    }
     // No `size === 0` escape hatch: an embedded asset's size is the real byte
     // count from its buffer, so the check cannot silently disable itself the
     // way it did when the size came from a possibly-absent Content-Length.
-    const complete = written === file.size;
+    const complete = result.value === file.size;
     if (!complete) {
       console.error(
-        `Embedded asset '${file.path}' is incomplete: wrote ${written} of ${file.size} bytes. `
+        `Embedded asset '${file.path}' is incomplete: wrote ${result.value} of ${file.size} bytes. `
         + 'The filesystem will report the declared size while reads return nothing.',
       );
     }
     return complete;
-  }));
-  if (embeddedFiles.length > 0 && embeddedResults.every(Boolean)) {
+  });
+  if (embeddedFiles.length > 0 && embeddedComplete.every(Boolean)) {
     console.log(`All ${embeddedFiles.length} embedded asset(s) loaded completely before setup().`);
+  }
+  if (embeddedComplete.some((complete) => !complete)) {
+    throw new Error('One or more required embedded assets failed to load completely');
   }
 
   const promiseImmediateFiles = fetchAllFiles(immediateFiles, () => {
@@ -992,13 +1028,9 @@ async function fastledLoadSetupLoop(
   });
   await promiseImmediateFiles;
   if (streamingFiles.length > 0) {
-    const streamingFilesPromise = fetchAllFiles(streamingFiles, () => {
+    await fetchAllFiles(streamingFiles, () => {
       console.log('All streaming files downloaded to FastLED.');
     });
-    const delay = new Promise((r) => { setTimeout(r, 250); });
-    // Wait for either the time delay or the streaming files to be processed, whichever
-    // happens first.
-    await Promise.any([delay, streamingFilesPromise]);
   }
 
   console.log('Starting fastled with Asyncify support');
