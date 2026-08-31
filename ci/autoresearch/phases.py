@@ -1663,10 +1663,7 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
         qctx.emit_log_path()
         return 1
 
-    rp2xxx_post_deploy_rescan = bool(
-        _active_rp2xxx_environment(final_environment)
-    ) and (ctx.rpc_smoke_mode or ctx.watchdog_soak_mode)
-    if upload_port is None and not rp2xxx_post_deploy_rescan:
+    if upload_port is None:
         print(
             "❌ No application serial port was returned after fbuild deployment "
             f"for environment '{build_environment}'"
@@ -1809,34 +1806,6 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     """
     args = ctx.args
     upload_port = ctx.upload_port
-    rp2xxx_environment = _active_rp2xxx_environment(ctx.final_environment)
-    if (
-        upload_port is None
-        and (ctx.rpc_smoke_mode or ctx.watchdog_soak_mode)
-        and ctx.use_fbuild
-        and rp2xxx_environment is not None
-    ):
-        # Stock RP2xxx deployment starts from BOOTSEL mass-storage and may
-        # return before Windows has published the application CDC endpoint.
-        # Poll by USB identity instead of asserting on the pre-deploy port.
-        wait_seconds = min(10.0, ctx.remaining_seconds())
-        deadline = time.monotonic() + max(0.0, wait_seconds)
-        while True:
-            result = await asyncio.to_thread(
-                auto_detect_upload_port,
-                expected_environment=rp2xxx_environment,
-            )
-            if result.selected_port:
-                upload_port = result.selected_port
-                ctx.upload_port = upload_port
-                print(
-                    f"✅ Discovered {rp2xxx_environment} application port: "
-                    f"{upload_port}"
-                )
-                break
-            if time.monotonic() >= deadline:
-                break
-            await asyncio.sleep(min(0.1, max(0.0, deadline - time.monotonic())))
     if upload_port is None:
         print("❌ No application serial port was returned after fbuild deployment")
         return 1
