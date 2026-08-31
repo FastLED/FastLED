@@ -11,8 +11,11 @@
 #include "fl/stl/ratio.h"
 
 #ifdef FASTLED_TESTING
+#define FL_CHRONO_HAS_TEST_TIME_PROVIDER 1
 #include "fl/stl/function.h"
 #include "fl/stl/noexcept.h"
+#else
+#define FL_CHRONO_HAS_TEST_TIME_PROVIDER 0
 #endif
 
 namespace fl {
