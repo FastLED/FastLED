@@ -1,0 +1,10 @@
+[
+  {
+    "variant": "memory",
+    "target": "mp3_memory_audit",
+    "total_calls": 1,
+    "total_time_ns": 1,
+    "ns_per_call": 1.0,
+    "calls_per_sec": 1000000000.0
+  }
+]

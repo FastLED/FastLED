@@ -34,7 +34,13 @@ FRAC_BITS = 26
 
 
 def q(value: float, bits: int) -> int:
-    """Round `value` into a Q`bits` fixed-point integer, half away from zero."""
+    """Round `value` into a Q`bits` fixed-point integer, half away from zero.
+
+    Deliberately a different rule from the decoder's runtime rounding, which is
+    half-toward-+infinity because an arithmetic shift is what implements it.
+    This runs once at build time, where symmetry around zero is worth more than
+    matching a shift, and a constant's sign should not bias its rounding.
+    """
     scaled = value * (1 << bits)
     result = math.floor(scaled + 0.5) if scaled >= 0 else math.ceil(scaled - 0.5)
     if not -(1 << 31) <= result <= (1 << 31) - 1:

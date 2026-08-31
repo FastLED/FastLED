@@ -194,11 +194,18 @@ namespace MINIMP3_NAMESPACE {
 
 /* FastLED: the fixed-point arithmetic contract.
 
-   ONE rounding rule for the whole decoder: round half away from zero, applied
-   once per multiply, in MP3D_MULSHIFT. This is not stylistic. Phase 4
-   (#4055) has to prove SSE2/NEON kernels bit-identical to this scalar path,
-   and a vector unit can reproduce a single uniform rule; it cannot reproduce
-   ad-hoc per-site rounding.
+   ONE rounding rule for the whole decoder: add half, then arithmetic-shift
+   right. Because the shift floors, that is round-half-toward-+infinity, NOT
+   round-half-away-from-zero -- -1.5 rounds to -1. Stated precisely because
+   Phase 4 (#4055) has to prove SSE2/NEON kernels bit-identical to this scalar
+   path, and it must implement this rule rather than the one the phrase
+   "rounding" usually implies. It is also the cheaper rule to vectorise, which
+   is why it is worth keeping rather than "correcting".
+
+   (Two deliberate exceptions, both documented at their definitions: the Python
+   table generator rounds half away from zero, because it runs once at build
+   time and symmetry matters for a constant; and mp3d_scale_pcm reproduces the
+   float build's own output rounding quirk so the two builds' PCM agrees.)
 
    Every product widens to int64 before shifting, so a 32x32 multiply can never
    overflow. Shifts are written to keep UBSan quiet: no left shift of a
@@ -233,8 +240,8 @@ static int32_t mp3d_shl_sat(int32_t value, int shift) FL_NO_EXCEPT
     return (int32_t)wide;
 }
 
-/* Arithmetic right shift with the same rounding rule, tolerating shifts that
-   discard the value entirely. */
+/* Arithmetic right shift with the same round-half-toward-+infinity rule,
+   tolerating shifts that discard the value entirely. */
 static int32_t mp3d_shr_round(int32_t value, int shift) FL_NO_EXCEPT
 {
     if (shift <= 0)
@@ -256,8 +263,8 @@ static int32_t mp3d_sat64(int64_t value) FL_NO_EXCEPT
     return (int32_t)value;
 }
 
-/* Narrow a Q30 accumulator to a sample, rounding once for the whole
-   accumulation rather than once per product. */
+/* Narrow a Q30 accumulator to a sample, rounding once (half toward +infinity,
+   as above) for the whole accumulation rather than once per product. */
 static int32_t mp3d_narrow_q30(int64_t acc) FL_NO_EXCEPT
 {
     return mp3d_sat64((acc + ((int64_t)1 << 29)) >> 30);
@@ -453,9 +460,15 @@ typedef struct
 #if MINIMP3_HAVE_FIXED_POINT
     /* Same mantissa/exponent split the Layer III gains use: the Layer I/II
        dequantiser steps are around 1e-7 before a runtime scale that can move
-       them 21 binary places either way, so they do not fit one Q format. */
+       them 21 binary places either way, so they do not fit one Q format.
+
+       int8_t, unlike the Layer III gains' int16_t, because this array lives on
+       the stack inside mp3dec_decode_frame_r rather than in the heap scratch
+       arena, and 192 entries of it is the difference between meeting the 2 KiB
+       decode-stack budget and missing it. The exponents here span roughly
+       [-36, 1]: the table's own range plus the runtime 2**(21 - b/3) scale. */
     int32_t scf_mant[3*64];
-    int16_t scf_exp[3*64];
+    int8_t scf_exp[3*64];
 #else
     float scf[3*64];
 #endif
@@ -646,7 +659,7 @@ static int32_t mp3d_l12_scale(int32_t raw, int32_t mant, int exp) FL_NO_EXCEPT
     return mp3d_clamp_sample(product);
 }
 
-static void L12_read_scalefactors(bs_t *bs, uint8_t *pba, uint8_t *scfcod, int bands, int32_t *scf_mant, int16_t *scf_exp) FL_NO_EXCEPT
+static void L12_read_scalefactors(bs_t *bs, uint8_t *pba, uint8_t *scfcod, int bands, int32_t *scf_mant, int8_t *scf_exp) FL_NO_EXCEPT
 {
     int i, m;
     for (i = 0; i < bands; i++)
@@ -667,7 +680,7 @@ static void L12_read_scalefactors(bs_t *bs, uint8_t *pba, uint8_t *scfcod, int b
                 exp = g_deq_L12_exp[idx] + 21 - b/3;
             }
             *scf_mant++ = mant;
-            *scf_exp++ = (int16_t)exp;
+            *scf_exp++ = (int8_t)exp;
         }
     }
 }
@@ -789,7 +802,7 @@ static int L12_dequantize_granule(mp3d_dsp_t *grbuf, bs_t *bs, L12_scale_info *s
 }
 
 #if MINIMP3_HAVE_FIXED_POINT
-static void L12_apply_scf_384(L12_scale_info *sci, const int32_t *scf_mant, const int16_t *scf_exp, mp3d_dsp_t *dst) FL_NO_EXCEPT
+static void L12_apply_scf_384(L12_scale_info *sci, const int32_t *scf_mant, const int8_t *scf_exp, mp3d_dsp_t *dst) FL_NO_EXCEPT
 {
     int i, k;
     memcpy(dst + 576 + sci->stereo_bands*18, dst + sci->stereo_bands*18, (sci->total_bands - sci->stereo_bands)*18*sizeof(mp3d_dsp_t));
@@ -1761,19 +1774,23 @@ static void L3_change_sign(int32_t *grbuf) FL_NO_EXCEPT
 
 static void L3_imdct_gr(int32_t *grbuf, int32_t *overlap, unsigned block_type, unsigned n_long_bands) FL_NO_EXCEPT
 {
-    static const int32_t *const g_mdct_window[2] = {
-        g_mdct_window_normal_q30, g_mdct_window_stop_q30
-    };
+    /* Selected with a conditional rather than through a two-entry pointer
+       table like the float build uses. The table would be a relocated array,
+       which costs a .rel entry and load-time relocation work on exactly the
+       embedded targets this path exists for. */
     if (n_long_bands)
     {
-        L3_imdct36(grbuf, overlap, g_mdct_window[0], n_long_bands);
+        L3_imdct36(grbuf, overlap, g_mdct_window_normal_q30, n_long_bands);
         grbuf += 18*n_long_bands;
         overlap += 9*n_long_bands;
     }
     if (block_type == SHORT_BLOCK_TYPE)
         L3_imdct_short(grbuf, overlap, 32 - n_long_bands);
     else
-        L3_imdct36(grbuf, overlap, g_mdct_window[block_type == STOP_BLOCK_TYPE], 32 - n_long_bands);
+        L3_imdct36(grbuf, overlap,
+                   block_type == STOP_BLOCK_TYPE ? g_mdct_window_stop_q30
+                                                 : g_mdct_window_normal_q30,
+                   32 - n_long_bands);
 }
 #else
 static void L3_dct3_9(float *y) FL_NO_EXCEPT

@@ -1,0 +1,17 @@
+{
+  "target": "mp3_memory_audit",
+  "comparison": false,
+  "statistics": {
+    "best": 1.0,
+    "median": 1.0,
+    "worst": 1.0,
+    "stdev": 0,
+    "count": 1
+  },
+  "raw_results": [
+    {
+      "ns_per_call": 1.0,
+      "calls_per_sec": 1000000000.0
+    }
+  ]
+}
