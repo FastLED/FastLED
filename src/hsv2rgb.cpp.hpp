@@ -558,9 +558,11 @@ void hsv2rgb_fullspectrum( const CHSV* phsv, CRGB * prgb, int numLeds) {
 // See extended notes in the .h file.
 CHSV rgb2hsv_approximate( const CRGB& rgb)
 {
-    fl::u8 r = rgb.r;
-    fl::u8 g = rgb.g;
-    fl::u8 b = rgb.b;
+    // These channels can exceed 255 while saturation is being undone. Keep
+    // the intermediate values wide until they are normalized below.
+    fl::u16 r = rgb.r;
+    fl::u16 g = rgb.g;
+    fl::u16 b = rgb.b;
     fl::u8 h, s, v;
 
     // find desaturation
@@ -616,8 +618,10 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
 
     //Serial.print("total="); Serial.print(total); Serial.println("");
 
-    // scale all channels up to compensate for low values
-    if( total < 255) {
+    // Normalize the channels to the range expected by the hue approximation.
+    // This scales low totals up as before, and also scales high totals down
+    // instead of letting wide intermediates wrap when stored in u8 channels.
+    if( total != 255) {
         if( total == 0) total = 1;
         fl::u32 scaleup = 65535 / (total);
         r = ((fl::u32)(r) * scaleup) / 256;
@@ -670,7 +674,7 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
 
     // start with which channel is highest
     // (ties don't matter)
-    fl::u8 highest = r;
+    fl::u16 highest = r;
     if( g > highest) highest = g;
     if( b > highest) highest = b;
 
