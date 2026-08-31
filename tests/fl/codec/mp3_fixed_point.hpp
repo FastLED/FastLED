@@ -36,6 +36,20 @@ const char* const kFixedPointCorpus[] = {
     "codec/minimp3/ILL2_layer1.bit",
 };
 
+/// Range measurement additionally sweeps the musical fixtures. The `.bit`
+/// conformance vectors are synthetic and narrow; real encoded music is what
+/// actually exercises the loud end the Q format has to hold.
+const char* const kRangeCorpus[] = {
+    "codec/minimp3/l3-hecommon.bit",
+    "codec/minimp3/l3-he_free.bit",
+    "codec/minimp3/l3-lame-vbrtag.bit",
+    "codec/minimp3/M2L3_bitrate_16_all.bit",
+    "codec/minimp3/ILL2_layer1.bit",
+    "codec/mary_had_a_little_lamb.mp3",
+    "codec/jazzy_percussion.mp3",
+    "codec/edm_beat.mp3",
+};
+
 fl::vector<fl::u8> readCorpusBytes(const char* path) {
     fl::FileSystem fs;
     FL_REQUIRE(fs.beginSd(0));
@@ -134,6 +148,61 @@ PcmComparison comparePcm(const fl::vector<fl::i16>& reference,
 }
 
 } // anonymous namespace
+
+namespace {
+
+/// Records the largest magnitude each pipeline stage has to represent. The
+/// fixed-point Q formats are chosen from these numbers, so the measurement is
+/// kept as a test rather than done once by hand: if a corpus addition ever
+/// pushes a stage past the headroom a Q format assumes, that has to fail
+/// loudly instead of silently saturating.
+class Mp3StageRangeSink : public fl::Mp3StageSink {
+  public:
+    void onStage(int stage, int, const float* buf, int count) FL_NO_EXCEPT override {
+        if (stage < 0 || stage >= MINIMP3_STAGE_COUNT) {
+            return;
+        }
+        for (int i = 0; i < count; ++i) {
+            const float magnitude = buf[i] < 0 ? -buf[i] : buf[i];
+            if (magnitude > mMaxAbs[stage]) {
+                mMaxAbs[stage] = magnitude;
+            }
+        }
+        mSamples[stage] += static_cast<fl::size>(count);
+    }
+
+    void onStage(int, int, const fl::i32*, int) FL_NO_EXCEPT override {}
+
+    float maxAbs(int stage) const { return mMaxAbs[stage]; }
+    fl::size samples(int stage) const { return mSamples[stage]; }
+
+  private:
+    float mMaxAbs[MINIMP3_STAGE_COUNT] = {};
+    fl::size mSamples[MINIMP3_STAGE_COUNT] = {};
+};
+
+} // anonymous namespace
+
+FL_TEST_CASE("minimp3 stage dynamic range stays inside the fixed-point headroom") {
+    fl::setTestFileSystemRoot("tests/data");
+
+    Mp3StageRangeSink sink;
+    fl::SetMp3StageSink(&sink);
+    for (const char* path : kRangeCorpus) {
+        const fl::vector<fl::u8> bytes = readCorpusBytes(path);
+        decodeWithVariant<fl::Minimp3FloatVariant>(bytes);
+    }
+    fl::ClearMp3StageSink();
+
+    static const char* const kStageNames[MINIMP3_STAGE_COUNT] = {
+        "huffman", "stereo", "antialias", "imdct", "dct2"};
+    for (int stage = 0; stage < MINIMP3_STAGE_COUNT; ++stage) {
+        printf("[stage-range] %-10s max=%.6g over %zu samples\n",
+               kStageNames[stage], static_cast<double>(sink.maxAbs(stage)),
+               sink.samples(stage));
+        FL_CHECK_GT(sink.samples(stage), 0);
+    }
+}
 
 // ---------------------------------------------------------------------------
 // Enabling gate. Everything below is only meaningful once this passes: a build
