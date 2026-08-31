@@ -6,13 +6,30 @@ import shutil
 import sys
 import time
 import warnings
+from dataclasses import dataclass
 from pathlib import Path
 
+from typeguard import typechecked
+
+from ci.compiler.asset_scanner import (
+    announce_storage_requirements,
+    embedded_fs_defines,
+    scan_sketch_assets,
+)
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 _GENERATED_EXAMPLE_DIRS = frozenset({".build", ".fbuild", ".pio", "fastled_js"})
 _GENERATED_EXAMPLE_FILES = frozenset({"compile_commands.json"})
+
+
+@typechecked
+@dataclass
+class CopyExampleResult:
+    """Result of staging an example and discovering its build requirements."""
+
+    success: bool
+    build_defines: list[str]
 
 
 def _scandir_sync(
@@ -181,7 +198,9 @@ __attribute__((weak)) int main() {{
     return main_cpp_content
 
 
-def copy_example_source(project_root: Path, build_dir: Path, example: str) -> bool:
+def copy_example_source(
+    project_root: Path, build_dir: Path, example: str
+) -> CopyExampleResult:
     """Copy example source to the build directory with sketch subdirectory structure.
 
     Args:
@@ -190,7 +209,7 @@ def copy_example_source(project_root: Path, build_dir: Path, example: str) -> bo
         example: Name of the example to copy, or path to example directory
 
     Returns:
-        True if successful, False if example not found
+        Staging status and preprocessor defines required by the example.
     """
     # Configure example source - handle both names and paths
     example_path = Path(example)
@@ -198,12 +217,12 @@ def copy_example_source(project_root: Path, build_dir: Path, example: str) -> bo
     if example_path.is_absolute():
         # Absolute path - use as-is
         if not example_path.exists():
-            return False
+            return CopyExampleResult(success=False, build_defines=[])
     else:
         # Relative path (including nested paths like Fx/FxWave2d) - resolve to examples directory
         example_path = project_root / "examples" / example
         if not example_path.exists():
-            return False
+            return CopyExampleResult(success=False, build_defines=[])
 
     # Create src and sketch directories (PlatformIO requirement with sketch subdirectory)
     src_dir = build_dir / "src"
@@ -284,17 +303,14 @@ def copy_example_source(project_root: Path, build_dir: Path, example: str) -> bo
     # leaving the user to discover it -- see announce_storage_requirements.
     # The example directory is scanned, not the copy: identical content, and it
     # is the path the user recognises if something is misdeclared.
-    from ci.compiler.asset_scanner import (
-        announce_storage_requirements,
-        scan_sketch_assets,
-    )
-
     # Not wrapped in a broad except: a storage declaration is build
     # configuration, and a build that cannot read it should say so rather than
     # continue as if the sketch had declared nothing. Malformed individual
     # `.lnk` files are already non-fatal -- scan_sketch_assets collects those as
     # warnings -- so reaching an exception here means something genuinely wrong.
-    announce_storage_requirements(scan_sketch_assets(example_path))
+    asset_scan = scan_sketch_assets(example_path)
+    announce_storage_requirements(asset_scan)
+    build_defines = embedded_fs_defines(asset_scan)
 
     # Create or update stub main.cpp that includes the .ino files
     main_cpp_content = generate_main_cpp(ino_files)
@@ -313,7 +329,7 @@ def copy_example_source(project_root: Path, build_dir: Path, example: str) -> bo
     if should_write:
         main_cpp_path.write_text(main_cpp_content, encoding="utf-8")
 
-    return True
+    return CopyExampleResult(success=True, build_defines=build_defines)
 
 
 def copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
