@@ -48,6 +48,16 @@ _FL_DEFPIN( 8, 0, B); _FL_DEFPIN( 9, 1, B); _FL_DEFPIN(10, 2, B); _FL_DEFPIN(11,
 _FL_DEFPIN(12, 4, B); _FL_DEFPIN(13, 5, B); _FL_DEFPIN(14, 0, C); _FL_DEFPIN(15, 1, C);
 _FL_DEFPIN(16, 2, C); _FL_DEFPIN(17, 3, C); _FL_DEFPIN(18, 4, C); _FL_DEFPIN(19, 5, C);
 
+// D1 is the hardware UART TX pin used by Serial on Arduino Uno, Nano, and
+// Pro Mini boards. Keep the clocked-example default off the console and use
+// this family's established hardware SPI pair instead.
+#ifndef FL_PIN_SPI_DATA_1
+#define FL_PIN_SPI_DATA_1 11
+#endif
+#ifndef FL_PIN_SPI_CLOCK_1
+#define FL_PIN_SPI_CLOCK_1 13
+#endif
+
 #define SPI_DATA 11
 #define SPI_CLOCK 13
 #define SPI_SELECT 10
