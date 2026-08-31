@@ -69,6 +69,17 @@ _FL_DEFPIN(4,4); _FL_DEFPIN(5,5);
 _FL_DEFPIN(12,12); _FL_DEFPIN(13,13); _FL_DEFPIN(14,14); _FL_DEFPIN(15,15);
 _FL_DEFPIN(16,16);
 
+// Keep example defaults off UART0, boot-strapping pins, and flash GPIOs.
+#ifndef FL_PIN_CLOCKLESS_1
+#define FL_PIN_CLOCKLESS_1 4
+#endif
+#ifndef FL_PIN_SPI_DATA_1
+#define FL_PIN_SPI_DATA_1 13
+#endif
+#ifndef FL_PIN_SPI_CLOCK_1
+#define FL_PIN_SPI_CLOCK_1 14
+#endif
+
 #define PORTA_FIRST_PIN 12
 #elif defined(FASTLED_ESP8266_D1_PIN_ORDER)
 #define MAX_PIN 15
@@ -89,6 +100,17 @@ _FL_DEFPIN(13,14);
 _FL_DEFPIN(14,4);
 _FL_DEFPIN(15,5);
 
+// D2 is GPIO4; D7/D5 are the established hardware SPI MOSI/SCK pins.
+#ifndef FL_PIN_CLOCKLESS_1
+#define FL_PIN_CLOCKLESS_1 4
+#endif
+#ifndef FL_PIN_SPI_DATA_1
+#define FL_PIN_SPI_DATA_1 7
+#endif
+#ifndef FL_PIN_SPI_CLOCK_1
+#define FL_PIN_SPI_CLOCK_1 5
+#endif
+
 #define PORTA_FIRST_PIN 12
 
 #else // if defined(FASTLED_ESP8266_NODEMCU_PIN_ORDER)
@@ -98,6 +120,17 @@ _FL_DEFPIN(15,5);
 _FL_DEFPIN(0,16); _FL_DEFPIN(1,5); _FL_DEFPIN(2,4); _FL_DEFPIN(3,0);
 _FL_DEFPIN(4,2); _FL_DEFPIN(5,14); _FL_DEFPIN(6,12); _FL_DEFPIN(7,13);
 _FL_DEFPIN(8,15); _FL_DEFPIN(9,3); _FL_DEFPIN(10,1);
+
+// D2 is GPIO4; D7/D5 are the established hardware SPI MOSI/SCK pins.
+#ifndef FL_PIN_CLOCKLESS_1
+#define FL_PIN_CLOCKLESS_1 2
+#endif
+#ifndef FL_PIN_SPI_DATA_1
+#define FL_PIN_SPI_DATA_1 7
+#endif
+#ifndef FL_PIN_SPI_CLOCK_1
+#define FL_PIN_SPI_CLOCK_1 5
+#endif
 
 #define PORTA_FIRST_PIN 6
 
