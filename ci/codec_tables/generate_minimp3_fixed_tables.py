@@ -23,7 +23,25 @@ from __future__ import annotations
 import argparse
 import math
 import sys
+from dataclasses import dataclass
 from pathlib import Path
+
+@dataclass(frozen=True)
+class MantissaExponentTable:
+    """A table whose values do not fit one Q format, so each carries its own
+    power-of-two exponent: value[i] == mantissa[i] * 2**(exponent[i] - 30)."""
+
+    mantissa: list[int]
+    exponent: list[int]
+
+
+@dataclass(frozen=True)
+class AntialiasCoefficients:
+    """Alias-reduction butterfly pair, both Q31."""
+
+    cs: list[int]
+    ca: list[int]
+
 
 ROOT = Path(__file__).resolve().parents[2]
 OUTPUT = ROOT / "src" / "third_party" / "minimp3" / "minimp3_fixed_tables.h"
@@ -75,7 +93,7 @@ def normalize(value: float) -> tuple[int, int]:
 # --------------------------------------------------------------------------
 
 
-def pow43_tables() -> tuple[list[int], list[int]]:
+def pow43_tables() -> MantissaExponentTable:
     """x**(4/3), laid out exactly like upstream's `g_pow43`.
 
     Indices 0..15 hold `-pow43(i)` and 16..144 hold `+pow43(x)` for x in
@@ -92,7 +110,7 @@ def pow43_tables() -> tuple[list[int], list[int]]:
         m, e = normalize(float(x) ** (4.0 / 3.0))
         mant.append(m)
         exp.append(e)
-    return mant, exp
+    return MantissaExponentTable(mant, exp)
 
 
 def expfrac_q30() -> list[int]:
@@ -104,7 +122,7 @@ def expfrac_q30() -> list[int]:
     return [q(2.0 ** (r / 4.0), 30) for r in range(4)]
 
 
-def antialias_q31() -> tuple[list[int], list[int]]:
+def antialias_q31() -> AntialiasCoefficients:
     """Alias-reduction butterfly coefficients, ISO 11172-3 2.4.3.4.10.1.
 
     cs = 1/sqrt(1+c^2), ca = c/sqrt(1+c^2); upstream stores `cs` and `-ca`.
@@ -112,7 +130,8 @@ def antialias_q31() -> tuple[list[int], list[int]]:
     c = [-0.6, -0.535, -0.33, -0.185, -0.095, -0.041, -0.0142, -0.0037]
     cs = [1.0 / math.sqrt(1.0 + ci * ci) for ci in c]
     ca = [ci / math.sqrt(1.0 + ci * ci) for ci in c]
-    return [q(v, 31) for v in cs], [q(-v, 31) for v in ca]
+    return AntialiasCoefficients([q(v, 31) for v in cs],
+                                 [q(-v, 31) for v in ca])
 
 
 def twid9_q30() -> list[int]:
@@ -169,7 +188,7 @@ def pan_q30() -> list[int]:
     return out
 
 
-def deq_l12_tables() -> tuple[list[int], list[int]]:
+def deq_l12_tables() -> MantissaExponentTable:
     """Layer I/II dequantiser steps, ISO 11172-3 tables B.3/B.4.
 
     Upstream writes these as `9.53674316e-07/x` and two siblings, which is
@@ -186,7 +205,7 @@ def deq_l12_tables() -> tuple[list[int], list[int]]:
             m, e = normalize(2.0 ** (-20.0 - j / 3.0) / float(step))
             mant.append(m)
             exp.append(e)
-    return mant, exp
+    return MantissaExponentTable(mant, exp)
 
 
 def scalar_constants() -> list[tuple[str, int, int, str]]:
@@ -243,9 +262,9 @@ def emit_array(ctype: str, name: str, values: list[int], per_line: int,
 
 
 def render() -> str:
-    pow43_mant, pow43_exp = pow43_tables()
-    aa_cs, aa_ca = antialias_q31()
-    deq_mant, deq_exp = deq_l12_tables()
+    pow43 = pow43_tables()
+    antialias = antialias_q31()
+    deq = deq_l12_tables()
     windows = mdct_window_q30()
 
     parts: list[str] = []
@@ -269,19 +288,19 @@ def render() -> str:
 """)
 
     parts.append(emit_array(
-        "int32_t", "g_pow43_mant", pow43_mant, 8,
+        "int32_t", "g_pow43_mant", pow43.mantissa, 8,
         "x**(4/3) mantissas, value = mant * 2**(exp - 30); upstream g_pow43 layout"))
     parts.append(emit_array(
-        "int8_t", "g_pow43_exp", pow43_exp, 24,
+        "int8_t", "g_pow43_exp", pow43.exponent, 24,
         "matching exponents for g_pow43_mant"))
     parts.append(emit_array(
         "int32_t", "g_expfrac_q30", expfrac_q30(), 4,
         "2**(r/4) for r in [0,3], Q30 -- fractional part of a gain exponent"))
     parts.append(emit_array(
-        "int32_t", "g_aa_cs_q31", aa_cs, 8,
+        "int32_t", "g_aa_cs_q31", antialias.cs, 8,
         "alias reduction cs = 1/sqrt(1+c^2), Q31"))
     parts.append(emit_array(
-        "int32_t", "g_aa_ca_q31", aa_ca, 8,
+        "int32_t", "g_aa_ca_q31", antialias.ca, 8,
         "alias reduction -ca = -c/sqrt(1+c^2), Q31"))
     parts.append(emit_array(
         "int32_t", "g_twid9_q30", twid9_q30(), 9,
@@ -302,10 +321,10 @@ def render() -> str:
         "int32_t", "g_pan_q30", pan_q30(), 6,
         "MPEG-1 intensity stereo pan pairs (kl, kr), Q30"))
     parts.append(emit_array(
-        "int32_t", "g_deq_L12_mant", deq_mant, 6,
+        "int32_t", "g_deq_L12_mant", deq.mantissa, 6,
         "Layer I/II dequantiser steps, value = mant * 2**(exp - 30)"))
     parts.append(emit_array(
-        "int8_t", "g_deq_L12_exp", deq_exp, 18,
+        "int8_t", "g_deq_L12_exp", deq.exponent, 18,
         "matching exponents for g_deq_L12_mant"))
 
     scalars = ["/* Inline kernel scalars. */"]
@@ -343,15 +362,15 @@ def cross_check() -> list[str]:
             problems.append(
                 f"{label}: generated {generated!r} vs upstream {upstream!r}")
 
-    aa_cs, aa_ca = antialias_q31()
+    antialias = antialias_q31()
     upstream_aa0 = [0.85749293, 0.88174200, 0.94962865, 0.98331459,
                     0.99551782, 0.99916056, 0.99989920, 0.99999316]
     upstream_aa1 = [0.51449576, 0.47173197, 0.31337745, 0.18191320,
                     0.09457419, 0.04096558, 0.01419856, 0.00369997]
     for i, expected in enumerate(upstream_aa0):
-        compare(f"g_aa[0][{i}]", aa_cs[i] / 2.0**31, expected)
+        compare(f"g_aa[0][{i}]", antialias.cs[i] / 2.0**31, expected)
     for i, expected in enumerate(upstream_aa1):
-        compare(f"g_aa[1][{i}]", aa_ca[i] / 2.0**31, expected)
+        compare(f"g_aa[1][{i}]", antialias.ca[i] / 2.0**31, expected)
 
     upstream_twid9 = [0.73727734, 0.79335334, 0.84339145, 0.88701083,
                       0.92387953, 0.95371695, 0.97629601, 0.99144486,
@@ -400,16 +419,16 @@ def cross_check() -> list[str]:
     # x**(4/3): the table half that upstream spells out.
     upstream_pow43_head = [0, 1, 2.519842, 4.326749, 6.349604, 8.549880,
                            10.902724, 13.390518, 16.000000]
-    mant, exp = pow43_tables()
+    pow43 = pow43_tables()
     for x, expected in enumerate(upstream_pow43_head):
-        value = mant[16 + x] * 2.0 ** (exp[16 + x] - 30)
+        value = pow43.mantissa[16 + x] * 2.0 ** (pow43.exponent[16 + x] - 30)
         compare(f"g_pow43[16+{x}]", value, expected)
 
     # Layer I/II: upstream's first triple is DQ(3).
-    deq_mant, deq_exp = deq_l12_tables()
+    deq = deq_l12_tables()
     for j, expected in enumerate([9.53674316e-07 / 3, 7.56931807e-07 / 3,
                                   6.00777173e-07 / 3]):
-        value = deq_mant[j] * 2.0 ** (deq_exp[j] - 30)
+        value = deq.mantissa[j] * 2.0 ** (deq.exponent[j] - 30)
         compare(f"g_deq_L12[{j}]", value, expected)
 
     return problems
