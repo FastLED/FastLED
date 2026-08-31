@@ -1,3 +1,5 @@
+// @filter: (platform is esp32)
+
 #include <FastLED.h>
 
 #if !defined(ESP32)
