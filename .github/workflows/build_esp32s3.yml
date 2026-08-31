@@ -46,6 +46,7 @@ on:
 
 jobs:
   build:
+    name: ESP32-S3 examples shard ${{ matrix.shard_index }} (8 total)
     # Hard-block external-fork pull requests (no exceptions per #2757).
     # `github.event.pull_request == null` lets push / workflow_dispatch / etc.
     # pass; the equality clause only matches when the PR head repo IS the base.
