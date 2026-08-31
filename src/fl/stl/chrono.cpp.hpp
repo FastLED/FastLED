@@ -20,7 +20,7 @@ namespace {
         fl::function<fl::u64()> micros64Provider;
     };
 
-    TimeProviderState& get_time_provider_state() {
+    TimeProviderState& get_time_provider_state() FL_NO_EXCEPT {
         // millis() may be called by background threads and static destructors
         // after ordinary function-local statics have been destroyed. Retain this
         // one bounded state object for the process lifetime so both its mutex and
@@ -29,7 +29,7 @@ namespace {
         return *state;
     }
 
-    bool get_injected_millis(fl::u32* value) {
+    bool get_injected_millis(fl::u32* value) FL_NO_EXCEPT {
         TimeProviderState& state = get_time_provider_state();
         fl::unique_lock<fl::mutex> lock(state.mutex);
         if (!state.provider) {
@@ -39,7 +39,7 @@ namespace {
         return true;
     }
 
-    bool get_injected_micros64(fl::u64* value) {
+    bool get_injected_micros64(fl::u64* value) FL_NO_EXCEPT {
         TimeProviderState& state = get_time_provider_state();
         fl::unique_lock<fl::mutex> lock(state.mutex);
         if (!state.micros64Provider) {
@@ -62,13 +62,13 @@ void clear_time_provider() {
     state.provider = time_provider_t{}; // Clear the function
 }
 
-void inject_micros64_time_provider(const fl::function<fl::u64()>& provider) {
+void inject_micros64_time_provider(const fl::function<fl::u64()>& provider) FL_NO_EXCEPT {
     TimeProviderState& state = get_time_provider_state();
     fl::unique_lock<fl::mutex> lock(state.mutex);
     state.micros64Provider = provider;
 }
 
-void clear_micros64_time_provider() {
+void clear_micros64_time_provider() FL_NO_EXCEPT {
     TimeProviderState& state = get_time_provider_state();
     fl::unique_lock<fl::mutex> lock(state.mutex);
     state.micros64Provider = fl::function<fl::u64()>{};
@@ -122,7 +122,7 @@ fl::u32 micros() {
     return fl::platforms::micros();
 }
 
-fl::u64 micros64() {
+fl::u64 micros64() FL_NO_EXCEPT {
 #ifdef FASTLED_TESTING
     fl::u64 injected_micros = 0;
     if (get_injected_micros64(&injected_micros)) {
