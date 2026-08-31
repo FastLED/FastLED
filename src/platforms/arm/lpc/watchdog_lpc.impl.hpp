@@ -96,17 +96,16 @@ namespace fl {
 namespace platforms {
 
 namespace lpc_wwdt {
-    // WDOSC nominal tick after the WWDT-internal /4 prescaler. Per
+    // LPC845: WDOSC nominal tick after the WWDT-internal /4 prescaler. Per
     // UM11029 §4.6.7 Table 51, FREQSEL=0x2 selects a nominal 1.05 MHz
-    // WDOSC source; with DIVSEL=0x00 the WDOSC output is 1.05/2 = 525 kHz
-    // and the WWDT-internal /4 brings the tick to ~131 kHz. We budget
-    // kTickHz at 125 kHz (4-5% conservative) so TC values overshoot
-    // slightly rather than undershoot, biasing the watchdog toward
-    // "fires a little late" rather than "fires while legit code runs."
-    // Either direction is within the ±40% silicon corner anyway.
+    // source; DIVSEL=0x00 produces 525 kHz. LPC804 instead has a fixed
+    // 500 kHz LPOSC selected through LPOSCCLKEN (UM11065 §4.5.17). Both
+    // yield approximately 125 kHz after the WWDT prescaler.
     constexpr fl::u32 kTickHz = 125000u;
+#if defined(FL_IS_ARM_LPC_845)
     constexpr fl::u32 kWdtoscCtrl =
         SYSCON_WDTOSCCTRL_FREQSEL(0x2u) | SYSCON_WDTOSCCTRL_DIVSEL(0x00u);
+#endif
 
     constexpr fl::u32 kModWden    = WWDT_MOD_WDEN_MASK;
     constexpr fl::u32 kModWdreset = WWDT_MOD_WDRESET_MASK;
@@ -159,15 +158,18 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
     if (timeout_ms > FL_WATCHDOG_MAX_TIMEOUT_MS) timeout_ms = FL_WATCHDOG_MAX_TIMEOUT_MS;
 
     // Power up the watchdog oscillator and turn on the WWDT AHB clock. The
-    // WDTOSC powerdown bit is *cleared* to enable (PDRUNCFG is an
+    // oscillator powerdown bit is *cleared* to enable (PDRUNCFG is an
     // active-low powerdown register).
-    SYSCON->PDRUNCFG      &= ~SYSCON_PDRUNCFG_WDTOSC_PD_MASK;
-    SYSCON->SYSAHBCLKCTRL0 |= SYSCON_SYSAHBCLKCTRL0_WWDT_MASK;
-
-    // Set WDOSC frequency band. Per UM11029 §4.6 the WDOSC frequency is
-    // somewhere between the FREQSEL/DIVSEL nominal and a ±40% corner — we
-    // want a round number so the math here matches WWDT->TC units.
+    // LPC845 exposes a configurable WDOSC. LPC804's vendor PAL instead
+    // exposes the fixed LPOSC and a dedicated WWDT clock-enable bit.
+#if defined(FL_IS_ARM_LPC_845)
+    SYSCON->PDRUNCFG &= ~SYSCON_PDRUNCFG_WDTOSC_PD_MASK;
     SYSCON->WDTOSCCTRL = kWdtoscCtrl;
+#else
+    SYSCON->PDRUNCFG &= ~SYSCON_PDRUNCFG_LPOSC_PD_MASK;
+    SYSCON->LPOSCCLKEN |= SYSCON_LPOSCCLKEN_WDT_MASK;
+#endif
+    SYSCON->SYSAHBCLKCTRL0 |= SYSCON_SYSAHBCLKCTRL0_WWDT_MASK;
 
     // TC is in WWDT ticks; we are at ~125 kHz after the internal /4. Round
     // up so we never timeout EARLY (timeout_ms is the maximum allowed
