@@ -1,21 +1,10 @@
 #!/usr/bin/env python3
 """End-to-end check that a `.lnk` asset reaches the WASM filesystem.
 
-Builds nothing -- run `bash compile wasm --examples AudioUrl` first. This
-serves `examples/AudioUrl/fastled_js/`, loads it in headless Chromium, and
-watches the console for the asset actually being fetched and injected.
-
-Why a browser: the whole feature is "the bytes end up in the filesystem", and
-nothing short of running the page proves that. A green compile proves only that
-the loader code exists. `examples/AudioUrl` is the acceptance case because its
-only asset is a remote `.lnk` -- `files.json` for it is literally `[]`, so if
-the asset appears at all, it came through the manifest path.
-
-Usage:
-    uv run ci/tests/verify_wasm_assets.py [--example AudioUrl] [--headed]
+Builds nothing: compile ``AudioUrl`` first. The check serves the generated
+page, opens it in Chromium, and verifies that the remote manifest asset is
+complete before the sketch's setup starts.
 """
-
-from __future__ import annotations
 
 import argparse
 import asyncio
@@ -24,30 +13,26 @@ import http.server
 import socketserver
 import sys
 import threading
+from dataclasses import dataclass
 from pathlib import Path
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-
-#: The asset AudioUrl declares, and the size we expect to see streamed. Both
-#: come from examples/AudioUrl/data/track.mp3.lnk resolving to FastLED/assets.
 ASSET_PATH = "data/track.mp3"
 
 
-def _serve(directory: Path) -> tuple[socketserver.TCPServer, int]:
-    """Start a background HTTP server on a free port, returning (server, port).
+@dataclass
+class ServeResult:
+    server: socketserver.TCPServer
+    port: int
 
-    COOP/COEP headers are required: the FastLED WASM build uses threads, so the
-    page needs cross-origin isolation or the module refuses to instantiate.
-    """
+
+def _serve(directory: Path) -> ServeResult:
+    """Serve a WASM build with the headers and MIME types Chromium requires."""
 
     class Handler(http.server.SimpleHTTPRequestHandler):
-        # Windows resolves .js from the registry, which frequently yields
-        # text/plain -- and a module script served as text/plain is rejected
-        # outright by strict MIME checking, so nothing loads. Pin the types
-        # that matter rather than depending on the host's file associations.
         extensions_map = {
             **http.server.SimpleHTTPRequestHandler.extensions_map,
             ".js": "text/javascript",
@@ -64,99 +49,128 @@ def _serve(directory: Path) -> tuple[socketserver.TCPServer, int]:
             self.send_header("Cache-Control", "no-store")
             super().end_headers()
 
-        def log_message(self, fmt: str, *args: object) -> None:
-            pass  # keep the harness output readable
+        def log_message(self, format: str, *args: object) -> None:  # noqa: A002
+            pass
 
     handler = functools.partial(Handler, directory=str(directory))
-    httpd = socketserver.TCPServer(("127.0.0.1", 0), handler)
-    port = httpd.server_address[1]
-    threading.Thread(target=httpd.serve_forever, daemon=True).start()
-    return httpd, port
+    server = socketserver.TCPServer(("127.0.0.1", 0), handler)
+    port = int(server.server_address[1])
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    return ServeResult(server=server, port=port)
 
 
 async def _run(example: str, headless: bool, timeout_s: int) -> int:
     from playwright.async_api import async_playwright
 
-    served = PROJECT_ROOT / "examples" / example / "fastled_js"
-    if not (served / "index.html").exists():
+    output_dir = PROJECT_ROOT / "examples" / example / "fastled_js"
+    required_outputs = ("index.html", "fastled.js", "fastled.wasm")
+    missing: list[str] = []
+    for name in required_outputs:
+        if not (output_dir / name).is_file():
+            missing.append(name)
+    if missing:
         print(
-            f"FAIL: {served}/index.html missing -- run: bash compile wasm --examples {example}"
+            f"FAIL: missing WASM build output in {output_dir}: {', '.join(missing)}\n"
+            f"Build it first with: bash compile wasm --examples {example}",
+            file=sys.stderr,
         )
         return 1
 
-    httpd, port = _serve(served)
-    url = f"http://127.0.0.1:{port}/index.html"
-    print(f"serving {served} at {url}")
-
+    serve_result = _serve(output_dir)
     logs: list[str] = []
-    try:
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=headless)
-            page = await browser.new_page()
-            page.on("console", lambda m: logs.append(f"{m.type}: {m.text}"))
-            page.on("pageerror", lambda e: logs.append(f"pageerror: {e}"))
+    page_finished = asyncio.Event()
 
-            await page.goto(url, timeout=timeout_s * 1000)
-            # The asset is fetched during load; give the module time to boot,
-            # stream it, and run a few frames.
-            await page.wait_for_timeout(timeout_s * 1000)
+    def record_console(message: object) -> None:
+        text = str(getattr(message, "text", message))
+        logs.append(text)
+        if "Starting fastled with Asyncify support" in text:
+            page_finished.set()
+
+    def record_page_error(error: object) -> None:
+        logs.append(f"pageerror: {error}")
+        page_finished.set()
+
+    try:
+        async with async_playwright() as playwright:
+            browser = await playwright.chromium.launch(headless=headless)
+            page = await browser.new_page()
+            page.on("console", record_console)
+            page.on("pageerror", record_page_error)
+            await page.goto(
+                f"http://127.0.0.1:{serve_result.port}/index.html",
+                timeout=timeout_s * 1000,
+                wait_until="domcontentloaded",
+            )
+            try:
+                await asyncio.wait_for(page_finished.wait(), timeout=timeout_s)
+            except TimeoutError:
+                logs.append(f"timeout: setup did not start within {timeout_s} seconds")
             await browser.close()
     finally:
-        httpd.shutdown()
+        serve_result.server.shutdown()
+        serve_result.server.server_close()
 
     joined = "\n".join(logs)
-    print("\n--- browser console ---")
-    for line in logs:
-        print(f"  {line}")
-    print("--- end console ---\n")
-
     checks = {
         "manifest loaded": "fastledAssetManifest" in joined,
-        "asset resolved to its url": f"Asset '{ASSET_PATH}'" in joined,
-        "asset injected into the filesystem": "manifest asset(s) into the filesystem"
-        in joined,
-        "bytes streamed": f"File fetched: {ASSET_PATH}" in joined,
-        # Parity with a device: on ESP the file is simply present when setup()
-        # runs. "Arrives eventually" means the preview is lying to the sketch,
-        # so completeness *before* setup is the property under test.
-        "loaded completely before setup()": "embedded asset(s) loaded completely before setup()"
-        in joined,
-        "no incomplete asset reported": "is incomplete: wrote" not in joined,
-        # The manifest declares a digest; trusting it unverified was #4025.
-        "sha256 verified": f"Asset '{ASSET_PATH}' sha256 verified" in joined,
-        "no integrity failure": "failed integrity check" not in joined,
+        "asset resolved": f"Asset '{ASSET_PATH}'" in joined,
+        "asset bytes streamed": f"File fetched: {ASSET_PATH}" in joined,
+        "asset complete before setup": (
+            "embedded asset(s) loaded completely before setup()" in joined
+        ),
+        "no incomplete asset": "is incomplete: wrote" not in joined,
+        "asset integrity verified": f"Asset '{ASSET_PATH}' sha256 verified" in joined,
+        "no asset integrity failure": "failed integrity check" not in joined,
+        "no uncaught page error": "pageerror:" not in joined,
     }
-
-    # Ordering is the whole point, so assert it rather than trusting the text.
     complete_at = next(
-        (i for i, ln in enumerate(logs) if "loaded completely before setup()" in ln),
+        (
+            i
+            for i, line in enumerate(logs)
+            if "loaded completely before setup()" in line
+        ),
         None,
     )
-    setup_at = next((i for i, ln in enumerate(logs) if "Starting fastled" in ln), None)
-    checks["completion preceded setup() starting"] = (
+    setup_at = next(
+        (
+            i
+            for i, line in enumerate(logs)
+            if "Starting fastled with Asyncify support" in line
+        ),
+        None,
+    )
+    checks["completion log precedes setup log"] = (
         complete_at is not None and setup_at is not None and complete_at < setup_at
     )
-    failures = [name for name, ok in checks.items() if not ok]
-    for name, ok in checks.items():
-        print(f"  [{'PASS' if ok else 'FAIL'}] {name}")
 
+    print("--- browser console ---")
+    for line in logs:
+        print(line)
+    print("--- asset checks ---")
+    for name, passed in checks.items():
+        print(f"[{'PASS' if passed else 'FAIL'}] {name}")
+
+    failures: list[str] = []
+    for name, passed in checks.items():
+        if not passed:
+            failures.append(name)
     if failures:
-        print(f"\nFAIL: {len(failures)} check(s) failed: {', '.join(failures)}")
+        print(f"FAIL: {', '.join(failures)}", file=sys.stderr)
         return 1
-    print("\nPASS: the .lnk asset reached the WASM filesystem")
+    print("PASS: embedded asset was complete before setup")
     return 0
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--example", default="AudioUrl")
-    ap.add_argument("--headed", action="store_true", help="show the browser")
-    ap.add_argument("--timeout", type=int, default=15)
-    args = ap.parse_args()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--example", default="AudioUrl")
+    parser.add_argument("--headed", action="store_true")
+    parser.add_argument("--timeout", type=int, default=45)
+    args = parser.parse_args()
     try:
         return asyncio.run(_run(args.example, not args.headed, args.timeout))
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
+    except KeyboardInterrupt as error:
+        handle_keyboard_interrupt(error)
         raise
 
 

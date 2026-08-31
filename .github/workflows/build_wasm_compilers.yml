@@ -60,6 +60,12 @@ jobs:
     - name: Run Playwright tests
       run: uv run ci/wasm_test.py wasm
 
+    - name: Compile AudioUrl asset acceptance example
+      run: uv run ci/ci-compile.py wasm --examples AudioUrl
+
+    - name: Verify embedded assets are complete before setup
+      run: uv run python ci/tests/verify_wasm_assets.py --timeout 45
+
     - name: Generate timestamp and random hex
       id: generate_id
       run: |
