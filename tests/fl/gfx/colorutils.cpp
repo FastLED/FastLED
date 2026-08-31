@@ -63,6 +63,23 @@ CRGB downconvert(const fl::CRGB16 &rgb) {
 
 FL_TEST_FILE(FL_FILEPATH) {
 
+FL_TEST_CASE("Oklab blending is opt-in and preserves endpoints") {
+    const CRGB first(12, 34, 56);
+    const CRGB second(210, 180, 90);
+
+    FL_CHECK_EQ(blend_oklab(first, second, 0), first);
+    FL_CHECK_EQ(blend_oklab(first, second, 255), second);
+
+    // In linear-light Oklab, halfway from black to white has L=0.5 and
+    // therefore RGB channels of 0.5 cubed, or approximately 32/255.
+    FL_CHECK_EQ(blend_oklab(CRGB::Black, CRGB::White, 128), CRGB(32, 32, 32));
+    // This interpolation reconstructs a negative red channel, which must be
+    // clipped to the CRGB gamut instead of wrapping during conversion.
+    FL_CHECK_EQ(blend_oklab(CRGB::Green, CRGB::Blue, 128), CRGB(0, 63, 107));
+    FL_CHECK_NE(blend_oklab(CRGB::Red, CRGB::Blue, 128),
+                blend(CRGB::Red, CRGB::Blue, 128));
+}
+
 FL_TEST_CASE("CHSV palettes upscale consistently") {
     CHSVPalette16 hsv16(
         make_hsv(0), make_hsv(1), make_hsv(2), make_hsv(3),

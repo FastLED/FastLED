@@ -19,6 +19,71 @@
 
 namespace fl {
 
+namespace {
+
+struct Oklab {
+    float lightness;
+    float green_red;
+    float blue_yellow;
+};
+
+float signedCubeRoot(float value) {
+    const float magnitude = fl::powf(fl::abs(value), 1.0f / 3.0f);
+    return value < 0.0f ? -magnitude : magnitude;
+}
+
+Oklab rgbToOklab(const CRGB &rgb) {
+    const float red = static_cast<float>(rgb.r) / 255.0f;
+    const float green = static_cast<float>(rgb.g) / 255.0f;
+    const float blue = static_cast<float>(rgb.b) / 255.0f;
+
+    const float l = 0.4122214708f * red + 0.5363325363f * green +
+                    0.0514459929f * blue;
+    const float m = 0.2119034982f * red + 0.6806995451f * green +
+                    0.1073969566f * blue;
+    const float s = 0.0883024619f * red + 0.2817188376f * green +
+                    0.6299787005f * blue;
+
+    const float lRoot = signedCubeRoot(l);
+    const float mRoot = signedCubeRoot(m);
+    const float sRoot = signedCubeRoot(s);
+
+    return {
+        0.2104542553f * lRoot + 0.7936177850f * mRoot -
+            0.0040720468f * sRoot,
+        1.9779984951f * lRoot - 2.4285922050f * mRoot +
+            0.4505937099f * sRoot,
+        0.0259040371f * lRoot + 0.7827717662f * mRoot -
+            0.8086757660f * sRoot,
+    };
+}
+
+fl::u8 channelFromFloat(float value) {
+    const float scaled = fl::roundf(fl::clamp(value, 0.0f, 1.0f) * 255.0f);
+    return static_cast<fl::u8>(scaled);
+}
+
+CRGB oklabToRgb(const Oklab &lab) {
+    const float lRoot = lab.lightness + 0.3963377774f * lab.green_red +
+                        0.2158037573f * lab.blue_yellow;
+    const float mRoot = lab.lightness - 0.1055613458f * lab.green_red -
+                        0.0638541728f * lab.blue_yellow;
+    const float sRoot = lab.lightness - 0.0894841775f * lab.green_red -
+                        1.2914855480f * lab.blue_yellow;
+    const float l = lRoot * lRoot * lRoot;
+    const float m = mRoot * mRoot * mRoot;
+    const float s = sRoot * sRoot * sRoot;
+
+    return CRGB(channelFromFloat(4.0767416621f * l - 3.3077115913f * m +
+                                 0.2309699292f * s),
+                channelFromFloat(-1.2684380046f * l + 2.6097574011f * m -
+                                 0.3413193965f * s),
+                channelFromFloat(-0.0041960863f * l - 0.7034186147f * m +
+                                 1.7076147010f * s));
+}
+
+} // namespace
+
 CRGB &nblend(CRGB &existing, const CRGB &overlay, fract8 amountOfOverlay) {
     if (amountOfOverlay == 0) {
         return existing;
@@ -64,6 +129,21 @@ CRGB blend(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) {
     CRGB nu(p1);
     nblend(nu, p2, amountOfP2);
     return nu;
+}
+
+CRGB blend_oklab(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) {
+    if (amountOfP2 == 0) { return p1; }
+    if (amountOfP2 == 255) { return p2; }
+
+    const Oklab first = rgbToOklab(p1);
+    const Oklab second = rgbToOklab(p2);
+    const float amount = static_cast<float>(amountOfP2) / 255.0f;
+    const Oklab mixed = {
+        first.lightness + (second.lightness - first.lightness) * amount,
+        first.green_red + (second.green_red - first.green_red) * amount,
+        first.blue_yellow + (second.blue_yellow - first.blue_yellow) * amount,
+    };
+    return oklabToRgb(mixed);
 }
 
 CRGB *blend(const CRGB *src1, const CRGB *src2, CRGB *dest, fl::u16 count,

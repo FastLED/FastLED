@@ -13,6 +13,7 @@ using fl::fade_raw;
 using fl::nscale8;
 using fl::fadeUsingColor;
 using fl::blend;
+using fl::blend_oklab;
 using fl::CRGBPalette16;
 using fl::CRGBPalette32;
 using fl::CRGBPalette256;
