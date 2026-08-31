@@ -56,7 +56,9 @@ class TestBoardToPlatformioIni(unittest.TestCase):
         self.assertEqual(ini.count("lib_deps ="), 1)
         self.assertIn("lib_deps = board-lib,extra-lib", ini)
 
-    def test_sparkfun_xrp_uses_supported_arduino_pico_framework(self) -> None:
+    def test_sparkfun_xrp_uses_supported_arduino_pico_framework(
+        self: "TestBoardToPlatformioIni",
+    ) -> None:
         ini = SPARKFUN_XRP_CONTROLLER_2350B.to_platformio_ini()
 
         self.assertIn("framework-arduinopico", ini)
