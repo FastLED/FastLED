@@ -6,52 +6,24 @@
 /// This file consolidates all SAMD51 SPI hardware initialization into a single
 /// manager following the ESP32 channel_manager pattern.
 ///
-/// Replaces scattered initialization from:
-/// - spi_hw_2_samd51.cpp.hpp::initSpiHw2Instances()
-/// - spi_hw_4_samd51.cpp.hpp::initSpiHw4Instances()
-///
 /// Platform support:
-/// - SAMD51 (Feather M4, Metro M4): SpiHw2 and SpiHw4 (dual/quad-lane SPI)
-/// - Uses SERCOM peripherals with DMA support
+/// - SAMD51 (Feather M4, Metro M4): SpiHw4 via the native QSPI peripheral
+/// - SpiHw2 remains unavailable until the SERCOM implementation drives two lanes
 ///
 // allow-include-after-namespace
 
 #include "platforms/arm/samd/is_samd.h"
 
-// Opt-in: this driver has never compiled. FL_IS_SAMD51 never evaluated true
-// until FastLED#4011 fixed SAMD detection, and in the meantime it drifted out
-// of sync with fl::DMABuffer, which now owns its memory and offers no
-// non-owning construction path -- so acquireDMABuffer() cannot return a view
-// over a caller-managed span. Reconciling that is a design change on a driver
-// that has also never run on hardware. FastLED#4017 tracks bring-up.
-#if defined(FL_IS_SAMD51) && defined(FL_SAMD51_HW_SPI)
+#if defined(FL_IS_SAMD51)
 
-#include "platforms/shared/spi_hw_2.h"
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/log/log.h"
 
 namespace fl {
 namespace detail {
 
-/// Priority constants for SPI hardware (higher = preferred)
+/// Priority constant for SPI hardware
 constexpr int PRIORITY_SPI_HW_4 = 7;   // Higher (4-lane quad-SPI)
-constexpr int PRIORITY_SPI_HW_2 = 6;   // Lower (2-lane dual-SPI)
-
-/// @brief Register SAMD51 SpiHw2 instances
-static void addSpiHw2IfPossible() {
-    // Note: SPIDualSAMD51 class is defined in spi_hw_2_samd51.cpp.hpp
-    // which is included by _build.hpp before this file
-    FL_DBG_F("SAMD51: Registering SpiHw2 instances");
-
-    // SAMD51 has multiple SERCOM peripherals available for SPI
-    static auto controller0 = fl::make_shared<SPIDualSAMD51>(0, "SPI0");
-    static auto controller1 = fl::make_shared<SPIDualSAMD51>(1, "SPI1");
-
-    SpiHw2::registerInstance(controller0);
-    SpiHw2::registerInstance(controller1);
-
-    FL_DBG_F("SAMD51: SpiHw2 instances registered");
-}
 
 /// @brief Register SAMD51 SpiHw4 instances
 static void addSpiHw4IfPossible() {
@@ -59,12 +31,10 @@ static void addSpiHw4IfPossible() {
     // which is included by _build.hpp before this file
     FL_DBG_F("SAMD51: Registering SpiHw4 instances");
 
-    // SAMD51 has multiple SERCOM peripherals available for SPI
-    static auto controller0 = fl::make_shared<SPIQuadSAMD51>(0, "SPI0");
-    static auto controller1 = fl::make_shared<SPIQuadSAMD51>(1, "SPI1");
+    // SAMD51 has one QSPI peripheral.
+    static auto controller0 = fl::make_shared<SPIQuadSAMD51>(0, "QSPI");
 
     SpiHw4::registerInstance(controller0);
-    SpiHw4::registerInstance(controller1);
 
     FL_DBG_F("SAMD51: SpiHw4 instances registered");
 }
@@ -78,18 +48,24 @@ namespace platforms {
 /// Called lazily on first access to SpiHw*::getAll().
 /// Registers all available SPI hardware controllers in priority order.
 ///
-/// Registration priority (highest to lowest):
+/// Registration priority:
 /// - SpiHw4 (priority 7): Quad-SPI, 4 parallel lanes
-/// - SpiHw2 (priority 6): Dual-SPI, 2 parallel lanes
 ///
 /// Platform availability:
-/// - SAMD51: Both SpiHw2 and SpiHw4 (via SERCOM)
+/// - SAMD51: SpiHw4 via the single native QSPI peripheral
 void initSpiHardware() {
+    static bool initialized = false;
+    if (initialized) {
+        return;
+    }
+    initialized = true;
+
     FL_DBG_F("SAMD51: Initializing SPI hardware");
 
     // Register in priority order (highest to lowest)
     detail::addSpiHw4IfPossible();  // Priority 7
-    detail::addSpiHw2IfPossible();  // Priority 6
+    // SPIDualSAMD51 currently transmits only on data0, so it must not be
+    // advertised as a two-lane controller. SpiHw2 correctly remains empty.
 
     FL_DBG_F("SAMD51: SPI hardware initialized");
 }
@@ -97,4 +73,4 @@ void initSpiHardware() {
 }  // namespace platforms
 }  // namespace fl
 
-#endif  // FL_IS_SAMD51 && FL_SAMD51_HW_SPI
+#endif  // FL_IS_SAMD51
