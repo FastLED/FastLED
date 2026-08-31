@@ -228,6 +228,16 @@ bool SPIQuadSAMD51::begin(const SpiHw4::Config& config) {
     if (config.data2_pin >= 0) mActiveLanes++;
     if (config.data3_pin >= 0) mActiveLanes++;
 
+    // QSPI supports single, dual, or quad widths. It cannot represent three
+    // independent lanes, and active data pins must form a contiguous prefix.
+    const bool pins_are_contiguous =
+        (config.data2_pin < 0 || config.data1_pin >= 0) &&
+        (config.data3_pin < 0 || config.data2_pin >= 0);
+    if (!pins_are_contiguous || mActiveLanes == 3) {
+        FL_WARN_F("SPIQuadSAMD51: QSPI requires 1, 2, or 4 contiguous data lanes");
+        return false;
+    }
+
     // Configure QSPI peripheral
     // Note: SAMD51 has dedicated QSPI pins (not configurable via SERCOM PADs):
     // - QSPI_SCK: Clock
@@ -331,8 +341,8 @@ DMABuffer SPIQuadSAMD51::acquireDMABuffer(size_t bytes_per_lane) {
         }
     }
 
-    // For quad-lane SPI: total size = bytes_per_lane × 4 (interleaved)
-    constexpr size_t num_lanes = 4;
+    // Allocate one interleaved slice for each configured QSPI lane.
+    const size_t num_lanes = mActiveLanes;
     // Validate size against platform max (256KB practical limit for embedded)
     constexpr size_t MAX_SIZE = 256 * 1024;
     if (bytes_per_lane > MAX_SIZE / num_lanes) {
