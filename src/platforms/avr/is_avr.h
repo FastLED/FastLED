@@ -28,7 +28,8 @@
     defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1280__) || \
     defined(__AVR_ATmega32U4__) || \
     defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__) || \
-    defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__) || \
+    defined(__AVR_ATmega644__) || defined(__AVR_ATmega644A__) || \
+    defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__) || \
     defined(__AVR_ATmega32__) || defined(__AVR_ATmega16__) || \
     defined(__AVR_ATmega128__) || defined(__AVR_ATmega64__) || \
     defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || \
