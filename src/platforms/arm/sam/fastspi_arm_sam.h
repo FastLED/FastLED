@@ -14,7 +14,7 @@
 #if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 // IWYU pragma: begin_keep
 #include "fl/system/arduino.h"
-#include <SPI.h>
+#include <variant.h>
 #include <wiring_private.h>
 // IWYU pragma: end_keep
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
@@ -201,62 +201,35 @@ namespace fl {
 template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
 class SAMDHardwareSPIOutput {
 private:
-	Sercom* mSPI;
 	Selectable *mPSelect;
-	u8 mSercomNum;
 	bool mInitialized;
 
-	static inline void waitForEmpty(Sercom* spi) FL_NO_EXCEPT {
-		while (!spi->SPI.INTFLAG.bit.DRE);
-	}
-
-	static inline void waitForComplete(Sercom* spi) FL_NO_EXCEPT {
-		while (!spi->SPI.INTFLAG.bit.TXC);
+	static SERCOM* peripheral() FL_NO_EXCEPT {
+		return &PERIPH_SPI;
 	}
 
 public:
-	SAMDHardwareSPIOutput() : mSPI(nullptr), mPSelect(nullptr), mSercomNum(0), mInitialized(false) {}
-	SAMDHardwareSPIOutput(Selectable *pSelect) : mSPI(nullptr), mPSelect(pSelect), mSercomNum(0), mInitialized(false) {}
+	SAMDHardwareSPIOutput() : mPSelect(nullptr), mInitialized(false) {}
+	SAMDHardwareSPIOutput(Selectable *pSelect) : mPSelect(pSelect), mInitialized(false) {}
 
 	// set the object representing the selectable
 	void setSelect(Selectable *pSelect) { mPSelect = pSelect; }
 
-	// Helper to get SERCOM instance from Arduino's SPI object
-	// On SAMD, the default SPI object uses a specific SERCOM
-	// We'll use Arduino's built-in SPI functionality if available
 	void init() FL_NO_EXCEPT {
 		if (mInitialized) {
 			return;
 		}
 
-		// Use Arduino's built-in SPI library for SAMD
-		// This leverages the proper SERCOM already configured by the Arduino core
-		::SPI.begin();
-
-		// Get the SERCOM instance used by Arduino's SPI
-		// Note: Different boards use different SERCOM units:
-		// - Arduino Zero: SERCOM4
-		// - Feather M0: SERCOM4
-		// - Feather M4: SERCOM1
-		// We rely on Arduino core's pin definitions
-
-		#if defined(FL_IS_SAMD51)
-		// SAMD51 - Arduino core typically uses SERCOM1 or specific board SERCOM
-		// Use the SPI peripheral that Arduino configured
-		mSPI = &(::SPI);
-		#elif defined(FL_IS_SAMD21)
-		// SAMD21 - Arduino core typically uses SERCOM4
-		mSPI = &(::SPI);
-		#endif
-
-		// Configure SPI settings
-		// Clock divider maps to SPI frequency
-		// Default Arduino SPI uses 4MHz, we can adjust based on _SPI_CLOCK_DIVIDER
 		u32 clock_hz = F_CPU / _SPI_CLOCK_DIVIDER;
 		if (clock_hz > 24000000) clock_hz = 24000000;  // Max 24MHz for safety
 
-		::SPI.beginTransaction(SPISettings(clock_hz, MSBFIRST, SPI_MODE0));
-		::SPI.endTransaction();
+		pinPeripheral(PIN_SPI_MISO, g_APinDescription[PIN_SPI_MISO].ulPinType);
+		pinPeripheral(PIN_SPI_SCK, g_APinDescription[PIN_SPI_SCK].ulPinType);
+		pinPeripheral(PIN_SPI_MOSI, g_APinDescription[PIN_SPI_MOSI].ulPinType);
+		peripheral()->initSPI(PAD_SPI_TX, PAD_SPI_RX, SPI_CHAR_SIZE_8_BITS,
+		                      MSB_FIRST);
+		peripheral()->initSPIClock(SERCOM_SPI_MODE_0, clock_hz);
+		peripheral()->enableSPI();
 
 		mInitialized = true;
 	}
@@ -266,18 +239,10 @@ public:
 		if(mPSelect != nullptr) {
 			mPSelect->select();
 		}
-		if (mInitialized) {
-			u32 clock_hz = F_CPU / _SPI_CLOCK_DIVIDER;
-			if (clock_hz > 24000000) clock_hz = 24000000;
-			::SPI.beginTransaction(SPISettings(clock_hz, MSBFIRST, SPI_MODE0));
-		}
 	}
 
 	// release the CS select
 	void inline release() FL_NO_EXCEPT __attribute__((always_inline)) {
-		if (mInitialized) {
-			::SPI.endTransaction();
-		}
 		if(mPSelect != nullptr) {
 			mPSelect->release();
 		}
@@ -290,17 +255,18 @@ public:
 
 	// wait until all queued up data has been written
 	void waitFully() FL_NO_EXCEPT {
-		// Arduino SPI is blocking, so no need to wait
+		// transferDataSPI() blocks until the receive-complete flag is set.
 	}
 
 	// write a byte out via SPI (returns immediately on writing register)
 	static void writeByte(u8 b) FL_NO_EXCEPT {
-		::SPI.transfer(b);
+		peripheral()->transferDataSPI(b);
 	}
 
 	// write a word out via SPI (returns immediately on writing register)
 	static void writeWord(u16 w) FL_NO_EXCEPT {
-		::SPI.transfer16(w);
+		writeByte(static_cast<u8>(w >> 8));
+		writeByte(static_cast<u8>(w));
 	}
 
 	// A raw set of writing byte values, assumes setup/init/waiting done elsewhere
@@ -332,8 +298,7 @@ public:
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	template <u8 BIT> inline void writeBit(u8 b) FL_NO_EXCEPT {
-		// For bit-banging, we need to temporarily disable SPI and use GPIO
-		::SPI.endTransaction();
+		peripheral()->disableSPI();
 
 		pinMode(_DATA_PIN, PinMode::Output);
 		pinMode(_CLOCK_PIN, PinMode::Output);
@@ -347,8 +312,9 @@ public:
 		digitalWrite(_CLOCK_PIN, PinValue::High);
 		digitalWrite(_CLOCK_PIN, PinValue::Low);
 
-		// Re-initialize pins for SPI
-		::SPI.begin();
+		pinPeripheral(PIN_SPI_SCK, g_APinDescription[PIN_SPI_SCK].ulPinType);
+		pinPeripheral(PIN_SPI_MOSI, g_APinDescription[PIN_SPI_MOSI].ulPinType);
+		peripheral()->enableSPI();
 	}
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.
@@ -381,7 +347,7 @@ public:
 		release();
 	}
 
-	/// Finalize transmission (no-op for SAMD SPI using Arduino core)
+	/// Finalize transmission (no-op for blocking SAMD SERCOM SPI)
 	/// This method exists for compatibility with other SPI implementations
 	static void finalizeTransmission() { }
 };

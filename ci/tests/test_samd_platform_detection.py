@@ -191,24 +191,16 @@ def test_arduino_metro_m4_board_macro_selects_d6_fastpin() -> None:
     )
 
 
-def test_samd_does_not_route_into_the_arduino_spi_backend() -> None:
-    """SAMD must not claim platforms/arm/sam/ hardware SPI while #4016 is open.
+def test_samd_routes_into_a_native_sercom_spi_backend() -> None:
+    """SAMD hardware SPI must not depend on Arduino's SPI library (#4016)."""
+    dispatcher = (SRC / "platforms" / "spi_output_template.h").read_text(
+        encoding="utf-8"
+    )
+    backend = (SRC / "platforms" / "arm" / "sam" / "fastspi_arm_sam.h").read_text(
+        encoding="utf-8"
+    )
 
-    That backend does `#include <SPI.h>`, and nothing available can supply it
-    under fbuild: lib_ldf_mode is unimplemented, the scan reaches neither an
-    `#if 0` LDF hint nor a conditional include, and `lib_deps = SPI` fails with
-    "library 'SPI' not found in registry" because framework-bundled libraries
-    are not registry packages (FastLED/fbuild#1371).
-
-    It also had never compiled on any board -- FL_IS_SAMD21/FL_IS_SAMD51 never
-    evaluated true until #4011 -- so routing SAMD to bit-bang SPI preserves the
-    behaviour every SAMD build has actually had, rather than switching on
-    untested code. #4016 tracks a real SERCOM backend.
-    """
-    for name in ("spi_device_proxy.h", "spi_output_template.h"):
-        text = (SRC / "platforms" / name).read_text(encoding="utf-8")
-        assert "defined(FL_IS_SAM) || defined(FL_IS_SAMD)" not in text, (
-            f"platforms/{name} routes SAMD into platforms/arm/sam/, whose SPI "
-            "backend needs Arduino <SPI.h>. SAMD builds fail with 'SPI.h: No "
-            "such file or directory'. See #4011, #4016, FastLED/fbuild#1371."
-        )
+    assert "defined(FL_IS_SAMD)" in dispatcher
+    assert "#include <SPI.h>" not in backend
+    assert "::SPI" not in backend
+    assert "PERIPH_SPI" in backend
