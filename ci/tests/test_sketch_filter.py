@@ -1004,5 +1004,19 @@ class TestMemoryTierMatching:
         assert not skip, "huge memory board should pass large memory filter"
 
 
+def test_multiple_esp32_spi_buses_is_filtered_to_esp32() -> None:
+    """Host and non-ESP32 discovery must skip the ESP32-only example."""
+    sketch = (
+        Path(__file__).parents[2]
+        / "examples"
+        / "MultipleEsp32SpiBuses"
+        / "MultipleEsp32SpiBuses.ino"
+    )
+    sketch_filter = parse_filter_from_sketch(sketch)
+
+    assert sketch_filter is not None
+    assert sketch_filter.require == {"platform": ["esp32"]}
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
