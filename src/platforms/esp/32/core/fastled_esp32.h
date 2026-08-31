@@ -15,6 +15,7 @@
 #include "platforms/esp/32/drivers/i2s_spi/bus_traits.h"
 #include "platforms/esp/32/drivers/lcd_spi/bus_traits.h"
 #include "platforms/esp/32/drivers/parlio/bus_traits.h"
+#include "platforms/shared/bitbang/bus_traits.h"
 // IWYU pragma: end_keep
 
 

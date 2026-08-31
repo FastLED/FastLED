@@ -67,6 +67,10 @@ template<> struct DefaultBus<ClocklessChipset> {
 template<> struct DefaultBus<SpiChipsetConfig> {
     static constexpr Bus value = Bus::FLEX_IO;
 };
+#else
+template<> struct DefaultBus<SpiChipsetConfig> {
+    static constexpr Bus value = Bus::BIT_BANG;
+};
 #endif
 
 #elif defined(FL_IS_TEENSY_4X)
