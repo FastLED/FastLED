@@ -79,14 +79,25 @@ def normalize(value: float) -> tuple[int, int]:
     """
     if value == 0.0:
         return 0, 0
-    exponent = math.floor(math.log2(abs(value))) + 1
-    mantissa = q(value / (2.0**exponent), 30)
-    # Rounding can carry the mantissa up to exactly 2**30 in magnitude after
-    # the divide (value just under a power of two); renormalise if so.
+    # floor(log2|v|), not floor+1: that puts |v| / 2**exponent in [1, 2) and so
+    # the Q30 mantissa in [2**30, 2**31), using the full 31 bits. Getting this
+    # off by one silently costs a bit of precision on every generated constant
+    # -- it produced mantissas in [2**29, 2**30) until the round-trip test
+    # asserted the documented range and caught it.
+    exponent = math.floor(math.log2(abs(value)))
+    # Rounded here rather than through q(), which range-checks against int32
+    # and would reject the carry case below before it can be renormalised.
+    scaled = (value / (2.0**exponent)) * (1 << 30)
+    mantissa = (
+        math.floor(scaled + 0.5) if scaled >= 0 else math.ceil(scaled - 0.5)
+    )
+    # A value just under a power of two divides to something just under 2.0 and
+    # rounds up to exactly 2**31; renormalise. The halving is exact for both
+    # signs because the magnitude is exactly 2**31 whenever this fires.
     if abs(mantissa) >= (1 << 31):
         mantissa //= 2
         exponent += 1
-    return mantissa, exponent
+    return int(mantissa), exponent
 
 
 # --------------------------------------------------------------------------
