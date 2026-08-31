@@ -15,10 +15,10 @@ HEADER = (
     / "fastpin_esp8266.h"
 )
 
-FALLBACKS = {
-    "FL_PIN_CLOCKLESS_1": 3,
-    "FL_PIN_SPI_DATA_1": 1,
-    "FL_PIN_SPI_CLOCK_1": 2,
+EXPECTED_GPIOS = {
+    "FL_PIN_CLOCKLESS_1": 4,
+    "FL_PIN_SPI_DATA_1": 13,
+    "FL_PIN_SPI_CLOCK_1": 14,
 }
 UNSAFE_GPIOS = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 15}
 
@@ -65,11 +65,20 @@ def test_parser_found_all_pin_orders() -> None:
 
 
 @pytest.mark.parametrize("variant,block", VARIANTS.items())
-@pytest.mark.parametrize("macro", sorted(FALLBACKS))
-def test_default_resolves_to_safe_gpio(variant: str, block: dict, macro: str) -> None:
-    logical = block["defaults"].get(macro, FALLBACKS[macro])
+@pytest.mark.parametrize("macro,expected_gpio", sorted(EXPECTED_GPIOS.items()))
+def test_default_resolves_to_expected_safe_gpio(
+    variant: str, block: dict, macro: str, expected_gpio: int
+) -> None:
+    assert set(block["defaults"]) == set(EXPECTED_GPIOS), (
+        f"{variant}: all three platform defaults must be explicitly defined"
+    )
+    logical = block["defaults"][macro]
     assert logical in block["pins"], f"{variant}: {macro} uses absent pin {logical}"
     gpio = block["pins"][logical]
+    assert gpio == expected_gpio, (
+        f"{variant}: {macro} resolves through pin {logical} to GPIO {gpio}, "
+        f"expected GPIO {expected_gpio}"
+    )
     assert gpio not in UNSAFE_GPIOS, (
         f"{variant}: {macro} resolves through pin {logical} to unsafe GPIO {gpio}; "
         "avoid UART, boot-strapping, and flash pins"
