@@ -112,6 +112,13 @@ void esp32_compile_tests() {
 #error "FASTLED_HAS_MILLIS should be defined for ESP32"
 #endif
 
+// ESP32 variants without a true-SPI Channel driver must keep AUTO usable for
+// clocked chipsets through the portable GPIO fallback.
+#if defined(FL_IS_ESP_32C2) || defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32S2)
+FL_STATIC_ASSERT(DefaultBus<SpiChipsetConfig>::value == Bus::BIT_BANG,
+                 "ESP32 variants without true-SPI Channel support must default to BIT_BANG");
+#endif
+
 // Check for ESP32 driver capabilities
 #if !defined(FASTLED_ESP32_HAS_RMT) && !defined(FASTLED_ESP32_HAS_CLOCKLESS_SPI)
 #warning "No clockless drivers defined - you may not be able to drive WS2812 and similar chipsets"
