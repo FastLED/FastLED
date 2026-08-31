@@ -1,0 +1,64 @@
+name: Stale issues and pull requests
+
+on:
+  schedule:
+    - cron: "17 8 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: stale-maintenance
+  cancel-in-progress: false
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark and close inactive issues and pull requests
+        uses: actions/stale@v11
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          stale-issue-label: "status: stale"
+          stale-pr-label: "status: stale"
+          days-before-issue-stale: 60
+          days-before-pr-stale: 30
+          days-before-issue-close: 30
+          days-before-pr-close: 30
+          exempt-issue-labels: >-
+            status: in-progress,
+            status: blocked,
+            priority: critical,
+            deferred,
+            help wanted
+          exempt-pr-labels: >-
+            status: in-progress,
+            status: blocked,
+            priority: critical,
+            deferred
+          exempt-all-assignees: true
+          exempt-all-milestones: true
+          exempt-draft-pr: true
+          remove-stale-when-updated: true
+          delete-branch: false
+          operations-per-run: 100
+          stale-issue-message: >-
+            This issue has had no activity for 60 days and is now marked stale.
+            It will close in 30 days unless there is new activity or a maintainer
+            applies an exempt label. Comment with current, actionable information
+            to keep it open; the stale label will be removed automatically.
+          close-issue-message: >-
+            This issue was closed after 30 additional days without activity.
+            If it is still relevant, please comment with current reproduction
+            details or other actionable information and it can be reopened.
+          stale-pr-message: >-
+            This pull request has had no activity for 30 days and is now marked
+            stale. It will close in 30 days unless it is updated or a maintainer
+            applies an exempt label. Any new activity removes the stale label.
+          close-pr-message: >-
+            This pull request was closed after 30 additional days without
+            activity. Its branch was not deleted, so it can be updated and
+            reopened when work resumes.
