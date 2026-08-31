@@ -19,7 +19,7 @@ namespace {
         time_provider_t provider;
     };
 
-    TimeProviderState& get_time_provider_state() {
+    TimeProviderState& get_time_provider_state() FL_NO_EXCEPT {
         // millis() may be called by background threads and static destructors
         // after ordinary function-local statics have been destroyed. Retain this
         // one bounded state object for the process lifetime so both its mutex and
