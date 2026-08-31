@@ -1664,6 +1664,16 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
         qctx.emit_log_path()
         return 1
 
+    rp2xxx_post_deploy_rescan = bool(
+        _active_rp2xxx_environment(final_environment)
+    ) and (ctx.rpc_smoke_mode or ctx.watchdog_soak_mode)
+    if upload_port is None and not rp2xxx_post_deploy_rescan:
+        print(
+            "❌ No application serial port was returned after fbuild deployment "
+            f"for environment '{build_environment}'"
+        )
+        return 1
+
     if ctx.net_peer_mode:
         # A peer run must remain entirely on fbuild's deploy path.  In
         # particular, do not open a direct serial flasher or fall back to a

@@ -17,7 +17,7 @@ import pytest
 from serial.tools.list_ports_common import ListPortInfo
 
 from ci.autoresearch.args import Args
-from ci.autoresearch.build_driver import BuildDriver
+from ci.autoresearch.build_driver import BuildDriver, DeployResult
 from ci.autoresearch.context import QuietContext, RunContext
 from ci.autoresearch.phases import (
     _build_environment_for_mode,
@@ -34,6 +34,7 @@ from ci.autoresearch.phases import (
     stop_autoresearch_watchdog,
 )
 from ci.rpc_client import RpcError, RpcTimeoutError
+from ci.util import port_utils, serial_probe
 from ci.util.port_utils import ChipDetectionResult, auto_detect_upload_port
 
 
@@ -1893,11 +1894,14 @@ class TestRunBuildDeploy:
         assert rc == 1
 
     def test_lpc_ieee754_uses_dedicated_build_environment(self) -> None:
+        """LPC deploys use the mode environment and accept fbuild's port."""
         mock_driver = _make_mock_driver()
+        mock_driver.deploy.return_value = DeployResult(success=True, port="COM7")
         ctx = _make_ctx(
             args=_make_args(skip_lint=True, ieee754=True),
             build_driver=mock_driver,
             final_environment="lpc845brk",
+            upload_port=None,
             ieee754_test_mode=True,
         )
         qctx = QuietContext(quiet=False)
@@ -1911,6 +1915,42 @@ class TestRunBuildDeploy:
         assert mock_driver.deploy.call_args.kwargs["environment"] == (
             "lpc845brk_ieee754"
         )
+        assert ctx.upload_port == "COM7"
+
+    def test_deferred_deploy_without_application_port_fails(self, capsys) -> None:
+        """A deferred non-RP deploy must fail before serial phases run."""
+        mock_driver = _make_mock_driver()
+        mock_driver.deploy.return_value = DeployResult(success=True, port=None)
+        ctx = _make_ctx(
+            args=_make_args(skip_lint=True),
+            build_driver=mock_driver,
+            final_environment="esp32s3",
+            upload_port=None,
+        )
+
+        rc = asyncio.run(_run_build_deploy(ctx, QuietContext(quiet=False)))
+
+        assert rc == 1
+        output = capsys.readouterr().out
+        assert "No application serial port" in output
+        assert "esp32s3" in output
+
+    def test_stock_rp_deploy_can_rescan_for_application_port_later(self) -> None:
+        """Stock RP smoke runs retain their post-deploy CDC rescan window."""
+        mock_driver = _make_mock_driver()
+        mock_driver.deploy.return_value = DeployResult(success=True, port=None)
+        ctx = _make_ctx(
+            args=_make_args(skip_lint=True, rpc_smoke=True),
+            build_driver=mock_driver,
+            final_environment="rp2350",
+            upload_port=None,
+            rpc_smoke_mode=True,
+        )
+
+        rc = asyncio.run(_run_build_deploy(ctx, QuietContext(quiet=False)))
+
+        assert rc is None
+        assert ctx.upload_port is None
 
     def test_stopping_host_watchdog_signals_and_clears_the_runner_handle(self) -> None:
         ctx = _make_ctx()
@@ -1921,6 +1961,13 @@ class TestRunBuildDeploy:
 
         cancel_event.set.assert_called_once_with()
         assert ctx._watchdog_task is None
+
+
+def test_legacy_usb_identity_tables_are_absent() -> None:
+    """Runtime port selection and labels no longer expose local tables."""
+    assert not hasattr(port_utils, "ENVIRONMENT_TO_VCOM_VID_PIDS")
+    assert not hasattr(port_utils, "ENVIRONMENT_TO_VCOM_VID_PID")
+    assert not hasattr(serial_probe, "BOARD_FINGERPRINTS")
 
 
 # ============================================================

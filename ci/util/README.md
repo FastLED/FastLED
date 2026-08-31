@@ -14,8 +14,8 @@ add the record upstream, let fbuild ingest it, then cascade the `fbuild==X.Y.Z`
 pin in `pyproject.toml` and relock locally (`uv lock && uv sync`; `uv.lock`
 itself is gitignored here).
 
-`ci/util/audit_usb_registry.py` retains the catalogue fetch/decode support used
-by the exact VID:PID lookup tracked in FastLED #3996. It no longer audits a
-local retirement checklist because the runtime tables have been removed.
+`ci/util/audit_usb_registry.py --lookup <VID:PID>` retains the exact catalogue
+query tracked in FastLED #3996. The script no longer has an audit mode or local
+retirement checklist because the runtime tables have been removed.
 
 Full rule and cascade procedure: `agents/docs/usb-vid-pid-registry.md`.
