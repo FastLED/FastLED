@@ -14,9 +14,52 @@
 #define MINIMP3_MAX_SAMPLES_PER_FRAME (1152*2)
 #define MINIMP3_SCRATCH_SIZE 7808
 
+/* FastLED: fixed-point mode. Define MINIMP3_FIXED_POINT to compile the integer
+   DSP path; MINIMP3_HAVE_FIXED_POINT reports whether this instantiation
+   actually built it. The macro is recomputed on every (re-)inclusion so that a
+   float variant and a fixed variant can coexist in one translation unit. */
+#undef MINIMP3_HAVE_FIXED_POINT
+#if defined(MINIMP3_FIXED_POINT)
+#define MINIMP3_HAVE_FIXED_POINT 1
+#else
+#define MINIMP3_HAVE_FIXED_POINT 0
+#endif
+
+/* FastLED: 1 once the integer kernels have actually replaced the float
+   pipeline for this instantiation. Deliberately separate from
+   MINIMP3_HAVE_FIXED_POINT: the golden gate has to be able to tell "this build
+   accepted -DMINIMP3_FIXED_POINT" apart from "this build decodes with integer
+   arithmetic", and during the staged conversion those are not the same thing.
+   The fixed-point kernels flip this to MINIMP3_HAVE_FIXED_POINT. */
+#undef MINIMP3_DSP_INTEGER
+#define MINIMP3_DSP_INTEGER 0
+
+/* FastLED: per-stage observation hook. Define MINIMP3_STAGE_DUMP to a callable
+   accepting (int stage, int channel, const T *buf, int count) where T is the
+   variant's DSP sample type. The golden harness uses it to compare the fixed
+   and float pipelines one stage at a time, which is what localizes a numeric
+   regression to a single kernel instead of to "the decoder". */
+#define MINIMP3_STAGE_HUFFMAN   0
+#define MINIMP3_STAGE_STEREO    1
+#define MINIMP3_STAGE_ANTIALIAS 2
+#define MINIMP3_STAGE_IMDCT     3
+#define MINIMP3_STAGE_DCT2      4
+#define MINIMP3_STAGE_COUNT     5
+
+/* FastLED: the decoder is instantiated more than once in the same program so
+   that the fixed-point build can be compared against the float build inside a
+   single test binary. Each instantiation lands in its own C++ namespace, so
+   the header carries no C linkage: `extern "C"` ignores namespaces and the
+   variants would collide at link time. Re-include with MINIMP3_H and
+   _MINIMP3_IMPLEMENTATION_GUARD undefined and MINIMP3_NAMESPACE set to a
+   fresh name to build another variant. */
+#ifndef MINIMP3_NAMESPACE
+#define MINIMP3_NAMESPACE third_party
+#endif
+
 #ifdef __cplusplus
 namespace fl {
-namespace third_party {
+namespace MINIMP3_NAMESPACE {
 #endif
 
 typedef struct
@@ -37,11 +80,11 @@ typedef union mp3dec_scratch_t
     uint8_t buffer[MINIMP3_SCRATCH_SIZE];
 } mp3dec_scratch_t;
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 void mp3dec_init(mp3dec_t *dec) FL_NO_EXCEPT;
+/* 1 when this instantiation was asked for the integer DSP path, 0 for float. */
+int mp3dec_is_fixed_point(void) FL_NO_EXCEPT;
+/* 1 when this instantiation actually decodes with integer arithmetic. */
+int mp3dec_dsp_is_integer(void) FL_NO_EXCEPT;
 #ifndef MINIMP3_FLOAT_OUTPUT
 typedef int16_t mp3d_sample_t;
 #else /* MINIMP3_FLOAT_OUTPUT */
@@ -54,8 +97,7 @@ int mp3dec_decode_frame_r(mp3dec_t *dec, mp3dec_scratch_t *scratch,
                           mp3dec_frame_info_t *info) FL_NO_EXCEPT;
 
 #ifdef __cplusplus
-}
-} /* namespace third_party */
+} /* namespace MINIMP3_NAMESPACE */
 } /* namespace fl */
 #endif /* __cplusplus */
 
@@ -65,7 +107,7 @@ int mp3dec_decode_frame_r(mp3dec_t *dec, mp3dec_scratch_t *scratch,
 
 #ifdef __cplusplus
 namespace fl {
-namespace third_party {
+namespace MINIMP3_NAMESPACE {
 #endif
 
 #define MAX_FREE_FORMAT_FRAME_SIZE  2304    /* more than ISO spec's */
@@ -105,6 +147,14 @@ namespace third_party {
 
 #define MINIMP3_MIN(a, b)           ((a) > (b) ? (b) : (a))
 #define MINIMP3_MAX(a, b)           ((a) < (b) ? (b) : (a))
+
+/* FastLED: see MINIMP3_STAGE_* in the public section. Compiles away entirely
+   unless the including translation unit asked for stage observation. */
+#ifdef MINIMP3_STAGE_DUMP
+#define MP3D_STAGE(stage, ch, buf, n) MINIMP3_STAGE_DUMP((stage), (ch), (buf), (n))
+#else
+#define MP3D_STAGE(stage, ch, buf, n) ((void)0)
+#endif
 
 #if !defined(MINIMP3_NO_SIMD)
 
@@ -1273,6 +1323,7 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_internal_t *s, L3_gr_info_t *g
         int layer3gr_limit = s->bs.pos + gr_info[ch].part_23_length;
         L3_decode_scalefactors(h->header, s->ist_pos[ch], &s->bs, gr_info + ch, s->scf, ch);
         L3_huffman(s->grbuf[ch], &s->bs, gr_info + ch, s->scf, layer3gr_limit);
+        MP3D_STAGE(MINIMP3_STAGE_HUFFMAN, ch, s->grbuf[ch], 576);
     }
 
     if (HDR_TEST_I_STEREO(h->header))
@@ -1282,6 +1333,7 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_internal_t *s, L3_gr_info_t *g
     {
         L3_midside_stereo(s->grbuf[0], 576);
     }
+    MP3D_STAGE(MINIMP3_STAGE_STEREO, 0, s->grbuf[0], 576*nch);
 
     for (ch = 0; ch < nch; ch++, gr_info++)
     {
@@ -1297,8 +1349,10 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_internal_t *s, L3_gr_info_t *g
         }
 
         L3_antialias(s->grbuf[ch], aa_bands);
+        MP3D_STAGE(MINIMP3_STAGE_ANTIALIAS, ch, s->grbuf[ch], 576);
         L3_imdct_gr(s->grbuf[ch], h->mdct_overlap[ch], gr_info->block_type, n_long_bands);
         L3_change_sign(s->grbuf[ch]);
+        MP3D_STAGE(MINIMP3_STAGE_IMDCT, ch, s->grbuf[ch], 576);
     }
 }
 
@@ -1665,6 +1719,7 @@ static void mp3d_synth_granule(float *qmf_state, float *grbuf, int nbands,
     for (i = 0; i < nch; i++)
     {
         mp3d_DCT_II(grbuf + 576*i, nbands);
+        MP3D_STAGE(MINIMP3_STAGE_DCT2, i, grbuf + 576*i, 18*nbands);
     }
 
     for (i = 0; i < nbands; i += 2)
@@ -1734,6 +1789,16 @@ static int mp3d_find_frame(const uint8_t *mp3, int mp3_bytes, int *free_format_b
     }
     *ptr_frame_bytes = 0;
     return mp3_bytes;
+}
+
+int mp3dec_is_fixed_point(void) FL_NO_EXCEPT
+{
+    return MINIMP3_HAVE_FIXED_POINT;
+}
+
+int mp3dec_dsp_is_integer(void) FL_NO_EXCEPT
+{
+    return MINIMP3_DSP_INTEGER;
 }
 
 void mp3dec_init(mp3dec_t *dec) FL_NO_EXCEPT
@@ -1898,7 +1963,79 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples) FL_NO_EXC
 }
 #endif /* MINIMP3_FLOAT_OUTPUT */
 #ifdef __cplusplus
-} /* namespace third_party */
+} /* namespace MINIMP3_NAMESPACE */
 } /* namespace fl */
 #endif
+
+/* FastLED: release every macro the implementation owns so the header can be
+   included a second time in the same translation unit under a different
+   MINIMP3_NAMESPACE. Without this the fixed variant would inherit the float
+   variant's SIMD configuration (HAVE_SIMD / MINIMP3_ONLY_SIMD in particular,
+   which would compile the scalar integer kernels out entirely) and every
+   redefinition that differs between the two would be a hard error. */
+#undef MP3D_STAGE
+#undef BITS_DEQUANTIZER_OUT
+#undef BSPOS
+#undef CHECK_BITS
+#undef DEQ_COUNT1
+#undef DQ
+#undef FLUSH_BITS
+#undef HAVE_ARMV6
+#undef HAVE_SIMD
+#undef HAVE_SSE
+#undef HDR_GET_BITRATE
+#undef HDR_GET_LAYER
+#undef HDR_GET_MY_SAMPLE_RATE
+#undef HDR_GET_SAMPLE_RATE
+#undef HDR_GET_STEREO_MODE
+#undef HDR_GET_STEREO_MODE_EXT
+#undef HDR_IS_CRC
+#undef HDR_IS_FRAME_576
+#undef HDR_IS_FREE_FORMAT
+#undef HDR_IS_LAYER_1
+#undef HDR_IS_MONO
+#undef HDR_IS_MS_STEREO
+#undef HDR_SIZE
+#undef HDR_TEST_I_STEREO
+#undef HDR_TEST_MPEG1
+#undef HDR_TEST_MS_STEREO
+#undef HDR_TEST_NOT_MPEG25
+#undef HDR_TEST_PADDING
+#undef LOAD
+#undef MAX_BITRESERVOIR_BYTES
+#undef MAX_FRAME_SYNC_MATCHES
+#undef MAX_FREE_FORMAT_FRAME_SIZE
+#undef MAX_L3_FRAME_PAYLOAD_BYTES
+#undef MAX_SCF
+#undef MAX_SCFI
+#undef minimp3_cpuid
+#undef MINIMP3_MAX
+#undef MINIMP3_MIN
+#undef MINIMP3_ONLY_SIMD
+#undef MODE_JOINT_STEREO
+#undef MODE_MONO
+#undef PEEK_BITS
+#undef RELOAD_SCALEFACTOR
+#undef S0
+#undef S1
+#undef S2
+#undef SHORT_BLOCK_TYPE
+#undef STOP_BLOCK_TYPE
+#undef V0
+#undef V1
+#undef V2
+#undef VADD
+#undef VLD
+#undef VLOAD
+#undef VMAC
+#undef VMSB
+#undef VMUL
+#undef VMUL_S
+#undef VREV
+#undef VSAVE2
+#undef VSAVE4
+#undef VSET
+#undef VSTORE
+#undef VSUB
+
 #endif /* MINIMP3_IMPLEMENTATION && !_MINIMP3_IMPLEMENTATION_GUARD */
