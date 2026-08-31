@@ -229,6 +229,20 @@ FL_TEST_CASE("rgb2hsv_approximate - orange is not reported as green (issue #436)
     }
 }
 
+FL_TEST_CASE("rgb2hsv_approximate - scaling does not wrap channels (issue #1074)") {
+    const CRGB original(218, 137, 48);
+    const CHSV hsv = rgb2hsv_approximate(original);
+    const CRGB roundtrip = hsv2rgb_rainbow(hsv);
+
+    // Scaling the desaturated channels produces an intermediate red value of
+    // 299. It must be normalized, not truncated to 43, which incorrectly
+    // makes green the dominant channel and moves this orange into green hues.
+    FL_CHECK_LE((int)hsv.hue, (int)HUE_YELLOW);
+    FL_CHECK_EQ((int)hsv.value, 255);
+    FL_CHECK_GT((int)roundtrip.r, (int)roundtrip.g);
+    FL_CHECK_GT((int)roundtrip.g, (int)roundtrip.b);
+}
+
 FL_TEST_CASE("rgb2hsv_approximate - hue stays in the red..yellow arc red -> yellow") {
     // Sweeping green up at full red walks hue from red toward yellow. The
     // underflow made this jump out into the greens partway through (46 -> 115
