@@ -14,36 +14,41 @@ namespace fl {
 #ifdef FASTLED_TESTING
 
 namespace {
-    // Thread-safe storage for injected time provider
-    fl::mutex& get_time_mutex() {
-        static fl::mutex mutex;
-        return mutex;
-    }
+    struct TimeProviderState {
+        fl::mutex mutex;
+        time_provider_t provider;
+    };
 
-    time_provider_t& get_time_provider() {
-        static time_provider_t provider;
-        return provider;
+    TimeProviderState& get_time_provider_state() {
+        // millis() may be called by background threads and static destructors
+        // after ordinary function-local statics have been destroyed. Retain this
+        // one bounded state object for the process lifetime so both its mutex and
+        // installed provider remain valid throughout teardown.
+        static TimeProviderState* const state = new TimeProviderState(); // ok bare allocation - intentionally retained for safe process teardown
+        return *state;
     }
 
     bool get_injected_millis(fl::u32* value) FL_NO_EXCEPT {
-        fl::unique_lock<fl::mutex> lock(get_time_mutex());
-        const auto& provider = get_time_provider();
-        if (!provider) {
+        TimeProviderState& state = get_time_provider_state();
+        fl::unique_lock<fl::mutex> lock(state.mutex);
+        if (!state.provider) {
             return false;
         }
-        *value = provider();
+        *value = state.provider();
         return true;
     }
 }
 
 void inject_time_provider(const time_provider_t& provider) {
-    fl::unique_lock<fl::mutex> lock(get_time_mutex());
-    get_time_provider() = provider;
+    TimeProviderState& state = get_time_provider_state();
+    fl::unique_lock<fl::mutex> lock(state.mutex);
+    state.provider = provider;
 }
 
 void clear_time_provider() {
-    fl::unique_lock<fl::mutex> lock(get_time_mutex());
-    get_time_provider() = time_provider_t{}; // Clear the function
+    TimeProviderState& state = get_time_provider_state();
+    fl::unique_lock<fl::mutex> lock(state.mutex);
+    state.provider = time_provider_t{}; // Clear the function
 }
 
 // MockTimeProvider implementation

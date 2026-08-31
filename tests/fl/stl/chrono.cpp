@@ -5,9 +5,28 @@
 #include "fl/stl/move.h"
 #include "fl/stl/int.h"
 
+#include <atomic>  // okay std namespace - host-only concurrency regression
+#include <thread>  // ok include - host-only concurrency regression
+
 FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
+
+#ifdef FASTLED_TESTING
+namespace {
+
+// Constructed before main and destroyed after function-local time-provider
+// state. Calling millis() here exercises the process-teardown access pattern
+// that originally attempted to lock an already-destroyed mutex.
+struct LateMillisCaller {
+    ~LateMillisCaller() { sink = fl::millis(); }
+    volatile fl::u32 sink = 0;
+};
+
+LateMillisCaller gLateMillisCaller;
+
+} // namespace
+#endif
 
 FL_TEST_CASE("fl::time - basic functionality") {
     FL_SUBCASE("time returns non-zero values") {
@@ -207,6 +226,39 @@ FL_TEST_CASE("fl::inject_time_provider - controls all time views") {
                 1239000);
 
     clear_time_provider();
+}
+
+FL_TEST_CASE("fl::time provider remains valid during concurrent replacement") {
+    constexpr int iterations = 2000;
+    std::atomic<bool> start{false}; // okay std namespace
+    std::atomic<bool> invalid{false}; // okay std namespace
+
+    inject_time_provider([]() { return 0x11111111u; });
+
+    std::thread reader([&]() { // okay std namespace
+        while (!start.load()) {
+            std::this_thread::yield(); // okay std namespace
+        }
+        for (int i = 0; i < iterations; ++i) {
+            const fl::u32 value = fl::millis();
+            if (value != 0x11111111u && value != 0x22222222u) {
+                invalid.store(true);
+            }
+        }
+    });
+
+    start.store(true);
+    for (int i = 0; i < iterations; ++i) {
+        if ((i & 1) == 0) {
+            inject_time_provider([]() { return 0x22222222u; });
+        } else {
+            inject_time_provider([]() { return 0x11111111u; });
+        }
+    }
+
+    reader.join();
+    clear_time_provider();
+    FL_CHECK_FALSE(invalid.load());
 }
 
 FL_TEST_CASE("fl::time - timing scenarios with mock") {
