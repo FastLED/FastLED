@@ -1,6 +1,6 @@
 import unittest
 
-from ci.boards import Board
+from ci.boards import SPARKFUN_XRP_CONTROLLER_2350B, Board
 
 
 class TestBoardToPlatformioIni(unittest.TestCase):
@@ -55,6 +55,13 @@ class TestBoardToPlatformioIni(unittest.TestCase):
 
         self.assertEqual(ini.count("lib_deps ="), 1)
         self.assertIn("lib_deps = board-lib,extra-lib", ini)
+
+    def test_sparkfun_xrp_uses_supported_arduino_pico_framework(self) -> None:
+        ini = SPARKFUN_XRP_CONTROLLER_2350B.to_platformio_ini()
+
+        self.assertIn("framework-arduinopico", ini)
+        self.assertIn("rp2040-5.7.0.zip", ini)
+        self.assertIn("board_build.core = earlephilhower", ini)
 
 
 if __name__ == "__main__":

@@ -764,6 +764,8 @@ SPARKFUN_XRP_CONTROLLER_2350B = Board(
     board_name="sparkfun_xrp_controller",
     platform="https://github.com/maxgerhardt/platform-raspberrypi",
     platform_needs_install=True,
+    platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico/releases/download/5.7.0/rp2040-5.7.0.zip",
+    board_build_core="earlephilhower",
 )
 
 APOLLO3_RED_BOARD = Board(
