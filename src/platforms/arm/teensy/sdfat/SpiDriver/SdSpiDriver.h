@@ -33,32 +33,20 @@
 #include "fl/stl/int.h"
 #include "platforms/arm/teensy/is_teensy.h"  // ok platform headers
 
-// Transport selection for the Arduino-shaped hardware driver.
-//
-// On Teensy 4 (IMXRT1062) SdFat's SPI port is FastLED's own `LpspiBus` rather
-// than the framework's `SPIClass`. This is not a preference: the Teensyduino
-// `SPI` library is only *compiled* when the library finder selects it from an
-// unconditional sketch-level `#include <SPI.h>`, so `SPIClass::begin`,
-// `SPIClass::transfer` and the global `SPI` object resolve as headers but
-// never link (FastLED #3970). The library also cannot be vendored -- it is
-// GPLv2/LGPLv2.1 and FastLED is MIT. `LpspiBus` (#3802) already owns the
-// registers, so the port type is simply retargeted at it.
+// Transport selection for the Arduino-shaped hardware driver. Teensy 4 uses
+// FastLED's LPSPI bus and Teensy 3.x/LC use FastLED's DSPI bus. These buses own
+// the peripheral registers directly, avoiding a dependency on the framework
+// SPI library (FastLED #3970, #3972).
 //
 // The Kinetis Teensys (3.x and LC) get the same treatment through
-// `DspiBus`, which owns SPI0's DSPI registers directly (FastLED #3972). That
-// also retires the `SPISettings::ctar_clock_table` / `ctar_div_table`
-// dependency: the frequency-to-CTAR mapping is computed from the K20/K64/K66
-// reference manual instead of transcribed from the GPL/LGPL tables.
-//
-// Define `FL_SDFAT_USE_ARDUINO_SPI` to force the Arduino path back on as an
-// escape hatch. Nothing links in that configuration unless the sketch also
-// carries an unconditional `#include <SPI.h>`.
-#if !defined(FL_SDFAT_USE_ARDUINO_SPI)
+// `DspiBus`, which owns SPI0's DSPI registers directly. Its frequency-to-CTAR
+// mapping is computed from the K20/K64/K66 reference manual.
 #if defined(FL_IS_TEENSY_4X)
 #define FL_SDFAT_HAS_LPSPI_BUS
 #elif defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_LC)
 #define FL_SDFAT_HAS_DSPI_BUS
-#endif
+#else
+#error "Teensy SdFat requires a supported FastLED SPI bus"
 #endif
 
 #if SPI_DRIVER_SELECT < 2
@@ -66,8 +54,6 @@
 #include "platforms/arm/teensy/teensy4_common/lpspi/lpspi_bus.h"  // ok platform headers
 #elif defined(FL_SDFAT_HAS_DSPI_BUS)
 #include "platforms/arm/teensy/kinetis_spi/dspi_bus.h"  // ok platform headers
-#else
-#include "SPI.h"
 #endif
 #endif
 
@@ -114,9 +100,9 @@ inline bool spiOptionDedicated(fl::u8 opt) {return opt & DEDICATED_SPI;}
 inline bool spiOptionDedicated(fl::u8 opt) {(void)opt; return false;}
 #endif  // ENABLE_DEDICATED_SPI
 //------------------------------------------------------------------------------
-/** SPISettings for SCK frequency in Hz. */
+/** SPI setting for SCK frequency in Hz. */
 #define SD_SCK_HZ(maxSpeed) (maxSpeed)
-/** SPISettings for SCK frequency in MHz. */
+/** SPI setting for SCK frequency in MHz. */
 #define SD_SCK_MHZ(maxMhz) (1000000UL*(maxMhz))
 // SPI divisor constants - obsolete.
 /** Set SCK to max rate. */

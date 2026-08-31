@@ -46,11 +46,6 @@ typedef fl::platforms::teensy::LpspiSettings SpiPortSettings_t;
 typedef fl::platforms::teensy::DspiBus SpiPort_t;
 /** Transaction settings for the FastLED DSPI hardware driver (Teensy 3.x / LC). */
 typedef fl::platforms::teensy::DspiSettings SpiPortSettings_t;
-#else
-/** Port type for Arduino SPI hardware driver. */
-typedef SPIClass SpiPort_t;
-/** Transaction settings for Arduino SPI hardware driver. */
-typedef SPISettings SpiPortSettings_t;
 #endif
 class SdSpiConfig;
 /**
@@ -94,7 +89,7 @@ class SdSpiArduinoDriver {
    * \param[in] count Number of bytes to send.
    */
   void send(const fl::u8* buf, fl::size count);
-  /** Save high speed SPISettings after SD initialization.
+  /** Save high speed SPI settings after SD initialization.
    *
    * \param[in] maxSck Maximum SCK frequency.
    */
@@ -105,8 +100,7 @@ class SdSpiArduinoDriver {
  private:
   // SpiPort_t / SpiPortSettings_t are selected just above, driven by the
   // transport macro SdSpiDriver.h defines before including this header:
-  // fl LpspiBus on Teensy 4, fl DspiBus on Teensy 3.x/LC, and SPIClass only
-  // when FL_SDFAT_USE_ARDUINO_SPI forces the framework path back on.
+  // fl LpspiBus on Teensy 4 and fl DspiBus on Teensy 3.x/LC.
   SpiPort_t *mSpi;
   SpiPortSettings_t mSpiSettings;
 };

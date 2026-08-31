@@ -6,10 +6,9 @@
 // Deliberately no `#include <SPI.h>` here. Every Teensy now routes SdFat
 // through a FastLED-owned bus -- `LpspiBus` on Teensy 4 (FastLED#3971),
 // `DspiBus` on Teensy 3.x/LC (FastLED#3972) -- and pulling the framework
-// header in would keep the GPL/LGPL `SPI.h` in the translation unit and
-// re-expose the undefined `SPIClass`/`SPI` symbols the moment anything
-// referenced them again. `SdSpiDriver.h` supplies whichever transport header
-// the platform actually needs.
+// header in would keep the GPL/LGPL SPI implementation in the translation
+// unit. `SdSpiDriver.h` supplies whichever transport header the platform
+// actually needs.
 
 // IWYU pragma: begin_keep
 #include "platforms/arm/teensy/sdfat/SdFat.h"
