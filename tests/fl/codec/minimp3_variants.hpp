@@ -94,6 +94,17 @@ inline void mp3StageDump(int stage, int channel, const fl::i32* buf,
 #undef MINIMP3_FIXED_POINT
 #undef MINIMP3_NAMESPACE
 
+// ---- restore the default instantiation -------------------------------------
+// The two blocks above leave MINIMP3_H defined for whichever variant went
+// last, which would make a later `#include "third_party/minimp3/minimp3.h"`
+// -- the one tests/fl/codec/mp3.hpp does -- a silent no-op, and every
+// fl::third_party::mp3dec_t reference an incomplete type. Re-declare the
+// default namespace here so this header is order-independent in an aggregate
+// TU. Declarations only: fl::third_party's implementation lives in libfastled.
+#undef MINIMP3_H
+#undef _MINIMP3_IMPLEMENTATION_GUARD
+#include "third_party/minimp3/minimp3.h" // ok cpp include
+
 namespace fl {
 
 /// Uniform surface over one minimp3 instantiation, so a golden test can be
