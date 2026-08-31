@@ -87,6 +87,17 @@ a conservative observation that includes the audit call boundary and its
 optimized decoder callgraph; every reachable emitted function must have a
 stack-usage record or the audit fails closed.
 
+`stack-watermark-observed` is recorded but **not regression-gated**, which now
+matches what the paragraph above always said the acceptance gate was. It is not
+reproducible across CI runs: helix has measured 1736 and 3336 on identical
+decoder code, each value exact and one of them reproduced on a re-run, and 1816
+locally, while `minimp3-float` measures 2056 in every environment tried. The
+scan reports the deepest byte *anything* disturbed rather than the deepest byte
+the decoder used, so one excursion below the real frame moves it by kilobytes.
+The rows below are the values last observed, kept so the audit still requires
+the metric to be emitted. FastLED#4106 tracks making it reproducible or
+host-keying it the way `codec_cpu_trend.json` keys its baselines.
+
 ## Static table inventory
 
 | backend | stage | symbol | bytes |

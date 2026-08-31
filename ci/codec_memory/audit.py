@@ -35,6 +35,20 @@ CALLGRAPH_ROOTS = {
 FRAME_LIMIT = 2048
 RAM_LIMIT = 24 * 1024
 REGRESSION_FACTOR = 1.02
+# Measured and required to be present, but not regression-gated. The ledger's
+# own prose already says the 2 KiB acceptance gate is the compiler-derived
+# callgraph and calls the watermark "a conservative observation"; the code did
+# not reflect that, and applied the same hard 2% gate to both. The watermark is
+# not reproducible across CI runs -- helix has measured 1736 and 3336 on
+# identical decoder code, each exactly and one of them on a re-run -- because it
+# reports the deepest byte *anything* disturbed, not the deepest byte the
+# decoder used. See FastLED#4106 for the real fix (host-key the ledger, or
+# measure the stack pointer directly instead of inferring it from a paint
+# pattern).
+INFORMATIONAL_METRICS = {
+    "stack-watermark-observed",
+}
+
 EXACT_METRICS = {
     "allocation-count",
     "decoder-state",
@@ -460,6 +474,13 @@ def check_ledger(
                 f"{key[0]}/{key[1]} changed: {current[key]} != {baseline}; "
                 "update the ledger deliberately"
             )
+            continue
+        if key[1] in INFORMATIONAL_METRICS:
+            if current[key] != baseline:
+                print(
+                    f"INFORMATIONAL:{key[0]}/{key[1]}={current[key]} "
+                    f"(ledger {baseline}; not gated, see FastLED#4106)"
+                )
             continue
         limit = int(baseline * REGRESSION_FACTOR)
         if current[key] > limit:
