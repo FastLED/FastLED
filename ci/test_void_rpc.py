@@ -53,7 +53,7 @@ async def main_async(port: str, baudrate: int, use_pyserial: bool) -> int:
         # Test 2: Call a non-void function (ping returns data)
         print("\n📡 Test 2: Non-void function (ping)")
         try:
-            response = await client.send("ping")
+            response = await client.send("ping", {})
             print(f"   Response success: {response.success}")
             print(f"   Response data: {response.data}")
             print(f"   Response ID: {response._id}")

@@ -226,7 +226,7 @@ async def run_sweep(
 
         # Ping to verify device is alive
         try:
-            ping_response = await client.send("ping", timeout=10.0)
+            ping_response = await client.send("ping", {}, timeout=10.0)
             print(f"Device alive: {ping_response.data}")
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)

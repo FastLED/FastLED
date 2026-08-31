@@ -183,8 +183,9 @@ def test_ota_peer_stages_artifact_without_a_host_wifi_manager(tmp_path) -> None:
 
     assert result == 0
     assert peer.send.await_args_list[1].args[0] == "beginOtaArtifact"
-    write_calls = [
-        call for call in peer.send.await_args_list if call.args[0] == "writeOtaArtifact"
-    ]
+    write_calls = []
+    for call in peer.send.await_args_list:
+        if call.args[0] == "writeOtaArtifact":
+            write_calls.append(call)
     assert len(write_calls) == 1
     assert write_calls[0].args[1] == base64.b64encode(b"firmware").decode("ascii")

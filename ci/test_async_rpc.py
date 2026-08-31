@@ -29,7 +29,7 @@ async def main_async(port: str, baudrate: int, use_pyserial: bool) -> int:
 
         # Test 1: Single request with ID
         print("\n📡 Test 1: Single request with ID correlation")
-        response = await client.send("ping")
+        response = await client.send("ping", {})
         print(f"   Request ID: {client._next_id - 1}")  # Previous ID used
         print(f"   Response ID: {response._id}")
         print(f"   Response data: {response.data}")
@@ -39,7 +39,7 @@ async def main_async(port: str, baudrate: int, use_pyserial: bool) -> int:
         print("\n📡 Test 2: Multiple sequential requests with unique IDs")
         for i in range(3):
             expected_id = client._next_id
-            response = await client.send("ping")
+            response = await client.send("ping", {})
             print(
                 f"   Request #{i + 1} - Expected ID: {expected_id}, Response ID: {response._id}"
             )
@@ -50,15 +50,15 @@ async def main_async(port: str, baudrate: int, use_pyserial: bool) -> int:
         # Test 3: Verify ID wrapping at uint32 boundary
         print("\n📡 Test 3: Verify ID counter wrapping (uint32 overflow)")
         client._next_id = 0xFFFFFFFE  # Near uint32 max (4294967294)
-        response1 = await client.send("ping")
+        response1 = await client.send("ping", {})
         print(
             f"   Request at 0xFFFFFFFE - Response ID: {response1._id} (should be 4294967294)"
         )
-        response2 = await client.send("ping")
+        response2 = await client.send("ping", {})
         print(
             f"   Request at 0xFFFFFFFF - Response ID: {response2._id} (should be 4294967295)"
         )
-        response3 = await client.send("ping")
+        response3 = await client.send("ping", {})
         print(
             f"   Request at 0x00000000 - Response ID: {response3._id} (should wrap to 0)"
         )

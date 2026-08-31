@@ -58,7 +58,7 @@ async def run_gpio_pretest(
             print("PING TEST (verify basic RPC works)")
             print("=" * 60)
             try:
-                ping_response = await client.send("ping", timeout=15.0, retries=3)
+                ping_response = await client.send("ping", {}, timeout=15.0, retries=3)
                 print(f"\u2705 Ping successful: {ping_response.data}")
             except KeyboardInterrupt as ki:
                 handle_keyboard_interrupt(ki)
@@ -95,7 +95,7 @@ async def run_gpio_pretest(
                         await client.connect(boot_wait=boot_wait, drain_boot=True)
                     else:
                         await client.drain_boot_output(verbose=True)
-                    ping_response = await client.send("ping", retries=3)
+                    ping_response = await client.send("ping", {}, retries=3)
                     print(
                         f"\u2705 Ping successful after DTR reset: {ping_response.data}"
                     )
@@ -263,7 +263,7 @@ async def run_pin_discovery(
         print("PING TEST (verify basic RPC works)")
         print("=" * 60)
         try:
-            ping_response = await client.send("ping", timeout=30.0, retries=3)
+            ping_response = await client.send("ping", {}, timeout=30.0, retries=3)
             print(f"\u2705 Ping successful: {ping_response.data}")
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
@@ -299,7 +299,7 @@ async def run_pin_discovery(
                     await client.connect(boot_wait=boot_wait, drain_boot=True)
                 else:
                     await client.drain_boot_output(verbose=True)
-                ping_response = await client.send("ping", timeout=30.0, retries=3)
+                ping_response = await client.send("ping", {}, timeout=30.0, retries=3)
                 print(f"\u2705 Ping successful after DTR reset: {ping_response.data}")
             except KeyboardInterrupt as ki:
                 handle_keyboard_interrupt(ki)

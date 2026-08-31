@@ -84,7 +84,7 @@ async def run_ota_peer_autoresearch(
     async def rpc_data(
         client: RpcClient,
         method: str,
-        params: str | list[Any] | dict[str, Any] | None = None,
+        params: str | list[Any] | dict[str, Any] | None,
     ) -> dict[str, Any]:
         response = await client.send(method, params or {}, timeout=rpc_timeout())
         if not isinstance(response.data, dict):
@@ -103,8 +103,8 @@ async def run_ota_peer_autoresearch(
         await primary.connect(boot_wait=3.0, drain_boot=True)
         await peer.connect(boot_wait=3.0, drain_boot=True)
 
-        primary_status = await rpc_data(primary, "status")
-        peer_status = await rpc_data(peer, "status")
+        primary_status = await rpc_data(primary, "status", {})
+        peer_status = await rpc_data(peer, "status", {})
         if "rp2350" not in str(primary_status.get("platform", "")).lower():
             raise RuntimeError(f"Primary board is not RP2350W: {primary_status}")
         if "esp32-c6" not in str(peer_status.get("platform", "")).lower():
@@ -122,14 +122,14 @@ async def run_ota_peer_autoresearch(
                 raise RuntimeError(
                     f"C6 artifact write failed at byte {offset}: {written}"
                 )
-        finished = await rpc_data(peer, "finishOtaArtifact")
+        finished = await rpc_data(peer, "finishOtaArtifact", {})
         if not finished.get("success") or finished.get("sha256") != sha256:
             raise RuntimeError(f"C6 artifact verification failed: {finished}")
 
-        c6_server = await rpc_data(peer, "startNetServer")
+        c6_server = await rpc_data(peer, "startNetServer", {})
         if not c6_server.get("success"):
             raise RuntimeError(f"C6 AP start failed: {c6_server}")
-        artifact_server = await rpc_data(peer, "startOtaArtifactServer")
+        artifact_server = await rpc_data(peer, "startOtaArtifactServer", {})
         host = artifact_server.get("ip")
         port = artifact_server.get("port")
         # `isinstance(port, int)` alone admits 0, negatives and values past
@@ -153,7 +153,7 @@ async def run_ota_peer_autoresearch(
         if not joined.get("success"):
             raise RuntimeError(f"RP2350W WiFi join failed: {joined}")
         for _ in range(20):
-            wifi = await rpc_data(primary, "wifiStatus")
+            wifi = await rpc_data(primary, "wifiStatus", {})
             if wifi.get("connected"):
                 break
             await asyncio.sleep(min(0.5, rpc_timeout()))
@@ -175,8 +175,8 @@ async def run_ota_peer_autoresearch(
             serial_interface=create_serial_interface(upload_port),
         )
         await primary.connect(boot_wait=8.0, drain_boot=True)
-        await rpc_data(primary, "ping")
-        served = await rpc_data(peer, "otaArtifactStatus")
+        await rpc_data(primary, "ping", {})
+        served = await rpc_data(peer, "otaArtifactStatus", {})
         if not served.get("success") or _served_request_count(served) < 1:
             raise RuntimeError(f"C6 did not serve the RP2350W artifact: {served}")
         print(f"{Fore.GREEN}OTA PEER AUTORESEARCH PASSED{Style.RESET_ALL}")
@@ -192,7 +192,7 @@ async def run_ota_peer_autoresearch(
             if client is None:
                 continue
             try:
-                await client.send(stop_method, timeout=2.0)
+                await client.send(stop_method, {}, timeout=2.0)
             except KeyboardInterrupt as ki:
                 handle_keyboard_interrupt(ki)
             except Exception:
@@ -250,7 +250,7 @@ async def run_ota_autoresearch(
 
         # Step 1: Start OTA on device
         print("\n--- Step 1: Start WiFi AP + OTA Server on ESP32 ---")
-        response = await client.send("startOta", timeout=30.0)
+        response = await client.send("startOta", {}, timeout=30.0)
         ota_info = response.data
 
         if not isinstance(ota_info, dict) or not ota_info.get("success"):
@@ -477,7 +477,7 @@ async def run_ota_autoresearch(
                         )
                         await client.connect(boot_wait=3.0, drain_boot=True)
 
-                        status_resp = await client.send("status", timeout=10.0)
+                        status_resp = await client.send("status", {}, timeout=10.0)
                         status_data = status_resp.data
 
                         if isinstance(status_data, dict) and status_data.get("ready"):
@@ -534,7 +534,7 @@ async def run_ota_autoresearch(
         # and we haven't already rebooted via OTA flash)
         if client:
             try:
-                await client.send("stopOta", timeout=10.0)
+                await client.send("stopOta", {}, timeout=10.0)
             except KeyboardInterrupt as ki:
                 handle_keyboard_interrupt(ki)
             except Exception:

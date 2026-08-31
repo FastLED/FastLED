@@ -2235,6 +2235,7 @@ async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
         try:
             await client.send(
                 "__autoresearch_missing_method__",
+                {},
                 timeout=min(2.0, max(1.0, ctx.remaining_seconds(minimum=1.0))),
             )
             missing_method_returned = True
@@ -2371,7 +2372,7 @@ async def _run_watchdog_soak(ctx: RunContext) -> int:
     try:
         await recovery.connect()
         await recovery.drain_boot_output(verbose=False)
-        after = await recovery.send("ping", timeout=8.0)
+        after = await recovery.send("ping", {}, timeout=8.0)
         if not after.success or not isinstance(after.data, dict):
             print(f"RESULT: watchdog soak FAIL: post-reset ping {after.data!r}")
             return 1

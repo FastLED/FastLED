@@ -367,7 +367,7 @@ async def run_net_loopback_autoresearch(
         print("  ESP32 will start HTTP server and GET its own endpoints via 127.0.0.1")
         print()
 
-        response = await client.send("runNetLoopback", timeout=30.0)
+        response = await client.send("runNetLoopback", {}, timeout=30.0)
         test_result = response.data
 
         if not isinstance(test_result, dict):
@@ -429,7 +429,7 @@ async def run_net_loopback_autoresearch(
     finally:
         if client:
             try:
-                await client.send("stopNet", timeout=10.0)
+                await client.send("stopNet", {}, timeout=10.0)
             except KeyboardInterrupt as ki:
                 handle_keyboard_interrupt(ki)
             except Exception:
@@ -596,7 +596,7 @@ async def run_net_peer_autoresearch(
             if client is None:
                 continue
             try:
-                await client.send("stopNet", timeout=2.0)
+                await client.send("stopNet", {}, timeout=2.0)
             except KeyboardInterrupt as ki:
                 handle_keyboard_interrupt(ki)
             except Exception:
@@ -668,7 +668,7 @@ async def run_net_autoresearch(
         if client:
             # Send stopNet to clean up device resources
             try:
-                await client.send("stopNet", timeout=10.0)
+                await client.send("stopNet", {}, timeout=10.0)
             except KeyboardInterrupt as ki:
                 handle_keyboard_interrupt(ki)
             except Exception:
@@ -692,7 +692,7 @@ async def _run_net_server_autoresearch(
     import httpx
 
     print("\n--- Step 1: Start WiFi AP + HTTP Server on ESP32 ---")
-    response = await client.send("startNetServer", timeout=30.0)
+    response = await client.send("startNetServer", {}, timeout=30.0)
     server_info = response.data
 
     if not isinstance(server_info, dict) or not server_info.get("success"):
@@ -838,7 +838,7 @@ async def _run_net_client_autoresearch(
     6. Cleanup
     """
     print("\n--- Step 1: Start WiFi AP on ESP32 ---")
-    response = await client.send("startNetClient", timeout=30.0)
+    response = await client.send("startNetClient", {}, timeout=30.0)
     ap_info = response.data
 
     if not isinstance(ap_info, dict) or not ap_info.get("success"):
