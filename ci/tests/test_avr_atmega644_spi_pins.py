@@ -50,7 +50,9 @@ def test_atmega644_variant_has_hardware_spi_pins(suffix: str) -> None:
     )
 
     assert result.returncode == 0, f"preprocessing failed:\n{result.stderr}"
-    macros = [line.rstrip() for line in result.stdout.splitlines()]
+    macros: list[str] = []
+    for line in result.stdout.splitlines():
+        macros.append(line.rstrip())
     assert "#define FL_IS_AVR_ATMEGA" in macros
     assert "#define SPI_DATA 5" in macros
     assert "#define SPI_CLOCK 7" in macros
