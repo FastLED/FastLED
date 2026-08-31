@@ -43,73 +43,6 @@ CHIP_TO_ENVIRONMENT: dict[str, str] = {
 # ESP32 variants that lack WiFi hardware
 NO_WIFI_ENVIRONMENTS: set[str] = {"esp32h2", "esp32p4"}
 
-# PlatformIO environments → expected USB VID:PID(s) for the data-bearing
-# VCOM port. This bypasses the description-string heuristic for boards
-# whose USB descriptors are too generic to disambiguate (e.g. "USB Serial
-# Device" on Windows for both the LPC845-BRK VCOM and any other Microsoft
-# CDC device).
-#
-# Each entry is a **tuple of accepted VID:PID pairs** — the first port
-# whose (vid, pid) matches any pair is selected. Some boards ship one of
-# several debug-probe firmwares that expose different VID:PIDs; listing
-# them all here lets the same PlatformIO env work regardless of which
-# firmware is on the on-board probe (see the LPC845-BRK note below).
-#
-# FROZEN — DO NOT ADD ENTRIES. USB VID:PID identity is owned by
-# https://github.com/FastLED/boards and reaches this repo through fbuild's
-# ingestion of the published `usb-vids.proto.zstd` archive. Every pair below
-# is already published there; this map survives only as a legacy fast path
-# for default-port selection (see FastLED #3300 for the LPC845-BRK case that
-# motivated it, and FastLED #3836 for its retirement).
-#
-# A board that cannot be identified is a FastLED/boards gap: add the record
-# on the appropriate data branch, let fbuild ingest it, then cascade the
-# `fbuild==X.Y.Z` pin in pyproject.toml and relock locally. Full procedure:
-# agents/docs/usb-vid-pid-registry.md.
-#
-# ci/util/serial_probe.py has a richer fingerprint table; it is likewise
-# frozen and is display/diagnostic only.
-ENVIRONMENT_TO_VCOM_VID_PIDS: dict[str, tuple[tuple[int, int], ...]] = {
-    # RP2040 Pico application CDC (the ROM BOOTSEL interface is 2E8A:0003
-    # and is intentionally not a serial port). Keep this fingerprint strict:
-    # falling back to an arbitrary CP210x/CH340 port can run RPC against a
-    # different attached board.
-    "rp2040": ((0x2E8A, 0x000A),),
-    "rpipico": ((0x2E8A, 0x000A),),
-    "rpipicow": ((0x2E8A, 0xF00A),),
-    # Arduino-Pico assigns distinct application CDC identities to Pico 2
-    # and Pico 2 W. Keep them board-exact so a non-W RP2350 cannot be
-    # selected for an rp2350w run when both variants are attached.
-    "rp2350": ((0x2E8A, 0x000F),),
-    "rpipico2": ((0x2E8A, 0x000F),),
-    "rp2350w": ((0x2E8A, 0xF00F),),
-    "rpipico2w": ((0x2E8A, 0xF00F),),
-    # LPC8xx family: the on-board debug probe can be either
-    #   * LPC11U35 running the LPCXpresso VCOM firmware — 16C0:0483
-    #     (the community "V-USB" VID:PID; shared with PJRC Teensy).
-    #   * LPC-Link2 CMSIS-DAP firmware — 1FC9:0132
-    #     (NXP's own VID:PID; the debug probe presents a single COM
-    #     port that carries the LPC845's USART0 as a virtual serial
-    #     bridge alongside the CMSIS-DAP HID interface).
-    # Newer LPC845-BRK / LPCXpresso boards ship with the LPC-Link2
-    # CMSIS-DAP firmware pre-flashed; either variant is acceptable for
-    # AutoResearch as long as the VCOM stream reaches the host.
-    "lpc845brk": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
-    "lpc845": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
-    "lpc804": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
-    "lpcxpresso845max": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
-    "lpcxpresso804": ((0x16C0, 0x0483), (0x1FC9, 0x0132)),
-}
-
-# Backwards-compatibility shim — the old single-VID:PID map is derived
-# from the first entry of the new plural form so any external caller
-# that still reads `ENVIRONMENT_TO_VCOM_VID_PID` gets the primary
-# (LPCXpresso VCOM) fingerprint. Deprecated; update callers to consume
-# the plural form and drop this once no in-repo callers remain.
-ENVIRONMENT_TO_VCOM_VID_PID: dict[str, tuple[int, int]] = {
-    env: pids[0] for env, pids in ENVIRONMENT_TO_VCOM_VID_PIDS.items()
-}
-
 
 def environment_has_wifi(environment: str) -> bool:
     """Check if a PlatformIO environment has WiFi hardware."""
@@ -177,7 +110,6 @@ def auto_detect_upload_port(
     expected_environment: str | None,
     *,
     expected_serial_number: str | None = None,
-    require_unique_match: bool = False,
 ) -> ComportResult:
     """Auto-detect the upload port from available serial ports.
 
@@ -195,8 +127,6 @@ def auto_detect_upload_port(
         expected_environment: Board environment used for strict fingerprinting.
         expected_serial_number: Optional stable USB identity that a matching
             board must retain across re-enumeration.
-        require_unique_match: Reject fingerprint detection when multiple ports
-            match instead of silently selecting the first one.
 
     Returns:
         ComportResult with detection status and diagnostics
@@ -249,75 +179,6 @@ def auto_detect_upload_port(
         )
 
     expected_env = expected_environment.lower() if expected_environment else None
-
-    # VID:PID-based detection takes precedence over chip-probe and description
-    # heuristics. For boards whose VCOM bridges have well-known IDs (LPC845-BRK
-    # via LPC11U35 or LPC-Link2 CMSIS-DAP, see FastLED #3300), this is the only
-    # reliable signal on Windows where multiple boards report a generic "USB
-    # Serial Device" name. An environment may map to more than one accepted
-    # VID:PID (e.g. LPC845-BRK boards ship with either LPCXpresso VCOM
-    # firmware 16C0:0483 or LPC-Link2 CMSIS-DAP firmware 1FC9:0132 on the
-    # debug probe) — the first port matching ANY of the entry's pairs wins.
-    expected_vid_pids = (
-        ENVIRONMENT_TO_VCOM_VID_PIDS.get(expected_env) if expected_env else None
-    )
-    if expected_vid_pids:
-        accepted = set(expected_vid_pids)
-        matching_ports = [
-            port
-            for port in usb_ports
-            if (port.vid, port.pid) in accepted
-            and (
-                expected_serial_number is None
-                or port.serial_number == expected_serial_number
-            )
-        ]
-        if require_unique_match and len(matching_ports) > 1:
-            devices = ", ".join(port.device for port in matching_ports)
-            return ComportResult(
-                ok=False,
-                selected_port=None,
-                error_message=(
-                    f"Multiple USB serial ports match '{expected_environment}' "
-                    f"({devices}); pass --upload-port to select the deployed board."
-                ),
-                all_ports=all_ports,
-            )
-        if matching_ports:
-            return ComportResult(
-                ok=True,
-                selected_port=matching_ports[0].device,
-                error_message=None,
-                all_ports=all_ports,
-            )
-        # Fingerprint expected but no port matched. Don't fall through to the
-        # ESP probe — the wrong port will fail later with PermissionError or
-        # silent timeout. Report explicitly so the user can plug the board in.
-        formatted_expected = " or ".join(
-            f"{vid:04X}:{pid:04X}" for vid, pid in expected_vid_pids
-        )
-        return ComportResult(
-            ok=False,
-            selected_port=None,
-            error_message=(
-                f"No USB serial port matched expected VCOM fingerprint for "
-                f"'{expected_environment}' (VID:PID {formatted_expected}"
-                + (
-                    f", serial {expected_serial_number}"
-                    if expected_serial_number
-                    else ""
-                )
-                + "). "
-                f"Detected USB ports: "
-                + ", ".join(
-                    f"{p.device}={p.vid:04X}:{p.pid:04X}"
-                    if p.vid and p.pid
-                    else f"{p.device}=----:----"
-                    for p in usb_ports
-                )
-            ),
-            all_ports=all_ports,
-        )
 
     esp_environments = {env.lower() for env in CHIP_TO_ENVIRONMENT.values()}
     if expected_env in esp_environments:

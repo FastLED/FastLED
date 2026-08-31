@@ -58,32 +58,14 @@ class Literal(NamedTuple):
 
 # Every VID:PID literal in the ci/ tree. Keep in sync when a literal is
 # retired — the point of this list is that it shrinks to empty.
-AUDITED_LITERALS: tuple[Literal, ...] = (
-    Literal(0x2E8A, 0x000A, "rp2040 / rpipico application CDC", "port_utils.py"),
-    Literal(0x2E8A, 0xF00A, "rpipicow application CDC", "port_utils.py"),
-    Literal(0x2E8A, 0x000F, "rp2350 / rpipico2 application CDC", "port_utils.py"),
-    Literal(0x2E8A, 0xF00F, "rp2350w / rpipico2w application CDC", "port_utils.py"),
-    Literal(0x2E8A, 0x0003, "RP2 ROM BOOTSEL", "port_utils.py (comment)"),
-    Literal(0x16C0, 0x0483, "LPCXpresso VCOM (LPC11U35)", "port_utils.py"),
-    Literal(0x1FC9, 0x0132, "NXP LPC-Link2 CMSIS-DAP", "port_utils.py"),
-    Literal(0x16C0, 0x0486, "PJRC / Teensy USB-Serial (alt)", "serial_probe.py"),
-    Literal(0x303A, 0x1001, "Espressif native USB CDC", "serial_probe.py"),
-    Literal(0x10C4, 0xEA60, "Silicon Labs CP2102", "serial_probe.py"),
-    Literal(0x1A86, 0x7523, "WCH CH340", "serial_probe.py"),
-    Literal(0x1A86, 0x55D4, "WCH CH343", "serial_probe.py"),
-    Literal(0x0403, 0x6001, "FTDI FT232R", "serial_probe.py"),
-    Literal(0x0403, 0x6010, "FTDI FT2232", "serial_probe.py"),
-    Literal(0x0403, 0x6014, "FTDI FT232H", "serial_probe.py"),
-)
+AUDITED_LITERALS: tuple[Literal, ...] = ()
 
 
 # Gaps already filed upstream and accepted as outstanding. A known gap keeps
 # the exit code green so this script can be wired into CI or a pre-commit hook
 # without going permanently red; an *unknown* gap still fails. Delete an entry
 # once the registry publishes it — the audit then fails loudly if it regresses.
-KNOWN_GAPS: dict[tuple[int, int], str] = {
-    (0x0403, 0x6014): "FastLED/boards#60",
-}
+KNOWN_GAPS: dict[tuple[int, int], str] = {}
 
 
 def _read_varint(buf: bytes, pos: int) -> tuple[int, int]:

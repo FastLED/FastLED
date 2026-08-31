@@ -13,8 +13,8 @@ version cascade — not a new literal in `ci/`.
 
 A local table forks on the first board that behaves differently, and the fork
 is invisible until hardware is attached. Three consumers had already drifted
-before this rule was written: `ci/util/port_utils.py`, `ci/util/serial_probe.py`,
-and fbuild's former generated Rust tables all carried overlapping,
+before this rule was written: FastLED's now-retired CI tables and fbuild's
+former generated Rust tables all carried overlapping,
 independently-edited copies of the same identities. FastLED/boards ends that by
 publishing one artifact that every consumer ingests.
 
@@ -101,45 +101,13 @@ uv run fbuild --version
 relock anyway: without it your local environment keeps running the previous
 wheel and any verification you do is against the old registry snapshot.
 
-## Migration status (audited 2026-08-22)
+## Migration status
 
-Every VID:PID literal in this repo's `ci/` tree was checked against the live
-`usb-vids.proto.zstd` (36 vendors / 1056 products). **14 of 15 resolve from the
-registry**:
+The legacy runtime VID:PID tables were retired after all 15 identities resolved
+from FastLED/boards. The catalogue fetch/decode utility remains for the exact
+VID:PID query mode tracked in FastLED #3996.
 
-| VID:PID | Identity | Registry |
-| --- | --- | --- |
-| `2E8A:000A` | rp2040 / rpipico application CDC | resolved |
-| `2E8A:F00A` | rpipicow application CDC | resolved |
-| `2E8A:000F` | rp2350 / rpipico2 application CDC | resolved |
-| `2E8A:F00F` | rp2350w / rpipico2w application CDC | resolved |
-| `2E8A:0003` | RP2 ROM BOOTSEL | resolved |
-| `16C0:0483` | LPCXpresso VCOM (LPC11U35) | resolved |
-| `16C0:0486` | PJRC / Teensy USB-Serial (alt) | resolved |
-| `1FC9:0132` | NXP LPC-Link2 CMSIS-DAP | resolved |
-| `303A:1001` | Espressif native USB CDC | resolved |
-| `10C4:EA60` | Silicon Labs CP2102 | resolved |
-| `1A86:7523` | WCH CH340 | resolved |
-| `1A86:55D4` | WCH CH343 | resolved |
-| `0403:6001` | FTDI FT232R | resolved |
-| `0403:6010` | FTDI FT2232 | resolved |
-| `0403:6014` | FTDI FT232H | **GAP** — FastLED/boards#60 |
-
-The FTDI vendor entry exists but enumerates only `6001` and `6010`; `6014` is
-absent registry-wide. It is the sole blocker to deleting the local tables
-outright rather than freezing them. Do not close that gap by keeping the
-literal — track it in FastLED/boards#60.
-
-Re-run the audit at any time:
-
-```bash
-uv run python ci/util/audit_usb_registry.py
-```
-
-It fetches the live artifact, decodes it, and reports which audited literals
-resolve. A cold or stale cache is indistinguishable from a missing record, so
-always check the published payload rather than a failed port scan. To check an
-observed pair directly, run:
+Check an observed identity against the published catalogue directly:
 
 ```bash
 uv run python ci/util/audit_usb_registry.py --lookup <VID:PID>
@@ -148,20 +116,12 @@ uv run python ci/util/audit_usb_registry.py --lookup <VID:PID>
 The lookup exits 0 and names the vendor/product when published, or exits 1 and
 reports `MISSING` when the exact pair is absent.
 
-Two lists in that script carry the state. `AUDITED_LITERALS` is the checklist —
-it should shrink to empty as literals are retired. `KNOWN_GAPS` holds gaps
-already filed upstream; those print as `GAP*` with their tracking issue and do
-**not** fail the run, so the audit can be wired into CI without going
-permanently red. It exits 1 on a gap that is *not* filed, and also when a
-`KNOWN_GAPS` entry has since been published — that is the prompt to drop the
-allowlist entry and delete the local literal.
-
-## Existing local tables (legacy, do not extend)
+## Runtime ownership
 
 | Location | Status |
 | --- | --- |
-| `ci/util/port_utils.py` → `ENVIRONMENT_TO_VCOM_VID_PIDS` | Legacy. Frozen — every pair is already published in FastLED/boards. Do not add entries; see FastLED#3836. |
-| `ci/util/serial_probe.py` → `BOARD_FINGERPRINTS` | Legacy display/diagnostic hints only. Never a selection authority. Do not add entries. |
+| `fbuild deploy` | Environment-aware port selection, including boards with multiple accepted probe identities. |
+| `fbuild port scan` | FastLED/boards-backed vendor/product diagnostics. |
 | `ci/tests/**` | Test fixtures may use concrete literals to exercise parsing and selection. They must not become runtime defaults. |
 
 Tests are the one sanctioned home for concrete USB literals in this repo —
