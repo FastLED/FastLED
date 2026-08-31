@@ -200,32 +200,32 @@ def test_samd_routes_into_a_native_sercom_spi_backend() -> None:
         encoding="utf-8"
     )
 
-    assert "defined(FL_IS_SAMD)" in dispatcher
+    assert "defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)" in dispatcher
     assert "#include <SPI.h>" not in backend
     assert "::SPI" not in backend
-    assert "PERIPH_SPI" in backend
+    implementation = (
+        SRC / "platforms" / "arm" / "sam" / "fastspi_arm_samd.hpp"
+    ).read_text(encoding="utf-8")
+    assert "PERIPH_SPI" in implementation
 
 
 def test_samd_sercom_select_restores_each_controllers_clock_divider() -> None:
     """Two controllers sharing PERIPH_SPI must retain distinct data rates."""
-    backend = (SRC / "platforms" / "arm" / "sam" / "fastspi_arm_sam.h").read_text(
+    backend = (SRC / "platforms" / "arm" / "sam" / "fastspi_arm_samd.hpp").read_text(
         encoding="utf-8"
     )
-    samd_backend = backend.split("class SAMDHardwareSPIOutput", 1)[1]
-    select_body = samd_backend.split("void inline select()", 1)[1].split(
-        "// release the CS select", 1
-    )[0]
-    configure_body = samd_backend.split("static void configureClock()", 1)[1].split(
-        "public:", 1
-    )[0]
-
-    assert "configureClock();" in select_body
-    assert "disableSPI()" in configure_body
-    assert "initSPI(PAD_SPI_TX, PAD_SPI_RX" in configure_body
-    assert "initSPIClock(SERCOM_SPI_MODE_0, clockHz())" in configure_body
-    assert "enableSPI()" in configure_body
+    assert "::select() FL_NO_EXCEPT" in backend
+    assert "configureClock();" in backend
+    assert "disableSPI()" in backend
+    assert "initSPI(PAD_SPI_TX, PAD_SPI_RX" in backend
+    assert "initSPIClock(SERCOM_SPI_MODE_0, clockHz())" in backend
+    assert "enableSPI()" in backend
 
     # Representative template dividers must remain distinct instead of the
     # last initialized controller's clock becoming global shared state.
     f_cpu = 120_000_000
     assert min(f_cpu // 8, 24_000_000) != min(f_cpu // 16, 24_000_000)
+    dispatcher = (
+        SRC / "platforms" / "arm" / "sam" / "spi_output_template.h"
+    ).read_text(encoding="utf-8")
+    assert "fastspi_arm_samd.hpp" in dispatcher

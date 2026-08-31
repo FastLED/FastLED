@@ -47,7 +47,7 @@
 #elif defined(FL_IS_TEENSY_LC)
 #include "platforms/arm/teensy/teensy_lc/spi_output_template.h"
 
-#elif defined(FL_IS_SAM) || defined(FL_IS_SAMD)
+#elif defined(FL_IS_SAM) || defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 #include "platforms/arm/sam/spi_output_template.h"
 
 #elif defined(FL_IS_STM32)

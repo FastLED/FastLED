@@ -204,24 +204,9 @@ private:
 	Selectable *mPSelect;
 	bool mInitialized;
 
-	static SERCOM* peripheral() FL_NO_EXCEPT {
-		return &PERIPH_SPI;
-	}
-
-	static u32 clockHz() FL_NO_EXCEPT {
-		u32 clock_hz = F_CPU / _SPI_CLOCK_DIVIDER;
-		return clock_hz > 24000000 ? 24000000 : clock_hz;
-	}
-
-	static void configureClock() FL_NO_EXCEPT {
-		// PERIPH_SPI is shared by every template instance. Restore this
-		// controller's requested rate whenever it acquires the peripheral.
-		peripheral()->disableSPI();
-		peripheral()->initSPI(PAD_SPI_TX, PAD_SPI_RX, SPI_CHAR_SIZE_8_BITS,
-		                      MSB_FIRST);
-		peripheral()->initSPIClock(SERCOM_SPI_MODE_0, clockHz());
-		peripheral()->enableSPI();
-	}
+	static SERCOM* peripheral() FL_NO_EXCEPT;
+	static u32 clockHz() FL_NO_EXCEPT;
+	static void configureClock() FL_NO_EXCEPT;
 
 public:
 	SAMDHardwareSPIOutput() : mPSelect(nullptr), mInitialized(false) {}
@@ -230,26 +215,10 @@ public:
 	// set the object representing the selectable
 	void setSelect(Selectable *pSelect) { mPSelect = pSelect; }
 
-	void init() FL_NO_EXCEPT {
-		if (mInitialized) {
-			return;
-		}
-
-		pinPeripheral(PIN_SPI_MISO, g_APinDescription[PIN_SPI_MISO].ulPinType);
-		pinPeripheral(PIN_SPI_SCK, g_APinDescription[PIN_SPI_SCK].ulPinType);
-		pinPeripheral(PIN_SPI_MOSI, g_APinDescription[PIN_SPI_MOSI].ulPinType);
-		configureClock();
-
-		mInitialized = true;
-	}
+	void init() FL_NO_EXCEPT;
 
 	// latch the CS select
-	void inline select() FL_NO_EXCEPT __attribute__((always_inline)) {
-		configureClock();
-		if(mPSelect != nullptr) {
-			mPSelect->select();
-		}
-	}
+	void inline select() FL_NO_EXCEPT __attribute__((always_inline));
 
 	// release the CS select
 	void inline release() FL_NO_EXCEPT __attribute__((always_inline)) {
@@ -363,6 +332,7 @@ public:
 };
 
 }  // namespace fl
+
 #endif  // FL_IS_SAMD21 || FL_IS_SAMD51
 
 

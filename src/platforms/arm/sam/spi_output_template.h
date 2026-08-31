@@ -11,6 +11,7 @@
 #include "platforms/arm/samd/is_samd.h"
 
 #if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
+#include "platforms/arm/sam/fastspi_arm_samd.hpp"
 #include "platforms/shared/spi_bitbang/generic_software_spi.h"
 #endif
 
