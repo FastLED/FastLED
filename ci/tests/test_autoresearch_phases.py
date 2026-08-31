@@ -17,7 +17,7 @@ import pytest
 from serial.tools.list_ports_common import ListPortInfo
 
 from ci.autoresearch.args import Args
-from ci.autoresearch.build_driver import BuildDriver
+from ci.autoresearch.build_driver import BuildDriver, DeployResult
 from ci.autoresearch.context import QuietContext, RunContext
 from ci.autoresearch.phases import (
     _build_environment_for_mode,
@@ -34,6 +34,7 @@ from ci.autoresearch.phases import (
     stop_autoresearch_watchdog,
 )
 from ci.rpc_client import RpcError, RpcTimeoutError
+from ci.util import port_utils, serial_probe
 from ci.util.port_utils import ChipDetectionResult, auto_detect_upload_port
 
 
@@ -1550,14 +1551,17 @@ class TestResolvePortAndEnvironment:
         assert ctx.drivers == ["UART1"]
         assert ctx.json_rpc_commands[0]["params"]["driver"] == "UART1"
 
-    def test_auto_detect_port_success(self) -> None:
-        ctx = _make_ctx(upload_port=None)
-        ctx.args = _make_args(upload_port=None)
-        mock_result = MagicMock(ok=True, selected_port="COM5")
+    @pytest.mark.parametrize(
+        "environment",
+        ("esp32s3", "lpc845brk", "lpc845", "lpcxpresso845max", "lpcxpresso804"),
+    )
+    def test_known_environment_defers_port_selection_to_fbuild(
+        self, environment: str
+    ) -> None:
+        ctx = _make_ctx(upload_port=None, final_environment=environment)
+        ctx.args = _make_args(upload_port=None, environment=environment)
         with (
-            patch(
-                f"{_PATCH_MOD}.auto_detect_upload_port", return_value=mock_result
-            ) as auto_detect,
+            patch(f"{_PATCH_MOD}.auto_detect_upload_port") as auto_detect,
             patch(
                 f"{_PATCH_MOD}.select_build_driver", return_value=_make_mock_driver()
             ),
@@ -1568,30 +1572,8 @@ class TestResolvePortAndEnvironment:
         ):
             rc = asyncio.run(_resolve_port_and_environment(ctx))
         assert rc is None
-        assert ctx.upload_port == "COM5"
-        assert ctx.final_environment == "esp32s3"
-        auto_detect.assert_called_once_with(expected_environment="esp32s3")
-
-    def test_auto_detect_port_uses_requested_environment(self) -> None:
-        ctx = _make_ctx(upload_port=None, final_environment="esp32c6")
-        ctx.args = _make_args(upload_port=None, environment="esp32c6")
-        mock_result = MagicMock(ok=True, selected_port="COM9")
-        with (
-            patch(
-                f"{_PATCH_MOD}.auto_detect_upload_port", return_value=mock_result
-            ) as auto_detect,
-            patch(
-                f"{_PATCH_MOD}.select_build_driver", return_value=_make_mock_driver()
-            ),
-            patch(
-                "ci.util.pio_package_daemon.get_default_environment",
-                return_value=None,
-            ),
-        ):
-            rc = asyncio.run(_resolve_port_and_environment(ctx))
-        assert rc is None
-        assert ctx.upload_port == "COM9"
-        auto_detect.assert_called_once_with(expected_environment="esp32c6")
+        assert ctx.upload_port is None
+        auto_detect.assert_not_called()
 
     @pytest.mark.parametrize(
         "environment", ("rp2350", "rpipico2", "rp2350w", "rpipico2w")
@@ -1747,56 +1729,6 @@ class TestResolvePortAndEnvironment:
             rc = asyncio.run(_resolve_port_and_environment(ctx))
         assert rc == 1
 
-    def test_teensy_port_detection_never_uploads_stale_pio_hex(
-        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
-    ) -> None:
-        stale_hex = tmp_path / ".pio" / "build" / "teensy41" / "firmware.hex"
-        stale_hex.parent.mkdir(parents=True)
-        stale_hex.write_text("", encoding="utf-8")
-
-        ctx = _make_ctx(
-            upload_port=None,
-            final_environment="teensy41",
-            build_dir=tmp_path,
-        )
-        ctx.args = _make_args(
-            upload_port=None,
-            environment="teensy41",
-            object_fled=True,
-            parlio=False,
-            use_root_platformio_ini=False,
-            project_dir=tmp_path,
-        )
-        mock_result = MagicMock(
-            ok=False,
-            selected_port=None,
-            error_message="No USB",
-            all_ports=[],
-        )
-        call_count = [0]
-        original_monotonic = __import__("time").monotonic
-
-        def fake_monotonic() -> float:
-            call_count[0] += 1
-            if call_count[0] <= 2:
-                return original_monotonic()
-            return original_monotonic() + 999
-
-        with (
-            patch(f"{_PATCH_MOD}.auto_detect_upload_port", return_value=mock_result),
-            patch(f"{_PATCH_MOD}.time") as mock_time,
-            patch(f"{_PATCH_MOD}.subprocess.run") as mock_subprocess_run,
-        ):
-            mock_time.monotonic = fake_monotonic
-            mock_time.sleep = MagicMock()
-            rc = asyncio.run(_resolve_port_and_environment(ctx))
-
-        output = capsys.readouterr().out
-        assert rc == 1
-        mock_subprocess_run.assert_not_called()
-        assert "AutoResearch will not pre-upload stale .pio firmware" in output
-        assert "Firmware uploaded via Teensy bootloader" not in output
-
 
 class TestAutoDetectUploadPort:
     """Test USB port detection edge cases used by autoresearch."""
@@ -1858,286 +1790,41 @@ class TestAutoDetectUploadPort:
             result.error_message or ""
         )
 
-    def test_lpc845brk_lpcxpresso_vcom_fingerprint_matches(self) -> None:
-        """LPC845-BRK with LPCXpresso VCOM firmware (16C0:0483) is accepted."""
-        port = ListPortInfo("COM12")
-        port.description = "USB Serial Device"
-        port.hwid = "USB VID:PID=16C0:0483"
-        port.vid = 0x16C0
-        port.pid = 0x0483
-
-        with patch(
-            "ci.util.port_utils.serial.tools.list_ports.comports",
-            return_value=[port],
-        ):
-            result = auto_detect_upload_port("lpc845brk")
-
-        assert result.ok is True
-        assert result.selected_port == "COM12"
-
-    def test_rp2040_requires_application_cdc_fingerprint(self) -> None:
-        """A nearby CP210x must never be selected for an RP2040 run."""
-        port = ListPortInfo("COM11")
-        port.description = "Silicon Labs CP210x USB to UART Bridge"
+    def test_non_esp_environment_does_not_guess_from_usb_descriptor(self) -> None:
+        port = ListPortInfo("COM9")
+        port.description = "CP210x USB to UART Bridge"
         port.hwid = "USB VID:PID=10C4:EA60"
-        port.vid = 0x10C4
-        port.pid = 0xEA60
+
         with patch(
             "ci.util.port_utils.serial.tools.list_ports.comports",
             return_value=[port],
         ):
             result = auto_detect_upload_port("rp2040")
-        assert result.ok is False
-        assert result.selected_port is None
-        assert "2E8A:000A" in (result.error_message or "")
-
-    def test_rp2040_application_cdc_fingerprint_matches(self) -> None:
-        port = ListPortInfo("COM11")
-        port.description = "USB Serial Device"
-        port.hwid = "USB VID:PID=2E8A:000A"
-        port.vid = 0x2E8A
-        port.pid = 0x000A
-        with patch(
-            "ci.util.port_utils.serial.tools.list_ports.comports",
-            return_value=[port],
-        ):
-            result = auto_detect_upload_port("rp2040")
-        assert result.ok is True
-        assert result.selected_port == "COM11"
-
-    def test_rp2040_rejects_rp2350_application_cdc_fingerprint(self) -> None:
-        rp2350 = ListPortInfo("COM12")
-        rp2350.description = "USB Serial Device"
-        rp2350.hwid = "USB VID:PID=2E8A:000F"
-        rp2350.vid = 0x2E8A
-        rp2350.pid = 0x000F
-
-        with patch(
-            "ci.util.port_utils.serial.tools.list_ports.comports",
-            return_value=[rp2350],
-        ):
-            result = auto_detect_upload_port("rp2040")
 
         assert result.ok is False
         assert result.selected_port is None
+        assert "cannot be identified safely" in (result.error_message or "")
 
-    def test_rpipicow_uses_its_board_exact_application_identity(
-        self: "TestAutoDetectUploadPort",
-    ) -> None:
-        pico = ListPortInfo("COM11")
-        pico.description = "USB Serial Device"
-        pico.hwid = "USB VID:PID=2E8A:000A"
-        pico.vid = 0x2E8A
-        pico.pid = 0x000A
-
-        pico_w = ListPortInfo("COM12")
-        pico_w.description = "USB Serial Device"
-        pico_w.hwid = "USB VID:PID=2E8A:F00A"
-        pico_w.vid = 0x2E8A
-        pico_w.pid = 0xF00A
+    def test_expected_serial_number_selects_reenumerated_non_esp_port(self) -> None:
+        wrong_port = ListPortInfo("COM8")
+        wrong_port.description = "USB Serial Device"
+        wrong_port.hwid = "USB VID:PID=FFFF:0001"
+        wrong_port.serial_number = "OTHER"
+        expected_port = ListPortInfo("COM9")
+        expected_port.description = "USB Serial Device"
+        expected_port.hwid = "USB VID:PID=2E8A:F00F"
+        expected_port.serial_number = "BOARD-123"
 
         with patch(
             "ci.util.port_utils.serial.tools.list_ports.comports",
-            return_value=[pico, pico_w],
-        ):
-            result = auto_detect_upload_port("rpipicow")
-
-        assert result.ok is True
-        assert result.selected_port == "COM12"
-
-    def test_rpipico2_application_cdc_fingerprint_matches(self) -> None:
-        port = ListPortInfo("COM12")
-        port.description = "USB Serial Device"
-        port.hwid = "USB VID:PID=2E8A:000F"
-        port.vid = 0x2E8A
-        port.pid = 0x000F
-        with patch(
-            "ci.util.port_utils.serial.tools.list_ports.comports",
-            return_value=[port],
-        ):
-            result = auto_detect_upload_port("rpipico2")
-        assert result.ok is True
-        assert result.selected_port == "COM12"
-
-    @pytest.mark.parametrize(
-        ("environment", "pid"),
-        (
-            ("rp2350", 0x000F),
-            ("rpipico2", 0x000F),
-            ("rp2350w", 0xF00F),
-            ("rpipico2w", 0xF00F),
-        ),
-    )
-    def test_rp2350_aliases_accept_board_exact_application_cdc_fingerprint(
-        self, environment: str, pid: int
-    ) -> None:
-        port = ListPortInfo("COM17")
-        port.description = "USB Serial Device"
-        port.hwid = f"USB VID:PID=2E8A:{pid:04X}"
-        port.vid = 0x2E8A
-        port.pid = pid
-
-        with patch(
-            "ci.util.port_utils.serial.tools.list_ports.comports",
-            return_value=[port],
-        ):
-            result = auto_detect_upload_port(environment)
-
-        assert result.ok is True
-        assert result.selected_port == "COM17"
-
-    @pytest.mark.parametrize(
-        ("environment", "wrong_pid"),
-        (("rp2350", 0xF00F), ("rp2350w", 0x000F)),
-    )
-    def test_rp2350_variants_reject_each_others_application_identity(
-        self, environment: str, wrong_pid: int
-    ) -> None:
-        other_variant = ListPortInfo("COM12")
-        other_variant.description = "USB Serial Device"
-        other_variant.hwid = f"USB VID:PID=2E8A:{wrong_pid:04X}"
-        other_variant.vid = 0x2E8A
-        other_variant.pid = wrong_pid
-
-        with patch(
-            "ci.util.port_utils.serial.tools.list_ports.comports",
-            return_value=[other_variant],
-        ):
-            result = auto_detect_upload_port(environment)
-
-        assert result.ok is False
-        assert result.selected_port is None
-
-    def test_rp2350w_strict_fingerprint_skips_unrelated_usb_serial(self) -> None:
-        unrelated = ListPortInfo("COM11")
-        unrelated.description = "Silicon Labs CP210x USB to UART Bridge"
-        unrelated.hwid = "USB VID:PID=10C4:EA60"
-        unrelated.vid = 0x10C4
-        unrelated.pid = 0xEA60
-
-        rp2350 = ListPortInfo("COM17")
-        rp2350.description = "USB Serial Device"
-        rp2350.hwid = "USB VID:PID=2E8A:F00F"
-        rp2350.vid = 0x2E8A
-        rp2350.pid = 0xF00F
-
-        with patch(
-            "ci.util.port_utils.serial.tools.list_ports.comports",
-            return_value=[unrelated, rp2350],
-        ):
-            result = auto_detect_upload_port("rp2350w")
-
-        assert result.ok is True
-        assert result.selected_port == "COM17"
-
-    def test_rp2350_strict_fingerprint_skips_attached_esp32c6(self) -> None:
-        esp32c6 = ListPortInfo("COM9")
-        esp32c6.description = "USB JTAG/serial debug unit"
-        esp32c6.hwid = "USB VID:PID=303A:1001"
-        esp32c6.vid = 0x303A
-        esp32c6.pid = 0x1001
-
-        rp2350 = ListPortInfo("COM17")
-        rp2350.description = "USB Serial Device"
-        rp2350.hwid = "USB VID:PID=2E8A:F00F"
-        rp2350.vid = 0x2E8A
-        rp2350.pid = 0xF00F
-
-        with patch(
-            "ci.util.port_utils.serial.tools.list_ports.comports",
-            return_value=[esp32c6, rp2350],
-        ):
-            result = auto_detect_upload_port("rp2350w")
-
-        assert result.ok is True
-        assert result.selected_port == "COM17"
-
-    def test_rp2350_strict_fingerprint_rejects_unrelated_usb_serial(self) -> None:
-        unrelated = ListPortInfo("COM11")
-        unrelated.description = "Silicon Labs CP210x USB to UART Bridge"
-        unrelated.hwid = "USB VID:PID=10C4:EA60"
-        unrelated.vid = 0x10C4
-        unrelated.pid = 0xEA60
-
-        with patch(
-            "ci.util.port_utils.serial.tools.list_ports.comports",
-            return_value=[unrelated],
-        ):
-            result = auto_detect_upload_port("rp2350")
-
-        assert result.ok is False
-        assert result.selected_port is None
-        assert "2E8A:000F" in (result.error_message or "")
-
-    def test_rp2350w_serial_identity_selects_original_board(self) -> None:
-        replacement = ListPortInfo("COM18")
-        replacement.description = "USB Serial Device"
-        replacement.hwid = "USB VID:PID=2E8A:F00F"
-        replacement.vid = 0x2E8A
-        replacement.pid = 0xF00F
-        replacement.serial_number = "OTHER-RP2350W"
-
-        original = ListPortInfo("COM19")
-        original.description = "USB Serial Device"
-        original.hwid = "USB VID:PID=2E8A:F00F"
-        original.vid = 0x2E8A
-        original.pid = 0xF00F
-        original.serial_number = "2DCB876B587EA334"
-
-        with patch(
-            "ci.util.port_utils.serial.tools.list_ports.comports",
-            return_value=[replacement, original],
+            return_value=[wrong_port, expected_port],
         ):
             result = auto_detect_upload_port(
-                "rp2350w", expected_serial_number="2DCB876B587EA334"
+                "rp2350w", expected_serial_number="BOARD-123"
             )
 
         assert result.ok is True
-        assert result.selected_port == "COM19"
-
-    def test_lpc845brk_lpc_link2_cmsis_dap_fingerprint_matches(self) -> None:
-        """LPC845-BRK with LPC-Link2 CMSIS-DAP firmware (1FC9:0132) is accepted.
-
-        FastLED #3468 follow-up: newer LPC845-BRK boards ship with NXP's own
-        LPC-Link2 CMSIS-DAP firmware pre-flashed on the debug probe. The
-        probe still exposes the LPC845's USART0 as a VCOM alongside the
-        CMSIS-DAP HID interface — VID:PID 1FC9:0132 belongs to NXP rather
-        than the community "V-USB" pool. Both firmwares are valid for
-        AutoResearch.
-        """
-        port = ListPortInfo("COM10")
-        port.description = "USB Serial Device"
-        port.hwid = "USB VID:PID=1FC9:0132"
-        port.vid = 0x1FC9
-        port.pid = 0x0132
-
-        with patch(
-            "ci.util.port_utils.serial.tools.list_ports.comports",
-            return_value=[port],
-        ):
-            result = auto_detect_upload_port("lpc845brk")
-
-        assert result.ok is True
-        assert result.selected_port == "COM10"
-
-    def test_lpc845brk_neither_fingerprint_matches_reports_both(self) -> None:
-        """Error message lists BOTH accepted VID:PIDs when neither is found."""
-        port = ListPortInfo("COM7")
-        port.description = "USB Serial Device"
-        port.hwid = "USB VID:PID=303A:1001"
-        port.vid = 0x303A
-        port.pid = 0x1001
-
-        with patch(
-            "ci.util.port_utils.serial.tools.list_ports.comports",
-            return_value=[port],
-        ):
-            result = auto_detect_upload_port("lpc845brk")
-
-        assert result.ok is False
-        assert result.selected_port is None
-        assert "16C0:0483" in (result.error_message or "")
-        assert "1FC9:0132" in (result.error_message or "")
+        assert result.selected_port == "COM9"
 
 
 # ============================================================
@@ -2243,26 +1930,63 @@ class TestRunBuildDeploy:
         assert rc == 1
 
     def test_lpc_ieee754_uses_dedicated_build_environment(self) -> None:
+        """LPC deploys use the mode environment and accept fbuild's port."""
         mock_driver = _make_mock_driver()
+        mock_driver.deploy.return_value = DeployResult(success=True, port="COM7")
         ctx = _make_ctx(
             args=_make_args(skip_lint=True, ieee754=True),
             build_driver=mock_driver,
             final_environment="lpc845brk",
+            upload_port=None,
             ieee754_test_mode=True,
         )
         qctx = QuietContext(quiet=False)
-        with patch(
-            f"{_PATCH_MOD}._build_and_deploy_nxplpc", return_value=True
-        ) as flash:
-            rc = asyncio.run(_run_build_deploy(ctx, qctx))
+        rc = asyncio.run(_run_build_deploy(ctx, qctx))
         assert rc is None
         assert _build_environment_for_mode(ctx) == "lpc845brk_ieee754"
         mock_driver.install_packages.assert_called_once_with(
             Path("/fake/project"), "lpc845brk_ieee754"
         )
-        flash.assert_called_once()
-        assert flash.call_args.kwargs["environment"] == "lpc845brk_ieee754"
-        mock_driver.deploy.assert_not_called()
+        mock_driver.deploy.assert_called_once()
+        assert mock_driver.deploy.call_args.kwargs["environment"] == (
+            "lpc845brk_ieee754"
+        )
+        assert ctx.upload_port == "COM7"
+
+    def test_deferred_deploy_without_application_port_fails(self, capsys) -> None:
+        """A deferred non-RP deploy must fail before serial phases run."""
+        mock_driver = _make_mock_driver()
+        mock_driver.deploy.return_value = DeployResult(success=True, port=None)
+        ctx = _make_ctx(
+            args=_make_args(skip_lint=True),
+            build_driver=mock_driver,
+            final_environment="esp32s3",
+            upload_port=None,
+        )
+
+        rc = asyncio.run(_run_build_deploy(ctx, QuietContext(quiet=False)))
+
+        assert rc == 1
+        output = capsys.readouterr().out
+        assert "No application serial port" in output
+        assert "esp32s3" in output
+
+    def test_stock_rp_deploy_can_rescan_for_application_port_later(self) -> None:
+        """Stock RP smoke runs retain their post-deploy CDC rescan window."""
+        mock_driver = _make_mock_driver()
+        mock_driver.deploy.return_value = DeployResult(success=True, port=None)
+        ctx = _make_ctx(
+            args=_make_args(skip_lint=True, rpc_smoke=True),
+            build_driver=mock_driver,
+            final_environment="rp2350",
+            upload_port=None,
+            rpc_smoke_mode=True,
+        )
+
+        rc = asyncio.run(_run_build_deploy(ctx, QuietContext(quiet=False)))
+
+        assert rc is None
+        assert ctx.upload_port is None
 
     def test_stopping_host_watchdog_signals_and_clears_the_runner_handle(self) -> None:
         ctx = _make_ctx()
@@ -2273,6 +1997,13 @@ class TestRunBuildDeploy:
 
         cancel_event.set.assert_called_once_with()
         assert ctx._watchdog_task is None
+
+
+def test_legacy_usb_identity_tables_are_absent() -> None:
+    """Runtime port selection and labels no longer expose local tables."""
+    assert not hasattr(port_utils, "ENVIRONMENT_TO_VCOM_VID_PIDS")
+    assert not hasattr(port_utils, "ENVIRONMENT_TO_VCOM_VID_PID")
+    assert not hasattr(serial_probe, "BOARD_FINGERPRINTS")
 
 
 # ============================================================

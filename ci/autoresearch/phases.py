@@ -1324,7 +1324,16 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
     )
 
     upload_port = args.upload_port
-    if not upload_port and not stock_rp2xxx_transport:
+    # Every board build selects FbuildDriver below. When the environment is
+    # known, passing no port is intentional: fbuild resolves every accepted
+    # identity for that environment from FastLED/boards and reports the
+    # post-deploy application port through FBUILD_DEPLOY_PORT.
+    defer_port_selection_to_fbuild = bool(ctx.final_environment)
+    if (
+        not upload_port
+        and not stock_rp2xxx_transport
+        and not defer_port_selection_to_fbuild
+    ):
         expected_environment = None if is_teensy else ctx.final_environment
         max_wait_s = 60
         poll_interval_s = 1.0
@@ -1395,10 +1404,10 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
 
         upload_port = result.selected_port
 
-    if stock_rp2xxx_transport and not upload_port:
+    if (stock_rp2xxx_transport or defer_port_selection_to_fbuild) and not upload_port:
         print(
-            f"📦 Stock {rp2xxx_environment} transport: no pre-deploy serial port required; "
-            "fbuild will discover RPI-RP2 and return the application CDC port."
+            f"📦 {ctx.final_environment} port selection deferred to fbuild; "
+            "deploy will use the FastLED/boards registry and return the application port."
         )
     else:
         assert upload_port is not None, "upload_port should be set by auto-detection"
@@ -1591,7 +1600,6 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
     args = ctx.args
     build_dir = ctx.build_dir
     final_environment = ctx.final_environment
-    final_environment_norm = (final_environment or "").lower()
     build_environment = _build_environment_for_mode(ctx)
     upload_port = ctx.upload_port
     build_driver = ctx.build_driver
@@ -1632,47 +1640,38 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
 
     print(f"\U0001f4e6 Using {build_driver.name}")
 
-    if final_environment_norm in LPC_BRING_UP_ENVS:
-        # Deployment is fbuild's responsibility — autoresearch never invokes
-        # flash tools (pyocd/lpc21isp/etc.) directly. The nxplpc deploy
-        # backend (LpcDeployer, lpc21isp UART ISP path) landed in
-        # FastLED/fbuild#595; if the pinned fbuild predates it, this fails
-        # loudly with a clear pointer rather than bringing a probe wedge
-        # here. See agents/docs/build-system.md.
-        if not _build_and_deploy_nxplpc(
-            build_dir,
-            environment=build_environment
-            or final_environment_norm
-            or final_environment,
-            upload_port=upload_port,
-            verbose=args.verbose,
-        ):
-            qctx.emit("BUILD+DEPLOY FAIL (nxplpc)")
-            qctx.emit_log_path()
-            return 1
-    else:
-        deploy_result = build_driver.deploy(
-            build_dir,
-            environment=build_environment,
-            upload_port=upload_port,
-            verbose=args.verbose,
-            clean=args.clean,
-            quiet=args.quiet,
-            log_file=qctx.log_file,
+    deploy_result = build_driver.deploy(
+        build_dir,
+        environment=build_environment,
+        upload_port=upload_port,
+        verbose=args.verbose,
+        clean=args.clean,
+        quiet=args.quiet,
+        log_file=qctx.log_file,
+    )
+    deploy_success = (
+        deploy_result.success
+        if isinstance(deploy_result, DeployResult)
+        else bool(deploy_result)
+    )
+    if isinstance(deploy_result, DeployResult) and deploy_result.port:
+        ctx.upload_port = deploy_result.port
+        upload_port = deploy_result.port
+        print(f"✅ fbuild returned application port: {deploy_result.port}")
+    if not deploy_success:
+        qctx.emit("BUILD+FLASH FAIL")
+        qctx.emit_log_path()
+        return 1
+
+    rp2xxx_post_deploy_rescan = bool(
+        _active_rp2xxx_environment(final_environment)
+    ) and (ctx.rpc_smoke_mode or ctx.watchdog_soak_mode)
+    if upload_port is None and not rp2xxx_post_deploy_rescan:
+        print(
+            "❌ No application serial port was returned after fbuild deployment "
+            f"for environment '{build_environment}'"
         )
-        deploy_success = (
-            deploy_result.success
-            if isinstance(deploy_result, DeployResult)
-            else bool(deploy_result)
-        )
-        if isinstance(deploy_result, DeployResult) and deploy_result.port:
-            ctx.upload_port = deploy_result.port
-            upload_port = deploy_result.port
-            print(f"✅ fbuild returned application port: {deploy_result.port}")
-        if not deploy_success:
-            qctx.emit("BUILD+FLASH FAIL")
-            qctx.emit_log_path()
-            return 1
+        return 1
 
     if ctx.net_peer_mode:
         # A peer run must remain entirely on fbuild's deploy path.  In

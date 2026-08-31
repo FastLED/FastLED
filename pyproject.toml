@@ -212,8 +212,8 @@ dependencies = [
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented
-    # `uv run python ci/util/audit_usb_registry.py` cannot break out from under
-    # us. See agents/docs/usb-vid-pid-registry.md.
+    # `uv run python ci/util/audit_usb_registry.py --lookup <VID:PID>` cannot
+    # break out from under us. See agents/docs/usb-vid-pid-registry.md.
     "zstandard>=0.22.0",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",

@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from ci.util import audit_usb_registry
 
 
@@ -24,6 +26,21 @@ def test_lookup_fails_for_absent_pair(monkeypatch, capsys) -> None:
 
     assert audit_usb_registry.main(["--lookup", "1234:9999"]) == 1
     assert "MISSING 1234:9999" in capsys.readouterr().out
+
+
+def test_lookup_is_required() -> None:
+    """A bare invocation must not silently report a vacuous 0/0 audit."""
+    with pytest.raises(SystemExit) as exc_info:
+        audit_usb_registry.main([])
+
+    assert exc_info.value.code == 2
+
+
+def test_retired_audit_contract_is_absent() -> None:
+    """The exact query tool must not retain the retired checklist API."""
+    assert not hasattr(audit_usb_registry, "AUDITED_LITERALS")
+    assert not hasattr(audit_usb_registry, "KNOWN_GAPS")
+    assert not hasattr(audit_usb_registry, "Literal")
 
 
 def test_registry_docs_use_exact_lookup_command() -> None:

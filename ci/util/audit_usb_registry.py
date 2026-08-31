@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit this repo's hardcoded USB VID:PID literals against FastLED/boards.
+"""Query an exact USB VID:PID pair in the FastLED/boards registry.
 
 The USB identity registry lives in https://github.com/FastLED/boards and is
 published as a zstd-compressed protobuf, `usb-vids.proto.zstd`. fbuild ingests
@@ -7,25 +7,15 @@ that artifact; FastLED consumes it through fbuild. See
 `agents/docs/usb-vid-pid-registry.md` for the full rule and the cascade
 procedure.
 
-This script exists so the migration status in that doc can be re-derived rather
-than trusted. It fetches the published artifact, decodes it, and reports which
-of the literals still present in `ci/` resolve from the registry.
+The local migration checklist was retired with FastLED #3997. This script keeps
+the exact registry query added for FastLED #3996:
 
-    uv run python ci/util/audit_usb_registry.py
     uv run python ci/util/audit_usb_registry.py --lookup 1234:5678
 
 Exit codes:
-    0 — every audited literal resolves, or the requested pair resolves
-    1 — an audited literal/requested pair is missing, or a known gap is stale
+    0 — the requested pair resolves
+    1 — the requested pair is missing
     2 — the artifact could not be fetched or decoded
-
-Exit 0 while a filed gap is outstanding is deliberate: it makes this safe to
-wire into CI or a pre-commit hook without going permanently red. Those show as
-`GAP*` with their tracking issue. A gap that is NOT in KNOWN_GAPS still fails.
-
-A missing literal is a registry gap, never a reason to keep or add a local
-entry. `0403:6014` (FTDI FT232H) is the one known outstanding gap, tracked as
-FastLED/boards#60.
 """
 
 from __future__ import annotations
@@ -33,7 +23,7 @@ from __future__ import annotations
 import argparse
 import sys
 import urllib.request
-from typing import Iterator, NamedTuple
+from typing import Iterator
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
@@ -45,45 +35,6 @@ ARTIFACT_URL = "https://fastled.github.io/boards/usb-vids.proto.zstd"
 MAX_INFLATED_BYTES = 64 << 20
 
 FETCH_TIMEOUT_S = 30
-
-
-class Literal(NamedTuple):
-    """A VID:PID pair hardcoded somewhere under `ci/`."""
-
-    vid: int
-    pid: int
-    label: str
-    source: str
-
-
-# Every VID:PID literal in the ci/ tree. Keep in sync when a literal is
-# retired — the point of this list is that it shrinks to empty.
-AUDITED_LITERALS: tuple[Literal, ...] = (
-    Literal(0x2E8A, 0x000A, "rp2040 / rpipico application CDC", "port_utils.py"),
-    Literal(0x2E8A, 0xF00A, "rpipicow application CDC", "port_utils.py"),
-    Literal(0x2E8A, 0x000F, "rp2350 / rpipico2 application CDC", "port_utils.py"),
-    Literal(0x2E8A, 0xF00F, "rp2350w / rpipico2w application CDC", "port_utils.py"),
-    Literal(0x2E8A, 0x0003, "RP2 ROM BOOTSEL", "port_utils.py (comment)"),
-    Literal(0x16C0, 0x0483, "LPCXpresso VCOM (LPC11U35)", "port_utils.py"),
-    Literal(0x1FC9, 0x0132, "NXP LPC-Link2 CMSIS-DAP", "port_utils.py"),
-    Literal(0x16C0, 0x0486, "PJRC / Teensy USB-Serial (alt)", "serial_probe.py"),
-    Literal(0x303A, 0x1001, "Espressif native USB CDC", "serial_probe.py"),
-    Literal(0x10C4, 0xEA60, "Silicon Labs CP2102", "serial_probe.py"),
-    Literal(0x1A86, 0x7523, "WCH CH340", "serial_probe.py"),
-    Literal(0x1A86, 0x55D4, "WCH CH343", "serial_probe.py"),
-    Literal(0x0403, 0x6001, "FTDI FT232R", "serial_probe.py"),
-    Literal(0x0403, 0x6010, "FTDI FT2232", "serial_probe.py"),
-    Literal(0x0403, 0x6014, "FTDI FT232H", "serial_probe.py"),
-)
-
-
-# Gaps already filed upstream and accepted as outstanding. A known gap keeps
-# the exit code green so this script can be wired into CI or a pre-commit hook
-# without going permanently red; an *unknown* gap still fails. Delete an entry
-# once the registry publishes it — the audit then fails loudly if it regresses.
-KNOWN_GAPS: dict[tuple[int, int], str] = {
-    (0x0403, 0x6014): "FastLED/boards#60",
-}
 
 
 def _read_varint(buf: bytes, pos: int) -> tuple[int, int]:
@@ -234,6 +185,7 @@ def main(argv: list[str] | None = None) -> int:
         "--lookup",
         type=_vid_pid,
         metavar="VID:PID",
+        required=True,
         help="check whether one exact hexadecimal VID:PID pair is published",
     )
     args = parser.parse_args(argv)
@@ -253,74 +205,14 @@ def main(argv: list[str] | None = None) -> int:
     product_count = sum(len(products) for _, products in registry.values())
     print(f"FastLED/boards registry: {vendor_count} vendors, {product_count} products")
 
-    if args.lookup is not None:
-        vid, pid = args.lookup
-        pair = f"{vid:04X}:{pid:04X}"
-        vendor = registry.get(vid)
-        if vendor is None or pid not in vendor[1]:
-            print(f"MISSING {pair} from FastLED/boards")
-            return 1
-        vendor_name, products = vendor
-        print(f"FOUND {pair}  {vendor_name} / {products[pid]}")
-        return 0
-
-    print(f"Auditing {len(AUDITED_LITERALS)} literals from ci/\n")
-
-    new_gaps: list[Literal] = []
-    known_gaps: list[Literal] = []
-    stale_known: list[Literal] = []
-    for entry in AUDITED_LITERALS:
-        pair = f"{entry.vid:04X}:{entry.pid:04X}"
-        tracker = KNOWN_GAPS.get((entry.vid, entry.pid))
-        vendor = registry.get(entry.vid)
-        if vendor is None or entry.pid not in vendor[1]:
-            if tracker is not None:
-                known_gaps.append(entry)
-                print(f"  GAP* {pair}  {entry.label}  [{entry.source}]  {tracker}")
-            else:
-                new_gaps.append(entry)
-                print(f"  GAP  {pair}  {entry.label}  [{entry.source}]")
-            continue
-        vendor_name, products = vendor
-        print(f"  OK   {pair}  {entry.label}  -> {vendor_name} / {products[entry.pid]}")
-        if tracker is not None:
-            stale_known.append(entry)
-
-    resolved = len(AUDITED_LITERALS) - len(new_gaps) - len(known_gaps)
-    print(f"\n{resolved}/{len(AUDITED_LITERALS)} resolve from FastLED/boards")
-
-    if stale_known:
-        # The registry caught up. Prompt the cleanup rather than letting the
-        # allowlist quietly mask a gap that no longer exists.
-        print("\nKNOWN_GAPS is stale — these now resolve upstream:")
-        for entry in stale_known:
-            pair = f"{entry.vid:04X}:{entry.pid:04X}"
-            tracker = KNOWN_GAPS[(entry.vid, entry.pid)]
-            print(f"  {pair}  {entry.label}  ({tracker})")
-        print(
-            "Drop them from KNOWN_GAPS and retire the literal from "
-            f"{stale_known[0].source}."
-        )
+    vid, pid = args.lookup
+    pair = f"{vid:04X}:{pid:04X}"
+    vendor = registry.get(vid)
+    if vendor is None or pid not in vendor[1]:
+        print(f"MISSING {pair} from FastLED/boards")
         return 1
-
-    if new_gaps:
-        print(
-            "\nEach GAP is a registry gap. Add the record on the FastLED/boards\n"
-            "data branch, let fbuild ingest it, then cascade the fbuild pin\n"
-            "in pyproject.toml. Do NOT keep or add a local literal.\n"
-            "See agents/docs/usb-vid-pid-registry.md."
-        )
-        return 1
-
-    if known_gaps:
-        print(
-            f"\n{len(known_gaps)} known gap(s) marked GAP*, already filed "
-            "upstream and accepted as outstanding.\nEvery other literal is "
-            "published and can be retired."
-        )
-        return 0
-
-    print("\nAll audited literals are published upstream and can be retired.")
+    vendor_name, products = vendor
+    print(f"FOUND {pair}  {vendor_name} / {products[pid]}")
     return 0
 
 
