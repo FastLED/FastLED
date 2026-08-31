@@ -4,25 +4,18 @@ Shared Python utilities for the FastLED CI/build system.
 
 ## USB VID/PID identities are not owned here
 
-`port_utils.py` and `serial_probe.py` each carry a legacy VID:PID table. Both
-are **frozen**. USB board identity is owned by
+USB board identity is owned by
 [FastLED/boards](https://github.com/FastLED/boards) and reaches this repo
 through fbuild's ingestion of the published `usb-vids.proto.zstd` archive.
 
-Do not add entries to either table. If a board cannot be identified, add the
-record upstream, let fbuild ingest it, then cascade the `fbuild==X.Y.Z` pin in
-`pyproject.toml` and relock locally (`uv lock && uv sync`; `uv.lock` itself is
-gitignored here).
+Use `fbuild port scan` for registry-backed USB diagnostics and let `fbuild
+deploy` select a port for a known environment. If a board cannot be identified,
+add the record upstream, let fbuild ingest it, then cascade the `fbuild==X.Y.Z`
+pin in `pyproject.toml` and relock locally (`uv lock && uv sync`; `uv.lock`
+itself is gitignored here).
 
-Check the migration status at any time:
-
-```bash
-uv run python ci/util/audit_usb_registry.py
-```
-
-It exits 0 while the only outstanding gaps are ones already filed upstream
-(listed in `KNOWN_GAPS`, shown as `GAP*`), so it is safe to wire into CI. It
-exits 1 on an unfiled gap, or when a `KNOWN_GAPS` entry has been published and
-the literal can finally be retired.
+`ci/util/audit_usb_registry.py` retains the catalogue fetch/decode support used
+by the exact VID:PID lookup tracked in FastLED #3996. It no longer audits a
+local retirement checklist because the runtime tables have been removed.
 
 Full rule and cascade procedure: `agents/docs/usb-vid-pid-registry.md`.

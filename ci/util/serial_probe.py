@@ -46,51 +46,6 @@ import serial  # type: ignore[import-not-found]
 import serial.tools.list_ports  # type: ignore[import-not-found]
 
 
-# Known board USB VID:PID fingerprints — display/diagnostic hints only.
-#
-# FROZEN — DO NOT ADD ENTRIES. USB VID:PID identity is owned by
-# https://github.com/FastLED/boards and reaches this repo through fbuild's
-# ingestion of the published `usb-vids.proto.zstd` archive; `fbuild port scan`
-# is the authority for naming an attached board. This table is never a
-# selection authority — it only labels ports that have already been chosen.
-#
-# A board that cannot be identified is a FastLED/boards gap: add the record
-# there, let fbuild ingest it, then cascade the `fbuild==X.Y.Z` pin in
-# pyproject.toml and relock locally. Full procedure:
-# agents/docs/usb-vid-pid-registry.md.
-BOARD_FINGERPRINTS: dict[tuple[int, int], str] = {
-    # NXP LPC845-BRK ships with an LPC11U35 carrying both the CMSIS-DAP
-    # debug interface AND a USB-VCOM bridge for the LPC845's USART0.
-    (0x1FC9, 0x0132): "NXP CMSIS-DAP debug (LPC845-BRK / LPC11U35)",
-    # 16C0:0483 is shared between the LPC11U35 VCOM bridge (when used on
-    # LPC845-BRK) and PJRC Teensy USB-Serial. Disambiguation requires
-    # additional signal — e.g. presence of a sibling CMSIS-DAP port for
-    # LPC, or `manufacturer.startswith("Teensyduino")` for PJRC. The
-    # fingerprint table only carries the joint hint; callers that need
-    # to act on the difference must inspect `manufacturer` / `serial_number`
-    # or the companion-port heuristic in `find_lpc845brk_vcom`.
-    (
-        0x16C0,
-        0x0483,
-    ): "LPC11U35 VCOM bridge (LPC845-BRK USART0) OR PJRC Teensy USB-Serial",
-    # Espressif native USB CDC across ESP32-S3/C3/C6/H2/P4 variants.
-    (0x303A, 0x1001): "Espressif native USB CDC (ESP32-S3/C3/C6/H2/P4)",
-    # CP2102 from Silicon Labs — common on ESP32-WROOM dev kits.
-    (0x10C4, 0xEA60): "Silicon Labs CP2102 USB-UART (ESP32 dev kit)",
-    # CH340/CH341 from WCH — common on cheaper ESP32/Arduino clones.
-    (0x1A86, 0x7523): "WCH CH340 USB-Serial",
-    (0x1A86, 0x55D4): "WCH CH343 USB-Serial",
-    # FTDI FT232R — older Arduinos, some shields.
-    (0x0403, 0x6001): "FTDI FT232R USB-UART",
-    (0x0403, 0x6010): "FTDI FT2232 dual UART",
-    # Only literal here not yet resolvable from FastLED/boards --
-    # tracked as FastLED/boards#60. Remove once the registry publishes it.
-    (0x0403, 0x6014): "FTDI FT232H USB-UART",
-    # Teensy 3.x/4.x.
-    (0x16C0, 0x0486): "PJRC / Teensy USB-Serial (alt)",
-}
-
-
 @dataclass(frozen=True)
 class PortInfo:
     device: str
@@ -105,18 +60,10 @@ class PortInfo:
     def vid_pid(self) -> tuple[int, int] | None:
         return (self.vid, self.pid) if (self.vid and self.pid) else None
 
-    @property
-    def board_hint(self) -> str | None:
-        vp = self.vid_pid
-        if vp is None:
-            return None
-        return BOARD_FINGERPRINTS.get(vp)
-
     def format(self) -> str:
         vp = f"{self.vid:04X}:{self.pid:04X}" if self.vid and self.pid else "----:----"
-        hint = f"  [{self.board_hint}]" if self.board_hint else ""
         ser = f"  ser={self.serial_number}" if self.serial_number else ""
-        return f"{self.device:8s}  {vp}{ser}  {self.description}{hint}"
+        return f"{self.device:8s}  {vp}{ser}  {self.description}"
 
 
 def list_ports() -> list[PortInfo]:
