@@ -26,6 +26,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+
 @dataclass(frozen=True)
 class MantissaExponentTable:
     """A table whose values do not fit one Q format, so each carries its own
@@ -130,8 +131,7 @@ def antialias_q31() -> AntialiasCoefficients:
     c = [-0.6, -0.535, -0.33, -0.185, -0.095, -0.041, -0.0142, -0.0037]
     cs = [1.0 / math.sqrt(1.0 + ci * ci) for ci in c]
     ca = [ci / math.sqrt(1.0 + ci * ci) for ci in c]
-    return AntialiasCoefficients([q(v, 31) for v in cs],
-                                 [q(-v, 31) for v in ca])
+    return AntialiasCoefficients([q(v, 31) for v in cs], [q(-v, 31) for v in ca])
 
 
 def twid9_q30() -> list[int]:
@@ -196,8 +196,26 @@ def deq_l12_tables() -> MantissaExponentTable:
     `2**(21 - b/3)`. Carried as mantissa+exponent because the raw values are
     around 1e-7 and the runtime shift can move them a long way either side.
     """
-    steps = [3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383,
-             32767, 65535, 3, 5, 9]
+    steps = [
+        3,
+        7,
+        15,
+        31,
+        63,
+        127,
+        255,
+        511,
+        1023,
+        2047,
+        4095,
+        8191,
+        16383,
+        32767,
+        65535,
+        3,
+        5,
+        9,
+    ]
     mant: list[int] = []
     exp: list[int] = []
     for step in steps:
@@ -211,37 +229,95 @@ def deq_l12_tables() -> MantissaExponentTable:
 def scalar_constants() -> list[tuple[str, int, int, str]]:
     """Named scalars used inline by the DCT/IMDCT kernels: (name, value, bits, comment)."""
     return [
-        ("MP3D_Q30_SQRT2", q(math.sqrt(2.0), 30), 30,
-         "sqrt(2), the mid/side stereo rescale"),
-        ("MP3D_Q31_COS_PI_4", q(math.cos(math.pi / 4.0), 31), 31,
-         "cos(pi/4), the DCT-32 half-butterfly scale"),
-        ("MP3D_Q31_TAN_PI_16", q(math.tan(math.pi / 16.0), 31), 31,
-         "tan(pi/16), first and third steps of the pi/8 rotation"),
-        ("MP3D_Q31_SIN_PI_8", q(math.sin(math.pi / 8.0), 31), 31,
-         "sin(pi/8), middle step of the pi/8 rotation"),
-        ("MP3D_Q29_SEC_PI_16", q(1.0 / (2.0 * math.cos(math.pi / 16.0)), 29), 29,
-         "1/(2 cos(pi/16))"),
-        ("MP3D_Q29_SEC_PI_8", q(1.0 / (2.0 * math.cos(math.pi / 8.0)), 29), 29,
-         "1/(2 cos(pi/8))"),
-        ("MP3D_Q29_SEC_3PI_16", q(1.0 / (2.0 * math.cos(3.0 * math.pi / 16.0)), 29), 29,
-         "1/(2 cos(3pi/16))"),
-        ("MP3D_Q29_SEC_5PI_16", q(1.0 / (2.0 * math.cos(5.0 * math.pi / 16.0)), 29), 29,
-         "1/(2 cos(5pi/16))"),
-        ("MP3D_Q29_SEC_3PI_8", q(1.0 / (2.0 * math.cos(3.0 * math.pi / 8.0)), 29), 29,
-         "1/(2 cos(3pi/8))"),
-        ("MP3D_Q29_SEC_7PI_16", q(1.0 / (2.0 * math.cos(7.0 * math.pi / 16.0)), 29), 29,
-         "1/(2 cos(7pi/16))"),
+        (
+            "MP3D_Q30_SQRT2",
+            q(math.sqrt(2.0), 30),
+            30,
+            "sqrt(2), the mid/side stereo rescale",
+        ),
+        (
+            "MP3D_Q31_COS_PI_4",
+            q(math.cos(math.pi / 4.0), 31),
+            31,
+            "cos(pi/4), the DCT-32 half-butterfly scale",
+        ),
+        (
+            "MP3D_Q31_TAN_PI_16",
+            q(math.tan(math.pi / 16.0), 31),
+            31,
+            "tan(pi/16), first and third steps of the pi/8 rotation",
+        ),
+        (
+            "MP3D_Q31_SIN_PI_8",
+            q(math.sin(math.pi / 8.0), 31),
+            31,
+            "sin(pi/8), middle step of the pi/8 rotation",
+        ),
+        (
+            "MP3D_Q29_SEC_PI_16",
+            q(1.0 / (2.0 * math.cos(math.pi / 16.0)), 29),
+            29,
+            "1/(2 cos(pi/16))",
+        ),
+        (
+            "MP3D_Q29_SEC_PI_8",
+            q(1.0 / (2.0 * math.cos(math.pi / 8.0)), 29),
+            29,
+            "1/(2 cos(pi/8))",
+        ),
+        (
+            "MP3D_Q29_SEC_3PI_16",
+            q(1.0 / (2.0 * math.cos(3.0 * math.pi / 16.0)), 29),
+            29,
+            "1/(2 cos(3pi/16))",
+        ),
+        (
+            "MP3D_Q29_SEC_5PI_16",
+            q(1.0 / (2.0 * math.cos(5.0 * math.pi / 16.0)), 29),
+            29,
+            "1/(2 cos(5pi/16))",
+        ),
+        (
+            "MP3D_Q29_SEC_3PI_8",
+            q(1.0 / (2.0 * math.cos(3.0 * math.pi / 8.0)), 29),
+            29,
+            "1/(2 cos(3pi/8))",
+        ),
+        (
+            "MP3D_Q29_SEC_7PI_16",
+            q(1.0 / (2.0 * math.cos(7.0 * math.pi / 16.0)), 29),
+            29,
+            "1/(2 cos(7pi/16))",
+        ),
         ("MP3D_Q31_COS_PI_9", q(math.cos(math.pi / 9.0), 31), 31, "cos(20 deg)"),
         ("MP3D_Q31_COS_2PI_9", q(math.cos(2.0 * math.pi / 9.0), 31), 31, "cos(40 deg)"),
         ("MP3D_Q31_COS_4PI_9", q(math.cos(4.0 * math.pi / 9.0), 31), 31, "cos(80 deg)"),
         ("MP3D_Q31_COS_PI_6", q(math.cos(math.pi / 6.0), 31), 31, "cos(30 deg)"),
         ("MP3D_Q31_COS_PI_18", q(math.cos(math.pi / 18.0), 31), 31, "cos(10 deg)"),
-        ("MP3D_Q31_COS_7PI_18", q(math.cos(7.0 * math.pi / 18.0), 31), 31, "cos(70 deg)"),
-        ("MP3D_Q31_COS_5PI_18", q(math.cos(5.0 * math.pi / 18.0), 31), 31, "cos(50 deg)"),
-        ("MP3D_Q30_POW43_C1", q(4.0 / 3.0, 30), 30,
-         "first-order term of the x**(4/3) interpolation"),
-        ("MP3D_Q30_POW43_C2", q(2.0 / 9.0, 30), 30,
-         "second-order term of the x**(4/3) interpolation"),
+        (
+            "MP3D_Q31_COS_7PI_18",
+            q(math.cos(7.0 * math.pi / 18.0), 31),
+            31,
+            "cos(70 deg)",
+        ),
+        (
+            "MP3D_Q31_COS_5PI_18",
+            q(math.cos(5.0 * math.pi / 18.0), 31),
+            31,
+            "cos(50 deg)",
+        ),
+        (
+            "MP3D_Q30_POW43_C1",
+            q(4.0 / 3.0, 30),
+            30,
+            "first-order term of the x**(4/3) interpolation",
+        ),
+        (
+            "MP3D_Q30_POW43_C2",
+            q(2.0 / 9.0, 30),
+            30,
+            "second-order term of the x**(4/3) interpolation",
+        ),
     ]
 
 
@@ -250,12 +326,12 @@ def scalar_constants() -> list[tuple[str, int, int, str]]:
 # --------------------------------------------------------------------------
 
 
-def emit_array(ctype: str, name: str, values: list[int], per_line: int,
-               comment: str) -> str:
-    lines = [f"/* {comment} */",
-             f"static const {ctype} {name}[{len(values)}] = {{"]
+def emit_array(
+    ctype: str, name: str, values: list[int], per_line: int, comment: str
+) -> str:
+    lines = [f"/* {comment} */", f"static const {ctype} {name}[{len(values)}] = {{"]
     for start in range(0, len(values), per_line):
-        chunk = values[start:start + per_line]
+        chunk = values[start : start + per_line]
         lines.append("    " + ",".join(str(v) for v in chunk) + ",")
     lines.append("};")
     return "\n".join(lines)
@@ -287,45 +363,123 @@ def render() -> str:
 */
 """)
 
-    parts.append(emit_array(
-        "int32_t", "g_pow43_mant", pow43.mantissa, 8,
-        "x**(4/3) mantissas, value = mant * 2**(exp - 30); upstream g_pow43 layout"))
-    parts.append(emit_array(
-        "int8_t", "g_pow43_exp", pow43.exponent, 24,
-        "matching exponents for g_pow43_mant"))
-    parts.append(emit_array(
-        "int32_t", "g_expfrac_q30", expfrac_q30(), 4,
-        "2**(r/4) for r in [0,3], Q30 -- fractional part of a gain exponent"))
-    parts.append(emit_array(
-        "int32_t", "g_aa_cs_q31", antialias.cs, 8,
-        "alias reduction cs = 1/sqrt(1+c^2), Q31"))
-    parts.append(emit_array(
-        "int32_t", "g_aa_ca_q31", antialias.ca, 8,
-        "alias reduction -ca = -c/sqrt(1+c^2), Q31"))
-    parts.append(emit_array(
-        "int32_t", "g_twid9_q30", twid9_q30(), 9,
-        "IMDCT-36 twiddles: cos then sin of (2k+1)*pi/72, Q30"))
-    parts.append(emit_array(
-        "int32_t", "g_twid3_q30", twid3_q30(), 6,
-        "IMDCT-12 twiddles: cos then sin of (2k+1)*pi/24, Q30"))
-    parts.append(emit_array(
-        "int32_t", "g_mdct_window_normal_q30", windows[0], 9,
-        "long-block window, cos then sin of (2i+1)*pi/72, Q30"))
-    parts.append(emit_array(
-        "int32_t", "g_mdct_window_stop_q30", windows[1], 9,
-        "start/stop-block window, Q30"))
-    parts.append(emit_array(
-        "int32_t", "g_sec_q27", sec_q27(), 6,
-        "DCT-32 secants 1/(2 cos theta), Q27 (values reach 10.19)"))
-    parts.append(emit_array(
-        "int32_t", "g_pan_q30", pan_q30(), 6,
-        "MPEG-1 intensity stereo pan pairs (kl, kr), Q30"))
-    parts.append(emit_array(
-        "int32_t", "g_deq_L12_mant", deq.mantissa, 6,
-        "Layer I/II dequantiser steps, value = mant * 2**(exp - 30)"))
-    parts.append(emit_array(
-        "int8_t", "g_deq_L12_exp", deq.exponent, 18,
-        "matching exponents for g_deq_L12_mant"))
+    parts.append(
+        emit_array(
+            "int32_t",
+            "g_pow43_mant",
+            pow43.mantissa,
+            8,
+            "x**(4/3) mantissas, value = mant * 2**(exp - 30); upstream g_pow43 layout",
+        )
+    )
+    parts.append(
+        emit_array(
+            "int8_t",
+            "g_pow43_exp",
+            pow43.exponent,
+            24,
+            "matching exponents for g_pow43_mant",
+        )
+    )
+    parts.append(
+        emit_array(
+            "int32_t",
+            "g_expfrac_q30",
+            expfrac_q30(),
+            4,
+            "2**(r/4) for r in [0,3], Q30 -- fractional part of a gain exponent",
+        )
+    )
+    parts.append(
+        emit_array(
+            "int32_t",
+            "g_aa_cs_q31",
+            antialias.cs,
+            8,
+            "alias reduction cs = 1/sqrt(1+c^2), Q31",
+        )
+    )
+    parts.append(
+        emit_array(
+            "int32_t",
+            "g_aa_ca_q31",
+            antialias.ca,
+            8,
+            "alias reduction -ca = -c/sqrt(1+c^2), Q31",
+        )
+    )
+    parts.append(
+        emit_array(
+            "int32_t",
+            "g_twid9_q30",
+            twid9_q30(),
+            9,
+            "IMDCT-36 twiddles: cos then sin of (2k+1)*pi/72, Q30",
+        )
+    )
+    parts.append(
+        emit_array(
+            "int32_t",
+            "g_twid3_q30",
+            twid3_q30(),
+            6,
+            "IMDCT-12 twiddles: cos then sin of (2k+1)*pi/24, Q30",
+        )
+    )
+    parts.append(
+        emit_array(
+            "int32_t",
+            "g_mdct_window_normal_q30",
+            windows[0],
+            9,
+            "long-block window, cos then sin of (2i+1)*pi/72, Q30",
+        )
+    )
+    parts.append(
+        emit_array(
+            "int32_t",
+            "g_mdct_window_stop_q30",
+            windows[1],
+            9,
+            "start/stop-block window, Q30",
+        )
+    )
+    parts.append(
+        emit_array(
+            "int32_t",
+            "g_sec_q27",
+            sec_q27(),
+            6,
+            "DCT-32 secants 1/(2 cos theta), Q27 (values reach 10.19)",
+        )
+    )
+    parts.append(
+        emit_array(
+            "int32_t",
+            "g_pan_q30",
+            pan_q30(),
+            6,
+            "MPEG-1 intensity stereo pan pairs (kl, kr), Q30",
+        )
+    )
+    parts.append(
+        emit_array(
+            "int32_t",
+            "g_deq_L12_mant",
+            deq.mantissa,
+            6,
+            "Layer I/II dequantiser steps, value = mant * 2**(exp - 30)",
+        )
+    )
+    parts.append(
+        emit_array(
+            "int8_t",
+            "g_deq_L12_exp",
+            deq.exponent,
+            18,
+            "matching exponents for g_deq_L12_mant",
+        )
+    )
 
     scalars = ["/* Inline kernel scalars. */"]
     for name, value, bits, comment in scalar_constants():
@@ -360,65 +514,184 @@ def cross_check() -> list[str]:
         scale = max(abs(upstream), 1e-9)
         if absolute / scale > 2.0**-20:
             problems.append(
-                f"{label}: generated {generated!r} vs upstream {upstream!r}")
+                f"{label}: generated {generated!r} vs upstream {upstream!r}"
+            )
 
     antialias = antialias_q31()
-    upstream_aa0 = [0.85749293, 0.88174200, 0.94962865, 0.98331459,
-                    0.99551782, 0.99916056, 0.99989920, 0.99999316]
-    upstream_aa1 = [0.51449576, 0.47173197, 0.31337745, 0.18191320,
-                    0.09457419, 0.04096558, 0.01419856, 0.00369997]
+    upstream_aa0 = [
+        0.85749293,
+        0.88174200,
+        0.94962865,
+        0.98331459,
+        0.99551782,
+        0.99916056,
+        0.99989920,
+        0.99999316,
+    ]
+    upstream_aa1 = [
+        0.51449576,
+        0.47173197,
+        0.31337745,
+        0.18191320,
+        0.09457419,
+        0.04096558,
+        0.01419856,
+        0.00369997,
+    ]
     for i, expected in enumerate(upstream_aa0):
         compare(f"g_aa[0][{i}]", antialias.cs[i] / 2.0**31, expected)
     for i, expected in enumerate(upstream_aa1):
         compare(f"g_aa[1][{i}]", antialias.ca[i] / 2.0**31, expected)
 
-    upstream_twid9 = [0.73727734, 0.79335334, 0.84339145, 0.88701083,
-                      0.92387953, 0.95371695, 0.97629601, 0.99144486,
-                      0.99904822, 0.67559021, 0.60876143, 0.53729961,
-                      0.46174861, 0.38268343, 0.30070580, 0.21643961,
-                      0.13052619, 0.04361938]
+    upstream_twid9 = [
+        0.73727734,
+        0.79335334,
+        0.84339145,
+        0.88701083,
+        0.92387953,
+        0.95371695,
+        0.97629601,
+        0.99144486,
+        0.99904822,
+        0.67559021,
+        0.60876143,
+        0.53729961,
+        0.46174861,
+        0.38268343,
+        0.30070580,
+        0.21643961,
+        0.13052619,
+        0.04361938,
+    ]
     generated_twid9 = twid9_q30()
     for i, expected in enumerate(upstream_twid9):
         compare(f"g_twid9[{i}]", generated_twid9[i] / 2.0**30, expected)
 
-    upstream_twid3 = [0.79335334, 0.92387953, 0.99144486,
-                      0.60876143, 0.38268343, 0.13052619]
+    upstream_twid3 = [
+        0.79335334,
+        0.92387953,
+        0.99144486,
+        0.60876143,
+        0.38268343,
+        0.13052619,
+    ]
     generated_twid3 = twid3_q30()
     for i, expected in enumerate(upstream_twid3):
         compare(f"g_twid3[{i}]", generated_twid3[i] / 2.0**30, expected)
 
-    upstream_sec = [10.19000816, 0.50060302, 0.50241929, 3.40760851, 0.50547093,
-                    0.52249861, 2.05778098, 0.51544732, 0.56694406, 1.48416460,
-                    0.53104258, 0.64682180, 1.16943991, 0.55310392, 0.78815460,
-                    0.97256821, 0.58293498, 1.06067765, 0.83934963, 0.62250412,
-                    1.72244716, 0.74453628, 0.67480832, 5.10114861]
+    upstream_sec = [
+        10.19000816,
+        0.50060302,
+        0.50241929,
+        3.40760851,
+        0.50547093,
+        0.52249861,
+        2.05778098,
+        0.51544732,
+        0.56694406,
+        1.48416460,
+        0.53104258,
+        0.64682180,
+        1.16943991,
+        0.55310392,
+        0.78815460,
+        0.97256821,
+        0.58293498,
+        1.06067765,
+        0.83934963,
+        0.62250412,
+        1.72244716,
+        0.74453628,
+        0.67480832,
+        5.10114861,
+    ]
     generated_sec = sec_q27()
     for i, expected in enumerate(upstream_sec):
         compare(f"g_sec[{i}]", generated_sec[i] / 2.0**27, expected)
 
-    upstream_pan = [0, 1, 0.21132487, 0.78867513, 0.36602540, 0.63397460, 0.5,
-                    0.5, 0.63397460, 0.36602540, 0.78867513, 0.21132487, 1, 0]
+    upstream_pan = [
+        0,
+        1,
+        0.21132487,
+        0.78867513,
+        0.36602540,
+        0.63397460,
+        0.5,
+        0.5,
+        0.63397460,
+        0.36602540,
+        0.78867513,
+        0.21132487,
+        1,
+        0,
+    ]
     generated_pan = pan_q30()
     for i, expected in enumerate(upstream_pan):
         compare(f"g_pan[{i}]", generated_pan[i] / 2.0**30, expected)
 
     upstream_windows = [
-        [0.99904822, 0.99144486, 0.97629601, 0.95371695, 0.92387953,
-         0.88701083, 0.84339145, 0.79335334, 0.73727734, 0.04361938,
-         0.13052619, 0.21643961, 0.30070580, 0.38268343, 0.46174861,
-         0.53729961, 0.60876143, 0.67559021],
-        [1, 1, 1, 1, 1, 1, 0.99144486, 0.92387953, 0.79335334,
-         0, 0, 0, 0, 0, 0, 0.13052619, 0.38268343, 0.60876143],
+        [
+            0.99904822,
+            0.99144486,
+            0.97629601,
+            0.95371695,
+            0.92387953,
+            0.88701083,
+            0.84339145,
+            0.79335334,
+            0.73727734,
+            0.04361938,
+            0.13052619,
+            0.21643961,
+            0.30070580,
+            0.38268343,
+            0.46174861,
+            0.53729961,
+            0.60876143,
+            0.67559021,
+        ],
+        [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.99144486,
+            0.92387953,
+            0.79335334,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.13052619,
+            0.38268343,
+            0.60876143,
+        ],
     ]
     generated_windows = mdct_window_q30()
     for row, expected_row in enumerate(upstream_windows):
         for i, expected in enumerate(expected_row):
-            compare(f"g_mdct_window[{row}][{i}]",
-                    generated_windows[row][i] / 2.0**30, expected)
+            compare(
+                f"g_mdct_window[{row}][{i}]",
+                generated_windows[row][i] / 2.0**30,
+                expected,
+            )
 
     # x**(4/3): the table half that upstream spells out.
-    upstream_pow43_head = [0, 1, 2.519842, 4.326749, 6.349604, 8.549880,
-                           10.902724, 13.390518, 16.000000]
+    upstream_pow43_head = [
+        0,
+        1,
+        2.519842,
+        4.326749,
+        6.349604,
+        8.549880,
+        10.902724,
+        13.390518,
+        16.000000,
+    ]
     pow43 = pow43_tables()
     for x, expected in enumerate(upstream_pow43_head):
         value = pow43.mantissa[16 + x] * 2.0 ** (pow43.exponent[16 + x] - 30)
@@ -426,8 +699,9 @@ def cross_check() -> list[str]:
 
     # Layer I/II: upstream's first triple is DQ(3).
     deq = deq_l12_tables()
-    for j, expected in enumerate([9.53674316e-07 / 3, 7.56931807e-07 / 3,
-                                  6.00777173e-07 / 3]):
+    for j, expected in enumerate(
+        [9.53674316e-07 / 3, 7.56931807e-07 / 3, 6.00777173e-07 / 3]
+    ):
         value = deq.mantissa[j] * 2.0 ** (deq.exponent[j] - 30)
         compare(f"g_deq_L12[{j}]", value, expected)
 
@@ -436,19 +710,25 @@ def cross_check() -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--write", action="store_true",
-                        help="write the generated header")
-    parser.add_argument("--check", action="store_true",
-                        help="verify the committed header matches, and that "
-                             "every constant agrees with upstream's floats")
+    parser.add_argument(
+        "--write", action="store_true", help="write the generated header"
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="verify the committed header matches, and that "
+        "every constant agrees with upstream's floats",
+    )
     args = parser.parse_args()
     if not args.write and not args.check:
         parser.error("pass --write or --check")
 
     problems = cross_check()
     if problems:
-        print("Generated constants disagree with upstream float literals:",
-              file=sys.stderr)
+        print(
+            "Generated constants disagree with upstream float literals:",
+            file=sys.stderr,
+        )
         for problem in problems:
             print(f"  {problem}", file=sys.stderr)
         return 1
@@ -459,13 +739,13 @@ def main() -> int:
         print(f"wrote {OUTPUT.relative_to(ROOT)}")
     if args.check:
         if not OUTPUT.exists():
-            print(f"{OUTPUT.relative_to(ROOT)} is missing; run --write",
-                  file=sys.stderr)
+            print(
+                f"{OUTPUT.relative_to(ROOT)} is missing; run --write", file=sys.stderr
+            )
             return 1
         current = OUTPUT.read_text(encoding="utf-8")
         if current != rendered:
-            print(f"{OUTPUT.relative_to(ROOT)} is stale; run --write",
-                  file=sys.stderr)
+            print(f"{OUTPUT.relative_to(ROOT)} is stale; run --write", file=sys.stderr)
             return 1
         print("fixed-point tables are current and agree with upstream")
     return 0

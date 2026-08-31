@@ -16,6 +16,11 @@
 /// only comparing final PCM. The production decoder in `libfastled` is
 /// untouched by any of this — it is a third instantiation, in `fl::third_party`,
 /// with the hook compiled out.
+///
+/// allow-include-after-namespace: the two `#include`s below deliberately come
+/// after the `fl::Mp3StageSink` declarations, because each one *is* the
+/// instantiation and it has to see the sink the `MINIMP3_STAGE_DUMP` macro
+/// names. Hoisting them would defeat the entire mechanism.
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/noexcept.h"

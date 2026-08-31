@@ -3,6 +3,7 @@
 #include "tests/fl/codec/gif.hpp"
 #include "tests/fl/codec/h264.hpp"
 #include "tests/fl/codec/jpeg.hpp"
+#include "tests/fl/codec/minimp3_variants.hpp"
 #include "tests/fl/codec/mp3.hpp"
 #include "tests/fl/codec/mp3_fixed_point.hpp"
 #include "tests/fl/codec/mp4_parser.hpp"
