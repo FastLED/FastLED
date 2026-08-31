@@ -10,6 +10,7 @@
 #define FASTLED_STUB_WATCHDOG_NO_ABORT 1
 
 #include "fl/wdt/watchdog.h"
+#include "platforms/stub/watchdog_stub.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/thread.h"
@@ -162,9 +163,24 @@ FL_TEST_CASE("fl::Watchdog — feeding before timeout prevents fire") {
     fired.store(false);
     dog.onTimeout([](void*) { fired.store(true); }, nullptr);
 
+    static fl::atomic<fl::u64> now_ms;
+    now_ms.store(1000);
+    struct ClockGuard {
+        ClockGuard() {
+            fl::platforms::setStubWatchdogClockForTesting(+[]() {
+                return fl::chrono::steady_clock::time_point(
+                    fl::chrono::milliseconds(now_ms.load()));
+            });
+        }
+        ~ClockGuard() { fl::platforms::clearStubWatchdogClockForTesting(); }
+    } clock_guard;
+
     dog.begin(200);
     for (int i = 0; i < 10; ++i) {
-        fl::this_thread::sleep_for(fl::chrono::milliseconds(50));  // ok sleep for
+        now_ms.store(now_ms.load() + 50);
+        // Give the worker a chance to observe each deterministic clock step.
+        // Wall-clock overshoot is harmless because it cannot advance now_ms.
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(15));  // ok sleep for
         dog.feed();
     }
     dog.disable();
