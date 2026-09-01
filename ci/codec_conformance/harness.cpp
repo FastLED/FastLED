@@ -41,22 +41,67 @@ void Mp3MemoryFree(void* p, fl::size, Mp3MemoryTag) FL_NO_EXCEPT { ::free(p); }
 
 namespace {
 
-unsigned char* slurp(const char* path, long* length) {
-    FILE* file = ::fopen(path, "rb");
-    if (!file) {
-        return NULL;
-    }
-    ::fseek(file, 0, SEEK_END);
-    *length = ::ftell(file);
-    ::rewind(file);
-    unsigned char* data = (unsigned char*)::malloc(*length ? *length : 1);
-    if (*length && ::fread(data, 1, *length, file) != (size_t)*length) {
+/* Owns a malloc'd block and closes over free(). The harness is short-lived and
+   nothing here would leak in a way that matters, but the repo asks for RAII
+   over raw owning pointers and there is no reason for a test tool to be the
+   exception. */
+class Buffer {
+public:
+    Buffer() : mData(NULL), mSize(0) {}
+    ~Buffer() { ::free(mData); }
+
+    bool load(const char* path) {
+        FILE* file = ::fopen(path, "rb");
+        if (!file) {
+            return false;
+        }
+        ::fseek(file, 0, SEEK_END);
+        const long length = ::ftell(file);
+        ::rewind(file);
+        if (length < 0) {
+            ::fclose(file);
+            return false;
+        }
+        unsigned char* data =
+            (unsigned char*)::malloc(length ? (size_t)length : 1);
+        if (!data) {
+            ::fclose(file);
+            return false;
+        }
+        if (length && ::fread(data, 1, (size_t)length, file) != (size_t)length) {
+            ::free(data);
+            ::fclose(file);
+            return false;
+        }
         ::fclose(file);
-        return NULL;
+        ::free(mData);
+        mData = data;
+        mSize = (size_t)length;
+        return true;
     }
-    ::fclose(file);
-    return data;
-}
+
+    const unsigned char* data() const { return mData; }
+    size_t size() const { return mSize; }
+
+private:
+    Buffer(const Buffer&);
+    Buffer& operator=(const Buffer&);
+    unsigned char* mData;
+    size_t mSize;
+};
+
+template <typename T>
+class Owned {
+public:
+    explicit Owned(size_t bytes) : mPtr((T*)::malloc(bytes)) {}
+    ~Owned() { ::free(mPtr); }
+    T* get() const { return mPtr; }
+
+private:
+    Owned(const Owned&);
+    Owned& operator=(const Owned&);
+    T* mPtr;
+};
 
 /* log10 without libm: the harness links no math library on purpose, and this
    only has to be accurate enough to compare against a 60 dB floor. */
@@ -76,22 +121,23 @@ int main(int argc, char** argv) {
         ::fprintf(stderr, "usage: harness <bitstream> <reference.pcm>\n");
         return 2;
     }
-    long n = 0, rn = 0;
-    unsigned char* data = slurp(argv[1], &n);
-    unsigned char* refbytes = slurp(argv[2], &rn);
-    if (!data || !refbytes) {
+    Buffer bitstream, referenceBytes;
+    if (!bitstream.load(argv[1]) || !referenceBytes.load(argv[2])) {
         ::printf("RESULT status=load_failed\n");
         return 1;
     }
-    const int16_t* ref = (const int16_t*)refbytes;
-    const size_t refn = (size_t)rn / 2;
+    const unsigned char* data = bitstream.data();
+    const long n = (long)bitstream.size();
+    const int16_t* ref = (const int16_t*)referenceBytes.data();
+    const size_t refn = referenceBytes.size() / 2;
 
-    fl::third_party::mp3dec_t* dec = (fl::third_party::mp3dec_t*)::malloc(
-        sizeof(fl::third_party::mp3dec_t));
-    fl::third_party::mp3dec_scratch_t* scratch =
-        (fl::third_party::mp3dec_scratch_t*)::malloc(
-            sizeof(fl::third_party::mp3dec_scratch_t));
-    int16_t* pcm = (int16_t*)::malloc(2304 * sizeof(int16_t));
+    Owned<fl::third_party::mp3dec_t> decoder(sizeof(fl::third_party::mp3dec_t));
+    Owned<fl::third_party::mp3dec_scratch_t> scratchStore(
+        sizeof(fl::third_party::mp3dec_scratch_t));
+    Owned<int16_t> pcmStore(2304 * sizeof(int16_t));
+    fl::third_party::mp3dec_t* dec = decoder.get();
+    fl::third_party::mp3dec_scratch_t* scratch = scratchStore.get();
+    int16_t* pcm = pcmStore.get();
     if (!dec || !scratch || !pcm) {
         ::printf("RESULT status=oom\n");
         return 1;

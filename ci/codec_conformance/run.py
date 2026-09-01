@@ -40,6 +40,41 @@ TARBALL = f"https://codeload.github.com/lieff/minimp3/tar.gz/{UPSTREAM_REVISION}
 
 ISO_FLOOR_DB = 60.0
 
+# The suite is fixed at a pinned revision, so the count is knowable. Requiring
+# it exactly stops a partial cache or a failed extraction from reporting a
+# green run over a subset.
+EXPECTED_PAIRS = 74
+
+# A decoder can emit a correct prefix and then stop, and a PSNR taken over the
+# shared prefix would not notice. So a shortfall against the reference is a
+# failure unless it is listed here with a reason.
+#
+# Every entry below is a Layer I or Layer II vector whose reference PCM is a
+# fixed-size power-of-two buffer -- 32768, 65536, 131072, 163840 samples --
+# rather than a frame-exact dump, so "produced < reference" does not mean
+# dropped audio for these. Two independent checks say the same: the shortfall
+# is identical to the sample on the *float* build, and inserting a resync on
+# parse failure recovers nothing. FastLED ships Layer III; Layer I/II decode is
+# incidental, and no Layer III vector is on this list.
+KNOWN_SHORT_OUTPUT = {
+    "l1-fl1", "l1-fl2", "l1-fl3", "l1-fl4", "l1-fl5", "l1-fl6", "l1-fl7",
+    "l1-fl8", "l2-fl10", "l2-fl11", "l2-fl12", "l2-fl13", "l2-fl14",
+    "l2-fl15", "l2-fl16",
+}
+
+# Decoders legitimately run a frame or two past the reference (encoder delay and
+# the final granule), which the repo's own tests allow as the "standard vector
+# length". Beyond that, surplus output is a defect unless listed.
+STANDARD_LENGTH_ALLOWANCE = 2 * 1152 * 2  # two frames, stereo
+
+KNOWN_LONG_OUTPUT = {
+    "l3-nonstandard-he_44_48khz": (
+        "Sample rate switches mid-stream (44.1 -> 48 kHz). The decoder follows "
+        "the switch and emits 172800 samples more than the reference, which "
+        "captures only one rate. Scores 132.27 dB over the shared prefix."
+    ),
+}
+
 # Vectors that do not clear the floor for reasons that are not decoder defects.
 # Each needs a reason; an empty reason is not acceptable.
 KNOWN_EXCEPTIONS = {
@@ -62,6 +97,8 @@ class VectorResult:
     psnr: float
     layer: int
     frames: int
+    produced: int
+    reference: int
 
 
 def fetch_vectors() -> Path:
@@ -125,7 +162,7 @@ def build_harness(*, float_variant: bool = False) -> Path:
 
 _RESULT_RE = re.compile(
     r"RESULT status=(\w+)(?:.*?psnr=([-\d.]+))?(?:.*?layer=(\d+))?"
-    r"(?:.*?frames=(\d+))?"
+    r"(?:.*?frames=(\d+))?(?:.*?produced=(\d+))?(?:.*?reference=(\d+))?"
 )
 
 
@@ -140,13 +177,15 @@ def run_vector(binary: Path, bitstream: Path, reference: Path) -> VectorResult:
     )
     match = _RESULT_RE.search(result.stdout or "")
     if not match:
-        return VectorResult(bitstream.stem, "crashed", 0.0, 0, 0)
+        return VectorResult(bitstream.stem, "crashed", 0.0, 0, 0, 0, 0)
     return VectorResult(
         name=bitstream.stem,
         status=match.group(1),
         psnr=float(match.group(2)) if match.group(2) else 0.0,
         layer=int(match.group(3)) if match.group(3) else 0,
         frames=int(match.group(4)) if match.group(4) else 0,
+        produced=int(match.group(5)) if match.group(5) else 0,
+        reference=int(match.group(6)) if match.group(6) else 0,
     )
 
 
@@ -173,9 +212,11 @@ def main(argv: list[str] | None = None) -> int:
         vectors = fetch_vectors()
         binary = build_harness(float_variant=args.float)
         pairs = collect(vectors)
-        if len(pairs) < 60:
+        if len(pairs) != EXPECTED_PAIRS:
             raise RuntimeError(
-                f"expected the full conformance suite, found {len(pairs)} pairs"
+                f"expected exactly {EXPECTED_PAIRS} conformance pairs at "
+                f"{UPSTREAM_REVISION[:8]}, found {len(pairs)}; a partial cache "
+                "or a changed revision would otherwise pass over a subset"
             )
 
         failures: list[VectorResult] = []
@@ -191,6 +232,21 @@ def main(argv: list[str] | None = None) -> int:
             if outcome.status != "ok":
                 failures.append(outcome)
                 continue
+            # Length before PSNR: a decoder that emits a correct prefix and
+            # then truncates scores well on the shared prefix, so the PSNR gate
+            # alone cannot see it.
+            shortfall = outcome.reference - outcome.produced
+            surplus = outcome.produced - outcome.reference
+            if shortfall > 0 and outcome.name not in KNOWN_SHORT_OUTPUT:
+                failures.append(outcome)
+                continue
+            if (
+                surplus > STANDARD_LENGTH_ALLOWANCE
+                and outcome.name not in KNOWN_LONG_OUTPUT
+            ):
+                failures.append(outcome)
+                continue
+
             if outcome.psnr >= ISO_FLOOR_DB:
                 passed += 1
                 if args.verbose:
@@ -211,7 +267,8 @@ def main(argv: list[str] | None = None) -> int:
         for outcome in failures:
             print(
                 f"  FAIL {outcome.name}: status={outcome.status} "
-                f"psnr={outcome.psnr:.2f} dB layer={outcome.layer}"
+                f"psnr={outcome.psnr:.2f} dB layer={outcome.layer} "
+                f"produced={outcome.produced} reference={outcome.reference}"
             )
         if failures:
             raise RuntimeError(

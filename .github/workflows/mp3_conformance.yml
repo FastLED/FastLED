@@ -13,6 +13,7 @@ on:
       - 'ci/codec_conformance/**'
       - 'ci/codec_tables/**'
       - 'tests/fl/codec/mp3*'
+      - 'tests/data/codec/minimp3/**'
       - '.github/workflows/mp3_conformance.yml'
   pull_request:
     branches: [master]
@@ -22,6 +23,7 @@ on:
       - 'ci/codec_conformance/**'
       - 'ci/codec_tables/**'
       - 'tests/fl/codec/mp3*'
+      - 'tests/data/codec/minimp3/**'
       - '.github/workflows/mp3_conformance.yml'
 
 permissions:
