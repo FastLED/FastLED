@@ -131,8 +131,7 @@ CRGB blend(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) {
     return nu;
 }
 
-CRGB blend_oklab(const CRGB &p1, const CRGB &p2,
-                 fract8 amountOfP2) FL_NO_EXCEPT {
+CRGB blend_oklab(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) FL_NO_EXCEPT {
     if (amountOfP2 == 0) { return p1; }
     if (amountOfP2 == 255) { return p2; }
 

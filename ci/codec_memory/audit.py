@@ -19,10 +19,36 @@ from typeguard import typechecked
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILD = ROOT / ".build" / "codec-memory-audit"
-BACKENDS = ("helix", "minimp3")
+BACKENDS = ("helix", "minimp3", "minimp3_fixed")
+# Audit TU name -> the name the ledger uses for it.
+LEDGER_NAMES = {
+    "helix": "helix",
+    "minimp3": "minimp3-float",
+    "minimp3_fixed": "minimp3-fixed",
+}
+# Entry point each backend's decode call graph is rooted at.
+CALLGRAPH_ROOTS = {
+    "helix": "MP3Decode",
+    "minimp3": "mp3dec_decode_frame_r",
+    "minimp3_fixed": "mp3dec_decode_frame_r",
+}
 FRAME_LIMIT = 2048
 RAM_LIMIT = 24 * 1024
 REGRESSION_FACTOR = 1.02
+# Measured and required to be present, but not regression-gated. The ledger's
+# own prose already says the 2 KiB acceptance gate is the compiler-derived
+# callgraph and calls the watermark "a conservative observation"; the code did
+# not reflect that, and applied the same hard 2% gate to both. The watermark is
+# not reproducible across CI runs -- helix has measured 1736 and 3336 on
+# identical decoder code, each exactly and one of them on a re-run -- because it
+# reports the deepest byte *anything* disturbed, not the deepest byte the
+# decoder used. See FastLED#4106 for the real fix (host-key the ledger, or
+# measure the stack pointer directly instead of inferring it from a paint
+# pattern).
+INFORMATIONAL_METRICS = {
+    "stack-watermark-observed",
+}
+
 EXACT_METRICS = {
     "allocation-count",
     "decoder-state",
@@ -207,7 +233,7 @@ def print_report(
         rows.sort(key=lambda row: row[1], reverse=True)
         max_frame = rows[0][1] if rows else 0
         print(f"STACK:{backend}:max-frame={max_frame}")
-        ledger_backend = "minimp3-float" if backend == "minimp3" else backend
+        ledger_backend = LEDGER_NAMES[backend]
         metrics[(ledger_backend, "stack-max-frame")] = max_frame
         for name, size, kind in rows[:12]:
             print(f"STACK_ITEM:{backend}:{size}:{kind}:{name}")
@@ -258,24 +284,24 @@ def print_report(
             for name, size, _ in parse_stack_usage(objects[backend].with_suffix(".su"))
         }
 
-    helix_graph = parse_llvm_callgraph(objects["helix"].with_suffix(".ll"))
-    minimp3_graph = parse_llvm_callgraph(objects["minimp3"].with_suffix(".ll"))
-    helix_depth = longest_stack_path(
-        frame_map("helix"),
-        helix_graph,
-        resolve_callgraph_root(helix_graph, "MP3Decode"),
-    )
-    minimp3_depth = longest_stack_path(
-        frame_map("minimp3"),
-        minimp3_graph,
-        resolve_callgraph_root(minimp3_graph, "mp3dec_decode_frame_r"),
-    )
-    metrics[("helix", "stack-callgraph")] = helix_depth
-    metrics[("minimp3-float", "stack-callgraph")] = minimp3_depth
-    print(f"CALLGRAPH:helix:decode-depth={helix_depth}")
-    print(f"CALLGRAPH:minimp3-float:decode-depth={minimp3_depth}")
-    if helix_depth > FRAME_LIMIT or minimp3_depth > FRAME_LIMIT:
-        raise RuntimeError("static decode call graph exceeds the 2 KiB stack budget")
+    over_budget: list[str] = []
+    for backend in BACKENDS:
+        graph = parse_llvm_callgraph(objects[backend].with_suffix(".ll"))
+        depth = longest_stack_path(
+            frame_map(backend),
+            graph,
+            resolve_callgraph_root(graph, CALLGRAPH_ROOTS[backend]),
+        )
+        ledger_backend = LEDGER_NAMES[backend]
+        metrics[(ledger_backend, "stack-callgraph")] = depth
+        print(f"CALLGRAPH:{ledger_backend}:decode-depth={depth}")
+        if depth > FRAME_LIMIT:
+            over_budget.append(ledger_backend)
+    if over_budget:
+        raise RuntimeError(
+            "static decode call graph exceeds the 2 KiB stack budget: "
+            + ", ".join(over_budget)
+        )
     return AuditValues(metrics, tables)
 
 
@@ -449,6 +475,13 @@ def check_ledger(
                 "update the ledger deliberately"
             )
             continue
+        if key[1] in INFORMATIONAL_METRICS:
+            if current[key] != baseline:
+                print(
+                    f"INFORMATIONAL:{key[0]}/{key[1]}={current[key]} "
+                    f"(ledger {baseline}; not gated, see FastLED#4106)"
+                )
+            continue
         limit = int(baseline * REGRESSION_FACTOR)
         if current[key] > limit:
             errors.append(f"{key[0]}/{key[1]} regressed: {current[key]} > {limit}")
@@ -462,10 +495,11 @@ def check_ledger(
     for key in expected_tables.keys() - current_tables.keys():
         errors.append(f"ledger table was not emitted: {key[0]}/{key[1]}")
 
-    working_ram = current.get(("minimp3-float", "working-ram"))
-    if working_ram is not None and working_ram > RAM_LIMIT:
-        errors.append("minimp3 working RAM exceeds 24 KiB")
-    for backend in ("helix", "minimp3-float"):
+    for backend in ("minimp3-float", "minimp3-fixed"):
+        working_ram = current.get((backend, "working-ram"))
+        if working_ram is not None and working_ram > RAM_LIMIT:
+            errors.append(f"{backend} working RAM exceeds 24 KiB")
+    for backend in ("helix", "minimp3-float", "minimp3-fixed"):
         stack_depth = current.get((backend, "stack-callgraph"))
         if stack_depth is not None and stack_depth > FRAME_LIMIT:
             errors.append(f"{backend} decode stack exceeds 2 KiB")
