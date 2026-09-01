@@ -250,7 +250,7 @@
             "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
             "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_granule(float*, float*, int, int, short*)": 173353159,
             "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_pair(short*, int, float const*)": 4473360,
-            "src/third_party/minimp3/minimp3.h:mp3dec_decode_frame_r": 252867274
+            "src/third_party/minimp3/minimp3.h:fl::third_party::mp3dec_decode_frame_r(fl::third_party::mp3dec_t*, fl::third_party::mp3dec_scratch_t*, unsigned char const*, int, short*, fl::third_party::mp3dec_frame_info_t*)": 252867274
           },
           "instructions": 261532799
         },
@@ -525,7 +525,7 @@
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_granule(float*, float*, int, int, short*)": 173353159,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_pair(short*, int, float const*)": 4473360,
-              "src/third_party/minimp3/minimp3.h:mp3dec_decode_frame_r": 252867274
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3dec_decode_frame_r(fl::third_party::mp3dec_t*, fl::third_party::mp3dec_scratch_t*, unsigned char const*, int, short*, fl::third_party::mp3dec_frame_info_t*)": 252867274
             },
             "instructions": 261532799
           },
@@ -708,7 +708,7 @@
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_granule(float*, float*, int, int, short*)": 173353159,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_pair(short*, int, float const*)": 4473360,
-              "src/third_party/minimp3/minimp3.h:mp3dec_decode_frame_r": 252867274
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3dec_decode_frame_r(fl::third_party::mp3dec_t*, fl::third_party::mp3dec_scratch_t*, unsigned char const*, int, short*, fl::third_party::mp3dec_frame_info_t*)": 252867274
             },
             "instructions": 261532799
           },
@@ -891,7 +891,7 @@
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_granule(float*, float*, int, int, short*)": 173353159,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth_pair(short*, int, float const*)": 4473360,
-              "src/third_party/minimp3/minimp3.h:mp3dec_decode_frame_r": 252867274
+              "src/third_party/minimp3/minimp3.h:fl::third_party::mp3dec_decode_frame_r(fl::third_party::mp3dec_t*, fl::third_party::mp3dec_scratch_t*, unsigned char const*, int, short*, fl::third_party::mp3dec_frame_info_t*)": 252867274
             },
             "instructions": 261532799
           },
