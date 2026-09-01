@@ -21,9 +21,9 @@ CRGB spi3Leds[8];
 
 void setup() {
     FastLED.addLeds<APA102, 11, 12, RGB, DATA_RATE_MHZ(20)>(
-        spi2Leds, 8, fl::Esp32SpiBus::SPI2);
+        spi2Leds, 8, fl::Esp32SpiBus::HOST2);
     FastLED.addLeds<APA102, 13, 14, RGB, DATA_RATE_MHZ(20)>(
-        spi3Leds, 8, fl::Esp32SpiBus::SPI3);
+        spi3Leds, 8, fl::Esp32SpiBus::HOST3);
 }
 
 void loop() {

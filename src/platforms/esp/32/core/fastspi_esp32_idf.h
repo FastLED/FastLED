@@ -94,10 +94,10 @@ public:
 
     void setBus(Esp32SpiBus bus) FL_NO_EXCEPT {
         switch (bus) {
-            case Esp32SpiBus::SPI2:
+            case Esp32SpiBus::HOST2:
                 mHost = SPI2_HOST;
                 break;
-            case Esp32SpiBus::SPI3:
+            case Esp32SpiBus::HOST3:
 #if SOC_SPI_PERIPH_NUM > 2
                 mHost = SPI3_HOST;
 #else
