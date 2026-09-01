@@ -75,17 +75,42 @@ KNOWN_LONG_OUTPUT = {
     ),
 }
 
+_SINGLE_FRAME_REASON = (
+    "A single-frame stream of 274-2048 bytes. minimp3 will not decode a lone "
+    "frame without lookahead to validate it, and upstream's float build "
+    "produces zero frames on these too -- so it is neither a regression nor "
+    "specific to the fixed-point port. Not a tag-handling problem: a real "
+    "multi-frame file with an ID3v2, APE or ID3v1 tag attached decodes "
+    "byte-identically to the untagged original (FastLED#4129)."
+)
+
 # Vectors that do not clear the floor for reasons that are not decoder defects.
 # Each needs a reason; an empty reason is not acceptable.
-KNOWN_EXCEPTIONS = {
-    "l3-nonstandard-sin1k0db_lame_vbrtag": (
-        "LAME VBR tag frame. The raw mp3dec_decode_frame_r loop this harness "
-        "and fl::Mp3Decoder both use does not skip the Xing/LAME header frame "
-        "or apply its encoder delay, so the output is offset against a "
-        "reference that assumes gapless trimming. Upstream's own float build "
-        "scores identically (2.85 dB), so this is a container-metadata gap in "
-        "the caller, not an arithmetic defect. Tracked separately."
+#
+# Empty as of FastLED#4129. The LAME VBR-tag vector used to live here because
+# the decode loop emitted the Xing header frame as audio and ignored the
+# encoder delay; it now skips both and scores 108.22 dB.
+KNOWN_EXCEPTIONS: dict[str, str] = {}
+
+# Vectors that ship a non-empty reference but legitimately decode to nothing.
+#
+# Without this list `no_overlap` is a free pass: a change that stopped decoding
+# a real vector would move it into "without comparable reference" and the run
+# would still report green. Anything landing there unlisted is a failure.
+KNOWN_NO_OUTPUT = {
+    "l3-nonstandard-vbrtag-oob-read": (
+        "104 bytes containing nothing but an Info tag frame. Since FastLED#4129 "
+        "that frame is recognised as metadata and not emitted, so the file "
+        "yields no audio -- which is the point of the change. Its reference is "
+        "2304 samples of pure silence, i.e. the tag frame decoded as if it were "
+        "audio; the sibling tag-only vectors vbrtag-only and vbrtag-empty ship "
+        "*empty* references, so upstream's own expectation for a tag-only file "
+        "is no output."
     ),
+    "l3-nonstandard-id3v1": _SINGLE_FRAME_REASON,
+    "l3-nonstandard-id3v2": _SINGLE_FRAME_REASON,
+    "l3-nonstandard-apetag": _SINGLE_FRAME_REASON,
+    "l3-nonstandard-id3v1-apetag": _SINGLE_FRAME_REASON,
 }
 
 
@@ -303,7 +328,11 @@ def main(argv: list[str] | None = None) -> int:
         for bitstream, reference in pairs:
             outcome = run_vector(binary, bitstream, reference)
             if outcome.status == "no_overlap":
-                # Tag-only or empty-reference vectors: nothing to compare.
+                if outcome.name not in KNOWN_NO_OUTPUT:
+                    # Silently tolerating this would let a change that stopped
+                    # decoding a real vector pass as "nothing to compare".
+                    failures.append(outcome)
+                    continue
                 no_overlap += 1
                 continue
             if outcome.status != "ok":

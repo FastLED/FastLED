@@ -1,5 +1,6 @@
 #include "test.h"
 #include "fl/codec/mp3.h"
+#include "fl/codec/mp3_vbr_tag.h"
 #include "fl/codec/mp3_memory.h"
 #include "fl/fs/fs.h"
 #include "fl/math/math.h"
@@ -496,6 +497,80 @@ FL_TEST_CASE("MP3 public stream recovers a valid frame after corruption") {
     }
     FL_CHECK_GT(decoded_frames, 0);
     FL_CHECK_FALSE(decoder.hasError());
+}
+
+FL_TEST_CASE("MP3 decoder skips the VBR tag frame and encoder priming") {
+    // FastLED#4129. A Xing/Info/VBRI header occupies a complete, valid MPEG
+    // frame, so a decoder that only scans for sync words emits it as audio --
+    // a burst of noise before the music. LAME additionally records how much
+    // encoder priming follows, and the filterbank contributes a further 529
+    // samples of its own latency that are not recorded anywhere in the file.
+    //
+    // On the conformance vector this is worth 2257 samples per channel and
+    // moves the PSNR from 2.85 dB to 108.22 dB. That vector's reference PCM is
+    // 1.4 MB, too large to vendor, so the behaviour is pinned here on the
+    // corpus file the repo already carries: the parser's own output, and the
+    // sample count the stream decoder actually emits.
+    fl::setTestFileSystemRoot("tests/data");
+    const fl::vector<fl::u8> bitstream =
+        loadMp3CorpusFile("codec/minimp3/l3-lame-vbrtag.bit");
+
+    fl::third_party::Mp3VbrTag tag;
+    FL_REQUIRE(fl::third_party::Mp3ParseVbrTag(bitstream.data(),
+                                               bitstream.size(), &tag));
+    FL_CHECK(tag.present);
+    FL_CHECK_EQ(tag.encoderDelay, 576u);
+
+    // A file with no VBR header must not be mistaken for one.
+    const fl::vector<fl::u8> plain =
+        loadMp3CorpusFile("codec/minimp3/l3-hecommon.bit");
+    fl::third_party::Mp3VbrTag none;
+    fl::third_party::Mp3ParseVbrTag(plain.data(), plain.size(), &none);
+    FL_CHECK_FALSE(none.present);
+
+    // The raw frame loop sees the tag frame as audio; the stream decoder must
+    // not, and must also drop the priming that follows it. Comparing sample
+    // *counts* between the two would not show that: the streaming path emits
+    // fewer samples than the raw loop anyway, for buffering reasons unrelated
+    // to this change. So compare the actual audio instead -- the first sample
+    // the stream decoder emits must be the first sample after the tag frame
+    // and the priming, not the first sample of the tag frame.
+    const Mp3DecodeResult raw = decodeMp3Corpus<Mp3Minimp3Decoder>(bitstream);
+    FL_REQUIRE_EQ(raw.mChannels, 2);
+    const fl::size drop_per_channel =
+        1152u + 576u + fl::third_party::MP3D_DECODER_DELAY;
+    FL_REQUIRE_GT(raw.mPcm.size(), drop_per_channel * 2 + 64);
+
+    auto stream = fl::make_shared<fl::memorybuf>(bitstream.size());
+    FL_REQUIRE_EQ(stream->write(fl::span<const fl::u8>(bitstream)),
+                  bitstream.size());
+    fl::Mp3Decoder decoder;
+    FL_REQUIRE(decoder.begin(stream));
+    fl::audio::Sample sample;
+    FL_REQUIRE(decoder.decodeNextFrame(&sample));
+    FL_REQUIRE_GT(sample.pcm().size(), 32u);
+
+    // The public decoder downmixes stereo to mono, so build the expectation
+    // the same way from the raw interleaved output.
+    for (fl::size i = 0; i < 32; ++i) {
+        const fl::size src = (drop_per_channel + i) * 2;
+        const fl::i32 left = raw.mPcm[src];
+        const fl::i32 right = raw.mPcm[src + 1];
+        FL_REQUIRE_EQ(sample.pcm()[i], static_cast<fl::i16>((left + right) / 2));
+    }
+
+    // And the tag frame's own output must not be what came out first, or the
+    // check above would pass on a decoder that skipped nothing.
+    bool differs_from_tag_frame = false;
+    for (fl::size i = 0; i < 32; ++i) {
+        const fl::i32 left = raw.mPcm[i * 2];
+        const fl::i32 right = raw.mPcm[i * 2 + 1];
+        if (sample.pcm()[i] != static_cast<fl::i16>((left + right) / 2)) {
+            differs_from_tag_frame = true;
+            break;
+        }
+    }
+    FL_CHECK(differs_from_tag_frame);
 }
 
 FL_TEST_CASE("MP3 decoder clears the ISO floor on the dequant-headroom vector") {

@@ -17,6 +17,7 @@
 #endif
 
 #include "fl/codec/mp3_memory.h"
+#include "fl/codec/mp3_vbr_tag.h"
 
 #if defined(CONFORMANCE_FLOAT)
 #define MINIMP3_FLOAT_POINT 1
@@ -148,6 +149,11 @@ int main(int argc, char** argv) {
     size_t compared = 0, produced = 0;
     int frames = 0, layer = 0, hz = 0, channels = 0;
     size_t offset = 0;
+    /* Samples still to drop from the head: the encoder's priming plus the
+       filterbank's own latency. Set when the first frame turns out to be a
+       Xing/Info/VBRI header rather than audio. */
+    size_t skip_remaining = 0;
+    bool inspected_first = false;
     while (offset + 4 < (size_t)n) {
         fl::third_party::mp3dec_frame_info_t info;
         ::memset(&info, 0, sizeof(info));
@@ -156,13 +162,36 @@ int main(int argc, char** argv) {
         if (info.frame_bytes <= 0) {
             break;
         }
+        if (!inspected_first) {
+            inspected_first = true;
+            fl::third_party::Mp3VbrTag tag;
+            if (fl::third_party::Mp3ParseVbrTag(data + offset,
+                                                (fl::size)((size_t)n - offset),
+                                                &tag) &&
+                tag.present) {
+                /* Metadata, not audio. Drop the frame and the priming that
+                   follows it. */
+                offset += (size_t)info.frame_bytes;
+                skip_remaining =
+                    (size_t)(tag.encoderDelay + fl::third_party::MP3D_DECODER_DELAY);
+                continue;
+            }
+        }
         offset += (size_t)info.frame_bytes;
         if (samples <= 0) {
             continue;
         }
         ++frames;
         if (!layer) { layer = info.layer; hz = info.hz; channels = info.channels; }
-        for (int i = 0; i < samples * info.channels; ++i) {
+        int emit_from = 0;
+        if (skip_remaining) {
+            const size_t drop = skip_remaining < (size_t)samples
+                                    ? skip_remaining
+                                    : (size_t)samples;
+            emit_from = (int)drop * info.channels;
+            skip_remaining -= drop;
+        }
+        for (int i = emit_from; i < samples * info.channels; ++i) {
             if (produced < refn) {
                 const double d = (double)ref[produced] - pcm[i];
                 squared_error += d * d;
