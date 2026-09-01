@@ -5,6 +5,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/int.h"
+#include "fl/channels/dither_frame.h"
 
 /// Disable dithering
 #define DISABLE_DITHER 0x00

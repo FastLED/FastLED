@@ -66,6 +66,14 @@ extern "C" void yield(void) { }
 
 fl::u8 get_brightness();
 
+fl::u8 fl::detail::ditherFrame() {
+	return fl::Singleton<fl::detail::DitherFrameState>::instance().frame;
+}
+
+void fl::detail::advanceDitherFrame() {
+	++fl::Singleton<fl::detail::DitherFrameState>::instance().frame;
+}
+
 /// Pointer to the matrix object when using the Smart Matrix Library
 /// @see https://github.com/pixelmatix/SmartMatrix
 void *pSmartMatrix = nullptr;
@@ -766,6 +774,7 @@ namespace __cxxabiv1
 
 
 void CFastLED::onBeginFrame() {
+	fl::detail::advanceDitherFrame();
 	fl::EngineEvents::onBeginFrame();
 }
 
