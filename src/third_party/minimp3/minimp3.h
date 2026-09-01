@@ -2146,9 +2146,292 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_internal_t *s, L3_gr_info_t *g
    can drive dequantised samples to the +/-1 clamp, and this butterfly stacks
    three levels of adds on top of a 10.19x multiply. Saturating there turns a
    signed-overflow UB report into a bounded, audible-at-worst result. */
+#if MP3D_HAVE_INT_SIMD
+/* FastLED: integer vector helpers for the polyphase back-end.
+
+   The polyphase filter is the one kernel where vectorising is bit-exact for
+   free: it is a pure int32 x int32 -> int64 multiply-accumulate with no
+   intermediate rounding or saturation, and int64 addition is exact and
+   associative, so any lane arrangement reproduces the scalar result exactly.
+   Every other kernel rounds and saturates per operation, which is why they are
+   not vectorised -- see the disposition note on mp3d_synth below.
+
+   The MUL_LO/MUL_HI pair takes two int32 lanes and returns two int64 products
+   -- `LO` for lanes 0 and 1, `HI` for lanes 2 and 3. ADDSAT/SUBSAT/MULSHIFT are
+   the four-lane forms of the scalar helpers of the same name and must match
+   them exactly, including the symmetric saturation range. */
+#if MP3D_INT_SIMD_NEON
+typedef int64x2_t mp3d_i64x2;
+#define MP3D_V_ZERO64()        vdupq_n_s64(0)
+#define MP3D_V_LOAD4(p)        vld1q_s32((const int32_t *)(p))
+#define MP3D_V_SPLAT(x)        vdupq_n_s32(x)
+#define MP3D_V_PREP(v)         (v)
+#define MP3D_V_STORE4(p, v)    vst1q_s32((int32_t *)(p), (v))
+#define MP3D_V_MUL_LO(v, s)    vmull_s32(vget_low_s32(v), vget_low_s32(s))
+#define MP3D_V_MUL_HI(v, s)    vmull_s32(vget_high_s32(v), vget_high_s32(s))
+#define MP3D_V_ADD64(x, y)     vaddq_s64((x), (y))
+#define MP3D_V_SUB64(x, y)     vsubq_s64((x), (y))
+#define MP3D_V_GET64(x, lane)  ((lane) ? vgetq_lane_s64((x), 1) : vgetq_lane_s64((x), 0))
+/* NEON multiplies signed 32x32 -> 64 natively and is in the ARM64 baseline, so
+   there is nothing to detect. */
+#define MP3D_SIMD_AVAILABLE()  1
+#define MP3D_SIMD_TARGET
+
+/* Saturating add/subtract. vqaddq_s32 saturates to INT32_MIN/MAX; the decoder's
+   range is symmetric, so the extra vmaxq_s32 pulls INT32_MIN up to
+   MP3D_SAT_MIN exactly as the scalar helper does. */
+#define MP3D_V_ADDSAT(a, b)                                                    \
+    vmaxq_s32(vqaddq_s32((a), (b)), vdupq_n_s32(MP3D_SAT_MIN))
+#define MP3D_V_SUBSAT(a, b)                                                    \
+    vmaxq_s32(vqsubq_s32((a), (b)), vdupq_n_s32(MP3D_SAT_MIN))
+
+/* value * Q`bits` coefficient, rounded and saturated -- the vector form of
+   mp3d_mulshift, and it must round the same way: add half, then shift right
+   with sign extension (round half toward +infinity). */
+static int32x4_t mp3d_v_mulshift(int32x4_t v, int32_t coef,
+                                 int64x2_t round, int shift) FL_NO_EXCEPT
+{
+    const int32x2_t c = vdup_n_s32(coef);
+    int64x2_t lo = vaddq_s64(vmull_s32(vget_low_s32(v), c), round);
+    int64x2_t hi = vaddq_s64(vmull_s32(vget_high_s32(v), c), round);
+    lo = vshlq_s64(lo, vdupq_n_s64(-shift));
+    hi = vshlq_s64(hi, vdupq_n_s64(-shift));
+    return vmaxq_s32(vcombine_s32(vqmovn_s64(lo), vqmovn_s64(hi)),
+                     vdupq_n_s32(MP3D_SAT_MIN));
+}
+#define MP3D_V_MULSHIFT(v, coef, bits)                                         \
+    mp3d_v_mulshift((v), (coef), vdupq_n_s64((int64_t)1 << ((bits) - 1)),      \
+                    (bits))
+#else /* MP3D_INT_SIMD_SSE */
+typedef __m128i mp3d_i64x2;
+#define MP3D_V_ZERO64()        _mm_setzero_si128()
+#define MP3D_V_LOAD4(p)        _mm_loadu_si128((const __m128i *)(const void *)(p))
+#define MP3D_V_SPLAT(x)        _mm_set1_epi32(x)
+/* _mm_mul_epi32 multiplies the even int32 lanes; shuffling to (0,1),(2,3) once
+   per vector lets both architectures share the accumulator bookkeeping. */
+#define MP3D_V_PREP(v)         _mm_shuffle_epi32((v), _MM_SHUFFLE(3, 1, 2, 0))
+#define MP3D_V_STORE4(p, v)    _mm_storeu_si128((__m128i *)(void *)(p), (v))
+#define MP3D_V_MUL_LO(v, s)    _mm_mul_epi32((v), (s))
+#define MP3D_V_MUL_HI(v, s)    _mm_mul_epi32(_mm_srli_si128((v), 4), (s))
+#define MP3D_V_ADD64(x, y)     _mm_add_epi64((x), (y))
+#define MP3D_V_SUB64(x, y)     _mm_sub_epi64((x), (y))
+
+static int64_t mp3d_get_i64(__m128i v, int lane) FL_NO_EXCEPT
+{
+    int64_t out[2];
+    _mm_storeu_si128((__m128i *)(void *)out, v);
+    return out[lane];
+}
+#define MP3D_V_GET64(x, lane)  mp3d_get_i64((x), (lane))
+
+/* Signed 32x32 -> 64 needs SSE4.1. SSE2 can emulate it with an unsigned
+   multiply plus a sign correction, and that was measured rather than assumed:
+   0.66x of scalar in a standalone harness, 0.95x inside the decoder. Slower is
+   not worth shipping, so SSE2-only hardware stays on the scalar kernel and the
+   vector path is chosen at run time -- the same shape as upstream's
+   have_simd() dispatch for the float kernels. The same harness measures 1.71x
+   once _mm_mul_epi32 is available. */
+#if defined(__GNUC__) || defined(__clang__)
+#define MP3D_SIMD_TARGET __attribute__((target("sse4.1")))
+#else
+#define MP3D_SIMD_TARGET
+#endif
+
+/* Self-contained: upstream's minimp3_cpuid lives inside the float SIMD block,
+   which the fixed build switches off, so this path cannot borrow it. */
+static int mp3d_have_sse41(void) FL_NO_EXCEPT
+{
+#if defined(__SSE4_1__)
+    return 1;
+#elif defined(_MSC_VER)
+    static int cached;
+    int info[4];
+    if (!cached)
+    {
+        __cpuid(info, 1);
+        cached = ((info[2] & (1 << 19)) != 0) + 1; /* ECX.SSE4_1 */
+    }
+    return cached - 1;
+#elif defined(__GNUC__) || defined(__clang__)
+    static int cached;
+    unsigned eax, ebx, ecx, edx;
+    if (!cached)
+    {
+        cached = (__get_cpuid(1, &eax, &ebx, &ecx, &edx) &&
+                  (ecx & (1u << 19))) + 1;
+    }
+    return cached - 1;
+#else
+    return 0;
+#endif
+}
+#define MP3D_SIMD_AVAILABLE()  mp3d_have_sse41()
+
+/* Saturating add/subtract on four int32 lanes. SSE has saturating add only for
+   8- and 16-bit lanes, so the 32-bit form is the classic branchless test: a
+   signed add overflows exactly when both operands share a sign the result does
+   not. The trailing _mm_max_epi32 enforces the decoder's symmetric range, the
+   same trailing clamp the scalar helper carries. */
+MP3D_SIMD_TARGET static __m128i mp3d_v_addsat(__m128i a, __m128i b) FL_NO_EXCEPT
+{
+    const __m128i sum = _mm_add_epi32(a, b);
+    /* _mm_blendv_epi8 selects per byte on that byte's high bit, so every mask
+       here is broadcast to a full lane with _mm_srai_epi32(.., 31) first --
+       handing it a raw value blends bytes independently and silently produces
+       a wrong answer in the low bits. */
+    const __m128i overflow = _mm_srai_epi32(
+        _mm_and_si128(_mm_xor_si128(a, sum), _mm_xor_si128(b, sum)), 31);
+    const __m128i rail = _mm_blendv_epi8(_mm_set1_epi32(MP3D_SAT_MAX),
+                                         _mm_set1_epi32(MP3D_SAT_MIN),
+                                         _mm_srai_epi32(a, 31));
+    return _mm_max_epi32(_mm_blendv_epi8(sum, rail, overflow),
+                         _mm_set1_epi32(MP3D_SAT_MIN));
+}
+
+MP3D_SIMD_TARGET static __m128i mp3d_v_subsat(__m128i a, __m128i b) FL_NO_EXCEPT
+{
+    const __m128i diff = _mm_sub_epi32(a, b);
+    const __m128i overflow = _mm_srai_epi32(
+        _mm_and_si128(_mm_xor_si128(a, b), _mm_xor_si128(a, diff)), 31);
+    const __m128i rail = _mm_blendv_epi8(_mm_set1_epi32(MP3D_SAT_MAX),
+                                         _mm_set1_epi32(MP3D_SAT_MIN),
+                                         _mm_srai_epi32(a, 31));
+    return _mm_max_epi32(_mm_blendv_epi8(diff, rail, overflow),
+                         _mm_set1_epi32(MP3D_SAT_MIN));
+}
+
+/* value * Q`bits` coefficient, rounded and saturated. SSE has no arithmetic
+   64-bit shift before AVX-512, so the sign bits are folded back in by hand;
+   and no 64-bit compare before SSE4.2, so the narrow detects out-of-range by
+   checking that the high word is the sign extension of the low one. */
+MP3D_SIMD_TARGET static __m128i mp3d_v_mulshift(__m128i v, int32_t coef,
+                                                int bits) FL_NO_EXCEPT
+{
+    const __m128i c = _mm_set1_epi32(coef);
+    const __m128i round = _mm_set1_epi64x((int64_t)1 << (bits - 1));
+    const __m128i s = _mm_shuffle_epi32(v, _MM_SHUFFLE(3, 1, 2, 0));
+    __m128i p01 = _mm_add_epi64(_mm_mul_epi32(s, c), round);
+    __m128i p23 = _mm_add_epi64(_mm_mul_epi32(_mm_srli_si128(s, 4), c), round);
+    const __m128i sign01 =
+        _mm_srai_epi32(_mm_shuffle_epi32(p01, _MM_SHUFFLE(3, 3, 1, 1)), 31);
+    const __m128i sign23 =
+        _mm_srai_epi32(_mm_shuffle_epi32(p23, _MM_SHUFFLE(3, 3, 1, 1)), 31);
+    p01 = _mm_or_si128(_mm_srli_epi64(p01, bits),
+                       _mm_slli_epi64(sign01, 64 - bits));
+    p23 = _mm_or_si128(_mm_srli_epi64(p23, bits),
+                       _mm_slli_epi64(sign23, 64 - bits));
+    {
+        const __m128i lo = _mm_castps_si128(
+            _mm_shuffle_ps(_mm_castsi128_ps(p01), _mm_castsi128_ps(p23),
+                           _MM_SHUFFLE(2, 0, 2, 0)));
+        const __m128i hi = _mm_castps_si128(
+            _mm_shuffle_ps(_mm_castsi128_ps(p01), _mm_castsi128_ps(p23),
+                           _MM_SHUFFLE(3, 1, 3, 1)));
+        const __m128i in_range = _mm_cmpeq_epi32(hi, _mm_srai_epi32(lo, 31));
+        const __m128i rail = _mm_blendv_epi8(_mm_set1_epi32(MP3D_SAT_MAX),
+                                             _mm_set1_epi32(MP3D_SAT_MIN),
+                                             _mm_srai_epi32(hi, 31));
+        return _mm_max_epi32(_mm_blendv_epi8(rail, lo, in_range),
+                             _mm_set1_epi32(MP3D_SAT_MIN));
+    }
+}
+#define MP3D_V_ADDSAT(a, b)            mp3d_v_addsat((a), (b))
+#define MP3D_V_SUBSAT(a, b)            mp3d_v_subsat((a), (b))
+#define MP3D_V_MULSHIFT(v, coef, bits) mp3d_v_mulshift((v), (coef), (bits))
+#endif
+
+#endif /* MP3D_HAVE_INT_SIMD */
+
+#if MP3D_HAVE_INT_SIMD
+/* Four bands of the DCT-32 at once.
+
+   grbuf is laid out band-major, so `y[i*18]` for four consecutive k values is
+   four consecutive int32 -- the same property upstream's float kernel relies
+   on, and the reason this vectorises without gathers.
+
+   Transcribed operation for operation from the scalar version below rather
+   than re-associated. That matters here in a way it did not for the polyphase:
+   every add saturates and every multiply rounds, so reordering them is
+   observable, and #4055's gate is exact equality with the scalar path. */
+MP3D_SIMD_TARGET static void mp3d_dct2_bands4(int32_t *grbuf, int k) FL_NO_EXCEPT
+{
+    mp3d_i32x4 t[4][8], *x;
+    int32_t *y = grbuf + k;
+    int i;
+
+    for (x = t[0], i = 0; i < 8; i++, x++)
+    {
+        const mp3d_i32x4 x0 = MP3D_V_LOAD4(&y[i*18]);
+        const mp3d_i32x4 x1 = MP3D_V_LOAD4(&y[(15 - i)*18]);
+        const mp3d_i32x4 x2 = MP3D_V_LOAD4(&y[(16 + i)*18]);
+        const mp3d_i32x4 x3 = MP3D_V_LOAD4(&y[(31 - i)*18]);
+        const mp3d_i32x4 t0 = MP3D_V_ADDSAT(x0, x3);
+        const mp3d_i32x4 t1 = MP3D_V_ADDSAT(x1, x2);
+        const mp3d_i32x4 t2 =
+            MP3D_V_MULSHIFT(MP3D_V_SUBSAT(x1, x2), g_sec_q27[3*i + 0], 27);
+        const mp3d_i32x4 t3 =
+            MP3D_V_MULSHIFT(MP3D_V_SUBSAT(x0, x3), g_sec_q27[3*i + 1], 27);
+        x[0]  = MP3D_V_ADDSAT(t0, t1);
+        x[8]  = MP3D_V_MULSHIFT(MP3D_V_SUBSAT(t0, t1), g_sec_q27[3*i + 2], 27);
+        x[16] = MP3D_V_ADDSAT(t3, t2);
+        x[24] = MP3D_V_MULSHIFT(MP3D_V_SUBSAT(t3, t2), g_sec_q27[3*i + 2], 27);
+    }
+    for (x = t[0], i = 0; i < 4; i++, x += 8)
+    {
+        mp3d_i32x4 x0 = x[0], x1 = x[1], x2 = x[2], x3 = x[3];
+        mp3d_i32x4 x4 = x[4], x5 = x[5], x6 = x[6], x7 = x[7], xt;
+        xt = MP3D_V_SUBSAT(x0, x7); x0 = MP3D_V_ADDSAT(x0, x7);
+        x7 = MP3D_V_SUBSAT(x1, x6); x1 = MP3D_V_ADDSAT(x1, x6);
+        x6 = MP3D_V_SUBSAT(x2, x5); x2 = MP3D_V_ADDSAT(x2, x5);
+        x5 = MP3D_V_SUBSAT(x3, x4); x3 = MP3D_V_ADDSAT(x3, x4);
+        x4 = MP3D_V_SUBSAT(x0, x3); x0 = MP3D_V_ADDSAT(x0, x3);
+        x3 = MP3D_V_SUBSAT(x1, x2); x1 = MP3D_V_ADDSAT(x1, x2);
+        x[0] = MP3D_V_ADDSAT(x0, x1);
+        x[4] = MP3D_V_MULSHIFT(MP3D_V_SUBSAT(x0, x1), MP3D_Q31_COS_PI_4, 31);
+        x5 = MP3D_V_ADDSAT(x5, x6);
+        x6 = MP3D_V_MULSHIFT(MP3D_V_ADDSAT(x6, x7), MP3D_Q31_COS_PI_4, 31);
+        x7 = MP3D_V_ADDSAT(x7, xt);
+        x3 = MP3D_V_MULSHIFT(MP3D_V_ADDSAT(x3, x4), MP3D_Q31_COS_PI_4, 31);
+        x5 = MP3D_V_SUBSAT(x5, MP3D_V_MULSHIFT(x7, MP3D_Q31_TAN_PI_16, 31));
+        x7 = MP3D_V_ADDSAT(x7, MP3D_V_MULSHIFT(x5, MP3D_Q31_SIN_PI_8, 31));
+        x5 = MP3D_V_SUBSAT(x5, MP3D_V_MULSHIFT(x7, MP3D_Q31_TAN_PI_16, 31));
+        x0 = MP3D_V_SUBSAT(xt, x6); xt = MP3D_V_ADDSAT(xt, x6);
+        x[1] = MP3D_V_MULSHIFT(MP3D_V_ADDSAT(xt, x7), MP3D_Q29_SEC_PI_16, 29);
+        x[2] = MP3D_V_MULSHIFT(MP3D_V_ADDSAT(x4, x3), MP3D_Q29_SEC_PI_8, 29);
+        x[3] = MP3D_V_MULSHIFT(MP3D_V_SUBSAT(x0, x5), MP3D_Q29_SEC_3PI_16, 29);
+        x[5] = MP3D_V_MULSHIFT(MP3D_V_ADDSAT(x0, x5), MP3D_Q29_SEC_5PI_16, 29);
+        x[6] = MP3D_V_MULSHIFT(MP3D_V_SUBSAT(x4, x3), MP3D_Q29_SEC_3PI_8, 29);
+        x[7] = MP3D_V_MULSHIFT(MP3D_V_SUBSAT(xt, x7), MP3D_Q29_SEC_7PI_16, 29);
+    }
+    for (i = 0; i < 7; i++, y += 4*18)
+    {
+        MP3D_V_STORE4(&y[0*18], t[0][i]);
+        MP3D_V_STORE4(&y[1*18], MP3D_V_ADDSAT(MP3D_V_ADDSAT(t[2][i], t[3][i]),
+                                              t[3][i + 1]));
+        MP3D_V_STORE4(&y[2*18], MP3D_V_ADDSAT(t[1][i], t[1][i + 1]));
+        MP3D_V_STORE4(&y[3*18],
+                      MP3D_V_ADDSAT(MP3D_V_ADDSAT(t[2][i + 1], t[3][i]),
+                                    t[3][i + 1]));
+    }
+    MP3D_V_STORE4(&y[0*18], t[0][7]);
+    MP3D_V_STORE4(&y[1*18], MP3D_V_ADDSAT(t[2][7], t[3][7]));
+    MP3D_V_STORE4(&y[2*18], t[1][7]);
+    MP3D_V_STORE4(&y[3*18], t[3][7]);
+}
+#endif /* MP3D_HAVE_INT_SIMD */
+
 static void mp3d_DCT_II(int32_t *grbuf, int n) FL_NO_EXCEPT
 {
     int i, k = 0;
+#if MP3D_HAVE_INT_SIMD
+    if (MP3D_SIMD_AVAILABLE())
+    {
+        for (; k + 4 <= n; k += 4)
+        {
+            mp3d_dct2_bands4(grbuf, k);
+        }
+    }
+#endif
     for (; k < n; k++)
     {
         int32_t t[4][8], *x, *y = grbuf + k;
@@ -2259,100 +2542,6 @@ static void mp3d_synth_pair(mp3d_sample_t *pcm, int nch, const int32_t *z) FL_NO
    up to int16, and it is the one place a 64-bit accumulator is genuinely
    required: the window coefficients reach 75038, so a single product already
    needs 48 bits before sixteen of them are summed. */
-#if MP3D_HAVE_INT_SIMD
-/* FastLED: integer vector helpers for the polyphase back-end.
-
-   The polyphase filter is the one kernel where vectorising is bit-exact for
-   free: it is a pure int32 x int32 -> int64 multiply-accumulate with no
-   intermediate rounding or saturation, and int64 addition is exact and
-   associative, so any lane arrangement reproduces the scalar result exactly.
-   Every other kernel rounds and saturates per operation, which is why they are
-   not vectorised -- see the disposition note on mp3d_synth below.
-
-   Both multiply helpers take two int32 lanes and return two int64 products:
-   `LO` for lanes 0 and 1, `HI` for lanes 2 and 3. */
-#if MP3D_INT_SIMD_NEON
-typedef int64x2_t mp3d_i64x2;
-#define MP3D_V_ZERO64()        vdupq_n_s64(0)
-#define MP3D_V_LOAD4(p)        vld1q_s32((const int32_t *)(p))
-#define MP3D_V_SPLAT(x)        vdupq_n_s32(x)
-#define MP3D_V_PREP(v)         (v)
-#define MP3D_V_MUL_LO(v, s)    vmull_s32(vget_low_s32(v), vget_low_s32(s))
-#define MP3D_V_MUL_HI(v, s)    vmull_s32(vget_high_s32(v), vget_high_s32(s))
-#define MP3D_V_ADD64(x, y)     vaddq_s64((x), (y))
-#define MP3D_V_SUB64(x, y)     vsubq_s64((x), (y))
-#define MP3D_V_GET64(x, lane)  ((lane) ? vgetq_lane_s64((x), 1) : vgetq_lane_s64((x), 0))
-/* NEON multiplies signed 32x32 -> 64 natively and is in the ARM64 baseline, so
-   there is nothing to detect. */
-#define MP3D_SIMD_AVAILABLE()  1
-#define MP3D_SIMD_TARGET
-#else /* MP3D_INT_SIMD_SSE */
-typedef __m128i mp3d_i64x2;
-#define MP3D_V_ZERO64()        _mm_setzero_si128()
-#define MP3D_V_LOAD4(p)        _mm_loadu_si128((const __m128i *)(const void *)(p))
-#define MP3D_V_SPLAT(x)        _mm_set1_epi32(x)
-/* _mm_mul_epi32 multiplies the even int32 lanes; shuffling to (0,1),(2,3) once
-   per vector lets both architectures share the accumulator bookkeeping. */
-#define MP3D_V_PREP(v)         _mm_shuffle_epi32((v), _MM_SHUFFLE(3, 1, 2, 0))
-#define MP3D_V_MUL_LO(v, s)    _mm_mul_epi32((v), (s))
-#define MP3D_V_MUL_HI(v, s)    _mm_mul_epi32(_mm_srli_si128((v), 4), (s))
-#define MP3D_V_ADD64(x, y)     _mm_add_epi64((x), (y))
-#define MP3D_V_SUB64(x, y)     _mm_sub_epi64((x), (y))
-
-static int64_t mp3d_get_i64(__m128i v, int lane) FL_NO_EXCEPT
-{
-    int64_t out[2];
-    _mm_storeu_si128((__m128i *)(void *)out, v);
-    return out[lane];
-}
-#define MP3D_V_GET64(x, lane)  mp3d_get_i64((x), (lane))
-
-/* Signed 32x32 -> 64 needs SSE4.1. SSE2 can emulate it with an unsigned
-   multiply plus a sign correction, and that was measured rather than assumed:
-   0.66x of scalar in a standalone harness, 0.95x inside the decoder. Slower is
-   not worth shipping, so SSE2-only hardware stays on the scalar kernel and the
-   vector path is chosen at run time -- the same shape as upstream's
-   have_simd() dispatch for the float kernels. The same harness measures 1.71x
-   once _mm_mul_epi32 is available. */
-#if defined(__GNUC__) || defined(__clang__)
-#define MP3D_SIMD_TARGET __attribute__((target("sse4.1")))
-#else
-#define MP3D_SIMD_TARGET
-#endif
-
-/* Self-contained: upstream's minimp3_cpuid lives inside the float SIMD block,
-   which the fixed build switches off, so this path cannot borrow it. */
-static int mp3d_have_sse41(void) FL_NO_EXCEPT
-{
-#if defined(__SSE4_1__)
-    return 1;
-#elif defined(_MSC_VER)
-    static int cached;
-    int info[4];
-    if (!cached)
-    {
-        __cpuid(info, 1);
-        cached = ((info[2] & (1 << 19)) != 0) + 1; /* ECX.SSE4_1 */
-    }
-    return cached - 1;
-#elif defined(__GNUC__) || defined(__clang__)
-    static int cached;
-    unsigned eax, ebx, ecx, edx;
-    if (!cached)
-    {
-        cached = (__get_cpuid(1, &eax, &ebx, &ecx, &edx) &&
-                  (ecx & (1u << 19))) + 1;
-    }
-    return cached - 1;
-#else
-    return 0;
-#endif
-}
-#define MP3D_SIMD_AVAILABLE()  mp3d_have_sse41()
-#endif
-
-#endif /* MP3D_HAVE_INT_SIMD */
-
 #if MP3D_HAVE_INT_SIMD
 /* One iteration's eight window taps.
 
@@ -3177,6 +3366,10 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples) FL_NO_EXC
 #undef MP3D_V_GET64
 #undef MP3D_V_PREP
 #undef MP3D_V_SIGN
+#undef MP3D_V_ADDSAT
+#undef MP3D_V_SUBSAT
+#undef MP3D_V_MULSHIFT
+#undef MP3D_V_STORE4
 #undef MP3D_HAVE_INT_SIMD
 #undef MP3D_INT_SIMD_SSE
 #undef MP3D_INT_SIMD_NEON
