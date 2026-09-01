@@ -23,7 +23,7 @@ def test_checked_in_cpu_trend_is_complete() -> None:
 
 
 def test_five_percent_regression_gate() -> None:
-    baseline = {"helix": 1_000_000, "minimp3-float": 2_000_000}
+    baseline = {"minimp3-float": 2_000_000}
     AUDIT.check_regression(baseline, dict(baseline))
     changed = dict(baseline)
     changed["minimp3-float"] = 2_100_001
@@ -66,59 +66,18 @@ entry:
     assert result.stage_sites["huffman"] == 1
 
 
-def test_helix_mulshift_accumulation_counts_one_mac() -> None:
-    llvm = """
-define i32 @MULSHIFT32(i32 %x, i32 %y) {
-entry:
-  %wide_x = sext i32 %x to i64
-  %wide_y = sext i32 %y to i64
-  %product = mul i64 %wide_x, %wide_y
-  %scaled = trunc i64 %product to i32
-  ret i32 %scaled
-}
-define i32 @AntiAlias(i32 %a, i32 %b, i32 %c) {
-entry:
-  %left = call i32 @MULSHIFT32(i32 %a, i32 %b)
-  %right = call i32 @MULSHIFT32(i32 %a, i32 %c)
-  %sum = add i32 %left, %right
-  ret i32 %sum
-}
-"""
-    result = AUDIT.instrument_llvm_ir(llvm, "helix")
-    assert result.text.count("i32 -1, i32 1, i32 0") == 1
-    assert result.text.count("i32 5, i32 0, i32 1") == 1
-
-
-def test_helix_mulshift_accumulation_survives_o0_spills_and_casts() -> None:
-    llvm = """
-define i64 @AntiAlias(i32 %a, i32 %b, ptr %slot) {
-entry:
-  %product = call i32 @MULSHIFT32(i32 %a, i32 %b)
-  store i32 %product, ptr %slot
-  %loaded = load i32, ptr %slot
-  %wide = sext i32 %loaded to i64
-  %first = add i64 %wide, 1
-  %second = sub i64 %first, 2
-  ret i64 %second
-}
-"""
-    result = AUDIT.instrument_llvm_ir(llvm, "helix")
-    assert result.text.count("i32 5, i32 0, i32 1") == 1
-
-
 def test_host_counters_combine_cycle_median_and_callgrind() -> None:
-    cycles = {"helix": 100.0, "minimp3-float": 200.0}
+    cycles = {"minimp3-float": 200.0}
     callgrind = {
         backend: {"instructions": 250, "branch_misses": 4} for backend in AUDIT.BACKENDS
     }
     counters = AUDIT.compose_host_counters(cycles, callgrind)
-    assert counters["helix"] == {
-        "cycles": 100.0,
+    assert counters["minimp3-float"] == {
+        "cycles": 200.0,
         "instructions": 250,
         "branch_misses": 4,
-        "ipc": 2.5,
+        "ipc": 1.25,
     }
-    assert counters["minimp3-float"]["ipc"] == 1.25
 
 
 def test_host_affinity_is_fail_closed() -> None:
@@ -196,10 +155,10 @@ def test_operation_ledger_is_exact_per_frame() -> None:
             for stage in AUDIT.STAGES
         },
     }
-    AUDIT.validate_operations("helix", operations)
+    AUDIT.validate_operations("minimp3-float", operations)
     operations["stages"]["imdct"]["multiplies_per_frame"] = 2.4
     with pytest.raises(RuntimeError, match="inexact derived operation metric"):
-        AUDIT.validate_operations("helix", operations)
+        AUDIT.validate_operations("minimp3-float", operations)
 
 
 def test_callgrind_attribution_keeps_codec_functions() -> None:
@@ -232,16 +191,16 @@ def test_callgrind_parser_prefers_complete_totals(tmp_path: Path) -> None:
 def test_trend_gate_rejects_more_than_five_percent() -> None:
     baseline = AUDIT.load_trend()
     current = json.loads(json.dumps(baseline))
-    counters = current["backends"]["helix"]["host"]["counter_median"]
+    counters = current["backends"]["minimp3-float"]["host"]["counter_median"]
     counters["cycles"] *= 1.051
     counters["ipc"] = round(counters["instructions"] / counters["cycles"], 6)
-    with pytest.raises(RuntimeError, match="helix/counter/cycles regressed"):
+    with pytest.raises(RuntimeError, match="minimp3-float/counter/cycles regressed"):
         AUDIT.check_trend(baseline, current)
 
 
 def test_trend_validation_rejects_inconsistent_derived_counters() -> None:
     trend = AUDIT.load_trend()
-    trend["backends"]["helix"]["host"]["counter_median"]["ipc"] = 0.5
+    trend["backends"]["minimp3-float"]["host"]["counter_median"]["ipc"] = 0.5
     with pytest.raises(RuntimeError, match="inexact derived host IPC"):
         AUDIT.validate_trend(trend)
 
@@ -260,7 +219,7 @@ def test_trend_gate_selects_known_host_baseline() -> None:
     current = json.loads(json.dumps(baseline))
     current["environment"]["cpu_model"] = "alternate hosted runner"
     current["host_key"] = AUDIT.environment_key(current["environment"])
-    primary_counters = baseline["backends"]["helix"]["host"]["counter_median"]
+    primary_counters = baseline["backends"]["minimp3-float"]["host"]["counter_median"]
     primary_counters["cycles"] /= 2
     primary_counters["ipc"] = round(
         primary_counters["instructions"] / primary_counters["cycles"], 6
@@ -279,17 +238,17 @@ def test_trend_gate_selects_known_host_baseline() -> None:
         }
     }
     AUDIT.check_trend(baseline, current)
-    counters = current["backends"]["helix"]["host"]["counter_median"]
+    counters = current["backends"]["minimp3-float"]["host"]["counter_median"]
     counters["cycles"] *= 1.051
     counters["ipc"] = round(counters["instructions"] / counters["cycles"], 6)
-    with pytest.raises(RuntimeError, match="helix/counter/cycles regressed"):
+    with pytest.raises(RuntimeError, match="minimp3-float/counter/cycles regressed"):
         AUDIT.check_trend(baseline, current)
 
 
 def test_trend_gate_checks_callgrind_function_share() -> None:
     baseline = AUDIT.load_trend()
     current = json.loads(json.dumps(baseline))
-    functions = current["backends"]["helix"]["host"]["callgrind"]["functions"]
+    functions = current["backends"]["minimp3-float"]["host"]["callgrind"]["functions"]
     function = next(iter(functions))
     functions[function] = functions[function] * 1051 // 1000
     with pytest.raises(RuntimeError, match=r"callgrind-function/.+ regressed"):

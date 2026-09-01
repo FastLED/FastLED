@@ -1896,7 +1896,6 @@ src/fl/codec/jpeg.h|void end() override;
 src/fl/codec/jpeg.h|void setProgressiveConfig(const ProgressiveConfig& config);
 src/fl/codec/mp3.cpp.hpp|Mp3Decoder::Mp3Decoder() : mImpl(fl::make_unique<third_party::Mp3StreamDecoderImpl>()) {}
 src/fl/codec/mp3.cpp.hpp|Mp3DecoderPtr Mp3::createDecoder(fl::string* error_message) {
-src/fl/codec/mp3.cpp.hpp|Mp3HelixDecoder::Mp3HelixDecoder() : mDecoder(nullptr) {
 src/fl/codec/mp3.cpp.hpp|Mp3Info Mp3::parseMp3Info(fl::span<const fl::u8> data, fl::string* error_message) {
 src/fl/codec/mp3.cpp.hpp|Mp3Info Mp3Decoder::getInfo() const {
 src/fl/codec/mp3.cpp.hpp|Mp3Info getInfo() const { return mInfo; }
@@ -1906,7 +1905,6 @@ src/fl/codec/mp3.cpp.hpp|bool Mp3Decoder::begin(fl::filebuf_ptr stream) {
 src/fl/codec/mp3.cpp.hpp|bool Mp3Decoder::decodeNextFrame(audio::Sample* out_sample) {
 src/fl/codec/mp3.cpp.hpp|bool Mp3Decoder::hasError(fl::string* msg) const {
 src/fl/codec/mp3.cpp.hpp|bool Mp3Decoder::isReady() const {
-src/fl/codec/mp3.cpp.hpp|bool Mp3HelixDecoder::init() {
 src/fl/codec/mp3.cpp.hpp|bool Mp3StreamDecoderImpl::begin(fl::filebuf_ptr stream) {
 src/fl/codec/mp3.cpp.hpp|bool Mp3StreamDecoderImpl::decodeNextFrame(audio::Sample* out_sample) {
 src/fl/codec/mp3.cpp.hpp|bool Mp3StreamDecoderImpl::fillBuffer() {
@@ -1920,12 +1918,8 @@ src/fl/codec/mp3.cpp.hpp|bool hasError(fl::string* msg = nullptr) const;
 src/fl/codec/mp3.cpp.hpp|bool isReady() const { return mStream != nullptr && mDecoder != nullptr; }
 src/fl/codec/mp3.cpp.hpp|fl::size Mp3Decoder::getPosition() const {
 src/fl/codec/mp3.cpp.hpp|fl::size getPosition() const { return mBytesProcessed; }
-src/fl/codec/mp3.cpp.hpp|fl::vector<audio::Sample> Mp3HelixDecoder::decodeToAudioSamples(const fl::u8* data, fl::size len) {
-src/fl/codec/mp3.cpp.hpp|int Mp3HelixDecoder::decodeFrame(const fl::u8** inbuf, fl::size* bytes_left) {
-src/fl/codec/mp3.cpp.hpp|int Mp3HelixDecoder::findSyncWord(const fl::u8* buf, fl::size len) {
 src/fl/codec/mp3.cpp.hpp|void Mp3Decoder::end() {
 src/fl/codec/mp3.cpp.hpp|void Mp3Decoder::reset() {
-src/fl/codec/mp3.cpp.hpp|void Mp3HelixDecoder::reset() {
 src/fl/codec/mp3.cpp.hpp|void Mp3StreamDecoderImpl::end() {
 src/fl/codec/mp3.cpp.hpp|void Mp3StreamDecoderImpl::reset() {
 src/fl/codec/mp3.cpp.hpp|void end();

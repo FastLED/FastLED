@@ -25,7 +25,12 @@ TREND_PATH = ROOT / "codec_cpu_trend.json"
 BUILD = Path(os.environ.get("CODEC_CPU_BUILD", ROOT / ".build" / "codec-cpu-audit"))
 REGRESSION_TOLERANCE = 0.05
 PROFILE_RUNS = 30
-BACKENDS = ("helix", "minimp3-float")
+# minimp3's float build. It stays the CPU-audited variant after Helix's
+# deletion: the host baselines in codec_cpu_trend.json are keyed by its symbols,
+# and re-baselining onto the fixed build is separate work (FastLED#4110). The
+# fixed path's speed is gated by the SIMD perf test in
+# tests/fl/codec/mp3_fixed_point.hpp.
+BACKENDS = ("minimp3-float",)
 STAGES = (
     "scalefactors",
     "huffman",
@@ -100,7 +105,6 @@ _STAGE_SYMBOLS: tuple[tuple[str, tuple[str, ...]], ...] = (
 )
 
 _FUSED_STAGES = {
-    "helix": {"reorder": "dequant"},
     "minimp3-float": {"dequant": "huffman"},
 }
 
@@ -264,19 +268,8 @@ def instrument_llvm_ir(
             if re.search(r"\bfmul\b", line)
             if (match := _LLVM_VALUE_RE.match(line))
         }
-        mulshift_values = {
-            match.group(1)
-            for line in body
-            if "MULSHIFT32" in line and re.search(r"\bcall\b", line)
-            if (match := _LLVM_VALUE_RE.match(line))
-        }
         float_accumulates = _tainted_accumulate_lines(
             body, fmul_values, r"\bf(?:add|sub)\b"
-        )
-        helix_accumulates = _tainted_accumulate_lines(
-            body,
-            mulshift_values,
-            r"\b(?:add|sub)(?:\s+nsw|\s+nuw)*\s+i(?:32|64)\b",
         )
         for relative, line in enumerate(body, start=start + 1):
             if (
@@ -301,27 +294,6 @@ def instrument_llvm_ir(
                 inserts.setdefault(relative, []).append(
                     "  call void @fastled_mp3_cpu_operation("
                     f"i32 {operation_stage_index}, i32 0, i32 {lanes})"
-                )
-                operation_sites += 1
-            elif (
-                operations
-                and backend == "helix"
-                and ("MULSHIFT32" in symbol or "MADD64" in symbol)
-                and re.search(r"\bmul(?:\s+nsw|\s+nuw)*\s+i64\b", line)
-            ):
-                inserts.setdefault(relative, []).append(
-                    "  call void @fastled_mp3_cpu_operation("
-                    f"i32 -1, i32 1, i32 {1 if 'MADD64' in symbol else 0})"
-                )
-                operation_sites += 1
-            elif (
-                operations
-                and backend == "helix"
-                and relative - (start + 1) in helix_accumulates
-            ):
-                inserts.setdefault(relative, []).append(
-                    "  call void @fastled_mp3_cpu_operation("
-                    f"i32 {operation_stage_index}, i32 0, i32 1)"
                 )
                 operation_sites += 1
     if operations and operation_sites == 0:
@@ -374,7 +346,6 @@ def build_instrumented_driver(*, operations: bool = True) -> InstrumentedDriver:
     BUILD.mkdir(parents=True, exist_ok=True)
     compiler = compiler_path()
     sources = {
-        "helix": ROOT / "ci" / "codec_memory" / "helix_audit.cpp",
         "minimp3-float": ROOT / "ci" / "codec_memory" / "minimp3_audit.cpp",
     }
     objects: list[Path] = []
@@ -456,7 +427,7 @@ def build_plain_driver() -> Path:
     BUILD.mkdir(parents=True, exist_ok=True)
     compiler = compiler_path()
     objects: list[Path] = []
-    for backend in ("helix", "minimp3"):
+    for backend in ("minimp3",):
         source = ROOT / "ci" / "codec_memory" / f"{backend}_audit.cpp"
         obj = BUILD / f"{backend}.plain.o"
         RunningProcess.run(
@@ -1132,14 +1103,9 @@ def _target_tools(target: str) -> TargetTools:
 def run_codegen_audit() -> dict[str, dict[str, dict[str, dict[str, int]]]]:
     BUILD.mkdir(parents=True, exist_ok=True)
     sources = {
-        "helix": Path(__file__).with_name("helix_codegen.cpp"),
         "minimp3-float": Path(__file__).with_name("minimp3_codegen.cpp"),
     }
     kernel_needles = {
-        "helix": {
-            "dct32": ("FDCT32",),
-            "polyphase": ("PolyphaseMono", "PolyphaseStereo"),
-        },
         "minimp3-float": {
             "dct32": ("mp3d_DCT_II",),
             "polyphase": ("mp3d_synth_pair",),

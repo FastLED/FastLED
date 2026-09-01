@@ -11,15 +11,6 @@
 #include "fl/stl/string.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
 
-#if defined(FASTLED_MP3_BACKEND_HELIX) &&                                   \
-    defined(FASTLED_MP3_BACKEND_MINIMP3)
-#error "Select only one FastLED MP3 backend"
-#endif
-
-#if !defined(FASTLED_MP3_BACKEND_HELIX) &&                                  \
-    !defined(FASTLED_MP3_BACKEND_MINIMP3)
-#define FASTLED_MP3_BACKEND_HELIX
-#endif
 
 namespace fl {
 
@@ -58,92 +49,19 @@ namespace third_party {
         int layer;                  // MPEG layer
     };
 
-    // Mp3HelixDecoder wraps the Helix MP3 fixed-point decoder
-    // This is exposed for testing purposes
-    class Mp3HelixDecoder {
-    public:
-        Mp3HelixDecoder() FL_NO_EXCEPT;
-        ~Mp3HelixDecoder() FL_NO_EXCEPT;
-
-        // Initialize the decoder. Returns true on success.
-        bool init();
-
-        // Reset decoder state
-        void reset();
-
-        // Decode MP3 data from the input buffer. Calls the provided callback
-        // for each decoded frame. Returns the number of frames decoded.
-        template <typename Fn>
-        int decode(const fl::u8* data, fl::size len, Fn on_frame) {
-            if (!mDecoder) {
-                return 0;
-            }
-
-            const fl::u8* inptr = data;
-            fl::size bytes_left = len;
-            int frames_decoded = 0;
-
-            while (bytes_left > 0) {
-                // Find sync word
-                int offset = findSyncWord(inptr, bytes_left);
-                if (offset < 0) {
-                    break;  // No sync word found
-                }
-
-                inptr += offset;
-                bytes_left -= offset;
-
-                // Decode one frame
-                int result = decodeFrame(&inptr, &bytes_left);
-                if (result == 0) {
-                    // Successfully decoded a frame
-                    Mp3Frame frame;
-                    frame.pcm = mPcmBuffer.get();
-                    frame.samples = mFrameInfo.outputSamps / mFrameInfo.nChans;
-                    frame.channels = mFrameInfo.nChans;
-                    frame.sample_rate = mFrameInfo.samprate;
-                    frame.bitrate = mFrameInfo.bitrate;
-                    frame.version = mFrameInfo.version;
-                    frame.layer = mFrameInfo.layer;
-
-                    on_frame(frame);
-                    frames_decoded++;
-                } else if (result < 0) {
-                    // Decode error - skip a bit and try again
-                    if (bytes_left > 0) {
-                        inptr++;
-                        bytes_left--;
-                    }
-                }
-            }
-
-            return frames_decoded;
-        }
-
-        // Decode MP3 data and convert to audio::Sample objects
-        fl::vector<audio::Sample> decodeToAudioSamples(const fl::u8* data, fl::size len);
-
-        // Public members/methods used by internal decoder implementation
-        int findSyncWord(const fl::u8* buf, fl::size len);
-        int decodeFrame(const fl::u8** inbuf, fl::size* bytes_left);
-
-        fl::unique_ptr<fl::i16[], Mp3MemoryDeleter<fl::i16>> mPcmBuffer;
-        struct FrameInfo {
-            int bitrate;
-            int nChans;
-            int samprate;
-            int bitsPerSample;
-            int outputSamps;
-            int layer;
-            int version;
-        };
-        FrameInfo mFrameInfo;
-
-    private:
-        void* mDecoder;  // HMP3Decoder handle
+    // Frame metadata shared by the decoder wrappers.
+    struct Mp3FrameInfo {
+        int bitrate;
+        int nChans;
+        int samprate;
+        int bitsPerSample;
+        int outputSamps;
+        int layer;
+        int version;
     };
 
-    // Mp3Minimp3Decoder wraps the vendored minimp3 floating-point decoder.
+    // Mp3Minimp3Decoder wraps the vendored minimp3 decoder (fixed-point by
+    // default; see MINIMP3_FLOAT_POINT for the float opt-out).
     // This is exposed for backend-parity testing.
     class Mp3Minimp3Decoder {
     public:
@@ -204,7 +122,7 @@ namespace third_party {
                         fl::size* bytes_left) FL_NO_EXCEPT;
 
         fl::unique_ptr<fl::i16[], Mp3MemoryDeleter<fl::i16>> mPcmBuffer;
-        Mp3HelixDecoder::FrameInfo mFrameInfo;
+        Mp3FrameInfo mFrameInfo;
 
     private:
         fl::unique_ptr<mp3dec_t, Mp3MemoryDeleter<mp3dec_t>> mDecoder;
@@ -264,9 +182,9 @@ FASTLED_SHARED_PTR(Mp3Decoder);
 //   - Audio quality difference: 0.67% RMS error (negligible)
 //
 // IMPORTANT: These benchmarks used native FFmpeg decoders on a desktop host.
-// Performance on embedded platforms (ESP32, ARM, etc.) using the Helix MP3
-// fixed-point decoder may differ significantly due to:
-//   - Different decoder implementations (Helix vs FFmpeg)
+// Performance on embedded platforms (ESP32, ARM, etc.) using the fixed-point
+// minimp3 decoder may differ significantly due to:
+//   - Different decoder implementations (minimp3 vs FFmpeg)
 //   - CPU architecture differences (ARM Cortex-M vs x86/x64)
 //   - Clock speeds and available RAM
 //   - Compiler optimizations and platform-specific code paths

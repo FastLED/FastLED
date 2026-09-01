@@ -45,7 +45,11 @@
    and the layout of the scratch arena, so every translation unit that sees this
    header must agree on it. Build-wide, that means defining
    FASTLED_MP3_FIXED_POINT as a compiler flag, which is why it is honoured here:
-   a flag reaches every TU, and a #define in one .cpp does not.
+   a flag reaches every TU, and a #define in one .cpp does not. Since fixed
+   point became the header's default (FastLED#4056) the flag is a no-op for a
+   normal build; it is kept because it is the documented, safe way to say
+   "fixed point everywhere" and because removing it would silently change the
+   meaning of any build that already passes it.
 
    Defining MINIMP3_FIXED_POINT directly in a single translation unit -- the
    unity build, say -- while `fl/codec/mp3.cpp.hpp` includes this header without
@@ -57,8 +61,41 @@
    The test harness in tests/fl/codec/minimp3_variants.hpp is the one safe
    exception: it sets the macro per-inclusion but also renames MINIMP3_NAMESPACE,
    so its types are distinct from production's and never meet them. */
-#if defined(FASTLED_MP3_FIXED_POINT) && !defined(MINIMP3_FIXED_POINT)
+#if defined(MINIMP3_FIXED_POINT) && defined(MINIMP3_FLOAT_POINT)
+#error "MINIMP3_FIXED_POINT and MINIMP3_FLOAT_POINT are mutually exclusive"
+#endif
+
+/* A translation unit that names MINIMP3_FLOAT_POINT means it, so the build-wide
+   flag does not override it. That is what lets the audit and reference TUs pin
+   the float variant while a build-wide -DFASTLED_MP3_FIXED_POINT is in force,
+   and it is why the pin is not silently ignorable. */
+#if defined(FASTLED_MP3_FIXED_POINT) && !defined(MINIMP3_FIXED_POINT) && \
+    !defined(MINIMP3_FLOAT_POINT)
 #define MINIMP3_FIXED_POINT 1
+#endif
+
+/* FastLED: fixed-point is the default DSP for this component.
+
+   Decided here, in the header, rather than by a build flag. The selection
+   changes MINIMP3_SCRATCH_SIZE, so every translation unit that sees this header
+   must agree on it; a flag can be passed to one TU and forgotten for another,
+   and the failure mode is a glibc malloc assertion from somewhere unrelated
+   rather than anything pointing at MP3. Deciding it in the header makes
+   disagreement impossible for a normal build.
+
+   MINIMP3_FLOAT_POINT opts back into upstream's float pipeline. It exists for
+   the golden harness, which builds both and holds the fixed path to a bounded
+   distance from the float one; it is not a supported production configuration
+   and must never be set for only part of a build. */
+#if !defined(MINIMP3_FIXED_POINT) && !defined(MINIMP3_FLOAT_POINT)
+#define MINIMP3_FIXED_POINT 1
+/* Marks the definition above as the header's, not the caller's, so the release
+   block at the end of this file can take it back. Without that, a first,
+   default inclusion would leave MINIMP3_FIXED_POINT defined and a later
+   MINIMP3_FLOAT_POINT-pinned inclusion in the same translation unit would trip
+   the mutual-exclusion #error above -- making the build order-dependent on
+   which header happened to pull minimp3 in first. */
+#define MINIMP3_FIXED_POINT_IS_HEADER_DEFAULT 1
 #endif
 
 #undef MINIMP3_HAVE_FIXED_POINT
@@ -79,8 +116,8 @@
 
 /* Scratch arena size. The fixed-point build needs a little more than the float
    build because scalefactor gains are carried as mantissa+exponent rather than
-   as a single float, so it gets its own figure rather than inflating the
-   shipping float decoder's working-RAM ledger for a variant it does not use.
+   as a single float, so each variant gets its own figure and the ledger records
+   both rather than charging one build for the other's arena.
    A static_assert on mp3dec_scratch_internal_t below enforces both. */
 #undef MINIMP3_SCRATCH_SIZE
 #if MINIMP3_HAVE_FIXED_POINT
@@ -3456,3 +3493,11 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples) FL_NO_EXC
 #undef VSUB
 
 #endif /* MINIMP3_IMPLEMENTATION && !_MINIMP3_IMPLEMENTATION_GUARD */
+
+/* Outside every guard above, so it runs on header-only inclusions too: give
+   back the variant default this header set for itself, leaving a caller's own
+   MINIMP3_FIXED_POINT alone. See MINIMP3_FIXED_POINT_IS_HEADER_DEFAULT. */
+#if defined(MINIMP3_FIXED_POINT_IS_HEADER_DEFAULT)
+#undef MINIMP3_FIXED_POINT
+#undef MINIMP3_FIXED_POINT_IS_HEADER_DEFAULT
+#endif

@@ -1,0 +1,23 @@
+# Ownership for the MP3 decoder and the evidence that gates it.
+#
+# FastLED/FastLED#4056 (Phase 5 of FastLED/license#14) made minimp3 the sole MP3
+# backend and deleted the RPSL/RCSL-licensed Helix tree. The decoder's
+# correctness, memory and CPU claims now rest entirely on the audits and ledgers
+# listed here, so a change to any of them is a change to the licensing and
+# quality argument -- not just to code.
+
+/src/third_party/minimp3/          @zackees
+/src/fl/codec/mp3.h                @zackees
+/src/fl/codec/mp3.cpp.hpp          @zackees
+/src/fl/codec/mp3_memory.h         @zackees
+/tests/fl/codec/mp3.hpp            @zackees
+/tests/fl/codec/mp3_fixed_point.hpp @zackees
+/tests/fl/codec/minimp3_variants.hpp @zackees
+/tests/profile/mp3_memory_audit.cpp @zackees
+/ci/codec_memory/                  @zackees
+/ci/codec_cpu/                     @zackees
+/ci/codec_tables/                  @zackees
+/codec_memory_ledger.md            @zackees
+/codec_cpu_trend.json              @zackees
+/.github/workflows/mp3_memory_audit.yml @zackees
+/.github/workflows/mp3_cpu_audit.yml    @zackees

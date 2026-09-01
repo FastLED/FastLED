@@ -88,9 +88,7 @@ def normalize(value: float) -> tuple[int, int]:
     # Rounded here rather than through q(), which range-checks against int32
     # and would reject the carry case below before it can be renormalised.
     scaled = (value / (2.0**exponent)) * (1 << 30)
-    mantissa = (
-        math.floor(scaled + 0.5) if scaled >= 0 else math.ceil(scaled - 0.5)
-    )
+    mantissa = math.floor(scaled + 0.5) if scaled >= 0 else math.ceil(scaled - 0.5)
     # A value just under a power of two divides to something just under 2.0 and
     # rounds up to exactly 2**31; renormalise. The halving is exact for both
     # signs because the magnitude is exactly 2**31 whenever this fires.

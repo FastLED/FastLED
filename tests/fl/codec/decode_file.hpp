@@ -239,7 +239,7 @@ static void validateJpeg(const fl::vector<fl::u8>& data) {
 
 static void validateMp3(const fl::vector<fl::u8>& data) {
     FL_CHECK_GT(data.size(), 0);
-    fl::third_party::Mp3HelixDecoder decoder;
+    fl::third_party::Mp3Minimp3Decoder decoder;
     FL_CHECK(decoder.init());
     int frames_decoded = 0;
     int sample_rate = 0;

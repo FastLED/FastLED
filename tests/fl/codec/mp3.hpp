@@ -68,11 +68,7 @@ private:
 };
 
 constexpr fl::size selectedStreamBufferSize() {
-#if defined(FASTLED_MP3_BACKEND_MINIMP3)
     return MP3_MINIMP3_STREAM_BUFFER_SIZE;
-#else
-    return MP3_HELIX_STREAM_BUFFER_SIZE;
-#endif
 }
 
 } // anonymous namespace
@@ -146,24 +142,6 @@ FL_TEST_CASE("MP3 initial allocation failures release partial state") {
         ClearMp3MemoryHook();
     }
 
-    const Mp3MemoryTag helix_tags[] = {
-        Mp3MemoryTag::DecoderState,
-        Mp3MemoryTag::Scratch,
-        Mp3MemoryTag::PcmOutput,
-    };
-    for (fl::size i = 0;
-         i < sizeof(helix_tags) / sizeof(helix_tags[0]); ++i) {
-        Mp3MemoryTestHook hook;
-        hook.reject(helix_tags[i]);
-        SetMp3MemoryHook(&hook);
-        {
-            Mp3HelixDecoder decoder;
-            FL_CHECK_FALSE(decoder.init());
-        }
-        FL_CHECK_EQ(hook.current(), 0);
-        ClearMp3MemoryHook();
-    }
-
     Mp3MemoryTestHook hook;
     hook.reject(Mp3MemoryTag::StreamBuffer);
     SetMp3MemoryHook(&hook);
@@ -197,15 +175,16 @@ namespace {
 struct Mp3DecodeResult {
     struct FrameMetadata {
         FrameMetadata(int sample_rate, int channels, int bitrate, int version,
-                      int layer)
+                      int layer, int samples)
             : mSampleRate(sample_rate), mChannels(channels), mBitrate(bitrate),
-              mVersion(version), mLayer(layer) {}
+              mVersion(version), mLayer(layer), mSamples(samples) {}
 
         int mSampleRate;
         int mChannels;
         int mBitrate;
         int mVersion;
         int mLayer;
+        int mSamples;
     };
 
     fl::vector<fl::i16> mPcm;
@@ -241,7 +220,7 @@ Mp3DecodeResult decodeMp3Corpus(const fl::vector<fl::u8>& bytes) {
             }
             result.mMetadata.push_back(Mp3DecodeResult::FrameMetadata(
                 frame.sample_rate, frame.channels, frame.bitrate,
-                frame.version, frame.layer));
+                frame.version, frame.layer, frame.samples));
             const int sample_count = frame.samples * frame.channels;
             for (int i = 0; i < sample_count; ++i) {
                 result.mPcm.push_back(frame.pcm[i]);
@@ -281,6 +260,22 @@ fl::vector<fl::i16> decodeLittleEndianPcm(
     return pcm;
 }
 
+// ISO 11172-3 / 13818-3 fix samples-per-frame by layer and MPEG version. This
+// is the independent witness the decoder's own reported sample count is checked
+// against: the count comes out of the frame decode, this comes out of the
+// header fields the same frame reported, and nothing derives one from the
+// other.
+int isoSamplesPerFrame(int layer, int version) {
+    if (layer == 1) {
+        return 384;
+    }
+    if (layer == 2) {
+        return 1152;
+    }
+    // Layer III: 1152 for MPEG-1, halved for MPEG-2 and MPEG-2.5.
+    return version == 0 ? 1152 : 576;
+}
+
 bool hasStandardVectorLength(fl::size decoded, fl::size reference) {
     return decoded == reference || decoded == reference + 1152 ||
            decoded == reference + 2304;
@@ -288,7 +283,7 @@ bool hasStandardVectorLength(fl::size decoded, fl::size reference) {
 
 } // anonymous namespace
 
-FL_TEST_CASE("MP3 golden corpus has matching backend frame behavior") {
+FL_TEST_CASE("MP3 golden corpus decodes with consistent frame metadata") {
     fl::setTestFileSystemRoot("tests/data");
     const char* corpus[] = {
         "codec/mary_had_a_little_lamb.mp3",
@@ -299,33 +294,42 @@ FL_TEST_CASE("MP3 golden corpus has matching backend frame behavior") {
         "codec/minimp3/l3-lame-vbrtag.bit",
     };
 
+    // This used to compare frame-for-frame against Helix. With Helix deleted
+    // the cross-decoder reference is gone, but the property it was really
+    // protecting -- that the decoder reports self-consistent metadata for every
+    // frame of every corpus file and produces the sample count that metadata
+    // implies -- does not need a second decoder to check. The ISO reference
+    // vectors below, and the fixed-vs-float gates in mp3_fixed_point.hpp, are
+    // what pin the actual sample values.
     for (const char* path : corpus) {
         const fl::vector<fl::u8> bytes = loadMp3CorpusFile(path);
-        const Mp3DecodeResult helix = decodeMp3Corpus<Mp3HelixDecoder>(bytes);
-        const Mp3DecodeResult minimp3 =
+        const Mp3DecodeResult decoded =
             decodeMp3Corpus<Mp3Minimp3Decoder>(bytes);
 
-        FL_CHECK_GT(helix.mFrames, 0);
-        FL_CHECK_EQ(minimp3.mFrames, helix.mFrames);
-        FL_CHECK_EQ(minimp3.mPcm.size(), helix.mPcm.size());
-        FL_CHECK_EQ(minimp3.mSampleRate, helix.mSampleRate);
-        FL_CHECK_EQ(minimp3.mChannels, helix.mChannels);
-        FL_REQUIRE_EQ(minimp3.mMetadata.size(), helix.mMetadata.size());
-        for (fl::size i = 0; i < helix.mMetadata.size(); ++i) {
-            FL_CHECK_EQ(minimp3.mMetadata[i].mSampleRate,
-                        helix.mMetadata[i].mSampleRate);
-            FL_CHECK_EQ(minimp3.mMetadata[i].mChannels,
-                        helix.mMetadata[i].mChannels);
-            FL_CHECK_EQ(minimp3.mMetadata[i].mBitrate,
-                        helix.mMetadata[i].mBitrate);
-            FL_CHECK_EQ(minimp3.mMetadata[i].mVersion,
-                        helix.mMetadata[i].mVersion);
-            FL_CHECK_EQ(minimp3.mMetadata[i].mLayer,
-                        helix.mMetadata[i].mLayer);
+        FL_CHECK_GT(decoded.mFrames, 0);
+        FL_CHECK_GT(decoded.mPcm.size(), 0u);
+        FL_REQUIRE_EQ(decoded.mMetadata.size(),
+                      static_cast<fl::size>(decoded.mFrames));
+
+        fl::size expected_samples = 0;
+        for (fl::size i = 0; i < decoded.mMetadata.size(); ++i) {
+            const Mp3DecodeResult::FrameMetadata& frame = decoded.mMetadata[i];
+            FL_CHECK_EQ(frame.mSampleRate, decoded.mSampleRate);
+            FL_CHECK_EQ(frame.mChannels, decoded.mChannels);
+            // Free-format frames carry bitrate index 0; the wrapper derives a
+            // real figure from the frame length in that case, so every decoded
+            // frame reports a positive bitrate either way.
+            FL_CHECK_GT(frame.mBitrate, 0);
+            const int iso_samples =
+                isoSamplesPerFrame(frame.mLayer, frame.mVersion);
+            FL_CHECK_EQ(frame.mSamples, iso_samples);
+            expected_samples +=
+                static_cast<fl::size>(iso_samples * frame.mChannels);
         }
-        printf("MP3 golden %s: frames=%d samples=%zu report-only PSNR=%.2f dB\n",
-               path, helix.mFrames, helix.mPcm.size(),
-               reportPsnr(helix.mPcm, minimp3.mPcm));
+        FL_CHECK_EQ(decoded.mPcm.size(), expected_samples);
+        printf("MP3 golden %s: frames=%d samples=%zu %d Hz %d ch\n", path,
+               decoded.mFrames, decoded.mPcm.size(), decoded.mSampleRate,
+               decoded.mChannels);
     }
 }
 
@@ -343,7 +347,7 @@ FL_TEST_CASE("minimp3 Layer I synthesis matches its reference vector") {
     FL_CHECK_GT(reportPsnr(reference, decoded.mPcm), 60.0);
 }
 
-FL_TEST_CASE("MP3 backends agree on resync and truncated input") {
+FL_TEST_CASE("MP3 decoder resyncs past garbage and survives truncation") {
     fl::setTestFileSystemRoot("tests/data");
     const fl::vector<fl::u8> bitstream =
         loadMp3CorpusFile("codec/minimp3/l3-hecommon.bit");
@@ -354,22 +358,43 @@ FL_TEST_CASE("MP3 backends agree on resync and truncated input") {
     fl::memcpy(with_garbage.data() + garbage_bytes, bitstream.data(),
                bitstream.size());
 
-    const Mp3DecodeResult helix_resync =
-        decodeMp3Corpus<Mp3HelixDecoder>(with_garbage);
-    const Mp3DecodeResult minimp3_resync =
+    // This was a two-backend agreement test. Agreement was never the property
+    // worth having here -- both decoders could have skipped the same wrong
+    // number of frames. What resync actually owes is that 19 bytes of leading
+    // garbage cost nothing: the same frames come out either way.
+    const Mp3DecodeResult clean = decodeMp3Corpus<Mp3Minimp3Decoder>(bitstream);
+    const Mp3DecodeResult resynced =
         decodeMp3Corpus<Mp3Minimp3Decoder>(with_garbage);
-    FL_CHECK_GT(helix_resync.mFrames, 0);
-    FL_CHECK_EQ(minimp3_resync.mFrames, helix_resync.mFrames);
-    FL_CHECK_EQ(minimp3_resync.mPcm.size(), helix_resync.mPcm.size());
+    FL_CHECK_GT(clean.mFrames, 0);
+    FL_CHECK_EQ(resynced.mFrames, clean.mFrames);
+    FL_REQUIRE_EQ(resynced.mPcm.size(), clean.mPcm.size());
+    for (fl::size i = 0; i < clean.mPcm.size(); ++i) {
+        FL_REQUIRE_EQ(resynced.mPcm[i], clean.mPcm[i]);
+    }
 
+    // Truncated input must terminate, and every frame it does report must be
+    // a whole frame -- the failure mode worth catching is the decoder emitting
+    // a partial final frame padded with garbage rather than stopping. Sizing
+    // the expectation from the ISO samples-per-frame rule rather than from the
+    // decoder's own reported count is what makes that catchable.
     const fl::vector<fl::u8> truncated =
         loadMp3CorpusFile("codec/minimp3/l3-compl-cut.mp3");
-    const Mp3DecodeResult helix_truncated =
-        decodeMp3Corpus<Mp3HelixDecoder>(truncated);
-    const Mp3DecodeResult minimp3_truncated =
+    const Mp3DecodeResult truncated_result =
         decodeMp3Corpus<Mp3Minimp3Decoder>(truncated);
-    FL_CHECK_EQ(minimp3_truncated.mFrames, helix_truncated.mFrames);
-    FL_CHECK_EQ(minimp3_truncated.mPcm.size(), helix_truncated.mPcm.size());
+    FL_CHECK_GT(truncated_result.mFrames, 0);
+    FL_REQUIRE_EQ(truncated_result.mMetadata.size(),
+                  static_cast<fl::size>(truncated_result.mFrames));
+    fl::size truncated_samples = 0;
+    for (fl::size i = 0; i < truncated_result.mMetadata.size(); ++i) {
+        const Mp3DecodeResult::FrameMetadata& frame =
+            truncated_result.mMetadata[i];
+        const int iso_samples =
+            isoSamplesPerFrame(frame.mLayer, frame.mVersion);
+        FL_CHECK_EQ(frame.mSamples, iso_samples);
+        truncated_samples +=
+            static_cast<fl::size>(iso_samples * frame.mChannels);
+    }
+    FL_CHECK_EQ(truncated_result.mPcm.size(), truncated_samples);
 }
 
 FL_TEST_CASE("MP3 public stream terminates on truncated input") {
@@ -392,7 +417,6 @@ FL_TEST_CASE("MP3 public stream terminates on truncated input") {
     FL_CHECK_FALSE(decoder.hasError());
 }
 
-#if defined(FASTLED_MP3_BACKEND_MINIMP3)
 FL_TEST_CASE("MP3 public minimp3 stream discovers large free-format frames") {
     fl::setTestFileSystemRoot("tests/data");
     const fl::vector<fl::u8> source =
@@ -434,7 +458,6 @@ FL_TEST_CASE("MP3 public minimp3 stream discovers large free-format frames") {
     FL_CHECK(decoder.decodeNextFrame(&sample));
     FL_CHECK_FALSE(decoder.hasError());
 }
-#endif
 
 FL_TEST_CASE("MP3 public stream recovers a valid frame after corruption") {
     fl::setTestFileSystemRoot("tests/data");
@@ -475,33 +498,27 @@ FL_TEST_CASE("MP3 public stream recovers a valid frame after corruption") {
     FL_CHECK_FALSE(decoder.hasError());
 }
 
-FL_TEST_CASE("MP3 backends pass the limited-accuracy reference floor") {
+FL_TEST_CASE("MP3 decoder passes the limited-accuracy reference floor") {
     fl::setTestFileSystemRoot("tests/data");
     const fl::vector<fl::u8> bitstream =
         loadMp3CorpusFile("codec/minimp3/l3-hecommon.bit");
     const fl::vector<fl::i16> reference = decodeLittleEndianPcm(
         loadMp3CorpusFile("codec/minimp3/l3-hecommon.pcm"));
-    const Mp3DecodeResult helix = decodeMp3Corpus<Mp3HelixDecoder>(bitstream);
     const Mp3DecodeResult minimp3 =
         decodeMp3Corpus<Mp3Minimp3Decoder>(bitstream);
 
-    FL_CHECK_EQ(minimp3.mFrames, helix.mFrames);
-    FL_CHECK_TRUE(hasStandardVectorLength(helix.mPcm.size(), reference.size()));
     FL_CHECK_TRUE(
         hasStandardVectorLength(minimp3.mPcm.size(), reference.size()));
 
-    const double helix_psnr = reportPsnr(reference, helix.mPcm);
     const double minimp3_psnr = reportPsnr(reference, minimp3.mPcm);
-    FL_CHECK_GE(helix_psnr, 60.0);
     FL_CHECK_GE(minimp3_psnr, 60.0);
-    printf("MP3 limited-accuracy vector: Helix=%.2f dB minimp3=%.2f dB\n",
-           helix_psnr, minimp3_psnr);
+    printf("MP3 limited-accuracy vector: minimp3=%.2f dB\n", minimp3_psnr);
 }
 
 // Minimal valid MP3 frame header (Layer III, MPEG1, 44.1kHz, 128kbps, mono)
 // This is a synthetic test - we'll just test initialization and basic API
-FL_TEST_CASE("Mp3HelixDecoder initialization") {
-    Mp3HelixDecoder decoder;
+FL_TEST_CASE("Mp3Minimp3Decoder initialization") {
+    Mp3Minimp3Decoder decoder;
 
     // Test initialization
     bool init_result = decoder.init();
@@ -511,8 +528,8 @@ FL_TEST_CASE("Mp3HelixDecoder initialization") {
     decoder.reset();
 }
 
-FL_TEST_CASE("Mp3HelixDecoder basic decode test") {
-    Mp3HelixDecoder decoder;
+FL_TEST_CASE("Mp3Minimp3Decoder basic decode test") {
+    Mp3Minimp3Decoder decoder;
     FL_CHECK(decoder.init());
 
     // Use a buffer large enough for the decoder to read without OOB access.
@@ -537,8 +554,8 @@ FL_TEST_CASE("Mp3HelixDecoder basic decode test") {
     FL_CHECK(frames >= 0);  // Just verify the callback mechanism works
 }
 
-FL_TEST_CASE("Mp3HelixDecoder empty data") {
-    Mp3HelixDecoder decoder;
+FL_TEST_CASE("Mp3Minimp3Decoder empty data") {
+    Mp3Minimp3Decoder decoder;
     FL_CHECK(decoder.init());
 
     fl::u8 empty_data[] = {};
@@ -551,8 +568,8 @@ FL_TEST_CASE("Mp3HelixDecoder empty data") {
     FL_CHECK_EQ(frames, 0);  // No frames from empty data
 }
 
-FL_TEST_CASE("Mp3HelixDecoder decodeToAudioSamples") {
-    Mp3HelixDecoder decoder;
+FL_TEST_CASE("Mp3Minimp3Decoder decodeToAudioSamples") {
+    Mp3Minimp3Decoder decoder;
     FL_CHECK(decoder.init());
 
     // Use a buffer large enough for the decoder to read without OOB access
@@ -569,7 +586,7 @@ FL_TEST_CASE("Mp3HelixDecoder decodeToAudioSamples") {
     FL_CHECK(samples.size() >= 0);
 }
 
-FL_TEST_CASE("Mp3HelixDecoder - Decode real MP3 file") {
+FL_TEST_CASE("Mp3Minimp3Decoder - Decode real MP3 file") {
     // Set up filesystem to point to tests/data directory
     fl::setTestFileSystemRoot("tests/data");
 
@@ -592,7 +609,7 @@ FL_TEST_CASE("Mp3HelixDecoder - Decode real MP3 file") {
     file.close();
 
     // Decode MP3 data
-    Mp3HelixDecoder decoder;
+    Mp3Minimp3Decoder decoder;
     FL_CHECK(decoder.init());
 
     int frames_decoded = 0;
@@ -620,7 +637,7 @@ FL_TEST_CASE("Mp3HelixDecoder - Decode real MP3 file") {
            frames_decoded, total_samples, sample_rate, channels);
 }
 
-FL_TEST_CASE("Mp3HelixDecoder - Convert to fl::audio::AudioSamples from real file") {
+FL_TEST_CASE("Mp3Minimp3Decoder - Convert to fl::audio::AudioSamples from real file") {
     // Set up filesystem to point to tests/data directory
     fl::setTestFileSystemRoot("tests/data");
 
@@ -639,7 +656,7 @@ FL_TEST_CASE("Mp3HelixDecoder - Convert to fl::audio::AudioSamples from real fil
     file.close();
 
     // Decode to fl::audio::AudioSamples
-    Mp3HelixDecoder decoder;
+    Mp3Minimp3Decoder decoder;
     FL_CHECK(decoder.init());
 
     fl::vector<fl::audio::Sample> samples = decoder.decodeToAudioSamples(mp3_data.data(), mp3_data.size());
