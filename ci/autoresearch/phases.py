@@ -2960,9 +2960,22 @@ async def _run_mp3_tests(ctx: RunContext) -> int:
             and shared_ok
         ):
             micros = int(data.get("decode_micros", 0))
+            samples = int(data.get("samples_decoded", 0))
+            frames = int(data.get("frames_decoded", 0))
+            combined = int(data.get("combined_fnv1a", 0)) & 0xFFFFFFFF
+            # Say what was actually decoded. A pass that reports only zeros is
+            # indistinguishable from a pass that decoded nothing at all.
+            if samples == 0 or frames == 0:
+                print(
+                    f"{Fore.RED}MP3 CODEC TEST INCONCLUSIVE: device reported "
+                    f"success but decoded {frames} frames / {samples} samples"
+                    f"{Style.RESET_ALL}"
+                )
+                return 1
             print(
                 f"{Fore.GREEN}MP3 CODEC TEST PASSED "
-                f"({streams_run} streams, bit-exact, {micros} us)"
+                f"({streams_run} streams, {frames} frames, {samples} samples, "
+                f"combined_fnv1a=0x{combined:08x}, bit-exact, {micros} us)"
                 f"{Style.RESET_ALL}"
             )
             return 0

@@ -44,6 +44,12 @@ struct Result {
     fl::u32 decode_micros;
     fl::u32 scratch_bytes;
     bool shared_decoder_matched;
+    /* Populated on every run, pass or fail. A green result that reports only
+       zeros is not evidence that anything was decoded -- it just means nothing
+       tripped the failure path. These say what the device actually produced. */
+    fl::u32 samples_decoded;
+    fl::u32 frames_decoded;
+    fl::u32 combined_fnv1a;
 };
 
 inline fl::u32 fnv1a(fl::u32 hash, const fl::i16* samples, fl::u32 count) {
@@ -51,6 +57,15 @@ inline fl::u32 fnv1a(fl::u32 hash, const fl::i16* samples, fl::u32 count) {
         const fl::u16 v = (fl::u16)samples[i];
         hash = (hash ^ (fl::u8)(v & 0xFF)) * 16777619u;
         hash = (hash ^ (fl::u8)(v >> 8)) * 16777619u;
+    }
+    return hash;
+}
+
+/// Fold one stream's checksum into the run-wide one, so a single reported
+/// value covers every stream in order.
+inline fl::u32 fnv1a_mix(fl::u32 hash, fl::u32 value) {
+    for (int byte = 0; byte < 4; ++byte) {
+        hash = (hash ^ (fl::u8)((value >> (byte * 8)) & 0xFF)) * 16777619u;
     }
     return hash;
 }
@@ -113,6 +128,7 @@ inline Result run() {
     r.first_failure = nullptr;
     r.scratch_bytes = (fl::u32)sizeof(fl::third_party::mp3dec_scratch_t);
     r.shared_decoder_matched = true;
+    r.combined_fnv1a = 2166136261u;
 
     // The decoder state and scratch arena are far too large for the stack on a
     // microcontroller -- roughly 11 KB and 8 KB -- so they go on the heap, once.
@@ -137,6 +153,9 @@ inline Result run() {
         fl::third_party::mp3dec_init(dec.get());
         const Decoded got = decodeStream(dec.get(), scratch.get(), pcm.get(), s);
         ++r.streams_run;
+        r.samples_decoded += got.samples;
+        r.frames_decoded += got.frames;
+        r.combined_fnv1a = fnv1a_mix(r.combined_fnv1a, got.fnv1a);
         if (got.fnv1a != s.fnv1a || got.samples != s.samples ||
             got.frames != s.frames) {
             recordFailure(r, s.name, s.fnv1a, got.fnv1a, s.samples,
