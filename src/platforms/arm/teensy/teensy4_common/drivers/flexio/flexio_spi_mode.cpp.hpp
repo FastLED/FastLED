@@ -33,6 +33,7 @@
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/flexio_internal.h"
 
 #include "fl/log/log.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/cstring.h"
 
 // IWYU pragma: begin_keep
@@ -64,7 +65,7 @@ namespace fl {
 // Private namespace for this TU's internal state + helpers. Avoids name
 // collisions with the sibling `objectfled_spi_mode.cpp.hpp` TU in the
 // unity build (`fl/build/platforms+.cpp`): both would otherwise define
-// identically-named `sSpiCurrentPins` / `sSpiDmaChannel` / etc. at fl::
+// identically-named `fxspi().currentPins` / `fxspi().dmaChannel` / etc. at fl::
 // namespace scope -- a redefinition. Per user directive 2026-06-27
 // "when in doubt use private namespaces" (#3428).
 namespace detail::flexio_spi_internal {
@@ -105,30 +106,43 @@ static constexpr u32 kSpiClockMaxHz = 25000000u;   // 25 MHz ceiling
 // Module State
 // ============================================================================
 
-static DMAChannel* sSpiDmaChannel = nullptr;
-static volatile bool sSpiDmaComplete = true;
-static bool sSpiInitialized = false;
-static FlexIOSPIPinInfo sSpiCurrentPins{};
-// Saved IOMUXC mux values so flexio_spi_deinit() can return the pads to a
-// safe ALT5 (GPIO) input without remembering the original alt function the
-// user had configured. ALT5 + SION=0 = pin functions as a plain GPIO input.
-static u32 sSpiSavedMosiMux = 0;
-static u32 sSpiSavedSclkMux = 0;
+/// SPI-mode driver state, in a Singleton rather than at namespace scope so the
+/// linker can drop it whole on boards that never use FlexIO SPI. Same ISR-safety
+/// reasoning as FlexIoDmaState in flexio_driver.cpp.hpp: the Singleton's storage
+/// and pointer are constant-initialized function-local statics, so no
+/// `__cxa_guard` is emitted, and flexio_spi_dma_init() touches the state before
+/// attachInterrupt(), so the one-time construction never happens in interrupt
+/// context.
+struct FlexIoSpiState {
+    DMAChannel* dmaChannel = nullptr;
+    volatile bool dmaComplete = true;
+    bool initialized = false;
+    FlexIOSPIPinInfo currentPins{};
+    // Saved IOMUXC mux values so flexio_spi_deinit() can return the pads to a
+    // safe ALT5 (GPIO) input without remembering the original alt function the
+    // user had configured. ALT5 + SION=0 = pin functions as a plain GPIO input.
+    u32 savedMosiMux = 0;
+    u32 savedSclkMux = 0;
+};
+
+static inline FlexIoSpiState& fxspi() FL_NO_EXCEPT {
+    return fl::Singleton<FlexIoSpiState>::instance();
+}
 
 // ============================================================================
 // DMA ISR
 // ============================================================================
 
 static void flexio_spi_dma_isr() {
-    // Guard: deinit() can delete sSpiDmaChannel while a pending IRQ is still
+    // Guard: deinit() can delete fxspi().dmaChannel while a pending IRQ is still
     // queued at the NVIC. Mirror flexio_driver.cpp.hpp:158 fix.
-    if (sSpiDmaChannel != nullptr) {
-        sSpiDmaChannel->clearInterrupt();
+    if (fxspi().dmaChannel != nullptr) {
+        fxspi().dmaChannel->clearInterrupt();
     }
     // Ensure the clearInterrupt() store reaches eDMA before the ISR returns
     // (Cortex-M7 posted-write barrier). Matches flexio_driver.cpp.hpp DSB.
     asm volatile("dsb" ::: "memory");
-    sSpiDmaComplete = true;
+    fxspi().dmaComplete = true;
 }
 
 }  // namespace detail::flexio_spi_internal
@@ -189,7 +203,7 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
         FL_LOG_FLEXIO_F("FlexIO_SPI: init refused -- clock_hz == 0");
         return false;
     }
-    if (sSpiInitialized) {
+    if (fxspi().initialized) {
         flexio_spi_deinit();
     }
 
@@ -233,8 +247,8 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
     // flexio_pin_init() in flexio_driver.cpp.hpp for the full investigation
     // -- without SION the pad stays gated and no signal appears.)
     // ------------------------------------------------------------------
-    sSpiSavedMosiMux = *(pin_info.mosi_mux_reg);
-    sSpiSavedSclkMux = *(pin_info.sclk_mux_reg);
+    fxspi().savedMosiMux = *(pin_info.mosi_mux_reg);
+    fxspi().savedSclkMux = *(pin_info.sclk_mux_reg);
     // Used by the DMA-alloc-failure cleanup below to restore pin muxes;
     // a future patch may also restore them in flexio_spi_deinit().
 
@@ -353,33 +367,33 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
 
     // DMA channel allocate-once. SHIFTSDEN stays OFF until show() so a
     // pre-armed channel cannot fire on a stale half-programmed TCD.
-    if (sSpiDmaChannel == nullptr) {
-        sSpiDmaChannel = new DMAChannel();  // ok bare allocation -- one-shot
-        if (sSpiDmaChannel == nullptr) {
+    if (fxspi().dmaChannel == nullptr) {
+        fxspi().dmaChannel = new DMAChannel();  // ok bare allocation -- one-shot
+        if (fxspi().dmaChannel == nullptr) {
             FL_LOG_FLEXIO_F("FlexIO_SPI: failed to allocate DMA channel");
             // Restore pin muxes -- without this, MOSI/SCLK stay stolen by
             // the failed init (we already switched them to ALT4|SION above)
             // and any subsequent re-init at different pins would dangle.
             // Per coderabbitai review on PR #3431.
             SPI_FLEXIO2_CTRL = 0;
-            *(pin_info.mosi_mux_reg) = sSpiSavedMosiMux;
-            *(pin_info.sclk_mux_reg) = sSpiSavedSclkMux;
+            *(pin_info.mosi_mux_reg) = fxspi().savedMosiMux;
+            *(pin_info.sclk_mux_reg) = fxspi().savedSclkMux;
             return false;
         }
-        sSpiDmaChannel->triggerAtHardwareEvent(DMAMUX_SOURCE_FLEXIO2_REQUEST0);
-        sSpiDmaChannel->attachInterrupt(flexio_spi_dma_isr);
+        fxspi().dmaChannel->triggerAtHardwareEvent(DMAMUX_SOURCE_FLEXIO2_REQUEST0);
+        fxspi().dmaChannel->attachInterrupt(flexio_spi_dma_isr);
     }
 
     // Save pin info for deinit pad-restore.
-    sSpiCurrentPins = pin_info;
+    fxspi().currentPins = pin_info;
 
     // Enable FlexIO. FASTACC stays OFF -- it requires FlexIO clock >= 2x
     // bus clock, but on Teensy 4.x the bus is 600 MHz and FlexIO is
     // 120 MHz, so FASTACC=1 would corrupt reads. See flexio_driver.cpp.hpp.
     SPI_FLEXIO2_CTRL = FLEXIO_CTRL_FLEXEN;
 
-    sSpiInitialized = true;
-    sSpiDmaComplete = true;
+    fxspi().initialized = true;
+    fxspi().dmaComplete = true;
     return true;
 }
 
@@ -389,7 +403,7 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
 
 bool flexio_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT {
     using namespace detail::flexio_spi_internal;
-    if (!sSpiInitialized || !sSpiDmaChannel || !buffer || num_bytes == 0) {
+    if (!fxspi().initialized || !fxspi().dmaChannel || !buffer || num_bytes == 0) {
         return false;
     }
 
@@ -400,11 +414,11 @@ bool flexio_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT {
     // flexio_spi_wait() can return early via its 50 ms timeout; if it does,
     // DMA is still live and modifying the TCD mid-transfer is UB on
     // i.MX RT eDMA. Mirrors flexio_show() in flexio_driver.cpp.hpp.
-    sSpiDmaChannel->disable();
-    sSpiDmaChannel->clearComplete();
-    sSpiDmaChannel->clearInterrupt();
-    sSpiDmaChannel->clearError();
-    sSpiDmaComplete = true;
+    fxspi().dmaChannel->disable();
+    fxspi().dmaChannel->clearComplete();
+    fxspi().dmaChannel->clearInterrupt();
+    fxspi().dmaChannel->clearError();
+    fxspi().dmaComplete = true;
 
     // Disarm the FlexIO->DMA request line while we re-program the TCD.
     SPI_FLEXIO2_SHIFTSDEN = 0;
@@ -441,24 +455,24 @@ bool flexio_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT {
     // starting from bit7; if it comes out reversed, switch to
     // SHIFTBUFBIS and adjust SOFF/SSIZE.
     // ------------------------------------------------------------------
-    sSpiDmaChannel->TCD->SADDR = buffer;
-    sSpiDmaChannel->TCD->SOFF  = 1;
-    sSpiDmaChannel->TCD->ATTR  = DMA_TCD_ATTR_SSIZE(0) | DMA_TCD_ATTR_DSIZE(0);
-    sSpiDmaChannel->TCD->NBYTES_MLNO = 1;
-    sSpiDmaChannel->TCD->SLAST = -(i32)num_bytes;
-    sSpiDmaChannel->TCD->DADDR = &SPI_FLEXIO2_SHIFTBUFBBS[0];
-    sSpiDmaChannel->TCD->DOFF  = 0;
-    sSpiDmaChannel->TCD->CITER_ELINKNO = num_bytes;
-    sSpiDmaChannel->TCD->BITER_ELINKNO = num_bytes;
-    sSpiDmaChannel->TCD->DLASTSGA = 0;
-    sSpiDmaChannel->TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ;
+    fxspi().dmaChannel->TCD->SADDR = buffer;
+    fxspi().dmaChannel->TCD->SOFF  = 1;
+    fxspi().dmaChannel->TCD->ATTR  = DMA_TCD_ATTR_SSIZE(0) | DMA_TCD_ATTR_DSIZE(0);
+    fxspi().dmaChannel->TCD->NBYTES_MLNO = 1;
+    fxspi().dmaChannel->TCD->SLAST = -(i32)num_bytes;
+    fxspi().dmaChannel->TCD->DADDR = &SPI_FLEXIO2_SHIFTBUFBBS[0];
+    fxspi().dmaChannel->TCD->DOFF  = 0;
+    fxspi().dmaChannel->TCD->CITER_ELINKNO = num_bytes;
+    fxspi().dmaChannel->TCD->BITER_ELINKNO = num_bytes;
+    fxspi().dmaChannel->TCD->DLASTSGA = 0;
+    fxspi().dmaChannel->TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ;
 
-    sSpiDmaComplete = false;
+    fxspi().dmaComplete = false;
 
     // Arm the channel BEFORE enabling the FlexIO->DMA request line, so the
     // first DMA request lands on a fully-armed TCD (same FX-CRIT-2
     // ordering pattern as flexio_show()).
-    sSpiDmaChannel->enable();
+    fxspi().dmaChannel->enable();
     SPI_FLEXIO2_SHIFTSDEN = (1u << 0);  // shifter-0-empty -> DMA request
 
     return true;
@@ -470,7 +484,7 @@ bool flexio_spi_show(const u8* buffer, u32 num_bytes) FL_NO_EXCEPT {
 
 void flexio_spi_wait() FL_NO_EXCEPT {
     using namespace detail::flexio_spi_internal;
-    if (sSpiDmaComplete) return;
+    if (fxspi().dmaComplete) return;
 
     // Bounded 50 ms wait for the DMA major-loop completion.
     // 25 MHz SCLK * 8 bits/byte means worst-case 320 ns/byte, so even a
@@ -478,17 +492,17 @@ void flexio_spi_wait() FL_NO_EXCEPT {
     // than any plausible APA102 frame needs.
     const u32 start = millis();
     const u32 timeout_ms = 50;
-    while (!sSpiDmaComplete) {
+    while (!fxspi().dmaComplete) {
         if ((u32)(millis() - start) >= timeout_ms) {
             // Force-recover so the next show() is not blocked forever.
             // Matches the flexio_wait() FX-MED-4 recovery pattern.
-            if (sSpiDmaChannel) {
-                sSpiDmaChannel->disable();
-                sSpiDmaChannel->clearComplete();
-                sSpiDmaChannel->clearError();
+            if (fxspi().dmaChannel) {
+                fxspi().dmaChannel->disable();
+                fxspi().dmaChannel->clearComplete();
+                fxspi().dmaChannel->clearError();
             }
             SPI_FLEXIO2_SHIFTSDEN = 0;
-            sSpiDmaComplete = true;
+            fxspi().dmaComplete = true;
             FL_LOG_FLEXIO_F("FlexIO_SPI: wait timed out after %u ms -- recovering",
                             (unsigned)timeout_ms);
             return;
@@ -518,7 +532,7 @@ void flexio_spi_wait() FL_NO_EXCEPT {
 
 void flexio_spi_deinit() FL_NO_EXCEPT {
     using namespace detail::flexio_spi_internal;
-    if (!sSpiInitialized) return;
+    if (!fxspi().initialized) return;
 
     flexio_spi_wait();
 
@@ -532,32 +546,32 @@ void flexio_spi_deinit() FL_NO_EXCEPT {
     SPI_FLEXIO2_TIMCFG[0]   = 0;
     SPI_FLEXIO2_TIMCMP[0]   = 0;
 
-    if (sSpiDmaChannel) {
+    if (fxspi().dmaChannel) {
         // Order: disable ERQ -> detach interrupt -> clear pending NVIC IRQ
         // -> mark pointer null -> delete. Without the detach + IRQ clear,
         // a pending interrupt vector dereferences a deleted channel
         // (same #3410 IMPRECISERR class fault we hit in clockless deinit).
-        sSpiDmaChannel->disable();
-        sSpiDmaChannel->detachInterrupt();
-        sSpiDmaChannel->clearInterrupt();
-        DMAChannel* to_delete = sSpiDmaChannel;
-        sSpiDmaChannel = nullptr;
+        fxspi().dmaChannel->disable();
+        fxspi().dmaChannel->detachInterrupt();
+        fxspi().dmaChannel->clearInterrupt();
+        DMAChannel* to_delete = fxspi().dmaChannel;
+        fxspi().dmaChannel = nullptr;
         delete to_delete;  // ok bare allocation
     }
 
     // Restore pad mux to ALT5 (GPIO) input. Drop SION so the pad is fully
     // released from FlexIO; the caller can re-pinMode() if they want to
     // reuse the pin for something else after deinit.
-    if (sSpiCurrentPins.mosi_mux_reg) {
-        *(sSpiCurrentPins.mosi_mux_reg) = 5u;
+    if (fxspi().currentPins.mosi_mux_reg) {
+        *(fxspi().currentPins.mosi_mux_reg) = 5u;
     }
-    if (sSpiCurrentPins.sclk_mux_reg) {
-        *(sSpiCurrentPins.sclk_mux_reg) = 5u;
+    if (fxspi().currentPins.sclk_mux_reg) {
+        *(fxspi().currentPins.sclk_mux_reg) = 5u;
     }
 
-    sSpiInitialized = false;
-    sSpiDmaComplete = true;
-    sSpiCurrentPins = FlexIOSPIPinInfo{};
+    fxspi().initialized = false;
+    fxspi().dmaComplete = true;
+    fxspi().currentPins = FlexIOSPIPinInfo{};
 }
 
 }  // namespace fl

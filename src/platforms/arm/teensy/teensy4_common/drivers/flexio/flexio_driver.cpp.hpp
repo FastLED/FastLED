@@ -10,6 +10,7 @@
 
 #include "fl/log/log.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/singleton.h"
 #include "fl/stl/static_assert.h"
 
 // IWYU pragma: begin_keep
@@ -136,26 +137,51 @@ static volatile u32* FLEXIO2_TIMCMP    = (volatile u32*)(kFLEXIO2_BASE + 0x500);
 // Module State
 // ============================================================================
 
-static DMAChannel* sDmaChannel = nullptr;
-static volatile bool sDmaComplete = true;
-static bool sInitialized = false;
-static u8 sFlexIOPin = 0;
-static u32 sLatchCycles = 0;
-static FlexIOPinInfo sCurrentPinInfo{};
+/// Driver state, held in a Singleton rather than at namespace scope so the
+/// linker can drop it whole on boards that never touch FlexIO
+/// (SingletonElisionChecker).
+///
+/// Safe from the DMA ISR, which is not obvious and is the reason this is
+/// spelled out. `Singleton<T>::instance()` keeps its storage and its pointer in
+/// function-local statics that are both constant-initialized, so no
+/// `__cxa_guard` is emitted and a steady-state access is a load, a test and a
+/// branch -- verified on the generated object, not assumed. The one-time
+/// placement-new therefore cannot run inside an interrupt either, because
+/// flexio_dma_init() below touches the state before it calls attachInterrupt():
+/// by the time the vector is live, the instance exists.
+///
+/// The volatile qualifiers move with the members; they are what the ISR and the
+/// wait loop rely on, not the storage location.
+struct FlexIoDmaState {
+    DMAChannel* dmaChannel = nullptr;
+    volatile bool dmaComplete = true;
+    bool initialized = false;
+    u8 flexIOPin = 0;
+    u32 latchCycles = 0;
+    FlexIOPinInfo currentPinInfo{};
+    volatile u32 dmaErrorCount = 0;
+    volatile u32 lastDmaEs = 0;
+};
+
+static inline FlexIoDmaState& fx() FL_NO_EXCEPT {
+    return fl::Singleton<FlexIoDmaState>::instance();
+}
 
 static constexpr u32 kMaxPixelBytes = 4096;
 DMAMEM static u32 sPixelBuffer[kMaxPixelBytes / 4] __attribute__((aligned(32)));
 
-static volatile u32 sDmaErrorCount = 0;
-static volatile u32 sLastDmaEs = 0;
-
 static void flexio_dma_isr() {
-    // Guard: deinit() can delete sDmaChannel while a pending IRQ is still
+    // Bind the state once. GCC does not inline Singleton<T>::instance() and
+    // cannot CSE across it, so writing fx() three times here compiled to three
+    // `bl` calls inside the interrupt handler -- checked in the disassembly,
+    // not assumed. One reference, one call.
+    FlexIoDmaState& s = fx();
+    // Guard: deinit() can delete s.dmaChannel while a pending IRQ is still
     // queued at the NVIC. Without this check the next IRQ vector services
     // a deleted channel and dereferences a freed pointer (IMPRECISERR
     // data bus fault observed during FlexIO bring-up, #3410).
-    if (sDmaChannel != nullptr) {
-        sDmaChannel->clearInterrupt();
+    if (s.dmaChannel != nullptr) {
+        s.dmaChannel->clearInterrupt();
     }
     // #3416 FX-HIGH-6: ensure the clearInterrupt() write to DMA_CINT
     // reaches the eDMA before we return. On Cortex-M7 a posted store can
@@ -163,7 +189,7 @@ static void flexio_dma_isr() {
     // NVIC to immediately re-fire the same vector before the interrupt
     // status actually clears. Matches Teensyduino FlexSerial.cpp:512.
     asm volatile("dsb" ::: "memory");
-    sDmaComplete = true;
+    s.dmaComplete = true;
 }
 
 // #3416 FX-HIGH-5: DMA_ES (eDMA Error Status) is now sampled in
@@ -398,11 +424,11 @@ static void flexio_configure_hw(u8 flexio_pin, u32 baud_div) {
 // ============================================================================
 
 static bool flexio_dma_init() {
-    if (sDmaChannel) {
+    if (fx().dmaChannel) {
         return true;
     }
-    sDmaChannel = new DMAChannel();  // ok bare allocation
-    if (!sDmaChannel) {
+    fx().dmaChannel = new DMAChannel();  // ok bare allocation
+    if (!fx().dmaChannel) {
         FL_LOG_FLEXIO_F("FlexIO: Failed to allocate DMA channel");
         return false;
     }
@@ -417,8 +443,8 @@ static bool flexio_dma_init() {
     // flexio_dma_init() again -- the early-return at the top means
     // the DMAMUX routing is unchanged across reinits (correct, since
     // we still target the same FlexIO2 shifter 0).
-    sDmaChannel->triggerAtHardwareEvent(DMAMUX_SOURCE_FLEXIO2_REQUEST0);
-    sDmaChannel->attachInterrupt(flexio_dma_isr);
+    fx().dmaChannel->triggerAtHardwareEvent(DMAMUX_SOURCE_FLEXIO2_REQUEST0);
+    fx().dmaChannel->attachInterrupt(flexio_dma_isr);
     // #3416 FX-HIGH-5: DO NOT install IRQ_DMA_ERROR handler globally --
     // that vector is shared by EVERY eDMA channel on the system and
     // replacing it would break Audio I2S, FlexSerial, ObjectFLED, etc.
@@ -491,7 +517,7 @@ bool flexio_init(const FlexIOPinInfo& pin_info, u32 t0h_ns, u32 t1h_ns,
     (void)t0h_ns;
     (void)t1h_ns;
     (void)period_ns;
-    if (sInitialized) {
+    if (fx().initialized) {
         flexio_deinit();
     }
 
@@ -500,9 +526,9 @@ bool flexio_init(const FlexIOPinInfo& pin_info, u32 t0h_ns, u32 t1h_ns,
     flexio_clock_init();
     flexio_pin_init(pin_info);
 
-    sFlexIOPin = pin_info.flexio_pin;
-    sLatchCycles = reset_us;
-    sCurrentPinInfo = pin_info;
+    fx().flexIOPin = pin_info.flexio_pin;
+    fx().latchCycles = reset_us;
+    fx().currentPinInfo = pin_info;
 
     flexio_configure_hw(pin_info.flexio_pin, kFlexIOBaudDiv);
 
@@ -510,13 +536,13 @@ bool flexio_init(const FlexIOPinInfo& pin_info, u32 t0h_ns, u32 t1h_ns,
         return false;
     }
 
-    sInitialized = true;
-    sDmaComplete = true;
+    fx().initialized = true;
+    fx().dmaComplete = true;
     return true;
 }
 
 bool flexio_show(const u8* pixel_data, u32 num_bytes) {
-    if (!sInitialized || !sDmaChannel || !pixel_data || num_bytes == 0) {
+    if (!fx().initialized || !fx().dmaChannel || !pixel_data || num_bytes == 0) {
         return false;
     }
 
@@ -526,11 +552,11 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     // flexio_wait can return early via its 50 ms timeout; if it does, DMA
     // is still live and modifying the TCD mid-transfer is undefined
     // behaviour on i.MX RT eDMA (IMPRECISERR observed pre-#3411).
-    sDmaChannel->disable();
-    sDmaChannel->clearComplete();
-    sDmaChannel->clearInterrupt();
-    sDmaChannel->clearError();
-    sDmaComplete = true;
+    fx().dmaChannel->disable();
+    fx().dmaChannel->clearComplete();
+    fx().dmaChannel->clearInterrupt();
+    fx().dmaChannel->clearError();
+    fx().dmaComplete = true;
     // #3416 FX-CRIT-3: ensure DMA disable + flag clears commit to the
     // eDMA engine before we touch FlexIO registers below. Without the
     // barrier, an in-flight minor-loop write to SHIFTBUF could overlap
@@ -567,7 +593,7 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     // ordering (SHIFTSDEN here -> TCD writes -> FLEXEN -> enable())
     // theoretically allowed a half-programmed TCD to service a pending
     // DMA request if the channel was still ERQ-armed from a previous
-    // frame. Even though sDmaChannel->disable() above clears ERQ, on a
+    // frame. Even though fx().dmaChannel->disable() above clears ERQ, on a
     // re-init path (different pin/timing) a stale armed flag could
     // sneak through. Move SHIFTSDEN to after enable() to close the
     // window unambiguously.
@@ -578,26 +604,26 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     // first edge-pair capture and the WS2812 decoder eats the leading
     // data bit (off-by-one across the whole frame, observed pre-Round 7
     // residual fix).
-    flexio_pin_park_low(sCurrentPinInfo);
+    flexio_pin_park_low(fx().currentPinInfo);
 
-    sDmaChannel->TCD->SADDR = sPixelBuffer;
-    sDmaChannel->TCD->SOFF = 4;
-    sDmaChannel->TCD->ATTR = DMA_TCD_ATTR_SSIZE(2) | DMA_TCD_ATTR_DSIZE(2);
-    sDmaChannel->TCD->NBYTES_MLNO = 4;
-    sDmaChannel->TCD->SLAST = -(i32)(num_words * 4u);
+    fx().dmaChannel->TCD->SADDR = sPixelBuffer;
+    fx().dmaChannel->TCD->SOFF = 4;
+    fx().dmaChannel->TCD->ATTR = DMA_TCD_ATTR_SSIZE(2) | DMA_TCD_ATTR_DSIZE(2);
+    fx().dmaChannel->TCD->NBYTES_MLNO = 4;
+    fx().dmaChannel->TCD->SLAST = -(i32)(num_words * 4u);
     // Write to SHIFTBUF (not SHIFTBUFBIS): SHIFTBUFBIS would bit-swap the
     // word and break our MSB-first pre-encoding. The shifter naturally
     // shifts MSB-first from SHIFTBUF, which is what we want.
-    sDmaChannel->TCD->DADDR = &FLEXIO2_SHIFTBUF[0];
-    sDmaChannel->TCD->DOFF = 0;
-    sDmaChannel->TCD->CITER_ELINKNO = num_words;
-    sDmaChannel->TCD->BITER_ELINKNO = num_words;
-    sDmaChannel->TCD->DLASTSGA = 0;
-    sDmaChannel->TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ;
+    fx().dmaChannel->TCD->DADDR = &FLEXIO2_SHIFTBUF[0];
+    fx().dmaChannel->TCD->DOFF = 0;
+    fx().dmaChannel->TCD->CITER_ELINKNO = num_words;
+    fx().dmaChannel->TCD->BITER_ELINKNO = num_words;
+    fx().dmaChannel->TCD->DLASTSGA = 0;
+    fx().dmaChannel->TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ;
     // #3416 FX-LOW-1: duplicate DADDR write removed (was set above
     // already). Editing artifact from the bring-up rounds.
 
-    sDmaComplete = false;
+    fx().dmaComplete = false;
     // CTRL = FLEXEN only. FASTACC (bit 2) was set previously, but per RM
     // 47.4.2 "Fast access requires the FlexIO clock to be at least twice
     // the bus interface clock frequency". On Teensy 4.x the bus runs at
@@ -613,7 +639,7 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     // CITER mis-matched with actual words queued (an off-by-one
     // over-shift). The hardware self-starts cleanly.
 
-    sDmaChannel->enable();
+    fx().dmaChannel->enable();
     // #3416 FX-CRIT-2: enable shifter-empty -> DMA request now that
     // both the TCD and the channel are fully armed. The first DMA
     // request fires on the next FLEXEN-induced SSF=HIGH transition.
@@ -623,7 +649,7 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
 }
 
 bool flexio_is_done() {
-    return sDmaComplete;
+    return fx().dmaComplete;
 }
 
 void flexio_wait() {
@@ -633,20 +659,20 @@ void flexio_wait() {
     // well below the autoresearch 120 s RPC deadline.
     const u32 start = millis();
     const u32 timeout_ms = 50;
-    while (!sDmaComplete) {
+    while (!fx().dmaComplete) {
         if ((u32)(millis() - start) >= timeout_ms) {
             // #3416 FX-MED-4: on timeout, force-recover instead of
-            // leaving sDmaComplete=false. The previous code returned with
+            // leaving fx().dmaComplete=false. The previous code returned with
             // the flag still false, so the very next flexio_show() would
             // call flexio_wait() again, time out a second time, and the
             // stuck channel was never disposed. Force-disable + mark
             // complete so the next show() can reprogram a fresh TCD.
-            if (sDmaChannel) {
-                sDmaChannel->disable();
-                sDmaChannel->clearComplete();
-                sDmaChannel->clearError();
+            if (fx().dmaChannel) {
+                fx().dmaChannel->disable();
+                fx().dmaChannel->clearComplete();
+                fx().dmaChannel->clearError();
             }
-            sDmaComplete = true;
+            fx().dmaComplete = true;
             FL_LOG_FLEXIO_F("FlexIO: flexio_wait() timed out after %u ms -- recovering",
                             (unsigned)timeout_ms);
             return;
@@ -671,21 +697,21 @@ void flexio_read_diagnostics(FlexIODiagnostics* out) {
     // been set at least once by flexio_init() -- accessing it any
     // earlier hits the same IMPRECISERR class fault we chased during
     // bring-up (#3411, #3412). Bail out of the FlexIO-side reads when
-    // !sInitialized so the autoresearch RPC path stays safe on every
+    // !fx().initialized so the autoresearch RPC path stays safe on every
     // Teensy 4.x test, including those that never bring FlexIO up.
     *out = FlexIODiagnostics{};
     out->ccm_ccgr3 = CCM_CCGR3;
     out->ccm_cscmr2 = CCM_CSCMR2;
     out->ccm_cs1cdr = CCM_CS1CDR;
-    out->initialized = sInitialized;
-    out->dmaComplete = sDmaComplete;
+    out->initialized = fx().initialized;
+    out->dmaComplete = fx().dmaComplete;
     // FX-HIGH-5: eDMA error status snapshot. DMA_ES is a global register
     // shared across all eDMA channels; non-zero indicates SOMETHING
     // erred (not necessarily our channel), so consumers must cross-
     // reference the ERR field of DMA_ES against our channel index.
     out->dma_es = DMA_ES;
 
-    if (!sInitialized) {
+    if (!fx().initialized) {
         interrupts();  // FX-LOW-4 atomic window close on early return
         return;
     }
@@ -701,44 +727,44 @@ void flexio_read_diagnostics(FlexIODiagnostics* out) {
     out->timcfg0 = FLEXIO2_TIMCFG[0];
     out->timcmp0 = FLEXIO2_TIMCMP[0];
     for (int i = 0; i < kNumFlexIOPins; i++) {
-        if (kFlexIOPins[i].flexio_pin == sFlexIOPin) {
+        if (kFlexIOPins[i].flexio_pin == fx().flexIOPin) {
             out->muxRegValue = *(volatile u32*)(kIOMUXC_BASE + kFlexIOPins[i].mux_reg_offset);
             out->padRegValue = *(volatile u32*)(kIOMUXC_BASE + kFlexIOPins[i].pad_reg_offset);
             break;
         }
     }
-    if (sDmaChannel && sDmaChannel->TCD) {
-        out->tcd_saddr = (u32)sDmaChannel->TCD->SADDR;
-        out->tcd_daddr = (u32)sDmaChannel->TCD->DADDR;
-        out->tcd_citer = sDmaChannel->TCD->CITER_ELINKNO;
-        out->tcd_biter = sDmaChannel->TCD->BITER_ELINKNO;
-        out->tcd_csr = sDmaChannel->TCD->CSR;
+    if (fx().dmaChannel && fx().dmaChannel->TCD) {
+        out->tcd_saddr = (u32)fx().dmaChannel->TCD->SADDR;
+        out->tcd_daddr = (u32)fx().dmaChannel->TCD->DADDR;
+        out->tcd_citer = fx().dmaChannel->TCD->CITER_ELINKNO;
+        out->tcd_biter = fx().dmaChannel->TCD->BITER_ELINKNO;
+        out->tcd_csr = fx().dmaChannel->TCD->CSR;
     }
     // TCD fields already zero from the FlexIODiagnostics{} value init above.
     interrupts();  // close the FX-LOW-4 atomic-snapshot window
 }
 
 void flexio_deinit() {
-    if (!sInitialized) return;
+    if (!fx().initialized) return;
     flexio_wait();
     // Shut down FlexIO BEFORE touching DMA so no more shifter-empty DMA
     // requests can fire while we're tearing the channel down.
     FLEXIO2_CTRL = 0;
     FLEXIO2_SHIFTSDEN = 0;
-    if (sDmaChannel) {
+    if (fx().dmaChannel) {
         // Order: disable ERQ -> detach interrupt -> clear pending NVIC IRQ
         // -> then mark pointer null -> only THEN delete. Without the
         // detach + IRQ-clear, a pending interrupt vector dereferences a
         // deleted channel (#3410 IMPRECISERR fault).
-        sDmaChannel->disable();
-        sDmaChannel->detachInterrupt();
-        sDmaChannel->clearInterrupt();
-        DMAChannel* to_delete = sDmaChannel;
-        sDmaChannel = nullptr;
+        fx().dmaChannel->disable();
+        fx().dmaChannel->detachInterrupt();
+        fx().dmaChannel->clearInterrupt();
+        DMAChannel* to_delete = fx().dmaChannel;
+        fx().dmaChannel = nullptr;
         delete to_delete;  // ok bare allocation
     }
-    sInitialized = false;
-    sDmaComplete = true;
+    fx().initialized = false;
+    fx().dmaComplete = true;
 }
 
 // ============================================================================
