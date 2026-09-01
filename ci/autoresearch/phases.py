@@ -2981,12 +2981,31 @@ async def _run_mp3_tests(ctx: RunContext) -> int:
                     f"{Style.RESET_ALL}"
                 )
                 return 1
+            audio = int(data.get("audio_micros", 0))
+            verify = int(data.get("verify_micros", 0))
+            # decode_micros and the frame/sample counts share a scope (the
+            # first pass); the shared-decoder pass is reported separately.
+            # Printing the real-time ratio rather than raw microseconds is the
+            # point: 310 ms means nothing until you know it covers 235 ms of
+            # audio, and on a 160 MHz part the margin is not comfortable.
+            ratio = (audio / micros) if micros else 0.0
             print(
                 f"{Fore.GREEN}MP3 CODEC TEST PASSED "
                 f"({streams_run} streams, {frames} frames, {samples} samples, "
-                f"combined_fnv1a=0x{combined:08x}, bit-exact, {micros} us)"
+                f"combined_fnv1a=0x{combined:08x}, bit-exact)"
                 f"{Style.RESET_ALL}"
             )
+            print(
+                f"   decode {micros} us for {audio} us of audio"
+                f" -> {ratio:.2f}x real time"
+                f"{'' if ratio >= 1.0 else '  <-- SLOWER THAN REAL TIME'}"
+            )
+            print(f"   shared-decoder verification pass: {verify} us")
+            if ratio < 1.0:
+                print(
+                    f"{Fore.RED}   the decoder cannot keep up with playback on "
+                    f"this part{Style.RESET_ALL}"
+                )
             return 0
 
         print(

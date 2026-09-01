@@ -50,6 +50,15 @@ struct Result {
     fl::u32 samples_decoded;
     fl::u32 frames_decoded;
     fl::u32 combined_fnv1a;
+    /* Wall-clock for the first pass only, so it has the same scope as the
+       counters above it. Timing both passes while counting one reads as if the
+       decode were twice as slow as it is. */
+    fl::u32 verify_micros;
+    /* How much audio those samples represent, from the fixture's own sample
+       rate and channel count. Reporting it alongside decode_micros is what
+       makes the pair interpretable: the ratio is the real-time margin, and on a
+       160 MHz part it is not large enough to leave implicit. */
+    fl::u32 audio_micros;
 };
 
 inline fl::u32 fnv1a(fl::u32 hash, const fl::i16* samples, fl::u32 count) {
@@ -158,6 +167,7 @@ inline Result run() {
     }
 
     const fl::u32 started = (fl::u32)micros();
+    fl::u32 audio_us = 0;
 
     // Pass 1: a fresh decoder per stream, which is how the host fixture was
     // produced. This is the bit-exactness check.
@@ -169,6 +179,10 @@ inline Result run() {
         r.samples_decoded += got.samples;
         r.frames_decoded += got.frames;
         r.combined_fnv1a = fnv1a_mix(r.combined_fnv1a, got.fnv1a);
+        if (s.hz > 0u && s.channels > 0u) {
+            const fl::u32 per_channel = got.samples / s.channels;
+            audio_us += (fl::u32)(((fl::u64)per_channel * 1000000ull) / s.hz);
+        }
         if (got.fnv1a != s.fnv1a || got.samples != s.samples ||
             got.frames != s.frames || got.hz != s.hz ||
             got.channels != s.channels || got.layer != s.layer) {
@@ -176,6 +190,10 @@ inline Result run() {
                           got.samples);
         }
     }
+
+    r.decode_micros = (fl::u32)micros() - started;
+    r.audio_micros = audio_us;
+    const fl::u32 verify_started = (fl::u32)micros();
 
     // Pass 2: one decoder driven across every stream in turn, without
     // re-initialising between them. Layer I/II scale info and Layer III's
@@ -201,7 +219,7 @@ inline Result run() {
         }
     }
 
-    r.decode_micros = (fl::u32)micros() - started;
+    r.verify_micros = (fl::u32)micros() - verify_started;
     r.success = r.streams_failed == 0u && r.shared_decoder_matched &&
                 r.streams_run == mp3_fixture::kStreamCount;
     return r;

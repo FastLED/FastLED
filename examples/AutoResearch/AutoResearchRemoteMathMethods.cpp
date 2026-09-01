@@ -264,6 +264,10 @@ void AutoResearchRemoteControl::bindMathMethods(fl::Remote& remote) {
                      static_cast<int64_t>(r.frames_decoded));
         response.set("combined_fnv1a",
                      static_cast<int64_t>(r.combined_fnv1a));
+        response.set("verify_micros",
+                     static_cast<int64_t>(r.verify_micros));
+        response.set("audio_micros",
+                     static_cast<int64_t>(r.audio_micros));
         return response;
     });
 
