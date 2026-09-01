@@ -27,12 +27,12 @@ struct Oklab {
     float blue_yellow;
 };
 
-float signedCubeRoot(float value) {
+float signedCubeRoot(float value) FL_NO_EXCEPT {
     const float magnitude = fl::powf(fl::abs(value), 1.0f / 3.0f);
     return value < 0.0f ? -magnitude : magnitude;
 }
 
-Oklab rgbToOklab(const CRGB &rgb) {
+Oklab rgbToOklab(const CRGB &rgb) FL_NO_EXCEPT {
     const float red = static_cast<float>(rgb.r) / 255.0f;
     const float green = static_cast<float>(rgb.g) / 255.0f;
     const float blue = static_cast<float>(rgb.b) / 255.0f;
@@ -58,12 +58,12 @@ Oklab rgbToOklab(const CRGB &rgb) {
     };
 }
 
-fl::u8 channelFromFloat(float value) {
+fl::u8 channelFromFloat(float value) FL_NO_EXCEPT {
     const float scaled = fl::roundf(fl::clamp(value, 0.0f, 1.0f) * 255.0f);
     return static_cast<fl::u8>(scaled);
 }
 
-CRGB oklabToRgb(const Oklab &lab) {
+CRGB oklabToRgb(const Oklab &lab) FL_NO_EXCEPT {
     const float lRoot = lab.lightness + 0.3963377774f * lab.green_red +
                         0.2158037573f * lab.blue_yellow;
     const float mRoot = lab.lightness - 0.1055613458f * lab.green_red -
@@ -131,7 +131,7 @@ CRGB blend(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) {
     return nu;
 }
 
-CRGB blend_oklab(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) {
+CRGB blend_oklab(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) FL_NO_EXCEPT {
     if (amountOfP2 == 0) { return p1; }
     if (amountOfP2 == 255) { return p2; }
 
