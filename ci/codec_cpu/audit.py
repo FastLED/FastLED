@@ -188,7 +188,18 @@ def _uses_llvm_value(line: str, value: str) -> bool:
     return re.search(rf"{re.escape(value)}(?:\s|,|$)", line) is not None
 
 
-def _integer_product_lines(body: list[str]) -> tuple[set[int], set[str]]:
+@typechecked
+@dataclass(frozen=True)
+class IntegerProducts:
+    """Where the fixed-point pipeline's Q-format multiplies are, and what they
+    define. `lines` indexes into the function body; `values` names the SSA
+    results, which the MAC taint analysis follows into the accumulates."""
+
+    lines: set[int]
+    values: set[str]
+
+
+def _integer_product_lines(body: list[str]) -> IntegerProducts:
     """Q-format multiplies in the fixed-point pipeline, and the values they
     define.
 
@@ -232,7 +243,7 @@ def _integer_product_lines(body: list[str]) -> tuple[set[int], set[str]]:
             continue
         lines.add(index)
         values.add(result)
-    return lines, values
+    return IntegerProducts(lines=lines, values=values)
 
 
 def _tainted_accumulate_lines(
@@ -318,9 +329,11 @@ def instrument_llvm_ir(
         float_accumulates = _tainted_accumulate_lines(
             body, fmul_values, r"\bf(?:add|sub)\b"
         )
-        integer_mul_lines, integer_mul_values = _integer_product_lines(body)
+        integer_products = _integer_product_lines(body)
         integer_accumulates = _tainted_accumulate_lines(
-            body, integer_mul_values, r"\b(?:add|sub)(?:\s+nsw|\s+nuw)*\s+i64\b"
+            body,
+            integer_products.values,
+            r"\b(?:add|sub)(?:\s+nsw|\s+nuw)*\s+i64\b",
         )
         for relative, line in enumerate(body, start=start + 1):
             if (
@@ -338,7 +351,7 @@ def instrument_llvm_ir(
             elif (
                 operations
                 and backend == "minimp3-fixed"
-                and relative - (start + 1) in integer_mul_lines
+                and relative - (start + 1) in integer_products.lines
             ):
                 inserts.setdefault(relative, []).append(
                     "  call void @fastled_mp3_cpu_operation("
@@ -955,6 +968,55 @@ def _check_lower_bound(path: str, baseline: float, current: float) -> None:
         raise RuntimeError(f"{path} regressed: {current} < {limit:.6f}")
 
 
+def _check_host_trend(
+    backend: str, baseline_host: dict[str, Any], current_host: dict[str, Any]
+) -> None:
+    """The host-dependent half of the trend gate: cycle counters, per-stage
+    timings and Callgrind attribution. Split out of check_trend so a host with
+    no baseline for this backend can skip exactly this and nothing else."""
+    for metric in ("cycles", "instructions", "branch_misses"):
+        _check_upper_bound(
+            f"{backend}/counter/{metric}",
+            baseline_host["counter_median"][metric],
+            current_host["counter_median"][metric],
+        )
+    _check_lower_bound(
+        f"{backend}/counter/ipc",
+        baseline_host["counter_median"]["ipc"],
+        current_host["counter_median"]["ipc"],
+    )
+    for stage in STAGES:
+        _check_upper_bound(
+            f"{backend}/stage/{stage}",
+            baseline_host["stage_ns_median"][stage],
+            current_host["stage_ns_median"][stage],
+        )
+    for metric in ("instructions", "branches", "branch_misses"):
+        _check_upper_bound(
+            f"{backend}/callgrind/{metric}",
+            baseline_host["callgrind"][metric],
+            current_host["callgrind"][metric],
+        )
+    baseline_functions = baseline_host["callgrind"]["functions"]
+    current_functions = current_host["callgrind"]["functions"]
+    for symbol, baseline_instructions in baseline_functions.items():
+        if symbol not in current_functions:
+            raise RuntimeError(
+                f"callgrind attribution disappeared for {backend}/{symbol}"
+            )
+        baseline_share = (
+            baseline_instructions / baseline_host["callgrind"]["instructions"]
+        )
+        current_share = (
+            current_functions[symbol] / current_host["callgrind"]["instructions"]
+        )
+        _check_upper_bound(
+            f"{backend}/callgrind-function/{symbol}",
+            baseline_share,
+            current_share,
+        )
+
+
 def check_trend(baseline: dict[str, Any], current: dict[str, Any]) -> None:
     """Enforce exact portable counts and a 5% CPU/codegen regression budget."""
     validate_trend(baseline)
@@ -973,11 +1035,13 @@ def check_trend(baseline: dict[str, Any], current: dict[str, Any]) -> None:
         if current_operations != baseline_operations:
             raise RuntimeError(f"exact operation ledger changed for {backend}")
 
+        baseline_host: dict[str, Any] | None
         if alternate_profile is None:
             baseline_host = baseline_entry["host"]
         elif backend in alternate_profile["hosts"]:
             baseline_host = alternate_profile["hosts"][backend]
         else:
+            baseline_host = None
             # A known host that has never measured this backend. The exact
             # operation ledger above is host-independent and has already been
             # enforced; the timing and callgrind figures are not comparable
@@ -990,54 +1054,19 @@ def check_trend(baseline: dict[str, Any], current: dict[str, Any]) -> None:
             # purpose -- a backend that stays uncovered here forever is a real
             # gap, just not one worth blocking unrelated PRs over.
             print(
-                f"UNGATED:{backend}/host={current_host_key}: no baseline for "
-                "this backend on this host; exact operation ledger still "
-                "enforced"
-            )
-            continue
-        current_host = current_entry["host"]
-        for metric in ("cycles", "instructions", "branch_misses"):
-            _check_upper_bound(
-                f"{backend}/counter/{metric}",
-                baseline_host["counter_median"][metric],
-                current_host["counter_median"][metric],
-            )
-        _check_lower_bound(
-            f"{backend}/counter/ipc",
-            baseline_host["counter_median"]["ipc"],
-            current_host["counter_median"]["ipc"],
-        )
-        for stage in STAGES:
-            _check_upper_bound(
-                f"{backend}/stage/{stage}",
-                baseline_host["stage_ns_median"][stage],
-                current_host["stage_ns_median"][stage],
-            )
-        for metric in ("instructions", "branches", "branch_misses"):
-            _check_upper_bound(
-                f"{backend}/callgrind/{metric}",
-                baseline_host["callgrind"][metric],
-                current_host["callgrind"][metric],
-            )
-        baseline_functions = baseline_host["callgrind"]["functions"]
-        current_functions = current_host["callgrind"]["functions"]
-        for symbol, baseline_instructions in baseline_functions.items():
-            if symbol not in current_functions:
-                raise RuntimeError(
-                    f"callgrind attribution disappeared for {backend}/{symbol}"
-                )
-            baseline_share = (
-                baseline_instructions / baseline_host["callgrind"]["instructions"]
-            )
-            current_share = (
-                current_functions[symbol] / current_host["callgrind"]["instructions"]
-            )
-            _check_upper_bound(
-                f"{backend}/callgrind-function/{symbol}",
-                baseline_share,
-                current_share,
+                f"UNGATED:{backend}/host={current_host_key}: no host baseline "
+                "for this backend on this host; the exact operation ledger and "
+                "the target codegen bounds are still enforced"
             )
 
+        # Only the host-dependent half is skipped. The codegen bounds further
+        # down are cross-compiled instruction counts -- host-independent, and
+        # read from the backend entry rather than the host profile -- so a
+        # target codegen regression must still fail here. Skipping them along
+        # with the timings would let one through on any host that has not
+        # measured this backend yet.
+        if baseline_host is not None:
+            _check_host_trend(backend, baseline_host, current_entry["host"])
         for target in TARGETS:
             for kernel in KERNELS:
                 for metric in ("instructions", "inner_loop_instructions"):

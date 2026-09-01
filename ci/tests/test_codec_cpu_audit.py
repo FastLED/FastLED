@@ -85,10 +85,10 @@ def test_integer_product_selection_ignores_address_and_size_math() -> None:
         "  %r = call ptr @memcpy(ptr %d, ptr %s, i64 %bytes)",
         "  %wide = mul nsw i64 %x, %y",              # neither sign-extended
     ]
-    lines, values = AUDIT._integer_product_lines(body)
+    products = AUDIT._integer_product_lines(body)
 
-    assert values == {"%prod", "%scaled"}
-    assert lines == {2, 4}
+    assert products.values == {"%prod", "%scaled"}
+    assert products.lines == {2, 4}
 
 
 def test_integer_mac_counts_one_accumulate_for_two_products() -> None:
