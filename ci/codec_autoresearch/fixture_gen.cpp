@@ -63,6 +63,10 @@ int main(int argc, char** argv) {
         (fl::third_party::mp3dec_scratch_t*)malloc(
             sizeof(fl::third_party::mp3dec_scratch_t));
     int16_t* pcm = (int16_t*)malloc(2304 * sizeof(int16_t));
+    if (!dec || !scratch || !pcm) {
+        fprintf(stderr, "out of memory allocating decoder state\n");
+        return 1;
+    }
     fl::third_party::mp3dec_init(dec);
 
     uint32_t hash = 2166136261u;

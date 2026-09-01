@@ -2926,10 +2926,19 @@ async def _run_mp3_tests(ctx: RunContext) -> int:
     print("=" * 60)
     print()
 
+    # 60s is ample -- the decode itself measures ~311 ms on an ESP32-C6 -- but a
+    # user who asked for a shorter --timeout meant it, so take the smaller of
+    # the two rather than letting three retries run past their own deadline.
+    rpc_timeout = 60.0
+    if ctx.timeout_seconds:
+        rpc_timeout = min(rpc_timeout, float(ctx.timeout_seconds))
+
     client: RpcClient | None = None
     try:
         print("   Connecting to device...", end="", flush=True)
-        client = RpcClient(upload_port, timeout=60.0, serial_interface=serial_iface)
+        client = RpcClient(
+            upload_port, timeout=rpc_timeout, serial_interface=serial_iface
+        )
         await client.connect(boot_wait=1.0, drain_boot=True)
         print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
 
@@ -3006,7 +3015,7 @@ async def _run_mp3_tests(ctx: RunContext) -> int:
     except RpcTimeoutError:
         print()
         print(f"{Fore.RED}MP3 CODEC TEST TIMEOUT{Style.RESET_ALL}")
-        print("   No response from device within 60 seconds")
+        print(f"   No response from device within {rpc_timeout:g} seconds")
         return 1
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)

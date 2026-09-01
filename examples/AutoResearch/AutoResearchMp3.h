@@ -74,6 +74,13 @@ struct Decoded {
     fl::u32 fnv1a;
     fl::u32 samples;
     fl::u32 frames;
+    /* The fixture records each stream's sample rate, channel count and layer.
+       Carrying them back is what makes them assertions rather than comments: a
+       decoder that emitted the right sample values at the wrong rate, or fell
+       back to mono, would otherwise match on the checksum path and pass. */
+    fl::u32 hz;
+    fl::u32 channels;
+    fl::u32 layer;
 };
 
 /// Decode one stream. `dec` is supplied by the caller so the same decoder can
@@ -86,6 +93,9 @@ inline Decoded decodeStream(fl::third_party::mp3dec_t* dec,
     out.fnv1a = 2166136261u;
     out.samples = 0;
     out.frames = 0;
+    out.hz = 0;
+    out.channels = 0;
+    out.layer = 0;
 
     fl::u32 offset = 0;
     while (offset + 4 < stream.size) {
@@ -103,6 +113,9 @@ inline Decoded decodeStream(fl::third_party::mp3dec_t* dec,
             out.fnv1a = fnv1a(out.fnv1a, pcm, count);
             out.samples += count;
             ++out.frames;
+            out.hz = (fl::u32)info.hz;
+            out.channels = (fl::u32)info.channels;
+            out.layer = (fl::u32)info.layer;
         }
     }
     return out;
@@ -157,7 +170,8 @@ inline Result run() {
         r.frames_decoded += got.frames;
         r.combined_fnv1a = fnv1a_mix(r.combined_fnv1a, got.fnv1a);
         if (got.fnv1a != s.fnv1a || got.samples != s.samples ||
-            got.frames != s.frames) {
+            got.frames != s.frames || got.hz != s.hz ||
+            got.channels != s.channels || got.layer != s.layer) {
             recordFailure(r, s.name, s.fnv1a, got.fnv1a, s.samples,
                           got.samples);
         }
@@ -173,7 +187,9 @@ inline Result run() {
     for (fl::u32 i = 0; i < mp3_fixture::kStreamCount; ++i) {
         const mp3_fixture::Stream& s = mp3_fixture::kStreams[i];
         const Decoded got = decodeStream(dec.get(), scratch.get(), pcm.get(), s);
-        if (got.fnv1a != s.fnv1a || got.samples != s.samples) {
+        if (got.fnv1a != s.fnv1a || got.samples != s.samples ||
+            got.hz != s.hz || got.channels != s.channels ||
+            got.layer != s.layer) {
             r.shared_decoder_matched = false;
             if (r.first_failure == nullptr) {
                 r.first_failure = s.name;

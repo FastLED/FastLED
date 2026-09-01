@@ -17,8 +17,11 @@ Run after changing the decoder or the vectors:
 from __future__ import annotations
 
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -42,10 +45,22 @@ FLAGS = [
 ]
 
 
+@dataclass(frozen=True)
+class Fixture:
+    """What the host decoder produced for one stream."""
+
+    nbytes: int
+    frames: int
+    samples: int
+    hz: int
+    channels: int
+    layer: int
+    fnv1a: int
+
+
 def compiler() -> str:
-    from shutil import which
     for candidate in ("clang++", "g++"):
-        found = which(candidate)
+        found = shutil.which(candidate)
         if found:
             return found
     raise RuntimeError("no C++ compiler found for the fixture generator")
@@ -61,7 +76,7 @@ def build(tmp: Path) -> Path:
     return binary
 
 
-def measure(binary: Path, path: Path, frames: int) -> dict[str, int]:
+def measure(binary: Path, path: Path, frames: int) -> Fixture:
     out = subprocess.run([str(binary), str(path), str(frames)],
                          cwd=ROOT, check=True, capture_output=True, text=True)
     match = re.search(
@@ -69,10 +84,16 @@ def measure(binary: Path, path: Path, frames: int) -> dict[str, int]:
         r"channels=(\d+) layer=(\d+) fnv1a=0x([0-9A-F]+)", out.stdout)
     if not match:
         raise RuntimeError(f"generator produced no result for {path}:\n{out.stdout}")
-    keys = ("bytes", "frames", "samples", "hz", "channels", "layer")
-    result = {k: int(match.group(i + 1)) for i, k in enumerate(keys)}
-    result["fnv1a"] = int(match.group(7), 16)
-    if result["frames"] == 0:
+    result = Fixture(
+        nbytes=int(match.group(1)),
+        frames=int(match.group(2)),
+        samples=int(match.group(3)),
+        hz=int(match.group(4)),
+        channels=int(match.group(5)),
+        layer=int(match.group(6)),
+        fnv1a=int(match.group(7), 16),
+    )
+    if result.frames == 0:
         raise RuntimeError(f"{path} decoded to nothing; refusing to emit an "
                            f"all-zero fixture that would pass trivially")
     return result
@@ -87,24 +108,22 @@ def emit_bytes(data: bytes) -> str:
 
 
 def main() -> int:
-    import tempfile
     with tempfile.TemporaryDirectory() as tmpdir:
         binary = build(Path(tmpdir))
         blocks, table = [], []
         for name, relative, frames in STREAMS:
             path = ROOT / relative
             info = measure(binary, path, frames)
-            data = path.read_bytes()[:info["bytes"]]
+            data = path.read_bytes()[:info.nbytes]
             blocks.append(
                 f"// {relative}\n"
-                f"// {info['frames']} frames, {info['samples']} samples, "
-                f"{info['hz']} Hz, {info['channels']} ch, layer "
-                f"{info['layer']}\n"
+                f"// {info.frames} frames, {info.samples} samples, "
+                f"{info.hz} Hz, {info.channels} ch, layer {info.layer}\n"
                 f"const fl::u8 k{name}Data[] = {{\n{emit_bytes(data)}\n}};\n")
             table.append(
-                f'    {{k{name}Data, {len(data)}u, {info["frames"]}u, '
-                f'{info["samples"]}u, {info["hz"]}u, {info["channels"]}u, '
-                f'{info["layer"]}u, 0x{info["fnv1a"]:08X}u, "{name}"}},')
+                f'    {{k{name}Data, {len(data)}u, {info.frames}u, '
+                f'{info.samples}u, {info.hz}u, {info.channels}u, '
+                f'{info.layer}u, 0x{info.fnv1a:08X}u, "{name}"}},')
 
     OUT.write_text(
         "/// @file AutoResearchMp3Fixture.h\n"
