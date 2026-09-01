@@ -29,8 +29,12 @@
 // FASTLED_MULTITHREADED is defined by fl/stl/thread_config.h
 // This file provides the STL-based thread implementation for multithreaded platforms
 
-// Forward declare fl::yield() for this_thread::yield() (which calls it on main thread)
-namespace fl { void yield(); }
+// fl::yield() for this_thread::yield() (which calls it on the main thread).
+// Included rather than forward-declared: a local copy of the declaration has to
+// be kept in step with fl/system/yield.h by hand, and the day FL_NO_EXCEPT stops
+// being a no-op a stale copy becomes a mismatched exception specification --
+// a compile error at the point of use, far from the duplicate that caused it.
+#include "fl/system/yield.h"
 
 namespace fl {
 namespace platforms {
