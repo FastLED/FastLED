@@ -63,7 +63,6 @@
             "-<**/*.cpp>",
             "+<fl/build/*.cpp>",
             "+<*.h>",
-            "+<third_party/libhelix_mp3/real/arm/*.S>",
             "+<platforms/esp/32/drivers/gpio_isr_rx/*.S>"
         ],
         "libArchive": true

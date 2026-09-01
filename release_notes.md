@@ -3,6 +3,12 @@
 
 FastLED 3.10.4 (Next Release)
 ==============
+  * **MP3 decoder: minimp3 is now the only backend, and it decodes in fixed point**
+    * The RPSL/RCSL-licensed `src/third_party/libhelix_mp3/` tree has been **removed**. FastLED's MP3 support is now entirely CC0 (minimp3), which is what makes the library redistributable without the Helix licence obligations.
+    * The decoder defaults to an integer (Q26 fixed-point) DSP path, so MP3 decoding no longer needs an FPU. Float remains available for reference and comparison via `MINIMP3_FLOAT_POINT`.
+    * Integer SIMD kernels (SSE4.1 with runtime dispatch, NEON unconditionally on ARM64) accelerate the polyphase filter and DCT-32, and are gated on producing bit-identical PCM to the scalar path.
+    * `Mp3HelixDecoder` is gone. It was an internal `fl::third_party` type exposed only for backend-parity testing; the public `fl::Mp3Decoder` / `fl::Mp3` API is unchanged. Code that named `Mp3HelixDecoder` or `MP3_HELIX_STREAM_BUFFER_SIZE` directly should use `Mp3Minimp3Decoder` / `MP3_MINIMP3_STREAM_BUFFER_SIZE`.
+    * Working RAM is 23,308 bytes against Helix's 27,952, and the budget is enforced in CI by `codec_memory_ledger.md`.
   * **NEW: TrueType Font Rendering Support**: Full TrueType font (.ttf/.ttc) rendering API with embedded default font
     * **High-quality text rendering**: Render scalable TrueType fonts to LED matrices with antialiasing support
     * **stb_truetype integration**: Built on industry-standard stb_truetype library (5108 lines, compact and efficient)

@@ -5,8 +5,14 @@
 #include <string.h>
 
 #include "fl/codec/mp3_memory.h"
-#include "third_party/libhelix_mp3/pub/mp3dec.h"
+
+// Pinned to the float variant: this rig links minimp3_audit.o, which is pinned
+// the same way, and the two must agree on mp3dec_scratch_t's size. The
+// fixed-point build's decode stack is covered by the gated, compiler-derived
+// `stack-callgraph` metric rather than by this observation -- see the ledger.
+#define MINIMP3_FLOAT_POINT 1
 #include "third_party/minimp3/minimp3.h"
+#undef MINIMP3_FLOAT_POINT
 
 namespace {
 
@@ -60,7 +66,6 @@ struct DecodeContext {
     const unsigned char* data;
     size_t size;
     unsigned char* stack;
-    bool minimp3;
     bool ok;
     size_t stack_usage;
 };
@@ -103,77 +108,43 @@ void finishWatermark(DecodeContext* context, unsigned char* paint_end) {
 __attribute__((noinline))
 void* decodeThread(void* opaque) {
     DecodeContext* context = static_cast<DecodeContext*>(opaque);
-    const size_t stream_bytes = context->minimp3
-                                    ? fl::third_party::MP3_MINIMP3_STREAM_BUFFER_SIZE
-                                    : fl::third_party::MP3_HELIX_STREAM_BUFFER_SIZE;
+    const size_t stream_bytes = fl::third_party::MP3_MINIMP3_STREAM_BUFFER_SIZE;
     void* stream = fl::third_party::Mp3MemoryAllocate(
         stream_bytes, fl::third_party::Mp3MemoryTag::StreamBuffer);
-    if (context->minimp3) {
-        fl::third_party::mp3dec_t* decoder =
-            static_cast<fl::third_party::mp3dec_t*>(
-                fl::third_party::Mp3MemoryAllocate(
-                    sizeof(fl::third_party::mp3dec_t),
-                    fl::third_party::Mp3MemoryTag::DecoderState));
-        fl::third_party::mp3dec_scratch_t* scratch =
-            static_cast<fl::third_party::mp3dec_scratch_t*>(
-                fl::third_party::Mp3MemoryAllocate(
-                    sizeof(fl::third_party::mp3dec_scratch_t),
-                    fl::third_party::Mp3MemoryTag::Scratch));
-        int16_t* pcm = static_cast<int16_t*>(
+    fl::third_party::mp3dec_t* decoder =
+        static_cast<fl::third_party::mp3dec_t*>(
             fl::third_party::Mp3MemoryAllocate(
-                2304 * sizeof(int16_t),
-                fl::third_party::Mp3MemoryTag::PcmOutput));
-        fl::third_party::mp3dec_frame_info_t info = {};
-        fl::third_party::mp3dec_init(decoder);
-        unsigned char* const paint_end = startWatermark(context);
-        if (!paint_end) {
-            return nullptr;
-        }
-        const int samples = fl::third_party::mp3dec_decode_frame_r(
-            decoder, scratch, context->data, static_cast<int>(context->size),
-            pcm, &info);
-        finishWatermark(context, paint_end);
-        context->ok = samples > 0 && info.frame_bytes > 0;
-        fl::third_party::Mp3MemoryFree(
-            pcm, 2304 * sizeof(int16_t),
-            fl::third_party::Mp3MemoryTag::PcmOutput);
-        fl::third_party::Mp3MemoryFree(
-            scratch, sizeof(fl::third_party::mp3dec_scratch_t),
-            fl::third_party::Mp3MemoryTag::Scratch);
-        fl::third_party::Mp3MemoryFree(
-            decoder, sizeof(fl::third_party::mp3dec_t),
-            fl::third_party::Mp3MemoryTag::DecoderState);
-    } else {
-        HMP3Decoder decoder = fl::third_party::MP3InitDecoder();
-        short* pcm = static_cast<short*>(fl::third_party::Mp3MemoryAllocate(
-            2304 * sizeof(short), fl::third_party::Mp3MemoryTag::PcmOutput));
-        const int offset = fl::third_party::MP3FindSyncWord(
-            context->data, static_cast<int>(context->size));
-        if (offset < 0) {
-            fl::third_party::Mp3MemoryFree(
-                pcm, 2304 * sizeof(short),
-                fl::third_party::Mp3MemoryTag::PcmOutput);
-            fl::third_party::MP3FreeDecoder(decoder);
-            fl::third_party::Mp3MemoryFree(
-                stream, stream_bytes,
-                fl::third_party::Mp3MemoryTag::StreamBuffer);
-            return nullptr;
-        }
-        const unsigned char* input = context->data + offset;
-        size_t remaining = context->size - static_cast<size_t>(offset);
-        unsigned char* const paint_end = startWatermark(context);
-        if (!paint_end) {
-            return nullptr;
-        }
-        const int result = fl::third_party::MP3Decode(
-            decoder, &input, &remaining, pcm, 0);
-        finishWatermark(context, paint_end);
-        context->ok = result == 0;
-        fl::third_party::Mp3MemoryFree(
-            pcm, 2304 * sizeof(short),
-            fl::third_party::Mp3MemoryTag::PcmOutput);
-        fl::third_party::MP3FreeDecoder(decoder);
+                sizeof(fl::third_party::mp3dec_t),
+                fl::third_party::Mp3MemoryTag::DecoderState));
+    fl::third_party::mp3dec_scratch_t* scratch =
+        static_cast<fl::third_party::mp3dec_scratch_t*>(
+            fl::third_party::Mp3MemoryAllocate(
+                sizeof(fl::third_party::mp3dec_scratch_t),
+                fl::third_party::Mp3MemoryTag::Scratch));
+    int16_t* pcm = static_cast<int16_t*>(
+        fl::third_party::Mp3MemoryAllocate(
+            2304 * sizeof(int16_t),
+            fl::third_party::Mp3MemoryTag::PcmOutput));
+    fl::third_party::mp3dec_frame_info_t info = {};
+    fl::third_party::mp3dec_init(decoder);
+    unsigned char* const paint_end = startWatermark(context);
+    if (!paint_end) {
+        return nullptr;
     }
+    const int samples = fl::third_party::mp3dec_decode_frame_r(
+        decoder, scratch, context->data, static_cast<int>(context->size),
+        pcm, &info);
+    finishWatermark(context, paint_end);
+    context->ok = samples > 0 && info.frame_bytes > 0;
+    fl::third_party::Mp3MemoryFree(
+        pcm, 2304 * sizeof(int16_t),
+        fl::third_party::Mp3MemoryTag::PcmOutput);
+    fl::third_party::Mp3MemoryFree(
+        scratch, sizeof(fl::third_party::mp3dec_scratch_t),
+        fl::third_party::Mp3MemoryTag::Scratch);
+    fl::third_party::Mp3MemoryFree(
+        decoder, sizeof(fl::third_party::mp3dec_t),
+        fl::third_party::Mp3MemoryTag::DecoderState);
     fl::third_party::Mp3MemoryFree(
         stream, stream_bytes, fl::third_party::Mp3MemoryTag::StreamBuffer);
     return nullptr;
@@ -196,9 +167,7 @@ bool loadFixture(unsigned char** data, size_t* size) {
 } // anonymous namespace
 
 int main(int argc, char** argv) {
-    if (argc > 2 ||
-        (argc == 2 && ::strcmp(argv[1], "helix") != 0 &&
-         ::strcmp(argv[1], "minimp3-float") != 0)) {
+    if (argc > 2 || (argc == 2 && ::strcmp(argv[1], "minimp3-float") != 0)) {
         return 1;
     }
     unsigned char* fixture = nullptr;
@@ -216,24 +185,16 @@ int main(int argc, char** argv) {
     pthread_attr_setguardsize(&attr, 0);
     pthread_attr_setstack(&attr, stack, STACK_BYTES);
 
-    const char* names[] = {"helix", "minimp3-float"};
-    for (int i = 0; i < 2; ++i) {
-        if (argc == 2 && ::strcmp(argv[1], names[i]) != 0) {
-            continue;
-        }
-        DecodeContext context = {
-            fixture, fixture_size, stack, i == 1, false, 0
-        };
-        pthread_t thread;
-        if (pthread_create(&thread, &attr, decodeThread, &context) != 0) {
-            return 1;
-        }
-        pthread_join(thread, nullptr);
-        ::printf("WATERMARK:backend=%s decode=%zu\n",
-                 names[i], context.stack_usage);
-        if (!context.ok) {
-            return 1;
-        }
+    DecodeContext context = {fixture, fixture_size, stack, false, 0};
+    pthread_t thread;
+    if (pthread_create(&thread, &attr, decodeThread, &context) != 0) {
+        return 1;
+    }
+    pthread_join(thread, nullptr);
+    ::printf("WATERMARK:backend=minimp3-float decode=%zu\n",
+             context.stack_usage);
+    if (!context.ok) {
+        return 1;
     }
 
     pthread_attr_destroy(&attr);
