@@ -25,12 +25,11 @@ TREND_PATH = ROOT / "codec_cpu_trend.json"
 BUILD = Path(os.environ.get("CODEC_CPU_BUILD", ROOT / ".build" / "codec-cpu-audit"))
 REGRESSION_TOLERANCE = 0.05
 PROFILE_RUNS = 30
-# minimp3's float build. It stays the CPU-audited variant after Helix's
-# deletion: the host baselines in codec_cpu_trend.json are keyed by its symbols,
-# and re-baselining onto the fixed build is separate work (FastLED#4110). The
-# fixed path's speed is gated by the SIMD perf test in
-# tests/fl/codec/mp3_fixed_point.hpp.
-BACKENDS = ("minimp3-float",)
+# Both minimp3 builds. `minimp3-fixed` is what ships; `minimp3-float` is the
+# reference the fixed-vs-float gates compare against, and it keeps its history
+# rather than being replaced (FastLED#4110). They cannot share a translation
+# unit, so each has its own source below and its own namespace.
+BACKENDS = ("minimp3-float", "minimp3-fixed")
 STAGES = (
     "scalefactors",
     "huffman",
@@ -106,6 +105,7 @@ _STAGE_SYMBOLS: tuple[tuple[str, tuple[str, ...]], ...] = (
 
 _FUSED_STAGES = {
     "minimp3-float": {"dequant": "huffman"},
+    "minimp3-fixed": {"dequant": "huffman"},
 }
 
 _LLVM_DEFINE_RE = re.compile(r'^\s*define\b.*@(?:"([^"]+)"|([^\s(]+))\(')
@@ -179,13 +179,60 @@ def _llvm_functions(lines: list[str]) -> list[tuple[int, int, str]]:
 
 
 def _operation_stage(backend: str, symbol: str) -> str | None:
-    if backend == "minimp3-float" and ("L3_huffman" in symbol or "L3_pow_43" in symbol):
+    if "L3_huffman" in symbol or "L3_pow_43" in symbol or "mp3d_pow43" in symbol:
         return "dequant"
     return classify_stage(symbol)
 
 
 def _uses_llvm_value(line: str, value: str) -> bool:
     return re.search(rf"{re.escape(value)}(?:\s|,|$)", line) is not None
+
+
+def _integer_product_lines(body: list[str]) -> tuple[set[int], set[str]]:
+    """Q-format multiplies in the fixed-point pipeline, and the values they
+    define.
+
+    The float build counts `fmul`, which is unambiguous. `mul` is not: at -O0
+    the decoder's integer arithmetic and the compiler's address and size
+    arithmetic are the same opcode. Measured on the fixed-point audit TU, the
+    discriminating shape is a 64-bit multiply with at least one operand sign
+    extended from i32 -- that is what `(int64_t)a * b` lowers to and what index
+    scaling never does -- whose product is not then consumed by a
+    `getelementptr` or passed to a call.
+
+    Those two exclusions are not decoration. Address scaling that does emit a
+    `mul` feeds a GEP, and `L12_apply_scf_384` computes a `memcpy` byte count as
+    `(total_bands - stereo_bands) * 18 * sizeof(...)`, which has the sign-extend
+    shape but is a size, not a sample. On the current tree this rule selects 69
+    multiplies and rejects exactly that one.
+    """
+    defs: dict[str, str] = {}
+    for line in body:
+        match = re.match(r"\s*(%[\w.]+) = (\w+)", line)
+        if match:
+            defs[match.group(1)] = match.group(2)
+
+    joined = "\n".join(body)
+    lines: set[int] = set()
+    values: set[str] = set()
+    for index, line in enumerate(body):
+        match = re.search(
+            r"(%[\w.]+) = mul (?:nsw |nuw )*i64 (%[\w.]+|-?\d+), (%[\w.]+|-?\d+)",
+            line,
+        )
+        if not match:
+            continue
+        result, left, right = match.group(1), match.group(2), match.group(3)
+        if defs.get(left) != "sext" and defs.get(right) != "sext":
+            continue
+        used = re.escape(result) + r"(?=[\s,)])"
+        if re.search(r"getelementptr[^\n]*" + used, joined):
+            continue
+        if re.search(r"\bcall\b[^\n]*" + used, joined):
+            continue
+        lines.add(index)
+        values.add(result)
+    return lines, values
 
 
 def _tainted_accumulate_lines(
@@ -271,6 +318,10 @@ def instrument_llvm_ir(
         float_accumulates = _tainted_accumulate_lines(
             body, fmul_values, r"\bf(?:add|sub)\b"
         )
+        integer_mul_lines, integer_mul_values = _integer_product_lines(body)
+        integer_accumulates = _tainted_accumulate_lines(
+            body, integer_mul_values, r"\b(?:add|sub)(?:\s+nsw|\s+nuw)*\s+i64\b"
+        )
         for relative, line in enumerate(body, start=start + 1):
             if (
                 operations
@@ -282,6 +333,26 @@ def instrument_llvm_ir(
                 inserts.setdefault(relative, []).append(
                     "  call void @fastled_mp3_cpu_operation("
                     f"i32 {operation_stage_index}, i32 {lanes}, i32 0)"
+                )
+                operation_sites += 1
+            elif (
+                operations
+                and backend == "minimp3-fixed"
+                and relative - (start + 1) in integer_mul_lines
+            ):
+                inserts.setdefault(relative, []).append(
+                    "  call void @fastled_mp3_cpu_operation("
+                    f"i32 {operation_stage_index}, i32 1, i32 0)"
+                )
+                operation_sites += 1
+            elif (
+                operations
+                and backend == "minimp3-fixed"
+                and relative - (start + 1) in integer_accumulates
+            ):
+                inserts.setdefault(relative, []).append(
+                    "  call void @fastled_mp3_cpu_operation("
+                    f"i32 {operation_stage_index}, i32 0, i32 1)"
                 )
                 operation_sites += 1
             elif (
@@ -347,11 +418,12 @@ def build_instrumented_driver(*, operations: bool = True) -> InstrumentedDriver:
     compiler = compiler_path()
     sources = {
         "minimp3-float": ROOT / "ci" / "codec_memory" / "minimp3_audit.cpp",
+        "minimp3-fixed": ROOT / "ci" / "codec_cpu" / "minimp3_fixed_driver.cpp",
     }
     objects: list[Path] = []
     stage_coverage: dict[str, dict[str, dict[str, Any]]] = {}
     for backend, source in sources.items():
-        stem = backend.replace("-float", "")
+        stem = backend.replace("minimp3-", "minimp3_")
         mode = "operations" if operations else "timing"
         raw_ir = BUILD / f"{stem}.{mode}.ll"
         instrumented_ir = BUILD / f"{stem}.{mode}.instrumented.ll"
@@ -427,8 +499,11 @@ def build_plain_driver() -> Path:
     BUILD.mkdir(parents=True, exist_ok=True)
     compiler = compiler_path()
     objects: list[Path] = []
-    for backend in ("minimp3",):
-        source = ROOT / "ci" / "codec_memory" / f"{backend}_audit.cpp"
+    plain_sources = {
+        "minimp3": ROOT / "ci" / "codec_memory" / "minimp3_audit.cpp",
+        "minimp3_fixed": ROOT / "ci" / "codec_cpu" / "minimp3_fixed_driver.cpp",
+    }
+    for backend, source in plain_sources.items():
         obj = BUILD / f"{backend}.plain.o"
         RunningProcess.run(
             [
@@ -1104,9 +1179,14 @@ def run_codegen_audit() -> dict[str, dict[str, dict[str, dict[str, int]]]]:
     BUILD.mkdir(parents=True, exist_ok=True)
     sources = {
         "minimp3-float": Path(__file__).with_name("minimp3_codegen.cpp"),
+        "minimp3-fixed": Path(__file__).with_name("minimp3_fixed_codegen.cpp"),
     }
     kernel_needles = {
         "minimp3-float": {
+            "dct32": ("mp3d_DCT_II",),
+            "polyphase": ("mp3d_synth_pair",),
+        },
+        "minimp3-fixed": {
             "dct32": ("mp3d_DCT_II",),
             "polyphase": ("mp3d_synth_pair",),
         },
@@ -1117,7 +1197,7 @@ def run_codegen_audit() -> dict[str, dict[str, dict[str, dict[str, int]]]]:
     for target in TARGETS:
         tools = _target_tools(target)
         for backend, source in sources.items():
-            stem = backend.replace("-float", "")
+            stem = backend.replace("minimp3-", "minimp3_")
             obj = BUILD / f"{stem}.{target}.o"
             cross_flags = [
                 flag
