@@ -286,6 +286,44 @@ FL_TEST_CASE("minimp3 fixed-point scalefactor gains match 2**(q/4) exactly") {
 // that merely accepted -DMINIMP3_FIXED_POINT and kept decoding in float would
 // otherwise sail through every fixed-vs-float comparison with a perfect score.
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Phase 4 (#4055): the SIMD kernels must be bit-identical to the scalar
+// fixed-point path, not merely close. Equality is the gate because both
+// operate on the same integer representation -- any difference is a defect in
+// one of them, not a rounding trade-off.
+// ---------------------------------------------------------------------------
+FL_TEST_CASE("minimp3 fixed-point SIMD kernels are bit-identical to scalar") {
+    fl::setTestFileSystemRoot("tests/data");
+
+    // The opt-out has to keep working: it is what makes "scalar" a real
+    // reference rather than whatever the default build happened to select.
+    FL_CHECK(fl::Minimp3FixedScalarVariant::dspIsInteger());
+    FL_CHECK_FALSE(fl::Minimp3FixedScalarVariant::dspUsesSimd());
+
+    // RED until the integer kernels land (#4055).
+    FL_CHECK(fl::Minimp3FixedVariant::dspUsesSimd());
+
+    for (const char* path : kFixedPointCorpus) {
+        const fl::vector<fl::u8> bytes = readCorpusBytes(path);
+        const VariantDecodeResult scalar =
+            decodeWithVariant<fl::Minimp3FixedScalarVariant>(bytes);
+        const VariantDecodeResult simd =
+            decodeWithVariant<fl::Minimp3FixedVariant>(bytes);
+
+        FL_CHECK_GT(scalar.mFrames, 0);
+        FL_REQUIRE_EQ(simd.mFrames, scalar.mFrames);
+        FL_REQUIRE_EQ(simd.mPcm.size(), scalar.mPcm.size());
+        for (fl::size i = 0; i < scalar.mPcm.size(); ++i) {
+            if (simd.mPcm[i] != scalar.mPcm[i]) {
+                printf("[simd-exact] %s diverges at sample %zu: %d != %d\n",
+                       path, i, static_cast<int>(simd.mPcm[i]),
+                       static_cast<int>(scalar.mPcm[i]));
+                FL_REQUIRE_EQ(simd.mPcm[i], scalar.mPcm[i]);
+            }
+        }
+    }
+}
+
 FL_TEST_CASE("minimp3 fixed-point variant decodes with integer arithmetic") {
     FL_CHECK(fl::Minimp3FixedVariant::isFixedPoint());
     FL_CHECK_FALSE(fl::Minimp3FloatVariant::isFixedPoint());

@@ -144,6 +144,11 @@ void mp3dec_init(mp3dec_t *dec) FL_NO_EXCEPT;
 int mp3dec_is_fixed_point(void) FL_NO_EXCEPT;
 /* 1 when this instantiation actually decodes with integer arithmetic. */
 int mp3dec_dsp_is_integer(void) FL_NO_EXCEPT;
+/* 1 when this instantiation compiled integer SIMD kernels. Reported
+   separately from the two above for the same reason they are separate from
+   each other: "the build accepted the flag" and "the build actually vectorised"
+   are different claims, and only the second is worth gating on. */
+int mp3dec_dsp_uses_simd(void) FL_NO_EXCEPT;
 #ifndef MINIMP3_FLOAT_OUTPUT
 typedef int16_t mp3d_sample_t;
 #else /* MINIMP3_FLOAT_OUTPUT */
@@ -356,15 +361,19 @@ static int32_t mp3d_scale_to_q(int32_t mant, int exp) FL_NO_EXCEPT
 #define MP3D_STAGE(stage, ch, buf, n) ((void)0)
 #endif
 
-/* FastLED: the SIMD kernels below are float-only. Integer SSE2/NEON kernels
-   are Phase 4 (FastLED/FastLED#4055); until then the fixed-point build is
-   scalar, and says so rather than silently compiling float vector code. */
-#if MINIMP3_HAVE_FIXED_POINT && !defined(MINIMP3_NO_SIMD)
-#define MINIMP3_NO_SIMD
-#define MP3D_OWNS_NO_SIMD
+/* FastLED: the vector kernels come in two families that must not be confused.
+   The `HAVE_SIMD` block below is the float one, and it stays exactly as
+   upstream wrote it -- the fixed-point build must never compile float vector
+   code. The integer kernels live in their own MP3D_HAVE_INT_SIMD block and are
+   selected only for the fixed build. */
+#if MINIMP3_HAVE_FIXED_POINT
+/* Keep upstream's float SIMD out of the fixed build without disturbing the
+   caller's own MINIMP3_NO_SIMD, which still has to mean "scalar everywhere"
+   and is what the Phase 4 opt-out proof relies on. */
+#define MP3D_FLOAT_SIMD_OFF
 #endif
 
-#if !defined(MINIMP3_NO_SIMD)
+#if !defined(MINIMP3_NO_SIMD) && !defined(MP3D_FLOAT_SIMD_OFF)
 
 #if !defined(MINIMP3_ONLY_SIMD) && (defined(_M_X64) || defined(__x86_64__) || defined(__aarch64__) || defined(_M_ARM64))
 /* x64 always have SSE2, arm64 always have neon, no need for generic code */
@@ -467,9 +476,39 @@ static int have_simd()
 #error MINIMP3_ONLY_SIMD used, but SSE/NEON not enabled
 #endif /* MINIMP3_ONLY_SIMD */
 #endif /* SIMD checks... */
-#else /* !defined(MINIMP3_NO_SIMD) */
+#else /* !defined(MINIMP3_NO_SIMD) && !defined(MP3D_FLOAT_SIMD_OFF) */
 #define HAVE_SIMD 0
-#endif /* !defined(MINIMP3_NO_SIMD) */
+#endif /* !defined(MINIMP3_NO_SIMD) && !defined(MP3D_FLOAT_SIMD_OFF) */
+
+/* FastLED: integer SIMD for the fixed-point path (FastLED/FastLED#4055).
+   Deliberately a separate detection block from upstream's float one above --
+   the two select different instruction sets and must never both be live.
+   MINIMP3_NO_SIMD suppresses this as well, which is what makes the scalar
+   opt-out proof meaningful. */
+#if MINIMP3_HAVE_FIXED_POINT && !defined(MINIMP3_NO_SIMD)
+#if (defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))) || \
+    ((defined(__i386__) || defined(__x86_64__)) && defined(__SSE2__))
+#include <emmintrin.h>
+#define MP3D_HAVE_INT_SIMD 1
+#define MP3D_INT_SIMD_SSE  1
+typedef __m128i mp3d_i32x4;
+#elif defined(__ARM_NEON) || defined(__aarch64__) || defined(_M_ARM64)
+#include <arm_neon.h>
+#define MP3D_HAVE_INT_SIMD 1
+#define MP3D_INT_SIMD_NEON 1
+typedef int32x4_t mp3d_i32x4;
+#endif
+#endif /* MINIMP3_HAVE_FIXED_POINT && !MINIMP3_NO_SIMD */
+
+#ifndef MP3D_HAVE_INT_SIMD
+#define MP3D_HAVE_INT_SIMD 0
+#endif
+
+/* 1 once integer kernels actually replace scalar ones. Separate from
+   MP3D_HAVE_INT_SIMD -- having the intrinsics available is not the same as
+   using them, and the gate is on the second. */
+#undef MP3D_SIMD_KERNELS_LIVE
+#define MP3D_SIMD_KERNELS_LIVE 0
 
 #if defined(__ARM_ARCH) && (__ARM_ARCH >= 6) && !defined(__aarch64__) && !defined(_M_ARM64) && !defined(__ARM_ARCH_6M__)
 #define HAVE_ARMV6 1
@@ -2741,6 +2780,11 @@ int mp3dec_dsp_is_integer(void) FL_NO_EXCEPT
     return MINIMP3_DSP_INTEGER;
 }
 
+int mp3dec_dsp_uses_simd(void) FL_NO_EXCEPT
+{
+    return MP3D_SIMD_KERNELS_LIVE;
+}
+
 void mp3dec_init(mp3dec_t *dec) FL_NO_EXCEPT
 {
     dec->header[0] = 0;
@@ -2933,10 +2977,11 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples) FL_NO_EXC
 #undef MP3D_PCM_LOWER
 /* Only release MINIMP3_NO_SIMD if this header is what set it; a caller that
    asked for the scalar build must keep getting it on a re-include. */
-#ifdef MP3D_OWNS_NO_SIMD
-#undef MINIMP3_NO_SIMD
-#undef MP3D_OWNS_NO_SIMD
-#endif
+#undef MP3D_FLOAT_SIMD_OFF
+#undef MP3D_HAVE_INT_SIMD
+#undef MP3D_INT_SIMD_SSE
+#undef MP3D_INT_SIMD_NEON
+#undef MP3D_SIMD_KERNELS_LIVE
 #undef BITS_DEQUANTIZER_OUT
 #undef BSPOS
 #undef CHECK_BITS
