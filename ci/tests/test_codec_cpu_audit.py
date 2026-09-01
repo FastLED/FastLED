@@ -74,21 +74,59 @@ def test_integer_product_selection_ignores_address_and_size_math() -> None:
     body = [
         "  %a64 = sext i32 %a to i64",
         "  %b64 = sext i32 %b to i64",
-        "  %prod = mul nsw i64 %a64, %b64",          # Q-format: counted
+        "  %prod = mul nsw i64 %a64, %b64",  # Q-format: counted
         "  %coef = sext i32 %c to i64",
-        "  %scaled = mul nsw i64 %coef, 37489",      # literal tap: counted
+        "  %scaled = mul nsw i64 %coef, 37489",  # literal tap: counted
         "  %idx = sext i32 %i to i64",
-        "  %off = mul nsw i64 %idx, 4",              # address math: rejected
+        "  %off = mul nsw i64 %idx, 4",  # address math: rejected
         "  %p = getelementptr inbounds i32, ptr %base, i64 %off",
         "  %n = sext i32 %count to i64",
-        "  %bytes = mul nsw i64 %n, 72",             # memcpy size: rejected
+        "  %bytes = mul nsw i64 %n, 72",  # memcpy size: rejected
         "  %r = call ptr @memcpy(ptr %d, ptr %s, i64 %bytes)",
-        "  %wide = mul nsw i64 %x, %y",              # neither sign-extended
+        "  %wide = mul nsw i64 %x, %y",  # neither sign-extended
     ]
     products = AUDIT._integer_product_lines(body)
 
     assert products.values == {"%prod", "%scaled"}
     assert products.lines == {2, 4}
+
+
+def test_widened_operands_are_still_counted_as_one_multiply() -> None:
+    """`(int64_t)(a - b) * c` and `((int64_t)a - (int64_t)b) * c` are the same
+    Q-format multiply spelled two ways, and both must be counted.
+
+    The first lowers to `sub i32 -> sext -> mul`; the second to
+    `sext, sext -> sub i64 -> mul`, where the multiply's operand is the subtract
+    rather than the extend. Keying on the extend alone made the counter blind to
+    329,616 multiplies in mp3d_synth_pair the moment FastLED#4133 widened its
+    operands to avoid signed overflow -- the arithmetic was unchanged, only the
+    IR shape. The exact operation ledger caught it, and re-baselining instead of
+    fixing the rule would have made the ledger permanently blind to the hottest
+    kernel in the decoder."""
+    narrow = [
+        "  %d = sub nsw i32 %a, %b",
+        "  %w = sext i32 %d to i64",
+        "  %m = mul nsw i64 %w, 29",
+    ]
+    widened = [
+        "  %wa = sext i32 %a to i64",
+        "  %wb = sext i32 %b to i64",
+        "  %d = sub nsw i64 %wa, %wb",
+        "  %m = mul nsw i64 %d, 29",
+    ]
+    assert AUDIT._integer_product_lines(narrow).values == {"%m"}
+    assert AUDIT._integer_product_lines(widened).values == {"%m"}
+
+    # The widening must not turn address or size arithmetic into a sample
+    # multiply either.
+    addressing = [
+        "  %wa = sext i32 %i to i64",
+        "  %wb = sext i32 %j to i64",
+        "  %d = add nsw i64 %wa, %wb",
+        "  %off = mul nsw i64 %d, 4",
+        "  %p = getelementptr inbounds i32, ptr %base, i64 %off",
+    ]
+    assert AUDIT._integer_product_lines(addressing).values == set()
 
 
 def test_integer_mac_counts_one_accumulate_for_two_products() -> None:
@@ -122,9 +160,12 @@ entry:
 }
 """
     # Counting the call form, not the `declare` line, which also names it.
-    assert AUDIT.instrument_llvm_ir(float_ir, "minimp3-float").text.count(
-        "call void @fastled_mp3_cpu_operation"
-    ) == 1
+    assert (
+        AUDIT.instrument_llvm_ir(float_ir, "minimp3-float").text.count(
+            "call void @fastled_mp3_cpu_operation"
+        )
+        == 1
+    )
     with pytest.raises(RuntimeError, match="no arithmetic sites"):
         AUDIT.instrument_llvm_ir(float_ir, "minimp3-fixed")
 

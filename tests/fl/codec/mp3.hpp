@@ -1,5 +1,6 @@
 #include "test.h"
 #include "fl/codec/mp3.h"
+#include "fl/codec/mp3_vbr_tag.h"
 #include "fl/codec/mp3_memory.h"
 #include "fl/fs/fs.h"
 #include "fl/math/math.h"
@@ -496,6 +497,171 @@ FL_TEST_CASE("MP3 public stream recovers a valid frame after corruption") {
     }
     FL_CHECK_GT(decoded_frames, 0);
     FL_CHECK_FALSE(decoder.hasError());
+}
+
+FL_TEST_CASE("MP3 decoder skips the VBR tag frame and encoder priming") {
+    // FastLED#4129. A Xing/Info/VBRI header occupies a complete, valid MPEG
+    // frame, so a decoder that only scans for sync words emits it as audio --
+    // a burst of noise before the music. LAME additionally records how much
+    // encoder priming follows, and the filterbank contributes a further 529
+    // samples of its own latency that are not recorded anywhere in the file.
+    //
+    // On the conformance vector this is worth 2257 samples per channel and
+    // moves the PSNR from 2.85 dB to 108.22 dB. That vector's reference PCM is
+    // 1.4 MB, too large to vendor, so the behaviour is pinned here on the
+    // corpus file the repo already carries: the parser's own output, and the
+    // sample count the stream decoder actually emits.
+    fl::setTestFileSystemRoot("tests/data");
+    const fl::vector<fl::u8> bitstream =
+        loadMp3CorpusFile("codec/minimp3/l3-lame-vbrtag.bit");
+
+    fl::third_party::Mp3VbrTag tag;
+    FL_REQUIRE(fl::third_party::Mp3ParseVbrTag(
+        fl::span<const fl::u8>(bitstream), &tag));
+    FL_CHECK(tag.present);
+    FL_CHECK_EQ(tag.encoderDelay, 576u);
+
+    // A file with no VBR header must not be mistaken for one.
+    const fl::vector<fl::u8> plain =
+        loadMp3CorpusFile("codec/minimp3/l3-hecommon.bit");
+    fl::third_party::Mp3VbrTag none;
+    fl::third_party::Mp3ParseVbrTag(fl::span<const fl::u8>(plain), &none);
+    FL_CHECK_FALSE(none.present);
+
+    // The raw frame loop sees the tag frame as audio; the stream decoder must
+    // not, and must also drop the priming that follows it. Comparing sample
+    // *counts* between the two would not show that: the streaming path emits
+    // fewer samples than the raw loop anyway, for buffering reasons unrelated
+    // to this change. So compare the actual audio instead -- the first sample
+    // the stream decoder emits must be the first sample after the tag frame
+    // and the priming, not the first sample of the tag frame.
+    const Mp3DecodeResult raw = decodeMp3Corpus<Mp3Minimp3Decoder>(bitstream);
+    FL_REQUIRE_EQ(raw.mChannels, 2);
+    const fl::size drop_per_channel =
+        1152u + 576u + fl::third_party::MP3D_DECODER_DELAY;
+    FL_REQUIRE_GT(raw.mPcm.size(), drop_per_channel * 2 + 64);
+
+    auto stream = fl::make_shared<fl::memorybuf>(bitstream.size());
+    FL_REQUIRE_EQ(stream->write(fl::span<const fl::u8>(bitstream)),
+                  bitstream.size());
+    fl::Mp3Decoder decoder;
+    FL_REQUIRE(decoder.begin(stream));
+    fl::audio::Sample sample;
+    FL_REQUIRE(decoder.decodeNextFrame(&sample));
+    FL_REQUIRE_GT(sample.pcm().size(), 32u);
+
+    // The public decoder downmixes stereo to mono, so build the expectation
+    // the same way from the raw interleaved output.
+    for (fl::size i = 0; i < 32; ++i) {
+        const fl::size src = (drop_per_channel + i) * 2;
+        const fl::i32 left = raw.mPcm[src];
+        const fl::i32 right = raw.mPcm[src + 1];
+        FL_REQUIRE_EQ(sample.pcm()[i], static_cast<fl::i16>((left + right) / 2));
+    }
+
+    // And the tag frame's own output must not be what came out first, or the
+    // check above would pass on a decoder that skipped nothing.
+    bool differs_from_tag_frame = false;
+    for (fl::size i = 0; i < 32; ++i) {
+        const fl::i32 left = raw.mPcm[i * 2];
+        const fl::i32 right = raw.mPcm[i * 2 + 1];
+        if (sample.pcm()[i] != static_cast<fl::i16>((left + right) / 2)) {
+            differs_from_tag_frame = true;
+            break;
+        }
+    }
+    FL_CHECK(differs_from_tag_frame);
+}
+
+FL_TEST_CASE("MP3 decoder clears VBR state when the stream is replaced") {
+    // FastLED#4129 suppresses the Xing/Info frame and the encoder priming that
+    // follows it, and records that it has done so in three members. begin()
+    // and reset() cleared every other per-stream field -- mBufferPos,
+    // mBytesProcessed, mHasDecodedFirstFrame -- but not those three, so a
+    // reused decoder carried the previous stream's verdict into the next one.
+    //
+    // Decoding an untagged file first is the damaging order: it leaves
+    // mInspectedFirstFrame set, so the tagged stream that follows is never
+    // inspected at all, and its metadata frame goes out as audio. That is
+    // precisely the burst of noise #4129 exists to remove, reappearing on the
+    // second use of the same object.
+    fl::setTestFileSystemRoot("tests/data");
+    const fl::vector<fl::u8> tagged =
+        loadMp3CorpusFile("codec/minimp3/l3-lame-vbrtag.bit");
+    const fl::vector<fl::u8> plain =
+        loadMp3CorpusFile("codec/minimp3/l3-hecommon.bit");
+
+    auto open = [](const fl::vector<fl::u8>& data) {
+        auto stream = fl::make_shared<fl::memorybuf>(data.size());
+        FL_REQUIRE_EQ(stream->write(fl::span<const fl::u8>(data)), data.size());
+        return stream;
+    };
+
+    // What a decoder that has only ever seen the tagged stream emits first.
+    fl::vector<fl::i16> fresh;
+    {
+        fl::Mp3Decoder decoder;
+        FL_REQUIRE(decoder.begin(open(tagged)));
+        fl::audio::Sample sample;
+        FL_REQUIRE(decoder.decodeNextFrame(&sample));
+        FL_REQUIRE_GT(sample.pcm().size(), 32u);
+        for (fl::size i = 0; i < 32; ++i) {
+            fresh.push_back(sample.pcm()[i]);
+        }
+    }
+
+    // The same stream on a decoder that has already handled an untagged one.
+    fl::Mp3Decoder reused;
+    FL_REQUIRE(reused.begin(open(plain)));
+    fl::audio::Sample discard;
+    FL_REQUIRE(reused.decodeNextFrame(&discard));
+
+    FL_REQUIRE(reused.begin(open(tagged)));
+    fl::audio::Sample sample;
+    FL_REQUIRE(reused.decodeNextFrame(&sample));
+    FL_REQUIRE_GT(sample.pcm().size(), 32u);
+    for (fl::size i = 0; i < 32; ++i) {
+        FL_REQUIRE_EQ(sample.pcm()[i], fresh[i]);
+    }
+
+    // reset() is the other entry point into a fresh stream and must clear the
+    // same state.
+    reused.reset();
+    FL_REQUIRE(reused.begin(open(tagged)));
+    fl::audio::Sample after_reset;
+    FL_REQUIRE(reused.decodeNextFrame(&after_reset));
+    FL_REQUIRE_GT(after_reset.pcm().size(), 32u);
+    for (fl::size i = 0; i < 32; ++i) {
+        FL_REQUIRE_EQ(after_reset.pcm()[i], fresh[i]);
+    }
+}
+
+FL_TEST_CASE("MP3 decoder clears the ISO floor on the dequant-headroom vector") {
+    // FastLED#4127. `l3-si_huff` drives the dequantised samples to 3.89 -- six
+    // times higher than any other conformance vector that ships a reference,
+    // and the only one above 0.63. The fixed-point path used to clamp them to
+    // 1.0 on the strength of a headroom measurement taken over the two vectors
+    // vendored at the time, which cost 81 dB here: 26.58 dB against float's
+    // 107.95, far below the 60 dB ISO floor, while every existing gate stayed
+    // green because none of them had ever seen this bitstream.
+    //
+    // The fixed-vs-float gates could not catch it either: they compare the two
+    // pipelines across the *vendored* corpus, so a divergence only present in a
+    // vector nobody vendored is invisible to them by construction.
+    fl::setTestFileSystemRoot("tests/data");
+    const fl::vector<fl::u8> bitstream =
+        loadMp3CorpusFile("codec/minimp3/l3-si_huff.bit");
+    const fl::vector<fl::i16> reference =
+        decodeLittleEndianPcm(loadMp3CorpusFile("codec/minimp3/l3-si_huff.pcm"));
+    const Mp3DecodeResult decoded =
+        decodeMp3Corpus<Mp3Minimp3Decoder>(bitstream);
+
+    FL_CHECK_TRUE(hasStandardVectorLength(decoded.mPcm.size(), reference.size()));
+    const double psnr = reportPsnr(reference, decoded.mPcm);
+    printf("MP3 dequant-headroom vector: minimp3=%.2f dB\n", psnr);
+    FL_CHECK_GE(psnr, 60.0);
+    // Well clear of the floor, not scraping it: the clamp bug scored 26.58.
+    FL_CHECK_GE(psnr, 90.0);
 }
 
 FL_TEST_CASE("MP3 decoder passes the limited-accuracy reference floor") {

@@ -1,8 +1,8 @@
 diff --git a/minimp3.h b/minimp3.h
-index 9fbd4d2..61b96e8 100644
+index 9fbd4d2..292241a 100644
 --- a/minimp3.h
 +++ b/minimp3.h
-@@ -1,50 +1,237 @@
+@@ -1,50 +1,250 @@
  #ifndef MINIMP3_H
  #define MINIMP3_H
 +// SPDX-License-Identifier: CC0-1.0
@@ -134,18 +134,31 @@ index 9fbd4d2..61b96e8 100644
 +
 +/* FastLED: number of fractional bits in a fixed-point DSP sample.
 +
-+   Measured (tests/fl/codec/mp3_fixed_point.hpp, "stage dynamic range") the
-+   float pipeline peaks near 0.65 at every stage across the conformance corpus
-+   and real encoded music -- minimp3 normalises internally and the polyphase
-+   window carries the scaling back up to int16 only at the very end. So one Q
-+   format serves the whole pipeline and block floating point is only needed
-+   where the dynamic range genuinely is unbounded: the scalefactor gains and
-+   x**(4/3), which are carried as mantissa+exponent instead.
++   Measured over the *full* upstream conformance suite -- all 83 vectors that
++   ship a reference PCM, not the handful vendored under tests/data -- the float
++   pipeline peaks at 3.89, in `l3-si_huff`. Every other vector with a reference
++   peaks at 0.63 or below. minimp3 normalises internally and the polyphase
++   window carries the scaling back up to int16 only at the very end, so one Q
++   format serves the whole pipeline; block floating point is needed only where
++   the dynamic range genuinely is unbounded (the scalefactor gains and
++   x**(4/3), carried as mantissa+exponent instead).
 +
-+   Q26 in int32 leaves range +/-32 (about 50x the measured peak, and dequantised
-+   samples are clamped to +/-1 besides) and a resolution of 2**-26, which is
-+   roughly 1/1000 of an int16 LSB at output scale. Every multiply widens to
-+   int64 first, so this is the only headroom that has to be reasoned about. */
++   Q26 in int32 leaves range +/-32 -- about 8x that measured peak -- and a
++   resolution of 2**-26, roughly 1/1000 of an int16 LSB at output scale. Every
++   multiply widens to int64 first, so this is the only headroom that has to be
++   reasoned about.
++
++   That 3.89 is why dequantised samples are clamped to the Q26 range rather
++   than to +/-1. They were clamped to +/-1 until FastLED#4127, on the strength
++   of a "peaks near 0.65" measurement taken over the two vectors that were
++   vendored at the time. `l3-si_huff` reaches 2.44 at the huffman stage and the
++   clamp truncated it, costing 81 dB on that vector -- 26.58 dB against float's
++   107.95, far below the 60 dB ISO floor. The measurement was sound; the sample
++   it was taken over was 2 of 83.
++
++   One vector, `l3-nonstandard-big-iscf`, drives the pipeline to 230767. It is
++   a deliberately malformed stream with no reference PCM, and saturating there
++   is the intended behaviour rather than a range failure. */
 +#undef MINIMP3_FRAC_BITS
 +#define MINIMP3_FRAC_BITS 26
 +
@@ -252,7 +265,7 @@ index 9fbd4d2..61b96e8 100644
  
  #define MAX_FREE_FORMAT_FRAME_SIZE  2304    /* more than ISO spec's */
  #ifndef MAX_FRAME_SYNC_MATCHES
-@@ -84,7 +271,180 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
+@@ -84,7 +284,179 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
  #define MINIMP3_MIN(a, b)           ((a) > (b) ? (b) : (a))
  #define MINIMP3_MAX(a, b)           ((a) < (b) ? (b) : (a))
  
@@ -384,12 +397,11 @@ index 9fbd4d2..61b96e8 100644
 +   an astronomically large dequantised value, and without this the DCT-32
 +   secants (up to 10.19) stacked on three levels of adds would overflow int32
 +   and hand UBSan a signed-overflow report. */
-+#define MP3D_ONE ((int32_t)1 << MINIMP3_FRAC_BITS)
 +
 +static int32_t mp3d_clamp_sample(int64_t value) FL_NO_EXCEPT
 +{
-+    if (value > MP3D_ONE) return MP3D_ONE;
-+    if (value < -MP3D_ONE) return -MP3D_ONE;
++    if (value > MP3D_SAT_MAX) return MP3D_SAT_MAX;
++    if (value < MP3D_SAT_MIN) return MP3D_SAT_MIN;
 +    return (int32_t)value;
 +}
 +
@@ -434,7 +446,7 @@ index 9fbd4d2..61b96e8 100644
  
  #if !defined(MINIMP3_ONLY_SIMD) && (defined(_M_X64) || defined(__x86_64__) || defined(__aarch64__) || defined(_M_ARM64))
  /* x64 always have SSE2, arm64 always have neon, no need for generic code */
-@@ -136,7 +496,7 @@ static __inline__ __attribute__((always_inline)) void minimp3_cpuid(int CPUInfo[
+@@ -136,7 +508,7 @@ static __inline__ __attribute__((always_inline)) void minimp3_cpuid(int CPUInfo[
  #endif /* defined(__PIC__)*/
  }
  #endif /* defined(_MSC_VER) || defined(MINIMP3_ONLY_SIMD) */
@@ -443,7 +455,7 @@ index 9fbd4d2..61b96e8 100644
  {
  #ifdef MINIMP3_ONLY_SIMD
      return 1;
-@@ -187,9 +547,37 @@ static int have_simd()
+@@ -187,9 +559,37 @@ static int have_simd()
  #error MINIMP3_ONLY_SIMD used, but SSE/NEON not enabled
  #endif /* MINIMP3_ONLY_SIMD */
  #endif /* SIMD checks... */
@@ -483,7 +495,7 @@ index 9fbd4d2..61b96e8 100644
  
  #if defined(__ARM_ARCH) && (__ARM_ARCH >= 6) && !defined(__aarch64__) && !defined(_M_ARM64) && !defined(__ARM_ARCH_6M__)
  #define HAVE_ARMV6 1
-@@ -211,7 +599,21 @@ typedef struct
+@@ -211,7 +611,21 @@ typedef struct
  
  typedef struct
  {
@@ -505,7 +517,7 @@ index 9fbd4d2..61b96e8 100644
      uint8_t total_bands, stereo_bands, bitalloc[64], scfcod[64];
  } L12_scale_info;
  
-@@ -234,18 +636,34 @@ typedef struct
+@@ -234,18 +648,34 @@ typedef struct
      bs_t bs;
      uint8_t maindata[MAX_BITRESERVOIR_BYTES + MAX_L3_FRAME_PAYLOAD_BYTES];
      L3_gr_info_t gr_info[4];
@@ -544,7 +556,7 @@ index 9fbd4d2..61b96e8 100644
  {
      uint32_t next, cache = 0, s = bs->pos & 7;
      int shl = n + s;
-@@ -261,7 +679,7 @@ static uint32_t get_bits(bs_t *bs, int n)
+@@ -261,7 +691,7 @@ static uint32_t get_bits(bs_t *bs, int n)
      return cache | (next >> -shl);
  }
  
@@ -553,7 +565,7 @@ index 9fbd4d2..61b96e8 100644
  {
      return h[0] == 0xff &&
          ((h[1] & 0xF0) == 0xf0 || (h[1] & 0xFE) == 0xe2) &&
-@@ -270,7 +688,7 @@ static int hdr_valid(const uint8_t *h)
+@@ -270,7 +700,7 @@ static int hdr_valid(const uint8_t *h)
          (HDR_GET_SAMPLE_RATE(h) != 3);
  }
  
@@ -562,7 +574,7 @@ index 9fbd4d2..61b96e8 100644
  {
      return hdr_valid(h2) &&
          ((h1[1] ^ h2[1]) & 0xFE) == 0 &&
-@@ -278,7 +696,7 @@ static int hdr_compare(const uint8_t *h1, const uint8_t *h2)
+@@ -278,7 +708,7 @@ static int hdr_compare(const uint8_t *h1, const uint8_t *h2)
          !(HDR_IS_FREE_FORMAT(h1) ^ HDR_IS_FREE_FORMAT(h2));
  }
  
@@ -571,7 +583,7 @@ index 9fbd4d2..61b96e8 100644
  {
      static const uint8_t halfrate[2][3][15] = {
          { { 0,4,8,12,16,20,24,28,32,40,48,56,64,72,80 }, { 0,4,8,12,16,20,24,28,32,40,48,56,64,72,80 }, { 0,16,24,28,32,40,48,56,64,72,80,88,96,112,128 } },
-@@ -287,18 +705,18 @@ static unsigned hdr_bitrate_kbps(const uint8_t *h)
+@@ -287,18 +717,18 @@ static unsigned hdr_bitrate_kbps(const uint8_t *h)
      return 2*halfrate[!!HDR_TEST_MPEG1(h)][HDR_GET_LAYER(h) - 1][HDR_GET_BITRATE(h)];
  }
  
@@ -593,7 +605,7 @@ index 9fbd4d2..61b96e8 100644
  {
      int frame_bytes = hdr_frame_samples(h)*hdr_bitrate_kbps(h)*125/hdr_sample_rate_hz(h);
      if (HDR_IS_LAYER_1(h))
-@@ -308,13 +726,13 @@ static int hdr_frame_bytes(const uint8_t *h, int free_format_size)
+@@ -308,13 +738,13 @@ static int hdr_frame_bytes(const uint8_t *h, int free_format_size)
      return frame_bytes ? frame_bytes : free_format_size;
  }
  
@@ -609,7 +621,7 @@ index 9fbd4d2..61b96e8 100644
  {
      const L12_subband_alloc_t *alloc;
      int mode = HDR_GET_STEREO_MODE(hdr);
-@@ -359,7 +777,57 @@ static const L12_subband_alloc_t *L12_subband_alloc_table(const uint8_t *hdr, L1
+@@ -359,7 +789,57 @@ static const L12_subband_alloc_t *L12_subband_alloc_table(const uint8_t *hdr, L1
      return alloc;
  }
  
@@ -668,7 +680,7 @@ index 9fbd4d2..61b96e8 100644
  {
      static const float g_deq_L12[18*3] = {
  #define DQ(x) 9.53674316e-07f/x, 7.56931807e-07f/x, 6.00777173e-07f/x
-@@ -382,8 +850,9 @@ static void L12_read_scalefactors(bs_t *bs, uint8_t *pba, uint8_t *scfcod, int b
+@@ -382,8 +862,9 @@ static void L12_read_scalefactors(bs_t *bs, uint8_t *pba, uint8_t *scfcod, int b
          }
      }
  }
@@ -679,7 +691,7 @@ index 9fbd4d2..61b96e8 100644
  {
      static const uint8_t g_bitalloc_code_tab[] = {
          0,17, 3, 4, 5,6,7, 8,9,10,11,12,13,14,15,16,
-@@ -423,7 +892,11 @@ static void L12_read_scale_info(const uint8_t *hdr, bs_t *bs, L12_scale_info *sc
+@@ -423,7 +904,11 @@ static void L12_read_scale_info(const uint8_t *hdr, bs_t *bs, L12_scale_info *sc
          sci->scfcod[i] = sci->bitalloc[i] ? HDR_IS_LAYER_1(hdr) ? 2 : get_bits(bs, 2) : 6;
      }
  
@@ -691,7 +703,7 @@ index 9fbd4d2..61b96e8 100644
  
      for (i = sci->stereo_bands; i < sci->total_bands; i++)
      {
-@@ -431,12 +904,16 @@ static void L12_read_scale_info(const uint8_t *hdr, bs_t *bs, L12_scale_info *sc
+@@ -431,12 +916,16 @@ static void L12_read_scale_info(const uint8_t *hdr, bs_t *bs, L12_scale_info *sc
      }
  }
  
@@ -710,7 +722,7 @@ index 9fbd4d2..61b96e8 100644
          for (i = 0; i < 2*sci->total_bands; i++)
          {
              int ba = sci->bitalloc[i];
-@@ -447,7 +924,7 @@ static int L12_dequantize_granule(float *grbuf, bs_t *bs, L12_scale_info *sci, i
+@@ -447,7 +936,7 @@ static int L12_dequantize_granule(float *grbuf, bs_t *bs, L12_scale_info *sci, i
                      int half = (1 << (ba - 1)) - 1;
                      for (k = 0; k < group_size; k++)
                      {
@@ -719,7 +731,7 @@ index 9fbd4d2..61b96e8 100644
                      }
                  } else
                  {
-@@ -455,7 +932,7 @@ static int L12_dequantize_granule(float *grbuf, bs_t *bs, L12_scale_info *sci, i
+@@ -455,7 +944,7 @@ static int L12_dequantize_granule(float *grbuf, bs_t *bs, L12_scale_info *sci, i
                      unsigned code = get_bits(bs, mod + 2 - (mod >> 3));  /* 5, 7, 10 */
                      for (k = 0; k < group_size; k++, code /= mod)
                      {
@@ -728,7 +740,7 @@ index 9fbd4d2..61b96e8 100644
                      }
                  }
              }
-@@ -466,7 +943,22 @@ static int L12_dequantize_granule(float *grbuf, bs_t *bs, L12_scale_info *sci, i
+@@ -466,7 +955,22 @@ static int L12_dequantize_granule(float *grbuf, bs_t *bs, L12_scale_info *sci, i
      return group_size*4;
  }
  
@@ -752,7 +764,7 @@ index 9fbd4d2..61b96e8 100644
  {
      int i, k;
      memcpy(dst + 576 + sci->stereo_bands*18, dst + sci->stereo_bands*18, (sci->total_bands - sci->stereo_bands)*18*sizeof(float));
-@@ -479,9 +971,10 @@ static void L12_apply_scf_384(L12_scale_info *sci, const float *scf, float *dst)
+@@ -479,9 +983,10 @@ static void L12_apply_scf_384(L12_scale_info *sci, const float *scf, float *dst)
          }
      }
  }
@@ -764,7 +776,7 @@ index 9fbd4d2..61b96e8 100644
  {
      static const uint8_t g_scf_long[8][23] = {
          { 6,6,6,6,6,6,8,10,12,14,16,20,24,28,32,38,46,52,60,68,58,54,0 },
-@@ -606,7 +1099,7 @@ static int L3_read_side_info(bs_t *bs, L3_gr_info_t *gr, const uint8_t *hdr)
+@@ -606,7 +1111,7 @@ static int L3_read_side_info(bs_t *bs, L3_gr_info_t *gr, const uint8_t *hdr)
      return main_data_begin;
  }
  
@@ -773,7 +785,7 @@ index 9fbd4d2..61b96e8 100644
  {
      int i, k;
      for (i = 0; i < 4 && scf_count[i]; i++, scfsi *= 2)
-@@ -639,7 +1132,99 @@ static void L3_read_scalefactors(uint8_t *scf, uint8_t *ist_pos, const uint8_t *
+@@ -639,7 +1144,99 @@ static void L3_read_scalefactors(uint8_t *scf, uint8_t *ist_pos, const uint8_t *
      scf[0] = scf[1] = scf[2] = 0;
  }
  
@@ -864,7 +876,7 @@ index 9fbd4d2..61b96e8 100644
 +    }
 +    if (shift <= 0)
 +    {
-+        return product > 0 ? MP3D_ONE : -MP3D_ONE;
++        return product > 0 ? MP3D_SAT_MAX : MP3D_SAT_MIN;
 +    }
 +    product = (product + ((int64_t)1 << (shift - 1))) >> shift;
 +    return mp3d_clamp_sample(product);
@@ -874,7 +886,7 @@ index 9fbd4d2..61b96e8 100644
  {
      static const float g_expfrac[4] = { 9.31322575e-10f,7.83145814e-10f,6.58544508e-10f,5.53767716e-10f };
      int e;
-@@ -650,8 +1235,18 @@ static float L3_ldexp_q2(float y, int exp_q2)
+@@ -650,8 +1247,18 @@ static float L3_ldexp_q2(float y, int exp_q2)
      } while ((exp_q2 -= e) > 0);
      return y;
  }
@@ -895,7 +907,7 @@ index 9fbd4d2..61b96e8 100644
  {
      static const uint8_t g_scf_partitions[3][28] = {
          { 6,5,5, 5,6,5,5,5,6,5, 7,3,11,10,0,0, 7, 7, 7,0, 6, 6,6,3, 8, 8,5,0 },
-@@ -661,7 +1256,9 @@ static void L3_decode_scalefactors(const uint8_t *hdr, uint8_t *ist_pos, bs_t *b
+@@ -661,7 +1268,9 @@ static void L3_decode_scalefactors(const uint8_t *hdr, uint8_t *ist_pos, bs_t *b
      const uint8_t *scf_partition = g_scf_partitions[!!gr->n_short_sfb + !gr->n_long_sfb];
      uint8_t scf_size[4], iscf[40];
      int i, scf_shift = gr->scalefac_scale + 1, gain_exp, scfsi = gr->scfsi;
@@ -905,7 +917,7 @@ index 9fbd4d2..61b96e8 100644
  
      if (HDR_TEST_MPEG1(hdr))
      {
-@@ -706,19 +1303,73 @@ static void L3_decode_scalefactors(const uint8_t *hdr, uint8_t *ist_pos, bs_t *b
+@@ -706,19 +1315,73 @@ static void L3_decode_scalefactors(const uint8_t *hdr, uint8_t *ist_pos, bs_t *b
      }
  
      gain_exp = gr->global_gain + BITS_DEQUANTIZER_OUT*4 - 210 - (HDR_IS_MS_STEREO(hdr) ? 2 : 0);
@@ -980,7 +992,7 @@ index 9fbd4d2..61b96e8 100644
  {
      float frac;
      int sign, mult = 256;
-@@ -738,8 +1389,9 @@ static float L3_pow_43(int x)
+@@ -738,8 +1401,9 @@ static float L3_pow_43(int x)
      frac = (float)((x & 63) - sign) / ((x & ~63) + sign);
      return g_pow43[16 + ((x + sign) >> 6)]*(1.f + frac*((4.f/3) + frac*(2.f/9)))*mult;
  }
@@ -991,7 +1003,7 @@ index 9fbd4d2..61b96e8 100644
  {
      static const int16_t tabs[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
          785,785,785,785,784,784,784,784,513,513,513,513,513,513,513,513,256,256,256,256,256,256,256,256,256,256,256,256,256,256,256,256,
-@@ -767,7 +1419,7 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const
+@@ -767,7 +1431,7 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const
  #define CHECK_BITS    while (bs_sh >= 0) { bs_cache |= (uint32_t)*bs_next_ptr++ << bs_sh; bs_sh -= 8; }
  #define BSPOS         ((bs_next_ptr - bs->buf)*8 - 24 + bs_sh)
  
@@ -1000,7 +1012,7 @@ index 9fbd4d2..61b96e8 100644
      int ireg = 0, big_val_cnt = gr_info->big_values;
      const uint8_t *sfb = gr_info->sfbtab;
      const uint8_t *bs_next_ptr = bs->buf + bs->pos/8;
-@@ -787,7 +1439,7 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const
+@@ -787,7 +1451,7 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const
              {
                  np = *sfb++ / 2;
                  pairs_to_decode = MINIMP3_MIN(big_val_cnt, np);
@@ -1009,7 +1021,7 @@ index 9fbd4d2..61b96e8 100644
                  do
                  {
                      int j, w = 5;
-@@ -808,10 +1460,10 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const
+@@ -808,10 +1472,10 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const
                              lsb += PEEK_BITS(linbits);
                              FLUSH_BITS(linbits);
                              CHECK_BITS;
@@ -1022,7 +1034,7 @@ index 9fbd4d2..61b96e8 100644
                          }
                          FLUSH_BITS(lsb ? 1 : 0);
                      }
-@@ -824,7 +1476,7 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const
+@@ -824,7 +1488,7 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const
              {
                  np = *sfb++ / 2;
                  pairs_to_decode = MINIMP3_MIN(big_val_cnt, np);
@@ -1031,7 +1043,7 @@ index 9fbd4d2..61b96e8 100644
                  do
                  {
                      int j, w = 5;
-@@ -840,7 +1492,7 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const
+@@ -840,7 +1504,7 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const
                      for (j = 0; j < 2; j++, dst++, leaf >>= 4)
                      {
                          int lsb = leaf & 0x0F;
@@ -1040,7 +1052,7 @@ index 9fbd4d2..61b96e8 100644
                          FLUSH_BITS(lsb ? 1 : 0);
                      }
                      CHECK_BITS;
-@@ -862,8 +1514,8 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const
+@@ -862,8 +1526,8 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const
          {
              break;
          }
@@ -1051,7 +1063,7 @@ index 9fbd4d2..61b96e8 100644
          RELOAD_SCALEFACTOR;
          DEQ_COUNT1(0);
          DEQ_COUNT1(1);
-@@ -876,10 +1528,10 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const
+@@ -876,10 +1540,10 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const
      bs->pos = layer3gr_limit;
  }
  
@@ -1064,7 +1076,7 @@ index 9fbd4d2..61b96e8 100644
  #if HAVE_SIMD
      if (have_simd())
      {
-@@ -901,24 +1553,47 @@ static void L3_midside_stereo(float *left, int n)
+@@ -901,24 +1565,47 @@ static void L3_midside_stereo(float *left, int n)
  #endif /* HAVE_SIMD */
      for (; i < n; i++)
      {
@@ -1114,7 +1126,7 @@ index 9fbd4d2..61b96e8 100644
  {
      int i, k;
  
-@@ -938,9 +1613,24 @@ static void L3_stereo_top_band(const float *right, const uint8_t *sfb, int nband
+@@ -938,9 +1625,24 @@ static void L3_stereo_top_band(const float *right, const uint8_t *sfb, int nband
      }
  }
  
@@ -1140,7 +1152,7 @@ index 9fbd4d2..61b96e8 100644
      unsigned i, max_pos = HDR_TEST_MPEG1(hdr) ? 7 : 64;
  
      for (i = 0; sfb[i]; i++)
-@@ -948,6 +1638,27 @@ static void L3_stereo_process(float *left, const uint8_t *ist_pos, const uint8_t
+@@ -948,6 +1650,27 @@ static void L3_stereo_process(float *left, const uint8_t *ist_pos, const uint8_t
          unsigned ipos = ist_pos[i];
          if ((int)i > max_band[i % 3] && ipos < max_pos)
          {
@@ -1168,7 +1180,7 @@ index 9fbd4d2..61b96e8 100644
              float kl, kr, s = HDR_TEST_MS_STEREO(hdr) ? 1.41421356f : 1;
              if (HDR_TEST_MPEG1(hdr))
              {
-@@ -964,6 +1675,7 @@ static void L3_stereo_process(float *left, const uint8_t *ist_pos, const uint8_t
+@@ -964,6 +1687,7 @@ static void L3_stereo_process(float *left, const uint8_t *ist_pos, const uint8_t
                  }
              }
              L3_intensity_stereo_band(left, sfb[i], kl*s, kr*s);
@@ -1176,7 +1188,7 @@ index 9fbd4d2..61b96e8 100644
          } else if (HDR_TEST_MS_STEREO(hdr))
          {
              L3_midside_stereo(left, sfb[i]);
-@@ -972,7 +1684,7 @@ static void L3_stereo_process(float *left, const uint8_t *ist_pos, const uint8_t
+@@ -972,7 +1696,7 @@ static void L3_stereo_process(float *left, const uint8_t *ist_pos, const uint8_t
      }
  }
  
@@ -1185,7 +1197,7 @@ index 9fbd4d2..61b96e8 100644
  {
      int max_band[3], n_sfb = gr->n_long_sfb + gr->n_short_sfb;
      int i, max_blocks = gr->n_short_sfb ? 3 : 1;
-@@ -992,10 +1704,10 @@ static void L3_intensity_stereo(float *left, uint8_t *ist_pos, const L3_gr_info_
+@@ -992,10 +1716,10 @@ static void L3_intensity_stereo(float *left, uint8_t *ist_pos, const L3_gr_info_
      L3_stereo_process(left, ist_pos, gr->sfbtab, hdr, max_band, gr[1].scalefac_compress & 1);
  }
  
@@ -1198,7 +1210,7 @@ index 9fbd4d2..61b96e8 100644
  
      for (;0 != (len = *sfb); sfb += 3, src += 2*len)
      {
-@@ -1006,15 +1718,17 @@ static void L3_reorder(float *grbuf, float *scratch, const uint8_t *sfb)
+@@ -1006,15 +1730,17 @@ static void L3_reorder(float *grbuf, float *scratch, const uint8_t *sfb)
              *dst++ = src[2*len];
          }
      }
@@ -1218,7 +1230,7 @@ index 9fbd4d2..61b96e8 100644
  
      for (; nbands > 0; nbands--, grbuf += 18)
      {
-@@ -1035,16 +1749,189 @@ static void L3_antialias(float *grbuf, int nbands)
+@@ -1035,16 +1761,189 @@ static void L3_antialias(float *grbuf, int nbands)
  #ifndef MINIMP3_ONLY_SIMD
          for(; i < 8; i++)
          {
@@ -1409,7 +1421,7 @@ index 9fbd4d2..61b96e8 100644
  {
      float s0, s1, s2, s3, s4, s5, s6, s7, s8, t0, t2, t4;
  
-@@ -1084,7 +1971,7 @@ static void L3_dct3_9(float *y)
+@@ -1084,7 +1983,7 @@ static void L3_dct3_9(float *y)
      y[8] = s4 + s7;
  }
  
@@ -1418,7 +1430,7 @@ index 9fbd4d2..61b96e8 100644
  {
      int i, j;
      static const float g_twid9[18] = {
-@@ -1141,7 +2028,7 @@ static void L3_imdct36(float *grbuf, float *overlap, const float *window, int nb
+@@ -1141,7 +2040,7 @@ static void L3_imdct36(float *grbuf, float *overlap, const float *window, int nb
      }
  }
  
@@ -1427,7 +1439,7 @@ index 9fbd4d2..61b96e8 100644
  {
      float m1 = x1*0.86602540f;
      float a1 = x0 - x2*0.5f;
-@@ -1150,7 +2037,7 @@ static void L3_idct3(float x0, float x1, float x2, float *dst)
+@@ -1150,7 +2049,7 @@ static void L3_idct3(float x0, float x1, float x2, float *dst)
      dst[2] = a1 - m1;
  }
  
@@ -1436,7 +1448,7 @@ index 9fbd4d2..61b96e8 100644
  {
      static const float g_twid3[6] = { 0.79335334f,0.92387953f,0.99144486f, 0.60876143f,0.38268343f,0.13052619f };
      float co[3], si[3];
-@@ -1170,7 +2057,7 @@ static void L3_imdct12(float *x, float *dst, float *overlap)
+@@ -1170,7 +2069,7 @@ static void L3_imdct12(float *x, float *dst, float *overlap)
      }
  }
  
@@ -1445,7 +1457,7 @@ index 9fbd4d2..61b96e8 100644
  {
      for (;nbands > 0; nbands--, overlap += 9, grbuf += 18)
      {
-@@ -1183,7 +2070,7 @@ static void L3_imdct_short(float *grbuf, float *overlap, int nbands)
+@@ -1183,7 +2082,7 @@ static void L3_imdct_short(float *grbuf, float *overlap, int nbands)
      }
  }
  
@@ -1454,7 +1466,7 @@ index 9fbd4d2..61b96e8 100644
  {
      int b, i;
      for (b = 0, grbuf += 18; b < 32; b += 2, grbuf += 36)
-@@ -1191,7 +2078,7 @@ static void L3_change_sign(float *grbuf)
+@@ -1191,7 +2090,7 @@ static void L3_change_sign(float *grbuf)
              grbuf[i] = -grbuf[i];
  }
  
@@ -1463,7 +1475,7 @@ index 9fbd4d2..61b96e8 100644
  {
      static const float g_mdct_window[2][18] = {
          { 0.99904822f,0.99144486f,0.97629601f,0.95371695f,0.92387953f,0.88701083f,0.84339145f,0.79335334f,0.73727734f,0.04361938f,0.13052619f,0.21643961f,0.30070580f,0.38268343f,0.46174861f,0.53729961f,0.60876143f,0.67559021f },
-@@ -1208,8 +2095,10 @@ static void L3_imdct_gr(float *grbuf, float *overlap, unsigned block_type, unsig
+@@ -1208,8 +2107,10 @@ static void L3_imdct_gr(float *grbuf, float *overlap, unsigned block_type, unsig
      else
          L3_imdct36(grbuf, overlap, g_mdct_window[block_type == STOP_BLOCK_TYPE], 32 - n_long_bands);
  }
@@ -1475,7 +1487,7 @@ index 9fbd4d2..61b96e8 100644
  {
      int pos = (s->bs.pos + 7)/8u;
      int remains = s->bs.limit/8u - pos;
-@@ -1225,7 +2114,7 @@ static void L3_save_reservoir(mp3dec_t *h, mp3dec_scratch_t *s)
+@@ -1225,7 +2126,7 @@ static void L3_save_reservoir(mp3dec_t *h, mp3dec_scratch_t *s)
      h->reserv = remains;
  }
  
@@ -1484,7 +1496,7 @@ index 9fbd4d2..61b96e8 100644
  {
      int frame_bytes = (bs->limit - bs->pos)/8;
      int bytes_have = MINIMP3_MIN(h->reserv, main_data_begin);
-@@ -1235,15 +2124,25 @@ static int L3_restore_reservoir(mp3dec_t *h, bs_t *bs, mp3dec_scratch_t *s, int
+@@ -1235,15 +2136,25 @@ static int L3_restore_reservoir(mp3dec_t *h, bs_t *bs, mp3dec_scratch_t *s, int
      return h->reserv >= main_data_begin;
  }
  
@@ -1513,7 +1525,7 @@ index 9fbd4d2..61b96e8 100644
      }
  
      if (HDR_TEST_I_STEREO(h->header))
-@@ -1253,6 +2152,7 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_t *s, L3_gr_info_t *gr_info, i
+@@ -1253,6 +2164,7 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_t *s, L3_gr_info_t *gr_info, i
      {
          L3_midside_stereo(s->grbuf[0], 576);
      }
@@ -1521,7 +1533,7 @@ index 9fbd4d2..61b96e8 100644
  
      for (ch = 0; ch < nch; ch++, gr_info++)
      {
-@@ -1262,16 +2162,721 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_t *s, L3_gr_info_t *gr_info, i
+@@ -1262,16 +2174,729 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_t *s, L3_gr_info_t *gr_info, i
          if (gr_info->n_short_sfb)
          {
              aa_bands = n_long_bands - 1;
@@ -2046,14 +2058,22 @@ index 9fbd4d2..61b96e8 100644
 +static void mp3d_synth_pair(mp3d_sample_t *pcm, int nch, const int32_t *z) FL_NO_EXCEPT
 +{
 +    int64_t a;
-+    a  = (int64_t)(z[14*64] - z[    0]) * 29;
-+    a += (int64_t)(z[ 1*64] + z[13*64]) * 213;
-+    a += (int64_t)(z[12*64] - z[ 2*64]) * 459;
-+    a += (int64_t)(z[ 3*64] + z[11*64]) * 2037;
-+    a += (int64_t)(z[10*64] - z[ 4*64]) * 5153;
-+    a += (int64_t)(z[ 5*64] + z[ 9*64]) * 6574;
-+    a += (int64_t)(z[ 8*64] - z[ 6*64]) * 37489;
-+    a += (int64_t) z[ 7*64]             * 75038;
++    /* Each operand widens before the add or subtract, not after (FastLED#4133).
++       `(int64_t)(x - y)` evaluates `x - y` in int32 and only then widens, which
++       overflows -- undefined behaviour, not merely a wrong number -- once the
++       polyphase inputs get large. Ordinary audio never does; a malformed
++       intensity-stereo stream does, and UBSan caught it on
++       l3-nonstandard-big-iscf. Widening rather than saturating is deliberate:
++       the accumulator is int64 and has room for the true difference, so there
++       is nothing to clamp. */
++    a  = ((int64_t)z[14*64] - (int64_t)z[    0]) * 29;
++    a += ((int64_t)z[ 1*64] + (int64_t)z[13*64]) * 213;
++    a += ((int64_t)z[12*64] - (int64_t)z[ 2*64]) * 459;
++    a += ((int64_t)z[ 3*64] + (int64_t)z[11*64]) * 2037;
++    a += ((int64_t)z[10*64] - (int64_t)z[ 4*64]) * 5153;
++    a += ((int64_t)z[ 5*64] + (int64_t)z[ 9*64]) * 6574;
++    a += ((int64_t)z[ 8*64] - (int64_t)z[ 6*64]) * 37489;
++    a += (int64_t) z[ 7*64]                      * 75038;
 +    pcm[0] = mp3d_scale_pcm(a);
 +
 +    z += 2;
@@ -2245,7 +2265,7 @@ index 9fbd4d2..61b96e8 100644
  {
      static const float g_sec[24] = {
          10.19000816f,0.50060302f,0.50241929f,3.40760851f,0.50547093f,0.52249861f,2.05778098f,0.51544732f,0.56694406f,1.48416460f,0.53104258f,0.64682180f,1.16943991f,0.55310392f,0.78815460f,0.97256821f,0.58293498f,1.06067765f,0.83934963f,0.62250412f,1.72244716f,0.74453628f,0.67480832f,5.10114861f
-@@ -1427,7 +3032,7 @@ static void mp3d_DCT_II(float *grbuf, int n)
+@@ -1427,7 +3052,7 @@ static void mp3d_DCT_II(float *grbuf, int n)
  }
  
  #ifndef MINIMP3_FLOAT_OUTPUT
@@ -2254,7 +2274,7 @@ index 9fbd4d2..61b96e8 100644
  {
  #if HAVE_ARMV6
      int32_t s32 = (int32_t)(sample + .5f);
-@@ -1448,7 +3053,7 @@ static float mp3d_scale_pcm(float sample)
+@@ -1448,7 +3073,7 @@ static float mp3d_scale_pcm(float sample)
  }
  #endif /* MINIMP3_FLOAT_OUTPUT */
  
@@ -2263,7 +2283,7 @@ index 9fbd4d2..61b96e8 100644
  {
      float a;
      a  = (z[14*64] - z[    0]) * 29;
-@@ -1473,7 +3078,7 @@ static void mp3d_synth_pair(mp3d_sample_t *pcm, int nch, const float *z)
+@@ -1473,7 +3098,7 @@ static void mp3d_synth_pair(mp3d_sample_t *pcm, int nch, const float *z)
      pcm[16*nch] = mp3d_scale_pcm(a);
  }
  
@@ -2272,7 +2292,7 @@ index 9fbd4d2..61b96e8 100644
  {
      int i;
      float *xr = xl + 576*(nch - 1);
-@@ -1626,16 +3231,17 @@ static void mp3d_synth(float *xl, mp3d_sample_t *dstl, int nch, float *lins)
+@@ -1626,16 +3251,17 @@ static void mp3d_synth(float *xl, mp3d_sample_t *dstl, int nch, float *lins)
  #endif /* MINIMP3_ONLY_SIMD */
  }
  
@@ -2293,7 +2313,7 @@ index 9fbd4d2..61b96e8 100644
      for (i = 0; i < nbands; i += 2)
      {
          mp3d_synth(grbuf + i, pcm + 32*nch*i, nch, lins + i*64);
-@@ -1650,11 +3256,13 @@ static void mp3d_synth_granule(float *qmf_state, float *grbuf, int nbands, int n
+@@ -1650,11 +3276,13 @@ static void mp3d_synth_granule(float *qmf_state, float *grbuf, int nbands, int n
      } else
  #endif /* MINIMP3_NONSTANDARD_BUT_LOGICAL */
      {
@@ -2309,7 +2329,7 @@ index 9fbd4d2..61b96e8 100644
  {
      int i, nmatch;
      for (i = 0, nmatch = 0; nmatch < MAX_FRAME_SYNC_MATCHES; nmatch++)
-@@ -1668,7 +3276,7 @@ static int mp3d_match_frame(const uint8_t *hdr, int mp3_bytes, int frame_bytes)
+@@ -1668,7 +3296,7 @@ static int mp3d_match_frame(const uint8_t *hdr, int mp3_bytes, int frame_bytes)
      return 1;
  }
  
@@ -2318,7 +2338,7 @@ index 9fbd4d2..61b96e8 100644
  {
      int i, k;
      for (i = 0; i < mp3_bytes - HDR_SIZE; i++, mp3++)
-@@ -1705,17 +3313,46 @@ static int mp3d_find_frame(const uint8_t *mp3, int mp3_bytes, int *free_format_b
+@@ -1705,17 +3333,46 @@ static int mp3d_find_frame(const uint8_t *mp3, int mp3_bytes, int *free_format_b
      return mp3_bytes;
  }
  
@@ -2368,7 +2388,7 @@ index 9fbd4d2..61b96e8 100644
  
      if (mp3_bytes > 4 && dec->header[0] == 0xff && hdr_compare(dec->header, mp3))
      {
-@@ -1758,23 +3395,23 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
+@@ -1758,23 +3415,23 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
  
      if (info->layer == 3)
      {
@@ -2398,7 +2418,7 @@ index 9fbd4d2..61b96e8 100644
      } else
      {
  #ifdef MINIMP3_ONLY_MP3
-@@ -1783,15 +3420,19 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
+@@ -1783,15 +3440,19 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
          L12_scale_info sci[1];
          L12_read_scale_info(hdr, bs_frame, sci);
  
@@ -2423,7 +2443,7 @@ index 9fbd4d2..61b96e8 100644
                  pcm += 384*info->channels;
              }
              if (bs_frame->pos > bs_frame->limit)
-@@ -1806,7 +3447,7 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
+@@ -1806,7 +3467,7 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
  }
  
  #ifdef MINIMP3_FLOAT_OUTPUT
@@ -2432,7 +2452,7 @@ index 9fbd4d2..61b96e8 100644
  {
      int i = 0;
  #if HAVE_SIMD
-@@ -1862,4 +3503,126 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples)
+@@ -1862,4 +3523,125 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples)
      }
  }
  #endif /* MINIMP3_FLOAT_OUTPUT */
@@ -2457,7 +2477,6 @@ index 9fbd4d2..61b96e8 100644
 +#undef MP3D_HUFF_ONE
 +#undef MP3D_SAT_MAX
 +#undef MP3D_SAT_MIN
-+#undef MP3D_ONE
 +#undef MP3D_PCM_HALF
 +#undef MP3D_PCM_UPPER
 +#undef MP3D_PCM_LOWER
