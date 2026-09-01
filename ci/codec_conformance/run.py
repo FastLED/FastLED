@@ -93,12 +93,16 @@ KNOWN_SHORT_OUTPUT = {
 # length". Beyond that, surplus output is a defect unless listed.
 STANDARD_LENGTH_ALLOWANCE = 2 * 1152 * 2  # two frames, stereo
 
+# Bounded the same way as KNOWN_SHORT_OUTPUT, and for the same reason: a
+# name-only entry would let a listed vector overrun by any amount at all, and
+# the surplus is just as invisible to a PSNR taken over the shared prefix as a
+# shortfall is. The number below is measured and identical on the fixed and
+# float builds.
 KNOWN_LONG_OUTPUT = {
-    "l3-nonstandard-he_44_48khz": (
-        "Sample rate switches mid-stream (44.1 -> 48 kHz). The decoder follows "
-        "the switch and emits 172800 samples more than the reference, which "
-        "captures only one rate. Scores 132.27 dB over the shared prefix."
-    ),
+    # Sample rate switches mid-stream (44.1 -> 48 kHz). The decoder follows the
+    # switch and emits 172800 samples more than the reference, which captures
+    # only one rate. Scores 132.27 dB over the shared prefix.
+    "l3-nonstandard-he_44_48khz": 172800,
 }
 
 _SINGLE_FRAME_REASON = (
@@ -373,9 +377,8 @@ def main(argv: list[str] | None = None) -> int:
             if shortfall > 0 and shortfall != KNOWN_SHORT_OUTPUT.get(outcome.name):
                 failures.append(outcome)
                 continue
-            if (
-                surplus > STANDARD_LENGTH_ALLOWANCE
-                and outcome.name not in KNOWN_LONG_OUTPUT
+            if surplus > STANDARD_LENGTH_ALLOWANCE and surplus != (
+                KNOWN_LONG_OUTPUT.get(outcome.name)
             ):
                 failures.append(outcome)
                 continue
