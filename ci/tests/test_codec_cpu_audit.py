@@ -295,6 +295,17 @@ def test_cycles_are_reported_but_do_not_fail_the_build(
     assert "drift=+30.00%" in printed
     assert "worth a look" in printed
 
+    # IPC regresses downwards, so the marker has to follow the metric's own
+    # direction. A 30% cycle increase is about -23% IPC, and flagging only
+    # positive drift would stay silent on exactly the case worth seeing.
+    ipc_line = next(
+        line
+        for line in printed.splitlines()
+        if line.startswith("UNGATED:minimp3-float/counter/ipc")
+    )
+    assert "drift=-23" in ipc_line
+    assert "worth a look" in ipc_line
+
 
 def test_trend_validation_rejects_inconsistent_derived_counters() -> None:
     trend = AUDIT.load_trend()

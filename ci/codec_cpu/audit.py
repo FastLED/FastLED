@@ -968,18 +968,28 @@ def _check_lower_bound(path: str, baseline: float, current: float) -> None:
         raise RuntimeError(f"{path} regressed: {current} < {limit:.6f}")
 
 
-def _report_drift(path: str, baseline: float, current: float) -> None:
+def _report_drift(
+    path: str, baseline: float, current: float, *, higher_is_worse: bool = True
+) -> None:
     """Record a measurement without gating on it.
 
     Loud rather than silent: a real slowdown still has to be visible to someone
     reading the log, it just does not fail the build on a number the runner pool
     moves by more than the budget on its own.
+
+    `higher_is_worse` picks which direction earns the marker. Cycles and stage
+    timings regress upwards; IPC regresses *downwards*, so flagging only
+    positive drift there would stay quiet on exactly the case worth seeing --
+    a 30% cycle increase shows up as roughly -23% IPC.
     """
     if baseline == 0:
         print(f"UNGATED:{path} baseline=0 current={current:.6g}")
         return
     drift = (current - baseline) / baseline * 100.0
-    marker = "  <-- worth a look" if drift > 100.0 * REGRESSION_TOLERANCE else ""
+    regression = drift if higher_is_worse else -drift
+    marker = (
+        "  <-- worth a look" if regression > 100.0 * REGRESSION_TOLERANCE else ""
+    )
     print(
         f"UNGATED:{path} baseline={baseline:.6g} current={current:.6g} "
         f"drift={drift:+.2f}%{marker}"
@@ -1028,6 +1038,7 @@ def _check_host_trend(
         f"{backend}/counter/ipc",
         baseline_host["counter_median"]["ipc"],
         current_host["counter_median"]["ipc"],
+        higher_is_worse=False,
     )
     for stage in STAGES:
         _report_drift(
