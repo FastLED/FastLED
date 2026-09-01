@@ -1,5 +1,5 @@
 diff --git a/minimp3.h b/minimp3.h
-index 9fbd4d2..587820c 100644
+index 9fbd4d2..61b96e8 100644
 --- a/minimp3.h
 +++ b/minimp3.h
 @@ -1,50 +1,237 @@
@@ -1124,7 +1124,7 @@ index 9fbd4d2..587820c 100644
 +   is always <= 0 here, so this is the same quarter-power split the scalefactor
 +   gains use, collapsed by a right shift instead of carried. */
 +static int32_t mp3d_ist_gain_q30(int quarters) FL_NO_EXCEPT
- {
++{
 +    int32_t mant;
 +    int exp;
 +    mp3d_gain_from_quarters(-quarters, &mant, &exp);
@@ -1133,7 +1133,7 @@ index 9fbd4d2..587820c 100644
 +#endif
 +
 +static void L3_stereo_process(mp3d_dsp_t *left, const uint8_t *ist_pos, const uint8_t *sfb, const uint8_t *hdr, int max_band[3], int mpeg2_sh) FL_NO_EXCEPT // ok array parameter
-+{
+ {
 +#if !MINIMP3_HAVE_FIXED_POINT
      static const float g_pan[7*2] = { 0,1,0.21132487f,0.78867513f,0.36602540f,0.63397460f,0.5f,0.5f,0.63397460f,0.36602540f,0.78867513f,0.21132487f,1,0 };
 +#endif
@@ -1218,7 +1218,7 @@ index 9fbd4d2..587820c 100644
  
      for (; nbands > 0; nbands--, grbuf += 18)
      {
-@@ -1035,16 +1749,193 @@ static void L3_antialias(float *grbuf, int nbands)
+@@ -1035,16 +1749,189 @@ static void L3_antialias(float *grbuf, int nbands)
  #ifndef MINIMP3_ONLY_SIMD
          for(; i < 8; i++)
          {
@@ -1287,6 +1287,15 @@ index 9fbd4d2..587820c 100644
 +    y[8] = mp3d_add_sat(s4, s7);
 +}
 +
++/* The closing twiddle-and-window loop of L3_imdct36, factored out so it can be
++   defined below the SIMD primitives it dispatches to while its caller stays
++   here (#4109). Plain and unattributed on purpose: the vector path and the
++   runtime capability check live inside the definition, so this declaration
++   needs none of the SIMD macros, which this point in the file precedes. */
++static void mp3d_imdct36_twiddle(int32_t *grbuf, int32_t *overlap,
++                                 const int32_t *window, const int32_t *co,
++                                 const int32_t *si) FL_NO_EXCEPT;
++
 +static void L3_imdct36(int32_t *grbuf, int32_t *overlap, const int32_t *window, int nbands) FL_NO_EXCEPT
 +{
 +    int i, j;
@@ -1316,20 +1325,7 @@ index 9fbd4d2..587820c 100644
 +           two. That matters: this pair of multiply-accumulates runs 18 times
 +           per band per granule, and per-term rounding would bias the overlap
 +           state, which then feeds the next frame. */
-+        for (i = 0; i < 9; i++)
-+        {
-+            const int32_t ovl = overlap[i];
-+            const int32_t sum = mp3d_narrow_q30(
-+                (int64_t)co[i]*g_twid9_q30[9 + i] +
-+                (int64_t)si[i]*g_twid9_q30[0 + i]);
-+            overlap[i] = mp3d_narrow_q30(
-+                (int64_t)co[i]*g_twid9_q30[0 + i] -
-+                (int64_t)si[i]*g_twid9_q30[9 + i]);
-+            grbuf[i] = mp3d_narrow_q30(
-+                (int64_t)ovl*window[0 + i] - (int64_t)sum*window[9 + i]);
-+            grbuf[17 - i] = mp3d_narrow_q30(
-+                (int64_t)ovl*window[9 + i] + (int64_t)sum*window[0 + i]);
-+        }
++        mp3d_imdct36_twiddle(grbuf, overlap, window, co, si);
 +    }
 +}
 +
@@ -1413,7 +1409,7 @@ index 9fbd4d2..587820c 100644
  {
      float s0, s1, s2, s3, s4, s5, s6, s7, s8, t0, t2, t4;
  
-@@ -1084,7 +1975,7 @@ static void L3_dct3_9(float *y)
+@@ -1084,7 +1971,7 @@ static void L3_dct3_9(float *y)
      y[8] = s4 + s7;
  }
  
@@ -1422,7 +1418,7 @@ index 9fbd4d2..587820c 100644
  {
      int i, j;
      static const float g_twid9[18] = {
-@@ -1141,7 +2032,7 @@ static void L3_imdct36(float *grbuf, float *overlap, const float *window, int nb
+@@ -1141,7 +2028,7 @@ static void L3_imdct36(float *grbuf, float *overlap, const float *window, int nb
      }
  }
  
@@ -1431,7 +1427,7 @@ index 9fbd4d2..587820c 100644
  {
      float m1 = x1*0.86602540f;
      float a1 = x0 - x2*0.5f;
-@@ -1150,7 +2041,7 @@ static void L3_idct3(float x0, float x1, float x2, float *dst)
+@@ -1150,7 +2037,7 @@ static void L3_idct3(float x0, float x1, float x2, float *dst)
      dst[2] = a1 - m1;
  }
  
@@ -1440,7 +1436,7 @@ index 9fbd4d2..587820c 100644
  {
      static const float g_twid3[6] = { 0.79335334f,0.92387953f,0.99144486f, 0.60876143f,0.38268343f,0.13052619f };
      float co[3], si[3];
-@@ -1170,7 +2061,7 @@ static void L3_imdct12(float *x, float *dst, float *overlap)
+@@ -1170,7 +2057,7 @@ static void L3_imdct12(float *x, float *dst, float *overlap)
      }
  }
  
@@ -1449,7 +1445,7 @@ index 9fbd4d2..587820c 100644
  {
      for (;nbands > 0; nbands--, overlap += 9, grbuf += 18)
      {
-@@ -1183,7 +2074,7 @@ static void L3_imdct_short(float *grbuf, float *overlap, int nbands)
+@@ -1183,7 +2070,7 @@ static void L3_imdct_short(float *grbuf, float *overlap, int nbands)
      }
  }
  
@@ -1458,7 +1454,7 @@ index 9fbd4d2..587820c 100644
  {
      int b, i;
      for (b = 0, grbuf += 18; b < 32; b += 2, grbuf += 36)
-@@ -1191,7 +2082,7 @@ static void L3_change_sign(float *grbuf)
+@@ -1191,7 +2078,7 @@ static void L3_change_sign(float *grbuf)
              grbuf[i] = -grbuf[i];
  }
  
@@ -1467,7 +1463,7 @@ index 9fbd4d2..587820c 100644
  {
      static const float g_mdct_window[2][18] = {
          { 0.99904822f,0.99144486f,0.97629601f,0.95371695f,0.92387953f,0.88701083f,0.84339145f,0.79335334f,0.73727734f,0.04361938f,0.13052619f,0.21643961f,0.30070580f,0.38268343f,0.46174861f,0.53729961f,0.60876143f,0.67559021f },
-@@ -1208,8 +2099,10 @@ static void L3_imdct_gr(float *grbuf, float *overlap, unsigned block_type, unsig
+@@ -1208,8 +2095,10 @@ static void L3_imdct_gr(float *grbuf, float *overlap, unsigned block_type, unsig
      else
          L3_imdct36(grbuf, overlap, g_mdct_window[block_type == STOP_BLOCK_TYPE], 32 - n_long_bands);
  }
@@ -1479,7 +1475,7 @@ index 9fbd4d2..587820c 100644
  {
      int pos = (s->bs.pos + 7)/8u;
      int remains = s->bs.limit/8u - pos;
-@@ -1225,7 +2118,7 @@ static void L3_save_reservoir(mp3dec_t *h, mp3dec_scratch_t *s)
+@@ -1225,7 +2114,7 @@ static void L3_save_reservoir(mp3dec_t *h, mp3dec_scratch_t *s)
      h->reserv = remains;
  }
  
@@ -1488,7 +1484,7 @@ index 9fbd4d2..587820c 100644
  {
      int frame_bytes = (bs->limit - bs->pos)/8;
      int bytes_have = MINIMP3_MIN(h->reserv, main_data_begin);
-@@ -1235,15 +2128,25 @@ static int L3_restore_reservoir(mp3dec_t *h, bs_t *bs, mp3dec_scratch_t *s, int
+@@ -1235,15 +2124,25 @@ static int L3_restore_reservoir(mp3dec_t *h, bs_t *bs, mp3dec_scratch_t *s, int
      return h->reserv >= main_data_begin;
  }
  
@@ -1517,7 +1513,7 @@ index 9fbd4d2..587820c 100644
      }
  
      if (HDR_TEST_I_STEREO(h->header))
-@@ -1253,6 +2156,7 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_t *s, L3_gr_info_t *gr_info, i
+@@ -1253,6 +2152,7 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_t *s, L3_gr_info_t *gr_info, i
      {
          L3_midside_stereo(s->grbuf[0], 576);
      }
@@ -1525,7 +1521,7 @@ index 9fbd4d2..587820c 100644
  
      for (ch = 0; ch < nch; ch++, gr_info++)
      {
-@@ -1262,16 +2166,595 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_t *s, L3_gr_info_t *gr_info, i
+@@ -1262,16 +2162,721 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_t *s, L3_gr_info_t *gr_info, i
          if (gr_info->n_short_sfb)
          {
              aa_bands = n_long_bands - 1;
@@ -1540,9 +1536,10 @@ index 9fbd4d2..587820c 100644
          L3_imdct_gr(s->grbuf[ch], h->mdct_overlap[ch], gr_info->block_type, n_long_bands);
          L3_change_sign(s->grbuf[ch]);
 +        MP3D_STAGE(MINIMP3_STAGE_IMDCT, ch, s->grbuf[ch], 576);
-+    }
-+}
-+
+     }
+ }
+ 
+-static void mp3d_DCT_II(float *grbuf, int n)
 +#if MINIMP3_HAVE_FIXED_POINT
 +/* DCT-32. Same factorisation as the float build. The secants reach 10.19 so
 +   they are Q27; the rotation constants are Q31 and the output scalings Q29,
@@ -1595,20 +1592,36 @@ index 9fbd4d2..587820c 100644
 +/* value * Q`bits` coefficient, rounded and saturated -- the vector form of
 +   mp3d_mulshift, and it must round the same way: add half, then shift right
 +   with sign extension (round half toward +infinity). */
-+static int32x4_t mp3d_v_mulshift(int32x4_t v, int32_t coef,
-+                                 int64x2_t round, int shift) FL_NO_EXCEPT
++/* Rounded, saturating narrow of two int64x2 accumulators -- the vector form of
++   mp3d_narrow_q30 generalised over the shift. Factored out of mp3d_v_mulshift
++   so a kernel that builds its own accumulators can share it (#4109): the
++   twiddle loop sums two products before narrowing once, and rounding each
++   product separately would differ from the scalar path in the low bit. */
++static int32x4_t mp3d_v_narrow(int64x2_t lo, int64x2_t hi,
++                               int shift) FL_NO_EXCEPT
 +{
-+    const int32x2_t c = vdup_n_s32(coef);
-+    int64x2_t lo = vaddq_s64(vmull_s32(vget_low_s32(v), c), round);
-+    int64x2_t hi = vaddq_s64(vmull_s32(vget_high_s32(v), c), round);
-+    lo = vshlq_s64(lo, vdupq_n_s64(-shift));
-+    hi = vshlq_s64(hi, vdupq_n_s64(-shift));
++    const int64x2_t round = vdupq_n_s64((int64_t)1 << (shift - 1));
++    const int64x2_t sh = vdupq_n_s64(-shift);
++    lo = vshlq_s64(vaddq_s64(lo, round), sh);
++    hi = vshlq_s64(vaddq_s64(hi, round), sh);
 +    return vmaxq_s32(vcombine_s32(vqmovn_s64(lo), vqmovn_s64(hi)),
 +                     vdupq_n_s32(MP3D_SAT_MIN));
 +}
-+#define MP3D_V_MULSHIFT(v, coef, bits)                                         \
-+    mp3d_v_mulshift((v), (coef), vdupq_n_s64((int64_t)1 << ((bits) - 1)),      \
-+                    (bits))
++
++static int32x4_t mp3d_v_mulshift(int32x4_t v, int32_t coef,
++                                 int shift) FL_NO_EXCEPT
++{
++    const int32x2_t c = vdup_n_s32(coef);
++    return mp3d_v_narrow(vmull_s32(vget_low_s32(v), c),
++                         vmull_s32(vget_high_s32(v), c), shift);
++}
++#define MP3D_V_MULSHIFT(v, coef, bits) mp3d_v_mulshift((v), (coef), (bits))
++/* Vector-by-vector 32x32->64. MP3D_V_MUL_LO/HI take a splat as their second
++   operand; the twiddle kernel needs both factors to vary per lane. */
++#define MP3D_V_MULV_LO(a, b)   vmull_s32(vget_low_s32(a), vget_low_s32(b))
++#define MP3D_V_MULV_HI(a, b)   vmull_s32(vget_high_s32(a), vget_high_s32(b))
++#define MP3D_V_REV4(v)                                                         \
++    vcombine_s32(vrev64_s32(vget_high_s32(v)), vrev64_s32(vget_low_s32(v)))
 +#else /* MP3D_INT_SIMD_SSE */
 +typedef __m128i mp3d_i64x2;
 +#define MP3D_V_ZERO64()        _mm_setzero_si128()
@@ -1711,14 +1724,12 @@ index 9fbd4d2..587820c 100644
 +   64-bit shift before AVX-512, so the sign bits are folded back in by hand;
 +   and no 64-bit compare before SSE4.2, so the narrow detects out-of-range by
 +   checking that the high word is the sign extension of the low one. */
-+MP3D_SIMD_TARGET static __m128i mp3d_v_mulshift(__m128i v, int32_t coef,
-+                                                int bits) FL_NO_EXCEPT
++MP3D_SIMD_TARGET static __m128i mp3d_v_narrow(__m128i a01, __m128i a23,
++                                             int bits) FL_NO_EXCEPT
 +{
-+    const __m128i c = _mm_set1_epi32(coef);
 +    const __m128i round = _mm_set1_epi64x((int64_t)1 << (bits - 1));
-+    const __m128i s = _mm_shuffle_epi32(v, _MM_SHUFFLE(3, 1, 2, 0));
-+    __m128i p01 = _mm_add_epi64(_mm_mul_epi32(s, c), round);
-+    __m128i p23 = _mm_add_epi64(_mm_mul_epi32(_mm_srli_si128(s, 4), c), round);
++    __m128i p01 = _mm_add_epi64(a01, round);
++    __m128i p23 = _mm_add_epi64(a23, round);
 +    const __m128i sign01 =
 +        _mm_srai_epi32(_mm_shuffle_epi32(p01, _MM_SHUFFLE(3, 3, 1, 1)), 31);
 +    const __m128i sign23 =
@@ -1742,6 +1753,22 @@ index 9fbd4d2..587820c 100644
 +                             _mm_set1_epi32(MP3D_SAT_MIN));
 +    }
 +}
++MP3D_SIMD_TARGET static __m128i mp3d_v_mulshift(__m128i v, int32_t coef,
++                                                int bits) FL_NO_EXCEPT
++{
++    const __m128i c = _mm_set1_epi32(coef);
++    const __m128i s = _mm_shuffle_epi32(v, _MM_SHUFFLE(3, 1, 2, 0));
++    return mp3d_v_narrow(_mm_mul_epi32(s, c),
++                         _mm_mul_epi32(_mm_srli_si128(s, 4), c), bits);
++}
++/* Vector-by-vector: both operands need the even-lane shuffle here, unlike
++   MP3D_V_MUL_LO/HI whose second operand is a splat. */
++#define MP3D_V_MULV_LO(a, b)                                                   \
++    _mm_mul_epi32(MP3D_V_PREP(a), MP3D_V_PREP(b))
++#define MP3D_V_MULV_HI(a, b)                                                   \
++    _mm_mul_epi32(_mm_srli_si128(MP3D_V_PREP(a), 4),                           \
++                  _mm_srli_si128(MP3D_V_PREP(b), 4))
++#define MP3D_V_REV4(v)         _mm_shuffle_epi32((v), _MM_SHUFFLE(0, 1, 2, 3))
 +#define MP3D_V_ADDSAT(a, b)            mp3d_v_addsat((a), (b))
 +#define MP3D_V_SUBSAT(a, b)            mp3d_v_subsat((a), (b))
 +#define MP3D_V_MULSHIFT(v, coef, bits) mp3d_v_mulshift((v), (coef), (bits))
@@ -1760,6 +1787,70 @@ index 9fbd4d2..587820c 100644
 +   than re-associated. That matters here in a way it did not for the polyphase:
 +   every add saturates and every multiply rounds, so reordering them is
 +   observable, and #4055's gate is exact equality with the scalar path. */
++/* The closing twiddle-and-window loop of L3_imdct36 (#4109).
++
++   Only this part of the IMDCT is addressable. The 9-point DCT-III above it has
++   a butterfly that does not map onto four lanes, and vectorising across bands
++   would need stride-18 gathers -- the IMDCT works *within* a band, the opposite
++   of the DCT-32 below, where four consecutive bands are four consecutive int32
++   and no gather is needed.
++
++   Nine iterations is two vectors plus a scalar tail. Each output sums two
++   int64 products and narrows once, exactly as the scalar path does. The
++   reversed grbuf[17 - i] store is a lane reverse, the shape upstream's float
++   kernel uses VREV for. */
++MP3D_SIMD_TARGET static void mp3d_imdct36_twiddle_simd(
++    int32_t *grbuf, int32_t *overlap, const int32_t *window,
++    const int32_t *co, const int32_t *si) FL_NO_EXCEPT
++{
++    int i;
++    for (i = 0; i <= 4; i += 4)
++    {
++        const mp3d_i32x4 cov = MP3D_V_LOAD4(&co[i]);
++        const mp3d_i32x4 siv = MP3D_V_LOAD4(&si[i]);
++        const mp3d_i32x4 tlo = MP3D_V_LOAD4(&g_twid9_q30[0 + i]);
++        const mp3d_i32x4 thi = MP3D_V_LOAD4(&g_twid9_q30[9 + i]);
++        const mp3d_i32x4 ovl = MP3D_V_LOAD4(&overlap[i]);
++        const mp3d_i32x4 wlo = MP3D_V_LOAD4(&window[0 + i]);
++        const mp3d_i32x4 whi = MP3D_V_LOAD4(&window[9 + i]);
++        const mp3d_i32x4 sum = mp3d_v_narrow(
++            MP3D_V_ADD64(MP3D_V_MULV_LO(cov, thi), MP3D_V_MULV_LO(siv, tlo)),
++            MP3D_V_ADD64(MP3D_V_MULV_HI(cov, thi), MP3D_V_MULV_HI(siv, tlo)),
++            30);
++        const mp3d_i32x4 nov = mp3d_v_narrow(
++            MP3D_V_SUB64(MP3D_V_MULV_LO(cov, tlo), MP3D_V_MULV_LO(siv, thi)),
++            MP3D_V_SUB64(MP3D_V_MULV_HI(cov, tlo), MP3D_V_MULV_HI(siv, thi)),
++            30);
++        const mp3d_i32x4 head = mp3d_v_narrow(
++            MP3D_V_SUB64(MP3D_V_MULV_LO(ovl, wlo), MP3D_V_MULV_LO(sum, whi)),
++            MP3D_V_SUB64(MP3D_V_MULV_HI(ovl, wlo), MP3D_V_MULV_HI(sum, whi)),
++            30);
++        const mp3d_i32x4 tail = mp3d_v_narrow(
++            MP3D_V_ADD64(MP3D_V_MULV_LO(ovl, whi), MP3D_V_MULV_LO(sum, wlo)),
++            MP3D_V_ADD64(MP3D_V_MULV_HI(ovl, whi), MP3D_V_MULV_HI(sum, wlo)),
++            30);
++
++        /* overlap[i] was read into ovl above, before this overwrites it. */
++        MP3D_V_STORE4(&overlap[i], nov);
++        MP3D_V_STORE4(&grbuf[i], head);
++        /* lanes 0..3 belong at 17-i down to 14-i: reversed, based at 14-i. */
++        MP3D_V_STORE4(&grbuf[14 - i], MP3D_V_REV4(tail));
++    }
++    {
++        const int32_t ovl = overlap[8];
++        const int32_t sum = mp3d_narrow_q30(
++            (int64_t)co[8]*g_twid9_q30[9 + 8] +
++            (int64_t)si[8]*g_twid9_q30[0 + 8]);
++        overlap[8] = mp3d_narrow_q30(
++            (int64_t)co[8]*g_twid9_q30[0 + 8] -
++            (int64_t)si[8]*g_twid9_q30[9 + 8]);
++        grbuf[8] = mp3d_narrow_q30(
++            (int64_t)ovl*window[0 + 8] - (int64_t)sum*window[9 + 8]);
++        grbuf[9] = mp3d_narrow_q30(
++            (int64_t)ovl*window[9 + 8] + (int64_t)sum*window[0 + 8]);
++    }
++}
++
 +MP3D_SIMD_TARGET static void mp3d_dct2_bands4(int32_t *grbuf, int k) FL_NO_EXCEPT
 +{
 +    mp3d_i32x4 t[4][8], *x;
@@ -1826,6 +1917,38 @@ index 9fbd4d2..587820c 100644
 +    MP3D_V_STORE4(&y[3*18], t[3][7]);
 +}
 +#endif /* MP3D_HAVE_INT_SIMD */
++
++/* Dispatches to the vector kernel when the host has the instructions and runs
++   the scalar loop otherwise. Both compute each output as two int64 products
++   narrowed once; rounding per product would differ between the two paths in
++   the low bit, and #4055's gate is exact equality. */
++static void mp3d_imdct36_twiddle(int32_t *grbuf, int32_t *overlap,
++                                 const int32_t *window, const int32_t *co,
++                                 const int32_t *si) FL_NO_EXCEPT
++{
++    int i;
++#if MP3D_SIMD_KERNELS_LIVE
++    if (MP3D_SIMD_AVAILABLE())
++    {
++        mp3d_imdct36_twiddle_simd(grbuf, overlap, window, co, si);
++        return;
++    }
++#endif
++    for (i = 0; i < 9; i++)
++    {
++        const int32_t ovl = overlap[i];
++        const int32_t sum = mp3d_narrow_q30(
++            (int64_t)co[i]*g_twid9_q30[9 + i] +
++            (int64_t)si[i]*g_twid9_q30[0 + i]);
++        overlap[i] = mp3d_narrow_q30(
++            (int64_t)co[i]*g_twid9_q30[0 + i] -
++            (int64_t)si[i]*g_twid9_q30[9 + i]);
++        grbuf[i] = mp3d_narrow_q30(
++            (int64_t)ovl*window[0 + i] - (int64_t)sum*window[9 + i]);
++        grbuf[17 - i] = mp3d_narrow_q30(
++            (int64_t)ovl*window[9 + i] + (int64_t)sum*window[0 + i]);
++    }
++}
 +
 +static void mp3d_DCT_II(int32_t *grbuf, int n) FL_NO_EXCEPT
 +{
@@ -1996,16 +2119,15 @@ index 9fbd4d2..587820c 100644
 +            ahi = MP3D_V_ADD64(ahi, MP3D_V_SUB64(MP3D_V_MUL_HI(vz, s0),
 +                                                 MP3D_V_MUL_HI(vy, s1)));
 +        }
-     }
++    }
 +
 +    a[0] = MP3D_V_GET64(alo, 0); a[1] = MP3D_V_GET64(alo, 1);
 +    a[2] = MP3D_V_GET64(ahi, 0); a[3] = MP3D_V_GET64(ahi, 1);
 +    b[0] = MP3D_V_GET64(blo, 0); b[1] = MP3D_V_GET64(blo, 1);
 +    b[2] = MP3D_V_GET64(bhi, 0); b[3] = MP3D_V_GET64(bhi, 1);
- }
++}
 +#endif /* MP3D_HAVE_INT_SIMD */
- 
--static void mp3d_DCT_II(float *grbuf, int n)
++
 +static void mp3d_synth(int32_t *xl, mp3d_sample_t *dstl, int nch, int32_t *lins) FL_NO_EXCEPT
 +{
 +    int i;
@@ -2123,7 +2245,7 @@ index 9fbd4d2..587820c 100644
  {
      static const float g_sec[24] = {
          10.19000816f,0.50060302f,0.50241929f,3.40760851f,0.50547093f,0.52249861f,2.05778098f,0.51544732f,0.56694406f,1.48416460f,0.53104258f,0.64682180f,1.16943991f,0.55310392f,0.78815460f,0.97256821f,0.58293498f,1.06067765f,0.83934963f,0.62250412f,1.72244716f,0.74453628f,0.67480832f,5.10114861f
-@@ -1427,7 +2910,7 @@ static void mp3d_DCT_II(float *grbuf, int n)
+@@ -1427,7 +3032,7 @@ static void mp3d_DCT_II(float *grbuf, int n)
  }
  
  #ifndef MINIMP3_FLOAT_OUTPUT
@@ -2132,7 +2254,7 @@ index 9fbd4d2..587820c 100644
  {
  #if HAVE_ARMV6
      int32_t s32 = (int32_t)(sample + .5f);
-@@ -1448,7 +2931,7 @@ static float mp3d_scale_pcm(float sample)
+@@ -1448,7 +3053,7 @@ static float mp3d_scale_pcm(float sample)
  }
  #endif /* MINIMP3_FLOAT_OUTPUT */
  
@@ -2141,7 +2263,7 @@ index 9fbd4d2..587820c 100644
  {
      float a;
      a  = (z[14*64] - z[    0]) * 29;
-@@ -1473,7 +2956,7 @@ static void mp3d_synth_pair(mp3d_sample_t *pcm, int nch, const float *z)
+@@ -1473,7 +3078,7 @@ static void mp3d_synth_pair(mp3d_sample_t *pcm, int nch, const float *z)
      pcm[16*nch] = mp3d_scale_pcm(a);
  }
  
@@ -2150,7 +2272,7 @@ index 9fbd4d2..587820c 100644
  {
      int i;
      float *xr = xl + 576*(nch - 1);
-@@ -1626,16 +3109,17 @@ static void mp3d_synth(float *xl, mp3d_sample_t *dstl, int nch, float *lins)
+@@ -1626,16 +3231,17 @@ static void mp3d_synth(float *xl, mp3d_sample_t *dstl, int nch, float *lins)
  #endif /* MINIMP3_ONLY_SIMD */
  }
  
@@ -2171,7 +2293,7 @@ index 9fbd4d2..587820c 100644
      for (i = 0; i < nbands; i += 2)
      {
          mp3d_synth(grbuf + i, pcm + 32*nch*i, nch, lins + i*64);
-@@ -1650,11 +3134,13 @@ static void mp3d_synth_granule(float *qmf_state, float *grbuf, int nbands, int n
+@@ -1650,11 +3256,13 @@ static void mp3d_synth_granule(float *qmf_state, float *grbuf, int nbands, int n
      } else
  #endif /* MINIMP3_NONSTANDARD_BUT_LOGICAL */
      {
@@ -2187,7 +2309,7 @@ index 9fbd4d2..587820c 100644
  {
      int i, nmatch;
      for (i = 0, nmatch = 0; nmatch < MAX_FRAME_SYNC_MATCHES; nmatch++)
-@@ -1668,7 +3154,7 @@ static int mp3d_match_frame(const uint8_t *hdr, int mp3_bytes, int frame_bytes)
+@@ -1668,7 +3276,7 @@ static int mp3d_match_frame(const uint8_t *hdr, int mp3_bytes, int frame_bytes)
      return 1;
  }
  
@@ -2196,7 +2318,7 @@ index 9fbd4d2..587820c 100644
  {
      int i, k;
      for (i = 0; i < mp3_bytes - HDR_SIZE; i++, mp3++)
-@@ -1705,17 +3191,46 @@ static int mp3d_find_frame(const uint8_t *mp3, int mp3_bytes, int *free_format_b
+@@ -1705,17 +3313,46 @@ static int mp3d_find_frame(const uint8_t *mp3, int mp3_bytes, int *free_format_b
      return mp3_bytes;
  }
  
@@ -2246,7 +2368,7 @@ index 9fbd4d2..587820c 100644
  
      if (mp3_bytes > 4 && dec->header[0] == 0xff && hdr_compare(dec->header, mp3))
      {
-@@ -1758,23 +3273,23 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
+@@ -1758,23 +3395,23 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
  
      if (info->layer == 3)
      {
@@ -2276,7 +2398,7 @@ index 9fbd4d2..587820c 100644
      } else
      {
  #ifdef MINIMP3_ONLY_MP3
-@@ -1783,15 +3298,19 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
+@@ -1783,15 +3420,19 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
          L12_scale_info sci[1];
          L12_read_scale_info(hdr, bs_frame, sci);
  
@@ -2301,7 +2423,7 @@ index 9fbd4d2..587820c 100644
                  pcm += 384*info->channels;
              }
              if (bs_frame->pos > bs_frame->limit)
-@@ -1806,7 +3325,7 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
+@@ -1806,7 +3447,7 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
  }
  
  #ifdef MINIMP3_FLOAT_OUTPUT
@@ -2310,7 +2432,7 @@ index 9fbd4d2..587820c 100644
  {
      int i = 0;
  #if HAVE_SIMD
-@@ -1862,4 +3381,123 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples)
+@@ -1862,4 +3503,126 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples)
      }
  }
  #endif /* MINIMP3_FLOAT_OUTPUT */
@@ -2345,6 +2467,9 @@ index 9fbd4d2..587820c 100644
 +#undef MP3D_V_ZERO64
 +#undef MP3D_V_LOAD4
 +#undef MP3D_V_SPLAT
++#undef MP3D_V_MULV_HI
++#undef MP3D_V_MULV_LO
++#undef MP3D_V_REV4
 +#undef MP3D_V_MUL_LO
 +#undef MP3D_V_MUL_HI
 +#undef MP3D_V_ADD64
