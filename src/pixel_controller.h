@@ -308,8 +308,14 @@ struct PixelController {
     /// @see "TEMPORAL DITHERING: THE COMPLETE GUIDE" section above (line 195)
     void init_binary_dithering() {
 #if !defined(NO_DITHERING) || (NO_DITHERING != 1)
-        // STEP 1: Use the phase shared by all controllers in this frame.
+        // STEP 1: Tiny targets retain their one-byte local phase counter.
+        // Other targets share a phase once per logical frame.
+#if FL_PLATFORM_HAS_TINY_MEMORY
+        static fl::u8 R = 0; // okay static in header: preserves the tiny-target footprint
+        ++R;
+#else
         fl::u8 R = fl::detail::ditherFrame();
+#endif
 
         // STEP 2: Wrap counter at 2^ditherBits (creates 8-frame cycle: 0,1,2,3,4,5,6,7,0...)
         fl::u8 ditherBits = VIRTUAL_BITS;

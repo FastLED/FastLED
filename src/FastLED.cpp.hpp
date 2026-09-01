@@ -66,13 +66,15 @@ extern "C" void yield(void) { }
 
 fl::u8 get_brightness();
 
+#if !FL_PLATFORM_HAS_TINY_MEMORY
 fl::u8 fl::detail::ditherFrame() {
-	return fl::Singleton<fl::detail::DitherFrameState>::instance().frame;
+    return fl::Singleton<fl::detail::DitherFrameState>::instance().frame;
 }
 
 void fl::detail::advanceDitherFrame() {
-	++fl::Singleton<fl::detail::DitherFrameState>::instance().frame;
+    ++fl::Singleton<fl::detail::DitherFrameState>::instance().frame;
 }
+#endif
 
 /// Pointer to the matrix object when using the Smart Matrix Library
 /// @see https://github.com/pixelmatix/SmartMatrix
@@ -774,7 +776,9 @@ namespace __cxxabiv1
 
 
 void CFastLED::onBeginFrame() {
+#if !FL_PLATFORM_HAS_TINY_MEMORY
 	fl::detail::advanceDitherFrame();
+#endif
 	fl::EngineEvents::onBeginFrame();
 }
 
