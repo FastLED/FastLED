@@ -128,18 +128,31 @@
 
 /* FastLED: number of fractional bits in a fixed-point DSP sample.
 
-   Measured (tests/fl/codec/mp3_fixed_point.hpp, "stage dynamic range") the
-   float pipeline peaks near 0.65 at every stage across the conformance corpus
-   and real encoded music -- minimp3 normalises internally and the polyphase
-   window carries the scaling back up to int16 only at the very end. So one Q
-   format serves the whole pipeline and block floating point is only needed
-   where the dynamic range genuinely is unbounded: the scalefactor gains and
-   x**(4/3), which are carried as mantissa+exponent instead.
+   Measured over the *full* upstream conformance suite -- all 83 vectors that
+   ship a reference PCM, not the handful vendored under tests/data -- the float
+   pipeline peaks at 3.89, in `l3-si_huff`. Every other vector with a reference
+   peaks at 0.63 or below. minimp3 normalises internally and the polyphase
+   window carries the scaling back up to int16 only at the very end, so one Q
+   format serves the whole pipeline; block floating point is needed only where
+   the dynamic range genuinely is unbounded (the scalefactor gains and
+   x**(4/3), carried as mantissa+exponent instead).
 
-   Q26 in int32 leaves range +/-32 (about 50x the measured peak, and dequantised
-   samples are clamped to +/-1 besides) and a resolution of 2**-26, which is
-   roughly 1/1000 of an int16 LSB at output scale. Every multiply widens to
-   int64 first, so this is the only headroom that has to be reasoned about. */
+   Q26 in int32 leaves range +/-32 -- about 8x that measured peak -- and a
+   resolution of 2**-26, roughly 1/1000 of an int16 LSB at output scale. Every
+   multiply widens to int64 first, so this is the only headroom that has to be
+   reasoned about.
+
+   That 3.89 is why dequantised samples are clamped to the Q26 range rather
+   than to +/-1. They were clamped to +/-1 until FastLED#4127, on the strength
+   of a "peaks near 0.65" measurement taken over the two vectors that were
+   vendored at the time. `l3-si_huff` reaches 2.44 at the huffman stage and the
+   clamp truncated it, costing 81 dB on that vector -- 26.58 dB against float's
+   107.95, far below the 60 dB ISO floor. The measurement was sound; the sample
+   it was taken over was 2 of 83.
+
+   One vector, `l3-nonstandard-big-iscf`, drives the pipeline to 230767. It is
+   a deliberately malformed stream with no reference PCM, and saturating there
+   is the intended behaviour rather than a range failure. */
 #undef MINIMP3_FRAC_BITS
 #define MINIMP3_FRAC_BITS 26
 
@@ -398,12 +411,11 @@ static int32_t mp3d_sub_sat(int32_t a, int32_t b) FL_NO_EXCEPT
    an astronomically large dequantised value, and without this the DCT-32
    secants (up to 10.19) stacked on three levels of adds would overflow int32
    and hand UBSan a signed-overflow report. */
-#define MP3D_ONE ((int32_t)1 << MINIMP3_FRAC_BITS)
 
 static int32_t mp3d_clamp_sample(int64_t value) FL_NO_EXCEPT
 {
-    if (value > MP3D_ONE) return MP3D_ONE;
-    if (value < -MP3D_ONE) return -MP3D_ONE;
+    if (value > MP3D_SAT_MAX) return MP3D_SAT_MAX;
+    if (value < MP3D_SAT_MIN) return MP3D_SAT_MIN;
     return (int32_t)value;
 }
 
@@ -1218,7 +1230,7 @@ static int32_t mp3d_dequant(int32_t gain_mant, int gain_exp,
     }
     if (shift <= 0)
     {
-        return product > 0 ? MP3D_ONE : -MP3D_ONE;
+        return product > 0 ? MP3D_SAT_MAX : MP3D_SAT_MIN;
     }
     product = (product + ((int64_t)1 << (shift - 1))) >> shift;
     return mp3d_clamp_sample(product);
@@ -3524,7 +3536,6 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples) FL_NO_EXC
 #undef MP3D_HUFF_ONE
 #undef MP3D_SAT_MAX
 #undef MP3D_SAT_MIN
-#undef MP3D_ONE
 #undef MP3D_PCM_HALF
 #undef MP3D_PCM_UPPER
 #undef MP3D_PCM_LOWER

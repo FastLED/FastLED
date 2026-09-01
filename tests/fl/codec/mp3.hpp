@@ -498,6 +498,34 @@ FL_TEST_CASE("MP3 public stream recovers a valid frame after corruption") {
     FL_CHECK_FALSE(decoder.hasError());
 }
 
+FL_TEST_CASE("MP3 decoder clears the ISO floor on the dequant-headroom vector") {
+    // FastLED#4127. `l3-si_huff` drives the dequantised samples to 3.89 -- six
+    // times higher than any other conformance vector that ships a reference,
+    // and the only one above 0.63. The fixed-point path used to clamp them to
+    // 1.0 on the strength of a headroom measurement taken over the two vectors
+    // vendored at the time, which cost 81 dB here: 26.58 dB against float's
+    // 107.95, far below the 60 dB ISO floor, while every existing gate stayed
+    // green because none of them had ever seen this bitstream.
+    //
+    // The fixed-vs-float gates could not catch it either: they compare the two
+    // pipelines across the *vendored* corpus, so a divergence only present in a
+    // vector nobody vendored is invisible to them by construction.
+    fl::setTestFileSystemRoot("tests/data");
+    const fl::vector<fl::u8> bitstream =
+        loadMp3CorpusFile("codec/minimp3/l3-si_huff.bit");
+    const fl::vector<fl::i16> reference =
+        decodeLittleEndianPcm(loadMp3CorpusFile("codec/minimp3/l3-si_huff.pcm"));
+    const Mp3DecodeResult decoded =
+        decodeMp3Corpus<Mp3Minimp3Decoder>(bitstream);
+
+    FL_CHECK_TRUE(hasStandardVectorLength(decoded.mPcm.size(), reference.size()));
+    const double psnr = reportPsnr(reference, decoded.mPcm);
+    printf("MP3 dequant-headroom vector: minimp3=%.2f dB\n", psnr);
+    FL_CHECK_GE(psnr, 60.0);
+    // Well clear of the floor, not scraping it: the clamp bug scored 26.58.
+    FL_CHECK_GE(psnr, 90.0);
+}
+
 FL_TEST_CASE("MP3 decoder passes the limited-accuracy reference floor") {
     fl::setTestFileSystemRoot("tests/data");
     const fl::vector<fl::u8> bitstream =
