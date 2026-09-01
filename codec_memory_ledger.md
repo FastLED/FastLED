@@ -50,7 +50,7 @@ to keep live.
 | minimp3-float | allocation-count | 4 |
 | minimp3-float | stack-max-frame | 1208 |
 | minimp3-float | stack-callgraph | 2032 |
-| minimp3-float | stack-watermark-observed | 2920 |
+| minimp3-float | stack-watermark-observed | 2056 |
 | minimp3-float | static-tables | 7878 |
 | minimp3-float | object-text | 23160 |
 | minimp3-float | object-data | 0 |
@@ -82,22 +82,24 @@ a conservative observation that includes the audit call boundary and its
 optimized decoder callgraph; every reachable emitted function must have a
 stack-usage record or the audit fails closed.
 
-`stack-watermark-observed` is recorded but **not regression-gated**, which now
-matches what the paragraph above always said the acceptance gate was. It is not
-reproducible: the retired Helix backend measured 1736 and 3336 on identical
-decoder code, each value exact and one of them reproduced on a re-run, and 1816
-locally. `minimp3-float` measured 2056 in every environment tried while the rig
-also carried a Helix branch, and 2920 locally (Clang 21) once FastLED#4056
-deleted that branch from `decodeThread`. The rig restructuring and the local
-toolchain are both in play and this run did not separate them; the decoder
-itself is unchanged either way, which is the #4106 point. CI will report its own
-value on this row as INFORMATIONAL, and that is expected rather than a
-regression. The
-scan reports the deepest byte *anything* disturbed rather than the deepest byte
-the decoder used, so one excursion below the real frame moves it by kilobytes.
-The rows below are the values last observed, kept so the audit still requires
-the metric to be emitted. FastLED#4106 tracks making it reproducible or
-host-keying it the way `codec_cpu_trend.json` keys its baselines.
+`stack-watermark-observed` is gated like every other metric again, because the
+measurement is now reproducible. It was demoted to informational in FastLED#4105
+because it landed on exact-but-different values on different CI runners while the
+decoder was byte-identical (1736 and 3336 for the retired Helix backend, each
+exact, one reproduced on a re-run).
+
+FastLED#4106 found the cause by instrumenting rather than inferring. The harness
+forwarded the decoder's `memcpy`/`memmove`/`memset` to glibc, so glibc's frames
+sat inside the measured window -- and those differ between glibc builds and CPU
+dispatch paths. Swapping them for plain loops moves the figure from 2952 to 2056
+and pins it: five runs identical, and unchanged under `GLIBC_TUNABLES` settings
+that select different `mem*` implementations. It was also measuring the wrong
+thing, since no MCU links glibc's vectorised `memcpy` and the 2 KiB budget is an
+MCU budget.
+
+The two independent instruments now corroborate each other: the compiler-derived
+callgraph says 2032 and the live watermark says 2056, a 24-byte gap that is the
+audit call boundary. Before the fix they disagreed by 664 bytes.
 
 ## Static table inventory
 
