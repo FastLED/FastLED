@@ -14,6 +14,26 @@
 #define MINIMP3_MAX_SAMPLES_PER_FRAME (1152*2)
 
 
+/* FastLED: intrinsics headers are included here, at global scope, rather than
+   next to the code that uses them.
+
+   The implementation section runs inside `namespace fl { namespace
+   MINIMP3_NAMESPACE {`, so an #include there declares int32x4_t and friends
+   *inside* that namespace. With one instantiation that is merely untidy; with
+   several -- which the fixed-vs-float and SIMD-vs-scalar gates require -- the
+   header guard means only the first variant gets the types and every later one
+   fails to compile with "did you mean minimp3_float_probe::int32x4_t". Found by
+   the macOS ARM64 CI job, which is the only place NEON is actually built. */
+#if (defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))) || \
+    ((defined(__i386__) || defined(__x86_64__)) && defined(__SSE2__))
+#include <immintrin.h>
+#if !defined(_MSC_VER) && (defined(__GNUC__) || defined(__clang__))
+#include <cpuid.h>
+#endif
+#elif defined(__ARM_NEON) || defined(__aarch64__) || defined(_M_ARM64)
+#include <arm_neon.h>
+#endif
+
 /* FastLED: fixed-point mode. MINIMP3_HAVE_FIXED_POINT reports whether this
    instantiation actually built the integer DSP path. The macro is recomputed on
    every (re-)inclusion so that a float variant and a fixed variant can coexist
@@ -324,22 +344,12 @@ static int32_t mp3d_narrow_q30(int64_t acc) FL_NO_EXCEPT
    though it does not overflow a 32-bit add. */
 static int32_t mp3d_add_sat(int32_t a, int32_t b) FL_NO_EXCEPT
 {
-    const int32_t sum = (int32_t)((uint32_t)a + (uint32_t)b);
-    if (((a ^ sum) & (b ^ sum)) < 0)
-    {
-        return a < 0 ? MP3D_SAT_MIN : MP3D_SAT_MAX;
-    }
-    return sum < MP3D_SAT_MIN ? MP3D_SAT_MIN : sum;
+    return mp3d_sat64((int64_t)a + (int64_t)b);
 }
 
 static int32_t mp3d_sub_sat(int32_t a, int32_t b) FL_NO_EXCEPT
 {
-    const int32_t diff = (int32_t)((uint32_t)a - (uint32_t)b);
-    if (((a ^ b) & (a ^ diff)) < 0)
-    {
-        return a < 0 ? MP3D_SAT_MIN : MP3D_SAT_MAX;
-    }
-    return diff < MP3D_SAT_MIN ? MP3D_SAT_MIN : diff;
+    return mp3d_sat64((int64_t)a - (int64_t)b);
 }
 
 /* One Q26 unit of 1.0, and the clamp applied to dequantised samples.
@@ -511,15 +521,10 @@ static int have_simd()
 #if MINIMP3_HAVE_FIXED_POINT && !defined(MINIMP3_NO_SIMD)
 #if (defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))) || \
     ((defined(__i386__) || defined(__x86_64__)) && defined(__SSE2__))
-#include <immintrin.h>
-#if !defined(_MSC_VER) && (defined(__GNUC__) || defined(__clang__))
-#include <cpuid.h>
-#endif
 #define MP3D_HAVE_INT_SIMD 1
 #define MP3D_INT_SIMD_SSE  1
 typedef __m128i mp3d_i32x4;
 #elif defined(__ARM_NEON) || defined(__aarch64__) || defined(_M_ARM64)
-#include <arm_neon.h>
 #define MP3D_HAVE_INT_SIMD 1
 #define MP3D_INT_SIMD_NEON 1
 typedef int32x4_t mp3d_i32x4;
