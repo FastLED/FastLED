@@ -514,6 +514,17 @@ template <int DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2812Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2812_800KHZ, RGB_ORDER> {};
 #endif
 
+/// OptoSupply OSTW2020C1E controller @ 800 kHz.
+/// @details Uses the WS2812 pulse timing verified against the manufacturer's
+/// VER A.0 datasheet, with a 300us inter-frame wait to satisfy its >280us
+/// reset requirement.
+/// @see https://www.tme.eu/Document/bddfe2b10b24331bb9ab3894a93aba32/OSTW2020C1E.pdf
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+class OSTW2020C1EController
+    : public fl::ClocklessControllerImpl<DATA_PIN,
+                                         fl::TIMING_WS2812_800KHZ,
+                                         RGB_ORDER, 0, false, 300> {};
+
 /// WS2812B-Mini-V3 controller @ 800 kHz - references centralized timing from fl::TIMING_WS2812B_MINI_V3
 /// @note Timing: 220ns, 360ns, 580ns (tighter timing specifications)
 /// @see fl::TIMING_WS2812B_MINI_V3 in fl::chipsets::led_timing.h (220, 360, 580 ns)
