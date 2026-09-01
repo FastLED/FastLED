@@ -91,6 +91,44 @@ def test_integer_product_selection_ignores_address_and_size_math() -> None:
     assert products.lines == {2, 4}
 
 
+def test_widened_operands_are_still_counted_as_one_multiply() -> None:
+    """`(int64_t)(a - b) * c` and `((int64_t)a - (int64_t)b) * c` are the same
+    Q-format multiply spelled two ways, and both must be counted.
+
+    The first lowers to `sub i32 -> sext -> mul`; the second to
+    `sext, sext -> sub i64 -> mul`, where the multiply's operand is the subtract
+    rather than the extend. Keying on the extend alone made the counter blind to
+    329,616 multiplies in mp3d_synth_pair the moment FastLED#4133 widened its
+    operands to avoid signed overflow -- the arithmetic was unchanged, only the
+    IR shape. The exact operation ledger caught it, and re-baselining instead of
+    fixing the rule would have made the ledger permanently blind to the hottest
+    kernel in the decoder."""
+    narrow = [
+        "  %d = sub nsw i32 %a, %b",
+        "  %w = sext i32 %d to i64",
+        "  %m = mul nsw i64 %w, 29",
+    ]
+    widened = [
+        "  %wa = sext i32 %a to i64",
+        "  %wb = sext i32 %b to i64",
+        "  %d = sub nsw i64 %wa, %wb",
+        "  %m = mul nsw i64 %d, 29",
+    ]
+    assert AUDIT._integer_product_lines(narrow).values == {"%m"}
+    assert AUDIT._integer_product_lines(widened).values == {"%m"}
+
+    # The widening must not turn address or size arithmetic into a sample
+    # multiply either.
+    addressing = [
+        "  %wa = sext i32 %i to i64",
+        "  %wb = sext i32 %j to i64",
+        "  %d = add nsw i64 %wa, %wb",
+        "  %off = mul nsw i64 %d, 4",
+        "  %p = getelementptr inbounds i32, ptr %base, i64 %off",
+    ]
+    assert AUDIT._integer_product_lines(addressing).values == set()
+
+
 def test_integer_mac_counts_one_accumulate_for_two_products() -> None:
     """Mirrors the float MAC test. Two products feeding one add is two
     multiplies and one multiply-accumulate, not three multiplies."""

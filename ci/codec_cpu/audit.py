@@ -223,6 +223,32 @@ def _integer_product_lines(body: list[str]) -> IntegerProducts:
         if match:
             defs[match.group(1)] = match.group(2)
 
+    # Values that carry a sign-extended int32, directly or through widened
+    # arithmetic. `(int64_t)a * b` lowers to `sext -> mul`, but
+    # `((int64_t)a - (int64_t)b) * c` lowers to `sext, sext -> sub i64 -> mul`,
+    # and the multiply's operand is then the subtract rather than the extend.
+    # Both are the same Q-format multiply; only the spelling differs.
+    #
+    # Keying on the extend alone made the counter blind to 329,616 multiplies in
+    # mp3d_synth_pair the moment FastLED#4133 widened its operands to avoid
+    # signed overflow -- the arithmetic was unchanged, the IR shape was not. The
+    # exact-ledger gate caught it, which is what that gate is for.
+    widened: set[str] = set()
+    for _ in range(2):  # one pass would do in SSA order; two is belt and braces
+        for line in body:
+            match = re.match(
+                r"\s*(%[\w.]+) = (\w+)(?:\s+nsw|\s+nuw)*\s*(?:i64)?\s*(.*)", line
+            )
+            if not match:
+                continue
+            result, opcode, rest = match.group(1), match.group(2), match.group(3)
+            if opcode == "sext":
+                widened.add(result)
+            elif opcode in ("add", "sub") and "i64" in line:
+                operands = re.findall(r"%[\w.]+", rest)
+                if operands and all(value in widened for value in operands):
+                    widened.add(result)
+
     joined = "\n".join(body)
     lines: set[int] = set()
     values: set[str] = set()
@@ -234,9 +260,14 @@ def _integer_product_lines(body: list[str]) -> IntegerProducts:
         if not match:
             continue
         result, left, right = match.group(1), match.group(2), match.group(3)
-        if defs.get(left) != "sext" and defs.get(right) != "sext":
+        if left not in widened and right not in widened:
             continue
-        used = re.escape(result) + r"(?=[\s,)])"
+        # Negative lookahead on word characters rather than a positive one on
+        # separators: `(?=[\s,)])` needs a *following* character, so a value at
+        # the end of the last line -- a getelementptr closing a block, say --
+        # slipped past the exclusion and got counted as arithmetic. This still
+        # keeps %off from matching inside %offset.
+        used = re.escape(result) + r"(?![\w.])"
         if re.search(r"getelementptr[^\n]*" + used, joined):
             continue
         if re.search(r"\bcall\b[^\n]*" + used, joined):
