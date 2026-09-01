@@ -12,6 +12,8 @@ on:
       - 'src/third_party/libhelix_mp3/**'
       - 'src/third_party/minimp3/**'
       - 'ci/codec_tables/**'
+      - 'tests/fl/codec/mp3*'
+      - 'tests/fl/codec/minimp3_variants.hpp'
       - 'tests/data/codec/minimp3/**'
       - 'ci/codec_cpu/**'
       - 'ci/codec_memory/*_audit.cpp'
@@ -26,6 +28,8 @@ on:
       - 'src/third_party/libhelix_mp3/**'
       - 'src/third_party/minimp3/**'
       - 'ci/codec_tables/**'
+      - 'tests/fl/codec/mp3*'
+      - 'tests/fl/codec/minimp3_variants.hpp'
       - 'tests/data/codec/minimp3/**'
       - 'ci/codec_cpu/**'
       - 'ci/codec_memory/*_audit.cpp'
@@ -72,6 +76,17 @@ jobs:
           uv run pio pkg install -g -t 'espressif/toolchain-xtensa-esp32@8.4.0+2021r2-patch3'
           uv run pio pkg install -g -t 'espressif/toolchain-riscv32-esp@12.2.0+20230208'
           uv run pio pkg install -g -t 'platformio/toolchain-gccarmnoneeabi@1.120301.0'
+
+      # The fixed-point SIMD kernels must not be slower than the scalar ones
+      # they replace (FastLED/FastLED#4055). That comparison lives in the codec
+      # unit tests, which measure both variants in one process so the result is
+      # same-host by construction and needs no baseline -- but it only asserts
+      # in an optimised build, because -O0 punishes intrinsics far more than
+      # scalar integer code and would measure the compiler instead of the
+      # kernel. The default unit-test build is -O0, so it is run here in
+      # release explicitly.
+      - name: Verify the fixed-point SIMD is not slower than scalar
+        run: bash test fl_codec --cpp --build-mode release
 
       - name: Verify the focused CPU gate
         env:

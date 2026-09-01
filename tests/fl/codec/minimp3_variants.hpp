@@ -94,6 +94,21 @@ inline void mp3StageDump(int stage, int channel, const fl::i32* buf,
 #undef MINIMP3_FIXED_POINT
 #undef MINIMP3_NAMESPACE
 
+// ---- fixed-point, scalar only (SIMD opt-out) -------------------------------
+// Phase 4 (#4055) has to prove MINIMP3_NO_SIMD still yields a working scalar
+// decoder, and it is the reference the SIMD kernels must match bit for bit.
+#undef MINIMP3_H
+#undef _MINIMP3_IMPLEMENTATION_GUARD
+#define MINIMP3_NAMESPACE minimp3_fixed_scalar_probe
+#define MINIMP3_FIXED_POINT 1
+#define MINIMP3_NO_SIMD
+#define MINIMP3_IMPLEMENTATION
+#include "third_party/minimp3/minimp3.h" // ok cpp include
+#undef MINIMP3_IMPLEMENTATION
+#undef MINIMP3_NO_SIMD
+#undef MINIMP3_FIXED_POINT
+#undef MINIMP3_NAMESPACE
+
 // ---- restore the default instantiation -------------------------------------
 // The two blocks above leave MINIMP3_H defined for whichever variant went
 // last, which would make a later `#include "third_party/minimp3/minimp3.h"`
@@ -125,6 +140,9 @@ namespace fl {
         static bool dspIsInteger() FL_NO_EXCEPT {                              \
             return NS::mp3dec_dsp_is_integer() != 0;                           \
         }                                                                      \
+        static bool dspUsesSimd() FL_NO_EXCEPT {                               \
+            return NS::mp3dec_dsp_uses_simd() != 0;                            \
+        }                                                                      \
         static int decodeFrame(decoder_type* dec, scratch_type* scratch,       \
                                const fl::u8* mp3, int bytes,                   \
                                sample_type* pcm, info_type* info)              \
@@ -136,5 +154,6 @@ namespace fl {
 
 FL_MP3_VARIANT_ADAPTER(Minimp3FloatVariant, fl::minimp3_float_probe);
 FL_MP3_VARIANT_ADAPTER(Minimp3FixedVariant, fl::minimp3_fixed_probe);
+FL_MP3_VARIANT_ADAPTER(Minimp3FixedScalarVariant, fl::minimp3_fixed_scalar_probe);
 
 } // namespace fl
