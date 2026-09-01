@@ -67,12 +67,17 @@ extern "C" void yield(void) { }
 fl::u8 get_brightness();
 
 #if !FL_PLATFORM_HAS_TINY_MEMORY
-fl::u8 fl::detail::ditherFrame() {
-    return fl::Singleton<fl::detail::DitherFrameState>::instance().frame;
+namespace {
+// FL_LINT_ALLOW_GLOBAL(shared dither phase is required once per logical frame)
+fl::detail::DitherFrameState ditherFrameState;
+} // namespace
+
+fl::u8 fl::detail::ditherFrame() FL_NO_EXCEPT {
+    return ditherFrameState.frame;
 }
 
-void fl::detail::advanceDitherFrame() {
-    ++fl::Singleton<fl::detail::DitherFrameState>::instance().frame;
+void fl::detail::advanceDitherFrame() FL_NO_EXCEPT {
+    ++ditherFrameState.frame;
 }
 #endif
 
@@ -776,9 +781,6 @@ namespace __cxxabiv1
 
 
 void CFastLED::onBeginFrame() {
-#if !FL_PLATFORM_HAS_TINY_MEMORY
-	fl::detail::advanceDitherFrame();
-#endif
 	fl::EngineEvents::onBeginFrame();
 }
 

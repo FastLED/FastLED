@@ -186,9 +186,6 @@ public:
 
     // Compatibility with the 3.8.x codebase.
     VIRTUAL_IF_NOT_AVR void showLeds(fl::u8 brightness) FL_NO_EXCEPT {
-#if !FL_PLATFORM_HAS_TINY_MEMORY
-        fl::detail::advanceDitherFrame();
-#endif
         fl::EngineEvents::onBeginFrame();
         void* data = beginShowLeds(mLeds.size());
         showLedsInternal(brightness);

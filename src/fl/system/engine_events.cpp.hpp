@@ -4,6 +4,9 @@
 // zackees/zccache#619 (Windows PCH path-spelling drift). The comment
 // above said "for printf debug" but no printf-debug call survived.
 #include "fl/stl/noexcept.h"
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+#include "fl/channels/dither_frame.h"
+#endif
 
 
 namespace fl {
@@ -40,6 +43,9 @@ void EngineEvents::setFrameTaskListener(Listener *listener) FL_NO_EXCEPT {
 }
 
 void EngineEvents::onBeginFrame() FL_NO_EXCEPT {
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+    detail::advanceDitherFrame();
+#endif
 #if FASTLED_HAS_ENGINE_EVENTS
     EngineEvents::getInstance()->_onBeginFrame();
 #endif
