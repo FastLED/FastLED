@@ -39,13 +39,7 @@
 
 #include "platforms/arm/samd/is_samd.h"
 
-// Opt-in: this driver has never compiled. FL_IS_SAMD51 never evaluated true
-// until FastLED#4011 fixed SAMD detection, and in the meantime it drifted out
-// of sync with fl::DMABuffer, which now owns its memory and offers no
-// non-owning construction path -- so acquireDMABuffer() cannot return a view
-// over a caller-managed span. Reconciling that is a design change on a driver
-// that has also never run on hardware. FastLED#4017 tracks bring-up.
-#if defined(FL_IS_SAMD51) && defined(FL_SAMD51_HW_SPI)
+#if defined(FL_IS_SAMD51)
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/log/log.h"
@@ -389,13 +383,12 @@ DMABuffer SPIDualSAMD51::acquireDMABuffer(size_t bytes_per_lane) {
 
     // For dual-lane SPI: total size = bytes_per_lane × 2 (interleaved)
     constexpr size_t num_lanes = 2;
-    const size_t total_size = bytes_per_lane * num_lanes;
-
     // Validate size against platform max (256KB practical limit for embedded)
     constexpr size_t MAX_SIZE = 256 * 1024;
-    if (total_size > MAX_SIZE) {
+    if (bytes_per_lane > MAX_SIZE / num_lanes) {
         return DMABuffer(SPIError::BUFFER_TOO_LARGE);
     }
+    const size_t total_size = bytes_per_lane * num_lanes;
 
     // Allocate new DMABuffer - it will manage its own memory
     mDMABuffer = DMABuffer(total_size);
@@ -565,4 +558,4 @@ void SPIDualSAMD51::cleanup() {
 
 }  // namespace fl
 
-#endif  // FL_IS_SAMD51 && FL_SAMD51_HW_SPI
+#endif  // FL_IS_SAMD51
