@@ -95,19 +95,37 @@ silently -- it did, between the fixed-point work and FastLED#4056. Regenerate
 and verify it with:
 
 ```bash
-curl -sSL -o /tmp/a/minimp3.h \
-  https://raw.githubusercontent.com/lieff/minimp3/<upstream_revision>/minimp3.h
-cp src/third_party/minimp3/minimp3.h /tmp/b/minimp3.h
-git diff --no-index /tmp/a/minimp3.h /tmp/b/minimp3.h   # then strip the /tmp
-                                                        # path prefixes to a/ b/
-# verify: applying it to the pristine upstream file must reproduce ours exactly
-cd /tmp/a && patch -p1 < src/third_party/minimp3/FASTLED.patch
-diff -q /tmp/a/minimp3.h src/third_party/minimp3/minimp3.h
+root=$(git rev-parse --show-toplevel)
+rev=$(sed -n 's/^upstream_revision = "\(.*\)"/\1/p' \
+        "$root/src/third_party/minimp3/manifest.toml")
+work=$(mktemp -d); mkdir -p "$work/a" "$work/b"
+
+curl -sSL -o "$work/a/minimp3.h" \
+  "https://raw.githubusercontent.com/lieff/minimp3/$rev/minimp3.h"
+# The patch's own `index` line names this blob hash; if it disagrees, the wrong
+# revision was fetched and nothing below means anything.
+git hash-object "$work/a/minimp3.h"
+
+cp "$root/src/third_party/minimp3/minimp3.h" "$work/b/minimp3.h"
+( cd "$work" && git diff --no-index a/minimp3.h b/minimp3.h ) \
+  | sed -e 's|^diff --git a/a/minimp3.h b/b/minimp3.h$|diff --git a/minimp3.h b/minimp3.h|' \
+        -e 's|^--- a/a/minimp3.h$|--- a/minimp3.h|' \
+        -e 's|^+++ b/b/minimp3.h$|+++ b/minimp3.h|' \
+  > "$root/src/third_party/minimp3/FASTLED.patch"
+
+# Verify: applying it to the pristine upstream file must reproduce ours exactly.
+rm -rf "$work/v" && mkdir -p "$work/v"
+curl -sSL -o "$work/v/minimp3.h" \
+  "https://raw.githubusercontent.com/lieff/minimp3/$rev/minimp3.h"
+( cd "$work/v" && patch -p1 < "$root/src/third_party/minimp3/FASTLED.patch" )
+diff -q "$work/v/minimp3.h" "$root/src/third_party/minimp3/minimp3.h"
 ```
 
-`<upstream_revision>` is `upstream_revision` in `manifest.toml`. The patch's own
-`index` line names that file's git blob hash, so `git hash-object` on the
-downloaded file is the check that the right revision was fetched. FastLED does
+`git diff --no-index` labels its output with the paths it was given, so the
+`sed` rewrites `a/a/minimp3.h` back to the `a/minimp3.h` the committed patch
+uses; without it the patch no longer applies at `-p1`.
+
+FastLED does
 not expose upstream's `mp3dec_decode_frame` convenience entry point because it
 allocates scratch on the stack; all callers use `mp3dec_decode_frame_r` with
 owned storage instead. FastLED uses a 7,808-byte scratch arena for the float

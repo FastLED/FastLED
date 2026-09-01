@@ -105,26 +105,60 @@ void finishWatermark(DecodeContext* context, unsigned char* paint_end) {
         (first_changed == painted_bytes ? 0 : painted_bytes - first_changed);
 }
 
+/* Releases one tagged allocation on every exit path. The audit runs this binary
+   under Massif and asserts the codec peak equals the accounting hook's peak, so
+   a leak on the error path would not merely leak -- it would corrupt the
+   measurement the ledger is built from. Written as a scope guard rather than
+   repeated frees because the early return below has to unwind whatever was
+   already allocated. */
+class TaggedAllocation {
+public:
+    TaggedAllocation(size_t bytes, fl::third_party::Mp3MemoryTag tag)
+        : mBytes(bytes), mTag(tag),
+          mPtr(fl::third_party::Mp3MemoryAllocate(bytes, tag)) {}
+
+    ~TaggedAllocation() {
+        if (mPtr) {
+            fl::third_party::Mp3MemoryFree(mPtr, mBytes, mTag);
+        }
+    }
+
+    void* get() const { return mPtr; }
+
+private:
+    TaggedAllocation(const TaggedAllocation&);
+    TaggedAllocation& operator=(const TaggedAllocation&);
+
+    size_t mBytes;
+    fl::third_party::Mp3MemoryTag mTag;
+    void* mPtr;
+};
+
 __attribute__((noinline))
 void* decodeThread(void* opaque) {
     DecodeContext* context = static_cast<DecodeContext*>(opaque);
     const size_t stream_bytes = fl::third_party::MP3_MINIMP3_STREAM_BUFFER_SIZE;
-    void* stream = fl::third_party::Mp3MemoryAllocate(
-        stream_bytes, fl::third_party::Mp3MemoryTag::StreamBuffer);
-    fl::third_party::mp3dec_t* decoder =
-        static_cast<fl::third_party::mp3dec_t*>(
-            fl::third_party::Mp3MemoryAllocate(
-                sizeof(fl::third_party::mp3dec_t),
-                fl::third_party::Mp3MemoryTag::DecoderState));
-    fl::third_party::mp3dec_scratch_t* scratch =
-        static_cast<fl::third_party::mp3dec_scratch_t*>(
-            fl::third_party::Mp3MemoryAllocate(
-                sizeof(fl::third_party::mp3dec_scratch_t),
-                fl::third_party::Mp3MemoryTag::Scratch));
-    int16_t* pcm = static_cast<int16_t*>(
-        fl::third_party::Mp3MemoryAllocate(
-            2304 * sizeof(int16_t),
-            fl::third_party::Mp3MemoryTag::PcmOutput));
+    TaggedAllocation stream(stream_bytes,
+                            fl::third_party::Mp3MemoryTag::StreamBuffer);
+    TaggedAllocation decoder_alloc(
+        sizeof(fl::third_party::mp3dec_t),
+        fl::third_party::Mp3MemoryTag::DecoderState);
+    TaggedAllocation scratch_alloc(
+        sizeof(fl::third_party::mp3dec_scratch_t),
+        fl::third_party::Mp3MemoryTag::Scratch);
+    TaggedAllocation pcm_alloc(2304 * sizeof(int16_t),
+                               fl::third_party::Mp3MemoryTag::PcmOutput);
+    if (!stream.get() || !decoder_alloc.get() || !scratch_alloc.get() ||
+        !pcm_alloc.get()) {
+        return nullptr;
+    }
+
+    fl::third_party::mp3dec_t* const decoder =
+        static_cast<fl::third_party::mp3dec_t*>(decoder_alloc.get());
+    fl::third_party::mp3dec_scratch_t* const scratch =
+        static_cast<fl::third_party::mp3dec_scratch_t*>(scratch_alloc.get());
+    int16_t* const pcm = static_cast<int16_t*>(pcm_alloc.get());
+
     fl::third_party::mp3dec_frame_info_t info = {};
     fl::third_party::mp3dec_init(decoder);
     unsigned char* const paint_end = startWatermark(context);
@@ -136,17 +170,6 @@ void* decodeThread(void* opaque) {
         pcm, &info);
     finishWatermark(context, paint_end);
     context->ok = samples > 0 && info.frame_bytes > 0;
-    fl::third_party::Mp3MemoryFree(
-        pcm, 2304 * sizeof(int16_t),
-        fl::third_party::Mp3MemoryTag::PcmOutput);
-    fl::third_party::Mp3MemoryFree(
-        scratch, sizeof(fl::third_party::mp3dec_scratch_t),
-        fl::third_party::Mp3MemoryTag::Scratch);
-    fl::third_party::Mp3MemoryFree(
-        decoder, sizeof(fl::third_party::mp3dec_t),
-        fl::third_party::Mp3MemoryTag::DecoderState);
-    fl::third_party::Mp3MemoryFree(
-        stream, stream_bytes, fl::third_party::Mp3MemoryTag::StreamBuffer);
     return nullptr;
 }
 

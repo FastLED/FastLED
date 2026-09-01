@@ -39,8 +39,9 @@ APOLLO3_2_2_0 = "https://github.com/nigelb/platform-apollo3blue"
 # Old fork that we were using
 # ESP32_IDF_5_1_PIOARDUINO = "https://github.com/zackees/platform-espressif32#Arduino/IDF5"
 
-# ALL will be auto populated in the Board constructor whenever a
-# board is defined.
+# ALL is auto-populated by Board.__post_init__ for every board declared with
+# add_board_to_all left at its default. Clones, create_board()'s unknown-board
+# fallbacks and test fixtures pass False and stay out.
 ALL: list["Board"] = []
 
 
@@ -125,7 +126,17 @@ class Board:
         # Auto-detect and exclude problematic libraries based on environmental signals
         self._auto_detect_library_exclusions()
 
-        ALL.append(self)
+        # Honour the flag. This used to append unconditionally, which made
+        # `add_board_to_all=False` mean nothing: `clone()` sets it, and
+        # `create_board()` returns `board.clone()`, so every create_board call
+        # anywhere in CI permanently appended one more entry to ALL. The
+        # unknown-board fallback in create_board sets it too, so those ad-hoc
+        # placeholders accumulated as well -- and the reverse-lookup loops in
+        # create_board scan ALL, so a later lookup could match a placeholder
+        # left behind by an earlier one. Registration is for boards declared in
+        # this module.
+        if self.add_board_to_all:
+            ALL.append(self)
 
     def _is_native_or_stub_platform(self) -> bool:
         """Check if this is a native or stub platform that doesn't need a framework"""
