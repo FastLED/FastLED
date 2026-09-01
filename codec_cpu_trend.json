@@ -45,19 +45,19 @@
       },
       "host": {
         "callgrind": {
-          "branch_misses": 973345,
+          "branch_misses": 975543,
           "branches": 25170807,
           "functions": {
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_antialias(int*, int)": 67670454,
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_dct3_9(int*)": 100403200,
-            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_decode(fl::minimp3_fixed::mp3dec_t*, fl::minimp3_fixed::mp3dec_scratch_internal_t*, fl::minimp3_fixed::L3_gr_info_t*, int)": 291383826,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_decode(fl::minimp3_fixed::mp3dec_t*, fl::minimp3_fixed::mp3dec_scratch_internal_t*, fl::minimp3_fixed::L3_gr_info_t*, int)": 292808466,
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_huffman(int*, fl::minimp3_fixed::bs_t*, fl::minimp3_fixed::L3_gr_info_t const*, int const*, short const*, int)": 30896343,
-            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_imdct36(int*, int*, int const*, int)": 174329720,
-            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_imdct_gr(int*, int*, unsigned int, unsigned int)": 175405686,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_imdct36(int*, int*, int const*, int)": 175754360,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_imdct_gr(int*, int*, unsigned int, unsigned int)": 176830326,
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_midside_stereo(int*, int)": 12751864,
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_DCT_II(int*, int)": 202859854,
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_add_sat(int, int)": 94137648,
-            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_dequant(int, int, int, int)": 4063716,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_imdct36_twiddle(int*, int*, int const*, int const*, int const*)": 54068480,
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_mulshift(int, int, int)": 107095393,
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_narrow_q30(long)": 24629760,
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_sat64(long)": 172018903,
@@ -67,15 +67,15 @@
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_synth(int*, short*, int, int*)": 145270996,
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_synth_granule(int*, int*, int, int, short*)": 349803817,
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_synth_pair(short*, int, int const*)": 5412102,
-            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3dec_decode_frame_r(fl::minimp3_fixed::mp3dec_t*, fl::minimp3_fixed::mp3dec_scratch_t*, unsigned char const*, int, short*, fl::minimp3_fixed::mp3dec_frame_info_t*)": 648993577
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3dec_decode_frame_r(fl::minimp3_fixed::mp3dec_t*, fl::minimp3_fixed::mp3dec_scratch_t*, unsigned char const*, int, short*, fl::minimp3_fixed::mp3dec_frame_info_t*)": 650418217
           },
-          "instructions": 657659874
+          "instructions": 659084514
         },
         "counter_median": {
-          "branch_misses": 973345,
-          "cycles": 188201676.0,
-          "instructions": 657659874,
-          "ipc": 3.494442
+          "branch_misses": 975543,
+          "cycles": 187720962.0,
+          "instructions": 659084514,
+          "ipc": 3.51098
         },
         "counter_source": {
           "branch_misses": "Valgrind Callgrind simulated Bcm plus Bim",
@@ -119,14 +119,14 @@
           }
         },
         "stage_ns_median": {
-          "antialias": 7209.909,
+          "antialias": 7213.8,
           "dequant": 0.0,
-          "huffman": 11129.263,
-          "imdct": 19037.077,
-          "reorder": 14.012,
-          "scalefactors": 573.165,
-          "stereo": 1610.854,
-          "synthesis": 41576.832
+          "huffman": 11160.302,
+          "imdct": 19186.098,
+          "reorder": 13.944,
+          "scalefactors": 579.044,
+          "stereo": 1610.025,
+          "synthesis": 41586.536
         }
       },
       "operations": {
