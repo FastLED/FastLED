@@ -1,5 +1,5 @@
 diff --git a/minimp3.h b/minimp3.h
-index 9fbd4d2..436a8b1 100644
+index 9fbd4d2..292241a 100644
 --- a/minimp3.h
 +++ b/minimp3.h
 @@ -1,50 +1,250 @@
@@ -1533,7 +1533,7 @@ index 9fbd4d2..436a8b1 100644
  
      for (ch = 0; ch < nch; ch++, gr_info++)
      {
-@@ -1262,16 +2174,721 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_t *s, L3_gr_info_t *gr_info, i
+@@ -1262,16 +2174,729 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_t *s, L3_gr_info_t *gr_info, i
          if (gr_info->n_short_sfb)
          {
              aa_bands = n_long_bands - 1;
@@ -2058,14 +2058,22 @@ index 9fbd4d2..436a8b1 100644
 +static void mp3d_synth_pair(mp3d_sample_t *pcm, int nch, const int32_t *z) FL_NO_EXCEPT
 +{
 +    int64_t a;
-+    a  = (int64_t)(z[14*64] - z[    0]) * 29;
-+    a += (int64_t)(z[ 1*64] + z[13*64]) * 213;
-+    a += (int64_t)(z[12*64] - z[ 2*64]) * 459;
-+    a += (int64_t)(z[ 3*64] + z[11*64]) * 2037;
-+    a += (int64_t)(z[10*64] - z[ 4*64]) * 5153;
-+    a += (int64_t)(z[ 5*64] + z[ 9*64]) * 6574;
-+    a += (int64_t)(z[ 8*64] - z[ 6*64]) * 37489;
-+    a += (int64_t) z[ 7*64]             * 75038;
++    /* Each operand widens before the add or subtract, not after (FastLED#4133).
++       `(int64_t)(x - y)` evaluates `x - y` in int32 and only then widens, which
++       overflows -- undefined behaviour, not merely a wrong number -- once the
++       polyphase inputs get large. Ordinary audio never does; a malformed
++       intensity-stereo stream does, and UBSan caught it on
++       l3-nonstandard-big-iscf. Widening rather than saturating is deliberate:
++       the accumulator is int64 and has room for the true difference, so there
++       is nothing to clamp. */
++    a  = ((int64_t)z[14*64] - (int64_t)z[    0]) * 29;
++    a += ((int64_t)z[ 1*64] + (int64_t)z[13*64]) * 213;
++    a += ((int64_t)z[12*64] - (int64_t)z[ 2*64]) * 459;
++    a += ((int64_t)z[ 3*64] + (int64_t)z[11*64]) * 2037;
++    a += ((int64_t)z[10*64] - (int64_t)z[ 4*64]) * 5153;
++    a += ((int64_t)z[ 5*64] + (int64_t)z[ 9*64]) * 6574;
++    a += ((int64_t)z[ 8*64] - (int64_t)z[ 6*64]) * 37489;
++    a += (int64_t) z[ 7*64]                      * 75038;
 +    pcm[0] = mp3d_scale_pcm(a);
 +
 +    z += 2;
@@ -2257,7 +2265,7 @@ index 9fbd4d2..436a8b1 100644
  {
      static const float g_sec[24] = {
          10.19000816f,0.50060302f,0.50241929f,3.40760851f,0.50547093f,0.52249861f,2.05778098f,0.51544732f,0.56694406f,1.48416460f,0.53104258f,0.64682180f,1.16943991f,0.55310392f,0.78815460f,0.97256821f,0.58293498f,1.06067765f,0.83934963f,0.62250412f,1.72244716f,0.74453628f,0.67480832f,5.10114861f
-@@ -1427,7 +3044,7 @@ static void mp3d_DCT_II(float *grbuf, int n)
+@@ -1427,7 +3052,7 @@ static void mp3d_DCT_II(float *grbuf, int n)
  }
  
  #ifndef MINIMP3_FLOAT_OUTPUT
@@ -2266,7 +2274,7 @@ index 9fbd4d2..436a8b1 100644
  {
  #if HAVE_ARMV6
      int32_t s32 = (int32_t)(sample + .5f);
-@@ -1448,7 +3065,7 @@ static float mp3d_scale_pcm(float sample)
+@@ -1448,7 +3073,7 @@ static float mp3d_scale_pcm(float sample)
  }
  #endif /* MINIMP3_FLOAT_OUTPUT */
  
@@ -2275,7 +2283,7 @@ index 9fbd4d2..436a8b1 100644
  {
      float a;
      a  = (z[14*64] - z[    0]) * 29;
-@@ -1473,7 +3090,7 @@ static void mp3d_synth_pair(mp3d_sample_t *pcm, int nch, const float *z)
+@@ -1473,7 +3098,7 @@ static void mp3d_synth_pair(mp3d_sample_t *pcm, int nch, const float *z)
      pcm[16*nch] = mp3d_scale_pcm(a);
  }
  
@@ -2284,7 +2292,7 @@ index 9fbd4d2..436a8b1 100644
  {
      int i;
      float *xr = xl + 576*(nch - 1);
-@@ -1626,16 +3243,17 @@ static void mp3d_synth(float *xl, mp3d_sample_t *dstl, int nch, float *lins)
+@@ -1626,16 +3251,17 @@ static void mp3d_synth(float *xl, mp3d_sample_t *dstl, int nch, float *lins)
  #endif /* MINIMP3_ONLY_SIMD */
  }
  
@@ -2305,7 +2313,7 @@ index 9fbd4d2..436a8b1 100644
      for (i = 0; i < nbands; i += 2)
      {
          mp3d_synth(grbuf + i, pcm + 32*nch*i, nch, lins + i*64);
-@@ -1650,11 +3268,13 @@ static void mp3d_synth_granule(float *qmf_state, float *grbuf, int nbands, int n
+@@ -1650,11 +3276,13 @@ static void mp3d_synth_granule(float *qmf_state, float *grbuf, int nbands, int n
      } else
  #endif /* MINIMP3_NONSTANDARD_BUT_LOGICAL */
      {
@@ -2321,7 +2329,7 @@ index 9fbd4d2..436a8b1 100644
  {
      int i, nmatch;
      for (i = 0, nmatch = 0; nmatch < MAX_FRAME_SYNC_MATCHES; nmatch++)
-@@ -1668,7 +3288,7 @@ static int mp3d_match_frame(const uint8_t *hdr, int mp3_bytes, int frame_bytes)
+@@ -1668,7 +3296,7 @@ static int mp3d_match_frame(const uint8_t *hdr, int mp3_bytes, int frame_bytes)
      return 1;
  }
  
@@ -2330,7 +2338,7 @@ index 9fbd4d2..436a8b1 100644
  {
      int i, k;
      for (i = 0; i < mp3_bytes - HDR_SIZE; i++, mp3++)
-@@ -1705,17 +3325,46 @@ static int mp3d_find_frame(const uint8_t *mp3, int mp3_bytes, int *free_format_b
+@@ -1705,17 +3333,46 @@ static int mp3d_find_frame(const uint8_t *mp3, int mp3_bytes, int *free_format_b
      return mp3_bytes;
  }
  
@@ -2380,7 +2388,7 @@ index 9fbd4d2..436a8b1 100644
  
      if (mp3_bytes > 4 && dec->header[0] == 0xff && hdr_compare(dec->header, mp3))
      {
-@@ -1758,23 +3407,23 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
+@@ -1758,23 +3415,23 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
  
      if (info->layer == 3)
      {
@@ -2410,7 +2418,7 @@ index 9fbd4d2..436a8b1 100644
      } else
      {
  #ifdef MINIMP3_ONLY_MP3
-@@ -1783,15 +3432,19 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
+@@ -1783,15 +3440,19 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
          L12_scale_info sci[1];
          L12_read_scale_info(hdr, bs_frame, sci);
  
@@ -2435,7 +2443,7 @@ index 9fbd4d2..436a8b1 100644
                  pcm += 384*info->channels;
              }
              if (bs_frame->pos > bs_frame->limit)
-@@ -1806,7 +3459,7 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
+@@ -1806,7 +3467,7 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
  }
  
  #ifdef MINIMP3_FLOAT_OUTPUT
@@ -2444,7 +2452,7 @@ index 9fbd4d2..436a8b1 100644
  {
      int i = 0;
  #if HAVE_SIMD
-@@ -1862,4 +3515,125 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples)
+@@ -1862,4 +3523,125 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples)
      }
  }
  #endif /* MINIMP3_FLOAT_OUTPUT */

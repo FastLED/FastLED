@@ -2693,14 +2693,22 @@ static mp3d_sample_t mp3d_scale_pcm(int64_t sample) FL_NO_EXCEPT
 static void mp3d_synth_pair(mp3d_sample_t *pcm, int nch, const int32_t *z) FL_NO_EXCEPT
 {
     int64_t a;
-    a  = (int64_t)(z[14*64] - z[    0]) * 29;
-    a += (int64_t)(z[ 1*64] + z[13*64]) * 213;
-    a += (int64_t)(z[12*64] - z[ 2*64]) * 459;
-    a += (int64_t)(z[ 3*64] + z[11*64]) * 2037;
-    a += (int64_t)(z[10*64] - z[ 4*64]) * 5153;
-    a += (int64_t)(z[ 5*64] + z[ 9*64]) * 6574;
-    a += (int64_t)(z[ 8*64] - z[ 6*64]) * 37489;
-    a += (int64_t) z[ 7*64]             * 75038;
+    /* Each operand widens before the add or subtract, not after (FastLED#4133).
+       `(int64_t)(x - y)` evaluates `x - y` in int32 and only then widens, which
+       overflows -- undefined behaviour, not merely a wrong number -- once the
+       polyphase inputs get large. Ordinary audio never does; a malformed
+       intensity-stereo stream does, and UBSan caught it on
+       l3-nonstandard-big-iscf. Widening rather than saturating is deliberate:
+       the accumulator is int64 and has room for the true difference, so there
+       is nothing to clamp. */
+    a  = ((int64_t)z[14*64] - (int64_t)z[    0]) * 29;
+    a += ((int64_t)z[ 1*64] + (int64_t)z[13*64]) * 213;
+    a += ((int64_t)z[12*64] - (int64_t)z[ 2*64]) * 459;
+    a += ((int64_t)z[ 3*64] + (int64_t)z[11*64]) * 2037;
+    a += ((int64_t)z[10*64] - (int64_t)z[ 4*64]) * 5153;
+    a += ((int64_t)z[ 5*64] + (int64_t)z[ 9*64]) * 6574;
+    a += ((int64_t)z[ 8*64] - (int64_t)z[ 6*64]) * 37489;
+    a += (int64_t) z[ 7*64]                      * 75038;
     pcm[0] = mp3d_scale_pcm(a);
 
     z += 2;

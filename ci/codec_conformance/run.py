@@ -131,16 +131,18 @@ def compiler_path() -> Path:
     raise RuntimeError("clang++ is required for the conformance harness")
 
 
-def build_harness(*, float_variant: bool = False) -> Path:
+def build_harness(*, float_variant: bool = False, sanitize: bool = False) -> Path:
     BUILD.mkdir(parents=True, exist_ok=True)
     suffix = "float" if float_variant else "fixed"
+    if sanitize:
+        suffix += "_san"
     binary = BUILD / f"harness_{suffix}"
     command = [
         str(compiler_path()),
         f"-I{ROOT / 'src'}",
         f"-I{ROOT / 'src' / 'platforms' / 'stub'}",
         "-std=gnu++11",
-        "-O2",
+        "-O1" if sanitize else "-O2",
         "-fno-exceptions",
         "-fno-rtti",
         "-fno-strict-aliasing",
@@ -153,6 +155,13 @@ def build_harness(*, float_variant: bool = False) -> Path:
         "-DFASTLED_NO_AUTO_NAMESPACE",
         "-DFASTLED_NO_PINMAP",
     ]
+    if sanitize:
+        # UBSan is the point: the fixed-point port does int32 arithmetic that
+        # ordinary audio never pushes to its limits, so a malformed stream is
+        # the only thing that exercises the edges. FastLED#4133 was exactly
+        # that -- a signed overflow in the polyphase, invisible on every
+        # well-formed vector.
+        command += ["-g", "-fno-omit-frame-pointer", "-fsanitize=address,undefined"]
     if float_variant:
         command.append("-DCONFORMANCE_FLOAT")
     command += [str(Path(__file__).with_name("harness.cpp")), "-o", str(binary)]
@@ -166,15 +175,31 @@ _RESULT_RE = re.compile(
 )
 
 
+_SANITIZER_RE = re.compile(r"(AddressSanitizer|runtime error:|SEGV)")
+
+
 def run_vector(binary: Path, bitstream: Path, reference: Path) -> VectorResult:
+    environment = dict(os.environ)
+    # Leaks are not what this pass is looking for and the harness exits without
+    # freeing on some paths by design.
+    environment["ASAN_OPTIONS"] = "detect_leaks=0"
     result = RunningProcess.run(
         [str(binary), str(bitstream), str(reference)],
         cwd=ROOT,
         check=False,
         text=True,
         capture_output=True,
-        timeout=120,
+        timeout=180,
+        env=environment,
     )
+    combined = (result.stdout or "") + (result.stderr or "")
+    if _SANITIZER_RE.search(combined):
+        detail = next(
+            (line for line in combined.splitlines() if _SANITIZER_RE.search(line)),
+            "sanitizer finding",
+        )
+        print(f"  SANITIZER {bitstream.stem}: {detail.strip()[:160]}")
+        return VectorResult(bitstream.stem, "sanitizer", 0.0, 0, 0, 0, 0)
     match = _RESULT_RE.search(result.stdout or "")
     if not match:
         return VectorResult(bitstream.stem, "crashed", 0.0, 0, 0, 0, 0)
@@ -187,6 +212,30 @@ def run_vector(binary: Path, bitstream: Path, reference: Path) -> VectorResult:
         produced=int(match.group(5)) if match.group(5) else 0,
         reference=int(match.group(6)) if match.group(6) else 0,
     )
+
+
+def collect_for_sanitizer(vectors: Path) -> list[tuple[Path, Path]]:
+    """Every bitstream, reference or not.
+
+    The PSNR pass can only use vectors that ship a reference PCM. The sanitizer
+    pass has no such constraint and must not inherit it: the malformed streams
+    are exactly the ones with no reference, and they are the only inputs that
+    push the fixed-point arithmetic to its edges. `l3-nonstandard-big-iscf`,
+    which found FastLED#4133, has no reference -- so scoping this pass to the
+    74 comparable pairs would have excluded the one vector that mattered.
+
+    A reference is still passed because the harness takes two arguments; which
+    one is irrelevant here, since only sanitizer output is inspected.
+    """
+    placeholder = next(iter(sorted(vectors.glob("*.pcm"))), None)
+    if placeholder is None:
+        raise RuntimeError("no reference PCM available to drive the harness")
+    streams: list[tuple[Path, Path]] = []
+    for pattern in ("*.bit", "*.mp3"):
+        for bitstream in sorted(vectors.glob(pattern)):
+            own = bitstream.with_suffix(".pcm")
+            streams.append((bitstream, own if own.exists() else placeholder))
+    return streams
 
 
 def collect(vectors: Path) -> list[tuple[Path, Path]]:
@@ -205,12 +254,40 @@ def collect(vectors: Path) -> list[tuple[Path, Path]]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--float", action="store_true", help="audit the float build")
+    parser.add_argument(
+        "--sanitize",
+        action="store_true",
+        help="build with ASan/UBSan and require every vector to be clean",
+    )
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args(argv)
 
     try:
         vectors = fetch_vectors()
-        binary = build_harness(float_variant=args.float)
+        binary = build_harness(float_variant=args.float, sanitize=args.sanitize)
+        if args.sanitize:
+            streams = collect_for_sanitizer(vectors)
+            if len(streams) < EXPECTED_PAIRS:
+                raise RuntimeError(
+                    f"expected at least {EXPECTED_PAIRS} bitstreams to "
+                    f"sanitize, found {len(streams)}"
+                )
+            findings = 0
+            for bitstream, reference in streams:
+                outcome = run_vector(binary, bitstream, reference)
+                if outcome.status == "sanitizer":
+                    findings += 1
+            print(
+                f"CONFORMANCE-SANITIZE: {len(streams)} bitstreams, "
+                f"{findings} sanitizer findings"
+            )
+            if findings:
+                raise RuntimeError(
+                    f"{findings} bitstreams tripped ASan or UBSan"
+                )
+            print("CONFORMANCE:PASS")
+            return 0
+
         pairs = collect(vectors)
         if len(pairs) != EXPECTED_PAIRS:
             raise RuntimeError(

@@ -75,3 +75,10 @@ jobs:
       # against, so a regression in it would silently move that reference.
       - name: Float decoder against the full ISO suite
         run: uv run python ci/codec_conformance/run.py --float
+
+      # Malformed streams are the only inputs that push the fixed-point
+      # pipeline's int32 arithmetic to its edges -- ordinary audio stays four
+      # orders of magnitude below them. FastLED#4133 was a signed overflow in
+      # the polyphase that every well-formed vector walked straight past.
+      - name: Sanitizers over the full ISO suite
+        run: uv run python ci/codec_conformance/run.py --sanitize
