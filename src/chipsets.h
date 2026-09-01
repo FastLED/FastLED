@@ -459,6 +459,14 @@ using UCS7604Controller16bit1600 = fl::UCS7604Controller16bit1600T<DATA_PIN, RGB
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_TM1809_800KHZ, RGB_ORDER> {};
 
+/// TM1908 controller @ 1.2 MHz with required mode/current command prefix.
+/// @see fl::TIMING_TM1908 in fl/chipsets/led_timing.h (240, 240, 350 ns)
+template <int DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1908Controller
+    : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_TM1908,
+                                         RGB_ORDER, 0, false,
+                                         fl::TIMING_TM1908::RESET> {};
+
 /// WS2811 controller @ 800kHz (fast mode)
 /// @see fl::TIMING_WS2811_800KHZ_LEGACY in fl/chipsets/led_timing.h (250, 350, 650 ns = 1250ns cycle = 800kHz)
 /// @note WS2811 supports both 400kHz and 800kHz modes (pins 7&8 configure speed)

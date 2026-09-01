@@ -299,6 +299,22 @@ struct TIMING_TM1809_800KHZ {
     };
 };
 
+/// TM1908 RGB controller @ 1.2 MHz.
+///
+/// Titan Micro Electronics TM1908 V1.2 typical values are T0H=240ns,
+/// T1H=480ns, bit period=830ns, and reset low >=80us.
+/// @see https://github.com/cheemsHe/LEDdatasheet/blob/main/TM1908_V1.2_EN.pdf
+struct TIMING_TM1908 {
+    enum : u32 {
+        T1 = 240,
+        T2 = 240,
+        T3 = 350,
+        RESET = 80
+    };
+    static constexpr ClocklessEncoder ENCODER =
+        ClocklessEncoder::CLOCKLESS_ENCODER_TM1908;
+};
+
 /// TM1812 RGBCCT controller @ 800 kHz (issue #995)
 ///
 /// Unlike the legacy RGB alias, this trait selects the TM1812 byte encoder:
