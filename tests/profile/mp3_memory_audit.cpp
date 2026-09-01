@@ -1,8 +1,25 @@
 // ok standalone
 
+#include <stdint.h>
+
 #include "fl/codec/mp3.h"
 #include "fl/codec/mp3_memory.h"
 #include "fl/stl/stdio.h"
+
+// A second minimp3 instantiation, this one with the integer DSP path, so the
+// ledger can carry a measured working-RAM figure for it rather than an
+// arithmetic claim. Only the allocation shape matters here, so this TU
+// re-includes the header under its own namespace instead of reaching for the
+// production wrapper, which is bound to whichever variant the build selected.
+#define MINIMP3_NAMESPACE minimp3_fixed_audit
+#define MINIMP3_FIXED_POINT 1
+#define MINIMP3_IMPLEMENTATION
+#define MINIMP3_NO_STDIO
+#include "third_party/minimp3/minimp3.h" // ok cpp include
+#undef MINIMP3_NO_STDIO
+#undef MINIMP3_IMPLEMENTATION
+#undef MINIMP3_FIXED_POINT
+#undef MINIMP3_NAMESPACE
 
 using namespace fl;
 using namespace fl::third_party;
@@ -72,6 +89,61 @@ private:
     bool mValid = true;
 };
 
+/* Mirrors Mp3Minimp3Decoder's allocation shape exactly -- decoder state,
+   scratch arena and caller-owned PCM, each under its accounting tag -- so the
+   two minimp3 rows in the ledger are measured the same way and differ only
+   where the decoders genuinely differ (the fixed build's larger scratch). */
+class Minimp3FixedProbeDecoder {
+public:
+    ~Minimp3FixedProbeDecoder() { reset(); }
+
+    bool init() FL_NO_EXCEPT {
+        // Mp3MemoryAllocateArray is only explicitly instantiated for the
+        // production decoder's types, so this goes through the untyped
+        // allocator. Both decoder structures are PODs, which is what makes the
+        // cast sound; the accounting tags are what the audit reads.
+        mDecoder = static_cast<fl::minimp3_fixed_audit::mp3dec_t*>(
+            Mp3MemoryAllocate(sizeof(fl::minimp3_fixed_audit::mp3dec_t),
+                              Mp3MemoryTag::DecoderState));
+        mScratch = static_cast<fl::minimp3_fixed_audit::mp3dec_scratch_t*>(
+            Mp3MemoryAllocate(sizeof(fl::minimp3_fixed_audit::mp3dec_scratch_t),
+                              Mp3MemoryTag::Scratch));
+        mPcm = static_cast<fl::i16*>(
+            Mp3MemoryAllocate(sizeof(fl::i16) * 2304, Mp3MemoryTag::PcmOutput));
+        if (!mDecoder || !mScratch || !mPcm) {
+            reset();
+            return false;
+        }
+        fl::minimp3_fixed_audit::mp3dec_init(mDecoder);
+        return true;
+    }
+
+    void reset() FL_NO_EXCEPT {
+        if (mDecoder) {
+            Mp3MemoryFree(mDecoder,
+                          sizeof(fl::minimp3_fixed_audit::mp3dec_t),
+                          Mp3MemoryTag::DecoderState);
+            mDecoder = nullptr;
+        }
+        if (mScratch) {
+            Mp3MemoryFree(mScratch,
+                          sizeof(fl::minimp3_fixed_audit::mp3dec_scratch_t),
+                          Mp3MemoryTag::Scratch);
+            mScratch = nullptr;
+        }
+        if (mPcm) {
+            Mp3MemoryFree(mPcm, sizeof(fl::i16) * 2304,
+                          Mp3MemoryTag::PcmOutput);
+            mPcm = nullptr;
+        }
+    }
+
+private:
+    fl::minimp3_fixed_audit::mp3dec_t* mDecoder = nullptr;
+    fl::minimp3_fixed_audit::mp3dec_scratch_t* mScratch = nullptr;
+    fl::i16* mPcm = nullptr;
+};
+
 template <typename Decoder>
 bool measureBackend(const char* backend, fl::size stream_bytes) {
     AccountingHook hook;
@@ -103,7 +175,9 @@ int main() {
         "helix", MP3_HELIX_STREAM_BUFFER_SIZE);
     const bool minimp3 = measureBackend<Mp3Minimp3Decoder>(
         "minimp3-float", MP3_MINIMP3_STREAM_BUFFER_SIZE);
-    if (!helix || !minimp3) {
+    const bool minimp3_fixed = measureBackend<Minimp3FixedProbeDecoder>(
+        "minimp3-fixed", MP3_MINIMP3_STREAM_BUFFER_SIZE);
+    if (!helix || !minimp3 || !minimp3_fixed) {
         return 1;
     }
     fl::printf(
