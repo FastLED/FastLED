@@ -4,14 +4,27 @@ from ci.boards import SPARKFUN_XRP_CONTROLLER_2350B, Board
 
 
 class TestBoardToPlatformioIni(unittest.TestCase):
-    """Tests for Board.to_platformio_ini()."""
+    """Tests for Board.to_platformio_ini().
+
+    Every Board built here passes add_board_to_all=False. Board.__post_init__
+    appends to the module-level ci.boards.ALL registry by default, so a fixture
+    board constructed without it leaks into that list for the rest of the pytest
+    process -- which made test_readme_badge_wall fail with a stray "custom"
+    alias when the two files ran in the same session, and pass when either ran
+    alone.
+    """
 
     def _ini_to_set(self, ini: str) -> set[str]:
         """Return a set with each non-empty, stripped line of the ini snippet."""
         return {line.strip() for line in ini.splitlines() if line.strip()}
 
     def test_basic_fields(self) -> None:
-        board = Board(board_name="uno", platform="atmelavr", framework="arduino")
+        board = Board(
+            board_name="uno",
+            platform="atmelavr",
+            framework="arduino",
+            add_board_to_all=False,
+        )
         ini = board.to_platformio_ini()
         lines = self._ini_to_set(ini)
         expected = {
@@ -29,6 +42,7 @@ class TestBoardToPlatformioIni(unittest.TestCase):
             board_name="esp32c3",
             real_board_name="esp32-c3-devkitm-1",
             platform="espressif32",
+            add_board_to_all=False,
         )
         ini = board.to_platformio_ini()
         lines = self._ini_to_set(ini)
@@ -40,6 +54,7 @@ class TestBoardToPlatformioIni(unittest.TestCase):
             board_name="custom",
             defines=["FASTLED_TEST=1"],
             build_flags=["-O2"],
+            add_board_to_all=False,
         )
         ini = board.to_platformio_ini()
         lines = self._ini_to_set(ini)
@@ -49,7 +64,9 @@ class TestBoardToPlatformioIni(unittest.TestCase):
         self.assertIn("-O2", lines)
 
     def test_lib_deps_are_merged_into_one_option(self) -> None:
-        board = Board(board_name="custom", lib_deps=["board-lib"])
+        board = Board(
+            board_name="custom", lib_deps=["board-lib"], add_board_to_all=False
+        )
 
         ini = board.to_platformio_ini(project_root=".", additional_libs=["extra-lib"])
 
