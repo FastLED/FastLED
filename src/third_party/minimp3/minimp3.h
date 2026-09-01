@@ -315,6 +315,15 @@ namespace MINIMP3_NAMESPACE {
 #define MP3D_SAT_MAX ((int32_t)0x7fffffff)
 #define MP3D_SAT_MIN (-MP3D_SAT_MAX)
 
+/* int32 add and subtract with defined wraparound. Signed overflow is undefined
+   in C; unsigned is specified to wrap, and the round trip through uint32_t is
+   the standard way to get the wrapping the hardware does anyway without telling
+   the optimiser it may assume otherwise. Compiles to one instruction. */
+#define MP3D_WRAP_ADD(x, y)                                                    \
+    ((int32_t)((uint32_t)(x) + (uint32_t)(y)))
+#define MP3D_WRAP_SUB(x, y)                                                    \
+    ((int32_t)((uint32_t)(x) - (uint32_t)(y)))
+
 /* Saturating narrow of a 64-bit accumulator to a Q(MINIMP3_FRAC_BITS) sample. */
 static int32_t mp3d_sat64(int64_t value) FL_NO_EXCEPT
 {
@@ -2693,22 +2702,34 @@ static mp3d_sample_t mp3d_scale_pcm(int64_t sample) FL_NO_EXCEPT
 static void mp3d_synth_pair(mp3d_sample_t *pcm, int nch, const int32_t *z) FL_NO_EXCEPT
 {
     int64_t a;
-    /* Each operand widens before the add or subtract, not after (FastLED#4133).
-       `(int64_t)(x - y)` evaluates `x - y` in int32 and only then widens, which
-       overflows -- undefined behaviour, not merely a wrong number -- once the
-       polyphase inputs get large. Ordinary audio never does; a malformed
-       intensity-stereo stream does, and UBSan caught it on
-       l3-nonstandard-big-iscf. Widening rather than saturating is deliberate:
-       the accumulator is int64 and has room for the true difference, so there
-       is nothing to clamp. */
-    a  = ((int64_t)z[14*64] - (int64_t)z[    0]) * 29;
-    a += ((int64_t)z[ 1*64] + (int64_t)z[13*64]) * 213;
-    a += ((int64_t)z[12*64] - (int64_t)z[ 2*64]) * 459;
-    a += ((int64_t)z[ 3*64] + (int64_t)z[11*64]) * 2037;
-    a += ((int64_t)z[10*64] - (int64_t)z[ 4*64]) * 5153;
-    a += ((int64_t)z[ 5*64] + (int64_t)z[ 9*64]) * 6574;
-    a += ((int64_t)z[ 8*64] - (int64_t)z[ 6*64]) * 37489;
-    a += (int64_t) z[ 7*64]                      * 75038;
+    /* The sums and differences are computed with defined wraparound, then
+       widened (FastLED#4133).
+
+       `(int64_t)(x - y)` evaluates `x - y` in int32 first and only then widens,
+       which overflows once the polyphase inputs get large -- undefined
+       behaviour, not merely a wrong number. Ordinary audio never gets there; a
+       malformed intensity-stereo stream does, and UBSan caught it on
+       l3-nonstandard-big-iscf.
+
+       Widening both operands first was the obvious fix and it is the wrong one
+       here: an int64 add or subtract costs two instructions plus carry on a
+       32-bit target, and the codegen ledger measured it at +34% on the Xtensa
+       polyphase inner loop -- 251 instructions against 187 -- which is the
+       hottest kernel on the most constrained platform FastLED targets.
+
+       Unsigned arithmetic wraps by definition in C, so MP3D_WRAP_SUB and
+       MP3D_WRAP_ADD emit exactly the same single 32-bit instruction the
+       undefined version did, and produce exactly the same bits. No well-formed
+       stream reaches the wrap; a malformed one now gets a defined, reproducible
+       answer instead of whatever the optimiser felt entitled to assume. */
+    a  = (int64_t)MP3D_WRAP_SUB(z[14*64], z[    0]) * 29;
+    a += (int64_t)MP3D_WRAP_ADD(z[ 1*64], z[13*64]) * 213;
+    a += (int64_t)MP3D_WRAP_SUB(z[12*64], z[ 2*64]) * 459;
+    a += (int64_t)MP3D_WRAP_ADD(z[ 3*64], z[11*64]) * 2037;
+    a += (int64_t)MP3D_WRAP_SUB(z[10*64], z[ 4*64]) * 5153;
+    a += (int64_t)MP3D_WRAP_ADD(z[ 5*64], z[ 9*64]) * 6574;
+    a += (int64_t)MP3D_WRAP_SUB(z[ 8*64], z[ 6*64]) * 37489;
+    a += (int64_t) z[ 7*64]                         * 75038;
     pcm[0] = mp3d_scale_pcm(a);
 
     z += 2;
@@ -3542,6 +3563,8 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples) FL_NO_EXC
 #undef MP3D_HUFF_ESC
 #undef MP3D_HUFF_TAB
 #undef MP3D_HUFF_ONE
+#undef MP3D_WRAP_ADD
+#undef MP3D_WRAP_SUB
 #undef MP3D_SAT_MAX
 #undef MP3D_SAT_MIN
 #undef MP3D_PCM_HALF
