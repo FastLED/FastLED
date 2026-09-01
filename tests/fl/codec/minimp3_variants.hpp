@@ -118,6 +118,11 @@ inline void mp3StageDump(int stage, int channel, const fl::i32* buf,
 // fl::third_party::mp3dec_t reference an incomplete type. Re-declare the
 // default namespace here so this header is order-independent in an aggregate
 // TU. Declarations only: fl::third_party's implementation lives in libfastled.
+//
+// The other half of that order-independence is in minimp3.h itself: it hands
+// back the MINIMP3_FIXED_POINT it sets for its own default at the end of every
+// inclusion, so the float block above can pin its variant regardless of whether
+// something else in the TU already pulled the header in with defaults.
 #undef MINIMP3_H
 #undef _MINIMP3_IMPLEMENTATION_GUARD
 #include "third_party/minimp3/minimp3.h" // ok cpp include

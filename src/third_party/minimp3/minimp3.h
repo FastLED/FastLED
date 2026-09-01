@@ -89,6 +89,13 @@
    and must never be set for only part of a build. */
 #if !defined(MINIMP3_FIXED_POINT) && !defined(MINIMP3_FLOAT_POINT)
 #define MINIMP3_FIXED_POINT 1
+/* Marks the definition above as the header's, not the caller's, so the release
+   block at the end of this file can take it back. Without that, a first,
+   default inclusion would leave MINIMP3_FIXED_POINT defined and a later
+   MINIMP3_FLOAT_POINT-pinned inclusion in the same translation unit would trip
+   the mutual-exclusion #error above -- making the build order-dependent on
+   which header happened to pull minimp3 in first. */
+#define MINIMP3_FIXED_POINT_IS_HEADER_DEFAULT 1
 #endif
 
 #undef MINIMP3_HAVE_FIXED_POINT
@@ -3486,3 +3493,11 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples) FL_NO_EXC
 #undef VSUB
 
 #endif /* MINIMP3_IMPLEMENTATION && !_MINIMP3_IMPLEMENTATION_GUARD */
+
+/* Outside every guard above, so it runs on header-only inclusions too: give
+   back the variant default this header set for itself, leaving a caller's own
+   MINIMP3_FIXED_POINT alone. See MINIMP3_FIXED_POINT_IS_HEADER_DEFAULT. */
+#if defined(MINIMP3_FIXED_POINT_IS_HEADER_DEFAULT)
+#undef MINIMP3_FIXED_POINT
+#undef MINIMP3_FIXED_POINT_IS_HEADER_DEFAULT
+#endif

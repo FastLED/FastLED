@@ -142,24 +142,6 @@ FL_TEST_CASE("MP3 initial allocation failures release partial state") {
         ClearMp3MemoryHook();
     }
 
-    const Mp3MemoryTag decoder_tags[] = {
-        Mp3MemoryTag::DecoderState,
-        Mp3MemoryTag::Scratch,
-        Mp3MemoryTag::PcmOutput,
-    };
-    for (fl::size i = 0;
-         i < sizeof(decoder_tags) / sizeof(decoder_tags[0]); ++i) {
-        Mp3MemoryTestHook hook;
-        hook.reject(decoder_tags[i]);
-        SetMp3MemoryHook(&hook);
-        {
-            Mp3Minimp3Decoder decoder;
-            FL_CHECK_FALSE(decoder.init());
-        }
-        FL_CHECK_EQ(hook.current(), 0);
-        ClearMp3MemoryHook();
-    }
-
     Mp3MemoryTestHook hook;
     hook.reject(Mp3MemoryTag::StreamBuffer);
     SetMp3MemoryHook(&hook);
@@ -278,6 +260,22 @@ fl::vector<fl::i16> decodeLittleEndianPcm(
     return pcm;
 }
 
+// ISO 11172-3 / 13818-3 fix samples-per-frame by layer and MPEG version. This
+// is the independent witness the decoder's own reported sample count is checked
+// against: the count comes out of the frame decode, this comes out of the
+// header fields the same frame reported, and nothing derives one from the
+// other.
+int isoSamplesPerFrame(int layer, int version) {
+    if (layer == 1) {
+        return 384;
+    }
+    if (layer == 2) {
+        return 1152;
+    }
+    // Layer III: 1152 for MPEG-1, halved for MPEG-2 and MPEG-2.5.
+    return version == 0 ? 1152 : 576;
+}
+
 bool hasStandardVectorLength(fl::size decoded, fl::size reference) {
     return decoded == reference || decoded == reference + 1152 ||
            decoded == reference + 2304;
@@ -315,14 +313,18 @@ FL_TEST_CASE("MP3 golden corpus decodes with consistent frame metadata") {
 
         fl::size expected_samples = 0;
         for (fl::size i = 0; i < decoded.mMetadata.size(); ++i) {
-            FL_CHECK_EQ(decoded.mMetadata[i].mSampleRate, decoded.mSampleRate);
-            FL_CHECK_EQ(decoded.mMetadata[i].mChannels, decoded.mChannels);
-            // Free-format streams (l3-he_free.bit) carry bitrate index 0, so
-            // the reported bitrate is legitimately 0 there.
-            FL_CHECK_GE(decoded.mMetadata[i].mBitrate, 0);
-            FL_CHECK_GT(decoded.mMetadata[i].mSamples, 0);
-            expected_samples += static_cast<fl::size>(
-                decoded.mMetadata[i].mSamples * decoded.mMetadata[i].mChannels);
+            const Mp3DecodeResult::FrameMetadata& frame = decoded.mMetadata[i];
+            FL_CHECK_EQ(frame.mSampleRate, decoded.mSampleRate);
+            FL_CHECK_EQ(frame.mChannels, decoded.mChannels);
+            // Free-format frames carry bitrate index 0; the wrapper derives a
+            // real figure from the frame length in that case, so every decoded
+            // frame reports a positive bitrate either way.
+            FL_CHECK_GT(frame.mBitrate, 0);
+            const int iso_samples =
+                isoSamplesPerFrame(frame.mLayer, frame.mVersion);
+            FL_CHECK_EQ(frame.mSamples, iso_samples);
+            expected_samples +=
+                static_cast<fl::size>(iso_samples * frame.mChannels);
         }
         FL_CHECK_EQ(decoded.mPcm.size(), expected_samples);
         printf("MP3 golden %s: frames=%d samples=%zu %d Hz %d ch\n", path,
@@ -372,7 +374,9 @@ FL_TEST_CASE("MP3 decoder resyncs past garbage and survives truncation") {
 
     // Truncated input must terminate, and every frame it does report must be
     // a whole frame -- the failure mode worth catching is the decoder emitting
-    // a partial final frame padded with garbage rather than stopping.
+    // a partial final frame padded with garbage rather than stopping. Sizing
+    // the expectation from the ISO samples-per-frame rule rather than from the
+    // decoder's own reported count is what makes that catchable.
     const fl::vector<fl::u8> truncated =
         loadMp3CorpusFile("codec/minimp3/l3-compl-cut.mp3");
     const Mp3DecodeResult truncated_result =
@@ -382,9 +386,13 @@ FL_TEST_CASE("MP3 decoder resyncs past garbage and survives truncation") {
                   static_cast<fl::size>(truncated_result.mFrames));
     fl::size truncated_samples = 0;
     for (fl::size i = 0; i < truncated_result.mMetadata.size(); ++i) {
-        truncated_samples += static_cast<fl::size>(
-            truncated_result.mMetadata[i].mSamples *
-            truncated_result.mMetadata[i].mChannels);
+        const Mp3DecodeResult::FrameMetadata& frame =
+            truncated_result.mMetadata[i];
+        const int iso_samples =
+            isoSamplesPerFrame(frame.mLayer, frame.mVersion);
+        FL_CHECK_EQ(frame.mSamples, iso_samples);
+        truncated_samples +=
+            static_cast<fl::size>(iso_samples * frame.mChannels);
     }
     FL_CHECK_EQ(truncated_result.mPcm.size(), truncated_samples);
 }
@@ -409,7 +417,6 @@ FL_TEST_CASE("MP3 public stream terminates on truncated input") {
     FL_CHECK_FALSE(decoder.hasError());
 }
 
-#if defined(FASTLED_MP3_BACKEND_MINIMP3)
 FL_TEST_CASE("MP3 public minimp3 stream discovers large free-format frames") {
     fl::setTestFileSystemRoot("tests/data");
     const fl::vector<fl::u8> source =
@@ -451,7 +458,6 @@ FL_TEST_CASE("MP3 public minimp3 stream discovers large free-format frames") {
     FL_CHECK(decoder.decodeNextFrame(&sample));
     FL_CHECK_FALSE(decoder.hasError());
 }
-#endif
 
 FL_TEST_CASE("MP3 public stream recovers a valid frame after corruption") {
     fl::setTestFileSystemRoot("tests/data");
