@@ -67,17 +67,11 @@ extern "C" void yield(void) { }
 fl::u8 get_brightness();
 
 #if !FL_PLATFORM_HAS_TINY_MEMORY
-namespace {
 // FL_LINT_ALLOW_GLOBAL(shared dither phase is required once per logical frame)
-fl::detail::DitherFrameState ditherFrameState;
-} // namespace
+fl::u8 fl::detail::gDitherFrame;
 
 fl::u8 fl::detail::ditherFrame() FL_NO_EXCEPT {
-    return ditherFrameState.frame;
-}
-
-void fl::detail::advanceDitherFrame() FL_NO_EXCEPT {
-    ++ditherFrameState.frame;
+    return gDitherFrame;
 }
 #endif
 
