@@ -116,14 +116,15 @@
 
 /* Scratch arena size. The fixed-point build needs a little more than the float
    build because scalefactor gains are carried as mantissa+exponent rather than
-   as a single float, so each variant gets its own figure and the ledger records
-   both rather than charging one build for the other's arena.
+   as a single float. Layer I/II scale information shares storage with the
+   mutually exclusive Layer III tail, keeping it out of the decode stack while
+   charging each variant only for its larger union member.
    A static_assert on mp3dec_scratch_internal_t below enforces both. */
 #undef MINIMP3_SCRATCH_SIZE
 #if MINIMP3_HAVE_FIXED_POINT
-#define MINIMP3_SCRATCH_SIZE 7936
+#define MINIMP3_SCRATCH_SIZE 8592
 #else
-#define MINIMP3_SCRATCH_SIZE 7808
+#define MINIMP3_SCRATCH_SIZE 8352
 #endif
 
 /* FastLED: number of fractional bits in a fixed-point DSP sample.
@@ -604,10 +605,9 @@ typedef struct
        dequantiser steps are around 1e-7 before a runtime scale that can move
        them 21 binary places either way, so they do not fit one Q format.
 
-       int8_t, unlike the Layer III gains' int16_t, because this array lives on
-       the stack inside mp3dec_decode_frame_r rather than in the heap scratch
-       arena, and 192 entries of it is the difference between meeting the 2 KiB
-       decode-stack budget and missing it. The exponents here span [-37, -1]:
+       int8_t, unlike the Layer III gains' int16_t, because its range fits a
+       signed byte and 192 wider entries would needlessly enlarge the caller's
+       heap scratch arena. The exponents here span [-37, -1]:
        the table's own range plus the runtime 2**(21 - b/3) scale. */
     int32_t scf_mant[3*64];
     int8_t scf_exp[3*64];
@@ -633,10 +633,7 @@ typedef struct
 
 typedef struct
 {
-    bs_t bs;
-    uint8_t maindata[MAX_BITRESERVOIR_BYTES + MAX_L3_FRAME_PAYLOAD_BYTES];
     L3_gr_info_t gr_info[4];
-    mp3d_dsp_t grbuf[2][576];
 #if MINIMP3_HAVE_FIXED_POINT
     /* Scalefactor gains span roughly 2**-181 to 2**10, so they are the one
        quantity in the pipeline that genuinely needs an exponent of its own.
@@ -647,6 +644,18 @@ typedef struct
     float scf[40];
 #endif
     uint8_t ist_pos[2][39];
+} mp3dec_layer3_scratch_t;
+
+typedef struct
+{
+    bs_t bs;
+    uint8_t maindata[MAX_BITRESERVOIR_BYTES + MAX_L3_FRAME_PAYLOAD_BYTES];
+    mp3d_dsp_t grbuf[2][576];
+    union
+    {
+        mp3dec_layer3_scratch_t l3;
+        L12_scale_info l12;
+    } layer;
 } mp3dec_scratch_internal_t;
 
 #ifdef __cplusplus
@@ -2132,9 +2141,9 @@ static int L3_restore_reservoir(mp3dec_t *h, bs_t *bs, mp3dec_scratch_internal_t
    and as a mantissa/exponent pair in the fixed build; this keeps L3_decode
    itself identical between the two. */
 #if MINIMP3_HAVE_FIXED_POINT
-#define MP3D_SCF_ARGS(s) (s)->scf_mant, (s)->scf_exp
+#define MP3D_SCF_ARGS(s) (s)->layer.l3.scf_mant, (s)->layer.l3.scf_exp
 #else
-#define MP3D_SCF_ARGS(s) (s)->scf
+#define MP3D_SCF_ARGS(s) (s)->layer.l3.scf
 #endif
 
 static void L3_decode(mp3dec_t *h, mp3dec_scratch_internal_t *s, L3_gr_info_t *gr_info, int nch) FL_NO_EXCEPT
@@ -2144,14 +2153,14 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_internal_t *s, L3_gr_info_t *g
     for (ch = 0; ch < nch; ch++)
     {
         int layer3gr_limit = s->bs.pos + gr_info[ch].part_23_length;
-        L3_decode_scalefactors(h->header, s->ist_pos[ch], &s->bs, gr_info + ch, MP3D_SCF_ARGS(s), ch);
+        L3_decode_scalefactors(h->header, s->layer.l3.ist_pos[ch], &s->bs, gr_info + ch, MP3D_SCF_ARGS(s), ch);
         L3_huffman(s->grbuf[ch], &s->bs, gr_info + ch, MP3D_SCF_ARGS(s), layer3gr_limit);
         MP3D_STAGE(MINIMP3_STAGE_HUFFMAN, ch, s->grbuf[ch], 576);
     }
 
     if (HDR_TEST_I_STEREO(h->header))
     {
-        L3_intensity_stereo(s->grbuf[0], s->ist_pos[1], gr_info, h->header);
+        L3_intensity_stereo(s->grbuf[0], s->layer.l3.ist_pos[1], gr_info, h->header);
     } else if (HDR_IS_MS_STEREO(h->header))
     {
         L3_midside_stereo(s->grbuf[0], 576);
@@ -3273,7 +3282,7 @@ int mp3dec_decode_frame_r(mp3dec_t *dec, mp3dec_scratch_t *scratch_storage,
 
     if (info->layer == 3)
     {
-        int main_data_begin = L3_read_side_info(bs_frame, scratch->gr_info, hdr);
+        int main_data_begin = L3_read_side_info(bs_frame, scratch->layer.l3.gr_info, hdr);
         if (main_data_begin < 0 || bs_frame->pos > bs_frame->limit)
         {
             mp3dec_init(dec);
@@ -3285,7 +3294,7 @@ int mp3dec_decode_frame_r(mp3dec_t *dec, mp3dec_scratch_t *scratch_storage,
             for (igr = 0; igr < (HDR_TEST_MPEG1(hdr) ? 2 : 1); igr++, pcm += 576*info->channels)
             {
                 memset(scratch->grbuf[0], 0, 576*2*sizeof(mp3d_dsp_t));
-                L3_decode(dec, scratch, scratch->gr_info + igr*info->channels, info->channels);
+                L3_decode(dec, scratch, scratch->layer.l3.gr_info + igr*info->channels, info->channels);
                 mp3d_synth_granule(dec->qmf_state, scratch->grbuf[0], 18, info->channels, pcm);
             }
         }
@@ -3295,7 +3304,7 @@ int mp3dec_decode_frame_r(mp3dec_t *dec, mp3dec_scratch_t *scratch_storage,
 #ifdef MINIMP3_ONLY_MP3
         return 0;
 #else /* MINIMP3_ONLY_MP3 */
-        L12_scale_info sci[1];
+        L12_scale_info *sci = &scratch->layer.l12;
         L12_read_scale_info(hdr, bs_frame, sci);
 
         memset(scratch->grbuf[0], 0, 576*2*sizeof(mp3d_dsp_t));
