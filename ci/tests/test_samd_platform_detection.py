@@ -212,3 +212,25 @@ def test_samd_does_not_route_into_the_arduino_spi_backend() -> None:
             "backend needs Arduino <SPI.h>. SAMD builds fail with 'SPI.h: No "
             "such file or directory'. See #4011, #4016, FastLED/fbuild#1371."
         )
+
+
+def test_samd51_does_not_register_unvalidated_qspi_as_four_lane_spi() -> None:
+    """QSPI byte serialization is not four independent LED lane streams."""
+    manager = (
+        SRC / "platforms" / "arm" / "d51" / "spi_hw_manager_samd51.cpp.hpp"
+    ).read_text(encoding="utf-8")
+
+    assert "SPIQuadSAMD51" in manager, "keep the hardware limitation documented"
+    assert "SpiHw4::registerInstance" not in manager
+    assert "make_shared<SPIQuadSAMD51>" not in manager
+
+
+def test_samd51_qspi_buffer_size_tracks_validated_active_lane_width() -> None:
+    """Buffer allocation and transmission must agree on the configured width."""
+    driver = (SRC / "platforms" / "arm" / "d51" / "spi_hw_4_samd51.cpp.hpp").read_text(
+        encoding="utf-8"
+    )
+
+    assert "mActiveLanes == 3" in driver
+    assert "const size_t num_lanes = mActiveLanes;" in driver
+    assert "bytes_per_lane > max_size / num_lanes" in driver
