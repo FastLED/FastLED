@@ -1813,6 +1813,15 @@ static void L3_dct3_9(int32_t *y) FL_NO_EXCEPT
     y[8] = mp3d_add_sat(s4, s7);
 }
 
+/* The closing twiddle-and-window loop of L3_imdct36, factored out so it can be
+   defined below the SIMD primitives it dispatches to while its caller stays
+   here (#4109). Plain and unattributed on purpose: the vector path and the
+   runtime capability check live inside the definition, so this declaration
+   needs none of the SIMD macros, which this point in the file precedes. */
+static void mp3d_imdct36_twiddle(int32_t *grbuf, int32_t *overlap,
+                                 const int32_t *window, const int32_t *co,
+                                 const int32_t *si) FL_NO_EXCEPT;
+
 static void L3_imdct36(int32_t *grbuf, int32_t *overlap, const int32_t *window, int nbands) FL_NO_EXCEPT
 {
     int i, j;
@@ -1842,20 +1851,7 @@ static void L3_imdct36(int32_t *grbuf, int32_t *overlap, const int32_t *window, 
            two. That matters: this pair of multiply-accumulates runs 18 times
            per band per granule, and per-term rounding would bias the overlap
            state, which then feeds the next frame. */
-        for (i = 0; i < 9; i++)
-        {
-            const int32_t ovl = overlap[i];
-            const int32_t sum = mp3d_narrow_q30(
-                (int64_t)co[i]*g_twid9_q30[9 + i] +
-                (int64_t)si[i]*g_twid9_q30[0 + i]);
-            overlap[i] = mp3d_narrow_q30(
-                (int64_t)co[i]*g_twid9_q30[0 + i] -
-                (int64_t)si[i]*g_twid9_q30[9 + i]);
-            grbuf[i] = mp3d_narrow_q30(
-                (int64_t)ovl*window[0 + i] - (int64_t)sum*window[9 + i]);
-            grbuf[17 - i] = mp3d_narrow_q30(
-                (int64_t)ovl*window[9 + i] + (int64_t)sum*window[0 + i]);
-        }
+        mp3d_imdct36_twiddle(grbuf, overlap, window, co, si);
     }
 }
 
@@ -2231,20 +2227,36 @@ typedef int64x2_t mp3d_i64x2;
 /* value * Q`bits` coefficient, rounded and saturated -- the vector form of
    mp3d_mulshift, and it must round the same way: add half, then shift right
    with sign extension (round half toward +infinity). */
-static int32x4_t mp3d_v_mulshift(int32x4_t v, int32_t coef,
-                                 int64x2_t round, int shift) FL_NO_EXCEPT
+/* Rounded, saturating narrow of two int64x2 accumulators -- the vector form of
+   mp3d_narrow_q30 generalised over the shift. Factored out of mp3d_v_mulshift
+   so a kernel that builds its own accumulators can share it (#4109): the
+   twiddle loop sums two products before narrowing once, and rounding each
+   product separately would differ from the scalar path in the low bit. */
+static int32x4_t mp3d_v_narrow(int64x2_t lo, int64x2_t hi,
+                               int shift) FL_NO_EXCEPT
 {
-    const int32x2_t c = vdup_n_s32(coef);
-    int64x2_t lo = vaddq_s64(vmull_s32(vget_low_s32(v), c), round);
-    int64x2_t hi = vaddq_s64(vmull_s32(vget_high_s32(v), c), round);
-    lo = vshlq_s64(lo, vdupq_n_s64(-shift));
-    hi = vshlq_s64(hi, vdupq_n_s64(-shift));
+    const int64x2_t round = vdupq_n_s64((int64_t)1 << (shift - 1));
+    const int64x2_t sh = vdupq_n_s64(-shift);
+    lo = vshlq_s64(vaddq_s64(lo, round), sh);
+    hi = vshlq_s64(vaddq_s64(hi, round), sh);
     return vmaxq_s32(vcombine_s32(vqmovn_s64(lo), vqmovn_s64(hi)),
                      vdupq_n_s32(MP3D_SAT_MIN));
 }
-#define MP3D_V_MULSHIFT(v, coef, bits)                                         \
-    mp3d_v_mulshift((v), (coef), vdupq_n_s64((int64_t)1 << ((bits) - 1)),      \
-                    (bits))
+
+static int32x4_t mp3d_v_mulshift(int32x4_t v, int32_t coef,
+                                 int shift) FL_NO_EXCEPT
+{
+    const int32x2_t c = vdup_n_s32(coef);
+    return mp3d_v_narrow(vmull_s32(vget_low_s32(v), c),
+                         vmull_s32(vget_high_s32(v), c), shift);
+}
+#define MP3D_V_MULSHIFT(v, coef, bits) mp3d_v_mulshift((v), (coef), (bits))
+/* Vector-by-vector 32x32->64. MP3D_V_MUL_LO/HI take a splat as their second
+   operand; the twiddle kernel needs both factors to vary per lane. */
+#define MP3D_V_MULV_LO(a, b)   vmull_s32(vget_low_s32(a), vget_low_s32(b))
+#define MP3D_V_MULV_HI(a, b)   vmull_s32(vget_high_s32(a), vget_high_s32(b))
+#define MP3D_V_REV4(v)                                                         \
+    vcombine_s32(vrev64_s32(vget_high_s32(v)), vrev64_s32(vget_low_s32(v)))
 #else /* MP3D_INT_SIMD_SSE */
 typedef __m128i mp3d_i64x2;
 #define MP3D_V_ZERO64()        _mm_setzero_si128()
@@ -2347,14 +2359,12 @@ MP3D_SIMD_TARGET static __m128i mp3d_v_subsat(__m128i a, __m128i b) FL_NO_EXCEPT
    64-bit shift before AVX-512, so the sign bits are folded back in by hand;
    and no 64-bit compare before SSE4.2, so the narrow detects out-of-range by
    checking that the high word is the sign extension of the low one. */
-MP3D_SIMD_TARGET static __m128i mp3d_v_mulshift(__m128i v, int32_t coef,
-                                                int bits) FL_NO_EXCEPT
+MP3D_SIMD_TARGET static __m128i mp3d_v_narrow(__m128i a01, __m128i a23,
+                                             int bits) FL_NO_EXCEPT
 {
-    const __m128i c = _mm_set1_epi32(coef);
     const __m128i round = _mm_set1_epi64x((int64_t)1 << (bits - 1));
-    const __m128i s = _mm_shuffle_epi32(v, _MM_SHUFFLE(3, 1, 2, 0));
-    __m128i p01 = _mm_add_epi64(_mm_mul_epi32(s, c), round);
-    __m128i p23 = _mm_add_epi64(_mm_mul_epi32(_mm_srli_si128(s, 4), c), round);
+    __m128i p01 = _mm_add_epi64(a01, round);
+    __m128i p23 = _mm_add_epi64(a23, round);
     const __m128i sign01 =
         _mm_srai_epi32(_mm_shuffle_epi32(p01, _MM_SHUFFLE(3, 3, 1, 1)), 31);
     const __m128i sign23 =
@@ -2378,6 +2388,22 @@ MP3D_SIMD_TARGET static __m128i mp3d_v_mulshift(__m128i v, int32_t coef,
                              _mm_set1_epi32(MP3D_SAT_MIN));
     }
 }
+MP3D_SIMD_TARGET static __m128i mp3d_v_mulshift(__m128i v, int32_t coef,
+                                                int bits) FL_NO_EXCEPT
+{
+    const __m128i c = _mm_set1_epi32(coef);
+    const __m128i s = _mm_shuffle_epi32(v, _MM_SHUFFLE(3, 1, 2, 0));
+    return mp3d_v_narrow(_mm_mul_epi32(s, c),
+                         _mm_mul_epi32(_mm_srli_si128(s, 4), c), bits);
+}
+/* Vector-by-vector: both operands need the even-lane shuffle here, unlike
+   MP3D_V_MUL_LO/HI whose second operand is a splat. */
+#define MP3D_V_MULV_LO(a, b)                                                   \
+    _mm_mul_epi32(MP3D_V_PREP(a), MP3D_V_PREP(b))
+#define MP3D_V_MULV_HI(a, b)                                                   \
+    _mm_mul_epi32(_mm_srli_si128(MP3D_V_PREP(a), 4),                           \
+                  _mm_srli_si128(MP3D_V_PREP(b), 4))
+#define MP3D_V_REV4(v)         _mm_shuffle_epi32((v), _MM_SHUFFLE(0, 1, 2, 3))
 #define MP3D_V_ADDSAT(a, b)            mp3d_v_addsat((a), (b))
 #define MP3D_V_SUBSAT(a, b)            mp3d_v_subsat((a), (b))
 #define MP3D_V_MULSHIFT(v, coef, bits) mp3d_v_mulshift((v), (coef), (bits))
@@ -2396,6 +2422,70 @@ MP3D_SIMD_TARGET static __m128i mp3d_v_mulshift(__m128i v, int32_t coef,
    than re-associated. That matters here in a way it did not for the polyphase:
    every add saturates and every multiply rounds, so reordering them is
    observable, and #4055's gate is exact equality with the scalar path. */
+/* The closing twiddle-and-window loop of L3_imdct36 (#4109).
+
+   Only this part of the IMDCT is addressable. The 9-point DCT-III above it has
+   a butterfly that does not map onto four lanes, and vectorising across bands
+   would need stride-18 gathers -- the IMDCT works *within* a band, the opposite
+   of the DCT-32 below, where four consecutive bands are four consecutive int32
+   and no gather is needed.
+
+   Nine iterations is two vectors plus a scalar tail. Each output sums two
+   int64 products and narrows once, exactly as the scalar path does. The
+   reversed grbuf[17 - i] store is a lane reverse, the shape upstream's float
+   kernel uses VREV for. */
+MP3D_SIMD_TARGET static void mp3d_imdct36_twiddle_simd(
+    int32_t *grbuf, int32_t *overlap, const int32_t *window,
+    const int32_t *co, const int32_t *si) FL_NO_EXCEPT
+{
+    int i;
+    for (i = 0; i <= 4; i += 4)
+    {
+        const mp3d_i32x4 cov = MP3D_V_LOAD4(&co[i]);
+        const mp3d_i32x4 siv = MP3D_V_LOAD4(&si[i]);
+        const mp3d_i32x4 tlo = MP3D_V_LOAD4(&g_twid9_q30[0 + i]);
+        const mp3d_i32x4 thi = MP3D_V_LOAD4(&g_twid9_q30[9 + i]);
+        const mp3d_i32x4 ovl = MP3D_V_LOAD4(&overlap[i]);
+        const mp3d_i32x4 wlo = MP3D_V_LOAD4(&window[0 + i]);
+        const mp3d_i32x4 whi = MP3D_V_LOAD4(&window[9 + i]);
+        const mp3d_i32x4 sum = mp3d_v_narrow(
+            MP3D_V_ADD64(MP3D_V_MULV_LO(cov, thi), MP3D_V_MULV_LO(siv, tlo)),
+            MP3D_V_ADD64(MP3D_V_MULV_HI(cov, thi), MP3D_V_MULV_HI(siv, tlo)),
+            30);
+        const mp3d_i32x4 nov = mp3d_v_narrow(
+            MP3D_V_SUB64(MP3D_V_MULV_LO(cov, tlo), MP3D_V_MULV_LO(siv, thi)),
+            MP3D_V_SUB64(MP3D_V_MULV_HI(cov, tlo), MP3D_V_MULV_HI(siv, thi)),
+            30);
+        const mp3d_i32x4 head = mp3d_v_narrow(
+            MP3D_V_SUB64(MP3D_V_MULV_LO(ovl, wlo), MP3D_V_MULV_LO(sum, whi)),
+            MP3D_V_SUB64(MP3D_V_MULV_HI(ovl, wlo), MP3D_V_MULV_HI(sum, whi)),
+            30);
+        const mp3d_i32x4 tail = mp3d_v_narrow(
+            MP3D_V_ADD64(MP3D_V_MULV_LO(ovl, whi), MP3D_V_MULV_LO(sum, wlo)),
+            MP3D_V_ADD64(MP3D_V_MULV_HI(ovl, whi), MP3D_V_MULV_HI(sum, wlo)),
+            30);
+
+        /* overlap[i] was read into ovl above, before this overwrites it. */
+        MP3D_V_STORE4(&overlap[i], nov);
+        MP3D_V_STORE4(&grbuf[i], head);
+        /* lanes 0..3 belong at 17-i down to 14-i: reversed, based at 14-i. */
+        MP3D_V_STORE4(&grbuf[14 - i], MP3D_V_REV4(tail));
+    }
+    {
+        const int32_t ovl = overlap[8];
+        const int32_t sum = mp3d_narrow_q30(
+            (int64_t)co[8]*g_twid9_q30[9 + 8] +
+            (int64_t)si[8]*g_twid9_q30[0 + 8]);
+        overlap[8] = mp3d_narrow_q30(
+            (int64_t)co[8]*g_twid9_q30[0 + 8] -
+            (int64_t)si[8]*g_twid9_q30[9 + 8]);
+        grbuf[8] = mp3d_narrow_q30(
+            (int64_t)ovl*window[0 + 8] - (int64_t)sum*window[9 + 8]);
+        grbuf[9] = mp3d_narrow_q30(
+            (int64_t)ovl*window[9 + 8] + (int64_t)sum*window[0 + 8]);
+    }
+}
+
 MP3D_SIMD_TARGET static void mp3d_dct2_bands4(int32_t *grbuf, int k) FL_NO_EXCEPT
 {
     mp3d_i32x4 t[4][8], *x;
@@ -2462,6 +2552,38 @@ MP3D_SIMD_TARGET static void mp3d_dct2_bands4(int32_t *grbuf, int k) FL_NO_EXCEP
     MP3D_V_STORE4(&y[3*18], t[3][7]);
 }
 #endif /* MP3D_HAVE_INT_SIMD */
+
+/* Dispatches to the vector kernel when the host has the instructions and runs
+   the scalar loop otherwise. Both compute each output as two int64 products
+   narrowed once; rounding per product would differ between the two paths in
+   the low bit, and #4055's gate is exact equality. */
+static void mp3d_imdct36_twiddle(int32_t *grbuf, int32_t *overlap,
+                                 const int32_t *window, const int32_t *co,
+                                 const int32_t *si) FL_NO_EXCEPT
+{
+    int i;
+#if MP3D_SIMD_KERNELS_LIVE
+    if (MP3D_SIMD_AVAILABLE())
+    {
+        mp3d_imdct36_twiddle_simd(grbuf, overlap, window, co, si);
+        return;
+    }
+#endif
+    for (i = 0; i < 9; i++)
+    {
+        const int32_t ovl = overlap[i];
+        const int32_t sum = mp3d_narrow_q30(
+            (int64_t)co[i]*g_twid9_q30[9 + i] +
+            (int64_t)si[i]*g_twid9_q30[0 + i]);
+        overlap[i] = mp3d_narrow_q30(
+            (int64_t)co[i]*g_twid9_q30[0 + i] -
+            (int64_t)si[i]*g_twid9_q30[9 + i]);
+        grbuf[i] = mp3d_narrow_q30(
+            (int64_t)ovl*window[0 + i] - (int64_t)sum*window[9 + i]);
+        grbuf[17 - i] = mp3d_narrow_q30(
+            (int64_t)ovl*window[9 + i] + (int64_t)sum*window[0 + i]);
+    }
+}
 
 static void mp3d_DCT_II(int32_t *grbuf, int n) FL_NO_EXCEPT
 {
@@ -3412,6 +3534,9 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples) FL_NO_EXC
 #undef MP3D_V_ZERO64
 #undef MP3D_V_LOAD4
 #undef MP3D_V_SPLAT
+#undef MP3D_V_MULV_HI
+#undef MP3D_V_MULV_LO
+#undef MP3D_V_REV4
 #undef MP3D_V_MUL_LO
 #undef MP3D_V_MUL_HI
 #undef MP3D_V_ADD64
