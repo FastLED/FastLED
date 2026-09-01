@@ -77,16 +77,16 @@ FL_TEST_CASE("SPIBusManager - explicit ESP32 hosts are independent") {
 
     SPIBusHandle spi2 = manager.registerDevice(18, 23, 1000000,
                                                 (void*)0x1234,
-                                                Esp32SpiBus::SPI2);
+                                                Esp32SpiBus::HOST2);
     SPIBusHandle spi3 = manager.registerDevice(18, 19, 1000000,
                                                 (void*)0x5678,
-                                                Esp32SpiBus::SPI3);
+                                                Esp32SpiBus::HOST3);
 
     FL_REQUIRE_TRUE(spi2.is_valid);
     FL_REQUIRE_TRUE(spi3.is_valid);
     FL_CHECK_NE(spi2.bus_id, spi3.bus_id);
-    FL_CHECK_EQ(manager.getBusInfo(spi2.bus_id)->requested_bus, Esp32SpiBus::SPI2);
-    FL_CHECK_EQ(manager.getBusInfo(spi3.bus_id)->requested_bus, Esp32SpiBus::SPI3);
+    FL_CHECK_EQ(manager.getBusInfo(spi2.bus_id)->requested_bus, Esp32SpiBus::HOST2);
+    FL_CHECK_EQ(manager.getBusInfo(spi3.bus_id)->requested_bus, Esp32SpiBus::HOST3);
     manager.reset();
 }
 
@@ -114,9 +114,9 @@ FL_TEST_CASE("SPIBusManager - explicit host controls multi-lane allocation") {
 
     SPIBusManager& manager = getSPIBusManager();
     manager.reset();
-    manager.registerDevice(18, 23, 1000000, (void*)0x1234, Esp32SpiBus::SPI3);
+    manager.registerDevice(18, 23, 1000000, (void*)0x1234, Esp32SpiBus::HOST3);
     SPIBusHandle handle = manager.registerDevice(
-        18, 19, 1000000, (void*)0x5678, Esp32SpiBus::SPI3);
+        18, 19, 1000000, (void*)0x5678, Esp32SpiBus::HOST3);
 
     FL_REQUIRE_TRUE(manager.initialize());
     FL_CHECK_FALSE(spi2->isInitialized());
