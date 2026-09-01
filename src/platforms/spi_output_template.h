@@ -47,12 +47,7 @@
 #elif defined(FL_IS_TEENSY_LC)
 #include "platforms/arm/teensy/teensy_lc/spi_output_template.h"
 
-// SAMD is deliberately absent: platforms/arm/sam/ hardware SPI needs the
-// Arduino <SPI.h> library, and had never compiled on any board until
-// FastLED#4011 fixed SAMD detection. SAMD falls through to bit-bang SPI
-// below, which is the behaviour every SAMD build has actually had.
-// FastLED#4016 tracks bringing up a real SAMD SERCOM backend.
-#elif defined(FL_IS_SAM)
+#elif defined(FL_IS_SAM) || defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
 #include "platforms/arm/sam/spi_output_template.h"
 
 #elif defined(FL_IS_STM32)
