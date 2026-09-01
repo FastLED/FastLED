@@ -23,6 +23,7 @@
 | Hardware driver bring-up evidence or postmortems | `agents/docs/driver-bringup-postmortems.md` |
 | Debugging a C++ crash | `agents/docs/debugging.md` |
 | Investigating binary size / flash bloat | `agents/docs/binary-size-analysis.md` |
+| Changing the MP3 decoder, or judging its speed | `agents/docs/mp3-decoder-performance.md` (minimp3-fixed is ~1.6x slower than the retired Helix; 1.51x real time on an ESP32-C6) |
 | Creating a new C++ linter | `agents/docs/linter-architecture.md` |
 | Detailed command reference | `agents/docs/commands-reference.md` |
 | Workflow and task management | `agents/docs/workflow.md` |
