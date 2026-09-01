@@ -23,7 +23,7 @@ def test_checked_in_cpu_trend_is_complete() -> None:
 
 
 def test_five_percent_regression_gate() -> None:
-    baseline = {"minimp3-float": 2_000_000}
+    baseline = {"minimp3-float": 2_000_000, "minimp3-fixed": 2_500_000}
     AUDIT.check_regression(baseline, dict(baseline))
     changed = dict(baseline)
     changed["minimp3-float"] = 2_100_001
@@ -66,8 +66,71 @@ entry:
     assert result.stage_sites["huffman"] == 1
 
 
+def test_integer_product_selection_ignores_address_and_size_math() -> None:
+    """`mul` is ambiguous in a way `fmul` is not: at -O0 the fixed-point
+    decoder's arithmetic and the compiler's address/size arithmetic share the
+    opcode. Only the sign-extended 64-bit product that is *not* consumed by a
+    getelementptr or a call is a sample multiply."""
+    body = [
+        "  %a64 = sext i32 %a to i64",
+        "  %b64 = sext i32 %b to i64",
+        "  %prod = mul nsw i64 %a64, %b64",          # Q-format: counted
+        "  %coef = sext i32 %c to i64",
+        "  %scaled = mul nsw i64 %coef, 37489",      # literal tap: counted
+        "  %idx = sext i32 %i to i64",
+        "  %off = mul nsw i64 %idx, 4",              # address math: rejected
+        "  %p = getelementptr inbounds i32, ptr %base, i64 %off",
+        "  %n = sext i32 %count to i64",
+        "  %bytes = mul nsw i64 %n, 72",             # memcpy size: rejected
+        "  %r = call ptr @memcpy(ptr %d, ptr %s, i64 %bytes)",
+        "  %wide = mul nsw i64 %x, %y",              # neither sign-extended
+    ]
+    products = AUDIT._integer_product_lines(body)
+
+    assert products.values == {"%prod", "%scaled"}
+    assert products.lines == {2, 4}
+
+
+def test_integer_mac_counts_one_accumulate_for_two_products() -> None:
+    """Mirrors the float MAC test. Two products feeding one add is two
+    multiplies and one multiply-accumulate, not three multiplies."""
+    llvm = """
+define void @L3_antialias() {
+entry:
+  %a64 = sext i32 %a to i64
+  %b64 = sext i32 %b to i64
+  %left = mul nsw i64 %a64, %b64
+  %c64 = sext i32 %c to i64
+  %right = mul nsw i64 %c64, %b64
+  %sum = add nsw i64 %left, %right
+  ret void
+}
+"""
+    result = AUDIT.instrument_llvm_ir(llvm, "minimp3-fixed")
+    assert result.text.count("i32 5, i32 1, i32 0") == 2
+    assert result.text.count("i32 5, i32 0, i32 1") == 1
+
+
+def test_float_instrumentation_does_not_fire_on_the_fixed_backend() -> None:
+    """The two backends must not cross-instrument: a float build has no
+    integer sample multiplies and a fixed build has no fmul."""
+    float_ir = """
+define void @L3_antialias() {
+entry:
+  %p = fmul float %a, %b
+  ret void
+}
+"""
+    # Counting the call form, not the `declare` line, which also names it.
+    assert AUDIT.instrument_llvm_ir(float_ir, "minimp3-float").text.count(
+        "call void @fastled_mp3_cpu_operation"
+    ) == 1
+    with pytest.raises(RuntimeError, match="no arithmetic sites"):
+        AUDIT.instrument_llvm_ir(float_ir, "minimp3-fixed")
+
+
 def test_host_counters_combine_cycle_median_and_callgrind() -> None:
-    cycles = {"minimp3-float": 200.0}
+    cycles = {"minimp3-float": 200.0, "minimp3-fixed": 250.0}
     callgrind = {
         backend: {"instructions": 250, "branch_misses": 4} for backend in AUDIT.BACKENDS
     }
