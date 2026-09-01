@@ -8,10 +8,22 @@
 // unqualified fl::third_party names its ledger rows and host baselines are
 // keyed to.
 //
-// SIMD is left enabled: the whole point of a CPU row for this variant is to
-// track what actually ships on a host, and the vector kernels are what ships.
-// That is the opposite of ci/codec_memory/minimp3_fixed_audit.cpp, which pins
-// MINIMP3_NO_SIMD because the stack budget it enforces is an MCU budget.
+// This TU does not pin a SIMD setting because it does not get to: every CPU
+// audit build passes -DMINIMP3_NO_SIMD through _common_compile_flags(), for the
+// instrumented and plain drivers alike. So the whole CPU audit measures the
+// scalar path.
+//
+// That is the right choice for the operation ledger, which is meant to be a
+// portable, host-independent count of the arithmetic the algorithm performs --
+// pinning it to scalar is what keeps it stable when a kernel is vectorised, and
+// it is why the fixed and float builds report identical synthesis and antialias
+// multiply counts. It is also why FastLED#4109's IMDCT kernel does not perturb
+// these numbers.
+//
+// Whether the *host counter and Callgrind* halves should instead measure the
+// vectorised build -- which is what actually ships -- is a fair question, but it
+// applies equally to the float row that has been measured this way since #4053,
+// so changing it belongs in its own issue rather than here.
 
 #include <stdint.h>
 #if defined(__SSE2__)
