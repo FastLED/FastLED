@@ -516,8 +516,8 @@ FL_TEST_CASE("MP3 decoder skips the VBR tag frame and encoder priming") {
         loadMp3CorpusFile("codec/minimp3/l3-lame-vbrtag.bit");
 
     fl::third_party::Mp3VbrTag tag;
-    FL_REQUIRE(fl::third_party::Mp3ParseVbrTag(bitstream.data(),
-                                               bitstream.size(), &tag));
+    FL_REQUIRE(fl::third_party::Mp3ParseVbrTag(
+        fl::span<const fl::u8>(bitstream), &tag));
     FL_CHECK(tag.present);
     FL_CHECK_EQ(tag.encoderDelay, 576u);
 
@@ -525,7 +525,7 @@ FL_TEST_CASE("MP3 decoder skips the VBR tag frame and encoder priming") {
     const fl::vector<fl::u8> plain =
         loadMp3CorpusFile("codec/minimp3/l3-hecommon.bit");
     fl::third_party::Mp3VbrTag none;
-    fl::third_party::Mp3ParseVbrTag(plain.data(), plain.size(), &none);
+    fl::third_party::Mp3ParseVbrTag(fl::span<const fl::u8>(plain), &none);
     FL_CHECK_FALSE(none.present);
 
     // The raw frame loop sees the tag frame as audio; the stream decoder must
@@ -571,6 +571,69 @@ FL_TEST_CASE("MP3 decoder skips the VBR tag frame and encoder priming") {
         }
     }
     FL_CHECK(differs_from_tag_frame);
+}
+
+FL_TEST_CASE("MP3 decoder clears VBR state when the stream is replaced") {
+    // FastLED#4129 suppresses the Xing/Info frame and the encoder priming that
+    // follows it, and records that it has done so in three members. begin()
+    // and reset() cleared every other per-stream field -- mBufferPos,
+    // mBytesProcessed, mHasDecodedFirstFrame -- but not those three, so a
+    // reused decoder carried the previous stream's verdict into the next one.
+    //
+    // Decoding an untagged file first is the damaging order: it leaves
+    // mInspectedFirstFrame set, so the tagged stream that follows is never
+    // inspected at all, and its metadata frame goes out as audio. That is
+    // precisely the burst of noise #4129 exists to remove, reappearing on the
+    // second use of the same object.
+    fl::setTestFileSystemRoot("tests/data");
+    const fl::vector<fl::u8> tagged =
+        loadMp3CorpusFile("codec/minimp3/l3-lame-vbrtag.bit");
+    const fl::vector<fl::u8> plain =
+        loadMp3CorpusFile("codec/minimp3/l3-hecommon.bit");
+
+    auto open = [](const fl::vector<fl::u8>& data) {
+        auto stream = fl::make_shared<fl::memorybuf>(data.size());
+        FL_REQUIRE_EQ(stream->write(fl::span<const fl::u8>(data)), data.size());
+        return stream;
+    };
+
+    // What a decoder that has only ever seen the tagged stream emits first.
+    fl::vector<fl::i16> fresh;
+    {
+        fl::Mp3Decoder decoder;
+        FL_REQUIRE(decoder.begin(open(tagged)));
+        fl::audio::Sample sample;
+        FL_REQUIRE(decoder.decodeNextFrame(&sample));
+        FL_REQUIRE_GT(sample.pcm().size(), 32u);
+        for (fl::size i = 0; i < 32; ++i) {
+            fresh.push_back(sample.pcm()[i]);
+        }
+    }
+
+    // The same stream on a decoder that has already handled an untagged one.
+    fl::Mp3Decoder reused;
+    FL_REQUIRE(reused.begin(open(plain)));
+    fl::audio::Sample discard;
+    FL_REQUIRE(reused.decodeNextFrame(&discard));
+
+    FL_REQUIRE(reused.begin(open(tagged)));
+    fl::audio::Sample sample;
+    FL_REQUIRE(reused.decodeNextFrame(&sample));
+    FL_REQUIRE_GT(sample.pcm().size(), 32u);
+    for (fl::size i = 0; i < 32; ++i) {
+        FL_REQUIRE_EQ(sample.pcm()[i], fresh[i]);
+    }
+
+    // reset() is the other entry point into a fresh stream and must clear the
+    // same state.
+    reused.reset();
+    FL_REQUIRE(reused.begin(open(tagged)));
+    fl::audio::Sample after_reset;
+    FL_REQUIRE(reused.decodeNextFrame(&after_reset));
+    FL_REQUIRE_GT(after_reset.pcm().size(), 32u);
+    for (fl::size i = 0; i < 32; ++i) {
+        FL_REQUIRE_EQ(after_reset.pcm()[i], fresh[i]);
+    }
 }
 
 FL_TEST_CASE("MP3 decoder clears the ISO floor on the dequant-headroom vector") {

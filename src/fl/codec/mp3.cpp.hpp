@@ -285,7 +285,18 @@ class Mp3StreamDecoderImpl {
     bool findAndDecodeFrame(audio::Sample* out_sample);
 
     /* VBR-tag state (FastLED#4129). mSkipTagFrame suppresses the metadata
-       frame itself; mSkipSamples counts the encoder priming after it. */
+       frame itself; mSkipSamples counts the encoder priming after it.
+
+       These are per-stream, so both begin() and reset() must clear them. A
+       decoder reused for a second stream otherwise carries the first one's
+       verdict across: having already inspected an untagged file it never
+       inspects the tagged one, and emits its metadata frame as audio. */
+    void resetVbrState() FL_NO_EXCEPT {
+        mInspectedFirstFrame = false;
+        mSkipTagFrame = false;
+        mSkipSamples = 0;
+    }
+
     bool mInspectedFirstFrame = false;
     bool mSkipTagFrame = false;
     fl::u32 mSkipSamples = 0;
@@ -345,6 +356,7 @@ bool Mp3StreamDecoderImpl::begin(fl::filebuf_ptr stream) {
     mHasError = false;
     mEndOfStream = false;
     mHasDecodedFirstFrame = false;
+    resetVbrState();
 
     return true;
 }
@@ -381,6 +393,7 @@ void Mp3StreamDecoderImpl::reset() {
     mHasError = false;
     mEndOfStream = false;
     mHasDecodedFirstFrame = false;
+    resetVbrState();
 }
 
 bool Mp3StreamDecoderImpl::fillBuffer() {
@@ -445,7 +458,8 @@ bool Mp3StreamDecoderImpl::findAndDecodeFrame(audio::Sample* out_sample) {
     if (!mInspectedFirstFrame) {
         mInspectedFirstFrame = true;
         Mp3VbrTag tag;
-        if (Mp3ParseVbrTag(inptr, bytes_left, &tag) && tag.present) {
+        if (Mp3ParseVbrTag(fl::span<const fl::u8>(inptr, bytes_left), &tag) &&
+            tag.present) {
             mSkipTagFrame = true;
             mSkipSamples = tag.encoderDelay + MP3D_DECODER_DELAY;
         }

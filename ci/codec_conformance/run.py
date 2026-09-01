@@ -45,6 +45,14 @@ ISO_FLOOR_DB = 60.0
 # green run over a subset.
 EXPECTED_PAIRS = 74
 
+# Every bitstream in the suite, including the nine that ship no reference PCM.
+# The sanitizer pass must see all of them: the malformed streams are precisely
+# the ones without references, and `l3-nonstandard-big-iscf` -- the vector that
+# found the polyphase overflow in FastLED#4133 -- is one of them. Guarding that
+# pass with EXPECTED_PAIRS accepted a 74-stream cache and skipped exactly the
+# inputs the pass exists to cover.
+EXPECTED_BITSTREAMS = 83
+
 # A decoder can emit a correct prefix and then stop, and a PSNR taken over the
 # shared prefix would not notice. So a shortfall against the reference is a
 # failure unless it is listed here with a reason.
@@ -56,10 +64,28 @@ EXPECTED_PAIRS = 74
 # is identical to the sample on the *float* build, and inserting a resync on
 # parse failure recovers nothing. FastLED ships Layer III; Layer I/II decode is
 # incidental, and no Layer III vector is on this list.
+# The exact shortfall is recorded per vector, not just the name. A name-only
+# allowlist would let a listed vector truncate by any amount at all -- which is
+# the same hole the length check was added to close, reopened for the fifteen
+# vectors that need an exception. These numbers are identical on the fixed and
+# float builds, which is the evidence that they are a property of the reference
+# files rather than of the fixed-point port.
 KNOWN_SHORT_OUTPUT = {
-    "l1-fl1", "l1-fl2", "l1-fl3", "l1-fl4", "l1-fl5", "l1-fl6", "l1-fl7",
-    "l1-fl8", "l2-fl10", "l2-fl11", "l2-fl12", "l2-fl13", "l2-fl14",
-    "l2-fl15", "l2-fl16",
+    "l1-fl1": 27904,
+    "l1-fl2": 27904,
+    "l1-fl3": 27904,
+    "l1-fl4": 13952,
+    "l1-fl5": 27904,
+    "l1-fl6": 27904,
+    "l1-fl7": 17152,
+    "l1-fl8": 27904,
+    "l2-fl10": 18176,
+    "l2-fl11": 18176,
+    "l2-fl12": 18176,
+    "l2-fl13": 9088,
+    "l2-fl14": 28672,
+    "l2-fl15": 28672,
+    "l2-fl16": 18688,
 }
 
 # Decoders legitimately run a frame or two past the reference (encoder delay and
@@ -292,10 +318,13 @@ def main(argv: list[str] | None = None) -> int:
         binary = build_harness(float_variant=args.float, sanitize=args.sanitize)
         if args.sanitize:
             streams = collect_for_sanitizer(vectors)
-            if len(streams) < EXPECTED_PAIRS:
+            if len(streams) != EXPECTED_BITSTREAMS:
                 raise RuntimeError(
-                    f"expected at least {EXPECTED_PAIRS} bitstreams to "
-                    f"sanitize, found {len(streams)}"
+                    f"expected exactly {EXPECTED_BITSTREAMS} bitstreams to "
+                    f"sanitize at {UPSTREAM_REVISION[:8]}, found "
+                    f"{len(streams)}; a cache holding only the "
+                    f"{EXPECTED_PAIRS} reference-backed vectors would skip the "
+                    f"malformed streams this pass exists to cover"
                 )
             findings = 0
             for bitstream, reference in streams:
@@ -307,9 +336,7 @@ def main(argv: list[str] | None = None) -> int:
                 f"{findings} sanitizer findings"
             )
             if findings:
-                raise RuntimeError(
-                    f"{findings} bitstreams tripped ASan or UBSan"
-                )
+                raise RuntimeError(f"{findings} bitstreams tripped ASan or UBSan")
             print("CONFORMANCE:PASS")
             return 0
 
@@ -343,7 +370,7 @@ def main(argv: list[str] | None = None) -> int:
             # alone cannot see it.
             shortfall = outcome.reference - outcome.produced
             surplus = outcome.produced - outcome.reference
-            if shortfall > 0 and outcome.name not in KNOWN_SHORT_OUTPUT:
+            if shortfall > 0 and shortfall != KNOWN_SHORT_OUTPUT.get(outcome.name):
                 failures.append(outcome)
                 continue
             if (
@@ -382,6 +409,9 @@ def main(argv: list[str] | None = None) -> int:
                 f"{ISO_FLOOR_DB:.0f} dB ISO floor"
             )
         print("CONFORMANCE:PASS")
+    except KeyboardInterrupt:
+        print("CONFORMANCE:INTERRUPTED", file=sys.stderr)
+        return 130
     except (OSError, RuntimeError, subprocess.CalledProcessError, ValueError) as exc:
         print(f"codec conformance failed: {exc}", file=sys.stderr)
         return 1

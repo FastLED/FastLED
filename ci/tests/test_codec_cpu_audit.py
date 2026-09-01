@@ -74,16 +74,16 @@ def test_integer_product_selection_ignores_address_and_size_math() -> None:
     body = [
         "  %a64 = sext i32 %a to i64",
         "  %b64 = sext i32 %b to i64",
-        "  %prod = mul nsw i64 %a64, %b64",          # Q-format: counted
+        "  %prod = mul nsw i64 %a64, %b64",  # Q-format: counted
         "  %coef = sext i32 %c to i64",
-        "  %scaled = mul nsw i64 %coef, 37489",      # literal tap: counted
+        "  %scaled = mul nsw i64 %coef, 37489",  # literal tap: counted
         "  %idx = sext i32 %i to i64",
-        "  %off = mul nsw i64 %idx, 4",              # address math: rejected
+        "  %off = mul nsw i64 %idx, 4",  # address math: rejected
         "  %p = getelementptr inbounds i32, ptr %base, i64 %off",
         "  %n = sext i32 %count to i64",
-        "  %bytes = mul nsw i64 %n, 72",             # memcpy size: rejected
+        "  %bytes = mul nsw i64 %n, 72",  # memcpy size: rejected
         "  %r = call ptr @memcpy(ptr %d, ptr %s, i64 %bytes)",
-        "  %wide = mul nsw i64 %x, %y",              # neither sign-extended
+        "  %wide = mul nsw i64 %x, %y",  # neither sign-extended
     ]
     products = AUDIT._integer_product_lines(body)
 
@@ -160,9 +160,12 @@ entry:
 }
 """
     # Counting the call form, not the `declare` line, which also names it.
-    assert AUDIT.instrument_llvm_ir(float_ir, "minimp3-float").text.count(
-        "call void @fastled_mp3_cpu_operation"
-    ) == 1
+    assert (
+        AUDIT.instrument_llvm_ir(float_ir, "minimp3-float").text.count(
+            "call void @fastled_mp3_cpu_operation"
+        )
+        == 1
+    )
     with pytest.raises(RuntimeError, match="no arithmetic sites"):
         AUDIT.instrument_llvm_ir(float_ir, "minimp3-fixed")
 

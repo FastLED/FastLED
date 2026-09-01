@@ -1018,9 +1018,7 @@ def _report_drift(
         return
     drift = (current - baseline) / baseline * 100.0
     regression = drift if higher_is_worse else -drift
-    marker = (
-        "  <-- worth a look" if regression > 100.0 * REGRESSION_TOLERANCE else ""
-    )
+    marker = "  <-- worth a look" if regression > 100.0 * REGRESSION_TOLERANCE else ""
     print(
         f"UNGATED:{path} baseline={baseline:.6g} current={current:.6g} "
         f"drift={drift:+.2f}%{marker}"

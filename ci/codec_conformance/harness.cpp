@@ -165,9 +165,10 @@ int main(int argc, char** argv) {
         if (!inspected_first) {
             inspected_first = true;
             fl::third_party::Mp3VbrTag tag;
-            if (fl::third_party::Mp3ParseVbrTag(data + offset,
-                                                (fl::size)((size_t)n - offset),
-                                                &tag) &&
+            if (fl::third_party::Mp3ParseVbrTag(
+                    fl::span<const fl::u8>(data + offset,
+                                           (fl::size)((size_t)n - offset)),
+                    &tag) &&
                 tag.present) {
                 /* Metadata, not audio. Drop the frame and the priming that
                    follows it. */
