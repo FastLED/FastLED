@@ -29,6 +29,11 @@ def parse_args() -> tuple:
         action="store_true",
         help="Run Playwright tests after compilation (default is compile-only)",
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Compile, then fail if the headless browser reports a runtime error",
+    )
     known_args, unknown_args = parser.parse_known_args()
     if "--build" in unknown_args:
         print("WARNING: --build is no longer supported. It will be ignored.")
@@ -41,6 +46,7 @@ def parse_args() -> tuple:
 
 def main() -> int:
     args, unknown_args = parse_args()
+    run_browser_check = args.run or args.check
 
     # Keep the sketch path relative to examples/ (e.g. "examples/Fx/FxCylon"
     # -> "Fx/FxCylon") so resolution stays unambiguous when two sketches share
@@ -73,13 +79,13 @@ def main() -> int:
         print(f"Note: Could not verify filter compatibility ({type(e).__name__})")
 
     # Print what we're going to do
-    if args.run:
+    if run_browser_check:
         _print_panel(
             "FastLED WASM Build Pipeline",
             [
                 f"Will:",
                 f"  1. Compile {example_name} to WASM",
-                f"  2. Launch headless browser demo",
+                f"  2. Launch headless browser check",
                 f"  3. Run for 5 seconds, verify rendering",
                 f"  4. Exit automatically",
             ],
@@ -90,11 +96,11 @@ def main() -> int:
             [
                 f"Will:",
                 f"  * Compile {example_name} to WASM",
-                f"  (Use --run to add automated testing)",
+                f"  (Use --check to add browser error detection)",
             ],
         )
 
-    steps = "2" if args.run else "1"
+    steps = "2" if run_browser_check else "1"
     print(f"Step 1/{steps}: Compiling WASM...")
 
     # Output to examples/<name>/fastled_js/fastled.js to match expected location
@@ -129,8 +135,9 @@ def main() -> int:
 
     print("WASM compilation successful")
 
-    # Run tests if --run flag is provided
-    if args.run:
+    # --check is the CI-friendly spelling; retain --run as its compatibility
+    # alias for scripts that predate browser console validation.
+    if run_browser_check:
         import subprocess
 
         print(f"\nStep 2/2: Running Playwright tests...\n")

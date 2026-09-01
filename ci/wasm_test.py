@@ -21,6 +21,7 @@ HERE = Path(__file__).parent
 PROJECT_ROOT = HERE.parent
 
 console = Console()
+stderr_console = Console(stderr=True)
 
 
 def parse_args():
@@ -200,18 +201,40 @@ async def main() -> None:
                     text = msg.text
                     if msg.type in ("error", "warn"):
                         browser_errors.append(f"[{msg.type}] {text}")
+                    if msg.type == "error":
+                        stderr_console.print(
+                            f"[WASM browser error] {text}", markup=False
+                        )
                     if "INVALID_OPERATION" in text:
-                        console.print(
-                            "[bold red]INVALID_OPERATION detected in console log[/bold red]"
+                        stderr_console.print(
+                            "[WASM browser error] INVALID_OPERATION detected in console log",
+                            markup=False,
                         )
 
                 page.on("console", console_log_handler)
 
                 # Also capture page errors (uncaught exceptions)
                 def page_error_handler(error: Exception) -> None:
-                    browser_errors.append(f"[error] Page error: {error}")
+                    message = f"[error] Page error: {error}"
+                    browser_errors.append(message)
+                    stderr_console.print(
+                        f"[WASM browser error] {message}", markup=False
+                    )
 
                 page.on("pageerror", page_error_handler)
+
+                # Browser fetch failures are not guaranteed to emit a console
+                # error. Treat HTTP failures as diagnostics too, so a missing
+                # manifest or worker resource cannot make --check look green.
+                def response_handler(response) -> None:
+                    if response.status >= 400:
+                        message = f"[error] HTTP {response.status}: {response.url}"
+                        browser_errors.append(message)
+                        stderr_console.print(
+                            f"[WASM browser error] {message}", markup=False
+                        )
+
+                page.on("response", response_handler)
 
                 test_url = f"http://localhost:{port}/"
                 if args.gfx is not None:

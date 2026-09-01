@@ -45,6 +45,7 @@ def _wasm_fast_path() -> int | None:
     # Extract example name (first positional, skipping flags)
     example = None
     has_run = False
+    has_check = False
     has_verbose = False
     defines: list[str] = []
     index = 0
@@ -52,6 +53,8 @@ def _wasm_fast_path() -> int | None:
         a = rest[index]
         if a == "--run":
             has_run = True
+        elif a == "--check":
+            has_check = True
         elif a in ("-v", "--verbose"):
             has_verbose = True
         elif a == "--just-compile":
@@ -76,15 +79,15 @@ def _wasm_fast_path() -> int | None:
     if has_verbose:
         os.environ["VERBOSE"] = "1"
 
-    if has_run:
-        # --run needs wasm_compile for Playwright test orchestration
+    if has_run or has_check:
+        # --run/--check need wasm_compile for Playwright orchestration.
         saved_argv = sys.argv
         sys.argv = ["ci.wasm_compile", f"examples/{example}"]
         if has_clean:
             sys.argv.append("--force")
         if defines:
             sys.argv.extend(["--defines", ",".join(defines)])
-        sys.argv.append("--run")
+        sys.argv.append("--check" if has_check else "--run")
         try:
             from ci.wasm_compile import main as wasm_compile_main
 
