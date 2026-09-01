@@ -9,18 +9,19 @@
 // IWYU pragma: end_keep
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace platforms {
 
 // Serial initialization (no-op on POSIX)
-void begin(u32 baudRate) {
+void begin(u32 baudRate) FL_NO_EXCEPT {
     (void)baudRate;
     // POSIX host platform doesn't have serial ports - no-op
 }
 
 // Print functions
-void print(const char* str) {
+void print(const char* str) FL_NO_EXCEPT {
     if (!str) return;
 
     // POSIX (Linux/macOS): Use direct system calls to stderr
@@ -35,25 +36,25 @@ void print(const char* str) {
     fsync(2);
 }
 
-void println(const char* str) {
+void println(const char* str) FL_NO_EXCEPT {
     if (!str) return;
     print(str);
     print("\n");
 }
 
 // Input functions
-int available() {
+int available() FL_NO_EXCEPT {
     // POSIX platforms - no input available in most cases
     // This is mainly for testing environments
     return 0;
 }
 
-int peek() {
+int peek() FL_NO_EXCEPT {
     // POSIX platforms - no peek support
     return -1;
 }
 
-int read() {
+int read() FL_NO_EXCEPT {
     // POSIX platforms - no input available in most cases
     // This is mainly for testing environments
     return -1;
@@ -67,7 +68,7 @@ int read() {
 // to TTY / fully buffered to pipe — either drains synchronously inside the
 // syscall), so the only observable timeout case is `flush(0)`, which now
 // short-circuits without entering the kernel.
-bool flush(u32 timeoutMs) {
+bool flush(u32 timeoutMs) FL_NO_EXCEPT {
     if (timeoutMs == 0) {
         return true;  // contract: flush(0) returns immediately
     }
@@ -75,7 +76,7 @@ bool flush(u32 timeoutMs) {
     return true;
 }
 
-size_t write_bytes(const u8* buffer, size_t size) {
+size_t write_bytes(const u8* buffer, size_t size) FL_NO_EXCEPT {
     if (!buffer || size == 0) return 0;
 
     // Write raw bytes to stderr
@@ -83,17 +84,17 @@ size_t write_bytes(const u8* buffer, size_t size) {
     return (written >= 0) ? static_cast<size_t>(written) : 0;
 }
 
-bool serial_ready() {
+bool serial_ready() FL_NO_EXCEPT {
     // POSIX host platform always "ready" (stderr always available)
     return true;
 }
 
-bool serial_is_buffered() {
+bool serial_is_buffered() FL_NO_EXCEPT {
     // POSIX stderr is always "buffered" (not ROM UART - that's ESP32-specific)
     return true;
 }
 
-int readLineNative(char delimiter, char* out, int outLen) {
+int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
     (void)delimiter; (void)out; (void)outLen;
     return -1;  // Not supported on POSIX host builds
 }
