@@ -968,25 +968,69 @@ def _check_lower_bound(path: str, baseline: float, current: float) -> None:
         raise RuntimeError(f"{path} regressed: {current} < {limit:.6f}")
 
 
+def _report_drift(path: str, baseline: float, current: float) -> None:
+    """Record a measurement without gating on it.
+
+    Loud rather than silent: a real slowdown still has to be visible to someone
+    reading the log, it just does not fail the build on a number the runner pool
+    moves by more than the budget on its own.
+    """
+    if baseline == 0:
+        print(f"UNGATED:{path} baseline=0 current={current:.6g}")
+        return
+    drift = (current - baseline) / baseline * 100.0
+    marker = "  <-- worth a look" if drift > 100.0 * REGRESSION_TOLERANCE else ""
+    print(
+        f"UNGATED:{path} baseline={baseline:.6g} current={current:.6g} "
+        f"drift={drift:+.2f}%{marker}"
+    )
+
+
 def _check_host_trend(
     backend: str, baseline_host: dict[str, Any], current_host: dict[str, Any]
 ) -> None:
-    """The host-dependent half of the trend gate: cycle counters, per-stage
-    timings and Callgrind attribution. Split out of check_trend so a host with
-    no baseline for this backend can skip exactly this and nothing else."""
-    for metric in ("cycles", "instructions", "branch_misses"):
+    """The host-dependent half of the trend gate.
+
+    Split by whether the measurement is a property of the *code* or of the
+    *machine that ran it* (FastLED#4130).
+
+    Gated: instruction count, branch misses, and everything else Callgrind
+    reports. `validate_trend` requires `counter_median` instructions and branch
+    misses to *equal* the Callgrind figures, so despite living under a "counter"
+    key those are simulated, exact and reproducible -- not hardware counters.
+
+    Ungated: cycles, the IPC derived from them, and the per-stage wall-clock
+    timings. Those are the only genuinely host-measured quantities here, and
+    they are properties of the machine. The `ubuntu-24.04` pool moves cycles by
+    more than the 5% budget between runners reporting the same CPU model,
+    because the host key identifies a CPU family and not a contention
+    environment.
+
+    The evidence for splitting here rather than widening the budget: on the PR
+    that prompted this, the float decoder's Callgrind instruction count matched
+    its baseline to 767 out of 261,532,799 -- 0.0003% -- while cycles came in
+    6.7% high, on a change that could not touch the float build at all. Same
+    work, different machine. Widening the budget would only move the threshold
+    the noise has to cross.
+    """
+    for metric in ("instructions", "branch_misses"):
         _check_upper_bound(
             f"{backend}/counter/{metric}",
             baseline_host["counter_median"][metric],
             current_host["counter_median"][metric],
         )
-    _check_lower_bound(
+    _report_drift(
+        f"{backend}/counter/cycles",
+        baseline_host["counter_median"]["cycles"],
+        current_host["counter_median"]["cycles"],
+    )
+    _report_drift(
         f"{backend}/counter/ipc",
         baseline_host["counter_median"]["ipc"],
         current_host["counter_median"]["ipc"],
     )
     for stage in STAGES:
-        _check_upper_bound(
+        _report_drift(
             f"{backend}/stage/{stage}",
             baseline_host["stage_ns_median"][stage],
             current_host["stage_ns_median"][stage],
@@ -1026,7 +1070,24 @@ def check_trend(baseline: dict[str, Any], current: dict[str, Any]) -> None:
     if baseline.get("host_key") != current_host_key:
         alternate_profile = baseline.get("host_baselines", {}).get(current_host_key)
         if alternate_profile is None:
-            raise RuntimeError(f"host baseline is unknown: {current_host_key}")
+            # An unknown host used to fail closed. That made sense while cycles
+            # were gated, because a cycle count from an unrecognised machine is
+            # not comparable to anything. It does not any more: after
+            # FastLED#4130 every *gated* figure is deterministic -- the exact
+            # operation ledger, the cross-compiled codegen bounds, and the
+            # Callgrind numbers that `counter_median` instructions and branch
+            # misses are required to equal. None of those depend on which
+            # machine ran them, so the primary baseline applies to any host.
+            #
+            # This matters operationally: the ubuntu-24.04 pool has presented at
+            # least five CPU models (EPYC 9V74, 9V45, 7763; Xeon 8573C,
+            # 6973P-C), and every new one blocked unrelated PRs until somebody
+            # harvested a baseline for it.
+            print(
+                f"UNKNOWN-HOST:{current_host_key}: no recorded profile; gating "
+                "on the primary baseline, which is safe because every gated "
+                "metric is simulated rather than timed"
+            )
     for backend in BACKENDS:
         baseline_entry = baseline["backends"][backend]
         current_entry = current["backends"][backend]

@@ -252,13 +252,48 @@ def test_callgrind_parser_prefers_complete_totals(tmp_path: Path) -> None:
 
 
 def test_trend_gate_rejects_more_than_five_percent() -> None:
+    """Retired instruction count is a property of the code, so it is gated."""
     baseline = AUDIT.load_trend()
     current = json.loads(json.dumps(baseline))
     counters = current["backends"]["minimp3-float"]["host"]["counter_median"]
-    counters["cycles"] *= 1.051
+    host = current["backends"]["minimp3-float"]["host"]
+    counters["instructions"] = int(counters["instructions"] * 1.051)
+    # perf and Callgrind instruction counts are cross-checked against each
+    # other, so both have to move or validation rejects the fixture first.
+    host["callgrind"]["instructions"] = int(host["callgrind"]["instructions"] * 1.051)
     counters["ipc"] = round(counters["instructions"] / counters["cycles"], 6)
-    with pytest.raises(RuntimeError, match="minimp3-float/counter/cycles regressed"):
+    with pytest.raises(
+        RuntimeError, match="minimp3-float/counter/instructions regressed"
+    ):
         AUDIT.check_trend(baseline, current)
+
+
+def test_cycles_are_reported_but_do_not_fail_the_build(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Cycles, the IPC derived from them, and per-stage wall-clock timings are
+    properties of the machine, not the code (FastLED#4130). Note that
+    `counter_median` instructions and branch misses are *not* in this set:
+    validate_trend requires them to equal the Callgrind figures, so they are
+    simulated and stay gated. Cycles are the only genuinely hardware-measured
+    quantity. The runner pool
+    moves them by more than the 5% budget between machines reporting the same
+    CPU model, which failed PRs that provably could not have caused it. They
+    are recorded loudly and no longer gated."""
+    baseline = AUDIT.load_trend()
+    current = json.loads(json.dumps(baseline))
+    counters = current["backends"]["minimp3-float"]["host"]["counter_median"]
+    counters["cycles"] = int(counters["cycles"] * 1.30)
+    counters["ipc"] = round(counters["instructions"] / counters["cycles"], 6)
+    for stage in current["backends"]["minimp3-float"]["host"]["stage_ns_median"]:
+        current["backends"]["minimp3-float"]["host"]["stage_ns_median"][stage] *= 1.30
+
+    AUDIT.check_trend(baseline, current)  # a 30% swing must not raise
+
+    printed = capsys.readouterr().out
+    assert "UNGATED:minimp3-float/counter/cycles" in printed
+    assert "drift=+30.00%" in printed
+    assert "worth a look" in printed
 
 
 def test_trend_validation_rejects_inconsistent_derived_counters() -> None:
@@ -268,12 +303,37 @@ def test_trend_validation_rejects_inconsistent_derived_counters() -> None:
         AUDIT.validate_trend(trend)
 
 
-def test_trend_gate_fails_closed_on_unknown_host() -> None:
+def test_unknown_host_still_gates_the_deterministic_metrics(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """An unknown runner no longer fails closed (FastLED#4130).
+
+    It used to, and that was right while cycles were gated: a cycle count from
+    an unrecognised machine compares to nothing. After the demotion every gated
+    figure is simulated -- the operation ledger, the cross-compiled codegen
+    bounds, and the Callgrind numbers that counter_median is required to equal
+    -- so the primary baseline applies to any host. The ubuntu-24.04 pool has
+    presented at least five CPU models, and each new one used to block
+    unrelated PRs until someone harvested a baseline.
+
+    What must not happen is an unknown host silently gating nothing."""
     baseline = AUDIT.load_trend()
     current = json.loads(json.dumps(baseline))
-    current["environment"]["cpu_model"] = "different hosted runner"
+    current["environment"]["cpu_model"] = "some runner nobody has measured"
     current["host_key"] = AUDIT.environment_key(current["environment"])
-    with pytest.raises(RuntimeError, match="host baseline is unknown"):
+
+    AUDIT.check_trend(baseline, current)
+    assert "UNKNOWN-HOST:" in capsys.readouterr().out
+
+    # ...and the deterministic gate still fires on that same unknown host.
+    host = current["backends"]["minimp3-float"]["host"]
+    counters = host["counter_median"]
+    counters["instructions"] = int(counters["instructions"] * 1.051)
+    host["callgrind"]["instructions"] = int(host["callgrind"]["instructions"] * 1.051)
+    counters["ipc"] = round(counters["instructions"] / counters["cycles"], 6)
+    with pytest.raises(
+        RuntimeError, match="minimp3-float/counter/instructions regressed"
+    ):
         AUDIT.check_trend(baseline, current)
 
 
@@ -302,9 +362,15 @@ def test_trend_gate_selects_known_host_baseline() -> None:
     }
     AUDIT.check_trend(baseline, current)
     counters = current["backends"]["minimp3-float"]["host"]["counter_median"]
-    counters["cycles"] *= 1.051
+    host = current["backends"]["minimp3-float"]["host"]
+    counters["instructions"] = int(counters["instructions"] * 1.051)
+    # perf and Callgrind instruction counts are cross-checked against each
+    # other, so both have to move or validation rejects the fixture first.
+    host["callgrind"]["instructions"] = int(host["callgrind"]["instructions"] * 1.051)
     counters["ipc"] = round(counters["instructions"] / counters["cycles"], 6)
-    with pytest.raises(RuntimeError, match="minimp3-float/counter/cycles regressed"):
+    with pytest.raises(
+        RuntimeError, match="minimp3-float/counter/instructions regressed"
+    ):
         AUDIT.check_trend(baseline, current)
 
 
