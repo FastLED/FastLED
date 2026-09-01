@@ -144,8 +144,7 @@ private:
     /// @brief Select best controller for a given clock pin
     /// @param clockPin Clock pin number to route
     /// @returns Controller index, or -1 if none available
-    int selectControllerForClockPin(int clockPin,
-                                    Esp32SpiBus requestedBus) FL_NO_EXCEPT;
+    int selectControllerForClockPin(int clockPin, Esp32SpiBus requestedBus) FL_NO_EXCEPT;
 
     /// @brief Check if controller can handle this clock pin
     /// @param ctrl Controller to check
