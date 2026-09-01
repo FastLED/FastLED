@@ -128,15 +128,19 @@ uses; without it the patch no longer applies at `-p1`.
 FastLED does
 not expose upstream's `mp3dec_decode_frame` convenience entry point because it
 allocates scratch on the stack; all callers use `mp3dec_decode_frame_r` with
-owned storage instead. FastLED uses a 7,808-byte scratch arena for the float
-build and 7,936 bytes for the fixed-point build -- the latter carries
+owned storage instead. FastLED uses an 8,352-byte scratch arena for the float
+build and 8,592 bytes for the fixed-point build -- the latter carries
 scalefactor gains as mantissa+exponent rather than as a single float, and gets
 its own figure so that each variant is charged for its own arena. Fixed point
 is what ships (FastLED#4056); the float build survives as the reference the
 fixed-vs-float gates compare against. FastLED also extends the
 decoder's persistent synthesis state so that it can serve as the synthesis
-workspace without a duplicate scratch copy. The upstream direct-decoder
-2,304-byte free-format frame cap and Phase 0's 4,096-byte stream buffer are
+workspace without a duplicate scratch copy. Layer I/II scale information is
+overlaid with the mutually exclusive Layer III tail of the arena; this removes
+the compiler-inlined scale arrays from `mp3dec_decode_frame_r`'s stack without
+adding an allocation or changing either decoding path's arithmetic. The
+upstream direct-decoder 2,304-byte free-format frame cap and Phase 0's
+4,096-byte stream buffer are
 retained; the stream buffer can discover unknown free-format spacing through
 2,045 bytes with upstream's three-header validation. The integration meets the
 24 KiB working-RAM budget without narrowing that Phase 0 streaming behavior.
