@@ -35,19 +35,15 @@ RAM_LIMIT = 24 * 1024
 # Retired Helix static-table total (12,744 bytes) + 20%. See check_ledger().
 STATIC_TABLE_LIMIT = 15292
 REGRESSION_FACTOR = 1.02
-# Measured and required to be present, but not regression-gated. The ledger's
-# own prose already says the 2 KiB acceptance gate is the compiler-derived
-# callgraph and calls the watermark "a conservative observation"; the code did
-# not reflect that, and applied the same hard 2% gate to both. The watermark is
-# not reproducible across CI runs -- the now-deleted Helix backend measured 1736
-# and 3336 on identical decoder code, each exactly and one of them on a re-run --
-# because it reports the deepest byte *anything* disturbed, not the deepest byte the
-# decoder used. See FastLED#4106 for the real fix (host-key the ledger, or
-# measure the stack pointer directly instead of inferring it from a paint
-# pattern).
-INFORMATIONAL_METRICS = {
-    "stack-watermark-observed",
-}
+# Metrics that are measured and recorded but deliberately not regression-gated.
+# Empty since FastLED#4106: `stack-watermark-observed` used to live here because
+# it was not reproducible across CI runners. The cause turned out to be glibc --
+# the harness forwarded the decoder's block moves to libc, so glibc's `mem*`
+# frames sat inside the measured window and moved the figure by ~900 bytes
+# depending on which implementation the host dispatched to. watermark.cpp now
+# uses its own loops, the measurement is host-independent, and the metric is
+# gated again like every other one.
+INFORMATIONAL_METRICS: set[str] = set()
 
 EXACT_METRICS = {
     "allocation-count",

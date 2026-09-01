@@ -20,18 +20,62 @@ void* volatile gAllocationWitness = nullptr;
 
 } // anonymous namespace
 
+/* These are the block-move primitives the decoder itself calls, and they are
+   deliberately plain loops rather than forwarders to libc.
+
+   That is the fix for FastLED#4106. Forwarding to glibc put its `mem*`
+   implementation's frames inside the measured window, and those frames are
+   large, and they differ between glibc builds and CPU dispatch paths -- which
+   is why the metric landed on exact-but-different answers on different CI
+   runners while the decoder code was byte-identical. Measured directly: with
+   glibc the watermark reads 2952 here, with these loops 2056, and the ~900-byte
+   difference is entirely glibc's. It also made the watermark disagree with the
+   compiler-derived callgraph figure by 664 bytes; with the loops the two
+   independent methods agree to within 24 bytes, which is the audit call
+   boundary.
+
+   Measuring glibc was also measuring the wrong thing. The 2 KiB budget this
+   audit enforces is an MCU budget, and no MCU links glibc's vectorised
+   `memcpy` -- newlib's is a word loop much like these.
+
+   The pointers are `volatile` so the compiler cannot recognise the loop idiom
+   and call `memcpy`/`memset` right back, silently restoring the variance. That
+   is a guarantee from the standard rather than a build flag someone can drop.
+   Slow is fine: nothing here is timed. */
 namespace fl {
 
 void* memcpy(void* dst, const void* src, fl::size n) FL_NO_EXCEPT {
-    return ::memcpy(dst, src, n);
+    volatile unsigned char* d = static_cast<volatile unsigned char*>(dst);
+    const volatile unsigned char* s =
+        static_cast<const volatile unsigned char*>(src);
+    for (fl::size i = 0; i < n; ++i) {
+        d[i] = s[i];
+    }
+    return dst;
 }
 
 void* memmove(void* dst, const void* src, fl::size n) FL_NO_EXCEPT {
-    return ::memmove(dst, src, n);
+    volatile unsigned char* d = static_cast<volatile unsigned char*>(dst);
+    const volatile unsigned char* s =
+        static_cast<const volatile unsigned char*>(src);
+    if (d < s) {
+        for (fl::size i = 0; i < n; ++i) {
+            d[i] = s[i];
+        }
+    } else {
+        for (fl::size i = n; i > 0; --i) {
+            d[i - 1] = s[i - 1];
+        }
+    }
+    return dst;
 }
 
 void* memset(void* dst, int value, fl::size n) FL_NO_EXCEPT {
-    return ::memset(dst, value, n);
+    volatile unsigned char* d = static_cast<volatile unsigned char*>(dst);
+    for (fl::size i = 0; i < n; ++i) {
+        d[i] = static_cast<unsigned char>(value);
+    }
+    return dst;
 }
 
 namespace third_party {
