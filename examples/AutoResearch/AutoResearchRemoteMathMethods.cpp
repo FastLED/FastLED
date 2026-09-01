@@ -41,6 +41,7 @@
 #include "AutoResearchParlioStream.h"
 #include "AutoResearchFlexIo.h"
 #include "AutoResearchIeee754.h"
+#include "AutoResearchMp3.h"
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
 #include <Arduino.h>
@@ -229,6 +230,34 @@ void AutoResearchRemoteControl::bindMathMethods(fl::Remote& remote) {
         response.set("first_failure", r.first_failure ? r.first_failure : "");
         response.set("expected_bits", static_cast<int64_t>(r.expected_bits));
         response.set("actual_bits", static_cast<int64_t>(r.actual_bits));
+        return response;
+    });
+
+    // Register "mp3CodecTest" - on-device verification of the fixed-point MP3
+    // decoder. FastLED ships minimp3 in fixed-point mode on every embedded
+    // target, and that pipeline is where 32-bit-specific defects live: host
+    // testing on x86-64 cannot see an int64 add that costs two instructions
+    // plus carry here, signed overflow the optimiser assumed away, or a
+    // different alignment of the scratch arena. The check is therefore
+    // bit-exact -- an FNV-1a over the PCM against the value the same
+    // mp3dec_decode_frame_r produced on the host -- because the fixed-point
+    // decoder is deterministic and has no tolerance to spend.
+    remote.bind("mp3CodecTest", [](const fl::json& args) -> fl::json {
+        (void)args;
+        const auto r = autoresearch::mp3_check::run();
+        fl::json response = fl::json::object();
+        response.set("success", r.success);
+        response.set("streams_run", static_cast<int64_t>(r.streams_run));
+        response.set("streams_failed", static_cast<int64_t>(r.streams_failed));
+        response.set("first_failure", r.first_failure ? r.first_failure : "");
+        response.set("expected_fnv1a", static_cast<int64_t>(r.expected_fnv1a));
+        response.set("actual_fnv1a", static_cast<int64_t>(r.actual_fnv1a));
+        response.set("expected_samples",
+                     static_cast<int64_t>(r.expected_samples));
+        response.set("actual_samples", static_cast<int64_t>(r.actual_samples));
+        response.set("decode_micros", static_cast<int64_t>(r.decode_micros));
+        response.set("scratch_bytes", static_cast<int64_t>(r.scratch_bytes));
+        response.set("shared_decoder_matched", r.shared_decoder_matched);
         return response;
     });
 
