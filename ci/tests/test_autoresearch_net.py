@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import base64
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -163,11 +162,16 @@ def test_ota_peer_stages_artifact_without_a_host_wifi_manager(tmp_path) -> None:
     primary_before.send = AsyncMock(side_effect=primary_before_send)
     primary_after.send = AsyncMock(side_effect=primary_after_send)
     peer.send = AsyncMock(side_effect=peer_send)
+    encoded_chunk = MagicMock()
+    encoded_chunk.decode.return_value = ""
     with (
         patch(
             "ci.autoresearch.ota.RpcClient",
             side_effect=[primary_before, peer, primary_after],
         ),
+        patch(
+            "ci.autoresearch.ota.base64.b64encode", return_value=encoded_chunk
+        ) as encode,
         patch("ci.util.serial_interface.create_serial_interface"),
         patch("ci.autoresearch.ota.asyncio.sleep", new_callable=AsyncMock),
     ):
@@ -182,10 +186,11 @@ def test_ota_peer_stages_artifact_without_a_host_wifi_manager(tmp_path) -> None:
         )
 
     assert result == 0
+    encode.assert_called_once_with(b"firmware")
     assert peer.send.await_args_list[1].args[0] == "beginOtaArtifact"
     write_calls = []
     for call in peer.send.await_args_list:
         if call.args[0] == "writeOtaArtifact":
             write_calls.append(call)
     assert len(write_calls) == 1
-    assert write_calls[0].args[1] == base64.b64encode(b"firmware").decode("ascii")
+    assert write_calls[0].args[1] == ""

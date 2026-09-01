@@ -86,7 +86,11 @@ async def run_ota_peer_autoresearch(
         method: str,
         params: str | list[Any] | dict[str, Any] | None,
     ) -> dict[str, Any]:
-        response = await client.send(method, params or {}, timeout=rpc_timeout())
+        response = await client.send(
+            method,
+            {} if params is None else params,
+            timeout=rpc_timeout(),
+        )
         if not isinstance(response.data, dict):
             raise RuntimeError(f"{method} returned a non-object response")
         return response.data
