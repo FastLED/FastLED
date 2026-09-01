@@ -14,10 +14,31 @@
 #define MINIMP3_MAX_SAMPLES_PER_FRAME (1152*2)
 
 
-/* FastLED: fixed-point mode. Define MINIMP3_FIXED_POINT to compile the integer
-   DSP path; MINIMP3_HAVE_FIXED_POINT reports whether this instantiation
-   actually built it. The macro is recomputed on every (re-)inclusion so that a
-   float variant and a fixed variant can coexist in one translation unit. */
+/* FastLED: fixed-point mode. MINIMP3_HAVE_FIXED_POINT reports whether this
+   instantiation actually built the integer DSP path. The macro is recomputed on
+   every (re-)inclusion so that a float variant and a fixed variant can coexist
+   in one translation unit.
+
+   HOW TO TURN IT ON, AND HOW NOT TO. The selection changes MINIMP3_SCRATCH_SIZE
+   and the layout of the scratch arena, so every translation unit that sees this
+   header must agree on it. Build-wide, that means defining
+   FASTLED_MP3_FIXED_POINT as a compiler flag, which is why it is honoured here:
+   a flag reaches every TU, and a #define in one .cpp does not.
+
+   Defining MINIMP3_FIXED_POINT directly in a single translation unit -- the
+   unity build, say -- while `fl/codec/mp3.cpp.hpp` includes this header without
+   it gives the two a different sizeof(mp3dec_scratch_t). The caller then
+   allocates the smaller arena and the decoder writes the larger one, and the
+   symptom is a glibc "malloc.c: assertion failed" from somewhere unrelated
+   rather than anything pointing at MP3. Confirmed by doing exactly that.
+
+   The test harness in tests/fl/codec/minimp3_variants.hpp is the one safe
+   exception: it sets the macro per-inclusion but also renames MINIMP3_NAMESPACE,
+   so its types are distinct from production's and never meet them. */
+#if defined(FASTLED_MP3_FIXED_POINT) && !defined(MINIMP3_FIXED_POINT)
+#define MINIMP3_FIXED_POINT 1
+#endif
+
 #undef MINIMP3_HAVE_FIXED_POINT
 #if defined(MINIMP3_FIXED_POINT)
 #define MINIMP3_HAVE_FIXED_POINT 1
