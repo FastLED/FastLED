@@ -309,14 +309,37 @@ static int32_t mp3d_narrow_q30(int64_t acc) FL_NO_EXCEPT
     return mp3d_sat64((acc + ((int64_t)1 << 29)) >> 30);
 }
 
+/* Saturating add/subtract, computed entirely in 32 bits.
+
+   These run tens of times per butterfly in the DCT-32 and IMDCT, which is the
+   hot path on exactly the 32-bit MCUs this path exists for, and there a 64-bit
+   add costs a register pair and a carry chain. The overflow test is the
+   standard one: a signed add overflows exactly when both operands share a sign
+   that the result does not, which is what `(a ^ sum) & (b ^ sum) < 0` says. The
+   wrapping sum is computed on unsigned operands, where wraparound is defined
+   rather than UB.
+
+   The trailing check preserves the previous behaviour exactly: the saturation
+   range is symmetric (see MP3D_SAT_MIN), so INT32_MIN is out of range even
+   though it does not overflow a 32-bit add. */
 static int32_t mp3d_add_sat(int32_t a, int32_t b) FL_NO_EXCEPT
 {
-    return mp3d_sat64((int64_t)a + (int64_t)b);
+    const int32_t sum = (int32_t)((uint32_t)a + (uint32_t)b);
+    if (((a ^ sum) & (b ^ sum)) < 0)
+    {
+        return a < 0 ? MP3D_SAT_MIN : MP3D_SAT_MAX;
+    }
+    return sum < MP3D_SAT_MIN ? MP3D_SAT_MIN : sum;
 }
 
 static int32_t mp3d_sub_sat(int32_t a, int32_t b) FL_NO_EXCEPT
 {
-    return mp3d_sat64((int64_t)a - (int64_t)b);
+    const int32_t diff = (int32_t)((uint32_t)a - (uint32_t)b);
+    if (((a ^ b) & (a ^ diff)) < 0)
+    {
+        return a < 0 ? MP3D_SAT_MIN : MP3D_SAT_MAX;
+    }
+    return diff < MP3D_SAT_MIN ? MP3D_SAT_MIN : diff;
 }
 
 /* One Q26 unit of 1.0, and the clamp applied to dequantised samples.
