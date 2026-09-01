@@ -233,4 +233,4 @@ def test_samd51_qspi_buffer_size_tracks_validated_active_lane_width() -> None:
 
     assert "mActiveLanes == 3" in driver
     assert "const size_t num_lanes = mActiveLanes;" in driver
-    assert "bytes_per_lane > MAX_SIZE / num_lanes" in driver
+    assert "bytes_per_lane > max_size / num_lanes" in driver

@@ -344,8 +344,8 @@ DMABuffer SPIQuadSAMD51::acquireDMABuffer(size_t bytes_per_lane) {
     // Allocate one interleaved slice for each configured QSPI lane.
     const size_t num_lanes = mActiveLanes;
     // Validate size against platform max (256KB practical limit for embedded)
-    constexpr size_t MAX_SIZE = 256 * 1024;
-    if (bytes_per_lane > MAX_SIZE / num_lanes) {
+    constexpr size_t max_size = 256 * 1024;
+    if (bytes_per_lane > max_size / num_lanes) {
         return DMABuffer(SPIError::BUFFER_TOO_LARGE);
     }
     const size_t total_size = bytes_per_lane * num_lanes;
