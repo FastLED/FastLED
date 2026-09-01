@@ -1,5 +1,188 @@
 {
   "backends": {
+    "minimp3-fixed": {
+      "codegen": {
+        "cortex-m0plus": {
+          "dct32": {
+            "inner_loop_instructions": 312,
+            "instructions": 339
+          },
+          "polyphase": {
+            "inner_loop_instructions": 0,
+            "instructions": 195
+          }
+        },
+        "cortex-m4": {
+          "dct32": {
+            "inner_loop_instructions": 278,
+            "instructions": 294
+          },
+          "polyphase": {
+            "inner_loop_instructions": 0,
+            "instructions": 75
+          }
+        },
+        "riscv32-esp": {
+          "dct32": {
+            "inner_loop_instructions": 0,
+            "instructions": 47
+          },
+          "polyphase": {
+            "inner_loop_instructions": 0,
+            "instructions": 183
+          }
+        },
+        "xtensa-esp32": {
+          "dct32": {
+            "inner_loop_instructions": 303,
+            "instructions": 317
+          },
+          "polyphase": {
+            "inner_loop_instructions": 0,
+            "instructions": 187
+          }
+        }
+      },
+      "host": {
+        "callgrind": {
+          "branch_misses": 973345,
+          "branches": 25170807,
+          "functions": {
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_antialias(int*, int)": 67670454,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_dct3_9(int*)": 100403200,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_decode(fl::minimp3_fixed::mp3dec_t*, fl::minimp3_fixed::mp3dec_scratch_internal_t*, fl::minimp3_fixed::L3_gr_info_t*, int)": 291383826,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_huffman(int*, fl::minimp3_fixed::bs_t*, fl::minimp3_fixed::L3_gr_info_t const*, int const*, short const*, int)": 30896343,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_imdct36(int*, int*, int const*, int)": 174329720,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_imdct_gr(int*, int*, unsigned int, unsigned int)": 175405686,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_midside_stereo(int*, int)": 12751864,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_DCT_II(int*, int)": 202859854,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_add_sat(int, int)": 94137648,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_dequant(int, int, int, int)": 4063716,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_mulshift(int, int, int)": 107095393,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_narrow_q30(long)": 24629760,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_sat64(long)": 172018903,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_scale_pcm(long)": 27068344,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_shr_round(int, int)": 4129372,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_sub_sat(int, int)": 79788016,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_synth(int*, short*, int, int*)": 145270996,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_synth_granule(int*, int*, int, int, short*)": 349803817,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_synth_pair(short*, int, int const*)": 5412102,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3dec_decode_frame_r(fl::minimp3_fixed::mp3dec_t*, fl::minimp3_fixed::mp3dec_scratch_t*, unsigned char const*, int, short*, fl::minimp3_fixed::mp3dec_frame_info_t*)": 648993577
+          },
+          "instructions": 657659874
+        },
+        "counter_median": {
+          "branch_misses": 973345,
+          "cycles": 188201676.0,
+          "instructions": 657659874,
+          "ipc": 3.494442
+        },
+        "counter_source": {
+          "branch_misses": "Valgrind Callgrind simulated Bcm plus Bim",
+          "cycles": "Clang readcyclecounter median over 30 pinned runs",
+          "instructions": "Valgrind Callgrind deterministic Ir",
+          "ipc": "Callgrind Ir divided by median cycle counter"
+        },
+        "stage_coverage": {
+          "antialias": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "dequant": {
+            "fused_with": "huffman",
+            "instrumentation_sites": 0,
+            "mode": "fused"
+          },
+          "huffman": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "imdct": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "reorder": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "scalefactors": {
+            "instrumentation_sites": 2,
+            "mode": "dedicated"
+          },
+          "stereo": {
+            "instrumentation_sites": 3,
+            "mode": "dedicated"
+          },
+          "synthesis": {
+            "instrumentation_sites": 2,
+            "mode": "dedicated"
+          }
+        },
+        "stage_ns_median": {
+          "antialias": 7209.909,
+          "dequant": 0.0,
+          "huffman": 11129.263,
+          "imdct": 19037.077,
+          "reorder": 14.012,
+          "scalefactors": 573.165,
+          "stereo": 1610.854,
+          "synthesis": 41576.832
+        }
+      },
+      "operations": {
+        "frames": 892,
+        "stages": {
+          "antialias": {
+            "macs_per_frame": 2357.668161,
+            "multiplies_per_frame": 2357.668161,
+            "total_macs": 2103040,
+            "total_multiplies": 2103040
+          },
+          "dequant": {
+            "macs_per_frame": 0.0,
+            "multiplies_per_frame": 10.86435,
+            "total_macs": 0,
+            "total_multiplies": 9691
+          },
+          "huffman": {
+            "macs_per_frame": 164.75,
+            "multiplies_per_frame": 164.75,
+            "total_macs": 146957,
+            "total_multiplies": 146957
+          },
+          "imdct": {
+            "macs_per_frame": 3981.919283,
+            "multiplies_per_frame": 6743.103139,
+            "total_macs": 3551872,
+            "total_multiplies": 6014848
+          },
+          "reorder": {
+            "macs_per_frame": 0.0,
+            "multiplies_per_frame": 0.0,
+            "total_macs": 0,
+            "total_multiplies": 0
+          },
+          "scalefactors": {
+            "macs_per_frame": 0.0,
+            "multiplies_per_frame": 0.0,
+            "total_macs": 0,
+            "total_multiplies": 0
+          },
+          "stereo": {
+            "macs_per_frame": 0.0,
+            "multiplies_per_frame": 0.0,
+            "total_macs": 0,
+            "total_multiplies": 0
+          },
+          "synthesis": {
+            "macs_per_frame": 16859.946188,
+            "multiplies_per_frame": 29634.941704,
+            "total_macs": 15039072,
+            "total_multiplies": 26434368
+          }
+        }
+      }
+    },
     "minimp3-float": {
       "codegen": {
         "cortex-m0plus": {

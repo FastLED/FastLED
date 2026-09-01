@@ -922,10 +922,18 @@ def validate_trend(trend: dict[str, Any]) -> None:
         ):
             raise RuntimeError(f"host baseline key does not match environment: {key}")
         hosts = profile.get("hosts")
-        if not isinstance(hosts, dict) or set(hosts) != set(BACKENDS):
+        # A host baseline may cover a subset of BACKENDS: a backend added after
+        # a host was last measured has no numbers for it until a run lands there
+        # again. Unknown backends are still rejected, and an empty profile is
+        # meaningless.
+        if not isinstance(hosts, dict) or not hosts:
             raise RuntimeError(f"host baseline is missing backends: {key}")
-        for backend in BACKENDS:
-            host = hosts[backend]
+        unknown = set(hosts) - set(BACKENDS)
+        if unknown:
+            raise RuntimeError(
+                f"host baseline names unknown backends: {key}: {sorted(unknown)}"
+            )
+        for backend, host in hosts.items():
             if not isinstance(host, dict):
                 raise RuntimeError(f"invalid host baseline {key}/{backend}")
             validate_host(backend, host)
@@ -965,11 +973,28 @@ def check_trend(baseline: dict[str, Any], current: dict[str, Any]) -> None:
         if current_operations != baseline_operations:
             raise RuntimeError(f"exact operation ledger changed for {backend}")
 
-        baseline_host = (
-            baseline_entry["host"]
-            if alternate_profile is None
-            else alternate_profile["hosts"][backend]
-        )
+        if alternate_profile is None:
+            baseline_host = baseline_entry["host"]
+        elif backend in alternate_profile["hosts"]:
+            baseline_host = alternate_profile["hosts"][backend]
+        else:
+            # A known host that has never measured this backend. The exact
+            # operation ledger above is host-independent and has already been
+            # enforced; the timing and callgrind figures are not comparable
+            # across hosts, and inventing a baseline from another machine's
+            # numbers would gate on the hardware rather than on the code.
+            #
+            # This is how a newly added backend accretes coverage: the runner
+            # pool rotates, and each host picks the backend up the first time a
+            # PR lands on it and someone commits the measured artifact. Loud on
+            # purpose -- a backend that stays uncovered here forever is a real
+            # gap, just not one worth blocking unrelated PRs over.
+            print(
+                f"UNGATED:{backend}/host={current_host_key}: no baseline for "
+                "this backend on this host; exact operation ledger still "
+                "enforced"
+            )
+            continue
         current_host = current_entry["host"]
         for metric in ("cycles", "instructions", "branch_misses"):
             _check_upper_bound(
