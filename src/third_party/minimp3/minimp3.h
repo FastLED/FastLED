@@ -27,7 +27,9 @@
 #if (defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))) || \
     ((defined(__i386__) || defined(__x86_64__)) && defined(__SSE2__))
 #include <immintrin.h>
-#if !defined(_MSC_VER) && (defined(__GNUC__) || defined(__clang__))
+#if defined(_MSC_VER)
+#include <intrin.h> /* __cpuid, for the SSE4.1 run-time check */
+#elif defined(__GNUC__) || defined(__clang__)
 #include <cpuid.h>
 #endif
 #elif defined(__ARM_NEON) || defined(__aarch64__) || defined(_M_ARM64)
@@ -329,19 +331,18 @@ static int32_t mp3d_narrow_q30(int64_t acc) FL_NO_EXCEPT
     return mp3d_sat64((acc + ((int64_t)1 << 29)) >> 30);
 }
 
-/* Saturating add/subtract, computed entirely in 32 bits.
+/* Saturating add/subtract, via a 64-bit intermediate.
 
-   These run tens of times per butterfly in the DCT-32 and IMDCT, which is the
-   hot path on exactly the 32-bit MCUs this path exists for, and there a 64-bit
-   add costs a register pair and a carry chain. The overflow test is the
-   standard one: a signed add overflows exactly when both operands share a sign
-   that the result does not, which is what `(a ^ sum) & (b ^ sum) < 0` says. The
-   wrapping sum is computed on unsigned operands, where wraparound is defined
-   rather than UB.
+   These run tens of times per butterfly in the DCT-32 and IMDCT, so a 32-bit
+   branchless form is tempting -- a 64-bit add is a register pair and a carry
+   chain on the MCUs this path targets. It was tried and reverted: on the one
+   target that could actually be measured it cost 6,265 bytes of text (+24%)
+   and 48 bytes of decode stack for ~3% of decode time, and the MCU argument for
+   it was never verified on an MCU. Revisit only with cross-compiled codegen
+   numbers; codec_cpu_trend.json has the rig.
 
-   The trailing check preserves the previous behaviour exactly: the saturation
-   range is symmetric (see MP3D_SAT_MIN), so INT32_MIN is out of range even
-   though it does not overflow a 32-bit add. */
+   Note the saturation range is symmetric (see MP3D_SAT_MIN), which the vector
+   forms of these must reproduce exactly. */
 static int32_t mp3d_add_sat(int32_t a, int32_t b) FL_NO_EXCEPT
 {
     return mp3d_sat64((int64_t)a + (int64_t)b);
@@ -3165,7 +3166,17 @@ int mp3dec_dsp_is_integer(void) FL_NO_EXCEPT
 
 int mp3dec_dsp_uses_simd(void) FL_NO_EXCEPT
 {
-    return MP3D_SIMD_KERNELS_LIVE;
+#if MP3D_SIMD_KERNELS_LIVE
+    /* Compile-time availability is not the question -- on x86 the kernels are
+       compiled for any SSE2 build but only reached when the run-time SSE4.1
+       check passes. Reporting the compile-time answer would make the
+       bit-exactness gate compare a scalar decode against another scalar decode
+       and call it a pass, and would make the perf gate assert a ratio on two
+       identical runs, i.e. on timer noise. */
+    return MP3D_SIMD_AVAILABLE();
+#else
+    return 0;
+#endif
 }
 
 void mp3dec_init(mp3dec_t *dec) FL_NO_EXCEPT
@@ -3370,7 +3381,6 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples) FL_NO_EXC
 #undef MP3D_V_SUB64
 #undef MP3D_V_GET64
 #undef MP3D_V_PREP
-#undef MP3D_V_SIGN
 #undef MP3D_V_ADDSAT
 #undef MP3D_V_SUBSAT
 #undef MP3D_V_MULSHIFT
@@ -3379,6 +3389,8 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples) FL_NO_EXC
 #undef MP3D_INT_SIMD_SSE
 #undef MP3D_INT_SIMD_NEON
 #undef MP3D_SIMD_KERNELS_LIVE
+#undef MP3D_SIMD_AVAILABLE
+#undef MP3D_SIMD_TARGET
 #undef BITS_DEQUANTIZER_OUT
 #undef BSPOS
 #undef CHECK_BITS
