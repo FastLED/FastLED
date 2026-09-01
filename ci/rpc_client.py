@@ -13,7 +13,7 @@ This module provides an async/await RPC client that automatically manages reques
 
 Usage (IDs are managed internally, async/await required):
     async with RpcClient("/dev/ttyUSB0") as client:
-        response = await client.send("ping")
+        response = await client.send("ping", {})
         print(response.data)  # {"timestamp": ..., "uptimeMs": ...}
         print(response.success)  # True/False
         # Note: response._id exists but is internal - don't use it
@@ -22,7 +22,7 @@ Usage (IDs are managed internally, async/await required):
     from ci.util.serial_interface import create_serial_interface
     iface = create_serial_interface("/dev/ttyUSB0", use_pyserial=True)
     async with RpcClient("/dev/ttyUSB0", serial_interface=iface) as client:
-        response = await client.send("ping")
+        response = await client.send("ping", {})
 
     # Or with explicit connection management:
     client = RpcClient("/dev/ttyUSB0")
@@ -371,7 +371,7 @@ class RpcClient:
     async def send(
         self,
         function: str,
-        args: list[Any] | dict[str, Any] | None = None,
+        args: str | list[Any] | dict[str, Any] | None,
         timeout: float | None = None,
         retries: int = 1,
         return_on_ack: bool = False,
@@ -381,9 +381,9 @@ class RpcClient:
         Args:
             function: RPC function name
             args: Function arguments passed as the single `fl::json` RPC
-                parameter — a list for positional handlers, or a dict for
-                object-param handlers (default: {}). Wrapped verbatim into
-                `params` as `[args]`.
+                parameter — a scalar string, list for positional handlers, or
+                dict for object-param handlers. Wrapped verbatim
+                into `params` as `[args]`.
             timeout: Override default timeout for this call
             retries: Number of retry attempts (default: 1 = no retries)
 

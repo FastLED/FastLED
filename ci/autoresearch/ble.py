@@ -67,7 +67,7 @@ async def run_ble_autoresearch(
 
         # Step 2: Start BLE on device via serial RPC
         print("\n--- Step 2: Start BLE GATT server on ESP32 ---")
-        response = await serial_client.send("startBle", timeout=30.0)
+        response = await serial_client.send("startBle", {}, timeout=30.0)
         ble_info = response.data
 
         if not isinstance(ble_info, dict) or not ble_info.get("success"):
@@ -100,7 +100,7 @@ async def run_ble_autoresearch(
         # Step 3b: Query BLE status over serial (diagnostics)
         print("\n--- Step 3b: Query BLE status (serial) ---")
         try:
-            status_response = await serial_client.send("bleStatus", timeout=10.0)
+            status_response = await serial_client.send("bleStatus", {}, timeout=10.0)
             ble_status = status_response.data
             print(f"  BLE status: {json.dumps(ble_status, indent=2)}")
         except KeyboardInterrupt as ki:
@@ -196,7 +196,7 @@ async def run_ble_autoresearch(
         ble_iface = None
 
         try:
-            stop_response = await serial_client.send("stopBle", timeout=10.0)
+            stop_response = await serial_client.send("stopBle", {}, timeout=10.0)
             print(f"  stopBle response: {stop_response.data}")
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
@@ -244,7 +244,7 @@ async def run_ble_autoresearch(
                 pass
         if serial_client:
             try:
-                await serial_client.send("stopBle", timeout=5.0)
+                await serial_client.send("stopBle", {}, timeout=5.0)
             except KeyboardInterrupt as ki:
                 handle_keyboard_interrupt(ki)
             except Exception:

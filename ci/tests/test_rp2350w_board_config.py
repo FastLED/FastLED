@@ -256,3 +256,53 @@ def test_rp2350w_autoresearch_exposes_the_cyw43_http_peer_surface() -> None:
     assert "delay(10);" in net_source
     assert "} while (static_cast<int32_t>(millis() - deadline_ms) < 0);" in net_source
     assert 'response.set("error", "TCP server failed to listen")' in net_source
+
+
+def test_esp32_autoresearch_enlarges_rx_queue_before_serial_begin() -> None:
+    """Framed 512-byte OTA chunks must fit through the C6 HWCDC queue."""
+    source = AUTORESEARCH_SKETCH.read_text(encoding="utf-8")
+    init_buffers = source[
+        source.index("void init_serial_buffers()") : source.index(
+            "// ============================================================================\n"
+            "// Global State",
+            source.index("void init_serial_buffers()"),
+        )
+    ]
+    setup_start = source.index(
+        "void setup()", source.index("void init_serial_buffers()")
+    )
+    setup = source[setup_start : source.index("void loop()", setup_start)]
+
+    assert "Serial.setRxBufferSize(4096);" in init_buffers
+    assert setup.index("init_serial_buffers();") < setup.index(
+        "fl::serial_begin(115200);"
+    )
+
+
+def test_rp2350w_http_responses_wait_for_passive_peer_close() -> None:
+    """The RP must not consume its five-PCB pool by actively closing each reply."""
+    source = AUTORESEARCH_NET.read_text(encoding="utf-8")
+    rp_source = source[
+        source.index("struct RpPeerState") : source.index(
+            "#else  // !FL_IS_ESP32 && !FL_IS_RP2350"
+        )
+    ]
+    response_helper = rp_source[
+        rp_source.index("void writeHttpResponse") : rp_source.index(
+            "fl::json runRpHttpRequestTest"
+        )
+    ]
+    poll = rp_source[rp_source.index("void pollNetServer()") :]
+
+    assert "bool response_complete = false;" in rp_source
+    assert ".stop()" not in response_helper
+    assert "state.response_complete = true;" in poll
+    assert "state.response_complete && !state.client->connected()" in poll
+    assert "state.client.reset();" in poll
+    timeout = poll[
+        poll.index("millis() - state.request_started_ms") : poll.index(
+            "while (state.client->available()"
+        )
+    ]
+    assert "state.client->stop();" in timeout
+    assert timeout.count("resetRpPeerRequest(state);") == 1

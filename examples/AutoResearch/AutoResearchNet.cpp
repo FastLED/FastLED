@@ -774,6 +774,7 @@ struct RpPeerState {
     size_t body_length = 0;
     size_t expected_body_length = 0;
     bool headers_complete = false;
+    bool response_complete = false;
     uint32_t request_started_ms = 0;
 };
 
@@ -786,6 +787,7 @@ void resetRpPeerRequest(RpPeerState& state) {
     state.body_length = 0;
     state.expected_body_length = 0;
     state.headers_complete = false;
+    state.response_complete = false;
     state.request_started_ms = 0;
     state.request[0] = '\0';
     state.body[0] = '\0';
@@ -799,7 +801,6 @@ void writeHttpResponse(WiFiClient& client, const char* body,
     client.print(fl::strlen(body));
     client.print("\r\nConnection: close\r\n\r\n");
     client.print(body);
-    client.stop();
 }
 
 void writeHttpNotFoundResponse(WiFiClient& client, const char* body) {
@@ -807,7 +808,19 @@ void writeHttpNotFoundResponse(WiFiClient& client, const char* body) {
     client.print(fl::strlen(body));
     client.print("\r\nConnection: close\r\n\r\n");
     client.print(body);
-    client.stop();
+}
+
+void writeHttpErrorResponse(WiFiClient& client, const char* status,
+                            const char* body,
+                            const char* content_type = "text/plain") {
+    client.print("HTTP/1.1 ");
+    client.print(status);
+    client.print("\r\nContent-Type: ");
+    client.print(content_type);
+    client.print("\r\nContent-Length: ");
+    client.print(fl::strlen(body));
+    client.print("\r\nConnection: close\r\n\r\n");
+    client.print(body);
 }
 
 fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
@@ -1131,10 +1144,18 @@ void pollNetServer() {
     if (!state.client) {
         return;
     }
+    if (state.response_complete && !state.client->connected()) {
+        state.client.reset();
+        resetRpPeerRequest(state);
+        return;
+    }
     if (static_cast<int32_t>(millis() - state.request_started_ms) >= 2000) {
         state.client->stop();
         state.client.reset();
         resetRpPeerRequest(state);
+        return;
+    }
+    if (state.response_complete) {
         return;
     }
 
@@ -1153,11 +1174,9 @@ void pollNetServer() {
     }
     if (!state.headers_complete) {
         if (state.request_length + 1 == sizeof(state.request)) {
-            state.client->print(
-                "HTTP/1.1 431 Request Header Fields Too Large\r\nConnection: close\r\n\r\n");
-            state.client->stop();
-            state.client.reset();
-            resetRpPeerRequest(state);
+            writeHttpErrorResponse(*state.client,
+                                   "431 Request Header Fields Too Large", "");
+            state.response_complete = true;
         }
         return;
     }
@@ -1168,10 +1187,8 @@ void pollNetServer() {
     if (is_post && state.expected_body_length == 0) {
         const char* content_length = fl::strstr(state.request, "\r\nContent-Length:");
         if (content_length == nullptr) {
-            state.client->print("HTTP/1.1 411 Length Required\r\nConnection: close\r\n\r\n");
-            state.client->stop();
-            state.client.reset();
-            resetRpPeerRequest(state);
+            writeHttpErrorResponse(*state.client, "411 Length Required", "");
+            state.response_complete = true;
             return;
         }
         content_length = fl::strstr(content_length, ":");
@@ -1181,28 +1198,22 @@ void pollNetServer() {
         }
         while (*content_length >= '0' && *content_length <= '9') {
             if (state.expected_body_length > (sizeof(state.body) - 1) / 10) {
-                state.client->print("HTTP/1.1 413 Payload Too Large\r\nConnection: close\r\n\r\n");
-                state.client->stop();
-                state.client.reset();
-                resetRpPeerRequest(state);
+                writeHttpErrorResponse(*state.client, "413 Payload Too Large", "");
+                state.response_complete = true;
                 return;
             }
             state.expected_body_length = state.expected_body_length * 10 +
                                          static_cast<size_t>(*content_length - '0');
             if (state.expected_body_length >= sizeof(state.body)) {
-                state.client->print("HTTP/1.1 413 Payload Too Large\r\nConnection: close\r\n\r\n");
-                state.client->stop();
-                state.client.reset();
-                resetRpPeerRequest(state);
+                writeHttpErrorResponse(*state.client, "413 Payload Too Large", "");
+                state.response_complete = true;
                 return;
             }
             ++content_length;
         }
         if (state.expected_body_length == 0) {
-            state.client->print("HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n");
-            state.client->stop();
-            state.client.reset();
-            resetRpPeerRequest(state);
+            writeHttpErrorResponse(*state.client, "400 Bad Request", "");
+            state.response_complete = true;
             return;
         }
     }
@@ -1248,9 +1259,10 @@ void pollNetServer() {
     } else if (is_post_rpc) {
         if (!fl::strstr(state.body, "\"jsonrpc\":\"2.0\"") ||
             !fl::strstr(state.body, "\"method\"")) {
-            state.client->print("HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\nConnection: close\r\n\r\n");
-            state.client->print("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"Invalid Request\"},\"id\":1}");
-            state.client->stop();
+            writeHttpErrorResponse(
+                *state.client, "400 Bad Request",
+                "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"Invalid Request\"},\"id\":1}",
+                "application/json");
         } else if (fl::strstr(state.body, "\"method\":\"rpc.discover\"")) {
             writeHttpResponse(*state.client,
                               "{\"jsonrpc\":\"2.0\",\"result\":{\"methods\":[\"rpc.discover\",\"ping\",\"debugTest\",\"status\"]},\"id\":1}",
@@ -1269,11 +1281,9 @@ void pollNetServer() {
                               "application/json");
         }
     } else {
-        state.client->print("HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n");
-        state.client->stop();
+        writeHttpErrorResponse(*state.client, "404 Not Found", "");
     }
-    state.client.reset();
-    resetRpPeerRequest(state);
+    state.response_complete = true;
 }
 
 #else  // !FL_IS_ESP32 && !FL_IS_RP2350
