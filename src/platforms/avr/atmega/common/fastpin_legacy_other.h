@@ -3,7 +3,7 @@
 // IWYU pragma: private
 
 // Other ATmega variants pin mappings
-// Includes: ATmega1284P, ATmega644P, ATmega32, ATmega16, AT90USB646, AT90USB1286,
+// Includes: ATmega1284P, ATmega644, ATmega32, ATmega16, AT90USB646, AT90USB1286,
 //           ATmega32U2, ATmega16U2, ATmega8U2, AT90USB82, AT90USB162,
 //           ATmega128RFA1, ATmega256RFR2, ATmega128
 
@@ -50,7 +50,11 @@ typedef volatile u8 & reg8_t;
   _FL_IO(H,7)
 #endif
 
-#if defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega32__) || defined(__AVR_ATmega16__)
+#if defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__) || \
+    defined(__AVR_ATmega644__) || defined(__AVR_ATmega644A__) || \
+    defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__) || \
+    defined(__AVR_ATmega32__) || \
+    defined(__AVR_ATmega16__)
 
 #define MAX_PIN 31
 _FL_DEFPIN(0, 0, B); _FL_DEFPIN(1, 1, B); _FL_DEFPIN(2, 2, B); _FL_DEFPIN(3, 3, B);
