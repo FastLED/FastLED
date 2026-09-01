@@ -655,7 +655,26 @@ typedef struct
 typedef struct
 {
     bs_t bs;
-    uint8_t maindata[MAX_BITRESERVOIR_BYTES + MAX_L3_FRAME_PAYLOAD_BYTES];
+    /* Layer III's main-data window and Layer I/II's scale info share storage:
+       a frame is one or the other, never both (FastLED#4116).
+
+       L12_scale_info is ~1090 bytes in the fixed-point build -- mantissa plus
+       exponent for 192 scalefactors -- and it used to sit on the stack inside
+       mp3dec_decode_frame_r, where it was almost the entire 1480-byte frame and
+       the difference between meeting the 2 KiB decode-stack budget and missing
+       it. Moving it to the heap arena would normally cost working RAM, of which
+       there were only 692 bytes spare against the 24 KiB budget. Overlapping it
+       with maindata costs nothing instead: maindata is at least 1951 bytes, so
+       the union sizes to maindata and MINIMP3_SCRATCH_SIZE does not move.
+
+       The exclusivity is structural, not incidental. maindata is written only
+       by L3_restore_reservoir and read only by the Layer III bitstream reader;
+       the Layer I/II path never touches it, and never runs in the same call. */
+    union
+    {
+        uint8_t maindata[MAX_BITRESERVOIR_BYTES + MAX_L3_FRAME_PAYLOAD_BYTES];
+        L12_scale_info l12;
+    } u;
     L3_gr_info_t gr_info[4];
     mp3d_dsp_t grbuf[2][576];
 #if MINIMP3_HAVE_FIXED_POINT
@@ -673,6 +692,12 @@ typedef struct
 #ifdef __cplusplus
 static_assert(sizeof(mp3dec_scratch_internal_t) <= MINIMP3_SCRATCH_SIZE,
               "MINIMP3_SCRATCH_SIZE is too small");
+/* The whole point of overlapping L12_scale_info with maindata is that it is
+   free. If L12_scale_info ever outgrows maindata the union starts costing
+   working RAM silently, which is exactly what this change exists to avoid. */
+static_assert(sizeof(L12_scale_info) <=
+                  MAX_BITRESERVOIR_BYTES + MAX_L3_FRAME_PAYLOAD_BYTES,
+              "L12_scale_info no longer fits inside maindata");
 static_assert(alignof(mp3dec_scratch_internal_t) <= alignof(mp3dec_scratch_t),
               "mp3dec_scratch_t alignment is too small");
 #endif
@@ -2130,7 +2155,7 @@ static void L3_save_reservoir(mp3dec_t *h, mp3dec_scratch_internal_t *s) FL_NO_E
     }
     if (remains > 0)
     {
-        memmove(h->reserv_buf, s->maindata + pos, remains);
+        memmove(h->reserv_buf, s->u.maindata + pos, remains);
     }
     h->reserv = remains;
 }
@@ -2139,9 +2164,9 @@ static int L3_restore_reservoir(mp3dec_t *h, bs_t *bs, mp3dec_scratch_internal_t
 {
     int frame_bytes = (bs->limit - bs->pos)/8;
     int bytes_have = MINIMP3_MIN(h->reserv, main_data_begin);
-    memcpy(s->maindata, h->reserv_buf + MINIMP3_MAX(0, h->reserv - main_data_begin), MINIMP3_MIN(h->reserv, main_data_begin));
-    memcpy(s->maindata + bytes_have, bs->buf + bs->pos/8, frame_bytes);
-    bs_init(&s->bs, s->maindata, bytes_have + frame_bytes);
+    memcpy(s->u.maindata, h->reserv_buf + MINIMP3_MAX(0, h->reserv - main_data_begin), MINIMP3_MIN(h->reserv, main_data_begin));
+    memcpy(s->u.maindata + bytes_have, bs->buf + bs->pos/8, frame_bytes);
+    bs_init(&s->bs, s->u.maindata, bytes_have + frame_bytes);
     return h->reserv >= main_data_begin;
 }
 
@@ -3458,7 +3483,8 @@ int mp3dec_decode_frame_r(mp3dec_t *dec, mp3dec_scratch_t *scratch_storage,
 #ifdef MINIMP3_ONLY_MP3
         return 0;
 #else /* MINIMP3_ONLY_MP3 */
-        L12_scale_info sci[1];
+        /* Aliases the arena rather than the stack; see the union above. */
+        L12_scale_info *sci = &scratch->u.l12;
         L12_read_scale_info(hdr, bs_frame, sci);
 
         memset(scratch->grbuf[0], 0, 576*2*sizeof(mp3d_dsp_t));

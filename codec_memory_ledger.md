@@ -32,9 +32,19 @@ gate actually uses.
 
 The fixed-point build costs 128 bytes more scratch than the float build --
 scalefactor gains are carried as mantissa plus exponent rather than as a
-single float -- and 3,021 more bytes of text. It uses *less* decode stack
-(1,920 against 2,032), because its polyphase back-end has no vector code paths
-to keep live.
+single float -- and 3,021 more bytes of text. It uses less decode stack than
+the float build (896 against 1,200), because its polyphase back-end has no
+vector code paths to keep live.
+
+Both figures dropped by about 1 KB in FastLED#4116, which moved
+`L12_scale_info` off the stack. Layer I/II scale info is ~1090 bytes in the
+fixed build and used to sit inside `mp3dec_decode_frame_r`, where it was almost
+the whole 1,480-byte frame; the fixed decoder was running at 94% of its 2 KiB
+budget, and the figure moved with the compiler's inlining decisions rather than
+with anything in the decoder. It now shares arena storage with Layer III's
+`maindata` through a union -- a frame is one layer or the other, never both --
+so `scratch` and `working-ram` do not move and the saving is free. The budget
+now sits at 44% for fixed and 59% for float.
 
 ## Summary
 
@@ -48,9 +58,9 @@ to keep live.
 | minimp3-float | working-ram | 23180 |
 | minimp3-float | pipeline-peak | 27788 |
 | minimp3-float | allocation-count | 4 |
-| minimp3-float | stack-max-frame | 1208 |
-| minimp3-float | stack-callgraph | 2032 |
-| minimp3-float | stack-watermark-observed | 2056 |
+| minimp3-float | stack-max-frame | 824 |
+| minimp3-float | stack-callgraph | 1200 |
+| minimp3-float | stack-watermark-observed | 1224 |
 | minimp3-float | static-tables | 7878 |
 | minimp3-float | object-text | 23160 |
 | minimp3-float | object-data | 0 |
@@ -64,8 +74,8 @@ to keep live.
 | minimp3-fixed | working-ram | 23308 |
 | minimp3-fixed | pipeline-peak | 27916 |
 | minimp3-fixed | allocation-count | 4 |
-| minimp3-fixed | stack-max-frame | 1480 |
-| minimp3-fixed | stack-callgraph | 1920 |
+| minimp3-fixed | stack-max-frame | 456 |
+| minimp3-fixed | stack-callgraph | 896 |
 | minimp3-fixed | static-tables | 8077 |
 | minimp3-fixed | object-text | 26181 |
 | minimp3-fixed | object-data | 0 |

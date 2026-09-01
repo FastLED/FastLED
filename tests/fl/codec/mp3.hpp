@@ -348,6 +348,70 @@ FL_TEST_CASE("minimp3 Layer I synthesis matches its reference vector") {
     FL_CHECK_GT(reportPsnr(reference, decoded.mPcm), 60.0);
 }
 
+FL_TEST_CASE("minimp3 Layer I and Layer III do not collide in shared scratch") {
+    // FastLED#4116 overlaps Layer I/II's L12_scale_info with Layer III's
+    // maindata window in a union, on the grounds that a frame is one layer or
+    // the other and never both. The static_assert beside the union checks that
+    // L12_scale_info still fits. Nothing checked the other half of the claim --
+    // that the two are really never live at once -- and that is the half whose
+    // failure would be silent: the sizes would still be fine and only the audio
+    // would be wrong.
+    //
+    // Decoding both layers through one decoder, and so one scratch arena, is
+    // what exercises it. Each stream must come out bit-identical to decoding it
+    // on a decoder that has seen nothing else.
+    fl::setTestFileSystemRoot("tests/data");
+    const fl::vector<fl::u8> layer1 =
+        loadMp3CorpusFile("codec/minimp3/ILL2_layer1.bit");
+    const fl::vector<fl::u8> layer3 =
+        loadMp3CorpusFile("codec/minimp3/l3-hecommon.bit");
+
+    const Mp3DecodeResult alone1 = decodeMp3Corpus<Mp3Minimp3Decoder>(layer1);
+    const Mp3DecodeResult alone3 = decodeMp3Corpus<Mp3Minimp3Decoder>(layer3);
+    FL_REQUIRE_GT(alone1.mPcm.size(), 0u);
+    FL_REQUIRE_GT(alone3.mPcm.size(), 0u);
+    FL_REQUIRE_EQ(alone1.mMetadata[0].mLayer, 1);
+    FL_REQUIRE_EQ(alone3.mMetadata[0].mLayer, 3);
+
+    // Both orders: Layer III leaves the reservoir populated, so III-then-I is
+    // the direction where stale maindata could reach the scale info, and
+    // I-then-III the direction where scale info could survive into maindata.
+    for (int order = 0; order < 2; ++order) {
+        Mp3Minimp3Decoder decoder;
+        FL_REQUIRE(decoder.init());
+
+        const fl::vector<fl::u8>& first = order == 0 ? layer1 : layer3;
+        const fl::vector<fl::u8>& second = order == 0 ? layer3 : layer1;
+        const Mp3DecodeResult& expect_first = order == 0 ? alone1 : alone3;
+        const Mp3DecodeResult& expect_second = order == 0 ? alone3 : alone1;
+
+        fl::vector<fl::i16> got_first;
+        decoder.decode(first.data(), first.size(), [&](const Mp3Frame& frame) {
+            const int n = frame.samples * frame.channels;
+            for (int i = 0; i < n; ++i) {
+                got_first.push_back(frame.pcm[i]);
+            }
+        });
+        fl::vector<fl::i16> got_second;
+        decoder.decode(second.data(), second.size(),
+                       [&](const Mp3Frame& frame) {
+            const int n = frame.samples * frame.channels;
+            for (int i = 0; i < n; ++i) {
+                got_second.push_back(frame.pcm[i]);
+            }
+        });
+
+        FL_REQUIRE_EQ(got_first.size(), expect_first.mPcm.size());
+        FL_REQUIRE_EQ(got_second.size(), expect_second.mPcm.size());
+        for (fl::size i = 0; i < got_first.size(); ++i) {
+            FL_REQUIRE_EQ(got_first[i], expect_first.mPcm[i]);
+        }
+        for (fl::size i = 0; i < got_second.size(); ++i) {
+            FL_REQUIRE_EQ(got_second[i], expect_second.mPcm[i]);
+        }
+    }
+}
+
 FL_TEST_CASE("MP3 decoder resyncs past garbage and survives truncation") {
     fl::setTestFileSystemRoot("tests/data");
     const fl::vector<fl::u8> bitstream =
