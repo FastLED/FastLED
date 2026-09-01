@@ -186,6 +186,7 @@ public:
 
     // Compatibility with the 3.8.x codebase.
     VIRTUAL_IF_NOT_AVR void showLeds(fl::u8 brightness) FL_NO_EXCEPT {
+        fl::detail::advanceDitherFrame();
         fl::EngineEvents::onBeginFrame();
         void* data = beginShowLeds(mLeds.size());
         showLedsInternal(brightness);

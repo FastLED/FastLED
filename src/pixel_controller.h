@@ -308,9 +308,8 @@ struct PixelController {
     /// @see "TEMPORAL DITHERING: THE COMPLETE GUIDE" section above (line 195)
     void init_binary_dithering() {
 #if !defined(NO_DITHERING) || (NO_DITHERING != 1)
-        // STEP 1: Increment frame counter (creates temporal variation)
-        static fl::u8 R = 0; // okay static in header
-        ++R;
+        // STEP 1: Use the phase shared by all controllers in this frame.
+        fl::u8 R = fl::detail::ditherFrame();
 
         // STEP 2: Wrap counter at 2^ditherBits (creates 8-frame cycle: 0,1,2,3,4,5,6,7,0...)
         fl::u8 ditherBits = VIRTUAL_BITS;
