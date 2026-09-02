@@ -96,6 +96,13 @@ MAX_INSTRUCTIONS = 3
 # regression there is visible even though it is not yet optimised.
 MAX_ROUND_INSTRUCTIONS = {"riscv32-esp": 8, "cortex-m4": 10}
 
+# Proof that the rounded multiply is actually here rather than called out to:
+# the target's 32x32->64 multiply must appear in the body. Cortex-M4 emits
+# `smlal` and not `smull`, because the portable form is a multiply followed by
+# an add of the rounding term and the core fuses the two into one
+# multiply-accumulate -- which is why its budget is the larger of the two.
+ROUND_MULTIPLY = {"riscv32-esp": ("mulh",), "cortex-m4": ("smull", "smlal")}
+
 
 def _find(compiler: str) -> str | None:
     found = shutil.which(compiler)
@@ -215,6 +222,16 @@ def test_int_asm_survives_no_inline(
         f"{target}: fl_test_round27 compiled to {len(round_body)} instructions "
         f"under -fno-inline ({' '.join(round_body)}), budget "
         f"{MAX_ROUND_INSTRUCTIONS[target]}."
+    )
+    # The budget alone would be satisfied by a body that just calls out to an
+    # out-of-line copy -- a call and a return is two instructions. Requiring the
+    # target's high-multiply proves the arithmetic is actually here, which is
+    # what FASTLED_FORCE_INLINE is for and what -fno-inline is trying to break.
+    wanted = ROUND_MULTIPLY[target]
+    assert any(op.startswith(m) for op in round_body for m in wanted), (
+        f"{target}: fl_test_round27 has none of {wanted} under -fno-inline "
+        f"({' '.join(round_body)}). The force-inline was declined and the "
+        f"multiply went out of line."
     )
 
     for name, mnemonic in expected.items():

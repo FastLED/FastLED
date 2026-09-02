@@ -22,7 +22,7 @@ import statistics
 import subprocess
 import sys
 import time
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 
@@ -212,7 +212,12 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if args.json:
-        args.json.write_text(json.dumps(results, indent=2))
+        # asdict, because Measurement became a dataclass and json cannot
+        # serialise one directly -- this path is only exercised with --json,
+        # so the conversion broke it silently.
+        args.json.write_text(
+            json.dumps([asdict(r) for r in results], indent=2)
+        )
         print(f"  wrote {args.json}")
     return 0
 
