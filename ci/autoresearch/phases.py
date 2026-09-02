@@ -655,7 +655,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         )
         if any_incompatible_mode:
             print(
-                f"{Fore.RED}\u274c Error: --decode cannot be combined with driver flags, --simd, --coroutine, --net, --ota, or --ble{Style.RESET_ALL}"
+                f"{Fore.RED}\u274c Error: --decode cannot be combined with driver flags, --simd, --coroutine, --mp3, --net, --ota, or --ble{Style.RESET_ALL}"
             )
             return 1
 
@@ -676,7 +676,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         or rpc_smoke_mode
     ):
         print(
-            f"{Fore.RED}\u274c Error: network, OTA, and BLE modes cannot be combined with driver flags, --simd, or --coroutine{Style.RESET_ALL}"
+            f"{Fore.RED}\u274c Error: network, OTA, and BLE modes cannot be combined with driver flags, --simd, --coroutine, or --mp3{Style.RESET_ALL}"
         )
         return 1
     net_mode_count = sum(
@@ -3002,10 +3002,18 @@ async def _run_mp3_tests(ctx: RunContext) -> int:
             )
             print(f"   shared-decoder verification pass: {verify} us")
             if ratio < 1.0:
+                # Printing this and returning success made the one result that
+                # matters advisory: a decoder that cannot keep up with playback
+                # has failed on this part, whatever its checksum says.
                 print(
                     f"{Fore.RED}   the decoder cannot keep up with playback on "
                     f"this part{Style.RESET_ALL}"
                 )
+                print(
+                    f"{Fore.RED}MP3 CODEC TEST FAILED"
+                    f" (decode is {ratio:.2f}x real time){Style.RESET_ALL}"
+                )
+                return 1
             return 0
 
         print(
