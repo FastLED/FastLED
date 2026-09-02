@@ -7,6 +7,8 @@
     This software is distributed without any warranty.
     See <http://creativecommons.org/publicdomain/zero/1.0/>.
 */
+#include "fl/stl/compiler_control.h"
+#include "fl/math/int_asm.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/stdint.h"
@@ -251,6 +253,57 @@ namespace MINIMP3_NAMESPACE {
 #define MAX_FRAME_SYNC_MATCHES      10
 #endif /* MAX_FRAME_SYNC_MATCHES */
 
+/* ---------------------------------------------------------------------------
+   Inline policy.
+
+   Two things are wanted from the same source and they conflict. While hunting
+   hotspots the hot functions must stay separable, or the profiler attributes
+   their cost to whatever inlined them -- that is how `mp3d_synth_granule` came
+   to read as 53% of the decode when a third of it was the DCT-32. While
+   shipping, the opposite: inline everything and let the compiler see through
+   it, because the wins in this decoder have repeatedly come from removing call
+   overhead and spill traffic around small leaves.
+
+   Three modes, selected at build time:
+
+     (default)                 the shipping policy. Leaves force-inlined; hot
+                               blocks left to the compiler except where a
+                               measurement said otherwise.
+     MINIMP3_PROFILE_ATTRIBUTION   keep the hot blocks out of line so
+                               callgrind_annotate can attribute them
+                               separately. Slower; for measurement only.
+     MINIMP3_MAX_INLINE        force-inline everything and ask for O3 on the
+                               kernels. Largest .text; use when flash is free
+                               and the last few percent matter.
+
+   MP3D_LEAF marks small helpers that should essentially always be inlined.
+   MP3D_HOT marks the big kernels whose attribution matters when profiling.
+
+   Do not assume MAX_INLINE is fastest without measuring. -O3 on the polyphase
+   emits 395 memory operations against a hand-written 188, and the biggest win
+   in this file came from *out*-of-lining mp3d_synth so the register allocator
+   stopped spilling across it. Measure on the device: the 64-bit host has
+   ranked these changes backwards twice.
+   --------------------------------------------------------------------------- */
+#if defined(MINIMP3_PROFILE_ATTRIBUTION) && defined(MINIMP3_MAX_INLINE)
+#error "MINIMP3_PROFILE_ATTRIBUTION and MINIMP3_MAX_INLINE are mutually exclusive"
+#endif
+
+#if defined(MINIMP3_MAX_INLINE)
+#define MP3D_LEAF FASTLED_FORCE_INLINE
+#define MP3D_HOT FASTLED_FORCE_INLINE
+#define MP3D_KERNEL FL_OPTIMIZE_FUNCTION
+#elif defined(MINIMP3_PROFILE_ATTRIBUTION)
+#define MP3D_LEAF static
+#define MP3D_HOT FL_NO_INLINE static
+#define MP3D_KERNEL FL_NO_INLINE
+#else
+#define MP3D_LEAF FL_ALWAYS_INLINE
+#define MP3D_HOT FL_NO_INLINE static
+#define MP3D_KERNEL FL_OPTIMIZE_FUNCTION
+#endif
+
+
 #define MAX_L3_FRAME_PAYLOAD_BYTES  MAX_FREE_FORMAT_FRAME_SIZE /* MUST be >= 320000/8/32000*1152 = 1440 */
 
 #define MAX_BITRESERVOIR_BYTES      511
@@ -332,6 +385,32 @@ static int32_t mp3d_sat64(int64_t value) FL_NO_EXCEPT
     return (int32_t)value;
 }
 
+/* FastLED: the small arithmetic helpers are force-inlined, and on a 32-bit
+   target that is worth more than any amount of tuning inside them.
+
+   gcc at -Os declines to inline mp3d_mulshift, mp3d_narrow_q30 and
+   mp3d_scale_pcm -- they are called from 36, 12 and 10 sites respectively, and
+   the size heuristic sees three functions worth keeping once. They are also
+   the innermost helpers in the decoder, which is the part the heuristic cannot
+   see: mp3d_scale_pcm alone runs 1.46M times over the audit corpus.
+
+   mp3d_mulshift is the worst of the three, and for an extra reason: `bits` is
+   a parameter, so out of line the compiler must emit a *variable* 64-bit shift
+   and a runtime rounding term -- 42 instructions on riscv32, plus call
+   overhead. Every one of its call sites passes a literal (27, 29, 30 or 31),
+   which folds that down to a handful. Inlining it alone took the C6 from
+   102,461 us to 56,105 us; adding the other two brought it to 50,933 us, a
+   ratio against Helix of 1.46x where it started at 2.84x.
+
+   The cost is 1750 bytes on the codec translation unit's .text, +14% measured
+   against the unmodified header (the mp3d_scale_pcm rewrite below gives 46 of
+   those bytes back, so the inlining alone accounts for 1796). Nothing about
+   the arithmetic changes: the host CPU-audit checksum and the device's FNV-1a
+   over decoded PCM are both unchanged, so this is pure codegen.
+
+   x86-64 sees none of this -- clang at -O2 already inlines all three, which is
+   exactly why the host callgrind number cannot be the authority here. */
+
 /* value * coefficient, where the coefficient is Q`bits`.
 
    Saturates on the way down to 32 bits. The coefficients are not all <= 1 --
@@ -346,11 +425,26 @@ static int32_t mp3d_sat64(int64_t value) FL_NO_EXCEPT
 
    Worth stating why this cannot be left to the fuzz gate: narrowing an int64 to
    int32 is implementation-defined, not undefined, so UBSan does not see it. */
-static int32_t mp3d_mulshift(int32_t value, int32_t coef, int bits) FL_NO_EXCEPT
+/* `(value * coef + 2^(Bits-1)) >> Bits`, via fl::math::mul_shift_round32.
+   Templated on the shift rather than taking it as a parameter: every one of the
+   36 call sites passes a literal (27, 29, 30 or 31), and a runtime `bits` forces
+   a variable 64-bit shift plus a runtime rounding term -- 42 riscv32
+   instructions against 10.
+
+   The result is no longer saturated. On riscv32 -Os the saturating form was 25
+   instructions, 15 of them the 64-bit clamp, and that clamp is very nearly
+   never taken: across the 83 ISO conformance vectors it fired 268 times in
+   40,613,225 calls, all 268 from one malformed stream
+   (`l3-nonstandard-big-iscf`), and zero times in 21,067,559 calls on real
+   music. Same reasoning, same evidence and same regression vector as the
+   butterfly clamp removed earlier.
+
+   Not to be confused with FastLED#4127's dequant clamp, which is a different
+   clamp on a different quantity and is untouched. */
+template <int Bits>
+MP3D_LEAF int32_t mp3d_mulshift(int32_t value, int32_t coef) FL_NO_EXCEPT
 {
-    int64_t product = (int64_t)value * (int64_t)coef;
-    product += (int64_t)1 << (bits - 1);
-    return mp3d_sat64(product >> bits);
+    return fl::math::mul_shift_round32<Bits>(value, coef);
 }
 
 /* Left shift that is defined for negative inputs, with saturation. `shift` is
@@ -384,32 +478,84 @@ static int32_t mp3d_shr_round(int32_t value, int shift) FL_NO_EXCEPT
 }
 
 /* Narrow a Q30 accumulator to a sample, rounding once (half toward +infinity,
-   as above) for the whole accumulation rather than once per product. */
-static int32_t mp3d_narrow_q30(int64_t acc) FL_NO_EXCEPT
+   as above) for the whole accumulation rather than once per product.
+
+   The narrow wraps rather than saturating (FastLED#4139, third instance).
+
+   This is the IMDCT's output stage: L3_imdct36's twiddle-and-window loop and
+   L3_imdct12 between them call it four times per output, and it is the only
+   caller of mp3d_sat64 left on the IMDCT path. Out of line the saturating form
+   is two 64-bit comparisons against 64-bit constants, which a 32-bit target
+   pays for as a compare/branch pair per half.
+
+   Instrumented the same way the butterfly and mulshift clamps were before they
+   went, counting actual clamps rather than calls:
+
+     83 ISO conformance vectors   14,685,696 calls   273 clamps   0.0019%
+     repo corpus (real music)      2,635,776 calls     0 clamps   0%
+
+   and all 273 come from l3-nonstandard-big-iscf.bit, the same malformed
+   intensity-stereo vector that accounts for every clamp the other two ever
+   took. The other 82 vectors clamp zero times. So on conformant input the two
+   forms produce identical bits, because the branch is never taken.
+
+   The narrowing is written through uint32_t rather than as a plain int64 ->
+   int32 conversion. That conversion is implementation-defined, not undefined,
+   so it would not be a correctness bug -- but the wrapping form is specified,
+   compiles to the same instruction, and matches MP3D_WRAP_ADD's idiom.
+
+   The vector path's mp3d_v_narrow still saturates, because there vqmovn_s64
+   and its SSE equivalent do it for free. That divergence is pre-existing --
+   MP3D_V_MULSHIFT already saturates where the scalar mp3d_mulshift no longer
+   does -- and it is unobservable on everything except the one malformed
+   vector; the SIMD-equals-scalar gate runs the real-music corpus, where
+   neither form ever clamps. */
+MP3D_LEAF int32_t mp3d_narrow_q30(int64_t acc) FL_NO_EXCEPT
 {
-    return mp3d_sat64((acc + ((int64_t)1 << 29)) >> 30);
+    return (int32_t)(uint32_t)((acc + ((int64_t)1 << 29)) >> 30);
 }
 
-/* Saturating add/subtract, via a 64-bit intermediate.
+/* Butterfly add/subtract with defined wraparound (FastLED#4139).
 
-   These run tens of times per butterfly in the DCT-32 and IMDCT, so a 32-bit
-   branchless form is tempting -- a 64-bit add is a register pair and a carry
-   chain on the MCUs this path targets. It was tried and reverted: on the one
-   target that could actually be measured it cost 6,265 bytes of text (+24%)
-   and 48 bytes of decode stack for ~3% of decode time, and the MCU argument for
-   it was never verified on an MCU. Revisit only with cross-compiled codegen
-   numbers; codec_cpu_trend.json has the rig.
+   These were saturating, via a 64-bit intermediate, and that was 24.5% of the
+   whole decode on x86-64 and 32.4% of mp3d_DCT_II's instructions on riscv32.
+   Removing it is worth 28% of Layer III decode time on an ESP32-C6: the gap to
+   the retired Helix backend goes from 3.99x to 2.84x, and real-time margin from
+   1.51x to 2.09x.
 
-   Note the saturation range is symmetric (see MP3D_SAT_MIN), which the vector
-   forms of these must reproduce exactly. */
+   It costs nothing, on four separate measurements:
+
+     - Output is bit-identical on conformant content. Instrumenting the clamp
+       showed it firing 4,609 times in 154,115,265 calls across the 83 ISO
+       vectors -- and every one of those from a single stream,
+       l3-nonstandard-big-iscf. On the repo's real-music corpus: 82,537,927
+       calls, zero clamps.
+     - All 83 ISO vectors still pass the 60 dB floor, fixed and float.
+     - ASan/UBSan clean across all 83 bitstreams. Unsigned arithmetic wraps by
+       definition, so this is specified behaviour, not the undefined overflow
+       FastLED#4133 removed.
+     - On the one vector that did clamp, the audible result is unchanged:
+       peak 32768 either way, mean |x| 16649 -> 17011, near-full-scale samples
+       46.4% -> 47.3%. The old comment argued the clamp bought "a bounded clip
+       instead of an audible bang"; measured, that stream is a wall of
+       near-full-scale noise with or without it.
+
+   Note this is NOT FastLED#4127's clamp. That one bounds *dequantised samples*
+   and was worth 81 dB; it is untouched, as is mp3d_sat64 itself, which is still
+   used by mp3d_mulshift and mp3d_narrow_q30 where the 64-bit intermediate is
+   real and the narrowing has to be bounded.
+
+   A branchless 32-bit saturating form was tried earlier and reverted at +24%
+   text for ~3% of decode time. This is a different change: not a cheaper clamp,
+   but no clamp where none was doing anything. */
 static int32_t mp3d_add_sat(int32_t a, int32_t b) FL_NO_EXCEPT
 {
-    return mp3d_sat64((int64_t)a + (int64_t)b);
+    return MP3D_WRAP_ADD(a, b);
 }
 
 static int32_t mp3d_sub_sat(int32_t a, int32_t b) FL_NO_EXCEPT
 {
-    return mp3d_sat64((int64_t)a - (int64_t)b);
+    return MP3D_WRAP_SUB(a, b);
 }
 
 /* One Q26 unit of 1.0, and the clamp applied to dequantised samples.
@@ -709,7 +855,28 @@ static void bs_init(bs_t *bs, const uint8_t *data, int bytes) FL_NO_EXCEPT
     bs->limit = bytes*8;
 }
 
-static uint32_t get_bits(bs_t *bs, int n) FL_NO_EXCEPT
+/* Force-inlined for riscv32 -Os, which leaves all four of these out of line.
+
+   FastLED#4117 force-inlined the DSP leaves and left the bitstream ones
+   alone, on the reading that minimp3 was already ahead of the retired Helix
+   backend on Huffman and dequantisation. It was not: that comparison counted
+   only the rows Callgrind attributed to this header and dropped the ones it
+   attributed to fl/math's int_asm.h for the same functions. Summed properly,
+   mp3dec_decode_frame_r is 43.6M instructions against Helix's 37.7M for
+   DecodeHuffman plus DequantBlock -- 5.9M behind, not 1.6M ahead.
+
+   Inlining the four leaves gcc leaves out of line at -Os is worth
+   41,634 -> 40,868 us on an ESP32-C6, 1.8% of the whole Layer III decode
+   (0.97% after normalising against the Helix reference measured in the same
+   two flashes, which moved 0.9%). Output is bit-identical: combined FNV-1a
+   0xc6b632ab, unchanged. It costs 1,716 bytes of .text.
+
+   mp3d_l12_scale is in the set on the same reasoning but honestly cannot be
+   credited with any of that number: it is Layer I/II code and the benchmark
+   above is Layer III only. It is kept because it is the same situation --
+   216 bytes out of line at -Os on a per-sample leaf -- and because removing
+   it would invalidate the measurement the other three come from. */
+MP3D_LEAF uint32_t get_bits(bs_t *bs, int n) FL_NO_EXCEPT
 {
     uint32_t next, cache = 0, s = bs->pos & 7;
     int shl = n + s;
@@ -825,7 +992,8 @@ static const L12_subband_alloc_t *L12_subband_alloc_table(const uint8_t *hdr, L1
 
 #if MINIMP3_HAVE_FIXED_POINT
 /* raw quantised value * Layer I/II step, landed in Q(MINIMP3_FRAC_BITS). */
-static int32_t mp3d_l12_scale(int32_t raw, int32_t mant, int exp) FL_NO_EXCEPT
+/* Force-inlined with get_bits above; see that comment. */
+MP3D_LEAF int32_t mp3d_l12_scale(int32_t raw, int32_t mant, int exp) FL_NO_EXCEPT
 {
     int64_t product = (int64_t)raw * (int64_t)mant;
     int shift;
@@ -1229,20 +1397,21 @@ static int32_t mp3d_pow43(int x, int *exp) FL_NO_EXCEPT
        and shifting a negative value left is UB, which the differential fuzzer
        caught under UBSan. */
     frac = (int32_t)(((int64_t)num * ((int64_t)1 << 30)) / den);
-    term = MP3D_Q30_POW43_C1 + mp3d_mulshift(frac, MP3D_Q30_POW43_C2, 30);
+    term = MP3D_Q30_POW43_C1 + mp3d_mulshift<30>(frac, MP3D_Q30_POW43_C2);
     /* Shift by 31 rather than 30: the polynomial reaches 1.72, which would
        carry a normalised mantissa past INT32_MAX. The lost bit is paid back
        in the exponent. */
-    poly = ((int32_t)1 << 30) + mp3d_mulshift(frac, term, 30);
+    poly = ((int32_t)1 << 30) + mp3d_mulshift<30>(frac, term);
     idx = 16 + ((x + sign) >> 6);
     *exp = g_pow43_exp[idx] + mult_log2 + 1;
-    return mp3d_mulshift(g_pow43_mant[idx], poly, 31);
+    return mp3d_mulshift<31>(g_pow43_mant[idx], poly);
 }
 
 /* scalefactor gain * x**(4/3), landed in Q(MINIMP3_FRAC_BITS) and clamped.
    Both inputs carry their own exponent, so this is where the pipeline's one
    unbounded quantity collapses into the fixed Q format. */
-static int32_t mp3d_dequant(int32_t gain_mant, int gain_exp,
+/* Force-inlined with get_bits above; see that comment. */
+MP3D_LEAF int32_t mp3d_dequant(int32_t gain_mant, int gain_exp,
                             int32_t pow_mant, int pow_exp) FL_NO_EXCEPT
 {
     int64_t product;
@@ -1383,7 +1552,8 @@ static int32_t mp3d_huff_escape(int32_t gain_mant, int gain_exp, int lsb,
     return negative ? -value : value;
 }
 
-static int32_t mp3d_huff_one(int32_t gain_mant, int gain_exp,
+/* Force-inlined with get_bits above; see that comment. */
+MP3D_LEAF int32_t mp3d_huff_one(int32_t gain_mant, int gain_exp,
                              int negative) FL_NO_EXCEPT
 {
     const int32_t value = mp3d_scale_to_q(gain_mant, gain_exp);
@@ -1630,8 +1800,8 @@ static void L3_intensity_stereo_band(mp3d_dsp_t *left, int n, mp3d_coef_t kl, mp
     for (i = 0; i < n; i++)
     {
 #if MINIMP3_HAVE_FIXED_POINT
-        left[i + 576] = mp3d_mulshift(left[i], kr, 30);
-        left[i] = mp3d_mulshift(left[i], kl, 30);
+        left[i + 576] = mp3d_mulshift<30>(left[i], kr);
+        left[i] = mp3d_mulshift<30>(left[i], kl);
 #else
         left[i + 576] = left[i]*kr;
         left[i] = left[i]*kl;
@@ -1702,8 +1872,8 @@ static void L3_stereo_process(mp3d_dsp_t *left, const uint8_t *ist_pos, const ui
                     kr = (int32_t)1 << 30;
                 }
             }
-            L3_intensity_stereo_band(left, sfb[i], mp3d_mulshift(kl, s, 30),
-                                     mp3d_mulshift(kr, s, 30));
+            L3_intensity_stereo_band(left, sfb[i], mp3d_mulshift<30>(kl, s),
+                                     mp3d_mulshift<30>(kr, s));
 #else
             float kl, kr, s = HDR_TEST_MS_STEREO(hdr) ? 1.41421356f : 1;
             if (HDR_TEST_MPEG1(hdr))
@@ -1798,10 +1968,10 @@ static void L3_antialias(mp3d_dsp_t *grbuf, int nbands) FL_NO_EXCEPT
 #if MINIMP3_HAVE_FIXED_POINT
             const int32_t u = grbuf[18 + i];
             const int32_t d = grbuf[17 - i];
-            grbuf[18 + i] = mp3d_sub_sat(mp3d_mulshift(u, g_aa_cs_q31[i], 31),
-                                         mp3d_mulshift(d, g_aa_ca_q31[i], 31));
-            grbuf[17 - i] = mp3d_add_sat(mp3d_mulshift(u, g_aa_ca_q31[i], 31),
-                                         mp3d_mulshift(d, g_aa_cs_q31[i], 31));
+            grbuf[18 + i] = mp3d_sub_sat(mp3d_mulshift<31>(u, g_aa_cs_q31[i]),
+                                         mp3d_mulshift<31>(d, g_aa_ca_q31[i]));
+            grbuf[17 - i] = mp3d_add_sat(mp3d_mulshift<31>(u, g_aa_ca_q31[i]),
+                                         mp3d_mulshift<31>(d, g_aa_cs_q31[i]));
 #else
             float u = grbuf[18 + i];
             float d = grbuf[17 - i];
@@ -1825,9 +1995,9 @@ static void L3_dct3_9(int32_t *y) FL_NO_EXCEPT
     s0 = y[0]; s2 = y[2]; s4 = y[4]; s6 = y[6]; s8 = y[8];
     t0 = mp3d_add_sat(s0, mp3d_shr_round(s6, 1));
     s0 = mp3d_sub_sat(s0, s6);
-    t4 = mp3d_mulshift(mp3d_add_sat(s4, s2), MP3D_Q31_COS_PI_9, 31);
-    t2 = mp3d_mulshift(mp3d_add_sat(s8, s2), MP3D_Q31_COS_2PI_9, 31);
-    s6 = mp3d_mulshift(mp3d_sub_sat(s4, s8), MP3D_Q31_COS_4PI_9, 31);
+    t4 = mp3d_mulshift<31>(mp3d_add_sat(s4, s2), MP3D_Q31_COS_PI_9);
+    t2 = mp3d_mulshift<31>(mp3d_add_sat(s8, s2), MP3D_Q31_COS_2PI_9);
+    s6 = mp3d_mulshift<31>(mp3d_sub_sat(s4, s8), MP3D_Q31_COS_4PI_9);
     s4 = mp3d_add_sat(s4, mp3d_sub_sat(s8, s2));
 
     s2 = mp3d_sub_sat(s0, mp3d_shr_round(s4, 1));
@@ -1838,12 +2008,12 @@ static void L3_dct3_9(int32_t *y) FL_NO_EXCEPT
 
     s1 = y[1]; s3 = y[3]; s5 = y[5]; s7 = y[7];
 
-    s3 = mp3d_mulshift(s3, MP3D_Q31_COS_PI_6, 31);
-    t0 = mp3d_mulshift(mp3d_add_sat(s5, s1), MP3D_Q31_COS_PI_18, 31);
-    t4 = mp3d_mulshift(mp3d_sub_sat(s5, s7), MP3D_Q31_COS_7PI_18, 31);
-    t2 = mp3d_mulshift(mp3d_add_sat(s1, s7), MP3D_Q31_COS_5PI_18, 31);
-    s1 = mp3d_mulshift(mp3d_sub_sat(mp3d_sub_sat(s1, s5), s7),
-                       MP3D_Q31_COS_PI_6, 31);
+    s3 = mp3d_mulshift<31>(s3, MP3D_Q31_COS_PI_6);
+    t0 = mp3d_mulshift<31>(mp3d_add_sat(s5, s1), MP3D_Q31_COS_PI_18);
+    t4 = mp3d_mulshift<31>(mp3d_sub_sat(s5, s7), MP3D_Q31_COS_7PI_18);
+    t2 = mp3d_mulshift<31>(mp3d_add_sat(s1, s7), MP3D_Q31_COS_5PI_18);
+    s1 = mp3d_mulshift<31>(mp3d_sub_sat(mp3d_sub_sat(s1, s5), s7),
+                       MP3D_Q31_COS_PI_6);
 
     s5 = mp3d_sub_sat(mp3d_sub_sat(t0, s3), t2);
     s7 = mp3d_sub_sat(mp3d_sub_sat(t4, s3), t0);
@@ -1868,7 +2038,9 @@ static void mp3d_imdct36_twiddle(int32_t *grbuf, int32_t *overlap,
                                  const int32_t *window, const int32_t *co,
                                  const int32_t *si) FL_NO_EXCEPT;
 
-static void L3_imdct36(int32_t *grbuf, int32_t *overlap, const int32_t *window, int nbands) FL_NO_EXCEPT
+/* -O3 for the same reason as mp3d_DCT_II above; the two were measured
+   together. */
+MP3D_KERNEL static void L3_imdct36(int32_t *grbuf, int32_t *overlap, const int32_t *window, int nbands) FL_NO_EXCEPT
 {
     int i, j;
 
@@ -1903,7 +2075,7 @@ static void L3_imdct36(int32_t *grbuf, int32_t *overlap, const int32_t *window, 
 
 static void L3_idct3(int32_t x0, int32_t x1, int32_t x2, int32_t *dst) FL_NO_EXCEPT
 {
-    const int32_t m1 = mp3d_mulshift(x1, MP3D_Q31_COS_PI_6, 31);
+    const int32_t m1 = mp3d_mulshift<31>(x1, MP3D_Q31_COS_PI_6);
     const int32_t a1 = mp3d_sub_sat(x0, mp3d_shr_round(x2, 1));
     dst[1] = mp3d_add_sat(x0, x2);
     dst[0] = mp3d_add_sat(a1, m1);
@@ -2603,7 +2775,9 @@ MP3D_SIMD_TARGET static void mp3d_dct2_bands4(int32_t *grbuf, int k) FL_NO_EXCEP
    the scalar loop otherwise. Both compute each output as two int64 products
    narrowed once; rounding per product would differ between the two paths in
    the low bit, and #4055's gate is exact equality. */
-static void mp3d_imdct36_twiddle(int32_t *grbuf, int32_t *overlap,
+/* -O3 for the same reason as mp3d_DCT_II above; the two were measured
+   together. */
+MP3D_KERNEL static void mp3d_imdct36_twiddle(int32_t *grbuf, int32_t *overlap,
                                  const int32_t *window, const int32_t *co,
                                  const int32_t *si) FL_NO_EXCEPT
 {
@@ -2631,7 +2805,28 @@ static void mp3d_imdct36_twiddle(int32_t *grbuf, int32_t *overlap,
     }
 }
 
-static void mp3d_DCT_II(int32_t *grbuf, int n) FL_NO_EXCEPT
+/* Forced to -O3 for the device, not for the host.
+
+   Every ESP-IDF build in this project compiles at -Os
+   (CONFIG_COMPILER_OPTIMIZATION_SIZE=y), and on these three kernels that is
+   the wrong trade: they are straight-line butterfly code with no loop that
+   -Os is protecting anyone from. Raising just them, on top of the polyphase
+   rework below, is 41,998 -> 41,634 us on an ESP32-C6 -- 0.87%, about three
+   times the flash-to-flash drift of the Helix reference measured alongside
+   it -- for 1,310 bytes of .text (14,564 -> 15,874, +9.0%). Output is
+   bit-identical: the ESP32-C6's combined FNV-1a over the decoded PCM is
+   0xc6b632ab either way.
+
+   ci/codec_cpu/callgrind.py cannot see this at all, because the host harness
+   already builds at -O2. It is one of the few changes in this file that has
+   to be decided on hardware.
+
+   Deliberately not applied to mp3d_synth: there -O3 unrolls the four-lane
+   chain to 3,007 instructions and 798 memory operations against the 998 and
+   188 the hand-written pair form below produces, and .text goes to 20,748
+   bytes. The unroll is the thing that helps, and doing it by hand is both
+   smaller and faster than asking for it. */
+MP3D_KERNEL static void mp3d_DCT_II(int32_t *grbuf, int n) FL_NO_EXCEPT
 {
     int i, k = 0;
 #if MP3D_HAVE_INT_SIMD
@@ -2655,12 +2850,12 @@ static void mp3d_DCT_II(int32_t *grbuf, int n) FL_NO_EXCEPT
             const int32_t x3 = y[(31 - i)*18];
             const int32_t t0 = mp3d_add_sat(x0, x3);
             const int32_t t1 = mp3d_add_sat(x1, x2);
-            const int32_t t2 = mp3d_mulshift(mp3d_sub_sat(x1, x2), g_sec_q27[3*i + 0], 27);
-            const int32_t t3 = mp3d_mulshift(mp3d_sub_sat(x0, x3), g_sec_q27[3*i + 1], 27);
+            const int32_t t2 = mp3d_mulshift<27>(mp3d_sub_sat(x1, x2), g_sec_q27[3*i + 0]);
+            const int32_t t3 = mp3d_mulshift<27>(mp3d_sub_sat(x0, x3), g_sec_q27[3*i + 1]);
             x[0]  = mp3d_add_sat(t0, t1);
-            x[8]  = mp3d_mulshift(mp3d_sub_sat(t0, t1), g_sec_q27[3*i + 2], 27);
+            x[8]  = mp3d_mulshift<27>(mp3d_sub_sat(t0, t1), g_sec_q27[3*i + 2]);
             x[16] = mp3d_add_sat(t3, t2);
-            x[24] = mp3d_mulshift(mp3d_sub_sat(t3, t2), g_sec_q27[3*i + 2], 27);
+            x[24] = mp3d_mulshift<27>(mp3d_sub_sat(t3, t2), g_sec_q27[3*i + 2]);
         }
         for (x = t[0], i = 0; i < 4; i++, x += 8)
         {
@@ -2673,22 +2868,22 @@ static void mp3d_DCT_II(int32_t *grbuf, int n) FL_NO_EXCEPT
             x4 = mp3d_sub_sat(x0, x3); x0 = mp3d_add_sat(x0, x3);
             x3 = mp3d_sub_sat(x1, x2); x1 = mp3d_add_sat(x1, x2);
             x[0] = mp3d_add_sat(x0, x1);
-            x[4] = mp3d_mulshift(mp3d_sub_sat(x0, x1), MP3D_Q31_COS_PI_4, 31);
+            x[4] = mp3d_mulshift<31>(mp3d_sub_sat(x0, x1), MP3D_Q31_COS_PI_4);
             x5 = mp3d_add_sat(x5, x6);
-            x6 = mp3d_mulshift(mp3d_add_sat(x6, x7), MP3D_Q31_COS_PI_4, 31);
+            x6 = mp3d_mulshift<31>(mp3d_add_sat(x6, x7), MP3D_Q31_COS_PI_4);
             x7 = mp3d_add_sat(x7, xt);
-            x3 = mp3d_mulshift(mp3d_add_sat(x3, x4), MP3D_Q31_COS_PI_4, 31);
+            x3 = mp3d_mulshift<31>(mp3d_add_sat(x3, x4), MP3D_Q31_COS_PI_4);
             /* rotate by PI/8 */
-            x5 = mp3d_sub_sat(x5, mp3d_mulshift(x7, MP3D_Q31_TAN_PI_16, 31));
-            x7 = mp3d_add_sat(x7, mp3d_mulshift(x5, MP3D_Q31_SIN_PI_8, 31));
-            x5 = mp3d_sub_sat(x5, mp3d_mulshift(x7, MP3D_Q31_TAN_PI_16, 31));
+            x5 = mp3d_sub_sat(x5, mp3d_mulshift<31>(x7, MP3D_Q31_TAN_PI_16));
+            x7 = mp3d_add_sat(x7, mp3d_mulshift<31>(x5, MP3D_Q31_SIN_PI_8));
+            x5 = mp3d_sub_sat(x5, mp3d_mulshift<31>(x7, MP3D_Q31_TAN_PI_16));
             x0 = mp3d_sub_sat(xt, x6); xt = mp3d_add_sat(xt, x6);
-            x[1] = mp3d_mulshift(mp3d_add_sat(xt, x7), MP3D_Q29_SEC_PI_16, 29);
-            x[2] = mp3d_mulshift(mp3d_add_sat(x4, x3), MP3D_Q29_SEC_PI_8, 29);
-            x[3] = mp3d_mulshift(mp3d_sub_sat(x0, x5), MP3D_Q29_SEC_3PI_16, 29);
-            x[5] = mp3d_mulshift(mp3d_add_sat(x0, x5), MP3D_Q29_SEC_5PI_16, 29);
-            x[6] = mp3d_mulshift(mp3d_sub_sat(x4, x3), MP3D_Q29_SEC_3PI_8, 29);
-            x[7] = mp3d_mulshift(mp3d_sub_sat(xt, x7), MP3D_Q29_SEC_7PI_16, 29);
+            x[1] = mp3d_mulshift<29>(mp3d_add_sat(xt, x7), MP3D_Q29_SEC_PI_16);
+            x[2] = mp3d_mulshift<29>(mp3d_add_sat(x4, x3), MP3D_Q29_SEC_PI_8);
+            x[3] = mp3d_mulshift<29>(mp3d_sub_sat(x0, x5), MP3D_Q29_SEC_3PI_16);
+            x[5] = mp3d_mulshift<29>(mp3d_add_sat(x0, x5), MP3D_Q29_SEC_5PI_16);
+            x[6] = mp3d_mulshift<29>(mp3d_sub_sat(x4, x3), MP3D_Q29_SEC_3PI_8);
+            x[7] = mp3d_mulshift<29>(mp3d_sub_sat(xt, x7), MP3D_Q29_SEC_7PI_16);
         }
         for (i = 0; i < 7; i++, y += 4*18)
         {
@@ -2708,19 +2903,45 @@ static void mp3d_DCT_II(int32_t *grbuf, int n) FL_NO_EXCEPT
    rounding exactly: add a half, truncate toward zero, then step away from zero
    for negatives ("away from zero, to be compliant"). Matching it matters --
    the fixed-vs-float gate is measured in LSBs, and a different rounding rule
-   alone would put a one-LSB difference on roughly every sample. */
-#define MP3D_PCM_HALF   ((int64_t)1 << (MINIMP3_FRAC_BITS - 1))
-#define MP3D_PCM_UPPER  (((int64_t)65533) << (MINIMP3_FRAC_BITS - 1))
-#define MP3D_PCM_LOWER  (-(((int64_t)65535) << (MINIMP3_FRAC_BITS - 1)))
+   alone would put a one-LSB difference on roughly every sample.
 
-static mp3d_sample_t mp3d_scale_pcm(int64_t sample) FL_NO_EXCEPT
+   The clamp happens after the shift rather than before it, which is what keeps
+   all but one operation here in 32 bits. This is an exact rewrite, not an
+   approximation, and the equivalence is worth spelling out because the
+   thresholds look like they moved:
+
+     - The old upper test fired at sample >= 32766.5 LSB. At exactly that point
+       t is 32767 LSB, so the shift yields s = 32767 and the new `s > 32767`
+       clamp returns 32767 -- and above it, more. Below it t < 32767 LSB, so
+       s <= 32766 and the clamp cannot fire. Same partition, same answers.
+     - The old lower test fired at sample <= -32767.5 LSB, where -t is at least
+       32767 LSB; truncation gives s <= -32767 and the `s -= (s < 0)` step puts
+       it at -32768 or beyond, which the new clamp returns. Above it -t is under
+       32767 LSB, so s >= -32767 after the step and the clamp cannot fire.
+
+   The shift result always fits in int32 long before the clamp needs to
+   consider it: the polyphase accumulator is bounded by 2^31 * 178833 < 2^48.5
+   (the largest window row, summed in absolute value), so `t >> 26` is at most
+   about 2^22.5.
+
+   What this buys is two 64-bit comparisons against 64-bit constants, which a
+   32-bit target pays for in a compare/branch pair per half. Measured out of
+   line on riscv32 -Os the function drops from 42 instructions to 29, and the
+   host callgrind total from 283.0M to 276.2M. It is a small win on its own --
+   0.8% of Layer III on the C6, against the 50% the force-inlining above is
+   worth -- but it is free. Nothing about the arithmetic
+   changes -- the CPU audit checksum is byte-identical either way, and the
+   ESP32-C6 reports the same combined FNV-1a over the decoded PCM. */
+#define MP3D_PCM_HALF   ((int64_t)1 << (MINIMP3_FRAC_BITS - 1))
+
+MP3D_LEAF mp3d_sample_t mp3d_scale_pcm(int64_t sample) FL_NO_EXCEPT
 {
-    int64_t t, s;
-    if (sample >= MP3D_PCM_UPPER) return (int16_t) 32767;
-    if (sample <= MP3D_PCM_LOWER) return (int16_t)-32768;
-    t = sample + MP3D_PCM_HALF;
-    s = t >= 0 ? (t >> MINIMP3_FRAC_BITS) : -((-t) >> MINIMP3_FRAC_BITS);
+    const int64_t t = sample + MP3D_PCM_HALF;
+    int32_t s = (int32_t)(t >= 0 ? (t >> MINIMP3_FRAC_BITS)
+                                 : -((-t) >> MINIMP3_FRAC_BITS));
     s -= (s < 0);
+    if (s > 32767) return (int16_t) 32767;
+    if (s < -32768) return (int16_t)-32768;
     return (int16_t)s;
 }
 
@@ -2829,7 +3050,33 @@ MP3D_SIMD_TARGET static void mp3d_synth_taps(const int32_t *zlin,
 }
 #endif /* MP3D_HAVE_INT_SIMD */
 
-static void mp3d_synth(int32_t *xl, mp3d_sample_t *dstl, int nch, int32_t *lins) FL_NO_EXCEPT
+/* Kept out of line deliberately, but for much less than the host says.
+
+   gcc inlines this into mp3d_synth_granule's `for (i = 0; i < nbands; i += 2)`
+   loop at both -O2 and -Os. On an x86-64 host that is a large pessimisation:
+   the polyphase keeps its 64-bit accumulators live across an eight-tap chain,
+   and folded into the granule's frame alongside the DCT-32 inlined just above
+   it the allocator spills them. ci/codec_cpu/callgrind.py on the 892-frame
+   corpus, scalar, -O2: 236,721,305 Ir inlined against 225,422,041 out of
+   line, 4.8% of the whole decode for a keyword, and the ratio to the retired
+   Helix backend goes 1.062x -> 1.011x.
+
+   On the ESP32-C6 -- which is the one that counts -- the same keyword alone
+   moved 46,505 -> 46,402 us. Each of those numbers is stable to 0.00% across
+   repeats, but the *unchanged* Helix reference drifts about 0.9% between
+   flashes, so 0.2% is indistinguishable from zero: on device this buys
+   nothing measurable. Not a contradiction -- -Os allocates the inlined
+   granule differently than -O2 does, and the host spill this removes was
+   never being paid on the device.
+
+   It is kept because it costs six bytes of .text (the granule shrinks by
+   what mp3d_synth takes on) and because it makes the polyphase separately
+   attributable in a profile, not because it is worth the 4.8% the host
+   reports. Anyone reading the host number as a device prediction should read
+   the next comment down instead: the restructuring below it is a 3.2% host
+   *regression* and it is what actually took the device from 1.33x Helix to
+   1.20x. */
+MP3D_HOT void mp3d_synth(int32_t *xl, mp3d_sample_t *dstl, int nch, int32_t *lins) FL_NO_EXCEPT
 {
     int i;
     int32_t *xr = xl + 576*(nch - 1);
@@ -2854,62 +3101,171 @@ static void mp3d_synth(int32_t *xl, mp3d_sample_t *dstl, int nch, int32_t *lins)
     };
     int32_t *zlin = lins + 15*64;
     const int32_t *w = g_win;
+    /* Lane stride through the four-lane accumulator.
+
+       The four lanes are (left, right) x (subband i, subband i+1). In mono
+       `xr == xl` and `dstr == dstl`, so lanes 1 and 3 recompute lanes 0 and 2
+       and their stores are immediately overwritten by the lane 0/2 stores that
+       follow them -- half the polyphase filterbank, thrown away. Helix avoids
+       it by shipping a separate PolyphaseMono; here it is the same function
+       with a two-lane tap chain, which is worth 34% of a mono decode on an
+       ESP32-C6 (136,546 -> 89,699 us over 60 frames of 16 kHz MPEG-2 Layer III,
+       bit-identical output).
+
+       Nothing else reads the odd lanes in mono. The granule's mono carry loop
+       (`for (i = 0; i < 15*64; i += 2)`) already saves only even indices, so
+       the odd lanes of the history are stale in mono either way -- today they
+       are read and discarded, which is exactly the work this removes.
+
+       The lane step is a literal in each of two copies of the tap chain rather
+       than a variable in one copy. One copy with `j += jstep` was tried first,
+       on the reasoning that riscv32 -Os does not unroll the four-lane loop
+       anyway (mp3d_synth_granule has exactly 32 `mulh` -- 8 taps x 4 products,
+       not 8 x 4 x 4), so the step ought to have been free. Measured on the C6
+       it was not: the stereo Layer III path went 46,294 -> 47,665 us, +3.0%,
+       against a helix reference that moved 0.01% between the same two runs.
+       Two chains with literal steps cost .text and nothing else. */
 #if MP3D_HAVE_INT_SIMD
     const int use_simd = MP3D_SIMD_AVAILABLE();
 #endif
 
     zlin[4*15]     = xl[18*16];
-    zlin[4*15 + 1] = xr[18*16];
     zlin[4*15 + 2] = xl[0];
-    zlin[4*15 + 3] = xr[0];
 
     zlin[4*31]     = xl[1 + 18*16];
-    zlin[4*31 + 1] = xr[1 + 18*16];
     zlin[4*31 + 2] = xl[1];
-    zlin[4*31 + 3] = xr[1];
 
-    mp3d_synth_pair(dstr, nch, lins + 4*15 + 1);
-    mp3d_synth_pair(dstr + 32*nch, nch, lins + 4*15 + 64 + 1);
+    if (nch == 2)
+    {
+        zlin[4*15 + 1] = xr[18*16];
+        zlin[4*15 + 3] = xr[0];
+        zlin[4*31 + 1] = xr[1 + 18*16];
+        zlin[4*31 + 3] = xr[1];
+
+        mp3d_synth_pair(dstr, nch, lins + 4*15 + 1);
+        mp3d_synth_pair(dstr + 32*nch, nch, lins + 4*15 + 64 + 1);
+    }
     mp3d_synth_pair(dstl, nch, lins + 4*15);
     mp3d_synth_pair(dstl + 32*nch, nch, lins + 4*15 + 64);
 
     for (i = 14; i >= 0; i--)
     {
-#define LOAD(k) int32_t w0 = *w++; int32_t w1 = *w++; const int32_t *vz = &zlin[4*i - k*64]; const int32_t *vy = &zlin[4*i - (15 - k)*64];
-#define S0(k) { int j; LOAD(k); for (j = 0; j < 4; j++) b[j]  = (int64_t)vz[j]*w1 + (int64_t)vy[j]*w0, a[j]  = (int64_t)vz[j]*w0 - (int64_t)vy[j]*w1; }
-#define S1(k) { int j; LOAD(k); for (j = 0; j < 4; j++) b[j] += (int64_t)vz[j]*w1 + (int64_t)vy[j]*w0, a[j] += (int64_t)vz[j]*w0 - (int64_t)vy[j]*w1; }
-#define S2(k) { int j; LOAD(k); for (j = 0; j < 4; j++) b[j] += (int64_t)vz[j]*w1 + (int64_t)vy[j]*w0, a[j] += (int64_t)vy[j]*w1 - (int64_t)vz[j]*w0; }
-        int64_t a[4], b[4];
+/* One tap of one lane pair. S0/S1/S2 are the original chain unchanged: S0
+   opens the accumulators, S1 adds and S2 adds with the `a` operands swapped.
+   The arithmetic, the operand order and the accumulation order are identical
+   to the four-lane form these replaced, which is why the PCM checksum does
+   not move.
+
+   Two things changed, and only the second one is arithmetic-free by accident.
+
+   The chain used to carry all four lanes -- eight int64 accumulators, held in
+   `int64_t a[4], b[4]` -- across the whole eight-tap run. On riscv32 -Os that
+   array is a stack slot, and the tap body paid eight memory operations per
+   tap per lane to reload and rewrite it: of its 35 instructions, four loads
+   and four stores were accumulator traffic and nothing else.
+
+   Halving the live set is necessary but not sufficient. `int64_t a[2], b[2]`
+   with the lane loop left rolled spills exactly as badly, because at -Os gcc
+   does not unroll a two-iteration loop and a variable index into a local array
+   has to be memory. The lanes are therefore written out as named scalars,
+   which is what actually lets the accumulators live in registers.
+
+   One lane at a time was tried too. It removes the spill just as completely
+   but re-reads the window pair and recomputes the two zlin base addresses
+   four times per tap instead of twice, which costs 3.2% on an x86-64 host
+   that had registers to spare and was never paying the spill. The pair keeps
+   both ends. */
+#define LOAD(k) const int32_t w0 = w[2*(k)]; const int32_t w1 = w[2*(k) + 1]; const int32_t *vz = &zlin[4*i + g - (k)*64]; const int32_t *vy = &zlin[4*i + g - (15 - (k))*64];
+#define S0(k, st) { LOAD(k);                                                   \
+        b0  = (int64_t)vz[0]*w1 + (int64_t)vy[0]*w0;                           \
+        a0  = (int64_t)vz[0]*w0 - (int64_t)vy[0]*w1;                           \
+        if (st == 1) {                                                         \
+        b1  = (int64_t)vz[1]*w1 + (int64_t)vy[1]*w0;                           \
+        a1  = (int64_t)vz[1]*w0 - (int64_t)vy[1]*w1; } }
+#define S1(k, st) { LOAD(k);                                                   \
+        b0 += (int64_t)vz[0]*w1 + (int64_t)vy[0]*w0;                           \
+        a0 += (int64_t)vz[0]*w0 - (int64_t)vy[0]*w1;                           \
+        if (st == 1) {                                                         \
+        b1 += (int64_t)vz[1]*w1 + (int64_t)vy[1]*w0;                           \
+        a1 += (int64_t)vz[1]*w0 - (int64_t)vy[1]*w1; } }
+#define S2(k, st) { LOAD(k);                                                   \
+        b0 += (int64_t)vz[0]*w1 + (int64_t)vy[0]*w0;                           \
+        a0 += (int64_t)vy[0]*w1 - (int64_t)vz[0]*w0;                           \
+        if (st == 1) {                                                         \
+        b1 += (int64_t)vz[1]*w1 + (int64_t)vy[1]*w0;                           \
+        a1 += (int64_t)vy[1]*w1 - (int64_t)vz[1]*w0; } }
+/* Lane pair g writes (a, b) to (15 - i, 17 + i) for g == 0 and to the same
+   pair plus 32 samples for g == 2; within the pair, lane 0 is the left
+   channel and lane 1 is dstr, which is dstl + (nch - 1). Both are address
+   arithmetic on the pair index rather than four copies of the chain.
+
+   In mono the odd lane recomputes the even one into the same address, so the
+   step is 2 and lane 1 never runs at all -- a1 and b1 are dead, not merely
+   redundant, and the zeroing below is what tells the compiler so rather than
+   a value anything reads. */
+#define MP3D_SYNTH_CHAIN(st)                                                   \
+        {                                                                      \
+            int g;                                                             \
+            for (g = 0; g < 4; g += 2)                                         \
+            {                                                                  \
+                mp3d_sample_t *d = dstl + g*16*nch;                            \
+                int64_t a0, b0, a1 = 0, b1 = 0;                                \
+                S0(0, st) S2(1, st) S1(2, st) S2(3, st)                        \
+                S1(4, st) S2(5, st) S1(6, st) S2(7, st)                        \
+                if (st == 1)                                                   \
+                {                                                              \
+                    d[(15 - i)*nch + 1] = mp3d_scale_pcm(a1);                  \
+                    d[(17 + i)*nch + 1] = mp3d_scale_pcm(b1);                  \
+                }                                                              \
+                d[(15 - i)*nch] = mp3d_scale_pcm(a0);                          \
+                d[(17 + i)*nch] = mp3d_scale_pcm(b0);                          \
+            }                                                                  \
+        }
 
         zlin[4*i]     = xl[18*(31 - i)];
-        zlin[4*i + 1] = xr[18*(31 - i)];
         zlin[4*i + 2] = xl[1 + 18*(31 - i)];
-        zlin[4*i + 3] = xr[1 + 18*(31 - i)];
         zlin[4*(i + 16)]   = xl[1 + 18*(1 + i)];
-        zlin[4*(i + 16) + 1] = xr[1 + 18*(1 + i)];
         zlin[4*(i - 16) + 2] = xl[18*(1 + i)];
-        zlin[4*(i - 16) + 3] = xr[18*(1 + i)];
+        if (nch == 2)
+        {
+            zlin[4*i + 1] = xr[18*(31 - i)];
+            zlin[4*i + 3] = xr[1 + 18*(31 - i)];
+            zlin[4*(i + 16) + 1] = xr[1 + 18*(1 + i)];
+            zlin[4*(i - 16) + 3] = xr[18*(1 + i)];
+        }
 
 #if MP3D_HAVE_INT_SIMD
         if (use_simd)
         {
+            /* The vector kernel still produces all four lanes at once, so it
+               keeps the array form and the store block that goes with it. */
+            int64_t a[4], b[4];
             mp3d_synth_taps(zlin, w, i, a, b);
-            w += 16; /* the scalar chain below advances w as a side effect */
+            if (nch == 2)
+            {
+                dstr[(15 - i)*nch] = mp3d_scale_pcm(a[1]);
+                dstr[(17 + i)*nch] = mp3d_scale_pcm(b[1]);
+                dstr[(47 - i)*nch] = mp3d_scale_pcm(a[3]);
+                dstr[(49 + i)*nch] = mp3d_scale_pcm(b[3]);
+            }
+            dstl[(15 - i)*nch] = mp3d_scale_pcm(a[0]);
+            dstl[(17 + i)*nch] = mp3d_scale_pcm(b[0]);
+            dstl[(47 - i)*nch] = mp3d_scale_pcm(a[2]);
+            dstl[(49 + i)*nch] = mp3d_scale_pcm(b[2]);
         }
         else
 #endif
+        /* In mono the odd lanes recompute the even ones into the same
+           addresses, so the step is 2 and lanes 1 and 3 never run. */
+        if (nch == 1)
         {
-        S0(0) S2(1) S1(2) S2(3) S1(4) S2(5) S1(6) S2(7)
+            MP3D_SYNTH_CHAIN(2)
         }
-
-        dstr[(15 - i)*nch] = mp3d_scale_pcm(a[1]);
-        dstr[(17 + i)*nch] = mp3d_scale_pcm(b[1]);
-        dstl[(15 - i)*nch] = mp3d_scale_pcm(a[0]);
-        dstl[(17 + i)*nch] = mp3d_scale_pcm(b[0]);
-        dstr[(47 - i)*nch] = mp3d_scale_pcm(a[3]);
-        dstr[(49 + i)*nch] = mp3d_scale_pcm(b[3]);
-        dstl[(47 - i)*nch] = mp3d_scale_pcm(a[2]);
-        dstl[(49 + i)*nch] = mp3d_scale_pcm(b[2]);
+        else
+        {
+            MP3D_SYNTH_CHAIN(1)
+        }
+        w += 16;
     }
 }
 
@@ -3591,11 +3947,12 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples) FL_NO_EXC
 #undef MP3D_HUFF_ONE
 #undef MP3D_WRAP_ADD
 #undef MP3D_WRAP_SUB
+#undef MP3D_LEAF
+#undef MP3D_HOT
+#undef MP3D_KERNEL
 #undef MP3D_SAT_MAX
 #undef MP3D_SAT_MIN
 #undef MP3D_PCM_HALF
-#undef MP3D_PCM_UPPER
-#undef MP3D_PCM_LOWER
 /* Only release MINIMP3_NO_SIMD if this header is what set it; a caller that
    asked for the scalar build must keep getting it on a re-include. */
 #undef MP3D_FLOAT_SIMD_OFF
@@ -3661,6 +4018,7 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples) FL_NO_EXC
 #undef MINIMP3_ONLY_SIMD
 #undef MODE_JOINT_STEREO
 #undef MODE_MONO
+#undef MP3D_SYNTH_CHAIN
 #undef PEEK_BITS
 #undef RELOAD_SCALEFACTOR
 #undef S0
