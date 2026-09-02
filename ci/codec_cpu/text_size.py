@@ -200,6 +200,22 @@ def _sections(objdump: str, obj: Path) -> dict[str, int]:
     return sizes
 
 
+def _demangle(names: list[str]) -> dict[str, str]:
+    """Mangled -> readable, via c++filt when it is available.
+
+    Done as a display step rather than by asking objdump for demangled symbols:
+    a demangled name contains spaces, which would have to be parsed back out of
+    a whitespace-delimited symbol table.
+    """
+    tool = shutil.which("llvm-cxxfilt") or shutil.which("c++filt")
+    if not tool or not names:
+        return {}
+    out = subprocess.run(
+        [tool], input="\n".join(names), capture_output=True, text=True
+    ).stdout.splitlines()
+    return dict(zip(names, out)) if len(out) == len(names) else {}
+
+
 def _functions(objdump: str, obj: Path) -> dict[str, int]:
     out = subprocess.run(
         [objdump, "-t", str(obj)], capture_output=True, text=True, check=True
@@ -208,9 +224,12 @@ def _functions(objdump: str, obj: Path) -> dict[str, int]:
     for line in out.splitlines():
         m = re.match(r"^[0-9a-f]+\s+.*?\s+F\s+\.text\s+([0-9a-f]+)\s+(\S+)", line)
         if m:
-            name = m.group(2)
-            demangled = name.split("E")[0] if name.startswith("_Z") else name
-            sizes[demangled] = int(m.group(1), 16)
+            # Key on the whole mangled symbol. Truncating at the first "E" --
+            # the end of an Itanium nested-name -- discards the parameter list,
+            # so overloads collapse onto one key and the last one silently
+            # overwrites the others' sizes. This decoder really has such a
+            # pair: L3_dct3_9(int32_t*) and L3_dct3_9(float*).
+            sizes[m.group(2)] = int(m.group(1), 16)
     return sizes
 
 
@@ -845,10 +864,12 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"    {size:>7,}  {prof.fn_stage.get(name, '?'):<10} {name}")
         elif args.functions:
             print("\n  per-function .text:")
+            _by_size = _functions(objdump, now)
+            readable = _demangle(list(_by_size))
             for size, name in sorted(
-                ((v, k) for k, v in _functions(objdump, now).items()), reverse=True
+                ((v, k) for k, v in _by_size.items()), reverse=True
             )[: args.top]:
-                print(f"    {size:>7,}  {name}")
+                print(f"    {size:>7,}  {readable.get(name, name)}")
     return 0
 
 

@@ -31,6 +31,7 @@ from pathlib import Path
 
 import pytest
 
+
 ROOT = Path(__file__).resolve().parents[2]
 
 SOURCE = """
@@ -205,9 +206,24 @@ def test_int_asm_survives_no_inline(
             compiler_path, [*extra, "-fno-inline"], Path(tmp), optimisation="-Os"
         )
 
+    # The instruction budget has to hold here too. Checking only the mnemonic
+    # would pass a body that kept its `mulh` but grew a stack frame around it,
+    # which is exactly what a declined force-inline looks like.
+    round_body = _body(assembly, "fl_test_round27")
+    assert round_body, f"{target}: no body for fl_test_round27 under -fno-inline"
+    assert len(round_body) <= MAX_ROUND_INSTRUCTIONS[target], (
+        f"{target}: fl_test_round27 compiled to {len(round_body)} instructions "
+        f"under -fno-inline ({' '.join(round_body)}), budget "
+        f"{MAX_ROUND_INSTRUCTIONS[target]}."
+    )
+
     for name, mnemonic in expected.items():
         body = _body(assembly, f"fl_test_{name}")
         assert body, f"{target}: no body found for fl_test_{name} under -fno-inline"
+        assert len(body) <= MAX_INSTRUCTIONS, (
+            f"{target}: fl_test_{name} compiled to {len(body)} instructions "
+            f"under -fno-inline ({' '.join(body)}), budget {MAX_INSTRUCTIONS}."
+        )
         assert any(op.startswith(mnemonic) for op in body), (
             f"{target}: under -fno-inline, fl_test_{name} emitted "
             f"{' '.join(body)} instead of '{mnemonic}'. The force-inline was "

@@ -1,4 +1,15 @@
-#pragma once
+/* Deliberately no include guard and no `#pragma once`.
+
+   This file is included exactly once per expansion of minimp3.h's
+   implementation block, which carries its own _MINIMP3_IMPLEMENTATION_GUARD.
+   A guard here would be redundant in the ordinary case and wrong in the one
+   that matters: tests/fl/codec/minimp3_variants.hpp builds several complete
+   copies of the decoder in a single translation unit -- float, fixed, and
+   fixed with MINIMP3_NO_SIMD -- by #undef-ing MINIMP3_H and
+   _MINIMP3_IMPLEMENTATION_GUARD between them. `#pragma once` is immune to
+   that, so the second and later fixed-point copies would compile minimp3.h's
+   implementation with this file silently skipped, and fail on the first use
+   of mp3d_synth_granule. Do not add one. */
 
 /* The fixed-point synthesis back-end: DCT-32, the polyphase filterbank and the
    integer SIMD kernels they dispatch to. This is 57% of a decode by host

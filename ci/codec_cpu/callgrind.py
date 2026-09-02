@@ -307,6 +307,16 @@ def callgrind(binary: Path, args: list[str], out: Path, top: int) -> Attribution
     attribution = Attribution(total=int(match.group(1).replace(",", "")))
 
     annotate = shutil.which("callgrind_annotate")
+    if top and not annotate:
+        # Asking for per-function attribution and silently getting none is the
+        # failure mode this whole file exists to avoid: the totals still print,
+        # so the run looks complete while the numbers that rank the change are
+        # simply absent.
+        raise SystemExit(
+            "callgrind_annotate is not on PATH, so per-function attribution "
+            "cannot be produced. Install valgrind, or pass --top 0 to ask for "
+            "totals only."
+        )
     if annotate and top:
         text = subprocess.run(
             # 99, not 90: callgrind_annotate's threshold is a *cumulative*
