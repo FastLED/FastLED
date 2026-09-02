@@ -22,6 +22,7 @@ import statistics
 import subprocess
 import sys
 import time
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -56,10 +57,24 @@ def _kill_stale_daemon() -> None:
         subprocess.run(["kill", pid], capture_output=True)
 
 
+@dataclass(frozen=True)
+class Measurement:
+    """One device run. Named and typed, so callers stop writing
+    int(r["l3_us"]) and the checksum cannot be silently absent."""
+
+    l3_us: int
+    helix_us: int
+    ratio: float
+    decode_us: int
+    audio_us: int
+    realtime: float
+    fnv1a: str
+
+
 TRANSPORT_FAILURE = "transport"
 
 
-def run_once(board: str, timeout: int) -> dict[str, object] | str | None:
+def run_once(board: str, timeout: int) -> Measurement | str | None:
     _kill_stale_daemon()
     inner = (
         "source /home/niteris/.clud/tmp/nixcompat/env.sh 2>/dev/null; "
@@ -73,6 +88,8 @@ def run_once(board: str, timeout: int) -> dict[str, object] | str | None:
             text=True,
             timeout=timeout,
         )
+    except KeyboardInterrupt:
+        raise
     except subprocess.TimeoutExpired:
         print("  the run itself hung; treating as a transport failure", file=sys.stderr)
         return TRANSPORT_FAILURE
@@ -95,15 +112,22 @@ def run_once(board: str, timeout: int) -> dict[str, object] | str | None:
     if not (l3 and dec):
         print("  could not parse the result line", file=sys.stderr)
         return None
-    return {
-        "l3_us": int(l3.group(1)),
-        "helix_us": int(l3.group(2)),
-        "ratio": float(l3.group(3)),
-        "decode_us": int(dec.group(1)),
-        "audio_us": int(dec.group(2)),
-        "realtime": float(dec.group(3)),
-        "fnv1a": fnv.group(1) if fnv else None,
-    }
+    if not fnv:
+        # The checksum is how a run is shown to have decoded the same audio.
+        # A measurement without one is a time with nothing attached to it, and
+        # reporting it as a result is how a decoder that quietly broke gets
+        # called faster.
+        print("  run produced no checksum; refusing to report a time", file=sys.stderr)
+        return None
+    return Measurement(
+        l3_us=int(l3.group(1)),
+        helix_us=int(l3.group(2)),
+        ratio=float(l3.group(3)),
+        decode_us=int(dec.group(1)),
+        audio_us=int(dec.group(2)),
+        realtime=float(dec.group(3)),
+        fnv1a=fnv.group(1),
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -122,7 +146,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", type=Path, help="write the raw results here")
     args = parser.parse_args(argv)
 
-    results: list[dict[str, object]] = []
+    results: list[Measurement] = []
     for i in range(args.runs):
         print(f"  run {i + 1}/{args.runs} on {args.board}...", flush=True)
         for attempt in range(args.retries + 1):
@@ -147,19 +171,19 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         results.append(got)
         print(
-            f"    L3 {got['l3_us']} us  helix {got['helix_us']} us  "
-            f"{got['ratio']}x  {got['realtime']}x real time"
+            f"    L3 {got.l3_us} us  helix {got.helix_us} us  "
+            f"{got.ratio}x  {got.realtime}x real time"
         )
 
-    checksums = {r["fnv1a"] for r in results}
+    checksums = {r.fnv1a for r in results}
     if len(checksums) > 1:
         # Output changing between runs of the same build is not noise.
         print(f"  CHECKSUMS DIFFER between runs: {checksums}", file=sys.stderr)
         return 1
 
-    l3 = [int(r["l3_us"]) for r in results]
-    helix = [int(r["helix_us"]) for r in results]
-    ratios = [float(r["ratio"]) for r in results]
+    l3 = [r.l3_us for r in results]
+    helix = [r.helix_us for r in results]
+    ratios = [r.ratio for r in results]
     spread = (max(l3) - min(l3)) / min(l3) * 100 if min(l3) else 0.0
 
     print()
@@ -169,7 +193,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     print(f"  helix L3     median {statistics.median(helix):>10,.0f} us")
     print(f"  ratio        median {statistics.median(ratios):.3f}x helix")
-    print(f"  checksum     0x{results[0]['fnv1a']}")
+    print(f"  checksum     0x{results[0].fnv1a}")
     if args.runs > 1 and spread > 2.0:
         print(
             f"  NOTE: {spread:.1f}% spread across runs -- treat deltas "

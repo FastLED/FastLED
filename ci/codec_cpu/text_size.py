@@ -45,6 +45,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -82,7 +83,17 @@ HOST_FLAGS = [f for f in FLAGS if f != "-DFL_CODEC_CPU_CODEGEN_ESP_TYPES"]
 DECODERS = {"minimp3-fixed": TU, "helix": HELIX_TU}
 
 
-def _toolchain() -> tuple[str, str]:
+@dataclass(frozen=True)
+class Toolchain:
+    """The riscv32 cross tools. Named fields rather than a positional pair:
+    `gpp, objdump = _toolchain()` reads the same whichever way round it is
+    wrong, and both are strings."""
+
+    gpp: str
+    objdump: str
+
+
+def _toolchain() -> Toolchain:
     found = list(Path.home().glob(".platformio/packages/**/bin/riscv32-esp-elf-g++"))
     if not found:
         raise SystemExit(
@@ -91,11 +102,13 @@ def _toolchain() -> tuple[str, str]:
             "'espressif/toolchain-riscv32-esp@12.2.0+20230208'"
         )
     gpp = str(found[0])
-    return gpp, str(Path(gpp).with_name("riscv32-esp-elf-objdump"))
+    return Toolchain(
+        gpp=gpp, objdump=str(Path(gpp).with_name("riscv32-esp-elf-objdump"))
+    )
 
 
 def _riscv_tool(name: str) -> str:
-    gpp, _ = _toolchain()
+    gpp = _toolchain().gpp
     return str(Path(gpp).with_name(f"riscv32-esp-elf-{name}"))
 
 
@@ -195,6 +208,8 @@ def _sections(objdump: str, obj: Path) -> dict[str, int]:
         if len(parts) > 2 and parts[1].startswith("."):
             try:
                 sizes[parts[1]] = int(parts[2], 16)
+            except KeyboardInterrupt:
+                raise
             except ValueError:
                 continue
     return sizes
@@ -624,7 +639,8 @@ def _build_profile(decoder: str, isa: str, tmp: Path) -> Profile:
     tu = DECODERS[decoder]
     tag = f"{decoder.replace('-', '_')}_{isa}.o"
     if isa == "riscv32":
-        gpp, objdump = _toolchain()
+        tools = _toolchain()
+        gpp, objdump = tools.gpp, tools.objdump
         addr2line = _riscv_tool("addr2line")
         obj = _compile(gpp, tmp, None, tu=tu, name=tag, flags=FLAGS, debug=True)
     else:
@@ -781,7 +797,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--top", type=int, default=12)
     args = parser.parse_args(argv)
 
-    gpp, objdump = _toolchain()
+    tools = _toolchain()
+    gpp, objdump = tools.gpp, tools.objdump
 
     if args.compare:
         with tempfile.TemporaryDirectory() as tmp:

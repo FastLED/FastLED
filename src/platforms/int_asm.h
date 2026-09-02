@@ -107,9 +107,13 @@ FASTLED_FORCE_INLINE i32 mulshift32(i32 x, i32 y) FL_NO_EXCEPT {
 /// assembly on it again.
 template <int Shift>
 FASTLED_FORCE_INLINE i32 mul_shift_round32(i32 x, i32 y) FL_NO_EXCEPT {
-#if defined(__riscv) && __riscv_xlen == 32 && defined(__riscv_mul)
+    // Hoisted out of the target branch below: the portable form is just as
+    // undefined for a shift outside this range -- `1 << (Shift - 1)` with
+    // Shift == 0 is a negative shift count -- so the bound belongs to the
+    // operation, not to one lowering of it.
     FL_STATIC_ASSERT(Shift >= 1 && Shift <= 31,
                      "mul_shift_round32 shift must be in [1, 31]");
+#if defined(__riscv) && __riscv_xlen == 32 && defined(__riscv_mul)
     const i64 product = (i64)x * (i64)y;
     const u32 low = (u32)product;
     const u32 high = (u32)(i32)(product >> 32);
