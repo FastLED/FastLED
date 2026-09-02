@@ -49,13 +49,28 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
+
+# Everything the riscv32 object is compiled from that we may edit. The
+# int_asm headers hold the decoder's multiply and wraparound primitives.
+SHADOW_PATHS = (
+    "src/third_party/minimp3",
+    "src/platforms/int_asm.h",
+    "src/fl/math/int_asm.h",
+)
 TU = ROOT / "ci" / "codec_cpu" / "minimp3_fixed_codegen.cpp"
 HELIX_TU = ROOT / "ci" / "codec_cpu" / "helix_codegen.cpp"
 
 FLAGS = [
-    "-std=gnu++11", "-Os", "-fno-exceptions", "-fno-rtti", "-fno-strict-aliasing",
-    "-DFL_CODEC_CPU_CODEGEN_ESP_TYPES", "-DMINIMP3_NO_SIMD",
-    "-DFASTLED_USE_PROGMEM=0", "-DARDUINO=10808", "-DFASTLED_NO_AUTO_NAMESPACE",
+    "-std=gnu++11",
+    "-Os",
+    "-fno-exceptions",
+    "-fno-rtti",
+    "-fno-strict-aliasing",
+    "-DFL_CODEC_CPU_CODEGEN_ESP_TYPES",
+    "-DMINIMP3_NO_SIMD",
+    "-DFASTLED_USE_PROGMEM=0",
+    "-DARDUINO=10808",
+    "-DFASTLED_NO_AUTO_NAMESPACE",
 ]
 
 # The host half of `--compare`. Same optimisation level, same scalar kernels,
@@ -68,8 +83,7 @@ DECODERS = {"minimp3-fixed": TU, "helix": HELIX_TU}
 
 
 def _toolchain() -> tuple[str, str]:
-    found = list(Path.home().glob(
-        ".platformio/packages/**/bin/riscv32-esp-elf-g++"))
+    found = list(Path.home().glob(".platformio/packages/**/bin/riscv32-esp-elf-g++"))
     if not found:
         raise SystemExit(
             "riscv32-esp-elf-g++ not found; install it with\n"
@@ -93,24 +107,33 @@ def _host_tool(*candidates: str) -> str:
     raise SystemExit(f"none of {candidates} found on PATH")
 
 
-def _compile(gpp: str, out: Path, include_first: Path | None,
-             tu: Path = TU, name: str = "codec.o",
-             flags: list[str] = FLAGS, debug: bool = False) -> Path:
+def _compile(
+    gpp: str,
+    out: Path,
+    include_first: Path | None,
+    tu: Path = TU,
+    name: str = "codec.o",
+    flags: list[str] = FLAGS,
+    debug: bool = False,
+) -> Path:
     obj = out / name
     includes = ([f"-I{include_first}"] if include_first else []) + [
-        f"-I{ROOT / 'src'}", f"-I{ROOT / 'src' / 'platforms' / 'stub'}"
+        f"-I{ROOT / 'src'}",
+        f"-I{ROOT / 'src' / 'platforms' / 'stub'}",
     ]
     extra = ["-g"] if debug else []
     subprocess.run(
         [gpp, *includes, *flags, *extra, "-c", str(tu), "-o", str(obj)],
-        check=True, capture_output=True,
+        check=True,
+        capture_output=True,
     )
     return obj
 
 
 def _exec_sections(objdump: str, obj: Path) -> list[str]:
-    out = subprocess.run([objdump, "-h", str(obj)], capture_output=True,
-                         text=True, check=True).stdout
+    out = subprocess.run(
+        [objdump, "-h", str(obj)], capture_output=True, text=True, check=True
+    ).stdout
     names, pending = [], None
     for line in out.splitlines():
         parts = line.split()
@@ -145,9 +168,16 @@ def _flatten(driver: str, objdump: str, obj: Path, isa: str) -> Path:
     if len(_exec_sections(objdump, obj)) < 2:
         return obj
     image = obj.with_suffix(".img")
-    cmd = [driver, "-nostdlib", "-nostartfiles",
-           "-Wl,--unresolved-symbols=ignore-all", "-Wl,-e0",
-           "-o", str(image), str(obj)]
+    cmd = [
+        driver,
+        "-nostdlib",
+        "-nostartfiles",
+        "-Wl,--unresolved-symbols=ignore-all",
+        "-Wl,-e0",
+        "-o",
+        str(image),
+        str(obj),
+    ]
     # A plain non-PIE executable, not `-shared`: the decoders take the address
     # of their tables from non-PIC code, which a shared object rejects.
     cmd[1:1] = ["-Wl,--no-relax"] if isa == "riscv32" else ["-no-pie"]
@@ -156,8 +186,9 @@ def _flatten(driver: str, objdump: str, obj: Path, isa: str) -> Path:
 
 
 def _sections(objdump: str, obj: Path) -> dict[str, int]:
-    out = subprocess.run([objdump, "-h", str(obj)], capture_output=True,
-                         text=True, check=True).stdout
+    out = subprocess.run(
+        [objdump, "-h", str(obj)], capture_output=True, text=True, check=True
+    ).stdout
     sizes: dict[str, int] = {}
     for line in out.splitlines():
         parts = line.split()
@@ -170,8 +201,9 @@ def _sections(objdump: str, obj: Path) -> dict[str, int]:
 
 
 def _functions(objdump: str, obj: Path) -> dict[str, int]:
-    out = subprocess.run([objdump, "-t", str(obj)], capture_output=True,
-                         text=True, check=True).stdout
+    out = subprocess.run(
+        [objdump, "-t", str(obj)], capture_output=True, text=True, check=True
+    ).stdout
     sizes: dict[str, int] = {}
     for line in out.splitlines():
         m = re.match(r"^[0-9a-f]+\s+.*?\s+F\s+\.text\s+([0-9a-f]+)\s+(\S+)", line)
@@ -193,8 +225,22 @@ def _functions(objdump: str, obj: Path) -> dict[str, int]:
 _INSN = re.compile(r"^\s+([0-9a-f]+):\s+((?:[0-9a-f]{2} ?)+?)\s{2,}(\S+)\s*(.*)$")
 
 _RV_MEM = {
-    "lw", "lh", "lhu", "lb", "lbu", "sw", "sh", "sb",
-    "c.lw", "c.sw", "c.lwsp", "c.swsp", "flw", "fsw", "fld", "fsd",
+    "lw",
+    "lh",
+    "lhu",
+    "lb",
+    "lbu",
+    "sw",
+    "sh",
+    "sb",
+    "c.lw",
+    "c.sw",
+    "c.lwsp",
+    "c.swsp",
+    "flw",
+    "fsw",
+    "fld",
+    "fsd",
 }
 # 32x32->64 on a 32-bit target: the operation the host does in one instruction
 # and riscv32 needs a pair for. Counting it separately is the closest static
@@ -206,8 +252,9 @@ class Disasm:
     """Per-instruction facts about one object file, keyed by address."""
 
     def __init__(self, objdump: str, obj: Path, isa: str) -> None:
-        out = subprocess.run([objdump, "-d", str(obj)], capture_output=True,
-                             text=True, check=True).stdout
+        out = subprocess.run(
+            [objdump, "-d", str(obj)], capture_output=True, text=True, check=True
+        ).stdout
         self.isa = isa
         self.rows: list[tuple[int, int, str, str]] = []
         for line in out.splitlines():
@@ -234,8 +281,7 @@ class Disasm:
         return mem, stack, wide
 
 
-def _inline_stacks(addr2line: str, obj: Path,
-                   addrs: list[int]) -> list[list[str]]:
+def _inline_stacks(addr2line: str, obj: Path, addrs: list[int]) -> list[list[str]]:
     """The inline frame stack for each address, innermost frame first.
 
     `-a` is what makes this parseable: `-i` emits a variable number of
@@ -243,9 +289,13 @@ def _inline_stacks(addr2line: str, obj: Path,
     so without the address markers the groups cannot be split apart.
     """
     inp = "\n".join(hex(a) for a in addrs)
-    out = subprocess.run([addr2line, "-a", "-f", "-i", "-C", "-e", str(obj)],
-                         input=inp, capture_output=True, text=True,
-                         check=True).stdout
+    out = subprocess.run(
+        [addr2line, "-a", "-f", "-i", "-C", "-e", str(obj)],
+        input=inp,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
     # After each `0x...` marker the output strictly alternates function name
     # and source location. Sniffing for "looks like a path" instead was wrong:
     # a demangled name ending in `::mulshift32` reads as a location under any
@@ -284,51 +334,160 @@ def _short(name: str) -> str:
 # Order matters only in that ARITH is consulted last -- see below.
 
 _MINIMP3_STAGES: list[tuple[str, set[str]]] = [
-    ("polyphase", {"mp3d_synth", "mp3d_synth_pair", "mp3d_synth_taps",
-                   "mp3d_scale_pcm", "mp3d_clamp_sample"}),
+    (
+        "polyphase",
+        {
+            "mp3d_synth",
+            "mp3d_synth_pair",
+            "mp3d_synth_taps",
+            "mp3d_scale_pcm",
+            "mp3d_clamp_sample",
+        },
+    ),
     ("dct32", {"mp3d_DCT_II", "mp3d_synth_granule"}),
-    ("imdct", {"L3_imdct36", "mp3d_imdct36_twiddle", "L3_dct3_9", "L3_imdct12",
-               "L3_imdct_short", "L3_imdct_gr", "L3_change_sign",
-               "L3_antialias", "L3_reorder"}),
-    ("bitstream", {"L3_huffman", "get_bits", "peek_bits", "bs_init",
-                   "L3_read_side_info", "L3_decode_scalefactors",
-                   "L3_read_scalefactors", "L3_restore_reservoir",
-                   "L3_save_reservoir", "mp3d_find_frame", "hdr_valid",
-                   "hdr_compare", "hdr_frame_bytes", "hdr_bitrate_kbps",
-                   "hdr_sample_rate_hz", "hdr_frame_samples", "hdr_padding",
-                   "L12_read_scale_info", "L12_subband_alloc_table",
-                   "L12_read_scalefactors"}),
-    ("dequant", {"mp3d_dequant", "mp3d_scale_to_q", "L3_ldexp_q",
-                 "mp3d_l12_scale", "L12_apply_scf_384",
-                 "L12_dequantize_granule", "mp3d_pow43"}),
-    ("stereo", {"L3_intensity_stereo", "L3_midside_stereo",
-                "L3_stereo_process", "L3_intensity_stereo_band"}),
-    ("frame", {"mp3dec_decode_frame_r", "L3_decode", "mp3dec_init",
-               "mp3dec_decode_frame"}),
+    (
+        "imdct",
+        {
+            "L3_imdct36",
+            "mp3d_imdct36_twiddle",
+            "L3_dct3_9",
+            "L3_imdct12",
+            "L3_imdct_short",
+            "L3_imdct_gr",
+            "L3_change_sign",
+            "L3_antialias",
+            "L3_reorder",
+        },
+    ),
+    (
+        "bitstream",
+        {
+            "L3_huffman",
+            "get_bits",
+            "peek_bits",
+            "bs_init",
+            "L3_read_side_info",
+            "L3_decode_scalefactors",
+            "L3_read_scalefactors",
+            "L3_restore_reservoir",
+            "L3_save_reservoir",
+            "mp3d_find_frame",
+            "hdr_valid",
+            "hdr_compare",
+            "hdr_frame_bytes",
+            "hdr_bitrate_kbps",
+            "hdr_sample_rate_hz",
+            "hdr_frame_samples",
+            "hdr_padding",
+            "L12_read_scale_info",
+            "L12_subband_alloc_table",
+            "L12_read_scalefactors",
+        },
+    ),
+    (
+        "dequant",
+        {
+            "mp3d_dequant",
+            "mp3d_scale_to_q",
+            "L3_ldexp_q",
+            "mp3d_l12_scale",
+            "L12_apply_scf_384",
+            "L12_dequantize_granule",
+            "mp3d_pow43",
+        },
+    ),
+    (
+        "stereo",
+        {
+            "L3_intensity_stereo",
+            "L3_midside_stereo",
+            "L3_stereo_process",
+            "L3_intensity_stereo_band",
+        },
+    ),
+    (
+        "frame",
+        {"mp3dec_decode_frame_r", "L3_decode", "mp3dec_init", "mp3dec_decode_frame"},
+    ),
 ]
 
 _HELIX_STAGES: list[tuple[str, set[str]]] = [
     ("polyphase", {"PolyphaseStereo", "PolyphaseMono"}),
     ("dct32", {"FDCT32", "Subband"}),
-    ("imdct", {"IMDCT", "idct9", "imdct12", "WinPrevious", "WinNext",
-               "FreqInvertRescale", "AntiAlias", "HybridTransform",
-               "IMDCT36", "IMDCT12x3"}),
-    ("bitstream", {"DecodeHuffman", "UnpackScaleFactors", "UnpackSideInfo",
-                   "UnpackFrameHeader", "GetBits", "SetBitstreamPointer",
-                   "RefillBitstreamCache", "CalcBitsUsed", "DecodeHuffmanPairs",
-                   "DecodeHuffmanQuads", "UnpackSFMPEG1", "UnpackSFMPEG2",
-                   "MP3FindSyncWord", "CheckPadBit"}),
-    ("dequant", {"Dequantize", "DequantChannel", "DequantBlock", "Reorder",
-                 "PolyphaseCoefficients"}),
-    ("stereo", {"IntensityProcMPEG1", "IntensityProcMPEG2", "MidSideProc",
-                "StereoProcess"}),
-    ("frame", {"MP3Decode", "MP3GetLastFrameInfo", "MP3GetNextFrameInfo",
-               "AllocateBuffers", "FreeBuffers", "MP3InitDecoder",
-               "MP3FreeDecoder", "MP3ClearBadFrame", "MP3GetLastFrameInfo"}),
+    (
+        "imdct",
+        {
+            "IMDCT",
+            "idct9",
+            "imdct12",
+            "WinPrevious",
+            "WinNext",
+            "FreqInvertRescale",
+            "AntiAlias",
+            "HybridTransform",
+            "IMDCT36",
+            "IMDCT12x3",
+        },
+    ),
+    (
+        "bitstream",
+        {
+            "DecodeHuffman",
+            "UnpackScaleFactors",
+            "UnpackSideInfo",
+            "UnpackFrameHeader",
+            "GetBits",
+            "SetBitstreamPointer",
+            "RefillBitstreamCache",
+            "CalcBitsUsed",
+            "DecodeHuffmanPairs",
+            "DecodeHuffmanQuads",
+            "UnpackSFMPEG1",
+            "UnpackSFMPEG2",
+            "MP3FindSyncWord",
+            "CheckPadBit",
+        },
+    ),
+    (
+        "dequant",
+        {
+            "Dequantize",
+            "DequantChannel",
+            "DequantBlock",
+            "Reorder",
+            "PolyphaseCoefficients",
+        },
+    ),
+    (
+        "stereo",
+        {"IntensityProcMPEG1", "IntensityProcMPEG2", "MidSideProc", "StereoProcess"},
+    ),
+    (
+        "frame",
+        {
+            "MP3Decode",
+            "MP3GetLastFrameInfo",
+            "MP3GetNextFrameInfo",
+            "AllocateBuffers",
+            "FreeBuffers",
+            "MP3InitDecoder",
+            "MP3FreeDecoder",
+            "MP3ClearBadFrame",
+            "MP3GetLastFrameInfo",
+        },
+    ),
 ]
 
-STAGE_ORDER = ["polyphase", "dct32", "imdct", "bitstream", "dequant",
-               "stereo", "frame", "other"]
+STAGE_ORDER = [
+    "polyphase",
+    "dct32",
+    "imdct",
+    "bitstream",
+    "dequant",
+    "stereo",
+    "frame",
+    "other",
+]
 
 # minimp3 spells its saturating arithmetic and fixed-point multiplies as
 # inlinable functions; Helix spells the same operations as macros, which have
@@ -337,16 +496,34 @@ STAGE_ORDER = ["polyphase", "dct32", "imdct", "bitstream", "dequant",
 # address inside `mul_shift_round32` is charged to whichever caller inlined it.
 _TRANSPARENT = {
     # minimp3
-    "mul_shift_round32", "mulshift32", "wrap_add32", "wrap_sub32",
-    "mp3d_mulshift", "mp3d_add_sat", "mp3d_sub_sat", "mp3d_shl_sat",
-    "mp3d_saturate", "mp3d_narrow",
+    "mul_shift_round32",
+    "mulshift32",
+    "wrap_add32",
+    "wrap_sub32",
+    "mp3d_mulshift",
+    "mp3d_add_sat",
+    "mp3d_sub_sat",
+    "mp3d_shl_sat",
+    "mp3d_saturate",
+    "mp3d_narrow",
     # Helix. `assembly.h` is macros on the platforms with hand assembly and
     # small static inlines everywhere else; on riscv32 it is the inlines, and
     # they are the same arithmetic minimp3 spells with the names above.
-    "MADD64", "MSUB64", "SAR64", "MULSHIFT32", "FASTABS", "CLZ", "Mul32x32to64",
-    "xmadd", "xmsub", "SHL64", "MULSHIFT32_ROUND",
+    "MADD64",
+    "MSUB64",
+    "SAR64",
+    "MULSHIFT32",
+    "FASTABS",
+    "CLZ",
+    "Mul32x32to64",
+    "xmadd",
+    "xmsub",
+    "SHL64",
+    "MULSHIFT32_ROUND",
     # neither
-    "memset", "memcpy", "memmove",
+    "memset",
+    "memcpy",
+    "memmove",
 }
 
 
@@ -373,8 +550,15 @@ def _attribution_name(stack: list[str]) -> str:
 class Profile:
     """Per-function and per-stage static facts for one decoder on one ISA."""
 
-    def __init__(self, name: str, isa: str, objdump: str, addr2line: str,
-                 obj: Path, stages: list[tuple[str, set[str]]]) -> None:
+    def __init__(
+        self,
+        name: str,
+        isa: str,
+        objdump: str,
+        addr2line: str,
+        obj: Path,
+        stages: list[tuple[str, set[str]]],
+    ) -> None:
         self.name = name
         self.isa = isa
         d = Disasm(objdump, obj, isa)
@@ -437,8 +621,7 @@ def _build_profile(decoder: str, isa: str, tmp: Path) -> Profile:
         gpp = _host_tool("g++", "clang++")
         objdump = _host_tool("objdump", "llvm-objdump")
         addr2line = _host_tool("addr2line", "llvm-addr2line")
-        obj = _compile(gpp, tmp, None, tu=tu, name=tag, flags=HOST_FLAGS,
-                       debug=True)
+        obj = _compile(gpp, tmp, None, tu=tu, name=tag, flags=HOST_FLAGS, debug=True)
     obj = _flatten(gpp, objdump, obj, isa)
     return Profile(decoder, isa, objdump, addr2line, obj, stages)
 
@@ -460,9 +643,11 @@ def _print_compare(profiles: dict[tuple[str, str], Profile], top: int) -> None:
     print("a stage above it is doing structurally more work on the target than")
     print("the host profile can charge it for.\n")
 
-    head = (f"  {'stage':<11}"
-            f"{'mp3 rv32':>9}{'mp3 x86':>9}{'infl':>7}   "
-            f"{'hx rv32':>9}{'hx x86':>9}{'infl':>7}   {'mp3/hx':>7}")
+    head = (
+        f"  {'stage':<11}"
+        f"{'mp3 rv32':>9}{'mp3 x86':>9}{'infl':>7}   "
+        f"{'hx rv32':>9}{'hx x86':>9}{'infl':>7}   {'mp3/hx':>7}"
+    )
     print(head)
     print("  " + "-" * (len(head) - 2))
     for stage in STAGE_ORDER:
@@ -470,34 +655,44 @@ def _print_compare(profiles: dict[tuple[str, str], Profile], top: int) -> None:
         c, d = hx_rv.st_insns[stage], hx_x8.st_insns[stage]
         if not (a or c):
             continue
-        print(f"  {stage:<11}{a:>9,}{b:>9,}{_ratio(a, b):>7}   "
-              f"{c:>9,}{d:>9,}{_ratio(c, d):>7}   {_ratio(a, c):>7}")
+        print(
+            f"  {stage:<11}{a:>9,}{b:>9,}{_ratio(a, b):>7}   "
+            f"{c:>9,}{d:>9,}{_ratio(c, d):>7}   {_ratio(a, c):>7}"
+        )
     ta, tb = mp_rv.total_insns, mp_x8.total_insns
     tc, td = hx_rv.total_insns, hx_x8.total_insns
     print("  " + "-" * (len(head) - 2))
-    print(f"  {'whole TU':<11}{ta:>9,}{tb:>9,}{_ratio(ta, tb):>7}   "
-          f"{tc:>9,}{td:>9,}{_ratio(tc, td):>7}   {_ratio(ta, tc):>7}")
+    print(
+        f"  {'whole TU':<11}{ta:>9,}{tb:>9,}{_ratio(ta, tb):>7}   "
+        f"{tc:>9,}{td:>9,}{_ratio(tc, td):>7}   {_ratio(ta, tc):>7}"
+    )
 
     print("\n  riscv32 memory traffic and 32x32 multiplies, per stage.")
     print("  `stack` is the subset of loads/stores against sp/s0 -- frame")
     print("  traffic, which is spills plus locals. `mul*` counts the multiply")
     print("  family, the pair riscv32 needs where x86-64 needs one imul.\n")
-    head2 = (f"  {'stage':<11}"
-             f"{'mp3 mem':>9}{'stack':>8}{'mul*':>7}   "
-             f"{'hx mem':>9}{'stack':>8}{'mul*':>7}")
+    head2 = (
+        f"  {'stage':<11}"
+        f"{'mp3 mem':>9}{'stack':>8}{'mul*':>7}   "
+        f"{'hx mem':>9}{'stack':>8}{'mul*':>7}"
+    )
     print(head2)
     print("  " + "-" * (len(head2) - 2))
     for stage in STAGE_ORDER:
         if not (mp_rv.st_insns[stage] or hx_rv.st_insns[stage]):
             continue
-        print(f"  {stage:<11}{mp_rv.st_mem[stage]:>9,}"
-              f"{mp_rv.st_stack[stage]:>8,}{mp_rv.st_wide[stage]:>7,}   "
-              f"{hx_rv.st_mem[stage]:>9,}{hx_rv.st_stack[stage]:>8,}"
-              f"{hx_rv.st_wide[stage]:>7,}")
+        print(
+            f"  {stage:<11}{mp_rv.st_mem[stage]:>9,}"
+            f"{mp_rv.st_stack[stage]:>8,}{mp_rv.st_wide[stage]:>7,}   "
+            f"{hx_rv.st_mem[stage]:>9,}{hx_rv.st_stack[stage]:>8,}"
+            f"{hx_rv.st_wide[stage]:>7,}"
+        )
 
     for prof_rv, prof_x8 in ((mp_rv, mp_x8), (hx_rv, hx_x8)):
-        print(f"\n  {prof_rv.name}: functions by riscv32/x86-64 inflation "
-              f"(>=100 riscv32 instructions)")
+        print(
+            f"\n  {prof_rv.name}: functions by riscv32/x86-64 inflation "
+            f"(>=100 riscv32 instructions)"
+        )
         rows, unmatched = [], []
         for fn, insns in prof_rv.fn_insns.items():
             if insns < 100:
@@ -506,14 +701,26 @@ def _print_compare(profiles: dict[tuple[str, str], Profile], top: int) -> None:
             if not host:
                 unmatched.append((insns, fn))
                 continue
-            rows.append((insns / host, fn, insns, host,
-                         prof_rv.fn_stack[fn], prof_rv.fn_stage.get(fn, "?")))
+            rows.append(
+                (
+                    insns / host,
+                    fn,
+                    insns,
+                    host,
+                    prof_rv.fn_stack[fn],
+                    prof_rv.fn_stage.get(fn, "?"),
+                )
+            )
         rows.sort(reverse=True)
-        print(f"    {'infl':>6} {'rv32':>7} {'x86':>7} {'stack':>7}  "
-              f"{'stage':<10} function")
+        print(
+            f"    {'infl':>6} {'rv32':>7} {'x86':>7} {'stack':>7}  "
+            f"{'stage':<10} function"
+        )
         for infl, fn, insns, host, stack, stage in rows[:top]:
-            print(f"    {infl:>5.2f}x {insns:>7,} {host:>7,} {stack:>7,}  "
-                  f"{stage:<10} {fn}")
+            print(
+                f"    {infl:>5.2f}x {insns:>7,} {host:>7,} {stack:>7,}  "
+                f"{stage:<10} {fn}"
+            )
         if unmatched:
             # The two builds do not inline the same set -- same compiler
             # family, different targets and different cost models -- so a
@@ -524,25 +731,34 @@ def _print_compare(profiles: dict[tuple[str, str], Profile], top: int) -> None:
             # one is a pointer to candidates.
             unmatched.sort(reverse=True)
             names = ", ".join(f"{fn} ({n:,})" for n, fn in unmatched[:6])
-            print(f"    no host frame (inlined on the host, not on riscv32): "
-                  f"{names}")
+            print(f"    no host frame (inlined on the host, not on riscv32): {names}")
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--baseline", help="git ref to compare against")
-    parser.add_argument("--functions", action="store_true",
-                        help="per-function .text, largest first")
-    parser.add_argument("--inlined", action="store_true",
-                        help="with --functions, attribute inlined code to the "
-                             "function it was written in rather than to the "
-                             "symbol that absorbed it")
-    parser.add_argument("--decoder", choices=sorted(DECODERS),
-                        default="minimp3-fixed",
-                        help="which decoder to size (default: minimp3-fixed)")
-    parser.add_argument("--compare", action="store_true",
-                        help="both decoders on riscv32 and x86-64, per stage "
-                             "and per function, ranked by ISA inflation")
+    parser.add_argument(
+        "--functions", action="store_true", help="per-function .text, largest first"
+    )
+    parser.add_argument(
+        "--inlined",
+        action="store_true",
+        help="with --functions, attribute inlined code to the "
+        "function it was written in rather than to the "
+        "symbol that absorbed it",
+    )
+    parser.add_argument(
+        "--decoder",
+        choices=sorted(DECODERS),
+        default="minimp3-fixed",
+        help="which decoder to size (default: minimp3-fixed)",
+    )
+    parser.add_argument(
+        "--compare",
+        action="store_true",
+        help="both decoders on riscv32 and x86-64, per stage "
+        "and per function, ranked by ISA inflation",
+    )
     parser.add_argument("--top", type=int, default=12)
     args = parser.parse_args(argv)
 
@@ -553,8 +769,7 @@ def main(argv: list[str] | None = None) -> int:
             profiles = {}
             for decoder in ("minimp3-fixed", "helix"):
                 for isa in ("riscv32", "x86_64"):
-                    profiles[(decoder, isa)] = _build_profile(
-                        decoder, isa, Path(tmp))
+                    profiles[(decoder, isa)] = _build_profile(decoder, isa, Path(tmp))
             _print_compare(profiles, args.top)
         return 0
 
@@ -577,12 +792,38 @@ def main(argv: list[str] | None = None) -> int:
                 )
             shadow = Path(tmp) / "baseline"
             (shadow / "third_party").mkdir(parents=True)
+            # The decoder's arithmetic primitives live outside its directory
+            # deliberately, so shadowing only src/third_party/minimp3 reports
+            # +0 bytes for a change to them -- a wrong delta, silently. Shadow
+            # every path the object is built from, and say so when a change
+            # lands somewhere neither of them covers.
             tar = subprocess.run(
-                ["git", "archive", args.baseline, "src/third_party/minimp3"],
-                cwd=ROOT, check=True, capture_output=True,
+                ["git", "archive", args.baseline, *SHADOW_PATHS],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
             ).stdout
-            subprocess.run(["tar", "-x", "-C", str(shadow), "--strip-components=1"],
-                           input=tar, check=True)
+            subprocess.run(
+                ["tar", "-x", "-C", str(shadow), "--strip-components=1"],
+                input=tar,
+                check=True,
+            )
+            changed = subprocess.run(
+                ["git", "diff", "--name-only", args.baseline, "--", "src"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            ).stdout.split()
+            unshadowed = [
+                f for f in changed if not any(f.startswith(pfx) for pfx in SHADOW_PATHS)
+            ]
+            if unshadowed:
+                print(
+                    f"  NOTE: {len(unshadowed)} changed file(s) under src/ are "
+                    "not shadowed, so the delta below does not include them:"
+                )
+                for f in unshadowed[:5]:
+                    print(f"          {f}")
             base = _compile(gpp, Path(tmp), shadow, tu=tu, name="baseline.o")
             base_text = _sections(objdump, base).get(".text", 0)
             delta = now_sections.get(".text", 0) - base_text
@@ -591,10 +832,12 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  delta    {delta:+,} bytes ({pct:+.2f}%)")
 
         if args.functions and args.inlined:
-            stages = (_MINIMP3_STAGES if args.decoder == "minimp3-fixed"
-                      else _HELIX_STAGES)
-            prof = Profile(args.decoder, "riscv32", objdump,
-                           _riscv_tool("addr2line"), now, stages)
+            stages = (
+                _MINIMP3_STAGES if args.decoder == "minimp3-fixed" else _HELIX_STAGES
+            )
+            prof = Profile(
+                args.decoder, "riscv32", objdump, _riscv_tool("addr2line"), now, stages
+            )
             print("\n  per-function .text (inline-aware):")
             for size, name in sorted(
                 ((v, k) for k, v in prof.fn_bytes.items()), reverse=True

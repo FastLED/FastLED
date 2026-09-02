@@ -54,6 +54,7 @@ SOURCE = """
 fl::i32 fl_test_mulshift(fl::i32 a, fl::i32 b) { return fl::math::mulshift32(a, b); }
 fl::i32 fl_test_wrap_add(fl::i32 a, fl::i32 b) { return fl::math::wrap_add32(a, b); }
 fl::i32 fl_test_wrap_sub(fl::i32 a, fl::i32 b) { return fl::math::wrap_sub32(a, b); }
+fl::i32 fl_test_round27(fl::i32 a, fl::i32 b) { return fl::math::mul_shift_round32<27>(a, b); }
 """
 
 # (target, compiler basename, extra flags, expected mnemonic per function).
@@ -81,6 +82,18 @@ TARGETS = [
 # One arithmetic instruction plus a return. Generous by one to tolerate a
 # register move; the failure this guards against is 40, not 3.
 MAX_INSTRUCTIONS = 3
+
+# The rounded multiply cannot be one instruction anywhere -- it needs both
+# halves of the product -- so it gets its own budget. These counts include the
+# return, like MAX_INSTRUCTIONS above. On riscv32 the carry-free form is seven
+# instructions (mul, mulh, srli, addi, srli, slli, add) plus ret. The obvious
+# spelling, adding 2^(S-1) to the whole product, costs nine because the
+# rounding term can overflow the low word and the carry has to be propagated
+# with an sltu. Those two instructions were worth 1.14% on an ESP32-C6, which
+# is why this is pinned rather than left to the optimiser. Cortex-M4 still
+# takes the portable form and is budgeted where it lands today, so that a
+# regression there is visible even though it is not yet optimised.
+MAX_ROUND_INSTRUCTIONS = {"riscv32-esp": 8, "cortex-m4": 10}
 
 
 def _find(compiler: str) -> str | None:
@@ -150,6 +163,16 @@ def test_int_asm_emits_one_instruction(
     with tempfile.TemporaryDirectory() as tmp:
         assembly = _emit(compiler_path, extra, Path(tmp))
 
+    round_body = _body(assembly, "fl_test_round27")
+    round_budget = MAX_ROUND_INSTRUCTIONS[target]
+    assert round_body, f"{target}: no body found for fl_test_round27"
+    assert len(round_body) <= round_budget, (
+        f"{target}: fl_test_round27 compiled to {len(round_body)} "
+        f"instructions ({' '.join(round_body)}), budget {round_budget}. The "
+        f"rounded multiply regressed to a carry-propagating form; see the "
+        f"identity in platforms/int_asm.h."
+    )
+
     for name, mnemonic in expected.items():
         body = _body(assembly, f"fl_test_{name}")
         assert body, f"{target}: no body found for fl_test_{name}"
@@ -161,8 +184,7 @@ def test_int_asm_emits_one_instruction(
             f"or check whether the inline request was declined."
         )
         assert any(op.startswith(mnemonic) for op in body), (
-            f"{target}: expected '{mnemonic}' in fl_test_{name}, got "
-            f"{' '.join(body)}"
+            f"{target}: expected '{mnemonic}' in fl_test_{name}, got {' '.join(body)}"
         )
 
 

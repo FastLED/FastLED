@@ -34,6 +34,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
 namespace platforms {
@@ -78,10 +79,45 @@ FASTLED_FORCE_INLINE i32 mulshift32(i32 x, i32 y) FL_NO_EXCEPT {
 /// malformed stream (`l3-nonstandard-big-iscf`), and zero times on real music
 /// in 21,067,559 calls. Saturating unconditionally costs 15 of 25 instructions
 /// on riscv32 for that.
+///
+/// **On RV32IM the rounding is folded into the low half rather than added to
+/// it.** Writing `(P + 2^(S-1)) >> S` directly costs a carry: the rounding term
+/// can overflow the low word, so gcc emits a materialised constant, an add, an
+/// `sltu` and a second add to propagate it -- nine instructions. Splitting the
+/// product into `hi` and `lo` and using
+///
+///     floor((P + 2^(S-1)) / 2^S) = (hi << (32-S)) + (((lo >> (S-1)) + 1) >> 1)
+///
+/// makes the carry structurally impossible. Writing lo = q*2^(S-1) + r with
+/// r < 2^(S-1), the low term is floor(((q+1)*2^(S-1) + r) / 2^S) = floor((q+1)/2),
+/// which is the right-hand side exactly -- no approximation, and q+1 cannot
+/// overflow because q has at most 33-S significant bits. Seven instructions:
+/// `mul`, `mulh`, `srli`, `addi`, `srli`, `slli`, `add`.
+///
+/// Only on 32-bit RISC-V, because it is a pessimisation anywhere the whole
+/// product lives in one register: x86-64 does the portable form in an `imul`
+/// and a `shrd`. ARMv7-M is a candidate for the same treatment but has not been
+/// measured, and this decoder has punished unmeasured extrapolation before.
+///
+/// The related idea of emitting `mulh` before `mul` -- the fusable order the
+/// RISC-V M-extension spec recommends so a microarchitecture can collapse the
+/// pair into one multiply -- was tried in inline assembly and measured on an
+/// ESP32-C6 at -0.07%, which is nothing. The C6 does not appear to fuse, or its
+/// multiplier is fast enough that the second pass is free. Do not spend
+/// assembly on it again.
 template <int Shift>
 FASTLED_FORCE_INLINE i32 mul_shift_round32(i32 x, i32 y) FL_NO_EXCEPT {
+#if defined(__riscv) && __riscv_xlen == 32 && defined(__riscv_mul)
+    FL_STATIC_ASSERT(Shift >= 1 && Shift <= 31,
+                     "mul_shift_round32 shift must be in [1, 31]");
+    const i64 product = (i64)x * (i64)y;
+    const u32 low = (u32)product;
+    const u32 high = (u32)(i32)(product >> 32);
+    return (i32)((high << (32 - Shift)) + (((low >> (Shift - 1)) + 1) >> 1));
+#else
     const i64 product = (i64)x * (i64)y + ((i64)1 << (Shift - 1));
     return (i32)(product >> Shift);
+#endif
 }
 
 /// Signed 32-bit add/subtract with defined wraparound.
