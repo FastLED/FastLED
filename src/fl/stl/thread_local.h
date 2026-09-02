@@ -40,7 +40,8 @@ template <typename T> class ThreadLocalReal {
 
     // With default: each thread's object is copy-constructed from defaultVal
     template <typename U>
-    explicit ThreadLocalReal(const U &defaultVal) : mDefaultValue(defaultVal), mHasDefault(true) {
+    explicit ThreadLocalReal(const U &defaultVal) FL_NO_EXCEPT
+        : mDefaultValue(defaultVal), mHasDefault(true) {
         initializeKey();
     }
 
@@ -75,7 +76,7 @@ template <typename T> class ThreadLocalReal {
     }
 
     // Access the thread-local instance
-    T &access() {
+    T &access() FL_NO_EXCEPT {
         ThreadStorage* storage = getStorage();
         if (!storage) {
             storage = createStorage();
@@ -87,7 +88,7 @@ template <typename T> class ThreadLocalReal {
         return storage->value;
     }
 
-    const T &access() const {
+    const T &access() const FL_NO_EXCEPT {
         ThreadStorage* storage = getStorage();
         if (!storage) {
             storage = createStorage();
@@ -100,13 +101,13 @@ template <typename T> class ThreadLocalReal {
     }
 
     // Set the value for this thread
-    void set(const T& value) {
+    void set(const T& value) FL_NO_EXCEPT {
         copyValue(access(), value);
     }
 
     // Convenience operators
-    operator T &() { return access(); }
-    operator const T &() const { return access(); }
+    operator T &() FL_NO_EXCEPT { return access(); }
+    operator const T &() const FL_NO_EXCEPT { return access(); }
 
     ThreadLocalReal &operator=(const T &v) FL_NO_EXCEPT {
         set(v);
@@ -116,13 +117,13 @@ template <typename T> class ThreadLocalReal {
   private:
     // Helper function to copy values, specialized for arrays
     template<typename U>
-    static void copyValue(U& dest, const U& src) {
+    static void copyValue(U& dest, const U& src) FL_NO_EXCEPT {
         dest = src;  // Default behavior for non-array types
     }
 
     // Specialization for array types
     template<typename U, size_t N>
-    static void copyValue(U (&dest)[N], const U (&src)[N]) {
+    static void copyValue(U (&dest)[N], const U (&src)[N]) FL_NO_EXCEPT {
         for (size_t i = 0; i < N; ++i) {
             copyValue(dest[i], src[i]);  // Recursively handle nested arrays
         }
@@ -141,7 +142,7 @@ template <typename T> class ThreadLocalReal {
     bool mHasDefault = false;
 
     // Initialize the pthread key
-    void initializeKey() {
+    void initializeKey() FL_NO_EXCEPT {
         int result = pthread_key_create(&mKey, cleanupThreadStorage);
         if (result == 0) {
             mKeyInitialized = true;
@@ -152,7 +153,7 @@ template <typename T> class ThreadLocalReal {
     }
 
     // Get thread-specific storage
-    ThreadStorage* getStorage() const {
+    ThreadStorage* getStorage() const FL_NO_EXCEPT {
         if (!mKeyInitialized) {
             return nullptr;
         }
@@ -160,7 +161,7 @@ template <typename T> class ThreadLocalReal {
     }
 
     // Create thread-specific storage
-    ThreadStorage* createStorage() const {
+    ThreadStorage* createStorage() const FL_NO_EXCEPT {
         if (!mKeyInitialized) {
             return nullptr;
         }
@@ -175,7 +176,7 @@ template <typename T> class ThreadLocalReal {
     }
 
     // Cleanup function called when thread exits
-    static void cleanupThreadStorage(void* data) {
+    static void cleanupThreadStorage(void* data) FL_NO_EXCEPT {
         if (data) {
             delete static_cast<ThreadStorage*>(data);  // ok bare allocation
         }

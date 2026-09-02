@@ -66,6 +66,15 @@ extern "C" void yield(void) { }
 
 fl::u8 get_brightness();
 
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+// FL_LINT_ALLOW_GLOBAL(shared dither phase is required once per logical frame)
+fl::u8 fl::detail::gDitherFrame;
+
+fl::u8 fl::detail::ditherFrame() FL_NO_EXCEPT {
+    return gDitherFrame;
+}
+#endif
+
 /// Pointer to the matrix object when using the Smart Matrix Library
 /// @see https://github.com/pixelmatix/SmartMatrix
 void *pSmartMatrix = nullptr;

@@ -1,0 +1,84 @@
+name: MP3 conformance
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/fl/codec/mp3*'
+      - 'src/third_party/minimp3/**'
+      - 'ci/codec_conformance/**'
+      - 'ci/codec_tables/**'
+      - 'tests/fl/codec/mp3*'
+      - 'tests/data/codec/minimp3/**'
+      - '.github/workflows/mp3_conformance.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'src/fl/codec/mp3*'
+      - 'src/third_party/minimp3/**'
+      - 'ci/codec_conformance/**'
+      - 'ci/codec_tables/**'
+      - 'tests/fl/codec/mp3*'
+      - 'tests/data/codec/minimp3/**'
+      - '.github/workflows/mp3_conformance.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          version: '0.8.0'
+
+      - name: Install clang
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang
+
+      - name: Install project dependencies
+        run: uv sync
+
+      # Cache the upstream vectors: 19 MB of reference PCM, pinned to the
+      # revision in the component manifest, so the suite is reproducible and
+      # the repo stays small enough to clone.
+      - name: Cache conformance vectors
+        uses: actions/cache@v4
+        with:
+          path: .cache/codec-conformance
+          key: codec-conformance-ea99364f61c14656440e8d77e9c233ccf3124633
+
+      # Every vector that ships a reference PCM must clear the 60 dB ISO
+      # limited-accuracy floor. This is the gate that FastLED#4127 showed the
+      # vendored corpus could not provide: the decoder passed every existing
+      # test while losing 81 dB on a vector nobody had.
+      - name: Fixed-point decoder against the full ISO suite
+        run: uv run python ci/codec_conformance/run.py
+
+      # The float build is the reference the fixed-vs-float gates compare
+      # against, so a regression in it would silently move that reference.
+      - name: Float decoder against the full ISO suite
+        run: uv run python ci/codec_conformance/run.py --float
+
+      # Malformed streams are the only inputs that push the fixed-point
+      # pipeline's int32 arithmetic to its edges -- ordinary audio stays four
+      # orders of magnitude below them. FastLED#4133 was a signed overflow in
+      # the polyphase that every well-formed vector walked straight past.
+      - name: Sanitizers over the full ISO suite
+        run: uv run python ci/codec_conformance/run.py --sanitize

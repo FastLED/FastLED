@@ -502,6 +502,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     simd_test_mode = args.simd
     coroutine_test_mode = args.coroutine
     ieee754_test_mode = args.ieee754
+    mp3_test_mode = args.mp3
     rpc_smoke_mode = args.rpc_smoke
     watchdog_soak_mode = args.watchdog_soak
 
@@ -643,6 +644,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             or simd_test_mode
             or coroutine_test_mode
             or ieee754_test_mode
+            or mp3_test_mode
             or rpc_smoke_mode
             or net_server_mode
             or net_client_mode
@@ -653,7 +655,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         )
         if any_incompatible_mode:
             print(
-                f"{Fore.RED}\u274c Error: --decode cannot be combined with driver flags, --simd, --coroutine, --net, --ota, or --ble{Style.RESET_ALL}"
+                f"{Fore.RED}\u274c Error: --decode cannot be combined with driver flags, --simd, --coroutine, --mp3, --net, --ota, or --ble{Style.RESET_ALL}"
             )
             return 1
 
@@ -670,10 +672,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         or simd_test_mode
         or coroutine_test_mode
         or ieee754_test_mode
+        or mp3_test_mode
         or rpc_smoke_mode
     ):
         print(
-            f"{Fore.RED}\u274c Error: network, OTA, and BLE modes cannot be combined with driver flags, --simd, or --coroutine{Style.RESET_ALL}"
+            f"{Fore.RED}\u274c Error: network, OTA, and BLE modes cannot be combined with driver flags, --simd, --coroutine, or --mp3{Style.RESET_ALL}"
         )
         return 1
     net_mode_count = sum(
@@ -720,6 +723,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         and not simd_test_mode
         and not coroutine_test_mode
         and not ieee754_test_mode
+        and not mp3_test_mode
         and not rpc_smoke_mode
         and not watchdog_soak_mode
         and perf_wave2d_grid is None
@@ -1287,6 +1291,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         simd_test_mode=simd_test_mode,
         coroutine_test_mode=coroutine_test_mode,
         ieee754_test_mode=ieee754_test_mode,
+        mp3_test_mode=mp3_test_mode,
         rpc_smoke_mode=rpc_smoke_mode,
         watchdog_soak_mode=watchdog_soak_mode,
         perf_wave2d_grid=perf_wave2d_grid,
@@ -1916,6 +1921,10 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print(
             "\n\U0001f4cc IEEE754 codec mode: skipping pin discovery and GPIO pre-test"
         )
+    elif ctx.mp3_test_mode:
+        print(
+            "\n\U0001f4cc MP3 codec mode: skipping pin discovery and GPIO pre-test"
+        )
     elif ctx.rpc_smoke_mode or ctx.watchdog_soak_mode:
         print("\n\U0001f4cc RPC smoke mode: skipping pin discovery and GPIO pre-test")
     elif ctx.perf_wave2d_grid is not None:
@@ -2008,6 +2017,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     elif ctx.coroutine_test_mode:
         pass
     elif ctx.ieee754_test_mode:
+        pass
+    elif ctx.mp3_test_mode:
         pass
     elif ctx.rpc_smoke_mode or ctx.watchdog_soak_mode:
         pass
@@ -2651,6 +2662,9 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     if ctx.ieee754_test_mode:
         return await _run_ieee754_tests(ctx)
 
+    if ctx.mp3_test_mode:
+        return await _run_mp3_tests(ctx)
+
     # Wave2D perf benchmark mode (#3113 Task 1 / #3122 A1)
     if ctx.perf_wave2d_grid is not None:
         return await _run_perf_wave2d_tests(ctx)
@@ -2894,6 +2908,148 @@ async def _run_ieee754_tests(ctx: RunContext) -> int:
     except Exception as e:
         print()
         print(f"{Fore.RED}IEEE754 CODEC TEST ERROR: {e}{Style.RESET_ALL}")
+        return 1
+    finally:
+        if client is not None:
+            await client.close()
+
+
+async def _run_mp3_tests(ctx: RunContext) -> int:
+    """Verify the fixed-point MP3 decoder on hardware, bit for bit."""
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+    serial_iface = ctx.serial_iface
+
+    print()
+    print("=" * 60)
+    print("MP3 CODEC TEST MODE")
+    print("=" * 60)
+    print()
+
+    # 60s is ample -- the decode itself measures ~311 ms on an ESP32-C6 -- but a
+    # user who asked for a shorter --timeout meant it, so take the smaller of
+    # the two rather than letting three retries run past their own deadline.
+    rpc_timeout = 60.0
+    if ctx.timeout_seconds:
+        rpc_timeout = min(rpc_timeout, float(ctx.timeout_seconds))
+
+    client: RpcClient | None = None
+    try:
+        print("   Connecting to device...", end="", flush=True)
+        client = RpcClient(
+            upload_port, timeout=rpc_timeout, serial_interface=serial_iface
+        )
+        await client.connect(boot_wait=1.0, drain_boot=True)
+        print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
+
+        print("   Sending mp3CodecTest RPC...", end="", flush=True)
+        response = await client.send_and_match(
+            "mp3CodecTest", match_key="success", retries=3
+        )
+        print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
+        print()
+
+        data = response.data
+        streams_run = int(data.get("streams_run", 0))
+        streams_failed = int(data.get("streams_failed", 0))
+        first_failure = str(data.get("first_failure", ""))
+        expected = int(data.get("expected_fnv1a", 0)) & 0xFFFFFFFF
+        actual = int(data.get("actual_fnv1a", 0)) & 0xFFFFFFFF
+        expected_samples = int(data.get("expected_samples", 0))
+        actual_samples = int(data.get("actual_samples", 0))
+        shared_ok = bool(data.get("shared_decoder_matched", False))
+
+        print(json.dumps(data, indent=2))
+        print()
+
+        if (
+            data.get("success", False)
+            and streams_failed == 0
+            and streams_run > 0
+            and shared_ok
+        ):
+            micros = int(data.get("decode_micros", 0))
+            samples = int(data.get("samples_decoded", 0))
+            frames = int(data.get("frames_decoded", 0))
+            combined = int(data.get("combined_fnv1a", 0)) & 0xFFFFFFFF
+            # Say what was actually decoded. A pass that reports only zeros is
+            # indistinguishable from a pass that decoded nothing at all.
+            if samples == 0 or frames == 0:
+                print(
+                    f"{Fore.RED}MP3 CODEC TEST INCONCLUSIVE: device reported "
+                    f"success but decoded {frames} frames / {samples} samples"
+                    f"{Style.RESET_ALL}"
+                )
+                return 1
+            audio = int(data.get("audio_micros", 0))
+            verify = int(data.get("verify_micros", 0))
+            # decode_micros and the frame/sample counts share a scope (the
+            # first pass); the shared-decoder pass is reported separately.
+            # Printing the real-time ratio rather than raw microseconds is the
+            # point: 310 ms means nothing until you know it covers 235 ms of
+            # audio, and on a 160 MHz part the margin is not comfortable.
+            ratio = (audio / micros) if micros else 0.0
+            print(
+                f"{Fore.GREEN}MP3 CODEC TEST PASSED "
+                f"({streams_run} streams, {frames} frames, {samples} samples, "
+                f"combined_fnv1a=0x{combined:08x}, bit-exact)"
+                f"{Style.RESET_ALL}"
+            )
+            print(
+                f"   decode {micros} us for {audio} us of audio"
+                f" -> {ratio:.2f}x real time"
+                f"{'' if ratio >= 1.0 else '  <-- SLOWER THAN REAL TIME'}"
+            )
+            print(f"   shared-decoder verification pass: {verify} us")
+            if ratio < 1.0:
+                # Printing this and returning success made the one result that
+                # matters advisory: a decoder that cannot keep up with playback
+                # has failed on this part, whatever its checksum says.
+                print(
+                    f"{Fore.RED}   the decoder cannot keep up with playback on "
+                    f"this part{Style.RESET_ALL}"
+                )
+                print(
+                    f"{Fore.RED}MP3 CODEC TEST FAILED"
+                    f" (decode is {ratio:.2f}x real time){Style.RESET_ALL}"
+                )
+                return 1
+            return 0
+
+        print(
+            f"{Fore.RED}MP3 CODEC TEST FAILED"
+            f" ({streams_failed}/{streams_run} streams){Style.RESET_ALL}"
+        )
+        if not shared_ok:
+            # The two members of the scratch union were live at once, or the
+            # struct is packed differently here than on the host.
+            print(
+                "   shared-decoder pass differed: a stream decoded differently "
+                "when another layer had used the same scratch arena "
+                "(FastLED#4116)"
+            )
+        if first_failure:
+            print(
+                f"   first_failure={first_failure} "
+                f"expected_fnv1a=0x{expected:08x} actual_fnv1a=0x{actual:08x}"
+            )
+            print(
+                f"   expected_samples={expected_samples} "
+                f"actual_samples={actual_samples}"
+            )
+        return 1
+
+    except RpcTimeoutError:
+        print()
+        print(f"{Fore.RED}MP3 CODEC TEST TIMEOUT{Style.RESET_ALL}")
+        print(f"   No response from device within {rpc_timeout:g} seconds")
+        return 1
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:
+        print()
+        print(f"{Fore.RED}MP3 CODEC TEST ERROR: {e}{Style.RESET_ALL}")
         return 1
     finally:
         if client is not None:

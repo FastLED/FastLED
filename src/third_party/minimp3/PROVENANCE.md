@@ -68,6 +68,16 @@ float kernel does -- and at ~13% of decode with roughly half the kernel
 addressable, the ceiling is around 2%. It is left scalar until something wants
 that 2% more than it wants the smaller diff.
 
+That closing loop is vectorised as of FastLED#4109: two vectors plus a scalar
+tail, sharing the rounded saturating narrow factored out of `mp3d_v_mulshift`
+so each output still sums two int64 products and rounds once, as the scalar
+path does. Measured with Callgrind rather than a clock -- 135,127,402
+instructions before, 131,959,062 after, a 2.34% reduction over the corpus with
+byte-identical PCM. Wall-clock on the development host could not resolve it:
+the same binary measured between 1.089x and 1.319x across eight consecutive
+runs, so a 2% effect is well inside the noise there. The 9-point DCT-III above
+it and the cross-band gathers remain unaddressable for the reasons above.
+
 ## Cortex-M4/M7 DSP evaluation
 
 `SMLAD` and its relatives are dual 16x16 -> 32 multiply-accumulates. The

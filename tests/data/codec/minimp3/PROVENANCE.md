@@ -11,6 +11,13 @@ These files are mirrored by `lieff/minimp3` at upstream commit
 - `l3-compl-cut.mp3`: truncated-input fuzz regression from `vectors/fuzz/`.
 - `ILL2_layer1.bit` and `.pcm`: MPEG Layer I synthesis vector used to cover
   minimp3's 12-band in-place QMF state slide.
+- `l3-si_huff.bit` and `.pcm`: MPEG-1 Layer III side-info/Huffman stress. This
+  is the vector that exposed FastLED#4127: it drives the dequantised samples to
+  3.89, six times higher than any other vector with a reference, and the
+  fixed-point path clamped them to 1.0 and lost 81 dB. Vendored specifically so
+  that regression cannot come back silently. The rest of the suite is exercised
+  by `ci/codec_conformance/run.py`, which fetches all 83 reference vectors from
+  the pinned upstream revision rather than vendoring 19 MB of PCM here.
 
 The `.pcm` file contains signed 16-bit little-endian interleaved reference
 samples. The Phase 0 golden test applies the upstream decoder's standard

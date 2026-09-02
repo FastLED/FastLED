@@ -15,6 +15,7 @@
 #include "fl/chipsets/encoders/ws2803.h"
 #include "fl/chipsets/encoders/ws2812.h"
 #include "fl/chipsets/encoders/tm1812.h"
+#include "fl/chipsets/encoders/tm1908.h"
 #include "fl/chipsets/encoders/apa102.h"
 #include "fl/chipsets/encoders/sk9822.h"
 #include "fl/chipsets/encoders/hd108.h"
@@ -222,6 +223,14 @@ class PixelIterator {
         auto back_ins = fl::back_inserter(*out);
         auto range = makeScaledPixelRangeRGBWW(this);
         encodeTM1812_RGBWW(range.first, range.second, back_ins);
+    }
+
+    /// @brief Encode RGB pixels with the required TM1908 command prefix.
+    template <typename CONTAINER_UIN8_T>
+    void writeTM1908(CONTAINER_UIN8_T* out) FL_NO_EXCEPT {
+        auto back_ins = fl::back_inserter(*out);
+        auto range = makeScaledPixelRangeRGB(this);
+        encodeTM1908(range.first, range.second, back_ins);
     }
 
     /// @brief Encode pixels in APA102/DOTSTAR format (zero allocation)

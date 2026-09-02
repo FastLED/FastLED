@@ -32,9 +32,58 @@ gate actually uses.
 
 The fixed-point build costs 128 bytes more scratch than the float build --
 scalefactor gains are carried as mantissa plus exponent rather than as a
-single float -- and 3,021 more bytes of text. It uses *less* decode stack
-(1,920 against 2,032), because its polyphase back-end has no vector code paths
-to keep live.
+single float -- and 3,021 more bytes of text. It uses less decode stack than
+the float build (896 against 1,200), because its polyphase back-end has no
+vector code paths to keep live.
+
+Both figures dropped by about 1 KB in FastLED#4116, which moved
+`L12_scale_info` off the stack. Layer I/II scale info is ~1090 bytes in the
+fixed build and used to sit inside `mp3dec_decode_frame_r`, where it was almost
+the whole 1,480-byte frame; the fixed decoder was running at 94% of its 2 KiB
+budget, and the figure moved with the compiler's inlining decisions rather than
+with anything in the decoder. It now shares arena storage with Layer III's
+`maindata` through a union -- a frame is one layer or the other, never both --
+so `scratch` and `working-ram` do not move and the saving is free. The budget
+now sits at 44% for fixed and 59% for float.
+
+## Deliberate revision: speed bought with text and stack (2026-09-02)
+
+Three summary rows and one static table moved in the fixed-point performance
+work, and they are recorded here rather than allowed to drift.
+
+| metric | was | now | |
+| --- | ---: | ---: | --- |
+| minimp3-fixed stack-callgraph | 896 | 1112 | +24.1% |
+| minimp3-fixed object-text | 26181 | 28677 | +9.5% |
+| minimp3-float object-text | 23160 | 24944 | +7.7% |
+
+**What was bought.** The ESP32-C6 decode went from 142,647 us to 39,385 us, a
+72% reduction, taking the decoder from 3.99x the retired Helix reference to
+1.13x, with accuracy unchanged at 123.24 dB throughout. That is the whole
+reason the fixed-point port is viable as the sole backend.
+
+**What it cost, and why the hard limits still hold.** The stack growth is the
+one that deserves scrutiny, because FastLED#4116 was taken specifically to
+reduce decode stack and this gives back roughly a quarter of it. It comes from
+force-inlining the hot leaf helpers and compiling the DCT-32 and IMDCT kernels
+at -O3 inside an -Os build; both are load-bearing, and the largest single
+measurement in the whole effort (-50%) was the force-inlining. The absolute
+ceilings are untouched: the decode stack limit is 2048 bytes and this is 1112,
+at 54%; the working-RAM limit is 24 KiB and did not move at all. Notably the
+deepest single frame went *down* (456 to 408) -- it is the chain that got
+deeper, not any one function.
+
+The float text moved because the inline-policy block sits outside
+`#if MINIMP3_HAVE_FIXED_POINT` deliberately, so both builds get the same
+attributes.
+
+**The table that vanished.** `g_sec_q27`, 96 bytes, is no longer emitted as a
+symbol at all. Making it `constexpr` is what allowed the DCT-32's secants to be
+passed as template arguments, and the compiler now folds them into the
+instruction stream as immediates. The 96 bytes did not leak; they moved from
+`.rodata` into `.text`, which is part of the object-text rise above. Its row is
+removed rather than zeroed, because a zero would read as "measured at nothing"
+rather than "no longer exists".
 
 ## Summary
 
@@ -48,11 +97,11 @@ to keep live.
 | minimp3-float | working-ram | 23180 |
 | minimp3-float | pipeline-peak | 27788 |
 | minimp3-float | allocation-count | 4 |
-| minimp3-float | stack-max-frame | 1208 |
-| minimp3-float | stack-callgraph | 2032 |
-| minimp3-float | stack-watermark-observed | 2056 |
+| minimp3-float | stack-max-frame | 824 |
+| minimp3-float | stack-callgraph | 1200 |
+| minimp3-float | stack-watermark-observed | 1224 |
 | minimp3-float | static-tables | 7878 |
-| minimp3-float | object-text | 23160 |
+| minimp3-float | object-text | 24944 |
 | minimp3-float | object-data | 0 |
 | minimp3-float | object-bss | 0 |
 | minimp3-float | massif-codec-peak | 27788 |
@@ -64,10 +113,10 @@ to keep live.
 | minimp3-fixed | working-ram | 23308 |
 | minimp3-fixed | pipeline-peak | 27916 |
 | minimp3-fixed | allocation-count | 4 |
-| minimp3-fixed | stack-max-frame | 1480 |
-| minimp3-fixed | stack-callgraph | 1920 |
+| minimp3-fixed | stack-max-frame | 456 |
+| minimp3-fixed | stack-callgraph | 1112 |
 | minimp3-fixed | static-tables | 8077 |
-| minimp3-fixed | object-text | 26181 |
+| minimp3-fixed | object-text | 28677 |
 | minimp3-fixed | object-data | 0 |
 | minimp3-fixed | object-bss | 0 |
 
@@ -158,7 +207,6 @@ audit call boundary. Before the fix they disagreed by 664 bytes.
 | minimp3-fixed | scalefactor | g_scf_partitions | 84 |
 | minimp3-fixed | header | halfrate | 90 |
 | minimp3-fixed | layer1-2 | g_bitalloc_code_tab | 92 |
-| minimp3-fixed | transform | g_sec_q27 | 96 |
 | minimp3-fixed | dequantization | g_pow43_exp | 145 |
 | minimp3-fixed | scalefactor | g_scf_long | 184 |
 | minimp3-fixed | layer1-2 | g_deq_L12_mant | 216 |

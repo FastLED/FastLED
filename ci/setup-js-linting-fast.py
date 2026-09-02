@@ -26,6 +26,8 @@ from pathlib import Path
 # Import httpx for HTTP requests (dynamically managed by uv)
 import httpx
 
+from ci.util.js_tools_cache import repository_tools_dir
+
 
 # Force UTF-8 output for Windows consoles
 if sys.platform.startswith("win"):
@@ -34,7 +36,9 @@ if sys.platform.startswith("win"):
 
 # Configuration
 NODE_VERSION = "20.11.0"  # LTS version
-TOOLS_DIR = Path(".cache/js-tools")
+
+
+TOOLS_DIR = repository_tools_dir(Path.cwd())
 NODE_DIR = TOOLS_DIR / "node"
 
 

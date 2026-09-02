@@ -29,8 +29,8 @@ enum memory_order { // ok plain enum
 template <typename T>
 class AtomicReal {
 public:
-    AtomicReal() : mValue{} {}
-    explicit AtomicReal(T value) : mValue(value) {}
+    AtomicReal() FL_NO_EXCEPT : mValue{} {}
+    explicit AtomicReal(T value) FL_NO_EXCEPT : mValue(value) {}
 
     // Non-copyable and non-movable (matches std::atomic behavior)
     AtomicReal(const AtomicReal&) = delete;
@@ -57,24 +57,24 @@ public:
 
     // Pre-increment: ++atomic
     // Returns the NEW value after increment
-    T operator++() {
+    T operator++() FL_NO_EXCEPT {
         return __atomic_add_fetch(&mValue, 1, __ATOMIC_ACQ_REL);
     }
 
     // Pre-decrement: --atomic
     // Returns the NEW value after decrement
-    T operator--() {
+    T operator--() FL_NO_EXCEPT {
         return __atomic_sub_fetch(&mValue, 1, __ATOMIC_ACQ_REL);
     }
 
     // Assignment operator
-    T operator=(T value) {
+    T operator=(T value) FL_NO_EXCEPT {
         store(value);
         return value;
     }
 
     // Conversion operator - returns current value
-    operator T() const {
+    operator T() const FL_NO_EXCEPT {
         return load();
     }
 

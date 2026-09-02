@@ -11,6 +11,8 @@ NC='\033[0m' # No Color
 # Store project root directory for cache operations
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 COMPILER_DIR="$PROJECT_ROOT/src/platforms/wasm/compiler"
+COMMON_GIT_DIR="$(git -C "$PROJECT_ROOT" rev-parse --path-format=absolute --git-common-dir)"
+JS_TOOLS_DIR="$(dirname "$COMMON_GIT_DIR")/.cache/js-tools"
 
 # Find a node_modules binary, preferring Unix name over .cmd (Windows)
 # Usage: find_bin <dir> <name>  →  sets FOUND_BIN or returns 1
@@ -27,14 +29,14 @@ find_bin() {
 
 # Resolve eslint binary → sets ESLINT_BIN or returns 1
 find_eslint() {
-    find_bin "$PROJECT_ROOT/.cache/js-tools/node_modules/.bin" "eslint" && ESLINT_BIN="$FOUND_BIN"
+    find_bin "$JS_TOOLS_DIR/node_modules/.bin" "eslint" && ESLINT_BIN="$FOUND_BIN"
 }
 
 # Resolve tsc binary → sets TSC_CMD or returns 1
 find_tsc() {
     if find_bin "$COMPILER_DIR/node_modules/.bin" "tsc"; then
         TSC_CMD="$FOUND_BIN"
-    elif find_bin "$PROJECT_ROOT/.cache/js-tools/node_modules/.bin" "tsc"; then
+    elif find_bin "$JS_TOOLS_DIR/node_modules/.bin" "tsc"; then
         TSC_CMD="$FOUND_BIN"
     elif command -v npx >/dev/null 2>&1; then
         TSC_CMD="npx tsc"
@@ -98,30 +100,30 @@ fi
 
 # Run ESLint using config from the compiler directory
 echo -e "${BLUE}Running ESLint...${NC}"
-cd .cache/js-tools
+cd "$JS_TOOLS_DIR"
 
 # Build the list of files/patterns to lint
 LINT_TARGETS=()
 
 # Add WASM TypeScript files
 if [ -n "$WASM_TS_FILES" ]; then
-    LINT_TARGETS+=("../../src/platforms/wasm/compiler/*.ts")
-    LINT_TARGETS+=("../../src/platforms/wasm/compiler/modules/**/*.ts")
+    LINT_TARGETS+=("$PROJECT_ROOT/src/platforms/wasm/compiler/*.ts")
+    LINT_TARGETS+=("$PROJECT_ROOT/src/platforms/wasm/compiler/modules/**/*.ts")
 fi
 
 # Add WASM JavaScript files (audio worklet, etc.)
 if [ -n "$WASM_JS_FILES" ]; then
-    LINT_TARGETS+=("../../src/platforms/wasm/compiler/modules/**/*.js")
+    LINT_TARGETS+=("$PROJECT_ROOT/src/platforms/wasm/compiler/modules/**/*.js")
 fi
 
 # Add avr8js TypeScript files
 if [ -n "$AVR_TS_FILES" ]; then
-    LINT_TARGETS+=("../../ci/docker_utils/avr8js/*.ts")
+    LINT_TARGETS+=("$PROJECT_ROOT/ci/docker_utils/avr8js/*.ts")
 fi
 
 # Copy eslintrc from compiler directory so ESLint can resolve the TS parser
 # (ESLint resolves parser modules relative to the config file location)
-cp "../../src/platforms/wasm/compiler/.eslintrc.cjs" ".eslintrc.cjs" 2>/dev/null || true
+cp "$PROJECT_ROOT/src/platforms/wasm/compiler/.eslintrc.cjs" ".eslintrc.cjs" 2>/dev/null || true
 
 if "$ESLINT_BIN" --no-eslintrc --no-inline-config -c .eslintrc.cjs "${LINT_TARGETS[@]}"; then
     echo -e "${GREEN}ESLint completed successfully${NC}"

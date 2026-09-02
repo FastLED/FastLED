@@ -1,5 +1,188 @@
 {
   "backends": {
+    "minimp3-fixed": {
+      "codegen": {
+        "cortex-m0plus": {
+          "dct32": {
+            "inner_loop_instructions": 312,
+            "instructions": 339
+          },
+          "polyphase": {
+            "inner_loop_instructions": 0,
+            "instructions": 195
+          }
+        },
+        "cortex-m4": {
+          "dct32": {
+            "inner_loop_instructions": 278,
+            "instructions": 294
+          },
+          "polyphase": {
+            "inner_loop_instructions": 0,
+            "instructions": 75
+          }
+        },
+        "riscv32-esp": {
+          "dct32": {
+            "inner_loop_instructions": 0,
+            "instructions": 47
+          },
+          "polyphase": {
+            "inner_loop_instructions": 0,
+            "instructions": 183
+          }
+        },
+        "xtensa-esp32": {
+          "dct32": {
+            "inner_loop_instructions": 303,
+            "instructions": 317
+          },
+          "polyphase": {
+            "inner_loop_instructions": 0,
+            "instructions": 187
+          }
+        }
+      },
+      "host": {
+        "callgrind": {
+          "branch_misses": 975543,
+          "branches": 25170807,
+          "functions": {
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_antialias(int*, int)": 67670454,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_dct3_9(int*)": 100403200,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_decode(fl::minimp3_fixed::mp3dec_t*, fl::minimp3_fixed::mp3dec_scratch_internal_t*, fl::minimp3_fixed::L3_gr_info_t*, int)": 292808466,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_huffman(int*, fl::minimp3_fixed::bs_t*, fl::minimp3_fixed::L3_gr_info_t const*, int const*, short const*, int)": 30896343,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_imdct36(int*, int*, int const*, int)": 175754360,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_imdct_gr(int*, int*, unsigned int, unsigned int)": 176830326,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_midside_stereo(int*, int)": 12751864,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_DCT_II(int*, int)": 202859854,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_add_sat(int, int)": 94137648,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_imdct36_twiddle(int*, int*, int const*, int const*, int const*)": 54068480,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_mulshift(int, int, int)": 107095393,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_narrow_q30(long)": 24629760,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_sat64(long)": 172018903,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_scale_pcm(long)": 27068344,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_shr_round(int, int)": 4129372,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_sub_sat(int, int)": 79788016,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_synth(int*, short*, int, int*)": 145270996,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_synth_granule(int*, int*, int, int, short*)": 349803817,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_synth_pair(short*, int, int const*)": 5412102,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3dec_decode_frame_r(fl::minimp3_fixed::mp3dec_t*, fl::minimp3_fixed::mp3dec_scratch_t*, unsigned char const*, int, short*, fl::minimp3_fixed::mp3dec_frame_info_t*)": 650418217
+          },
+          "instructions": 659084514
+        },
+        "counter_median": {
+          "branch_misses": 975543,
+          "cycles": 187720962.0,
+          "instructions": 659084514,
+          "ipc": 3.51098
+        },
+        "counter_source": {
+          "branch_misses": "Valgrind Callgrind simulated Bcm plus Bim",
+          "cycles": "Clang readcyclecounter median over 30 pinned runs",
+          "instructions": "Valgrind Callgrind deterministic Ir",
+          "ipc": "Callgrind Ir divided by median cycle counter"
+        },
+        "stage_coverage": {
+          "antialias": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "dequant": {
+            "fused_with": "huffman",
+            "instrumentation_sites": 0,
+            "mode": "fused"
+          },
+          "huffman": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "imdct": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "reorder": {
+            "instrumentation_sites": 1,
+            "mode": "dedicated"
+          },
+          "scalefactors": {
+            "instrumentation_sites": 2,
+            "mode": "dedicated"
+          },
+          "stereo": {
+            "instrumentation_sites": 3,
+            "mode": "dedicated"
+          },
+          "synthesis": {
+            "instrumentation_sites": 2,
+            "mode": "dedicated"
+          }
+        },
+        "stage_ns_median": {
+          "antialias": 7213.8,
+          "dequant": 0.0,
+          "huffman": 11160.302,
+          "imdct": 19186.098,
+          "reorder": 13.944,
+          "scalefactors": 579.044,
+          "stereo": 1610.025,
+          "synthesis": 41586.536
+        }
+      },
+      "operations": {
+        "frames": 892,
+        "stages": {
+          "antialias": {
+            "macs_per_frame": 2357.668161,
+            "multiplies_per_frame": 2357.668161,
+            "total_macs": 2103040,
+            "total_multiplies": 2103040
+          },
+          "dequant": {
+            "macs_per_frame": 123.113229,
+            "multiplies_per_frame": 133.977578,
+            "total_macs": 109817,
+            "total_multiplies": 119508
+          },
+          "huffman": {
+            "macs_per_frame": 41.636771,
+            "multiplies_per_frame": 41.636771,
+            "total_macs": 37140,
+            "total_multiplies": 37140
+          },
+          "imdct": {
+            "macs_per_frame": 3981.919283,
+            "multiplies_per_frame": 6743.103139,
+            "total_macs": 3551872,
+            "total_multiplies": 6014848
+          },
+          "reorder": {
+            "macs_per_frame": 0.0,
+            "multiplies_per_frame": 0.0,
+            "total_macs": 0,
+            "total_multiplies": 0
+          },
+          "scalefactors": {
+            "macs_per_frame": 0.0,
+            "multiplies_per_frame": 0.0,
+            "total_macs": 0,
+            "total_multiplies": 0
+          },
+          "stereo": {
+            "macs_per_frame": 0.0,
+            "multiplies_per_frame": 0.0,
+            "total_macs": 0,
+            "total_multiplies": 0
+          },
+          "synthesis": {
+            "macs_per_frame": 10958.44843,
+            "multiplies_per_frame": 24850.654709,
+            "total_macs": 9774936,
+            "total_multiplies": 22166784
+          }
+        }
+      }
+    },
     "minimp3-float": {
       "codegen": {
         "cortex-m0plus": {
@@ -61,7 +244,6 @@
             "src/third_party/minimp3/minimp3.h:fl::third_party::L3_pow_43(int)": 455424,
             "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_scalefactors(unsigned char*, unsigned char*, unsigned char const*, unsigned char const*, fl::third_party::bs_t*, int)": 1357481,
             "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_side_info(fl::third_party::bs_t*, fl::third_party::L3_gr_info_t*, unsigned char const*)": 1053557,
-            "src/third_party/minimp3/minimp3.h:fl::third_party::get_bits(fl::third_party::bs_t*, int)": 1425121,
             "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_DCT_II(float*, int)": 30475052,
             "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_scale_pcm(float)": 19588608,
             "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
@@ -218,10 +400,6 @@
     "governor": "not-exposed",
     "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39"
   },
-  "host_key": "AMD EPYC 9V74 80-Core Processor | Ubuntu clang version 18.1.3 (1ubuntu1) | not-exposed",
-  "profile_runs": 30,
-  "regression_tolerance": 0.05,
-  "schema_version": 2,
   "host_baselines": {
     "AMD EPYC 7763 64-Core Processor | Ubuntu clang version 18.1.3 (1ubuntu1) | not-exposed": {
       "environment": {
@@ -250,7 +428,6 @@
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_pow_43(int)": 455424,
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_scalefactors(unsigned char*, unsigned char*, unsigned char const*, unsigned char const*, fl::third_party::bs_t*, int)": 1357481,
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_side_info(fl::third_party::bs_t*, fl::third_party::L3_gr_info_t*, unsigned char const*)": 1053557,
-              "src/third_party/minimp3/minimp3.h:fl::third_party::get_bits(fl::third_party::bs_t*, int)": 1425121,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_DCT_II(float*, int)": 30475052,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_scale_pcm(float)": 19588608,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
@@ -347,7 +524,6 @@
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_pow_43(int)": 455424,
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_scalefactors(unsigned char*, unsigned char*, unsigned char const*, unsigned char const*, fl::third_party::bs_t*, int)": 1357481,
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_side_info(fl::third_party::bs_t*, fl::third_party::L3_gr_info_t*, unsigned char const*)": 1053557,
-              "src/third_party/minimp3/minimp3.h:fl::third_party::get_bits(fl::third_party::bs_t*, int)": 1425121,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_DCT_II(float*, int)": 30475052,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_scale_pcm(float)": 19588608,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
@@ -444,7 +620,6 @@
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_pow_43(int)": 455424,
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_scalefactors(unsigned char*, unsigned char*, unsigned char const*, unsigned char const*, fl::third_party::bs_t*, int)": 1357481,
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_side_info(fl::third_party::bs_t*, fl::third_party::L3_gr_info_t*, unsigned char const*)": 1053557,
-              "src/third_party/minimp3/minimp3.h:fl::third_party::get_bits(fl::third_party::bs_t*, int)": 1425121,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_DCT_II(float*, int)": 30475052,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_scale_pcm(float)": 19588608,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
@@ -514,5 +689,9 @@
         }
       }
     }
-  }
+  },
+  "host_key": "AMD EPYC 9V74 80-Core Processor | Ubuntu clang version 18.1.3 (1ubuntu1) | not-exposed",
+  "profile_runs": 30,
+  "regression_tolerance": 0.05,
+  "schema_version": 2
 }

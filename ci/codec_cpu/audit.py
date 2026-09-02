@@ -25,12 +25,11 @@ TREND_PATH = ROOT / "codec_cpu_trend.json"
 BUILD = Path(os.environ.get("CODEC_CPU_BUILD", ROOT / ".build" / "codec-cpu-audit"))
 REGRESSION_TOLERANCE = 0.05
 PROFILE_RUNS = 30
-# minimp3's float build. It stays the CPU-audited variant after Helix's
-# deletion: the host baselines in codec_cpu_trend.json are keyed by its symbols,
-# and re-baselining onto the fixed build is separate work (FastLED#4110). The
-# fixed path's speed is gated by the SIMD perf test in
-# tests/fl/codec/mp3_fixed_point.hpp.
-BACKENDS = ("minimp3-float",)
+# Both minimp3 builds. `minimp3-fixed` is what ships; `minimp3-float` is the
+# reference the fixed-vs-float gates compare against, and it keeps its history
+# rather than being replaced (FastLED#4110). They cannot share a translation
+# unit, so each has its own source below and its own namespace.
+BACKENDS = ("minimp3-float", "minimp3-fixed")
 STAGES = (
     "scalefactors",
     "huffman",
@@ -106,6 +105,7 @@ _STAGE_SYMBOLS: tuple[tuple[str, tuple[str, ...]], ...] = (
 
 _FUSED_STAGES = {
     "minimp3-float": {"dequant": "huffman"},
+    "minimp3-fixed": {"dequant": "huffman"},
 }
 
 _LLVM_DEFINE_RE = re.compile(r'^\s*define\b.*@(?:"([^"]+)"|([^\s(]+))\(')
@@ -179,13 +179,102 @@ def _llvm_functions(lines: list[str]) -> list[tuple[int, int, str]]:
 
 
 def _operation_stage(backend: str, symbol: str) -> str | None:
-    if backend == "minimp3-float" and ("L3_huffman" in symbol or "L3_pow_43" in symbol):
+    if "L3_huffman" in symbol or "L3_pow_43" in symbol or "mp3d_pow43" in symbol:
         return "dequant"
     return classify_stage(symbol)
 
 
 def _uses_llvm_value(line: str, value: str) -> bool:
     return re.search(rf"{re.escape(value)}(?:\s|,|$)", line) is not None
+
+
+@typechecked
+@dataclass(frozen=True)
+class IntegerProducts:
+    """Where the fixed-point pipeline's Q-format multiplies are, and what they
+    define. `lines` indexes into the function body; `values` names the SSA
+    results, which the MAC taint analysis follows into the accumulates."""
+
+    lines: set[int]
+    values: set[str]
+
+
+def _integer_product_lines(body: list[str]) -> IntegerProducts:
+    """Q-format multiplies in the fixed-point pipeline, and the values they
+    define.
+
+    The float build counts `fmul`, which is unambiguous. `mul` is not: at -O0
+    the decoder's integer arithmetic and the compiler's address and size
+    arithmetic are the same opcode. Measured on the fixed-point audit TU, the
+    discriminating shape is a 64-bit multiply with at least one operand sign
+    extended from i32 -- that is what `(int64_t)a * b` lowers to and what index
+    scaling never does -- whose product is not then consumed by a
+    `getelementptr` or passed to a call.
+
+    Those two exclusions are not decoration. Address scaling that does emit a
+    `mul` feeds a GEP, and `L12_apply_scf_384` computes a `memcpy` byte count as
+    `(total_bands - stereo_bands) * 18 * sizeof(...)`, which has the sign-extend
+    shape but is a size, not a sample. On the current tree this rule selects 69
+    multiplies and rejects exactly that one.
+    """
+    defs: dict[str, str] = {}
+    for line in body:
+        match = re.match(r"\s*(%[\w.]+) = (\w+)", line)
+        if match:
+            defs[match.group(1)] = match.group(2)
+
+    # Values that carry a sign-extended int32, directly or through widened
+    # arithmetic. `(int64_t)a * b` lowers to `sext -> mul`, but
+    # `((int64_t)a - (int64_t)b) * c` lowers to `sext, sext -> sub i64 -> mul`,
+    # and the multiply's operand is then the subtract rather than the extend.
+    # Both are the same Q-format multiply; only the spelling differs.
+    #
+    # Keying on the extend alone made the counter blind to 329,616 multiplies in
+    # mp3d_synth_pair the moment FastLED#4133 widened its operands to avoid
+    # signed overflow -- the arithmetic was unchanged, the IR shape was not. The
+    # exact-ledger gate caught it, which is what that gate is for.
+    widened: set[str] = set()
+    for _ in range(2):  # one pass would do in SSA order; two is belt and braces
+        for line in body:
+            match = re.match(
+                r"\s*(%[\w.]+) = (\w+)(?:\s+nsw|\s+nuw)*\s*(?:i64)?\s*(.*)", line
+            )
+            if not match:
+                continue
+            result, opcode, rest = match.group(1), match.group(2), match.group(3)
+            if opcode == "sext":
+                widened.add(result)
+            elif opcode in ("add", "sub") and "i64" in line:
+                operands = re.findall(r"%[\w.]+", rest)
+                if operands and all(value in widened for value in operands):
+                    widened.add(result)
+
+    joined = "\n".join(body)
+    lines: set[int] = set()
+    values: set[str] = set()
+    for index, line in enumerate(body):
+        match = re.search(
+            r"(%[\w.]+) = mul (?:nsw |nuw )*i64 (%[\w.]+|-?\d+), (%[\w.]+|-?\d+)",
+            line,
+        )
+        if not match:
+            continue
+        result, left, right = match.group(1), match.group(2), match.group(3)
+        if left not in widened and right not in widened:
+            continue
+        # Negative lookahead on word characters rather than a positive one on
+        # separators: `(?=[\s,)])` needs a *following* character, so a value at
+        # the end of the last line -- a getelementptr closing a block, say --
+        # slipped past the exclusion and got counted as arithmetic. This still
+        # keeps %off from matching inside %offset.
+        used = re.escape(result) + r"(?![\w.])"
+        if re.search(r"getelementptr[^\n]*" + used, joined):
+            continue
+        if re.search(r"\bcall\b[^\n]*" + used, joined):
+            continue
+        lines.add(index)
+        values.add(result)
+    return IntegerProducts(lines=lines, values=values)
 
 
 def _tainted_accumulate_lines(
@@ -271,6 +360,12 @@ def instrument_llvm_ir(
         float_accumulates = _tainted_accumulate_lines(
             body, fmul_values, r"\bf(?:add|sub)\b"
         )
+        integer_products = _integer_product_lines(body)
+        integer_accumulates = _tainted_accumulate_lines(
+            body,
+            integer_products.values,
+            r"\b(?:add|sub)(?:\s+nsw|\s+nuw)*\s+i64\b",
+        )
         for relative, line in enumerate(body, start=start + 1):
             if (
                 operations
@@ -282,6 +377,26 @@ def instrument_llvm_ir(
                 inserts.setdefault(relative, []).append(
                     "  call void @fastled_mp3_cpu_operation("
                     f"i32 {operation_stage_index}, i32 {lanes}, i32 0)"
+                )
+                operation_sites += 1
+            elif (
+                operations
+                and backend == "minimp3-fixed"
+                and relative - (start + 1) in integer_products.lines
+            ):
+                inserts.setdefault(relative, []).append(
+                    "  call void @fastled_mp3_cpu_operation("
+                    f"i32 {operation_stage_index}, i32 1, i32 0)"
+                )
+                operation_sites += 1
+            elif (
+                operations
+                and backend == "minimp3-fixed"
+                and relative - (start + 1) in integer_accumulates
+            ):
+                inserts.setdefault(relative, []).append(
+                    "  call void @fastled_mp3_cpu_operation("
+                    f"i32 {operation_stage_index}, i32 0, i32 1)"
                 )
                 operation_sites += 1
             elif (
@@ -347,11 +462,12 @@ def build_instrumented_driver(*, operations: bool = True) -> InstrumentedDriver:
     compiler = compiler_path()
     sources = {
         "minimp3-float": ROOT / "ci" / "codec_memory" / "minimp3_audit.cpp",
+        "minimp3-fixed": ROOT / "ci" / "codec_cpu" / "minimp3_fixed_driver.cpp",
     }
     objects: list[Path] = []
     stage_coverage: dict[str, dict[str, dict[str, Any]]] = {}
     for backend, source in sources.items():
-        stem = backend.replace("-float", "")
+        stem = backend.replace("minimp3-", "minimp3_")
         mode = "operations" if operations else "timing"
         raw_ir = BUILD / f"{stem}.{mode}.ll"
         instrumented_ir = BUILD / f"{stem}.{mode}.instrumented.ll"
@@ -427,8 +543,11 @@ def build_plain_driver() -> Path:
     BUILD.mkdir(parents=True, exist_ok=True)
     compiler = compiler_path()
     objects: list[Path] = []
-    for backend in ("minimp3",):
-        source = ROOT / "ci" / "codec_memory" / f"{backend}_audit.cpp"
+    plain_sources = {
+        "minimp3": ROOT / "ci" / "codec_memory" / "minimp3_audit.cpp",
+        "minimp3_fixed": ROOT / "ci" / "codec_cpu" / "minimp3_fixed_driver.cpp",
+    }
+    for backend, source in plain_sources.items():
         obj = BUILD / f"{backend}.plain.o"
         RunningProcess.run(
             [
@@ -847,10 +966,18 @@ def validate_trend(trend: dict[str, Any]) -> None:
         ):
             raise RuntimeError(f"host baseline key does not match environment: {key}")
         hosts = profile.get("hosts")
-        if not isinstance(hosts, dict) or set(hosts) != set(BACKENDS):
+        # A host baseline may cover a subset of BACKENDS: a backend added after
+        # a host was last measured has no numbers for it until a run lands there
+        # again. Unknown backends are still rejected, and an empty profile is
+        # meaningless.
+        if not isinstance(hosts, dict) or not hosts:
             raise RuntimeError(f"host baseline is missing backends: {key}")
-        for backend in BACKENDS:
-            host = hosts[backend]
+        unknown = set(hosts) - set(BACKENDS)
+        if unknown:
+            raise RuntimeError(
+                f"host baseline names unknown backends: {key}: {sorted(unknown)}"
+            )
+        for backend, host in hosts.items():
             if not isinstance(host, dict):
                 raise RuntimeError(f"invalid host baseline {key}/{backend}")
             validate_host(backend, host)
@@ -872,6 +999,108 @@ def _check_lower_bound(path: str, baseline: float, current: float) -> None:
         raise RuntimeError(f"{path} regressed: {current} < {limit:.6f}")
 
 
+def _report_drift(
+    path: str, baseline: float, current: float, *, higher_is_worse: bool = True
+) -> None:
+    """Record a measurement without gating on it.
+
+    Loud rather than silent: a real slowdown still has to be visible to someone
+    reading the log, it just does not fail the build on a number the runner pool
+    moves by more than the budget on its own.
+
+    `higher_is_worse` picks which direction earns the marker. Cycles and stage
+    timings regress upwards; IPC regresses *downwards*, so flagging only
+    positive drift there would stay quiet on exactly the case worth seeing --
+    a 30% cycle increase shows up as roughly -23% IPC.
+    """
+    if baseline == 0:
+        print(f"UNGATED:{path} baseline=0 current={current:.6g}")
+        return
+    drift = (current - baseline) / baseline * 100.0
+    regression = drift if higher_is_worse else -drift
+    marker = "  <-- worth a look" if regression > 100.0 * REGRESSION_TOLERANCE else ""
+    print(
+        f"UNGATED:{path} baseline={baseline:.6g} current={current:.6g} "
+        f"drift={drift:+.2f}%{marker}"
+    )
+
+
+def _check_host_trend(
+    backend: str, baseline_host: dict[str, Any], current_host: dict[str, Any]
+) -> None:
+    """The host-dependent half of the trend gate.
+
+    Split by whether the measurement is a property of the *code* or of the
+    *machine that ran it* (FastLED#4130).
+
+    Gated: instruction count, branch misses, and everything else Callgrind
+    reports. `validate_trend` requires `counter_median` instructions and branch
+    misses to *equal* the Callgrind figures, so despite living under a "counter"
+    key those are simulated, exact and reproducible -- not hardware counters.
+
+    Ungated: cycles, the IPC derived from them, and the per-stage wall-clock
+    timings. Those are the only genuinely host-measured quantities here, and
+    they are properties of the machine. The `ubuntu-24.04` pool moves cycles by
+    more than the 5% budget between runners reporting the same CPU model,
+    because the host key identifies a CPU family and not a contention
+    environment.
+
+    The evidence for splitting here rather than widening the budget: on the PR
+    that prompted this, the float decoder's Callgrind instruction count matched
+    its baseline to 767 out of 261,532,799 -- 0.0003% -- while cycles came in
+    6.7% high, on a change that could not touch the float build at all. Same
+    work, different machine. Widening the budget would only move the threshold
+    the noise has to cross.
+    """
+    for metric in ("instructions", "branch_misses"):
+        _check_upper_bound(
+            f"{backend}/counter/{metric}",
+            baseline_host["counter_median"][metric],
+            current_host["counter_median"][metric],
+        )
+    _report_drift(
+        f"{backend}/counter/cycles",
+        baseline_host["counter_median"]["cycles"],
+        current_host["counter_median"]["cycles"],
+    )
+    _report_drift(
+        f"{backend}/counter/ipc",
+        baseline_host["counter_median"]["ipc"],
+        current_host["counter_median"]["ipc"],
+        higher_is_worse=False,
+    )
+    for stage in STAGES:
+        _report_drift(
+            f"{backend}/stage/{stage}",
+            baseline_host["stage_ns_median"][stage],
+            current_host["stage_ns_median"][stage],
+        )
+    for metric in ("instructions", "branches", "branch_misses"):
+        _check_upper_bound(
+            f"{backend}/callgrind/{metric}",
+            baseline_host["callgrind"][metric],
+            current_host["callgrind"][metric],
+        )
+    baseline_functions = baseline_host["callgrind"]["functions"]
+    current_functions = current_host["callgrind"]["functions"]
+    for symbol, baseline_instructions in baseline_functions.items():
+        if symbol not in current_functions:
+            raise RuntimeError(
+                f"callgrind attribution disappeared for {backend}/{symbol}"
+            )
+        baseline_share = (
+            baseline_instructions / baseline_host["callgrind"]["instructions"]
+        )
+        current_share = (
+            current_functions[symbol] / current_host["callgrind"]["instructions"]
+        )
+        _check_upper_bound(
+            f"{backend}/callgrind-function/{symbol}",
+            baseline_share,
+            current_share,
+        )
+
+
 def check_trend(baseline: dict[str, Any], current: dict[str, Any]) -> None:
     """Enforce exact portable counts and a 5% CPU/codegen regression budget."""
     validate_trend(baseline)
@@ -881,7 +1110,24 @@ def check_trend(baseline: dict[str, Any], current: dict[str, Any]) -> None:
     if baseline.get("host_key") != current_host_key:
         alternate_profile = baseline.get("host_baselines", {}).get(current_host_key)
         if alternate_profile is None:
-            raise RuntimeError(f"host baseline is unknown: {current_host_key}")
+            # An unknown host used to fail closed. That made sense while cycles
+            # were gated, because a cycle count from an unrecognised machine is
+            # not comparable to anything. It does not any more: after
+            # FastLED#4130 every *gated* figure is deterministic -- the exact
+            # operation ledger, the cross-compiled codegen bounds, and the
+            # Callgrind numbers that `counter_median` instructions and branch
+            # misses are required to equal. None of those depend on which
+            # machine ran them, so the primary baseline applies to any host.
+            #
+            # This matters operationally: the ubuntu-24.04 pool has presented at
+            # least five CPU models (EPYC 9V74, 9V45, 7763; Xeon 8573C,
+            # 6973P-C), and every new one blocked unrelated PRs until somebody
+            # harvested a baseline for it.
+            print(
+                f"UNKNOWN-HOST:{current_host_key}: no recorded profile; gating "
+                "on the primary baseline, which is safe because every gated "
+                "metric is simulated rather than timed"
+            )
     for backend in BACKENDS:
         baseline_entry = baseline["backends"][backend]
         current_entry = current["backends"][backend]
@@ -890,54 +1136,38 @@ def check_trend(baseline: dict[str, Any], current: dict[str, Any]) -> None:
         if current_operations != baseline_operations:
             raise RuntimeError(f"exact operation ledger changed for {backend}")
 
-        baseline_host = (
-            baseline_entry["host"]
-            if alternate_profile is None
-            else alternate_profile["hosts"][backend]
-        )
-        current_host = current_entry["host"]
-        for metric in ("cycles", "instructions", "branch_misses"):
-            _check_upper_bound(
-                f"{backend}/counter/{metric}",
-                baseline_host["counter_median"][metric],
-                current_host["counter_median"][metric],
-            )
-        _check_lower_bound(
-            f"{backend}/counter/ipc",
-            baseline_host["counter_median"]["ipc"],
-            current_host["counter_median"]["ipc"],
-        )
-        for stage in STAGES:
-            _check_upper_bound(
-                f"{backend}/stage/{stage}",
-                baseline_host["stage_ns_median"][stage],
-                current_host["stage_ns_median"][stage],
-            )
-        for metric in ("instructions", "branches", "branch_misses"):
-            _check_upper_bound(
-                f"{backend}/callgrind/{metric}",
-                baseline_host["callgrind"][metric],
-                current_host["callgrind"][metric],
-            )
-        baseline_functions = baseline_host["callgrind"]["functions"]
-        current_functions = current_host["callgrind"]["functions"]
-        for symbol, baseline_instructions in baseline_functions.items():
-            if symbol not in current_functions:
-                raise RuntimeError(
-                    f"callgrind attribution disappeared for {backend}/{symbol}"
-                )
-            baseline_share = (
-                baseline_instructions / baseline_host["callgrind"]["instructions"]
-            )
-            current_share = (
-                current_functions[symbol] / current_host["callgrind"]["instructions"]
-            )
-            _check_upper_bound(
-                f"{backend}/callgrind-function/{symbol}",
-                baseline_share,
-                current_share,
+        baseline_host: dict[str, Any] | None
+        if alternate_profile is None:
+            baseline_host = baseline_entry["host"]
+        elif backend in alternate_profile["hosts"]:
+            baseline_host = alternate_profile["hosts"][backend]
+        else:
+            baseline_host = None
+            # A known host that has never measured this backend. The exact
+            # operation ledger above is host-independent and has already been
+            # enforced; the timing and callgrind figures are not comparable
+            # across hosts, and inventing a baseline from another machine's
+            # numbers would gate on the hardware rather than on the code.
+            #
+            # This is how a newly added backend accretes coverage: the runner
+            # pool rotates, and each host picks the backend up the first time a
+            # PR lands on it and someone commits the measured artifact. Loud on
+            # purpose -- a backend that stays uncovered here forever is a real
+            # gap, just not one worth blocking unrelated PRs over.
+            print(
+                f"UNGATED:{backend}/host={current_host_key}: no host baseline "
+                "for this backend on this host; the exact operation ledger and "
+                "the target codegen bounds are still enforced"
             )
 
+        # Only the host-dependent half is skipped. The codegen bounds further
+        # down are cross-compiled instruction counts -- host-independent, and
+        # read from the backend entry rather than the host profile -- so a
+        # target codegen regression must still fail here. Skipping them along
+        # with the timings would let one through on any host that has not
+        # measured this backend yet.
+        if baseline_host is not None:
+            _check_host_trend(backend, baseline_host, current_entry["host"])
         for target in TARGETS:
             for kernel in KERNELS:
                 for metric in ("instructions", "inner_loop_instructions"):
@@ -1104,9 +1334,14 @@ def run_codegen_audit() -> dict[str, dict[str, dict[str, dict[str, int]]]]:
     BUILD.mkdir(parents=True, exist_ok=True)
     sources = {
         "minimp3-float": Path(__file__).with_name("minimp3_codegen.cpp"),
+        "minimp3-fixed": Path(__file__).with_name("minimp3_fixed_codegen.cpp"),
     }
     kernel_needles = {
         "minimp3-float": {
+            "dct32": ("mp3d_DCT_II",),
+            "polyphase": ("mp3d_synth_pair",),
+        },
+        "minimp3-fixed": {
             "dct32": ("mp3d_DCT_II",),
             "polyphase": ("mp3d_synth_pair",),
         },
@@ -1117,7 +1352,7 @@ def run_codegen_audit() -> dict[str, dict[str, dict[str, dict[str, int]]]]:
     for target in TARGETS:
         tools = _target_tools(target)
         for backend, source in sources.items():
-            stem = backend.replace("-float", "")
+            stem = backend.replace("minimp3-", "minimp3_")
             obj = BUILD / f"{stem}.{target}.o"
             cross_flags = [
                 flag
