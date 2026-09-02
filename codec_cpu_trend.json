@@ -244,7 +244,6 @@
             "src/third_party/minimp3/minimp3.h:fl::third_party::L3_pow_43(int)": 455424,
             "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_scalefactors(unsigned char*, unsigned char*, unsigned char const*, unsigned char const*, fl::third_party::bs_t*, int)": 1357481,
             "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_side_info(fl::third_party::bs_t*, fl::third_party::L3_gr_info_t*, unsigned char const*)": 1053557,
-            "src/third_party/minimp3/minimp3.h:fl::third_party::get_bits(fl::third_party::bs_t*, int)": 1425121,
             "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_DCT_II(float*, int)": 30475052,
             "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_scale_pcm(float)": 19588608,
             "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
@@ -401,10 +400,6 @@
     "governor": "not-exposed",
     "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39"
   },
-  "host_key": "AMD EPYC 9V74 80-Core Processor | Ubuntu clang version 18.1.3 (1ubuntu1) | not-exposed",
-  "profile_runs": 30,
-  "regression_tolerance": 0.05,
-  "schema_version": 2,
   "host_baselines": {
     "AMD EPYC 7763 64-Core Processor | Ubuntu clang version 18.1.3 (1ubuntu1) | not-exposed": {
       "environment": {
@@ -433,7 +428,6 @@
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_pow_43(int)": 455424,
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_scalefactors(unsigned char*, unsigned char*, unsigned char const*, unsigned char const*, fl::third_party::bs_t*, int)": 1357481,
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_side_info(fl::third_party::bs_t*, fl::third_party::L3_gr_info_t*, unsigned char const*)": 1053557,
-              "src/third_party/minimp3/minimp3.h:fl::third_party::get_bits(fl::third_party::bs_t*, int)": 1425121,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_DCT_II(float*, int)": 30475052,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_scale_pcm(float)": 19588608,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
@@ -530,7 +524,6 @@
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_pow_43(int)": 455424,
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_scalefactors(unsigned char*, unsigned char*, unsigned char const*, unsigned char const*, fl::third_party::bs_t*, int)": 1357481,
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_side_info(fl::third_party::bs_t*, fl::third_party::L3_gr_info_t*, unsigned char const*)": 1053557,
-              "src/third_party/minimp3/minimp3.h:fl::third_party::get_bits(fl::third_party::bs_t*, int)": 1425121,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_DCT_II(float*, int)": 30475052,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_scale_pcm(float)": 19588608,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
@@ -627,7 +620,6 @@
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_pow_43(int)": 455424,
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_scalefactors(unsigned char*, unsigned char*, unsigned char const*, unsigned char const*, fl::third_party::bs_t*, int)": 1357481,
               "src/third_party/minimp3/minimp3.h:fl::third_party::L3_read_side_info(fl::third_party::bs_t*, fl::third_party::L3_gr_info_t*, unsigned char const*)": 1053557,
-              "src/third_party/minimp3/minimp3.h:fl::third_party::get_bits(fl::third_party::bs_t*, int)": 1425121,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_DCT_II(float*, int)": 30475052,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_scale_pcm(float)": 19588608,
               "src/third_party/minimp3/minimp3.h:fl::third_party::mp3d_synth(float*, short*, int, float*)": 141205140,
@@ -697,5 +689,9 @@
         }
       }
     }
-  }
+  },
+  "host_key": "AMD EPYC 9V74 80-Core Processor | Ubuntu clang version 18.1.3 (1ubuntu1) | not-exposed",
+  "profile_runs": 30,
+  "regression_tolerance": 0.05,
+  "schema_version": 2
 }
