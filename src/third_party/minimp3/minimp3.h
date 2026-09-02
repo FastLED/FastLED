@@ -2358,6 +2358,30 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_internal_t *s, L3_gr_info_t *g
     for (ch = 0; ch < nch; ch++)
     {
         int layer3gr_limit = s->bs.pos + gr_info[ch].part_23_length;
+        /* Clear only what L3_huffman will not itself define, and only for the
+           channels this granule decodes. The granule buffer has three regions:
+
+             [0, 2*big_values)   the big_values loop stores every sample. Each
+                                 band writes 2*min(big_val_cnt, np) and takes np
+                                 off the count, so `dst` lands exactly on
+                                 grbuf + 2*big_values whether the last band is
+                                 whole or partial. Pre-clearing it is dead.
+             [2*big_values, ..)  the count1 loop stores *sparsely* -- DEQ_COUNT1
+                                 writes a sample only when its quadruple bit is
+                                 set -- so the gaps have to already read zero.
+             (.., 576)           rzero. Never written; must read zero.
+
+           So the clear starts at 2*big_values and runs to the end of the
+           granule. `big_values <= 288` is enforced in L3_read_side_info, so the
+           length is never negative, and every g_scf_* band width is even and
+           each table sums to exactly 576, so `*sfb++/2` never truncates and the
+           big_values accounting is exact.
+
+           A mono granule needs no clear of grbuf[1] at all: `mp3d_synth` takes
+           `xr = xl + 576*(nch - 1)`, so `xr == xl` and every read of it sits
+           behind `if (nch == 2)`. This loop running `ch < nch` covers that. */
+        memset(s->grbuf[ch] + 2*gr_info[ch].big_values, 0,
+               (576 - 2*(int)gr_info[ch].big_values)*sizeof(mp3d_dsp_t));
         L3_decode_scalefactors(h->header, s->ist_pos[ch], &s->bs, gr_info + ch, MP3D_SCF_ARGS(s), ch);
         L3_huffman(s->grbuf[ch], &s->bs, gr_info + ch, MP3D_SCF_ARGS(s), layer3gr_limit);
         MP3D_STAGE(MINIMP3_STAGE_HUFFMAN, ch, s->grbuf[ch], 576);
@@ -3828,7 +3852,6 @@ int mp3dec_decode_frame_r(mp3dec_t *dec, mp3dec_scratch_t *scratch_storage,
         {
             for (igr = 0; igr < (HDR_TEST_MPEG1(hdr) ? 2 : 1); igr++, pcm += 576*info->channels)
             {
-                memset(scratch->grbuf[0], 0, 576*2*sizeof(mp3d_dsp_t));
                 L3_decode(dec, scratch, scratch->gr_info + igr*info->channels, info->channels);
                 mp3d_synth_granule(dec->qmf_state, scratch->grbuf[0], 18, info->channels, pcm);
             }

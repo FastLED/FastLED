@@ -328,6 +328,75 @@ Related: `-O3` on the polyphase is worse than hand-unrolling (gcc emits 395
 memory operations against a hand-written 188) but *does* pay on the DCT-32 and
 IMDCT -- which host Callgrind at `-O2` structurally cannot observe at all.
 
+## Making the 32-bit cost visible: `text_size.py --compare`
+
+Host Callgrind reads **1.000x** against Helix on the 892-frame corpus while an
+ESP32-C6 reads **1.170x**. That difference is not noise and it is not the
+corpus -- it is work that only exists on a 32-bit target: 32x32->64 multiplies
+that need a `mul`/`mulh` pair, and values that live in registers on x86-64 and
+in the frame on riscv32. Callgrind cannot see any of it.
+
+    uv run python ci/codec_cpu/text_size.py --compare
+
+builds *both* decoders for *both* ISAs from the same sources and prints, per
+stage, how much each one inflates going from x86-64 to riscv32. Two details
+make the numbers mean anything, and both were wrong in the first version:
+
+- **Same compiler family on both sides** (`esp-elf-g++` against host `g++`).
+  Against host *clang* the tool reported minimp3's DCT-32 at 798 riscv32
+  instructions to 217 on x86-64 and called it a 3.7x ISA penalty. It is 1.59x.
+  g++ fully unrolls the DCT-32's inner loops -- 798 riscv32 instructions
+  contain two backward branches -- and clang at `-Os` does not. Most of that
+  ratio was one compiler against another.
+- **Inline-aware attribution.** Both decoders inline heavily at `-Os`;
+  a symbol table compares two different partitions of the same program. The
+  tool disassembles, asks `addr2line -i` for each address's inline stack, and
+  charges the bytes to the innermost frame that names a stage. minimp3's
+  `fl::math` helpers are transparent, because Helix spells the same operations
+  as macros and counting minimp3's separately would score a language choice as
+  an algorithmic difference.
+
+What it says today (riscv32 instructions, `-Os`, scalar):
+
+| stage | mp3 rv32 | infl | hx rv32 | infl | mp3/hx |
+|---|---|---|---|---|---|
+| polyphase | 1,278 | 1.85x | 1,820 | 2.09x | 0.70x |
+| **dct32** | **876** | **1.50x** | **710** | **1.05x** | **1.23x** |
+| imdct | 692 | 1.36x | 1,158 | 1.02x | 0.60x |
+| bitstream | 1,649 | 0.88x | 1,784 | 1.03x | 0.92x |
+| dequant | 453 | 1.42x | 599 | 1.06x | 0.76x |
+| whole TU | 5,713 | **1.24x** | 7,197 | **1.18x** | 0.79x |
+
+minimp3 inflates 1.24x from host to target against Helix's 1.18x -- the same
+direction as the host/device disagreement, and the first static measurement of
+it this project has had.
+
+**The DCT-32 is the one stage where minimp3 loses to Helix on riscv32.**
+Everywhere else minimp3 needs 0.60-0.92x of Helix's instructions; in `dct32` it
+needs 1.23x, and the riscv32 instruction mix says why:
+
+| | minimp3 `dct32` | Helix `dct32` |
+|---|---|---|
+| memory ops | 257 | 275 |
+| ...of which sp/s0 (frame traffic) | **174** | **47** |
+| multiplies (`mul`+`mulh`) | **89** | **44** |
+
+`mp3d_DCT_II` alone is 798 riscv32 instructions of which 147 are frame traffic,
+against Helix's `FDCT32` at 488 with 19. Twice the multiplies and nearly four
+times the spill. `mp3d_synth_granule` -- which is where the DCT-32 lands -- is
+15.2% of host Ir, so the host does see the stage; what it cannot see is that
+the stage costs disproportionately more on the target.
+
+Read all of this as a **bound, not a measurement**. Static instruction counts
+say where the target does structurally more work; they do not say what that
+work costs. A change removing 15 of 25 riscv32 instructions once delivered 4.6%
+on device because the branches it removed were predictable. `device_profile.py`
+decides.
+
+The Helix half builds through `ci/codec_cpu/helix_codegen.cpp`, which is
+benchmark-only: RPSL/RCSL-licensed, not part of the library, not linked by any
+firmware.
+
 ## Disable SIMD when tracing on the host
 
 **Host profiling must pass `-DMINIMP3_NO_SIMD`.** `ci/codec_cpu/audit.py`
