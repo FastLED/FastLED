@@ -524,6 +524,9 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
             case ClocklessEncoder::CLOCKLESS_ENCODER_TM1812_RGBWW:
                 pixelIterator.writeTM1812RGBWW(&data);
                 break;
+            case ClocklessEncoder::CLOCKLESS_ENCODER_TM1908:
+                pixelIterator.writeTM1908(&data);
+                break;
 #if !defined(FASTLED_DISABLE_UCS7604) || !FASTLED_DISABLE_UCS7604
             // Gated by FASTLED_DISABLE_UCS7604 (#2920). For WS2812-only
             // sketches the UCS7604 case is dead at runtime, but each

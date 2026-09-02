@@ -152,6 +152,7 @@ class Args:
     # cycle after #3281 lands.
     use_root_platformio_ini: bool
     watchdog_soak: bool = False
+    mp3: bool = False
 
     @staticmethod
     def parse_args(argv: list[str] | None = None) -> "Args":
@@ -374,6 +375,15 @@ See Also:
             "--ieee754",
             action="store_true",
             help="Run on-device integer IEEE 754 decimal codec verification (#3039)",
+        )
+        driver_group.add_argument(
+            "--mp3",
+            action="store_true",
+            help=(
+                "Run on-device fixed-point MP3 decoder verification: a Layer I "
+                "and a Layer III stream decoded bit-exactly against "
+                "host-computed checksums (no LED drivers)"
+            ),
         )
         driver_group.add_argument(
             "--rpc-smoke",
@@ -888,6 +898,7 @@ See Also:
             simd=parsed.simd,
             coroutine=parsed.coroutine,
             ieee754=parsed.ieee754,
+            mp3=parsed.mp3,
             rpc_smoke=parsed.rpc_smoke,
             watchdog_soak=parsed.watchdog_soak,
             perf_wave2d=parsed.perf_wave2d,
