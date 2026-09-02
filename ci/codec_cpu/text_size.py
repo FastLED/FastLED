@@ -871,8 +871,20 @@ def main(argv: list[str] | None = None) -> int:
             stages = (
                 _MINIMP3_STAGES if args.decoder == "minimp3-fixed" else _HELIX_STAGES
             )
+            # Link the relocatable first. MP3D_KERNEL carries `hot`, so the
+            # kernels land in .text.hot.* -- a separate section that, in an
+            # unlinked object, starts at address 0 like .text does. addr2line
+            # then resolves those addresses against the wrong section and
+            # misattributes the entire DCT-32. _build_profile already flattens
+            # for exactly this reason; this path was constructing Profile on
+            # the raw object and quietly getting a different answer.
             prof = Profile(
-                args.decoder, "riscv32", objdump, _riscv_tool("addr2line"), now, stages
+                args.decoder,
+                "riscv32",
+                objdump,
+                _riscv_tool("addr2line"),
+                _flatten(gpp, objdump, now, "riscv32"),
+                stages,
             )
             print("\n  per-function .text (inline-aware):")
             for size, name in sorted(

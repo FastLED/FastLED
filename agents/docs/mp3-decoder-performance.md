@@ -58,7 +58,15 @@ because a cycle measurement was taken on a loaded box. As a cross-check, the
 Helix count measured in 2026-09 came out 0.18% from the baseline recorded a year
 earlier on different hardware.
 
-Scalar (`-DMINIMP3_NO_SIMD`), `-O2` with inlining, five-file corpus, 892 frames:
+**These figures are historical.** They were taken at `-O2` when
+`callgrind.py` compiled at that level, against the decoder as it stood before
+any of the optimisation work below. The script now compiles at `-Os`, which is
+what ships, so a fresh run will not reproduce these numbers and is not meant
+to -- see "Where it stands today" for the current ones. They are kept because
+they are the measurement the whole effort started from.
+
+Scalar (`-DMINIMP3_NO_SIMD`), `-O2` with inlining, five-file corpus, 892
+frames, decoder as of 2026-08:
 
 Ratios below are `backend / helix` **instructions executed**, so higher is
 worse. 1.59x means minimp3-fixed does 59% *more* work than Helix, not that it is
@@ -74,7 +82,11 @@ The configuration matters more than it looks. At `-O1 -fno-inline` (the audit's
 flags) the same comparison gives 1.42x by instructions and 1.18x by cycles.
 Helix gains more from inlining than minimp3 does -- 2.07x against 1.86x -- so
 the gap *widens* with optimisation, and the `-fno-inline` number understates
-what ships. Quote the `-O2` scalar figure.
+what ships. At the time these were taken, the figure to quote was the `-O2`
+scalar one. **That guidance has since changed:** `callgrind.py` compiles at
+`-Os` now, because `-Os` is what FastLED ships and measuring the level that
+ships is worth more than measuring the level that flatters. Quote the `-Os`
+scalar figure, and quote the *device* number for any speed claim.
 
 `minimp3-fixed` is the default everywhere -- the choice is made in
 `minimp3.h`, not by a build flag -- so the configuration FastLED actually ships
@@ -196,7 +208,8 @@ a concrete lead.
 
 ## Where the gap is: saturation, not DSP
 
-Callgrind attribution, scalar `-O2`, the numbers that should drive any
+Callgrind attribution, scalar `-O2` (historical; the script is `-Os` now),
+the numbers that should drive any
 optimisation work:
 
 | minimp3-fixed | | helix | |
