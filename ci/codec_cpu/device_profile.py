@@ -74,7 +74,18 @@ class Measurement:
 TRANSPORT_FAILURE = "transport"
 
 
+# `board` is interpolated into a shell string below -- `sg dialout -c` takes a
+# command line, not an argv -- so it is constrained to what a board name can
+# actually be rather than trusted.
+_BOARD_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
+
+
 def run_once(board: str, timeout: int) -> Measurement | str | None:
+    if not _BOARD_RE.match(board):
+        raise SystemExit(
+            f"refusing to run with board name {board!r}: it is "
+            "interpolated into a shell command"
+        )
     _kill_stale_daemon()
     inner = (
         "source /home/niteris/.clud/tmp/nixcompat/env.sh 2>/dev/null; "
