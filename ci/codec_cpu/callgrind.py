@@ -58,11 +58,11 @@ FLAGS = [
     "-Isrc/platforms/stub",
     "-std=gnu++11",
     # -Os, not -O2: the ESP32-C6 and every other target this decoder ships to
-        # build at -Os, and the two are not interchangeable here. -O3 on the
-        # polyphase produces 395 memory operations against a hand-written 188,
-        # and -O2 sits between. Profiling an optimisation level nobody ships
-        # measures a different program.
-        "-Os",
+    # build at -Os, and the two are not interchangeable here. -O3 on the
+    # polyphase produces 395 memory operations against a hand-written 188,
+    # and -O2 sits between. Profiling an optimisation level nobody ships
+    # measures a different program.
+    "-Os",
     "-fno-exceptions",
     "-fno-rtti",
     "-fno-strict-aliasing",
@@ -79,6 +79,20 @@ FLAGS = [
 ]
 
 DECODERS = ("minimp3-fixed", "minimp3-float", "helix")
+
+
+def helix_present() -> bool:
+    """Whether the Helix reference is in this tree at all.
+
+    It is a benchmark reference carried on one branch, not part of the
+    decoder, so a tree without it is normal and must still profile. Probe
+    the source, not the driver: the driver is checked in unconditionally
+    and compiles to nothing useful without the headers it includes.
+    """
+    return (
+        ROOT / "src" / "third_party" / "libhelix_mp3" / "real" / "dct32.hpp"
+    ).is_file()
+
 
 # Same corpus the CPU audit uses, and it matters that the mono vector is in it:
 # mp3d_synth runs a different lane path for one channel, and a corpus of only
@@ -164,19 +178,6 @@ int main(int argc, char** argv) {
 """
 
 
-def helix_available() -> bool:
-    """Is the RPSL/RCSL reference decoder present?
-
-    It normally is not: it lives outside this tree by design. Everything that
-    matters -- minimp3 totals, per-function attribution, baseline deltas --
-    works without it, so its absence downgrades the report rather than failing
-    it.
-    """
-    return (ROOT / "ci" / "codec_cpu" / "helix_driver.cpp").exists() and (
-        ROOT / "src" / "third_party" / "libhelix_mp3" / "_build.cpp.hpp"
-    ).exists()
-
-
 def _no_functions() -> list[tuple[int, str]]:
     """Typed default for Attribution.functions; a bare `list` reads as unknown."""
     return []
@@ -189,9 +190,7 @@ class Attribution:
 
 
 def _run(command: list[str], cwd: Path = ROOT) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        command, cwd=cwd, check=True, text=True, capture_output=True
-    )
+    return subprocess.run(command, cwd=cwd, check=True, text=True, capture_output=True)
 
 
 def _require(tool: str) -> str:
@@ -237,24 +236,22 @@ def compile_driver(out_dir: Path, include_first: Path | None, per_file: bool) ->
         _run([clang, *prefix, *FLAGS, str(source), "-o", str(binary)])
         return binary
 
-    # The Helix reference decoder is optional and usually absent: it is
-    # RPSL/RCSL and lives outside this tree. When it is not here, build without
-    # it rather than failing -- the minimp3 numbers and the per-function
-    # attribution are the point, and the helix column is a bonus.
     objects: list[str] = []
     units = {
         "f.o": "ci/codec_memory/minimp3_audit.cpp",
         "x.o": "ci/codec_cpu/minimp3_fixed_driver.cpp",
     }
     flags = list(FLAGS)
-    if helix_available():
+    if helix_present():
         units["h.o"] = "ci/codec_cpu/helix_driver.cpp"
         flags.append("-DFL_CODEC_CPU_HAS_HELIX=1")
     for name, unit in units.items():
         obj = out_dir / name
         _run([clang, *prefix, *flags, "-c", unit, "-o", str(obj)])
         objects.append(str(obj))
-    _run([clang, *prefix, *flags, "ci/codec_cpu/driver.cpp", *objects, "-o", str(binary)])
+    _run(
+        [clang, *prefix, *flags, "ci/codec_cpu/driver.cpp", *objects, "-o", str(binary)]
+    )
     return binary
 
 
@@ -371,7 +368,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--no-helix",
         action="store_true",
-        help="skip the Helix reference run (halves the runtime)",
+        default=not helix_present(),
+        help="skip the Helix reference run (halves the runtime); on by "
+        "default when the reference is not in this tree",
     )
     parser.add_argument(
         "--per-file",
@@ -398,12 +397,13 @@ def main(argv: list[str] | None = None) -> int:
             binary = compile_driver(out_dir, include, per_file=True)
             rows: dict[str, tuple[int, str]] = {}
             for relative in CORPUS:
-                run = callgrind(
-                    binary, [relative], out_dir / "cg.perfile", top=0
-                )
+                run = callgrind(binary, [relative], out_dir / "cg.perfile", top=0)
                 detail = subprocess.run(
-                    [str(binary), relative], cwd=ROOT, check=True,
-                    text=True, capture_output=True,
+                    [str(binary), relative],
+                    cwd=ROOT,
+                    check=True,
+                    text=True,
+                    capture_output=True,
                 ).stdout.strip()
                 rows[relative] = (run.total, detail.replace("DECODE ", ""))
             per_file[label] = rows
@@ -414,7 +414,7 @@ def main(argv: list[str] | None = None) -> int:
             binary, [args.decoder], out_dir / "cg.out", args.top
         )
         totals[label] = attributions[label].total
-        if not args.no_helix and helix_available():
+        if not args.no_helix:
             helix_totals[label] = callgrind(
                 binary, ["helix"], out_dir / "cg.helix", top=0
             ).total
@@ -438,19 +438,21 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     print(f"{'variant':10s} {'decoder':>14s} {'Ir':>14s}", end="")
-    if not args.no_helix and helix_available():
+    if not args.no_helix:
         print(f" {'helix':>14s} {'ratio':>8s}", end="")
     print()
     for label, _ in variants:
         print(f"{label:10s} {args.decoder:>14s} {totals[label]:14,d}", end="")
-        if not args.no_helix and helix_available():
+        if not args.no_helix:
             helix = helix_totals[label]
             print(f" {helix:14,d} {totals[label] / helix:7.3f}x", end="")
         print()
     if args.baseline:
         delta = totals["tree"] - totals[args.baseline]
-        print(f"{'delta':10s} {'':>14s} {delta:14,d} "
-              f"({_pct(totals['tree'], totals[args.baseline])})")
+        print(
+            f"{'delta':10s} {'':>14s} {delta:14,d} "
+            f"({_pct(totals['tree'], totals[args.baseline])})"
+        )
 
     tree = attributions["tree"]
     print(f"\ntop {args.top} functions (tree, {args.decoder}):")
@@ -458,9 +460,9 @@ def main(argv: list[str] | None = None) -> int:
         share = 100.0 * count / tree.total if tree.total else 0.0
         line = f"  {share:5.1f}%  {count:14,d}  {name}"
         if args.baseline:
-            before = dict(
-                (n, c) for c, n in attributions[args.baseline].functions
-            ).get(name)
+            before = dict((n, c) for c, n in attributions[args.baseline].functions).get(
+                name
+            )
             if before is not None:
                 line += f"   ({_pct(count, before)})"
         print(line)

@@ -1,5 +1,51 @@
 # MP3 decoder performance: minimp3 vs the retired Helix backend
 
+## Measuring a change: one command
+
+```
+bash mp3measure
+```
+
+Host Callgrind instruction counts against the last commit, an ESP32-C6
+autoresearch run with the Helix ratio, the riscv32 `.text` delta, and PSNR.
+`--gates` adds conformance, sanitizers and lint; `--skip-device` when no board
+is attached. Step output goes to log files, so the report stays readable.
+
+**Optimisation work happens in one file:
+`src/third_party/minimp3/minimp3_synth_fixed.h`** -- the fixed-point synthesis
+back-end (DCT-32, polyphase, integer SIMD). It is 57% of a decode and holds the
+one stage where this decoder still loses to Helix on RISC-V. It is textually
+included from `minimp3.h` at a single point inside
+`#if MINIMP3_HAVE_FIXED_POINT` and does not compile standalone.
+
+PSNR is checked on every run, not behind `--gates`: fixed-point work can "win"
+by breaking the arithmetic, and an opt-in tripwire is one a loop will skip. The
+device checksum (`0xc6b632ab`) covers the same risk on hardware.
+
+A serial timeout is retried automatically. The board re-enumerates on reset, so
+a back-to-back run can open the port the previous run left behind and hear
+nothing; that is the link failing, not the decoder.
+
+## Where it stands today
+
+ESP32-C6 at 160 MHz, both decoders in one firmware, timed in the same run
+(`bash mp3measure`):
+
+| | minimp3-fixed | Helix | ratio |
+|---|---|---|---|
+| Layer III decode | **39,839 us** | 35,284 us | **1.130x** |
+
+Down from 4.0x when this work started. Accuracy is unchanged throughout:
+PSNR 123.24 dB on `l3-hecommon`, device checksum `0xc6b632ab`.
+
+Two cautions on that ratio. Helix's leg is untouched code and still moves
+0.6-0.7% flash to flash, so it is a usable drift control but not a fixed
+reference -- against the leg measured at the start of this round (34,812 us)
+the same firmware reads 1.144x. And the *host* now reads 1.024x against Helix
+where it used to read 1.000x: several of the changes that pay on a 32-bit
+target cost instructions on x86-64. That is the expected direction, not a
+regression to chase.
+
 ## Summary
 
 FastLED replaced libhelix_mp3 with minimp3 in FastLED#4056, for licensing
@@ -330,8 +376,8 @@ IMDCT -- which host Callgrind at `-O2` structurally cannot observe at all.
 
 ## Making the 32-bit cost visible: `text_size.py --compare`
 
-Host Callgrind reads **1.000x** against Helix on the 892-frame corpus while an
-ESP32-C6 reads **1.170x**. That difference is not noise and it is not the
+Host Callgrind reads **1.024x** against Helix on the 892-frame corpus while an
+ESP32-C6 reads **1.130x**. That difference is not noise and it is not the
 corpus -- it is work that only exists on a 32-bit target: 32x32->64 multiplies
 that need a `mul`/`mulh` pair, and values that live in registers on x86-64 and
 in the frame on riscv32. Callgrind cannot see any of it.
@@ -361,31 +407,101 @@ What it says today (riscv32 instructions, `-Os`, scalar):
 | stage | mp3 rv32 | infl | hx rv32 | infl | mp3/hx |
 |---|---|---|---|---|---|
 | polyphase | 1,278 | 1.85x | 1,820 | 2.09x | 0.70x |
-| **dct32** | **876** | **1.50x** | **710** | **1.05x** | **1.23x** |
+| dct32 | 742 | 1.03x | 710 | 1.05x | **1.05x** |
 | imdct | 692 | 1.36x | 1,158 | 1.02x | 0.60x |
 | bitstream | 1,649 | 0.88x | 1,784 | 1.03x | 0.92x |
 | dequant | 453 | 1.42x | 599 | 1.06x | 0.76x |
-| whole TU | 5,713 | **1.24x** | 7,197 | **1.18x** | 0.79x |
+| whole TU | 5,579 | **1.17x** | 7,197 | **1.18x** | 0.78x |
 
-minimp3 inflates 1.24x from host to target against Helix's 1.18x -- the same
-direction as the host/device disagreement, and the first static measurement of
-it this project has had.
+minimp3 no longer inflates faster than Helix from host to target. It used to:
+1.24x against 1.18x, with `dct32` alone at 1.50x -- and closing that stage is
+what moved the whole-TU figure to 1.17x.
 
-**The DCT-32 is the one stage where minimp3 loses to Helix on riscv32.**
-Everywhere else minimp3 needs 0.60-0.92x of Helix's instructions; in `dct32` it
-needs 1.23x, and the riscv32 instruction mix says why:
+## The DCT-32 gap was the multiply lowering, not the spill
 
-| | minimp3 `dct32` | Helix `dct32` |
+`dct32` was the one stage where minimp3 lost to Helix on riscv32 -- 876
+instructions to 710, a ratio of 1.23x where every other stage sat at 0.60-0.92x.
+Two numbers looked like the cause and only one of them was:
+
+| | minimp3 `dct32`, before | Helix `dct32` |
 |---|---|---|
 | memory ops | 257 | 275 |
 | ...of which sp/s0 (frame traffic) | **174** | **47** |
 | multiplies (`mul`+`mulh`) | **89** | **44** |
 
-`mp3d_DCT_II` alone is 798 riscv32 instructions of which 147 are frame traffic,
-against Helix's `FDCT32` at 488 with 19. Twice the multiplies and nearly four
-times the spill. `mp3d_synth_granule` -- which is where the DCT-32 lands -- is
-15.2% of host Ir, so the host does see the stage; what it cannot see is that
-the stage costs disproportionately more on the target.
+**The frame traffic was a red herring, and worth spelling out because the
+metric will mislead the next reader the same way.** Three things were going on:
+
+- About 87 of `mp3d_DCT_II`'s 147 frame accesses are its *prologue*, where gcc
+  constant-folds `g_sec_q27` into `lui`/`addi` immediates and spills them to
+  stack slots outside the k loop. That runs once per call against 18 iterations
+  of ~1,140 instructions -- 0.4% of the function, dynamically.
+- The rest is `t[4][8]`, the transpose scratch between pass 1 (which writes
+  columns) and pass 2 (which reads rows). Those 32 values have to be
+  materialised somewhere. Helix pays exactly the same traffic to its `buf[32]`
+  -- but `buf` is a *pointer argument*, so its loads and stores are addressed
+  off `a0` and the sp/s0 counter does not attribute them as frame traffic at
+  all. Total memory ops, which is the honest comparison, were 257 to 275: this
+  decoder was already doing slightly *less*.
+- Both decoders execute exactly **80 multiplies per 32-point DCT**, and their
+  non-multiply code came to 427 instructions against 439 -- within 3%.
+
+So the entire gap was in how one multiply lowers. Helix spends two instructions
+on each -- `mulh`, then a shift to undo the coefficient's Q format -- and this
+decoder spent nine:
+
+    mul  mulh  lui  add  sltu  add  srli  slli  or
+
+Seven of those exist only to round at bit `Bits` rather than at bit 32, which
+needs the low half of the product, the carry out of adding 2^(Bits-1) to it,
+and a 64-bit funnel shift. Helix does not round anywhere; it truncates, and
+that is where its 20 dB of accuracy went.
+
+`mp3d_mulshift_k` rounds at bit 32 -- which `mulh` does for free -- and lands
+on the same bits. Writing a compile-time coefficient as `Coef = W*2^Bits + F`:
+
+    floor((v*Coef + 2^(Bits-1)) / 2^Bits)
+      = v*W + floor((v*(F << (32-Bits)) + 2^31) / 2^32)
+      = v*W + mulh(v, F32) + (lo(v*F32) >> 31)
+
+`F32` is kept as a *signed* int32 -- most of these coefficients have a
+fractional part above a half, so the Q32 form has its top bit set; reading that
+bit pattern as negative subtracts 2^32, and the missing 1 goes back on the
+integer side as `W+1`. Spelling it unsigned instead makes gcc emit
+`srai/mul/mul/mulhu/add` and hands the whole win back.
+
+Per coefficient on riscv32 `-Os`, excluding the `lui`/`addi` that materialises
+it (both forms pay that): 8 instructions become 4 where W is 0, 5 where W is 1,
+7 where W is 3 or 10. `mp3d_DCT_II`'s dynamic count per 32-point transform went
+**1,140 -> 894 (-21.6%)**, and the stage to 1.05x of Helix.
+
+The requirement is that the coefficient be a constant *expression*, not merely
+a constant the compiler knows the value of -- only then can W and F32 be
+computed at compile time. That is why pass 1 is spelled out as eight macro
+invocations with `i` as a template argument and `g_sec_q27` is `constexpr`.
+
+Bit-exactness here is proved rather than argued: the identity was checked
+against `mp3d_mulshift` for all 2^32 int32 inputs against each of the 33
+coefficients the DCT instantiates -- 141,733,920,768 pairs, zero mismatches.
+The device checksum and the PSNR are unchanged, and they are the tripwire if a
+constant is ever transcribed wrong.
+
+**What is left, and it is not much.** The multiply column still reads 94 to
+Helix's 44, because the rounding bit needs the low half and so every multiply
+is still a `mul`/`mulh` pair where Helix uses one `mulh`. Removing that means
+truncating, which is the 20 dB. The remaining candidate is the *general*
+`fl::math::mul_shift_round32`, still 9 instructions at its 20 non-DCT call
+sites (IMDCT, antialias, stereo); the same low-half-rounding identity takes it
+to 7 without needing a compile-time coefficient:
+
+    (hi << (32-S)) + (((lo >> (S-1)) + 1) >> 1)
+
+That lives in `src/platforms/int_asm.h` behind a pinned codegen test, so it is
+a separate piece of work from anything in the synthesis file.
+
+`mp3d_synth_granule` -- which is where the DCT-32 lands -- is 17.0% of host Ir,
+so the host does see the stage; what it could not see is that the stage cost
+disproportionately more on the target.
 
 Read all of this as a **bound, not a measurement**. Static instruction counts
 say where the target does structurally more work; they do not say what that
