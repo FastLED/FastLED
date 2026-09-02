@@ -126,14 +126,30 @@ enum class TaskType {
 class ITaskImpl;
 class Coroutine;  // IWYU pragma: keep
 
-/// @brief Configuration for OS-level coroutine tasks
+/// @brief Function and platform tuning for an OS-level coroutine task.
+/// @note Every field is copied when coroutine() is called, so the config object
+/// may be destroyed as soon as that call returns.
 struct CoroutineConfig {
-    optional<TracePoint> trace; ///< Optional location where the task was created.
-    function<void()> func;      ///< Function executed by the coroutine.
-    string name = "task";       ///< Diagnostic name reported by the platform.
-    size_t stack_size = 4096;   ///< Requested stack size in bytes.
-    u8 priority = 5;            ///< Platform task priority.
-    optional<int> core_id;      ///< Optional CPU core affinity on supported platforms.
+    /// Optional location where the task was created, reported by
+    /// Handle::trace_label(). Unset by default, in which case the label is empty.
+    optional<TracePoint> trace;
+    /// Function executed by the coroutine, copied at creation time. An empty
+    /// function is legal: the coroutine starts, does nothing, and exits.
+    function<void()> func;
+    /// Diagnostic name reported by the platform. Defaults to "task".
+    string name = "task";
+    /// Requested stack size in bytes, default 4096. A platform may raise a
+    /// smaller request to its own floor (ESP32 clamps up to 2048) and platforms
+    /// that emulate coroutines may ignore the field entirely.
+    size_t stack_size = 4096;
+    /// Platform task priority relative to the platform idle priority, default 5.
+    /// On ESP32 the FreeRTOS priority becomes `tskIDLE_PRIORITY + priority`.
+    /// FastLED does not clamp this against the platform maximum.
+    u8 priority = 5;
+    /// Optional CPU core affinity, unset by default (no affinity). Only ESP32
+    /// honors it; a value outside [0, FL_CPU_CORES) is silently downgraded to no
+    /// affinity, and single-core or non-RTOS platforms ignore the field.
+    optional<int> core_id;
 };
 
 /// @brief Task Handle with fluent API (was class fl::task, renamed to avoid namespace collision)
@@ -152,8 +168,14 @@ public:
     /// @brief Moves a handle without changing the underlying task.
     Handle& operator=(Handle&&) FL_NO_EXCEPT = default;
 
-    /// @brief Constructs a handle for a task implementation.
-    /// @param impl Shared task implementation owned by the scheduler.
+    /// @brief Constructs a handle for an existing task implementation.
+    /// @param impl Task implementation. Ownership is shared: this handle, every
+    /// copy of it, and the entry Scheduler::add_task keeps all hold the
+    /// implementation alive, and it is destroyed when the last of them goes away.
+    /// Passing nullptr yields an invalid handle that behaves exactly like a
+    /// default-constructed one: is_valid() returns false, every accessor returns
+    /// a default value, every mutator is a no-op, and the scheduler refuses to
+    /// register it.
     /// @note This is public only because ITaskImpl is forward-declared.
     explicit Handle(shared_ptr<ITaskImpl> impl) FL_NO_EXCEPT;
 
@@ -243,29 +265,34 @@ Handle at_framerate(int fps) FL_NO_EXCEPT;
 /// @return A handle for configuring and controlling the task.
 Handle at_framerate(int fps, const TracePoint& trace) FL_NO_EXCEPT;
 
+/// Frame tasks recur: every overload below schedules a task that runs once per
+/// FastLED frame and keeps doing so until Handle::cancel() is called on it, so
+/// keep the returned handle whenever the task will need to be canceled.
+
 /// @brief Creates a task that runs before every FastLED frame until canceled.
 /// @return A handle for configuring and controlling the task.
 /// @note Prefer after_frame() unless work must happen immediately before rendering.
 Handle before_frame() FL_NO_EXCEPT;
-/// @brief Creates a traced task that runs before every FastLED frame.
+/// @brief Creates a traced task that runs before every FastLED frame until canceled.
 /// @param trace Location where the task was created.
 /// @return A handle for configuring and controlling the task.
 Handle before_frame(const TracePoint& trace) FL_NO_EXCEPT;
 
 /// @brief Creates a task that runs after every FastLED frame until canceled.
 /// @return A handle for configuring and controlling the task.
-/// @note Keep the returned handle when the task will need to be canceled.
-/// UI work usually belongs after the frame so it is ready for the next loop.
+/// @note UI work usually belongs after the frame so it is ready for the next loop.
 Handle after_frame() FL_NO_EXCEPT;
-/// @brief Creates a traced task that runs after every FastLED frame.
+/// @brief Creates a traced task that runs after every FastLED frame until canceled.
 /// @param trace Location where the task was created.
 /// @return A handle for configuring and controlling the task.
 Handle after_frame(const TracePoint& trace) FL_NO_EXCEPT;
-/// @brief Creates an after-frame task with its success callback configured.
+/// @brief Creates an after-frame task, running until canceled, with its success
+/// callback already configured.
 /// @param on_then Callback invoked after each FastLED frame.
 /// @return A handle for controlling the task.
 Handle after_frame(function<void()> on_then) FL_NO_EXCEPT;
-/// @brief Creates a traced after-frame task with its callback configured.
+/// @brief Creates a traced after-frame task, running until canceled, with its
+/// success callback already configured.
 /// @param on_then Callback invoked after each FastLED frame.
 /// @param trace Location where the task was created.
 /// @return A handle for controlling the task.
