@@ -19,6 +19,7 @@ from ci.python_lint_cache import (
     invalidate_python_cache,
     mark_python_lint_success,
 )
+from ci.util.js_tools_cache import repository_tools_dir
 
 
 # IWYU (Include-What-You-Use) is currently disabled because it doesn't work well
@@ -344,10 +345,11 @@ def run_js_lint(no_fingerprint: bool) -> bool:
 
     # Determine ESLint executable path
     eslint_exe = ""
+    js_tools_dir = repository_tools_dir(Path.cwd())
     if sys.platform in ("win32", "cygwin", "msys"):
-        eslint_exe = ".cache/js-tools/node_modules/.bin/eslint.cmd"
+        eslint_exe = js_tools_dir / "node_modules" / ".bin" / "eslint.cmd"
     else:
-        eslint_exe = ".cache/js-tools/node_modules/.bin/eslint"
+        eslint_exe = js_tools_dir / "node_modules" / ".bin" / "eslint"
 
     # Check if fast linting is available
     lint_script = Path("ci/lint-js-fast")
@@ -895,7 +897,7 @@ def run_js_lint_single_file(file_path: str) -> bool:
     print(f"🌐 JS lint: {os.path.relpath(file_path)}")
 
     # ESLint runs from .cache/js-tools/ with its local config
-    js_tools_dir = Path(".cache/js-tools").resolve()
+    js_tools_dir = repository_tools_dir(Path.cwd())
     if sys.platform in ("win32", "cygwin", "msys"):
         eslint_exe = js_tools_dir / "node_modules" / ".bin" / "eslint.cmd"
     else:

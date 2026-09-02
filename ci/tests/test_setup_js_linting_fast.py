@@ -18,6 +18,24 @@ def _load_setup_module() -> ModuleType:
     return module
 
 
+def test_js_tools_cache_is_shared_by_linked_worktrees(tmp_path: Path) -> None:
+    module = _load_setup_module()
+    repository = tmp_path / "fastled"
+    common_git_dir = repository / ".git"
+    common_git_dir.mkdir(parents=True)
+
+    worktree = tmp_path / "fastled-wt-feature"
+    worktree.mkdir()
+    worktree_git_dir = common_git_dir / "worktrees" / "feature"
+    worktree_git_dir.mkdir(parents=True)
+    (worktree_git_dir / "commondir").write_text("../..\n", encoding="utf-8")
+    (worktree / ".git").write_text(f"gitdir: {worktree_git_dir}\n", encoding="utf-8")
+
+    expected = repository / ".cache" / "js-tools"
+    assert module.repository_tools_dir(repository) == expected
+    assert module.repository_tools_dir(worktree) == expected
+
+
 def test_node_archive_is_reused_after_extracted_tree_is_removed(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
