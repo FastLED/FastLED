@@ -139,16 +139,16 @@
             "total_multiplies": 2103040
           },
           "dequant": {
-            "macs_per_frame": 0.0,
-            "multiplies_per_frame": 10.86435,
-            "total_macs": 0,
-            "total_multiplies": 9691
+            "macs_per_frame": 123.113229,
+            "multiplies_per_frame": 133.977578,
+            "total_macs": 109817,
+            "total_multiplies": 119508
           },
           "huffman": {
-            "macs_per_frame": 164.75,
-            "multiplies_per_frame": 164.75,
-            "total_macs": 146957,
-            "total_multiplies": 146957
+            "macs_per_frame": 41.636771,
+            "multiplies_per_frame": 41.636771,
+            "total_macs": 37140,
+            "total_multiplies": 37140
           },
           "imdct": {
             "macs_per_frame": 3981.919283,
@@ -175,10 +175,10 @@
             "total_multiplies": 0
           },
           "synthesis": {
-            "macs_per_frame": 16859.946188,
-            "multiplies_per_frame": 29634.941704,
-            "total_macs": 15039072,
-            "total_multiplies": 26434368
+            "macs_per_frame": 10958.44843,
+            "multiplies_per_frame": 24850.654709,
+            "total_macs": 9774936,
+            "total_multiplies": 22166784
           }
         }
       }
