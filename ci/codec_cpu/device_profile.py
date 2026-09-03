@@ -54,15 +54,22 @@ def _kill_stale_daemon() -> None:
     looking for a stuck process rather than at credentials."""
     found = RunningProcess.run(
         ["pgrep", "-x", "fbuild-daemon"],
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",
     )
     for pid in found.stdout.split():
-        # Output is discarded; keep bytes mode, since RunningProcess.run
-        # defaults to text where subprocess.run does not.
-        RunningProcess.run(["kill", pid], capture_output=True, text=False)
+        # Output is discarded, so only the exit status matters here.
+        RunningProcess.run(
+            ["kill", pid],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
 
 
 @dataclass(frozen=True)
@@ -103,7 +110,8 @@ def run_once(board: str, timeout: int) -> Measurement | str | None:
         proc = RunningProcess.run(
             ["sg", "dialout", "-c", f"bash -c '{inner}'"],
             cwd=ROOT,
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
             timeout=timeout,
             encoding="utf-8",
@@ -115,7 +123,11 @@ def run_once(board: str, timeout: int) -> Measurement | str | None:
     except subprocess.TimeoutExpired:
         print("  the run itself hung; treating as a transport failure", file=sys.stderr)
         return TRANSPORT_FAILURE
-    out = proc.stdout + proc.stderr
+    # Explicit separator: RunningProcess.run strips the trailing newline
+    # from each stream, so a bare `+` welds the last stdout line onto the
+    # first stderr line -- which here would corrupt the checksum line and
+    # report a false "CHECKSUMS DIFFER".
+    out = proc.stdout + "\n" + proc.stderr
     if RE_SUPPRESSED.search(out):
         print(
             "  ratio suppressed: the two decoders did not decode the same "

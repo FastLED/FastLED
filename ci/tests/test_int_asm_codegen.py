@@ -139,8 +139,11 @@ def _emit(
             str(asm),
         ],
         check=True,
-        capture_output=True,
-        text=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     return asm.read_text()
 

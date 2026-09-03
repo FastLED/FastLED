@@ -196,8 +196,9 @@ def _run(command: list[str], cwd: Path = ROOT) -> subprocess.CompletedProcess[st
         command,
         cwd=cwd,
         check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
-        capture_output=True,
         encoding="utf-8",
         errors="replace",
     )
@@ -224,15 +225,16 @@ def materialise_baseline(ref: str, into: Path) -> Path:
     if not any(n == "minimp3.h" for n in names):
         raise SystemExit(f"{ref}:{VENDORED} has no minimp3.h")
     for name in names:
-        blob = RunningProcess.run(
+        # noqa-SRC001 rationale: this blob is written back out verbatim by
+        # write_bytes. RunningProcess.run does not round-trip a binary stdout
+        # capture even with text=False -- measured 71,680 B of `git archive`
+        # returning as 71,435 B -- so the vendored source would be silently
+        # corrupted.
+        blob = subprocess.run(  # noqa: SRC001 - binary stdout; see above
             ["git", "show", f"{ref}:{VENDORED}/{name}"],
             cwd=ROOT,
             check=True,
             capture_output=True,
-            # Consumed by write_bytes below. subprocess.run defaults to bytes;
-            # RunningProcess.run defaults to text, so this must be explicit or
-            # the blob arrives decoded and the vendored file is corrupted.
-            text=False,
         )
         (shadow / name).write_bytes(blob.stdout)
     return into
@@ -312,8 +314,9 @@ def callgrind(binary: Path, args: list[str], out: Path, top: int) -> Attribution
         ],
         cwd=ROOT,
         check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
-        capture_output=True,
         encoding="utf-8",
         errors="replace",
     )
@@ -343,8 +346,9 @@ def callgrind(binary: Path, args: list[str], out: Path, top: int) -> Attribution
             [annotate, "--threshold=99", str(out)],
             cwd=ROOT,
             check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            capture_output=True,
             encoding="utf-8",
             errors="replace",
         ).stdout
@@ -430,8 +434,9 @@ def main(argv: list[str] | None = None) -> int:
                     [str(binary), relative],
                     cwd=ROOT,
                     check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
                     text=True,
-                    capture_output=True,
                     encoding="utf-8",
                     errors="replace",
                 ).stdout.strip()
