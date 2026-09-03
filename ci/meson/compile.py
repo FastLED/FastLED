@@ -22,6 +22,11 @@ from ci.meson.link_retry import (
     kill_stale_runner_processes,
 )
 from ci.meson.output import print_banner
+from ci.meson.zccache_retry import (
+    find_zccache_transient_failures,
+    format_zccache_transient_message,
+    is_zccache_transient_failure,
+)
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.tee import StreamTee
@@ -33,6 +38,11 @@ from ci.util.timestamp_print import ts_print as _ts_print
 # Each retry waits ``0.5 * (attempt + 1)`` seconds and is preceded by a
 # best-effort kill of any stale runner process under the build directory.
 _LLD_PERM_DENIED_MAX_RETRIES = 3
+
+# Maximum number of retries when zccache returns exit 113 (daemon overloaded
+# or unhealthy) with no compiler diagnostic. Each retry waits
+# ``2.0 * (attempt + 1)`` seconds to let the daemon drain its queue. See #4132.
+_ZCCACHE_TRANSIENT_MAX_RETRIES = 2
 
 
 @dataclass
@@ -714,6 +724,60 @@ def compile_meson(
                 # permission-denied pattern. A different failure means the
                 # retry loop is done (fall through to normal error handling).
                 if not is_link_permission_denied_error(retry_output):
+                    break
+
+        # zccache exit-113 retry (#4132).
+        # zccache under load sometimes returns 113 without running the
+        # compiler. That is a daemon problem, not a defect in the code being
+        # built, so name it as such and re-invoke ninja: only the failed
+        # objects rebuild, and the daemon has had a moment to drain.
+        if returncode != 0 and is_zccache_transient_failure(output):
+            for _attempt in range(_ZCCACHE_TRANSIENT_MAX_RETRIES):
+                _ts_print(
+                    "[MESON] ⚠️  "
+                    + format_zccache_transient_message(
+                        find_zccache_transient_failures(output)
+                    ),
+                    file=sys.stderr,
+                )
+                _ts_print(
+                    f"[MESON] 🔁 Retrying the build "
+                    f"(attempt {_attempt + 1}/{_ZCCACHE_TRANSIENT_MAX_RETRIES})",
+                    file=sys.stderr,
+                )
+                time.sleep(2.0 * (_attempt + 1))
+                try:
+                    retry_proc = RunningProcess(
+                        cmd,
+                        timeout=600,
+                        auto_run=True,
+                        check=False,
+                        output_formatter=TimestampFormatter(),
+                    )
+                    retry_proc.wait(echo=False)
+                    returncode = cast(int, retry_proc.returncode)
+                    retry_output = str(retry_proc.stdout)
+                    output = output + "\n" + retry_output
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
+                    raise
+                except Exception as retry_error:
+                    _ts_print(
+                        f"[MESON] ⚠️  Retry invocation failed: {retry_error}",
+                        file=sys.stderr,
+                    )
+                    break
+
+                if returncode == 0:
+                    _ts_print(
+                        f"[MESON] ✅ zccache retry succeeded on attempt {_attempt + 1}",
+                        file=sys.stderr,
+                    )
+                    break
+
+                # A different failure means a real defect surfaced — stop
+                # retrying and fall through to normal error handling.
+                if not is_zccache_transient_failure(retry_output):
                     break
 
         if returncode != 0:
