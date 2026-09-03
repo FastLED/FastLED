@@ -36,6 +36,14 @@ def ensure_tls_trust_store() -> None:
     that is really there, so this can neither override a deliberate
     configuration nor invent a broken one.
 
+    An *empty* `SSL_CERT_FILE` counts as not chosen, deliberately. OpenSSL
+    cannot load `""` as a trust store, so honouring it would leave the caller
+    with the exact failure this function exists to prevent and no benefit to
+    anyone; and an empty value is nearly always an accidental expansion of an
+    unset variable rather than a considered setting. Unsetting the variable,
+    not emptying it, is how you ask for OpenSSL's own defaults -- and that
+    path is untouched here.
+
     Finding no candidate is not an error: Windows and macOS have neither file
     and Python's default trust store works there. Any genuine TLS failure is
     still reported by the caller, with its full traceback.
