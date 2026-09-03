@@ -21,6 +21,8 @@ from running_process import RunningProcess
 
 try:
     import certifi  # optional: only consulted when no system CA bundle exists
+except KeyboardInterrupt:
+    raise
 except ImportError:  # pragma: no cover - depends on the host environment
     certifi = None
 
