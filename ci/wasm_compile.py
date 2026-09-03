@@ -1,4 +1,15 @@
 import sys
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from typeguard import typechecked
+else:
+    # No-op decorator: skip typeguard's ~277ms import cost on the wasm fast path.
+    # Static type checkers (mypy/pyright) still see the real decorator.
+    def typechecked(f):  # type: ignore[no-redef]
+        return f
 
 
 def _print_panel(title: str, lines: list[str]) -> None:
@@ -14,7 +25,18 @@ def _print_panel(title: str, lines: list[str]) -> None:
     print(f"+{border}+\n")
 
 
-def parse_args() -> tuple:
+@typechecked
+@dataclass
+class WasmCompileArgs:
+    """Parsed command line for the WASM compile entry point."""
+
+    sketch_dir: str
+    run: bool
+    check: bool
+    passthrough_args: list[str]
+
+
+def parse_args(argv: list[str] | None) -> WasmCompileArgs:
     import argparse
 
     parser = argparse.ArgumentParser(description="Compile wasm")
@@ -29,18 +51,29 @@ def parse_args() -> tuple:
         action="store_true",
         help="Run Playwright tests after compilation (default is compile-only)",
     )
-    known_args, unknown_args = parser.parse_known_args()
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Compile, then fail if the headless browser reports a runtime error",
+    )
+    known_args, unknown_args = parser.parse_known_args(argv)
     if "--build" in unknown_args:
         print("WARNING: --build is no longer supported. It will be ignored.")
         unknown_args.remove("--build")
     if "-b" in unknown_args:
         print("WARNING: -b is no longer supported. It will be ignored.")
         unknown_args.remove("-b")
-    return known_args, unknown_args
+    return WasmCompileArgs(
+        sketch_dir=known_args.sketch_dir,
+        run=known_args.run,
+        check=known_args.check,
+        passthrough_args=unknown_args,
+    )
 
 
-def main() -> int:
-    args, unknown_args = parse_args()
+def main(argv: list[str] | None) -> int:
+    args = parse_args(argv)
+    run_browser_check = args.run or args.check
 
     # Keep the sketch path relative to examples/ (e.g. "examples/Fx/FxCylon"
     # -> "Fx/FxCylon") so resolution stays unambiguous when two sketches share
@@ -73,33 +106,31 @@ def main() -> int:
         print(f"Note: Could not verify filter compatibility ({type(e).__name__})")
 
     # Print what we're going to do
-    if args.run:
+    if run_browser_check:
         _print_panel(
             "FastLED WASM Build Pipeline",
             [
-                f"Will:",
+                "Will:",
                 f"  1. Compile {example_name} to WASM",
-                f"  2. Launch headless browser demo",
-                f"  3. Run for 5 seconds, verify rendering",
-                f"  4. Exit automatically",
+                "  2. Launch headless browser check",
+                "  3. Run for 5 seconds, verify rendering",
+                "  4. Exit automatically",
             ],
         )
     else:
         _print_panel(
             "FastLED WASM Build Pipeline",
             [
-                f"Will:",
+                "Will:",
                 f"  * Compile {example_name} to WASM",
-                f"  (Use --run to add automated testing)",
+                "  (Use --check to add browser error detection)",
             ],
         )
 
-    steps = "2" if args.run else "1"
+    steps = "2" if run_browser_check else "1"
     print(f"Step 1/{steps}: Compiling WASM...")
 
     # Output to examples/<name>/fastled_js/fastled.js to match expected location
-    from pathlib import Path
-
     from ci.wasm_build import resolve_example_dir
 
     output_dir = resolve_example_dir(sketch_rel) / "fastled_js"
@@ -117,7 +148,7 @@ def main() -> int:
         sketch_rel,
         "-o",
         str(output_js),
-    ] + unknown_args
+    ] + args.passthrough_args
     try:
         compile_result = wasm_build_main()
     finally:
@@ -129,13 +160,17 @@ def main() -> int:
 
     print("WASM compilation successful")
 
-    # Run tests if --run flag is provided
-    if args.run:
+    # --check is the CI-friendly spelling; retain --run as its compatibility
+    # alias for scripts that predate browser console validation.
+    if run_browser_check:
         import subprocess
 
-        print(f"\nStep 2/2: Running Playwright tests...\n")
+        print("\nStep 2/2: Running Playwright tests...\n")
 
-        test_cmd = [sys.executable, "-m", "ci.wasm_test", example_name]
+        # Pass the examples-relative path, not the bare name: ci.wasm_test
+        # serves examples/<arg>/fastled_js, which is only the directory the
+        # build wrote to when nested sketches keep their parent segments.
+        test_cmd = [sys.executable, "-m", "ci.wasm_test", sketch_rel]
         cmd_str = subprocess.list2cmdline(test_cmd)
         print(f"-> {cmd_str}")
         test_result = subprocess.call(test_cmd)
@@ -150,4 +185,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(None))

@@ -10,17 +10,19 @@ import sys
 import time
 from pathlib import Path
 
-from playwright.async_api import ConsoleMessage, async_playwright
+from playwright.async_api import ConsoleMessage, Response, async_playwright
 from rich.console import Console
 from rich.panel import Panel
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+from ci.wasm_build import resolve_example_dir
 
 
 HERE = Path(__file__).parent
 PROJECT_ROOT = HERE.parent
 
 console = Console()
+stderr_console = Console(stderr=True)
 
 
 def parse_args():
@@ -32,7 +34,8 @@ def parse_args():
         "example",
         nargs="?",
         default="wasm",
-        help="Example name to test (e.g., 'Blink', 'wasm')",
+        help="Example to test: a bare name ('Blink') or an examples-relative "
+        "path ('Fx/FxCylon')",
     )
     parser.add_argument(
         "--gfx",
@@ -157,7 +160,10 @@ async def main() -> None:
 
     # Start the HTTP server
     os.chdir(str(PROJECT_ROOT))
-    directory = Path(f"examples/{args.example}/fastled_js")
+    # Accept a bare name or an examples-relative path; resolve_example_dir
+    # finds the sketch either way, so a nested example is served from the
+    # directory the build actually wrote to.
+    directory = resolve_example_dir(args.example) / "fastled_js"
     console.print(f"[cyan]Testing example:[/cyan] [bold]{args.example}[/bold]")
     console.print(f"[dim]Server directory: {directory}[/dim]")
     server_process = start_http_server(port=port, directory=directory)
@@ -200,18 +206,45 @@ async def main() -> None:
                     text = msg.text
                     if msg.type in ("error", "warn"):
                         browser_errors.append(f"[{msg.type}] {text}")
+                    if msg.type == "error":
+                        stderr_console.print(
+                            f"[WASM browser error] {text}", markup=False
+                        )
                     if "INVALID_OPERATION" in text:
-                        console.print(
-                            "[bold red]INVALID_OPERATION detected in console log[/bold red]"
+                        stderr_console.print(
+                            "[WASM browser error] INVALID_OPERATION detected in console log",
+                            markup=False,
                         )
 
                 page.on("console", console_log_handler)
 
                 # Also capture page errors (uncaught exceptions)
                 def page_error_handler(error: Exception) -> None:
-                    browser_errors.append(f"[error] Page error: {error}")
+                    message = f"[error] Page error: {error}"
+                    browser_errors.append(message)
+                    stderr_console.print(
+                        f"[WASM browser error] {message}", markup=False
+                    )
 
                 page.on("pageerror", page_error_handler)
+
+                # Browser fetch failures are not guaranteed to emit a console
+                # error. Treat HTTP failures as diagnostics too, so a missing
+                # manifest or worker resource cannot make --check look green.
+                def response_handler(response: Response) -> None:
+                    # /favicon.ico is requested by the browser itself, not by
+                    # the sketch, and the generated page ships no icon. Its 404
+                    # says nothing about whether FastLED loaded.
+                    if response.url.endswith("/favicon.ico"):
+                        return
+                    if response.status >= 400:
+                        message = f"[error] HTTP {response.status}: {response.url}"
+                        browser_errors.append(message)
+                        stderr_console.print(
+                            f"[WASM browser error] {message}", markup=False
+                        )
+
+                page.on("response", response_handler)
 
                 test_url = f"http://localhost:{port}/"
                 if args.gfx is not None:

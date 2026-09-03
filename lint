@@ -6,4 +6,4 @@ cd "$(dirname "$0")"
 # (zackees/soldr#805). Without sync, `uv run` falls back to the existing
 # .venv — fast. Manual `uv sync` is still required after `pyproject.toml`
 # / `uv.lock` changes.
-uv run --no-sync ci/lint.py "$@"
+PYTHONPATH=. uv run --no-sync ci/lint.py "$@"
