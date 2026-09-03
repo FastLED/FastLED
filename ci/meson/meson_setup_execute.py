@@ -18,6 +18,12 @@ from typing import NamedTuple, Optional, cast
 
 from running_process import RunningProcess
 
+
+try:
+    import certifi  # optional: only consulted when no system CA bundle exists
+except ImportError:  # pragma: no cover - depends on the host environment
+    certifi = None
+
 from ci.meson.compiler import (
     get_compiler_version,
     get_meson_executable,
@@ -124,12 +130,8 @@ def _ensure_tls_trust_store() -> None:
     if os.environ.get("SSL_CERT_FILE"):
         return
     candidates = [Path("/etc/ssl/certs/ca-certificates.crt")]
-    try:
-        import certifi  # noqa: PLC0415 - optional, and only needed on this path
-
+    if certifi is not None:
         candidates.append(Path(certifi.where()))
-    except ImportError:
-        pass
     for candidate in candidates:
         if candidate.is_file():
             os.environ["SSL_CERT_FILE"] = str(candidate)
