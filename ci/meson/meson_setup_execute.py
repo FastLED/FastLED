@@ -101,6 +101,41 @@ def _resolve_xcode_sdk_root() -> str:
     return path
 
 
+def _ensure_tls_trust_store() -> None:
+    """Give the clang-tool-chain wrappers a CA bundle they can actually find.
+
+    Every `clang-tool-chain-*` invocation version-checks its manifest over
+    HTTPS. On distributions whose Python is built expecting `/etc/ssl/cert.pem`
+    -- NixOS among them -- that file does not exist, and the `capath` fallback
+    (`/etc/ssl/certs`) carries no `c_rehash` symlinks, so *every* such request
+    dies with `CERTIFICATE_VERIFY_FAILED`.
+
+    The failure does not look like a network problem. The wrapper prints its
+    SSL traceback where the build generator expects a version string, so
+    configuration aborts with the thoroughly misleading::
+
+        ERROR: Unknown linker(s): [['.../clang-tool-chain-ar']]
+
+    Pointing `SSL_CERT_FILE` at a bundle that exists fixes it. Set only when
+    the caller has not already chosen one, and only to a path that is really
+    there, so this can neither override a deliberate configuration nor invent
+    a broken one.
+    """
+    if os.environ.get("SSL_CERT_FILE"):
+        return
+    candidates = [Path("/etc/ssl/certs/ca-certificates.crt")]
+    try:
+        import certifi  # noqa: PLC0415 - optional, and only needed on this path
+
+        candidates.append(Path(certifi.where()))
+    except ImportError:
+        pass
+    for candidate in candidates:
+        if candidate.is_file():
+            os.environ["SSL_CERT_FILE"] = str(candidate)
+            return
+
+
 def detect_compiler_and_cache(
     markers: MarkerPaths, verbose: bool, build_mode: str
 ) -> CompilerDetection:
@@ -124,6 +159,11 @@ def detect_compiler_and_cache(
             )
     else:
         _ts_print("[MESON] Skipping compiler cache in Docker (startup delay too long)")
+
+    # Before the first wrapper invocation: they phone home on every call,
+    # and a system without a resolvable CA bundle turns that failure into
+    # what looks like a broken linker.
+    _ensure_tls_trust_store()
 
     clang_wrapper = shutil.which("clang-tool-chain-c")
     clangxx_wrapper = shutil.which("clang-tool-chain-cpp")
