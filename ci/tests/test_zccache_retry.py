@@ -52,6 +52,22 @@ def test_not_transient_with_driver_error() -> None:
     assert not is_zccache_transient_failure(output)
 
 
+def test_not_transient_with_ansi_coloured_error() -> None:
+    """clang under -fdiagnostics-color=always: no word boundary before 'error'."""
+    coloured = (
+        "\x1b[1m../../src/fl/foo.cpp:12:5: \x1b[0m\x1b[0;1;31merror: \x1b[0m"
+        "\x1b[1muse of undeclared identifier 'bar'\x1b[0m\n"
+    )
+    assert not is_zccache_transient_failure(_TRANSIENT_OUTPUT + coloured)
+
+
+def test_not_transient_with_ansi_coloured_driver_error() -> None:
+    coloured = (
+        "clang++: \x1b[0;1;31merror: \x1b[0mlinker command failed with exit code 1\n"
+    )
+    assert not is_zccache_transient_failure(_TRANSIENT_OUTPUT + coloured)
+
+
 def test_not_transient_with_fatal_error() -> None:
     output = _TRANSIENT_OUTPUT + "a.cpp:1:10: fatal error: 'nope.h' file not found\n"
     assert not is_zccache_transient_failure(output)

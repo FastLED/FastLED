@@ -43,12 +43,22 @@ _COMPILER_ERROR_PATTERN = re.compile(
     r"(?m)^(?!zccache\[)[^\n]*\b(?:fatal )?error:",
 )
 
+# The meson build passes -fdiagnostics-color=always, so clang emits
+# ``\x1b[0;1;31merror: \x1b[0m`` — no word boundary before ``error``. Strip
+# SGR sequences before matching so coloured diagnostics are still seen.
+_ANSI_SGR_PATTERN = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def _strip_ansi(text: str) -> str:
+    return _ANSI_SGR_PATTERN.sub("", text)
+
 
 def find_zccache_transient_failures(output: str) -> list[str]:
     """Return the object paths that ninja reported as ``FAILED: [code=113]``."""
     if not output:
         return []
-    return [m.group("obj") for m in _FAILED_113_PATTERN.finditer(output)]
+    plain = _strip_ansi(output)
+    return [m.group("obj") for m in _FAILED_113_PATTERN.finditer(plain)]
 
 
 def is_zccache_transient_failure(output: str) -> bool:
@@ -59,7 +69,7 @@ def is_zccache_transient_failure(output: str) -> bool:
     """
     if not find_zccache_transient_failures(output):
         return False
-    return _COMPILER_ERROR_PATTERN.search(output) is None
+    return _COMPILER_ERROR_PATTERN.search(_strip_ansi(output)) is None
 
 
 def format_zccache_transient_message(objects: list[str]) -> str:

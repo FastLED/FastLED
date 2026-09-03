@@ -203,6 +203,71 @@ def _precompile_passes_can_be_skipped(build_dir: Path) -> bool:
     return abs(current - saved) < 1e-6
 
 
+def _retry_ninja(
+    cmd: list[str],
+    output: str,
+    max_retries: int,
+    backoff_seconds: float,
+    still_transient: Callable[[str], bool],
+    describe: Callable[[str, int], str],
+    before_retry: Callable[[], None] | None,
+    label: str,
+) -> tuple[int, str]:
+    """Re-invoke the same ninja command while a transient failure persists.
+
+    Shared by the ld.lld permission-denied retry (#2268) and the zccache
+    exit-113 retry (#4132). ``still_transient`` is evaluated on the output
+    of the *latest* attempt only, so a real defect that surfaces on a retry
+    stops the loop instead of being replayed. ``describe`` receives that
+    latest output and the 1-based attempt number.
+
+    Returns the final ``(returncode, output)``; ``output`` accumulates every
+    attempt so downstream diagnostics keep the full context.
+    """
+    returncode = -1
+    latest = output
+    for _attempt in range(max_retries):
+        _ts_print(f"[MESON] ⚠️  {describe(latest, _attempt + 1)}", file=sys.stderr)
+        if before_retry is not None:
+            before_retry()
+        # Linear backoff: gives the daemon / OS / AV time to settle.
+        time.sleep(backoff_seconds * (_attempt + 1))
+        try:
+            retry_proc = RunningProcess(
+                cmd,
+                timeout=600,
+                auto_run=True,
+                check=False,
+                output_formatter=TimestampFormatter(),
+            )
+            retry_proc.wait(echo=False)
+            returncode = cast(int, retry_proc.returncode)
+            latest = str(retry_proc.stdout)
+            output = output + "\n" + latest
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as retry_error:
+            _ts_print(
+                f"[MESON] ⚠️  Retry invocation failed: {retry_error}",
+                file=sys.stderr,
+            )
+            break
+
+        if returncode == 0:
+            _ts_print(
+                f"[MESON] ✅ {label} retry succeeded on attempt {_attempt + 1}",
+                file=sys.stderr,
+            )
+            break
+
+        # A different failure means a real defect surfaced — stop retrying
+        # and fall through to normal error handling.
+        if not still_transient(latest):
+            break
+    return returncode, output
+
+
 def compile_meson(
     build_dir: Path,
     target: Optional[str] = None,
@@ -669,62 +734,32 @@ def compile_meson(
         # non-Windows platforms because ``is_link_permission_denied_error``
         # returns False off-Windows.
         if returncode != 0 and is_link_permission_denied_error(output):
-            for _attempt in range(_LLD_PERM_DENIED_MAX_RETRIES):
-                _ts_print(
-                    f"[MESON] ⚠️  ld.lld permission denied on runner binary "
-                    f"(attempt {_attempt + 1}/{_LLD_PERM_DENIED_MAX_RETRIES}) - "
-                    f"killing stale runner processes and retrying",
-                    file=sys.stderr,
+
+            def _describe_lld(_latest: str, attempt: int) -> str:
+                return (
+                    f"ld.lld permission denied on runner binary "
+                    f"(attempt {attempt}/{_LLD_PERM_DENIED_MAX_RETRIES}) - "
+                    f"killing stale runner processes and retrying"
                 )
+
+            def _before_lld_retry() -> None:
                 _killed_retry = kill_stale_runner_processes(build_dir)
                 if _killed_retry:
                     _ts_print(
                         f"[MESON] 🧹 Killed {_killed_retry} stale runner process(es)",
                         file=sys.stderr,
                     )
-                # Backoff 0.5s, 1.0s, 1.5s — gives Windows/AV time to release
-                # any remaining handles on the .exe.
-                time.sleep(0.5 * (_attempt + 1))
 
-                # Re-invoke ninja for the same compile command. We reuse the
-                # original ``cmd`` (meson compile -C build_dir [target]) so
-                # ninja does an incremental relink of just the failed target.
-                try:
-                    retry_proc = RunningProcess(
-                        cmd,
-                        timeout=600,
-                        auto_run=True,
-                        check=False,
-                        output_formatter=TimestampFormatter(),
-                    )
-                    retry_proc.wait(echo=False)
-                    returncode = cast(int, retry_proc.returncode)
-                    retry_output = str(retry_proc.stdout)
-                    # Merge retry output into the captured output so downstream
-                    # diagnostics include the retry context.
-                    output = output + "\n" + retry_output
-                except KeyboardInterrupt as ki:
-                    handle_keyboard_interrupt(ki)
-                    raise
-                except Exception as retry_error:
-                    _ts_print(
-                        f"[MESON] ⚠️  Retry invocation failed: {retry_error}",
-                        file=sys.stderr,
-                    )
-                    break
-
-                if returncode == 0:
-                    _ts_print(
-                        f"[MESON] ✅ Link retry succeeded on attempt {_attempt + 1}",
-                        file=sys.stderr,
-                    )
-                    break
-
-                # Only keep retrying while the failure is still the same
-                # permission-denied pattern. A different failure means the
-                # retry loop is done (fall through to normal error handling).
-                if not is_link_permission_denied_error(retry_output):
-                    break
+            returncode, output = _retry_ninja(
+                cmd,
+                output,
+                max_retries=_LLD_PERM_DENIED_MAX_RETRIES,
+                backoff_seconds=0.5,
+                still_transient=is_link_permission_denied_error,
+                describe=_describe_lld,
+                before_retry=_before_lld_retry,
+                label="Link",
+            )
 
         # zccache exit-113 retry (#4132).
         # zccache under load sometimes returns 113 without running the
@@ -732,53 +767,26 @@ def compile_meson(
         # built, so name it as such and re-invoke ninja: only the failed
         # objects rebuild, and the daemon has had a moment to drain.
         if returncode != 0 and is_zccache_transient_failure(output):
-            for _attempt in range(_ZCCACHE_TRANSIENT_MAX_RETRIES):
-                _ts_print(
-                    "[MESON] ⚠️  "
-                    + format_zccache_transient_message(
-                        find_zccache_transient_failures(output)
-                    ),
-                    file=sys.stderr,
-                )
-                _ts_print(
-                    f"[MESON] 🔁 Retrying the build "
-                    f"(attempt {_attempt + 1}/{_ZCCACHE_TRANSIENT_MAX_RETRIES})",
-                    file=sys.stderr,
-                )
-                time.sleep(2.0 * (_attempt + 1))
-                try:
-                    retry_proc = RunningProcess(
-                        cmd,
-                        timeout=600,
-                        auto_run=True,
-                        check=False,
-                        output_formatter=TimestampFormatter(),
-                    )
-                    retry_proc.wait(echo=False)
-                    returncode = cast(int, retry_proc.returncode)
-                    retry_output = str(retry_proc.stdout)
-                    output = output + "\n" + retry_output
-                except KeyboardInterrupt as ki:
-                    handle_keyboard_interrupt(ki)
-                    raise
-                except Exception as retry_error:
-                    _ts_print(
-                        f"[MESON] ⚠️  Retry invocation failed: {retry_error}",
-                        file=sys.stderr,
-                    )
-                    break
 
-                if returncode == 0:
-                    _ts_print(
-                        f"[MESON] ✅ zccache retry succeeded on attempt {_attempt + 1}",
-                        file=sys.stderr,
+            def _describe_zccache(latest: str, attempt: int) -> str:
+                return (
+                    format_zccache_transient_message(
+                        find_zccache_transient_failures(latest)
                     )
-                    break
+                    + f"\n  Retrying the build "
+                    f"(attempt {attempt}/{_ZCCACHE_TRANSIENT_MAX_RETRIES})"
+                )
 
-                # A different failure means a real defect surfaced — stop
-                # retrying and fall through to normal error handling.
-                if not is_zccache_transient_failure(retry_output):
-                    break
+            returncode, output = _retry_ninja(
+                cmd,
+                output,
+                max_retries=_ZCCACHE_TRANSIENT_MAX_RETRIES,
+                backoff_seconds=2.0,
+                still_transient=is_zccache_transient_failure,
+                describe=_describe_zccache,
+                before_retry=None,
+                label="zccache",
+            )
 
         if returncode != 0:
             # In quiet mode, don't print failure messages (fallback retries handle this)
