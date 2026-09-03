@@ -23,6 +23,7 @@
 | Hardware driver bring-up evidence or postmortems | `agents/docs/driver-bringup-postmortems.md` |
 | Debugging a C++ crash | `agents/docs/debugging.md` |
 | Investigating binary size / flash bloat | `agents/docs/binary-size-analysis.md` |
+| Changing the MP3 decoder, or profiling it | `agents/docs/mp3-decoder-performance.md` (one command measures a change: `bash mp3measure`. Edit `src/third_party/minimp3/minimp3_synth_fixed.h`; profile scalar with `-DMINIMP3_NO_SIMD`; minimp3-fixed is 1.13x Helix on an ESP32-C6, and host and device have disagreed in both direction and magnitude -- quote the device number) |
 | Creating a new C++ linter | `agents/docs/linter-architecture.md` |
 | Detailed command reference | `agents/docs/commands-reference.md` |
 | Workflow and task management | `agents/docs/workflow.md` |

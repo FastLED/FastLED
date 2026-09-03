@@ -9,7 +9,6 @@ on:
     branches: [master]
     paths:
       - 'src/fl/codec/mp3*'
-      - 'src/third_party/libhelix_mp3/**'
       - 'src/third_party/minimp3/**'
       - 'ci/codec_tables/**'
       - 'tests/fl/codec/mp3*'
@@ -25,7 +24,6 @@ on:
     branches: [master]
     paths:
       - 'src/fl/codec/mp3*'
-      - 'src/third_party/libhelix_mp3/**'
       - 'src/third_party/minimp3/**'
       - 'ci/codec_tables/**'
       - 'tests/fl/codec/mp3*'
@@ -88,15 +86,21 @@ jobs:
       - name: Verify the fixed-point SIMD is not slower than scalar
         run: bash test fl_codec --cpp --build-mode release
 
-      - name: Verify the focused CPU gate
-        env:
-          PYTEST_ADDOPTS: -k codec_cpu_audit
-        run: bash test --py --verbose
-
+      # Measure before gating, so a red gate still produces the numbers needed
+      # to diagnose it -- and so that adding a backend can bootstrap its
+      # baselines from a run that necessarily fails the check first. The upload
+      # below is `if: always()`, which was pointless while the step that writes
+      # the file sat behind a gate that could stop it running at all.
       - name: Enforce operation, host, and target-codegen trends
         run: >-
           uv run python ci/codec_cpu/audit.py --check
           --write codec_cpu_current.json
+
+      - name: Verify the focused CPU gate
+        if: always()
+        env:
+          PYTEST_ADDOPTS: -k codec_cpu_audit
+        run: bash test --py --verbose
 
       - name: Upload measured report
         if: always()

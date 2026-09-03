@@ -14,7 +14,7 @@ ci/autoresearch/decode.py|SRC001|1
 ci/autoresearch/driver_sweep.py|SRC001|1
 ci/autoresearch/net.py|SRC001|11
 ci/autoresearch/net.py|SRC004|11
-ci/autoresearch/phases.py|SRC001|10
+ci/autoresearch/phases.py|SRC001|8
 ci/bin_bloat_analysis.py|SRC001|2
 ci/bin_bloat_analysis.py|SRC003|2
 ci/bin_bloat_analysis.py|SRC004|2
@@ -97,7 +97,6 @@ ci/tests/test_bin_2_elf.py|SRC001|1
 ci/tests/test_clean_worktrees.py|SRC003|2
 ci/tests/test_elf.py|SRC001|1
 ci/tests/test_platformio_url_resolution.py|SRC006|1
-ci/tests/test_renesas_i2s_include_guard.py|SRC001|1
 ci/tests/test_stale_lock_real_scenario.py|SRC002|3
 ci/tests/test_stale_lock_real_scenario.py|SRC004|3
 ci/tests/test_symbol_analysis.py|SRC001|1

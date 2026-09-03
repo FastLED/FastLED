@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+"""Regenerate the on-device MP3 fixture for AutoResearch.
+
+The device test decodes these bitstreams and checks the result against the
+numbers recorded here. Those numbers come from the *same* decoder entry point
+the device calls, built for the host, so a mismatch on hardware means the
+fixed-point pipeline behaves differently on a 32-bit target -- which is the
+whole reason the test exists. FastLED ships fixed-point by default, and the
+class of bug it catches (signed overflow, Q-format truncation, alignment) is
+invisible on x86-64.
+
+Run after changing the decoder or the vectors:
+
+    uv run python ci/codec_autoresearch/generate.py
+"""
+
+from __future__ import annotations
+
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from dataclasses import dataclass
+from pathlib import Path
+
+from running_process import RunningProcess
+
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / "examples" / "AutoResearch" / "AutoResearchMp3Fixture.h"
+
+# (identifier, path, max frames). Layer I is included because it is the branch
+# that shares scratch with Layer III's main-data window (FastLED#4116) -- if
+# that union is ever wrong, a Layer I decode after a Layer III one is where it
+# shows.
+STREAMS = [
+    ("Layer1", "tests/data/codec/minimp3/ILL2_layer1.bit", 99),
+    ("Layer3", "tests/data/codec/minimp3/l3-hecommon.bit", 8),
+]
+
+FLAGS = [
+    "-Isrc",
+    "-Isrc/platforms/stub",
+    "-std=gnu++11",
+    "-O2",
+    "-fno-exceptions",
+    "-fno-rtti",
+    "-fno-strict-aliasing",
+    "-DFASTLED_USE_PROGMEM=0",
+    "-DSTUB_PLATFORM",
+    "-DARDUINO=10808",
+    "-DFASTLED_USE_STUB_ARDUINO",
+    "-DFASTLED_STUB_IMPL",
+    "-DFASTLED_TESTING",
+    "-DFASTLED_NO_AUTO_NAMESPACE",
+    "-DFASTLED_NO_PINMAP",
+]
+
+
+@dataclass(frozen=True)
+class Fixture:
+    """What the host decoder produced for one stream."""
+
+    nbytes: int
+    frames: int
+    samples: int
+    hz: int
+    channels: int
+    layer: int
+    fnv1a: int
+
+
+def compiler() -> str:
+    for candidate in ("clang++", "g++"):
+        found = shutil.which(candidate)
+        if found:
+            return found
+    raise RuntimeError("no C++ compiler found for the fixture generator")
+
+
+def build(tmp: Path) -> Path:
+    binary = tmp / "mp3_fixture_gen"
+    RunningProcess.run(
+        [
+            compiler(),
+            *FLAGS,
+            str(Path(__file__).with_name("fixture_gen.cpp")),
+            "-o",
+            str(binary),
+        ],
+        cwd=ROOT,
+        check=True,
+    )
+    return binary
+
+
+def measure(binary: Path, path: Path, frames: int) -> Fixture:
+    out = RunningProcess.run(
+        [str(binary), str(path), str(frames)],
+        cwd=ROOT,
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    match = re.search(
+        r"FIXTURE bytes=(\d+) frames=(\d+) samples=(\d+) hz=(\d+) "
+        r"channels=(\d+) layer=(\d+) fnv1a=0x([0-9A-F]+)",
+        out.stdout,
+    )
+    if not match:
+        raise RuntimeError(f"generator produced no result for {path}:\n{out.stdout}")
+    result = Fixture(
+        nbytes=int(match.group(1)),
+        frames=int(match.group(2)),
+        samples=int(match.group(3)),
+        hz=int(match.group(4)),
+        channels=int(match.group(5)),
+        layer=int(match.group(6)),
+        fnv1a=int(match.group(7), 16),
+    )
+    if result.frames == 0:
+        raise RuntimeError(
+            f"{path} decoded to nothing; refusing to emit an "
+            f"all-zero fixture that would pass trivially"
+        )
+    return result
+
+
+def emit_bytes(data: bytes) -> str:
+    lines = []
+    for start in range(0, len(data), 16):
+        chunk = data[start : start + 16]
+        lines.append("    " + " ".join(f"0x{b:02X}," for b in chunk))
+    return "\n".join(lines)
+
+
+def main() -> int:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        binary = build(Path(tmpdir))
+        blocks, table = [], []
+        for name, relative, frames in STREAMS:
+            path = ROOT / relative
+            info = measure(binary, path, frames)
+            data = path.read_bytes()[: info.nbytes]
+            blocks.append(
+                f"// {relative}\n"
+                f"// {info.frames} frames, {info.samples} samples, "
+                f"{info.hz} Hz, {info.channels} ch, layer {info.layer}\n"
+                f"const fl::u8 k{name}Data[] = {{\n{emit_bytes(data)}\n}};\n"
+            )
+            table.append(
+                f"    {{k{name}Data, {len(data)}u, {info.frames}u, "
+                f"{info.samples}u, {info.hz}u, {info.channels}u, "
+                f'{info.layer}u, 0x{info.fnv1a:08X}u, "{name}"}},'
+            )
+
+    OUT.write_text(
+        "/// @file AutoResearchMp3Fixture.h\n"
+        "/// @brief Expected MP3 decodes for the on-device codec check.\n"
+        "///\n"
+        "/// AUTO-GENERATED by ci/codec_autoresearch/generate.py -- do not\n"
+        "/// edit by hand. Regenerate after changing the decoder or vectors.\n"
+        "///\n"
+        "/// The checksums come from the same mp3dec_decode_frame_r the device\n"
+        "/// calls, built for the host. A mismatch on hardware therefore means\n"
+        "/// the fixed-point pipeline behaves differently on a 32-bit target,\n"
+        "/// which x86-64 testing cannot see.\n\n"
+        "#pragma once\n\n"
+        '#include "fl/stl/int.h"\n\n'
+        "namespace autoresearch {\nnamespace mp3_fixture {\n\n"
+        + "\n".join(blocks)
+        + "\nstruct Stream {\n"
+        "    const fl::u8* data;\n    fl::u32 size;\n    fl::u32 frames;\n"
+        "    fl::u32 samples;\n    fl::u32 hz;\n    fl::u32 channels;\n"
+        "    fl::u32 layer;\n    fl::u32 fnv1a;\n    const char* name;\n};\n\n"
+        "const Stream kStreams[] = {\n" + "\n".join(table) + "\n};\n\n"
+        "const fl::u32 kStreamCount =\n"
+        "    (fl::u32)(sizeof(kStreams) / sizeof(kStreams[0]));\n\n"
+        "} // namespace mp3_fixture\n} // namespace autoresearch\n"
+    )
+    print(f"wrote {OUT.relative_to(ROOT)}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

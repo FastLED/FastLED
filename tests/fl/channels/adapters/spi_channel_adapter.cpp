@@ -551,7 +551,7 @@ FL_TEST_CASE("SpiChannelEngineAdapter - explicit SPI host selects matching contr
     auto adapter = SpiChannelEngineAdapter::create(
         controllers, priorities, names, "SPI_UNIFIED");
 
-    adapter->enqueue(createSpiChannelData(5, 18, Esp32SpiBus::SPI3));
+    adapter->enqueue(createSpiChannelData(5, 18, Esp32SpiBus::HOST3));
     adapter->show();
 
     FL_CHECK_FALSE(spi2->wasTransmitCalled());

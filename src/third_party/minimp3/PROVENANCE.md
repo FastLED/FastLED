@@ -20,8 +20,10 @@ file rather than a fork of it, so `FASTLED.patch` remains a readable diff
 against the pristine header.
 
 It is a clean-room conversion in the sense the parent tracker requires. The
-RPSL/RCSL-licensed `libhelix_mp3` tree in this repository was not used as a
-source, not even for values that are mathematically forced. Every constant is
+RPSL/RCSL-licensed `libhelix_mp3` tree that this repository carried at the time
+was not used as a source, not even for values that are mathematically forced.
+That tree has since been deleted (FastLED#4056), which is the point of the
+exercise: had any of it been copied, deleting it would not have been possible. Every constant is
 regenerated from its ISO 11172-3 / 13818-3 formula by
 `ci/codec_tables/generate_minimp3_fixed_tables.py`, which also cross-checks
 each generated value against upstream minimp3's own CC0 float literals; that
@@ -66,6 +68,16 @@ float kernel does -- and at ~13% of decode with roughly half the kernel
 addressable, the ceiling is around 2%. It is left scalar until something wants
 that 2% more than it wants the smaller diff.
 
+That closing loop is vectorised as of FastLED#4109: two vectors plus a scalar
+tail, sharing the rounded saturating narrow factored out of `mp3d_v_mulshift`
+so each output still sums two int64 products and rounds once, as the scalar
+path does. Measured with Callgrind rather than a clock -- 135,127,402
+instructions before, 131,959,062 after, a 2.34% reduction over the corpus with
+byte-identical PCM. Wall-clock on the development host could not resolve it:
+the same binary measured between 1.089x and 1.319x across eight consecutive
+runs, so a 2% effect is well inside the noise there. The 9-point DCT-III above
+it and the cross-band gathers remain unaddressable for the reasons above.
+
 ## Cortex-M4/M7 DSP evaluation
 
 `SMLAD` and its relatives are dual 16x16 -> 32 multiply-accumulates. The
@@ -85,14 +97,53 @@ future DSP attempt would have to beat while still proving bit-exactness.
 
 FastLED's source-level integration changes are recorded in `FASTLED.patch`.
 They add the `fl::third_party` namespace, `FL_NO_EXCEPT` API annotations, SPDX
-markers, and the caller-owned `mp3dec_decode_frame_r` scratch API. FastLED does
+markers, the caller-owned `mp3dec_decode_frame_r` scratch API, the fixed-point
+DSP path and its integer SIMD kernels.
+
+Nothing in CI regenerates or verifies `FASTLED.patch`, so it can go stale
+silently -- it did, between the fixed-point work and FastLED#4056. Regenerate
+and verify it with:
+
+```bash
+root=$(git rev-parse --show-toplevel)
+rev=$(sed -n 's/^upstream_revision = "\(.*\)"/\1/p' \
+        "$root/src/third_party/minimp3/manifest.toml")
+work=$(mktemp -d); mkdir -p "$work/a" "$work/b"
+
+curl -sSL -o "$work/a/minimp3.h" \
+  "https://raw.githubusercontent.com/lieff/minimp3/$rev/minimp3.h"
+# The patch's own `index` line names this blob hash; if it disagrees, the wrong
+# revision was fetched and nothing below means anything.
+git hash-object "$work/a/minimp3.h"
+
+cp "$root/src/third_party/minimp3/minimp3.h" "$work/b/minimp3.h"
+( cd "$work" && git diff --no-index a/minimp3.h b/minimp3.h ) \
+  | sed -e 's|^diff --git a/a/minimp3.h b/b/minimp3.h$|diff --git a/minimp3.h b/minimp3.h|' \
+        -e 's|^--- a/a/minimp3.h$|--- a/minimp3.h|' \
+        -e 's|^+++ b/b/minimp3.h$|+++ b/minimp3.h|' \
+  > "$root/src/third_party/minimp3/FASTLED.patch"
+
+# Verify: applying it to the pristine upstream file must reproduce ours exactly.
+rm -rf "$work/v" && mkdir -p "$work/v"
+curl -sSL -o "$work/v/minimp3.h" \
+  "https://raw.githubusercontent.com/lieff/minimp3/$rev/minimp3.h"
+( cd "$work/v" && patch -p1 < "$root/src/third_party/minimp3/FASTLED.patch" )
+diff -q "$work/v/minimp3.h" "$root/src/third_party/minimp3/minimp3.h"
+```
+
+`git diff --no-index` labels its output with the paths it was given, so the
+`sed` rewrites `a/a/minimp3.h` back to the `a/minimp3.h` the committed patch
+uses; without it the patch no longer applies at `-p1`.
+
+FastLED does
 not expose upstream's `mp3dec_decode_frame` convenience entry point because it
 allocates scratch on the stack; all callers use `mp3dec_decode_frame_r` with
 owned storage instead. FastLED uses a 7,808-byte scratch arena for the float
 build and 7,936 bytes for the fixed-point build -- the latter carries
 scalefactor gains as mantissa+exponent rather than as a single float, and gets
-its own figure so that a variant the shipping decoder does not use cannot move
-the float decoder's working-RAM ledger. FastLED also extends the
+its own figure so that each variant is charged for its own arena. Fixed point
+is what ships (FastLED#4056); the float build survives as the reference the
+fixed-vs-float gates compare against. FastLED also extends the
 decoder's persistent synthesis state so that it can serve as the synthesis
 workspace without a duplicate scratch copy. The upstream direct-decoder
 2,304-byte free-format frame cap and Phase 0's 4,096-byte stream buffer are

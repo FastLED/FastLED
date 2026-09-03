@@ -613,4 +613,88 @@ FL_TEST_CASE("minimp3 fixed-point tracks float across the golden corpus") {
     }
 }
 
+// ---------------------------------------------------------------------------
+// The mono polyphase path is a separate code path from the
+// stereo one, and until this test existed nothing said so out loud.
+//
+// mp3d_synth carries four accumulator lanes: (left, right) x (subband i,
+// subband i+1). In mono `xr == xl` and `dstr == dstl`, so lanes 1 and 3
+// recompute lanes 0 and 2 and their stores are immediately overwritten. The
+// fixed-point decoder now skips them, which means mono and stereo run
+// different tap chains, different zlin stores and different output stores.
+//
+// The corpus test above would catch a mono regression today, but only by
+// accident -- it happens to contain one mono vector, and nothing stops that
+// vector being swapped for a stereo one, which would silently retire the
+// coverage. This asserts the mono-ness rather than relying on it, and it names
+// the failure so a regression reads as "mono synthesis" instead of "some file
+// in a list".
+//
+// The reference is the float decoder rather than a pinned checksum on purpose:
+// a golden hash would fail for any bit-exactness-preserving change to the
+// fixed path as loudly as it would for a real defect, and would say nothing
+// about which. A lane mix-up, a dropped lane or stale-history bleed all move
+// the PSNR by tens of dB; nothing that keeps the mono output correct can.
+// ---------------------------------------------------------------------------
+FL_TEST_CASE("minimp3 fixed-point mono synthesis matches the float reference") {
+    fl::setTestFileSystemRoot("tests/data");
+
+    // 16 kHz, single channel, 476 frames -- MPEG-2 Layer III, which is where
+    // FastLED's own low-bitrate content lands.
+    const char* const kMonoVector = "codec/minimp3/M2L3_bitrate_16_all.bit";
+    const fl::vector<fl::u8> bytes = readCorpusBytes(kMonoVector);
+
+    const VariantDecodeResult flt =
+        decodeWithVariant<fl::Minimp3FloatVariant>(bytes);
+    const VariantDecodeResult fixed =
+        decodeWithVariant<fl::Minimp3FixedVariant>(bytes);
+    const VariantDecodeResult fixed_scalar =
+        decodeWithVariant<fl::Minimp3FixedScalarVariant>(bytes);
+
+    // The point of the test. If this vector ever stops being mono the lane
+    // path below is not being exercised at all, and that must fail loudly
+    // rather than pass vacuously.
+    FL_REQUIRE_EQ(flt.mChannels, 1);
+    FL_REQUIRE_EQ(fixed.mChannels, 1);
+    FL_CHECK_GT(fixed.mFrames, 0);
+    FL_CHECK_EQ(fixed.mFrames, flt.mFrames);
+    FL_REQUIRE_EQ(fixed.mPcm.size(), flt.mPcm.size());
+
+    // Both fixed-point kernels take the mono path; the vector one still
+    // computes all four lanes and discards two, the scalar one no longer
+    // computes them. They must agree exactly.
+    FL_REQUIRE_EQ(fixed_scalar.mPcm.size(), fixed.mPcm.size());
+    for (fl::size i = 0; i < fixed.mPcm.size(); ++i) {
+        if (fixed_scalar.mPcm[i] != fixed.mPcm[i]) {
+            printf("[mono-synth] scalar/simd diverge at sample %zu: %d != %d\n",
+                   i, static_cast<int>(fixed_scalar.mPcm[i]),
+                   static_cast<int>(fixed.mPcm[i]));
+            FL_REQUIRE_EQ(fixed_scalar.mPcm[i], fixed.mPcm[i]);
+        }
+    }
+
+    const PcmComparison cmp = comparePcm(flt.mPcm, fixed.mPcm);
+    printf("[mono-synth] %-40s psnr=%.2f dB max=%d differing=%zu/%zu\n",
+           kMonoVector, cmp.mPsnrDb, cmp.mMaxAbsDiff, cmp.mDiffering,
+           cmp.mCount);
+    FL_CHECK_GE(cmp.mPsnrDb, 90.0);
+    FL_CHECK_LE(cmp.mMaxAbsDiff, 8);
+
+    // A decoder that emitted silence, or that wrote only the lanes it kept and
+    // left the rest at zero, would clear a PSNR gate taken against a quiet
+    // reference. Require the output to actually carry signal.
+    fl::size loud = 0;
+    for (fl::size i = 0; i < fixed.mPcm.size(); ++i) {
+        const int magnitude =
+            fixed.mPcm[i] < 0 ? -static_cast<int>(fixed.mPcm[i])
+                              : static_cast<int>(fixed.mPcm[i]);
+        if (magnitude > 64) {
+            ++loud;
+        }
+    }
+    printf("[mono-synth] %zu/%zu samples above 64 LSB\n", loud,
+           fixed.mPcm.size());
+    FL_CHECK_GT(loud, fixed.mPcm.size() / 8);
+}
+
 #endif // FASTLED_TESTING

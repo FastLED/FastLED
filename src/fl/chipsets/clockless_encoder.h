@@ -23,7 +23,8 @@ enum class ClocklessEncoder : u8 {
     CLOCKLESS_ENCODER_UCS7604_8BIT,         ///< UCS7604 8-bit 800KHz
     CLOCKLESS_ENCODER_UCS7604_16BIT,        ///< UCS7604 16-bit 800KHz
     CLOCKLESS_ENCODER_UCS7604_16BIT_1600,   ///< UCS7604 16-bit 1600KHz
-    CLOCKLESS_ENCODER_TM1812_RGBWW          ///< TM1812: two 5-byte RGBWW pixels in each 12-byte IC frame
+    CLOCKLESS_ENCODER_TM1812_RGBWW,         ///< TM1812: two 5-byte RGBWW pixels in each 12-byte IC frame
+    CLOCKLESS_ENCODER_TM1908                ///< TM1908: command prefix followed by RGB pixels
 };
 
 /// @brief SFINAE helpers for detecting a static ENCODER member on timing structs

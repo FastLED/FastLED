@@ -19,35 +19,31 @@ from typeguard import typechecked
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILD = ROOT / ".build" / "codec-memory-audit"
-BACKENDS = ("helix", "minimp3", "minimp3_fixed")
+BACKENDS = ("minimp3", "minimp3_fixed")
 # Audit TU name -> the name the ledger uses for it.
 LEDGER_NAMES = {
-    "helix": "helix",
     "minimp3": "minimp3-float",
     "minimp3_fixed": "minimp3-fixed",
 }
 # Entry point each backend's decode call graph is rooted at.
 CALLGRAPH_ROOTS = {
-    "helix": "MP3Decode",
     "minimp3": "mp3dec_decode_frame_r",
     "minimp3_fixed": "mp3dec_decode_frame_r",
 }
 FRAME_LIMIT = 2048
 RAM_LIMIT = 24 * 1024
+# Retired Helix static-table total (12,744 bytes) + 20%. See check_ledger().
+STATIC_TABLE_LIMIT = 15292
 REGRESSION_FACTOR = 1.02
-# Measured and required to be present, but not regression-gated. The ledger's
-# own prose already says the 2 KiB acceptance gate is the compiler-derived
-# callgraph and calls the watermark "a conservative observation"; the code did
-# not reflect that, and applied the same hard 2% gate to both. The watermark is
-# not reproducible across CI runs -- helix has measured 1736 and 3336 on
-# identical decoder code, each exactly and one of them on a re-run -- because it
-# reports the deepest byte *anything* disturbed, not the deepest byte the
-# decoder used. See FastLED#4106 for the real fix (host-key the ledger, or
-# measure the stack pointer directly instead of inferring it from a paint
-# pattern).
-INFORMATIONAL_METRICS = {
-    "stack-watermark-observed",
-}
+# Metrics that are measured and recorded but deliberately not regression-gated.
+# Empty since FastLED#4106: `stack-watermark-observed` used to live here because
+# it was not reproducible across CI runners. The cause turned out to be glibc --
+# the harness forwarded the decoder's block moves to libc, so glibc's `mem*`
+# frames sat inside the measured window and moved the figure by ~900 bytes
+# depending on which implementation the host dispatched to. watermark.cpp now
+# uses its own loops, the measurement is host-independent, and the metric is
+# gated again like every other one.
+INFORMATIONAL_METRICS: set[str] = set()
 
 EXACT_METRICS = {
     "allocation-count",
@@ -347,7 +343,6 @@ def run_watermark(
         "-fno-rtti",
         "-mno-red-zone",
         str(Path(__file__).with_name("watermark.cpp")),
-        str(objects["helix"]),
         str(objects["minimp3"]),
         "-pthread",
         "-o",
@@ -434,7 +429,7 @@ def profile_metrics(binary: Path) -> dict[tuple[str, str], int]:
     )
     print_captured(result.stdout)
     metrics = parse_profile_output(result.stdout)
-    for backend in ("helix", "minimp3-float"):
+    for backend in ("minimp3-float", "minimp3-fixed"):
         for metric in EXACT_METRICS:
             if (backend, metric) not in metrics:
                 raise RuntimeError(f"production profile missing {backend}/{metric}")
@@ -499,18 +494,21 @@ def check_ledger(
         working_ram = current.get((backend, "working-ram"))
         if working_ram is not None and working_ram > RAM_LIMIT:
             errors.append(f"{backend} working RAM exceeds 24 KiB")
-    for backend in ("helix", "minimp3-float", "minimp3-fixed"):
+    for backend in ("minimp3-float", "minimp3-fixed"):
         stack_depth = current.get((backend, "stack-callgraph"))
         if stack_depth is not None and stack_depth > FRAME_LIMIT:
             errors.append(f"{backend} decode stack exceeds 2 KiB")
-    helix_tables = current.get(("helix", "static-tables"))
-    minimp3_tables = current.get(("minimp3-float", "static-tables"))
-    if (
-        helix_tables is not None
-        and minimp3_tables is not None
-        and minimp3_tables > int(helix_tables * 1.2)
-    ):
-        errors.append("minimp3 static tables exceed Helix +20%")
+    # Was "below Helix's static tables +20%", computed live from the Helix
+    # audit object. Helix is gone, so the referent is gone with it; the budget
+    # it produced is kept as the absolute number it always evaluated to
+    # (12,744 * 1.2), which is the figure the ledger prose already quotes.
+    for backend in ("minimp3-float", "minimp3-fixed"):
+        tables_total = current.get((backend, "static-tables"))
+        if tables_total is not None and tables_total > STATIC_TABLE_LIMIT:
+            errors.append(
+                f"{backend} static tables exceed the {STATIC_TABLE_LIMIT}-byte "
+                "budget (retired Helix baseline +20%)"
+            )
     if errors:
         raise RuntimeError("; ".join(errors))
     print("LEDGER:PASS:all metrics within budgets and 2% regression allowance")
@@ -537,7 +535,7 @@ def main(argv: list[str] | None = None) -> int:
             metrics.update(profile_metrics(args.profile_binary))
             hook_peaks = {
                 backend: metrics[(backend, "pipeline-peak")]
-                for backend in ("helix", "minimp3-float")
+                for backend in ("minimp3-float",)
             }
             metrics.update(run_watermark(objects, hook_peaks))
             if args.check:

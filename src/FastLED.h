@@ -369,6 +369,13 @@ class TM1812 : public TM1809Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class TM1809 : public TM1809Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
+/// @brief TM1908 controller class.
+/// @details Emits the normal-mode and maximum-current commands required by
+/// the Titan Micro Electronics TM1908 V1.2 protocol before every RGB frame.
+/// @copydetails TM1908Controller
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
+class TM1908 : public TM1908Controller<DATA_PIN, RGB_ORDER> {};
+
 /// @brief TM1804 controller class.
 /// @copydetails TM1809Controller800Khz
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
@@ -437,6 +444,14 @@ class WS2852 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 /// @copydetails WS2812Controller800Khz
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class WS2812B : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
+
+/// @brief OptoSupply OSTW2020C1E controller class (2020-package RGB).
+/// @details The manufacturer specifies an 800 Kbps, GRB/MSB-first protocol
+/// compatible with WS2812 pulse timing and a reset interval greater than
+/// 280us. The dedicated controller uses a 300us inter-frame wait.
+/// @copydetails OSTW2020C1EController
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
+class OSTW2020C1E : public OSTW2020C1EController<DATA_PIN, RGB_ORDER> {};
 
 /// @brief WS2812B-Mini-V3 controller class.
 /// @copydetails WS2812BMiniV3Controller

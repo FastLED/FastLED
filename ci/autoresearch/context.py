@@ -159,6 +159,7 @@ class RunContext:
     decode_mode: bool
     gpio_only_mode: bool
     parallel_mode: bool
+    mp3_test_mode: bool = False
     rpc_smoke_mode: bool = False
     watchdog_soak_mode: bool = False
 

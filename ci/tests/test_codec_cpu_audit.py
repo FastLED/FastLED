@@ -23,7 +23,7 @@ def test_checked_in_cpu_trend_is_complete() -> None:
 
 
 def test_five_percent_regression_gate() -> None:
-    baseline = {"helix": 1_000_000, "minimp3-float": 2_000_000}
+    baseline = {"minimp3-float": 2_000_000, "minimp3-fixed": 2_500_000}
     AUDIT.check_regression(baseline, dict(baseline))
     changed = dict(baseline)
     changed["minimp3-float"] = 2_100_001
@@ -66,59 +66,122 @@ entry:
     assert result.stage_sites["huffman"] == 1
 
 
-def test_helix_mulshift_accumulation_counts_one_mac() -> None:
+def test_integer_product_selection_ignores_address_and_size_math() -> None:
+    """`mul` is ambiguous in a way `fmul` is not: at -O0 the fixed-point
+    decoder's arithmetic and the compiler's address/size arithmetic share the
+    opcode. Only the sign-extended 64-bit product that is *not* consumed by a
+    getelementptr or a call is a sample multiply."""
+    body = [
+        "  %a64 = sext i32 %a to i64",
+        "  %b64 = sext i32 %b to i64",
+        "  %prod = mul nsw i64 %a64, %b64",  # Q-format: counted
+        "  %coef = sext i32 %c to i64",
+        "  %scaled = mul nsw i64 %coef, 37489",  # literal tap: counted
+        "  %idx = sext i32 %i to i64",
+        "  %off = mul nsw i64 %idx, 4",  # address math: rejected
+        "  %p = getelementptr inbounds i32, ptr %base, i64 %off",
+        "  %n = sext i32 %count to i64",
+        "  %bytes = mul nsw i64 %n, 72",  # memcpy size: rejected
+        "  %r = call ptr @memcpy(ptr %d, ptr %s, i64 %bytes)",
+        "  %wide = mul nsw i64 %x, %y",  # neither sign-extended
+    ]
+    products = AUDIT._integer_product_lines(body)
+
+    assert products.values == {"%prod", "%scaled"}
+    assert products.lines == {2, 4}
+
+
+def test_widened_operands_are_still_counted_as_one_multiply() -> None:
+    """`(int64_t)(a - b) * c` and `((int64_t)a - (int64_t)b) * c` are the same
+    Q-format multiply spelled two ways, and both must be counted.
+
+    The first lowers to `sub i32 -> sext -> mul`; the second to
+    `sext, sext -> sub i64 -> mul`, where the multiply's operand is the subtract
+    rather than the extend. Keying on the extend alone made the counter blind to
+    329,616 multiplies in mp3d_synth_pair the moment FastLED#4133 widened its
+    operands to avoid signed overflow -- the arithmetic was unchanged, only the
+    IR shape. The exact operation ledger caught it, and re-baselining instead of
+    fixing the rule would have made the ledger permanently blind to the hottest
+    kernel in the decoder."""
+    narrow = [
+        "  %d = sub nsw i32 %a, %b",
+        "  %w = sext i32 %d to i64",
+        "  %m = mul nsw i64 %w, 29",
+    ]
+    widened = [
+        "  %wa = sext i32 %a to i64",
+        "  %wb = sext i32 %b to i64",
+        "  %d = sub nsw i64 %wa, %wb",
+        "  %m = mul nsw i64 %d, 29",
+    ]
+    assert AUDIT._integer_product_lines(narrow).values == {"%m"}
+    assert AUDIT._integer_product_lines(widened).values == {"%m"}
+
+    # The widening must not turn address or size arithmetic into a sample
+    # multiply either.
+    addressing = [
+        "  %wa = sext i32 %i to i64",
+        "  %wb = sext i32 %j to i64",
+        "  %d = add nsw i64 %wa, %wb",
+        "  %off = mul nsw i64 %d, 4",
+        "  %p = getelementptr inbounds i32, ptr %base, i64 %off",
+    ]
+    assert AUDIT._integer_product_lines(addressing).values == set()
+
+
+def test_integer_mac_counts_one_accumulate_for_two_products() -> None:
+    """Mirrors the float MAC test. Two products feeding one add is two
+    multiplies and one multiply-accumulate, not three multiplies."""
     llvm = """
-define i32 @MULSHIFT32(i32 %x, i32 %y) {
+define void @L3_antialias() {
 entry:
-  %wide_x = sext i32 %x to i64
-  %wide_y = sext i32 %y to i64
-  %product = mul i64 %wide_x, %wide_y
-  %scaled = trunc i64 %product to i32
-  ret i32 %scaled
-}
-define i32 @AntiAlias(i32 %a, i32 %b, i32 %c) {
-entry:
-  %left = call i32 @MULSHIFT32(i32 %a, i32 %b)
-  %right = call i32 @MULSHIFT32(i32 %a, i32 %c)
-  %sum = add i32 %left, %right
-  ret i32 %sum
+  %a64 = sext i32 %a to i64
+  %b64 = sext i32 %b to i64
+  %left = mul nsw i64 %a64, %b64
+  %c64 = sext i32 %c to i64
+  %right = mul nsw i64 %c64, %b64
+  %sum = add nsw i64 %left, %right
+  ret void
 }
 """
-    result = AUDIT.instrument_llvm_ir(llvm, "helix")
-    assert result.text.count("i32 -1, i32 1, i32 0") == 1
+    result = AUDIT.instrument_llvm_ir(llvm, "minimp3-fixed")
+    assert result.text.count("i32 5, i32 1, i32 0") == 2
     assert result.text.count("i32 5, i32 0, i32 1") == 1
 
 
-def test_helix_mulshift_accumulation_survives_o0_spills_and_casts() -> None:
-    llvm = """
-define i64 @AntiAlias(i32 %a, i32 %b, ptr %slot) {
+def test_float_instrumentation_does_not_fire_on_the_fixed_backend() -> None:
+    """The two backends must not cross-instrument: a float build has no
+    integer sample multiplies and a fixed build has no fmul."""
+    float_ir = """
+define void @L3_antialias() {
 entry:
-  %product = call i32 @MULSHIFT32(i32 %a, i32 %b)
-  store i32 %product, ptr %slot
-  %loaded = load i32, ptr %slot
-  %wide = sext i32 %loaded to i64
-  %first = add i64 %wide, 1
-  %second = sub i64 %first, 2
-  ret i64 %second
+  %p = fmul float %a, %b
+  ret void
 }
 """
-    result = AUDIT.instrument_llvm_ir(llvm, "helix")
-    assert result.text.count("i32 5, i32 0, i32 1") == 1
+    # Counting the call form, not the `declare` line, which also names it.
+    assert (
+        AUDIT.instrument_llvm_ir(float_ir, "minimp3-float").text.count(
+            "call void @fastled_mp3_cpu_operation"
+        )
+        == 1
+    )
+    with pytest.raises(RuntimeError, match="no arithmetic sites"):
+        AUDIT.instrument_llvm_ir(float_ir, "minimp3-fixed")
 
 
 def test_host_counters_combine_cycle_median_and_callgrind() -> None:
-    cycles = {"helix": 100.0, "minimp3-float": 200.0}
+    cycles = {"minimp3-float": 200.0, "minimp3-fixed": 250.0}
     callgrind = {
         backend: {"instructions": 250, "branch_misses": 4} for backend in AUDIT.BACKENDS
     }
     counters = AUDIT.compose_host_counters(cycles, callgrind)
-    assert counters["helix"] == {
-        "cycles": 100.0,
+    assert counters["minimp3-float"] == {
+        "cycles": 200.0,
         "instructions": 250,
         "branch_misses": 4,
-        "ipc": 2.5,
+        "ipc": 1.25,
     }
-    assert counters["minimp3-float"]["ipc"] == 1.25
 
 
 def test_host_affinity_is_fail_closed() -> None:
@@ -196,10 +259,10 @@ def test_operation_ledger_is_exact_per_frame() -> None:
             for stage in AUDIT.STAGES
         },
     }
-    AUDIT.validate_operations("helix", operations)
+    AUDIT.validate_operations("minimp3-float", operations)
     operations["stages"]["imdct"]["multiplies_per_frame"] = 2.4
     with pytest.raises(RuntimeError, match="inexact derived operation metric"):
-        AUDIT.validate_operations("helix", operations)
+        AUDIT.validate_operations("minimp3-float", operations)
 
 
 def test_callgrind_attribution_keeps_codec_functions() -> None:
@@ -230,28 +293,99 @@ def test_callgrind_parser_prefers_complete_totals(tmp_path: Path) -> None:
 
 
 def test_trend_gate_rejects_more_than_five_percent() -> None:
+    """Retired instruction count is a property of the code, so it is gated."""
     baseline = AUDIT.load_trend()
     current = json.loads(json.dumps(baseline))
-    counters = current["backends"]["helix"]["host"]["counter_median"]
-    counters["cycles"] *= 1.051
+    counters = current["backends"]["minimp3-float"]["host"]["counter_median"]
+    host = current["backends"]["minimp3-float"]["host"]
+    counters["instructions"] = int(counters["instructions"] * 1.051)
+    # perf and Callgrind instruction counts are cross-checked against each
+    # other, so both have to move or validation rejects the fixture first.
+    host["callgrind"]["instructions"] = int(host["callgrind"]["instructions"] * 1.051)
     counters["ipc"] = round(counters["instructions"] / counters["cycles"], 6)
-    with pytest.raises(RuntimeError, match="helix/counter/cycles regressed"):
+    with pytest.raises(
+        RuntimeError, match="minimp3-float/counter/instructions regressed"
+    ):
         AUDIT.check_trend(baseline, current)
+
+
+def test_cycles_are_reported_but_do_not_fail_the_build(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Cycles, the IPC derived from them, and per-stage wall-clock timings are
+    properties of the machine, not the code (FastLED#4130). Note that
+    `counter_median` instructions and branch misses are *not* in this set:
+    validate_trend requires them to equal the Callgrind figures, so they are
+    simulated and stay gated. Cycles are the only genuinely hardware-measured
+    quantity. The runner pool
+    moves them by more than the 5% budget between machines reporting the same
+    CPU model, which failed PRs that provably could not have caused it. They
+    are recorded loudly and no longer gated."""
+    baseline = AUDIT.load_trend()
+    current = json.loads(json.dumps(baseline))
+    counters = current["backends"]["minimp3-float"]["host"]["counter_median"]
+    counters["cycles"] = int(counters["cycles"] * 1.30)
+    counters["ipc"] = round(counters["instructions"] / counters["cycles"], 6)
+    for stage in current["backends"]["minimp3-float"]["host"]["stage_ns_median"]:
+        current["backends"]["minimp3-float"]["host"]["stage_ns_median"][stage] *= 1.30
+
+    AUDIT.check_trend(baseline, current)  # a 30% swing must not raise
+
+    printed = capsys.readouterr().out
+    assert "UNGATED:minimp3-float/counter/cycles" in printed
+    assert "drift=+30.00%" in printed
+    assert "worth a look" in printed
+
+    # IPC regresses downwards, so the marker has to follow the metric's own
+    # direction. A 30% cycle increase is about -23% IPC, and flagging only
+    # positive drift would stay silent on exactly the case worth seeing.
+    ipc_line = next(
+        line
+        for line in printed.splitlines()
+        if line.startswith("UNGATED:minimp3-float/counter/ipc")
+    )
+    assert "drift=-23" in ipc_line
+    assert "worth a look" in ipc_line
 
 
 def test_trend_validation_rejects_inconsistent_derived_counters() -> None:
     trend = AUDIT.load_trend()
-    trend["backends"]["helix"]["host"]["counter_median"]["ipc"] = 0.5
+    trend["backends"]["minimp3-float"]["host"]["counter_median"]["ipc"] = 0.5
     with pytest.raises(RuntimeError, match="inexact derived host IPC"):
         AUDIT.validate_trend(trend)
 
 
-def test_trend_gate_fails_closed_on_unknown_host() -> None:
+def test_unknown_host_still_gates_the_deterministic_metrics(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """An unknown runner no longer fails closed (FastLED#4130).
+
+    It used to, and that was right while cycles were gated: a cycle count from
+    an unrecognised machine compares to nothing. After the demotion every gated
+    figure is simulated -- the operation ledger, the cross-compiled codegen
+    bounds, and the Callgrind numbers that counter_median is required to equal
+    -- so the primary baseline applies to any host. The ubuntu-24.04 pool has
+    presented at least five CPU models, and each new one used to block
+    unrelated PRs until someone harvested a baseline.
+
+    What must not happen is an unknown host silently gating nothing."""
     baseline = AUDIT.load_trend()
     current = json.loads(json.dumps(baseline))
-    current["environment"]["cpu_model"] = "different hosted runner"
+    current["environment"]["cpu_model"] = "some runner nobody has measured"
     current["host_key"] = AUDIT.environment_key(current["environment"])
-    with pytest.raises(RuntimeError, match="host baseline is unknown"):
+
+    AUDIT.check_trend(baseline, current)
+    assert "UNKNOWN-HOST:" in capsys.readouterr().out
+
+    # ...and the deterministic gate still fires on that same unknown host.
+    host = current["backends"]["minimp3-float"]["host"]
+    counters = host["counter_median"]
+    counters["instructions"] = int(counters["instructions"] * 1.051)
+    host["callgrind"]["instructions"] = int(host["callgrind"]["instructions"] * 1.051)
+    counters["ipc"] = round(counters["instructions"] / counters["cycles"], 6)
+    with pytest.raises(
+        RuntimeError, match="minimp3-float/counter/instructions regressed"
+    ):
         AUDIT.check_trend(baseline, current)
 
 
@@ -260,7 +394,7 @@ def test_trend_gate_selects_known_host_baseline() -> None:
     current = json.loads(json.dumps(baseline))
     current["environment"]["cpu_model"] = "alternate hosted runner"
     current["host_key"] = AUDIT.environment_key(current["environment"])
-    primary_counters = baseline["backends"]["helix"]["host"]["counter_median"]
+    primary_counters = baseline["backends"]["minimp3-float"]["host"]["counter_median"]
     primary_counters["cycles"] /= 2
     primary_counters["ipc"] = round(
         primary_counters["instructions"] / primary_counters["cycles"], 6
@@ -279,17 +413,23 @@ def test_trend_gate_selects_known_host_baseline() -> None:
         }
     }
     AUDIT.check_trend(baseline, current)
-    counters = current["backends"]["helix"]["host"]["counter_median"]
-    counters["cycles"] *= 1.051
+    counters = current["backends"]["minimp3-float"]["host"]["counter_median"]
+    host = current["backends"]["minimp3-float"]["host"]
+    counters["instructions"] = int(counters["instructions"] * 1.051)
+    # perf and Callgrind instruction counts are cross-checked against each
+    # other, so both have to move or validation rejects the fixture first.
+    host["callgrind"]["instructions"] = int(host["callgrind"]["instructions"] * 1.051)
     counters["ipc"] = round(counters["instructions"] / counters["cycles"], 6)
-    with pytest.raises(RuntimeError, match="helix/counter/cycles regressed"):
+    with pytest.raises(
+        RuntimeError, match="minimp3-float/counter/instructions regressed"
+    ):
         AUDIT.check_trend(baseline, current)
 
 
 def test_trend_gate_checks_callgrind_function_share() -> None:
     baseline = AUDIT.load_trend()
     current = json.loads(json.dumps(baseline))
-    functions = current["backends"]["helix"]["host"]["callgrind"]["functions"]
+    functions = current["backends"]["minimp3-float"]["host"]["callgrind"]["functions"]
     function = next(iter(functions))
     functions[function] = functions[function] * 1051 // 1000
     with pytest.raises(RuntimeError, match=r"callgrind-function/.+ regressed"):

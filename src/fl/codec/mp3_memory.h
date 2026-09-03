@@ -11,7 +11,6 @@ namespace third_party {
 // Internal codec-allocation contract. These declarations are visible through
 // mp3.h only because decoder private storage contains typed deleters. They are
 // not a consumer allocation API and may change with the decoder backends.
-constexpr fl::size MP3_HELIX_STREAM_BUFFER_SIZE = 4096;
 constexpr fl::size MP3_MINIMP3_STREAM_BUFFER_SIZE = 4096;
 
 enum class Mp3MemoryTag : fl::u8 {

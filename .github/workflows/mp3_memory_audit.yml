@@ -9,7 +9,6 @@ on:
     branches: [master]
     paths:
       - 'src/fl/codec/mp3*'
-      - 'src/third_party/libhelix_mp3/**'
       - 'src/third_party/minimp3/**'
       - 'ci/codec_tables/**'
       - 'tests/fl/codec/mp3*'
@@ -22,7 +21,6 @@ on:
     branches: [master]
     paths:
       - 'src/fl/codec/mp3*'
-      - 'src/third_party/libhelix_mp3/**'
       - 'src/third_party/minimp3/**'
       - 'ci/codec_tables/**'
       - 'tests/fl/codec/mp3*'

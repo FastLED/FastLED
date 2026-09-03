@@ -3,10 +3,9 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/singleton.h"
 
-// Include Helix MP3 decoder internal API (in fl::third_party namespace)
 // IWYU pragma: begin_keep
-#include "third_party/libhelix_mp3/pub/mp3dec.h"
 #include "third_party/minimp3/minimp3.h"
+#include "fl/codec/mp3_vbr_tag.h"
 #include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 
@@ -115,123 +114,12 @@ void Mp3MemoryFree(void* ptr, fl::size bytes,
 // Maximum PCM output: 1152 samples/channel * 2 channels = 2304 samples
 constexpr fl::size MAX_PCM_SAMPLES = 2304;
 
-// Mp3HelixDecoder implementation
-Mp3HelixDecoder::Mp3HelixDecoder() FL_NO_EXCEPT
-    : mPcmBuffer(nullptr, Mp3MemoryDeleter<fl::i16>(
-                              sizeof(fl::i16) * MAX_PCM_SAMPLES,
-                              Mp3MemoryTag::PcmOutput)),
-      mDecoder(nullptr) {
-    fl::memset(&mFrameInfo, 0, sizeof(mFrameInfo));
-}
-
-Mp3HelixDecoder::~Mp3HelixDecoder() FL_NO_EXCEPT {
-    reset();
-}
-
-bool Mp3HelixDecoder::init() {
-    if (mDecoder) {
-        return true;  // Already initialized
-    }
-
-    // Initialize Helix decoder
-    mDecoder = MP3InitDecoder();
-    if (!mDecoder) {
-        return false;
-    }
-
-    // Allocate PCM buffer
-    mPcmBuffer.reset(Mp3MemoryAllocateArray<fl::i16>(
-        MAX_PCM_SAMPLES, Mp3MemoryTag::PcmOutput));
-    if (!mPcmBuffer) {
-        MP3FreeDecoder(static_cast<HMP3Decoder>(mDecoder));
-        mDecoder = nullptr;
-        return false;
-    }
-
-    return true;
-}
-
-void Mp3HelixDecoder::reset() {
-    if (mDecoder) {
-        MP3FreeDecoder(static_cast<HMP3Decoder>(mDecoder));
-        mDecoder = nullptr;
-    }
-
-    mPcmBuffer.reset();
-
-    fl::memset(&mFrameInfo, 0, sizeof(mFrameInfo));
-}
-
-int Mp3HelixDecoder::findSyncWord(const fl::u8* buf, fl::size len) {
-    int offset = MP3FindSyncWord(buf, static_cast<int>(len));
-    return offset;
-}
-
-int Mp3HelixDecoder::decodeFrame(const fl::u8** inbuf, fl::size* bytes_left) {
-    if (!mDecoder || !mPcmBuffer) {
-        return ERR_MP3_NULL_POINTER;
-    }
-
-    // Decode one frame
-    int result = MP3Decode(
-        static_cast<HMP3Decoder>(mDecoder),
-        inbuf,
-        bytes_left,
-        fl::bit_cast<short*>(mPcmBuffer.get()),
-        0  // useSize = 0 (use default)
-    );
-
-    if (result == ERR_MP3_NONE) {
-        // Get frame info
-        MP3FrameInfo helix_info;
-        MP3GetLastFrameInfo(static_cast<HMP3Decoder>(mDecoder), &helix_info);
-
-        mFrameInfo.bitrate = helix_info.bitrate;
-        mFrameInfo.nChans = helix_info.nChans;
-        mFrameInfo.samprate = helix_info.samprate;
-        mFrameInfo.bitsPerSample = helix_info.bitsPerSample;
-        mFrameInfo.outputSamps = helix_info.outputSamps;
-        mFrameInfo.layer = helix_info.layer;
-        mFrameInfo.version = helix_info.version;
-    }
-
-    return result;
-}
-
-fl::vector<audio::Sample> Mp3HelixDecoder::decodeToAudioSamples(const fl::u8* data, fl::size len) {
-    fl::vector<audio::Sample> samples;
-
-    decode(data, len, [&](const Mp3Frame& frame) {
-        // Convert stereo to mono by averaging channels
-        if (frame.channels == 2) {
-            fl::vector<fl::i16> mono_pcm;
-            mono_pcm.reserve(frame.samples);
-
-            for (int i = 0; i < frame.samples; i++) {
-                fl::i32 left = frame.pcm[i * 2];
-                fl::i32 right = frame.pcm[i * 2 + 1];
-                fl::i32 avg = (left + right) / 2;
-                mono_pcm.push_back(static_cast<fl::i16>(avg));
-            }
-
-            audio::Sample sample(mono_pcm);
-            samples.push_back(sample);
-        } else {
-            // Mono audio - use directly
-            audio::Sample sample(fl::span<const fl::i16>(frame.pcm, frame.samples));
-            samples.push_back(sample);
-        }
-    });
-
-    return samples;
-}
-
 namespace {
 
 int minimp3Version(const fl::u8* header) FL_NO_EXCEPT {
     const int version_bits = (header[1] >> 3) & 0x03;
     if (version_bits == 0x03) {
-        return 0; // MPEG-1, matching Helix's MPEGVersion encoding.
+        return 0; // MPEG-1.
     }
     if (version_bits == 0x02) {
         return 1; // MPEG-2.
@@ -373,11 +261,7 @@ Mp3Minimp3Decoder::decodeToAudioSamples(const fl::u8* data,
     return samples;
 }
 
-#if defined(FASTLED_MP3_BACKEND_MINIMP3)
 using Mp3SelectedDecoder = Mp3Minimp3Decoder;
-#else
-using Mp3SelectedDecoder = Mp3HelixDecoder;
-#endif
 
 // Mp3StreamDecoderImpl - internal implementation of streaming MP3 decoder
 class Mp3StreamDecoderImpl {
@@ -395,14 +279,27 @@ class Mp3StreamDecoderImpl {
     Mp3Info getInfo() const { return mInfo; }
 
   private:
-#if defined(FASTLED_MP3_BACKEND_MINIMP3)
     static constexpr fl::size BUFFER_SIZE = MP3_MINIMP3_STREAM_BUFFER_SIZE;
-#else
-    static constexpr fl::size BUFFER_SIZE = MP3_HELIX_STREAM_BUFFER_SIZE;
-#endif
 
     bool fillBuffer();
     bool findAndDecodeFrame(audio::Sample* out_sample);
+
+    /* VBR-tag state (FastLED#4129). mSkipTagFrame suppresses the metadata
+       frame itself; mSkipSamples counts the encoder priming after it.
+
+       These are per-stream, so both begin() and reset() must clear them. A
+       decoder reused for a second stream otherwise carries the first one's
+       verdict across: having already inspected an untagged file it never
+       inspects the tagged one, and emits its metadata frame as audio. */
+    void resetVbrState() FL_NO_EXCEPT {
+        mInspectedFirstFrame = false;
+        mSkipTagFrame = false;
+        mSkipSamples = 0;
+    }
+
+    bool mInspectedFirstFrame = false;
+    bool mSkipTagFrame = false;
+    fl::u32 mSkipSamples = 0;
 
     fl::filebuf_ptr mStream;
     fl::unique_ptr<Mp3SelectedDecoder> mDecoder;
@@ -459,6 +356,7 @@ bool Mp3StreamDecoderImpl::begin(fl::filebuf_ptr stream) {
     mHasError = false;
     mEndOfStream = false;
     mHasDecodedFirstFrame = false;
+    resetVbrState();
 
     return true;
 }
@@ -495,6 +393,7 @@ void Mp3StreamDecoderImpl::reset() {
     mHasError = false;
     mEndOfStream = false;
     mHasDecodedFirstFrame = false;
+    resetVbrState();
 }
 
 bool Mp3StreamDecoderImpl::fillBuffer() {
@@ -552,6 +451,20 @@ bool Mp3StreamDecoderImpl::findAndDecodeFrame(audio::Sample* out_sample) {
     const fl::u8* decode_ptr = inptr;
     fl::size decode_bytes = bytes_left;
 
+    /* The first frame may be a Xing/Info/VBRI header rather than audio. It is
+       a complete, valid MPEG frame, so decoding it emits noise before the
+       music; LAME also records how much encoder priming follows it. Inspect
+       before decoding so the frame can be dropped whole (FastLED#4129). */
+    if (!mInspectedFirstFrame) {
+        mInspectedFirstFrame = true;
+        Mp3VbrTag tag;
+        if (Mp3ParseVbrTag(fl::span<const fl::u8>(inptr, bytes_left), &tag) &&
+            tag.present) {
+            mSkipTagFrame = true;
+            mSkipSamples = tag.encoderDelay + MP3D_DECODER_DELAY;
+        }
+    }
+
     int result = mDecoder->decodeFrame(&decode_ptr, &decode_bytes);
 
     // Update buffer position based on how many bytes were consumed
@@ -563,6 +476,12 @@ bool Mp3StreamDecoderImpl::findAndDecodeFrame(audio::Sample* out_sample) {
     }
     mBufferPos += consumed;
     mBytesProcessed += consumed;
+
+    if (result == 0 && mSkipTagFrame) {
+        // The metadata frame itself: consumed above, never emitted.
+        mSkipTagFrame = false;
+        return false;
+    }
 
     if (result == 0) {
         // Successfully decoded a frame
@@ -586,12 +505,27 @@ bool Mp3StreamDecoderImpl::findAndDecodeFrame(audio::Sample* out_sample) {
             mHasDecodedFirstFrame = true;
         }
 
+        /* Encoder priming plus the filterbank's own latency: not signal, and
+           audible as a burst at the start of playback if emitted. */
+        int first = 0;
+        if (mSkipSamples > 0) {
+            const fl::u32 available = static_cast<fl::u32>(frame.samples);
+            const fl::u32 drop =
+                mSkipSamples < available ? mSkipSamples : available;
+            first = static_cast<int>(drop);
+            mSkipSamples -= drop;
+            if (first >= frame.samples) {
+                return false; // whole frame was priming
+            }
+        }
+        const int emitted = frame.samples - first;
+
         // Convert to audio::Sample (convert stereo to mono if needed)
         if (frame.channels == 2) {
             fl::vector<fl::i16> mono_pcm;
-            mono_pcm.reserve(frame.samples);
+            mono_pcm.reserve(emitted);
 
-            for (int i = 0; i < frame.samples; i++) {
+            for (int i = first; i < frame.samples; i++) {
                 fl::i32 left = frame.pcm[i * 2];
                 fl::i32 right = frame.pcm[i * 2 + 1];
                 fl::i32 avg = (left + right) / 2;
@@ -601,7 +535,8 @@ bool Mp3StreamDecoderImpl::findAndDecodeFrame(audio::Sample* out_sample) {
             *out_sample = audio::Sample(mono_pcm);
         } else {
             // Mono audio - use directly
-            *out_sample = audio::Sample(fl::span<const fl::i16>(frame.pcm, frame.samples));
+            *out_sample = audio::Sample(
+                fl::span<const fl::i16>(frame.pcm + first, emitted));
         }
 
         return true;

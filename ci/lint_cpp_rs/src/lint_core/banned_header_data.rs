@@ -271,7 +271,6 @@ const BANNED_HEADER_EXCEPTIONS: &[(&str, &str)] = &[
         "platforms/shared/mock/esp/32/drivers/spi_peripheral_mock.cpp.hpp",
     ),
     ("stdlib.h", "platforms/shared/ui/json/json_console.cpp.hpp"),
-    ("stdlib.h", "third_party/libhelix_mp3/real/buffers.hpp"),
     ("stdlib.h", "third_party/stb/truetype/stb_truetype.cpp.hpp"),
     ("malloc.h", "fl/stl/cstdlib.cpp.hpp"),
     ("malloc.h", "fl/stl/alloca.h"),

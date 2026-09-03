@@ -5,8 +5,27 @@
 #include <string.h>
 
 #include "fl/codec/mp3_memory.h"
-#include "third_party/libhelix_mp3/pub/mp3dec.h"
+
+// Pinned to the float variant: this driver links minimp3_audit.o, which pins it
+// the same way, and the audit's host baselines are keyed by that build's
+// symbols. minimp3.h now defaults to fixed point, so relying on the default
+// would silently swap the measured decoder.
+#define MINIMP3_FLOAT_POINT 1
 #include "third_party/minimp3/minimp3.h"
+#undef MINIMP3_FLOAT_POINT
+
+// ...and the fixed-point build's declarations under its own namespace. The
+// implementation is ci/codec_cpu/minimp3_fixed_driver.cpp, linked alongside.
+// Two variants cannot share a translation unit -- different DSP path, different
+// mp3dec_scratch_t layout -- so the header is re-included with the guards
+// cleared, exactly as tests/fl/codec/minimp3_variants.hpp does.
+#undef MINIMP3_H
+#undef _MINIMP3_IMPLEMENTATION_GUARD
+#define MINIMP3_NAMESPACE minimp3_fixed
+#define MINIMP3_FIXED_POINT 1
+#include "third_party/minimp3/minimp3.h"
+#undef MINIMP3_FIXED_POINT
+#undef MINIMP3_NAMESPACE
 
 #if __has_include(<valgrind/callgrind.h>)
 #include <valgrind/callgrind.h>
@@ -107,58 +126,41 @@ uint64_t checksumPcm(const int16_t* pcm, int samples, int channels) {
     return value;
 }
 
-bool decodeHelix(const unsigned char* data, size_t size, uint64_t* checksum,
-                 int* frames) {
-    const int frames_before = *frames;
-    HMP3Decoder decoder = fl::third_party::MP3InitDecoder();
-    if (!decoder) {
-        return false;
+/* One body, two instantiations. The two decoders have identical API shapes in
+   different namespaces, so the traits below are the only thing that differs --
+   keeping the measured work identical between the variants, which is the point
+   of comparing them. */
+struct FloatVariant {
+    typedef fl::third_party::mp3dec_t dec_t;
+    typedef fl::third_party::mp3dec_scratch_t scratch_t;
+    typedef fl::third_party::mp3dec_frame_info_t info_t;
+    static void init(dec_t* d) { fl::third_party::mp3dec_init(d); }
+    static int decode(dec_t* d, scratch_t* s, const unsigned char* in, int n,
+                      int16_t* pcm, info_t* i) {
+        return fl::third_party::mp3dec_decode_frame_r(d, s, in, n, pcm, i);
     }
-    int16_t* pcm = static_cast<int16_t*>(::malloc(2304 * sizeof(int16_t)));
-    if (!pcm) {
-        fl::third_party::MP3FreeDecoder(decoder);
-        return false;
-    }
-    const unsigned char* input = data;
-    size_t remaining = size;
-    while (remaining > 4) {
-        const int offset = fl::third_party::MP3FindSyncWord(
-            input, static_cast<int>(remaining));
-        if (offset < 0) {
-            break;
-        }
-        input += offset;
-        remaining -= static_cast<size_t>(offset);
-        const size_t before = remaining;
-        const int result = fl::third_party::MP3Decode(
-            decoder, &input, &remaining, pcm, 0);
-        if (result == 0) {
-            MP3FrameInfo info = {};
-            fl::third_party::MP3GetLastFrameInfo(decoder, &info);
-            if (info.outputSamps > 0 && info.nChans > 0) {
-                *checksum ^= checksumPcm(
-                    pcm, info.outputSamps / info.nChans, info.nChans);
-                ++*frames;
-            }
-        }
-        if (remaining >= before) {
-            break;
-        }
-    }
-    ::free(pcm);
-    fl::third_party::MP3FreeDecoder(decoder);
-    return *frames > frames_before;
-}
+};
 
+struct FixedVariant {
+    typedef fl::minimp3_fixed::mp3dec_t dec_t;
+    typedef fl::minimp3_fixed::mp3dec_scratch_t scratch_t;
+    typedef fl::minimp3_fixed::mp3dec_frame_info_t info_t;
+    static void init(dec_t* d) { fl::minimp3_fixed::mp3dec_init(d); }
+    static int decode(dec_t* d, scratch_t* s, const unsigned char* in, int n,
+                      int16_t* pcm, info_t* i) {
+        return fl::minimp3_fixed::mp3dec_decode_frame_r(d, s, in, n, pcm, i);
+    }
+};
+
+template <typename Variant>
 bool decodeMinimp3(const unsigned char* data, size_t size, uint64_t* checksum,
                    int* frames) {
     const int frames_before = *frames;
-    fl::third_party::mp3dec_t* decoder =
-        static_cast<fl::third_party::mp3dec_t*>(
-            ::malloc(sizeof(fl::third_party::mp3dec_t)));
-    fl::third_party::mp3dec_scratch_t* scratch =
-        static_cast<fl::third_party::mp3dec_scratch_t*>(
-            ::malloc(sizeof(fl::third_party::mp3dec_scratch_t)));
+    typename Variant::dec_t* decoder = static_cast<typename Variant::dec_t*>(
+        ::malloc(sizeof(typename Variant::dec_t)));
+    typename Variant::scratch_t* scratch =
+        static_cast<typename Variant::scratch_t*>(
+            ::malloc(sizeof(typename Variant::scratch_t)));
     if (!decoder || !scratch) {
         ::free(scratch);
         ::free(decoder);
@@ -170,11 +172,11 @@ bool decodeMinimp3(const unsigned char* data, size_t size, uint64_t* checksum,
         ::free(decoder);
         return false;
     }
-    fl::third_party::mp3dec_init(decoder);
+    Variant::init(decoder);
     size_t offset = 0;
     while (offset + 4 < size) {
-        fl::third_party::mp3dec_frame_info_t info = {};
-        const int samples = fl::third_party::mp3dec_decode_frame_r(
+        typename Variant::info_t info = {};
+        const int samples = Variant::decode(
             decoder, scratch, data + offset, static_cast<int>(size - offset),
             pcm, &info);
         if (info.frame_bytes <= 0) {
@@ -268,10 +270,10 @@ void Mp3MemoryFree(void* ptr, fl::size bytes, Mp3MemoryTag tag) FL_NO_EXCEPT {
 } // namespace fl
 
 int main(int argc, char** argv) {
-    if (argc != 2 ||
-        (::strcmp(argv[1], "helix") != 0 &&
-         ::strcmp(argv[1], "minimp3-float") != 0)) {
-        ::fprintf(stderr, "usage: codec_cpu_driver helix|minimp3-float\n");
+    const bool want_fixed = argc == 2 && ::strcmp(argv[1], "minimp3-fixed") == 0;
+    const bool want_float = argc == 2 && ::strcmp(argv[1], "minimp3-float") == 0;
+    if (!want_fixed && !want_float) {
+        ::fprintf(stderr, "usage: codec_cpu_driver minimp3-float|minimp3-fixed\n");
         return 2;
     }
     uint64_t checksum = 0;
@@ -294,9 +296,11 @@ int main(int argc, char** argv) {
         }
         callgrindStart();
         const uint64_t cycle_start = cycleCounter();
-        const bool decoded = ::strcmp(argv[1], "helix") == 0
-                                 ? decodeHelix(data, size, &checksum, &frames)
-                                 : decodeMinimp3(data, size, &checksum, &frames);
+        const bool decoded =
+            want_fixed ? decodeMinimp3<FixedVariant>(data, size, &checksum,
+                                                     &frames)
+                       : decodeMinimp3<FloatVariant>(data, size, &checksum,
+                                                     &frames);
         cycles += cycleCounter() - cycle_start;
         callgrindStop();
         ::free(data);

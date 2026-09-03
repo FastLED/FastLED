@@ -185,7 +185,7 @@ fl::vector<fl::AudioSample> loadAndDecodeMp3(const char* path) {
     mp3_data.resize(file_size);
     file->read(mp3_data.data(), file_size);
     file->close();
-    fl::third_party::Mp3HelixDecoder decoder;
+    fl::third_party::Mp3Minimp3Decoder decoder;
     if (!decoder.init()) return {};
     return decoder.decodeToAudioSamples(mp3_data.data(), mp3_data.size());
 }
