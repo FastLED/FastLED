@@ -247,12 +247,12 @@ using Url = url;
 
 /// Metadata extracted from a `.lnk` asset link file.
 ///
-/// v1: parsed but not enforced; reserved for future integrity/fallback
-/// features. The runtime ignores everything except `primary`.
+/// The C++ side only resolves `primary`. The WASM browser loader verifies
+/// `sha256` and retries `fallback` (#4025); other platforms do not yet.
 struct LnkMetadata {
     fl::url primary;       ///< First non-comment URL in the file.
-    fl::string sha256;     ///< Hex-encoded sha256 of the expected asset (reserved).
-    fl::url fallback;      ///< Mirror URL used if `primary` fails (reserved).
+    fl::string sha256;     ///< Hex-encoded sha256 of the expected asset.
+    fl::url fallback;      ///< Mirror URL used if `primary` fails.
 
     bool isValid() const FL_NO_EXCEPT { return primary.isValid(); }
     explicit operator bool() const FL_NO_EXCEPT { return primary.isValid(); }
@@ -318,10 +318,9 @@ inline url parse_lnk(fl::string_view content) FL_NO_EXCEPT {
 ///   - `fallback=<url>` — stored in `LnkMetadata::fallback`
 /// Unknown keys are silently ignored (forward-compat).
 ///
-/// v1: the returned metadata is parsed but NOT enforced by the runtime.
-/// `sha256` is not verified and `fallback` is not retried. These fields
-/// are reserved for future integrity/retry features so existing `.lnk`
-/// files remain valid when richer behavior lands.
+/// This parser only extracts the fields. Enforcement lives in the WASM
+/// browser loader, which verifies `sha256` and retries `fallback` (#4025);
+/// C++ resolution on other platforms still uses only the primary URL.
 inline LnkMetadata parse_lnk_with_metadata(fl::string_view content) FL_NO_EXCEPT {
     LnkMetadata out;
     bool gotPrimary = false;

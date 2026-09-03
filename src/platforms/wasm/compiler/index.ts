@@ -68,8 +68,9 @@ console.log(`⭐ index.js loading, URL: ${window.location.href}`);
  *
  * The WASM build pipeline emits `asset_manifest.json` alongside `fastled.js`.
  * The manifest maps sketch-relative asset paths (e.g. "data/track.mp3") to
- * `{url, sha256, fallback}`. sha256 and fallback are parsed but NOT enforced
- * by v1 — they are reserved for future integrity/retry features.
+ * `{url, sha256, fallback}`. `resolveManifestAssets()` below fetches each
+ * asset, retries `fallback` when the primary URL fails, and verifies the bytes
+ * against `sha256` before the sketch can read them (issue #4025).
  *
  * We expose the manifest as `window.fastledAssetManifest` so C++-side
  * `fl::resolve_asset()` consumers (populated via register_asset calls in

@@ -158,9 +158,9 @@ constexpr asset_ref asset(const char* path) FL_NO_EXCEPT {
 ///   - **Other platforms (e.g., ESP32):** v1 returns an empty url(). ESP32
 ///     LittleFS / SD-card resolution is tracked as future work.
 ///
-/// The runtime ignores any `sha256=` / `fallback=` metadata in `.lnk` files.
-/// These are parsed by `fl::parse_lnk_with_metadata()` for forward-compat and
-/// reserved for future integrity/retry features.
+/// The C++ registry ignores any `sha256=` / `fallback=` metadata in `.lnk`
+/// files; `fl::parse_lnk_with_metadata()` only carries them. On WASM the
+/// browser loader enforces both before the asset reaches the sketch (#4025).
 ///
 /// Declared here; defined in `fl/asset/asset.cpp.hpp`.
 fl::url resolve_asset(const asset_ref& a) FL_NO_EXCEPT;
