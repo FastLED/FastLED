@@ -1,5 +1,15 @@
 import sys
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from typeguard import typechecked
+else:
+    # No-op decorator: skip typeguard's ~277ms import cost on the wasm fast path.
+    # Static type checkers (mypy/pyright) still see the real decorator.
+    def typechecked(f):  # type: ignore[no-redef]
+        return f
 
 
 def _print_panel(title: str, lines: list[str]) -> None:
@@ -15,6 +25,7 @@ def _print_panel(title: str, lines: list[str]) -> None:
     print(f"+{border}+\n")
 
 
+@typechecked
 @dataclass
 class WasmCompileArgs:
     """Parsed command line for the WASM compile entry point."""
@@ -25,7 +36,7 @@ class WasmCompileArgs:
     passthrough_args: list[str]
 
 
-def parse_args(argv: list[str] | None = None) -> WasmCompileArgs:
+def parse_args(argv: list[str] | None) -> WasmCompileArgs:
     import argparse
 
     parser = argparse.ArgumentParser(description="Compile wasm")
@@ -60,7 +71,7 @@ def parse_args(argv: list[str] | None = None) -> WasmCompileArgs:
     )
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None) -> int:
     args = parse_args(argv)
     run_browser_check = args.run or args.check
 
@@ -174,4 +185,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(None))

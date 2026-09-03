@@ -91,7 +91,7 @@ def _wasm_fast_path() -> int | None:
         try:
             from ci.wasm_compile import main as wasm_compile_main
 
-            return wasm_compile_main()
+            return wasm_compile_main(None)
         finally:
             sys.argv = saved_argv
 
@@ -237,7 +237,7 @@ def main() -> int:
         try:
             from ci.wasm_compile import main as wasm_compile_main
 
-            return wasm_compile_main()
+            return wasm_compile_main(None)
         finally:
             sys.argv = saved_argv
 
