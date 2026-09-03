@@ -26,7 +26,6 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from running_process import RunningProcess
-from typeguard import typechecked
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -73,11 +72,18 @@ def _kill_stale_daemon() -> None:
         )
 
 
-@typechecked
 @dataclass(frozen=True)
 class Measurement:
     """One device run. Named and typed, so callers stop writing
-    int(r["l3_us"]) and the checksum cannot be silently absent."""
+    int(r["l3_us"]) and the checksum cannot be silently absent.
+
+    Deliberately not @typechecked: typeguard cannot instrument the __init__
+    that @dataclass generates, so the decorator is a no-op here -- verified by
+    constructing one with a str l3_us and watching it succeed. These
+    annotations are enforced statically by the repo's type checker, and every
+    field is produced by an explicit int()/float() at the single construction
+    site in parse_run, so there is no unvalidated path for a __post_init__ to
+    guard."""
 
     # The Layer III-only leg, and nothing else. It exists only when the Helix
     # reference is compiled in (the feat/helix-benchmark-reference branch;

@@ -87,11 +87,11 @@ def test_mixed_helix_and_non_helix_runs_are_refused(
     quantities differ by 13% here, which is an order of magnitude more than
     the deltas mp3measure exists to resolve."""
     transcripts = iter([WITH_HELIX, PASS])
-    monkeypatch.setattr(
-        device_profile,
-        "run_once",
-        lambda board, timeout: device_profile.parse_run(next(transcripts)),
-    )
+
+    def run_once(board: str, timeout: int) -> object:
+        return device_profile.parse_run(next(transcripts))
+
+    monkeypatch.setattr(device_profile, "run_once", run_once)
     assert device_profile.main(["--runs", "2", "--retries", "0"]) == 1
 
 
