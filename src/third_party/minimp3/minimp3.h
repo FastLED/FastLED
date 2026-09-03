@@ -3209,6 +3209,7 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples) FL_NO_EXC
 #undef MP3D_SIMD_KERNELS_LIVE
 #undef MP3D_SIMD_AVAILABLE
 #undef MP3D_SIMD_TARGET
+#undef MP3D_MULSHIFT_K_WIDE_PRODUCT
 #undef BITS_DEQUANTIZER_OUT
 #undef BSPOS
 #undef CHECK_BITS
