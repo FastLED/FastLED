@@ -146,7 +146,7 @@ Helix target codegen, also recovered (instructions / inner-loop):
 | riscv32-esp | 15 / 0 | 776 / 0 |
 | xtensa-esp32 | 551 / 117 | 2075 / 1251 |
 
-Do not read these against minimp3's current polyphase figures (75-195
+Do not read these against minimp3's current polyphase figures (90-263
 instructions) as if they were the same measurement. Helix's polyphase is one
 large unrolled routine; minimp3's `mp3d_synth_pair` is small and called many
 times. Static size does not order the two -- dynamic instruction count does,
