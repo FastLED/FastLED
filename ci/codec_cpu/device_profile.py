@@ -240,6 +240,23 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  CHECKSUMS DIFFER between runs: {checksums}", file=sys.stderr)
         return 1
 
+    # Every run has to be the same *kind* of measurement. l3_us means the
+    # Layer III-only leg when Helix is compiled in and the whole fixture decode
+    # when it is not, and on this fixture those differ by 13% -- so a run whose
+    # Helix line was truncated on the serial link would otherwise be folded
+    # silently into the median and the spread that `bash mp3measure` uses to
+    # resolve sub-1% deltas. Mixing them is a corrupt transcript, not a build
+    # that changed shape mid-loop.
+    legs = {r.helix_us is not None for r in results}
+    if len(legs) > 1:
+        print(
+            "  runs disagree on whether the Helix leg was present; one "
+            "transcript was probably truncated. Refusing to mix a Layer "
+            "III-only time with a whole-fixture time.",
+            file=sys.stderr,
+        )
+        return 1
+
     l3 = [r.l3_us for r in results]
     helix = [r.helix_us for r in results if r.helix_us is not None]
     ratios = [r.ratio for r in results if r.ratio is not None]
