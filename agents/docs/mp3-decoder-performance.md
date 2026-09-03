@@ -502,15 +502,20 @@ constant is ever transcribed wrong.
 **What is left, and it is not much.** The multiply column still reads 94 to
 Helix's 44, because the rounding bit needs the low half and so every multiply
 is still a `mul`/`mulh` pair where Helix uses one `mulh`. Removing that means
-truncating, which is the 20 dB. The remaining candidate is the *general*
-`fl::math::mul_shift_round32`, still 9 instructions at its 20 non-DCT call
-sites (IMDCT, antialias, stereo); the same low-half-rounding identity takes it
-to 7 without needing a compile-time coefficient:
+truncating, which is the 20 dB. The *general* `fl::math::mul_shift_round32`
+has since taken the same low-half-rounding identity (7 instructions on riscv32,
+pinned by `ci/tests/test_int_asm_codegen.py`), and the IMDCT's 9-point
+DCT-III, 3-point IDCT and pow43 now use `mp3d_mulshift_k` for their constant
+coefficients as the DCT-32 does -- 45,186 -> 44,993 us on the C6 (-0.43%) for
+-46 bytes of .text, bit-identical. The antialias loop still indexes its
+coefficients at run time (`g_aa_cs_q31[i]`), so it cannot use the
+compile-time form without being unrolled through a template index the way
+the DCT-32's first pass is; that is the last constant-coefficient site.
 
-    (hi << (32-S)) + (((lo >> (S-1)) + 1) >> 1)
-
-That lives in `src/platforms/int_asm.h` behind a pinned codegen test, so it is
-a separate piece of work from anything in the synthesis file.
+`bash mp3measure` on master reports the device time without the Helix ratio:
+Helix is RPSL/RCSL and lives only on `feat/helix-benchmark-reference`.
+minimp3's own device leg reproduces to the microsecond across flashes, so an
+absolute A/B (stash, flash, unstash, flash) resolves changes well under 1%.
 
 `mp3d_synth_granule` -- which is where the DCT-32 lands -- is 17.0% of host Ir,
 so the host does see the stage; what it could not see is that the stage cost
