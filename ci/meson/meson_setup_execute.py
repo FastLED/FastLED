@@ -134,6 +134,9 @@ def _ensure_tls_trust_store() -> None:
         if candidate.is_file():
             os.environ["SSL_CERT_FILE"] = str(candidate)
             return
+    # No candidate is not an error. Windows and macOS have neither file and
+    # Python's default trust store works there; the wrapper will report any
+    # real TLS failure itself with the full traceback.
 
 
 def detect_compiler_and_cache(
