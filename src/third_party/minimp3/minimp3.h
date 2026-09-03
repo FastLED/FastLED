@@ -508,22 +508,50 @@ MP3D_LEAF int32_t mp3d_mulshift(int32_t value, int32_t coef) FL_NO_EXCEPT
    fixture in 44,993 us against 45,186 us before (-0.43%, spread 0.00%
    either side), for -46 bytes of .text.
 
+   Only where the product does *not* already fit in one register. The whole
+   trick is to avoid materialising the low half, so it is a pessimisation
+   wherever a single instruction hands you all 64 bits: on x86-64 the portable
+   form is an `imul` and a `shrd`, and routing the DCT-32 and the IMDCT through
+   this identity instead cost +7.5% in L3_dct3_9 and +0.95% of the whole
+   fixed-point decode, measured under Callgrind. `fl::math::mul_shift_round32`
+   guards the same identity the same way and for the same reason -- see
+   src/platforms/int_asm.h, which also records why a 64-bit host cannot be the
+   authority on this file.
+
+   The test is register width, not pointer width in principle; pointer width is
+   what the preprocessor can actually see, and it separates the two cases for
+   every target this decoder is built for. wasm32 lands on the narrow path
+   despite having a native i64, which is what it already did before the guard
+   existed, and no wasm codegen bound moved.
+
    Not applied to the SIMD kernels: MP3D_V_MULSHIFT saturates on the narrow,
    which this form cannot do without giving back what it saved, and the vector
    targets have no scarcity of multiply throughput to fix. */
+#if (defined(__SIZEOF_POINTER__) && __SIZEOF_POINTER__ >= 8) || \
+    defined(_WIN64) || defined(__LP64__) || defined(_LP64)
+#define MP3D_MULSHIFT_K_WIDE_PRODUCT 1
+#else
+#define MP3D_MULSHIFT_K_WIDE_PRODUCT 0
+#endif
+
 template <int Bits, int32_t Coef>
 MP3D_LEAF int32_t mp3d_mulshift_k(int32_t value) FL_NO_EXCEPT
 {
     /* Every coefficient this is used with is a positive secant or cosine.
        The split relies on that: `Coef >> Bits` is implementation-defined for a negative
-       value, and W would have to round the other way. */
+       value, and W would have to round the other way. Outside the #if because it
+       is a property of the coefficient, not of one lowering. */
     static_assert(Coef > 0, "mp3d_mulshift_k: coefficient must be positive");
+#if MP3D_MULSHIFT_K_WIDE_PRODUCT
+    return mp3d_mulshift<Bits>(value, Coef);
+#else
     const int32_t frac = (int32_t)((uint32_t)Coef << (32 - Bits));
     const int32_t whole = (int32_t)(Coef >> Bits) + (frac < 0 ? 1 : 0);
     const int64_t product = (int64_t)value * (int64_t)frac;
     const uint32_t rounded = (uint32_t)(uint64_t)(product >> 32) +
                              ((uint32_t)(uint64_t)product >> 31);
     return (int32_t)((uint32_t)value * (uint32_t)whole + rounded);
+#endif
 }
 
 /* Left shift that is defined for negative inputs, with saturation. `shift` is

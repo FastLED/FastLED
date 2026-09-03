@@ -73,3 +73,18 @@ def test_suppressed_ratio_is_not_a_number() -> None:
     assert (
         device_profile.parse_run("not the same work, ratio suppressed\n" + PASS) is None
     )
+
+
+def test_mixed_helix_and_non_helix_runs_are_refused() -> None:
+    """A truncated Helix line must not be averaged into a whole-fixture time.
+
+    l3_us means two different quantities depending on whether Helix was
+    compiled in, and on this fixture they differ by 13%. Folding both into
+    one median would quietly corrupt the number mp3measure reports."""
+    with_helix = device_profile.parse_run(WITH_HELIX)
+    without = device_profile.parse_run(PASS)
+    assert isinstance(with_helix, device_profile.Measurement)
+    assert isinstance(without, device_profile.Measurement)
+    legs = {r.helix_us is not None for r in (with_helix, without)}
+    assert len(legs) > 1, "the two fixtures must differ in Helix presence"
+    assert with_helix.l3_us != without.l3_us

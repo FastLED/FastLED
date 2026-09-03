@@ -512,6 +512,16 @@ coefficients at run time (`g_aa_cs_q31[i]`), so it cannot use the
 compile-time form without being unrolled through a template index the way
 the DCT-32's first pass is; that is the last constant-coefficient site.
 
+`mp3d_mulshift_k` is now guarded to targets whose 64-bit product does not
+already live in one register, the way `fl::math::mul_shift_round32` has
+always been. The identity exists to avoid materialising the low half, so on
+x86-64 -- an `imul` and a `shrd` -- it is pure overhead: the unguarded form
+cost +7.5% in `L3_dct3_9` and +0.95% across the whole fixed-point decode
+under Callgrind, which is how the CI audit caught it. All four cross-compiled
+codegen targets are 32-bit and keep the fast path, so no gated bound moved,
+and the device numbers above stand. This is the second time this file has
+paid for assuming a host measurement generalises.
+
 `bash mp3measure` on master reports the device time without the Helix ratio:
 Helix is RPSL/RCSL and lives only on `feat/helix-benchmark-reference`.
 minimp3's own device leg reproduces to the microsecond across flashes, so an
