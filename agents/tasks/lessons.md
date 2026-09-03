@@ -72,3 +72,16 @@
 - GitHub-hosted runner labels can rotate among materially different CPU
   models. Host performance gates need separate environment-keyed baselines;
   a single baseline for an OS label either flakes or compares unlike machines.
+- A multiply identity that avoids materialising the low half of the product is
+  only a win where the low half costs something. On a target whose single
+  instruction yields all 64 bits it is pure overhead: applying
+  `mp3d_mulshift_k` unguarded cost +7.5% in `L3_dct3_9` and +0.95% across the
+  fixed-point decode on the x86-64 audit host, while buying 0.43% on an
+  ESP32-C6. Guard such lowerings on register width and let the portable form
+  serve everyone else, exactly as `fl::math::mul_shift_round32` already does.
+- An `exact operation ledger changed` failure is a question, not a chore.
+  Re-baselining it from CI's artifact is only correct once the direction of
+  every moved figure has been explained; here the ledger and the per-function
+  Callgrind budget were both reporting a real host regression, and a
+  re-baseline would have recorded it as the new normal. Read the callgrind
+  deltas in the artifact before rewriting the file.
