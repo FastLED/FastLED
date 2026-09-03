@@ -74,6 +74,7 @@ protected:
     }
 
     bool rejectFixedWhiteChannelChange(const char* operation) const FL_NO_EXCEPT {
+        FL_UNUSED(operation);  // only consumed by FL_WARN_F, a no-op on small platforms
         const char* chipset = fixedWhiteChannelChipset();
         if (chipset == nullptr) {
             return false;

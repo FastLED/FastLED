@@ -24,6 +24,7 @@
 #include "fl/math/xymap.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_UNUSED
 
 namespace fl {
 
@@ -70,6 +71,7 @@ class ReorderingPixelIteratorAny {
         Rgbww rgbww,
         const fl::string& channelName)
         : mPixelIterator(pixels, rgbOrder, rgbw, rgbww) {
+        FL_UNUSED(channelName);  // only consumed by FL_ERROR_F, a no-op on small platforms
 
         // Apply addressing transformation if configured
         if (addressing) {
@@ -129,6 +131,8 @@ FL_NO_INLINE
 static void emitDisabledDriverError(const fl::string& channelName,
                                     const fl::string& driverName,
                                     const fl::string& exclusive) FL_NO_EXCEPT {
+    FL_UNUSED(channelName);  // only consumed by FL_ERROR_F, a no-op on small platforms
+    FL_UNUSED(driverName);
     if (!exclusive.empty()) {
         FL_ERROR_F("Channel '%s': bound driver '%s' is currently DISABLED by exclusive-driver selection '%s'. Frame will be silently dropped. Resolve with: FastLED.enableDrivers<fl::Bus::%s>() or FastLED.enableAllDrivers().", channelName, driverName, exclusive, driverName);
     } else {

@@ -6,6 +6,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_UNUSED
 
 namespace fl {
 namespace net {
@@ -53,6 +54,9 @@ HttpStreamTransport::HttpStreamTransport(const fl::string& host, u16 port, u32 h
     , mHeartbeatInterval(heartbeatIntervalMs)
     , mTimeoutMs(60000)  // Default 60s timeout
     , mWasConnected(false) {
+    // The concrete transport owns the endpoint; connect() is pure virtual here.
+    FL_UNUSED(host);
+    FL_UNUSED(port);
 }
 
 HttpStreamTransport::~HttpStreamTransport() FL_NO_EXCEPT {

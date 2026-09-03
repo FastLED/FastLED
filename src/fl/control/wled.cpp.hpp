@@ -2,6 +2,7 @@
 #include "fl/fx/wled.h"
 #include "fl/log/log.h"
 #include "fl/log/log.h"
+#include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_UNUSED
 namespace fl {
 
 // WLED Constructor and Stub Implementations
@@ -18,6 +19,7 @@ fl::optional<fl::json> WLED::stubRequestSource() {
 }
 
 void WLED::stubResponseSink(const fl::json& response) {
+    FL_UNUSED(response);  // only consumed by FL_ERROR_F, a no-op on small platforms
     FL_ERROR_F("WLED::stubResponseSink: Not implemented - provide a real ResponseSink callback");
 }
 
