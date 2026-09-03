@@ -26,6 +26,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from running_process import RunningProcess
+from typeguard import typechecked
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -72,19 +73,24 @@ def _kill_stale_daemon() -> None:
         )
 
 
+@typechecked
 @dataclass(frozen=True)
 class Measurement:
     """One device run. Named and typed, so callers stop writing
     int(r["l3_us"]) and the checksum cannot be silently absent."""
 
-    # Layer III microseconds. With the Helix reference compiled in (the
-    # feat/helix-benchmark-reference branch; Helix is RPSL/RCSL-licensed and
-    # does not ship on master) this is the Layer III-only leg timed against
-    # Helix in the same firmware. Without it, it is the whole fixture decode
-    # and helix_us / ratio are None: an absolute time on a device whose
-    # run-to-run spread is 0.00% is still a measurement, and refusing it
-    # made `bash mp3measure` fail its device step on every master checkout.
-    l3_us: int
+    # The Layer III-only leg, and nothing else. It exists only when the Helix
+    # reference is compiled in (the feat/helix-benchmark-reference branch;
+    # Helix is RPSL/RCSL-licensed and does not ship on master), because that
+    # is the firmware that times the two decoders over the same 8 frames.
+    #
+    # It deliberately does *not* fall back to decode_us when the line is
+    # absent. The two differ by 13% on this fixture, so a transcript whose
+    # Helix line was truncated on the serial link would otherwise hand back a
+    # whole-fixture time wearing the Layer III label -- and with --runs 1
+    # there is no second run to contradict it. Absent means absent; callers
+    # pick decode_us, which is always the whole fixture.
+    l3_us: int | None
     helix_us: int | None
     ratio: float | None
     decode_us: int
@@ -169,7 +175,7 @@ def parse_run(out: str) -> Measurement | str | None:
         print("  run produced no checksum; refusing to report a time", file=sys.stderr)
         return None
     return Measurement(
-        l3_us=int(l3.group(1)) if l3 else int(dec.group(1)),
+        l3_us=int(l3.group(1)) if l3 else None,
         helix_us=int(l3.group(2)) if l3 else None,
         ratio=float(l3.group(3)) if l3 else None,
         decode_us=int(dec.group(1)),
@@ -224,14 +230,15 @@ def main(argv: list[str] | None = None) -> int:
                 )
             return 1
         results.append(got)
-        if got.helix_us is not None:
+        if got.l3_us is not None:
             print(
                 f"    L3 {got.l3_us} us  helix {got.helix_us} us  "
                 f"{got.ratio}x  {got.realtime}x real time"
             )
         else:
             print(
-                f"    decode {got.l3_us} us  {got.realtime}x real time  (no Helix leg)"
+                f"    decode {got.decode_us} us  {got.realtime}x real time  "
+                f"(no Helix leg)"
             )
 
     checksums = {r.fnv1a for r in results}
@@ -240,14 +247,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  CHECKSUMS DIFFER between runs: {checksums}", file=sys.stderr)
         return 1
 
-    # Every run has to be the same *kind* of measurement. l3_us means the
-    # Layer III-only leg when Helix is compiled in and the whole fixture decode
-    # when it is not, and on this fixture those differ by 13% -- so a run whose
-    # Helix line was truncated on the serial link would otherwise be folded
-    # silently into the median and the spread that `bash mp3measure` uses to
-    # resolve sub-1% deltas. Mixing them is a corrupt transcript, not a build
-    # that changed shape mid-loop.
-    legs = {r.helix_us is not None for r in results}
+    # Every run has to be the same *kind* of measurement. A firmware does not
+    # grow or lose its Helix leg between runs of one invocation, so runs that
+    # disagree mean a truncated transcript -- and averaging a Layer III-only
+    # time with a whole-fixture one would move the median by far more than the
+    # sub-1% deltas mp3measure exists to resolve.
+    legs = {r.l3_us is not None for r in results}
     if len(legs) > 1:
         print(
             "  runs disagree on whether the Helix leg was present; one "
@@ -257,14 +262,23 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
-    l3 = [r.l3_us for r in results]
+    # One series, named for what it actually is. `series` is the Layer III leg
+    # when every run has one and the whole-fixture decode otherwise; the label
+    # travels with it so the summary can never call a fixture time "L3".
+    have_l3 = all(r.l3_us is not None for r in results)
+    if have_l3:
+        series = [r.l3_us for r in results if r.l3_us is not None]
+        label = "minimp3 L3  "
+    else:
+        series = [r.decode_us for r in results]
+        label = "minimp3 fixt"
     helix = [r.helix_us for r in results if r.helix_us is not None]
     ratios = [r.ratio for r in results if r.ratio is not None]
-    spread = (max(l3) - min(l3)) / min(l3) * 100 if min(l3) else 0.0
+    spread = (max(series) - min(series)) / min(series) * 100 if min(series) else 0.0
 
     print()
     print(
-        f"  minimp3 L3   median {statistics.median(l3):>10,.0f} us   "
+        f"  {label} median {statistics.median(series):>10,.0f} us   "
         f"spread {spread:.2f}%"
     )
     if helix and ratios:
@@ -272,7 +286,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  ratio        median {statistics.median(ratios):.3f}x helix")
     else:
         print(
-            "  helix        not compiled in; absolute time only "
+            "  helix        not compiled in; whole-fixture time only "
             "(the ratio needs feat/helix-benchmark-reference)"
         )
     print(f"  checksum     0x{results[0].fnv1a}")

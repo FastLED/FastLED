@@ -14,6 +14,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+import pytest
+
 
 # Loaded by path like test_codec_cpu_audit.py: ci/codec_cpu is a script
 # directory, not a package.
@@ -41,7 +43,7 @@ WITH_HELIX = (
 def test_master_run_without_helix_leg_is_a_measurement() -> None:
     got = device_profile.parse_run(PASS)
     assert isinstance(got, device_profile.Measurement)
-    assert got.l3_us == 44992
+    assert got.l3_us is None, "no Helix leg means no Layer III time"
     assert got.decode_us == 44992
     assert got.audio_us == 235101
     assert got.realtime == 5.23
@@ -75,16 +77,47 @@ def test_suppressed_ratio_is_not_a_number() -> None:
     )
 
 
-def test_mixed_helix_and_non_helix_runs_are_refused() -> None:
-    """A truncated Helix line must not be averaged into a whole-fixture time.
+def test_mixed_helix_and_non_helix_runs_are_refused(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """main() must refuse to average a Layer III leg with a fixture decode.
 
-    l3_us means two different quantities depending on whether Helix was
-    compiled in, and on this fixture they differ by 13%. Folding both into
-    one median would quietly corrupt the number mp3measure reports."""
-    with_helix = device_profile.parse_run(WITH_HELIX)
-    without = device_profile.parse_run(PASS)
-    assert isinstance(with_helix, device_profile.Measurement)
-    assert isinstance(without, device_profile.Measurement)
-    legs = {r.helix_us is not None for r in (with_helix, without)}
-    assert len(legs) > 1, "the two fixtures must differ in Helix presence"
-    assert with_helix.l3_us != without.l3_us
+    A firmware does not grow or lose its Helix leg between runs of one
+    invocation, so runs that disagree mean a truncated transcript. The two
+    quantities differ by 13% here, which is an order of magnitude more than
+    the deltas mp3measure exists to resolve."""
+    transcripts = iter([WITH_HELIX, PASS])
+    monkeypatch.setattr(
+        device_profile,
+        "run_once",
+        lambda board, timeout: device_profile.parse_run(next(transcripts)),
+    )
+    assert device_profile.main(["--runs", "2", "--retries", "0"]) == 1
+
+
+def test_single_run_without_helix_reports_the_fixture_time(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The --runs 1 path has no second run to cross-check against, so the
+    label has to be right on its own. l3_us is None here, and the summary must
+    say so rather than presenting 44,992 us as a Layer III time."""
+    monkeypatch.setattr(
+        device_profile,
+        "run_once",
+        lambda board, timeout: device_profile.parse_run(PASS),
+    )
+    assert device_profile.main(["--runs", "1", "--retries", "0"]) == 0
+    out = capsys.readouterr().out
+    assert "44,992" in out
+    assert "minimp3 fixt" in out, "a fixture time must not be labelled L3"
+    assert "minimp3 L3" not in out
+
+
+def test_truncated_helix_line_does_not_become_an_l3_time() -> None:
+    """The regression that motivated splitting l3_us from decode_us: a
+    Helix-enabled transcript whose Layer III line was lost on the serial link
+    used to yield the whole-fixture time under the l3_us name."""
+    got = device_profile.parse_run(PASS)
+    assert isinstance(got, device_profile.Measurement)
+    assert got.l3_us is None, "absent means absent, never a fixture-time stand-in"
+    assert got.decode_us == 44992

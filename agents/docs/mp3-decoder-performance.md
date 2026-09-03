@@ -11,12 +11,17 @@ autoresearch run with the Helix ratio, the riscv32 `.text` delta, and PSNR.
 `--gates` adds conformance, sanitizers and lint; `--skip-device` when no board
 is attached. Step output goes to log files, so the report stays readable.
 
-**Optimisation work happens in one file:
+**Optimisation work happens mostly in one file:
 `src/third_party/minimp3/minimp3_synth_fixed.h`** -- the fixed-point synthesis
 back-end (DCT-32, polyphase, integer SIMD). It is 57% of a decode and holds the
 one stage where this decoder still loses to Helix on RISC-V. It is textually
 included from `minimp3.h` at a single point inside
 `#if MINIMP3_HAVE_FIXED_POINT` and does not compile standalone.
+
+The IMDCT and the shared arithmetic helpers live above that include point, in
+`src/third_party/minimp3/minimp3.h` -- `L3_dct3_9`, `L3_idct3`, `mp3d_pow43`,
+`mp3d_mulshift` and `mp3d_mulshift_k`. A change to a helper used by both files
+belongs there, and both files are in scope for a performance change.
 
 PSNR is checked on every run, not behind `--gates`: fixed-point work can "win"
 by breaking the arithmetic, and an opt-in tripwire is one a loop will skip. The
