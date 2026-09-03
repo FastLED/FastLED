@@ -232,6 +232,11 @@ async def main() -> None:
                 # error. Treat HTTP failures as diagnostics too, so a missing
                 # manifest or worker resource cannot make --check look green.
                 def response_handler(response: Response) -> None:
+                    # /favicon.ico is requested by the browser itself, not by
+                    # the sketch, and the generated page ships no icon. Its 404
+                    # says nothing about whether FastLED loaded.
+                    if response.url.endswith("/favicon.ico"):
+                        return
                     if response.status >= 400:
                         message = f"[error] HTTP {response.status}: {response.url}"
                         browser_errors.append(message)
