@@ -17,6 +17,7 @@
 // Include WASM-specific implementation
 // IWYU pragma: begin_keep
 #include "platforms/wasm/js_fetch.h"  // ok platform headers
+#include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_UNUSED
 // IWYU pragma: end_keep
 
 // Native networking includes
@@ -30,7 +31,6 @@
     #include "platforms/posix/socket_posix.h"  // ok platform headers  // IWYU pragma: keep
     #include <fcntl.h>  // ok platform headers (for O_NONBLOCK flag)  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
-#include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_UNUSED
 #endif
 #endif
 
