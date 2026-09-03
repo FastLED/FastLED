@@ -16,7 +16,8 @@ This module provides:
   * ``ZCCACHE_TRANSIENT_EXIT_CODE`` — the exit code zccache uses.
   * ``find_zccache_transient_failures`` — the objects that failed with 113.
   * ``is_zccache_transient_failure`` — True when the build failed *only*
-    because of 113s, i.e. no compiler diagnostic accompanies any failure.
+    because of 113s, i.e. no compiler diagnostic and no other exit code
+    accompanies any failure.
   * ``format_zccache_transient_message`` — a self-identifying explanation.
 
 Related: FastLED issue #4132.
@@ -25,6 +26,16 @@ Related: FastLED issue #4132.
 from __future__ import annotations
 
 import re
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from typeguard import typechecked
+else:
+    # No-op decorator: skip typeguard's ~277ms import cost on the build path.
+    # Static type checkers (mypy/pyright) still see the real decorator.
+    def typechecked(f):  # type: ignore[no-redef]
+        return f
 
 
 ZCCACHE_TRANSIENT_EXIT_CODE = 113
@@ -34,6 +45,10 @@ ZCCACHE_TRANSIENT_EXIT_CODE = 113
 _FAILED_113_PATTERN = re.compile(
     r"FAILED:\s*\[code=113\]\s*(?P<obj>\S+)",
 )
+
+# Any ninja failure banner, whatever the exit code. Used to refuse a retry
+# when a non-113 failure sits in the same run: that one is not zccache.
+_FAILED_ANY_PATTERN = re.compile(r"FAILED:\s*\[code=(?P<code>\d+)\]")
 
 # Any real compiler/linker diagnostic. Matches clang-style
 # ``path:line:col: error:`` and driver-style ``clang: error:`` / ``ld.lld:
@@ -53,25 +68,36 @@ def _strip_ansi(text: str) -> str:
     return _ANSI_SGR_PATTERN.sub("", text)
 
 
+@typechecked
 def find_zccache_transient_failures(output: str) -> list[str]:
     """Return the object paths that ninja reported as ``FAILED: [code=113]``."""
     if not output:
         return []
     plain = _strip_ansi(output)
-    return [m.group("obj") for m in _FAILED_113_PATTERN.finditer(plain)]
+    objects: list[str] = []
+    for match in _FAILED_113_PATTERN.finditer(plain):
+        objects.append(match.group("obj"))
+    return objects
 
 
+@typechecked
 def is_zccache_transient_failure(output: str) -> bool:
     """Return True if the build failed only with zccache exit 113 and no diagnostic.
 
-    A 113 that sits next to a genuine ``error:`` line anywhere in the output
-    is NOT treated as transient: the retry would just replay a real defect.
+    A 113 that sits next to a genuine ``error:`` line, or next to a failure
+    banner with any other exit code, is NOT treated as transient: the retry
+    would just replay a real defect.
     """
     if not find_zccache_transient_failures(output):
         return False
-    return _COMPILER_ERROR_PATTERN.search(_strip_ansi(output)) is None
+    plain = _strip_ansi(output)
+    for match in _FAILED_ANY_PATTERN.finditer(plain):
+        if int(match.group("code")) != ZCCACHE_TRANSIENT_EXIT_CODE:
+            return False
+    return _COMPILER_ERROR_PATTERN.search(plain) is None
 
 
+@typechecked
 def format_zccache_transient_message(objects: list[str]) -> str:
     """Explain a 113 failure in one read, the way fbuild's daemon errors do."""
     listed = "\n".join(f"    {obj}" for obj in objects)

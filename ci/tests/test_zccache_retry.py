@@ -73,6 +73,12 @@ def test_not_transient_with_fatal_error() -> None:
     assert not is_zccache_transient_failure(output)
 
 
+def test_not_transient_with_mixed_exit_codes() -> None:
+    """A non-113 failure in the same run is not zccache, even with no diagnostic."""
+    output = _TRANSIENT_OUTPUT + "FAILED: [code=1] ci/meson/native/x.o\n"
+    assert not is_zccache_transient_failure(output)
+
+
 def test_not_transient_without_113() -> None:
     output = "FAILED: [code=1] ci/meson/native/x.o\nninja: build stopped: subcommand failed.\n"
     assert not is_zccache_transient_failure(output)
