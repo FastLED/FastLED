@@ -321,7 +321,12 @@ dependencies = [
     "ffmpeg-python>=0.2.0",
     "static-ffmpeg>=2.7",
     "fastled>=2.0.9",
-    "running-process>=4.0.0",
+    # Cap below 4.10.10: that release regressed its wheel tags from
+    # `cp310-abi3` (installable on 3.10+) to `cp311-cp311` (3.11 only), so
+    # every CI job on CPython 3.12 falls back to the sdist, and the sdist
+    # build fails because soldr refuses an unpinned Rust toolchain. Lift the
+    # cap once running-process publishes abi3 wheels again.
+    "running-process>=4.0.0,<4.10.10",
     "nodejs-wheel>=22.0.0",
     "daemoniker>=0.2.3",
     "colorama>=0.4.6",
