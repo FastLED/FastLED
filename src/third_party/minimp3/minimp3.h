@@ -521,8 +521,9 @@ MP3D_LEAF int32_t mp3d_mulshift(int32_t value, int32_t coef) FL_NO_EXCEPT
    The test is register width, not pointer width in principle; pointer width is
    what the preprocessor can actually see, and it separates the two cases for
    every target this decoder is built for. wasm32 lands on the narrow path
-   despite having a native i64, which is what it already did before the guard
-   existed, and no wasm codegen bound moved.
+   despite having a native i64 -- which is what it already did before this
+   guard existed, so it is status quo rather than a decision; there is no
+   wasm codegen bound recorded to check it against.
 
    Not applied to the SIMD kernels: MP3D_V_MULSHIFT saturates on the narrow,
    which this form cannot do without giving back what it saved, and the vector
