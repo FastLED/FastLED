@@ -77,9 +77,16 @@ class Measurement:
     """One device run. Named and typed, so callers stop writing
     int(r["l3_us"]) and the checksum cannot be silently absent."""
 
+    # Layer III microseconds. With the Helix reference compiled in (the
+    # feat/helix-benchmark-reference branch; Helix is RPSL/RCSL-licensed and
+    # does not ship on master) this is the Layer III-only leg timed against
+    # Helix in the same firmware. Without it, it is the whole fixture decode
+    # and helix_us / ratio are None: an absolute time on a device whose
+    # run-to-run spread is 0.00% is still a measurement, and refusing it
+    # made `bash mp3measure` fail its device step on every master checkout.
     l3_us: int
-    helix_us: int
-    ratio: float
+    helix_us: int | None
+    ratio: float | None
     decode_us: int
     audio_us: int
     realtime: float
@@ -128,6 +135,14 @@ def run_once(board: str, timeout: int) -> Measurement | str | None:
     # first stderr line -- which here would corrupt the checksum line and
     # report a false "CHECKSUMS DIFFER".
     out = proc.stdout + "\n" + proc.stderr
+    return parse_run(out)
+
+
+def parse_run(out: str) -> Measurement | str | None:
+    """Turn one autoresearch transcript into a Measurement.
+
+    Returns TRANSPORT_FAILURE when the serial link, not the decoder, failed;
+    None when the run did not produce a usable result."""
     if RE_SUPPRESSED.search(out):
         print(
             "  ratio suppressed: the two decoders did not decode the same "
@@ -143,7 +158,7 @@ def run_once(board: str, timeout: int) -> Measurement | str | None:
         print(f"  run did not pass:\n{tail}", file=sys.stderr)
         return None
     l3, dec, fnv = RE_L3.search(out), RE_DECODE.search(out), RE_FNV.search(out)
-    if not (l3 and dec):
+    if not dec:
         print("  could not parse the result line", file=sys.stderr)
         return None
     if not fnv:
@@ -154,9 +169,9 @@ def run_once(board: str, timeout: int) -> Measurement | str | None:
         print("  run produced no checksum; refusing to report a time", file=sys.stderr)
         return None
     return Measurement(
-        l3_us=int(l3.group(1)),
-        helix_us=int(l3.group(2)),
-        ratio=float(l3.group(3)),
+        l3_us=int(l3.group(1)) if l3 else int(dec.group(1)),
+        helix_us=int(l3.group(2)) if l3 else None,
+        ratio=float(l3.group(3)) if l3 else None,
         decode_us=int(dec.group(1)),
         audio_us=int(dec.group(2)),
         realtime=float(dec.group(3)),
@@ -209,10 +224,15 @@ def main(argv: list[str] | None = None) -> int:
                 )
             return 1
         results.append(got)
-        print(
-            f"    L3 {got.l3_us} us  helix {got.helix_us} us  "
-            f"{got.ratio}x  {got.realtime}x real time"
-        )
+        if got.helix_us is not None:
+            print(
+                f"    L3 {got.l3_us} us  helix {got.helix_us} us  "
+                f"{got.ratio}x  {got.realtime}x real time"
+            )
+        else:
+            print(
+                f"    decode {got.l3_us} us  {got.realtime}x real time  (no Helix leg)"
+            )
 
     checksums = {r.fnv1a for r in results}
     if len(checksums) > 1:
@@ -221,8 +241,8 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     l3 = [r.l3_us for r in results]
-    helix = [r.helix_us for r in results]
-    ratios = [r.ratio for r in results]
+    helix = [r.helix_us for r in results if r.helix_us is not None]
+    ratios = [r.ratio for r in results if r.ratio is not None]
     spread = (max(l3) - min(l3)) / min(l3) * 100 if min(l3) else 0.0
 
     print()
@@ -230,8 +250,14 @@ def main(argv: list[str] | None = None) -> int:
         f"  minimp3 L3   median {statistics.median(l3):>10,.0f} us   "
         f"spread {spread:.2f}%"
     )
-    print(f"  helix L3     median {statistics.median(helix):>10,.0f} us")
-    print(f"  ratio        median {statistics.median(ratios):.3f}x helix")
+    if helix and ratios:
+        print(f"  helix L3     median {statistics.median(helix):>10,.0f} us")
+        print(f"  ratio        median {statistics.median(ratios):.3f}x helix")
+    else:
+        print(
+            "  helix        not compiled in; absolute time only "
+            "(the ratio needs feat/helix-benchmark-reference)"
+        )
     print(f"  checksum     0x{results[0].fnv1a}")
     if args.runs > 1 and spread > 2.0:
         print(
