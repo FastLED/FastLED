@@ -4,42 +4,42 @@
       "codegen": {
         "cortex-m0plus": {
           "dct32": {
-            "inner_loop_instructions": 312,
-            "instructions": 339
+            "inner_loop_instructions": 881,
+            "instructions": 959
           },
           "polyphase": {
-            "inner_loop_instructions": 0,
-            "instructions": 195
+            "inner_loop_instructions": 110,
+            "instructions": 263
           }
         },
         "cortex-m4": {
           "dct32": {
-            "inner_loop_instructions": 278,
-            "instructions": 294
+            "inner_loop_instructions": 512,
+            "instructions": 531
           },
           "polyphase": {
-            "inner_loop_instructions": 0,
-            "instructions": 75
+            "inner_loop_instructions": 55,
+            "instructions": 115
           }
         },
         "riscv32-esp": {
           "dct32": {
             "inner_loop_instructions": 0,
-            "instructions": 47
+            "instructions": 91
           },
           "polyphase": {
             "inner_loop_instructions": 0,
-            "instructions": 183
+            "instructions": 90
           }
         },
         "xtensa-esp32": {
           "dct32": {
-            "inner_loop_instructions": 303,
-            "instructions": 317
+            "inner_loop_instructions": 1013,
+            "instructions": 1028
           },
           "polyphase": {
             "inner_loop_instructions": 0,
-            "instructions": 187
+            "instructions": 243
           }
         }
       },
