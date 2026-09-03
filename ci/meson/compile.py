@@ -203,6 +203,21 @@ def _precompile_passes_can_be_skipped(build_dir: Path) -> bool:
     return abs(current - saved) < 1e-6
 
 
+@dataclass(slots=True)
+class _RetryOutcome:
+    """Result of ``_retry_ninja``.
+
+    ``output`` accumulates every attempt so downstream diagnostics keep the
+    full context; ``latest`` is the output of the last attempt alone so a
+    subsequent classifier is not confused by failures that an earlier
+    attempt already recovered from.
+    """
+
+    returncode: int
+    output: str
+    latest: str
+
+
 def _retry_ninja(
     cmd: list[str],
     output: str,
@@ -215,7 +230,7 @@ def _retry_ninja(
     timeout: int,
     env: dict[str, str] | None,
     output_formatter: TimestampFormatter | None,
-) -> tuple[int, str]:
+) -> _RetryOutcome:
     """Re-invoke the same ninja command while a transient failure persists.
 
     Shared by the ld.lld permission-denied retry (#2268) and the zccache
@@ -224,8 +239,7 @@ def _retry_ninja(
     stops the loop instead of being replayed. ``describe`` receives that
     latest output and the 1-based attempt number.
 
-    Returns the final ``(returncode, output)``; ``output`` accumulates every
-    attempt so downstream diagnostics keep the full context.
+    See ``_RetryOutcome`` for what is returned.
     """
     returncode = -1
     latest = output
@@ -269,7 +283,7 @@ def _retry_ninja(
         # and fall through to normal error handling.
         if not still_transient(latest):
             break
-    return returncode, output
+    return _RetryOutcome(returncode, output, latest)
 
 
 def compile_meson(
@@ -737,7 +751,8 @@ def compile_meson(
         # invocation a few times with a short backoff. This is a no-op on
         # non-Windows platforms because ``is_link_permission_denied_error``
         # returns False off-Windows.
-        if returncode != 0 and is_link_permission_denied_error(output):
+        latest_output = output
+        if returncode != 0 and is_link_permission_denied_error(latest_output):
 
             def _describe_lld(_latest: str, attempt: int) -> str:
                 return (
@@ -754,7 +769,7 @@ def compile_meson(
                         file=sys.stderr,
                     )
 
-            returncode, output = _retry_ninja(
+            _outcome = _retry_ninja(
                 cmd,
                 output,
                 max_retries=_LLD_PERM_DENIED_MAX_RETRIES,
@@ -767,13 +782,16 @@ def compile_meson(
                 env=None,
                 output_formatter=TimestampFormatter(),
             )
+            returncode = _outcome.returncode
+            output = _outcome.output
+            latest_output = _outcome.latest
 
         # zccache exit-113 retry (#4132).
         # zccache under load sometimes returns 113 without running the
         # compiler. That is a daemon problem, not a defect in the code being
         # built, so name it as such and re-invoke ninja: only the failed
         # objects rebuild, and the daemon has had a moment to drain.
-        if returncode != 0 and is_zccache_transient_failure(output):
+        if returncode != 0 and is_zccache_transient_failure(latest_output):
 
             def _describe_zccache(latest: str, attempt: int) -> str:
                 return (
@@ -784,7 +802,7 @@ def compile_meson(
                     f"(attempt {attempt}/{_ZCCACHE_TRANSIENT_MAX_RETRIES})"
                 )
 
-            returncode, output = _retry_ninja(
+            _outcome = _retry_ninja(
                 cmd,
                 output,
                 max_retries=_ZCCACHE_TRANSIENT_MAX_RETRIES,
@@ -797,6 +815,9 @@ def compile_meson(
                 env=None,
                 output_formatter=TimestampFormatter(),
             )
+            returncode = _outcome.returncode
+            output = _outcome.output
+            latest_output = _outcome.latest
 
         if returncode != 0:
             # In quiet mode, don't print failure messages (fallback retries handle this)

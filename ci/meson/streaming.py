@@ -67,6 +67,49 @@ class StreamingResult:
     num_failed_examples: int = 0
 
 
+# Ninja line announcing a test/example executable link, e.g.
+# ``[35/1084] Linking CXX executable tests/fl/test_foo``.
+_LINK_PATTERN = re.compile(r"^\[\d+/\d+\]\s+Linking (?:CXX executable|target)\s+(.+)$")
+
+
+def link_line_test_path(line: str, build_dir: Path) -> Optional[Path]:
+    """Return the runnable test/example path a Ninja link line announces.
+
+    ``None`` when the line is not a link line, or links something the test
+    runner must not execute (the runner binaries themselves, profile
+    harnesses, anything outside ``tests/`` and ``examples/``). Shared by the
+    streamed parser and the retry path (#4132) so a test that only links
+    during a successful retry is still collected and run.
+    """
+    match = _LINK_PATTERN.match(line.strip())
+    if not match:
+        return None
+    rel_path = match.group(1)
+    if not (
+        "tests/" in rel_path
+        or "tests\\" in rel_path
+        or "examples/" in rel_path
+        or "examples\\" in rel_path
+    ):
+        return None
+    test_path = build_dir / rel_path
+    if test_path.stem in ("runner", "test_runner", "example_runner"):
+        return None
+    if "tests/profile/" in rel_path or "tests\\profile\\" in rel_path:
+        return None
+    return test_path
+
+
+def collect_test_paths(output: str, build_dir: Path) -> list[Path]:
+    """Collect every test/example path linked in a block of Ninja output."""
+    paths: list[Path] = []
+    for line in output.splitlines():
+        test_path = link_line_test_path(line, build_dir)
+        if test_path is not None:
+            paths.append(test_path)
+    return paths
+
+
 def is_example_artifact(test_path: Path) -> bool:
     """True when a built artifact is an example rather than a unit test.
 
@@ -178,9 +221,7 @@ def stream_compile_only(
         _ts_print(f"[MESON] 🧹 Killed {_killed} stale runner process(es) before link")
 
     # Pattern to detect test executable linking
-    link_pattern = re.compile(
-        r"^\[\d+/\d+\]\s+Linking (?:CXX executable|target)\s+(.+)$"
-    )
+    link_pattern = _LINK_PATTERN
 
     # Pattern to detect static library archiving
     archive_pattern = re.compile(r"^\[\d+/\d+\]\s+Linking static target\s+(.+)$")
@@ -396,34 +437,13 @@ def stream_compile_only(
                         _ts_print(f"[BUILD] Compiling... [{last_step}/{total_steps}]")
                         last_progress_time = time.time()
 
-                    # Collect compiled test paths
-                    match = (
-                        link_match if link_match else link_pattern.match(line.strip())
-                    )
-                    if match:
-                        rel_path = match.group(1)
-                        test_path = build_dir / rel_path
-
-                        # Only collect if it's a test executable
-                        if (
-                            "tests/" in rel_path
-                            or "tests\\" in rel_path
-                            or "examples/" in rel_path
-                            or "examples\\" in rel_path
-                        ):
-                            test_name = test_path.stem
-                            if test_name in ("runner", "test_runner", "example_runner"):
-                                continue
-                            if (
-                                "tests/profile/" in rel_path
-                                or "tests\\profile\\" in rel_path
-                            ):
-                                continue
-                            # DLLs/.so/.dylib are handled by runner in test_callback
-
-                            if verbose:
-                                _ts_print(f"[MESON] Test built: {test_path.name}")
-                            compiled_tests.append(test_path)
+                    # Collect compiled test paths. DLLs/.so/.dylib are
+                    # handled by runner in test_callback.
+                    test_path = link_line_test_path(line, build_dir)
+                    if test_path is not None:
+                        if verbose:
+                            _ts_print(f"[MESON] Test built: {test_path.name}")
+                        compiled_tests.append(test_path)
 
             # Check compilation result
             returncode = cast(int, proc.wait())
@@ -446,6 +466,12 @@ def stream_compile_only(
                     f.write("\n".join(last_error_lines))
 
             compilation_output = str(proc.stdout)
+            # Output of the most recent ninja attempt alone. Retry
+            # classification must look at this, not the accumulated log:
+            # an ld.lld failure that a retry already recovered from must
+            # not mask a zccache exit 113 on that retry (#4132).
+            latest_output = compilation_output
+            retried = False
 
             # Windows ld.lld 'permission denied' retry (#2268).
             # If the link failed because runner.exe / example_runner.exe was
@@ -453,7 +479,7 @@ def stream_compile_only(
             # ninja invocation a few times with a short backoff. No-op on
             # non-Windows platforms because ``is_link_permission_denied_error``
             # returns False off-Windows.
-            if returncode != 0 and is_link_permission_denied_error(compilation_output):
+            if returncode != 0 and is_link_permission_denied_error(latest_output):
 
                 def _describe_lld(_latest: str, attempt: int) -> str:
                     return (
@@ -470,7 +496,7 @@ def stream_compile_only(
                             file=sys.stderr,
                         )
 
-                returncode, compilation_output = _retry_ninja(
+                _outcome = _retry_ninja(
                     cmd,
                     compilation_output,
                     max_retries=_LLD_PERM_DENIED_MAX_RETRIES,
@@ -483,10 +509,14 @@ def stream_compile_only(
                     env=os.environ.copy(),
                     output_formatter=None,
                 )
+                returncode = _outcome.returncode
+                compilation_output = _outcome.output
+                latest_output = _outcome.latest
+                retried = True
 
             # zccache exit-113 retry (#4132). This is the path CI takes; see
             # compile.py for the same block on the non-streaming path.
-            if returncode != 0 and is_zccache_transient_failure(compilation_output):
+            if returncode != 0 and is_zccache_transient_failure(latest_output):
 
                 def _describe_zccache(latest: str, attempt: int) -> str:
                     return (
@@ -497,7 +527,7 @@ def stream_compile_only(
                         f"(attempt {attempt}/{_ZCCACHE_TRANSIENT_MAX_RETRIES})"
                     )
 
-                returncode, compilation_output = _retry_ninja(
+                _outcome = _retry_ninja(
                     cmd,
                     compilation_output,
                     max_retries=_ZCCACHE_TRANSIENT_MAX_RETRIES,
@@ -510,6 +540,19 @@ def stream_compile_only(
                     env=os.environ.copy(),
                     output_formatter=None,
                 )
+                returncode = _outcome.returncode
+                compilation_output = _outcome.output
+                latest_output = _outcome.latest
+                retried = True
+
+            # A retry that succeeded ran without the streaming parser above,
+            # so any test it linked has not been collected yet.
+            if retried and returncode == 0:
+                for test_path in collect_test_paths(latest_output, build_dir):
+                    if test_path not in compiled_tests:
+                        if verbose:
+                            _ts_print(f"[MESON] Test built: {test_path.name}")
+                        compiled_tests.append(test_path)
 
             if returncode != 0:
                 phase_tracker.set_phase("LINK", target=target, path="streaming")

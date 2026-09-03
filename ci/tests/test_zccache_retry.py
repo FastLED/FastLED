@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
+from ci.meson.streaming import collect_test_paths, link_line_test_path
 from ci.meson.zccache_retry import (
     find_zccache_transient_failures,
     format_zccache_transient_message,
@@ -92,3 +95,35 @@ def test_message_is_self_identifying() -> None:
     assert _OBJ_A in msg
     assert "no compilation was attempted" in msg
     assert "#4132" in msg
+
+
+# --- retry output feeds test collection (#4132 review) ---------------------
+
+
+def test_link_line_yields_test_path() -> None:
+    build = Path("/b")
+    line = "[35/1084] Linking CXX executable tests/fl/test_foo"
+    assert link_line_test_path(line, build) == build / "tests/fl/test_foo"
+
+
+def test_link_line_skips_runner_and_profile_and_library() -> None:
+    build = Path("/b")
+    assert link_line_test_path("[1/2] Linking target tests/runner", build) is None
+    assert link_line_test_path("[1/2] Linking target tests/profile/p_x", build) is None
+    assert link_line_test_path("[1/2] Linking target src/libfastled.a", build) is None
+    assert link_line_test_path("[1/2] Compiling C++ object x.o", build) is None
+
+
+def test_collect_test_paths_from_retry_output() -> None:
+    build = Path("/b")
+    output = "\n".join(
+        [
+            "[1/3] Compiling C++ object tests/fl/test_foo.p/foo.cpp.o",
+            "[2/3] Linking CXX executable tests/fl/test_foo",
+            "[3/3] Linking CXX executable examples/Blink/Blink",
+        ]
+    )
+    assert collect_test_paths(output, build) == [
+        build / "tests/fl/test_foo",
+        build / "examples/Blink/Blink",
+    ]
