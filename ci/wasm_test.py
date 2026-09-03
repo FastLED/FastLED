@@ -10,11 +10,12 @@ import sys
 import time
 from pathlib import Path
 
-from playwright.async_api import ConsoleMessage, async_playwright
+from playwright.async_api import ConsoleMessage, Response, async_playwright
 from rich.console import Console
 from rich.panel import Panel
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+from ci.wasm_build import resolve_example_dir
 
 
 HERE = Path(__file__).parent
@@ -33,7 +34,8 @@ def parse_args():
         "example",
         nargs="?",
         default="wasm",
-        help="Example name to test (e.g., 'Blink', 'wasm')",
+        help="Example to test: a bare name ('Blink') or an examples-relative "
+        "path ('Fx/FxCylon')",
     )
     parser.add_argument(
         "--gfx",
@@ -158,7 +160,10 @@ async def main() -> None:
 
     # Start the HTTP server
     os.chdir(str(PROJECT_ROOT))
-    directory = Path(f"examples/{args.example}/fastled_js")
+    # Accept a bare name or an examples-relative path; resolve_example_dir
+    # finds the sketch either way, so a nested example is served from the
+    # directory the build actually wrote to.
+    directory = resolve_example_dir(args.example) / "fastled_js"
     console.print(f"[cyan]Testing example:[/cyan] [bold]{args.example}[/bold]")
     console.print(f"[dim]Server directory: {directory}[/dim]")
     server_process = start_http_server(port=port, directory=directory)
@@ -226,7 +231,7 @@ async def main() -> None:
                 # Browser fetch failures are not guaranteed to emit a console
                 # error. Treat HTTP failures as diagnostics too, so a missing
                 # manifest or worker resource cannot make --check look green.
-                def response_handler(response) -> None:
+                def response_handler(response: Response) -> None:
                     if response.status >= 400:
                         message = f"[error] HTTP {response.status}: {response.url}"
                         browser_errors.append(message)

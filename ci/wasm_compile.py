@@ -1,4 +1,5 @@
 import sys
+from dataclasses import dataclass
 
 
 def _print_panel(title: str, lines: list[str]) -> None:
@@ -14,7 +15,17 @@ def _print_panel(title: str, lines: list[str]) -> None:
     print(f"+{border}+\n")
 
 
-def parse_args() -> tuple:
+@dataclass
+class WasmCompileArgs:
+    """Parsed command line for the WASM compile entry point."""
+
+    sketch_dir: str
+    run: bool
+    check: bool
+    passthrough_args: list[str]
+
+
+def parse_args(argv: list[str] | None = None) -> WasmCompileArgs:
     import argparse
 
     parser = argparse.ArgumentParser(description="Compile wasm")
@@ -34,18 +45,23 @@ def parse_args() -> tuple:
         action="store_true",
         help="Compile, then fail if the headless browser reports a runtime error",
     )
-    known_args, unknown_args = parser.parse_known_args()
+    known_args, unknown_args = parser.parse_known_args(argv)
     if "--build" in unknown_args:
         print("WARNING: --build is no longer supported. It will be ignored.")
         unknown_args.remove("--build")
     if "-b" in unknown_args:
         print("WARNING: -b is no longer supported. It will be ignored.")
         unknown_args.remove("-b")
-    return known_args, unknown_args
+    return WasmCompileArgs(
+        sketch_dir=known_args.sketch_dir,
+        run=known_args.run,
+        check=known_args.check,
+        passthrough_args=unknown_args,
+    )
 
 
-def main() -> int:
-    args, unknown_args = parse_args()
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
     run_browser_check = args.run or args.check
 
     # Keep the sketch path relative to examples/ (e.g. "examples/Fx/FxCylon"
@@ -83,20 +99,20 @@ def main() -> int:
         _print_panel(
             "FastLED WASM Build Pipeline",
             [
-                f"Will:",
+                "Will:",
                 f"  1. Compile {example_name} to WASM",
-                f"  2. Launch headless browser check",
-                f"  3. Run for 5 seconds, verify rendering",
-                f"  4. Exit automatically",
+                "  2. Launch headless browser check",
+                "  3. Run for 5 seconds, verify rendering",
+                "  4. Exit automatically",
             ],
         )
     else:
         _print_panel(
             "FastLED WASM Build Pipeline",
             [
-                f"Will:",
+                "Will:",
                 f"  * Compile {example_name} to WASM",
-                f"  (Use --check to add browser error detection)",
+                "  (Use --check to add browser error detection)",
             ],
         )
 
@@ -104,8 +120,6 @@ def main() -> int:
     print(f"Step 1/{steps}: Compiling WASM...")
 
     # Output to examples/<name>/fastled_js/fastled.js to match expected location
-    from pathlib import Path
-
     from ci.wasm_build import resolve_example_dir
 
     output_dir = resolve_example_dir(sketch_rel) / "fastled_js"
@@ -123,7 +137,7 @@ def main() -> int:
         sketch_rel,
         "-o",
         str(output_js),
-    ] + unknown_args
+    ] + args.passthrough_args
     try:
         compile_result = wasm_build_main()
     finally:
@@ -140,9 +154,12 @@ def main() -> int:
     if run_browser_check:
         import subprocess
 
-        print(f"\nStep 2/2: Running Playwright tests...\n")
+        print("\nStep 2/2: Running Playwright tests...\n")
 
-        test_cmd = [sys.executable, "-m", "ci.wasm_test", example_name]
+        # Pass the examples-relative path, not the bare name: ci.wasm_test
+        # serves examples/<arg>/fastled_js, which is only the directory the
+        # build wrote to when nested sketches keep their parent segments.
+        test_cmd = [sys.executable, "-m", "ci.wasm_test", sketch_rel]
         cmd_str = subprocess.list2cmdline(test_cmd)
         print(f"-> {cmd_str}")
         test_result = subprocess.call(test_cmd)
