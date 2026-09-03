@@ -30,6 +30,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+from running_process import RunningProcess
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -119,7 +120,7 @@ def _emit(
     src = out / "probe.cpp"
     src.write_text(SOURCE)
     asm = out / "probe.s"
-    subprocess.run(
+    RunningProcess.run(
         [
             compiler_path,
             f"-I{ROOT / 'src'}",
@@ -139,6 +140,7 @@ def _emit(
         ],
         check=True,
         capture_output=True,
+        text=False,
     )
     return asm.read_text()
 

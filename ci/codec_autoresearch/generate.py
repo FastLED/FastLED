@@ -24,6 +24,9 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
+from running_process import RunningProcess
+
+
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "examples" / "AutoResearch" / "AutoResearchMp3Fixture.h"
 
@@ -37,11 +40,21 @@ STREAMS = [
 ]
 
 FLAGS = [
-    "-Isrc", "-Isrc/platforms/stub", "-std=gnu++11", "-O2",
-    "-fno-exceptions", "-fno-rtti", "-fno-strict-aliasing",
-    "-DFASTLED_USE_PROGMEM=0", "-DSTUB_PLATFORM", "-DARDUINO=10808",
-    "-DFASTLED_USE_STUB_ARDUINO", "-DFASTLED_STUB_IMPL", "-DFASTLED_TESTING",
-    "-DFASTLED_NO_AUTO_NAMESPACE", "-DFASTLED_NO_PINMAP",
+    "-Isrc",
+    "-Isrc/platforms/stub",
+    "-std=gnu++11",
+    "-O2",
+    "-fno-exceptions",
+    "-fno-rtti",
+    "-fno-strict-aliasing",
+    "-DFASTLED_USE_PROGMEM=0",
+    "-DSTUB_PLATFORM",
+    "-DARDUINO=10808",
+    "-DFASTLED_USE_STUB_ARDUINO",
+    "-DFASTLED_STUB_IMPL",
+    "-DFASTLED_TESTING",
+    "-DFASTLED_NO_AUTO_NAMESPACE",
+    "-DFASTLED_NO_PINMAP",
 ]
 
 
@@ -68,20 +81,35 @@ def compiler() -> str:
 
 def build(tmp: Path) -> Path:
     binary = tmp / "mp3_fixture_gen"
-    subprocess.run(
-        [compiler(), *FLAGS, str(Path(__file__).with_name("fixture_gen.cpp")),
-         "-o", str(binary)],
-        cwd=ROOT, check=True,
+    RunningProcess.run(
+        [
+            compiler(),
+            *FLAGS,
+            str(Path(__file__).with_name("fixture_gen.cpp")),
+            "-o",
+            str(binary),
+        ],
+        cwd=ROOT,
+        check=True,
     )
     return binary
 
 
 def measure(binary: Path, path: Path, frames: int) -> Fixture:
-    out = subprocess.run([str(binary), str(path), str(frames)],
-                         cwd=ROOT, check=True, capture_output=True, text=True)
+    out = RunningProcess.run(
+        [str(binary), str(path), str(frames)],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
     match = re.search(
         r"FIXTURE bytes=(\d+) frames=(\d+) samples=(\d+) hz=(\d+) "
-        r"channels=(\d+) layer=(\d+) fnv1a=0x([0-9A-F]+)", out.stdout)
+        r"channels=(\d+) layer=(\d+) fnv1a=0x([0-9A-F]+)",
+        out.stdout,
+    )
     if not match:
         raise RuntimeError(f"generator produced no result for {path}:\n{out.stdout}")
     result = Fixture(
@@ -94,15 +122,17 @@ def measure(binary: Path, path: Path, frames: int) -> Fixture:
         fnv1a=int(match.group(7), 16),
     )
     if result.frames == 0:
-        raise RuntimeError(f"{path} decoded to nothing; refusing to emit an "
-                           f"all-zero fixture that would pass trivially")
+        raise RuntimeError(
+            f"{path} decoded to nothing; refusing to emit an "
+            f"all-zero fixture that would pass trivially"
+        )
     return result
 
 
 def emit_bytes(data: bytes) -> str:
     lines = []
     for start in range(0, len(data), 16):
-        chunk = data[start:start + 16]
+        chunk = data[start : start + 16]
         lines.append("    " + " ".join(f"0x{b:02X}," for b in chunk))
     return "\n".join(lines)
 
@@ -114,16 +144,18 @@ def main() -> int:
         for name, relative, frames in STREAMS:
             path = ROOT / relative
             info = measure(binary, path, frames)
-            data = path.read_bytes()[:info.nbytes]
+            data = path.read_bytes()[: info.nbytes]
             blocks.append(
                 f"// {relative}\n"
                 f"// {info.frames} frames, {info.samples} samples, "
                 f"{info.hz} Hz, {info.channels} ch, layer {info.layer}\n"
-                f"const fl::u8 k{name}Data[] = {{\n{emit_bytes(data)}\n}};\n")
+                f"const fl::u8 k{name}Data[] = {{\n{emit_bytes(data)}\n}};\n"
+            )
             table.append(
-                f'    {{k{name}Data, {len(data)}u, {info.frames}u, '
-                f'{info.samples}u, {info.hz}u, {info.channels}u, '
-                f'{info.layer}u, 0x{info.fnv1a:08X}u, "{name}"}},')
+                f"    {{k{name}Data, {len(data)}u, {info.frames}u, "
+                f"{info.samples}u, {info.hz}u, {info.channels}u, "
+                f'{info.layer}u, 0x{info.fnv1a:08X}u, "{name}"}},'
+            )
 
     OUT.write_text(
         "/// @file AutoResearchMp3Fixture.h\n"
@@ -139,15 +171,16 @@ def main() -> int:
         "#pragma once\n\n"
         '#include "fl/stl/int.h"\n\n'
         "namespace autoresearch {\nnamespace mp3_fixture {\n\n"
-        + "\n".join(blocks) +
-        "\nstruct Stream {\n"
+        + "\n".join(blocks)
+        + "\nstruct Stream {\n"
         "    const fl::u8* data;\n    fl::u32 size;\n    fl::u32 frames;\n"
         "    fl::u32 samples;\n    fl::u32 hz;\n    fl::u32 channels;\n"
         "    fl::u32 layer;\n    fl::u32 fnv1a;\n    const char* name;\n};\n\n"
         "const Stream kStreams[] = {\n" + "\n".join(table) + "\n};\n\n"
         "const fl::u32 kStreamCount =\n"
         "    (fl::u32)(sizeof(kStreams) / sizeof(kStreams[0]));\n\n"
-        "} // namespace mp3_fixture\n} // namespace autoresearch\n")
+        "} // namespace mp3_fixture\n} // namespace autoresearch\n"
+    )
     print(f"wrote {OUT.relative_to(ROOT)}")
     return 0
 
