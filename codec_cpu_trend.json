@@ -45,7 +45,7 @@
       },
       "host": {
         "callgrind": {
-          "branch_misses": 818393,
+          "branch_misses": 818858,
           "branches": 15264668,
           "functions": {
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::L3_antialias(int*, int)": 20417774,
@@ -62,20 +62,20 @@
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_imdct36_twiddle(int*, int*, int const*, int const*, int const*)": 5495040,
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_shr_round(int, int)": 4129372,
             "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3d_sub_sat(int, int)": 12062400,
-            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3dec_decode_frame_r(fl::minimp3_fixed::mp3dec_t*, fl::minimp3_fixed::mp3dec_scratch_t*, unsigned char const*, int, short*, fl::minimp3_fixed::mp3dec_frame_info_t*)": 321991900,
-            "src/third_party/minimp3/minimp3_synth_fixed.h:fl::minimp3_fixed::mp3d_DCT_II(int*, int)": 80786468,
+            "src/third_party/minimp3/minimp3.h:fl::minimp3_fixed::mp3dec_decode_frame_r(fl::minimp3_fixed::mp3dec_t*, fl::minimp3_fixed::mp3dec_scratch_t*, unsigned char const*, int, short*, fl::minimp3_fixed::mp3dec_frame_info_t*)": 313102096,
+            "src/third_party/minimp3/minimp3_synth_fixed.h:fl::minimp3_fixed::mp3d_DCT_II(int*, int)": 71896664,
             "src/third_party/minimp3/minimp3_synth_fixed.h:fl::minimp3_fixed::mp3d_imdct36_twiddle(int*, int*, int const*, int const*, int const*)": 23676160,
             "src/third_party/minimp3/minimp3_synth_fixed.h:fl::minimp3_fixed::mp3d_synth(int*, short*, int, int*)": 99031624,
-            "src/third_party/minimp3/minimp3_synth_fixed.h:fl::minimp3_fixed::mp3d_synth_granule(int*, int*, int, int, short*)": 181491059,
+            "src/third_party/minimp3/minimp3_synth_fixed.h:fl::minimp3_fixed::mp3d_synth_granule(int*, int*, int, int, short*)": 172601255,
             "src/third_party/minimp3/minimp3_synth_fixed.h:fl::minimp3_fixed::mp3d_synth_pair(short*, int, int const*)": 3770744
           },
-          "instructions": 330658197
+          "instructions": 321768393
         },
         "counter_median": {
-          "branch_misses": 818393,
-          "cycles": 63826750.0,
-          "instructions": 330658197,
-          "ipc": 5.180558
+          "branch_misses": 818858,
+          "cycles": 86364096.0,
+          "instructions": 321768393,
+          "ipc": 3.725719
         },
         "counter_source": {
           "branch_misses": "Valgrind Callgrind simulated Bcm plus Bim",
@@ -119,14 +119,14 @@
           }
         },
         "stage_ns_median": {
-          "antialias": 1367.381,
+          "antialias": 2088.559,
           "dequant": 0.0,
-          "huffman": 5068.234,
-          "imdct": 7490.064,
-          "reorder": 5.701,
-          "scalefactors": 295.652,
-          "stereo": 851.385,
-          "synthesis": 17322.67
+          "huffman": 8421.764,
+          "imdct": 9932.132,
+          "reorder": 10.818,
+          "scalefactors": 440.477,
+          "stereo": 1236.807,
+          "synthesis": 24889.406
         }
       },
       "operations": {
@@ -175,9 +175,9 @@
             "total_multiplies": 0
           },
           "synthesis": {
-            "macs_per_frame": 10958.44843,
+            "macs_per_frame": 14409.928251,
             "multiplies_per_frame": 24850.654709,
-            "total_macs": 9774936,
+            "total_macs": 12853656,
             "total_multiplies": 22166784
           }
         }
