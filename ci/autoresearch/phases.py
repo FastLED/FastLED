@@ -1922,9 +1922,7 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
             "\n\U0001f4cc IEEE754 codec mode: skipping pin discovery and GPIO pre-test"
         )
     elif ctx.mp3_test_mode:
-        print(
-            "\n\U0001f4cc MP3 codec mode: skipping pin discovery and GPIO pre-test"
-        )
+        print("\n\U0001f4cc MP3 codec mode: skipping pin discovery and GPIO pre-test")
     elif ctx.rpc_smoke_mode or ctx.watchdog_soak_mode:
         print("\n\U0001f4cc RPC smoke mode: skipping pin discovery and GPIO pre-test")
     elif ctx.perf_wave2d_grid is not None:

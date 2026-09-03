@@ -25,6 +25,8 @@ import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from running_process import RunningProcess
+
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -50,11 +52,24 @@ def _kill_stale_daemon() -> None:
     """A daemon started before the dialout group was granted cannot open the
     port, and reports it as "port is busy or doesn't exist" -- which sends you
     looking for a stuck process rather than at credentials."""
-    found = subprocess.run(
-        ["pgrep", "-x", "fbuild-daemon"], capture_output=True, text=True
+    found = RunningProcess.run(
+        ["pgrep", "-x", "fbuild-daemon"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     for pid in found.stdout.split():
-        subprocess.run(["kill", pid], capture_output=True)
+        # Output is discarded, so only the exit status matters here.
+        RunningProcess.run(
+            ["kill", pid],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
 
 
 @dataclass(frozen=True)
@@ -92,19 +107,27 @@ def run_once(board: str, timeout: int) -> Measurement | str | None:
         f"bash autoresearch {board} --mp3 --skip-lint"
     )
     try:
-        proc = subprocess.run(
+        proc = RunningProcess.run(
             ["sg", "dialout", "-c", f"bash -c '{inner}'"],
             cwd=ROOT,
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
             timeout=timeout,
+            encoding="utf-8",
+            errors="replace",
         )
-    except KeyboardInterrupt:
+    except KeyboardInterrupt:  # noqa: KBI002 - guard so the TimeoutExpired
+        # handler below cannot swallow Ctrl-C; re-raises unchanged.
         raise
     except subprocess.TimeoutExpired:
         print("  the run itself hung; treating as a transport failure", file=sys.stderr)
         return TRANSPORT_FAILURE
-    out = proc.stdout + proc.stderr
+    # Explicit separator: RunningProcess.run strips the trailing newline
+    # from each stream, so a bare `+` welds the last stdout line onto the
+    # first stderr line -- which here would corrupt the checksum line and
+    # report a false "CHECKSUMS DIFFER".
+    out = proc.stdout + "\n" + proc.stderr
     if RE_SUPPRESSED.search(out):
         print(
             "  ratio suppressed: the two decoders did not decode the same "
@@ -172,7 +195,12 @@ def main(argv: list[str] | None = None) -> int:
                     flush=True,
                 )
                 time.sleep(8)
-        if got is None or got is TRANSPORT_FAILURE:
+        # `isinstance`, not `got is None or got is TRANSPORT_FAILURE`: the
+        # sentinel is a plain `str`, so an identity check cannot narrow `str`
+        # out of `Measurement | str | None` and every attribute access below
+        # reads as possibly-str. Same three outcomes, in a form the checker
+        # can follow.
+        if not isinstance(got, Measurement):
             if got is TRANSPORT_FAILURE:
                 print(
                     f"  the serial link failed {args.retries + 1} times. "
@@ -215,9 +243,7 @@ def main(argv: list[str] | None = None) -> int:
         # asdict, because Measurement became a dataclass and json cannot
         # serialise one directly -- this path is only exercised with --json,
         # so the conversion broke it silently.
-        args.json.write_text(
-            json.dumps([asdict(r) for r in results], indent=2)
-        )
+        args.json.write_text(json.dumps([asdict(r) for r in results], indent=2))
         print(f"  wrote {args.json}")
     return 0
 

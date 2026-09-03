@@ -412,7 +412,7 @@ def main(argv: list[str] | None = None) -> int:
                 f"{ISO_FLOOR_DB:.0f} dB ISO floor"
             )
         print("CONFORMANCE:PASS")
-    except KeyboardInterrupt:
+    except KeyboardInterrupt:  # noqa: KBI002 - top-level handler, exits 130 cleanly
         print("CONFORMANCE:INTERRUPTED", file=sys.stderr)
         return 130
     except (OSError, RuntimeError, subprocess.CalledProcessError, ValueError) as exc:
