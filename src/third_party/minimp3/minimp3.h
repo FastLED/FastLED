@@ -447,6 +447,85 @@ MP3D_LEAF int32_t mp3d_mulshift(int32_t value, int32_t coef) FL_NO_EXCEPT
     return fl::math::mul_shift_round32<Bits>(value, coef);
 }
 
+/* value * Coef, where Coef is a compile-time Q`Bits` coefficient -- the same
+   arithmetic as mp3d_mulshift<Bits>(value, Coef), computed from the high half
+   of the product instead of the low one.
+
+   This is the one thing that made the DCT-32 the only stage where this decoder
+   still lost to Helix on riscv32. Both do the same 80 multiplies per 32-point
+   DCT; Helix spends two instructions on each (`mulh`, then a left shift to
+   undo the coefficient's Q format) and this decoder spent nine:
+
+       mul  mulh  lui  add  sltu  add  srli  slli  or
+
+   The seven after `mul` are all there to round at bit `Bits` rather than at
+   bit 32, which needs the low half of the product, the carry out of adding
+   2^(Bits-1) to it, and a 64-bit funnel shift. Helix does not round at all --
+   it truncates, which is where its 20 dB of accuracy went.
+
+   The identity below rounds at bit 32 instead, which `mulh` does for free, and
+   still lands on exactly the same bits. Write Coef = W*2^Bits + F with
+   0 <= F < 2^Bits; then
+
+       floor((v*Coef + 2^(Bits-1)) / 2^Bits)
+         = v*W + floor((v*F + 2^(Bits-1)) / 2^Bits)
+         = v*W + floor((v*(F << (32-Bits)) + 2^31) / 2^32)
+
+   and the second term is `mulh(v, F32) + (lo(v*F32) >> 31)`, because adding
+   2^31 to an unsigned low half carries exactly when its top bit is set. Both
+   W and F32 are compile-time constants.
+
+   F32 is kept *signed*. F << (32-Bits) is a Q32 fraction and exceeds int32
+   whenever the coefficient's fractional part is at least a half, which is most
+   of them; taking that bit pattern as a negative int32 subtracts 2^32 from it,
+   so the missing 2^32/2^32 = 1 goes back on the integer side as W+1. That
+   keeps the multiply a plain `mulh` -- gcc lowers a genuinely unsigned
+   constant operand into srai/mul/mul/mulhu/add, five instructions, which
+   throws the win away.
+
+   Cost on riscv32 -Os, excluding the lui/addi that materialises the
+   coefficient (both forms pay that, and both hoist it out of the k loop):
+
+     | coefficient                  | before | after |
+     |------------------------------|--------|-------|
+     | tan(pi/16) Q31, W = 0        |    8   |   4   |
+     | cos(pi/4)  Q31, W = 1        |    8   |   5   |
+     | 1/(2cos(7pi/16)) Q29, W = 3  |    8   |   7   |
+     | secants Q27, W = 0 or 1      |    8   |  4..5 |
+
+   Bit-exactness is not an argument here, it is a proof: the identity was
+   checked against mp3d_mulshift for all 2^32 int32 inputs against each of the
+   33 coefficients the DCT-32 instantiates, and again for the seven Q31
+   cosines of the 9-point DCT-III / 3-point IDCT and the Q30 pow43 term,
+   with zero mismatches. The device checksum and the PSNR are unchanged, and
+   they are the tripwire if a transcribed constant is ever wrong.
+
+   Defined here rather than in minimp3_synth_fixed.h because the IMDCT's
+   L3_dct3_9, L3_idct3 and mp3d_pow43 above that include point use it too.
+   On riscv32 -Os those ten call sites were 7 instructions each through
+   mp3d_mulshift and are 4 here -- W is 0 for all of them, the nine Q31
+   cosine sites and the Q30 pow43 term alike. An ESP32-C6 decodes the
+   fixture in 44,993 us against 45,186 us before (-0.43%, spread 0.00%
+   either side), for -46 bytes of .text.
+
+   Not applied to the SIMD kernels: MP3D_V_MULSHIFT saturates on the narrow,
+   which this form cannot do without giving back what it saved, and the vector
+   targets have no scarcity of multiply throughput to fix. */
+template <int Bits, int32_t Coef>
+MP3D_LEAF int32_t mp3d_mulshift_k(int32_t value) FL_NO_EXCEPT
+{
+    /* Every coefficient this is used with is a positive secant or cosine.
+       The split relies on that: `Coef >> Bits` is implementation-defined for a negative
+       value, and W would have to round the other way. */
+    static_assert(Coef > 0, "mp3d_mulshift_k: coefficient must be positive");
+    const int32_t frac = (int32_t)((uint32_t)Coef << (32 - Bits));
+    const int32_t whole = (int32_t)(Coef >> Bits) + (frac < 0 ? 1 : 0);
+    const int64_t product = (int64_t)value * (int64_t)frac;
+    const uint32_t rounded = (uint32_t)(uint64_t)(product >> 32) +
+                             ((uint32_t)(uint64_t)product >> 31);
+    return (int32_t)((uint32_t)value * (uint32_t)whole + rounded);
+}
+
 /* Left shift that is defined for negative inputs, with saturation. `shift` is
    assumed to be in [0, 62]; callers clamp before calling. */
 static int32_t mp3d_shl_sat(int32_t value, int shift) FL_NO_EXCEPT
@@ -1397,7 +1476,7 @@ static int32_t mp3d_pow43(int x, int *exp) FL_NO_EXCEPT
        and shifting a negative value left is UB, which the differential fuzzer
        caught under UBSan. */
     frac = (int32_t)(((int64_t)num * ((int64_t)1 << 30)) / den);
-    term = MP3D_Q30_POW43_C1 + mp3d_mulshift<30>(frac, MP3D_Q30_POW43_C2);
+    term = MP3D_Q30_POW43_C1 + mp3d_mulshift_k<30, MP3D_Q30_POW43_C2>(frac);
     /* Shift by 31 rather than 30: the polynomial reaches 1.72, which would
        carry a normalised mantissa past INT32_MAX. The lost bit is paid back
        in the exponent. */
@@ -1995,9 +2074,9 @@ static void L3_dct3_9(int32_t *y) FL_NO_EXCEPT
     s0 = y[0]; s2 = y[2]; s4 = y[4]; s6 = y[6]; s8 = y[8];
     t0 = mp3d_add_sat(s0, mp3d_shr_round(s6, 1));
     s0 = mp3d_sub_sat(s0, s6);
-    t4 = mp3d_mulshift<31>(mp3d_add_sat(s4, s2), MP3D_Q31_COS_PI_9);
-    t2 = mp3d_mulshift<31>(mp3d_add_sat(s8, s2), MP3D_Q31_COS_2PI_9);
-    s6 = mp3d_mulshift<31>(mp3d_sub_sat(s4, s8), MP3D_Q31_COS_4PI_9);
+    t4 = mp3d_mulshift_k<31, MP3D_Q31_COS_PI_9>(mp3d_add_sat(s4, s2));
+    t2 = mp3d_mulshift_k<31, MP3D_Q31_COS_2PI_9>(mp3d_add_sat(s8, s2));
+    s6 = mp3d_mulshift_k<31, MP3D_Q31_COS_4PI_9>(mp3d_sub_sat(s4, s8));
     s4 = mp3d_add_sat(s4, mp3d_sub_sat(s8, s2));
 
     s2 = mp3d_sub_sat(s0, mp3d_shr_round(s4, 1));
@@ -2008,12 +2087,11 @@ static void L3_dct3_9(int32_t *y) FL_NO_EXCEPT
 
     s1 = y[1]; s3 = y[3]; s5 = y[5]; s7 = y[7];
 
-    s3 = mp3d_mulshift<31>(s3, MP3D_Q31_COS_PI_6);
-    t0 = mp3d_mulshift<31>(mp3d_add_sat(s5, s1), MP3D_Q31_COS_PI_18);
-    t4 = mp3d_mulshift<31>(mp3d_sub_sat(s5, s7), MP3D_Q31_COS_7PI_18);
-    t2 = mp3d_mulshift<31>(mp3d_add_sat(s1, s7), MP3D_Q31_COS_5PI_18);
-    s1 = mp3d_mulshift<31>(mp3d_sub_sat(mp3d_sub_sat(s1, s5), s7),
-                       MP3D_Q31_COS_PI_6);
+    s3 = mp3d_mulshift_k<31, MP3D_Q31_COS_PI_6>(s3);
+    t0 = mp3d_mulshift_k<31, MP3D_Q31_COS_PI_18>(mp3d_add_sat(s5, s1));
+    t4 = mp3d_mulshift_k<31, MP3D_Q31_COS_7PI_18>(mp3d_sub_sat(s5, s7));
+    t2 = mp3d_mulshift_k<31, MP3D_Q31_COS_5PI_18>(mp3d_add_sat(s1, s7));
+    s1 = mp3d_mulshift_k<31, MP3D_Q31_COS_PI_6>(mp3d_sub_sat(mp3d_sub_sat(s1, s5), s7));
 
     s5 = mp3d_sub_sat(mp3d_sub_sat(t0, s3), t2);
     s7 = mp3d_sub_sat(mp3d_sub_sat(t4, s3), t0);
@@ -2075,7 +2153,7 @@ MP3D_KERNEL static void L3_imdct36(int32_t *grbuf, int32_t *overlap, const int32
 
 static void L3_idct3(int32_t x0, int32_t x1, int32_t x2, int32_t *dst) FL_NO_EXCEPT
 {
-    const int32_t m1 = mp3d_mulshift<31>(x1, MP3D_Q31_COS_PI_6);
+    const int32_t m1 = mp3d_mulshift_k<31, MP3D_Q31_COS_PI_6>(x1);
     const int32_t a1 = mp3d_sub_sat(x0, mp3d_shr_round(x2, 1));
     dst[1] = mp3d_add_sat(x0, x2);
     dst[0] = mp3d_add_sat(a1, m1);
