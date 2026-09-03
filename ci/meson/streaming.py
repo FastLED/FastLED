@@ -14,8 +14,11 @@ from running_process import RunningProcess
 
 from ci.meson.build_optimizer import BuildOptimizer
 from ci.meson.compile import (
+    _LLD_PERM_DENIED_MAX_RETRIES,
+    _ZCCACHE_TRANSIENT_MAX_RETRIES,
     _create_error_context_filter,
     _is_compilation_error,
+    _retry_ninja,
 )
 from ci.meson.compiler import get_meson_executable
 from ci.meson.link_retry import (
@@ -25,6 +28,11 @@ from ci.meson.link_retry import (
 from ci.meson.mtime_stabilizer import stabilize_dll_mtimes
 from ci.meson.output import print_error, print_success
 from ci.meson.phase_tracker import PhaseTracker
+from ci.meson.zccache_retry import (
+    find_zccache_transient_failures,
+    format_zccache_transient_message,
+    is_zccache_transient_failure,
+)
 from ci.util.cpu_count import cpu_count
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.tee import StreamTee
@@ -446,57 +454,62 @@ def stream_compile_only(
             # non-Windows platforms because ``is_link_permission_denied_error``
             # returns False off-Windows.
             if returncode != 0 and is_link_permission_denied_error(compilation_output):
-                for _attempt in range(_LLD_PERM_DENIED_MAX_RETRIES):
-                    _ts_print(
-                        f"[MESON] ⚠️  ld.lld permission denied on runner binary "
-                        f"(attempt {_attempt + 1}/{_LLD_PERM_DENIED_MAX_RETRIES}) - "
-                        f"killing stale runner processes and retrying",
-                        file=sys.stderr,
+
+                def _describe_lld(_latest: str, attempt: int) -> str:
+                    return (
+                        f"ld.lld permission denied on runner binary "
+                        f"(attempt {attempt}/{_LLD_PERM_DENIED_MAX_RETRIES}) - "
+                        f"killing stale runner processes and retrying"
                     )
+
+                def _before_lld_retry() -> None:
                     _killed_retry = kill_stale_runner_processes(build_dir)
                     if _killed_retry:
                         _ts_print(
                             f"[MESON] 🧹 Killed {_killed_retry} stale runner process(es)",
                             file=sys.stderr,
                         )
-                    # Backoff 0.5s, 1.0s, 1.5s — gives Windows / antivirus
-                    # time to release any remaining handles on the .exe.
-                    time.sleep(0.5 * (_attempt + 1))
 
-                    try:
-                        retry_proc = RunningProcess(
-                            cmd,
-                            timeout=compile_timeout,
-                            auto_run=True,
-                            check=False,
-                            env=os.environ.copy(),
-                        )
-                        retry_proc.wait(echo=False)
-                        returncode = cast(int, retry_proc.returncode)
-                        retry_output = str(retry_proc.stdout)
-                        compilation_output = compilation_output + "\n" + retry_output
-                    except KeyboardInterrupt as ki:
-                        handle_keyboard_interrupt(ki)
-                        raise
-                    except Exception as retry_error:
-                        _ts_print(
-                            f"[MESON] ⚠️  Retry invocation failed: {retry_error}",
-                            file=sys.stderr,
-                        )
-                        break
+                returncode, compilation_output = _retry_ninja(
+                    cmd,
+                    compilation_output,
+                    max_retries=_LLD_PERM_DENIED_MAX_RETRIES,
+                    backoff_seconds=0.5,
+                    still_transient=is_link_permission_denied_error,
+                    describe=_describe_lld,
+                    before_retry=_before_lld_retry,
+                    label="Link",
+                    timeout=compile_timeout,
+                    env=os.environ.copy(),
+                    output_formatter=None,
+                )
 
-                    if returncode == 0:
-                        _ts_print(
-                            f"[MESON] ✅ Link retry succeeded on attempt {_attempt + 1}",
-                            file=sys.stderr,
-                        )
-                        break
+            # zccache exit-113 retry (#4132). This is the path CI takes; see
+            # compile.py for the same block on the non-streaming path.
+            if returncode != 0 and is_zccache_transient_failure(compilation_output):
 
-                    # Only keep retrying while the failure is still the same
-                    # permission-denied pattern. Non-retryable failures fall
-                    # through to the normal error path below.
-                    if not is_link_permission_denied_error(retry_output):
-                        break
+                def _describe_zccache(latest: str, attempt: int) -> str:
+                    return (
+                        format_zccache_transient_message(
+                            find_zccache_transient_failures(latest)
+                        )
+                        + f"\n  Retrying the build "
+                        f"(attempt {attempt}/{_ZCCACHE_TRANSIENT_MAX_RETRIES})"
+                    )
+
+                returncode, compilation_output = _retry_ninja(
+                    cmd,
+                    compilation_output,
+                    max_retries=_ZCCACHE_TRANSIENT_MAX_RETRIES,
+                    backoff_seconds=2.0,
+                    still_transient=is_zccache_transient_failure,
+                    describe=_describe_zccache,
+                    before_retry=None,
+                    label="zccache",
+                    timeout=compile_timeout,
+                    env=os.environ.copy(),
+                    output_formatter=None,
+                )
 
             if returncode != 0:
                 phase_tracker.set_phase("LINK", target=target, path="streaming")

@@ -212,6 +212,9 @@ def _retry_ninja(
     describe: Callable[[str, int], str],
     before_retry: Callable[[], None] | None,
     label: str,
+    timeout: int,
+    env: dict[str, str] | None,
+    output_formatter: TimestampFormatter | None,
 ) -> tuple[int, str]:
     """Re-invoke the same ninja command while a transient failure persists.
 
@@ -235,10 +238,11 @@ def _retry_ninja(
         try:
             retry_proc = RunningProcess(
                 cmd,
-                timeout=600,
+                timeout=timeout,
                 auto_run=True,
                 check=False,
-                output_formatter=TimestampFormatter(),
+                env=env,
+                output_formatter=output_formatter,
             )
             retry_proc.wait(echo=False)
             returncode = cast(int, retry_proc.returncode)
@@ -759,6 +763,9 @@ def compile_meson(
                 describe=_describe_lld,
                 before_retry=_before_lld_retry,
                 label="Link",
+                timeout=600,
+                env=None,
+                output_formatter=TimestampFormatter(),
             )
 
         # zccache exit-113 retry (#4132).
@@ -786,6 +793,9 @@ def compile_meson(
                 describe=_describe_zccache,
                 before_retry=None,
                 label="zccache",
+                timeout=600,
+                env=None,
+                output_formatter=TimestampFormatter(),
             )
 
         if returncode != 0:
