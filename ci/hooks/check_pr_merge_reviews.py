@@ -52,10 +52,16 @@ def _repo_at(path: str) -> str | None:
     origin, a URL shape this does not recognise).
     """
     try:
-        result = subprocess.run(
+        # noqa: SRC001 - RunningProcess.run merges stderr into stdout, and this
+        # parses stdout as a URL: one git warning on stderr would be spliced
+        # into the value and yield a wrong owner/repo, which is the class of
+        # bug this function exists to fix.
+        result = subprocess.run(  # noqa: SRC001
             ["git", "-C", path, "config", "--get", "remote.origin.url"],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
     except KeyboardInterrupt as ki:
@@ -130,7 +136,10 @@ def main() -> int:
         cmd.extend(["--repo", repo])
 
     try:
-        result = subprocess.run(
+        # noqa: SRC001 - the streams are used separately: stderr is forwarded to
+        # the user as the block reason, stdout is not. Merging them would put
+        # the checker's diagnostics into the wrong channel.
+        result = subprocess.run(  # noqa: SRC001
             cmd,
             capture_output=True,
             text=True,

@@ -315,8 +315,11 @@ def main() -> int:
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except KeyboardInterrupt:
-        raise
+    except KeyboardInterrupt as ki:
+        import _thread  # noqa: PLC0415
+
+        _thread.interrupt_main()
+        raise ki
     except SystemExit:
         raise
     except Exception as exc:  # noqa: BLE001 - the exit code is the point

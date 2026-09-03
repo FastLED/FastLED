@@ -80,8 +80,8 @@ def _make_repo(tmp_path: Any, name: str, origin: str) -> str:
 
     path = tmp_path / name
     path.mkdir()
-    subprocess.run(["git", "init", "-q"], cwd=path, check=True)
-    subprocess.run(["git", "remote", "add", "origin", origin], cwd=path, check=True)
+    subprocess.run(["git", "init", "-q"], cwd=path, check=True)  # noqa: SRC001
+    subprocess.run(["git", "remote", "add", "origin", origin], cwd=path, check=True)  # noqa: SRC001
     return str(path)
 
 
@@ -155,7 +155,7 @@ def test_addressor_crash_exits_2_not_1(tmp_path: Any) -> None:
 
     addressor = REPO_ROOT / "ci" / "tools" / "coderabbit_addressor.py"
     # A PR number that cannot exist drives `gh api` to fail inside the check.
-    result = subprocess.run(
+    result = subprocess.run(  # noqa: SRC001
         [
             _sys.executable,
             str(addressor),
@@ -166,6 +166,8 @@ def test_addressor_crash_exits_2_not_1(tmp_path: Any) -> None:
         ],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=120,
     )
 
