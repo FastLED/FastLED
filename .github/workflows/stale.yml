@@ -26,7 +26,12 @@ jobs:
           stale-pr-label: "status: stale"
           days-before-issue-stale: 60
           days-before-pr-stale: 30
-          days-before-issue-close: 30
+          # Issue auto-close is permanently disabled: the 60/30 close schedule
+          # auto-closed 53 real issues as not_planned over three runs
+          # (2026-09-01 -> 09-03), accelerating each day. -1 is the
+          # actions/stale documented value for "never close". Do not change
+          # this back to a number without repo owner sign-off.
+          days-before-issue-close: -1
           days-before-pr-close: 30
           exempt-issue-labels: >-
             status: in-progress,
@@ -53,9 +58,9 @@ jobs:
           operations-per-run: 100
           stale-issue-message: >-
             This issue has had no activity for 60 days and is now marked stale.
-            It will close in 30 days unless there is new activity or a maintainer
-            applies an exempt label. Comment with current, actionable information
-            to keep it open; the stale label will be removed automatically.
+            This label is a triage signal only; the issue will not be closed
+            automatically. Comment with current, actionable information at any
+            time and the stale label will be removed automatically.
           close-issue-message: >-
             This issue was closed after 30 additional days without activity.
             If it is still relevant, please comment with current reproduction
