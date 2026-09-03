@@ -239,6 +239,7 @@ class PixelIterator {
     /// @note Protocol: [Start:32b 0x00][LED:[0xE0|bri5][B][G][R]] x N, then [End: (N/32)+1 x 32b 0xFF]
     template <typename CONTAINER_UIN8_T>
     void writeAPA102(CONTAINER_UIN8_T* out, bool hd_gamma = false) FL_NO_EXCEPT {
+        FL_UNUSED(hd_gamma);  // only read under FASTLED_HD_COLOR_MIXING
         auto back_ins = fl::back_inserter(*out);
 
         #if FASTLED_HD_COLOR_MIXING
@@ -271,6 +272,7 @@ class PixelIterator {
     /// @note Protocol: Same as APA102, including the all-ones end clock frame.
     template <typename CONTAINER_UIN8_T>
     void writeSK9822(CONTAINER_UIN8_T* out, bool hd_gamma = false) FL_NO_EXCEPT {
+        FL_UNUSED(hd_gamma);  // only read under FASTLED_HD_COLOR_MIXING
         auto back_ins = fl::back_inserter(*out);
 
         #if FASTLED_HD_COLOR_MIXING

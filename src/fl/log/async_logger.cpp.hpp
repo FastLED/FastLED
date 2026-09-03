@@ -9,6 +9,7 @@
 #include "fl/task/task.h"  // For fl::task
 #include "fl/task/scheduler.h"  // For fl::task::Scheduler
 #include "fl/stl/noexcept.h"
+#include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_UNUSED
 
 namespace fl {
 
@@ -17,6 +18,8 @@ namespace detail {
     /// Called from checkLoggerEnabled template function
     /// IMPORTANT: This must NOT be inline - needs external linkage for cross-TU calls
     void printLoggerDisabledError(const char* category_name, const char* define_name) {
+        FL_UNUSED(category_name);  // only consumed by FL_ERROR_F, a no-op on small platforms
+        FL_UNUSED(define_name);
         FL_ERROR_F("%s ASYNC LOGGING NOT ENABLED. Add '#define %s' before including FastLED.h", category_name, define_name);
     }
 } // namespace detail

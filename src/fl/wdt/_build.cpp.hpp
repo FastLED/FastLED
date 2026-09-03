@@ -9,6 +9,7 @@
 #include "fl/system/delay.h"
 
 #include "fl/wdt/watchdog.cpp.hpp"
+#include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_UNUSED
 
 namespace fl {
 namespace platforms {
@@ -17,6 +18,7 @@ namespace platforms {
 // here (in the unity TU) rather than in watchdog.cpp.hpp so that public
 // headers don't pull in fl/log/log.h.
 void scopedWatchdogPrintLine(fl::string_view sv) FL_NO_EXCEPT {
+    FL_UNUSED(sv);  // only consumed by FL_WARN_F, a no-op on small platforms
     FL_WARN_F("%s", sv);
 }
 

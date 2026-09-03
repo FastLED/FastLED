@@ -17,6 +17,7 @@
 // Include WASM-specific implementation
 // IWYU pragma: begin_keep
 #include "platforms/wasm/js_fetch.h"  // ok platform headers
+#include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_UNUSED
 // IWYU pragma: end_keep
 
 // Native networking includes
@@ -408,7 +409,8 @@ void fetch(const fl::string& url, const FetchCallback& callback) {
 }
 
 fl::task::Promise<Response> execute_fetch_request(const fl::string& url, const FetchOptions& request) {
-    (void)request;
+    FL_UNUSED(request);
+    FL_UNUSED(url);  // only consumed by FL_WARN_F, a no-op on small platforms
     FL_WARN_F("HTTP fetch is not supported on this platform. URL: %s", url);
     Response error_response(501, "Not Implemented");
     error_response.set_body("HTTP fetch is not available on this platform.");

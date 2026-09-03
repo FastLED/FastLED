@@ -12,6 +12,7 @@
 // cstdio.h symbol — `fl::available()` — so forward-declare it here
 // and let consumers that need the full cstdio API include it themselves.
 #include "fl/stl/noexcept.h"
+#include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_UNUSED
 
 namespace fl {
     int available() FL_NO_EXCEPT;
@@ -257,6 +258,8 @@ public:
     istream& putback(char c) {
 #if SKETCH_HAS_LARGE_MEMORY
         mRealStream.putback(c);
+#else
+        FL_UNUSED(c);
 #endif
         return *this;
     }
