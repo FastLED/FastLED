@@ -29,6 +29,8 @@ import tempfile
 import time
 from pathlib import Path
 
+from running_process import RunningProcess
+
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
@@ -55,8 +57,19 @@ PSNR_EXPECTED = 123.24
 def _run(command: list[str], label: str, logs: Path, quiet: bool = True):
     """Run a step, print its verdict, keep its output in a file."""
     started = time.monotonic()
-    proc = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
-    text = proc.stdout + proc.stderr
+    proc = RunningProcess.run(
+        command,
+        cwd=ROOT,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    # Explicit separator: RunningProcess.run strips the trailing newline
+    # from each stream, so a bare `+` welds the last stdout line onto the
+    # first stderr line -- enough to corrupt a `PSNR=...` match downstream.
+    text = proc.stdout + "\n" + proc.stderr
     log = logs / (re.sub(r"[^a-z0-9]+", "-", label.lower()).strip("-") + ".log")
     log.write_text(text)
     if not quiet:

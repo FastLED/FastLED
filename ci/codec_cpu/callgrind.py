@@ -40,6 +40,8 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from running_process import RunningProcess
+
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILD = ROOT / ".build" / "codec-callgrind"
@@ -190,7 +192,16 @@ class Attribution:
 
 
 def _run(command: list[str], cwd: Path = ROOT) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, cwd=cwd, check=True, text=True, capture_output=True)
+    return RunningProcess.run(
+        command,
+        cwd=cwd,
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
 
 
 def _require(tool: str) -> str:
@@ -214,7 +225,12 @@ def materialise_baseline(ref: str, into: Path) -> Path:
     if not any(n == "minimp3.h" for n in names):
         raise SystemExit(f"{ref}:{VENDORED} has no minimp3.h")
     for name in names:
-        blob = subprocess.run(
+        # noqa-SRC001 rationale: this blob is written back out verbatim by
+        # write_bytes. RunningProcess.run does not round-trip a binary stdout
+        # capture even with text=False -- measured 71,680 B of `git archive`
+        # returning as 71,435 B -- so the vendored source would be silently
+        # corrupted.
+        blob = subprocess.run(  # noqa: SRC001 - binary stdout; see above
             ["git", "show", f"{ref}:{VENDORED}/{name}"],
             cwd=ROOT,
             check=True,
@@ -287,7 +303,7 @@ _ANNOTATED = re.compile(
 
 def callgrind(binary: Path, args: list[str], out: Path, top: int) -> Attribution:
     valgrind = _require("valgrind")
-    result = subprocess.run(
+    result = RunningProcess.run(
         [
             valgrind,
             "--tool=callgrind",
@@ -298,8 +314,11 @@ def callgrind(binary: Path, args: list[str], out: Path, top: int) -> Attribution
         ],
         cwd=ROOT,
         check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
-        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
     )
     match = _IREFS.search(result.stderr)
     if not match:
@@ -318,7 +337,7 @@ def callgrind(binary: Path, args: list[str], out: Path, top: int) -> Attribution
             "totals only."
         )
     if annotate and top:
-        text = subprocess.run(
+        text = RunningProcess.run(
             # 99, not 90: callgrind_annotate's threshold is a *cumulative*
             # percentage, so at 90 it stops emitting rows once the running
             # total reaches 90% of the program -- which silently caps the list
@@ -327,8 +346,11 @@ def callgrind(binary: Path, args: list[str], out: Path, top: int) -> Attribution
             [annotate, "--threshold=99", str(out)],
             cwd=ROOT,
             check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            capture_output=True,
+            encoding="utf-8",
+            errors="replace",
         ).stdout
         found: list[tuple[int, str]] = []
         # Aggregate by function, not by (file, function): an inlined body
@@ -408,12 +430,15 @@ def main(argv: list[str] | None = None) -> int:
             rows: dict[str, tuple[int, str]] = {}
             for relative in CORPUS:
                 run = callgrind(binary, [relative], out_dir / "cg.perfile", top=0)
-                detail = subprocess.run(
+                detail = RunningProcess.run(
                     [str(binary), relative],
                     cwd=ROOT,
                     check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
                     text=True,
-                    capture_output=True,
+                    encoding="utf-8",
+                    errors="replace",
                 ).stdout.strip()
                 rows[relative] = (run.total, detail.replace("DECODE ", ""))
             per_file[label] = rows

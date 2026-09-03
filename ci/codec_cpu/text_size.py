@@ -48,6 +48,8 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
+from running_process import RunningProcess
+
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -135,17 +137,27 @@ def _compile(
         f"-I{ROOT / 'src' / 'platforms' / 'stub'}",
     ]
     extra = ["-g"] if debug else []
-    subprocess.run(
+    RunningProcess.run(
         [gpp, *includes, *flags, *extra, "-c", str(tu), "-o", str(obj)],
         check=True,
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     return obj
 
 
 def _exec_sections(objdump: str, obj: Path) -> list[str]:
-    out = subprocess.run(
-        [objdump, "-h", str(obj)], capture_output=True, text=True, check=True
+    out = RunningProcess.run(
+        [objdump, "-h", str(obj)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=True,
+        encoding="utf-8",
+        errors="replace",
     ).stdout
     names, pending = [], None
     for line in out.splitlines():
@@ -194,13 +206,27 @@ def _flatten(driver: str, objdump: str, obj: Path, isa: str) -> Path:
     # A plain non-PIE executable, not `-shared`: the decoders take the address
     # of their tables from non-PIC code, which a shared object rejects.
     cmd[1:1] = ["-Wl,--no-relax"] if isa == "riscv32" else ["-no-pie"]
-    subprocess.run(cmd, check=True, capture_output=True)
+    RunningProcess.run(
+        cmd,
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
     return image
 
 
 def _sections(objdump: str, obj: Path) -> dict[str, int]:
-    out = subprocess.run(
-        [objdump, "-h", str(obj)], capture_output=True, text=True, check=True
+    out = RunningProcess.run(
+        [objdump, "-h", str(obj)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=True,
+        encoding="utf-8",
+        errors="replace",
     ).stdout
     sizes: dict[str, int] = {}
     for line in out.splitlines():
@@ -208,7 +234,8 @@ def _sections(objdump: str, obj: Path) -> dict[str, int]:
         if len(parts) > 2 and parts[1].startswith("."):
             try:
                 sizes[parts[1]] = int(parts[2], 16)
-            except KeyboardInterrupt:
+            except KeyboardInterrupt:  # noqa: KBI002 - guard so the ValueError
+                # handler below cannot swallow Ctrl-C; re-raises unchanged.
                 raise
             except ValueError:
                 continue
@@ -225,15 +252,27 @@ def _demangle(names: list[str]) -> dict[str, str]:
     tool = shutil.which("llvm-cxxfilt") or shutil.which("c++filt")
     if not tool or not names:
         return {}
-    out = subprocess.run(
-        [tool], input="\n".join(names), capture_output=True, text=True
+    out = RunningProcess.run(
+        [tool],
+        input="\n".join(names),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
     ).stdout.splitlines()
     return dict(zip(names, out)) if len(out) == len(names) else {}
 
 
 def _functions(objdump: str, obj: Path) -> dict[str, int]:
-    out = subprocess.run(
-        [objdump, "-t", str(obj)], capture_output=True, text=True, check=True
+    out = RunningProcess.run(
+        [objdump, "-t", str(obj)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=True,
+        encoding="utf-8",
+        errors="replace",
     ).stdout
     sizes: dict[str, int] = {}
     for line in out.splitlines():
@@ -286,8 +325,14 @@ class Disasm:
     """Per-instruction facts about one object file, keyed by address."""
 
     def __init__(self, objdump: str, obj: Path, isa: str) -> None:
-        out = subprocess.run(
-            [objdump, "-d", str(obj)], capture_output=True, text=True, check=True
+        out = RunningProcess.run(
+            [objdump, "-d", str(obj)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True,
+            encoding="utf-8",
+            errors="replace",
         ).stdout
         self.isa = isa
         self.rows: list[tuple[int, int, str, str]] = []
@@ -299,7 +344,7 @@ class Disasm:
             nbytes = len(m.group(2).replace(" ", "")) // 2
             self.rows.append((addr, nbytes, m.group(3), m.group(4)))
 
-    def classify(self, mnemonic: str, operands: str) -> tuple[bool, bool, bool]:
+    def classify(self, mnemonic: str, operands: str) -> tuple[bool, bool, bool]:  # noqa: DCT002 - one call site, unpacked straight into mem/stk/wide
         """(memory, stack-relative memory, wide-multiply) for one instruction."""
         if self.isa == "riscv32":
             mem = mnemonic in _RV_MEM
@@ -323,12 +368,15 @@ def _inline_stacks(addr2line: str, obj: Path, addrs: list[int]) -> list[list[str
     so without the address markers the groups cannot be split apart.
     """
     inp = "\n".join(hex(a) for a in addrs)
-    out = subprocess.run(
+    out = RunningProcess.run(
         [addr2line, "-a", "-f", "-i", "-C", "-e", str(obj)],
         input=inp,
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
         check=True,
+        encoding="utf-8",
+        errors="replace",
     ).stdout
     # After each `0x...` marker the output strictly alternates function name
     # and source location. Sniffing for "looks like a path" instead was wrong:
@@ -833,22 +881,30 @@ def main(argv: list[str] | None = None) -> int:
             # +0 bytes for a change to them -- a wrong delta, silently. Shadow
             # every path the object is built from, and say so when a change
             # lands somewhere neither of them covers.
-            tar = subprocess.run(
+            # noqa-SRC001 rationale: RunningProcess.run mangles a binary
+            # stdout capture -- measured 71,680 B of `git archive` output
+            # coming back as 71,435 B -- which truncates the tar below into
+            # an "unexpected EOF" (exit 2). The bytes have to be exact here.
+            tar = subprocess.run(  # noqa: SRC001 - binary stdout; see above
                 ["git", "archive", args.baseline, *SHADOW_PATHS],
                 cwd=ROOT,
                 check=True,
                 capture_output=True,
             ).stdout
-            subprocess.run(
+            RunningProcess.run(
                 ["tar", "-x", "-C", str(shadow), "--strip-components=1"],
                 input=tar,
                 check=True,
+                text=False,
             )
-            changed = subprocess.run(
+            changed = RunningProcess.run(
                 ["git", "diff", "--name-only", args.baseline, "--", "src"],
                 cwd=ROOT,
-                capture_output=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
             ).stdout.split()
             unshadowed = [
                 f for f in changed if not any(f.startswith(pfx) for pfx in SHADOW_PATHS)
