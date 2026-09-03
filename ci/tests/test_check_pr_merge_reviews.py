@@ -64,3 +64,112 @@ def test_non_merge_commands_are_ignored() -> None:
     assert not hook.MERGE_RE.search("gh pr view 1268 --repo FastLED/fbuild")
     assert not hook.MERGE_RE.search("gh pr create --title x")
     assert hook.MERGE_RE.search("gh pr merge 1268")
+
+
+# ---------------------------------------------------------------------------
+# `cd <dir> && gh pr merge N` — the repo comes from the directory, not the
+# checkout the hook happens to run in.
+# ---------------------------------------------------------------------------
+
+
+def _make_repo(tmp_path: Any, name: str, origin: str) -> str:
+    """A real git repo with an origin, so `_repo_at` is exercised rather than
+    mocked. The hook shells out to `git config`; a fake would not prove it
+    parses what git actually prints."""
+    import subprocess
+
+    path = tmp_path / name
+    path.mkdir()
+    subprocess.run(["git", "init", "-q"], cwd=path, check=True)
+    subprocess.run(["git", "remote", "add", "origin", origin], cwd=path, check=True)
+    return str(path)
+
+
+def test_cd_prefix_resolves_the_repo_from_that_directory(tmp_path: Any) -> None:
+    """The false positive this fixes: merging another project's PR from its
+    worktree was judged against *this* checkout. clud#1150 and
+    FastLED/FastLED#1150 are unrelated PRs that happen to share a number, and
+    the hook blocked the clud merge citing the FastLED one."""
+    hook = _load_hook()
+    other = _make_repo(tmp_path, "clud-wt", "https://github.com/zackees/clud.git")
+
+    pr, repo = hook._target(f"cd {other} && gh pr merge 1150 --squash --delete-branch")
+
+    assert pr == "1150"
+    assert repo == "zackees/clud", "must not fall back to the current checkout"
+
+
+def test_ssh_remote_urls_resolve(tmp_path: Any) -> None:
+    hook = _load_hook()
+    other = _make_repo(tmp_path, "ssh-wt", "git@github.com:zackees/clud.git")
+
+    _, repo = hook._target(f"cd {other} && gh pr merge 7 --squash")
+
+    assert repo == "zackees/clud"
+
+
+def test_explicit_repo_still_wins_over_the_cd(tmp_path: Any) -> None:
+    """`--repo` is what the user actually asked for; a `cd` earlier in the
+    chain must not override it."""
+    hook = _load_hook()
+    other = _make_repo(tmp_path, "wt", "https://github.com/zackees/clud.git")
+
+    _, repo = hook._target(
+        f"cd {other} && gh pr merge 1268 --repo FastLED/fbuild --squash"
+    )
+
+    assert repo == "FastLED/fbuild"
+
+
+def test_no_cd_is_unchanged(tmp_path: Any) -> None:
+    """The ordinary same-repo merge keeps resolving to the current checkout,
+    so this fix cannot weaken the guard it exists to enforce."""
+    hook = _load_hook()
+
+    assert hook._target("gh pr merge 3866 --squash --delete-branch") == ("3866", None)
+
+
+def test_a_cd_to_a_non_repo_is_allowed_rather_than_misjudged(tmp_path: Any) -> None:
+    """If the directory is not a git checkout we cannot name the target repo.
+    Judging the number against *this* checkout is exactly the original bug, so
+    the hook declines instead."""
+    hook = _load_hook()
+    plain = tmp_path / "not-a-repo"
+    plain.mkdir()
+
+    _, repo = hook._target(f"cd {plain} && gh pr merge 1150 --squash")
+
+    assert repo is None
+
+
+def test_addressor_crash_exits_2_not_1(tmp_path: Any) -> None:
+    """A crash in the checker must not read as "unresolved reviews".
+
+    An unhandled traceback exits 1, which is precisely the code the hook
+    treats as a real verdict — so a `gh` failure, a network blip, or a PR
+    number that does not exist in the resolved repo all blocked the merge
+    while claiming there were review comments to address.
+    """
+    import subprocess
+    import sys as _sys
+
+    addressor = REPO_ROOT / "ci" / "tools" / "coderabbit_addressor.py"
+    # A PR number that cannot exist drives `gh api` to fail inside the check.
+    result = subprocess.run(
+        [
+            _sys.executable,
+            str(addressor),
+            "--check",
+            "999999999",
+            "--repo",
+            "FastLED/FastLED",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+
+    assert result.returncode != 1, (
+        "exit 1 is the hook's 'unresolved reviews' verdict; an internal "
+        f"failure must not use it. stderr:\n{result.stderr[-600:]}"
+    )

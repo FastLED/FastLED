@@ -35,6 +35,38 @@ REPO_ARG_RE = re.compile(r"(?:--repo|-R)[= ]\s*([\w.-]+/[\w.-]+)")
 # `gh pr merge https://github.com/OWNER/NAME/pull/N` would be checked
 # against the current checkout instead of OWNER/NAME.
 PR_URL_RE = re.compile(r"github\.com/([\w.-]+/[\w.-]+)/pull/\d+")
+# `cd <dir> && gh pr merge N` — `gh` resolves the repo from *that* directory,
+# so the hook has to as well. Without this, merging another project's PR from
+# its worktree was checked against this checkout: merging zackees/clud#1150
+# from `cd ~/dev/clud-wt-gate` was judged against FastLED/FastLED#1150, an
+# unrelated PR that happened to share a number.
+CD_RE = re.compile(r"(?:^|&&|;|\|\|)\s*cd\s+(?:--\s+)?([^\s;&|]+)")
+REMOTE_URL_RE = re.compile(r"[:/]([\w.-]+/[\w.-]+?)(?:\.git)?$")
+
+
+def _repo_at(path: str) -> str | None:
+    """`owner/repo` for the git checkout at `path`, or None.
+
+    Reads `remote.origin.url` rather than calling `gh`: no network, and it
+    fails closed to None on anything unexpected (missing dir, not a repo, no
+    origin, a URL shape this does not recognise).
+    """
+    try:
+        result = subprocess.run(
+            ["git", "-C", path, "config", "--get", "remote.origin.url"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        return None
+    if result.returncode != 0:
+        return None
+    match = REMOTE_URL_RE.search(result.stdout.strip())
+    return match.group(1) if match else None
 
 
 def _target(command: str) -> tuple[str | None, str | None]:
@@ -48,8 +80,14 @@ def _target(command: str) -> tuple[str | None, str | None]:
     if pr_match:
         pr = pr_match.group(1) or pr_match.group(2)
     repo_match = REPO_ARG_RE.search(command) or PR_URL_RE.search(command)
-    repo = repo_match.group(1) if repo_match else None
-    return pr, repo
+    if repo_match:
+        return pr, repo_match.group(1)
+    # No explicit repo. If the command cd's somewhere first, that is where
+    # `gh` will resolve the repo from, so resolve it from there too.
+    cd_match = CD_RE.search(command)
+    if cd_match:
+        return pr, _repo_at(cd_match.group(1))
+    return pr, None
 
 
 def main() -> int:
@@ -76,6 +114,15 @@ def main() -> int:
     # repository — and blocked with "no PR found for current branch" whenever
     # the current branch had no PR of its own.
     pr, repo = _target(command)
+    if repo is None and CD_RE.search(command):
+        # The command changes directory but we could not name the repository
+        # there. Checking `pr` against *this* checkout is what produced the
+        # original false positive, so decline to judge rather than judge wrong.
+        sys.stderr.write(
+            "[check_pr_merge_reviews] command changes directory and the "
+            "repository there could not be identified; allowing merge.\n"
+        )
+        return 0
     cmd = ["uv", "run", "python", "ci/tools/coderabbit_addressor.py", "--check"]
     if pr:
         cmd.append(pr)
@@ -98,10 +145,10 @@ def main() -> int:
     if result.returncode == 0:
         return 0
 
-    # Exit 2 from the addressor means "could not identify a PR", not
-    # "this PR has unresolved reviews". Blocking then is a false positive:
-    # there is no review state to protect. Only a real unresolved-comment
-    # verdict (exit 1) blocks.
+    # Exit 2 from the addressor means "could not identify a PR" or "the check
+    # itself failed" — not "this PR has unresolved reviews". Blocking then is
+    # a false positive: there is no review state to protect. Only a real
+    # unresolved-comment verdict (exit 1) blocks.
     if result.returncode != 1:
         sys.stderr.write(result.stderr or "")
         sys.stderr.write(

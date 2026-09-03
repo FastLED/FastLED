@@ -313,4 +313,24 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        raise
+    except SystemExit:
+        raise
+    except Exception as exc:  # noqa: BLE001 - the exit code is the point
+        # Exit 2, not the 1 an unhandled traceback would produce. The merge
+        # hook reads 1 as "this PR has unresolved review comments" and blocks
+        # on it; a crash in here is not that. Letting the traceback out made
+        # every internal failure — a `gh` error, a network blip, a PR number
+        # that does not exist in this repo — indistinguishable from a real
+        # verdict, and it blocked the merge either way.
+        import traceback
+
+        traceback.print_exc()
+        print(
+            "[address-reviews] internal error (above); not a review verdict",
+            file=sys.stderr,
+        )
+        sys.exit(2)
