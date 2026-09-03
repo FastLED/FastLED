@@ -5,10 +5,23 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.5.20. It carries hardened USB/deploy recovery, current
+    # Pin to fbuild 2.5.22. It carries hardened USB/deploy recovery, current
     # esptool probing, and the accumulated library/build fixes below.
     #
     # Pin history:
+    #   2.5.22 -- ESP32-S3 stops reinstalling its 298 MB SDK-libs archive on
+    #              every build. The completion check required
+    #              `<mcu>/lib/libfreertos.a`, which S3 alone does not ship
+    #              there (its FreeRTOS build is per flash/PSRAM mode, so the
+    #              archive lives under dio_opi/, qio_qspi/, ...), so the check
+    #              never passed. Measured on a bare S3 blink: no-op build
+    #              161.2s -> 0.3s, one-file fresh build 233.0s -> 7.1s
+    #              (FastLED/fbuild#1411/#1413).
+    #   2.5.21 -- exposes structured firmware artifacts to the Python API
+    #              (FastLED/fbuild#1402), fetches the ESP8266 core from a
+    #              release asset so its submodules come with it
+    #              (FastLED/fbuild#1398), and runs shared-code CI against a
+    #              core board set instead of all 80 (FastLED/fbuild#1397).
     #   2.5.20 -- fbuild provisions the Linux shared libraries Espressif QEMU
     #              needs (libslirp/libSDL2/libpixman) itself instead of
     #              requiring an apt-get step from the caller: it probes the
@@ -208,7 +221,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.21",
+    "fbuild==2.5.22",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented
