@@ -450,27 +450,6 @@ reviews:
         statics with non-trivial constructors (Teensy 3.x `__cxa_guard` conflict), or
         the `.cpp.hpp` / `.impl.hpp` content patterns. If function definitions are
         needed, they belong in `.cpp.hpp` or `.impl.hpp` files.
-
-    # Listed after the src/**/*.h rule above, which also matches this path.
-    # Vendored upstream sources are held to upstream's shape, not FastLED's.
-    - path: "src/third_party/**/*.{h,hpp}"
-      instructions: |
-        Vendored upstream code, tracked against upstream via `FASTLED.patch` and
-        `PROVENANCE.md` in the same directory. The repository's own header
-        conventions do NOT apply here, and flagging them produces false
-        positives on every PR that touches this tree:
-
-        - These are single-header libraries. Function and template definitions
-          belong in the `.h` and must stay there; there is no `.cpp.hpp` /
-          `.impl.hpp` split to move them into, and inventing one enlarges the
-          diff carried against upstream.
-        - They use upstream's own macro prefixes (`MP3D_`, `MINIMP3_`), not
-          `FL_<COMPONENT>_HAS_<FEATURE>`. A capability macro here should match
-          the surrounding file and be released in its `#undef` block.
-
-        Review these files for correctness, for bit-exactness against the
-        reference decoder, and for how much patch surface a change adds against
-        upstream -- not for layout or naming.
     - path: "src/fl/**/*.h"
       instructions: |
         FastLED Public Settings Pattern (see agents/docs/cpp-standards.md):
