@@ -34,3 +34,13 @@ debug = "line-tables-only"
 # (cargo caches dep artifacts across crate-source edits).
 [profile.dev.package."*"]
 opt-level = 1
+
+# CI runs the crate's tests with `--release`. Since cargo 1.77 the release
+# profile defaults to `strip = "debuginfo"`, which makes rustc shell out to
+# `rust-objcopy` after every link. On the GitHub macOS runners that binary
+# dies at load time (`dyld: Library not loaded: @rpath/libLLVM.dylib`);
+# rustc only warns, but soldr >= 0.9.12 promotes the failed strip into a
+# build failure, which turned `unit tests macos` red on master. Nothing
+# consumes a stripped test binary, so opt out of stripping entirely.
+[profile.release]
+strip = "none"
