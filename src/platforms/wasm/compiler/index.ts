@@ -820,14 +820,21 @@ async function resolveManifestAssets(manifest) {
 
     if (spec.sha256) {
       const actual = await sha256Hex(bytes);
-      if (actual && actual !== String(spec.sha256).toLowerCase()) {
+      if (!actual) {
+        // Fail closed: a declared digest that cannot be checked (no
+        // SubtleCrypto, e.g. an insecure origin) must not admit the bytes.
+        console.error(
+          `Asset '${path}' declares a sha256 but SubtleCrypto is unavailable; cannot verify. Dropping it.`,
+        );
+        return null;
+      }
+      if (actual !== String(spec.sha256).toLowerCase()) {
         console.error(
           `Asset '${path}' failed integrity check: declared ${spec.sha256}, got ${actual}. Dropping it.`,
         );
         return null;
       }
-      if (actual) console.log(`Asset '${path}' sha256 verified`);
-      else console.warn(`Asset '${path}': no SubtleCrypto, sha256 not verified`);
+      console.log(`Asset '${path}' sha256 verified`);
     } else {
       console.warn(`Asset '${path}' declares no sha256; contents are unverified`);
     }
