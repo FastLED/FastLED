@@ -22,9 +22,11 @@ entry of a shared manifest.
 
 v1 scope:
     - Platforms: WASM + host/stub only. ESP32 LittleFS is future work.
-    - Metadata keys parsed but NOT enforced: ``sha256=<hex>``, ``fallback=<url>``.
-      The scanner records them so the shipping manifest is forward-compatible
-      with future integrity/retry features; the runtime ignores them in v1.
+    - Metadata keys ``sha256=<hex>`` and ``fallback=<url>`` are enforced by the
+      WASM loader (``src/platforms/wasm/compiler/index.ts``): it retries the
+      fallback when the primary URL fails and drops any asset whose bytes do
+      not match the declared digest (#4025). The C++ registry only resolves
+      URLs and does not check either field.
     - ``.lnk`` file naming: ``<asset>.<ext>.lnk`` (e.g. ``track.mp3.lnk``). The
       scanner reports the relative path WITHOUT the trailing ``.lnk``, so
       sketches can write ``fl::asset("data/track.mp3")`` and get a hit.

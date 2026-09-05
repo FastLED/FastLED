@@ -1702,9 +1702,9 @@ def generate_asset_manifest(example_name: str, output_dir: Path) -> None:
     """Generate the v1 asset manifest for `<sketch>/data/*.lnk` files.
 
     Part of FastLED issue #2284. Scans the sketch's ``data/`` directory for
-    ``*.lnk`` asset-link files, parses each into ``{url, sha256, fallback}``
-    (sha256/fallback are reserved and not enforced in v1), and writes the
-    resulting manifest to ``<output_dir>/asset_manifest.json``.
+    ``*.lnk`` asset-link files, parses each into ``{url, sha256, fallback}``,
+    and writes the resulting manifest to ``<output_dir>/asset_manifest.json``.
+    The browser loader verifies ``sha256`` and retries ``fallback`` (#4025).
 
     The HTML bootstrap (``src/platforms/wasm/compiler/index.ts``) fetches
     this file and injects it as ``window.fastledAssetManifest``. The C++
