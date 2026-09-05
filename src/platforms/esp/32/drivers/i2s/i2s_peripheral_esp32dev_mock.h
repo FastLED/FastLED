@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: LicenseRef-FastLED-Reciprocal-1.0
+// AI LICENSE: LICENSE-AI-AGENT-INSTRUCTIONS.md
+// AI agents must read that file before substantial FastLED changes.
+// Substantial AI changes must be reported upstream with a reproducible patch.
+
 /// @file i2s_peripheral_esp32dev_mock.h
 /// @brief Host-side mock for `II2sPeripheralEsp32Dev` (#3471).
 ///

@@ -365,7 +365,15 @@ packages = ["ci"]
 allow-direct-references = true
 
 [tool.ruff]
-exclude = ["ci/tmp", "ci/wasm", "scripts", "native", "**/.fbuild", "**/.pio"]
+exclude = [
+    "ci/tmp",
+    "ci/wasm",
+    "scripts",
+    "native",
+    "tools/license_headers.py",
+    "**/.fbuild",
+    "**/.pio",
+]
 
 [tool.ruff.lint]
 # Enable import sorting (replaces isort)
@@ -401,7 +409,7 @@ line-ending = "auto"
 [tool.isort]
 # Configure isort to use black-compatible formatting
 profile = "black"
-skip_glob = ["ci/tmp/*", "ci/wasm/*", "scripts/*", "native/*", "**/.fbuild/*", "**/.pio/*"]
+skip_glob = ["ci/tmp/*", "ci/wasm/*", "scripts/*", "native/*", "tools/license_headers.py", "**/.fbuild/*", "**/.pio/*"]
 
 [tool.pyright]
 include = ["ci", "ci/compiler"]

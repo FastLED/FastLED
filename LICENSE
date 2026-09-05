@@ -1,20 +1,104 @@
-The MIT License (MIT)
+FastLED Reciprocal License Version 1.0 — Release Candidate
+==========================================================
 
-Copyright (c) 2013 FastLED
+This combined license consists of the Mozilla Public License Version 2.0 and
+the FastLED Additional Terms below.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+1. Incorporation of MPL 2.0
+---------------------------
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+The complete Mozilla Public License Version 2.0 contained in `MPL-2.0.txt` is
+incorporated into this License by reference. All provisions of MPL 2.0 apply to
+Covered Software, including its file-level copyleft, Larger Work boundary,
+contributor copyright and patent grants, contributor representation, patent
+litigation termination, warranty disclaimer, and limitation of liability.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+The FastLED Additional Terms are appended conditions of this combined License.
+Where an Additional Term expressly conflicts with MPL 2.0, that Additional Term
+controls only to the minimum extent of the conflict. Otherwise MPL 2.0 applies
+unchanged.
+
+This combined instrument is named the **FastLED Reciprocal License 1.0**. It is
+not the unmodified Mozilla Public License, is not represented as OSI-approved,
+and uses the identifier `LicenseRef-FastLED-Reciprocal-1.0`. The Mozilla
+Foundation is not the steward of this combined license; FastLED is its steward.
+The MPL text is included and identified to acknowledge the license on which
+this combined instrument is based.
+
+2. FastLED Additional Terms
+---------------------------
+
+2.1. Definitions
+
+"FastLED" means Covered Software originating in the official FastLED
+repository.
+
+"Modified FastLED" means FastLED containing Modifications as that term is
+defined by MPL 2.0. It does not include separate files of a Larger Work that do
+not contain or derive from Covered Software.
+
+"First Sale" means the first sale, lease, or other transfer for monetary
+compensation of Modified FastLED, or of software, firmware, or hardware that
+includes Modified FastLED.
+
+2.2. Proprietary Larger Works
+
+For clarity, independent application code, sketches, firmware logic, products,
+plugins, and other works that merely call FastLED APIs are separate files of a
+Larger Work. They do not become Covered Software solely through use,
+compilation, static or dynamic linking, embedding, distribution, deployment,
+or sale. Such Larger Work material may remain proprietary, subject to
+compliance with MPL 2.0 and these Additional Terms for Covered Software.
+
+2.3. Public Availability on the Date of First Sale
+
+If You make a First Sale of Modified FastLED, You must satisfy one of the
+following public reporting mechanisms on or before the date of that First Sale.
+There is no post-sale grace period.
+
+(a) **Public fork.** Publish the complete Source Code Form of the Modified
+    FastLED in a repository that is publicly discoverable, readable, cloneable,
+    and forkable without payment or special access. The preferred location is a
+    public fork of the official FastLED repository on the same source-hosting
+    platform. The fork must identify the upstream FastLED commit or release
+    from which it was derived. If that platform cannot provide a public fork,
+    an equivalent public Git repository is sufficient.
+
+(b) **Public bug-report patch.** Open a public issue or bug report in the
+    official FastLED repository that identifies the exact upstream commit SHA
+    used as the base and contains a complete unified diff against that commit,
+    together with a short description of the modification. The base commit and
+    diff must be sufficient to reconstruct the complete Modified FastLED Source
+    Code Form deterministically. A patch represented by the equivalent of
+    `git diff <upstream-commit>...HEAD` is sufficient regardless of size.
+
+This requirement applies only to Modified FastLED. It does not require
+publication of independent application, sketch, firmware, product, plugin, or
+other Larger Work source.
+
+2.4. No Relicensing of Historical Releases
+
+These terms apply only where a copyright holder validly offers Covered
+Software under this License. They do not withdraw, terminate, or alter rights
+previously granted under the MIT License or any other license.
+
+3. Source Code Form Notice
+--------------------------
+
+The recommended machine-readable notice is:
+
+  SPDX-License-Identifier: LicenseRef-FastLED-Reciprocal-1.0
+
+The corresponding complete license text is this `LICENSE` file together with
+the incorporated `MPL-2.0.txt` file. Additional AI-agent discovery lines may
+refer to `LICENSE-AI-AGENT-INSTRUCTIONS.md`; those behavioral instructions are
+legally non-remedial and are not conditions of this copyright license.
+
+4. Release-Candidate Status
+---------------------------
+
+This text requires review by an open-source licensing attorney before adoption
+or a `v1.0.0` tag. In particular, counsel must review whether the appended
+condition is compatible with MPL 2.0 Section 3.1, the definition and timing of
+First Sale, public-fork fallback, patent terms, and downstream-license
+compatibility.
