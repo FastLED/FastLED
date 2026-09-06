@@ -6,7 +6,7 @@
 
 - [x] Revalidate current master, phase issues, and #4156 review decisions.
 - [x] Assign P1, P2, and P4 to Terra agents in isolated checkouts.
-- [ ] Merge the cross-phase contract addendum and link it from the tracker.
+- [ ] Merge the [cross-phase contract addendum](../../docs/color-pipeline-contracts.md) and link it from the tracker.
 - [ ] P1 #4035: complete research/schema artifacts and merge its PR.
 - [ ] P2 #4036: complete profile/binding API and merge its PR.
 - [ ] P3 #4037: complete generator/ingestion/freshness tooling and merge its PR.

@@ -38,10 +38,12 @@ if red light is `d` and green light is `d*d`, quartering full-scale drive yields
 red light `1/4` but green light `1/16`. Quarter light requires drives `1/4` and
 `1/2` respectively. P5 golden vectors and P6/P8 integration must cover this.
 
-Source-profile defaults for ordinary managed RGB buffers are linear transfer,
-BT.709 primaries, and D65 white. This names the primary/white convention as well
-as the transfer; enabling management is explicit and can change appearance.
-With management disabled, existing byte output remains unchanged.
+Source-profile defaults for ordinary managed, containerless RGB buffers are
+linear transfer, BT.709 primaries, and D65 white. This applies to RGB8 buffers
+too; eight-bit storage alone does not imply sRGB transfer. In contrast,
+[RGB8 `.fled` input with absent metadata](#source-admission-and-playback-r1-r5-r6-r10)
+defaults to sRGB transfer. Enabling management is explicit and can change
+appearance. With management disabled, existing byte output remains unchanged.
 
 ### Container formats and generic storage
 
