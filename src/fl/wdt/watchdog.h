@@ -177,22 +177,15 @@ public:
     /// @endcode
     /// Requires `FL_WATCHDOG_HAS_BOOTLOADER_REBOOT`; elsewhere the escape is
     /// a no-op that returns false and leaves the crash counter intact.
-    fl::u16 bootloaderEscapeThreshold() const FL_NO_EXCEPT {
-        return mBootloaderEscapeThreshold;
-    }
+    fl::u16 bootloaderEscapeThreshold() const FL_NO_EXCEPT;
 
     /// @brief Set the consecutive-watchdog-reset count that triggers the
     /// escape. 0 (the default) disables it.
-    void setBootloaderEscapeThreshold(fl::u16 threshold) FL_NO_EXCEPT {
-        mBootloaderEscapeThreshold = threshold;
-    }
+    void setBootloaderEscapeThreshold(fl::u16 threshold) FL_NO_EXCEPT;
 
     /// @brief True when the escape is enabled and the board has hit the
     /// consecutive-watchdog-reset threshold.
-    bool shouldEscapeToBootloader() const FL_NO_EXCEPT {
-        return mBootloaderEscapeThreshold != 0
-            && consecutiveCrashCount() >= mBootloaderEscapeThreshold;
-    }
+    bool shouldEscapeToBootloader() const FL_NO_EXCEPT;
 
     /// @brief Reboot into the bootloader if this looks like a boot loop.
     /// @return false when not looping, or when the platform has no bootloader
@@ -200,10 +193,7 @@ public:
     ///
     /// The crash counter is deliberately left alone: if the reboot is
     /// unsupported we must not destroy the evidence that a loop is happening.
-    bool escapeToBootloaderIfLooping() FL_NO_EXCEPT {
-        if (!shouldEscapeToBootloader()) return false;
-        return rebootIntoBootloader();
-    }
+    bool escapeToBootloaderIfLooping() FL_NO_EXCEPT;
 
     FL_NO_RETURN void reboot() FL_NO_EXCEPT;
 
