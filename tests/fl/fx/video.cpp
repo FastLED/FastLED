@@ -16,10 +16,14 @@
 #include "fl/gfx/crgb.h"
 #include "fl/fx/fx.h"
 #include "fl/fx/fx2d.h"
+#include "fl/fx/frame.h"
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
+#include "fl/stl/cstring.h"
 #include "fl/math/xymap.h"
 #include "fl/video/pixel_stream.h"
+#include "fl/fled/color.h"
+#include "fl/fled/pixel_format.h"
 #include "FastLED.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -82,26 +86,456 @@ class FakeFilebuf : public fl::filebuf {
     size_t mPos = 0;
 };
 
-FL_TEST_CASE("PixelStream zero frame size reports no displayed frames") {
+class NonSeekableFakeFilebuf : public FakeFilebuf {
+  public:
+    bool seek(size_t, fl::seek_dir) override { return false; }
+};
+
+FL_TEST_CASE("PixelStream rejects zero and negative base frame sizes") {
     FakeFilebufPtr fileHandle = fl::make_shared<FakeFilebuf>();
     const uint8_t byte = 0x42;
     FL_REQUIRE_EQ(fileHandle->writeData(&byte, 1), 1);
 
-    fl::PixelStream stream(0);
-    FL_REQUIRE(stream.begin(fileHandle));
-    FL_CHECK_EQ(stream.framesDisplayed(), 0);
-    FL_CHECK_EQ(stream.bytesRemainingInFrame(), 0);
+    FL_SUBCASE("zero") {
+        fl::PixelStream stream(0);
+        FL_CHECK_FALSE(stream.begin(fileHandle));
+        FL_CHECK_FALSE(stream.available());
+    }
+    FL_SUBCASE("negative") {
+        fl::PixelStream stream(-3);
+        FL_CHECK_FALSE(stream.begin(fileHandle));
+        FL_CHECK_FALSE(stream.available());
+    }
 }
 
-FL_TEST_CASE("PixelStream zero frame size preserves streaming semantics") {
-    fl::memorybufPtr memoryStream = fl::make_shared<fl::memorybuf>(3);
-    const CRGB pixel = CRGB::Red;
-    FL_REQUIRE_EQ(memoryStream->writeCRGB(&pixel, 1), 1);
+FL_TEST_CASE("PixelStream rejects RGB16 FLED stride that overflows i32") {
+    FakeFilebufPtr fileHandle = fl::make_shared<FakeFilebuf>();
+    const uint8_t rgb16Fled[] = {
+        'F', 'L', 'E', 'D', 1, 0x05, 0, 0, 0, 0, 0, 0,
+    };
+    FL_REQUIRE_EQ(fileHandle->writeData(rgb16Fled, sizeof(rgb16Fled)),
+                  sizeof(rgb16Fled));
 
-    fl::PixelStream stream(0);
-    FL_REQUIRE(stream.begin(memoryStream));
-    FL_CHECK_EQ(stream.getType(), fl::PixelStream::kStreaming);
-    FL_CHECK_EQ(stream.framesDisplayed(), -1);
+    // This positive RGB8 base stride is divisible by three, but multiplying
+    // its LED count by RGB16's six-byte storage does not fit in i32.
+    fl::PixelStream stream(2147483646);
+    FL_CHECK_FALSE(stream.begin(fileHandle));
+    FL_CHECK_FALSE(stream.available());
+}
+
+FL_TEST_CASE("PixelStream rejects partial FLED frames and reserved header bytes") {
+    struct InvalidFled {
+        fl::u8 format;
+        fl::u8 payloadBytes;
+        fl::u8 reservedOffset;
+    };
+    const InvalidFled invalid[] = {
+        {0x00, 4, 0}, // rgb8 tail
+        {0x05, 7, 0}, // rgb16 tail
+        {0x00, 3, 6}, // reserved byte 0
+        {0x00, 3, 7}, // reserved byte 1
+    };
+    for (const InvalidFled& item : invalid) {
+        FakeFilebufPtr file = fl::make_shared<FakeFilebuf>();
+        fl::vector<fl::u8> bytes(12 + item.payloadBytes, 0);
+        bytes[0] = 'F'; bytes[1] = 'L'; bytes[2] = 'E'; bytes[3] = 'D';
+        bytes[4] = 1;
+        bytes[5] = item.format;
+        if (item.reservedOffset != 0) {
+            bytes[item.reservedOffset] = 1;
+        }
+        FL_REQUIRE_EQ(file->writeData(bytes.data(), bytes.size()), bytes.size());
+        fl::PixelStream stream(3);
+        CRGB pixel = CRGB::Red;
+        FL_CHECK_FALSE(stream.begin(file));
+        FL_CHECK_FALSE(stream.available());
+        FL_CHECK_FALSE(stream.readPixel(&pixel));
+        FL_CHECK_EQ(pixel, CRGB::Red);
+    }
+}
+
+FL_TEST_CASE("Video Frame draw fails dark after rejected FLED admission") {
+    FakeFilebufPtr file = fl::make_shared<FakeFilebuf>();
+    const uint8_t invalidFled[] = {
+        'F', 'L', 'E', 'D', 1, 0x00, 1, 0, 0, 0, 0, 0, 1, 2, 3,
+    };
+    FL_REQUIRE_EQ(file->writeData(invalidFled, sizeof(invalidFled)),
+                  sizeof(invalidFled));
+    fl::Video video(1, 30, 1);
+    FL_CHECK_FALSE(video.begin(file));
+    fl::Frame frame(1);
+    frame.rgb()[0] = CRGB::Red;
+    FL_CHECK_FALSE(video.draw(0, &frame));
+    FL_CHECK_EQ(frame.rgb()[0], CRGB::Black);
+}
+
+FL_TEST_CASE("Video admits a valid source after a rejected FLED container") {
+    FakeFilebufPtr bad = fl::make_shared<FakeFilebuf>();
+    const uint8_t invalidFled[] = {
+        'F', 'L', 'E', 'D', 1, 0x00, 1, 0, 0, 0, 0, 0, 1, 2, 3,
+    };
+    FL_REQUIRE_EQ(bad->writeData(invalidFled, sizeof(invalidFled)),
+                  sizeof(invalidFled));
+
+    fl::Video video(1, 30, 1);
+    FL_REQUIRE_FALSE(video.begin(bad));
+    FL_REQUIRE(video.error().size());
+
+    // Rejecting one container describes that source, not the instance. The
+    // same Video has to admit a valid handle afterwards, and must not carry
+    // the previous rejection forward as its error state.
+    FakeFilebufPtr good = fl::make_shared<FakeFilebuf>();
+    const uint8_t raw[] = {0x11, 0x22, 0x33};
+    FL_REQUIRE_EQ(good->writeData(raw, sizeof(raw)), sizeof(raw));
+
+    FL_CHECK(video.begin(good));
+    FL_CHECK(video.error().empty());
+    FL_CHECK_FALSE(video.hasEmbeddedScreenMap());
+}
+
+FL_TEST_CASE("Video setError blocks admission until the caller clears it") {
+    FakeFilebufPtr good = fl::make_shared<FakeFilebuf>();
+    const uint8_t raw[] = {0x11, 0x22, 0x33};
+    FL_REQUIRE_EQ(good->writeData(raw, sizeof(raw)), sizeof(raw));
+
+    fl::Video video(1, 30, 1);
+    // A caller-supplied error is persistent, unlike a begin() rejection.
+    video.setError("persistent failure");
+    FL_CHECK_FALSE(video.begin(good));
+    FL_CHECK_EQ(video.error(), fl::string("persistent failure"));
+
+    video.setError("");
+    FL_CHECK(video.begin(good));
+}
+
+FL_TEST_CASE("PixelStream rejects an unsupported FLED format instead of reading its header as RGB") {
+    FakeFilebufPtr fileHandle = fl::make_shared<FakeFilebuf>();
+    // A complete FLED header for rgb16_linear followed by one six-byte
+    // sample. PixelStream only renders RGB8 today, so recognizing the magic
+    // must reject this container rather than rewinding and exposing "FLE".
+    const uint8_t fledRgb16[] = {
+        'F', 'L', 'E', 'D', 1, 0xff, 0, 0, 0, 0, 0, 0,
+        0x00, 0x12, 0x01, 0x12, 0x02, 0x12,
+    };
+    FL_REQUIRE_EQ(fileHandle->writeData(fledRgb16, sizeof(fledRgb16)),
+                  sizeof(fledRgb16));
+
+    fl::PixelStream stream(3);
+    FL_CHECK_FALSE(stream.begin(fileHandle));
+    CRGB pixel;
+    FL_CHECK_FALSE(stream.available());
+    FL_CHECK_FALSE(stream.readPixel(&pixel));
+}
+
+FL_TEST_CASE("PixelStream FLED recognition only falls back when magic is absent") {
+    FL_SUBCASE("raw RGB remains playable") {
+        FakeFilebufPtr fileHandle = fl::make_shared<FakeFilebuf>();
+        const uint8_t raw[] = {0x11, 0x22, 0x33};
+        FL_REQUIRE_EQ(fileHandle->writeData(raw, sizeof(raw)), sizeof(raw));
+
+        fl::PixelStream stream(3);
+        FL_REQUIRE(stream.begin(fileHandle));
+        CRGB pixel;
+        FL_REQUIRE(stream.readPixel(&pixel));
+        FL_CHECK_EQ(pixel, CRGB(0x11, 0x22, 0x33));
+    }
+
+    FL_SUBCASE("valid RGB8 FLED skips the header") {
+        FakeFilebufPtr fileHandle = fl::make_shared<FakeFilebuf>();
+        const uint8_t fledRgb8[] = {
+            'F', 'L', 'E', 'D', 1, 0x00, 0, 0, 0, 0, 0, 0,
+            0x11, 0x22, 0x33,
+        };
+        FL_REQUIRE_EQ(fileHandle->writeData(fledRgb8, sizeof(fledRgb8)),
+                      sizeof(fledRgb8));
+
+        fl::PixelStream stream(3);
+        FL_REQUIRE(stream.begin(fileHandle));
+        CRGB pixel;
+        FL_REQUIRE(stream.readPixel(&pixel));
+        FL_CHECK_EQ(pixel, CRGB(0x11, 0x22, 0x33));
+    }
+
+    FL_SUBCASE("future format version and truncation are rejected") {
+        const uint8_t invalidHeaders[][12] = {
+            {'F', 'L', 'E', 'D', 1, 0x06, 0, 0, 0, 0, 0, 0},
+            {'F', 'L', 'E', 'D', 2, 0x00, 0, 0, 0, 0, 0, 0},
+            {'F', 'L', 'E', 'D', 1, 0x00, 0, 0, 1, 0, 0, 0},
+        };
+        for (fl::size i = 0; i < sizeof(invalidHeaders) / sizeof(invalidHeaders[0]); ++i) {
+            FakeFilebufPtr fileHandle = fl::make_shared<FakeFilebuf>();
+            FL_REQUIRE_EQ(fileHandle->writeData(invalidHeaders[i],
+                                                sizeof(invalidHeaders[i])),
+                          sizeof(invalidHeaders[i]));
+            fl::PixelStream stream(3);
+            FL_CHECK_FALSE(stream.begin(fileHandle));
+        }
+
+        FakeFilebufPtr truncated = fl::make_shared<FakeFilebuf>();
+        const uint8_t magicOnly[] = {'F', 'L', 'E', 'D', 1};
+        FL_REQUIRE_EQ(truncated->writeData(magicOnly, sizeof(magicOnly)),
+                      sizeof(magicOnly));
+        fl::PixelStream stream(3);
+        FL_CHECK_FALSE(stream.begin(truncated));
+    }
+}
+
+FL_TEST_CASE("PixelStream rejects FLED magic on a non-seekable input") {
+    fl::shared_ptr<NonSeekableFakeFilebuf> fileHandle =
+        fl::make_shared<NonSeekableFakeFilebuf>();
+    const uint8_t fledRgb16[] = {
+        'F', 'L', 'E', 'D', 1, 0x05, 0, 0, 0, 0, 0, 0,
+        0x00, 0x12, 0x01, 0x12, 0x02, 0x12,
+    };
+    FL_REQUIRE_EQ(fileHandle->writeData(fledRgb16, sizeof(fledRgb16)),
+                  sizeof(fledRgb16));
+
+    fl::PixelStream stream(3);
+    FL_CHECK_FALSE(stream.begin(fileHandle));
+    FL_CHECK_FALSE(stream.available());
+}
+
+FL_TEST_CASE("Video carries RGB16 FLED source metadata and darkens rejected playback") {
+    FakeFilebufPtr rgb16 = fl::make_shared<FakeFilebuf>();
+    const uint8_t rgb16Fled[] = {
+        'F', 'L', 'E', 'D', 1, 0x05, 0, 0, 0, 0, 0, 0,
+        0x00, 0x12, 0x01, 0x12, 0x02, 0x12,
+    };
+    FL_REQUIRE_EQ(rgb16->writeData(rgb16Fled, sizeof(rgb16Fled)),
+                  sizeof(rgb16Fled));
+    fl::Video video(1, 30, 1);
+    FL_REQUIRE(video.begin(rgb16));
+
+    fl::fled::VideoColor color;
+    fl::fled::PixelStorage storage;
+    FL_REQUIRE(video.videoColor(&color));
+    FL_REQUIRE(video.pixelStorage(&storage));
+    FL_CHECK_EQ(storage.mFormat, fl::PixelFormat::Rgb16);
+    FL_CHECK_EQ(storage.mComponentByteOrder,
+                fl::fled::ComponentByteOrder::LittleEndian);
+    FL_CHECK_EQ(color.transfer, fl::fled::ColorTransfer::Linear);
+
+    CRGB leds[] = {CRGB::Red};
+    FL_CHECK_FALSE(video.draw(0, leds));
+    FL_CHECK_EQ(leds[0], CRGB::Black);
+}
+
+FL_TEST_CASE("Known non-RGB8 FLED formats never reach RGB8 playback") {
+    struct UnsupportedFormat {
+        fl::u8 mFormat;
+        fl::u8 bytesPerLed;
+    };
+    const UnsupportedFormat formats[] = {
+        {0x01, 1}, // gray8
+        {0x02, 4}, // rgba8
+        {0x03, 4}, // rgbw8
+        {0x04, 2}, // rgb565_le
+    };
+    const char metadata[] =
+        "{\"video\":{\"color\":{\"primaries\":\"bt709\",\"transfer\":\"srgb\","
+        "\"matrix\":\"rgb\",\"range\":\"full\"}}}";
+
+    for (const UnsupportedFormat& format : formats) {
+        fl::vector<uint8_t> bytes(12 + sizeof(metadata) - 1 + format.bytesPerLed, 0);
+        bytes[0] = 'F'; bytes[1] = 'L'; bytes[2] = 'E'; bytes[3] = 'D';
+        bytes[4] = 1;
+        bytes[5] = format.mFormat;
+        bytes[8] = sizeof(metadata) - 1;
+        for (fl::size i = 0; i < sizeof(metadata) - 1; ++i) {
+            bytes[12 + i] = metadata[i];
+        }
+        for (fl::size i = 0; i < format.bytesPerLed; ++i) {
+            bytes[12 + sizeof(metadata) - 1 + i] = static_cast<uint8_t>(i + 1);
+        }
+
+        FakeFilebufPtr streamFile = fl::make_shared<FakeFilebuf>();
+        FL_REQUIRE_EQ(streamFile->writeData(bytes.data(), bytes.size()), bytes.size());
+        fl::PixelStream stream(3);
+        FL_REQUIRE(stream.begin(streamFile));
+        CRGB legacy = CRGB::Red;
+        FL_CHECK_FALSE(stream.readPixel(&legacy));
+        FL_CHECK_EQ(legacy, CRGB::Red);
+
+        FakeFilebufPtr videoFile = fl::make_shared<FakeFilebuf>();
+        FL_REQUIRE_EQ(videoFile->writeData(bytes.data(), bytes.size()), bytes.size());
+        fl::Video video(1, 30, 1);
+        FL_REQUIRE(video.begin(videoFile));
+        CRGB leds[] = {CRGB::Red};
+        FL_CHECK_FALSE(video.draw(0, leds));
+        FL_CHECK_EQ(leds[0], CRGB::Black);
+    }
+}
+
+FL_TEST_CASE("PixelStream reads RGB16 FLED through a typed sample only") {
+    FakeFilebufPtr fileHandle = fl::make_shared<FakeFilebuf>();
+    const uint8_t rgb16Fled[] = {
+        'F', 'L', 'E', 'D', 1, 0x05, 0, 0, 0, 0, 0, 0,
+        0x00, 0x12, 0x01, 0x12, 0x02, 0x12,
+    };
+    FL_REQUIRE_EQ(fileHandle->writeData(rgb16Fled, sizeof(rgb16Fled)),
+                  sizeof(rgb16Fled));
+
+    fl::PixelStream stream(3);
+    FL_REQUIRE(stream.begin(fileHandle));
+    CRGB legacy;
+    FL_CHECK_FALSE(stream.readPixel(&legacy));
+
+    fl::video::PixelSample sample;
+    FL_REQUIRE(stream.readSample(&sample));
+    FL_CHECK_EQ(sample.mStorage.mFormat, fl::PixelFormat::Rgb16);
+    FL_CHECK_EQ(sample.mStorage.mComponentByteOrder,
+                fl::fled::ComponentByteOrder::LittleEndian);
+    FL_CHECK_EQ(sample.mColor.transfer, fl::fled::ColorTransfer::Linear);
+    FL_CHECK_EQ(sample.mComponents[0], fl::u16(0x1200));
+    FL_CHECK_EQ(sample.mComponents[1], fl::u16(0x1201));
+    FL_CHECK_EQ(sample.mComponents[2], fl::u16(0x1202));
+}
+
+FL_TEST_CASE("PixelStream resets FLED metadata and stride across reopen") {
+    const uint8_t rgb16Fled[] = {
+        'F', 'L', 'E', 'D', 1, 0x05, 0, 0, 0, 0, 0, 0,
+        0x00, 0x12, 0x01, 0x12, 0x02, 0x12,
+    };
+    const uint8_t rgb8Fled[] = {
+        'F', 'L', 'E', 'D', 1, 0x00, 0, 0, 0, 0, 0, 0,
+        0x12, 0x34, 0x56,
+    };
+    fl::PixelStream stream(3);
+    fl::fled::PixelStorage storage;
+    for (int i = 0; i < 2; ++i) {
+        FakeFilebufPtr file = fl::make_shared<FakeFilebuf>();
+        FL_REQUIRE_EQ(file->writeData(rgb16Fled, sizeof(rgb16Fled)),
+                      sizeof(rgb16Fled));
+        FL_REQUIRE(stream.begin(file));
+        FL_REQUIRE(stream.pixelStorage(&storage));
+        FL_CHECK_EQ(storage.mFormat, fl::PixelFormat::Rgb16);
+        FL_CHECK_EQ(stream.bytesPerFrame(), 6);
+    }
+    stream.close();
+    FL_CHECK_FALSE(stream.pixelStorage(&storage));
+
+    FakeFilebufPtr rgb8 = fl::make_shared<FakeFilebuf>();
+    FL_REQUIRE_EQ(rgb8->writeData(rgb8Fled, sizeof(rgb8Fled)), sizeof(rgb8Fled));
+    FL_REQUIRE(stream.begin(rgb8));
+    FL_REQUIRE(stream.pixelStorage(&storage));
+    FL_CHECK_EQ(storage.mFormat, fl::PixelFormat::Rgb8);
+    FL_CHECK_EQ(stream.bytesPerFrame(), 3);
+
+    FakeFilebufPtr raw = fl::make_shared<FakeFilebuf>();
+    const uint8_t rawBytes[] = {1, 2, 3};
+    FL_REQUIRE_EQ(raw->writeData(rawBytes, sizeof(rawBytes)), sizeof(rawBytes));
+    FL_REQUIRE(stream.begin(raw));
+    FL_CHECK_FALSE(stream.pixelStorage(&storage));
+    FL_CHECK_EQ(stream.bytesPerFrame(), 3);
+
+    fl::PixelStream nullStream(3);
+    FL_CHECK_FALSE(nullStream.begin(fl::filebuf_ptr()));
+
+    FakeFilebufPtr truncated = fl::make_shared<FakeFilebuf>();
+    const uint8_t truncatedHeader[] = {'F', 'L', 'E', 'D', 1};
+    FL_REQUIRE_EQ(truncated->writeData(truncatedHeader, sizeof(truncatedHeader)),
+                  sizeof(truncatedHeader));
+    FL_CHECK_FALSE(stream.begin(truncated));
+    FL_CHECK_FALSE(stream.pixelStorage(&storage));
+}
+
+FL_TEST_CASE("Video requires explicit best effort for invalid advisory RGB8 metadata") {
+    const char metadata[] =
+        "{\"video\":{\"color\":{\"primaries\":\"not-a-space\"}}}";
+    FakeFilebufPtr strictFile = fl::make_shared<FakeFilebuf>();
+    fl::vector<uint8_t> bytes(12 + sizeof(metadata) - 1 + 3, 0);
+    bytes[0] = 'F'; bytes[1] = 'L'; bytes[2] = 'E'; bytes[3] = 'D';
+    bytes[4] = 1;
+    bytes[8] = sizeof(metadata) - 1;
+    for (fl::size i = 0; i < sizeof(metadata) - 1; ++i) {
+        bytes[12 + i] = metadata[i];
+    }
+    bytes[12 + sizeof(metadata) - 1] = 0x12;
+    bytes[13 + sizeof(metadata) - 1] = 0x34;
+    bytes[14 + sizeof(metadata) - 1] = 0x56;
+    FL_REQUIRE_EQ(strictFile->writeData(bytes.data(), bytes.size()), bytes.size());
+
+    fl::Video strict(1, 30, 1);
+    FL_CHECK_FALSE(strict.begin(strictFile));
+    CRGB leds[] = {CRGB::Red};
+    strict.draw(fl::DrawContext(0, leds));
+    FL_CHECK_EQ(leds[0], CRGB::Black);
+
+    FakeFilebufPtr bestEffortFile = fl::make_shared<FakeFilebuf>();
+    FL_REQUIRE_EQ(bestEffortFile->writeData(bytes.data(), bytes.size()), bytes.size());
+    fl::Video bestEffort(1, 30, 1);
+    bestEffort.setFade(0, 0);
+    bestEffort.setFledPlaybackMode(fl::FledPlaybackMode::BestEffort);
+    FL_REQUIRE(bestEffort.begin(bestEffortFile));
+    FL_REQUIRE(bestEffort.draw(0, leds));
+    FL_CHECK_EQ(leds[0], CRGB(0x12, 0x34, 0x56));
+}
+
+FL_TEST_CASE("Video best effort never admits malformed FLED envelopes") {
+    const char* const envelopes[] = {"{", "[]"};
+    for (fl::size index = 0; index < sizeof(envelopes) / sizeof(envelopes[0]);
+         ++index) {
+        const char* envelope = envelopes[index];
+        const fl::size length = fl::strlen(envelope);
+        FakeFilebufPtr file = fl::make_shared<FakeFilebuf>();
+        fl::vector<uint8_t> bytes(12 + length + 3, 0);
+        bytes[0] = 'F'; bytes[1] = 'L'; bytes[2] = 'E'; bytes[3] = 'D';
+        bytes[4] = 1;
+        bytes[8] = static_cast<uint8_t>(length);
+        for (fl::size i = 0; i < length; ++i) {
+            bytes[12 + i] = static_cast<uint8_t>(envelope[i]);
+        }
+        FL_REQUIRE_EQ(file->writeData(bytes.data(), bytes.size()), bytes.size());
+        fl::Video video(1, 30, 1);
+        video.setFledPlaybackMode(fl::FledPlaybackMode::BestEffort);
+        FL_CHECK_FALSE(video.begin(file));
+    }
+}
+
+FL_TEST_CASE("Video exposes typed RGB16 samples without CRGB conversion") {
+    FakeFilebufPtr fileHandle = fl::make_shared<FakeFilebuf>();
+    const uint8_t rgb16Fled[] = {
+        'F', 'L', 'E', 'D', 1, 0x05, 0, 0, 0, 0, 0, 0,
+        0x00, 0x12, 0x01, 0x12, 0x02, 0x12,
+    };
+    FL_REQUIRE_EQ(fileHandle->writeData(rgb16Fled, sizeof(rgb16Fled)),
+                  sizeof(rgb16Fled));
+    fl::Video video(1, 30, 1);
+    FL_REQUIRE(video.begin(fileHandle));
+    fl::video::PixelSample sample;
+    FL_REQUIRE(video.readSample(&sample));
+    FL_CHECK_EQ(sample.mComponents[0], fl::u16(0x1200));
+    FL_CHECK_EQ(sample.mComponents[1], fl::u16(0x1201));
+}
+
+FL_TEST_CASE("PixelStream defers fragmented stream classification without losing raw bytes") {
+    fl::shared_ptr<NonSeekableFakeFilebuf> fled =
+        fl::make_shared<NonSeekableFakeFilebuf>();
+    const uint8_t partialMagic[] = {'F', 'L', 'E'};
+    FL_REQUIRE_EQ(fled->writeData(partialMagic, sizeof(partialMagic)),
+                  sizeof(partialMagic));
+    fl::PixelStream fledStream(3);
+    FL_REQUIRE(fledStream.begin(fled));
+    FL_CHECK_FALSE(fledStream.available());
+
+    const uint8_t finalMagic = 'D';
+    FL_REQUIRE_EQ(fled->writeData(&finalMagic, 1), 1);
+    FL_CHECK_FALSE(fledStream.available());
+    CRGB pixel;
+    FL_CHECK_FALSE(fledStream.readPixel(&pixel));
+
+    fl::shared_ptr<NonSeekableFakeFilebuf> raw =
+        fl::make_shared<NonSeekableFakeFilebuf>();
+    const uint8_t rawBytes[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
+    FL_REQUIRE_EQ(raw->writeData(rawBytes, sizeof(rawBytes)), sizeof(rawBytes));
+    fl::PixelStream rawStream(3);
+    FL_REQUIRE(rawStream.begin(raw));
+    uint8_t replayed[sizeof(rawBytes)] = {};
+    FL_REQUIRE_EQ(rawStream.readBytes(replayed, sizeof(replayed)),
+                  sizeof(replayed));
+    for (fl::size i = 0; i < sizeof(rawBytes); ++i) {
+        FL_CHECK_EQ(replayed[i], rawBytes[i]);
+    }
 }
 
 FL_TEST_CASE("video with memory stream") {

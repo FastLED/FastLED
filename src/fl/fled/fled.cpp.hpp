@@ -144,6 +144,45 @@ fled::ColorStatus Fled::videoColor(fled::VideoColor *out) const FL_NO_EXCEPT {
     return fled::resolveVideoColor(mImpl->envelope(), pixelFormat(), out);
 }
 
+bool Fled::videoFrame(fl::size frameIndex, fl::size ledCount,
+                      fled::VideoFrameView *out) const FL_NO_EXCEPT {
+    if (!mImpl || !out || ledCount == 0) {
+        return false;
+    }
+    fled::PixelStorage storage;
+    if (!fled::toPixelStorage(static_cast<fled::PixelFormat>(pixelFormat()),
+                              &storage)) {
+        return false;
+    }
+    fled::VideoColor color;
+    if (videoColor(&color) != fled::ColorStatus::Ok) {
+        return false;
+    }
+    const fl::size bytesPerLed = fled::bytesPerLed(pixelFormat());
+    const fl::size payloadBytes = mImpl->payloadLen();
+    if (bytesPerLed == 0 || ledCount > payloadBytes / bytesPerLed) {
+        return false;
+    }
+    const fl::size stride = ledCount * bytesPerLed;
+    if (stride == 0 || payloadBytes % stride != 0 ||
+        frameIndex >= payloadBytes / stride) {
+        return false;
+    }
+    fl::size completePayloadBytes = 0;
+    fl::shared_ptr<const fl::u8> payload = blob("frame_payload",
+                                                &completePayloadBytes);
+    if (!payload) {
+        return false;
+    }
+    const fl::size offset = frameIndex * stride;
+    out->mStorage = storage;
+    out->mColor = color;
+    out->mPayload = fl::shared_ptr<const fl::u8>(payload, payload.get() + offset);
+    out->mPayloadBytes = stride;
+    out->mStride = stride;
+    return true;
+}
+
 // ---- blobs ----
 
 fl::shared_ptr<const fl::u8> Fled::blob(const char *sectionName,

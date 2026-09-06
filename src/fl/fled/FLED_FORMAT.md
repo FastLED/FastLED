@@ -52,7 +52,7 @@ Values `0x00` through `0x05` are defined for FLED v1. Values `0x06` through
 
 | Value | Name | Bytes per LED | Payload byte order | Notes |
 | ---: | --- | ---: | --- | --- |
-| `0x00` | `rgb8` | 3 | `R, G, B` | Current FastLED reader support and the preferred v1 video payload. |
+| `0x00` | `rgb8` | 3 | `R, G, B` | FastLED legacy CRGB playback and typed ingress support. |
 | `0x01` | `gray8` | 1 | `Y` | 8-bit luminance. Consumers expand to RGB as needed. |
 | `0x02` | `rgba8` | 4 | `R, G, B, A` | 8-bit RGB plus alpha. Alpha handling is consumer-defined. |
 | `0x03` | `rgbw8` | 4 | `R, G, B, W` | 8-bit RGB plus white channel. |
@@ -180,8 +180,10 @@ Rejecting a *declaration* is not the same as refusing a *file*:
   consumer must refuse rather than guess.
 
 Producers and validation tooling always take the strict reading. `resolveVideoColor()`
-reports every violation; the latitude above is a playback-consumer policy, and
-FastLED does not exercise it yet because nothing here renders from the profile.
+reports every violation. FastLED playback is strict by default; an application
+may explicitly select best-effort only for advisory `rgb8` color metadata, and
+that path emits a warning. A malformed or truncated container, and every
+mandatory `rgb16_linear` color failure, remain hard errors.
 
 ### Validation rules
 
@@ -237,9 +239,10 @@ payload is identical to the legacy headerless `.rgb` layout after the FLED
 header and JSON envelope are skipped.
 
 Consumers that only support a subset of pixel formats should reject unsupported
-`pixel_format` values before reading frame bytes. FastLED's legacy video reader
-currently accepts `rgb8` FLED v1 files and falls back to headerless `.rgb` when
-the `FLED` magic is absent.
+`pixel_format` values before reading frame bytes. FastLED admits `rgb8` for
+legacy CRGB playback and exposes `rgb16_linear` via typed little-endian samples;
+the CRGB draw path fails dark for RGB16 until the managed transform phase lands.
+It falls back to headerless `.rgb` only when the `FLED` magic is absent.
 
 ## Growth Notes
 

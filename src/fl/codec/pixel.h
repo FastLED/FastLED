@@ -8,7 +8,11 @@ enum class PixelFormat {
     RGB565,     // 16-bit RGB: RRRRR GGGGGG BBBBB
     RGB888,     // 24-bit RGB: RRRRRRRR GGGGGGGG BBBBBBBB
     RGBA8888,   // 32-bit RGBA: RRRRRRRR GGGGGGGG BBBBBBBB AAAAAAAA
-    YUV420      // YUV 4:2:0 format (mainly for internal use)
+    YUV420,     // YUV 4:2:0 format (mainly for internal use)
+    // Generic storage formats. These do not encode transfer function,
+    // primaries, component byte order, or any container wire identifier.
+    Rgb8 = RGB888,
+    Rgb16 = 4,
 };
 
 // Calculate bytes per pixel for given format
@@ -18,7 +22,8 @@ inline fl::u8 getBytesPerPixel(PixelFormat format) {
         case PixelFormat::RGB888: return 3;
         case PixelFormat::RGBA8888: return 4;
         case PixelFormat::YUV420: return 1; // Simplified for luminance component
-        default: return 3;
+        case PixelFormat::Rgb16: return 6;
+        default: return 0;
     }
 }
 

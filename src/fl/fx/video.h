@@ -7,6 +7,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/fx1d.h"
+#include "fl/video/pixel_sample.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -26,6 +27,11 @@ class VideoImpl;
 } // namespace video
 using VideoImpl = video::VideoImpl;
 using VideoImplPtr = fl::shared_ptr<VideoImpl>;
+
+enum class FledPlaybackMode : fl::u8 {
+    Strict,
+    BestEffort,
+};
 
 // Video represents a video file that can be played back on a LED strip.
 // The video file is expected to be a sequence of frames. Pass any filebuf
@@ -68,7 +74,13 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     void setTimeScale(float timeScale);
     float timeScale() const;
     string error() const;
-    void setError(const string &error) { mError = error; }
+    // A caller-supplied error is persistent: it blocks admission until the
+    // caller clears it. Admission errors recorded by begin() are not -- see
+    // mAdmissionError.
+    void setError(const string &error) FL_NO_EXCEPT {
+        mError = error;
+        mAdmissionError = false;
+    }
     size_t pixelsPerFrame() const;
 
     // FLED v1 container (issue #3072): true / non-empty only when begin()
@@ -77,6 +89,10 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     // Spec: https://github.com/zackees/ledmapper/blob/main/docs/fled-format.md
     bool hasEmbeddedScreenMap() const FL_NO_EXCEPT;
     const fl::string &embeddedScreenMapJson() const FL_NO_EXCEPT;
+    bool videoColor(fled::VideoColor *out) const FL_NO_EXCEPT;
+    bool pixelStorage(fled::PixelStorage *out) const FL_NO_EXCEPT;
+    bool readSample(video::PixelSample *out) FL_NO_EXCEPT;
+    void setFledPlaybackMode(FledPlaybackMode mode) FL_NO_EXCEPT;
     void pause(fl::u32 now) override;
     void resume(fl::u32 now) override;
     void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
@@ -86,7 +102,16 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     operator bool() const { return mImpl.get(); }
 
   private:
+    // True when mError was recorded by a failed begin() rather than by
+    // setError(). Such a failure describes one rejected source, not a dead
+    // object, so the next begin() clears it and admits a new handle.
+    void setAdmissionError(const string &error) FL_NO_EXCEPT {
+        mError = error;
+        mAdmissionError = true;
+    }
+
     bool mFinished = false;
+    bool mAdmissionError = false;
     VideoImplPtr mImpl;
     string mError;
     string mName;

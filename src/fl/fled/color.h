@@ -11,6 +11,7 @@
 
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
+#include "fl/fled/pixel_format.h"
 
 namespace fl {
 
@@ -106,6 +107,11 @@ bool defaultVideoColor(fl::u8 pixelFormat, VideoColor* out) FL_NO_EXCEPT;
 // On ColorStatus::Ok, *out holds the resolved tuple. On any other status
 // *out is left untouched and the status names the rejection reason.
 ColorStatus resolveVideoColor(const fl::json& envelope, fl::u8 pixelFormat,
+                              VideoColor* out) FL_NO_EXCEPT;
+
+// Typed overload. Kept in the public API because callers hold a PixelFormat
+// and should not have to cast to the wire byte to resolve a color tuple.
+ColorStatus resolveVideoColor(const fl::json& envelope, PixelFormat pixelFormat,
                               VideoColor* out) FL_NO_EXCEPT;
 
 // Stable human-readable text for a status, for diagnostics. Never null.

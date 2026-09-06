@@ -41,8 +41,15 @@ bool Video::begin(filebuf_ptr handle) {
                      "must include full parameters.");
         return false;
     }
+    // Drop a previous admission failure before evaluating this attempt.
+    // Rejecting one source says nothing about the next; only a persistent
+    // setError() failure keeps blocking.
+    if (mAdmissionError) {
+        mError.clear();
+        mAdmissionError = false;
+    }
     if (!handle) {
-        mError = "filebuf is null";
+        setAdmissionError("filebuf is null");
         FL_DBG_F("%s", mError.c_str());
         return false;
     }
@@ -50,12 +57,20 @@ bool Video::begin(filebuf_ptr handle) {
         FL_DBG_F("%s", mError.c_str());
         return false;
     }
-    mError.clear();
-    mImpl->begin(handle);
+    if (!mImpl->begin(handle)) {
+        setAdmissionError("unsupported or malformed FLED container");
+        return false;
+    }
     return true;
 }
 
 bool Video::draw(fl::u32 now, fl::span<CRGB> leds) {
+    if (!mError.empty()) {
+        for (fl::size_t i = 0; i < leds.size(); ++i) {
+            leds[i] = CRGB::Black;
+        }
+        return false;
+    }
     if (!mImpl) {
         FL_WARN_F_IF(!mError.empty(), "%s", mError.c_str());
         return false;
@@ -69,11 +84,7 @@ bool Video::draw(fl::u32 now, fl::span<CRGB> leds) {
 }
 
 void Video::draw(DrawContext context) {
-    if (!mImpl) {
-        FL_WARN_F_IF(!mError.empty(), "%s", mError.c_str());
-        return;
-    }
-    mImpl->draw(context.now, context.leds);
+    draw(context.now, context.leds);
 }
 
 i32 Video::durationMicros() const {
@@ -86,10 +97,10 @@ i32 Video::durationMicros() const {
 string Video::fxName() const { return "Video"; }
 
 bool Video::draw(fl::u32 now, Frame *frame) {
-    if (!mImpl) {
+    if (!frame) {
         return false;
     }
-    return mImpl->draw(now, frame);
+    return draw(now, frame->rgb());
 }
 
 void Video::end() {
@@ -113,6 +124,24 @@ float Video::timeScale() const {
 }
 
 string Video::error() const { return mError; }
+
+bool Video::videoColor(fled::VideoColor *out) const FL_NO_EXCEPT {
+    return mImpl && mImpl->videoColor(out);
+}
+
+bool Video::pixelStorage(fled::PixelStorage *out) const FL_NO_EXCEPT {
+    return mImpl && mImpl->pixelStorage(out);
+}
+
+bool Video::readSample(video::PixelSample *out) FL_NO_EXCEPT {
+    return mImpl && mImpl->readSample(out);
+}
+
+void Video::setFledPlaybackMode(FledPlaybackMode mode) FL_NO_EXCEPT {
+    if (mImpl) {
+        mImpl->setBestEffortFled(mode == FledPlaybackMode::BestEffort);
+    }
+}
 
 size_t Video::pixelsPerFrame() const {
     if (!mImpl) {

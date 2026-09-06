@@ -5,6 +5,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/string.h"
+#include "fl/video/pixel_sample.h"
 namespace fl {
 class filebuf;
 using filebuf_ptr = fl::shared_ptr<filebuf>;
@@ -31,15 +32,16 @@ class PixelStream {
         kFile,      // Seekable (e.g. posix_filebuf, SD card)
     };
 
-    explicit PixelStream(int bytes_per_frame);
+    explicit PixelStream(int bytes_per_frame) FL_NO_EXCEPT;
 
     // Opens a handle. Streaming vs seekable is auto-detected:
     // seek(0, beg) succeeds → kFile, fails → kStreaming.
-    bool begin(fl::filebuf_ptr h);
+    bool begin(fl::filebuf_ptr h) FL_NO_EXCEPT;
 
     void close();
     i32 bytesPerFrame();
     bool readPixel(CRGB *dst);
+    bool readSample(PixelSample *out) FL_NO_EXCEPT;
     size_t readBytes(u8 *dst, size_t len);
 
     bool readFrame(Frame *frame);
@@ -59,9 +61,16 @@ class PixelStream {
     // a valid FLED header on a seekable handle; otherwise empty / false.
     bool hasEmbeddedScreenMap() const FL_NO_EXCEPT;
     const fl::string &embeddedScreenMapJson() const FL_NO_EXCEPT;
+    bool videoColor(fled::VideoColor *out) const FL_NO_EXCEPT;
+    bool pixelStorage(fled::PixelStorage *out) const FL_NO_EXCEPT;
+    // True only when the active source can be consumed by the legacy CRGB
+    // playback path. Typed formats require a separate ingress consumer.
+    bool isRgb8Playback() const FL_NO_EXCEPT;
+    void setBestEffortFled(bool enabled) FL_NO_EXCEPT { mBestEffortFled = enabled; }
 
   private:
     fl::i32 mbytesPerFrame;
+    const fl::i32 mBaseBytesPerFrame;
     fl::filebuf_ptr mHandle;
     Type mType;
 
@@ -69,6 +78,22 @@ class PixelStream {
     // `.rgb` files; 12 + jsonLength for FLED-formatted files.
     fl::size_t mPayloadOffset = 0;
     fl::string mEmbeddedScreenMapJson;
+    fl::u8 mFledPixelFormat = 0;
+    fl::u8 mFledBytesPerLed = 0;
+    bool mHasFledContainer = false;
+    fled::VideoColor mVideoColor = {};
+    bool mHasVideoColor = false;
+    bool mBestEffortFled = false;
+
+    // Non-seekable handles need a small magic probe. Raw stream bytes read
+    // for that probe are replayed before the underlying handle is consumed.
+    mutable fl::u8 mStreamingPrefix[4] = {};
+    mutable fl::size_t mStreamingPrefixSize = 0;
+    mutable fl::size_t mStreamingPrefixPos = 0;
+    mutable bool mStreamingProbePending = false;
+    mutable bool mStreamingRejected = false;
+
+    bool probeStreamingMagic() const FL_NO_EXCEPT;
 
   public:
     virtual ~PixelStream() FL_NO_EXCEPT;

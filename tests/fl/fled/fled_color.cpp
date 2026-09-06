@@ -16,7 +16,7 @@
 // pixels are transformed by it.
 
 #include "fl/fled/color.h"
-#include "fl/fled/detail/pixel_format.h"
+#include "fl/fled/pixel_format.h"
 #include "fl/fled/fled.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/int.h"
@@ -69,6 +69,15 @@ FL_TEST_CASE("FLED_COLOR - rgb16_linear is 6 bytes per LED") {
     // 0x06 and up remain reserved / rejected.
     FL_CHECK_EQ(fl::fled::bytesPerLed(static_cast<fl::u8>(0x06)), 0);
     FL_CHECK_EQ(fl::fled::bytesPerLed(static_cast<fl::u8>(0xff)), 0);
+}
+
+FL_TEST_CASE("FLED_COLOR - typed resolveVideoColor accepts the public wire enum") {
+    VideoColor color;
+    fl::json envelope = fl::json::parse(fl::string("{}"));
+    FL_REQUIRE_EQ(fl::fled::resolveVideoColor(envelope, PixelFormat::Rgb16Linear,
+                                              &color),
+                  ColorStatus::Ok);
+    FL_CHECK_EQ(color.transfer, ColorTransfer::Linear);
 }
 
 // ============================================================================

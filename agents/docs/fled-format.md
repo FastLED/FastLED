@@ -14,15 +14,15 @@
 - Absent metadata resolves to the default tuple `{bt709, srgb, rgb, full}` for formats that define one; that is the historical interpretation and must keep working. Only a declaration that is *present and invalid* is rejected.
 - Key inheritance is scoped to formats with a default tuple (the display-encoded RGB family plus `rgb16_linear`). `gray8`/`rgbw8` are all-or-nothing — this is what stops a future YCbCr format from silently inheriting `matrix: "rgb"`.
 - `pixel_format` `0x05` is `rgb16_linear` (6 B/LED) and requires `transfer: "linear"`. Reserved values now start at `0x06`.
-- FastLED **carries and validates** this declaration; it does not yet transform pixels by it. Read side: `fl::fled::resolveVideoColor()` / `Fled::videoColor()` in `src/fl/fled/color.h`, tests in `tests/fl/fled/fled_color.cpp`.
+- FastLED **carries and validates** this declaration; it does not yet transform pixels by it. Its public FLED wire enum is `fl::fled::PixelFormat`; the independent generic storage descriptor is `fl::PixelFormat` plus explicit component byte order. `fl::fled::resolveVideoColor()` / `Fled::videoColor()` report source semantics, while `Fled::videoFrame()` and `Video::readSample()` preserve RGB16 little-endian samples without an RGB8 intermediate. The legacy `Video::draw()` path refuses RGB16 and clears its destination until the managed transform phase lands.
 - The producer-side enforcement lives in ledmapper (`packages/gfx/src/render/fled-color.ts` + `tests/unit/fled-color.test.ts`). The two suites are halves of one cross-repo contract: change a rule in one and the other must move in the same change.
 
 ### Adding a pixel format is a three-hop cascade
 
 FastLED has **two** `.fled` readers, and adding an enum value to one leaves the other behind:
 
-1. `src/fl/fled/detail/pixel_format.h` — the on-device C++ reader.
-2. `src/platforms/wasm/compiler/package.json` pins `@fastled/gfx` to a **released tarball** (currently `gfx-v0.1.1`), whose bundled reader carries its own bytes-per-LED table. Until that pin moves, the WASM preview rejects any format the release predates.
+1. `src/fl/fled/pixel_format.h` — the public on-device C++ wire-format reader and checked mapping to generic storage.
+2. `src/platforms/wasm/compiler/package.json` **and** `src/platforms/wasm/compiler/package-lock.json` pin `@fastled/gfx` to a **released tarball** (currently `gfx-v0.1.1`), whose bundled reader carries its own bytes-per-LED table. Both files carry the pin and both must move together. Until they do, the WASM preview rejects any format the release predates.
 3. The canonical ledmapper spec + producer.
 
-`rgb16_linear` (`0x05`) is in this state today: it resolves on device but `gfx-v0.1.1` returns `unknown-format` for it in the browser preview. That fails loudly rather than misparsing, which is why it was allowed to land — but the pin must move once ledmapper cuts a release containing the format, and the ordering is fixed: **ledmapper merge → gfx release → bump the pin here**.
+`rgb16_linear` (`0x05`) is in this state today: FastLED admits it through typed ingress, but `gfx-v0.1.1` predates the corresponding browser-preview support. The preview must fail loudly rather than misparse; the pin moves only after a released producer/parser implementation. The ordering is fixed: **ledmapper merge → gfx release → bump both FastLED package manifests here**.

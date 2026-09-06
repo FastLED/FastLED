@@ -54,11 +54,16 @@ bool VideoImpl::needsFrame(fl::u32 now) const {
 
 VideoImpl::~VideoImpl() FL_NO_EXCEPT { end(); }
 
-void VideoImpl::begin(filebuf_ptr h) {
+bool VideoImpl::begin(filebuf_ptr h) FL_NO_EXCEPT {
     end();
     mStream = fl::make_shared<PixelStream>(mPixelsPerFrame * kSizeRGB8);
-    mStream->begin(h);
+    mStream->setBestEffortFled(mBestEffortFled);
+    if (!mStream->begin(h)) {
+        mStream.reset();
+        return false;
+    }
     mPrevNow = 0;
+    return true;
 }
 
 void VideoImpl::end() {
@@ -95,6 +100,12 @@ bool VideoImpl::draw(fl::u32 now, fl::span<CRGB> leds) {
     now = mTime->update(now);
     if (!mStream) {
         FL_WARN_F("no stream");
+        return false;
+    }
+    if (!mStream->isRgb8Playback()) {
+        for (fl::size_t i = 0; i < leds.size(); ++i) {
+            leds[i] = CRGB::Black;
+        }
         return false;
     }
     bool ok = updateBufferIfNecessary(mPrevNow, now);
@@ -146,6 +157,18 @@ bool VideoImpl::draw(fl::u32 now, fl::span<CRGB> leds) {
         }
     }
     return true;
+}
+
+bool VideoImpl::videoColor(fled::VideoColor *out) const FL_NO_EXCEPT {
+    return mStream && mStream->videoColor(out);
+}
+
+bool VideoImpl::pixelStorage(fled::PixelStorage *out) const FL_NO_EXCEPT {
+    return mStream && mStream->pixelStorage(out);
+}
+
+bool VideoImpl::readSample(PixelSample *out) FL_NO_EXCEPT {
+    return mStream && mStream->readSample(out);
 }
 
 bool VideoImpl::updateBufferFromStream(fl::u32 now) {

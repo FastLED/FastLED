@@ -13,7 +13,7 @@
 //
 // All bundles are hand-assembled in memory; no on-disk fixtures.
 
-#include "fl/fled/detail/pixel_format.h"
+#include "fl/fled/pixel_format.h"
 #include "fl/fled/fled.h"
 #include "fl/math/screenmap.h"
 #include "fl/stl/int.h"
@@ -94,13 +94,135 @@ FL_TEST_CASE("FLED_FORMAT - bytesPerLed for reserved values returns 0") {
     FL_CHECK_EQ(fl::fled::bytesPerLed(fl::u8(0xff)), fl::u8(0));
 }
 
-FL_TEST_CASE("FLED_FORMAT - PixelFormat enum overload agrees with raw u8") {
+FL_TEST_CASE("FLED_FORMAT - container formats map explicitly to generic storage") {
+    using fl::fled::ComponentByteOrder;
     using fl::fled::PixelFormat;
-    FL_CHECK_EQ(fl::fled::bytesPerLed(PixelFormat::Rgb8),     fl::u8(3));
-    FL_CHECK_EQ(fl::fled::bytesPerLed(PixelFormat::Gray8),    fl::u8(1));
-    FL_CHECK_EQ(fl::fled::bytesPerLed(PixelFormat::Rgba8),    fl::u8(4));
-    FL_CHECK_EQ(fl::fled::bytesPerLed(PixelFormat::Rgbw8),    fl::u8(4));
-    FL_CHECK_EQ(fl::fled::bytesPerLed(PixelFormat::Rgb565Le), fl::u8(2));
+    using fl::fled::PixelStorage;
+
+    // These are wire values. The generic fl::PixelFormat values are a
+    // separate API and are intentionally not compared numerically.
+    FL_CHECK_EQ(static_cast<fl::u8>(PixelFormat::Rgb8), fl::u8(0x00));
+    FL_CHECK_EQ(static_cast<fl::u8>(PixelFormat::Rgb16Linear), fl::u8(0x05));
+
+    PixelStorage storage;
+    FL_REQUIRE(fl::fled::toPixelStorage(PixelFormat::Rgb8, &storage));
+    FL_CHECK_EQ(storage.mFormat, fl::PixelFormat::Rgb8);
+    FL_CHECK_EQ(storage.mComponentByteOrder, ComponentByteOrder::NotApplicable);
+
+    FL_REQUIRE(fl::fled::toPixelStorage(PixelFormat::Rgb16Linear, &storage));
+    FL_CHECK_EQ(storage.mFormat, fl::PixelFormat::Rgb16);
+    FL_CHECK_EQ(storage.mComponentByteOrder, ComponentByteOrder::LittleEndian);
+
+    PixelFormat roundTrip = PixelFormat::Rgb8;
+    fl::fled::VideoColor linearColor = {
+        fl::fled::ColorPrimaries::Bt709,
+        fl::fled::ColorTransfer::Linear,
+        fl::fled::ColorMatrix::Rgb,
+        fl::fled::ColorRange::Full,
+        false,
+        {},
+    };
+    FL_REQUIRE(fl::fled::toFledPixelFormat(storage, linearColor, &roundTrip));
+    FL_CHECK_EQ(roundTrip, PixelFormat::Rgb16Linear);
+
+    linearColor.transfer = fl::fled::ColorTransfer::Srgb;
+    FL_CHECK_FALSE(fl::fled::toFledPixelFormat(storage, linearColor, &roundTrip));
+
+    // Restore the transfer first: Rgb16 with an Srgb transfer is rejected
+    // before byte order is ever consulted, so leaving it set would let the
+    // previous assertion's cause satisfy this one.
+    linearColor.transfer = fl::fled::ColorTransfer::Linear;
+    storage.mComponentByteOrder = ComponentByteOrder::Native;
+    FL_CHECK_FALSE(fl::fled::toFledPixelFormat(storage, linearColor, &roundTrip));
+    FL_CHECK_FALSE(fl::fled::toPixelStorage(static_cast<PixelFormat>(0x06),
+                                             &storage));
+    FL_CHECK_EQ(fl::getBytesPerPixel(static_cast<fl::PixelFormat>(0xff)), 0);
+}
+
+FL_TEST_CASE("FLED_FORMAT - typed RGB16 frame ingress preserves low bits and metadata") {
+    const char envelope[] =
+        "{\"video\":{\"color\":{\"primaries\":\"display-p3\","
+        "\"transfer\":\"linear\",\"matrix\":\"rgb\",\"range\":\"full\"}}}";
+    // Two adjacent linear values must not pass through CRGB/RGB8 on ingress.
+    const fl::u8 payload[] = {
+        0x00, 0x12, 0x01, 0x12, 0x02, 0x12,
+        0x01, 0x12, 0x03, 0x12, 0x04, 0x12,
+    };
+    Fled fled = Fled::loadFromVector(buildBundle(
+        1, static_cast<fl::u8>(fl::fled::PixelFormat::Rgb16Linear), envelope,
+        sizeof(envelope) - 1, payload, sizeof(payload)));
+    FL_REQUIRE(fled);
+
+    fl::fled::VideoFrameView frame;
+    FL_REQUIRE(fled.videoFrame(0, 2, &frame));
+    FL_CHECK_EQ(frame.mStorage.mFormat, fl::PixelFormat::Rgb16);
+    FL_CHECK_EQ(frame.mStorage.mComponentByteOrder,
+                fl::fled::ComponentByteOrder::LittleEndian);
+    FL_CHECK_EQ(frame.mColor.primaries, fl::fled::ColorPrimaries::DisplayP3);
+    FL_CHECK_EQ(frame.mColor.transfer, fl::fled::ColorTransfer::Linear);
+    FL_CHECK_EQ(frame.component16(0, 0), fl::u16(0x1200));
+    FL_CHECK_EQ(frame.component16(1, 0), fl::u16(0x1201));
+}
+
+FL_TEST_CASE("FLED_FORMAT - typed ingress validates color and owns its payload view") {
+    fl::fled::VideoFrameView empty;
+    FL_CHECK_EQ(empty.component16(0, 0), fl::u16(0));
+
+    fl::fled::PixelStorage storage = {
+        fl::PixelFormat::Rgb16,
+        fl::fled::ComponentByteOrder::LittleEndian,
+    };
+    fl::fled::VideoColor invalidColor = {
+        static_cast<fl::fled::ColorPrimaries>(0xff),
+        fl::fled::ColorTransfer::Linear,
+        fl::fled::ColorMatrix::Rgb,
+        fl::fled::ColorRange::Full,
+        false,
+        {},
+    };
+    fl::fled::PixelFormat wire = fl::fled::PixelFormat::Rgb8;
+    FL_CHECK_FALSE(fl::fled::toFledPixelFormat(storage, invalidColor, &wire));
+
+    const char envelope[] = "{}";
+    const fl::u8 payload[] = {0x00, 0x12, 0, 0, 0, 0};
+    fl::fled::VideoFrameView frame;
+    {
+        Fled fled = Fled::loadFromVector(buildBundle(
+            1, static_cast<fl::u8>(fl::fled::PixelFormat::Rgb16Linear),
+            envelope, sizeof(envelope) - 1, payload, sizeof(payload)));
+        FL_REQUIRE(fled.videoFrame(0, 1, &frame));
+    }
+    FL_CHECK_EQ(frame.component16(0, 0), fl::u16(0x1200));
+}
+
+FL_TEST_CASE("FLED_FORMAT - typed frame view rejects a trailing partial frame") {
+    const char envelope[] = "{}";
+    const fl::u8 rgb8Tail[] = {1, 2, 3, 4};
+    const fl::u8 rgb16Tail[] = {1, 2, 3, 4, 5, 6, 7};
+
+    Fled rgb8 = Fled::loadFromVector(buildBundle(
+        1, static_cast<fl::u8>(fl::fled::PixelFormat::Rgb8), envelope,
+        sizeof(envelope) - 1, rgb8Tail, sizeof(rgb8Tail)));
+    Fled rgb16 = Fled::loadFromVector(buildBundle(
+        1, static_cast<fl::u8>(fl::fled::PixelFormat::Rgb16Linear), envelope,
+        sizeof(envelope) - 1, rgb16Tail, sizeof(rgb16Tail)));
+    fl::fled::VideoFrameView frame;
+    FL_REQUIRE(rgb8);
+    FL_REQUIRE(rgb16);
+    FL_CHECK_FALSE(rgb8.videoFrame(0, 1, &frame));
+    FL_CHECK_FALSE(rgb16.videoFrame(0, 1, &frame));
+}
+
+FL_TEST_CASE("FLED_FORMAT - reserved header bytes must be zero") {
+    const char envelope[] = "{}";
+    const fl::u8 payload[] = {1, 2, 3};
+    for (fl::size reservedOffset = 6; reservedOffset <= 7; ++reservedOffset) {
+        fl::vector<fl::u8> bundle = buildBundle(
+            1, static_cast<fl::u8>(fl::fled::PixelFormat::Rgb8), envelope,
+            sizeof(envelope) - 1, payload, sizeof(payload));
+        bundle[reservedOffset] = 1;
+        FL_CHECK_FALSE(Fled::loadFromVector(fl::move(bundle)));
+    }
 }
 
 // ============================================================================
