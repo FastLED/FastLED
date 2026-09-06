@@ -17,5 +17,23 @@ fl::u8 bytesPerLed(fl::u8 pixelFormat) FL_NO_EXCEPT {
     }
 }
 
+bool toPixelStorage(PixelFormat fledFormat, PixelStorage* out) FL_NO_EXCEPT {
+    if (!out) {
+        return false;
+    }
+    switch (fledFormat) {
+    case PixelFormat::Rgb8:
+        out->mFormat = fl::PixelFormat::Rgb8;
+        out->mComponentByteOrder = ComponentByteOrder::NotApplicable;
+        return true;
+    case PixelFormat::Rgb16Linear:
+        out->mFormat = fl::PixelFormat::Rgb16;
+        out->mComponentByteOrder = ComponentByteOrder::LittleEndian;
+        return true;
+    default:
+        return false;
+    }
+}
+
 }  // namespace fled
 }  // namespace fl

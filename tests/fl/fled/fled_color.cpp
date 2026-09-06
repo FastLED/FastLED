@@ -1,4 +1,4 @@
-// Tests for the .fled v1 `video.color` source-color contract.
+// Tests for the .fled v1 `video.mColor` source-color contract.
 //
 // The normative rules live in src/fl/fled/FLED_FORMAT.md ("Source Color
 // Metadata"), which mirrors the canonical ledmapper spec. This file walks
@@ -16,7 +16,7 @@
 // pixels are transformed by it.
 
 #include "fl/fled/color.h"
-#include "fl/fled/detail/pixel_format.h"
+#include "fl/fled/pixel_format.h"
 #include "fl/fled/fled.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/int.h"
@@ -71,11 +71,20 @@ FL_TEST_CASE("FLED_COLOR - rgb16_linear is 6 bytes per LED") {
     FL_CHECK_EQ(fl::fled::bytesPerLed(static_cast<fl::u8>(0xff)), 0);
 }
 
+FL_TEST_CASE("FLED_COLOR - typed resolveVideoColor accepts the public wire enum") {
+    VideoColor color;
+    fl::json envelope = fl::json::parse(fl::string("{}"));
+    FL_REQUIRE_EQ(fl::fled::resolveVideoColor(envelope, PixelFormat::Rgb16Linear,
+                                              &color),
+                  ColorStatus::Ok);
+    FL_CHECK_EQ(color.transfer, ColorTransfer::Linear);
+}
+
 // ============================================================================
 // Default tuple + absent metadata
 // ============================================================================
 
-FL_TEST_CASE("FLED_COLOR - absent video.color resolves to the default tuple") {
+FL_TEST_CASE("FLED_COLOR - absent video.mColor resolves to the default tuple") {
     VideoColor c;
     FL_CHECK(resolve("{}", kRgb8, &c) == ColorStatus::Ok);
     FL_CHECK(c.primaries == ColorPrimaries::Bt709);
@@ -252,7 +261,7 @@ FL_TEST_CASE("FLED_COLOR - non-string scalars are rejected, not coerced") {
                      kRgb8, &c) == ColorStatus::UnknownRange);
 }
 
-FL_TEST_CASE("FLED_COLOR - video.color must be an object") {
+FL_TEST_CASE("FLED_COLOR - video.mColor must be an object") {
     VideoColor c;
     FL_CHECK(resolve("{\"video\":{\"color\":\"bt709\"}}", kRgb8, &c) ==
              ColorStatus::NotAnObject);
@@ -510,7 +519,7 @@ FL_TEST_CASE("FLED_COLOR - the serialized envelope carries the whole metadata") 
     FL_CHECK(static_cast<bool>(fps));
     FL_CHECK(*fps == 60.0f);
 
-    // The color tuple survives under video.color, key by key.
+    // The color tuple survives under video.mColor, key by key.
     const fl::json color = round["video"]["color"];
     FL_CHECK(color.is_object());
     struct { const char* key; const char* value; } expected[4] = {

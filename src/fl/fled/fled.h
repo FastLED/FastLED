@@ -31,6 +31,34 @@ struct MultiChannelConfig;
 
 namespace fled {
 class FledImpl;
+
+// A typed, zero-copy video frame. The payload owner keeps Fled's owned bytes
+// alive; static-input callers still retain the lifetime obligation documented
+// by loadFromStatic(). Rgb16 components are decoded from little-endian bytes,
+// never reinterpreted as native-endian words.
+struct VideoFrameView {
+    PixelStorage mStorage = {fl::PixelFormat::Rgb8,
+                            ComponentByteOrder::NotApplicable};
+    VideoColor mColor = {ColorPrimaries::Bt709, ColorTransfer::Srgb,
+                        ColorMatrix::Rgb, ColorRange::Full, false, {}};
+    fl::shared_ptr<const fl::u8> mPayload;
+    fl::size mPayloadBytes = 0;
+    fl::size mStride = 0;
+
+    fl::u16 component16(fl::size led, fl::u8 component) const FL_NO_EXCEPT {
+        if (!mPayload || mStorage.mFormat != fl::PixelFormat::Rgb16 ||
+            mStorage.mComponentByteOrder != ComponentByteOrder::LittleEndian ||
+            component >= 3 || led >= mPayloadBytes / 6) {
+            return 0;
+        }
+        const fl::size offset = led * 6 + static_cast<fl::size>(component) * 2;
+        if (offset >= mPayloadBytes - 1) {
+            return 0;
+        }
+        return static_cast<fl::u16>(mPayload.get()[offset]) |
+               (static_cast<fl::u16>(mPayload.get()[offset + 1]) << 8);
+    }
+};
 }
 
 class Fled {
@@ -91,6 +119,13 @@ class Fled {
     // This only reports what the file declares its numbers to mean. FastLED
     // does not yet transform pixels according to that declaration.
     fled::ColorStatus videoColor(fled::VideoColor *out) const FL_NO_EXCEPT;
+
+    // Opens a typed zero-copy view of one video frame. The view preserves
+    // storage precision, component layout, and the resolved FLED source color
+    // tuple. Returns false for unsupported storage, invalid color metadata,
+    // incomplete frames, or an out-of-range frame index.
+    bool videoFrame(fl::size frameIndex, fl::size ledCount,
+                    fled::VideoFrameView *out) const FL_NO_EXCEPT;
 
     // Parsed JSON envelope. For null Fled, returns a reference to a static
     // empty json (safe to chain into).

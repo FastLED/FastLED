@@ -21,6 +21,7 @@ namespace video {
 
 class FrameInterpolator;
 class PixelStream;
+struct PixelSample;
 
 FASTLED_SHARED_PTR(VideoImpl);
 FASTLED_SHARED_PTR(FrameInterpolator);
@@ -38,7 +39,8 @@ class VideoImpl {
               size_t frameHistoryCount = 0);
     ~VideoImpl() FL_NO_EXCEPT;
     // Api
-    void begin(fl::filebuf_ptr h);
+    bool begin(fl::filebuf_ptr h) FL_NO_EXCEPT;
+    void setBestEffortFled(bool enabled) FL_NO_EXCEPT { mBestEffortFled = enabled; }
     void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
     bool draw(fl::u32 now, fl::span<CRGB> leds);
     void end();
@@ -58,6 +60,9 @@ class VideoImpl {
     // empty / false for legacy headerless `.rgb` files.
     bool hasEmbeddedScreenMap() const FL_NO_EXCEPT;
     const fl::string &embeddedScreenMapJson() const FL_NO_EXCEPT;
+    bool videoColor(fled::VideoColor *out) const FL_NO_EXCEPT;
+    bool pixelStorage(fled::PixelStorage *out) const FL_NO_EXCEPT;
+    bool readSample(PixelSample *out) FL_NO_EXCEPT;
 
   private:
     bool updateBufferIfNecessary(fl::u32 prev, fl::u32 now);
@@ -71,6 +76,7 @@ class VideoImpl {
     fl::u32 mFadeInTime = 1000;
     fl::u32 mFadeOutTime = 1000;
     float mTimeScale = 1.0f;
+    bool mBestEffortFled = false;
 };
 
 } // namespace video

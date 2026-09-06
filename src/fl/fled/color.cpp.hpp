@@ -250,6 +250,50 @@ ColorStatus resolveVideoColor(const fl::json& envelope, fl::u8 pixelFormat,
     return ColorStatus::Ok;
 }
 
+bool toFledPixelFormat(const PixelStorage& storage, const VideoColor& color,
+                       PixelFormat* out) FL_NO_EXCEPT {
+    if (!out) {
+        return false;
+    }
+    const bool validPrimaries = color.primaries == ColorPrimaries::Bt709 ||
+        color.primaries == ColorPrimaries::DisplayP3 ||
+        color.primaries == ColorPrimaries::Bt2020 ||
+        color.primaries == ColorPrimaries::Custom;
+    const bool validTransfer = color.transfer == ColorTransfer::Srgb ||
+        color.transfer == ColorTransfer::Bt709 ||
+        color.transfer == ColorTransfer::Linear;
+    if (!validPrimaries || !validTransfer || color.matrix != ColorMatrix::Rgb ||
+        color.range != ColorRange::Full) {
+        return false;
+    }
+    if (color.primaries == ColorPrimaries::Custom) {
+        for (fl::size_t i = 0; i < 8; ++i) {
+            const float value = color.customPrimaries[i];
+            if (!(value == value) || value <= 0.0f || value > 1.0f) {
+                return false;
+            }
+        }
+    }
+    switch (storage.mFormat) {
+    case fl::PixelFormat::Rgb8:
+        if (storage.mComponentByteOrder != ComponentByteOrder::NotApplicable ||
+            color.transfer == ColorTransfer::Linear) {
+            return false;
+        }
+        *out = PixelFormat::Rgb8;
+        return true;
+    case fl::PixelFormat::Rgb16:
+        if (storage.mComponentByteOrder != ComponentByteOrder::LittleEndian ||
+            color.transfer != ColorTransfer::Linear) {
+            return false;
+        }
+        *out = PixelFormat::Rgb16Linear;
+        return true;
+    default:
+        return false;
+    }
+}
+
 const char* colorStatusMessage(ColorStatus status) FL_NO_EXCEPT {
     switch (status) {
     case ColorStatus::Ok:

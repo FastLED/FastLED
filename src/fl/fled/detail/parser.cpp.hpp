@@ -39,6 +39,9 @@ bool parseHeaderAndEnvelope(const fl::u8* data, fl::size len,
     if (ver != kVersionV1) {
         return false;
     }
+    if (data[6] != 0 || data[7] != 0) {
+        return false;
+    }
     const fl::u8 pixelFormat = data[5];
     const fl::u32 jsonLen =
         static_cast<fl::u32>(data[8]) |

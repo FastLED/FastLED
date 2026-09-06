@@ -11,6 +11,7 @@
 
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
+#include "fl/fled/pixel_format.h"
 
 namespace fl {
 
@@ -107,6 +108,12 @@ bool defaultVideoColor(fl::u8 pixelFormat, VideoColor* out) FL_NO_EXCEPT;
 // *out is left untouched and the status names the rejection reason.
 ColorStatus resolveVideoColor(const fl::json& envelope, fl::u8 pixelFormat,
                               VideoColor* out) FL_NO_EXCEPT;
+
+inline ColorStatus resolveVideoColor(const fl::json& envelope,
+                                     PixelFormat pixelFormat,
+                                     VideoColor* out) FL_NO_EXCEPT {
+    return resolveVideoColor(envelope, static_cast<fl::u8>(pixelFormat), out);
+}
 
 // Stable human-readable text for a status, for diagnostics. Never null.
 const char* colorStatusMessage(ColorStatus status) FL_NO_EXCEPT;
