@@ -2,6 +2,34 @@
 
 <!-- Add tasks here as checkable items -->
 
+## Profiled color pipeline (#4032 / #4034)
+
+- [x] Revalidate current master, phase issues, and #4156 review decisions.
+- [x] Assign P1, P2, and P4 to Terra agents in isolated checkouts.
+- [ ] Merge the cross-phase contract addendum and link it from the tracker.
+- [ ] P1 #4035: complete research/schema artifacts and merge its PR.
+- [ ] P2 #4036: complete profile/binding API and merge its PR.
+- [ ] P3 #4037: complete generator/ingestion/freshness tooling and merge its PR.
+- [ ] P4 #4038: complete media contract and playback integration and merge its PR.
+- [ ] P5 #4039: complete float64 reference/goldens/RED baseline and merge its PR.
+- [ ] P6 #4040: complete streaming core/brightness/power and merge its PR.
+- [ ] P7 #4041: complete gamut/device solve and merge its PR.
+- [ ] P8 #4042: complete native encoders/dithering and merge its PR.
+- [ ] P9 #4043: prove fixed-point/TINY/bloat/throughput gates and merge its PR.
+- [ ] P10 #4044: complete measured hardware/compatibility gates and merge its PR.
+- [ ] Audit every criterion, clean owned worktrees/artifacts, return to origin/master.
+
+### Evidence and constraints
+
+- Initial checkout and remote default are master at 9de01d3547; origin/main
+  does not exist. No pre-existing worktree changes were present.
+- P4's carry/validate layer landed in #4045; that does not satisfy playback.
+- Current port scan reports one healthy Espressif USB device at /dev/ttyACM0.
+  Calibration instrument and strip/measurement provenance still need validation.
+- Full requirement ownership remains #4034; implementation contracts are in
+  docs/color-pipeline-contracts.md. No phase is complete merely because an API
+  or test stub exists.
+
 ## Preserve FastLED imports for external Meson consumers
 
 - [x] Reproduce the foreign-working-directory `ModuleNotFoundError` in CI.
