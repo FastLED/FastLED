@@ -10,6 +10,7 @@
 // Fled type itself stays at top-level fl::; every auxiliary moves to
 // the fl::fled namespace.
 
+#include "fl/fled/color.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/span.h"
@@ -37,6 +38,19 @@ class FledBuilder {
     FledBuilder& setScreenMapJson(const char* json) FL_NO_EXCEPT;
     FledBuilder& setChannelsJson(const char* json) FL_NO_EXCEPT;
 
+    // Declare the source color tuple, emitted as `video.color` with the
+    // spelling FLED_FORMAT.md defines. This is the producer half of the
+    // contract the parser enforces: a payload whose numbers are not the
+    // default tuple has to say so, and hand-written JSON is the only other
+    // way to say it.
+    //
+    // The tuple is written out in full -- all four keys, never a partial
+    // object -- because inheritance of missing keys applies only to pixel
+    // formats that define a default tuple, and a producer should not have to
+    // reason about which those are. `declared` is ignored: calling this is
+    // the declaration.
+    FledBuilder& setVideoColor(const VideoColor& color) FL_NO_EXCEPT;
+
     // Optional frame payload (raw bytes appended after the envelope).
     // The builder copies the bytes.
     FledBuilder& setPayload(fl::span<const fl::u8> bytes) FL_NO_EXCEPT;
@@ -52,6 +66,7 @@ class FledBuilder {
     fl::u8             mPixelFormat;
     fl::string         mScreenMapJson;
     fl::string         mChannelsJson;
+    fl::string         mVideoColorJson;
     fl::vector<fl::u8> mPayload;
 };
 

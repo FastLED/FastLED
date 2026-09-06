@@ -5,6 +5,7 @@
 
 #include "fl/channels/config.h"
 #include "fl/fled/builder.h"
+#include "fl/fled/color.h"
 #include "fl/fled/fled.h"
 #include "fl/math/screenmap.h"
 #include "fl/stl/int.h"
@@ -40,6 +41,98 @@ FL_TEST_CASE("FledBuilder - setVersion + setPixelFormat round-trip into Fled") {
     FL_CHECK(static_cast<bool>(f));
     FL_CHECK_EQ(f.version(), fl::u8(1));
     FL_CHECK_EQ(f.pixelFormat(), fl::u8(0x05));
+}
+
+namespace {
+fl::fled::VideoColor makeColor(fl::fled::ColorPrimaries p,
+                               fl::fled::ColorTransfer t) {
+    fl::fled::VideoColor c{};
+    c.primaries = p;
+    c.transfer  = t;
+    c.matrix    = fl::fled::ColorMatrix::Rgb;
+    c.range     = fl::fled::ColorRange::Full;
+    c.declared  = true;
+    return c;
+}
+}  // namespace
+
+// The producer half of the video.color contract: what setVideoColor() writes
+// has to survive the canonical parse path and come back as the same tuple.
+FL_TEST_CASE("FledBuilder - setVideoColor round-trips each named primaries value") {
+    struct Case {
+        fl::fled::ColorPrimaries primaries;
+        fl::fled::ColorTransfer  transfer;
+        fl::u8                   pixelFormat;
+    };
+    const Case cases[] = {
+        {fl::fled::ColorPrimaries::Bt709,     fl::fled::ColorTransfer::Srgb,   0x00},
+        {fl::fled::ColorPrimaries::DisplayP3, fl::fled::ColorTransfer::Bt709,  0x00},
+        {fl::fled::ColorPrimaries::Bt2020,    fl::fled::ColorTransfer::Linear, 0x05},
+    };
+    for (const Case& c : cases) {
+        fl::fled::FledBuilder b;
+        b.setPixelFormat(c.pixelFormat)
+         .setVideoColor(makeColor(c.primaries, c.transfer));
+        fl::Fled f = b.build();
+        FL_REQUIRE(static_cast<bool>(f));
+
+        fl::fled::VideoColor got{};
+        FL_REQUIRE_EQ(f.videoColor(&got), fl::fled::ColorStatus::Ok);
+        FL_CHECK_EQ(got.primaries, c.primaries);
+        FL_CHECK_EQ(got.transfer, c.transfer);
+        FL_CHECK_EQ(got.matrix, fl::fled::ColorMatrix::Rgb);
+        FL_CHECK_EQ(got.range, fl::fled::ColorRange::Full);
+        FL_CHECK(got.declared);
+    }
+}
+
+FL_TEST_CASE("FledBuilder - custom primaries survive as CIE xy pairs") {
+    fl::fled::VideoColor c = makeColor(fl::fled::ColorPrimaries::Custom,
+                                       fl::fled::ColorTransfer::Srgb);
+    // sRGB primaries with D65 white, written out explicitly.
+    const float xy[8] = {0.6400f, 0.3300f, 0.3000f, 0.6000f,
+                         0.1500f, 0.0600f, 0.3127f, 0.3290f};
+    for (int i = 0; i < 8; ++i) c.customPrimaries[i] = xy[i];
+
+    fl::fled::FledBuilder b;
+    b.setVideoColor(c);
+    fl::Fled f = b.build();
+    FL_REQUIRE(static_cast<bool>(f));
+
+    fl::fled::VideoColor got{};
+    FL_REQUIRE_EQ(f.videoColor(&got), fl::fled::ColorStatus::Ok);
+    FL_CHECK_EQ(got.primaries, fl::fled::ColorPrimaries::Custom);
+    for (int i = 0; i < 8; ++i) {
+        FL_CHECK_CLOSE(got.customPrimaries[i], xy[i], 0.0001f);
+    }
+}
+
+// A producer must not be able to emit a tuple its own parser rejects. rgb8
+// with a linear transfer is the rule the spec states most plainly.
+FL_TEST_CASE("FledBuilder - an emitted tuple that conflicts with the format is rejected on parse") {
+    fl::fled::FledBuilder b;
+    b.setPixelFormat(0x00)  // rgb8
+     .setVideoColor(makeColor(fl::fled::ColorPrimaries::Bt709,
+                              fl::fled::ColorTransfer::Linear));
+    fl::Fled f = b.build();
+    FL_REQUIRE(static_cast<bool>(f));
+
+    fl::fled::VideoColor got{};
+    FL_CHECK_EQ(f.videoColor(&got),
+                fl::fled::ColorStatus::TransferConflictsWithFormat);
+}
+
+FL_TEST_CASE("FledBuilder - omitting setVideoColor leaves the tuple undeclared") {
+    fl::fled::FledBuilder b;
+    fl::Fled f = b.build();
+    FL_REQUIRE(static_cast<bool>(f));
+
+    fl::fled::VideoColor got{};
+    FL_REQUIRE_EQ(f.videoColor(&got), fl::fled::ColorStatus::Ok);
+    // Absent metadata resolves to the default tuple for rgb8, and says so.
+    FL_CHECK_EQ(got.primaries, fl::fled::ColorPrimaries::Bt709);
+    FL_CHECK_EQ(got.transfer, fl::fled::ColorTransfer::Srgb);
+    FL_CHECK_FALSE(got.declared);
 }
 
 FL_TEST_CASE("FledBuilder - header + screenmap JSON yields a real ScreenMap") {

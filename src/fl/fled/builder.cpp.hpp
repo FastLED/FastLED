@@ -5,6 +5,7 @@
 
 #include "fl/fled/builder.h"
 
+#include "fl/fled/color.h"
 #include "fl/fled/fled.h"
 #include "fl/stl/int.h"
 #include "fl/stl/move.h"
@@ -37,7 +38,8 @@ void appendString(fl::vector<fl::u8>& out, const fl::string& s) FL_NO_EXCEPT {
 // their canonical top-level keys. If no sections are configured the
 // envelope is "{}".
 fl::string buildEnvelope(const fl::string& screenMapJson,
-                         const fl::string& channelsJson) FL_NO_EXCEPT {
+                         const fl::string& channelsJson,
+                         const fl::string& videoColorJson) FL_NO_EXCEPT {
     fl::string out;
     out += '{';
     bool first = true;
@@ -52,7 +54,74 @@ fl::string buildEnvelope(const fl::string& screenMapJson,
         out += channelsJson;
         first = false;
     }
+    if (!videoColorJson.empty()) {
+        if (!first) out += ',';
+        out += "\"video\":{\"color\":";
+        out += videoColorJson;
+        out += '}';
+        first = false;
+    }
     out += '}';
+    return out;
+}
+
+// Spellings are the ones FLED_FORMAT.md defines. They are written here rather
+// than derived from the enum so that renaming a C++ enumerator cannot silently
+// change the wire format.
+const char* primariesName(ColorPrimaries p) FL_NO_EXCEPT {
+    switch (p) {
+    case ColorPrimaries::Bt709:     return "bt709";
+    case ColorPrimaries::DisplayP3: return "display-p3";
+    case ColorPrimaries::Bt2020:    return "bt2020";
+    case ColorPrimaries::Custom:    return nullptr;  // emitted as an object
+    }
+    return "bt709";
+}
+
+const char* transferName(ColorTransfer t) FL_NO_EXCEPT {
+    switch (t) {
+    case ColorTransfer::Srgb:   return "srgb";
+    case ColorTransfer::Bt709:  return "bt709";
+    case ColorTransfer::Linear: return "linear";
+    }
+    return "srgb";
+}
+
+// A CIE xy pair, four decimals -- enough for the D65 white point (0.3127,
+// 0.3290) to survive the round trip exactly.
+void appendXy(fl::string& out, float x, float y) FL_NO_EXCEPT {
+    out += '[';
+    out += fl::to_string(x, 4);
+    out += ',';
+    out += fl::to_string(y, 4);
+    out += ']';
+}
+
+fl::string serializeVideoColor(const VideoColor& c) FL_NO_EXCEPT {
+    fl::string out;
+    out += "{\"primaries\":";
+    const char* named = primariesName(c.primaries);
+    if (named != nullptr) {
+        out += '"';
+        out += named;
+        out += '"';
+    } else {
+        out += "{\"red\":";
+        appendXy(out, c.customPrimaries[0], c.customPrimaries[1]);
+        out += ",\"green\":";
+        appendXy(out, c.customPrimaries[2], c.customPrimaries[3]);
+        out += ",\"blue\":";
+        appendXy(out, c.customPrimaries[4], c.customPrimaries[5]);
+        out += ",\"white\":";
+        appendXy(out, c.customPrimaries[6], c.customPrimaries[7]);
+        out += '}';
+    }
+    out += ",\"transfer\":\"";
+    out += transferName(c.transfer);
+    // v1 defines exactly one value for each of matrix and range; the parser
+    // rejects anything else, so emitting them literally keeps producer and
+    // parser from drifting apart.
+    out += "\",\"matrix\":\"rgb\",\"range\":\"full\"}";
     return out;
 }
 
@@ -63,6 +132,7 @@ FledBuilder::FledBuilder() FL_NO_EXCEPT
       mPixelFormat(0),
       mScreenMapJson(),
       mChannelsJson(),
+      mVideoColorJson(),
       mPayload() {}
 
 FledBuilder& FledBuilder::setVersion(fl::u8 v) FL_NO_EXCEPT {
@@ -85,13 +155,19 @@ FledBuilder& FledBuilder::setChannelsJson(const char* json) FL_NO_EXCEPT {
     return *this;
 }
 
+FledBuilder& FledBuilder::setVideoColor(const VideoColor& color) FL_NO_EXCEPT {
+    mVideoColorJson = serializeVideoColor(color);
+    return *this;
+}
+
 FledBuilder& FledBuilder::setPayload(fl::span<const fl::u8> bytes) FL_NO_EXCEPT {
     mPayload.assign(bytes.begin(), bytes.end());
     return *this;
 }
 
 fl::Fled FledBuilder::build() const FL_NO_EXCEPT {
-    const fl::string envelope = buildEnvelope(mScreenMapJson, mChannelsJson);
+    const fl::string envelope =
+        buildEnvelope(mScreenMapJson, mChannelsJson, mVideoColorJson);
     const fl::u32 jsonLen = static_cast<fl::u32>(envelope.size());
 
     fl::vector<fl::u8> buf;
