@@ -336,9 +336,19 @@ def scalar_constants() -> list[tuple[str, int, int, str]]:
 
 
 def emit_array(
-    ctype: str, name: str, values: list[int], per_line: int, comment: str
+    ctype: str,
+    name: str,
+    values: list[int],
+    per_line: int,
+    comment: str,
+    *,
+    constexpr: bool = False,
 ) -> str:
-    lines = [f"/* {comment} */", f"static const {ctype} {name}[{len(values)}] = {{"]
+    qualifier: str = "constexpr" if constexpr else "const"
+    lines: list[str] = [
+        f"/* {comment} */",
+        f"static {qualifier} {ctype} {name}[{len(values)}] = {{",
+    ]
     for start in range(0, len(values), per_line):
         chunk = values[start : start + per_line]
         lines.append("    " + ",".join(str(v) for v in chunk) + ",")
@@ -460,6 +470,8 @@ def render() -> str:
             sec_q27(),
             6,
             "DCT-32 secants 1/(2 cos theta), Q27 (values reach 10.19)",
+            # The fixed DCT uses these coefficients as template arguments.
+            constexpr=True,
         )
     )
     parts.append(
