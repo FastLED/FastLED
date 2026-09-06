@@ -134,6 +134,12 @@ struct ChannelOptions {
         mColorProfile.mStorage.reset();
         mColorProfile.mStaticProfile = nullptr;
         mColorProfile.mRequested = false;
+        // Also drop the global-source opt-in. Without this, a profile bound
+        // by setColorProfile() leaves the flag set, and a following
+        // requestColorManagement(explicitSource) has its source silently
+        // replaced by defaultSourceProfile() in Channel::create().
+        // setColorProfile() re-establishes the flag itself when it succeeds.
+        mColorProfile.mUseGlobalSourceDefault = false;
 #endif
     }
     bool hasColorProfile() const FL_NO_EXCEPT {

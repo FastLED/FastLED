@@ -190,6 +190,22 @@ FL_TEST_CASE("Static profile sugar and fallback status are observable without en
     FL_CHECK_EQ(channel->colorProfileStatus(), ColorProfileStatus::Configured);
 }
 
+FL_TEST_CASE("An explicit source after a bound profile is not replaced by the global default") {
+    CRGB leds[1] = {};
+    // The global default differs from the source requested below, so if the
+    // global-source opt-in survives clearColorProfile() the channel silently
+    // ends up on linearSrgb instead of the Display P3 that was asked for.
+    FastLED.setDefaultSourceProfile(SourceProfile::linearSrgb());
+    ChannelOptions options;
+    FL_REQUIRE(options.setColorProfile(kFixtureProfile));
+    options.requestColorManagement(SourceProfile::displayP3());
+    ChannelConfig config(ClocklessChipset(), leds, RGB, options);
+    ChannelPtr channel = Channel::create(config);
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK_EQ(channel->sourceProfile().primaries.red.x,
+                SourceProfile::displayP3().primaries.red.x);
+}
+
 FL_TEST_CASE("Global source defaults are applied when a channel omits a source declaration") {
     CRGB leds[1] = {};
     FastLED.setDefaultSourceProfile(SourceProfile::displayP3());
