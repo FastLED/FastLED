@@ -94,15 +94,6 @@ FL_TEST_CASE("FLED_FORMAT - bytesPerLed for reserved values returns 0") {
     FL_CHECK_EQ(fl::fled::bytesPerLed(fl::u8(0xff)), fl::u8(0));
 }
 
-FL_TEST_CASE("FLED_FORMAT - PixelFormat enum overload agrees with raw u8") {
-    using fl::fled::PixelFormat;
-    FL_CHECK_EQ(fl::fled::bytesPerLed(PixelFormat::Rgb8),     fl::u8(3));
-    FL_CHECK_EQ(fl::fled::bytesPerLed(PixelFormat::Gray8),    fl::u8(1));
-    FL_CHECK_EQ(fl::fled::bytesPerLed(PixelFormat::Rgba8),    fl::u8(4));
-    FL_CHECK_EQ(fl::fled::bytesPerLed(PixelFormat::Rgbw8),    fl::u8(4));
-    FL_CHECK_EQ(fl::fled::bytesPerLed(PixelFormat::Rgb565Le), fl::u8(2));
-}
-
 FL_TEST_CASE("FLED_FORMAT - container formats map explicitly to generic storage") {
     using fl::fled::ComponentByteOrder;
     using fl::fled::PixelFormat;

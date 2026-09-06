@@ -17,10 +17,6 @@ fl::u8 bytesPerLed(fl::u8 pixelFormat) FL_NO_EXCEPT {
     }
 }
 
-fl::u8 bytesPerLed(PixelFormat pf) FL_NO_EXCEPT {
-    return bytesPerLed(static_cast<fl::u8>(pf));
-}
-
 bool toPixelStorage(PixelFormat fledFormat, PixelStorage* out) FL_NO_EXCEPT {
     if (!out) {
         return false;
