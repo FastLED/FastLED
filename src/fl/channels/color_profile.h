@@ -57,14 +57,13 @@ struct ColorProfileBinding {
 };
 
 namespace detail {
-inline bool& colorProfileStrictMode() FL_NO_EXCEPT {
-    static bool strict = false;
-    return strict;
-}
-inline SourceProfile& defaultSourceProfile() FL_NO_EXCEPT {
-    static SourceProfile profile = SourceProfile::linearSrgb();
-    return profile;
-}
+// Defined in color_profile.cpp.hpp, not here. A function-local static in a
+// header gives every DLL that includes it its own copy, so on Windows the
+// test module set one instance of these while Channel::create() read
+// another; `SourceProfile` also has a non-trivial constructor, which the
+// header rule prohibits outright.
+bool& colorProfileStrictMode() FL_NO_EXCEPT;
+SourceProfile& defaultSourceProfile() FL_NO_EXCEPT;
 }  // namespace detail
 
 }  // namespace fl
