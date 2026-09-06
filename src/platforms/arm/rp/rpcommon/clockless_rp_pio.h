@@ -32,6 +32,7 @@
 
 #include "platforms/arm/rp/rpcommon/pio_gen.h"
 #include "platforms/arm/rp/rpcommon/rp_pio_dma_resource_manager.h"
+#include "fl/log/log.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
@@ -182,7 +183,17 @@ public:
             }
             break;
         }
-        if (offset == -1) return;
+        if (offset == -1) {
+            // Every PIO state machine (or all program space) is already
+            // claimed by other code -- Adafruit TinyUSB is the common case on
+            // RP2040. Report it: silently returning here leaves the strip dark
+            // with no explanation. See FastLED#1471.
+            FL_WARN_F("[RP PIO] no free PIO state machine for pin %d; "
+                      "another library holds them all. Set "
+                      "FASTLED_RP2040_CLOCKLESS_PIO 0 to bit-bang instead.",
+                      int(DATA_PIN));
+            return;
+        }
 
         // Store PIO, state machine, and offset for later use
         mPio = pio;
@@ -190,6 +201,9 @@ public:
         mPioOffset = offset;
 
         if (!resources.claimDmaChannel(&dma_channel)) {
+            FL_WARN_F("[RP PIO] no free DMA channel for pin %d; "
+                      "output disabled on this pin.",
+                      int(DATA_PIN));
             resources.releasePioStateMachine(mPio, mSm);
             mPio = nullptr;
             mSm = -1;
@@ -197,6 +211,9 @@ public:
         }
 
         if (!resources.claimPins(DATA_PIN, 1)) {
+            FL_WARN_F("[RP PIO] pin %d is already claimed by other code; "
+                      "output disabled on this pin.",
+                      int(DATA_PIN));
             resources.releaseDmaChannel(dma_channel);
             resources.releasePioStateMachine(mPio, mSm);
             dma_channel = -1;
