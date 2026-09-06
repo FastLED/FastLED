@@ -377,11 +377,16 @@ def delta_e2000(first: Lab, second: Lab) -> float:
         - 0.20 * cos(radians(4.0 * average_hue - 63.0))
     )
     delta_theta = 30.0 * exp(-(((average_hue - 275.0) / 25.0) ** 2))
-    chroma_scale = 2.0 * sqrt(average_chroma**7 / (average_chroma**7 + 25.0**7))
     lightness_scale = 1.0 + 0.015 * (average_lightness - 50.0) ** 2 / sqrt(
         20.0 + (average_lightness - 50.0) ** 2
     )
     chroma_mean = (adjusted_chroma1 + adjusted_chroma2) / 2.0
+    # R_C is defined over the *adjusted* chroma mean C-bar-prime, not the raw
+    # mean used for G above. The two coincide at high chroma (G -> 0) and at
+    # low chroma (R_C -> 0), which is why the usual Sharma pairs do not
+    # separate them; they disagree in the band around C ~ 15-25 where G is
+    # still large and R_C is turning on.
+    chroma_scale = 2.0 * sqrt(chroma_mean**7 / (chroma_mean**7 + 25.0**7))
     saturation_scale = 1.0 + 0.045 * chroma_mean
     hue_scale = 1.0 + 0.015 * chroma_mean * t
     rotation = -sin(radians(2.0 * delta_theta)) * chroma_scale

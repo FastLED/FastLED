@@ -314,6 +314,47 @@ class TestColorReference(unittest.TestCase):
             places=12,
         )
 
+    def test_ciede2000_matches_published_sharma_pairs(self) -> None:
+        """Sharma/Wu/Dalal CIEDE2000 reference pairs, published values.
+
+        These span the term-by-term traps the formula is known for: the hue
+        arc across 0/360, near-neutral pairs where the chroma product is zero,
+        low-lightness pairs, and the blue region where the rotation term is
+        largest.
+        """
+
+        published = (
+            ((50.0, 2.6772, -79.7751), (50.0, 0.0, -82.7485), 2.0425),
+            ((50.0, 2.5, 0.0), (50.0, 0.0, -2.5), 4.3065),
+            ((22.7233, 20.0904, -46.6940), (23.0331, 14.9730, -42.5619), 2.0373),
+            ((36.4612, 47.8580, 18.3852), (36.2715, 50.5065, 21.2231), 1.4146),
+            ((60.2574, -34.0099, 36.2677), (60.4626, -34.1751, 39.4387), 1.2644),
+            ((35.0831, -44.1164, 3.7933), (35.0232, -40.0716, 1.5901), 1.8645),
+            ((63.0109, -31.0961, -5.8663), (62.8187, -29.7946, -4.0864), 1.2630),
+            ((61.2901, 3.7196, -5.3901), (61.4292, 2.2480, -4.9620), 1.8731),
+            ((90.8027, -2.0831, 1.4410), (91.1528, -1.6435, 0.0447), 1.4441),
+            ((2.0776, 0.0795, -1.1350), (0.9033, -0.0636, -0.5514), 0.9082),
+        )
+        for first, second, expected in published:
+            with self.subTest(first=first, second=second):
+                self.assertAlmostEqual(delta_e2000(first, second), expected, places=4)
+
+    def test_ciede2000_rotation_uses_the_adjusted_chroma_mean(self) -> None:
+        """R_C is defined over C-bar-prime, not the raw chroma mean.
+
+        The published pairs above do not separate the two: at high chroma the
+        G adjustment vanishes, and at low chroma R_C vanishes. They disagree
+        only in the blue band around C ~ 15-25, where G is still large and
+        R_C is turning on. This pair sits in that band, so it fails if the
+        rotation magnitude is ever recomputed from the unadjusted mean.
+        """
+
+        self.assertAlmostEqual(
+            delta_e2000((50.0, 2.0, -19.8), (50.0, 3.0, -13.8)),
+            4.299463,
+            places=6,
+        )
+
     def test_ciede2000_reference_pair_and_profile_white_normalization(self) -> None:
         self.assertAlmostEqual(
             delta_e2000((50.0, 2.6772, -79.7751), (50.0, 0.0, -82.7485)),
