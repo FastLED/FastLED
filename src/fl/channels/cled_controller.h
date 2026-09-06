@@ -37,7 +37,14 @@ protected:
     fl::span<CRGB> mLeds;     ///< span of LED data used by this controller
     CLEDController *mPNext = nullptr;   ///< pointer to the next LED controller in the linked list
     ChannelOptions mSettings;  ///< Optional channel settings (correction, temperature, dither, rgbw, affinity)
-    bool mEnabled = true;
+    // Reuse the legacy enabled byte for P2's TINY static-profile state. This
+    // keeps the base-controller ABI unchanged while allowing a legacy setter
+    // to clear an immutable compile-time binding exactly once.
+    enum StateFlags : u8 {
+        kEnabled = 1 << 0,
+        kStaticProfileCleared = 1 << 1,
+    };
+    u8 mStateFlags = kEnabled;
     static CLEDController *mPHead;  ///< pointer to the first LED controller in the linked list
     static CLEDController *mPTail;  ///< pointer to the last LED controller in the linked list
 
@@ -153,8 +160,44 @@ public:
         return *this;
     }
 
-    void setEnabled(bool enabled) FL_NO_EXCEPT { mEnabled = enabled; }
-    bool getEnabled() FL_NO_EXCEPT { return mEnabled; }
+    void setEnabled(bool enabled) FL_NO_EXCEPT {
+        if (enabled) {
+            mStateFlags |= kEnabled;
+        } else {
+            mStateFlags &= static_cast<u8>(~kEnabled);
+        }
+    }
+    bool getEnabled() FL_NO_EXCEPT { return (mStateFlags & kEnabled) != 0; }
+    const EmitterProfile* emitterProfile() const FL_NO_EXCEPT {
+        const EmitterProfile* static_profile = staticEmitterProfile();
+        return static_profile != nullptr && !staticProfileCleared()
+            ? static_profile
+            : mSettings.emitterProfile();
+    }
+    void bindStaticEmitterProfile(const EmitterProfile* profile) FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        mSettings.clearColorProfile();
+        mSettings.mColorProfile.mStaticProfile = profile;
+        mSettings.mColorProfile.mRequested = profile != nullptr;
+#else
+        FL_UNUSED(profile);
+#endif
+    }
+
+protected:
+    /// Template-derived static-profile controllers override this hook. It
+    /// carries compile-time identity without an instance pointer field.
+    virtual const EmitterProfile* staticEmitterProfile() const FL_NO_EXCEPT { return nullptr; }
+    bool staticProfileCleared() const FL_NO_EXCEPT {
+        return (mStateFlags & kStaticProfileCleared) != 0;
+    }
+    void clearStaticProfileForLegacySettings() FL_NO_EXCEPT {
+        if (staticEmitterProfile() != nullptr) {
+            mStateFlags |= kStaticProfileCleared;
+        }
+    }
+
+public:
 
     CLEDController() FL_NO_EXCEPT;
     // If we added virtual to the AVR boards then we are going to add 600 bytes of memory to the binary
@@ -207,7 +250,7 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see show(const CRGB*, int, CRGB)
     void showInternal(const CRGB *data, int nLeds, fl::u8 brightness) FL_NO_EXCEPT {
-        if (mEnabled) {
+        if (getEnabled()) {
            show(data, nLeds,brightness);
         }
     }
@@ -220,7 +263,7 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const CRGB&, int, CRGB)
     void showColorInternal(const CRGB &data, int nLeds, fl::u8 brightness) FL_NO_EXCEPT {
-        if (mEnabled) {
+        if (getEnabled()) {
             showColor(data, nLeds, brightness);
         }
     }
@@ -229,7 +272,7 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see show(const CRGB*, int, fl::u8)
     void showLedsInternal(fl::u8 brightness) FL_NO_EXCEPT {
-        if (mEnabled) {
+        if (getEnabled()) {
             show(mLeds.data(), mLeds.size(), brightness);
         }
     }
@@ -240,7 +283,7 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const CRGB&, int, CRGB)
     void showColorInternal(const CRGB & data, fl::u8 brightness) FL_NO_EXCEPT {
-        if (mEnabled) {
+        if (getEnabled()) {
             showColor(data, mLeds.size(), brightness);
         }
     }
@@ -383,10 +426,18 @@ public:
     /// The color corrction to use for this controller, expressed as a CRGB object
     /// @param correction the color correction to set
     /// @returns a reference to the controller
-    CLEDController & setCorrection(CRGB correction) FL_NO_EXCEPT { mSettings.mCorrection = correction; return *this; }
+    CLEDController & setCorrection(CRGB correction) FL_NO_EXCEPT {
+        clearStaticProfileForLegacySettings();
+        mSettings.setLegacyCorrection(correction);
+        return *this;
+    }
 
     /// @copydoc setCorrection()
-    CLEDController & setCorrection(LEDColorCorrection correction) FL_NO_EXCEPT { mSettings.mCorrection = correction; return *this; }
+    CLEDController & setCorrection(LEDColorCorrection correction) FL_NO_EXCEPT {
+        clearStaticProfileForLegacySettings();
+        mSettings.setLegacyCorrection(correction);
+        return *this;
+    }
 
     /// Get the correction value used by this controller
     /// @returns the current color correction (CLEDController::mSettings.mCorrection)
@@ -395,10 +446,18 @@ public:
     /// Set the color temperature, aka white point, for this controller
     /// @param temperature the color temperature to set
     /// @returns a reference to the controller
-    CLEDController & setTemperature(CRGB temperature) FL_NO_EXCEPT { mSettings.mTemperature = temperature; return *this; }
+    CLEDController & setTemperature(CRGB temperature) FL_NO_EXCEPT {
+        clearStaticProfileForLegacySettings();
+        mSettings.setLegacyTemperature(temperature);
+        return *this;
+    }
 
     /// @copydoc setTemperature()
-    CLEDController & setTemperature(ColorTemperature temperature) FL_NO_EXCEPT { mSettings.mTemperature = temperature; return *this; }
+    CLEDController & setTemperature(ColorTemperature temperature) FL_NO_EXCEPT {
+        clearStaticProfileForLegacySettings();
+        mSettings.setLegacyTemperature(temperature);
+        return *this;
+    }
 
     /// Get the color temperature, aka white point, for this controller
     /// @returns the current color temperature (CLEDController::mSettings.mTemperature)
@@ -414,6 +473,19 @@ public:
     /// Gets the maximum possible refresh rate of the strip
     /// @returns the maximum refresh rate, in frames per second (FPS)
     virtual fl::u16 getMaxRefreshRate() const FL_NO_EXCEPT { return 0; }
+};
+
+/// A legacy-controller wrapper for a compile-time emitter profile. The
+/// override carries identity in the vtable; it intentionally has no members.
+template<const EmitterProfile& Profile,
+         template<u8, EOrder> class Chipset,
+         u8 DataPin,
+         EOrder RgbOrder>
+class StaticProfileClocklessController final : public Chipset<DataPin, RgbOrder> {
+protected:
+    const EmitterProfile* staticEmitterProfile() const FL_NO_EXCEPT override {
+        return &Profile;
+    }
 };
 
 }  // namespace fl

@@ -3,6 +3,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/string.h"  // IWYU pragma: keep
+#include "fl/stl/stdint.h"
 
 namespace fl {
 
@@ -10,6 +11,10 @@ class IChannel;
 class IChannelDriver;  // IWYU pragma: keep
 class ChannelData;
 struct ChannelConfig;
+enum class ColorProfileStatus : u8;
+enum class ColorProfileWarning : u8 { ProfileClearedByLegacy, LegacyClearedByProfile };
+struct ColorProfileFallbackEvent { i32 channelId; ColorProfileStatus status; };
+struct ColorProfileWarningEvent { ColorProfileWarning kind; };
 
 /// @brief Singleton event router for Channel lifecycle events
 ///
@@ -70,6 +75,8 @@ struct ChannelEvents {
     detail::NoOpChannelEvent onChannelAdded;
     detail::NoOpChannelEvent onChannelRemoved;
     detail::NoOpChannelEvent onChannelConfigured;
+    detail::NoOpChannelEvent onColorProfileFallback;
+    detail::NoOpChannelEvent onColorProfileWarning;
     detail::NoOpChannelEvent onChannelDataEncoded;
     detail::NoOpChannelEvent onChannelEnqueued;
 };
@@ -99,6 +106,8 @@ struct ChannelEvents {
 
     /// Fired after applyConfig() reconfigures a Channel
     fl::function_list<void(const IChannel&, const ChannelConfig&)> onChannelConfigured;
+    fl::function_list<void(const ColorProfileFallbackEvent&)> onColorProfileFallback;
+    fl::function_list<void(const ColorProfileWarningEvent&)> onColorProfileWarning;
 
     // -- Rendering events --
 

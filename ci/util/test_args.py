@@ -228,6 +228,13 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
 
     # Auto-enable --py or --cpp mode when a specific test is provided
     if test_args.test:
+        # Dedicated no-PCH TINY ABI executable. It is intentionally excluded
+        # from normal source discovery, so smart selection must not rewrite it
+        # to a host-tier DLL target.
+        if test_args.test in ("color_profile_tiny_layout", "color_profile_tiny_runtime"):
+            test_args.cpp = True
+            test_args.unit = True
+            return test_args
         # Check if this is a Python test first
         if _python_test_exists(test_args.test):
             # This is a Python test - enable Python mode

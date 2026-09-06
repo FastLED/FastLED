@@ -174,8 +174,21 @@ ChannelPtr Channel::create(const ChannelConfig &config) {
 
     auto channel = fl::make_shared<Channel>(config.chipset, config.mLeds,
                                               config.rgb_order, config.options);
-    channel->mName = makeName(channel->mId, config.mName);
     auto& events = ChannelEvents::instance();
+#if FL_COLOR_PROFILE_RUNTIME
+    if (config.options.mColorProfile.mRequested && !config.options.hasColorProfile()) {
+        channel->mColorProfileFallback = true;
+        channel->mProfileBindingAccepted = !detail::colorProfileStrictMode();
+        if (!channel->mProfileBindingAccepted) channel->setEnabled(false);
+    }
+    if (channel->mSettings.mColorProfile.mUseGlobalSourceDefault) {
+        channel->mSettings.mColorProfile.mSource = detail::defaultSourceProfile();
+    }
+    if (channel->mColorProfileFallback) {
+        events.onColorProfileFallback({channel->id(), channel->colorProfileStatus()});
+    }
+#endif
+    channel->mName = makeName(channel->mId, config.mName);
     events.onChannelCreated(*channel);
     return channel;
 }
@@ -237,8 +250,7 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
     CLEDController::mSettings = options;
 
     // Set color correction/temperature/dither/rgbw from ChannelOptions
-    setCorrection(options.mCorrection);
-    setTemperature(options.mTemperature);
+    if (!options.hasColorProfile()) { setCorrection(options.mCorrection); setTemperature(options.mTemperature); }
     setDither(options.mDitherMode);
     applyWhiteCfg(*this, options);
 
@@ -268,8 +280,7 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     CLEDController::mSettings = options;
 
     // Set color correction/temperature/dither/rgbw from ChannelOptions
-    setCorrection(options.mCorrection);
-    setTemperature(options.mTemperature);
+    if (!options.hasColorProfile()) { setCorrection(options.mCorrection); setTemperature(options.mTemperature); }
     setDither(options.mDitherMode);
     applyWhiteCfg(*this, options);
 
@@ -293,8 +304,7 @@ void Channel::applyConfig(const ChannelConfig& config) {
     CLEDController::mSettings = config.options;
     mBus = config.options.mBus;
     mBusWhich = config.options.mBusWhich;
-    setCorrection(config.options.mCorrection);
-    setTemperature(config.options.mTemperature);
+    if (!config.options.hasColorProfile()) { setCorrection(config.options.mCorrection); setTemperature(config.options.mTemperature); }
     setDither(config.options.mDitherMode);
     applyWhiteCfg(*this, config.options);
     auto& events = ChannelEvents::instance();

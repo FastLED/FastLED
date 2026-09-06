@@ -23,6 +23,7 @@
 #pragma once
 
 #include "fl/math/math.h"
+#include "fl/gfx/color_profile.h"
 #include "fl/stl/stdint.h"
 
 namespace fl {
@@ -262,6 +263,31 @@ struct EmitterProfile {
     float input_xy_g[2];  // source G primary chromaticity (default: native LED G)
     float input_xy_b[2];  // source B primary chromaticity (default: native LED B)
     float input_xy_w[2];  // source white chromaticity (default D65)
+
+    const char* id;
+    const u16* response_lut_r;
+    const u16* response_lut_g;
+    const u16* response_lut_b;
+    u16 response_lut_size;
+    u8 native_code_depth;
+    FiveBitSemantics five_bit_semantics;
+    const char* provenance_kind;
+    const char* report_id;
+    float reference_temperature_c;
+    float electrical_milliwatts_r;
+    float electrical_milliwatts_g;
+    float electrical_milliwatts_b;
+    float electrical_idle_milliwatts;
+
+    static constexpr EmitterProfile rgb(const char* profile_id, Chromaticity red,
+                                        Chromaticity green, Chromaticity blue,
+                                        float red_y, float green_y, float blue_y,
+                                        const char* provenance = nullptr,
+                                        const char* report = nullptr) FL_NO_EXCEPT {
+        return EmitterProfile{{red.x, red.y}, {green.x, green.y}, {blue.x, blue.y}, red_y, green_y, blue_y,
+                              {0, 0}, {0, 0}, {0, 0}, {0, 0}, profile_id, nullptr, nullptr, nullptr, 0, 8,
+                              FiveBitSemantics::NotApplicable, provenance, report, 0, 0, 0, 0, 0};
+    }
 };
 
 // Backward-compat alias for the original PR vocabulary (issue #3231 → PR 2
@@ -269,6 +295,13 @@ struct EmitterProfile {
 // `EmitterProfile` name; existing call sites that spell out
 // `RgbColorimetricProfile` keep compiling.
 using RgbColorimetricProfile = EmitterProfile;
+
+namespace profiles {
+static constexpr EmitterProfile WS2812B = EmitterProfile::rgb(
+    "ws2812b/placeholder/uncalibrated", Chromaticity(.640f, .330f),
+    Chromaticity(.300f, .600f), Chromaticity(.150f, .060f), 1.0f, 1.0f, 1.0f,
+    "placeholder", "uncalibrated");
+}  // namespace profiles
 
 // Cache derived from `EmitterProfile`: precomputed XYZ primaries, inverse
 // primary matrix, and source-space matrix when an input gamut is supplied.
@@ -378,4 +411,8 @@ inline bool solve_rgb_colorimetric(const RgbColorimetricCache& cache,
 }
 
 } // namespace colorimetric_response
+
+namespace profiles {
+using colorimetric_response::profiles::WS2812B;  // ok bare using: public P2 profile API
+}  // namespace profiles
 } // namespace fl

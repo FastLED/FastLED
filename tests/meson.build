@@ -197,6 +197,55 @@ test_shared_objs_lib = static_library('test_shared_objs',
 )
 shared_test_objects = test_shared_objs_lib.extract_all_objects(recursive: false)
 
+# P2 TINY layout probe: compile headers under an isolated tiny-memory
+# configuration. It deliberately does not link fastled_lib or use test_pch,
+# avoiding host-tier ODR/PCH contamination of sizeof assertions.
+color_profile_tiny_layout = executable('color_profile_tiny_layout',
+  'fl/channels/color_profile_tiny_layout.cpp',
+  cpp_args: test_abs_include_args + unit_test_compile_args + [
+    '-DFL_PLATFORM_HAS_TINY_MEMORY=1',
+    '-DFL_PLATFORM_HAS_LARGE_MEMORY=0',
+    '-DFL_PLATFORM_HAS_HUGE_MEMORY=0',
+    '-DFL_COLOR_PROFILE_RUNTIME=0',
+  ],
+  link_args: unit_test_link_args,
+  implicit_include_directories: false,
+  build_by_default: false,
+  install: false
+)
+test('color_profile_tiny_layout', color_profile_tiny_layout)
+
+# Consistent TINY production library plus runtime identity probe. Never link
+# against host-tier fastled_lib: the ABI/layout flags must match both sides.
+fastled_tiny_lib = static_library('fastled_tiny_profile',
+  fastled_sources + platforms_shared_files,
+  cpp_args: base_compile_args + test_abs_include_args + [
+    '-DFASTLED_BUILDING_DLL',
+    '-DFL_PLATFORM_HAS_TINY_MEMORY=1',
+    '-DFL_PLATFORM_HAS_LARGE_MEMORY=0',
+    '-DFL_PLATFORM_HAS_HUGE_MEMORY=0',
+    '-DFL_COLOR_PROFILE_RUNTIME=0',
+  ],
+  implicit_include_directories: false,
+  build_by_default: false,
+  install: false
+)
+color_profile_tiny_runtime = executable('color_profile_tiny_runtime',
+  'fl/channels/color_profile_tiny_runtime.cpp',
+  cpp_args: test_abs_include_args + unit_test_compile_args + [
+    '-DFL_PLATFORM_HAS_TINY_MEMORY=1',
+    '-DFL_PLATFORM_HAS_LARGE_MEMORY=0',
+    '-DFL_PLATFORM_HAS_HUGE_MEMORY=0',
+    '-DFL_COLOR_PROFILE_RUNTIME=0',
+  ],
+  link_args: unit_test_link_args,
+  link_with: fastled_tiny_lib,
+  implicit_include_directories: false,
+  build_by_default: false,
+  install: false
+)
+test('color_profile_tiny_runtime', color_profile_tiny_runtime)
+
 # Build each test as a DLL with shared PCH
 foreach test_name : test_names
   # Get test file path from dynamic map (for subdirectories) or default to test_name.cpp

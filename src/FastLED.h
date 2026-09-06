@@ -809,6 +809,13 @@ public:
 	/// @endcode
 	static fl::ChannelPtr add(const fl::ChannelConfig& config);
 
+	template<fl::ProfileId Profile>
+	static fl::ChannelPtr add(const fl::ChannelConfig& config) {
+		fl::ChannelPtr channel = fl::Channel::create<Profile>(config);
+		if (channel != nullptr) add(channel);
+		return channel;
+	}
+
 	/// @brief Add multiple LED channels from a config array
 	///
 	/// Creates and registers multiple Channel-based LED controllers from an array of configurations.
@@ -1290,6 +1297,17 @@ public:
 		fl::busKeepAlive<B>();
 		static CHIPSET<DATA_PIN, RGB_ORDER> c;
 		return addLedsImpl(&c, data, nLedsOrOffset, nLedsIfOffset);
+	}
+
+	template<fl::ProfileId PROFILE, template<fl::u8, fl::EOrder> class CHIPSET,
+	         fl::u8 DATA_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
+	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		FL_STATIC_ASSERT(PROFILE == fl::ProfileId::WS2812B, "Unsupported color profile");
+		fl::busKeepAlive<B>();
+		using Controller = fl::StaticProfileClocklessController<fl::profiles::WS2812B,
+			CHIPSET, DATA_PIN, RGB_ORDER>;
+		static Controller controller;
+		return addLedsImpl(&controller, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	/// Add a clockless based CLEDController instance to the world.
@@ -1839,6 +1857,21 @@ public:
 	/// whatever previous dithering option those controllers may have had.
 	/// @param ditherMode what type of dithering to use, either BINARY_DITHER or DISABLE_DITHER
 	void setDither(fl::u8 ditherMode = BINARY_DITHER);
+
+	/// In strict mode a channel that requests color management without an
+	/// emitter profile reports a rejected binding instead of silent fallback.
+	void setColorManagementStrict(bool strict) FL_NO_EXCEPT {
+		fl::detail::colorProfileStrictMode() = strict;
+	}
+	bool colorManagementStrict() const FL_NO_EXCEPT {
+		return fl::detail::colorProfileStrictMode();
+	}
+	void setDefaultSourceProfile(const fl::SourceProfile& profile) FL_NO_EXCEPT {
+		fl::detail::defaultSourceProfile() = profile;
+	}
+	const fl::SourceProfile& defaultSourceProfile() const FL_NO_EXCEPT {
+		return fl::detail::defaultSourceProfile();
+	}
 
 	/// Set the maximum refresh rate.  This is global for all leds.  Attempts to
 	/// call show() faster than this rate will simply wait.
