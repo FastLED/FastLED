@@ -109,11 +109,10 @@ bool defaultVideoColor(fl::u8 pixelFormat, VideoColor* out) FL_NO_EXCEPT;
 ColorStatus resolveVideoColor(const fl::json& envelope, fl::u8 pixelFormat,
                               VideoColor* out) FL_NO_EXCEPT;
 
-inline ColorStatus resolveVideoColor(const fl::json& envelope,
-                                     PixelFormat pixelFormat,
-                                     VideoColor* out) FL_NO_EXCEPT {
-    return resolveVideoColor(envelope, static_cast<fl::u8>(pixelFormat), out);
-}
+// Typed overload. Kept in the public API because callers hold a PixelFormat
+// and should not have to cast to the wire byte to resolve a color tuple.
+ColorStatus resolveVideoColor(const fl::json& envelope, PixelFormat pixelFormat,
+                              VideoColor* out) FL_NO_EXCEPT;
 
 // Stable human-readable text for a status, for diagnostics. Never null.
 const char* colorStatusMessage(ColorStatus status) FL_NO_EXCEPT;

@@ -137,6 +137,10 @@ FL_TEST_CASE("FLED_FORMAT - container formats map explicitly to generic storage"
     linearColor.transfer = fl::fled::ColorTransfer::Srgb;
     FL_CHECK_FALSE(fl::fled::toFledPixelFormat(storage, linearColor, &roundTrip));
 
+    // Restore the transfer first: Rgb16 with an Srgb transfer is rejected
+    // before byte order is ever consulted, so leaving it set would let the
+    // previous assertion's cause satisfy this one.
+    linearColor.transfer = fl::fled::ColorTransfer::Linear;
     storage.mComponentByteOrder = ComponentByteOrder::Native;
     FL_CHECK_FALSE(fl::fled::toFledPixelFormat(storage, linearColor, &roundTrip));
     FL_CHECK_FALSE(fl::fled::toPixelStorage(static_cast<PixelFormat>(0x06),

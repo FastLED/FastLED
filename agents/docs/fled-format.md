@@ -22,7 +22,7 @@
 FastLED has **two** `.fled` readers, and adding an enum value to one leaves the other behind:
 
 1. `src/fl/fled/pixel_format.h` — the public on-device C++ wire-format reader and checked mapping to generic storage.
-2. `src/platforms/wasm/compiler/package.json` pins `@fastled/gfx` to a **released tarball** (currently `gfx-v0.1.1`), whose bundled reader carries its own bytes-per-LED table. Until that pin moves, the WASM preview rejects any format the release predates.
+2. `src/platforms/wasm/compiler/package.json` **and** `src/platforms/wasm/compiler/package-lock.json` pin `@fastled/gfx` to a **released tarball** (currently `gfx-v0.1.1`), whose bundled reader carries its own bytes-per-LED table. Both files carry the pin and both must move together. Until they do, the WASM preview rejects any format the release predates.
 3. The canonical ledmapper spec + producer.
 
 `rgb16_linear` (`0x05`) is in this state today: FastLED admits it through typed ingress, but `gfx-v0.1.1` predates the corresponding browser-preview support. The preview must fail loudly rather than misparse; the pin moves only after a released producer/parser implementation. The ordering is fixed: **ledmapper merge → gfx release → bump both FastLED package manifests here**.

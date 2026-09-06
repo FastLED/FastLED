@@ -39,9 +39,9 @@ struct PixelStorage {
 // unknown/reserved. Callers must reject zero before reading payload bytes.
 fl::u8 bytesPerLed(fl::u8 pixelFormat) FL_NO_EXCEPT;
 
-inline fl::u8 bytesPerLed(PixelFormat pf) FL_NO_EXCEPT {
-    return bytesPerLed(static_cast<fl::u8>(pf));
-}
+// Typed overload. Kept in the public API because callers hold a PixelFormat
+// and should not have to cast to the wire byte to ask this question.
+fl::u8 bytesPerLed(PixelFormat pf) FL_NO_EXCEPT;
 
 // Checked conversion between FLED's wire enum and generic storage. Only
 // direct RGB storage has a mapping today. The source color declaration is

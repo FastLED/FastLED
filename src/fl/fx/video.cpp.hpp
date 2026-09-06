@@ -41,8 +41,15 @@ bool Video::begin(filebuf_ptr handle) {
                      "must include full parameters.");
         return false;
     }
+    // Drop a previous admission failure before evaluating this attempt.
+    // Rejecting one source says nothing about the next; only a persistent
+    // setError() failure keeps blocking.
+    if (mAdmissionError) {
+        mError.clear();
+        mAdmissionError = false;
+    }
     if (!handle) {
-        mError = "filebuf is null";
+        setAdmissionError("filebuf is null");
         FL_DBG_F("%s", mError.c_str());
         return false;
     }
@@ -50,9 +57,8 @@ bool Video::begin(filebuf_ptr handle) {
         FL_DBG_F("%s", mError.c_str());
         return false;
     }
-    mError.clear();
     if (!mImpl->begin(handle)) {
-        mError = "unsupported or malformed FLED container";
+        setAdmissionError("unsupported or malformed FLED container");
         return false;
     }
     return true;

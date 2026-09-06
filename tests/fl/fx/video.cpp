@@ -169,6 +169,45 @@ FL_TEST_CASE("Video Frame draw fails dark after rejected FLED admission") {
     FL_CHECK_EQ(frame.rgb()[0], CRGB::Black);
 }
 
+FL_TEST_CASE("Video admits a valid source after a rejected FLED container") {
+    FakeFilebufPtr bad = fl::make_shared<FakeFilebuf>();
+    const uint8_t invalidFled[] = {
+        'F', 'L', 'E', 'D', 1, 0x00, 1, 0, 0, 0, 0, 0, 1, 2, 3,
+    };
+    FL_REQUIRE_EQ(bad->writeData(invalidFled, sizeof(invalidFled)),
+                  sizeof(invalidFled));
+
+    fl::Video video(1, 30, 1);
+    FL_REQUIRE_FALSE(video.begin(bad));
+    FL_REQUIRE(video.error().size());
+
+    // Rejecting one container describes that source, not the instance. The
+    // same Video has to admit a valid handle afterwards, and must not carry
+    // the previous rejection forward as its error state.
+    FakeFilebufPtr good = fl::make_shared<FakeFilebuf>();
+    const uint8_t raw[] = {0x11, 0x22, 0x33};
+    FL_REQUIRE_EQ(good->writeData(raw, sizeof(raw)), sizeof(raw));
+
+    FL_CHECK(video.begin(good));
+    FL_CHECK(video.error().empty());
+    FL_CHECK_FALSE(video.hasEmbeddedScreenMap());
+}
+
+FL_TEST_CASE("Video setError blocks admission until the caller clears it") {
+    FakeFilebufPtr good = fl::make_shared<FakeFilebuf>();
+    const uint8_t raw[] = {0x11, 0x22, 0x33};
+    FL_REQUIRE_EQ(good->writeData(raw, sizeof(raw)), sizeof(raw));
+
+    fl::Video video(1, 30, 1);
+    // A caller-supplied error is persistent, unlike a begin() rejection.
+    video.setError("persistent failure");
+    FL_CHECK_FALSE(video.begin(good));
+    FL_CHECK_EQ(video.error(), fl::string("persistent failure"));
+
+    video.setError("");
+    FL_CHECK(video.begin(good));
+}
+
 FL_TEST_CASE("PixelStream rejects an unsupported FLED format instead of reading its header as RGB") {
     FakeFilebufPtr fileHandle = fl::make_shared<FakeFilebuf>();
     // A complete FLED header for rgb16_linear followed by one six-byte

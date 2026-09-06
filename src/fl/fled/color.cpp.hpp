@@ -250,6 +250,11 @@ ColorStatus resolveVideoColor(const fl::json& envelope, fl::u8 pixelFormat,
     return ColorStatus::Ok;
 }
 
+ColorStatus resolveVideoColor(const fl::json& envelope, PixelFormat pixelFormat,
+                              VideoColor* out) FL_NO_EXCEPT {
+    return resolveVideoColor(envelope, static_cast<fl::u8>(pixelFormat), out);
+}
+
 bool toFledPixelFormat(const PixelStorage& storage, const VideoColor& color,
                        PixelFormat* out) FL_NO_EXCEPT {
     if (!out) {

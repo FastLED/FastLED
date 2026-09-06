@@ -74,7 +74,13 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     void setTimeScale(float timeScale);
     float timeScale() const;
     string error() const;
-    void setError(const string &error) { mError = error; }
+    // A caller-supplied error is persistent: it blocks admission until the
+    // caller clears it. Admission errors recorded by begin() are not -- see
+    // mAdmissionError.
+    void setError(const string &error) FL_NO_EXCEPT {
+        mError = error;
+        mAdmissionError = false;
+    }
     size_t pixelsPerFrame() const;
 
     // FLED v1 container (issue #3072): true / non-empty only when begin()
@@ -96,7 +102,16 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     operator bool() const { return mImpl.get(); }
 
   private:
+    // True when mError was recorded by a failed begin() rather than by
+    // setError(). Such a failure describes one rejected source, not a dead
+    // object, so the next begin() clears it and admits a new handle.
+    void setAdmissionError(const string &error) FL_NO_EXCEPT {
+        mError = error;
+        mAdmissionError = true;
+    }
+
     bool mFinished = false;
+    bool mAdmissionError = false;
     VideoImplPtr mImpl;
     string mError;
     string mName;
