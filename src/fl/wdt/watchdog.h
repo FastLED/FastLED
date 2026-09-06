@@ -155,6 +155,56 @@ public:
     fl::u16    safeModeThreshold() const FL_NO_EXCEPT;
     void       setSafeModeThreshold(fl::u16 threshold) FL_NO_EXCEPT;
 
+    /// @brief Boot-loop escape hatch: drop to the bootloader instead of
+    /// looping forever, so an unattended host can re-flash the board.
+    ///
+    /// A board whose firmware wedges before its USB stack comes up is
+    /// invisible to the host -- no CDC endpoint, so no 1200-baud touch and no
+    /// `picotool reboot`. Nothing on the host can recover it, because a
+    /// root-hub port reset is a bus reset, not a VBUS power cycle. The only
+    /// remaining fix is physical. See FastLED#3713 / #3714.
+    ///
+    /// Setting a non-zero threshold makes the *device* break that loop: after
+    /// N consecutive watchdog resets, `escapeToBootloaderIfLooping()` reboots
+    /// into the bootloader, where the board re-enumerates as a flashable
+    /// target and the host can push working firmware without a human.
+    ///
+    /// Opt-in by design -- the default of 0 disables it. Call the check early
+    /// in `setup()`, before any code that might wedge:
+    /// @code
+    ///   FastLED.watchdog().setBootloaderEscapeThreshold(3);
+    ///   FastLED.watchdog().escapeToBootloaderIfLooping();
+    /// @endcode
+    /// Requires `FL_WATCHDOG_HAS_BOOTLOADER_REBOOT`; elsewhere the escape is
+    /// a no-op that returns false and leaves the crash counter intact.
+    fl::u16 bootloaderEscapeThreshold() const FL_NO_EXCEPT {
+        return mBootloaderEscapeThreshold;
+    }
+
+    /// @brief Set the consecutive-watchdog-reset count that triggers the
+    /// escape. 0 (the default) disables it.
+    void setBootloaderEscapeThreshold(fl::u16 threshold) FL_NO_EXCEPT {
+        mBootloaderEscapeThreshold = threshold;
+    }
+
+    /// @brief True when the escape is enabled and the board has hit the
+    /// consecutive-watchdog-reset threshold.
+    bool shouldEscapeToBootloader() const FL_NO_EXCEPT {
+        return mBootloaderEscapeThreshold != 0
+            && consecutiveCrashCount() >= mBootloaderEscapeThreshold;
+    }
+
+    /// @brief Reboot into the bootloader if this looks like a boot loop.
+    /// @return false when not looping, or when the platform has no bootloader
+    /// reboot. On success it does not return.
+    ///
+    /// The crash counter is deliberately left alone: if the reboot is
+    /// unsupported we must not destroy the evidence that a loop is happening.
+    bool escapeToBootloaderIfLooping() FL_NO_EXCEPT {
+        if (!shouldEscapeToBootloader()) return false;
+        return rebootIntoBootloader();
+    }
+
     FL_NO_RETURN void reboot() FL_NO_EXCEPT;
 
     // ========== Tier 1 — most platforms ==========
@@ -180,6 +230,7 @@ private:
     Watchdog& operator=(const Watchdog&) FL_NO_EXCEPT = delete;
 
     fl::u16 mSafeModeThreshold = 2;
+    fl::u16 mBootloaderEscapeThreshold = 0;   // 0 = escape disabled
 };
 
 /// @brief RAII watchdog guard for the canonical `loop()`-top use case.
