@@ -349,6 +349,53 @@ FL_TEST_CASE("Static Channel factory identity is visible through ChannelPtr and 
     FL_CHECK_EQ(base.emitterProfile(), &kFixtureProfile);
 }
 
+// applyConfig() replaces mSettings wholesale. Without reconciliation it keeps
+// the verdict of the configuration it replaced, in both directions.
+FL_TEST_CASE("applyConfig rejects a newly requested profile under strict mode") {
+    CRGB leds[1] = {};
+    ChannelOptions plain;
+    ChannelConfig config(ClocklessChipset(), leds, RGB, plain);
+    ChannelPtr channel = Channel::create(config);
+    FL_REQUIRE(channel != nullptr);
+    FL_REQUIRE(channel->isEnabled());
+    FL_REQUIRE_FALSE(channel->hasColorProfileFallback());
+
+    // Now reconfigure asking for management with nothing to bind to.
+    FastLED.setColorManagementStrict(true);
+    ChannelOptions requested;
+    requested.requestColorManagement();
+    ChannelConfig rebound(ClocklessChipset(), leds, RGB, requested);
+    channel->applyConfig(rebound);
+    FastLED.setColorManagementStrict(false);
+
+    FL_CHECK_EQ(channel->colorProfileStatus(), ColorProfileStatus::Rejected);
+    FL_CHECK_FALSE(channel->isEnabled());
+}
+
+FL_TEST_CASE("applyConfig clears a stale rejection when a real profile arrives") {
+    CRGB leds[1] = {};
+    FastLED.setColorManagementStrict(true);
+    ChannelOptions requested;
+    requested.requestColorManagement();
+    ChannelConfig config(ClocklessChipset(), leds, RGB, requested);
+    ChannelPtr channel = Channel::create(config);
+    FastLED.setColorManagementStrict(false);
+    FL_REQUIRE(channel != nullptr);
+    FL_REQUIRE_EQ(channel->colorProfileStatus(), ColorProfileStatus::Rejected);
+    FL_REQUIRE_FALSE(channel->isEnabled());
+
+    // A valid profile withdraws the rejection: the channel must stop
+    // reporting fallback and regain the enable the rejection took away.
+    ChannelOptions bound;
+    FL_REQUIRE(bound.setColorProfile(kFixtureProfile));
+    ChannelConfig rebound(ClocklessChipset(), leds, RGB, bound);
+    channel->applyConfig(rebound);
+
+    FL_CHECK_FALSE(channel->hasColorProfileFallback());
+    FL_CHECK_EQ(channel->colorProfileStatus(), ColorProfileStatus::Configured);
+    FL_CHECK(channel->isEnabled());
+}
+
 FL_TEST_CASE("Runtime static Channel factory yields to legacy clear and runtime rebind") {
     CRGB leds[1] = {};
     ChannelConfig config(ClocklessChipset(), leds, RGB);

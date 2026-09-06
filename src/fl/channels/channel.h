@@ -340,6 +340,17 @@ private:
     ChannelDataPtr mChannelData;
     fl::ScreenMap mScreenMap;        // Screen map for JS canvas visualization
 #if FL_COLOR_PROFILE_RUNTIME
+    // Recompute the color-profile verdict from the current mSettings and
+    // apply its consequences. Runs on both creation and reconfiguration, so
+    // applyConfig() cannot leave a channel reporting the verdict of the
+    // configuration it just replaced. Returns true when the binding fell back.
+    // Reads the requested/bound state from `options` rather than mSettings on
+    // purpose: the constructor and applyConfig() both call setCorrection()
+    // when no profile is bound, and that runs clearColorProfile(), which wipes
+    // mRequested and mUseGlobalSourceDefault. mSettings therefore no longer
+    // remembers that management was asked for; the caller's options do.
+    bool reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT;
+
     bool mColorProfileFallback = false;
     bool mProfileBindingAccepted = true;
 #endif

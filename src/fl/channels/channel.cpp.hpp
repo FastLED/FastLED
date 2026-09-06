@@ -176,15 +176,7 @@ ChannelPtr Channel::create(const ChannelConfig &config) {
                                               config.rgb_order, config.options);
     auto& events = ChannelEvents::instance();
 #if FL_COLOR_PROFILE_RUNTIME
-    if (config.options.mColorProfile.mRequested && !config.options.hasColorProfile()) {
-        channel->mColorProfileFallback = true;
-        channel->mProfileBindingAccepted = !detail::colorProfileStrictMode();
-        if (!channel->mProfileBindingAccepted) channel->setEnabled(false);
-    }
-    if (channel->mSettings.mColorProfile.mUseGlobalSourceDefault) {
-        channel->mSettings.mColorProfile.mSource = detail::defaultSourceProfile();
-    }
-    if (channel->mColorProfileFallback) {
+    if (channel->reconcileColorProfile(config.options)) {
         events.onColorProfileFallback({channel->id(), channel->colorProfileStatus()});
     }
 #endif
@@ -293,6 +285,38 @@ Channel::~Channel() FL_NO_EXCEPT {
     events.onChannelBeginDestroy(*this);
 }
 
+#if FL_COLOR_PROFILE_RUNTIME
+bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT {
+    // A strict-mode rejection disables the channel. Remember whether the
+    // current disabled state is ours, so that withdrawing the rejection
+    // re-enables the channel without also overriding a caller's own
+    // setEnabled(false).
+    const bool wasRejectedByUs = mColorProfileFallback && !mProfileBindingAccepted;
+
+    // Recompute from scratch. Reconfiguration must not inherit the verdict of
+    // the configuration it replaces: a valid profile applied over a rejected
+    // one has to clear the fallback, not keep reporting it.
+    mColorProfileFallback = false;
+    mProfileBindingAccepted = true;
+
+    if (options.mColorProfile.mRequested && !options.hasColorProfile()) {
+        mColorProfileFallback = true;
+        mProfileBindingAccepted = !detail::colorProfileStrictMode();
+    }
+    if (options.mColorProfile.mUseGlobalSourceDefault) {
+        mSettings.mColorProfile.mSource = detail::defaultSourceProfile();
+    }
+
+    const bool rejectedNow = mColorProfileFallback && !mProfileBindingAccepted;
+    if (rejectedNow) {
+        setEnabled(false);
+    } else if (wasRejectedByUs) {
+        setEnabled(true);
+    }
+    return mColorProfileFallback;
+}
+#endif
+
 void Channel::applyConfig(const ChannelConfig& config) {
     mRgbOrder = config.rgb_order;
     if (config.mName.has_value()) {
@@ -308,6 +332,11 @@ void Channel::applyConfig(const ChannelConfig& config) {
     setDither(config.options.mDitherMode);
     applyWhiteCfg(*this, config.options);
     auto& events = ChannelEvents::instance();
+#if FL_COLOR_PROFILE_RUNTIME
+    if (reconcileColorProfile(config.options)) {
+        events.onColorProfileFallback({id(), colorProfileStatus()});
+    }
+#endif
     events.onChannelConfigured(*this, config);
 }
 
