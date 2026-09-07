@@ -357,8 +357,18 @@ FL_TEST_CASE("minimp3 fixed-point SIMD is not slower than scalar") {
     const double ratio = simd_us ? static_cast<double>(scalar_us) /
                                        static_cast<double>(simd_us)
                                  : 0.0;
-    printf("[simd-perf] scalar=%u us  simd=%u us  speedup=%.3fx over %d reps\n",
-           scalar_us, simd_us, ratio, kReps);
+    // Whether the ratio is enforced is printed with it, deliberately. This
+    // line is emitted before the `dspUsesSimd()` check below, so a ratio on
+    // its own says nothing about whether the gate ran: a target with no
+    // integer SIMD prints one too and then returns without asserting. Making
+    // each line say which it is means a CI log can be read on its own,
+    // instead of by cross-referencing whether the exactness test happened to
+    // print its own "no integer SIMD" note.
+    printf("[simd-perf] scalar=%u us  simd=%u us  speedup=%.3fx over %d reps "
+           "(integer SIMD: %s)\n",
+           scalar_us, simd_us, ratio, kReps,
+           fl::Minimp3FixedVariant::dspUsesSimd() ? "yes, ratio enforced"
+                                                  : "no, ratio not enforced");
     FL_CHECK_GT(scalar_us, 0u);
     FL_CHECK_GT(simd_us, 0u);
 
