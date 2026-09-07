@@ -63,10 +63,12 @@ const Vector kNonD65Vectors[] = {
 void checkAgainstReference(const i32 (&white)[3], const Vector* vectors,
                            int count) {
     WhiteAllocationQ16 allocation;
-    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), white, &allocation));
+    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), white,
+                                       WhiteAllocationPolicy::WhitePreferred,
+                                       &allocation));
     for (int v = 0; v < count; ++v) {
         i32 drives[4];
-        FL_REQUIRE(allocateWhitePreferredQ16(allocation, vectors[v].xyz, drives));
+        FL_REQUIRE(allocateEmitterDrivesQ16(allocation, vectors[v].xyz, drives));
         for (int i = 0; i < 4; ++i) {
             // 256 raw units is one code at 8-bit output. The reference
             // inverts in float64; this quantizes the matrix first, so
@@ -107,7 +109,9 @@ FL_TEST_CASE("White allocation prefers white as far as the target allows") {
     // under-allocation before it notices, and the reconstruction test does
     // not catch the difference because the RGB drives absorb it.
     WhiteAllocationQ16 allocation;
-    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), kWhiteD65, &allocation));
+    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), kWhiteD65,
+                                       WhiteAllocationPolicy::WhitePreferred,
+                                       &allocation));
 
     int exercised = 0;
     for (int step = 1; step <= 12; ++step) {
@@ -116,7 +120,7 @@ FL_TEST_CASE("White allocation prefers white as far as the target allows") {
         colorimetric_response::xyY_to_XYZ(0.3127f, 0.3290f, luminance, xyz_f);
         const i32 xyz[3] = {q16(xyz_f[0]), q16(xyz_f[1]), q16(xyz_f[2])};
         i32 drives[4];
-        FL_REQUIRE(allocateWhitePreferredQ16(allocation, xyz, drives));
+        FL_REQUIRE(allocateEmitterDrivesQ16(allocation, xyz, drives));
 
         i32 at_zero[3];
         solveRgbDrivesQ16(allocation.rgb_solve, xyz, at_zero);
@@ -159,7 +163,9 @@ FL_TEST_CASE("White allocation survives a white emitter dim enough to overflow")
     const i32 dim_white[3] = {6, 7, 7};
 
     WhiteAllocationQ16 allocation;
-    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), dim_white, &allocation));
+    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), dim_white,
+                                       WhiteAllocationPolicy::WhitePreferred,
+                                       &allocation));
     // Pin that the fixture really does reach the small-slope case, so this
     // cannot go quiet if the solve or the constants move.
     i32 largest_slope = 0;
@@ -175,7 +181,7 @@ FL_TEST_CASE("White allocation survives a white emitter dim enough to overflow")
     colorimetric_response::xyY_to_XYZ(0.3127f, 0.3290f, 0.5f, xyz_f);
     const i32 xyz[3] = {q16(xyz_f[0]), q16(xyz_f[1]), q16(xyz_f[2])};
     i32 drives[4];
-    FL_REQUIRE(allocateWhitePreferredQ16(allocation, xyz, drives));
+    FL_REQUIRE(allocateEmitterDrivesQ16(allocation, xyz, drives));
     for (int i = 0; i < 4; ++i) {
         FL_CHECK_GE(drives[i], 0);
         FL_CHECK_LE(drives[i], kFullDrive);
@@ -192,13 +198,15 @@ FL_TEST_CASE("White allocation reproduces the target it was given") {
     // target. This is what would break if the white column were subtracted
     // with the wrong sign or scale.
     WhiteAllocationQ16 allocation;
-    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), kWhiteD65, &allocation));
+    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), kWhiteD65,
+                                       WhiteAllocationPolicy::WhitePreferred,
+                                       &allocation));
 
     const float emitters[3][2] = {
         {0.6400f, 0.3300f}, {0.3000f, 0.6000f}, {0.1500f, 0.0600f}};
     for (const auto& vector : kRgbwVectors) {
         i32 drives[4];
-        FL_REQUIRE(allocateWhitePreferredQ16(allocation, vector.xyz, drives));
+        FL_REQUIRE(allocateEmitterDrivesQ16(allocation, vector.xyz, drives));
         float reproduced[3] = {0.0f, 0.0f, 0.0f};
         for (int e = 0; e < 3; ++e) {
             float column[3];
@@ -219,7 +227,9 @@ FL_TEST_CASE("White allocation reproduces the target it was given") {
 
 FL_TEST_CASE("White allocation refuses a target outside the hull") {
     WhiteAllocationQ16 allocation;
-    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), kWhiteD65, &allocation));
+    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), kWhiteD65,
+                                       WhiteAllocationPolicy::WhitePreferred,
+                                       &allocation));
 
     // A saturated chromaticity well outside the sRGB triangle, and an
     // over-bright neutral. Neither has a white level that rescues it, and
@@ -235,25 +245,127 @@ FL_TEST_CASE("White allocation refuses a target outside the hull") {
         colorimetric_response::xyY_to_XYZ(sample[0], sample[1], sample[2], xyz_f);
         const i32 xyz[3] = {q16(xyz_f[0]), q16(xyz_f[1]), q16(xyz_f[2])};
         i32 drives[4];
-        if (!allocateWhitePreferredQ16(allocation, xyz, drives)) {
+        if (!allocateEmitterDrivesQ16(allocation, xyz, drives)) {
             ++refused;
         }
     }
     FL_CHECK_EQ(refused, 3);
 }
 
+FL_TEST_CASE("RGB-preferred takes the other end of the same interval") {
+    // C3's per-profile override. Both policies reproduce the target exactly
+    // -- they pick different points on the same feasible interval -- so the
+    // test is that they differ in white and agree in the light they make.
+    WhiteAllocationQ16 white_first;
+    WhiteAllocationQ16 rgb_first;
+    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), kWhiteD65,
+                                       WhiteAllocationPolicy::WhitePreferred,
+                                       &white_first));
+    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), kWhiteD65,
+                                       WhiteAllocationPolicy::RgbPreferred,
+                                       &rgb_first));
+
+    const float emitters[3][2] = {
+        {0.6400f, 0.3300f}, {0.3000f, 0.6000f}, {0.1500f, 0.0600f}};
+    int differed = 0;
+    for (int step = 1; step <= 12; ++step) {
+        const float luminance = static_cast<float>(step) / 12.0f;
+        float xyz_f[3];
+        colorimetric_response::xyY_to_XYZ(0.3127f, 0.3290f, luminance, xyz_f);
+        const i32 xyz[3] = {q16(xyz_f[0]), q16(xyz_f[1]), q16(xyz_f[2])};
+
+        i32 with_white[4];
+        i32 with_rgb[4];
+        FL_REQUIRE(allocateEmitterDrivesQ16(white_first, xyz, with_white));
+        FL_REQUIRE(allocateEmitterDrivesQ16(rgb_first, xyz, with_rgb));
+
+        // RGB-preferred never uses more white than white-preferred.
+        FL_CHECK_LE(with_rgb[3], with_white[3]);
+        if (with_rgb[3] < with_white[3]) {
+            ++differed;
+        }
+
+        // Both must land on the same colour. Reconstructed through the
+        // emitter columns rather than compared drive by drive, since the
+        // whole point is that the drives differ.
+        for (int which = 0; which < 2; ++which) {
+            const i32* drives = which == 0 ? with_white : with_rgb;
+            float made[3] = {0.0f, 0.0f, 0.0f};
+            for (int e = 0; e < 3; ++e) {
+                float column[3];
+                colorimetric_response::xyY_to_XYZ(emitters[e][0], emitters[e][1],
+                                                  1.0f, column);
+                for (int i = 0; i < 3; ++i) {
+                    made[i] += toFloat(drives[e]) * column[i];
+                }
+            }
+            for (int i = 0; i < 3; ++i) {
+                made[i] += toFloat(drives[3]) * toFloat(kWhiteD65[i]);
+            }
+            for (int i = 0; i < 3; ++i) {
+                FL_CHECK_LT(fl::fabsf(made[i] - toFloat(xyz[i])), 0.01f);
+            }
+        }
+    }
+    // Guard against the two policies never actually diverging, which would
+    // make every check above vacuous. A D65 neutral is exactly the case
+    // where white can do all the work or none of it.
+    FL_CHECK_GT(differed, 8);
+}
+
+FL_TEST_CASE("RGB-preferred still uses white when RGB alone cannot reach") {
+    // The override is not "ignore the white emitter". Where the primaries
+    // cannot reach the target on their own, this must return the smallest
+    // white level that makes it reachable rather than failing.
+    WhiteAllocationQ16 rgb_first;
+    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), kWhiteD65,
+                                       WhiteAllocationPolicy::RgbPreferred,
+                                       &rgb_first));
+
+    // Brighter than the RGB primaries can manage alone, but inside the
+    // four-emitter hull.
+    float xyz_f[3];
+    colorimetric_response::xyY_to_XYZ(0.3127f, 0.3290f, 2.0f, xyz_f);
+    const i32 xyz[3] = {q16(xyz_f[0]), q16(xyz_f[1]), q16(xyz_f[2])};
+
+    // Pin the premise: RGB alone really cannot do this one.
+    i32 rgb_only[3];
+    solveRgbDrivesQ16(rgb_first.rgb_solve, xyz, rgb_only);
+    bool rgb_alone_fails = false;
+    for (int i = 0; i < 3; ++i) {
+        if (rgb_only[i] > kFullDrive) {
+            rgb_alone_fails = true;
+        }
+    }
+    FL_REQUIRE(rgb_alone_fails);
+
+    i32 drives[4];
+    FL_REQUIRE(allocateEmitterDrivesQ16(rgb_first, xyz, drives));
+    FL_CHECK_GT(drives[3], 0);
+    for (int i = 0; i < 4; ++i) {
+        FL_CHECK_GE(drives[i], 0);
+        FL_CHECK_LE(drives[i], kFullDrive);
+    }
+}
+
 FL_TEST_CASE("White allocation rejects profiles it cannot work with") {
     WhiteAllocationQ16 allocation;
-    FL_CHECK_FALSE(buildWhiteAllocationQ16(rgbDevice(), kWhiteD65, nullptr));
+    FL_CHECK_FALSE(buildWhiteAllocationQ16(rgbDevice(), kWhiteD65,
+                                        WhiteAllocationPolicy::WhitePreferred,
+                                        nullptr));
 
     EmitterProfile collinear = rgbDevice();
     collinear.xy_g[0] = 0.6400f;
     collinear.xy_g[1] = 0.3300f;
-    FL_CHECK_FALSE(buildWhiteAllocationQ16(collinear, kWhiteD65, &allocation));
+    FL_CHECK_FALSE(buildWhiteAllocationQ16(collinear, kWhiteD65,
+                                        WhiteAllocationPolicy::WhitePreferred,
+                                        &allocation));
 
     // A white emitter with no light in it leaves nothing to trade against.
     const i32 dark[3] = {0, 0, 0};
-    FL_CHECK_FALSE(buildWhiteAllocationQ16(rgbDevice(), dark, &allocation));
+    FL_CHECK_FALSE(buildWhiteAllocationQ16(rgbDevice(), dark,
+                                       WhiteAllocationPolicy::WhitePreferred,
+                                       &allocation));
 }
 
 }  // FL_TEST_FILE

@@ -56,10 +56,12 @@ i32 scaleWhiteQ16(i32 value, i32 factor) FL_NO_EXCEPT {
 
 bool buildWhiteAllocationQ16(const EmitterProfile& profile,
                              const i32 (&white_xyz)[3],
+                             WhiteAllocationPolicy policy,
                              WhiteAllocationQ16* out) FL_NO_EXCEPT {
     if (out == nullptr) {
         return false;
     }
+    out->policy = policy;
     if (!buildRgbSolveMatrixQ16(profile, &out->rgb_solve)) {
         return false;
     }
@@ -77,9 +79,9 @@ bool buildWhiteAllocationQ16(const EmitterProfile& profile,
     return expressible;
 }
 
-bool allocateWhitePreferredQ16(const WhiteAllocationQ16& allocation,
-                               const i32 (&xyz)[3],
-                               i32 (&drives)[4]) FL_NO_EXCEPT {
+bool allocateEmitterDrivesQ16(const WhiteAllocationQ16& allocation,
+                              const i32 (&xyz)[3],
+                              i32 (&drives)[4]) FL_NO_EXCEPT {
     i32 at_zero[3];
     solveRgbDrivesQ16(allocation.rgb_solve, xyz, at_zero);
 
@@ -127,8 +129,9 @@ bool allocateWhitePreferredQ16(const WhiteAllocationQ16& allocation,
         return false;
     }
 
-    // White-preferred: the top of the interval.
-    const i32 level = high;
+    // Either end reproduces the target exactly; which one is policy.
+    const i32 level =
+        allocation.policy == WhiteAllocationPolicy::RgbPreferred ? low : high;
     i32 rgb[3];
     for (int i = 0; i < 3; ++i) {
         const i32 drive = at_zero[i] - scaleWhiteQ16(allocation.per_white[i], level);

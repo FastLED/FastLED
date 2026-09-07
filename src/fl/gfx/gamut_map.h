@@ -88,8 +88,12 @@ struct GamutMapRgbwQ16 {
 /// Derive the mapper for a three-primary profile plus one white emitter.
 ///
 /// `white_xyz` is the white emitter's XYZ at full drive, in s16.16.
+/// `policy` is C3's per-profile choice of which end of the feasible white
+/// interval to take; it changes the drives, never which targets are
+/// reachable, so the hull this maps onto is the same either way.
 bool buildGamutMapRgbwQ16(const EmitterProfile& profile,
                           const i32 (&white_xyz)[3],
+                          WhiteAllocationPolicy policy,
                           GamutMapRgbwQ16* out) FL_NO_EXCEPT;
 
 /// One pixel: XYZ in s16.16 to four in-gamut drives, red, green, blue, white.
