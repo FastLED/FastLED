@@ -16,16 +16,32 @@
 
 namespace fl {
 
-/// Largest magnitude either direction accepts, as an s16.16 raw value (4.0).
+/// Largest XYZ magnitude the forward transform accepts, as an s16.16 raw
+/// value (64.0).
 ///
-/// Inputs are clamped to this before any multiply. The working domain never
-/// approaches it -- XYZ stays inside roughly [0, 2] and OKLab inside
-/// [-1, 1.5] -- but the transform must not be a way to reach signed overflow
-/// from a caller's bad data. With coefficients bounded by 2.43 (Q16 159160,
-/// under 2^17.3) and inputs bounded here by 2^18, each product is under
-/// 2^35.3 and a row sum under 2^37, so the i64 accumulator has ~26 bits of
-/// headroom. Clamping also bounds the cube: 4.0 cubed is 64, far inside i32.
-constexpr i32 kOklabQ16MaxMagnitude = 4 * 65536;
+/// Not a theoretical bound -- the working domain really does get large. An
+/// emitter profile normalized to unit *luminance* per emitter, which is what
+/// `EmitterProfile` carries, puts the blue emitter's Z near 13 (see
+/// `device_solve.h`), so a saturated blue at a few times unit drive reaches
+/// XYZ in the tens. An earlier revision of this file clamped at 4.0 on the
+/// assumption that XYZ stayed inside [0, 2]; the P7 gamut mapper found that
+/// wrong immediately, and silently, by producing identical OKLab for targets
+/// 30x apart in luminance.
+///
+/// 64.0 leaves the accumulator far inside i64: coefficients are bounded by
+/// 2.43 (Q16 159160, under 2^17.3) and inputs here by 2^22, so each product
+/// is under 2^39.3 and a row sum under 2^41.
+constexpr i32 kOklabQ16MaxXyz = 64 * 65536;
+
+/// Largest OKLab magnitude the inverse transform accepts (4.0).
+///
+/// Tighter than the XYZ bound because the inverse *cubes* its intermediate.
+/// At this bound the cube-rooted LMS stays under 15.6, whose cube is 3796 --
+/// still inside i32 as s16.16, with the widest intermediate product around
+/// 2^44. Raising it much further would overflow the result, and there is
+/// nothing to raise it for: OKLab lightness is about 1 for a display white
+/// and stays near 4 even for absurd inputs, while chroma rarely passes 0.4.
+constexpr i32 kOklabQ16MaxLab = 4 * 65536;
 
 /// XYZ (s16.16, D65-relative) -> OKLab (s16.16), L then a then b.
 ///

@@ -208,6 +208,30 @@ FL_TEST_CASE("OKLab Q16 lightness is monotonic along the neutral axis") {
     }
 }
 
+FL_TEST_CASE("OKLab Q16 handles the XYZ range emitter profiles actually reach") {
+    // Regression. `EmitterProfile` normalizes each emitter to unit
+    // *luminance*, which puts the blue emitter's Z near 13 (see
+    // device_solve.h), so XYZ in this working domain reaches the tens. An
+    // earlier revision clamped at 4.0 believing XYZ stayed inside [0, 2].
+    //
+    // The failure was silent and would have been easy to miss: targets 30x
+    // apart in luminance came back with byte-identical OKLab, because both
+    // saturated the clamp. So this asserts they stay *distinct*, which is
+    // what actually broke, rather than only that no overflow occurred.
+    const float kLuminances[] = {1.05f, 1.5f, 3.0f, 12.0f};
+    i32 previous_lightness = -1;
+    for (float scale : kLuminances) {
+        // Roughly the sum of three unit-luminance sRGB emitters, which is
+        // where the large Z comes from.
+        const i32 xyz[3] = {toQ16(4.94f * scale), toQ16(3.0f * scale),
+                            toQ16(13.42f * scale)};
+        i32 lab[3];
+        xyzToOklabQ16(xyz, lab);
+        FL_CHECK_GT(lab[0], previous_lightness);
+        previous_lightness = lab[0];
+    }
+}
+
 FL_TEST_CASE("OKLab Q16 clamps rather than overflowing on absurd input") {
     // The transform must not be a route from a caller's bad data to signed
     // overflow. INT32_MIN and INT32_MAX are the inputs that would do it.
@@ -215,16 +239,15 @@ FL_TEST_CASE("OKLab Q16 clamps rather than overflowing on absurd input") {
     i32 lab[3];
     xyzToOklabQ16(huge, lab);
     for (int i = 0; i < 3; ++i) {
-        // Clamped to +/-4.0 in, so every output stays inside the range the
-        // coefficients can produce from it: 4.0 * (2.43 * 3) is under 30.
-        FL_CHECK_LT(fl::fabsf(fromQ16(lab[i])), 30.0f);
+        // Clamped to +/-64 in, so the cube-rooted LMS is bounded by about 8
+        // and the output by 8 * 2.43 * 3.
+        FL_CHECK_LT(fl::fabsf(fromQ16(lab[i])), 60.0f);
     }
     i32 xyz[3];
     oklabToXyzQ16(huge, xyz);
     for (int i = 0; i < 3; ++i) {
-        // The inverse cubes its intermediate, so its bound is 4^3 = 64 per
-        // term before the final matrix widens it.
-        FL_CHECK_LT(fl::fabsf(fromQ16(xyz[i])), 1000.0f);
+        // The inverse clamps tighter because it cubes its intermediate.
+        FL_CHECK_LT(fl::fabsf(fromQ16(xyz[i])), 20000.0f);
     }
 }
 
