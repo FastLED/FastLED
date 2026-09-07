@@ -109,8 +109,8 @@ FL_TEST_CASE("Streaming pipeline reproduces the P5 reference") {
     float worst = 0.0f;
     for (const auto& vector : kVectors) {
         StreamingPipelineQ16 pipeline;
-        FL_REQUIRE(buildStreamingPipelineQ16(sourceFor(vector.source),
-                                             rgbDevice(), &pipeline));
+        FL_REQUIRE(buildStreamingPipelineQ16(sourceFor(vector.source), rgbDevice(),
+                                             GamutPolicy::ChromaCompress, &pipeline));
         i32 drives[3];
         processPixelQ16(pipeline, static_cast<u8>(vector.code[0]),
                         static_cast<u8>(vector.code[1]),
@@ -137,7 +137,8 @@ FL_TEST_CASE("Brightness scales the drives without moving the colour") {
     // "chromaticity preserved" means at this point in the chain.
     StreamingPipelineQ16 pipeline;
     FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::srgbBt709(),
-                                         rgbDevice(), &pipeline));
+                                         rgbDevice(),
+                                         GamutPolicy::ChromaCompress, &pipeline));
 
     i32 full[3];
     processPixelQ16(pipeline, 200, 120, 60, full);
@@ -168,7 +169,8 @@ FL_TEST_CASE("Full brightness is exactly a pass-through") {
     // would show here and nowhere else.
     StreamingPipelineQ16 pipeline;
     FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::srgbBt709(),
-                                         rgbDevice(), &pipeline));
+                                         rgbDevice(),
+                                         GamutPolicy::ChromaCompress, &pipeline));
     for (int code = 0; code <= 255; code += 17) {
         i32 unity_drives[3];
         processPixelQ16(pipeline, static_cast<u8>(code),
@@ -192,6 +194,7 @@ FL_TEST_CASE("Streaming pipeline always returns drives inside [0, 1]") {
     for (Src which : kSources) {
         StreamingPipelineQ16 pipeline;
         FL_REQUIRE(buildStreamingPipelineQ16(sourceFor(which), rgbDevice(),
+                                             GamutPolicy::ChromaCompress,
                                              &pipeline));
         for (int r = 0; r <= 255; r += 15) {
             for (int g = 0; g <= 255; g += 15) {
@@ -213,7 +216,8 @@ FL_TEST_CASE("Streaming pipeline always returns drives inside [0, 1]") {
 FL_TEST_CASE("Black stays black and the profile round-trips its own white") {
     StreamingPipelineQ16 pipeline;
     FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::srgbBt709(),
-                                         rgbDevice(), &pipeline));
+                                         rgbDevice(),
+                                         GamutPolicy::ChromaCompress, &pipeline));
 
     i32 black[3];
     processPixelQ16(pipeline, 0, 0, 0, black);
@@ -253,14 +257,15 @@ FL_TEST_CASE("Black stays black and the profile round-trips its own white") {
 
 FL_TEST_CASE("Streaming pipeline rejects what its stages reject") {
     StreamingPipelineQ16 pipeline;
-    FL_CHECK_FALSE(buildStreamingPipelineQ16(SourceProfile::srgbBt709(),
-                                             rgbDevice(), nullptr));
+    FL_CHECK_FALSE(buildStreamingPipelineQ16(SourceProfile::srgbBt709(), rgbDevice(),
+                                             GamutPolicy::ChromaCompress, nullptr));
 
     EmitterProfile collinear = rgbDevice();
     collinear.xy_g[0] = 0.6400f;
     collinear.xy_g[1] = 0.3300f;
     FL_CHECK_FALSE(buildStreamingPipelineQ16(SourceProfile::srgbBt709(),
-                                             collinear, &pipeline));
+                                             collinear,
+                                             GamutPolicy::ChromaCompress, &pipeline));
 
     // Red and green identical: no source gamut at all.
     const SourceProfile degenerate = SourceProfile::custom(
@@ -268,7 +273,8 @@ FL_TEST_CASE("Streaming pipeline rejects what its stages reject") {
                      Chromaticity(0.15f, 0.06f), Chromaticity(0.3127f, 0.3290f)),
         TransferFunction::Srgb);
     FL_CHECK_FALSE(
-        buildStreamingPipelineQ16(degenerate, rgbDevice(), &pipeline));
+        buildStreamingPipelineQ16(degenerate, rgbDevice(),
+                                              GamutPolicy::ChromaCompress, &pipeline));
 
     // Nearly identical, which is the case the threshold is actually for.
     // `invert3x3`'s own guard rejects below 1e-20, and these primaries
@@ -280,12 +286,13 @@ FL_TEST_CASE("Streaming pipeline rejects what its stages reject") {
                      Chromaticity(0.6401f, 0.33005f),
                      Chromaticity(0.15f, 0.06f), Chromaticity(0.3127f, 0.3290f)),
         TransferFunction::Srgb);
-    FL_CHECK_FALSE(buildStreamingPipelineQ16(nearly, rgbDevice(), &pipeline));
+    FL_CHECK_FALSE(buildStreamingPipelineQ16(nearly, rgbDevice(),
+                                              GamutPolicy::ChromaCompress, &pipeline));
 
     // And a real gamut is nowhere near the threshold, so this cannot be
     // rejecting everything.
     FL_CHECK(buildStreamingPipelineQ16(SourceProfile::bt2020(), rgbDevice(),
-                                       &pipeline));
+                                       GamutPolicy::ChromaCompress, &pipeline));
 }
 
 }  // FL_TEST_FILE

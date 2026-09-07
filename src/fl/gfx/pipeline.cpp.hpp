@@ -19,10 +19,12 @@ constexpr Chromaticity kPipelineD65 = Chromaticity(0.3127f, 0.3290f);
 
 bool buildStreamingPipelineQ16(const SourceProfile& source,
                                const EmitterProfile& device,
+                               GamutPolicy policy,
                                StreamingPipelineQ16* out) FL_NO_EXCEPT {
     if (out == nullptr) {
         return false;
     }
+    out->gamut_policy = policy;
     if (!buildSourceMatrixQ16(source.primaries, &out->source)) {
         return false;
     }
@@ -73,9 +75,24 @@ void processPixelQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g, u8 b,
     i32 xyz[3];
     linearRgbToXyzQ16(pipeline.source, linear_r, linear_g, linear_b, xyz);
 
-    // The mapper owns clamping, so the stages above hand it the honest
-    // target even when that is outside the hull.
-    mapAndSolveDrivesQ16(pipeline.gamut, xyz, drives);
+    if (pipeline.gamut_policy == GamutPolicy::Clamp) {
+        // The caller asked for the cheap answer. Solve and clip, which is
+        // `map_clip` from the P7 study -- about 20 dE2000 from the reference
+        // where the mapper is at 0.15, and offered only because the binding
+        // offers it.
+        solveRgbDrivesQ16(pipeline.gamut.solve, xyz, drives);
+        for (int i = 0; i < 3; ++i) {
+            if (drives[i] < 0) {
+                drives[i] = 0;
+            } else if (drives[i] > 65536) {
+                drives[i] = 65536;
+            }
+        }
+    } else {
+        // The mapper owns clamping, so the stages above hand it the honest
+        // target even when that is outside the hull.
+        mapAndSolveDrivesQ16(pipeline.gamut, xyz, drives);
+    }
 
     // C4's single amplitude stage, last so nothing downstream can rescale a
     // channel on its own.
