@@ -20,6 +20,7 @@
 // atan2, hypot, cos and sin never appear.
 
 #include "fl/gfx/device_solve.h"
+#include "fl/gfx/white_allocation.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
 
@@ -56,6 +57,49 @@ struct GamutMapQ16 {
     /// 1.05x to 50x device white, the two agree to 0 ULP.
     i32 max_neutral_lightness;
 };
+
+/// The same mapper for a device with a white emitter.
+///
+/// The distinction is not cosmetic. A white emitter enlarges the reachable
+/// set, and testing a target against the RGB hull alone under-reports it
+/// badly: over 200 000 targets drawn from inside a four-emitter device's own
+/// zonotope, the RGB-only solve rejects **43%** of them. Every one of those
+/// would be compressed by the three-emitter mapper despite the device being
+/// able to produce it exactly.
+struct GamutMapRgbwQ16 {
+    WhiteAllocationQ16 allocation;
+
+    /// OKLab lightness of the brightest D65 neutral this device can reach.
+    ///
+    /// Larger than the three-emitter bound by whatever the white emitter
+    /// adds -- 2.398 against 1.398 for a white at D65 and unit luminance,
+    /// exactly the one unit it contributes.
+    ///
+    /// Derived at bind time by bisecting between two bounds: the
+    /// three-emitter one, always reachable with the white emitter off, and a
+    /// relaxation of the problem that ignores the lower limits on the RGB
+    /// drives. The relaxation is an upper bound but not generally
+    /// attainable -- full white can push a channel negative -- so it is
+    /// tested rather than trusted. The bisection runs once per profile,
+    /// never per pixel.
+    i32 max_neutral_lightness;
+};
+
+/// Derive the mapper for a three-primary profile plus one white emitter.
+///
+/// `white_xyz` is the white emitter's XYZ at full drive, in s16.16.
+bool buildGamutMapRgbwQ16(const EmitterProfile& profile,
+                          const i32 (&white_xyz)[3],
+                          GamutMapRgbwQ16* out) FL_NO_EXCEPT;
+
+/// One pixel: XYZ in s16.16 to four in-gamut drives, red, green, blue, white.
+///
+/// Same shape as the three-emitter path -- one forward OKLab transform, one
+/// lightness comparison, then eight halvings -- but every feasibility test
+/// goes through the white-preferred allocation, so the hull it maps onto is
+/// the device's real one.
+void mapAndAllocateRgbwQ16(const GamutMapRgbwQ16& map, const i32 (&xyz)[3],
+                           i32 (&drives)[4]) FL_NO_EXCEPT;
 
 /// Derive the mapper for a three-emitter profile.
 ///
