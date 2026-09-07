@@ -20,7 +20,7 @@ import httpx
 from colorama import Fore, Style
 
 from ci.autoresearch.net import create_wifi_manager
-from ci.rpc_client import RpcClient, RpcTimeoutError
+from ci.rpc_client import RpcClient, RpcError, RpcTimeoutError
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
@@ -44,6 +44,30 @@ def _served_request_count(status: dict[str, Any]) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         return 0
     return value if value >= 0 else 0
+
+
+async def _settle_link(client: "RpcClient", label: str) -> None:
+    """Ping `client` until it answers, or raise naming the board that did not.
+
+    Exists because the opening request of the peer-OTA run could time out
+    against a device that was demonstrably healthy on both sides of the
+    window. Without this the failure surfaced as a bare
+    `No response with ID 1`, which names neither the board nor the call.
+    """
+    last: Exception | None = None
+    for attempt in range(1, 4):
+        try:
+            await client.send("ping", {}, timeout=10.0)
+            if attempt > 1:
+                print(f"  {label} link settled after {attempt} attempts")
+            return
+        except (RpcError, RpcTimeoutError) as exc:
+            last = exc
+            print(f"  {label} did not answer ping (attempt {attempt}/3): {exc}")
+            await asyncio.sleep(2.0)
+    raise RpcTimeoutError(
+        f"{label} did not answer ping after 3 attempts; last error: {last}"
+    )
 
 
 async def run_ota_peer_autoresearch(
@@ -106,6 +130,16 @@ async def run_ota_peer_autoresearch(
         )
         await primary.connect(boot_wait=3.0, drain_boot=True)
         await peer.connect(boot_wait=3.0, drain_boot=True)
+
+        # Settle both links before the first real call. The peer flash runs
+        # for ~60-90 s after the primary's, and the first request on the
+        # primary was timing out even though the device answered `status`
+        # immediately when queried standalone a moment later, and had just
+        # served a schema fetch (FastLED#3956). One dropped opening request
+        # should not sink the whole run, so ping with a bounded retry and
+        # report which link is at fault when it genuinely is unreachable.
+        await _settle_link(primary, "RP2350W")
+        await _settle_link(peer, "ESP32-C6")
 
         primary_status = await rpc_data(primary, "status", {})
         peer_status = await rpc_data(peer, "status", {})
