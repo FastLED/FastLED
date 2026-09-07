@@ -174,8 +174,14 @@ ChannelPtr Channel::create(const ChannelConfig &config) {
 
     auto channel = fl::make_shared<Channel>(config.chipset, config.mLeds,
                                               config.rgb_order, config.options);
-    channel->mName = makeName(channel->mId, config.mName);
     auto& events = ChannelEvents::instance();
+#if FL_COLOR_PROFILE_RUNTIME
+    if (channel->reconcileColorProfile(config.options)) {
+        events.onColorProfileFallback(
+            ColorProfileEvent{channel->id(), channel->colorProfileStatus(), {}});
+    }
+#endif
+    channel->mName = makeName(channel->mId, config.mName);
     events.onChannelCreated(*channel);
     return channel;
 }
@@ -237,8 +243,7 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
     CLEDController::mSettings = options;
 
     // Set color correction/temperature/dither/rgbw from ChannelOptions
-    setCorrection(options.mCorrection);
-    setTemperature(options.mTemperature);
+    if (!options.hasColorProfile()) { setCorrection(options.mCorrection); setTemperature(options.mTemperature); }
     setDither(options.mDitherMode);
     applyWhiteCfg(*this, options);
 
@@ -268,8 +273,7 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     CLEDController::mSettings = options;
 
     // Set color correction/temperature/dither/rgbw from ChannelOptions
-    setCorrection(options.mCorrection);
-    setTemperature(options.mTemperature);
+    if (!options.hasColorProfile()) { setCorrection(options.mCorrection); setTemperature(options.mTemperature); }
     setDither(options.mDitherMode);
     applyWhiteCfg(*this, options);
 
@@ -282,6 +286,38 @@ Channel::~Channel() FL_NO_EXCEPT {
     events.onChannelBeginDestroy(*this);
 }
 
+#if FL_COLOR_PROFILE_RUNTIME
+bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT {
+    // A strict-mode rejection disables the channel. Remember whether the
+    // current disabled state is ours, so that withdrawing the rejection
+    // re-enables the channel without also overriding a caller's own
+    // setEnabled(false).
+    const bool wasRejectedByUs = mColorProfileFallback && !mProfileBindingAccepted;
+
+    // Recompute from scratch. Reconfiguration must not inherit the verdict of
+    // the configuration it replaces: a valid profile applied over a rejected
+    // one has to clear the fallback, not keep reporting it.
+    mColorProfileFallback = false;
+    mProfileBindingAccepted = true;
+
+    if (options.mColorProfile.mRequested && !options.hasColorProfile()) {
+        mColorProfileFallback = true;
+        mProfileBindingAccepted = !detail::colorProfileStrictMode();
+    }
+    if (options.mColorProfile.mUseGlobalSourceDefault) {
+        mSettings.mColorProfile.mSource = detail::defaultSourceProfile();
+    }
+
+    const bool rejectedNow = mColorProfileFallback && !mProfileBindingAccepted;
+    if (rejectedNow) {
+        setEnabled(false);
+    } else if (wasRejectedByUs) {
+        setEnabled(true);
+    }
+    return mColorProfileFallback;
+}
+#endif
+
 void Channel::applyConfig(const ChannelConfig& config) {
     mRgbOrder = config.rgb_order;
     if (config.mName.has_value()) {
@@ -293,11 +329,15 @@ void Channel::applyConfig(const ChannelConfig& config) {
     CLEDController::mSettings = config.options;
     mBus = config.options.mBus;
     mBusWhich = config.options.mBusWhich;
-    setCorrection(config.options.mCorrection);
-    setTemperature(config.options.mTemperature);
+    if (!config.options.hasColorProfile()) { setCorrection(config.options.mCorrection); setTemperature(config.options.mTemperature); }
     setDither(config.options.mDitherMode);
     applyWhiteCfg(*this, config.options);
     auto& events = ChannelEvents::instance();
+#if FL_COLOR_PROFILE_RUNTIME
+    if (reconcileColorProfile(config.options)) {
+        events.onColorProfileFallback(ColorProfileEvent{id(), colorProfileStatus(), {}});
+    }
+#endif
     events.onChannelConfigured(*this, config);
 }
 

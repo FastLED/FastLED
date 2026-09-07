@@ -3,6 +3,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/string.h"  // IWYU pragma: keep
+#include "fl/stl/stdint.h"
 
 namespace fl {
 
@@ -10,6 +11,25 @@ class IChannel;
 class IChannelDriver;  // IWYU pragma: keep
 class ChannelData;
 struct ChannelConfig;
+enum class ColorProfileStatus : u8;
+enum class ColorProfileWarning : u8 { ProfileClearedByLegacy, LegacyClearedByProfile };
+/// Payload shared by every color-profile notification.
+///
+/// Both lists below deliberately use this one type. `fl::function_list`
+/// instantiates its machinery per *signature*, not per member, so two
+/// distinct payload types cost two complete template stacks -- measured at
+/// ~520 B of esp32s3 flash that every build pays whether or not anything
+/// subscribes, because ChannelEvents is constructed unconditionally. Every
+/// other channel event already shares `void(const IChannel&)`.
+///
+/// Only the fields relevant to the emitting list are meaningful:
+/// `onColorProfileFallback` sets channelId/status, `onColorProfileWarning`
+/// sets warning.
+struct ColorProfileEvent {
+    i32 channelId;
+    ColorProfileStatus status;
+    ColorProfileWarning warning;
+};
 
 /// @brief Singleton event router for Channel lifecycle events
 ///
@@ -70,6 +90,8 @@ struct ChannelEvents {
     detail::NoOpChannelEvent onChannelAdded;
     detail::NoOpChannelEvent onChannelRemoved;
     detail::NoOpChannelEvent onChannelConfigured;
+    detail::NoOpChannelEvent onColorProfileFallback;
+    detail::NoOpChannelEvent onColorProfileWarning;
     detail::NoOpChannelEvent onChannelDataEncoded;
     detail::NoOpChannelEvent onChannelEnqueued;
 };
@@ -99,6 +121,8 @@ struct ChannelEvents {
 
     /// Fired after applyConfig() reconfigures a Channel
     fl::function_list<void(const IChannel&, const ChannelConfig&)> onChannelConfigured;
+    fl::function_list<void(const ColorProfileEvent&)> onColorProfileFallback;
+    fl::function_list<void(const ColorProfileEvent&)> onColorProfileWarning;
 
     // -- Rendering events --
 

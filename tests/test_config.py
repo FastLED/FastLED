@@ -49,6 +49,9 @@ EXCLUDED_TEST_FILES: set[Path] = {
     TESTS_DIR / "fl" / "eorder.cpp",  # → hsv16.cpp
     TESTS_DIR / "fl" / "xymap.cpp",  # → screenmap.cpp
     TESTS_DIR / "fl" / "splat.cpp",  # → downscale.cpp
+    # Dedicated no-PCH tier-layout executable; registered directly in Meson.
+    TESTS_DIR / "fl" / "channels" / "color_profile_tiny_layout.cpp",
+    TESTS_DIR / "fl" / "channels" / "color_profile_tiny_runtime.cpp",
 }
 
 # Directories to exclude from recursive test discovery.

@@ -23,6 +23,7 @@
 #include "fl/stl/weak_ptr.h"
 #include "fl/stl/stdint.h"
 #include "fl/channels/config.h"
+#include "fl/channels/channel_events.h"
 #include "fl/stl/compiler_control.h"
 
 namespace fl {
@@ -32,7 +33,10 @@ class IChannelDriver;
 class ChannelData;
 struct ChannelOptions;  // IWYU pragma: keep
 class Channel;
+template<const EmitterProfile& Profile> class StaticProfileChannel;
 class XMap;
+enum class ColorProfileStatus : u8 { Unconfigured, Configured, Fallback, Rejected };
+enum class ProfileId : u8 { WS2812B };
 FASTLED_SHARED_PTR(Channel);
 FASTLED_SHARED_PTR(ChannelData);
 
@@ -56,6 +60,25 @@ public:
     /// @return Shared pointer to channel (auto-cleanup when out of scope)
     /// @note Channels always use ChannelManager by default.
     static ChannelPtr create(const ChannelConfig& config);
+    template<const EmitterProfile& Profile>
+    static ChannelPtr create(const ChannelConfig& config) FL_NO_EXCEPT {
+        ChannelConfig rebound(config);
+#if FL_COLOR_PROFILE_RUNTIME
+        rebound.options.clearColorProfile();
+        rebound.options.mColorProfile.mStaticProfile = &Profile;
+        rebound.options.mColorProfile.mRequested = true;
+#else
+#endif
+        auto channel = fl::make_shared<StaticProfileChannel<Profile>>(rebound);
+        channel->mName = makeName(channel->mId, rebound.mName);
+        auto& events = ChannelEvents::instance();
+        events.onChannelCreated(*channel);
+        return channel;
+    }
+    template<ProfileId Id>
+    static ChannelPtr create(const ChannelConfig& config) FL_NO_EXCEPT {
+        return create<profiles::WS2812B>(config);
+    }
 
     /// @brief Destructor
     virtual ~Channel() FL_NO_EXCEPT;
@@ -147,6 +170,42 @@ public:
     /// @brief Get the RGBW conversion mode
     Rgbw getRgbw() const;
 
+    bool hasColorProfile() const FL_NO_EXCEPT { return emitterProfile() != nullptr; }
+    /// P2 binds profiles only. P6 changes this to true when the streaming
+    /// transform is actually installed in the output path.
+    bool isColorManaged() const FL_NO_EXCEPT { return false; }
+    const EmitterProfile* emitterProfile() const FL_NO_EXCEPT {
+        return CLEDController::emitterProfile();
+    }
+    const SourceProfile& sourceProfile() const FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        return mSettings.mColorProfile.mSource;
+#else
+        return detail::defaultSourceProfile();
+#endif
+    }
+    Chromaticity targetWhite() const FL_NO_EXCEPT { return mSettings.targetWhite(); }
+    bool isEnabled() const FL_NO_EXCEPT { return const_cast<Channel*>(this)->getEnabled(); }
+    bool hasColorProfileFallback() const FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        return mColorProfileFallback;
+#else
+        return false;
+#endif
+    }
+    bool profileBindingAccepted() const FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        return mProfileBindingAccepted;
+#else
+        return true;
+#endif
+    }
+    ColorProfileStatus colorProfileStatus() const FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        if (mColorProfileFallback) return mProfileBindingAccepted ? ColorProfileStatus::Fallback : ColorProfileStatus::Rejected;
+#endif
+        return hasColorProfile() ? ColorProfileStatus::Configured : ColorProfileStatus::Unconfigured;
+    }
     /// @brief Get the name of the currently bound driver (if any)
     /// @return Engine name, or empty string if no driver is bound or driver has expired
     fl::string getEngineName() const;
@@ -186,6 +245,8 @@ private:
     /// @brief Friend declaration for make_shared to access private constructor
     template<typename T, typename... Args>
     friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NO_EXCEPT;
+    template<const EmitterProfile& Profile>
+    friend class StaticProfileChannel;
 
 protected:
     // CPixelLEDController interface implementation - protected so subclass delegates
@@ -278,6 +339,39 @@ private:
     fl::string mName;               // User-specified or auto-generated name
     ChannelDataPtr mChannelData;
     fl::ScreenMap mScreenMap;        // Screen map for JS canvas visualization
+#if FL_COLOR_PROFILE_RUNTIME
+    // Recompute the color-profile verdict from the current mSettings and
+    // apply its consequences. Runs on both creation and reconfiguration, so
+    // applyConfig() cannot leave a channel reporting the verdict of the
+    // configuration it just replaced. Returns true when the binding fell back.
+    // Reads the requested/bound state from `options` rather than mSettings on
+    // purpose: the constructor and applyConfig() both call setCorrection()
+    // when no profile is bound, and that runs clearColorProfile(), which wipes
+    // mRequested and mUseGlobalSourceDefault. mSettings therefore no longer
+    // remembers that management was asked for; the caller's options do.
+    bool reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT;
+
+    bool mColorProfileFallback = false;
+    bool mProfileBindingAccepted = true;
+#endif
+};
+
+/// A compile-time profile channel. Its identity is carried solely in the
+/// vtable override; it adds no per-instance profile pointer or owned storage.
+template<const EmitterProfile& Profile>
+class StaticProfileChannel final : public Channel {
+public:
+    explicit StaticProfileChannel(const ChannelConfig& config) FL_NO_EXCEPT
+        : Channel(config.chipset, config.mLeds, config.rgb_order, config.options) {}
+
+protected:
+    const EmitterProfile* staticEmitterProfile() const FL_NO_EXCEPT override {
+#if FL_COLOR_PROFILE_RUNTIME
+        return nullptr;
+#else
+        return &Profile;
+#endif
+    }
 };
 
 /// @brief Get stub channel driver for testing or unsupported platforms
