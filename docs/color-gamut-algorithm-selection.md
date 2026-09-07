@@ -214,9 +214,74 @@ embedded mapper relies on bisection, either:
 Recording this rather than leaving it implicit: the table above is evidence
 for the *objective*, and only provisional evidence for the *search*.
 
+## Devices with a white emitter (C3)
+
+A white emitter makes the emitter matrix wide: the preimage of a target is no
+longer unique, and C3 asks for the white-preferred one. The P5 reference finds
+it by enumerating vertices — every way of choosing three free emitters and
+pinning the rest to 0 or 1, solved and filtered. A3/B11 forbid anything
+resembling that search per pixel, so the question is whether it is necessary.
+
+Harness: `ci/color_rgbw_study.py`. Regression test:
+`ci/tests/test_color_rgbw_study.py`.
+
+### One white emitter needs no search at all
+
+With the white emitter at drive `w`, the RGB drives making up the difference
+are
+
+    d(w) = M⁻¹ · target − w · (M⁻¹ · white)
+
+which is **affine in `w`**. Each of the six bounds on the three RGB drives is
+therefore a single inequality in `w`, the feasible set is one interval, and
+white-preferred is its upper end. One matrix multiply for the target, one for
+the white column — which a real implementation precomputes at bind time — then
+six comparisons.
+
+Scored against the reference over the corpus:
+
+| device | vectors | worst per-drive disagreement |
+| --- | --- | --- |
+| `rgbw` (white at D65) | 48 | 1.1e-15 |
+| `non_d65_white` (white at D50) | 48 | 7.8e-16 |
+
+That is float64 rounding: the closed form *is* the reference's answer. Nothing
+in the derivation assumed the white sat on the neutral axis, and the second row
+is what says so.
+
+### Two white emitters do need more, and the corpus hides it
+
+The obvious extension is to run the one-white form once per white and keep the
+better answer. It agrees with the reference on **every** `rgbww` vector in the
+corpus.
+
+It is also wrong on most targets. Over 34 520 random reachable targets, mixing
+both whites beat the better single white **29 245 times** — 85% — by up to a
+full emitter's worth of light.
+
+The reason is not subtle once seen: a single emitter's drive is capped at 1, so
+any target needing more white than one emitter can supply must use both. The
+corpus does not contain such a target. All 48 `rgbww` vectors are dim enough
+that one white suffices — 32 of them use no white at all — so **agreement over
+this corpus says nothing whatsoever about the reduction**.
+
+Recording that explicitly, because the measurement was nearly taken the other
+way round. Maximizing `w₁ + w₂` with two whites is a linear program over a
+polygon; `most_white_two` solves it by exact vertex enumeration, and the
+regression test keeps the cheap reduction pinned as *failing* so nobody
+simplifies to it later.
+
+### What this leaves
+
+`rgbw` and `non_d65_white` are settled and ready to implement. `rgbww` needs
+either the 2D enumeration above — bounded at 28 candidate vertices, so not an
+iterative solver in the A3/B11 sense, but not free either — or a closed form
+nobody has found yet. It also needs corpus vectors bright enough to tell the
+two apart before any of it can be trusted.
+
 ## Not covered
 
-Only the three-emitter `rgb` device. RGBW and RGBWW add a redundant emitter,
-so the hull is a zonotope with a non-unique preimage and the allocation policy
-(C3, white-preferred) interacts with the mapping. That needs its own study
-once the ≥4-emitter solve exists.
+The interaction between the allocation policy and the gamut mapping. Both are
+characterized here in isolation; a target that is out of gamut *and* on a
+device with a white emitter goes through both, and that composition has not
+been scored.
