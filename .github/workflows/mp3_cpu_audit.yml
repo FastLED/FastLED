@@ -81,8 +81,24 @@ jobs:
       # scalar integer code and would measure the compiler instead of the
       # kernel. The default unit-test build is -O0, so it is run here in
       # release explicitly.
+      # The SIMD-vs-scalar ratio this job gates on depends on which runner
+      # GitHub hands out: 1.080x on one, 0.904x on another, a 19% spread
+      # across a fleet that is not one machine. Recording the CPU is what
+      # lets those be told apart rather than argued about as noise.
+      # See FastLED#4183.
+      - name: Record the runner CPU
+        if: always()
+        run: |
+          lscpu | grep -E "Model name|Vendor ID|Flags" | cut -c1-400 || true
+
+      # --verbose because the harness echoes a test's stdout only when it
+      # fails, and the ratio this step prints is the whole point of it. A
+      # passing run used to record nothing, which left a green result
+      # indistinguishable from one where the comparison returned early for
+      # want of integer SIMD and passed vacuously. That ambiguity is what
+      # stalled FastLED#4183; with this, every run says which it was.
       - name: Verify the fixed-point SIMD is not slower than scalar
-        run: bash test fl_codec --cpp --build-mode release
+        run: bash test fl_codec --cpp --build-mode release --verbose
 
       # Measure before gating, so a red gate still produces the numbers needed
       # to diagnose it -- and so that adding a backend can bootstrap its
