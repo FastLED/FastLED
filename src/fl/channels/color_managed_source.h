@@ -52,35 +52,19 @@ class ColorManagedPixelSource {
     /// going through them would apply it twice. Legacy correction and
     /// temperature are not a concern here: binding a profile clears them,
     /// which is what the `LegacyClearedByProfile` warning is for.
-    void loadAndScaleRGB(u8* b0_out, u8* b1_out, u8* b2_out) FL_NO_EXCEPT {
-        const u8* raw = mController.mData;
-        i32 drives[3];
-        processPixelQ16(mPipeline, raw[0], raw[1], raw[2], drives);
-        u8 channels[3];
-        for (int i = 0; i < 3; ++i) {
-            channels[i] = quantize(drives[i]);
-        }
-        *b0_out = channels[mSlot0];
-        *b1_out = channels[mSlot1];
-        *b2_out = channels[mSlot2];
-    }
+    void loadAndScaleRGB(u8* b0_out, u8* b1_out, u8* b2_out) FL_NO_EXCEPT;
 
     /// Legacy. An RGBW device's white emitter has no home in
     /// `EmitterProfile`, which carries three primaries and nothing else, so
     /// there is no profile for `allocateEmitterDrivesQ16` to be given. That
     /// is a schema question (P1/P3), not something to invent here.
     void loadAndScaleRGBW(const Rgbw& rgbw, u8* b0_out, u8* b1_out, u8* b2_out,
-                          u8* b3_out) FL_NO_EXCEPT {
-        mController.loadAndScaleRGBW(rgbw, b0_out, b1_out, b2_out, b3_out);
-    }
+                          u8* b3_out) FL_NO_EXCEPT;
 
     /// Legacy, for the same reason, with two whites instead of one -- and
     /// the two-white allocation is itself unimplemented (#4198).
     void loadAndScaleRGBWW(Rgbww rgbww, u8* b0_out, u8* b1_out, u8* b2_out,
-                           u8* b3_out, u8* b4_out) FL_NO_EXCEPT {
-        mController.loadAndScaleRGBWW(rgbww, b0_out, b1_out, b2_out, b3_out,
-                                      b4_out);
-    }
+                           u8* b3_out, u8* b4_out) FL_NO_EXCEPT;
 
 #if FASTLED_HD_COLOR_MIXING
     /// Legacy. This hands the encoder a colour triple *and* a separate 5-bit
@@ -89,9 +73,7 @@ class ColorManagedPixelSource {
     /// quantization and 5-bit semantics -- and answering it by whatever
     /// makes this compile would be the wrong way round.
     void loadRGBScaleAndBrightness(u8* c0, u8* c1, u8* c2,
-                                   u8* brightness) FL_NO_EXCEPT {
-        mController.loadRGBScaleAndBrightness(c0, c1, c2, brightness);
-    }
+                                   u8* brightness) FL_NO_EXCEPT;
 #endif
 
     /// Dithering stays with the controller; P8 owns it.
@@ -106,15 +88,7 @@ class ColorManagedPixelSource {
     ///
     /// This is the single final quantization B3 asks for: nothing upstream
     /// of it is 8-bit, and nothing downstream re-quantizes.
-    static u8 quantize(i32 drive) FL_NO_EXCEPT {
-        if (drive <= 0) {
-            return 0;
-        }
-        if (drive >= 65536) {
-            return 255;
-        }
-        return static_cast<u8>((static_cast<i32>(drive) * 255 + 32768) >> 16);
-    }
+    static u8 quantize(i32 drive) FL_NO_EXCEPT;
 
     PixelController<RGB>& mController;
     const StreamingPipelineQ16& mPipeline;

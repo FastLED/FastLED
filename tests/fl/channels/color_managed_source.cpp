@@ -116,10 +116,15 @@ FL_TEST_CASE("Brightness is applied once, by the pipeline") {
     CRGB leds[1] = {CRGB(200, 120, 60)};
     const StreamingPipelineQ16 unity = makePipeline();
 
+    // `color` and `brightness` only exist under FASTLED_HD_COLOR_MIXING;
+    // `premixed` is the one field that is always there, and it is the one
+    // this test is about -- it is what the legacy scale would have folded in.
     ColorAdjustment dim;
     dim.premixed = CRGB(128, 128, 128);
+#if FASTLED_HD_COLOR_MIXING
     dim.color = CRGB(0xff, 0xff, 0xff);
     dim.brightness = 128;
+#endif
 
     u8 bright_bytes[3];
     u8 dim_bytes[3];
