@@ -32,6 +32,7 @@
 #include "fl/gfx/tile2x2.cpp.hpp"
 #include "fl/gfx/transfer.cpp.hpp"
 #include "fl/gfx/upscale.cpp.hpp"
+#include "fl/gfx/white_allocation.cpp.hpp"
 #include "fl/gfx/xypath.cpp.hpp"
 #include "fl/gfx/xypath_impls.cpp.hpp"
 #include "fl/gfx/xypath_renderer.cpp.hpp"
