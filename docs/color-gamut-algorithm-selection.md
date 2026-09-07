@@ -363,6 +363,33 @@ polygon; `most_white_two` solves it by exact vertex enumeration, and the
 regression test keeps the cheap reduction pinned as *failing* so nobody
 simplifies to it later.
 
+### The mapper has to target the real hull
+
+A white emitter enlarges the reachable set, so testing a target against the
+RGB hull alone under-reports it. By how much was measured: over 200 000
+targets drawn from inside a four-emitter device's own zonotope, the RGB-only
+solve **rejects 43%** of them. Every one of those would be compressed by the
+three-emitter mapper despite the device being able to produce it exactly —
+typically because an RGB-only drive lands just above full scale where the
+white emitter would have covered it.
+
+So `mapAndAllocateRgbwQ16` runs the same eight halvings as the three-emitter
+path but takes every feasibility decision through the white-preferred
+allocation.
+
+Its lightness bound is closed form for the same reason the three-emitter one
+is. Along the D65 neutral ray the RGB drives are `s·d0 − w·dW`, and when every
+component of `dW` is positive, pushing `w` to full scale relaxes every upper
+bound, so `s_max = min_i (1 + dW_i) / d0_i`. Measured against a 60-step
+bisection the two agree to 1e-12, and for a white at D65 and unit luminance
+the bound moves from **1.398** to **2.398** times D65 — exactly the one unit
+the white emitter contributes.
+
+A negative component of `dW` means a white emitter outside the RGB triangle,
+where more white *raises* an RGB drive; full white is then not optimal and
+the closed form does not hold. The bound falls back to the three-emitter one
+there, which is attainable and merely conservative rather than wrong.
+
 ### What this leaves
 
 `rgbw` and `non_d65_white` are settled and ready to implement. `rgbww` needs

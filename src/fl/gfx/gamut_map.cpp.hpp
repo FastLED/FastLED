@@ -78,6 +78,61 @@ i32 scaleGamutQ16(i32 value, i32 factor) FL_NO_EXCEPT {
     return static_cast<i32>((product + 32768) >> 16);
 }
 
+/// XYZ of the candidate at `factor` of the target's chroma.
+void chromaCandidateXyz(const i32 (&lab)[3], i32 lightness, i32 factor,
+                        i32 (&out_xyz)[3]) FL_NO_EXCEPT {
+    const i32 candidate_lab[3] = {
+        lightness,
+        scaleGamutQ16(lab[1], factor),
+        scaleGamutQ16(lab[2], factor),
+    };
+    oklabToXyzQ16(candidate_lab, out_xyz);
+}
+
+/// Feasibility against the three-emitter hull.
+struct RgbFeasible {
+    const EmitterSolveMatrixQ16& solve;
+
+    bool operator()(const i32 (&xyz)[3]) const FL_NO_EXCEPT {
+        i32 drives[3];
+        solveRgbDrivesQ16(solve, xyz, drives);
+        return gamutDrivesAreInRange(drives, 0);
+    }
+};
+
+/// Feasibility against the device's real hull when it has a white emitter.
+struct RgbwFeasible {
+    const WhiteAllocationQ16& allocation;
+
+    bool operator()(const i32 (&xyz)[3]) const FL_NO_EXCEPT {
+        i32 drives[4];
+        return allocateWhitePreferredQ16(allocation, xyz, drives);
+    }
+};
+
+/// Largest chroma factor the hull accepts, by a fixed count of halvings.
+///
+/// Shared by both mappers so the search cannot drift between them; only the
+/// feasibility predicate differs. `low` is the largest factor known to be
+/// feasible, `high` the smallest known not to be.
+template <typename Feasible>
+i32 largestFeasibleChroma(const i32 (&lab)[3], i32 lightness,
+                          Feasible feasible) FL_NO_EXCEPT {
+    i32 low = 0;
+    i32 high = kGamutFullDrive;
+    for (int step = 0; step < kGamutMapHalvings; ++step) {
+        const i32 factor = (low + high) >> 1;
+        i32 candidate_xyz[3];
+        chromaCandidateXyz(lab, lightness, factor, candidate_xyz);
+        if (feasible(candidate_xyz)) {
+            low = factor;
+        } else {
+            high = factor;
+        }
+    }
+    return low;
+}
+
 }  // namespace
 
 bool buildGamutMapQ16(const EmitterProfile& profile, GamutMapQ16* out) FL_NO_EXCEPT {
@@ -162,37 +217,110 @@ void mapAndSolveDrivesQ16(const GamutMapQ16& map, const i32 (&xyz)[3],
         lightness = 0;
     }
 
-    // Then chroma, by scaling (a, b) toward zero. `low` is the largest
-    // factor known to be feasible, `high` the smallest known not to be.
-    i32 low = 0;
-    i32 high = kGamutFullDrive;
-    for (int step = 0; step < kGamutMapHalvings; ++step) {
-        const i32 factor = (low + high) >> 1;
-        const i32 candidate_lab[3] = {
-            lightness,
-            scaleGamutQ16(lab[1], factor),
-            scaleGamutQ16(lab[2], factor),
-        };
-        i32 candidate_xyz[3];
-        oklabToXyzQ16(candidate_lab, candidate_xyz);
-        i32 candidate_drives[3];
-        solveRgbDrivesQ16(map.solve, candidate_xyz, candidate_drives);
-        if (gamutDrivesAreInRange(candidate_drives, 0)) {
-            low = factor;
-        } else {
-            high = factor;
+    // Then chroma, by scaling (a, b) toward zero.
+    const i32 factor = largestFeasibleChroma(lab, lightness, RgbFeasible{map.solve});
+    i32 mapped_xyz[3];
+    chromaCandidateXyz(lab, lightness, factor, mapped_xyz);
+    solveRgbDrivesQ16(map.solve, mapped_xyz, drives);
+    clampGamutDrives(drives);
+}
+
+bool buildGamutMapRgbwQ16(const EmitterProfile& profile,
+                          const i32 (&white_xyz)[3],
+                          GamutMapRgbwQ16* out) FL_NO_EXCEPT {
+    if (out == nullptr) {
+        return false;
+    }
+    if (!buildWhiteAllocationQ16(profile, white_xyz, &out->allocation)) {
+        return false;
+    }
+
+    i32 neutral_drives[3];
+    solveRgbDrivesQ16(out->allocation.rgb_solve, kGamutD65Q16, neutral_drives);
+    for (int i = 0; i < 3; ++i) {
+        // As in the three-emitter build: every drive, not just the largest.
+        if (neutral_drives[i] <= 0) {
+            return false;
         }
     }
 
-    const i32 mapped_lab[3] = {
-        lightness,
-        scaleGamutQ16(lab[1], low),
-        scaleGamutQ16(lab[2], low),
+    // With every component of `per_white` positive, full white relaxes every
+    // upper bound on the RGB drives, so the brightest neutral is
+    // min_i (1 + per_white_i) / neutral_drive_i. A negative component means
+    // more white *raises* that drive, full white is no longer optimal, and
+    // the closed form does not hold -- so fall back to the three-emitter
+    // bound, which is attainable and merely conservative.
+    bool white_helps_every_channel = true;
+    for (int i = 0; i < 3; ++i) {
+        if (out->allocation.per_white[i] < 0) {
+            white_helps_every_channel = false;
+        }
+    }
+
+    i64 scale_wide = static_cast<i64>(kOklabQ16MaxMagnitude);
+    for (int i = 0; i < 3; ++i) {
+        const i64 numerator = white_helps_every_channel
+            ? static_cast<i64>(kGamutFullDrive) +
+                  static_cast<i64>(out->allocation.per_white[i])
+            : static_cast<i64>(kGamutFullDrive);
+        const i64 candidate =
+            (numerator << 16) / static_cast<i64>(neutral_drives[i]);
+        if (candidate < scale_wide) {
+            scale_wide = candidate;
+        }
+    }
+    if (scale_wide < 0) {
+        return false;
+    }
+    const i32 scale = static_cast<i32>(scale_wide);
+    const i32 brightest_neutral[3] = {
+        scaleGamutQ16(kGamutD65Q16[0], scale),
+        scaleGamutQ16(kGamutD65Q16[1], scale),
+        scaleGamutQ16(kGamutD65Q16[2], scale),
     };
+    i32 lab[3];
+    xyzToOklabQ16(brightest_neutral, lab);
+    out->max_neutral_lightness = lab[0];
+    return true;
+}
+
+void mapAndAllocateRgbwQ16(const GamutMapRgbwQ16& map, const i32 (&xyz)[3],
+                           i32 (&drives)[4]) FL_NO_EXCEPT {
+    if (allocateWhitePreferredQ16(map.allocation, xyz, drives)) {
+        // Already inside the device's hull -- which, with a white emitter,
+        // is a good deal larger than the RGB one.
+        return;
+    }
+
+    i32 lab[3];
+    xyzToOklabQ16(xyz, lab);
+    i32 lightness = lab[0];
+    if (lightness > map.max_neutral_lightness) {
+        lightness = map.max_neutral_lightness;
+    }
+    if (lightness < 0) {
+        lightness = 0;
+    }
+
+    const i32 factor =
+        largestFeasibleChroma(lab, lightness, RgbwFeasible{map.allocation});
     i32 mapped_xyz[3];
-    oklabToXyzQ16(mapped_lab, mapped_xyz);
-    solveRgbDrivesQ16(map.solve, mapped_xyz, drives);
-    clampGamutDrives(drives);
+    chromaCandidateXyz(lab, lightness, factor, mapped_xyz);
+    if (allocateWhitePreferredQ16(map.allocation, mapped_xyz, drives)) {
+        return;
+    }
+    // The accepted candidate can fall a few ULP outside on the final
+    // re-solve. Fall back to the neutral at this lightness, which the
+    // lightness bound guarantees is reachable.
+    const i32 neutral_lab[3] = {lightness, 0, 0};
+    i32 neutral_xyz[3];
+    oklabToXyzQ16(neutral_lab, neutral_xyz);
+    if (!allocateWhitePreferredQ16(map.allocation, neutral_xyz, drives)) {
+        drives[0] = 0;
+        drives[1] = 0;
+        drives[2] = 0;
+        drives[3] = 0;
+    }
 }
 
 }  // namespace fl

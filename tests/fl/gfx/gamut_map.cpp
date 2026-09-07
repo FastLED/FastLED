@@ -564,6 +564,126 @@ FL_TEST_CASE("Gamut map leaves an in-gamut ramp exactly where it found it") {
         FL_CHECK_LT(fl::fabsf(reproduced[1] / sum - 0.3290f), 0.002f);
     }
     FL_CHECK_GT(exercised, 20);
+// The white emitter the corpus's `rgbw` device uses: D65 at unit luminance.
+constexpr i32 kWhiteD65[3] = {62289, 65536, 71372};
+
+FL_TEST_CASE("RGBW mapper leaves alone what the RGB hull wrongly rejects") {
+    // The whole reason this variant exists. Over 200 000 targets drawn from
+    // inside a four-emitter device's own zonotope, the RGB-only solve
+    // rejects 43% of them -- every one of which the three-emitter mapper
+    // would compress despite the device being able to produce it exactly.
+    //
+    // These five are from that measurement. Each is reachable, and each has
+    // an RGB-only drive above full scale.
+    const float kReachable[][3] = {
+        {2.065f, 1.833f, 5.497f},
+        {2.599f, 2.165f, 2.563f},
+        {2.827f, 2.086f, 1.201f},
+        {1.966f, 2.134f, 2.050f},
+        {2.964f, 2.123f, 8.427f},
+    };
+
+    GamutMapRgbwQ16 rgbw;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65, &rgbw));
+    GamutMapQ16 rgb_only;
+    FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &rgb_only));
+
+    for (const auto& sample : kReachable) {
+        const i32 xyz[3] = {q16(sample[0]), q16(sample[1]),
+                            q16(sample[2])};
+
+        // Pin the premise: the RGB-only solve really does reject these, so
+        // this test cannot go quiet if the fixture or the solve moves.
+        i32 plain[3];
+        solveRgbDrivesQ16(rgb_only.solve, xyz, plain);
+        bool rgb_rejects = false;
+        for (int i = 0; i < 3; ++i) {
+            if (plain[i] < 0 || plain[i] > kFullDrive) {
+                rgb_rejects = true;
+            }
+        }
+        FL_REQUIRE(rgb_rejects);
+
+        // The RGBW mapper must return them untouched -- the allocation
+        // reproduces the target, so nothing is compressed.
+        i32 drives[4];
+        mapAndAllocateRgbwQ16(rgbw, xyz, drives);
+        i32 direct[4];
+        FL_REQUIRE(allocateWhitePreferredQ16(rgbw.allocation, xyz, direct));
+        for (int i = 0; i < 4; ++i) {
+            FL_CHECK_EQ(drives[i], direct[i]);
+            FL_CHECK_GE(drives[i], 0);
+            FL_CHECK_LE(drives[i], kFullDrive);
+        }
+    }
+}
+
+FL_TEST_CASE("RGBW lightness bound is the brighter one the white emitter buys") {
+    // A white emitter at D65 and unit luminance adds exactly one unit of
+    // neutral, so the brightest attainable neutral goes from 1.398 to 2.398
+    // times D65. Both are checked here, because a bound that silently stayed
+    // at the three-emitter value would leave the mapper dimming RGBW
+    // neutrals for no reason.
+    GamutMapRgbwQ16 rgbw;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65, &rgbw));
+    GamutMapQ16 rgb_only;
+    FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &rgb_only));
+
+    FL_CHECK_GT(rgbw.max_neutral_lightness, rgb_only.max_neutral_lightness);
+
+    // Independently: the lightness of 2.398 x D65, computed here rather than
+    // taken from the implementation.
+    const i32 expected_neutral[3] = {
+        q16(0.9504559f * 2.398271526f),
+        q16(1.0f * 2.398271526f),
+        q16(1.0890578f * 2.398271526f),
+    };
+    i32 expected_lab[3];
+    xyzToOklabQ16(expected_neutral, expected_lab);
+    FL_CHECK_LT(fl::fabsf(toFloat(rgbw.max_neutral_lightness - expected_lab[0])),
+                0.002f);
+
+    // And that neutral must actually be reachable, while 5% brighter is not.
+    i32 drives[4];
+    FL_CHECK(allocateWhitePreferredQ16(rgbw.allocation, expected_neutral, drives));
+    const i32 too_bright[3] = {
+        static_cast<i32>(expected_neutral[0] * 1.05f),
+        static_cast<i32>(expected_neutral[1] * 1.05f),
+        static_cast<i32>(expected_neutral[2] * 1.05f),
+    };
+    FL_CHECK_FALSE(
+        allocateWhitePreferredQ16(rgbw.allocation, too_bright, drives));
+}
+
+FL_TEST_CASE("RGBW mapper always returns drives inside [0, 1]") {
+    GamutMapRgbwQ16 rgbw;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65, &rgbw));
+
+    int exercised = 0;
+    for (int hue = 0; hue < 36; ++hue) {
+        const float angle = static_cast<float>(hue) * 10.0f * 3.14159265f / 180.0f;
+        const float x = 0.33f + 0.45f * fl::cosf(angle);
+        const float y = 0.33f + 0.45f * fl::sinf(angle);
+        if (x <= 0.01f || y <= 0.01f || x + y >= 0.99f) {
+            continue;
+        }
+        for (float luminance : {0.2f, 1.0f, 4.0f}) {
+            i32 xyz[3];
+            xyzAt(x, y, luminance, xyz);
+            i32 probe[4];
+            if (allocateWhitePreferredQ16(rgbw.allocation, xyz, probe)) {
+                continue;  // nothing for the mapper to do
+            }
+            ++exercised;
+            i32 drives[4];
+            mapAndAllocateRgbwQ16(rgbw, xyz, drives);
+            for (int i = 0; i < 4; ++i) {
+                FL_CHECK_GE(drives[i], 0);
+                FL_CHECK_LE(drives[i], kFullDrive);
+            }
+        }
+    }
+    FL_CHECK_GT(exercised, 12);
 }
 
 FL_TEST_CASE("Gamut map rejects a degenerate profile") {
