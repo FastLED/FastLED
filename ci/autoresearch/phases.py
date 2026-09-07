@@ -3736,6 +3736,24 @@ async def _run_rp_spi_public_api_tests(ctx: RunContext) -> int:
     print(
         f"{chip_name} SPI1 public API loopback: GPIO11 MOSI -> GPIO8 MISO, GPIO10 SCK"
     )
+
+    # FastLED#4207, same as the loopback phase above: the child opens its own
+    # RpcBench on this port, and a second client on a port we already hold
+    # connects fine and then answers nothing. Confirmed on an RP2350W --
+    # without this the child reported
+    # "FAIL — rpSpiPublicApiLoopback dispatch result: None" while the harness's
+    # own schema fetch in the same run succeeded. This phase is terminal, so
+    # release the interface before handing the port over.
+    if ctx.serial_iface is not None:
+        try:
+            await ctx.serial_iface.close()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as exc:  # noqa: BLE001 - teardown must not mask the test
+            print(f"   (warning: releasing harness serial interface: {exc})")
+        ctx.serial_iface = None
+
     result = RunningProcess.run(
         [
             "uv",
