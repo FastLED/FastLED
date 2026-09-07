@@ -9,7 +9,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from ci.autoresearch.net import run_net_peer_autoresearch
-from ci.autoresearch.ota import run_ota_peer_autoresearch
+from ci.autoresearch.ota import _settle_link, run_ota_peer_autoresearch
+from ci.rpc_client import RpcTimeoutError
 
 
 def _response(data: dict[str, Any]) -> MagicMock:
@@ -201,3 +202,41 @@ def test_ota_peer_stages_artifact_without_a_host_wifi_manager(tmp_path) -> None:
             write_calls.append(call)
     assert len(write_calls) == 1
     assert write_calls[0].args[1] == ""
+
+
+def test_settle_link_retries_a_failed_serial_write() -> None:
+    """A failed write must be retried, and must name the board when it isn't.
+
+    `PyserialMonitor.write` converts `serial.SerialException` into
+    `RuntimeError("Serial write error: ...")`, and `RpcClient.send` only
+    retries `RpcTimeoutError` -- so a write failure arrives here as a bare
+    `RuntimeError`. Before this was caught, it escaped the retry entirely and
+    surfaced as a transport error naming neither the board nor the call,
+    which is the failure #3956 exists to fix.
+    """
+    client = MagicMock()
+    client.send = AsyncMock(side_effect=RuntimeError("Serial write error: boom"))
+
+    with pytest.raises(RpcTimeoutError) as caught:
+        asyncio.run(_settle_link(client, "primary (COM18)", lambda: 30.0))
+
+    message = str(caught.value)
+    # Names the board, the number of attempts, and keeps the original cause.
+    assert "primary (COM18)" in message
+    assert "3 attempts" in message
+    assert "Serial write error: boom" in message
+    # All three attempts were made rather than one throw escaping.
+    assert client.send.await_count == 3
+
+
+def test_settle_link_returns_once_the_board_answers() -> None:
+    """The retry stops at the first success, and does not raise."""
+    client = MagicMock()
+    client.send = AsyncMock(
+        side_effect=[
+            RuntimeError("Serial write error: boom"),
+            _response({"success": True}),
+        ]
+    )
+    asyncio.run(_settle_link(client, "peer (COM9)", lambda: 30.0))
+    assert client.send.await_count == 2
