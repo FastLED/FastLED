@@ -759,6 +759,7 @@ void pollNetServer() {}
 #include "fl/net/wifi.h"
 #include "fl/stl/array.h"
 #include "fl/stl/cstdio.h"
+#include "fl/stl/cstdlib.h"  // fl::atol for Content-Length
 #include "fl/stl/cstring.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/unique_ptr.h"
@@ -859,28 +860,89 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
         delay(1);
     }
 
-    char status_line[64];
-    size_t length = 0;
-    while (client.available() && length + 1 < sizeof(status_line)) {
-        const int ch = client.read();
-        if (ch < 0 || ch == '\n') {
-            break;
-        }
-        if (ch != '\r') {
-            status_line[length++] = static_cast<char>(ch);
-        }
-    }
-    status_line[length] = '\0';
-    char response[256] = {};
-    size_t response_length = 0;
-    while (static_cast<int32_t>(millis() - deadline_ms) < 0 &&
-           (client.connected() || client.available())) {
-        while (client.available() && response_length + 1 < sizeof(response)) {
+    // Read one CRLF-terminated line, waiting for bytes that have not arrived
+    // yet. The previous status-line loop stopped as soon as `available()` went
+    // false, so a response split across TCP segments left it holding a partial
+    // line -- harmless when everything was drained into one buffer, fatal once
+    // the headers have to be parsed. Returns false only if the deadline
+    // expires with the line unfinished. See FastLED#4173.
+    auto read_line = [&](char* out, size_t out_size) -> bool {
+        size_t used = 0;
+        while (static_cast<int32_t>(millis() - deadline_ms) < 0) {
+            if (!client.available()) {
+                if (!client.connected()) {
+                    break;
+                }
+                FastLED.watchdog().feed();
+                delay(1);
+                continue;
+            }
             const int ch = client.read();
             if (ch < 0) {
                 break;
             }
-            response[response_length++] = static_cast<char>(ch);
+            if (ch == '\n') {
+                out[used] = '\0';
+                return true;
+            }
+            if (ch != '\r' && used + 1 < out_size) {
+                out[used++] = static_cast<char>(ch);
+            }
+        }
+        out[used] = '\0';
+        return false;
+    };
+
+    char status_line[64];
+    read_line(status_line, sizeof(status_line));
+
+    // Consume headers, capturing Content-Length. Every response this client
+    // talks to sends one along with `Connection: close`; stopping on the
+    // declared length is what lets the read finish promptly, because
+    // `client.connected()` does not go false quickly enough to end it and the
+    // old loop therefore waited out its full 2 s deadline on every request --
+    // ~2.2 s x 12 requests = the 26.5 s measured, almost all of it idle.
+    long content_length = -1;
+    char header[128];
+    while (read_line(header, sizeof(header))) {
+        if (header[0] == '\0') {
+            break;  // blank line: headers done
+        }
+        if (content_length < 0 &&
+            fl::strncmp(header, "Content-Length:", 15) == 0) {
+            const char* value = header + 15;
+            while (*value == ' ') {
+                ++value;
+            }
+            content_length = fl::atol(value);
+        }
+    }
+
+    // Record the body only. It previously held headers *and* body, so a
+    // response with long headers could push the asserted fragment out of the
+    // 256-byte window entirely.
+    char response[256] = {};
+    size_t response_length = 0;
+    long body_read = 0;
+    while (static_cast<int32_t>(millis() - deadline_ms) < 0) {
+        if (content_length >= 0 && body_read >= content_length) {
+            break;  // complete
+        }
+        if (client.available()) {
+            const int ch = client.read();
+            if (ch < 0) {
+                break;
+            }
+            ++body_read;
+            // Keep draining past the buffer so the socket is not abandoned
+            // mid-response; only the first 256 bytes are recorded.
+            if (response_length + 1 < sizeof(response)) {
+                response[response_length++] = static_cast<char>(ch);
+            }
+            continue;
+        }
+        if (!client.connected()) {
+            break;  // closed with nothing buffered
         }
         FastLED.watchdog().feed();
         delay(1);
@@ -897,10 +959,28 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
                         fl::strncmp(status_line + 9, expected_status_code, 3) == 0;
     const bool content_ok = expected_fragment == nullptr ||
                             fl::strstr(response, expected_fragment) != nullptr;
+
+    // A short body is a failure even when the fragment is in it. The loop
+    // above can leave early two ways -- the peer closing, or the deadline --
+    // and both can happen mid-body, which is exactly the truncation this
+    // change is about not tolerating. Without this, a response cut off after
+    // the fragment reads as a pass.
+    //
+    // Only checkable when the peer declared a length; without one there is
+    // nothing to compare against and the close is the only end-of-body
+    // signal there is.
+    const bool body_complete = content_length < 0 || body_read >= content_length;
+
     result.set("status_line", status_line);
-    result.set("passed", passed && content_ok);
-    if (!passed || !content_ok) {
-        result.set("error", passed ? "Unexpected response body" : "Unexpected HTTP status");
+    result.set("content_length", static_cast<int32_t>(content_length));
+    result.set("body_read", static_cast<int32_t>(body_read));
+    result.set("passed", passed && content_ok && body_complete);
+    if (!passed) {
+        result.set("error", "Unexpected HTTP status");
+    } else if (!body_complete) {
+        result.set("error", "Truncated response body");
+    } else if (!content_ok) {
+        result.set("error", "Unexpected response body");
     }
     return result;
 }
