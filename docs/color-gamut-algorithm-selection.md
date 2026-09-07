@@ -274,10 +274,10 @@ three drives between adjacent samples, at the shipped eight halvings:
 | hue sweep, fully out of gamut | 0.003189 | 0.81 | 4.6x |
 | neutral luminance ramp | 0.004028 | 1.03 | 1.2x |
 
-The 42.8x in the third column is the discontinuity showing itself: on the
-boundary crossing the worst step is forty-odd times the typical one, which
-is exactly what a jump looks like. It is still under one 8-bit code, which
-is why nothing bands.
+The last column is the discontinuity showing itself: on the boundary
+crossing the worst step is forty-odd times the typical one, which is exactly
+what a jump looks like. It is still under one 8-bit code, which is why
+nothing bands.
 
 ### More halvings do not remove it
 

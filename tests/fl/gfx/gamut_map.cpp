@@ -466,6 +466,7 @@ FL_TEST_CASE("Gamut map moves smoothly enough to animate") {
     for (const auto& path : kPaths) {
         i32 previous[3] = {0, 0, 0};
         float worst = 0.0f;
+        int mapped_samples = 0;
         for (int step = 0; step <= path.steps; ++step) {
             const float t = static_cast<float>(step) / path.steps;
             const float x = path.x0 + t * (path.x1 - path.x0);
@@ -474,6 +475,14 @@ FL_TEST_CASE("Gamut map moves smoothly enough to animate") {
                 path.luminance > 0.0f ? path.luminance : (0.02f + t * 1.6f);
             i32 xyz[3];
             xyzAt(x, y, luminance, xyz);
+            i32 plain[3];
+            solveRgbDrivesQ16(map.solve, xyz, plain);
+            for (int i = 0; i < 3; ++i) {
+                if (plain[i] < 0 || plain[i] > kFullDrive) {
+                    ++mapped_samples;
+                    break;
+                }
+            }
             i32 drives[3];
             mapAndSolveDrivesQ16(map, xyz, drives);
             if (step > 0) {
@@ -489,6 +498,11 @@ FL_TEST_CASE("Gamut map moves smoothly enough to animate") {
                 previous[i] = drives[i];
             }
         }
+        // Every path has to actually cross into the mapped branch. A fixture
+        // or solve change that left one entirely in gamut would leave this
+        // measuring the plain solve's smoothness and saying nothing at all
+        // about the mapper.
+        FL_REQUIRE_GT(mapped_samples, 0);
         // 1.5 codes at 8-bit: about twice the worst measured, so platform
         // float differences do not make this flaky, while a mapper that
         // started stepping by a visible amount would fail.
@@ -526,9 +540,28 @@ FL_TEST_CASE("Gamut map leaves an in-gamut ramp exactly where it found it") {
         for (int i = 0; i < 3; ++i) {
             FL_CHECK_EQ(drives[i], plain[i]);
         }
-        // Neutral in means the drives keep the neutral's fixed ratios.
-        const float ratio = toFloat(drives[1]) / toFloat(plain[1]);
-        FL_CHECK_LT(fl::fabsf(ratio - 1.0f), 1e-6f);
+        // And the light those drives actually make is still D65. Comparing
+        // drives against the plain solve, as above, cannot show this: the
+        // two are equal by assertion, so any ratio between them is 1 by
+        // construction. Pushing the drives back through the emitter columns
+        // and checking the chromaticity is independent of the solve, and is
+        // what would catch a wrong matrix that happened to be applied
+        // consistently.
+        float reproduced[3] = {0.0f, 0.0f, 0.0f};
+        const float emitters[3][2] = {
+            {0.6400f, 0.3300f}, {0.3000f, 0.6000f}, {0.1500f, 0.0600f}};
+        for (int e = 0; e < 3; ++e) {
+            float column[3];
+            colorimetric_response::xyY_to_XYZ(emitters[e][0], emitters[e][1], 1.0f,
+                                              column);
+            for (int i = 0; i < 3; ++i) {
+                reproduced[i] += toFloat(drives[e]) * column[i];
+            }
+        }
+        const float sum = reproduced[0] + reproduced[1] + reproduced[2];
+        FL_REQUIRE_GT(sum, 1e-4f);
+        FL_CHECK_LT(fl::fabsf(reproduced[0] / sum - 0.3127f), 0.002f);
+        FL_CHECK_LT(fl::fabsf(reproduced[1] / sum - 0.3290f), 0.002f);
     }
     FL_CHECK_GT(exercised, 20);
 }
