@@ -20,6 +20,20 @@ const float kBradford[3][3] = {
     {0.0389f, -0.0685f, 1.0296f},
 };
 
+/// True only for a real, usable chromaticity.
+///
+/// `xyY_to_XYZ` guards `y < 1e-12f`, which NaN slips past because every
+/// comparison against NaN is false. It then propagates through the cone
+/// solve -- the zero-cone check below is comparison-based and lets it
+/// through for the same reason -- and reaches the float-to-i32 cast, where
+/// converting a NaN is undefined behaviour rather than a wrong number.
+bool isUsableChromaticity(Chromaticity c) FL_NO_EXCEPT {
+    // Self-comparison rejects NaN; the bounds reject infinities and values
+    // outside the chromaticity diagram.
+    return c.x == c.x && c.y == c.y && c.x > 0.0f && c.x < 1.0f &&
+           c.y > 1e-6f && c.y < 1.0f;
+}
+
 i32 quantizeAdaptationQ16(float v) FL_NO_EXCEPT {
     const float scaled = v * 65536.0f;
     return static_cast<i32>(scaled >= 0.0f ? scaled + 0.5f : scaled - 0.5f);
@@ -39,6 +53,10 @@ bool buildBradfordMatrixQ16(Chromaticity source_white,
                             Chromaticity destination_white,
                             AdaptationMatrixQ16* out) FL_NO_EXCEPT {
     if (out == nullptr) {
+        return false;
+    }
+    if (!isUsableChromaticity(source_white) ||
+        !isUsableChromaticity(destination_white)) {
         return false;
     }
     float source_xyz[3];

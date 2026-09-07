@@ -29,8 +29,15 @@ bool buildBradfordMatrixQ16(Chromaticity source_white,
                             Chromaticity destination_white,
                             AdaptationMatrixQ16* out) FL_NO_EXCEPT;
 
-/// Adapt one XYZ triple. Provided for stage-by-stage bisection against the
-/// P5 golden vectors; the streaming path should fold instead.
+/// Adapt one XYZ triple.
+///
+/// Public because it is the only way to exercise adaptation on its own.
+/// `foldAdaptationIntoSourceMatrix` cannot carry it: that folds into a source
+/// matrix and never exposes an adapted XYZ, so there is no existing seam this
+/// could route through. The tracker asks P5's vectors to be "serialized per
+/// stage so embedded phases can bisect failures", and bisecting a stage
+/// requires being able to run that stage alone -- P7 and P8 will need this
+/// when their own budgets miss. The streaming path uses the fold.
 void adaptXyzQ16(const AdaptationMatrixQ16& matrix, const i32 (&xyz)[3],
                  i32 (&out_xyz)[3]) FL_NO_EXCEPT;
 

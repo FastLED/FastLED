@@ -109,6 +109,23 @@ FL_TEST_CASE("Folding into the source matrix equals applying both in sequence") 
     }
 }
 
+FL_TEST_CASE("Non-finite chromaticities are rejected, not converted") {
+    // xyY_to_XYZ guards `y < 1e-12f`, which NaN slips past because every
+    // comparison against NaN is false. Without an explicit check it reaches
+    // the float-to-i32 cast, and converting a NaN there is undefined
+    // behaviour rather than merely a wrong colour.
+    const float nan_value = 0.0f / (sizeof(int) > 100 ? 1.0f : 0.0f);
+    AdaptationMatrixQ16 matrix;
+    FL_CHECK_FALSE(buildBradfordMatrixQ16(Chromaticity(nan_value, 0.3290f), kD65, &matrix));
+    FL_CHECK_FALSE(buildBradfordMatrixQ16(kD50, Chromaticity(0.3127f, nan_value), &matrix));
+    // y == 0 would divide by zero inside xyY_to_XYZ's guarded path.
+    FL_CHECK_FALSE(buildBradfordMatrixQ16(Chromaticity(0.3f, 0.0f), kD65, &matrix));
+    // Out of the chromaticity diagram entirely.
+    FL_CHECK_FALSE(buildBradfordMatrixQ16(Chromaticity(1.5f, 0.3f), kD65, &matrix));
+    // The valid pair still builds.
+    FL_CHECK(buildBradfordMatrixQ16(kD50, kD65, &matrix));
+}
+
 FL_TEST_CASE("A null out-pointer is rejected rather than dereferenced") {
     FL_CHECK_FALSE(buildBradfordMatrixQ16(kD50, kD65, nullptr));
     AdaptationMatrixQ16 matrix;
