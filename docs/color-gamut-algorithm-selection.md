@@ -23,14 +23,59 @@ relative colorimetry, profile white at full drive, dark surround.
 
 | algorithm | worst ΔE2000 | mean ΔE2000 |
 | --- | --- | --- |
-| clip negative drives | 20.652 | 3.923 |
+| clip drives into [0, 1] | 20.652 | 3.923 |
 | max-normalize | 20.652 | 3.923 |
 | desaturate toward neutral | 14.893 | 2.101 |
 | **OKLCh chroma compression** | **0.000** | **0.000** |
 
 A1's budget is max ΔE2000 ≤ 0.5 at identity brightness.
 
+## Cost: how much search is actually needed
+
+The reference and the unbounded bisection both run to convergence, which no
+per-pixel path can afford. Two bounded options were measured over the same 20
+vectors.
+
+**Fixed iteration count**, no table:
+
+| halvings | worst ΔE2000 | mean ΔE2000 |
+| --- | --- | --- |
+| 2 | 10.149 | 3.166 |
+| 4 | 1.604 | 0.590 |
+| 6 | 0.623 | 0.214 |
+| **8** | **0.152** | **0.046** |
+| 10 | 0.030 | 0.010 |
+
+**LUT of maximum chroma over an (L, hue) grid**, two variants -- one
+interpolating and shrinking on infeasibility, one storing the per-cell
+minimum so a lookup never overshoots:
+
+| grid | table bytes (u16) | worst, shrink-on-miss | worst, conservative |
+| --- | --- | --- | --- |
+| 8 x 16 | 256 | 4.406 | 10.992 |
+| 16 x 32 | 1 024 | 4.373 | 7.631 |
+| 32 x 64 | 4 096 | 2.180 | 4.621 |
+| 64 x 128 | 16 384 | -- | 2.434 |
+
+## Selection: eight halvings, no table
+
+Eight halvings meet A1 with about a 3x margin and need **no table at all**.
+A 16 KB LUT scores 2.434, which is worse than *four* halvings -- so the
+"optionally LUT-backed" option in #4041 resolves to no for this budget.
+
+The reason is geometric: the OKLCh gamut boundary has sharp corners at the
+primaries, and a grid cannot represent a corner without enormous resolution.
+Refining along the ray costs nothing to store and lands on the corner
+directly.
+
+Eight halvings is also a *bounded* computation rather than an iterative
+solver in the A3/B11 sense. Its cost is fixed at compile time; it does not
+loop until a convergence criterion is met, which is the property that makes
+`nnls3` unacceptable per pixel.
+
 ## What this means
+
+
 
 **The objective is what matters; the search is not.** OKLCh chroma
 compression implemented as a plain 30-iteration bisection reproduces the
@@ -49,6 +94,34 @@ line to neutral in XYZ is not a line of constant hue.
 So the embedded path must implement the OKLCh objective. That is the finding:
 the cheap options are not "slightly worse", they are not in the same range,
 and A1 cannot be met by clamping.
+
+## Is the feasible chroma ray actually connected?
+
+Bisection assumes it is. The reference does not, so the assumption was tested
+rather than argued: 4 680 rays (lightness on a 40-step grid, hue every 3
+degrees), each sampled at 401 chroma values -- about 1.9 million feasibility
+evaluations.
+
+**No disconnected interval was found.** On every ray sampled, the feasible
+chroma was a single interval starting at zero.
+
+That is strong evidence for this device, not a proof, and it says nothing
+about the >=4-emitter case where the zonotope gains a redundant generator. A
+coarser sweep runs on every test invocation so the assumption cannot rot
+silently.
+
+## Lightness must be clamped before chroma
+
+Chroma compression alone cannot rescue a target that is too *bright*: at zero
+chroma the point is still outside the hull, and a chroma-only bisection
+converges on an infeasible answer. Every mapper here clamps into the hull --
+the OKLCh ones by first reducing lightness to the attainable neutral, as the
+reference does, and the naive ones by bounding drives to [0, 1].
+
+The corpus contains no over-bright target, so this had to be constructed to
+be tested. That gap has now hidden two defects in this harness: this one and
+the missing upper-bound check in `is_feasible` fixed alongside it. Worth
+noting for whoever extends the corpus.
 
 ## The limit of this study
 

@@ -87,6 +87,85 @@ class TestColorGamutStudy(unittest.TestCase):
                 with self.subTest(candidate=name, target=target):
                     self.assertTrue(is_feasible(self.inverse, mapped))
 
+    def test_the_selected_algorithm_meets_the_a1_budget(
+        self: "TestColorGamutStudy",
+    ) -> None:
+        # The report selects eight halvings. If this stops holding, the
+        # recorded selection is no longer supported by anything.
+        score = score_candidate(
+            "oklch-bisect-8", self.forward, self.inverse, self.cases
+        )
+        self.assertLess(score.worst_delta_e, 0.5)
+
+    def test_bounded_search_beats_a_large_lookup_table(
+        self: "TestColorGamutStudy",
+    ) -> None:
+        # The selection rests on this comparison: eight halvings need no
+        # storage and still beat a 16 KB table, because a grid cannot
+        # represent the gamut boundary's corners at the primaries.
+        LARGEST_LUT_WORST_DELTA_E = 2.434  # 64 x 128 conservative, 16 KB
+        eight = score_candidate(
+            "oklch-bisect-8", self.forward, self.inverse, self.cases
+        )
+        self.assertLess(eight.worst_delta_e, LARGEST_LUT_WORST_DELTA_E)
+
+    def test_over_bright_targets_are_mapped_into_the_hull(
+        self: "TestColorGamutStudy",
+    ) -> None:
+        # Chroma compression alone cannot rescue a target that is too bright:
+        # at zero chroma it is still outside, so a chroma-only mapper returns
+        # an infeasible result. The corpus contains no such target, which is
+        # why this needed constructing rather than finding.
+        white: Xyz = (
+            sum(self.forward.row0),
+            sum(self.forward.row1),
+            sum(self.forward.row2),
+        )
+        over_bright: Xyz = (white[0] * 1.5, white[1] * 1.5, white[2] * 1.5)
+        self.assertFalse(is_feasible(self.inverse, over_bright))
+        for name, mapper in CANDIDATES.items():
+            with self.subTest(candidate=name):
+                mapped = mapper(self.forward, self.inverse, over_bright)
+                self.assertTrue(is_feasible(self.inverse, mapped))
+
+    def test_feasible_chroma_is_one_interval_for_this_device(
+        self: "TestColorGamutStudy",
+    ) -> None:
+        """Bisection assumes the feasible chroma ray is connected.
+
+        The reference does not assume that, so the assumption is checked here
+        rather than asserted in prose. A coarse sweep on every run; the dense
+        1.9M-sample sweep behind the report's claim is recorded there.
+        """
+
+        import math
+
+        from ci.color_reference import _xyz_from_oklab
+
+        for lightness_step in range(1, 10):
+            lightness = lightness_step / 10.0
+            for hue_degrees in range(0, 360, 30):
+                radians = math.radians(hue_degrees)
+                seen_infeasible = False
+                for chroma_step in range(0, 61):
+                    chroma = chroma_step * 0.5 / 60
+                    point = _xyz_from_oklab(
+                        (
+                            lightness,
+                            chroma * math.cos(radians),
+                            chroma * math.sin(radians),
+                        )
+                    )
+                    if is_feasible(self.inverse, point):
+                        with self.subTest(lightness=lightness, hue=hue_degrees):
+                            self.assertFalse(
+                                seen_infeasible,
+                                "feasible chroma is disconnected here; "
+                                "bisection would discard the far interval",
+                            )
+                    else:
+                        seen_infeasible = True
+
     def test_feasibility_checks_both_bounds(
         self: "TestColorGamutStudy",
     ) -> None:
