@@ -50,6 +50,16 @@ struct StreamingPipelineQ16 {
     /// The device hull, its solve, and the lightness bound.
     GamutMapQ16 gamut;
 
+    /// What to do with a target the device cannot reproduce.
+    ///
+    /// `ChromaCompress` is the default and the one the P7 study selected;
+    /// `Clamp` is the caller saying they would rather have the cheap answer.
+    /// The study measured what that costs: clipping drives into range lands
+    /// about 20 dE2000 from the reference against a budget of 0.5, because
+    /// no amount of clamping substitutes for the objective. It is offered
+    /// because `ColorProfileBinding` offers it, not because it is close.
+    GamutPolicy gamut_policy = GamutPolicy::ChromaCompress;
+
     /// Brightness times power limiting, as one scalar (C4).
     ///
     /// Initialized here because `FluxScalar` has no default constructor --
@@ -69,6 +79,7 @@ struct StreamingPipelineQ16 {
 /// everything else here does not.
 bool buildStreamingPipelineQ16(const SourceProfile& source,
                                const EmitterProfile& device,
+                               GamutPolicy policy,
                                StreamingPipelineQ16* out) FL_NO_EXCEPT;
 
 /// Set the composed brightness-and-power scalar for the frames that follow.
