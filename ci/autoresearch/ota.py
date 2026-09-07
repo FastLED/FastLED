@@ -13,6 +13,7 @@ import asyncio
 import base64
 import hashlib
 import time
+from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -46,18 +47,27 @@ def _served_request_count(status: dict[str, Any]) -> int:
     return value if value >= 0 else 0
 
 
-async def _settle_link(client: "RpcClient", label: str) -> None:
+async def _settle_link(
+    client: "RpcClient",
+    label: str,
+    remaining_timeout: "Callable[[], float]",
+) -> None:
     """Ping `client` until it answers, or raise naming the board that did not.
 
     Exists because the opening request of the peer-OTA run could time out
     against a device that was demonstrably healthy on both sides of the
     window. Without this the failure surfaced as a bare
     `No response with ID 1`, which names neither the board nor the call.
+
+    `remaining_timeout` is the run's own budget helper. Settling must not
+    invent a window of its own: three fixed 10 s pings plus their backoffs
+    could outlast a shorter caller deadline, so each ping is clamped to
+    whatever the run has left and raises once that is exhausted.
     """
     last: Exception | None = None
     for attempt in range(1, 4):
         try:
-            await client.send("ping", {}, timeout=10.0)
+            await client.send("ping", {}, timeout=min(10.0, remaining_timeout()))
             if attempt > 1:
                 print(f"  {label} link settled after {attempt} attempts")
             return
@@ -72,7 +82,10 @@ async def _settle_link(client: "RpcClient", label: str) -> None:
         except (RpcError, RpcTimeoutError) as exc:
             last = exc
             print(f"  {label} did not answer ping (attempt {attempt}/3): {exc}")
-            await asyncio.sleep(2.0)
+            # No backoff after the final attempt -- it would just delay the
+            # error by 2 s.
+            if attempt < 3:
+                await asyncio.sleep(2.0)
     raise RpcTimeoutError(
         f"{label} did not answer ping after 3 attempts; last error: {last}"
     )
@@ -146,8 +159,8 @@ async def run_ota_peer_autoresearch(
         # served a schema fetch (FastLED#3956). One dropped opening request
         # should not sink the whole run, so ping with a bounded retry and
         # report which link is at fault when it genuinely is unreachable.
-        await _settle_link(primary, "RP2350W")
-        await _settle_link(peer, "ESP32-C6")
+        await _settle_link(primary, "RP2350W", rpc_timeout)
+        await _settle_link(peer, "ESP32-C6", rpc_timeout)
 
         primary_status = await rpc_data(primary, "status", {})
         peer_status = await rpc_data(peer, "status", {})
