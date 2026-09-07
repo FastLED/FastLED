@@ -92,7 +92,11 @@ FL_TEST_CASE("RP UART declines when the backend reports no usable UART clock") {
     ChannelEngineRpUart uart0(peripheral, 0);
 
     FL_CHECK_FALSE(uart0.canHandle(makeWs2812Channel(0, 0)));
-    FL_CHECK_FALSE(uart0.lastError().empty());
+    // Assert the exact reason: a bare non-empty check would still pass if the
+    // zero-clock and excessive-baud diagnostics were swapped, which is the one
+    // regression these two cases exist to catch.
+    FL_CHECK_EQ(uart0.lastError(),
+                fl::string("RP UART: UART clock unavailable"));
 }
 
 FL_TEST_CASE("RP UART declines when the timing needs more baud than the backend has") {
@@ -104,7 +108,9 @@ FL_TEST_CASE("RP UART declines when the timing needs more baud than the backend 
     ChannelEngineRpUart uart0(peripheral, 0);
 
     FL_CHECK_FALSE(uart0.canHandle(makeWs2812Channel(0, 0)));
-    FL_CHECK_FALSE(uart0.lastError().empty());
+    FL_CHECK_EQ(uart0.lastError(),
+                fl::string("RP UART: chipset timing needs a baud above the "
+                           "UART backend maximum"));
 }
 
 FL_TEST_CASE("RP UART accepts a pin it would otherwise take once the ceiling is adequate") {
