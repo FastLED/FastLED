@@ -16,6 +16,8 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
+from typeguard import typechecked
+
 from ci.color_reference import (
     Matrix3,
     Xyz,
@@ -78,9 +80,9 @@ def map_clip(forward: Matrix3, inverse: Matrix3, xyz: Xyz) -> Xyz:
 
     drives = _matvec(inverse, xyz)
     clamped: Xyz = (
-        max(drives[0], 0.0),
-        max(drives[1], 0.0),
-        max(drives[2], 0.0),
+        min(max(drives[0], 0.0), 1.0),
+        min(max(drives[1], 0.0), 1.0),
+        min(max(drives[2], 0.0), 1.0),
     )
     return _matvec(forward, clamped)
 
@@ -127,11 +129,21 @@ def map_desaturate_to_neutral(forward: Matrix3, inverse: Matrix3, xyz: Xyz) -> X
             low = middle
         else:
             high = middle
-    return (
+    pulled: Xyz = (
         neutral[0] + low * (xyz[0] - neutral[0]),
         neutral[1] + low * (xyz[1] - neutral[1]),
         neutral[2] + low * (xyz[2] - neutral[2]),
     )
+    # Pulling toward an equal-luminance neutral cannot fix an over-bright
+    # target, since the neutral is over-bright too. Clamp the drives so the
+    # candidate still satisfies the mapper contract.
+    pulled_drives = _matvec(inverse, pulled)
+    bounded: Xyz = (
+        min(max(pulled_drives[0], 0.0), 1.0),
+        min(max(pulled_drives[1], 0.0), 1.0),
+        min(max(pulled_drives[2], 0.0), 1.0),
+    )
+    return _matvec(forward, bounded)
 
 
 def map_oklch_bisect(forward: Matrix3, inverse: Matrix3, xyz: Xyz) -> Xyz:
@@ -146,19 +158,43 @@ def map_oklch_bisect(forward: Matrix3, inverse: Matrix3, xyz: Xyz) -> Xyz:
         return xyz
     polar = _oklch_from_xyz(xyz)
     hue = math.radians(polar.hue_degrees)
+    lightness = attainable_lightness(inverse, polar.lightness)
     low, high = 0.0, polar.chroma
     for _ in range(30):
         chroma = (low + high) / 2.0
         candidate = _xyz_from_oklab(
-            (polar.lightness, chroma * math.cos(hue), chroma * math.sin(hue))
+            (lightness, chroma * math.cos(hue), chroma * math.sin(hue))
         )
         if is_feasible(inverse, candidate):
             low = chroma
         else:
             high = chroma
-    return _xyz_from_oklab((polar.lightness, low * math.cos(hue), low * math.sin(hue)))
+    return _xyz_from_oklab((lightness, low * math.cos(hue), low * math.sin(hue)))
 
 
+@typechecked
+def attainable_lightness(inverse: Matrix3, lightness: float) -> float:
+    """Largest neutral lightness the device can reach, at or below `lightness`.
+
+    Chroma compression cannot rescue a target that is too *bright*: at zero
+    chroma the point is still outside the hull, so the bisection converges on
+    an infeasible answer. The reference clamps lightness to the attainable
+    neutral interval before compressing chroma, and this is that clamp.
+    """
+
+    if is_feasible(inverse, _xyz_from_oklab((lightness, 0.0, 0.0))):
+        return lightness
+    low, high = 0.0, lightness
+    for _ in range(30):
+        middle = (low + high) / 2.0
+        if is_feasible(inverse, _xyz_from_oklab((middle, 0.0, 0.0))):
+            low = middle
+        else:
+            high = middle
+    return low
+
+
+@typechecked
 def map_oklch_bounded(
     forward: Matrix3, inverse: Matrix3, xyz: Xyz, iterations: int
 ) -> Xyz:
@@ -173,17 +209,21 @@ def map_oklch_bounded(
         return xyz
     polar = _oklch_from_xyz(xyz)
     hue = math.radians(polar.hue_degrees)
+    # Lightness first: reducing chroma cannot bring an over-bright target back
+    # into the hull, so without this the bisection converges on an infeasible
+    # answer -- at zero chroma the point is still outside.
+    lightness = attainable_lightness(inverse, polar.lightness)
     low, high = 0.0, polar.chroma
     for _ in range(iterations):
         chroma = (low + high) / 2.0
         candidate = _xyz_from_oklab(
-            (polar.lightness, chroma * math.cos(hue), chroma * math.sin(hue))
+            (lightness, chroma * math.cos(hue), chroma * math.sin(hue))
         )
         if is_feasible(inverse, candidate):
             low = chroma
         else:
             high = chroma
-    return _xyz_from_oklab((polar.lightness, low * math.cos(hue), low * math.sin(hue)))
+    return _xyz_from_oklab((lightness, low * math.cos(hue), low * math.sin(hue)))
 
 
 def map_oklch_bisect_8(forward: Matrix3, inverse: Matrix3, xyz: Xyz) -> Xyz:

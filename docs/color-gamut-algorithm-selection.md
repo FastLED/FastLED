@@ -95,6 +95,34 @@ So the embedded path must implement the OKLCh objective. That is the finding:
 the cheap options are not "slightly worse", they are not in the same range,
 and A1 cannot be met by clamping.
 
+## Is the feasible chroma ray actually connected?
+
+Bisection assumes it is. The reference does not, so the assumption was tested
+rather than argued: 4 680 rays (lightness on a 40-step grid, hue every 3
+degrees), each sampled at 401 chroma values -- about 1.9 million feasibility
+evaluations.
+
+**No disconnected interval was found.** On every ray sampled, the feasible
+chroma was a single interval starting at zero.
+
+That is strong evidence for this device, not a proof, and it says nothing
+about the >=4-emitter case where the zonotope gains a redundant generator. A
+coarser sweep runs on every test invocation so the assumption cannot rot
+silently.
+
+## Lightness must be clamped before chroma
+
+Chroma compression alone cannot rescue a target that is too *bright*: at zero
+chroma the point is still outside the hull, and a chroma-only bisection
+converges on an infeasible answer. Every mapper here clamps into the hull --
+the OKLCh ones by first reducing lightness to the attainable neutral, as the
+reference does, and the naive ones by bounding drives to [0, 1].
+
+The corpus contains no over-bright target, so this had to be constructed to
+be tested. That gap has now hidden two defects in this harness: this one and
+the missing upper-bound check in `is_feasible` fixed alongside it. Worth
+noting for whoever extends the corpus.
+
 ## The limit of this study
 
 Bisection assumes feasibility along the chroma ray is monotonic. The P5
