@@ -60,7 +60,13 @@ U8_BUFFER = re.compile(r"\bu8\s+[^;{}()=]*\[")
 # line; stripping strings before comments would treat a quote inside a
 # comment as opening one.
 _LEXICAL = re.compile(
-    r'"(?:[^"\\\n]|\\.)*"'
+    # Raw strings first, and not merely for tidiness: `R"(a " b // c)"` holds
+    # both a quote and a line-comment marker, so whichever of the two forms
+    # below matched it would run off the end and take real code with it. The
+    # delimiter is captured and back-referenced, which is what makes the
+    # terminator unambiguous -- that is the whole point of the form.
+    r'R"([^()\\\s]{0,16})\(.*?\)\1"'
+    r'|"(?:[^"\\\n]|\\.)*"'
     r"|'(?:[^'\\\n]|\\.)*'"
     r"|/\*.*?\*/"
     r"|//[^\n]*",
@@ -82,7 +88,7 @@ def strip_comments_and_strings(source: str) -> str:
 
     def replace(match: "re.Match[str]") -> str:
         text = match.group(0)
-        if text.startswith('"'):
+        if text.startswith('"') or text.startswith('R"'):
             return '""'
         if text.startswith("'"):
             return "''"
@@ -186,6 +192,20 @@ class TestNoRgb8Intermediate(unittest.TestCase):
 
         # The mirror case: a quote inside a comment must not open a string.
         survived = strip_comments_and_strings("// it's fine\nCRGB mid;")
+        self.assertRegex(survived, r"\bCRGB\b")
+
+        # Raw strings are the form that defeats a naive lexer, because one
+        # can hold both a quote and a line-comment marker. Either of the
+        # plain forms would run off the end here and swallow the
+        # declaration that follows.
+        survived = strip_comments_and_strings(
+            'const char* s = R"(quote " // not a comment)"; CRGB mid;'
+        )
+        self.assertRegex(survived, r"\bCRGB\b")
+
+        # And with a custom delimiter, which is what makes the terminator
+        # unambiguous -- the closing `)"` inside the body is not the end.
+        survived = strip_comments_and_strings('auto s = R"xy(a)" b)xy"; CRGB mid;')
         self.assertRegex(survived, r"\bCRGB\b")
 
 
