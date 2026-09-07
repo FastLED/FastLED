@@ -131,6 +131,42 @@ boundaries of a stage is not measuring that stage.
 s16.16 is what P6's stages already use, so the mapper needs no wider
 intermediate than the pipeline carries anyway.
 
+### The cube root was the last stage still running in float64
+
+The table above quantizes every value the mapper passes around, but it
+reached OKLCh through Python's own cube root. OKLab's forward transform
+needs three of those per pixel, and there was no fixed-point cube root in
+the tree to reach for -- so the study was, by its own standard above,
+measuring the stages on either side of the root rather than the root
+itself.
+
+`fl::icbrt64` (`src/fl/math/fixed_point/icbrt.h`) and `s16x16::cbrt` close
+that. The identity is the one `sqrt` already uses one power down: for a Q16
+raw `r`, the root satisfies `y^3 = r * 2^32`, so the root is an integer cube
+root of the raw value shifted left by 32 -- a 22-step bit-by-bit loop with
+no division and no float, exact to within one ULP.
+
+Re-scoring the mapper with that root in place, and then perturbing it to
+find out how much accuracy is actually required:
+
+| cube-root error | worst ΔE2000 |
+| --- | --- |
+| **exact** | **0.149** |
+| ± 64 ULP | 0.200 |
+| ± 256 ULP | 0.459 |
+| ± 1024 ULP | 1.717 |
+
+The exact root reproduces the recorded result, so the cube root costs the
+mapper nothing. A1's budget of 0.5 is not reached until roughly 256 ULP,
+which the exact root clears by more than two orders of magnitude.
+
+The perturbation is worth more than the reassurance. It says a *cheaper*
+root is still on the table -- anything holding under about 64 ULP would
+also pass -- so if 22 steps per root ever turns out to cost too much on an
+8-bit target, the budget for replacing it is known in advance rather than
+guessed at. Both ends are pinned by
+`ci/tests/test_color_gamut_study.py`.
+
 ## Is the feasible chroma ray actually connected?
 
 Bisection assumes it is. The reference does not, so the assumption was tested

@@ -5,6 +5,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/math/sin32.h"
+#include "fl/math/fixed_point/icbrt.h"
 #include "fl/math/fixed_point/isqrt.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/math/fixed_point/traits.h"
@@ -230,6 +231,24 @@ class s16x16 {
         return sqrt(x).mValue == 0
             ? s16x16()
             : from_raw(SCALE) / sqrt(x);
+    }
+
+    // Signed cube root, exact to within one ULP (it truncates toward zero).
+    //
+    // The identity is the same one `sqrt` uses one power down: for a Q16 raw
+    // value `r` representing r/2^16, the root `y` satisfies
+    // (y/2^16)^3 = r/2^16, i.e. y^3 = r * 2^32 -- so the root is the integer
+    // cube root of the raw value shifted left by 2*FRAC_BITS.
+    //
+    // The shift cannot overflow: the widest input, raw = INT32_MIN, gives
+    // 2^31 << 32 = 2^63, which is representable in u64, and the result
+    // 2^21 = 32.0 is well inside i32.
+    static constexpr FASTLED_FORCE_INLINE s16x16 cbrt(s16x16 x) FL_NO_EXCEPT {
+        return x.mValue < 0
+            ? from_raw(-static_cast<i32>(fl::icbrt64(
+                  static_cast<u64>(-static_cast<i64>(x.mValue)) << (2 * FRAC_BITS))))
+            : from_raw(static_cast<i32>(fl::icbrt64(
+                  static_cast<u64>(x.mValue) << (2 * FRAC_BITS))));
     }
 
     static FASTLED_FORCE_INLINE s16x16 pow(s16x16 base, s16x16 exp) FL_NO_EXCEPT {
