@@ -111,6 +111,33 @@ FL_TEST_CASE("Profile binding validates and owns response tables") {
     FL_CHECK_EQ(options.emitterProfile()->response_lut_r[1], fl::u16(257));
 }
 
+// Pins the P2/P6 boundary. A successfully bound profile is *configured*, not
+// *managed*: P2 only binds, and isColorManaged() stays false until P6
+// installs the streaming transform in the output path (channel.h:174). The
+// other isColorManaged() assertions in this file are all on channels with no
+// profile, so without this one nothing distinguishes "false because nothing
+// is bound" from "false because P6 has not landed" -- and nothing would fail
+// if someone flipped the accessor to true here ahead of the transform.
+FL_TEST_CASE("A bound fixture profile is configured but not yet color managed") {
+    CRGB leds[1] = {};
+    ChannelOptions options;
+    FL_REQUIRE(options.setColorProfile(kFixtureProfile, SourceProfile::linearSrgb()));
+
+    ChannelConfig config(ClocklessChipset(), leds, RGB, options);
+    ChannelPtr channel = Channel::create(config);
+    FL_REQUIRE(channel != nullptr);
+
+    FL_CHECK(channel->hasColorProfile());
+    FL_CHECK_FALSE(channel->hasColorProfileFallback());
+    FL_CHECK_EQ(channel->colorProfileStatus(), ColorProfileStatus::Configured);
+    FL_REQUIRE(channel->emitterProfile() != nullptr);
+    FL_CHECK_EQ(fl::string(channel->emitterProfile()->id),
+                fl::string(kFixtureProfile.id));
+
+    // Deliberate: flip this in P6 (#4040), not before.
+    FL_CHECK_FALSE(channel->isColorManaged());
+}
+
 FL_TEST_CASE("Strict fallback turns an unavailable profile into an observable bind error") {
     CRGB leds[1] = {};
     FastLED.setColorManagementStrict(true);
