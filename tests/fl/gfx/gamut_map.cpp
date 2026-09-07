@@ -193,14 +193,17 @@ FL_TEST_CASE("Gamut map preserves hue while compressing chroma") {
         const float control_scale =
             fl::sqrtf((ax * ax + ay * ay) * (cx * cx + cy * cy));
 
-        if (scale > 1e-4f) {
-            // The mapper's drift, and the measurement's own, on the same
-            // scale. The second bound is what makes the first meaningful.
-            FL_CHECK_LT(cross / scale, 0.005f);
-            if (control_scale > 1e-6f) {
-                FL_CHECK_LT(fl::fabsf(ax * cy - ay * cx) / control_scale, 0.001f);
-            }
-        }
+        // Required, not conditional. Skipping the hue check when the mapped
+        // result is neutral would let a regression that collapses every
+        // colour to grey pass silently -- and every target in this list is
+        // saturated enough that the mapper must return chroma.
+        FL_REQUIRE_GT(scale, 1e-4f);
+        FL_REQUIRE_GT(bx * bx + by * by, 1e-6f);
+        // The mapper's drift, and the measurement's own, on the same scale.
+        // The second bound is what makes the first meaningful.
+        FL_CHECK_LT(cross / scale, 0.005f);
+        FL_REQUIRE_GT(control_scale, 1e-6f);
+        FL_CHECK_LT(fl::fabsf(ax * cy - ay * cx) / control_scale, 0.001f);
         // And chroma must not have grown.
         FL_CHECK_LE(bx * bx + by * by, (ax * ax + ay * ay) * 1.02f + 1e-6f);
     }
@@ -332,6 +335,89 @@ FL_TEST_CASE("Gamut map reproduces the model the study validated") {
             FL_CHECK_LT(fl::fabsf(toFloat(drives[i] - v.drives[i])),
                         256.0f / 65536.0f);
         }
+    }
+}
+
+FL_TEST_CASE("Gamut map rejects a profile that cannot make a neutral") {
+    // The header promises this and the code did not deliver it: the check
+    // was on the largest neutral drive alone, so a solve like {-x, y, z} --
+    // primaries that do not enclose D65, so no neutral at any brightness --
+    // passed. The lightness bound derived from it would be the lightness of
+    // a colour the device cannot produce, leaving the mapper too permissive.
+    //
+    // Green pulled far toward yellow leaves D65 outside the triangle.
+    EmitterProfile outside = rgbDevice();
+    outside.xy_g[0] = 0.4800f;
+    outside.xy_g[1] = 0.5100f;
+    outside.xy_b[0] = 0.2600f;
+    outside.xy_b[1] = 0.2400f;
+
+    EmitterSolveMatrixQ16 solve;
+    FL_REQUIRE(buildRgbSolveMatrixQ16(outside, &solve));
+    const i32 d65[3] = {62289, 65536, 71372};
+    i32 neutral[3];
+    solveRgbDrivesQ16(solve, d65, neutral);
+    bool any_negative = false;
+    for (int i = 0; i < 3; ++i) {
+        if (neutral[i] <= 0) {
+            any_negative = true;
+        }
+    }
+    // If this fails the fixture stopped being out-of-gamut and the test
+    // below would pass for the wrong reason.
+    FL_REQUIRE(any_negative);
+
+    GamutMapQ16 map;
+    FL_CHECK_FALSE(buildGamutMapQ16(outside, &map));
+}
+
+FL_TEST_CASE("Gamut map survives a profile bright enough to overflow the scale") {
+    // The neutral scale is 2^32 / largest_neutral_drive. `EmitterProfile`
+    // accepts luminances up to 1e6, and a profile that reaches D65 on a
+    // drive of one or two raw units puts that at or past i32's range --
+    // exactly 2^31 at largest == 2 -- where narrowing is
+    // implementation-defined and the bound it produces is nonsense.
+    // Luminances chosen so the D65 solve lands on drives of one and two raw
+    // units -- the case that puts 2^32 / largest at exactly 2^31. A uniform
+    // huge luminance does not reach it: every drive rounds to zero and the
+    // neutral check rejects the profile first, which is how the first
+    // version of this test managed to assert nothing at all.
+    EmitterProfile blazing = rgbDevice();
+    blazing.lum_r = 6966.4768f;
+    blazing.lum_g = 23435.6736f;
+    blazing.lum_b = 2365.8496f;
+
+    // Pin that this fixture really does reach the overflow case, so the
+    // test cannot go quiet if the solve or the constants move.
+    EmitterSolveMatrixQ16 probe;
+    FL_REQUIRE(buildRgbSolveMatrixQ16(blazing, &probe));
+    const i32 d65[3] = {62289, 65536, 71372};
+    i32 neutral[3];
+    solveRgbDrivesQ16(probe, d65, neutral);
+    i32 largest = 0;
+    for (int i = 0; i < 3; ++i) {
+        FL_REQUIRE_GT(neutral[i], 0);
+        if (neutral[i] > largest) {
+            largest = neutral[i];
+        }
+    }
+    // 2^32 / 2 is 2^31 -- one past i32.
+    FL_REQUIRE_LE(largest, 2);
+
+    GamutMapQ16 map;
+    FL_REQUIRE(buildGamutMapQ16(blazing, &map));
+    // Whatever comes back must be a sane lightness, not a wrapped one.
+    FL_CHECK_GT(map.max_neutral_lightness, 0);
+    FL_CHECK_LE(map.max_neutral_lightness, kOklabQ16MaxMagnitude);
+
+    // And the mapper must still return usable drives through it.
+    i32 xyz[3];
+    xyzAt(0.70f, 0.28f, 0.5f, xyz);
+    i32 drives[3];
+    mapAndSolveDrivesQ16(map, xyz, drives);
+    for (int i = 0; i < 3; ++i) {
+        FL_CHECK_GE(drives[i], 0);
+        FL_CHECK_LE(drives[i], kFullDrive);
     }
 }
 

@@ -94,21 +94,39 @@ bool buildGamutMapQ16(const EmitterProfile& profile, GamutMapQ16* out) FL_NO_EXC
     i32 neutral_drives[3];
     solveRgbDrivesQ16(out->solve, kGamutD65Q16, neutral_drives);
     i32 largest = neutral_drives[0];
-    for (int i = 1; i < 3; ++i) {
+    for (int i = 0; i < 3; ++i) {
+        // Every drive, not just the largest. A solve like {-x, y, z} has a
+        // positive largest but describes a device whose primaries do not
+        // enclose D65, so it cannot make a neutral at any brightness. Taking
+        // the largest alone would scale that infeasible point up and hand
+        // back the lightness of a colour the device cannot produce, leaving
+        // the mapper's lightness bound too permissive.
+        if (neutral_drives[i] <= 0) {
+            return false;
+        }
         if (neutral_drives[i] > largest) {
             largest = neutral_drives[i];
         }
     }
-    if (largest <= 0) {
-        // No positive drive reaches the neutral: the profile cannot make
-        // white at all, so there is no lightness bound to speak of.
-        return false;
-    }
 
     // s_max = 1 / largest, in s16.16. This is the one division in the whole
     // module, and it runs once per bind rather than once per pixel.
-    const i32 scale = static_cast<i32>(
-        (static_cast<i64>(kGamutFullDrive) << 16) / static_cast<i64>(largest));
+    //
+    // Computed and clamped in i64. `buildRgbSolveMatrixQ16` accepts emitter
+    // luminances up to 1e6, and a profile bright enough to reach D65 on a
+    // drive of one or two raw units puts 2^32 / largest at or past i32's
+    // range -- 2^31 exactly, at largest == 2. Narrowing that is
+    // implementation-defined, and the bound it produced would be nonsense.
+    //
+    // The clamp is at 64.0 because that is where the OKLab transform's
+    // domain ends: a neutral scaled past it would be clamped there anyway,
+    // so nothing downstream can tell the difference.
+    i64 scale_wide = (static_cast<i64>(kGamutFullDrive) << 16) /
+                     static_cast<i64>(largest);
+    if (scale_wide > kOklabQ16MaxMagnitude) {
+        scale_wide = kOklabQ16MaxMagnitude;
+    }
+    const i32 scale = static_cast<i32>(scale_wide);
     const i32 brightest_neutral[3] = {
         scaleGamutQ16(kGamutD65Q16[0], scale),
         scaleGamutQ16(kGamutD65Q16[1], scale),
