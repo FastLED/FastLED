@@ -42,6 +42,27 @@ class CorpusVector:
     target: Xyz
     emitter_light: list[float]
 
+    def __post_init__(self: "CorpusVector") -> None:
+        """Check the shape the tests index into.
+
+        These fields come straight out of `json.loads`, so nothing has
+        checked them. `@typechecked` would not help: typeguard decorates the
+        class before `@dataclass` generates `__init__`, so the generated
+        initializer is never instrumented and the decorator validates
+        nothing here.
+
+        The tests read `emitter_light[3]` and `[4]` directly. Without this a
+        corpus whose shape changed would surface as an IndexError inside an
+        assertion loop rather than as a statement about the corpus.
+        """
+
+        if len(self.target) != 3:
+            raise ValueError(f"target must be XYZ, got {self.target!r}")
+        if len(self.emitter_light) < 3:
+            raise ValueError(
+                f"expected at least three emitter drives, got {self.emitter_light!r}"
+            )
+
 
 def corpus_vectors(profile: str) -> list[CorpusVector]:
     corpus = json.loads(GOLDEN.read_text(encoding="utf-8"))
